@@ -163,45 +163,25 @@ async function loadHome(){
  ids.forEach(id=>skeleton($(id)));
  renderContinueWatching();
 
- // Only fetch what is immediately visible. Deeper rows load as they approach
- // the viewport, which keeps first paint and first interaction fast.
- const initial=["trending","nowPlaying","popularMovies"];
- const deferred=[
-   ["topRatedMovies","top-rated"],
-   ["popularTv","tv"],
-   ["topRatedTv","top-tv"],
-   ["airingToday","airing"],
-   ["anime","anime"],
-   ["kdrama","kdrama"],
-   ["upcoming","upcoming"]
+ // Load the complete catalogue in small parallel batches. This keeps the first
+ // rows fast while guaranteeing that deeper rails do not depend on scrolling.
+ const batches=[
+   ["trending","nowPlaying","popularMovies"],
+   ["topRatedMovies","popularTv","topRatedTv"],
+   ["airingToday","anime","kdrama"],
+   ["upcoming"]
  ];
- try{ await loadSectionBatch(initial); }catch(e){ console.warn("Initial home sections failed:",e); }
-
- const loadDeferred=async (entry)=>{
-   const [key,sectionId]=entry;
-   const section=document.getElementById(sectionId);
-   if(!section||section.dataset.loaded==="true")return;
-   section.dataset.loaded="true";
-   await loadSectionBatch([key]);
- };
- if("IntersectionObserver" in window){
-   const observer=new IntersectionObserver((entries)=>{
-     entries.forEach((entry)=>{
-       if(!entry.isIntersecting)return;
-       const sectionId=entry.target.id;
-       const item=deferred.find(([,id])=>id===sectionId);
-       if(item){void loadDeferred(item);observer.unobserve(entry.target);}
-     });
-   },{rootMargin:"700px 0px"});
-   deferred.forEach(([,id])=>{const section=document.getElementById(id);if(section)observer.observe(section);});
- }else{
-   const loadNext=()=>deferred.reduce((promise,item)=>promise.then(()=>loadDeferred(item)),Promise.resolve());
-   if("requestIdleCallback" in window)requestIdleCallback(loadNext,{timeout:2500});else setTimeout(loadNext,800);
+ for(const batch of batches){
+   try{
+     await loadSectionBatch(batch);
+   }catch(error){
+     console.warn("Vivid home batch failed:",batch,error);
+   }
  }
- if("requestIdleCallback" in window)requestIdleCallback(()=>void renderRecommendations(),{timeout:1800});
- else setTimeout(()=>void renderRecommendations(),1200);
-}
 
+ if("requestIdleCallback" in window)requestIdleCallback(()=>void renderRecommendations(),{timeout:1200});
+ else setTimeout(()=>void renderRecommendations(),500);
+}
 function showSearch(items){
  const panel=$("search-panel");if(!panel)return;
  panel.innerHTML=items.length?items.slice(0,8).map(m=>'<a class="vivid-search-result" href="'+getMediaUrl(m)+'"><img src="'+getImageUrl(m.poster_path,"w92")+'" alt=""><span><strong>'+escapeHtml(m.title)+'</strong><br><small>'+escapeHtml(m.year||"—")+' · '+(m.media_type==="tv"?"TV":"Movie")+"</small></span></a>").join(""):'<div class="vivid-empty">No titles found.</div>';
