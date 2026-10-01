@@ -115,79 +115,126 @@ async function loadHeroVideo(item){
  host.classList.remove("is-ready");
  fallback.classList.add("is-visible");
  if(!prefersHeroAutoplay())return false;
+
  try{
-   const data=item.media_type==="tv"?await tmdbApi.tvVideos(item.id):await tmdbApi.movieVideos(item.id);
+   const data=item.media_type==="tv"
+     ?await tmdbApi.tvVideos(item.id)
+     :await tmdbApi.movieVideos(item.id);
    if(token!==heroPlayerToken)return false;
-   const list=Array.isArray(data?.results)?data.results:(Array.isArray(data?.videos?.results)?data.videos.results:[]);
-   const videos=list
+
+   const list=Array.isArray(data?.results)
+     ?data.results
+     :(Array.isArray(data?.videos?.results)?data.videos.results:[]);
+   const trailer=list
      .filter(v=>v&&v.site==="YouTube"&&v.key)
-     .sort((x,y)=>{
-       const score=v=>((v.type==="Trailer")?100:0)+((v.official!==false)?20:0)+((v.type==="Teaser")?10:0);
-       return score(y)-score(x);
-     });
-   const trailer=videos[0];
+     .sort((a,b)=>{
+       const score=v=>
+         (v.type==="Trailer"?100:0)+
+         (v.official!==false?20:0)+
+         (v.type==="Teaser"?10:0)+
+         (v.type==="Clip"?-20:0);
+       return score(b)-score(a);
+     })[0];
+
    if(!trailer?.key){
      console.warn("Hero trailer: no YouTube trailer for",item.media_type,item.id);
      return false;
    }
 
-   const origin=encodeURIComponent(location.origin);
-   const src="https://www.youtube.com/embed/"+encodeURIComponent(trailer.key)
-     +"?autoplay=1&mute=1&controls=0&rel=0&playsinline=1&modestbranding=1"
-     +"&iv_load_policy=3&enablejsapi=1&loop=1&playlist="+encodeURIComponent(trailer.key)
-     +"&origin="+origin;
+   await loadYouTubeApi();
+   if(token!==heroPlayerToken)return false;
 
-   const iframe=document.createElement("iframe");
-   iframe.className="vivid-hero-youtube";
-   iframe.src=src;
-   iframe.title=(item.title||"Trailer")+" trailer";
-   iframe.allow="autoplay; encrypted-media; picture-in-picture; fullscreen";
-   iframe.setAttribute("allowfullscreen","");
-   iframe.setAttribute("referrerpolicy","strict-origin-when-cross-origin");
-   iframe.style.cssText="position:absolute;inset:0;width:100%;height:100%;border:0;pointer-events:none";
-   host.appendChild(iframe);
+   const mount=document.createElement("div");
+   mount.className="vivid-hero-youtube";
+   host.appendChild(mount);
 
-   const reveal=()=>{
-     if(token!==heroPlayerToken)return;
-     host.classList.add("is-ready");
-     fallback.classList.remove("is-visible");
-   };
-   iframe.addEventListener("load",reveal,{once:true});
-   window.setTimeout(reveal,600);
+   const player=await new Promise((resolve,reject)=>{
+     let settled=false;
+     const finish=(value,error)=>{
+       if(settled)return;
+       settled=true;
+       clearTimeout(timer);
+       error?reject(error):resolve(value);
+     };
+     const timer=setTimeout(
+       ()=>finish(null,new Error("YouTube trailer player timed out")),
+       10000
+     );
 
-   try{
-     await loadYouTubeApi();
-     if(token!==heroPlayerToken)return true;
-     await new Promise(resolve=>{
-       let settled=false;
-       const done=()=>{if(!settled){settled=true;resolve()}};
-       window.setTimeout(done,8000);
-       try{
-         heroPlayer=new YT.Player(iframe,{
-           events:{
-             onReady:event=>{
+     try{
+       const instance=new YT.Player(mount,{
+         width:"100%",
+         height:"100%",
+         videoId:trailer.key,
+         playerVars:{
+           autoplay:1,
+           mute:1,
+           controls:0,
+           playsinline:1,
+           rel:0,
+           modestbranding:1,
+           iv_load_policy:3,
+           enablejsapi:1,
+           origin:location.origin,
+           fs:0
+         },
+         events:{
+           onReady:event=>{
+             if(token!==heroPlayerToken){
+               finish(null,new Error("Hero changed"));
+               return;
+             }
+             try{
+               event.target.mute();
+               event.target.setVolume(0);
+               if(heroPlaying)event.target.playVideo();
+               else event.target.pauseVideo();
+             }catch(error){
+               finish(null,error);
+             }
+           },
+           onStateChange:event=>{
+             if(token!==heroPlayerToken){
+               finish(null,new Error("Hero changed"));
+               return;
+             }
+             if(event.data===YT.PlayerState.PLAYING){
+               host.classList.add("is-ready");
+               fallback.classList.remove("is-visible");
+               finish(event.target);
+             }else if(event.data===YT.PlayerState.ENDED){
                try{
-                 event.target.mute();
-                 if(!heroMuted)event.target.unMute();
+                 event.target.seekTo(0);
                  if(heroPlaying)event.target.playVideo();
-                 else event.target.pauseVideo();
                }catch{}
-               done();
-             },
-             onStateChange:event=>{
-               if(event.data===YT.PlayerState.ENDED){
-                 try{event.target.seekTo(0);event.target.playVideo()}catch{}
-               }
-             },
-             onError:()=>done()
+             }
+           },
+           onAutoplayBlocked:()=>{
+             finish(null,new Error("YouTube muted autoplay was blocked"));
+           },
+           onError:event=>{
+             finish(null,new Error("YouTube player error "+event.data));
            }
-         });
-       }catch{done()}
-     });
-   }catch(apiError){
-     console.warn("Hero YT API bind skipped:",apiError);
+         }
+       });
+       heroPlayer=instance;
+     }catch(error){
+       finish(null,error);
+     }
+   });
+
+   if(token!==heroPlayerToken)return false;
+   heroPlayer=player;
+   const embedded=host.querySelector("iframe");
+   if(embedded){
+     embedded.setAttribute("allow","autoplay; encrypted-media; picture-in-picture; fullscreen");
+     embedded.setAttribute("allowfullscreen","");
+     embedded.setAttribute("referrerpolicy","strict-origin-when-cross-origin");
+     embedded.style.pointerEvents="none";
    }
 
+   host.classList.add("is-ready");
+   fallback.classList.remove("is-visible");
    return true;
  }catch(error){
    if(token===heroPlayerToken){
@@ -198,7 +245,6 @@ async function loadHeroVideo(item){
    return false;
  }
 }
-
 function animateHeroScrollMotion(){
   heroScrollRaf=0;
   const track=$("feature-track");
