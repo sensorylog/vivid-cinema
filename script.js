@@ -80,7 +80,7 @@ async function loadHeroVideo(item){
  const iframe=$("hero-video"),fallback=$("hero-fallback");
  iframe.classList.remove("is-ready");fallback.classList.add("is-visible");
  try{
-   const data=item.media_type==="tv"?await tmdbApi.tvDetails(item.id):await tmdbApi.movieDetails(item.id);
+   const data=item.media_type==="tv"?await tmdbApi.tvVideos(item.id):await tmdbApi.movieVideos(item.id);
    const videos=data.videos?.results||[];
    const trailer=videos.find(v=>v.site==="YouTube"&&v.type==="Trailer"&&v.official!==false)||videos.find(v=>v.site==="YouTube"&&v.type==="Teaser");
    if(trailer?.key){iframe.src=youtubeUrl(trailer.key,heroMuted);iframe.onload=()=>{iframe.classList.add("is-ready");fallback.classList.remove("is-visible")}}
