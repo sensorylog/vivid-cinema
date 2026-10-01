@@ -131,12 +131,18 @@ function updateRailControls(rail){
 }
 
 async function loadSectionBatch(keys){
- const result=await getHomeSections(keys);
- keys.forEach(key=>{
+ const results=await Promise.allSettled(keys.map(key=>getHomeSectionPage(key,1)));
+ results.forEach((result,index)=>{
+   const key=keys[index];
    const railId=SECTION_RAIL_IDS[key];
-   if(!railId) return;
-   const data=result[key];
-   if(!data)return;
+   if(!railId)return;
+   if(result.status!=="fulfilled"){
+     console.warn("Vivid home section failed:",key,result.reason);
+     const el=$(railId);
+     if(el)el.innerHTML='<div class="vivid-empty">Unable to load this section. Try again.</div>';
+     return;
+   }
+   const data=result.value;
    renderRail(railId,data.items,{signal:sectionSignal(key)});
    sectionState[key]={page:data.page,totalPages:data.totalPages};
    const button=document.querySelector('[data-load-section="'+key+'"]');
