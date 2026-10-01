@@ -53,6 +53,7 @@ export const tmdbApi = Object.freeze({
   discoverTv: (params = {}) => tmdb("discover/tv", params),
   movieDetails: (id) => tmdb("movie/" + encodeURIComponent(id), { append_to_response: "credits,videos,similar,watch/providers" }),
   tvDetails: (id) => tmdb("tv/" + encodeURIComponent(id), { append_to_response: "credits,videos,similar,watch/providers" }),
+  tvSeason: (id, season) => tmdb("tv/" + encodeURIComponent(id) + "/season/" + encodeURIComponent(season), { append_to_response: "credits,videos" }),
   movieGenres: () => tmdb("genre/movie/list"),
   tvGenres: () => tmdb("genre/tv/list"),
   movieSimilar: (id, page = 1) => tmdb("movie/" + encodeURIComponent(id) + "/similar", { page }),

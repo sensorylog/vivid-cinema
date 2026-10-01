@@ -38,6 +38,34 @@ function renderProviderGroups(details) {
     '</div><p class="vivid-provider-note">Provider availability varies by country. Vivid Cinema does not host or provide the title.</p></section>';
 }
 
+function renderSeasons(details) {
+  if (media?.media_type !== "tv" || !Array.isArray(details.seasons) || !details.seasons.length) return "";
+  const seasons = details.seasons.filter(s => s.season_number >= 0);
+  return '<section class="vivid-title-section vivid-seasons"><div class="vivid-section-heading"><div><span>EPISODES</span><h2>Seasons & episodes</h2></div><label class="vivid-season-picker"><span class="vivid-sr-only">Choose season</span><select id="season-select">' + seasons.map(s => '<option value="' + s.season_number + '">' + escapeHtml(s.name || ("Season " + s.season_number)) + '</option>').join("") + '</select></label></div><div id="episode-list" class="vivid-episode-list"><p class="vivid-muted">Loading episodes…</p></div></section>';
+}
+
+async function loadSeason(id, seasonNumber) {
+  const container = $("episode-list");
+  if (!container) return;
+  container.innerHTML = '<p class="vivid-muted">Loading episodes…</p>';
+  try {
+    const data = await tmdbApi.tvSeason(id, seasonNumber);
+    const episodes = data.episodes || [];
+    container.innerHTML = episodes.length ? episodes.map(ep => '<article class="vivid-episode"><div class="vivid-episode-thumb"><img loading="lazy" src="' + getImageUrl(ep.still_path,"w500") + '" alt="" onerror="this.style.visibility=\'hidden\'"></div><div class="vivid-episode-copy"><div class="vivid-episode-line"><strong>Episode ' + ep.episode_number + '</strong><span>★ ' + (ep.vote_average ? Number(ep.vote_average).toFixed(1) : "—") + '</span></div><h3>' + escapeHtml(ep.name || ("Episode " + ep.episode_number)) + '</h3><small>' + escapeHtml(ep.air_date || "Air date unavailable") + '</small><p>' + escapeHtml(ep.overview || "No episode synopsis is available.") + '</p></div></article>').join("") : '<p class="vivid-muted">No episodes are available for this season.</p>';
+  } catch (error) {
+    container.innerHTML = '<p class="vivid-muted">' + escapeHtml(getErrorMessage(error)) + '</p>';
+  }
+}
+
+function wireSeasons(details) {
+  if (media?.media_type !== "tv") return;
+  const select = $("season-select");
+  if (!select) return;
+  const id = media.id;
+  select.addEventListener("change", () => loadSeason(id, select.value));
+  loadSeason(id, select.value || details.seasons?.[0]?.season_number || 0);
+}
+
 function render(details) {
   media = normalizeMedia(details, route.params.get("type") === "tv" ? "tv" : "movie");
   const title = media.title;
@@ -59,9 +87,10 @@ function render(details) {
       '</div></div></section>' +
     '<section class="vivid-title-section"><div class="vivid-section-heading"><div><span>CAST</span><h2>People in the story</h2></div></div><div class="vivid-cast-grid">' +
       (cast.length ? cast.map(person => '<article class="vivid-cast"><img src="' + getImageUrl(person.profile_path,"w185") + '" alt="' + escapeHtml(person.name) + '"><strong>' + escapeHtml(person.name) + '</strong><small>' + escapeHtml(person.character || "Cast") + '</small></article>').join("") : '<p class="vivid-muted">Cast information is unavailable.</p>') +
-    '</div></section>' + renderProviderGroups(details) +
+    '</div></section>' + renderSeasons(details) + renderProviderGroups(details) +
     '<section class="vivid-title-section"><div class="vivid-section-heading"><div><span>YOU MAY ALSO LIKE</span><h2>Similar titles</h2></div></div><div class="vivid-similar" id="similar-rail"></div></section>';
   const similar = normalizeResults(details.similar?.results || [], media.media_type).slice(0,8);
+  wireSeasons(details);
   $("similar-rail").innerHTML = similar.length ? similar.map(item => '<a class="vivid-similar-card" href="' + getMediaUrl(item) + '"><img src="' + getImageUrl(item.poster_path,"w342") + '" alt="' + escapeHtml(item.title) + '"><span>' + escapeHtml(item.title) + '</span><small>★ ' + (item.vote_average ? item.vote_average.toFixed(1) : "—") + '</small></a>').join("") : '<p class="vivid-muted">No similar titles available.</p>';
 }
 
