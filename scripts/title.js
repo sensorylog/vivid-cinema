@@ -242,8 +242,19 @@ async function init() {
   const type = route.params.get("type") === "tv" ? "tv" : "movie";
   if (!id) return renderError("This title link is missing its media ID.");
   try {
-    const details = type === "tv" ? await tmdbApi.tvDetails(id) : await tmdbApi.movieDetails(id);
-    render(details);
+    // Paint the title page from the lightweight metadata endpoint first. This avoids
+    // making the first screen wait for credits, videos, providers and recommendations.
+    const basic = type === "tv" ? await tmdbApi.tvDetailsBasic(id) : await tmdbApi.movieDetailsBasic(id);
+    render(basic);
+    // Enrich the page in the background without blocking the first meaningful paint.
+    void (async () => {
+      try {
+        const enriched = type === "tv" ? await tmdbApi.tvDetails(id) : await tmdbApi.movieDetails(id);
+        render(enriched);
+      } catch (error) {
+        console.warn("Vivid title enrichment unavailable:", error);
+      }
+    })();
   } catch (error) {
     renderError(getErrorMessage(error));
   }
