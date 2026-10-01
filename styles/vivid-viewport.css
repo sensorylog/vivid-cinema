@@ -119,3 +119,138 @@ body{
     height:80px;
   }
 }
+
+
+/* Responsive containment + carousel controls pass.
+   Keeps the document itself locked to the viewport while each content rail
+   owns its horizontal overflow. Controls stay in the section header instead
+   of being squeezed off-screen. */
+html{
+  width:100%;
+  max-width:100%;
+  overflow-x:hidden;
+}
+body.vivid-cinema-home,
+.vivid-home,
+.vivid-nav,
+.vivid-section-wrap,
+.vivid-rails,
+.vivid-rail-head,
+.vivid-rail-head > div:first-child{
+  min-width:0;
+  max-width:100%;
+  box-sizing:border-box;
+}
+.vivid-nav{
+  overflow:hidden;
+}
+.vivid-navlinks{
+  min-width:0;
+}
+.vivid-nav-search{
+  flex:0 1 300px;
+  min-width:0;
+}
+.vivid-nav-action{
+  flex:0 0 auto;
+}
+
+.vivid-rail-head{
+  width:100%;
+}
+.vivid-rail-head > div:first-child{
+  flex:1 1 auto;
+}
+.vivid-rail-controls{
+  flex:0 0 auto;
+  min-width:max-content;
+  visibility:visible;
+}
+.vivid-rail-controls[hidden]{
+  display:none!important;
+}
+.vivid-rail-controls button{
+  flex:0 0 38px;
+}
+.vivid-rail{
+  width:100%;
+  min-width:0;
+  box-sizing:border-box;
+}
+
+@media(max-width:640px){
+  .vivid-nav{
+    gap:8px;
+  }
+  .vivid-nav-action{
+    padding-inline:8px;
+    white-space:nowrap;
+  }
+  .vivid-nav-search{
+    flex:0 0 42px;
+    width:42px;
+  }
+
+  .vivid-rail-head{
+    align-items:center;
+    gap:8px;
+    margin-bottom:10px;
+  }
+  .vivid-rail-head h2{
+    font-size:1.12rem;
+  }
+  .vivid-rail-controls{
+    display:flex!important;
+    gap:5px;
+  }
+  .vivid-rail-controls button{
+    width:34px;
+    height:34px;
+    flex-basis:34px;
+  }
+
+  .vivid-rail{
+    overflow-x:auto;
+    overflow-y:visible;
+    padding-left:1px;
+    padding-right:12px;
+  }
+
+  .vivid-card{
+    flex-basis:min(132px,36vw);
+  }
+
+  .vivid-section-wrap{
+    padding-left:14px;
+    padding-right:14px;
+  }
+}
+
+@media(max-width:380px){
+  .vivid-rail-head h2{
+    font-size:1.05rem;
+  }
+  .vivid-rail-controls button{
+    width:32px;
+    height:32px;
+    flex-basis:32px;
+  }
+  .vivid-card{
+    flex-basis:min(124px,38vw);
+  }
+}
+
+/* Desktop: give enlarged hover cards room without widening the page. */
+@media(min-width:641px){
+  .vivid-section-wrap{
+    overflow:visible;
+  }
+  .vivid-rail-head{
+    padding-inline:0;
+  }
+  .vivid-rail{
+    width:calc(100% + 2px);
+    padding-left:1px;
+    padding-right:1px;
+  }
+}
