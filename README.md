@@ -2,6 +2,13 @@
 
 Vivid Cinema is being rebuilt as a premium cinematic web app and installable PWA.
 
+## Phase A4 — Data and content architecture
+The data layer now has a canonical media model in `scripts/media.js`. Movie/TV results carry an explicit `media_type` and collision-safe `content_id` (`movie:123` / `tv:123`). TMDB access, timeout/error handling, detail endpoints, discovery, genres and similar-title pagination are centralized in `scripts/tmdb.js`. Home/search/filter consumers use `scripts/content.js` and the shared client instead of embedding their own API requests.
+
+Title URLs accept an explicit `type` query parameter when known, avoiding unnecessary movie/TV detection requests. The temporary local library also uses typed keys so a movie and TV show with the same numeric TMDB ID cannot collide.
+
+The TMDB browser key remains configuration rather than a secret; production security hardening and any server-side proxy decision are deferred to the later security/launch work so the free static-hosting architecture is not accidentally replaced.
+
 ## Phase A3 — App shell architecture
 The shell now owns page identity, responsive viewport state and online/offline state. Route construction and query parsing live in `scripts/routes.js`, while safe-area and shell readiness primitives live in `styles/vivid-shell.css`. This is deliberately framework-neutral so the legacy site can migrate incrementally.
 
