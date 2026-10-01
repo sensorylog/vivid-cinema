@@ -162,13 +162,44 @@ async function loadHome(){
  const ids=["trending-rail","now-playing-rail","movies-rail","top-rated-rail","tv-rail","top-tv-rail","airing-rail","anime-rail","kdrama-rail","upcoming-rail"];
  ids.forEach(id=>skeleton($(id)));
  renderContinueWatching();
- void renderRecommendations();
- try{
-   await loadSectionBatch(["trending","nowPlaying","popularMovies"]);
-   const remaining=["topRatedMovies","popularTv","topRatedTv","airingToday","anime","kdrama","upcoming"];
-   const loadNext=()=>loadSectionBatch(remaining);
-   if("requestIdleCallback" in window)requestIdleCallback(loadNext,{timeout:1200});else setTimeout(loadNext,80);
- }catch(e){console.error(e)}
+
+ // Only fetch what is immediately visible. Deeper rows load as they approach
+ // the viewport, which keeps first paint and first interaction fast.
+ const initial=["trending","nowPlaying","popularMovies"];
+ const deferred=[
+   ["topRatedMovies","top-rated"],
+   ["popularTv","tv"],
+   ["topRatedTv","top-tv"],
+   ["airingToday","airing"],
+   ["anime","anime"],
+   ["kdrama","kdrama"],
+   ["upcoming","upcoming"]
+ ];
+ try{ await loadSectionBatch(initial); }catch(e){ console.warn("Initial home sections failed:",e); }
+
+ const loadDeferred=async (entry)=>{
+   const [key,sectionId]=entry;
+   const section=document.getElementById(sectionId);
+   if(!section||section.dataset.loaded==="true")return;
+   section.dataset.loaded="true";
+   await loadSectionBatch([key]);
+ };
+ if("IntersectionObserver" in window){
+   const observer=new IntersectionObserver((entries)=>{
+     entries.forEach((entry)=>{
+       if(!entry.isIntersecting)return;
+       const sectionId=entry.target.id;
+       const item=deferred.find(([,id])=>id===sectionId);
+       if(item){void loadDeferred(item);observer.unobserve(entry.target);}
+     });
+   },{rootMargin:"700px 0px"});
+   deferred.forEach(([,id])=>{const section=document.getElementById(id);if(section)observer.observe(section);});
+ }else{
+   const loadNext=()=>deferred.reduce((promise,item)=>promise.then(()=>loadDeferred(item)),Promise.resolve());
+   if("requestIdleCallback" in window)requestIdleCallback(loadNext,{timeout:2500});else setTimeout(loadNext,800);
+ }
+ if("requestIdleCallback" in window)requestIdleCallback(()=>void renderRecommendations(),{timeout:1800});
+ else setTimeout(()=>void renderRecommendations(),1200);
 }
 
 function showSearch(items){
