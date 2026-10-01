@@ -190,51 +190,51 @@ function renderProviderOnly(details, countryCode) {
   wireProviders(details);
 }
 
+function renderRecommendationCards(items){
+  return items.length
+    ? items.map((item)=>'<a class="vivid-similar-card" href="'+escapeHtml(getMediaUrl(item))+'"><img loading="lazy" src="'+getImageUrl(item.poster_path,"w342")+'" alt="'+escapeHtml(item.title)+'"><span>'+escapeHtml(item.title)+'</span><small>★ '+(item.vote_average?item.vote_average.toFixed(1):"—")+'</small></a>').join("")
+    : '<p class="vivid-muted">No recommendations available yet.</p>';
+}
+
 function render(details) {
-  currentDetails = details;
-  media = normalizeMedia(details, route.params.get("type") === "tv" ? "tv" : "movie");
-  const title = media.title;
-  const year = media.year || "—";
-  const rating = media.vote_average ? media.vote_average.toFixed(1) : "—";
-  const runtime = media.media_type === "tv"
-    ? (details.number_of_seasons ? details.number_of_seasons + " season" + (details.number_of_seasons === 1 ? "" : "s") : "")
+  currentDetails=details;
+  media=normalizeMedia(details,route.params.get("type")==="tv"?"tv":"movie");
+  const title=media.title;
+  const year=media.year||"—";
+  const rating=media.vote_average?media.vote_average.toFixed(1):"—";
+  const runtime=media.media_type==="tv"
+    ? (details.number_of_seasons?details.number_of_seasons+" season"+(details.number_of_seasons===1?"":"s"):"")
     : formatRuntime(details.runtime);
-  const genres = (details.genres || []).map((genre) => '<span>' + escapeHtml(genre.name) + '</span>').join("");
-  const cast = (details.credits?.cast || []).slice(0, 8);
-  const videos = trailerVideos(details);
-  const firstTrailer = videos[0];
+  const genreItems=details.genres||[];
+  const genres=genreItems.map((genre)=>'<a href="discover.html?genre='+encodeURIComponent(genre.id)+'&type='+encodeURIComponent(media.media_type)+'">'+escapeHtml(genre.name)+'</a>').join("");
+  const cast=(details.credits?.cast||[]).slice(0,8);
+  const videos=trailerVideos(details);
+  const firstTrailer=videos[0];
+  const recommendations=normalizeResults(details.recommendations?.results||[],media.media_type).slice(0,12);
+  const similar=normalizeResults(details.similar?.results||[],media.media_type).slice(0,12);
+  const related=recommendations.length?recommendations:similar;
 
-  document.title = title + " · Vivid Cinema";
-  const country = getInitialCountry(details);
-  $("title-content").innerHTML =
-    '<section class="vivid-title-hero" style="--title-backdrop:url(' + JSON.stringify(getImageUrl(media.backdrop_path, "w1280")) + ')">' +
-      '<div class="vivid-title-hero-overlay"></div><div class="vivid-title-hero-inner">' +
-      '<div class="vivid-title-poster"><img src="' + getImageUrl(media.poster_path, "w500") + '" alt="' + escapeHtml(title) + ' poster"></div>' +
-      '<div class="vivid-title-copy"><span class="vivid-title-kicker">' + (media.media_type === "tv" ? "TV SERIES" : "MOVIE") + '</span><h1>' + escapeHtml(title) + '</h1>' +
-      '<div class="vivid-title-meta"><span>' + escapeHtml(year) + '</span>' + (runtime ? '<i></i><span>' + escapeHtml(runtime) + '</span>' : "") + '<i></i><span>★ ' + rating + '</span></div>' +
-      '<div class="vivid-title-genres">' + genres + '</div><p>' + escapeHtml(media.overview || "No synopsis is available for this title yet.") + '</p>' +
-      '<div class="vivid-title-actions"><a class="vivid-button vivid-button--primary" href="' + escapeHtml(buildWatchUrl(media.id, media.media_type, media.media_type === "tv" ? (details.seasons?.find((season) => season.episode_count > 0 && season.season_number >= 0)?.season_number ?? 1) : null, media.media_type === "tv" ? 1 : null)) + '"><i class="bi bi-play-fill"></i> Watch now</a>' + (firstTrailer ? '<button class="vivid-button vivid-button--secondary" id="hero-trailer" type="button"><i class="bi bi-play-circle"></i> Watch trailer</button>' : "") + '<a class="vivid-button vivid-button--ghost" href="home.html"><i class="bi bi-arrow-left"></i> Browse more</a></div></div></section>' +
-    renderTrailerSection(details) +
-    renderLibraryActions() +
-    '<section class="vivid-title-section"><div class="vivid-section-heading"><div><span>CAST</span><h2>People in the story</h2></div></div><div class="vivid-cast-grid">' +
-      (cast.length ? cast.map((person) => '<article class="vivid-cast"><img loading="lazy" src="' + getImageUrl(person.profile_path, "w185") + '" alt="' + escapeHtml(person.name) + '"><strong>' + escapeHtml(person.name) + '</strong><small>' + escapeHtml(person.character || "Cast") + '</small></article>').join("") : '<p class="vivid-muted">Cast information is unavailable.</p>') +
-    '</div></section>' + renderSeasons(details) + renderProviderGroups(details, country) +
-    '<section class="vivid-title-section"><div class="vivid-section-heading"><div><span>YOU MAY ALSO LIKE</span><h2>Similar titles</h2></div></div><div class="vivid-similar" id="similar-rail"></div></section>';
+  document.title=title+" · Vivid Cinema";
+  const country=getInitialCountry(details);
+  $("title-content").innerHTML=
+    '<section class="vivid-title-backdrop" style="--title-backdrop:url('+JSON.stringify(getImageUrl(media.backdrop_path,"w1280"))+')"><div class="vivid-title-backdrop-overlay"></div><div class="vivid-title-backdrop-label">'+(media.media_type==="tv"?"SERIES":"FEATURE")+'</div></section>'+
+    '<section class="vivid-title-info"><div class="vivid-title-info-inner">'+
+      '<div class="vivid-title-poster"><img src="'+getImageUrl(media.poster_path,"w500")+'" alt="'+escapeHtml(title)+' poster"></div>'+
+      '<div class="vivid-title-copy"><span class="vivid-title-kicker">'+(media.media_type==="tv"?"TV SERIES":"MOVIE")+'</span><h1>'+escapeHtml(title)+'</h1>'+
+      '<div class="vivid-title-meta"><span>'+escapeHtml(year)+'</span>'+(runtime?'<i></i><span>'+escapeHtml(runtime)+'</span>':"")+'<i></i><span>★ '+rating+'</span></div>'+
+      '<div class="vivid-title-genres">'+genres+'</div><p>'+escapeHtml(media.overview||"No synopsis is available for this title yet.")+'</p>'+
+      '<div class="vivid-title-actions"><a class="vivid-button vivid-button--primary" href="'+escapeHtml(buildWatchUrl(media.id,media.media_type,media.media_type==="tv"?(details.seasons?.find((season)=>season.episode_count>0&&season.season_number>=0)?.season_number??1):null,media.media_type==="tv"?1:null))+'"><i class="bi bi-play-fill"></i> Watch now</a>'+(firstTrailer?'<button class="vivid-button vivid-button--secondary" id="hero-trailer" type="button"><i class="bi bi-play-circle"></i> Watch trailer</button>':"")+'<a class="vivid-button vivid-button--ghost" href="home.html"><i class="bi bi-arrow-left"></i> Browse more</a></div></div>'+
+    '</div></section>'+
+    renderLibraryActions()+
+    renderTrailerSection(details)+
+    '<section class="vivid-title-section"><div class="vivid-section-heading"><div><span>CAST</span><h2>People in the story</h2></div></div><div class="vivid-cast-grid">'+
+      (cast.length?cast.map((person)=>'<article class="vivid-cast"><img loading="lazy" src="'+getImageUrl(person.profile_path,"w185")+'" alt="'+escapeHtml(person.name)+'"><strong>'+escapeHtml(person.name)+'</strong><small>'+escapeHtml(person.character||"Cast")+'</small></article>').join(""):'<p class="vivid-muted">Cast information is unavailable.</p>')+
+    '</div></section>'+renderSeasons(details)+renderProviderGroups(details,country)+
+    '<section class="vivid-title-section"><div class="vivid-section-heading"><div><span>RECOMMENDED</span><h2>More like this</h2></div></div><div class="vivid-similar" id="recommendation-rail">'+renderRecommendationCards(related)+'</div></section>';
 
-  const similar = normalizeResults(details.similar?.results || [], media.media_type).slice(0, 8);
-  upsertLibraryItem("history", libraryItem());
-  wireSeasons(details);
-  wireProviders(details);
-  wireTrailers();
-  wireLibraryActions();
-
-  if (firstTrailer) {
-    $("hero-trailer").addEventListener("click", () => openTrailer(firstTrailer.key, firstTrailer.name || "Trailer"));
-  }
-
-  $("similar-rail").innerHTML = similar.length
-    ? similar.map((item) => '<a class="vivid-similar-card" href="' + escapeHtml(getMediaUrl(item)) + '"><img loading="lazy" src="' + getImageUrl(item.poster_path, "w342") + '" alt="' + escapeHtml(item.title) + '"><span>' + escapeHtml(item.title) + '</span><small>★ ' + (item.vote_average ? item.vote_average.toFixed(1) : "—") + '</small></a>').join("")
-    : '<p class="vivid-muted">No similar titles available.</p>';
+  upsertLibraryItem("history",libraryItem());
+  wireSeasons(details);wireProviders(details);wireTrailers();wireLibraryActions();
+  if(firstTrailer)$("hero-trailer").addEventListener("click",()=>openTrailer(firstTrailer.key,firstTrailer.name||"Trailer"));
 }
 
 async function init() {

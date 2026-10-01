@@ -21,7 +21,8 @@ service cloud.firestore {
         'title',
         'year',
         'poster_path',
-        'backdrop_path'
+        'backdrop_path',
+        'updatedAt'
       ])
       && request.resource.data.id is string
       && request.resource.data.media_type in ['movie', 'tv']
@@ -32,7 +33,8 @@ service cloud.firestore {
       && request.resource.data.poster_path is string
       && request.resource.data.poster_path.size() <= 500
       && request.resource.data.backdrop_path is string
-      && request.resource.data.backdrop_path.size() <= 500;
+      && request.resource.data.backdrop_path.size() <= 500
+      && (!request.resource.data.keys().hasAny(['updatedAt']) || request.resource.data.updatedAt is number);
     }
 
     function validProfile() {

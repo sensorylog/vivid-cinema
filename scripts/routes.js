@@ -5,6 +5,7 @@ export const VIVID_ROUTES = Object.freeze({
   title: { path: VIVID_CONFIG.routes.title, page: "title" },
   watch: { path: VIVID_CONFIG.routes.watch, page: "watch" },
   discover: { path: VIVID_CONFIG.routes.discover, page: "discover" },
+  collection: { path: VIVID_CONFIG.routes.collection, page: "collection" },
   library: { path: VIVID_CONFIG.routes.library, page: "library" },
   login: { path: VIVID_CONFIG.routes.login, page: "login" },
   signup: { path: VIVID_CONFIG.routes.signup, page: "signup" },
@@ -25,8 +26,7 @@ export function getRoute(url = window.location.href) {
 }
 
 export function buildTitleUrl(id, type = "movie") {
-  const params = new URLSearchParams({ id: String(id), type });
-  return VIVID_CONFIG.routes.title + "?" + params.toString();
+  return VIVID_CONFIG.routes.title + "?" + new URLSearchParams({ id: String(id), type });
 }
 
 export function buildDiscoverUrl(params = {}) {
@@ -38,11 +38,16 @@ export function buildDiscoverUrl(params = {}) {
   return VIVID_CONFIG.routes.discover + (suffix ? "?" + suffix : "");
 }
 
-export function buildWatchUrl(id, type = "movie", season = null, episode = null) {
+export function buildCollectionUrl(collection) {
+  return VIVID_CONFIG.routes.collection + "?" + new URLSearchParams({ collection: String(collection) });
+}
+
+export function buildWatchUrl(id, type = "movie", season = null, episode = null, startAt = null) {
   const params = new URLSearchParams({ id: String(id), type });
   if (type === "tv") {
     if (season !== null && season !== undefined) params.set("season", String(season));
     if (episode !== null && episode !== undefined) params.set("episode", String(episode));
   }
+  if (startAt !== null && startAt !== undefined && Number(startAt) > 0) params.set("startAt", String(Math.floor(Number(startAt))));
   return VIVID_CONFIG.routes.watch + "?" + params.toString();
 }

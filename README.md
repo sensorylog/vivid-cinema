@@ -169,3 +169,23 @@ Firebase's client-side configuration values are not treated as secrets; authoriz
 
 ### QA gate
 The rules and headers still require deployment-level verification. Test authenticated owner access, cross-user access denial, malformed library writes, profile-field restrictions, authentication flows, and production response headers before calling the security work fully verified.
+
+
+## Phase F — Streaming discovery & recommendation experience
+
+Phase F upgrades Vivid's core Discover → Title → Watch flow without adding paid infrastructure.
+
+- Home renders critical rails first, then progressively loads secondary rails.
+- Every major home rail supports Load more and See all.
+- Collection browsing supports pagination plus genre, year and sort controls.
+- Discover restores URL filters and adds minimum-rating filtering.
+- Title pages separate the cinematic backdrop from the movie/series details and expose related recommendations.
+- VidAPI playback supports resume timestamps and PLAYER_EVENT progress messages from the authorized embed host.
+- Continue Watching is based on actual VidAPI progress rather than fabricated percentages.
+- TV playback can advance to the next episode when VidAPI reports completion and the next episode exists.
+- Local playback progress remains client-side; Firebase library sync remains limited to the existing library collections.
+- Firestore library rules now explicitly permit the safe library timestamp used for ordering.
+
+### Phase F verification
+
+No browser/device runtime QA was performed in this environment. The branch was inspected for integration consistency; production verification still needs to cover mobile/desktop rendering, TMDB failures, collection pagination, title routing, VidAPI progress events, TV next-episode behavior, Firebase rules deployment, and PWA cache activation.
