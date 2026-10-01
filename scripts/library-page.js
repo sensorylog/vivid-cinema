@@ -25,7 +25,7 @@ function render() {
   list.innerHTML = items.map((item) => {
     const type=item.media_type||item.mediaType||"movie", url=getMediaUrl({id:item.id,media_type:type}), title=item.title||item.name||"Untitled";
     const meta=[type==="tv"?"TV":"Movie",item.year||""].filter(Boolean).join(" · ");
-    return '<a class="vivid-library-card" href="'+escapeHtml(url)+'"><img loading="lazy" src="'+getImageUrl(item.poster_path,"w342")+'" alt="'+escapeHtml(title)+' poster"><div class="vivid-library-card-copy"><strong>'+escapeHtml(title)+'</strong><small>'+escapeHtml(meta)+'</small></div><button class="vivid-library-remove" type="button" data-remove-id="'+escapeHtml(String(item.id))+'" data-remove-type="'+escapeHtml(type)+'" aria-label="Remove '+escapeHtml(title)+'"><i class="bi bi-x-lg"></i></button></a>';
+    return '<article class="vivid-library-card"><a href="'+escapeHtml(url)+'"><img loading="lazy" src="'+getImageUrl(item.poster_path,"w342")+'" alt="'+escapeHtml(title)+' poster"><div class="vivid-library-card-copy"><strong>'+escapeHtml(title)+'</strong><small>'+escapeHtml(meta)+'</small></div></a><button class="vivid-library-remove" type="button" data-remove-id="'+escapeHtml(String(item.id))+'" data-remove-type="'+escapeHtml(type)+'" aria-label="Remove '+escapeHtml(title)+'"><i class="bi bi-x-lg"></i></button></article>';
   }).join("");
   list.querySelectorAll("[data-remove-id]").forEach((button) => button.addEventListener("click",(event)=>{
     event.preventDefault(); event.stopPropagation(); removeLibraryItem(activeCollection,button.dataset.removeId,button.dataset.removeType); render();
