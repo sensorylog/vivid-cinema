@@ -271,3 +271,15 @@ body.vivid-cinema-home,
     font-size:16px!important;
   }
 }
+
+
+/* Desktop performance: keep off-screen catalogue work out of the active paint
+   path. Media players remain fully eager/interactive; this only reduces work
+   from long card sections below the fold. */
+@media(min-width:641px){
+  .vivid-section-wrap,
+  .vivid-watch-recommendations{
+    content-visibility:auto;
+    contain-intrinsic-size:1px 720px;
+  }
+}
