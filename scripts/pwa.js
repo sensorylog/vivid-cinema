@@ -105,7 +105,8 @@ async function registerServiceWorker() {
     activeRegistration = registration;
     createUpdateControl(registration);
     // Do not force a network update during first paint. Firebase Hosting will serve the
-    // cached shell immediately; a background update is enough for a PWA.\n    window.setTimeout(() => { void registration.update().catch(() => {}); }, 30000);
+    // cached shell immediately; a background update is enough for a PWA.
+    window.setTimeout(() => { void registration.update().catch(() => {}); }, 30000);
 
     navigator.serviceWorker.addEventListener("controllerchange", () => {
       window.location.reload();
