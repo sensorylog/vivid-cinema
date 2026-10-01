@@ -8,7 +8,7 @@ const $ = (id) => document.getElementById(id);
 function render() {
   const library = getLocalLibrary();
   ["favorites","watchLater","history"].forEach((key) => {
-    const count = document.querySelector("[data-count="" + key + ""]");
+    const count = document.querySelector("[data-count=\"" + key + "\"]");
     if (count) count.textContent = String((library[key] || []).length);
   });
   const items = library[activeCollection] || [];
