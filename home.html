@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <!-- Elfsight AI Chatbot | Untitled AI Chatbot -->
+  <script src="https://static.elfsight.com/platform/platform.js" async></script>
+  <div class="elfsight-app-a06e1c82-9d26-440f-81cd-508cf535e150" data-elfsight-app-lazy></div>
+
+  <!-- Elfsight Social Share Buttons | Untitled Social Share Buttons -->
+  <script src="https://static.elfsight.com/platform/platform.js" async></script>
+  <div class="elfsight-app-cdb2ac41-1d7f-4e20-bd0f-84d9daa4fbb4" data-elfsight-app-lazy></div>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#e50914" />
+  <meta name="google-adsense-account" content="ca-pub-6559393992371691">
+  <meta name="robots" content="index, follow">
+  <meta name="author" content="Vivid Cinema">
+  <meta name="description"
+    content="Stream movies, anime, and shows with Vivid Cinema. Discover trending content, explore genres, and enjoy seamless entertainment.">
+  <meta property="og:title" content="Vivid Cinema - Stream & Discover">
+  <meta property="og:description"
+    content="Discover trending movies, TV shows, anime, and more. Watch them all on Vivid Cinema.">
+  <meta property="og:image" content="img/logo.png">
+  <meta property="og:url" content="https://vividcinema.com">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Vivid Cinema - Stream & Discover">
+  <meta name="twitter:description"
+    content="Discover trending movies, TV shows, anime, and more. Watch them all on Vivid Cinema.">
+
+  <title>Vivid Cinema - Stream & Discover</title>
+  <link rel="icon" href="img/fav-icon.png" type="image/x-icon" />
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="swiper-bundle.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.9.1/font/bootstrap-icons.css">
+  <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="hamburger.css">
+
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6559393992371691"
+    crossorigin="anonymous"></script>
+  <script type="text/javascript" src="//acscdn.com/script/aclib.js" async></script>
+  <script src="https://ligheechoagool.com/88/tag.min.js" async data-zone="143800" data-cfasync="false"></script>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-PV6HY6BQX8"></script>
+</head>
+
+<body>
+  <header role="banner">
+    <div class="nav container" role="navigation">
+      <a href="index.html" class="img/fav-icon.png">Vivid<span>Cinema</span></a>
+      <div class="search-box">
+        <input type="search" id="search-input" placeholder="Search Movies" aria-label="Search for movies" />
+        <i class="bx bx-search"></i>
+        <div class="search-suggestions hidden" id="search-suggestions"></div>
+      </div>
+      <button id="theme-toggle" class="watch-btn" aria-label="Toggle theme">
+        <i class="bx bx-moon"></i>
+      </button>
+      <div class="user-dropdown" id="user-dropdown">
+        <ul class="dropdown-menu hidden" id="user-menu">
+          <li><span id="user-email"></span></li>
+          <li><a href="#" id="logout-link">Logout</a></li>
+        </ul>
+      </div>
+      <a href="auth.html" class="signup-btn" id="auth-link">Sign Up</a>
+
+      <button id="hamburger-btn" class="hamburger-btn" aria-label="Menu">
+        <div class="hamburger-line"></div>
+        <div class="hamburger-line"></div>
+        <div class="hamburger-line"></div>
+      </button>
+    </div>
+  </header>
+
+  <div id="mobile-filter-menu" class="mobile-filter-menu hidden">
+    <div class="filter-container">
+      <button id="close-filter-menu" class="close-filter-menu" aria-label="Close Menu">&times;</button>
+      <h3>Filter Movies</h3>
+      <div class="filter-group">
+        <label for="genre-select">Genre:</label>
+        <select id="genre-select">
+          <option value="">Select Genre</option>
+          <option value="Action">Action</option>
+          <option value="Drama">Drama</option>
+          <option value="Comedy">Comedy</option>
+          <option value="Horror">Horror</option>
+          <option value="Romance">Romance</option>
+          <option value="Fantasy">Fantasy</option>
+          <option value="Mystery">Mystery</option>
+          <option value="Thriller">Thriller</option>
+          <option value="Historical">Historical</option>
+          <option value="Animation">Animation</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label for="year-select">Year:</label>
+        <select id="year-select">
+          <option value="">Select Year</option>
+          <option value="2025">2025</option>
+          <option value="2024">2024</option>
+          <option value="2023">2023</option>
+          <option value="2022">2022</option>
+          <option value="2021">2021</option>
+          <option value="2020">2020</option>
+          <option value="2019">2019</option>
+          <option value="2018">2018</option>
+          <option value="2017">2017</option>
+          <option value="2016">2016</option>
+          <option value="2015">2015</option>
+          <option value="2014">2014</option>
+          <option value="2013">2013</option>
+          <option value="2012">2012</option>
+          <option value="2011">2011</option>
+          <option value="2010">2010</option>
+          <option value="2009">2009</option>
+          <option value="2008">2008</option>
+          <option value="2007">2007</option>
+          <option value="2006">2006</option>
+          <option value="2005">2005</option>
+          <option value="2004">2004</option>
+          <option value="2003">2003</option>
+          <option value="2002">2002</option>
+          <option value="2001">2001</option>
+          <option value="2000">2000</option>
+          <!-- more years -->
+        </select>
+      </div>
+      <button id="apply-filters">Apply Filters</button>
+    </div>
+  </div>
+
+  <header class="hero-stylish">
+    <div id="hero-video-container"></div>
+    <nav>
+      <div class="logo_ul">
+        <img src="home/brahjohnson/Downloads/VividCinema/fav-icon.png"/>
+        <ul>
+          <li><a href="#home"><i class="bx bx-home"></i><span>Home</span></a></li>
+          <li><a href="#popular"><i class="bx bxs-hot"></i><span>Trending</span></a></li>
+          <li><a href="#movies"><i class="bx bx-compass"></i><span>Explore</span></a></li>
+          <li><a href="#tv-shows"><i class="bx bx-tv"></i><span>TV Shows</span></a></li>
+          <li><a href="#favorites"><i class="bx bx-heart"></i><span>Favourite</span></a></li>
+          <li><a href="#premium"><i class="bx bx-crown"></i><span>Premium</span></a></li>
+          <li><a href="account.html"><i class="bx bx-user"></i><span>My Account</span></a></li>
+        </ul>
+      </div>
+    </nav>
+    <main>
+      <div class="content">
+        <h1 id="title">Loading...</h1>
+        <p id="overview">Loading description...</p>
+        <div class="details">
+          <h6>A Netflix Original Film</h6>
+          <h5 id="gen">Genre</h5>
+          <h4 id="date">Year</h4>
+          <h3 id="rate"><span>IMDB</span><i class="bi bi-star-fill"></i> <span id="rating">0.0</span></h3>
+        </div>
+        <div class="btns">
+          <a href="#" id="play">Watch <i class="bi bi-play-fill"></i></a>
+          <a href="#" id="download_main"><i class="bi bi-cloud-arrow-down-fill"></i></a>
+        </div>
+      </div>
+      <section>
+        <h4>Latest Release</h4>
+        <i class="bi bi-chevron-left" onclick="scrollCards(-1)"></i>
+        <i class="bi bi-chevron-right" onclick="scrollCards(1)"></i>
+        <div class="cards" id="upcoming-cards"></div>
+      </section>
+    </main>
+  </header>
+
+  <section class="movies container" id="movies">
+    <h2 class="heading-title">All Movies</h2>
+    <div class="movies-content" id="movies-container"></div>
+    <button class="next-btn" id="nowplaying-more">Load More</button>
+  </section>
+  <!-- Additional Sections (Popular, Top Rated, Anime, Kdrama, TV Shows, Favorites) -->
+  <section class="main-content-grid">
+    <div class="content-left">
+      <section class="popular container" id="popular">
+        <h2 class="heading-title">Popular Movies</h2>
+        <div class="movies-content" id="popular-container"></div>
+        <button class="next-btn" id="popular-more">Load More</button>
+      </section>
+      <section class="top-rated container">
+        <h2 class="heading-title">Top Rated Movies</h2>
+        <div class="movies-content" id="top-rated-container"></div>
+        <button class="next-btn" id="top-rated-more">Load More</button>
+      </section>
+      <section class="Anime container">
+        <h2 class="heading-title">Anime</h2>
+        <div class="movies-content" id="Anime"></div>
+        <button class="next-btn" id="Anime-more">Load More</button>
+      </section>
+      <section class="kdrama container">
+        <h2 class="heading-title">Hot Korean Dramas</h2>
+        <div class="movies-content" id="kdrama-container"></div>
+        <button class="next-btn" id="kdrama-more">Load More</button>
+      </section>
+      <section class="tvshows container" id="tv-shows">
+        <h2 class="heading-title">TV Shows</h2>
+        <div class="movies-content" id="tvshows-container"></div>
+        <button class="next-btn" id="tvshows-more">Load More</button>
+      </section>
+      <section class="favorites container" id="favorites">
+        <h2 class="heading-title">My Favourite List</h2>
+        <div class="movies-content" id="favorites-container"></div>
+      </section>
+    </div>
+  </section>
+  </main>
+
+  <footer>
+    &copy; 2025 Vivid Cinema. All rights reserved.
+    <a href="terms.html" class="footer-link">Terms</a> |
+    <a href="privacy.html" class="footer-link">Privacy Policy</a> |
+    <a href="pages.html" class="footer-link">About</a> |
+    <a href="contact.html" class="footer-link">Contact</a>
+  </footer>
+  <script>
+  // firebase.js
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
+  import { getAuth } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
+  import { getFirestore } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
+  
+  const firebaseConfig = {
+    apiKey: "AIzaSyAZQGjixUxuhjSIyHuKK4fAas4tG9C1rxE",
+    authDomain: "vivid-cinema.firebaseapp.com",
+    projectId: "vivid-cinema",
+  };
+  
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+  
+  export { auth, db };
+  import { auth, db } from "./firebase.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
+import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
+
+// Check user and hide ads if premium
+onAuthStateChanged(auth, async (user) => {
+  if (user) {
+    try {
+      const userDoc = await getDoc(doc(db, "users", user.uid));
+      if (userDoc.exists() && userDoc.data().isPremium) {
+        hideAdsForPremium();
+      }
+    } catch (err) {
+      console.error("Error fetching user doc:", err);
+    }
+  }
+});
+
+function hideAdsForPremium() {
+  document.querySelectorAll(".adsbygoogle, script[src*='adsbygoogle'], script[src*='acscdn'], script[src*='ligheechoagool']").forEach(el => {
+    el.remove();
+  });
+
+  // Optionally also hide inline ad containers
+  const adContainers = document.querySelectorAll('[data-ad-client], .ad-banner, .ad-slot');
+  adContainers.forEach(el => el.style.display = 'none');
+}
+ 
+  </script>
+  <script src="swiper-bundle.min.js"></script>
+  
+  <script src="script.js" defer></script>
+  <script type="module" src="scripts/scripts/auth.js"></script>
+  <script type="module" src="scripts/scripts/hamburger.js"></script>
+  <link rel="stylesheet" href="styles.css">
+  <script src="hamburger.js" defer></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6559393992371691"
+    crossorigin="anonymous"></script>
+  <!-- VividCinema -->
+  <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-6559393992371691" data-ad-slot="9430062600"
+    data-ad-format="auto" data-full-width-responsive="true"></ins>
+  <script>
+    (adsbygoogle = window.adsbygoogle || []).push({});
+  </script>
+</body>
+
+</html>

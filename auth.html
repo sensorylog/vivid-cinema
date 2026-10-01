@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  
+  <script data-name="BMC-Widget" data-cfasync="false" src="https://cdnjs.buymeacoffee.com/1.0.0/widget.prod.min.js" data-id="vividcinema" data-description="Support me on Buy me a coffee!" data-message="" data-color="#5F7FFF" data-position="Right" data-x_margin="18" data-y_margin="18"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sign Up - Vivid Cinema</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="manifest" href="manifest.json" />
+  <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
+  <script src="https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js"></script>
+  <script src="https://js.paystack.co/v1/inline.js"></script>
+  <style>
+    /* same styles you had */
+    .auth-container {
+      max-width: 420px;
+      margin: 6rem auto 2rem;
+      padding: 2rem;
+      background: var(--container-color);
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.4);
+    }
+    .auth-container input, .auth-container label {
+      width: 100%;
+      margin-bottom: 1rem;
+      border: none;
+      border-radius: 5px;
+      background: #2c2c2c;
+      color: var(--text-color);
+      padding: 0.9rem;
+    }
+    .auth-switch { text-align: center; margin-top: 1rem; }
+    .auth-switch a { color: var(--main-color); font-weight: 500; }
+    .error-msg { color: red; font-size: 0.9rem; margin-bottom: 1rem; }
+    .premium-section {
+      margin-top: 4rem;
+      padding: 2rem;
+      background: var(--container-color);
+      border-radius: 10px;
+      text-align: center;
+    }
+    .premium-section h2 { margin-bottom: 1rem; }
+    .plan-buttons a {
+      display: inline-block;
+      margin: 0.5rem;
+      padding: 0.8rem 1.5rem;
+      background: var(--main-color);
+      color: white;
+      border-radius: 6px;
+      text-decoration: none;
+      transition: background 0.3s ease;
+    }
+    .plan-buttons a:hover { background: #e03131; }
+    .plan-description { font-size: 0.9rem; margin-top: 0.5rem; color: var(--text-light); }
+  </style>
+</head>
+<body>
+  <header class="nav container">
+    <a href="Home.html" class="logo">Vivid<span>Cinema</span></a>
+  </header>
+
+  <main class="auth-container">
+    <h1>Create Account</h1>
+    <form id="signup-form">
+      <input type="text" id="username" placeholder="Username" required />
+      <input type="email" id="email" placeholder="Email" required />
+      <input type="password" id="password" placeholder="Password" required />
+      <div class="error-msg" id="error-msg"></div>
+      <button type="submit" class="watch-btn">Sign Up</button>
+    </form>
+    <div class="auth-switch">
+      Already have an account? <a href="login.html">Log In</a>
+    </div>
+  </main>
+
+  <section class="premium-section">
+    <h2>Unlock Premium Access</h2>
+    <p>Subscribe to watch all premium movies and enjoy an ad-free experience.</p>
+    <div class="plan-buttons">
+      <a href="#" onclick="payWithPaystack('PLN_s0a4ssb21kcze93')">Monthly - GHS 159.90</a>
+      <div class="plan-description">Pay monthly. Cancel anytime.</div>
+
+      <a href="#" onclick="payWithPaystack('PLN_h9p653iext9lhwv')">Quarterly - GHS 0.00</a>
+      <div class="plan-description">Save more by paying every 3 months.</div>
+
+      <a href="#" onclick="payWithPaystack('PLN_js1flirhq7f5olk')">Yearly - GHS 639.60</a>
+      <div class="plan-description">Best value! Get 3 months free.</div>
+    </div>
+  </section>
+
+  <script type="module" src="scripts/scripts/auth.js"></script>
+
+  <script>
+    function payWithPaystack(planCode) {
+      let handler = PaystackPop.setup({
+        key: 'pk_live_d43279760e5f3ea84aed449e8026da10fab2f1ad',
+        email: document.getElementById('email').value || "test@example.com",
+        plan: planCode,
+        callback: function(response) {
+          alert('Payment successful! Reference: ' + response.reference);
+          location.href = 'account.html';
+        },
+        onClose: function() {
+          alert('Transaction cancelled.');
+        }
+      });
+      handler.openIframe();
+    }
+  </script>
+</body>
+</html>

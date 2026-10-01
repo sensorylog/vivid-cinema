@@ -1,0 +1,19 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "start-server",
+      "type": "shell",
+      "command": "npx live-server --port=5500",
+      "isBackground": true,
+      "problemMatcher": {
+        "pattern": [],
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": ".",
+          "endsPattern": "Serving"
+        }
+      }
+    }
+  ]
+}

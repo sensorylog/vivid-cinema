@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vivid Cinema Chatbot</title>
+  <style>
+    /* Add your styles here *
+    <style>
+    /* Chatbot Styles */
+    #chatbot-container {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background-color: #1c1c1c;
+      color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      width: 300px;
+      height: 400px;
+      display: none;
+      flex-direction: column;
+      padding: 10px;
+    }
+
+    #chatbot-container.open {
+      display: flex;
+    }
+
+    #chatbot-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px;
+      background-color: #333;
+      border-radius: 8px;
+    }
+
+    #chatbot-header h3 {
+      margin: 0;
+    }
+
+    #chatbot-body {
+      flex: 1;
+      padding: 10px;
+      overflow-y: auto;
+      height: 100%;
+    }
+
+    #chatbot-footer {
+      display: flex;
+      padding: 10px;
+      background-color: #333;
+      border-radius: 8px;
+    }
+
+    #chatbot-footer input {
+      width: 100%;
+      padding: 5px;
+      border: none;
+      border-radius: 4px;
+    }
+
+    #chatbot-footer button {
+      padding: 6px 10px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+
+    /* Floating Button */
+    #chatbot-btn {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background-color: #4CAF50;
+      color: white;
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      font-size: 24px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+  </style>
+</head>
+<body>
+
+<!-- Chatbot UI -->
+<div id="chatbot-btn" onclick="toggleChatbot()">💬</div>
+<div id="chatbot-container">
+  <div id="chatbot-header">
+    <h3>Vivid Cinema Bot</h3>
+    <button onclick="toggleChatbot()">X</button>
+  </div>
+  <div id="chatbot-body">
+    <div id="chatbot-messages"></div>
+  </div>
+  <div id="chatbot-footer">
+    <input type="text" id="chatbot-input" placeholder="Ask me anything..." />
+    <button onclick="sendMessage()">Send</button>
+  </div>
+</div>
+
+<script>
+  function toggleChatbot() {
+    const chatbotContainer = document.getElementById('chatbot-container');
+    chatbotContainer.classList.toggle('open');
+  }
+
+  function addMessage(content, isBot = false) {
+    const messagesDiv = document.getElementById('chatbot-messages');
+    const messageDiv = document.createElement('div');
+    messageDiv.classList.add(isBot ? 'bot-message' : 'user-message');
+    messageDiv.textContent = content;
+    messagesDiv.appendChild(messageDiv);
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+  }
+
+  async function sendMessage() {
+    const inputElement = document.getElementById('chatbot-input');
+    const userMessage = inputElement.value;
+    if (!userMessage.trim()) return;
+
+    addMessage(userMessage, false);
+    inputElement.value = '';
+
+    try {
+      // Send the message to your backend which will then send it via Twilio
+      const response = await fetch('/send-message', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          message: userMessage,
+        }),
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        addMessage('Message sent successfully to admin!', true);
+      } else {
+        addMessage('Sorry, there was an error sending the message.', true);
+      }
+    } catch (error) {
+      addMessage('There was an error processing your request.', true);
+    }
+  }
+</script>
+
+</body>
+</html>

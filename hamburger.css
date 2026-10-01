@@ -1,0 +1,95 @@
+   :root {
+      --hamburger-size: 24px;
+      --hamburger-color: #fff;
+      --menu-bg: #151515;
+      --menu-text: #fff;
+      --menu-border: #333;
+      --transition-speed: 0.3s;
+    }
+    /* Hamburger Button */
+    #hamburger-btn {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      width: var(--hamburger-size);
+      height: var(--hamburger-size);
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      padding: 0;
+      z-index: 1000;
+    }
+    #hamburger-btn .hamburger-line {
+      width: 100%;
+      height: 3px;
+      background-color: var(--hamburger-color);
+      border-radius: 2px;
+      transition: transform var(--transition-speed) ease, opacity var(--transition-speed) ease;
+    }
+    /* Animate to X when open */
+    #hamburger-btn.open .hamburger-line:nth-child(1) {
+      transform: translateY(9px) rotate(45deg);
+    }
+    #hamburger-btn.open .hamburger-line:nth-child(2) {
+      opacity: 0;
+    }
+    #hamburger-btn.open .hamburger-line:nth-child(3) {
+      transform: translateY(-9px) rotate(-45deg);
+    }
+    /* Mobile Filter Menu */
+    #mobile-filter-menu {
+      position: fixed;
+      top: 0;
+      right: 0;
+      width: 280px;
+      height: 100vh;
+      background: var(--menu-bg);
+      color: var(--menu-text);
+      transform: translateX(100%);
+      transition: transform var(--transition-speed) ease;
+      z-index: 999;
+      padding: 1rem;
+      box-shadow: -2px 0 5px rgba(0,0,0,0.5);
+      display: flex;
+      flex-direction: column;
+    }
+    #mobile-filter-menu.open {
+      transform: translateX(0);
+    }
+    #close-filter-menu {
+      align-self: flex-end;
+      background: transparent;
+      border: none;
+      font-size: 1.5rem;
+      color: var(--menu-text);
+      cursor: pointer;
+      margin-bottom: 1rem;
+    }
+    .filter-container h3 {
+      margin-bottom: 1rem;
+    }
+    .filter-container label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-size: 0.9rem;
+    }
+    .filter-container select {
+      width: 100%;
+      padding: 0.5rem;
+      background: transparent;
+      border: 1px solid var(--menu-border);
+      border-radius: 4px;
+      color: var(--menu-text);
+      font-size: 1rem;
+      margin-bottom: 1rem;
+    }
+    #apply-filters {
+      margin-top: auto;
+      padding: 0.75rem;
+      background: var(--hamburger-color);
+      color: #000;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 1rem;
+    }
