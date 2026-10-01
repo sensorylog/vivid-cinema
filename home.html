@@ -11,7 +11,7 @@
 <div class="vivid-home">
 <header class="vivid-topbar" id="topbar"><nav class="vivid-nav" aria-label="Primary">
 <a class="vivid-brand" href="home.html">Vivid<span>Cinema</span></a>
-<div class="vivid-navlinks"><a href="#home" aria-current="true">Home</a><a href="#trending">Trending</a><a href="#movies">Movies</a><a href="#tv">TV</a><a href="account.html">My Library</a></div>
+<div class="vivid-navlinks"><a href="#home" aria-current="true">Home</a><a href="discover.html">Discover</a><a href="#trending">Trending</a><a href="#movies">Movies</a><a href="#tv">TV</a><a href="account.html">My Library</a></div>
 <div class="vivid-nav-search"><i class="bi bi-search" aria-hidden="true"></i><input id="search-input" type="search" placeholder="Search" aria-label="Search movies and TV"></div>
 <a class="vivid-nav-action" id="auth-link" href="auth.html">Sign in</a>
 </nav><div class="vivid-search-panel" id="search-panel" aria-label="Search results"></div></header>
@@ -19,7 +19,7 @@
 <section class="vivid-hero" aria-label="Featured titles">
 <div class="vivid-hero-media"><div class="vivid-hero-fallback" id="hero-fallback"></div><iframe class="vivid-hero-video" id="hero-video" title="Featured trailer" allow="autoplay; encrypted-media; picture-in-picture" referrerpolicy="strict-origin-when-cross-origin"></iframe></div>
 <div class="vivid-hero-content"><div class="vivid-kicker" id="hero-kicker">Featured</div><h1 class="vivid-hero-title" id="hero-title">Loading Vivid Cinema…</h1><div class="vivid-meta" id="hero-meta"></div><p class="vivid-hero-copy" id="hero-copy">Finding something worth watching.</p>
-<div class="vivid-actions"><a class="vivid-button vivid-button--primary" id="hero-watch" href="watch.html"><i class="bi bi-play-fill"></i> Details</a><button class="vivid-button vivid-button--secondary" id="hero-more" type="button"><i class="bi bi-info-circle"></i> More info</button></div></div>
+<div class="vivid-actions"><a class="vivid-button vivid-button--primary" id="hero-watch" href="title.html"><i class="bi bi-play-fill"></i> Details</a><button class="vivid-button vivid-button--secondary" id="hero-more" type="button"><i class="bi bi-info-circle"></i> More info</button></div></div>
 <button class="vivid-hero-control prev" id="hero-prev" type="button" aria-label="Previous featured title"><i class="bi bi-chevron-left"></i></button><button class="vivid-hero-control next" id="hero-next" type="button" aria-label="Next featured title"><i class="bi bi-chevron-right"></i></button>
 <div class="vivid-hero-tools"><button id="hero-sound" type="button" aria-label="Unmute trailer"><i class="bi bi-volume-mute-fill"></i></button><button id="hero-pause" type="button" aria-label="Pause trailer"><i class="bi bi-pause-fill"></i></button></div>
 <div class="vivid-feature-strip"><div class="vivid-feature-viewport"><div class="vivid-feature-track" id="feature-track" aria-label="Featured titles carousel"></div></div></div>
@@ -37,7 +37,7 @@
 <section class="vivid-rails" id="upcoming"><div class="vivid-rail-head"><div><h2>Coming soon</h2><p>Upcoming movies on the radar.</p></div><div class="vivid-rail-controls"><button data-scroll="upcoming-rail" data-dir="-1" aria-label="Previous upcoming titles"><i class="bi bi-chevron-left"></i></button><button data-scroll="upcoming-rail" data-dir="1" aria-label="Next upcoming titles"><i class="bi bi-chevron-right"></i></button></div></div><div class="vivid-rail" id="upcoming-rail"></div></section>
 </div></div></main>
 <footer class="vivid-footer">&copy; 2026 Vivid Cinema · <a href="terms.html">Terms</a> · <a href="privacy.html">Privacy</a> · <a href="contact.html">Contact</a></footer>
-<nav class="vivid-mobile-nav" aria-label="Mobile navigation"><a href="#home" class="is-active"><i class="bi bi-house"></i><span>Home</span></a><a href="#trending"><i class="bi bi-fire"></i><span>Trending</span></a><a href="#movies"><i class="bi bi-film"></i><span>Movies</span></a><a href="#tv"><i class="bi bi-tv"></i><span>TV</span></a><a href="account.html"><i class="bi bi-person"></i><span>Account</span></a></nav>
+<nav class="vivid-mobile-nav" aria-label="Mobile navigation"><a href="#home" class="is-active"><i class="bi bi-house"></i><span>Home</span></a><a href="discover.html"><i class="bi bi-compass"></i><span>Discover</span></a><a href="#movies"><i class="bi bi-film"></i><span>Movies</span></a><a href="#tv"><i class="bi bi-tv"></i><span>TV</span></a><a href="account.html"><i class="bi bi-person"></i><span>Account</span></a></nav>
 </div>
 <script type="module" src="scripts/app-shell.js"></script><script type="module" src="script.js"></script><script type="module" src="scripts/nav-auth.js"></script>
 </body></html>
