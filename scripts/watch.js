@@ -55,6 +55,7 @@ function renderShell(params) {
     </section>
     <section class="vivid-player-section" aria-label="Video player">
       <div class="vivid-player-frame">
+        <div id="player-status" class="vivid-player-status" role="status" aria-live="polite">Preparing player…</div>
         <iframe id="vidapi-player" title="${escapeHtml(title)} player" allow="autoplay; fullscreen; picture-in-picture; encrypted-media" allowfullscreen referrerpolicy="origin" loading="eager"></iframe>
       </div>
       <div class="vivid-player-bar">
@@ -64,7 +65,21 @@ function renderShell(params) {
     </section>
     ${isTv ? '<section class="vivid-watch-note"><i class="bi bi-collection-play"></i><div><strong>Episode playback</strong><span>Use the episode list on the title page to switch seasons and episodes.</span></div></section>' : ""}
   `;
-  $("vidapi-player").src = buildEmbedUrl(params);
+  const player = $("vidapi-player");
+  const playerStatus = $("player-status");
+  let loaded = false;
+  const timeout = window.setTimeout(() => {
+    if (!loaded && playerStatus) {
+      playerStatus.textContent = "The player is taking longer than expected. If it does not appear, try again or return to the title.";
+      playerStatus.classList.add("is-warning");
+    }
+  }, 9000);
+  player.addEventListener("load", () => {
+    loaded = true;
+    window.clearTimeout(timeout);
+    playerStatus?.remove();
+  }, { once: true });
+  player.src = buildEmbedUrl(params);
   recordHistory();
 }
 
