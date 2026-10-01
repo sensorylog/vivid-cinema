@@ -1,10 +1,21 @@
 {
   "name": "Vivid Cinema",
-  "short_name": "Vivid Cinema",
-  "start_url": "home.html",
+  "short_name": "Vivid",
+  "description": "A premium cinematic discovery experience for movies and series.",
+  "start_url": "./home.html",
+  "scope": "./",
   "display": "standalone",
-  "background_color": "#0d0d0d",
-  "theme_color": "#e50914",
-  "orientation": "portrait",
-  "lang": "en"
+  "background_color": "#08090b",
+  "theme_color": "#08090b",
+  "orientation": "any",
+  "lang": "en",
+  "categories": ["entertainment", "movies", "tv"],
+  "icons": [
+    {
+      "src": "./icons/vivid-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
 }
