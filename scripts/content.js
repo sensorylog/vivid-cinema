@@ -40,9 +40,22 @@ export async function getFeaturedMovies(limit = 8) {
   return normalizeResults(data.results || [], "movie").filter((item) => item.backdrop_path).slice(0, limit);
 }
 
+async function loadHomeKey(key, page) {
+  let lastError;
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    try {
+      return await HOME_LOADERS[key](page);
+    } catch (error) {
+      lastError = error;
+      if (attempt === 0) await new Promise((resolve) => setTimeout(resolve, 250));
+    }
+  }
+  throw lastError;
+}
+
 export async function getHomeSections(keys = Object.keys(HOME_LOADERS), page = 1) {
   const selected = keys.filter((key) => HOME_LOADERS[key]);
-  const requests = await Promise.allSettled(selected.map((key) => HOME_LOADERS[key](page)));
+  const requests = await Promise.allSettled(selected.map((key) => loadHomeKey(key, page)));
   const output = {};
   selected.forEach((key, index) => {
     output[key] = requests[index].status === "fulfilled"
