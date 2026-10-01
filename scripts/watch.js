@@ -29,7 +29,7 @@ function buildEmbedUrl(params,startAt=0){
  return base+"/embed/movie/"+encodeURIComponent(params.id)+suffix;
 }
 function recordHistory(){
- if(!media)return;
+ if(!media||!media.title||/^Loading\b/.test(media.title))return;
  upsertLibraryItem("history",{id:media.id,media_type:media.media_type,title:media.title,year:media.year,poster_path:media.poster_path,backdrop_path:media.backdrop_path});
 }
 function recommendationCards(){
@@ -97,6 +97,11 @@ function handlePlayerEvent(event){
  const data=payload.data;
  const info=data.player_info||{};
  if(String(info.mediaType||"")!==String(media?.media_type||""))return;
+ if(info.tmdb != null && String(info.tmdb) !== String(media?.id))return;
+ if(currentParams?.type==="tv"){
+   if(info.season != null && Number(info.season)!==Number(currentParams.season))return;
+   if(info.episode != null && Number(info.episode)!==Number(currentParams.episode))return;
+ }
  const progress=Number(data.player_progress)||0;
  const duration=Number(data.player_duration)||0;
  if(progress>0){

@@ -47,7 +47,6 @@ function cleanItem(item){
     updatedAt:Number(item.updatedAt)||Date.now()
   };
 }
-async function waitForUser(){if(auth.currentUser)return auth.currentUser;return new Promise(resolve=>{const unsubscribe=onAuthStateChanged(auth,user=>{unsubscribe();resolve(user);});});}
 async function setRemoteItem(uid,collection,item){
   const safe=cleanItem(item);
   await setDoc(doc(db,"users",uid,collection,safe.media_type+":"+safe.id),safe,{merge:true});
