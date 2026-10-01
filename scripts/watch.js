@@ -40,22 +40,41 @@ function recommendationCards(){
 }
 function renderShell(params){
  const isTv=params.type==="tv";
- const title=media.title;
+ const title=media.title||"Vivid Cinema";
  const episodeTitle=isTv&&details?.episode?details.episode.name:"";
  const saved=getPlaybackProgress(progressKey());
  document.title=(episodeTitle?episodeTitle+" · ":"")+title+" · Vivid Cinema";
  $("watch-content").innerHTML=
-  '<section class="vivid-watch-hero"><div class="vivid-watch-backdrop" style="--watch-backdrop:url(\''+getImageUrl(media.backdrop_path,"w1280")+'\')"></div><div class="vivid-watch-head"><div><span class="vivid-watch-kicker">'+(isTv?"TV · SEASON "+params.season+" · EPISODE "+params.episode:"MOVIE")+'</span><h1>'+escapeHtml(episodeTitle||title)+'</h1><p>'+escapeHtml(isTv&&details?.episode?.overview?details.episode.overview:media.overview||"")+'</p></div><a class="vivid-button vivid-button--secondary" href="'+escapeHtml(buildTitleUrl(media.id,media.media_type))+'"><i class="bi bi-info-circle"></i> Details</a></div></section>'+
-  '<section class="vivid-player-section" aria-label="Video player"><div class="vivid-player-frame"><div id="player-status" class="vivid-player-status" role="status" aria-live="polite">'+(saved?"Resuming where you left off…":"Preparing player…")+'</div><iframe id="vidapi-player" title="'+escapeHtml(title)+' player" allow="autoplay; fullscreen; picture-in-picture; encrypted-media" allowfullscreen referrerpolicy="origin" loading="eager"></iframe></div><div class="vivid-player-bar"><div><i class="bi bi-shield-check"></i><span>Powered by VidAPI</span></div><div><a href="'+escapeHtml(buildTitleUrl(media.id,media.media_type))+'">Back to title</a><a id="player-open" href="#" target="_blank" rel="noopener noreferrer">Open player</a></div></div></section>'+
+  '<section class="vivid-watch-hero"><div id="watch-backdrop" class="vivid-watch-backdrop" style="--watch-backdrop:url(\''+getImageUrl(media.backdrop_path,"w1280")+'\')"></div><div class="vivid-watch-head"><div><span id="watch-kicker" class="vivid-watch-kicker">'+(isTv?"TV · SEASON "+params.season+" · EPISODE "+params.episode:"MOVIE")+'</span><h1 id="watch-title">'+escapeHtml(episodeTitle||title)+'</h1><p id="watch-overview">'+escapeHtml(isTv&&details?.episode?.overview?details.episode.overview:media.overview||"")+'</p></div><a class="vivid-button vivid-button--secondary" href="'+escapeHtml(buildTitleUrl(media.id,media.media_type))+'"><i class="bi bi-info-circle"></i> Details</a></div></section>'+
+  '<section class="vivid-player-section" aria-label="Video player"><div class="vivid-player-frame"><div id="player-status" class="vivid-player-status" role="status" aria-live="polite">'+(saved?"Resuming where you left off…":"Preparing VidAPI player…")+'</div><iframe id="vidapi-player" title="'+escapeHtml(title)+' player" allow="autoplay; fullscreen; picture-in-picture; encrypted-media" allowfullscreen referrerpolicy="origin" loading="eager"></iframe></div><div class="vivid-player-bar"><div><i class="bi bi-shield-check"></i><span>Powered by VidAPI</span></div><div><a href="'+escapeHtml(buildTitleUrl(media.id,media.media_type))+'">Back to title</a><a id="player-open" href="#" target="_blank" rel="noopener noreferrer">Open player</a></div></div></section>'+
   (isTv?'<section class="vivid-watch-note"><i class="bi bi-collection-play"></i><div><strong>Episode playback</strong><span>Use the episode list on the title page to switch seasons and episodes.</span></div></section>':"")+
-  '<section class="vivid-watch-recommendations"><div class="vivid-section-heading"><div><span>AFTER WATCHING</span><h2>More like this</h2></div></div><div class="vivid-watch-rec-rail">'+recommendationCards()+'</div></section>';
+  '<section class="vivid-watch-recommendations"><div class="vivid-section-heading"><div><span>AFTER WATCHING</span><h2>More like this</h2></div></div><div id="watch-recommendations" class="vivid-watch-rec-rail">'+recommendationCards()+'</div></section>';
  const player=$("vidapi-player"),status=$("player-status");
  let loaded=false;
- const timeout=window.setTimeout(()=>{if(!loaded&&status){status.textContent="The player is taking longer than expected. If it does not appear, try again or return to the title.";status.classList.add("is-warning")}},9000);
+ const timeout=window.setTimeout(()=>{if(!loaded&&status){status.textContent="VidAPI is taking longer than expected. You can open the player directly or return to the title.";status.classList.add("is-warning")}},9000);
  player.addEventListener("load",()=>{loaded=true;window.clearTimeout(timeout);status?.remove()},{once:true});
  const embedUrl=buildEmbedUrl(params,saved?.progress||route.params.get("startAt")||0);
  player.src=embedUrl;
  const openPlayer=$("player-open"); if(openPlayer)openPlayer.href=embedUrl;
+}
+function hydrateWatchDetails(params){
+ if(!media)return;
+ const isTv=params.type==="tv";
+ const episodeTitle=isTv&&details?.episode?details.episode.name:"";
+ const title=media.title||"Vivid Cinema";
+ const titleNode=$("watch-title");
+ const overviewNode=$("watch-overview");
+ const kickerNode=$("watch-kicker");
+ const backdrop=$("watch-backdrop");
+ const player=$("vidapi-player");
+ if(titleNode)titleNode.textContent=episodeTitle||title;
+ if(overviewNode)overviewNode.textContent=isTv&&details?.episode?.overview?details.episode.overview:(media.overview||"");
+ if(kickerNode)kickerNode.textContent=isTv?"TV · SEASON "+params.season+" · EPISODE "+params.episode:"MOVIE";
+ if(backdrop)backdrop.style.setProperty("--watch-backdrop","url('"+getImageUrl(media.backdrop_path,"w1280")+"')");
+ if(player)player.title=title+" player";
+ const recommendations=$("watch-recommendations");
+ if(recommendations)recommendations.innerHTML=recommendationCards();
+ document.title=(episodeTitle?episodeTitle+" · ":"")+title+" · Vivid Cinema";
  recordHistory();
 }
 async function prepareNextEpisode(params){
@@ -97,16 +116,35 @@ async function load(){
  if(!currentParams.id){
   $("watch-content").innerHTML='<section class="vivid-watch-error"><i class="bi bi-exclamation-circle"></i><h1>Playback link is incomplete.</h1><p>Choose a title from Vivid Cinema and start playback again.</p><a class="vivid-button vivid-button--secondary" href="home.html">Browse titles</a></section>';return;
  }
+
+ // VidAPI only needs the media ID/type (and season/episode for TV) to begin
+ // playback. Do not make the player wait for TMDB details, credits or providers.
+ media=normalizeMedia({
+   id:currentParams.id,
+   overview:"",
+   title:currentParams.type==="tv"?"Loading episode…":"Loading movie…",
+   poster_path:"",
+   backdrop_path:""
+ },currentParams.type);
+ renderShell(currentParams);
+
  try{
   details=currentParams.type==="tv"?await tmdbApi.tvDetails(currentParams.id):await tmdbApi.movieDetails(currentParams.id);
   media=normalizeMedia(details,currentParams.type);
   if(currentParams.type==="tv"){
-    try{details.episode=await tmdbApi.tvSeason(currentParams.id,currentParams.season).then(season=>(season.episodes||[]).find(ep=>ep.episode_number===currentParams.episode)||null)}catch(_){details.episode=null}
+    const episodePromise=tmdbApi.tvSeason(currentParams.id,currentParams.season)
+      .then(season=>(season.episodes||[]).find(ep=>Number(ep.episode_number)===Number(currentParams.episode))||null)
+      .catch(()=>null);
+    details.episode=await episodePromise;
     nextEpisode=await prepareNextEpisode(currentParams);
   }
-  renderShell(currentParams);
+  hydrateWatchDetails(currentParams);
  }catch(error){
-  $("watch-content").innerHTML='<section class="vivid-watch-error"><i class="bi bi-exclamation-circle"></i><h1>We couldn’t prepare playback.</h1><p>'+escapeHtml(getErrorMessage(error))+'</p><a class="vivid-button vivid-button--secondary" href="home.html">Back to browse</a></section>';
+  // Playback is already available through VidAPI even if TMDB metadata is unavailable.
+  // Keep the player alive and surface only the metadata failure in the page copy.
+  console.warn("Vivid metadata unavailable while playback is active:",error);
+  const overviewNode=$("watch-overview");
+  if(overviewNode)overviewNode.textContent="Playback is ready. Title information is temporarily unavailable.";
  }
 }
 document.addEventListener("DOMContentLoaded",()=>{void startLibrarySync().catch(()=>{});load();});
