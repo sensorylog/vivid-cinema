@@ -9,9 +9,9 @@ body.vivid-cinema-home{background:#06070a;color:#f5f7fa;overflow-x:hidden}
 .vivid-navlinks{display:flex;gap:4px;align-items:center}
 .vivid-navlinks a,.vivid-nav-action{color:#b8bdc7;text-decoration:none;padding:10px 12px;border-radius:12px;font-size:.9rem;background:transparent;border:0;cursor:pointer}
 .vivid-navlinks a:hover,.vivid-nav-action:hover,.vivid-navlinks a[aria-current=true]{color:#fff;background:rgba(255,255,255,.07)}
-.vivid-nav-search{margin-left:auto;position:relative;width:min(28vw,300px)}
+.vivid-nav-search{margin-left:auto;position:relative;width:min(28vw,300px);transition:width .22s ease}
 .vivid-nav-search input{width:100%;height:42px;border-radius:999px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);color:#fff;padding:0 16px 0 40px;outline:0}
-.vivid-nav-search i{position:absolute;left:15px;top:12px;color:#9da3ad}
+.vivid-nav-search i{position:absolute;left:15px;top:12px;color:#9da3ad;pointer-events:none}.vivid-nav-search input:focus{border-color:rgba(255,255,255,.28);box-shadow:0 0 0 3px rgba(255,255,255,.05)}
 .vivid-hero{position:relative;min-height:min(860px,100svh);height:clamp(650px,88svh,900px);overflow:hidden;background:#090a0d}
 .vivid-hero-media,.vivid-hero-media::after{position:absolute;inset:0}
 .vivid-hero-media::after{content:"";background:linear-gradient(90deg,rgba(4,5,7,.96) 0%,rgba(4,5,7,.72) 34%,rgba(4,5,7,.22) 70%,rgba(4,5,7,.55) 100%),linear-gradient(0deg,#06070a 0%,transparent 35%,rgba(0,0,0,.18) 100%);z-index:2}
@@ -37,7 +37,7 @@ body.vivid-cinema-home{background:#06070a;color:#f5f7fa;overflow-x:hidden}
 .vivid-feature-track{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;padding:8px 2px 14px}
 .vivid-feature-track::-webkit-scrollbar{display:none}
 .vivid-feature-card{flex:0 0 clamp(150px,14vw,205px);height:112px;scroll-snap-align:start;border:1px solid rgba(255,255,255,.12);border-radius:16px;overflow:hidden;position:relative;background:#101217;cursor:pointer;opacity:.68;transition:transform .25s ease,opacity .25s ease,border-color .25s ease}
-.vivid-feature-card:hover,.vivid-feature-card.is-active{opacity:1;transform:translateY(-3px);border-color:rgba(255,255,255,.34)}
+.vivid-feature-card:hover,.vivid-feature-card.is-active{opacity:1;transform:translateY(-3px);border-color:rgba(255,255,255,.34)}.vivid-feature-card:focus-visible,.vivid-hero-control:focus-visible,.vivid-hero-tools button:focus-visible,.vivid-rail-controls button:focus-visible{outline:2px solid rgba(255,255,255,.75);outline-offset:3px}
 .vivid-feature-card img{width:100%;height:100%;object-fit:cover}
 .vivid-feature-card::after{content:"";position:absolute;inset:0;background:linear-gradient(0deg,rgba(0,0,0,.75),transparent 70%)}
 .vivid-feature-card strong{position:absolute;z-index:2;left:11px;right:10px;bottom:9px;font-size:.76rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -72,7 +72,7 @@ body.vivid-cinema-home{background:#06070a;color:#f5f7fa;overflow-x:hidden}
 .vivid-search-result small{color:#7e8590}
 .vivid-mobile-nav{display:none}
 @media(max-width:900px){
- .vivid-navlinks{display:none}.vivid-nav-search{width:auto;margin-left:auto}.vivid-nav-search input{width:42px;padding:0;font-size:0}.vivid-nav-search i{left:13px}.vivid-hero{height:78svh;min-height:620px}.vivid-hero-content{padding-top:130px;padding-bottom:175px}.vivid-hero-control{display:none}.vivid-hero-tools{bottom:150px}.vivid-feature-card{flex-basis:145px;height:94px}
+ .vivid-navlinks{display:none}.vivid-nav-search{width:42px;margin-left:auto}.vivid-nav-search input{width:42px;padding:0 12px;font-size:0;cursor:pointer}.vivid-nav-search i{left:13px}.vivid-nav-search.is-focused{width:min(260px,58vw)}.vivid-nav-search.is-focused input{width:100%;padding:0 16px 0 40px;font-size:.9rem;cursor:text}.vivid-hero{height:78svh;min-height:620px}.vivid-hero-content{padding-top:130px;padding-bottom:175px}.vivid-hero-control{display:none}.vivid-hero-tools{bottom:150px}.vivid-feature-card{flex-basis:145px;height:94px}
 }
 @media(max-width:640px){
  .vivid-topbar{padding:8px 12px}.vivid-nav{min-height:50px}.vivid-brand{font-size:1.05rem}.vivid-nav-action{padding:9px}.vivid-hero{height:78svh;min-height:600px}.vivid-hero-media::after{background:linear-gradient(0deg,#06070a 0%,rgba(4,5,7,.45) 38%,rgba(4,5,7,.42) 100%),linear-gradient(90deg,rgba(4,5,7,.72),rgba(4,5,7,.1))}
