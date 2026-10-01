@@ -562,3 +562,10 @@ body.vivid-cinema-home{background:#06070a;color:#f5f7fa;overflow-x:hidden}
 @media(prefers-reduced-motion:reduce){
   .vivid-card,.vivid-card::after,.vivid-card-media img{transition:none}
 }
+
+
+/* Final placement: featured hero cards sit directly below the cinematic hero frame. */
+.vivid-feature-strip{position:relative;z-index:7;width:min(1440px,100%);margin:0 auto;padding:14px var(--vivid-page-gutter) 28px;background:#06070a;pointer-events:auto}
+.vivid-feature-viewport{width:100%;padding:0;overflow:hidden}
+.vivid-feature-track{justify-content:flex-start;overflow-x:auto}
+@media(max-width:640px){.vivid-feature-strip{padding:8px 16px 18px}.vivid-feature-track{justify-content:flex-start}}
