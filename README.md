@@ -137,3 +137,15 @@ No browser/device or production-hosting QA has been run by this phase. Before ca
 - accessibility with keyboard and reduced-motion settings
 
 Phase E deliberately avoids claiming runtime success until those checks are performed on the deployed site.
+
+
+## Phase E2 — production integrity hardening
+
+E2 adds small production-facing safeguards without expanding the product surface:
+- playback page now shows a non-blocking readiness state and a delayed warning when an embedded player takes longer than expected
+- authentication pages use the canonical home route instead of the legacy index route
+- auth pages receive viewport, theme and description metadata consistent with the rest of Vivid
+- no change to the direct VidAPI architecture or Firebase hosting model
+
+### QA status
+This phase still does not claim browser/device execution. The remaining launch gate is real deployment testing of movie playback, TV episode playback, authentication, library sync, PWA lifecycle, mobile layout, and third-party player behavior.
