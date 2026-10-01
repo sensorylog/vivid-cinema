@@ -47,22 +47,6 @@ function cleanItem(item){
     updatedAt:Number(item.updatedAt)||Date.now()
   };
 }
-async function waitForUser(timeoutMs=5000){
-  if(auth.currentUser)return auth.currentUser;
-  return new Promise(resolve=>{
-    let settled=false;
-    let timer=null;
-    const finish=(user)=>{
-      if(settled)return;
-      settled=true;
-      if(timer)clearTimeout(timer);
-      unsubscribe();
-      resolve(user);
-    };
-    const unsubscribe=onAuthStateChanged(auth,user=>finish(user));
-    timer=setTimeout(()=>finish(auth.currentUser||null),timeoutMs);
-  });
-}
 async function setRemoteItem(uid,collection,item){
   const safe=cleanItem(item);
   await setDoc(doc(db,"users",uid,collection,safe.media_type+":"+safe.id),safe,{merge:true});
