@@ -11,6 +11,21 @@ let featured=[],activeIndex=0,heroMuted=true,heroPlaying=true,heroTimer=null;
 const rails={};
 const sectionState={};
 
+// Keep data keys separate from DOM ids. Several sections intentionally use human-friendly
+// ids (for example `movies-rail`) while the TMDB loader keys are API-oriented.
+const SECTION_RAIL_IDS=Object.freeze({
+ trending:"trending-rail",
+ nowPlaying:"now-playing-rail",
+ popularMovies:"movies-rail",
+ topRatedMovies:"top-rated-rail",
+ popularTv:"tv-rail",
+ topRatedTv:"top-tv-rail",
+ airingToday:"airing-rail",
+ anime:"anime-rail",
+ kdrama:"kdrama-rail",
+ upcoming:"upcoming-rail"
+});
+
 function skeleton(container,count=8){if(!container)return;container.innerHTML='<div class="vivid-loading">'+Array.from({length:count},()=>'<div class="vivid-skeleton-card"></div>').join("")+'</div>'}
 
 function card(media,options={}){
@@ -111,7 +126,8 @@ function updateRailControls(rail){
 async function loadSectionBatch(keys){
  const result=await getHomeSections(keys);
  keys.forEach(key=>{
-   const railId=key+"-rail";
+   const railId=SECTION_RAIL_IDS[key];
+   if(!railId) return;
    const data=result[key];
    if(!data)return;
    renderRail(railId,data.items);
@@ -128,10 +144,12 @@ async function loadMoreSection(key,button){
  button.disabled=true;button.textContent="Loading…";
  try{
    const data=await getHomeSectionPage(key,state.page+1);
-   renderRail(key+"-rail",data.items,{append:true});
+   const railId=SECTION_RAIL_IDS[key];
+   if(!railId) return;
+   renderRail(railId,data.items,{append:true});
    sectionState[key]={page:data.page,totalPages:data.totalPages};
    button.hidden=data.page>=data.totalPages;
-   updateRailControls($(key+"-rail"));
+   updateRailControls($(railId));
  }catch(error){button.textContent="Try again";console.warn("Vivid rail load failed:",error)}
  finally{if(!button.hidden&&button.textContent==="Loading…")button.textContent="Load more";button.disabled=false}
 }
