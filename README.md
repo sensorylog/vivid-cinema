@@ -2,6 +2,13 @@
 
 Vivid Cinema is being rebuilt as a premium cinematic web app and installable PWA.
 
+## Phase A5 — Runtime readiness
+The migrated data modules are now loaded as ES modules on their consuming pages. This closes a critical integration gap introduced during A4: `script.js`, `hamburger.js`, and `watch.js` all use imports and must therefore be loaded with `type="module"`. The landing page also initializes the shared app shell.
+
+The home filter markup no longer contains hard-coded genre/year values that conflict with the dynamic TMDB genre/year population. User-facing TMDB timeout/rate-limit/server errors now have a shared message helper for the next UI migration.
+
+Browser/device QA is still pending; this phase intentionally does not claim runtime verification.
+
 ## Phase A4 — Data and content architecture
 The data layer now has a canonical media model in `scripts/media.js`. Movie/TV results carry an explicit `media_type` and collision-safe `content_id` (`movie:123` / `tv:123`). TMDB access, timeout/error handling, detail endpoints, discovery, genres and similar-title pagination are centralized in `scripts/tmdb.js`. Home/search/filter consumers use `scripts/content.js` and the shared client instead of embedding their own API requests.
 
