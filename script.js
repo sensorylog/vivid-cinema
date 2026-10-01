@@ -31,11 +31,12 @@ function skeleton(container,count=8){if(!container)return;container.innerHTML='<
 function card(media,options={}){
  const title=media.title||"Untitled", rating=Number(media.vote_average||0).toFixed(1);
  const progress=options.progress;
+ const signal=options.signal||"";
  const contentId=media.content_id||((media.media_type||"movie")+":"+media.id);
  const progressBar=progress&&Number(progress.percentage)>0?'<div class="vivid-card-progress"><span style="width:'+Math.min(100,Number(progress.percentage)||0)+'%"></span></div>':"";
  return '<article class="vivid-card" data-id="'+escapeHtml(media.id)+'" data-type="'+escapeHtml(media.media_type||"movie")+'" tabindex="0" role="link" aria-label="'+escapeHtml(title)+'">'+
  '<div class="vivid-card-media"><img src="'+getImageUrl(media.poster_path,"w342")+'" alt="'+escapeHtml(title)+'" loading="lazy" decoding="async">'+
- (rating!=="0.0"?'<span class="vivid-rating">★ '+rating+"</span>":"")+progressBar+'</div>'+
+ (signal?'<span class="vivid-card-signal">'+escapeHtml(signal)+"</span>":"")+(rating!=="0.0"?'<span class="vivid-rating">★ '+rating+"</span>":"")+progressBar+'</div>'+
  '<div class="vivid-card-info"><div class="vivid-card-title">'+escapeHtml(title)+'</div><div class="vivid-card-sub">'+escapeHtml(media.year||"—")+(media.media_type==="tv"?" · Series":" · Movie")+(progress?" · "+formatProgress(progress):"")+"</div></div></article>";
 }
 
@@ -53,10 +54,15 @@ function wireCards(container){
 function renderRail(id,items=[],options={}){
  const el=$(id);if(!el)return;
  const normalized=items.map(x=>x.media_type?x:normalizeResults([x])[0]).filter(Boolean);
- const html=normalized.length?normalized.map(item=>card(item,{progress:options.progressMap?.[item.media_type+":"+item.id]})).join(""):'<div class="vivid-empty">Nothing available right now.</div>';
+ const html=normalized.length?normalized.map(item=>card(item,{progress:options.progressMap?.[item.media_type+":"+item.id],signal:options.signal})).join(""):'<div class="vivid-empty">Nothing available right now.</div>';
  el.innerHTML=options.append&&el.querySelector(".vivid-card")?el.innerHTML+html:html;
  wireCards(el);
  rails[id]=el;
+}
+
+function sectionSignal(key){
+ const labels={trending:"Trending",nowPlaying:"Now playing",popularMovies:"Popular",topRatedMovies:"Top rated",popularTv:"Popular",topRatedTv:"Top rated",airingToday:"Airing today",anime:"Anime",kdrama:"K-Drama",upcoming:"Coming soon"};
+ return labels[key]||"";
 }
 
 function setHeroText(item){
@@ -103,6 +109,7 @@ async function initHero(){
  try{
    const data=await tmdbApi.trending("all","week");
    featured=normalizeResults(data.results||[]).filter(x=>x.backdrop_path).slice(0,7);
+   if(featured[0]?.backdrop_path){const preload=new Image();preload.decoding="async";preload.src=getImageUrl(featured[0].backdrop_path,"w1280");}
    if(featured.length)showHero(0);
  }catch(e){$("hero-title").textContent="Discover something vivid";$("hero-copy").textContent=getErrorMessage(e)}
 }
@@ -130,7 +137,7 @@ async function loadSectionBatch(keys){
    if(!railId) return;
    const data=result[key];
    if(!data)return;
-   renderRail(railId,data.items);
+   renderRail(railId,data.items,{signal:sectionSignal(key)});
    sectionState[key]={page:data.page,totalPages:data.totalPages};
    const button=document.querySelector('[data-load-section="'+key+'"]');
    if(button)button.hidden=data.page>=data.totalPages;
@@ -146,7 +153,7 @@ async function loadMoreSection(key,button){
    const data=await getHomeSectionPage(key,state.page+1);
    const railId=SECTION_RAIL_IDS[key];
    if(!railId) return;
-   renderRail(railId,data.items,{append:true});
+   renderRail(railId,data.items,{append:true,signal:sectionSignal(key)});
    sectionState[key]={page:data.page,totalPages:data.totalPages};
    button.hidden=data.page>=data.totalPages;
    updateRailControls($(railId));
