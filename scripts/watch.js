@@ -116,16 +116,35 @@ async function load(){
  if(!currentParams.id){
   $("watch-content").innerHTML='<section class="vivid-watch-error"><i class="bi bi-exclamation-circle"></i><h1>Playback link is incomplete.</h1><p>Choose a title from Vivid Cinema and start playback again.</p><a class="vivid-button vivid-button--secondary" href="home.html">Browse titles</a></section>';return;
  }
+
+ // VidAPI only needs the media ID/type (and season/episode for TV) to begin
+ // playback. Do not make the player wait for TMDB details, credits or providers.
+ media=normalizeMedia({
+   id:currentParams.id,
+   overview:"",
+   title:currentParams.type==="tv"?"Loading episode…":"Loading movie…",
+   poster_path:"",
+   backdrop_path:""
+ },currentParams.type);
+ renderShell(currentParams);
+
  try{
   details=currentParams.type==="tv"?await tmdbApi.tvDetails(currentParams.id):await tmdbApi.movieDetails(currentParams.id);
   media=normalizeMedia(details,currentParams.type);
   if(currentParams.type==="tv"){
-    try{details.episode=await tmdbApi.tvSeason(currentParams.id,currentParams.season).then(season=>(season.episodes||[]).find(ep=>ep.episode_number===currentParams.episode)||null)}catch(_){details.episode=null}
+    const episodePromise=tmdbApi.tvSeason(currentParams.id,currentParams.season)
+      .then(season=>(season.episodes||[]).find(ep=>Number(ep.episode_number)===Number(currentParams.episode))||null)
+      .catch(()=>null);
+    details.episode=await episodePromise;
     nextEpisode=await prepareNextEpisode(currentParams);
   }
-  renderShell(currentParams);
+  hydrateWatchDetails(currentParams);
  }catch(error){
-  $("watch-content").innerHTML='<section class="vivid-watch-error"><i class="bi bi-exclamation-circle"></i><h1>We couldn’t prepare playback.</h1><p>'+escapeHtml(getErrorMessage(error))+'</p><a class="vivid-button vivid-button--secondary" href="home.html">Back to browse</a></section>';
+  // Playback is already available through VidAPI even if TMDB metadata is unavailable.
+  // Keep the player alive and surface only the metadata failure in the page copy.
+  console.warn("Vivid metadata unavailable while playback is active:",error);
+  const overviewNode=$("watch-overview");
+  if(overviewNode)overviewNode.textContent="Playback is ready. Title information is temporarily unavailable.";
  }
 }
 document.addEventListener("DOMContentLoaded",()=>{void startLibrarySync().catch(()=>{});load();});
