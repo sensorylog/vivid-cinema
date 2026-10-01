@@ -195,6 +195,7 @@ function resetFilters() {
   state.year = "";
   state.sort = "popularity.desc";
   state.rating = "";
+  state.region = "";
   state.query = "";
   state.page = 1;
   document.querySelectorAll("[data-type]").forEach((button) => button.classList.toggle("is-active", button.dataset.type === "all"));
@@ -214,6 +215,7 @@ function wire() {
   $("year-filter").addEventListener("change", () => updateFromControls());
   $("sort-filter").addEventListener("change", () => updateFromControls());
   $("rating-filter").addEventListener("change", () => updateFromControls());
+  $("region-filter").addEventListener("change", () => updateFromControls());
   $("region-filter").addEventListener("change", () => updateFromControls());
   $("reset-filters").addEventListener("click", resetFilters);
 
