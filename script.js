@@ -8,6 +8,7 @@ import { buildWatchUrl } from "./scripts/routes.js";
 
 const $=id=>document.getElementById(id);
 let featured=[],activeIndex=0,heroMuted=true,heroPlaying=true,heroTimer=null;
+let heroScrollShift=0,heroScrollTarget=0,heroScrollLastY=window.scrollY||0,heroScrollRaf=0;
 const rails={};
 const sectionState={};
 
@@ -192,6 +193,33 @@ async function loadHeroVideo(item){
  }
 }
 
+function animateHeroScrollMotion(){
+  heroScrollRaf=0;
+  const track=$("feature-track");
+  if(!track)return;
+  const reduceMotion=window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
+  if(reduceMotion||!window.matchMedia?.("(hover:hover) and (pointer:fine)")?.matches){
+    heroScrollShift=0;
+    heroScrollTarget=0;
+    track.style.setProperty("--hero-scroll-shift","0px");
+    return;
+  }
+  heroScrollShift+=(heroScrollTarget-heroScrollShift)*.16;
+  heroScrollTarget*=.86;
+  if(Math.abs(heroScrollShift)<.05&&Math.abs(heroScrollTarget)<.05)heroScrollShift=heroScrollTarget=0;
+  track.style.setProperty("--hero-scroll-shift",heroScrollShift.toFixed(2)+"px");
+  if(heroScrollShift||heroScrollTarget)heroScrollRaf=requestAnimationFrame(animateHeroScrollMotion);
+}
+
+function updateHeroScrollMotion(){
+  const y=window.scrollY||0;
+  const delta=y-heroScrollLastY;
+  heroScrollLastY=y;
+  if(Math.abs(delta)<.5)return;
+  heroScrollTarget=Math.max(-72,Math.min(72,heroScrollTarget+delta*.42));
+  if(!heroScrollRaf)heroScrollRaf=requestAnimationFrame(animateHeroScrollMotion);
+}
+
 function renderFeatureStrip(){
  const track=$("feature-track");if(!track)return;
  track.innerHTML=featured.map((item,i)=>'<button class="vivid-feature-card '+(i===activeIndex?"is-active":"")+'" data-index="'+i+'" type="button"><img src="'+getImageUrl(item.backdrop_path||item.poster_path,"w342")+'" alt="" loading="lazy"><strong>'+escapeHtml(item.title)+'</strong></button>').join("");
@@ -369,7 +397,7 @@ function wireHeroSwipe(){
    if(Math.abs(dx)>55&&Math.abs(dx)>Math.abs(dy)*1.25)showHero(activeIndex+(dx<0?1:-1),true);
  },{passive:true});
 }
-window.addEventListener("scroll",()=>$("topbar")?.classList.toggle("is-scrolled",scrollY>18),{passive:true});
+window.addEventListener("scroll",()=>{$("topbar")?.classList.toggle("is-scrolled",scrollY>18);updateHeroScrollMotion()},{passive:true});
 document.addEventListener("keydown",e=>{if(e.target.matches("input,textarea,select"))return;if(e.key==="ArrowLeft")showHero(activeIndex-1,true);if(e.key==="ArrowRight")showHero(activeIndex+1,true)});
 document.addEventListener("DOMContentLoaded",()=>{
  wireRails();wireSearch();wireHeroSwipe();
