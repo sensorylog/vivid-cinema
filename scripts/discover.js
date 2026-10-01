@@ -144,6 +144,8 @@ async function fetchDiscovery() {
       params["vote_average.gte"] = state.rating || undefined;
       params.watch_region = state.region || undefined;
       params.with_watch_monetization_types = state.region ? "flatrate|free|rent|buy" : undefined;
+      params.watch_region = state.region || undefined;
+      params.with_watch_monetization_types = state.region ? "flatrate|free|rent|buy" : undefined;
       const data = state.type === "movie" ? await tmdbApi.discoverMovies(params) : await tmdbApi.discoverTv(params);
       items = normalizeResults(data.results || [], state.type);
       totalPages = Number(data.total_pages || 1);
