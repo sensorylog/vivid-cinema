@@ -1,23 +1,37 @@
 # Vivid Cinema
 
-Vivid Cinema 2.0 is being rebuilt as a premium cinematic movie/TV discovery web app and installable PWA.
+Vivid Cinema is being rebuilt as a premium cinematic web app and installable PWA.
 
-## Build phases
+## Phase A2 — Design system
+The A2 layer establishes reusable primitives before the final cinematic UI:
+- typography hierarchy and system-font strategy
+- 4px-based spacing scale
+- responsive content gutters and layout primitives
+- restrained liquid-glass surfaces
+- buttons, icon buttons, cards, pills and form controls
+- skeleton/loading state
+- keyboard-visible focus treatment
+- reduced-motion support
+- mobile touch-target rules
 
-- A — Foundation: architecture, shared data layer, utilities, design tokens, Firebase foundation.
-- B — Cinematic Experience: premium landing page, swipeable trailer hero, home discovery rails.
-- C — Discovery: movies, TV, search, title pages, provider discovery.
-- D — Personal App: authentication, synced library, account, PWA/offline experience.
-- E — Launch: performance, accessibility, security, legal, QA and production hardening.
+**Glass:** a depth treatment, not a default background. Use it selectively for navigation, floating controls, overlays and selected surfaces.
 
-## Phase A foundation modules
+**Content:** strong hierarchy, compact metadata and minimal text walls.
 
-- scripts/config.js — centralized app/API configuration.
-- scripts/tmdb.js — single TMDB client with request timeout and in-memory response cache.
-- scripts/content.js — home/featured content orchestration.
-- scripts/utils.js — shared rendering/data utilities.
-- scripts/app-shell.js — shared viewport/app-shell bootstrap.
-- scripts/library.js — temporary local library adapter used while Firestore sync is built in Phase D.
-- styles/vivid-foundation.css — Vivid 2.0 design tokens and restrained liquid-glass primitives.
+**Motion:** communicate state and spatial relationships; honor reduced-motion preferences.
 
-The current legacy UI remains intact on this branch while the new foundation is introduced incrementally. No unauthorized streaming/download functionality is part of the 2.0 architecture.
+## Roadmap
+### Phase A — Foundation
+Shared configuration, TMDB client/cache, content orchestration, app shell, temporary library adapter and base tokens.
+
+### Phase B — Cinematic experience
+Premium landing page, signature swipeable trailer hero, discovery rails and featured content.
+
+### Phase C — Discovery and content
+Movies, TV, search, title details, seasons, cast, trailers and legitimate watch-provider discovery.
+
+### Phase D — Personal app + PWA
+Firebase Auth, verification/reset, optional Google sign-in, Firestore-synced library, install/offline shell.
+
+### Phase E — Launch
+Performance, accessibility, security, legal, QA and production hardening.
