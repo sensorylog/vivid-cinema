@@ -249,4 +249,22 @@ async function init() {
   }
 }
 
-document.addEventListener("DOMContentLoaded", async () => { await startLibrarySync(); init(); });
+function refreshLibraryActions() {
+  if (!media) return;
+  const current = document.querySelector(".vivid-title-library-actions");
+  if (!current) return;
+  const wrapper = document.createElement("div");
+  wrapper.innerHTML = renderLibraryActions();
+  current.replaceWith(wrapper.firstElementChild);
+  wireLibraryActions();
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  // Title rendering must never wait on Firebase Auth/Firestore.
+  // Library synchronization continues in the background so a slow or unavailable
+  // auth session cannot leave the title page stuck on its loading state.
+  init();
+  void startLibrarySync()
+    .then(() => refreshLibraryActions())
+    .catch((error) => console.warn("Vivid library sync unavailable:", error));
+});
