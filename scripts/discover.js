@@ -111,13 +111,15 @@ async function fetchDiscovery() {
           page: state.page,
           sort_by: state.sort,
           with_genres: state.genre || undefined,
-          primary_release_year: state.year || undefined
+          primary_release_year: state.year || undefined,
+          "vote_average.gte": state.rating || undefined
         }),
         tmdbApi.discoverTv({
           page: state.page,
           sort_by: tvSort,
           with_genres: state.genre || undefined,
-          first_air_date_year: state.year || undefined
+          first_air_date_year: state.year || undefined,
+          "vote_average.gte": state.rating || undefined
         })
       ]);
 
@@ -186,6 +188,7 @@ function resetFilters() {
   state.genre = "";
   state.year = "";
   state.sort = "popularity.desc";
+  state.rating = "";
   state.query = "";
   state.page = 1;
   document.querySelectorAll("[data-type]").forEach((button) => button.classList.toggle("is-active", button.dataset.type === "all"));
@@ -246,6 +249,9 @@ async function init() {
   populateYears();
   wire();
   await loadGenres();
+  syncControlsFromUrl();
+  $("discovery-search").value = state.query;
+  $("clear-search").hidden = !state.query;
   await fetchDiscovery();
 }
 
