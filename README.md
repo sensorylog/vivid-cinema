@@ -41,6 +41,9 @@ The A2 layer establishes reusable primitives before the final cinematic UI:
 ### Phase A — Foundation
 Shared configuration, TMDB client/cache, content orchestration, app shell, temporary library adapter and base tokens.
 
+### Phase C1 — Title detail foundation
+The title route is now a dedicated cinematic detail surface. It resolves typed movie/TV URLs through the shared TMDB client, renders poster/backdrop metadata, genres, cast, trailers, legitimate watch-provider discovery, and similar titles. Provider availability is country-dependent and Vivid Cinema does not host or provide titles. TV season/episode exploration remains a later Phase C step.
+
 ### Phase B — Cinematic experience
 Premium landing page, signature swipeable trailer hero, discovery rails and featured content.
 
