@@ -560,7 +560,7 @@ body.vivid-cinema-home{background:#06070a;color:#f5f7fa;overflow-x:hidden}
   }
 }
 @media(prefers-reduced-motion:reduce){
-  .vivid-card,.vivid-card::after,.vivid-card-media img{transition:none}
+  .vivid-card,.vivid-card::after,.vivid-card-media img,.vivid-feature-track{transition:none;transform:none!important}
 }
 
 
@@ -668,6 +668,8 @@ body.vivid-cinema-home{
   .vivid-feature-track{
     padding-top:18px;
     padding-bottom:20px;
+    transform:translate3d(var(--hero-scroll-shift,0px),0,0);
+    will-change:transform;
   }
 }
 @media (hover:none), (pointer:coarse){
