@@ -32,7 +32,8 @@ function render() {
   }));
 }
 
-document.addEventListener("DOMContentLoaded",async()=>{\n  await startLibrarySync();
+document.addEventListener("DOMContentLoaded",async()=>{
+  await startLibrarySync();
   document.querySelectorAll("[data-library-tab]").forEach((tab)=>tab.addEventListener("click",()=>{
     activeCollection=tab.dataset.libraryTab;
     document.querySelectorAll("[data-library-tab]").forEach((item)=>{const active=item===tab;item.classList.toggle("is-active",active);item.setAttribute("aria-selected",String(active));});
