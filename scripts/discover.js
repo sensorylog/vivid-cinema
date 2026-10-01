@@ -165,7 +165,14 @@ function updateFromControls(resetPage = true) {
   fetchDiscovery();
 }
 
-function syncControlsFromUrl() {\n  document.querySelectorAll("[data-type]").forEach((button) => button.classList.toggle("is-active", button.dataset.type === state.type));\n  $("year-filter").value = state.year;\n  $("sort-filter").value = state.sort;\n  $("rating-filter").value = state.rating;\n}\n\nfunction setType(type) {
+function syncControlsFromUrl() {
+  document.querySelectorAll("[data-type]").forEach((button) => button.classList.toggle("is-active", button.dataset.type === state.type));
+  $("year-filter").value = state.year;
+  $("sort-filter").value = state.sort;
+  $("rating-filter").value = state.rating;
+}
+
+function setType(type) {
   state.type = type;
   state.genre = "";
   state.page = 1;
