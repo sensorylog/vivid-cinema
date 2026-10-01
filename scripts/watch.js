@@ -29,7 +29,7 @@ function buildEmbedUrl(params,startAt=0){
  return base+"/embed/movie/"+encodeURIComponent(params.id)+suffix;
 }
 function recordHistory(){
- if(!media)return;
+ if(!media||!media.title||/^Loading\b/.test(media.title))return;
  upsertLibraryItem("history",{id:media.id,media_type:media.media_type,title:media.title,year:media.year,poster_path:media.poster_path,backdrop_path:media.backdrop_path});
 }
 function recommendationCards(){
