@@ -569,3 +569,66 @@ body.vivid-cinema-home{background:#06070a;color:#f5f7fa;overflow-x:hidden}
 .vivid-feature-viewport{width:100%;padding:0;overflow:hidden}
 .vivid-feature-track{justify-content:flex-start;overflow-x:auto}
 @media(max-width:640px){.vivid-feature-strip{padding:8px 16px 18px}.vivid-feature-track{justify-content:flex-start}}
+
+
+/* Final responsive hero-card and mobile-scroll stability pass. */
+html,body{
+  max-width:100%;
+  overflow-x:hidden;
+}
+body.vivid-cinema-home{
+  overscroll-behavior-x:none;
+  -webkit-overflow-scrolling:touch;
+}
+.vivid-hero,
+.vivid-hero-media,
+.vivid-feature-strip,
+.vivid-section-wrap{
+  max-width:100%;
+}
+.vivid-hero{
+  contain:layout paint;
+}
+.vivid-hero-video{
+  display:block;
+  pointer-events:none;
+  will-change:opacity;
+}
+.vivid-feature-track{
+  overscroll-behavior-x:contain;
+  -webkit-overflow-scrolling:touch;
+  touch-action:pan-x;
+  scrollbar-width:none;
+}
+.vivid-feature-card{
+  flex:0 0 clamp(210px,18vw,270px);
+  height:152px;
+}
+@media(max-width:900px){
+  .vivid-feature-card{
+    flex-basis:190px;
+    height:107px;
+  }
+}
+@media(max-width:640px){
+  .vivid-hero{
+    overflow:hidden;
+    contain:layout paint;
+  }
+  .vivid-feature-strip{
+    padding:12px 16px 20px;
+    overflow:hidden;
+  }
+  .vivid-feature-viewport{
+    overflow:hidden;
+  }
+  .vivid-feature-track{
+    gap:10px;
+    padding:4px 1px 8px;
+  }
+  .vivid-feature-card{
+    flex-basis:172px;
+    height:97px;
+    border-radius:14px;
+  }
+}
