@@ -34,7 +34,7 @@
 <body>
   <header role="banner">
     <div class="nav container" role="navigation">
-      <a href="index.html" class="img/fav-icon.png">Vivid<span>Cinema</span></a>
+      <a href="index.html" class="logo">Vivid<span>Cinema</span></a>
       <div class="search-box">
         <input type="search" id="search-input" placeholder="Search Movies" aria-label="Search for movies" />
         <i class="bx bx-search"></i>
@@ -127,7 +127,6 @@
           <li><a href="#movies"><i class="bx bx-compass"></i><span>Explore</span></a></li>
           <li><a href="#tv-shows"><i class="bx bx-tv"></i><span>TV Shows</span></a></li>
           <li><a href="#favorites"><i class="bx bx-heart"></i><span>Favourite</span></a></li>
-          <li><a href="#premium"><i class="bx bx-crown"></i><span>Premium</span></a></li>
           <li><a href="account.html"><i class="bx bx-user"></i><span>My Account</span></a></li>
         </ul>
       </div>
@@ -204,59 +203,10 @@
     <a href="legalpages.html" class="footer-link">About</a> |
     <a href="contact.html" class="footer-link">Contact</a>
   </footer>
-  <script>
-  // firebase.js
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
-  import { getAuth } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
-  import { getFirestore } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
-  
-  const firebaseConfig = {
-    apiKey: "AIzaSyAZQGjixUxuhjSIyHuKK4fAas4tG9C1rxE",
-    authDomain: "vivid-cinema.firebaseapp.com",
-    projectId: "vivid-cinema",
-  };
-  
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  const db = getFirestore(app);
-  
-  export { auth, db };
-  import { auth, db } from "./firebase.js";
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
-import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
-
-// Check user and hide ads if premium
-onAuthStateChanged(auth, async (user) => {
-  if (user) {
-    try {
-      const userDoc = await getDoc(doc(db, "users", user.uid));
-      if (userDoc.exists() && userDoc.data().isPremium) {
-        hideAdsForPremium();
-      }
-    } catch (err) {
-      console.error("Error fetching user doc:", err);
-    }
-  }
-});
-
-function hideAdsForPremium() {
-  document.querySelectorAll(".adsbygoogle, script[src*='adsbygoogle'], script[src*='acscdn'], script[src*='ligheechoagool']").forEach(el => {
-    el.remove();
-  });
-
-  // Optionally also hide inline ad containers
-  const adContainers = document.querySelectorAll('[data-ad-client], .ad-banner, .ad-slot');
-  adContainers.forEach(el => el.style.display = 'none');
-}
- 
-  </script>
-  <script src="swiper-bundle.min.js"></script>
-  
   <script src="script.js" defer></script>
-  <script type="module" src="scripts/scripts/auth.js"></script>
-  <script type="module" src="scripts/scripts/hamburger.js"></script>
   <link rel="stylesheet" href="styles.css">
   <script src="hamburger.js" defer></script>
+  <script type="module" src="scripts/nav-auth.js"></script>
   <!-- VividCinema -->
   </body>
 
