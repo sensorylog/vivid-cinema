@@ -1,0 +1,63 @@
+/* Desktop-only Netflix-style hover elevation for catalogue cards and hero tabs. */
+@media (hover:hover) and (pointer:fine){
+  .vivid-rail{
+    padding-top:22px;
+    padding-bottom:28px;
+  }
+  .vivid-card{
+    z-index:1;
+    transform:translateY(0) scale(1);
+    transform-origin:center bottom;
+    transition:transform 240ms cubic-bezier(.2,.8,.2,1),box-shadow 240ms ease,border-color 240ms ease,z-index 0s;
+  }
+  .vivid-card:hover,
+  .vivid-card:focus-visible{
+    z-index:30;
+    transform:translateY(-14px) scale(1.12);
+    box-shadow:0 28px 70px rgba(0,0,0,.55);
+    border-color:rgba(255,255,255,.35);
+  }
+  .vivid-card:hover .vivid-card-media img,
+  .vivid-card:focus-visible .vivid-card-media img{
+    transform:scale(1.04);
+  }
+  .vivid-feature-card{
+    z-index:1;
+    transform:translateY(0) scale(1);
+    transform-origin:center center;
+    transition:transform 240ms cubic-bezier(.2,.8,.2,1),box-shadow 240ms ease,opacity 240ms ease,border-color 240ms ease,z-index 0s;
+  }
+  .vivid-feature-card:hover,
+  .vivid-feature-card:focus-visible,
+  .vivid-feature-card.is-active{
+    z-index:25;
+    opacity:1;
+    transform:translateY(-12px) scale(1.08);
+    border-color:rgba(255,255,255,.48);
+    box-shadow:0 26px 60px rgba(0,0,0,.5);
+  }
+}
+
+/* YouTube iframe must fully cover the hero media frame. */
+.vivid-hero-video,
+.vivid-hero-video.is-ready{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  overflow:hidden;
+}
+.vivid-hero-video > iframe,
+.vivid-hero-youtube,
+.vivid-hero-youtube iframe{
+  position:absolute!important;
+  inset:0!important;
+  width:100%!important;
+  height:100%!important;
+  max-width:none!important;
+  border:0!important;
+  pointer-events:none;
+  object-fit:cover;
+  transform:scale(1.15);
+  transform-origin:center center;
+}
