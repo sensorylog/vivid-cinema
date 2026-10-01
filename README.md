@@ -87,3 +87,21 @@ Firebase Auth, verification/reset, Firestore-synced library, install/offline she
 
 ## Phase E — Launch
 Performance, accessibility, security, legal, QA and production hardening.
+
+
+## Phase D6 — VidAPI viewing integration
+
+- Added a dedicated Vivid Cinema watch experience at `watch.html`.
+- Movie playback uses the VidAPI embed route `/embed/movie/{tmdbId}`.
+- TV playback uses `/embed/tv/{tmdbId}/{season}/{episode}`.
+- Title pages now expose a primary **Watch now** action.
+- TV episode cards now expose direct **Play episode** actions.
+- Playback records the title in the existing History library.
+- VidAPI is embedded in a responsive, fullscreen-capable iframe with a Vivid cinematic shell.
+- VidAPI's documented embed host is configurable through `VIVID_CONFIG.vidapiEmbedBaseUrl`.
+- The current configuration uses VidAPI's documented embed host `https://vaplayer.ru`.
+- The VidAPI account/domain should have the Vivid domain added to its Allowed Sites whitelist where enabled.
+- The VidAPI custom-domain flow uses DNS CNAME verification; `vidapi-ip.org` is the DNS target, not an iframe URL.
+- Service-worker shell cache upgraded to v3 and now includes the watch page, player module, and watch styles.
+- No movie/episode files are downloaded or proxied through Vivid's own server.
+- Browser/device playback QA is still required on the deployed Firebase Hosting site.
