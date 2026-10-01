@@ -2,7 +2,7 @@ import { tmdbApi } from "./tmdb.js";
 import { getImageUrl, getMediaUrl, normalizeMedia, normalizeResults } from "./media.js";
 import { getRoute } from "./routes.js";
 import { escapeHtml, getErrorMessage } from "./utils.js";
-import { hasLibraryItem, toggleLibraryItem, upsertLibraryItem } from "./library.js";
+import { hasLibraryItem, startLibrarySync, toggleLibraryItem, upsertLibraryItem } from "./library.js";
 
 const $ = (id) => document.getElementById(id);
 const route = getRoute();
@@ -250,4 +250,4 @@ async function init() {
   }
 }
 
-document.addEventListener("DOMContentLoaded", init);
+document.addEventListener("DOMContentLoaded", async () => { await startLibrarySync(); init(); });
