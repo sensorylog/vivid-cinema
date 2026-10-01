@@ -70,10 +70,16 @@ async function loadPage(reset=false){
       const page=state.page+1;
       const params={page,sort_by:state.sort,with_genres:state.genre||undefined};
       if(type==="movie")params.primary_release_year=state.year||undefined;
-      else if(type==="tv")params.first_air_date_year=state.year||undefined;
-      else return;
-      const raw=type==="movie"?await tmdbApi.discoverMovies(params):await tmdbApi.discoverTv({...params,sort_by:state.sort.replace("primary_release_date","first_air_date")});
-      data={items:normalizeResults(raw.results||[],type),page:Number(raw.page||page),totalPages:Number(raw.total_pages||1)};
+      if(type==="tv")params.first_air_date_year=state.year||undefined;
+      if(type==="all"){
+        const tvParams={...params,sort_by:state.sort.replace("primary_release_date","first_air_date")};
+        if(state.year)tvParams.first_air_date_year=state.year;
+        const [movies,tv]=await Promise.all([tmdbApi.discoverMovies(params),tmdbApi.discoverTv(tvParams)]);
+        data={items:sort([...normalizeResults(movies.results||[],"movie"),...normalizeResults(tv.results||[],"tv")]),page, totalPages:Math.max(Number(movies.total_pages||1),Number(tv.total_pages||1))};
+      }else{
+        const raw=type==="movie"?await tmdbApi.discoverMovies(params):await tmdbApi.discoverTv({...params,sort_by:state.sort.replace("primary_release_date","first_air_date")});
+        data={items:normalizeResults(raw.results||[],type),page:Number(raw.page||page),totalPages:Number(raw.total_pages||1)};
+      }
     }
     if(id!==state.requestId)return;
     let incoming=sort(data.items||[]);
