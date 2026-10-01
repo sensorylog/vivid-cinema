@@ -11,25 +11,105 @@
       {
         "source": "**/*.html",
         "headers": [
-          {"key":"X-Content-Type-Options","value":"nosniff"},
-          {"key":"Referrer-Policy","value":"strict-origin-when-cross-origin"},
-          {"key":"Permissions-Policy","value":"camera=(), microphone=(), geolocation=(), payment=()"},
-          {"key":"X-Frame-Options","value":"SAMEORIGIN"}
+          {
+            "key": "X-Content-Type-Options",
+            "value": "nosniff"
+          },
+          {
+            "key": "Referrer-Policy",
+            "value": "strict-origin-when-cross-origin"
+          },
+          {
+            "key": "Cache-Control",
+            "value": "no-cache"
+          },
+          {
+            "key": "Permissions-Policy",
+            "value": "camera=(), microphone=(), geolocation=(), payment=()"
+          },
+          {
+            "key": "X-Frame-Options",
+            "value": "SAMEORIGIN"
+          }
         ]
       },
       {
         "source": "**/*.js",
         "headers": [
-          {"key":"X-Content-Type-Options","value":"nosniff"},
-          {"key":"Referrer-Policy","value":"strict-origin-when-cross-origin"}
+          {
+            "key": "X-Content-Type-Options",
+            "value": "nosniff"
+          },
+          {
+            "key": "Referrer-Policy",
+            "value": "strict-origin-when-cross-origin"
+          },
+          {
+            "key": "Cache-Control",
+            "value": "public,max-age=3600"
+          }
+        ]
+      },
+      {
+        "source": "**/*.css",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "public,max-age=3600"
+          }
+        ]
+      },
+      {
+        "source": "**/*.png",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "public,max-age=86400"
+          }
+        ]
+      },
+      {
+        "source": "**/*.jpg",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "public,max-age=86400"
+          }
+        ]
+      },
+      {
+        "source": "**/*.jpeg",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "public,max-age=86400"
+          }
+        ]
+      },
+      {
+        "source": "**/*.webp",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "public,max-age=86400"
+          }
         ]
       },
       {
         "source": "**/*",
         "headers": [
-          {"key":"Strict-Transport-Security","value":"max-age=31536000; includeSubDomains"},
-          {"key":"X-Content-Type-Options","value":"nosniff"},
-          {"key":"Referrer-Policy","value":"strict-origin-when-cross-origin"}
+          {
+            "key": "Strict-Transport-Security",
+            "value": "max-age=31536000; includeSubDomains"
+          },
+          {
+            "key": "X-Content-Type-Options",
+            "value": "nosniff"
+          },
+          {
+            "key": "Referrer-Policy",
+            "value": "strict-origin-when-cross-origin"
+          }
         ]
       }
     ]

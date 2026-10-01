@@ -190,3 +190,35 @@ body.vivid-cinema-home{background:#06070a;color:#f5f7fa;overflow-x:hidden}
 .vivid-card-progress span{display:block;height:100%;background:#fff;border-radius:inherit}
 .vivid-card:focus-visible,.vivid-feature-card:focus-visible,.vivid-rail-load:focus-visible,.vivid-rail-see-all:focus-visible{outline:2px solid rgba(255,255,255,.75);outline-offset:3px}
 @media(max-width:640px){.vivid-rail-head{gap:10px}.vivid-rail-see-all{padding:6px 9px}.vivid-rail-footer{padding-bottom:8px}}
+
+
+/* Phase G — hero composition: trailer first, title information second, featured carousel third. */
+.vivid-hero{height:auto;min-height:0;overflow:visible;display:block;background:#06070a}
+.vivid-hero-media{position:relative;inset:auto;width:100%;height:min(68svh,760px);min-height:500px;overflow:hidden;background:linear-gradient(135deg,#11141a,#06070a 65%)}
+.vivid-hero-content{position:relative;z-index:5;width:min(1440px,100%);height:auto;margin:auto;padding:42px var(--vivid-page-gutter) 34px;display:flex;flex-direction:column;justify-content:flex-start;align-items:flex-start;background:#06070a}
+.vivid-hero-title{max-width:1000px}
+.vivid-hero-copy{max-width:820px}
+.vivid-hero-tools{position:absolute;z-index:9;right:var(--vivid-page-gutter);bottom:24px}
+.vivid-feature-strip{position:relative;z-index:4;left:auto;right:auto;bottom:auto;width:min(1440px,100%);margin:auto;padding:0 var(--vivid-page-gutter) 34px;background:#06070a}
+.vivid-feature-viewport{width:100%;padding:0;overflow:hidden}
+.vivid-feature-track{padding:4px 2px 8px}
+.vivid-hero-control{top:50%}
+.vivid-section-wrap{padding-top:4px}
+@media(max-width:900px){
+ .vivid-hero-media{height:60svh;min-height:420px}
+ .vivid-hero-content{padding:30px 24px 26px}
+ .vivid-hero-tools{bottom:20px}
+ .vivid-feature-strip{padding:0 24px 26px}
+}
+@media(max-width:640px){
+ .vivid-hero-media{height:50svh;min-height:300px;max-height:520px}
+ .vivid-hero-content{padding:24px 16px 18px}
+ .vivid-hero-title{font-size:clamp(2.5rem,13vw,4rem);margin-bottom:14px}
+ .vivid-hero-copy{max-width:620px}
+ .vivid-hero-tools{position:absolute;top:auto;right:16px;bottom:18px}
+ .vivid-feature-strip{padding:0 16px 18px}
+ .vivid-feature-track{padding:4px 2px 8px}
+}
+@media(max-width:380px){
+ .vivid-hero-media{height:46svh;min-height:290px}
+}

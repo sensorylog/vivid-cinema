@@ -22,9 +22,11 @@ function getParams(){
 function progressKey(){return media?media.media_type+":"+media.id:"";}
 function buildEmbedUrl(params,startAt=0){
  const base=String(VIVID_CONFIG.vidapiEmbedBaseUrl||"").replace(/\/+$/,"");
- const resume=Number(startAt)>5?"?resumeAt="+encodeURIComponent(Math.floor(Number(startAt))):"";
- if(params.type==="tv")return base+"/embed/tv/"+encodeURIComponent(params.id)+"/"+params.season+"/"+params.episode+resume;
- return base+"/embed/movie/"+encodeURIComponent(params.id)+resume;
+ const query=new URLSearchParams({autoplay:"1"});
+ if(Number(startAt)>5)query.set("resumeAt",String(Math.floor(Number(startAt))));
+ const suffix="?"+query.toString();
+ if(params.type==="tv")return base+"/embed/tv/"+encodeURIComponent(params.id)+"/"+params.season+"/"+params.episode+suffix;
+ return base+"/embed/movie/"+encodeURIComponent(params.id)+suffix;
 }
 function recordHistory(){
  if(!media)return;
@@ -44,14 +46,16 @@ function renderShell(params){
  document.title=(episodeTitle?episodeTitle+" · ":"")+title+" · Vivid Cinema";
  $("watch-content").innerHTML=
   '<section class="vivid-watch-hero"><div class="vivid-watch-backdrop" style="--watch-backdrop:url(\''+getImageUrl(media.backdrop_path,"w1280")+'\')"></div><div class="vivid-watch-head"><div><span class="vivid-watch-kicker">'+(isTv?"TV · SEASON "+params.season+" · EPISODE "+params.episode:"MOVIE")+'</span><h1>'+escapeHtml(episodeTitle||title)+'</h1><p>'+escapeHtml(isTv&&details?.episode?.overview?details.episode.overview:media.overview||"")+'</p></div><a class="vivid-button vivid-button--secondary" href="'+escapeHtml(buildTitleUrl(media.id,media.media_type))+'"><i class="bi bi-info-circle"></i> Details</a></div></section>'+
-  '<section class="vivid-player-section" aria-label="Video player"><div class="vivid-player-frame"><div id="player-status" class="vivid-player-status" role="status" aria-live="polite">'+(saved?"Resuming where you left off…":"Preparing player…")+'</div><iframe id="vidapi-player" title="'+escapeHtml(title)+' player" allow="autoplay; fullscreen; picture-in-picture; encrypted-media" allowfullscreen referrerpolicy="origin" loading="eager"></iframe></div><div class="vivid-player-bar"><div><i class="bi bi-shield-check"></i><span>Powered by VidAPI</span></div><a href="'+escapeHtml(buildTitleUrl(media.id,media.media_type))+'">Back to title</a></div></section>'+
+  '<section class="vivid-player-section" aria-label="Video player"><div class="vivid-player-frame"><div id="player-status" class="vivid-player-status" role="status" aria-live="polite">'+(saved?"Resuming where you left off…":"Preparing player…")+'</div><iframe id="vidapi-player" title="'+escapeHtml(title)+' player" allow="autoplay; fullscreen; picture-in-picture; encrypted-media" allowfullscreen referrerpolicy="origin" loading="eager"></iframe></div><div class="vivid-player-bar"><div><i class="bi bi-shield-check"></i><span>Powered by VidAPI</span></div><div><a href="'+escapeHtml(buildTitleUrl(media.id,media.media_type))+'">Back to title</a><a id="player-open" href="#" target="_blank" rel="noopener noreferrer">Open player</a></div></div></section>'+
   (isTv?'<section class="vivid-watch-note"><i class="bi bi-collection-play"></i><div><strong>Episode playback</strong><span>Use the episode list on the title page to switch seasons and episodes.</span></div></section>':"")+
   '<section class="vivid-watch-recommendations"><div class="vivid-section-heading"><div><span>AFTER WATCHING</span><h2>More like this</h2></div></div><div class="vivid-watch-rec-rail">'+recommendationCards()+'</div></section>';
  const player=$("vidapi-player"),status=$("player-status");
  let loaded=false;
  const timeout=window.setTimeout(()=>{if(!loaded&&status){status.textContent="The player is taking longer than expected. If it does not appear, try again or return to the title.";status.classList.add("is-warning")}},9000);
  player.addEventListener("load",()=>{loaded=true;window.clearTimeout(timeout);status?.remove()},{once:true});
- player.src=buildEmbedUrl(params,saved?.progress||route.params.get("startAt")||0);
+ const embedUrl=buildEmbedUrl(params,saved?.progress||route.params.get("startAt")||0);
+ player.src=embedUrl;
+ const openPlayer=$("player-open"); if(openPlayer)openPlayer.href=embedUrl;
  recordHistory();
 }
 async function prepareNextEpisode(params){
