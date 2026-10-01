@@ -1,0 +1,4 @@
+Contact: https://vivid-cinema.firebaseapp.com/contact.html
+Expires: 2027-10-01T00:00:00.000Z
+Preferred-Languages: en
+Canonical: https://vivid-cinema.firebaseapp.com/.well-known/security.txt
