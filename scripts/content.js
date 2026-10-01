@@ -71,7 +71,7 @@ export async function getHomeSections(keys = Object.keys(HOME_LOADERS), page = 1
 
 export async function getHomeSectionPage(key, page = 1) {
   if (!HOME_LOADERS[key]) throw new Error("Unknown home section: " + key);
-  return normalizeHome(key, await HOME_LOADERS[key](page));
+  return normalizeHome(key, await loadHomeKey(key, page));
 }
 
 export async function searchContent(query, page = 1) {
