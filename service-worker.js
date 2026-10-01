@@ -1,4 +1,4 @@
-const CACHE_NAME = "vivid-cinema-shell-v3";
+const CACHE_NAME = "vivid-cinema-shell-v4";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -10,8 +10,14 @@ const APP_SHELL = [
   "./auth.html",
   "./login.html",
   "./account.html",
+  "./terms.html",
+  "./privacy.html",
+  "./contact.html",
   "./offline.html",
+  "./404.html",
   "./manifest.json",
+  "./robots.txt",
+  "./sitemap.xml",
   "./fav-icon.png",
   "./icons/vivid-icon.svg",
   "./styles/vivid-foundation.css",
@@ -24,6 +30,7 @@ const APP_SHELL = [
   "./styles/vivid-auth.css",
   "./styles/vivid-account.css",
   "./styles/vivid-pwa.css",
+  "./styles/vivid-legal.css",
   "./scripts/app-shell.js",
   "./scripts/pwa.js",
   "./scripts/routes.js",
@@ -50,9 +57,7 @@ async function cacheShell() {
     .map((result, index) => result.status === "rejected" ? APP_SHELL[index] : null)
     .filter(Boolean);
 
-  if (failures.length) {
-    console.warn("Vivid shell assets unavailable during install:", failures);
-  }
+  if (failures.length) console.warn("Vivid shell assets unavailable during install:", failures);
 }
 
 self.addEventListener("install", (event) => {
@@ -88,7 +93,7 @@ async function networkFirst(request) {
     return response;
   } catch {
     const cached = await caches.match(request);
-    return cached || caches.match("./home.html");
+    return cached || caches.match("./offline.html") || caches.match("./home.html");
   } finally {
     clearTimeout(timeout);
   }
