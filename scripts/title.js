@@ -216,15 +216,18 @@ function render(details) {
       '<div class="vivid-title-actions">' + (firstTrailer ? '<button class="vivid-button vivid-button--primary" id="hero-trailer" type="button"><i class="bi bi-play-fill"></i> Watch trailer</button>' : "") + '<a class="vivid-button vivid-button--secondary" href="home.html"><i class="bi bi-arrow-left"></i> Browse more</a></div>' +
       '</div></div></section>' +
     renderTrailerSection(details) +
+    renderLibraryActions() +
     '<section class="vivid-title-section"><div class="vivid-section-heading"><div><span>CAST</span><h2>People in the story</h2></div></div><div class="vivid-cast-grid">' +
       (cast.length ? cast.map((person) => '<article class="vivid-cast"><img loading="lazy" src="' + getImageUrl(person.profile_path, "w185") + '" alt="' + escapeHtml(person.name) + '"><strong>' + escapeHtml(person.name) + '</strong><small>' + escapeHtml(person.character || "Cast") + '</small></article>').join("") : '<p class="vivid-muted">Cast information is unavailable.</p>') +
     '</div></section>' + renderSeasons(details) + renderProviderGroups(details, country) +
     '<section class="vivid-title-section"><div class="vivid-section-heading"><div><span>YOU MAY ALSO LIKE</span><h2>Similar titles</h2></div></div><div class="vivid-similar" id="similar-rail"></div></section>';
 
   const similar = normalizeResults(details.similar?.results || [], media.media_type).slice(0, 8);
+  upsertLibraryItem("history", libraryItem());
   wireSeasons(details);
   wireProviders(details);
   wireTrailers();
+  wireLibraryActions();
 
   if (firstTrailer) {
     $("hero-trailer").addEventListener("click", () => openTrailer(firstTrailer.key, firstTrailer.name || "Trailer"));
