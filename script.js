@@ -78,13 +78,20 @@ function youtubeUrl(key,muted=true){return "https://www.youtube.com/embed/"+enco
 
 async function loadHeroVideo(item){
  const iframe=$("hero-video"),fallback=$("hero-fallback");
- iframe.classList.remove("is-ready");fallback.classList.add("is-visible");
+ iframe.classList.remove("is-ready");
+ fallback.classList.add("is-visible");
  try{
    const data=item.media_type==="tv"?await tmdbApi.tvVideos(item.id):await tmdbApi.movieVideos(item.id);
    const videos=data.videos?.results||[];
    const trailer=videos.find(v=>v.site==="YouTube"&&v.type==="Trailer"&&v.official!==false)||videos.find(v=>v.site==="YouTube"&&v.type==="Teaser");
-   if(trailer?.key){iframe.src=youtubeUrl(trailer.key,heroMuted);iframe.onload=()=>{iframe.classList.add("is-ready");fallback.classList.remove("is-visible")}}
-   else iframe.removeAttribute("src");
+   if(trailer?.key){
+     iframe.src=youtubeUrl(trailer.key,heroMuted);
+     iframe.onload=()=>{iframe.classList.add("is-ready");fallback.classList.remove("is-visible")};
+     iframe.onerror=()=>{iframe.classList.remove("is-ready");fallback.classList.add("is-visible")};
+   } else {
+     iframe.removeAttribute("src");
+     fallback.classList.add("is-visible");
+   }
  }catch(e){console.warn("Hero trailer unavailable",e)}
 }
 
@@ -118,10 +125,20 @@ function toggleSound(){heroMuted=!heroMuted;const item=featured[activeIndex];if(
 function togglePause(){heroPlaying=!heroPlaying;clearTimeout(heroTimer);$("hero-pause").innerHTML='<i class="bi bi-'+(heroPlaying?"pause-fill":"play-fill")+'"></i>';$("hero-pause").setAttribute("aria-label",heroPlaying?"Pause trailer":"Play trailer");if(heroPlaying)showHero(activeIndex,true);else $("hero-video").removeAttribute("src")}
 
 function wireRails(){
- document.querySelectorAll("[data-scroll]").forEach(btn=>btn.addEventListener("click",()=>{const el=$(btn.dataset.scroll);if(el)el.scrollBy({left:el.clientWidth*.82*Number(btn.dataset.dir),behavior:"smooth"})}));
+ document.querySelectorAll("[data-scroll]").forEach(btn=>btn.addEventListener("click",e=>{
+   e.preventDefault();
+   const el=$(btn.dataset.scroll);
+   if(el)el.scrollBy({left:el.clientWidth*.82*Number(btn.dataset.dir),behavior:"smooth"});
+ }));
  document.querySelectorAll(".vivid-rail").forEach(rail=>rail.addEventListener("scroll",()=>updateRailControls(rail),{passive:true}));
  window.addEventListener("resize",()=>document.querySelectorAll(".vivid-rail").forEach(updateRailControls),{passive:true});
- document.querySelectorAll("[data-load-section]").forEach(button=>button.addEventListener("click",()=>loadMoreSection(button.dataset.loadSection,button)));
+ document.addEventListener("click",e=>{
+   const button=e.target.closest("[data-load-section]");
+   if(!button)return;
+   e.preventDefault();
+   e.stopPropagation();
+   void loadMoreSection(button.dataset.loadSection,button);
+ });
 }
 
 function updateRailControls(rail){
@@ -153,18 +170,33 @@ async function loadSectionBatch(keys){
 
 async function loadMoreSection(key,button){
  const state=sectionState[key]||{page:1,totalPages:1};
- if(button.disabled||state.page>=state.totalPages)return;
- button.disabled=true;button.textContent="Loading…";
+ if(!button||button.disabled)return;
+ if(state.page>=state.totalPages){
+   button.hidden=true;
+   return;
+ }
+ button.disabled=true;
+ button.setAttribute("aria-busy","true");
+ button.textContent="Loading…";
  try{
-   const data=await getHomeSectionPage(key,state.page+1);
+   const nextPage=Math.min(state.page+1,state.totalPages);
+   const data=await getHomeSectionPage(key,nextPage);
    const railId=SECTION_RAIL_IDS[key];
-   if(!railId) return;
+   if(!railId)throw new Error("Unknown rail: "+key);
+   if(!data.items.length)throw new Error("No titles returned for "+key+" page "+nextPage);
    renderRail(railId,data.items,{append:true,signal:sectionSignal(key)});
    sectionState[key]={page:data.page,totalPages:data.totalPages};
    button.hidden=data.page>=data.totalPages;
+   button.textContent=button.hidden?"Load more":"Load more";
    updateRailControls($(railId));
- }catch(error){button.textContent="Try again";console.warn("Vivid rail load failed:",error)}
- finally{if(!button.hidden&&button.textContent==="Loading…")button.textContent="Load more";button.disabled=false}
+ }catch(error){
+   button.textContent="Try again";
+   console.warn("Vivid rail load failed:",key,error);
+ }finally{
+   button.disabled=false;
+   button.removeAttribute("aria-busy");
+   if(!button.hidden && button.textContent==="Loading…")button.textContent="Load more";
+ }
 }
 
 function renderContinueWatching(){
