@@ -165,7 +165,7 @@ E3 strengthens the Firebase-backed production boundary without introducing paid 
 - Added `/.well-known/security.txt` for responsible security reporting
 
 ### Security notes
-Firebase's client-side configuration values are not treated as secrets; authorization is enforced by Firebase Authentication and Firestore Security Rules. Firebase documents owner-scoped rules and recommends testing rules with the Rules Simulator or Local Emulator Suite before production deployment. citeturn0search0turn0search3
+Firebase's client-side configuration values are not treated as secrets; authorization is enforced by Firebase Authentication and Firestore Security Rules. Firebase documents owner-scoped rules and recommends testing rules with the Rules Simulator or Local Emulator Suite before production deployment.
 
 ### QA gate
 The rules and headers still require deployment-level verification. Test authenticated owner access, cross-user access denial, malformed library writes, profile-field restrictions, authentication flows, and production response headers before calling the security work fully verified.
