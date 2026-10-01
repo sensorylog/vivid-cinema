@@ -254,3 +254,20 @@ body.vivid-cinema-home,
     padding-right:1px;
   }
 }
+
+
+/* iOS/mobile search focus: keep the viewport at its current scale.
+   Safari auto-zooms focused form controls whose computed text is below 16px.
+   Keep user pinch-zoom available; only prevent the unwanted focus zoom. */
+@media (pointer:coarse){
+  input,
+  textarea,
+  select,
+  [contenteditable="true"]{
+    font-size:max(16px,1em)!important;
+  }
+
+  .vivid-nav-search input{
+    font-size:16px!important;
+  }
+}
