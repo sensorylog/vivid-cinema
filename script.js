@@ -288,6 +288,46 @@ const search=debounce(async q=>{
  try{showSearch(await searchContent(q),q)}catch(e){$("search-panel").innerHTML='<div class="vivid-empty">'+escapeHtml(getErrorMessage(e))+"</div>";$("search-panel").classList.add("is-open")}
 },300);
 
+async function browseByLetter(letter){
+ const rail=$("alphabet-rail"),status=$("alphabet-status");
+ if(!rail||!status)return;
+ document.querySelectorAll("[data-letter]").forEach(button=>{
+   const active=button.dataset.letter===letter;
+   button.classList.toggle("is-active",active);
+   button.setAttribute("aria-pressed",String(active));
+ });
+ if(letter==="all"){
+   rail.hidden=true;
+   status.textContent="Choose a letter to browse the catalogue.";
+   return;
+ }
+ status.textContent="Finding titles…";
+ rail.hidden=false;
+ rail.innerHTML='<div class="vivid-loading">'+Array.from({length:6},()=>'<div class="vivid-skeleton-card"></div>').join("")+'</div>';
+ try{
+   const items=await searchContent(letter==="0-9"?"0":letter);
+   const matches=items.filter(item=>{
+     const title=String(item.title||"").trim();
+     return letter==="0-9" ? /^[0-9]/.test(title) : title.toUpperCase().startsWith(letter);
+   }).slice(0,12);
+   if(!matches.length){
+     rail.innerHTML='<div class="vivid-empty">No titles beginning with '+escapeHtml(letter)+" were found right now.</div>";
+     status.textContent="No matching titles found.";
+     return;
+   }
+   renderRail("alphabet-rail",matches);
+   status.textContent=(letter==="0-9"?"Titles beginning with a number":"Titles beginning with "+letter)+" · "+matches.length+" shown";
+   rail.scrollIntoView({behavior:"smooth",block:"nearest"});
+ }catch(error){
+   rail.innerHTML='<div class="vivid-empty">Unable to load this part of the catalogue. Try again.</div>';
+   status.textContent=getErrorMessage(error);
+ }
+}
+
+function wireAlphabet(){
+ document.querySelectorAll("[data-letter]").forEach(button=>button.addEventListener("click",()=>void browseByLetter(button.dataset.letter)));
+}
+
 function wireSearch(){
  const input=$("search-input");if(!input)return;
  input.addEventListener("input",e=>search(e.target.value.trim()));
@@ -301,7 +341,7 @@ function wireHeroSwipe(){
 window.addEventListener("scroll",()=>{$("topbar")?.classList.toggle("is-scrolled",scrollY>18);updateHeroScrollMotion()},{passive:true});
 document.addEventListener("keydown",e=>{if(e.target.matches("input,textarea,select"))return;if(e.key==="ArrowLeft")showHero(activeIndex-1,true);if(e.key==="ArrowRight")showHero(activeIndex+1,true)});
 document.addEventListener("DOMContentLoaded",()=>{
- wireRails();wireSearch();wireHeroSwipe();
+ wireRails();wireSearch();wireAlphabet();wireHeroSwipe();
  initHero();loadHome();
  $("hero-prev")?.addEventListener("click",()=>showHero(activeIndex-1,true));
  $("hero-next")?.addEventListener("click",()=>showHero(activeIndex+1,true));
