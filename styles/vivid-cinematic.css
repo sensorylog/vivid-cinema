@@ -91,3 +91,91 @@ body.vivid-cinema-home{background:#06070a;color:#f5f7fa;overflow-x:hidden}
  .vivid-rail-head{align-items:center}
  .vivid-rail-head p{display:none}
 }
+
+/* Mobile composition: give the hero its own media, content and carousel space. */
+@media(max-width:640px){
+  .vivid-hero{
+    height:auto;
+    min-height:0;
+    overflow:visible;
+    display:flex;
+    flex-direction:column;
+    background:#06070a;
+  }
+  .vivid-hero-media{
+    position:relative;
+    inset:auto;
+    width:100%;
+    height:50svh;
+    min-height:320px;
+    max-height:520px;
+    order:0;
+  }
+  .vivid-hero-content{
+    position:relative;
+    order:1;
+    width:100%;
+    height:auto;
+    padding:26px 16px 12px;
+    justify-content:flex-start;
+  }
+  .vivid-hero-title{
+    max-width:100%;
+    margin-bottom:14px;
+  }
+  .vivid-hero-copy{
+    max-width:620px;
+    margin-bottom:4px;
+  }
+  .vivid-hero-tools{
+    position:absolute;
+    top:calc(50svh - 58px);
+    right:16px;
+    bottom:auto;
+  }
+  .vivid-feature-strip{
+    position:relative;
+    order:2;
+    left:auto;
+    right:auto;
+    bottom:auto;
+    width:100%;
+    padding:4px 0 16px;
+  }
+  .vivid-feature-viewport{
+    padding:0 16px;
+  }
+  .vivid-feature-track{
+    padding:6px 2px 8px;
+  }
+  .vivid-feature-card{
+    flex-basis:132px;
+    height:86px;
+  }
+  .vivid-section-wrap{
+    padding:0 16px;
+  }
+  .vivid-rails{
+    padding:28px 0 4px;
+  }
+  .vivid-rails+.vivid-rails{
+    margin-top:8px;
+  }
+  .vivid-rail-head{
+    margin-bottom:12px;
+  }
+  .vivid-rail{
+    padding-top:4px;
+    padding-bottom:18px;
+    gap:10px;
+  }
+  .vivid-card{
+    flex-basis:145px;
+  }
+}
+@media(max-width:380px){
+  .vivid-hero-media{height:46svh;min-height:290px}
+  .vivid-hero-tools{top:calc(46svh - 58px)}
+  .vivid-hero-title{font-size:clamp(2.25rem,12vw,3.2rem)}
+  .vivid-card{flex-basis:138px}
+}
