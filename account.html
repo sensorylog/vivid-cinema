@@ -1,184 +1,85 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>My Account | Vivid Cinema</title>
-  <link rel="stylesheet" href="styles.css"/>
+  <link rel="stylesheet" href="styles.css">
   <style>
-    body { background-color: #141414; color: #ffffff; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; margin: 0; }
-    header { background-color: #141414; padding: 20px; }
-    .logo { font-size: 24px; font-weight: bold; color: #E50914; text-decoration: none; }
-    .nav-container { max-width: 1000px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; }
-    .btn { cursor: pointer; text-decoration: none; font-size: 14px; border-radius: 3px; }
-    .btn-primary { background-color: #E50914; color: #fff; padding: 8px 16px; border: none; }
-    .btn-secondary { background-color: transparent; color: #fff; border: 1px solid #fff; padding: 8px 16px; }
-    main { max-width: 1000px; margin: 40px auto; padding: 0 20px; }
-    .card { background-color: #222; border-radius: 8px; padding: 20px; display: flex; align-items: center; gap: 40px; }
-    #profile-pic { width: 120px; height: 120px; border-radius: 50%; border: 3px solid #E50914; object-fit: cover; }
-    label, input { display: block; width: 100%; color: #fff; }
-    input { background-color: #333; border: 1px solid #444; border-radius: 4px; padding: 8px; margin-top: 4px; margin-bottom: 16px; }
-    label { margin-top: 16px; margin-bottom: 4px; font-size: 14px; }
-    .grid { display: grid; gap: 20px; }
-    .grid-2 { grid-template-columns: repeat(auto-fill, minmax(200px,1fr)); }
-    .section-title { font-size: 20px; margin: 20px 0 12px; }
-    .premium-badge { display: none; margin-left: 8px; background-color: #E50914; color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 12px; }
-    .movie-box { background-color: #333; border-radius: 4px; overflow: hidden; cursor: pointer; }
-    .movie-box img { width: 100%; height: auto; display: block; }
-    .box-text { padding: 8px; color: #fff; }
-    .premium-section { margin-top: 4rem; padding: 2rem; background: #333; border-radius: 10px; text-align: center; }
-    .premium-section h2 { margin-bottom: 1rem; }
-    .plan-buttons a {
-      display: inline-block;
-      margin: 0.5rem;
-      padding: 0.8rem 1.5rem;
-      background: #E50914;
-      color: white;
-      border-radius: 6px;
-      text-decoration: none;
-      transition: background 0.3s ease;
-    }
-    .plan-buttons a:hover { background: #e03131; }
-    .plan-description { font-size: 0.9rem; margin-top: 0.5rem; color: #bbb; }
+    .account-shell{max-width:1000px;margin:6rem auto 3rem;padding:0 1rem}
+    .account-card{background:#222;border-radius:10px;padding:2rem}
+    .account-card input{width:100%;max-width:520px;background:#333;color:#fff;border:1px solid #444;border-radius:6px;padding:.8rem}
+    .account-actions{display:flex;gap:.75rem;flex-wrap:wrap;margin-top:1rem}
+    .section-title{margin:2rem 0 1rem}
+    .empty-state{padding:1.5rem;background:#1b1b1b;border-radius:8px;color:#aaa}
   </style>
 </head>
 <body>
-  <!-- Navigation -->
-  <header>
-    <div class="nav-container">
-      <a href="index.html" class="logo">Vivid<span style="color:#fff">Cinema</span></a>
-      <div>
-        <a href="auth.html" id="auth-link" class="btn btn-secondary">Sign Up</a>
-        <span id="user-dropdown" style="display:none;">
-          <span id="user-email"></span>
-          <span id="nav-premium-badge" class="premium-badge">Premium</span>
-          <a href="#" id="logout-link" class="btn btn-secondary">Logout</a>
-        </span>
-      </div>
-    </div>
+  <header class="nav container">
+    <a href="index.html" class="logo">Vivid<span>Cinema</span></a>
+    <a href="home.html">Browse</a>
   </header>
-
-  <!-- Account Card -->
-  <main>
-    <section class="card">
-      <div style="text-align:center;">
-        <img id="profile-pic" src="img/user.png" alt="Profile"/>
-        <label for="upload-pic" style="cursor:pointer; font-size:14px; text-decoration:underline;">Change Photo</label>
-        <input type="file" id="upload-pic" accept="image/*" style="display:none;"/>
+  <main class="account-shell">
+    <section class="account-card">
+      <h1>My Account</h1>
+      <p id="account-status">Checking your session…</p>
+      <label for="user-email">Email</label>
+      <input id="user-email" type="email" disabled>
+      <label for="user-name">Name</label>
+      <input id="user-name" type="text" placeholder="Your name">
+      <div class="account-actions">
+        <button id="save-btn" class="watch-btn" type="button">Save Changes</button>
+        <button id="logout-btn" class="watch-btn" type="button">Log Out</button>
       </div>
-      <form id="account-form" style="flex:1;">
-        <h1 style="font-size:24px; margin-bottom:8px;">👤 My Account <span id="account-premium-badge" class="premium-badge">Premium Member</span></h1>
-        <label for="user-email">Email</label>
-        <input type="email" id="user-email" disabled/>
-        <label for="user-name">Name</label>
-        <input type="text" id="user-name" placeholder="Enter your name"/>
-        <div style="text-align:right; margin-top:20px; display:flex; justify-content:flex-end; gap:12px;">
-          <button type="button" id="logout-btn" class="btn btn-secondary">Logout</button>
-          <button type="submit" id="save-btn" class="btn btn-primary">Save Changes</button>
-        </div>
-      </form>
     </section>
 
     <section>
-      <h2 class="section-title">📺 Watch History</h2>
-      <div id="history-list" class="grid grid-2"></div>
+      <h2 class="section-title">Watch History</h2>
+      <div id="history-list" class="empty-state">Watch history will be synced to your account in the next data-layer upgrade.</div>
     </section>
     <section>
-      <h2 class="section-title">❤️ Favorites</h2>
-      <div id="fav-list" class="grid grid-2"></div>
-    </section>
-
-    <!-- Premium Section -->
-    <section class="premium-section">
-      <h2>Unlock Premium Access</h2>
-      <p>Subscribe to watch all premium movies and enjoy an ad-free experience.</p>
-      <div class="plan-buttons">
-        <a href="#" onclick="payWithPaystack('PLN_s0a4ssb21kcze93')">Monthly - GHS 159.90</a>
-        <div class="plan-description">Pay monthly. Cancel anytime.</div>
-
-        <a href="#" onclick="payWithPaystack('PLN_h9p653iext9lhwv')">Quarterly - GHS 0.00</a>
-        <div class="plan-description">Save more by paying every 3 months.</div>
-
-        <a href="#" onclick="payWithPaystack('PLN_js1flirhq7f5olk')">Yearly - GHS 639.60</a>
-        <div class="plan-description">Best value! Get 3 months free.</div>
-      </div>
+      <h2 class="section-title">Favorites</h2>
+      <div id="fav-list" class="empty-state">Your current favorites remain available on this device. Cross-device sync is part of the next upgrade.</div>
     </section>
   </main>
-
-  <footer style="text-align:center; padding:20px; background-color:#141414; color:#888;">
-    © 2025 Vivid Cinema — All Rights Reserved
-  </footer>
-
-  <!-- Firebase Auth & Paystack Integration -->
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
-    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
-    import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
+    import { auth, db } from "./scripts/firebase.js";
+    import { onAuthStateChanged, signOut, updateProfile } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
+    import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyAZQGjixUxuhjSIyHuKK4fAas4tG9C1rxE",
-      authDomain: "vivid-cinema.firebaseapp.com",
-      projectId: "vivid-cinema",
-    };
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
+    const emailEl=document.getElementById("user-email");
+    const nameEl=document.getElementById("user-name");
+    const statusEl=document.getElementById("account-status");
 
-    const authLink = document.getElementById("auth-link");
-    const userDropdown = document.getElementById("user-dropdown");
-    const userEmailEl = document.getElementById("user-email");
-    const navBadge = document.getElementById("nav-premium-badge");
-    const accountBadge = document.getElementById("account-premium-badge");
+    onAuthStateChanged(auth, async (user)=>{
+      if(!user){ window.location.href="login.html"; return; }
+      emailEl.value=user.email||"";
+      nameEl.value=user.displayName||"";
+      statusEl.textContent="Signed in";
+      try{
+        const snap=await getDoc(doc(db,"users",user.uid));
+        if(snap.exists() && snap.data().displayName && !nameEl.value) nameEl.value=snap.data().displayName;
+      }catch(error){ console.error(error); }
+    });
 
-    onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        authLink.style.display = 'none';
-        userDropdown.style.display = 'inline-block';
-        userEmailEl.textContent = user.email;
-        document.getElementById("user-email").value = user.email;
-
-        const snap = await getDoc(doc(db, 'users', user.uid));
-        const isPremium = snap.exists() && snap.data().isPremium;
-
-        if (isPremium) {
-          navBadge.style.display = 'inline-block';
-          accountBadge.style.display = 'inline-block';
-        }
-      } else {
-        authLink.style.display = 'inline-block';
-        userDropdown.style.display = 'none';
-        location.href = 'login.html';
+    document.getElementById("save-btn").addEventListener("click", async ()=>{
+      const user=auth.currentUser;
+      if(!user) return;
+      const name=nameEl.value.trim();
+      try{
+        await updateProfile(user,{displayName:name});
+        await setDoc(doc(db,"users",user.uid),{displayName:name,email:user.email},{merge:true});
+        statusEl.textContent="Changes saved.";
+      }catch(error){
+        console.error(error);
+        statusEl.textContent="Could not save changes.";
       }
     });
 
-    document.getElementById("logout-btn").addEventListener("click", () => signOut(auth).then(() => location.href='login.html'));
-    document.getElementById("logout-link").addEventListener("click", () => signOut(auth).then(() => location.href='login.html'));
-
-    // Paystack payment handler
-    function payWithPaystack(planCode) {
-      let handler = PaystackPop.setup({
-        key: 'pk_live_d43279760e5f3ea84aed449e8026da10fab2f1ad',
-        email: document.getElementById('user-email').value || "test@example.com",
-        plan: planCode,
-        callback: function(response) {
-          alert('Payment successful! Reference: ' + response.reference);
-
-          // After successful payment, update Firebase user data to premium
-          const user = auth.currentUser;
-          if (user) {
-            updateDoc(doc(db, 'users', user.uid), {
-              isPremium: true,
-            }).then(() => {
-              location.reload();  // Reload the page to reflect changes
-            });
-          }
-        },
-        onClose: function() {
-          alert('Transaction cancelled.');
-        }
-      });
-      handler.openIframe();
-    }
+    document.getElementById("logout-btn").addEventListener("click", async ()=>{
+      await signOut(auth);
+      window.location.href="login.html";
+    });
   </script>
 </body>
 </html>

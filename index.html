@@ -2,20 +2,12 @@
 <html lang="en">
 <head>
   <!-- Elfsight Click to Call | Untitled Click to Call -->
-<script src="https://static.elfsight.com/platform/platform.js" async></script>
-<div class="elfsight-app-7262184c-4a88-475b-8d44-c1ddaa5087dd" data-elfsight-app-lazy></div>
-  <!-- Elfsight Social Share Buttons | Untitled Social Share Buttons -->
-<script src="https://static.elfsight.com/platform/platform.js" async></script>
-<div class="elfsight-app-cdb2ac41-1d7f-4e20-bd0f-84d9daa4fbb4" data-elfsight-app-lazy></div>
-  <script data-name="BMC-Widget" data-cfasync="false" src="https://cdnjs.buymeacoffee.com/1.0.0/widget.prod.min.js" data-id="vividcinema" data-description="Support me on Buy me a coffee!" data-message="" data-color="#5F7FFF" data-position="Right" data-x_margin="18" data-y_margin="18"></script>
-  <meta charset="UTF-8" />
+<!-- Elfsight Social Share Buttons | Untitled Social Share Buttons -->
+<meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Welcome to Vivid Cinema</title>
   <meta name="description" content="Stream trending movies, anime and shows ad-free on Vivid Cinema. Pure cinema, zero distractions." />
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700&display=swap" rel="stylesheet">
-  <script src="https://js.paystack.co/v1/inline.js" defer></script>
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6559393992371691"
-  crossorigin="anonymous"></script>
   <style>
     :root {
       --bg: #0d1117;
@@ -297,22 +289,12 @@
   </section>
 
   <section id="pricing">
-    <h2 class="section-title">Subscription Plans</h2>
+    <h2 class="section-title">Access Vivid Cinema</h2>
     <div class="pricing">
       <div class="plan">
-        <h3>Monthly</h3>
-        <p>GHS 159.90 / month</p>
-        <button class="btn btn-primary" onclick="payWithPaystack('PLN_s0a4ssb21kcze93')">Subscribe</button>
-      </div>
-      <div class="plan">
-        <h3>Quarterly</h3>
-        <p>GHS 318.18 / 3 months</p>
-        <button class="btn btn-primary" onclick="payWithPaystack('PLN_h9p653iext9lhwv')">Subscribe</button>
-      </div>
-      <div class="plan">
-        <h3>Yearly</h3>
-        <p>GHS 639.60 / year</p>
-        <button class="btn btn-primary" onclick="payWithPaystack('PLN_js1flirhq7f5olk')">Subscribe</button>
+        <h3>Free</h3>
+        <p>Browse movies, TV shows and anime while we build the next version of Vivid Cinema.</p>
+        <a class="btn btn-primary" href="auth.html">Create Account</a>
       </div>
     </div>
   </section>
@@ -341,39 +323,6 @@
     <a href="terms.html" class="footer-link">Terms of Use</a>
   </footer>
 
-  <script>
-    function payWithPaystack(plan) {
-      var email = prompt('Enter your email to subscribe:');
-      if (!email) {
-        alert('Subscription cancelled.');
-        return;
-      }
-      var handler = PaystackPop.setup({
-        key: 'pk_live_d43279760e5f3ea84aed449e8026da10fab2f1ad',
-        email: email,
-        plan: plan,
-        callback: function(response) {
-          alert('Subscription successful! Ref: ' + response.reference);
-          window.location.href = 'home.html';
-        },
-        onClose: function() {
-          alert('Payment window closed.');
-        }
-      });
-      handler.openIframe();
-    }
-  </script>
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6559393992371691"
-crossorigin="anonymous"></script>
-<!-- VividCinema -->
-<ins class="adsbygoogle"
-style="display:block"
-data-ad-client="ca-pub-6559393992371691"
-data-ad-slot="9430062600"
-data-ad-format="auto"
-data-full-width-responsive="true"></ins>
-<script>
-(adsbygoogle = window.adsbygoogle || []).push({});
-</script>
+  <!-- VividCinema -->
 </body>
 </html>
