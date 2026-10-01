@@ -3,3 +3,5 @@
 .vivid-app-shell{min-height:100dvh;padding-top:var(--vivid-safe-top);padding-right:var(--vivid-safe-right);padding-bottom:var(--vivid-safe-bottom);padding-left:var(--vivid-safe-left)}
 html[data-network="offline"] [data-vivid-online-only]{display:none!important}
 @media(prefers-reduced-motion:reduce){html[data-vivid-ready="true"] body{transition:none}}
+
+.vivid-page-back{display:inline-flex;align-items:center;gap:7px;width:max-content;min-height:36px;margin:0 0 20px;padding:0 12px 0 9px;border:1px solid rgba(255,255,255,.09);border-radius:999px;background:rgba(255,255,255,.045);color:rgba(255,255,255,.72);text-decoration:none;font-size:.82rem;font-weight:600;letter-spacing:-.01em;transition:background .18s ease,color .18s ease,border-color .18s ease,transform .18s ease}.vivid-page-back:hover,.vivid-page-back:focus-visible{color:#fff;background:rgba(255,255,255,.09);border-color:rgba(255,255,255,.16);transform:translateX(-1px)}.vivid-page-back:focus-visible{outline:2px solid rgba(255,255,255,.42);outline-offset:3px}@media(max-width:640px){.vivid-page-back{margin-bottom:16px}}
