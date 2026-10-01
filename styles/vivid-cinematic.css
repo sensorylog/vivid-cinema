@@ -222,3 +222,160 @@ body.vivid-cinema-home{background:#06070a;color:#f5f7fa;overflow-x:hidden}
 @media(max-width:380px){
  .vivid-hero-media{height:46svh;min-height:290px}
 }
+
+
+/* Netflix-style hero: trailer and title information share one cinematic screen. */
+.vivid-hero{
+  position:relative;
+  height:min(78svh,820px);
+  min-height:620px;
+  overflow:hidden;
+  background:#06070a;
+}
+.vivid-hero-media{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  min-height:0;
+  overflow:hidden;
+  background:#06070a;
+}
+.vivid-hero-video,
+.vivid-hero-fallback{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+}
+.vivid-hero-video{
+  z-index:1;
+  border:0;
+  object-fit:cover;
+  transform:scale(1.02);
+  opacity:0;
+  transition:opacity .45s ease;
+  pointer-events:none;
+}
+.vivid-hero-video.is-ready{opacity:1}
+.vivid-hero-fallback{
+  z-index:0;
+  background-size:cover;
+  background-position:center;
+  opacity:1;
+}
+.vivid-hero-fallback.is-visible{opacity:1}
+.vivid-hero-media::before{
+  content:"";
+  position:absolute;
+  z-index:2;
+  inset:0;
+  pointer-events:none;
+  background:
+    linear-gradient(90deg,rgba(4,5,7,.94) 0%,rgba(4,5,7,.72) 25%,rgba(4,5,7,.18) 58%,rgba(4,5,7,.08) 100%),
+    linear-gradient(0deg,rgba(4,5,7,.92) 0%,rgba(4,5,7,.38) 22%,rgba(4,5,7,.04) 62%,rgba(4,5,7,.32) 100%);
+}
+.vivid-hero-content{
+  position:absolute;
+  z-index:5;
+  inset:0 auto 0 0;
+  width:min(760px,62%);
+  height:auto;
+  margin:0;
+  padding:clamp(120px,17vh,180px) 0 110px var(--vivid-page-gutter);
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:flex-start;
+  background:none;
+}
+.vivid-hero-title{
+  max-width:720px;
+  font-size:clamp(3rem,5.7vw,6.2rem);
+  line-height:.92;
+  margin:0 0 18px;
+}
+.vivid-hero-copy{
+  max-width:650px;
+  margin:0 0 22px;
+  color:#d0d3d8;
+}
+.vivid-meta{margin:0 0 20px}
+.vivid-hero-tools{
+  position:absolute;
+  z-index:8;
+  right:var(--vivid-page-gutter);
+  bottom:34px;
+}
+.vivid-hero-control{z-index:8}
+.vivid-feature-strip{
+  position:absolute;
+  z-index:10;
+  left:0;
+  right:0;
+  bottom:18px;
+  width:100%;
+  margin:0;
+  padding:0 var(--vivid-page-gutter);
+  background:transparent;
+  pointer-events:none;
+}
+.vivid-feature-viewport{width:100%;padding:0;overflow:hidden}
+.vivid-feature-track{
+  justify-content:flex-end;
+  pointer-events:auto;
+}
+.vivid-feature-card{flex-basis:150px;height:86px}
+.vivid-section-wrap{position:relative;z-index:2}
+
+@media(max-width:900px){
+  .vivid-hero{height:76svh;min-height:580px}
+  .vivid-hero-content{width:min(720px,78%);padding-left:24px}
+  .vivid-feature-strip{padding:0 24px}
+}
+
+@media(max-width:640px){
+  .vivid-hero{
+    height:72svh;
+    min-height:560px;
+    overflow:hidden;
+    display:block;
+  }
+  .vivid-hero-media{
+    position:absolute;
+    inset:0;
+    height:100%;
+    min-height:0;
+    max-height:none;
+  }
+  .vivid-hero-media::before{
+    background:
+      linear-gradient(90deg,rgba(4,5,7,.9) 0%,rgba(4,5,7,.46) 65%,rgba(4,5,7,.15) 100%),
+      linear-gradient(0deg,rgba(4,5,7,.96) 0%,rgba(4,5,7,.4) 30%,rgba(4,5,7,.08) 72%,rgba(4,5,7,.3) 100%);
+  }
+  .vivid-hero-content{
+    inset:auto 0 0 0;
+    width:100%;
+    padding:0 16px 118px;
+    justify-content:flex-end;
+  }
+  .vivid-hero-title{
+    font-size:clamp(2.45rem,12vw,4rem);
+    margin-bottom:12px;
+  }
+  .vivid-hero-copy{
+    max-width:100%;
+    -webkit-line-clamp:3;
+    margin-bottom:14px;
+  }
+  .vivid-meta{margin-bottom:12px}
+  .vivid-hero-tools{right:16px;bottom:118px}
+  .vivid-feature-strip{
+    left:0;
+    right:0;
+    bottom:12px;
+    padding:0 16px;
+  }
+  .vivid-feature-track{justify-content:flex-start}
+  .vivid-feature-card{flex-basis:122px;height:72px}
+}
