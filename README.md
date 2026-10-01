@@ -1,5 +1,24 @@
 # Vivid Cinema
 
+## Phase D4 — PWA foundation and offline shell
+Vivid Cinema now has the first production-oriented PWA layer:
+- installable web-app manifest with standalone display
+- dedicated Vivid app icon asset
+- service worker registration
+- versioned application-shell cache
+- network-first navigation with cached fallback
+- cache-first same-origin static assets
+- automatic cache cleanup on service-worker activation
+- browser install prompt when the platform exposes it
+- mobile-safe install control placement
+- PWA metadata wired across the primary app surfaces
+
+The service worker intentionally stays conservative: it caches the application shell and same-origin static resources, but does not proxy third-party TMDB, YouTube, Firebase or CDN requests. Dynamic catalogue data therefore remains network-dependent while the application shell can reopen offline.
+
+The PWA layer does not add streaming or download functionality.
+
+Runtime/device PWA verification is still pending. In particular, install prompts, iOS home-screen behavior, service-worker lifecycle, offline navigation and Firebase/TMDB behavior should be tested on real devices before launch.
+
 ## Phase D3 — Account and viewing preferences
 The account surface now provides a dedicated premium profile experience with:
 - display-name editing
