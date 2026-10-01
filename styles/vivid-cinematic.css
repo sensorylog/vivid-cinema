@@ -1,1 +1,3 @@
-/* see file */
+/* Phase B — cinematic experience. Legacy selectors remain available on other pages. */
+body.vivid-cinema-home{background:#06070a;color:#f5f7fa;overflow-x:hidden}
+.vivid-home{min-height:100dvh;background:#06070a}
