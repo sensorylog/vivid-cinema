@@ -8,7 +8,7 @@ import { VIVID_CONFIG } from "./config.js";
 
 const $=id=>document.getElementById(id);
 const route=getRoute();
-const VIDAPI_ORIGIN=new URL(VIVID_CONFIG.vidapiEmbedBaseUrl).origin;
+const VIDAPI_ORIGIN=new URL(VIVID_CONFIG.api.vidapiEmbedBaseUrl).origin;
 let media=null,details=null,currentParams=null,nextEpisode=null;
 
 function getParams(){
@@ -21,7 +21,7 @@ function getParams(){
 
 function progressKey(){return media?media.media_type+":"+media.id:"";}
 function buildEmbedUrl(params,startAt=0){
- const base=String(VIVID_CONFIG.vidapiEmbedBaseUrl||"").replace(/\/+$/,"");
+ const base=String(VIVID_CONFIG.api.vidapiEmbedBaseUrl||"").replace(/\/+$/,"");
  const query=new URLSearchParams({autoplay:"1"});
  if(Number(startAt)>5)query.set("resumeAt",String(Math.floor(Number(startAt))));
  const suffix="?"+query.toString();
