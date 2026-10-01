@@ -1,6 +1,6 @@
 import { tmdbApi } from "./tmdb.js";
 import { getImageUrl, getMediaUrl, normalizeMedia, normalizeResults } from "./media.js";
-import { getRoute } from "./routes.js";
+import { getRoute, buildWatchUrl } from "./routes.js";
 import { escapeHtml, getErrorMessage } from "./utils.js";
 import { hasLibraryItem, startLibrarySync, toggleLibraryItem, upsertLibraryItem } from "./library.js";
 
@@ -125,7 +125,7 @@ async function loadSeason(id, seasonNumber) {
   try {
     const data = await tmdbApi.tvSeason(id, seasonNumber);
     const episodes = data.episodes || [];
-    container.innerHTML = episodes.length ? episodes.map((episode) => '<article class="vivid-episode"><div class="vivid-episode-thumb"><img loading="lazy" src="' + getImageUrl(episode.still_path, "w500") + '" alt="" onerror="this.style.visibility=\'hidden\'"></div><div class="vivid-episode-copy"><div class="vivid-episode-line"><strong>Episode ' + episode.episode_number + '</strong><span>★ ' + (episode.vote_average ? Number(episode.vote_average).toFixed(1) : "—") + '</span></div><h3>' + escapeHtml(episode.name || ("Episode " + episode.episode_number)) + '</h3><small>' + escapeHtml(episode.air_date || "Air date unavailable") + '</small><p>' + escapeHtml(episode.overview || "No episode synopsis is available.") + '</p></div></article>').join("") : '<p class="vivid-muted">No episodes are available for this season.</p>';
+    container.innerHTML = episodes.length ? episodes.map((episode) => '<article class="vivid-episode"><div class="vivid-episode-thumb"><img loading="lazy" src="' + getImageUrl(episode.still_path, "w500") + '" alt="" onerror="this.style.visibility=\'hidden\'"></div><div class="vivid-episode-copy"><div class="vivid-episode-line"><strong>Episode ' + episode.episode_number + '</strong><span>★ ' + (episode.vote_average ? Number(episode.vote_average).toFixed(1) : "—") + '</span></div><h3>' + escapeHtml(episode.name || ("Episode " + episode.episode_number)) + '</h3><small>' + escapeHtml(episode.air_date || "Air date unavailable") + '</small><p>' + escapeHtml(episode.overview || "No episode synopsis is available.") + '</p><a class="vivid-button vivid-button--secondary vivid-episode-watch" href="' + escapeHtml(buildWatchUrl(media.id, "tv", seasonNumber, episode.episode_number)) + '"><i class="bi bi-play-fill"></i> Play episode</a></div></article>').join("") : '<p class="vivid-muted">No episodes are available for this season.</p>';
   } catch (error) {
     container.innerHTML = '<p class="vivid-muted">' + escapeHtml(getErrorMessage(error)) + '</p>';
   }
@@ -213,8 +213,7 @@ function render(details) {
       '<div class="vivid-title-copy"><span class="vivid-title-kicker">' + (media.media_type === "tv" ? "TV SERIES" : "MOVIE") + '</span><h1>' + escapeHtml(title) + '</h1>' +
       '<div class="vivid-title-meta"><span>' + escapeHtml(year) + '</span>' + (runtime ? '<i></i><span>' + escapeHtml(runtime) + '</span>' : "") + '<i></i><span>★ ' + rating + '</span></div>' +
       '<div class="vivid-title-genres">' + genres + '</div><p>' + escapeHtml(media.overview || "No synopsis is available for this title yet.") + '</p>' +
-      '<div class="vivid-title-actions">' + (firstTrailer ? '<button class="vivid-button vivid-button--primary" id="hero-trailer" type="button"><i class="bi bi-play-fill"></i> Watch trailer</button>' : "") + '<a class="vivid-button vivid-button--secondary" href="home.html"><i class="bi bi-arrow-left"></i> Browse more</a></div>' +
-      '</div></div></section>' +
+      '<div class="vivid-title-actions"><a class="vivid-button vivid-button--primary" href="' + escapeHtml(buildWatchUrl(media.id, media.media_type, media.media_type === "tv" ? (details.seasons?.find((season) => season.episode_count > 0 && season.season_number >= 0)?.season_number ?? 1) : null, media.media_type === "tv" ? 1 : null)) + '"><i class="bi bi-play-fill"></i> Watch now</a>' + (firstTrailer ? '<button class="vivid-button vivid-button--secondary" id="hero-trailer" type="button"><i class="bi bi-play-circle"></i> Watch trailer</button>' : "") + '<a class="vivid-button vivid-button--ghost" href="home.html"><i class="bi bi-arrow-left"></i> Browse more</a></div></div></section>' +
     renderTrailerSection(details) +
     renderLibraryActions() +
     '<section class="vivid-title-section"><div class="vivid-section-heading"><div><span>CAST</span><h2>People in the story</h2></div></div><div class="vivid-cast-grid">' +
