@@ -4,6 +4,7 @@ import { getImageUrl, getMediaUrl, normalizeResults } from "./scripts/media.js";
 import { getLocalLibrary } from "./scripts/library.js";
 import { getContinueWatching, getPlaybackProgress, getPersonalRecommendations, formatProgress } from "./scripts/recommendations.js";
 import { escapeHtml, debounce, getErrorMessage } from "./scripts/utils.js";
+import { buildWatchUrl } from "./scripts/routes.js";
 
 const $=id=>document.getElementById(id);
 let featured=[],activeIndex=0,heroMuted=true,heroPlaying=true,heroTimer=null;
@@ -27,7 +28,7 @@ function wireCards(container){
  container?.querySelectorAll(".vivid-card").forEach(c=>{
    const open=()=>{
      const progress=getPlaybackProgress(c.dataset.type+":"+c.dataset.id);
-     location.href=getMediaUrl({id:c.dataset.id,media_type:c.dataset.type})+(progress?"&resume=1":"");
+     location.href=progress ? buildWatchUrl(c.dataset.id,c.dataset.type,progress.season,progress.episode,progress.progress) : getMediaUrl({id:c.dataset.id,media_type:c.dataset.type});
    };
    c.addEventListener("click",open);
    c.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();open()}});
