@@ -2,17 +2,17 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="robots" content="noindex">
-<title>Vivid Cinema</title>
+<meta name="theme-color" content="#06070a"><meta name="description" content="Watch movies and series on Vivid Cinema.">
+<title>Watch · Vivid Cinema</title><link rel="icon" href="fav-icon.png" type="image/x-icon">
+<link rel="manifest" href="manifest.json"><link rel="apple-touch-icon" href="fav-icon.png">
+<link rel="stylesheet" href="styles/vivid-foundation.css"><link rel="stylesheet" href="styles/vivid-system.css"><link rel="stylesheet" href="styles/vivid-shell.css"><link rel="stylesheet" href="styles/vivid-title.css"><link rel="stylesheet" href="styles/vivid-watch.css"><link rel="stylesheet" href="styles/vivid-pwa.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.9.1/font/bootstrap-icons.css">
 </head>
-<body>
-<p>Opening Vivid Cinema…</p>
-<script>
-  const destination = new URL("title.html", window.location.href);
-  destination.search = window.location.search;
-  destination.hash = window.location.hash;
-  window.location.replace(destination.href);
-</script>
-<noscript><p><a href="title.html">Continue to Vivid Cinema</a></p></noscript>
-</body>
-</html>
+<body data-vivid-page="watch" class="vivid-watch-page">
+<div class="vivid-watch-app">
+<header class="vivid-watch-nav"><a class="vivid-brand" href="home.html">Vivid<span>Cinema</span></a><nav><a href="discover.html"><i class="bi bi-compass"></i> Discover</a><a href="library.html"><i class="bi bi-bookmark"></i> My Library</a></nav><a class="vivid-nav-action" id="watch-auth" href="auth.html">Sign in</a></header>
+<main id="watch-content" aria-live="polite"><section class="vivid-watch-loading"><div></div></section></main>
+<footer class="vivid-footer">© 2026 Vivid Cinema · <a href="terms.html">Terms</a> · <a href="privacy.html">Privacy</a> · <a href="contact.html">Contact</a></footer>
+</div>
+<script type="module" src="scripts/app-shell.js"></script><script type="module" src="scripts/nav-auth.js"></script><script type="module" src="scripts/watch.js"></script><script type="module" src="scripts/pwa.js"></script>
+</body></html>
