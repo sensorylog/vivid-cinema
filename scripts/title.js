@@ -2,6 +2,7 @@ import { tmdbApi } from "./tmdb.js";
 import { getImageUrl, getMediaUrl, normalizeMedia, normalizeResults } from "./media.js";
 import { getRoute } from "./routes.js";
 import { escapeHtml, getErrorMessage } from "./utils.js";
+import { hasLibraryItem, toggleLibraryItem, upsertLibraryItem } from "./library.js";
 
 const $ = (id) => document.getElementById(id);
 const route = getRoute();
@@ -37,6 +38,34 @@ function getInitialCountry(details) {
   const locale = (navigator.language || "").split("-")[1]?.toUpperCase();
   if (locale && details["watch/providers"]?.results?.[locale]) return locale;
   return details["watch/providers"]?.results?.US ? "US" : Object.keys(details["watch/providers"]?.results || {})[0] || "US";
+}
+
+function libraryItem() {
+  return { id: media.id, media_type: media.media_type, title: media.title, year: media.year, poster_path: media.poster_path, backdrop_path: media.backdrop_path };
+}
+
+function renderLibraryActions() {
+  const item = libraryItem();
+  const favorite = hasLibraryItem("favorites", item);
+  const watchLater = hasLibraryItem("watchLater", item);
+  return '<div class="vivid-title-library-actions" aria-label="Library actions">' +
+    '<button class="vivid-button vivid-button--secondary" type="button" id="library-favorite"><i class="bi bi-heart' + (favorite ? '-fill' : '') + '"></i> ' + (favorite ? "Favorited" : "Favorite") + '</button>' +
+    '<button class="vivid-button vivid-button--secondary" type="button" id="library-watch-later"><i class="bi bi-clock' + (watchLater ? '-fill' : '') + '"></i> ' + (watchLater ? "Saved" : "Watch later") + '</button>' +
+    '<a class="vivid-button vivid-button--ghost" href="library.html"><i class="bi bi-bookmark"></i> My Library</a></div>';
+}
+
+function wireLibraryActions() {
+  const item = libraryItem();
+  const favorite = $("library-favorite");
+  const watchLater = $("library-watch-later");
+  favorite?.addEventListener("click", () => {
+    toggleLibraryItem("favorites", item);
+    favorite.innerHTML = hasLibraryItem("favorites", item) ? '<i class="bi bi-heart-fill"></i> Favorited' : '<i class="bi bi-heart"></i> Favorite';
+  });
+  watchLater?.addEventListener("click", () => {
+    toggleLibraryItem("watchLater", item);
+    watchLater.innerHTML = hasLibraryItem("watchLater", item) ? '<i class="bi bi-clock-fill"></i> Saved' : '<i class="bi bi-clock"></i> Watch later';
+  });
 }
 
 function renderError(message) {
