@@ -749,3 +749,16 @@ body.vivid-cinema-home{
   transform:scale(1.15);
   transform-origin:center center;
 }
+
+
+/* Bottom catalogue index — streaming-service style A–Z browsing. */
+.vivid-alphabet{margin-top:20px;padding:34px 0 48px;border-top:1px solid rgba(255,255,255,.06)}
+.vivid-alphabet-head h2{margin:5px 0 0;font-size:clamp(1.45rem,2.4vw,2rem);letter-spacing:-.035em}
+.vivid-alphabet-head p{margin:6px 0 0;color:#858b95;font-size:.86rem}
+.vivid-alphabet-list{display:flex;flex-wrap:wrap;gap:7px;margin-top:22px}
+.vivid-alphabet-list button{min-width:38px;height:38px;padding:0 10px;border:1px solid rgba(255,255,255,.1);border-radius:9px;background:rgba(255,255,255,.035);color:#aeb4bd;font:600 .78rem/1 inherit;cursor:pointer;transition:background .16s ease,color .16s ease,border-color .16s ease,transform .16s ease}
+.vivid-alphabet-list button:hover{color:#fff;background:rgba(255,255,255,.09);border-color:rgba(255,255,255,.2);transform:translateY(-1px)}
+.vivid-alphabet-list button.is-active{color:#08090b;background:#fff;border-color:#fff}
+.vivid-alphabet-status{min-height:20px;margin:16px 2px 4px;color:#777e89;font-size:.76rem}
+.vivid-alphabet .vivid-rail{padding-top:14px}
+@media(max-width:640px){.vivid-alphabet{padding:28px 0 34px}.vivid-alphabet-list{gap:6px;margin-top:18px}.vivid-alphabet-list button{min-width:36px;height:36px;padding:0 8px}}
