@@ -4,26 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Contact Us - Vivid Cinema</title>
-  
-  <!-- Favicon -->
-  <link rel="shortcut icon" href="img/fav-icon.png" type="image/x-icon" />
-  
-  <!-- Styles -->
+  <link rel="shortcut icon" href="fav-icon.png" type="image/x-icon" />
   <link rel="stylesheet" href="styles.css" />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.9.1/font/bootstrap-icons.css">
-
-  <!-- Memberful Embed -->
-  <script type="text/javascript">
-    (function(c) {
-      var script = document.createElement("script");
-      script.src = "https://js.memberful.com/embed.js";
-      script.onload = function() { Memberful.setup(c) };
-      document.head.appendChild(script);
-    })({ site: ["https://vividcinema.memberful.com"] });
-  </script>
-
-  <!-- Google Adsense -->
-  <meta name="google-adsense-account" content="ca-pub-6559393992371691">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.9.1/font/bootstrap-icons.css" rel="stylesheet">
 
   <style>
     body {
@@ -83,9 +66,7 @@
       border-radius: 6px;
       transition: background 0.3s;
     }
-    .contact-form button:hover {
-      background: #b00610;
-    }
+    .contact-form button:hover { background: #b00610; }
     .success-message {
       display: none;
       background: #28a745;
@@ -116,7 +97,6 @@
 </head>
 
 <body>
-
   <div class="contact-container">
     <h2>Contact Us</h2>
 
@@ -127,12 +107,12 @@
       <textarea name="message" rows="5" placeholder="Your Message" required></textarea>
       <input type="file" name="screenshot" accept="image/*" />
       <button type="submit">Send Message</button>
-      <div class="success-message" id="successMsg">✅ Message sent successfully!</div>
+      <div class="success-message" id="successMsg">Message sent successfully!</div>
     </form>
 
     <div class="map-container">
-      <iframe 
-        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3958.866897358663!2d-0.1791884!3d5.6301936!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xfdf9b21b041a5c3%3A0x1fabc2e1e25f6594!2sAccra%20Mall!5e0!3m2!1sen!2sgh!4v1649937264973!5m2!1sen!2sgh" 
+      <iframe
+        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3958.866897358663!2d-0.1791884!3d5.6301936!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xfdf9b21b041a5c3%3A0x1fabc2e1e25f6594!2sAccra%20Mall!5e0!3m2!1sen!2sgh!4v1649937264973!5m2!1sen!2sgh"
         loading="lazy"
         referrerpolicy="no-referrer-when-downgrade"
         allowfullscreen>
@@ -140,7 +120,6 @@
     </div>
   </div>
 
-  <!-- Form Submit -->
   <script>
     const form = document.getElementById("contactForm");
     const successMsg = document.getElementById("successMsg");
@@ -153,7 +132,7 @@
         const res = await fetch(form.action, {
           method: "POST",
           body: formData,
-          headers: { 'Accept': 'application/json' }
+          headers: { Accept: "application/json" }
         });
 
         if (res.ok) {
@@ -170,26 +149,5 @@
       }
     });
   </script>
-
-  <!-- Tawk.to Live Chat -->
-  <script type="text/javascript">
-    var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
-    (function(){
-      var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
-      s1.async=true;
-      s1.src='https://embed.tawk.to/680a675f39e9bb190d1dc9a6/1ipka7j99';
-      s1.charset='UTF-8';
-      s1.setAttribute('crossorigin','*');
-      s0.parentNode.insertBefore(s1,s0);
-    })();
-  </script>
-
-  <!-- Auto Popup (aclib) -->
-  <script type="text/javascript" src="//acscdn.com/script/aclib.js"></script>
-  <script type="text/javascript">
-    aclib.runPop({ zoneId: '9868074' });
-    aclib.runAutoTag({ zoneId: 'eupttewxhz' });
-  </script>
-
 </body>
 </html>
