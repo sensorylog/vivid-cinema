@@ -10,6 +10,7 @@ export const VIVID_CONFIG = Object.freeze({
     home: "home.html",
     title: "title.html",
     discover: "discover.html",
+    library: "library.html",
     login: "login.html",
     signup: "auth.html",
     account: "account.html"

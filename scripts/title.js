@@ -2,6 +2,7 @@ import { tmdbApi } from "./tmdb.js";
 import { getImageUrl, getMediaUrl, normalizeMedia, normalizeResults } from "./media.js";
 import { getRoute } from "./routes.js";
 import { escapeHtml, getErrorMessage } from "./utils.js";
+import { hasLibraryItem, toggleLibraryItem, upsertLibraryItem } from "./library.js";
 
 const $ = (id) => document.getElementById(id);
 const route = getRoute();
@@ -37,6 +38,34 @@ function getInitialCountry(details) {
   const locale = (navigator.language || "").split("-")[1]?.toUpperCase();
   if (locale && details["watch/providers"]?.results?.[locale]) return locale;
   return details["watch/providers"]?.results?.US ? "US" : Object.keys(details["watch/providers"]?.results || {})[0] || "US";
+}
+
+function libraryItem() {
+  return { id: media.id, media_type: media.media_type, title: media.title, year: media.year, poster_path: media.poster_path, backdrop_path: media.backdrop_path };
+}
+
+function renderLibraryActions() {
+  const item = libraryItem();
+  const favorite = hasLibraryItem("favorites", item);
+  const watchLater = hasLibraryItem("watchLater", item);
+  return '<div class="vivid-title-library-actions" aria-label="Library actions">' +
+    '<button class="vivid-button vivid-button--secondary" type="button" id="library-favorite"><i class="bi bi-heart' + (favorite ? '-fill' : '') + '"></i> ' + (favorite ? "Favorited" : "Favorite") + '</button>' +
+    '<button class="vivid-button vivid-button--secondary" type="button" id="library-watch-later"><i class="bi bi-clock' + (watchLater ? '-fill' : '') + '"></i> ' + (watchLater ? "Saved" : "Watch later") + '</button>' +
+    '<a class="vivid-button vivid-button--ghost" href="library.html"><i class="bi bi-bookmark"></i> My Library</a></div>';
+}
+
+function wireLibraryActions() {
+  const item = libraryItem();
+  const favorite = $("library-favorite");
+  const watchLater = $("library-watch-later");
+  favorite?.addEventListener("click", () => {
+    toggleLibraryItem("favorites", item);
+    favorite.innerHTML = hasLibraryItem("favorites", item) ? '<i class="bi bi-heart-fill"></i> Favorited' : '<i class="bi bi-heart"></i> Favorite';
+  });
+  watchLater?.addEventListener("click", () => {
+    toggleLibraryItem("watchLater", item);
+    watchLater.innerHTML = hasLibraryItem("watchLater", item) ? '<i class="bi bi-clock-fill"></i> Saved' : '<i class="bi bi-clock"></i> Watch later';
+  });
 }
 
 function renderError(message) {
@@ -187,15 +216,18 @@ function render(details) {
       '<div class="vivid-title-actions">' + (firstTrailer ? '<button class="vivid-button vivid-button--primary" id="hero-trailer" type="button"><i class="bi bi-play-fill"></i> Watch trailer</button>' : "") + '<a class="vivid-button vivid-button--secondary" href="home.html"><i class="bi bi-arrow-left"></i> Browse more</a></div>' +
       '</div></div></section>' +
     renderTrailerSection(details) +
+    renderLibraryActions() +
     '<section class="vivid-title-section"><div class="vivid-section-heading"><div><span>CAST</span><h2>People in the story</h2></div></div><div class="vivid-cast-grid">' +
       (cast.length ? cast.map((person) => '<article class="vivid-cast"><img loading="lazy" src="' + getImageUrl(person.profile_path, "w185") + '" alt="' + escapeHtml(person.name) + '"><strong>' + escapeHtml(person.name) + '</strong><small>' + escapeHtml(person.character || "Cast") + '</small></article>').join("") : '<p class="vivid-muted">Cast information is unavailable.</p>') +
     '</div></section>' + renderSeasons(details) + renderProviderGroups(details, country) +
     '<section class="vivid-title-section"><div class="vivid-section-heading"><div><span>YOU MAY ALSO LIKE</span><h2>Similar titles</h2></div></div><div class="vivid-similar" id="similar-rail"></div></section>';
 
   const similar = normalizeResults(details.similar?.results || [], media.media_type).slice(0, 8);
+  upsertLibraryItem("history", libraryItem());
   wireSeasons(details);
   wireProviders(details);
   wireTrailers();
+  wireLibraryActions();
 
   if (firstTrailer) {
     $("hero-trailer").addEventListener("click", () => openTrailer(firstTrailer.key, firstTrailer.name || "Trailer"));

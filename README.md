@@ -1,5 +1,10 @@
 # Vivid Cinema
 
+## Phase C5 — Personal library foundation
+The new local-first library surface gives users a dedicated place for favorites, watch-later titles and recently opened history. Title pages can save/remove favorites and watch-later items, and opening a title records a compact history entry. The library is intentionally device-local in C5; authenticated Firestore synchronization remains Phase D.
+
+The canonical route is `library.html`, with the shared typed media identity preserved across movie and TV entries. The implementation does not add playback, downloads or unauthorized provider access.
+
 Vivid Cinema is being rebuilt as a premium cinematic web app and installable PWA.
 
 ## Phase C4 — Title experience and legitimate viewing discovery
