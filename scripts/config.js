@@ -8,7 +8,8 @@ export const VIVID_CONFIG = Object.freeze({
   }),
   routes: Object.freeze({
     home: "home.html",
-    title: "watch.html",
+    title: "title.html",
+    discover: "discover.html",
     login: "login.html",
     signup: "auth.html",
     account: "account.html"
