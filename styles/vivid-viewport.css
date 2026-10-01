@@ -1,0 +1,121 @@
+/* Viewport safety: stop page-level horizontal overflow and free content from under the mobile nav.
+   Does not change feature behavior — spacing and containment only. */
+
+html{
+  max-width:100%;
+  overflow-x:clip;
+}
+body{
+  max-width:100%;
+  overflow-x:clip;
+  overscroll-behavior-x:none;
+}
+.vivid-home,
+.vivid-hero,
+.vivid-hero-media,
+.vivid-feature-strip,
+.vivid-section-wrap,
+.vivid-rails{
+  max-width:100%;
+}
+
+/* Rails scroll horizontally; the page itself must not. */
+.vivid-rail,
+.vivid-feature-track{
+  max-width:100%;
+  overscroll-behavior-x:contain;
+  -webkit-overflow-scrolling:touch;
+}
+
+/* Desktop hover scale must not expand the document width or hide edge cards. */
+@media (hover:hover) and (pointer:fine){
+  .vivid-rails{
+    overflow:visible;
+  }
+  .vivid-rail{
+    overflow-x:auto;
+    overflow-y:visible;
+    padding-top:18px;
+    padding-bottom:24px;
+    margin-inline:0;
+  }
+  .vivid-card:hover,
+  .vivid-card:focus-visible{
+    transform:translateY(-10px) scale(1.06);
+  }
+  .vivid-feature-card:hover,
+  .vivid-feature-card:focus-visible,
+  .vivid-feature-card.is-active{
+    transform:translateY(-8px) scale(1.05);
+  }
+}
+
+/* Mobile: room to breathe + clear the fixed bottom nav */
+@media (max-width:640px){
+  :root{
+    --vivid-page-gutter:14px;
+  }
+
+  .vivid-section-wrap{
+    padding-left:14px;
+    padding-right:14px;
+    padding-bottom:calc(96px + env(safe-area-inset-bottom,0px));
+  }
+
+  .vivid-feature-strip{
+    padding-left:14px;
+    padding-right:14px;
+  }
+
+  .vivid-feature-card{
+    flex:0 0 min(148px,42vw);
+    height:86px;
+  }
+
+  .vivid-card{
+    flex:0 0 min(132px,36vw);
+  }
+
+  .vivid-rails{
+    padding-top:12px;
+    padding-bottom:6px;
+  }
+
+  .vivid-rail{
+    gap:10px;
+    padding:4px 2px 14px;
+  }
+
+  .vivid-rail-footer{
+    padding:10px 0 16px;
+  }
+
+  .vivid-footer{
+    padding-bottom:calc(110px + env(safe-area-inset-bottom,0px));
+  }
+
+  .vivid-mobile-nav{
+    left:10px;
+    right:10px;
+    bottom:calc(10px + env(safe-area-inset-bottom,0px));
+    height:58px;
+    padding-bottom:0;
+    z-index:1100;
+  }
+
+  /* Title / detail pages: keep action buttons clear of the home indicator */
+  .vivid-title-info-inner,
+  .vivid-title-library-actions{
+    padding-bottom:calc(12px + env(safe-area-inset-bottom,0px));
+  }
+}
+
+@media (max-width:380px){
+  .vivid-card{
+    flex:0 0 min(124px,38vw);
+  }
+  .vivid-feature-card{
+    flex:0 0 min(136px,44vw);
+    height:80px;
+  }
+}
