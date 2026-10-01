@@ -105,3 +105,35 @@ Performance, accessibility, security, legal, QA and production hardening.
 - Service-worker shell cache upgraded to v3 and now includes the watch page, player module, and watch styles.
 - No movie/episode files are downloaded or proxied through Vivid's own server.
 - Browser/device playback QA is still required on the deployed Firebase Hosting site.
+
+
+## Phase E — Launch hardening
+
+Phase E prepares the rebuilt Vivid Cinema experience for production without changing the core product direction: discover a movie or TV series, open its title page, and watch through the configured VidAPI player.
+
+### Included
+- Replaced the old landing page with a canonical redirect to the cinematic home experience
+- Branded Firebase 404 page
+- Rebuilt Terms, Privacy and Contact surfaces to match Vivid Cinema
+- Added shared legal-page styling
+- Added robots.txt and a lightweight sitemap for the Firebase-hosted public surfaces
+- Added PWA shortcuts for Browse, Discover and My Library
+- Expanded the service-worker shell to include legal/support pages and launch metadata
+- Upgraded the shell cache to v4
+- Offline navigation now falls back to the dedicated offline page before home
+- Preserved third-party boundaries: TMDB, YouTube, Firebase and VidAPI remain external services
+- No new paid infrastructure, custom domain or Cloudflare dependency
+
+### Launch QA still required
+No browser/device or production-hosting QA has been run by this phase. Before calling Vivid Cinema production-ready, verify on the deployed Firebase URL:
+- movie playback through VidAPI
+- TV season/episode playback
+- mobile and desktop player behavior
+- Firebase Auth and Firestore library synchronization
+- PWA install/update/offline behavior on iOS and Android/Chromium
+- navigation, search and title links
+- contact form delivery
+- legal/support pages and 404 behavior
+- accessibility with keyboard and reduced-motion settings
+
+Phase E deliberately avoids claiming runtime success until those checks are performed on the deployed site.
