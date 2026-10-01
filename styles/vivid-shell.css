@@ -2,6 +2,4 @@
 :root{--vivid-safe-top:env(safe-area-inset-top,0px);--vivid-safe-right:env(safe-area-inset-right,0px);--vivid-safe-bottom:env(safe-area-inset-bottom,0px);--vivid-safe-left:env(safe-area-inset-left,0px)}
 .vivid-app-shell{min-height:100dvh;padding-top:var(--vivid-safe-top);padding-right:var(--vivid-safe-right);padding-bottom:var(--vivid-safe-bottom);padding-left:var(--vivid-safe-left)}
 html[data-network="offline"] [data-vivid-online-only]{display:none!important}
-html[data-vivid-ready="false"] body{opacity:.001}
-html[data-vivid-ready="true"] body{opacity:1;transition:opacity 180ms ease}
 @media(prefers-reduced-motion:reduce){html[data-vivid-ready="true"] body{transition:none}}
