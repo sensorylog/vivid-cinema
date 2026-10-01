@@ -1,5 +1,10 @@
 # Vivid Cinema
 
+## Phase D1 — Account and authentication foundation
+Phase D begins with the account foundation. Email/password accounts now send verification email before access, password reset remains available, and Google sign-in is supported through Firebase Authentication. User records are initialized in Firestore. `firestore.rules` scopes account and personal-library paths to the authenticated owner only.
+
+Before production use, enable the Google provider in the Firebase Authentication console and deploy/test the Firestore rules against the Vivid Cinema Firebase project. Browser/device runtime QA remains pending.
+
 ## Phase C5 — Personal library foundation
 The new local-first library surface gives users a dedicated place for favorites, watch-later titles and recently opened history. Title pages can save/remove favorites and watch-later items, and opening a title records a compact history entry. The library is intentionally device-local in C5; authenticated Firestore synchronization remains Phase D.
 
