@@ -76,96 +76,118 @@ function setHeroText(item){
 
 let heroPlayer=null,heroPlayerToken=0,ytApiPromise=null;
 
-function youtubeUrl(key,muted=true){
- const p=new URLSearchParams({
-   autoplay:"1",mute:muted?"1":"0",controls:"0",playsinline:"1",rel:"0",
-   modestbranding:"1",enablejsapi:"1",iv_load_policy:"3",origin:location.origin
- });
- return "https://www.youtube.com/embed/"+encodeURIComponent(key)+"?"+p.toString();
-}
-
 function loadYouTubeApi(){
  if(window.YT?.Player)return Promise.resolve(window.YT);
  if(ytApiPromise)return ytApiPromise;
  ytApiPromise=new Promise((resolve,reject)=>{
+   const timeout=setTimeout(()=>reject(new Error("YouTube IFrame API timed out")),12000);
    const previous=window.onYouTubeIframeAPIReady;
-   window.onYouTubeIframeAPIReady=()=>{try{previous?.();}catch{} resolve(window.YT)};
-   const script=document.createElement("script");
-   script.src="https://www.youtube.com/iframe_api";
-   script.async=true;
-   script.onerror=()=>{ytApiPromise=null;reject(new Error("YouTube player API failed to load"))};
-   document.head.appendChild(script);
-   setTimeout(()=>reject(new Error("YouTube player API timed out")),10000);
+   window.onYouTubeIframeAPIReady=()=>{
+     clearTimeout(timeout);
+     try{previous?.()}catch{}
+     if(window.YT?.Player)resolve(window.YT);else reject(new Error("YouTube IFrame API unavailable"));
+   };
+   const tag=document.createElement("script");
+   tag.src="https://www.youtube.com/iframe_api";
+   tag.async=true;
+   tag.onerror=()=>{clearTimeout(timeout);ytApiPromise=null;reject(new Error("YouTube IFrame API failed to load"))};
+   document.head.appendChild(tag);
  });
  return ytApiPromise;
 }
 
 function destroyHeroPlayer(){
- try{heroPlayer?.destroy?.()}catch{}
+ try{heroPlayer?.stopVideo?.();heroPlayer?.destroy?.()}catch{}
  heroPlayer=null;
 }
 
-async function waitForHeroPlayback(token){
- const iframe=$("hero-video"),fallback=$("hero-fallback");
- try{
-   await loadYouTubeApi();
-   if(token!==heroPlayerToken||!iframe.src)return false;
-   await new Promise(resolve=>{
-     let done=false;
-     const finish=ok=>{if(done)return;done=true;clearTimeout(timer);resolve(ok)};
-     const timer=setTimeout(()=>finish(false),7000);
-     destroyHeroPlayer();
-     heroPlayer=new YT.Player(iframe,{
-       events:{
-         onReady:event=>{
-           if(token!==heroPlayerToken){finish(false);return}
-           try{
-             event.target.mute();
-             if(!heroMuted){event.target.unMute();event.target.setVolume(100)}
-             if(heroPlaying)event.target.playVideo();
-           }catch{}
-         },
-         onStateChange:event=>{
-           if(token!==heroPlayerToken){finish(false);return}
-           if(event.data===YT.PlayerState.PLAYING){
-             iframe.classList.add("is-ready");
-             fallback.classList.remove("is-visible");
-             finish(true);
-           }
-         },
-         onError:()=>finish(false)
-       }
-     });
-   });
-   return iframe.classList.contains("is-ready");
- }catch(e){
-   console.warn("Hero playback unavailable",e);
-   return false;
- }
-}
-
 async function loadHeroVideo(item){
- const iframe=$("hero-video"),fallback=$("hero-fallback");
+ const host=$("hero-video"),fallback=$("hero-fallback");
  const token=++heroPlayerToken;
  destroyHeroPlayer();
- iframe.classList.remove("is-ready");
+ host.innerHTML="";
+ host.classList.remove("is-ready");
  fallback.classList.add("is-visible");
  try{
    const data=item.media_type==="tv"?await tmdbApi.tvVideos(item.id):await tmdbApi.movieVideos(item.id);
    if(token!==heroPlayerToken)return false;
-   const videos=(data.videos?.results||[]).filter(v=>v.site==="YouTube"&&v.key);
-   const trailer=videos.find(v=>v.type==="Trailer"&&v.official!==false)
-     ||videos.find(v=>v.type==="Trailer")
-     ||videos.find(v=>v.type==="Teaser")
-     ||videos.find(v=>v.type==="Clip")
-     ||videos[0];
-   if(!trailer?.key){iframe.removeAttribute("src");return false}
-   iframe.src=youtubeUrl(trailer.key,heroMuted);
-   return await waitForHeroPlayback(token);
- }catch(e){
-   iframe.classList.remove("is-ready");
-   fallback.classList.add("is-visible");
-   console.warn("Hero trailer unavailable",e);
+   const videos=(data.videos?.results||[])
+     .filter(v=>v.site==="YouTube"&&v.key)
+     .sort((x,y)=>{
+       const score=v=>((v.type==="Trailer")?100:0)+((v.official!==false)?20:0)+((v.type==="Teaser")?10:0);
+       return score(y)-score(x);
+     });
+   const trailer=videos[0];
+   if(!trailer?.key)return false;
+
+   await loadYouTubeApi();
+   if(token!==heroPlayerToken)return false;
+
+   const iframe=document.createElement("div");
+   iframe.className="vivid-hero-youtube";
+   host.appendChild(iframe);
+
+   const player=await new Promise((resolve,reject)=>{
+     let settled=false;
+     const finish=(value,error)=>{
+       if(settled)return;
+       settled=true;
+       clearTimeout(timer);
+       error?reject(error):resolve(value);
+     };
+     const timer=setTimeout(()=>finish(null,new Error("YouTube player ready timeout")),10000);
+     const instance=new YT.Player(iframe,{
+       width:"100%",
+       height:"100%",
+       videoId:trailer.key,
+       playerVars:{
+         autoplay:1,
+         controls:0,
+         playsinline:1,
+         rel:0,
+         iv_load_policy:3,
+         enablejsapi:1,
+         origin:location.origin
+       },
+       events:{
+         onReady:event=>{
+           if(token!==heroPlayerToken){finish(null,new Error("Hero changed"));return}
+           try{
+             event.target.mute();
+             event.target.playVideo();
+           }catch(error){finish(null,error)}
+         },
+         onStateChange:event=>{
+           if(token!==heroPlayerToken){finish(null,new Error("Hero changed"));return}
+           if(event.data===YT.PlayerState.PLAYING)finish(event.target);
+           else if(event.data===YT.PlayerState.ENDED){
+             try{event.target.playVideo()}catch{}
+           }
+         },
+         onAutoplayBlocked:()=>{
+           finish(null,new Error("YouTube autoplay was blocked"))
+         },
+         onError:event=>{
+           finish(null,new Error("YouTube player error "+event.data))
+         }
+       }
+     });
+     heroPlayer=instance;
+   });
+
+   if(token!==heroPlayerToken)return false;
+   heroPlayer=player;
+   const embedded=host.querySelector("iframe");
+   if(embedded)embedded.setAttribute("allow","autoplay; encrypted-media; picture-in-picture");
+   host.classList.add("is-ready");
+   fallback.classList.remove("is-visible");
+   return true;
+ }catch(error){
+   if(token===heroPlayerToken){
+     host.classList.remove("is-ready");
+     fallback.classList.add("is-visible");
+   }
+   console.warn("Hero trailer unavailable:",error);
    return false;
  }
 }
