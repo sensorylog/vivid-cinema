@@ -10,19 +10,81 @@ service cloud.firestore {
       return signedIn() && request.auth.uid == userId;
     }
 
+    function validContentId() {
+      return contentId.matches('^(movie|tv):[0-9]+$');
+    }
+
+    function validLibraryData() {
+      return request.resource.data.keys().hasOnly([
+        'id',
+        'media_type',
+        'title',
+        'year',
+        'poster_path',
+        'backdrop_path'
+      ])
+      && request.resource.data.id is string
+      && request.resource.data.media_type in ['movie', 'tv']
+      && request.resource.data.title is string
+      && request.resource.data.title.size() <= 300
+      && request.resource.data.year is string
+      && request.resource.data.year.size() <= 10
+      && request.resource.data.poster_path is string
+      && request.resource.data.poster_path.size() <= 500
+      && request.resource.data.backdrop_path is string
+      && request.resource.data.backdrop_path.size() <= 500;
+    }
+
+    function validProfile() {
+      return request.resource.data.keys().hasOnly([
+        'displayName',
+        'email',
+        'provider',
+        'preferences',
+        'createdAt',
+        'updatedAt'
+      ])
+      && (!request.resource.data.keys().hasAny(['displayName']) || request.resource.data.displayName is string)
+      && (!request.resource.data.keys().hasAny(['email']) || request.resource.data.email is string)
+      && (!request.resource.data.keys().hasAny(['provider']) || request.resource.data.provider is string)
+      && (!request.resource.data.keys().hasAny(['preferences']) || validPreferences());
+    }
+
+    function validPreferences() {
+      return request.resource.data.preferences.keys().hasOnly([
+        'providerCountry',
+        'autoplayTrailers',
+        'reducedMotion'
+      ])
+      && request.resource.data.preferences.providerCountry is string
+      && request.resource.data.preferences.providerCountry.matches('^[A-Z]{2}$')
+      && request.resource.data.preferences.autoplayTrailers is bool
+      && request.resource.data.preferences.reducedMotion is bool;
+    }
+
     match /users/{userId} {
-      allow read, create, update, delete: if isOwner(userId);
+      allow get: if isOwner(userId);
+      allow list: if false;
+      allow create: if isOwner(userId) && validProfile();
+      allow update: if isOwner(userId) && validProfile();
+      allow delete: if isOwner(userId);
 
       match /favorites/{contentId} {
-        allow read, create, update, delete: if isOwner(userId);
+        allow read: if isOwner(userId);
+        allow create, update: if isOwner(userId) && validContentId() && validLibraryData();
+        allow delete: if isOwner(userId);
       }
 
       match /watchLater/{contentId} {
-        allow read, create, update, delete: if isOwner(userId);
+        allow read: if isOwner(userId);
+        allow create, update: if isOwner(userId) && validContentId() && validLibraryData();
+        allow delete: if isOwner(userId);
       }
 
       match /history/{contentId} {
-        allow read, create, update, delete: if isOwner(userId);
+        allow read: if isOwner(userId);
+        allow create, update: if isOwner(userId) && validContentId() && validLibraryData();
+        allow delete: if isOwner(userId);
       }
     }
 
