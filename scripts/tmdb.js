@@ -13,7 +13,6 @@ export async function tmdb(path, params = {}, options = {}) {
   const useCache = options.cache !== false;
   const timeoutMs = options.timeoutMs ?? 10000;
   if (useCache && cache.has(url)) return cache.get(url);
-
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), timeoutMs);
   try {
@@ -46,18 +45,20 @@ export const tmdbApi = Object.freeze({
   popularTv: (page = 1) => tmdb("tv/popular", { page }),
   topRatedTv: (page = 1) => tmdb("tv/top_rated", { page }),
   airingTodayTv: (page = 1) => tmdb("tv/airing_today", { page }),
-  trending: (mediaType = "all", timeWindow = "week") => tmdb("trending/" + mediaType + "/" + timeWindow),
+  trending: (mediaType = "all", timeWindow = "week", page = 1) => tmdb("trending/" + mediaType + "/" + timeWindow, { page }),
   searchMovies: (query, page = 1) => tmdb("search/movie", { query, page }),
   searchTv: (query, page = 1) => tmdb("search/tv", { query, page }),
   discoverMovies: (params = {}) => tmdb("discover/movie", params),
   discoverTv: (params = {}) => tmdb("discover/tv", params),
-  movieDetails: (id) => tmdb("movie/" + encodeURIComponent(id), { append_to_response: "credits,videos,similar,watch/providers" }),
-  tvDetails: (id) => tmdb("tv/" + encodeURIComponent(id), { append_to_response: "credits,videos,similar,watch/providers" }),
+  movieDetails: (id) => tmdb("movie/" + encodeURIComponent(id), { append_to_response: "credits,videos,similar,watch/providers,recommendations" }),
+  tvDetails: (id) => tmdb("tv/" + encodeURIComponent(id), { append_to_response: "credits,videos,watch/providers,recommendations" }),
   tvSeason: (id, season) => tmdb("tv/" + encodeURIComponent(id) + "/season/" + encodeURIComponent(season), { append_to_response: "credits,videos" }),
   movieGenres: () => tmdb("genre/movie/list"),
   tvGenres: () => tmdb("genre/tv/list"),
   movieSimilar: (id, page = 1) => tmdb("movie/" + encodeURIComponent(id) + "/similar", { page }),
-  tvSimilar: (id, page = 1) => tmdb("tv/" + encodeURIComponent(id) + "/similar", { page })
+  tvSimilar: (id, page = 1) => tmdb("tv/" + encodeURIComponent(id) + "/similar", { page }),
+  movieRecommendations: (id, page = 1) => tmdb("movie/" + encodeURIComponent(id) + "/recommendations", { page }),
+  tvRecommendations: (id, page = 1) => tmdb("tv/" + encodeURIComponent(id) + "/recommendations", { page })
 });
 
 export function clearTmdbCache() { cache.clear(); }
