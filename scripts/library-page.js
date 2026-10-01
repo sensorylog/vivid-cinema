@@ -1,4 +1,4 @@
-import { getLocalLibrary, clearLibraryCollection, removeLibraryItem } from "./library.js";
+import { getLocalLibrary, clearLibraryCollection, removeLibraryItem, startLibrarySync } from "./library.js";
 import { getImageUrl, getMediaUrl } from "./media.js";
 import { escapeHtml } from "./utils.js";
 
@@ -32,7 +32,7 @@ function render() {
   }));
 }
 
-document.addEventListener("DOMContentLoaded",()=>{
+document.addEventListener("DOMContentLoaded",async()=>{\n  await startLibrarySync();
   document.querySelectorAll("[data-library-tab]").forEach((tab)=>tab.addEventListener("click",()=>{
     activeCollection=tab.dataset.libraryTab;
     document.querySelectorAll("[data-library-tab]").forEach((item)=>{const active=item===tab;item.classList.toggle("is-active",active);item.setAttribute("aria-selected",String(active));});

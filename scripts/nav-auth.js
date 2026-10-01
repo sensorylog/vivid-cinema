@@ -7,7 +7,7 @@ const userEmail=document.getElementById("user-email");
 const logoutLink=document.getElementById("logout-link");
 
 onAuthStateChanged(auth,user=>{
- if(user){
+ if(user){\n   window.dispatchEvent(new CustomEvent("vivid:auth-ready",{detail:user}));
    if(authLink){authLink.style.display="";authLink.textContent="Account";authLink.href="account.html";authLink.setAttribute("aria-label","Open account");}
    if(userDropdown)userDropdown.style.display="";
    if(userEmail)userEmail.textContent=user.email||user.displayName||"Account";
