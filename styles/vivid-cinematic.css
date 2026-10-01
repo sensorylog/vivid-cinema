@@ -632,3 +632,45 @@ body.vivid-cinema-home{
     border-radius:14px;
   }
 }
+
+
+/* Desktop hover elevation: featured hero tabs and catalogue cards lift out of the rail. */
+@media (hover:hover) and (pointer:fine){
+  .vivid-feature-card{
+    transform:translateY(0) scale(1);
+    transform-origin:center center;
+    box-shadow:0 0 0 rgba(0,0,0,0);
+    transition:transform 220ms cubic-bezier(.2,.7,.2,1),box-shadow 220ms ease,opacity 220ms ease,border-color 220ms ease;
+  }
+  .vivid-feature-card:hover,
+  .vivid-feature-card:focus-visible{
+    transform:translateY(-9px) scale(1.055);
+    z-index:20;
+    opacity:1;
+    border-color:rgba(255,255,255,.42);
+    box-shadow:0 22px 55px rgba(0,0,0,.48);
+  }
+  .vivid-card{
+    transform:translateY(0) scale(1);
+    transform-origin:center bottom;
+    transition:transform 220ms cubic-bezier(.2,.7,.2,1),box-shadow 220ms ease,border-color 220ms ease;
+  }
+  .vivid-card:hover,
+  .vivid-card:focus-visible{
+    transform:translateY(-8px) scale(1.045);
+    box-shadow:0 24px 60px rgba(0,0,0,.48);
+    border-color:rgba(255,255,255,.28);
+  }
+  .vivid-rail{
+    padding-top:12px;
+    padding-bottom:18px;
+  }
+  .vivid-feature-track{
+    padding-top:18px;
+    padding-bottom:20px;
+  }
+}
+@media (hover:none), (pointer:coarse){
+  .vivid-feature-card:hover,
+  .vivid-card:hover{transform:none}
+}
