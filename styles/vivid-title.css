@@ -27,3 +27,97 @@ body.vivid-title-page{background:#06070a;color:#f5f7fa;min-height:100dvh}.vivid-
  .vivid-title-info .vivid-title-poster{margin-top:-56px}
  .vivid-title-copy{padding-top:0}
 }
+
+/* Phase H — title page cleanup: compact cinematic hero + scrollable cast rail. */
+.vivid-title-backdrop{
+  height:min(46svh,520px);
+  min-height:320px;
+}
+.vivid-title-backdrop-overlay{
+  background:
+    linear-gradient(180deg,rgba(6,7,10,.08) 0%,rgba(6,7,10,.12) 42%,#06070a 100%),
+    linear-gradient(90deg,rgba(6,7,10,.45),transparent 60%,rgba(6,7,10,.32));
+}
+.vivid-title-info-inner{
+  width:min(1280px,100%);
+  grid-template-columns:220px minmax(0,1fr);
+  gap:36px;
+  padding-bottom:42px;
+}
+.vivid-title-info .vivid-title-poster{
+  margin-top:-58px;
+}
+.vivid-title-copy{
+  padding-top:20px;
+  min-width:0;
+}
+.vivid-title-copy h1{
+  font-size:clamp(2.4rem,5vw,4.8rem);
+  line-height:.95;
+  margin-bottom:14px;
+}
+.vivid-title-copy p{
+  max-width:780px;
+  line-height:1.6;
+}
+.vivid-title-section{
+  width:min(1280px,100%);
+  padding-top:38px;
+}
+.vivid-cast-grid{
+  display:flex;
+  gap:14px;
+  overflow-x:auto;
+  padding:2px 2px 18px;
+  scrollbar-width:thin;
+  scroll-snap-type:x proximity;
+}
+.vivid-cast{
+  flex:0 0 126px;
+  scroll-snap-align:start;
+  min-width:0;
+}
+.vivid-cast img{
+  display:block;
+  width:126px;
+  height:178px;
+  object-fit:cover;
+  border-radius:14px;
+}
+.vivid-cast strong,.vivid-cast small{
+  max-width:126px;
+}
+.vivid-video-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+.vivid-similar-card{flex-basis:156px}
+@media(max-width:800px){
+  .vivid-title-backdrop{height:40svh;min-height:270px}
+  .vivid-title-info-inner{
+    grid-template-columns:120px minmax(0,1fr);
+    gap:18px;
+  }
+  .vivid-title-info .vivid-title-poster{margin-top:-42px}
+  .vivid-title-copy{padding-top:14px}
+  .vivid-title-copy h1{font-size:clamp(2rem,7vw,3.4rem)}
+  .vivid-cast{flex-basis:104px}
+  .vivid-cast img{width:104px;height:148px}
+  .vivid-cast strong,.vivid-cast small{max-width:104px}
+}
+@media(max-width:520px){
+  .vivid-title-backdrop{height:34svh;min-height:230px}
+  .vivid-title-info-inner{
+    grid-template-columns:1fr;
+    gap:14px;
+    padding-bottom:26px;
+  }
+  .vivid-title-info .vivid-title-poster{
+    margin-top:-48px;
+    width:116px;
+  }
+  .vivid-title-copy{padding-top:0}
+  .vivid-title-copy h1{font-size:clamp(2.25rem,11vw,3.4rem)}
+  .vivid-title-section{padding-top:30px}
+  .vivid-cast{flex-basis:92px}
+  .vivid-cast img{width:92px;height:132px;border-radius:12px}
+  .vivid-cast strong,.vivid-cast small{max-width:92px}
+  .vivid-video-grid{grid-template-columns:1fr 1fr}
+}
