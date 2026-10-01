@@ -379,3 +379,186 @@ body.vivid-cinema-home{background:#06070a;color:#f5f7fa;overflow-x:hidden}
   .vivid-feature-track{justify-content:flex-start}
   .vivid-feature-card{flex-basis:122px;height:72px}
 }
+
+
+/* Phase I — final streaming UX pass.
+   The hero remains one cinematic surface: trailer, metadata and actions share the same frame. */
+.vivid-hero-media{
+  position:relative;
+  width:100%;
+  height:min(78svh,820px);
+  min-height:620px;
+  overflow:hidden;
+  background:#090a0d;
+}
+.vivid-hero-media::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:2;
+  pointer-events:none;
+  background:
+    linear-gradient(90deg,rgba(4,5,7,.97) 0%,rgba(4,5,7,.78) 28%,rgba(4,5,7,.24) 64%,rgba(4,5,7,.48) 100%),
+    linear-gradient(0deg,#06070a 0%,rgba(6,7,10,.18) 27%,transparent 62%);
+}
+.vivid-hero-video,
+.vivid-hero-fallback{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+}
+.vivid-hero-video{
+  z-index:1;
+  transform:scale(1.08);
+  opacity:0;
+  border:0;
+}
+.vivid-hero-video.is-ready{opacity:1}
+.vivid-hero-fallback{
+  z-index:0;
+  background-size:cover;
+  background-position:center;
+}
+.vivid-hero-content{
+  position:absolute;
+  inset:0;
+  z-index:5;
+  width:min(1440px,100%);
+  height:100%;
+  margin:auto;
+  padding:clamp(110px,18vh,170px) var(--vivid-page-gutter) 150px;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:flex-start;
+  background:transparent;
+  pointer-events:none;
+}
+.vivid-hero-content>*{pointer-events:auto}
+.vivid-hero-title{
+  max-width:min(850px,68vw);
+  text-wrap:balance;
+}
+.vivid-hero-copy{
+  max-width:620px;
+}
+.vivid-hero-tools{
+  bottom:32px;
+}
+.vivid-feature-strip{
+  position:relative;
+  z-index:7;
+  left:auto;
+  right:auto;
+  bottom:auto;
+  width:min(1440px,100%);
+  margin:auto;
+  padding:0 var(--vivid-page-gutter) 30px;
+  background:#06070a;
+}
+.vivid-card{
+  isolation:isolate;
+}
+.vivid-card::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  border-radius:inherit;
+  pointer-events:none;
+  box-shadow:inset 0 0 0 1px transparent;
+  transition:box-shadow .22s ease;
+}
+.vivid-card:hover,
+.vivid-card:focus-visible{
+  transform:translateY(-6px) scale(1.015);
+  z-index:4;
+}
+.vivid-card:hover::after,
+.vivid-card:focus-visible::after{
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.3);
+}
+.vivid-card:focus-visible{
+  outline:2px solid rgba(255,255,255,.8);
+  outline-offset:3px;
+}
+.vivid-card-signal{
+  position:absolute;
+  left:8px;
+  top:8px;
+  z-index:3;
+  max-width:calc(100% - 64px);
+  padding:5px 8px;
+  border-radius:999px;
+  background:rgba(5,6,8,.76);
+  border:1px solid rgba(255,255,255,.12);
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+  color:#f1f3f5;
+  font-size:.63rem;
+  font-weight:700;
+  letter-spacing:.01em;
+}
+.vivid-card-info{
+  min-height:58px;
+}
+.vivid-card-sub{
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+@media(max-width:900px){
+  .vivid-hero-media{height:66svh;min-height:520px}
+  .vivid-hero-content{padding:110px 24px 110px}
+  .vivid-hero-title{max-width:82vw}
+  .vivid-feature-strip{padding-left:24px;padding-right:24px}
+}
+@media(max-width:640px){
+  .vivid-hero-media{
+    height:72svh;
+    min-height:540px;
+    max-height:none;
+  }
+  .vivid-hero-media::after{
+    background:
+      linear-gradient(90deg,rgba(4,5,7,.9),rgba(4,5,7,.28) 72%,rgba(4,5,7,.38)),
+      linear-gradient(0deg,#06070a 0%,rgba(6,7,10,.2) 38%,rgba(0,0,0,.18) 100%);
+  }
+  .vivid-hero-content{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    padding:88px 16px 92px;
+    justify-content:flex-end;
+  }
+  .vivid-hero-title{
+    max-width:100%;
+    font-size:clamp(2.45rem,13vw,4rem);
+  }
+  .vivid-hero-copy{
+    max-width:100%;
+    -webkit-line-clamp:3;
+  }
+  .vivid-hero-tools{
+    right:16px;
+    bottom:16px;
+  }
+  .vivid-hero-control{
+    top:50%;
+    width:40px;
+    height:40px;
+  }
+  .vivid-hero-control.prev{left:12px}
+  .vivid-hero-control.next{right:12px}
+  .vivid-feature-strip{
+    padding:0 16px 18px;
+  }
+  .vivid-card:hover,
+  .vivid-card:focus-visible{
+    transform:translateY(-3px);
+  }
+}
+@media(prefers-reduced-motion:reduce){
+  .vivid-card,.vivid-card::after,.vivid-card-media img{transition:none}
+}
