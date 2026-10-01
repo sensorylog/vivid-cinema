@@ -117,6 +117,9 @@ async function loadHeroVideo(item){
  if(!prefersHeroAutoplay())return false;
 
  try{
+   // TMDB's video endpoint is authoritative for the trailer metadata.
+   // Request English + language-neutral videos so a title is not rejected
+   // merely because its YouTube entry has no en-US language tag.
    const data=item.media_type==="tv"
      ?await tmdbApi.tvVideos(item.id)
      :await tmdbApi.movieVideos(item.id);
@@ -141,100 +144,46 @@ async function loadHeroVideo(item){
      return false;
    }
 
-   await loadYouTubeApi();
-   if(token!==heroPlayerToken)return false;
-
-   const mount=document.createElement("div");
-   mount.className="vivid-hero-youtube";
-   host.appendChild(mount);
-
-   const player=await new Promise((resolve,reject)=>{
-     let settled=false;
-     const finish=(value,error)=>{
-       if(settled)return;
-       settled=true;
-       clearTimeout(timer);
-       error?reject(error):resolve(value);
-     };
-     const timer=setTimeout(
-       ()=>finish(null,new Error("YouTube trailer player timed out")),
-       10000
-     );
-
-     try{
-       const instance=new YT.Player(mount,{
-         width:"100%",
-         height:"100%",
-         videoId:trailer.key,
-         playerVars:{
-           autoplay:1,
-           mute:1,
-           controls:0,
-           playsinline:1,
-           rel:0,
-           modestbranding:1,
-           iv_load_policy:3,
-           enablejsapi:1,
-           origin:location.origin,
-           fs:0
-         },
-         events:{
-           onReady:event=>{
-             if(token!==heroPlayerToken){
-               finish(null,new Error("Hero changed"));
-               return;
-             }
-             try{
-               event.target.mute();
-               event.target.setVolume(0);
-               if(heroPlaying)event.target.playVideo();
-               else event.target.pauseVideo();
-             }catch(error){
-               finish(null,error);
-             }
-           },
-           onStateChange:event=>{
-             if(token!==heroPlayerToken){
-               finish(null,new Error("Hero changed"));
-               return;
-             }
-             if(event.data===YT.PlayerState.PLAYING){
-               host.classList.add("is-ready");
-               fallback.classList.remove("is-visible");
-               finish(event.target);
-             }else if(event.data===YT.PlayerState.ENDED){
-               try{
-                 event.target.seekTo(0);
-                 if(heroPlaying)event.target.playVideo();
-               }catch{}
-             }
-           },
-           onAutoplayBlocked:()=>{
-             finish(null,new Error("YouTube muted autoplay was blocked"));
-           },
-           onError:event=>{
-             finish(null,new Error("YouTube player error "+event.data));
-           }
-         }
-       });
-       heroPlayer=instance;
-     }catch(error){
-       finish(null,error);
-     }
+   // Use YouTube's native embed autoplay path here instead of constructing an
+   // IFrame API player and then trying to bind the API to that same iframe.
+   // This is the documented, simplest autoplay path.
+   const params=new URLSearchParams({
+     autoplay:"1",
+     mute:"1",
+     controls:"0",
+     playsinline:"1",
+     rel:"0",
+     iv_load_policy:"3",
+     enablejsapi:"1",
+     origin:location.origin
    });
+   const iframe=document.createElement("iframe");
+   iframe.className="vivid-hero-youtube";
+   iframe.src="https://www.youtube.com/embed/"+encodeURIComponent(trailer.key)+"?"+params.toString();
+   iframe.title=(item.title||"Featured")+" trailer";
+   iframe.allow="autoplay; encrypted-media; picture-in-picture; fullscreen";
+   iframe.setAttribute("allowfullscreen","");
+   iframe.setAttribute("referrerpolicy","strict-origin-when-cross-origin");
+   iframe.loading="eager";
+   iframe.style.cssText="position:absolute;inset:0;width:100%;height:100%;border:0;pointer-events:none";
+   host.appendChild(iframe);
 
+   // The embed itself owns autoplay. Do not wait for the IFrame API or a
+   // PLAYING event before revealing it; either can race with page lifecycle.
    if(token!==heroPlayerToken)return false;
-   heroPlayer=player;
-   const embedded=host.querySelector("iframe");
-   if(embedded){
-     embedded.setAttribute("allow","autoplay; encrypted-media; picture-in-picture; fullscreen");
-     embedded.setAttribute("allowfullscreen","");
-     embedded.setAttribute("referrerpolicy","strict-origin-when-cross-origin");
-     embedded.style.pointerEvents="none";
-   }
-
    host.classList.add("is-ready");
    fallback.classList.remove("is-visible");
+
+   // Bind the API only as an optional enhancement for the pause/sound buttons.
+   // Playback must never depend on this secondary binding succeeding.
+   try{
+     await loadYouTubeApi();
+     if(token!==heroPlayerToken)return true;
+     heroPlayer=new YT.Player(iframe);
+   }catch(error){
+     console.warn("Hero controls API unavailable; native embed remains active:",error);
+   }
+
    return true;
  }catch(error){
    if(token===heroPlayerToken){
