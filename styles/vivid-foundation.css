@@ -1,33 +1,4 @@
-:root {
-  --vivid-bg: #08090b;
-  --vivid-surface: rgba(18, 19, 22, 0.72);
-  --vivid-surface-solid: #121316;
-  --vivid-text: #f5f5f5;
-  --vivid-text-muted: #a6a7ad;
-  --vivid-accent: #ffffff;
-  --vivid-border: rgba(255, 255, 255, 0.12);
-  --vivid-glass-blur: 22px;
-  --vivid-radius-sm: 10px;
-  --vivid-radius-md: 16px;
-  --vivid-radius-lg: 24px;
-  --vivid-content-width: 1440px;
-  --vivid-page-gutter: clamp(1rem, 3vw, 3rem);
-  --vivid-transition-fast: 180ms ease;
-  --vivid-transition-standard: 320ms cubic-bezier(.2,.7,.2,1);
-}
-
-.vivid-glass {
-  background: var(--vivid-surface);
-  border: 1px solid var(--vivid-border);
-  backdrop-filter: blur(var(--vivid-glass-blur)) saturate(120%);
-  -webkit-backdrop-filter: blur(var(--vivid-glass-blur)) saturate(120%);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    scroll-behavior: auto !important;
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
-}
+/* Compatibility layer: legacy foundation selectors remain stable while A2 provides richer tokens. */
+:root{--vivid-glass-blur:22px;--vivid-radius-sm:12px;--vivid-radius-md:16px;--vivid-radius-lg:24px;--vivid-content-width:1440px;--vivid-page-gutter:clamp(1rem,4vw,4rem);--vivid-transition-fast:160ms ease;--vivid-transition-standard:280ms cubic-bezier(.2,.7,.2,1)}
+.vivid-glass{background:var(--vivid-surface,rgba(18,20,25,.72));border:1px solid var(--vivid-border,rgba(255,255,255,.12));border-radius:var(--vivid-radius-md);backdrop-filter:blur(var(--vivid-glass-blur)) saturate(120%);-webkit-backdrop-filter:blur(var(--vivid-glass-blur)) saturate(120%)}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
