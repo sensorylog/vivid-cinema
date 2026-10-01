@@ -44,6 +44,9 @@ Shared configuration, TMDB client/cache, content orchestration, app shell, tempo
 ### Phase C1 — Title detail foundation
 The title route is now a dedicated cinematic detail surface. It resolves typed movie/TV URLs through the shared TMDB client, renders poster/backdrop metadata, genres, cast, trailers, legitimate watch-provider discovery, and similar titles. Provider availability is country-dependent and Vivid Cinema does not host or provide titles. TV season/episode exploration remains a later Phase C step.
 
+### Phase C2 — TV seasons and episodes
+TV title pages now expose a season selector and episode browser backed by the shared TMDB client. Episode stills, air dates, ratings and synopses are presented as discovery information only; Vivid Cinema does not host or stream episodes.
+
 ### Phase B — Cinematic experience
 Premium landing page, signature swipeable trailer hero, discovery rails and featured content.
 
