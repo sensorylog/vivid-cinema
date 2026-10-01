@@ -1,9 +1,11 @@
 import { tmdbApi } from "./tmdb.js";
 import { getImageUrl, getMediaUrl, normalizeResults } from "./media.js";
 import { escapeHtml, getErrorMessage } from "./utils.js";
+import { getRoute } from "./routes.js";
 
 const $ = (id) => document.getElementById(id);
-const state = { type: "all", genre: "", year: "", sort: "popularity.desc", query: "", page: 1, totalPages: 1, requestId: 0 };
+const route = getRoute();
+const state = { type: route.params.get("type") === "tv" ? "tv" : route.params.get("type") === "movie" ? "movie" : "all", genre: route.params.get("genre") || "", year: route.params.get("year") || "", sort: route.params.get("sort") || "popularity.desc", rating: route.params.get("rating") || "", query: route.params.get("q") || "", page: 1, totalPages: 1, requestId: 0 };
 let genres = { movie: [], tv: [] };
 
 function currentGenres() {
@@ -135,6 +137,7 @@ async function fetchDiscovery() {
           ? { primary_release_year: state.year || undefined }
           : { first_air_date_year: state.year || undefined })
       };
+      params["vote_average.gte"] = state.rating || undefined;
       const data = state.type === "movie" ? await tmdbApi.discoverMovies(params) : await tmdbApi.discoverTv(params);
       items = normalizeResults(data.results || [], state.type);
       totalPages = Number(data.total_pages || 1);
@@ -157,6 +160,7 @@ function updateFromControls(resetPage = true) {
   state.genre = $("genre-filter").value;
   state.year = $("year-filter").value;
   state.sort = $("sort-filter").value;
+  state.rating = $("rating-filter").value;
   if (resetPage) state.page = 1;
   fetchDiscovery();
 }
@@ -178,11 +182,12 @@ function resetFilters() {
   state.query = "";
   state.page = 1;
   document.querySelectorAll("[data-type]").forEach((button) => button.classList.toggle("is-active", button.dataset.type === "all"));
-  $("discovery-search").value = "";
-  $("clear-search").hidden = true;
+  $("discovery-search").value = state.query;
+  $("clear-search").hidden = !state.query;
   $("genre-filter").value = "";
   $("year-filter").value = "";
   $("sort-filter").value = state.sort;
+  $("rating-filter").value = state.rating;
   populateGenres();
   fetchDiscovery();
 }
@@ -192,6 +197,7 @@ function wire() {
   $("genre-filter").addEventListener("change", () => updateFromControls());
   $("year-filter").addEventListener("change", () => updateFromControls());
   $("sort-filter").addEventListener("change", () => updateFromControls());
+  $("rating-filter").addEventListener("change", () => updateFromControls());
   $("reset-filters").addEventListener("click", resetFilters);
 
   $("prev-page").addEventListener("click", () => {
