@@ -48,7 +48,7 @@ function setHeroText(item){
  $("hero-title").textContent=item.title;
  $("hero-copy").textContent=item.overview||"Explore this title on Vivid Cinema.";
  $("hero-meta").innerHTML='<span>'+escapeHtml(item.year||"—")+'</span><span class="vivid-dot"></span><span>'+escapeHtml(item.media_type==="tv"?"TV Series":"Movie")+'</span><span class="vivid-dot"></span><span>★ '+Number(item.vote_average||0).toFixed(1)+'</span>';
- $("hero-watch").href=getMediaUrl(item);
+ $("hero-watch").href=buildWatchUrl(item.id,item.media_type,item.media_type==="tv"?1:null,item.media_type==="tv"?1:null);
  $("hero-more").onclick=()=>location.href=getMediaUrl(item);
  $("hero-fallback").style.backgroundImage=item.backdrop_path?'url("'+getImageUrl(item.backdrop_path,"w1280")+'")':"none";
 }
