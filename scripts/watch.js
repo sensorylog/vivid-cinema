@@ -22,9 +22,11 @@ function getParams(){
 function progressKey(){return media?media.media_type+":"+media.id:"";}
 function buildEmbedUrl(params,startAt=0){
  const base=String(VIVID_CONFIG.vidapiEmbedBaseUrl||"").replace(/\/+$/,"");
- const resume=Number(startAt)>5?"?resumeAt="+encodeURIComponent(Math.floor(Number(startAt))):"";
- if(params.type==="tv")return base+"/embed/tv/"+encodeURIComponent(params.id)+"/"+params.season+"/"+params.episode+resume;
- return base+"/embed/movie/"+encodeURIComponent(params.id)+resume;
+ const query=new URLSearchParams({autoplay:"1"});
+ if(Number(startAt)>5)query.set("resumeAt",String(Math.floor(Number(startAt))));
+ const suffix="?"+query.toString();
+ if(params.type==="tv")return base+"/embed/tv/"+encodeURIComponent(params.id)+"/"+params.season+"/"+params.episode+suffix;
+ return base+"/embed/movie/"+encodeURIComponent(params.id)+suffix;
 }
 function recordHistory(){
  if(!media)return;
