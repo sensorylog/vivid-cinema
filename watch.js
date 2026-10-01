@@ -37,7 +37,7 @@ async function render(type,id){
 }
 function bindPage(id){
   bindSimilar();renderComments(id);bindComments(id);
-  document.getElementById("load-more")?.addEventListener("click",async()=>{moreLikePage++;try{const data=await tmdbApi[currentType==="tv"?"tvDetails":"movieDetails"](id);const results=(data.similar?.results||[]);const box=document.getElementById("similar-container");if(box)box.insertAdjacentHTML("beforeend",renderSimilar(results));bindSimilar();}catch(e){console.error(e);}});
+  document.getElementById("load-more")?.addEventListener("click",async()=>{moreLikePage++;try{const data=await tmdbApi[currentType==="tv"?"tvSimilar":"movieSimilar"](id,moreLikePage);const results=data.results||[];const box=document.getElementById("similar-container");if(box)box.insertAdjacentHTML("beforeend",renderSimilar(results));bindSimilar();}catch(e){console.error(e);}});
   document.getElementById("add-watch-later")?.addEventListener("click",()=>alert(storeList("watchLater",currentContent)?"Added to Watch Later.":"Already in Watch Later."));
   document.getElementById("add-favorites")?.addEventListener("click",()=>alert(storeList("favorites",currentContent)?"Added to Favorites.":"Already in Favorites."));
 }
