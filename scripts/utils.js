@@ -18,3 +18,10 @@ export function getMediaYear(item = {}) { return getMediaDate(item).slice(0, 4);
 export function getMediaType(item = {}) { return item.media_type || (item.first_air_date ? "tv" : "movie"); }
 export function getPosterUrl(path, size = "w500") { return path ? "https://image.tmdb.org/t/p/" + size + path : "fav-icon.png"; }
 export function getBackdropUrl(path, size = "w1280") { return path ? "https://image.tmdb.org/t/p/" + size + path : ""; }
+
+export function getErrorMessage(error, fallback = "Something went wrong. Please try again.") {
+  if (error?.code === "TMDB_TIMEOUT") return "The content service took too long to respond. Please try again.";
+  if (error?.status === 429) return "Too many requests right now. Please try again shortly.";
+  if (error?.status >= 500) return "The content service is temporarily unavailable. Please try again."; 
+  return fallback;
+}
