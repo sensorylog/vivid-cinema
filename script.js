@@ -12,8 +12,6 @@ let heroScrollShift=0,heroScrollTarget=0,heroScrollLastY=window.scrollY||0,heroS
 const rails={};
 const sectionState={};
 
-// Keep data keys separate from DOM ids. Several sections intentionally use human-friendly
-// ids (for example `movies-rail`) while the TMDB loader keys are API-oriented.
 const SECTION_RAIL_IDS=Object.freeze({
  trending:"trending-rail",
  nowPlaying:"now-playing-rail",
@@ -33,7 +31,6 @@ function card(media,options={}){
  const title=media.title||"Untitled", rating=Number(media.vote_average||0).toFixed(1);
  const progress=options.progress;
  const signal=options.signal||"";
- const contentId=media.content_id||((media.media_type||"movie")+":"+media.id);
  const progressBar=progress&&Number(progress.percentage)>0?'<div class="vivid-card-progress"><span style="width:'+Math.min(100,Number(progress.percentage)||0)+'%"></span></div>':"";
  return '<article class="vivid-card" data-id="'+escapeHtml(media.id)+'" data-type="'+escapeHtml(media.media_type||"movie")+'" tabindex="0" role="link" aria-label="'+escapeHtml(title)+'">'+
  '<div class="vivid-card-media"><img src="'+getImageUrl(media.poster_path,"w342")+'" alt="'+escapeHtml(title)+'" loading="lazy" decoding="async">'+
@@ -119,8 +116,6 @@ async function loadHeroVideo(item){
  fallback.classList.add("is-visible");
  if(!prefersHeroAutoplay())return false;
  try{
-   // movieVideos / tvVideos hit the standalone /videos endpoint, so the list is at data.results.
-   // (append_to_response payloads use data.videos.results — support both shapes.)
    const data=item.media_type==="tv"?await tmdbApi.tvVideos(item.id):await tmdbApi.movieVideos(item.id);
    if(token!==heroPlayerToken)return false;
    const list=Array.isArray(data?.results)?data.results:(Array.isArray(data?.videos?.results)?data.videos.results:[]);
@@ -131,78 +126,68 @@ async function loadHeroVideo(item){
        return score(y)-score(x);
      });
    const trailer=videos[0];
-   if(!trailer?.key)return false;
-
-   await loadYouTubeApi();
-   if(token!==heroPlayerToken)return false;
-
-   const mount=document.createElement("div");
-   mount.className="vivid-hero-youtube";
-   host.appendChild(mount);
-
-   const player=await new Promise((resolve,reject)=>{
-     let settled=false;
-     const finish=(value,error)=>{
-       if(settled)return;
-       settled=true;
-       clearTimeout(timer);
-       error?reject(error):resolve(value);
-     };
-     const timer=setTimeout(()=>finish(null,new Error("YouTube player ready timeout")),12000);
-     const instance=new YT.Player(mount,{
-       width:"100%",
-       height:"100%",
-       videoId:trailer.key,
-       playerVars:{
-         autoplay:1,
-         mute:1,
-         controls:0,
-         playsinline:1,
-         rel:0,
-         modestbranding:1,
-         iv_load_policy:3,
-         enablejsapi:1,
-         origin:location.origin,
-         fs:0
-       },
-       events:{
-         onReady:event=>{
-           if(token!==heroPlayerToken){finish(null,new Error("Hero changed"));return}
-           try{
-             event.target.mute();
-             if(heroMuted)event.target.mute();
-             else event.target.unMute();
-             event.target.playVideo();
-           }catch(error){finish(null,error)}
-         },
-         onStateChange:event=>{
-           if(token!==heroPlayerToken){finish(null,new Error("Hero changed"));return}
-           if(event.data===YT.PlayerState.PLAYING)finish(event.target);
-           else if(event.data===YT.PlayerState.ENDED){
-             try{event.target.seekTo(0);event.target.playVideo()}catch{}
-           }
-         },
-         onAutoplayBlocked:()=>{
-           finish(null,new Error("YouTube autoplay was blocked"))
-         },
-         onError:event=>{
-           finish(null,new Error("YouTube player error "+event.data))
-         }
-       }
-     });
-     heroPlayer=instance;
-   });
-
-   if(token!==heroPlayerToken)return false;
-   heroPlayer=player;
-   const embedded=host.querySelector("iframe");
-   if(embedded){
-     embedded.setAttribute("allow","autoplay; encrypted-media; picture-in-picture");
-     embedded.setAttribute("allowfullscreen","");
-     embedded.style.pointerEvents="none";
+   if(!trailer?.key){
+     console.warn("Hero trailer: no YouTube trailer for",item.media_type,item.id);
+     return false;
    }
-   host.classList.add("is-ready");
-   fallback.classList.remove("is-visible");
+
+   const origin=encodeURIComponent(location.origin);
+   const src="https://www.youtube.com/embed/"+encodeURIComponent(trailer.key)
+     +"?autoplay=1&mute=1&controls=0&rel=0&playsinline=1&modestbranding=1"
+     +"&iv_load_policy=3&enablejsapi=1&loop=1&playlist="+encodeURIComponent(trailer.key)
+     +"&origin="+origin;
+
+   const iframe=document.createElement("iframe");
+   iframe.className="vivid-hero-youtube";
+   iframe.src=src;
+   iframe.title=(item.title||"Trailer")+" trailer";
+   iframe.allow="autoplay; encrypted-media; picture-in-picture; fullscreen";
+   iframe.setAttribute("allowfullscreen","");
+   iframe.setAttribute("referrerpolicy","strict-origin-when-cross-origin");
+   iframe.style.cssText="position:absolute;inset:0;width:100%;height:100%;border:0;pointer-events:none";
+   host.appendChild(iframe);
+
+   const reveal=()=>{
+     if(token!==heroPlayerToken)return;
+     host.classList.add("is-ready");
+     fallback.classList.remove("is-visible");
+   };
+   iframe.addEventListener("load",reveal,{once:true});
+   window.setTimeout(reveal,600);
+
+   try{
+     await loadYouTubeApi();
+     if(token!==heroPlayerToken)return true;
+     await new Promise(resolve=>{
+       let settled=false;
+       const done=()=>{if(!settled){settled=true;resolve()}};
+       window.setTimeout(done,8000);
+       try{
+         heroPlayer=new YT.Player(iframe,{
+           events:{
+             onReady:event=>{
+               try{
+                 event.target.mute();
+                 if(!heroMuted)event.target.unMute();
+                 if(heroPlaying)event.target.playVideo();
+                 else event.target.pauseVideo();
+               }catch{}
+               done();
+             },
+             onStateChange:event=>{
+               if(event.data===YT.PlayerState.ENDED){
+                 try{event.target.seekTo(0);event.target.playVideo()}catch{}
+               }
+             },
+             onError:()=>done()
+           }
+         });
+       }catch{done()}
+     });
+   }catch(apiError){
+     console.warn("Hero YT API bind skipped:",apiError);
+   }
+
    return true;
  }catch(error){
    if(token===heroPlayerToken){
@@ -334,7 +319,7 @@ async function loadMoreSection(key,button){
    renderRail(railId,data.items,{append:true,signal:sectionSignal(key)});
    sectionState[key]={page:data.page,totalPages:data.totalPages};
    button.hidden=data.page>=data.totalPages;
-   button.textContent=button.hidden?"Load more":"Load more";
+   button.textContent="Load more";
    updateRailControls($(railId));
  }catch(error){
    button.textContent="Try again";
@@ -372,9 +357,6 @@ async function loadHome(){
  const ids=["trending-rail","now-playing-rail","movies-rail","top-rated-rail","tv-rail","top-tv-rail","airing-rail","anime-rail","kdrama-rail","upcoming-rail"];
  ids.forEach(id=>skeleton($(id)));
  renderContinueWatching();
-
- // Load the complete catalogue in small parallel batches. This keeps the first
- // rows fast while guaranteeing that deeper rails do not depend on scrolling.
  const batches=[
    ["trending","nowPlaying","popularMovies"],
    ["topRatedMovies","popularTv","topRatedTv"],
@@ -382,13 +364,8 @@ async function loadHome(){
    ["upcoming"]
  ];
  for(const batch of batches){
-   try{
-     await loadSectionBatch(batch);
-   }catch(error){
-     console.warn("Vivid home batch failed:",batch,error);
-   }
+   try{await loadSectionBatch(batch)}catch(error){console.warn("Vivid home batch failed:",batch,error)}
  }
-
  if("requestIdleCallback" in window)requestIdleCallback(()=>void renderRecommendations(),{timeout:1200});
  else setTimeout(()=>void renderRecommendations(),500);
 }
@@ -409,14 +386,9 @@ function wireSearch(){
  document.addEventListener("click",e=>{if(!e.target.closest(".vivid-nav-search")&&!e.target.closest("#search-panel"))$("search-panel")?.classList.remove("is-open")});
 }
 function wireHeroSwipe(){
- const hero=document.querySelector(".vivid-hero");let startX=0,startY=0;
- hero.addEventListener("touchstart",e=>{
-   const t=e.changedTouches[0];startX=t.clientX;startY=t.clientY;
- },{passive:true});
- hero.addEventListener("touchend",e=>{
-   const t=e.changedTouches[0],dx=t.clientX-startX,dy=t.clientY-startY;
-   if(Math.abs(dx)>55&&Math.abs(dx)>Math.abs(dy)*1.25)showHero(activeIndex+(dx<0?1:-1),true);
- },{passive:true});
+ const hero=document.querySelector(".vivid-hero");if(!hero)return;let startX=0,startY=0;
+ hero.addEventListener("touchstart",e=>{const t=e.changedTouches[0];startX=t.clientX;startY=t.clientY},{passive:true});
+ hero.addEventListener("touchend",e=>{const t=e.changedTouches[0],dx=t.clientX-startX,dy=t.clientY-startY;if(Math.abs(dx)>55&&Math.abs(dx)>Math.abs(dy)*1.25)showHero(activeIndex+(dx<0?1:-1),true)},{passive:true});
 }
 window.addEventListener("scroll",()=>{$("topbar")?.classList.toggle("is-scrolled",scrollY>18);updateHeroScrollMotion()},{passive:true});
 document.addEventListener("keydown",e=>{if(e.target.matches("input,textarea,select"))return;if(e.key==="ArrowLeft")showHero(activeIndex-1,true);if(e.key==="ArrowRight")showHero(activeIndex+1,true)});
