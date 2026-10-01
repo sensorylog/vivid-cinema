@@ -207,7 +207,7 @@ function render(details) {
     : formatRuntime(details.runtime);
   const genreItems=details.genres||[];
   const genres=genreItems.map((genre)=>'<a href="discover.html?genre='+encodeURIComponent(genre.id)+'&type='+encodeURIComponent(media.media_type)+'">'+escapeHtml(genre.name)+'</a>').join("");
-  const cast=(details.credits?.cast||[]).slice(0,8);
+  const cast=(details.credits?.cast||[]).filter((person)=>person.name).slice(0,20);
   const videos=trailerVideos(details);
   const firstTrailer=videos[0];
   const recommendations=normalizeResults(details.recommendations?.results||[],media.media_type).slice(0,12);
