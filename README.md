@@ -1,5 +1,10 @@
 # Vivid Cinema
 
+## Phase D2 — Authenticated library synchronization
+The C5 local library now synchronizes with the signed-in user's Firestore space. On authenticated load, remote favorites, watch-later items and history are merged with the local device library, then the merged state is written back to the user's owner-scoped collections. Local changes also attempt to persist remotely while keeping the local UI responsive. Signed-out users continue using the device-local library.
+
+The sync is intentionally local-first and non-destructive: C5 data is merged by typed `movie:id` / `tv:id` identity. Firestore rules remain UID-scoped from D1. Runtime/browser and deployed-rule testing is still pending.
+
 ## Phase D1 — Account and authentication foundation
 Phase D begins with the account foundation. Email/password accounts now send verification email before access, password reset remains available, and Google sign-in is supported through Firebase Authentication. User records are initialized in Firestore. `firestore.rules` scopes account and personal-library paths to the authenticated owner only.
 
