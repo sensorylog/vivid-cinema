@@ -1,6 +1,8 @@
 import { tmdbApi } from "./tmdb.js";
 import { normalizeResults } from "./media.js";
 
+const settledResults = (requests) => requests.map((result) => result.status === "fulfilled" ? result.value : { results: [] });
+
 export async function getFeaturedMovies(limit = 8) {
   const data = await tmdbApi.trending("movie", "week");
   return normalizeResults(data.results || [], "movie").filter((item) => item.backdrop_path).slice(0, limit);
@@ -9,19 +11,29 @@ export async function getFeaturedMovies(limit = 8) {
 export async function getHomeSections() {
   const requests = await Promise.allSettled([
     tmdbApi.trending("all", "week"),
+    tmdbApi.nowPlayingMovies(),
     tmdbApi.popularMovies(),
     tmdbApi.topRatedMovies(),
+    tmdbApi.upcomingMovies(),
     tmdbApi.popularTv(),
-    tmdbApi.upcomingMovies()
+    tmdbApi.topRatedTv(),
+    tmdbApi.airingTodayTv(),
+    tmdbApi.discoverMovies({ with_genres: 16, sort_by: "popularity.desc" }),
+    tmdbApi.discoverTv({ with_original_language: "ko", sort_by: "popularity.desc" })
   ]);
-  const value = (index) => requests[index].status === "fulfilled" ? requests[index].value : { results: [] };
+  const [trending, nowPlaying, popularMovies, topRatedMovies, upcoming, popularTv, topRatedTv, airingToday, anime, kdrama] = settledResults(requests);
   return {
-    trending: normalizeResults(value(0).results || []),
-    popularMovies: normalizeResults(value(1).results || [], "movie"),
-    topRatedMovies: normalizeResults(value(2).results || [], "movie"),
-    popularTv: normalizeResults(value(3).results || [], "tv"),
-    upcoming: normalizeResults(value(4).results || [], "movie"),
-    failed: requests.some((result) => result.status === "rejected")
+    trending: normalizeResults(trending.results || []),
+    nowPlaying: normalizeResults(nowPlaying.results || [], "movie"),
+    popularMovies: normalizeResults(popularMovies.results || [], "movie"),
+    topRatedMovies: normalizeResults(topRatedMovies.results || [], "movie"),
+    upcoming: normalizeResults(upcoming.results || [], "movie"),
+    popularTv: normalizeResults(popularTv.results || [], "tv"),
+    topRatedTv: normalizeResults(topRatedTv.results || [], "tv"),
+    airingToday: normalizeResults(airingToday.results || [], "tv"),
+    anime: normalizeResults(anime.results || [], "movie"),
+    kdrama: normalizeResults(kdrama.results || [], "tv"),
+    hasPartialFailure: requests.some((result) => result.status === "rejected")
   };
 }
 
