@@ -5,7 +5,7 @@ import { getRoute } from "./routes.js";
 
 const $ = (id) => document.getElementById(id);
 const route = getRoute();
-const state = { type: route.params.get("type") === "tv" ? "tv" : route.params.get("type") === "movie" ? "movie" : "all", genre: route.params.get("genre") || "", year: route.params.get("year") || "", sort: route.params.get("sort") || "popularity.desc", rating: route.params.get("rating") || "", query: route.params.get("q") || "", page: 1, totalPages: 1, requestId: 0 };
+const state = { type: route.params.get("type") === "tv" ? "tv" : route.params.get("type") === "movie" ? "movie" : "all", genre: route.params.get("genre") || "", year: route.params.get("year") || "", sort: route.params.get("sort") || "popularity.desc", rating: route.params.get("rating") || "", region: route.params.get("region") || "", query: route.params.get("q") || "", page: 1, totalPages: 1, requestId: 0 };
 let genres = { movie: [], tv: [] };
 
 function currentGenres() {
@@ -112,7 +112,9 @@ async function fetchDiscovery() {
           sort_by: state.sort,
           with_genres: state.genre || undefined,
           primary_release_year: state.year || undefined,
-          "vote_average.gte": state.rating || undefined
+          "vote_average.gte": state.rating || undefined,
+          watch_region: state.region || undefined,
+          with_watch_monetization_types: state.region ? "flatrate|free|rent|buy" : undefined
         }),
         tmdbApi.discoverTv({
           page: state.page,
@@ -140,6 +142,8 @@ async function fetchDiscovery() {
           : { first_air_date_year: state.year || undefined })
       };
       params["vote_average.gte"] = state.rating || undefined;
+      params.watch_region = state.region || undefined;
+      params.with_watch_monetization_types = state.region ? "flatrate|free|rent|buy" : undefined;
       const data = state.type === "movie" ? await tmdbApi.discoverMovies(params) : await tmdbApi.discoverTv(params);
       items = normalizeResults(data.results || [], state.type);
       totalPages = Number(data.total_pages || 1);
@@ -163,6 +167,7 @@ function updateFromControls(resetPage = true) {
   state.year = $("year-filter").value;
   state.sort = $("sort-filter").value;
   state.rating = $("rating-filter").value;
+  state.region = $("region-filter").value;
   if (resetPage) state.page = 1;
   fetchDiscovery();
 }
@@ -172,6 +177,7 @@ function syncControlsFromUrl() {
   $("year-filter").value = state.year;
   $("sort-filter").value = state.sort;
   $("rating-filter").value = state.rating;
+  $("region-filter").value = state.region;
 }
 
 function setType(type) {
@@ -208,6 +214,7 @@ function wire() {
   $("year-filter").addEventListener("change", () => updateFromControls());
   $("sort-filter").addEventListener("change", () => updateFromControls());
   $("rating-filter").addEventListener("change", () => updateFromControls());
+  $("region-filter").addEventListener("change", () => updateFromControls());
   $("reset-filters").addEventListener("click", resetFilters);
 
   $("prev-page").addEventListener("click", () => {
