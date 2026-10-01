@@ -149,3 +149,23 @@ E2 adds small production-facing safeguards without expanding the product surface
 
 ### QA status
 This phase still does not claim browser/device execution. The remaining launch gate is real deployment testing of movie playback, TV episode playback, authentication, library sync, PWA lifecycle, mobile layout, and third-party player behavior.
+
+
+## Phase E3 — security hardening
+
+E3 strengthens the Firebase-backed production boundary without introducing paid infrastructure or changing playback architecture.
+
+### Included
+- Firebase Hosting security headers: HSTS, MIME sniffing protection, strict-origin referrer policy, permissions policy and same-origin framing protection
+- Version-controlled Firestore rules deployment through `firebase.json`
+- Owner-only Firestore access remains enforced for user data
+- Firestore profile writes are restricted to the known profile fields and expected preference types
+- Favorites, Watch Later and History writes are restricted to typed `movie:<id>` / `tv:<id>` document IDs and bounded media fields
+- Unknown Firestore paths remain denied
+- Added `/.well-known/security.txt` for responsible security reporting
+
+### Security notes
+Firebase's client-side configuration values are not treated as secrets; authorization is enforced by Firebase Authentication and Firestore Security Rules. Firebase documents owner-scoped rules and recommends testing rules with the Rules Simulator or Local Emulator Suite before production deployment.
+
+### QA gate
+The rules and headers still require deployment-level verification. Test authenticated owner access, cross-user access denial, malformed library writes, profile-field restrictions, authentication flows, and production response headers before calling the security work fully verified.
