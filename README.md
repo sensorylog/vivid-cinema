@@ -1,5 +1,20 @@
 # Vivid Cinema
 
+## Phase D3 — Account and viewing preferences
+The account surface now provides a dedicated premium profile experience with:
+- display-name editing
+- sign-in method and email-verification status
+- authenticated Firestore profile persistence
+- provider-region preference shared with title availability discovery
+- trailer autoplay preference
+- reduced-motion preference
+- local library counts for Favorites, Watch Later and History
+- reliable auth navigation event handling
+
+Preferences are stored under the authenticated user's `users/{uid}` document and mirrored locally where they affect immediate browser behavior. Account data remains owner-scoped by the D1 Firestore rules.
+
+The D2 local-first library synchronization remains unchanged. Runtime/browser QA and deployed Firestore-rule verification are still pending.
+
 ## Phase D2 — Authenticated library synchronization
 The C5 local library now synchronizes with the signed-in user's Firestore space. On authenticated load, remote favorites, watch-later items and history are merged with the local device library, then the merged state is written back to the user's owner-scoped collections. Local changes also attempt to persist remotely while keeping the local UI responsive. Signed-out users continue using the device-local library.
 
@@ -49,7 +64,7 @@ Premium landing page, signature swipeable trailer hero, discovery rails and feat
 Shared configuration, TMDB client/cache, content orchestration, app shell, temporary library adapter, runtime readiness and design-system primitives.
 
 ## Phase D — Personal app + PWA
-Firebase Auth, verification/reset, optional Google sign-in, Firestore-synced library, install/offline shell.
+Firebase Auth, verification/reset, Firestore-synced library, install/offline shell.
 
 ## Phase E — Launch
 Performance, accessibility, security, legal, QA and production hardening.
