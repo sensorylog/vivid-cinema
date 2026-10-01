@@ -107,7 +107,32 @@ function prefersHeroAutoplay(){
   return true;
 }
 
-async function loadHeroVideo(item){
+async function getHeroTrailer(item){
+  try{
+    const data=item.media_type==="tv"
+      ?await tmdbApi.tvVideos(item.id)
+      :await tmdbApi.movieVideos(item.id);
+    const list=Array.isArray(data?.results)
+      ?data.results
+      :(Array.isArray(data?.videos?.results)?data.videos.results:[]);
+    return list
+      .filter(v=>v&&v.site==="YouTube"&&v.key)
+      .sort((a,b)=>{
+        const score=v=>
+          (v.type==="Trailer"?1000:0)+
+          (v.official===true?100:0)+
+          (v.type==="Teaser"?20:0)+
+          (v.type==="Clip"?-100:0)+
+          (v.type==="Featurette"?-150:0);
+        return score(b)-score(a);
+      })[0]||null;
+  }catch(error){
+    console.warn("Hero trailer metadata failed:",item.media_type,item.id,error);
+    return null;
+  }
+}
+
+async function loadHeroVideo(item,trailerOverride=null){
  const host=$("hero-video"),fallback=$("hero-fallback");
  const token=++heroPlayerToken;
  destroyHeroPlayer();
@@ -117,45 +142,20 @@ async function loadHeroVideo(item){
  if(!prefersHeroAutoplay())return false;
 
  try{
-   // TMDB's video endpoint is authoritative for the trailer metadata.
-   // Request English + language-neutral videos so a title is not rejected
-   // merely because its YouTube entry has no en-US language tag.
-   const data=item.media_type==="tv"
-     ?await tmdbApi.tvVideos(item.id)
-     :await tmdbApi.movieVideos(item.id);
+   const trailer=trailerOverride||await getHeroTrailer(item);
    if(token!==heroPlayerToken)return false;
-
-   const list=Array.isArray(data?.results)
-     ?data.results
-     :(Array.isArray(data?.videos?.results)?data.videos.results:[]);
-   const trailer=list
-     .filter(v=>v&&v.site==="YouTube"&&v.key)
-     .sort((a,b)=>{
-       const score=v=>
-         (v.type==="Trailer"?100:0)+
-         (v.official!==false?20:0)+
-         (v.type==="Teaser"?10:0)+
-         (v.type==="Clip"?-20:0);
-       return score(b)-score(a);
-     })[0];
-
    if(!trailer?.key){
      console.warn("Hero trailer: no YouTube trailer for",item.media_type,item.id);
      return false;
    }
 
-   // Use YouTube's native embed autoplay path here instead of constructing an
-   // IFrame API player and then trying to bind the API to that same iframe.
-   // This is the documented, simplest autoplay path.
    const params=new URLSearchParams({
      autoplay:"1",
      mute:"1",
      controls:"0",
      playsinline:"1",
      rel:"0",
-     iv_load_policy:"3",
-     enablejsapi:"1",
-     origin:location.origin
+     iv_load_policy:"3"
    });
    const iframe=document.createElement("iframe");
    iframe.className="vivid-hero-youtube";
@@ -165,17 +165,15 @@ async function loadHeroVideo(item){
    iframe.setAttribute("allowfullscreen","");
    iframe.setAttribute("referrerpolicy","strict-origin-when-cross-origin");
    iframe.loading="eager";
-   iframe.style.cssText="position:absolute;inset:0;width:100%;height:100%;border:0;pointer-events:none";
+   iframe.style.cssText="position:absolute;inset:0;width:100%;height:100%;display:block;border:0;pointer-events:none";
    host.appendChild(iframe);
 
-   // The embed itself owns autoplay. Do not wait for the IFrame API or a
-   // PLAYING event before revealing it; either can race with page lifecycle.
    if(token!==heroPlayerToken)return false;
+   host.dataset.videoKey=trailer.key;
    host.classList.add("is-ready");
    fallback.classList.remove("is-visible");
 
-   // Bind the API only as an optional enhancement for the pause/sound buttons.
-   // Playback must never depend on this secondary binding succeeding.
+   // API control is an enhancement only. The iframe above owns playback.
    try{
      await loadYouTubeApi();
      if(token!==heroPlayerToken)return true;
@@ -183,7 +181,6 @@ async function loadHeroVideo(item){
    }catch(error){
      console.warn("Hero controls API unavailable; native embed remains active:",error);
    }
-
    return true;
  }catch(error){
    if(token===heroPlayerToken){
@@ -229,12 +226,35 @@ function renderFeatureStrip(){
 
 async function showHero(index,userAction=false){
  if(!featured.length)return;
- activeIndex=(index+featured.length)%featured.length;
- const item=featured[activeIndex];
- setHeroText(item);renderFeatureStrip();
- const activeCard=document.querySelector(".vivid-feature-card.is-active"); if(activeCard){const track=$("feature-track"); const left=activeCard.offsetLeft-Math.max(0,(track.clientWidth-activeCard.offsetWidth)/2); track.scrollTo({left:Math.max(0,left),behavior:userAction?"smooth":"auto"});}
  clearTimeout(heroTimer);
- const playing=await loadHeroVideo(item);
+ const start=(index+featured.length)%featured.length;
+ let selectedIndex=start;
+ let trailer=null;
+
+ // Do not leave the hero stuck on artwork simply because the first trending
+ // result has no YouTube video. Probe the featured set and choose the first
+ // title with a real TMDB YouTube trailer.
+ for(let offset=0;offset<featured.length;offset++){
+   const candidateIndex=(start+offset)%featured.length;
+   const candidate=featured[candidateIndex];
+   const candidateTrailer=await getHeroTrailer(candidate);
+   if(candidateTrailer?.key){
+     selectedIndex=candidateIndex;
+     trailer=candidateTrailer;
+     break;
+   }
+ }
+ activeIndex=selectedIndex;
+ const item=featured[activeIndex];
+ setHeroText(item);
+ renderFeatureStrip();
+ const activeCard=document.querySelector(".vivid-feature-card.is-active");
+ if(activeCard){
+   const track=$("feature-track");
+   const left=activeCard.offsetLeft-Math.max(0,(track.clientWidth-activeCard.offsetWidth)/2);
+   track.scrollTo({left:Math.max(0,left),behavior:userAction?"smooth":"auto"});
+ }
+ const playing=await loadHeroVideo(item,trailer);
  if(playing&&heroPlaying&&!userAction)heroTimer=setTimeout(()=>showHero(activeIndex+1),18000);
 }
 
