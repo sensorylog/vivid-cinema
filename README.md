@@ -2,6 +2,9 @@
 
 Vivid Cinema is being rebuilt as a premium cinematic web app and installable PWA.
 
+## Phase A3 — App shell architecture
+The shell now owns page identity, responsive viewport state and online/offline state. Route construction and query parsing live in `scripts/routes.js`, while safe-area and shell readiness primitives live in `styles/vivid-shell.css`. This is deliberately framework-neutral so the legacy site can migrate incrementally.
+
 ## Phase A2 — Design system
 The A2 layer establishes reusable primitives before the final cinematic UI:
 - typography hierarchy and system-font strategy
