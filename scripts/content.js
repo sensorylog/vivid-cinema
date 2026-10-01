@@ -7,16 +7,21 @@ export async function getFeaturedMovies(limit = 8) {
 }
 
 export async function getHomeSections() {
-  const [trending, popularMovies, topRatedMovies, popularTv, upcoming] = await Promise.all([
-    tmdbApi.trending("all", "week"), tmdbApi.popularMovies(), tmdbApi.topRatedMovies(),
-    tmdbApi.popularTv(), tmdbApi.upcomingMovies()
+  const requests = await Promise.allSettled([
+    tmdbApi.trending("all", "week"),
+    tmdbApi.popularMovies(),
+    tmdbApi.topRatedMovies(),
+    tmdbApi.popularTv(),
+    tmdbApi.upcomingMovies()
   ]);
+  const value = (index) => requests[index].status === "fulfilled" ? requests[index].value : { results: [] };
   return {
-    trending: normalizeResults(trending.results || []),
-    popularMovies: normalizeResults(popularMovies.results || [], "movie"),
-    topRatedMovies: normalizeResults(topRatedMovies.results || [], "movie"),
-    popularTv: normalizeResults(popularTv.results || [], "tv"),
-    upcoming: normalizeResults(upcoming.results || [], "movie")
+    trending: normalizeResults(value(0).results || []),
+    popularMovies: normalizeResults(value(1).results || [], "movie"),
+    topRatedMovies: normalizeResults(value(2).results || [], "movie"),
+    popularTv: normalizeResults(value(3).results || [], "tv"),
+    upcoming: normalizeResults(value(4).results || [], "movie"),
+    failed: requests.some((result) => result.status === "rejected")
   };
 }
 
