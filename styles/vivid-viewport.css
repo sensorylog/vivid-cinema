@@ -283,3 +283,39 @@ body.vivid-cinema-home,
     contain-intrinsic-size:1px 720px;
   }
 }
+
+
+/* Mobile/tablet search: collapsed icon expands on focus so typed text is
+   visible instead of being clipped by the 42px closed state. */
+@media (max-width:900px){
+  .vivid-nav-search{
+    flex:0 1 42px;
+    width:42px;
+    min-width:42px;
+    transition:width .2s ease, flex-basis .2s ease;
+  }
+  .vivid-nav-search:focus-within{
+    flex:1 1 220px;
+    width:220px;
+    min-width:150px;
+  }
+  .vivid-nav-search input,
+  .vivid-nav-search:focus-within input{
+    width:100%;
+    height:42px;
+    padding:0 14px 0 40px;
+    font-size:16px!important;
+    line-height:42px;
+    color:#fff;
+    -webkit-text-fill-color:#fff;
+    caret-color:#fff;
+  }
+}
+
+@media (max-width:640px){
+  .vivid-nav-search:focus-within{
+    flex:1 1 180px;
+    width:180px;
+    min-width:150px;
+  }
+}
