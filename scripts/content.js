@@ -42,12 +42,15 @@ export async function getFeaturedMovies(limit = 8) {
 
 async function loadHomeKey(key, page) {
   let lastError;
-  for (let attempt = 0; attempt < 2; attempt += 1) {
+  for (let attempt = 0; attempt < 3; attempt += 1) {
     try {
       return await HOME_LOADERS[key](page);
     } catch (error) {
       lastError = error;
-      if (attempt === 0) await new Promise((resolve) => setTimeout(resolve, 250));
+      const status = Number(error?.status || 0);
+      const retryable = !status || status === 408 || status === 429 || status >= 500;
+      if (!retryable || attempt === 2) break;
+      await new Promise((resolve) => setTimeout(resolve, 350 * (attempt + 1)));
     }
   }
   throw lastError;
