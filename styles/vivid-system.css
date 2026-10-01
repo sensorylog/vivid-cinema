@@ -1,0 +1,47 @@
+/* Vivid Cinema 2.0 — Phase A2 design system. */
+:root {
+  color-scheme: dark;
+  --vivid-font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --vivid-font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --vivid-text-xs:.75rem; --vivid-text-sm:.875rem; --vivid-text-md:1rem; --vivid-text-lg:1.125rem;
+  --vivid-text-xl:1.375rem; --vivid-text-2xl:clamp(1.75rem,3vw,2.5rem); --vivid-text-3xl:clamp(2.25rem,5vw,4.5rem);
+  --vivid-leading-tight:1.05; --vivid-leading-body:1.5;
+  --vivid-weight-regular:400; --vivid-weight-medium:500; --vivid-weight-semibold:600; --vivid-weight-bold:700;
+  --vivid-space-1:.25rem; --vivid-space-2:.5rem; --vivid-space-3:.75rem; --vivid-space-4:1rem; --vivid-space-5:1.25rem;
+  --vivid-space-6:1.5rem; --vivid-space-8:2rem; --vivid-space-10:2.5rem; --vivid-space-12:3rem; --vivid-space-16:4rem; --vivid-space-20:5rem;
+  --vivid-content-width:1440px; --vivid-reading-width:720px; --vivid-page-gutter:clamp(1rem,4vw,4rem);
+  --vivid-section-gap:clamp(2.5rem,6vw,5rem); --vivid-grid-gap:clamp(.75rem,1.5vw,1.5rem);
+  --vivid-bg:#08090b; --vivid-bg-elevated:#0d0f12; --vivid-surface-solid:#121419; --vivid-surface:rgba(18,20,25,.72);
+  --vivid-surface-soft:rgba(255,255,255,.055); --vivid-surface-strong:rgba(255,255,255,.09);
+  --vivid-text:#f5f7fa; --vivid-text-muted:#a8adb7; --vivid-text-subtle:#747a85; --vivid-accent:#fff;
+  --vivid-danger:#ff5f56; --vivid-success:#32d583; --vivid-border:rgba(255,255,255,.12); --vivid-border-strong:rgba(255,255,255,.2);
+  --vivid-radius-xs:8px; --vivid-radius-sm:12px; --vivid-radius-md:16px; --vivid-radius-lg:24px; --vivid-radius-xl:32px; --vivid-radius-pill:999px;
+  --vivid-shadow-sm:0 8px 24px rgba(0,0,0,.18); --vivid-shadow-md:0 18px 50px rgba(0,0,0,.28); --vivid-shadow-lg:0 28px 90px rgba(0,0,0,.42);
+  --vivid-glass-blur:22px; --vivid-ease-out:cubic-bezier(.2,.7,.2,1); --vivid-duration-fast:160ms; --vivid-duration-standard:280ms; --vivid-duration-slow:500ms;
+}
+.vivid-shell{width:min(100% - (var(--vivid-page-gutter)*2),var(--vivid-content-width));margin-inline:auto}
+.vivid-section{padding-block:var(--vivid-section-gap)}
+.vivid-stack{display:flex;flex-direction:column;gap:var(--vivid-space-4)}
+.vivid-row{display:flex;align-items:center;gap:var(--vivid-space-3)}
+.vivid-cluster{display:flex;flex-wrap:wrap;align-items:center;gap:var(--vivid-space-3)}
+.vivid-glass,.vivid-surface{border:1px solid var(--vivid-border);border-radius:var(--vivid-radius-md);background:var(--vivid-surface);box-shadow:var(--vivid-shadow-sm)}
+.vivid-glass{backdrop-filter:blur(var(--vivid-glass-blur)) saturate(120%);-webkit-backdrop-filter:blur(var(--vivid-glass-blur)) saturate(120%)}
+.vivid-glass--strong{background:var(--vivid-surface-strong);border-color:var(--vivid-border-strong)}
+.vivid-surface--solid{background:var(--vivid-surface-solid)} .vivid-surface--flat{box-shadow:none}
+.vivid-button,.vivid-icon-button,.vivid-input,.vivid-select{font:inherit;color:var(--vivid-text)}
+.vivid-button{min-height:44px;display:inline-flex;align-items:center;justify-content:center;gap:.5rem;padding:.7rem 1rem;border:1px solid transparent;border-radius:var(--vivid-radius-sm);cursor:pointer;font-weight:600;text-decoration:none;transition:transform var(--vivid-duration-fast) var(--vivid-ease-out),background var(--vivid-duration-fast) ease,border-color var(--vivid-duration-fast) ease,opacity var(--vivid-duration-fast) ease}
+.vivid-button:hover{transform:translateY(-1px)} .vivid-button:active{transform:translateY(0)} .vivid-button--primary{background:#fff;color:#08090b}
+.vivid-button--secondary{background:var(--vivid-surface-strong);border-color:var(--vivid-border)} .vivid-button--ghost{background:transparent;border-color:transparent}
+.vivid-button:disabled{cursor:not-allowed;opacity:.5;transform:none}
+.vivid-icon-button{width:44px;height:44px;display:inline-grid;place-items:center;padding:0;border:1px solid var(--vivid-border);border-radius:50%;background:var(--vivid-surface-soft);cursor:pointer;transition:background var(--vivid-duration-fast) ease,transform var(--vivid-duration-fast) var(--vivid-ease-out)}
+.vivid-icon-button:hover{transform:translateY(-1px);background:var(--vivid-surface-strong)}
+.vivid-input,.vivid-select{width:100%;min-height:46px;padding:.7rem .9rem;border:1px solid var(--vivid-border);border-radius:var(--vivid-radius-sm);background:rgba(255,255,255,.045);outline:0}
+.vivid-input::placeholder{color:var(--vivid-text-subtle)}
+.vivid-input:focus-visible,.vivid-select:focus-visible,.vivid-button:focus-visible,.vivid-icon-button:focus-visible,.vivid-link:focus-visible{outline:2px solid #fff;outline-offset:3px}
+.vivid-card{overflow:hidden;border:1px solid var(--vivid-border);border-radius:var(--vivid-radius-md);background:var(--vivid-surface-solid);box-shadow:var(--vivid-shadow-sm)}
+.vivid-card__media{aspect-ratio:2/3;background:var(--vivid-bg-elevated);overflow:hidden}.vivid-card__media>img{width:100%;height:100%;display:block;object-fit:cover}.vivid-card__body{padding:var(--vivid-space-4)}
+.vivid-pill{display:inline-flex;align-items:center;min-height:30px;padding-inline:.7rem;border:1px solid var(--vivid-border);border-radius:999px;background:var(--vivid-surface-soft);color:var(--vivid-text-muted);font-size:.875rem;font-weight:500}
+.vivid-skeleton{min-height:1rem;border-radius:8px;background:linear-gradient(90deg,rgba(255,255,255,.05),rgba(255,255,255,.1),rgba(255,255,255,.05));background-size:200% 100%;animation:vivid-shimmer 1.5s linear infinite}
+@keyframes vivid-shimmer{to{background-position:-200% 0}} .vivid-link{color:inherit;text-decoration:none}
+@media(max-width:767px){:root{--vivid-page-gutter:1rem;--vivid-section-gap:2.5rem}.vivid-button{min-height:46px}}
+@media(prefers-reduced-motion:reduce){.vivid-skeleton{animation:none}.vivid-button,.vivid-icon-button{transition:none}}
