@@ -25,7 +25,7 @@
           },
           {
             "key": "Permissions-Policy",
-            "value": "camera=(), microphone=(), geolocation=(), payment=(), autoplay=(self \"https://www.youtube.com\" \"https://www.youtube-nocookie.com\")"
+            "value": "camera=(), microphone=(), geolocation=(), payment=(), fullscreen=(self \"https://www.youtube.com\" \"https://www.youtube-nocookie.com\"), autoplay=(self \"https://www.youtube.com\" \"https://www.youtube-nocookie.com\" \"https://youtube.com\")"
           },
           {
             "key": "X-Frame-Options",
