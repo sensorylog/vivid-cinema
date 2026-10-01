@@ -16,7 +16,7 @@ export async function tmdb(path, params = {}, options = {}) {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), timeoutMs);
   try {
-    const response = await fetch(url, { signal: controller.signal });
+    const response = await fetch(url, { signal: controller.signal, cache: "no-store", headers: { Accept: "application/json" } });
     if (!response.ok) {
       const error = new Error("TMDB request failed: " + response.status);
       error.status = response.status;
