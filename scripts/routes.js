@@ -3,6 +3,7 @@ import { VIVID_CONFIG } from "./config.js";
 export const VIVID_ROUTES = Object.freeze({
   home: { path: VIVID_CONFIG.routes.home, page: "home" },
   title: { path: VIVID_CONFIG.routes.title, page: "title" },
+  watch: { path: VIVID_CONFIG.routes.watch, page: "watch" },
   discover: { path: VIVID_CONFIG.routes.discover, page: "discover" },
   library: { path: VIVID_CONFIG.routes.library, page: "library" },
   login: { path: VIVID_CONFIG.routes.login, page: "login" },
@@ -35,4 +36,13 @@ export function buildDiscoverUrl(params = {}) {
   });
   const suffix = query.toString();
   return VIVID_CONFIG.routes.discover + (suffix ? "?" + suffix : "");
+}
+
+export function buildWatchUrl(id, type = "movie", season = null, episode = null) {
+  const params = new URLSearchParams({ id: String(id), type });
+  if (type === "tv") {
+    if (season !== null && season !== undefined) params.set("season", String(season));
+    if (episode !== null && episode !== undefined) params.set("episode", String(episode));
+  }
+  return VIVID_CONFIG.routes.watch + "?" + params.toString();
 }
