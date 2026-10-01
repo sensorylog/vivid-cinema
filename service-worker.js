@@ -1,4 +1,4 @@
-const CACHE_NAME = "vivid-cinema-shell-v7";
+const CACHE_NAME = "vivid-cinema-shell-v8";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -105,7 +105,7 @@ async function networkFirst(request) {
   }
 }
 
-async function staleWhileRevalidate(request) {
+async function networkFirst(request) {\n  const controller = new AbortController();\n  const timeout = setTimeout(() => controller.abort(), 6000);\n  try {\n    const response = await fetch(request, { signal: controller.signal });\n    if (response.ok && response.type === "basic") {\n      const cache = await caches.open(CACHE_NAME);\n      await cache.put(request, response.clone());\n    }\n    return response;\n  } catch {\n    return (await caches.match(request)) || new Response("", { status: 504, statusText: "Offline" });\n  } finally {\n    clearTimeout(timeout);\n  }\n}\n\nasync function staleWhileRevalidate(request) {
   const cached = await caches.match(request);
   const refresh = fetch(request).then(async (response) => {
     if (response.ok && response.type === "basic") {
@@ -130,5 +130,5 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  event.respondWith(staleWhileRevalidate(request));
+  const isCodeOrStyle = /\\.(?:js|css|html)$/.test(url.pathname);\n  event.respondWith(isCodeOrStyle ? networkFirst(request) : staleWhileRevalidate(request));
 });
