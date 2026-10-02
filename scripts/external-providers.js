@@ -1,6 +1,7 @@
-// Explicit external-provider links for titles Vivid is authorized to link to.
-// Keep this list manually curated. Vivid does not fetch, proxy, generate, or transform
-// third-party file/download URLs.
+// Explicit external download-page links for titles Vivid is authorized to link to.
+// Keep this list manually curated. Vivid never fetches, proxies, generates, or transforms
+// third-party file/download URLs. Store the provider's stable public page, not a temporary
+// direct-file URL. The UI remains Vivid-branded; the external destination is opened directly.
 const EXTERNAL_PROVIDER_LINKS = Object.freeze({
   movie: Object.freeze({}),
   tv: Object.freeze({})
