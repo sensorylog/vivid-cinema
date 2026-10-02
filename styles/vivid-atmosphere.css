@@ -125,10 +125,10 @@ body.vivid-atmosphere::after{
 .vivid-ambient-art{
   position:fixed;
   inset:-8%;
-  z-index:-3;
+  z-index:0;
   pointer-events:none;
   overflow:hidden;
-  opacity:.48;
+  opacity:.72;
   filter:blur(34px) saturate(.72);
   transform:scale(1.08);
 }
@@ -142,7 +142,7 @@ body.vivid-atmosphere::after{
   transition:opacity 1.8s ease,transform 14s ease;
 }
 .vivid-ambient-art-layer.is-visible{
-  opacity:.13;
+  opacity:.22;
   transform:scale(1.09);
 }
 .vivid-ambient-art::after{
@@ -155,7 +155,7 @@ body.vivid-atmosphere::after{
 }
 @media(max-width:640px){
   .vivid-ambient-art{filter:blur(42px) saturate(.65);opacity:.42}
-  .vivid-ambient-art-layer.is-visible{opacity:.1}
+  .vivid-ambient-art-layer.is-visible{opacity:.16}
 }
 @media(prefers-reduced-motion:reduce){
   .vivid-ambient-art-layer{transition:none;transform:none}
