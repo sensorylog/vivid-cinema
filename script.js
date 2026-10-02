@@ -283,7 +283,6 @@ async function loadHome(){
  const primary=["trending","nowPlaying","popularMovies"];
  try{await loadSectionBatch(primary)}catch(error){console.warn("Vivid primary home load failed:",error)}
 
- const secondary=["topRatedMovies","popularTv","topRatedTv","airingToday","anime","kdrama","upcoming"];
  const loadSecondary=async()=>{
    // Keep secondary shelves from creating a seven-request burst. Each small
    // batch can paint before the next one starts, keeping scrolling responsive.
