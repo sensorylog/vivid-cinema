@@ -277,17 +277,20 @@ async function loadHome(){
  const ids=["trending-rail","now-playing-rail","movies-rail","top-rated-rail","tv-rail","top-tv-rail","airing-rail","anime-rail","kdrama-rail","upcoming-rail"];
  ids.forEach(id=>skeleton($(id)));
  renderContinueWatching();
- const batches=[
-   ["trending","nowPlaying","popularMovies"],
-   ["topRatedMovies","popularTv","topRatedTv"],
-   ["airingToday","anime","kdrama"],
-   ["upcoming"]
- ];
- for(const batch of batches){
-   try{await loadSectionBatch(batch)}catch(error){console.warn("Vivid home batch failed:",batch,error)}
- }
- if("requestIdleCallback" in window)requestIdleCallback(()=>void renderRecommendations(),{timeout:1200});
- else setTimeout(()=>void renderRecommendations(),500);
+
+ // The first viewport gets the smallest useful data set first. Secondary shelves
+ // still load automatically, but they never compete with the hero and first rows.
+ const primary=["trending","nowPlaying","popularMovies"];
+ try{await loadSectionBatch(primary)}catch(error){console.warn("Vivid primary home load failed:",error)}
+
+ const secondary=["topRatedMovies","popularTv","topRatedTv","airingToday","anime","kdrama","upcoming"];
+ const loadSecondary=()=>void loadSectionBatch(secondary).catch(error=>console.warn("Vivid secondary home load failed:",error));
+ if("requestIdleCallback" in window)requestIdleCallback(loadSecondary,{timeout:1800});
+ else window.setTimeout(loadSecondary,900);
+
+ const loadRecommendations=()=>void renderRecommendations();
+ if("requestIdleCallback" in window)requestIdleCallback(loadRecommendations,{timeout:2600});
+ else window.setTimeout(loadRecommendations,1800);
 }
 function showSearch(items){
  const panel=$("search-panel");if(!panel)return;
