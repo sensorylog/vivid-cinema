@@ -97,29 +97,7 @@ const mutationObserver=new MutationObserver(records=>{
 });
 mutationObserver.observe(document.body,{childList:true,subtree:true});
 
-(function setupSharedScrollMotion(){
-  if(reduceMotion)return;
-  let raf=0;
-  const update=()=>{
-    raf=0;
-    const vh=window.innerHeight||800;
-    document.querySelectorAll(".vivid-rail").forEach(rail=>{
-      const rect=rail.getBoundingClientRect();
-      if(rect.bottom<0||rect.top>vh)return;
-      const center=rect.top+rect.height*.5;
-      const delta=Math.max(-1,Math.min(1,(vh*.52-center)/(vh*.72)));
-      rail.style.setProperty("--vivid-rail-shift",(delta*3.5).toFixed(2)+"px");
-      const head=rail.closest(".vivid-rails")?.querySelector(".vivid-rail-head");
-      if(head)head.style.setProperty("--vivid-head-shift",(delta*1.8).toFixed(2)+"px");
-    });
-  };
-  const request=()=>{if(!raf)raf=requestAnimationFrame(update)};
-  window.addEventListener("scroll",request,{passive:true});
-  window.addEventListener("resize",request,{passive:true});
-  request();
-})();
-
-(function setupPageTransitions(){
+function setupPageTransitions(){
   if(reduceMotion)return;
   const layer=document.createElement("div");
   layer.className="vivid-page-transition";
