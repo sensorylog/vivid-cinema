@@ -53,6 +53,12 @@ document.addEventListener("click", event => {
     return;
   }
 
+  const discoveryCard = event.target.closest?.(".vivid-discovery-card,.vivid-search-result");
+  if (discoveryCard) {
+    track("content_click", { content_title: discoveryCard.querySelector("strong,.vivid-card-title")?.textContent?.trim() || undefined, destination: discoveryCard.getAttribute("href") || undefined });
+    return;
+  }
+
   const loadMore = event.target.closest?.("[data-load-section],#load-more,#collection-more");
   if (loadMore) {
     track("load_more", {
