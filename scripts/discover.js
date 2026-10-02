@@ -20,6 +20,12 @@ const state = {
 };
 let genres = { movie: [], tv: [] };
 let providers = { movie: [], tv: [] };
+const FEATURED_PROVIDER_IDS = [8, 119, 337, 1899, 350, 15, 531, 386, 283, 11];
+const FEATURED_PROVIDER_NAMES = new Map([
+  [8, "Netflix"], [119, "Prime Video"], [337, "Disney+"], [1899, "Max"],
+  [350, "Apple TV+"], [15, "Hulu"], [531, "Paramount+"], [386, "Peacock"],
+  [283, "Crunchyroll"], [11, "MUBI"]
+]);
 
 function currentGenres() {
   if (state.type === "tv") return genres.tv;
@@ -71,13 +77,30 @@ function syncUrl() {
   history.replaceState(null, "", params.toString() ? "discover.html?" + params : "discover.html");
 }
 
+function providerPool() {
+  const source = state.type === "tv" ? providers.tv : state.type === "movie" ? providers.movie : [...providers.movie, ...providers.tv];
+  const unique = source.filter((provider, index, list) =>
+    list.findIndex((item) => item.provider_id === provider.provider_id) === index
+  );
+  return FEATURED_PROVIDER_IDS
+    .map((id) => unique.find((provider) => Number(provider.provider_id) === id))
+    .filter(Boolean)
+    .map((provider) => ({ ...provider, provider_name: FEATURED_PROVIDER_NAMES.get(Number(provider.provider_id)) || provider.provider_name }));
+}
+
 function populateProviders() {
-  const select = $("provider-filter");
-  const available = state.type === "tv" ? providers.tv : state.type === "movie" ? providers.movie : [...providers.movie, ...providers.tv].filter((provider, index, list) => list.findIndex((item) => item.provider_id === provider.provider_id) === index);
-  const selected = state.provider;
-  select.innerHTML = '<option value="">All services</option>' + available.sort((a,b) => String(a.provider_name).localeCompare(String(b.provider_name))).map((provider) => '<option value="' + provider.provider_id + '">' + escapeHtml(provider.provider_name) + "</option>").join("");
-  select.value = selected && available.some((provider) => String(provider.provider_id) === String(selected)) ? selected : "";
-  if (select.value !== selected) state.provider = "";
+  const strip = $("provider-filter");
+  const available = providerPool();
+  const selected = String(state.provider || "");
+  strip.innerHTML = '<button class="vivid-provider-chip' + (!selected ? ' is-active' : '') + '" data-provider="" type="button"><span class="vivid-provider-all-icon"><i class="bi bi-grid-3x3-gap" aria-hidden="true"></i></span><span>All services</span></button>' +
+    available.map((provider) => {
+      const id = String(provider.provider_id);
+      const logo = provider.logo_path ? getImageUrl(provider.logo_path, "w92") : "fav-icon.png";
+      return '<button class="vivid-provider-chip' + (id === selected ? ' is-active' : '') + '" data-provider="' + escapeHtml(id) + '" type="button" aria-pressed="' + (id === selected) + '" title="' + escapeHtml(provider.provider_name) + '">' +
+        '<span class="vivid-provider-logo"><img loading="lazy" decoding="async" src="' + escapeHtml(logo) + '" alt="" aria-hidden="true"></span>' +
+        '<span class="vivid-provider-name">' + escapeHtml(provider.provider_name) + '</span></button>';
+    }).join("");
+  if (selected && !available.some((provider) => String(provider.provider_id) === selected)) state.provider = "";
 }
 
 async function loadProviders() {
@@ -217,7 +240,7 @@ async function updateFromControls() {
   state.sort = $("sort-filter").value;
   state.rating = $("rating-filter").value;
   state.region = $("region-filter").value;
-  state.provider = $("provider-filter").value;
+  state.provider = state.provider;
   state.page = 1;
   if (state.region !== previousRegion) await loadProviders();
   if (state.provider && !state.region) {
@@ -236,7 +259,7 @@ function syncControlsFromUrl() {
   $("sort-filter").value = state.sort;
   $("rating-filter").value = state.rating;
   $("region-filter").value = state.region;
-  $("provider-filter").value = state.provider;
+  populateProviders();
 }
 
 function setType(type) {
@@ -271,7 +294,7 @@ function resetFilters() {
   $("sort-filter").value = state.sort;
   $("rating-filter").value = "";
   $("region-filter").value = "";
-  $("provider-filter").value = "";
+  state.provider = "";
   populateGenres();
   fetchDiscovery();
 }
@@ -280,8 +303,16 @@ function wire() {
   document.querySelectorAll("[data-type]").forEach((button) =>
     button.addEventListener("click", () => setType(button.dataset.type))
   );
-  ["genre-filter", "year-filter", "sort-filter", "rating-filter", "region-filter", "provider-filter"]
+  ["genre-filter", "year-filter", "sort-filter", "rating-filter", "region-filter"]
     .forEach((id) => $(id).addEventListener("change", updateFromControls));
+  $("provider-filter").addEventListener("click", (event) => {
+    const button = event.target.closest("[data-provider]");
+    if (!button) return;
+    state.provider = button.dataset.provider || "";
+    state.page = 1;
+    populateProviders();
+    fetchDiscovery();
+  });
   $("reset-filters").addEventListener("click", resetFilters);
 
   $("prev-page").addEventListener("click", () => {
