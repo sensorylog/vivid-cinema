@@ -219,21 +219,7 @@ body.vivid-atmosphere::after{
   .vivid-atmosphere .vivid-card:hover .vivid-card-info{
     transform:translateY(-1px);
   }
-  .vivid-atmosphere .vivid-rail .vivid-card{
-    transform:translate3d(0,var(--vivid-rail-shift,0px),0);
-  }
-  .vivid-atmosphere .vivid-rail .vivid-card:hover,
-  .vivid-atmosphere .vivid-rail .vivid-card:focus-visible{
-    transform:translate3d(0,calc(var(--vivid-rail-shift,0px) - 14px),0) scale(1.12);
-  }
-}
-.vivid-atmosphere .vivid-feature-card{
-  box-shadow:0 18px 55px rgba(0,0,0,.2),inset 0 1px rgba(255,255,255,.06);
-}
-.vivid-atmosphere .vivid-feature-card::after{
-  transition:opacity .35s ease,transform .5s ease;
-}
-.vivid-atmosphere .vivid-feature-card:hover::after,
+  .vivid-atmosphere .vivid-feature-card:hover::after,
 .vivid-atmosphere .vivid-feature-card.is-active::after{
   opacity:1;
   transform:scale(1.03);
