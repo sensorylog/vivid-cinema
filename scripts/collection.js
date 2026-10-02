@@ -112,6 +112,6 @@ async function init(){
   $("collection-title").textContent=meta.label;
   $("collection-description").textContent=meta.description;
   document.title=meta.label+" · Vivid Cinema";
-  populateYears();wire();await loadGenres();await loadPage(true);
+  populateYears();wire();await loadPage(true);void loadGenres(); 
 }
 init();
