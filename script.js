@@ -102,7 +102,19 @@ async function loadHeroVideo(item){
      videos.find(v=>v?.site==="YouTube"&&v?.key&&v.type==="Teaser")||
      videos.find(v=>v?.site==="YouTube"&&v?.key);
    if(!trailer?.key){iframe.removeAttribute("src");iframe.dataset.videoKey="";return false;}
-   iframe.onload=()=>{if(token!==heroLoadToken)return;iframe.classList.add("is-ready");fallback.classList.remove("is-visible");if(!heroPlaying)sendHeroPlayerCommand("pauseVideo");};
+   iframe.onload=()=>{
+     if(token!==heroLoadToken)return;
+     iframe.classList.add("is-ready");
+     fallback.classList.remove("is-visible");
+     if(!heroPlaying){sendHeroPlayerCommand("pauseVideo");return;}
+     // Some browsers/YouTube player loads ignore the first autoplay attempt even
+     // when the embed is muted. Retry through the documented IFrame API command
+     // channel without rebuilding the iframe or changing the current title.
+     [250,800,1800].forEach(delay=>setTimeout(()=>{
+       if(token!==heroLoadToken||!heroPlaying)return;
+       sendHeroPlayerCommand("playVideo");
+     },delay));
+   };
    iframe.onerror=()=>{if(token!==heroLoadToken)return;iframe.classList.remove("is-ready");fallback.classList.add("is-visible");};
    iframe.src=youtubeUrl(trailer.key,heroMuted);
    iframe.dataset.videoKey=trailer.key;
