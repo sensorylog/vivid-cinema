@@ -8,11 +8,6 @@ async function initAnalytics() {
     if (!(await isSupported())) return null;
     analytics = getAnalytics(app);
     setAnalyticsCollectionEnabled(analytics, true);
-    logEvent(analytics, "page_view", {
-      page_location: location.href,
-      page_title: document.title,
-      page_path: location.pathname
-    });
     return analytics;
   } catch (error) {
     console.warn("Vivid Analytics unavailable:", error);
