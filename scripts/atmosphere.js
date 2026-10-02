@@ -97,7 +97,7 @@ const mutationObserver=new MutationObserver(records=>{
   }
 });
 mutationObserver.observe(document.body,{childList:true,subtree:true});
-/* Phase 2 rail physics: tiny scroll-linked lift, never enough to distract. */
+/* Shared scroll motion — one RAF for rails and headings. */
 function setupCardAtmosphere(root=document){
   root.querySelectorAll?.(".vivid-card").forEach(card=>{
     const img=card.querySelector(".vivid-card-media img");
@@ -105,27 +105,8 @@ function setupCardAtmosphere(root=document){
   });
 }
 setupCardAtmosphere();
-let railRaf=0;
-function updateRailPhysics(){
-  railRaf=0;
-  if(reduceMotion)return;
-  const vh=window.innerHeight||800;
-  document.querySelectorAll(".vivid-rail").forEach(rail=>{
-    const rect=rail.getBoundingClientRect();
-    if(rect.bottom<0||rect.top>vh) return;
-    const center=rect.top+rect.height/2;
-    const delta=Math.max(-1,Math.min(1,(vh*.52-center)/(vh*.7)));
-    rail.style.setProperty("--vivid-rail-shift",(delta*3).toFixed(2)+"px");
-  });
-}
-window.addEventListener("scroll",()=>{
-  if(!railRaf)railRaf=requestAnimationFrame(updateRailPhysics);
-},{passive:true});
-updateRailPhysics();
 
-
-/* Phase 4 — interaction choreography. One RAF drives the shared scroll motion. */
-(function setupPhase4Motion(){
+(function setupSharedScrollMotion(){
   if(reduceMotion)return;
   let raf=0;
   const update=()=>{
@@ -137,7 +118,7 @@ updateRailPhysics();
       const center=rect.top+rect.height*.5;
       const delta=Math.max(-1,Math.min(1,(vh*.52-center)/(vh*.72)));
       rail.style.setProperty("--vivid-rail-shift",(delta*3.5).toFixed(2)+"px");
-      const head=rail.querySelector(".vivid-rail-head");
+      const head=rail.closest(".vivid-rails")?.querySelector(".vivid-rail-head");
       if(head)head.style.setProperty("--vivid-head-shift",(delta*1.8).toFixed(2)+"px");
     });
   };
