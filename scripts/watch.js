@@ -64,7 +64,7 @@ function renderShell(params){
    start?.blur();
    close?.focus();
    loaded=false;
-   if(player&&!player.src) player.src=embedUrl;
+   if(player) player.src=embedUrl;
    timeout=window.setTimeout(()=>{const status=$("player-status");if(!loaded&&status){status.textContent="VidAPI is taking longer than expected.";status.classList.add("is-warning")}},9000);
  };
  const closePlayer=()=>{
@@ -80,7 +80,7 @@ function renderShell(params){
  close?.addEventListener("click",closePlayer);
  modal?.addEventListener("click",(event)=>{if(event.target===modal)closePlayer()});
  document.addEventListener("keydown",(event)=>{if(event.key==="Escape"&&modal?.classList.contains("is-open"))closePlayer()});
- player?.addEventListener("load",()=>{loaded=true;window.clearTimeout(timeout);$("player-status")?.remove()},{once:true});
+ player?.addEventListener("load",()=>{loaded=true;window.clearTimeout(timeout);$("player-status")?.remove()});
 }
 function hydrateWatchDetails(params){
  if(!media)return;
