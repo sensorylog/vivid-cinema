@@ -17,6 +17,12 @@ const errorEl=document.getElementById("error-msg")||document.getElementById("log
 const resetLink=document.getElementById("reset-password");
 const googleButtons=document.querySelectorAll("[data-google-auth]");
 
+try {
+  const rememberedEmail=sessionStorage.getItem("vivid:signup-email");
+  const emailInput=document.getElementById("email");
+  if(rememberedEmail && emailInput){emailInput.value=rememberedEmail;sessionStorage.removeItem("vivid:signup-email");}
+} catch {}
+
 function showMessage(text,good=false){if(!errorEl)return;errorEl.textContent=text;errorEl.style.color=good?"#7ee787":"#ff6b6b";}
 function friendlyError(error){
   const messages={"auth/email-already-in-use":"An account already exists for this email.","auth/invalid-email":"Please enter a valid email address.","auth/weak-password":"Choose a stronger password.","auth/invalid-credential":"Email or password is incorrect.","auth/user-disabled":"This account has been disabled.","auth/too-many-requests":"Too many attempts. Please wait and try again.","auth/popup-closed-by-user":"Google sign-in was cancelled.","auth/popup-blocked":"Your browser blocked the sign-in window. Please allow popups and try again.","auth/account-exists-with-different-credential":"An account already exists with a different sign-in method."};
