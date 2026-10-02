@@ -1,0 +1,124 @@
+/* Vivid Cinema — ambient visual system.
+   Adds atmosphere and motion without changing content layout or player architecture. */
+:root{
+  --vivid-ink:#06070a;
+  --vivid-line:rgba(255,255,255,.09);
+  --vivid-atmosphere-x:50%;
+  --vivid-atmosphere-y:28%;
+}
+body.vivid-atmosphere{
+  position:relative;
+  isolation:isolate;
+  background:var(--vivid-ink);
+}
+body.vivid-atmosphere::before{
+  content:"";
+  position:fixed;
+  inset:-18%;
+  z-index:-2;
+  pointer-events:none;
+  background:
+    radial-gradient(circle at 18% 18%,rgba(255,255,255,.055),transparent 28%),
+    radial-gradient(circle at 82% 32%,rgba(120,140,170,.035),transparent 30%),
+    radial-gradient(circle at 52% 88%,rgba(255,255,255,.025),transparent 34%);
+  filter:blur(26px);
+  opacity:.9;
+  animation:vividAmbientDrift 24s ease-in-out infinite alternate;
+}
+body.vivid-atmosphere::after{
+  content:"";
+  position:fixed;
+  inset:0;
+  z-index:20;
+  pointer-events:none;
+  opacity:.7;
+  background:radial-gradient(520px circle at var(--vivid-atmosphere-x) var(--vivid-atmosphere-y),rgba(255,255,255,.045),transparent 68%);
+  mix-blend-mode:screen;
+}
+@keyframes vividAmbientDrift{
+  0%{transform:translate3d(-1.5%,0,0) scale(1)}
+  50%{transform:translate3d(1%,1.5%,0) scale(1.035)}
+  100%{transform:translate3d(-.5%,-1%,0) scale(1.02)}
+}
+.vivid-atmosphere .vivid-topbar,
+.vivid-atmosphere .vivid-discovery-nav,
+.vivid-atmosphere .vivid-title-nav,
+.vivid-atmosphere .vivid-library-nav,
+.vivid-atmosphere .vivid-watch-nav{
+  transition:background .35s ease,border-color .35s ease,box-shadow .35s ease,backdrop-filter .35s ease;
+}
+.vivid-atmosphere .vivid-card,
+.vivid-atmosphere .vivid-feature-card,
+.vivid-atmosphere .landing-poster,
+.vivid-atmosphere .account-card,
+.vivid-atmosphere .vivid-filter-panel,
+.vivid-atmosphere .vivid-collection-toolbar,
+.vivid-atmosphere .vivid-library-tabs{
+  box-shadow:0 18px 55px rgba(0,0,0,.16),inset 0 1px rgba(255,255,255,.035);
+}
+.vivid-atmosphere .vivid-card,
+.vivid-atmosphere .vivid-feature-card,
+.vivid-atmosphere .landing-poster{
+  transition:transform .32s cubic-bezier(.2,.8,.2,1),box-shadow .32s ease,border-color .32s ease,filter .32s ease;
+}
+.vivid-atmosphere .vivid-card::before,
+.vivid-atmosphere .vivid-feature-card::before,
+.vivid-atmosphere .landing-poster::before{
+  content:"";
+  position:absolute;
+  z-index:4;
+  inset:0;
+  pointer-events:none;
+  opacity:0;
+  background:linear-gradient(112deg,transparent 30%,rgba(255,255,255,.14) 48%,transparent 65%);
+  transform:translateX(-115%);
+}
+@media (hover:hover) and (pointer:fine){
+  .vivid-atmosphere .vivid-card:hover::before,
+  .vivid-atmosphere .vivid-feature-card:hover::before,
+  .vivid-atmosphere .landing-poster:hover::before{
+    opacity:1;
+    animation:vividSheen .7s ease forwards;
+  }
+}
+@keyframes vividSheen{to{transform:translateX(115%)}}
+.vivid-atmosphere .vivid-rail-head h2,
+.vivid-atmosphere .vivid-section-heading h2,
+.vivid-atmosphere .landing-section h2{
+  text-shadow:0 2px 24px rgba(0,0,0,.38);
+}
+.vivid-reveal{
+  opacity:0;
+  transform:translate3d(0,18px,0);
+  transition:opacity .65s ease,transform .65s cubic-bezier(.2,.8,.2,1);
+}
+.vivid-reveal.is-visible{
+  opacity:1;
+  transform:none;
+}
+.vivid-reveal:nth-child(2){transition-delay:45ms}
+.vivid-reveal:nth-child(3){transition-delay:90ms}
+.vivid-reveal:nth-child(4){transition-delay:135ms}
+.vivid-reveal:nth-child(5){transition-delay:180ms}
+.vivid-reveal:nth-child(6){transition-delay:225ms}
+.vivid-atmosphere .vivid-button,
+.vivid-atmosphere button,
+.vivid-atmosphere a{
+  -webkit-tap-highlight-color:transparent;
+}
+.vivid-atmosphere .vivid-button:active,
+.vivid-atmosphere .landing-submit:active{
+  transform:translateY(1px) scale(.985);
+}
+@media(max-width:640px){
+  body.vivid-atmosphere::after{opacity:.45}
+  body.vivid-atmosphere::before{filter:blur(32px);animation-duration:32s}
+}
+@media(prefers-reduced-motion:reduce){
+  body.vivid-atmosphere::before{animation:none}
+  body.vivid-atmosphere::after{display:none}
+  .vivid-reveal{opacity:1;transform:none;transition:none}
+  .vivid-atmosphere .vivid-card::before,
+  .vivid-atmosphere .vivid-feature-card::before,
+  .vivid-atmosphere .landing-poster::before{display:none}
+}
