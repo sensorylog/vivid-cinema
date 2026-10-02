@@ -14,7 +14,6 @@ if(!reduceMotion && window.matchMedia("(hover: hover) and (pointer: fine)").matc
 }
 
 const revealSelector=[
-  ".vivid-rails",
   ".vivid-discovery-intro",
   ".vivid-discovery-results",
   ".vivid-collection-intro",
@@ -143,7 +142,7 @@ function setupPageTransitions(){
       content.style.opacity=String(1-Math.min(.16,progress*.16));
     }
     if(track && window.innerWidth>640){
-      track.style.setProperty("--hero-scroll-shift",(progress*10).toFixed(2)+"px");
+      track.style.setProperty("--hero-scroll-shift","0px");
     }
   };
   const request=()=>{if(!raf)raf=requestAnimationFrame(update)};
