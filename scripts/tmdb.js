@@ -64,7 +64,8 @@ export const tmdbApi = Object.freeze({
   movieSimilar: (id, page = 1) => tmdb("movie/" + encodeURIComponent(id) + "/similar", { page }),
   tvSimilar: (id, page = 1) => tmdb("tv/" + encodeURIComponent(id) + "/similar", { page }),
   movieRecommendations: (id, page = 1) => tmdb("movie/" + encodeURIComponent(id) + "/recommendations", { page }),
-  tvRecommendations: (id, page = 1) => tmdb("tv/" + encodeURIComponent(id) + "/recommendations", { page })
+  tvRecommendations: (id, page = 1) => tmdb("tv/" + encodeURIComponent(id) + "/recommendations", { page }),
+  personDetails: (id) => tmdb("person/" + encodeURIComponent(id), { append_to_response: "combined_credits,external_ids,images" })
 });
 
 export function clearTmdbCache() { cache.clear(); }
