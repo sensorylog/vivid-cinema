@@ -110,7 +110,7 @@ async function loadProviders() {
     providers = { movie: movie.results || [], tv: tv.results || [] };
     populateProviders();
   } catch {
-    $("provider-filter").innerHTML = '<option value="">Streaming services unavailable</option>';
+    $("provider-filter").innerHTML = '<button class="vivid-provider-chip is-active" data-provider="" type="button"><span class="vivid-provider-all-icon"><i class="bi bi-grid-3x3-gap" aria-hidden="true"></i></span><span>Services unavailable</span></button>';
   }
 }
 
@@ -240,7 +240,6 @@ async function updateFromControls() {
   state.sort = $("sort-filter").value;
   state.rating = $("rating-filter").value;
   state.region = $("region-filter").value;
-  state.provider = state.provider;
   state.page = 1;
   if (state.region !== previousRegion) await loadProviders();
   if (state.provider && !state.region) {
@@ -305,12 +304,18 @@ function wire() {
   );
   ["genre-filter", "year-filter", "sort-filter", "rating-filter", "region-filter"]
     .forEach((id) => $(id).addEventListener("change", updateFromControls));
-  $("provider-filter").addEventListener("click", (event) => {
+  $("provider-filter").addEventListener("click", async (event) => {
     const button = event.target.closest("[data-provider]");
     if (!button) return;
     state.provider = button.dataset.provider || "";
     state.page = 1;
-    populateProviders();
+    if (state.provider && !state.region) {
+      state.region = "GH";
+      $("region-filter").value = "GH";
+      await loadProviders();
+    } else {
+      populateProviders();
+    }
     fetchDiscovery();
   });
   $("reset-filters").addEventListener("click", resetFilters);
