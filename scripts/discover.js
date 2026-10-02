@@ -82,7 +82,7 @@ function populateProviders() {
 
 async function loadProviders() {
   try {
-    const region = state.region || "GH";
+    const region = state.region || "";
     const [movie, tv] = await Promise.all([tmdbApi.movieWatchProviders(region), tmdbApi.tvWatchProviders(region)]);
     providers = { movie: movie.results || [], tv: tv.results || [] };
     populateProviders();
@@ -152,8 +152,10 @@ async function fetchDiscovery() {
   renderLoading();
   const query = state.query.trim();
   $("results-label").textContent = query ? "SEARCH" : "DISCOVER";
+  const selectedProvider = [...(providers.movie || []), ...(providers.tv || [])].find((provider) => String(provider.provider_id) === String(state.provider));
   $("results-title").textContent = query
     ? 'Results for “' + escapeHtml(query) + '”'
+    : selectedProvider ? selectedProvider.provider_name
     : state.type === "all" ? "All titles" : state.type === "tv" ? "TV series" : "Movies";
 
   try {
@@ -208,7 +210,8 @@ async function fetchDiscovery() {
   }
 }
 
-function updateFromControls() {
+async function updateFromControls() {
+  const previousRegion = state.region;
   state.genre = $("genre-filter").value;
   state.year = $("year-filter").value;
   state.sort = $("sort-filter").value;
@@ -216,6 +219,12 @@ function updateFromControls() {
   state.region = $("region-filter").value;
   state.provider = $("provider-filter").value;
   state.page = 1;
+  if (state.region !== previousRegion) await loadProviders();
+  if (state.provider && !state.region) {
+    state.region = "GH";
+    $("region-filter").value = "GH";
+    await loadProviders();
+  }
   fetchDiscovery();
 }
 
