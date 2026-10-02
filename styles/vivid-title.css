@@ -221,3 +221,7 @@ body.vivid-title-page{background:#06070a;color:#f5f7fa;min-height:100dvh}.vivid-
   .vivid-title-page .vivid-video-card,
   .vivid-title-page .vivid-similar-card{transition:none;transform:none}
 }
+
+/* Cast members are navigable profiles. */
+.vivid-title-page a.vivid-cast{display:block;color:#fff;text-decoration:none;cursor:pointer}
+.vivid-title-page a.vivid-cast:focus-visible{outline:2px solid rgba(255,255,255,.75);outline-offset:4px;border-radius:14px}
