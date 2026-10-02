@@ -9,8 +9,13 @@
 // Keep provider destinations out of the UI until a complete, authorized public page URL
 // has been verified. This prevents dead/temporary links from leaking into the product.
 const EXTERNAL_PROVIDER_LINKS = Object.freeze({
+  // TMDB IDs are preferred. IMDb IDs are supported as a fallback because some
+  // external catalogues identify titles by IMDb rather than TMDB.
   movie: Object.freeze({}),
-  tv: Object.freeze({})
+  tv: Object.freeze({}),
+  movieImdb: Object.freeze({
+    "tt35682658": "https://loadedfiles.net/d4d7aa45dba9038a/Infirmary.2026.540p.X265.AAC.[9jaRocks.Com].mkv"
+  })
 });
 
 function safeExternalUrl(value) {
@@ -24,9 +29,14 @@ function safeExternalUrl(value) {
 }
 
 export function getExternalProviderLink(media) {
-  if (!media?.id) return "";
+  if (!media) return "";
   const type = media.media_type === "tv" ? "tv" : "movie";
-  return safeExternalUrl(EXTERNAL_PROVIDER_LINKS[type]?.[String(media.id)]);
+  const direct = media.id ? EXTERNAL_PROVIDER_LINKS[type]?.[String(media.id)] : "";
+  const imdbId = media.imdb_id || media.external_ids?.imdb_id || "";
+  const imdbFallback = type === "movie" && imdbId
+    ? EXTERNAL_PROVIDER_LINKS.movieImdb?.[String(imdbId)]
+    : "";
+  return safeExternalUrl(direct || imdbFallback);
 }
 
 export function getExternalEpisodeLink(media, seasonNumber, episodeNumber) {
