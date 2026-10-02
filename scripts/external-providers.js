@@ -1,22 +1,12 @@
-// Explicit external download-page links for titles Vivid is authorized to link to.
-// Keep this list manually curated. Vivid never fetches, proxies, generates, or transforms
-// third-party file/download URLs. Store the provider's stable public page, not a temporary
-// direct-file URL.
+// Authorized external download-page integration point.
 //
-// Movie key: TMDB movie ID as a string.
-// TV key: TMDB TV ID -> season number -> episode number.
+// Vivid does not host, proxy, scrape, generate, or transform third-party
+// movie/episode download URLs. A provider can be integrated here only when it
+// exposes an authorized, documented catalogue/API that Vivid is permitted to
+// query and link to.
 //
-// Keep provider destinations out of the UI until a complete, authorized public page URL
-// has been verified. This prevents dead/temporary links from leaking into the product.
-const EXTERNAL_PROVIDER_LINKS = Object.freeze({
-  // TMDB IDs are preferred. IMDb IDs are supported as a fallback because some
-  // external catalogues identify titles by IMDb rather than TMDB.
-  movie: Object.freeze({}),
-  tv: Object.freeze({}),
-  movieImdb: Object.freeze({
-    "tt35682658": "https://loadedfiles.net/d4d7aa45dba9038a/Infirmary.2026.540p.X265.AAC.[9jaRocks.Com].mkv"
-  })
-});
+// Keep temporary file-host URLs and manually hard-coded title URLs out of the
+// application. Provider-specific resolution belongs behind a documented API.
 
 function safeExternalUrl(value) {
   if (!value) return "";
@@ -29,20 +19,16 @@ function safeExternalUrl(value) {
 }
 
 export function getExternalProviderLink(media) {
-  if (!media) return "";
-  const type = media.media_type === "tv" ? "tv" : "movie";
-  const direct = media.id ? EXTERNAL_PROVIDER_LINKS[type]?.[String(media.id)] : "";
-  const imdbId = media.imdb_id || media.external_ids?.imdb_id || "";
-  const imdbFallback = type === "movie" && imdbId
-    ? EXTERNAL_PROVIDER_LINKS.movieImdb?.[String(imdbId)]
-    : "";
-  return safeExternalUrl(direct || imdbFallback);
+  // No provider is currently configured with a documented authorized API.
+  // Returning an empty value keeps the Download action hidden instead of
+  // presenting stale or fabricated links.
+  void media;
+  return safeExternalUrl("");
 }
 
 export function getExternalEpisodeLink(media, seasonNumber, episodeNumber) {
-  if (!media?.id || media.media_type !== "tv") return "";
-  const season = String(Number(seasonNumber));
-  const episode = String(Number(episodeNumber));
-  if (!Number.isInteger(Number(season)) || !Number.isInteger(Number(episode))) return "";
-  return safeExternalUrl(EXTERNAL_PROVIDER_LINKS.tv?.[String(media.id)]?.[season]?.[episode]);
+  void media;
+  void seasonNumber;
+  void episodeNumber;
+  return safeExternalUrl("");
 }
