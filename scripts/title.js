@@ -239,10 +239,12 @@ function renderStorySection(details, cast) {
 
 function render(details) {
   currentDetails=details;
-  media=normalizeMedia(details,route.params.get("type")==="tv"?"tv":"movie");
-  // Preserve the external IMDb identifier on the normalized title object so
-  // manually curated provider mappings can work without changing TMDB identity.
-  if (details.imdb_id) media.imdb_id = details.imdb_id;
+  const normalizedMedia = normalizeMedia(details,route.params.get("type")==="tv"?"tv":"movie");
+  // Keep the normalized media object immutable. External identity metadata is
+  // copied into a new object instead of mutating the Object.freeze() result.
+  media = details.imdb_id
+    ? { ...normalizedMedia, imdb_id: details.imdb_id }
+    : normalizedMedia;
   const title=media.title;
   const year=media.year||"—";
   const rating=media.vote_average?media.vote_average.toFixed(1):"—";
