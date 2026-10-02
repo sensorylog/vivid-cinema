@@ -8,6 +8,7 @@ const $ = (id) => document.getElementById(id);
 const route = getRoute();
 let media = null;
 let currentDetails = null;
+let trailerTrigger = null;
 const PROVIDER_COUNTRIES = [
   ["US", "United States"],
   ["GH", "Ghana"],
@@ -150,8 +151,10 @@ function openTrailer(key, name) {
     modal.addEventListener("click", (event) => { if (event.target === modal) closeTrailer(); });
     $("trailer-close").addEventListener("click", closeTrailer);
   }
+  trailerTrigger = document.activeElement;
   $("trailer-modal-title").textContent = name || "Trailer";
-  $("trailer-frame").src = "https://www.youtube.com/embed/" + encodeURIComponent(key) + "?autoplay=1&rel=0";
+  const params = new URLSearchParams({ autoplay:"1", rel:"0", playsinline:"1", enablejsapi:"1", origin:window.location.origin });
+  $("trailer-frame").src = "https://www.youtube.com/embed/" + encodeURIComponent(key) + "?" + params.toString();
   modal.classList.add("is-open");
   document.body.classList.add("vivid-modal-open");
   $("trailer-close").focus();
@@ -163,6 +166,8 @@ function closeTrailer() {
   $("trailer-frame").src = "";
   modal.classList.remove("is-open");
   document.body.classList.remove("vivid-modal-open");
+  if(trailerTrigger && typeof trailerTrigger.focus==="function") trailerTrigger.focus();
+  trailerTrigger=null;
 }
 
 function wireTrailers() {
