@@ -284,9 +284,16 @@ async function loadHome(){
  try{await loadSectionBatch(primary)}catch(error){console.warn("Vivid primary home load failed:",error)}
 
  const secondary=["topRatedMovies","popularTv","topRatedTv","airingToday","anime","kdrama","upcoming"];
- const loadSecondary=()=>void loadSectionBatch(secondary).catch(error=>console.warn("Vivid secondary home load failed:",error));
- if("requestIdleCallback" in window)requestIdleCallback(loadSecondary,{timeout:1800});
- else window.setTimeout(loadSecondary,900);
+ const loadSecondary=async()=>{
+   // Keep secondary shelves from creating a seven-request burst. Each small
+   // batch can paint before the next one starts, keeping scrolling responsive.
+   for(const batch of [["topRatedMovies","popularTv"],["topRatedTv","airingToday"],["anime","kdrama"],["upcoming"]]){
+     try{await loadSectionBatch(batch)}catch(error){console.warn("Vivid secondary home load failed:",batch,error)}
+     await new Promise(resolve=>window.setTimeout(resolve,80));
+   }
+ };
+ if("requestIdleCallback" in window)requestIdleCallback(()=>void loadSecondary(),{timeout:1800});
+ else window.setTimeout(()=>void loadSecondary(),900);
 
  const loadRecommendations=()=>void renderRecommendations();
  if("requestIdleCallback" in window)requestIdleCallback(loadRecommendations,{timeout:2600});
