@@ -3,7 +3,7 @@ import { getImageUrl, getMediaUrl, normalizeMedia, normalizeResults } from "./me
 import { getRoute, buildWatchUrl } from "./routes.js";
 import { escapeHtml, getErrorMessage } from "./utils.js";
 import { hasLibraryItem, startLibrarySync, toggleLibraryItem, upsertLibraryItem } from "./library.js";
-import { getExternalProviderLink } from "./external-providers.js";
+import { getExternalEpisodeLink, getExternalProviderLink } from "./external-providers.js";
 
 const $ = (id) => document.getElementById(id);
 const route = getRoute();
@@ -130,7 +130,10 @@ async function loadSeason(id, seasonNumber) {
   try {
     const data = await tmdbApi.tvSeason(id, seasonNumber);
     const episodes = data.episodes || [];
-    container.innerHTML = episodes.length ? episodes.map((episode) => '<article class="vivid-episode"><div class="vivid-episode-thumb"><img loading="lazy" src="' + getImageUrl(episode.still_path, "w500") + '" alt="" onerror="this.style.visibility=\'hidden\'"></div><div class="vivid-episode-copy"><div class="vivid-episode-line"><strong>Episode ' + episode.episode_number + '</strong><span>★ ' + (episode.vote_average ? Number(episode.vote_average).toFixed(1) : "—") + '</span></div><h3>' + escapeHtml(episode.name || ("Episode " + episode.episode_number)) + '</h3><small>' + escapeHtml(episode.air_date || "Air date unavailable") + '</small><p>' + escapeHtml(episode.overview || "No episode synopsis is available.") + '</p><a class="vivid-button vivid-button--secondary vivid-episode-watch" href="' + escapeHtml(buildWatchUrl(media.id, "tv", seasonNumber, episode.episode_number)) + '"><i class="bi bi-play-fill"></i> Play episode</a></div></article>').join("") : '<p class="vivid-muted">No episodes are available for this season.</p>';
+    container.innerHTML = episodes.length ? episodes.map((episode) => {
+      const downloadLink = getExternalEpisodeLink(media, seasonNumber, episode.episode_number);
+      return '<article class="vivid-episode"><div class="vivid-episode-thumb"><img loading="lazy" src="' + getImageUrl(episode.still_path, "w500") + '" alt="" onerror="this.style.visibility=\'hidden\'"></div><div class="vivid-episode-copy"><div class="vivid-episode-line"><strong>Episode ' + episode.episode_number + '</strong><span>★ ' + (episode.vote_average ? Number(episode.vote_average).toFixed(1) : "—") + '</span></div><h3>' + escapeHtml(episode.name || ("Episode " + episode.episode_number)) + '</h3><small>' + escapeHtml(episode.air_date || "Air date unavailable") + '</small><p>' + escapeHtml(episode.overview || "No episode synopsis is available.") + '</p><div class="vivid-episode-actions"><a class="vivid-button vivid-button--secondary vivid-episode-watch" href="' + escapeHtml(buildWatchUrl(media.id, "tv", seasonNumber, episode.episode_number)) + '"><i class="bi bi-play-fill"></i> Play episode</a>' + (downloadLink ? '<a class="vivid-button vivid-button--ghost" href="' + escapeHtml(downloadLink) + '" target="_blank" rel="noopener noreferrer" aria-label="Download episode ' + episode.episode_number + '"><i class="bi bi-download"></i> Download</a>' : '') + '</div></div></article>';
+    }).join("") : '<p class="vivid-muted">No episodes are available for this season.</p>';
   } catch (error) {
     container.innerHTML = '<p class="vivid-muted">' + escapeHtml(getErrorMessage(error)) + '</p>';
   }
