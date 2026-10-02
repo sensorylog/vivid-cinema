@@ -122,3 +122,48 @@ window.addEventListener("scroll",()=>{
   if(!railRaf)railRaf=requestAnimationFrame(updateRailPhysics);
 },{passive:true});
 updateRailPhysics();
+
+
+/* Phase 4 — interaction choreography. One RAF drives the shared scroll motion. */
+(function setupPhase4Motion(){
+  if(reduceMotion)return;
+  let raf=0;
+  const update=()=>{
+    raf=0;
+    const vh=window.innerHeight||800;
+    document.querySelectorAll(".vivid-rail").forEach(rail=>{
+      const rect=rail.getBoundingClientRect();
+      if(rect.bottom<0||rect.top>vh)return;
+      const center=rect.top+rect.height*.5;
+      const delta=Math.max(-1,Math.min(1,(vh*.52-center)/(vh*.72)));
+      rail.style.setProperty("--vivid-rail-shift",(delta*3.5).toFixed(2)+"px");
+      const head=rail.querySelector(".vivid-rail-head");
+      if(head)head.style.setProperty("--vivid-head-shift",(delta*1.8).toFixed(2)+"px");
+    });
+  };
+  const request=()=>{if(!raf)raf=requestAnimationFrame(update)};
+  window.addEventListener("scroll",request,{passive:true});
+  window.addEventListener("resize",request,{passive:true});
+  request();
+})();
+
+(function setupPageTransitions(){
+  if(reduceMotion)return;
+  const layer=document.createElement("div");
+  layer.className="vivid-page-transition";
+  layer.setAttribute("aria-hidden","true");
+  document.body.appendChild(layer);
+  requestAnimationFrame(()=>document.body.classList.add("vivid-page-ready"));
+  document.addEventListener("click",event=>{
+    const link=event.target.closest("a[href]");
+    if(!link||event.defaultPrevented||link.target==="_blank"||link.hasAttribute("download"))return;
+    if(event.metaKey||event.ctrlKey||event.shiftKey||event.altKey)return;
+    const url=new URL(link.href,location.href);
+    if(url.origin!==location.origin||url.pathname===location.pathname&&url.search===location.search)return;
+    if(url.protocol!=="http:"&&url.protocol!=="https:")return;
+    event.preventDefault();
+    layer.classList.add("is-active");
+    window.setTimeout(()=>{location.href=url.href},150);
+  });
+  window.addEventListener("pageshow",()=>layer.classList.remove("is-active"));
+})();
