@@ -118,10 +118,13 @@ function renderProviderGroups(details, countryCode) {
 function renderSeasons(details) {
   if (media?.media_type !== "tv" || !Array.isArray(details.seasons) || !details.seasons.length) return "";
   const seasons = details.seasons.filter((season) => season.season_number >= 0);
-  return '<section class="vivid-title-section vivid-seasons"><div class="vivid-section-heading"><div><span>EPISODES</span><h2>Seasons & episodes</h2></div><label class="vivid-season-picker"><span class="vivid-sr-only">Choose season</span><select id="season-select">' +
-    seasons.map((season) => '<option value="' + season.season_number + '">' + escapeHtml(season.name || ("Season " + season.season_number)) + '</option>').join("") +
-    '</select></label></div><div id="episode-list" class="vivid-episode-list"><p class="vivid-muted">Loading episodes…</p></div></section>';
+  const options = seasons.map((season) => '<option value="' + season.season_number + '">' + escapeHtml(season.name || ("Season " + season.season_number)) + '</option>').join("");
+  const initial = seasons.find((season) => season.episode_count > 0) || seasons[0];
+  return '<section class="vivid-title-section vivid-seasons"><div class="vivid-season-header"><div class="vivid-section-heading"><div><span>EPISODES</span><h2>Seasons & episodes</h2></div></div>' +
+    '<div class="vivid-season-control"><span>Season</span><div class="vivid-season-select-wrap"><select id="season-select" aria-label="Select season">' + options + '</select><i class="bi bi-chevron-down" aria-hidden="true"></i></div></div></div>' +
+    '<div id="season-summary" class="vivid-season-summary"></div><div id="episode-list" class="vivid-episode-list"><p class="vivid-muted">Loading episodes…</p></div></section>';
 }
+
 
 async function loadSeason(id, seasonNumber) {
   const container = $("episode-list");
@@ -143,8 +146,27 @@ function wireSeasons(details) {
   if (media?.media_type !== "tv") return;
   const select = $("season-select");
   if (!select) return;
-  select.addEventListener("change", () => loadSeason(media.id, select.value));
-  loadSeason(media.id, select.value || details.seasons?.[0]?.season_number || 0);
+  const initial = details.seasons?.find((season) => season.episode_count > 0) || details.seasons?.[0];
+  const initialNumber = String(initial?.season_number ?? 0);
+  select.value = initialNumber;
+  select.addEventListener("change", () => {
+    const selected = details.seasons?.find((season) => String(season.season_number) === String(select.value));
+    const summary = $("season-summary");
+    if (summary && selected) {
+      summary.innerHTML = '<span>' + escapeHtml(selected.episode_count || 0) + ' episodes</span>' +
+        (selected.air_date ? '<span>Started ' + escapeHtml(selected.air_date.slice(0,4)) + '</span>' : '') +
+        (selected.overview ? '<p>' + escapeHtml(selected.overview) + '</p>' : '');
+    }
+    loadSeason(media.id, select.value);
+  });
+  const selected = details.seasons?.find((season) => String(season.season_number) === initialNumber);
+  const summary = $("season-summary");
+  if (summary && selected) {
+    summary.innerHTML = '<span>' + escapeHtml(selected.episode_count || 0) + ' episodes</span>' +
+      (selected.air_date ? '<span>Started ' + escapeHtml(selected.air_date.slice(0,4)) + '</span>' : '') +
+      (selected.overview ? '<p>' + escapeHtml(selected.overview) + '</p>' : '');
+  }
+  loadSeason(media.id, initialNumber);
 }
 
 function openTrailer(key, name) {
