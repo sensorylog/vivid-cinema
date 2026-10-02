@@ -2,6 +2,7 @@ import { VIVID_CONFIG } from "./config.js";
 
 const { tmdbBaseUrl, tmdbApiKey, language } = VIVID_CONFIG.api;
 const cache = new Map();
+const inFlight = new Map();
 
 function buildUrl(path, params = {}) {
   return tmdbBaseUrl + "/" + path.replace(/^\/+/, "") + "?" +
@@ -13,8 +14,10 @@ export async function tmdb(path, params = {}, options = {}) {
   const useCache = options.cache !== false;
   const timeoutMs = options.timeoutMs ?? 10000;
   if (useCache && cache.has(url)) return cache.get(url);
+  if (useCache && inFlight.has(url)) return inFlight.get(url);
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), timeoutMs);
+  const request = (async () => {
   try {
     const response = await fetch(url, { signal: controller.signal, cache: "no-store", headers: { Accept: "application/json" } });
     if (!response.ok) {
@@ -34,6 +37,13 @@ export async function tmdb(path, params = {}, options = {}) {
     throw error;
   } finally {
     clearTimeout(timeout);
+  }
+  })();
+  if (useCache) inFlight.set(url, request);
+  try {
+    return await request;
+  } finally {
+    inFlight.delete(url);
   }
 }
 
