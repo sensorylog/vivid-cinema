@@ -46,16 +46,41 @@ function renderShell(params){
  document.title=(episodeTitle?episodeTitle+" · ":"")+title+" · Vivid Cinema";
  $("watch-content").innerHTML=
   '<section class="vivid-watch-hero"><div id="watch-backdrop" class="vivid-watch-backdrop" style="--watch-backdrop:url(\''+getImageUrl(media.backdrop_path,"w1280")+'\')"></div><div class="vivid-watch-head"><div><span id="watch-kicker" class="vivid-watch-kicker">'+(isTv?"TV · SEASON "+params.season+" · EPISODE "+params.episode:"MOVIE")+'</span><h1 id="watch-title">'+escapeHtml(episodeTitle||title)+'</h1><p id="watch-overview">'+escapeHtml(isTv&&details?.episode?.overview?details.episode.overview:media.overview||"")+'</p></div><a class="vivid-button vivid-button--secondary" href="'+escapeHtml(buildTitleUrl(media.id,media.media_type))+'"><i class="bi bi-info-circle"></i> Details</a></div></section>'+
-  '<section class="vivid-player-section" aria-label="Video player"><div class="vivid-player-frame"><div id="player-status" class="vivid-player-status" role="status" aria-live="polite">'+(saved?"Resuming where you left off…":"Preparing VidAPI player…")+'</div><iframe id="vidapi-player" title="'+escapeHtml(title)+' player" allow="autoplay; fullscreen; picture-in-picture; encrypted-media" allowfullscreen referrerpolicy="origin" loading="eager"></iframe></div><div class="vivid-player-bar"><div><i class="bi bi-shield-check"></i><span>Powered by VidAPI</span></div><div><a href="'+escapeHtml(buildTitleUrl(media.id,media.media_type))+'">Back to title</a><a id="player-open" href="#" target="_blank" rel="noopener noreferrer">Open player</a></div></div></section>'+
+  '<section class="vivid-player-section" aria-label="Video player"><div class="vivid-player-placeholder"><div><span class="vivid-player-placeholder-kicker"><i class="bi bi-play-circle"></i> READY TO WATCH</span><h2>'+(isTv?escapeHtml(episodeTitle||title):escapeHtml(title))+'</h2><p>Playback opens in a focused player over this page. Your title page stays right where you left it.</p><button id="start-playback" class="vivid-button vivid-button--primary" type="button"><i class="bi bi-play-fill"></i> Start watching</button></div></div><div class="vivid-player-bar"><div><i class="bi bi-shield-check"></i><span>Powered by VidAPI</span></div><div><a href="'+escapeHtml(buildTitleUrl(media.id,media.media_type))+'">Back to title</a></div></div></section>' +
+  '<div id="watch-player-modal" class="vivid-watch-player-modal" aria-hidden="true"><div class="vivid-watch-player-dialog" role="dialog" aria-modal="true" aria-labelledby="watch-player-title"><div class="vivid-watch-player-head"><div><span>NOW PLAYING</span><h2 id="watch-player-title">'+escapeHtml(isTv?episodeTitle||title:title)+'</h2></div><button id="close-watch-player" type="button" aria-label="Close player"><i class="bi bi-x-lg"></i></button></div><div class="vivid-watch-player-frame"><div id="player-status" class="vivid-player-status" role="status" aria-live="polite">'+(saved?"Resuming where you left off…":"Preparing VidAPI player…")+'</div><iframe id="vidapi-player" title="'+escapeHtml(title)+' player" allow="autoplay; fullscreen; picture-in-picture; encrypted-media" allowfullscreen referrerpolicy="origin"></iframe></div></div></div>'+
   (isTv?'<section class="vivid-watch-note"><i class="bi bi-collection-play"></i><div><strong>Episode playback</strong><span>Use the episode list on the title page to switch seasons and episodes.</span></div></section>':"")+
   '<section class="vivid-watch-recommendations"><div class="vivid-section-heading"><div><span>AFTER WATCHING</span><h2>More like this</h2></div></div><div id="watch-recommendations" class="vivid-watch-rec-rail">'+recommendationCards()+'</div></section>';
- const player=$("vidapi-player"),status=$("player-status");
- let loaded=false;
- const timeout=window.setTimeout(()=>{if(!loaded&&status){status.textContent="VidAPI is taking longer than expected. You can open the player directly or return to the title.";status.classList.add("is-warning")}},9000);
- player.addEventListener("load",()=>{loaded=true;window.clearTimeout(timeout);status?.remove()},{once:true});
+ const modal=$("watch-player-modal");
+ const player=$("vidapi-player");
+ const start=$("start-playback");
+ const close=$("close-watch-player");
+ let loaded=false,timeout=0,previousFocus=null;
  const embedUrl=buildEmbedUrl(params,saved?.progress||route.params.get("startAt")||0);
- player.src=embedUrl;
- const openPlayer=$("player-open"); if(openPlayer)openPlayer.href=embedUrl;
+ const openPlayer=()=>{
+   previousFocus=document.activeElement;
+   modal?.classList.add("is-open");
+   modal?.setAttribute("aria-hidden","false");
+   document.body.classList.add("vivid-modal-open");
+   start?.blur();
+   close?.focus();
+   loaded=false;
+   if(player&&!player.src) player.src=embedUrl;
+   timeout=window.setTimeout(()=>{const status=$("player-status");if(!loaded&&status){status.textContent="VidAPI is taking longer than expected.";status.classList.add("is-warning")}},9000);
+ };
+ const closePlayer=()=>{
+   if(!modal)return;
+   modal.classList.remove("is-open");
+   modal.setAttribute("aria-hidden","true");
+   document.body.classList.remove("vivid-modal-open");
+   if(player)player.src="about:blank";
+   if(timeout)window.clearTimeout(timeout);
+   if(previousFocus&&typeof previousFocus.focus==="function")previousFocus.focus();
+ };
+ start?.addEventListener("click",openPlayer);
+ close?.addEventListener("click",closePlayer);
+ modal?.addEventListener("click",(event)=>{if(event.target===modal)closePlayer()});
+ document.addEventListener("keydown",(event)=>{if(event.key==="Escape"&&modal?.classList.contains("is-open"))closePlayer()});
+ player?.addEventListener("load",()=>{loaded=true;window.clearTimeout(timeout);$("player-status")?.remove()},{once:true});
 }
 function hydrateWatchDetails(params){
  if(!media)return;
