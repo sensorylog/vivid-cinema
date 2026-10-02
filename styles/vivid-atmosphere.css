@@ -224,6 +224,7 @@ body.vivid-atmosphere::after{
   opacity:1;
   transform:scale(1.03);
 }
+}
 @media(prefers-reduced-motion:reduce){
   .vivid-atmosphere .vivid-card,
   .vivid-atmosphere .vivid-card-info,
