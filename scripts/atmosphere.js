@@ -54,7 +54,7 @@ function setupReveals(root=document){
 setupReveals();
 
 function setupAmbientArtwork(){
-  if(reduceMotion || document.body.matches(".vivid-landing") || document.body.matches(".vivid-watch-page") || document.querySelector(".vivid-hero-video")) return;
+  if(reduceMotion || document.body.matches(".vivid-landing") || document.body.matches(".vivid-watch-page")) return;
   const sources=()=>[...document.querySelectorAll("img[src]")].map(img=>img.currentSrc||img.src).filter(src=>/^https?:/i.test(src));
   const ensure=()=>{
     const list=[...new Set(sources())].slice(0,18);
