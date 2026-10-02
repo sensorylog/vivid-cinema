@@ -1,5 +1,4 @@
 const reduceMotion=window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-document.documentElement.classList.add("vivid-live-ui");
 document.body.classList.add("vivid-atmosphere");
 
 if(!reduceMotion && window.matchMedia("(hover: hover) and (pointer: fine)").matches){
@@ -92,19 +91,11 @@ setupAmbientArtwork();
 const mutationObserver=new MutationObserver(records=>{
   for(const record of records){
     for(const node of record.addedNodes){
-      if(node.nodeType===1){setupReveals(node);setupCardAtmosphere(node);}
+      if(node.nodeType===1)setupReveals(node);
     }
   }
 });
 mutationObserver.observe(document.body,{childList:true,subtree:true});
-/* Shared scroll motion — one RAF for rails and headings. */
-function setupCardAtmosphere(root=document){
-  root.querySelectorAll?.(".vivid-card").forEach(card=>{
-    const img=card.querySelector(".vivid-card-media img");
-    if(img?.src) card.style.setProperty("--vivid-card-art",'url("'+img.src.replace(/"/g,"%22")+'")');
-  });
-}
-setupCardAtmosphere();
 
 (function setupSharedScrollMotion(){
   if(reduceMotion)return;
