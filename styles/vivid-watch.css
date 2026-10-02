@@ -11,3 +11,32 @@
 .vivid-watch-rec-card strong{font-size:.8rem;margin-top:8px}
 .vivid-watch-rec-card small{color:#777f8b;margin-top:3px}
 @media(max-width:700px){.vivid-watch-recommendations{padding:28px 16px 45px}.vivid-watch-rec-card{flex-basis:138px}}
+
+/* Focused in-page playback: lazy-load the VidAPI iframe only after the user chooses to watch. */
+.vivid-player-placeholder{min-height:360px;display:grid;place-items:center;text-align:center;padding:48px 24px;border:1px solid rgba(255,255,255,.08);border-radius:18px;background:radial-gradient(circle at 50% 25%,rgba(255,255,255,.065),transparent 42%),linear-gradient(145deg,#0d0f13,#08090c);box-shadow:0 30px 90px rgba(0,0,0,.32)}
+.vivid-player-placeholder>div{max-width:560px}
+.vivid-player-placeholder-kicker{display:inline-flex;align-items:center;gap:7px;color:#8e96a1;font-size:.66rem;letter-spacing:.16em;font-weight:750}
+.vivid-player-placeholder h2{margin:10px 0 8px;font-size:clamp(1.5rem,3vw,2.4rem);letter-spacing:-.04em}
+.vivid-player-placeholder p{margin:0 auto 20px;max-width:500px;color:#7f8792;font-size:.8rem;line-height:1.6}
+.vivid-watch-player-modal{position:fixed;inset:0;z-index:5000;display:grid;place-items:center;padding:18px;background:rgba(2,3,5,.82);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);opacity:0;visibility:hidden;pointer-events:none;transition:opacity .2s ease,visibility .2s ease}
+.vivid-watch-player-modal.is-open{opacity:1;visibility:visible;pointer-events:auto}
+.vivid-watch-player-dialog{width:min(1280px,100%);max-height:calc(100dvh - 36px);display:grid;grid-template-rows:auto minmax(0,1fr);overflow:hidden;border:1px solid rgba(255,255,255,.12);border-radius:20px;background:#080a0d;box-shadow:0 40px 120px rgba(0,0,0,.68);transform:translateY(10px) scale(.985);transition:transform .22s ease}
+.vivid-watch-player-modal.is-open .vivid-watch-player-dialog{transform:none}
+.vivid-watch-player-head{display:flex;align-items:center;gap:16px;padding:12px 14px;border-bottom:1px solid rgba(255,255,255,.08);background:rgba(10,11,14,.94)}
+.vivid-watch-player-head>div{min-width:0}
+.vivid-watch-player-head span{display:block;color:#737b87;font-size:.58rem;letter-spacing:.16em;font-weight:750;margin-bottom:3px}
+.vivid-watch-player-head h2{margin:0;color:#eef0f3;font-size:.88rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vivid-watch-player-head button{margin-left:auto;flex:0 0 42px;width:42px;height:42px;border:1px solid rgba(255,255,255,.1);border-radius:12px;background:rgba(255,255,255,.06);color:#fff;cursor:pointer;font-size:.85rem;transition:background .18s ease,transform .18s ease}
+.vivid-watch-player-head button:hover{background:rgba(255,255,255,.12);transform:scale(1.03)}
+.vivid-watch-player-frame{position:relative;aspect-ratio:16/9;min-height:0;background:#000;overflow:hidden}
+.vivid-watch-player-frame iframe{width:100%;height:100%;min-height:100%;display:block;border:0;background:#000}
+body.vivid-modal-open{overflow:hidden}
+@media(max-width:700px){
+ .vivid-player-placeholder{min-height:280px;border-radius:10px;padding:36px 18px}
+ .vivid-watch-player-modal{padding:0}
+ .vivid-watch-player-dialog{width:100%;max-height:100dvh;height:100dvh;border-radius:0;border:0;grid-template-rows:auto 1fr}
+ .vivid-watch-player-frame{aspect-ratio:auto;height:100%;display:flex;align-items:center}
+ .vivid-watch-player-frame iframe{height:56.25vw;max-height:100%;min-height:220px}
+ .vivid-watch-player-head{padding:10px 12px}
+}
+@media(prefers-reduced-motion:reduce){.vivid-watch-player-modal,.vivid-watch-player-dialog,.vivid-watch-player-head button{transition:none}}
