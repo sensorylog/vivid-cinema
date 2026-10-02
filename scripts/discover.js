@@ -12,12 +12,14 @@ const state = {
   sort: route.params.get("sort") || "popularity.desc",
   rating: route.params.get("rating") || "",
   region: route.params.get("region") || "",
+  provider: route.params.get("provider") || "",
   query: route.params.get("q") || "",
   page: Number(route.params.get("page") || 1) || 1,
   totalPages: 1,
   requestId: 0
 };
 let genres = { movie: [], tv: [] };
+let providers = { movie: [], tv: [] };
 
 function currentGenres() {
   if (state.type === "tv") return genres.tv;
@@ -63,9 +65,30 @@ function syncUrl() {
   if (state.sort !== "popularity.desc") params.set("sort", state.sort);
   if (state.rating) params.set("rating", state.rating);
   if (state.region) params.set("region", state.region);
+  if (state.provider) params.set("provider", state.provider);
   if (state.query) params.set("q", state.query);
   if (state.page > 1) params.set("page", String(state.page));
   history.replaceState(null, "", params.toString() ? "discover.html?" + params : "discover.html");
+}
+
+function populateProviders() {
+  const select = $("provider-filter");
+  const available = state.type === "tv" ? providers.tv : state.type === "movie" ? providers.movie : [...providers.movie, ...providers.tv].filter((provider, index, list) => list.findIndex((item) => item.provider_id === provider.provider_id) === index);
+  const selected = state.provider;
+  select.innerHTML = '<option value="">All services</option>' + available.sort((a,b) => String(a.provider_name).localeCompare(String(b.provider_name))).map((provider) => '<option value="' + provider.provider_id + '">' + escapeHtml(provider.provider_name) + "</option>").join("");
+  select.value = selected && available.some((provider) => String(provider.provider_id) === String(selected)) ? selected : "";
+  if (select.value !== selected) state.provider = "";
+}
+
+async function loadProviders() {
+  try {
+    const region = state.region || "GH";
+    const [movie, tv] = await Promise.all([tmdbApi.movieWatchProviders(region), tmdbApi.tvWatchProviders(region)]);
+    providers = { movie: movie.results || [], tv: tv.results || [] };
+    populateProviders();
+  } catch {
+    $("provider-filter").innerHTML = '<option value="">Streaming services unavailable</option>';
+  }
 }
 
 function renderLoading() {
@@ -118,7 +141,8 @@ function discoverParams(type) {
       : { first_air_date_year: state.year || undefined }),
     "vote_average.gte": state.rating || undefined,
     watch_region: state.region || undefined,
-    with_watch_monetization_types: state.region ? "flatrate|free|rent|buy" : undefined
+    with_watch_monetization_types: state.provider ? "flatrate" : (state.region ? "flatrate|free|rent|buy" : undefined),
+    with_watch_providers: state.provider || undefined
   };
 }
 
@@ -190,6 +214,7 @@ function updateFromControls() {
   state.sort = $("sort-filter").value;
   state.rating = $("rating-filter").value;
   state.region = $("region-filter").value;
+  state.provider = $("provider-filter").value;
   state.page = 1;
   fetchDiscovery();
 }
@@ -202,6 +227,7 @@ function syncControlsFromUrl() {
   $("sort-filter").value = state.sort;
   $("rating-filter").value = state.rating;
   $("region-filter").value = state.region;
+  $("provider-filter").value = state.provider;
 }
 
 function setType(type) {
@@ -212,6 +238,7 @@ function setType(type) {
     button.classList.toggle("is-active", button.dataset.type === type)
   );
   populateGenres();
+  populateProviders();
   fetchDiscovery();
 }
 
@@ -222,6 +249,7 @@ function resetFilters() {
   state.sort = "popularity.desc";
   state.rating = "";
   state.region = "";
+  state.provider = "";
   state.query = "";
   state.page = 1;
   document.querySelectorAll("[data-type]").forEach((button) =>
@@ -234,6 +262,7 @@ function resetFilters() {
   $("sort-filter").value = state.sort;
   $("rating-filter").value = "";
   $("region-filter").value = "";
+  $("provider-filter").value = "";
   populateGenres();
   fetchDiscovery();
 }
@@ -242,7 +271,7 @@ function wire() {
   document.querySelectorAll("[data-type]").forEach((button) =>
     button.addEventListener("click", () => setType(button.dataset.type))
   );
-  ["genre-filter", "year-filter", "sort-filter", "rating-filter", "region-filter"]
+  ["genre-filter", "year-filter", "sort-filter", "rating-filter", "region-filter", "provider-filter"]
     .forEach((id) => $(id).addEventListener("change", updateFromControls));
   $("reset-filters").addEventListener("click", resetFilters);
 
@@ -283,6 +312,7 @@ async function init() {
   populateYears();
   wire();
   await loadGenres();
+  await loadProviders();
   syncControlsFromUrl();
   $("discovery-search").value = state.query;
   $("clear-search").hidden = !state.query;
