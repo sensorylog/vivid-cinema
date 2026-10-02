@@ -320,12 +320,12 @@ function wire() {
 async function init() {
   populateYears();
   wire();
-  await loadGenres();
-  await loadProviders();
   syncControlsFromUrl();
   $("discovery-search").value = state.query;
   $("clear-search").hidden = !state.query;
   await fetchDiscovery();
+  await Promise.allSettled([loadGenres(), loadProviders()]);
+  syncControlsFromUrl();
 }
 
 void init();
