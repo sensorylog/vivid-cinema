@@ -244,3 +244,19 @@ body.vivid-atmosphere::after{
   .vivid-atmosphere .vivid-card-media::after,
   .vivid-atmosphere .vivid-card::after{transition:none!important;transform:none!important}
 }
+
+/* Phase 4 — global motion language. Motion stays quiet until the user interacts. */
+html{scroll-behavior:smooth}
+body.vivid-atmosphere{transition:opacity .32s ease}
+body.vivid-page-enter{opacity:0}
+body.vivid-page-ready{opacity:1}
+.vivid-page-transition{position:fixed;inset:0;z-index:9999;pointer-events:none;background:#06070a;opacity:0;transition:opacity .22s ease}
+.vivid-page-transition.is-active{opacity:1}
+.vivid-atmosphere .vivid-topbar,
+.vivid-atmosphere .vivid-discovery-nav,
+.vivid-atmosphere .vivid-title-nav,
+.vivid-atmosphere .vivid-library-nav,
+.vivid-atmosphere .vivid-watch-nav{will-change:background,box-shadow}
+.vivid-atmosphere .vivid-rail-head{transition:transform .35s cubic-bezier(.2,.8,.2,1)}
+.vivid-atmosphere .vivid-rail-head.is-drifting{transform:translate3d(var(--vivid-head-shift,0px),0,0)}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.vivid-page-transition{display:none}.vivid-rail-head{transform:none!important}}
