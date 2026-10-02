@@ -121,3 +121,78 @@ body.vivid-title-page{background:#06070a;color:#f5f7fa;min-height:100dvh}.vivid-
   .vivid-cast strong,.vivid-cast small{max-width:92px}
   .vivid-video-grid{grid-template-columns:1fr 1fr}
 }
+
+/* Phase 3 — title page: turn the detail view into a cinematic environment. */
+.vivid-title-page .vivid-title-backdrop{
+  isolation:isolate;
+  min-height:380px;
+  background-position:center 22%;
+}
+.vivid-title-page .vivid-title-backdrop::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:1;
+  pointer-events:none;
+  background:
+    radial-gradient(ellipse at 68% 32%,rgba(255,255,255,.08),transparent 30%),
+    linear-gradient(180deg,transparent 48%,#06070a 100%);
+  mix-blend-mode:screen;
+  opacity:.34;
+}
+.vivid-title-page .vivid-title-backdrop-label{z-index:2}
+.vivid-title-page .vivid-title-info{
+  position:relative;
+}
+.vivid-title-page .vivid-title-info::before{
+  content:"";
+  position:absolute;
+  left:8%;
+  right:8%;
+  top:-90px;
+  height:180px;
+  pointer-events:none;
+  background:radial-gradient(ellipse,rgba(255,255,255,.07),transparent 68%);
+  filter:blur(28px);
+  opacity:.45;
+}
+.vivid-title-page .vivid-title-poster{
+  transition:transform .45s cubic-bezier(.2,.8,.2,1),box-shadow .45s ease,border-color .3s ease;
+}
+@media (hover:hover) and (pointer:fine){
+  .vivid-title-page .vivid-title-poster:hover{
+    transform:translateY(-5px) scale(1.018);
+    box-shadow:0 34px 90px rgba(0,0,0,.55),0 0 0 1px rgba(255,255,255,.08);
+    border-color:rgba(255,255,255,.22);
+  }
+}
+.vivid-title-page .vivid-section-heading{
+  position:relative;
+}
+.vivid-title-page .vivid-section-heading::after{
+  content:"";
+  width:52px;
+  height:1px;
+  margin-bottom:4px;
+  background:rgba(255,255,255,.28);
+}
+.vivid-title-page .vivid-cast{
+  transition:transform .35s ease,opacity .35s ease;
+}
+@media (hover:hover) and (pointer:fine){
+  .vivid-title-page .vivid-cast:hover{transform:translateY(-6px)}
+}
+.vivid-title-page .vivid-video-card,
+.vivid-title-page .vivid-similar-card{
+  transition:transform .35s ease,opacity .35s ease;
+}
+@media (hover:hover) and (pointer:fine){
+  .vivid-title-page .vivid-video-card:hover,
+  .vivid-title-page .vivid-similar-card:hover{transform:translateY(-5px)}
+}
+@media(prefers-reduced-motion:reduce){
+  .vivid-title-page .vivid-title-poster,
+  .vivid-title-page .vivid-cast,
+  .vivid-title-page .vivid-video-card,
+  .vivid-title-page .vivid-similar-card{transition:none;transform:none}
+}
