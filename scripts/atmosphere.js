@@ -138,9 +138,13 @@ setupCardAtmosphere();
   document.addEventListener("click",event=>{
     const link=event.target.closest("a[href]");
     if(!link||event.defaultPrevented||link.target==="_blank"||link.hasAttribute("download"))return;
+    if(link.hasAttribute("data-no-page-transition")||link.hasAttribute("data-vivid-back"))return;
+    if(link.matches("[download], [href^='#'], [href^='mailto:'], [href^='tel:']"))return;
     if(event.metaKey||event.ctrlKey||event.shiftKey||event.altKey)return;
     const url=new URL(link.href,location.href);
-    if(url.origin!==location.origin||url.pathname===location.pathname&&url.search===location.search)return;
+    if(url.origin!==location.origin)return;
+    if(url.pathname===location.pathname&&url.search===location.search)return;
+    if(url.hash&&url.pathname===location.pathname&&url.search===location.search)return;
     if(url.protocol!=="http:"&&url.protocol!=="https:")return;
     event.preventDefault();
     layer.classList.add("is-active");
