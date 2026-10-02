@@ -151,7 +151,7 @@ body.vivid-atmosphere .account-grid>*{min-width:0}
   body.vivid-atmosphere .vivid-card:focus-visible{transform:translateY(-7px) scale(1.035)!important}
   body.vivid-atmosphere .vivid-feature-card:hover,
   body.vivid-atmosphere .vivid-feature-card:focus-visible,
-  body.vivid-atmosphere .vivid-feature-card.is-active{transform:translateY(-4px) scale(1.025)!important}
+  body.vivid-atmosphere .vivid-feature-card.is-active{transform:translateY(-8px) scale(1.05)!important}
 }
 @media (max-width:640px){
   body.vivid-atmosphere .vivid-card:hover,
