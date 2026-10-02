@@ -5,8 +5,12 @@ const cache = new Map();
 const inFlight = new Map();
 
 function buildUrl(path, params = {}) {
+  const cleanParams = Object.fromEntries(
+    Object.entries({ api_key: tmdbApiKey, language, ...params })
+      .filter(([, value]) => value !== undefined && value !== null && value !== "")
+  );
   return tmdbBaseUrl + "/" + path.replace(/^\/+/, "") + "?" +
-    new URLSearchParams({ api_key: tmdbApiKey, language, ...params }).toString();
+    new URLSearchParams(cleanParams).toString();
 }
 
 export async function tmdb(path, params = {}, options = {}) {

@@ -164,7 +164,7 @@ function discoverParams(type) {
       : { first_air_date_year: state.year || undefined }),
     "vote_average.gte": state.rating || undefined,
     watch_region: state.region || undefined,
-    with_watch_monetization_types: state.provider ? "flatrate" : (state.region ? "flatrate|free|rent|buy" : undefined),
+    with_watch_monetization_types: state.provider ? "flatrate" : undefined,
     with_watch_providers: state.provider || undefined
   };
 }
@@ -359,9 +359,9 @@ async function init() {
   syncControlsFromUrl();
   $("discovery-search").value = state.query;
   $("clear-search").hidden = !state.query;
-  await fetchDiscovery();
   await Promise.allSettled([loadGenres(), loadProviders()]);
   syncControlsFromUrl();
+  await fetchDiscovery();
 }
 
 void init();
