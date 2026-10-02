@@ -73,3 +73,90 @@ body.vivid-atmosphere .vivid-rail-head{transform:none}
 @media(max-width:900px){body.vivid-atmosphere .vivid-ambient-art{filter:blur(20px) saturate(.55) brightness(.65)!important;opacity:.42!important}body.vivid-atmosphere .vivid-ambient-art-layer.is-visible{opacity:.12!important}}
 @media(max-width:640px){html{scroll-behavior:smooth}body.vivid-atmosphere::before{filter:blur(32px);animation-duration:32s}body.vivid-atmosphere::after{opacity:.45}body.vivid-atmosphere .vivid-rail{gap:10px}body.vivid-atmosphere .vivid-card,body.vivid-atmosphere .vivid-skeleton-card{flex-basis:136px!important;width:136px;min-width:136px;max-width:136px}body.vivid-atmosphere .vivid-card-info{min-height:46px!important;padding:7px 8px 9px}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}body.vivid-atmosphere::before{animation:none}body.vivid-atmosphere::after{display:none}body.vivid-atmosphere .vivid-ambient-art-layer{transition:none;transform:none}.vivid-reveal{opacity:1;transform:none;transition:none}.vivid-atmosphere .vivid-card,.vivid-atmosphere .vivid-card-info,.vivid-atmosphere .vivid-card-media::after,.vivid-atmosphere .vivid-card::after{transition:none!important;transform:none!important}.vivid-atmosphere .vivid-card::before,.vivid-atmosphere .vivid-feature-card::before,.vivid-atmosphere .landing-poster::before{display:none}.vivid-page-transition{display:none}}
+
+
+/* Global responsive containment: every page must fit the viewport without clipping or accidental zoom. */
+html,body{width:100%;max-width:100%;min-width:0;overflow-x:clip}
+body.vivid-atmosphere{min-width:0}
+body.vivid-atmosphere *,body.vivid-atmosphere *::before,body.vivid-atmosphere *::after{box-sizing:border-box;max-inline-size:100%}
+body.vivid-atmosphere img,body.vivid-atmosphere video,body.vivid-atmosphere iframe,body.vivid-atmosphere svg,body.vivid-atmosphere canvas{max-width:100%}
+body.vivid-atmosphere table{display:block;max-width:100%;overflow-x:auto}
+body.vivid-atmosphere pre,body.vivid-atmosphere code{max-width:100%;overflow:auto}
+body.vivid-atmosphere p,body.vivid-atmosphere h1,body.vivid-atmosphere h2,body.vivid-atmosphere h3,body.vivid-atmosphere h4,body.vivid-atmosphere h5,body.vivid-atmosphere h6{overflow-wrap:anywhere}
+body.vivid-atmosphere .vivid-landing-shell,
+body.vivid-atmosphere .vivid-discovery-app,
+body.vivid-atmosphere .vivid-collection-app,
+body.vivid-atmosphere .vivid-title-app,
+body.vivid-atmosphere .vivid-watch-app,
+body.vivid-atmosphere .vivid-library-app,
+body.vivid-atmosphere .vivid-home{background:transparent!important}
+body.vivid-atmosphere .vivid-discovery-main,
+body.vivid-atmosphere .vivid-collection-main,
+body.vivid-atmosphere .vivid-title-section,
+body.vivid-atmosphere .vivid-watch-recommendations,
+body.vivid-atmosphere .vivid-library-main,
+body.vivid-atmosphere .vivid-account-shell,
+body.vivid-atmosphere .vivid-legal-main,
+body.vivid-atmosphere .vivid-shell{min-width:0;max-width:100%}
+body.vivid-atmosphere .vivid-discovery-grid,
+body.vivid-atmosphere .vivid-library-grid,
+body.vivid-atmosphere .vivid-cast-grid,
+body.vivid-atmosphere .vivid-provider-grid,
+body.vivid-atmosphere .vivid-video-grid,
+body.vivid-atmosphere .account-grid{min-width:0}
+body.vivid-atmosphere .vivid-discovery-grid>*,
+body.vivid-atmosphere .vivid-library-grid>*,
+body.vivid-atmosphere .vivid-cast-grid>*,
+body.vivid-atmosphere .vivid-provider-grid>*,
+body.vivid-atmosphere .vivid-video-grid>*,
+body.vivid-atmosphere .account-grid>*{min-width:0}
+@media (max-width:1100px){
+  body.vivid-atmosphere .vivid-discovery-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+  body.vivid-atmosphere .vivid-library-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+  body.vivid-atmosphere .vivid-cast-grid{grid-template-columns:repeat(6,minmax(0,1fr))}
+  body.vivid-atmosphere .vivid-video-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+  body.vivid-atmosphere .vivid-discovery-intro{grid-template-columns:minmax(0,1fr) minmax(240px,380px)}
+}
+@media (max-width:800px){
+  body.vivid-atmosphere .vivid-discovery-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+  body.vivid-atmosphere .vivid-library-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+  body.vivid-atmosphere .vivid-cast-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+  body.vivid-atmosphere .vivid-video-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  body.vivid-atmosphere .vivid-title-info-inner{grid-template-columns:minmax(96px,120px) minmax(0,1fr)}
+  body.vivid-atmosphere .vivid-title-hero-inner{grid-template-columns:minmax(96px,120px) minmax(0,1fr)}
+}
+@media (max-width:560px){
+  body.vivid-atmosphere .vivid-discovery-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  body.vivid-atmosphere .vivid-library-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  body.vivid-atmosphere .vivid-cast-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+  body.vivid-atmosphere .vivid-video-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  body.vivid-atmosphere .vivid-discovery-intro{grid-template-columns:1fr;gap:18px}
+  body.vivid-atmosphere .vivid-filter-panel,
+  body.vivid-atmosphere .vivid-collection-toolbar{padding:12px}
+  body.vivid-atmosphere .vivid-title-info-inner{grid-template-columns:1fr}
+  body.vivid-atmosphere .vivid-title-poster{width:min(145px,44vw)}
+}
+@media (max-width:380px){
+  body.vivid-atmosphere .vivid-discovery-main,
+  body.vivid-atmosphere .vivid-collection-main,
+  body.vivid-atmosphere .vivid-title-section,
+  body.vivid-atmosphere .vivid-watch-recommendations,
+  body.vivid-atmosphere .vivid-library-main{padding-left:12px;padding-right:12px}
+  body.vivid-atmosphere .vivid-discovery-grid,
+  body.vivid-atmosphere .vivid-library-grid{gap:9px}
+  body.vivid-atmosphere .vivid-cast-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@media (hover:hover) and (pointer:fine){
+  body.vivid-atmosphere .vivid-card:hover,
+  body.vivid-atmosphere .vivid-card:focus-visible{transform:translateY(-7px) scale(1.035)!important}
+  body.vivid-atmosphere .vivid-feature-card:hover,
+  body.vivid-atmosphere .vivid-feature-card:focus-visible,
+  body.vivid-atmosphere .vivid-feature-card.is-active{transform:translateY(-4px) scale(1.025)!important}
+}
+@media (max-width:640px){
+  body.vivid-atmosphere .vivid-card:hover,
+  body.vivid-atmosphere .vivid-card:focus-visible,
+  body.vivid-atmosphere .vivid-feature-card:hover,
+  body.vivid-atmosphere .vivid-feature-card:focus-visible,
+  body.vivid-atmosphere .vivid-feature-card.is-active{transform:none!important}
+}
