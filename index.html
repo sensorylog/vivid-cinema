@@ -3,18 +3,90 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#08090b">
-<meta name="description" content="Vivid Cinema — discover and watch movies and TV series in a premium cinematic experience.">
-<link rel="canonical" href="https://vivid-cinema.firebaseapp.com/home.html">
+<meta name="theme-color" content="#050608">
+<meta name="description" content="Vivid Cinema — discover movies and series worth watching.">
+<link rel="canonical" href="https://vivid-cinema.firebaseapp.com/">
 <link rel="icon" href="fav-icon.png" type="image/png">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="fav-icon.png">
-<title>Vivid Cinema</title>
+<link rel="preconnect" href="https://api.themoviedb.org">
+<link rel="preconnect" href="https://image.tmdb.org">
+<title>Vivid Cinema — Movies. Series. Your next obsession.</title>
+<link rel="stylesheet" href="styles/vivid-foundation.css">
+<link rel="stylesheet" href="styles/vivid-system.css">
+<link rel="stylesheet" href="styles/vivid-landing.css">
 </head>
-<body>
-<p>Opening Vivid Cinema… <a href="home.html">Continue</a></p>
-<script>
-  window.location.replace("home.html");
-</script>
+<body class="vivid-landing" data-vivid-page="landing">
+<div class="vivid-landing-shell">
+<section class="landing-hero" aria-labelledby="landing-title">
+  <div class="landing-backdrops" id="landing-backdrops" aria-hidden="true"></div>
+  <header class="landing-header">
+    <a class="landing-brand" href="./" aria-label="Vivid Cinema home">Vivid<span>Cinema</span></a>
+    <a class="landing-signin" href="login.html">Sign in</a>
+  </header>
+  <div class="landing-hero-inner">
+    <div class="landing-kicker">A smarter way to discover</div>
+    <h1 id="landing-title">Movies. Series.<br>Your next obsession.</h1>
+    <p class="landing-copy">Discover what is worth watching without digging through endless menus. Find movies, series, trailers and your next favorite in one cinematic place.</p>
+    <form class="landing-form" data-landing-email-form>
+      <input class="landing-email" type="email" name="email" placeholder="Email address" autocomplete="email" inputmode="email" aria-label="Email address" required>
+      <button class="landing-submit" type="submit">Get Started</button>
+    </form>
+    <button class="landing-google" type="button" data-google-start>Continue with Google <span aria-hidden="true">→</span></button>
+    <div class="landing-message" id="landing-message" aria-live="polite"></div>
+    <div class="landing-scroll-cue">Scroll to explore</div>
+  </div>
+</section>
+
+<main class="landing-content">
+<section class="landing-section" aria-labelledby="trending-heading">
+  <div class="landing-section-head"><div><h2 id="trending-heading">Trending now</h2><p class="landing-section-lede">What people are discovering this week.</p></div></div>
+  <div class="landing-trending" id="landing-trending" aria-live="polite">
+    <div class="landing-poster" aria-hidden="true"></div><div class="landing-poster" aria-hidden="true"></div><div class="landing-poster" aria-hidden="true"></div><div class="landing-poster" aria-hidden="true"></div><div class="landing-poster" aria-hidden="true"></div><div class="landing-poster" aria-hidden="true"></div>
+  </div>
+</section>
+
+<section class="landing-section" aria-labelledby="reasons-heading">
+  <div class="landing-section-head"><div><h2 id="reasons-heading">Made for finding something great.</h2><p class="landing-section-lede">Less hunting. More watching.</p></div></div>
+  <div class="landing-reasons">
+    <article class="landing-reason"><div class="landing-reason-icon" aria-hidden="true">✦</div><h3>Discover faster</h3><p>Trending titles, popular releases and curated rails put the good stuff closer to the surface.</p></article>
+    <article class="landing-reason"><div class="landing-reason-icon" aria-hidden="true">⌁</div><h3>One cinematic place</h3><p>Movies and series live together in a calm interface designed around the next thing you want to watch.</p></article>
+    <article class="landing-reason"><div class="landing-reason-icon" aria-hidden="true">＋</div><h3>Build your library</h3><p>Keep the titles you care about close and pick up where you left off across your devices.</p></article>
+    <article class="landing-reason"><div class="landing-reason-icon" aria-hidden="true">◌</div><h3>Always something new</h3><p>Explore what is trending, newly released, highly rated and coming soon.</p></article>
+  </div>
+</section>
+
+<section class="landing-section" aria-labelledby="faq-heading">
+  <div class="landing-section-head"><div><h2 id="faq-heading">Frequently asked questions</h2><p class="landing-section-lede">Everything you need to know before you start.</p></div></div>
+  <div class="landing-faq">
+    <div class="landing-faq-item"><button class="landing-faq-q" aria-expanded="false" type="button"><span>What is Vivid Cinema?</span><span aria-hidden="true">+</span></button><div class="landing-faq-a"><div><p>Vivid Cinema is a cinematic movie and TV discovery experience built to help you find what is worth watching, explore titles and keep your personal library in one place.</p></div></div></div>
+    <div class="landing-faq-item"><button class="landing-faq-q" aria-expanded="false" type="button"><span>Do I need an account?</span><span aria-hidden="true">+</span></button><div class="landing-faq-a"><div><p>You can explore the public experience, while an account gives you access to your personal library and account-based features.</p></div></div></div>
+    <div class="landing-faq-item"><button class="landing-faq-q" aria-expanded="false" type="button"><span>How do I get started?</span><span aria-hidden="true">+</span></button><div class="landing-faq-a"><div><p>Enter your email above to start creating your account, or choose Continue with Google for a faster sign-in.</p></div></div></div>
+    <div class="landing-faq-item"><button class="landing-faq-q" aria-expanded="false" type="button"><span>Can I use Vivid Cinema on mobile and desktop?</span><span aria-hidden="true">+</span></button><div class="landing-faq-a"><div><p>Yes. The experience is designed responsively for desktop, tablet and mobile screens, with touch-friendly discovery on smaller devices.</p></div></div></div>
+    <div class="landing-faq-item"><button class="landing-faq-q" aria-expanded="false" type="button"><span>Where does the movie information come from?</span><span aria-hidden="true">+</span></button><div class="landing-faq-a"><div><p>Vivid Cinema uses third-party catalogue and metadata services to power title information, artwork and discovery data.</p></div></div></div>
+    <div class="landing-faq-item"><button class="landing-faq-q" aria-expanded="false" type="button"><span>Can I keep a personal library?</span><span aria-hidden="true">+</span></button><div class="landing-faq-a"><div><p>Yes. Sign in to use Vivid Cinema's account and library features across supported devices.</p></div></div></div>
+  </div>
+</section>
+
+<section class="landing-section">
+  <div class="landing-cta">
+    <h2>Ready to find your next watch?</h2>
+    <p class="landing-section-lede">Start with your email and enter Vivid Cinema.</p>
+    <form class="landing-form" data-landing-email-form>
+      <input class="landing-email" type="email" name="email" placeholder="Email address" autocomplete="email" inputmode="email" aria-label="Email address" required>
+      <button class="landing-submit" type="submit">Get Started</button>
+    </form>
+  </div>
+</section>
+</main>
+
+<footer class="landing-footer">
+  <div class="landing-footer-inner">
+    <div>© 2026 Vivid Cinema</div>
+    <div class="landing-footer-links"><a href="terms.html">Terms</a><a href="privacy.html">Privacy</a><a href="contact.html">Contact</a><a href="home.html">Explore</a></div>
+  </div>
+</footer>
+</div>
+<script type="module" src="scripts/landing.js"></script>
 </body>
 </html>
