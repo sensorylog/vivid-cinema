@@ -510,3 +510,23 @@ body.vivid-atmosphere .vivid-skeleton-card{
     padding:7px 8px 9px;
   }
 }
+
+
+/* Performance guard: keep atmosphere cinematic without a full-screen blur tax. */
+body.vivid-atmosphere .vivid-ambient-art{
+  filter:blur(24px) saturate(.58) brightness(.68) !important;
+  opacity:.64 !important;
+  contain:paint;
+}
+body.vivid-atmosphere .vivid-ambient-art-layer.is-visible{
+  opacity:.18 !important;
+}
+@media(max-width:900px){
+  body.vivid-atmosphere .vivid-ambient-art{
+    filter:blur(20px) saturate(.55) brightness(.65) !important;
+    opacity:.42 !important;
+  }
+  body.vivid-atmosphere .vivid-ambient-art-layer.is-visible{
+    opacity:.12 !important;
+  }
+}
