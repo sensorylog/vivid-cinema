@@ -7,7 +7,7 @@ import { escapeHtml, debounce, getErrorMessage } from "./scripts/utils.js";
 import { buildWatchUrl } from "./scripts/routes.js";
 
 const $=id=>document.getElementById(id);
-let featured=[],activeIndex=0,heroMuted=true,heroPlaying=true,heroTimer=null;
+let featured=[],activeIndex=0,heroMuted=true,heroPlaying=true,heroTimer=null,heroLoadToken=0;
 let heroScrollShift=0,heroScrollTarget=0,heroScrollLastY=window.scrollY||0,heroScrollRaf=0;
 const rails={};
 const sectionState={};
@@ -73,28 +73,42 @@ function setHeroText(item){
 }
 
 function youtubeUrl(key,muted=true){
- const params=new URLSearchParams({autoplay:"1",mute:muted?"1":"0",controls:"0",playsinline:"1",rel:"0",iv_load_policy:"3"});
+ const params=new URLSearchParams({
+   autoplay:"1",mute:muted?"1":"0",controls:"0",playsinline:"1",rel:"0",
+   iv_load_policy:"3",enablejsapi:"1",origin:window.location.origin
+ });
  return "https://www.youtube.com/embed/"+encodeURIComponent(key)+"?"+params.toString();
+}
+
+function sendHeroPlayerCommand(func){
+ const iframe=$("hero-video");
+ if(!iframe?.contentWindow)return false;
+ try{iframe.contentWindow.postMessage(JSON.stringify({event:"command",func,args:[]}),"https://www.youtube.com");return true}catch{return false}
 }
 
 async function loadHeroVideo(item){
  const iframe=$("hero-video"),fallback=$("hero-fallback");
+ if(!iframe||!fallback||!item)return false;
+ const token=++heroLoadToken;
  iframe.classList.remove("is-ready");
  fallback.classList.add("is-visible");
  try{
    const data=item.media_type==="tv"?await tmdbApi.tvDetails(item.id):await tmdbApi.movieDetails(item.id);
+   if(token!==heroLoadToken)return false;
    const videos=data?.videos?.results||[];
    const trailer=
      videos.find(v=>v?.site==="YouTube"&&v?.key&&v.type==="Trailer"&&v.official!==false)||
      videos.find(v=>v?.site==="YouTube"&&v?.key&&v.type==="Trailer")||
      videos.find(v=>v?.site==="YouTube"&&v?.key&&v.type==="Teaser")||
      videos.find(v=>v?.site==="YouTube"&&v?.key);
-   if(!trailer?.key){iframe.removeAttribute("src");return false;}
-   iframe.onload=()=>{iframe.classList.add("is-ready");fallback.classList.remove("is-visible");};
+   if(!trailer?.key){iframe.removeAttribute("src");iframe.dataset.videoKey="";return false;}
+   iframe.onload=()=>{if(token!==heroLoadToken)return;iframe.classList.add("is-ready");fallback.classList.remove("is-visible");if(!heroPlaying)sendHeroPlayerCommand("pauseVideo");};
+   iframe.onerror=()=>{if(token!==heroLoadToken)return;iframe.classList.remove("is-ready");fallback.classList.add("is-visible");};
    iframe.src=youtubeUrl(trailer.key,heroMuted);
    iframe.dataset.videoKey=trailer.key;
    return true;
  }catch(error){
+   if(token!==heroLoadToken)return false;
    iframe.classList.remove("is-ready");
    fallback.classList.add("is-visible");
    console.warn("Hero trailer unavailable:",error);
@@ -161,8 +175,21 @@ async function initHero(){
  }catch(e){$("hero-title").textContent="Discover something vivid";$("hero-copy").textContent=getErrorMessage(e)}
 }
 
-function toggleSound(){heroMuted=!heroMuted;if(heroPlayer){try{heroMuted?heroPlayer.mute():heroPlayer.unMute();}catch{}} else {const item=featured[activeIndex];if(item)void loadHeroVideo(item);}$("hero-sound").innerHTML='<i class="bi bi-'+(heroMuted?"volume-mute-fill":"volume-up-fill")+'"></i>';$("hero-sound").setAttribute("aria-label",heroMuted?"Unmute trailer":"Mute trailer")}
-function togglePause(){heroPlaying=!heroPlaying;clearTimeout(heroTimer);if(heroPlayer){try{heroPlaying?heroPlayer.playVideo():heroPlayer.pauseVideo();}catch{}} $("hero-pause").innerHTML='<i class="bi bi-'+(heroPlaying?"pause-fill":"play-fill")+'"></i>';$("hero-pause").setAttribute("aria-label",heroPlaying?"Pause trailer":"Play trailer");if(heroPlaying&&!heroPlayer)showHero(activeIndex,true)}
+function toggleSound(){
+ heroMuted=!heroMuted;
+ const changed=sendHeroPlayerCommand(heroMuted?"mute":"unMute");
+ if(!changed){const item=featured[activeIndex];if(item)void loadHeroVideo(item);}
+ const button=$("hero-sound");
+ if(button){button.innerHTML='<i class="bi bi-'+(heroMuted?"volume-mute-fill":"volume-up-fill")+'"></i>';button.setAttribute("aria-label",heroMuted?"Unmute trailer":"Mute trailer");}
+}
+function togglePause(){
+ heroPlaying=!heroPlaying;
+ clearTimeout(heroTimer);
+ sendHeroPlayerCommand(heroPlaying?"playVideo":"pauseVideo");
+ const button=$("hero-pause");
+ if(button){button.innerHTML='<i class="bi bi-'+(heroPlaying?"pause-fill":"play-fill")+'"></i>';button.setAttribute("aria-label",heroPlaying?"Pause trailer":"Play trailer");}
+ if(heroPlaying)heroTimer=setTimeout(()=>showHero(activeIndex+1),18000);
+}
 
 function wireRails(){
  document.querySelectorAll("[data-scroll]").forEach(btn=>btn.addEventListener("click",e=>{
