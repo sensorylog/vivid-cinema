@@ -445,3 +445,68 @@ body.vivid-atmosphere .vivid-library-nav,
 body.vivid-atmosphere .vivid-watch-nav{
   z-index:1000;
 }
+
+
+/* Final visual + card geometry normalization.
+   Keep one authoritative catalogue-card size after the legacy cinematic layers. */
+body.vivid-atmosphere{
+  background:
+    radial-gradient(900px 620px at 8% 4%,rgba(91,108,132,.13),transparent 62%),
+    radial-gradient(760px 560px at 92% 16%,rgba(65,79,101,.10),transparent 62%),
+    radial-gradient(900px 700px at 50% 100%,rgba(52,61,76,.08),transparent 66%),
+    linear-gradient(180deg,#090b10 0%,#07090d 48%,#06080c 100%) !important;
+  color:#f4f6f8 !important;
+}
+body.vivid-atmosphere .vivid-rail{
+  gap:12px;
+}
+body.vivid-atmosphere .vivid-card{
+  flex:0 0 clamp(150px,11vw,168px) !important;
+  width:clamp(150px,11vw,168px);
+  min-width:clamp(150px,11vw,168px);
+  max-width:clamp(150px,11vw,168px);
+  transform:none;
+}
+body.vivid-atmosphere .vivid-card-media{
+  aspect-ratio:3 / 4 !important;
+}
+body.vivid-atmosphere .vivid-card-info{
+  min-height:48px !important;
+  padding:8px 9px 10px;
+}
+body.vivid-atmosphere .vivid-card-title{
+  font-size:.82rem;
+}
+body.vivid-atmosphere .vivid-card-sub{
+  font-size:.68rem;
+  margin-top:3px;
+}
+body.vivid-atmosphere .vivid-skeleton-card{
+  flex:0 0 clamp(150px,11vw,168px) !important;
+  width:clamp(150px,11vw,168px);
+  min-width:clamp(150px,11vw,168px);
+  max-width:clamp(150px,11vw,168px);
+  aspect-ratio:3 / 4 !important;
+}
+@media (hover:hover) and (pointer:fine){
+  body.vivid-atmosphere .vivid-card:hover,
+  body.vivid-atmosphere .vivid-card:focus-visible{
+    transform:translateY(-7px) scale(1.035) !important;
+  }
+}
+@media(max-width:640px){
+  body.vivid-atmosphere .vivid-rail{
+    gap:10px;
+  }
+  body.vivid-atmosphere .vivid-card,
+  body.vivid-atmosphere .vivid-skeleton-card{
+    flex-basis:136px !important;
+    width:136px;
+    min-width:136px;
+    max-width:136px;
+  }
+  body.vivid-atmosphere .vivid-card-info{
+    min-height:46px !important;
+    padding:7px 8px 9px;
+  }
+}
