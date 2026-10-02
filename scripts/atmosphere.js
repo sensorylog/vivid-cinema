@@ -53,6 +53,42 @@ function setupReveals(root=document){
 }
 setupReveals();
 
+function setupAmbientArtwork(){
+  if(reduceMotion || document.body.matches(".vivid-landing") || document.body.matches(".vivid-watch-page") || document.querySelector(".vivid-hero-video")) return;
+  const sources=()=>[...document.querySelectorAll("img[src]")].map(img=>img.currentSrc||img.src).filter(src=>/^https?:/i.test(src));
+  const ensure=()=>{
+    const list=[...new Set(sources())].slice(0,18);
+    if(!list.length)return;
+    let host=document.querySelector(".vivid-ambient-art");
+    if(!host){
+      host=document.createElement("div");
+      host.className="vivid-ambient-art";
+      host.setAttribute("aria-hidden","true");
+      host.innerHTML='<div class="vivid-ambient-art-layer"></div><div class="vivid-ambient-art-layer"></div>';
+      document.body.prepend(host);
+    }
+    if(host.dataset.ready)return;
+    host.dataset.ready="1";
+    const layers=[...host.children];
+    let index=0;
+    const paint=()=>{
+      const src=list[index%list.length];
+      const next=layers[(index+1)%2];
+      const current=layers[index%2];
+      next.style.backgroundImage='url("'+src.replace(/"/g,"%22")+'")';
+      next.classList.add("is-visible");
+      current.classList.remove("is-visible");
+      index++;
+    };
+    paint();
+    if(list.length>1)window.setInterval(paint,9000);
+  };
+  ensure();
+  const observer=new MutationObserver(ensure);
+  observer.observe(document.body,{childList:true,subtree:true});
+}
+setupAmbientArtwork();
+
 const mutationObserver=new MutationObserver(records=>{
   for(const record of records){
     for(const node of record.addedNodes){
