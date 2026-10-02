@@ -104,9 +104,9 @@ async function registerServiceWorker() {
     const registration = await navigator.serviceWorker.register(SW_PATH, { scope: "./" });
     activeRegistration = registration;
     createUpdateControl(registration);
-    // Do not force a network update during first paint. Firebase Hosting will serve the
-    // cached shell immediately; a background update is enough for a PWA.
-    window.setTimeout(() => { void registration.update().catch(() => {}); }, 30000);
+    // Check for a fresh worker immediately so visual/code fixes are not held behind
+    // a long-lived cached shell. The new worker still takes control normally.
+    void registration.update().catch(() => {});
 
     navigator.serviceWorker.addEventListener("controllerchange", () => {
       window.location.reload();
