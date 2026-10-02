@@ -55,7 +55,7 @@ function renderLibraryActions() {
     '<button class="vivid-button vivid-button--secondary" type="button" id="library-favorite"><i class="bi bi-heart' + (favorite ? '-fill' : '') + '"></i> ' + (favorite ? "Favorited" : "Favorite") + '</button>' +
     '<button class="vivid-button vivid-button--secondary" type="button" id="library-watch-later"><i class="bi bi-clock' + (watchLater ? '-fill' : '') + '"></i> ' + (watchLater ? "Saved" : "Watch later") + '</button>' +
     '<a class="vivid-button vivid-button--ghost" href="library.html"><i class="bi bi-bookmark"></i> My Library</a>' +
-    (externalLink ? '<a class="vivid-button vivid-button--secondary" href="' + escapeHtml(externalLink) + '" target="_blank" rel="noopener noreferrer"><i class="bi bi-box-arrow-up-right"></i> External provider</a>' : "") +
+    (externalLink ? '<a class="vivid-button vivid-button--secondary" href="' + escapeHtml(externalLink) + '" target="_blank" rel="noopener noreferrer" aria-label="Download this title"><i class="bi bi-download"></i> Download</a>' : "") +
     '</div>';
 }
 
