@@ -813,3 +813,46 @@ body.vivid-cinema-home{
   .vivid-cinema-home .vivid-actions{animation:none;transition:none}
   .vivid-cinema-home .vivid-feature-track{scroll-behavior:auto;scroll-snap-type:none}
 }
+
+
+/* Stability correction: catalogue cards stay planted while the page scrolls. */
+.vivid-rail{
+  touch-action:pan-x pan-y;
+  overscroll-behavior-x:contain;
+  scroll-snap-type:none;
+}
+.vivid-card{
+  transform:none;
+  will-change:auto;
+}
+.vivid-card:hover{
+  transform:translateY(-3px);
+}
+@media (hover:hover) and (pointer:fine){
+  .vivid-rail{
+    padding-top:14px;
+    padding-bottom:18px;
+  }
+  .vivid-card{
+    transform:none;
+  }
+  .vivid-card:hover,
+  .vivid-card:focus-visible{
+    transform:translateY(-8px) scale(1.045);
+  }
+}
+@media (max-width:640px){
+  .vivid-rail{
+    padding-top:2px;
+    padding-bottom:10px;
+    touch-action:pan-x pan-y;
+    scroll-snap-type:none;
+  }
+  .vivid-rails{
+    padding-top:18px;
+    padding-bottom:2px;
+  }
+  .vivid-card{
+    transform:none!important;
+  }
+}
