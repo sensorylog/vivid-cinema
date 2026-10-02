@@ -167,3 +167,33 @@ updateRailPhysics();
   });
   window.addEventListener("pageshow",()=>layer.classList.remove("is-active"));
 })();
+
+
+/* Phase 5 — hero motion. No player API changes; only visual choreography around the existing iframe. */
+(function setupHeroChoreography(){
+  const hero=document.querySelector(".vivid-hero");
+  const media=document.querySelector(".vivid-hero-media");
+  const content=document.querySelector(".vivid-hero-content");
+  const track=document.querySelector(".vivid-feature-track");
+  if(!hero||!media)return;
+  if(reduceMotion)return;
+  let raf=0;
+  const update=()=>{
+    raf=0;
+    const rect=hero.getBoundingClientRect();
+    const h=Math.max(1,rect.height);
+    const progress=Math.max(0,Math.min(1,-rect.top/(h*.72)));
+    media.style.setProperty("--hero-progress",progress.toFixed(3));
+    if(content && window.innerWidth>640){
+      content.style.transform="translate3d(0,"+(progress*-22).toFixed(2)+"px,0)";
+      content.style.opacity=String(1-Math.min(.16,progress*.16));
+    }
+    if(track && window.innerWidth>640){
+      track.style.setProperty("--hero-scroll-shift",(progress*10).toFixed(2)+"px");
+    }
+  };
+  const request=()=>{if(!raf)raf=requestAnimationFrame(update)};
+  window.addEventListener("scroll",request,{passive:true});
+  window.addEventListener("resize",request,{passive:true});
+  request();
+})();
