@@ -122,3 +122,41 @@ body.vivid-atmosphere::after{
   .vivid-atmosphere .vivid-feature-card::before,
   .vivid-atmosphere .landing-poster::before{display:none}
 }
+.vivid-ambient-art{
+  position:fixed;
+  inset:-8%;
+  z-index:-3;
+  pointer-events:none;
+  overflow:hidden;
+  opacity:.48;
+  filter:blur(34px) saturate(.72);
+  transform:scale(1.08);
+}
+.vivid-ambient-art-layer{
+  position:absolute;
+  inset:0;
+  background-position:center;
+  background-size:cover;
+  opacity:0;
+  transform:scale(1.04);
+  transition:opacity 1.8s ease,transform 14s ease;
+}
+.vivid-ambient-art-layer.is-visible{
+  opacity:.13;
+  transform:scale(1.09);
+}
+.vivid-ambient-art::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:
+    linear-gradient(90deg,rgba(4,5,7,.97),rgba(4,5,7,.86) 42%,rgba(4,5,7,.94)),
+    linear-gradient(0deg,rgba(4,5,7,.98),transparent 45%,rgba(4,5,7,.9));
+}
+@media(max-width:640px){
+  .vivid-ambient-art{filter:blur(42px) saturate(.65);opacity:.42}
+  .vivid-ambient-art-layer.is-visible{opacity:.1}
+}
+@media(prefers-reduced-motion:reduce){
+  .vivid-ambient-art-layer{transition:none;transform:none}
+}
