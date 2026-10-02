@@ -1,1 +1,45 @@
  .account-page{min-height:100dvh;background:radial-gradient(circle at 20% 0%,rgba(255,255,255,.06),transparent 35%),#08090b;color:#f5f7fa}.account-shell{width:min(1100px,calc(100% - 2*var(--vivid-page-gutter,1rem)));margin:0 auto;padding:clamp(6rem,10vw,8rem) 0 5rem}.account-header{display:flex;align-items:end;justify-content:space-between;gap:1rem;margin-bottom:2rem}.account-header h1{margin:0;font-size:clamp(2rem,5vw,3.6rem);letter-spacing:-.04em}.account-header p{margin:.5rem 0 0;color:#a8adb7}.account-grid{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(280px,.65fr);gap:1rem}.account-card{padding:1.25rem;background:rgba(20,22,27,.72);border:1px solid rgba(255,255,255,.08);border-radius:24px;box-shadow:0 20px 70px rgba(0,0,0,.28);backdrop-filter:blur(22px)}.account-card h2{margin:0 0 1rem;font-size:1.05rem}.account-field{display:grid;gap:.45rem;margin:0 0 1rem}.account-field label{font-size:.82rem;color:#a8adb7}.account-field input,.account-field select{width:100%;box-sizing:border-box;min-height:46px;border:1px solid rgba(255,255,255,.1);border-radius:12px;background:rgba(255,255,255,.05);color:#f5f7fa;padding:.75rem .85rem}.account-field input:disabled{opacity:.7}.account-field select option{background:#17191d;color:#fff}.account-status{min-height:1.3rem;margin:.5rem 0 1rem;color:#a8adb7}.account-status[data-state="success"]{color:#9be6ad}.account-meta{display:grid;gap:.75rem;margin:0 0 1.25rem}.account-meta-row{display:flex;justify-content:space-between;gap:1rem;padding:.8rem 0;border-bottom:1px solid rgba(255,255,255,.06)}.account-meta-row span:first-child{color:#a8adb7}.account-meta-row span:last-child{text-align:right}.account-badge[data-state="success"]{color:#9be6ad}.account-badge[data-state="warning"]{color:#ffd27a}.account-actions{display:flex;gap:.75rem;flex-wrap:wrap}.account-actions button{min-height:44px}.account-toggle{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:.9rem 0;border-bottom:1px solid rgba(255,255,255,.06)}.account-toggle:last-child{border-bottom:0}.account-toggle strong{display:block;font-size:.95rem}.account-toggle small{display:block;color:#8e949e;margin-top:.2rem}.account-toggle input{width:20px;height:20px;accent-color:#f5f7fa}.account-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:.65rem}.account-stat{padding:1rem;border-radius:16px;background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.06)}.account-stat strong{display:block;font-size:1.5rem}.account-stat span{display:block;color:#8e949e;font-size:.78rem;margin-top:.2rem}@media(max-width:760px){.account-shell{padding-top:5rem}.account-header{align-items:start;flex-direction:column}.account-grid{grid-template-columns:1fr}.account-card{border-radius:20px}.account-stats{grid-template-columns:1fr 1fr 1fr}.account-stat{padding:.75rem}}@media(prefers-reduced-motion:reduce){.account-page *{scroll-behavior:auto}}
+
+/* Phase 3 — account: quiet profile cockpit. */
+.account-page{position:relative;overflow-x:hidden}
+.account-page .account-shell{position:relative}
+.account-page .account-header{
+  position:relative;
+  padding:26px 0 42px;
+}
+.account-page .account-header::before{
+  content:"";
+  position:absolute;
+  left:-10%;
+  top:-35px;
+  width:460px;
+  height:260px;
+  background:radial-gradient(ellipse,rgba(255,255,255,.07),transparent 70%);
+  filter:blur(32px);
+  pointer-events:none;
+}
+.account-page .account-header>*{position:relative}
+.account-page .account-card{
+  position:relative;
+  overflow:hidden;
+  border-color:rgba(255,255,255,.1);
+  background:linear-gradient(145deg,rgba(255,255,255,.055),rgba(255,255,255,.025));
+  box-shadow:0 22px 65px rgba(0,0,0,.24),inset 0 1px rgba(255,255,255,.05);
+}
+.account-page .account-card::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  background:linear-gradient(125deg,rgba(255,255,255,.055),transparent 28%,transparent 72%,rgba(255,255,255,.018));
+  opacity:.7;
+}
+.account-page .account-card>*{position:relative;z-index:1}
+.account-page .account-toggle{
+  transition:background .25s ease,border-color .25s ease;
+}
+.account-page .account-toggle:hover{background:rgba(255,255,255,.045);border-color:rgba(255,255,255,.1)}
+.account-page .account-stat strong{letter-spacing:-.04em}
+@media(max-width:700px){
+  .account-page .account-card{box-shadow:0 16px 45px rgba(0,0,0,.2)}
+}
