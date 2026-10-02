@@ -635,37 +635,8 @@ body.vivid-cinema-home{
 }
 
 
-/* Desktop hover elevation: featured hero tabs and catalogue cards lift out of the rail. */
+/* Desktop hover is owned by vivid-atmosphere.css. Keep only the hero-card scroll choreography here. */
 @media (hover:hover) and (pointer:fine){
-  .vivid-feature-card{
-    transform:translateY(0) scale(1);
-    transform-origin:center center;
-    box-shadow:0 0 0 rgba(0,0,0,0);
-    transition:transform 220ms cubic-bezier(.2,.7,.2,1),box-shadow 220ms ease,opacity 220ms ease,border-color 220ms ease;
-  }
-  .vivid-feature-card:hover,
-  .vivid-feature-card:focus-visible{
-    transform:translateY(-9px) scale(1.055);
-    z-index:20;
-    opacity:1;
-    border-color:rgba(255,255,255,.42);
-    box-shadow:0 22px 55px rgba(0,0,0,.48);
-  }
-  .vivid-card{
-    transform:translateY(0) scale(1);
-    transform-origin:center bottom;
-    transition:transform 220ms cubic-bezier(.2,.7,.2,1),box-shadow 220ms ease,border-color 220ms ease;
-  }
-  .vivid-card:hover,
-  .vivid-card:focus-visible{
-    transform:translateY(-8px) scale(1.045);
-    box-shadow:0 24px 60px rgba(0,0,0,.48);
-    border-color:rgba(255,255,255,.28);
-  }
-  .vivid-rail{
-    padding-top:12px;
-    padding-bottom:18px;
-  }
   .vivid-feature-track{
     padding-top:18px;
     padding-bottom:20px;
@@ -674,10 +645,8 @@ body.vivid-cinema-home{
   }
 }
 @media (hover:none), (pointer:coarse){
-  .vivid-feature-card:hover,
-  .vivid-card:hover{transform:none}
+  .vivid-feature-track{transform:none!important}
 }
-
 
 .vivid-hero-video > iframe,
 .vivid-hero-youtube{
@@ -685,46 +654,6 @@ body.vivid-cinema-home{
   height:100%!important;
   display:block;
   border:0;
-}
-
-/* Netflix-style desktop hover: cards and hero tabs pop out of the rail. */
-@media (hover:hover) and (pointer:fine){
-  .vivid-rail{
-    padding-top:22px;
-    padding-bottom:28px;
-  }
-  .vivid-card{
-    z-index:1;
-    transform:translateY(0) scale(1);
-    transform-origin:center bottom;
-    transition:transform 240ms cubic-bezier(.2,.8,.2,1),box-shadow 240ms ease,border-color 240ms ease,z-index 0s;
-  }
-  .vivid-card:hover,
-  .vivid-card:focus-visible{
-    z-index:30;
-    transform:translateY(-14px) scale(1.12);
-    box-shadow:0 28px 70px rgba(0,0,0,.55);
-    border-color:rgba(255,255,255,.35);
-  }
-  .vivid-card:hover .vivid-card-media img,
-  .vivid-card:focus-visible .vivid-card-media img{
-    transform:scale(1.04);
-  }
-  .vivid-feature-card{
-    z-index:1;
-    transform:translateY(0) scale(1);
-    transform-origin:center center;
-    transition:transform 240ms cubic-bezier(.2,.8,.2,1),box-shadow 240ms ease,opacity 240ms ease,border-color 240ms ease,z-index 0s;
-  }
-  .vivid-feature-card:hover,
-  .vivid-feature-card:focus-visible,
-  .vivid-feature-card.is-active{
-    z-index:25;
-    opacity:1;
-    transform:translateY(-12px) scale(1.08);
-    border-color:rgba(255,255,255,.48);
-    box-shadow:0 26px 60px rgba(0,0,0,.5);
-  }
 }
 
 /* Ensure YouTube iframe fully covers the hero media frame. */
