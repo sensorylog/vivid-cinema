@@ -92,7 +92,7 @@ setupAmbientArtwork();
 const mutationObserver=new MutationObserver(records=>{
   for(const record of records){
     for(const node of record.addedNodes){
-      if(node.nodeType===1)setupReveals(node);
+      if(node.nodeType===1){setupReveals(node);setupCardAtmosphere(node);}
     }
   }
 });
