@@ -451,7 +451,7 @@ body.vivid-cinema-home{
   .vivid-feature-track{
     padding-top:18px;
     padding-bottom:20px;
-    transform:translate3d(var(--hero-scroll-shift,0px),0,0);
+    transform:none;
     will-change:transform;
   }
 }
