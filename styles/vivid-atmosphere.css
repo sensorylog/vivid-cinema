@@ -421,3 +421,26 @@ body.vivid-atmosphere .vivid-rail-head{
 @media(prefers-reduced-motion:reduce){
   body.vivid-atmosphere .vivid-ambient-art{filter:blur(42px) saturate(.62) brightness(.72)}
 }
+
+/* Ambient artwork is a background layer, never a content layer. */
+body.vivid-atmosphere .vivid-ambient-art{
+  pointer-events:none!important;
+}
+body.vivid-atmosphere .vivid-discovery-app,
+body.vivid-atmosphere .vivid-library-app,
+body.vivid-atmosphere .vivid-title-app,
+body.vivid-atmosphere .vivid-watch-app,
+body.vivid-atmosphere .account-page,
+body.vivid-atmosphere .auth-container,
+body.vivid-atmosphere .nav,
+body.vivid-atmosphere .vivid-collection-app{
+  position:relative;
+  z-index:1;
+}
+body.vivid-atmosphere .vivid-topbar,
+body.vivid-atmosphere .vivid-discovery-nav,
+body.vivid-atmosphere .vivid-title-nav,
+body.vivid-atmosphere .vivid-library-nav,
+body.vivid-atmosphere .vivid-watch-nav{
+  z-index:1000;
+}
