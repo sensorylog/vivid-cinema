@@ -27,6 +27,7 @@ function initAppShell() {
   initialized = true;
 
   document.documentElement.dataset.vividReady = "false";
+  document.documentElement.dataset.vividTheme = "cinematic";
   setViewportState();
   setConnectionState();
   setPageIdentity();
