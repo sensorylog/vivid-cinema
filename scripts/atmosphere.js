@@ -97,3 +97,28 @@ const mutationObserver=new MutationObserver(records=>{
   }
 });
 mutationObserver.observe(document.body,{childList:true,subtree:true});
+/* Phase 2 rail physics: tiny scroll-linked lift, never enough to distract. */
+function setupCardAtmosphere(root=document){
+  root.querySelectorAll?.(".vivid-card").forEach(card=>{
+    const img=card.querySelector(".vivid-card-media img");
+    if(img?.src) card.style.setProperty("--vivid-card-art",'url("'+img.src.replace(/"/g,"%22")+'")');
+  });
+}
+setupCardAtmosphere();
+let railRaf=0;
+function updateRailPhysics(){
+  railRaf=0;
+  if(reduceMotion)return;
+  const vh=window.innerHeight||800;
+  document.querySelectorAll(".vivid-rail").forEach(rail=>{
+    const rect=rail.getBoundingClientRect();
+    if(rect.bottom<0||rect.top>vh) return;
+    const center=rect.top+rect.height/2;
+    const delta=Math.max(-1,Math.min(1,(vh*.52-center)/(vh*.7)));
+    rail.style.setProperty("--vivid-rail-shift",(delta*3).toFixed(2)+"px");
+  });
+}
+window.addEventListener("scroll",()=>{
+  if(!railRaf)railRaf=requestAnimationFrame(updateRailPhysics);
+},{passive:true});
+updateRailPhysics();
