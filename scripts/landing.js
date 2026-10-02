@@ -1,4 +1,4 @@
-import { getFeaturedMovies, getHomeSections } from "./content.js";
+import { getFeaturedMovies } from "./content.js";
 import { getImageUrl } from "./media.js";
 import { auth, db } from "./firebase.js";
 import { GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
@@ -19,7 +19,12 @@ async function loadTrending(){
   rail.innerHTML=items.map((item,i)=>'<a class="landing-poster" href="title.html?id='+encodeURIComponent(item.id)+'&type='+encodeURIComponent(item.media_type||"movie")+'"><img src="'+getImageUrl(item.poster_path||item.backdrop_path,"w342")+'" alt="'+String(item.title||"Title").replace(/&/g,"&amp;").replace(/</g,"&lt;")+'" loading="lazy" decoding="async"><span class="landing-rank">'+(i+1)+'</span><span class="landing-poster-title">'+String(item.title||"Untitled").replace(/&/g,"&amp;").replace(/</g,"&lt;")+'</span></a>').join("");
   const backdrops=items.filter(x=>x.backdrop_path).slice(0,4);const layer=$("landing-backdrops");
   backdrops.forEach((item,i)=>{const div=document.createElement("div");div.className="landing-backdrop";div.style.backgroundImage="url(\""+getImageUrl(item.backdrop_path,"w1280")+"\")";div.setAttribute("aria-hidden","true");if(i===0)div.classList.add("is-visible");layer.appendChild(div)});
+  const stack=$("landing-hero-stack");
+  if(stack){
+    stack.innerHTML=items.slice(0,3).map(item=>'<a class="landing-stack-poster" href="title.html?id='+encodeURIComponent(item.id)+'&type=movie"><img src="'+getImageUrl(item.poster_path||item.backdrop_path,"w500")+'" alt="" loading="eager"></a>').join("");
+  }
   if(backdrops.length>1){let i=0;window.setInterval(()=>{const layers=layer.querySelectorAll(".landing-backdrop");layers[i]?.classList.remove("is-visible");i=(i+1)%layers.length;layers[i]?.classList.add("is-visible")},7000)}
+
  }catch(error){console.warn("Landing discovery unavailable:",error)}
 }
 function wireFaq(){document.querySelectorAll(".landing-faq-q").forEach(button=>button.addEventListener("click",()=>{const item=button.closest(".landing-faq-item");const open=item.classList.toggle("is-open");button.setAttribute("aria-expanded",String(open))}))}
