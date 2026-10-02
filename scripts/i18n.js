@@ -25,6 +25,9 @@ function makeStyles(){
 .vivid-language{position:relative;display:inline-flex;align-items:center;flex:0 0 auto}
 .vivid-language select{appearance:none;-webkit-appearance:none;height:36px;min-width:58px;padding:0 27px 0 10px;border:1px solid rgba(255,255,255,.11);border-radius:11px;background:rgba(255,255,255,.055);color:#f5f7fa;font:600 .72rem/1 inherit;letter-spacing:.04em;outline:0;cursor:pointer}
 .vivid-language select:focus{border-color:rgba(255,255,255,.3);box-shadow:0 0 0 3px rgba(255,255,255,.05)}
+.vivid-language select option{background:#11151c;color:#f5f7fa;font-weight:500}
+.vivid-language select option:checked{background:#202631;color:#fff}
+@media(hover:hover) and (pointer:fine){.vivid-language select:hover{background:rgba(255,255,255,.085);border-color:rgba(255,255,255,.18)}}
 .vivid-language:after{content:"⌄";position:absolute;right:9px;top:50%;transform:translateY(-52%);pointer-events:none;color:#9fa6b0;font-size:.72rem}
 .vivid-nav .vivid-language{margin-left:2px}
 .vivid-footer{display:flex;justify-content:center;align-items:center;gap:8px;flex-wrap:wrap;text-align:center}
