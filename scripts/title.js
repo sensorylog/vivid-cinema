@@ -201,6 +201,35 @@ function renderRecommendationCards(items){
     : '<p class="vivid-muted">No recommendations available yet.</p>';
 }
 
+function renderFacts(details) {
+  const facts = [
+    ["Release", details.release_date || details.first_air_date || ""],
+    ["Status", details.status || ""],
+    ["Original language", details.original_language ? String(details.original_language).toUpperCase() : ""],
+    ["Runtime", media?.media_type === "movie" ? formatRuntime(details.runtime) : (details.number_of_episodes ? details.number_of_episodes + " episodes" : "")],
+    ["Seasons", media?.media_type === "tv" && details.number_of_seasons ? String(details.number_of_seasons) : ""],
+    ["Episodes", media?.media_type === "tv" && details.number_of_episodes ? String(details.number_of_episodes) : ""]
+  ].filter(([, value]) => value);
+  if (!facts.length) return "";
+  return '<section class="vivid-title-section vivid-title-facts"><div class="vivid-section-heading"><div><span>DETAILS</span><h2>At a glance</h2></div></div><div class="vivid-facts-grid">' +
+    facts.map(([label,value]) => '<div class="vivid-fact"><span>' + escapeHtml(label) + '</span><strong>' + escapeHtml(value) + '</strong></div>').join("") +
+    '</div></section>';
+}
+
+function renderStorySection(details, cast) {
+  const crew = details.credits?.crew || [];
+  const directors = crew.filter((person) => person.job === "Director").map((person) => person.name).filter(Boolean).slice(0, 4);
+  const writers = crew.filter((person) => ["Writer", "Screenplay", "Story", "Creator"].includes(person.job)).map((person) => person.name).filter(Boolean).slice(0, 5);
+  const creators = (details.created_by || []).map((person) => person.name).filter(Boolean).slice(0, 4);
+  const leadCast = cast.slice(0, 6);
+  return '<section class="vivid-title-section vivid-title-story"><div class="vivid-story-grid"><div><div class="vivid-section-heading"><div><span>THE STORY</span><h2>About this title</h2></div></div><p class="vivid-story-overview">' + escapeHtml(media.overview || "No synopsis is available for this title yet.") + '</p></div><div class="vivid-credit-panel">' +
+    (directors.length ? '<div><span>Director</span><strong>' + escapeHtml(directors.join(", ")) + '</strong></div>' : '') +
+    (creators.length ? '<div><span>Created by</span><strong>' + escapeHtml(creators.join(", ")) + '</strong></div>' : '') +
+    (writers.length ? '<div><span>Writing</span><strong>' + escapeHtml(writers.join(", ")) + '</strong></div>' : '') +
+    (leadCast.length ? '<div><span>Starring</span><strong>' + escapeHtml(leadCast.map((person) => person.name).join(", ")) + '</strong></div>' : '') +
+    '</div></div></section>';
+}
+
 function render(details) {
   currentDetails=details;
   media=normalizeMedia(details,route.params.get("type")==="tv"?"tv":"movie");
@@ -231,10 +260,11 @@ function render(details) {
       '<div class="vivid-title-actions"><a class="vivid-button vivid-button--primary" href="'+escapeHtml(buildWatchUrl(media.id,media.media_type,media.media_type==="tv"?(details.seasons?.find((season)=>season.episode_count>0&&season.season_number>=0)?.season_number??1):null,media.media_type==="tv"?1:null))+'"><i class="bi bi-play-fill"></i> Watch now</a>'+(firstTrailer?'<button class="vivid-button vivid-button--secondary" id="hero-trailer" type="button"><i class="bi bi-play-circle"></i> Watch trailer</button>':"")+'<a class="vivid-button vivid-button--ghost" href="home.html"><i class="bi bi-arrow-left"></i> Browse more</a></div></div>'+
     '</div></section>'+
     renderLibraryActions()+
-    renderTrailerSection(details)+
-    '<section class="vivid-title-section"><div class="vivid-section-heading"><div><span>CAST</span><h2>People in the story</h2></div></div><div class="vivid-cast-grid">'+
+    renderFacts(details)+
+    renderStorySection(details, cast)+
+    '<section class="vivid-title-section"><div class="vivid-section-heading"><div><span>CAST & CREW</span><h2>People in the story</h2></div></div><div class="vivid-cast-grid">'+
       (cast.length?cast.map((person)=>'<article class="vivid-cast"><img loading="lazy" src="'+getImageUrl(person.profile_path,"w185")+'" alt="'+escapeHtml(person.name)+'"><strong>'+escapeHtml(person.name)+'</strong><small>'+escapeHtml(person.character||"Cast")+'</small></article>').join(""):'<p class="vivid-muted">Cast information is unavailable.</p>')+
-    '</div></section>'+renderSeasons(details)+renderProviderGroups(details,country)+
+    '</div></section>'+renderTrailerSection(details)+renderSeasons(details)+renderProviderGroups(details,country)+
     '<section class="vivid-title-section"><div class="vivid-section-heading"><div><span>RECOMMENDED</span><h2>More like this</h2></div></div><div class="vivid-similar" id="recommendation-rail">'+renderRecommendationCards(related)+'</div></section>';
 
   upsertLibraryItem("history",libraryItem());
