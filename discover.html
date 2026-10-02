@@ -6,9 +6,9 @@
 <title>Discover · Vivid Cinema</title><link rel="icon" href="fav-icon.png" type="image/x-icon">
 <link rel="stylesheet" href="styles/vivid-foundation.css"><link rel="stylesheet" href="styles/vivid-system.css"><link rel="stylesheet" href="styles/vivid-shell.css"><link rel="stylesheet" href="styles/vivid-discovery.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.9.1/font/bootstrap-icons.css">
-  <link rel="manifest" href="manifest.json">
-  <link rel="apple-touch-icon" href="fav-icon.png">
-  <link rel="stylesheet" href="styles/vivid-pwa.css">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="fav-icon.png">
+<link rel="stylesheet" href="styles/vivid-pwa.css">
 <link rel="stylesheet" href="styles/vivid-atmosphere.css">
 </head>
 <body data-vivid-page="discover" class="vivid-discovery-page vivid-atmosphere">
@@ -31,8 +31,14 @@
 <div class="vivid-filter-row">
 <label>Genre<select id="genre-filter"><option value="">All genres</option></select></label>
 <label>Year<select id="year-filter"><option value="">Any year</option></select></label>
-<label>Sort<select id="sort-filter"><option value="popularity.desc">Most popular</option><option value="vote_average.desc">Highest rated</option><option value="primary_release_date.desc">Newest</option><option value="primary_release_date.asc">Oldest</option></select></label><label>Min rating<select id="rating-filter"><option value="">Any rating</option><option value="9">9+</option><option value="8">8+</option><option value="7">7+</option><option value="6">6+</option><option value="5">5+</option></select></label><label>Streaming region<select id="region-filter"><option value="">Any region</option><option value="GH">Ghana</option><option value="US">United States</option><option value="GB">United Kingdom</option><option value="CA">Canada</option><option value="NG">Nigeria</option><option value="AU">Australia</option></select></label><label>Streaming service<select id="provider-filter"><option value="">All services</option></select></label>
+<label>Sort<select id="sort-filter"><option value="popularity.desc">Most popular</option><option value="vote_average.desc">Highest rated</option><option value="primary_release_date.desc">Newest</option><option value="primary_release_date.asc">Oldest</option></select></label><label>Min rating<select id="rating-filter"><option value="">Any rating</option><option value="9">9+</option><option value="8">8+</option><option value="7">7+</option><option value="6">6+</option><option value="5">5+</option></select></label><label>Streaming region<select id="region-filter"><option value="">Any region</option><option value="GH">Ghana</option><option value="US">United States</option><option value="GB">United Kingdom</option><option value="CA">Canada</option><option value="NG">Nigeria</option><option value="AU">Australia</option></select></label>
 <button id="reset-filters" class="vivid-filter-reset" type="button">Reset</button>
+</div>
+<div class="vivid-provider-filter" aria-label="Streaming service">
+<div class="vivid-provider-heading"><span>STREAMING SERVICES</span><small>Choose a service</small></div>
+<div id="provider-filter" class="vivid-provider-strip" role="group" aria-label="Streaming services">
+<button class="vivid-provider-chip is-active" data-provider="" type="button"><span class="vivid-provider-all-icon"><i class="bi bi-grid-3x3-gap" aria-hidden="true"></i></span><span>All services</span></button>
+</div>
 </div>
 </section>
 <section class="vivid-discovery-results" aria-live="polite">
@@ -45,6 +51,7 @@
 <footer class="vivid-footer">© 2026 Vivid Cinema · <a href="terms.html">Terms</a> · <a href="privacy.html">Privacy</a> · <a href="contact.html">Contact</a></footer>
 </div>
 <script type="module" src="scripts/app-shell.js"></script><script type="module" src="scripts/nav-auth.js"></script><script type="module" src="scripts/discover.js"></script>
-  <script type="module" src="scripts/pwa.js"></script>
+<script type="module" src="scripts/pwa.js"></script>
 <script type="module" src="scripts/atmosphere.js"></script>
-<script type="module" src="scripts/i18n.js"></script>\n</body></html>
+<script type="module" src="scripts/i18n.js"></script>
+</body></html>
