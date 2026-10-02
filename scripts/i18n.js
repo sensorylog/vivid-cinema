@@ -39,11 +39,15 @@ function makeStyles(){
  document.head.appendChild(style)
 }
 function labelForAnchor(a,lang){
- const c=COPY[lang],href=(a.getAttribute("href")||"").split("?")[0].replace(/^\.\//,"");
+ const c=COPY[lang],rawHref=a.getAttribute("href")||"";
+ const [rawPath,queryString=""]=rawHref.split("?");
+ const href=rawPath.replace(/^\.\//,"");
+ const query=new URLSearchParams(queryString);
  if(href==="home.html"||href==="#home")return c.home;
  if(href==="discover.html")return c.discover;
- if(href.startsWith("collection.html?collection=movies")||href==="collection.html")return a.textContent.trim().toLowerCase().includes("browse")?c.discover:c.movies;
- if(href.startsWith("collection.html?collection=tv"))return c.tv;
+ if(href==="collection.html"&&query.get("collection")==="movies")return c.movies;
+ if(href==="collection.html"&&query.get("collection")==="tv")return c.tv;
+ if(href==="collection.html")return a.textContent.trim().toLowerCase().includes("browse")?c.discover:c.movies;
  if(href==="library.html")return c.library;
  if(href==="#trending")return c.trending;
  if(href==="auth.html")return c.signIn;
