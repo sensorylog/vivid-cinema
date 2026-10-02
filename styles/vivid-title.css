@@ -225,3 +225,51 @@ body.vivid-title-page{background:#06070a;color:#f5f7fa;min-height:100dvh}.vivid-
 /* Cast members are navigable profiles. */
 .vivid-title-page a.vivid-cast{display:block;color:#fff;text-decoration:none;cursor:pointer}
 .vivid-title-page a.vivid-cast:focus-visible{outline:2px solid rgba(255,255,255,.75);outline-offset:4px;border-radius:14px}
+
+/* Premium TV season selector */
+.vivid-seasons{padding-top:52px}
+.vivid-season-header{display:flex;align-items:end;justify-content:space-between;gap:30px;margin-bottom:18px;padding-bottom:18px;border-bottom:1px solid rgba(255,255,255,.08)}
+.vivid-season-control{display:grid;gap:7px;min-width:220px}
+.vivid-season-control>span{font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;color:#747c87;font-weight:750}
+.vivid-season-select-wrap{position:relative}
+.vivid-season-select-wrap select{appearance:none;-webkit-appearance:none;width:100%;height:50px;padding:0 44px 0 15px;border:1px solid rgba(255,255,255,.13);border-radius:14px;background:linear-gradient(145deg,rgba(255,255,255,.075),rgba(255,255,255,.025));color:#f5f6f8;font:700 .82rem/1 inherit;outline:none;cursor:pointer;box-shadow:inset 0 1px rgba(255,255,255,.045),0 10px 30px rgba(0,0,0,.14);transition:border-color .2s ease,background .2s ease,box-shadow .2s ease}
+.vivid-season-select-wrap select:hover{border-color:rgba(255,255,255,.24);background:linear-gradient(145deg,rgba(255,255,255,.09),rgba(255,255,255,.035))}
+.vivid-season-select-wrap select:focus{border-color:rgba(255,255,255,.48);box-shadow:0 0 0 3px rgba(255,255,255,.06),inset 0 1px rgba(255,255,255,.05)}
+.vivid-season-select-wrap select option{background:#111318;color:#fff}
+.vivid-season-select-wrap>i{position:absolute;right:15px;top:50%;transform:translateY(-50%);pointer-events:none;color:#aeb4bd;font-size:.78rem}
+.vivid-season-summary{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin:0 0 18px;color:#8c939e;font-size:.7rem}
+.vivid-season-summary>span{padding:6px 9px;border:1px solid rgba(255,255,255,.08);border-radius:999px;background:rgba(255,255,255,.035)}
+.vivid-season-summary p{flex-basis:100%;max-width:800px;margin:3px 0 0;color:#737b86;line-height:1.55;font-size:.75rem}
+.vivid-episode-list{display:grid;gap:10px}
+.vivid-episode{display:grid;grid-template-columns:230px minmax(0,1fr);gap:20px;padding:12px;border:1px solid rgba(255,255,255,.07);border-radius:17px;background:linear-gradient(145deg,rgba(255,255,255,.045),rgba(255,255,255,.016));transition:border-color .25s ease,transform .25s ease,background .25s ease;overflow:hidden}
+.vivid-episode:hover{border-color:rgba(255,255,255,.14);background:linear-gradient(145deg,rgba(255,255,255,.06),rgba(255,255,255,.02));transform:translateY(-2px)}
+.vivid-episode-thumb{aspect-ratio:16/9;border-radius:12px;overflow:hidden;background:#0e1014;align-self:start}
+.vivid-episode-thumb img{display:block;width:100%;height:100%;object-fit:cover;transition:transform .35s ease}
+.vivid-episode:hover .vivid-episode-thumb img{transform:scale(1.025)}
+.vivid-episode-copy{min-width:0;padding:4px 8px 5px 0}
+.vivid-episode-line{display:flex;align-items:center;gap:12px;color:#8e96a1;font-size:.68rem}
+.vivid-episode-line strong{color:#d9dde3;font-size:.7rem;letter-spacing:.03em}
+.vivid-episode-line span{color:#9da4ae}
+.vivid-episode-copy h3{margin:7px 0 4px;font-size:1.02rem;letter-spacing:-.02em;color:#f3f4f6}
+.vivid-episode-copy small{color:#727a86;font-size:.68rem}
+.vivid-episode-copy p{margin:11px 0 14px;max-width:780px;color:#8f97a2;font-size:.75rem;line-height:1.55}
+.vivid-episode-actions{display:flex;gap:8px;flex-wrap:wrap}
+.vivid-episode-actions .vivid-button{min-height:36px;padding:0 12px;font-size:.68rem}
+@media(max-width:800px){
+ .vivid-season-header{align-items:flex-start;flex-direction:column;gap:14px}
+ .vivid-season-control{width:min(300px,100%)}
+ .vivid-episode{grid-template-columns:180px minmax(0,1fr);gap:14px}
+}
+@media(max-width:560px){
+ .vivid-seasons{padding-top:40px}
+ .vivid-season-control{width:100%}
+ .vivid-season-select-wrap select{height:52px;font-size:.8rem}
+ .vivid-episode{grid-template-columns:1fr;gap:12px;padding:10px}
+ .vivid-episode-thumb{width:100%;aspect-ratio:16/8.8}
+ .vivid-episode-copy{padding:2px 4px 5px}
+ .vivid-episode-copy h3{font-size:.94rem}
+ .vivid-episode-copy p{font-size:.73rem}
+ .vivid-episode-actions{display:grid;grid-template-columns:1fr 1fr}
+ .vivid-episode-actions .vivid-button{justify-content:center}
+}
+@media(prefers-reduced-motion:reduce){.vivid-episode,.vivid-episode-thumb img{transition:none}}
