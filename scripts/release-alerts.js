@@ -85,16 +85,19 @@ async function inspectTv(item){
   const details=await tmdbApi.tvDetailsBasic(item.id);
   const next=details.next_episode_to_air;
   if(!next?.air_date)return null;
-  const episodeKey=alertKey(item,"tv-episode",String(next.id||((next.season_number||0)+"-"+(next.episode_number||0))));
+  const seriesKey=alertKey(item,"tv-next");
   const knownState=known();
-  const previous=knownState[episodeKey];
-  knownState[episodeKey]=normalizeDate(next.air_date); write(ALERT_KNOWN_KEY,knownState);
-  if(!previous)return null;
-  if(previous===normalizeDate(next.air_date))return null;
+  const previous=knownState[seriesKey];
+  const current={date:normalizeDate(next.air_date),season:Number(next.season_number||0),episode:Number(next.episode_number||0)};
+  knownState[seriesKey]=current; write(ALERT_KNOWN_KEY,knownState);
+  if(!previous || typeof previous!=="object")return null;
+  if(previous.date===current.date && previous.season===current.season && previous.episode===current.episode)return null;
+  const seasonChanged=current.season>Number(previous.season||0);
   return {
-    key:episodeKey,type:"tv-episode",title:item.title||details.name,media_type:"tv",id:item.id,
-    releaseDate:normalizeDate(next.air_date),season:next.season_number,episode:next.episode_number,
-    episodeTitle:next.name||"",schedule:scheduleLabel(item,normalizeDate(next.air_date)),message:"has a new episode"
+    key:alertKey(item,seasonChanged?"tv-season":"tv-episode",String(next.id||((current.season)+"-"+(current.episode)))),
+    type:seasonChanged?"tv-season":"tv-episode",title:item.title||details.name,media_type:"tv",id:item.id,
+    releaseDate:current.date,season:current.season,episode:current.episode,
+    episodeTitle:next.name||"",schedule:scheduleLabel(item,current.date),message:seasonChanged?"has a new season":"has a new episode"
   };
 }
 
