@@ -1,10 +1,10 @@
 import { tmdbApi } from "./tmdb.js";
 import { getFollowedTitles } from "./library.js";
 
-const ALERT_STATE_KEY="vivid:release-alerts:v1";
-const ALERT_SEEN_KEY="vivid:release-seen:v1";
-const ALERT_KNOWN_KEY="vivid:release-known:v1";
-const MAX_SEEN=300;
+const ALERT_STATE_KEY="vivid:release-alerts:v2";
+const ALERT_SEEN_KEY="vivid:release-seen:v2";
+const ALERT_KNOWN_KEY="vivid:release-known:v2";
+const MAX_SEEN=300;\nconst CHECK_INTERVAL_MS=4*60*60*1000;\nconst SETTINGS_KEY="vivid:release-settings:v1";
 
 function read(key,fallback){
   try{return JSON.parse(localStorage.getItem(key))??fallback;}catch{return fallback;}
@@ -12,14 +12,14 @@ function read(key,fallback){
 function write(key,value){
   try{localStorage.setItem(key,JSON.stringify(value));}catch{}
 }
-function state(){return read(ALERT_STATE_KEY,{permission:"default",lastCheckedAt:0});}
+function state(){return read(ALERT_STATE_KEY,{permission:"default",lastCheckedAt:0,region:"US"});}\nfunction settings(){return {movies:true,episodes:true,seasons:true,...read(SETTINGS_KEY,{})};}\nfunction region(){try{const saved=String(localStorage.getItem("vivid:provider-country")||"").toUpperCase();if(/^[A-Z]{2}$/.test(saved))return saved;}catch{} try{const locale=Intl.DateTimeFormat().resolvedOptions().locale||"";const match=locale.match(/[-_]([A-Z]{2})\\b/);if(match)return match[1];}catch{} return "US";}\nfunction released(value){return Boolean(value&&new Date(String(value).slice(0,10)+"T00:00:00")<=today());}
 function seen(){return read(ALERT_SEEN_KEY,{});}
 function known(){return read(ALERT_KNOWN_KEY,{});}
 function today(){const d=new Date();d.setHours(0,0,0,0);return d;}
 function alertKey(item,type,extra=""){return [item.media_type||item.mediaType||"movie",item.id,type,extra].join(":");}
 function normalizeDate(value){return value?String(value).slice(0,10):"";}
 
-export function getReleaseAlertState(){return state();}
+export function getReleaseAlertState(){return state();}\nexport function getReleaseAlertSettings(){return settings();}\nexport function saveReleaseAlertSettings(next={}){const merged={...settings(),...next};write(SETTINGS_KEY,{movies:Boolean(merged.movies),episodes:Boolean(merged.episodes),seasons:Boolean(merged.seasons)});return settings();}
 export function getPendingReleaseAlerts(){return Object.values(seen()).filter(item=>item.pending===true).sort((a,b)=>Number(b.createdAt||0)-Number(a.createdAt||0));}
 
 export async function requestReleaseAlerts(){
@@ -102,10 +102,10 @@ async function inspectTv(item){
   };
 }
 
-export async function checkForReleaseAlerts(){
+export async function checkForReleaseAlerts(options={}){
   const followed=getFollowedTitles().slice(0,30);
   if(!followed.length)return [];
-  const results=await Promise.allSettled(followed.map(item=>item.media_type==="tv"?inspectTv(item):inspectMovie(item)));
+  const results=await Promise.allSettled(eligible.map(item=>item.media_type==="tv"?inspectTv(item):inspectMovie(item,currentRegion)));
   const alerts=[];
   results.forEach(result=>{
     if(result.status!=="fulfilled"||!result.value)return;
