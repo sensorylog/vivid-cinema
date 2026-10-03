@@ -161,6 +161,11 @@ function categoryParams(category, type, page, filters = {}, keywordId = "") {
     else base.primary_release_year = filters.year;
   }
   if (filters.rating) base["vote_average.gte"] = filters.rating;
+  if (filters.region) base.watch_region = filters.region;
+  if (filters.provider) {
+    base.with_watch_monetization_types = "flatrate";
+    base.with_watch_providers = filters.provider;
+  }
   base.page = page;
   base.sort_by = type === "tv"
     ? sortValue(filters).replace("primary_release_date", "first_air_date")
