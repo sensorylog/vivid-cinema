@@ -15,7 +15,7 @@ function render() {
   const list = $("library-list");
   if (!items.length) {
     const copy = activeCollection === "favorites"
-      ? ["No favorites yet","Save titles from their detail page and they will appear here.","Discover titles"]
+      ? ["No likes yet","Like titles from their detail page and they will appear here.","Discover titles"]
       : activeCollection === "watchLater"
         ? ["Your watch-later list is empty","Save something you want to come back to.","Browse movies & TV"]
         : ["No recent history","Titles you open will appear here for quick access.","Start browsing"];
