@@ -33,7 +33,10 @@ function render() {
 }
 
 document.addEventListener("DOMContentLoaded",async()=>{
-  await startLibrarySync();
+  const syncStatus=document.getElementById("library-sync-status"); const syncDot=document.getElementById("library-sync-dot");
+  const setSync=(message,state)=>{if(syncStatus)syncStatus.textContent=message;if(syncDot)syncDot.dataset.state=state;};
+  setSync("Checking cloud library…","syncing");
+  try{await startLibrarySync();setSync("Synced to your account or saved locally.","success");}catch{setSync("Local library available. Cloud sync is unavailable.","error");}
   document.querySelectorAll("[data-library-tab]").forEach((tab)=>tab.addEventListener("click",()=>{
     activeCollection=tab.dataset.libraryTab;
     document.querySelectorAll("[data-library-tab]").forEach((item)=>{const active=item===tab;item.classList.toggle("is-active",active);item.setAttribute("aria-selected",String(active));});
