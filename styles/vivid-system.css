@@ -45,3 +45,10 @@
 @keyframes vivid-shimmer{to{background-position:-200% 0}} .vivid-link{color:inherit;text-decoration:none}
 @media(max-width:767px){:root{--vivid-page-gutter:1rem;--vivid-section-gap:2.5rem}.vivid-button{min-height:46px}}
 @media(prefers-reduced-motion:reduce){.vivid-skeleton{animation:none}.vivid-button,.vivid-icon-button{transition:none}}
+
+.vivid-site-brand{line-height:1;text-decoration:none!important;white-space:nowrap}
+.vivid-brand-icon{width:32px;height:32px;display:block;flex:0 0 32px;object-fit:contain}
+.vivid-site-brand .vivid-brand-wordmark{display:inline-flex;align-items:baseline;font-weight:800;letter-spacing:-.04em}
+.vivid-site-brand .vivid-brand-wordmark>span{font-weight:500;color:#aeb4bd}
+.vivid-legal-brand .vivid-brand-icon{width:34px;height:34px;flex-basis:34px}
+@media(max-width:640px){.vivid-brand-icon{width:29px;height:29px;flex-basis:29px}.vivid-site-brand{gap:7px}}
