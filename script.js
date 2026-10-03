@@ -275,7 +275,7 @@ async function renderRecommendations(){
 }
 
 async function loadHome(){
- const ids=["trending-rail","now-playing-rail","movies-rail","top-rated-rail","tv-rail","top-tv-rail","airing-rail","anime-rail","kdrama-rail","upcoming-rail"];
+ const ids=["trending-rail","now-playing-rail","movies-rail","top-rated-rail","tv-rail","top-tv-rail","upcoming-rail"];
  ids.forEach(id=>skeleton($(id)));
  renderContinueWatching();
 
@@ -287,7 +287,7 @@ async function loadHome(){
  const loadSecondary=async()=>{
    // Keep secondary shelves from creating a seven-request burst. Each small
    // batch can paint before the next one starts, keeping scrolling responsive.
-   for(const batch of [["topRatedMovies","popularTv"],["topRatedTv","airingToday"],["anime","kdrama"],["upcoming"]]){
+   for(const batch of [["topRatedMovies","popularTv"],["topRatedTv"],["upcoming"]]){
      try{await loadSectionBatch(batch)}catch(error){console.warn("Vivid secondary home load failed:",batch,error)}
      await new Promise(resolve=>window.setTimeout(resolve,80));
    }
