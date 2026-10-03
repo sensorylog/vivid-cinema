@@ -102,7 +102,7 @@ export async function getPersonalRecommendations(limit = 12) {
   const library = getLocalLibrary();
   const progress = readProgress();
   const observed = [...(library.history || []), ...(library.favorites || []), ...(library.watchLater || [])];
-  const seeds = uniqueByKey(observed).sort((a,b) => (Number(b.updatedAt||0) - Number(a.updatedAt||0))).slice(0, 6);
+  const seeds = uniqueByKey(observed).sort((a,b) => (Number(b.updatedAt||0) - Number(a.updatedAt||0))).slice(0, 4);
   if (!seeds.length) return [];
 
   const libraryKey = [...observed, ...Object.values(progress)].map(keyFor).sort().join("|");
@@ -122,7 +122,7 @@ export async function getPersonalRecommendations(limit = 12) {
   });
 
   const topGenres = Object.entries(profile.genres).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([id])=>id).join("|");
-  const calls = seeds.slice(0,5).map(seed => seed.media_type === "tv" ? tmdbApi.tvRecommendations(seed.id) : tmdbApi.movieRecommendations(seed.id));
+  const calls = seeds.map(seed => seed.media_type === "tv" ? tmdbApi.tvRecommendations(seed.id) : tmdbApi.movieRecommendations(seed.id));
   if (topGenres) {
     calls.push(tmdbApi.discoverMovies({with_genres:topGenres,sort_by:"popularity.desc",vote_count_gte:100,page:1}));
     calls.push(tmdbApi.discoverTv({with_genres:topGenres,sort_by:"popularity.desc",vote_count_gte:50,page:1}));
