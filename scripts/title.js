@@ -293,7 +293,7 @@ function render(details) {
   $("title-content").innerHTML=
     '<section class="vivid-title-backdrop" style="--title-backdrop:url(\''+backdropUrl+'\')"><div class="vivid-title-backdrop-overlay"></div><div class="vivid-title-backdrop-label">'+(media.media_type==="tv"?"SERIES":"FEATURE")+'</div></section>'+
     '<section class="vivid-title-info"><div class="vivid-title-info-inner">'+
-      '<div class="vivid-title-poster"><img src="'+posterUrl+'" alt="'+escapeHtml(title)+' poster" onerror="this.onerror=null;this.src=\'fav-icon.png\'"></div>'+
+      '<div class="vivid-title-poster"><img src="'+posterUrl+'" alt="'+escapeHtml(title)+' poster" onerror="this.onerror=null;this.src=\'icons/vivid-icon.svg\'"></div>'+
       '<div class="vivid-title-copy"><span class="vivid-title-kicker">'+(media.media_type==="tv"?"TV SERIES":"MOVIE")+'</span><h1>'+escapeHtml(title)+'</h1>'+
       '<div class="vivid-title-meta"><span>'+escapeHtml(year)+'</span>'+(runtime?'<i></i><span>'+escapeHtml(runtime)+'</span>':"")+'<i></i><span>★ '+rating+'</span></div>'+
       '<div class="vivid-title-genres">'+genres+'</div><p>'+escapeHtml(media.overview||"No synopsis is available for this title yet.")+'</p>'+
