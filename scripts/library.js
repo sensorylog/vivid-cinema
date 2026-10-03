@@ -200,3 +200,9 @@ export function startLibrarySync(){
 
   return syncPromise;
 }
+
+
+export function getFollowedTitles(){
+  const library=readLocal();
+  return [...(library.favorites||[]),...(library.watchLater||[])].filter((item,index,list)=>list.findIndex(entry=>itemKey(entry)===itemKey(item))===index);
+}
