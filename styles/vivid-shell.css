@@ -21,3 +21,12 @@ html[data-network="offline"] [data-vivid-online-only]{display:none!important}
 .vivid-release-alert span{min-width:0}.vivid-release-alert strong,.vivid-release-alert small{display:block}.vivid-release-alert strong{font-size:.88rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.vivid-release-alert small{margin-top:3px;opacity:.58;font-size:.72rem}
 .vivid-release-popover-actions{padding:12px 18px}.vivid-release-popover-actions button{width:100%;padding:10px 12px;border:1px solid rgba(255,255,255,.12);border-radius:10px;background:rgba(255,255,255,.06);color:inherit;cursor:pointer}
 @media(max-width:640px){.vivid-release-popover{top:auto;bottom:78px;right:12px;width:calc(100vw - 24px)}.vivid-notification-button{width:38px;height:38px}}
+
+
+/* Release center: keep each alert actionable without forcing a full-page navigation. */
+.vivid-release-alert{position:relative;align-items:center}
+.vivid-release-alert>a{display:flex;align-items:center;gap:12px;min-width:0;flex:1;color:inherit;text-decoration:none}
+.vivid-release-alert>a>i{display:grid;place-items:center;width:34px;height:34px;flex:0 0 34px;border-radius:10px;background:rgba(255,255,255,.08)}
+.vivid-release-alert>button{width:30px;height:30px;flex:0 0 30px;border:0;border-radius:9px;background:transparent;color:inherit;opacity:.45;cursor:pointer}
+.vivid-release-alert>button:hover{background:rgba(255,255,255,.08);opacity:1}
+.vivid-release-popover-actions small{display:block;margin-top:8px;opacity:.5;font-size:.68rem;line-height:1.4}
