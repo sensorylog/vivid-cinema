@@ -15,7 +15,7 @@ async function initAuthUi() {
       if (user) {
         if (authLink) {
           authLink.style.display = "";
-          authLink.textContent = "Account";
+          authLink.innerHTML = '<i class="bi bi-person-fill" aria-hidden="true"></i>';
           authLink.href = "account.html";
           authLink.setAttribute("aria-label", "Open account");
         }
@@ -24,9 +24,9 @@ async function initAuthUi() {
       } else {
         if (authLink) {
           authLink.style.display = "";
-          authLink.textContent = "Sign in";
+          authLink.innerHTML = '<i class="bi bi-person-fill" aria-hidden="true"></i>';
           authLink.href = "auth.html";
-          authLink.removeAttribute("aria-label");
+          authLink.setAttribute("aria-label", "Sign in");
         }
         if (userDropdown) userDropdown.style.display = "none";
       }
