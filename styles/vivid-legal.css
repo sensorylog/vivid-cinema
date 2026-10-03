@@ -1,2 +1,49 @@
-undefined
-.vivid-contact-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:1.5rem 0 2rem}.vivid-contact-grid>div{padding:1rem;border:1px solid rgba(255,255,255,.07);border-radius:16px;background:rgba(255,255,255,.025)}.vivid-contact-grid h2{margin:0 0 .45rem!important;font-size:1rem!important}.vivid-contact-grid p{margin:0;font-size:.9rem}.vivid-contact-check{display:flex!important;grid-template-columns:none!important;align-items:flex-start;gap:.7rem!important;padding:.9rem;border:1px solid rgba(255,255,255,.08);border-radius:14px;background:rgba(255,255,255,.025)}.vivid-contact-check input{width:18px!important;height:18px;margin-top:.15rem;flex:0 0 auto}.vivid-contact-check span{color:#b8bdc7;line-height:1.5}.vivid-field-optional{color:#737b87;font-size:.78rem;font-weight:400}.vivid-legal-card strong{color:#eef1f5}@media(max-width:760px){.vivid-contact-grid{grid-template-columns:1fr}}
+/* Vivid editorial / legal surface — restrained, readable, intentional. */
+.vivid-legal-page{min-height:100dvh;background:#07080a;color:#f3f5f7;font-family:var(--vivid-font-sans);overflow-x:hidden}
+.vivid-legal-page::before{content:"";position:fixed;inset:0;pointer-events:none;background:radial-gradient(circle at 78% 0%,rgba(255,255,255,.055),transparent 30%),linear-gradient(180deg,rgba(255,255,255,.018),transparent 28%);z-index:-1}
+.vivid-legal-nav{position:sticky;top:0;z-index:20;height:72px;display:flex;align-items:center;justify-content:space-between;width:min(100% - 32px,1280px);margin:0 auto;border-bottom:1px solid rgba(255,255,255,.07);background:rgba(7,8,10,.78);backdrop-filter:blur(24px) saturate(130%);-webkit-backdrop-filter:blur(24px) saturate(130%)}
+.vivid-legal-brand{display:inline-flex;align-items:center;gap:9px;color:#fff;text-decoration:none;font-weight:800;letter-spacing:-.045em;font-size:1.05rem}
+.vivid-legal-brand::before{content:"";width:30px;height:30px;background:url("../icons/vivid-icon.svg") center/contain no-repeat;display:block}
+.vivid-legal-brand span{color:#aeb4bd;font-weight:500}
+.vivid-legal-navlinks{display:flex;align-items:center;gap:4px}
+.vivid-legal-navlinks a{padding:9px 12px;border-radius:10px;color:#8f96a0;text-decoration:none;font-size:.78rem;font-weight:600;transition:color .18s,background .18s}
+.vivid-legal-navlinks a:hover,.vivid-legal-navlinks a:focus-visible{color:#fff;background:rgba(255,255,255,.07)}
+.vivid-legal-main{width:min(100% - 32px,900px);margin:0 auto;padding:44px 0 90px}
+.vivid-page-back{display:inline-flex;align-items:center;gap:7px;color:#8f96a0;text-decoration:none;font-size:.78rem;font-weight:600;margin-bottom:34px;transition:color .18s}
+.vivid-page-back:hover{color:#fff}
+.vivid-legal-eyebrow{color:#737b86;text-transform:uppercase;letter-spacing:.14em;font-size:.64rem;font-weight:700;margin-bottom:14px}
+.vivid-legal-main>h1{max-width:780px;margin:0;letter-spacing:-.055em;font-size:clamp(2.6rem,7vw,5.5rem);line-height:.94;font-weight:700;text-wrap:balance}
+.vivid-legal-intro{max-width:700px;margin:22px 0 48px;color:#9da4ae;font-size:1.02rem;line-height:1.72}
+.vivid-legal-card{padding:0;border:0;background:transparent;box-shadow:none}
+.vivid-legal-card h2{margin:46px 0 11px;color:#f2f4f7;font-size:1.08rem;line-height:1.3;letter-spacing:-.018em}
+.vivid-legal-card h2:first-child{margin-top:0}
+.vivid-legal-card p,.vivid-legal-card li{max-width:720px;color:#989fa9;font-size:.92rem;line-height:1.78}
+.vivid-legal-card p{margin:0 0 14px}
+.vivid-legal-card ul{padding-left:20px;margin:0 0 18px}
+.vivid-legal-card li{margin:7px 0}
+.vivid-legal-card a{color:#fff;text-decoration:underline;text-decoration-color:rgba(255,255,255,.3);text-underline-offset:3px}
+.vivid-legal-card a:hover{text-decoration-color:#fff}
+.vivid-legal-card strong{color:#e9ecf0;font-weight:600}
+.vivid-contact-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:0 0 42px}
+.vivid-contact-grid>div{padding:20px;border:1px solid rgba(255,255,255,.08);border-radius:18px;background:rgba(255,255,255,.025)}
+.vivid-contact-grid h2{margin:0 0 7px!important;font-size:.92rem!important}
+.vivid-contact-grid p{margin:0;font-size:.8rem;line-height:1.6}
+.vivid-contact-lead{display:flex;gap:14px;align-items:flex-start;padding:0 0 30px;margin-bottom:34px;border-bottom:1px solid rgba(255,255,255,.07)}
+.vivid-contact-icon{width:42px;height:42px;display:grid;place-items:center;flex:0 0 42px;border:1px solid rgba(255,255,255,.1);border-radius:13px;background:rgba(255,255,255,.05)}
+.vivid-contact-lead strong{font-size:.92rem}.vivid-contact-lead p{margin:4px 0 0;color:#8e959f;font-size:.82rem;line-height:1.55}
+.vivid-contact-form{display:grid;gap:17px;max-width:700px}
+.vivid-contact-form label{display:grid;gap:8px;color:#a8afb8;font-size:.76rem;font-weight:600}
+.vivid-contact-form input,.vivid-contact-form select,.vivid-contact-form textarea{width:100%;border:1px solid rgba(255,255,255,.1);border-radius:13px;background:rgba(255,255,255,.045);color:#f4f6f8;padding:12px 13px;font:inherit;font-size:.88rem;outline:none}
+.vivid-contact-form textarea{resize:vertical;min-height:150px}
+.vivid-contact-form input:focus,.vivid-contact-form select:focus,.vivid-contact-form textarea:focus{border-color:rgba(255,255,255,.3);box-shadow:0 0 0 4px rgba(255,255,255,.04)}
+.vivid-contact-form button{justify-self:start;border:0;border-radius:12px;background:#fff;color:#07080a;padding:12px 17px;font:600 .82rem inherit;cursor:pointer}
+.vivid-contact-check{display:flex!important;grid-template-columns:none!important;align-items:flex-start;gap:10px!important;padding:12px;border:1px solid rgba(255,255,255,.08);border-radius:13px;background:rgba(255,255,255,.025)}
+.vivid-contact-check input{width:17px!important;height:17px;margin-top:2px;flex:0 0 auto}
+.vivid-contact-check span{color:#858d98;line-height:1.5;font-size:.74rem}
+.vivid-field-optional{display:block;color:#686f7a;font-size:.7rem;font-weight:400}
+.vivid-legal-note{color:#777f8a!important;font-size:.75rem!important;display:flex;gap:7px;align-items:flex-start;margin-top:2px!important}
+.vivid-contact-status{min-height:20px;color:#9ca4ae;font-size:.78rem}
+.vivid-legal-footer{width:min(100% - 32px,900px);margin:0 auto;padding:24px 0 34px;border-top:1px solid rgba(255,255,255,.07);color:#626a75;font-size:.7rem}
+.vivid-legal-footer a{color:#8f96a0;text-decoration:none}.vivid-legal-footer a:hover{color:#fff}
+@media(max-width:760px){.vivid-legal-nav{height:64px}.vivid-legal-navlinks{display:none}.vivid-legal-main{padding:32px 0 64px}.vivid-legal-main>h1{font-size:clamp(2.5rem,14vw,4.2rem)}.vivid-legal-intro{font-size:.92rem;margin:18px 0 38px}.vivid-legal-card h2{margin-top:38px}.vivid-legal-card p,.vivid-legal-card li{font-size:.88rem;line-height:1.72}.vivid-contact-grid{grid-template-columns:1fr}.vivid-contact-lead{margin-bottom:28px}}
+@media(prefers-reduced-motion:reduce){.vivid-legal-navlinks a{transition:none}}
