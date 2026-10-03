@@ -107,7 +107,7 @@ export function deliverReleaseAlerts(alerts=[]){
   if(!alerts.length||!("Notification" in window)||Notification.permission!=="granted")return;
   alerts.slice(0,3).forEach(alert=>{
     try{
-      new Notification("Vivid Cinema · "+alert.type==="movie-release"?"New movie":"New TV release",{body:alert.title+" — "+alert.schedule,tag:alert.key});
+      new Notification("Vivid Cinema · "+(alert.type==="movie-release"?"New movie":"New TV release"),{body:alert.title+" — "+alert.schedule,tag:alert.key});
     }catch{}
   });
 }
