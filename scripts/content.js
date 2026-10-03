@@ -238,8 +238,25 @@ export async function getHomeSectionPage(key, page = 1) {
 export async function searchContent(query, page = 1) {
   const q = String(query || "").trim();
   if (!q) return [];
-  const [movies, shows] = await Promise.all([tmdbApi.searchMovies(q, page), tmdbApi.searchTv(q, page)]);
-  return [...normalizeResults(movies.results || [], "movie"), ...normalizeResults(shows.results || [], "tv")];
+  const data = await tmdbApi.searchMulti(q, page);
+  return (data.results || [])
+    .filter(item => ["movie", "tv", "person"].includes(item.media_type))
+    .map(item => item.media_type === "person"
+      ? {
+          id: String(item.id),
+          media_type: "person",
+          content_id: "person:" + item.id,
+          title: item.name || "Unknown person",
+          year: "",
+          overview: "",
+          poster_path: item.profile_path || "",
+          backdrop_path: "",
+          vote_average: 0,
+          raw: item
+        }
+      : normalizeResults([item], item.media_type)[0]
+    )
+    .filter(Boolean);
 }
 
 export async function discoverMovies(params = {}) {
