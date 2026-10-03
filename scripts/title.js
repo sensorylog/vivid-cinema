@@ -101,8 +101,7 @@ function renderProviderGroups(details, countryCode) {
     ["Buy", country.buy]
   ].filter(([, items]) => Array.isArray(items) && items.length);
 
-  const countryOptions = PROVIDER_COUNTRIES
-    .filter(([code]) => availableCountries[code])
+  const countryOptions = providerCountries(availableCountries)
     .map(([code, name]) => '<option value="' + code + '"' + (code === countryCode ? " selected" : "") + ">" + name + "</option>")
     .join("");
 

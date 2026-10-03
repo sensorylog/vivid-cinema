@@ -1,6 +1,6 @@
 const CACHE_NAME = "vivid-cinema-shell-v38";
 const APP_SHELL = [
-  "./","./index.html","./home.html","./discover.html","./collection.html","./title.html","./watch.html",
+  "./","./index.html","./home.html","./person.html","./discover.html","./collection.html","./title.html","./watch.html",
   "./library.html","./auth.html","./login.html","./forgot-password.html","./account.html","./terms.html","./privacy.html","./contact.html",
   "./offline.html","./404.html","./manifest.json","./robots.txt","./sitemap.xml","./icons/vivid-icon.svg",
   "./styles/vivid-foundation.css","./styles/vivid-system.css","./styles/vivid-shell.css","./styles/vivid-cinematic.css",
@@ -11,7 +11,7 @@ const APP_SHELL = [
   "./scripts/atmosphere.js","./scripts/i18n.js","./scripts/routes.js",
   "./scripts/config.js","./scripts/utils.js","./scripts/content.js","./scripts/media.js","./scripts/tmdb.js",
   "./scripts/nav-auth.js","./scripts/library.js","./scripts/library-page.js","./scripts/discover.js",
-  "./scripts/collection.js","./scripts/recommendations.js","./scripts/release-alerts.js","./scripts/title.js","./scripts/watch.js","./scripts/external-providers.js","./scripts/landing.js",
+  "./scripts/collection.js","./scripts/person.js","./scripts/recommendations.js","./scripts/release-alerts.js","./scripts/title.js","./scripts/watch.js","./scripts/external-providers.js","./scripts/landing.js",
   "./scripts/account.js","./scripts/auth.js","./script.js"
 ];
 
