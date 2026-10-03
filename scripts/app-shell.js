@@ -39,6 +39,14 @@ function syncVividBranding() {
     brand.style.display = "inline-flex";
     brand.style.alignItems = "center";
     brand.style.gap = "9px";
+    const icon = brand.querySelector(".vivid-brand-icon");
+    if (icon) {
+      icon.style.width = "32px";
+      icon.style.height = "32px";
+      icon.style.flex = "0 0 32px";
+      icon.style.display = "block";
+      icon.style.objectFit = "contain";
+    }
   });
 }
 
