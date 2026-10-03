@@ -22,26 +22,26 @@ export async function tmdb(path, params = {}, options = {}) {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), timeoutMs);
   const request = (async () => {
-  try {
-    const response = await fetch(url, { signal: controller.signal, cache: "no-store", headers: { Accept: "application/json" } });
-    if (!response.ok) {
-      const error = new Error("TMDB request failed: " + response.status);
-      error.status = response.status;
+    try {
+      const response = await fetch(url, { signal: controller.signal, cache: "no-store", headers: { Accept: "application/json" } });
+      if (!response.ok) {
+        const error = new Error("TMDB request failed: " + response.status);
+        error.status = response.status;
+        throw error;
+      }
+      const data = await response.json();
+      if (useCache) cache.set(url, data);
+      return data;
+    } catch (error) {
+      if (error.name === "AbortError") {
+        const timeoutError = new Error("TMDB request timed out");
+        timeoutError.code = "TMDB_TIMEOUT";
+        throw timeoutError;
+      }
       throw error;
+    } finally {
+      clearTimeout(timeout);
     }
-    const data = await response.json();
-    if (useCache) cache.set(url, data);
-    return data;
-  } catch (error) {
-    if (error.name === "AbortError") {
-      const timeoutError = new Error("TMDB request timed out");
-      timeoutError.code = "TMDB_TIMEOUT";
-      throw timeoutError;
-    }
-    throw error;
-  } finally {
-    clearTimeout(timeout);
-  }
   })();
   if (useCache) inFlight.set(url, request);
   try {
@@ -62,6 +62,7 @@ export const tmdbApi = Object.freeze({
   trending: (mediaType = "all", timeWindow = "week", page = 1) => tmdb("trending/" + mediaType + "/" + timeWindow, { page }),
   searchMovies: (query, page = 1) => tmdb("search/movie", { query, page }),
   searchTv: (query, page = 1) => tmdb("search/tv", { query, page }),
+  searchKeywords: (query, page = 1) => tmdb("search/keyword", { query, page }),
   discoverMovies: (params = {}) => tmdb("discover/movie", params),
   discoverTv: (params = {}) => tmdb("discover/tv", params),
   movieWatchProviders: (region = "") => tmdb("watch/providers/movie", { watch_region: region || undefined }),
