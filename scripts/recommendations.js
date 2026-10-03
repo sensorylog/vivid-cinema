@@ -62,7 +62,7 @@ export function formatProgress(item) {
 }
 
 function tasteWeight(item, progress, base) {
-  const pct = Number(progress[keyFor(item)]?.percentage || 0);
+  const pct = Number(progress[keyFor(item)]?.percentage || item.completion || 0);
   const completion = pct >= 80 ? 1.45 : pct >= 45 ? 1.1 : pct > 5 ? .72 : 1;
   const age = Math.max(0, (Date.now() - Number(item.updatedAt || 0)) / 86400000);
   return base * (0.55 + 0.45 * Math.exp(-age / 45)) * completion;
