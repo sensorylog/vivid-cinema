@@ -10,15 +10,15 @@ const route = getRoute();
 let media = null;
 let currentDetails = null;
 let trailerTrigger = null;
-const PROVIDER_COUNTRIES = [
-  ["US", "United States"],
-  ["GH", "Ghana"],
-  ["GB", "United Kingdom"],
-  ["CA", "Canada"],
-  ["NG", "Nigeria"],
-  ["ZA", "South Africa"],
-  ["AU", "Australia"]
-];
+function countryName(code) {
+  try { return new Intl.DisplayNames([navigator.language || "en"], { type: "region" }).of(code) || code; }
+  catch { return code; }
+}
+function providerCountries(availableCountries) {
+  return Object.keys(availableCountries || {})
+    .sort((a, b) => countryName(a).localeCompare(countryName(b)))
+    .map(code => [code, countryName(code)]);
+}
 
 function formatRuntime(minutes) {
   if (!minutes) return "";
@@ -90,7 +90,7 @@ function renderProviderGroups(details, countryCode) {
   const availableCountries = details["watch/providers"]?.results || {};
   if (!country) {
     return '<section class="vivid-title-section"><div class="vivid-section-heading"><div><span>WHERE TO WATCH</span><h2>Provider availability</h2></div><label class="vivid-country-picker"><span>Country</span><select id="provider-country">' +
-      PROVIDER_COUNTRIES.filter(([code]) => availableCountries[code]).map(([code, name]) => '<option value="' + code + '">' + name + '</option>').join("") +
+      providerCountries(availableCountries).map(([code, name]) => '<option value="' + code + '">' + name + '</option>').join("") +
       '</select></label></div><p class="vivid-muted">No provider listings are available for this country. Try another country.</p></section>';
   }
 
