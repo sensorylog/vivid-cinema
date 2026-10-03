@@ -17,7 +17,7 @@ function released(v){return Boolean(v&&new Date(date(v)+"T00:00:00")<=today());}
 function key(item,type,extra=""){return [item.media_type||item.mediaType||"movie",item.id,type,extra].join(":");}
 function getRegion(){
   try{const v=String(localStorage.getItem("vivid:provider-country")||"").toUpperCase();if(/^[A-Z]{2}$/.test(v))return v;}catch{}
-  try{const m=(Intl.DateTimeFormat().resolvedOptions().locale||"").match(/[-_]([A-Z]{2})\\b/);if(m)return m[1];}catch{}
+  try{const m=(Intl.DateTimeFormat().resolvedOptions().locale||"").match(/[-_]([A-Z]{2})\b/);if(m)return m[1];}catch{}
   return "US";
 }
 function addAlert(a){
