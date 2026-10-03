@@ -62,6 +62,7 @@ export const tmdbApi = Object.freeze({
   trending: (mediaType = "all", timeWindow = "week", page = 1) => tmdb("trending/" + mediaType + "/" + timeWindow, { page }),
   searchMovies: (query, page = 1) => tmdb("search/movie", { query, page }),
   searchTv: (query, page = 1) => tmdb("search/tv", { query, page }),
+  searchMulti: (query, page = 1) => tmdb("search/multi", { query, page }),
   searchKeywords: (query, page = 1) => tmdb("search/keyword", { query, page }),
   discoverMovies: (params = {}) => tmdb("discover/movie", params),
   discoverTv: (params = {}) => tmdb("discover/tv", params),
