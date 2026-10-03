@@ -14,7 +14,7 @@ import { doc, serverTimestamp, setDoc } from "https://www.gstatic.com/firebasejs
 const signupForm=document.getElementById("signup-form");
 const loginForm=document.getElementById("login-form");
 const errorEl=document.getElementById("error-msg")||document.getElementById("login-error-msg");
-const resetLink=document.getElementById("reset-password");
+const resetLink=document.getElementById("reset-password");\nconst forgotForm=document.getElementById("forgot-form");\nconst forgotMessage=document.getElementById("forgot-message");
 const googleButtons=document.querySelectorAll("[data-google-auth]");
 
 try {
@@ -65,7 +65,7 @@ loginForm?.addEventListener("submit",async(event)=>{
     await startLibrarySync();\n    window.location.href="home.html";
   }catch(error){console.error(error);showMessage(friendlyError(error));button.disabled=false;}
 });
-document.getElementById("resend-verification")?.addEventListener("click",async()=>{\n  const user=auth.currentUser;\n  if(!user){showMessage("Sign in first, then resend verification.");return;}\n  try{await sendEmailVerification(user);showMessage("Verification email sent. Check your inbox and spam folder.",true);}catch(error){showMessage(friendlyError(error));}\n});\n\ndocument.querySelectorAll("[data-password-toggle]").forEach(toggle=>toggle.addEventListener("click",()=>{const input=document.querySelector(toggle.dataset.passwordToggle);if(!input)return;const visible=input.type==="text";input.type=visible?"password":"text";toggle.textContent=visible?"Show":"Hide";toggle.setAttribute("aria-label",visible?"Show password":"Hide password");}));\n\nresetLink?.addEventListener("click",async(event)=>{
+document.getElementById("resend-verification")?.addEventListener("click",async()=>{\n  const user=auth.currentUser;\n  if(!user){showMessage("Sign in first, then resend verification.");return;}\n  try{await sendEmailVerification(user);showMessage("Verification email sent. Check your inbox and spam folder.",true);}catch(error){showMessage(friendlyError(error));}\n});\n\ndocument.querySelectorAll("[data-password-toggle]").forEach(toggle=>toggle.addEventListener("click",()=>{const input=document.querySelector(toggle.dataset.passwordToggle);if(!input)return;const visible=input.type==="text";input.type=visible?"password":"text";toggle.textContent=visible?"Show":"Hide";toggle.setAttribute("aria-label",visible?"Show password":"Hide password");}));\n\nforgotForm?.addEventListener("submit",async(event)=>{\n  event.preventDefault();\n  const email=document.getElementById("reset-email")?.value.trim()||"";\n  const button=forgotForm.querySelector("button[type=submit]");\n  if(!email)return;\n  button.disabled=true;\n  if(forgotMessage){forgotMessage.textContent="Sending secure reset link…";forgotMessage.style.color="#7ee787";}\n  try{await sendPasswordResetEmail(auth,email);if(forgotMessage)forgotMessage.textContent="If an account exists for that email, a reset link is on its way.";forgotForm.reset();}\n  catch(error){if(forgotMessage){forgotMessage.textContent=friendlyError(error);forgotMessage.style.color="#ff6b6b";}}\n  finally{button.disabled=false;}\n});\n\nresetLink?.addEventListener("click",async(event)=>{
   event.preventDefault();const email=document.getElementById("login-email")?.value.trim()||"";
   if(!email){showMessage("Enter your email first, then choose Forgot password.");return;}
   try{await sendPasswordResetEmail(auth,email);showMessage("Password reset email sent.",true);}catch(error){console.error(error);showMessage(friendlyError(error));}
