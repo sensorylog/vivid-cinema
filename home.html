@@ -26,7 +26,11 @@
 <div class="vivid-navlinks"><a href="#home" aria-current="true"><i class="bi bi-house-fill" aria-hidden="true"></i><span>Home</span></a><a href="discover.html"><i class="bi bi-compass" aria-hidden="true"></i><span>Discover</span></a><a href="#trending"><i class="bi bi-fire" aria-hidden="true"></i><span>Trending</span></a><a href="collection.html?collection=movies"><i class="bi bi-film" aria-hidden="true"></i><span>Movies</span></a><a href="collection.html?collection=tv"><i class="bi bi-tv" aria-hidden="true"></i><span>TV</span></a><a href="library.html"><i class="bi bi-bookmark" aria-hidden="true"></i><span>Library</span></a></div>
 <div class="vivid-nav-search"><i class="bi bi-search" aria-hidden="true"></i><input id="search-input" type="search" placeholder="Search" aria-label="Search movies and TV"></div>
 <button class="vivid-notification-button" id="release-alert-button" type="button" aria-label="Release alerts" aria-expanded="false"><i class="bi bi-bell" aria-hidden="true"></i><span id="release-alert-count" hidden>0</span></button><a class="vivid-nav-action" id="auth-link" href="auth.html">Sign in</a>
-</nav><div class="vivid-search-panel" id="search-panel" aria-label="Search results"></div></header>
+</nav><div class="vivid-search-panel" id="search-panel" aria-label="Search results"></div></header><aside class="vivid-release-popover" id="release-alert-popover" hidden aria-label="Vivid release alerts">
+<div class="vivid-release-popover-head"><div><span>VIVID ALERTS</span><strong>New releases</strong></div><button id="release-alert-close" type="button" aria-label="Close alerts"><i class="bi bi-x-lg"></i></button></div>
+<div class="vivid-release-alert-list" id="release-alert-list" aria-live="polite"></div>
+<div class="vivid-release-popover-actions"><button id="release-alert-enable" type="button">Enable notifications</button><small id="release-alert-status">Checks titles you Like or save for Watch Later.</small></div>
+</aside>
 <main id="home">
 <section class="vivid-hero" aria-label="Featured titles"><div class="vivid-hero-media"><div class="vivid-hero-fallback" id="hero-fallback"></div><iframe class="vivid-hero-video" id="hero-video" title="Featured trailer" allow="autoplay; encrypted-media; picture-in-picture" referrerpolicy="strict-origin-when-cross-origin"></iframe><div class="vivid-hero-content">
 <div class="vivid-kicker" id="hero-kicker">Featured</div>
