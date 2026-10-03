@@ -27,11 +27,164 @@ export const HOME_SECTION_META = Object.freeze({
   upcoming: { title: "Coming soon", description: "Upcoming movies on the radar.", type: "movie" }
 });
 
+export const CURATED_CATEGORIES = Object.freeze({
+  sitcom: {
+    label: "Sitcom",
+    description: "Situation comedies from across the world.",
+    type: "tv",
+    params: { with_genres: "35" },
+    keyword: "sitcom"
+  },
+  teenRomance: {
+    label: "Teen romance",
+    description: "Coming-of-age stories, first loves and young romance.",
+    type: "all",
+    params: { with_genres: "10749" },
+    keyword: "teen romance"
+  },
+  gangsta: {
+    label: "Gangsta & crime",
+    description: "Gangster, street, organized-crime and crime stories.",
+    type: "all",
+    params: { with_genres: "80" },
+    keyword: "gangster"
+  },
+  cDrama: {
+    label: "C-Dramas",
+    description: "Chinese-language series from mainland China.",
+    type: "tv",
+    params: { with_origin_country: "CN", with_original_language: "zh" }
+  },
+  bollywood: {
+    label: "Bollywood",
+    description: "Hindi-language Indian movies and series.",
+    type: "all",
+    params: { with_origin_country: "IN", with_original_language: "hi" }
+  },
+  nollywood: {
+    label: "Nollywood",
+    description: "Movies and series from Nigeria.",
+    type: "all",
+    params: { with_origin_country: "NG" }
+  },
+  kumawood: {
+    label: "Kumawood",
+    description: "Ghanaian titles tagged to the Kumawood tradition when TMDB metadata supports it.",
+    type: "all",
+    params: { with_origin_country: "GH" },
+    keyword: "kumawood"
+  },
+  ghallywood: {
+    label: "Ghallywood",
+    description: "Ghanaian titles tagged to the Ghallywood tradition when TMDB metadata supports it.",
+    type: "all",
+    params: { with_origin_country: "GH" },
+    keyword: "ghallywood"
+  },
+  kDrama: {
+    label: "K-Dramas",
+    description: "Korean-language series from South Korea.",
+    type: "tv",
+    params: { with_origin_country: "KR", with_original_language: "ko" }
+  },
+  anime: {
+    label: "Anime",
+    description: "Japanese animation and anime from around the world.",
+    type: "all",
+    params: { with_genres: "16", with_original_language: "ja" }
+  },
+  turkishDrama: {
+    label: "Turkish dramas",
+    description: "Series and stories from Türkiye.",
+    type: "tv",
+    params: { with_origin_country: "TR", with_original_language: "tr" }
+  },
+  british: {
+    label: "British",
+    description: "Movies and TV from the United Kingdom.",
+    type: "all",
+    params: { with_origin_country: "GB" }
+  },
+  french: {
+    label: "French cinema",
+    description: "French-language movies and series.",
+    type: "all",
+    params: { with_original_language: "fr" }
+  },
+  japanese: {
+    label: "Japanese",
+    description: "Japanese movies and TV beyond anime.",
+    type: "all",
+    params: { with_origin_country: "JP", with_original_language: "ja" }
+  }
+});
+
+const keywordCache = new Map();
+
 function normalizeHome(key, data) {
   return {
     items: normalizeResults(data?.results || [], HOME_SECTION_META[key]?.type || null),
     page: Number(data?.page || 1),
     totalPages: Math.min(500, Number(data?.total_pages || 1))
+  };
+}
+
+function sortValue(params = {}) {
+  return params.sort_by || "popularity.desc";
+}
+
+async function resolveKeyword(query) {
+  const normalized = String(query || "").trim().toLowerCase();
+  if (!normalized) return "";
+  if (keywordCache.has(normalized)) return keywordCache.get(normalized);
+  try {
+    const data = await tmdbApi.searchKeywords(query);
+    const results = data.results || [];
+    const exact = results.find(item => String(item.name || "").trim().toLowerCase() === normalized);
+    const id = String((exact || results[0])?.id || "");
+    keywordCache.set(normalized, id);
+    return id;
+  } catch {
+    keywordCache.set(normalized, "");
+    return "";
+  }
+}
+
+function categoryParams(category, type, page, filters = {}, keywordId = "") {
+  const base = { ...(category.params || {}) };
+  if (keywordId) base.with_keywords = keywordId;
+  if (filters.genre) base.with_genres = base.with_genres
+    ? base.with_genres + "," + filters.genre
+    : filters.genre;
+  if (filters.year) {
+    if (type === "tv") base.first_air_date_year = filters.year;
+    else base.primary_release_year = filters.year;
+  }
+  if (filters.rating) base["vote_average.gte"] = filters.rating;
+  base.page = page;
+  base.sort_by = type === "tv"
+    ? sortValue(filters).replace("primary_release_date", "first_air_date")
+    : sortValue(filters);
+  return base;
+}
+
+export async function getCuratedPage(key, page = 1, filters = {}) {
+  const category = CURATED_CATEGORIES[key];
+  if (!category) throw new Error("Unknown curated category: " + key);
+  const keywordId = category.keyword ? await resolveKeyword(category.keyword) : "";
+  const types = category.type === "all" ? ["movie", "tv"] : [category.type];
+  const results = await Promise.all(types.map(type =>
+    type === "movie"
+      ? tmdbApi.discoverMovies(categoryParams(category, type, page, filters, keywordId))
+      : tmdbApi.discoverTv(categoryParams(category, type, page, filters, keywordId))
+  ));
+  const items = results.flatMap((data, index) =>
+    normalizeResults(data?.results || [], types[index])
+  );
+  return {
+    items,
+    page,
+    totalPages: Math.min(500, Math.max(...results.map(data => Number(data?.total_pages || 1)), 1))
   };
 }
 
