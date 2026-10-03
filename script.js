@@ -5,6 +5,7 @@ import { getLocalLibrary } from "./scripts/library.js";
 import { getContinueWatching, getPlaybackProgress, getPersonalRecommendations, formatProgress } from "./scripts/recommendations.js";
 import { escapeHtml, debounce, getErrorMessage } from "./scripts/utils.js";
 import { buildWatchUrl } from "./scripts/routes.js";
+import { checkForReleaseAlerts, deliverReleaseAlerts, getPendingReleaseAlerts, requestReleaseAlerts, dismissReleaseAlert } from "./scripts/release-alerts.js";
 
 const $=id=>document.getElementById(id);
 let featured=[],activeIndex=0,heroMuted=true,heroPlaying=true,heroTimer=null,heroLoadToken=0,searchRequestId=0;
@@ -350,6 +351,35 @@ function wireAlphabet(){
  document.querySelectorAll("[data-letter]").forEach(button=>button.addEventListener("click",()=>void browseByLetter(button.dataset.letter)));
 }
 
+function renderReleaseAlerts(){
+ const list=$("release-alert-list"),count=$("release-alert-count");
+ if(!list)return;
+ const alerts=getPendingReleaseAlerts();
+ if(count){count.textContent=String(alerts.length);count.hidden=!alerts.length;}
+ list.innerHTML=alerts.length?alerts.slice(0,8).map(alert=>{
+   const meta=alert.type==="tv-episode"?"New episode · S"+alert.season+" E"+alert.episode:"New movie";
+   const href=alert.media_type==="tv"?"title.html?id="+encodeURIComponent(alert.id)+"&type=tv":"title.html?id="+encodeURIComponent(alert.id)+"&type=movie";
+   return '<a class="vivid-release-alert" href="'+href+'"><i class="bi '+(alert.type==="tv-episode"?"bi-tv":"bi-film")+'"></i><span><strong>'+escapeHtml(alert.title)+'</strong><small>'+escapeHtml(meta+(alert.episodeTitle?" · "+alert.episodeTitle:""))+'</small></span></a>';
+ }).join(""):'<p class="vivid-muted">No new releases yet. Follow titles with Like or Watch Later and Vivid will watch for updates.</p>';
+}
+async function refreshReleaseAlerts(){
+ try{
+   const permission=window.Notification?.permission;
+   if(permission==="granted"){
+     const alerts=await checkForReleaseAlerts();
+     if(alerts.length)deliverReleaseAlerts(alerts);
+   }
+ }catch(error){console.warn("Vivid release alerts unavailable:",error)}
+ renderReleaseAlerts();
+}
+function wireReleaseAlerts(){
+ const button=$("release-alert-button"),popover=$("release-alert-popover"),close=$("release-alert-close"),enable=$("release-alert-enable");
+ const toggle=()=>{if(!popover)return;popover.hidden=!popover.hidden;button?.setAttribute("aria-expanded",String(!popover.hidden));renderReleaseAlerts();};
+ button?.addEventListener("click",toggle);
+ close?.addEventListener("click",()=>{popover.hidden=true;button?.setAttribute("aria-expanded","false")});
+ enable?.addEventListener("click",async()=>{const result=await requestReleaseAlerts();enable.textContent=result==="granted"?"Notifications enabled":result==="denied"?"Notifications blocked":"Notifications unavailable";await refreshReleaseAlerts();});
+ document.addEventListener("click",event=>{if(popover&&!popover.hidden&&!event.target.closest("#release-alert-popover")&&!event.target.closest("#release-alert-button")){popover.hidden=true;button?.setAttribute("aria-expanded","false")}});
+}
 function wireSearch(){
  const input=$("search-input");if(!input)return;
  input.addEventListener("input",e=>search(e.target.value.trim()));
@@ -363,8 +393,8 @@ function wireHeroSwipe(){
 window.addEventListener("scroll",()=>{$("topbar")?.classList.toggle("is-scrolled",scrollY>18)},{passive:true});
 document.addEventListener("keydown",e=>{if(e.target.matches("input,textarea,select"))return;if(e.key==="ArrowLeft")showHero(activeIndex-1,true);if(e.key==="ArrowRight")showHero(activeIndex+1,true)});
 document.addEventListener("DOMContentLoaded",()=>{
- wireRails();wireSearch();wireAlphabet();wireHeroSwipe();
- initHero();loadHome();
+ wireRails();wireSearch();wireAlphabet();wireHeroSwipe();wireReleaseAlerts();
+ initHero();loadHome();refreshReleaseAlerts();
  $("hero-prev")?.addEventListener("click",()=>showHero(activeIndex-1,true));
  $("hero-next")?.addEventListener("click",()=>showHero(activeIndex+1,true));
  $("hero-sound")?.addEventListener("click",toggleSound);$("hero-pause")?.addEventListener("click",togglePause);
