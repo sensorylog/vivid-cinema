@@ -29,6 +29,11 @@ export function getMediaUrl(media) {
   return VIVID_CONFIG.routes.title + "?" + new URLSearchParams({ id: String(id), type });
 }
 
+export function getPersonUrl(person) {
+  const id = typeof person === "object" ? person.id : person;
+  return "person.html?" + new URLSearchParams({ id: String(id) });
+}
+
 export function getImageUrl(path, size = "w500") {
   return path ? VIVID_CONFIG.api.tmdbImageBaseUrl + "/" + size + path : "icons/vivid-icon.svg";
 }
