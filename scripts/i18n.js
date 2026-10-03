@@ -64,7 +64,15 @@ function labelForAnchor(a,lang){
 function translateChrome(lang){
  const c=COPY[lang];
  document.documentElement.lang=lang;
- document.querySelectorAll("nav a,a.vivid-nav-action").forEach(a=>{const next=labelForAnchor(a,lang);if(next)a.textContent=next});
+ document.querySelectorAll("nav a,a.vivid-nav-action").forEach(a=>{
+ const next=labelForAnchor(a,lang);
+ if(!next)return;
+ const label=a.querySelector(":scope > span");
+ if(label){label.textContent=next;return;}
+ const textNode=[...a.childNodes].find(node=>node.nodeType===Node.TEXT_NODE && node.textContent.trim());
+ if(textNode)textNode.textContent=next;
+ else a.appendChild(document.createTextNode(next));
+});
  document.querySelectorAll(".vivid-nav-search input").forEach(i=>{i.placeholder=c.search;i.setAttribute("aria-label",c.search)});
  document.querySelectorAll(".vivid-footer").forEach(footer=>{
    const year=footer.querySelector(".vivid-footer-year")?.textContent||"© 2026 Vivid Cinema";
