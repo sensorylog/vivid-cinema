@@ -40,3 +40,7 @@ body.vivid-modal-open{overflow:hidden}
  .vivid-watch-player-head{padding:10px 12px}
 }
 @media(prefers-reduced-motion:reduce){.vivid-watch-player-modal,.vivid-watch-player-dialog,.vivid-watch-player-head button{transition:none}}
+
+.vivid-watch-nav google-cast-launcher{display:inline-flex;flex:0 0 40px;width:40px;height:40px;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,.1);border-radius:12px;background:rgba(255,255,255,.05);--connected-color:#fff;--disconnected-color:#cfd4dc;transition:background .18s ease,transform .18s ease}
+.vivid-watch-nav google-cast-launcher:hover{background:rgba(255,255,255,.1);transform:translateY(-1px)}
+@media(max-width:700px){.vivid-watch-nav google-cast-launcher{margin-left:auto}.vivid-watch-nav .vivid-nav-action{display:none}}
