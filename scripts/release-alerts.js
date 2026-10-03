@@ -27,14 +27,14 @@ function addAlert(a){
   return true;
 }
 function movieEvents(data,region){
-  const rows=data?.results||[], country=rows.find(x=>x.iso_3166_1===region)||rows.find(x=>x.iso_3166_1==="US")||rows[0];
+  const rows=data?.results||[], country=rows.find(x=>x.iso_3166_1===region)||rows[0];
   return (country?.release_dates||[]).filter(x=>x?.release_date&&[2,3,4,5,6].includes(Number(x.type)))
     .map(x=>({date:date(x.release_date),type:Number(x.type),note:String(x.note||"").trim()}))
     .filter(x=>x.date)
     .filter((x,i,a)=>a.findIndex(y=>x.date===y.date&&x.type===y.type&&x.note===y.note)===i);
 }
 async function inspectMovie(item,region){
-  const [details,releases]=await Promise.all([tmdbApi.movieDetailsBasic(item.id),tmdbApi.movieReleaseDates(item.id)]);
+  const [details,releases]=await Promise.all([tmdbApi.movieDetailsBasic(item.id),tmdbApi.movieReleaseDates(item.id).catch(()=>null)]);
   const events=movieEvents(releases,region);
   if(!events.length&&details.release_date)events.push({date:date(details.release_date),type:3,note:""});
   if(!events.length)return null;
