@@ -61,3 +61,5 @@ body.vivid-library-page{background:#06070a;color:#f5f7fa;min-height:100dvh}.vivi
   .vivid-library-page .vivid-library-card,
   .vivid-library-page .vivid-library-card img{transition:none;transform:none}
 }
+
+.library-sync-line{display:flex;align-items:center;gap:8px;margin-top:10px;color:#7f8791;font-size:.78rem}.library-sync-line span:last-child{min-height:1em}.library-sync-line #library-sync-dot{width:7px;height:7px;border-radius:50%;background:#7b838d;flex:0 0 auto}.library-sync-line #library-sync-dot[data-state=success]{background:#73d99b}.library-sync-line #library-sync-dot[data-state=syncing]{background:#f0c674;animation:vivid-library-sync 1s ease-in-out infinite}.library-sync-line #library-sync-dot[data-state=error]{background:#ff7b7b}@keyframes vivid-library-sync{50%{opacity:.35;transform:scale(.7)}}
