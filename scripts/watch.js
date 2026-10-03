@@ -102,7 +102,6 @@ function hydrateWatchDetails(params){
  const recommendations=$("watch-recommendations");
  if(recommendations)recommendations.innerHTML=recommendationCards();
  document.title=(episodeTitle?episodeTitle+" · ":"")+title+" · Vivid Cinema";
- recordHistory();
 }
 async function prepareNextEpisode(params){
  if(params.type!=="tv")return null;
