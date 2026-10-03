@@ -7,7 +7,7 @@ async function initAuthUi() {
   try {
     const [{ auth }, { onAuthStateChanged, signOut }] = await Promise.all([
       import("./firebase.js"),
-      import("https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js")
+      import("https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js")
     ]);
 
     onAuthStateChanged(auth, (user) => {
