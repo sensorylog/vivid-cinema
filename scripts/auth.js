@@ -27,8 +27,14 @@ try {
 } catch {}
 
 function showMessage(text,good=false){if(!errorEl)return;errorEl.textContent=text;errorEl.style.color=good?"#7ee787":"#ff6b6b";}
+function withTimeout(promise,ms,label){
+  return Promise.race([
+    promise,
+    new Promise((_,reject)=>window.setTimeout(()=>reject(Object.assign(new Error(label),{code:"auth/timeout"})),ms))
+  ]);
+}
 function friendlyError(error){
-  const messages={"auth/internal-error":"Google sign-in could not finish in this browser. Please try again.","auth/web-storage-unsupported":"This browser is blocking secure sign-in storage. Please allow site storage for Vivid Cinema and try again.","auth/cancelled-popup-request":"Another Google sign-in is already in progress. Please try again.","auth/popup-closed-by-user":"Google sign-in was cancelled.","auth/email-already-in-use":"An account already exists for this email.","auth/invalid-email":"Please enter a valid email address.","auth/weak-password":"Choose a stronger password.","auth/invalid-credential":"Email or password is incorrect.","auth/user-disabled":"This account has been disabled.","auth/too-many-requests":"Too many attempts. Please wait and try again.","auth/popup-blocked":"Your browser blocked the Google sign-in window. Allow pop-ups for Vivid Cinema, then try again.","auth/account-exists-with-different-credential":"An account already exists with a different sign-in method.","auth/network-request-failed":"Connection problem. Check your internet connection and try again.","auth/requires-recent-login":"For security, please sign in again and retry."};
+  const messages={"auth/internal-error":"Google sign-in could not finish in this browser. Please try again.","auth/web-storage-unsupported":"This browser is blocking secure sign-in storage. Please allow site storage for Vivid Cinema and try again.","auth/cancelled-popup-request":"Another Google sign-in is already in progress. Please try again.","auth/popup-closed-by-user":"Google sign-in was cancelled.","auth/email-already-in-use":"An account already exists for this email.","auth/invalid-email":"Please enter a valid email address.","auth/weak-password":"Choose a stronger password.","auth/invalid-credential":"Email or password is incorrect.","auth/user-disabled":"This account has been disabled.","auth/too-many-requests":"Too many attempts. Please wait and try again.","auth/popup-blocked":"Your browser blocked the Google sign-in window. Allow pop-ups for Vivid Cinema, then try again.","auth/account-exists-with-different-credential":"An account already exists with a different sign-in method.","auth/network-request-failed":"Connection problem. Check your internet connection and try again.","auth/requires-recent-login":"For security, please sign in again and retry.","auth/timeout":"Firebase sign-in is taking too long. Check your connection and try again."};
   if(error?.code==="auth/unauthorized-domain") return "Google sign-in is not enabled for this Vivid domain yet.";
   if(error?.code==="auth/operation-not-allowed") return "Google sign-in is currently disabled. Please use email and password for now.";
   return messages[error?.code]||"Something went wrong. Please try again.";
@@ -45,7 +51,7 @@ async function finishGoogleSignIn(credential){
 async function googleSignIn(){
   const provider=new GoogleAuthProvider();
   provider.setCustomParameters({prompt:"select_account"});
-  const credential=await signInWithPopup(auth,provider);
+  const credential=await withTimeout(signInWithPopup(auth,provider),45000,"Google sign-in timed out.");
   await finishGoogleSignIn(credential);
 }
 googleButtons.forEach(button=>button.addEventListener("click",async()=>{
@@ -58,10 +64,11 @@ signupForm?.addEventListener("submit",async(event)=>{
   if(password.length<6){showMessage("Password must be at least 6 characters.");return;}
   button.disabled=true;showMessage("Creating your account…",true);
   try{
-    const credential=await createUserWithEmailAndPassword(auth,email,password);
-    if(name)await updateProfile(credential.user,{displayName:name});
-    await createUserRecord(credential.user,name);
-    await sendEmailVerification(credential.user);
+    const credential=await withTimeout(createUserWithEmailAndPassword(auth,email,password),15000,"Account creation timed out.");
+    if(name)await withTimeout(updateProfile(credential.user,{displayName:name}),10000,"Profile update timed out.");
+    try{await withTimeout(createUserRecord(credential.user,name),10000,"Profile sync timed out.");}
+    catch(profileError){console.warn("Profile sync skipped after account creation:",profileError);}
+    await withTimeout(sendEmailVerification(credential.user),15000,"Verification email request timed out.");
     showMessage("Account created. Check your email to verify your address, then log in.",true);
     await signOut(auth);
     button.disabled=false;
@@ -72,7 +79,7 @@ loginForm?.addEventListener("submit",async(event)=>{
   const email=document.getElementById("login-email")?.value.trim()||"",password=document.getElementById("login-password")?.value||"",button=loginForm.querySelector("button[type=submit]");
   button.disabled=true;showMessage("Signing in…",true);
   try{
-    const credential=await signInWithEmailAndPassword(auth,email,password);
+    const credential=await withTimeout(signInWithEmailAndPassword(auth,email,password),15000,"Email sign-in timed out.");
     if(!credential.user.emailVerified){await signOut(auth);showMessage("Please verify your email before signing in. Check your inbox.");button.disabled=false;return;}
     void startLibrarySync();
     window.location.href="home.html";
