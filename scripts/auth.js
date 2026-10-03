@@ -6,7 +6,6 @@ import {
   sendPasswordResetEmail,
   signInWithEmailAndPassword,
   signInWithPopup,
-  browserPopupRedirectResolver,
   signOut,
   updateProfile
 } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
@@ -46,7 +45,7 @@ async function finishGoogleSignIn(credential){
 async function googleSignIn(){
   const provider=new GoogleAuthProvider();
   provider.setCustomParameters({prompt:"select_account"});
-  const credential=await signInWithPopup(auth,provider,browserPopupRedirectResolver);
+  const credential=await signInWithPopup(auth,provider);
   await finishGoogleSignIn(credential);
 }
 googleButtons.forEach(button=>button.addEventListener("click",async()=>{
