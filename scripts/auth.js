@@ -37,7 +37,7 @@ async function createUserRecord(user,name){
 async function googleSignIn(){
   const credential=await signInWithPopup(auth,new GoogleAuthProvider());
   await createUserRecord(credential.user,credential.user.displayName||"");
-  await startLibrarySync();
+  void startLibrarySync();
   window.location.href="home.html";
 }
 googleButtons.forEach(button=>button.addEventListener("click",async()=>{
@@ -66,7 +66,7 @@ loginForm?.addEventListener("submit",async(event)=>{
   try{
     const credential=await signInWithEmailAndPassword(auth,email,password);
     if(!credential.user.emailVerified){await signOut(auth);showMessage("Please verify your email before signing in. Check your inbox.");button.disabled=false;return;}
-    await startLibrarySync();
+    void startLibrarySync();
     window.location.href="home.html";
   }catch(error){console.error(error);showMessage(friendlyError(error));button.disabled=false;}
 });
