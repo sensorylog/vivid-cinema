@@ -357,18 +357,15 @@ function renderReleaseAlerts(){
  const alerts=getPendingReleaseAlerts();
  if(count){count.textContent=String(alerts.length);count.hidden=!alerts.length;}
  list.innerHTML=alerts.length?alerts.slice(0,8).map(alert=>{
-   const meta=alert.type==="tv-episode"?"New episode · S"+alert.season+" E"+alert.episode:"New movie";
+   const meta=alert.type==="tv-season"?"New season · S"+alert.season:alert.type==="tv-episode"?"New episode · S"+alert.season+" E"+alert.episode:"New movie";
    const href=alert.media_type==="tv"?"title.html?id="+encodeURIComponent(alert.id)+"&type=tv":"title.html?id="+encodeURIComponent(alert.id)+"&type=movie";
    return '<a class="vivid-release-alert" href="'+href+'"><i class="bi '+(alert.type==="tv-episode"?"bi-tv":"bi-film")+'"></i><span><strong>'+escapeHtml(alert.title)+'</strong><small>'+escapeHtml(meta+(alert.episodeTitle?" · "+alert.episodeTitle:""))+'</small></span></a>';
  }).join(""):'<p class="vivid-muted">No new releases yet. Follow titles with Like or Watch Later and Vivid will watch for updates.</p>';
 }
 async function refreshReleaseAlerts(){
  try{
-   const permission=window.Notification?.permission;
-   if(permission==="granted"){
-     const alerts=await checkForReleaseAlerts();
-     if(alerts.length)deliverReleaseAlerts(alerts);
-   }
+   const alerts=await checkForReleaseAlerts();
+   if(alerts.length && window.Notification?.permission==="granted") deliverReleaseAlerts(alerts);
  }catch(error){console.warn("Vivid release alerts unavailable:",error)}
  renderReleaseAlerts();
 }
