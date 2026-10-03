@@ -381,7 +381,7 @@ function wireReleaseAlerts(){
  close?.addEventListener("click",()=>{popover.hidden=true;button?.setAttribute("aria-expanded","false")});
  enable?.addEventListener("click",async()=>{const result=await requestReleaseAlerts();enable.textContent=result==="granted"?"Notifications enabled":result==="denied"?"Notifications blocked":"Notifications unavailable";const status=$("release-alert-status");if(status)status.textContent=result==="granted"?"Background-capable notifications are enabled for this installed/browser app.":"Notifications stay in the Vivid alert center.";await checkForReleaseAlerts({force:true});renderReleaseAlerts();});
  document.addEventListener("click",event=>{const dismiss=event.target.closest("[data-dismiss-release]");if(dismiss){dismissReleaseAlert(dismiss.dataset.dismissRelease);renderReleaseAlerts();return;}if(popover&&!popover.hidden&&!event.target.closest("#release-alert-popover")&&!event.target.closest("#release-alert-button")){popover.hidden=true;button?.setAttribute("aria-expanded","false")}});
- document.addEventListener("click",event=>{if(popover&&!popover.hidden&&!event.target.closest("#release-alert-popover")&&!event.target.closest("#release-alert-button")){popover.hidden=true;button?.setAttribute("aria-expanded","false")}});
+
 }
 function wireSearch(){
  const input=$("search-input");if(!input)return;
