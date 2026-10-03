@@ -43,3 +43,5 @@
 @media(max-width:700px){
   .account-page .account-card{box-shadow:0 16px 45px rgba(0,0,0,.2)}
 }
+
+.account-sync{display:flex;align-items:center;gap:12px;margin:16px 0;padding:12px 14px;border:1px solid rgba(255,255,255,.08);border-radius:14px;background:rgba(255,255,255,.035)}.account-sync>div{min-width:0;flex:1}.account-sync strong,.account-sync small{display:block}.account-sync strong{font-size:.88rem}.account-sync small{margin-top:3px;color:#818994}.account-sync-dot{width:9px;height:9px;border-radius:50%;background:#7b838d;box-shadow:0 0 0 5px rgba(123,131,141,.08);flex:0 0 auto}.account-sync-dot[data-state=success]{background:#73d99b;box-shadow:0 0 0 5px rgba(115,217,155,.08)}.account-sync-dot[data-state=syncing]{background:#f0c674;animation:vivid-sync-pulse 1s ease-in-out infinite}.account-sync-dot[data-state=error]{background:#ff7b7b}.account-security-card p{color:#8d949f;line-height:1.55}.account-security-card .account-status{margin-top:12px}@keyframes vivid-sync-pulse{50%{opacity:.35;transform:scale(.7)}}@media(max-width:700px){.account-sync{align-items:flex-start}.account-sync .vivid-button{padding:8px 10px;white-space:nowrap}}
