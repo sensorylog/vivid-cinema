@@ -8,8 +8,8 @@ import {
   signInWithPopup,
   signOut,
   updateProfile
-} from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
-import { doc, serverTimestamp, setDoc } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
+} from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
+import { doc, serverTimestamp, setDoc } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
 import { startLibrarySync } from "./library.js";
 
 const signupForm=document.getElementById("signup-form");
@@ -28,7 +28,7 @@ try {
 
 function showMessage(text,good=false){if(!errorEl)return;errorEl.textContent=text;errorEl.style.color=good?"#7ee787":"#ff6b6b";}
 function friendlyError(error){
-  const messages={"auth/email-already-in-use":"An account already exists for this email.","auth/invalid-email":"Please enter a valid email address.","auth/weak-password":"Choose a stronger password.","auth/invalid-credential":"Email or password is incorrect.","auth/user-disabled":"This account has been disabled.","auth/too-many-requests":"Too many attempts. Please wait and try again.","auth/popup-closed-by-user":"Google sign-in was cancelled.","auth/popup-blocked":"Your browser blocked the Google sign-in window. Allow pop-ups for Vivid Cinema, then try again.","auth/account-exists-with-different-credential":"An account already exists with a different sign-in method.","auth/network-request-failed":"Connection problem. Check your internet connection and try again.","auth/requires-recent-login":"For security, please sign in again and retry."};
+  const messages={"auth/internal-error":"Google sign-in could not finish in this browser. Please try again.","auth/web-storage-unsupported":"This browser is blocking secure sign-in storage. Please allow site storage for Vivid Cinema and try again.","auth/cancelled-popup-request":"Another Google sign-in is already in progress. Please try again.","auth/popup-closed-by-user":"Google sign-in was cancelled.","auth/email-already-in-use":"An account already exists for this email.","auth/invalid-email":"Please enter a valid email address.","auth/weak-password":"Choose a stronger password.","auth/invalid-credential":"Email or password is incorrect.","auth/user-disabled":"This account has been disabled.","auth/too-many-requests":"Too many attempts. Please wait and try again.","auth/popup-blocked":"Your browser blocked the Google sign-in window. Allow pop-ups for Vivid Cinema, then try again.","auth/account-exists-with-different-credential":"An account already exists with a different sign-in method.","auth/network-request-failed":"Connection problem. Check your internet connection and try again.","auth/requires-recent-login":"For security, please sign in again and retry."};
   if(error?.code==="auth/unauthorized-domain") return "Google sign-in is not enabled for this Vivid domain yet.";
   if(error?.code==="auth/operation-not-allowed") return "Google sign-in is currently disabled. Please use email and password for now.";
   return messages[error?.code]||"Something went wrong. Please try again.";
@@ -44,6 +44,7 @@ async function finishGoogleSignIn(credential){
 }
 async function googleSignIn(){
   const provider=new GoogleAuthProvider();
+  provider.setCustomParameters({prompt:"select_account"});
   const credential=await signInWithPopup(auth,provider);
   await finishGoogleSignIn(credential);
 }
