@@ -52,7 +52,7 @@ function renderLibraryActions() {
   const watchLater = hasLibraryItem("watchLater", item);
   const externalLink = getExternalProviderLink(media);
   return '<div class="vivid-title-library-actions" aria-label="Library actions">' +
-    '<button class="vivid-button vivid-button--secondary" type="button" id="library-favorite"><i class="bi bi-heart' + (favorite ? '-fill' : '') + '"></i> ' + (favorite ? "Favorited" : "Favorite") + '</button>' +
+    '<button class="vivid-button vivid-button--secondary" type="button" id="library-favorite"><i class="bi bi-heart' + (favorite ? '-fill' : '') + '"></i> ' + (favorite ? "Liked" : "Like") + '</button>' +
     '<button class="vivid-button vivid-button--secondary" type="button" id="library-watch-later"><i class="bi bi-clock' + (watchLater ? '-fill' : '') + '"></i> ' + (watchLater ? "Saved" : "Watch later") + '</button>' +
     '<a class="vivid-button vivid-button--ghost" href="library.html"><i class="bi bi-bookmark"></i> My Library</a>' +
     (externalLink ? '<a class="vivid-button vivid-button--secondary" href="' + escapeHtml(externalLink) + '" target="_blank" rel="noopener noreferrer" aria-label="Download this title"><i class="bi bi-download"></i> Download</a>' : "") +
@@ -65,7 +65,7 @@ function wireLibraryActions() {
   const watchLater = $("library-watch-later");
   favorite?.addEventListener("click", () => {
     toggleLibraryItem("favorites", item);
-    favorite.innerHTML = hasLibraryItem("favorites", item) ? '<i class="bi bi-heart-fill"></i> Favorited' : '<i class="bi bi-heart"></i> Favorite';
+    favorite.innerHTML = hasLibraryItem("favorites", item) ? '<i class="bi bi-heart-fill"></i> Liked' : '<i class="bi bi-heart"></i> Like';
   });
   watchLater?.addEventListener("click", () => {
     toggleLibraryItem("watchLater", item);
