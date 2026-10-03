@@ -1,4 +1,4 @@
-const CACHE_NAME = "vivid-cinema-shell-v33";
+const CACHE_NAME = "vivid-cinema-shell-v34";
 const APP_SHELL = [
   "./","./index.html","./home.html","./discover.html","./collection.html","./title.html","./watch.html",
   "./library.html","./auth.html","./login.html","./forgot-password.html","./account.html","./terms.html","./privacy.html","./contact.html",
@@ -74,4 +74,15 @@ self.addEventListener("fetch",event=>{
   }
   const isCodeOrStyle=/\.(?:js|css|html)$/.test(url.pathname);
   event.respondWith(isCodeOrStyle?networkFirst(request):staleWhileRevalidate(request));
+});
+
+
+self.addEventListener("notificationclick",event=>{
+  event.notification.close();
+  const target=event.notification.data?.url||"./home.html";
+  event.waitUntil(clients.matchAll({type:"window",includeUncontrolled:true}).then(list=>{
+    const existing=list.find(client=>client.url.includes(self.location.origin));
+    if(existing){existing.navigate(new URL(target,self.location.origin).href);return existing.focus();}
+    return clients.openWindow(new URL(target,self.location.origin).href);
+  }));
 });
