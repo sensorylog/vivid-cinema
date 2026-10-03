@@ -333,6 +333,13 @@ body.vivid-cinema-home{background:transparent;color:#f5f7fa;overflow-x:hidden}
     min-height:540px;
     max-height:none;
   }
+  /* Mobile keeps the full backdrop visible instead of cropping the sides. */
+  .vivid-hero-fallback{
+    background-size:auto 100%;
+    background-position:center center;
+    background-repeat:no-repeat;
+    background-color:#090a0d;
+  }
   .vivid-hero-media::after{
     background:
       linear-gradient(90deg,rgba(4,5,7,.9),rgba(4,5,7,.28) 72%,rgba(4,5,7,.38)),
