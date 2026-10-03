@@ -25,7 +25,7 @@
           },
           {
             "key": "Permissions-Policy",
-            "value": "camera=(), microphone=(), geolocation=(), payment=(), fullscreen=(self \"https://www.youtube.com\" \"https://www.youtube-nocookie.com\"), autoplay=(self \"https://www.youtube.com\" \"https://www.youtube-nocookie.com\" \"https://youtube.com\")"
+            "value": "camera=(), microphone=(), geolocation=(), payment=(), fullscreen=(self \"https://www.youtube.com\" \"https://www.youtube-nocookie.com\" \"https://vaplayer.ru\"), autoplay=(self \"https://www.youtube.com\" \"https://www.youtube-nocookie.com\" \"https://youtube.com\" \"https://vaplayer.ru\")"
           },
           {
             "key": "X-Frame-Options",
