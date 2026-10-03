@@ -1,8 +1,8 @@
 import { auth, db } from "./firebase.js";
-import { onAuthStateChanged, signOut, updateProfile } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
-import { doc, getDoc, serverTimestamp, setDoc } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
+import { onAuthStateChanged, signOut, updateProfile } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
+import { doc, getDoc, serverTimestamp, setDoc } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
 import { getLocalLibrary, syncLibraryForUser } from "./library.js";
-import { sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
+import { sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
 
 const statusEl = document.getElementById("account-status");
 const emailEl = document.getElementById("user-email");
