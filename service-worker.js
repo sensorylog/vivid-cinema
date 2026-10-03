@@ -1,4 +1,4 @@
-const CACHE_NAME = "vivid-cinema-shell-v19";
+const CACHE_NAME = "vivid-cinema-shell-v20";
 const APP_SHELL = [
   "./","./index.html","./home.html","./discover.html","./collection.html","./title.html","./watch.html",
   "./library.html","./auth.html","./login.html","./account.html","./terms.html","./privacy.html","./contact.html",
