@@ -7,7 +7,7 @@ import { escapeHtml, debounce, getErrorMessage } from "./scripts/utils.js";
 import { buildWatchUrl } from "./scripts/routes.js";
 
 const $=id=>document.getElementById(id);
-let featured=[],activeIndex=0,heroMuted=true,heroPlaying=true,heroTimer=null,heroLoadToken=0;
+let featured=[],activeIndex=0,heroMuted=true,heroPlaying=true,heroTimer=null,heroLoadToken=0,searchRequestId=0;
 
 const rails={};
 const sectionState={};
@@ -305,8 +305,9 @@ function showSearch(items){
 }
 
 const search=debounce(async q=>{
+ const requestId=++searchRequestId;
  if(!q){$("search-panel")?.classList.remove("is-open");return}
- try{showSearch(await searchContent(q),q)}catch(e){$("search-panel").innerHTML='<div class="vivid-empty">'+escapeHtml(getErrorMessage(e))+"</div>";$("search-panel").classList.add("is-open")}
+ try{const items=await searchContent(q);if(requestId!==searchRequestId)return;showSearch(items)}catch(e){if(requestId!==searchRequestId)return;$("search-panel").innerHTML='<div class="vivid-empty">'+escapeHtml(getErrorMessage(e))+"</div>";$("search-panel").classList.add("is-open")}
 },300);
 
 async function browseByLetter(letter){
