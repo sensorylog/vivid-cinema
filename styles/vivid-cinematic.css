@@ -8,6 +8,8 @@ body.vivid-cinema-home{background:transparent;color:#f5f7fa;overflow-x:hidden}
 .vivid-brand{font-weight:800;letter-spacing:-.04em;font-size:1.2rem;white-space:nowrap}
 .vivid-brand span{color:#aeb4bd}
 .vivid-navlinks{display:flex;gap:4px;align-items:center}
+.vivid-navlinks a{display:inline-flex;align-items:center;gap:7px}
+.vivid-navlinks a i{font-size:.92rem;line-height:1}
 .vivid-navlinks a,.vivid-nav-action{color:#b8bdc7;text-decoration:none;padding:10px 12px;border-radius:12px;font-size:.9rem;background:transparent;border:0;cursor:pointer}
 .vivid-navlinks a:hover,.vivid-nav-action:hover,.vivid-navlinks a[aria-current=true]{color:#fff;background:rgba(255,255,255,.07)}
 .vivid-nav-search{margin-left:auto;position:relative;width:min(28vw,300px)}
