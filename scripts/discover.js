@@ -1,4 +1,5 @@
 import { tmdbApi } from "./tmdb.js";
+import { CURATED_CATEGORIES, getCuratedPage } from "./content.js";
 import { getImageUrl, getMediaUrl, normalizeResults } from "./media.js";
 import { escapeHtml, getErrorMessage } from "./utils.js";
 import { getRoute } from "./routes.js";
@@ -13,11 +14,13 @@ const state = {
   rating: route.params.get("rating") || "",
   region: route.params.get("region") || "",
   provider: route.params.get("provider") || "",
+  category: route.params.get("category") || "",
   query: route.params.get("q") || "",
   page: Number(route.params.get("page") || 1) || 1,
   totalPages: 1,
   requestId: 0
 };
+if (!CURATED_CATEGORIES[state.category]) state.category = "";
 let genres = { movie: [], tv: [] };
 let providers = { movie: [], tv: [] };
 const FEATURED_PROVIDER_IDS = [8, 119, 337, 1899, 350, 15, 531, 386, 283, 11];
@@ -65,6 +68,7 @@ function sortItems(items) {
 
 function syncUrl() {
   const params = new URLSearchParams();
+  if (state.category) params.set("category", state.category);
   if (state.type !== "all") params.set("type", state.type);
   if (state.genre) params.set("genre", state.genre);
   if (state.year) params.set("year", state.year);
@@ -174,10 +178,12 @@ async function fetchDiscovery() {
   syncUrl();
   renderLoading();
   const query = state.query.trim();
-  $("results-label").textContent = query ? "SEARCH" : "DISCOVER";
+  $("results-label").textContent = query ? "SEARCH" : state.category ? "COLLECTION" : "DISCOVER";
   const selectedProvider = [...(providers.movie || []), ...(providers.tv || [])].find((provider) => String(provider.provider_id) === String(state.provider));
+  const selectedCategory = CURATED_CATEGORIES[state.category];
   $("results-title").textContent = query
     ? 'Results for “' + escapeHtml(query) + '”'
+    : selectedCategory ? selectedCategory.label
     : selectedProvider ? selectedProvider.provider_name
     : state.type === "all" ? "All titles" : state.type === "tv" ? "TV series" : "Movies";
 
@@ -201,6 +207,17 @@ async function fetchDiscovery() {
         .filter((item) => !state.rating || Number(item.vote_average || 0) >= Number(state.rating));
       totalPages = Math.max(...results.map((data) => Number(data.total_pages || 1)));
       items = sortItems(items);
+    } else if (state.category) {
+      const data = await getCuratedPage(state.category, state.page, {
+        genre: state.genre,
+        year: state.year,
+        sort: state.sort,
+        rating: state.rating,
+        region: state.region,
+        provider: state.provider
+      });
+      items = sortItems(data.items || []);
+      totalPages = Number(data.totalPages || 1);
     } else if (state.type === "all") {
       const [movies, tv] = await Promise.all([
         tmdbApi.discoverMovies(discoverParams("movie")),
@@ -251,6 +268,8 @@ async function updateFromControls() {
 }
 
 function syncControlsFromUrl() {
+  const categorySelect = $("category-filter");
+  if (categorySelect) categorySelect.value = state.category;
   document.querySelectorAll("[data-type]").forEach((button) =>
     button.classList.toggle("is-active", button.dataset.type === state.type)
   );
@@ -281,6 +300,7 @@ function resetFilters() {
   state.rating = "";
   state.region = "";
   state.provider = "";
+  state.category = "";
   state.query = "";
   state.page = 1;
   document.querySelectorAll("[data-type]").forEach((button) =>
@@ -294,6 +314,7 @@ function resetFilters() {
   $("rating-filter").value = "";
   $("region-filter").value = "";
   state.provider = "";
+  if ($("category-filter")) $("category-filter").value = "";
   populateGenres();
   fetchDiscovery();
 }
@@ -302,6 +323,21 @@ function wire() {
   document.querySelectorAll("[data-type]").forEach((button) =>
     button.addEventListener("click", () => setType(button.dataset.type))
   );
+  $("category-filter")?.addEventListener("change", () => {
+    state.category = $("category-filter").value;
+    state.page = 1;
+    const category = CURATED_CATEGORIES[state.category];
+    if (category) {
+      state.type = category.type;
+      document.querySelectorAll("[data-type]").forEach((button) =>
+        button.classList.toggle("is-active", button.dataset.type === state.type)
+      );
+      state.genre = "";
+      if ($("genre-filter")) $("genre-filter").value = "";
+      populateGenres();
+    }
+    fetchDiscovery();
+  });
   ["genre-filter", "year-filter", "sort-filter", "rating-filter", "region-filter"]
     .forEach((id) => $(id).addEventListener("change", updateFromControls));
   $("provider-filter").addEventListener("click", async (event) => {
@@ -355,6 +391,15 @@ function wire() {
 
 async function init() {
   populateYears();
+  if ($("category-filter")) {
+    $("category-filter").innerHTML = '<option value="">All catalogue</option>' +
+      Object.entries(CURATED_CATEGORIES).map(([key, category]) =>
+        '<option value="' + escapeHtml(key) + '">' + escapeHtml(category.label) + '</option>'
+      ).join("");
+    $("category-filter").value = state.category;
+    const category = CURATED_CATEGORIES[state.category];
+    if (category) state.type = category.type;
+  }
   wire();
   syncControlsFromUrl();
   $("discovery-search").value = state.query;
