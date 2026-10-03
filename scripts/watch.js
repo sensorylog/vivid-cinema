@@ -5,7 +5,6 @@ import { escapeHtml, getErrorMessage } from "./utils.js";
 import { upsertLibraryItem, startLibrarySync } from "./library.js";
 import { getPlaybackProgress, savePlaybackProgress, removePlaybackProgress } from "./recommendations.js";
 import { VIVID_CONFIG } from "./config.js";
-import { setCastMedia } from "./cast.js";
 
 const $=id=>document.getElementById(id);
 const route=getRoute();
@@ -59,7 +58,6 @@ function renderShell(params){
  const close=$("close-watch-player");
  let loaded=false,timeout=0,previousFocus=null;
  const embedUrl=buildEmbedUrl(params,saved?.progress||route.params.get("startAt")||0);
- setCastMedia({ url: embedUrl, title: isTv ? (episodeTitle || title) : title });
  const openPlayer=()=>{
    previousFocus=document.activeElement;
    modal?.classList.add("is-open");
