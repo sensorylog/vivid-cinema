@@ -6,6 +6,8 @@ import {
   sendPasswordResetEmail,
   signInWithEmailAndPassword,
   signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   signOut,
   updateProfile
 } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
@@ -29,17 +31,49 @@ try {
 function showMessage(text,good=false){if(!errorEl)return;errorEl.textContent=text;errorEl.style.color=good?"#7ee787":"#ff6b6b";}
 function friendlyError(error){
   const messages={"auth/email-already-in-use":"An account already exists for this email.","auth/invalid-email":"Please enter a valid email address.","auth/weak-password":"Choose a stronger password.","auth/invalid-credential":"Email or password is incorrect.","auth/user-disabled":"This account has been disabled.","auth/too-many-requests":"Too many attempts. Please wait and try again.","auth/popup-closed-by-user":"Google sign-in was cancelled.","auth/popup-blocked":"Your browser blocked the sign-in window. Please allow popups and try again.","auth/account-exists-with-different-credential":"An account already exists with a different sign-in method.","auth/network-request-failed":"Connection problem. Check your internet connection and try again.","auth/requires-recent-login":"For security, please sign in again and retry."};
+  if(error?.code==="auth/unauthorized-domain") return "Google sign-in is not enabled for this Vivid domain yet.";
+  if(error?.code==="auth/operation-not-allowed") return "Google sign-in is currently disabled. Please use email and password for now.";
   return messages[error?.code]||"Something went wrong. Please try again.";
 }
 async function createUserRecord(user,name){
   await setDoc(doc(db,"users",user.uid),{displayName:name,email:user.email||null,provider:user.providerData?.[0]?.providerId||"password",updatedAt:serverTimestamp(),createdAt:serverTimestamp()},{merge:true});
 }
-async function googleSignIn(){
-  const credential=await signInWithPopup(auth,new GoogleAuthProvider());
-  await createUserRecord(credential.user,credential.user.displayName||"");
+async function finishGoogleSignIn(credential){
+  try{await createUserRecord(credential.user,credential.user.displayName||"");}
+  catch(error){console.warn("Google sign-in succeeded but profile sync failed:",error);}
   void startLibrarySync();
   window.location.href="home.html";
 }
+async function handleGoogleRedirectResult(){
+  try{
+    const result=await getRedirectResult(auth);
+    if(result?.user) await finishGoogleSignIn(result);
+  }catch(error){
+    console.error("Google redirect sign-in failed:",error);
+    showMessage(friendlyError(error));
+  }
+}
+function isMobileBrowser(){
+  return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || (navigator.platform==="MacIntel" && navigator.maxTouchPoints>1);
+}
+async function googleSignIn(){
+  const provider=new GoogleAuthProvider();
+  if(isMobileBrowser()){
+    await signInWithRedirect(auth,provider);
+    return;
+  }
+  try{
+    const credential=await signInWithPopup(auth,provider);
+    await finishGoogleSignIn(credential);
+  }catch(error){
+    if(error?.code==="auth/popup-blocked" || error?.code==="auth/operation-not-supported"){
+      await signInWithRedirect(auth,provider);
+      return;
+    }
+    throw error;
+  }
+}
+void handleGoogleRedirectResult();
 googleButtons.forEach(button=>button.addEventListener("click",async()=>{
   button.disabled=true;showMessage("Connecting to Google…",true);
   try{await googleSignIn();}catch(error){console.error(error);showMessage(friendlyError(error));button.disabled=false;}
