@@ -40,3 +40,9 @@ body.vivid-modal-open{overflow:hidden}
  .vivid-watch-player-head{padding:10px 12px}
 }
 @media(prefers-reduced-motion:reduce){.vivid-watch-player-modal,.vivid-watch-player-dialog,.vivid-watch-player-head button{transition:none}}
+
+
+/* App-wide navigation polish: keep icons aligned without changing the player layout. */
+.vivid-watch-nav nav a{display:inline-flex;align-items:center;gap:7px}
+.vivid-watch-nav nav a i{font-size:.92rem;line-height:1}
+@media(max-width:640px){.vivid-watch-nav nav a{padding:8px 9px}}
