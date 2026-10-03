@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
-import { getAuth } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
+import { initializeAuth, browserLocalPersistence, browserSessionPersistence } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
 import { getFirestore } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
 
 async function loadFirebaseConfig() {
@@ -21,7 +21,7 @@ async function loadFirebaseConfig() {
 
 const firebaseConfig = await loadFirebaseConfig();
 const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
+const auth = initializeAuth(app, { persistence: [browserLocalPersistence, browserSessionPersistence] });
 const db = getFirestore(app);
 
 export { app, auth, db };
