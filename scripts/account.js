@@ -1,7 +1,8 @@
 import { auth, db } from "./firebase.js";
 import { onAuthStateChanged, signOut, updateProfile } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
 import { doc, getDoc, serverTimestamp, setDoc } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
-import { getLocalLibrary, syncLibraryForUser } from "./library.js";\nimport { sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
+import { getLocalLibrary, syncLibraryForUser } from "./library.js";
+import { sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
 
 const statusEl = document.getElementById("account-status");
 const emailEl = document.getElementById("user-email");
@@ -12,7 +13,13 @@ const countryEl = document.getElementById("provider-country");
 const autoplayEl = document.getElementById("autoplay-trailers");
 const reducedMotionEl = document.getElementById("reduced-motion");
 const saveButton = document.getElementById("save-btn");
-const logoutButton = document.getElementById("logout-btn");\nconst syncButton = document.getElementById("sync-btn");\nconst syncDot = document.getElementById("sync-dot");\nconst syncLabel = document.getElementById("sync-label");\nconst syncDetail = document.getElementById("sync-detail");\nconst changePasswordButton = document.getElementById("change-password-btn");\nconst securityStatus = document.getElementById("security-status");
+const logoutButton = document.getElementById("logout-btn");
+const syncButton = document.getElementById("sync-btn");
+const syncDot = document.getElementById("sync-dot");
+const syncLabel = document.getElementById("sync-label");
+const syncDetail = document.getElementById("sync-detail");
+const changePasswordButton = document.getElementById("change-password-btn");
+const securityStatus = document.getElementById("security-status");
 const counts = {
   favorites: document.getElementById("favorites-count"),
   watchLater: document.getElementById("watch-later-count"),
@@ -148,7 +155,23 @@ onAuthStateChanged(auth, async (user) => {
   }
 });
 
-syncButton?.addEventListener("click", async () => {\n  const user=auth.currentUser;if(!user)return;\n  syncButton.disabled=true;setSyncStatus("Syncing…","Merging this device with your cloud library.","syncing");\n  try{const library=await syncLibraryForUser(user);renderCounts(library);setSyncStatus("Synced just now","Your likes, watch later list and history are up to date.","success");setStatus("Library synced.",true);}\n  catch(error){console.error(error);setSyncStatus("Sync paused","Your local library is still available on this device.","error");setStatus("Cloud sync could not be completed.");}\n  finally{syncButton.disabled=false;}\n});\n\nchangePasswordButton?.addEventListener("click", async () => {\n  const user=auth.currentUser;if(!user?.email)return;\n  changePasswordButton.disabled=true;\n  try{await sendPasswordResetEmail(auth,user.email);if(securityStatus)securityStatus.textContent="Password reset instructions sent to your email.";}\n  catch(error){if(securityStatus)securityStatus.textContent="Could not send the reset email. Please try again.";console.error(error);}\n  finally{changePasswordButton.disabled=false;}\n});\n\nsaveButton?.addEventListener("click", saveAccount);
+syncButton?.addEventListener("click", async () => {
+  const user=auth.currentUser;if(!user)return;
+  syncButton.disabled=true;setSyncStatus("Syncing…","Merging this device with your cloud library.","syncing");
+  try{const library=await syncLibraryForUser(user);renderCounts(library);setSyncStatus("Synced just now","Your likes, watch later list and history are up to date.","success");setStatus("Library synced.",true);}
+  catch(error){console.error(error);setSyncStatus("Sync paused","Your local library is still available on this device.","error");setStatus("Cloud sync could not be completed.");}
+  finally{syncButton.disabled=false;}
+});
+
+changePasswordButton?.addEventListener("click", async () => {
+  const user=auth.currentUser;if(!user?.email)return;
+  changePasswordButton.disabled=true;
+  try{await sendPasswordResetEmail(auth,user.email);if(securityStatus)securityStatus.textContent="Password reset instructions sent to your email.";}
+  catch(error){if(securityStatus)securityStatus.textContent="Could not send the reset email. Please try again.";console.error(error);}
+  finally{changePasswordButton.disabled=false;}
+});
+
+saveButton?.addEventListener("click", saveAccount);
 logoutButton?.addEventListener("click", async () => {
   await signOut(auth);
   window.location.replace("login.html");
