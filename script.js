@@ -1,6 +1,6 @@
 import { tmdbApi } from "./scripts/tmdb.js";
 import { getHomeSections, getHomeSectionPage, searchContent } from "./scripts/content.js";
-import { getImageUrl, getMediaUrl, normalizeResults } from "./scripts/media.js";
+import { getImageUrl, getMediaUrl, getPersonUrl, normalizeResults } from "./scripts/media.js";
 import { getLocalLibrary } from "./scripts/library.js";
 import { getContinueWatching, getPlaybackProgress, getPersonalRecommendations, formatProgress } from "./scripts/recommendations.js";
 import { escapeHtml, debounce, getErrorMessage } from "./scripts/utils.js";
@@ -301,7 +301,12 @@ async function loadHome(){
 }
 function showSearch(items){
  const panel=$("search-panel");if(!panel)return;
- panel.innerHTML=items.length?items.slice(0,8).map(m=>'<a class="vivid-search-result" href="'+getMediaUrl(m)+'"><img src="'+getImageUrl(m.poster_path,"w92")+'" alt=""><span><strong>'+escapeHtml(m.title)+'</strong><br><small>'+escapeHtml(m.year||"—")+' · '+(m.media_type==="tv"?"TV":"Movie")+"</small></span></a>").join(""):'<div class="vivid-empty">No titles found.</div>';
+ panel.innerHTML=items.length?items.slice(0,8).map(m=>{
+   const person=m.media_type==="person";
+   const href=person?getPersonUrl(m):getMediaUrl(m);
+   const meta=person?"Person":(m.year||"—")+" · "+(m.media_type==="tv"?"TV":"Movie");
+   return '<a class="vivid-search-result" href="'+escapeHtml(href)+'"><img src="'+getImageUrl(m.poster_path,"w92")+'" alt=""><span><strong>'+escapeHtml(m.title)+'</strong><br><small>'+escapeHtml(meta)+"</small></span></a>";
+ }).join(""):'<div class="vivid-empty">No matches found.</div>';
  panel.classList.add("is-open");panel.setAttribute("aria-expanded","true");
 }
 
