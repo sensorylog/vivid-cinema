@@ -3,6 +3,7 @@ import { getFollowedTitles } from "./library.js";
 
 const ALERT_STATE_KEY="vivid:release-alerts:v1";
 const ALERT_SEEN_KEY="vivid:release-seen:v1";
+const ALERT_KNOWN_KEY="vivid:release-known:v1";
 const MAX_SEEN=300;
 
 function read(key,fallback){
@@ -13,6 +14,8 @@ function write(key,value){
 }
 function state(){return read(ALERT_STATE_KEY,{permission:"default",lastCheckedAt:0});}
 function seen(){return read(ALERT_SEEN_KEY,{});}
+function known(){return read(ALERT_KNOWN_KEY,{});}
+function today(){const d=new Date();d.setHours(0,0,0,0);return d;}
 function alertKey(item,type,extra=""){return [item.media_type||item.mediaType||"movie",item.id,type,extra].join(":");}
 function normalizeDate(value){return value?String(value).slice(0,10):"";}
 
@@ -62,29 +65,37 @@ async function inspectMovie(item){
   const details=await tmdbApi.movieDetailsBasic(item.id);
   const release=normalizeDate(details.release_date);
   if(!release)return null;
-  return {
+  const id=alertKey(item,"movie-release");
+  const knownState=known();
+  const previous=knownState[id];
+  knownState[id]=release; write(ALERT_KNOWN_KEY,knownState);
+  const isNow=new Date(release+"T00:00:00")<=today();
+  const wasKnown=Boolean(previous);
+  const crossedIntoRelease=wasKnown && previous!==release && isNow;
+  return crossedIntoRelease ? {
     key:alertKey(item,"movie-release",release),
     type:"movie-release",
     title:item.title||details.title||details.name,
-    media_type:"movie",
-    id:item.id,
-    releaseDate:release,
-    schedule:scheduleLabel(item,release),
-    message:(new Date(release+"T00:00:00")<=new Date())?"is now available":"is coming "+scheduleLabel(item,release).toLowerCase()
-  };
+    media_type:"movie", id:item.id, releaseDate:release,
+    schedule:"Now available", message:"is now available"
+  } : null;
 }
 
 async function inspectTv(item){
   const details=await tmdbApi.tvDetailsBasic(item.id);
-  const alerts=[];
-  const firstAir=normalizeDate(details.first_air_date);
-  if(firstAir){
-    alerts.push({key:alertKey(item,"tv-release",firstAir),type:"tv-release",title:item.title||details.name,media_type:"tv",id:item.id,releaseDate:firstAir,schedule:scheduleLabel(item,firstAir),message:"has a new release date"});
-  }
-  // Basic details carry season/episode counts. We deliberately do not poll every
-  // episode here: the next phase can add episode-level monitoring without turning
-  // every Home visit into a large TMDB request burst.
-  return alerts;
+  const next=details.next_episode_to_air;
+  if(!next?.air_date)return null;
+  const episodeKey=alertKey(item,"tv-episode",String(next.id||((next.season_number||0)+"-"+(next.episode_number||0))));
+  const knownState=known();
+  const previous=knownState[episodeKey];
+  knownState[episodeKey]=normalizeDate(next.air_date); write(ALERT_KNOWN_KEY,knownState);
+  if(!previous)return null;
+  if(previous===normalizeDate(next.air_date))return null;
+  return {
+    key:episodeKey,type:"tv-episode",title:item.title||details.name,media_type:"tv",id:item.id,
+    releaseDate:normalizeDate(next.air_date),season:next.season_number,episode:next.episode_number,
+    episodeTitle:next.name||"",schedule:scheduleLabel(item,normalizeDate(next.air_date)),message:"has a new episode"
+  };
 }
 
 export async function checkForReleaseAlerts(){
@@ -99,6 +110,7 @@ export async function checkForReleaseAlerts(){
   });
   const next=state();
   next.lastCheckedAt=Date.now();
+  next.followedCount=followed.length;
   write(ALERT_STATE_KEY,next);
   return alerts;
 }
