@@ -5,3 +5,19 @@ html[data-network="offline"] [data-vivid-online-only]{display:none!important}
 @media(prefers-reduced-motion:reduce){html[data-vivid-ready="true"] body{transition:none}}
 
 .vivid-page-back{display:inline-flex;align-items:center;gap:7px;width:max-content;min-height:36px;margin:0 0 20px;padding:0 12px 0 9px;border:1px solid rgba(255,255,255,.09);border-radius:999px;background:rgba(255,255,255,.045);color:rgba(255,255,255,.72);text-decoration:none;font-size:.82rem;font-weight:600;letter-spacing:-.01em;transition:background .18s ease,color .18s ease,border-color .18s ease,transform .18s ease}.vivid-page-back:hover,.vivid-page-back:focus-visible{color:#fff;background:rgba(255,255,255,.09);border-color:rgba(255,255,255,.16);transform:translateX(-1px)}.vivid-page-back:focus-visible{outline:2px solid rgba(255,255,255,.42);outline-offset:3px}@media(max-width:640px){.vivid-page-back{margin-bottom:16px}}
+
+.vivid-notification-button{position:relative;display:inline-grid;place-items:center;width:40px;height:40px;border:0;border-radius:999px;background:transparent;color:inherit;cursor:pointer}
+.vivid-notification-button:hover{background:rgba(255,255,255,.08)}
+.vivid-notification-button>i{font-size:1.05rem}
+.vivid-notification-button>span{position:absolute;top:2px;right:1px;min-width:16px;height:16px;padding:0 4px;border-radius:999px;background:#fff;color:#08090c;font:700 10px/16px system-ui;text-align:center}
+.vivid-release-popover{position:fixed;z-index:80;top:72px;right:24px;width:min(390px,calc(100vw - 28px));border:1px solid rgba(255,255,255,.1);border-radius:18px;background:rgba(16,17,21,.96);box-shadow:0 22px 70px rgba(0,0,0,.5);backdrop-filter:blur(24px);overflow:hidden}
+.vivid-release-popover-head{display:flex;align-items:center;justify-content:space-between;padding:18px 18px 14px;border-bottom:1px solid rgba(255,255,255,.07)}
+.vivid-release-popover-head span{display:block;font-size:.62rem;letter-spacing:.16em;opacity:.55}.vivid-release-popover-head strong{display:block;margin-top:3px;font-size:1rem}
+.vivid-release-popover-head button{border:0;background:transparent;color:inherit;cursor:pointer;font-size:.95rem}
+.vivid-release-alert-list{max-height:330px;overflow:auto}
+.vivid-release-alert{display:flex;gap:12px;padding:14px 18px;color:inherit;text-decoration:none;border-bottom:1px solid rgba(255,255,255,.06)}
+.vivid-release-alert:hover{background:rgba(255,255,255,.05)}
+.vivid-release-alert>i{display:grid;place-items:center;width:34px;height:34px;flex:0 0 34px;border-radius:10px;background:rgba(255,255,255,.08)}
+.vivid-release-alert span{min-width:0}.vivid-release-alert strong,.vivid-release-alert small{display:block}.vivid-release-alert strong{font-size:.88rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.vivid-release-alert small{margin-top:3px;opacity:.58;font-size:.72rem}
+.vivid-release-popover-actions{padding:12px 18px}.vivid-release-popover-actions button{width:100%;padding:10px 12px;border:1px solid rgba(255,255,255,.12);border-radius:10px;background:rgba(255,255,255,.06);color:inherit;cursor:pointer}
+@media(max-width:640px){.vivid-release-popover{top:auto;bottom:78px;right:12px;width:calc(100vw - 24px)}.vivid-notification-button{width:38px;height:38px}}
