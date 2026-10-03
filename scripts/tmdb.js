@@ -67,6 +67,7 @@ export const tmdbApi = Object.freeze({
   movieWatchProviders: (region = "") => tmdb("watch/providers/movie", { watch_region: region || undefined }),
   tvWatchProviders: (region = "") => tmdb("watch/providers/tv", { watch_region: region || undefined }),
   movieDetailsBasic: (id) => tmdb("movie/" + encodeURIComponent(id)),
+  movieReleaseDates: (id) => tmdb("movie/" + encodeURIComponent(id) + "/release_dates"),
   movieVideos: (id) => tmdb("movie/" + encodeURIComponent(id) + "/videos", { include_video_language: "en-US,null" }),
   movieDetails: (id) => tmdb("movie/" + encodeURIComponent(id), { append_to_response: "credits,videos,similar,watch/providers,recommendations,external_ids" }),
   tvDetailsBasic: (id) => tmdb("tv/" + encodeURIComponent(id)),
