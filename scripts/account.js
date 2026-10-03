@@ -41,6 +41,8 @@ function providerLabel(user) {
   return provider === "google.com" ? "Google" : provider === "password" ? "Email & password" : provider;
 }
 
+function setSyncStatus(label, detail, state="idle"){if(syncLabel)syncLabel.textContent=label;if(syncDetail)syncDetail.textContent=detail;if(syncDot)syncDot.dataset.state=state;}
+
 function setStatus(message, good = false) {
   if (!statusEl) return;
   statusEl.textContent = message;
