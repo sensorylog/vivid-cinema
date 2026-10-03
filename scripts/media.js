@@ -30,5 +30,5 @@ export function getMediaUrl(media) {
 }
 
 export function getImageUrl(path, size = "w500") {
-  return path ? VIVID_CONFIG.api.tmdbImageBaseUrl + "/" + size + path : "fav-icon.png";
+  return path ? VIVID_CONFIG.api.tmdbImageBaseUrl + "/" + size + path : "icons/vivid-icon.svg";
 }
