@@ -214,7 +214,8 @@ async function fetchDiscovery() {
         sort: state.sort,
         rating: state.rating,
         region: state.region,
-        provider: state.provider
+        provider: state.provider,
+        type: state.type
       });
       items = sortItems(data.items || []);
       totalPages = Number(data.totalPages || 1);
