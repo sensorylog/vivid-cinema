@@ -14,6 +14,34 @@ function setConnectionState() {
     navigator.onLine ? "online" : "offline";
 }
 
+function syncVividBranding() {
+  const iconPath = "./icons/vivid-icon.svg";
+  const applyHeadIcon = (selector, rel, type = null) => {
+    let link = document.querySelector(selector);
+    if (!link) {
+      link = document.createElement("link");
+      link.rel = rel;
+      document.head.appendChild(link);
+    }
+    link.href = iconPath;
+    if (type) link.type = type;
+  };
+
+  applyHeadIcon('link[rel="icon"]', "icon", "image/svg+xml");
+  applyHeadIcon('link[rel="apple-touch-icon"]', "apple-touch-icon");
+  applyHeadIcon('link[rel="manifest"]', "manifest");
+
+  document.querySelectorAll(".vivid-brand, .vivid-legal-brand, .logo").forEach(brand => {
+    if (brand.dataset.vividBrandReady === "true") return;
+    brand.dataset.vividBrandReady = "true";
+    brand.classList.add("vivid-site-brand");
+    brand.innerHTML = '<img class="vivid-brand-icon" src="./icons/vivid-icon.svg" alt="" aria-hidden="true" decoding="async"><span class="vivid-brand-wordmark">Vivid<span>Cinema</span></span>';
+    brand.style.display = "inline-flex";
+    brand.style.alignItems = "center";
+    brand.style.gap = "9px";
+  });
+}
+
 function setPageIdentity() {
   const page = document.body?.dataset?.vividPage || "unknown";
   document.documentElement.dataset.vividPage = page;
@@ -32,6 +60,7 @@ function initAppShell() {
   setViewportState();
   setConnectionState();
   setPageIdentity();
+  syncVividBranding();
 
   window.addEventListener("resize", setViewportState, { passive: true });
   window.addEventListener("online", setConnectionState);
