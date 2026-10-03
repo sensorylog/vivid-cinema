@@ -359,7 +359,7 @@ function renderReleaseAlerts(){
  list.innerHTML=alerts.length?alerts.slice(0,8).map(alert=>{
    const meta=alert.type==="tv-season"?"New season · S"+alert.season:alert.type==="tv-episode"?"New episode · S"+alert.season+" E"+alert.episode:"New movie";
    const href=alert.media_type==="tv"?"title.html?id="+encodeURIComponent(alert.id)+"&type=tv":"title.html?id="+encodeURIComponent(alert.id)+"&type=movie";
-   return '<a class="vivid-release-alert" href="'+href+'"><i class="bi '+(alert.type==="tv-episode"?"bi-tv":"bi-film")+'"></i><span><strong>'+escapeHtml(alert.title)+'</strong><small>'+escapeHtml(meta+(alert.episodeTitle?" · "+alert.episodeTitle:""))+'</small></span></a>';
+   return '<div class="vivid-release-alert"><a href="'+href+'"><i class="bi '+(alert.type==="tv-episode"?"bi-tv":alert.type==="tv-season"?"bi-collection-play":"bi-film")+'"></i><span><strong>'+escapeHtml(alert.title)+'</strong><small>'+escapeHtml(meta+(alert.releaseTypeLabel?" · "+alert.releaseTypeLabel:"")+(alert.episodeTitle?" · "+alert.episodeTitle:""))+'</small></span></a><button type="button" data-dismiss-release="'+escapeHtml(alert.key)+'" aria-label="Dismiss '+escapeHtml(alert.title)+'"><i class="bi bi-x"></i></button></div>';
  }).join(""):'<p class="vivid-muted">No new releases yet. Follow titles with Like or Watch Later and Vivid will watch for updates.</p>';
 }
 async function refreshReleaseAlerts(){
@@ -374,7 +374,8 @@ function wireReleaseAlerts(){
  const toggle=()=>{if(!popover)return;popover.hidden=!popover.hidden;button?.setAttribute("aria-expanded",String(!popover.hidden));renderReleaseAlerts();};
  button?.addEventListener("click",toggle);
  close?.addEventListener("click",()=>{popover.hidden=true;button?.setAttribute("aria-expanded","false")});
- enable?.addEventListener("click",async()=>{const result=await requestReleaseAlerts();enable.textContent=result==="granted"?"Notifications enabled":result==="denied"?"Notifications blocked":"Notifications unavailable";await refreshReleaseAlerts();});
+ enable?.addEventListener("click",async()=>{const result=await requestReleaseAlerts();enable.textContent=result==="granted"?"Notifications enabled":result==="denied"?"Notifications blocked":"Notifications unavailable";const status=$("release-alert-status");if(status)status.textContent=result==="granted"?"Background-capable notifications are enabled for this installed/browser app.":"Notifications stay in the Vivid alert center.";await checkForReleaseAlerts({force:true});renderReleaseAlerts();});
+ document.addEventListener("click",event=>{const dismiss=event.target.closest("[data-dismiss-release]");if(dismiss){dismissReleaseAlert(dismiss.dataset.dismissRelease);renderReleaseAlerts();return;}if(popover&&!popover.hidden&&!event.target.closest("#release-alert-popover")&&!event.target.closest("#release-alert-button")){popover.hidden=true;button?.setAttribute("aria-expanded","false")}});
  document.addEventListener("click",event=>{if(popover&&!popover.hidden&&!event.target.closest("#release-alert-popover")&&!event.target.closest("#release-alert-button")){popover.hidden=true;button?.setAttribute("aria-expanded","false")}});
 }
 function wireSearch(){
