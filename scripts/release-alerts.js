@@ -68,10 +68,11 @@ async function inspectMovie(item){
   const id=alertKey(item,"movie-release");
   const knownState=known();
   const previous=knownState[id];
-  knownState[id]=release; write(ALERT_KNOWN_KEY,knownState);
   const isNow=new Date(release+"T00:00:00")<=today();
-  const wasKnown=Boolean(previous);
-  const crossedIntoRelease=wasKnown && previous!==release && isNow;
+  const previousDate=typeof previous==="object"?previous.date:previous;
+  const previouslyReleased=typeof previous==="object"?Boolean(previous.released):Boolean(previousDate && new Date(previousDate+"T00:00:00")<=today());
+  knownState[id]={date:release,released:isNow}; write(ALERT_KNOWN_KEY,knownState);
+  const crossedIntoRelease=Boolean(previous) && isNow && (!previouslyReleased || previousDate!==release);
   return crossedIntoRelease ? {
     key:alertKey(item,"movie-release",release),
     type:"movie-release",
