@@ -78,7 +78,7 @@ function renderShell(params){
    if(timeout)window.clearTimeout(timeout);
    if(previousFocus&&typeof previousFocus.focus==="function")previousFocus.focus();
  };
- start?.addEventListener("click",openPlayer);
+ start?.addEventListener("click",()=>{ recordHistory(); openPlayer(); });
  close?.addEventListener("click",closePlayer);
  modal?.addEventListener("click",(event)=>{if(event.target===modal)closePlayer()});
  document.addEventListener("keydown",(event)=>{if(event.key==="Escape"&&modal?.classList.contains("is-open"))closePlayer()});
