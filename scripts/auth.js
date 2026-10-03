@@ -9,7 +9,7 @@ import {
   signOut,
   updateProfile
 } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
-import { doc, serverTimestamp, setDoc } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
+import { doc, serverTimestamp, setDoc } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";\nimport { startLibrarySync } from "./library.js";
 
 const signupForm=document.getElementById("signup-form");
 const loginForm=document.getElementById("login-form");
@@ -25,7 +25,7 @@ try {
 
 function showMessage(text,good=false){if(!errorEl)return;errorEl.textContent=text;errorEl.style.color=good?"#7ee787":"#ff6b6b";}
 function friendlyError(error){
-  const messages={"auth/email-already-in-use":"An account already exists for this email.","auth/invalid-email":"Please enter a valid email address.","auth/weak-password":"Choose a stronger password.","auth/invalid-credential":"Email or password is incorrect.","auth/user-disabled":"This account has been disabled.","auth/too-many-requests":"Too many attempts. Please wait and try again.","auth/popup-closed-by-user":"Google sign-in was cancelled.","auth/popup-blocked":"Your browser blocked the sign-in window. Please allow popups and try again.","auth/account-exists-with-different-credential":"An account already exists with a different sign-in method."};
+  const messages={"auth/email-already-in-use":"An account already exists for this email.","auth/invalid-email":"Please enter a valid email address.","auth/weak-password":"Choose a stronger password.","auth/invalid-credential":"Email or password is incorrect.","auth/user-disabled":"This account has been disabled.","auth/too-many-requests":"Too many attempts. Please wait and try again.","auth/popup-closed-by-user":"Google sign-in was cancelled.","auth/popup-blocked":"Your browser blocked the sign-in window. Please allow popups and try again.","auth/account-exists-with-different-credential":"An account already exists with a different sign-in method.","auth/network-request-failed":"Connection problem. Check your internet connection and try again.","auth/requires-recent-login":"For security, please sign in again and retry."};
   return messages[error?.code]||"Something went wrong. Please try again.";
 }
 async function createUserRecord(user,name){
@@ -34,7 +34,7 @@ async function createUserRecord(user,name){
 async function googleSignIn(){
   const credential=await signInWithPopup(auth,new GoogleAuthProvider());
   await createUserRecord(credential.user,credential.user.displayName||"");
-  window.location.href="home.html";
+  await startLibrarySync();\n  window.location.href="home.html";
 }
 googleButtons.forEach(button=>button.addEventListener("click",async()=>{
   button.disabled=true;showMessage("Connecting to Google…",true);
@@ -62,10 +62,10 @@ loginForm?.addEventListener("submit",async(event)=>{
   try{
     const credential=await signInWithEmailAndPassword(auth,email,password);
     if(!credential.user.emailVerified){await signOut(auth);showMessage("Please verify your email before signing in. Check your inbox.");button.disabled=false;return;}
-    window.location.href="home.html";
+    await startLibrarySync();\n    window.location.href="home.html";
   }catch(error){console.error(error);showMessage(friendlyError(error));button.disabled=false;}
 });
-resetLink?.addEventListener("click",async(event)=>{
+document.getElementById("resend-verification")?.addEventListener("click",async()=>{\n  const user=auth.currentUser;\n  if(!user){showMessage("Sign in first, then resend verification.");return;}\n  try{await sendEmailVerification(user);showMessage("Verification email sent. Check your inbox and spam folder.",true);}catch(error){showMessage(friendlyError(error));}\n});\n\ndocument.querySelectorAll("[data-password-toggle]").forEach(toggle=>toggle.addEventListener("click",()=>{const input=document.querySelector(toggle.dataset.passwordToggle);if(!input)return;const visible=input.type==="text";input.type=visible?"password":"text";toggle.textContent=visible?"Show":"Hide";toggle.setAttribute("aria-label",visible?"Show password":"Hide password");}));\n\nresetLink?.addEventListener("click",async(event)=>{
   event.preventDefault();const email=document.getElementById("login-email")?.value.trim()||"";
   if(!email){showMessage("Enter your email first, then choose Forgot password.");return;}
   try{await sendPasswordResetEmail(auth,email);showMessage("Password reset email sent.",true);}catch(error){console.error(error);showMessage(friendlyError(error));}
