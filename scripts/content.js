@@ -177,7 +177,10 @@ export async function getCuratedPage(key, page = 1, filters = {}) {
   const category = CURATED_CATEGORIES[key];
   if (!category) throw new Error("Unknown curated category: " + key);
   const keywordId = category.keyword ? await resolveKeyword(category.keyword) : "";
-  const types = category.type === "all" ? ["movie", "tv"] : [category.type];
+  const requestedType = filters.type === "movie" || filters.type === "tv" ? filters.type : "";
+  const types = requestedType
+    ? [requestedType]
+    : category.type === "all" ? ["movie", "tv"] : [category.type];
   const results = await Promise.all(types.map(type =>
     type === "movie"
       ? tmdbApi.discoverMovies(categoryParams(category, type, page, filters, keywordId))
