@@ -100,6 +100,7 @@ async function loadUser(user) {
   renderCounts(getLocalLibrary());
 
   saveButton.disabled = false;
+  setSyncStatus("Cloud library connected","Your likes, watch later list and history are synced.","success");
   setStatus("Account ready.", true);
 }
 
