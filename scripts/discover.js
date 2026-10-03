@@ -95,7 +95,7 @@ function populateProviders() {
   strip.innerHTML = '<button class="vivid-provider-chip' + (!selected ? ' is-active' : '') + '" data-provider="" type="button"><span class="vivid-provider-all-icon"><i class="bi bi-grid-3x3-gap" aria-hidden="true"></i></span><span>All services</span></button>' +
     available.map((provider) => {
       const id = String(provider.provider_id);
-      const logo = provider.logo_path ? getImageUrl(provider.logo_path, "w92") : "fav-icon.png";
+      const logo = provider.logo_path ? getImageUrl(provider.logo_path, "w92") : "icons/vivid-icon.svg";
       return '<button class="vivid-provider-chip' + (id === selected ? ' is-active' : '') + '" data-provider="' + escapeHtml(id) + '" type="button" aria-pressed="' + (id === selected) + '" title="' + escapeHtml(provider.provider_name) + '">' +
         '<span class="vivid-provider-logo"><img loading="lazy" decoding="async" src="' + escapeHtml(logo) + '" alt="" aria-hidden="true"></span>' +
         '<span class="vivid-provider-name">' + escapeHtml(provider.provider_name) + '</span></button>';
