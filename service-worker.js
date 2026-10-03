@@ -1,4 +1,4 @@
-const CACHE_NAME = "vivid-cinema-shell-v24";
+const CACHE_NAME = "vivid-cinema-shell-v25";
 const APP_SHELL = [
   "./","./index.html","./home.html","./discover.html","./collection.html","./title.html","./watch.html",
   "./library.html","./auth.html","./login.html","./forgot-password.html","./account.html","./terms.html","./privacy.html","./contact.html",
@@ -8,7 +8,7 @@ const APP_SHELL = [
   "./styles/vivid-collection.css","./styles/vivid-auth.css","./styles/vivid-account.css","./styles/vivid-pwa.css",
   "./styles/vivid-atmosphere.css","./styles/vivid-landing.css","./styles/vivid-viewport.css",
   "./styles/vivid-legal.css","./styles.css","./scripts/app-shell.js","./scripts/pwa.js",
-  "./scripts/atmosphere.js","./scripts/routes.js",
+  "./scripts/atmosphere.js","./scripts/i18n.js","./scripts/routes.js",
   "./scripts/config.js","./scripts/utils.js","./scripts/content.js","./scripts/media.js","./scripts/tmdb.js",
   "./scripts/nav-auth.js","./scripts/library.js","./scripts/library-page.js","./scripts/discover.js",
   "./scripts/collection.js","./scripts/recommendations.js","./scripts/title.js","./scripts/watch.js","./scripts/landing.js",
