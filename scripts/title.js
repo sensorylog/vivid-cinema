@@ -359,12 +359,22 @@ async function init() {
     // Paint the title page from the lightweight metadata endpoint first. This avoids
     // making the first screen wait for credits, videos, providers and recommendations.
     const basic = type === "tv" ? await tmdbApi.tvDetailsBasic(id) : await tmdbApi.movieDetailsBasic(id);
-    render(basic);
+    try {
+      render(basic);
+    } catch (error) {
+      console.error("Vivid title render failed:", error);
+      renderError("This title could not be displayed. Please try again.");
+      return;
+    }
     // Enrich the page in the background without blocking the first meaningful paint.
     void (async () => {
       try {
         const enriched = type === "tv" ? await tmdbApi.tvDetails(id) : await tmdbApi.movieDetails(id);
-        render(enriched);
+        try {
+          render(enriched);
+        } catch (error) {
+          console.warn("Vivid title enrichment render unavailable:", error);
+        }
       } catch (error) {
         console.warn("Vivid title enrichment unavailable:", error);
       }
