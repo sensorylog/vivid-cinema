@@ -28,16 +28,16 @@ let genres = { movie: [], tv: [] };
 let providers = { movie: [], tv: [] };
 
 const MOODS = Object.freeze({
-  relax: { label: "Relax", genres: [35, 10751], sort: "vote_average.desc" },
+  relax: { label: "Relax", genres: [35, 10751], sort: "popularity.desc" },
   intense: { label: "Intense", genres: [28, 53, 80], sort: "popularity.desc" },
-  funny: { label: "Funny", genres: [35], sort: "vote_average.desc" },
-  romantic: { label: "Romantic", genres: [10749, 18], sort: "vote_average.desc" },
-  thoughtful: { label: "Thought-provoking", genres: [18, 9648, 99], sort: "vote_average.desc" },
+  funny: { label: "Funny", genres: [35], sort: "popularity.desc" },
+  romantic: { label: "Romantic", genres: [10749, 18], sort: "popularity.desc" },
+  thoughtful: { label: "Thought-provoking", genres: [18, 9648, 99], sort: "popularity.desc" },
   escapist: { label: "Escapist", genres: [12, 14, 878], sort: "popularity.desc" },
   scary: { label: "Scary", genres: [27, 53], sort: "popularity.desc" },
-  emotional: { label: "Emotional", genres: [18, 10749], sort: "vote_average.desc" },
+  emotional: { label: "Emotional", genres: [18, 10749], sort: "popularity.desc" },
   fast: { label: "Fast-paced", genres: [28, 53], sort: "popularity.desc" },
-  late: { label: "Late-night", genres: [27, 9648, 53], sort: "vote_average.desc" }
+  late: { label: "Late-night", genres: [27, 9648, 53], sort: "popularity.desc" }
 });
 const RUNTIMES = Object.freeze({
   short: { label: "Under 90 min", min: 1, max: 89 },
@@ -159,8 +159,9 @@ function populateProviders() {
 
 async function loadProviders() {
   try {
-    const region = state.region || "";
-    const [movie, tv] = await Promise.all([tmdbApi.movieWatchProviders(region), tmdbApi.tvWatchProviders(region)]);
+    // Keep the service catalogue global. The selected region is used when
+    // discovering titles, not to hide services from the service browser.
+    const [movie, tv] = await Promise.all([tmdbApi.movieWatchProviders(""), tmdbApi.tvWatchProviders("")]);
     providers = { movie: movie.results || [], tv: tv.results || [] };
     populateProviders();
   } catch {
@@ -216,10 +217,16 @@ function discoverParams(type) {
   const runtime = RUNTIMES[state.runtime];
   const moodGenres = mood?.genres?.length ? mood.genres.join(",") : undefined;
   const baseGenres = state.genre || moodGenres;
+  // TMDB treats comma-separated genres as AND and pipe-separated genres as OR.
+  // Mood chips are intentionally OR-based so a mood like "Intense" means any
+  // of its relevant genres instead of requiring a title to match all of them.
+  const moodGenreQuery = moodGenres ? mood.genres.join("|") : "";
   const params = {
+    include_adult: false,
+    include_video: false,
     page: state.page,
     sort_by: sort,
-    with_genres: baseGenres,
+    with_genres: state.genre || moodGenreQuery || undefined,
     ...(type === "movie"
       ? { primary_release_year: state.year || undefined }
       : { first_air_date_year: state.year || undefined }),
@@ -421,16 +428,54 @@ function wire() {
     state.provider = button.dataset.provider || "";
     state.page = 1;
     if (state.provider && !state.region) {
-      state.region = "GH";
-      $("region-filter").value = "GH";
+      // Provider availability needs a watch region. Use a broad default
+      // rather than silently restricting the service to Ghana.
+      state.region = "US";
+      $("region-filter").value = "US";
       await loadProviders();
     } else {
       populateProviders();
     }
     fetchDiscovery();
   });
-  document.querySelectorAll("[data-mood]").forEach((button) => button.addEventListener("click", () => { state.mood = button.dataset.mood || ""; state.runtime = ""; state.category = ""; document.querySelectorAll("[data-runtime]").forEach((item) => item.classList.toggle("is-active", item.dataset.runtime === "")); if ($("category-filter")) $("category-filter").value = ""; state.page = 1; document.querySelectorAll("[data-mood]").forEach((item) => item.classList.toggle("is-active", item.dataset.mood === state.mood)); fetchDiscovery(); }));
-  document.querySelectorAll("[data-runtime]").forEach((button) => button.addEventListener("click", () => { state.runtime = button.dataset.runtime || ""; state.mood = ""; state.category = ""; document.querySelectorAll("[data-mood]").forEach((item) => item.classList.toggle("is-active", item.dataset.mood === "")); if ($("category-filter")) $("category-filter").value = ""; state.page = 1; document.querySelectorAll("[data-runtime]").forEach((item) => item.classList.toggle("is-active", item.dataset.runtime === state.runtime)); fetchDiscovery(); }));
+  document.querySelectorAll("[data-mood]").forEach((button) => button.addEventListener("click", () => {
+    state.mood = button.dataset.mood || "";
+    state.runtime = "";
+    state.category = "";
+    // Mood is a primary discovery mode. Clear restrictive filters so a
+    // previous provider/genre/year/rating cannot silently reduce it to zero.
+    state.genre = "";
+    state.year = "";
+    state.rating = "";
+    state.provider = "";
+    if ($("category-filter")) $("category-filter").value = "";
+    if ($("genre-filter")) $("genre-filter").value = "";
+    if ($("year-filter")) $("year-filter").value = "";
+    if ($("rating-filter")) $("rating-filter").value = "";
+    populateProviders();
+    document.querySelectorAll("[data-runtime]").forEach((item) => item.classList.toggle("is-active", item.dataset.runtime === ""));
+    state.page = 1;
+    document.querySelectorAll("[data-mood]").forEach((item) => item.classList.toggle("is-active", item.dataset.mood === state.mood));
+    fetchDiscovery();
+  }));
+  document.querySelectorAll("[data-runtime]").forEach((button) => button.addEventListener("click", () => {
+    state.runtime = button.dataset.runtime || "";
+    state.mood = "";
+    state.category = "";
+    state.genre = "";
+    state.year = "";
+    state.rating = "";
+    state.provider = "";
+    if ($("category-filter")) $("category-filter").value = "";
+    if ($("genre-filter")) $("genre-filter").value = "";
+    if ($("year-filter")) $("year-filter").value = "";
+    if ($("rating-filter")) $("rating-filter").value = "";
+    populateProviders();
+    document.querySelectorAll("[data-mood]").forEach((item) => item.classList.toggle("is-active", item.dataset.mood === ""));
+    state.page = 1;
+    document.querySelectorAll("[data-runtime]").forEach((item) => item.classList.toggle("is-active", item.dataset.runtime === state.runtime));
+    fetchDiscovery();
+  }));
   $("reset-filters").addEventListener("click", resetFilters);
 
   $("prev-page").addEventListener("click", () => {
