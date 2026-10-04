@@ -3,7 +3,7 @@ import { getImageUrl, getMediaUrl, normalizeMedia, normalizeResults } from "./me
 import { buildTitleUrl, buildWatchUrl, getRoute } from "./routes.js";
 import { escapeHtml, getErrorMessage } from "./utils.js";
 import { getLocalLibrary, saveLocalLibrary, syncLocalItem, upsertLibraryItem, startLibrarySync } from "./library.js";
-import { getPlaybackProgress, savePlaybackProgress, flushPlaybackProgress, removePlaybackProgress, startPlaybackSync } from "./recommendations.js";
+import { getPlaybackProgress, savePlaybackProgress, flushPlaybackProgress, completePlaybackProgress, removePlaybackProgress, startPlaybackSync } from "./recommendations.js";
 import { VIVID_CONFIG } from "./config.js";
 
 const $=id=>document.getElementById(id);
@@ -177,6 +177,7 @@ function handlePlayerEvent(event){
  }
  if(data.player_status==="completed"){
    upsertLibraryItem("history",{id:media.id,media_type:media.media_type,title:media.title,year:media.year,poster_path:media.poster_path,backdrop_path:media.backdrop_path,completion:100,completedAt:Date.now(),updatedAt:Date.now()});
+   completePlaybackProgress(progressKey(),{duration,season:info.season??currentParams?.season,episode:info.episode??currentParams?.episode,title:media.title,media_type:media.media_type,id:media.id});
    removePlaybackProgress(progressKey());
    if(media.media_type==="tv"&&nextEpisode){
      const target=buildWatchUrl(media.id,"tv",nextEpisode.season,nextEpisode.episode);
