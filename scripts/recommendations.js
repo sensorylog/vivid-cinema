@@ -65,6 +65,8 @@ function progressDocData(contentId, item) {
     progress: Math.max(0, Number(item.progress) || 0),
     duration: Math.max(0, Number(item.duration) || 0),
     percentage: Math.max(0, Math.min(100, Number(item.percentage) || 0)),
+    completed: Boolean(item.completed),
+    ...(item.completedAt ? { completedAt: Number(item.completedAt) } : {}),
     season: item.season == null ? null : Math.max(0, Number(item.season) || 0),
     episode: item.episode == null ? null : Math.max(1, Number(item.episode) || 1),
     title: String(item.title || "").slice(0, 300),
@@ -107,7 +109,7 @@ function queueRemoteProgress(contentId, item) {
 
 export function getPlaybackProgress(contentId) {
   const item = readProgress()[contentId];
-  return item && Number(item.progress) > 0 ? item : null;
+  return item && !item.completed && Number(item.progress) > 0 ? item : null;
 }
 
 export function savePlaybackProgress(contentId, data = {}) {
@@ -122,6 +124,8 @@ export function savePlaybackProgress(contentId, data = {}) {
     progress,
     duration,
     percentage,
+    completed: false,
+    completedAt: null,
     updatedAt: Date.now()
   };
   writeProgress(current);
