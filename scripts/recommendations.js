@@ -310,7 +310,11 @@ function scoreCandidate(item, taste, progress, feedback, recentGenres = new Set(
   const popularity = Math.min(1, Math.log10(1 + Math.max(0, Number(item.popularity || 0))) / 4);
   const feedbackBoost = feedback[keyFor(item)]?.kind === "like" ? 6 : 0;
   const recentGenreBoost = genreIds.filter(id => recentGenres.has(Number(id))).slice(0, 2).length * .75;
-  return genreScore * 5.4 + mediaScore * 1.9 + languageScore * .55 + countryScore * .35 + decadeScore * .3 + quality * 1.4 + popularity * .8 + feedbackBoost + recentGenreBoost;
+  const releaseValue = source.release_date || source.first_air_date || item.date || "";
+  const releaseTime = Date.parse(releaseValue);
+  const ageDays = Number.isFinite(releaseTime) ? Math.max(0, (Date.now() - releaseTime) / 86400000) : Infinity;
+  const freshness = Number.isFinite(ageDays) ? Math.max(0, 1 - (ageDays / 180)) : 0;
+  return genreScore * 5.4 + mediaScore * 1.9 + languageScore * .55 + countryScore * .35 + decadeScore * .3 + quality * 1.4 + popularity * .8 + feedbackBoost + recentGenreBoost + freshness * .55;
 }
 
 function rankForYou(candidates, taste, progress, feedback, excluded, limit, recentGenres = new Set()) {
@@ -449,7 +453,8 @@ export async function getPersonalRecommendations(limit = 12) {
     ...Object.entries(feedback).map(([k, v]) => k + ":" + v.kind + ":" + v.updatedAt),
     ...Object.entries(progress).map(([k, v]) => k + ":" + v.updatedAt),
     "recent:" + (library.history || []).slice(0, 5).map(item => keyFor(item) + ":" + (item.lastWatchedAt || item.updatedAt || "")).join(","),
-    "taste:" + Number(taste.updatedAt || 0)
+    "taste:" + Number(taste.updatedAt || 0),
+    "rotation:" + new Date().toISOString().slice(0, 10)
   ].sort().join("|");
 
   const cached = readForYouCache();
@@ -484,7 +489,7 @@ export async function getPersonalRecommendations(limit = 12) {
   );
 
   const items = rankForYou([...candidates, ...discoveryCandidates], taste, progress, feedback, excluded, limit, recentGenres);
-  writeForYouCache({ version: 2, fingerprint, updatedAt: Date.now(), items });
+  writeForYouCache({ version: 3, fingerprint, updatedAt: Date.now(), items });
 
   return items;
 }
