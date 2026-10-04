@@ -134,6 +134,12 @@ export function savePlaybackProgress(contentId, data = {}) {
 
 export function completePlaybackProgress(contentId, data = {}) {
   if (!contentId) return;
+  const timer = progressTimers.get(contentId);
+  if (timer) {
+    window.clearTimeout(timer);
+    progressTimers.delete(contentId);
+  }
+  pendingProgress.delete(contentId);
   const current = readProgress();
   const existing = current[contentId] || {};
   const duration = Math.max(0, Number(data.duration || existing.duration) || 0);
