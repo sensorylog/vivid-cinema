@@ -81,6 +81,7 @@ function wireLibraryActions() {
   });
   notForMe?.addEventListener("click", () => {
     const next = setFeedback(item, "not_for_me");
+    if (next === "not_for_me" && hasLibraryItem("favorites", item)) toggleLibraryItem("favorites", item);
     notForMe.setAttribute("aria-pressed",String(next === "not_for_me"));
     notForMe.innerHTML = '<i class="bi bi-hand-thumbs-down' + (next === "not_for_me" ? '-fill' : '') + '"></i> Not for me';
   });
