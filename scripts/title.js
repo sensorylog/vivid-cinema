@@ -297,6 +297,28 @@ function renderStorySection(details, cast) {
     '</div></div></section>';
 }
 
+function renderMinimal(details) {
+  const type = route.params.get("type") === "tv" ? "tv" : "movie";
+  const normalized = normalizeMedia(details, type);
+  media = normalized;
+  const title = normalized.title;
+  const year = normalized.year || "—";
+  const poster = escapeHtml(getImageUrl(normalized.poster_path || normalized.backdrop_path, "w500"));
+  const backdrop = escapeHtml(getImageUrl(normalized.backdrop_path || normalized.poster_path, "w1280"));
+  document.title = title + " · Vivid Cinema";
+  $("title-content").innerHTML =
+    '<section class="vivid-title-backdrop" style="--title-backdrop:url(\\'' + backdrop + '\\')"><div class="vivid-title-backdrop-overlay"></div></section>' +
+    '<section class="vivid-title-info"><div class="vivid-title-info-inner">' +
+      '<div class="vivid-title-poster"><img src="' + poster + '" alt="' + escapeHtml(title) + ' poster" onerror="this.onerror=null;this.src=\\'icons/vivid-icon.svg\\'"></div>' +
+      '<div class="vivid-title-copy"><span class="vivid-title-kicker">' + (type === "tv" ? "TV SERIES" : "MOVIE") + '</span>' +
+      '<h1>' + escapeHtml(title) + '</h1><div class="vivid-title-meta"><span>' + escapeHtml(year) + '</span>' +
+      (normalized.vote_average ? '<i></i><span>★ ' + normalized.vote_average.toFixed(1) + '</span>' : '') +
+      '</div><p>' + escapeHtml(normalized.overview || "No synopsis is available for this title yet.") + '</p>' +
+      '<div class="vivid-title-actions"><a class="vivid-button vivid-button--primary" href="' + escapeHtml(buildWatchUrl(normalized.id, type, type === "tv" ? 1 : null, type === "tv" ? 1 : null)) + '"><i class="bi bi-play-fill"></i> Watch now</a><a class="vivid-button vivid-button--ghost" href="home.html"><i class="bi bi-arrow-left"></i> Browse more</a></div>' +
+      '</div></div></section>';
+  try { recordBehavior("title_opened", normalized, { source: document.referrer || "direct" }); } catch {}
+}
+
 function render(details) {
   currentDetails=details;
   const normalizedMedia = normalizeMedia(details,route.params.get("type")==="tv"?"tv":"movie");
@@ -363,8 +385,7 @@ async function init() {
       render(basic);
     } catch (error) {
       console.error("Vivid title render failed:", error);
-      renderError("This title could not be displayed. Please try again.");
-      return;
+      try { renderMinimal(basic); } catch { renderError("This title could not be displayed. Please try again."); }
     }
     // Enrich the page in the background without blocking the first meaningful paint.
     void (async () => {
