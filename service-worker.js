@@ -1,4 +1,4 @@
-const CACHE_NAME = "vivid-cinema-shell-v45";
+const CACHE_NAME = "vivid-cinema-shell-v46";
 const APP_SHELL = [
   "./","./index.html","./home.html","./person.html","./discover.html","./collection.html","./title.html","./watch.html",
   "./library.html","./auth.html","./login.html","./forgot-password.html","./account.html","./terms.html","./privacy.html","./contact.html",
@@ -11,7 +11,7 @@ const APP_SHELL = [
   "./scripts/atmosphere.js","./scripts/i18n.js","./scripts/routes.js",
   "./scripts/config.js","./scripts/utils.js","./scripts/content.js","./scripts/media.js","./scripts/tmdb.js",
   "./scripts/nav-auth.js","./scripts/library.js","./scripts/library-page.js","./scripts/discover.js",
-  "./scripts/collection.js","./scripts/person.js","./scripts/recommendations.js","./scripts/release-alerts.js","./scripts/cinema-reminders.js","./scripts/news.js","./scripts/title.js","./scripts/watch.js","./scripts/external-providers.js","./scripts/landing.js",
+  "./scripts/collection.js","./scripts/person.js","./scripts/recommendations.js","./scripts/release-alerts.js","./scripts/cinema-reminders.js","./scripts/push-notifications.js","./scripts/news.js","./scripts/title.js","./scripts/watch.js","./scripts/external-providers.js","./scripts/landing.js",
   "./scripts/account.js","./scripts/auth.js","./script.js"
 ];
 
@@ -63,7 +63,7 @@ async function staleWhileRevalidate(request){
   return cached||await refresh||new Response("",{status:504,statusText:"Offline"});
 }
 
-self.addEventListener("fetch",event=>{
+\nself.addEventListener("push",event=>{\n  event.waitUntil((async()=>{\n    let data={};\n    try{data=event.data?.json?.()||{}}catch{try{data=JSON.parse(event.data?.text?.()||"{}")}catch{}}\n    const title=data.title||"Vivid Cinema";\n    const options={\n      body:data.body||"Your Vivid Cinema reminder is ready.",\n      icon:"./icons/vivid-icon.svg",\n      badge:"./icons/vivid-icon.svg",\n      tag:data.tag||"vivid-cinema-reminder",\n      renotify:false,\n      data:{url:data.url||"./home.html"}\n    };\n    await self.registration.showNotification(title,options);\n  })());\n});\n\nself.addEventListener("fetch",event=>{
   const request=event.request;
   if(request.method!=="GET")return;
   const url=new URL(request.url);
