@@ -221,7 +221,11 @@ function discoverParams(type) {
       ? { primary_release_year: state.year || undefined }
       : { first_air_date_year: state.year || undefined }),
     "vote_average.gte": state.rating || undefined,
-    ...(type === "movie" && runtime ? { with_runtime_gte: runtime.min, with_runtime_lte: runtime.max } : {}),
+    // TMDB expects the dotted runtime parameters. Use them for both movies
+    // and TV because TV discover supports episode runtime as well.
+    ...(runtime && (state.runtime === "short" || state.runtime === "standard" || state.runtime === "long" || state.runtime === "episode")
+      ? { "with_runtime.gte": runtime.min, "with_runtime.lte": runtime.max }
+      : {}),
     watch_region: state.region || undefined,
     with_watch_monetization_types: state.provider ? "flatrate" : undefined,
     with_watch_providers: state.provider || undefined
@@ -416,8 +420,8 @@ function wire() {
     }
     fetchDiscovery();
   });
-  document.querySelectorAll("[data-mood]").forEach((button) => button.addEventListener("click", () => { state.mood = button.dataset.mood || ""; state.page = 1; document.querySelectorAll("[data-mood]").forEach((item) => item.classList.toggle("is-active", item.dataset.mood === state.mood)); fetchDiscovery(); }));
-  document.querySelectorAll("[data-runtime]").forEach((button) => button.addEventListener("click", () => { state.runtime = button.dataset.runtime || ""; state.page = 1; document.querySelectorAll("[data-runtime]").forEach((item) => item.classList.toggle("is-active", item.dataset.runtime === state.runtime)); fetchDiscovery(); }));
+  document.querySelectorAll("[data-mood]").forEach((button) => button.addEventListener("click", () => { state.mood = button.dataset.mood || ""; state.category = ""; if ($("category-filter")) $("category-filter").value = ""; state.page = 1; document.querySelectorAll("[data-mood]").forEach((item) => item.classList.toggle("is-active", item.dataset.mood === state.mood)); fetchDiscovery(); }));
+  document.querySelectorAll("[data-runtime]").forEach((button) => button.addEventListener("click", () => { state.runtime = button.dataset.runtime || ""; state.category = ""; if ($("category-filter")) $("category-filter").value = ""; state.page = 1; document.querySelectorAll("[data-runtime]").forEach((item) => item.classList.toggle("is-active", item.dataset.runtime === state.runtime)); fetchDiscovery(); }));
   $("reset-filters").addEventListener("click", resetFilters);
 
   $("prev-page").addEventListener("click", () => {
