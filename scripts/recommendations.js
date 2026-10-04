@@ -132,6 +132,28 @@ export function savePlaybackProgress(contentId, data = {}) {
   queueRemoteProgress(contentId, current[contentId]);
 }
 
+export function completePlaybackProgress(contentId, data = {}) {
+  if (!contentId) return;
+  const current = readProgress();
+  const existing = current[contentId] || {};
+  const duration = Math.max(0, Number(data.duration || existing.duration) || 0);
+  current[contentId] = {
+    ...existing,
+    ...data,
+    progress: duration || Number(data.progress || existing.progress) || 0,
+    duration,
+    percentage: 100,
+    completed: true,
+    completedAt: Date.now(),
+    updatedAt: Date.now()
+  };
+  writeProgress(current);
+  const completed = current[contentId];
+  void getFirebaseAuth().then(auth => {
+    if (auth?.currentUser) return setRemoteProgress(auth.currentUser.uid, contentId, completed);
+  }).catch(error => console.warn("Vivid completion sync unavailable:", error));
+}
+
 export async function flushPlaybackProgress(contentId) {
   if (!contentId) return;
   const timer = progressTimers.get(contentId);
