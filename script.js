@@ -6,7 +6,7 @@ import { getContinueWatching, getPlaybackProgress, getPersonalRecommendations, g
 import { escapeHtml, debounce, getErrorMessage } from "./scripts/utils.js";
 import { buildWatchUrl } from "./scripts/routes.js";
 import { checkForReleaseAlerts, deliverReleaseAlerts, getPendingReleaseAlerts, requestReleaseAlerts, dismissReleaseAlert } from "./scripts/release-alerts.js";
-import { startIntelligenceSync, shouldShowColdStart, completeColdStart, dismissColdStart, recordBehavior } from "./scripts/intelligence.js";
+import { startIntelligenceSync, shouldShowColdStart, completeColdStart, dismissColdStart, recordBehavior, getTasteProfile, getTasteStrength } from "./scripts/intelligence.js";
 import { searchIntelligently, getRecentSearches, rememberSearch, clearRecentSearches } from "./scripts/search.js";
 
 const $=id=>document.getElementById(id);
@@ -302,6 +302,31 @@ async function renderRecommendations(){
    }
  }catch(error){console.warn("Recommendations unavailable:",error)}
 }
+async function composeHomepage() {
+  const strength = getTasteStrength();
+  const wrap = document.querySelector(".vivid-section-wrap");
+  if (!wrap || strength < 0.28) return;
+  const sections = ["continue-section","recommended-section","because-section","tonight-section","trending","now-playing","tv","upcoming","movies","top-rated","top-tv"]
+    .map(id => document.getElementById(id)).filter(Boolean);
+  ["movies","top-rated","top-tv"].forEach(id => { const el = document.getElementById(id); if (el) el.hidden = true; });
+  if (strength >= 0.55) { const el = document.getElementById("tv"); if (el) el.hidden = true; }
+  const order = ["continue-section","recommended-section","because-section","tonight-section","trending","now-playing","tv","upcoming","movies","top-rated","top-tv"];
+  order.forEach(id => { const el = document.getElementById(id); if (el) wrap.appendChild(el); });
+  const head = document.querySelector("#recommended-section .vivid-rail-head p");
+  if (head) head.textContent = "A mix shaped by what you watch, like and finish.";
+  const trending = document.querySelector("#trending .vivid-rail-head p");
+  if (trending) trending.textContent = "A fresh signal beyond your usual taste.";
+  try {
+    const taste = await getTasteProfile();
+    if (Number(taste.media?.tv || 0) > Number(taste.media?.movie || 0)) {
+      const tv = document.getElementById("tv");
+      const upcoming = document.getElementById("upcoming");
+      if (tv) tv.hidden = false;
+      if (upcoming) upcoming.hidden = true;
+    }
+  } catch {}
+}
+
 async function maybeShowColdStart(){
  if(!shouldShowColdStart())return;
  try{
@@ -343,7 +368,7 @@ async function loadHome(){
  if("requestIdleCallback" in window)requestIdleCallback(()=>void loadSecondary(),{timeout:1800});
  else window.setTimeout(()=>void loadSecondary(),900);
 
- const loadRecommendations=()=>void renderRecommendations();
+ const loadRecommendations=()=>void renderRecommendations().then(composeHomepage);
  if("requestIdleCallback" in window)requestIdleCallback(loadRecommendations,{timeout:2600});
  else window.setTimeout(loadRecommendations,1800);
 }
