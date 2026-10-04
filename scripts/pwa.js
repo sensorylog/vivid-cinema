@@ -68,7 +68,7 @@ function createNetworkStatus() {
 }
 
 function createUpdateControl(registration) {
-  if (updateControl || isStandalone() && !registration.waiting) return;
+  if (updateControl) return;
 
   const button = document.createElement("button");
   button.type = "button";
