@@ -70,7 +70,9 @@ function wireLibraryActions() {
   favorite?.addEventListener("click", () => {
     const wasFavorite = hasLibraryItem("favorites", item);
     toggleLibraryItem("favorites", item);
-    setFeedback(item, wasFavorite ? "like" : "like");
+    const feedback = getFeedback(item);
+    if (wasFavorite && feedback === "like") setFeedback(item, "like");
+    else if (!wasFavorite && feedback !== "like") setFeedback(item, "like");
     favorite.innerHTML = hasLibraryItem("favorites", item) ? '<i class="bi bi-heart-fill"></i> Liked' : '<i class="bi bi-heart"></i> Like';
     if (notForMe) {
       notForMe.setAttribute("aria-pressed","false");
