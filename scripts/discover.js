@@ -251,20 +251,26 @@ async function fetchDiscovery() {
     let totalPages = 1;
 
     if (query) {
-      const requests = state.type === "movie"
-        ? [tmdbApi.searchMovies(query, state.page)]
-        : state.type === "tv"
-          ? [tmdbApi.searchTv(query, state.page)]
-          : [tmdbApi.searchMovies(query, state.page), tmdbApi.searchTv(query, state.page)];
-      const results = await Promise.all(requests);
-      const normalized = results.flatMap((data, index) =>
-        normalizeResults(data.results || [], state.type === "all" ? (index === 0 ? "movie" : "tv") : state.type)
-      );
+      const data = await tmdbApi.searchMulti(query, state.page);
+      const rawResults = (data.results || [])
+        .filter((item) => ["movie", "tv", "person"].includes(item.media_type))
+        .filter((item) => state.type === "all" || item.media_type === state.type);
+      const normalized = rawResults.map((item) => {
+        if (item.media_type === "person") {
+          return {
+            id: String(item.id), media_type: "person", content_id: "person:" + item.id,
+            title: item.name || "Unknown person", year: "",
+            overview: item.known_for_department || "", poster_path: item.profile_path || "",
+            backdrop_path: "", vote_average: 0, raw: item
+          };
+        }
+        return normalizeResults([item], item.media_type)[0];
+      }).filter(Boolean);
       items = normalized
-        .filter((item) => !state.genre || item.raw.genre_ids?.includes(Number(state.genre)))
-        .filter((item) => !state.year || item.year === String(state.year))
-        .filter((item) => !state.rating || Number(item.vote_average || 0) >= Number(state.rating));
-      totalPages = Math.max(...results.map((data) => Number(data.total_pages || 1)));
+        .filter((item) => item.media_type === "person" || !state.genre || item.raw.genre_ids?.includes(Number(state.genre)))
+        .filter((item) => item.media_type === "person" || !state.year || item.year === String(state.year))
+        .filter((item) => item.media_type === "person" || !state.rating || Number(item.vote_average || 0) >= Number(state.rating));
+      totalPages = Math.min(500, Number(data.total_pages || 1));
       items = await rankSearchResults(items, query, { limit: items.length || 20 });
       if (!items.length) items = sortItems(normalized);
     } else if (state.category) {
