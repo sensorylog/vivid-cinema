@@ -12,7 +12,19 @@ function key(x){return x?String(x.media_type||x.mediaType||"movie")+":"+String(x
 function safe(x){return{id:String(x?.id||""),media_type:x?.media_type||x?.mediaType||"movie",title:String(x?.title||x?.name||"Untitled").slice(0,300),year:String(x?.year||"").slice(0,10),poster_path:String(x?.poster_path||"").slice(0,500),backdrop_path:String(x?.backdrop_path||"").slice(0,500)}}
 function sid(){if(sessionId)return sessionId;sessionId=localStorage.getItem(SESSION_KEY)||Date.now().toString(36)+"-"+Math.random().toString(36).slice(2,8);try{localStorage.setItem(SESSION_KEY,sessionId)}catch{}return sessionId}
 async function fb(){if(!firebasePromise)firebasePromise=Promise.all([import("./firebase.js"),import("https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js"),import("https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js")]).then(([f,a,s])=>({...f,onAuthStateChanged:a.onAuthStateChanged,collection:s.collection,doc:s.doc,getDocs:s.getDocs,setDoc:s.setDoc})).catch(e=>{firebasePromise=null;throw e});return firebasePromise}
-async function user(){try{const {auth}=await fb();if(auth.currentUser)return auth.currentUser;return await new Promise(resolve=>{let done=false;const finish=u=>{if(done)return;done=true;unsub?.();resolve(u)};const unsub=(awaitable=>awaitable)(fb()).then(({auth:a,onAuthStateChanged})=>onAuthStateChanged(a,finish)).catch(()=>finish(null));setTimeout(()=>finish(auth.currentUser||null),1200)})}catch{return null}}
+async function user(){
+ try{
+  const {auth,onAuthStateChanged}=await fb();
+  if(auth.currentUser)return auth.currentUser;
+  return await new Promise(resolve=>{
+   let settled=false;
+   let unsubscribe=()=>{};
+   const finish=u=>{if(settled)return;settled=true;unsubscribe();resolve(u)};
+   unsubscribe=onAuthStateChanged(auth,finish);
+   setTimeout(()=>finish(auth.currentUser||null),1200);
+  });
+ }catch{return null}
+}
 function cloud(path,data){void user().then(u=>u&&fb().then(({db,doc,setDoc})=>setDoc(doc(db,"users",u.uid,...path),data,{merge:true}))).catch(()=>{})}
 
 export function getFeedback(x){return read().feedback[typeof x==="string"?x:key(x)]?.kind||null}
