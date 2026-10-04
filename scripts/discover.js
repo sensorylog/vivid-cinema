@@ -215,8 +215,7 @@ function discoverParams(type) {
     : state.sort;
   const mood = MOODS[state.mood];
   const runtime = RUNTIMES[state.runtime];
-  const moodGenres = mood?.genres?.length ? mood.genres.join(",") : undefined;
-  const baseGenres = state.genre || moodGenres;
+  const moodGenres = mood?.genres?.length ? mood.genres.join("|") : "";
   // TMDB treats comma-separated genres as AND and pipe-separated genres as OR.
   // Mood chips are intentionally OR-based so a mood like "Intense" means any
   // of its relevant genres instead of requiring a title to match all of them.
