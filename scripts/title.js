@@ -1,6 +1,6 @@
 import { tmdbApi } from "./tmdb.js";
 import { getImageUrl, getMediaUrl, normalizeMedia, normalizeResults } from "./media.js";
-import { getRoute, buildWatchUrl } from "./routes.js";
+import { getRoute, buildWatchUrl, buildDiscoverUrl } from "./routes.js";
 import { escapeHtml, getErrorMessage } from "./utils.js";
 import { hasLibraryItem, startLibrarySync, toggleLibraryItem, upsertLibraryItem } from "./library.js";
 import { getExternalEpisodeLink, getExternalProviderLink } from "./external-providers.js";
