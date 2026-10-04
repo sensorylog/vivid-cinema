@@ -55,6 +55,29 @@ const FEATURED_PROVIDER_NAMES = new Map([
   [283, "Crunchyroll"], [11, "MUBI"]
 ]);
 
+function renderFeaturedCollections() {
+  const container = $("featured-collections");
+  if (!container) return;
+  const entries = Object.entries(CURATED_CATEGORIES).filter(([, category]) => category.featured).slice(0, 8);
+  container.innerHTML = entries.map(([key, category]) =>
+    '<button class="vivid-collection-card" type="button" data-collection="' + escapeHtml(key) + '">' +
+    '<span class="vivid-collection-card-kicker">VIVID</span><strong>' + escapeHtml(category.label) + '</strong><small>' + escapeHtml(category.description) + '</small><span class="vivid-collection-card-arrow"><i class="bi bi-arrow-up-right"></i></span></button>'
+  ).join("");
+  container.querySelectorAll("[data-collection]").forEach((button) => button.addEventListener("click", () => {
+    state.category = button.dataset.collection || "";
+    state.page = 1;
+    const category = CURATED_CATEGORIES[state.category];
+    if (category) {
+      state.type = category.type;
+      document.querySelectorAll("[data-type]").forEach((item) => item.classList.toggle("is-active", item.dataset.type === state.type));
+      $("category-filter").value = state.category;
+      populateGenres();
+    }
+    fetchDiscovery();
+    document.querySelector(".vivid-discovery-results")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }));
+}
+
 function currentGenres() {
   if (state.type === "tv") return genres.tv;
   if (state.type === "movie") return genres.movie;
@@ -361,6 +384,7 @@ function wire() {
   document.querySelectorAll("[data-type]").forEach((button) =>
     button.addEventListener("click", () => setType(button.dataset.type))
   );
+  renderFeaturedCollections();
   $("category-filter")?.addEventListener("change", () => {
     state.category = $("category-filter").value;
     state.page = 1;
