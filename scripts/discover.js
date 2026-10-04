@@ -465,10 +465,19 @@ function wire() {
     state.year = "";
     state.rating = "";
     state.provider = "";
+    // Episode-length presets are TV-specific. Switch to TV instead of sending
+    // an episode runtime filter to the movie endpoint as well.
+    if (state.runtime === "quickEpisode" || state.runtime === "episode" || state.runtime === "longEpisode") {
+      state.type = "tv";
+      document.querySelectorAll("[data-type]").forEach((item) =>
+        item.classList.toggle("is-active", item.dataset.type === "tv")
+      );
+    }
     if ($("category-filter")) $("category-filter").value = "";
     if ($("genre-filter")) $("genre-filter").value = "";
     if ($("year-filter")) $("year-filter").value = "";
     if ($("rating-filter")) $("rating-filter").value = "";
+    populateGenres();
     populateProviders();
     document.querySelectorAll("[data-mood]").forEach((item) => item.classList.toggle("is-active", item.dataset.mood === ""));
     state.page = 1;
