@@ -4,7 +4,7 @@ import { getRoute, buildWatchUrl } from "./routes.js";
 import { escapeHtml, getErrorMessage } from "./utils.js";
 import { hasLibraryItem, startLibrarySync, toggleLibraryItem, upsertLibraryItem } from "./library.js";
 import { getExternalEpisodeLink, getExternalProviderLink } from "./external-providers.js";
-import { getFeedback, setFeedback, recordBehavior } from "./intelligence.js";
+import { getFeedback, setFeedback, recordBehavior, startIntelligenceSync } from "./intelligence.js";
 
 const $ = (id) => document.getElementById(id);
 const route = getRoute();
@@ -368,6 +368,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Library synchronization continues in the background so a slow or unavailable
   // auth session cannot leave the title page stuck on its loading state.
   init();
+  void startIntelligenceSync().then(() => refreshLibraryActions()).catch(() => {});
   void startLibrarySync()
     .then(() => refreshLibraryActions())
     .catch((error) => console.warn("Vivid library sync unavailable:", error));
