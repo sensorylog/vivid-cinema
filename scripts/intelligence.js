@@ -36,7 +36,7 @@ export function invalidateRecommendationCaches(){try{localStorage.removeItem("vi
 
 export function recordBehavior(type,item=null,metadata={}){
  const s=read(),x=item?safe(item):null,now=Date.now();
- const duplicateWindow=["title_opened","trailer_started","watch_started"].includes(type)?15000:type==="playback_progress"?30000:0;
+ const duplicateWindow=["title_opened","trailer_started","watch_started"].includes(type)?15000:type==="playback_progress"?30000:type==="recommendation_row_view"?60000:0;
  const duplicate=duplicateWindow&&s.events.some(e=>e.type===type&&e.contentId===key(x)&&now-Number(e.occurredAt||0)<duplicateWindow);
  if(duplicate)return;
  const clean={};Object.entries(metadata||{}).slice(0,10).forEach(([k,v])=>{if(typeof v==="string")clean[k.slice(0,40)]=v.slice(0,160);else if(typeof v==="number"||typeof v==="boolean")clean[k.slice(0,40)]=v});
