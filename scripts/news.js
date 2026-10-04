@@ -245,9 +245,11 @@ async function load() {
   state.stories = stories;
   state.calendar = [...coming, ...weekItems].map(item=>({
     item,date:item.release_date||item.first_air_date,title:titleOf(item),media_type:mediaType(item)
-  })).filter(x=>x.date).sort((a,b)=>x.date.localeCompare(b.date)).slice(0,10);
+  })).filter(x=>x.date).sort((a,b)=>String(a.date).localeCompare(String(b.date))).slice(0,10);
   state.hero = trendItems[0] || coming[0] || todayItems[0] || null;
   state.lastUpdated = Date.now();
+  // Never leave the page in an empty loading state when the catalogue returns no matching rows.
+  // The feed itself is rendered before optional personalization/trailer work begins.
   render(document.querySelector(".vivid-news-filter.is-active")?.dataset.filter || "all");
   renderHero();
   const loading = $("news-loading"); if (loading) loading.hidden = true;
