@@ -29,13 +29,13 @@ export const HOME_SECTION_META = Object.freeze({
 
 export const CURATED_CATEGORIES = Object.freeze({
   spaceSciFi: { label: "Space sci-fi", description: "Big ideas, distant worlds and stories beyond Earth.", type: "all", params: { with_genres: "878", with_keywords: "9882" }, featured: true },
-  action90s: { label: "90s action", description: "Classic action energy from the 1990s.", type: "movie", params: { with_genres: "28", primary_release_date_gte: "1990-01-01", primary_release_date_lte: "1999-12-31" }, featured: true },
+  action90s: { label: "90s action", description: "Classic action energy from the 1990s.", type: "movie", params: { with_genres: "28", "primary_release_date.gte": "1990-01-01", "primary_release_date.lte": "1999-12-31" }, featured: true },
   africanCinema: { label: "African cinema", description: "Stories from across Africa, including Ghana and Nigeria.", type: "all", params: { with_origin_country: "GH|NG|ZA|KE|SN" }, featured: true },
   oneNight: { label: "One-night movies", description: "Easy-to-finish movies for a single evening.", type: "movie", params: { with_runtime_gte: "1", with_runtime_lte: "120" }, featured: true },
   under100: { label: "Under 100 minutes", description: "Great picks when time is limited.", type: "movie", params: { with_runtime_gte: "1", with_runtime_lte: "99" }, featured: true },
   feelGood: { label: "Feel-good", description: "Warm, uplifting and easy-to-love stories.", type: "all", params: { with_genres: "35,10751,10749" }, featured: true },
-  hiddenGems: { label: "Hidden gems", description: "Strongly rated titles with less mainstream popularity.", type: "all", params: { vote_average_gte: "7", vote_count_gte: "100", sort_by: "vote_average.desc" }, featured: true },
-  awardWinners: { label: "Award-worthy", description: "Critically acclaimed stories worth discovering.", type: "movie", params: { vote_average_gte: "7.5", vote_count_gte: "500", sort_by: "vote_average.desc" }, featured: true },
+  hiddenGems: { label: "Hidden gems", description: "Strongly rated titles with less mainstream popularity.", type: "all", params: { "vote_average.gte": "7", "vote_count.gte": "100", sort_by: "vote_average.desc" }, featured: true },
+  awardWinners: { label: "Award-worthy", description: "Critically acclaimed stories worth discovering.", type: "movie", params: { "vote_average.gte": "7.5", "vote_count.gte": "500", sort_by: "vote_average.desc" }, featured: true },
   sitcom: {
     label: "Sitcom",
     description: "Situation comedies from across the world.",
