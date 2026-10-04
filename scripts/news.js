@@ -271,7 +271,7 @@ $("news-refresh")?.addEventListener("click", refresh);
 $("news-search")?.addEventListener("keydown", event => {
   if(event.key !== "Enter") return;
   const q=event.currentTarget.value.trim();
-  if(q) window.location.href="home.html?search="+encodeURIComponent(q);
+  if(q) window.location.href="discover.html?q="+encodeURIComponent(q);
 });
 startCinemaReminderLoop();
 load().catch(e=>{console.warn("Vivid cinema news unavailable:",e);const loading=$("news-loading");if(loading)loading.textContent="Cinema news is temporarily unavailable.";});
