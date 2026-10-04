@@ -44,7 +44,7 @@ service cloud.firestore {
 
     function validProgressData() {
       return request.resource.data.keys().hasOnly([
-        'id','media_type','progress','duration','percentage','season','episode','title','updatedAt'
+        'id','media_type','progress','duration','percentage','completed','completedAt','season','episode','title','updatedAt'
       ])
       && request.resource.data.id is string
       && request.resource.data.id.matches('^[0-9]+$')
@@ -56,6 +56,8 @@ service cloud.firestore {
       && request.resource.data.percentage is number
       && request.resource.data.percentage >= 0
       && request.resource.data.percentage <= 100
+      && request.resource.data.completed is bool
+      && (!request.resource.data.keys().hasAny(['completedAt']) || request.resource.data.completedAt is number)
       && (!request.resource.data.keys().hasAny(['season']) || request.resource.data.season == null || request.resource.data.season is number)
       && (!request.resource.data.keys().hasAny(['episode']) || request.resource.data.episode == null || request.resource.data.episode is number)
       && request.resource.data.title is string
