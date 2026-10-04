@@ -293,7 +293,7 @@ function writeForYouCache(value) {
   try { localStorage.setItem(FOR_YOU_CACHE_KEY, JSON.stringify(value)); } catch {}
 }
 
-function scoreCandidate(item, taste, progress, feedback) {
+function scoreCandidate(item, taste, progress, feedback, recentGenres = new Set()) {
   const genres = new Set(item.genre_ids || []);
   const genreScore = Object.entries(taste.genres || {}).reduce((sum, [id, weight]) =>
     sum + (genres.has(Number(id)) ? Number(weight) : 0), 0);
@@ -301,13 +301,14 @@ function scoreCandidate(item, taste, progress, feedback) {
   const quality = Math.min(1, Math.max(0, Number(item.vote_average || 0) / 10));
   const popularity = Math.min(1, Math.log10(1 + Math.max(0, Number(item.popularity || 0))) / 4);
   const feedbackBoost = feedback[keyFor(item)]?.kind === "like" ? 6 : 0;
-  return genreScore * 5.4 + mediaScore * 1.9 + quality * 1.4 + popularity * .8 + feedbackBoost;
+  const recentGenreBoost = (item.genre_ids || []).filter(id => recentGenres.has(Number(id))).slice(0, 2).length * .75;
+  return genreScore * 5.4 + mediaScore * 1.9 + quality * 1.4 + popularity * .8 + feedbackBoost + recentGenreBoost;
 }
 
-function rankForYou(candidates, taste, progress, feedback, excluded, limit) {
+function rankForYou(candidates, taste, progress, feedback, excluded, limit, recentGenres = new Set()) {
   const ranked = uniqueByKey(candidates)
     .filter(item => !excluded.has(keyFor(item)))
-    .map(item => ({ item, score: scoreCandidate(item, taste, progress, feedback) }))
+    .map(item => ({ item, score: scoreCandidate(item, taste, progress, feedback, recentGenres) }))
     .sort((a, b) => b.score - a.score);
 
   const out = [];
@@ -425,6 +426,14 @@ export async function getPersonalRecommendations(limit = 12) {
     ...observed.map(keyFor),
     ...getNotForMeKeys()
   ]);
+  const recentGenres = new Set(
+    (library.history || [])
+      .slice()
+      .sort((a, b) => Number(b.lastWatchedAt || b.updatedAt || 0) - Number(a.lastWatchedAt || a.updatedAt || 0))
+      .slice(0, 5)
+      .flatMap(item => item.genre_ids || [])
+      .map(Number)
+  );
 
   const fingerprint = [
     ...Object.entries(feedback).map(([k, v]) => k + ":" + v.kind + ":" + v.updatedAt),
@@ -454,7 +463,7 @@ export async function getPersonalRecommendations(limit = 12) {
     result.status === "fulfilled" ? normalizeResults(result.value?.results || []) : []
   );
 
-  const items = rankForYou(candidates, taste, progress, feedback, excluded, limit);
+  const items = rankForYou(candidates, taste, progress, feedback, excluded, limit, recentGenres);
   writeForYouCache({ version: 2, fingerprint, updatedAt: Date.now(), items });
 
   return items;
