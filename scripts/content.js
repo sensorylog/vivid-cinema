@@ -180,6 +180,15 @@ function categoryParams(category, type, page, filters = {}, keywordId = "") {
     base.with_watch_monetization_types = "flatrate";
     base.with_watch_providers = filters.provider;
   }
+  if (filters.moodGenres?.length) {
+    base.with_genres = base.with_genres
+      ? base.with_genres + "," + filters.moodGenres.join("|")
+      : filters.moodGenres.join("|");
+  }
+  if (filters.runtime) {
+    base["with_runtime.gte"] = filters.runtime.min;
+    base["with_runtime.lte"] = filters.runtime.max;
+  }
   base.page = page;
   base.sort_by = type === "tv"
     ? sortValue(filters).replace("primary_release_date", "first_air_date")
