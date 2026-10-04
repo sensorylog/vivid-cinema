@@ -2,14 +2,15 @@ import { tmdbApi } from "./tmdb.js";
 import { getImageUrl, getMediaUrl, normalizeMedia, normalizeResults } from "./media.js";
 import { buildTitleUrl, buildWatchUrl, getRoute } from "./routes.js";
 import { escapeHtml, getErrorMessage } from "./utils.js";
-import { upsertLibraryItem, startLibrarySync } from "./library.js";
-import { getPlaybackProgress, savePlaybackProgress, removePlaybackProgress } from "./recommendations.js";
+import { getLocalLibrary, saveLocalLibrary, syncLocalItem, upsertLibraryItem, startLibrarySync } from "./library.js";
+import { getPlaybackProgress, savePlaybackProgress, flushPlaybackProgress, removePlaybackProgress, startPlaybackSync } from "./recommendations.js";
 import { VIVID_CONFIG } from "./config.js";
 
 const $=id=>document.getElementById(id);
 const route=getRoute();
 const VIDAPI_ORIGIN=new URL(VIVID_CONFIG.api.vidapiEmbedBaseUrl).origin;
 let media=null,details=null,currentParams=null,nextEpisode=null;
+let lastHistorySyncAt=0;
 
 function getParams(){
  const id=route.params.get("id");
@@ -30,9 +31,50 @@ function buildEmbedUrl(params,startAt=0){
  if(params.type==="tv")return base+"/embed/tv/"+encodeURIComponent(params.id)+"/"+params.season+"/"+params.episode+suffix;
  return base+"/embed/movie/"+encodeURIComponent(params.id)+suffix;
 }
+function historyItem(extra={}){
+ return {
+  id:media.id,
+  media_type:media.media_type,
+  title:media.title,
+  year:media.year,
+  poster_path:media.poster_path,
+  backdrop_path:media.backdrop_path,
+  ...extra
+ };
+}
+
 function recordHistory(){
  if(!media||!media.title||/^Loading\b/.test(media.title))return;
- upsertLibraryItem("history",{id:media.id,media_type:media.media_type,title:media.title,year:media.year,poster_path:media.poster_path,backdrop_path:media.backdrop_path});
+ const library=getLocalLibrary();
+ const existing=(library.history||[]).find(item=>item.media_type===media.media_type&&String(item.id)===String(media.id));
+ upsertLibraryItem("history",historyItem({
+  startedAt:Number(existing?.startedAt)||Date.now(),
+  lastWatchedAt:Date.now(),
+  watchedSeconds:Number(existing?.watchedSeconds)||0,
+  completion:Number(existing?.completion)||0
+ }));
+}
+
+function recordWatchActivity(progress,duration){
+ if(!media||progress<=0)return;
+ const library=getLocalLibrary();
+ const existing=(library.history||[]).find(item=>item.media_type===media.media_type&&String(item.id)===String(media.id));
+ const percentage=duration>0?Math.min(100,(progress/duration)*100):Number(existing?.completion)||0;
+ const now=Date.now();
+ const item=historyItem({
+  startedAt:Number(existing?.startedAt)||now,
+  lastWatchedAt:now,
+  watchedSeconds:Math.max(Number(existing?.watchedSeconds)||0,progress),
+  completion:Math.max(Number(existing?.completion)||0,percentage),
+  updatedAt:now
+ });
+ const next={...library,history:[item,...(library.history||[]).filter(entry=>entry!==existing)};
+ saveLocalLibrary(next);
+
+ if(now-lastHistorySyncAt>=30000){
+  lastHistorySyncAt=now;
+  void syncLocalItem("history",item);
+ }
 }
 function recommendationCards(){
  const items=normalizeResults(details?.recommendations?.results||[],media?.media_type).slice(0,10);
@@ -179,4 +221,11 @@ async function load(){
   if(overviewNode)overviewNode.textContent="Playback is ready. Title information is temporarily unavailable.";
  }
 }
-document.addEventListener("DOMContentLoaded",()=>{void startLibrarySync().catch(()=>{});load();});
+document.addEventListener("visibilitychange",()=>{
+ if(document.visibilityState==="hidden"&&currentParams?.id) void flushPlaybackProgress(progressKey());
+});
+document.addEventListener("DOMContentLoaded",()=>{
+ void startLibrarySync().catch(()=>{});
+ void startPlaybackSync().catch(()=>{});
+ load();
+});
