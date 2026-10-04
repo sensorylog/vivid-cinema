@@ -160,3 +160,233 @@ body.vivid-atmosphere .account-grid>*{min-width:0}
   body.vivid-atmosphere .vivid-feature-card:focus-visible,
   body.vivid-atmosphere .vivid-feature-card.is-active{transform:none!important}
 }
+
+
+/* Cross-platform visual parity.
+   One home composition across desktop browser, mobile browser and iOS standalone.
+   Responsive differences are limited to navigation density and available width;
+   the cinematic hierarchy, surfaces, spacing language and card treatment stay shared. */
+body.vivid-cinema-home .vivid-home{
+  width:100%;
+  max-width:none;
+  overflow:clip;
+}
+body.vivid-cinema-home .vivid-topbar{
+  padding-top:calc(8px + var(--vivid-safe-top,0px));
+  padding-right:max(12px,var(--vivid-safe-right,0px));
+  padding-bottom:8px;
+  padding-left:max(12px,var(--vivid-safe-left,0px));
+}
+body.vivid-cinema-home .vivid-nav{
+  width:min(100%,1440px);
+  min-height:50px;
+  gap:10px;
+}
+body.vivid-cinema-home .vivid-brand{
+  font-size:1.05rem;
+}
+body.vivid-cinema-home .vivid-hero{
+  width:100%;
+  min-height:0;
+  height:clamp(540px,72svh,780px);
+}
+body.vivid-cinema-home .vivid-hero-media{
+  height:100%;
+  min-height:0;
+}
+body.vivid-cinema-home .vivid-hero-content{
+  width:min(1440px,100%);
+  padding:88px var(--vivid-page-gutter) 92px;
+}
+body.vivid-cinema-home .vivid-hero-title{
+  max-width:min(850px,72vw);
+  font-size:clamp(2.45rem,7vw,6rem);
+}
+body.vivid-cinema-home .vivid-hero-copy{
+  max-width:620px;
+}
+body.vivid-cinema-home .vivid-feature-strip{
+  width:min(1440px,100%);
+  padding:12px var(--vivid-page-gutter) 20px;
+}
+body.vivid-cinema-home .vivid-feature-card{
+  flex:0 0 clamp(172px,18vw,220px);
+  width:clamp(172px,18vw,220px);
+  height:97px;
+}
+body.vivid-cinema-home .vivid-section-wrap{
+  width:min(1440px,100%);
+  padding-inline:var(--vivid-page-gutter);
+}
+body.vivid-cinema-home .vivid-rails{
+  padding-block:18px 4px;
+}
+body.vivid-cinema-home .vivid-rail{
+  gap:12px;
+  padding-top:4px;
+  padding-bottom:14px;
+}
+body.vivid-cinema-home .vivid-card,
+body.vivid-cinema-home .vivid-skeleton-card{
+  flex:0 0 clamp(136px,11vw,168px)!important;
+  width:clamp(136px,11vw,168px);
+  min-width:clamp(136px,11vw,168px);
+  max-width:clamp(136px,11vw,168px);
+}
+@media(max-width:900px){
+  body.vivid-cinema-home .vivid-nav{
+    gap:8px;
+  }
+  body.vivid-cinema-home .vivid-hero{
+    height:66svh;
+    min-height:520px;
+  }
+  body.vivid-cinema-home .vivid-hero-content{
+    padding:88px 24px 92px;
+  }
+  body.vivid-cinema-home .vivid-feature-strip{
+    padding-inline:24px;
+  }
+}
+@media(max-width:640px){
+  body.vivid-cinema-home .vivid-topbar{
+    padding-top:calc(8px + var(--vivid-safe-top,0px));
+    padding-right:calc(12px + var(--vivid-safe-right,0px));
+    padding-bottom:8px;
+    padding-left:calc(12px + var(--vivid-safe-left,0px));
+  }
+  body.vivid-cinema-home .vivid-nav{
+    min-height:50px;
+  }
+  body.vivid-cinema-home .vivid-hero{
+    height:72svh;
+    min-height:540px;
+  }
+  body.vivid-cinema-home .vivid-hero-content{
+    padding:88px 16px 92px;
+  }
+  body.vivid-cinema-home .vivid-hero-title{
+    max-width:100%;
+    font-size:clamp(2.45rem,13vw,4rem);
+  }
+  body.vivid-cinema-home .vivid-feature-strip{
+    padding:12px 16px 20px;
+  }
+  body.vivid-cinema-home .vivid-feature-card{
+    flex-basis:172px;
+    width:172px;
+    height:97px;
+  }
+  body.vivid-cinema-home .vivid-section-wrap{
+    padding-inline:14px;
+    padding-bottom:calc(96px + env(safe-area-inset-bottom,0px));
+  }
+  body.vivid-cinema-home .vivid-card,
+  body.vivid-cinema-home .vivid-skeleton-card{
+    flex-basis:136px!important;
+    width:136px;
+    min-width:136px;
+    max-width:136px;
+  }
+}
+
+
+/* Streaming-product standardization.
+   Vivid follows the common premium-service hierarchy: one hero, a small set of
+   high-signal rows, consistent card geometry, quiet chrome, and personalization
+   ahead of generic catalogue volume. */
+body.vivid-cinema-home .vivid-rail-head{
+  min-height:42px;
+  margin-bottom:12px;
+}
+body.vivid-cinema-home .vivid-rail-head h2{
+  font-size:clamp(1.18rem,1.65vw,1.55rem);
+  line-height:1.12;
+}
+body.vivid-cinema-home .vivid-rail-head p{
+  max-width:620px;
+  margin-top:5px;
+  line-height:1.35;
+}
+body.vivid-cinema-home .vivid-rail-see-all{
+  min-height:34px;
+  display:inline-flex;
+  align-items:center;
+}
+body.vivid-cinema-home .vivid-rail{
+  scroll-padding-inline:2px;
+  scrollbar-width:none;
+}
+body.vivid-cinema-home .vivid-card,
+body.vivid-cinema-home .vivid-skeleton-card{
+  flex-basis:clamp(180px,13.5vw,220px)!important;
+  width:clamp(180px,13.5vw,220px);
+  min-width:clamp(180px,13.5vw,220px);
+  max-width:clamp(180px,13.5vw,220px);
+}
+body.vivid-cinema-home .vivid-card-media{
+  aspect-ratio:2/3!important;
+}
+body.vivid-cinema-home .vivid-card-info{
+  min-height:58px!important;
+  padding:9px 10px 11px;
+}
+body.vivid-cinema-home .vivid-card-title{
+  font-size:.84rem;
+  line-height:1.25;
+}
+body.vivid-cinema-home .vivid-card-sub{
+  font-size:.7rem;
+}
+body.vivid-cinema-home .vivid-rails{
+  padding-block:20px 8px;
+}
+body.vivid-cinema-home .vivid-rails + .vivid-rails{
+  border-top:1px solid rgba(255,255,255,.025);
+}
+body.vivid-cinema-home .vivid-catalogue-explore{
+  padding-top:22px;
+  padding-bottom:6px;
+}
+body.vivid-cinema-home .vivid-catalogue-chips a{
+  min-height:38px;
+  display:inline-flex;
+  align-items:center;
+}
+@media(max-width:900px){
+  body.vivid-cinema-home .vivid-card,
+  body.vivid-cinema-home .vivid-skeleton-card{
+    flex-basis:180px!important;
+    width:180px;
+    min-width:180px;
+    max-width:180px;
+  }
+}
+@media(max-width:640px){
+  body.vivid-cinema-home .vivid-rails{
+    padding-block:16px 4px;
+  }
+  body.vivid-cinema-home .vivid-rails + .vivid-rails{
+    border-top:0;
+  }
+  body.vivid-cinema-home .vivid-card,
+  body.vivid-cinema-home .vivid-skeleton-card{
+    flex-basis:136px!important;
+    width:136px;
+    min-width:136px;
+    max-width:136px;
+  }
+  body.vivid-cinema-home .vivid-card-info{
+    min-height:46px!important;
+    padding:7px 8px 9px;
+  }
+}
+
+/* Desktop is pointer-led; touch devices keep cards visually stable. */
+@media(hover:hover) and (pointer:fine){
+  body.vivid-cinema-home .vivid-card:hover,
+  body.vivid-cinema-home .vivid-card:focus-visible{
+    transform:translateY(-9px) scale(1.035)!important;
+    box-shadow:0 24px 54px rgba(0,0,0,.34);
+  }
+}
