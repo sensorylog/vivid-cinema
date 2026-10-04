@@ -500,7 +500,8 @@ function wireHeroSwipe(){
 }
 window.addEventListener("scroll",()=>{$("topbar")?.classList.toggle("is-scrolled",scrollY>18)},{passive:true});
 document.addEventListener("keydown",e=>{if(e.target.matches("input,textarea,select"))return;if(e.key==="ArrowLeft")showHero(activeIndex-1,true);if(e.key==="ArrowRight")showHero(activeIndex+1,true)});
-document.addEventListener("DOMContentLoaded",async()=>{\n  startCinemaReminderLoop();
+document.addEventListener("DOMContentLoaded",async()=>{
+  startCinemaReminderLoop();
  // First-entry taste selection is a gate: new users choose a few titles (or skip)
  // before Vivid paints the main catalogue, so personalization is intentional from day one.
  const needsColdStart=shouldShowColdStart();
