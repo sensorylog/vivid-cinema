@@ -294,15 +294,23 @@ function writeForYouCache(value) {
 }
 
 function scoreCandidate(item, taste, progress, feedback, recentGenres = new Set()) {
-  const genres = new Set(item.genre_ids || []);
+  const source = item.raw || item;
+  const genreIds = source.genre_ids || item.genre_ids || [];
+  const genres = new Set(genreIds);
   const genreScore = Object.entries(taste.genres || {}).reduce((sum, [id, weight]) =>
     sum + (genres.has(Number(id)) ? Number(weight) : 0), 0);
   const mediaScore = Number(taste.media?.[item.media_type || "movie"] || 0);
+  const languageScore = taste.languages?.[source.original_language] ? Number(taste.languages[source.original_language]) : 0;
+  const countryCodes = source.origin_country || (source.production_countries || []).map(country => country.iso_3166_1).filter(Boolean);
+  const countryScore = countryCodes.reduce((sum, code) => sum + Number(taste.countries?.[code] || 0), 0);
+  const year = Number(String(source.release_date || source.first_air_date || item.date || "").slice(0, 4));
+  const decade = year >= 1900 ? String(Math.floor(year / 10) * 10) : "";
+  const decadeScore = decade ? Number(taste.decades?.[decade] || 0) : 0;
   const quality = Math.min(1, Math.max(0, Number(item.vote_average || 0) / 10));
   const popularity = Math.min(1, Math.log10(1 + Math.max(0, Number(item.popularity || 0))) / 4);
   const feedbackBoost = feedback[keyFor(item)]?.kind === "like" ? 6 : 0;
-  const recentGenreBoost = (item.genre_ids || []).filter(id => recentGenres.has(Number(id))).slice(0, 2).length * .75;
-  return genreScore * 5.4 + mediaScore * 1.9 + quality * 1.4 + popularity * .8 + feedbackBoost + recentGenreBoost;
+  const recentGenreBoost = genreIds.filter(id => recentGenres.has(Number(id))).slice(0, 2).length * .75;
+  return genreScore * 5.4 + mediaScore * 1.9 + languageScore * .55 + countryScore * .35 + decadeScore * .3 + quality * 1.4 + popularity * .8 + feedbackBoost + recentGenreBoost;
 }
 
 function rankForYou(candidates, taste, progress, feedback, excluded, limit, recentGenres = new Set()) {
@@ -319,7 +327,7 @@ function rankForYou(candidates, taste, progress, feedback, excluded, limit, rece
     if (out.length >= limit) break;
     const item = entry.item;
     const type = item.media_type || "movie";
-    const genres = (item.genre_ids || []).filter(id => taste.genres?.[id]);
+    const genres = (item.raw?.genre_ids || item.genre_ids || []).filter(id => taste.genres?.[id]);
     const dominantGenre = genres[0];
     const secondaryGenre = genres.find(id => id !== dominantGenre);
     if (dominantGenre && (genreCounts.get(dominantGenre) || 0) >= 3) continue;
@@ -338,7 +346,7 @@ function rankForYou(candidates, taste, progress, feedback, excluded, limit, rece
       recommendationReason: dominantGenre ? "Because it matches your taste" : "Picked for you"
     });
     typeCounts[type] = (typeCounts[type] || 0) + 1;
-    (item.genre_ids || []).filter(id => taste.genres?.[id]).slice(0, 2).forEach(id =>
+    (item.raw?.genre_ids || item.genre_ids || []).filter(id => taste.genres?.[id]).slice(0, 2).forEach(id =>
       genreCounts.set(id, (genreCounts.get(id) || 0) + 1)
     );
   }
