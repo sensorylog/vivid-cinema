@@ -10,7 +10,11 @@
   "theme_color": "#08090b",
   "orientation": "any",
   "lang": "en",
-  "categories": ["entertainment", "movies", "tv"],
+  "categories": [
+    "entertainment",
+    "movies",
+    "tv"
+  ],
   "icons": [
     {
       "src": "./icons/vivid-icon.svg",
@@ -32,8 +36,25 @@
     }
   ],
   "shortcuts": [
-    {"name":"Browse movies and TV","short_name":"Browse","url":"./home.html"},
-    {"name":"Discover","short_name":"Discover","url":"./discover.html"},
-    {"name":"My Library","short_name":"Library","url":"./library.html"}
+    {
+      "name": "Browse movies and TV",
+      "short_name": "Browse",
+      "url": "./home.html"
+    },
+    {
+      "name": "Discover",
+      "short_name": "Discover",
+      "url": "./discover.html"
+    },
+    {
+      "name": "My Library",
+      "short_name": "Library",
+      "url": "./library.html"
+    },
+    {
+      "name": "Cinema News",
+      "short_name": "News",
+      "url": "./news.html"
+    }
   ]
 }
