@@ -1,4 +1,5 @@
 const authLink = document.getElementById("auth-link");
+const pageAuthLinks = document.querySelectorAll("#library-auth, #title-auth");
 const userDropdown = document.getElementById("user-dropdown");
 const userEmail = document.getElementById("user-email");
 const logoutLink = document.getElementById("logout-link");
@@ -13,6 +14,12 @@ async function initAuthUi() {
     onAuthStateChanged(auth, (user) => {
       window.dispatchEvent(new CustomEvent("vivid:auth-ready", { detail: user }));
       if (user) {
+        pageAuthLinks.forEach(link => {
+          link.style.display = "";
+          link.textContent = "Account";
+          link.href = "account.html";
+          link.setAttribute("aria-label", "Open account");
+        });
         if (authLink) {
           authLink.style.display = "";
           authLink.innerHTML = '<i class="bi bi-person-fill" aria-hidden="true"></i>';
@@ -22,6 +29,12 @@ async function initAuthUi() {
         if (userDropdown) userDropdown.style.display = "";
         if (userEmail) userEmail.textContent = user.email || user.displayName || "Account";
       } else {
+        pageAuthLinks.forEach(link => {
+          link.style.display = "";
+          link.textContent = "Sign in";
+          link.href = "auth.html";
+          link.setAttribute("aria-label", "Sign in");
+        });
         if (authLink) {
           authLink.style.display = "";
           authLink.innerHTML = '<i class="bi bi-person-fill" aria-hidden="true"></i>';
