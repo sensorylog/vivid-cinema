@@ -323,7 +323,7 @@ function render(details) {
     '<section class="vivid-title-section"><div class="vivid-section-heading"><div><span>CAST & CREW</span><h2>People in the story</h2></div></div><div class="vivid-cast-grid">'+
       (cast.length?cast.map((person)=>'<a class="vivid-cast" href="person.html?id='+encodeURIComponent(person.id)+'" aria-label="View '+escapeHtml(person.name)+'"><img loading="lazy" src="'+getImageUrl(person.profile_path,"w185")+'" alt="'+escapeHtml(person.name)+'"><strong>'+escapeHtml(person.name)+'</strong><small>'+escapeHtml(person.character||"Cast")+'</small></a>').join(""):'<p class="vivid-muted">Cast information is unavailable.</p>')+
     '</div></section>'+renderTrailerSection(details)+renderSeasons(details)+renderProviderGroups(details,country)+
-    '<section class="vivid-title-section"><div class="vivid-section-heading"><div><span>RECOMMENDED</span><h2>More like this</h2></div></div><div class="vivid-similar" id="recommendation-rail">'+renderRecommendationCards(related)+'</div></section>';
+    '<section class="vivid-title-section"><div class="vivid-section-heading"><div><span>RECOMMENDED</span><h2>More like this</h2></div></div><div class="vivid-similar" id="recommendation-rail">'+renderRecommendationCards(related)+'</div></section>'+exploreSection;
 
   recordBehavior("title_opened", libraryItem(), { source: document.referrer || "direct" });
   wireSeasons(details);wireProviders(details);wireTrailers();wireLibraryActions();
