@@ -44,6 +44,9 @@ function card(media,options={}){
 function wireCards(container){
  container?.querySelectorAll(".vivid-card").forEach(c=>{
    const open=()=>{
+     if(c.dataset.recommendation==="true"){
+       recordBehavior("recommendation_clicked",{id:c.dataset.id,media_type:c.dataset.type,title:c.dataset.title||""},{surface:c.dataset.surface||"recommendation",position:Number(c.dataset.position||0)});
+     }
      const progress=getPlaybackProgress(c.dataset.type+":"+c.dataset.id);
      location.href=progress ? buildWatchUrl(c.dataset.id,c.dataset.type,progress.season,progress.episode,progress.progress) : getMediaUrl({id:c.dataset.id,media_type:c.dataset.type});
    };
