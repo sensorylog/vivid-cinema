@@ -55,17 +55,29 @@ export function setFeedback(item,kind){
 
 function add(m,k,w){if(k)m[k]=(m[k]||0)+w}
 function decay(t,h=60){const age=Math.max(0,(Date.now()-Number(t||0))/86400000);return Math.pow(.5,age/h)}
+function eventSignal(s,k){
+ const now=Date.now();
+ return s.events.reduce((sum,e)=>{
+  if(e.contentId!==k)return sum;
+  const age=Math.max(0,(now-Number(e.occurredAt||0))/86400000);
+  const recent=Math.pow(.5,age/45);
+  const weights={title_opened:.12,trailer_started:.45,watch_started:1.4,watch_completed:3.2,playback_progress:.35};
+  return sum+(weights[e.type]||0)*recent;
+ },0)
+}
 function top(m,n){return Object.fromEntries(Object.entries(m).sort((a,b)=>b[1]-a[1]).slice(0,n))}
 async function seeds(){
  const l=getLocalLibrary(),s=read(),all=[...(l.favorites||[]).map(x=>({item:x,w:4})),...(l.history||[]).filter(x=>Number(x.completion||0)>=25).map(x=>({item:x,w:2.5*Number(x.completion||0)/100})),...(l.watchLater||[]).map(x=>({item:x,w:1})),...Object.values(s.feedback).filter(x=>x.kind==="like").map(x=>({item:x,w:5}))];
+ const eventBoosted=(l.history||[]).map(item=>({item,w:eventSignal(s,key(item))})).filter(x=>x.w>0);
+ all.push(...eventBoosted);
  const m=new Map;all.forEach(x=>{const k=key(x.item),cur=m.get(k);if(k&&(!cur||x.w>cur.w))m.set(k,x)});return [...m.values()].sort((a,b)=>b.w-a.w).slice(0,12)
 }
 export async function rebuildTasteProfile(){
  const s=read(),l=getLocalLibrary(),t={genres:{},languages:{},countries:{},actors:{},directors:{},media:{movie:0,tv:0},decades:{}};
  const apply=(items,base,completion)=>{(items||[]).forEach(x=>{let w=base*decay(x.updatedAt||x.lastWatchedAt);if(completion){const c=Number(x.completion||0);w*=c>=80?1.8:c>=40?1.15:.55}add(t.media,x.media_type||"movie",w)})};
  apply(l.favorites,3.5,false);apply(l.watchLater,1.2,false);apply(l.history,2.2,true);Object.values(s.feedback).forEach(x=>{if(x.kind==="like")add(t.media,x.media_type||"movie",4.5*decay(x.updatedAt,75))});
- const ss=await seeds();const details=await Promise.allSettled(ss.slice(0,6).map(x=>x.item.media_type==="tv"?tmdbApi.tvDetails(x.item.id):tmdbApi.movieDetails(x.item.id)));
- details.forEach((r,i)=>{if(r.status!=="fulfilled")return;const d=r.value,w=ss[i].w;(d.genres||[]).forEach(g=>add(t.genres,String(g.id),w));if(d.original_language)add(t.languages,d.original_language,w*.8);(d.production_countries||[]).forEach(c=>add(t.countries,c.iso_3166_1,w*.55));const y=Number(String(d.release_date||d.first_air_date||"").slice(0,4));if(y>=1900)add(t.decades,String(Math.floor(y/10)*10),w*.45);(d.credits?.cast||[]).slice(0,10).forEach(p=>add(t.actors,String(p.id),w*.42));(d.credits?.crew||[]).filter(p=>["Director","Creator"].includes(p.job)).slice(0,5).forEach(p=>add(t.directors,String(p.id),w*.5))});
+ const ss=await seeds();const details=await Promise.allSettled(ss.slice(0,8).map(x=>x.item.media_type==="tv"?tmdbApi.tvDetails(x.item.id):tmdbApi.movieDetails(x.item.id)));
+ details.forEach((r,i)=>{if(r.status!=="fulfilled")return;const d=r.value,w=ss[i].w*(1+Math.min(.75,eventSignal(s,key(ss[i].item))));(d.genres||[]).forEach(g=>add(t.genres,String(g.id),w));if(d.original_language)add(t.languages,d.original_language,w*.8);(d.production_countries||[]).forEach(c=>add(t.countries,c.iso_3166_1,w*.55));const y=Number(String(d.release_date||d.first_air_date||"").slice(0,4));if(y>=1900)add(t.decades,String(Math.floor(y/10)*10),w*.45);(d.credits?.cast||[]).slice(0,10).forEach(p=>add(t.actors,String(p.id),w*.42));(d.credits?.crew||[]).filter(p=>["Director","Creator"].includes(p.job)).slice(0,5).forEach(p=>add(t.directors,String(p.id),w*.5))});
  s.taste={genres:top(t.genres,20),languages:top(t.languages,10),countries:top(t.countries,12),actors:top(t.actors,20),directors:top(t.directors,12),media:t.media,decades:top(t.decades,8),updatedAt:Date.now()};write(s);try{localStorage.setItem("vivid:taste:v1",JSON.stringify(s.taste))}catch{};cloud(["taste","profile"],{version:1,...s.taste});return s.taste
 }
 export async function getTasteProfile(){const t=read().taste;return t.updatedAt? t:rebuildTasteProfile()}
