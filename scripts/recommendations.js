@@ -1,7 +1,7 @@
 import { tmdbApi } from "./tmdb.js";
 import { getLocalLibrary } from "./library.js";
 import { normalizeResults } from "./media.js";
-import { getTasteProfile, getNotForMeKeys, getFeedbackState, getTasteStrength, recordBehavior } from "./intelligence.js";
+import { getTasteProfile, getNotForMeKeys, getFeedbackState, getTasteStrength, getRecommendationMemory, recordBehavior } from "./intelligence.js";
 
 const PROGRESS_KEY = "vivid:progress:v1";
 const FOR_YOU_CACHE_KEY = "vivid:for-you:v1";
@@ -293,7 +293,7 @@ function writeForYouCache(value) {
   try { localStorage.setItem(FOR_YOU_CACHE_KEY, JSON.stringify(value)); } catch {}
 }
 
-function scoreCandidate(item, taste, progress, feedback, recentGenres = new Set()) {
+function scoreCandidate(item, taste, progress, feedback, recentGenres = new Set(), recommendationMemory = new Map()) {
   const source = item.raw || item;
   const genreIds = source.genre_ids || item.genre_ids || [];
   const genres = new Set(genreIds);
@@ -309,18 +309,21 @@ function scoreCandidate(item, taste, progress, feedback, recentGenres = new Set(
   const quality = Math.min(1, Math.max(0, Number(item.vote_average || 0) / 10));
   const popularity = Math.min(1, Math.log10(1 + Math.max(0, Number(item.popularity || 0))) / 4);
   const feedbackBoost = feedback[keyFor(item)]?.kind === "like" ? 6 : 0;
+  const memory = recommendationMemory.get(keyFor(item));
+  const seenPenalty = memory ? Math.min(1.8, memory.impressions * .28) : 0;
+  const clickRecovery = memory ? Math.min(1.2, memory.clicks * .6) : 0;
   const recentGenreBoost = genreIds.filter(id => recentGenres.has(Number(id))).slice(0, 2).length * .75;
   const releaseValue = source.release_date || source.first_air_date || item.date || "";
   const releaseTime = Date.parse(releaseValue);
   const ageDays = Number.isFinite(releaseTime) ? Math.max(0, (Date.now() - releaseTime) / 86400000) : Infinity;
   const freshness = Number.isFinite(ageDays) ? Math.max(0, 1 - (ageDays / 180)) : 0;
-  return genreScore * 5.4 + mediaScore * 1.9 + languageScore * .55 + countryScore * .35 + decadeScore * .3 + quality * 1.4 + popularity * .8 + feedbackBoost + recentGenreBoost + freshness * .55;
+  return genreScore * 5.4 + mediaScore * 1.9 + languageScore * .55 + countryScore * .35 + decadeScore * .3 + quality * 1.4 + popularity * .8 + feedbackBoost + recentGenreBoost + freshness * .55 - seenPenalty + clickRecovery;
 }
 
-function rankForYou(candidates, taste, progress, feedback, excluded, limit, recentGenres = new Set()) {
+function rankForYou(candidates, taste, progress, feedback, excluded, limit, recentGenres = new Set(), recommendationMemory = new Map()) {
   const ranked = uniqueByKey(candidates)
     .filter(item => !excluded.has(keyFor(item)))
-    .map(item => ({ item, score: scoreCandidate(item, taste, progress, feedback, recentGenres) }))
+    .map(item => ({ item, score: scoreCandidate(item, taste, progress, feedback, recentGenres, recommendationMemory) }))
     .sort((a, b) => b.score - a.score);
 
   const out = [];
@@ -451,6 +454,7 @@ export async function getPersonalRecommendations(limit = 12) {
     ...observed.map(keyFor),
     ...getNotForMeKeys()
   ]);
+  const recommendationMemory = getRecommendationMemory();
   const recentGenres = new Set(
     (library.history || [])
       .slice()
@@ -499,7 +503,7 @@ export async function getPersonalRecommendations(limit = 12) {
     result.status === "fulfilled" ? normalizeResults(result.value?.results || []) : []
   );
 
-  const items = rankForYou([...candidates, ...discoveryCandidates], taste, progress, feedback, excluded, limit, recentGenres);
+  const items = rankForYou([...candidates, ...discoveryCandidates], taste, progress, feedback, excluded, limit, recentGenres, recommendationMemory);
   writeForYouCache({ version: 3, fingerprint, updatedAt: Date.now(), items });
 
   return items;
