@@ -680,3 +680,5 @@ body.vivid-cinema-home{
 @media(prefers-reduced-motion:reduce){
   .vivid-catalogue-chips a{transition:none}
 }
+
+.vivid-explore-section .vivid-section-heading>p{margin:7px 0 0;color:var(--vivid-text-subtle);font-size:.82rem}.vivid-explore-links{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}.vivid-explore-link{display:inline-flex;align-items:center;gap:10px;min-height:42px;padding:0 15px;border:1px solid rgba(255,255,255,.1);border-radius:999px;background:rgba(255,255,255,.045);color:#e8ebef;text-decoration:none;font-size:.82rem;font-weight:600;transition:transform .18s ease,background .18s ease,border-color .18s ease}.vivid-explore-link i{font-size:.75rem;color:#8e96a2}.vivid-explore-link:hover,.vivid-explore-link:focus-visible{transform:translateY(-2px);background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.18);outline:none}@media(max-width:640px){.vivid-explore-links{gap:8px}.vivid-explore-link{min-height:40px;padding-inline:13px;font-size:.78rem}}
