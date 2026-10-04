@@ -473,8 +473,17 @@ export async function getPersonalRecommendations(limit = 12) {
   const candidates = responses.flatMap(result =>
     result.status === "fulfilled" ? normalizeResults(result.value?.results || []) : []
   );
+  const discoveryCalls = [];
+  const preferredLanguages = Object.entries(taste.languages || {}).sort((a, b) => Number(b[1]) - Number(a[1])).slice(0, 2).map(([code]) => code);
+  if (preferredLanguages.length) {
+    discoveryCalls.push(tmdbApi.discoverMovies({ sort_by: "vote_average.desc", vote_count_gte: 250, with_original_language: preferredLanguages[0], page: 1 }));
+  }
+  const discoveryResponses = await Promise.allSettled(discoveryCalls);
+  const discoveryCandidates = discoveryResponses.flatMap(result =>
+    result.status === "fulfilled" ? normalizeResults(result.value?.results || []) : []
+  );
 
-  const items = rankForYou(candidates, taste, progress, feedback, excluded, limit, recentGenres);
+  const items = rankForYou([...candidates, ...discoveryCandidates], taste, progress, feedback, excluded, limit, recentGenres);
   writeForYouCache({ version: 2, fingerprint, updatedAt: Date.now(), items });
 
   return items;
