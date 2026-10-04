@@ -12,12 +12,11 @@ const state = {
   genre: route.params.get("genre") || "",
   year: route.params.get("year") || "",
   sort: route.params.get("sort") || "popularity.desc",
-  rating: route.params.get("rating") || "", ratingMax: route.params.get("ratingMax") || "", votes: route.params.get("votes") || "",
+  rating: route.params.get("rating") || "",
   region: route.params.get("region") || "",
   provider: route.params.get("provider") || "",
   mood: route.params.get("mood") || "",
-  runtime: route.params.get("runtime") || "", runtimeMin: route.params.get("runtimeMin") || "", runtimeMax: route.params.get("runtimeMax") || "",
-  releaseFrom: route.params.get("releaseFrom") || "", releaseTo: route.params.get("releaseTo") || "", monetization: route.params.get("monetization") || "", language: route.params.get("language") || "", country: route.params.get("country") || "", certification: route.params.get("certification") || "", releaseType: route.params.get("releaseType") || "", video: route.params.get("video") || "", status: route.params.get("status") || "", showType: route.params.get("showType") || "", theatrical: route.params.get("theatrical") || "", nullDates: route.params.get("nullDates") || "", adult: route.params.get("adult") === "true",
+  runtime: route.params.get("runtime") || "",
   category: route.params.get("category") || "",
   query: route.params.get("q") || "",
   page: Number(route.params.get("page") || 1) || 1,
@@ -71,7 +70,7 @@ function renderFeaturedCollections() {
     if (category) {
       state.type = category.type;
       document.querySelectorAll("[data-type]").forEach((item) => item.classList.toggle("is-active", item.dataset.type === state.type));
-      $("category-filter")?.value = state.category;
+      $("category-filter").value = state.category;
       populateGenres();
     }
     fetchDiscovery();
@@ -132,10 +131,42 @@ function syncUrl() {
   history.replaceState(null, "", params.toString() ? "discover.html?" + params : "discover.html");
 }
 
-function providerPool(){return [...(providers.movie||[]),...(providers.tv||[])].filter((p,i,list)=>list.findIndex(x=>x.provider_id===p.provider_id)===i).sort((a,b)=>(Number(a.display_priority??9999)-Number(b.display_priority??9999))||String(a.provider_name||"").localeCompare(String(b.provider_name||"")));}
-function populateProviders(){const strip=$("provider-filter"),select=$("provider-select"),all=providerPool(),q=String($("provider-search")?.value||"").trim().toLowerCase(),available=all.filter(p=>!q||String(p.provider_name||"").toLowerCase().includes(q)),selected=String(state.provider||"");if(select){select.innerHTML='<option value="">All services</option>'+all.map(p=>'<option value="'+escapeHtml(String(p.provider_id))+'">'+escapeHtml(p.provider_name||"Service")+'</option>').join("");select.value=selected;}strip.innerHTML='<button class="vivid-provider-chip'+(!selected?" is-active":"")+'" data-provider="" type="button"><span class="vivid-provider-all-icon"><i class="bi bi-grid-3x3-gap"></i></span><span>All services</span></button>'+available.map(p=>{const id=String(p.provider_id),logo=p.logo_path?getImageUrl(p.logo_path,"w92"):"icons/vivid-icon.svg";return '<button class="vivid-provider-chip'+(id===selected?" is-active":"")+'" data-provider="'+escapeHtml(id)+'" type="button" title="'+escapeHtml(p.provider_name||"")+'"><span class="vivid-provider-logo"><img loading="lazy" decoding="async" src="'+escapeHtml(logo)+'" alt="" aria-hidden="true"></span><span class="vivid-provider-name">'+escapeHtml(p.provider_name||"Service")+'</span></button>';}).join("");}
-async function loadProviders(){try{const [movie,tv]=await Promise.all([tmdbApi.movieWatchProviders(),tmdbApi.tvWatchProviders()]);providers={movie:movie.results||[],tv:tv.results||[]};populateProviders();}catch{}}
+function providerPool() {
+  const source = state.type === "tv" ? providers.tv : state.type === "movie" ? providers.movie : [...providers.movie, ...providers.tv];
+  const unique = source.filter((provider, index, list) =>
+    list.findIndex((item) => item.provider_id === provider.provider_id) === index
+  );
+  return FEATURED_PROVIDER_IDS
+    .map((id) => unique.find((provider) => Number(provider.provider_id) === id))
+    .filter(Boolean)
+    .map((provider) => ({ ...provider, provider_name: FEATURED_PROVIDER_NAMES.get(Number(provider.provider_id)) || provider.provider_name }));
+}
 
+function populateProviders() {
+  const strip = $("provider-filter");
+  const available = providerPool();
+  const selected = String(state.provider || "");
+  strip.innerHTML = '<button class="vivid-provider-chip' + (!selected ? ' is-active' : '') + '" data-provider="" type="button"><span class="vivid-provider-all-icon"><i class="bi bi-grid-3x3-gap" aria-hidden="true"></i></span><span>All services</span></button>' +
+    available.map((provider) => {
+      const id = String(provider.provider_id);
+      const logo = provider.logo_path ? getImageUrl(provider.logo_path, "w92") : "icons/vivid-icon.svg";
+      return '<button class="vivid-provider-chip' + (id === selected ? ' is-active' : '') + '" data-provider="' + escapeHtml(id) + '" type="button" aria-pressed="' + (id === selected) + '" title="' + escapeHtml(provider.provider_name) + '">' +
+        '<span class="vivid-provider-logo"><img loading="lazy" decoding="async" src="' + escapeHtml(logo) + '" alt="" aria-hidden="true"></span>' +
+        '<span class="vivid-provider-name">' + escapeHtml(provider.provider_name) + '</span></button>';
+    }).join("");
+  if (selected && !available.some((provider) => String(provider.provider_id) === selected)) state.provider = "";
+}
+
+async function loadProviders() {
+  try {
+    const region = state.region || "";
+    const [movie, tv] = await Promise.all([tmdbApi.movieWatchProviders(region), tmdbApi.tvWatchProviders(region)]);
+    providers = { movie: movie.results || [], tv: tv.results || [] };
+    populateProviders();
+  } catch {
+    $("provider-filter").innerHTML = '<button class="vivid-provider-chip is-active" data-provider="" type="button"><span class="vivid-provider-all-icon"><i class="bi bi-grid-3x3-gap" aria-hidden="true"></i></span><span>Services unavailable</span></button>';
+  }
+}
 
 function renderLoading() {
   $("discovery-empty").hidden = true;
@@ -174,7 +205,32 @@ async function loadGenres() {
   }
 }
 
-function discoverParams(type){const sort=type==="tv"?(state.sort==="revenue.desc"?"popularity.desc":state.sort.replace("primary_release_date","first_air_date")):state.sort;const mood=MOODS[state.mood],quick=RUNTIMES[state.runtime];const common={page:state.page,sort_by:sort,include_adult:state.adult,with_genres:state.genre||mood?.genres?.join(","),"vote_average.gte":state.rating||undefined,"vote_average.lte":state.ratingMax||undefined,"vote_count.gte":state.votes||undefined,watch_region:state.region||undefined,with_watch_providers:state.provider||undefined,with_watch_monetization_types:state.monetization||(state.provider?"flatrate":undefined),with_original_language:state.language||undefined,with_origin_country:state.country||undefined,"with_runtime.gte":state.runtimeMin||quick?.min||undefined,"with_runtime.lte":state.runtimeMax||quick?.max||undefined};return type==="movie"?{...common,primary_release_year:state.year||undefined,"primary_release_date.gte":state.releaseFrom||undefined,"primary_release_date.lte":state.releaseTo||undefined,region:state.region||undefined,certification:state.certification||undefined,certification_country:state.region||undefined,with_release_type:state.releaseType||undefined,include_video:state.video===""?undefined:state.video==="true"}:{...common,first_air_date_year:state.year||undefined,"first_air_date.gte":state.releaseFrom||undefined,"first_air_date.lte":state.releaseTo||undefined,with_status:state.status||undefined,with_type:state.showType||undefined,screened_theatrically:state.theatrical===""?undefined:state.theatrical==="true",include_null_first_air_dates:state.nullDates==="true"};}
+function discoverParams(type) {
+  const sort = type === "tv"
+    ? state.sort.replace("primary_release_date", "first_air_date")
+    : state.sort;
+  const mood = MOODS[state.mood];
+  const runtime = RUNTIMES[state.runtime];
+  const moodGenres = mood?.genres?.length ? mood.genres.join(",") : undefined;
+  const baseGenres = state.genre || moodGenres;
+  const params = {
+    page: state.page,
+    sort_by: sort,
+    with_genres: baseGenres,
+    ...(type === "movie"
+      ? { primary_release_year: state.year || undefined }
+      : { first_air_date_year: state.year || undefined }),
+    "vote_average.gte": state.rating || undefined,
+    // TMDB expects the dotted runtime parameters. Use them for both movies
+    // and TV because TV discover supports episode runtime as well.
+    ...(runtime
+      ? { "with_runtime.gte": runtime.min, "with_runtime.lte": runtime.max }
+      : {}),
+    watch_region: state.region || undefined,
+    with_watch_monetization_types: state.provider ? "flatrate" : undefined,
+    with_watch_providers: state.provider || undefined
+  };
+}
 
 async function fetchDiscovery() {
   const requestId = ++state.requestId;
@@ -422,18 +478,3 @@ async function init() {
 }
 
 void init();
-
-
-// TMDB-style advanced Discover controls. Kept as a thin layer over the stable Vivid renderer.
-const enhanceDiscover = () => {
-  const map = {genre:"genre-filter",year:"year-filter",sort:"sort-filter",rating:"rating-filter",ratingMax:"rating-max-filter",votes:"votes-filter",region:"region-filter",monetization:"monetization-filter",language:"language-filter",country:"country-filter",runtimeMin:"runtime-min-filter",runtimeMax:"runtime-max-filter",releaseFrom:"release-from-filter",releaseTo:"release-to-filter",certification:"certification-filter",releaseType:"release-type-filter",video:"video-filter",status:"status-filter",showType:"show-type-filter",theatrical:"theatrical-filter",nullDates:"null-date-filter"};
-  const read=()=>{Object.entries(map).forEach(([key,id])=>{const el=$(id);if(el)state[key]=el.value;});state.adult=Boolean($("adult-filter")?.checked);state.category="";state.page=1;fetchDiscovery();};
-  Object.values(map).forEach(id=>$(id)?.addEventListener("change",read));$("adult-filter")?.addEventListener("change",read);
-  $("advanced-toggle")?.addEventListener("click",()=>{const panel=$("advanced-filters");const open=panel.hidden;panel.hidden=!open;$("advanced-toggle").setAttribute("aria-expanded",String(open));});
-  $("provider-search")?.addEventListener("input",populateProviders);
-  $("provider-select")?.addEventListener("change",()=>{state.provider=$("provider-select").value;state.page=1;if(state.provider&&!state.region){state.region="GH";$("region-filter").value="GH";}populateProviders();fetchDiscovery();});
-  $("reset-filters")?.addEventListener("click",()=>location.href="discover.html");
-  if($("provider-region-label")&&state.region)$("provider-region-label").textContent="Availability in "+state.region;
-};
-const loadDiscoverMetadata=async()=>{const [countries,languages,movieCerts,tvCerts]=await Promise.allSettled([tmdbApi.countries(),tmdbApi.languages(),tmdbApi.movieCertifications(),tmdbApi.tvCertifications()]);const cs=countries.status==="fulfilled"?countries.value||[]:[],ls=languages.status==="fulfilled"?languages.value||[]:[],certData=state.type==="tv"?(tvCerts.status==="fulfilled"?tvCerts.value?.certifications||{}:{}):(movieCerts.status==="fulfilled"?movieCerts.value?.certifications||{}:{});const fill=(id,items,placeholder)=>{const el=$(id);if(!el)return;const old=el.value;el.innerHTML='<option value="">'+placeholder+'</option>'+items.map(x=>'<option value="'+escapeHtml(String(x.value))+'">'+escapeHtml(x.label)+'</option>').join("");el.value=old||"";};fill("region-filter",cs.map(c=>({value:c.iso_3166_1,label:c.english_name||c.native_name||c.iso_3166_1})),"Any region");fill("country-filter",cs.map(c=>({value:c.iso_3166_1,label:c.english_name||c.native_name||c.iso_3166_1})),"Any country");fill("language-filter",ls.map(l=>({value:l.iso_639_1,label:l.english_name||l.name||l.iso_639_1})),"Any language");fill("certification-filter",Object.values(certData).flat().map(c=>({value:c.certification,label:c.certification+(c.meaning?" · "+c.meaning:"")})),"Any certification");populateProviders();};
-if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",()=>{enhanceDiscover();loadDiscoverMetadata();},{once:true});else{enhanceDiscover();loadDiscoverMetadata();}
