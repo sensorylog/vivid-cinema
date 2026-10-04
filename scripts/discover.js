@@ -103,8 +103,6 @@ function syncUrl() {
   if (state.provider) params.set("provider", state.provider);
   if (state.mood) params.set("mood", state.mood);
   if (state.runtime) params.set("runtime", state.runtime);
-  if (state.mood) params.set("mood", state.mood);
-  if (state.runtime) params.set("runtime", state.runtime);
   if (state.query) params.set("q", state.query);
   if (state.page > 1) params.set("page", String(state.page));
   history.replaceState(null, "", params.toString() ? "discover.html?" + params : "discover.html");
