@@ -185,12 +185,15 @@ function renderResults(items, totalPages) {
     return;
   }
   $("discovery-grid").innerHTML = items.map((item) => {
-    const meta = [item.year, item.media_type === "tv" ? "TV" : "Movie"].filter(Boolean).join(" · ");
-    return '<a class="vivid-discovery-card" href="' + escapeHtml(getMediaUrl(item)) + '">' +
-      '<div class="vivid-discovery-poster"><img loading="lazy" decoding="async" src="' + getImageUrl(item.poster_path, "w500") +
+    const isPerson = item.media_type === "person";
+    const meta = isPerson ? "Person" : [item.year, item.media_type === "tv" ? "TV" : "Movie"].filter(Boolean).join(" · ");
+    const href = isPerson ? "person.html?id=" + encodeURIComponent(item.id) : getMediaUrl(item);
+    const image = item.poster_path || item.profile_path;
+    return '<a class="vivid-discovery-card' + (isPerson ? ' vivid-discovery-card--person' : '') + '" href="' + escapeHtml(href) + '">' +
+      '<div class="vivid-discovery-poster"><img loading="lazy" decoding="async" src="' + getImageUrl(image, "w500") +
       '" alt="' + escapeHtml(item.title) + ' poster" onerror="this.style.visibility=\'hidden\'">' +
-      '<span class="vivid-discovery-rating">★ ' + (item.vote_average ? item.vote_average.toFixed(1) : "—") +
-      '</span></div><div class="vivid-discovery-copy"><strong>' + escapeHtml(item.title) +
+      (!isPerson ? '<span class="vivid-discovery-rating">★ ' + (item.vote_average ? item.vote_average.toFixed(1) : "—") + '</span>' : '') +
+      '</div><div class="vivid-discovery-copy"><strong>' + escapeHtml(item.title) +
       '</strong><small>' + escapeHtml(meta) + "</small></div></a>";
   }).join("");
 }
