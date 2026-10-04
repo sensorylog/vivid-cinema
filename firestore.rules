@@ -16,9 +16,11 @@ service cloud.firestore {
 
     function validLibraryData() {
       return request.resource.data.keys().hasOnly([
-        'id','media_type','title','year','poster_path','backdrop_path','updatedAt'
+        'id','media_type','title','year','poster_path','backdrop_path','updatedAt',
+        'startedAt','lastWatchedAt','watchedSeconds','completion','completedAt'
       ])
       && request.resource.data.id is string
+      && request.resource.data.id.matches('^[0-9]+$')
       && request.resource.data.media_type in ['movie', 'tv']
       && request.resource.data.title is string
       && request.resource.data.title.size() <= 300
@@ -28,7 +30,46 @@ service cloud.firestore {
       && request.resource.data.poster_path.size() <= 500
       && request.resource.data.backdrop_path is string
       && request.resource.data.backdrop_path.size() <= 500
-      && (!request.resource.data.keys().hasAny(['updatedAt']) || request.resource.data.updatedAt is number);
+      && (!request.resource.data.keys().hasAny(['updatedAt']) || request.resource.data.updatedAt is number)
+      && (!request.resource.data.keys().hasAny(['startedAt']) || request.resource.data.startedAt is number)
+      && (!request.resource.data.keys().hasAny(['lastWatchedAt']) || request.resource.data.lastWatchedAt is number)
+      && (!request.resource.data.keys().hasAny(['watchedSeconds']) || request.resource.data.watchedSeconds is number)
+      && (!request.resource.data.keys().hasAny(['completion']) || (
+        request.resource.data.completion is number &&
+        request.resource.data.completion >= 0 &&
+        request.resource.data.completion <= 100
+      ))
+      && (!request.resource.data.keys().hasAny(['completedAt']) || request.resource.data.completedAt is number);
+    }
+
+    function validProgressData() {
+      return request.resource.data.keys().hasOnly([
+        'id','media_type','progress','duration','percentage','completed','completedAt','season','episode','title','updatedAt'
+      ])
+      && request.resource.data.id is string
+      && request.resource.data.id.matches('^[0-9]+$')
+      && request.resource.data.media_type in ['movie','tv']
+      && request.resource.data.progress is number
+      && request.resource.data.progress >= 0
+      && request.resource.data.duration is number
+      && request.resource.data.duration >= 0
+      && request.resource.data.percentage is number
+      && request.resource.data.percentage >= 0
+      && request.resource.data.percentage <= 100
+      && request.resource.data.completed is bool
+      && (!request.resource.data.keys().hasAny(['completedAt']) || request.resource.data.completedAt is number)
+      && (!request.resource.data.keys().hasAny(['season']) || request.resource.data.season == null || request.resource.data.season is number)
+      && (!request.resource.data.keys().hasAny(['episode']) || request.resource.data.episode == null || request.resource.data.episode is number)
+      && request.resource.data.title is string
+      && request.resource.data.title.size() <= 300
+      && request.resource.data.updatedAt is number;
+    }
+
+    function validTombstoneData() {
+      return request.resource.data.keys().hasOnly(['collection','contentId','deletedAt'])
+      && request.resource.data.collection in ['favorites','watchLater','history']
+      && request.resource.data.contentId.matches('^(movie|tv):[0-9]+$')
+      && request.resource.data.deletedAt is number;
     }
 
     function validProfile() {
@@ -82,6 +123,18 @@ service cloud.firestore {
       match /history/{contentId} {
         allow read: if isOwner(userId);
         allow create, update: if isOwner(userId) && validContentId() && validLibraryData();
+        allow delete: if isOwner(userId);
+      }
+
+      match /progress/{contentId} {
+        allow read: if isOwner(userId);
+        allow create, update: if isOwner(userId) && validContentId() && validProgressData();
+        allow delete: if isOwner(userId);
+      }
+
+      match /libraryTombstones/{tombstoneId} {
+        allow read: if isOwner(userId);
+        allow create, update: if isOwner(userId) && validTombstoneData();
         allow delete: if isOwner(userId);
       }
     }

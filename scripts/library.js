@@ -1,8 +1,10 @@
 const STORAGE_KEY="vivid:library:v2";
 const COLLECTIONS=["favorites","watchLater","history"];
 const emptyLibrary=()=>({favorites:[],watchLater:[],history:[]});
+const TOMBSTONE_STORAGE_KEY="vivid:library-tombstones:v1";
 
 function itemKey(item){return String(item.media_type||item.mediaType||"movie")+":"+String(item.id);}
+function tombstoneKey(collection,item){return collection+":"+itemKey(item);}
 
 function readLocal(){
   try{
@@ -11,6 +13,19 @@ function readLocal(){
   }catch{
     return emptyLibrary();
   }
+}
+
+function readLocalTombstones(){
+  try{
+    const parsed=JSON.parse(localStorage.getItem(TOMBSTONE_STORAGE_KEY));
+    return parsed&&typeof parsed==="object"?parsed:{};
+  }catch{
+    return {};
+  }
+}
+
+function saveLocalTombstones(value){
+  try{localStorage.setItem(TOMBSTONE_STORAGE_KEY,JSON.stringify(value));}catch{}
 }
 
 export function getLocalLibrary(){return readLocal();}
@@ -31,16 +46,29 @@ export function upsertLibraryItem(collection,item){
   const items=Array.isArray(library[collection])?library[collection]:[];
   library[collection]=[safe,...items.filter(entry=>itemKey(entry)!==itemKey(safe))];
   saveLocalLibrary(library);
+
+  const tombstones=readLocalTombstones();
+  delete tombstones[tombstoneKey(collection,safe)];
+  saveLocalTombstones(tombstones);
+
   void syncLocalItem(collection,safe);
   return library;
 }
 
 export function removeLibraryItem(collection,id,mediaType="movie"){
   const library=readLocal();
-  const removed=(library[collection]||[]).find(entry=>itemKey(entry)===String(mediaType)+":"+String(id));
-  library[collection]=(library[collection]||[]).filter(entry=>itemKey(entry)!==String(mediaType)+":"+String(id));
+  const key=String(mediaType)+":"+String(id);
+  const removed=(library[collection]||[]).find(entry=>itemKey(entry)===key);
+  library[collection]=(library[collection]||[]).filter(entry=>itemKey(entry)!==key);
   saveLocalLibrary(library);
-  if(removed)void removeSyncedLibraryItem(collection,removed);
+
+  if(removed){
+    const deletedAt=Date.now();
+    const tombstones=readLocalTombstones();
+    tombstones[tombstoneKey(collection,removed)]={collection,contentId:key,deletedAt};
+    saveLocalTombstones(tombstones);
+    void removeSyncedLibraryItem(collection,removed,deletedAt);
+  }
   return library;
 }
 
@@ -55,8 +83,16 @@ export function clearLibraryCollection(collection){
   const removed=library[collection]||[];
   library[collection]=[];
   saveLocalLibrary(library);
+
+  const deletedAt=Date.now();
+  const tombstones=readLocalTombstones();
+  removed.forEach(item=>{
+    tombstones[tombstoneKey(collection,item)]={collection,contentId:itemKey(item),deletedAt};
+  });
+  saveLocalTombstones(tombstones);
+
   void getFirebaseAuth().then(auth=>{
-    if(auth?.currentUser) return Promise.all(removed.map(item=>removeSyncedLibraryItem(collection,item)));
+    if(auth?.currentUser) return Promise.all(removed.map(item=>removeSyncedLibraryItem(collection,item,deletedAt)));
   }).catch(()=>{});
   return library;
 }
@@ -69,7 +105,20 @@ function cleanItem(item){
     year:item.year||"",
     poster_path:item.poster_path||"",
     backdrop_path:item.backdrop_path||"",
-    updatedAt:Number(item.updatedAt)||Date.now()
+    updatedAt:Number(item.updatedAt)||Date.now(),
+    ...(item.startedAt?{startedAt:Number(item.startedAt)}:{}),
+    ...(item.lastWatchedAt?{lastWatchedAt:Number(item.lastWatchedAt)}:{}),
+    ...(item.watchedSeconds!=null?{watchedSeconds:Math.max(0,Number(item.watchedSeconds)||0)}:{}),
+    ...(item.completion!=null?{completion:Math.max(0,Math.min(100,Number(item.completion)||0))}:{}),
+    ...(item.completedAt?{completedAt:Number(item.completedAt)}:{})
+  };
+}
+
+function cleanTombstone(item){
+  return {
+    collection:String(item.collection||""),
+    contentId:String(item.contentId||""),
+    deletedAt:Number(item.deletedAt)||Date.now()
   };
 }
 
@@ -106,15 +155,32 @@ async function getFirebaseAuth(){
 }
 
 async function setRemoteItem(uid,collection,item){
-  const {db,doc,setDoc}=await getFirebase();
+  const {db,doc,setDoc,deleteDoc}=await getFirebase();
   const safe=cleanItem(item);
-  await setDoc(doc(db,"users",uid,collection,safe.media_type+":"+safe.id),safe,{merge:true});
+  const id=safe.media_type+":"+safe.id;
+  await setDoc(doc(db,"users",uid,collection,id),safe,{merge:true});
+  await deleteDoc(doc(db,"users",uid,"libraryTombstones",tombstoneKey(collection,safe)));
 }
 
-async function deleteRemoteItem(uid,collection,item){
+async function setRemoteTombstone(uid,tombstone){
+  const {db,doc,setDoc}=await getFirebase();
+  await setDoc(
+    doc(db,"users",uid,"libraryTombstones",String(tombstone.collection)+":"+String(tombstone.contentId)),
+    cleanTombstone(tombstone),
+    {merge:true}
+  );
+}
+
+async function deleteRemoteItem(uid,collection,item,deletedAt){
   const {db,doc,deleteDoc}=await getFirebase();
   const safe=cleanItem(item);
-  await deleteDoc(doc(db,"users",uid,collection,safe.media_type+":"+safe.id));
+  const id=safe.media_type+":"+safe.id;
+  await setRemoteTombstone(uid,{
+    collection,
+    contentId:id,
+    deletedAt
+  });
+  await deleteDoc(doc(db,"users",uid,collection,id));
 }
 
 async function fetchRemote(uid,collection){
@@ -123,25 +189,79 @@ async function fetchRemote(uid,collection){
   return snapshot.docs.map(item=>item.data());
 }
 
+async function fetchTombstones(uid){
+  const {db,firestoreCollection,getDocs}=await getFirebase();
+  const snapshot=await getDocs(firestoreCollection(db,"users",uid,"libraryTombstones"));
+  return snapshot.docs.map(item=>item.data());
+}
+
+function mergeTombstones(remote){
+  const merged={...readLocalTombstones()};
+  remote.forEach(item=>{
+    if(!item.collection||!item.contentId)return;
+    const key=String(item.collection)+":"+String(item.contentId);
+    const existing=merged[key];
+    if(!existing || Number(item.deletedAt||0)>Number(existing.deletedAt||0)) merged[key]=item;
+  });
+  return merged;
+}
+
+function mergeCollection(localItems,remoteItems,tombstones,collection){
+  const map=new Map();
+  const relevant=Object.values(tombstones).filter(item=>item.collection===collection);
+  const tombstoneMap=new Map(relevant.map(item=>[String(item.contentId),Number(item.deletedAt)||0]));
+
+  [...remoteItems,...localItems].forEach(item=>{
+    const key=itemKey(item);
+    const deletedAt=tombstoneMap.get(key)||0;
+    const updatedAt=Number(item.updatedAt)||0;
+    if(deletedAt && deletedAt>=updatedAt)return;
+
+    const current=map.get(key);
+    if(!current || updatedAt>Number(current.updatedAt||0)) map.set(key,item);
+  });
+
+  return Array.from(map.values()).sort((a,b)=>(Number(b.updatedAt)||0)-(Number(a.updatedAt)||0));
+}
+
 export async function syncLibraryForUser(user=null){
   const local=readLocal();
   if(!user)return local;
 
   try{
-    const remote=await Promise.all(COLLECTIONS.map(key=>fetchRemote(user.uid,key)));
+    const [remoteCollections,remoteTombstones]=await Promise.all([
+      Promise.all(COLLECTIONS.map(key=>fetchRemote(user.uid,key))),
+      fetchTombstones(user.uid)
+    ]);
+
+    const tombstones=mergeTombstones(remoteTombstones);
     const merged=emptyLibrary();
 
     COLLECTIONS.forEach((key,index)=>{
-      const map=new Map();
-      [...remote[index],...(local[key]||[])].forEach(item=>map.set(itemKey(item),item));
-      merged[key]=Array.from(map.values()).sort((a,b)=>(Number(b.updatedAt)||0)-(Number(a.updatedAt)||0));
+      merged[key]=mergeCollection(local[key]||[],remoteCollections[index]||[],tombstones,key);
     });
+
+    const activeKeys=new Set(
+      COLLECTIONS.flatMap(key=>merged[key].map(item=>key+":"+itemKey(item)))
+    );
+
+    const tombstoneEntries=Object.values(tombstones).filter(item=>item.collection&&item.contentId);
+    await Promise.all(tombstoneEntries.map(tombstone=>{
+      const key=tombstone.collection+":"+tombstone.contentId;
+      if(activeKeys.has(key)) return Promise.resolve();
+      return setRemoteTombstone(user.uid,tombstone);
+    }));
 
     await Promise.all(
       COLLECTIONS.flatMap(key=>merged[key].map(item=>setRemoteItem(user.uid,key,item)))
     );
 
     saveLocalLibrary(merged);
+    saveLocalTombstones(
+      Object.fromEntries(
+        Object.entries(tombstones).filter(([key])=>!activeKeys.has(key))
+      )
+    );
     return merged;
   }catch(error){
     console.error("Vivid library sync failed:",error);
@@ -159,13 +279,13 @@ export async function syncLocalItem(collection,item){
   }
 }
 
-export async function removeSyncedLibraryItem(collection,item){
+export async function removeSyncedLibraryItem(collection,item,deletedAt=Date.now()){
   try{
     const auth=await getFirebaseAuth();
     if(!auth?.currentUser)return;
-    await deleteRemoteItem(auth.currentUser.uid,collection,item);
+    await deleteRemoteItem(auth.currentUser.uid,collection,item,deletedAt);
   }catch(error){
-    console.warn("Vivid library remote removal unavailable:",error);
+    console.warn("Vivid remote library removal unavailable:",error);
   }
 }
 
@@ -200,7 +320,6 @@ export function startLibrarySync(){
 
   return syncPromise;
 }
-
 
 export function getFollowedTitles(){
   const library=readLocal();
