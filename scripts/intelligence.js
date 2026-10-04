@@ -31,6 +31,19 @@ export function getFeedback(x){return read().feedback[typeof x==="string"?x:key(
 export function getFeedbackState(){return read().feedback}
 export function getNotForMeKeys(){return new Set(Object.entries(read().feedback).filter(([,v])=>v.kind==="not_for_me").map(([k])=>k))}
 export function isNotForMe(x){return getFeedback(x)==="not_for_me"}
+export function getRecommendationMemory(){
+ const events=read().events;
+ const memory=new Map();
+ for(const event of events){
+  if(!event?.contentId||!["recommendation_impression","recommendation_clicked"].includes(event.type))continue;
+  const current=memory.get(event.contentId)||{impressions:0,clicks:0,lastSeen:0};
+  if(event.type==="recommendation_impression")current.impressions++;
+  if(event.type==="recommendation_clicked")current.clicks++;
+  current.lastSeen=Math.max(current.lastSeen,Number(event.occurredAt||0));
+  memory.set(event.contentId,current);
+ }
+ return memory;
+}
 
 export function invalidateRecommendationCaches(){try{localStorage.removeItem("vivid:for-you:v1");localStorage.removeItem("vivid:for-you:v2");localStorage.removeItem("vivid:taste:v1")}catch{};window.dispatchEvent(new CustomEvent("vivid:recommendations-invalidated"))}
 
