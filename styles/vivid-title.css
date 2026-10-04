@@ -273,3 +273,9 @@ body.vivid-title-page{background:#06070a;color:#f5f7fa;min-height:100dvh}.vivid-
  .vivid-episode-actions .vivid-button{justify-content:center}
 }
 @media(prefers-reduced-motion:reduce){.vivid-episode,.vivid-episode-thumb img{transition:none}}
+
+/* Reliable title artwork: use a real image element so the cinematic asset is not dependent on CSS custom-property parsing. */
+.vivid-title-backdrop{isolation:isolate}
+.vivid-title-backdrop-image{position:absolute;inset:0;width:100%;height:100%;display:block;object-fit:cover;object-position:center 22%;z-index:0}
+.vivid-title-backdrop-overlay{z-index:1}
+.vivid-title-backdrop-label{z-index:2}
