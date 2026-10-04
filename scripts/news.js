@@ -180,7 +180,7 @@ async function load() {
   const now = localDateKey();
   const weekEnd = addDays(now, 7);
   const futureEnd = addDays(now, 45);
-  const [trending, todayMovies, todayTv, weekMovies, weekTv, future, futureTv, popularMovies, popularTv, tasteResult] = await Promise.allSettled([
+  const core = await Promise.allSettled([
     tmdbApi.trending("all", "day"),
     tmdbApi.newMovies(1, now, now),
     tmdbApi.newTv(1, now, now),
@@ -189,48 +189,111 @@ async function load() {
     tmdbApi.futureMovies(1, now, futureEnd),
     tmdbApi.futureTv(1, now, futureEnd),
     tmdbApi.popularMovies(1),
-    tmdbApi.popularTv(1),
-    getTasteProfile()
+    tmdbApi.popularTv(1)
   ]);
+  const value = i => core[i]?.status === "fulfilled" ? core[i].value : {results:[]};
   const seen = new Set(), stories = [];
   const add = s => addUnique(stories, seen, s);
-  const todayItems = [...(todayMovies.value?.results || []).map(x=>({...x,media_type:"movie"})), ...(todayTv.value?.results || []).map(x=>({...x,media_type:"tv"}))]
-    .filter(x => (x.release_date || x.first_air_date) === now)
-    .sort((a,b)=>Number(b.popularity||0)-Number(a.popularity||0));
-  todayItems.slice(0, 8).forEach(x => add(story(x,"today","NEW TODAY",titleOf(x) + " is new today.",safeOverview(x.overview,"A fresh title just entered the catalogue."),"new",now)));
-  const weekItems = [...(weekMovies.value?.results || []).map(x=>({...x,media_type:"movie"})), ...(weekTv.value?.results || []).map(x=>({...x,media_type:"tv"}))]
-    .filter(x => { const d=x.release_date||x.first_air_date; return d && d >= now && d <= weekEnd && d !== now; })
-    .sort((a,b)=>String(a.release_date||a.first_air_date).localeCompare(String(b.release_date||b.first_air_date)));
-  weekItems.slice(0, 10).forEach(x => add(story(x,"week","THIS WEEK",titleOf(x) + " arrives this week.",safeOverview(x.overview,"A newly arriving title worth keeping on your radar."),"week",x.release_date||x.first_air_date)));
-  const coming = [...(future.value?.results || []).map(x=>({...x,media_type:"movie"})), ...(futureTv.value?.results || []).map(x=>({...x,media_type:"tv"}))]
-    .filter(x => { const d=x.release_date||x.first_air_date; return d && d > weekEnd && d <= futureEnd; })
-    .sort((a,b)=>String(a.release_date||a.first_air_date).localeCompare(String(b.release_date||b.first_air_date)));
-  coming.slice(0, 12).forEach(x => add(story(x,"coming","COMING UP",titleOf(x) + " is on the way.",releaseLanguage(x.release_date||x.first_air_date) + " · " + safeOverview(x.overview,"A future release worth tracking."),"release",x.release_date||x.first_air_date)));
-  const trendItems = (trending.value?.results || []).filter(x => ["movie","tv"].includes(mediaType(x)));
-  trendItems.slice(0, 10).forEach(x => add(story(x,"trending","TRENDING NOW",titleOf(x) + " is heating up.",safeOverview(x.overview,"A title drawing attention across the current catalogue."),"trend",null)));
-  const taste = tasteResult.status === "fulfilled" ? tasteResult.value : null;
-  let forYouItems = [];
-  if (taste) {
-    const params = tasteParams(taste);
-    const [m,t] = await Promise.allSettled([tmdbApi.discoverMovies(params), tmdbApi.discoverTv({...params, sort_by:"popularity.desc"})]);
-    forYouItems = [...(m.value?.results || []).map(x=>({...x,media_type:"movie"})), ...(t.value?.results || []).map(x=>({...x,media_type:"tv"}))]
-      .filter(x=>!getNotForMeKeys().has(keyOf(x)))
-      .sort((a,b)=>scoreStory(b)-scoreStory(a)).slice(0,8);
-  }
-  if (!forYouItems.length) forYouItems = [...(popularMovies.value?.results || []).map(x=>({...x,media_type:"movie"})), ...(popularTv.value?.results || []).map(x=>({...x,media_type:"tv"}))].sort((a,b)=>scoreStory(b)-scoreStory(a)).slice(0,8);
-  forYouItems.forEach(x=>add(story(x,"forYou","FOR YOU",titleOf(x) + " might be your kind of watch.",safeOverview(x.overview,"A Vivid pick based on catalogue signals."),"recommend",x.release_date||x.first_air_date||null)));
-  const trailerSource = [...todayItems,...weekItems,...trendItems,...coming];
-  const trailerStories = [];
-  await addTrailerStories(trailerStories, trailerSource, new Set(), 8);
-  trailerStories.forEach(add);
-  state.stories = stories.sort((a,b) => scoreStory(b)-scoreStory(a));
-  state.calendar = [...coming, ...weekItems].map(item=>({item,date:item.release_date||item.first_air_date,title:titleOf(item),media_type:mediaType(item)}))
-    .filter(x=>x.date).sort((a,b)=>x.date.localeCompare(b.date)).slice(0,10);
+
+  const todayItems = [
+    ...(value(1).results || []).map(x=>({...x,media_type:"movie"})),
+    ...(value(2).results || []).map(x=>({...x,media_type:"tv"}))
+  ].filter(x => (x.release_date || x.first_air_date) === now)
+   .sort((a,b)=>Number(b.popularity||0)-Number(a.popularity||0));
+
+  todayItems.slice(0, 8).forEach(x => {
+    const type = mediaType(x);
+    add(story(x, type === "tv" ? "episodes" : "today", type === "tv" ? "TV TODAY" : "NEW TODAY",
+      titleOf(x) + (type === "tv" ? " is airing today." : " is new today."),
+      safeOverview(x.overview, type === "tv" ? "A new episode or series entry is landing today." : "A fresh title just entered the catalogue."),
+      "new", now));
+  });
+
+  const weekItems = [
+    ...(value(3).results || []).map(x=>({...x,media_type:"movie"})),
+    ...(value(4).results || []).map(x=>({...x,media_type:"tv"}))
+  ].filter(x => {
+    const d=x.release_date||x.first_air_date;
+    return d && d > now && d <= weekEnd;
+  }).sort((a,b)=>String(a.release_date||a.first_air_date).localeCompare(String(b.release_date||b.first_air_date)));
+
+  weekItems.slice(0, 10).forEach(x => add(story(x,"week","THIS WEEK",
+    titleOf(x) + " arrives this week.",
+    safeOverview(x.overview,"A newly arriving title worth keeping on your radar."),
+    "week",x.release_date||x.first_air_date)));
+
+  const coming = [
+    ...(value(5).results || []).map(x=>({...x,media_type:"movie"})),
+    ...(value(6).results || []).map(x=>({...x,media_type:"tv"}))
+  ].filter(x => {
+    const d=x.release_date||x.first_air_date;
+    return d && d > weekEnd && d <= futureEnd;
+  }).sort((a,b)=>String(a.release_date||a.first_air_date).localeCompare(String(b.release_date||b.first_air_date)));
+
+  coming.slice(0, 12).forEach(x => add(story(x,"coming","COMING UP",
+    titleOf(x) + " is on the way.",
+    releaseLanguage(x.release_date||x.first_air_date) + " · " + safeOverview(x.overview,"A future release worth tracking."),
+    "release",x.release_date||x.first_air_date)));
+
+  const trendItems = (value(0).results || []).filter(x => ["movie","tv"].includes(mediaType(x)));
+  trendItems.slice(0, 10).forEach(x => add(story(x,"trending","TRENDING NOW",
+    titleOf(x) + " is heating up.",
+    safeOverview(x.overview,"A title drawing attention across the current catalogue."),
+    "trend",null)));
+
+  // Render the core feed immediately. Optional intelligence must never blank the News page.
+  state.stories = stories;
+  state.calendar = [...coming, ...weekItems].map(item=>({
+    item,date:item.release_date||item.first_air_date,title:titleOf(item),media_type:mediaType(item)
+  })).filter(x=>x.date).sort((a,b)=>x.date.localeCompare(b.date)).slice(0,10);
   state.hero = trendItems[0] || coming[0] || todayItems[0] || null;
   state.lastUpdated = Date.now();
   render(document.querySelector(".vivid-news-filter.is-active")?.dataset.filter || "all");
   renderHero();
   const loading = $("news-loading"); if (loading) loading.hidden = true;
+
+  // Personalization is progressive: if it fails, curated popular titles remain.
+  try {
+    const taste = await getTasteProfile();
+    const params = tasteParams(taste);
+    const [m,t] = await Promise.allSettled([
+      tmdbApi.discoverMovies(params),
+      tmdbApi.discoverTv({...params, sort_by:"popularity.desc"})
+    ]);
+    let forYouItems = [
+      ...(m.status === "fulfilled" ? (m.value?.results || []) : []).map(x=>({...x,media_type:"movie"})),
+      ...(t.status === "fulfilled" ? (t.value?.results || []) : []).map(x=>({...x,media_type:"tv"}))
+    ].filter(x=>!getNotForMeKeys().has(keyOf(x))).sort((a,b)=>scoreStory(b)-scoreStory(a)).slice(0,8);
+    if (!forYouItems.length) forYouItems = [
+      ...(value(7).results || []).map(x=>({...x,media_type:"movie"})),
+      ...(value(8).results || []).map(x=>({...x,media_type:"tv"}))
+    ].sort((a,b)=>scoreStory(b)-scoreStory(a)).slice(0,8);
+    forYouItems.forEach(x=>add(story(x,"forYou","FOR YOU",
+      titleOf(x) + " might be your kind of watch.",
+      safeOverview(x.overview,"A Vivid pick based on catalogue signals."),
+      "recommend",x.release_date||x.first_air_date||null)));
+  } catch (error) {
+    console.warn("Vivid News personalization unavailable:", error);
+    [
+      ...(value(7).results || []).map(x=>({...x,media_type:"movie"})),
+      ...(value(8).results || []).map(x=>({...x,media_type:"tv"}))
+    ].sort((a,b)=>scoreStory(b)-scoreStory(a)).slice(0,8).forEach(x=>add(story(x,"forYou","CURATED",
+      titleOf(x) + " is worth a look.",
+      safeOverview(x.overview,"A strong catalogue pick."),
+      "recommend",x.release_date||x.first_air_date||null)));
+  }
+
+  // Trailer discovery is also progressive and never blocks the main feed.
+  try {
+    const trailerStories = [];
+    await addTrailerStories(trailerStories, [...todayItems,...weekItems,...trendItems,...coming], new Set(), 8);
+    trailerStories.forEach(add);
+  } catch (error) {
+    console.warn("Vivid News trailer discovery unavailable:", error);
+  }
+  state.stories = stories.sort((a,b) => scoreStory(b)-scoreStory(a));
+  render(document.querySelector(".vivid-news-filter.is-active")?.dataset.filter || "all");
+  renderHero();
 }
 function wire() {
   document.querySelectorAll(".vivid-news-filter").forEach(button => {
