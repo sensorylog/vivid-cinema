@@ -242,6 +242,26 @@ function renderProviderOnly(details, countryCode) {
   wireProviders(details);
 }
 
+function renderExploreLinks(details, cast) {
+  const genres = (details.genres || []).slice(0, 3);
+  const crew = details.credits?.crew || [];
+  const directors = crew.filter(person => person.job === "Director" && person.id && person.name).slice(0, 2);
+  const leadCast = (cast || []).filter(person => person.id && person.name).slice(0, 5);
+  const links = [];
+  genres.forEach(genre => links.push({ label: "More " + genre.name, href: buildDiscoverUrl({ genre: genre.id, type: media.media_type }) }));
+  directors.forEach(person => links.push({ label: "More by " + person.name, href: "person.html?id=" + encodeURIComponent(person.id) }));
+  leadCast.slice(0, 3).forEach(person => links.push({ label: "More with " + person.name, href: "person.html?id=" + encodeURIComponent(person.id) }));
+  const year = details.release_date || details.first_air_date || "";
+  if (year) links.push({ label: "More from " + year.slice(0, 4), href: buildDiscoverUrl({ year: year.slice(0, 4), type: media.media_type }) }));
+  const unique = [];
+  const seen = new Set();
+  links.forEach(link => { if (!seen.has(link.href)) { seen.add(link.href); unique.push(link); } });
+  if (!unique.length) return "";
+  return '<section class="vivid-title-section vivid-explore-section"><div class="vivid-section-heading"><div><span>EXPLORE</span><h2>Go deeper</h2></div><p>Follow the parts of this title you want more of.</p></div><div class="vivid-explore-links">' +
+    unique.slice(0, 8).map(link => '<a class="vivid-explore-link" href="' + escapeHtml(link.href) + '">' + escapeHtml(link.label) + '<i class="bi bi-arrow-up-right" aria-hidden="true"></i></a>').join("") +
+    '</div></section>';
+}
+
 function renderRecommendationCards(items){
   return items.length
     ? items.map((item)=>'<a class="vivid-similar-card" href="'+escapeHtml(getMediaUrl(item))+'"><img loading="lazy" src="'+getImageUrl(item.poster_path,"w342")+'" alt="'+escapeHtml(item.title)+'"><span>'+escapeHtml(item.title)+'</span><small>★ '+(item.vote_average?item.vote_average.toFixed(1):"—")+'</small></a>').join("")
@@ -299,6 +319,7 @@ function render(details) {
   const recommendations=normalizeResults(details.recommendations?.results||[],media.media_type).slice(0,12);
   const similar=normalizeResults(details.similar?.results||[],media.media_type).slice(0,12);
   const related=recommendations.length?recommendations:similar;
+  const exploreSection = renderExploreLinks(details, cast);
 
   document.title=title+" · Vivid Cinema";
   const country=getInitialCountry(details);
