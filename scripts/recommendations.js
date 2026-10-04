@@ -320,16 +320,26 @@ function rankForYou(candidates, taste, progress, feedback, excluded, limit) {
     const type = item.media_type || "movie";
     const genres = (item.genre_ids || []).filter(id => taste.genres?.[id]);
     const dominantGenre = genres[0];
-    if (dominantGenre && (genreCounts.get(dominantGenre) || 0) >= 4) continue;
-    if (out.length >= 5 && typeCounts[type] >= Math.ceil(limit * .72)) continue;
+    const secondaryGenre = genres.find(id => id !== dominantGenre);
+    if (dominantGenre && (genreCounts.get(dominantGenre) || 0) >= 3) continue;
+    if (out.length >= 5 && typeCounts[type] >= Math.ceil(limit * .7)) continue;
+
+    // Penalize a title that only repeats an already dominant genre.
+    // The score remains visible so strong matches can still win.
+    const repetitionPenalty = dominantGenre
+      ? Math.min(2.2, (genreCounts.get(dominantGenre) || 0) * .65)
+      : 0;
+    const diversityScore = entry.score - repetitionPenalty + (secondaryGenre && !genreCounts.has(secondaryGenre) ? .35 : 0);
 
     out.push({
       ...item,
-      recommendationScore: entry.score,
+      recommendationScore: diversityScore,
       recommendationReason: dominantGenre ? "Because it matches your taste" : "Picked for you"
     });
     typeCounts[type] = (typeCounts[type] || 0) + 1;
-    if (dominantGenre) genreCounts.set(dominantGenre, (genreCounts.get(dominantGenre) || 0) + 1);
+    (item.genre_ids || []).filter(id => taste.genres?.[id]).slice(0, 2).forEach(id =>
+      genreCounts.set(id, (genreCounts.get(id) || 0) + 1)
+    );
   }
   return out;
 }
