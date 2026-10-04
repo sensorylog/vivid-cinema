@@ -1,25 +1,23 @@
+// Vivid Cinema title renderer baseline restored from the last known-good implementation.
 import { tmdbApi } from "./tmdb.js";
 import { getImageUrl, getMediaUrl, normalizeMedia, normalizeResults } from "./media.js";
-import { getRoute, buildWatchUrl, buildDiscoverUrl } from "./routes.js";
+import { getRoute, buildWatchUrl } from "./routes.js";
 import { escapeHtml, getErrorMessage } from "./utils.js";
 import { hasLibraryItem, startLibrarySync, toggleLibraryItem, upsertLibraryItem } from "./library.js";
-import { getExternalEpisodeLink, getExternalProviderLink } from "./external-providers.js";
-import { getFeedback, setFeedback, recordBehavior, startIntelligenceSync } from "./intelligence.js";
 
 const $ = (id) => document.getElementById(id);
 const route = getRoute();
 let media = null;
 let currentDetails = null;
-let trailerTrigger = null;
-function countryName(code) {
-  try { return new Intl.DisplayNames([navigator.language || "en"], { type: "region" }).of(code) || code; }
-  catch { return code; }
-}
-function providerCountries(availableCountries) {
-  return Object.keys(availableCountries || {})
-    .sort((a, b) => countryName(a).localeCompare(countryName(b)))
-    .map(code => [code, countryName(code)]);
-}
+const PROVIDER_COUNTRIES = [
+  ["US", "United States"],
+  ["GH", "Ghana"],
+  ["GB", "United Kingdom"],
+  ["CA", "Canada"],
+  ["NG", "Nigeria"],
+  ["ZA", "South Africa"],
+  ["AU", "Australia"]
+];
 
 function formatRuntime(minutes) {
   if (!minutes) return "";
@@ -51,39 +49,19 @@ function renderLibraryActions() {
   const item = libraryItem();
   const favorite = hasLibraryItem("favorites", item);
   const watchLater = hasLibraryItem("watchLater", item);
-  const feedback = getFeedback(item);
-  const externalLink = getExternalProviderLink(media);
-  return '<div class="vivid-title-library-actions" aria-label="Library and recommendation actions">' +
-    '<button class="vivid-button vivid-button--secondary" type="button" id="library-favorite"><i class="bi bi-heart' + (favorite ? '-fill' : '') + '"></i> ' + (favorite ? "Liked" : "Like") + '</button>' +
-    '<button class="vivid-button vivid-button--secondary" type="button" id="title-not-for-me" aria-pressed="' + String(feedback === "not_for_me") + '"><i class="bi bi-hand-thumbs-down' + (feedback === "not_for_me" ? '-fill' : '') + '"></i> ' + (feedback === "not_for_me" ? "Not for me" : "Not for me") + '</button>' +
+  return '<div class="vivid-title-library-actions" aria-label="Library actions">' +
+    '<button class="vivid-button vivid-button--secondary" type="button" id="library-favorite"><i class="bi bi-heart' + (favorite ? '-fill' : '') + '"></i> ' + (favorite ? "Favorited" : "Favorite") + '</button>' +
     '<button class="vivid-button vivid-button--secondary" type="button" id="library-watch-later"><i class="bi bi-clock' + (watchLater ? '-fill' : '') + '"></i> ' + (watchLater ? "Saved" : "Watch later") + '</button>' +
-    '<a class="vivid-button vivid-button--ghost" href="library.html"><i class="bi bi-bookmark"></i> My Library</a>' +
-    (externalLink ? '<a class="vivid-button vivid-button--secondary" href="' + escapeHtml(externalLink) + '" target="_blank" rel="noopener noreferrer" aria-label="Open external provider"><i class="bi bi-box-arrow-up-right"></i> Where to watch</a>' : "") +
-    '</div>';
+    '<a class="vivid-button vivid-button--ghost" href="library.html"><i class="bi bi-bookmark"></i> My Library</a></div>';
 }
 
 function wireLibraryActions() {
   const item = libraryItem();
   const favorite = $("library-favorite");
-  const notForMe = $("title-not-for-me");
   const watchLater = $("library-watch-later");
   favorite?.addEventListener("click", () => {
-    const wasFavorite = hasLibraryItem("favorites", item);
     toggleLibraryItem("favorites", item);
-    const feedback = getFeedback(item);
-    if (wasFavorite && feedback === "like") setFeedback(item, "like");
-    else if (!wasFavorite && feedback !== "like") setFeedback(item, "like");
-    favorite.innerHTML = hasLibraryItem("favorites", item) ? '<i class="bi bi-heart-fill"></i> Liked' : '<i class="bi bi-heart"></i> Like';
-    if (notForMe) {
-      notForMe.setAttribute("aria-pressed","false");
-      notForMe.innerHTML = '<i class="bi bi-hand-thumbs-down"></i> Not for me';
-    }
-  });
-  notForMe?.addEventListener("click", () => {
-    const next = setFeedback(item, "not_for_me");
-    if (next === "not_for_me" && hasLibraryItem("favorites", item)) toggleLibraryItem("favorites", item);
-    notForMe.setAttribute("aria-pressed",String(next === "not_for_me"));
-    notForMe.innerHTML = '<i class="bi bi-hand-thumbs-down' + (next === "not_for_me" ? '-fill' : '') + '"></i> Not for me';
+    favorite.innerHTML = hasLibraryItem("favorites", item) ? '<i class="bi bi-heart-fill"></i> Favorited' : '<i class="bi bi-heart"></i> Favorite';
   });
   watchLater?.addEventListener("click", () => {
     toggleLibraryItem("watchLater", item);
@@ -108,7 +86,7 @@ function renderProviderGroups(details, countryCode) {
   const availableCountries = details["watch/providers"]?.results || {};
   if (!country) {
     return '<section class="vivid-title-section"><div class="vivid-section-heading"><div><span>WHERE TO WATCH</span><h2>Provider availability</h2></div><label class="vivid-country-picker"><span>Country</span><select id="provider-country">' +
-      providerCountries(availableCountries).map(([code, name]) => '<option value="' + code + '">' + name + '</option>').join("") +
+      PROVIDER_COUNTRIES.filter(([code]) => availableCountries[code]).map(([code, name]) => '<option value="' + code + '">' + name + '</option>').join("") +
       '</select></label></div><p class="vivid-muted">No provider listings are available for this country. Try another country.</p></section>';
   }
 
@@ -119,7 +97,8 @@ function renderProviderGroups(details, countryCode) {
     ["Buy", country.buy]
   ].filter(([, items]) => Array.isArray(items) && items.length);
 
-  const countryOptions = providerCountries(availableCountries)
+  const countryOptions = PROVIDER_COUNTRIES
+    .filter(([code]) => availableCountries[code])
     .map(([code, name]) => '<option value="' + code + '"' + (code === countryCode ? " selected" : "") + ">" + name + "</option>")
     .join("");
 
@@ -135,13 +114,10 @@ function renderProviderGroups(details, countryCode) {
 function renderSeasons(details) {
   if (media?.media_type !== "tv" || !Array.isArray(details.seasons) || !details.seasons.length) return "";
   const seasons = details.seasons.filter((season) => season.season_number >= 0);
-  const options = seasons.map((season) => '<option value="' + season.season_number + '">' + escapeHtml(season.name || ("Season " + season.season_number)) + '</option>').join("");
-  const initial = seasons.find((season) => season.episode_count > 0) || seasons[0];
-  return '<section class="vivid-title-section vivid-seasons"><div class="vivid-season-header"><div class="vivid-section-heading"><div><span>EPISODES</span><h2>Seasons & episodes</h2></div></div>' +
-    '<div class="vivid-season-control"><span>Season</span><div class="vivid-season-select-wrap"><select id="season-select" aria-label="Select season">' + options + '</select><i class="bi bi-chevron-down" aria-hidden="true"></i></div></div></div>' +
-    '<div id="season-summary" class="vivid-season-summary"></div><div id="episode-list" class="vivid-episode-list"><p class="vivid-muted">Loading episodes…</p></div></section>';
+  return '<section class="vivid-title-section vivid-seasons"><div class="vivid-section-heading"><div><span>EPISODES</span><h2>Seasons & episodes</h2></div><label class="vivid-season-picker"><span class="vivid-sr-only">Choose season</span><select id="season-select">' +
+    seasons.map((season) => '<option value="' + season.season_number + '">' + escapeHtml(season.name || ("Season " + season.season_number)) + '</option>').join("") +
+    '</select></label></div><div id="episode-list" class="vivid-episode-list"><p class="vivid-muted">Loading episodes…</p></div></section>';
 }
-
 
 async function loadSeason(id, seasonNumber) {
   const container = $("episode-list");
@@ -150,10 +126,7 @@ async function loadSeason(id, seasonNumber) {
   try {
     const data = await tmdbApi.tvSeason(id, seasonNumber);
     const episodes = data.episodes || [];
-    container.innerHTML = episodes.length ? episodes.map((episode) => {
-      const downloadLink = getExternalEpisodeLink(media, seasonNumber, episode.episode_number);
-      return '<article class="vivid-episode"><div class="vivid-episode-thumb"><img loading="lazy" src="' + getImageUrl(episode.still_path, "w500") + '" alt="" onerror="this.style.visibility=\'hidden\'"></div><div class="vivid-episode-copy"><div class="vivid-episode-line"><strong>Episode ' + episode.episode_number + '</strong><span>★ ' + (episode.vote_average ? Number(episode.vote_average).toFixed(1) : "—") + '</span></div><h3>' + escapeHtml(episode.name || ("Episode " + episode.episode_number)) + '</h3><small>' + escapeHtml(episode.air_date || "Air date unavailable") + '</small><p>' + escapeHtml(episode.overview || "No episode synopsis is available.") + '</p><div class="vivid-episode-actions"><a class="vivid-button vivid-button--secondary vivid-episode-watch" href="' + escapeHtml(buildWatchUrl(media.id, "tv", seasonNumber, episode.episode_number)) + '"><i class="bi bi-play-fill"></i> Play episode</a>' + (downloadLink ? '<a class="vivid-button vivid-button--ghost" href="' + escapeHtml(downloadLink) + '" target="_blank" rel="noopener noreferrer" aria-label="Download episode ' + episode.episode_number + '"><i class="bi bi-download"></i> Download</a>' : '') + '</div></div></article>';
-    }).join("") : '<p class="vivid-muted">No episodes are available for this season.</p>';
+    container.innerHTML = episodes.length ? episodes.map((episode) => '<article class="vivid-episode"><div class="vivid-episode-thumb"><img loading="lazy" src="' + getImageUrl(episode.still_path, "w500") + '" alt="" onerror="this.style.visibility=\'hidden\'"></div><div class="vivid-episode-copy"><div class="vivid-episode-line"><strong>Episode ' + episode.episode_number + '</strong><span>★ ' + (episode.vote_average ? Number(episode.vote_average).toFixed(1) : "—") + '</span></div><h3>' + escapeHtml(episode.name || ("Episode " + episode.episode_number)) + '</h3><small>' + escapeHtml(episode.air_date || "Air date unavailable") + '</small><p>' + escapeHtml(episode.overview || "No episode synopsis is available.") + '</p><a class="vivid-button vivid-button--secondary vivid-episode-watch" href="' + escapeHtml(buildWatchUrl(media.id, "tv", seasonNumber, episode.episode_number)) + '"><i class="bi bi-play-fill"></i> Play episode</a></div></article>').join("") : '<p class="vivid-muted">No episodes are available for this season.</p>';
   } catch (error) {
     container.innerHTML = '<p class="vivid-muted">' + escapeHtml(getErrorMessage(error)) + '</p>';
   }
@@ -163,27 +136,8 @@ function wireSeasons(details) {
   if (media?.media_type !== "tv") return;
   const select = $("season-select");
   if (!select) return;
-  const initial = details.seasons?.find((season) => season.episode_count > 0) || details.seasons?.[0];
-  const initialNumber = String(initial?.season_number ?? 0);
-  select.value = initialNumber;
-  select.addEventListener("change", () => {
-    const selected = details.seasons?.find((season) => String(season.season_number) === String(select.value));
-    const summary = $("season-summary");
-    if (summary && selected) {
-      summary.innerHTML = '<span>' + escapeHtml(selected.episode_count || 0) + ' episodes</span>' +
-        (selected.air_date ? '<span>Started ' + escapeHtml(selected.air_date.slice(0,4)) + '</span>' : '') +
-        (selected.overview ? '<p>' + escapeHtml(selected.overview) + '</p>' : '');
-    }
-    loadSeason(media.id, select.value);
-  });
-  const selected = details.seasons?.find((season) => String(season.season_number) === initialNumber);
-  const summary = $("season-summary");
-  if (summary && selected) {
-    summary.innerHTML = '<span>' + escapeHtml(selected.episode_count || 0) + ' episodes</span>' +
-      (selected.air_date ? '<span>Started ' + escapeHtml(selected.air_date.slice(0,4)) + '</span>' : '') +
-      (selected.overview ? '<p>' + escapeHtml(selected.overview) + '</p>' : '');
-  }
-  loadSeason(media.id, initialNumber);
+  select.addEventListener("change", () => loadSeason(media.id, select.value));
+  loadSeason(media.id, select.value || details.seasons?.[0]?.season_number || 0);
 }
 
 function openTrailer(key, name) {
@@ -197,11 +151,8 @@ function openTrailer(key, name) {
     modal.addEventListener("click", (event) => { if (event.target === modal) closeTrailer(); });
     $("trailer-close").addEventListener("click", closeTrailer);
   }
-  trailerTrigger = document.activeElement;
   $("trailer-modal-title").textContent = name || "Trailer";
-  const params = new URLSearchParams({ autoplay:"1", rel:"0", playsinline:"1", enablejsapi:"1", origin:window.location.origin });
-  $("trailer-frame").src = "https://www.youtube.com/embed/" + encodeURIComponent(key) + "?" + params.toString();
-  recordBehavior("trailer_started", media, { video: key });
+  $("trailer-frame").src = "https://www.youtube.com/embed/" + encodeURIComponent(key) + "?autoplay=1&rel=0";
   modal.classList.add("is-open");
   document.body.classList.add("vivid-modal-open");
   $("trailer-close").focus();
@@ -213,8 +164,6 @@ function closeTrailer() {
   $("trailer-frame").src = "";
   modal.classList.remove("is-open");
   document.body.classList.remove("vivid-modal-open");
-  if(trailerTrigger && typeof trailerTrigger.focus==="function") trailerTrigger.focus();
-  trailerTrigger=null;
 }
 
 function wireTrailers() {
@@ -242,91 +191,15 @@ function renderProviderOnly(details, countryCode) {
   wireProviders(details);
 }
 
-function renderExploreLinks(details, cast) {
-  const genres = (details.genres || []).slice(0, 3);
-  const crew = details.credits?.crew || [];
-  const directors = crew.filter(person => person.job === "Director" && person.id && person.name).slice(0, 2);
-  const leadCast = (cast || []).filter(person => person.id && person.name).slice(0, 5);
-  const links = [];
-  genres.forEach(genre => links.push({ label: "More " + genre.name, href: buildDiscoverUrl({ genre: genre.id, type: media.media_type }) }));
-  directors.forEach(person => links.push({ label: "More by " + person.name, href: "person.html?id=" + encodeURIComponent(person.id) }));
-  leadCast.slice(0, 3).forEach(person => links.push({ label: "More with " + person.name, href: "person.html?id=" + encodeURIComponent(person.id) }));
-  const year = details.release_date || details.first_air_date || "";
-  if (year) links.push({ label: "More from " + year.slice(0, 4), href: buildDiscoverUrl({ year: year.slice(0, 4), type: media.media_type }) }));
-  const unique = [];
-  const seen = new Set();
-  links.forEach(link => { if (!seen.has(link.href)) { seen.add(link.href); unique.push(link); } });
-  if (!unique.length) return "";
-  return '<section class="vivid-title-section vivid-explore-section"><div class="vivid-section-heading"><div><span>EXPLORE</span><h2>Go deeper</h2></div><p>Follow the parts of this title you want more of.</p></div><div class="vivid-explore-links">' +
-    unique.slice(0, 8).map(link => '<a class="vivid-explore-link" href="' + escapeHtml(link.href) + '">' + escapeHtml(link.label) + '<i class="bi bi-arrow-up-right" aria-hidden="true"></i></a>').join("") +
-    '</div></section>';
-}
-
 function renderRecommendationCards(items){
   return items.length
     ? items.map((item)=>'<a class="vivid-similar-card" href="'+escapeHtml(getMediaUrl(item))+'"><img loading="lazy" src="'+getImageUrl(item.poster_path,"w342")+'" alt="'+escapeHtml(item.title)+'"><span>'+escapeHtml(item.title)+'</span><small>★ '+(item.vote_average?item.vote_average.toFixed(1):"—")+'</small></a>').join("")
     : '<p class="vivid-muted">No recommendations available yet.</p>';
 }
 
-function renderFacts(details) {
-  const facts = [
-    ["Release", details.release_date || details.first_air_date || ""],
-    ["Status", details.status || ""],
-    ["Original language", details.original_language ? String(details.original_language).toUpperCase() : ""],
-    ["Runtime", media?.media_type === "movie" ? formatRuntime(details.runtime) : (details.number_of_episodes ? details.number_of_episodes + " episodes" : "")],
-    ["Seasons", media?.media_type === "tv" && details.number_of_seasons ? String(details.number_of_seasons) : ""],
-    ["Episodes", media?.media_type === "tv" && details.number_of_episodes ? String(details.number_of_episodes) : ""]
-  ].filter(([, value]) => value);
-  if (!facts.length) return "";
-  return '<section class="vivid-title-section vivid-title-facts"><div class="vivid-section-heading"><div><span>DETAILS</span><h2>At a glance</h2></div></div><div class="vivid-facts-grid">' +
-    facts.map(([label,value]) => '<div class="vivid-fact"><span>' + escapeHtml(label) + '</span><strong>' + escapeHtml(value) + '</strong></div>').join("") +
-    '</div></section>';
-}
-
-function renderStorySection(details, cast) {
-  const crew = details.credits?.crew || [];
-  const directors = crew.filter((person) => person.job === "Director").map((person) => person.name).filter(Boolean).slice(0, 4);
-  const writers = crew.filter((person) => ["Writer", "Screenplay", "Story", "Creator"].includes(person.job)).map((person) => person.name).filter(Boolean).slice(0, 5);
-  const creators = (details.created_by || []).map((person) => person.name).filter(Boolean).slice(0, 4);
-  const leadCast = cast.slice(0, 6);
-  return '<section class="vivid-title-section vivid-title-story"><div class="vivid-story-grid"><div><div class="vivid-section-heading"><div><span>THE STORY</span><h2>About this title</h2></div></div><p class="vivid-story-overview">' + escapeHtml(media.overview || "No synopsis is available for this title yet.") + '</p></div><div class="vivid-credit-panel">' +
-    (directors.length ? '<div><span>Director</span><strong>' + escapeHtml(directors.join(", ")) + '</strong></div>' : '') +
-    (creators.length ? '<div><span>Created by</span><strong>' + escapeHtml(creators.join(", ")) + '</strong></div>' : '') +
-    (writers.length ? '<div><span>Writing</span><strong>' + escapeHtml(writers.join(", ")) + '</strong></div>' : '') +
-    (leadCast.length ? '<div><span>Starring</span><strong>' + escapeHtml(leadCast.map((person) => person.name).join(", ")) + '</strong></div>' : '') +
-    '</div></div></section>';
-}
-
-function renderMinimal(details) {
-  const type = route.params.get("type") === "tv" ? "tv" : "movie";
-  const normalized = normalizeMedia(details, type);
-  media = normalized;
-  const title = normalized.title;
-  const year = normalized.year || "—";
-  const poster = escapeHtml(getImageUrl(normalized.poster_path || normalized.backdrop_path, "w500"));
-  const backdrop = escapeHtml(getImageUrl(normalized.backdrop_path || normalized.poster_path, "w1280"));
-  document.title = title + " · Vivid Cinema";
-  $("title-content").innerHTML =
-    '<section class="vivid-title-backdrop" style="--title-backdrop:url(\'' + backdrop + '\')"><div class="vivid-title-backdrop-overlay"></div></section>' +
-    '<section class="vivid-title-info"><div class="vivid-title-info-inner">' +
-      '<div class="vivid-title-poster"><img src="' + poster + '" alt="' + escapeHtml(title) + ' poster" onerror="this.onerror=null;this.src=\'icons/vivid-icon.svg\'"></div>' +
-      '<div class="vivid-title-copy"><span class="vivid-title-kicker">' + (type === "tv" ? "TV SERIES" : "MOVIE") + '</span>' +
-      '<h1>' + escapeHtml(title) + '</h1><div class="vivid-title-meta"><span>' + escapeHtml(year) + '</span>' +
-      (normalized.vote_average ? '<i></i><span>★ ' + normalized.vote_average.toFixed(1) + '</span>' : '') +
-      '</div><p>' + escapeHtml(normalized.overview || "No synopsis is available for this title yet.") + '</p>' +
-      '<div class="vivid-title-actions"><a class="vivid-button vivid-button--primary" href="' + escapeHtml(buildWatchUrl(normalized.id, type, type === "tv" ? 1 : null, type === "tv" ? 1 : null)) + '"><i class="bi bi-play-fill"></i> Watch now</a><a class="vivid-button vivid-button--ghost" href="home.html"><i class="bi bi-arrow-left"></i> Browse more</a></div>' +
-      '</div></div></section>';
-  try { recordBehavior("title_opened", normalized, { source: document.referrer || "direct" }); } catch {}
-}
-
 function render(details) {
   currentDetails=details;
-  const normalizedMedia = normalizeMedia(details,route.params.get("type")==="tv"?"tv":"movie");
-  // Keep the normalized media object immutable. External identity metadata is
-  // copied into a new object instead of mutating the Object.freeze() result.
-  media = details.imdb_id
-    ? { ...normalizedMedia, imdb_id: details.imdb_id }
-    : normalizedMedia;
+  media=normalizeMedia(details,route.params.get("type")==="tv"?"tv":"movie");
   const title=media.title;
   const year=media.year||"—";
   const rating=media.vote_average?media.vote_average.toFixed(1):"—";
@@ -341,34 +214,26 @@ function render(details) {
   const recommendations=normalizeResults(details.recommendations?.results||[],media.media_type).slice(0,12);
   const similar=normalizeResults(details.similar?.results||[],media.media_type).slice(0,12);
   const related=recommendations.length?recommendations:similar;
-  const exploreSection = renderExploreLinks(details, cast);
 
   document.title=title+" · Vivid Cinema";
   const country=getInitialCountry(details);
-  // Keep the backdrop URL inside a valid quoted HTML attribute. JSON.stringify()
-  // produced nested double-quotes that broke the style attribute at runtime.
-  const backdropPath=media.backdrop_path||media.poster_path;
-  const posterPath=media.poster_path||media.backdrop_path;
-  const backdropUrl=escapeHtml(getImageUrl(backdropPath,"w1280"));
-  const posterUrl=escapeHtml(getImageUrl(posterPath,"w500"));
   $("title-content").innerHTML=
-    '<section class="vivid-title-backdrop" style="--title-backdrop:url(\''+backdropUrl+'\')"><div class="vivid-title-backdrop-overlay"></div><div class="vivid-title-backdrop-label">'+(media.media_type==="tv"?"SERIES":"FEATURE")+'</div></section>'+
+    '<section class="vivid-title-backdrop" style="--title-backdrop:url('+JSON.stringify(getImageUrl(media.backdrop_path,"w1280"))+')"><div class="vivid-title-backdrop-overlay"></div><div class="vivid-title-backdrop-label">'+(media.media_type==="tv"?"SERIES":"FEATURE")+'</div></section>'+
     '<section class="vivid-title-info"><div class="vivid-title-info-inner">'+
-      '<div class="vivid-title-poster"><img src="'+posterUrl+'" alt="'+escapeHtml(title)+' poster" onerror="this.onerror=null;this.src=\'icons/vivid-icon.svg\'"></div>'+
+      '<div class="vivid-title-poster"><img src="'+getImageUrl(media.poster_path,"w500")+'" alt="'+escapeHtml(title)+' poster"></div>'+
       '<div class="vivid-title-copy"><span class="vivid-title-kicker">'+(media.media_type==="tv"?"TV SERIES":"MOVIE")+'</span><h1>'+escapeHtml(title)+'</h1>'+
       '<div class="vivid-title-meta"><span>'+escapeHtml(year)+'</span>'+(runtime?'<i></i><span>'+escapeHtml(runtime)+'</span>':"")+'<i></i><span>★ '+rating+'</span></div>'+
       '<div class="vivid-title-genres">'+genres+'</div><p>'+escapeHtml(media.overview||"No synopsis is available for this title yet.")+'</p>'+
       '<div class="vivid-title-actions"><a class="vivid-button vivid-button--primary" href="'+escapeHtml(buildWatchUrl(media.id,media.media_type,media.media_type==="tv"?(details.seasons?.find((season)=>season.episode_count>0&&season.season_number>=0)?.season_number??1):null,media.media_type==="tv"?1:null))+'"><i class="bi bi-play-fill"></i> Watch now</a>'+(firstTrailer?'<button class="vivid-button vivid-button--secondary" id="hero-trailer" type="button"><i class="bi bi-play-circle"></i> Watch trailer</button>':"")+'<a class="vivid-button vivid-button--ghost" href="home.html"><i class="bi bi-arrow-left"></i> Browse more</a></div></div>'+
     '</div></section>'+
     renderLibraryActions()+
-    renderFacts(details)+
-    renderStorySection(details, cast)+
-    '<section class="vivid-title-section"><div class="vivid-section-heading"><div><span>CAST & CREW</span><h2>People in the story</h2></div></div><div class="vivid-cast-grid">'+
-      (cast.length?cast.map((person)=>'<a class="vivid-cast" href="person.html?id='+encodeURIComponent(person.id)+'" aria-label="View '+escapeHtml(person.name)+'"><img loading="lazy" src="'+getImageUrl(person.profile_path,"w185")+'" alt="'+escapeHtml(person.name)+'"><strong>'+escapeHtml(person.name)+'</strong><small>'+escapeHtml(person.character||"Cast")+'</small></a>').join(""):'<p class="vivid-muted">Cast information is unavailable.</p>')+
-    '</div></section>'+renderTrailerSection(details)+renderSeasons(details)+renderProviderGroups(details,country)+
-    '<section class="vivid-title-section"><div class="vivid-section-heading"><div><span>RECOMMENDED</span><h2>More like this</h2></div></div><div class="vivid-similar" id="recommendation-rail">'+renderRecommendationCards(related)+'</div></section>'+exploreSection;
+    renderTrailerSection(details)+
+    '<section class="vivid-title-section"><div class="vivid-section-heading"><div><span>CAST</span><h2>People in the story</h2></div></div><div class="vivid-cast-grid">'+
+      (cast.length?cast.map((person)=>'<article class="vivid-cast"><img loading="lazy" src="'+getImageUrl(person.profile_path,"w185")+'" alt="'+escapeHtml(person.name)+'"><strong>'+escapeHtml(person.name)+'</strong><small>'+escapeHtml(person.character||"Cast")+'</small></article>').join(""):'<p class="vivid-muted">Cast information is unavailable.</p>')+
+    '</div></section>'+renderSeasons(details)+renderProviderGroups(details,country)+
+    '<section class="vivid-title-section"><div class="vivid-section-heading"><div><span>RECOMMENDED</span><h2>More like this</h2></div></div><div class="vivid-similar" id="recommendation-rail">'+renderRecommendationCards(related)+'</div></section>';
 
-  recordBehavior("title_opened", libraryItem(), { source: document.referrer || "direct" });
+  upsertLibraryItem("history",libraryItem());
   wireSeasons(details);wireProviders(details);wireTrailers();wireLibraryActions();
   if(firstTrailer)$("hero-trailer").addEventListener("click",()=>openTrailer(firstTrailer.key,firstTrailer.name||"Trailer"));
 }
@@ -381,21 +246,12 @@ async function init() {
     // Paint the title page from the lightweight metadata endpoint first. This avoids
     // making the first screen wait for credits, videos, providers and recommendations.
     const basic = type === "tv" ? await tmdbApi.tvDetailsBasic(id) : await tmdbApi.movieDetailsBasic(id);
-    try {
-      render(basic);
-    } catch (error) {
-      console.error("Vivid title render failed:", error);
-      try { renderMinimal(basic); } catch { renderError("This title could not be displayed. Please try again."); }
-    }
+    render(basic);
     // Enrich the page in the background without blocking the first meaningful paint.
     void (async () => {
       try {
         const enriched = type === "tv" ? await tmdbApi.tvDetails(id) : await tmdbApi.movieDetails(id);
-        try {
-          render(enriched);
-        } catch (error) {
-          console.warn("Vivid title enrichment render unavailable:", error);
-        }
+        render(enriched);
       } catch (error) {
         console.warn("Vivid title enrichment unavailable:", error);
       }
@@ -420,7 +276,6 @@ document.addEventListener("DOMContentLoaded", () => {
   // Library synchronization continues in the background so a slow or unavailable
   // auth session cannot leave the title page stuck on its loading state.
   init();
-  void startIntelligenceSync().then(() => refreshLibraryActions()).catch(() => {});
   void startLibrarySync()
     .then(() => refreshLibraryActions())
     .catch((error) => console.warn("Vivid library sync unavailable:", error));
