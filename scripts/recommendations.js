@@ -298,11 +298,17 @@ function scoreCandidate(item, taste, progress, feedback, recentGenres = new Set(
   const genreScore = Object.entries(taste.genres || {}).reduce((sum, [id, weight]) =>
     sum + (genres.has(Number(id)) ? Number(weight) : 0), 0);
   const mediaScore = Number(taste.media?.[item.media_type || "movie"] || 0);
+  const languageScore = taste.languages?.[item.original_language] ? Number(taste.languages[item.original_language]) : 0;
+  const countryCodes = item.origin_country || (item.production_countries || []).map(country => country.iso_3166_1).filter(Boolean);
+  const countryScore = countryCodes.reduce((sum, code) => sum + Number(taste.countries?.[code] || 0), 0);
+  const year = Number(String(item.release_date || item.first_air_date || "").slice(0, 4));
+  const decade = year >= 1900 ? String(Math.floor(year / 10) * 10) : "";
+  const decadeScore = decade ? Number(taste.decades?.[decade] || 0) : 0;
   const quality = Math.min(1, Math.max(0, Number(item.vote_average || 0) / 10));
   const popularity = Math.min(1, Math.log10(1 + Math.max(0, Number(item.popularity || 0))) / 4);
   const feedbackBoost = feedback[keyFor(item)]?.kind === "like" ? 6 : 0;
   const recentGenreBoost = (item.genre_ids || []).filter(id => recentGenres.has(Number(id))).slice(0, 2).length * .75;
-  return genreScore * 5.4 + mediaScore * 1.9 + quality * 1.4 + popularity * .8 + feedbackBoost + recentGenreBoost;
+  return genreScore * 5.4 + mediaScore * 1.9 + languageScore * .55 + countryScore * .35 + decadeScore * .3 + quality * 1.4 + popularity * .8 + feedbackBoost + recentGenreBoost;
 }
 
 function rankForYou(candidates, taste, progress, feedback, excluded, limit, recentGenres = new Set()) {
