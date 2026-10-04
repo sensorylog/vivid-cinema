@@ -1,4 +1,5 @@
 import "./analytics.js";
+import "./pwa.js";
 import { VIVID_CONFIG } from "./config.js";
 
 const MOBILE_BREAKPOINT = 768;

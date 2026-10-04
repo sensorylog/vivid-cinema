@@ -2,6 +2,30 @@ const SW_PATH = "./service-worker.js";
 let deferredInstallPrompt = null;
 let activeRegistration = null;
 let updateControl = null;
+const INSTALL_GUIDE_DISMISSED = "vivid:install-guide:dismissed";
+function installGuideDismissed() {
+  try { return localStorage.getItem(INSTALL_GUIDE_DISMISSED) === "1"; } catch { return false; }
+}
+function dismissInstallGuide() {
+  try { localStorage.setItem(INSTALL_GUIDE_DISMISSED, "1"); } catch {}
+}
+function createInstallGuide() {
+  if (isStandalone() || installGuideDismissed() || document.querySelector("[data-vivid-install-guide]")) return;
+  const ios = /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.MSStream;
+  const modal = document.createElement("div");
+  modal.className = "vivid-install-guide";
+  modal.dataset.vividInstallGuide = "true";
+  modal.innerHTML = '<div class="vivid-install-guide-backdrop" data-install-close></div><section class="vivid-install-guide-card" role="dialog" aria-modal="true" aria-labelledby="vivid-install-title"><button class="vivid-install-guide-close" type="button" aria-label="Close" data-install-close>×</button><span class="vivid-install-guide-kicker">VIVID CINEMA</span><h2 id="vivid-install-title">Take Vivid with you.</h2><p>Add Vivid to your Home Screen for a faster, app-like cinema experience.</p><ol>' +
+    (ios ? '<li>Tap <strong>Share</strong> in Safari.</li><li>Choose <strong>Add to Home Screen</strong>.</li><li>Tap <strong>Add</strong>.</li>' : '<li>Tap <strong>Install app</strong> when your browser offers it.</li><li>Confirm <strong>Install</strong>.</li>') +
+    '</ol><button class="vivid-install-guide-done" type="button" data-install-close>Got it</button></section>';
+  document.body.appendChild(modal);
+  const close = () => { dismissInstallGuide(); modal.remove(); };
+  modal.querySelectorAll("[data-install-close]").forEach(el => el.addEventListener("click", close));
+  if (ios) window.setTimeout(() => modal.isConnected && !installGuideDismissed() && modal.classList.add("is-visible"), 900);
+  else modal.classList.add("is-visible");
+  window.addEventListener("appinstalled", close, { once: true });
+}
+
 
 function isStandalone() {
   return window.matchMedia?.("(display-mode: standalone)")?.matches ||
