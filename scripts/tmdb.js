@@ -55,7 +55,7 @@ export const tmdbApi = Object.freeze({
   popularMovies: (page = 1) => tmdb("movie/popular", { page }),
   topRatedMovies: (page = 1) => tmdb("movie/top_rated", { page }),
   upcomingMovies: (page = 1) => tmdb("movie/upcoming", { page }),
-  futureMovies: (page = 1, from = "", to = "") => tmdb("discover/movie", { page, sort_by: "primary_release_date.asc", "primary_release_date.gte": from || undefined, "primary_release_date.lte": to || undefined, with_release_type: "2|3|4|5|6", without_release_type: undefined }),
+  futureMovies: (page = 1, from = "", to = "") => tmdb("discover/movie", { page, sort_by: "primary_release_date.asc", "primary_release_date.gte": from || undefined, "primary_release_date.lte": to || undefined, with_release_type: "2|3|4|5|6" }),
   futureTv: (page = 1, from = "", to = "") => tmdb("discover/tv", { page, sort_by: "first_air_date.asc", "first_air_date.gte": from || undefined, "first_air_date.lte": to || undefined }),
   newMovies: (page = 1, from = "", to = "") => tmdb("discover/movie", { page, sort_by: "popularity.desc", "primary_release_date.gte": from || undefined, "primary_release_date.lte": to || undefined, with_release_type: "2|3|4|5|6" }),
   newTv: (page = 1, from = "", to = "") => tmdb("discover/tv", { page, sort_by: "popularity.desc", "first_air_date.gte": from || undefined, "first_air_date.lte": to || undefined }),
