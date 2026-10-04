@@ -54,7 +54,7 @@ async function googleSignIn(){
   const credential=await withTimeout(signInWithPopup(auth,provider),45000,"Google sign-in timed out.");
   await finishGoogleSignIn(credential);
 }
-googleButtons.forEach(button=>button.addEventListener("click",async()=>{
+void handleGoogleRedirect();\ngoogleButtons.forEach(button=>button.addEventListener("click",async()=>{
   button.disabled=true;showMessage("Connecting to Google…",true);
   try{await googleSignIn();}catch(error){console.error(error);showMessage(friendlyError(error));button.disabled=false;}
 }));
