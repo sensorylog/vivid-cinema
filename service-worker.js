@@ -11,7 +11,7 @@ const APP_SHELL = [
   "./scripts/atmosphere.js","./scripts/i18n.js","./scripts/routes.js",
   "./scripts/config.js","./scripts/utils.js","./scripts/content.js","./scripts/media.js","./scripts/tmdb.js",
   "./scripts/nav-auth.js","./scripts/library.js","./scripts/library-page.js","./scripts/discover.js",
-  "./scripts/collection.js","./scripts/person.js","./scripts/recommendations.js","./scripts/release-alerts.js","./scripts/cinema-reminders.js","./scripts/news.js","./scripts/title.js","./scripts/watch.js","./scripts/external-providers.js","./scripts/landing.js",
+  "./scripts/collection.js","./scripts/person.js","./scripts/recommendations.js","./scripts/release-alerts.js","./scripts/cinema-reminders.js","./scripts/push-notifications.js","./scripts/news.js","./scripts/title.js","./scripts/watch.js","./scripts/external-providers.js","./scripts/landing.js",
   "./scripts/account.js","./scripts/auth.js","./script.js"
 ];
 
