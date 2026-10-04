@@ -70,7 +70,7 @@ function tokenOverlap(queryTokens, title) {
   return queryTokens.reduce((score, token) => score + (titleTokens.has(token) ? 1 : 0), 0);
 }
 
-export async function searchIntelligently(query, options = {}) {
+export async function rankSearchResults(items, query, options = {}) {
   const q = normalizeQuery(query);
   if (!q) return { items: [], intent: getSearchIntent(""), recent: getRecentSearches() };
 
@@ -79,7 +79,6 @@ export async function searchIntelligently(query, options = {}) {
   const notForMe = getNotForMeKeys();
   const queryTokens = tokens(q.replace(/\\b(?:movies?|films?|series|shows?)\\b/gi, ""));
 
-  let items = await searchContent(q, 1);
   const exact = q.toLowerCase();
 
   const ranked = items
