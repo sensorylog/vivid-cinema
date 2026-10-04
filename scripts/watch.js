@@ -176,6 +176,7 @@ function handlePlayerEvent(event){
  const duration=Number(data.player_duration)||0;
  if(progress>0){
    savePlaybackProgress(progressKey(),{progress,duration,season:info.season??currentParams?.season,episode:info.episode??currentParams?.episode,title:media.title,media_type:media.media_type,id:media.id});
+   recordWatchActivity(progress,duration);
    recordBehavior("playback_progress", media, { progress, duration, percentage: duration ? Math.round(progress / duration * 100) : 0, season: info.season ?? currentParams?.season, episode: info.episode ?? currentParams?.episode });
  }
  if(data.player_status==="completed"){
