@@ -1,17 +1,211 @@
-import {tmdbApi} from "./tmdb.js";
-import {getImageUrl,getMediaUrl} from "./media.js";
+import {tmdbApi, clearTmdbCache} from "./tmdb.js";
+import {getImageUrl, getMediaUrl} from "./media.js";
 import {escapeHtml} from "./utils.js";
-import {addCinemaReminder,addCinemaReminderToCalendar,getCinemaReminders,hasCinemaReminder,startCinemaReminderLoop} from "./cinema-reminders.js";
-import {enableCinemaPush,savePushReminder} from "./push-notifications.js";
-const $=id=>document.getElementById(id);
-const state={stories:[]};
-const dateOnly=x=>String(x||"").slice(0,10);
-const pretty=x=>{if(!x)return "Release date TBA";const d=new Date(x+"T00:00:00");return Number.isNaN(d.getTime())?"Release date TBA":d.toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"})};
-function storyCard(s){
- const reminder=hasCinemaReminder(s.id,s.kind);
- return '<article class="vivid-news-card"><a class="vivid-news-image" href="'+getMediaUrl({id:s.id,media_type:s.media_type})+'"><img src="'+getImageUrl(s.backdrop_path||s.poster_path,"w780")+'" alt="'+escapeHtml(s.title)+'" loading="lazy"><span>'+escapeHtml(s.label)+'</span></a><div class="vivid-news-body"><small>'+escapeHtml(s.meta)+'</small><h2>'+escapeHtml(s.headline)+'</h2><p>'+escapeHtml(s.copy)+'</p><div class="vivid-news-actions"><a href="'+getMediaUrl({id:s.id,media_type:s.media_type})+'">Explore</a>'+(s.when?'<button class="vivid-notify-release" data-id="'+s.id+'" data-type="'+s.media_type+'" data-kind="'+s.kind+'" '+(reminder?"disabled":"")+'>'+(reminder?"Reminded":"Notify me")+'</button>'+(reminder?'<button class="vivid-calendar-add" data-id="'+s.id+'" data-kind="'+s.kind+'">Add to calendar</button>':""):"")+'</div></div></article>';
+import {addCinemaReminder, addCinemaReminderToCalendar, getCinemaReminders, hasCinemaReminder, startCinemaReminderLoop} from "./cinema-reminders.js";
+import {enableCinemaPush, savePushReminder} from "./push-notifications.js";
+
+const $ = id => document.getElementById(id);
+const state = { stories: [] };
+
+function today() {
+  return new Date().toISOString().slice(0, 10);
 }
-function render(filter="all"){const el=$("news-grid");const list=filter==="all"?state.stories:state.stories.filter(x=>x.category===filter);el.innerHTML=list.length?list.map(storyCard).join(""):'<div class="vivid-news-empty">Nothing new in this category yet.</div>';wire();}
-function wire(){document.querySelectorAll(".vivid-news-filter").forEach(b=>b.onclick=()=>{document.querySelectorAll(".vivid-news-filter").forEach(x=>x.classList.remove("is-active"));b.classList.add("is-active");render(b.dataset.filter)});document.querySelectorAll(".vivid-notify-release").forEach(b=>b.onclick=async()=>{const s=state.stories.find(x=>String(x.id)===b.dataset.id&&x.media_type===b.dataset.type&&x.kind===b.dataset.kind);if(!s)return;try{const r=addCinemaReminder({title:s.title,when:s.when,note:s.headline,contentId:s.id,mediaType:s.media_type,kind:s.kind});let pushEnabled=false;try{await enableCinemaPush();await savePushReminder(r);pushEnabled=true}catch(pushError){console.warn("Vivid background push unavailable:",pushError);}b.disabled=true;b.textContent=pushEnabled?"Background reminder on":"Reminder saved";$("news-toast").textContent=pushEnabled?"Vivid will notify you when it is available · "+pretty(s.when):"Reminder saved · Sign in and allow notifications for background delivery";$("news-toast").hidden=false;setTimeout(()=>{$("news-toast").hidden=true},3500);const cal=$("calendar-"+s.id);if(cal)cal.hidden=false;state.stories=state.stories.map(x=>x===s?{...x,reminder:r}:x);render(document.querySelector(".vivid-news-filter.is-active")?.dataset.filter||"all")}catch(e){$("news-toast").textContent=e.message||"Could not save reminder.";$("news-toast").hidden=false}});document.querySelectorAll(".vivid-calendar-add").forEach(b=>b.onclick=()=>{const r=getCinemaReminders().find(x=>x.contentId===b.dataset.id&&x.kind===b.dataset.kind);if(r){addCinemaReminderToCalendar(r);b.textContent="Calendar added"}});}
-async function load(){const [upcoming,airing,trending]=await Promise.allSettled([tmdbApi.upcomingMovies(1),tmdbApi.airingTodayTv(1),tmdbApi.trending("all","week")]);const stories=[];const push=(x,category,label,headline,copy,kind,when)=>{if(!x?.id)return;stories.push({id:String(x.id),media_type:x.media_type||"movie",title:x.title||x.name||"Untitled",poster_path:x.poster_path,backdrop_path:x.backdrop_path,category,label,headline,copy,kind,when,meta:when?pretty(when):"This week"})};(upcoming.value?.results||[]).slice(0,6).forEach(x=>push({...x,media_type:"movie"},"releases","RELEASE RADAR",(x.title||"A new movie")+" is coming.","Track the release and get a Vivid reminder when it lands.","release",x.release_date));(airing.value?.results||[]).slice(0,6).forEach(x=>push({...x,media_type:"tv"},"episodes","NEW EPISODES",(x.name||"A series")+" has a new episode.","Catch up with what is airing today.","episode",new Date().toISOString().slice(0,10)));(trending.value?.results||[]).filter(x=>x.media_type==="tv").slice(0,4).forEach(x=>push(x,"seasons","SERIES WATCH",(x.name||"A series")+" is heating up.","A trending series worth keeping on your radar.","series",null));state.stories=stories;render();$("news-loading").hidden=true}
-$("news-refresh").onclick=()=>{ $("news-loading").hidden=false;void load()};startCinemaReminderLoop();load().catch(()=>{$("news-loading").textContent="Cinema news is temporarily unavailable."});
+function addDays(iso, days) {
+  const d = new Date(iso + "T00:00:00");
+  d.setDate(d.getDate() + days);
+  return d.toISOString().slice(0, 10);
+}
+function parseDate(value) {
+  if (!value) return null;
+  const d = new Date(value + "T00:00:00");
+  return Number.isNaN(d.getTime()) ? null : d;
+}
+function pretty(value) {
+  const d = parseDate(value);
+  return d ? d.toLocaleDateString(undefined, {month: "short", day: "numeric", year: "numeric"}) : "Date TBA";
+}
+function daysUntil(value) {
+  const d = parseDate(value);
+  if (!d) return null;
+  return Math.ceil((d.getTime() - Date.now()) / 86400000);
+}
+function releaseLanguage(value) {
+  const d = parseDate(value);
+  if (!d) return "Release date TBA";
+  const days = daysUntil(value);
+  if (days === 0) return "Out today";
+  if (days === 1) return "Out tomorrow";
+  if (days > 1) return "In " + days + " days";
+  if (days === -1) return "Released yesterday";
+  return "Released " + pretty(value);
+}
+function storyCard(s) {
+  const reminder = hasCinemaReminder(s.id, s.kind);
+  const reminderButton = s.when
+    ? '<button class="vivid-notify-release" data-id="' + s.id + '" data-type="' + s.media_type + '" data-kind="' + s.kind + '" ' + (reminder ? "disabled" : "") + '>' + (reminder ? "Reminded" : "Notify me") + '</button>'
+    : "";
+  const calendarButton = reminder
+    ? '<button class="vivid-calendar-add" data-id="' + s.id + '" data-kind="' + s.kind + '">Add to calendar</button>'
+    : "";
+  return '<article class="vivid-news-card">' +
+    '<a class="vivid-news-image" href="' + getMediaUrl({id: s.id, media_type: s.media_type}) + '">' +
+      '<img src="' + getImageUrl(s.backdrop_path || s.poster_path, "w780") + '" alt="' + escapeHtml(s.title) + '" loading="lazy">' +
+      '<span>' + escapeHtml(s.label) + '</span>' +
+    '</a>' +
+    '<div class="vivid-news-body">' +
+      '<small>' + escapeHtml(s.meta) + '</small>' +
+      '<h2>' + escapeHtml(s.headline) + '</h2>' +
+      '<p>' + escapeHtml(s.copy) + '</p>' +
+      '<div class="vivid-news-actions"><a href="' + getMediaUrl({id: s.id, media_type: s.media_type}) + '">Explore</a>' + reminderButton + calendarButton + '</div>' +
+    '</div>' +
+  '</article>';
+}
+function render(filter = "all") {
+  const el = $("news-grid");
+  if (!el) return;
+  const list = filter === "all" ? state.stories : state.stories.filter(x => x.category === filter);
+  el.innerHTML = list.length
+    ? list.map(storyCard).join("")
+    : '<div class="vivid-news-empty">Nothing fresh in this category right now.</div>';
+  wire();
+  const status = $("news-status");
+  if (status) status.textContent = list.length + " stories · Updated just now";
+}
+function wire() {
+  document.querySelectorAll(".vivid-news-filter").forEach(button => {
+    button.onclick = () => {
+      document.querySelectorAll(".vivid-news-filter").forEach(x => x.classList.remove("is-active"));
+      button.classList.add("is-active");
+      render(button.dataset.filter);
+    };
+  });
+  document.querySelectorAll(".vivid-notify-release").forEach(button => {
+    button.onclick = async () => {
+      const s = state.stories.find(x => String(x.id) === button.dataset.id && x.media_type === button.dataset.type && x.kind === button.dataset.kind);
+      if (!s) return;
+      try {
+        const reminder = addCinemaReminder({
+          title: s.title, when: s.when, note: s.headline,
+          contentId: s.id, mediaType: s.media_type, kind: s.kind
+        });
+        let pushEnabled = false;
+        try {
+          await enableCinemaPush();
+          await savePushReminder(reminder);
+          pushEnabled = true;
+        } catch (error) {
+          console.warn("Vivid background push unavailable:", error);
+        }
+        button.disabled = true;
+        button.textContent = pushEnabled ? "Background reminder on" : "Reminder saved";
+        const toast = $("news-toast");
+        if (toast) {
+          toast.textContent = pushEnabled
+            ? "Vivid will notify you before " + s.title + " arrives."
+            : "Reminder saved · Sign in and allow notifications for background delivery";
+          toast.hidden = false;
+          setTimeout(() => { toast.hidden = true; }, 3500);
+        }
+        render(document.querySelector(".vivid-news-filter.is-active")?.dataset.filter || "all");
+      } catch (error) {
+        const toast = $("news-toast");
+        if (toast) {
+          toast.textContent = error.message || "Could not save reminder.";
+          toast.hidden = false;
+        }
+      }
+    };
+  });
+  document.querySelectorAll(".vivid-calendar-add").forEach(button => {
+    button.onclick = () => {
+      const reminder = getCinemaReminders().find(x => x.contentId === button.dataset.id && x.kind === button.dataset.kind);
+      if (reminder) {
+        addCinemaReminderToCalendar(reminder);
+        button.textContent = "Calendar added";
+      }
+    };
+  });
+}
+function pushStory(stories, item, category, label, headline, copy, kind, when) {
+  if (!item?.id) return;
+  const mediaType = item.media_type || (item.name ? "tv" : "movie");
+  stories.push({
+    id: String(item.id),
+    media_type: mediaType,
+    title: item.title || item.name || "Untitled",
+    poster_path: item.poster_path,
+    backdrop_path: item.backdrop_path,
+    category, label, headline, copy, kind, when,
+    meta: when ? releaseLanguage(when) : "Trending this week"
+  });
+}
+async function load() {
+  const now = today();
+  const futureEnd = addDays(now, 120);
+  const [future, nowPlaying, airing, trending] = await Promise.allSettled([
+    tmdbApi.futureMovies(1, now, futureEnd),
+    tmdbApi.nowPlayingMovies(1),
+    tmdbApi.airingTodayTv(1),
+    tmdbApi.trending("all", "week")
+  ]);
+  const stories = [];
+  const seen = new Set();
+  const add = (...args) => {
+    const item = args[1];
+    const key = String(item?.id || "") + ":" + (item?.media_type || (item?.name ? "tv" : "movie"));
+    if (!item?.id || seen.has(key)) return;
+    seen.add(key);
+    pushStory(stories, ...args);
+  };
+
+  (future.value?.results || [])
+    .filter(x => x.release_date && x.release_date >= now)
+    .slice(0, 8)
+    .forEach(x => add(stories, {...x, media_type: "movie"}, "releases", "RELEASE RADAR",
+      daysUntil(x.release_date) <= 1 ? (x.title || "A new movie") + " arrives next." : (x.title || "A new movie") + " is on the way.",
+      "A date-accurate release window, with a reminder you can turn on.", "release", x.release_date));
+
+  (nowPlaying.value?.results || [])
+    .filter(x => x.release_date && x.release_date <= now && daysUntil(x.release_date) >= -45)
+    .sort((a, b) => String(b.release_date).localeCompare(String(a.release_date)))
+    .slice(0, 6)
+    .forEach(x => add(stories, {...x, media_type: "movie"}, "inCinemas", "JUST RELEASED",
+      (x.title || "A movie") + " is out now.",
+      "Freshly released titles currently in the cinema/release cycle.", "released", x.release_date));
+
+  (airing.value?.results || []).slice(0, 6).forEach(x => add(stories, {...x, media_type: "tv"}, "episodes", "ON TV TODAY",
+    (x.name || "A series") + " is airing today.",
+    "Today's television schedule, pulled fresh from the catalogue.", "episode", now));
+
+  (trending.value?.results || []).slice(0, 6).forEach(x => add(stories, x, "trending", "TRENDING NOW",
+    (x.title || x.name || "A title") + " is getting attention.",
+    "Popular with viewers across Vivid's current catalogue.", "trend", null));
+
+  state.stories = stories;
+  render(document.querySelector(".vivid-news-filter.is-active")?.dataset.filter || "all");
+  const loading = $("news-loading");
+  if (loading) loading.hidden = true;
+  const status = $("news-status");
+  if (status) status.textContent = stories.length + " stories · Updated " + new Date().toLocaleTimeString([], {hour: "numeric", minute: "2-digit"});
+}
+async function refresh() {
+  const loading = $("news-loading");
+  const button = $("news-refresh");
+  if (button) { button.disabled = true; button.innerHTML = '<i class="bi bi-arrow-repeat"></i> Updating…'; }
+  if (loading) { loading.hidden = false; loading.textContent = "Checking the latest cinema data…"; }
+  clearTmdbCache();
+  try { await load(); }
+  catch (error) {
+    console.warn("Vivid cinema news unavailable:", error);
+    if (loading) loading.textContent = "Cinema news is temporarily unavailable.";
+  } finally {
+    if (button) { button.disabled = false; button.innerHTML = '<i class="bi bi-arrow-clockwise"></i> Refresh'; }
+  }
+}
+$("news-refresh")?.addEventListener("click", refresh);
+startCinemaReminderLoop();
+load().catch(error => {
+  console.warn("Vivid cinema news unavailable:", error);
+  const loading = $("news-loading");
+  if (loading) loading.textContent = "Cinema news is temporarily unavailable.";
+});
