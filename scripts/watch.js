@@ -3,7 +3,7 @@ import { getImageUrl, getMediaUrl, normalizeMedia, normalizeResults } from "./me
 import { buildTitleUrl, buildWatchUrl, getRoute } from "./routes.js";
 import { escapeHtml, getErrorMessage } from "./utils.js";
 import { getLocalLibrary, saveLocalLibrary, syncLocalItem, upsertLibraryItem, startLibrarySync } from "./library.js";
-import { getPlaybackProgress, savePlaybackProgress, flushPlaybackProgress, completePlaybackProgress, removePlaybackProgress, startPlaybackSync } from "./recommendations.js";
+import { getPlaybackProgress, savePlaybackProgress, flushPlaybackProgress, completePlaybackProgress, startPlaybackSync } from "./recommendations.js";
 import { VIVID_CONFIG } from "./config.js";
 
 const $=id=>document.getElementById(id);
