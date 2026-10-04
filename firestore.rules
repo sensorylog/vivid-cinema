@@ -44,7 +44,8 @@ service cloud.firestore {
 
     function validProgressData() {
       return request.resource.data.keys().hasOnly([
-        'id','media_type','progress','duration','percentage','completed','completedAt','season','episode','title','updatedAt'
+        'id','media_type','progress','duration','percentage','completed','completedAt',
+        'season','episode','title','updatedAt'
       ])
       && request.resource.data.id is string
       && request.resource.data.id.matches('^[0-9]+$')
@@ -70,6 +71,50 @@ service cloud.firestore {
       && request.resource.data.collection in ['favorites','watchLater','history']
       && request.resource.data.contentId.matches('^(movie|tv):[0-9]+$')
       && request.resource.data.deletedAt is number;
+    }
+
+    function validFeedbackData() {
+      return request.resource.data.keys().hasOnly([
+        'id','media_type','title','year','poster_path','backdrop_path','kind','updatedAt'
+      ])
+      && request.resource.data.kind in ['like','not_for_me','cleared']
+      && request.resource.data.updatedAt is number
+      && (!request.resource.data.keys().hasAny(['id']) || request.resource.data.id.matches('^[0-9]+$'))
+      && (!request.resource.data.keys().hasAny(['media_type']) || request.resource.data.media_type in ['movie','tv'])
+      && (!request.resource.data.keys().hasAny(['title']) || (request.resource.data.title is string && request.resource.data.title.size() <= 300))
+      && (!request.resource.data.keys().hasAny(['year']) || request.resource.data.year is string)
+      && (!request.resource.data.keys().hasAny(['poster_path']) || request.resource.data.poster_path is string)
+      && (!request.resource.data.keys().hasAny(['backdrop_path']) || request.resource.data.backdrop_path is string);
+    }
+
+    function validEventData() {
+      return request.resource.data.keys().hasOnly([
+        'id','type','contentId','mediaType','occurredAt','sessionId','metadata'
+      ])
+      && request.resource.data.id is string
+      && request.resource.data.type is string
+      && request.resource.data.type.size() <= 60
+      && request.resource.data.occurredAt is number
+      && request.resource.data.sessionId is string
+      && request.resource.data.sessionId.size() <= 100
+      && (!request.resource.data.keys().hasAny(['contentId']) || request.resource.data.contentId == null || request.resource.data.contentId.matches('^(movie|tv):[0-9]+$'))
+      && (!request.resource.data.keys().hasAny(['mediaType']) || request.resource.data.mediaType == null || request.resource.data.mediaType in ['movie','tv'])
+      && (!request.resource.data.keys().hasAny(['metadata']) || request.resource.data.metadata is map);
+    }
+
+    function validTasteData() {
+      return request.resource.data.keys().hasOnly([
+        'version','genres','languages','countries','actors','directors','media','decades','updatedAt'
+      ])
+      && request.resource.data.version is number
+      && request.resource.data.genres is map
+      && request.resource.data.languages is map
+      && request.resource.data.countries is map
+      && request.resource.data.actors is map
+      && request.resource.data.directors is map
+      && request.resource.data.media is map
+      && request.resource.data.decades is map
+      && request.resource.data.updatedAt is number;
     }
 
     function validProfile() {
@@ -135,6 +180,23 @@ service cloud.firestore {
       match /libraryTombstones/{tombstoneId} {
         allow read: if isOwner(userId);
         allow create, update: if isOwner(userId) && validTombstoneData();
+        allow delete: if isOwner(userId);
+      }
+
+      match /feedback/{contentId} {
+        allow read: if isOwner(userId);
+        allow create, update: if isOwner(userId) && validFeedbackData();
+        allow delete: if isOwner(userId);
+      }
+
+      match /events/{eventId} {
+        allow create: if isOwner(userId) && validEventData();
+        allow read, update, delete: if false;
+      }
+
+      match /taste/{tasteId} {
+        allow read: if isOwner(userId);
+        allow create, update: if isOwner(userId) && tasteId == "profile" && validTasteData();
         allow delete: if isOwner(userId);
       }
     }

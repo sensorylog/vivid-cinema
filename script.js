@@ -2,10 +2,11 @@ import { tmdbApi } from "./scripts/tmdb.js";
 import { getHomeSections, getHomeSectionPage, searchContent } from "./scripts/content.js";
 import { getImageUrl, getMediaUrl, getPersonUrl, normalizeResults } from "./scripts/media.js";
 import { getLocalLibrary } from "./scripts/library.js";
-import { getContinueWatching, getPlaybackProgress, getPersonalRecommendations, formatProgress } from "./scripts/recommendations.js";
+import { getContinueWatching, getPlaybackProgress, getPersonalRecommendations, getBecauseYouLiked, formatProgress } from "./scripts/recommendations.js";
 import { escapeHtml, debounce, getErrorMessage } from "./scripts/utils.js";
 import { buildWatchUrl } from "./scripts/routes.js";
 import { checkForReleaseAlerts, deliverReleaseAlerts, getPendingReleaseAlerts, requestReleaseAlerts, dismissReleaseAlert } from "./scripts/release-alerts.js";
+import { startIntelligenceSync, shouldShowColdStart, completeColdStart, dismissColdStart, recordBehavior } from "./scripts/intelligence.js";
 
 const $=id=>document.getElementById(id);
 let featured=[],activeIndex=0,heroMuted=true,heroPlaying=true,heroTimer=null,heroLoadToken=0,searchRequestId=0;
@@ -267,11 +268,37 @@ function renderContinueWatching(){
 
 async function renderRecommendations(){
  try{
-   const items=await getPersonalRecommendations(12);
-   if(!items.length)return;
-   $("recommended-section").hidden=false;
-   renderRail("recommended-rail",items);
+   const [items,because]=await Promise.all([getPersonalRecommendations(12),getBecauseYouLiked(12)]);
+   if(items.length){
+     $("recommended-section").hidden=false;
+     renderRail("recommended-rail",items);
+   }
+   if(because.length){
+     const seed=because[0]?.recommendationReason?.replace(/^Because you liked /,"");
+     if(seed) $("because-title").textContent="Because you liked "+seed;
+     $("because-section").hidden=false;
+     renderRail("because-rail",because);
+   }
  }catch(error){console.warn("Recommendations unavailable:",error)}
+}
+async function maybeShowColdStart(){
+ if(!shouldShowColdStart())return;
+ try{
+  const data=await getHomeSectionPage("trending",1);
+  const candidates=normalizeResults(data.items||[]).slice(0,10);
+  if(candidates.length<3)return;
+  const selected=new Set();
+  const modal=document.createElement("div");
+  modal.className="vivid-onboarding-modal";
+  modal.innerHTML='<div class="vivid-onboarding-dialog" role="dialog" aria-modal="true" aria-labelledby="vivid-onboarding-title"><div class="vivid-onboarding-head"><div><span>MAKE VIVID YOURS</span><h2 id="vivid-onboarding-title">Pick a few you already love.</h2><p>Choose at least 3. We’ll use them to shape your first recommendations.</p></div><button type="button" class="vivid-onboarding-close" aria-label="Skip personalization"><i class="bi bi-x-lg"></i></button></div><div class="vivid-onboarding-grid">'+candidates.map(item=>'<button type="button" class="vivid-onboarding-card" data-key="'+escapeHtml(item.media_type+":"+item.id)+'"><img src="'+getImageUrl(item.poster_path,"w342")+'" alt="'+escapeHtml(item.title)+'"><span>'+escapeHtml(item.title)+'</span></button>').join("")+'</div><div class="vivid-onboarding-actions"><small id="vivid-onboarding-count">0 selected</small><div><button type="button" class="vivid-button vivid-button--ghost" id="vivid-onboarding-skip">Skip</button><button type="button" class="vivid-button vivid-button--primary" id="vivid-onboarding-save" disabled>Continue</button></div></div></div>';
+  document.body.appendChild(modal);
+  const update=()=>{const n=selected.size;modal.querySelector("#vivid-onboarding-count").textContent=n+" selected";modal.querySelector("#vivid-onboarding-save").disabled=n<3};
+  modal.querySelectorAll(".vivid-onboarding-card").forEach(button=>button.addEventListener("click",()=>{const k=button.dataset.key;if(selected.has(k)){selected.delete(k);button.classList.remove("is-selected")}else if(selected.size<6){selected.add(k);button.classList.add("is-selected")}update()}));
+  const close=()=>{dismissColdStart();modal.remove()};
+  modal.querySelector(".vivid-onboarding-close").addEventListener("click",close);
+  modal.querySelector("#vivid-onboarding-skip").addEventListener("click",close);
+  modal.querySelector("#vivid-onboarding-save").addEventListener("click",async()=>{await completeColdStart(candidates.filter(x=>selected.has(x.media_type+":"+x.id)));modal.remove();await renderRecommendations()});
+ }catch(error){console.warn("Vivid cold-start unavailable:",error)}
 }
 
 async function loadHome(){
@@ -313,7 +340,7 @@ function showSearch(items){
 const search=debounce(async q=>{
  const requestId=++searchRequestId;
  if(!q){$("search-panel")?.classList.remove("is-open");return}
- try{const items=await searchContent(q);if(requestId!==searchRequestId)return;showSearch(items)}catch(e){if(requestId!==searchRequestId)return;$("search-panel").innerHTML='<div class="vivid-empty">'+escapeHtml(getErrorMessage(e))+"</div>";$("search-panel").classList.add("is-open")}
+ try{recordBehavior("search_query",null,{query:q});const items=await searchContent(q);if(requestId!==searchRequestId)return;showSearch(items)}catch(e){if(requestId!==searchRequestId)return;$("search-panel").innerHTML='<div class="vivid-empty">'+escapeHtml(getErrorMessage(e))+"</div>";$("search-panel").classList.add("is-open")}
 },300);
 
 async function browseByLetter(letter){
@@ -396,6 +423,7 @@ function wireHeroSwipe(){
 window.addEventListener("scroll",()=>{$("topbar")?.classList.toggle("is-scrolled",scrollY>18)},{passive:true});
 document.addEventListener("keydown",e=>{if(e.target.matches("input,textarea,select"))return;if(e.key==="ArrowLeft")showHero(activeIndex-1,true);if(e.key==="ArrowRight")showHero(activeIndex+1,true)});
 document.addEventListener("DOMContentLoaded",()=>{
+ void startIntelligenceSync().then(()=>window.setTimeout(()=>void maybeShowColdStart(),900)).catch(()=>window.setTimeout(()=>void maybeShowColdStart(),3200));
  wireRails();wireSearch();wireAlphabet();wireHeroSwipe();wireReleaseAlerts();
  initHero();loadHome();refreshReleaseAlerts();
  $("hero-prev")?.addEventListener("click",()=>showHero(activeIndex-1,true));

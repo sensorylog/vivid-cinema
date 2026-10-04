@@ -5,6 +5,7 @@ import { escapeHtml, getErrorMessage } from "./utils.js";
 import { getLocalLibrary, saveLocalLibrary, syncLocalItem, upsertLibraryItem, startLibrarySync } from "./library.js";
 import { getPlaybackProgress, savePlaybackProgress, flushPlaybackProgress, completePlaybackProgress, startPlaybackSync } from "./recommendations.js";
 import { VIVID_CONFIG } from "./config.js";
+import { recordBehavior, startIntelligenceSync } from "./intelligence.js";
 
 const $=id=>document.getElementById(id);
 const route=getRoute();
@@ -109,6 +110,7 @@ function renderShell(params){
    close?.focus();
    loaded=false;
    if(player) player.src=embedUrl;
+   recordBehavior("watch_started", media, { season: params.season, episode: params.episode, resumeAt: Number(saved?.progress || 0) });
    timeout=window.setTimeout(()=>{const status=$("player-status");if(!loaded&&status){status.textContent="VidAPI is taking longer than expected.";status.classList.add("is-warning")}},9000);
  };
  const closePlayer=()=>{
@@ -174,8 +176,11 @@ function handlePlayerEvent(event){
  const duration=Number(data.player_duration)||0;
  if(progress>0){
    savePlaybackProgress(progressKey(),{progress,duration,season:info.season??currentParams?.season,episode:info.episode??currentParams?.episode,title:media.title,media_type:media.media_type,id:media.id});
+   recordWatchActivity(progress,duration);
+   recordBehavior("playback_progress", media, { progress, duration, percentage: duration ? Math.round(progress / duration * 100) : 0, season: info.season ?? currentParams?.season, episode: info.episode ?? currentParams?.episode });
  }
  if(data.player_status==="completed"){
+   recordBehavior("watch_completed", media, { duration, season: info.season ?? currentParams?.season, episode: info.episode ?? currentParams?.episode });
    upsertLibraryItem("history",{id:media.id,media_type:media.media_type,title:media.title,year:media.year,poster_path:media.poster_path,backdrop_path:media.backdrop_path,completion:100,completedAt:Date.now(),updatedAt:Date.now()});
    completePlaybackProgress(progressKey(),{duration,season:info.season??currentParams?.season,episode:info.episode??currentParams?.episode,title:media.title,media_type:media.media_type,id:media.id});
    if(media.media_type==="tv"&&nextEpisode){
@@ -226,6 +231,7 @@ document.addEventListener("visibilitychange",()=>{
 });
 document.addEventListener("DOMContentLoaded",()=>{
  void startLibrarySync().catch(()=>{});
+ void startIntelligenceSync().catch(()=>{});
  void startPlaybackSync().catch(()=>{});
  load();
 });
