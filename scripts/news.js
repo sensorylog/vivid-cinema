@@ -155,7 +155,7 @@ function updateStatus(count) {
 }
 function addUnique(target, seen, s) {
   if (!s?.id) return;
-  const key = keyOf(s);
+  const key = s.category + ":" + keyOf(s);
   if (seen.has(key)) return;
   seen.add(key); target.push(s);
 }
