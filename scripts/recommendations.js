@@ -6,6 +6,7 @@ import { getTasteProfile, getNotForMeKeys, getFeedbackState, getTasteStrength, r
 const PROGRESS_KEY = "vivid:progress:v1";
 const FOR_YOU_CACHE_KEY = "vivid:for-you:v1";
 const FOR_YOU_CACHE_TTL = 30 * 60 * 1000;
+const TONIGHT_SESSION_KEY = "vivid:tonight:v1";
 const PROGRESS_SYNC_DEBOUNCE = 1800;
 
 let firebasePromise = null;
@@ -342,6 +343,63 @@ async function getRecommendationSeeds() {
     ...(library.history || []).filter(item => Number(item.completion || 0) >= 25),
     ...(library.watchLater || [])
   ]).sort((a, b) => Number(b.updatedAt || 0) - Number(a.updatedAt || 0)).slice(0, 8);
+}
+
+
+function readTonightSession() {
+  try { const value = JSON.parse(sessionStorage.getItem(TONIGHT_SESSION_KEY)); return value && typeof value === "object" ? value : { rejected: [] }; } catch { return { rejected: [] }; }
+}
+function writeTonightSession(value) {
+  try { sessionStorage.setItem(TONIGHT_SESSION_KEY, JSON.stringify(value)); } catch {}
+}
+function getTonightRejected() { return new Set(readTonightSession().rejected || []); }
+function rejectTonight(item) {
+  const state = readTonightSession();
+  const k = keyFor(item);
+  state.rejected = [...new Set([...(state.rejected || []), k])].slice(-40);
+  writeTonightSession(state);
+}
+function tonightScore(item, taste, progress, feedback) {
+  const genres = new Set(item.genre_ids || []);
+  const genre = Object.entries(taste.genres || {}).reduce((sum, [id, weight]) => sum + (genres.has(Number(id)) ? Number(weight) : 0), 0);
+  const quality = Math.min(1, Math.max(0, Number(item.vote_average || 0) / 10));
+  const popularity = Math.min(1, Math.log10(1 + Math.max(0, Number(item.popularity || 0))) / 4);
+  const media = Number(taste.media?.[item.media_type || "movie"] || 0);
+  const liked = feedback[keyFor(item)]?.kind === "like" ? 5 : 0;
+  const unfinished = progress[keyFor(item)] && !progress[keyFor(item)].completed ? -4 : 0;
+  return genre * 5.8 + media * 1.5 + quality * 2.2 + popularity * .65 + liked + unfinished;
+}
+export async function getTonightPick(options = {}) {
+  const limit = Math.max(1, Math.min(20, Number(options.limit) || 12));
+  const taste = await getTasteProfile();
+  const progress = readProgress();
+  const feedback = getFeedbackState();
+  const library = getLocalLibrary();
+  const excluded = new Set([...getNotForMeKeys(), ...getTonightRejected()]);
+  const watched = new Set((library.history || []).map(keyFor));
+  const seeds = await getRecommendationSeeds();
+  const calls = [];
+  seeds.slice(0, 6).forEach(seed => calls.push(seed.media_type === "tv" ? tmdbApi.tvRecommendations(seed.id) : tmdbApi.movieRecommendations(seed.id)));
+  const topGenres = Object.entries(taste.genres || {}).sort((a,b) => Number(b[1]) - Number(a[1])).slice(0, 4).map(([id]) => id).join("|");
+  if (topGenres) {
+    calls.push(tmdbApi.discoverMovies({ with_genres: topGenres, sort_by: "popularity.desc", vote_count_gte: 100, page: 1 }));
+    calls.push(tmdbApi.discoverTv({ with_genres: topGenres, sort_by: "popularity.desc", vote_count_gte: 50, page: 1 }));
+  } else {
+    calls.push(tmdbApi.trending("all", "week", 1));
+    calls.push(tmdbApi.popularMovies(1));
+  }
+  const responses = await Promise.allSettled(calls);
+  const candidates = uniqueByKey(responses.flatMap(result => result.status === "fulfilled" ? normalizeResults(result.value?.results || []) : []))
+    .filter(item => !excluded.has(keyFor(item)) && !watched.has(keyFor(item)));
+  return candidates.map(item => ({ ...item, tonightScore: tonightScore(item, taste, progress, feedback) }))
+    .sort((a,b) => b.tonightScore - a.tonightScore)
+    .slice(0, limit);
+}
+export function dismissTonightPick(item) {
+  if (item) {
+    rejectTonight(item);
+    recordBehavior("pick_for_me_rejected", item, { reason: "not_tonight" });
+  }
 }
 
 export async function getPersonalRecommendations(limit = 12) {
