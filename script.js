@@ -281,6 +281,26 @@ async function renderRecommendations(){
    }
  }catch(error){console.warn("Recommendations unavailable:",error)}
 }
+async function maybeShowColdStart(){
+ if(!shouldShowColdStart())return;
+ try{
+  const data=await getHomeSectionPage("trending",1);
+  const candidates=normalizeResults(data.items||[]).slice(0,10);
+  if(candidates.length<3)return;
+  const selected=new Set();
+  const modal=document.createElement("div");
+  modal.className="vivid-onboarding-modal";
+  modal.innerHTML='<div class="vivid-onboarding-dialog" role="dialog" aria-modal="true" aria-labelledby="vivid-onboarding-title"><div class="vivid-onboarding-head"><div><span>MAKE VIVID YOURS</span><h2 id="vivid-onboarding-title">Pick a few you already love.</h2><p>Choose at least 3. We’ll use them to shape your first recommendations.</p></div><button type="button" class="vivid-onboarding-close" aria-label="Skip personalization"><i class="bi bi-x-lg"></i></button></div><div class="vivid-onboarding-grid">'+candidates.map(item=>'<button type="button" class="vivid-onboarding-card" data-key="'+escapeHtml(item.media_type+":"+item.id)+'"><img src="'+getImageUrl(item.poster_path,"w342")+'" alt="'+escapeHtml(item.title)+'"><span>'+escapeHtml(item.title)+'</span></button>').join("")+'</div><div class="vivid-onboarding-actions"><small id="vivid-onboarding-count">0 selected</small><div><button type="button" class="vivid-button vivid-button--ghost" id="vivid-onboarding-skip">Skip</button><button type="button" class="vivid-button vivid-button--primary" id="vivid-onboarding-save" disabled>Continue</button></div></div></div>';
+  document.body.appendChild(modal);
+  const update=()=>{const n=selected.size;modal.querySelector("#vivid-onboarding-count").textContent=n+" selected";modal.querySelector("#vivid-onboarding-save").disabled=n<3};
+  modal.querySelectorAll(".vivid-onboarding-card").forEach(button=>button.addEventListener("click",()=>{const k=button.dataset.key;if(selected.has(k)){selected.delete(k);button.classList.remove("is-selected")}else if(selected.size<6){selected.add(k);button.classList.add("is-selected")}update()}));
+  const close=()=>{dismissColdStart();modal.remove()};
+  modal.querySelector(".vivid-onboarding-close").addEventListener("click",close);
+  modal.querySelector("#vivid-onboarding-skip").addEventListener("click",close);
+  modal.querySelector("#vivid-onboarding-save").addEventListener("click",async()=>{await completeColdStart(candidates.filter(x=>selected.has(x.media_type+":"+x.id)));modal.remove();await renderRecommendations()});
+ }catch(error){console.warn("Vivid cold-start unavailable:",error)}
+}
+
 async function loadHome(){
  const ids=["trending-rail","now-playing-rail","movies-rail","top-rated-rail","tv-rail","top-tv-rail","upcoming-rail"];
  ids.forEach(id=>skeleton($(id)));
