@@ -68,9 +68,9 @@ function wireLibraryActions() {
   const notForMe = $("title-not-for-me");
   const watchLater = $("library-watch-later");
   favorite?.addEventListener("click", () => {
+    const wasFavorite = hasLibraryItem("favorites", item);
     toggleLibraryItem("favorites", item);
-    const feedback = getFeedback(item);
-    if (feedback !== "like") setFeedback(item, "like");
+    setFeedback(item, wasFavorite ? "like" : "like");
     favorite.innerHTML = hasLibraryItem("favorites", item) ? '<i class="bi bi-heart-fill"></i> Liked' : '<i class="bi bi-heart"></i> Like';
     if (notForMe) {
       notForMe.setAttribute("aria-pressed","false");
