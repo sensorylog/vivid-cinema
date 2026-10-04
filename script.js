@@ -2,7 +2,7 @@ import { tmdbApi } from "./scripts/tmdb.js";
 import { getHomeSections, getHomeSectionPage, searchContent } from "./scripts/content.js";
 import { getImageUrl, getMediaUrl, getPersonUrl, normalizeResults } from "./scripts/media.js";
 import { getLocalLibrary } from "./scripts/library.js";
-import { getContinueWatching, getPlaybackProgress, getPersonalRecommendations, getBecauseYouLiked, formatProgress } from "./scripts/recommendations.js";
+import { getContinueWatching, getPlaybackProgress, getPersonalRecommendations, getBecauseYouLiked, getTonightPick, dismissTonightPick, formatProgress } from "./scripts/recommendations.js";
 import { escapeHtml, debounce, getErrorMessage } from "./scripts/utils.js";
 import { buildWatchUrl } from "./scripts/routes.js";
 import { checkForReleaseAlerts, deliverReleaseAlerts, getPendingReleaseAlerts, requestReleaseAlerts, dismissReleaseAlert } from "./scripts/release-alerts.js";
@@ -52,6 +52,25 @@ function wireCards(container){
  });
 }
 
+async function renderTonightPick() {
+  const section = $("tonight-section");
+  if (!section) return;
+  try {
+    const items = await getTonightPick({ limit: 8 });
+    const item = items[0];
+    if (!item) { section.hidden = true; return; }
+    section.hidden = false;
+    $("tonight-title").textContent = item.title;
+    $("tonight-reason").textContent = item.recommendationReason || "A strong match for your taste tonight.";
+    $("tonight-poster").src = getImageUrl(item.poster_path, "w500");
+    $("tonight-poster").alt = item.title + " poster";
+    $("tonight-watch").href = buildWatchUrl(item.id, item.media_type || "movie");
+    $("tonight-another").onclick = async () => { dismissTonightPick(item); await renderTonightPick(); };
+    $("tonight-not-tonight").onclick = async () => { dismissTonightPick(item); await renderTonightPick(); };
+  } catch {
+    section.hidden = true;
+  }
+}
 function renderRail(id,items=[],options={}){
  const el=$(id);if(!el)return;
  const normalized=items.map(x=>x.media_type?x:normalizeResults([x])[0]).filter(Boolean);
@@ -270,6 +289,7 @@ function renderContinueWatching(){
 async function renderRecommendations(){
  try{
    const [items,because]=await Promise.all([getPersonalRecommendations(12),getBecauseYouLiked(12)]);
+     await renderTonightPick();
    if(items.length){
      $("recommended-section").hidden=false;
      renderRail("recommended-rail",items);
