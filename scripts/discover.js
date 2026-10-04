@@ -3,6 +3,7 @@ import { CURATED_CATEGORIES, getCuratedPage } from "./content.js";
 import { getImageUrl, getMediaUrl, normalizeResults } from "./media.js";
 import { escapeHtml, getErrorMessage } from "./utils.js";
 import { getRoute } from "./routes.js";
+import { rankSearchResults } from "./search.js";
 
 const $ = (id) => document.getElementById(id);
 const route = getRoute();
@@ -206,7 +207,8 @@ async function fetchDiscovery() {
         .filter((item) => !state.year || item.year === String(state.year))
         .filter((item) => !state.rating || Number(item.vote_average || 0) >= Number(state.rating));
       totalPages = Math.max(...results.map((data) => Number(data.total_pages || 1)));
-      items = sortItems(items);
+      items = await rankSearchResults(items, query, { limit: items.length || 20 });
+      if (!items.length) items = sortItems(normalized);
     } else if (state.category) {
       const data = await getCuratedPage(state.category, state.page, {
         genre: state.genre,

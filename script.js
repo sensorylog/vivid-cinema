@@ -7,6 +7,7 @@ import { escapeHtml, debounce, getErrorMessage } from "./scripts/utils.js";
 import { buildWatchUrl } from "./scripts/routes.js";
 import { checkForReleaseAlerts, deliverReleaseAlerts, getPendingReleaseAlerts, requestReleaseAlerts, dismissReleaseAlert } from "./scripts/release-alerts.js";
 import { startIntelligenceSync, shouldShowColdStart, completeColdStart, dismissColdStart, recordBehavior } from "./scripts/intelligence.js";
+import { searchIntelligently, getRecentSearches, rememberSearch, clearRecentSearches } from "./scripts/search.js";
 
 const $=id=>document.getElementById(id);
 let featured=[],activeIndex=0,heroMuted=true,heroPlaying=true,heroTimer=null,heroLoadToken=0,searchRequestId=0;
@@ -326,22 +327,47 @@ async function loadHome(){
  if("requestIdleCallback" in window)requestIdleCallback(loadRecommendations,{timeout:2600});
  else window.setTimeout(loadRecommendations,1800);
 }
-function showSearch(items){
+function showRecentSearches(){
  const panel=$("search-panel");if(!panel)return;
- panel.innerHTML=items.length?items.slice(0,8).map(m=>{
-   const person=m.media_type==="person";
-   const href=person?getPersonUrl(m):getMediaUrl(m);
-   const meta=person?"Person":(m.year||"—")+" · "+(m.media_type==="tv"?"TV":"Movie");
-   return '<a class="vivid-search-result" href="'+escapeHtml(href)+'"><img src="'+getImageUrl(m.poster_path,"w92")+'" alt=""><span><strong>'+escapeHtml(m.title)+'</strong><br><small>'+escapeHtml(meta)+"</small></span></a>";
- }).join(""):'<div class="vivid-empty">No matches found.</div>';
+ const recent=getRecentSearches();
+ panel.innerHTML='<div class="vivid-search-head"><span>RECENT SEARCHES</span>'+(recent.length?'<button type="button" id="clear-recent-searches">Clear</button>':"")+'</div>'+
+   (recent.length?recent.map(q=>'<button type="button" class="vivid-search-recent" data-recent-search="'+escapeHtml(q)+'"><i class="bi bi-clock-history" aria-hidden="true"></i><span>'+escapeHtml(q)+'</span></button>').join(""):'<div class="vivid-empty">Search movies, series, people or genres.</div>');
+ panel.classList.add("is-open");panel.setAttribute("aria-expanded","true");
+ panel.querySelector("#clear-recent-searches")?.addEventListener("click",()=>{clearRecentSearches();showRecentSearches()});
+ panel.querySelectorAll("[data-recent-search]").forEach(button=>button.addEventListener("click",()=>{const input=$("search-input");input.value=button.dataset.recentSearch;void runSearch(button.dataset.recentSearch)}));
+}
+
+function showSearch(items,intent){
+ const panel=$("search-panel");if(!panel)return;
+ const intentLabel=[intent?.type?intent.type==="tv"?"TV":"Movies":"",intent?.genres?.length?"Genre match":"",intent?.similarity?"Similarity search":""].filter(Boolean).join(" · ");
+ panel.innerHTML=(intentLabel?'<div class="vivid-search-head"><span>'+escapeHtml(intentLabel)+'</span></div>':"")+
+   (items.length?items.map(m=>{
+     const person=m.media_type==="person";
+     const href=person?getPersonUrl(m):getMediaUrl(m);
+     const meta=person?"Person":(m.year||"—")+" · "+(m.media_type==="tv"?"TV":"Movie");
+     return '<a class="vivid-search-result" href="'+escapeHtml(href)+'"><img src="'+getImageUrl(m.poster_path,"w92")+'" alt=""><span><strong>'+escapeHtml(m.title)+'</strong><br><small>'+escapeHtml(meta)+'</small></span></a>';
+   }).join(""):'<div class="vivid-empty">No matches found.</div>');
  panel.classList.add("is-open");panel.setAttribute("aria-expanded","true");
 }
 
-const search=debounce(async q=>{
+async function runSearch(q){
  const requestId=++searchRequestId;
- if(!q){$("search-panel")?.classList.remove("is-open");return}
- try{recordBehavior("search_query",null,{query:q});const items=await searchContent(q);if(requestId!==searchRequestId)return;showSearch(items)}catch(e){if(requestId!==searchRequestId)return;$("search-panel").innerHTML='<div class="vivid-empty">'+escapeHtml(getErrorMessage(e))+"</div>";$("search-panel").classList.add("is-open")}
-},300);
+ const query=String(q||"").trim();
+ if(!query){showRecentSearches();return}
+ try{
+   recordBehavior("search_query",null,{query});
+   const result=await searchIntelligently(query);
+   if(requestId!==searchRequestId)return;
+   rememberSearch(query);
+   showSearch(result.items,result.intent);
+ }catch(e){
+   if(requestId!==searchRequestId)return;
+   $("search-panel").innerHTML='<div class="vivid-empty">'+escapeHtml(getErrorMessage(e))+"</div>";
+   $("search-panel").classList.add("is-open");
+ }
+}
+
+const search=debounce((q)=>void runSearch(q),300);
 
 async function browseByLetter(letter){
  const rail=$("alphabet-rail"),status=$("alphabet-status");
@@ -412,7 +438,9 @@ function wireReleaseAlerts(){
 }
 function wireSearch(){
  const input=$("search-input");if(!input)return;
+ input.addEventListener("focus",()=>{if(!input.value.trim())showRecentSearches()});
  input.addEventListener("input",e=>search(e.target.value.trim()));
+ input.addEventListener("keydown",e=>{if(e.key==="Enter"&&input.value.trim()){e.preventDefault();void runSearch(input.value.trim())}});
  document.addEventListener("click",e=>{if(!e.target.closest(".vivid-nav-search")&&!e.target.closest("#search-panel"))$("search-panel")?.classList.remove("is-open")});
 }
 function wireHeroSwipe(){
