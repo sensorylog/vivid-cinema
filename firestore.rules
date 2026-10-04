@@ -72,6 +72,208 @@ service cloud.firestore {
       && request.resource.data.deletedAt is number;
     }
 
+    function validFeedbackData() {
+      return request.resource.data.keys().hasOnly([
+        'id','media_type','title','year','poster_path','backdrop_path','kind','updatedAt'
+      ])
+      && request.resource.data.kind in ['like','not_for_me','cleared']
+      && request.resource.data.updatedAt is number
+      && (!request.resource.data.keys().hasAny(['id']) || request.resource.data.id.matches('^[0-9]+
+      return request.resource.data.keys().hasOnly([
+        'displayName','email','provider','preferences','createdAt','updatedAt'
+      ])
+      && (!request.resource.data.keys().hasAny(['displayName']) ||
+          (request.resource.data.displayName is string &&
+           request.resource.data.displayName.size() <= 100))
+      && (!request.resource.data.keys().hasAny(['email']) ||
+          (request.resource.data.email == null ||
+           (request.resource.data.email is string &&
+            request.resource.data.email.size() <= 320)))
+      && (!request.resource.data.keys().hasAny(['provider']) ||
+          (request.resource.data.provider is string &&
+           request.resource.data.provider.size() <= 50))
+      && (!request.resource.data.keys().hasAny(['preferences']) || validPreferences())
+      && (!request.resource.data.keys().hasAny(['createdAt']) || request.resource.data.createdAt is timestamp)
+      && (!request.resource.data.keys().hasAny(['updatedAt']) || request.resource.data.updatedAt is timestamp);
+    }
+
+    function validPreferences() {
+      return request.resource.data.preferences.keys().hasOnly([
+        'providerCountry','autoplayTrailers','reducedMotion'
+      ])
+      && request.resource.data.preferences.providerCountry is string
+      && request.resource.data.preferences.providerCountry.matches('^[A-Z]{2}$')
+      && request.resource.data.preferences.autoplayTrailers is bool
+      && request.resource.data.preferences.reducedMotion is bool;
+    }
+
+    match /users/{userId} {
+      allow get: if isOwner(userId);
+      allow list: if false;
+      allow create: if isOwner(userId) && validProfile();
+      allow update: if isOwner(userId) && validProfile();
+      allow delete: if isOwner(userId);
+
+      match /favorites/{contentId} {
+        allow read: if isOwner(userId);
+        allow create, update: if isOwner(userId) && validContentId() && validLibraryData();
+        allow delete: if isOwner(userId);
+      }
+
+      match /watchLater/{contentId} {
+        allow read: if isOwner(userId);
+        allow create, update: if isOwner(userId) && validContentId() && validLibraryData();
+        allow delete: if isOwner(userId);
+      }
+
+      match /history/{contentId} {
+        allow read: if isOwner(userId);
+        allow create, update: if isOwner(userId) && validContentId() && validLibraryData();
+        allow delete: if isOwner(userId);
+      }
+
+      match /progress/{contentId} {
+        allow read: if isOwner(userId);
+        allow create, update: if isOwner(userId) && validContentId() && validProgressData();
+        allow delete: if isOwner(userId);
+      }
+
+      match /libraryTombstones/{tombstoneId} {
+        allow read: if isOwner(userId);
+        allow create, update: if isOwner(userId) && validTombstoneData();
+        allow delete: if isOwner(userId);
+      }
+
+      match /feedback/{contentId} {
+        allow read: if isOwner(userId);
+        allow create, update: if isOwner(userId) && validFeedbackData();
+        allow delete: if isOwner(userId);
+      }
+
+      match /events/{eventId} {
+        allow create: if isOwner(userId) && validEventData();
+        allow read, update, delete: if false;
+      }
+
+      match /taste/{tasteId} {
+        allow read: if isOwner(userId);
+        allow create, update: if isOwner(userId) && tasteId == "profile" && validTasteData();
+        allow delete: if isOwner(userId);
+      }
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
+))
+      && (!request.resource.data.keys().hasAny(['media_type']) || request.resource.data.media_type in ['movie','tv'])
+      && (!request.resource.data.keys().hasAny(['title']) || (request.resource.data.title is string && request.resource.data.title.size() <= 300));
+    }
+
+    function validEventData() {
+      return request.resource.data.keys().hasOnly([
+        'id','type','contentId','mediaType','occurredAt','sessionId','metadata'
+      ])
+      && request.resource.data.id is string
+      && request.resource.data.type is string
+      && request.resource.data.type.size() <= 60
+      && request.resource.data.occurredAt is number
+      && request.resource.data.sessionId is string
+      && request.resource.data.sessionId.size() <= 100
+      && (!request.resource.data.keys().hasAny(['contentId']) || request.resource.data.contentId == null || request.resource.data.contentId.matches('^(movie|tv):[0-9]+
+      return request.resource.data.keys().hasOnly([
+        'displayName','email','provider','preferences','createdAt','updatedAt'
+      ])
+      && (!request.resource.data.keys().hasAny(['displayName']) ||
+          (request.resource.data.displayName is string &&
+           request.resource.data.displayName.size() <= 100))
+      && (!request.resource.data.keys().hasAny(['email']) ||
+          (request.resource.data.email == null ||
+           (request.resource.data.email is string &&
+            request.resource.data.email.size() <= 320)))
+      && (!request.resource.data.keys().hasAny(['provider']) ||
+          (request.resource.data.provider is string &&
+           request.resource.data.provider.size() <= 50))
+      && (!request.resource.data.keys().hasAny(['preferences']) || validPreferences())
+      && (!request.resource.data.keys().hasAny(['createdAt']) || request.resource.data.createdAt is timestamp)
+      && (!request.resource.data.keys().hasAny(['updatedAt']) || request.resource.data.updatedAt is timestamp);
+    }
+
+    function validPreferences() {
+      return request.resource.data.preferences.keys().hasOnly([
+        'providerCountry','autoplayTrailers','reducedMotion'
+      ])
+      && request.resource.data.preferences.providerCountry is string
+      && request.resource.data.preferences.providerCountry.matches('^[A-Z]{2}$')
+      && request.resource.data.preferences.autoplayTrailers is bool
+      && request.resource.data.preferences.reducedMotion is bool;
+    }
+
+    match /users/{userId} {
+      allow get: if isOwner(userId);
+      allow list: if false;
+      allow create: if isOwner(userId) && validProfile();
+      allow update: if isOwner(userId) && validProfile();
+      allow delete: if isOwner(userId);
+
+      match /favorites/{contentId} {
+        allow read: if isOwner(userId);
+        allow create, update: if isOwner(userId) && validContentId() && validLibraryData();
+        allow delete: if isOwner(userId);
+      }
+
+      match /watchLater/{contentId} {
+        allow read: if isOwner(userId);
+        allow create, update: if isOwner(userId) && validContentId() && validLibraryData();
+        allow delete: if isOwner(userId);
+      }
+
+      match /history/{contentId} {
+        allow read: if isOwner(userId);
+        allow create, update: if isOwner(userId) && validContentId() && validLibraryData();
+        allow delete: if isOwner(userId);
+      }
+
+      match /progress/{contentId} {
+        allow read: if isOwner(userId);
+        allow create, update: if isOwner(userId) && validContentId() && validProgressData();
+        allow delete: if isOwner(userId);
+      }
+
+      match /libraryTombstones/{tombstoneId} {
+        allow read: if isOwner(userId);
+        allow create, update: if isOwner(userId) && validTombstoneData();
+        allow delete: if isOwner(userId);
+      }
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
+))
+      && (!request.resource.data.keys().hasAny(['mediaType']) || request.resource.data.mediaType == null || request.resource.data.mediaType in ['movie','tv'])
+      && (!request.resource.data.keys().hasAny(['metadata']) || request.resource.data.metadata is map);
+    }
+
+    function validTasteData() {
+      return request.resource.data.keys().hasOnly([
+        'version','genres','languages','countries','actors','directors','media','decades','updatedAt'
+      ])
+      && request.resource.data.version is number
+      && request.resource.data.genres is map
+      && request.resource.data.languages is map
+      && request.resource.data.countries is map
+      && request.resource.data.actors is map
+      && request.resource.data.directors is map
+      && request.resource.data.media is map
+      && request.resource.data.decades is map
+      && request.resource.data.updatedAt is number;
+    }
+
     function validProfile() {
       return request.resource.data.keys().hasOnly([
         'displayName','email','provider','preferences','createdAt','updatedAt'
