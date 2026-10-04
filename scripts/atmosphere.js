@@ -55,7 +55,9 @@ function setupAmbientArtwork(){
   if(reduceMotion || document.body.matches(".vivid-landing") || document.body.matches(".vivid-watch-page")) return;
   const sources=()=>[...document.querySelectorAll("img[src]")].map(img=>img.currentSrc||img.src).filter(src=>/^https?:/i.test(src));
   const ensure=()=>{
-    const list=[...new Set(sources())].slice(0,18);
+    // Ambient artwork is decorative; keep it well outside the critical path and
+    // sample only a couple of already-requested images to avoid duplicate decoding.
+    const list=[...new Set(sources())].slice(0,2);
     if(!list.length)return;
     let host=document.querySelector(".vivid-ambient-art");
     if(!host){
@@ -85,7 +87,8 @@ function setupAmbientArtwork(){
   const observer=new MutationObserver(ensure);
   observer.observe(document.body,{childList:true,subtree:true});
 }
-setupAmbientArtwork();
+if ("requestIdleCallback" in window) requestIdleCallback(setupAmbientArtwork, { timeout: 3000 });
+else window.setTimeout(setupAmbientArtwork, 2200);
 
 const mutationObserver=new MutationObserver(records=>{
   for(const record of records){

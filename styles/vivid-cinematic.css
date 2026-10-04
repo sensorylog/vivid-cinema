@@ -680,3 +680,11 @@ body.vivid-cinema-home{
 @media(prefers-reduced-motion:reduce){
   .vivid-catalogue-chips a{transition:none}
 }
+
+
+/* Performance: below-the-fold catalogue rails should not consume layout/paint time
+   before the user can reach them. The intrinsic size keeps scrolling stable. */
+.vivid-cinema-home .vivid-rails{
+  content-visibility:auto;
+  contain-intrinsic-size:420px;
+}

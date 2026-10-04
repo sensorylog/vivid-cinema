@@ -1,5 +1,13 @@
-import "./analytics.js";
 import { VIVID_CONFIG } from "./config.js";
+
+// Analytics is useful, but it is not part of the critical render path.
+// Load it after the first useful paint so Firebase/Analytics cannot compete
+// with the home hero and catalogue during startup.
+function scheduleAnalytics() {
+  const load = () => import("./analytics.js").catch(error => console.warn("Vivid Analytics unavailable:", error));
+  if ("requestIdleCallback" in window) requestIdleCallback(load, { timeout: 2500 });
+  else window.setTimeout(load, 1800);
+}
 
 const MOBILE_BREAKPOINT = 768;
 let initialized = false;
@@ -78,6 +86,7 @@ function initAppShell() {
 
   requestAnimationFrame(() => {
     document.documentElement.dataset.vividReady = "true";
+    scheduleAnalytics();
   });
 }
 
