@@ -15,6 +15,8 @@ const state = {
   rating: route.params.get("rating") || "",
   region: route.params.get("region") || "",
   provider: route.params.get("provider") || "",
+  mood: route.params.get("mood") || "",
+  runtime: route.params.get("runtime") || "",
   category: route.params.get("category") || "",
   query: route.params.get("q") || "",
   page: Number(route.params.get("page") || 1) || 1,
@@ -24,6 +26,28 @@ const state = {
 if (!CURATED_CATEGORIES[state.category]) state.category = "";
 let genres = { movie: [], tv: [] };
 let providers = { movie: [], tv: [] };
+
+const MOODS = Object.freeze({
+  relax: { label: "Relax", genres: [35, 10751], sort: "vote_average.desc" },
+  intense: { label: "Intense", genres: [28, 53, 80], sort: "popularity.desc" },
+  funny: { label: "Funny", genres: [35], sort: "vote_average.desc" },
+  romantic: { label: "Romantic", genres: [10749, 18], sort: "vote_average.desc" },
+  thoughtful: { label: "Thought-provoking", genres: [18, 9648, 99], sort: "vote_average.desc" },
+  escapist: { label: "Escapist", genres: [12, 14, 878], sort: "popularity.desc" },
+  scary: { label: "Scary", genres: [27, 53], sort: "popularity.desc" },
+  emotional: { label: "Emotional", genres: [18, 10749], sort: "vote_average.desc" },
+  fast: { label: "Fast-paced", genres: [28, 53], sort: "popularity.desc" },
+  late: { label: "Late-night", genres: [27, 9648, 53], sort: "vote_average.desc" }
+});
+const RUNTIMES = Object.freeze({
+  short: { label: "Under 90 min", min: 0, max: 90 },
+  standard: { label: "90–120 min", min: 90, max: 120 },
+  long: { label: "2+ hours", min: 120, max: 300 },
+  episode: { label: "One episode", min: 0, max: 70 },
+  shortseries: { label: "Short series", min: 1, max: 8 },
+  binge: { label: "Long binge", min: 9, max: 60 }
+});
+
 const FEATURED_PROVIDER_IDS = [8, 119, 337, 1899, 350, 15, 531, 386, 283, 11];
 const FEATURED_PROVIDER_NAMES = new Map([
   [8, "Netflix"], [119, "Prime Video"], [337, "Disney+"], [1899, "Max"],
@@ -77,6 +101,8 @@ function syncUrl() {
   if (state.rating) params.set("rating", state.rating);
   if (state.region) params.set("region", state.region);
   if (state.provider) params.set("provider", state.provider);
+  if (state.mood) params.set("mood", state.mood);
+  if (state.runtime) params.set("runtime", state.runtime);
   if (state.query) params.set("q", state.query);
   if (state.page > 1) params.set("page", String(state.page));
   history.replaceState(null, "", params.toString() ? "discover.html?" + params : "discover.html");
@@ -160,14 +186,19 @@ function discoverParams(type) {
   const sort = type === "tv"
     ? state.sort.replace("primary_release_date", "first_air_date")
     : state.sort;
-  return {
+  const mood = MOODS[state.mood];
+  const runtime = RUNTIMES[state.runtime];
+  const moodGenres = mood?.genres?.length ? mood.genres.join(",") : undefined;
+  const baseGenres = state.genre || moodGenres;
+  const params = {
     page: state.page,
     sort_by: sort,
-    with_genres: state.genre || undefined,
+    with_genres: baseGenres,
     ...(type === "movie"
       ? { primary_release_year: state.year || undefined }
       : { first_air_date_year: state.year || undefined }),
     "vote_average.gte": state.rating || undefined,
+    ...(type === "movie" && runtime ? { with_runtime_gte: runtime.min, with_runtime_lte: runtime.max } : {}),
     watch_region: state.region || undefined,
     with_watch_monetization_types: state.provider ? "flatrate" : undefined,
     with_watch_providers: state.provider || undefined
@@ -280,6 +311,8 @@ function syncControlsFromUrl() {
   $("sort-filter").value = state.sort;
   $("rating-filter").value = state.rating;
   $("region-filter").value = state.region;
+  document.querySelectorAll("[data-mood]").forEach((button) => button.classList.toggle("is-active", button.dataset.mood === state.mood));
+  document.querySelectorAll("[data-runtime]").forEach((button) => button.classList.toggle("is-active", button.dataset.runtime === state.runtime));
   populateProviders();
 }
 
@@ -303,6 +336,8 @@ function resetFilters() {
   state.rating = "";
   state.region = "";
   state.provider = "";
+  state.mood = "";
+  state.runtime = "";
   state.category = "";
   state.query = "";
   state.page = 1;
@@ -357,6 +392,8 @@ function wire() {
     }
     fetchDiscovery();
   });
+  document.querySelectorAll("[data-mood]").forEach((button) => button.addEventListener("click", () => { state.mood = button.dataset.mood || ""; state.page = 1; document.querySelectorAll("[data-mood]").forEach((item) => item.classList.toggle("is-active", item.dataset.mood === state.mood)); fetchDiscovery(); }));
+  document.querySelectorAll("[data-runtime]").forEach((button) => button.addEventListener("click", () => { state.runtime = button.dataset.runtime || ""; state.page = 1; document.querySelectorAll("[data-runtime]").forEach((item) => item.classList.toggle("is-active", item.dataset.runtime === state.runtime)); fetchDiscovery(); }));
   $("reset-filters").addEventListener("click", resetFilters);
 
   $("prev-page").addEventListener("click", () => {

@@ -66,6 +66,8 @@ export const tmdbApi = Object.freeze({
   searchKeywords: (query, page = 1) => tmdb("search/keyword", { query, page }),
   discoverMovies: (params = {}) => tmdb("discover/movie", params),
   discoverTv: (params = {}) => tmdb("discover/tv", params),
+  discoverMoviesByRuntime: (params = {}) => tmdb("discover/movie", params),
+  discoverTvByRuntime: (params = {}) => tmdb("discover/tv", params),
   movieWatchProviders: (region = "") => tmdb("watch/providers/movie", { watch_region: region || undefined }),
   tvWatchProviders: (region = "") => tmdb("watch/providers/tv", { watch_region: region || undefined }),
   movieDetailsBasic: (id) => tmdb("movie/" + encodeURIComponent(id)),
