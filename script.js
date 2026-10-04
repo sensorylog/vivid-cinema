@@ -423,8 +423,10 @@ function wireHeroSwipe(){
 window.addEventListener("scroll",()=>{$("topbar")?.classList.toggle("is-scrolled",scrollY>18)},{passive:true});
 document.addEventListener("keydown",e=>{if(e.target.matches("input,textarea,select"))return;if(e.key==="ArrowLeft")showHero(activeIndex-1,true);if(e.key==="ArrowRight")showHero(activeIndex+1,true)});
 document.addEventListener("DOMContentLoaded",()=>{
+ void startIntelligenceSync().catch(()=>{});
  wireRails();wireSearch();wireAlphabet();wireHeroSwipe();wireReleaseAlerts();
  initHero();loadHome();refreshReleaseAlerts();
+ window.setTimeout(()=>void maybeShowColdStart(),3200);
  $("hero-prev")?.addEventListener("click",()=>showHero(activeIndex-1,true));
  $("hero-next")?.addEventListener("click",()=>showHero(activeIndex+1,true));
  $("hero-sound")?.addEventListener("click",toggleSound);$("hero-pause")?.addEventListener("click",togglePause);
