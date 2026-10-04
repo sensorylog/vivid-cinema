@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-labelledby="title desc">
+<title id="title">Vivid Cinema — Find something worth watching.</title>
+<desc id="desc">Vivid Cinema movie and series discovery.</desc>
+<defs>
+<linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#050608"/><stop offset=".55" stop-color="#101725"/><stop offset="1" stop-color="#050608"/></linearGradient>
+<radialGradient id="glow" cx=".75" cy=".35" r=".6"><stop offset="0" stop-color="#1f5d8a" stop-opacity=".45"/><stop offset="1" stop-color="#1f5d8a" stop-opacity="0"/></radialGradient>
+</defs>
+<rect width="1200" height="630" fill="url(#bg)"/><rect width="1200" height="630" fill="url(#glow)"/>
+<g transform="translate(92 86)"><rect width="82" height="82" rx="22" fill="#0d1118" stroke="#fff" stroke-opacity=".18"/><path d="M24 29h34l-9 13 9 11H24l9-12z" fill="#fff"/><path d="M31 53h22" stroke="#fff" stroke-width="5" stroke-linecap="round"/></g>
+<text x="92" y="270" fill="#fff" font-family="Arial,Helvetica,sans-serif" font-size="76" font-weight="700">Vivid Cinema</text>
+<text x="96" y="340" fill="#c7d1dc" font-family="Arial,Helvetica,sans-serif" font-size="34">Find something worth watching.</text>
+<text x="96" y="412" fill="#8e9baa" font-family="Arial,Helvetica,sans-serif" font-size="25">Discover movies and series • Explore • Save • Watch</text>
+<rect x="96" y="485" width="230" height="4" rx="2" fill="#fff" opacity=".8"/>
+</svg>
