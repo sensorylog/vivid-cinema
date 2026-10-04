@@ -438,6 +438,7 @@ export async function getPersonalRecommendations(limit = 12) {
   const fingerprint = [
     ...Object.entries(feedback).map(([k, v]) => k + ":" + v.kind + ":" + v.updatedAt),
     ...Object.entries(progress).map(([k, v]) => k + ":" + v.updatedAt),
+    "recent:" + (library.history || []).slice(0, 5).map(item => keyFor(item) + ":" + (item.lastWatchedAt || item.updatedAt || "")).join(","),
     "taste:" + Number(taste.updatedAt || 0)
   ].sort().join("|");
 
