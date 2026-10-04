@@ -11,7 +11,13 @@ const HOME_LOADERS = Object.freeze({
   airingToday: (page) => tmdbApi.airingTodayTv(page),
   anime: (page) => tmdbApi.discoverMovies({ page, with_genres: 16, sort_by: "popularity.desc" }),
   kdrama: (page) => tmdbApi.discoverTv({ page, with_original_language: "ko", sort_by: "popularity.desc" }),
-  upcoming: (page) => tmdbApi.upcomingMovies(page)
+  upcoming: (page) => {
+    const now = new Date();
+    const from = now.toISOString().slice(0, 10);
+    const future = new Date(now);
+    future.setDate(future.getDate() + 120);
+    return tmdbApi.futureMovies(page, from, future.toISOString().slice(0, 10));
+  }
 });
 
 export const HOME_SECTION_META = Object.freeze({
