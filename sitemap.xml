@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://vivid-cinema.firebaseapp.com/home.html</loc></url>
-  <url><loc>https://vivid-cinema.firebaseapp.com/discover.html</loc></url>
+  <url><loc>https://vivid-cinema.web.app/</loc></url>
+  <url><loc>https://vivid-cinema.web.app/home.html</loc></url>
+  <url><loc>https://vivid-cinema.web.app/discover.html</loc></url>
+  <url><loc>https://vivid-cinema.web.app/about.html</loc></url>
+  <url><loc>https://vivid-cinema.web.app/help.html</loc></url>
+  <url><loc>https://vivid-cinema.web.app/contact.html</loc></url>
+  <url><loc>https://vivid-cinema.web.app/accessibility.html</loc></url>
 </urlset>
