@@ -499,8 +499,14 @@ function wireHeroSwipe(){
 }
 window.addEventListener("scroll",()=>{$("topbar")?.classList.toggle("is-scrolled",scrollY>18)},{passive:true});
 document.addEventListener("keydown",e=>{if(e.target.matches("input,textarea,select"))return;if(e.key==="ArrowLeft")showHero(activeIndex-1,true);if(e.key==="ArrowRight")showHero(activeIndex+1,true)});
-document.addEventListener("DOMContentLoaded",()=>{
- void startIntelligenceSync().then(()=>window.setTimeout(()=>void maybeShowColdStart(),900)).catch(()=>window.setTimeout(()=>void maybeShowColdStart(),3200));
+document.addEventListener("DOMContentLoaded",async()=>{
+ // First-entry taste selection is a gate: new users choose a few titles (or skip)
+ // before Vivid paints the main catalogue, so personalization is intentional from day one.
+ const needsColdStart=shouldShowColdStart();
+ if(needsColdStart)document.body.classList.add("vivid-onboarding-active");
+ try{await startIntelligenceSync()}catch{}
+ if(shouldShowColdStart())await maybeShowColdStart();
+ if(needsColdStart)document.body.classList.remove("vivid-onboarding-active");
  wireRails();wireSearch();wireAlphabet();wireHeroSwipe();wireReleaseAlerts();
  initHero();loadHome();refreshReleaseAlerts();
  $("hero-prev")?.addEventListener("click",()=>showHero(activeIndex-1,true));
