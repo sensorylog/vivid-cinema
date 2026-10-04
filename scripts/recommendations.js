@@ -338,12 +338,14 @@ function rankForYou(candidates, taste, progress, feedback, excluded, limit, rece
     const repetitionPenalty = dominantGenre
       ? Math.min(2.2, (genreCounts.get(dominantGenre) || 0) * .65)
       : 0;
-    const diversityScore = entry.score - repetitionPenalty + (secondaryGenre && !genreCounts.has(secondaryGenre) ? .35 : 0);
+    const knownGenreCount = genres.filter(id => genreCounts.has(id)).length;
+    const exploration = knownGenreCount === 0 ? .9 : knownGenreCount === 1 && dominantGenre !== undefined ? .3 : 0;
+    const discoveryScore = entry.score - repetitionPenalty + exploration + (secondaryGenre && !genreCounts.has(secondaryGenre) ? .35 : 0);
 
     out.push({
       ...item,
-      recommendationScore: diversityScore,
-      recommendationReason: dominantGenre ? "Because it matches your taste" : "Picked for you"
+      recommendationScore: discoveryScore,
+      recommendationReason: dominantGenre ? (exploration > .5 ? "A discovery that fits your taste" : "Because it matches your taste") : "Picked for you"
     });
     typeCounts[type] = (typeCounts[type] || 0) + 1;
     (item.raw?.genre_ids || item.genre_ids || []).filter(id => taste.genres?.[id]).slice(0, 2).forEach(id =>
@@ -471,8 +473,17 @@ export async function getPersonalRecommendations(limit = 12) {
   const candidates = responses.flatMap(result =>
     result.status === "fulfilled" ? normalizeResults(result.value?.results || []) : []
   );
+  const discoveryCalls = [];
+  const preferredLanguages = Object.entries(taste.languages || {}).sort((a, b) => Number(b[1]) - Number(a[1])).slice(0, 2).map(([code]) => code);
+  if (preferredLanguages.length) {
+    discoveryCalls.push(tmdbApi.discoverMovies({ sort_by: "vote_average.desc", vote_count_gte: 250, with_original_language: preferredLanguages[0], page: 1 }));
+  }
+  const discoveryResponses = await Promise.allSettled(discoveryCalls);
+  const discoveryCandidates = discoveryResponses.flatMap(result =>
+    result.status === "fulfilled" ? normalizeResults(result.value?.results || []) : []
+  );
 
-  const items = rankForYou(candidates, taste, progress, feedback, excluded, limit, recentGenres);
+  const items = rankForYou([...candidates, ...discoveryCandidates], taste, progress, feedback, excluded, limit, recentGenres);
   writeForYouCache({ version: 2, fingerprint, updatedAt: Date.now(), items });
 
   return items;
