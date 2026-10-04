@@ -390,3 +390,121 @@ body.vivid-cinema-home .vivid-catalogue-chips a{
     box-shadow:0 24px 54px rgba(0,0,0,.34);
   }
 }
+
+
+/* Premium page standardization — detail, playback, discovery and library use the
+   same cinematic chrome as Home without changing player/data behavior. */
+body.vivid-atmosphere .vivid-title-nav,
+body.vivid-atmosphere .vivid-watch-nav,
+body.vivid-atmosphere .vivid-library-nav,
+body.vivid-atmosphere .vivid-discovery-nav{
+  padding-top:calc(10px + var(--vivid-safe-top,0px));
+  padding-right:max(var(--vivid-page-gutter),var(--vivid-safe-right,0px));
+  padding-left:max(var(--vivid-page-gutter),var(--vivid-safe-left,0px));
+  min-height:calc(62px + var(--vivid-safe-top,0px));
+}
+body.vivid-atmosphere .vivid-title-nav,
+body.vivid-atmosphere .vivid-watch-nav{
+  background:linear-gradient(180deg,rgba(7,9,13,.92),rgba(7,9,13,.62));
+}
+body.vivid-atmosphere .vivid-title-nav .vivid-brand,
+body.vivid-atmosphere .vivid-watch-nav .vivid-brand,
+body.vivid-atmosphere .vivid-library-nav .vivid-brand,
+body.vivid-atmosphere .vivid-discovery-nav .vivid-brand{
+  flex:0 0 auto;
+}
+body.vivid-atmosphere .vivid-title-page .vivid-title-backdrop{
+  margin-top:0;
+  height:clamp(300px,46svh,520px);
+  min-height:300px;
+}
+body.vivid-atmosphere .vivid-title-page .vivid-title-info-inner{
+  width:min(1280px,100%);
+  grid-template-columns:220px minmax(0,1fr);
+  gap:36px;
+}
+body.vivid-atmosphere .vivid-title-page .vivid-title-section{
+  width:min(1280px,100%);
+}
+body.vivid-atmosphere .vivid-title-page .vivid-title-library-actions{
+  width:min(1280px,100%);
+}
+body.vivid-atmosphere .vivid-title-page .vivid-title-section + .vivid-title-section{
+  border-top:1px solid rgba(255,255,255,.035);
+}
+body.vivid-atmosphere .vivid-watch-page .vivid-watch-hero{
+  min-height:clamp(300px,42svh,500px);
+}
+body.vivid-atmosphere .vivid-watch-page .vivid-player-section{
+  width:min(1280px,100%);
+}
+body.vivid-atmosphere .vivid-watch-page .vivid-player-placeholder{
+  min-height:clamp(300px,44vw,560px);
+  border-radius:20px;
+}
+body.vivid-atmosphere .vivid-watch-page .vivid-watch-recommendations{
+  width:min(1280px,100%);
+}
+body.vivid-atmosphere .vivid-watch-page .vivid-watch-rec-card{
+  flex-basis:176px;
+}
+body.vivid-atmosphere .vivid-watch-page .vivid-watch-rec-card img{
+  border-radius:16px;
+  box-shadow:0 16px 42px rgba(0,0,0,.22);
+}
+body.vivid-atmosphere .vivid-watch-page .vivid-watch-player-dialog{
+  width:min(1320px,100%);
+}
+body.vivid-atmosphere .vivid-discovery-page .vivid-discovery-main,
+body.vivid-atmosphere .vivid-library-page .vivid-library-main,
+body.vivid-atmosphere .account-page .account-shell{
+  width:min(1280px,100%);
+}
+body.vivid-atmosphere .vivid-discovery-page .vivid-filter-panel,
+body.vivid-atmosphere .vivid-library-page .vivid-library-tabs{
+  border-color:rgba(255,255,255,.09);
+}
+body.vivid-atmosphere .vivid-discovery-page .vivid-discovery-card,
+body.vivid-atmosphere .vivid-library-page .vivid-library-card{
+  min-width:0;
+}
+@media(max-width:800px){
+  body.vivid-atmosphere .vivid-title-nav,
+  body.vivid-atmosphere .vivid-watch-nav,
+  body.vivid-atmosphere .vivid-library-nav,
+  body.vivid-atmosphere .vivid-discovery-nav{
+    padding-top:calc(8px + var(--vivid-safe-top,0px));
+    padding-right:max(12px,var(--vivid-safe-right,0px));
+    padding-left:max(12px,var(--vivid-safe-left,0px));
+  }
+  body.vivid-atmosphere .vivid-title-page .vivid-title-backdrop{
+    height:clamp(260px,40svh,380px);
+    min-height:260px;
+  }
+  body.vivid-atmosphere .vivid-title-page .vivid-title-info-inner{
+    grid-template-columns:120px minmax(0,1fr);
+    gap:18px;
+  }
+  body.vivid-atmosphere .vivid-watch-page .vivid-watch-hero{
+    min-height:280px;
+  }
+  body.vivid-atmosphere .vivid-watch-page .vivid-player-placeholder{
+    min-height:280px;
+    border-radius:14px;
+  }
+}
+@media(max-width:560px){
+  body.vivid-atmosphere .vivid-title-page .vivid-title-info-inner{
+    grid-template-columns:1fr;
+    gap:14px;
+  }
+  body.vivid-atmosphere .vivid-title-page .vivid-title-poster{
+    width:116px;
+  }
+  body.vivid-atmosphere .vivid-watch-page .vivid-watch-rec-card{
+    flex-basis:148px;
+  }
+}
+@media(prefers-reduced-motion:reduce){
+  body.vivid-atmosphere .vivid-watch-page .vivid-watch-rec-card img{transition:none}
+}
