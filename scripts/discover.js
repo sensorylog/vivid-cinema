@@ -306,15 +306,21 @@ async function fetchDiscovery() {
       items = sortItems(data.items || []);
       totalPages = Number(data.totalPages || 1);
     } else if (state.type === "all") {
-      const [movies, tv] = await Promise.all([
-        tmdbApi.discoverMovies(discoverParams("movie")),
-        tmdbApi.discoverTv(discoverParams("tv"))
-      ]);
-      items = sortItems([
-        ...normalizeResults(movies.results || [], "movie"),
-        ...normalizeResults(tv.results || [], "tv")
-      ]);
-      totalPages = Math.max(Number(movies.total_pages || 1), Number(tv.total_pages || 1));
+      const runtime = RUNTIMES[state.runtime];
+      const types = runtime?.kind === "movie"
+        ? ["movie"]
+        : runtime?.kind === "tv"
+          ? ["tv"]
+          : ["movie", "tv"];
+      const results = await Promise.all(types.map((type) =>
+        type === "movie"
+          ? tmdbApi.discoverMovies(discoverParams(type))
+          : tmdbApi.discoverTv(discoverParams(type))
+      ));
+      items = sortItems(results.flatMap((data, index) =>
+        normalizeResults(data.results || [], types[index])
+      ));
+      totalPages = Math.max(...results.map((data) => Number(data.total_pages || 1)), 1);
     } else {
       const data = await (state.type === "movie"
         ? tmdbApi.discoverMovies(discoverParams("movie"))
