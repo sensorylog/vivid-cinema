@@ -117,6 +117,141 @@ service cloud.firestore {
       && request.resource.data.updatedAt is number;
     }
 
+    function validPushSubscription() {
+      return request.resource.data.keys().hasOnly([
+        'endpoint','expirationTime','keys','userAgent','updatedAt'
+      ])
+      && request.resource.data.endpoint is string
+      && request.resource.data.endpoint.size() <= 2000
+      && request.resource.data.keys.keys().hasOnly(['p256dh','auth'])
+      && request.resource.data.keys.p256dh is string
+      && request.resource.data.keys.auth is string
+      && request.resource.data.userAgent is string
+      && request.resource.data.userAgent.size() <= 500
+      && request.resource.data.updatedAt is number;
+    }
+
+    function validCinemaReminder() {
+      return request.resource.data.keys().hasOnly([
+        'id','title','note','when','contentId','mediaType','kind','createdAt','sent'
+      ])
+      && request.resource.data.id is string
+      && request.resource.data.id.size() <= 100
+      && request.resource.data.title is string
+      && request.resource.data.title.size() <= 180
+      && request.resource.data.note is string
+      && request.resource.data.note.size() <= 500
+      && request.resource.data.when is string
+      && request.resource.data.contentId is string
+      && request.resource.data.contentId.matches('^[0-9]+
+      return request.resource.data.keys().hasOnly([
+        'displayName','email','provider','preferences','createdAt','updatedAt'
+      ])
+      && (!request.resource.data.keys().hasAny(['displayName']) ||
+          (request.resource.data.displayName is string &&
+           request.resource.data.displayName.size() <= 100))
+      && (!request.resource.data.keys().hasAny(['email']) ||
+          (request.resource.data.email == null ||
+           (request.resource.data.email is string &&
+            request.resource.data.email.size() <= 320)))
+      && (!request.resource.data.keys().hasAny(['provider']) ||
+          (request.resource.data.provider is string &&
+           request.resource.data.provider.size() <= 50))
+      && (!request.resource.data.keys().hasAny(['preferences']) || validPreferences())
+      && (!request.resource.data.keys().hasAny(['createdAt']) || request.resource.data.createdAt is timestamp)
+      && (!request.resource.data.keys().hasAny(['updatedAt']) || request.resource.data.updatedAt is timestamp);
+    }
+
+    function validPreferences() {
+      return request.resource.data.preferences.keys().hasOnly([
+        'providerCountry','autoplayTrailers','reducedMotion'
+      ])
+      && request.resource.data.preferences.providerCountry is string
+      && request.resource.data.preferences.providerCountry.matches('^[A-Z]{2}$')
+      && request.resource.data.preferences.autoplayTrailers is bool
+      && request.resource.data.preferences.reducedMotion is bool;
+    }
+
+    match /users/{userId} {
+      allow get: if isOwner(userId);
+      allow list: if false;
+      allow create: if isOwner(userId) && validProfile();
+      allow update: if isOwner(userId) && validProfile();
+      allow delete: if isOwner(userId);
+
+      match /pushSubscriptions/{subscriptionId} {
+        allow read: if isOwner(userId);
+        allow create, update: if isOwner(userId) && validPushSubscription();
+        allow delete: if isOwner(userId);
+      }
+
+      match /cinemaReminders/{reminderId} {
+        allow read: if isOwner(userId);
+        allow create, update: if isOwner(userId) && validCinemaReminder();
+        allow delete: if isOwner(userId);
+      }
+
+      match /favorites/{contentId} {
+        allow read: if isOwner(userId);
+        allow create, update: if isOwner(userId) && validContentId() && validLibraryData();
+        allow delete: if isOwner(userId);
+      }
+
+      match /watchLater/{contentId} {
+        allow read: if isOwner(userId);
+        allow create, update: if isOwner(userId) && validContentId() && validLibraryData();
+        allow delete: if isOwner(userId);
+      }
+
+      match /history/{contentId} {
+        allow read: if isOwner(userId);
+        allow create, update: if isOwner(userId) && validContentId() && validLibraryData();
+        allow delete: if isOwner(userId);
+      }
+
+      match /progress/{contentId} {
+        allow read: if isOwner(userId);
+        allow create, update: if isOwner(userId) && validContentId() && validProgressData();
+        allow delete: if isOwner(userId);
+      }
+
+      match /libraryTombstones/{tombstoneId} {
+        allow read: if isOwner(userId);
+        allow create, update: if isOwner(userId) && validTombstoneData();
+        allow delete: if isOwner(userId);
+      }
+
+      match /feedback/{contentId} {
+        allow read: if isOwner(userId);
+        allow create, update: if isOwner(userId) && validFeedbackData();
+        allow delete: if isOwner(userId);
+      }
+
+      match /events/{eventId} {
+        allow create: if isOwner(userId) && validEventData();
+        allow read, update, delete: if false;
+      }
+
+      match /taste/{tasteId} {
+        allow read: if isOwner(userId);
+        allow create, update: if isOwner(userId) && tasteId == "profile" && validTasteData();
+        allow delete: if isOwner(userId);
+      }
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
+)
+      && request.resource.data.mediaType in ['movie','tv']
+      && request.resource.data.kind is string
+      && request.resource.data.kind.size() <= 40
+      && request.resource.data.createdAt is number
+      && request.resource.data.sent is bool;
+    }
+
     function validProfile() {
       return request.resource.data.keys().hasOnly([
         'displayName','email','provider','preferences','createdAt','updatedAt'
