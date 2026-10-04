@@ -128,6 +128,24 @@ export function savePlaybackProgress(contentId, data = {}) {
   queueRemoteProgress(contentId, current[contentId]);
 }
 
+export async function flushPlaybackProgress(contentId) {
+  if (!contentId) return;
+  const timer = progressTimers.get(contentId);
+  if (timer) {
+    window.clearTimeout(timer);
+    progressTimers.delete(contentId);
+  }
+  const current = readProgress()[contentId];
+  if (!current) return;
+  pendingProgress.delete(contentId);
+  try {
+    const auth = await getFirebaseAuth();
+    if (auth?.currentUser) await setRemoteProgress(auth.currentUser.uid, contentId, current);
+  } catch (error) {
+    console.warn("Vivid playback progress flush unavailable:", error);
+  }
+}
+
 export function removePlaybackProgress(contentId) {
   if (!contentId) return;
   const current = readProgress();
