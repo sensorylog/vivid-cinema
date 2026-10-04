@@ -5,7 +5,7 @@ import { escapeHtml, getErrorMessage } from "./utils.js";
 import { getLocalLibrary, saveLocalLibrary, syncLocalItem, upsertLibraryItem, startLibrarySync } from "./library.js";
 import { getPlaybackProgress, savePlaybackProgress, flushPlaybackProgress, completePlaybackProgress, startPlaybackSync } from "./recommendations.js";
 import { VIVID_CONFIG } from "./config.js";
-import { recordBehavior } from "./intelligence.js";
+import { recordBehavior, startIntelligenceSync } from "./intelligence.js";
 
 const $=id=>document.getElementById(id);
 const route=getRoute();
@@ -231,6 +231,7 @@ document.addEventListener("visibilitychange",()=>{
 });
 document.addEventListener("DOMContentLoaded",()=>{
  void startLibrarySync().catch(()=>{});
+ void startIntelligenceSync().catch(()=>{});
  void startPlaybackSync().catch(()=>{});
  load();
 });
