@@ -189,18 +189,23 @@ export async function getCuratedPage(key, page = 1, filters = {}) {
   const types = requestedType
     ? [requestedType]
     : category.type === "all" ? ["movie", "tv"] : [category.type];
-  const results = await Promise.all(types.map(type =>
+  const results = await Promise.allSettled(types.map(type =>
     type === "movie"
       ? tmdbApi.discoverMovies(categoryParams(category, type, page, filters, keywordId))
       : tmdbApi.discoverTv(categoryParams(category, type, page, filters, keywordId))
   ));
-  const items = results.flatMap((data, index) =>
-    normalizeResults(data?.results || [], types[index])
+  const successful = results
+    .map((result, index) => ({ result, type: types[index] }))
+    .filter(({ result }) => result.status === "fulfilled");
+  if (!successful.length) throw (results.find(result => result.status === "rejected")?.reason || new Error("Curated discovery unavailable."));
+  const items = successful.flatMap(({ result, type }) =>
+    normalizeResults(result.value?.results || [], type)
   );
   return {
     items,
     page,
-    totalPages: Math.min(500, Math.max(...results.map(data => Number(data?.total_pages || 1)), 1))
+    totalPages: Math.min(500, Math.max(...successful.map(({ result }) => Number(result.value?.total_pages || 1)), 1)),
+    partial: successful.length < results.length
   };
 }
 
