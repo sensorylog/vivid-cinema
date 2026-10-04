@@ -160,3 +160,132 @@ body.vivid-atmosphere .account-grid>*{min-width:0}
   body.vivid-atmosphere .vivid-feature-card:focus-visible,
   body.vivid-atmosphere .vivid-feature-card.is-active{transform:none!important}
 }
+
+
+/* Cross-platform visual parity.
+   One home composition across desktop browser, mobile browser and iOS standalone.
+   Responsive differences are limited to navigation density and available width;
+   the cinematic hierarchy, surfaces, spacing language and card treatment stay shared. */
+body.vivid-cinema-home .vivid-home{
+  width:100%;
+  max-width:none;
+  overflow:clip;
+}
+body.vivid-cinema-home .vivid-topbar{
+  padding-top:calc(8px + var(--vivid-safe-top,0px));
+  padding-right:max(12px,var(--vivid-safe-right,0px));
+  padding-bottom:8px;
+  padding-left:max(12px,var(--vivid-safe-left,0px));
+}
+body.vivid-cinema-home .vivid-nav{
+  width:min(100%,1440px);
+  min-height:50px;
+  gap:10px;
+}
+body.vivid-cinema-home .vivid-brand{
+  font-size:1.05rem;
+}
+body.vivid-cinema-home .vivid-hero{
+  width:100%;
+  min-height:0;
+  height:clamp(540px,72svh,780px);
+}
+body.vivid-cinema-home .vivid-hero-media{
+  height:100%;
+  min-height:0;
+}
+body.vivid-cinema-home .vivid-hero-content{
+  width:min(1440px,100%);
+  padding:88px var(--vivid-page-gutter) 92px;
+}
+body.vivid-cinema-home .vivid-hero-title{
+  max-width:min(850px,72vw);
+  font-size:clamp(2.45rem,7vw,6rem);
+}
+body.vivid-cinema-home .vivid-hero-copy{
+  max-width:620px;
+}
+body.vivid-cinema-home .vivid-feature-strip{
+  width:min(1440px,100%);
+  padding:12px var(--vivid-page-gutter) 20px;
+}
+body.vivid-cinema-home .vivid-feature-card{
+  flex:0 0 clamp(172px,18vw,220px);
+  width:clamp(172px,18vw,220px);
+  height:97px;
+}
+body.vivid-cinema-home .vivid-section-wrap{
+  width:min(1440px,100%);
+  padding-inline:var(--vivid-page-gutter);
+}
+body.vivid-cinema-home .vivid-rails{
+  padding-block:18px 4px;
+}
+body.vivid-cinema-home .vivid-rail{
+  gap:12px;
+  padding-top:4px;
+  padding-bottom:14px;
+}
+body.vivid-cinema-home .vivid-card,
+body.vivid-cinema-home .vivid-skeleton-card{
+  flex:0 0 clamp(136px,11vw,168px)!important;
+  width:clamp(136px,11vw,168px);
+  min-width:clamp(136px,11vw,168px);
+  max-width:clamp(136px,11vw,168px);
+}
+@media(max-width:900px){
+  body.vivid-cinema-home .vivid-nav{
+    gap:8px;
+  }
+  body.vivid-cinema-home .vivid-hero{
+    height:66svh;
+    min-height:520px;
+  }
+  body.vivid-cinema-home .vivid-hero-content{
+    padding:88px 24px 92px;
+  }
+  body.vivid-cinema-home .vivid-feature-strip{
+    padding-inline:24px;
+  }
+}
+@media(max-width:640px){
+  body.vivid-cinema-home .vivid-topbar{
+    padding-top:calc(8px + var(--vivid-safe-top,0px));
+    padding-right:calc(12px + var(--vivid-safe-right,0px));
+    padding-bottom:8px;
+    padding-left:calc(12px + var(--vivid-safe-left,0px));
+  }
+  body.vivid-cinema-home .vivid-nav{
+    min-height:50px;
+  }
+  body.vivid-cinema-home .vivid-hero{
+    height:72svh;
+    min-height:540px;
+  }
+  body.vivid-cinema-home .vivid-hero-content{
+    padding:88px 16px 92px;
+  }
+  body.vivid-cinema-home .vivid-hero-title{
+    max-width:100%;
+    font-size:clamp(2.45rem,13vw,4rem);
+  }
+  body.vivid-cinema-home .vivid-feature-strip{
+    padding:12px 16px 20px;
+  }
+  body.vivid-cinema-home .vivid-feature-card{
+    flex-basis:172px;
+    width:172px;
+    height:97px;
+  }
+  body.vivid-cinema-home .vivid-section-wrap{
+    padding-inline:14px;
+    padding-bottom:calc(96px + env(safe-area-inset-bottom,0px));
+  }
+  body.vivid-cinema-home .vivid-card,
+  body.vivid-cinema-home .vivid-skeleton-card{
+    flex-basis:136px!important;
+    width:136px;
+    min-width:136px;
+    max-width:136px;
+  }
+}
