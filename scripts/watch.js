@@ -25,7 +25,7 @@ function getParams() {
 }
 
 function progressKey() {
-  return media ? media.media_type + ":" + media.id : "";
+  return media ? media.media_type + ":" + media.id + (media.media_type === "tv" && currentParams ? ":" + currentParams.season + ":" + currentParams.episode : "") : "";
 }
 
 function buildEmbedUrl(params, startAt = 0) {
