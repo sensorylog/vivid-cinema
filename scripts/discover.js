@@ -40,12 +40,12 @@ const MOODS = Object.freeze({
   late: { label: "Late-night", genres: [27, 9648, 53], sort: "vote_average.desc" }
 });
 const RUNTIMES = Object.freeze({
-  short: { label: "Under 90 min", min: 0, max: 90 },
+  short: { label: "Under 90 min", min: 1, max: 89 },
   standard: { label: "90–120 min", min: 90, max: 120 },
-  long: { label: "2+ hours", min: 120, max: 300 },
-  episode: { label: "One episode", min: 0, max: 70 },
-  shortseries: { label: "Short series", min: 1, max: 8 },
-  binge: { label: "Long binge", min: 9, max: 60 }
+  long: { label: "Over 120 min", min: 121, max: 360 },
+  quickEpisode: { label: "Episodes under 30 min", min: 1, max: 29 },
+  episode: { label: "Episodes 30–60 min", min: 30, max: 60 },
+  longEpisode: { label: "Episodes over 60 min", min: 61, max: 180 }
 });
 
 const FEATURED_PROVIDER_IDS = [8, 119, 337, 1899, 350, 15, 531, 386, 283, 11];
@@ -223,7 +223,7 @@ function discoverParams(type) {
     "vote_average.gte": state.rating || undefined,
     // TMDB expects the dotted runtime parameters. Use them for both movies
     // and TV because TV discover supports episode runtime as well.
-    ...(runtime && (state.runtime === "short" || state.runtime === "standard" || state.runtime === "long" || state.runtime === "episode")
+    ...(runtime
       ? { "with_runtime.gte": runtime.min, "with_runtime.lte": runtime.max }
       : {}),
     watch_region: state.region || undefined,
@@ -420,8 +420,8 @@ function wire() {
     }
     fetchDiscovery();
   });
-  document.querySelectorAll("[data-mood]").forEach((button) => button.addEventListener("click", () => { state.mood = button.dataset.mood || ""; state.category = ""; if ($("category-filter")) $("category-filter").value = ""; state.page = 1; document.querySelectorAll("[data-mood]").forEach((item) => item.classList.toggle("is-active", item.dataset.mood === state.mood)); fetchDiscovery(); }));
-  document.querySelectorAll("[data-runtime]").forEach((button) => button.addEventListener("click", () => { state.runtime = button.dataset.runtime || ""; state.category = ""; if ($("category-filter")) $("category-filter").value = ""; state.page = 1; document.querySelectorAll("[data-runtime]").forEach((item) => item.classList.toggle("is-active", item.dataset.runtime === state.runtime)); fetchDiscovery(); }));
+  document.querySelectorAll("[data-mood]").forEach((button) => button.addEventListener("click", () => { state.mood = button.dataset.mood || ""; state.runtime = ""; state.category = ""; document.querySelectorAll("[data-runtime]").forEach((item) => item.classList.toggle("is-active", item.dataset.runtime === "")); if ($("category-filter")) $("category-filter").value = ""; state.page = 1; document.querySelectorAll("[data-mood]").forEach((item) => item.classList.toggle("is-active", item.dataset.mood === state.mood)); fetchDiscovery(); }));
+  document.querySelectorAll("[data-runtime]").forEach((button) => button.addEventListener("click", () => { state.runtime = button.dataset.runtime || ""; state.mood = ""; state.category = ""; document.querySelectorAll("[data-mood]").forEach((item) => item.classList.toggle("is-active", item.dataset.mood === "")); if ($("category-filter")) $("category-filter").value = ""; state.page = 1; document.querySelectorAll("[data-runtime]").forEach((item) => item.classList.toggle("is-active", item.dataset.runtime === state.runtime)); fetchDiscovery(); }));
   $("reset-filters").addEventListener("click", resetFilters);
 
   $("prev-page").addEventListener("click", () => {
