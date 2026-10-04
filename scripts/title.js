@@ -307,9 +307,9 @@ function renderMinimal(details) {
   const backdrop = escapeHtml(getImageUrl(normalized.backdrop_path || normalized.poster_path, "w1280"));
   document.title = title + " · Vivid Cinema";
   $("title-content").innerHTML =
-    '<section class="vivid-title-backdrop" style="--title-backdrop:url(\\'' + backdrop + '\\')"><div class="vivid-title-backdrop-overlay"></div></section>' +
+    '<section class="vivid-title-backdrop" style="--title-backdrop:url(\'' + backdrop + '\')"><div class="vivid-title-backdrop-overlay"></div></section>' +
     '<section class="vivid-title-info"><div class="vivid-title-info-inner">' +
-      '<div class="vivid-title-poster"><img src="' + poster + '" alt="' + escapeHtml(title) + ' poster" onerror="this.onerror=null;this.src=\\'icons/vivid-icon.svg\\'"></div>' +
+      '<div class="vivid-title-poster"><img src="' + poster + '" alt="' + escapeHtml(title) + ' poster" onerror="this.onerror=null;this.src=\'icons/vivid-icon.svg\'"></div>' +
       '<div class="vivid-title-copy"><span class="vivid-title-kicker">' + (type === "tv" ? "TV SERIES" : "MOVIE") + '</span>' +
       '<h1>' + escapeHtml(title) + '</h1><div class="vivid-title-meta"><span>' + escapeHtml(year) + '</span>' +
       (normalized.vote_average ? '<i></i><span>★ ' + normalized.vote_average.toFixed(1) + '</span>' : '') +
