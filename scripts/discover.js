@@ -103,6 +103,8 @@ function syncUrl() {
   if (state.provider) params.set("provider", state.provider);
   if (state.mood) params.set("mood", state.mood);
   if (state.runtime) params.set("runtime", state.runtime);
+  if (state.mood) params.set("mood", state.mood);
+  if (state.runtime) params.set("runtime", state.runtime);
   if (state.query) params.set("q", state.query);
   if (state.page > 1) params.set("page", String(state.page));
   history.replaceState(null, "", params.toString() ? "discover.html?" + params : "discover.html");
@@ -311,6 +313,8 @@ function syncControlsFromUrl() {
   $("sort-filter").value = state.sort;
   $("rating-filter").value = state.rating;
   $("region-filter").value = state.region;
+  document.querySelectorAll("[data-mood]").forEach((button) => button.classList.toggle("is-active", button.dataset.mood === state.mood));
+  document.querySelectorAll("[data-runtime]").forEach((button) => button.classList.toggle("is-active", button.dataset.runtime === state.runtime));
   populateProviders();
 }
 
@@ -334,6 +338,8 @@ function resetFilters() {
   state.rating = "";
   state.region = "";
   state.provider = "";
+  state.mood = "";
+  state.runtime = "";
   state.category = "";
   state.query = "";
   state.page = 1;
@@ -388,6 +394,8 @@ function wire() {
     }
     fetchDiscovery();
   });
+  document.querySelectorAll("[data-mood]").forEach((button) => button.addEventListener("click", () => { state.mood = button.dataset.mood || ""; state.page = 1; document.querySelectorAll("[data-mood]").forEach((item) => item.classList.toggle("is-active", item.dataset.mood === state.mood)); fetchDiscovery(); }));
+  document.querySelectorAll("[data-runtime]").forEach((button) => button.addEventListener("click", () => { state.runtime = button.dataset.runtime || ""; state.page = 1; document.querySelectorAll("[data-runtime]").forEach((item) => item.classList.toggle("is-active", item.dataset.runtime === state.runtime)); fetchDiscovery(); }));
   $("reset-filters").addEventListener("click", resetFilters);
 
   $("prev-page").addEventListener("click", () => {
