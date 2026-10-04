@@ -48,12 +48,6 @@ const RUNTIMES = Object.freeze({
   longEpisode: { label: "Episodes over 60 min", min: 61, max: 180 }
 });
 
-const FEATURED_PROVIDER_IDS = [8, 119, 337, 1899, 350, 15, 531, 386, 283, 11];
-const FEATURED_PROVIDER_NAMES = new Map([
-  [8, "Netflix"], [119, "Prime Video"], [337, "Disney+"], [1899, "Max"],
-  [350, "Apple TV+"], [15, "Hulu"], [531, "Paramount+"], [386, "Peacock"],
-  [283, "Crunchyroll"], [11, "MUBI"]
-]);
 
 function renderFeaturedCollections() {
   const container = $("featured-collections");
@@ -132,14 +126,20 @@ function syncUrl() {
 }
 
 function providerPool() {
-  const source = state.type === "tv" ? providers.tv : state.type === "movie" ? providers.movie : [...providers.movie, ...providers.tv];
+  const source = state.type === "tv"
+    ? providers.tv
+    : state.type === "movie"
+      ? providers.movie
+      : [...providers.movie, ...providers.tv];
   const unique = source.filter((provider, index, list) =>
     list.findIndex((item) => item.provider_id === provider.provider_id) === index
   );
-  return FEATURED_PROVIDER_IDS
-    .map((id) => unique.find((provider) => Number(provider.provider_id) === id))
-    .filter(Boolean)
-    .map((provider) => ({ ...provider, provider_name: FEATURED_PROVIDER_NAMES.get(Number(provider.provider_id)) || provider.provider_name }));
+  return unique
+    .filter((provider) => provider?.provider_id && provider?.provider_name)
+    .sort((a, b) =>
+      (Number(a.display_priority) || 9999) - (Number(b.display_priority) || 9999) ||
+      String(a.provider_name).localeCompare(String(b.provider_name))
+    );
 }
 
 function populateProviders() {
