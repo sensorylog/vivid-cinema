@@ -30,6 +30,23 @@
 <link rel="preconnect" href="https://api.themoviedb.org"><link rel="preconnect" href="https://image.tmdb.org">
 <title>Vivid Cinema — Find something worth watching.</title>
 <link rel="stylesheet" href="styles/vivid-foundation.css"><link rel="stylesheet" href="styles/vivid-system.css"><link rel="stylesheet" href="styles/vivid-landing.css"><link rel="stylesheet" href="styles/vivid-atmosphere.css">
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@type":"WebSite",
+  "name":"Vivid Cinema",
+  "url":"https://vivid-cinema.web.app/",
+  "description":"Vivid Cinema — discover movies and series worth watching.",
+  "potentialAction":{
+    "@type":"SearchAction",
+    "target":{
+      "@type":"EntryPoint",
+      "urlTemplate":"https://vivid-cinema.web.app/home.html?search={search_term_string}"
+    },
+    "query-input":"required name=search_term_string"
+  }
+}
+</script>
 </head>
 <body class="vivid-landing vivid-atmosphere" data-vivid-page="landing">
 <div class="vivid-landing-shell">
