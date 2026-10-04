@@ -57,7 +57,7 @@ export function getSearchIntent(query) {
     .filter((id, index, list) => list.indexOf(id) === index);
   const type = Object.entries(TYPE_HINTS).find(([label]) => new RegExp("\\b" + label + "\\b").test(q))?.[1] || null;
   const similarity = q.match(/(?:like|similar to|similar)\\s+(.+)$/i)?.[1]?.trim() || "";
-  const people = /\\b(actor|actress|director|creator|cast)\\b/.test(q);
+  const people = /\b(actor|actress|director|creator|cast)\b/.test(q);
   return { query: normalizeQuery(query), genres, type, similarity, people };
 }
 
@@ -72,12 +72,12 @@ function tokenOverlap(queryTokens, title) {
 
 export async function rankSearchResults(items, query, options = {}) {
   const q = normalizeQuery(query);
-  if (!q) return { items: [], intent: getSearchIntent(""), recent: getRecentSearches() };
+  if (!q) return [];
 
   const intent = getSearchIntent(q);
   const taste = await getTasteProfile().catch(() => ({ genres: {} }));
   const notForMe = getNotForMeKeys();
-  const queryTokens = tokens(q.replace(/\\b(?:movies?|films?|series|shows?)\\b/gi, ""));
+  const queryTokens = tokens(q.replace(/\b(?:movies?|films?|series|shows?)\b/gi, ""));
 
   const exact = q.toLowerCase();
 
