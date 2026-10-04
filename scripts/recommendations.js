@@ -346,10 +346,21 @@ function rankForYou(candidates, taste, progress, feedback, excluded, limit, rece
     const exploration = knownGenreCount === 0 ? .9 : knownGenreCount === 1 && dominantGenre !== undefined ? .3 : 0;
     const discoveryScore = entry.score - repetitionPenalty + exploration + (secondaryGenre && !genreCounts.has(secondaryGenre) ? .35 : 0);
 
+    const source = item.raw || item;
+    const languageMatch = Boolean(source.original_language && taste.languages?.[source.original_language]);
+    const countryMatch = (source.origin_country || []).some(code => taste.countries?.[code]);
+    const recentMatch = (source.genre_ids || []).some(id => recentGenres.has(Number(id)));
+    let recommendationReason = "Picked for you";
+    if (exploration > .5) recommendationReason = "A discovery that fits your taste";
+    else if (dominantGenre) recommendationReason = "Because it matches your taste";
+    else if (recentMatch) recommendationReason = "Because you've been watching this lately";
+    else if (languageMatch) recommendationReason = "Because you enjoy this language";
+    else if (countryMatch) recommendationReason = "Because you enjoy this kind of cinema";
+
     out.push({
       ...item,
       recommendationScore: discoveryScore,
-      recommendationReason: dominantGenre ? (exploration > .5 ? "A discovery that fits your taste" : "Because it matches your taste") : "Picked for you"
+      recommendationReason
     });
     typeCounts[type] = (typeCounts[type] || 0) + 1;
     (item.raw?.genre_ids || item.genre_ids || []).filter(id => taste.genres?.[id]).slice(0, 2).forEach(id =>
