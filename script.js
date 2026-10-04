@@ -8,6 +8,7 @@ import { buildWatchUrl } from "./scripts/routes.js";
 import { checkForReleaseAlerts, deliverReleaseAlerts, getPendingReleaseAlerts, requestReleaseAlerts, dismissReleaseAlert } from "./scripts/release-alerts.js";
 import { startIntelligenceSync, shouldShowColdStart, completeColdStart, dismissColdStart, recordBehavior, getTasteProfile, getTasteStrength } from "./scripts/intelligence.js";
 import { searchIntelligently, getRecentSearches, rememberSearch, clearRecentSearches } from "./scripts/search.js";
+import { startCinemaReminderLoop } from "./scripts/cinema-reminders.js";
 
 const $=id=>document.getElementById(id);
 let featured=[],activeIndex=0,heroMuted=true,heroPlaying=true,heroTimer=null,heroLoadToken=0,searchRequestId=0;
@@ -499,7 +500,7 @@ function wireHeroSwipe(){
 }
 window.addEventListener("scroll",()=>{$("topbar")?.classList.toggle("is-scrolled",scrollY>18)},{passive:true});
 document.addEventListener("keydown",e=>{if(e.target.matches("input,textarea,select"))return;if(e.key==="ArrowLeft")showHero(activeIndex-1,true);if(e.key==="ArrowRight")showHero(activeIndex+1,true)});
-document.addEventListener("DOMContentLoaded",async()=>{
+document.addEventListener("DOMContentLoaded",async()=>{\n  startCinemaReminderLoop();
  // First-entry taste selection is a gate: new users choose a few titles (or skip)
  // before Vivid paints the main catalogue, so personalization is intentional from day one.
  const needsColdStart=shouldShowColdStart();
