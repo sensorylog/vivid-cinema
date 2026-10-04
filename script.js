@@ -74,7 +74,8 @@ async function renderTonightPick() {
 function renderRail(id,items=[],options={}){
  const el=$(id);if(!el)return;
  const normalized=items.map(x=>x.media_type?x:normalizeResults([x])[0]).filter(Boolean);
- const html=normalized.length?normalized.map(item=>card(item,{progress:options.progressMap?.[item.media_type+":"+item.id],signal:options.signal})).join(""):'<div class="vivid-empty">Nothing available right now.</div>';
+ const isRecommendation=/^(recommended-rail|because-rail)$/.test(id);
+ const html=normalized.length?normalized.map((item,index)=>{const markup=card(item,{progress:options.progressMap?.[item.media_type+":"+item.id],signal:options.signal});if(isRecommendation){const key=item.media_type+":"+item.id;recordBehavior("recommendation_impression",item,{surface:id,position:index});return markup.replace("<article class=\"vivid-card\"","<article data-recommendation=\"true\" data-surface=\""+id+"\" data-position=\""+index+"\" data-title=\""+escapeHtml(item.title||"").replace(/"/g,"&quot;")+"\" class=\"vivid-card\"");}return markup;}).join(""):'<div class="vivid-empty">Nothing available right now.</div>';
  el.innerHTML=options.append&&el.querySelector(".vivid-card")?el.innerHTML+html:html;
  wireCards(el);
  rails[id]=el;
