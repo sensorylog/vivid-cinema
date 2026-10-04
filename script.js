@@ -268,13 +268,19 @@ function renderContinueWatching(){
 
 async function renderRecommendations(){
  try{
-   const items=await getPersonalRecommendations(12);
-   if(!items.length)return;
-   $("recommended-section").hidden=false;
-   renderRail("recommended-rail",items);
+   const [items,because]=await Promise.all([getPersonalRecommendations(12),getBecauseYouLiked(12)]);
+   if(items.length){
+     $("recommended-section").hidden=false;
+     renderRail("recommended-rail",items);
+   }
+   if(because.length){
+     const seed=because[0]?.recommendationReason?.replace(/^Because you liked /,"");
+     if(seed) $("because-title").textContent="Because you liked "+seed;
+     $("because-section").hidden=false;
+     renderRail("because-rail",because);
+   }
  }catch(error){console.warn("Recommendations unavailable:",error)}
 }
-
 async function loadHome(){
  const ids=["trending-rail","now-playing-rail","movies-rail","top-rated-rail","tv-rail","top-tv-rail","upcoming-rail"];
  ids.forEach(id=>skeleton($(id)));
