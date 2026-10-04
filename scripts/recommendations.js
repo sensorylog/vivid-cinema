@@ -1,6 +1,7 @@
 import { tmdbApi } from "./tmdb.js";
 import { getLocalLibrary } from "./library.js";
 import { normalizeResults } from "./media.js";
+import { getTasteProfile, getNotForMeKeys, getFeedbackState, getTasteStrength, recordBehavior } from "./intelligence.js";
 
 const PROGRESS_KEY = "vivid:progress:v1";
 const FOR_YOU_CACHE_KEY = "vivid:for-you:v1";
@@ -273,20 +274,13 @@ export function formatProgress(item) {
   return Math.round(percentage) + "%";
 }
 
-function tasteWeight(item, progress, base) {
-  const pct = Number(progress[keyFor(item)]?.percentage || item.completion || 0);
-  const completion = pct >= 80 ? 1.45 : pct >= 45 ? 1.1 : pct > 5 ? .72 : 1;
-  const age = Math.max(0, (Date.now() - Number(item.updatedAt || 0)) / 86400000);
-  return base * (0.55 + 0.45 * Math.exp(-age / 45)) * completion;
-}
-
 function keyFor(item) {
   return String(item?.media_type || item?.mediaType || "movie") + ":" + String(item?.id);
 }
 
 function uniqueByKey(items) {
   const map = new Map();
-  items.forEach(item => map.set(keyFor(item), item));
+  items.forEach(item => { if (item?.id != null) map.set(keyFor(item), item); });
   return [...map.values()];
 }
 
@@ -298,64 +292,90 @@ function writeForYouCache(value) {
   try { localStorage.setItem(FOR_YOU_CACHE_KEY, JSON.stringify(value)); } catch {}
 }
 
-function rankForYou(candidates, profile, excluded, limit) {
-  const ranked = uniqueByKey(candidates).filter(item => !excluded.has(keyFor(item))).map(item => {
-    const genres = new Set(item.genre_ids || []);
-    const genreScore = Object.entries(profile.genres).reduce((sum, [id, weight]) => sum + (genres.has(Number(id)) ? weight : 0), 0);
-    const media = profile.media[item.media_type || "movie"] || 0;
-    const quality = Math.min(1, Number(item.vote_average || 0) / 10);
-    const popularity = Math.min(1, Math.log10(1 + Math.max(0, Number(item.popularity || 0))) / 4);
-    return { item, score: genreScore * 5.2 + media * 1.8 + quality * 1.7 + popularity * 1.1 };
-  }).sort((a, b) => b.score - a.score);
+function scoreCandidate(item, taste, progress, feedback) {
+  const genres = new Set(item.genre_ids || []);
+  const genreScore = Object.entries(taste.genres || {}).reduce((sum, [id, weight]) =>
+    sum + (genres.has(Number(id)) ? Number(weight) : 0), 0);
+  const mediaScore = Number(taste.media?.[item.media_type || "movie"] || 0);
+  const quality = Math.min(1, Math.max(0, Number(item.vote_average || 0) / 10));
+  const popularity = Math.min(1, Math.log10(1 + Math.max(0, Number(item.popularity || 0))) / 4);
+  const feedbackBoost = feedback[keyFor(item)]?.kind === "like" ? 6 : 0;
+  return genreScore * 5.4 + mediaScore * 1.9 + quality * 1.4 + popularity * .8 + feedbackBoost;
+}
 
-  const out = [], genres = new Map(), types = { movie: 0, tv: 0 };
-  for (const { item } of ranked) {
+function rankForYou(candidates, taste, progress, feedback, excluded, limit) {
+  const ranked = uniqueByKey(candidates)
+    .filter(item => !excluded.has(keyFor(item)))
+    .map(item => ({ item, score: scoreCandidate(item, taste, progress, feedback) }))
+    .sort((a, b) => b.score - a.score);
+
+  const out = [];
+  const genreCounts = new Map();
+  const typeCounts = { movie: 0, tv: 0 };
+
+  for (const entry of ranked) {
     if (out.length >= limit) break;
+    const item = entry.item;
     const type = item.media_type || "movie";
-    const genre = (item.genre_ids || []).find(id => profile.genres[id]);
-    if (genre && (genres.get(genre) || 0) >= 4) continue;
-    if (out.length >= 4 && types[type] >= Math.ceil(limit * .75)) continue;
-    out.push(item);
-    types[type] = (types[type] || 0) + 1;
-    if (genre) genres.set(genre, (genres.get(genre) || 0) + 1);
+    const genres = (item.genre_ids || []).filter(id => taste.genres?.[id]);
+    const dominantGenre = genres[0];
+    if (dominantGenre && (genreCounts.get(dominantGenre) || 0) >= 4) continue;
+    if (out.length >= 5 && typeCounts[type] >= Math.ceil(limit * .72)) continue;
+
+    out.push({
+      ...item,
+      recommendationScore: entry.score,
+      recommendationReason: dominantGenre ? "Because it matches your taste" : "Picked for you"
+    });
+    typeCounts[type] = (typeCounts[type] || 0) + 1;
+    if (dominantGenre) genreCounts.set(dominantGenre, (genreCounts.get(dominantGenre) || 0) + 1);
   }
   return out;
+}
+
+async function getRecommendationSeeds() {
+  const library = getLocalLibrary();
+  const feedback = getFeedbackState();
+  return uniqueByKey([
+    ...(Object.values(feedback).filter(item => item.kind === "like")),
+    ...(library.favorites || []),
+    ...(library.history || []).filter(item => Number(item.completion || 0) >= 25),
+    ...(library.watchLater || [])
+  ]).sort((a, b) => Number(b.updatedAt || 0) - Number(a.updatedAt || 0)).slice(0, 8);
 }
 
 export async function getPersonalRecommendations(limit = 12) {
   const library = getLocalLibrary();
   const progress = readProgress();
+  const feedback = getFeedbackState();
+  const taste = await getTasteProfile();
   const observed = [...(library.history || []), ...(library.favorites || []), ...(library.watchLater || [])];
-  const seeds = uniqueByKey(observed).sort((a, b) => Number(b.updatedAt || 0) - Number(a.updatedAt || 0)).slice(0, 4);
-  if (!seeds.length) return [];
+  const seeds = await getRecommendationSeeds();
+  if (!seeds.length && !Object.keys(taste.genres || {}).length) return [];
 
-  const libraryKey = [...observed, ...Object.values(progress)].map(keyFor).sort().join("|");
+  const excluded = new Set([
+    ...observed.map(keyFor),
+    ...getNotForMeKeys()
+  ]);
+
+  const fingerprint = [
+    ...Object.entries(feedback).map(([k, v]) => k + ":" + v.kind + ":" + v.updatedAt),
+    ...Object.entries(progress).map(([k, v]) => k + ":" + v.updatedAt),
+    "taste:" + Number(taste.updatedAt || 0)
+  ].sort().join("|");
+
   const cached = readForYouCache();
-  if (cached?.libraryKey === libraryKey && Date.now() - Number(cached.updatedAt || 0) < FOR_YOU_CACHE_TTL) {
-    return (cached.items || []).slice(0, limit);
+  if (cached?.fingerprint === fingerprint && Date.now() - Number(cached.updatedAt || 0) < FOR_YOU_CACHE_TTL) {
+    return (cached.items || []).filter(item => !excluded.has(keyFor(item))).slice(0, limit);
   }
 
-  const profile = { genres: {}, media: { movie: 0, tv: 0 } };
-  seeds.forEach(item => {
-    const base = library.favorites?.some(x => keyFor(x) === keyFor(item)) ? 3.2 : library.history?.some(x => keyFor(x) === keyFor(item)) ? 2.1 : 1.2;
-    profile.media[item.media_type || "movie"] += tasteWeight(item, progress, base);
-  });
-
-  const details = await Promise.allSettled(seeds.map(seed =>
-    seed.media_type === "tv" ? tmdbApi.tvDetailsBasic(seed.id) : tmdbApi.movieDetailsBasic(seed.id)
-  ));
-  details.forEach((result, i) => {
-    if (result.status !== "fulfilled") return;
-    const weight = tasteWeight(seeds[i], progress, 2);
-    (result.value.genres || []).forEach(g => {
-      profile.genres[g.id] = (profile.genres[g.id] || 0) + weight;
-    });
-  });
-
-  const topGenres = Object.entries(profile.genres).sort((a, b) => b[1] - a[1]).slice(0, 3).map(([id]) => id).join("|");
-  const calls = seeds.map(seed =>
-    seed.media_type === "tv" ? tmdbApi.tvRecommendations(seed.id) : tmdbApi.movieRecommendations(seed.id)
+  const calls = seeds.slice(0, 6).map(seed =>
+    seed.media_type === "tv"
+      ? tmdbApi.tvRecommendations(seed.id)
+      : tmdbApi.movieRecommendations(seed.id)
   );
+
+  const topGenres = Object.entries(taste.genres || {}).sort((a, b) => Number(b[1]) - Number(a[1])).slice(0, 4).map(([id]) => id).join("|");
   if (topGenres) {
     calls.push(tmdbApi.discoverMovies({ with_genres: topGenres, sort_by: "popularity.desc", vote_count_gte: 100, page: 1 }));
     calls.push(tmdbApi.discoverTv({ with_genres: topGenres, sort_by: "popularity.desc", vote_count_gte: 50, page: 1 }));
@@ -365,17 +385,37 @@ export async function getPersonalRecommendations(limit = 12) {
   const candidates = responses.flatMap(result =>
     result.status === "fulfilled" ? normalizeResults(result.value?.results || []) : []
   );
-  const excluded = new Set(observed.map(keyFor));
-  const items = rankForYou(candidates, profile, excluded, limit);
 
-  writeForYouCache({ version: 1, libraryKey, updatedAt: Date.now(), items });
-  try {
-    localStorage.setItem("vivid:taste:v1", JSON.stringify({
-      version: 1,
-      updatedAt: Date.now(),
-      genres: profile.genres,
-      media: profile.media
-    }));
-  } catch {}
+  const items = rankForYou(candidates, taste, progress, feedback, excluded, limit);
+  writeForYouCache({ version: 2, fingerprint, updatedAt: Date.now(), items });
+
   return items;
+}
+
+export async function getBecauseYouLiked(limit = 12) {
+  const feedback = getFeedbackState();
+  const liked = Object.values(feedback)
+    .filter(item => item.kind === "like")
+    .sort((a, b) => Number(b.updatedAt || 0) - Number(a.updatedAt || 0));
+  if (!liked.length) return [];
+
+  const seed = liked[0];
+  try {
+    const response = seed.media_type === "tv"
+      ? await tmdbApi.tvRecommendations(seed.id)
+      : await tmdbApi.movieRecommendations(seed.id);
+    const excluded = new Set([...getNotForMeKeys(), keyFor(seed)]);
+    const items = normalizeResults(response?.results || [])
+      .filter(item => !excluded.has(keyFor(item)))
+      .slice(0, limit)
+      .map(item => ({ ...item, recommendationReason: "Because you liked " + seed.title }));
+    recordBehavior("recommendation_row_view", seed, { reason: "because_you_liked" });
+    return items;
+  } catch {
+    return [];
+  }
+}
+
+export function getRecommendationStrength() {
+  return getTasteStrength();
 }
