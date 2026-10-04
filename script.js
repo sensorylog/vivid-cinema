@@ -70,7 +70,14 @@ function setHeroText(item){
  $("hero-meta").innerHTML='<span>'+escapeHtml(item.year||"—")+'</span><span class="vivid-dot"></span><span>'+escapeHtml(item.media_type==="tv"?"TV Series":"Movie")+'</span><span class="vivid-dot"></span><span>★ '+Number(item.vote_average||0).toFixed(1)+'</span>';
  $("hero-watch").href=buildWatchUrl(item.id,item.media_type,item.media_type==="tv"?1:null,item.media_type==="tv"?1:null);
  $("hero-more").onclick=()=>location.href=getMediaUrl(item);
- $("hero-fallback").style.backgroundImage=item.backdrop_path?'url("'+getImageUrl(item.backdrop_path,"w1280")+'")':"none";
+ const backdrop=item.backdrop_path?getImageUrl(item.backdrop_path,"w1280"):"";
+ $("hero-fallback").style.backgroundImage=backdrop?'url("'+backdrop+'")':"none";
+ if(backdrop){
+   const preload=new Image();
+   preload.decoding="async";
+   preload.fetchPriority="high";
+   preload.src=backdrop;
+ }
 }
 
 function youtubeUrl(key,muted=true){
@@ -94,7 +101,7 @@ async function loadHeroVideo(item){
  iframe.classList.remove("is-ready");
  fallback.classList.add("is-visible");
  try{
-   const data=item.media_type==="tv"?await tmdbApi.tvDetails(item.id):await tmdbApi.movieDetails(item.id);
+   const data=item.media_type==="tv"?await tmdbApi.tvVideos(item.id):await tmdbApi.movieVideos(item.id);
    if(token!==heroLoadToken)return false;
    const videos=data?.videos?.results||[];
    const trailer=
@@ -148,7 +155,9 @@ async function showHero(index,userAction=false){
    track.scrollTo({left:Math.max(0,left),behavior:userAction?"smooth":"auto"});
  }
  clearTimeout(heroTimer);
- void loadHeroVideo(item);
+ const startTrailer=()=>void loadHeroVideo(item);
+ if("requestIdleCallback" in window) requestIdleCallback(startTrailer,{timeout:1200});
+ else window.setTimeout(startTrailer,500);
  heroTimer=setTimeout(()=>showHero(activeIndex+1),18000);
 }
 async function initHero(){
@@ -402,7 +411,10 @@ window.addEventListener("scroll",()=>{$("topbar")?.classList.toggle("is-scrolled
 document.addEventListener("keydown",e=>{if(e.target.matches("input,textarea,select"))return;if(e.key==="ArrowLeft")showHero(activeIndex-1,true);if(e.key==="ArrowRight")showHero(activeIndex+1,true)});
 document.addEventListener("DOMContentLoaded",()=>{
  wireRails();wireSearch();wireAlphabet();wireHeroSwipe();wireReleaseAlerts();
- initHero();loadHome();refreshReleaseAlerts();
+ void initHero().then(()=>loadHome());
+ const scheduleAlerts=()=>void refreshReleaseAlerts();
+ if("requestIdleCallback" in window) requestIdleCallback(scheduleAlerts,{timeout:3500});
+ else window.setTimeout(scheduleAlerts,2500);
  $("hero-prev")?.addEventListener("click",()=>showHero(activeIndex-1,true));
  $("hero-next")?.addEventListener("click",()=>showHero(activeIndex+1,true));
  $("hero-sound")?.addEventListener("click",toggleSound);$("hero-pause")?.addEventListener("click",togglePause);
