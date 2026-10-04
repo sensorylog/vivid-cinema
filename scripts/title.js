@@ -4,6 +4,7 @@ import { getRoute, buildWatchUrl } from "./routes.js";
 import { escapeHtml, getErrorMessage } from "./utils.js";
 import { hasLibraryItem, startLibrarySync, toggleLibraryItem, upsertLibraryItem } from "./library.js";
 import { getExternalEpisodeLink, getExternalProviderLink } from "./external-providers.js";
+import { getFeedback, setFeedback, recordBehavior } from "./intelligence.js";
 
 const $ = (id) => document.getElementById(id);
 const route = getRoute();
@@ -50,22 +51,36 @@ function renderLibraryActions() {
   const item = libraryItem();
   const favorite = hasLibraryItem("favorites", item);
   const watchLater = hasLibraryItem("watchLater", item);
+  const feedback = getFeedback(item);
   const externalLink = getExternalProviderLink(media);
-  return '<div class="vivid-title-library-actions" aria-label="Library actions">' +
+  return '<div class="vivid-title-library-actions" aria-label="Library and recommendation actions">' +
     '<button class="vivid-button vivid-button--secondary" type="button" id="library-favorite"><i class="bi bi-heart' + (favorite ? '-fill' : '') + '"></i> ' + (favorite ? "Liked" : "Like") + '</button>' +
+    '<button class="vivid-button vivid-button--secondary" type="button" id="title-not-for-me" aria-pressed="' + String(feedback === "not_for_me") + '"><i class="bi bi-hand-thumbs-down' + (feedback === "not_for_me" ? '-fill' : '') + '"></i> ' + (feedback === "not_for_me" ? "Not for me" : "Not for me") + '</button>' +
     '<button class="vivid-button vivid-button--secondary" type="button" id="library-watch-later"><i class="bi bi-clock' + (watchLater ? '-fill' : '') + '"></i> ' + (watchLater ? "Saved" : "Watch later") + '</button>' +
     '<a class="vivid-button vivid-button--ghost" href="library.html"><i class="bi bi-bookmark"></i> My Library</a>' +
-    (externalLink ? '<a class="vivid-button vivid-button--secondary" href="' + escapeHtml(externalLink) + '" target="_blank" rel="noopener noreferrer" aria-label="Download this title"><i class="bi bi-download"></i> Download</a>' : "") +
+    (externalLink ? '<a class="vivid-button vivid-button--secondary" href="' + escapeHtml(externalLink) + '" target="_blank" rel="noopener noreferrer" aria-label="Open external provider"><i class="bi bi-box-arrow-up-right"></i> Where to watch</a>' : "") +
     '</div>';
 }
 
 function wireLibraryActions() {
   const item = libraryItem();
   const favorite = $("library-favorite");
+  const notForMe = $("title-not-for-me");
   const watchLater = $("library-watch-later");
   favorite?.addEventListener("click", () => {
     toggleLibraryItem("favorites", item);
+    const feedback = getFeedback(item);
+    if (feedback !== "like") setFeedback(item, "like");
     favorite.innerHTML = hasLibraryItem("favorites", item) ? '<i class="bi bi-heart-fill"></i> Liked' : '<i class="bi bi-heart"></i> Like';
+    if (notForMe) {
+      notForMe.setAttribute("aria-pressed","false");
+      notForMe.innerHTML = '<i class="bi bi-hand-thumbs-down"></i> Not for me';
+    }
+  });
+  notForMe?.addEventListener("click", () => {
+    const next = setFeedback(item, "not_for_me");
+    notForMe.setAttribute("aria-pressed",String(next === "not_for_me"));
+    notForMe.innerHTML = '<i class="bi bi-hand-thumbs-down' + (next === "not_for_me" ? '-fill' : '') + '"></i> Not for me';
   });
   watchLater?.addEventListener("click", () => {
     toggleLibraryItem("watchLater", item);
@@ -183,6 +198,7 @@ function openTrailer(key, name) {
   $("trailer-modal-title").textContent = name || "Trailer";
   const params = new URLSearchParams({ autoplay:"1", rel:"0", playsinline:"1", enablejsapi:"1", origin:window.location.origin });
   $("trailer-frame").src = "https://www.youtube.com/embed/" + encodeURIComponent(key) + "?" + params.toString();
+  recordBehavior("trailer_started", media, { video: key });
   modal.classList.add("is-open");
   document.body.classList.add("vivid-modal-open");
   $("trailer-close").focus();
@@ -306,7 +322,7 @@ function render(details) {
     '</div></section>'+renderTrailerSection(details)+renderSeasons(details)+renderProviderGroups(details,country)+
     '<section class="vivid-title-section"><div class="vivid-section-heading"><div><span>RECOMMENDED</span><h2>More like this</h2></div></div><div class="vivid-similar" id="recommendation-rail">'+renderRecommendationCards(related)+'</div></section>';
 
-  upsertLibraryItem("history",libraryItem());
+  recordBehavior("title_opened", libraryItem(), { source: document.referrer || "direct" });
   wireSeasons(details);wireProviders(details);wireTrailers();wireLibraryActions();
   if(firstTrailer)$("hero-trailer").addEventListener("click",()=>openTrailer(firstTrailer.key,firstTrailer.name||"Trailer"));
 }
