@@ -78,7 +78,6 @@ export async function rankSearchResults(items, query, options = {}) {
   const taste = await getTasteProfile().catch(() => ({ genres: {} }));
   const notForMe = getNotForMeKeys();
   const queryTokens = tokens(q.replace(/\b(?:movies?|films?|series|shows?)\b/gi, ""));
-
   const exact = q.toLowerCase();
 
   const ranked = items
@@ -90,24 +89,26 @@ export async function rankSearchResults(items, query, options = {}) {
       if (title === exact) score += 120;
       else if (title.startsWith(exact)) score += 70;
       else if (title.includes(exact)) score += 35;
-
       score += tokenOverlap(queryTokens, item.title) * 18;
-
       if (intent.type && item.media_type === intent.type) score += 24;
       if (intent.genres.some(id => (raw.genre_ids || []).includes(id))) score += 28;
-
       const tasteGenres = Object.keys(taste.genres || {});
       const matchedTaste = (raw.genre_ids || []).filter(id => tasteGenres.includes(String(id))).length;
       score += Math.min(24, matchedTaste * 8);
-
       score += Math.min(12, Number(raw.popularity || 0) / 20);
-      if (item.media_type === "person") score += intent.people ? 20 : 0;
-
+      if (item.media_type === "person" && intent.people) score += 20;
       return { item, score };
     })
     .sort((a, b) => b.score - a.score)
     .map(entry => entry.item);
 
-  const limit = Number(options.limit || 8);
-  return { items: ranked.slice(0, limit), intent, recent: getRecentSearches() };
+  return ranked.slice(0, Number(options.limit || 8));
+}
+
+export async function searchIntelligently(query, options = {}) {
+  const q = normalizeQuery(query);
+  if (!q) return { items: [], intent: getSearchIntent(""), recent: getRecentSearches() };
+  const items = await searchContent(q, 1);
+  const ranked = await rankSearchResults(items, q, options);
+  return { items: ranked, intent: getSearchIntent(q), recent: getRecentSearches() };
 }
