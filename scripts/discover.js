@@ -42,10 +42,10 @@ const MOODS = Object.freeze({
 const RUNTIMES = Object.freeze({
   short: { label: "Under 90 min", min: 1, max: 89 },
   standard: { label: "90–120 min", min: 90, max: 120 },
-  long: { label: "Over 120 min", min: 121, max: 360 },
+  long: { label: "Over 120 min", min: 121 },
   quickEpisode: { label: "Episodes under 30 min", min: 1, max: 29 },
   episode: { label: "Episodes 30–60 min", min: 30, max: 60 },
-  longEpisode: { label: "Episodes over 60 min", min: 61, max: 180 }
+  longEpisode: { label: "Episodes over 60 min", min: 61 }
 });
 
 
@@ -159,8 +159,8 @@ function populateProviders() {
 
 async function loadProviders() {
   try {
-    // Keep the service catalogue global. The selected region is used when
-    // discovering titles, not to hide services from the service browser.
+    // Provider availability is region-specific, so the provider browser and
+    // the actual Discover query must use the same selected region.
     const [movie, tv] = await Promise.all([tmdbApi.movieWatchProviders(state.region), tmdbApi.tvWatchProviders(state.region)]);
     providers = { movie: movie.results || [], tv: tv.results || [] };
     populateProviders();
@@ -282,7 +282,8 @@ async function fetchDiscovery() {
         .filter((item) => item.media_type === "person" || !state.rating || Number(item.vote_average || 0) >= Number(state.rating));
       totalPages = Math.min(500, Number(data.total_pages || 1));
       items = await rankSearchResults(items, query, { limit: items.length || 20 });
-      if (!items.length) items = sortItems(normalized);
+      // Never fall back to unfiltered search results: doing so would make an
+      // active genre/year/rating filter appear to return incorrect titles.
     } else if (state.category) {
       const data = await getCuratedPage(state.category, state.page, {
         genre: state.genre,
@@ -362,6 +363,13 @@ function syncControlsFromUrl() {
 function setType(type) {
   state.type = type;
   state.genre = "";
+  // Runtime presets are content-type specific. Do not send a movie runtime
+  // to TV or an episode runtime to the movie endpoint after switching type.
+  const episodeRuntime = ["quickEpisode", "episode", "longEpisode"].includes(state.runtime);
+  const movieRuntime = ["short", "standard", "long"].includes(state.runtime);
+  if ((type === "tv" && movieRuntime) || (type === "movie" && episodeRuntime)) {
+    state.runtime = "";
+  }
   state.page = 1;
   document.querySelectorAll("[data-type]").forEach((button) =>
     button.classList.toggle("is-active", button.dataset.type === type)
@@ -428,6 +436,9 @@ function wire() {
     state.provider = button.dataset.provider || "";
     state.mood = "";
     state.runtime = "";
+    state.genre = "";
+    state.year = "";
+    state.rating = "";
     state.query = "";
     $("discovery-search").value = "";
     $("clear-search").hidden = true;
@@ -437,8 +448,8 @@ function wire() {
     if ($("category-filter")) $("category-filter").value = "";
     state.page = 1;
     if (state.provider && !state.region) {
-      // Provider availability needs a watch region. Use a broad default
-      // rather than silently restricting the service to Ghana.
+      // A provider cannot be resolved without a watch region. Ghana is the
+      // safe default for this public deployment when none has been selected.
       state.region = "GH";
       $("region-filter").value = "GH";
       await loadProviders();
@@ -487,12 +498,16 @@ function wire() {
     state.provider = "";
     // Episode-length presets are TV-specific. Switch to TV instead of sending
     // an episode runtime filter to the movie endpoint as well.
-    if (state.runtime === "quickEpisode" || state.runtime === "episode" || state.runtime === "longEpisode") {
+    const episodeRuntime = ["quickEpisode", "episode", "longEpisode"].includes(state.runtime);
+    const movieRuntime = ["short", "standard", "long"].includes(state.runtime);
+    if (episodeRuntime) {
       state.type = "tv";
-      document.querySelectorAll("[data-type]").forEach((item) =>
-        item.classList.toggle("is-active", item.dataset.type === "tv")
-      );
+    } else if (movieRuntime) {
+      state.type = "movie";
     }
+    document.querySelectorAll("[data-type]").forEach((item) =>
+      item.classList.toggle("is-active", item.dataset.type === state.type)
+    );
     if ($("category-filter")) $("category-filter").value = "";
     if ($("genre-filter")) $("genre-filter").value = "";
     if ($("year-filter")) $("year-filter").value = "";
