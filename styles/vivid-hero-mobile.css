@@ -1,0 +1,70 @@
+/* Mobile hero trailer cover — kill black letterbox under the header.
+   YouTube embeds are 16:9; a tall portrait hero left black bars at the top.
+   Scale the iframe to cover height so the trailer fills the frame.
+   CSS only. No JS / third-party changes. */
+@media (max-width: 640px) {
+  .vivid-hero {
+    min-height: 0;
+  }
+
+  .vivid-hero-media {
+    position: relative;
+    width: 100%;
+    height: min(62svh, 560px);
+    min-height: 420px;
+    max-height: none;
+    overflow: hidden;
+    background: #090a0d;
+  }
+
+  /* Cover the media box: expand width so 16:9 fills height, center horizontally */
+  .vivid-hero-video {
+    position: absolute !important;
+    top: 0 !important;
+    left: 50% !important;
+    right: auto !important;
+    bottom: auto !important;
+    width: 177.78vh !important;
+    max-width: none !important;
+    height: 100% !important;
+    min-width: 100% !important;
+    transform: translateX(-50%) scale(1.12) !important;
+    transform-origin: center center !important;
+    border: 0;
+    z-index: 1;
+  }
+
+  .vivid-hero-fallback {
+    background-size: cover !important;
+    background-position: center top !important;
+    background-repeat: no-repeat !important;
+  }
+
+  .vivid-hero-content {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    padding: calc(72px + env(safe-area-inset-top, 0px)) 16px 72px !important;
+    justify-content: flex-end !important;
+  }
+
+  .vivid-hero-tools {
+    right: 16px !important;
+    bottom: 16px !important;
+    top: auto !important;
+  }
+
+  .vivid-hero-media::after {
+    background:
+      linear-gradient(90deg, rgba(4, 5, 7, 0.92) 0%, rgba(4, 5, 7, 0.35) 55%, rgba(4, 5, 7, 0.45) 100%),
+      linear-gradient(0deg, #06070a 0%, rgba(6, 7, 10, 0.15) 42%, rgba(0, 0, 0, 0.25) 100%) !important;
+  }
+}
+
+@media (max-width: 380px) {
+  .vivid-hero-media {
+    height: min(58svh, 480px);
+    min-height: 380px;
+  }
+}
