@@ -1,4 +1,4 @@
-import { getAnalytics, isSupported, logEvent, setAnalyticsCollectionEnabled } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-analytics.js";
+import { getAnalytics, isSupported, logEvent, setAnalyticsCollectionEnabled } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-analytics.js";
 import { app } from "./firebase.js";
 
 let analytics = null;
@@ -30,13 +30,8 @@ async function track(name, params = {}) {
   }
 }
 
-window.vividAnalytics = Object.freeze({
-  track,
-  ready
-});
+window.vividAnalytics = Object.freeze({ track, ready });
 
-// Meaningful interactions only. This keeps analytics useful without turning
-// every mouse movement or scroll tick into an event.
 document.addEventListener("click", event => {
   const card = event.target.closest?.("[data-id][data-type]");
   if (card) {
@@ -55,12 +50,7 @@ document.addEventListener("click", event => {
   }
 
   const loadMore = event.target.closest?.("[data-load-section],#load-more,#collection-more");
-  if (loadMore) {
-    track("load_more", {
-      section: loadMore.dataset.loadSection || "similar"
-    });
-    return;
-  }
+  if (loadMore) track("load_more", { section: loadMore.dataset.loadSection || "similar" });
 
   const watch = event.target.closest?.("#hero-watch,[data-watch],#stream-button,.stream-button");
   if (watch) track("stream_click", { source: location.pathname });
@@ -68,13 +58,9 @@ document.addEventListener("click", event => {
 
 document.addEventListener("submit", event => {
   const form = event.target;
-  if (form.matches?.("[data-landing-email-form]")) {
-    track("signup_start", { method: "email" });
-  } else if (form.matches?.("#signup-form")) {
-    track("signup_submit", { method: "email" });
-  } else if (form.matches?.("#login-form")) {
-    track("login_submit", { method: "email" });
-  }
+  if (form.matches?.("[data-landing-email-form]")) track("signup_start", { method: "email" });
+  else if (form.matches?.("#signup-form")) track("signup_submit", { method: "email" });
+  else if (form.matches?.("#login-form")) track("login_submit", { method: "email" });
 });
 
 document.addEventListener("input", event => {
@@ -83,8 +69,6 @@ document.addEventListener("input", event => {
   const query = input.value.trim();
   if (query.length >= 3) {
     clearTimeout(input.__vividAnalyticsTimer);
-    input.__vividAnalyticsTimer = setTimeout(() => {
-      track("search", { search_term: query.slice(0, 100) });
-    }, 700);
+    input.__vividAnalyticsTimer = setTimeout(() => track("search", { search_term: query.slice(0, 100) }), 700);
   }
 });
