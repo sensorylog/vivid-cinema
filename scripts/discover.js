@@ -161,7 +161,7 @@ async function loadProviders() {
   try {
     // Keep the service catalogue global. The selected region is used when
     // discovering titles, not to hide services from the service browser.
-    const [movie, tv] = await Promise.all([tmdbApi.movieWatchProviders(""), tmdbApi.tvWatchProviders("")]);
+    const [movie, tv] = await Promise.all([tmdbApi.movieWatchProviders(state.region), tmdbApi.tvWatchProviders(state.region)]);
     providers = { movie: movie.results || [], tv: tv.results || [] };
     populateProviders();
   } catch {
@@ -426,6 +426,9 @@ function wire() {
     const button = event.target.closest("[data-provider]");
     if (!button) return;
     state.provider = button.dataset.provider || "";
+    state.query = "";
+    $("discovery-search").value = "";
+    $("clear-search").hidden = true;
     // A provider is its own discovery mode. Never let a curated collection
     // silently bypass the provider filter and return unrelated titles.
     state.category = "";
@@ -444,6 +447,9 @@ function wire() {
   });
   document.querySelectorAll("[data-mood]").forEach((button) => button.addEventListener("click", () => {
     state.mood = button.dataset.mood || "";
+    state.query = "";
+    $("discovery-search").value = "";
+    $("clear-search").hidden = true;
     state.runtime = "";
     state.category = "";
     // Mood is a primary discovery mode. Clear restrictive filters so a
@@ -464,6 +470,9 @@ function wire() {
   }));
   document.querySelectorAll("[data-runtime]").forEach((button) => button.addEventListener("click", () => {
     state.runtime = button.dataset.runtime || "";
+    state.query = "";
+    $("discovery-search").value = "";
+    $("clear-search").hidden = true;
     state.mood = "";
     state.category = "";
     state.genre = "";
