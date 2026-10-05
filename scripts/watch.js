@@ -23,6 +23,7 @@ let activeSource = "vidapi";
 let primaryHealthy = false;
 let fallbackTimer = null;
 let imdbId = "";
+let tmdbId = "";
 
 function getParams() {
   const id = route.params.get("id");
@@ -52,13 +53,31 @@ function buildVidapiEmbedUrl(params, startAt = 0) {
     : base + "/embed/movie/" + encodeURIComponent(params.id) + "?" + query;
 }
 
-function buildVidsrcEmbedUrl(params, imdb) {
-  const base = String(VIVID_CONFIG.api.vidsrcEmbedBaseUrl || "https://vidsrc.cc").replace(/\/+$/, "");
-  const id = encodeURIComponent(imdb);
+function buildVidsrcEmbedUrl(params) {
+  const base = String(VIVID_CONFIG.api.vidsrcEmbedBaseUrl || "https://vidsrc.to").replace(/\/+$/, "");
+  const id = encodeURIComponent(imdbId || tmdbId);
   if (params.type === "tv") {
-    return base + "/v2/embed/tv/" + id + "/" + params.season + "/" + params.episode + "?poster=true&autoPlay=false";
+    return base + "/embed/tv/" + id + "/" + params.season + "/" + params.episode;
   }
-  return base + "/v2/embed/movie/" + id + "?poster=true&autoPlay=false";
+  return base + "/embed/movie/" + id;
+}
+
+function hasFallbackId() {
+  return Boolean(imdbId || tmdbId);
+}
+
+function triggerVidsrcFallback(reason = "primary_error") {
+  if (activeSource !== "vidapi" || !currentParams || !hasFallbackId()) return false;
+  clearFallbackTimer();
+  const status = $("player-status");
+  if (status) {
+    status.textContent = "Primary source unavailable — switching to alternate…";
+    status.classList.add("is-warning");
+    status.hidden = false;
+  }
+  console.warn("Vivid playback fallback:", reason);
+  setPlayerSource("vidsrc", currentParams, Number(getPlaybackProgress(progressKey())?.progress || route.params.get("startAt") || 0));
+  return true;
 }
 
 function clearFallbackTimer() {
@@ -73,7 +92,7 @@ function updateSourceLabel() {
   if (label) label.textContent = activeSource === "vidsrc" ? "Alternate source" : "Powered by VidAPI";
   const switchBtn = document.getElementById("player-switch-source");
   if (switchBtn) {
-    const canSwitch = Boolean(imdbId);
+    const canSwitch = hasFallbackId();
     switchBtn.hidden = !canSwitch;
     switchBtn.textContent = activeSource === "vidsrc" ? "Try primary source" : "Try alternate source";
   }
@@ -86,9 +105,9 @@ function setPlayerSource(source, params, startAt = 0) {
   activeSource = source;
   const status = $("player-status");
   if (source === "vidsrc") {
-    if (!imdbId) return;
+    if (!hasFallbackId()) return;
     primaryHealthy = false;
-    player.src = buildVidsrcEmbedUrl(params, imdbId);
+    player.src = buildVidsrcEmbedUrl(params);
     if (status) {
       status.textContent = "Loading alternate source…";
       status.classList.remove("is-warning");
@@ -103,14 +122,10 @@ function setPlayerSource(source, params, startAt = 0) {
       status.hidden = false;
     }
     // Auto-fallback only when we have an IMDb id and primary never signals health.
-    if (imdbId) {
+    if (hasFallbackId()) {
       fallbackTimer = window.setTimeout(() => {
         if (primaryHealthy || activeSource !== "vidapi") return;
-        if (status) {
-          status.textContent = "Primary source unavailable — switching to alternate…";
-          status.classList.add("is-warning");
-        }
-        setPlayerSource("vidsrc", params, startAt);
+        triggerVidsrcFallback("primary_timeout");
       }, 8000);
     }
   }
@@ -208,10 +223,16 @@ function renderShell(params) {
   const status = $("player-status");
   if (player) {
     player.addEventListener("load", () => {
-      // Hide status shortly after iframe loads; keep fallback timer if primary never confirms health.
+      // A cross-origin iframe load only proves the document loaded; it does not prove
+      // that the VidAPI player found a playable source. PLAYER_EVENT is the health signal.
       window.setTimeout(() => {
-        if (status && status.isConnected && !status.classList.contains("is-warning")) status.hidden = true;
+        if (status && status.isConnected && activeSource === "vidapi" && primaryHealthy && !status.classList.contains("is-warning")) {
+          status.hidden = true;
+        }
       }, 450);
+    });
+    player.addEventListener("error", () => {
+      triggerVidsrcFallback("iframe_error");
     });
     // Start on primary (TMDB / VidAPI). Fallback uses IMDb once metadata resolves.
     setPlayerSource("vidapi", params, resumeAt);
@@ -268,8 +289,26 @@ async function prepareNextEpisode(params) {
 function handlePlayerEvent(event) {
   if (event.origin !== VIDAPI_ORIGIN) return;
   const payload = event.data;
-  if (!payload || payload.type !== "PLAYER_EVENT" || !payload.data) return;
-  // Any real PLAYER_EVENT means primary embed is alive — cancel auto-fallback.
+  if (!payload || typeof payload !== "object") return;
+
+  // VidAPI can report provider/player failures through postMessage. Catch common
+  // status/code/error shapes before treating any PLAYER_EVENT as a healthy player.
+  const eventData = payload.data || payload;
+  const statusValue = String(eventData.player_status || eventData.status || eventData.event || "").toLowerCase();
+  const errorValue = String(eventData.error || eventData.error_code || eventData.code || eventData.message || "").toLowerCase();
+  const numericCode = Number(eventData.status_code ?? eventData.http_status ?? eventData.httpStatus ?? eventData.statusCode);
+  const looksLikeFailure =
+    (Number.isFinite(numericCode) && numericCode >= 400) ||
+    /(^|\D)(404|403|500|502|503)(\D|$)/.test(errorValue) ||
+    /(error|failed|failure|not.?found|unavailable|offline|load.?failed|source.?failed)/.test(statusValue + " " + errorValue);
+
+  if (looksLikeFailure && activeSource === "vidapi") {
+    triggerVidsrcFallback("vidapi_" + (numericCode || statusValue || "error"));
+    return;
+  }
+
+  if (payload.type !== "PLAYER_EVENT" || !payload.data) return;
+  // A real playback/progress event means the primary embed is alive.
   primaryHealthy = true;
   clearFallbackTimer();
   const status = $("player-status");
@@ -327,6 +366,7 @@ async function load() {
     details = currentParams.type === "tv" ? await tmdbApi.tvDetails(currentParams.id) : await tmdbApi.movieDetails(currentParams.id);
     media = normalizeMedia(details, currentParams.type);
     imdbId = resolveImdbId(details);
+    tmdbId = /^\d+$/.test(String(currentParams.id || "")) ? String(currentParams.id) : String(details?.id || "");
     if (currentParams.type === "tv") {
       details.episode = await tmdbApi.tvSeason(currentParams.id, currentParams.season)
         .then(season => (season.episodes || []).find(ep => Number(ep.episode_number) === Number(currentParams.episode)) || null)
@@ -336,18 +376,12 @@ async function load() {
     hydrateWatchDetails(currentParams);
     // Metadata arrived after shell — enable switch + re-arm auto-fallback if still waiting.
     updateSourceLabel();
-    if (imdbId && activeSource === "vidapi" && !primaryHealthy && !fallbackTimer) {
+    if (hasFallbackId() && activeSource === "vidapi" && !primaryHealthy && !fallbackTimer) {
       const saved = getPlaybackProgress(progressKey());
       const resumeAt = Number(saved?.progress || route.params.get("startAt") || 0);
       fallbackTimer = window.setTimeout(() => {
         if (primaryHealthy || activeSource !== "vidapi") return;
-        const status = $("player-status");
-        if (status) {
-          status.textContent = "Primary source unavailable — switching to alternate…";
-          status.classList.add("is-warning");
-          status.hidden = false;
-        }
-        setPlayerSource("vidsrc", currentParams, resumeAt);
+        triggerVidsrcFallback("primary_timeout_after_metadata");
       }, 8000);
     }
   } catch (error) {
