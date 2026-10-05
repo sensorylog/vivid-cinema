@@ -10,11 +10,19 @@ import { recordBehavior, startIntelligenceSync } from "./intelligence.js";
 const $ = (id) => document.getElementById(id);
 const route = getRoute();
 const VIDAPI_ORIGIN = new URL(VIVID_CONFIG.api.vidapiEmbedBaseUrl).origin;
+const VIDSRC_ORIGIN = (() => {
+  try { return new URL(VIVID_CONFIG.api.vidsrcEmbedBaseUrl || "https://vidsrc.cc").origin; }
+  catch { return "https://vidsrc.cc"; }
+})();
 let media = null;
 let details = null;
 let currentParams = null;
 let nextEpisode = null;
 let lastHistorySyncAt = 0;
+let activeSource = "vidapi";
+let primaryHealthy = false;
+let fallbackTimer = null;
+let imdbId = "";
 
 function getParams() {
   const id = route.params.get("id");
@@ -28,13 +36,85 @@ function progressKey() {
   return media ? media.media_type + ":" + media.id + (media.media_type === "tv" && currentParams ? ":" + currentParams.season + ":" + currentParams.episode : "") : "";
 }
 
-function buildEmbedUrl(params, startAt = 0) {
+function resolveImdbId(source) {
+  if (!source) return "";
+  const raw = source.external_ids?.imdb_id || source.imdb_id || source.external_ids?.imdb || "";
+  const id = String(raw || "").trim();
+  return /^tt\d+$/i.test(id) ? id : "";
+}
+
+function buildVidapiEmbedUrl(params, startAt = 0) {
   const base = String(VIVID_CONFIG.api.vidapiEmbedBaseUrl || "").replace(/\/+$/, "");
   const query = new URLSearchParams({ autoplay: "1", controls: "1", overlay: "1" });
   if (Number(startAt) > 5) query.set("resumeAt", String(Math.floor(Number(startAt))));
   return params.type === "tv"
     ? base + "/embed/tv/" + encodeURIComponent(params.id) + "/" + params.season + "/" + params.episode + "?" + query
     : base + "/embed/movie/" + encodeURIComponent(params.id) + "?" + query;
+}
+
+function buildVidsrcEmbedUrl(params, imdb) {
+  const base = String(VIVID_CONFIG.api.vidsrcEmbedBaseUrl || "https://vidsrc.cc").replace(/\/+$/, "");
+  const id = encodeURIComponent(imdb);
+  if (params.type === "tv") {
+    return base + "/v2/embed/tv/" + id + "/" + params.season + "/" + params.episode + "?poster=true&autoPlay=false";
+  }
+  return base + "/v2/embed/movie/" + id + "?poster=true&autoPlay=false";
+}
+
+function clearFallbackTimer() {
+  if (fallbackTimer) {
+    clearTimeout(fallbackTimer);
+    fallbackTimer = null;
+  }
+}
+
+function updateSourceLabel() {
+  const label = document.getElementById("player-source-label");
+  if (label) label.textContent = activeSource === "vidsrc" ? "Alternate source" : "Powered by VidAPI";
+  const switchBtn = document.getElementById("player-switch-source");
+  if (switchBtn) {
+    const canSwitch = Boolean(imdbId);
+    switchBtn.hidden = !canSwitch;
+    switchBtn.textContent = activeSource === "vidsrc" ? "Try primary source" : "Try alternate source";
+  }
+}
+
+function setPlayerSource(source, params, startAt = 0) {
+  const player = $("vidapi-player");
+  if (!player || !params) return;
+  clearFallbackTimer();
+  activeSource = source;
+  const status = $("player-status");
+  if (source === "vidsrc") {
+    if (!imdbId) return;
+    primaryHealthy = false;
+    player.src = buildVidsrcEmbedUrl(params, imdbId);
+    if (status) {
+      status.textContent = "Loading alternate source…";
+      status.classList.remove("is-warning");
+      status.hidden = false;
+    }
+  } else {
+    primaryHealthy = false;
+    player.src = buildVidapiEmbedUrl(params, startAt);
+    if (status) {
+      status.textContent = Number(startAt) > 5 ? "Resuming where you left off…" : "Preparing playback…";
+      status.classList.remove("is-warning");
+      status.hidden = false;
+    }
+    // Auto-fallback only when we have an IMDb id and primary never signals health.
+    if (imdbId) {
+      fallbackTimer = window.setTimeout(() => {
+        if (primaryHealthy || activeSource !== "vidapi") return;
+        if (status) {
+          status.textContent = "Primary source unavailable — switching to alternate…";
+          status.classList.add("is-warning");
+        }
+        setPlayerSource("vidsrc", params, startAt);
+      }, 8000);
+    }
+  }
+  updateSourceLabel();
 }
 
 function historyItem(extra = {}) {
@@ -120,19 +200,32 @@ function renderShell(params) {
     '<section class="vivid-player-section" aria-label="Video player"><div class="vivid-player-frame">' +
       '<div id="player-status" class="vivid-player-status" role="status" aria-live="polite">' + (resumeAt > 5 ? "Resuming where you left off…" : "Preparing playback…") + '</div>' +
       '<iframe id="vidapi-player" title="' + escapeHtml(title) + ' player" allow="autoplay; fullscreen; picture-in-picture; encrypted-media; clipboard-write" allowfullscreen referrerpolicy="origin" loading="eager"></iframe>' +
-    '</div><div class="vivid-player-bar"><div><i class="bi bi-shield-check"></i><span>Powered by VidAPI</span></div><div><a href="' + escapeHtml(buildTitleUrl(media.id, media.media_type)) + '">Back to title</a></div></div></section>' +
+    '</div><div class="vivid-player-bar"><div><i class="bi bi-shield-check"></i><span id="player-source-label">Powered by VidAPI</span></div><div class="vivid-player-bar-actions"><button type="button" id="player-switch-source" class="vivid-player-switch" hidden>Try alternate source</button><a href="' + escapeHtml(buildTitleUrl(media.id, media.media_type)) + '">Back to title</a></div></div></section>' +
     (isTv ? '<section class="vivid-watch-note"><i class="bi bi-collection-play"></i><div><strong>Episode playback</strong><span>Use the episode list on the title page to switch seasons and episodes.</span></div></section>' : "") +
     '<section class="vivid-watch-recommendations"><div class="vivid-section-heading"><div><span>AFTER WATCHING</span><h2>More like this</h2></div></div><div id="watch-recommendations" class="vivid-watch-rec-rail">' + recommendationCards() + '</div></section>';
 
   const player = $("vidapi-player");
   const status = $("player-status");
   if (player) {
-    player.src = buildEmbedUrl(params, resumeAt);
-    player.addEventListener("load", () => window.setTimeout(() => status?.remove(), 450), { once: true });
+    player.addEventListener("load", () => {
+      // Hide status shortly after iframe loads; keep fallback timer if primary never confirms health.
+      window.setTimeout(() => {
+        if (status && status.isConnected && !status.classList.contains("is-warning")) status.hidden = true;
+      }, 450);
+    });
+    // Start on primary (TMDB / VidAPI). Fallback uses IMDb once metadata resolves.
+    setPlayerSource("vidapi", params, resumeAt);
+    const switchBtn = $("player-switch-source");
+    if (switchBtn) {
+      switchBtn.addEventListener("click", () => {
+        const next = activeSource === "vidsrc" ? "vidapi" : "vidsrc";
+        setPlayerSource(next, params, resumeAt);
+      });
+    }
   }
   window.setTimeout(() => {
     const current = $("player-status");
-    if (current && current.isConnected) {
+    if (current && current.isConnected && !current.hidden && activeSource === "vidapi" && !primaryHealthy) {
       current.textContent = "Playback is taking longer than expected. The player is still loading.";
       current.classList.add("is-warning");
     }
@@ -176,6 +269,11 @@ function handlePlayerEvent(event) {
   if (event.origin !== VIDAPI_ORIGIN) return;
   const payload = event.data;
   if (!payload || payload.type !== "PLAYER_EVENT" || !payload.data) return;
+  // Any real PLAYER_EVENT means primary embed is alive — cancel auto-fallback.
+  primaryHealthy = true;
+  clearFallbackTimer();
+  const status = $("player-status");
+  if (status) status.hidden = true;
   const data = payload.data;
   const info = data.player_info || {};
   if (String(info.mediaType || "") !== String(media?.media_type || "")) return;
@@ -228,6 +326,7 @@ async function load() {
   try {
     details = currentParams.type === "tv" ? await tmdbApi.tvDetails(currentParams.id) : await tmdbApi.movieDetails(currentParams.id);
     media = normalizeMedia(details, currentParams.type);
+    imdbId = resolveImdbId(details);
     if (currentParams.type === "tv") {
       details.episode = await tmdbApi.tvSeason(currentParams.id, currentParams.season)
         .then(season => (season.episodes || []).find(ep => Number(ep.episode_number) === Number(currentParams.episode)) || null)
@@ -235,6 +334,22 @@ async function load() {
       nextEpisode = await prepareNextEpisode(currentParams);
     }
     hydrateWatchDetails(currentParams);
+    // Metadata arrived after shell — enable switch + re-arm auto-fallback if still waiting.
+    updateSourceLabel();
+    if (imdbId && activeSource === "vidapi" && !primaryHealthy && !fallbackTimer) {
+      const saved = getPlaybackProgress(progressKey());
+      const resumeAt = Number(saved?.progress || route.params.get("startAt") || 0);
+      fallbackTimer = window.setTimeout(() => {
+        if (primaryHealthy || activeSource !== "vidapi") return;
+        const status = $("player-status");
+        if (status) {
+          status.textContent = "Primary source unavailable — switching to alternate…";
+          status.classList.add("is-warning");
+          status.hidden = false;
+        }
+        setPlayerSource("vidsrc", currentParams, resumeAt);
+      }, 8000);
+    }
   } catch (error) {
     console.warn("Vivid metadata unavailable while playback is active:", error);
     const overviewNode = $("watch-overview");
