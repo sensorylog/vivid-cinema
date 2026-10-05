@@ -30,16 +30,18 @@ let genres = { movie: [], tv: [] };
 let providers = { movie: [], tv: [] };
 
 const MOODS = Object.freeze({
-  relax: { label: "Relax", genres: [35, 10751], sort: "popularity.desc" },
-  intense: { label: "Intense", genres: [28, 53, 80], sort: "popularity.desc" },
-  funny: { label: "Funny", genres: [35], sort: "popularity.desc" },
-  romantic: { label: "Romantic", genres: [10749, 18], sort: "popularity.desc" },
-  thoughtful: { label: "Thought-provoking", genres: [18, 9648, 99], sort: "popularity.desc" },
-  escapist: { label: "Escapist", genres: [12, 14, 878], sort: "popularity.desc" },
-  scary: { label: "Scary", genres: [27, 53], sort: "popularity.desc" },
-  emotional: { label: "Emotional", genres: [18, 10749], sort: "popularity.desc" },
-  fast: { label: "Fast-paced", genres: [28, 53], sort: "popularity.desc" },
-  late: { label: "Late-night", genres: [27, 9648, 53], sort: "popularity.desc" }
+  // genres[0] is the primary TMDB genre used for ranking so results feel like the chip.
+  // Additional ids are OR matches so related titles still surface, then get ranked below.
+  relax: { label: "Relax", genres: [35, 10751], sort: "popularity.desc" },       // Comedy, Family
+  intense: { label: "Intense", genres: [28, 53, 80], sort: "popularity.desc" }, // Action, Thriller, Crime
+  funny: { label: "Funny", genres: [35], sort: "popularity.desc" },             // Comedy only
+  romantic: { label: "Romantic", genres: [10749], sort: "popularity.desc" },    // Romance only
+  thoughtful: { label: "Thought-provoking", genres: [18, 9648, 99], sort: "popularity.desc" }, // Drama, Mystery, Documentary
+  escapist: { label: "Escapist", genres: [12, 14, 878], sort: "popularity.desc" }, // Adventure, Fantasy, Sci-Fi
+  scary: { label: "Scary", genres: [27], sort: "popularity.desc" },             // Horror only
+  emotional: { label: "Emotional", genres: [18, 10749], sort: "popularity.desc" }, // Drama, Romance
+  fast: { label: "Fast-paced", genres: [28, 53], sort: "popularity.desc" },     // Action, Thriller
+  late: { label: "Late-night", genres: [27, 9648, 53], sort: "popularity.desc" } // Horror, Mystery, Thriller
 });
 const RUNTIMES = Object.freeze({
   short: { label: "Under 90 min", min: 1, max: 89 },
@@ -49,6 +51,28 @@ const RUNTIMES = Object.freeze({
   episode: { label: "Episodes 30–60 min", min: 30, max: 60 },
   longEpisode: { label: "Episodes over 60 min", min: 61 }
 });
+
+// Rank discover results so the mood's primary genre leads. TMDB with_genres is
+// inclusive (any listed genre), so multi-tagged titles (e.g. action-comedy) can
+// appear under Funny; ranking puts pure comedy first and drops titles that lost
+// the mood genre after normalization edge cases.
+function rankByMood(items) {
+  const mood = MOODS[state.mood];
+  if (!mood?.genres?.length || !items?.length) return items || [];
+  const primary = mood.genres[0];
+  const allowed = new Set(mood.genres.map(Number));
+  return items
+    .map((item) => {
+      const ids = (item.raw?.genre_ids || []).map(Number);
+      const hasPrimary = ids[0] === primary;
+      const hasAny = ids.some((id) => allowed.has(id));
+      const score = hasPrimary ? 3 : hasAny ? 1 : 0;
+      return { item, score, vote: Number(item.vote_average || 0) };
+    })
+    .filter((entry) => entry.score > 0)
+    .sort((a, b) => b.score - a.score || b.vote - a.vote)
+    .map((entry) => entry.item);
+}
 
 
 function renderFeaturedCollections() {
@@ -212,26 +236,29 @@ async function loadGenres() {
 }
 
 function discoverParams(type) {
-  const sort = type === "tv"
-    ? state.sort.replace("primary_release_date", "first_air_date")
-    : state.sort;
   const mood = MOODS[state.mood];
   const runtime = RUNTIMES[state.runtime];
-  const moodGenres = mood?.genres?.length ? mood.genres.join("|") : "";
-  // TMDB treats comma-separated genres as AND and pipe-separated genres as OR.
-  // Mood chips are intentionally OR-based so a mood like "Intense" means any
-  // of its relevant genres instead of requiring a title to match all of them.
-  const moodGenreQuery = moodGenres ? mood.genres.join("|") : "";
+  // Mood is the primary discovery mode: its genres and sort win over a stale
+  // genre select so Funny always hits Comedy (35), Scary always hits Horror (27).
+  const effectiveSort = mood?.sort || state.sort;
+  const sort = type === "tv"
+    ? effectiveSort.replace("primary_release_date", "first_air_date")
+    : effectiveSort;
+  // TMDB: comma = AND, pipe = OR. Moods use OR across their genre list.
+  const moodGenreQuery = mood?.genres?.length ? mood.genres.join("|") : "";
   const params = {
     include_adult: false,
     include_video: false,
     page: state.page,
     sort_by: sort,
-    with_genres: state.genre || moodGenreQuery || undefined,
+    with_genres: moodGenreQuery || state.genre || undefined,
     ...(type === "movie"
       ? { primary_release_year: state.year || undefined }
       : { first_air_date_year: state.year || undefined }),
     "vote_average.gte": state.rating || undefined,
+    // Modest vote floor when browsing by mood so mis-tagged low-signal titles
+    // do not drown out real comedy / horror / romance matches.
+    ...(mood ? { "vote_count.gte": 40 } : {}),
     // TMDB expects the dotted runtime parameters. Use them for both movies
     // and TV because TV discover supports episode runtime as well.
     ...(runtime
@@ -253,9 +280,11 @@ async function fetchDiscovery() {
   $("results-label").textContent = query ? "SEARCH" : state.category ? "COLLECTION" : "DISCOVER";
   const selectedProvider = [...(providers.movie || []), ...(providers.tv || [])].find((provider) => String(provider.provider_id) === String(state.provider));
   const selectedCategory = CURATED_CATEGORIES[state.category];
+  const selectedMood = MOODS[state.mood];
   $("results-title").textContent = query
     ? 'Results for “' + escapeHtml(query) + '”'
     : selectedCategory ? selectedCategory.label
+    : selectedMood ? selectedMood.label
     : selectedProvider ? selectedProvider.provider_name
     : state.type === "all" ? "All titles" : state.type === "tv" ? "TV series" : "Movies";
 
@@ -306,12 +335,14 @@ async function fetchDiscovery() {
         ...normalizeResults(movies.results || [], "movie"),
         ...normalizeResults(tv.results || [], "tv")
       ]);
+      if (state.mood) items = rankByMood(items);
       totalPages = Math.max(Number(movies.total_pages || 1), Number(tv.total_pages || 1));
     } else {
       const data = await (state.type === "movie"
         ? tmdbApi.discoverMovies(discoverParams("movie"))
         : tmdbApi.discoverTv(discoverParams("tv")));
       items = normalizeResults(data.results || [], state.type);
+      if (state.mood) items = rankByMood(items);
       totalPages = Number(data.total_pages || 1);
     }
 
