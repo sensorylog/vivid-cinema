@@ -440,7 +440,7 @@ function wire() {
       // Provider availability needs a watch region. Use a broad default
       // rather than silently restricting the service to Ghana.
       state.region = "GH";
-      $("region-filter").value = "US";
+      $("region-filter").value = "GH";
       await loadProviders();
     } else {
       populateProviders();
