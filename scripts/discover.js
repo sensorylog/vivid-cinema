@@ -24,6 +24,8 @@ const state = {
   requestId: 0
 };
 if (!CURATED_CATEGORIES[state.category]) state.category = "";
+if (["quickEpisode", "episode", "longEpisode"].includes(state.runtime)) state.type = "tv";
+if (["short", "standard", "long"].includes(state.runtime)) state.type = "movie";
 let genres = { movie: [], tv: [] };
 let providers = { movie: [], tv: [] };
 
@@ -282,8 +284,6 @@ async function fetchDiscovery() {
         .filter((item) => item.media_type === "person" || !state.rating || Number(item.vote_average || 0) >= Number(state.rating));
       totalPages = Math.min(500, Number(data.total_pages || 1));
       items = await rankSearchResults(items, query, { limit: items.length || 20 });
-      // Never fall back to unfiltered search results: doing so would make an
-      // active genre/year/rating filter appear to return incorrect titles.
     } else if (state.category) {
       const data = await getCuratedPage(state.category, state.page, {
         genre: state.genre,
@@ -369,6 +369,9 @@ function setType(type) {
   const movieRuntime = ["short", "standard", "long"].includes(state.runtime);
   if ((type === "tv" && movieRuntime) || (type === "movie" && episodeRuntime)) {
     state.runtime = "";
+    document.querySelectorAll("[data-runtime]").forEach((item) =>
+      item.classList.toggle("is-active", item.dataset.runtime === "")
+    );
   }
   state.page = 1;
   document.querySelectorAll("[data-type]").forEach((button) =>
