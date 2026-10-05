@@ -241,6 +241,64 @@ function discoverParams(type) {
   };
 }
 
+async function enforceStrictFilters(items) {
+  let filtered = items;
+
+  // Mood is a hard filter, not a ranking hint. TMDB's discover endpoint is
+  // already asked for the genres, but keep the UI honest if a mixed movie/TV
+  // response or cached result slips through.
+  const mood = MOODS[state.mood];
+  if (mood?.genres?.length) {
+    const allowed = new Set(mood.genres.map(Number));
+    filtered = filtered.filter(item =>
+      Array.isArray(item.raw?.genre_ids)
+        ? item.raw.genre_ids.some(id => allowed.has(Number(id)))
+        : true
+    );
+  }
+
+  // Runtime is verified against the title's actual runtime. Movies expose
+  // runtime in minutes; TV exposes episode_run_time.
+  const runtime = RUNTIMES[state.runtime];
+  if (runtime && filtered.length) {
+    const checked = await Promise.allSettled(filtered.map(async item => {
+      if (item.media_type === "movie") {
+        const details = await tmdbApi.movieDetailsBasic(item.id);
+        return Number(details?.runtime || 0);
+      }
+      const details = await tmdbApi.tvDetailsBasic(item.id);
+      const values = Array.isArray(details?.episode_run_time) ? details.episode_run_time.map(Number).filter(Boolean) : [];
+      return values.length ? Math.round(values.reduce((a, b) => a + b, 0) / values.length) : 0;
+    }));
+    filtered = filtered.filter((item, index) => {
+      const result = checked[index];
+      if (result?.status !== "fulfilled") return false;
+      const minutes = Number(result.value || 0);
+      return minutes >= runtime.min && minutes <= runtime.max;
+    });
+  }
+
+  // Provider discovery is verified against the selected region/provider so a
+  // provider chip can never merely change the heading while leaving unrelated
+  // titles in the grid.
+  if (state.provider && state.region && filtered.length) {
+    const providerId = Number(state.provider);
+    const checked = await Promise.allSettled(filtered.map(async item => {
+      const data = item.media_type === "tv"
+        ? await tmdbApi.tvWatchProvidersById(item.id)
+        : await tmdbApi.movieWatchProvidersById(item.id);
+      const region = data?.results?.[state.region];
+      if (!region) return false;
+      return ["flatrate", "free", "ads", "rent", "buy"].some(type =>
+        Array.isArray(region[type]) && region[type].some(provider => Number(provider.provider_id) === providerId)
+      );
+    }));
+    filtered = filtered.filter((item, index) => checked[index]?.status === "fulfilled" && checked[index].value === true);
+  }
+
+  return filtered;
+}
+
 async function fetchDiscovery() {
   const requestId = ++state.requestId;
   syncUrl();
@@ -312,6 +370,8 @@ async function fetchDiscovery() {
       totalPages = Number(data.total_pages || 1);
     }
 
+    if (requestId !== state.requestId) return;
+    if (state.mood || state.runtime || state.provider) items = await enforceStrictFilters(items);
     if (requestId !== state.requestId) return;
     renderResults(items, totalPages);
   } catch (error) {
