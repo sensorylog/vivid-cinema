@@ -236,7 +236,7 @@ function discoverParams(type) {
       ? { "with_runtime.gte": runtime.min, "with_runtime.lte": runtime.max }
       : {}),
     watch_region: state.region || undefined,
-    with_watch_monetization_types: state.provider ? "flatrate|free|ads|rent|buy" : undefined,
+    with_watch_monetization_types: state.provider ? "flatrate" : undefined,
     with_watch_providers: state.provider || undefined
   };
 }
@@ -426,6 +426,8 @@ function wire() {
     const button = event.target.closest("[data-provider]");
     if (!button) return;
     state.provider = button.dataset.provider || "";
+    state.mood = "";
+    state.runtime = "";
     state.query = "";
     $("discovery-search").value = "";
     $("clear-search").hidden = true;
@@ -437,7 +439,7 @@ function wire() {
     if (state.provider && !state.region) {
       // Provider availability needs a watch region. Use a broad default
       // rather than silently restricting the service to Ghana.
-      state.region = "US";
+      state.region = "GH";
       $("region-filter").value = "US";
       await loadProviders();
     } else {
@@ -447,6 +449,8 @@ function wire() {
   });
   document.querySelectorAll("[data-mood]").forEach((button) => button.addEventListener("click", () => {
     state.mood = button.dataset.mood || "";
+    state.runtime = "";
+    state.provider = "";
     state.query = "";
     $("discovery-search").value = "";
     $("clear-search").hidden = true;
@@ -470,6 +474,8 @@ function wire() {
   }));
   document.querySelectorAll("[data-runtime]").forEach((button) => button.addEventListener("click", () => {
     state.runtime = button.dataset.runtime || "";
+    state.mood = "";
+    state.provider = "";
     state.query = "";
     $("discovery-search").value = "";
     $("clear-search").hidden = true;
