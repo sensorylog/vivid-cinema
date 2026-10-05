@@ -5,7 +5,7 @@ export const VIVID_CONFIG = Object.freeze({
     tmdbImageBaseUrl: "https://image.tmdb.org/t/p",
     tmdbApiKey: "6a46c44a2b36f3b6c206e5f19cafa558",
     vidapiEmbedBaseUrl: "https://vaplayer.ru",
-    vidsrcEmbedBaseUrl: "https://vidsrc.cc",
+    vidsrcEmbedBaseUrl: "https://vidsrc.to",
     language: "en-US"
   }),
   routes: Object.freeze({
