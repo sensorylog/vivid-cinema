@@ -319,3 +319,19 @@ body.vivid-cinema-home,
     min-width:150px;
   }
 }
+
+
+/* Search focus polish: keep the brand/header visible while the search field is active. */
+.vivid-search-panel{top:calc(100% + 8px);right:0;width:min(420px,calc(100vw - 32px));max-height:min(65vh,520px);box-sizing:border-box}
+@media(max-width:900px){
+ .vivid-topbar:has(.vivid-nav-search:focus-within){padding-bottom:60px}
+ .vivid-topbar:has(.vivid-nav-search:focus-within) .vivid-nav{position:relative}
+ .vivid-topbar .vivid-nav-search:focus-within{position:absolute;left:0;right:0;bottom:-50px;width:auto;min-width:0;flex:none;z-index:3}
+ .vivid-topbar .vivid-nav-search:focus-within input{width:100%;box-sizing:border-box}
+ .vivid-search-panel{left:0;right:0;width:auto;max-height:min(58vh,460px);border-radius:14px}
+}
+@media(max-width:640px){
+ .vivid-topbar:has(.vivid-nav-search:focus-within){padding-bottom:58px}
+ .vivid-topbar .vivid-nav-search:focus-within{bottom:-48px}
+ .vivid-search-panel{top:calc(100% + 6px);left:0;right:0;width:auto}
+}
