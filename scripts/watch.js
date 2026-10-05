@@ -9,7 +9,7 @@ import { recordBehavior, startIntelligenceSync } from "./intelligence.js";
 
 const $ = (id) => document.getElementById(id);
 const route = getRoute();
-const VIDAPI_ORIGIN = new URL(VIVID_CONFIG.api.vidapiEmbedBaseUrl).origin;
+const VIDAPI_ORIGINS = new Set([new URL(VIVID_CONFIG.api.vidapiEmbedBaseUrl).origin, "https://vidapi.ru"]);
 const VIDSRC_ORIGIN = (() => {
   try { return new URL(VIVID_CONFIG.api.vidsrcEmbedBaseUrl || "https://vidsrc.cc").origin; }
   catch { return "https://vidsrc.cc"; }
@@ -55,7 +55,7 @@ function buildVidapiEmbedUrl(params, startAt = 0) {
 
 function buildVidsrcEmbedUrl(params) {
   const base = String(VIVID_CONFIG.api.vidsrcEmbedBaseUrl || "https://vidsrc.to").replace(/\/+$/, "");
-  const id = encodeURIComponent(imdbId || tmdbId);
+  // VidSrc accepts numeric TMDB IDs, so the fallback stays fully TMDB-based.\n  const id = encodeURIComponent(tmdbId || imdbId);
   if (params.type === "tv") {
     return base + "/embed/tv/" + id + "/" + params.season + "/" + params.episode;
   }
@@ -63,7 +63,7 @@ function buildVidsrcEmbedUrl(params) {
 }
 
 function hasFallbackId() {
-  return Boolean(imdbId || tmdbId);
+  return Boolean(tmdbId || imdbId);
 }
 
 function triggerVidsrcFallback(reason = "primary_error") {
@@ -121,7 +121,7 @@ function setPlayerSource(source, params, startAt = 0) {
       status.classList.remove("is-warning");
       status.hidden = false;
     }
-    // Auto-fallback only when we have an IMDb id and primary never signals health.
+    // Auto-fallback only when we have the title ID and primary never signals health.
     if (hasFallbackId()) {
       fallbackTimer = window.setTimeout(() => {
         if (primaryHealthy || activeSource !== "vidapi") return;
@@ -234,7 +234,7 @@ function renderShell(params) {
     player.addEventListener("error", () => {
       triggerVidsrcFallback("iframe_error");
     });
-    // Start on primary (TMDB / VidAPI). Fallback uses IMDb once metadata resolves.
+    // Start on primary (TMDB / VidAPI). Fallback uses the same TMDB ID once metadata resolves.
     setPlayerSource("vidapi", params, resumeAt);
     const switchBtn = $("player-switch-source");
     if (switchBtn) {
@@ -287,7 +287,7 @@ async function prepareNextEpisode(params) {
 }
 
 function handlePlayerEvent(event) {
-  if (event.origin !== VIDAPI_ORIGIN) return;
+  if (!VIDAPI_ORIGINS.has(event.origin)) return;
   const payload = event.data;
   if (!payload || typeof payload !== "object") return;
 
