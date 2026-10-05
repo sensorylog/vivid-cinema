@@ -236,7 +236,7 @@ function discoverParams(type) {
       ? { "with_runtime.gte": runtime.min, "with_runtime.lte": runtime.max }
       : {}),
     watch_region: state.region || undefined,
-    with_watch_monetization_types: state.provider ? "flatrate" : undefined,
+    with_watch_monetization_types: state.provider ? "flatrate|free|ads|rent|buy" : undefined,
     with_watch_providers: state.provider || undefined
   };
 }
@@ -425,6 +425,10 @@ function wire() {
     const button = event.target.closest("[data-provider]");
     if (!button) return;
     state.provider = button.dataset.provider || "";
+    // A provider is its own discovery mode. Never let a curated collection
+    // silently bypass the provider filter and return unrelated titles.
+    state.category = "";
+    if ($("category-filter")) $("category-filter").value = "";
     state.page = 1;
     if (state.provider && !state.region) {
       // Provider availability needs a watch region. Use a broad default
