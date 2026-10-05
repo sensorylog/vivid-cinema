@@ -699,3 +699,108 @@ body.vivid-onboarding-active{overflow:hidden;background:#06070a!important}
 .vivid-onboarding-head{display:flex;gap:20px;align-items:flex-start}.vivid-onboarding-head>div{min-width:0}.vivid-onboarding-head span{font-size:.66rem;letter-spacing:.2em;color:#8e96a4}.vivid-onboarding-head h2{margin:7px 0 8px;font-size:clamp(1.7rem,4vw,2.7rem);letter-spacing:-.045em}.vivid-onboarding-head p{margin:0;color:#8e96a4;line-height:1.5}.vivid-onboarding-close{margin-left:auto;flex:0 0 auto;width:42px;height:42px;border:1px solid rgba(255,255,255,.1);border-radius:12px;background:rgba(255,255,255,.05);color:#fff;cursor:pointer}.vivid-onboarding-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin:24px 0}.vivid-onboarding-card{position:relative;padding:0;border:1px solid rgba(255,255,255,.08);border-radius:14px;overflow:hidden;background:#101217;color:#fff;text-align:left;cursor:pointer;transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease}.vivid-onboarding-card img{display:block;width:100%;aspect-ratio:2/3;object-fit:cover}.vivid-onboarding-card span{display:block;padding:9px 10px;font-size:.75rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.vivid-onboarding-card.is-selected{border-color:rgba(255,255,255,.8);transform:translateY(-4px);box-shadow:0 14px 35px rgba(0,0,0,.35)}.vivid-onboarding-card.is-selected::after{content:"✓";position:absolute;top:9px;right:9px;width:28px;height:28px;display:grid;place-items:center;border-radius:50%;background:#fff;color:#08090b;font-weight:800}.vivid-onboarding-actions{display:flex;align-items:center;justify-content:space-between;gap:14px}.vivid-onboarding-actions small{color:#777f8b}.vivid-onboarding-actions>div{display:flex;gap:9px}.vivid-onboarding-actions .vivid-button:disabled{opacity:.4;cursor:not-allowed}
 @media(max-width:700px){.vivid-onboarding-dialog{padding:18px;border-radius:22px}.vivid-onboarding-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin:18px 0}.vivid-onboarding-card span{padding:7px 8px;font-size:.68rem}.vivid-onboarding-actions{position:sticky;bottom:-18px;margin:0 -18px -18px;padding:14px 18px;background:rgba(13,15,20,.96);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}}
 @media(max-width:420px){.vivid-onboarding-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.vivid-onboarding-head h2{font-size:1.7rem}.vivid-onboarding-actions{align-items:center}.vivid-onboarding-actions>div{flex:1}.vivid-onboarding-actions .vivid-button{flex:1}}
+
+
+/* Tonight's Pick — desktop composition pass.
+   Keep the recommendation as one deliberate module: copy/actions on the left,
+   the selected title artwork on the right. */
+.vivid-tonight-inline{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(220px,300px);
+  grid-template-areas:"copy poster";
+  align-items:stretch;
+  gap:clamp(24px,4vw,56px);
+  padding:clamp(24px,3vw,40px) 0;
+  margin-top:6px;
+  border-top:1px solid rgba(255,255,255,.055);
+  border-bottom:1px solid rgba(255,255,255,.055);
+}
+.vivid-tonight-inline .vivid-rail-head{
+  grid-area:copy;
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  justify-content:center;
+  gap:0;
+  margin:0;
+  min-width:0;
+}
+.vivid-tonight-inline .vivid-rail-head > div:first-child{max-width:680px}
+.vivid-tonight-inline .vivid-section-kicker{
+  display:block;
+  margin-bottom:9px;
+  color:#8f96a0;
+  font-size:.66rem;
+  font-weight:700;
+  letter-spacing:.18em;
+  line-height:1.2;
+}
+.vivid-tonight-inline .vivid-rail-head h2{
+  margin:0;
+  max-width:100%;
+  font-size:clamp(1.8rem,3.2vw,3.15rem);
+  line-height:1;
+  letter-spacing:-.045em;
+  text-wrap:balance;
+}
+.vivid-tonight-inline .vivid-rail-head p{
+  margin:12px 0 0;
+  max-width:52ch;
+  color:#9299a4!important;
+  font-size:.9rem!important;
+  line-height:1.55;
+}
+.vivid-tonight-actions{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  flex-wrap:wrap;
+  margin-top:22px;
+}
+.vivid-tonight-actions .vivid-rail-see-all{
+  min-height:38px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding:0 14px;
+}
+.vivid-tonight-actions #tonight-watch{
+  background:#fff!important;
+  border-color:#fff!important;
+  color:#08090b!important;
+  font-weight:700;
+}
+.vivid-tonight-card{
+  grid-area:poster;
+  width:100%;
+  aspect-ratio:2/3;
+  max-height:360px;
+  justify-self:end;
+  align-self:center;
+  overflow:hidden;
+  border-radius:18px;
+  border:1px solid rgba(255,255,255,.1);
+  background:#101217;
+  box-shadow:0 20px 60px rgba(0,0,0,.28);
+}
+.vivid-tonight-card img{
+  display:block;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+@media(max-width:760px){
+  .vivid-tonight-inline{
+    grid-template-columns:1fr;
+    grid-template-areas:"copy" "poster";
+    gap:18px;
+    padding:24px 0 20px;
+  }
+  .vivid-tonight-inline .vivid-rail-head h2{font-size:clamp(1.7rem,9vw,2.35rem)}
+  .vivid-tonight-actions{margin-top:18px}
+  .vivid-tonight-card{
+    width:min(100%,220px);
+    max-height:none;
+    justify-self:start;
+  }
+}
