@@ -38,8 +38,8 @@ function card(media,options={}){
  const progressBar=progress&&Number(progress.percentage)>0?'<div class="vivid-card-progress"><span style="width:'+Math.min(100,Number(progress.percentage)||0)+'%"></span></div>':"";
  return '<article class="vivid-card" data-id="'+escapeHtml(media.id)+'" data-type="'+escapeHtml(media.media_type||"movie")+'" tabindex="0" role="link" aria-label="'+escapeHtml(title)+'">'+
  '<div class="vivid-card-media"><img src="'+getImageUrl(media.poster_path,"w342")+'" alt="'+escapeHtml(title)+'" loading="lazy" decoding="async">'+
- (signal?'<span class="vivid-card-signal">'+escapeHtml(signal)+"</span>":"")+(rating!=="0.0"?'<span class="vivid-rating">â '+rating+"</span>":"")+progressBar+'</div>'+
- '<div class="vivid-card-info"><div class="vivid-card-title">'+escapeHtml(title)+'</div><div class="vivid-card-sub">'+escapeHtml(media.year||"â")+(media.media_type==="tv"?" Â· Series":" Â· Movie")+(progress?" Â· "+formatProgress(progress):"")+"</div></div></article>";
+ (signal?'<span class="vivid-card-signal">'+escapeHtml(signal)+"</span>":"")+(rating!=="0.0"?'<span class="vivid-rating">★ '+rating+"</span>":"")+progressBar+'</div>'+
+ '<div class="vivid-card-info"><div class="vivid-card-title">'+escapeHtml(title)+'</div><div class="vivid-card-sub">'+escapeHtml(media.year||"—")+(media.media_type==="tv"?" · Series":" · Movie")+(progress?" · "+formatProgress(progress):"")+"</div></div></article>";
 }
 
 function wireCards(container){
@@ -93,7 +93,7 @@ function sectionSignal(key){
 function setHeroText(item){
  $("hero-title").textContent=item.title;
  $("hero-copy").textContent=item.overview||"Explore this title on Vivid Cinema.";
- $("hero-meta").innerHTML='<span>'+escapeHtml(item.year||"â")+'</span><span class="vivid-dot"></span><span>'+escapeHtml(item.media_type==="tv"?"TV Series":"Movie")+'</span><span class="vivid-dot"></span><span>â '+Number(item.vote_average||0).toFixed(1)+'</span>';
+ $("hero-meta").innerHTML='<span>'+escapeHtml(item.year||"—")+'</span><span class="vivid-dot"></span><span>'+escapeHtml(item.media_type==="tv"?"TV Series":"Movie")+'</span><span class="vivid-dot"></span><span>★ '+Number(item.vote_average||0).toFixed(1)+'</span>';
  $("hero-watch").href=buildWatchUrl(item.id,item.media_type,item.media_type==="tv"?1:null,item.media_type==="tv"?1:null);
  $("hero-more").onclick=()=>location.href=getMediaUrl(item);
  $("hero-fallback").style.backgroundImage=item.backdrop_path?'url("'+getImageUrl(item.backdrop_path,"w1280")+'")':"none";
@@ -265,11 +265,11 @@ async function loadMoreSection(key,button){
  const nextPage=Math.min(currentPage+1,totalPages);
  button.disabled=true;
  button.setAttribute("aria-busy","true");
- button.textContent="Loadingâ¦";
+ button.textContent="Loading…";
  try{
    const data=await getHomeSectionPage(key,nextPage);
    if(!data.items.length){
-     // Nothing more from TMDB â stop the button cleanly.
+     // Nothing more from TMDB — stop the button cleanly.
      sectionState[key]={page:data.page||nextPage,totalPages:data.page||nextPage};
      button.hidden=true;
      button.textContent="Load more";
@@ -286,7 +286,7 @@ async function loadMoreSection(key,button){
  }finally{
    button.disabled=false;
    button.removeAttribute("aria-busy");
-   if(!button.hidden && button.textContent==="Loadingâ¦")button.textContent="Load more";
+   if(!button.hidden && button.textContent==="Loading…")button.textContent="Load more";
  }
 }
 
@@ -353,7 +353,7 @@ async function maybeShowColdStart(){
   const selected=new Set();
   const modal=document.createElement("div");
   modal.className="vivid-onboarding-modal";
-  modal.innerHTML='<div class="vivid-onboarding-dialog" role="dialog" aria-modal="true" aria-labelledby="vivid-onboarding-title"><div class="vivid-onboarding-head"><div><span>MAKE VIVID YOURS</span><h2 id="vivid-onboarding-title">Pick a few you already love.</h2><p>Choose at least 3. Weâll use them to shape your first recommendations.</p></div><button type="button" class="vivid-onboarding-close" aria-label="Skip personalization"><i class="bi bi-x-lg"></i></button></div><div class="vivid-onboarding-grid">'+candidates.map(item=>'<button type="button" class="vivid-onboarding-card" data-key="'+escapeHtml(item.media_type+":"+item.id)+'"><img src="'+getImageUrl(item.poster_path,"w342")+'" alt="'+escapeHtml(item.title)+'"><span>'+escapeHtml(item.title)+'</span></button>').join("")+'</div><div class="vivid-onboarding-actions"><small id="vivid-onboarding-count">0 selected</small><div><button type="button" class="vivid-button vivid-button--ghost" id="vivid-onboarding-skip">Skip</button><button type="button" class="vivid-button vivid-button--primary" id="vivid-onboarding-save" disabled>Continue</button></div></div></div>';
+  modal.innerHTML='<div class="vivid-onboarding-dialog" role="dialog" aria-modal="true" aria-labelledby="vivid-onboarding-title"><div class="vivid-onboarding-head"><div><span>MAKE VIVID YOURS</span><h2 id="vivid-onboarding-title">Pick a few you already love.</h2><p>Choose at least 3. We’ll use them to shape your first recommendations.</p></div><button type="button" class="vivid-onboarding-close" aria-label="Skip personalization"><i class="bi bi-x-lg"></i></button></div><div class="vivid-onboarding-grid">'+candidates.map(item=>'<button type="button" class="vivid-onboarding-card" data-key="'+escapeHtml(item.media_type+":"+item.id)+'"><img src="'+getImageUrl(item.poster_path,"w342")+'" alt="'+escapeHtml(item.title)+'"><span>'+escapeHtml(item.title)+'</span></button>').join("")+'</div><div class="vivid-onboarding-actions"><small id="vivid-onboarding-count">0 selected</small><div><button type="button" class="vivid-button vivid-button--ghost" id="vivid-onboarding-skip">Skip</button><button type="button" class="vivid-button vivid-button--primary" id="vivid-onboarding-save" disabled>Continue</button></div></div></div>';
   document.body.appendChild(modal);
   const update=()=>{const n=selected.size;modal.querySelector("#vivid-onboarding-count").textContent=n+" selected";modal.querySelector("#vivid-onboarding-save").disabled=n<3};
   modal.querySelectorAll(".vivid-onboarding-card").forEach(button=>button.addEventListener("click",()=>{const k=button.dataset.key;if(selected.has(k)){selected.delete(k);button.classList.remove("is-selected")}else if(selected.size<6){selected.add(k);button.classList.add("is-selected")}update()}));
@@ -401,12 +401,12 @@ function showRecentSearches(){
 
 function showSearch(items,intent){
  const panel=$("search-panel");if(!panel)return;
- const intentLabel=[intent?.type?intent.type==="tv"?"TV":"Movies":"",intent?.genres?.length?"Genre match":"",intent?.similarity?"Similarity search":""].filter(Boolean).join(" Â· ");
+ const intentLabel=[intent?.type?intent.type==="tv"?"TV":"Movies":"",intent?.genres?.length?"Genre match":"",intent?.similarity?"Similarity search":""].filter(Boolean).join(" · ");
  panel.innerHTML=(intentLabel?'<div class="vivid-search-head"><span>'+escapeHtml(intentLabel)+'</span></div>':"")+
    (items.length?items.map(m=>{
      const person=m.media_type==="person";
      const href=person?getPersonUrl(m):getMediaUrl(m);
-     const meta=person?"Person":(m.year||"â")+" Â· "+(m.media_type==="tv"?"TV":"Movie");
+     const meta=person?"Person":(m.year||"—")+" · "+(m.media_type==="tv"?"TV":"Movie");
      return '<a class="vivid-search-result" href="'+escapeHtml(href)+'"><img src="'+getImageUrl(m.poster_path,"w92")+'" alt=""><span><strong>'+escapeHtml(m.title)+'</strong><br><small>'+escapeHtml(meta)+'</small></span></a>';
    }).join(""):'<div class="vivid-empty">No matches found.</div>');
  panel.classList.add("is-open");panel.setAttribute("aria-expanded","true");
@@ -444,7 +444,7 @@ async function browseByLetter(letter){
    status.textContent="Choose a letter to browse the catalogue.";
    return;
  }
- status.textContent="Finding titlesâ¦";
+ status.textContent="Finding titles…";
  rail.hidden=false;
  rail.innerHTML='<div class="vivid-loading">'+Array.from({length:6},()=>'<div class="vivid-skeleton-card"></div>').join("")+'</div>';
  try{
@@ -459,7 +459,7 @@ async function browseByLetter(letter){
      return;
    }
    renderRail("alphabet-rail",matches);
-   status.textContent=(letter==="0-9"?"Titles beginning with a number":"Titles beginning with "+letter)+" Â· "+matches.length+" shown";
+   status.textContent=(letter==="0-9"?"Titles beginning with a number":"Titles beginning with "+letter)+" · "+matches.length+" shown";
    rail.scrollIntoView({behavior:"smooth",block:"nearest"});
  }catch(error){
    rail.innerHTML='<div class="vivid-empty">Unable to load this part of the catalogue. Try again.</div>';
@@ -477,9 +477,9 @@ function renderReleaseAlerts(){
  const alerts=getPendingReleaseAlerts();
  if(count){count.textContent=String(alerts.length);count.hidden=!alerts.length;}
  list.innerHTML=alerts.length?alerts.slice(0,8).map(alert=>{
-   const meta=alert.type==="tv-season"?"New season Â· S"+alert.season:alert.type==="tv-episode"?"New episode Â· S"+alert.season+" E"+alert.episode:"New movie";
+   const meta=alert.type==="tv-season"?"New season · S"+alert.season:alert.type==="tv-episode"?"New episode · S"+alert.season+" E"+alert.episode:"New movie";
    const href=alert.media_type==="tv"?"title.html?id="+encodeURIComponent(alert.id)+"&type=tv":"title.html?id="+encodeURIComponent(alert.id)+"&type=movie";
-   return '<div class="vivid-release-alert"><a href="'+href+'"><i class="bi '+(alert.type==="tv-episode"?"bi-tv":alert.type==="tv-season"?"bi-collection-play":"bi-film")+'"></i><span><strong>'+escapeHtml(alert.title)+'</strong><small>'+escapeHtml(meta+(alert.releaseTypeLabel?" Â· "+alert.releaseTypeLabel:"")+(alert.episodeTitle?" Â· "+alert.episodeTitle:""))+'</small></span></a><button type="button" data-dismiss-release="'+escapeHtml(alert.key)+'" aria-label="Dismiss '+escapeHtml(alert.title)+'"><i class="bi bi-x"></i></button></div>';
+   return '<div class="vivid-release-alert"><a href="'+href+'"><i class="bi '+(alert.type==="tv-episode"?"bi-tv":alert.type==="tv-season"?"bi-collection-play":"bi-film")+'"></i><span><strong>'+escapeHtml(alert.title)+'</strong><small>'+escapeHtml(meta+(alert.releaseTypeLabel?" · "+alert.releaseTypeLabel:"")+(alert.episodeTitle?" · "+alert.episodeTitle:""))+'</small></span></a><button type="button" data-dismiss-release="'+escapeHtml(alert.key)+'" aria-label="Dismiss '+escapeHtml(alert.title)+'"><i class="bi bi-x"></i></button></div>';
  }).join(""):'<p class="vivid-muted">No new releases yet. Follow titles with Like or Watch Later and Vivid will watch for updates.</p>';
 }
 async function refreshReleaseAlerts(){
