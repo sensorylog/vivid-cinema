@@ -241,6 +241,7 @@ function discoverParams(type) {
     with_watch_monetization_types: state.provider ? "flatrate" : undefined,
     with_watch_providers: state.provider || undefined
   };
+  return params;
 }
 
 
@@ -398,6 +399,12 @@ function resetFilters() {
   document.querySelectorAll("[data-type]").forEach((button) =>
     button.classList.toggle("is-active", button.dataset.type === "all")
   );
+  document.querySelectorAll("[data-mood]").forEach((button) =>
+    button.classList.toggle("is-active", button.dataset.mood === "")
+  );
+  document.querySelectorAll("[data-runtime]").forEach((button) =>
+    button.classList.toggle("is-active", button.dataset.runtime === "")
+  );
   $("discovery-search").value = "";
   $("clear-search").hidden = true;
   $("genre-filter").value = "";
@@ -405,9 +412,9 @@ function resetFilters() {
   $("sort-filter").value = state.sort;
   $("rating-filter").value = "";
   $("region-filter").value = "";
-  state.provider = "";
   if ($("category-filter")) $("category-filter").value = "";
   populateGenres();
+  populateProviders();
   fetchDiscovery();
 }
 
