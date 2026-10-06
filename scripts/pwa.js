@@ -151,12 +151,34 @@ function initPwa() {
   // native Safari "Add to Home Screen" steps instead. Never show the
   // guide inside the installed app or after the user dismissed it.
   const ios = /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.MSStream;
-  if (ios && !isStandalone()) {
-    // Show the iOS install guidance as soon as the app shell is ready,
-    // not after a later onboarding/catalogue interaction.
-    const showGuide = () => window.setTimeout(createInstallGuide, 250);
-    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", showGuide, { once: true });
-    else showGuide();
+  const isMainCinemaSite = document.body?.dataset?.vividPage === "home";
+
+  if (ios && !isStandalone() && isMainCinemaSite) {
+    // Do not interrupt early app-shell paint. The guide appears only after
+    // the full main cinema surface is ready and visible.
+    const showGuideWhenReady = () => {
+      if (document.visibilityState !== "visible" || isStandalone() || installGuideDismissed()) return;
+      window.setTimeout(() => {
+        if (document.visibilityState === "visible" && !isStandalone() && !installGuideDismissed()) {
+          createInstallGuide();
+        }
+      }, 1800);
+    };
+
+    const waitForShell = () => {
+      if (document.documentElement.dataset.vividReady === "true") {
+        showGuideWhenReady();
+        return;
+      }
+      const observer = new MutationObserver(() => {
+        if (document.documentElement.dataset.vividReady !== "true") return;
+        observer.disconnect();
+        showGuideWhenReady();
+      });
+      observer.observe(document.documentElement, { attributes: true, attributeFilter: ["data-vivid-ready"] });
+    };
+
+    waitForShell();
   }
 
   if (window.isSecureContext) void registerServiceWorker();
