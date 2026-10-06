@@ -6,6 +6,10 @@ import {
   sendPasswordResetEmail,
   signInWithEmailAndPassword,
   signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
+  setPersistence,
+  browserLocalPersistence,
   signOut,
   updateProfile
 } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
@@ -51,8 +55,17 @@ async function finishGoogleSignIn(credential){
 async function googleSignIn(){
   const provider=new GoogleAuthProvider();
   provider.setCustomParameters({prompt:"select_account"});
+  await setPersistence(auth,browserLocalPersistence);
+  const mobile=window.matchMedia?.("(pointer:coarse)")?.matches || window.innerWidth<700;
+  if(mobile){await signInWithRedirect(auth,provider);return;}
   const credential=await withTimeout(signInWithPopup(auth,provider),45000,"Google sign-in timed out.");
   await finishGoogleSignIn(credential);
+}
+async function finishPendingGoogleRedirect(){
+  try{
+    const result=await withTimeout(getRedirectResult(auth),30000,"Google sign-in redirect timed out.");
+    if(result?.user) await finishGoogleSignIn(result);
+  }catch(error){console.error("Google redirect sign-in failed:",error);showMessage(friendlyError(error));}
 }
 googleButtons.forEach(button=>button.addEventListener("click",async()=>{
   button.disabled=true;showMessage("Connecting to Google…",true);
@@ -86,9 +99,18 @@ loginForm?.addEventListener("submit",async(event)=>{
   }catch(error){console.error(error);showMessage(friendlyError(error));button.disabled=false;}
 });
 document.getElementById("resend-verification")?.addEventListener("click",async()=>{
-  const user=auth.currentUser;
-  if(!user){showMessage("Sign in first, then resend verification.");return;}
-  try{await sendEmailVerification(user);showMessage("Verification email sent. Check your inbox and spam folder.",true);}catch(error){showMessage(friendlyError(error));}
+  const email=document.getElementById("login-email")?.value.trim()||"";
+  const password=document.getElementById("login-password")?.value||"";
+  const button=document.getElementById("resend-verification");
+  if(!email||!password){showMessage("Enter your email and password first.");return;}
+  button.disabled=true;showMessage("Sending verification email…",true);
+  try{
+    const credential=await withTimeout(signInWithEmailAndPassword(auth,email,password),15000,"Verification sign-in timed out.");
+    if(credential.user.emailVerified) showMessage("Your email is already verified. You can log in normally.",true);
+    else{await withTimeout(sendEmailVerification(credential.user),15000,"Verification email request timed out.");showMessage("Verification email sent. Check your inbox and spam folder.",true);}
+    await signOut(auth);
+  }catch(error){console.error(error);showMessage(friendlyError(error));}
+  finally{button.disabled=false;}
 });
 
 document.querySelectorAll("[data-password-toggle]").forEach(toggle=>toggle.addEventListener("click",()=>{const input=document.querySelector(toggle.dataset.passwordToggle);if(!input)return;const visible=input.type==="text";input.type=visible?"password":"text";toggle.textContent=visible?"Show":"Hide";toggle.setAttribute("aria-label",visible?"Show password":"Hide password");}));
@@ -111,3 +133,5 @@ resetLink?.addEventListener("click",async(event)=>{
   try{await sendPasswordResetEmail(auth,email);showMessage("Password reset email sent.",true);}catch(error){console.error(error);showMessage(friendlyError(error));}
 });
 document.querySelectorAll("[data-logout]").forEach(button=>button.addEventListener("click",async(event)=>{event.preventDefault();await signOut(auth);window.location.href="login.html";}));
+
+void finishPendingGoogleRedirect();
