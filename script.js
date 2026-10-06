@@ -541,7 +541,7 @@ function wireSearch(){
     if(e.key==="Escape"&&searchDialog&&!searchDialog.hidden)closeSearch();
   });
 }
-function browseByLetter(letter){
+async function browseByLetter(letter){
  const rail=$("alphabet-rail"),status=$("alphabet-status");
  if(!rail||!status)return;
  document.querySelectorAll("[data-letter]").forEach(button=>{
