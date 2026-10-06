@@ -1,4 +1,4 @@
-const CACHE_NAME = "vivid-cinema-shell-v48";
+const CACHE_NAME = "vivid-cinema-shell-v49";
 const APP_SHELL = [
   "./","./index.html","./home.html","./person.html","./discover.html","./collection.html","./title.html","./watch.html",
   "./library.html","./auth.html","./login.html","./forgot-password.html","./account.html","./terms.html","./privacy.html","./contact.html",
@@ -20,7 +20,9 @@ async function cacheShell(){
   await Promise.allSettled(APP_SHELL.map(asset=>cache.add(asset)));
 }
 
-self.addEventListener("install",event=>event.waitUntil(cacheShell()));
+self.addEventListener("install",event=>{
+  event.waitUntil(cacheShell().then(()=>self.skipWaiting()));
+});
 
 self.addEventListener("activate",event=>{
   event.waitUntil(
