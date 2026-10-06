@@ -7,7 +7,7 @@ const APP_SHELL = [
   "./styles/vivid-title.css","./styles/vivid-watch.css","./styles/vivid-library.css","./styles/vivid-discovery.css",
   "./styles/vivid-collection.css","./styles/vivid-auth.css","./styles/vivid-account.css","./styles/vivid-pwa.css",
   "./styles/vivid-atmosphere.css","./styles/vivid-liquid-glass.css","./styles/vivid-landing.css","./styles/vivid-viewport.css",
-  "./styles/vivid-legal.css","./styles.css","./scripts/app-shell.js","./scripts/pwa.js",
+  "./styles/vivid-legal.css","./scripts/app-shell.js","./scripts/pwa.js",
   "./scripts/atmosphere.js","./scripts/i18n.js","./scripts/routes.js",
   "./scripts/config.js","./scripts/utils.js","./scripts/content.js","./scripts/media.js","./scripts/tmdb.js",
   "./scripts/nav-auth.js","./scripts/library.js","./scripts/library-page.js","./scripts/discover.js",
