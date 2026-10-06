@@ -2,3 +2,15 @@
 :root{--vivid-glass-blur:22px;--vivid-radius-sm:12px;--vivid-radius-md:16px;--vivid-radius-lg:24px;--vivid-content-width:1440px;--vivid-page-gutter:clamp(1rem,4vw,4rem);--vivid-transition-fast:160ms ease;--vivid-transition-standard:280ms cubic-bezier(.2,.7,.2,1)}
 .vivid-glass{background:var(--vivid-surface,rgba(18,20,25,.72));border:1px solid var(--vivid-border,rgba(255,255,255,.12));border-radius:var(--vivid-radius-md);backdrop-filter:blur(var(--vivid-glass-blur)) saturate(120%);-webkit-backdrop-filter:blur(var(--vivid-glass-blur)) saturate(120%)}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+
+/* Vivid 3.0 compatibility tokens — legacy components inherit the same system. */
+:root{
+  --vivid-glass-blur:var(--vivid-ui-blur,28px);
+  --vivid-radius-sm:12px;
+  --vivid-radius-md:16px;
+  --vivid-radius-lg:24px;
+  --vivid-content-width:var(--vivid-content-width,1500px);
+  --vivid-page-gutter:var(--vivid-page-gutter,clamp(1rem,2.8vw,3rem));
+  --vivid-transition-fast:var(--vivid-duration-ui,220ms) var(--vivid-motion,cubic-bezier(.22,.8,.22,1));
+  --vivid-transition-standard:var(--vivid-duration-standard,280ms) var(--vivid-motion,cubic-bezier(.22,.8,.22,1));
+}
