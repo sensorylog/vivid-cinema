@@ -405,6 +405,30 @@ html[data-vivid-theme="light"] body.vivid-atmosphere select option{background:#f
 }
 
 
+/* Keep the embedded watch surface isolated from browser/PWA restoration layers.
+   The player owns its own controls; the page chrome must never paint above the iframe. */
+.vivid-player-frame{
+  position:relative!important;
+  isolation:isolate!important;
+  overflow:hidden!important;
+  contain:paint!important;
+}
+.vivid-player-frame iframe{
+  position:relative!important;
+  z-index:1!important;
+  display:block!important;
+  width:100%!important;
+  height:100%!important;
+  border:0!important;
+  opacity:1!important;
+  visibility:visible!important;
+}
+.vivid-player-status{
+  position:absolute!important;
+  z-index:2!important;
+  pointer-events:none!important;
+}
+
 /* iOS Home Screen/PWA search input hardening.
    Safari and installed standalone WebKit can paint native search controls differently
    from the browser tab. Keep the editable text on a plain composited layer so typed

@@ -310,8 +310,18 @@ function renderShell(params) {
   const status = $("player-status");
   if (player) {
     player.addEventListener("load", () => {
-      // A cross-origin iframe load only proves the document loaded; it does not prove
-      // that the VidAPI player found a playable source. PLAYER_EVENT is the health signal.
+      // Yenime is cross-origin and does not expose the same PLAYER_EVENT health signal
+      // as VidAPI. Once its iframe document has loaded, stop the alternate-source
+      // watchdog and dismiss the loading banner after a short paint grace period.
+      if (activeSource === "yenime") {
+        clearFallbackTimer();
+        window.setTimeout(() => {
+          if (status && status.isConnected && activeSource === "yenime") status.hidden = true;
+        }, 900);
+        return;
+      }
+      // A cross-origin iframe load only proves the document loaded; VidAPI still
+      // needs a matching PLAYER_EVENT before its fallback watchdog is cancelled.
       window.setTimeout(() => {
         if (status && status.isConnected && activeSource === "vidapi" && primaryHealthy && !status.classList.contains("is-warning")) {
           status.hidden = true;
@@ -440,6 +450,25 @@ function handlePlayerEvent(event) {
     }
   }
 }
+
+window.addEventListener("pageshow", (event) => {
+  if (!event.persisted) return;
+  const player = $("vidapi-player");
+  if (!player || !currentParams) return;
+
+  // Returning from an external ad/redirect can restore the page from iOS/WebKit's
+  // back-forward cache while the embedded document is still in the ad's visual
+  // state. Recreate only the iframe document, preserving the Vivid page and using
+  // the latest saved progress when the provider supports resume.
+  const saved = getPlaybackProgress(progressKey());
+  const resumeAt = Number(saved?.progress || 0);
+  const source = activeSource;
+  if (source === "yenime" && !malId) return;
+  window.setTimeout(() => {
+    if (!player.isConnected || !currentParams) return;
+    setPlayerSource(source, currentParams, resumeAt);
+  }, 80);
+});
 
 window.addEventListener("message", handlePlayerEvent);
 
