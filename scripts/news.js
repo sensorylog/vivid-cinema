@@ -97,6 +97,33 @@ function section(title, kicker, items, id, description = "") {
     (description ? "<p>" + escapeHtml(description) + "</p>" : "") + '</div><a href="discover.html">Explore more <i class="bi bi-arrow-up-right"></i></a></div>' +
     '<div class="vivid-news-grid">' + items.map(x => card(x)).join("") + "</div></section>";
 }
+function renderFinderResults(results, query) {
+  const el = $("news-search-results");
+  if (!el) return;
+  el.hidden = false;
+  if (!results.length) {
+    el.innerHTML = '<div class="vivid-news-search-empty"><strong>No match found in Vivid.</strong><span>Try the title name, a shorter phrase, or open Discover.</span><a href="discover.html?q=' + encodeURIComponent(query) + '">Open Discover</a></div>';
+    return;
+  }
+  el.innerHTML = '<div class="vivid-news-search-head"><div><span>VIVID SEARCH</span><h2>Here’s what I found</h2></div><button type="button" id="news-search-close" aria-label="Close search results"><i class="bi bi-x-lg"></i></button></div><div class="vivid-news-search-grid">' +
+    results.slice(0,8).map(item => '<a class="vivid-news-search-card" href="' + escapeHtml(getMediaUrl(item)) + '"><img src="' + getImageUrl(item.poster_path || item.backdrop_path, "w342") + '" alt="' + escapeHtml(titleOf(item)) + '" loading="lazy"><div><strong>' + escapeHtml(titleOf(item)) + '</strong><small>' + escapeHtml(mediaType(item) === "tv" ? "TV series" : "Movie") + (item.release_date || item.first_air_date ? " · " + escapeHtml((item.release_date || item.first_air_date).slice(0,4)) : "") + (item.vote_average ? " · ★ " + Number(item.vote_average).toFixed(1) : "") + '</small><p>' + escapeHtml(safeOverview(item.overview, "Open the title for the full cinema brief.")) + '</p><span>Open cinema brief <i class="bi bi-arrow-right"></i></span></div></a>').join("") +
+    '</div>';
+  $("news-search-close")?.addEventListener("click", () => { el.hidden = true; });
+}
+async function runNewsSearch(query) {
+  const q = String(query || "").trim();
+  if (!q) return;
+  const el = $("news-search-results");
+  if (el) { el.hidden = false; el.innerHTML = '<div class="vivid-news-search-empty"><i class="bi bi-search"></i><strong>Searching Vivid…</strong><span>Checking movies and series in the catalogue.</span></div>'; }
+  try {
+    const data = await tmdbApi.searchMulti(q);
+    const results = (data.results || []).filter(item => ["movie","tv"].includes(mediaType(item)));
+    renderFinderResults(results, q);
+  } catch (error) {
+    console.warn("Vivid News search unavailable:", error);
+    if (el) el.innerHTML = '<div class="vivid-news-search-empty"><strong>Search is temporarily unavailable.</strong><span>You can still browse the live cinema feed below.</span></div>';
+  }
+}
 function emptyState() {
   return '<div class="vivid-news-empty"><i class="bi bi-stars"></i><h2>Nothing new here yet.</h2><p>Try Everything or Discover for the full catalogue.</p><a href="discover.html">Open Discover</a></div>';
 }
@@ -333,6 +360,10 @@ async function refresh() {
   finally { if(button){button.disabled=false;button.innerHTML='<i class="bi bi-arrow-clockwise"></i> Refresh';} }
 }
 $("news-refresh")?.addEventListener("click", refresh);
+$("news-search-form")?.addEventListener("submit", event => {
+  event.preventDefault();
+  void runNewsSearch($("news-search")?.value);
+});
 $("news-search")?.addEventListener("keydown", event => {
   if(event.key !== "Enter") return;
   const q=event.currentTarget.value.trim();
