@@ -146,6 +146,15 @@ async function registerServiceWorker() {
 function initPwa() {
   createInstallControl();
   createNetworkStatus();
+
+  // iOS Safari does not expose beforeinstallprompt, so give users the
+  // native Safari "Add to Home Screen" steps instead. Never show the
+  // guide inside the installed app or after the user dismissed it.
+  const ios = /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.MSStream;
+  if (ios && !isStandalone()) {
+    window.setTimeout(createInstallGuide, 900);
+  }
+
   if (window.isSecureContext) void registerServiceWorker();
 }
 
