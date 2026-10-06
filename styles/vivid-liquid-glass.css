@@ -174,3 +174,81 @@ html[data-vivid-theme="light"] body.vivid-atmosphere .vivid-nav-search input,
 html[data-vivid-theme="light"] body.vivid-atmosphere .vivid-discovery-search input{background:rgba(255,255,255,.94)!important;border-color:rgba(20,28,40,.18)!important;color:#10131a!important;-webkit-text-fill-color:#10131a!important;box-shadow:0 4px 18px rgba(20,28,40,.08)!important}
 html[data-vivid-theme="light"] body.vivid-atmosphere .vivid-nav-search input::placeholder,
 html[data-vivid-theme="light"] body.vivid-atmosphere .vivid-discovery-search input::placeholder{color:#626a76!important;-webkit-text-fill-color:#626a76!important}
+
+
+/* Final header/search interaction pass — keep the brand clear and make the
+   search surface appear immediately on focus/tap, before any typing. */
+body.vivid-atmosphere .vivid-topbar{
+  position:relative;
+}
+body.vivid-atmosphere .vivid-nav{
+  min-height:56px;
+  align-items:center;
+  gap:clamp(10px,1.4vw,18px);
+}
+body.vivid-atmosphere .vivid-site-brand,
+body.vivid-atmosphere .vivid-brand{
+  flex:0 0 auto;
+  min-width:max-content;
+}
+body.vivid-atmosphere .vivid-nav-search{
+  box-sizing:border-box;
+}
+@media (min-width:901px){
+  body.vivid-atmosphere .vivid-nav{
+    padding-inline:clamp(12px,1.8vw,28px);
+  }
+  body.vivid-atmosphere .vivid-nav-search{
+    margin-left:auto;
+  }
+}
+@media (max-width:900px){
+  body.vivid-atmosphere .vivid-topbar:has(.vivid-nav-search:focus-within){
+    padding-bottom:70px!important;
+  }
+  body.vivid-atmosphere .vivid-topbar .vivid-nav{
+    position:relative;
+  }
+  body.vivid-atmosphere .vivid-topbar .vivid-nav-search:focus-within{
+    position:absolute!important;
+    left:0!important;
+    right:0!important;
+    top:calc(100% + 10px)!important;
+    bottom:auto!important;
+    width:auto!important;
+    min-width:0!important;
+    max-width:none!important;
+    height:48px!important;
+    margin:0!important;
+    z-index:120!important;
+  }
+  body.vivid-atmosphere .vivid-topbar .vivid-nav-search:focus-within input{
+    display:block!important;
+    width:100%!important;
+    height:48px!important;
+    min-height:48px!important;
+    padding:0 16px 0 44px!important;
+    font-size:16px!important;
+    line-height:48px!important;
+    visibility:visible!important;
+  }
+  body.vivid-atmosphere .vivid-topbar .vivid-nav-search:focus-within i{
+    left:16px!important;
+    top:50%!important;
+    transform:translateY(-50%)!important;
+    z-index:2!important;
+  }
+  body.vivid-atmosphere .vivid-topbar .vivid-search-panel{
+    position:absolute!important;
+    top:58px!important;
+    left:0!important;
+    right:0!important;
+    width:auto!important;
+    z-index:121!important;
+  }
+}
+@media (max-width:640px){
+  body.vivid-atmosphere .vivid-topbar:has(.vivid-nav-search:focus-within){
+    padding-bottom:68px!important;
+  }
+}
