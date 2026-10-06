@@ -51,3 +51,63 @@
 .vivid-site-brand .vivid-brand-wordmark>span{font-weight:500;color:#aeb4bd}
 .vivid-legal-brand .vivid-brand-icon{width:34px;height:34px;flex-basis:34px}
 @media(max-width:640px){.vivid-brand-icon{width:29px;height:29px;flex-basis:29px}.vivid-site-brand{gap:7px}}
+
+
+/* Vivid Cinema 3.0 — unified material, type, motion and theme tokens. */
+:root{
+  --vivid-font-sans:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Inter","Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  --vivid-ui-blur:28px;
+  --vivid-ui-blur-strong:42px;
+  --vivid-material:rgba(255,255,255,.065);
+  --vivid-material-strong:rgba(255,255,255,.105);
+  --vivid-material-solid:rgba(20,22,28,.86);
+  --vivid-highlight:rgba(255,255,255,.20);
+  --vivid-glow:rgba(160,190,255,.12);
+  --vivid-focus:rgba(200,215,255,.52);
+  --vivid-motion:cubic-bezier(.22,.8,.22,1);
+  --vivid-duration-ui:220ms;
+}
+html[data-vivid-theme="dark"]{color-scheme:dark}
+html[data-vivid-theme="light"]{
+  color-scheme:light;
+  --vivid-bg:#f2f4f7;
+  --vivid-bg-elevated:#e9ecf1;
+  --vivid-surface-solid:#ffffff;
+  --vivid-surface:rgba(255,255,255,.70);
+  --vivid-surface-soft:rgba(20,28,40,.055);
+  --vivid-surface-strong:rgba(20,28,40,.09);
+  --vivid-text:#10131a;
+  --vivid-text-muted:#59616d;
+  --vivid-text-subtle:#7a828e;
+  --vivid-accent:#10131a;
+  --vivid-border:rgba(20,28,40,.12);
+  --vivid-border-strong:rgba(20,28,40,.20);
+  --vivid-material:rgba(255,255,255,.62);
+  --vivid-material-strong:rgba(255,255,255,.78);
+  --vivid-material-solid:rgba(255,255,255,.88);
+  --vivid-highlight:rgba(255,255,255,.72);
+  --vivid-glow:rgba(100,130,190,.14);
+  --vivid-focus:rgba(70,100,170,.45);
+}
+html[data-vivid-theme="light"] body{
+  background:var(--vivid-bg);
+  color:var(--vivid-text);
+}
+.vivid-theme-toggle{
+  width:40px;height:40px;display:inline-grid;place-items:center;flex:0 0 40px;
+  border:1px solid var(--vivid-border);border-radius:999px;
+  background:var(--vivid-material);color:var(--vivid-text);
+  cursor:pointer;backdrop-filter:blur(18px) saturate(160%);-webkit-backdrop-filter:blur(18px) saturate(160%);
+  transition:transform var(--vivid-duration-ui) var(--vivid-motion),background var(--vivid-duration-ui) ease,border-color var(--vivid-duration-ui) ease;
+}
+.vivid-theme-toggle:hover{transform:translateY(-1px);background:var(--vivid-material-strong)}
+.vivid-theme-toggle:active{transform:scale(.95)}
+.vivid-theme-toggle:focus-visible{outline:2px solid var(--vivid-focus);outline-offset:3px}
+html[data-vivid-theme="light"] .vivid-button--primary{background:#10131a;color:#fff}
+html[data-vivid-theme="light"] .vivid-card,
+html[data-vivid-theme="light"] .vivid-surface{box-shadow:0 14px 40px rgba(20,28,40,.10)}
+html[data-vivid-theme="light"] .vivid-input,
+html[data-vivid-theme="light"] .vivid-select{background:rgba(255,255,255,.72);color:var(--vivid-text)}
+@media(prefers-reduced-motion:reduce){
+  .vivid-theme-toggle{transition:none}
+}
