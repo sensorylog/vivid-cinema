@@ -293,3 +293,6 @@ body.vivid-cinema-home,
   }
 }
 .vivid-rail::after{content:"";flex:0 0 var(--vivid-page-gutter)}
+
+@media(pointer:coarse){.vivid-rail .vivid-card,.vivid-rail .vivid-card:hover,.vivid-rail .vivid-card:focus,.vivid-rail .vivid-card:focus-visible,.vivid-feature-track .vivid-feature-card,.vivid-feature-track .vivid-feature-card:hover,.vivid-feature-track .vivid-feature-card:focus,.vivid-feature-track .vivid-feature-card:focus-visible{transform:none!important}.vivid-rail .vivid-card img,.vivid-rail .vivid-card:hover img,.vivid-rail .vivid-card:focus img,.vivid-rail .vivid-card:focus-visible img{transform:none!important}}
+.vivid-card,.vivid-discovery-card,.vivid-library-card,.vivid-person-credit,.vivid-similar-card{box-sizing:border-box}.vivid-card-info,.vivid-discovery-copy,.vivid-library-card-copy{min-width:0}
