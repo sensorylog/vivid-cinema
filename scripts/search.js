@@ -109,6 +109,13 @@ export async function searchIntelligently(query, options = {}) {
   const q = normalizeQuery(query);
   if (!q) return { items: [], intent: getSearchIntent(""), recent: getRecentSearches() };
   const items = await searchContent(q, 1);
-  const ranked = await rankSearchResults(items, q, options);
+  // Search must remain useful even if personalization/taste data is unavailable.
+  // Catalogue results are the source of truth; ranking is an enhancement.
+  let ranked = items;
+  try {
+    ranked = await rankSearchResults(items, q, options);
+  } catch {
+    ranked = items.slice(0, Number(options.limit || 8));
+  }
   return { items: ranked, intent: getSearchIntent(q), recent: getRecentSearches() };
 }
