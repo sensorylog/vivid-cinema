@@ -151,3 +151,58 @@ html[data-vivid-theme="light"] .vivid-atmosphere .vivid-filter-panel :is(h1,h2,h
 html[data-vivid-theme="light"] .vivid-atmosphere .vivid-search-panel :is(h1,h2,h3,h4,h5,h6,p,span){color:inherit}
 html[data-vivid-theme="light"] .vivid-atmosphere .vivid-text-muted{color:var(--vivid-text-muted)!important}
 html[data-vivid-theme="light"] .vivid-atmosphere .vivid-text-subtle{color:var(--vivid-text-subtle)!important}
+
+/* Light mode consistency pass. */
+html[data-vivid-theme="light"] body.vivid-discovery-page,
+html[data-vivid-theme="light"] body.vivid-collection-page,
+html[data-vivid-theme="light"] body.vivid-library-page,
+html[data-vivid-theme="light"] body.vivid-watch-page,
+html[data-vivid-theme="light"] body.account-page,
+html[data-vivid-theme="light"] body[data-vivid-page="auth"],
+html[data-vivid-theme="light"] body[data-vivid-page="login"]{background:var(--vivid-bg)!important;color:var(--vivid-text)!important}
+html[data-vivid-theme="light"] .vivid-discovery-nav,
+html[data-vivid-theme="light"] .vivid-library-nav,
+html[data-vivid-theme="light"] .vivid-watch-nav,
+html[data-vivid-theme="light"] .vivid-topbar,
+html[data-vivid-theme="light"] .vivid-title-nav{background:var(--vivid-material)!important;border-color:var(--vivid-border)!important;box-shadow:0 10px 30px rgba(20,28,40,.08)!important}
+html[data-vivid-theme="light"] .vivid-discovery-nav nav a,
+html[data-vivid-theme="light"] .vivid-library-nav nav a,
+html[data-vivid-theme="light"] .vivid-watch-nav nav a,
+html[data-vivid-theme="light"] .vivid-navlinks a{color:var(--vivid-text-muted)!important}
+html[data-vivid-theme="light"] .vivid-discovery-nav nav a:hover,
+html[data-vivid-theme="light"] .vivid-discovery-nav nav a.is-active,
+html[data-vivid-theme="light"] .vivid-library-nav nav a:hover,
+html[data-vivid-theme="light"] .vivid-library-nav nav a[aria-current="page"],
+html[data-vivid-theme="light"] .vivid-navlinks a:hover,
+html[data-vivid-theme="light"] .vivid-navlinks a[aria-current="true"]{color:var(--vivid-text)!important;background:rgba(20,28,40,.07)!important}
+html[data-vivid-theme="light"] .vivid-discovery-page .vivid-filter-panel,
+html[data-vivid-theme="light"] .vivid-collection-toolbar,
+html[data-vivid-theme="light"] .vivid-collection-card,
+html[data-vivid-theme="light"] .vivid-library-tabs,
+html[data-vivid-theme="light"] .account-card,
+html[data-vivid-theme="light"] .auth-container{background:var(--vivid-surface)!important;border-color:var(--vivid-border)!important;box-shadow:0 16px 45px rgba(20,28,40,.08)!important}
+html[data-vivid-theme="light"] .vivid-discovery-search input,
+html[data-vivid-theme="light"] .vivid-filter-row select,
+html[data-vivid-theme="light"] .vivid-collection-toolbar select,
+html[data-vivid-theme="light"] .vivid-collection-toolbar>button,
+html[data-vivid-theme="light"] .account-field input,
+html[data-vivid-theme="light"] .account-field select,
+html[data-vivid-theme="light"] .auth-container input{background:#fff!important;color:var(--vivid-text)!important;border-color:var(--vivid-border)!important}
+html[data-vivid-theme="light"] .vivid-discovery-copy strong,
+html[data-vivid-theme="light"] .vivid-library-card,
+html[data-vivid-theme="light"] .vivid-watch-rec-card,
+html[data-vivid-theme="light"] .account-card,
+html[data-vivid-theme="light"] .auth-container{color:var(--vivid-text)!important}
+html[data-vivid-theme="light"] .vivid-discovery-copy small,
+html[data-vivid-theme="light"] .vivid-library-card small,
+html[data-vivid-theme="light"] .vivid-watch-head p,
+html[data-vivid-theme="light"] .account-header p,
+html[data-vivid-theme="light"] .account-field label,
+html[data-vivid-theme="light"] .account-toggle small,
+html[data-vivid-theme="light"] .auth-container>p,
+html[data-vivid-theme="light"] .auth-switch,
+html[data-vivid-theme="light"] .auth-divider{color:var(--vivid-text-muted)!important}
+html[data-vivid-theme="light"] .auth-container .google-auth{background:var(--vivid-surface-strong)!important;color:var(--vivid-text)!important}
+html[data-vivid-theme="light"] .vivid-page-back{color:var(--vivid-text-muted);background:rgba(20,28,40,.055);border-color:var(--vivid-border)}
+html[data-vivid-theme="light"] .vivid-page-back:hover,
+html[data-vivid-theme="light"] .vivid-page-back:focus-visible{color:var(--vivid-text);background:rgba(20,28,40,.09)}
