@@ -96,23 +96,43 @@ async function loadPage(reset=false){
     $("collection-status").textContent="";
   }finally{$("collection-more").disabled=false;}
 }
+function syncUrl(){
+  const params=new URLSearchParams();
+  if(state.collection!=="trending")params.set("collection",state.collection);
+  if(state.genre)params.set("genre",state.genre);
+  if(state.year)params.set("year",state.year);
+  if(state.sort!=="popularity.desc")params.set("sort",state.sort);
+  history.replaceState(null,"",params.toString()?"collection.html?"+params:"collection.html");
+}
 function apply(){
-  state.genre=$("collection-genre").value;state.year=$("collection-year").value;state.sort=$("collection-sort").value;loadPage(true);
+  state.genre=$("collection-genre").value;state.year=$("collection-year").value;state.sort=$("collection-sort").value;
+  state.page=0;
+  syncUrl();
+  loadPage(true);
 }
 function wire(){
   $("collection-more").addEventListener("click",()=>loadPage(false));
   ["collection-genre","collection-year","collection-sort"].forEach(id=>$(id).addEventListener("change",apply));
-  $("collection-reset").addEventListener("click",()=>{$("collection-genre").value="";$("collection-year").value="";$("collection-sort").value="popularity.desc";state.genre="";state.year="";state.sort="popularity.desc";loadPage(true);});
+  $("collection-reset").addEventListener("click",()=>{$("collection-genre").value="";$("collection-year").value="";$("collection-sort").value="popularity.desc";state.genre="";state.year="";state.sort="popularity.desc";state.page=0;syncUrl();loadPage(true);});
 }
 async function init(){
   const requested=route.params.get("collection")||"trending";
   state.collection=COLLECTIONS[requested]?requested:"trending";
+  state.genre=route.params.get("genre")||"";
+  state.year=route.params.get("year")||"";
+  state.sort=route.params.get("sort")||"popularity.desc";
   document.querySelectorAll("[data-mobile-nav]").forEach(link => link.classList.toggle("is-active", link.dataset.mobileNav === state.collection));
   const meta=COLLECTIONS[state.collection];
   $("collection-kicker").textContent="COLLECTION";
   $("collection-title").textContent=meta.label;
   $("collection-description").textContent=meta.description;
   document.title=meta.label+" · Vivid Cinema";
-  populateYears();wire();await loadPage(true);void loadGenres(); 
+  populateYears();
+  $("collection-genre").value=state.genre;
+  $("collection-year").value=state.year;
+  $("collection-sort").value=state.sort;
+  wire();
+  syncUrl();
+  await Promise.allSettled([loadPage(true), loadGenres()]); 
 }
 init();
