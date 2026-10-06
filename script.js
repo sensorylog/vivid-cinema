@@ -12,7 +12,7 @@ import { startCinemaReminderLoop } from "./scripts/cinema-reminders.js";
 import { enableCinemaPush, getServerReleaseAlerts, dismissServerReleaseAlert } from "./scripts/push-notifications.js";
 
 const $=id=>document.getElementById(id);
-let featured=[],activeIndex=0,heroMuted=true,heroPlaying=true,heroTimer=null,heroLoadToken=0,searchRequestId=0;
+let featured=[],activeIndex=0,heroMuted=true,heroPlaying=true,heroTimer=null,heroLoadToken=0;
 
 const rails={};
 let serverReleaseAlerts=[];
@@ -400,55 +400,148 @@ async function loadHome(){
  if("requestIdleCallback" in window)requestIdleCallback(loadRecommendations,{timeout:2600});
  else window.setTimeout(loadRecommendations,1800);
 }
+let searchDialog=null;
+let searchInput=null;
+let searchRequestId=0;
+
+function ensureSearchDialog(){
+  if(searchDialog?.isConnected)return searchDialog;
+  searchDialog=document.createElement("section");
+  searchDialog.className="vivid-search-dialog";
+  searchDialog.id="vivid-search-dialog";
+  searchDialog.hidden=true;
+  searchDialog.setAttribute("role","dialog");
+  searchDialog.setAttribute("aria-modal","true");
+  searchDialog.setAttribute("aria-labelledby","vivid-search-title");
+  searchDialog.innerHTML=
+    '<div class="vivid-search-backdrop" data-search-close></div>'+
+    '<div class="vivid-search-window">'+
+      '<div class="vivid-search-top">'+
+        '<div class="vivid-search-field">'+
+          '<i class="bi bi-search" aria-hidden="true"></i>'+
+          '<input id="vivid-search-input" type="search" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Search movies, shows, people…" aria-label="Search Vivid Cinema">'+
+          '<button type="button" class="vivid-search-clear" data-search-clear aria-label="Clear search" hidden><i class="bi bi-x-lg" aria-hidden="true"></i></button>'+
+        '</div>'+
+        '<button type="button" class="vivid-search-close" data-search-close aria-label="Close search">Cancel</button>'+
+      '</div>'+
+      '<div class="vivid-search-content">'+
+        '<div class="vivid-search-intro" id="vivid-search-title"><span>SEARCH</span><strong>What do you want to watch?</strong><p>Find movies, series, people and more.</p></div>'+
+        '<div class="vivid-search-results" id="vivid-search-results" aria-live="polite"></div>'+
+      '</div>'+
+    '</div>';
+  document.body.appendChild(searchDialog);
+  searchInput=$("vivid-search-input");
+  searchDialog.querySelector("[data-search-clear]")?.addEventListener("click",()=>{searchInput.value="";searchInput.focus({preventScroll:true});showRecentSearches()});
+  searchDialog.querySelectorAll("[data-search-close]").forEach(el=>el.addEventListener("click",closeSearch));
+  searchInput?.addEventListener("input",e=>{
+    const query=e.target.value.trim();
+    searchDialog.querySelector("[data-search-clear]").hidden=!query;
+    search(query);
+  });
+  searchInput?.addEventListener("keydown",e=>{
+    if(e.key==="Escape"){e.preventDefault();closeSearch();return}
+    if(e.key==="Enter"&&e.target.value.trim()){e.preventDefault();void runSearch(e.target.value.trim())}
+  });
+  return searchDialog;
+}
+
+function lockSearchScroll(){
+  const y=window.scrollY;
+  document.body.dataset.searchScrollY=String(y);
+  document.body.style.position="fixed";
+  document.body.style.top="-"+y+"px";
+  document.body.style.left="0";
+  document.body.style.right="0";
+  document.body.style.width="100%";
+  document.body.classList.add("vivid-search-open");
+  document.documentElement.classList.add("vivid-search-open");
+}
+function unlockSearchScroll(){
+  const y=Number(document.body.dataset.searchScrollY||0);
+  document.body.classList.remove("vivid-search-open");
+  document.documentElement.classList.remove("vivid-search-open");
+  document.body.style.position="";
+  document.body.style.top="";
+  document.body.style.left="";
+  document.body.style.right="";
+  document.body.style.width="";
+  delete document.body.dataset.searchScrollY;
+  window.scrollTo(0,y);
+}
+function openSearch(){
+  const dialog=ensureSearchDialog();
+  dialog.hidden=false;
+  requestAnimationFrame(()=>{
+    lockSearchScroll();
+    searchInput?.focus({preventScroll:true});
+    if(!searchInput?.value.trim())showRecentSearches();
+  });
+}
+function closeSearch(){
+  if(!searchDialog)return;
+  searchDialog.hidden=true;
+  searchInput?.blur();
+  unlockSearchScroll();
+}
 function showRecentSearches(){
- const panel=$("search-panel");if(!panel)return;
- const recent=getRecentSearches();
- panel.innerHTML='<div class="vivid-search-head"><span>RECENT SEARCHES</span>'+(recent.length?'<button type="button" id="clear-recent-searches">Clear</button>':"")+'</div>'+
-   (recent.length?recent.map(q=>'<button type="button" class="vivid-search-recent" data-recent-search="'+escapeHtml(q)+'"><i class="bi bi-clock-history" aria-hidden="true"></i><span>'+escapeHtml(q)+'</span></button>').join(""):'<div class="vivid-empty">Search movies, series, people or genres.</div>');
- panel.classList.add("is-open");panel.setAttribute("aria-expanded","true");
- panel.querySelector("#clear-recent-searches")?.addEventListener("click",()=>{clearRecentSearches();showRecentSearches()});
- panel.querySelectorAll("[data-recent-search]").forEach(button=>button.addEventListener("click",()=>{const input=$("search-input");input.value=button.dataset.recentSearch;void runSearch(button.dataset.recentSearch)}));
+  const results=$("vivid-search-results");
+  if(!results)return;
+  const recent=getRecentSearches();
+  results.innerHTML=recent.length
+    ? '<div class="vivid-search-label">RECENT SEARCHES</div>'+recent.map(q=>'<button type="button" class="vivid-search-recent" data-recent-search="'+escapeHtml(q)+'"><i class="bi bi-clock-history" aria-hidden="true"></i><span>'+escapeHtml(q)+'</span><i class="bi bi-arrow-up-left" aria-hidden="true"></i></button>').join("")
+    : '<div class="vivid-search-empty"><i class="bi bi-search" aria-hidden="true"></i><strong>Start typing to search</strong><span>Try a movie, series, actor, or genre.</span></div>';
+  results.querySelectorAll("[data-recent-search]").forEach(button=>button.addEventListener("click",()=>{
+    searchInput.value=button.dataset.recentSearch;
+    searchInput.dispatchEvent(new Event("input",{bubbles:true}));
+    void runSearch(button.dataset.recentSearch);
+  }));
 }
-
-function showSearch(items,intent){
- const panel=$("search-panel");if(!panel)return;
- const intentLabel=[intent?.type?intent.type==="tv"?"TV":"Movies":"",intent?.genres?.length?"Genre match":"",intent?.similarity?"Similarity search":""].filter(Boolean).join(" · ");
- panel.innerHTML=(intentLabel?'<div class="vivid-search-head"><span>'+escapeHtml(intentLabel)+'</span></div>':"")+
-   (items.length?items.map(m=>{
-     const person=m.media_type==="person";
-     const href=person?getPersonUrl(m):getMediaUrl(m);
-     const meta=person?"Person":(m.year||"—")+" · "+(m.media_type==="tv"?"TV":"Movie");
-     return '<a class="vivid-search-result" href="'+escapeHtml(href)+'"><img src="'+getImageUrl(m.poster_path,"w92")+'" alt=""><span><strong>'+escapeHtml(m.title)+'</strong><br><small>'+escapeHtml(meta)+'</small></span></a>';
-   }).join(""):'<div class="vivid-empty">No matches found.</div>');
- panel.classList.add("is-open");panel.setAttribute("aria-expanded","true");
+function showSearchLoading(query){
+  const results=$("vivid-search-results");
+  if(!results)return;
+  results.innerHTML='<div class="vivid-search-state"><span class="vivid-search-spinner" aria-hidden="true"></span><strong>Searching for “'+escapeHtml(query)+'”</strong></div>';
 }
-
+function showSearch(items,intent,query=""){
+  const results=$("vivid-search-results");
+  if(!results)return;
+  const intentLabel=[intent?.type?intent.type==="tv"?"TV":"Movies":"",intent?.genres?.length?"Genre":"",intent?.similarity?"For you":""].filter(Boolean).join(" · ");
+  const context=intentLabel?'<div class="vivid-search-context">'+escapeHtml(intentLabel)+'</div>':"";
+  const cards=items.length?items.map(m=>{
+    const person=m.media_type==="person";
+    const href=person?getPersonUrl(m):getMediaUrl(m);
+    const meta=person?"Person":(m.year||"—")+" · "+(m.media_type==="tv"?"TV Series":"Movie");
+    return '<a class="vivid-search-result" href="'+escapeHtml(href)+'"><img src="'+getImageUrl(m.poster_path,"w185")+'" alt="" loading="lazy" decoding="async"><span><strong>'+escapeHtml(m.title)+'</strong><small>'+escapeHtml(meta)+'</small></span><i class="bi bi-chevron-right" aria-hidden="true"></i></a>';
+  }).join(""):'<div class="vivid-search-empty"><i class="bi bi-search" aria-hidden="true"></i><strong>No matches found</strong><span>Try a different title, actor, genre, or shorter search.</span></div>';
+  results.innerHTML=(query?'<div class="vivid-search-label">RESULTS FOR “'+escapeHtml(query)+'”</div>':"")+context+cards;
+}
 async function runSearch(q){
- const requestId=++searchRequestId;
- const query=String(q||"").trim();
- if(!query){showRecentSearches();return}
- const panel=$("search-panel");
- if(panel){
-   panel.innerHTML='<div class="vivid-search-head"><span>SEARCHING</span></div><div class="vivid-empty">Finding matches…</div>';
-   panel.classList.add("is-open");
-   panel.setAttribute("aria-expanded","true");
- }
- try{
-   try { recordBehavior("search_query",null,{query}); } catch {}
-   const result=await searchIntelligently(query);
-   if(requestId!==searchRequestId)return;
-   rememberSearch(query);
-   showSearch(result.items,result.intent);
- }catch(e){
-   if(requestId!==searchRequestId)return;
-   $("search-panel").innerHTML='<div class="vivid-empty">'+escapeHtml(getErrorMessage(e))+"</div>";
-   $("search-panel").classList.add("is-open");
- }
+  const requestId=++searchRequestId;
+  const query=String(q||"").trim();
+  if(!query){showRecentSearches();return}
+  showSearchLoading(query);
+  try{
+    try{recordBehavior("search_query",null,{query})}catch{}
+    const result=await searchIntelligently(query);
+    if(requestId!==searchRequestId)return;
+    rememberSearch(query);
+    showSearch(result.items,result.intent,query);
+  }catch(error){
+    if(requestId!==searchRequestId)return;
+    const results=$("vivid-search-results");
+    if(results)results.innerHTML='<div class="vivid-search-empty"><i class="bi bi-exclamation-circle" aria-hidden="true"></i><strong>Search is temporarily unavailable</strong><span>'+escapeHtml(getErrorMessage(error))+'</span></div>';
+  }
 }
-
-const search=debounce((q)=>void runSearch(q),300);
-
-async function browseByLetter(letter){
+const search=debounce((q)=>void runSearch(q),260);
+function wireSearch(){
+  const trigger=document.querySelector("[data-search-trigger]");
+  if(!trigger)return;
+  trigger.addEventListener("click",openSearch);
+  document.addEventListener("keydown",e=>{
+    if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==="k"){e.preventDefault();openSearch()}
+    if(e.key==="Escape"&&!searchDialog?.hidden)closeSearch();
+  });
+}
+function browseByLetter(letter){
  const rail=$("alphabet-rail"),status=$("alphabet-status");
  if(!rail||!status)return;
  document.querySelectorAll("[data-letter]").forEach(button=>{
