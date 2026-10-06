@@ -124,8 +124,6 @@ button,a,.vivid-card,.vivid-discovery-card,.vivid-feature-card,.vivid-mode-chip,
   transition-duration:var(--vivid-duration-ui);
   transition-timing-function:var(--vivid-motion);
 }
-.vivid-discovery-main,.vivid-collection-main{width:min(var(--vivid-content-width),100%)}
-.vivid-discovery-main,.vivid-collection-main{padding-left:var(--vivid-page-gutter);padding-right:var(--vivid-page-gutter)}
 @media(max-width:767px){
   .vivid-discovery-main,.vivid-collection-main{padding-left:14px;padding-right:14px}
 }
