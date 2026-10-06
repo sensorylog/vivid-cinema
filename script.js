@@ -5,7 +5,7 @@ import { getLocalLibrary } from "./scripts/library.js";
 import { getContinueWatching, getPlaybackProgress, getPersonalRecommendations, getBecauseYouLiked, getTonightPick, dismissTonightPick, formatProgress } from "./scripts/recommendations.js";
 import { escapeHtml, debounce, getErrorMessage } from "./scripts/utils.js";
 import { buildWatchUrl } from "./scripts/routes.js";
-import { checkForReleaseAlerts, deliverReleaseAlerts, getPendingReleaseAlerts, requestReleaseAlerts, dismissReleaseAlert } from "./scripts/release-alerts.js";
+import { checkForReleaseAlerts, deliverReleaseAlerts, getPendingReleaseAlerts, requestReleaseAlerts, dismissReleaseAlert, clearReleaseAlerts, getReleaseAlertState } from "./scripts/release-alerts.js";
 import { startIntelligenceSync, shouldShowColdStart, completeColdStart, dismissColdStart, recordBehavior, getTasteProfile, getTasteStrength } from "./scripts/intelligence.js";
 import { searchIntelligently, getRecentSearches, rememberSearch, clearRecentSearches } from "./scripts/search.js";
 import { startCinemaReminderLoop } from "./scripts/cinema-reminders.js";
@@ -471,33 +471,29 @@ function wireAlphabet(){
  document.querySelectorAll("[data-letter]").forEach(button=>button.addEventListener("click",()=>void browseByLetter(button.dataset.letter)));
 }
 
+function formatAlertTime(value){const diff=Math.max(0,Date.now()-Number(value||0)),mins=Math.floor(diff/60000),hrs=Math.floor(mins/60),days=Math.floor(hrs/24);if(mins<1)return "just now";if(mins<60)return mins+"m ago";if(hrs<24)return hrs+"h ago";if(days<7)return days+"d ago";return new Date(value).toLocaleDateString(undefined,{month:"short",day:"numeric"});}
 function renderReleaseAlerts(){
- const list=$("release-alert-list"),count=$("release-alert-count");
- if(!list)return;
- const alerts=getPendingReleaseAlerts();
- if(count){count.textContent=String(alerts.length);count.hidden=!alerts.length;}
- list.innerHTML=alerts.length?alerts.slice(0,8).map(alert=>{
-   const meta=alert.type==="tv-season"?"New season · S"+alert.season:alert.type==="tv-episode"?"New episode · S"+alert.season+" E"+alert.episode:"New movie";
-   const href=alert.media_type==="tv"?"title.html?id="+encodeURIComponent(alert.id)+"&type=tv":"title.html?id="+encodeURIComponent(alert.id)+"&type=movie";
-   return '<div class="vivid-release-alert"><a href="'+href+'"><i class="bi '+(alert.type==="tv-episode"?"bi-tv":alert.type==="tv-season"?"bi-collection-play":"bi-film")+'"></i><span><strong>'+escapeHtml(alert.title)+'</strong><small>'+escapeHtml(meta+(alert.releaseTypeLabel?" · "+alert.releaseTypeLabel:"")+(alert.episodeTitle?" · "+alert.episodeTitle:""))+'</small></span></a><button type="button" data-dismiss-release="'+escapeHtml(alert.key)+'" aria-label="Dismiss '+escapeHtml(alert.title)+'"><i class="bi bi-x"></i></button></div>';
- }).join(""):'<p class="vivid-muted">No new releases yet. Follow titles with Like or Watch Later and Vivid will watch for updates.</p>';
+ const list=$("release-alert-list"),count=$("release-alert-count"),button=$("release-alert-button");if(!list)return;
+ const alerts=getPendingReleaseAlerts(),state=getReleaseAlertState();
+ if(count){count.textContent=alerts.length>9?"9+":String(alerts.length);count.hidden=!alerts.length}button?.classList.toggle("has-alerts",alerts.length>0);
+ const updated=$("release-alert-updated");if(updated)updated.textContent=state.lastCheckedAt?"Checked "+formatAlertTime(state.lastCheckedAt):"Not checked yet";
+ const summary=$("release-alert-summary");if(summary)summary.textContent=alerts.length?alerts.length+" new "+(alerts.length===1?"release":"releases")+" waiting for you.":"Keeping an eye on your saved titles.";
+ const enable=$("release-alert-enable");if(enable){const permission=window.Notification?.permission||"unsupported";enable.textContent=permission==="granted"?"Enabled":permission==="denied"?"Blocked":"Enable";enable.disabled=permission==="granted"}
+ list.innerHTML=alerts.length?alerts.slice(0,12).map(alert=>{const meta=alert.type==="tv-season"?"New season · S"+alert.season:alert.type==="tv-episode"?"New episode · S"+alert.season+" E"+alert.episode:"New release · "+(alert.releaseTypeLabel||"Available now");const href=alert.media_type==="tv"?"title.html?id="+encodeURIComponent(alert.id)+"&type=tv":"title.html?id="+encodeURIComponent(alert.id)+"&type=movie";return '<div class="vivid-release-alert"><a href="'+href+'"><i class="bi '+(alert.type==="tv-episode"?"bi-tv":alert.type==="tv-season"?"bi-collection-play":"bi-film")+'"></i><span><strong>'+escapeHtml(alert.title)+'</strong><small>'+escapeHtml(meta+(alert.episodeTitle?" · "+alert.episodeTitle:""))+'</small></span></a><button type="button" data-dismiss-release="'+escapeHtml(alert.key)+'" aria-label="Dismiss '+escapeHtml(alert.title)+'"><i class="bi bi-x"></i></button></div>'}).join(""):'<div class="vivid-release-empty"><div class="vivid-release-empty-icon"><i class="bi bi-check2-circle"></i></div><strong>You’re all caught up</strong><p>When a title you follow gets a new release, episode or season, it will appear here.</p></div>';
 }
-async function refreshReleaseAlerts(){
- try{
-   const alerts=await checkForReleaseAlerts();
-   if(alerts.length && window.Notification?.permission==="granted") deliverReleaseAlerts(alerts);
- }catch(error){console.warn("Vivid release alerts unavailable:",error)}
- renderReleaseAlerts();
+async function refreshReleaseAlerts(force=false){
+ const refresh=$("release-alert-refresh");if(refresh){refresh.disabled=true;refresh.setAttribute("aria-busy","true")}
+ try{const alerts=await checkForReleaseAlerts({force});if(alerts.length&&window.Notification?.permission==="granted")await deliverReleaseAlerts(alerts)}catch(error){console.warn("Vivid release alerts unavailable:",error)}
+ finally{if(refresh){refresh.disabled=false;refresh.removeAttribute("aria-busy")}}renderReleaseAlerts();
 }
 function wireReleaseAlerts(){
- const button=$("release-alert-button"),popover=$("release-alert-popover"),close=$("release-alert-close"),enable=$("release-alert-enable");
- const toggle=()=>{if(!popover)return;popover.hidden=!popover.hidden;button?.setAttribute("aria-expanded",String(!popover.hidden));renderReleaseAlerts();};
- button?.addEventListener("click",toggle);
- close?.addEventListener("click",()=>{popover.hidden=true;button?.setAttribute("aria-expanded","false")});
- enable?.addEventListener("click",async()=>{const result=await requestReleaseAlerts();enable.textContent=result==="granted"?"Notifications enabled":result==="denied"?"Notifications blocked":"Notifications unavailable";const status=$("release-alert-status");if(status)status.textContent=result==="granted"?"Background-capable notifications are enabled for this installed/browser app.":"Notifications stay in the Vivid alert center.";await checkForReleaseAlerts({force:true});renderReleaseAlerts();});
- document.addEventListener("click",event=>{const dismiss=event.target.closest("[data-dismiss-release]");if(dismiss){dismissReleaseAlert(dismiss.dataset.dismissRelease);renderReleaseAlerts();return;}if(popover&&!popover.hidden&&!event.target.closest("#release-alert-popover")&&!event.target.closest("#release-alert-button")){popover.hidden=true;button?.setAttribute("aria-expanded","false")}});
-
+ const button=$("release-alert-button"),popover=$("release-alert-popover"),close=$("release-alert-close"),enable=$("release-alert-enable"),refresh=$("release-alert-refresh"),clear=$("release-alert-clear");
+ const toggle=()=>{if(!popover)return;popover.hidden=!popover.hidden;button?.setAttribute("aria-expanded",String(!popover.hidden));renderReleaseAlerts()};button?.addEventListener("click",toggle);close?.addEventListener("click",()=>{popover.hidden=true;button?.setAttribute("aria-expanded","false")});
+ refresh?.addEventListener("click",()=>void refreshReleaseAlerts(true));clear?.addEventListener("click",()=>{clearReleaseAlerts();renderReleaseAlerts()});
+ enable?.addEventListener("click",async()=>{const result=await requestReleaseAlerts();const status=$("release-alert-status");if(status)status.textContent=result==="granted"?"Device notifications are enabled for this browser.":result==="denied"?"Notifications are blocked. Allow them in browser settings.":result==="unsupported"?"This browser does not support device notifications.":"Notifications stay inside Vivid.";await refreshReleaseAlerts(true);renderReleaseAlerts()});
+ document.addEventListener("click",event=>{const dismiss=event.target.closest("[data-dismiss-release]");if(dismiss){dismissReleaseAlert(dismiss.dataset.dismissRelease);renderReleaseAlerts();return}if(popover&&!popover.hidden&&!event.target.closest("#release-alert-popover")&&!event.target.closest("#release-alert-button")){popover.hidden=true;button?.setAttribute("aria-expanded","false")}});
 }
+
 function wireSearch(){
  const input=$("search-input");if(!input)return;
  input.addEventListener("focus",()=>{if(!input.value.trim())showRecentSearches()});
