@@ -46,11 +46,17 @@ function friendlyError(error){
 async function createUserRecord(user,name){
   await setDoc(doc(db,"users",user.uid),{displayName:name,email:user.email||null,provider:user.providerData?.[0]?.providerId||"password",updatedAt:serverTimestamp(),createdAt:serverTimestamp()},{merge:true});
 }
+let googleFinishPromise=null;
 async function finishGoogleSignIn(credential){
-  try{await createUserRecord(credential.user,credential.user.displayName||"");}
-  catch(error){console.warn("Google sign-in succeeded but profile sync failed:",error);}
-  void startLibrarySync();
-  window.location.href="home.html";
+  if(!credential?.user)return;
+  if(googleFinishPromise)return googleFinishPromise;
+  googleFinishPromise=(async()=>{
+    try{await createUserRecord(credential.user,credential.user.displayName||"");}
+    catch(error){console.warn("Google sign-in succeeded but profile sync failed:",error);}
+    void startLibrarySync();
+    window.location.replace("home.html");
+  })();
+  return googleFinishPromise;
 }
 async function googleSignIn(){
   const provider=new GoogleAuthProvider();
@@ -64,8 +70,24 @@ async function googleSignIn(){
 async function finishPendingGoogleRedirect(){
   try{
     const result=await withTimeout(getRedirectResult(auth),30000,"Google sign-in redirect timed out.");
-    if(result?.user) await finishGoogleSignIn(result);
-  }catch(error){console.error("Google redirect sign-in failed:",error);showMessage(friendlyError(error));}
+    if(result?.user){await finishGoogleSignIn(result);return;}
+    // Some mobile/PWA browsers complete the redirect and restore the Firebase
+    // session before getRedirectResult resolves with a credential. In that case
+    // the auth-state event is the reliable completion signal.
+    await new Promise(resolve=>{
+      let settled=false;
+      const done=()=>{if(!settled){settled=true;resolve();}};
+      const timer=window.setTimeout(done,2500);
+      import("https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js").then(({onAuthStateChanged})=>{
+        const unsubscribe=onAuthStateChanged(auth,user=>{
+          if(user){clearTimeout(timer);unsubscribe();void finishGoogleSignIn({user}).finally(done);}
+        });
+      }).catch(done);
+    });
+  }catch(error){
+    console.error("Google redirect sign-in failed:",error);
+    if(error?.code!=="auth/timeout")showMessage(friendlyError(error));
+  }
 }
 googleButtons.forEach(button=>button.addEventListener("click",async()=>{
   button.disabled=true;showMessage("Connecting to Google…",true);
