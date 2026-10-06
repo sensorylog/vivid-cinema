@@ -129,3 +129,25 @@ button,a,.vivid-card,.vivid-discovery-card,.vivid-feature-card,.vivid-mode-chip,
 @media(max-width:767px){
   .vivid-discovery-main,.vivid-collection-main{padding-left:14px;padding-right:14px}
 }
+
+
+/* Light theme contrast pass: inherited legacy white text must follow the active theme. */
+html[data-vivid-theme="light"] .vivid-atmosphere,
+html[data-vivid-theme="light"] .vivid-atmosphere .vivid-section-wrap,
+html[data-vivid-theme="light"] .vivid-atmosphere .vivid-discovery-main,
+html[data-vivid-theme="light"] .vivid-atmosphere .vivid-collection-main{color:var(--vivid-text)}
+html[data-vivid-theme="light"] .vivid-atmosphere .vivid-card,
+html[data-vivid-theme="light"] .vivid-atmosphere .vivid-surface,
+html[data-vivid-theme="light"] .vivid-atmosphere .vivid-filter-panel,
+html[data-vivid-theme="light"] .vivid-atmosphere .vivid-collection-toolbar,
+html[data-vivid-theme="light"] .vivid-atmosphere .vivid-library-tabs,
+html[data-vivid-theme="light"] .vivid-atmosphere .account-card,
+html[data-vivid-theme="light"] .vivid-atmosphere .auth-container,
+html[data-vivid-theme="light"] .vivid-atmosphere .vivid-search-panel,
+html[data-vivid-theme="light"] .vivid-atmosphere .vivid-release-popover,
+html[data-vivid-theme="light"] .vivid-atmosphere .vivid-collection-card{color:var(--vivid-text)}
+html[data-vivid-theme="light"] .vivid-atmosphere .vivid-card :is(h1,h2,h3,h4,h5,h6,p,span),
+html[data-vivid-theme="light"] .vivid-atmosphere .vivid-filter-panel :is(h1,h2,h3,h4,h5,h6,p,span),
+html[data-vivid-theme="light"] .vivid-atmosphere .vivid-search-panel :is(h1,h2,h3,h4,h5,h6,p,span){color:inherit}
+html[data-vivid-theme="light"] .vivid-atmosphere .vivid-text-muted{color:var(--vivid-text-muted)!important}
+html[data-vivid-theme="light"] .vivid-atmosphere .vivid-text-subtle{color:var(--vivid-text-subtle)!important}
