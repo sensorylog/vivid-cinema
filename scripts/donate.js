@@ -94,9 +94,8 @@ form.addEventListener("submit", async (event) => {
       },
       onSuccess: (response) => {
         setBusy(false);
-        setStatus("Thank you ❤️ Your contribution was submitted successfully. Reference: " + response.reference, "success");
-        form.reset();
-        renderCurrency();
+        const reference = response && response.reference ? response.reference : "";
+        window.location.assign("donation-success.html" + (reference ? "?reference=" + encodeURIComponent(reference) : ""));
       },
       onCancel: () => {
         setBusy(false);

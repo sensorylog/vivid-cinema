@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#06070a">
+<meta name="description" content="Thank you for supporting Vivid Cinema.">
+<title>Thank You — Vivid Cinema</title>
+<link rel="icon" href="icons/vivid-icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="styles/vivid-foundation.css">
+<link rel="stylesheet" href="styles/vivid-system.css">
+<style>
+body{min-height:100dvh;margin:0;background:#06070a;color:#fff;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+.success-shell{min-height:100dvh;display:grid;place-items:center;padding:24px;box-sizing:border-box}
+.success-card{width:min(560px,100%);padding:clamp(28px,6vw,52px);box-sizing:border-box;text-align:center;border:1px solid rgba(255,255,255,.1);border-radius:28px;background:linear-gradient(145deg,rgba(255,255,255,.075),rgba(255,255,255,.025));box-shadow:0 30px 90px rgba(0,0,0,.45)}
+.success-mark{width:58px;height:58px;margin:0 auto 20px;display:grid;place-items:center;border-radius:18px;background:rgba(255,255,255,.08);font-size:1.45rem}
+.success-eyebrow{display:block;font-size:.66rem;letter-spacing:.18em;opacity:.5;font-weight:800}
+h1{margin:10px 0 12px;font-size:clamp(2rem,6vw,3.2rem);letter-spacing:-.05em}
+.success-copy{margin:0 auto;max-width:430px;color:#a9afb8;line-height:1.7;font-size:.95rem}
+.success-reference{margin:22px 0 0;padding:12px 14px;border:1px solid rgba(255,255,255,.08);border-radius:12px;background:rgba(0,0,0,.18);color:#7f8791;font:600 .72rem/1.4 ui-monospace,SFMono-Regular,Menlo,monospace;word-break:break-all}
+.success-actions{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:26px}
+.success-actions a{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 17px;border-radius:999px;text-decoration:none;font-size:.8rem;font-weight:800}
+.success-primary{background:#fff;color:#07080b}.success-secondary{border:1px solid rgba(255,255,255,.1);color:#d4d8dd;background:rgba(255,255,255,.04)}
+</style>
+</head>
+<body>
+<main class="success-shell">
+<section class="success-card" aria-labelledby="success-title">
+<div class="success-mark" aria-hidden="true">♥</div>
+<span class="success-eyebrow">VIVID CINEMA</span>
+<h1 id="success-title">Thank you. ❤️</h1>
+<p class="success-copy">Your support means a lot. Paystack reported the checkout as successful. We appreciate you helping keep Vivid Cinema moving.</p>
+<p class="success-copy" style="margin-top:10px;font-size:.78rem;opacity:.7">This page is a confirmation screen, not an independent payment verification record.</p>
+<div class="success-reference" id="success-reference" hidden></div>
+<div class="success-actions">
+<a class="success-primary" href="home.html">Back to Vivid</a>
+<a class="success-secondary" href="donate.html">Support again</a>
+</div>
+</section>
+</main>
+<script>
+const reference=new URLSearchParams(location.search).get("reference");
+const el=document.getElementById("success-reference");
+if(reference){el.hidden=false;el.textContent="Reference: "+reference;}
+</script>
+</body>
+</html>
