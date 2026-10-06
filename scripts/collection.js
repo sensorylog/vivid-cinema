@@ -107,6 +107,7 @@ function wire(){
 async function init(){
   const requested=route.params.get("collection")||"trending";
   state.collection=COLLECTIONS[requested]?requested:"trending";
+  document.querySelectorAll("[data-mobile-nav]").forEach(link => link.classList.toggle("is-active", link.dataset.mobileNav === state.collection));
   const meta=COLLECTIONS[state.collection];
   $("collection-kicker").textContent="COLLECTION";
   $("collection-title").textContent=meta.label;
