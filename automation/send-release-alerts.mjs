@@ -21,7 +21,7 @@ const safeRegion=v=>/^[A-Z]{2}$/.test(String(v||""))?String(v):"US";
 const alertId=k=>crypto.createHash("sha256").update(k).digest("hex").slice(0,40);
 
 async function tmdb(path,params={}){
- const url=new URL(TMDB+"/"+path.replace(/^\/+ /,"").replace(/^\/+ /,""));
+ const url=new URL(TMDB+"/"+path.replace(/^\/+/, ""));
  url.searchParams.set("api_key",tmdbApiKey);url.searchParams.set("language","en-US");
  Object.entries(params).forEach(([k,v])=>{if(v!==undefined&&v!==null&&v!=="")url.searchParams.set(k,v)});
  const key=url.toString();if(cache.has(key))return cache.get(key);
