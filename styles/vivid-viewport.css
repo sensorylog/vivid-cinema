@@ -348,3 +348,72 @@ body.vivid-cinema-home,
   .vivid-rail{gap:9px;touch-action:pan-y}
   .vivid-section-wrap{padding-left:12px;padding-right:12px}
 }
+
+
+/* 2026 density cleanup — reduce the "zoomed in / crowded" feel without changing layout behavior.
+   Keep content architecture, catalogue data, routing and player untouched. */
+:root{
+  --vivid-content-width:1440px;
+  --vivid-page-gutter:clamp(14px,2.2vw,40px);
+  --vivid-section-gap:clamp(2rem,4.5vw,4rem);
+  --vivid-grid-gap:clamp(.6rem,1vw,1rem);
+}
+body.vivid-atmosphere{
+  line-height:1.48;
+}
+.vivid-section-wrap,
+.vivid-discovery-main,
+.vivid-collection-main{
+  max-width:1440px;
+}
+.vivid-rails{padding-top:20px;padding-bottom:8px}
+.vivid-rail-head{margin-bottom:11px}
+.vivid-rail-head h2{font-size:clamp(1.15rem,1.7vw,1.5rem)}
+.vivid-rail-head p{font-size:.72rem}
+.vivid-card{border-radius:13px}
+.vivid-card-info{padding:8px 9px 10px;min-height:52px}
+.vivid-card-title{font-size:.8rem}
+.vivid-card-sub{font-size:.68rem;margin-top:3px}
+.vivid-rating{top:7px;right:7px;padding:4px 6px;font-size:.64rem}
+.vivid-rail{gap:11px;padding-top:3px;padding-bottom:12px}
+.vivid-rail-footer{padding-top:5px;padding-bottom:10px}
+.vivid-button{min-height:42px;padding:.62rem .9rem}
+.vivid-icon-button{width:40px;height:40px}
+.vivid-input,.vivid-select{min-height:42px;padding:.6rem .8rem}
+.vivid-nav{gap:12px;min-height:52px}
+.vivid-navlinks a,.vivid-nav-action{padding:8px 10px;font-size:.84rem}
+.vivid-nav-search input{height:40px}
+@media(max-width:900px){
+  .vivid-nav{gap:8px;min-height:50px}
+  .vivid-hero-title{letter-spacing:-.045em}
+  .vivid-section-wrap{padding-left:14px;padding-right:14px}
+  .vivid-rails{padding-top:18px;padding-bottom:4px}
+}
+@media(max-width:640px){
+  :root{--vivid-page-gutter:12px;--vivid-section-gap:2rem}
+  .vivid-topbar{padding-top:calc(6px + var(--vivid-safe-top,0px));padding-bottom:6px}
+  .vivid-nav{min-height:46px}
+  .vivid-brand{font-size:1rem}
+  .vivid-nav-action{padding:7px 7px;font-size:.78rem}
+  .vivid-notification-button{width:36px;height:36px}
+  .vivid-rails{padding-top:16px;padding-bottom:2px}
+  .vivid-rail-head{margin-bottom:8px}
+  .vivid-rail-head h2{font-size:1.08rem}
+  .vivid-rail-controls button{width:32px;height:32px;flex-basis:32px}
+  .vivid-rail{gap:8px;padding:2px 2px 10px}
+  .vivid-card{flex:0 0 min(124px,33vw);border-radius:12px}
+  .vivid-card-info{padding:7px 8px 9px;min-height:48px}
+  .vivid-card-title{font-size:.76rem}
+  .vivid-card-sub{font-size:.65rem}
+  .vivid-feature-card{flex-basis:min(154px,42vw);height:86px;border-radius:12px}
+  .vivid-feature-card strong{font-size:.7rem;left:9px;bottom:8px}
+  .vivid-catalogue-explore{padding:10px 12px 2px}
+  .vivid-catalogue-explore-head{margin-bottom:12px}
+  .vivid-catalogue-explore-head h2{font-size:1.35rem}
+  .vivid-catalogue-chips a{padding:8px 11px;font-size:.7rem}
+  .vivid-button{min-height:40px}
+}
+@media(max-width:380px){
+  .vivid-card{flex-basis:min(116px,32vw)}
+  .vivid-feature-card{flex-basis:min(142px,41vw);height:80px}
+}
