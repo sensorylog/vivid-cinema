@@ -1,7 +1,6 @@
 /* ==========================================================================
    Vivid Cinema — Liquid Glass (v2 — visible)
    Apple-style frosted glass. Load LAST.
-   Higher specificity + more translucent so blur/highlight actually show.
    ========================================================================== */
 
 :root {
@@ -21,6 +20,16 @@
   --lg-fill-strong: rgba(255, 255, 255, 0.14);
   --lg-fill-dark: rgba(12, 14, 20, 0.45);
   --lg-fill-panel: rgba(16, 18, 26, 0.52);
+}
+
+/* Desktop: bottom tabs must never show — top nav only */
+@media (min-width: 641px) {
+  body.vivid-atmosphere .vivid-mobile-nav,
+  .vivid-mobile-nav {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
 }
 
 body.vivid-atmosphere .vivid-filter-panel,
@@ -115,52 +124,74 @@ body.vivid-atmosphere .vivid-discovery-search input:focus {
   box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1) !important;
 }
 
-body.vivid-atmosphere .vivid-mobile-nav {
-  position: fixed !important;
-  display: flex !important;
-  left: 10px !important;
-  right: 10px !important;
-  bottom: calc(10px + env(safe-area-inset-bottom, 0px)) !important;
-  height: 62px !important;
-  z-index: 1200 !important;
-  padding: 4px 6px !important;
-  border-radius: 22px !important;
-  background: rgba(18, 20, 28, 0.42) !important;
-  border: 1px solid rgba(255, 255, 255, 0.32) !important;
-  backdrop-filter: blur(50px) saturate(200%) !important;
-  -webkit-backdrop-filter: blur(50px) saturate(200%) !important;
-  box-shadow:
-    0 14px 48px rgba(0, 0, 0, 0.5),
-    inset 0 1px 0 rgba(255, 255, 255, 0.22),
-    inset 0 -1px 0 rgba(255, 255, 255, 0.06) !important;
-}
+/* Bottom tabs: glass + visible only on phones */
+@media (max-width: 640px) {
+  body.vivid-atmosphere .vivid-mobile-nav {
+    position: fixed !important;
+    display: flex !important;
+    left: 10px !important;
+    right: 10px !important;
+    bottom: calc(10px + env(safe-area-inset-bottom, 0px)) !important;
+    height: 62px !important;
+    z-index: 1200 !important;
+    padding: 4px 6px !important;
+    border-radius: 22px !important;
+    background: rgba(18, 20, 28, 0.42) !important;
+    border: 1px solid rgba(255, 255, 255, 0.32) !important;
+    backdrop-filter: blur(50px) saturate(200%) !important;
+    -webkit-backdrop-filter: blur(50px) saturate(200%) !important;
+    box-shadow:
+      0 14px 48px rgba(0, 0, 0, 0.5),
+      inset 0 1px 0 rgba(255, 255, 255, 0.22),
+      inset 0 -1px 0 rgba(255, 255, 255, 0.06) !important;
+  }
 
-body.vivid-atmosphere .vivid-mobile-nav::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  background: radial-gradient(
-    120% 70% at 50% 0%,
-    rgba(255, 255, 255, 0.2),
-    transparent 60%
-  );
-  mix-blend-mode: soft-light;
-  pointer-events: none !important;
-  z-index: 0;
-}
+  body.vivid-atmosphere .vivid-mobile-nav::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: radial-gradient(
+      120% 70% at 50% 0%,
+      rgba(255, 255, 255, 0.2),
+      transparent 60%
+    );
+    mix-blend-mode: soft-light;
+    pointer-events: none !important;
+    z-index: 0;
+  }
 
-body.vivid-atmosphere .vivid-mobile-nav a {
-  position: relative;
-  z-index: 1;
-  border-radius: 14px;
-  pointer-events: auto !important;
-}
+  body.vivid-atmosphere .vivid-mobile-nav a {
+    position: relative;
+    z-index: 1;
+    flex: 1 1 0;
+    min-width: 0;
+    border-radius: 14px;
+    pointer-events: auto !important;
+    font-size: 0.58rem !important;
+    padding: 4px 2px !important;
+  }
 
-body.vivid-atmosphere .vivid-mobile-nav a.is-active {
-  background: rgba(255, 255, 255, 0.16) !important;
-  color: #fff !important;
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18);
+  body.vivid-atmosphere .vivid-mobile-nav a i {
+    font-size: 1.15rem !important;
+  }
+
+  body.vivid-atmosphere .vivid-mobile-nav a.is-active {
+    background: rgba(255, 255, 255, 0.16) !important;
+    color: #fff !important;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18);
+  }
+
+  body.vivid-atmosphere .vivid-section-wrap,
+  body.vivid-atmosphere .vivid-home main,
+  body.vivid-atmosphere .vivid-discovery-main,
+  body.vivid-atmosphere .vivid-library-main {
+    padding-bottom: calc(88px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  body.vivid-atmosphere .vivid-footer {
+    padding-bottom: calc(100px + env(safe-area-inset-bottom, 0px)) !important;
+  }
 }
 
 body.vivid-atmosphere .vivid-button--secondary,
@@ -345,30 +376,6 @@ body.vivid-atmosphere,
     display: inline-grid !important;
     place-items: center !important;
     border-radius: 999px !important;
-  }
-}
-
-@media (max-width: 640px) {
-  body.vivid-atmosphere .vivid-section-wrap,
-  body.vivid-atmosphere .vivid-home main,
-  body.vivid-atmosphere .vivid-discovery-main,
-  body.vivid-atmosphere .vivid-library-main {
-    padding-bottom: calc(88px + env(safe-area-inset-bottom, 0px)) !important;
-  }
-
-  body.vivid-atmosphere .vivid-footer {
-    padding-bottom: calc(100px + env(safe-area-inset-bottom, 0px)) !important;
-  }
-
-  body.vivid-atmosphere .vivid-mobile-nav a {
-    flex: 1 1 0;
-    min-width: 0;
-    font-size: 0.58rem !important;
-    padding: 4px 2px !important;
-  }
-
-  body.vivid-atmosphere .vivid-mobile-nav a i {
-    font-size: 1.15rem !important;
   }
 }
 
