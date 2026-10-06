@@ -290,3 +290,77 @@ body{
 @media(prefers-reduced-motion:reduce){
   .vivid-card,.vivid-button,.vivid-icon-button{transition:none!important}
 }
+
+
+/* Home landing-page density refinement.
+   Keep the cinematic hero, but remove visual congestion and excess copy on entry. */
+.vivid-catalogue-explore{
+  max-width:var(--vivid-content-width);
+  margin:0 auto;
+  padding:22px var(--vivid-page-gutter) 8px;
+}
+.vivid-catalogue-explore-head{
+  display:flex;
+  align-items:end;
+  justify-content:space-between;
+  gap:24px;
+  margin-bottom:14px;
+}
+.vivid-catalogue-explore-head > div{min-width:0}
+.vivid-catalogue-explore-head > div > span{
+  display:block;
+  margin-bottom:5px;
+  font-size:.65rem;
+  font-weight:700;
+  letter-spacing:.14em;
+  color:var(--vivid-text-subtle);
+}
+.vivid-catalogue-explore-head h2{
+  margin:0;
+  font-size:clamp(1.25rem,2.2vw,1.65rem);
+  line-height:1.08;
+}
+.vivid-catalogue-explore-head p{
+  margin:5px 0 0;
+  max-width:520px;
+  font-size:.78rem;
+  line-height:1.45;
+  color:var(--vivid-text-muted);
+}
+.vivid-catalogue-explore-head > a{
+  flex:0 0 auto;
+  color:var(--vivid-text-muted);
+  font-size:.76rem;
+  text-decoration:none;
+  white-space:nowrap;
+}
+.vivid-catalogue-chips{
+  display:flex;
+  gap:7px;
+  overflow-x:auto;
+  padding:2px 2px 8px;
+  scrollbar-width:none;
+  overscroll-behavior-x:contain;
+}
+.vivid-catalogue-chips::-webkit-scrollbar{display:none}
+.vivid-catalogue-chips a{
+  flex:0 0 auto;
+  padding:7px 10px;
+  border:1px solid var(--vivid-border);
+  border-radius:999px;
+  color:var(--vivid-text-muted);
+  background:var(--vivid-surface-soft);
+  font-size:.72rem;
+  text-decoration:none;
+}
+.vivid-catalogue-chips a:hover{
+  color:var(--vivid-text);
+  background:var(--vivid-surface-strong);
+}
+@media(max-width:640px){
+  .vivid-catalogue-explore{padding:18px 12px 4px}
+  .vivid-catalogue-explore-head{display:block;margin-bottom:10px}
+  .vivid-catalogue-explore-head > a{display:inline-block;margin-top:8px}
+  .vivid-catalogue-explore-head p{max-width:360px;font-size:.74rem}
+  .vivid-catalogue-chips{gap:6px}
+}
