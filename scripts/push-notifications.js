@@ -19,7 +19,7 @@ async function getFirebase(){
       import("./firebase.js"),
       import("https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js"),
       import("https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js")
-    ]).then(([firebase,authSdk,fs])=>({...firebase,onAuthStateChanged:authSdk.onAuthStateChanged,doc:fs.doc,setDoc:fs.setDoc,deleteDoc:fs.deleteDoc}))
+    ]).then(([firebase,authSdk,fs])=>({...firebase,onAuthStateChanged:authSdk.onAuthStateChanged,doc:fs.doc,setDoc:fs.setDoc,deleteDoc:fs.deleteDoc,collection:fs.collection,getDocs:fs.getDocs}))
       .catch(error=>{firebasePromise=null;throw error});
   }
   return firebasePromise;
@@ -71,6 +71,28 @@ export async function disableCinemaPush(){
     await Promise.all(snapshot.docs.map(item=>deleteDoc(doc(db,"users",user.uid,SUBS_COLLECTION,item.id))));
   }catch{}
   return true;
+}
+
+export async function getServerReleaseAlerts(){
+  try{
+    const {auth}=await getFirebase();
+    if(!auth.currentUser)return [];
+    const {db,collection,getDocs}=await getFirebase();
+    const snapshot=await getDocs(collection(db,"users",auth.currentUser.uid,"releaseAlerts"));
+    return snapshot.docs.map(item=>({id:item.id,...item.data(),source:"server",pending:true})).sort((a,b)=>(Number(b.createdAt)||0)-(Number(a.createdAt)||0));
+  }catch(error){
+    console.warn("Vivid server release alerts unavailable:",error);
+    return [];
+  }
+}
+export async function dismissServerReleaseAlert(id){
+  try{
+    const {auth}=await getFirebase();
+    if(!auth.currentUser)return false;
+    const {db,doc,deleteDoc}=await getFirebase();
+    await deleteDoc(doc(db,"users",auth.currentUser.uid,"releaseAlerts",String(id)));
+    return true;
+  }catch{return false;}
 }
 
 export async function savePushReminder(reminder){
