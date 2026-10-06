@@ -286,7 +286,8 @@ body.vivid-cinema-home,
     scroll-snap-type:x proximity;
     scroll-padding-inline:var(--vivid-page-gutter);
     overscroll-behavior-x:contain;
-    touch-action:pan-x;
+    touch-action:auto;
+    scroll-behavior:auto;
   }
   .vivid-rail .vivid-card,.vivid-feature-track .vivid-feature-card{
     scroll-snap-align:start;
