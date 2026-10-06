@@ -1,72 +1,106 @@
 /* ==========================================================================
-   Vivid Cinema — Liquid Glass (v2 — visible)
-   Apple-style frosted glass. Load LAST.
+   Vivid Cinema — Liquid Glass v3
+   Real frost + animated liquid light. Load LAST.
    ========================================================================== */
 
 :root {
-  --lg-stroke: rgba(255, 255, 255, 0.28);
-  --lg-stroke-strong: rgba(255, 255, 255, 0.42);
-  --lg-highlight: rgba(255, 255, 255, 0.22);
-  --lg-highlight-soft: rgba(255, 255, 255, 0.12);
-  --lg-shadow: rgba(0, 0, 0, 0.28);
-  --lg-shadow-strong: rgba(0, 0, 0, 0.42);
-  --lg-blur: 36px;
-  --lg-blur-strong: 48px;
-  --lg-radius: 22px;
-  --lg-radius-lg: 28px;
+  --lg-blur: 40px;
+  --lg-blur-strong: 56px;
+  --lg-stroke: rgba(255, 255, 255, 0.34);
+  --lg-stroke-strong: rgba(255, 255, 255, 0.5);
+  --lg-fill: rgba(255, 255, 255, 0.1);
+  --lg-fill-strong: rgba(255, 255, 255, 0.18);
+  --lg-panel: rgba(255, 255, 255, 0.07);
+  --lg-panel-dark: rgba(8, 10, 16, 0.35);
+  --lg-radius: 24px;
   --lg-radius-sm: 16px;
   --lg-radius-pill: 999px;
-  --lg-fill: rgba(255, 255, 255, 0.08);
-  --lg-fill-strong: rgba(255, 255, 255, 0.14);
-  --lg-fill-dark: rgba(12, 14, 20, 0.45);
-  --lg-fill-panel: rgba(16, 18, 26, 0.52);
 }
 
-/* Desktop: bottom tabs must never show — top nav only */
-@media (min-width: 641px) {
-  body.vivid-atmosphere .vivid-mobile-nav,
-  .vivid-mobile-nav {
-    display: none !important;
-    visibility: hidden !important;
-    pointer-events: none !important;
-  }
+body.vivid-atmosphere {
+  isolation: isolate;
 }
 
+/* Animated liquid light field */
+body.vivid-atmosphere::after {
+  content: "";
+  position: fixed;
+  inset: -20%;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 50% 40% at 20% 30%, rgba(120, 170, 255, 0.22), transparent 55%),
+    radial-gradient(ellipse 45% 35% at 80% 20%, rgba(200, 120, 255, 0.16), transparent 50%),
+    radial-gradient(ellipse 55% 40% at 60% 80%, rgba(80, 220, 200, 0.14), transparent 55%),
+    radial-gradient(ellipse 40% 30% at 30% 70%, rgba(255, 140, 100, 0.1), transparent 50%);
+  filter: blur(60px) saturate(140%);
+  animation: lgLiquidDrift 18s ease-in-out infinite alternate;
+  opacity: 0.9;
+}
+
+@keyframes lgLiquidDrift {
+  0% { transform: translate(0, 0) scale(1) rotate(0deg); }
+  33% { transform: translate(3%, -2%) scale(1.06) rotate(2deg); }
+  66% { transform: translate(-2%, 3%) scale(0.97) rotate(-1.5deg); }
+  100% { transform: translate(2%, 1%) scale(1.04) rotate(1deg); }
+}
+
+@keyframes lgSheen {
+  0% { background-position: -120% 0; }
+  100% { background-position: 220% 0; }
+}
+
+@keyframes lgGlowPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0), inset 0 1px 0 rgba(255, 255, 255, 0.2); }
+  50% { box-shadow: 0 0 24px rgba(160, 190, 255, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.35); }
+}
+
+@keyframes lgTabSlide {
+  from { transform: scale(0.92); opacity: 0.6; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+/* Core glass panels */
 body.vivid-atmosphere .vivid-filter-panel,
 body.vivid-atmosphere .vivid-collection-toolbar,
 body.vivid-atmosphere .vivid-library-tabs,
 body.vivid-atmosphere .account-card,
 body.vivid-atmosphere .auth-container,
 body.vivid-atmosphere .vivid-search-panel,
-body.vivid-atmosphere .vivid-release-popover {
+body.vivid-atmosphere .vivid-release-popover,
+body.vivid-atmosphere .vivid-collection-card {
   position: relative;
-  background: var(--lg-fill-panel) !important;
+  overflow: hidden;
+  background: var(--lg-panel) !important;
   border: 1px solid var(--lg-stroke) !important;
   border-radius: var(--lg-radius) !important;
-  backdrop-filter: blur(var(--lg-blur)) saturate(180%) !important;
-  -webkit-backdrop-filter: blur(var(--lg-blur)) saturate(180%) !important;
+  backdrop-filter: blur(var(--lg-blur)) saturate(200%) brightness(1.05) !important;
+  -webkit-backdrop-filter: blur(var(--lg-blur)) saturate(200%) brightness(1.05) !important;
   box-shadow:
-    0 12px 40px var(--lg-shadow),
-    inset 0 1px 0 rgba(255, 255, 255, 0.18),
-    inset 0 -1px 0 rgba(255, 255, 255, 0.04) !important;
+    0 16px 48px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.28),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.06) !important;
 }
 
-body.vivid-atmosphere .vivid-filter-panel::before,
-body.vivid-atmosphere .vivid-search-panel::before,
-body.vivid-atmosphere .vivid-release-popover::before,
-body.vivid-atmosphere .auth-container::before {
+body.vivid-atmosphere .vivid-filter-panel::after,
+body.vivid-atmosphere .vivid-search-panel::after,
+body.vivid-atmosphere .vivid-release-popover::after,
+body.vivid-atmosphere .auth-container::after {
   content: "";
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  background: radial-gradient(
-    130% 80% at 15% 0%,
-    rgba(255, 255, 255, 0.28),
-    transparent 55%
+  background: linear-gradient(
+    105deg,
+    transparent 35%,
+    rgba(255, 255, 255, 0.14) 48%,
+    transparent 62%
   );
-  mix-blend-mode: soft-light;
+  background-size: 220% 100%;
+  animation: lgSheen 7s ease-in-out infinite;
   pointer-events: none !important;
   z-index: 0;
+  mix-blend-mode: soft-light;
 }
 
 body.vivid-atmosphere .vivid-filter-panel > *,
@@ -77,88 +111,134 @@ body.vivid-atmosphere .auth-container > * {
   z-index: 1;
 }
 
+/* Top bars — translucent glass */
 body.vivid-atmosphere .vivid-topbar,
 body.vivid-atmosphere .vivid-discovery-nav,
 body.vivid-atmosphere .vivid-title-nav,
 body.vivid-atmosphere .vivid-library-nav,
 body.vivid-atmosphere .vivid-watch-nav {
-  background: rgba(10, 12, 18, 0.48) !important;
-  backdrop-filter: blur(var(--lg-blur-strong)) saturate(190%) !important;
-  -webkit-backdrop-filter: blur(var(--lg-blur-strong)) saturate(190%) !important;
+  background: rgba(255, 255, 255, 0.06) !important;
+  backdrop-filter: blur(var(--lg-blur-strong)) saturate(210%) brightness(1.08) !important;
+  -webkit-backdrop-filter: blur(var(--lg-blur-strong)) saturate(210%) brightness(1.08) !important;
   border-bottom: 1px solid var(--lg-stroke) !important;
   box-shadow:
-    0 10px 36px rgba(0, 0, 0, 0.32),
-    inset 0 1px 0 rgba(255, 255, 255, 0.12) !important;
+    0 12px 40px rgba(0, 0, 0, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.22) !important;
 }
 
 body.vivid-atmosphere .vivid-topbar.is-scrolled {
-  background: rgba(10, 12, 18, 0.62) !important;
+  background: rgba(255, 255, 255, 0.09) !important;
   border-bottom-color: var(--lg-stroke-strong) !important;
+}
+
+body.vivid-atmosphere .vivid-navlinks a,
+body.vivid-atmosphere .vivid-discovery-nav nav a {
+  border-radius: 14px !important;
+  transition: background 0.25s ease, box-shadow 0.25s ease, color 0.2s ease, transform 0.2s ease !important;
 }
 
 body.vivid-atmosphere .vivid-navlinks a:hover,
 body.vivid-atmosphere .vivid-navlinks a[aria-current="true"],
-body.vivid-atmosphere .vivid-nav-action:hover,
 body.vivid-atmosphere .vivid-discovery-nav nav a.is-active,
-body.vivid-atmosphere .vivid-discovery-nav nav a:hover {
-  background: var(--lg-fill-strong) !important;
+body.vivid-atmosphere .vivid-discovery-nav nav a:hover,
+body.vivid-atmosphere .vivid-nav-action:hover {
+  background: rgba(255, 255, 255, 0.14) !important;
   color: #fff !important;
-  box-shadow: inset 0 0 0 1px var(--lg-stroke) !important;
-  border-radius: 12px !important;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.28),
+    0 4px 16px rgba(0, 0, 0, 0.15) !important;
+  transform: translateY(-1px);
+}
+
+body.vivid-atmosphere .vivid-navlinks a[aria-current="true"],
+body.vivid-atmosphere .vivid-discovery-nav nav a.is-active {
+  animation: lgTabSlide 0.35s cubic-bezier(0.34, 1.4, 0.64, 1);
+  background: rgba(255, 255, 255, 0.16) !important;
 }
 
 body.vivid-atmosphere .vivid-nav-search input,
 body.vivid-atmosphere .vivid-discovery-search input {
-  background: var(--lg-fill) !important;
+  background: rgba(255, 255, 255, 0.08) !important;
   border: 1px solid var(--lg-stroke) !important;
   border-radius: var(--lg-radius-pill) !important;
-  backdrop-filter: blur(20px) saturate(160%) !important;
-  -webkit-backdrop-filter: blur(20px) saturate(160%) !important;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+  backdrop-filter: blur(24px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18) !important;
+  transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.25s ease !important;
 }
 
 body.vivid-atmosphere .vivid-nav-search input:focus,
 body.vivid-atmosphere .vivid-discovery-search input:focus {
-  background: var(--lg-fill-strong) !important;
+  background: rgba(255, 255, 255, 0.14) !important;
   border-color: var(--lg-stroke-strong) !important;
-  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1) !important;
+  box-shadow:
+    0 0 0 4px rgba(160, 190, 255, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25) !important;
 }
 
-/* Bottom tabs: glass + visible only on phones */
+/* Desktop: no bottom tabs */
+@media (min-width: 641px) {
+  body.vivid-atmosphere .vivid-mobile-nav,
+  .vivid-mobile-nav {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
+}
+
+/* Mobile bottom tabs — living glass */
 @media (max-width: 640px) {
   body.vivid-atmosphere .vivid-mobile-nav {
     position: fixed !important;
     display: flex !important;
-    left: 10px !important;
-    right: 10px !important;
-    bottom: calc(10px + env(safe-area-inset-bottom, 0px)) !important;
-    height: 62px !important;
+    left: 12px !important;
+    right: 12px !important;
+    bottom: calc(12px + env(safe-area-inset-bottom, 0px)) !important;
+    height: 64px !important;
     z-index: 1200 !important;
-    padding: 4px 6px !important;
-    border-radius: 22px !important;
-    background: rgba(18, 20, 28, 0.42) !important;
-    border: 1px solid rgba(255, 255, 255, 0.32) !important;
-    backdrop-filter: blur(50px) saturate(200%) !important;
-    -webkit-backdrop-filter: blur(50px) saturate(200%) !important;
+    padding: 5px 6px !important;
+    border-radius: 24px !important;
+    background: rgba(255, 255, 255, 0.08) !important;
+    border: 1px solid rgba(255, 255, 255, 0.38) !important;
+    backdrop-filter: blur(56px) saturate(220%) brightness(1.1) !important;
+    -webkit-backdrop-filter: blur(56px) saturate(220%) brightness(1.1) !important;
     box-shadow:
-      0 14px 48px rgba(0, 0, 0, 0.5),
-      inset 0 1px 0 rgba(255, 255, 255, 0.22),
-      inset 0 -1px 0 rgba(255, 255, 255, 0.06) !important;
+      0 16px 50px rgba(0, 0, 0, 0.45),
+      inset 0 1px 0 rgba(255, 255, 255, 0.35),
+      inset 0 -1px 0 rgba(255, 255, 255, 0.08) !important;
+    overflow: hidden;
+    animation: lgGlowPulse 4s ease-in-out infinite;
   }
 
   body.vivid-atmosphere .vivid-mobile-nav::before {
     content: "";
     position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    background: radial-gradient(
-      120% 70% at 50% 0%,
-      rgba(255, 255, 255, 0.2),
-      transparent 60%
-    );
-    mix-blend-mode: soft-light;
+    inset: -30%;
+    background:
+      radial-gradient(circle at 30% 20%, rgba(140, 180, 255, 0.25), transparent 40%),
+      radial-gradient(circle at 70% 80%, rgba(200, 130, 255, 0.18), transparent 40%);
+    filter: blur(20px);
+    animation: lgLiquidDrift 12s ease-in-out infinite alternate;
     pointer-events: none !important;
     z-index: 0;
+  }
+
+  body.vivid-atmosphere .vivid-mobile-nav::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: linear-gradient(
+      105deg,
+      transparent 30%,
+      rgba(255, 255, 255, 0.18) 50%,
+      transparent 70%
+    );
+    background-size: 200% 100%;
+    animation: lgSheen 5s ease-in-out infinite;
+    pointer-events: none !important;
+    z-index: 0;
+    mix-blend-mode: soft-light;
   }
 
   body.vivid-atmosphere .vivid-mobile-nav a {
@@ -166,34 +246,43 @@ body.vivid-atmosphere .vivid-discovery-search input:focus {
     z-index: 1;
     flex: 1 1 0;
     min-width: 0;
-    border-radius: 14px;
-    pointer-events: auto !important;
+    border-radius: 16px;
     font-size: 0.58rem !important;
-    padding: 4px 2px !important;
+    padding: 6px 2px !important;
+    transition: background 0.25s ease, color 0.2s ease, transform 0.25s cubic-bezier(0.34, 1.4, 0.64, 1) !important;
   }
 
   body.vivid-atmosphere .vivid-mobile-nav a i {
-    font-size: 1.15rem !important;
+    font-size: 1.2rem !important;
+    transition: transform 0.25s cubic-bezier(0.34, 1.4, 0.64, 1);
   }
 
   body.vivid-atmosphere .vivid-mobile-nav a.is-active {
-    background: rgba(255, 255, 255, 0.16) !important;
+    background: rgba(255, 255, 255, 0.2) !important;
     color: #fff !important;
-    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18);
+    box-shadow:
+      inset 0 0 0 1px rgba(255, 255, 255, 0.3),
+      0 4px 16px rgba(0, 0, 0, 0.2);
+    animation: lgTabSlide 0.35s cubic-bezier(0.34, 1.4, 0.64, 1);
+  }
+
+  body.vivid-atmosphere .vivid-mobile-nav a.is-active i {
+    transform: scale(1.12);
   }
 
   body.vivid-atmosphere .vivid-section-wrap,
   body.vivid-atmosphere .vivid-home main,
   body.vivid-atmosphere .vivid-discovery-main,
   body.vivid-atmosphere .vivid-library-main {
-    padding-bottom: calc(88px + env(safe-area-inset-bottom, 0px)) !important;
+    padding-bottom: calc(92px + env(safe-area-inset-bottom, 0px)) !important;
   }
 
   body.vivid-atmosphere .vivid-footer {
-    padding-bottom: calc(100px + env(safe-area-inset-bottom, 0px)) !important;
+    padding-bottom: calc(104px + env(safe-area-inset-bottom, 0px)) !important;
   }
 }
 
+/* Buttons / chips */
 body.vivid-atmosphere .vivid-button--secondary,
 body.vivid-atmosphere .vivid-button--ghost,
 body.vivid-atmosphere .vivid-icon-button,
@@ -208,14 +297,16 @@ body.vivid-atmosphere .vivid-mode-chip,
 body.vivid-atmosphere .vivid-type-row button,
 body.vivid-atmosphere .vivid-provider-chip,
 body.vivid-atmosphere .vivid-catalogue-chips a,
-body.vivid-atmosphere .vivid-pill {
-  background: var(--lg-fill) !important;
+body.vivid-atmosphere .vivid-pill,
+body.vivid-atmosphere .vivid-language select {
+  background: rgba(255, 255, 255, 0.09) !important;
   border: 1px solid var(--lg-stroke) !important;
-  backdrop-filter: blur(18px) saturate(160%) !important;
-  -webkit-backdrop-filter: blur(18px) saturate(160%) !important;
+  backdrop-filter: blur(20px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
   box-shadow:
-    0 4px 16px rgba(0, 0, 0, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.14) !important;
+    0 4px 18px rgba(0, 0, 0, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.22) !important;
+  transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease, box-shadow 0.25s ease !important;
 }
 
 body.vivid-atmosphere .vivid-button--secondary:hover,
@@ -227,60 +318,68 @@ body.vivid-atmosphere .vivid-provider-chip.is-active,
 body.vivid-atmosphere .vivid-catalogue-chips a:hover,
 body.vivid-atmosphere .vivid-rail-see-all:hover,
 body.vivid-atmosphere .vivid-rail-load:hover {
-  background: var(--lg-fill-strong) !important;
+  background: rgba(255, 255, 255, 0.18) !important;
   border-color: var(--lg-stroke-strong) !important;
   color: #fff !important;
+  transform: translateY(-1px);
+  box-shadow:
+    0 8px 28px rgba(0, 0, 0, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
 }
 
+body.vivid-atmosphere .vivid-mode-chip.is-active,
+body.vivid-atmosphere .vivid-type-row button.is-active {
+  animation: lgTabSlide 0.3s cubic-bezier(0.34, 1.4, 0.64, 1);
+}
+
+/* Cards */
 body.vivid-atmosphere .vivid-card,
 body.vivid-atmosphere .vivid-feature-card,
 body.vivid-atmosphere .vivid-discovery-poster {
-  border: 1px solid rgba(255, 255, 255, 0.16) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
   box-shadow:
-    0 12px 32px rgba(0, 0, 0, 0.28),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+    0 14px 36px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.14) !important;
+  transition: border-color 0.25s ease, box-shadow 0.3s ease !important;
 }
 
 body.vivid-atmosphere .vivid-card:hover,
 body.vivid-atmosphere .vivid-feature-card:hover,
 body.vivid-atmosphere .vivid-discovery-card:hover .vivid-discovery-poster {
-  border-color: rgba(255, 255, 255, 0.28) !important;
+  border-color: rgba(255, 255, 255, 0.36) !important;
   box-shadow:
-    0 18px 48px rgba(0, 0, 0, 0.4),
-    inset 0 1px 0 rgba(255, 255, 255, 0.16) !important;
+    0 20px 52px rgba(0, 0, 0, 0.42),
+    0 0 0 1px rgba(255, 255, 255, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.22) !important;
 }
 
 body.vivid-atmosphere .vivid-rating,
 body.vivid-atmosphere .vivid-card-signal,
 body.vivid-atmosphere .vivid-discovery-rating {
-  background: rgba(8, 10, 14, 0.55) !important;
+  background: rgba(255, 255, 255, 0.1) !important;
   border: 1px solid var(--lg-stroke) !important;
-  backdrop-filter: blur(16px) !important;
-  -webkit-backdrop-filter: blur(16px) !important;
+  backdrop-filter: blur(18px) !important;
+  -webkit-backdrop-filter: blur(18px) !important;
 }
 
 body.vivid-atmosphere .vivid-filter-row select {
-  background: rgba(8, 10, 14, 0.5) !important;
-  border: 1px solid var(--lg-stroke) !important;
-  backdrop-filter: blur(14px) !important;
-  -webkit-backdrop-filter: blur(14px) !important;
-  color: #fff !important;
-}
-
-body.vivid-atmosphere .vivid-collection-card {
-  background: var(--lg-fill-panel) !important;
-  border: 1px solid var(--lg-stroke) !important;
-  backdrop-filter: blur(24px) saturate(170%) !important;
-  -webkit-backdrop-filter: blur(24px) saturate(170%) !important;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12) !important;
-}
-
-body.vivid-atmosphere .vivid-notification-button,
-body.vivid-atmosphere .vivid-language select {
-  background: var(--lg-fill) !important;
+  background: rgba(255, 255, 255, 0.08) !important;
   border: 1px solid var(--lg-stroke) !important;
   backdrop-filter: blur(16px) !important;
   -webkit-backdrop-filter: blur(16px) !important;
+  color: #fff !important;
+}
+
+body.vivid-atmosphere .vivid-library-tabs button {
+  background: transparent !important;
+  border-radius: 14px !important;
+  transition: background 0.25s ease, box-shadow 0.25s ease !important;
+}
+
+body.vivid-atmosphere .vivid-library-tabs button.is-active {
+  background: rgba(255, 255, 255, 0.14) !important;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.28) !important;
+  animation: lgTabSlide 0.3s cubic-bezier(0.34, 1.4, 0.64, 1);
 }
 
 html, body {
@@ -306,33 +405,20 @@ body.vivid-atmosphere,
 }
 
 @media (max-width: 900px) {
-  body.vivid-atmosphere .vivid-topbar,
-  body.vivid-atmosphere .vivid-discovery-nav,
-  body.vivid-atmosphere .vivid-library-nav,
-  body.vivid-atmosphere .vivid-title-nav,
-  body.vivid-atmosphere .vivid-watch-nav {
-    padding-left: 10px !important;
-    padding-right: 10px !important;
-  }
-
-  body.vivid-atmosphere .vivid-nav {
-    gap: 6px !important;
-  }
-
   body.vivid-atmosphere .vivid-navlinks {
     display: none !important;
   }
 
   body.vivid-atmosphere .vivid-nav-search {
-    width: 38px !important;
-    min-width: 38px !important;
-    max-width: 38px !important;
+    width: 40px !important;
+    min-width: 40px !important;
+    max-width: 40px !important;
     margin-left: auto !important;
   }
 
   body.vivid-atmosphere .vivid-nav-search input {
-    width: 38px !important;
-    height: 38px !important;
+    width: 40px !important;
+    height: 40px !important;
     padding: 0 !important;
     font-size: 0 !important;
   }
@@ -347,18 +433,17 @@ body.vivid-atmosphere,
     position: absolute !important;
     left: 10px !important;
     right: 10px !important;
-    top: calc(100% + 6px) !important;
+    top: calc(100% + 8px) !important;
     width: auto !important;
     max-width: none !important;
-    min-width: 0 !important;
-    height: 44px;
+    height: 46px;
     z-index: 5;
   }
 
   body.vivid-atmosphere .vivid-nav-search:focus-within input {
     width: 100% !important;
-    height: 44px !important;
-    padding: 0 14px 0 40px !important;
+    height: 46px !important;
+    padding: 0 14px 0 42px !important;
     font-size: 16px !important;
   }
 
@@ -369,9 +454,9 @@ body.vivid-atmosphere,
 
   body.vivid-atmosphere .vivid-notification-button,
   body.vivid-atmosphere a.vivid-nav-action {
-    width: 38px !important;
-    height: 38px !important;
-    min-width: 38px !important;
+    width: 40px !important;
+    height: 40px !important;
+    min-width: 40px !important;
     padding: 0 !important;
     display: inline-grid !important;
     place-items: center !important;
@@ -379,16 +464,29 @@ body.vivid-atmosphere,
   }
 }
 
+@media (prefers-reduced-motion: reduce) {
+  body.vivid-atmosphere::after,
+  body.vivid-atmosphere .vivid-mobile-nav,
+  body.vivid-atmosphere .vivid-mobile-nav::before,
+  body.vivid-atmosphere .vivid-mobile-nav::after,
+  body.vivid-atmosphere .vivid-filter-panel::after,
+  body.vivid-atmosphere .vivid-search-panel::after {
+    animation: none !important;
+  }
+}
+
 @media (prefers-reduced-transparency: reduce) {
+  body.vivid-atmosphere::after {
+    display: none !important;
+  }
   body.vivid-atmosphere .vivid-topbar,
   body.vivid-atmosphere .vivid-discovery-nav,
   body.vivid-atmosphere .vivid-mobile-nav,
   body.vivid-atmosphere .vivid-filter-panel,
-  body.vivid-atmosphere .vivid-search-panel,
   body.vivid-atmosphere .vivid-button--secondary,
   body.vivid-atmosphere .vivid-mode-chip {
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
-    background: rgba(18, 20, 26, 0.94) !important;
+    background: rgba(16, 18, 24, 0.94) !important;
   }
 }
