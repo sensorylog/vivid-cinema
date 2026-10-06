@@ -608,9 +608,18 @@ async function init() {
   syncControlsFromUrl();
   $("discovery-search").value = state.query;
   $("clear-search").hidden = !state.query;
-  await Promise.allSettled([loadGenres(), loadProviders()]);
-  syncControlsFromUrl();
-  await fetchDiscovery();
+  // Do not block the first catalogue render on secondary metadata requests.
+  // Genres/providers hydrate in the background and are ready for subsequent filtering.
+  const firstRender = fetchDiscovery();
+  void Promise.allSettled([loadGenres(), loadProviders()]).then(() => {
+    if (state.provider || state.category || state.genre) {
+      syncControlsFromUrl();
+    } else {
+      populateGenres();
+      populateProviders();
+    }
+  });
+  await firstRender;
 }
 
 void init();
