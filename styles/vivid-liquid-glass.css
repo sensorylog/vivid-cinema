@@ -1,1 +1,3 @@
-/* see local file */
+/* Temporary restore: load last known-good liquid-glass.
+   Search visibility for standalone/PWA is handled by styles/vivid-search-standalone.css (loaded after this file). */
+@import url("https://cdn.jsdelivr.net/gh/sensorylog/vivid-cinema@7f58efb95b92f41499060f0f2df1ed031e2e5238/styles/vivid-liquid-glass.css");
