@@ -120,7 +120,7 @@ function initAppShell() {
   window.addEventListener("online", setConnectionState);
   window.addEventListener("offline", setConnectionState);
 
-  document.addEventListener("click", event => { const back=event.target.closest("[data-vivid-back]"); if(!back) return; if(event.metaKey||event.ctrlKey||event.shiftKey||event.altKey) return; if(window.history.length>1){event.preventDefault();window.history.back();} });
+  document.addEventListener("click", event => { const back=event.target.closest("[data-vivid-back]"); if(!back) return; if(event.metaKey||event.ctrlKey||event.shiftKey||event.altKey) return; if(window.history.length>1){try{const ref=document.referrer?new URL(document.referrer,location.href):null;if(ref?.origin===location.origin){event.preventDefault();window.history.back();}}catch{}} });
 
   requestAnimationFrame(() => {
     document.documentElement.dataset.vividReady = "true";
