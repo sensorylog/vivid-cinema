@@ -24,6 +24,8 @@ let primaryHealthy = false;
 let fallbackTimer = null;
 let imdbId = "";
 let tmdbId = "";
+const PRIMARY_FALLBACK_MS = 5000;
+const ANIME_FALLBACK_MS = 3200;
 
 function getParams() {
   const id = route.params.get("id");
@@ -60,6 +62,16 @@ function buildVidsrcEmbedUrl(params) {
     return base + "/embed/tv/" + id + "/" + params.season + "/" + params.episode;
   }
   return base + "/embed/movie/" + id;
+}
+
+function isLikelyAnime() {
+  const genres = Array.isArray(details?.genres) ? details.genres : [];
+  const isAnimation = genres.some(g => Number(g?.id) === 16 || String(g?.name || "").toLowerCase() === "animation");
+  return currentParams?.type === "tv" && (isAnimation && String(details?.original_language || "").toLowerCase() === "ja");
+}
+
+function fallbackDelayMs() {
+  return isLikelyAnime() ? ANIME_FALLBACK_MS : PRIMARY_FALLBACK_MS;
 }
 
 function hasFallbackId() {
@@ -126,7 +138,7 @@ function setPlayerSource(source, params, startAt = 0) {
       fallbackTimer = window.setTimeout(() => {
         if (primaryHealthy || activeSource !== "vidapi") return;
         triggerVidsrcFallback("primary_timeout");
-      }, 8000);
+      }, fallbackDelayMs());
     }
   }
   updateSourceLabel();
@@ -250,7 +262,7 @@ function renderShell(params) {
       current.textContent = "Playback is taking longer than expected. The player is still loading.";
       current.classList.add("is-warning");
     }
-  }, 9000);
+  }, fallbackDelayMs() + 1000);
   recordHistory();
   recordBehavior("watch_started", media, { season: params.season, episode: params.episode, resumeAt });
 }
@@ -382,7 +394,7 @@ async function load() {
       fallbackTimer = window.setTimeout(() => {
         if (primaryHealthy || activeSource !== "vidapi") return;
         triggerVidsrcFallback("primary_timeout_after_metadata");
-      }, 8000);
+      }, fallbackDelayMs());
     }
   } catch (error) {
     console.warn("Vivid metadata unavailable while playback is active:", error);
