@@ -206,3 +206,87 @@ html[data-vivid-theme="light"] .auth-container .google-auth{background:var(--viv
 html[data-vivid-theme="light"] .vivid-page-back{color:var(--vivid-text-muted);background:rgba(20,28,40,.055);border-color:var(--vivid-border)}
 html[data-vivid-theme="light"] .vivid-page-back:hover,
 html[data-vivid-theme="light"] .vivid-page-back:focus-visible{color:var(--vivid-text);background:rgba(20,28,40,.09)}
+
+
+/* Apple TV-inspired refinement: quiet chrome, stronger hierarchy, calmer surfaces.
+   Shared across browser and installed-PWA modes. Preserve existing component behavior. */
+:root{
+  --vivid-content-width:1440px;
+  --vivid-page-gutter:clamp(16px,2.4vw,40px);
+  --vivid-section-gap:clamp(2.25rem,4.5vw,4.5rem);
+  --vivid-grid-gap:clamp(.65rem,1vw,1rem);
+  --vivid-radius-sm:12px;
+  --vivid-radius-md:14px;
+  --vivid-radius-lg:22px;
+}
+body{
+  min-width:320px;
+  background:var(--vivid-bg);
+}
+.vivid-shell{
+  width:min(100% - (var(--vivid-page-gutter)*2),var(--vivid-content-width));
+}
+.vivid-button{
+  min-height:42px;
+  padding:.62rem .95rem;
+  border-radius:12px;
+  letter-spacing:-.01em;
+}
+.vivid-icon-button{
+  width:42px;
+  height:42px;
+}
+.vivid-card{
+  border-radius:14px;
+  box-shadow:none;
+}
+.vivid-pill{
+  min-height:28px;
+  font-size:.8rem;
+}
+.vivid-page-back{
+  font-size:.8rem;
+}
+.vivid-discovery-main,
+.vivid-collection-main{
+  max-width:var(--vivid-content-width);
+}
+.vivid-discovery-main h1,
+.vivid-collection-main h1,
+.vivid-library-main h1,
+.vivid-title-page h1{
+  line-height:1.02;
+  text-wrap:balance;
+}
+.vivid-discovery-main h2,
+.vivid-collection-main h2,
+.vivid-library-main h2,
+.vivid-title-page h2{
+  line-height:1.08;
+  text-wrap:balance;
+}
+.vivid-discovery-main p,
+.vivid-collection-main p,
+.vivid-library-main p{
+  line-height:1.55;
+}
+.vivid-card:focus-visible,
+.vivid-discovery-card:focus-visible,
+.vivid-feature-card:focus-visible,
+.vivid-button:focus-visible,
+.vivid-icon-button:focus-visible,
+.vivid-link:focus-visible{
+  outline:2px solid var(--vivid-focus);
+  outline-offset:3px;
+}
+@media(max-width:767px){
+  :root{
+    --vivid-page-gutter:14px;
+    --vivid-section-gap:2.5rem;
+  }
+  .vivid-shell{width:min(100% - 28px,var(--vivid-content-width))}
+  .vivid-card{border-radius:12px}
+}
+@media(prefers-reduced-motion:reduce){
+  .vivid-card,.vivid-button,.vivid-icon-button{transition:none!important}
+}
