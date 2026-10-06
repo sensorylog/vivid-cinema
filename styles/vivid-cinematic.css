@@ -14,7 +14,7 @@ body.vivid-cinema-home{background:transparent;color:#f5f7fa;overflow-x:hidden}
 .vivid-navlinks a:hover,.vivid-nav-action:hover,.vivid-navlinks a[aria-current=true]{color:#fff;background:rgba(255,255,255,.07)}
 .vivid-nav-search{margin-left:auto;position:relative;width:min(28vw,300px)}
 .vivid-nav-search input{width:100%;height:42px;border-radius:999px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);color:#fff;padding:0 16px 0 40px;outline:0}
-.vivid-nav-search i{position:absolute;left:15px;top:12px;color:#9da3ad}
+.vivid-nav-search i{position:absolute;left:15px;top:12px;color:#9da3ad};pointer-events:none
 .vivid-hero{position:relative;min-height:min(860px,100svh);height:clamp(650px,88svh,900px);overflow:hidden;background:#090a0d}
 .vivid-hero-media,.vivid-hero-media::after{position:absolute;inset:0}
 .vivid-hero-media::after{content:"";background:linear-gradient(90deg,rgba(4,5,7,.96) 0%,rgba(4,5,7,.72) 34%,rgba(4,5,7,.22) 70%,rgba(4,5,7,.55) 100%),linear-gradient(0deg,#06070a 0%,transparent 35%,rgba(0,0,0,.18) 100%);z-index:1;pointer-events:none}
