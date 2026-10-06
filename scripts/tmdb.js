@@ -3,6 +3,9 @@ import { VIVID_CONFIG } from "./config.js";
 const { tmdbBaseUrl, tmdbApiKey, language } = VIVID_CONFIG.api;
 const cache = new Map();
 const inFlight = new Map();
+const SESSION_CACHE_PREFIX = "vivid:tmdb:";
+const SESSION_CACHE_TTL_MS = 5 * 60 * 1000;
+const SESSION_CACHE_MAX_BYTES = 180000;
 
 function buildUrl(path, params = {}) {
   const cleanParams = Object.fromEntries(
@@ -18,6 +21,19 @@ export async function tmdb(path, params = {}, options = {}) {
   const useCache = options.cache !== false;
   const timeoutMs = options.timeoutMs ?? 10000;
   if (useCache && cache.has(url)) return cache.get(url);
+  if (useCache) {
+    try {
+      const raw = sessionStorage.getItem(SESSION_CACHE_PREFIX + url);
+      if (raw) {
+        const entry = JSON.parse(raw);
+        if (entry && Date.now() - Number(entry.t) < SESSION_CACHE_TTL_MS && entry.data) {
+          cache.set(url, entry.data);
+          return entry.data;
+        }
+        sessionStorage.removeItem(SESSION_CACHE_PREFIX + url);
+      }
+    } catch {}
+  }
   if (useCache && inFlight.has(url)) return inFlight.get(url);
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), timeoutMs);
@@ -30,7 +46,15 @@ export async function tmdb(path, params = {}, options = {}) {
         throw error;
       }
       const data = await response.json();
-      if (useCache) cache.set(url, data);
+      if (useCache) {
+        cache.set(url, data);
+        try {
+          const serialized = JSON.stringify({ t: Date.now(), data });
+          if (serialized.length <= SESSION_CACHE_MAX_BYTES) {
+            sessionStorage.setItem(SESSION_CACHE_PREFIX + url, serialized);
+          }
+        } catch {}
+      }
       return data;
     } catch (error) {
       if (error.name === "AbortError") {
