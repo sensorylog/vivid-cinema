@@ -204,6 +204,17 @@ service cloud.firestore {
         allow delete: if isOwner(userId);
       }
 
+      match /releaseAlerts/{alertId} {
+        allow read: if isOwner(userId);
+        allow delete: if isOwner(userId);
+        allow create, update: if false;
+      }
+
+      match /releaseStates/{stateId} {
+        allow read, write: if false;
+      }
+
+
       match /cinemaReminders/{reminderId} {
         allow read: if isOwner(userId);
         allow create, update: if isOwner(userId) && validCinemaReminder();
