@@ -1,298 +1,124 @@
-/* Viewport safety: stop page-level horizontal overflow and free content from under the mobile nav.
-   Does not change feature behavior — spacing and containment only. */
+/* Vivid viewport + responsive density system.
+   Layout/containment only. Feature behavior, catalogue data, routing and player are untouched. */
 
-html{
-  max-width:100%;
-  overflow-x:clip;
-}
-body{
-  max-width:100%;
-  overflow-x:clip;
-  overscroll-behavior-x:none;
-}
-.vivid-home,
-.vivid-hero,
-.vivid-hero-media,
-.vivid-feature-strip,
-.vivid-section-wrap,
-.vivid-rails{
-  max-width:100%;
-}
-
-/* Rails scroll horizontally; the page itself must not. */
-.vivid-rail,
-.vivid-feature-track{
-  max-width:100%;
-  overscroll-behavior-x:contain;
-  -webkit-overflow-scrolling:touch;
-}
-
-/* Desktop hover scale must not expand the document width or hide edge cards. */
-@media (hover:hover) and (pointer:fine){
-  .vivid-rails{
-    overflow:visible;
-  }
-  .vivid-rail{
-    overflow-x:auto;
-    overflow-y:visible;
-    padding-top:18px;
-    padding-bottom:24px;
-    margin-inline:0;
-  }
-  .vivid-card:hover,
-  .vivid-card:focus-visible{
-    transform:translateY(-10px) scale(1.06);
-  }
-  .vivid-feature-card:hover,
-  .vivid-feature-card:focus-visible,
-  .vivid-feature-card.is-active{
-    transform:translateY(-8px) scale(1.05);
-  }
-}
-
-/* Mobile: room to breathe + clear the fixed bottom nav */
-@media (max-width:640px){
-  :root{
-    --vivid-page-gutter:14px;
-  }
-
-  .vivid-section-wrap{
-    padding-left:14px;
-    padding-right:14px;
-    padding-bottom:calc(96px + env(safe-area-inset-bottom,0px));
-  }
-
-  .vivid-feature-strip{
-    padding-left:14px;
-    padding-right:14px;
-  }
-
-  .vivid-feature-card{
-    flex:0 0 min(148px,42vw);
-    height:86px;
-  }
-
-  .vivid-card{
-    flex:0 0 min(132px,36vw);
-  }
-
-  .vivid-rails{
-    padding-top:12px;
-    padding-bottom:6px;
-  }
-
-  .vivid-rail{
-    gap:10px;
-    padding:4px 2px 14px;
-  }
-
-  .vivid-rail-footer{
-    padding:10px 0 16px;
-  }
-
-  .vivid-footer{
-    padding-bottom:calc(110px + env(safe-area-inset-bottom,0px));
-  }
-
-  .vivid-mobile-nav{
-    left:10px;
-    right:10px;
-    bottom:calc(10px + env(safe-area-inset-bottom,0px));
-    height:58px;
-    padding-bottom:0;
-    z-index:1100;
-  }
-
-  /* Title / detail pages: keep action buttons clear of the home indicator */
-  .vivid-title-info-inner,
-  .vivid-title-library-actions{
-    padding-bottom:calc(12px + env(safe-area-inset-bottom,0px));
-  }
-}
-
-@media (max-width:380px){
-  .vivid-card{
-    flex:0 0 min(124px,38vw);
-  }
-  .vivid-feature-card{
-    flex:0 0 min(136px,44vw);
-    height:80px;
-  }
-}
-
-
-/* Responsive containment + carousel controls pass.
-   Keeps the document itself locked to the viewport while each content rail
-   owns its horizontal overflow. Controls stay in the section header instead
-   of being squeezed off-screen. */
 html{
   width:100%;
   max-width:100%;
   overflow-x:hidden;
 }
+body{
+  width:100%;
+  max-width:100%;
+  overflow-x:clip;
+  overscroll-behavior-x:none;
+}
 body.vivid-cinema-home,
 .vivid-home,
-.vivid-nav,
+.vivid-hero,
+.vivid-hero-media,
+.vivid-feature-strip,
 .vivid-section-wrap,
 .vivid-rails,
+.vivid-nav,
 .vivid-rail-head,
 .vivid-rail-head > div:first-child{
   min-width:0;
   max-width:100%;
   box-sizing:border-box;
 }
-.vivid-nav{
-  overflow:hidden;
-}
-.vivid-navlinks{
-  min-width:0;
-}
-.vivid-nav-search{
-  flex:0 1 300px;
-  min-width:0;
-}
-.vivid-nav-action{
-  flex:0 0 auto;
+
+:root{
+  --vivid-content-width:1440px;
+  --vivid-page-gutter:clamp(14px,2.2vw,40px);
+  --vivid-section-gap:clamp(2rem,4.5vw,4rem);
+  --vivid-grid-gap:clamp(.6rem,1vw,1rem);
 }
 
+/* Horizontal rails own their scrolling; the document does not. */
+.vivid-rail,
+.vivid-feature-track{
+  width:100%;
+  min-width:0;
+  max-width:100%;
+  box-sizing:border-box;
+  overscroll-behavior-x:contain;
+  -webkit-overflow-scrolling:touch;
+}
+.vivid-rail{
+  overflow-x:auto;
+  overflow-y:visible;
+  gap:11px;
+  padding:3px 2px 12px;
+}
+.vivid-rails{
+  max-width:100%;
+  padding-top:20px;
+  padding-bottom:8px;
+}
 .vivid-rail-head{
   width:100%;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin-bottom:11px;
 }
-.vivid-rail-head > div:first-child{
-  flex:1 1 auto;
-}
+.vivid-rail-head > div:first-child{flex:1 1 auto;min-width:0}
+.vivid-rail-head h2{font-size:clamp(1.15rem,1.7vw,1.5rem)}
+.vivid-rail-head p{font-size:.72rem}
 .vivid-rail-controls{
   flex:0 0 auto;
   min-width:max-content;
   visibility:visible;
+  display:flex;
+  gap:5px;
 }
-.vivid-rail-controls[hidden]{
-  display:none!important;
-}
+.vivid-rail-controls[hidden]{display:none!important}
 .vivid-rail-controls button{
   flex:0 0 38px;
-}
-.vivid-rail{
-  width:100%;
-  min-width:0;
-  box-sizing:border-box;
+  width:38px;
+  height:38px;
 }
 
-@media(max-width:640px){
-  .vivid-nav{
-    gap:8px;
-  }
-  .vivid-nav-action{
-    padding-inline:8px;
-    white-space:nowrap;
-  }
+/* Shared content sizing. */
+.vivid-section-wrap,
+.vivid-discovery-main,
+.vivid-collection-main{
+  max-width:var(--vivid-content-width);
+}
+.vivid-card{
+  border-radius:13px;
+  user-select:none;
+  -webkit-user-drag:none;
+}
+.vivid-card-info{padding:8px 9px 10px;min-height:52px}
+.vivid-card-title{font-size:.8rem}
+.vivid-card-sub{font-size:.68rem;margin-top:3px}
+.vivid-rating{top:7px;right:7px;padding:4px 6px;font-size:.64rem}
+.vivid-feature-card{border-radius:13px}
+.vivid-rail-footer{padding:5px 0 10px}
+
+/* Header/search containment. */
+.vivid-nav{
+  gap:12px;
+  min-width:0;
+  overflow:hidden;
+}
+.vivid-navlinks{min-width:0}
+.vivid-nav-action{flex:0 0 auto;padding:8px 10px;font-size:.84rem;white-space:nowrap}
+.vivid-nav-search{flex:0 1 300px;min-width:0}
+.vivid-nav-search input{height:40px}
+.vivid-button{min-height:42px;padding:.62rem .9rem}
+.vivid-icon-button{width:40px;height:40px}
+.vivid-input,.vivid-select{min-height:42px;padding:.6rem .8rem}
+
+/* Mobile/tablet search: closed icon expands only while active. */
+@media(max-width:900px){
+  .vivid-nav{gap:8px;min-height:50px}
   .vivid-nav-search{
     flex:0 0 42px;
     width:42px;
-  }
-
-  .vivid-rail-head{
-    align-items:center;
-    gap:8px;
-    margin-bottom:10px;
-  }
-  .vivid-rail-head h2{
-    font-size:1.12rem;
-  }
-  .vivid-rail-controls{
-    display:flex!important;
-    gap:5px;
-  }
-  .vivid-rail-controls button{
-    width:34px;
-    height:34px;
-    flex-basis:34px;
-  }
-
-  .vivid-rail{
-    overflow-x:auto;
-    overflow-y:visible;
-    padding-left:1px;
-    padding-right:12px;
-  }
-
-  .vivid-card{
-    flex-basis:min(132px,36vw);
-  }
-
-  .vivid-section-wrap{
-    padding-left:14px;
-    padding-right:14px;
-  }
-}
-
-@media(max-width:380px){
-  .vivid-rail-head h2{
-    font-size:1.05rem;
-  }
-  .vivid-rail-controls button{
-    width:32px;
-    height:32px;
-    flex-basis:32px;
-  }
-  .vivid-card{
-    flex-basis:min(124px,38vw);
-  }
-}
-
-/* Desktop: give enlarged hover cards room without widening the page. */
-@media(min-width:641px){
-  .vivid-section-wrap{
-    overflow:visible;
-  }
-  .vivid-rail-head{
-    padding-inline:0;
-  }
-  .vivid-rail{
-    width:calc(100% + 2px);
-    padding-left:1px;
-    padding-right:1px;
-  }
-}
-
-
-/* iOS/mobile search focus: keep the viewport at its current scale.
-   Safari auto-zooms focused form controls whose computed text is below 16px.
-   Keep user pinch-zoom available; only prevent the unwanted focus zoom. */
-@media (pointer:coarse){
-  input,
-  textarea,
-  select,
-  [contenteditable="true"]{
-    font-size:max(16px,1em)!important;
-  }
-
-  .vivid-nav-search input{
-    font-size:16px!important;
-  }
-}
-
-
-/* Desktop performance: keep off-screen catalogue work out of the active paint
-   path. Media players remain fully eager/interactive; this only reduces work
-   from long card sections below the fold. */
-@media(min-width:641px){
-  .vivid-section-wrap,
-  .vivid-watch-recommendations{
-    content-visibility:auto;
-    contain-intrinsic-size:1px 720px;
-  }
-}
-
-
-/* Mobile/tablet search: collapsed icon expands on focus so typed text is
-   visible instead of being clipped by the 42px closed state. */
-@media (max-width:900px){
-  .vivid-nav-search{
-    flex:0 1 42px;
-    width:42px;
     min-width:42px;
-    transition:width .2s ease, flex-basis .2s ease;
+    transition:width .2s ease,flex-basis .2s ease;
   }
   .vivid-nav-search:focus-within{
     flex:1 1 220px;
@@ -303,6 +129,7 @@ body.vivid-cinema-home,
   .vivid-nav-search:focus-within input{
     width:100%;
     height:42px;
+    box-sizing:border-box;
     padding:0 14px 0 40px;
     font-size:16px!important;
     line-height:42px;
@@ -310,103 +137,84 @@ body.vivid-cinema-home,
     -webkit-text-fill-color:#fff;
     caret-color:#fff;
   }
+  .vivid-topbar:has(.vivid-nav-search:focus-within){padding-bottom:60px}
+  .vivid-topbar:has(.vivid-nav-search:focus-within) .vivid-nav{position:relative}
+  .vivid-topbar .vivid-nav-search:focus-within{
+    position:absolute;
+    left:0;
+    right:0;
+    bottom:-50px;
+    width:auto;
+    min-width:0;
+    flex:none;
+    z-index:3;
+  }
+  .vivid-search-panel{
+    left:0;
+    right:0;
+    width:auto;
+    max-height:min(58vh,460px);
+    border-radius:14px;
+  }
 }
-
-@media (max-width:640px){
+@media(max-width:640px){
+  :root{
+    --vivid-page-gutter:12px;
+    --vivid-section-gap:2rem;
+  }
+  .vivid-topbar{
+    padding-top:calc(6px + var(--vivid-safe-top,0px));
+    padding-bottom:6px;
+  }
+  .vivid-nav{min-height:46px}
+  .vivid-brand{font-size:1rem}
+  .vivid-nav-action{padding:7px;font-size:.78rem}
+  .vivid-notification-button{width:36px;height:36px}
   .vivid-nav-search:focus-within{
     flex:1 1 180px;
     width:180px;
     min-width:150px;
   }
-}
-
-
-/* Search focus polish: keep the brand/header visible while the search field is active. */
-.vivid-search-panel{top:calc(100% + 8px);right:0;width:min(420px,calc(100vw - 32px));max-height:min(65vh,520px);box-sizing:border-box}
-@media(max-width:900px){
- .vivid-topbar:has(.vivid-nav-search:focus-within){padding-bottom:60px}
- .vivid-topbar:has(.vivid-nav-search:focus-within) .vivid-nav{position:relative}
- .vivid-topbar .vivid-nav-search:focus-within{position:absolute;left:0;right:0;bottom:-50px;width:auto;min-width:0;flex:none;z-index:3}
- .vivid-topbar .vivid-nav-search:focus-within input{width:100%;box-sizing:border-box}
- .vivid-search-panel{left:0;right:0;width:auto;max-height:min(58vh,460px);border-radius:14px}
-}
-@media(max-width:640px){
- .vivid-topbar:has(.vivid-nav-search:focus-within){padding-bottom:58px}
- .vivid-topbar .vivid-nav-search:focus-within{bottom:-48px}
- .vivid-search-panel{top:calc(100% + 6px);left:0;right:0;width:auto}
-}
-
-
-/* Calm card interaction pass — keep cards visually anchored while the page scrolls. */
-.vivid-card,.vivid-discovery-card{user-select:none;-webkit-user-drag:none}
-@media (hover:hover) and (pointer:fine){
-  .vivid-card:hover,.vivid-card:focus-visible{transform:none!important}
-  .vivid-feature-card:hover,.vivid-feature-card:focus-visible,.vivid-feature-card.is-active{transform:none!important}
-}
-@media(max-width:640px){
-  .vivid-card{flex-basis:min(128px,34vw)}
-  .vivid-rail{gap:9px;touch-action:pan-y}
-  .vivid-section-wrap{padding-left:12px;padding-right:12px}
-}
-
-
-/* 2026 density cleanup — reduce the "zoomed in / crowded" feel without changing layout behavior.
-   Keep content architecture, catalogue data, routing and player untouched. */
-:root{
-  --vivid-content-width:1440px;
-  --vivid-page-gutter:clamp(14px,2.2vw,40px);
-  --vivid-section-gap:clamp(2rem,4.5vw,4rem);
-  --vivid-grid-gap:clamp(.6rem,1vw,1rem);
-}
-body.vivid-atmosphere{
-  line-height:1.48;
-}
-.vivid-section-wrap,
-.vivid-discovery-main,
-.vivid-collection-main{
-  max-width:1440px;
-}
-.vivid-rails{padding-top:20px;padding-bottom:8px}
-.vivid-rail-head{margin-bottom:11px}
-.vivid-rail-head h2{font-size:clamp(1.15rem,1.7vw,1.5rem)}
-.vivid-rail-head p{font-size:.72rem}
-.vivid-card{border-radius:13px}
-.vivid-card-info{padding:8px 9px 10px;min-height:52px}
-.vivid-card-title{font-size:.8rem}
-.vivid-card-sub{font-size:.68rem;margin-top:3px}
-.vivid-rating{top:7px;right:7px;padding:4px 6px;font-size:.64rem}
-.vivid-rail{gap:11px;padding-top:3px;padding-bottom:12px}
-.vivid-rail-footer{padding-top:5px;padding-bottom:10px}
-.vivid-button{min-height:42px;padding:.62rem .9rem}
-.vivid-icon-button{width:40px;height:40px}
-.vivid-input,.vivid-select{min-height:42px;padding:.6rem .8rem}
-.vivid-nav{gap:12px;min-height:52px}
-.vivid-navlinks a,.vivid-nav-action{padding:8px 10px;font-size:.84rem}
-.vivid-nav-search input{height:40px}
-@media(max-width:900px){
-  .vivid-nav{gap:8px;min-height:50px}
-  .vivid-hero-title{letter-spacing:-.045em}
-  .vivid-section-wrap{padding-left:14px;padding-right:14px}
-  .vivid-rails{padding-top:18px;padding-bottom:4px}
-}
-@media(max-width:640px){
-  :root{--vivid-page-gutter:12px;--vivid-section-gap:2rem}
-  .vivid-topbar{padding-top:calc(6px + var(--vivid-safe-top,0px));padding-bottom:6px}
-  .vivid-nav{min-height:46px}
-  .vivid-brand{font-size:1rem}
-  .vivid-nav-action{padding:7px 7px;font-size:.78rem}
-  .vivid-notification-button{width:36px;height:36px}
+  .vivid-topbar:has(.vivid-nav-search:focus-within){padding-bottom:58px}
+  .vivid-topbar .vivid-nav-search:focus-within{bottom:-48px}
+  .vivid-search-panel{top:calc(100% + 6px)}
+  .vivid-section-wrap{padding:0 12px calc(96px + env(safe-area-inset-bottom,0px))}
+  .vivid-feature-strip{padding-left:12px;padding-right:12px}
   .vivid-rails{padding-top:16px;padding-bottom:2px}
-  .vivid-rail-head{margin-bottom:8px}
+  .vivid-rail-head{gap:8px;margin-bottom:8px}
   .vivid-rail-head h2{font-size:1.08rem}
-  .vivid-rail-controls button{width:32px;height:32px;flex-basis:32px}
-  .vivid-rail{gap:8px;padding:2px 2px 10px}
-  .vivid-card{flex:0 0 min(124px,33vw);border-radius:12px}
+  .vivid-rail-controls button{
+    width:32px;
+    height:32px;
+    flex-basis:32px;
+  }
+  .vivid-rail{gap:8px;padding:2px 2px 10px;touch-action:pan-y}
+  .vivid-card{
+    flex:0 0 min(124px,33vw);
+    border-radius:12px;
+  }
   .vivid-card-info{padding:7px 8px 9px;min-height:48px}
   .vivid-card-title{font-size:.76rem}
   .vivid-card-sub{font-size:.65rem}
-  .vivid-feature-card{flex-basis:min(154px,42vw);height:86px;border-radius:12px}
+  .vivid-feature-card{
+    flex:0 0 min(154px,42vw);
+    height:86px;
+    border-radius:12px;
+  }
   .vivid-feature-card strong{font-size:.7rem;left:9px;bottom:8px}
+  .vivid-footer{padding-bottom:calc(110px + env(safe-area-inset-bottom,0px))}
+  .vivid-mobile-nav{
+    left:10px;
+    right:10px;
+    bottom:calc(10px + env(safe-area-inset-bottom,0px));
+    height:58px;
+    padding-bottom:0;
+    z-index:1100;
+  }
+  .vivid-title-info-inner,
+  .vivid-title-library-actions{
+    padding-bottom:calc(12px + env(safe-area-inset-bottom,0px));
+  }
   .vivid-catalogue-explore{padding:10px 12px 2px}
   .vivid-catalogue-explore-head{margin-bottom:12px}
   .vivid-catalogue-explore-head h2{font-size:1.35rem}
@@ -414,6 +222,43 @@ body.vivid-atmosphere{
   .vivid-button{min-height:40px}
 }
 @media(max-width:380px){
+  .vivid-rail-head h2{font-size:1.05rem}
   .vivid-card{flex-basis:min(116px,32vw)}
   .vivid-feature-card{flex-basis:min(142px,41vw);height:80px}
+}
+
+/* Coarse pointers: prevent Safari focus zoom on form controls. */
+@media(pointer:coarse){
+  input,textarea,select,[contenteditable="true"]{font-size:max(16px,1em)!important}
+  .vivid-nav-search input{font-size:16px!important}
+}
+
+/* Search panel geometry. */
+.vivid-search-panel{
+  top:calc(100% + 8px);
+  right:0;
+  width:min(420px,calc(100vw - 32px));
+  max-height:min(65vh,520px);
+  box-sizing:border-box;
+}
+
+/* Desktop: off-screen sections can be skipped during paint. */
+@media(min-width:641px){
+  .vivid-section-wrap,
+  .vivid-watch-recommendations{
+    content-visibility:auto;
+    contain-intrinsic-size:1px 720px;
+  }
+  .vivid-section-wrap{overflow:visible}
+}
+
+/* Desktop interaction: keep cards anchored instead of oversized hover jumps. */
+@media(hover:hover) and (pointer:fine){
+  .vivid-card:hover,
+  .vivid-card:focus-visible,
+  .vivid-feature-card:hover,
+  .vivid-feature-card:focus-visible,
+  .vivid-feature-card.is-active{
+    transform:none!important;
+  }
 }
