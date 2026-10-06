@@ -143,7 +143,14 @@ async function registerServiceWorker() {
   }
 }
 
+function markIosStandalone() {
+  if (/iphone|ipad|ipod/i.test(navigator.userAgent) && isStandalone()) {
+    document.documentElement.classList.add("vivid-ios-standalone");
+  }
+}
+
 function initPwa() {
+  markIosStandalone();
   createInstallControl();
   createNetworkStatus();
 
