@@ -152,7 +152,11 @@ function initPwa() {
   // guide inside the installed app or after the user dismissed it.
   const ios = /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.MSStream;
   if (ios && !isStandalone()) {
-    window.setTimeout(createInstallGuide, 900);
+    // Show the iOS install guidance as soon as the app shell is ready,
+    // not after a later onboarding/catalogue interaction.
+    const showGuide = () => window.setTimeout(createInstallGuide, 250);
+    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", showGuide, { once: true });
+    else showGuide();
   }
 
   if (window.isSecureContext) void registerServiceWorker();
