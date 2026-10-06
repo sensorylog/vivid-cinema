@@ -89,6 +89,19 @@ function setPageIdentity() {
   }
 }
 
+function ensureBackControl() {
+  const main=document.querySelector("main");
+  if(!main || document.querySelector("[data-vivid-back]")) return;
+  const page=document.body?.dataset?.vividPage||"";
+  if(["home","landing"].includes(page)) return;
+  const back=document.createElement("a");
+  back.className="vivid-page-back";
+  back.href="home.html";
+  back.dataset.vividBack="true";
+  back.innerHTML='<span aria-hidden="true">‹</span><span>Back</span>';
+  main.prepend(back);
+}
+
 function initAppShell() {
   if (initialized) return;
   initialized = true;
@@ -101,6 +114,7 @@ function initAppShell() {
   setPageIdentity();
   syncVividBranding();
   initThemeToggle();
+  ensureBackControl();
 
   window.addEventListener("resize", setViewportState, { passive: true });
   window.addEventListener("online", setConnectionState);
