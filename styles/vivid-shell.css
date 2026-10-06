@@ -115,7 +115,7 @@ html[data-network="offline"] [data-vivid-online-only]{display:none!important}
 @media(max-width:640px){
   .vivid-unified-header{padding:8px 12px}
   .vivid-unified-nav{min-height:50px;gap:8px}
-  .vivid-unified-nav .vivid-navlinks{display:none}
+  .vivid-unified-nav .vivid-navlinks{display:flex;overflow-x:auto;scrollbar-width:none;min-width:0}.vivid-unified-nav .vivid-navlinks::-webkit-scrollbar{display:none}
   .vivid-unified-nav .vivid-nav-action{min-height:44px;padding:9px 10px}
   .vivid-unified-header + main{padding-top:76px}
   .vivid-unified-header ~ main{padding-top:76px}
