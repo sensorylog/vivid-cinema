@@ -153,3 +153,24 @@ html[data-vivid-theme="light"] body.vivid-atmosphere .vivid-mobile-nav::before,
 html[data-vivid-theme="light"] body.vivid-atmosphere .vivid-mobile-nav::after{
   opacity:.3;
 }
+
+
+/* Search readability + light-theme contrast safety. Keep the search field above all glass effects. */
+.vivid-nav-search,.vivid-discovery-search{position:relative;z-index:20!important}
+.vivid-nav-search input,.vivid-discovery-search input{position:relative;z-index:21!important;color:var(--vivid-text)!important;-webkit-text-fill-color:var(--vivid-text)!important;caret-color:var(--vivid-text)!important;text-shadow:none!important;opacity:1!important;filter:none!important;}
+.vivid-nav-search input::placeholder,.vivid-discovery-search input::placeholder{color:var(--vivid-text-subtle)!important;-webkit-text-fill-color:var(--vivid-text-subtle)!important;opacity:1!important}
+body.vivid-atmosphere .vivid-nav-search input,body.vivid-atmosphere .vivid-discovery-search input{background:rgba(255,255,255,.11)!important;color:var(--vivid-text)!important;-webkit-text-fill-color:var(--vivid-text)!important}
+body.vivid-atmosphere .vivid-search-panel{z-index:30!important}
+html[data-vivid-theme="light"] body.vivid-atmosphere .vivid-topbar,
+html[data-vivid-theme="light"] body.vivid-atmosphere .vivid-discovery-nav,
+html[data-vivid-theme="light"] body.vivid-atmosphere .vivid-title-nav,
+html[data-vivid-theme="light"] body.vivid-atmosphere .vivid-library-nav,
+html[data-vivid-theme="light"] body.vivid-atmosphere .vivid-watch-nav{background:rgba(255,255,255,.78)!important;border-bottom-color:rgba(20,28,40,.14)!important;box-shadow:0 12px 40px rgba(20,28,40,.10),inset 0 1px 0 rgba(255,255,255,.9)!important}
+html[data-vivid-theme="light"] body.vivid-atmosphere .vivid-navlinks a:hover,
+html[data-vivid-theme="light"] body.vivid-atmosphere .vivid-navlinks a[aria-current=true],
+html[data-vivid-theme="light"] body.vivid-atmosphere .vivid-discovery-nav nav a.is-active,
+html[data-vivid-theme="light"] body.vivid-atmosphere .vivid-discovery-nav nav a:hover{color:#10131a!important;background:rgba(20,28,40,.08)!important}
+html[data-vivid-theme="light"] body.vivid-atmosphere .vivid-nav-search input,
+html[data-vivid-theme="light"] body.vivid-atmosphere .vivid-discovery-search input{background:rgba(255,255,255,.94)!important;border-color:rgba(20,28,40,.18)!important;color:#10131a!important;-webkit-text-fill-color:#10131a!important;box-shadow:0 4px 18px rgba(20,28,40,.08)!important}
+html[data-vivid-theme="light"] body.vivid-atmosphere .vivid-nav-search input::placeholder,
+html[data-vivid-theme="light"] body.vivid-atmosphere .vivid-discovery-search input::placeholder{color:#626a76!important;-webkit-text-fill-color:#626a76!important}
