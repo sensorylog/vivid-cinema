@@ -111,3 +111,21 @@ html[data-vivid-theme="light"] .vivid-select{background:rgba(255,255,255,.72);co
 @media(prefers-reduced-motion:reduce){
   .vivid-theme-toggle{transition:none}
 }
+
+
+/* Cross-page consistency: one type scale, one interaction language, one responsive frame. */
+html,body,button,input,textarea,select{font-family:var(--vivid-font-sans)}
+body{line-height:var(--vivid-leading-body);text-rendering:optimizeLegibility;-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4,h5,h6{font-family:var(--vivid-font-sans);font-weight:700;letter-spacing:-.035em}
+button,a,.vivid-card,.vivid-discovery-card,.vivid-feature-card,.vivid-mode-chip,.vivid-provider-chip{
+  -webkit-tap-highlight-color:transparent;
+}
+.vivid-button,.vivid-icon-button,.vivid-input,.vivid-select,.vivid-card,.vivid-discovery-card,.vivid-mode-chip,.vivid-provider-chip{
+  transition-duration:var(--vivid-duration-ui);
+  transition-timing-function:var(--vivid-motion);
+}
+.vivid-discovery-main,.vivid-collection-main{width:min(var(--vivid-content-width),100%)}
+.vivid-discovery-main,.vivid-collection-main{padding-left:var(--vivid-page-gutter);padding-right:var(--vivid-page-gutter)}
+@media(max-width:767px){
+  .vivid-discovery-main,.vivid-collection-main{padding-left:14px;padding-right:14px}
+}
