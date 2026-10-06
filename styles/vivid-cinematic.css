@@ -804,3 +804,49 @@ body.vivid-onboarding-active{overflow:hidden;background:#06070a!important}
     justify-self:start;
   }
 }
+
+
+/* Home hero density pass: give the first screen a calmer hierarchy on every viewport. */
+.vivid-hero-content{
+  padding-top:clamp(96px,14vh,145px);
+  padding-bottom:clamp(110px,14vh,145px);
+}
+.vivid-hero-title{
+  font-size:clamp(2.45rem,6.2vw,5.7rem);
+  max-width:760px;
+  margin-bottom:14px;
+}
+.vivid-hero-copy{
+  max-width:540px;
+  font-size:clamp(.9rem,1.15vw,1rem);
+  line-height:1.5;
+  -webkit-line-clamp:2;
+}
+.vivid-meta{
+  margin:14px 0;
+  gap:7px;
+}
+.vivid-actions{gap:8px}
+.vivid-feature-strip{padding-top:8px;padding-bottom:20px}
+.vivid-feature-card{
+  flex-basis:clamp(170px,16vw,220px);
+  height:124px;
+}
+@media(max-width:900px){
+  .vivid-hero-media{height:64svh;min-height:500px}
+  .vivid-hero-content{padding:96px 24px 104px}
+  .vivid-hero-title{max-width:78vw}
+  .vivid-feature-card{flex-basis:180px;height:102px}
+}
+@media(max-width:640px){
+  .vivid-hero-media{height:64svh;min-height:470px}
+  .vivid-hero-content{padding:82px 16px 74px}
+  .vivid-hero-title{
+    font-size:clamp(2.25rem,12vw,3.5rem);
+    margin-bottom:10px;
+  }
+  .vivid-hero-copy{font-size:.86rem;-webkit-line-clamp:2}
+  .vivid-meta{margin:9px 0}
+  .vivid-feature-strip{padding:8px 12px 14px}
+  .vivid-feature-card{flex-basis:150px;height:86px}
+}
