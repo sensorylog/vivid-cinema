@@ -79,7 +79,7 @@ export async function getServerReleaseAlerts(){
     if(!auth.currentUser)return [];
     const {db,collection,getDocs}=await getFirebase();
     const snapshot=await getDocs(collection(db,"users",auth.currentUser.uid,"releaseAlerts"));
-    return snapshot.docs.map(item=>({id:item.id,...item.data(),source:"server",pending:true})).sort((a,b)=>(Number(b.createdAt)||0)-(Number(a.createdAt)||0));
+    return snapshot.docs.map(item=>({...item.data(),docId:item.id,media_type:item.data().mediaType,source:"server",pending:true})).sort((a,b)=>(Number(b.createdAt)||0)-(Number(a.createdAt)||0));
   }catch(error){
     console.warn("Vivid server release alerts unavailable:",error);
     return [];
