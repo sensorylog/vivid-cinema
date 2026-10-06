@@ -418,8 +418,14 @@ async function runSearch(q){
  const requestId=++searchRequestId;
  const query=String(q||"").trim();
  if(!query){showRecentSearches();return}
+ const panel=$("search-panel");
+ if(panel){
+   panel.innerHTML='<div class="vivid-search-head"><span>SEARCHING</span></div><div class="vivid-empty">Finding matches…</div>';
+   panel.classList.add("is-open");
+   panel.setAttribute("aria-expanded","true");
+ }
  try{
-   recordBehavior("search_query",null,{query});
+   try { recordBehavior("search_query",null,{query}); } catch {}
    const result=await searchIntelligently(query);
    if(requestId!==searchRequestId)return;
    rememberSearch(query);
@@ -511,7 +517,10 @@ function wireSearch(){
  const input=$("search-input");if(!input)return;
  input.addEventListener("focus",()=>{if(!input.value.trim())showRecentSearches()});
  input.addEventListener("input",e=>search(e.target.value.trim()));
- input.addEventListener("keydown",e=>{if(e.key==="Enter"&&input.value.trim()){e.preventDefault();void runSearch(input.value.trim())}});
+ input.addEventListener("keydown",e=>{
+   if(e.key==="Enter"&&input.value.trim()){e.preventDefault();void runSearch(input.value.trim())}
+   if(e.key==="Escape"){$("search-panel")?.classList.remove("is-open");input.blur()}
+ });
  document.addEventListener("click",e=>{if(!e.target.closest(".vivid-nav-search")&&!e.target.closest("#search-panel"))$("search-panel")?.classList.remove("is-open")});
 }
 function wireHeroSwipe(){
