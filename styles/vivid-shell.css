@@ -53,3 +53,48 @@ html[data-network="offline"] [data-vivid-online-only]{display:none!important}
 .vivid-release-alert{gap:10px;padding:12px 14px;border-bottom:1px solid rgba(255,255,255,.055);transition:background .16s ease}.vivid-release-alert>a{gap:10px}.vivid-release-alert>a>i{width:38px;height:38px;flex-basis:38px;border:1px solid rgba(255,255,255,.055);background:rgba(255,255,255,.055);color:#c4c9d0}.vivid-release-alert strong{font-size:.79rem;line-height:1.25}.vivid-release-alert small{font-size:.65rem;line-height:1.35;color:#747b86;white-space:normal}
 .vivid-release-settings{display:flex;align-items:center;gap:12px;padding:12px 14px;border-top:1px solid rgba(255,255,255,.065);background:rgba(255,255,255,.018)}.vivid-release-setting-copy{min-width:0;flex:1}.vivid-release-setting-copy strong{display:block;font-size:.7rem}.vivid-release-setting-copy small{display:block;margin-top:3px;color:#6f7680;font-size:.62rem;line-height:1.35}.vivid-release-enable{min-width:72px;padding:8px 10px;border:1px solid rgba(255,255,255,.12);border-radius:9px;background:#f1f2f4;color:#090a0d;font:700 .65rem/1 system-ui;cursor:pointer}.vivid-release-enable:hover{background:#fff;transform:translateY(-1px)}.vivid-release-footnote{display:flex;align-items:center;gap:7px;padding:9px 14px 11px;color:#5f6670;font-size:.59rem;line-height:1.35}.vivid-release-footnote i{color:#858c96}
 @media(max-width:640px){.vivid-release-popover{left:10px;right:10px;bottom:calc(68px + env(safe-area-inset-bottom,0px));top:auto;width:auto;max-height:calc(100dvh - 96px);border-radius:20px}.vivid-release-popover-head{padding-top:16px}.vivid-release-alert-list{max-height:45vh}.vivid-release-toolbar{padding-inline:12px}}@media(prefers-reduced-motion:reduce){.vivid-notification-button.has-alerts>i{animation:none}}
+
+
+/* Responsive navigation + touch target pass.
+   Keeps every mobile navigation control reachable without changing routes or behavior. */
+.vivid-mobile-nav{
+  box-sizing:border-box;
+}
+.vivid-mobile-nav a,
+.vivid-mobile-nav button{
+  min-width:44px;
+  min-height:44px;
+}
+.vivid-mobile-nav a:focus-visible,
+.vivid-mobile-nav button:focus-visible{
+  outline:2px solid rgba(255,255,255,.72);
+  outline-offset:2px;
+}
+@media(max-width:640px){
+  .vivid-mobile-nav{
+    display:flex;
+    align-items:stretch;
+    justify-content:space-around;
+    gap:2px;
+    padding-inline:6px;
+    padding-bottom:env(safe-area-inset-bottom,0px);
+  }
+  .vivid-mobile-nav a{
+    flex:1 1 0;
+    min-width:44px;
+    min-height:44px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:3px;
+    padding:5px 3px;
+    box-sizing:border-box;
+    white-space:nowrap;
+  }
+  .vivid-mobile-nav a span{
+    max-width:100%;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+}
