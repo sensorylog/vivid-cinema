@@ -1,4 +1,4 @@
-const CACHE_NAME = "vivid-cinema-shell-v47";
+const CACHE_NAME = "vivid-cinema-shell-v48";
 const APP_SHELL = [
   "./","./index.html","./home.html","./person.html","./discover.html","./collection.html","./title.html","./watch.html",
   "./library.html","./auth.html","./login.html","./forgot-password.html","./account.html","./terms.html","./privacy.html","./contact.html",
@@ -95,8 +95,9 @@ self.addEventListener("fetch", event => {
     event.respondWith(networkFirst(request));
     return;
   }
-  const isCodeOrStyle = /\.(?:js|css|html)$/.test(url.pathname);
-  event.respondWith(isCodeOrStyle ? networkFirst(request) : staleWhileRevalidate(request));
+  const isCodeOrStyle = /\.(?:js|css)$/.test(url.pathname);
+  const isHtml = /\.html$/.test(url.pathname);
+  event.respondWith(isCodeOrStyle ? staleWhileRevalidate(request) : isHtml ? networkFirst(request) : staleWhileRevalidate(request));
 });
 
 self.addEventListener("notificationclick", event => {
