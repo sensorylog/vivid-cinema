@@ -9,12 +9,13 @@ import { checkForReleaseAlerts, deliverReleaseAlerts, getPendingReleaseAlerts, r
 import { startIntelligenceSync, shouldShowColdStart, completeColdStart, dismissColdStart, recordBehavior, getTasteProfile, getTasteStrength } from "./scripts/intelligence.js";
 import { searchIntelligently, getRecentSearches, rememberSearch, clearRecentSearches } from "./scripts/search.js";
 import { startCinemaReminderLoop } from "./scripts/cinema-reminders.js";
-import { enableCinemaPush } from "./scripts/push-notifications.js";
+import { enableCinemaPush, getServerReleaseAlerts, dismissServerReleaseAlert } from "./scripts/push-notifications.js";
 
 const $=id=>document.getElementById(id);
 let featured=[],activeIndex=0,heroMuted=true,heroPlaying=true,heroTimer=null,heroLoadToken=0,searchRequestId=0;
 
 const rails={};
+let serverReleaseAlerts=[];
 const sectionState={};
 
 const SECTION_RAIL_IDS=Object.freeze({
@@ -473,9 +474,10 @@ function wireAlphabet(){
 }
 
 function formatAlertTime(value){const diff=Math.max(0,Date.now()-Number(value||0)),mins=Math.floor(diff/60000),hrs=Math.floor(mins/60),days=Math.floor(hrs/24);if(mins<1)return "just now";if(mins<60)return mins+"m ago";if(hrs<24)return hrs+"h ago";if(days<7)return days+"d ago";return new Date(value).toLocaleDateString(undefined,{month:"short",day:"numeric"});}
+async function refreshServerReleaseCenter(){serverReleaseAlerts=await getServerReleaseAlerts();renderReleaseAlerts();}
 function renderReleaseAlerts(){
  const list=$("release-alert-list"),count=$("release-alert-count"),button=$("release-alert-button");if(!list)return;
- const alerts=getPendingReleaseAlerts(),state=getReleaseAlertState();
+ const localAlerts=getPendingReleaseAlerts(),alerts=[...serverReleaseAlerts,...localAlerts.filter(local=>!serverReleaseAlerts.some(remote=>remote.key&&remote.key===local.key))].sort((a,b)=>(Number(b.createdAt)||0)-(Number(a.createdAt)||0)),state=getReleaseAlertState();
  if(count){count.textContent=alerts.length>9?"9+":String(alerts.length);count.hidden=!alerts.length}button?.classList.toggle("has-alerts",alerts.length>0);
  const updated=$("release-alert-updated");if(updated)updated.textContent=state.lastCheckedAt?"Checked "+formatAlertTime(state.lastCheckedAt):"Not checked yet";
  const summary=$("release-alert-summary");if(summary)summary.textContent=alerts.length?alerts.length+" new "+(alerts.length===1?"release":"releases")+" waiting for you.":"Keeping an eye on your saved titles.";
@@ -489,8 +491,8 @@ async function refreshReleaseAlerts(force=false){
 }
 function wireReleaseAlerts(){
  const button=$("release-alert-button"),popover=$("release-alert-popover"),close=$("release-alert-close"),enable=$("release-alert-enable"),refresh=$("release-alert-refresh"),clear=$("release-alert-clear");
- const toggle=()=>{if(!popover)return;popover.hidden=!popover.hidden;button?.setAttribute("aria-expanded",String(!popover.hidden));renderReleaseAlerts()};button?.addEventListener("click",toggle);close?.addEventListener("click",()=>{popover.hidden=true;button?.setAttribute("aria-expanded","false")});
- refresh?.addEventListener("click",()=>void refreshReleaseAlerts(true));clear?.addEventListener("click",()=>{clearReleaseAlerts();renderReleaseAlerts()});
+ const toggle=()=>{if(!popover)return;popover.hidden=!popover.hidden;button?.setAttribute("aria-expanded",String(!popover.hidden));renderReleaseAlerts();if(!popover.hidden)void refreshServerReleaseCenter()};button?.addEventListener("click",toggle);close?.addEventListener("click",()=>{popover.hidden=true;button?.setAttribute("aria-expanded","false")});
+ refresh?.addEventListener("click",()=>void refreshReleaseAlerts(true));clear?.addEventListener("click",async()=>{clearReleaseAlerts();await Promise.all(serverReleaseAlerts.map(alert=>dismissServerReleaseAlert(alert.id)));serverReleaseAlerts=[];renderReleaseAlerts()});
  enable?.addEventListener("click",async()=>{let result="unsupported";
  try{
    result=await enableCinemaPush();
@@ -502,7 +504,7 @@ function wireReleaseAlerts(){
    console.warn("Vivid push setup failed:",error);
  }
  await refreshReleaseAlerts(true);renderReleaseAlerts()});
- document.addEventListener("click",event=>{const dismiss=event.target.closest("[data-dismiss-release]");if(dismiss){dismissReleaseAlert(dismiss.dataset.dismissRelease);renderReleaseAlerts();return}if(popover&&!popover.hidden&&!event.target.closest("#release-alert-popover")&&!event.target.closest("#release-alert-button")){popover.hidden=true;button?.setAttribute("aria-expanded","false")}});
+ document.addEventListener("click",event=>{const dismiss=event.target.closest("[data-dismiss-release]");if(dismiss){const key=dismiss.dataset.dismissRelease;const remote=serverReleaseAlerts.find(alert=>alert.key===key||alert.id===key);if(remote){void dismissServerReleaseAlert(remote.id);serverReleaseAlerts=serverReleaseAlerts.filter(alert=>alert.id!==remote.id)}dismissReleaseAlert(key);renderReleaseAlerts();return}if(popover&&!popover.hidden&&!event.target.closest("#release-alert-popover")&&!event.target.closest("#release-alert-button")){popover.hidden=true;button?.setAttribute("aria-expanded","false")}});
 }
 
 function wireSearch(){
@@ -529,7 +531,7 @@ document.addEventListener("DOMContentLoaded",async()=>{
  if(shouldShowColdStart())await maybeShowColdStart();
  if(needsColdStart)document.body.classList.remove("vivid-onboarding-active");
  wireRails();wireSearch();wireAlphabet();wireHeroSwipe();wireReleaseAlerts();
- initHero();loadHome();refreshReleaseAlerts();
+ initHero();loadHome();refreshReleaseAlerts();void refreshServerReleaseCenter();
  $("hero-prev")?.addEventListener("click",()=>showHero(activeIndex-1,true));
  $("hero-next")?.addEventListener("click",()=>showHero(activeIndex+1,true));
  $("hero-sound")?.addEventListener("click",toggleSound);$("hero-pause")?.addEventListener("click",togglePause);
