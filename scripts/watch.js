@@ -310,14 +310,17 @@ function renderShell(params) {
   const status = $("player-status");
   if (player) {
     player.addEventListener("load", () => {
-      // Yenime is cross-origin and does not expose the same PLAYER_EVENT health signal
-      // as VidAPI. Once its iframe document has loaded, stop the alternate-source
-      // watchdog and dismiss the loading banner after a short paint grace period.
-      if (activeSource === "yenime") {
+      // A loaded cross-origin player document is enough to remove our page-level
+      // loading banner for alternate providers. VidAPI remains special: its iframe
+      // can load while the actual media source is still unavailable, so PLAYER_EVENT
+      // continues to be the health signal used for VidAPI fallback.
+      if (activeSource === "yenime" || activeSource === "vidsrc") {
         clearFallbackTimer();
         window.setTimeout(() => {
-          if (status && status.isConnected && activeSource === "yenime") status.hidden = true;
-        }, 900);
+          if (status && status.isConnected && (activeSource === "yenime" || activeSource === "vidsrc")) {
+            status.hidden = true;
+          }
+        }, 500);
         return;
       }
       // A cross-origin iframe load only proves the document loaded; VidAPI still
