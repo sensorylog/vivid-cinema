@@ -9,8 +9,8 @@
   --vivid-radius-sm:12px;
   --vivid-radius-md:16px;
   --vivid-radius-lg:24px;
-  --vivid-content-width:var(--vivid-content-width,1500px);
-  --vivid-page-gutter:var(--vivid-page-gutter,clamp(1rem,2.8vw,3rem));
+  --vivid-content-width:1500px;
+  --vivid-page-gutter:clamp(1rem,2.8vw,3rem);
   --vivid-transition-fast:var(--vivid-duration-ui,220ms) var(--vivid-motion,cubic-bezier(.22,.8,.22,1));
   --vivid-transition-standard:var(--vivid-duration-standard,280ms) var(--vivid-motion,cubic-bezier(.22,.8,.22,1));
 }
