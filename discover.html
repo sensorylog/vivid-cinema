@@ -24,21 +24,39 @@
 <a class="vivid-page-back" data-vivid-back href="home.html"><i class="bi bi-chevron-left" aria-hidden="true"></i><span>Back</span></a>
 <section class="vivid-discovery-intro">
 <div><span class="vivid-discovery-kicker">EXPLORE</span><h1>Find your next story.</h1><p>Search the catalogue or shape your results with filters.</p></div>
-<div class="vivid-discovery-search"><i class="bi bi-search" aria-hidden="true"></i><input id="discovery-search" type="search" placeholder="Search movies and TV" aria-label="Search movies and TV" autocomplete="off"></div>
+<div class="vivid-discovery-search"><i class="bi bi-search" aria-hidden="true"></i><input id="discovery-search" type="search" placeholder="Search movies, TV and people" aria-label="Search movies, TV and people" autocomplete="off"><button id="clear-search" type="button" aria-label="Clear search" hidden><i class="bi bi-x-lg" aria-hidden="true"></i></button></div>
+</section>
+<section class="vivid-collection-explorer" aria-label="Featured collections">
+<div class="vivid-collection-heading"><div><span class="vivid-discovery-kicker">CURATED</span><h2>Explore by collection</h2><p>Jump straight into a hand-picked catalogue.</p></div></div>
+<div id="featured-collections" class="vivid-collection-grid"></div>
 </section>
 <section class="vivid-discovery-filters" aria-label="Discovery filters">
 <div class="vivid-filter-panel">
+<div class="vivid-filter-row vivid-type-row" role="group" aria-label="Content type">
+<button type="button" data-type="all" class="is-active">All</button><button type="button" data-type="movie">Movies</button><button type="button" data-type="tv">TV</button>
+</div>
 <div class="vivid-filter-row">
-<label>Type<select id="filter-type"><option value="">All</option><option value="movie">Movies</option><option value="tv">TV</option></select></label>
-<label>Genre<select id="filter-genre"><option value="">All genres</option></select></label>
-<label>Year<select id="filter-year"><option value="">Any year</option></select></label>
-<label>Sort<select id="filter-sort"><option value="popularity.desc">Most popular</option><option value="vote_average.desc">Highest rated</option><option value="primary_release_date.desc">Newest</option></select></label>
-<button id="filter-reset" type="button">Reset</button>
+<label>Collection<select id="category-filter"><option value="">All catalogue</option></select></label>
+<label>Genre<select id="genre-filter"><option value="">All genres</option></select></label>
+<label>Year<select id="year-filter"><option value="">Any year</option></select></label>
+<label>Sort<select id="sort-filter"><option value="popularity.desc">Most popular</option><option value="vote_average.desc">Highest rated</option><option value="primary_release_date.desc">Newest</option><option value="primary_release_date.asc">Oldest</option></select></label>
+<label>Rating<select id="rating-filter"><option value="">Any rating</option><option value="8">8+</option><option value="7">7+</option><option value="6">6+</option><option value="5">5+</option></select></label>
+<label>Region<select id="region-filter"><option value="">Global</option><option value="GH">Ghana</option><option value="NG">Nigeria</option><option value="US">United States</option><option value="GB">United Kingdom</option><option value="CA">Canada</option><option value="AU">Australia</option><option value="IN">India</option></select></label>
+<button id="reset-filters" class="vivid-filter-reset" type="button">Reset</button>
+</div>
+<div class="vivid-discovery-modes">
+<div class="vivid-mode-group"><span class="vivid-discovery-kicker">MOOD</span><div class="vivid-mode-strip" role="group" aria-label="Mood">
+<button class="vivid-mode-chip is-active" type="button" data-mood="">Any mood</button><button class="vivid-mode-chip" type="button" data-mood="relax">Relax</button><button class="vivid-mode-chip" type="button" data-mood="intense">Intense</button><button class="vivid-mode-chip" type="button" data-mood="funny">Funny</button><button class="vivid-mode-chip" type="button" data-mood="romantic">Romantic</button><button class="vivid-mode-chip" type="button" data-mood="thoughtful">Thought-provoking</button><button class="vivid-mode-chip" type="button" data-mood="escapist">Escapist</button><button class="vivid-mode-chip" type="button" data-mood="scary">Scary</button><button class="vivid-mode-chip" type="button" data-mood="emotional">Emotional</button><button class="vivid-mode-chip" type="button" data-mood="fast">Fast-paced</button><button class="vivid-mode-chip" type="button" data-mood="late">Late-night</button>
+</div>
+<div class="vivid-mode-group"><span class="vivid-discovery-kicker">RUNTIME</span><div class="vivid-mode-strip" role="group" aria-label="Runtime">
+<button class="vivid-mode-chip is-active" type="button" data-runtime="">Any length</button><button class="vivid-mode-chip" type="button" data-runtime="short">Under 90 min</button><button class="vivid-mode-chip" type="button" data-runtime="standard">90–120 min</button><button class="vivid-mode-chip" type="button" data-runtime="long">Over 120 min</button><button class="vivid-mode-chip" type="button" data-runtime="quickEpisode">Episodes under 30 min</button><button class="vivid-mode-chip" type="button" data-runtime="episode">Episodes 30–60 min</button><button class="vivid-mode-chip" type="button" data-runtime="longEpisode">Episodes over 60 min</button>
+</div>
 </div>
 <div class="vivid-provider-filter" aria-label="Streaming service">
 <div class="vivid-provider-heading"><span>STREAMING SERVICES</span><small>Choose a service</small></div>
 <div id="provider-filter" class="vivid-provider-strip" role="group" aria-label="Streaming services">
 <button class="vivid-provider-chip is-active" data-provider="" type="button"><span class="vivid-provider-all-icon"><i class="bi bi-grid-3x3-gap" aria-hidden="true"></i></span><span>All services</span></button>
+</div>
 </div>
 </div>
 </div>
