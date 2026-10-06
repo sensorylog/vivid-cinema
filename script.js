@@ -546,7 +546,17 @@ function closeSearchSurface({restoreFocus=false}={}){
  }
 }
 function wireSearch(){
- const input=$("search-input");if(!input)return;
+ const input=$("search-input"),searchBox=input?.closest(".vivid-nav-search");if(!input||!searchBox)return;
+ const activate=()=>{
+   setSearchSurface(true);
+   if(!input.value.trim())showRecentSearches();
+   requestAnimationFrame(()=>input.focus({preventScroll:true}));
+ };
+ searchBox.addEventListener("pointerdown",event=>{
+   if(event.button!==undefined&&event.button!==0)return;
+   activate();
+ });
+ searchBox.addEventListener("touchstart",activate,{passive:true});
  input.addEventListener("focus",()=>{
    setSearchSurface(true);
    if(!input.value.trim())showRecentSearches();
