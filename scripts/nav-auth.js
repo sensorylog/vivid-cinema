@@ -1,5 +1,5 @@
 const authLink = document.getElementById("auth-link");
-const pageAuthLinks = document.querySelectorAll("#library-auth, #title-auth");
+const pageAuthLinks = document.querySelectorAll(".vivid-nav-action");
 const userDropdown = document.getElementById("user-dropdown");
 const userEmail = document.getElementById("user-email");
 const logoutLink = document.getElementById("logout-link");
