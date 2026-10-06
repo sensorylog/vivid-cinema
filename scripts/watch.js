@@ -85,7 +85,8 @@ function animeTitleCandidates() {
 
 async function resolveAnimeMalId() {
   if (!details || !animeProvider) return "";
-  const base = String(VIVID_CONFIG.api.jikanBaseUrl || "https://api.jikan.moe/v4").replace(/\\/+$/, "");
+  let base = String(VIVID_CONFIG.api.jikanBaseUrl || "https://api.jikan.moe/v4");
+  while (base.endsWith("/")) base = base.slice(0, -1);
   const year = Number(details.release_date?.slice(0, 4) || details.first_air_date?.slice(0, 4)) || 0;
   for (const title of animeTitleCandidates().slice(0, 3)) {
     try {
@@ -115,7 +116,8 @@ async function resolveAnimeMalId() {
 
 function buildVidsrcEmbedUrl(params) {
   const base = String(VIVID_CONFIG.api.vidsrcEmbedBaseUrl || "https://vidsrc.to").replace(/\/+$/, "");
-  // VidSrc accepts numeric TMDB IDs, so the fallback stays fully TMDB-based.\n  const id = encodeURIComponent(tmdbId || imdbId);
+  // VidSrc accepts numeric TMDB IDs, so the fallback stays fully TMDB-based.
+  const id = encodeURIComponent(tmdbId || imdbId);
   if (params.type === "tv") {
     return base + "/embed/tv/" + id + "/" + params.season + "/" + params.episode;
   }
