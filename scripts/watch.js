@@ -71,7 +71,7 @@ function normalizeAnimeTitle(value) {
   return String(value || "")
     .normalize("NFKC")
     .toLowerCase()
-    .replace(/[ââ"'â]/g, "")
+    .replace(/[“”"'’]/g, "")
     .replace(/[^a-z0-9\u3040-\u30ff\u3400-\u9fff]+/g, " ")
     .replace(/\s+/g, " ")
     .trim();
@@ -144,7 +144,7 @@ function triggerVidsrcFallback(reason = "primary_error") {
   clearFallbackTimer();
   const status = $("player-status");
   if (status) {
-    status.textContent = "Source unavailable â switching to alternateâ¦";
+    status.textContent = "Source unavailable — switching to alternate…";
     status.classList.add("is-warning");
     status.hidden = false;
   }
@@ -187,7 +187,7 @@ function setPlayerSource(source, params, startAt = 0) {
     }
     player.src = url;
     if (status) {
-      status.textContent = "Loading anime sourceâ¦";
+      status.textContent = "Loading anime source…";
       status.classList.remove("is-warning");
       status.hidden = false;
     }
@@ -200,7 +200,7 @@ function setPlayerSource(source, params, startAt = 0) {
     if (!hasFallbackId()) return;
     player.src = buildVidsrcEmbedUrl(params);
     if (status) {
-      status.textContent = "Loading alternate sourceâ¦";
+      status.textContent = "Loading alternate source…";
       status.classList.remove("is-warning");
       status.hidden = false;
     }
@@ -208,7 +208,7 @@ function setPlayerSource(source, params, startAt = 0) {
     primaryHealthy = false;
     player.src = buildVidapiEmbedUrl(params, startAt);
     if (status) {
-      status.textContent = Number(startAt) > 5 ? "Resuming where you left offâ¦" : "Preparing playbackâ¦";
+      status.textContent = Number(startAt) > 5 ? "Resuming where you left off…" : "Preparing playback…";
       status.classList.remove("is-warning");
       status.hidden = false;
     }
@@ -284,7 +284,7 @@ function recommendationCards() {
         '<a class="vivid-watch-rec-card" href="' + escapeHtml(getMediaUrl(item)) + '">' +
           '<img loading="lazy" src="' + getImageUrl(item.poster_path, "w342") + '" alt="' + escapeHtml(item.title) + '">' +
           '<strong>' + escapeHtml(item.title) + '</strong>' +
-          '<small>â ' + (item.vote_average ? item.vote_average.toFixed(1) : "â") + '</small>' +
+          '<small>★ ' + (item.vote_average ? item.vote_average.toFixed(1) : "—") + '</small>' +
         '</a>'
       ).join("")
     : '<p class="vivid-muted">More recommendations will appear as you explore Vivid.</p>';
@@ -297,14 +297,14 @@ function renderShell(params) {
   const saved = getPlaybackProgress(progressKey());
   const resumeAt = Number(saved?.progress || route.params.get("startAt") || 0);
 
-  document.title = (episodeTitle ? episodeTitle + " Â· " : "") + title + " Â· Vivid Cinema";
+  document.title = (episodeTitle ? episodeTitle + " · " : "") + title + " · Vivid Cinema";
   $("watch-content").innerHTML =
     '<section class="vivid-watch-hero"><div id="watch-backdrop" class="vivid-watch-backdrop" style="--watch-backdrop:url(\'' + getImageUrl(media.backdrop_path, "w1280") + '\')"></div>' +
-      '<div class="vivid-watch-head"><div><span id="watch-kicker" class="vivid-watch-kicker">' + (isTv ? "TV Â· SEASON " + params.season + " Â· EPISODE " + params.episode : "MOVIE") + '</span>' +
+      '<div class="vivid-watch-head"><div><span id="watch-kicker" class="vivid-watch-kicker">' + (isTv ? "TV · SEASON " + params.season + " · EPISODE " + params.episode : "MOVIE") + '</span>' +
         '<h1 id="watch-title">' + escapeHtml(episodeTitle || title) + '</h1><p id="watch-overview">' + escapeHtml(isTv && details?.episode?.overview ? details.episode.overview : media.overview || "") + '</p>' +
       '</div><a class="vivid-button vivid-button--secondary" href="' + escapeHtml(buildTitleUrl(media.id, media.media_type)) + '"><i class="bi bi-info-circle"></i> Details</a></div></section>' +
     '<section class="vivid-player-section" aria-label="Video player"><div class="vivid-player-frame">' +
-      '<div id="player-status" class="vivid-player-status" role="status" aria-live="polite">' + (resumeAt > 5 ? "Resuming where you left offâ¦" : "Preparing playbackâ¦") + '</div>' +
+      '<div id="player-status" class="vivid-player-status" role="status" aria-live="polite">' + (resumeAt > 5 ? "Resuming where you left off…" : "Preparing playback…") + '</div>' +
       '<iframe id="vidapi-player" title="' + escapeHtml(title) + ' player" allow="autoplay; fullscreen; picture-in-picture; encrypted-media; clipboard-write" allowfullscreen referrerpolicy="origin" loading="eager"></iframe>' +
     '</div><div class="vivid-player-bar"><div><i class="bi bi-shield-check"></i><span id="player-source-label">Powered by VidAPI</span></div><div class="vivid-player-bar-actions"><button type="button" id="player-switch-source" class="vivid-player-switch" hidden>Try alternate source</button><a href="' + escapeHtml(buildTitleUrl(media.id, media.media_type)) + '">Back to title</a></div></div></section>' +
     (isTv ? '<section class="vivid-watch-note"><i class="bi bi-collection-play"></i><div><strong>Episode playback</strong><span>Use the episode list on the title page to switch seasons and episodes.</span></div></section>' : "") +
@@ -375,14 +375,14 @@ function hydrateWatchDetails(params) {
   $("watch-title")?.replaceChildren(document.createTextNode(episodeTitle || title));
   $("watch-overview")?.replaceChildren(document.createTextNode(isTv && details?.episode?.overview ? details.episode.overview : media.overview || ""));
   const kicker = $("watch-kicker");
-  if (kicker) kicker.textContent = isTv ? "TV Â· SEASON " + params.season + " Â· EPISODE " + params.episode : "MOVIE";
+  if (kicker) kicker.textContent = isTv ? "TV · SEASON " + params.season + " · EPISODE " + params.episode : "MOVIE";
   const backdrop = $("watch-backdrop");
   if (backdrop) backdrop.style.setProperty("--watch-backdrop", "url('" + getImageUrl(media.backdrop_path, "w1280") + "')");
   const player = $("vidapi-player");
   if (player) player.title = title + " player";
   const recommendations = $("watch-recommendations");
   if (recommendations) recommendations.innerHTML = recommendationCards();
-  document.title = (episodeTitle ? episodeTitle + " Â· " : "") + title + " Â· Vivid Cinema";
+  document.title = (episodeTitle ? episodeTitle + " · " : "") + title + " · Vivid Cinema";
 }
 
 async function prepareNextEpisode(params) {
@@ -492,7 +492,7 @@ async function load() {
     $("watch-content").innerHTML = '<section class="vivid-watch-error"><i class="bi bi-exclamation-circle"></i><h1>Playback link is incomplete.</h1><p>Choose a title from Vivid Cinema and start playback again.</p><a class="vivid-button vivid-button--secondary" href="home.html">Browse titles</a></section>';
     return;
   }
-  media = normalizeMedia({ id: currentParams.id, overview: "", title: currentParams.type === "tv" ? "Loading episodeâ¦" : "Loading movieâ¦", poster_path: "", backdrop_path: "" }, currentParams.type);
+  media = normalizeMedia({ id: currentParams.id, overview: "", title: currentParams.type === "tv" ? "Loading episode…" : "Loading movie…", poster_path: "", backdrop_path: "" }, currentParams.type);
   renderShell(currentParams);
   try {
     details = currentParams.type === "tv" ? await tmdbApi.tvDetails(currentParams.id) : await tmdbApi.movieDetails(currentParams.id);
