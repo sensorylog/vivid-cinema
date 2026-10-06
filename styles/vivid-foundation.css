@@ -2,11 +2,4 @@
 /* Vivid 3.0 compatibility tokens — legacy components inherit the same system. */
 :root{
   --vivid-glass-blur:var(--vivid-ui-blur,28px);
-  --vivid-radius-sm:12px;
-  --vivid-radius-md:16px;
-  --vivid-radius-lg:24px;
-  --vivid-content-width:1500px;
-  --vivid-page-gutter:clamp(1rem,2.8vw,3rem);
-  --vivid-transition-fast:var(--vivid-duration-ui,220ms) var(--vivid-motion,cubic-bezier(.22,.8,.22,1));
-  --vivid-transition-standard:var(--vivid-duration-standard,280ms) var(--vivid-motion,cubic-bezier(.22,.8,.22,1));
 }
