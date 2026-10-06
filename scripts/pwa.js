@@ -125,16 +125,19 @@ async function registerServiceWorker() {
   if (!("serviceWorker" in navigator)) return null;
 
   try {
-    const registration = await navigator.serviceWorker.register(SW_PATH, { scope: "./" });
+    const registration = await navigator.serviceWorker.register(SW_PATH, { scope: "./", updateViaCache: "none" });
     activeRegistration = registration;
     createUpdateControl(registration);
-    // Check for a fresh worker immediately so visual/code fixes are not held behind
-    // a long-lived cached shell. The new worker still takes control normally.
-    void registration.update().catch(() => {});
 
+    // Listen before the update check so an activated worker always reloads
+    // the document and switches the app shell as one coherent version.
     navigator.serviceWorker.addEventListener("controllerchange", () => {
       window.location.reload();
     }, { once: true });
+
+    // iOS Home Screen apps can retain an older worker/cache longer than Safari.
+    // updateViaCache:"none" makes the worker update check bypass the HTTP cache.
+    void registration.update().catch(() => {});
 
     return registration;
   } catch (error) {
