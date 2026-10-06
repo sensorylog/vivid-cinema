@@ -492,7 +492,7 @@ async function refreshReleaseAlerts(force=false){
 function wireReleaseAlerts(){
  const button=$("release-alert-button"),popover=$("release-alert-popover"),close=$("release-alert-close"),enable=$("release-alert-enable"),refresh=$("release-alert-refresh"),clear=$("release-alert-clear");
  const toggle=()=>{if(!popover)return;popover.hidden=!popover.hidden;button?.setAttribute("aria-expanded",String(!popover.hidden));renderReleaseAlerts();if(!popover.hidden)void refreshServerReleaseCenter()};button?.addEventListener("click",toggle);close?.addEventListener("click",()=>{popover.hidden=true;button?.setAttribute("aria-expanded","false")});
- refresh?.addEventListener("click",()=>void refreshReleaseAlerts(true));clear?.addEventListener("click",async()=>{clearReleaseAlerts();await Promise.all(serverReleaseAlerts.map(alert=>dismissServerReleaseAlert(alert.id)));serverReleaseAlerts=[];renderReleaseAlerts()});
+ refresh?.addEventListener("click",()=>void refreshReleaseAlerts(true));clear?.addEventListener("click",async()=>{clearReleaseAlerts();await Promise.all(serverReleaseAlerts.map(alert=>dismissServerReleaseAlert(alert.docId)));serverReleaseAlerts=[];renderReleaseAlerts()});
  enable?.addEventListener("click",async()=>{let result="unsupported";
  try{
    result=await enableCinemaPush();
@@ -504,7 +504,7 @@ function wireReleaseAlerts(){
    console.warn("Vivid push setup failed:",error);
  }
  await refreshReleaseAlerts(true);renderReleaseAlerts()});
- document.addEventListener("click",event=>{const dismiss=event.target.closest("[data-dismiss-release]");if(dismiss){const key=dismiss.dataset.dismissRelease;const remote=serverReleaseAlerts.find(alert=>alert.key===key||alert.id===key);if(remote){void dismissServerReleaseAlert(remote.id);serverReleaseAlerts=serverReleaseAlerts.filter(alert=>alert.id!==remote.id)}dismissReleaseAlert(key);renderReleaseAlerts();return}if(popover&&!popover.hidden&&!event.target.closest("#release-alert-popover")&&!event.target.closest("#release-alert-button")){popover.hidden=true;button?.setAttribute("aria-expanded","false")}});
+ document.addEventListener("click",event=>{const dismiss=event.target.closest("[data-dismiss-release]");if(dismiss){const key=dismiss.dataset.dismissRelease;const remote=serverReleaseAlerts.find(alert=>alert.key===key||alert.docId===key);if(remote){void dismissServerReleaseAlert(remote.docId);serverReleaseAlerts=serverReleaseAlerts.filter(alert=>alert.docId!==remote.docId)}dismissReleaseAlert(key);renderReleaseAlerts();return}if(popover&&!popover.hidden&&!event.target.closest("#release-alert-popover")&&!event.target.closest("#release-alert-button")){popover.hidden=true;button?.setAttribute("aria-expanded","false")}});
 }
 
 function wireSearch(){
