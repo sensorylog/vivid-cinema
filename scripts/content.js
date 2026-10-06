@@ -51,10 +51,10 @@ export const CURATED_CATEGORIES = Object.freeze({
   },
   teenRomance: {
     label: "Teen romance",
-    description: "Coming-of-age stories, first loves and young romance.",
+    description: "Coming-of-age stories, first loves, high school and young romance.",
     type: "all",
-    params: { with_genres: "10749" },
-    keyword: "teen romance"
+    // Romance + Drama without a rare single keyword so the list is not tiny.
+    params: { with_genres: "10749,18", "vote_count.gte": "40", sort_by: "popularity.desc" }
   },
   gangsta: {
     label: "Gangsta & crime",
@@ -190,7 +190,13 @@ function categoryParams(category, type, page, filters = {}, keywordId = "") {
 export async function getCuratedPage(key, page = 1, filters = {}) {
   const category = CURATED_CATEGORIES[key];
   if (!category) throw new Error("Unknown curated category: " + key);
-  const keywordId = category.keyword ? await resolveKeyword(category.keyword) : "";
+  let keywordId = "";
+  if (Array.isArray(category.keywords) && category.keywords.length) {
+    const ids = await Promise.all(category.keywords.map((q) => resolveKeyword(q)));
+    keywordId = ids.filter(Boolean).join("|"); // TMDB OR
+  } else if (category.keyword) {
+    keywordId = await resolveKeyword(category.keyword);
+  }
   const requestedType = filters.type === "movie" || filters.type === "tv" ? filters.type : "";
   const types = requestedType
     ? [requestedType]
