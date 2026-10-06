@@ -55,6 +55,24 @@ export async function enableCinemaPush(){
   },{merge:true});
   return {subscription,userId:user.uid};
 }
+export async function disableCinemaPush(){
+  try{
+    if(!("serviceWorker" in navigator))return false;
+    const registration=await navigator.serviceWorker.ready;
+    const subscription=await registration.pushManager?.getSubscription();
+    if(subscription)await subscription.unsubscribe();
+  }catch{}
+  try{
+    const {auth}=await getFirebase();
+    const user=auth.currentUser;
+    if(!user)return false;
+    const {db,doc,deleteDoc}=await getFirebase();
+    const snapshot=await import("https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js").then(fs=>fs.getDocs(fs.collection(db,"users",user.uid,SUBS_COLLECTION)));
+    await Promise.all(snapshot.docs.map(item=>deleteDoc(doc(db,"users",user.uid,SUBS_COLLECTION,item.id))));
+  }catch{}
+  return true;
+}
+
 export async function savePushReminder(reminder){
   const {auth}=await getFirebase();
   if(!auth.currentUser)return false;
