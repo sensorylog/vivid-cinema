@@ -27,3 +27,34 @@
 @media(max-width:620px){.vivid-news-main{padding-left:14px;padding-right:14px;padding-bottom:100px}.vivid-news-hero{border-radius:22px}.vivid-news-hero h1{font-size:42px}.vivid-news-hero-art{min-height:270px}.vivid-news-grid{grid-template-columns:1fr}.vivid-calendar-list{grid-template-columns:1fr 1fr}.vivid-news-section-head{align-items:flex-start}.vivid-news-section-head>a{display:none}.vivid-news-livebar{align-items:flex-start;flex-direction:column;gap:5px}}
 
 body.vivid-cinema-home{min-height:100vh;overflow-x:hidden;overflow-y:auto!important}.vivid-news-main{min-height:100vh;overflow:visible}.vivid-news-feed,.vivid-news-section{overflow:visible}.vivid-news-filters{touch-action:pan-x;overscroll-behavior-x:contain}.vivid-news-grid{overflow:visible}
+
+/* News filters: touch-friendly horizontal tab rail with no page-width spill. */
+.vivid-news-filters{
+  min-width:0;
+  max-width:100%;
+  scroll-padding-inline:8px;
+  overscroll-behavior-x:contain;
+  -webkit-overflow-scrolling:touch;
+}
+.vivid-news-filter,
+.vivid-news-refresh{
+  min-height:44px;
+}
+.vivid-news-filter{
+  flex:0 0 auto;
+  cursor:pointer;
+}
+.vivid-news-filter:focus-visible,
+.vivid-news-refresh:focus-visible{
+  outline:2px solid rgba(255,255,255,.72);
+  outline-offset:2px;
+}
+@media(max-width:620px){
+  .vivid-news-filters{
+    width:100%;
+    padding-bottom:8px;
+    touch-action:pan-x;
+  }
+  .vivid-news-toolbar{width:100%;min-width:0}
+  .vivid-news-refresh{align-self:stretch}
+}
