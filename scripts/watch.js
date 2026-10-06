@@ -319,8 +319,9 @@ function renderShell(params) {
     player.addEventListener("error", () => {
       triggerVidsrcFallback("iframe_error");
     });
-    // Metadata is loaded asynchronously. Start with VidAPI for the initial shell,
-    // then switch to Yenime as soon as anime + MAL resolution succeeds.
+    // Metadata is loaded asynchronously. Start with the existing VidAPI path so
+    // non-anime playback is unchanged, then switch to Yenime when anime + MAL resolve.
+    setPlayerSource("vidapi", params, resumeAt);
     const switchBtn = $("player-switch-source");
     if (switchBtn) {
       switchBtn.addEventListener("click", () => {
@@ -394,11 +395,6 @@ function handlePlayerEvent(event) {
   }
 
   if (payload.type !== "PLAYER_EVENT" || !payload.data) return;
-  // A real playback/progress event means the primary embed is alive.
-  primaryHealthy = true;
-  clearFallbackTimer();
-  const status = $("player-status");
-  if (status) status.hidden = true;
   const data = payload.data;
   const info = data.player_info || {};
   if (String(info.mediaType || "") !== String(media?.media_type || "")) return;
@@ -407,6 +403,11 @@ function handlePlayerEvent(event) {
     if (info.season != null && Number(info.season) !== Number(currentParams.season)) return;
     if (info.episode != null && Number(info.episode) !== Number(currentParams.episode)) return;
   }
+  // Only a matching player event proves that the current VidAPI source is healthy.
+  primaryHealthy = true;
+  clearFallbackTimer();
+  const status = $("player-status");
+  if (status) status.hidden = true;
   const progress = Number(data.player_progress) || 0;
   const duration = Number(data.player_duration) || 0;
   if (progress > 0) {
