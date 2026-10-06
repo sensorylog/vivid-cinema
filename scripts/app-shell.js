@@ -51,6 +51,35 @@ function syncVividBranding() {
   });
 }
 
+function initThemeToggle() {
+  const root = document.documentElement;
+  const nav = document.querySelector(".vivid-nav, .vivid-discovery-nav, .vivid-library-nav, .vivid-title-nav, .vivid-watch-nav, .landing-header");
+  if (!nav || nav.querySelector(".vivid-theme-toggle")) return;
+
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "vivid-theme-toggle";
+  button.setAttribute("aria-label", "Switch to light mode");
+  button.title = "Switch theme";
+  button.innerHTML = '<i class="bi bi-sun" aria-hidden="true"></i>';
+
+  const apply = (theme, persist = true) => {
+    root.dataset.vividTheme = theme;
+    button.innerHTML = theme === "light"
+      ? '<i class="bi bi-moon-stars" aria-hidden="true"></i>'
+      : '<i class="bi bi-sun" aria-hidden="true"></i>';
+    button.setAttribute("aria-label", theme === "light" ? "Switch to dark mode" : "Switch to light mode");
+    if (persist) { try { localStorage.setItem("vivid:theme", theme); } catch {} }
+  };
+
+  button.addEventListener("click", () => apply(root.dataset.vividTheme === "light" ? "dark" : "light"));
+  apply(root.dataset.vividTheme, false);
+
+  const action = nav.querySelector(".vivid-nav-action, .landing-signin");
+  if (action?.parentElement === nav) nav.insertBefore(button, action);
+  else nav.appendChild(button);
+}
+
 function setPageIdentity() {
   const page = document.body?.dataset?.vividPage || "unknown";
   document.documentElement.dataset.vividPage = page;
@@ -65,11 +94,13 @@ function initAppShell() {
   initialized = true;
 
   document.documentElement.dataset.vividReady = "false";
-  document.documentElement.dataset.vividTheme = "cinematic";
+  const storedTheme = (() => { try { return localStorage.getItem("vivid:theme"); } catch { return null; } })();
+  document.documentElement.dataset.vividTheme = storedTheme === "light" ? "light" : "dark";
   setViewportState();
   setConnectionState();
   setPageIdentity();
   syncVividBranding();
+  initThemeToggle();
 
   window.addEventListener("resize", setViewportState, { passive: true });
   window.addEventListener("online", setConnectionState);
