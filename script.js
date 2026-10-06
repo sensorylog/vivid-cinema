@@ -478,7 +478,7 @@ function openSearch(){
   });
 }
 function closeSearch(){
-  if(!searchDialog)return;
+  if(!searchDialog || searchDialog.hidden)return;
   searchDialog.hidden=true;
   searchInput?.blur();
   unlockSearchScroll();
@@ -538,7 +538,7 @@ function wireSearch(){
   trigger.addEventListener("click",openSearch);
   document.addEventListener("keydown",e=>{
     if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==="k"){e.preventDefault();openSearch()}
-    if(e.key==="Escape"&&!searchDialog?.hidden)closeSearch();
+    if(e.key==="Escape"&&searchDialog&&!searchDialog.hidden)closeSearch();
   });
 }
 function browseByLetter(letter){
