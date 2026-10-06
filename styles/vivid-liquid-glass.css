@@ -1,8 +1,7 @@
 /* ==========================================================================
-   Vivid Cinema — Liquid Glass
-   Apple-inspired material system (frosted glass + lens highlights + depth).
-   Load this stylesheet LAST. It only strengthens existing surfaces.
-   No HTML/JS changes required. Safe for all pages and tabs.
+   Vivid Cinema — Liquid Glass (audited)
+   Apple-inspired material system. Load LAST.
+   Visual-only. No layout, display, or interaction breakage.
    ========================================================================== */
 
 :root {
@@ -24,20 +23,15 @@
 }
 
 /* --------------------------------------------------------------------------
-   Core Liquid Glass surface
+   Core Liquid Glass surface (visual only — no overflow on cards)
    -------------------------------------------------------------------------- */
 .vivid-glass,
 .vivid-surface,
-.vivid-card,
-.vivid-feature-card,
-.vivid-search-panel,
-.vivid-release-popover,
 .vivid-filter-panel,
 .vivid-collection-toolbar,
 .vivid-library-tabs,
 .account-card,
 .auth-container {
-  position: relative;
   background: var(--lg-surface-solid) !important;
   border: 1px solid var(--lg-stroke) !important;
   border-radius: var(--lg-radius) !important;
@@ -46,10 +40,9 @@
   box-shadow:
     0 10px 30px var(--lg-shadow),
     inset 0 1px 0 rgba(255, 255, 255, 0.06) !important;
-  overflow: hidden;
 }
 
-/* Soft “lens” highlight (liquid refraction) */
+/* Soft lens highlight — never intercepts clicks */
 .vivid-glass::before,
 .vivid-surface::before,
 .vivid-search-panel::before,
@@ -65,12 +58,36 @@
     transparent 55%
   );
   mix-blend-mode: soft-light;
-  pointer-events: none;
+  pointer-events: none !important;
+  z-index: 0;
+}
+
+/* Panels that legitimately need clipping */
+.vivid-search-panel,
+.vivid-release-popover {
+  position: relative;
+  overflow: hidden;
+  background: rgba(12, 14, 18, 0.82) !important;
+  border: 1px solid var(--lg-stroke) !important;
+  border-radius: var(--lg-radius) !important;
+  backdrop-filter: blur(var(--lg-blur)) saturate(160%) !important;
+  -webkit-backdrop-filter: blur(var(--lg-blur)) saturate(160%) !important;
+  box-shadow: 0 24px 70px var(--lg-shadow-strong) !important;
+}
+
+/* Interactive children always receive clicks */
+.vivid-search-panel > *,
+.vivid-release-popover > *,
+.auth-container > *,
+.vivid-glass > *,
+.vivid-surface > * {
+  position: relative;
   z-index: 1;
+  pointer-events: auto;
 }
 
 /* --------------------------------------------------------------------------
-   Top navigation bar (desktop + tablet) — liquid glass floating bar
+   Top navigation — liquid glass (does not change position/z-index/layout)
    -------------------------------------------------------------------------- */
 .vivid-topbar,
 .vivid-discovery-nav,
@@ -93,11 +110,11 @@
   border-bottom-color: var(--lg-stroke-strong) !important;
 }
 
-/* Nav links — subtle glass pills on hover / active */
 .vivid-navlinks a,
 .vivid-nav-action {
   border-radius: var(--lg-radius-sm) !important;
   transition: background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease !important;
+  pointer-events: auto !important;
 }
 
 .vivid-navlinks a:hover,
@@ -108,7 +125,7 @@
   box-shadow: inset 0 0 0 1px var(--lg-stroke) !important;
 }
 
-/* Search field — liquid glass capsule */
+/* Search capsule */
 .vivid-nav-search {
   border-radius: var(--lg-radius-pill) !important;
 }
@@ -120,6 +137,7 @@
   backdrop-filter: blur(16px) !important;
   -webkit-backdrop-filter: blur(16px) !important;
   transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease !important;
+  pointer-events: auto !important;
 }
 
 .vivid-nav-search:focus-within input,
@@ -130,9 +148,10 @@
 }
 
 /* --------------------------------------------------------------------------
-   Mobile bottom tabs — floating liquid glass pill (the main “tabs”)
+   Mobile bottom tabs — floating liquid glass pill
    -------------------------------------------------------------------------- */
 .vivid-mobile-nav {
+  position: relative; /* required for ::before */
   background: rgba(12, 14, 18, 0.72) !important;
   border: 1px solid var(--lg-stroke) !important;
   border-radius: 22px !important;
@@ -141,7 +160,7 @@
   box-shadow:
     0 12px 36px var(--lg-shadow-strong),
     inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
-  overflow: hidden;
+  /* no overflow:hidden — keeps tab hits reliable */
 }
 
 .vivid-mobile-nav::before {
@@ -155,13 +174,15 @@
     transparent 60%
   );
   mix-blend-mode: soft-light;
-  pointer-events: none;
+  pointer-events: none !important;
+  z-index: 0;
 }
 
 .vivid-mobile-nav a {
   position: relative;
   z-index: 1;
   border-radius: 14px;
+  pointer-events: auto !important;
   transition: color 0.2s ease, background 0.2s ease !important;
 }
 
@@ -175,7 +196,7 @@
 }
 
 /* --------------------------------------------------------------------------
-   Buttons — liquid glass treatment
+   Buttons — material only (no pointer-events / display changes)
    -------------------------------------------------------------------------- */
 .vivid-button--secondary,
 .vivid-button--ghost,
@@ -195,6 +216,8 @@
               background 0.2s ease,
               border-color 0.2s ease,
               box-shadow 0.2s ease !important;
+  pointer-events: auto !important;
+  cursor: pointer;
 }
 
 .vivid-button--secondary:hover,
@@ -213,10 +236,12 @@
 
 .vivid-button--primary {
   box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35) !important;
+  pointer-events: auto !important;
 }
 
 /* --------------------------------------------------------------------------
-   Movie / title cards — liquid glass edge + depth
+   Movie cards — edges + depth only (NO overflow, NO position change)
+   Atmosphere already owns ::after glow and hover transform.
    -------------------------------------------------------------------------- */
 .vivid-card,
 .vivid-feature-card {
@@ -225,6 +250,7 @@
   box-shadow:
     0 10px 28px var(--lg-shadow),
     inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+  /* deliberately no overflow, no position, no pointer-events */
 }
 
 .vivid-card:hover,
@@ -243,21 +269,11 @@
   border: 1px solid var(--lg-stroke) !important;
   backdrop-filter: blur(14px) !important;
   -webkit-backdrop-filter: blur(14px) !important;
+  pointer-events: none; /* decorative badges */
 }
 
 /* --------------------------------------------------------------------------
-   Search panel, release alerts, popovers
-   -------------------------------------------------------------------------- */
-.vivid-search-panel,
-.vivid-release-popover {
-  border-radius: var(--lg-radius) !important;
-  background: rgba(12, 14, 18, 0.82) !important;
-  border-color: var(--lg-stroke) !important;
-  box-shadow: 0 24px 70px var(--lg-shadow-strong) !important;
-}
-
-/* --------------------------------------------------------------------------
-   Catalogue chips / pills
+   Catalogue chips
    -------------------------------------------------------------------------- */
 .vivid-catalogue-chips a,
 .vivid-pill {
@@ -267,6 +283,7 @@
   backdrop-filter: blur(12px) !important;
   -webkit-backdrop-filter: blur(12px) !important;
   transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease !important;
+  pointer-events: auto !important;
 }
 
 .vivid-catalogue-chips a:hover,
@@ -277,15 +294,32 @@
 }
 
 /* --------------------------------------------------------------------------
-   Auth / account cards
+   Auth / account
    -------------------------------------------------------------------------- */
 .auth-container,
 .account-card {
   border-radius: var(--lg-radius-lg) !important;
+  position: relative;
 }
 
 /* --------------------------------------------------------------------------
-   Accessibility & reduced motion
+   Back button
+   -------------------------------------------------------------------------- */
+.vivid-page-back {
+  background: var(--lg-surface) !important;
+  border: 1px solid var(--lg-stroke) !important;
+  backdrop-filter: blur(14px) !important;
+  -webkit-backdrop-filter: blur(14px) !important;
+  pointer-events: auto !important;
+}
+
+.vivid-page-back:hover {
+  background: var(--lg-surface-strong) !important;
+  border-color: var(--lg-stroke-strong) !important;
+}
+
+/* --------------------------------------------------------------------------
+   Accessibility
    -------------------------------------------------------------------------- */
 @media (prefers-reduced-transparency: reduce) {
   .vivid-glass,
@@ -296,7 +330,11 @@
   .vivid-release-popover,
   .vivid-card,
   .vivid-button--secondary,
-  .vivid-nav-search input {
+  .vivid-nav-search input,
+  .vivid-filter-panel,
+  .vivid-collection-toolbar,
+  .account-card,
+  .auth-container {
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
     background: rgba(18, 20, 25, 0.94) !important;
@@ -309,23 +347,10 @@
   .vivid-button--secondary,
   .vivid-icon-button,
   .vivid-hero-control,
-  .vivid-catalogue-chips a {
+  .vivid-catalogue-chips a,
+  .vivid-rail-see-all,
+  .vivid-rail-load {
     transition: none !important;
     transform: none !important;
   }
-}
-
-/* --------------------------------------------------------------------------
-   Small refinements for consistency across pages
-   -------------------------------------------------------------------------- */
-.vivid-page-back {
-  background: var(--lg-surface) !important;
-  border: 1px solid var(--lg-stroke) !important;
-  backdrop-filter: blur(14px) !important;
-  -webkit-backdrop-filter: blur(14px) !important;
-}
-
-.vivid-page-back:hover {
-  background: var(--lg-surface-strong) !important;
-  border-color: var(--lg-stroke-strong) !important;
 }
