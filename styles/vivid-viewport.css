@@ -394,3 +394,41 @@ html[data-vivid-theme="light"].vivid-search-active body > *:not(.vivid-topbar):n
 @media(prefers-reduced-motion:reduce){
   html.vivid-search-active .vivid-search-panel{scroll-behavior:auto}
 }
+
+
+/* Search redesign: a proper, browser-wide search workspace. */
+html.vivid-search-active .vivid-search-panel{
+  top:var(--vivid-search-top,72px)!important;
+  display:block!important;
+  padding:18px max(var(--vivid-page-gutter),20px) 36px!important;
+  background:#080a0e!important;
+}
+.vivid-search-toolbar{display:flex;align-items:center;justify-content:space-between;gap:20px;max-width:980px;margin:0 auto;padding:2px 0 16px;border-bottom:1px solid rgba(255,255,255,.08)}
+.vivid-search-toolbar>div{min-width:0;display:flex;flex-direction:column;gap:4px}
+.vivid-search-eyebrow{font-size:.62rem;font-weight:800;letter-spacing:.16em;color:#7f8792}
+.vivid-search-toolbar strong{font-size:1.15rem;letter-spacing:-.02em;color:#f5f7fa}
+.vivid-search-toolbar>button{width:40px;height:40px;flex:0 0 40px;border:1px solid rgba(255,255,255,.12);border-radius:50%;background:rgba(255,255,255,.06);color:#fff;cursor:pointer}
+.vivid-search-helper,.vivid-search-context{max-width:980px;margin:14px auto;color:#858d98;font-size:.8rem}
+.vivid-search-section-label{max-width:980px;margin:20px auto 7px;color:#6f7783;font-size:.63rem;font-weight:800;letter-spacing:.14em}
+.vivid-search-results{max-width:980px;margin:0 auto;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.vivid-search-result{min-width:0;display:flex;align-items:center;gap:13px;padding:9px;border:1px solid rgba(255,255,255,.065);border-radius:12px;background:rgba(255,255,255,.025);color:#fff;text-decoration:none;transition:background .15s ease,border-color .15s ease,transform .15s ease}
+.vivid-search-result:hover,.vivid-search-result:focus-visible{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.14);transform:translateY(-1px);outline:none}
+.vivid-search-result img{width:48px;height:68px;flex:0 0 48px;object-fit:cover;border-radius:7px;background:#12151a}
+.vivid-search-result-copy{min-width:0;display:flex;flex-direction:column;gap:5px;flex:1}
+.vivid-search-result-copy strong{font-size:.88rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vivid-search-result-copy small{font-size:.7rem;color:#7f8792}
+.vivid-search-result>i{color:#737b86;font-size:.75rem}
+.vivid-search-recent{max-width:980px;margin:0 auto 4px;display:flex;align-items:center;gap:11px;width:100%;padding:11px 12px;border:0;border-radius:10px;background:transparent;color:#e9ebef;text-align:left;cursor:pointer;font:inherit}
+.vivid-search-recent:hover,.vivid-search-recent:focus-visible{background:rgba(255,255,255,.06);outline:none}.vivid-search-recent>i:last-child{margin-left:auto;color:#68717d}
+.vivid-search-status,.vivid-search-empty{max-width:980px;min-height:180px;margin:0 auto;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;text-align:center;color:#818995;font-size:.82rem}
+.vivid-search-empty strong{color:#dfe3e8;font-size:.95rem}.vivid-search-empty span{max-width:420px;line-height:1.5}
+.vivid-search-spinner{width:22px;height:22px;border:2px solid rgba(255,255,255,.16);border-top-color:#fff;border-radius:50%;animation:vivid-search-spin .75s linear infinite}@keyframes vivid-search-spin{to{transform:rotate(360deg)}}
+@media(max-width:640px){
+ html.vivid-search-active .vivid-search-panel{top:calc(60px + var(--vivid-safe-top,0px))!important;padding:12px 12px 28px!important}
+ .vivid-search-toolbar{padding-bottom:12px}.vivid-search-toolbar strong{font-size:1.02rem}
+ .vivid-search-results{grid-template-columns:1fr;gap:6px}
+ .vivid-search-result{min-height:70px}.vivid-search-result img{width:44px;height:62px;flex-basis:44px}
+}
+@media(prefers-reduced-motion:reduce){.vivid-search-result{transition:none}.vivid-search-spinner{animation:none}}
+html[data-vivid-theme="light"].vivid-search-active .vivid-search-panel{background:#f7f8fa!important;color:#10131a!important}
+html[data-vivid-theme="light"].vivid-search-active .vivid-search-toolbar strong,html[data-vivid-theme="light"].vivid-search-active .vivid-search-result{color:#10131a}
