@@ -26,6 +26,9 @@ let imdbId = "";
 let tmdbId = "";
 const PRIMARY_FALLBACK_MS = 5000;
 const ANIME_FALLBACK_MS = 3200;
+const YENIME_FALLBACK_MS = 3500;
+let malId = "";
+let animeProvider = false;
 
 function getParams() {
   const id = route.params.get("id");
@@ -53,6 +56,45 @@ function buildVidapiEmbedUrl(params, startAt = 0) {
   return params.type === "tv"
     ? base + "/embed/tv/" + encodeURIComponent(params.id) + "/" + params.season + "/" + params.episode + "?" + query
     : base + "/embed/movie/" + encodeURIComponent(params.id) + "?" + query;
+}
+
+function buildYenimeEmbedUrl(params, startAt = 0) {
+  const base = String(VIVID_CONFIG.api.yenimeEmbedBaseUrl || "").replace(/\\/+$/, "");
+  if (!malId) return "";
+  const query = new URLSearchParams({ autoplay: "true" });
+  if (Number(startAt) > 5) query.set("startAt", String(Math.floor(Number(startAt))));
+  return params.type === "tv"
+    ? base + "/embed/" + encodeURIComponent(malId) + "/" + params.episode + "?" + query
+    : base + "/embed/" + encodeURIComponent(malId) + "?" + query;
+}
+
+function animeTitleCandidates() {
+  return [...new Set([
+    details?.title, details?.name, details?.original_title, details?.original_name, media?.title
+  ].map(value => String(value || "").trim()).filter(Boolean))];
+}
+
+async function resolveAnimeMalId() {
+  if (!details || !animeProvider) return "";
+  const base = String(VIVID_CONFIG.api.jikanBaseUrl || "https://api.jikan.moe/v4").replace(/\\/+$/, "");
+  const year = Number(details.release_date?.slice(0, 4) || details.first_air_date?.slice(0, 4)) || 0;
+  for (const title of animeTitleCandidates().slice(0, 3)) {
+    try {
+      const response = await fetch(base + "/anime?" + new URLSearchParams({
+        q: title, type: currentParams?.type === "movie" ? "movie" : "tv", limit: "5", sfw: "true"
+      }), { headers: { Accept: "application/json" }, cache: "force-cache" });
+      if (!response.ok) continue;
+      const results = (await response.json())?.data || [];
+      const exact = results.find(item => {
+        const names = [item.title, item.title_english, item.title_japanese, ...(item.title_synonyms || [])]
+          .map(value => String(value || "").trim().toLowerCase()).filter(Boolean);
+        const itemYear = Number(item.year || item.aired?.from?.slice(0, 4)) || 0;
+        return names.includes(title.toLowerCase()) && (!year || !itemYear || Math.abs(itemYear - year) <= 1);
+      });
+      if (exact?.mal_id) return String(exact.mal_id);
+    } catch (_) {}
+  }
+  return "";
 }
 
 function buildVidsrcEmbedUrl(params) {
@@ -101,7 +143,7 @@ function clearFallbackTimer() {
 
 function updateSourceLabel() {
   const label = document.getElementById("player-source-label");
-  if (label) label.textContent = activeSource === "vidsrc" ? "Alternate source" : "Powered by VidAPI";
+  if (label) label.textContent = activeSource === "yenime" ? "Powered by Yenime" : activeSource === "vidsrc" ? "Alternate source" : "Powered by VidAPI";
   const switchBtn = document.getElementById("player-switch-source");
   if (switchBtn) {
     const canSwitch = hasFallbackId();
@@ -116,9 +158,23 @@ function setPlayerSource(source, params, startAt = 0) {
   clearFallbackTimer();
   activeSource = source;
   const status = $("player-status");
-  if (source === "vidsrc") {
+  if (source === "yenime") {
+    const url = buildYenimeEmbedUrl(params, startAt);
+    if (!url) {
+      setPlayerSource("vidapi", params, startAt);
+      return;
+    }
+    player.src = url;
+    if (status) {
+      status.textContent = "Loading anime source…";
+      status.classList.remove("is-warning");
+      status.hidden = false;
+    }
+    fallbackTimer = window.setTimeout(() => {
+      if (activeSource === "yenime") setPlayerSource("vidapi", params, startAt);
+    }, YENIME_FALLBACK_MS);
+  } else if (source === "vidsrc") {
     if (!hasFallbackId()) return;
-    primaryHealthy = false;
     player.src = buildVidsrcEmbedUrl(params);
     if (status) {
       status.textContent = "Loading alternate source…";
@@ -247,11 +303,11 @@ function renderShell(params) {
       triggerVidsrcFallback("iframe_error");
     });
     // Start on primary (TMDB / VidAPI). Fallback uses the same TMDB ID once metadata resolves.
-    setPlayerSource("vidapi", params, resumeAt);
+    setPlayerSource(animeProvider && malId ? "yenime" : "vidapi", params, resumeAt);
     const switchBtn = $("player-switch-source");
     if (switchBtn) {
       switchBtn.addEventListener("click", () => {
-        const next = activeSource === "vidsrc" ? "vidapi" : "vidsrc";
+        const next = activeSource === "yenime" ? "vidapi" : activeSource === "vidsrc" ? "vidapi" : animeProvider && malId ? "yenime" : "vidsrc";
         setPlayerSource(next, params, resumeAt);
       });
     }
@@ -379,6 +435,9 @@ async function load() {
     media = normalizeMedia(details, currentParams.type);
     imdbId = resolveImdbId(details);
     tmdbId = /^\d+$/.test(String(currentParams.id || "")) ? String(currentParams.id) : String(details?.id || "");
+    const genres = Array.isArray(details?.genres) ? details.genres : [];
+    animeProvider = genres.some(g => Number(g?.id) === 16 || String(g?.name || "").toLowerCase() === "animation");
+    if (animeProvider) malId = await resolveAnimeMalId();
     if (currentParams.type === "tv") {
       details.episode = await tmdbApi.tvSeason(currentParams.id, currentParams.season)
         .then(season => (season.episodes || []).find(ep => Number(ep.episode_number) === Number(currentParams.episode)) || null)
