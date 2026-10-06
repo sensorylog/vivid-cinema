@@ -622,18 +622,29 @@ function wireHeroSwipe(){
 }
 window.addEventListener("scroll",()=>{$("topbar")?.classList.toggle("is-scrolled",scrollY>18)},{passive:true});
 document.addEventListener("keydown",e=>{if(e.target.matches("input,textarea,select"))return;if(e.key==="ArrowLeft")showHero(activeIndex-1,true);if(e.key==="ArrowRight")showHero(activeIndex+1,true)});
-document.addEventListener("DOMContentLoaded",async()=>{
+document.addEventListener("DOMContentLoaded",()=>{
   startCinemaReminderLoop();
- // First-entry taste selection is a gate: new users choose a few titles (or skip)
- // before Vivid paints the main catalogue, so personalization is intentional from day one.
- const needsColdStart=shouldShowColdStart();
- if(needsColdStart)document.body.classList.add("vivid-onboarding-active");
- try{await startIntelligenceSync()}catch{}
- if(shouldShowColdStart())await maybeShowColdStart();
- if(needsColdStart)document.body.classList.remove("vivid-onboarding-active");
- wireRails();wireSearch();wireAlphabet();wireHeroSwipe();wireReleaseAlerts();
- initHero();loadHome();refreshReleaseAlerts();void refreshServerReleaseCenter();
- $("hero-prev")?.addEventListener("click",()=>showHero(activeIndex-1,true));
- $("hero-next")?.addEventListener("click",()=>showHero(activeIndex+1,true));
- $("hero-sound")?.addEventListener("click",toggleSound);$("hero-pause")?.addEventListener("click",togglePause);
+
+  // Paint Home immediately. Intelligence/auth sync is optional enrichment and must
+  // never be allowed to block the catalogue from loading.
+  wireRails();wireSearch();wireAlphabet();wireHeroSwipe();wireReleaseAlerts();
+  initHero();void loadHome();void refreshReleaseAlerts();void refreshServerReleaseCenter();
+  $("hero-prev")?.addEventListener("click",()=>showHero(activeIndex-1,true));
+  $("hero-next")?.addEventListener("click",()=>showHero(activeIndex+1,true));
+  $("hero-sound")?.addEventListener("click",toggleSound);
+  $("hero-pause")?.addEventListener("click",togglePause);
+
+  // Personalization runs in the background after the core Home UI has started.
+  void (async()=>{
+    const needsColdStart=shouldShowColdStart();
+    if(needsColdStart)document.body.classList.add("vivid-onboarding-active");
+    try{await Promise.race([
+      startIntelligenceSync(),
+      new Promise(resolve=>window.setTimeout(resolve,1800))
+    ])}catch{}
+    try{
+      if(shouldShowColdStart())await maybeShowColdStart();
+    }catch{}
+    if(needsColdStart)document.body.classList.remove("vivid-onboarding-active");
+  })();
 });
