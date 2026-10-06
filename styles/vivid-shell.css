@@ -98,3 +98,28 @@ html[data-network="offline"] [data-vivid-online-only]{display:none!important}
     text-overflow:ellipsis;
   }
 }
+
+
+/* Unified primary navigation: every content page uses the same information architecture as Home. */
+.vivid-unified-header{position:fixed;z-index:1000;top:0;left:0;right:0;padding:12px var(--vivid-page-gutter);background:rgba(7,8,11,.72);backdrop-filter:blur(22px) saturate(125%);-webkit-backdrop-filter:blur(22px);border-bottom:1px solid rgba(255,255,255,.08)}
+.vivid-unified-nav{width:min(100%,1440px);margin:auto;min-height:56px}
+.vivid-unified-nav .vivid-navlinks{display:flex;gap:4px;align-items:center}
+.vivid-unified-nav .vivid-navlinks a,.vivid-unified-nav .vivid-nav-action{display:inline-flex;align-items:center;gap:7px;color:#b8bdc7;text-decoration:none;padding:10px 12px;border-radius:12px;font-size:.9rem;background:transparent;border:0;cursor:pointer}
+.vivid-unified-nav .vivid-navlinks a:hover,.vivid-unified-nav .vivid-navlinks a[aria-current="page"],.vivid-unified-nav .vivid-nav-action:hover{color:#fff;background:rgba(255,255,255,.07)}
+.vivid-unified-nav .vivid-brand{margin-right:8px}
+@media(max-width:900px){
+  .vivid-unified-nav .vivid-navlinks{display:flex;overflow-x:auto;scrollbar-width:none;min-width:0}
+  .vivid-unified-nav .vivid-navlinks::-webkit-scrollbar{display:none}
+  .vivid-unified-nav .vivid-navlinks a{flex:0 0 auto}
+}
+@media(max-width:640px){
+  .vivid-unified-header{padding:8px 12px}
+  .vivid-unified-nav{min-height:50px;gap:8px}
+  .vivid-unified-nav .vivid-navlinks{display:none}
+  .vivid-unified-nav .vivid-nav-action{min-height:44px;padding:9px 10px}
+  .vivid-unified-header + main{padding-top:76px}
+  .vivid-unified-header ~ main{padding-top:76px}
+}
+html[data-vivid-theme="light"] .vivid-unified-header{background:rgba(255,255,255,.88);border-bottom-color:rgba(20,28,40,.12)}
+html[data-vivid-theme="light"] .vivid-unified-nav .vivid-navlinks a,html[data-vivid-theme="light"] .vivid-unified-nav .vivid-nav-action{color:#59616d}
+html[data-vivid-theme="light"] .vivid-unified-nav .vivid-navlinks a:hover,html[data-vivid-theme="light"] .vivid-unified-nav .vivid-navlinks a[aria-current="page"],html[data-vivid-theme="light"] .vivid-unified-nav .vivid-nav-action:hover{color:#10131a;background:rgba(20,28,40,.07)}
