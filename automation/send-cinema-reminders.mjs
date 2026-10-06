@@ -18,7 +18,9 @@ const snapshot=await db.collectionGroup("cinemaReminders")
   .get();
 
 let sent=0,failed=0;
-for(const reminderDoc of snapshot.docs){\n  const reminderDate=Date.parse(String(reminderDoc.data().when||""));\n  if(!Number.isFinite(reminderDate)||reminderDate>now)continue;
+for(const reminderDoc of snapshot.docs){
+  const reminderDate=Date.parse(String(reminderDoc.data().when||""));
+  if(!Number.isFinite(reminderDate)||reminderDate>now)continue;
   const reminder=reminderDoc.data();
   const userRef=reminderDoc.ref.parent.parent;
   if(!userRef)continue;
