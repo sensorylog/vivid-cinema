@@ -92,15 +92,24 @@ function sectionSignal(key){
  return labels[key]||"";
 }
 
+function formatRuntime(item){
+ const minutes=Number(item?.raw?.runtime||item?.runtime||0);
+ if(!Number.isFinite(minutes)||minutes<=0)return "";
+ const hours=Math.floor(minutes/60), mins=minutes%60;
+ return hours ? hours+"h"+(mins?" "+mins+"m":"") : minutes+"m";
+}
 function setHeroText(item){
  $("hero-title").textContent=item.title;
  $("hero-copy").textContent=item.overview||"Explore this title on Vivid Cinema.";
- $("hero-meta").innerHTML='<span>'+escapeHtml(item.year||"—")+'</span><span class="vivid-dot"></span><span>'+escapeHtml(item.media_type==="tv"?"TV Series":"Movie")+'</span><span class="vivid-dot"></span><span>★ '+Number(item.vote_average||0).toFixed(1)+'</span>';
+ const runtime=formatRuntime(item);
+ const meta=['<span>'+escapeHtml(item.year||"—")+'</span>','<span class="vivid-dot"></span>','<span>'+escapeHtml(item.media_type==="tv"?"TV Series":"Movie")+'</span>'];
+ if(runtime) meta.push('<span class="vivid-dot"></span>','<span>'+escapeHtml(runtime)+'</span>');
+ if(Number(item.vote_average||0)>0) meta.push('<span class="vivid-dot"></span>','<span>★ '+Number(item.vote_average).toFixed(1)+'</span>');
+ $("hero-meta").innerHTML=meta.join("");
  $("hero-watch").href=buildWatchUrl(item.id,item.media_type,item.media_type==="tv"?1:null,item.media_type==="tv"?1:null);
  $("hero-more").onclick=()=>location.href=getMediaUrl(item);
  $("hero-fallback").style.backgroundImage=item.backdrop_path?'url("'+getImageUrl(item.backdrop_path,"w1280")+'")':"none";
 }
-
 function youtubeUrl(key,muted=true){
  const params=new URLSearchParams({
    autoplay:"1",mute:muted?"1":"0",controls:"0",playsinline:"1",rel:"0",
