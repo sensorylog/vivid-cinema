@@ -252,3 +252,154 @@ body.vivid-atmosphere .vivid-nav-search{
     padding-bottom:68px!important;
   }
 }
+
+
+/* Vivid UI audit — final theme contrast + floating chrome pass.
+   Keep the header visually weightless: no glass slab, blur, shadow or separator.
+   Light mode is a real theme, not a white background behind dark-mode text. */
+body.vivid-atmosphere .vivid-topbar,
+body.vivid-atmosphere .vivid-discovery-nav,
+body.vivid-atmosphere .vivid-title-nav,
+body.vivid-atmosphere .vivid-library-nav,
+body.vivid-atmosphere .vivid-watch-nav{
+  background:transparent!important;
+  backdrop-filter:none!important;
+  -webkit-backdrop-filter:none!important;
+  border:0!important;
+  border-bottom:0!important;
+  box-shadow:none!important;
+}
+body.vivid-atmosphere .vivid-nav,
+body.vivid-atmosphere .vivid-discovery-nav,
+body.vivid-atmosphere .vivid-title-nav,
+body.vivid-atmosphere .vivid-library-nav,
+body.vivid-atmosphere .vivid-watch-nav{gap:clamp(8px,1vw,14px)!important}
+body.vivid-atmosphere .vivid-brand,
+body.vivid-atmosphere .vivid-site-brand{flex:0 0 auto!important;min-width:max-content!important;margin:0!important;text-shadow:none!important}
+body.vivid-atmosphere .vivid-navlinks{flex:0 1 auto!important;margin:0!important;gap:2px!important}
+body.vivid-atmosphere .vivid-navlinks a,
+body.vivid-atmosphere .vivid-discovery-nav nav a{padding:8px 10px!important}
+body.vivid-atmosphere .vivid-nav-search{flex:0 0 clamp(170px,20vw,260px)!important;width:clamp(170px,20vw,260px)!important;min-width:0!important;margin-left:auto!important;margin-right:0!important}
+body.vivid-atmosphere .vivid-nav-search input,
+body.vivid-atmosphere .vivid-discovery-search input{backdrop-filter:none!important;-webkit-backdrop-filter:none!important;box-shadow:none!important}
+body.vivid-atmosphere .vivid-notification-button,
+body.vivid-atmosphere .vivid-language,
+body.vivid-atmosphere a.vivid-nav-action,
+body.vivid-atmosphere .vivid-theme-toggle{margin-left:0!important;box-shadow:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+body.vivid-atmosphere .vivid-notification-button:hover,
+body.vivid-atmosphere a.vivid-nav-action:hover,
+body.vivid-atmosphere .vivid-theme-toggle:hover{box-shadow:none!important}
+@media (min-width:901px){
+  body.vivid-atmosphere .vivid-nav{min-height:52px!important;padding-inline:clamp(8px,1.2vw,18px)!important}
+  body.vivid-atmosphere .vivid-navlinks{max-width:max-content!important}
+  body.vivid-atmosphere .vivid-nav-search{margin-left:auto!important}
+}
+@media (max-width:900px){
+  body.vivid-atmosphere .vivid-nav{gap:8px!important}
+  body.vivid-atmosphere .vivid-nav-search{flex:0 0 40px!important;width:40px!important;min-width:40px!important}
+}
+
+/* Theme-safe page surfaces. */
+html[data-vivid-theme="light"] body.vivid-atmosphere,
+html[data-vivid-theme="light"] body.vivid-atmosphere .vivid-home,
+html[data-vivid-theme="light"] body.vivid-atmosphere .vivid-discovery-app,
+html[data-vivid-theme="light"] body.vivid-atmosphere .vivid-collection-app,
+html[data-vivid-theme="light"] body.vivid-atmosphere .vivid-library-app,
+html[data-vivid-theme="light"] body.vivid-atmosphere .vivid-title-app,
+html[data-vivid-theme="light"] body.vivid-atmosphere .vivid-watch-app{background:var(--vivid-bg)!important;color:var(--vivid-text)!important}
+html[data-vivid-theme="light"] body.vivid-atmosphere .vivid-feature-strip,
+html[data-vivid-theme="light"] body.vivid-atmosphere .vivid-footer{background:var(--vivid-bg)!important;color:var(--vivid-text-muted)!important;border-color:var(--vivid-border)!important}
+
+/* Common dark-mode text literals that previously survived the theme switch. */
+html[data-vivid-theme="light"] body.vivid-atmosphere :is(
+  .vivid-rail-head h2,.vivid-card-title,.vivid-discovery-copy strong,.vivid-collection-heading h2,
+  .vivid-library-header h1,.vivid-library-card strong,.vivid-library-empty h2,.vivid-results-head h2,
+  .vivid-title-copy h1,.vivid-section-heading h2,.vivid-watch-head h1,.vivid-watch-recommendations h2,
+  .account-header h1,.account-card h2,.auth-container h1
+){color:var(--vivid-text)!important}
+html[data-vivid-theme="light"] body.vivid-atmosphere :is(
+  .vivid-rail-head p,.vivid-card-sub,.vivid-discovery-copy small,.vivid-discovery-empty,.vivid-discovery-error,
+  .vivid-collection-intro p,.vivid-collection-heading p,.vivid-library-header p,.vivid-library-empty,
+  .vivid-title-copy p,.vivid-watch-head p,.vivid-watch-note,.vivid-watch-error p,.account-header p,
+  .account-field label,.account-status,.account-toggle small,.auth-container>p,.auth-switch,.auth-help-row
+){color:var(--vivid-text-muted)!important}
+
+/* Light controls: readable text, real borders, no dark-mode white-on-white. */
+html[data-vivid-theme="light"] body.vivid-atmosphere :is(
+  .vivid-filter-panel,.vivid-collection-toolbar,.vivid-library-tabs,.vivid-search-panel,.vivid-release-popover,
+  .account-card,.auth-container,.vivid-collection-card,.vivid-discovery-empty,.vivid-discovery-error
+){
+  color:var(--vivid-text)!important;background:rgba(255,255,255,.92)!important;border-color:var(--vivid-border)!important;
+  box-shadow:0 12px 34px rgba(20,28,40,.08)!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important
+}
+html[data-vivid-theme="light"] body.vivid-atmosphere :is(
+  .vivid-input,.vivid-select,.vivid-filter-row select,.vivid-collection-toolbar select,.vivid-collection-toolbar>button,
+  .account-field input,.account-field select,.auth-container input,.vivid-season-select-wrap select
+){
+  color:var(--vivid-text)!important;background:#fff!important;border-color:var(--vivid-border)!important;
+  -webkit-text-fill-color:var(--vivid-text)!important;box-shadow:none!important
+}
+html[data-vivid-theme="light"] body.vivid-atmosphere :is(
+  .vivid-input::placeholder,.vivid-nav-search input::placeholder,.vivid-discovery-search input::placeholder
+){color:var(--vivid-text-subtle)!important;-webkit-text-fill-color:var(--vivid-text-subtle)!important;opacity:1!important}
+html[data-vivid-theme="light"] body.vivid-atmosphere :is(
+  .vivid-button--secondary,.vivid-button--ghost,.vivid-icon-button,.vivid-rail-controls button,.vivid-rail-see-all,
+  .vivid-rail-load,.vivid-page-back,.vivid-mode-chip,.vivid-provider-chip,.vivid-catalogue-chips a,.vivid-pill,.vivid-type-row
+){
+  color:var(--vivid-text)!important;background:rgba(20,28,40,.045)!important;border-color:var(--vivid-border)!important;
+  box-shadow:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important
+}
+html[data-vivid-theme="light"] body.vivid-atmosphere :is(
+  .vivid-button--secondary:hover,.vivid-button--ghost:hover,.vivid-mode-chip:hover,.vivid-mode-chip.is-active,
+  .vivid-provider-chip:hover,.vivid-provider-chip.is-active,.vivid-catalogue-chips a:hover,.vivid-rail-see-all:hover,.vivid-rail-load:hover
+){color:var(--vivid-text)!important;background:rgba(20,28,40,.09)!important;border-color:var(--vivid-border-strong)!important}
+html[data-vivid-theme="light"] body.vivid-atmosphere .vivid-search-result,
+html[data-vivid-theme="light"] body.vivid-atmosphere .vivid-search-recent{color:var(--vivid-text)!important}
+html[data-vivid-theme="light"] body.vivid-atmosphere .vivid-search-result:hover,
+html[data-vivid-theme="light"] body.vivid-atmosphere .vivid-search-recent:hover{background:rgba(20,28,40,.06)!important}
+html[data-vivid-theme="light"] body.vivid-atmosphere .vivid-search-result small{color:var(--vivid-text-muted)!important}
+
+/* Light-mode cards keep artwork strong while making surrounding copy legible. */
+html[data-vivid-theme="light"] body.vivid-atmosphere :is(
+  .vivid-card,.vivid-feature-card,.vivid-discovery-poster,.vivid-library-card,.vivid-video-card,.vivid-similar-card
+){border-color:var(--vivid-border)!important;background:#fff!important;box-shadow:0 10px 28px rgba(20,28,40,.08)!important}
+html[data-vivid-theme="light"] body.vivid-atmosphere .vivid-library-card>a{background:#fff!important;border-color:var(--vivid-border)!important;box-shadow:none!important}
+html[data-vivid-theme="light"] body.vivid-atmosphere .vivid-rating,
+html[data-vivid-theme="light"] body.vivid-atmosphere .vivid-card-signal,
+html[data-vivid-theme="light"] body.vivid-atmosphere .vivid-discovery-rating{
+  color:var(--vivid-text)!important;background:rgba(255,255,255,.94)!important;border-color:var(--vivid-border)!important;
+  box-shadow:0 4px 14px rgba(20,28,40,.08)!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important
+}
+
+/* Keep cinematic media surfaces dark; light mode applies to the chrome around them. */
+html[data-vivid-theme="light"] body.vivid-atmosphere :is(.vivid-hero,.vivid-hero-media,.vivid-watch-backdrop,.vivid-player-frame){background:#090a0d!important}
+html[data-vivid-theme="light"] body.vivid-atmosphere .vivid-hero-title,
+html[data-vivid-theme="light"] body.vivid-atmosphere .vivid-hero-copy,
+html[data-vivid-theme="light"] body.vivid-atmosphere .vivid-kicker,
+html[data-vivid-theme="light"] body.vivid-atmosphere .vivid-meta{color:#f5f7fa!important}
+html[data-vivid-theme="light"] body.vivid-atmosphere .vivid-footer-links a{color:var(--vivid-text-muted)!important}
+html[data-vivid-theme="light"] body.vivid-atmosphere .vivid-footer-links a:hover{color:var(--vivid-text)!important}
+
+/* Floating header items: brand, search, bell, account and theme control sit directly on the page. */
+html[data-vivid-theme="light"] body.vivid-atmosphere .vivid-brand,
+html[data-vivid-theme="light"] body.vivid-atmosphere .vivid-site-brand{color:var(--vivid-text)!important}
+html[data-vivid-theme="light"] body.vivid-atmosphere .vivid-brand span,
+html[data-vivid-theme="light"] body.vivid-atmosphere .vivid-site-brand .vivid-brand-wordmark>span{color:var(--vivid-text-muted)!important}
+html[data-vivid-theme="light"] body.vivid-atmosphere :is(.vivid-notification-button,a.vivid-nav-action,.vivid-theme-toggle){
+  color:var(--vivid-text)!important;background:transparent!important;border-color:transparent!important
+}
+html[data-vivid-theme="light"] body.vivid-atmosphere :is(.vivid-notification-button:hover,a.vivid-nav-action:hover,.vivid-theme-toggle:hover){
+  color:var(--vivid-text)!important;background:rgba(20,28,40,.06)!important
+}
+html[data-vivid-theme="light"] body.vivid-atmosphere .vivid-nav-search input{
+  color:var(--vivid-text)!important;background:rgba(255,255,255,.82)!important;border-color:rgba(20,28,40,.14)!important;
+  -webkit-text-fill-color:var(--vivid-text)!important;box-shadow:none!important
+}
+@media(max-width:900px){html[data-vivid-theme="light"] body.vivid-atmosphere .vivid-nav-search input{background:transparent!important;border-color:transparent!important}}
+html[data-vivid-theme="light"] body.vivid-atmosphere select option{background:#fff!important;color:#10131a!important}
+@media(prefers-reduced-transparency:reduce){
+  body.vivid-atmosphere .vivid-topbar,body.vivid-atmosphere .vivid-discovery-nav,body.vivid-atmosphere .vivid-title-nav,
+  body.vivid-atmosphere .vivid-library-nav,body.vivid-atmosphere .vivid-watch-nav{
+    background:transparent!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;box-shadow:none!important
+  }
+}
