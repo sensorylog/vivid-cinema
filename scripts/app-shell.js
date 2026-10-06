@@ -53,7 +53,7 @@ function syncVividBranding() {
 
 function initThemeToggle() {
   const root = document.documentElement;
-  const nav = document.querySelector(".vivid-nav, .vivid-discovery-nav, .vivid-library-nav, .vivid-title-nav, .vivid-watch-nav, .landing-header");
+  const nav = document.querySelector(".vivid-unified-nav, .vivid-nav, .vivid-discovery-nav, .vivid-library-nav, .vivid-title-nav, .vivid-watch-nav, .landing-header");
   if (!nav || nav.querySelector(".vivid-theme-toggle")) return;
 
   const button = document.createElement("button");
@@ -90,6 +90,7 @@ function setPageIdentity() {
 }
 
 function ensureBackControl() {
+  // Keep an existing page-specific Back control; create one only when a page lacks it.
   const main=document.querySelector("main");
   if(!main || document.querySelector("[data-vivid-back]")) return;
   const page=document.body?.dataset?.vividPage||"";
