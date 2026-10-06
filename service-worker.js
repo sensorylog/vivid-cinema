@@ -1,4 +1,4 @@
-const CACHE_NAME = "vivid-cinema-shell-v46";
+const CACHE_NAME = "vivid-cinema-shell-v47";
 const APP_SHELL = [
   "./","./index.html","./home.html","./person.html","./discover.html","./collection.html","./title.html","./watch.html",
   "./library.html","./auth.html","./login.html","./forgot-password.html","./account.html","./terms.html","./privacy.html","./contact.html",
@@ -6,7 +6,7 @@ const APP_SHELL = [
   "./styles/vivid-foundation.css","./styles/vivid-system.css","./styles/vivid-shell.css","./styles/vivid-cinematic.css",
   "./styles/vivid-title.css","./styles/vivid-watch.css","./styles/vivid-library.css","./styles/vivid-discovery.css",
   "./styles/vivid-collection.css","./styles/vivid-auth.css","./styles/vivid-account.css","./styles/vivid-pwa.css",
-  "./styles/vivid-atmosphere.css","./styles/vivid-landing.css","./styles/vivid-viewport.css",
+  "./styles/vivid-atmosphere.css","./styles/vivid-liquid-glass.css","./styles/vivid-landing.css","./styles/vivid-viewport.css",
   "./styles/vivid-legal.css","./styles.css","./scripts/app-shell.js","./scripts/pwa.js",
   "./scripts/atmosphere.js","./scripts/i18n.js","./scripts/routes.js",
   "./scripts/config.js","./scripts/utils.js","./scripts/content.js","./scripts/media.js","./scripts/tmdb.js",
@@ -63,26 +63,53 @@ async function staleWhileRevalidate(request){
   return cached||await refresh||new Response("",{status:504,statusText:"Offline"});
 }
 
-\nself.addEventListener("push",event=>{\n  event.waitUntil((async()=>{\n    let data={};\n    try{data=event.data?.json?.()||{}}catch{try{data=JSON.parse(event.data?.text?.()||"{}")}catch{}}\n    const title=data.title||"Vivid Cinema";\n    const options={\n      body:data.body||"Your Vivid Cinema reminder is ready.",\n      icon:"./icons/vivid-icon.svg",\n      badge:"./icons/vivid-icon.svg",\n      tag:data.tag||"vivid-cinema-reminder",\n      renotify:false,\n      data:{url:data.url||"./home.html"}\n    };\n    await self.registration.showNotification(title,options);\n  })());\n});\n\nself.addEventListener("fetch",event=>{
-  const request=event.request;
-  if(request.method!=="GET")return;
-  const url=new URL(request.url);
-  if(url.origin!==self.location.origin)return;
-  if(request.mode==="navigate"){
+self.addEventListener("push", event => {
+  event.waitUntil((async () => {
+    let data = {};
+    try {
+      data = event.data?.json?.() || {};
+    } catch {
+      try {
+        data = JSON.parse(event.data?.text?.() || "{}");
+      } catch {}
+    }
+    const title = data.title || "Vivid Cinema";
+    const options = {
+      body: data.body || "Your Vivid Cinema reminder is ready.",
+      icon: "./icons/vivid-icon.svg",
+      badge: "./icons/vivid-icon.svg",
+      tag: data.tag || "vivid-cinema-reminder",
+      renotify: false,
+      data: { url: data.url || "./home.html" }
+    };
+    await self.registration.showNotification(title, options);
+  })());
+});
+
+self.addEventListener("fetch", event => {
+  const request = event.request;
+  if (request.method !== "GET") return;
+  const url = new URL(request.url);
+  if (url.origin !== self.location.origin) return;
+  if (request.mode === "navigate") {
     event.respondWith(networkFirst(request));
     return;
   }
-  const isCodeOrStyle=/\.(?:js|css|html)$/.test(url.pathname);
-  event.respondWith(isCodeOrStyle?networkFirst(request):staleWhileRevalidate(request));
+  const isCodeOrStyle = /\.(?:js|css|html)$/.test(url.pathname);
+  event.respondWith(isCodeOrStyle ? networkFirst(request) : staleWhileRevalidate(request));
 });
 
-
-self.addEventListener("notificationclick",event=>{
+self.addEventListener("notificationclick", event => {
   event.notification.close();
-  const target=event.notification.data?.url||"./home.html";
-  event.waitUntil(clients.matchAll({type:"window",includeUncontrolled:true}).then(list=>{
-    const existing=list.find(client=>client.url.includes(self.location.origin));
-    if(existing){existing.navigate(new URL(target,self.location.origin).href);return existing.focus();}
-    return clients.openWindow(new URL(target,self.location.origin).href);
-  }));
+  const target = event.notification.data?.url || "./home.html";
+  event.waitUntil(
+    clients.matchAll({ type: "window", includeUncontrolled: true }).then(list => {
+      const existing = list.find(client => client.url.includes(self.location.origin));
+      if (existing) {
+        existing.navigate(new URL(target, self.location.origin).href);
+        return existing.focus();
+      }
+      return clients.openWindow(new URL(target, self.location.origin).href);
+    })
+  );
 });
