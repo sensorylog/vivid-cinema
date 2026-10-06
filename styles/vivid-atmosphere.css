@@ -557,3 +557,108 @@ body.vivid-atmosphere .vivid-library-page .vivid-library-card{
 @media(prefers-reduced-motion:reduce){
   .vivid-onboarding-card.is-selected{transform:none}
 }
+
+
+/* Vivid Cinema critical UI consistency pass.
+   Final cascade: cards stay anchored; depth comes from light/shadow, not layout scaling. */
+body.vivid-atmosphere .vivid-card,
+body.vivid-atmosphere .vivid-feature-card,
+body.vivid-atmosphere .landing-poster{
+  transform:none!important;
+  transition:
+    box-shadow var(--vivid-duration-ui) var(--vivid-motion),
+    border-color var(--vivid-duration-ui) ease,
+    filter var(--vivid-duration-ui) ease;
+}
+@media(hover:hover) and (pointer:fine){
+  body.vivid-atmosphere .vivid-card:hover,
+  body.vivid-atmosphere .vivid-card:focus-visible{
+    transform:translateY(-4px)!important;
+    box-shadow:0 22px 54px rgba(0,0,0,.34),inset 0 1px 0 var(--vivid-highlight)!important;
+  }
+  body.vivid-atmosphere .vivid-feature-card:hover,
+  body.vivid-atmosphere .vivid-feature-card:focus-visible,
+  body.vivid-atmosphere .vivid-feature-card.is-active{
+    transform:translateY(-4px)!important;
+  }
+}
+@media(max-width:640px){
+  body.vivid-atmosphere .vivid-card,
+  body.vivid-atmosphere .vivid-card:hover,
+  body.vivid-atmosphere .vivid-card:focus-visible,
+  body.vivid-atmosphere .vivid-feature-card,
+  body.vivid-atmosphere .vivid-feature-card:hover,
+  body.vivid-atmosphere .vivid-feature-card:focus-visible,
+  body.vivid-atmosphere .vivid-feature-card.is-active{
+    transform:none!important;
+  }
+}
+
+/* Shared controls: every page gets the same tactile glass language. */
+body.vivid-atmosphere .vivid-button,
+body.vivid-atmosphere .vivid-icon-button,
+body.vivid-atmosphere .vivid-mode-chip,
+body.vivid-atmosphere .vivid-provider-chip,
+body.vivid-atmosphere .vivid-filter-panel select,
+body.vivid-atmosphere .vivid-collection-toolbar select{
+  border-color:var(--vivid-border);
+  border-radius:var(--vivid-radius-sm);
+  box-shadow:inset 0 1px 0 var(--vivid-highlight);
+}
+body.vivid-atmosphere .vivid-button:hover,
+body.vivid-atmosphere .vivid-icon-button:hover,
+body.vivid-atmosphere .vivid-mode-chip:hover,
+body.vivid-atmosphere .vivid-provider-chip:hover{
+  border-color:var(--vivid-border-strong);
+}
+body.vivid-atmosphere .vivid-button--primary{
+  background:var(--vivid-accent);
+  color:var(--vivid-bg);
+}
+html[data-vivid-theme="light"] body.vivid-atmosphere .vivid-button--primary{
+  background:#10131a;
+  color:#fff;
+}
+
+/* Light theme: preserve cinematic depth without turning the UI flat white. */
+html[data-vivid-theme="light"] body.vivid-atmosphere{
+  background:
+    radial-gradient(900px 560px at 10% 0%,rgba(150,170,205,.16),transparent 65%),
+    radial-gradient(800px 520px at 92% 8%,rgba(190,200,220,.18),transparent 64%),
+    #f2f4f7!important;
+}
+html[data-vivid-theme="light"] body.vivid-atmosphere .vivid-topbar,
+html[data-vivid-theme="light"] body.vivid-atmosphere .vivid-discovery-nav,
+html[data-vivid-theme="light"] body.vivid-atmosphere .vivid-title-nav,
+html[data-vivid-theme="light"] body.vivid-atmosphere .vivid-library-nav,
+html[data-vivid-theme="light"] body.vivid-atmosphere .vivid-watch-nav{
+  background:rgba(255,255,255,.62)!important;
+  border-color:rgba(20,28,40,.11)!important;
+  box-shadow:0 12px 36px rgba(20,28,40,.09),inset 0 1px rgba(255,255,255,.9)!important;
+}
+html[data-vivid-theme="light"] body.vivid-atmosphere .vivid-card,
+html[data-vivid-theme="light"] body.vivid-atmosphere .vivid-feature-card,
+html[data-vivid-theme="light"] body.vivid-atmosphere .vivid-provider-group,
+html[data-vivid-theme="light"] body.vivid-atmosphere .vivid-library-tabs{
+  background:rgba(255,255,255,.72)!important;
+  border-color:rgba(20,28,40,.11)!important;
+  box-shadow:0 16px 42px rgba(20,28,40,.09),inset 0 1px rgba(255,255,255,.9)!important;
+}
+html[data-vivid-theme="light"] body.vivid-atmosphere .vivid-card-title,
+html[data-vivid-theme="light"] body.vivid-atmosphere .vivid-rail-head h2,
+html[data-vivid-theme="light"] body.vivid-atmosphere .vivid-section-heading h2,
+html[data-vivid-theme="light"] body.vivid-atmosphere .vivid-library-header h1,
+html[data-vivid-theme="light"] body.vivid-atmosphere .vivid-discovery-intro h1,
+html[data-vivid-theme="light"] body.vivid-atmosphere .account-header h1{
+  color:#10131a!important;
+}
+html[data-vivid-theme="light"] body.vivid-atmosphere p,
+html[data-vivid-theme="light"] body.vivid-atmosphere .vivid-card-sub{
+  color:#606875!important;
+}
+
+/* Keep focus accessible in both themes. */
+body.vivid-atmosphere :where(a,button,input,select,textarea,[tabindex]):focus-visible{
+  outline:2px solid var(--vivid-focus);
+  outline-offset:3px;
+}
