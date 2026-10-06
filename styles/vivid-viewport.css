@@ -262,3 +262,34 @@ body.vivid-cinema-home,
     transform:none!important;
   }
 }
+
+
+/* Apple-TV-style scrolling discipline: cards never shift while the finger is moving. */
+.vivid-rail,.vivid-feature-track{
+  transform:translateZ(0);
+  will-change:scroll-position;
+  scroll-behavior:smooth;
+  scrollbar-width:none;
+  -ms-overflow-style:none;
+}
+.vivid-rail::-webkit-scrollbar,.vivid-feature-track::-webkit-scrollbar{display:none}
+.vivid-rail .vivid-card,.vivid-feature-track .vivid-feature-card{
+  transform:translateZ(0)!important;
+  transition:opacity .18s ease,filter .18s ease;
+}
+.vivid-rail .vivid-card:hover,.vivid-rail .vivid-card:focus,.vivid-rail .vivid-card:focus-visible,
+.vivid-feature-track .vivid-feature-card:hover,.vivid-feature-track .vivid-feature-card:focus,.vivid-feature-track .vivid-feature-card:focus-visible{
+  transform:translateZ(0)!important;
+}
+@media(pointer:coarse){
+  .vivid-rail,.vivid-feature-track{
+    scroll-snap-type:x proximity;
+    scroll-padding-inline:var(--vivid-page-gutter);
+    overscroll-behavior-x:contain;
+    touch-action:pan-x;
+  }
+  .vivid-rail .vivid-card,.vivid-feature-track .vivid-feature-card{
+    scroll-snap-align:start;
+  }
+}
+.vivid-rail::after{content:"";flex:0 0 var(--vivid-page-gutter)}
