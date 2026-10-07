@@ -2184,3 +2184,40 @@ body{font-weight:400;}
     transform:none;
   }
 }
+
+/* Final Apple-TV-style viewport lock: this file loads last, so it owns the final rail behavior. */
+html,
+body{
+  min-width:320px!important;
+  max-width:100%!important;
+  overflow-x:hidden!important;
+  overscroll-behavior-x:none!important;
+}
+.vivid-rail,
+.vivid-feature-track{
+  max-width:100%!important;
+  box-sizing:border-box!important;
+  scroll-padding-inline:0!important;
+  overscroll-behavior-x:none!important;
+  touch-action:pan-x!important;
+}
+.vivid-rail::after,
+.vivid-cinema-home .vivid-rail::after{
+  content:none!important;
+  display:none!important;
+}
+.vivid-rail{
+  padding-right:0!important;
+}
+.vivid-feature-track{
+  padding-right:0!important;
+}
+@media(pointer:coarse){
+  .vivid-rail,
+  .vivid-feature-track{
+    scroll-snap-type:x mandatory!important;
+    scroll-padding-inline:0!important;
+    overscroll-behavior-x:none!important;
+    touch-action:pan-x!important;
+  }
+}
