@@ -81,16 +81,6 @@ function renderTrailerSection(details) {
     '</div></section>';
 }
 
-function isAnimeTitle(details) {
-  const genres = Array.isArray(details?.genres) ? details.genres : [];
-  const animation = genres.some(g => Number(g?.id) === 16 || String(g?.name || "").toLowerCase() === "animation");
-  return animation && String(details?.original_language || "").toLowerCase() === "ja";
-}
-
-function renderAnimeProvider() {
-  return '<section class="vivid-title-section vivid-anime-provider"><div class="vivid-section-heading"><div><span>WATCH ANIME</span><h2>Powered by Yenime</h2></div></div><div class="vivid-anime-provider-card"><i class="bi bi-stars" aria-hidden="true"></i><div><strong>Yenime is the anime player.</strong><p>Anime playback on Vivid uses Yenime only. Choose an episode above and Vivid will open the Yenime embed.</p></div><span>YENIME</span></div></section>';
-}
-
 function renderProviderGroups(details, countryCode) {
   const country = details["watch/providers"]?.results?.[countryCode];
   const availableCountries = details["watch/providers"]?.results || {};
@@ -136,7 +126,7 @@ async function loadSeason(id, seasonNumber) {
   try {
     const data = await tmdbApi.tvSeason(id, seasonNumber);
     const episodes = data.episodes || [];
-    container.innerHTML = episodes.length ? episodes.map((episode) => '<article class="vivid-episode"><div class="vivid-episode-thumb"><img loading="lazy" src="' + getImageUrl(episode.still_path, "w500") + '" alt="" onerror="this.style.visibility=\'hidden\'"></div><div class="vivid-episode-copy"><div class="vivid-episode-line"><strong>Episode ' + episode.episode_number + '</strong><span>★ ' + (episode.vote_average ? Number(episode.vote_average).toFixed(1) : "—") + '</span></div><h3>' + escapeHtml(episode.name || ("Episode " + episode.episode_number)) + '</h3><small>' + escapeHtml(episode.air_date || "Air date unavailable") + '</small><p>' + escapeHtml(episode.overview || "No episode synopsis is available.") + '</p><a class="vivid-button vivid-button--secondary vivid-episode-watch" href="' + escapeHtml(buildWatchUrl(media.id, "tv", seasonNumber, episode.episode_number)+(isAnimeTitle(details)?"&anime=1":"")) + '"><i class="bi bi-play-fill"></i> Play episode</a></div></article>').join("") : '<p class="vivid-muted">No episodes are available for this season.</p>';
+    container.innerHTML = episodes.length ? episodes.map((episode) => '<article class="vivid-episode"><div class="vivid-episode-thumb"><img loading="lazy" src="' + getImageUrl(episode.still_path, "w500") + '" alt="" onerror="this.style.visibility=\'hidden\'"></div><div class="vivid-episode-copy"><div class="vivid-episode-line"><strong>Episode ' + episode.episode_number + '</strong><span>★ ' + (episode.vote_average ? Number(episode.vote_average).toFixed(1) : "—") + '</span></div><h3>' + escapeHtml(episode.name || ("Episode " + episode.episode_number)) + '</h3><small>' + escapeHtml(episode.air_date || "Air date unavailable") + '</small><p>' + escapeHtml(episode.overview || "No episode synopsis is available.") + '</p><a class="vivid-button vivid-button--secondary vivid-episode-watch" href="' + escapeHtml(buildWatchUrl(media.id, "tv", seasonNumber, episode.episode_number)) + '"><i class="bi bi-play-fill"></i> Play episode</a></div></article>').join("") : '<p class="vivid-muted">No episodes are available for this season.</p>';
   } catch (error) {
     container.innerHTML = '<p class="vivid-muted">' + escapeHtml(getErrorMessage(error)) + '</p>';
   }
@@ -207,6 +197,8 @@ function renderRecommendationCards(items){
     : '<p class="vivid-muted">No recommendations available yet.</p>';
 }
 
+function isAnimeTitle(details) { return (details?.genres || []).some(g => Number(g?.id) === 16) && String(details?.original_language || "").toLowerCase() === "ja"; }
+
 function render(details) {
   currentDetails=details;
   media=normalizeMedia(details,route.params.get("type")==="tv"?"tv":"movie");
@@ -224,25 +216,24 @@ function render(details) {
   const recommendations=normalizeResults(details.recommendations?.results||[],media.media_type).slice(0,12);
   const similar=normalizeResults(details.similar?.results||[],media.media_type).slice(0,12);
   const related=recommendations.length?recommendations:similar;
-  const isAnime=isAnimeTitle(details);
-  const watchUrl=buildWatchUrl(media.id,media.media_type,media.media_type==="tv"?(details.seasons?.find((season)=>season.episode_count>0&&season.season_number>=0)?.season_number??1):null,media.media_type==="tv"?1:null)+(isAnime?"&anime=1":"");
+  const titleWatchUrl=buildWatchUrl(media.id,media.media_type,media.media_type==="tv"?(details.seasons?.find((season)=>season.episode_count>0&&season.season_number>=0)?.season_number??1):null,media.media_type==="tv"?1:null)+(isAnimeTitle(details)?"&anime=1":"");
 
   document.title=title+" · Vivid Cinema";
   const country=getInitialCountry(details);
   $("title-content").innerHTML=
-    '<section class="vivid-title-backdrop"><img class="vivid-title-backdrop-image" src="'+getImageUrl(media.backdrop_path || media.poster_path,"original")+'" alt="" aria-hidden="true" onerror="this.onerror=null;this.src='+JSON.stringify(getImageUrl(media.poster_path,"w780"))+'"><div class="vivid-title-backdrop-overlay"></div><div class="vivid-title-backdrop-label">'+(media.media_type==="tv"?"SERIES":"FEATURE")+'</div></section>'+
+    '<section class="vivid-title-backdrop" style="--title-backdrop:url('+JSON.stringify(getImageUrl(media.backdrop_path,"w1280"))+')"><div class="vivid-title-backdrop-overlay"></div><div class="vivid-title-backdrop-label">'+(media.media_type==="tv"?"SERIES":"FEATURE")+'</div></section>'+
     '<section class="vivid-title-info"><div class="vivid-title-info-inner">'+
-      '<div class="vivid-title-poster"><img src="'+getImageUrl(media.poster_path || media.backdrop_path,"w500")+'" alt="'+escapeHtml(title)+' poster" onerror="this.onerror=null;this.src=\'icons/vivid-icon.svg\'"></div>'+
+      '<div class="vivid-title-poster"><img src="'+getImageUrl(media.poster_path,"w500")+'" alt="'+escapeHtml(title)+' poster"></div>'+
       '<div class="vivid-title-copy"><span class="vivid-title-kicker">'+(media.media_type==="tv"?"TV SERIES":"MOVIE")+'</span><h1>'+escapeHtml(title)+'</h1>'+
       '<div class="vivid-title-meta"><span>'+escapeHtml(year)+'</span>'+(runtime?'<i></i><span>'+escapeHtml(runtime)+'</span>':"")+'<i></i><span>★ '+rating+'</span></div>'+
       '<div class="vivid-title-genres">'+genres+'</div><p>'+escapeHtml(media.overview||"No synopsis is available for this title yet.")+'</p>'+
-      '<div class="vivid-title-actions"><a class="vivid-button vivid-button--primary" href="'+escapeHtml(watchUrl)+'"><i class="bi bi-play-fill"></i> Watch now</a>'+(firstTrailer?'<button class="vivid-button vivid-button--secondary" id="hero-trailer" type="button"><i class="bi bi-play-circle"></i> Watch trailer</button>':"")+'<a class="vivid-button vivid-button--ghost" href="home.html"><i class="bi bi-arrow-left"></i> Browse more</a></div></div>'+
+      '<div class="vivid-title-actions"><a class="vivid-button vivid-button--primary" href="'+escapeHtml(titleWatchUrl)+'"><i class="bi bi-play-fill"></i> Watch now</a>'+(firstTrailer?'<button class="vivid-button vivid-button--secondary" id="hero-trailer" type="button"><i class="bi bi-play-circle"></i> Watch trailer</button>':"")+'<a class="vivid-button vivid-button--ghost" href="home.html"><i class="bi bi-arrow-left"></i> Browse more</a></div></div>'+
     '</div></section>'+
     renderLibraryActions()+
     renderTrailerSection(details)+
     '<section class="vivid-title-section"><div class="vivid-section-heading"><div><span>CAST</span><h2>People in the story</h2></div></div><div class="vivid-cast-grid">'+
-      (cast.length?cast.map((person)=>'<a class="vivid-cast" href="person.html?id='+encodeURIComponent(person.id)+'" aria-label="View '+escapeHtml(person.name)+'"><img loading="lazy" src="'+getImageUrl(person.profile_path,"w185")+'" alt="'+escapeHtml(person.name)+'"><strong>'+escapeHtml(person.name)+'</strong><small>'+escapeHtml(person.character||"Cast")+'</small></a>').join(""):'<p class="vivid-muted">Cast information is unavailable.</p>')+
-    '</div></section>'+renderSeasons(details)+(isAnimeTitle(details)?renderAnimeProvider():renderProviderGroups(details,country))+
+      (cast.length?cast.map((person)=>'<article class="vivid-cast"><img loading="lazy" src="'+getImageUrl(person.profile_path,"w185")+'" alt="'+escapeHtml(person.name)+'"><strong>'+escapeHtml(person.name)+'</strong><small>'+escapeHtml(person.character||"Cast")+'</small></article>').join(""):'<p class="vivid-muted">Cast information is unavailable.</p>')+
+    '</div></section>'+renderSeasons(details)+renderProviderGroups(details,country)+
     '<section class="vivid-title-section"><div class="vivid-section-heading"><div><span>RECOMMENDED</span><h2>More like this</h2></div></div><div class="vivid-similar" id="recommendation-rail">'+renderRecommendationCards(related)+'</div></section>';
 
   upsertLibraryItem("history",libraryItem());
