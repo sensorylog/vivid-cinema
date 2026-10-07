@@ -219,15 +219,25 @@ function getCertification(details, preferredCountry = "US", externalCertificatio
   return "";
 }
 
-function getMovieCertification(details, preferredCountry = "US", releaseData = null) {
+function getMovieRatingDetails(details, preferredCountry = "US", releaseData = null) {
   const releases = Array.isArray(releaseData?.results) ? releaseData.results : [];
   const countryCode = String(preferredCountry || "US").toUpperCase();
-  const groups = [releases.find((item) => item.iso_3166_1 === countryCode), releases.find((item) => item.iso_3166_1 === "US")].filter(Boolean);
+  const groups = [
+    releases.find((item) => item.iso_3166_1 === countryCode),
+    releases.find((item) => item.iso_3166_1 === "US")
+  ].filter(Boolean);
   for (const group of groups) {
     const release = (group.release_dates || []).find((item) => item.certification);
-    if (release?.certification) return release.certification;
+    if (release?.certification) return {
+      rating: String(release.certification),
+      note: String(release.note || "").trim()
+    };
   }
-  return "";
+  return { rating: "", note: "" };
+}
+
+function getMovieCertification(details, preferredCountry = "US", releaseData = null) {
+  return getMovieRatingDetails(details, preferredCountry, releaseData).rating;
 }
 
 function renderCapabilityBadges(details, certification) {
@@ -246,7 +256,7 @@ function renderCapabilityBadges(details, certification) {
   return '<div class="vivid-title-capabilities" aria-label="Title formats and accessibility">' + scoreBadge + ratingBadge + badges + '</div>';
 }
 
-function renderInformation(details, countryCode, externalCertification = "") {
+function renderInformation(details, countryCode, externalCertification = "", externalCertificationNote = "") {
   const isTv = media?.media_type === "tv";
   const releaseYear = String(details?.release_date || details?.first_air_date || "").slice(0, 4) || media?.year || "";
   const studio = details?.production_companies?.[0]?.name || "";
@@ -265,7 +275,7 @@ function renderInformation(details, countryCode, externalCertification = "") {
     studio ? '<div class="vivid-title-information-row"><dt>Studio</dt><dd>' + escapeHtml(studio) + '</dd></div>' : "",
     releaseYear ? '<div class="vivid-title-information-row"><dt>Released</dt><dd>' + escapeHtml(releaseYear) + '</dd></div>' : "",
     runtime ? '<div class="vivid-title-information-row"><dt>Run Time</dt><dd>' + escapeHtml(runtime) + '</dd></div>' : "",
-    certification ? '<div class="vivid-title-information-row"><dt>Rated</dt><dd>' + escapeHtml(certification) + '</dd></div>' : "",
+    certification ? '<div class="vivid-title-information-row"><dt>Rated</dt><dd>' + escapeHtml(certification) + (externalCertificationNote ? '<span class="vivid-title-rating-note">' + escapeHtml(externalCertificationNote) + '</span>' : "") + '</dd></div>' : "",
     origins.length ? '<div class="vivid-title-information-row"><dt>Regions of Origin</dt><dd>' + escapeHtml(origins.join(", ")) + '</dd></div>' : "",
     copyright ? '<div class="vivid-title-information-row"><dt>Rights</dt><dd>' + escapeHtml(copyright) + '</dd></div>' : ""
   ].join("");
@@ -288,7 +298,7 @@ function renderRecommendationCards(items){
 
 function isAnimeTitle(details) { return (details?.genres || []).some(g => Number(g?.id) === 16) && String(details?.original_language || "").toLowerCase() === "ja"; }
 
-function render(details, externalCertification = "") {
+function render(details, externalCertification = "", externalCertificationNote = "") {
   currentDetails=details;
   media=normalizeMedia(details,route.params.get("type")==="tv"?"tv":"movie");
   const title=media.title;
@@ -320,7 +330,7 @@ function render(details, externalCertification = "") {
       '<div class="vivid-title-genres">'+genres+'</div><p>'+escapeHtml(media.overview||"No synopsis is available for this title yet.")+'</p>'+
       '<div class="vivid-title-actions"><a class="vivid-button vivid-button--primary" href="'+escapeHtml(titleWatchUrl)+'"><i class="bi bi-play-fill"></i> Watch now</a>'+(firstTrailer?'<button class="vivid-button vivid-button--secondary" id="hero-trailer" type="button"><i class="bi bi-play-circle"></i> Watch trailer</button>':"")+'<a class="vivid-button vivid-button--ghost" href="home.html"><i class="bi bi-arrow-left"></i> Browse more</a></div>'+renderLibraryActions()+'</div></div>'+
     '</div></section>'+
-    renderInformation(details, country, externalCertification)+
+    renderInformation(details, country, externalCertification, externalCertificationNote)+
     renderTrailerSection(details)+
     '<section class="vivid-title-section"><div class="vivid-section-heading"><div><span>CAST</span><h2>People in the story</h2></div></div><div class="vivid-cast-grid">'+
       (cast.length?cast.map((person)=>'<a class="vivid-cast" href="title.html?person='+encodeURIComponent(person.id)+'"><img loading="lazy" src="'+getImageUrl(person.profile_path,"w185")+'" alt="'+escapeHtml(person.name)+'"><strong>'+escapeHtml(person.name)+'</strong><small>'+escapeHtml(person.character||"Cast")+'</small></a>').join(""):'<p class="vivid-muted">Cast information is unavailable.</p>')+
@@ -382,10 +392,10 @@ async function init() {
           type === "tv" ? tmdbApi.tvContentRatings(id) : tmdbApi.movieReleaseDates(id)
         ]);
         const preferredCountry = getProviderCountry();
-        const certification = type === "tv"
-          ? getCertification(enriched, preferredCountry)
-          : getMovieCertification(enriched, preferredCountry, certificationData);
-        render(enriched, certification);
+        const ratingDetails = type === "tv"
+          ? { rating: getCertification(enriched, preferredCountry), note: "" }
+          : getMovieRatingDetails(enriched, preferredCountry, certificationData);
+        render(enriched, ratingDetails.rating, ratingDetails.note);
       } catch (error) {
         console.warn("Vivid title enrichment unavailable:", error);
       }
