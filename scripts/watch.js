@@ -71,11 +71,9 @@ function buildVidsrcEmbedUrl(params) {
 
 function buildMultiembedUrl(params) {
   const base = String(VIVID_CONFIG.api.multiembedBaseUrl || "https://multiembed.mov").replace(/\/+$/, "");
-  const id = encodeURIComponent(imdbId || tmdbId);
-  const query = new URLSearchParams({ video_id: id });
-
-  // MultiEmbed distinguishes numeric TMDB IDs from IMDb IDs with tmdb=1.
-  if (!imdbId && tmdbId) query.set("tmdb", "1");
+  // MultiEmbed fallback is intentionally TMDB-only. Do not send an IMDb ID here.
+  if (!tmdbId) return "";
+  const query = new URLSearchParams({ video_id: String(tmdbId), tmdb: "1" });
   if (params.type === "tv") {
     query.set("s", String(params.season));
     query.set("e", String(params.episode));
@@ -179,9 +177,25 @@ function setPlayerSource(source, params, startAt = 0) {
       }, fallbackDelayMs());
     }
   } else if (source === "multiembed") {
-    if (!hasFallbackId()) return;
+    if (!tmdbId) {
+      if (status) {
+        status.textContent = "MultiEmbed needs a TMDB ID for this title.";
+        status.classList.add("is-warning");
+        status.hidden = false;
+      }
+      return;
+    }
     primaryHealthy = false;
-    player.src = buildMultiembedUrl(params);
+    const multiembedUrl = buildMultiembedUrl(params);
+    if (!multiembedUrl) {
+      if (status) {
+        status.textContent = "MultiEmbed could not build a TMDB playback URL.";
+        status.classList.add("is-warning");
+        status.hidden = false;
+      }
+      return;
+    }
+    player.src = multiembedUrl;
     if (status) {
       status.textContent = "Loading MultiEmbed fallback…";
       status.classList.remove("is-warning");
@@ -192,10 +206,12 @@ function setPlayerSource(source, params, startAt = 0) {
         if (primaryHealthy || activeSource !== "multiembed") return;
         clearFallbackTimer();
         if (status) {
-          status.textContent = "All playback sources are taking longer than expected.";
+          status.textContent = "MultiEmbed could not start playback. Try MultiEmbed again or return to the title.";
           status.classList.add("is-warning");
           status.hidden = false;
         }
+        const switchBtn = $("player-switch-source");
+        if (switchBtn) switchBtn.textContent = "Retry MultiEmbed";
       }, fallbackDelayMs());
     }
   } else {
