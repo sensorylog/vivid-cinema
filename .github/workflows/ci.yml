@@ -1,0 +1,82 @@
+name: Vivid Cinema CI
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  static-validation:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate JavaScript syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+          while IFS= read -r -d '' file; do
+            node --check "$file"
+          done < <(find . -type f -name '*.js' -not -path './.git/*' -print0)
+
+      - name: Validate JSON
+        shell: bash
+        run: |
+          set -euo pipefail
+          node - <<'NODE'
+          const fs = require("fs");
+          const path = require("path");
+          function walk(dir) {
+            for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+              if (entry.name === ".git" || entry.name === "node_modules") continue;
+              const full = path.join(dir, entry.name);
+              if (entry.isDirectory()) walk(full);
+              else if (entry.isFile() && full.endsWith(".json")) {
+                JSON.parse(fs.readFileSync(full, "utf8"));
+              }
+            }
+          }
+          walk(".");
+          NODE
+
+      - name: Validate local HTML/CSS/JS references
+        shell: bash
+        run: |
+          set -euo pipefail
+          node - <<'NODE'
+          const fs = require("fs");
+          const path = require("path");
+          const root = process.cwd();
+          const files = [];
+          function walk(dir) {
+            for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+              if (entry.name === ".git" || entry.name === "node_modules") continue;
+              const full = path.join(dir, entry.name);
+              if (entry.isDirectory()) walk(full);
+              else if (entry.isFile() && /\.(html|css)$/.test(entry.name)) files.push(full);
+            }
+          }
+          walk(root);
+          const missing = [];
+          for (const file of files) {
+            const source = fs.readFileSync(file, "utf8");
+            const refs = [...source.matchAll(/(?:href|src|url)\\s*=\\s*["']([^"']+)["']/gi)].map(m => m[1]);
+            for (let ref of refs) {
+              if (!ref || /^(?:https?:|data:|blob:|mailto:|tel:|#)/i.test(ref)) continue;
+              ref = ref.split("#")[0].split("?")[0];
+              if (!ref) continue;
+              const target = path.resolve(path.dirname(file), ref);
+              if (!target.startsWith(root + path.sep) && target !== root) continue;
+              if (!fs.existsSync(target)) missing.push(file + " -> " + ref);
+            }
+          }
+          if (missing.length) {
+            console.error("Missing local references:");
+            console.error(missing.join("\n"));
+            process.exit(1);
+          }
+          NODE
