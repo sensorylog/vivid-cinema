@@ -340,7 +340,7 @@ async function loadMoreSection(key,button){
      button.textContent="Load more";
      return;
    }
-   renderRail(railId,data.items,{append:true,signal:sectionSignal(key),rankStart:key==="top10"?(currentPage-1)*data.items.length+1:0});
+   renderRail(railId,data.items,{append:true,signal:sectionSignal(key),rankStart:key==="top10"?($(railId)?.querySelectorAll(".vivid-top10-card").length||0)+1:0});
    $(railId)?.classList.add("is-expanded");
    sectionState[key]={page:data.page,totalPages:data.totalPages};
    button.hidden=data.page>=data.totalPages;
