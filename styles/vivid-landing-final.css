@@ -1,209 +1,64 @@
-/* Landing page composition reset — keep every major surface inside its own box. */
-body.vivid-cinema-home{
-  overflow-x:hidden!important;
-  background:#06070a!important;
+/* Vivid Cinema — landing/start page composition lock. Loaded last to own responsive geometry. */
+body.vivid-landing{min-width:0;overflow-x:hidden}
+body.vivid-landing,.vivid-landing-shell{background:#050608}
+.vivid-landing-shell{width:100%;max-width:100%;overflow:hidden}
+.landing-hero{width:100%;min-height:100svh;height:auto;display:block;overflow:hidden}
+.landing-header{position:absolute;inset:0 0 auto;min-height:74px;box-sizing:border-box}
+.landing-hero-inner{box-sizing:border-box;width:min(var(--landing-max),calc(100% - (var(--landing-pad)*2)));min-height:100svh;margin:0 auto;padding-top:112px;padding-bottom:88px;align-content:center;align-items:center}
+.landing-hero-copy{min-width:0;position:relative;z-index:5}
+.landing-hero h1{max-width:720px;overflow-wrap:normal}
+.landing-copy{max-width:540px}
+.landing-hero-visual{min-width:0;width:100%;max-width:560px;height:430px;justify-self:center;overflow:visible}
+.landing-content{box-sizing:border-box;width:min(var(--landing-max),calc(100% - (var(--landing-pad)*2)));max-width:var(--landing-max)}
+.landing-section,.landing-showcase,.landing-cta,.landing-footer-inner{min-width:0}
+.landing-trending{min-width:0}
+.landing-poster,.landing-showcase-card,.landing-reason,.landing-faq,.landing-cta{min-width:0}
+
+/* Tablet: collapse before the decorative poster can compete with the copy. */
+@media(max-width:1050px){
+  .landing-hero{min-height:100svh}
+  .landing-hero-inner{min-height:100svh;grid-template-columns:minmax(0,1fr);padding-top:108px;padding-bottom:64px;align-content:end}
+  .landing-hero-copy{max-width:760px}
+  .landing-hero-visual{position:absolute;right:-30px;bottom:40px;width:420px;max-width:42vw;height:360px;opacity:.38;z-index:1;pointer-events:none}
 }
-.vivid-home{
-  width:100%;
-  max-width:100%;
-  overflow:clip;
-  background:#06070a!important;
-}
-.vivid-hero{
-  position:relative!important;
-  width:100%!important;
-  height:auto!important;
-  min-height:0!important;
-  overflow:hidden!important;
-  background:#06070a!important;
-}
-.vivid-hero-media{
-  position:relative!important;
-  inset:auto!important;
-  width:100%!important;
-  height:clamp(560px,82svh,820px)!important;
-  min-height:560px!important;
-  max-height:820px!important;
-  overflow:hidden!important;
-}
-.vivid-hero-video{
-  position:absolute!important;
-  inset:0!important;
-  width:100%!important;
-  height:100%!important;
-  max-width:none!important;
-  border:0!important;
-  transform:scale(1.035)!important;
-}
-.vivid-hero-fallback{
-  position:absolute!important;
-  inset:0!important;
-  width:100%!important;
-  height:100%!important;
-  background-size:cover!important;
-  background-position:center!important;
-}
-.vivid-hero-content{
-  position:absolute!important;
-  inset:0!important;
-  width:min(1440px,100%)!important;
-  height:100%!important;
-  box-sizing:border-box!important;
-  margin:0 auto!important;
-  padding:clamp(110px,17vh,170px) max(var(--vivid-page-gutter),24px) 110px!important;
-  display:flex!important;
-  justify-content:center!important;
-  align-items:flex-start!important;
-}
-.vivid-hero-title{
-  width:min(850px,68vw)!important;
-  max-width:100%!important;
-  font-size:clamp(2.8rem,6.5vw,6.2rem)!important;
-  line-height:.94!important;
-  text-wrap:balance!important;
-}
-.vivid-hero-copy{
-  width:min(620px,100%)!important;
-  max-width:100%!important;
-}
-.vivid-hero-tools{
-  right:max(var(--vivid-page-gutter),24px)!important;
-  bottom:24px!important;
-}
-.vivid-feature-strip{
-  position:relative!important;
-  width:min(1440px,100%)!important;
-  max-width:100%!important;
-  box-sizing:border-box!important;
-  margin:0 auto!important;
-  padding:14px max(var(--vivid-page-gutter),24px) 28px!important;
-  background:#06070a!important;
-  overflow:hidden!important;
-}
-.vivid-feature-viewport{
-  width:100%!important;
-  max-width:100%!important;
-  padding:0!important;
-  overflow:hidden!important;
-}
-.vivid-feature-track{
-  width:100%!important;
-  max-width:100%!important;
-  box-sizing:border-box!important;
-  overflow-x:auto!important;
-  overflow-y:hidden!important;
-}
-.vivid-catalogue-explore{
-  width:min(1440px,100%)!important;
-  max-width:100%!important;
-  box-sizing:border-box!important;
-  margin:0 auto!important;
-}
-.vivid-section-wrap{
-  width:min(1440px,100%)!important;
-  max-width:100%!important;
-  box-sizing:border-box!important;
-  margin:0 auto!important;
-  overflow:visible!important;
-}
-@media(max-width:900px){
-  .vivid-hero-media{
-    height:clamp(500px,72svh,680px)!important;
-    min-height:500px!important;
-    max-height:680px!important;
-  }
-  .vivid-hero-content{
-    padding:100px 20px 70px!important;
-    justify-content:flex-end!important;
-  }
-  .vivid-hero-title{width:100%!important;font-size:clamp(2.5rem,11vw,4.8rem)!important}
-  .vivid-hero-copy{-webkit-line-clamp:3!important}
-}
+
+/* Phones: one vertical composition; decorative poster/orbits are removed from layout. */
 @media(max-width:640px){
-  .vivid-hero-media{
-    height:clamp(430px,66svh,590px)!important;
-    min-height:430px!important;
-    max-height:590px!important;
-  }
-  .vivid-hero-video{
-    transform:scale(1)!important;
-  }
-  .vivid-hero-fallback{
-    background-size:cover!important;
-    background-position:center top!important;
-  }
-  .vivid-hero-content{
-    padding:84px 16px 28px!important;
-    justify-content:flex-end!important;
-  }
-  .vivid-hero-title{
-    width:100%!important;
-    max-width:100%!important;
-    font-size:clamp(2.15rem,11.5vw,3.55rem)!important;
-    line-height:.96!important;
-    margin-bottom:10px!important;
-  }
-  .vivid-meta{
-    margin:8px 0!important;
-    gap:7px!important;
-  }
-  .vivid-hero-copy{
-    max-width:100%!important;
-    margin:0 0 10px!important;
-    font-size:.86rem!important;
-    line-height:1.45!important;
-    -webkit-line-clamp:2!important;
-  }
-  .vivid-actions{
-    width:100%!important;
-    gap:8px!important;
-  }
-  .vivid-actions .vivid-button{
-    min-height:42px!important;
-    padding-inline:14px!important;
-  }
-  .vivid-hero-tools{
-    right:12px!important;
-    bottom:12px!important;
-  }
-  .vivid-feature-strip{
-    padding:8px 12px 18px!important;
-  }
-  .vivid-feature-track{
-    gap:8px!important;
-    padding:4px 0 8px!important;
-  }
-  .vivid-feature-card{
-    flex:0 0 128px!important;
-    width:128px!important;
-    height:78px!important;
-  }
-  .vivid-catalogue-explore{
-    padding-inline:12px!important;
-    overflow:hidden!important;
-  }
-  .vivid-section-wrap{
-    padding-inline:12px!important;
-    overflow:visible!important;
-  }
-  .vivid-rails{
-    width:100%!important;
-    max-width:100%!important;
-    box-sizing:border-box!important;
-  }
-  .vivid-rail{
-    width:100%!important;
-    max-width:100%!important;
-    overflow-x:auto!important;
-    overflow-y:hidden!important;
-  }
+  :root{--landing-pad:16px}
+  .landing-hero{min-height:100svh;height:auto;display:block}
+  .landing-header{position:absolute;top:0;left:0;right:0;min-height:64px;padding:14px 16px;gap:12px}
+  .landing-signin{min-height:38px;padding-inline:15px}
+  .landing-hero-inner{width:100%;min-height:100svh;margin:0;padding:94px 16px 34px;display:block;box-sizing:border-box}
+  .landing-hero-copy{width:100%;max-width:560px;margin:0 auto}
+  .landing-kicker{font-size:.59rem;letter-spacing:.15em}
+  .landing-hero h1{max-width:100%;margin:13px 0 16px;font-size:clamp(2.85rem,13.5vw,4.35rem);line-height:.9;letter-spacing:-.07em}
+  .landing-copy{max-width:100%;margin-bottom:18px;font-size:.88rem;line-height:1.55}
+  .landing-form{width:100%;max-width:none}
+  .landing-email,.landing-submit{width:100%;max-width:none;box-sizing:border-box}
+  .landing-secondary-actions{width:100%;margin-top:11px}
+  .landing-secondary-actions .landing-explore-primary{width:100%;box-sizing:border-box}
+  .landing-proof{margin-top:17px;gap:8px 12px}
+  .landing-proof span{font-size:.59rem}
+  .landing-hero-visual{display:none}
+  .landing-scroll-cue{position:static;transform:none;margin:22px 0 0;align-items:flex-start}
+  .landing-backdrop{background-position:center center;transform:scale(1.015)}
+  .landing-backdrop.is-visible{transform:scale(1.035)}
+  .landing-backdrop::after{background:linear-gradient(180deg,rgba(5,6,8,.72) 0%,rgba(5,6,8,.28) 25%,rgba(5,6,8,.66) 55%,#050608 94%),linear-gradient(90deg,rgba(5,6,8,.48),transparent 65%)}
+  .landing-content{width:calc(100% - 32px);margin-inline:auto}
+  .landing-section{padding-block:58px}
+  .landing-trending-section{padding-top:50px}
+  .landing-trending{width:100%;overflow-x:auto;overflow-y:hidden;overscroll-behavior-x:contain}
+  .landing-showcase-grid,.landing-reasons{width:100%}
+  .landing-showcase-card{width:100%}
 }
+
+/* Very small phones: prevent text/button crowding. */
 @media(max-width:380px){
-  .vivid-hero-media{
-    height:clamp(410px,64svh,520px)!important;
-    min-height:410px!important;
-  }
-  .vivid-hero-content{padding-inline:14px!important}
-  .vivid-hero-title{font-size:clamp(2rem,11vw,3rem)!important}
-  .vivid-actions .vivid-button{padding-inline:11px!important;font-size:.78rem!important}
+  .landing-header{padding-inline:12px}
+  .landing-hero-inner{padding-inline:12px;padding-top:88px;padding-bottom:28px}
+  .landing-hero h1{font-size:clamp(2.65rem,14vw,3.55rem)}
+  .landing-copy{font-size:.84rem}
+  .landing-proof{display:grid;grid-template-columns:1fr 1fr}
+  .landing-proof span:last-child{grid-column:1/-1}
+  .landing-content{width:calc(100% - 24px)}
 }
