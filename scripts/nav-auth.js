@@ -16,7 +16,7 @@ async function initAuthUi() {
       if (user) {
         pageAuthLinks.forEach(link => {
           link.style.display = "";
-          link.textContent = "Account";
+          link.innerHTML = '<i class="bi bi-person-fill" aria-hidden="true"></i><span class="vivid-account-label">Account</span>';
           link.href = "account.html";
           link.setAttribute("aria-label", "Open account");
         });
@@ -31,7 +31,7 @@ async function initAuthUi() {
       } else {
         pageAuthLinks.forEach(link => {
           link.style.display = "";
-          link.textContent = "Sign in";
+          link.innerHTML = '<i class="bi bi-person-fill" aria-hidden="true"></i><span class="vivid-account-label">Account</span>';
           link.href = "auth.html";
           link.setAttribute("aria-label", "Sign in");
         });
