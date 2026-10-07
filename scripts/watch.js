@@ -9,7 +9,7 @@ import { recordBehavior, startIntelligenceSync } from "./intelligence.js";
 
 const $ = (id) => document.getElementById(id);
 const route = getRoute();
-const VIDAPI_ORIGINS = new Set([new URL(VIVID_CONFIG.api.vidapiEmbedBaseUrl).origin, "https://vidapi.ru"]);
+const VIDAPI_ORIGINS = new Set([new URL(VIVID_CONFIG.api.vidapiEmbedBaseUrl).origin, "https://vidapi.ru", "https://www.vaplayer.ru", "https://www.vidapi.ru"]);
 const VIDSRC_ORIGIN = (() => {
   try { return new URL(VIVID_CONFIG.api.vidsrcEmbedBaseUrl || "https://vidsrc.to").origin; }
   catch { return "https://vidsrc.to"; }
@@ -360,6 +360,7 @@ function setPlayerSource(source, params, startAt = 0) {
   clearFallbackTimer();
   activeSource = source;
   const status = $("player-status");
+  const openSourceBtn = $("player-open-source");
   if (source === "yenime") {
     const url = buildYenimeEmbedUrl(params, startAt);
     if (!url) {
@@ -374,6 +375,10 @@ function setPlayerSource(source, params, startAt = 0) {
       return;
     }
     player.src = url;
+    if (openSourceBtn) {
+      openSourceBtn.href = url;
+      openSourceBtn.hidden = false;
+    }
     if (status) {
       status.textContent = "Loading anime source…";
       status.classList.remove("is-warning");
@@ -390,7 +395,12 @@ function setPlayerSource(source, params, startAt = 0) {
     }, YENIME_FALLBACK_MS);
   } else if (source === "vidsrc") {
     if (!hasFallbackId()) return;
-    player.src = buildVidsrcEmbedUrl(params);
+    const sourceUrl = buildVidsrcEmbedUrl(params);
+    player.src = sourceUrl;
+    if (openSourceBtn) {
+      openSourceBtn.href = sourceUrl;
+      openSourceBtn.hidden = false;
+    }
     if (status) {
       status.textContent = "Loading alternate source…";
       status.classList.remove("is-warning");
@@ -398,7 +408,12 @@ function setPlayerSource(source, params, startAt = 0) {
     }
   } else {
     primaryHealthy = false;
-    player.src = buildVidapiEmbedUrl(params, startAt);
+    const sourceUrl = buildVidapiEmbedUrl(params, startAt);
+    player.src = sourceUrl;
+    if (openSourceBtn) {
+      openSourceBtn.href = sourceUrl;
+      openSourceBtn.hidden = false;
+    }
     if (status) {
       status.textContent = Number(startAt) > 5 ? "Resuming where you left off…" : "Preparing playback…";
       status.classList.remove("is-warning");
@@ -548,8 +563,27 @@ function renderShell(params) {
       if (yenimeFallback) yenimeFallback.hidden = true;
       setPlayerSource("vidapi", params, resumeAt);
     }
+    const openSourceBtn = $("player-open-source");
+    const syncOpenSource = () => {
+      if (!openSourceBtn) return;
+      const sourceUrl = activeSource === "yenime"
+        ? buildYenimeEmbedUrl(params, resumeAt)
+        : activeSource === "vidsrc"
+          ? buildVidsrcEmbedUrl(params)
+          : buildVidapiEmbedUrl(params, resumeAt);
+      if (sourceUrl) {
+        openSourceBtn.href = sourceUrl;
+        openSourceBtn.hidden = false;
+      } else {
+        openSourceBtn.hidden = true;
+      }
+    };
+    syncOpenSource();
     const reloadBtn = $("player-reload");
-    if (reloadBtn) reloadBtn.addEventListener("click", reloadActivePlayer);
+    if (reloadBtn) reloadBtn.addEventListener("click", () => {
+      reloadActivePlayer();
+      window.setTimeout(syncOpenSource, 60);
+    });
     const switchBtn = $("player-switch-source");
     if (yenimeFallbackLink) {
       yenimeFallbackLink.href = buildYenimeWebUrl(params);
@@ -611,10 +645,12 @@ async function prepareNextEpisode(params) {
 }
 
 function handlePlayerEvent(event) {
-  if (!VIDAPI_ORIGINS.has(event.origin)) return;
+  const player = $("vidapi-player");
+  if (!player || event.source !== player.contentWindow) return;
+  if (activeSource !== "vidapi") return;
+  if (event.origin && !VIDAPI_ORIGINS.has(event.origin)) return;
   const payload = event.data;
   if (!payload || typeof payload !== "object") return;
-  if (activeSource !== "vidapi") return;
 
   // VidAPI can report provider/player failures through postMessage. Catch common
   // status/code/error shapes before treating any PLAYER_EVENT as a healthy player.
@@ -635,13 +671,19 @@ function handlePlayerEvent(event) {
   if (payload.type !== "PLAYER_EVENT" || !payload.data) return;
   const data = payload.data;
   const info = data.player_info || {};
-  if (String(info.mediaType || "") !== String(media?.media_type || "")) return;
-  if (info.tmdb != null && String(info.tmdb) !== String(media?.id)) return;
+  const eventMediaType = String(info.mediaType || "").toLowerCase();
+  if (eventMediaType && eventMediaType !== String(media?.media_type || "").toLowerCase()) return;
+  const eventTmdb = info.tmdb != null ? String(info.tmdb) : "";
+  const eventImdb = String(info.imdb || "").trim();
+  if (eventTmdb && eventTmdb !== String(media?.id)) {
+    if (!eventImdb || eventImdb.toLowerCase() !== String(imdbId || "").toLowerCase()) return;
+  }
+  if (eventImdb && imdbId && eventImdb.toLowerCase() !== String(imdbId).toLowerCase()) return;
   if (currentParams?.type === "tv") {
     if (info.season != null && Number(info.season) !== Number(currentParams.season)) return;
     if (info.episode != null && Number(info.episode) !== Number(currentParams.episode)) return;
   }
-  // Only a matching player event proves that the current VidAPI source is healthy.
+  // A matching event from this exact iframe proves the VidAPI player is alive.
   primaryHealthy = true;
   clearFallbackTimer();
   const status = $("player-status");
