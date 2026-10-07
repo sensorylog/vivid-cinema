@@ -22,6 +22,7 @@ const sectionState={};
 const loadingSections=new Set();
 
 const SECTION_RAIL_IDS=Object.freeze({
+ top10:"top-10-rail",
  trending:"trending-rail",
  nowPlaying:"now-playing-rail",
  popularMovies:"movies-rail",
@@ -99,7 +100,7 @@ function renderRail(id,items=[],options={}){
 }
 
 function sectionSignal(key){
- const labels={trending:"Trending",nowPlaying:"Now playing",popularMovies:"Popular",topRatedMovies:"Top rated",popularTv:"Popular",topRatedTv:"Top rated",airingToday:"Airing today",anime:"Anime",kdrama:"K-Drama",upcoming:"Coming soon",newReleases:"New releases",netflix:"Netflix",primeVideo:"Prime Video",hboMax:"HBO Max",disneyPlus:"Disney+",appleTvPlus:"Apple TV+",hulu:"Hulu",paramountPlus:"Paramount+"};
+ const labels={top10:"Top 10",trending:"Trending",nowPlaying:"Now playing",popularMovies:"Popular",topRatedMovies:"Top rated",popularTv:"Popular",topRatedTv:"Top rated",airingToday:"Airing today",anime:"Anime",kdrama:"K-Drama",upcoming:"Coming soon",newReleases:"New releases",netflix:"Netflix",primeVideo:"Prime Video",hboMax:"HBO Max",disneyPlus:"Disney+",appleTvPlus:"Apple TV+",hulu:"Hulu",paramountPlus:"Paramount+"};
  return labels[key]||"";
 }
 
@@ -414,13 +415,13 @@ async function maybeShowColdStart(){
 }
 
 async function loadHome(){
- const ids=["trending-rail","now-playing-rail","movies-rail","top-rated-rail","tv-rail","top-tv-rail","upcoming-rail","new-releases-rail","netflix-rail","prime-video-rail","hbo-max-rail","disney-plus-rail","apple-tv-plus-rail","hulu-rail","paramount-plus-rail"];
+ const ids=["top-10-rail","trending-rail","now-playing-rail","movies-rail","top-rated-rail","tv-rail","top-tv-rail","upcoming-rail","new-releases-rail","netflix-rail","prime-video-rail","hbo-max-rail","disney-plus-rail","apple-tv-plus-rail","hulu-rail","paramount-plus-rail"];
  ids.forEach(id=>skeleton($(id)));
  renderContinueWatching();
 
  // The first viewport gets the smallest useful data set first. Secondary shelves
  // still load automatically, but they never compete with the hero and first rows.
- const primary=["trending","nowPlaying","popularMovies"];
+ const primary=["top10","trending","nowPlaying","popularMovies"];
  try{await loadSectionBatch(primary)}catch(error){console.warn("Vivid primary home load failed:",error)}
 
  const loadSecondary=async()=>{
