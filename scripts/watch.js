@@ -26,6 +26,7 @@ let lastHistorySyncAt = 0;
 let activeSource = "vidapi";
 let primaryHealthy = false;
 let fallbackTimer = null;
+let multiembedTimedOut = false;
 let imdbId = "";
 let tmdbId = "";
 const PRIMARY_FALLBACK_MS = 15000;
@@ -160,6 +161,7 @@ function setPlayerSource(source, params, startAt = 0) {
   if (!player || !params) return;
   clearFallbackTimer();
   activeSource = source;
+  multiembedTimedOut = false;
   const status = $("player-status");
   if (source === "vidsrc") {
     if (!hasFallbackId()) return;
@@ -205,6 +207,7 @@ function setPlayerSource(source, params, startAt = 0) {
       fallbackTimer = window.setTimeout(() => {
         if (primaryHealthy || activeSource !== "multiembed") return;
         clearFallbackTimer();
+        multiembedTimedOut = true;
         if (status) {
           status.textContent = "MultiEmbed could not start playback. Try MultiEmbed again or return to the title.";
           status.classList.add("is-warning");
@@ -340,7 +343,11 @@ function renderShell(params) {
     const switchBtn = $("player-switch-source");
     if (switchBtn) {
       switchBtn.addEventListener("click", () => {
-        const next = activeSource === "vidapi" ? "vidsrc" : activeSource === "vidsrc" ? "multiembed" : "vidapi";
+        const next = activeSource === "vidapi"
+          ? "vidsrc"
+          : activeSource === "vidsrc"
+            ? "multiembed"
+            : (multiembedTimedOut ? "multiembed" : "vidapi");
         setPlayerSource(next, params, resumeAt);
       });
     }
