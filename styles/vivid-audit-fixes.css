@@ -139,3 +139,16 @@
 @media(prefers-reduced-motion:reduce){
   .vivid-release-popover,.vivid-search-window{scroll-behavior:auto!important}
 }
+
+
+/* Home catalogue: Load more expands the rail into visible rows instead of hiding page 2 off-screen. */
+body[data-vivid-page="home"] .vivid-rail.is-expanded{
+  display:grid;
+  grid-template-columns:repeat(6,minmax(0,1fr));
+  gap:16px;
+  overflow:visible;
+  scroll-snap-type:none;
+}
+@media (max-width:1100px){body[data-vivid-page="home"] .vivid-rail.is-expanded{grid-template-columns:repeat(5,minmax(0,1fr));}}
+@media (max-width:850px){body[data-vivid-page="home"] .vivid-rail.is-expanded{grid-template-columns:repeat(4,minmax(0,1fr));}}
+@media (max-width:640px){body[data-vivid-page="home"] .vivid-rail.is-expanded{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;overflow:visible;padding-right:2px;}}
