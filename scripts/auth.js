@@ -62,14 +62,19 @@ async function googleSignIn(){
   const provider=new GoogleAuthProvider();
   provider.setCustomParameters({prompt:"select_account"});
   await setPersistence(auth,browserLocalPersistence);
-  const mobile=window.matchMedia?.("(pointer:coarse)")?.matches || window.innerWidth<700;
-  if(mobile){
+  // Prefer a popup on every device. Mobile browsers can return from a
+  // redirect before Firebase has restored the credential, which can make the
+  // UI immediately look signed out. Only fall back to redirect when the popup
+  // is actually blocked/unavailable.
+  try{
+    const credential=await withTimeout(signInWithPopup(auth,provider),45000,"Google sign-in timed out.");
+    await finishGoogleSignIn(credential);
+    return;
+  }catch(error){
+    if(error?.code!=="auth/popup-blocked" && error?.code!=="auth/operation-not-supported-in-this-environment") throw error;
     try{localStorage.setItem("vivid:google-redirect","1");}catch{}
     await signInWithRedirect(auth,provider);
-    return;
   }
-  const credential=await withTimeout(signInWithPopup(auth,provider),45000,"Google sign-in timed out.");
-  await finishGoogleSignIn(credential);
 }
 async function finishPendingGoogleRedirect(){
   let pending=false;
