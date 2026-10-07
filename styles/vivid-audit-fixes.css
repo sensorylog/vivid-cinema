@@ -1430,3 +1430,31 @@ html[data-vivid-theme="light"] .vivid-home-breathe-screen{background:linear-grad
 html[data-vivid-theme="light"] .vivid-home-breathe-screen-line{color:rgba(17,18,22,.55)}
 html[data-vivid-theme="light"] .vivid-home-breathe-copy strong{color:#111216}
 html[data-vivid-theme="light"] .vivid-home-breathe-action{color:#22242a;background:rgba(17,18,22,.035);border-color:rgba(17,18,22,.10)}
+
+
+/* SAFE AREA — keep the Vivid navigation below iPhone/iPad sensor housing. */
+body.vivid-atmosphere :is(
+  .vivid-topbar,
+  .vivid-discovery-nav,
+  .vivid-title-nav,
+  .vivid-library-nav,
+  .vivid-watch-nav,
+  .vivid-unified-header
+){
+  margin-top:max(8px, env(safe-area-inset-top));
+}
+@media(max-width:700px){
+  body.vivid-atmosphere :is(
+    .vivid-topbar,
+    .vivid-discovery-nav,
+    .vivid-title-nav,
+    .vivid-library-nav,
+    .vivid-watch-nav,
+    .vivid-unified-header
+  ){
+    margin-top:max(10px, env(safe-area-inset-top));
+  }
+}
+body.vivid-cinema-home .vivid-hero{
+  padding-top:env(safe-area-inset-top);
+}
