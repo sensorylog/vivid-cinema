@@ -62,9 +62,11 @@ function buildYenimeEmbedUrl(params, startAt = 0) {
   if (!malId) return "";
   const query = new URLSearchParams({ autoplay: "true" });
   if (Number(startAt) > 5) query.set("startAt", String(Math.floor(Number(startAt))));
+  // Yenime's episode route is the same embed API for both series and films.
+  // Movies use the base MAL-ID player; TV uses the episode-specific route.
   return params.type === "tv"
-    ? base + "/embed/" + encodeURIComponent(malId) + "/" + params.episode + "?" + query
-    : base + "/embed/" + encodeURIComponent(malId) + "?" + query;
+    ? base + "/embed/" + encodeURIComponent(malId) + "/" + params.episode + "?" + query.toString()
+    : base + "/embed/" + encodeURIComponent(malId) + "?" + query.toString();
 }
 
 function normalizeAnimeTitle(value) {
@@ -412,7 +414,7 @@ function renderShell(params) {
       '</div><a class="vivid-button vivid-button--secondary" href="' + escapeHtml(buildTitleUrl(media.id, media.media_type)) + '"><i class="bi bi-info-circle"></i> Details</a></div></section>' +
     '<section class="vivid-player-section" aria-label="Video player"><div class="vivid-player-frame">' +
       '<div id="player-status" class="vivid-player-status" role="status" aria-live="polite">' + (resumeAt > 5 ? "Resuming where you left off…" : "Preparing playback…") + '</div>' +
-      '<iframe id="vidapi-player" title="' + escapeHtml(title) + ' player" allow="autoplay; fullscreen; picture-in-picture; encrypted-media; clipboard-write" allowfullscreen referrerpolicy="origin" loading="eager"></iframe>' +
+      '<iframe id="vidapi-player" title="' + escapeHtml(title) + ' player" allow="autoplay; fullscreen; picture-in-picture; encrypted-media; clipboard-write; web-share" allowfullscreen referrerpolicy="origin" loading="eager"></iframe>' +
     '</div><div class="vivid-player-bar"><div><i class="bi bi-shield-check"></i><span id="player-source-label">Powered by VidAPI</span></div><div class="vivid-player-bar-actions"><button type="button" id="player-switch-source" class="vivid-player-switch" hidden>Try alternate source</button><a href="' + escapeHtml(buildTitleUrl(media.id, media.media_type)) + '">Back to title</a></div></div></section>' +
     (isTv ? '<section class="vivid-watch-note"><i class="bi bi-collection-play"></i><div><strong>Episode playback</strong><span>Use the episode list on the title page to switch seasons and episodes.</span></div></section>' : "") +
     '<section class="vivid-watch-recommendations"><div class="vivid-section-heading"><div><span>AFTER WATCHING</span><h2>More like this</h2></div></div><div id="watch-recommendations" class="vivid-watch-rec-rail">' + recommendationCards() + '</div></section>';
