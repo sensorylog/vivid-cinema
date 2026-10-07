@@ -84,6 +84,29 @@ function initThemeToggle() {
   else nav.appendChild(button);
 }
 
+function syncAnimeNavigation() {
+  const addLink = (container, mobile = false) => {
+    if (!container || container.querySelector('a[href="anime.html"]')) return;
+    const link = document.createElement("a");
+    link.href = "anime.html";
+    link.dataset.vividAnimeNav = "true";
+    link.innerHTML = '<i class="bi bi-stars" aria-hidden="true"></i><span>Anime</span>';
+    if (mobile) container.appendChild(link);
+    else {
+      const news = Array.from(container.querySelectorAll("a")).find(a => a.getAttribute("href") === "news.html");
+      news ? news.before(link) : container.appendChild(link);
+    }
+  };
+  addLink(document.querySelector(".vivid-navlinks"));
+  addLink(document.querySelector(".vivid-mobile-nav"), true);
+  if (document.body?.dataset?.vividPage === "anime") {
+    document.querySelectorAll('a[data-vivid-anime-nav]').forEach(link => {
+      link.classList.add("is-active");
+      link.setAttribute("aria-current", "page");
+    });
+  }
+}
+
 function setPageIdentity() {
   const page = document.body?.dataset?.vividPage || "unknown";
   document.documentElement.dataset.vividPage = page;
@@ -119,6 +142,7 @@ function initAppShell() {
   setConnectionState();
   setPageIdentity();
   syncVividBranding();
+  syncAnimeNavigation();
   initThemeToggle();
   ensureBackControl();
 
