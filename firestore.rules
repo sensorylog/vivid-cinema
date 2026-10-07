@@ -185,7 +185,11 @@ service cloud.firestore {
             request.resource.data.email.size() <= 320)))
       && (!request.resource.data.keys().hasAny(['provider']) ||
           (request.resource.data.provider is string &&
-           request.resource.data.provider.size() <= 50))
+           request.resource.data.provider.size() <= 50 &&
+           request.resource.data.provider in ['password', 'google.com']))
+      && (!request.resource.data.keys().hasAny(['email']) ||
+          request.resource.data.email == null ||
+          request.resource.data.email == request.auth.token.email)
       && (!request.resource.data.keys().hasAny(['preferences']) || validPreferences())
       && (!request.resource.data.keys().hasAny(['createdAt']) || request.resource.data.createdAt is timestamp)
       && (!request.resource.data.keys().hasAny(['updatedAt']) || request.resource.data.updatedAt is timestamp);
