@@ -5,7 +5,7 @@ import { getRoute, buildWatchUrl } from "./routes.js";
 import { escapeHtml, getErrorMessage } from "./utils.js";
 import { hasLibraryItem, startLibrarySync, toggleLibraryItem, upsertLibraryItem } from "./library.js";
 import { getProviderCountry, setProviderCountry } from "./provider-region.js";
-import { getPlaybackProgress } from "./recommendations.js";
+import { getLatestPlaybackProgress } from "./recommendations.js";
 
 const $ = (id) => document.getElementById(id);
 const route = getRoute();
@@ -320,7 +320,7 @@ function render(details, externalCertification = "", externalCertificationNote =
   const backdropUrl=media.backdrop_path ? getImageUrl(backdropPath,"w1280") : getImageUrl(backdropPath,"w780");
   const firstSeason=media.media_type==="tv"?(details.seasons?.find((season)=>season.episode_count>0&&season.season_number>=0)?.season_number??1):null;
   const progressKey=media.media_type+":"+media.id;
-  const savedProgress=getPlaybackProgress(progressKey);
+  const savedProgress=getLatestPlaybackProgress(media.media_type,media.id);
   const resumeSeason=media.media_type==="tv"?Number(savedProgress?.season||firstSeason||1):null;
   const resumeEpisode=media.media_type==="tv"?Number(savedProgress?.episode||1):null;
   const hasResume=Number(savedProgress?.progress||0)>5;
