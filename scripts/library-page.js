@@ -41,20 +41,26 @@ function render() {
   });
   const items = library[activeCollection] || [];
   const list = $("library-list");
+  const sectionCopy = activeCollection === "favorites"
+    ? ["LIKES", "Your favorites.", "Titles you have saved to your library."]
+    : activeCollection === "watchLater"
+      ? ["WATCH LATER", "Your watchlist.", "Keep the titles you want to come back to."]
+      : ["HISTORY", "Recently watched.", "Your latest Vivid Cinema activity."];
+
   if (!items.length) {
     const copy = activeCollection === "favorites"
       ? ["No likes yet","Like titles from their detail page and they will appear here.","Discover titles"]
       : activeCollection === "watchLater"
         ? ["Your watch-later list is empty","Save something you want to come back to.","Browse movies & TV"]
         : ["No recent history","Titles you open will appear here for quick access.","Start browsing"];
-    list.innerHTML = '<div class="vivid-library-empty"><i class="bi bi-bookmark"></i><h2>'+copy[0]+'</h2><p>'+copy[1]+'</p><a class="vivid-button vivid-button--primary" href="discover.html">'+copy[2]+'</a></div>';
+    list.innerHTML = '<div class="vivid-library-shelf-head"><div><span class="vivid-library-kicker">'+sectionCopy[0]+'</span><h2>'+sectionCopy[1]+'</h2><p>'+sectionCopy[2]+'</p></div></div><div class="vivid-library-empty"><i class="bi bi-bookmark"></i><h2>'+copy[0]+'</h2><p>'+copy[1]+'</p><a class="vivid-button vivid-button--primary" href="discover.html">'+copy[2]+'</a></div>';
     return;
   }
-  list.innerHTML = items.map((item) => {
+  list.innerHTML = '<div class="vivid-library-shelf-head"><div><span class="vivid-library-kicker">'+sectionCopy[0]+'</span><h2>'+sectionCopy[1]+'</h2><p>'+sectionCopy[2]+'</p></div><span class="vivid-library-shelf-note">'+items.length+' saved</span></div><div class="vivid-library-shelf">'+items.map((item) => {
     const type=item.media_type||item.mediaType||"movie", url=getMediaUrl({id:item.id,media_type:type}), title=item.title||item.name||"Untitled";
     const meta=[type==="tv"?"TV":"Movie",item.year||""].filter(Boolean).join(" · ");
     return '<article class="vivid-library-card"><a href="'+escapeHtml(url)+'"><img loading="lazy" src="'+getImageUrl(item.poster_path,"w342")+'" alt="'+escapeHtml(title)+' poster"><div class="vivid-library-card-copy"><strong>'+escapeHtml(title)+'</strong><small>'+escapeHtml(meta)+'</small></div></a><button class="vivid-library-remove" type="button" data-remove-id="'+escapeHtml(String(item.id))+'" data-remove-type="'+escapeHtml(type)+'" aria-label="Remove '+escapeHtml(title)+'"><i class="bi bi-x-lg"></i></button></article>';
-  }).join("");
+  }).join("") + '</div>';
   list.querySelectorAll("[data-remove-id]").forEach((button) => button.addEventListener("click",(event)=>{
     event.preventDefault(); event.stopPropagation(); removeLibraryItem(activeCollection,button.dataset.removeId,button.dataset.removeType); render();
   }));
