@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#06070a"><meta name="description" content="Vivid Anime — discover anime and watch with Yenime.">
+<title>Anime · Vivid Cinema</title>
+<link rel="icon" href="icons/vivid-icon.svg" type="image/svg+xml"><link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="styles/vivid-foundation.css"><link rel="stylesheet" href="styles/vivid-system.css"><link rel="stylesheet" href="styles/vivid-shell.css"><link rel="stylesheet" href="styles/vivid-liquid-glass.css"><link rel="stylesheet" href="styles/vivid-audit-fixes.css"><link rel="stylesheet" href="styles/vivid-anime.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.9.1/font/bootstrap-icons.css">
+</head>
+<body data-vivid-page="anime" class="vivid-anime-page vivid-atmosphere">
+<div class="vivid-anime-shell">
+<header class="vivid-topbar"><nav class="vivid-nav" aria-label="Primary">
+<a class="vivid-brand" href="home.html">Vivid<span>Cinema</span></a>
+<div class="vivid-navlinks"><a href="home.html"><i class="bi bi-house-fill" aria-hidden="true"></i><span>Home</span></a><a href="discover.html"><i class="bi bi-compass" aria-hidden="true"></i><span>Discover</span></a><a href="collection.html?collection=movies"><i class="bi bi-film" aria-hidden="true"></i><span>Movies</span></a><a href="collection.html?collection=tv"><i class="bi bi-tv" aria-hidden="true"></i><span>TV</span></a><a class="is-active" href="anime.html" aria-current="page"><i class="bi bi-stars" aria-hidden="true"></i><span>Anime</span></a><a href="library.html"><i class="bi bi-bookmark" aria-hidden="true"></i><span>Library</span></a><a href="news.html"><i class="bi bi-newspaper" aria-hidden="true"></i><span>News</span></a></div>
+<a class="vivid-nav-action" href="auth.html">Sign in</a></nav></header>
+<main>
+<section class="vivid-anime-hero">
+<div class="vivid-anime-hero-copy"><span class="vivid-anime-eyebrow"><i class="bi bi-stars"></i> VIVID ANIME</span><h1>All anime.<br><em>One home.</em></h1><p>Anime gets its own lane on Vivid — series, films, classics and new releases, with every play routed through Yenime.</p><div class="vivid-anime-hero-actions"><a class="vivid-button vivid-button--primary" href="#anime-catalogue"><i class="bi bi-play-fill"></i> Explore anime</a><span><i class="bi bi-shield-check"></i> Yenime only for playback</span></div></div>
+<div class="vivid-anime-orbit" aria-hidden="true"><span></span><span></span><span></span></div>
+</section>
+<section class="vivid-anime-controls" aria-label="Anime filters">
+<button class="is-active" type="button" data-anime-type="">All anime</button><button type="button" data-anime-type="tv">Series</button><button type="button" data-anime-type="movie">Films</button><button type="button" data-anime-sort="popularity.desc">Popular</button><button type="button" data-anime-sort="vote_average.desc">Top rated</button><button type="button" data-anime-sort="first_air_date.desc">Newest</button>
+</section>
+<section id="anime-catalogue" class="vivid-anime-catalogue" aria-labelledby="anime-catalogue-title">
+<div class="vivid-anime-heading"><div><span>THE ANIME CATALOGUE</span><h2 id="anime-catalogue-title">Made for anime fans.</h2><p id="anime-status">Loading anime…</p></div><button id="anime-load-more" class="vivid-rail-load" type="button">Load more</button></div>
+<div id="anime-grid" class="vivid-anime-grid"><div class="vivid-anime-loading"><div class="vivid-anime-skeleton"></div><div class="vivid-anime-skeleton"></div><div class="vivid-anime-skeleton"></div><div class="vivid-anime-skeleton"></div><div class="vivid-anime-skeleton"></div><div class="vivid-anime-skeleton"></div><div class="vivid-anime-skeleton"></div><div class="vivid-anime-skeleton"></div><div class="vivid-anime-skeleton"></div><div class="vivid-anime-skeleton"></div><div class="vivid-anime-skeleton"></div><div class="vivid-anime-skeleton"></div></div></div>
+</section>
+<section class="vivid-anime-policy"><i class="bi bi-stars"></i><div><strong>Anime playback is intentionally separate.</strong><p>Vivid uses Yenime for anime embeds only. Movie and TV providers do not appear in this anime lane.</p></div><a href="home.html">Back to cinema</a></section>
+</main>
+<footer class="vivid-footer">© 2026 Vivid Cinema <span class="vivid-footer-links"><a href="about.html">About</a><a href="terms.html">Terms</a><a href="privacy.html">Privacy</a><a href="contact.html">Contact</a></span></footer>
+<nav class="vivid-mobile-nav" aria-label="Mobile navigation"><a href="home.html"><i class="bi bi-house-fill"></i><span>Home</span></a><a href="discover.html"><i class="bi bi-compass"></i><span>Discover</span></a><a href="collection.html?collection=movies"><i class="bi bi-film"></i><span>Movies</span></a><a href="collection.html?collection=tv"><i class="bi bi-tv-fill"></i><span>TV</span></a><a href="anime.html" class="is-active" aria-current="page"><i class="bi bi-stars"></i><span>Anime</span></a><a href="library.html"><i class="bi bi-bookmark-fill"></i><span>Library</span></a></nav>
+</div>
+<script type="module" src="scripts/app-shell.js"></script><script type="module" src="scripts/anime.js"></script><script type="module" src="scripts/i18n.js"></script>
+</body></html>
