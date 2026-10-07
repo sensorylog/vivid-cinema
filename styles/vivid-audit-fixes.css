@@ -178,3 +178,67 @@ body[data-vivid-page="home"] .vivid-rail.is-expanded{
     transform:scale(1.08)!important;
   }
 }
+
+/* FINAL HOME HERO OVERRIDE — YouTube's 16:9 player must cover the tall mobile artwork frame. */
+.vivid-cinema-home .vivid-hero{
+  overflow:hidden!important;
+}
+.vivid-cinema-home .vivid-hero-media{
+  position:absolute!important;
+  inset:0!important;
+  width:100%!important;
+  height:100%!important;
+  min-height:0!important;
+  max-height:none!important;
+  overflow:hidden!important;
+}
+.vivid-cinema-home .vivid-hero-video{
+  position:absolute!important;
+  top:50%!important;
+  left:50%!important;
+  right:auto!important;
+  bottom:auto!important;
+  width:100%!important;
+  height:100%!important;
+  min-width:0!important;
+  max-width:none!important;
+  transform:translate(-50%,-50%) scale(1.12)!important;
+  transform-origin:center center!important;
+}
+@media(max-width:640px){
+  .vivid-cinema-home .vivid-hero{
+    height:100svh!important;
+    min-height:100svh!important;
+    overflow:hidden!important;
+  }
+  .vivid-cinema-home .vivid-hero-media{
+    position:absolute!important;
+    inset:0!important;
+    width:100%!important;
+    height:100%!important;
+  }
+  .vivid-cinema-home .vivid-hero-video{
+    top:50%!important;
+    left:50%!important;
+    width:177.78%!important;
+    height:100%!important;
+    min-width:0!important;
+    transform:translate(-50%,-50%) scale(1.04)!important;
+  }
+  .vivid-cinema-home .vivid-hero-fallback{
+    position:absolute!important;
+    inset:0!important;
+    width:100%!important;
+    height:100%!important;
+    background-size:cover!important;
+    background-position:center!important;
+  }
+  .vivid-cinema-home .vivid-hero-content{
+    position:absolute!important;
+    inset:0!important;
+    width:100%!important;
+    height:100%!important;
+    padding:calc(100px + env(safe-area-inset-top,0px)) 16px 190px!important;
+    justify-content:flex-end!important;
+  }
+}
