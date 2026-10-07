@@ -127,65 +127,6 @@ function hydrateBrowseCategoryImages(container) {
   }
 }
 
-const browseImageCache = new Map();
-
-function renderBrowseCategories() {
-  const container = $("browse-category-groups");
-  if (!container) return;
-  const groups = [...new Set(BROWSE_CATEGORIES.map((category) => category.group))];
-  container.innerHTML = groups.map((group) => {
-    const categories = BROWSE_CATEGORIES.filter((category) => category.group === group);
-    return '<section class="vivid-browse-category-group" aria-labelledby="browse-' + escapeHtml(group.toLowerCase()) + '">' +
-      '<div class="vivid-browse-category-head"><div><span class="vivid-discovery-kicker">' + escapeHtml(group.toUpperCase()) + '</span><h2 id="browse-' + escapeHtml(group.toLowerCase()) + '">' + escapeHtml(group === "Featured" ? "Featured categories" : group === "Vivid" ? "Vivid collections" : group) + '</h2></div></div>' +
-      '<div class="vivid-browse-category-grid">' +
-      categories.map((category) =>
-        '<a class="vivid-browse-category-card" href="discover.html?category=' + encodeURIComponent(category.key) + '" data-browse-category="' + escapeHtml(category.key) + '" aria-label="' + escapeHtml(category.label) + '">' +
-          '<span class="vivid-browse-category-image" aria-hidden="true"></span>' +
-          '<span class="vivid-browse-category-gradient" aria-hidden="true"></span>' +
-          '<span class="vivid-browse-category-copy"><strong>' + escapeHtml(category.label) + '</strong></span>' +
-        '</a>'
-      ).join("") +
-      '</div></section>';
-  }).join("");
-
-  const cards = [...container.querySelectorAll("[data-browse-category]")];
-  if (!("IntersectionObserver" in window)) {
-    cards.forEach(hydrateBrowseCategoryImage);
-    return;
-  }
-  const observer = new IntersectionObserver((entries, io) => {
-    entries.forEach((entry) => {
-      if (!entry.isIntersecting) return;
-      io.unobserve(entry.target);
-      hydrateBrowseCategoryImage(entry.target);
-    });
-  }, { rootMargin: "500px 0px" });
-  cards.forEach((card) => observer.observe(card));
-}
-
-async function hydrateBrowseCategoryImage(card) {
-  const key = card?.dataset?.browseCategory;
-  const image = card?.querySelector(".vivid-browse-category-image");
-  if (!key || !image) return;
-  if (browseImageCache.has(key)) {
-    const cached = browseImageCache.get(key);
-    if (cached) image.style.backgroundImage = 'url("' + cached + '")';
-    return;
-  }
-  browseImageCache.set(key, "");
-  try {
-    const data = await getCuratedPage(key, 1, { type: "all", sort: "popularity.desc" });
-    const item = (data.items || []).find((entry) => entry.backdrop_path || entry.poster_path);
-    const path = item?.backdrop_path || item?.poster_path;
-    if (!path) return;
-    const url = getImageUrl(path, "w780");
-    browseImageCache.set(key, url);
-    image.style.backgroundImage = 'url("' + url + '")';
-  } catch (error) {
-    console.warn("Browse category image failed:", key, error);
-  }
-}
-
 function updateBrowseMode() {
   const landing = !state.category && !state.query && state.type === "all" && !state.genre && !state.year && !state.rating && !state.region && !state.provider && !state.mood && !state.runtime;
   document.body.classList.toggle("vivid-browse-landing", landing);
