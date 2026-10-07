@@ -8,7 +8,7 @@ const FOR_YOU_CACHE_KEY = "vivid:for-you:v1";
 const FOR_YOU_CACHE_TTL = 30 * 60 * 1000;
 const TONIGHT_SESSION_KEY = "vivid:tonight:v1";
 const PROGRESS_SYNC_DEBOUNCE = 1800;
-const LOCAL_OWNER_KEY = "vivid:account-owner:v1";
+const LOCAL_OWNER_KEY = "vivid:progress-owner:v1";
 function ensureProgressOwner(uid){
   if(!uid)return;
   try{
