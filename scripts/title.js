@@ -229,9 +229,8 @@ function render(details) {
       '<div class="vivid-title-copy"><span class="vivid-title-kicker">'+(media.media_type==="tv"?"TV SERIES":"MOVIE")+'</span><h1>'+escapeHtml(title)+'</h1>'+
       '<div class="vivid-title-meta"><span>'+escapeHtml(year)+'</span>'+(runtime?'<i></i><span>'+escapeHtml(runtime)+'</span>':"")+'<i></i><span>★ '+rating+'</span></div>'+
       '<div class="vivid-title-genres">'+genres+'</div><p>'+escapeHtml(media.overview||"No synopsis is available for this title yet.")+'</p>'+
-      '<div class="vivid-title-actions"><a class="vivid-button vivid-button--primary" href="'+escapeHtml(titleWatchUrl)+'"><i class="bi bi-play-fill"></i> Watch now</a>'+(firstTrailer?'<button class="vivid-button vivid-button--secondary" id="hero-trailer" type="button"><i class="bi bi-play-circle"></i> Watch trailer</button>':"")+'<a class="vivid-button vivid-button--ghost" href="home.html"><i class="bi bi-arrow-left"></i> Browse more</a></div></div>'+
+      '<div class="vivid-title-actions"><a class="vivid-button vivid-button--primary" href="'+escapeHtml(titleWatchUrl)+'"><i class="bi bi-play-fill"></i> Watch now</a>'+(firstTrailer?'<button class="vivid-button vivid-button--secondary" id="hero-trailer" type="button"><i class="bi bi-play-circle"></i> Watch trailer</button>':"")+'<a class="vivid-button vivid-button--ghost" href="home.html"><i class="bi bi-arrow-left"></i> Browse more</a></div>'+renderLibraryActions()+'</div></div>'+
     '</div></section>'+
-    renderLibraryActions()+
     renderTrailerSection(details)+
     '<section class="vivid-title-section"><div class="vivid-section-heading"><div><span>CAST</span><h2>People in the story</h2></div></div><div class="vivid-cast-grid">'+
       (cast.length?cast.map((person)=>'<a class="vivid-cast" href="title.html?person='+encodeURIComponent(person.id)+'"><img loading="lazy" src="'+getImageUrl(person.profile_path,"w185")+'" alt="'+escapeHtml(person.name)+'"><strong>'+escapeHtml(person.name)+'</strong><small>'+escapeHtml(person.character||"Cast")+'</small></a>').join(""):'<p class="vivid-muted">Cast information is unavailable.</p>')+
