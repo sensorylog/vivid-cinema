@@ -110,3 +110,272 @@ body.vivid-cinema-home{min-height:100vh;overflow-x:hidden;overflow-y:auto!import
   .vivid-news-search-grid{grid-template-columns:1fr}
   .vivid-news-search-results{padding:15px}
 }
+
+/* Phase G — Apple TV-inspired News editorial system. */
+.vivid-news-main{
+  padding-top:calc(var(--vivid-shell-height,64px) + 24px);
+  max-width:1440px;
+}
+.vivid-news-hero{
+  min-height:min(620px,68vh);
+  grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);
+  border:0;
+  border-radius:0;
+  background:#08090b;
+  margin-bottom:56px;
+}
+.vivid-news-hero-copy{
+  position:relative;
+  z-index:2;
+  padding:clamp(28px,5vw,72px) clamp(16px,4vw,64px);
+  background:linear-gradient(90deg,#08090b 0%,#08090bf5 58%,transparent 100%);
+}
+.vivid-news-kicker{
+  color:#8e8e93;
+  font-size:10px;
+  font-weight:700;
+  letter-spacing:.16em;
+}
+.vivid-news-hero h1{
+  max-width:650px;
+  margin:12px 0 18px;
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text",sans-serif;
+  font-size:clamp(42px,5.6vw,76px);
+  font-weight:700;
+  line-height:.98;
+  letter-spacing:-.055em;
+}
+.vivid-news-hero p{
+  max-width:570px;
+  color:#8e8e93;
+  font-size:15px;
+  line-height:1.65;
+}
+.vivid-news-hero-actions{margin-top:24px}
+.vivid-news-primary,.vivid-news-secondary{
+  min-height:40px;
+  padding:0 15px;
+  border-radius:9px;
+  font-size:13px;
+  font-weight:600;
+}
+.vivid-news-primary{background:#f5f5f7}
+.vivid-news-secondary{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.08)}
+.vivid-news-hero-art{
+  min-height:620px;
+  margin-left:-120px;
+  background-position:center;
+}
+.vivid-news-hero-shade{
+  background:
+    linear-gradient(90deg,#08090b 0%,rgba(8,9,11,.8) 15%,rgba(8,9,11,.12) 58%,rgba(8,9,11,.2) 100%),
+    linear-gradient(0deg,#08090b 0%,transparent 35%);
+}
+.vivid-news-hero-meta{padding:28px 32px}
+.vivid-news-hero-meta span{color:#8e8e93}
+.vivid-news-hero-meta strong{
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text",sans-serif;
+  font-size:22px;
+  font-weight:600;
+}
+.vivid-news-toolbar{
+  margin-bottom:14px;
+  padding-bottom:10px;
+  border-bottom:1px solid rgba(255,255,255,.07);
+}
+.vivid-news-filters{gap:4px}
+.vivid-news-filter{
+  min-height:36px;
+  padding:8px 12px;
+  border:0;
+  border-radius:9px;
+  background:transparent;
+  color:#8e8e93;
+  font:600 13px -apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif;
+}
+.vivid-news-filter.is-active{
+  background:#f5f5f7;
+  color:#090a0c;
+}
+.vivid-news-refresh{
+  min-height:36px;
+  padding:8px 12px;
+  border:0;
+  border-radius:9px;
+  background:rgba(255,255,255,.06);
+  color:#8e8e93;
+  font:600 12px -apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif;
+}
+.vivid-news-livebar{
+  margin-bottom:36px;
+  padding:0;
+  border:0;
+  border-radius:0;
+  background:transparent;
+  color:#8e8e93;
+}
+.vivid-news-section{margin-bottom:52px}
+.vivid-news-section-head{
+  margin-bottom:14px;
+}
+.vivid-news-section-head span,
+.vivid-calendar-head span{
+  color:#8e8e93;
+  font-size:10px;
+  font-weight:700;
+  letter-spacing:.14em;
+}
+.vivid-news-section-head h2,
+.vivid-calendar-head h2{
+  margin:5px 0 0;
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text",sans-serif;
+  font-size:clamp(22px,3vw,30px);
+  font-weight:700;
+  letter-spacing:-.035em;
+}
+.vivid-news-section-head p,
+.vivid-calendar-head p{
+  margin-top:6px;
+  color:#8e8e93;
+  font-size:13px;
+}
+.vivid-news-section-head>a{
+  color:#8e8e93;
+  font-size:13px;
+}
+.vivid-news-grid{
+  display:flex;
+  gap:14px;
+  overflow-x:auto;
+  padding:2px 2px 18px 0;
+  scrollbar-width:none;
+  scroll-snap-type:x proximity;
+  overscroll-behavior-x:contain;
+}
+.vivid-news-grid::-webkit-scrollbar{display:none}
+.vivid-news-card{
+  flex:0 0 280px;
+  border:0;
+  border-radius:13px;
+  background:transparent;
+  scroll-snap-align:start;
+  overflow:hidden;
+}
+.vivid-news-image{
+  aspect-ratio:16/9;
+  border-radius:13px;
+  background:#101114;
+}
+.vivid-news-image img{transition:transform .35s ease}
+.vivid-news-image>span{
+  left:10px;
+  bottom:10px;
+  border:0;
+  border-radius:7px;
+  background:rgba(8,9,11,.78);
+  color:#fff;
+  font-size:9px;
+}
+.vivid-news-image .vivid-news-play{
+  background:#f5f5f7;
+  color:#090a0c;
+}
+.vivid-news-body{padding:10px 2px 0}
+.vivid-news-body small{
+  color:#8e8e93;
+  font-size:12px;
+}
+.vivid-news-body h3{
+  margin:5px 0 4px;
+  color:#f5f5f7;
+  font-size:15px;
+  font-weight:600;
+  line-height:1.25;
+}
+.vivid-news-body p{
+  margin-bottom:9px;
+  color:#8e8e93;
+  font-size:13px;
+  line-height:1.45;
+}
+.vivid-news-actions a{
+  color:#f5f5f7;
+  font-size:12px;
+  font-weight:600;
+}
+.vivid-notify-release,.vivid-calendar-add{
+  border-radius:8px;
+  padding:7px 9px;
+  font-size:11px;
+}
+.vivid-news-finder{
+  margin-bottom:32px;
+  padding:0 0 22px;
+  border:0;
+  border-bottom:1px solid rgba(255,255,255,.07);
+  border-radius:0;
+  background:transparent;
+}
+.vivid-news-finder h2{
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text",sans-serif;
+  font-weight:700;
+}
+.vivid-news-search{
+  min-height:44px;
+  border-radius:10px;
+  background:#1c1c1e;
+}
+.vivid-news-search-results{
+  border:0;
+  border-radius:0;
+  border-bottom:1px solid rgba(255,255,255,.07);
+  background:transparent;
+  padding:0 0 30px;
+}
+.vivid-news-search-card{
+  border:0;
+  border-radius:12px;
+  background:rgba(255,255,255,.045);
+}
+.vivid-news-calendar{
+  margin-bottom:48px;
+}
+.vivid-calendar-list{
+  display:flex;
+  gap:10px;
+  overflow-x:auto;
+  padding:2px 2px 12px 0;
+  scrollbar-width:none;
+}
+.vivid-calendar-list::-webkit-scrollbar{display:none}
+.vivid-calendar-day{
+  flex:0 0 190px;
+  min-height:104px;
+  border:0;
+  border-radius:12px;
+  background:#1c1c1e;
+}
+@media(max-width:820px){
+  .vivid-news-hero{
+    display:block;
+    min-height:0;
+    margin-bottom:42px;
+  }
+  .vivid-news-hero-copy{
+    padding:34px 0 18px;
+    background:linear-gradient(180deg,#08090b 70%,transparent);
+  }
+  .vivid-news-hero-art{
+    min-height:360px;
+    margin-left:0;
+    margin-top:-80px;
+  }
+}
+@media(max-width:620px){
+  .vivid-news-main{padding-top:calc(var(--vivid-mobile-nav-height,64px) + 16px)}
+  .vivid-news-hero h1{font-size:42px}
+  .vivid-news-hero-art{min-height:280px;margin-top:-40px}
+  .vivid-news-card{flex-basis:78vw}
+  .vivid-news-grid{gap:12px}
+  .vivid-news-section{margin-bottom:42px}
+}
