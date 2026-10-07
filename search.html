@@ -19,16 +19,32 @@
   <section class="vivid-search-page-head" aria-labelledby="search-page-title">
     <div>
       <span class="vivid-search-kicker">VIVID SEARCH</span>
-      <h1 id="search-page-title">Search</h1>
+      <h1 id="search-page-title">Search everything.</h1>
     </div>
-    <p>Find movies, shows, people and more.</p>
+    <p>Movies, shows, people, genres, moods and more — one search across Vivid.</p>
   </section>
   <section class="vivid-search-page-field" aria-label="Search catalogue">
     <i class="bi bi-search" aria-hidden="true"></i>
     <input id="search-page-input" type="search" autocomplete="off" placeholder="Shows, Movies, and More" aria-label="Search shows, movies, and more">
     <button id="search-page-clear" type="button" aria-label="Clear search" hidden><i class="bi bi-x-lg" aria-hidden="true"></i></button>
   </section>
-  <section class="vivid-search-quick" aria-label="Browse Vivid"><span class="vivid-search-page-label">BROWSE VIVID</span><div class="vivid-search-quick-grid"><a href="discover.html?type=movie">Movies</a><a href="discover.html?type=tv">TV Shows</a><a href="discover.html?mood=funny">Funny</a><a href="discover.html?mood=romantic">Romantic</a><a href="discover.html?mood=intense">Intense</a><a href="discover.html?mood=late">Late-night</a><a href="discover.html?category=anime">Anime</a><a href="discover.html?category=africanCinema">African cinema</a></div></section>
+  <section class="vivid-search-quick" aria-label="Browse Vivid">
+    <div class="vivid-search-quick-head"><div><span class="vivid-search-page-label">BROWSE VIVID</span><h2>Jump straight into a world.</h2></div><a href="discover.html">See all Browse <i class="bi bi-arrow-up-right" aria-hidden="true"></i></a></div>
+    <div class="vivid-search-quick-grid">
+      <a href="discover.html?type=movie"><i class="bi bi-film"></i><span>Movies</span></a>
+      <a href="discover.html?type=tv"><i class="bi bi-tv"></i><span>TV Shows</span></a>
+      <a href="discover.html?category=anime"><i class="bi bi-stars"></i><span>Anime</span></a>
+      <a href="discover.html?category=africanCinema"><i class="bi bi-globe-africa"></i><span>African cinema</span></a>
+      <a href="discover.html?mood=funny"><i class="bi bi-emoji-laughing"></i><span>Funny</span></a>
+      <a href="discover.html?mood=romantic"><i class="bi bi-heart"></i><span>Romantic</span></a>
+      <a href="discover.html?mood=intense"><i class="bi bi-lightning-charge"></i><span>Intense</span></a>
+      <a href="discover.html?mood=late"><i class="bi bi-moon-stars"></i><span>Late-night</span></a>
+      <a href="discover.html?category=kDrama"><i class="bi bi-globe2"></i><span>K-Dramas</span></a>
+      <a href="discover.html?category=bollywood"><i class="bi bi-camera-reels"></i><span>Bollywood</span></a>
+      <a href="discover.html?category=nollywood"><i class="bi bi-film"></i><span>Nollywood</span></a>
+      <a href="discover.html?category=hiddenGems"><i class="bi bi-gem"></i><span>Hidden gems</span></a>
+    </div>
+  </section>
   <section id="search-page-content" class="vivid-search-page-content" aria-live="polite"></section>
 </main>
 <script type="module" src="scripts/app-shell.js"></script>
