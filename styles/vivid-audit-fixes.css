@@ -154,7 +154,7 @@ body[data-vivid-page="home"] .vivid-rail.is-expanded{
 @media (max-width:640px){body[data-vivid-page="home"] .vivid-rail.is-expanded{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;overflow:visible;padding-right:2px;}}
 
 
-/* Home hero trailer: safe full-bleed frame without shrinking the hero. */
+/* Home hero trailer: match the artwork frame exactly; crop only the YouTube player chrome. */
 .vivid-cinema-home .vivid-hero-media{
   overflow:hidden!important;
   isolation:isolate;
@@ -165,16 +165,16 @@ body[data-vivid-page="home"] .vivid-rail.is-expanded{
   width:100%!important;
   height:100%!important;
   max-width:none!important;
+  max-height:none!important;
   border:0!important;
-  transform:scale(1.18)!important;
+  transform:scale(1.12)!important;
   transform-origin:center center!important;
-  object-fit:cover!important;
 }
 @media(max-width:640px){
   .vivid-cinema-home .vivid-hero-video{
     inset:0!important;
     width:100%!important;
     height:100%!important;
-    transform:scale(1.12)!important;
+    transform:scale(1.08)!important;
   }
 }
