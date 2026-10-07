@@ -85,10 +85,42 @@ function animeTitleCandidates() {
 
 async function resolveAnimeMalId() {
   if (!details || !animeProvider) return "";
+
+  // Deterministic path first: TMDB and MAL are different ID namespaces, so
+  // title-searching alone is inherently fuzzy. AniMap publishes cross-service
+  // mappings and preserves the TMDB movie/tv namespace.
+  const tmdbLookupBase = String(VIVID_CONFIG.api.animapBaseUrl || "https://animap.id").replace(/\/+$/, "");
+  const tmdbKey = String(currentParams?.id || details?.id || "").trim();
+  if (/^\d+$/.test(tmdbKey)) {
+    try {
+      const response = await fetch(tmdbLookupBase + "/api/map/tmdb/" + encodeURIComponent(tmdbKey), {
+        headers: { Accept: "application/json" },
+        cache: "force-cache"
+      });
+      if (response.ok) {
+        const payload = await response.json();
+        const rows = Array.isArray(payload) ? payload : [payload];
+        const wantedType = currentParams?.type === "movie" ? "movie" : "tv";
+        for (const row of rows) {
+          const refs = Array.isArray(row?.tmdb_id) ? row.tmdb_id : [];
+          const typeMatches = refs.some(ref => String(ref?.type || "").toLowerCase() === wantedType && String(ref?.id) === tmdbKey);
+          const ids = Array.isArray(row?.mal_id) ? row.mal_id : row?.mal_id ? [row.mal_id] : [];
+          if (typeMatches && ids.length) return String(ids[0]);
+        }
+        // Some legacy AniMap responses return a single object without the
+        // normalized tmdb_id array. Keep the MAL ID if the lookup itself matched.
+        const fallbackIds = rows.flatMap(row => Array.isArray(row?.mal_id) ? row.mal_id : row?.mal_id ? [row.mal_id] : []);
+        if (fallbackIds.length) return String(fallbackIds[0]);
+      }
+    } catch (_) {}
+  }
+
+  // Fallback: Jikan title search for titles that are missing from AniMap.
   let base = String(VIVID_CONFIG.api.jikanBaseUrl || "https://api.jikan.moe/v4").replace(/\/+$/, "");
   const year = Number(details.release_date?.slice(0, 4) || details.first_air_date?.slice(0, 4)) || 0;
+  const wantedType = currentParams?.type === "movie" ? "movie" : "tv";
 
-  for (const title of animeTitleCandidates().slice(0, 4)) {
+  for (const title of animeTitleCandidates().slice(0, 5)) {
     try {
       const params = new URLSearchParams({ q: title, limit: "10", sfw: "true" });
       const response = await fetch(base + "/anime?" + params, {
@@ -110,19 +142,17 @@ async function resolveAnimeMalId() {
         const itemYear = Number(item.year || item.aired?.from?.slice(0, 4)) || 0;
         const exact = names.includes(wanted);
         const contains = names.some(name => name && (wanted.includes(name) || name.includes(wanted)));
-        const yearMatch = !year || !itemYear || Math.abs(itemYear - year) <= 1;
-        const typeMatch = currentParams?.type === "movie"
-          ? String(item.type || "").toLowerCase() === "movie"
-          : String(item.type || "").toLowerCase() === "tv";
+        const yearMatch = !year || !itemYear || Math.abs(itemYear - year) <= 2;
+        const typeMatch = String(item.type || "").toLowerCase() === wantedType;
 
         const score =
           (exact ? 100 : contains ? 45 : 0) +
           (yearMatch ? 20 : 0) +
-          (typeMatch ? 10 : 0);
+          (typeMatch ? 15 : 0);
 
         return { item, score, exact, contains };
       })
-      .filter(candidate => candidate.exact || candidate.score >= 65)
+      .filter(candidate => candidate.exact || candidate.score >= 55)
       .sort((a, b) => b.score - a.score)[0];
 
       if (ranked?.item?.mal_id) return String(ranked.item.mal_id);
