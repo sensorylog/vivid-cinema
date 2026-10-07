@@ -6,6 +6,7 @@ export const VIVID_CONFIG = Object.freeze({
     tmdbApiKey: "6a46c44a2b36f3b6c206e5f19cafa558",
     yenimeEmbedBaseUrl: "https://api.yenime.net",
     jikanBaseUrl: "https://api.jikan.moe/v4",
+    animapBaseUrl: "https://animap.id",
     vidapiEmbedBaseUrl: "https://vaplayer.ru",
     vidsrcEmbedBaseUrl: "https://vidsrc.to",
     language: "en-US"
