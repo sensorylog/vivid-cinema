@@ -19,14 +19,24 @@
 <main class="vivid-discovery-main">
 <a class="vivid-page-back" data-vivid-back href="home.html"><i class="bi bi-chevron-left" aria-hidden="true"></i><span>Back</span></a>
 <section class="vivid-discovery-intro">
-<div><span class="vivid-discovery-kicker">DISCOVER</span><h1>Find something great.</h1><p>Search, filter, and browse.</p></div>
+<div><span class="vivid-discovery-kicker">BROWSE</span><h1>Find your next world.</h1><p>Explore by format, genre, mood, service, region and curated Vivid collections.</p></div>
 <div class="vivid-discovery-search"><i class="bi bi-search" aria-hidden="true"></i><input id="discovery-search" type="search" placeholder="Search titles or people" aria-label="Search titles or people" autocomplete="off"><button id="clear-search" type="button" aria-label="Clear search" hidden><i class="bi bi-x-lg" aria-hidden="true"></i></button></div>
 </section>
+<section class="vivid-browse-universes" aria-label="Browse by format and world">
+<div class="vivid-browse-universes-head"><div><span class="vivid-discovery-kicker">EXPLORE</span><h2>Browse by universe</h2><p>Start broad, then make it yours.</p></div></div>
+<div class="vivid-browse-universe-grid">
+<a href="discover.html?type=movie" class="vivid-browse-universe-card"><i class="bi bi-film"></i><strong>Movies</strong><span>Feature films, classics and new releases</span></a>
+<a href="discover.html?type=tv" class="vivid-browse-universe-card"><i class="bi bi-tv"></i><strong>TV Shows</strong><span>Series, seasons and episodes</span></a>
+<a href="discover.html?category=anime" class="vivid-browse-universe-card"><i class="bi bi-stars"></i><strong>Anime</strong><span>Japanese animation and anime worlds</span></a>
+<a href="discover.html?category=africanCinema" class="vivid-browse-universe-card"><i class="bi bi-globe-africa"></i><strong>African cinema</strong><span>Ghana, Nigeria and stories across Africa</span></a>
+<a href="discover.html?category=kDrama" class="vivid-browse-universe-card"><i class="bi bi-globe2"></i><strong>K-Dramas</strong><span>Korean-language series and stories</span></a>
+<a href="discover.html?category=bollywood" class="vivid-browse-universe-card"><i class="bi bi-camera-reels"></i><strong>Bollywood</strong><span>Hindi-language movies and series</span></a>
+</div></section>
 <section class="vivid-collection-explorer" aria-label="Featured collections">
 <div class="vivid-collection-heading"><div><span class="vivid-discovery-kicker">COLLECTIONS</span><h2>Browse by collection</h2><p>Quick picks, ready to explore.</p></div></div>
 <div id="featured-collections" class="vivid-collection-grid"></div>
 </section>
-<section class="vivid-discovery-filters" aria-label="Discovery filters">
+<section class="vivid-discovery-filters" aria-label="Browse filters">
 <div class="vivid-filter-panel">
 <div class="vivid-filter-row vivid-type-row" role="group" aria-label="Content type">
 <button type="button" data-type="all" class="is-active">All</button><button type="button" data-type="movie">Movies</button><button type="button" data-type="tv">TV</button>
