@@ -6,6 +6,7 @@ const inFlight = new Map();
 const SESSION_CACHE_PREFIX = "vivid:tmdb:";
 const SESSION_CACHE_TTL_MS = 5 * 60 * 1000;
 const SESSION_CACHE_MAX_BYTES = 180000;
+const MEMORY_CACHE_MAX_ENTRIES = 80;
 
 function buildUrl(path, params = {}) {
   const cleanParams = Object.fromEntries(
@@ -28,6 +29,7 @@ export async function tmdb(path, params = {}, options = {}) {
         const entry = JSON.parse(raw);
         if (entry && Date.now() - Number(entry.t) < SESSION_CACHE_TTL_MS && entry.data) {
           cache.set(url, entry.data);
+          trimMemoryCache();
           return entry.data;
         }
         sessionStorage.removeItem(SESSION_CACHE_PREFIX + url);
@@ -39,7 +41,7 @@ export async function tmdb(path, params = {}, options = {}) {
   const timeout = setTimeout(() => controller.abort(), timeoutMs);
   const request = (async () => {
     try {
-      const response = await fetch(url, { signal: controller.signal, cache: "no-store", headers: { Accept: "application/json" } });
+      const response = await fetch(url, { signal: controller.signal, cache: "default", headers: { Accept: "application/json" } });
       if (!response.ok) {
         const error = new Error("TMDB request failed: " + response.status);
         error.status = response.status;
@@ -48,6 +50,7 @@ export async function tmdb(path, params = {}, options = {}) {
       const data = await response.json();
       if (useCache) {
         cache.set(url, data);
+        trimMemoryCache();
         try {
           const serialized = JSON.stringify({ t: Date.now(), data });
           if (serialized.length <= SESSION_CACHE_MAX_BYTES) {
@@ -120,5 +123,13 @@ export const tmdbApi = Object.freeze({
   tvRecommendations: (id, page = 1) => tmdb("tv/" + encodeURIComponent(id) + "/recommendations", { page }),
   personDetails: (id) => tmdb("person/" + encodeURIComponent(id), { append_to_response: "combined_credits,external_ids,images" })
 });
+
+function trimMemoryCache() {
+  while (cache.size > MEMORY_CACHE_MAX_ENTRIES) {
+    const oldest = cache.keys().next().value;
+    if (oldest === undefined) break;
+    cache.delete(oldest);
+  }
+}
 
 export function clearTmdbCache() { cache.clear(); }
