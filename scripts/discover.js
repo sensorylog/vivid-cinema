@@ -160,12 +160,21 @@ function providerPool() {
   const unique = source.filter((provider, index, list) =>
     list.findIndex((item) => item.provider_id === provider.provider_id) === index
   );
-  return unique
+  const known = [
+    "Netflix", "Amazon Prime Video", "Prime Video", "Disney Plus", "Disney+",
+    "Apple TV", "Apple TV+", "Showmax", "Max", "HBO Max", "Crunchyroll",
+    "Paramount Plus", "Paramount+", "MUBI", "Hulu"
+  ];
+  const ranked = unique
     .filter((provider) => provider?.provider_id && provider?.provider_name)
     .sort((a, b) =>
       (Number(a.display_priority) || 9999) - (Number(b.display_priority) || 9999) ||
       String(a.provider_name).localeCompare(String(b.provider_name))
     );
+  const familiar = ranked.filter((provider) =>
+    known.some((name) => String(provider.provider_name).toLowerCase().includes(name.toLowerCase()))
+  );
+  return [...familiar, ...ranked.filter((provider) => !familiar.includes(provider))].slice(0, 8);
 }
 
 function populateProviders() {
