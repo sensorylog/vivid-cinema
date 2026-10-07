@@ -1570,3 +1570,55 @@ body.vivid-atmosphere .vivid-brand{
 .vivid-home-viewer-popcorn{position:absolute;z-index:3;right:5px;top:128px;width:46px;height:45px;border-radius:5px 5px 10px 10px;background:repeating-linear-gradient(90deg,#f3f3f2 0 8px,#272a31 8px 16px);border:1px solid rgba(255,255,255,.12);transform:rotate(-8deg);box-shadow:0 8px 16px rgba(0,0,0,.25)}.vivid-home-viewer-popcorn:before{content:"";position:absolute;left:4px;right:4px;top:-13px;height:25px;border-radius:50%;background:radial-gradient(circle at 14% 62%,#f4f1e7 0 6px,transparent 7px),radial-gradient(circle at 38% 42%,#f4f1e7 0 7px,transparent 8px),radial-gradient(circle at 61% 57%,#f4f1e7 0 7px,transparent 8px),radial-gradient(circle at 84% 43%,#f4f1e7 0 6px,transparent 7px)}.vivid-home-viewer-leg{position:absolute;top:136px;width:34px;height:69px;border-radius:18px 18px 10px 10px;background:#171a20;transform-origin:top center}.vivid-home-viewer-leg.leg-left{left:48px;transform:rotate(28deg)}.vivid-home-viewer-leg.leg-right{left:91px;transform:rotate(-22deg)}.vivid-home-breathe-copy{top:300px!important}
 @keyframes vivid-tv-float{0%,100%{transform:translateX(-50%) translateY(3px) rotate(-.35deg)}50%{transform:translateX(-50%) translateY(-7px) rotate(.35deg)}}@keyframes vivid-tv-channel{0%{opacity:.3;transform:scale(1.07)}100%{opacity:.9;transform:scale(1.025)}}@keyframes vivid-tv-title{0%{opacity:0;transform:translateY(6px)}100%{opacity:1;transform:translateY(0)}}@keyframes vivid-tv-glass-glint{0%,60%{transform:translateX(-90%)}78%,100%{transform:translateX(90%)}}@keyframes vivid-viewer-watch{0%,100%{transform:translateY(3px) rotate(1deg)}50%{transform:translateY(-2px) rotate(-1deg)}}@keyframes vivid-viewer-chew{0%,100%{transform:scaleY(1)}45%{transform:scaleY(.45)}60%{transform:scaleY(1.15)}}@keyframes vivid-viewer-eat{0%,58%,100%{transform:rotate(-48deg)}66%{transform:rotate(-72deg) translate(-2px,4px)}74%{transform:rotate(-88deg) translate(-3px,7px)}82%{transform:rotate(-54deg)}}
 @media(max-width:760px){.vivid-home-breathe{min-height:485px!important}.vivid-home-tv{width:min(390px,78vw)}.vivid-home-viewer{right:calc(50% - 175px);top:145px;transform:scale(.82)}.vivid-home-breathe-copy{top:294px!important;padding-inline:18px}}@media(max-width:520px){.vivid-home-breathe{min-height:470px!important}.vivid-home-tv{top:18px;width:min(330px,82vw)}.vivid-home-tv-screen{border-width:5px;border-radius:18px}.vivid-home-tv-copy{left:14px;right:14px;bottom:12px}.vivid-home-viewer{right:calc(50% - 128px);top:126px;transform:scale(.68);transform-origin:50% 100%}.vivid-home-breathe-copy{top:260px!important}.vivid-home-breathe-copy strong{font-size:1.35rem}}@media(prefers-reduced-motion:reduce){.vivid-home-tv,.vivid-home-tv-screen:after,.vivid-home-viewer,.vivid-home-viewer-arm.viewer-arm-right,.vivid-home-viewer-mouth{animation:none!important}.vivid-home-tv-art,.vivid-home-tv-title{transition:none!important}}html[data-vivid-theme="light"] .vivid-home-tv-screen{border-color:rgba(17,18,22,.12);background:#eef0f4;box-shadow:0 24px 55px rgba(17,18,22,.12),inset 0 1px 0 rgba(255,255,255,.9)}
+
+/* HOME CINEMA MOMENT — viewer staging refinement */
+.vivid-home-breathe-scene{min-height:450px!important}
+.vivid-home-tv{z-index:3}
+.vivid-home-viewer{
+  z-index:5;
+  right:calc(50% - 410px);
+  top:118px;
+  transform:scale(.78);
+  transform-origin:50% 100%;
+  animation:vivid-viewer-watch 4.8s ease-in-out infinite;
+}
+.vivid-home-viewer-head{
+  transform:rotate(-7deg);
+  transform-origin:50% 70%;
+}
+.vivid-home-viewer-eye.eye-left{left:13px}
+.vivid-home-viewer-eye.eye-right{right:25px}
+.vivid-home-viewer-mouth{left:25px}
+.vivid-home-breathe-copy{
+  top:350px!important;
+  z-index:8!important;
+}
+@keyframes vivid-viewer-watch{
+  0%,100%{transform:scale(.78) translateY(3px) rotate(1deg)}
+  50%{transform:scale(.78) translateY(-2px) rotate(-1deg)}
+}
+@media(max-width:760px){
+  .vivid-home-breathe-scene{min-height:430px!important}
+  .vivid-home-viewer{
+    right:calc(50% - 250px);
+    top:132px;
+    transform:scale(.64);
+  }
+  .vivid-home-breathe-copy{top:332px!important}
+}
+@media(max-width:520px){
+  .vivid-home-breathe{min-height:510px!important}
+  .vivid-home-viewer{
+    right:calc(50% - 176px);
+    top:125px;
+    transform:scale(.55);
+  }
+  .vivid-home-breathe-copy{
+    top:318px!important;
+    padding-inline:14px;
+  }
+  @keyframes vivid-viewer-watch{
+    0%,100%{transform:scale(.55) translateY(3px) rotate(1deg)}
+    50%{transform:scale(.55) translateY(-2px) rotate(-1deg)}
+  }
+}
