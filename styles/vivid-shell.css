@@ -137,7 +137,7 @@ html[data-network="offline"] [data-vivid-online-only]{display:none!important}
   .vivid-unified-nav .vivid-navlinks a{flex:0 0 auto}
 }
 @media(max-width:640px){
-  .vivid-unified-header{padding:8px 12px}
+  .vivid-unified-header{padding:calc(8px + env(safe-area-inset-top,0px)) 12px 8px}
   .vivid-unified-nav{min-height:50px;gap:8px}
   .vivid-unified-nav .vivid-navlinks{display:flex;overflow-x:auto;scrollbar-width:none;min-width:0}.vivid-unified-nav .vivid-navlinks::-webkit-scrollbar{display:none}
   .vivid-unified-nav .vivid-nav-action{min-height:44px;padding:9px 10px}
@@ -251,7 +251,7 @@ html[data-vivid-theme="light"] .vivid-unified-nav .vivid-navlinks a:hover,html[d
   .vivid-v2-mobile-nav{
     position:fixed!important;
     display:grid!important;
-    grid-template-columns:repeat(4,1fr);
+    grid-template-columns:repeat(5,minmax(0,1fr));
     align-items:stretch;
     left:0!important;
     right:0!important;
@@ -357,4 +357,14 @@ html[data-vivid-theme="light"] .vivid-v2-mobile-nav a[aria-current="page"]{color
   html[data-vivid-page="anime"] .vivid-v2-nav .vivid-brand-wordmark::after{content:"Browse"}
   html[data-vivid-page="library"] .vivid-v2-nav .vivid-brand-wordmark::after{content:"Library"}
   html[data-vivid-page="search"] .vivid-v2-nav .vivid-brand-wordmark::after{content:"Search"}
+}
+
+
+/* Phase N — iOS/PWA safe-area hardening. Keep the fixed shell clear of the status area and home indicator. */
+@media(max-width:640px){
+  .vivid-unified-header{padding-left:max(12px,env(safe-area-inset-left,0px));padding-right:max(12px,env(safe-area-inset-right,0px))}
+  .vivid-v2-mobile-nav{padding-left:max(4px,env(safe-area-inset-left,0px));padding-right:max(4px,env(safe-area-inset-right,0px))}
+}
+@media(min-width:641px){
+  .vivid-unified-header{padding-left:max(var(--vivid-page-gutter,16px),env(safe-area-inset-left,0px));padding-right:max(var(--vivid-page-gutter,16px),env(safe-area-inset-right,0px))}
 }
