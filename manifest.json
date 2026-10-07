@@ -39,7 +39,7 @@
     {
       "name": "Browse movies and TV",
       "short_name": "Browse",
-      "url": "./home.html"
+      "url": "./discover.html"
     },
     {
       "name": "Discover",
