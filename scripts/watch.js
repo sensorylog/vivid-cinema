@@ -27,7 +27,7 @@ let tmdbId = "";
 const PRIMARY_FALLBACK_MS = 5000;
 const YENIME_FALLBACK_MS = 3500;
 let malId = "";
-let animeProvider = false;
+let animeProvider = route.params.get("anime") === "1";
 
 function getParams() {
   const id = route.params.get("id");
@@ -352,7 +352,7 @@ function renderShell(params) {
     });
     // Metadata is loaded asynchronously. Start with the existing VidAPI path so
     // non-anime playback is unchanged, then switch to Yenime when anime + MAL resolve.
-    setPlayerSource("vidapi", params, resumeAt);
+    if (animeProvider) { activeSource = "yenime"; updateSourceLabel(); } else { setPlayerSource("vidapi", params, resumeAt); }
     const switchBtn = $("player-switch-source");
     if (switchBtn) {
       switchBtn.addEventListener("click", () => {
@@ -511,7 +511,7 @@ async function load() {
     media = normalizeMedia(details, currentParams.type);
     imdbId = resolveImdbId(details);
     tmdbId = /^\d+$/.test(String(currentParams.id || "")) ? String(currentParams.id) : String(details?.id || "");
-    animeProvider = isLikelyAnime();
+    animeProvider = animeProvider || isLikelyAnime();
     if (animeProvider) malId = await resolveAnimeMalId();
     if (currentParams.type === "tv") {
       details.episode = await tmdbApi.tvSeason(currentParams.id, currentParams.season)
