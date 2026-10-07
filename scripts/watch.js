@@ -85,9 +85,43 @@ function normalizeAnimeTitle(value) {
 }
 
 function animeTitleCandidates() {
+  const aliases = [];
+  const alternative = details?.alternative_titles;
+  if (Array.isArray(alternative)) aliases.push(...alternative);
+  if (alternative && typeof alternative === "object") {
+    for (const key of ["results", "titles", "en", "ja"]) {
+      if (Array.isArray(alternative[key])) aliases.push(...alternative[key]);
+      else if (typeof alternative[key] === "string") aliases.push(alternative[key]);
+    }
+  }
   return [...new Set([
-    details?.title, details?.name, details?.original_title, details?.original_name, media?.title
-  ].map(value => String(value || "").trim()).filter(Boolean))];
+    details?.title,
+    details?.name,
+    details?.original_title,
+    details?.original_name,
+    ...aliases.map(value => typeof value === "object" ? (value.title || value.name || value.iso_3166_1) : value),
+    media?.title
+  ].map(value => String(value || "").trim()).filter(value => value.length >= 2))];
+}
+
+function extractAnimeMapItems(payload) {
+  if (Array.isArray(payload)) return payload;
+  if (!payload || typeof payload !== "object") return [];
+  for (const key of ["data", "results", "items", "anime", "titles"]) {
+    if (Array.isArray(payload[key])) return payload[key];
+  }
+  return [payload];
+}
+
+function extractMalId(value) {
+  const candidates = [
+    value?.mal_id,
+    value?.malId,
+    value?.mal?.id,
+    ...(Array.isArray(value?.mal_id) ? value.mal_id : []),
+    ...(Array.isArray(value?.mal_ids) ? value.mal_ids : [])
+  ];
+  return candidates.map(item => String(item || "").trim()).find(item => /^\\d+$/.test(item)) || "";
 }
 
 async function resolveAnimeMalId() {
@@ -122,12 +156,12 @@ async function resolveAnimeMalId() {
 
       if (!response.ok) continue;
 
-      const results = await response.json();
-      if (!Array.isArray(results)) continue;
+      const payload = await response.json();
+      const results = extractAnimeMapItems(payload);
 
       const wanted = normalizeAnimeTitle(title);
       const ranked = results
-        .filter(item => item?.mal_id)
+        .filter(item => extractMalId(item))
         .map(item => {
           const names = Array.isArray(item.titles)
             ? item.titles.map(normalizeAnimeTitle).filter(Boolean)
@@ -150,7 +184,8 @@ async function resolveAnimeMalId() {
         .sort((a, b) => b.score - a.score);
 
       const best = ranked[0];
-      if (best?.item?.mal_id) return String(best.item.mal_id);
+      const bestMalId = extractMalId(best?.item);
+      if (bestMalId) return bestMalId;
     } catch (_) {}
   }
 
@@ -176,11 +211,10 @@ async function resolveAnimeMalId() {
         );
 
         if (namespaceMatches) {
-          const candidates = [...new Set(
-            (Array.isArray(entry?.mal_id) ? entry.mal_id : [entry?.mal_id])
-              .map(value => String(value || "").trim())
-              .filter(value => /^\\d+$/.test(value))
-          )];
+          const candidates = [
+            ...(Array.isArray(entry?.mal_id) ? entry.mal_id : [entry?.mal_id]),
+            ...(Array.isArray(entry?.mal_ids) ? entry.mal_ids : [])
+          ].map(value => String(value || "").trim()).filter(value => /^\\d+$/.test(value));
 
           if (candidates.length) return candidates[0];
         }
