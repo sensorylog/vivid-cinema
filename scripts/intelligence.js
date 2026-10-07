@@ -5,7 +5,7 @@ const KEY="vivid:intelligence:v1";
 const SESSION_KEY="vivid:session:v1";
 const empty=()=>({version:1,feedback:{},events:[],taste:{genres:{},languages:{},countries:{},actors:{},directors:{},media:{movie:0,tv:0},decades:{},updatedAt:0},onboarding:{completed:false,dismissed:false,completedAt:0}});
 let firebasePromise=null, syncPromise=null, sessionId=null;
-const LOCAL_OWNER_KEY="vivid:account-owner:v1";
+const LOCAL_OWNER_KEY="vivid:intelligence-owner:v1";
 function ensureIntelligenceOwner(uid){
  try{
   const owner=localStorage.getItem(LOCAL_OWNER_KEY);
