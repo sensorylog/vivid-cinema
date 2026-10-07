@@ -473,6 +473,8 @@ function renderShell(params) {
 
   const player = $("vidapi-player");
   const status = $("player-status");
+  const yenimeFallback = $("yenime-fallback");
+  const yenimeFallbackLink = $("yenime-fallback-link");
   if (player) {
     player.addEventListener("load", () => {
       // A loaded cross-origin player document is enough to remove our page-level
