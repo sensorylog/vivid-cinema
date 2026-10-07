@@ -221,7 +221,7 @@ function render(details) {
   document.title=title+" · Vivid Cinema";
   const country=getInitialCountry(details);
   $("title-content").innerHTML=
-    '<section class="vivid-title-backdrop" style="--title-backdrop:url('+JSON.stringify(getImageUrl(media.backdrop_path,"w1280"))+')"><div class="vivid-title-backdrop-overlay"></div><div class="vivid-title-backdrop-label">'+(media.media_type==="tv"?"SERIES":"FEATURE")+'</div></section>'+
+    '<section class="vivid-title-backdrop"><img class="vivid-title-backdrop-image" src="'+escapeHtml(getImageUrl(media.backdrop_path,"w1280"))+'" alt="" aria-hidden="true" loading="eager" decoding="async" onerror="this.remove()"><div class="vivid-title-backdrop-overlay"></div><div class="vivid-title-backdrop-label">'+(media.media_type==="tv"?"SERIES":"FEATURE")+'</div></section>'+
     '<section class="vivid-title-info"><div class="vivid-title-info-inner">'+
       '<div class="vivid-title-poster"><img src="'+getImageUrl(media.poster_path,"w500")+'" alt="'+escapeHtml(title)+' poster"></div>'+
       '<div class="vivid-title-copy"><span class="vivid-title-kicker">'+(media.media_type==="tv"?"TV SERIES":"MOVIE")+'</span><h1>'+escapeHtml(title)+'</h1>'+
