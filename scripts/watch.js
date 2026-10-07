@@ -72,15 +72,30 @@ function buildVidsrcEmbedUrl(params) {
 
 function buildMultiembedUrl(params) {
   const base = String(VIVID_CONFIG.api.multiembedBaseUrl || "https://multiembed.mov").replace(/\/+$/, "");
-  // MultiEmbed VIP/directstream is TMDB-only here. The endpoint falls back to
-  // MultiEmbed's normal player when VIP playback is unavailable.
-  if (!tmdbId) return "";
-  const query = new URLSearchParams({ video_id: String(tmdbId), tmdb: "1" });
+  // MultiEmbed's documented directstream flow is most reliable with an IMDb
+  // identifier. Fall back to TMDB explicitly only when IMDb is unavailable.
+  const videoId = imdbId || tmdbId;
+  if (!videoId) return "";
+  const query = new URLSearchParams({ video_id: String(videoId) });
+  if (!imdbId) query.set("tmdb", "1");
   if (params.type === "tv") {
     query.set("s", String(params.season));
     query.set("e", String(params.episode));
   }
   return base + "/directstream.php?" + query;
+}
+
+function buildMultiembedStandardUrl(params) {
+  const base = String(VIVID_CONFIG.api.multiembedBaseUrl || "https://multiembed.mov").replace(/\/+$/, "");
+  const videoId = imdbId || tmdbId;
+  if (!videoId) return "";
+  const query = new URLSearchParams({ video_id: String(videoId) });
+  if (!imdbId) query.set("tmdb", "1");
+  if (params.type === "tv") {
+    query.set("s", String(params.season));
+    query.set("e", String(params.episode));
+  }
+  return base + "/?" + query;
 }
 
 function getNextSource(source) {
@@ -203,14 +218,29 @@ function setPlayerSource(source, params, startAt = 0) {
       fallbackTimer = window.setTimeout(() => {
         if (primaryHealthy || activeSource !== "multiembed") return;
         clearFallbackTimer();
-        multiembedTimedOut = true;
-        if (status) {
-          status.textContent = "MultiEmbed VIP could not start playback. Try MultiEmbed again or return to the title.";
-          status.classList.add("is-warning");
-          status.hidden = false;
+        if (activeSource === "multiembed") {
+          const standardUrl = buildMultiembedStandardUrl(params);
+          if (standardUrl && player.src !== standardUrl) {
+            multiembedTimedOut = true;
+            player.src = standardUrl;
+            if (status) {
+              status.textContent = "MultiEmbed VIP did not find this file — trying MultiEmbed standard…";
+              status.classList.add("is-warning");
+              status.hidden = false;
+            }
+            fallbackTimer = window.setTimeout(() => {
+              if (primaryHealthy || activeSource !== "multiembed") return;
+              multiembedTimedOut = true;
+              if (status) {
+                status.textContent = "MultiEmbed could not start playback. Try MultiEmbed again or return to the title.";
+                status.classList.add("is-warning");
+                status.hidden = false;
+              }
+              const switchBtn = $("player-switch-source");
+              if (switchBtn) switchBtn.textContent = "Retry MultiEmbed";
+            }, fallbackDelayMs());
+          }
         }
-        const switchBtn = $("player-switch-source");
-        if (switchBtn) switchBtn.textContent = "Retry MultiEmbed VIP";
       }, fallbackDelayMs());
     }
   } else {
