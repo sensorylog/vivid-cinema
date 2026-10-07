@@ -1,4 +1,3 @@
-import "./analytics.js";
 import "./pwa.js";
 import { VIVID_CONFIG } from "./config.js";
 
@@ -111,6 +110,7 @@ function initAppShell() {
   initialized = true;
 
   document.documentElement.dataset.vividReady = "false";
+  void import("./analytics.js").catch(() => {});
   const storedTheme = (() => { try { return localStorage.getItem("vivid:theme"); } catch { return null; } })();
   document.documentElement.dataset.vividTheme = storedTheme === "light" ? "light" : "dark";
   setViewportState();
