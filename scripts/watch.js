@@ -29,8 +29,8 @@ let fallbackTimer = null;
 let multiembedTimedOut = false;
 let imdbId = "";
 let tmdbId = "";
-const PRIMARY_FALLBACK_MS = 15000;
-const ANIME_FALLBACK_MS = 15000;
+const PRIMARY_FALLBACK_MS = 9000;
+const ANIME_FALLBACK_MS = 9000;
 
 function getParams() {
   const id = route.params.get("id");
@@ -61,7 +61,7 @@ function buildVidapiEmbedUrl(params, startAt = 0) {
 }
 
 function buildVidsrcEmbedUrl(params) {
-  const base = String(VIVID_CONFIG.api.vidsrcEmbedBaseUrl || "https://vidsrc.to").replace(/\/+$/, "");
+  const base = String(VIVID_CONFIG.api.vidsrcEmbedBaseUrl || "https://vidsrc.sh").replace(/\/+$/, "");
   // VidSrc accepts numeric TMDB IDs, so the fallback stays fully TMDB-based.
   const id = encodeURIComponent(tmdbId || imdbId);
   if (params.type === "tv") {
@@ -93,12 +93,6 @@ function getSourceLabel(source) {
   if (source === "vidsrc") return "VidSrc alternate source";
   if (source === "multiembed") return "MultiEmbed VIP";
   return "Powered by VidAPI";
-}
-
-function getSourceOrigin(source) {
-  if (source === "vidsrc") return VIDSRC_ORIGIN;
-  if (source === "multiembed") return MULTIEMBED_ORIGIN;
-  return null;
 }
 
 function isLikelyAnime() {
