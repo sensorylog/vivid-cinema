@@ -5,6 +5,19 @@ const KEY="vivid:intelligence:v1";
 const SESSION_KEY="vivid:session:v1";
 const empty=()=>({version:1,feedback:{},events:[],taste:{genres:{},languages:{},countries:{},actors:{},directors:{},media:{movie:0,tv:0},decades:{},updatedAt:0},onboarding:{completed:false,dismissed:false,completedAt:0}});
 let firebasePromise=null, syncPromise=null, sessionId=null;
+const LOCAL_OWNER_KEY="vivid:account-owner:v1";
+function ensureIntelligenceOwner(uid){
+ try{
+  const owner=localStorage.getItem(LOCAL_OWNER_KEY);
+  if(!owner){localStorage.setItem(LOCAL_OWNER_KEY,String(uid));return;}
+  if(owner===String(uid))return;
+  localStorage.removeItem(KEY);
+  localStorage.removeItem(SESSION_KEY);
+  localStorage.setItem(LOCAL_OWNER_KEY,String(uid));
+  sessionId=null;
+  window.dispatchEvent(new CustomEvent("vivid:account-switched",{detail:{uid:String(uid)}}));
+ }catch{}
+}
 
 function read(){try{const v=JSON.parse(localStorage.getItem(KEY));const d=empty();return {...d,...v,feedback:{...d.feedback,...(v?.feedback||{})},events:Array.isArray(v?.events)?v.events:[],taste:{...d.taste,...(v?.taste||{})},onboarding:{...d.onboarding,...(v?.onboarding||{})}}}catch{return empty()}}
 function write(v){try{localStorage.setItem(KEY,JSON.stringify(v))}catch{};window.dispatchEvent(new CustomEvent("vivid:intelligence-changed",{detail:v}))}
@@ -99,5 +112,6 @@ export function shouldShowColdStart(){const s=read(),l=getLocalLibrary();return 
 export async function completeColdStart(items=[]){const s=read(),seen=new Set;items.slice(0,6).forEach(x=>{const i=safe(x),k=key(i);if(!k||seen.has(k))return;seen.add(k);const updatedAt=Date.now();s.feedback[k]={...i,kind:"like",updatedAt};cloud(["feedback",k],{...i,kind:"like",updatedAt});recordBehavior("cold_start_like",i)});s.onboarding={completed:true,dismissed:false,completedAt:Date.now()};write(s);invalidateRecommendationCaches();await rebuildTasteProfile();return s}
 export function dismissColdStart(){const s=read();s.onboarding={...s.onboarding,dismissed:true};write(s)}
 export async function syncIntelligenceForUser(u){
- if(!u)return read();try{const {db,collection,getDocs}=await fb();const [f,t]=await Promise.all([getDocs(collection(db,"users",u.uid,"feedback")),getDocs(collection(db,"users",u.uid,"taste"))]);const s=read();let feedbackChanged=false;f.docs.forEach(d=>{const x=d.data()||{};if(x.kind==="cleared"){if(s.feedback[d.id]){delete s.feedback[d.id];feedbackChanged=true}}else if(!s.feedback[d.id]||Number(x.updatedAt||0)>Number(s.feedback[d.id].updatedAt||0)){s.feedback[d.id]=x;feedbackChanged=true}});if(feedbackChanged)s.taste.updatedAt=0;const remote=t.docs.find(d=>d.id==="profile")?.data();if(remote&&Number(remote.updatedAt||0)>Number(s.taste.updatedAt||0))s.taste=remote;write(s);invalidateRecommendationCaches();return s}catch(e){console.warn("Vivid intelligence sync unavailable:",e);return read()}}
+ if(!u)return read();
+ ensureIntelligenceOwner(u.uid);try{const {db,collection,getDocs}=await fb();const [f,t]=await Promise.all([getDocs(collection(db,"users",u.uid,"feedback")),getDocs(collection(db,"users",u.uid,"taste"))]);const s=read();let feedbackChanged=false;f.docs.forEach(d=>{const x=d.data()||{};if(x.kind==="cleared"){if(s.feedback[d.id]){delete s.feedback[d.id];feedbackChanged=true}}else if(!s.feedback[d.id]||Number(x.updatedAt||0)>Number(s.feedback[d.id].updatedAt||0)){s.feedback[d.id]=x;feedbackChanged=true}});if(feedbackChanged)s.taste.updatedAt=0;const remote=t.docs.find(d=>d.id==="profile")?.data();if(remote&&Number(remote.updatedAt||0)>Number(s.taste.updatedAt||0))s.taste=remote;write(s);invalidateRecommendationCaches();return s}catch(e){console.warn("Vivid intelligence sync unavailable:",e);return read()}}
 export function startIntelligenceSync(){if(syncPromise)return syncPromise;syncPromise=(async()=>{try{const {auth,onAuthStateChanged}=await fb();return await new Promise(resolve=>{let done=false;const finish=x=>{if(done)return;done=true;unsub?.();resolve(x)};const unsub=onAuthStateChanged(auth,u=>u?syncIntelligenceForUser(u).then(finish):finish(read()))})}catch{return read()}})();return syncPromise}
