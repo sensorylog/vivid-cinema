@@ -1,13 +1,13 @@
-const CACHE_NAME = "vivid-cinema-shell-v69";
+const CACHE_NAME = "vivid-cinema-shell-v70";
 const APP_SHELL = [
   "./","./index.html","./home.html","./person.html","./discover.html","./collection.html","./title.html","./watch.html",
   "./library.html","./auth.html","./login.html","./forgot-password.html","./account.html","./terms.html","./privacy.html","./contact.html",
-  "./offline.html","./news.html","./404.html","./manifest.json","./robots.txt","./sitemap.xml","./icons/vivid-icon.svg",
+  "./offline.html","./news.html","./search.html","./anime.html","./help.html","./about.html","./accessibility.html","./cookies.html","./404.html","./manifest.json","./robots.txt","./sitemap.xml","./icons/vivid-icon.svg",
   "./styles/vivid-foundation.css","./styles/vivid-system.css","./styles/vivid-shell.css","./styles/vivid-cinematic.css",
   "./styles/vivid-title.css","./styles/vivid-watch.css","./styles/vivid-library.css","./styles/vivid-discovery.css",
   "./styles/vivid-collection.css","./styles/vivid-auth.css","./styles/vivid-account.css","./styles/vivid-pwa.css",
-  "./styles/vivid-atmosphere.css","./styles/vivid-search-standalone.css","./styles/vivid-landing.css" ,"./styles/vivid-viewport.css",
-  "./styles/vivid-legal.css","./scripts/app-shell.js","./scripts/analytics.js","./scripts/provider-region.js","./scripts/search.js","./scripts/intelligence.js","./scripts/firebase.js","./scripts/pwa.js","./scripts/home-catalogue-fallback.js",
+  "./styles/vivid-atmosphere.css","./styles/vivid-search-standalone.css","./styles/vivid-landing.css","./styles/vivid-landing-final.css","./styles/vivid-hero-mobile.css","./styles/vivid-home-breathe.css","./styles/vivid-news.css","./styles/vivid-anime.css","./styles/vivid-viewport.css",
+  "./styles/vivid-legal.css","./scripts/app-shell.js","./scripts/analytics.js","./scripts/provider-region.js","./scripts/search.js","./scripts/search-page.js","./scripts/intelligence.js","./scripts/firebase.js","./scripts/pwa.js","./scripts/home-catalogue-fallback.js",
   "./scripts/atmosphere.js","./scripts/i18n.js","./scripts/routes.js",
   "./scripts/config.js","./scripts/utils.js","./scripts/content.js","./scripts/media.js","./scripts/tmdb.js",
   "./scripts/nav-auth.js","./scripts/library.js","./scripts/library-page.js","./scripts/discover.js",
