@@ -34,6 +34,7 @@ function syncVividBranding() {
   apple.href = appleTouchIconPath;
   let manifest = document.querySelector('link[rel="manifest"]');
   if (!manifest) { manifest = document.createElement("link"); manifest.rel = "manifest"; document.head.appendChild(manifest); }
+  manifest.href = "./manifest.json";
 
   document.querySelectorAll(".vivid-brand, .vivid-legal-brand, .logo").forEach(brand => {
     if (brand.dataset.vividBrandReady === "true") return;
