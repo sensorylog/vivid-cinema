@@ -426,19 +426,21 @@ function handlePlayerEvent(event) {
     /^(play|playing|timeupdate|progress|loadedmetadata|canplay|ready|started)$/i.test(statusValue) ||
     Number(eventData.player_progress) > 0;
   if (!isPlaybackSignal) return;
-  // A real playback/progress event means the primary embed is alive.
-  primaryHealthy = true;
-  clearFallbackTimer();
-  const status = $("player-status");
-  if (status) status.hidden = true;
   const data = payload.data;
   const info = data.player_info || {};
+  // Validate the event before marking the source healthy. Cross-origin players can
+  // emit generic events, and an unrelated/late event must never suppress fallback.
   if (String(info.mediaType || "") !== String(media?.media_type || "")) return;
   if (isVidapi && info.tmdb != null && String(info.tmdb) !== String(media?.id)) return;
   if (currentParams?.type === "tv") {
     if (info.season != null && Number(info.season) !== Number(currentParams.season)) return;
     if (info.episode != null && Number(info.episode) !== Number(currentParams.episode)) return;
   }
+  // A validated playback/progress event means the active embed is alive.
+  primaryHealthy = true;
+  clearFallbackTimer();
+  const status = $("player-status");
+  if (status) status.hidden = true;
   const progress = Number(data.player_progress) || 0;
   const duration = Number(data.player_duration) || 0;
   if (progress > 0) {
