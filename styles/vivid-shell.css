@@ -147,3 +147,196 @@ html[data-network="offline"] [data-vivid-online-only]{display:none!important}
 html[data-vivid-theme="light"] .vivid-unified-header{background:rgba(255,255,255,.88);border-bottom-color:rgba(20,28,40,.12)}
 html[data-vivid-theme="light"] .vivid-unified-nav .vivid-navlinks a,html[data-vivid-theme="light"] .vivid-unified-nav .vivid-nav-action{color:#59616d}
 html[data-vivid-theme="light"] .vivid-unified-nav .vivid-navlinks a:hover,html[data-vivid-theme="light"] .vivid-unified-nav .vivid-navlinks a[aria-current="page"],html[data-vivid-theme="light"] .vivid-unified-nav .vivid-nav-action:hover{color:#10131a;background:rgba(20,28,40,.07)}
+
+
+/* ============================================================
+   Vivid Cinema v2 shell — Apple TV-style navigation foundation.
+   Four primary destinations: Home, Browse, Library, Search.
+   ============================================================ */
+.vivid-v2-nav{
+  width:min(100%,1440px);
+  margin:auto;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  min-height:56px;
+}
+.vivid-v2-nav .vivid-brand{
+  display:inline-flex;
+  align-items:center;
+  flex:0 0 auto;
+  margin-right:8px;
+  color:#fff;
+  text-decoration:none;
+}
+.vivid-v2-nav .vivid-brand-icon{width:30px;height:30px;flex:0 0 30px}
+.vivid-v2-nav .vivid-brand-wordmark{display:inline-flex;align-items:baseline;font-size:1.08rem;font-weight:800;letter-spacing:-.045em}
+.vivid-v2-nav .vivid-brand-wordmark>span{font-weight:500;color:#aeb4bd}
+.vivid-v2-nav .vivid-navlinks{display:flex;align-items:center;gap:2px;min-width:0}
+.vivid-v2-nav .vivid-navlinks a,
+.vivid-v2-nav .vivid-search-trigger,
+.vivid-v2-nav .vivid-nav-action{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:7px;
+  min-height:40px;
+  padding:8px 12px;
+  border:0;
+  border-radius:10px;
+  background:transparent;
+  color:#969ca6;
+  text-decoration:none;
+  font:600 .82rem/1 var(--vivid-font-sans);
+  white-space:nowrap;
+  cursor:pointer;
+  transition:color .18s ease,background .18s ease;
+}
+.vivid-v2-nav .vivid-navlinks a:hover,
+.vivid-v2-nav .vivid-navlinks a[aria-current="page"],
+.vivid-v2-nav .vivid-search-trigger:hover,
+.vivid-v2-nav .vivid-nav-action:hover{
+  color:#fff;
+  background:rgba(255,255,255,.065);
+}
+.vivid-v2-nav .vivid-navlinks i,
+.vivid-v2-nav .vivid-search-trigger>i{font-size:.9rem}
+.vivid-v2-nav .vivid-shell-search-link{margin-left:auto}
+.vivid-v2-nav .vivid-shell-search-link kbd{
+  display:none;
+}
+.vivid-v2-nav .vivid-theme-toggle{margin-left:0}
+.vivid-v2-nav .vivid-notification-button{flex:0 0 40px}
+
+.vivid-v2-mobile-nav{display:none}
+
+@media(max-width:900px){
+  .vivid-v2-nav .vivid-navlinks{overflow-x:auto;scrollbar-width:none}
+  .vivid-v2-nav .vivid-navlinks::-webkit-scrollbar{display:none}
+  .vivid-v2-nav .vivid-navlinks a{flex:0 0 auto}
+}
+@media(max-width:640px){
+  /* The mobile frame is intentionally quiet: title/logo above, glass navigation below. */
+  .vivid-v2-nav{
+    min-height:50px;
+    gap:8px;
+  }
+  .vivid-v2-nav .vivid-brand{
+    margin-right:auto;
+  }
+  .vivid-v2-nav .vivid-brand-icon{
+    display:none;
+  }
+  .vivid-v2-nav .vivid-brand-wordmark{
+    font-size:1.05rem;
+  }
+  .vivid-v2-nav .vivid-brand-wordmark>span{display:none}
+  .vivid-v2-nav .vivid-navlinks,
+  .vivid-v2-nav .vivid-nav-action,
+  .vivid-v2-nav .vivid-theme-toggle,
+  .vivid-v2-nav .vivid-notification-button{
+    display:none!important;
+  }
+  .vivid-v2-nav .vivid-shell-search-link{
+    margin-left:auto;
+    width:40px;
+    min-width:40px;
+    padding:0;
+    border-radius:999px;
+    font-size:0;
+    color:#d8dbe0;
+    background:rgba(255,255,255,.07);
+  }
+  .vivid-v2-nav .vivid-shell-search-link i{font-size:1rem}
+  .vivid-v2-mobile-nav{
+    position:fixed!important;
+    display:grid!important;
+    grid-template-columns:repeat(4,1fr);
+    align-items:stretch;
+    left:0!important;
+    right:0!important;
+    bottom:0!important;
+    z-index:1100;
+    height:calc(64px + env(safe-area-inset-bottom,0px));
+    padding:0 4px env(safe-area-inset-bottom,0px);
+    border:0!important;
+    border-top:1px solid rgba(255,255,255,.09)!important;
+    border-radius:0!important;
+    background:rgba(24,24,27,.91)!important;
+    box-shadow:0 -10px 35px rgba(0,0,0,.28);
+    backdrop-filter:blur(26px) saturate(135%);
+    -webkit-backdrop-filter:blur(26px) saturate(135%);
+  }
+  .vivid-v2-mobile-nav a{
+    min-width:0;
+    min-height:56px;
+    padding:6px 2px;
+    display:flex!important;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:4px;
+    color:#85868b!important;
+    text-decoration:none;
+    font-size:.62rem;
+    font-weight:600;
+    letter-spacing:-.01em;
+  }
+  .vivid-v2-mobile-nav a i{
+    font-size:1.18rem;
+    line-height:1;
+  }
+  .vivid-v2-mobile-nav a.is-active,
+  .vivid-v2-mobile-nav a[aria-current="page"]{
+    color:#0a84ff!important;
+  }
+  .vivid-v2-mobile-nav a:focus-visible{
+    outline:2px solid rgba(10,132,255,.8);
+    outline-offset:-3px;
+    border-radius:10px;
+  }
+  body{
+    padding-bottom:calc(64px + env(safe-area-inset-bottom,0px));
+  }
+  .vivid-footer{
+    padding-bottom:calc(88px + env(safe-area-inset-bottom,0px))!important;
+  }
+  .vivid-unified-header{
+    padding:calc(6px + var(--vivid-safe-top,0px)) 14px 6px;
+    border-bottom:0;
+    background:rgba(6,7,10,.72);
+  }
+  .vivid-topbar{
+    padding:calc(6px + var(--vivid-safe-top,0px)) 14px 6px;
+    border-bottom:0;
+  }
+  .vivid-unified-header + main,
+  .vivid-unified-header ~ main{
+    padding-top:62px;
+  }
+}
+
+html[data-vivid-theme="light"] .vivid-v2-nav .vivid-navlinks a,
+html[data-vivid-theme="light"] .vivid-v2-nav .vivid-search-trigger,
+html[data-vivid-theme="light"] .vivid-v2-nav .vivid-nav-action{
+  color:#59616d;
+}
+html[data-vivid-theme="light"] .vivid-v2-nav .vivid-navlinks a:hover,
+html[data-vivid-theme="light"] .vivid-v2-nav .vivid-navlinks a[aria-current="page"],
+html[data-vivid-theme="light"] .vivid-v2-nav .vivid-search-trigger:hover,
+html[data-vivid-theme="light"] .vivid-v2-nav .vivid-nav-action:hover{
+  color:#10131a;
+  background:rgba(20,28,40,.07);
+}
+html[data-vivid-theme="light"] .vivid-v2-mobile-nav{
+  background:rgba(246,246,248,.94)!important;
+  border-top-color:rgba(20,28,40,.12)!important;
+}
+html[data-vivid-theme="light"] .vivid-v2-mobile-nav a{color:#777b83!important}
+html[data-vivid-theme="light"] .vivid-v2-mobile-nav a.is-active,
+html[data-vivid-theme="light"] .vivid-v2-mobile-nav a[aria-current="page"]{color:#007aff!important}
+
+@media(prefers-reduced-motion:reduce){
+  .vivid-v2-nav *,
+  .vivid-v2-mobile-nav *{transition:none!important}
+}
