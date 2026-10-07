@@ -12,7 +12,9 @@ import { startCinemaReminderLoop } from "./scripts/cinema-reminders.js";
 import { enableCinemaPush, getServerReleaseAlerts, dismissServerReleaseAlert } from "./scripts/push-notifications.js";
 
 const $=id=>document.getElementById(id);
-let featured=[],activeIndex=0,heroMuted=true,heroPlaying=true,heroTimer=null,heroLoadToken=0;
+let featured=[],activeIndex=0,heroMuted=true,heroPlaying=true,heroTimer=null,heroLoadToken=0,heroTrailerDelay=null,heroVisibilityPaused=false;
+const HERO_TRAILER_DURATION=22000;
+const HERO_TRAILER_START_DELAY=900;
 
 const rails={};
 let serverReleaseAlerts=[];
@@ -129,6 +131,7 @@ async function loadHeroVideo(item){
  const iframe=$("hero-video"),fallback=$("hero-fallback");
  if(!iframe||!fallback||!item)return false;
  const token=++heroLoadToken;
+ clearTimeout(heroTrailerDelay);
  iframe.classList.remove("is-ready");
  fallback.classList.add("is-visible");
  try{
@@ -155,8 +158,13 @@ async function loadHeroVideo(item){
      },delay));
    };
    iframe.onerror=()=>{if(token!==heroLoadToken)return;iframe.classList.remove("is-ready");fallback.classList.add("is-visible");};
-   iframe.src=youtubeUrl(trailer.key,heroMuted);
-   iframe.dataset.videoKey=trailer.key;
+   const setTrailer=()=>{
+     if(token!==heroLoadToken)return;
+     iframe.src=youtubeUrl(trailer.key,heroMuted);
+     iframe.dataset.videoKey=trailer.key;
+   };
+   // Let the cinematic artwork establish the scene before the auto-preview starts.
+   heroTrailerDelay=setTimeout(setTrailer,HERO_TRAILER_START_DELAY);
    return true;
  }catch(error){
    if(token!==heroLoadToken)return false;
@@ -187,7 +195,7 @@ async function showHero(index,userAction=false){
  }
  clearTimeout(heroTimer);
  void loadHeroVideo(item);
- heroTimer=setTimeout(()=>showHero(activeIndex+1),18000);
+ heroTimer=setTimeout(()=>showHero(activeIndex+1),HERO_TRAILER_DURATION);
 }
 async function initHero(){
  try{
@@ -206,13 +214,31 @@ function toggleSound(){
  const button=$("hero-sound");
  if(button){button.innerHTML='<i class="bi bi-'+(heroMuted?"volume-mute-fill":"volume-up-fill")+'"></i>';button.setAttribute("aria-label",heroMuted?"Unmute trailer":"Mute trailer");}
 }
+function handleHeroVisibility(){
+ if(document.hidden){
+   heroVisibilityPaused=true;
+   clearTimeout(heroTimer);
+   if(heroPlaying)sendHeroPlayerCommand("pauseVideo");
+   return;
+ }
+ if(!heroVisibilityPaused)return;
+ heroVisibilityPaused=false;
+ if(heroPlaying){
+   sendHeroPlayerCommand("playVideo");
+   clearTimeout(heroTimer);
+   heroTimer=setTimeout(()=>showHero(activeIndex+1),HERO_TRAILER_DURATION);
+ }
+}
+
+document.addEventListener("visibilitychange",handleHeroVisibility);
+
 function togglePause(){
  heroPlaying=!heroPlaying;
  clearTimeout(heroTimer);
  sendHeroPlayerCommand(heroPlaying?"playVideo":"pauseVideo");
  const button=$("hero-pause");
  if(button){button.innerHTML='<i class="bi bi-'+(heroPlaying?"pause-fill":"play-fill")+'"></i>';button.setAttribute("aria-label",heroPlaying?"Pause trailer":"Play trailer");}
- if(heroPlaying)heroTimer=setTimeout(()=>showHero(activeIndex+1),18000);
+ if(heroPlaying)heroTimer=setTimeout(()=>showHero(activeIndex+1),HERO_TRAILER_DURATION);
 }
 
 function wireRails(){
