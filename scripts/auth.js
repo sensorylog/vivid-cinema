@@ -74,9 +74,27 @@ async function googleSignIn(){
 async function finishPendingGoogleRedirect(){
   let pending=false;
   try{pending=localStorage.getItem("vivid:google-redirect")==="1";}catch{}
-  // Always ask Firebase for a redirect result on auth pages. This is important
-  // on iOS/PWA browsers where the redirect can restore auth state without
-  // preserving sessionStorage.
+
+  // Firebase can restore the Google session even when the browser returns
+  // without a redirect credential. Listen for that restored user as a second
+  // completion path, especially for iOS/PWA navigation.
+  const authStatePromise=new Promise(resolve=>{
+    let settled=false;
+    const done=()=>{if(!settled){settled=true;resolve();}};
+    const timer=window.setTimeout(done,4000);
+    import("https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js").then(({onAuthStateChanged})=>{
+      let unsubscribe=()=>{};
+      unsubscribe=onAuthStateChanged(auth,user=>{
+        if(user && pending){
+          clearTimeout(timer);
+          unsubscribe();
+          try{localStorage.removeItem("vivid:google-redirect");}catch{}
+          void finishGoogleSignIn({user}).finally(done);
+        }
+      });
+    }).catch(done);
+  });
+
   try{
     const result=await withTimeout(getRedirectResult(auth),30000,"Google sign-in redirect timed out.");
     if(result?.user){
@@ -84,30 +102,15 @@ async function finishPendingGoogleRedirect(){
       await finishGoogleSignIn(result);
       return;
     }
-    if(!pending)return;
+    if(!pending){
+      await authStatePromise;
+      return;
+    }
+    await authStatePromise;
   }catch(error){
     console.error("Google redirect sign-in failed:",error);
     if(error?.code!=="auth/timeout")showMessage(friendlyError(error));
-    return;
   }
-
-  // Fallback: some mobile/PWA browsers finish the OAuth redirect by restoring
-  // the Firebase session, while getRedirectResult() returns null.
-  await new Promise(resolve=>{
-    let settled=false;
-    const done=()=>{if(!settled){settled=true;resolve();}};
-    const timer=window.setTimeout(done,4000);
-    const unsubscribe=import("https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js").then(({onAuthStateChanged})=>{
-      return onAuthStateChanged(auth,user=>{
-        if(user){
-          clearTimeout(timer);
-          unsubscribe?.();
-          try{localStorage.removeItem("vivid:google-redirect");}catch{}
-          void finishGoogleSignIn({user}).finally(done);
-        }
-      });
-    }).catch(done);
-  });
 }
 googleButtons.forEach(button=>button.addEventListener("click",async()=>{
   button.disabled=true;showMessage("Connecting to Google…",true);
