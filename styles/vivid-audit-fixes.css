@@ -753,3 +753,134 @@ html[data-vivid-theme="light"] :is(
     box-shadow:0 1px 0 rgba(17,18,22,.04),0 5px 20px rgba(17,18,22,.045)!important;
   }
 }
+
+
+/* Landing page Light Mode — editorial, not inverted. */
+html[data-vivid-theme="light"] body.vivid-landing,
+html[data-vivid-theme="light"] .vivid-landing-shell{
+  background:#f5f5f7!important;
+  color:#111216!important;
+}
+html[data-vivid-theme="light"] .landing-hero{
+  background:#e8eaf0!important;
+}
+html[data-vivid-theme="light"] .landing-header{
+  background:linear-gradient(180deg,rgba(245,245,247,.96),rgba(245,245,247,0))!important;
+}
+html[data-vivid-theme="light"] .landing-brand{
+  color:#111216!important;
+}
+html[data-vivid-theme="light"] .landing-brand span{
+  color:#707681!important;
+}
+html[data-vivid-theme="light"] .landing-signin,
+html[data-vivid-theme="light"] .landing-submit{
+  background:#111216!important;
+  color:#fff!important;
+}
+html[data-vivid-theme="light"] .landing-signin:hover,
+html[data-vivid-theme="light"] .landing-submit:hover{
+  background:#292b31!important;
+}
+html[data-vivid-theme="light"] .landing-hero-shade{
+  background:
+    linear-gradient(90deg,rgba(245,245,247,.96) 0%,rgba(245,245,247,.86) 34%,rgba(245,245,247,.38) 72%,rgba(245,245,247,.52) 100%),
+    linear-gradient(0deg,#f5f5f7 0%,rgba(245,245,247,.06) 48%,rgba(245,245,247,.76) 100%)!important;
+}
+html[data-vivid-theme="light"] .landing-kicker,
+html[data-vivid-theme="light"] .landing-eyebrow{
+  color:#747a84!important;
+}
+html[data-vivid-theme="light"] .landing-hero h1,
+html[data-vivid-theme="light"] .landing-section h2,
+html[data-vivid-theme="light"] .landing-cta h2{
+  color:#111216!important;
+}
+html[data-vivid-theme="light"] .landing-hero h1 em,
+html[data-vivid-theme="light"] .landing-cta h2 em{
+  color:#737983!important;
+}
+html[data-vivid-theme="light"] .landing-copy,
+html[data-vivid-theme="light"] .landing-browse{
+  color:#626873!important;
+}
+html[data-vivid-theme="light"] .landing-browse:hover{
+  color:#111216!important;
+}
+html[data-vivid-theme="light"] .landing-email{
+  background:rgba(255,255,255,.92)!important;
+  color:#111216!important;
+  border-color:rgba(17,18,22,.14)!important;
+  box-shadow:0 5px 18px rgba(17,18,22,.06)!important;
+}
+html[data-vivid-theme="light"] .landing-email::placeholder{
+  color:#8a9099!important;
+}
+html[data-vivid-theme="light"] .landing-email:focus{
+  border-color:#4b63a8!important;
+  box-shadow:0 0 0 3px rgba(75,99,168,.12)!important;
+}
+html[data-vivid-theme="light"] .landing-scroll-cue{
+  color:#737983!important;
+}
+html[data-vivid-theme="light"] .landing-scroll-cue i{
+  background:linear-gradient(#737983,transparent)!important;
+}
+html[data-vivid-theme="light"] .landing-section-link{
+  color:#626873!important;
+}
+html[data-vivid-theme="light"] .landing-section-link:hover{
+  color:#111216!important;
+}
+html[data-vivid-theme="light"] .landing-poster{
+  background:#e4e6eb!important;
+  border-color:rgba(17,18,22,.09)!important;
+  box-shadow:0 8px 24px rgba(17,18,22,.07)!important;
+}
+html[data-vivid-theme="light"] .landing-poster:hover{
+  border-color:rgba(17,18,22,.16)!important;
+  box-shadow:0 15px 34px rgba(17,18,22,.11)!important;
+}
+html[data-vivid-theme="light"] .landing-poster::after{
+  background:linear-gradient(0deg,rgba(0,0,0,.68),transparent 45%)!important;
+}
+html[data-vivid-theme="light"] .landing-reasons-section,
+html[data-vivid-theme="light"] .landing-faq,
+html[data-vivid-theme="light"] .landing-faq-item,
+html[data-vivid-theme="light"] .landing-cta{
+  border-color:rgba(17,18,22,.10)!important;
+}
+html[data-vivid-theme="light"] .landing-reason{
+  background:#fff!important;
+  border-color:rgba(17,18,22,.09)!important;
+  box-shadow:0 8px 26px rgba(17,18,22,.05)!important;
+}
+html[data-vivid-theme="light"] .landing-reason:hover{
+  border-color:rgba(17,18,22,.15)!important;
+  box-shadow:0 14px 34px rgba(17,18,22,.08)!important;
+}
+html[data-vivid-theme="light"] .landing-reason-icon{
+  background:#f0f1f4!important;
+  color:#111216!important;
+}
+html[data-vivid-theme="light"] .landing-reason h3,
+html[data-vivid-theme="light"] .landing-faq-q{
+  color:#111216!important;
+}
+html[data-vivid-theme="light"] .landing-reason p,
+html[data-vivid-theme="light"] .landing-faq-a p{
+  color:#626873!important;
+}
+html[data-vivid-theme="light"] .landing-faq-q span:last-child{
+  color:#737983!important;
+}
+html[data-vivid-theme="light"] .landing-footer{
+  color:#737983!important;
+}
+html[data-vivid-theme="light"] .landing-footer p,
+html[data-vivid-theme="light"] .landing-footer a:not(.landing-brand){
+  color:#7b818b!important;
+}
+html[data-vivid-theme="light"] .landing-footer a:hover{
+  color:#111216!important;
+}
