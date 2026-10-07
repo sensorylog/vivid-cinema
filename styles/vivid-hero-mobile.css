@@ -24,11 +24,11 @@
     left: 50% !important;
     right: auto !important;
     bottom: auto !important;
-    width: 177.78vh !important;
+    width: 177.78% !important;
     max-width: none !important;
     height: 100% !important;
     min-width: 100% !important;
-    transform: translateX(-50%) scale(1.12) !important;
+    transform: translateX(-50%) scale(1.02) !important;
     transform-origin: center center !important;
     border: 0;
     z-index: 1;
