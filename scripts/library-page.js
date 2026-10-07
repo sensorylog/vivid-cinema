@@ -3,7 +3,7 @@ import { getImageUrl, getMediaUrl } from "./media.js";
 import { escapeHtml } from "./utils.js";
 import { getContinueWatching, formatProgress } from "./recommendations.js";
 
-let activeCollection = "favorites";
+let activeCollection = "favorites"; // Library shelf state
 const $ = (id) => document.getElementById(id);
 
 function renderContinueWatching() {
