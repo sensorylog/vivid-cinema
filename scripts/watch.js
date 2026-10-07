@@ -57,6 +57,11 @@ function buildVidapiEmbedUrl(params, startAt = 0) {
     : base + "/embed/movie/" + encodeURIComponent(params.id) + "?" + query;
 }
 
+function buildYenimeWebUrl(params) {
+  const base = "https://yenime.net/anime/" + encodeURIComponent(malId || "");
+  return base;
+}
+
 function buildYenimeEmbedUrl(params, startAt = 0) {
   const base = String(VIVID_CONFIG.api.yenimeEmbedBaseUrl || "").replace(/\/+$/, "");
   if (!malId) return "";
@@ -414,6 +419,7 @@ function renderShell(params) {
       '</div><a class="vivid-button vivid-button--secondary" href="' + escapeHtml(buildTitleUrl(media.id, media.media_type)) + '"><i class="bi bi-info-circle"></i> Details</a></div></section>' +
     '<section class="vivid-player-section" aria-label="Video player"><div class="vivid-player-frame">' +
       '<div id="player-status" class="vivid-player-status" role="status" aria-live="polite">' + (resumeAt > 5 ? "Resuming where you left off…" : "Preparing playback…") + '</div>' +
+      '<div id="yenime-fallback" class="vivid-player-fallback" hidden><span>Player not loading?</span><a id="yenime-fallback-link" class="vivid-button vivid-button--secondary" target="_blank" rel="noopener noreferrer">Open Yenime</a></div>' +
       '<iframe id="vidapi-player" title="' + escapeHtml(title) + ' player" allow="autoplay; fullscreen; picture-in-picture; encrypted-media; clipboard-write; web-share" allowfullscreen referrerpolicy="origin" loading="eager"></iframe>' +
     '</div><div class="vivid-player-bar"><div><i class="bi bi-shield-check"></i><span id="player-source-label">Powered by VidAPI</span></div><div class="vivid-player-bar-actions"><button type="button" id="player-switch-source" class="vivid-player-switch" hidden>Try alternate source</button><a href="' + escapeHtml(buildTitleUrl(media.id, media.media_type)) + '">Back to title</a></div></div></section>' +
     (isTv ? '<section class="vivid-watch-note"><i class="bi bi-collection-play"></i><div><strong>Episode playback</strong><span>Use the episode list on the title page to switch seasons and episodes.</span></div></section>' : "") +
@@ -457,8 +463,18 @@ function renderShell(params) {
     });
     // Metadata is loaded asynchronously. Start with the existing VidAPI path so
     // non-anime playback is unchanged, then switch to Yenime when anime + MAL resolve.
-    if (animeProvider) { activeSource = "yenime"; updateSourceLabel(); } else { setPlayerSource("vidapi", params, resumeAt); }
+    if (animeProvider) {
+      activeSource = "yenime";
+      if (yenimeFallback) yenimeFallback.hidden = false;
+      updateSourceLabel();
+    } else {
+      if (yenimeFallback) yenimeFallback.hidden = true;
+      setPlayerSource("vidapi", params, resumeAt);
+    }
     const switchBtn = $("player-switch-source");
+    if (yenimeFallbackLink) {
+      yenimeFallbackLink.href = buildYenimeWebUrl(params);
+    }
     if (switchBtn) {
       switchBtn.addEventListener("click", () => {
         let next = "vidapi";
@@ -631,6 +647,8 @@ async function load() {
       const saved = getPlaybackProgress(progressKey());
       const resumeAt = Number(saved?.progress || route.params.get("startAt") || 0);
       if (malId) {
+        if (yenimeFallbackLink) yenimeFallbackLink.href = buildYenimeWebUrl(currentParams);
+        if (yenimeFallback) yenimeFallback.hidden = false;
         setPlayerSource("yenime", currentParams, resumeAt);
       } else {
         const player = $("vidapi-player");
