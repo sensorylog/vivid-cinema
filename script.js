@@ -17,6 +17,7 @@ let featured=[],activeIndex=0,heroMuted=true,heroPlaying=true,heroTimer=null,her
 const rails={};
 let serverReleaseAlerts=[];
 const sectionState={};
+const loadingSections=new Set();
 
 const SECTION_RAIL_IDS=Object.freeze({
  trending:"trending-rail",
@@ -259,7 +260,7 @@ async function loadSectionBatch(keys){
 }
 
 async function loadMoreSection(key,button){
- if(!button||button.disabled)return;
+ if(!button||button.disabled||loadingSections.has(key))return;
  const railId=SECTION_RAIL_IDS[key];
  if(!railId){
    console.warn("Vivid load more: unknown section",key);
@@ -275,6 +276,7 @@ async function loadMoreSection(key,button){
  }
  const nextPage=Math.min(currentPage+1,totalPages);
  button.disabled=true;
+ loadingSections.add(key);
  button.setAttribute("aria-busy","true");
  button.textContent="Loading…";
  try{
@@ -295,6 +297,7 @@ async function loadMoreSection(key,button){
    button.textContent="Try again";
    console.warn("Vivid rail load failed:",key,error);
  }finally{
+   loadingSections.delete(key);
    button.disabled=false;
    button.removeAttribute("aria-busy");
    if(!button.hidden && button.textContent==="Loading…")button.textContent="Load more";
