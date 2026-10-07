@@ -61,3 +61,10 @@ html[data-vivid-theme="light"] .vivid-search-page-field,
 html[data-vivid-theme="light"] .vivid-search-recent-grid button,
 html[data-vivid-theme="light"] .vivid-search-page-result{background:rgba(20,28,40,.045);border-color:var(--vivid-border);color:var(--vivid-text)}
 html[data-vivid-theme="light"] .vivid-search-page-field input{color:var(--vivid-text)}
+
+
+.vivid-search-quick{padding-top:30px}
+.vivid-search-quick-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.vivid-search-quick-grid a{display:flex;align-items:center;min-height:48px;padding:0 14px;border:1px solid rgba(255,255,255,.07);border-radius:12px;background:rgba(255,255,255,.035);color:#c9cdd3;text-decoration:none;font-size:.8rem;font-weight:700;transition:background .2s ease,border-color .2s ease,transform .2s ease}
+.vivid-search-quick-grid a:hover{background:rgba(255,255,255,.075);border-color:rgba(255,255,255,.16);transform:translateY(-1px);color:#fff}
+@media(max-width:640px){.vivid-search-quick-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
