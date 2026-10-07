@@ -1849,3 +1849,185 @@ body.vivid-atmosphere{background:#000;}
   .vivid-library-continue-rail,
   .vivid-library-shelf{scroll-behavior:auto;}
 }
+
+/* ========================================================================== */
+/* CINEMATIC DEFERENCE + GUIDED DECISION PASS                                */
+/* ========================================================================== */
+
+/* Dark mode owns the cinema canvas. Light mode remains an intentional theme. */
+html:not([data-vivid-theme="light"]),
+html:not([data-vivid-theme="light"]) body,
+html:not([data-vivid-theme="light"]) body.vivid-atmosphere{
+  background:#000;
+}
+html[data-vivid-theme="light"] body,
+html[data-vivid-theme="light"] body.vivid-atmosphere{
+  background:var(--vivid-bg)!important;
+}
+
+/* Apple-style hierarchy: regular body copy, bold headings, quiet metadata. */
+body{font-weight:400;}
+.vivid-card-sub,
+.vivid-rail-head p,
+.vivid-library-section-note,
+.vivid-library-shelf-head p,
+.vivid-library-shelf-note{font-weight:400;}
+
+/* Content deference: the artwork is the surface, not a boxed dashboard. */
+.vivid-cinema-home .vivid-card{
+  background:transparent;
+  border:0;
+  box-shadow:none;
+  transition:transform .18s ease,opacity .18s ease;
+}
+.vivid-cinema-home .vivid-card-media{
+  border:0;
+  box-shadow:none;
+  border-radius:12px;
+}
+.vivid-cinema-home .vivid-card:active{
+  transform:scale(.985);
+  opacity:.9;
+}
+@media (hover:none), (pointer:coarse){
+  .vivid-cinema-home .vivid-card:active{transform:scale(.985)!important}
+}
+
+/* Top 10: ranking is a visual object, not another metadata label. */
+.vivid-cinema-home .vivid-top10-card{
+  position:relative;
+  flex-basis:clamp(184px,14.5vw,244px);
+  width:clamp(184px,14.5vw,244px);
+  padding-left:34px;
+}
+.vivid-cinema-home .vivid-top10-card .vivid-top10-rank{
+  position:absolute;
+  left:-1px;
+  bottom:28px;
+  z-index:4;
+  color:#fff;
+  font-family:var(--vivid-font-display);
+  font-size:clamp(3.2rem,5.4vw,5.8rem);
+  line-height:.78;
+  font-weight:700;
+  letter-spacing:-.09em;
+  text-shadow:0 8px 24px rgba(0,0,0,.65);
+  pointer-events:none;
+}
+.vivid-cinema-home .vivid-top10-card .vivid-card-media{
+  aspect-ratio:2/3;
+}
+.vivid-cinema-home .vivid-top10-card .vivid-card-info{padding-left:0;}
+.vivid-cinema-home .vivid-top10-card .vivid-card-title{font-weight:600;}
+@media(max-width:640px){
+  .vivid-cinema-home .vivid-top10-card{
+    flex-basis:calc((100vw - 34px)/2.35);
+    width:calc((100vw - 34px)/2.35);
+    min-width:150px;
+    padding-left:30px;
+  }
+  .vivid-cinema-home .vivid-top10-card .vivid-top10-rank{
+    font-size:3.3rem;
+    bottom:27px;
+  }
+}
+
+/* Continue Watching: resolve context at a glance with landscape artwork and time left. */
+.vivid-cinema-home .vivid-continue-card{
+  flex-basis:clamp(270px,32vw,420px);
+  width:clamp(270px,32vw,420px);
+}
+.vivid-cinema-home .vivid-continue-card .vivid-card-media{
+  aspect-ratio:16/9;
+  border-radius:12px;
+}
+.vivid-cinema-home .vivid-continue-card .vivid-card-media img{
+  object-fit:cover;
+}
+.vivid-cinema-home .vivid-continue-card .vivid-card-info{
+  padding-top:8px;
+}
+.vivid-cinema-home .vivid-continue-card .vivid-continue-remaining{
+  position:absolute;
+  left:10px;
+  bottom:10px;
+  z-index:3;
+  color:#fff;
+  font-size:11px;
+  line-height:1;
+  font-weight:600;
+  letter-spacing:.02em;
+  text-shadow:0 1px 8px rgba(0,0,0,.8);
+}
+.vivid-cinema-home .vivid-continue-card .vivid-card-progress{
+  bottom:0;
+  left:0;
+  right:0;
+  height:3px;
+  border-radius:0;
+}
+@media(max-width:640px){
+  .vivid-cinema-home .vivid-continue-card{
+    flex-basis:78vw;
+    width:78vw;
+    min-width:270px;
+  }
+}
+
+/* Section headings are guidance, not chrome. */
+.vivid-cinema-home .vivid-rail-head h2{
+  font-size:22px;
+  line-height:1.15;
+  font-weight:700;
+}
+.vivid-cinema-home .vivid-rail-head p{
+  color:#8e8e93;
+}
+
+/* Library tabs should sit on the canvas rather than look like a control panel. */
+.vivid-library-page .vivid-library-tabs{
+  border:0;
+  border-bottom:1px solid rgba(255,255,255,.08);
+  border-radius:0;
+  background:rgba(0,0,0,.78);
+  box-shadow:none;
+  padding:6px 0 9px;
+}
+.vivid-library-page .vivid-library-tabs button{
+  border-radius:9px;
+}
+.vivid-library-page .vivid-library-tabs button.is-active{
+  background:#fff;
+  box-shadow:none;
+}
+.vivid-library-page .vivid-library-card{
+  border:0;
+  background:transparent;
+  box-shadow:none;
+}
+.vivid-library-page .vivid-library-card a{
+  border:0;
+  background:transparent;
+  box-shadow:none;
+}
+.vivid-library-page .vivid-library-card-copy{
+  padding-left:0;
+  padding-right:0;
+}
+.vivid-library-page .vivid-library-card:active{
+  transform:scale(.985);
+  opacity:.9;
+}
+@media(max-width:700px){
+  .vivid-library-page .vivid-library-tabs{
+    padding-inline:0;
+    background:rgba(0,0,0,.88);
+  }
+}
+
+/* Touch feedback is immediate; motion stays restrained on touch devices. */
+.vivid-cinema-home .vivid-feature-card:active,
+.vivid-library-page .vivid-library-continue-card:active{
+  transform:scale(.985);
+  opacity:.92;
+}
