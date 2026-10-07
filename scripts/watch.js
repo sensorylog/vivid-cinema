@@ -72,14 +72,15 @@ function buildVidsrcEmbedUrl(params) {
 
 function buildMultiembedUrl(params) {
   const base = String(VIVID_CONFIG.api.multiembedBaseUrl || "https://multiembed.mov").replace(/\/+$/, "");
-  // MultiEmbed fallback is intentionally TMDB-only. Do not send an IMDb ID here.
+  // MultiEmbed VIP/directstream is TMDB-only here. The endpoint falls back to
+  // MultiEmbed's normal player when VIP playback is unavailable.
   if (!tmdbId) return "";
   const query = new URLSearchParams({ video_id: String(tmdbId), tmdb: "1" });
   if (params.type === "tv") {
     query.set("s", String(params.season));
     query.set("e", String(params.episode));
   }
-  return base + "/?" + query;
+  return base + "/directstream.php?" + query;
 }
 
 function getNextSource(source) {
@@ -90,7 +91,7 @@ function getNextSource(source) {
 
 function getSourceLabel(source) {
   if (source === "vidsrc") return "VidSrc alternate source";
-  if (source === "multiembed") return "MultiEmbed fallback";
+  if (source === "multiembed") return "MultiEmbed VIP";
   return "Powered by VidAPI";
 }
 
@@ -151,7 +152,7 @@ function updateSourceLabel() {
     switchBtn.textContent = activeSource === "vidapi"
       ? "Try alternate source"
       : activeSource === "vidsrc"
-        ? "Try MultiEmbed"
+        ? "Try MultiEmbed VIP"
         : "Try primary source";
   }
 }
@@ -199,7 +200,7 @@ function setPlayerSource(source, params, startAt = 0) {
     }
     player.src = multiembedUrl;
     if (status) {
-      status.textContent = "Loading MultiEmbed fallback…";
+      status.textContent = "Loading MultiEmbed VIP…";
       status.classList.remove("is-warning");
       status.hidden = false;
     }
@@ -209,12 +210,12 @@ function setPlayerSource(source, params, startAt = 0) {
         clearFallbackTimer();
         multiembedTimedOut = true;
         if (status) {
-          status.textContent = "MultiEmbed could not start playback. Try MultiEmbed again or return to the title.";
+          status.textContent = "MultiEmbed VIP could not start playback. Try MultiEmbed again or return to the title.";
           status.classList.add("is-warning");
           status.hidden = false;
         }
         const switchBtn = $("player-switch-source");
-        if (switchBtn) switchBtn.textContent = "Retry MultiEmbed";
+        if (switchBtn) switchBtn.textContent = "Retry MultiEmbed VIP";
       }, fallbackDelayMs());
     }
   } else {
