@@ -99,21 +99,69 @@ async function resolveAnimeMalId() {
     details.release_date?.slice(0, 4) ||
     details.first_air_date?.slice(0, 4)
   ) || 0;
-  const titles = animeTitleCandidates().slice(0, 6);
-
+  const titles = animeTitleCandidates().slice(0, 8);
   const animapBase = String(
     VIVID_CONFIG.api.animapBaseUrl || "https://animap.id"
-  ).replace(/\/+$/, "");
+  ).replace(/\\/+$/, "");
 
-  // First choice: AniMap's documented TMDB mapping. This avoids title ambiguity
-  // for sequels, remakes, films, specials, and alternate English/Japanese names.
-  if (/^\d+$/.test(tmdbNumericId)) {
+  // Fastest/most reliable title match: AniMap's documented search endpoint.
+  // It returns mapped MAL IDs directly and ranks exact title matches first.
+  for (const title of titles) {
+    try {
+      const query = title + (year ? " " + year : "");
+      const response = await fetch(
+        animapBase + "/api/search?" + new URLSearchParams({
+          q: query,
+          limit: "25"
+        }).toString(),
+        {
+          headers: { Accept: "application/json" },
+          cache: "no-store"
+        }
+      );
+
+      if (!response.ok) continue;
+
+      const results = await response.json();
+      if (!Array.isArray(results)) continue;
+
+      const wanted = normalizeAnimeTitle(title);
+      const ranked = results
+        .filter(item => item?.mal_id)
+        .map(item => {
+          const names = Array.isArray(item.titles)
+            ? item.titles.map(normalizeAnimeTitle).filter(Boolean)
+            : [];
+          const itemYear = Number(item.year) || 0;
+          const exact = names.includes(wanted);
+          const contains = names.some(name =>
+            name && (wanted.includes(name) || name.includes(wanted))
+          );
+          const yearMatch = !year || !itemYear || Math.abs(itemYear - year) <= 2;
+          const exactYear = Boolean(year && itemYear === year);
+
+          return {
+            item,
+            score:
+              (exact ? 1000 : contains ? 400 : 0) +
+              (exactYear ? 250 : yearMatch ? 100 : 0)
+          };
+        })
+        .sort((a, b) => b.score - a.score);
+
+      const best = ranked[0];
+      if (best?.item?.mal_id) return String(best.item.mal_id);
+    } catch (_) {}
+  }
+
+  // Deterministic TMDB -> MAL mapping for titles not found by title search.
+  if (/^\\d+$/.test(tmdbNumericId)) {
     try {
       const response = await fetch(
         animapBase + "/api/map/tmdb/" + encodeURIComponent(tmdbNumericId),
         {
           headers: { Accept: "application/json" },
-          cache: "force-cache"
+          cache: "no-store"
         }
       );
 
@@ -122,86 +170,28 @@ async function resolveAnimeMalId() {
         const entry = Array.isArray(payload) ? payload[0] : payload;
         const refs = Array.isArray(entry?.tmdb_id) ? entry.tmdb_id : [];
         const namespaceMatches = refs.length === 0 || refs.some(
-          ref => String(ref?.id) === tmdbNumericId && String(ref?.type || "").toLowerCase() === mediaType
+          ref =>
+            String(ref?.id) === tmdbNumericId &&
+            String(ref?.type || "").toLowerCase() === mediaType
         );
 
         if (namespaceMatches) {
           const candidates = [...new Set(
             (Array.isArray(entry?.mal_id) ? entry.mal_id : [entry?.mal_id])
               .map(value => String(value || "").trim())
-              .filter(value => /^\d+$/.test(value))
-          )].slice(0, 8);
+              .filter(value => /^\\d+$/.test(value))
+          )];
 
-          if (candidates.length) {
-            const malRecords = await Promise.allSettled(
-              candidates.map(async id => {
-                const recordResponse = await fetch(
-                  animapBase + "/api/mal/" + encodeURIComponent(id),
-                  {
-                    headers: { Accept: "application/json" },
-                    cache: "force-cache"
-                  }
-                );
-                if (!recordResponse.ok) return null;
-                return await recordResponse.json();
-              })
-            );
-
-            const wantedTitles = titles.map(normalizeAnimeTitle).filter(Boolean);
-            const ranked = malRecords
-              .map(result => result.status === "fulfilled" ? result.value : null)
-              .filter(Boolean)
-              .map(record => {
-                const names = [
-                  record.title,
-                  record.title_english,
-                  record.title_japanese,
-                  ...(Array.isArray(record.title_synonyms) ? record.title_synonyms : [])
-                ].map(normalizeAnimeTitle).filter(Boolean);
-
-                const recordYear = Number(
-                  record.year ||
-                  record.aired_from?.slice?.(0, 4) ||
-                  record.aired?.from?.slice?.(0, 4)
-                ) || 0;
-                const type = String(record.type || "").toLowerCase();
-                const typeMatch = mediaType === "movie"
-                  ? type === "movie"
-                  : ["tv", "ona", "ova", "special", "tv special"].includes(type);
-                const exact = wantedTitles.some(title => names.includes(title));
-                const contains = wantedTitles.some(title =>
-                  names.some(name => name && (title.includes(name) || name.includes(title)))
-                );
-                const yearMatch = !year || !recordYear || Math.abs(recordYear - year) <= 2;
-
-                const score =
-                  (exact ? 100 : contains ? 45 : 0) +
-                  (typeMatch ? 25 : 0) +
-                  (yearMatch ? 20 : 0) +
-                  (recordYear === year && year ? 10 : 0);
-
-                return { record, score };
-              })
-              .sort((a, b) => b.score - a.score)[0];
-
-            if (ranked?.record?.mal_id && ranked.score >= 45) {
-              return String(ranked.record.mal_id);
-            }
-
-            // If AniMap returned a direct TMDB mapping but MAL metadata was
-            // temporarily unavailable, the mapping itself is still authoritative.
-            if (candidates[0]) return candidates[0];
-          }
+          if (candidates.length) return candidates[0];
         }
       }
     } catch (_) {}
   }
 
-  // Fallback: Jikan title search for titles that are not present in AniMap's
-  // TMDB mapping snapshot yet.
+  // Last fallback: Jikan title search, with generous title/year/type matching.
   const jikanBase = String(
     VIVID_CONFIG.api.jikanBaseUrl || "https://api.jikan.moe/v4"
-  ).replace(/\/+$/, "");
+  ).replace(/\\/+$/, "");
 
   for (const title of titles) {
     try {
@@ -210,10 +200,10 @@ async function resolveAnimeMalId() {
           q: title,
           limit: "10",
           sfw: "true"
-        }),
+        }).toString(),
         {
           headers: { Accept: "application/json" },
-          cache: "force-cache"
+          cache: "no-store"
         }
       );
 
@@ -221,7 +211,6 @@ async function resolveAnimeMalId() {
 
       const results = (await response.json())?.data || [];
       const wanted = normalizeAnimeTitle(title);
-
       const ranked = results
         .filter(item => item?.mal_id)
         .map(item => {
@@ -231,38 +220,34 @@ async function resolveAnimeMalId() {
             item.title_japanese,
             ...(item.title_synonyms || [])
           ].map(normalizeAnimeTitle).filter(Boolean);
-
-          const itemYear = Number(
-            item.year || item.aired?.from?.slice(0, 4)
-          ) || 0;
+          const itemYear = Number(item.year || item.aired?.from?.slice(0, 4)) || 0;
           const type = String(item.type || "").toLowerCase();
           const typeMatch = mediaType === "movie"
             ? type === "movie"
             : ["tv", "ona", "ova", "special"].includes(type);
           const exact = names.includes(wanted);
-          const contains = names.some(
-            name => name && (wanted.includes(name) || name.includes(wanted))
+          const contains = names.some(name =>
+            name && (wanted.includes(name) || name.includes(wanted))
           );
           const yearMatch = !year || !itemYear || Math.abs(itemYear - year) <= 2;
 
-          const score =
-            (exact ? 100 : contains ? 45 : 0) +
-            (typeMatch ? 25 : 0) +
-            (yearMatch ? 25 : 0) +
-            (itemYear === year && year ? 10 : 0);
-
-          return { item, score };
+          return {
+            item,
+            score:
+              (exact ? 1000 : contains ? 400 : 0) +
+              (typeMatch ? 100 : 0) +
+              (year && itemYear === year ? 100 : yearMatch ? 50 : 0)
+          };
         })
         .sort((a, b) => b.score - a.score)[0];
 
-      if (ranked?.item?.mal_id && ranked.score >= 45) {
-        return String(ranked.item.mal_id);
-      }
+      if (ranked?.item?.mal_id) return String(ranked.item.mal_id);
     } catch (_) {}
   }
 
   return "";
 }
+
 function buildVidsrcEmbedUrl(params) {
   const base = String(VIVID_CONFIG.api.vidsrcEmbedBaseUrl || "https://vidsrc.to").replace(/\/+$/, "");
   // VidSrc accepts numeric TMDB IDs, so the fallback stays fully TMDB-based.
