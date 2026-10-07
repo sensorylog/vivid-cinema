@@ -351,3 +351,405 @@ h1,h2,h3,h4,h5,h6,
 .account-stat-label{
   font-weight:500;
 }
+
+
+/* ========================================================================== */
+/* VIVID LIGHT MODE — PREMIUM SYSTEM PASS                                    */
+/* Light is a designed appearance, not a white version of Dark Mode.         */
+/* ========================================================================== */
+html[data-vivid-theme="light"]{
+  color-scheme:light;
+  --vivid-bg:#f5f5f7;
+  --vivid-bg-elevated:#ffffff;
+  --vivid-surface-solid:#ffffff;
+  --vivid-surface:rgba(255,255,255,.88);
+  --vivid-surface-soft:rgba(20,24,32,.045);
+  --vivid-surface-strong:rgba(20,24,32,.075);
+  --vivid-text:#111216;
+  --vivid-text-muted:#626873;
+  --vivid-text-subtle:#8a9099;
+  --vivid-accent:#111216;
+  --vivid-border:rgba(17,18,22,.105);
+  --vivid-border-strong:rgba(17,18,22,.17);
+  --vivid-highlight:rgba(255,255,255,.92);
+  --vivid-focus:#4b63a8;
+  --vivid-glow:rgba(78,101,160,.08);
+  --vivid-shadow-sm:0 4px 18px rgba(17,18,22,.055);
+  --vivid-shadow-md:0 12px 34px rgba(17,18,22,.075);
+  --vivid-shadow-lg:0 24px 70px rgba(17,18,22,.11);
+}
+
+html[data-vivid-theme="light"] body{
+  background:
+    radial-gradient(900px 520px at 8% -8%,rgba(211,218,232,.38),transparent 62%),
+    radial-gradient(780px 500px at 94% 0%,rgba(226,229,236,.34),transparent 60%),
+    var(--vivid-bg);
+  color:var(--vivid-text);
+}
+
+/* The page background stays quiet; hierarchy comes from surfaces and spacing. */
+html[data-vivid-theme="light"] body.vivid-atmosphere,
+html[data-vivid-theme="light"] body.vivid-cinema-home{
+  background:var(--vivid-bg)!important;
+}
+html[data-vivid-theme="light"] body.vivid-atmosphere:not(.vivid-cinema-home){
+  background:
+    radial-gradient(900px 520px at 8% -8%,rgba(211,218,232,.38),transparent 62%),
+    radial-gradient(780px 500px at 94% 0%,rgba(226,229,236,.34),transparent 60%),
+    var(--vivid-bg)!important;
+}
+
+/* Shared chrome: restrained, solid enough to feel intentional. */
+html[data-vivid-theme="light"] :is(
+  .vivid-topbar,
+  .vivid-discovery-nav,
+  .vivid-library-nav,
+  .vivid-title-nav,
+  .vivid-watch-nav
+){
+  background:rgba(255,255,255,.82)!important;
+  border-color:var(--vivid-border)!important;
+  box-shadow:0 1px 0 rgba(17,18,22,.035),0 8px 28px rgba(17,18,22,.045)!important;
+  color:var(--vivid-text)!important;
+  backdrop-filter:blur(24px) saturate(145%);
+  -webkit-backdrop-filter:blur(24px) saturate(145%);
+}
+html[data-vivid-theme="light"] :is(
+  .vivid-navlinks a,
+  .vivid-discovery-nav nav a,
+  .vivid-library-nav nav a,
+  .vivid-watch-nav nav a
+){
+  color:#626873!important;
+}
+html[data-vivid-theme="light"] :is(
+  .vivid-navlinks a:hover,
+  .vivid-navlinks a[aria-current="true"],
+  .vivid-discovery-nav nav a:hover,
+  .vivid-discovery-nav nav a.is-active,
+  .vivid-library-nav nav a:hover,
+  .vivid-library-nav nav a[aria-current="page"],
+  .vivid-watch-nav nav a:hover,
+  .vivid-watch-nav nav a[aria-current="page"]
+){
+  color:#111216!important;
+  background:rgba(17,18,22,.055)!important;
+}
+
+/* Buttons and controls share one light-material language. */
+html[data-vivid-theme="light"] :is(
+  .vivid-button,
+  .vivid-icon-button,
+  .vivid-theme-toggle,
+  .vivid-search-trigger,
+  .vivid-notification-button,
+  .vivid-nav-action,
+  .vivid-page-back,
+  .vivid-mode-chip,
+  .vivid-provider-chip,
+  .vivid-filter-reset,
+  .vivid-rail-load,
+  .vivid-rail-see-all
+){
+  color:#202228!important;
+  background:rgba(255,255,255,.76)!important;
+  border-color:var(--vivid-border)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 2px 8px rgba(17,18,22,.035)!important;
+}
+html[data-vivid-theme="light"] :is(
+  .vivid-button:hover,
+  .vivid-icon-button:hover,
+  .vivid-theme-toggle:hover,
+  .vivid-search-trigger:hover,
+  .vivid-notification-button:hover,
+  .vivid-nav-action:hover,
+  .vivid-page-back:hover,
+  .vivid-mode-chip:hover,
+  .vivid-provider-chip:hover,
+  .vivid-filter-reset:hover,
+  .vivid-rail-load:hover,
+  .vivid-rail-see-all:hover
+){
+  background:#fff!important;
+  border-color:var(--vivid-border-strong)!important;
+  box-shadow:0 6px 16px rgba(17,18,22,.07)!important;
+}
+html[data-vivid-theme="light"] .vivid-button--primary,
+html[data-vivid-theme="light"] body.vivid-atmosphere .vivid-button--primary{
+  background:#111216!important;
+  color:#fff!important;
+  border-color:#111216!important;
+  box-shadow:0 7px 18px rgba(17,18,22,.16)!important;
+}
+html[data-vivid-theme="light"] .vivid-button--primary:hover{
+  background:#24262c!important;
+  color:#fff!important;
+}
+
+/* Inputs: crisp, white, quiet — never translucent gray boxes. */
+html[data-vivid-theme="light"] :is(
+  .vivid-input,
+  .vivid-select,
+  .vivid-search-field input,
+  .vivid-discovery-search input,
+  .vivid-filter-row select,
+  .vivid-collection-toolbar select,
+  .vivid-collection-toolbar>button,
+  .account-field input,
+  .account-field select,
+  .auth-container input
+){
+  background:#fff!important;
+  color:#111216!important;
+  border-color:rgba(17,18,22,.13)!important;
+  box-shadow:inset 0 1px 2px rgba(17,18,22,.025)!important;
+}
+html[data-vivid-theme="light"] :is(
+  .vivid-input::placeholder,
+  .vivid-search-field input::placeholder,
+  .vivid-discovery-search input::placeholder,
+  .account-field input::placeholder
+){
+  color:#8a9099!important;
+}
+
+/* Cards: white surfaces with subtle separation, not floating gray slabs. */
+html[data-vivid-theme="light"] :is(
+  .vivid-card,
+  .vivid-discovery-card,
+  .vivid-feature-card,
+  .vivid-collection-card,
+  .vivid-library-card,
+  .vivid-watch-rec-card,
+  .account-card,
+  .auth-container,
+  .vivid-provider-group,
+  .vivid-filter-panel,
+  .vivid-collection-toolbar,
+  .vivid-library-tabs,
+  .vivid-search-panel
+){
+  background:#fff!important;
+  color:#111216!important;
+  border-color:rgba(17,18,22,.09)!important;
+  box-shadow:0 8px 28px rgba(17,18,22,.055),inset 0 1px 0 rgba(255,255,255,.96)!important;
+}
+html[data-vivid-theme="light"] :is(
+  .vivid-card:hover,
+  .vivid-discovery-card:hover,
+  .vivid-feature-card:hover,
+  .vivid-collection-card:hover,
+  .vivid-library-card:hover
+){
+  border-color:rgba(17,18,22,.14)!important;
+  box-shadow:0 14px 34px rgba(17,18,22,.09),inset 0 1px 0 #fff!important;
+}
+
+/* Typography hierarchy. Secondary copy should be readable, not washed out. */
+html[data-vivid-theme="light"] :is(
+  h1,h2,h3,h4,h5,h6,
+  .vivid-hero-title,
+  .vivid-card-title,
+  .vivid-rail-head h2,
+  .vivid-section-heading h2,
+  .vivid-discovery-intro h1,
+  .vivid-library-header h1,
+  .account-header h1,
+  .account-title,
+  .account-profile-name
+){
+  color:#111216!important;
+}
+html[data-vivid-theme="light"] :is(
+  p,
+  .vivid-card-sub,
+  .vivid-rail-head p,
+  .vivid-discovery-intro p,
+  .vivid-discovery-copy small,
+  .vivid-library-card small,
+  .vivid-watch-head p,
+  .account-header p,
+  .account-copy,
+  .account-meta,
+  .account-stat-label,
+  .auth-container>p,
+  .auth-switch,
+  .auth-divider
+){
+  color:#626873!important;
+}
+
+/* Home rails: preserve the cinematic catalogue feel in daylight. */
+html[data-vivid-theme="light"] body.vivid-cinema-home .vivid-rails + .vivid-rails{
+  border-top:1px solid rgba(17,18,22,.055);
+}
+html[data-vivid-theme="light"] body.vivid-cinema-home .vivid-card{
+  background:transparent!important;
+  border-color:transparent!important;
+  box-shadow:none!important;
+}
+html[data-vivid-theme="light"] body.vivid-cinema-home .vivid-card-media{
+  background:#e9ebef!important;
+  border-color:rgba(17,18,22,.08)!important;
+  box-shadow:0 7px 20px rgba(17,18,22,.08)!important;
+}
+html[data-vivid-theme="light"] body.vivid-cinema-home .vivid-card:hover .vivid-card-media{
+  border-color:rgba(17,18,22,.15)!important;
+  box-shadow:0 15px 32px rgba(17,18,22,.13)!important;
+}
+html[data-vivid-theme="light"] body.vivid-cinema-home .vivid-rating{
+  color:#111216!important;
+  background:rgba(255,255,255,.90)!important;
+  border-color:rgba(17,18,22,.10)!important;
+}
+
+/* Discovery/provider chips should read like a designed filter system. */
+html[data-vivid-theme="light"] :is(
+  .vivid-provider-chip,
+  .vivid-mode-chip
+){
+  color:#4f555f!important;
+}
+html[data-vivid-theme="light"] :is(
+  .vivid-provider-chip.is-active,
+  .vivid-mode-chip.is-active,
+  .vivid-mode-chip[aria-selected="true"]
+){
+  background:#111216!important;
+  color:#fff!important;
+  border-color:#111216!important;
+}
+
+/* Search, notification and release surfaces. */
+html[data-vivid-theme="light"] :is(
+  .vivid-search-window,
+  .vivid-search-dialog,
+  .vivid-release-popover,
+  .vivid-release-alert,
+  .vivid-notification-popover
+){
+  background:rgba(255,255,255,.96)!important;
+  color:#111216!important;
+  border-color:rgba(17,18,22,.10)!important;
+  box-shadow:0 24px 70px rgba(17,18,22,.16)!important;
+}
+html[data-vivid-theme="light"] :is(
+  .vivid-search-window h1,
+  .vivid-search-window h2,
+  .vivid-release-popover h1,
+  .vivid-release-popover h2,
+  .vivid-release-alert strong
+){
+  color:#111216!important;
+}
+html[data-vivid-theme="light"] :is(
+  .vivid-search-window p,
+  .vivid-release-popover small,
+  .vivid-release-alert small
+){
+  color:#626873!important;
+}
+
+/* Dialog scrims need to be neutral in Light Mode. */
+html[data-vivid-theme="light"] :is(
+  .vivid-search-dialog,
+  .vivid-onboarding-modal,
+  .vivid-watch-player-dialog
+){
+  background:rgba(17,18,22,.34)!important;
+}
+html[data-vivid-theme="light"] .vivid-onboarding-dialog{
+  background:#fff!important;
+  color:#111216!important;
+  border-color:rgba(17,18,22,.10)!important;
+  box-shadow:0 28px 90px rgba(17,18,22,.20)!important;
+}
+html[data-vivid-theme="light"] .vivid-onboarding-card{
+  background:#f5f5f7!important;
+  color:#111216!important;
+  border-color:rgba(17,18,22,.10)!important;
+}
+html[data-vivid-theme="light"] .vivid-onboarding-card.is-selected{
+  border-color:#111216!important;
+  box-shadow:0 0 0 2px rgba(17,18,22,.12)!important;
+}
+html[data-vivid-theme="light"] .vivid-onboarding-card.is-selected:after{
+  background:#111216!important;
+  color:#fff!important;
+}
+
+/* Account/auth/library page surfaces. */
+html[data-vivid-theme="light"] :is(
+  .account-profile-hero,
+  .account-security,
+  .account-preferences,
+  .account-library,
+  .account-stats
+){
+  color:#111216!important;
+}
+html[data-vivid-theme="light"] :is(
+  .account-meta-row,
+  .account-stat
+){
+  background:#fff!important;
+  border-color:rgba(17,18,22,.09)!important;
+}
+html[data-vivid-theme="light"] .auth-container .google-auth{
+  background:#fff!important;
+  color:#111216!important;
+  border-color:rgba(17,18,22,.11)!important;
+}
+
+/* Legal and footer areas keep the same hierarchy as the main application. */
+html[data-vivid-theme="light"] :is(
+  .vivid-footer,
+  .vivid-legal,
+  footer
+){
+  color:#626873;
+}
+html[data-vivid-theme="light"] footer :is(a,p,small,span){
+  color:#737983;
+}
+html[data-vivid-theme="light"] footer a:hover{
+  color:#111216!important;
+}
+
+/* Selection/focus states remain unmistakable in daylight. */
+html[data-vivid-theme="light"] ::selection{
+  background:#111216;
+  color:#fff;
+}
+html[data-vivid-theme="light"] :where(a,button,input,select,textarea,[tabindex]):focus-visible{
+  outline:2px solid #4b63a8!important;
+  outline-offset:3px;
+}
+
+/* Avoid accidental dark-theme decorative overlays leaking into daylight. */
+html[data-vivid-theme="light"] :is(
+  .vivid-skeleton,
+  .vivid-skeleton-card
+){
+  background:linear-gradient(90deg,#e8eaee,#f3f4f6,#e8eaee)!important;
+  background-size:200% 100%;
+}
+@media(prefers-reduced-motion:reduce){
+  html[data-vivid-theme="light"] :is(.vivid-skeleton,.vivid-skeleton-card){animation:none!important}
+}
+
+/* Light mode should remain polished at narrow widths too. */
+@media(max-width:640px){
+  html[data-vivid-theme="light"] body{
+    background:var(--vivid-bg);
+  }
+  html[data-vivid-theme="light"] :is(
+    .vivid-topbar,
+    .vivid-discovery-nav,
+    .vivid-library-nav,
+    .vivid-title-nav,
+    .vivid-watch-nav
+  ){
+    box-shadow:0 1px 0 rgba(17,18,22,.04),0 5px 20px rgba(17,18,22,.045)!important;
+  }
+}
