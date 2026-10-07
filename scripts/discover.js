@@ -96,7 +96,7 @@ function renderBrowseCategories() {
 }
 
 function updateBrowseMode() {
-  const landing = !state.category && !state.query && !state.type && !state.genre && !state.year && !state.rating && !state.region && !state.provider && !state.mood && !state.runtime;
+  const landing = !state.category && !state.query && state.type === "all" && !state.genre && !state.year && !state.rating && !state.region && !state.provider && !state.mood && !state.runtime;
   document.body.classList.toggle("vivid-browse-landing", landing);
   $("browse-category-groups")?.closest(".vivid-browse-categories")?.toggleAttribute("hidden", !landing);
   $("browse-results-shell")?.toggleAttribute("hidden", landing);
