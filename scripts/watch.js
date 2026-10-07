@@ -165,7 +165,7 @@ function updateSourceLabel() {
   if (label) label.textContent = activeSource === "yenime" ? "Powered by Yenime" : activeSource === "vidsrc" ? "Alternate source" : "Powered by VidAPI";
   const switchBtn = document.getElementById("player-switch-source");
   if (switchBtn) {
-    const canSwitch = hasFallbackId() || Boolean(malId);
+    const canSwitch = animeProvider ? false : (hasFallbackId() || Boolean(malId));
     switchBtn.hidden = !canSwitch;
     if (activeSource === "vidsrc") switchBtn.textContent = "Try primary source";
     else if (activeSource === "yenime") switchBtn.textContent = hasFallbackId() ? "Try alternate source" : "Try VidAPI";
@@ -182,7 +182,14 @@ function setPlayerSource(source, params, startAt = 0) {
   if (source === "yenime") {
     const url = buildYenimeEmbedUrl(params, startAt);
     if (!url) {
-      setPlayerSource("vidapi", params, startAt);
+      const statusNode = $("player-status");
+      if (statusNode) {
+        statusNode.textContent = "Yenime could not build the anime player for this title.";
+        statusNode.classList.add("is-warning");
+        statusNode.hidden = false;
+      }
+      activeSource = "yenime";
+      updateSourceLabel();
       return;
     }
     player.src = url;
