@@ -199,15 +199,22 @@ function initCinematicFocusNavigation() {
     ".vivid-video-card[tabindex]",
     ".vivid-watch-rec-card[tabindex]"
   ].join(",");
+
+  const visible = (item) => item && item.offsetParent !== null && item.getClientRects().length > 0;
+  const railFor = (target) => target.closest(".vivid-rail, .vivid-library-continue-rail, .vivid-library-shelf, .vivid-watch-rec-rail, .vivid-cast-list, .vivid-similar-rail, .vivid-video-rail") || target.parentElement;
+
   document.addEventListener("keydown", event => {
     if (!["ArrowLeft","ArrowRight","ArrowUp","ArrowDown"].includes(event.key)) return;
     const target = event.target.closest(selector);
     if (!target || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
-    const rail = target.parentElement;
+
+    const rail = railFor(target);
     if (!rail) return;
-    const items = [...rail.querySelectorAll(selector)].filter(item => item.offsetParent !== null);
+
+    const items = [...rail.querySelectorAll(selector)].filter(visible);
     const index = items.indexOf(target);
     if (index < 0) return;
+
     if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
       const nextIndex = index + (event.key === "ArrowRight" ? 1 : -1);
       if (!items[nextIndex]) return;
@@ -216,18 +223,29 @@ function initCinematicFocusNavigation() {
       items[nextIndex].scrollIntoView({ behavior: "smooth", block: "nearest", inline: "nearest" });
       return;
     }
+
+    // Vertical navigation is scoped to sibling rails/sections instead of the
+    // entire document, preventing a Down press from jumping into an unrelated
+    // card far below the current shelf.
     const currentRect = target.getBoundingClientRect();
-    const candidates = [...document.querySelectorAll(selector)].filter(item => item !== target && item.offsetParent !== null);
+    const currentSection = target.closest("section, main, .vivid-section, .vivid-rail-wrap") || rail.parentElement;
+    const candidates = [...(currentSection || document).querySelectorAll(selector)]
+      .filter(item => item !== target && visible(item) && railFor(item) !== rail);
+
     const direction = event.key === "ArrowDown" ? 1 : -1;
     const vertical = candidates
       .map(item => ({ item, rect: item.getBoundingClientRect() }))
-      .filter(({rect}) => direction > 0 ? rect.top > currentRect.top + 8 : rect.bottom < currentRect.bottom - 8)
-      .map(({item,rect}) => ({
+      .filter(({ rect }) => direction > 0
+        ? rect.top > currentRect.top + 8
+        : rect.bottom < currentRect.bottom - 8)
+      .map(({ item, rect }) => ({
         item,
-        distance: Math.abs((rect.left + rect.width/2) - (currentRect.left + currentRect.width/2)) +
-          Math.abs(rect.top - currentRect.top) * 0.35
+        distance:
+          Math.abs((rect.left + rect.width / 2) - (currentRect.left + currentRect.width / 2)) +
+          Math.abs(rect.top - currentRect.top) * 0.45
       }))
-      .sort((a,b) => a.distance - b.distance)[0];
+      .sort((a, b) => a.distance - b.distance)[0];
+
     if (!vertical) return;
     event.preventDefault();
     vertical.item.focus({ preventScroll: true });
