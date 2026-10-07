@@ -31,7 +31,7 @@ export function getMediaUrl(media) {
 
 export function getPersonUrl(person) {
   const id = typeof person === "object" ? person.id : person;
-  return "person.html?" + new URLSearchParams({ id: String(id) });
+  return VIVID_CONFIG.routes.title + "?" + new URLSearchParams({ person: String(id) });
 }
 
 export function getImageUrl(path, size = "w500") {
