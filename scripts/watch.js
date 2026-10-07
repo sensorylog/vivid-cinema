@@ -14,6 +14,10 @@ const VIDSRC_ORIGIN = (() => {
   try { return new URL(VIVID_CONFIG.api.vidsrcEmbedBaseUrl || "https://vidsrc.cc").origin; }
   catch { return "https://vidsrc.cc"; }
 })();
+const MULTIEMBED_ORIGIN = (() => {
+  try { return new URL(VIVID_CONFIG.api.multiembedBaseUrl || "https://multiembed.mov").origin; }
+  catch { return "https://multiembed.mov"; }
+})();
 let media = null;
 let details = null;
 let currentParams = null;
@@ -57,11 +61,44 @@ function buildVidapiEmbedUrl(params, startAt = 0) {
 
 function buildVidsrcEmbedUrl(params) {
   const base = String(VIVID_CONFIG.api.vidsrcEmbedBaseUrl || "https://vidsrc.to").replace(/\/+$/, "");
-  // VidSrc accepts numeric TMDB IDs, so the fallback stays fully TMDB-based.\n  const id = encodeURIComponent(tmdbId || imdbId);
+  // VidSrc accepts numeric TMDB IDs, so the fallback stays fully TMDB-based.
+  const id = encodeURIComponent(tmdbId || imdbId);
   if (params.type === "tv") {
     return base + "/embed/tv/" + id + "/" + params.season + "/" + params.episode;
   }
   return base + "/embed/movie/" + id;
+}
+
+function buildMultiembedUrl(params) {
+  const base = String(VIVID_CONFIG.api.multiembedBaseUrl || "https://multiembed.mov").replace(/\/+$/, "");
+  const id = encodeURIComponent(imdbId || tmdbId);
+  const query = new URLSearchParams({ video_id: id });
+
+  // MultiEmbed distinguishes numeric TMDB IDs from IMDb IDs with tmdb=1.
+  if (!imdbId && tmdbId) query.set("tmdb", "1");
+  if (params.type === "tv") {
+    query.set("s", String(params.season));
+    query.set("e", String(params.episode));
+  }
+  return base + "/?" + query;
+}
+
+function getNextSource(source) {
+  if (source === "vidapi") return "vidsrc";
+  if (source === "vidsrc") return "multiembed";
+  return null;
+}
+
+function getSourceLabel(source) {
+  if (source === "vidsrc") return "VidSrc alternate source";
+  if (source === "multiembed") return "MultiEmbed fallback";
+  return "Powered by VidAPI";
+}
+
+function getSourceOrigin(source) {
+  if (source === "vidsrc") return VIDSRC_ORIGIN;
+  if (source === "multiembed") return MULTIEMBED_ORIGIN;
+  return null;
 }
 
 function isLikelyAnime() {
@@ -78,17 +115,23 @@ function hasFallbackId() {
   return Boolean(tmdbId || imdbId);
 }
 
-function triggerVidsrcFallback(reason = "primary_error") {
-  if (activeSource !== "vidapi" || !currentParams || !hasFallbackId()) return false;
+function triggerFallback(reason = "source_error") {
+  if (!currentParams || !hasFallbackId()) return false;
+  const nextSource = getNextSource(activeSource);
+  if (!nextSource) return false;
+
   clearFallbackTimer();
   const status = $("player-status");
   if (status) {
-    status.textContent = "Primary source unavailable — switching to alternate…";
+    status.textContent = activeSource === "vidapi"
+      ? "Primary source unavailable — trying alternate…"
+      : "Alternate source unavailable — trying the next source…";
     status.classList.add("is-warning");
     status.hidden = false;
   }
-  console.warn("Vivid playback fallback:", reason);
-  setPlayerSource("vidsrc", currentParams, Number(getPlaybackProgress(progressKey())?.progress || route.params.get("startAt") || 0));
+
+  console.warn("Vivid playback fallback:", activeSource, "→", nextSource, reason);
+  setPlayerSource(nextSource, currentParams, Number(getPlaybackProgress(progressKey())?.progress || route.params.get("startAt") || 0));
   return true;
 }
 
@@ -101,12 +144,16 @@ function clearFallbackTimer() {
 
 function updateSourceLabel() {
   const label = document.getElementById("player-source-label");
-  if (label) label.textContent = activeSource === "vidsrc" ? "Alternate source" : "Powered by VidAPI";
+  if (label) label.textContent = getSourceLabel(activeSource);
   const switchBtn = document.getElementById("player-switch-source");
   if (switchBtn) {
     const canSwitch = hasFallbackId();
     switchBtn.hidden = !canSwitch;
-    switchBtn.textContent = activeSource === "vidsrc" ? "Try primary source" : "Try alternate source";
+    switchBtn.textContent = activeSource === "vidapi"
+      ? "Try alternate source"
+      : activeSource === "vidsrc"
+        ? "Try MultiEmbed"
+        : "Try primary source";
   }
 }
 
@@ -125,6 +172,32 @@ function setPlayerSource(source, params, startAt = 0) {
       status.classList.remove("is-warning");
       status.hidden = false;
     }
+    if (hasFallbackId()) {
+      fallbackTimer = window.setTimeout(() => {
+        if (primaryHealthy || activeSource !== "vidsrc") return;
+        triggerFallback("vidsrc_timeout");
+      }, fallbackDelayMs());
+    }
+  } else if (source === "multiembed") {
+    if (!hasFallbackId()) return;
+    primaryHealthy = false;
+    player.src = buildMultiembedUrl(params);
+    if (status) {
+      status.textContent = "Loading MultiEmbed fallback…";
+      status.classList.remove("is-warning");
+      status.hidden = false;
+    }
+    if (hasFallbackId()) {
+      fallbackTimer = window.setTimeout(() => {
+        if (primaryHealthy || activeSource !== "multiembed") return;
+        clearFallbackTimer();
+        if (status) {
+          status.textContent = "All playback sources are taking longer than expected.";
+          status.classList.add("is-warning");
+          status.hidden = false;
+        }
+      }, fallbackDelayMs());
+    }
   } else {
     primaryHealthy = false;
     player.src = buildVidapiEmbedUrl(params, startAt);
@@ -137,7 +210,7 @@ function setPlayerSource(source, params, startAt = 0) {
     if (hasFallbackId()) {
       fallbackTimer = window.setTimeout(() => {
         if (primaryHealthy || activeSource !== "vidapi") return;
-        triggerVidsrcFallback("primary_timeout");
+        triggerFallback("primary_timeout");
       }, fallbackDelayMs());
     }
   }
@@ -244,14 +317,14 @@ function renderShell(params) {
       }, 450);
     });
     player.addEventListener("error", () => {
-      triggerVidsrcFallback("iframe_error");
+      triggerFallback("iframe_error");
     });
-    // Start on primary (TMDB / VidAPI). Fallback uses the same TMDB ID once metadata resolves.
+    // Start on primary (VidAPI), then fall through VidSrc → MultiEmbed if needed.
     setPlayerSource("vidapi", params, resumeAt);
     const switchBtn = $("player-switch-source");
     if (switchBtn) {
       switchBtn.addEventListener("click", () => {
-        const next = activeSource === "vidsrc" ? "vidapi" : "vidsrc";
+        const next = activeSource === "vidapi" ? "vidsrc" : activeSource === "vidsrc" ? "multiembed" : "vidapi";
         setPlayerSource(next, params, resumeAt);
       });
     }
@@ -299,7 +372,9 @@ async function prepareNextEpisode(params) {
 }
 
 function handlePlayerEvent(event) {
-  if (!VIDAPI_ORIGINS.has(event.origin)) return;
+  const isVidapi = VIDAPI_ORIGINS.has(event.origin);
+  const isFallback = event.origin === VIDSRC_ORIGIN || event.origin === MULTIEMBED_ORIGIN;
+  if (!isVidapi && !isFallback) return;
   const payload = event.data;
   if (!payload || typeof payload !== "object") return;
 
@@ -315,11 +390,18 @@ function handlePlayerEvent(event) {
     /(error|failed|failure|not.?found|unavailable|offline|load.?failed|source.?failed)/.test(statusValue + " " + errorValue);
 
   if (looksLikeFailure && activeSource === "vidapi") {
-    triggerVidsrcFallback("vidapi_" + (numericCode || statusValue || "error"));
+    triggerFallback((isVidapi ? "vidapi_" : activeSource + "_") + (numericCode || statusValue || "error"));
     return;
   }
 
-  if (payload.type !== "PLAYER_EVENT" || !payload.data) return;
+  if (!payload.data) return;
+  // VidAPI has a formal PLAYER_EVENT contract; fallbacks may expose simpler
+  // playback messages. Only treat explicit playback/progress signals as healthy.
+  const isPlaybackSignal =
+    payload.type === "PLAYER_EVENT" ||
+    /^(play|playing|timeupdate|progress|loadedmetadata|canplay|ready|started)$/i.test(statusValue) ||
+    Number(eventData.player_progress) > 0;
+  if (!isPlaybackSignal) return;
   // A real playback/progress event means the primary embed is alive.
   primaryHealthy = true;
   clearFallbackTimer();
@@ -328,7 +410,7 @@ function handlePlayerEvent(event) {
   const data = payload.data;
   const info = data.player_info || {};
   if (String(info.mediaType || "") !== String(media?.media_type || "")) return;
-  if (info.tmdb != null && String(info.tmdb) !== String(media?.id)) return;
+  if (isVidapi && info.tmdb != null && String(info.tmdb) !== String(media?.id)) return;
   if (currentParams?.type === "tv") {
     if (info.season != null && Number(info.season) !== Number(currentParams.season)) return;
     if (info.episode != null && Number(info.episode) !== Number(currentParams.episode)) return;
@@ -386,14 +468,15 @@ async function load() {
       nextEpisode = await prepareNextEpisode(currentParams);
     }
     hydrateWatchDetails(currentParams);
-    // Metadata arrived after shell — enable switch + re-arm auto-fallback if still waiting.
+    // Metadata arrived after shell — enable the full fallback chain and re-arm
+    // the primary timer if the player is still waiting.
     updateSourceLabel();
     if (hasFallbackId() && activeSource === "vidapi" && !primaryHealthy && !fallbackTimer) {
       const saved = getPlaybackProgress(progressKey());
       const resumeAt = Number(saved?.progress || route.params.get("startAt") || 0);
       fallbackTimer = window.setTimeout(() => {
         if (primaryHealthy || activeSource !== "vidapi") return;
-        triggerVidsrcFallback("primary_timeout_after_metadata");
+        triggerFallback("primary_timeout_after_metadata");
       }, fallbackDelayMs());
     }
   } catch (error) {
