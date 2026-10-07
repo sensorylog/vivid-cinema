@@ -212,7 +212,7 @@ async function initHero(){
    let data;
    try{data=await tmdbApi.trending("all","week")}catch(e){console.warn("Featured fallback",e);data=await tmdbApi.trending("movie","week")}
    featured=normalizeResults(data.results||[]).filter(x=>x.backdrop_path||x.poster_path).slice(0,8);
-   if(featured[0]?.backdrop_path){const preload=new Image();preload.decoding="async";preload.src=getImageUrl(featured[0].backdrop_path,"w1280");}
+   if(featured[0]?.backdrop_path){const preload=new Image();preload.decoding="async";preload.fetchPriority="high";preload.src=getImageUrl(featured[0].backdrop_path,"w1280");}
    if(featured.length)showHero(0);
  }catch(e){$("hero-title").textContent="Discover something vivid";$("hero-copy").textContent=getErrorMessage(e)}
 }
