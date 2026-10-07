@@ -508,3 +508,155 @@ html[data-vivid-theme="light"] .vivid-anime-provider-card{background:rgba(130,10
   .vivid-title-page .vivid-episode-thumb{aspect-ratio:16/9}
   .vivid-title-page .vivid-episode-copy p{font-size:13px}
 }
+
+/* Phase F — final cinematic hero / cast / trailer hierarchy. */
+.vivid-title-page .vivid-title-backdrop{
+  position:relative;
+  min-height:clamp(390px,58vw,680px);
+  margin:0 calc(50% - 50vw);
+  overflow:hidden;
+}
+.vivid-title-page .vivid-title-backdrop-image{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  object-position:center 30%;
+}
+.vivid-title-page .vivid-title-backdrop-overlay{
+  position:absolute;
+  inset:0;
+  background:
+    linear-gradient(90deg,rgba(0,0,0,.92) 0%,rgba(0,0,0,.62) 34%,rgba(0,0,0,.16) 68%,rgba(0,0,0,.3) 100%),
+    linear-gradient(0deg,rgba(8,9,11,1) 0%,rgba(8,9,11,.08) 38%,rgba(8,9,11,.18) 100%);
+}
+.vivid-title-page .vivid-title-backdrop-label{
+  position:absolute;
+  left:16px;
+  bottom:18px;
+  color:rgba(255,255,255,.72);
+  font-size:10px;
+  font-weight:700;
+  letter-spacing:.16em;
+}
+.vivid-title-page .vivid-title-info{
+  position:relative;
+  margin-top:-145px;
+  z-index:2;
+}
+.vivid-title-page .vivid-title-info-inner{
+  align-items:end;
+}
+.vivid-title-page .vivid-title-poster{
+  border-radius:12px;
+  box-shadow:0 20px 50px rgba(0,0,0,.45);
+}
+.vivid-title-page .vivid-title-copy{
+  max-width:760px;
+}
+.vivid-title-page .vivid-title-copy h1{
+  max-width:720px;
+  font-size:clamp(2.35rem,5.8vw,5rem);
+  line-height:.98;
+  letter-spacing:-.055em;
+  text-wrap:balance;
+}
+.vivid-title-page .vivid-title-copy>p{
+  max-width:700px;
+  color:#d1d1d6;
+  font-size:15px;
+  line-height:1.65;
+}
+.vivid-title-page .vivid-title-actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:9px;
+}
+.vivid-title-page .vivid-title-actions .vivid-button{
+  min-height:40px;
+  padding:0 15px;
+  border-radius:9px;
+  font-size:13px;
+  font-weight:600;
+}
+.vivid-title-page .vivid-title-actions .vivid-button--primary{
+  box-shadow:0 8px 24px rgba(0,0,0,.25);
+}
+.vivid-title-page .vivid-title-section .vivid-video-grid{
+  display:flex;
+  gap:14px;
+  overflow-x:auto;
+  padding:2px 2px 18px 0;
+  scrollbar-width:none;
+  scroll-snap-type:x proximity;
+}
+.vivid-title-page .vivid-title-section .vivid-video-grid::-webkit-scrollbar{display:none}
+.vivid-title-page .vivid-title-section .vivid-video-card{
+  flex:0 0 min(340px,72vw);
+  scroll-snap-align:start;
+  border-radius:13px;
+  overflow:hidden;
+}
+.vivid-title-page .vivid-title-section .vivid-video-card img{
+  aspect-ratio:16/9;
+  object-fit:cover;
+}
+.vivid-title-page .vivid-cast-grid{
+  display:flex;
+  gap:14px;
+  overflow-x:auto;
+  padding:2px 2px 18px 0;
+  scrollbar-width:none;
+  scroll-snap-type:x proximity;
+}
+.vivid-title-page .vivid-cast-grid::-webkit-scrollbar{display:none}
+.vivid-title-page .vivid-cast{
+  flex:0 0 112px;
+  scroll-snap-align:start;
+}
+.vivid-title-page .vivid-cast img{
+  width:112px;
+  height:150px;
+  border-radius:12px;
+  object-fit:cover;
+}
+.vivid-title-page .vivid-cast strong{
+  display:block;
+  margin-top:8px;
+  color:#fff;
+  font-size:13px;
+  font-weight:600;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.vivid-title-page .vivid-cast small{
+  display:block;
+  margin-top:3px;
+  color:#8e8e93;
+  font-size:12px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+@media(max-width:700px){
+  .vivid-title-page .vivid-title-backdrop{min-height:390px}
+  .vivid-title-page .vivid-title-info{margin-top:-92px}
+  .vivid-title-page .vivid-title-poster{display:none}
+  .vivid-title-page .vivid-title-copy h1{font-size:clamp(2.2rem,12vw,3.6rem)}
+}
+@media(max-width:520px){
+  .vivid-title-page .vivid-title-backdrop{
+    min-height:330px;
+    margin-inline:0;
+  }
+  .vivid-title-page .vivid-title-backdrop-overlay{
+    background:
+      linear-gradient(0deg,rgba(8,9,11,1) 0%,rgba(8,9,11,.3) 48%,rgba(8,9,11,.05) 100%);
+  }
+  .vivid-title-page .vivid-title-info{margin-top:-55px}
+  .vivid-title-page .vivid-title-actions{display:grid;grid-template-columns:1fr 1fr}
+  .vivid-title-page .vivid-title-actions .vivid-button{width:100%;justify-content:center}
+  .vivid-title-page .vivid-title-actions .vivid-button--ghost{grid-column:1/-1}
+}
