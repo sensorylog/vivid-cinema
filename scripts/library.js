@@ -2,7 +2,7 @@ const STORAGE_KEY="vivid:library:v2";
 const COLLECTIONS=["favorites","watchLater","history"];
 const emptyLibrary=()=>({favorites:[],watchLater:[],history:[]});
 const TOMBSTONE_STORAGE_KEY="vivid:library-tombstones:v1";
-const LOCAL_OWNER_KEY="vivid:account-owner:v1";
+const LOCAL_OWNER_KEY="vivid:library-owner:v1";
 function ensureLocalOwner(uid){
   if(!uid)return;
   try{
