@@ -301,3 +301,105 @@ html[data-vivid-theme="light"] .vivid-anime-provider-card{background:rgba(130,10
 .vivid-title-copy .vivid-title-library-actions .vivid-button--ghost{background:rgba(255,255,255,.045)}
 @media(max-width:520px){.vivid-title-copy .vivid-title-library-actions{display:grid;grid-template-columns:1fr;gap:8px}.vivid-title-copy .vivid-title-library-actions .vivid-button{width:100%;justify-content:center}}
 .vivid-title-copy .vivid-title-actions{margin-bottom:0}
+
+/* Phase F — cinematic content rails and detail hierarchy. */
+.vivid-title-page .vivid-title-section{
+  margin-top:0;
+  padding-top:42px;
+  padding-bottom:4px;
+}
+.vivid-title-page .vivid-section-heading{
+  display:flex;
+  align-items:end;
+  justify-content:space-between;
+  gap:18px;
+  margin-bottom:16px;
+}
+.vivid-title-page .vivid-section-heading>div>span{
+  display:block;
+  color:#8e8e93;
+  font-size:.65rem;
+  font-weight:700;
+  letter-spacing:.14em;
+}
+.vivid-title-page .vivid-section-heading h2{
+  margin:5px 0 0;
+  color:#fff;
+  font-size:clamp(1.35rem,2.5vw,1.8rem);
+  font-weight:700;
+  letter-spacing:-.035em;
+}
+.vivid-title-page .vivid-similar{
+  display:flex;
+  gap:14px;
+  overflow-x:auto;
+  padding:2px 2px 18px 0;
+  scrollbar-width:none;
+  scroll-snap-type:x proximity;
+  overscroll-behavior-x:contain;
+}
+.vivid-title-page .vivid-similar::-webkit-scrollbar{display:none}
+.vivid-title-page .vivid-similar-card{
+  flex:0 0 156px;
+  scroll-snap-align:start;
+  min-width:0;
+}
+.vivid-title-page .vivid-similar-card img{
+  display:block;
+  width:100%;
+  aspect-ratio:2/3;
+  object-fit:cover;
+  border-radius:13px;
+}
+.vivid-title-page .vivid-similar-card span{
+  display:block;
+  margin-top:8px;
+  color:#fff;
+  font-size:15px;
+  font-weight:600;
+  line-height:1.25;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.vivid-title-page .vivid-similar-card small{display:block;margin-top:4px;color:#8e8e93;font-size:13px}
+.vivid-title-page .vivid-provider-grid{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:12px;
+}
+.vivid-title-page .vivid-provider-group{
+  padding:15px;
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:14px;
+  background:rgba(255,255,255,.035);
+}
+.vivid-title-page .vivid-provider-group h3{
+  margin:0 0 12px;
+  color:#8e8e93;
+  font-size:.66rem;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+}
+.vivid-title-page .vivid-provider-group>div{display:grid;gap:8px}
+.vivid-title-page .vivid-provider{
+  display:flex;
+  align-items:center;
+  gap:9px;
+  min-width:0;
+  padding:7px;
+  border-radius:10px;
+  color:#fff;
+  text-decoration:none;
+  background:rgba(255,255,255,.035);
+}
+.vivid-title-page .vivid-provider:hover{background:rgba(255,255,255,.08)}
+.vivid-title-page .vivid-provider img{width:28px;height:28px;border-radius:7px;object-fit:cover}
+.vivid-title-page .vivid-provider span{font-size:.72rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@media(max-width:900px){.vivid-title-page .vivid-provider-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:520px){
+  .vivid-title-page .vivid-title-section{padding-top:34px}
+  .vivid-title-page .vivid-section-heading{align-items:flex-start}
+  .vivid-title-page .vivid-similar-card{flex-basis:138px}
+  .vivid-title-page .vivid-provider-grid{grid-template-columns:1fr}
+}
