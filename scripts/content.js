@@ -221,6 +221,30 @@ export async function getCuratedPage(key, page = 1, filters = {}) {
   };
 }
 
+export async function getAnimePage(page = 1, filters = {}) {
+  const type = filters.type === "movie" || filters.type === "tv" ? filters.type : "";
+  const params = { page, with_genres: "16", with_original_language: "ja", sort_by: filters.sort_by || "popularity.desc" };
+  if (filters.year) {
+    if (type === "tv") params.first_air_date_year = filters.year;
+    if (type === "movie") params.primary_release_year = filters.year;
+  }
+  if (filters.rating) params["vote_average.gte"] = filters.rating;
+  const requests = type === "movie"
+    ? [tmdbApi.discoverMovies(params).then(data => ({ data, type: "movie" }))]
+    : type === "tv"
+      ? [tmdbApi.discoverTv(params).then(data => ({ data, type: "tv" }))]
+      : [
+          tmdbApi.discoverTv(params).then(data => ({ data, type: "tv" })),
+          tmdbApi.discoverMovies(params).then(data => ({ data, type: "movie" }))
+        ];
+  const results = await Promise.allSettled(requests);
+  const successful = results.filter(result => result.status === "fulfilled").map(result => result.value);
+  if (!successful.length) throw (results.find(result => result.status === "rejected")?.reason || new Error("Anime catalogue unavailable."));
+  const items = successful.flatMap(({ data, type: mediaType }) => normalizeResults(data?.results || [], mediaType))
+    .sort((a,b) => Number(b.raw?.popularity || 0) - Number(a.raw?.popularity || 0) || Number(b.vote_average || 0) - Number(a.vote_average || 0));
+  return { items, page, totalPages: Math.min(500, Math.max(...successful.map(({data}) => Number(data?.total_pages || 1)), 1)), partial: successful.length < requests.length };
+}
+
 export async function getFeaturedMovies(limit = 8) {
   const data = await tmdbApi.trending("movie", "week");
   return normalizeResults(data.results || [], "movie").filter((item) => item.backdrop_path).slice(0, limit);
