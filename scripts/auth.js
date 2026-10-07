@@ -9,8 +9,6 @@ import {
   signInWithRedirect,
   getRedirectResult,
   onAuthStateChanged,
-  setPersistence,
-  browserLocalPersistence,
   signOut,
   updateProfile
 } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
@@ -62,7 +60,6 @@ async function finishGoogleSignIn(credential){
 async function googleSignIn(){
   const provider=new GoogleAuthProvider();
   provider.setCustomParameters({prompt:"select_account"});
-  await setPersistence(auth,browserLocalPersistence);
   // Prefer a popup on every device. Mobile browsers can return from a
   // redirect before Firebase has restored the credential, which can make the
   // UI immediately look signed out. Only fall back to redirect when the popup
