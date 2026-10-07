@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#06070a">
+<title>Search · Vivid Cinema</title>
+<link rel="icon" href="icons/vivid-icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="styles/vivid-foundation.css">
+<link rel="stylesheet" href="styles/vivid-system.css">
+<link rel="stylesheet" href="styles/vivid-shell.css">
+<link rel="stylesheet" href="styles/vivid-cinematic.css">
+<link rel="stylesheet" href="styles/vivid-search-standalone.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.9.1/font/bootstrap-icons.css">
+</head>
+<body data-vivid-page="search" class="vivid-atmosphere vivid-search-page">
+<header class="vivid-unified-header"><nav class="vivid-nav vivid-unified-nav" aria-label="Primary"></nav></header>
+<main class="vivid-search-main">
+  <section class="vivid-search-page-head" aria-labelledby="search-page-title">
+    <div>
+      <span class="vivid-search-kicker">VIVID SEARCH</span>
+      <h1 id="search-page-title">Search</h1>
+    </div>
+    <p>Find movies, shows, people and more.</p>
+  </section>
+  <section class="vivid-search-page-field" aria-label="Search catalogue">
+    <i class="bi bi-search" aria-hidden="true"></i>
+    <input id="search-page-input" type="search" autocomplete="off" placeholder="Shows, Movies, and More" aria-label="Search shows, movies, and more">
+    <button id="search-page-clear" type="button" aria-label="Clear search" hidden><i class="bi bi-x-lg" aria-hidden="true"></i></button>
+  </section>
+  <section id="search-page-content" class="vivid-search-page-content" aria-live="polite"></section>
+</main>
+<script type="module" src="scripts/app-shell.js"></script>
+<script type="module" src="scripts/search-page.js"></script>
+<script type="module" src="scripts/atmosphere.js"></script>
+</body>
+</html>
