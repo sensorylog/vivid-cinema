@@ -85,32 +85,50 @@ function animeTitleCandidates() {
 
 async function resolveAnimeMalId() {
   if (!details || !animeProvider) return "";
-  let base = String(VIVID_CONFIG.api.jikanBaseUrl || "https://api.jikan.moe/v4");
-  while (base.endsWith("/")) base = base.slice(0, -1);
+  let base = String(VIVID_CONFIG.api.jikanBaseUrl || "https://api.jikan.moe/v4").replace(/\/+$/, "");
   const year = Number(details.release_date?.slice(0, 4) || details.first_air_date?.slice(0, 4)) || 0;
-  for (const title of animeTitleCandidates().slice(0, 3)) {
+
+  for (const title of animeTitleCandidates().slice(0, 4)) {
     try {
-      const response = await fetch(base + "/anime?" + new URLSearchParams({
-        q: title, type: currentParams?.type === "movie" ? "movie" : "tv", limit: "5", sfw: "true"
-      }), { headers: { Accept: "application/json" }, cache: "force-cache" });
+      const params = new URLSearchParams({ q: title, limit: "10", sfw: "true" });
+      const response = await fetch(base + "/anime?" + params, {
+        headers: { Accept: "application/json" },
+        cache: "force-cache"
+      });
       if (!response.ok) continue;
+
       const results = (await response.json())?.data || [];
       const wanted = normalizeAnimeTitle(title);
-      const exact = results
-        .map(item => {
-          const names = [item.title, item.title_english, item.title_japanese, ...(item.title_synonyms || [])]
-            .map(normalizeAnimeTitle).filter(Boolean);
-          const itemYear = Number(item.year || item.aired?.from?.slice(0, 4)) || 0;
-          const titleMatch = names.includes(wanted);
-          const yearMatch = !year || !itemYear || Math.abs(itemYear - year) <= 1;
-          const score = titleMatch ? 100 : names.some(name => name && (wanted.includes(name) || name.includes(wanted))) ? 50 : 0;
-          return { item, score: score + (yearMatch ? 10 : 0) };
-        })
-        .filter(candidate => candidate.score >= (year ? 110 : 100))
-        .sort((a, b) => b.score - a.score)[0]?.item;
-      if (exact?.mal_id) return String(exact.mal_id);
+      const ranked = results.map(item => {
+        const names = [
+          item.title,
+          item.title_english,
+          item.title_japanese,
+          ...(item.title_synonyms || [])
+        ].map(normalizeAnimeTitle).filter(Boolean);
+
+        const itemYear = Number(item.year || item.aired?.from?.slice(0, 4)) || 0;
+        const exact = names.includes(wanted);
+        const contains = names.some(name => name && (wanted.includes(name) || name.includes(wanted)));
+        const yearMatch = !year || !itemYear || Math.abs(itemYear - year) <= 1;
+        const typeMatch = currentParams?.type === "movie"
+          ? String(item.type || "").toLowerCase() === "movie"
+          : String(item.type || "").toLowerCase() === "tv";
+
+        const score =
+          (exact ? 100 : contains ? 45 : 0) +
+          (yearMatch ? 20 : 0) +
+          (typeMatch ? 10 : 0);
+
+        return { item, score, exact, contains };
+      })
+      .filter(candidate => candidate.exact || candidate.score >= 65)
+      .sort((a, b) => b.score - a.score)[0];
+
+      if (ranked?.item?.mal_id) return String(ranked.item.mal_id);
     } catch (_) {}
   }
+
   return "";
 }
 
