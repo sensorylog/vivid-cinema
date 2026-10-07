@@ -1622,3 +1622,12 @@ body.vivid-atmosphere .vivid-brand{
     50%{transform:scale(.55) translateY(-2px) rotate(-1deg)}
   }
 }
+
+.vivid-home-tv:before{content:"";position:absolute;z-index:-1;left:8%;right:8%;bottom:8px;height:34px;border-radius:50%;background:rgba(120,145,255,.14);filter:blur(18px);animation:vivid-tv-aura 4.8s ease-in-out infinite}
+.vivid-home-tv-screen:before{content:"";position:absolute;inset:0;z-index:3;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(255,255,255,.018) 0,rgba(255,255,255,.018) 1px,transparent 1px,transparent 4px);opacity:.5}
+.vivid-home-viewer-head{transform:rotate(-10deg)!important;box-shadow:inset -9px -8px 0 rgba(100,45,34,.12),-8px 5px 20px rgba(0,0,0,.2)}
+.vivid-home-viewer-eye.eye-left{left:9px!important;top:30px;transform:rotate(-5deg)}
+.vivid-home-viewer-eye.eye-right{right:27px!important;top:31px;transform:rotate(-5deg)}
+.vivid-home-viewer-eye{box-shadow:0 0 0 1px rgba(0,0,0,.08)}
+.vivid-home-viewer-body:before{content:"";position:absolute;left:13px;top:13px;width:66px;height:40px;border-radius:50%;background:radial-gradient(circle at 22% 35%,rgba(255,255,255,.13),transparent 3px),linear-gradient(145deg,rgba(255,255,255,.07),transparent 55%)}
+@keyframes vivid-tv-aura{0%,100%{opacity:.45;transform:scaleX(.92)}50%{opacity:.85;transform:scaleX(1.06)}}
