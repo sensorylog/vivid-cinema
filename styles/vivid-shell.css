@@ -429,3 +429,42 @@ html:not([data-vivid-ready="true"]) .vivid-mobile-nav{
 @media(max-width:640px){
   .vivid-account-control{width:38px;min-width:38px;height:38px;min-height:38px}
 }
+
+
+/* Final shell geometry: Vivid Cinema left, Account centered, EN far right. */
+.vivid-v2-nav{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) auto minmax(0,1fr)!important;
+  align-items:center!important;
+  position:relative!important;
+}
+.vivid-v2-nav .vivid-brand{justify-self:start!important;margin-right:0!important}
+.vivid-v2-nav .vivid-navlinks,
+.vivid-v2-nav .vivid-shell-search-link,
+.vivid-v2-nav .vivid-notification-button{display:none!important}
+.vivid-v2-nav .vivid-account-control{
+  grid-column:2!important;
+  justify-self:center!important;
+  margin:0!important;
+  display:inline-grid!important;
+}
+.vivid-v2-nav .vivid-language{
+  grid-column:3!important;
+  justify-self:end!important;
+  margin:0!important;
+}
+@media(max-width:640px){
+  .vivid-v2-nav{
+    grid-template-columns:minmax(0,1fr) auto minmax(0,1fr)!important;
+  }
+  .vivid-v2-nav .vivid-brand{display:flex!important}
+  .vivid-v2-nav .vivid-account-control{
+    grid-column:2!important;
+    display:inline-grid!important;
+  }
+  .vivid-v2-nav .vivid-language{
+    grid-column:3!important;
+    display:inline-flex!important;
+    justify-self:end!important;
+  }
+}
