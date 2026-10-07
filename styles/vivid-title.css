@@ -797,3 +797,5 @@ html[data-vivid-theme="light"] .vivid-anime-provider-card{background:rgba(130,10
     padding:0 8px;
   }
 }
+
+.vivid-title-page .vivid-title-rating-note{display:block;margin-top:3px;color:#8e8e93;font-size:12px;font-weight:400;line-height:1.5}
