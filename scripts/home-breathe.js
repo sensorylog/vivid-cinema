@@ -61,15 +61,10 @@ function refreshTrending() {
  * that doesn't fight the CSS keyframes.
  */
 function startLiveMotion() {
-  const viewer = document.querySelector(".vivid-home-viewer");
-  const head = document.querySelector(".vivid-home-viewer-head");
-  const arm = document.querySelector(".vivid-home-viewer-arm.viewer-arm-right");
-  const mouth = document.querySelector(".vivid-home-viewer-mouth");
   const tv = document.querySelector(".vivid-home-tv");
   const bucket = document.querySelector(".vivid-home-viewer-popcorn");
 
   if (
-    !viewer ||
     !window.matchMedia ||
     window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
     !Element.prototype.animate
@@ -80,73 +75,11 @@ function startLiveMotion() {
   liveAnimations.forEach((a) => a.cancel());
   liveAnimations = [];
 
-  // Soft body sway — feels like shifting weight while watching
-  liveAnimations.push(
-    viewer.animate(
-      [
-        { transform: "scale(0.8) translate3d(0, 2px, 0) rotate(1.1deg)" },
-        { transform: "scale(0.8) translate3d(0, -3px, 0) rotate(-0.9deg)" },
-        { transform: "scale(0.8) translate3d(1px, 1px, 0) rotate(0.5deg)" },
-        { transform: "scale(0.8) translate3d(0, 2px, 0) rotate(1.1deg)" }
-      ],
-      { duration: 5400, iterations: Infinity, easing: "ease-in-out" }
-    )
-  );
+  // The viewer, head, arm and mouth are intentionally left to CSS.
+  // Their CSS transforms now control the TV-facing pose, gaze and eating motion.
+  // WAAPI transforms here would override those keyframes and flatten the 3-D turn.
 
-  // Occasional curious head lean toward the screen
-  if (head) {
-    liveAnimations.push(
-      head.animate(
-        [
-          { transform: "rotate(-9deg)" },
-          { transform: "rotate(-9deg)" },
-          { transform: "rotate(-14deg) translate(1px, 1px)" },
-          { transform: "rotate(-7deg)" },
-          { transform: "rotate(-9deg)" }
-        ],
-        { duration: 8200, iterations: Infinity, easing: "ease-in-out" }
-      )
-    );
-  }
-
-  // Right arm: clear reach → grab → mouth → rest cycle
-  if (arm) {
-    liveAnimations.push(
-      arm.animate(
-        [
-          { transform: "rotate(-42deg) translate(0, 0)" },
-          { transform: "rotate(-42deg) translate(0, 0)", offset: 0.18 },
-          { transform: "rotate(-60deg) translate(-3px, 5px)", offset: 0.28 },
-          { transform: "rotate(-82deg) translate(-7px, 12px)", offset: 0.38 },
-          { transform: "rotate(-98deg) translate(-5px, 9px)", offset: 0.48 },
-          { transform: "rotate(-68deg) translate(-1px, 1px)", offset: 0.58 },
-          { transform: "rotate(-48deg) translate(0, 0)", offset: 0.72 },
-          { transform: "rotate(-42deg) translate(0, 0)" }
-        ],
-        { duration: 4200, iterations: Infinity, easing: "cubic-bezier(0.3, 0.7, 0.2, 1)" }
-      )
-    );
-  }
-
-  // Mouth chews in sync with the late part of the reach
-  if (mouth) {
-    liveAnimations.push(
-      mouth.animate(
-        [
-          { transform: "scaleY(1) scaleX(1)" },
-          { transform: "scaleY(1) scaleX(1)", offset: 0.5 },
-          { transform: "scaleY(0.3) scaleX(1.2)", offset: 0.58 },
-          { transform: "scaleY(1.25) scaleX(0.88)", offset: 0.66 },
-          { transform: "scaleY(0.5) scaleX(1.08)", offset: 0.74 },
-          { transform: "scaleY(1) scaleX(1)", offset: 0.85 },
-          { transform: "scaleY(1) scaleX(1)" }
-        ],
-        { duration: 4200, iterations: Infinity, easing: "ease-in-out" }
-      )
-    );
-  }
-
-  // Bucket reacts when the hand dips in
+  // Keep only the environmental motion that does not compete with viewer transforms.
   if (bucket) {
     liveAnimations.push(
       bucket.animate(
@@ -162,7 +95,6 @@ function startLiveMotion() {
     );
   }
 
-  // TV stays almost still — just a gentle living room float
   if (tv) {
     liveAnimations.push(
       tv.animate(
