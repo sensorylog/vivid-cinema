@@ -403,3 +403,108 @@ html[data-vivid-theme="light"] .vivid-anime-provider-card{background:rgba(130,10
   .vivid-title-page .vivid-similar-card{flex-basis:138px}
   .vivid-title-page .vivid-provider-grid{grid-template-columns:1fr}
 }
+
+/* Phase F — Apple TV-inspired metadata + episode presentation. */
+.vivid-title-page .vivid-title-meta{
+  display:flex;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:8px;
+  color:#8e8e93;
+  font-size:13px;
+}
+.vivid-title-page .vivid-title-meta i{
+  width:3px;
+  height:3px;
+  flex:0 0 3px;
+  border-radius:50%;
+  background:#8e8e93;
+}
+.vivid-title-page .vivid-title-genres{display:flex;flex-wrap:wrap;gap:7px;margin:14px 0 16px}
+.vivid-title-page .vivid-title-genres a{
+  padding:5px 9px;
+  border:0;
+  border-radius:999px;
+  background:rgba(255,255,255,.07);
+  color:#d7d7dc;
+  font-size:13px;
+}
+.vivid-title-page .vivid-title-story{
+  margin-top:0;
+}
+.vivid-title-page .vivid-story-grid{
+  display:grid;
+  grid-template-columns:minmax(0,1.5fr) minmax(220px,.7fr);
+  gap:48px;
+  padding:26px 0;
+  border-top:1px solid rgba(255,255,255,.08);
+  border-bottom:1px solid rgba(255,255,255,.08);
+}
+.vivid-title-page .vivid-story-overview{
+  max-width:760px;
+  color:#b0b0b5;
+  font-size:15px;
+  line-height:1.7;
+}
+.vivid-title-page .vivid-credit-panel{gap:14px}
+.vivid-title-page .vivid-credit-panel span{color:#8e8e93;font-size:13px}
+.vivid-title-page .vivid-credit-panel strong{color:#f5f5f7;font-size:14px}
+.vivid-title-page .vivid-seasons{
+  padding-top:42px;
+}
+.vivid-title-page .vivid-seasons .vivid-section-heading{
+  margin-bottom:18px;
+}
+.vivid-title-page .vivid-season-picker select{
+  min-width:180px;
+  height:42px;
+  padding:0 34px 0 12px;
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:10px;
+  background:#1c1c1e;
+  color:#fff;
+  font:600 13px -apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif;
+}
+.vivid-title-page .vivid-episode-list{gap:0}
+.vivid-title-page .vivid-episode{
+  grid-template-columns:210px minmax(0,1fr);
+  gap:20px;
+  padding:18px 0;
+  border:0;
+  border-top:1px solid rgba(255,255,255,.08);
+  border-radius:0;
+  background:transparent;
+  box-shadow:none;
+  transform:none;
+}
+.vivid-title-page .vivid-episode:last-child{border-bottom:1px solid rgba(255,255,255,.08)}
+.vivid-title-page .vivid-episode:hover{
+  background:rgba(255,255,255,.025);
+  transform:none;
+}
+.vivid-title-page .vivid-episode-thumb{border-radius:10px}
+.vivid-title-page .vivid-episode-copy h3{
+  margin:6px 0 5px;
+  font-size:16px;
+  font-weight:600;
+}
+.vivid-title-page .vivid-episode-copy p{
+  color:#8e8e93;
+  font-size:13px;
+  line-height:1.55;
+}
+.vivid-title-page .vivid-episode-watch{
+  min-height:34px;
+  padding:0 12px;
+  font-size:13px;
+}
+@media(max-width:700px){
+  .vivid-title-page .vivid-story-grid{grid-template-columns:1fr;gap:26px}
+  .vivid-title-page .vivid-episode{grid-template-columns:150px minmax(0,1fr);gap:14px}
+}
+@media(max-width:520px){
+  .vivid-title-page .vivid-story-grid{padding:22px 0}
+  .vivid-title-page .vivid-episode{grid-template-columns:1fr;padding:14px 0}
+  .vivid-title-page .vivid-episode-thumb{aspect-ratio:16/9}
+  .vivid-title-page .vivid-episode-copy p{font-size:13px}
+}
