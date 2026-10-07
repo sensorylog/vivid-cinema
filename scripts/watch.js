@@ -23,7 +23,6 @@ let lastHistorySyncAt = 0;
 let activeSource = "vidapi";
 let primaryHealthy = false;
 let fallbackTimer = null;
-let cineproActive = false;
 let imdbId = "";
 let tmdbId = "";
 const PRIMARY_FALLBACK_MS = 15000;
@@ -146,7 +145,6 @@ function setPlayerSource(source, params, startAt = 0) {
   if (!player || !params) return;
   clearFallbackTimer();
   activeSource = source;
-  multiembedTimedOut = false;
   const status = $("player-status");
   if (!["vidapi", "vidsrc", "cinepro"].includes(source)) return;
   if (source === "vidsrc") {
@@ -166,7 +164,6 @@ function setPlayerSource(source, params, startAt = 0) {
     }
   } else if (source === "cinepro") {
     primaryHealthy = false;
-    cineproActive = true;
     const cineproUrl = buildCineproUrl(params);
     player.src = cineproUrl;
     if (status) {
