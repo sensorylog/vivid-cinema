@@ -21,7 +21,7 @@ function renderContinueWatching() {
     const type = item.media_type || item.mediaType || "movie";
     const title = item.title || item.name || "Untitled";
     const url = getMediaUrl({id:item.id, media_type:type});
-    const progress = formatProgress(item);
+    const progress = formatProgress(item); const progressValue = Math.max(0, Math.min(100, Number.parseFloat(progress) || 0));
     const episode = type === "tv" && item.season && item.episode ? "S" + item.season + " · E" + item.episode : (type === "tv" ? "TV series" : "Movie");
     return '<a class="vivid-library-continue-card" href="' + escapeHtml(url) + '">' +
       '<div class="vivid-library-continue-art"><img loading="lazy" src="' + getImageUrl(item.backdrop_path || item.poster_path, "w780") + '" alt="' + escapeHtml(title) + '"></div>' +
@@ -49,11 +49,11 @@ function render() {
 
   if (!items.length) {
     const copy = activeCollection === "favorites"
-      ? ["No likes yet","Like titles from their detail page and they will appear here.","Discover titles"]
+      ? ["No likes yet","Like titles from their detail page and they will appear here.","Discover titles","bi-heart"]
       : activeCollection === "watchLater"
-        ? ["Your watch-later list is empty","Save something you want to come back to.","Browse movies & TV"]
-        : ["No recent history","Titles you open will appear here for quick access.","Start browsing"];
-    list.innerHTML = '<div class="vivid-library-shelf-head"><div><span class="vivid-library-kicker">'+sectionCopy[0]+'</span><h2>'+sectionCopy[1]+'</h2><p>'+sectionCopy[2]+'</p></div></div><div class="vivid-library-empty"><i class="bi bi-bookmark"></i><h2>'+copy[0]+'</h2><p>'+copy[1]+'</p><a class="vivid-button vivid-button--primary" href="discover.html">'+copy[2]+'</a></div>';
+        ? ["Your watch-later list is empty","Save something you want to come back to.","Browse movies & TV","bi-clock"]
+        : ["No recent history","Titles you open will appear here for quick access.","Start browsing","bi-play-circle"];
+    list.innerHTML = '<div class="vivid-library-shelf-head"><div><span class="vivid-library-kicker">'+sectionCopy[0]+'</span><h2>'+sectionCopy[1]+'</h2><p>'+sectionCopy[2]+'</p></div></div><div class="vivid-library-empty"><i class="bi '+copy[3]+'"></i><h2>'+copy[0]+'</h2><p>'+copy[1]+'</p><a class="vivid-button vivid-button--primary" href="discover.html">'+copy[2]+'</a></div>';
     return;
   }
   list.innerHTML = '<div class="vivid-library-shelf-head"><div><span class="vivid-library-kicker">'+sectionCopy[0]+'</span><h2>'+sectionCopy[1]+'</h2><p>'+sectionCopy[2]+'</p></div><span class="vivid-library-shelf-note">'+items.length+' saved</span></div><div class="vivid-library-shelf">'+items.map((item) => {
