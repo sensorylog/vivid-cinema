@@ -13,7 +13,7 @@ function resultHref(item) {
     ? "title.html?id=" + encodeURIComponent(item.id) + "&type=tv"
     : item.media_type === "movie"
       ? "title.html?id=" + encodeURIComponent(item.id) + "&type=movie"
-      : "person.html?id=" + encodeURIComponent(item.id);
+      : "title.html?person=" + encodeURIComponent(item.id);
 }
 
 function renderRecent() {
