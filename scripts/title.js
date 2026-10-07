@@ -243,7 +243,40 @@ function render(details) {
   if(firstTrailer)$("hero-trailer").addEventListener("click",()=>openTrailer(firstTrailer.key,firstTrailer.name||"Trailer"));
 }
 
+function renderPersonPage(person) {
+  const credits = Array.isArray(person?.combined_credits?.cast) ? person.combined_credits.cast
+    .filter((item) => item?.id && (item?.title || item?.name))
+    .sort((a,b) => (Number(b.popularity)||0) - (Number(a.popularity)||0))
+    .slice(0,24) : [];
+  const known = Array.isArray(person?.combined_credits?.crew) ? person.combined_credits.crew
+    .filter((item) => item?.id && (item?.title || item?.name))
+    .sort((a,b) => (Number(b.popularity)||0) - (Number(a.popularity)||0))
+    .slice(0,8) : [];
+  const creditsHtml = credits.map((item) => {
+    const type = item.media_type === "tv" ? "tv" : "movie";
+    const name = item.title || item.name || "Untitled";
+    const year = String(item.release_date || item.first_air_date || "").slice(0,4);
+    return '<a class="vivid-card" href="title.html?id='+encodeURIComponent(item.id)+'&type='+type+'"><div class="vivid-card-media"><img loading="lazy" src="'+getImageUrl(item.poster_path,"w342")+'" alt="'+escapeHtml(name)+'"></div><div class="vivid-card-info"><strong class="vivid-card-title">'+escapeHtml(name)+'</strong><small class="vivid-card-sub">'+escapeHtml(year)+'</small></div></a>';
+  }).join("");
+  const bio = String(person?.biography || "").trim();
+  const jobs = known.map((item) => escapeHtml(item.job || item.department || "Crew")).filter(Boolean).slice(0,4).join(" · ");
+  $("title-content").innerHTML =
+    '<section class="vivid-person-hero"><div class="vivid-person-photo"><img src="'+getImageUrl(person.profile_path,"w342")+'" alt="'+escapeHtml(person.name||"Person")+'"></div><div class="vivid-person-copy"><span>CAST & CREW</span><h1>'+escapeHtml(person.name||"Person")+'</h1><p>'+escapeHtml(person.known_for_department||"Actor")+(jobs ? " · "+jobs : "")+'</p></div></section>'+
+    (bio ? '<section class="vivid-title-section vivid-person-bio"><div class="vivid-section-heading"><div><span>BIOGRAPHY</span><h2>About '+escapeHtml(person.name||"them")+'</h2></div></div><p>'+escapeHtml(bio)+'</p></section>' : '')+
+    '<section class="vivid-title-section"><div class="vivid-section-heading"><div><span>ON VIVID</span><h2>Known for</h2></div></div><div class="vivid-cast-grid vivid-person-grid">'+(creditsHtml || '<p class="vivid-muted">No credits available.</p>')+'</div></section>';
+}
+
 async function init() {
+  const personId = route.params.get("person");
+  if (personId) {
+    try {
+      const person = await tmdbApi.personDetails(personId);
+      renderPersonPage(person);
+    } catch (error) {
+      renderError(getErrorMessage(error));
+    }
+    return;
+  }
   const id = route.params.get("id");
   const type = route.params.get("type") === "tv" ? "tv" : "movie";
   if (!id) return renderError("This title link is missing its media ID.");
