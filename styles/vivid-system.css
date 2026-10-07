@@ -362,3 +362,17 @@ body{
   .vivid-catalogue-explore-head p{max-width:360px;font-size:.74rem}
   .vivid-catalogue-chips{gap:6px}
 }
+
+/* Phase I — explainable recommendation signals. */
+.vivid-card-reason{
+  margin-bottom:4px;
+  color:#8e8e93;
+  font:600 10px/1.2 -apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif;
+  letter-spacing:.02em;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+#recommended-rail .vivid-card-info,
+#because-rail .vivid-card-info{min-height:66px}
+@media(max-width:640px){.vivid-card-reason{font-size:9px}}
