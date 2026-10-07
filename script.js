@@ -45,16 +45,32 @@ const SECTION_RAIL_IDS=Object.freeze({
 
 function skeleton(container,count=8){if(!container)return;container.innerHTML='<div class="vivid-loading">'+Array.from({length:count},()=>'<div class="vivid-skeleton-card"></div>').join("")+'</div>'}
 
+function formatRemaining(progress){
+ const duration=Number(progress?.duration||0),position=Number(progress?.progress||0);
+ if(!duration||position<=0)return "";
+ const minutes=Math.max(1,Math.ceil((duration-position)/60));
+ if(minutes>=60){const hours=Math.floor(minutes/60),mins=minutes%60;return hours+" HR"+(mins?" "+mins+" MIN":"")+" LEFT";}
+ return minutes+" MIN LEFT";
+}
+
 function card(media,options={}){
  const title=media.title||"Untitled", rating=Number(media.vote_average||0).toFixed(1);
  const progress=options.progress;
  const signal=options.signal||"";
+ const rank=Number(options.rank||0);
  const recommendationReason=media.recommendationReason||"";
+ const isContinue=Boolean(options.continueWatching);
+ const imagePath=isContinue?(media.backdrop_path||media.poster_path):media.poster_path;
+ const imageSize=isContinue?"w780":"w342";
  const progressBar=progress&&Number(progress.percentage)>0?'<div class="vivid-card-progress"><span style="width:'+Math.min(100,Number(progress.percentage)||0)+'%"></span></div>':"";
- return '<article class="vivid-card" data-id="'+escapeHtml(media.id)+'" data-type="'+escapeHtml(media.media_type||"movie")+'" tabindex="0" role="link" aria-label="'+escapeHtml(title)+(recommendationReason?' — '+escapeHtml(recommendationReason):"")+'">'+
- '<div class="vivid-card-media"><img src="'+getImageUrl(media.poster_path,"w342")+'" alt="'+escapeHtml(title)+'" loading="lazy" decoding="async">'+
- (signal?'<span class="vivid-card-signal">'+escapeHtml(signal)+"</span>":"")+(rating!=="0.0"?'<span class="vivid-rating">★ '+rating+"</span>":"")+progressBar+'</div>'+
- '<div class="vivid-card-info">'+(recommendationReason?'<div class="vivid-card-reason">'+escapeHtml(recommendationReason)+'</div>':"")+'<div class="vivid-card-title">'+escapeHtml(title)+'</div><div class="vivid-card-sub">'+escapeHtml(media.year||"—")+(media.media_type==="tv"?" · Series":" · Movie")+(progress?" · "+formatProgress(progress):"")+"</div></div></article>";
+ const rankMarkup=rank?'<span class="vivid-top10-rank" aria-hidden="true">'+String(rank).padStart(2,"0")+'</span>':"";
+ const remaining=isContinue?formatRemaining(progress):"";
+ const remainingMarkup=remaining?'<span class="vivid-continue-remaining">'+escapeHtml(remaining)+"</span>":"";
+ const ariaSuffix=rank?' — ranked '+rank:(recommendationReason?' — '+recommendationReason:"");
+ return '<article class="vivid-card'+(rank?' vivid-top10-card':"")+(isContinue?' vivid-continue-card':"")+'" data-id="'+escapeHtml(media.id)+'" data-type="'+escapeHtml(media.media_type||"movie")+'" tabindex="0" role="link" aria-label="'+escapeHtml(title)+escapeHtml(ariaSuffix)+'">'+
+ (rank?rankMarkup:"")+'<div class="vivid-card-media"><img src="'+getImageUrl(imagePath,imageSize)+'" alt="'+escapeHtml(title)+'" loading="lazy" decoding="async">'+
+ (signal&&!rank?'<span class="vivid-card-signal">'+escapeHtml(signal)+"</span>":"")+(rating!=="0.0"&&!rank?'<span class="vivid-rating">★ '+rating+"</span>":"")+remainingMarkup+progressBar+'</div>'+
+ '<div class="vivid-card-info">'+(recommendationReason?'<div class="vivid-card-reason">'+escapeHtml(recommendationReason)+'</div>':"")+'<div class="vivid-card-title">'+escapeHtml(title)+'</div><div class="vivid-card-sub">'+escapeHtml(media.year||"—")+(media.media_type==="tv"?" · Series":" · Movie")+(progress&&!isContinue?" · "+formatProgress(progress):"")+"</div></div></article>";
 }
 
 function wireCards(container){
@@ -94,7 +110,7 @@ function renderRail(id,items=[],options={}){
  const el=$(id);if(!el)return;
  const normalized=items.map(x=>x.media_type?x:normalizeResults([x])[0]).filter(Boolean);
  const isRecommendation=/^(recommended-rail|because-rail)$/.test(id);
- const html=normalized.length?normalized.map((item,index)=>{const markup=card(item,{progress:options.progressMap?.[item.media_type+":"+item.id],signal:options.signal});if(isRecommendation){const key=item.media_type+":"+item.id;recordBehavior("recommendation_impression",item,{surface:id,position:index});return markup.replace("<article class=\"vivid-card\"","<article data-recommendation=\"true\" data-surface=\""+id+"\" data-position=\""+index+"\" data-title=\""+escapeHtml(item.title||"").replace(/"/g,"&quot;")+"\" class=\"vivid-card\"");}return markup;}).join(""):'<div class="vivid-empty">Nothing available right now.</div>';
+ const html=normalized.length?normalized.map((item,index)=>{const markup=card(item,{progress:options.progressMap?.[item.media_type+":"+item.id],signal:options.signal,rank:options.rankStart?options.rankStart+index:0,continueWatching:options.continueWatching});if(isRecommendation){const key=item.media_type+":"+item.id;recordBehavior("recommendation_impression",item,{surface:id,position:index});return markup.replace("<article class=\"vivid-card\"","<article data-recommendation=\"true\" data-surface=\""+id+"\" data-position=\""+index+"\" data-title=\""+escapeHtml(item.title||"").replace(/"/g,"&quot;")+"\" class=\"vivid-card\"");}return markup;}).join(""):'<div class="vivid-empty">Nothing available right now.</div>';
  el.innerHTML=options.append&&el.querySelector(".vivid-card")?el.innerHTML+html:html;
  wireCards(el);
  rails[id]=el;
@@ -287,7 +303,7 @@ async function loadSectionBatch(keys){
      return;
    }
    const data=result.value;
-   renderRail(railId,data.items,{signal:sectionSignal(key)});
+   renderRail(railId,data.items,{signal:sectionSignal(key),rankStart:key==="top10"?1:0});
    sectionState[key]={page:data.page,totalPages:data.totalPages};
    const button=document.querySelector('[data-load-section="'+key+'"]');
    if(button)button.hidden=data.page>=data.totalPages;
@@ -324,7 +340,7 @@ async function loadMoreSection(key,button){
      button.textContent="Load more";
      return;
    }
-   renderRail(railId,data.items,{append:true,signal:sectionSignal(key)});
+   renderRail(railId,data.items,{append:true,signal:sectionSignal(key),rankStart:key==="top10"?(currentPage-1)*data.items.length+1:0});
    $(railId)?.classList.add("is-expanded");
    sectionState[key]={page:data.page,totalPages:data.totalPages};
    button.hidden=data.page>=data.totalPages;
@@ -351,7 +367,7 @@ function renderContinueWatching(){
  if(!resolved.length)return;
  const progressMap=Object.fromEntries(progressItems.map(item=>[item.content_id,item]));
  $("continue-section").hidden=false;
- renderRail("continue-rail",resolved,{progressMap});
+ renderRail("continue-rail",resolved,{progressMap,continueWatching:true});
 }
 
 async function renderRecommendations(){
