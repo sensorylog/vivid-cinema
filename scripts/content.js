@@ -1,6 +1,20 @@
 import { tmdbApi } from "./tmdb.js";
 import { normalizeResults } from "./media.js";
 
+async function providerDiscover(providerId, type, page = 1) {
+  const params = { page, watch_region: "US", with_watch_monetization_types: "flatrate", with_watch_providers: String(providerId), sort_by: "popularity.desc", "vote_count.gte": "20" };
+  return type === "movie" ? tmdbApi.discoverMovies(params) : tmdbApi.discoverTv(params);
+}
+async function providerHome(providerId) {
+  const results = await Promise.allSettled([providerDiscover(providerId, "movie"), providerDiscover(providerId, "tv")]);
+  const items = [];
+  results.forEach((result, index) => {
+    if (result.status === "fulfilled") items.push(...normalizeResults(result.value?.results || [], index === 0 ? "movie" : "tv"));
+  });
+  items.sort((a,b) => Number(b.raw?.popularity||0)-Number(a.raw?.popularity||0) || Number(b.vote_average||0)-Number(a.vote_average||0));
+  return { page: 1, total_pages: 1, results: items.slice(0, 20) };
+}
+const PROVIDER_IDS = Object.freeze({ netflix: 8, primeVideo: 9, hboMax: 1899, disneyPlus: 337, appleTvPlus: 350, hulu: 15, paramountPlus: 531 });
 const HOME_LOADERS = Object.freeze({
   trending: (page) => tmdbApi.trending("all", "week", page),
   nowPlaying: (page) => tmdbApi.nowPlayingMovies(page),
@@ -11,6 +25,13 @@ const HOME_LOADERS = Object.freeze({
   airingToday: (page) => tmdbApi.airingTodayTv(page),
   anime: (page) => tmdbApi.discoverMovies({ page, with_genres: 16, sort_by: "popularity.desc" }),
   kdrama: (page) => tmdbApi.discoverTv({ page, with_original_language: "ko", sort_by: "popularity.desc" }),
+  netflix: () => providerHome(PROVIDER_IDS.netflix),
+  primeVideo: () => providerHome(PROVIDER_IDS.primeVideo),
+  hboMax: () => providerHome(PROVIDER_IDS.hboMax),
+  disneyPlus: () => providerHome(PROVIDER_IDS.disneyPlus),
+  appleTvPlus: () => providerHome(PROVIDER_IDS.appleTvPlus),
+  hulu: () => providerHome(PROVIDER_IDS.hulu),
+  paramountPlus: () => providerHome(PROVIDER_IDS.paramountPlus),
   upcoming: (page) => {
     const now = new Date();
     const from = now.toISOString().slice(0, 10);
@@ -30,7 +51,14 @@ export const HOME_SECTION_META = Object.freeze({
   airingToday: { title: "On TV today", description: "Series with episodes airing today.", type: "tv" },
   anime: { title: "Anime", description: "Animated worlds and stories.", type: "movie" },
   kdrama: { title: "K-Dramas", description: "Popular Korean series.", type: "tv" },
-  upcoming: { title: "Coming soon", description: "Upcoming movies on the radar.", type: "movie" }
+  upcoming: { title: "Coming soon", description: "Upcoming movies on the radar.", type: "movie" },
+  netflix: { title: "Trending on Netflix", description: "Popular titles currently surfacing on Netflix.", type: "all" },
+  primeVideo: { title: "Trending on Prime Video", description: "Popular titles currently surfacing on Prime Video.", type: "all" },
+  hboMax: { title: "Trending on HBO Max", description: "Popular titles currently surfacing on HBO Max.", type: "all" },
+  disneyPlus: { title: "Trending on Disney+", description: "Popular titles currently surfacing on Disney+.", type: "all" },
+  appleTvPlus: { title: "Trending on Apple TV+", description: "Popular titles currently surfacing on Apple TV+.", type: "all" },
+  hulu: { title: "Trending on Hulu", description: "Popular titles currently surfacing on Hulu.", type: "all" },
+  paramountPlus: { title: "Trending on Paramount+", description: "Popular titles currently surfacing on Paramount+.", type: "all" }
 });
 
 export const CURATED_CATEGORIES = Object.freeze({
