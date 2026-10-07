@@ -125,7 +125,7 @@ jobs:
           const missing = [];
           for (const file of htmlFiles) {
             const source = fs.readFileSync(file, "utf8");
-            for (const match of source.matchAll(/(?:href|action)\\s*=\\s*["']([^"']+)["']/gi)) {
+            for (const match of source.matchAll(/(?:href|action)\s*=\s*["']([^"']+)["']/gi)) {
               let ref = match[1];
               if (/^(?:https?:|mailto:|tel:|javascript:|data:|blob:|#)/i.test(ref)) continue;
               ref = ref.split("#")[0].split("?")[0];
@@ -136,7 +136,7 @@ jobs:
           }
           if (missing.length) {
             console.error("Missing internal navigation targets:");
-            console.error(missing.join("\\n"));
+            console.error(missing.join("\n"));
             process.exit(1);
           }
           NODE
