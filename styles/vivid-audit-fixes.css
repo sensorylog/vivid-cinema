@@ -154,46 +154,27 @@ body[data-vivid-page="home"] .vivid-rail.is-expanded{
 @media (max-width:640px){body[data-vivid-page="home"] .vivid-rail.is-expanded{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;overflow:visible;padding-right:2px;}}
 
 
-/* Home hero trailer: full-bleed cinema frame. Keep the YouTube iframe cropped inside the hero so player chrome/title overlays never become part of the composition. */
+/* Home hero trailer: safe full-bleed frame without shrinking the hero. */
 .vivid-cinema-home .vivid-hero-media{
   overflow:hidden!important;
   isolation:isolate;
 }
 .vivid-cinema-home .vivid-hero-video{
   position:absolute!important;
-  inset:-4%!important;
-  width:108%!important;
-  height:108%!important;
+  inset:0!important;
+  width:100%!important;
+  height:100%!important;
   max-width:none!important;
   border:0!important;
-  transform:none!important;
-  object-fit:cover!important;
-  object-position:center center!important;
-}
-.vivid-cinema-home .vivid-hero-video > iframe,
-.vivid-cinema-home .vivid-hero-youtube,
-.vivid-cinema-home .vivid-hero-youtube iframe{
-  position:absolute!important;
-  inset:-12%!important;
-  width:124%!important;
-  height:124%!important;
-  max-width:none!important;
-  max-height:none!important;
-  border:0!important;
-  transform:none!important;
+  transform:scale(1.18)!important;
+  transform-origin:center center!important;
   object-fit:cover!important;
 }
 @media(max-width:640px){
   .vivid-cinema-home .vivid-hero-video{
-    inset:-8%!important;
-    width:116%!important;
-    height:116%!important;
-  }
-  .vivid-cinema-home .vivid-hero-video > iframe,
-  .vivid-cinema-home .vivid-hero-youtube,
-  .vivid-cinema-home .vivid-hero-youtube iframe{
-    inset:-18%!important;
-    width:136%!important;
-    height:136%!important;
+    inset:0!important;
+    width:100%!important;
+    height:100%!important;
+    transform:scale(1.12)!important;
   }
 }
