@@ -8,6 +8,20 @@ const FOR_YOU_CACHE_KEY = "vivid:for-you:v1";
 const FOR_YOU_CACHE_TTL = 30 * 60 * 1000;
 const TONIGHT_SESSION_KEY = "vivid:tonight:v1";
 const PROGRESS_SYNC_DEBOUNCE = 1800;
+const LOCAL_OWNER_KEY = "vivid:account-owner:v1";
+function ensureProgressOwner(uid){
+  if(!uid)return;
+  try{
+    const owner=localStorage.getItem(LOCAL_OWNER_KEY);
+    if(!owner){localStorage.setItem(LOCAL_OWNER_KEY,String(uid));return;}
+    if(owner===String(uid))return;
+    localStorage.removeItem(PROGRESS_KEY);
+    localStorage.removeItem(FOR_YOU_CACHE_KEY);
+    localStorage.removeItem(TONIGHT_SESSION_KEY);
+    localStorage.setItem(LOCAL_OWNER_KEY,String(uid));
+    window.dispatchEvent(new CustomEvent("vivid:account-switched",{detail:{uid:String(uid)}}));
+  }catch{}
+}
 
 let firebasePromise = null;
 let progressSyncPromise = null;
@@ -199,6 +213,7 @@ export function removePlaybackProgress(contentId) {
 }
 
 export async function syncPlaybackProgressForUser(user = null) {
+  if (user?.uid) ensureProgressOwner(user.uid);
   if (!user) return readProgress();
   try {
     const { db, collection, getDocs } = await getFirebase();
