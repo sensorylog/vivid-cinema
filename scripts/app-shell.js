@@ -203,7 +203,6 @@ function initCinematicFocusNavigation() {
     if (!["ArrowLeft","ArrowRight","ArrowUp","ArrowDown"].includes(event.key)) return;
     const target = event.target.closest(selector);
     if (!target || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
-    if (event.target.closest("input,textarea,select,button,a") && !target.matches("a")) return;
     const rail = target.parentElement;
     if (!rail) return;
     const items = [...rail.querySelectorAll(selector)].filter(item => item.offsetParent !== null);
