@@ -660,3 +660,140 @@ html[data-vivid-theme="light"] .vivid-anime-provider-card{background:rgba(130,10
   .vivid-title-page .vivid-title-actions .vivid-button{width:100%;justify-content:center}
   .vivid-title-page .vivid-title-actions .vivid-button--ghost{grid-column:1/-1}
 }
+
+
+/* Apple TV-style title information + capability row. */
+.vivid-title-page .vivid-title-information{
+  padding-top:48px;
+}
+.vivid-title-page .vivid-title-information-header{
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  gap:24px;
+  margin-bottom:22px;
+}
+.vivid-title-page .vivid-title-information-header>div>span{
+  display:block;
+  color:#8e8e93;
+  font-size:10px;
+  font-weight:700;
+  letter-spacing:.15em;
+}
+.vivid-title-page .vivid-title-information-header h2{
+  margin:5px 0 0;
+  color:#fff;
+  font-size:clamp(1.45rem,2.5vw,1.8rem);
+  font-weight:700;
+  letter-spacing:-.035em;
+}
+.vivid-title-page .vivid-title-capabilities{
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  flex-wrap:wrap;
+  gap:7px;
+}
+.vivid-title-page .vivid-title-capability{
+  display:inline-flex;
+  align-items:center;
+  min-height:28px;
+  padding:0 9px;
+  border:1px solid rgba(255,255,255,.13);
+  border-radius:7px;
+  background:rgba(255,255,255,.055);
+  color:#d1d1d6;
+  white-space:nowrap;
+}
+.vivid-title-page .vivid-title-capability strong{
+  font-size:11px;
+  font-weight:700;
+  letter-spacing:.01em;
+}
+.vivid-title-page .vivid-title-capability--score{
+  background:rgba(255,255,255,.09);
+  border-color:rgba(255,255,255,.18);
+  color:#fff;
+}
+.vivid-title-page .vivid-title-capability--icon{
+  gap:5px;
+}
+.vivid-title-page .vivid-title-capability--icon i{
+  font-size:5px;
+  opacity:.75;
+}
+.vivid-title-page .vivid-title-information-grid{
+  display:grid;
+  grid-template-columns:minmax(0,1.15fr) minmax(280px,.85fr);
+  gap:54px;
+  padding:24px 0 4px;
+  border-top:1px solid rgba(255,255,255,.08);
+}
+.vivid-title-page .vivid-title-information dl{
+  display:grid;
+  margin:0;
+}
+.vivid-title-page .vivid-title-information-row{
+  display:grid;
+  grid-template-columns:minmax(130px,.32fr) minmax(0,1fr);
+  gap:22px;
+  padding:11px 0;
+  border-bottom:1px solid rgba(255,255,255,.055);
+}
+.vivid-title-page .vivid-title-information-row dt,
+.vivid-title-page .vivid-title-language-row span{
+  color:#8e8e93;
+  font-size:13px;
+}
+.vivid-title-page .vivid-title-information-row dd,
+.vivid-title-page .vivid-title-language-row strong{
+  margin:0;
+  color:#f5f5f7;
+  font-size:13px;
+  font-weight:500;
+  line-height:1.55;
+}
+.vivid-title-page .vivid-title-languages{
+  padding-left:4px;
+}
+.vivid-title-page .vivid-title-languages h3{
+  margin:0 0 8px;
+  color:#fff;
+  font-size:15px;
+  font-weight:600;
+}
+.vivid-title-page .vivid-title-language-row{
+  display:grid;
+  grid-template-columns:110px minmax(0,1fr);
+  gap:16px;
+  padding:11px 0;
+  border-bottom:1px solid rgba(255,255,255,.055);
+}
+@media(max-width:760px){
+  .vivid-title-page .vivid-title-information-header{
+    align-items:flex-start;
+    flex-direction:column;
+    gap:14px;
+  }
+  .vivid-title-page .vivid-title-capabilities{justify-content:flex-start}
+  .vivid-title-page .vivid-title-information-grid{
+    grid-template-columns:1fr;
+    gap:28px;
+  }
+  .vivid-title-page .vivid-title-languages{padding-left:0}
+}
+@media(max-width:520px){
+  .vivid-title-page .vivid-title-information{padding-top:38px}
+  .vivid-title-page .vivid-title-information-row{
+    grid-template-columns:1fr;
+    gap:4px;
+  }
+  .vivid-title-page .vivid-title-language-row{
+    grid-template-columns:1fr;
+    gap:4px;
+  }
+  .vivid-title-page .vivid-title-capability{
+    min-height:27px;
+    padding:0 8px;
+  }
+}
