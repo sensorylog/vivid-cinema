@@ -468,3 +468,39 @@ html:not([data-vivid-ready="true"]) .vivid-mobile-nav{
     justify-self:end!important;
   }
 }
+
+
+/* Final account control: every Vivid shell uses the same centered person button. */
+.vivid-v2-nav .vivid-account-control{
+  display:inline-grid!important;
+  grid-column:2!important;
+  justify-self:center!important;
+  place-items:center!important;
+  width:40px!important;
+  min-width:40px!important;
+  height:40px!important;
+  min-height:40px!important;
+  padding:0!important;
+  margin:0!important;
+  border-radius:50%!important;
+  text-decoration:none!important;
+}
+.vivid-v2-nav .vivid-account-control i{
+  display:block!important;
+  font-size:1.3rem!important;
+  line-height:1!important;
+}
+.vivid-v2-nav .vivid-account-control .vivid-account-label{
+  display:none!important;
+}
+@media(max-width:640px){
+  .vivid-v2-nav .vivid-account-control{
+    width:38px!important;
+    min-width:38px!important;
+    height:38px!important;
+    min-height:38px!important;
+  }
+  .vivid-v2-nav .vivid-account-control i{
+    font-size:1.22rem!important;
+  }
+}
