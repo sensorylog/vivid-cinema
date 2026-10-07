@@ -285,3 +285,69 @@ body[data-vivid-page="home"] .vivid-rail.is-expanded{
   .vivid-cinema-home .vivid-card-title{font-size:.74rem}
   .vivid-cinema-home .vivid-card-sub{font-size:.64rem}
 }
+
+
+/* GLOBAL TYPE WEIGHT PASS — Vivid uses confident, Apple-TV-inspired typography site-wide.
+   Keep the hierarchy restrained: semibold UI, bold headings, regular/medium long-form copy. */
+:root{
+  --vivid-type-ui:600;
+  --vivid-type-strong:700;
+  --vivid-type-display:700;
+  --vivid-type-body:500;
+}
+body{
+  font-weight:var(--vivid-type-body);
+}
+button,
+input,
+select,
+textarea{
+  font-weight:var(--vivid-type-ui);
+}
+h1,h2,h3,h4,h5,h6,
+.vivid-hero-title,
+.landing-hero h1,
+.landing-section h2,
+.landing-cta h2{
+  font-weight:var(--vivid-type-display);
+}
+.vivid-brand,
+.landing-brand,
+.vivid-card-title,
+.vivid-feature-card strong,
+.vivid-rail-head h2,
+.vivid-discovery-intro h1,
+.vivid-discovery-section h2,
+.account-title,
+.account-profile-name,
+.account-stat strong{
+  font-weight:var(--vivid-type-strong);
+}
+.vivid-navlinks a,
+.vivid-nav-action,
+.vivid-search-trigger,
+.vivid-notification-button,
+.vivid-rail-load,
+.vivid-rail-see-all,
+.vivid-provider-name,
+.vivid-filter-reset,
+.landing-signin,
+.landing-submit,
+.landing-browse,
+.landing-section-link,
+.landing-eyebrow,
+.landing-kicker,
+.landing-proof span{
+  font-weight:var(--vivid-type-ui);
+}
+.vivid-card-sub,
+.vivid-rail-head p,
+.vivid-discovery-intro p,
+.landing-copy,
+.landing-reason p,
+.landing-faq-a p,
+.account-copy,
+.account-meta,
+.account-stat-label{
+  font-weight:500;
+}
