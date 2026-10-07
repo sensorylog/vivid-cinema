@@ -75,6 +75,58 @@ function rankByMood(items) {
 }
 
 
+const browseImageCache = new Map();
+const browseImagePending = new Set();
+
+function browseCardMarkup(category) {
+  return '<a class="vivid-browse-category-card" href="discover.html?category=' + encodeURIComponent(category.key) + '" data-browse-category="' + escapeHtml(category.key) + '">' +
+    '<span class="vivid-browse-category-media" aria-hidden="true"><img loading="lazy" decoding="async" alt="" /></span>' +
+    '<span class="vivid-browse-category-copy"><strong>' + escapeHtml(category.label) + '</strong></span>' +
+  '</a>';
+}
+
+async function hydrateBrowseCategoryImage(card) {
+  const key = card?.dataset?.browseCategory;
+  if (!key || browseImageCache.has(key) || browseImagePending.has(key)) return;
+  const category = BROWSE_CATEGORIES.find((item) => item.key === key);
+  if (!category) return;
+  browseImagePending.add(key);
+  try {
+    const data = await getCuratedPage(key, 1, { type: category.type === "movie" || category.type === "tv" ? category.type : "all" });
+    const item = (data.items || []).find((entry) => entry.backdrop_path || entry.poster_path);
+    const image = item?.backdrop_path || item?.poster_path || "";
+    if (image) {
+      browseImageCache.set(key, image);
+      const img = card.querySelector("img");
+      if (img) {
+        img.src = getImageUrl(image, "w780");
+        img.alt = "";
+      }
+      card.classList.add("has-image");
+    }
+  } catch (error) {
+    console.warn("Vivid browse category image failed:", key, error);
+  } finally {
+    browseImagePending.delete(key);
+  }
+}
+
+function hydrateBrowseCategoryImages(container) {
+  if (!container) return;
+  const cards = [...container.querySelectorAll("[data-browse-category]")];
+  if ("IntersectionObserver" in window) {
+    const observer = new IntersectionObserver((entries, obs) => {
+      entries.filter((entry) => entry.isIntersecting).forEach((entry) => {
+        hydrateBrowseCategoryImage(entry.target);
+        obs.unobserve(entry.target);
+      });
+    }, { rootMargin: "320px 0px" });
+    cards.forEach((card) => observer.observe(card));
+  } else {
+    cards.forEach((card) => hydrateBrowseCategoryImage(card));
+  }
+}
+
 function renderBrowseCategories() {
   const container = $("browse-category-groups");
   if (!container) return;
@@ -82,17 +134,10 @@ function renderBrowseCategories() {
   container.innerHTML = groups.map((group) => {
     const categories = BROWSE_CATEGORIES.filter((category) => category.group === group);
     return '<section class="vivid-browse-category-group" aria-labelledby="browse-' + escapeHtml(group.toLowerCase()) + '">' +
-      '<div class="vivid-browse-category-head"><div><span class="vivid-discovery-kicker">' + escapeHtml(group.toUpperCase()) + '</span><h2 id="browse-' + escapeHtml(group.toLowerCase()) + '">' + escapeHtml(group === "Featured" ? "Featured categories" : group === "Vivid" ? "Vivid collections" : group) + '</h2></div><span>' + categories.length + '</span></div>' +
-      '<div class="vivid-browse-category-grid">' +
-      categories.map((category, index) =>
-        '<a class="vivid-browse-category-card" href="discover.html?category=' + encodeURIComponent(category.key) + '">' +
-          '<span class="vivid-browse-category-art art-' + (index % 6) + '"><i class="bi ' + (["bi-stars","bi-moon-stars","bi-film","bi-compass","bi-lightning-charge","bi-globe2"][index % 6]) + '" aria-hidden="true"></i></span>' +
-          '<span class="vivid-browse-category-copy"><strong>' + escapeHtml(category.label) + '</strong><small>' + escapeHtml(category.description) + '</small></span>' +
-          '<i class="bi bi-chevron-right vivid-browse-category-arrow" aria-hidden="true"></i>' +
-        '</a>'
-      ).join("") +
-      '</div></section>';
+      '<div class="vivid-browse-category-head"><div><span class="vivid-discovery-kicker">' + escapeHtml(group.toUpperCase()) + '</span><h2 id="browse-' + escapeHtml(group.toLowerCase()) + '">' + escapeHtml(group === "Featured" ? "Featured categories" : group === "Vivid" ? "Vivid collections" : group) + '</h2></div></div>' +
+      '<div class="vivid-browse-category-grid">' + categories.map((category) => browseCardMarkup(category)).join("") + '</div></section>';
   }).join("");
+  hydrateBrowseCategoryImages(container);
 }
 
 function updateBrowseMode() {
