@@ -262,6 +262,16 @@ export function startPlaybackSync() {
   return progressSyncPromise;
 }
 
+export function getLatestPlaybackProgress(mediaType, id) {
+  const prefix = String(mediaType || "movie") + ":" + String(id);
+  const matches = Object.entries(readProgress())
+    .filter(([key, item]) => key === prefix || key.startsWith(prefix + ":"))
+    .map(([contentId, item]) => ({ ...item, content_id: contentId }))
+    .filter(item => Number(item.progress) > 5 && Number(item.duration) > 0 && Number(item.percentage) < 92)
+    .sort((a, b) => Number(b.updatedAt || 0) - Number(a.updatedAt || 0));
+  return matches[0] || null;
+}
+
 export function getContinueWatching(limit = 10) {
   return Object.entries(readProgress())
     .map(([contentId, item]) => ({ ...item, content_id: contentId }))
