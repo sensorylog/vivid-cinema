@@ -443,6 +443,8 @@ async function loadHome(){
 let searchDialog=null;
 let searchInput=null;
 let searchRequestId=0;
+let searchReturnFocus=null;
+let searchBackgroundInert=[];
 
 function ensureSearchDialog(){
   if(searchDialog?.isConnected)return searchDialog;
@@ -508,8 +510,15 @@ function unlockSearchScroll(){
   delete document.body.dataset.searchScrollY;
   window.scrollTo(0,y);
 }
+function getSearchFocusables() {
+  if (!searchDialog) return [];
+  return [...searchDialog.querySelectorAll('a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])')].filter(el => !el.hidden && el.getClientRects().length);
+}
 function openSearch(){
   const dialog=ensureSearchDialog();
+  searchReturnFocus=document.activeElement instanceof HTMLElement ? document.activeElement : null;
+  searchBackgroundInert=[...document.body.children].filter(el=>el!==dialog).map(el=>({el,inert:el.inert}));
+  searchBackgroundInert.forEach(({el})=>{el.inert=true;});
   dialog.hidden=false;
   requestAnimationFrame(()=>{
     lockSearchScroll();
@@ -521,8 +530,23 @@ function closeSearch(){
   if(!searchDialog || searchDialog.hidden)return;
   searchDialog.hidden=true;
   searchInput?.blur();
+  searchBackgroundInert.forEach(({el,inert})=>{el.inert=inert;});
+  searchBackgroundInert=[];
   unlockSearchScroll();
+  if(searchReturnFocus?.isConnected)searchReturnFocus.focus({preventScroll:true});
+  searchReturnFocus=null;
 }
+
+document.addEventListener("keydown",event=>{
+  if(!searchDialog || searchDialog.hidden)return;
+  if(event.key!=="Tab")return;
+  const focusables=getSearchFocusables();
+  if(!focusables.length){event.preventDefault();return;}
+  const first=focusables[0], last=focusables[focusables.length-1];
+  if(event.shiftKey && document.activeElement===first){event.preventDefault();last.focus();return;}
+  if(!event.shiftKey && document.activeElement===last){event.preventDefault();first.focus();}
+});
+
 function showRecentSearches(){
   const results=$("vivid-search-results");
   if(!results)return;
