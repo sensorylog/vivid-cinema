@@ -149,7 +149,7 @@ async function loadHeroVideo(item){
      // Some browsers/YouTube player loads ignore the first autoplay attempt even
      // when the embed is muted. Retry through the documented IFrame API command
      // channel without rebuilding the iframe or changing the current title.
-     [250,800,1800].forEach(delay=>setTimeout(()=>{
+     [250,800,1800,3200].forEach(delay=>setTimeout(()=>{
        if(token!==heroLoadToken||!heroPlaying)return;
        sendHeroPlayerCommand("playVideo");
      },delay));
