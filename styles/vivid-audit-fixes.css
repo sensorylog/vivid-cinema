@@ -1,0 +1,141 @@
+/* Vivid Cinema — final cross-viewport audit fixes.
+   Loaded last so visibility, geometry and interaction rules are deterministic. */
+
+/* Native hidden state must always win over layout rules. */
+.vivid-release-popover[hidden],
+.vivid-search-dialog[hidden],
+.vivid-mobile-nav[hidden]{display:none!important}
+
+/* Release center: anchored to the header, never allowed to run below the viewport. */
+.vivid-release-popover{
+  position:fixed!important;
+  top:calc(64px + var(--vivid-safe-top,0px))!important;
+  right:max(16px,env(safe-area-inset-right,0px))!important;
+  left:auto!important;
+  bottom:auto!important;
+  width:min(420px,calc(100vw - 32px))!important;
+  max-height:calc(100dvh - 80px)!important;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden!important;
+  z-index:1200!important;
+  box-sizing:border-box!important;
+}
+.vivid-release-popover-head,
+.vivid-release-toolbar,
+.vivid-release-settings,
+.vivid-release-footnote{flex:0 0 auto}
+.vivid-release-alert-list{
+  flex:1 1 auto!important;
+  min-height:0!important;
+  max-height:none!important;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  overscroll-behavior:contain;
+  -webkit-overflow-scrolling:touch;
+}
+.vivid-release-popover-head{min-width:0}
+.vivid-release-head-copy{min-width:0}
+.vivid-release-head-copy small{display:block;max-width:32ch;white-space:normal}
+.vivid-release-toolbar{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.vivid-release-toolbar>div{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.vivid-release-toolbar button{white-space:nowrap}
+.vivid-release-alert{min-width:0}
+.vivid-release-alert>a{min-width:0}
+.vivid-release-alert span{overflow:hidden}
+.vivid-release-alert strong,.vivid-release-alert small{overflow:hidden;text-overflow:ellipsis}
+.vivid-release-empty{padding:32px 20px!important;text-align:center}
+@media(max-width:640px){
+  .vivid-release-popover{
+    top:calc(58px + var(--vivid-safe-top,0px))!important;
+    right:12px!important;
+    left:12px!important;
+    width:auto!important;
+    max-height:calc(100dvh - 74px - var(--vivid-safe-top,0px))!important;
+    border-radius:18px!important;
+  }
+  .vivid-release-popover-head{padding:14px!important}
+  .vivid-release-toolbar{padding:8px 10px!important}
+  .vivid-release-alert-list{min-height:120px!important}
+}
+
+/* The search workspace is a true modal surface and must sit above every shell layer. */
+.vivid-search-dialog{z-index:10050!important}
+.vivid-search-window{min-height:100dvh!important}
+.vivid-search-content{min-height:0!important}
+.vivid-search-field input{
+  -webkit-appearance:none!important;
+  appearance:none!important;
+  min-width:0!important;
+  opacity:1!important;
+  visibility:visible!important;
+  caret-color:currentColor!important;
+}
+@media(max-width:640px){
+  .vivid-search-top{position:sticky;top:0;z-index:5}
+  .vivid-search-window{width:100%!important}
+}
+
+/* Header: prevent desktop navigation from pushing controls outside the viewport. */
+.vivid-nav{min-width:0!important}
+.vivid-navlinks{min-width:0!important;overflow:hidden}
+.vivid-navlinks a{flex:0 0 auto}
+.vivid-search-trigger{flex:0 0 auto!important;white-space:nowrap}
+.vivid-notification-button,.vivid-nav-action,.vivid-theme-toggle{flex:0 0 auto!important}
+@media(min-width:901px) and (max-width:1180px){
+  .vivid-nav{gap:6px!important}
+  .vivid-navlinks{gap:0!important}
+  .vivid-navlinks a{padding-inline:7px!important;font-size:.78rem!important}
+  .vivid-navlinks a span{display:none}
+  .vivid-search-trigger{padding-inline:9px!important}
+}
+@media(max-width:900px){
+  .vivid-navlinks{display:none!important}
+  .vivid-nav{gap:6px!important}
+  .vivid-search-trigger{width:40px!important;min-width:40px!important;height:40px!important;padding:0!important;border-radius:50%!important}
+  .vivid-search-trigger span,.vivid-search-trigger kbd{display:none!important}
+}
+
+/* Home hero: the trailer scales from the hero container, not the viewport height. */
+@media(max-width:640px){
+  .vivid-hero-media{
+    height:clamp(400px,62svh,560px)!important;
+    min-height:400px!important;
+    max-height:560px!important;
+  }
+  .vivid-hero-video{
+    width:177.78%!important;
+    height:100%!important;
+    min-width:0!important;
+    max-width:none!important;
+    left:50%!important;
+    top:0!important;
+    transform:translateX(-50%) scale(1.02)!important;
+  }
+}
+@media(max-width:380px){
+  .vivid-hero-media{height:clamp(380px,60svh,500px)!important;min-height:380px!important}
+}
+
+/* The feature strip belongs visually to the hero even though it is a sibling in the DOM. */
+.vivid-feature-strip{
+  position:relative!important;
+  left:auto!important;
+  right:auto!important;
+  bottom:auto!important;
+  width:min(1440px,100%)!important;
+  margin:-116px auto 0!important;
+  padding:8px var(--vivid-page-gutter) 18px!important;
+  box-sizing:border-box;
+  z-index:7!important;
+}
+.vivid-feature-viewport{width:100%!important;padding:0!important}
+@media(max-width:640px){
+  .vivid-feature-strip{
+    margin:-92px auto 0!important;
+    padding:8px 12px 14px!important;
+  }
+}
+@media(prefers-reduced-motion:reduce){
+  .vivid-release-popover,.vivid-search-window{scroll-behavior:auto!important}
+}
