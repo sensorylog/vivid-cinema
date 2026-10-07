@@ -113,6 +113,7 @@ export const tmdbApi = Object.freeze({
   movieWatchProvidersById: (id) => tmdb("movie/" + encodeURIComponent(id) + "/watch/providers"),
   tvWatchProvidersById: (id) => tmdb("tv/" + encodeURIComponent(id) + "/watch/providers"),
   tvVideos: (id) => tmdb("tv/" + encodeURIComponent(id) + "/videos", { include_video_language: "en-US,null" }),
+  tvContentRatings: (id) => tmdb("tv/" + encodeURIComponent(id) + "/content_ratings"),
   tvDetails: (id) => tmdb("tv/" + encodeURIComponent(id), { append_to_response: "credits,videos,watch/providers,recommendations,external_ids" }),
   tvSeason: (id, season) => tmdb("tv/" + encodeURIComponent(id) + "/season/" + encodeURIComponent(season), { append_to_response: "credits,videos" }),
   movieGenres: () => tmdb("genre/movie/list"),
