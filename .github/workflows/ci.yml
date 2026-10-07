@@ -43,6 +43,42 @@ jobs:
           walk(".");
           NODE
 
+
+      - name: Validate local JavaScript imports
+        shell: bash
+        run: |
+          set -euo pipefail
+          node - <<'NODE'
+          const fs = require("fs");
+          const path = require("path");
+          const root = process.cwd();
+          const files = [];
+          function walk(dir) {
+            for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+              if (entry.name === ".git" || entry.name === "node_modules") continue;
+              const full = path.join(dir, entry.name);
+              if (entry.isDirectory()) walk(full);
+              else if (entry.isFile() && full.endsWith(".js")) files.push(full);
+            }
+          }
+          walk(root);
+          const missing = [];
+          for (const file of files) {
+            const source = fs.readFileSync(file, "utf8");
+            const refs = [];
+            for (const match of source.matchAll(/(?:from|import)\\s*[(]?\\s*["'](\\.\\/?[^"']+)["']/g)) refs.push(match[1]);
+            for (const ref of refs) {
+              const target = path.resolve(path.dirname(file), ref);
+              if (!fs.existsSync(target)) missing.push(file + " -> " + ref);
+            }
+          }
+          if (missing.length) {
+            console.error("Missing local JavaScript imports:");
+            console.error(missing.join("\\n"));
+            process.exit(1);
+          }
+          NODE
+
       - name: Validate local HTML/CSS/JS references
         shell: bash
         run: |
