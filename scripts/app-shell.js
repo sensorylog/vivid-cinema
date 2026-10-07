@@ -1,4 +1,3 @@
-import "./analytics.js";
 import "./pwa.js";
 import { VIVID_CONFIG } from "./config.js";
 
@@ -17,6 +16,7 @@ function setConnectionState() {
 
 function syncVividBranding() {
   const iconPath = "./icons/vivid-icon.svg";
+  const manifestPath = "./manifest.json";
   const applyHeadIcon = (selector, rel, type = null) => {
     let link = document.querySelector(selector);
     if (!link) {
@@ -31,6 +31,8 @@ function syncVividBranding() {
   applyHeadIcon('link[rel="icon"]', "icon", "image/svg+xml");
   applyHeadIcon('link[rel="apple-touch-icon"]', "apple-touch-icon");
   applyHeadIcon('link[rel="manifest"]', "manifest");
+  const manifest = document.querySelector('link[rel="manifest"]');
+  if (manifest) manifest.href = manifestPath;
 
   document.querySelectorAll(".vivid-brand, .vivid-legal-brand, .logo").forEach(brand => {
     if (brand.dataset.vividBrandReady === "true") return;
@@ -108,6 +110,7 @@ function initAppShell() {
   initialized = true;
 
   document.documentElement.dataset.vividReady = "false";
+  void import("./analytics.js").catch(() => {});
   const storedTheme = (() => { try { return localStorage.getItem("vivid:theme"); } catch { return null; } })();
   document.documentElement.dataset.vividTheme = storedTheme === "light" ? "light" : "dark";
   setViewportState();
