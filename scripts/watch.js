@@ -93,74 +93,115 @@ function animeTitleCandidates() {
 async function resolveAnimeMalId() {
   if (!details || !animeProvider) return "";
 
+  const tmdbNumericId = String(tmdbId || currentParams?.id || "").trim();
+  const mediaType = currentParams?.type === "tv" ? "tv" : "movie";
   const year = Number(
     details.release_date?.slice(0, 4) ||
     details.first_air_date?.slice(0, 4)
   ) || 0;
-
   const titles = animeTitleCandidates().slice(0, 6);
 
-  // TMDB is only our catalogue namespace. Resolve its title into the
-  // MyAnimeList namespace through AniMap before asking Yenime to play it.
-  // AniMap's search endpoint is title-based and can return the MAL ID even
-  // when there is no direct TMDB -> MAL row for the specific TMDB record.
   const animapBase = String(
     VIVID_CONFIG.api.animapBaseUrl || "https://animap.id"
   ).replace(/\/+$/, "");
 
-  for (const title of titles) {
+  // First choice: AniMap's documented TMDB mapping. This avoids title ambiguity
+  // for sequels, remakes, films, specials, and alternate English/Japanese names.
+  if (/^\d+$/.test(tmdbNumericId)) {
     try {
-      const query = title + (year ? " " + year : "");
       const response = await fetch(
-        animapBase + "/api/search?" + new URLSearchParams({
-          q: query,
-          limit: "25"
-        }),
+        animapBase + "/api/map/tmdb/" + encodeURIComponent(tmdbNumericId),
         {
           headers: { Accept: "application/json" },
           cache: "force-cache"
         }
       );
 
-      if (!response.ok) continue;
+      if (response.ok) {
+        const payload = await response.json();
+        const entry = Array.isArray(payload) ? payload[0] : payload;
+        const refs = Array.isArray(entry?.tmdb_id) ? entry.tmdb_id : [];
+        const namespaceMatches = refs.length === 0 || refs.some(
+          ref => String(ref?.id) === tmdbNumericId && String(ref?.type || "").toLowerCase() === mediaType
+        );
 
-      const results = await response.json();
-      if (!Array.isArray(results)) continue;
+        if (namespaceMatches) {
+          const candidates = [...new Set(
+            (Array.isArray(entry?.mal_id) ? entry.mal_id : [entry?.mal_id])
+              .map(value => String(value || "").trim())
+              .filter(value => /^\d+$/.test(value))
+          )].slice(0, 8);
 
-      const wanted = normalizeAnimeTitle(title);
+          if (candidates.length) {
+            const malRecords = await Promise.allSettled(
+              candidates.map(async id => {
+                const recordResponse = await fetch(
+                  animapBase + "/api/mal/" + encodeURIComponent(id),
+                  {
+                    headers: { Accept: "application/json" },
+                    cache: "force-cache"
+                  }
+                );
+                if (!recordResponse.ok) return null;
+                return await recordResponse.json();
+              })
+            );
 
-      const ranked = results
-        .filter(item => item?.mal_id)
-        .map(item => {
-          const names = Array.isArray(item.titles)
-            ? item.titles.map(normalizeAnimeTitle).filter(Boolean)
-            : [];
-          const itemYear = Number(item.year) || 0;
-          const exact = names.includes(wanted);
-          const contains = names.some(
-            name => name && (wanted.includes(name) || name.includes(wanted))
-          );
-          const yearMatch = !year || !itemYear || Math.abs(itemYear - year) <= 2;
+            const wantedTitles = titles.map(normalizeAnimeTitle).filter(Boolean);
+            const ranked = malRecords
+              .map(result => result.status === "fulfilled" ? result.value : null)
+              .filter(Boolean)
+              .map(record => {
+                const names = [
+                  record.title,
+                  record.title_english,
+                  record.title_japanese,
+                  ...(Array.isArray(record.title_synonyms) ? record.title_synonyms : [])
+                ].map(normalizeAnimeTitle).filter(Boolean);
 
-          const score =
-            (exact ? 100 : contains ? 45 : 0) +
-            (yearMatch ? 30 : 0) +
-            (itemYear === year && year ? 15 : 0);
+                const recordYear = Number(
+                  record.year ||
+                  record.aired_from?.slice?.(0, 4) ||
+                  record.aired?.from?.slice?.(0, 4)
+                ) || 0;
+                const type = String(record.type || "").toLowerCase();
+                const typeMatch = mediaType === "movie"
+                  ? type === "movie"
+                  : ["tv", "ona", "ova", "special", "tv special"].includes(type);
+                const exact = wantedTitles.some(title => names.includes(title));
+                const contains = wantedTitles.some(title =>
+                  names.some(name => name && (title.includes(name) || name.includes(title)))
+                );
+                const yearMatch = !year || !recordYear || Math.abs(recordYear - year) <= 2;
 
-          return { item, score };
-        })
-        .sort((a, b) => b.score - a.score)[0];
+                const score =
+                  (exact ? 100 : contains ? 45 : 0) +
+                  (typeMatch ? 25 : 0) +
+                  (yearMatch ? 20 : 0) +
+                  (recordYear === year && year ? 10 : 0);
 
-      if (ranked?.item?.mal_id) {
-        return String(ranked.item.mal_id);
+                return { record, score };
+              })
+              .sort((a, b) => b.score - a.score)[0];
+
+            if (ranked?.record?.mal_id && ranked.score >= 45) {
+              return String(ranked.record.mal_id);
+            }
+
+            // If AniMap returned a direct TMDB mapping but MAL metadata was
+            // temporarily unavailable, the mapping itself is still authoritative.
+            if (candidates[0]) return candidates[0];
+          }
+        }
       }
     } catch (_) {}
   }
 
-  // Final fallback for titles that AniMap has not indexed yet.
+  // Fallback: Jikan title search for titles that are not present in AniMap's
+  // TMDB mapping snapshot yet.
   const jikanBase = String(
     VIVID_CONFIG.api.jikanBaseUrl || "https://api.jikan.moe/v4"
-  ).replace(/\\/+$/, "");
+  ).replace(/\/+$/, "");
 
   for (const title of titles) {
     try {
@@ -194,6 +235,10 @@ async function resolveAnimeMalId() {
           const itemYear = Number(
             item.year || item.aired?.from?.slice(0, 4)
           ) || 0;
+          const type = String(item.type || "").toLowerCase();
+          const typeMatch = mediaType === "movie"
+            ? type === "movie"
+            : ["tv", "ona", "ova", "special"].includes(type);
           const exact = names.includes(wanted);
           const contains = names.some(
             name => name && (wanted.includes(name) || name.includes(wanted))
@@ -202,8 +247,9 @@ async function resolveAnimeMalId() {
 
           const score =
             (exact ? 100 : contains ? 45 : 0) +
+            (typeMatch ? 25 : 0) +
             (yearMatch ? 25 : 0) +
-            (itemYear === year && year ? 15 : 0);
+            (itemYear === year && year ? 10 : 0);
 
           return { item, score };
         })
