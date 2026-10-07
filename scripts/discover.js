@@ -459,8 +459,6 @@ function resetFilters() {
   document.querySelectorAll("[data-runtime]").forEach((button) =>
     button.classList.toggle("is-active", button.dataset.runtime === "")
   );
-  $("discovery-search").value = "";
-  $("clear-search").hidden = true;
   $("genre-filter").value = "";
   $("year-filter").value = "";
   $("sort-filter").value = state.sort;
@@ -504,8 +502,6 @@ function wire() {
     state.year = "";
     state.rating = "";
     state.query = "";
-    $("discovery-search").value = "";
-    $("clear-search").hidden = true;
     // A provider is its own discovery mode. Never let a curated collection
     // silently bypass the provider filter and return unrelated titles.
     state.category = "";
@@ -527,8 +523,6 @@ function wire() {
     state.runtime = "";
     state.provider = "";
     state.query = "";
-    $("discovery-search").value = "";
-    $("clear-search").hidden = true;
     state.runtime = "";
     state.category = "";
     // Mood is a primary discovery mode. Clear restrictive filters so a
@@ -552,8 +546,6 @@ function wire() {
     state.mood = "";
     state.provider = "";
     state.query = "";
-    $("discovery-search").value = "";
-    $("clear-search").hidden = true;
     state.mood = "";
     state.category = "";
     state.genre = "";
@@ -596,24 +588,7 @@ function wire() {
     fetchDiscovery();
   });
 
-  let searchTimer;
-  $("discovery-search").addEventListener("input", () => {
-    state.query = $("discovery-search").value;
-    $("clear-search").hidden = !state.query;
-    clearTimeout(searchTimer);
-    searchTimer = setTimeout(() => {
-      state.page = 1;
-      fetchDiscovery();
-    }, 350);
-  });
-  $("clear-search").addEventListener("click", () => {
-    state.query = "";
-    $("discovery-search").value = "";
-    $("clear-search").hidden = true;
-    state.page = 1;
-    fetchDiscovery();
-    $("discovery-search").focus();
-  });
+
 }
 
 async function init() {
@@ -624,14 +599,13 @@ async function init() {
         '<option value="' + escapeHtml(key) + '">' + escapeHtml(category.label) + '</option>'
       ).join("");
     $("category-filter").value = state.category;
-    const category = CURATED_CATEGORIES[state.category];
+    const category = CURATED_CATEGORIES[state.category] || BROWSE_CATEGORIES.find((item) => item.key === state.category);
     if (category) state.type = category.type;
   }
   wire();
   syncControlsFromUrl();
   updateBrowseMode();
-  $("discovery-search").value = state.query;
-  $("clear-search").hidden = !state.query;
+  if (!state.category && state.type === "all" && !state.query && !state.genre && !state.year && !state.rating && !state.region && !state.provider && !state.mood && !state.runtime) return;
   // Do not block the first catalogue render on secondary metadata requests.
   // Genres/providers hydrate in the background and are ready for subsequent filtering.
   const firstRender = fetchDiscovery();
