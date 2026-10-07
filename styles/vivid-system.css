@@ -386,3 +386,14 @@ body{
   :where(html){scroll-behavior:auto!important}
   :where(*,::before,::after){animation-duration:.001ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.001ms!important}
 }
+
+
+/* Phase M — accessible navigation and interaction affordances. */
+.vivid-skip-link{position:fixed;top:8px;left:8px;z-index:20000;transform:translateY(-160%);padding:10px 14px;border-radius:9px;background:#f5f5f7;color:#090a0c;font:600 13px/1 var(--vivid-font-text);text-decoration:none;box-shadow:0 8px 24px rgba(0,0,0,.28)}
+.vivid-skip-link:focus{transform:translateY(0);outline:3px solid #fff;outline-offset:2px}
+:where(button,a,input,select,textarea):focus-visible{outline:2px solid #fff;outline-offset:3px}
+@media(forced-colors:active){
+  :where(button,a,input,select,textarea):focus-visible{outline:2px solid CanvasText;outline-offset:3px}
+  .vivid-skip-link{border:1px solid ButtonText;background:Canvas;color:CanvasText}
+}
+@media(prefers-reduced-motion:reduce){.vivid-skip-link{transition:none!important}}
