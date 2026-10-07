@@ -1497,3 +1497,61 @@ body.vivid-atmosphere .vivid-brand{
     padding-inline:0!important;
   }
 }
+
+
+/* ==========================================================================
+   HOME CINEMA MOMENT — stronger motion + clearer staging.
+   Keep the playful animation visible in normal motion mode.
+   ========================================================================== */
+.vivid-home-breathe{
+  min-height:470px;
+}
+.vivid-home-breathe-screen{
+  animation:vivid-breathe-screen 4.8s cubic-bezier(.2,.7,.2,1) infinite;
+  will-change:transform;
+}
+.vivid-home-breathe-screen::after{
+  animation:vivid-breathe-glint 4.2s ease-in-out infinite;
+  will-change:transform;
+}
+.vivid-home-breathe-screen-line{
+  animation:vivid-breathe-text 2.2s ease-in-out infinite;
+}
+.vivid-home-breathe-screen-cursor{
+  animation:vivid-breathe-cursor .7s steps(1) infinite;
+}
+.vivid-home-popcorn{
+  animation:vivid-breathe-popcorn 3.8s cubic-bezier(.2,.8,.2,1) infinite;
+  will-change:transform;
+}
+.vivid-home-breathe-copy{
+  animation:vivid-breathe-copy-in 4.8s ease-in-out infinite;
+}
+@keyframes vivid-breathe-copy-in{
+  0%,100%{transform:translateY(2px);opacity:.84}
+  50%{transform:translateY(-3px);opacity:1}
+}
+@keyframes vivid-breathe-screen{
+  0%,100%{transform:perspective(900px) rotateX(2deg) translateY(3px) rotateZ(0deg)}
+  25%{transform:perspective(900px) rotateX(2deg) translateY(-4px) rotateZ(-.35deg)}
+  50%{transform:perspective(900px) rotateX(2deg) translateY(-9px) rotateZ(0deg)}
+  75%{transform:perspective(900px) rotateX(2deg) translateY(-4px) rotateZ(.35deg)}
+}
+@keyframes vivid-breathe-popcorn{
+  0%,62%,100%{transform:rotate(0deg) translate3d(0,0,0)}
+  68%{transform:rotate(-10deg) translate3d(-4px,-8px,0)}
+  74%{transform:rotate(11deg) translate3d(6px,-15px,0)}
+  80%{transform:rotate(-7deg) translate3d(-5px,-6px,0)}
+  86%{transform:rotate(4deg) translate3d(2px,-1px,0)}
+}
+.vivid-support-bottom{
+  margin-top:clamp(28px,5vw,54px)!important;
+}
+@media(max-width:640px){
+  .vivid-home-breathe{
+    min-height:420px;
+  }
+  .vivid-support-bottom{
+    margin-top:34px!important;
+  }
+}
