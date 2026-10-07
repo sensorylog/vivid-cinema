@@ -1135,3 +1135,28 @@ body.vivid-landing .landing-faq-item{
 @media(prefers-reduced-motion:reduce){
   body::before,body::after{display:none!important}
 }
+
+
+/* FINAL HOME HERO MEDIA — preserve the trailer's native 16:9 frame.
+   Mobile uses width expansion to cover the tall hero; no extra scale transform. */
+.vivid-cinema-home .vivid-hero-video{
+  top:50%!important;
+  left:50%!important;
+  width:100%!important;
+  height:100%!important;
+  min-width:0!important;
+  max-width:none!important;
+  transform:translate(-50%,-50%)!important;
+  transform-origin:center center!important;
+}
+@media(max-width:640px){
+  .vivid-cinema-home .vivid-hero-video{
+    top:50%!important;
+    left:50%!important;
+    width:177.78%!important;
+    height:100%!important;
+    min-width:0!important;
+    max-width:none!important;
+    transform:translate(-50%,-50%)!important;
+  }
+}
