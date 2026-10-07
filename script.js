@@ -289,6 +289,7 @@ async function loadMoreSection(key,button){
      return;
    }
    renderRail(railId,data.items,{append:true,signal:sectionSignal(key)});
+   $(railId)?.classList.add("is-expanded");
    sectionState[key]={page:data.page,totalPages:data.totalPages};
    button.hidden=data.page>=data.totalPages;
    button.textContent="Load more";
