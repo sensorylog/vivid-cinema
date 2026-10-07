@@ -17,6 +17,13 @@ async function providerHome(providerId) {
 const PROVIDER_IDS = Object.freeze({ netflix: 8, primeVideo: 9, hboMax: 1899, disneyPlus: 337, appleTvPlus: 350, hulu: 15, paramountPlus: 531 });
 const HOME_LOADERS = Object.freeze({
   trending: (page) => tmdbApi.trending("all", "week", page),
+  top10: async () => {
+    const results = await Promise.allSettled([tmdbApi.popularMovies(1), tmdbApi.popularTv(1)]);
+    const items = [];
+    results.forEach((result,index) => { if(result.status === "fulfilled") items.push(...normalizeResults(result.value?.results || [], index === 0 ? "movie" : "tv")); });
+    items.sort((a,b) => Number(b.raw?.popularity || 0) - Number(a.raw?.popularity || 0) || Number(b.vote_average || 0) - Number(a.vote_average || 0));
+    return {page:1,total_pages:1,results:items.slice(0,10)};
+  },
   nowPlaying: (page) => tmdbApi.nowPlayingMovies(page),
   popularMovies: (page) => tmdbApi.popularMovies(page),
   topRatedMovies: (page) => tmdbApi.topRatedMovies(page),
@@ -59,6 +66,7 @@ const HOME_LOADERS = Object.freeze({
 
 export const HOME_SECTION_META = Object.freeze({
   trending: { title: "Trending now", description: "What people are discovering this week.", type: "all" },
+  top10: { title: "Top 10 on Vivid", description: "The ten titles with the strongest current catalogue momentum.", type: "all" },
   nowPlaying: { title: "Now playing", description: "Movies currently in cinemas and in the current release cycle.", type: "movie" },
   popularMovies: { title: "Popular movies", description: "Big-screen stories worth a look.", type: "movie" },
   topRatedMovies: { title: "Top rated", description: "Highly rated across the catalogue.", type: "movie" },
