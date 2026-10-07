@@ -104,6 +104,43 @@ jobs:
           }
           NODE
 
+      - name: Validate internal navigation targets
+        shell: bash
+        run: |
+          set -euo pipefail
+          node - <<'NODE'
+          const fs = require("fs");
+          const path = require("path");
+          const root = process.cwd();
+          const htmlFiles = [];
+          function walk(dir) {
+            for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+              if (entry.name === ".git" || entry.name === "node_modules") continue;
+              const full = path.join(dir, entry.name);
+              if (entry.isDirectory()) walk(full);
+              else if (entry.isFile() && full.endsWith(".html")) htmlFiles.push(full);
+            }
+          }
+          walk(root);
+          const missing = [];
+          for (const file of htmlFiles) {
+            const source = fs.readFileSync(file, "utf8");
+            for (const match of source.matchAll(/(?:href|action)\\s*=\\s*["']([^"']+)["']/gi)) {
+              let ref = match[1];
+              if (/^(?:https?:|mailto:|tel:|javascript:|data:|blob:|#)/i.test(ref)) continue;
+              ref = ref.split("#")[0].split("?")[0];
+              if (!ref || !/\.html$/i.test(ref)) continue;
+              const target = path.resolve(path.dirname(file), ref);
+              if (target.startsWith(root + path.sep) && !fs.existsSync(target)) missing.push(file + " -> " + ref);
+            }
+          }
+          if (missing.length) {
+            console.error("Missing internal navigation targets:");
+            console.error(missing.join("\\n"));
+            process.exit(1);
+          }
+          NODE
+
       - name: Validate local HTML/CSS/JS references
         shell: bash
         run: |
