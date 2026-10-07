@@ -2,6 +2,19 @@ const STORAGE_KEY="vivid:library:v2";
 const COLLECTIONS=["favorites","watchLater","history"];
 const emptyLibrary=()=>({favorites:[],watchLater:[],history:[]});
 const TOMBSTONE_STORAGE_KEY="vivid:library-tombstones:v1";
+const LOCAL_OWNER_KEY="vivid:account-owner:v1";
+function ensureLocalOwner(uid){
+  if(!uid)return;
+  try{
+    const owner=localStorage.getItem(LOCAL_OWNER_KEY);
+    if(!owner){localStorage.setItem(LOCAL_OWNER_KEY,String(uid));return;}
+    if(owner===String(uid))return;
+    localStorage.setItem(STORAGE_KEY,JSON.stringify(emptyLibrary()));
+    localStorage.setItem(TOMBSTONE_STORAGE_KEY,JSON.stringify({}));
+    localStorage.setItem(LOCAL_OWNER_KEY,String(uid));
+    window.dispatchEvent(new CustomEvent("vivid:account-switched",{detail:{uid:String(uid)}}));
+  }catch{}
+}
 
 function itemKey(item){return String(item.media_type||item.mediaType||"movie")+":"+String(item.id);}
 function tombstoneKey(collection,item){return collection+":"+itemKey(item);}
@@ -225,6 +238,7 @@ function mergeCollection(localItems,remoteItems,tombstones,collection){
 }
 
 export async function syncLibraryForUser(user=null){
+  if(user?.uid)ensureLocalOwner(user.uid);
   const local=readLocal();
   if(!user)return local;
 
