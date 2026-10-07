@@ -99,7 +99,7 @@ function renderRail(id,items=[],options={}){
 }
 
 function sectionSignal(key){
- const labels={trending:"Trending",nowPlaying:"Now playing",popularMovies:"Popular",topRatedMovies:"Top rated",popularTv:"Popular",topRatedTv:"Top rated",airingToday:"Airing today",anime:"Anime",kdrama:"K-Drama",upcoming:"Coming soon"};
+ const labels={trending:"Trending",nowPlaying:"Now playing",popularMovies:"Popular",topRatedMovies:"Top rated",popularTv:"Popular",topRatedTv:"Top rated",airingToday:"Airing today",anime:"Anime",kdrama:"K-Drama",upcoming:"Coming soon",newReleases:"New releases",netflix:"Netflix",primeVideo:"Prime Video",hboMax:"HBO Max",disneyPlus:"Disney+",appleTvPlus:"Apple TV+",hulu:"Hulu",paramountPlus:"Paramount+"};
  return labels[key]||"";
 }
 
