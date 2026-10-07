@@ -15,67 +15,73 @@
 </head>
 <body data-vivid-page="discover" class="vivid-discovery-page vivid-atmosphere">
 <div class="vivid-discovery-app">
-<header class="vivid-unified-header"><nav class="vivid-nav vivid-unified-nav" aria-label="Primary"><a class="vivid-brand" href="home.html">Vivid<span>Cinema</span></a><div class="vivid-navlinks"><a href="home.html"><i class="bi bi-house-fill" aria-hidden="true"></i><span>Home</span></a><a href="discover.html" aria-current="page"><i class="bi bi-compass" aria-hidden="true"></i><span>Discover</span></a><a href="home.html#trending"><i class="bi bi-fire" aria-hidden="true"></i><span>Trending</span></a><a href="collection.html?collection=movies"><i class="bi bi-film" aria-hidden="true"></i><span>Movies</span></a><a href="collection.html?collection=tv"><i class="bi bi-tv" aria-hidden="true"></i><span>TV</span></a><a href="library.html"><i class="bi bi-bookmark" aria-hidden="true"></i><span>Library</span></a><a href="news.html"><i class="bi bi-newspaper" aria-hidden="true"></i><span>News</span></a></div><a class="vivid-nav-action" id="discover-auth" data-vivid-nav-auth="true" href="auth.html">Sign in</a></nav></header>
+<header class="vivid-unified-header"><nav class="vivid-nav vivid-unified-nav" aria-label="Primary"><a class="vivid-brand" href="home.html">Vivid<span>Cinema</span></a><div class="vivid-navlinks"><a href="home.html"><i class="bi bi-house-fill" aria-hidden="true"></i><span>Home</span></a><a href="discover.html" aria-current="page"><i class="bi bi-grid-fill" aria-hidden="true"></i><span>Browse</span></a><a href="home.html#trending"><i class="bi bi-fire" aria-hidden="true"></i><span>Trending</span></a><a href="collection.html?collection=movies"><i class="bi bi-film" aria-hidden="true"></i><span>Movies</span></a><a href="collection.html?collection=tv"><i class="bi bi-tv" aria-hidden="true"></i><span>TV</span></a><a href="library.html"><i class="bi bi-bookmark" aria-hidden="true"></i><span>Library</span></a><a href="news.html"><i class="bi bi-newspaper" aria-hidden="true"></i><span>News</span></a></div><a class="vivid-nav-action" id="discover-auth" data-vivid-nav-auth="true" href="auth.html">Sign in</a></nav></header>
 <main class="vivid-discovery-main">
 <a class="vivid-page-back" data-vivid-back href="home.html"><i class="bi bi-chevron-left" aria-hidden="true"></i><span>Back</span></a>
+
 <section class="vivid-discovery-intro">
-<div><span class="vivid-discovery-kicker">BROWSE</span><h1>Find your next world.</h1><p>Explore by format, genre, mood, service, region and curated Vivid collections.</p></div>
-<div class="vivid-discovery-search"><i class="bi bi-search" aria-hidden="true"></i><input id="discovery-search" type="search" placeholder="Search titles or people" aria-label="Search titles or people" autocomplete="off"><button id="clear-search" type="button" aria-label="Clear search" hidden><i class="bi bi-x-lg" aria-hidden="true"></i></button></div>
+  <div>
+    <span class="vivid-discovery-kicker">BROWSE</span>
+    <h1 id="discovery-heading">Browse.</h1>
+    <p id="discovery-copy">Explore Vivid the way you want. Pick a category and let us take you there.</p>
+  </div>
 </section>
-<section class="vivid-browse-universes" aria-label="Browse by format and world">
-<div class="vivid-browse-universes-head"><div><span class="vivid-discovery-kicker">EXPLORE</span><h2>Browse by universe</h2><p>Start broad, then make it yours.</p></div></div>
-<div class="vivid-browse-universe-grid">
-<a href="discover.html?type=movie" class="vivid-browse-universe-card"><i class="bi bi-film"></i><strong>Movies</strong><span>Feature films, classics and new releases</span></a>
-<a href="discover.html?type=tv" class="vivid-browse-universe-card"><i class="bi bi-tv"></i><strong>TV Shows</strong><span>Series, seasons and episodes</span></a>
-<a href="discover.html?category=anime" class="vivid-browse-universe-card"><i class="bi bi-stars"></i><strong>Anime</strong><span>Japanese animation and anime worlds</span></a>
-<a href="discover.html?category=africanCinema" class="vivid-browse-universe-card"><i class="bi bi-globe-africa"></i><strong>African cinema</strong><span>Ghana, Nigeria and stories across Africa</span></a>
-<a href="discover.html?category=kDrama" class="vivid-browse-universe-card"><i class="bi bi-globe2"></i><strong>K-Dramas</strong><span>Korean-language series and stories</span></a>
-<a href="discover.html?category=bollywood" class="vivid-browse-universe-card"><i class="bi bi-camera-reels"></i><strong>Bollywood</strong><span>Hindi-language movies and series</span></a>
-</div></section>
-<section class="vivid-collection-explorer" aria-label="Featured collections">
-<div class="vivid-collection-heading"><div><span class="vivid-discovery-kicker">COLLECTIONS</span><h2>Browse by collection</h2><p>Quick picks, ready to explore.</p></div></div>
-<div id="featured-collections" class="vivid-collection-grid"></div>
+
+<section class="vivid-browse-categories" aria-labelledby="browse-categories-title">
+  <div class="vivid-browse-title-row">
+    <div>
+      <span class="vivid-discovery-kicker">BROWSE CATEGORIES</span>
+      <h2 id="browse-categories-title">Find something to watch.</h2>
+      <p>Curated worlds, moods, genres and Vivid collections.</p>
+    </div>
+  </div>
+  <div id="browse-category-groups"></div>
 </section>
-<section class="vivid-discovery-filters" aria-label="Browse filters">
-<div class="vivid-filter-panel">
-<div class="vivid-filter-row vivid-type-row" role="group" aria-label="Content type">
-<button type="button" data-type="all" class="is-active">All</button><button type="button" data-type="movie">Movies</button><button type="button" data-type="tv">TV</button>
-</div>
-<div class="vivid-filter-row">
-<label>Collection<select id="category-filter"><option value="">All</option></select></label>
-<label>Genre<select id="genre-filter"><option value="">All</option></select></label>
-<label>Year<select id="year-filter"><option value="">Any</option></select></label>
-<label>Sort<select id="sort-filter"><option value="popularity.desc">Popular</option><option value="vote_average.desc">Top rated</option><option value="primary_release_date.desc">Newest</option><option value="primary_release_date.asc">Oldest</option></select></label>
-<label>Rating<select id="rating-filter"><option value="">Any</option><option value="8">8+</option><option value="7">7+</option><option value="6">6+</option><option value="5">5+</option></select></label>
-<label>Region<select id="region-filter"><option value="">Global</option><option value="GH">Ghana</option><option value="NG">Nigeria</option><option value="US">US</option><option value="GB">UK</option><option value="CA">Canada</option><option value="AU">Australia</option><option value="IN">India</option></select></label>
-<button id="reset-filters" class="vivid-filter-reset" type="button">Reset</button>
-</div>
-<div class="vivid-discovery-modes">
-<div class="vivid-mode-group"><span class="vivid-discovery-kicker">MOOD</span><div class="vivid-mode-strip" role="group" aria-label="Mood">
-<button class="vivid-mode-chip is-active" type="button" data-mood="">Any mood</button><button class="vivid-mode-chip" type="button" data-mood="relax">Relax</button><button class="vivid-mode-chip" type="button" data-mood="intense">Intense</button><button class="vivid-mode-chip" type="button" data-mood="funny">Funny</button><button class="vivid-mode-chip" type="button" data-mood="romantic">Romantic</button><button class="vivid-mode-chip" type="button" data-mood="thoughtful">Thoughtful</button><button class="vivid-mode-chip" type="button" data-mood="escapist">Escapist</button><button class="vivid-mode-chip" type="button" data-mood="scary">Scary</button><button class="vivid-mode-chip" type="button" data-mood="emotional">Emotional</button><button class="vivid-mode-chip" type="button" data-mood="fast">Fast-paced</button><button class="vivid-mode-chip" type="button" data-mood="late">Late-night</button>
-</div>
-<div class="vivid-mode-group"><span class="vivid-discovery-kicker">RUNTIME</span><div class="vivid-mode-strip" role="group" aria-label="Runtime">
-<button class="vivid-mode-chip is-active" type="button" data-runtime="">Any length</button><button class="vivid-mode-chip" type="button" data-runtime="short">Under 90 min</button><button class="vivid-mode-chip" type="button" data-runtime="standard">90–120 min</button><button class="vivid-mode-chip" type="button" data-runtime="long">Over 120 min</button><button class="vivid-mode-chip" type="button" data-runtime="quickEpisode">Under 30 min</button><button class="vivid-mode-chip" type="button" data-runtime="episode">30–60 min</button><button class="vivid-mode-chip" type="button" data-runtime="longEpisode">Over 60 min</button>
-</div>
-</div>
-<div class="vivid-provider-filter" aria-label="Streaming service">
-<div class="vivid-provider-heading"><span>WATCH ON</span><small>Popular services</small></div>
-<div id="provider-filter" class="vivid-provider-strip" role="group" aria-label="Streaming services">
-<button class="vivid-provider-chip is-active" data-provider="" type="button"><span class="vivid-provider-all-icon"><i class="bi bi-grid-3x3-gap" aria-hidden="true"></i></span><span>All</span></button>
-</div>
-</div>
-</div>
-</div>
-</section>
-<section class="vivid-discovery-results" aria-live="polite">
-<div class="vivid-results-head"><div><span id="results-label">DISCOVER</span><h2 id="results-title">All titles</h2></div><span id="results-count"></span></div>
-<div id="discovery-grid" class="vivid-discovery-grid"><div class="vivid-discovery-loading" aria-label="Loading titles"></div></div>
-<div id="discovery-empty" class="vivid-discovery-empty" hidden><i class="bi bi-search"></i><h2>No titles found</h2><p>Try a different search or loosen one of the filters.</p></div>
-<div class="vivid-pagination"><button id="prev-page" type="button"><i class="bi bi-chevron-left"></i> Previous</button><span id="page-label">Page 1</span><button id="next-page" type="button">Next <i class="bi bi-chevron-right"></i></button></div>
+
+<section id="browse-results-shell" class="vivid-browse-results-shell" hidden>
+  <a class="vivid-browse-results-back" href="discover.html"><i class="bi bi-chevron-left" aria-hidden="true"></i> Browse Categories</a>
+
+  <section class="vivid-discovery-filters" aria-label="Browse filters">
+    <div class="vivid-filter-panel">
+      <div class="vivid-filter-row vivid-type-row" role="group" aria-label="Content type">
+        <button type="button" data-type="all" class="is-active">All</button><button type="button" data-type="movie">Movies</button><button type="button" data-type="tv">TV</button>
+      </div>
+      <div class="vivid-filter-row">
+        <label>Collection<select id="category-filter"><option value="">All</option></select></label>
+        <label>Genre<select id="genre-filter"><option value="">All</option></select></label>
+        <label>Year<select id="year-filter"><option value="">Any</option></select></label>
+        <label>Sort<select id="sort-filter"><option value="popularity.desc">Popular</option><option value="vote_average.desc">Top rated</option><option value="primary_release_date.desc">Newest</option><option value="primary_release_date.asc">Oldest</option></select></label>
+        <label>Rating<select id="rating-filter"><option value="">Any</option><option value="8">8+</option><option value="7">7+</option><option value="6">6+</option><option value="5">5+</option></select></label>
+        <label>Region<select id="region-filter"><option value="">Global</option><option value="GH">Ghana</option><option value="NG">Nigeria</option><option value="US">US</option><option value="GB">UK</option><option value="CA">Canada</option><option value="AU">Australia</option><option value="IN">India</option></select></label>
+        <button id="reset-filters" class="vivid-filter-reset" type="button">Reset</button>
+      </div>
+      <div class="vivid-discovery-modes">
+        <div class="vivid-mode-group"><span class="vivid-discovery-kicker">MOOD</span><div class="vivid-mode-strip" role="group" aria-label="Mood">
+          <button class="vivid-mode-chip is-active" type="button" data-mood="">Any mood</button><button class="vivid-mode-chip" type="button" data-mood="relax">Relax</button><button class="vivid-mode-chip" type="button" data-mood="intense">Intense</button><button class="vivid-mode-chip" type="button" data-mood="funny">Funny</button><button class="vivid-mode-chip" type="button" data-mood="romantic">Romantic</button><button class="vivid-mode-chip" type="button" data-mood="thoughtful">Thoughtful</button><button class="vivid-mode-chip" type="button" data-mood="escapist">Escapist</button><button class="vivid-mode-chip" type="button" data-mood="scary">Scary</button><button class="vivid-mode-chip" type="button" data-mood="emotional">Emotional</button><button class="vivid-mode-chip" type="button" data-mood="fast">Fast-paced</button><button class="vivid-mode-chip" type="button" data-mood="late">Late-night</button>
+        </div></div>
+        <div class="vivid-mode-group"><span class="vivid-discovery-kicker">RUNTIME</span><div class="vivid-mode-strip" role="group" aria-label="Runtime">
+          <button class="vivid-mode-chip is-active" type="button" data-runtime="">Any length</button><button class="vivid-mode-chip" type="button" data-runtime="short">Under 90 min</button><button class="vivid-mode-chip" type="button" data-runtime="standard">90–120 min</button><button class="vivid-mode-chip" type="button" data-runtime="long">Over 120 min</button><button class="vivid-mode-chip" type="button" data-runtime="quickEpisode">Under 30 min</button><button class="vivid-mode-chip" type="button" data-runtime="episode">30–60 min</button><button class="vivid-mode-chip" type="button" data-runtime="longEpisode">Over 60 min</button>
+        </div></div>
+        <div class="vivid-provider-filter" aria-label="Streaming service">
+          <div class="vivid-provider-heading"><span>WATCH ON</span><small>Popular services</small></div>
+          <div id="provider-filter" class="vivid-provider-strip" role="group" aria-label="Streaming services">
+            <button class="vivid-provider-chip is-active" data-provider="" type="button"><span class="vivid-provider-all-icon"><i class="bi bi-grid-3x3-gap" aria-hidden="true"></i></span><span>All</span></button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="vivid-discovery-results" aria-live="polite">
+    <div class="vivid-results-head"><div><span id="results-label">BROWSE</span><h2 id="results-title">All titles</h2></div><span id="results-count"></span></div>
+    <div id="discovery-grid" class="vivid-discovery-grid"><div class="vivid-discovery-loading" aria-label="Loading titles"></div></div>
+    <div id="discovery-empty" class="vivid-discovery-empty" hidden><i class="bi bi-search"></i><h2>No titles found</h2><p>Try another category or loosen one of the filters.</p></div>
+    <div class="vivid-pagination"><button id="prev-page" type="button"><i class="bi bi-chevron-left"></i> Previous</button><span id="page-label">Page 1</span><button id="next-page" type="button">Next <i class="bi bi-chevron-right"></i></button></div>
+  </section>
 </section>
 </main>
 <footer class="vivid-footer">© 2026 Vivid Cinema <span class="vivid-footer-links"><a href="about.html">About</a><a href="terms.html">Terms</a><a href="privacy.html">Privacy</a><a href="contact.html">Contact</a></span></footer>
-<nav class="vivid-mobile-nav" aria-label="Mobile navigation"><a href="home.html"><i class="bi bi-house-fill"></i><span>Home</span></a><a href="discover.html" class="is-active"><i class="bi bi-compass"></i><span>Discover</span></a><a href="collection.html?collection=movies"><i class="bi bi-film"></i><span>Movies</span></a><a href="collection.html?collection=tv"><i class="bi bi-tv-fill"></i><span>TV</span></a><a href="news.html"><i class="bi bi-newspaper"></i><span>News</span></a><a href="library.html"><i class="bi bi-bookmark-fill"></i><span>Library</span></a></nav>
+<nav class="vivid-mobile-nav" aria-label="Mobile navigation"><a href="home.html"><i class="bi bi-house-fill"></i><span>Home</span></a><a href="discover.html" class="is-active"><i class="bi bi-grid-fill"></i><span>Browse</span></a><a href="collection.html?collection=movies"><i class="bi bi-film"></i><span>Movies</span></a><a href="collection.html?collection=tv"><i class="bi bi-tv-fill"></i><span>TV</span></a><a href="news.html"><i class="bi bi-newspaper"></i><span>News</span></a><a href="library.html"><i class="bi bi-bookmark-fill"></i><span>Library</span></a></nav>
 </div>
 <script type="module" src="scripts/app-shell.js"></script><script type="module" src="scripts/nav-auth.js"></script><script type="module" src="scripts/discover.js"></script>
 
