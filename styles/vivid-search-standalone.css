@@ -88,3 +88,186 @@ html[data-vivid-theme="light"] .vivid-search-page-field input{color:var(--vivid-
   .vivid-search-quick-head>a{padding-top:2px}
   .vivid-search-result-group .vivid-search-page-results{grid-template-columns:1fr}
 }
+
+/* Phase H — Apple TV-inspired dedicated Search surface. */
+.vivid-search-main{
+  width:min(100% - 32px,1180px);
+  padding:calc(var(--vivid-shell-height,64px) + 46px) 0 110px;
+}
+.vivid-search-page-head{
+  display:block;
+  margin-bottom:22px;
+}
+.vivid-search-kicker,.vivid-search-page-label{
+  color:#8e8e93;
+  font:700 10px -apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif;
+  letter-spacing:.16em;
+}
+.vivid-search-page-head h1{
+  margin:6px 0 0;
+  font:700 clamp(36px,5.2vw,58px)/1 -apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text",sans-serif;
+  letter-spacing:-.055em;
+}
+.vivid-search-page-head p{
+  max-width:620px;
+  margin:10px 0 0;
+  color:#8e8e93;
+  font-size:14px;
+  line-height:1.5;
+}
+.vivid-search-page-field{
+  max-width:900px;
+  min-height:54px;
+  padding:0 14px;
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:11px;
+  background:#1c1c1e;
+  box-shadow:none;
+}
+.vivid-search-page-field:focus-within{
+  border-color:rgba(255,255,255,.25);
+  box-shadow:0 0 0 3px rgba(255,255,255,.04);
+}
+.vivid-search-page-field input{
+  font:400 16px/1 -apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif;
+}
+.vivid-search-page-field button{
+  width:30px;height:30px;
+  background:rgba(255,255,255,.09);
+}
+.vivid-search-quick{
+  padding-top:42px;
+}
+.vivid-search-quick-head{
+  margin-bottom:14px;
+}
+.vivid-search-quick-head h2{
+  font:600 20px/1.2 -apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text",sans-serif;
+  letter-spacing:-.02em;
+}
+.vivid-search-quick-head>a{
+  color:#8e8e93;
+  font-size:13px;
+  font-weight:500;
+}
+.vivid-search-quick-grid{
+  display:flex;
+  gap:8px;
+  overflow-x:auto;
+  padding:2px 2px 12px 0;
+  scrollbar-width:none;
+  scroll-snap-type:x proximity;
+}
+.vivid-search-quick-grid::-webkit-scrollbar{display:none}
+.vivid-search-quick-grid a{
+  flex:0 0 auto;
+  min-height:38px;
+  padding:0 13px;
+  border:0;
+  border-radius:9px;
+  background:#1c1c1e;
+  color:#d1d1d6;
+  font:500 13px/1 -apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif;
+  scroll-snap-align:start;
+}
+.vivid-search-quick-grid a:hover{
+  transform:none;
+  background:#2c2c2e;
+  color:#fff;
+}
+.vivid-search-quick-grid a i{color:#8e8e93}
+.vivid-search-page-content{
+  padding-top:42px;
+}
+.vivid-search-result-group{
+  margin-bottom:42px;
+}
+.vivid-search-result-group-head{
+  margin-bottom:12px;
+}
+.vivid-search-result-group-head h2{
+  font:600 20px/1.2 -apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text",sans-serif;
+}
+.vivid-search-result-group-head span{
+  color:#8e8e93;
+  font-size:12px;
+}
+.vivid-search-result-group .vivid-search-page-results{
+  display:flex;
+  gap:14px;
+  overflow-x:auto;
+  padding:2px 2px 18px 0;
+  scrollbar-width:none;
+  scroll-snap-type:x proximity;
+}
+.vivid-search-result-group .vivid-search-page-results::-webkit-scrollbar{display:none}
+.vivid-search-page-result{
+  display:block;
+  flex:0 0 156px;
+  padding:0;
+  border:0;
+  border-radius:0;
+  background:transparent;
+  scroll-snap-align:start;
+}
+.vivid-search-page-result img{
+  display:block;
+  width:156px;
+  height:234px;
+  border-radius:12px;
+  background:#1c1c1e;
+}
+.vivid-search-page-result span{
+  display:block;
+  padding-top:8px;
+}
+.vivid-search-page-result strong{
+  color:#fff;
+  font:600 15px/1.25 -apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif;
+}
+.vivid-search-page-result small{
+  margin-top:4px;
+  color:#8e8e93;
+  font:400 13px/1.2 -apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif;
+}
+.vivid-search-page-result>i{display:none}
+.vivid-search-recent-grid{
+  display:flex;
+  gap:8px;
+  overflow-x:auto;
+  padding-bottom:10px;
+  scrollbar-width:none;
+}
+.vivid-search-recent-grid::-webkit-scrollbar{display:none}
+.vivid-search-recent-grid button{
+  flex:0 0 auto;
+  min-height:40px;
+  padding:0 13px;
+  border:0;
+  border-radius:9px;
+  background:#1c1c1e;
+  color:#d1d1d6;
+  font:500 13px -apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif;
+}
+.vivid-search-clear-recent{
+  color:#8e8e93;
+  font-size:12px;
+}
+.vivid-search-empty-page{
+  min-height:220px;
+  border-top:1px solid rgba(255,255,255,.07);
+  color:#8e8e93;
+}
+.vivid-search-loading{
+  min-height:220px;
+}
+@media(max-width:640px){
+  .vivid-search-main{
+    width:min(100% - 24px,1180px);
+    padding:calc(var(--vivid-mobile-nav-height,64px) + 22px) 0 96px;
+  }
+  .vivid-search-page-head h1{font-size:40px}
+  .vivid-search-page-result{flex-basis:138px}
+  .vivid-search-page-result img{width:138px;height:207px}
+  .vivid-search-page-content{padding-top:34px}
+}
