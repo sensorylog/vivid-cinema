@@ -190,6 +190,52 @@ function ensureBackControl() {
   main.prepend(back);
 }
 
+function initCinematicFocusNavigation() {
+  const selector = [
+    ".vivid-card[tabindex]",
+    ".vivid-feature-card[tabindex]",
+    ".vivid-cast[tabindex]",
+    ".vivid-similar-card[tabindex]",
+    ".vivid-video-card[tabindex]",
+    ".vivid-watch-rec-card[tabindex]"
+  ].join(",");
+  document.addEventListener("keydown", event => {
+    if (!["ArrowLeft","ArrowRight","ArrowUp","ArrowDown"].includes(event.key)) return;
+    const target = event.target.closest(selector);
+    if (!target || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
+    if (event.target.closest("input,textarea,select,button,a") && !target.matches("a")) return;
+    const rail = target.parentElement;
+    if (!rail) return;
+    const items = [...rail.querySelectorAll(selector)].filter(item => item.offsetParent !== null);
+    const index = items.indexOf(target);
+    if (index < 0) return;
+    if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
+      const nextIndex = index + (event.key === "ArrowRight" ? 1 : -1);
+      if (!items[nextIndex]) return;
+      event.preventDefault();
+      items[nextIndex].focus({ preventScroll: true });
+      items[nextIndex].scrollIntoView({ behavior: "smooth", block: "nearest", inline: "nearest" });
+      return;
+    }
+    const currentRect = target.getBoundingClientRect();
+    const candidates = [...document.querySelectorAll(selector)].filter(item => item !== target && item.offsetParent !== null);
+    const direction = event.key === "ArrowDown" ? 1 : -1;
+    const vertical = candidates
+      .map(item => ({ item, rect: item.getBoundingClientRect() }))
+      .filter(({rect}) => direction > 0 ? rect.top > currentRect.top + 8 : rect.bottom < currentRect.bottom - 8)
+      .map(({item,rect}) => ({
+        item,
+        distance: Math.abs((rect.left + rect.width/2) - (currentRect.left + currentRect.width/2)) +
+          Math.abs(rect.top - currentRect.top) * 0.35
+      }))
+      .sort((a,b) => a.distance - b.distance)[0];
+    if (!vertical) return;
+    event.preventDefault();
+    vertical.item.focus({ preventScroll: true });
+    vertical.item.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "nearest" });
+  }, true);
+}
+
 function initAppShell() {
   if (initialized) return;
   initialized = true;
@@ -206,6 +252,7 @@ function initAppShell() {
   initThemeToggle();
   ensureBackControl();
   ensureSkipLink();
+  initCinematicFocusNavigation();
 
   window.addEventListener("resize", setViewportState, { passive: true });
   window.addEventListener("online", setConnectionState);
