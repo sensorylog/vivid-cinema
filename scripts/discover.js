@@ -127,6 +127,21 @@ function hydrateBrowseCategoryImages(container) {
   }
 }
 
+function renderBrowseCategories() {
+  const container = $("browse-category-groups");
+  if (!container) return;
+  const groups = BROWSE_CATEGORIES.reduce((map, category) => {
+    const group = category.group || "Featured";
+    (map[group] ||= []).push(category);
+    return map;
+  }, {});
+  container.innerHTML = Object.entries(groups).map(([group, categories]) =>
+    '<section class="vivid-browse-category-group"><div class="vivid-browse-group-head"><h3>' + escapeHtml(group) + '</h3></div><div class="vivid-browse-category-grid">' +
+      categories.map(browseCardMarkup).join("") + '</div></section>'
+  ).join("");
+  hydrateBrowseCategoryImages(container);
+}
+
 function updateBrowseMode() {
   const landing = !state.category && !state.query && state.type === "all" && !state.genre && !state.year && !state.rating && !state.region && !state.provider && !state.mood && !state.runtime;
   document.body.classList.toggle("vivid-browse-landing", landing);
