@@ -64,6 +64,7 @@ function buildPrimaryLinks(page) {
     navLink("home.html", "bi-house-fill", "Home", page === "home"),
     navLink("discover.html", "bi-grid-fill", "Browse", isBrowsePage(page)),
     navLink("library.html", "bi-bookmark-fill", "Library", page === "library"),
+    navLink("news.html", "bi-newspaper", "News", page === "news"),
     navLink("search.html", "bi-search", "Search", page === "search")
   ].join("");
 }
