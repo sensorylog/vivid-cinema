@@ -10,7 +10,7 @@ html[data-network="offline"] [data-vivid-online-only]{display:none!important}
 .vivid-notification-button:hover{background:rgba(255,255,255,.08)}
 .vivid-notification-button>i{font-size:1.05rem}
 .vivid-notification-button>span{position:absolute;top:2px;right:1px;min-width:16px;height:16px;padding:0 4px;border-radius:999px;background:#fff;color:#08090c;font:700 10px/16px system-ui;text-align:center}
-.vivid-release-popover{position:fixed;z-index:80;top:72px;right:24px;width:min(390px,calc(100vw - 28px));border:1px solid rgba(255,255,255,.1);border-radius:18px;background:rgba(16,17,21,.96);box-shadow:0 22px 70px rgba(0,0,0,.5);backdrop-filter:blur(24px);overflow:hidden}
+.vivid-release-popover{position:fixed;z-index:1100;top:72px;right:24px;width:min(390px,calc(100vw - 28px));border:1px solid rgba(255,255,255,.1);border-radius:18px;background:rgba(16,17,21,.96);box-shadow:0 22px 70px rgba(0,0,0,.5);backdrop-filter:blur(24px);overflow:hidden}
 .vivid-release-popover-head{display:flex;align-items:center;justify-content:space-between;padding:18px 18px 14px;border-bottom:1px solid rgba(255,255,255,.07)}
 .vivid-release-popover-head span{display:block;font-size:.62rem;letter-spacing:.16em;opacity:.55}.vivid-release-popover-head strong{display:block;margin-top:3px;font-size:1rem}
 .vivid-release-popover-head button{border:0;background:transparent;color:inherit;cursor:pointer;font-size:.95rem}
@@ -54,18 +54,17 @@ html[data-network="offline"] [data-vivid-online-only]{display:none!important}
 .vivid-release-settings{display:flex;align-items:center;gap:12px;padding:12px 14px;border-top:1px solid rgba(255,255,255,.065);background:rgba(255,255,255,.018)}.vivid-release-setting-copy{min-width:0;flex:1}.vivid-release-setting-copy strong{display:block;font-size:.7rem}.vivid-release-setting-copy small{display:block;margin-top:3px;color:#6f7680;font-size:.62rem;line-height:1.35}.vivid-release-enable{min-width:72px;padding:8px 10px;border:1px solid rgba(255,255,255,.12);border-radius:9px;background:#f1f2f4;color:#090a0d;font:700 .65rem/1 system-ui;cursor:pointer}.vivid-release-enable:hover{background:#fff;transform:translateY(-1px)}.vivid-release-footnote{display:flex;align-items:center;gap:7px;padding:9px 14px 11px;color:#5f6670;font-size:.59rem;line-height:1.35}.vivid-release-footnote i{color:#858c96}
 @media(max-width:640px){
   .vivid-release-popover{
-    position:fixed;
-    left:8px;
-    right:8px;
     top:calc(var(--vivid-safe-top) + 58px);
+    right:12px;
+    left:auto;
     bottom:auto;
-    width:auto;
-    max-height:calc(100dvh - var(--vivid-safe-top) - 76px);
+    width:min(380px,calc(100vw - 24px));
+    max-height:min(560px,65dvh);
     border-radius:18px;
     display:flex;
     flex-direction:column;
     overflow:hidden;
-    z-index:1200;
+    z-index:1100;
   }
   .vivid-release-popover-head{padding:14px 14px 12px;flex:0 0 auto}
   .vivid-release-head-copy small{max-width:none;font-size:.66rem}
