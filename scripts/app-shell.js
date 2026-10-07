@@ -81,8 +81,11 @@ function syncDesktopNavigation() {
   const oldNotification = nav.querySelector("#release-alert-button");
   const oldAuth = nav.querySelector(".vivid-nav-action[data-vivid-nav-auth], #auth-link, #discover-auth, #library-auth, #collection-auth, #title-auth, #watch-auth, .vivid-nav-action");
   const auth = oldAuth || Object.assign(document.createElement("a"), { className: "vivid-nav-action", href: "auth.html", textContent: "Sign in" });
-  auth.classList.add("vivid-nav-action");
+  auth.classList.add("vivid-nav-action", "vivid-account-control");
+  auth.dataset.vividNavAuth = "true";
   if (!auth.getAttribute("href")) auth.setAttribute("href", "auth.html");
+  auth.innerHTML = '<i class="bi bi-person-circle" aria-hidden="true"></i><span class="vivid-account-label">Account</span>';
+  auth.setAttribute("aria-label", "Account");
 
   nav.innerHTML = "";
   const brand = document.createElement("a");
