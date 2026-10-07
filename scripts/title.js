@@ -30,10 +30,12 @@ function formatRuntime(minutes) {
 }
 
 function trailerVideos(details) {
-  return (details.videos?.results || [])
-    .filter((video) => video.site === "YouTube" && ["Trailer", "Teaser", "Clip", "Featurette"].includes(video.type))
-    .filter((video) => video.official !== false)
-    .slice(0, 8);
+  const videos = (details.videos?.results || [])
+    .filter((video) => video.site === "YouTube" && ["Trailer", "Teaser", "Clip", "Featurette"].includes(video.type));
+  const official = videos.filter((video) => video.official !== false);
+  // Prefer official uploads, but never hide a valid TMDB trailer just because
+  // the YouTube record is not marked official.
+  return (official.length ? official : videos).slice(0, 8);
 }
 
 function getInitialCountry(details) {
