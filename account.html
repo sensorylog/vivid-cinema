@@ -22,18 +22,27 @@
 
   <main class="account-shell"><a class="vivid-page-back" data-vivid-back href="home.html"><i class="bi bi-chevron-left" aria-hidden="true"></i><span>Back</span></a>
     <header class="account-header">
-      <div>
-        <h1>My account</h1>
-        <p>Your profile, viewing preferences and personal library at a glance.</p>
+      <div class="account-heading-copy">
+        <span class="account-kicker">ACCOUNT</span>
+        <h1>Make Vivid yours.</h1>
+        <p>Your profile, preferences and library — all in one place.</p>
       </div>
     </header>
 
     <div class="account-grid">
-      <section class="account-card" aria-labelledby="profile-title">
-        <h2 id="profile-title">Profile</h2>
+      <section class="account-card account-profile-card" aria-labelledby="profile-title">
+        <div class="account-profile-hero">
+          <div class="account-avatar" id="account-avatar" aria-hidden="true">V</div>
+          <div class="account-profile-copy">
+            <span class="account-card-kicker">YOUR PROFILE</span>
+            <h2 id="profile-title">Profile</h2>
+            <p id="profile-summary">Your identity on Vivid.</p>
+          </div>
+          <span id="user-verification" class="account-badge">Loading…</span>
+        </div>
         <div class="account-meta">
           <div class="account-meta-row"><span>Sign-in method</span><span id="user-provider">Loading…</span></div>
-          <div class="account-meta-row"><span>Email status</span><span id="user-verification" class="account-badge">Loading…</span></div>
+          <div class="account-meta-row"><span>Account</span><span id="account-type">Personal</span></div>
         </div>
 
         <div class="account-field">
@@ -52,9 +61,10 @@
         </div>
       </section>
 
-      <section class="account-card account-security-card" aria-labelledby="security-title"><h2 id="security-title">Security</h2><p>Keep your account protected and recover access without losing your library.</p><button id="change-password-btn" class="vivid-button vivid-button--secondary" type="button">Send password reset</button><p id="security-status" class="account-status" aria-live="polite"></p></section>
+      <section class="account-card account-security-card" aria-labelledby="security-title"><span class="account-card-kicker">PROTECTION</span><h2 id="security-title">Security</h2><p>Keep your account protected and your library yours.</p><button id="change-password-btn" class="vivid-button vivid-button--secondary" type="button">Send password reset</button><p id="security-status" class="account-status" aria-live="polite"></p></section>
 
       <section class="account-card" aria-labelledby="preferences-title">
+        <span class="account-card-kicker">YOUR EXPERIENCE</span>
         <h2 id="preferences-title">Viewing preferences</h2>
         <div class="account-field">
           <label for="provider-country">Provider region</label>
@@ -71,12 +81,12 @@
         </label>
       </section>
 
-      <section class="account-card" aria-labelledby="library-summary-title">
-        <h2 id="library-summary-title">Library</h2>
+      <section class="account-card account-library-card" aria-labelledby="library-summary-title">
+        <div class="account-section-heading"><div><span class="account-card-kicker">YOUR ACTIVITY</span><h2 id="library-summary-title">Library</h2></div><a href="library.html">Open library <i class="bi bi-arrow-up-right"></i></a></div>
         <div class="account-stats">
-          <div class="account-stat"><strong id="favorites-count">0</strong><span>Likes</span></div>
+          <div class="account-stat"><strong id="favorites-count">0</strong><span>Liked</span></div>
           <div class="account-stat"><strong id="watch-later-count">0</strong><span>Watch later</span></div>
-          <div class="account-stat"><strong id="history-count">0</strong><span>History</span></div>
+          <div class="account-stat"><strong id="history-count">0</strong><span>Watched</span></div>
         </div>
       </section>
     </div>
