@@ -35,14 +35,11 @@ jobs:
               if (entry.name === ".git" || entry.name === "node_modules") continue;
               const full = path.join(dir, entry.name);
               if (entry.isDirectory()) walk(full);
-              else if (entry.isFile() && full.endsWith(".json")) {
-                JSON.parse(fs.readFileSync(full, "utf8"));
-              }
+              else if (entry.isFile() && full.endsWith(".json")) JSON.parse(fs.readFileSync(full, "utf8"));
             }
           }
           walk(".");
           NODE
-
 
       - name: Validate local JavaScript imports
         shell: bash
@@ -65,16 +62,17 @@ jobs:
           const missing = [];
           for (const file of files) {
             const source = fs.readFileSync(file, "utf8");
-            const refs = [];
-            for (const match of source.matchAll(/(?:from|import)\\s*[(]?\\s*["'](\\.\\/?[^"']+)["']/g)) refs.push(match[1]);
-            for (const ref of refs) {
-              const target = path.resolve(path.dirname(file), ref);
-              if (!fs.existsSync(target)) missing.push(file + " -> " + ref);
+            for (const match of source.matchAll(/(?:from|import)\s*\(?\s*["'](\.\/?[^"']+)["']/g)) {
+              const ref = match[1];
+              const candidates = [ref, ref + ".js", ref + "/index.js"];
+              if (!candidates.some(candidate => fs.existsSync(path.resolve(path.dirname(file), candidate)))) {
+                missing.push(file + " -> " + ref);
+              }
             }
           }
           if (missing.length) {
             console.error("Missing local JavaScript imports:");
-            console.error(missing.join("\\n"));
+            console.error(missing.join("\n"));
             process.exit(1);
           }
           NODE
@@ -102,7 +100,7 @@ jobs:
             const source = fs.readFileSync(file, "utf8");
             const refs = [...source.matchAll(/(?:href|src)\s*=\s*["']([^"']+)["']|url\(\s*["']?([^"')]+)["']?\s*\)/gi)].map(m => m[1] || m[2]);
             for (let ref of refs) {
-              if (!ref || /^(?:https?:|data:|blob:|mailto:|tel:|#)/i.test(ref)) continue;
+              if (!ref || /^(?:https?:|data:|blob:|mailto:|tel:|#|javascript:)/i.test(ref)) continue;
               ref = ref.split("#")[0].split("?")[0];
               if (!ref) continue;
               const target = path.resolve(path.dirname(file), ref);
