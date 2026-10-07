@@ -38,17 +38,31 @@ function renderRecent() {
 }
 
 function renderResults(items, query) {
+  const movies = items.filter(item => item.media_type === "movie");
+  const shows = items.filter(item => item.media_type === "tv");
+  const people = items.filter(item => item.media_type === "person");
+
+  const renderGroup = (label, group) => !group.length ? "" :
+    '<section class="vivid-search-result-group">' +
+      '<div class="vivid-search-result-group-head"><h2>' + label + '</h2><span>' + group.length + '</span></div>' +
+      '<div class="vivid-search-page-results">' + group.map(item => {
+        const title = item.title || "Untitled";
+        const meta = item.media_type === "person"
+          ? "Person"
+          : ((item.year || "—") + " · " + (item.media_type === "tv" ? "TV Series" : "Movie"));
+        const image = item.poster_path
+          ? "https://image.tmdb.org/t/p/w185" + item.poster_path
+          : "icons/vivid-icon.svg";
+        return '<a class="vivid-search-page-result" href="' + escapeHtml(resultHref(item)) + '">' +
+          '<img src="' + escapeHtml(image) + '" alt="" loading="lazy">' +
+          '<span><strong>' + escapeHtml(title) + '</strong><small>' + escapeHtml(meta) + '</small></span>' +
+          '<i class="bi bi-chevron-right"></i></a>';
+      }).join("") + '</div></section>';
+
   content.innerHTML =
     '<div class="vivid-search-page-label">RESULTS FOR “' + escapeHtml(query) + '”</div>' +
     (items.length
-      ? '<div class="vivid-search-page-results">' + items.map(item => {
-          const title = item.title || "Untitled";
-          const meta = item.media_type === "person" ? "Person" : ((item.year || "—") + " · " + (item.media_type === "tv" ? "TV Series" : "Movie"));
-          return '<a class="vivid-search-page-result" href="' + escapeHtml(resultHref(item)) + '">' +
-            '<img src="' + escapeHtml(item.poster_path ? "https://image.tmdb.org/t/p/w185" + item.poster_path : "icons/vivid-icon.svg") + '" alt="" loading="lazy">' +
-            '<span><strong>' + escapeHtml(title) + '</strong><small>' + escapeHtml(meta) + '</small></span>' +
-            '<i class="bi bi-chevron-right"></i></a>';
-        }).join("") + '</div>'
+      ? renderGroup("Movies", movies) + renderGroup("TV Shows", shows) + renderGroup("People", people)
       : '<div class="vivid-search-empty-page"><i class="bi bi-search"></i><strong>No matches found</strong><span>Try another title, person, genre, or shorter search.</span></div>');
 }
 
