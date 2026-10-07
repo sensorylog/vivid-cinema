@@ -14,10 +14,7 @@ const VIDSRC_ORIGIN = (() => {
   try { return new URL(VIVID_CONFIG.api.vidsrcEmbedBaseUrl || "https://vidsrc.cc").origin; }
   catch { return "https://vidsrc.cc"; }
 })();
-const MULTIEMBED_ORIGIN = (() => {
-  try { return new URL(VIVID_CONFIG.api.multiembedBaseUrl || "https://multiembed.mov").origin; }
-  catch { return "https://multiembed.mov"; }
-})();
+const CINEPRO_ORIGIN = "https://ui.cinepro.cc";
 let media = null;
 let details = null;
 let currentParams = null;
@@ -26,10 +23,10 @@ let lastHistorySyncAt = 0;
 let activeSource = "vidapi";
 let primaryHealthy = false;
 let fallbackTimer = null;
-let multiembedTimedOut = false;
+let cineproActive = false;
 let imdbId = "";
 let tmdbId = "";
-const PRIMARY_FALLBACK_MS = 9000;
+const PRIMARY_FALLBACK_MS = 15000;
 const ANIME_FALLBACK_MS = 9000;
 
 function getParams() {
@@ -70,43 +67,21 @@ function buildVidsrcEmbedUrl(params) {
   return base + "/embed/movie/" + id;
 }
 
-function buildMultiembedUrl(params) {
-  const base = String(VIVID_CONFIG.api.multiembedBaseUrl || "https://multiembed.mov").replace(/\/+$/, "");
-  // MultiEmbed's documented directstream flow is most reliable with an IMDb
-  // identifier. Fall back to TMDB explicitly only when IMDb is unavailable.
-  const videoId = imdbId || tmdbId;
-  if (!videoId) return "";
-  const query = new URLSearchParams({ video_id: String(videoId) });
-  if (!imdbId) query.set("tmdb", "1");
-  if (params.type === "tv") {
-    query.set("s", String(params.season));
-    query.set("e", String(params.episode));
-  }
-  return base + "/directstream.php?" + query;
-}
-
-function buildMultiembedStandardUrl(params) {
-  const base = String(VIVID_CONFIG.api.multiembedBaseUrl || "https://multiembed.mov").replace(/\/+$/, "");
-  const videoId = imdbId || tmdbId;
-  if (!videoId) return "";
-  const query = new URLSearchParams({ video_id: String(videoId) });
-  if (!imdbId) query.set("tmdb", "1");
-  if (params.type === "tv") {
-    query.set("s", String(params.season));
-    query.set("e", String(params.episode));
-  }
-  return base + "/?" + query;
+function buildCineproUrl(params) {
+  const base = "https://ui.cinepro.cc/watch/" + (params.type === "tv" ? "tv/" : "movie/") + encodeURIComponent(tmdbId || params.id);
+  if (params.type === "tv") return base + "?s=" + params.season + "&e=" + params.episode;
+  return base;
 }
 
 function getNextSource(source) {
   if (source === "vidapi") return "vidsrc";
-  if (source === "vidsrc") return "multiembed";
+  if (source === "vidsrc") return "cinepro";
   return null;
 }
 
 function getSourceLabel(source) {
   if (source === "vidsrc") return "VidSrc alternate source";
-  if (source === "multiembed") return "MultiEmbed VIP";
+  if (source === "cinepro") return "CinePro fallback";
   return "Powered by VidAPI";
 }
 
@@ -161,8 +136,8 @@ function updateSourceLabel() {
     switchBtn.textContent = activeSource === "vidapi"
       ? "Try alternate source"
       : activeSource === "vidsrc"
-        ? "Try MultiEmbed VIP"
-        : (multiembedTimedOut ? "Retry MultiEmbed VIP" : "Try primary source");
+        ? "Open CinePro"
+        : "Open CinePro";
   }
 }
 
@@ -173,7 +148,7 @@ function setPlayerSource(source, params, startAt = 0) {
   activeSource = source;
   multiembedTimedOut = false;
   const status = $("player-status");
-  if (!["vidapi", "vidsrc", "multiembed"].includes(source)) return;
+  if (!["vidapi", "vidsrc", "cinepro"].includes(source)) return;
   if (source === "vidsrc") {
     if (!hasFallbackId()) return;
     primaryHealthy = false;
@@ -189,60 +164,24 @@ function setPlayerSource(source, params, startAt = 0) {
         triggerFallback("vidsrc_timeout");
       }, fallbackDelayMs());
     }
-  } else if (source === "multiembed") {
-    if (!tmdbId) {
-      if (status) {
-        status.textContent = "MultiEmbed needs a TMDB ID for this title.";
-        status.classList.add("is-warning");
-        status.hidden = false;
-      }
-      return;
-    }
+  } else if (source === "cinepro") {
     primaryHealthy = false;
-    const multiembedUrl = buildMultiembedUrl(params);
-    if (!multiembedUrl) {
-      if (status) {
-        status.textContent = "MultiEmbed could not build a TMDB playback URL.";
-        status.classList.add("is-warning");
-        status.hidden = false;
-      }
-      return;
-    }
-    player.src = multiembedUrl;
+    cineproActive = true;
+    const cineproUrl = buildCineproUrl(params);
+    player.src = cineproUrl;
     if (status) {
-      status.textContent = "Loading MultiEmbed VIP…";
+      status.textContent = "Opening CinePro fallback…";
       status.classList.remove("is-warning");
       status.hidden = false;
     }
-    if (hasFallbackId()) {
-      fallbackTimer = window.setTimeout(() => {
-        if (primaryHealthy || activeSource !== "multiembed") return;
-        clearFallbackTimer();
-        if (activeSource === "multiembed") {
-          const standardUrl = buildMultiembedStandardUrl(params);
-          if (standardUrl && player.src !== standardUrl) {
-            multiembedTimedOut = true;
-            player.src = standardUrl;
-            if (status) {
-              status.textContent = "MultiEmbed VIP did not find this file — trying MultiEmbed standard…";
-              status.classList.add("is-warning");
-              status.hidden = false;
-            }
-            fallbackTimer = window.setTimeout(() => {
-              if (primaryHealthy || activeSource !== "multiembed") return;
-              multiembedTimedOut = true;
-              if (status) {
-                status.textContent = "MultiEmbed could not start playback. Try MultiEmbed again or return to the title.";
-                status.classList.add("is-warning");
-                status.hidden = false;
-              }
-              const switchBtn = $("player-switch-source");
-              if (switchBtn) switchBtn.textContent = "Retry MultiEmbed";
-            }, fallbackDelayMs());
-          }
-        }
-      }, fallbackDelayMs());
-    }
+    fallbackTimer = window.setTimeout(() => {
+      if (activeSource !== "cinepro" || primaryHealthy) return;
+      if (status) {
+        status.textContent = "CinePro is taking longer than expected. You can open it directly.";
+        status.classList.add("is-warning");
+        status.hidden = false;
+      }
+    }, 10000);
   } else {
     primaryHealthy = false;
     player.src = buildVidapiEmbedUrl(params, startAt);
@@ -364,7 +303,7 @@ function renderShell(params) {
     player.addEventListener("error", () => {
       triggerFallback("iframe_error");
     });
-    // Start on primary (VidAPI), then fall through VidSrc → MultiEmbed if needed.
+    // Start on primary (VidAPI), then fall through VidSrc → CinePro if needed.
     setPlayerSource("vidapi", params, resumeAt);
     const switchBtn = $("player-switch-source");
     if (switchBtn) {
@@ -372,8 +311,8 @@ function renderShell(params) {
         const next = activeSource === "vidapi"
           ? "vidsrc"
           : activeSource === "vidsrc"
-            ? "multiembed"
-            : (multiembedTimedOut ? "multiembed" : "vidapi");
+            ? "cinepro"
+            : "vidapi";
         setPlayerSource(next, params, resumeAt);
       });
     }
@@ -424,7 +363,7 @@ function handlePlayerEvent(event) {
   const player = $("vidapi-player");
   if (!player || event.source !== player.contentWindow) return;
   const isVidapi = VIDAPI_ORIGINS.has(event.origin);
-  const isFallback = event.origin === VIDSRC_ORIGIN || event.origin === MULTIEMBED_ORIGIN;
+  const isFallback = event.origin === VIDSRC_ORIGIN || event.origin === CINEPRO_ORIGIN;
   if (!isVidapi && !isFallback) return;
   const payload = event.data;
   if (!payload || typeof payload !== "object") return;
