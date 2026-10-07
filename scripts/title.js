@@ -10,6 +10,7 @@ const $ = (id) => document.getElementById(id);
 const route = getRoute();
 let media = null;
 let currentDetails = null;
+let trailerKeydownBound = false;
 const PROVIDER_COUNTRIES = [
   ["US", "United States"],
   ["GH", "Ghana"],
@@ -167,9 +168,11 @@ function closeTrailer() {
 
 function wireTrailers() {
   document.querySelectorAll("[data-video-key]").forEach((button) => button.addEventListener("click", () => openTrailer(button.dataset.videoKey, button.dataset.videoTitle)));
+  if (trailerKeydownBound) return;
+  trailerKeydownBound = true;
   document.addEventListener("keydown", (event) => {
     if (event.key === "Escape") closeTrailer();
-  }, { once: true });
+  });
 }
 
 function wireProviders(details) {
