@@ -234,7 +234,7 @@ function render(details) {
     renderLibraryActions()+
     renderTrailerSection(details)+
     '<section class="vivid-title-section"><div class="vivid-section-heading"><div><span>CAST</span><h2>People in the story</h2></div></div><div class="vivid-cast-grid">'+
-      (cast.length?cast.map((person)=>'<article class="vivid-cast"><img loading="lazy" src="'+getImageUrl(person.profile_path,"w185")+'" alt="'+escapeHtml(person.name)+'"><strong>'+escapeHtml(person.name)+'</strong><small>'+escapeHtml(person.character||"Cast")+'</small></article>').join(""):'<p class="vivid-muted">Cast information is unavailable.</p>')+
+      (cast.length?cast.map((person)=>'<a class="vivid-cast" href="person.html?id='+encodeURIComponent(person.id)+'"><img loading="lazy" src="'+getImageUrl(person.profile_path,"w185")+'" alt="'+escapeHtml(person.name)+'"><strong>'+escapeHtml(person.name)+'</strong><small>'+escapeHtml(person.character||"Cast")+'</small></a>').join(""):'<p class="vivid-muted">Cast information is unavailable.</p>')+
     '</div></section>'+renderSeasons(details)+renderProviderGroups(details,country)+
     '<section class="vivid-title-section"><div class="vivid-section-heading"><div><span>RECOMMENDED</span><h2>More like this</h2></div></div><div class="vivid-similar" id="recommendation-rail">'+renderRecommendationCards(related)+'</div></section>';
 
