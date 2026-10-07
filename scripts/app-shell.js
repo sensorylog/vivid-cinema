@@ -102,8 +102,12 @@ function syncDesktopNavigation() {
   nav.insertAdjacentHTML("beforeend", buildSearchControl());
 
   if (oldNotification) nav.appendChild(oldNotification);
+
+  // Clean three-zone shell: brand left, account centered, language far right.
   nav.appendChild(auth);
   nav.classList.add("vivid-v2-nav");
+  const language = nav.querySelector(".vivid-language");
+  if (language) nav.appendChild(language);
 }
 
 function syncMobileNavigation() {
