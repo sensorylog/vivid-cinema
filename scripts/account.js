@@ -9,6 +9,9 @@ const emailEl = document.getElementById("user-email");
 const nameEl = document.getElementById("user-name");
 const providerEl = document.getElementById("user-provider");
 const verificationEl = document.getElementById("user-verification");
+const avatarEl = document.getElementById("account-avatar");
+const profileSummaryEl = document.getElementById("profile-summary");
+const accountTypeEl = document.getElementById("account-type");
 const countryEl = document.getElementById("provider-country");
 const autoplayEl = document.getElementById("autoplay-trailers");
 const reducedMotionEl = document.getElementById("reduced-motion");
@@ -90,7 +93,11 @@ async function loadUser(user) {
   const preferences = { ...local, ...(profile.preferences || {}) };
 
   emailEl.value = user.email || "";
-  nameEl.value = profile.displayName || user.displayName || "";
+  const displayName = profile.displayName || user.displayName || user.email?.split("@")[0] || "Vivid member";
+  if (avatarEl) avatarEl.textContent = displayName.trim().charAt(0).toUpperCase() || "V";
+  if (profileSummaryEl) profileSummaryEl.textContent = user.email || "Your Vivid profile";
+  if (accountTypeEl) accountTypeEl.textContent = providerLabel(user);
+  nameEl.value = displayName;
   providerEl.textContent = providerLabel(user);
   verificationEl.textContent = user.emailVerified ? "Verified" : "Verification required";
   verificationEl.dataset.state = user.emailVerified ? "success" : "warning";
