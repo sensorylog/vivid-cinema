@@ -9,7 +9,6 @@ import { recordBehavior, startIntelligenceSync } from "./intelligence.js";
 
 const $ = (id) => document.getElementById(id);
 const route = getRoute();
-const VIDAPI_ORIGINS = new Set([new URL(VIVID_CONFIG.api.vidapiEmbedBaseUrl).origin, "https://vidapi.ru", "https://www.vaplayer.ru", "https://www.vidapi.ru"]);
 const VIDSRC_ORIGIN = (() => {
   try { return new URL(VIVID_CONFIG.api.vidsrcEmbedBaseUrl || "https://vidsrc.to").origin; }
   catch { return "https://vidsrc.to"; }
@@ -648,7 +647,6 @@ function handlePlayerEvent(event) {
   const player = $("vidapi-player");
   if (!player || event.source !== player.contentWindow) return;
   if (activeSource !== "vidapi") return;
-  if (event.origin && !VIDAPI_ORIGINS.has(event.origin)) return;
   const payload = event.data;
   if (!payload || typeof payload !== "object") return;
 
