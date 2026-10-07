@@ -5,6 +5,7 @@ import { getRoute, buildWatchUrl } from "./routes.js";
 import { escapeHtml, getErrorMessage } from "./utils.js";
 import { hasLibraryItem, startLibrarySync, toggleLibraryItem, upsertLibraryItem } from "./library.js";
 import { getProviderCountry, setProviderCountry } from "./provider-region.js";
+import { getPlaybackProgress } from "./recommendations.js";
 
 const $ = (id) => document.getElementById(id);
 const route = getRoute();
@@ -317,7 +318,13 @@ function render(details, externalCertification = "", externalCertificationNote =
   const related=recommendations.length?recommendations:similar;
   const backdropPath=media.backdrop_path || media.poster_path || "";
   const backdropUrl=media.backdrop_path ? getImageUrl(backdropPath,"w1280") : getImageUrl(backdropPath,"w780");
-  const titleWatchUrl=buildWatchUrl(media.id,media.media_type,media.media_type==="tv"?(details.seasons?.find((season)=>season.episode_count>0&&season.season_number>=0)?.season_number??1):null,media.media_type==="tv"?1:null)+(isAnimeTitle(details)?"&anime=1":"");
+  const firstSeason=media.media_type==="tv"?(details.seasons?.find((season)=>season.episode_count>0&&season.season_number>=0)?.season_number??1):null;
+  const progressKey=media.media_type+":"+media.id;
+  const savedProgress=getPlaybackProgress(progressKey);
+  const resumeSeason=media.media_type==="tv"?Number(savedProgress?.season||firstSeason||1):null;
+  const resumeEpisode=media.media_type==="tv"?Number(savedProgress?.episode||1):null;
+  const hasResume=Number(savedProgress?.progress||0)>5;
+  const titleWatchUrl=buildWatchUrl(media.id,media.media_type,resumeSeason,resumeEpisode,hasResume?savedProgress.progress:null)+(isAnimeTitle(details)?"&anime=1":"");
 
   document.title=title+" · Vivid Cinema";
   const country=getInitialCountry(details);
@@ -328,7 +335,7 @@ function render(details, externalCertification = "", externalCertificationNote =
       '<div class="vivid-title-copy"><span class="vivid-title-kicker">'+(media.media_type==="tv"?"TV SERIES":"MOVIE")+'</span><h1>'+escapeHtml(title)+'</h1>'+
       '<div class="vivid-title-meta"><span>'+escapeHtml(year)+'</span>'+(runtime?'<i></i><span>'+escapeHtml(runtime)+'</span>':"")+'<i></i><span>★ '+rating+'</span></div>'+
       '<div class="vivid-title-genres">'+genres+'</div><p>'+escapeHtml(media.overview||"No synopsis is available for this title yet.")+'</p>'+
-      '<div class="vivid-title-actions"><a class="vivid-button vivid-button--primary" href="'+escapeHtml(titleWatchUrl)+'"><i class="bi bi-play-fill"></i> Watch now</a>'+(firstTrailer?'<button class="vivid-button vivid-button--secondary" id="hero-trailer" type="button"><i class="bi bi-play-circle"></i> Watch trailer</button>':"")+'<a class="vivid-button vivid-button--ghost" href="home.html"><i class="bi bi-arrow-left"></i> Browse more</a></div>'+renderLibraryActions()+'</div></div>'+
+      '<div class="vivid-title-actions"><a class="vivid-button vivid-button--primary" href="'+escapeHtml(titleWatchUrl)+'"><i class="bi bi-play-fill"></i> '+(hasResume?"Resume":"Watch now")+'</a>'+(firstTrailer?'<button class="vivid-button vivid-button--secondary" id="hero-trailer" type="button"><i class="bi bi-play-circle"></i> Watch trailer</button>':"")+'<a class="vivid-button vivid-button--ghost" href="home.html"><i class="bi bi-arrow-left"></i> Browse more</a></div>'+renderLibraryActions()+'</div></div>'+
     '</div></section>'+
     renderInformation(details, country, externalCertification, externalCertificationNote)+
     renderTrailerSection(details)+
