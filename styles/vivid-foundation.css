@@ -1,6 +1,6 @@
 /* Vivid Cinema — shared design tokens. Kept intentionally small so page-specific CSS stays composable. */
 :root{
-  --vivid-bg:#07090d;
+  --vivid-bg:#000000;
   --vivid-surface:#1c1c1e;
   --vivid-surface-strong:#242426;
   --vivid-text:#f5f5f7;
@@ -12,6 +12,11 @@
   --vivid-radius-md:12px;
   --vivid-radius-lg:14px;
   --vivid-gutter:16px;
+  --vivid-page-gutter:16px;
+  --vivid-section-title-size:22px;
+  --vivid-card-title-size:15px;
+  --vivid-card-meta-size:13px;
+  --vivid-search-text-size:16px;
   --vivid-shell-height:64px;
   --vivid-mobile-nav-height:64px;
   --vivid-ui-blur:18px;
