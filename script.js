@@ -426,7 +426,7 @@ async function loadHome(){
  const loadSecondary=async()=>{
    // Keep secondary shelves from creating a seven-request burst. Each small
    // batch can paint before the next one starts, keeping scrolling responsive.
-   for(const batch of [["topRatedMovies","popularTv"],["topRatedTv"],["upcoming","newReleases"],["netflix","primeVideo"],["hboMax","disneyPlus"],["appleTvPlus","hulu"],["paramountPlus"]]){
+   for(const batch of [["top10","topRatedMovies","popularTv"],["topRatedTv"],["upcoming","newReleases"],["netflix","primeVideo"],["hboMax","disneyPlus"],["appleTvPlus","hulu"],["paramountPlus"]]){
      try{await loadSectionBatch(batch)}catch(error){console.warn("Vivid secondary home load failed:",batch,error)}
      await new Promise(resolve=>window.setTimeout(resolve,80));
    }
