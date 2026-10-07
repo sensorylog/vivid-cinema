@@ -14,7 +14,10 @@ const VIDSRC_ORIGIN = (() => {
   try { return new URL(VIVID_CONFIG.api.vidsrcEmbedBaseUrl || "https://vidsrc.cc").origin; }
   catch { return "https://vidsrc.cc"; }
 })();
-const CINEPRO_ORIGIN = "https://ui.cinepro.cc";
+const CINEPRO_ORIGIN = (() => {
+  try { return new URL(VIVID_CONFIG.api.cineproBaseUrl || "https://ui.cinepro.cc").origin; }
+  catch { return "https://ui.cinepro.cc"; }
+})();
 let media = null;
 let details = null;
 let currentParams = null;
@@ -67,7 +70,7 @@ function buildVidsrcEmbedUrl(params) {
 }
 
 function buildCineproUrl(params) {
-  const base = "https://ui.cinepro.cc/watch/" + (params.type === "tv" ? "tv/" : "movie/") + encodeURIComponent(tmdbId || params.id);
+  const base = String(VIVID_CONFIG.api.cineproBaseUrl || "https://ui.cinepro.cc").replace(/\/+$/, "") + "/watch/" + (params.type === "tv" ? "tv/" : "movie/") + encodeURIComponent(tmdbId || params.id);
   if (params.type === "tv") return base + "?s=" + params.season + "&e=" + params.episode;
   return base;
 }
