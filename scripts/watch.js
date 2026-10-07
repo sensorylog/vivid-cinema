@@ -153,7 +153,7 @@ function updateSourceLabel() {
       ? "Try alternate source"
       : activeSource === "vidsrc"
         ? "Try MultiEmbed VIP"
-        : "Try primary source";
+        : (multiembedTimedOut ? "Retry MultiEmbed VIP" : "Try primary source");
   }
 }
 
@@ -164,6 +164,7 @@ function setPlayerSource(source, params, startAt = 0) {
   activeSource = source;
   multiembedTimedOut = false;
   const status = $("player-status");
+  if (!["vidapi", "vidsrc", "multiembed"].includes(source)) return;
   if (source === "vidsrc") {
     if (!hasFallbackId()) return;
     primaryHealthy = false;
@@ -396,6 +397,8 @@ async function prepareNextEpisode(params) {
 }
 
 function handlePlayerEvent(event) {
+  const player = $("vidapi-player");
+  if (!player || event.source !== player.contentWindow) return;
   const isVidapi = VIDAPI_ORIGINS.has(event.origin);
   const isFallback = event.origin === VIDSRC_ORIGIN || event.origin === MULTIEMBED_ORIGIN;
   if (!isVidapi && !isFallback) return;
