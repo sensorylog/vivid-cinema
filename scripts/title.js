@@ -81,6 +81,16 @@ function renderTrailerSection(details) {
     '</div></section>';
 }
 
+function isAnimeTitle(details) {
+  const genres = Array.isArray(details?.genres) ? details.genres : [];
+  const animation = genres.some(g => Number(g?.id) === 16 || String(g?.name || "").toLowerCase() === "animation");
+  return animation && String(details?.original_language || "").toLowerCase() === "ja";
+}
+
+function renderAnimeProvider() {
+  return '<section class="vivid-title-section vivid-anime-provider"><div class="vivid-section-heading"><div><span>WATCH ANIME</span><h2>Powered by Yenime</h2></div></div><div class="vivid-anime-provider-card"><i class="bi bi-stars" aria-hidden="true"></i><div><strong>Yenime is the anime player.</strong><p>Anime playback on Vivid uses Yenime only. Choose an episode above and Vivid will open the Yenime embed.</p></div><span>YENIME</span></div></section>';
+}
+
 function renderProviderGroups(details, countryCode) {
   const country = details["watch/providers"]?.results?.[countryCode];
   const availableCountries = details["watch/providers"]?.results || {};
@@ -230,7 +240,7 @@ function render(details) {
     renderTrailerSection(details)+
     '<section class="vivid-title-section"><div class="vivid-section-heading"><div><span>CAST</span><h2>People in the story</h2></div></div><div class="vivid-cast-grid">'+
       (cast.length?cast.map((person)=>'<a class="vivid-cast" href="person.html?id='+encodeURIComponent(person.id)+'" aria-label="View '+escapeHtml(person.name)+'"><img loading="lazy" src="'+getImageUrl(person.profile_path,"w185")+'" alt="'+escapeHtml(person.name)+'"><strong>'+escapeHtml(person.name)+'</strong><small>'+escapeHtml(person.character||"Cast")+'</small></a>').join(""):'<p class="vivid-muted">Cast information is unavailable.</p>')+
-    '</div></section>'+renderSeasons(details)+renderProviderGroups(details,country)+
+    '</div></section>'+renderSeasons(details)+(isAnimeTitle(details)?renderAnimeProvider():renderProviderGroups(details,country))+
     '<section class="vivid-title-section"><div class="vivid-section-heading"><div><span>RECOMMENDED</span><h2>More like this</h2></div></div><div class="vivid-similar" id="recommendation-rail">'+renderRecommendationCards(related)+'</div></section>';
 
   upsertLibraryItem("history",libraryItem());
