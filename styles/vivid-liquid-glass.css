@@ -507,3 +507,241 @@ html.vivid-ios-standalone .vivid-discovery-search input{
   mix-blend-mode:normal!important;
   font-size:16px!important;
 }
+
+
+/* ========================================================================== */
+/* VIVID MATERIAL SYSTEM v4 — hierarchy-first glass                          */
+/* Glass belongs to the floating control layer. Content stays calm/solid.    */
+/* ========================================================================== */
+:root{
+  --vivid-glass-regular:rgba(18,20,25,.58);
+  --vivid-glass-regular-light:rgba(255,255,255,.70);
+  --vivid-glass-border:rgba(255,255,255,.24);
+  --vivid-glass-border-light:rgba(17,18,22,.11);
+  --vivid-glass-highlight:rgba(255,255,255,.30);
+  --vivid-glass-shadow:0 18px 60px rgba(0,0,0,.28);
+  --vivid-glass-shadow-light:0 18px 55px rgba(17,18,22,.11);
+}
+
+/* Content layer: deliberately quiet. No glass-on-glass card stacks. */
+body.vivid-atmosphere :is(
+  .vivid-card,
+  .vivid-feature-card,
+  .vivid-discovery-card,
+  .vivid-discovery-poster,
+  .vivid-collection-card,
+  .vivid-library-card,
+  .vivid-watch-rec-card,
+  .vivid-provider-group,
+  .vivid-filter-panel,
+  .vivid-collection-toolbar,
+  .vivid-library-tabs,
+  .account-card,
+  .auth-container,
+  .vivid-search-panel,
+  .vivid-discovery-empty,
+  .vivid-discovery-error,
+  #collection-empty
+){
+  backdrop-filter:none!important;
+  -webkit-backdrop-filter:none!important;
+  animation:none!important;
+}
+
+/* Flat content surfaces — depth comes from spacing, not fake transparency. */
+body.vivid-atmosphere :is(
+  .vivid-card,
+  .vivid-feature-card,
+  .vivid-discovery-card,
+  .vivid-collection-card,
+  .vivid-library-card,
+  .vivid-watch-rec-card,
+  .account-card,
+  .auth-container,
+  .vivid-filter-panel,
+  .vivid-collection-toolbar,
+  .vivid-library-tabs
+){
+  background:var(--vivid-surface-solid)!important;
+  border-color:var(--vivid-border)!important;
+  box-shadow:var(--vivid-shadow-sm)!important;
+}
+
+/* REAL GLASS: navigation is the floating functional layer. */
+body.vivid-atmosphere :is(
+  .vivid-topbar,
+  .vivid-discovery-nav,
+  .vivid-title-nav,
+  .vivid-library-nav,
+  .vivid-watch-nav,
+  .vivid-unified-header
+){
+  background:var(--vivid-glass-regular)!important;
+  border:1px solid var(--vivid-glass-border)!important;
+  border-top-color:rgba(255,255,255,.16)!important;
+  box-shadow:
+    0 18px 60px rgba(0,0,0,.22),
+    inset 0 1px 0 var(--vivid-glass-highlight)!important;
+  backdrop-filter:blur(34px) saturate(180%) contrast(1.04)!important;
+  -webkit-backdrop-filter:blur(34px) saturate(180%) contrast(1.04)!important;
+}
+
+/* A restrained inner highlight makes the material read as glass, not gray plastic. */
+body.vivid-atmosphere :is(
+  .vivid-topbar,
+  .vivid-discovery-nav,
+  .vivid-title-nav,
+  .vivid-library-nav,
+  .vivid-watch-nav,
+  .vivid-unified-header
+)::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  border-radius:inherit;
+  pointer-events:none;
+  background:
+    linear-gradient(180deg,rgba(255,255,255,.10),transparent 38%),
+    radial-gradient(120% 180% at 50% -90%,rgba(255,255,255,.16),transparent 58%);
+  opacity:.72;
+}
+
+/* Search / notifications are transient floating glass — not content cards. */
+body.vivid-atmosphere :is(
+  .vivid-search-window,
+  .vivid-search-dialog,
+  .vivid-release-popover,
+  .vivid-notification-popover
+){
+  background:rgba(18,20,25,.74)!important;
+  border:1px solid rgba(255,255,255,.26)!important;
+  box-shadow:0 28px 90px rgba(0,0,0,.46),inset 0 1px 0 rgba(255,255,255,.25)!important;
+  backdrop-filter:blur(42px) saturate(180%) contrast(1.05)!important;
+  -webkit-backdrop-filter:blur(42px) saturate(180%) contrast(1.05)!important;
+}
+
+/* Small controls can use glass when they float over cinematic content. */
+body.vivid-atmosphere :is(
+  .vivid-hero-control,
+  .vivid-hero-tools button,
+  .vivid-rail-controls button,
+  .vivid-notification-button,
+  .vivid-page-back
+){
+  background:rgba(255,255,255,.10)!important;
+  border:1px solid rgba(255,255,255,.24)!important;
+  box-shadow:0 8px 26px rgba(0,0,0,.20),inset 0 1px 0 rgba(255,255,255,.22)!important;
+  backdrop-filter:blur(20px) saturate(170%)!important;
+  -webkit-backdrop-filter:blur(20px) saturate(170%)!important;
+}
+
+/* Selection is a fill, not another glass layer. */
+body.vivid-atmosphere :is(
+  .vivid-navlinks a[aria-current="true"],
+  .vivid-navlinks a[aria-current="page"],
+  .vivid-discovery-nav nav a.is-active,
+  .vivid-library-tabs button.is-active,
+  .vivid-mode-chip.is-active,
+  .vivid-provider-chip.is-active
+){
+  backdrop-filter:none!important;
+  -webkit-backdrop-filter:none!important;
+  background:rgba(255,255,255,.15)!important;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.20)!important;
+}
+
+/* Light mode: same material rules, different optical balance. */
+html[data-vivid-theme="light"] body.vivid-atmosphere :is(
+  .vivid-topbar,
+  .vivid-discovery-nav,
+  .vivid-title-nav,
+  .vivid-library-nav,
+  .vivid-watch-nav,
+  .vivid-unified-header
+){
+  background:var(--vivid-glass-regular-light)!important;
+  border-color:var(--vivid-glass-border-light)!important;
+  border-top-color:rgba(255,255,255,.96)!important;
+  box-shadow:var(--vivid-glass-shadow-light),inset 0 1px 0 rgba(255,255,255,.96)!important;
+  backdrop-filter:blur(34px) saturate(155%) contrast(1.02)!important;
+  -webkit-backdrop-filter:blur(34px) saturate(155%) contrast(1.02)!important;
+}
+html[data-vivid-theme="light"] body.vivid-atmosphere :is(
+  .vivid-topbar,
+  .vivid-discovery-nav,
+  .vivid-title-nav,
+  .vivid-library-nav,
+  .vivid-watch-nav,
+  .vivid-unified-header
+)::before{
+  background:
+    linear-gradient(180deg,rgba(255,255,255,.72),transparent 42%),
+    radial-gradient(120% 180% at 50% -90%,rgba(255,255,255,.82),transparent 58%);
+  opacity:.72;
+}
+html[data-vivid-theme="light"] body.vivid-atmosphere :is(
+  .vivid-search-window,
+  .vivid-search-dialog,
+  .vivid-release-popover,
+  .vivid-notification-popover
+){
+  background:rgba(255,255,255,.82)!important;
+  border-color:rgba(17,18,22,.12)!important;
+  box-shadow:0 28px 90px rgba(17,18,22,.16),inset 0 1px 0 rgba(255,255,255,.98)!important;
+  backdrop-filter:blur(42px) saturate(145%) contrast(1.02)!important;
+  -webkit-backdrop-filter:blur(42px) saturate(145%) contrast(1.02)!important;
+}
+html[data-vivid-theme="light"] body.vivid-atmosphere :is(
+  .vivid-hero-control,
+  .vivid-hero-tools button,
+  .vivid-rail-controls button,
+  .vivid-notification-button,
+  .vivid-page-back
+){
+  background:rgba(255,255,255,.68)!important;
+  border-color:rgba(17,18,22,.12)!important;
+  color:#111216!important;
+  box-shadow:0 8px 26px rgba(17,18,22,.09),inset 0 1px 0 rgba(255,255,255,.96)!important;
+  backdrop-filter:blur(20px) saturate(145%)!important;
+  -webkit-backdrop-filter:blur(20px) saturate(145%)!important;
+}
+html[data-vivid-theme="light"] body.vivid-atmosphere :is(
+  .vivid-navlinks a[aria-current="true"],
+  .vivid-navlinks a[aria-current="page"],
+  .vivid-discovery-nav nav a.is-active,
+  .vivid-library-tabs button.is-active,
+  .vivid-mode-chip.is-active,
+  .vivid-provider-chip.is-active
+){
+  background:#111216!important;
+  color:#fff!important;
+  border-color:#111216!important;
+  box-shadow:none!important;
+}
+
+/* Don't fake glass when the device asks for reduced transparency. */
+@media(prefers-reduced-transparency:reduce){
+  body.vivid-atmosphere :is(
+    .vivid-topbar,
+    .vivid-discovery-nav,
+    .vivid-title-nav,
+    .vivid-library-nav,
+    .vivid-watch-nav,
+    .vivid-unified-header,
+    .vivid-search-window,
+    .vivid-search-dialog,
+    .vivid-release-popover,
+    .vivid-notification-popover,
+    .vivid-hero-control,
+    .vivid-hero-tools button,
+    .vivid-rail-controls button,
+    .vivid-notification-button,
+    .vivid-page-back
+  ){
+    backdrop-filter:none!important;
+    -webkit-backdrop-filter:none!important;
+    background:var(--vivid-surface-solid)!important;
+    border-color:var(--vivid-border)!important;
+    box-shadow:var(--vivid-shadow-md)!important;
+  }
+}
