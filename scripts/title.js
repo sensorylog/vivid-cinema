@@ -224,6 +224,8 @@ function render(details) {
   const recommendations=normalizeResults(details.recommendations?.results||[],media.media_type).slice(0,12);
   const similar=normalizeResults(details.similar?.results||[],media.media_type).slice(0,12);
   const related=recommendations.length?recommendations:similar;
+  const isAnime=isAnimeTitle(details);
+  const watchUrl=watchUrl+(isAnime?"&anime=1":"");
 
   document.title=title+" · Vivid Cinema";
   const country=getInitialCountry(details);
