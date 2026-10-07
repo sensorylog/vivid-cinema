@@ -100,16 +100,38 @@ function createUpdateControl(registration) {
   button.dataset.vividUpdate = "true";
   button.textContent = "Update Vivid";
   button.hidden = true;
+  button.setAttribute("aria-label", "Update Vivid Cinema");
   document.body.appendChild(button);
   updateControl = button;
 
-  button.addEventListener("click", () => {
-    if (!registration.waiting) return;
+  const markDone = () => {
+    try { localStorage.setItem("vivid:update-prompt:v1", "1"); } catch {}
+    button.hidden = true;
+  };
+
+  const show = () => {
+    try {
+      if (localStorage.getItem("vivid:update-prompt:v1") === "1") return;
+    } catch {}
+    button.hidden = false;
+  };
+
+  button.addEventListener("click", async () => {
+    if (button.disabled) return;
     button.disabled = true;
-    registration.waiting.postMessage({ type: "SKIP_WAITING" });
+    button.textContent = "Updating…";
+    markDone();
+    try { await registration.update(); } catch {}
+    if (registration.waiting) {
+      registration.waiting.postMessage({ type: "SKIP_WAITING" });
+      return;
+    }
+    window.location.reload();
   });
 
-  const show = () => { button.hidden = false; };
+  // Existing controlled visitors get this migration prompt once.
+  // First-time visitors are never interrupted by it.
+  if (navigator.serviceWorker.controller) show();
   if (registration.waiting) show();
 
   registration.addEventListener("updatefound", () => {
