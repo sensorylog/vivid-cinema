@@ -193,8 +193,12 @@ function setPlayerSource(source, params, startAt = 0) {
     }
     fallbackTimer = window.setTimeout(() => {
       if (activeSource !== "yenime") return;
-      if (hasFallbackId()) triggerVidsrcFallback("yenime_timeout");
-      else setPlayerSource("vidapi", params, startAt);
+      const statusNode = $("player-status");
+      if (statusNode) {
+        statusNode.textContent = "Yenime is taking longer than expected. Anime playback stays on Yenime.";
+        statusNode.classList.add("is-warning");
+        statusNode.hidden = false;
+      }
     }, YENIME_FALLBACK_MS);
   } else if (source === "vidsrc") {
     if (!hasFallbackId()) return;
@@ -336,7 +340,15 @@ function renderShell(params) {
       }, 450);
     });
     player.addEventListener("error", () => {
-      if (activeSource === "vidapi" || activeSource === "yenime") triggerVidsrcFallback("iframe_error");
+      if (activeSource === "vidapi") triggerVidsrcFallback("iframe_error");
+      else if (activeSource === "yenime") {
+        const statusNode = $("player-status");
+        if (statusNode) {
+          statusNode.textContent = "Yenime could not load this anime episode.";
+          statusNode.classList.add("is-warning");
+          statusNode.hidden = false;
+        }
+      }
     });
     // Metadata is loaded asynchronously. Start with the existing VidAPI path so
     // non-anime playback is unchanged, then switch to Yenime when anime + MAL resolve.
@@ -348,9 +360,9 @@ function renderShell(params) {
         if (activeSource === "vidapi") {
           next = animeProvider && malId ? "yenime" : hasFallbackId() ? "vidsrc" : "vidapi";
         } else if (activeSource === "yenime") {
-          next = hasFallbackId() ? "vidsrc" : "vidapi";
+          next = "yenime";
         } else {
-          next = "vidapi";
+          next = animeProvider ? "yenime" : "vidapi";
         }
         setPlayerSource(next, params, resumeAt);
       });
@@ -510,10 +522,23 @@ async function load() {
     hydrateWatchDetails(currentParams);
     // Metadata arrived after shell. Anime must actually enter Yenime now;
     // otherwise the initial VidAPI iframe would keep running and Yenime would never be used.
-    if (animeProvider && malId && activeSource === "vidapi") {
+    if (animeProvider) {
       const saved = getPlaybackProgress(progressKey());
       const resumeAt = Number(saved?.progress || route.params.get("startAt") || 0);
-      setPlayerSource("yenime", currentParams, resumeAt);
+      if (malId) {
+        setPlayerSource("yenime", currentParams, resumeAt);
+      } else {
+        const player = $("vidapi-player");
+        if (player) player.src = "";
+        const status = $("player-status");
+        if (status) {
+          status.textContent = "Yenime could not match this anime to a MAL ID.";
+          status.classList.add("is-warning");
+          status.hidden = false;
+        }
+        activeSource = "yenime";
+        updateSourceLabel();
+      }
     } else if (hasFallbackId() && activeSource === "vidapi" && !primaryHealthy && !fallbackTimer) {
       const saved = getPlaybackProgress(progressKey());
       const resumeAt = Number(saved?.progress || route.params.get("startAt") || 0);
