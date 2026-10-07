@@ -216,12 +216,14 @@ function render(details) {
   const recommendations=normalizeResults(details.recommendations?.results||[],media.media_type).slice(0,12);
   const similar=normalizeResults(details.similar?.results||[],media.media_type).slice(0,12);
   const related=recommendations.length?recommendations:similar;
+  const backdropPath=media.backdrop_path || media.poster_path || "";
+  const backdropUrl=media.backdrop_path ? getImageUrl(backdropPath,"w1280") : getImageUrl(backdropPath,"w780");
   const titleWatchUrl=buildWatchUrl(media.id,media.media_type,media.media_type==="tv"?(details.seasons?.find((season)=>season.episode_count>0&&season.season_number>=0)?.season_number??1):null,media.media_type==="tv"?1:null)+(isAnimeTitle(details)?"&anime=1":"");
 
   document.title=title+" · Vivid Cinema";
   const country=getInitialCountry(details);
   $("title-content").innerHTML=
-    '<section class="vivid-title-backdrop"><img class="vivid-title-backdrop-image" src="'+escapeHtml(getImageUrl(media.backdrop_path,"w1280"))+'" alt="" aria-hidden="true" loading="eager" decoding="async" onerror="this.remove()"><div class="vivid-title-backdrop-overlay"></div><div class="vivid-title-backdrop-label">'+(media.media_type==="tv"?"SERIES":"FEATURE")+'</div></section>'+
+    '<section class="vivid-title-backdrop"><img class="vivid-title-backdrop-image" src="'+escapeHtml(backdropUrl)+'" alt="" aria-hidden="true" loading="eager" decoding="async" onerror="this.remove()"><div class="vivid-title-backdrop-overlay"></div><div class="vivid-title-backdrop-label">'+(media.media_type==="tv"?"SERIES":"FEATURE")+'</div></section>'+
     '<section class="vivid-title-info"><div class="vivid-title-info-inner">'+
       '<div class="vivid-title-poster"><img src="'+getImageUrl(media.poster_path,"w500")+'" alt="'+escapeHtml(title)+' poster"></div>'+
       '<div class="vivid-title-copy"><span class="vivid-title-kicker">'+(media.media_type==="tv"?"TV SERIES":"MOVIE")+'</span><h1>'+escapeHtml(title)+'</h1>'+
