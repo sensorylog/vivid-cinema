@@ -1,0 +1,377 @@
+/* ==========================================================================
+   HOME CINEMA MOMENT — personality + realism pass (final)
+   Only this decorative beat. Everything else untouched.
+   ========================================================================== */
+
+.vivid-home-breathe{
+  min-height: 520px !important;
+}
+.vivid-home-breathe-scene{
+  min-height: 460px !important;
+  width: min(900px, 94vw) !important;
+}
+
+/* TV — calmer float, richer presence */
+.vivid-home-tv{
+  z-index: 3 !important;
+  top: 22px !important;
+  width: min(520px, 70vw) !important;
+  filter: drop-shadow(0 28px 50px rgba(0,0,0,.38)) !important;
+  animation: vivid-tv-float 6.4s ease-in-out infinite !important;
+}
+.vivid-home-tv:before{
+  content: "" !important;
+  position: absolute !important;
+  z-index: -1 !important;
+  left: 10% !important;
+  right: 10% !important;
+  bottom: 6px !important;
+  height: 36px !important;
+  border-radius: 50% !important;
+  background: radial-gradient(ellipse, rgba(140,165,255,.22), transparent 70%) !important;
+  filter: blur(20px) !important;
+  animation: vivid-tv-aura 5.2s ease-in-out infinite !important;
+}
+.vivid-home-tv-screen{
+  border-width: 8px !important;
+  border-color: #14171d !important;
+  border-radius: 22px !important;
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,.1),
+    inset 0 1px 0 rgba(255,255,255,.1),
+    0 20px 50px rgba(0,0,0,.38) !important;
+}
+.vivid-home-tv-stand{
+  width: 120px !important;
+  height: 26px !important;
+  background: linear-gradient(180deg, #2a2e38, #0e1014) !important;
+}
+
+/* Viewer — staged as a person sitting slightly in front / to the side */
+.vivid-home-viewer{
+  position: absolute !important;
+  z-index: 6 !important;
+  right: calc(50% - 420px) !important;
+  top: 128px !important;
+  width: 188px !important;
+  height: 220px !important;
+  transform: scale(.8) !important;
+  transform-origin: 50% 100% !important;
+  animation: vivid-viewer-idle 5.2s ease-in-out infinite !important;
+  filter: drop-shadow(0 18px 22px rgba(0,0,0,.28));
+}
+
+/* Head — warmer skin, hair silhouette, cheeks, better eyes */
+.vivid-home-viewer-head{
+  position: absolute !important;
+  top: 2px !important;
+  left: 58px !important;
+  width: 72px !important;
+  height: 72px !important;
+  border-radius: 50% !important;
+  background:
+    radial-gradient(circle at 32% 28%, rgba(255,220,190,.35), transparent 42%),
+    linear-gradient(155deg, #e0b08a, #c07a55 55%, #a85f42) !important;
+  border: 2px solid rgba(80,35,25,.28) !important;
+  box-shadow:
+    inset -10px -9px 0 rgba(120,50,35,.14),
+    inset 4px 6px 10px rgba(255,230,200,.18),
+    -6px 8px 18px rgba(0,0,0,.22) !important;
+  transform: rotate(-9deg) !important;
+  transform-origin: 50% 80% !important;
+  z-index: 5 !important;
+  animation: vivid-viewer-head 7s ease-in-out infinite !important;
+}
+/* Hair */
+.vivid-home-viewer-head:before{
+  content: "" !important;
+  position: absolute !important;
+  left: 5px !important;
+  top: -6px !important;
+  width: 62px !important;
+  height: 28px !important;
+  border-radius: 60% 55% 30% 35% !important;
+  background: linear-gradient(180deg, #1a1c22, #0e1014) !important;
+  transform: rotate(-6deg) !important;
+  box-shadow: 2px 2px 0 rgba(0,0,0,.15) !important;
+}
+/* Soft cheek / nose hint */
+.vivid-home-viewer-head:after{
+  content: "" !important;
+  position: absolute !important;
+  left: 28px !important;
+  top: 34px !important;
+  width: 14px !important;
+  height: 10px !important;
+  border-radius: 50% !important;
+  background: radial-gradient(circle, rgba(200,90,70,.22), transparent 70%) !important;
+  pointer-events: none !important;
+}
+
+/* Eyes — white + pupil, blink */
+.vivid-home-viewer-eye{
+  position: absolute !important;
+  top: 30px !important;
+  width: 11px !important;
+  height: 9px !important;
+  border-radius: 50% !important;
+  background: #f5f2eb !important;
+  box-shadow: inset 0 -1px 0 rgba(0,0,0,.12), 0 0 0 1px rgba(0,0,0,.1) !important;
+  overflow: hidden !important;
+  animation: vivid-viewer-blink 4.8s ease-in-out infinite !important;
+}
+.vivid-home-viewer-eye.eye-left{
+  left: 14px !important;
+  top: 29px !important;
+  transform: rotate(-4deg) !important;
+  animation-delay: 0s !important;
+  background:
+    radial-gradient(circle at 55% 48%, #1a1c22 0 3.2px, transparent 3.4px),
+    #f5f2eb !important;
+}
+.vivid-home-viewer-eye.eye-right{
+  right: 22px !important;
+  left: auto !important;
+  top: 30px !important;
+  transform: rotate(-4deg) !important;
+  animation-delay: .12s !important;
+  background:
+    radial-gradient(circle at 45% 48%, #1a1c22 0 3.2px, transparent 3.4px),
+    #f5f2eb !important;
+}
+
+/* Mouth — expressive chew */
+.vivid-home-viewer-mouth{
+  position: absolute !important;
+  left: 30px !important;
+  top: 48px !important;
+  width: 14px !important;
+  height: 8px !important;
+  border: none !important;
+  border-radius: 0 0 14px 14px !important;
+  background: #6a2e28 !important;
+  box-shadow: inset 0 2px 3px rgba(0,0,0,.25) !important;
+  transform-origin: 50% 0 !important;
+  animation: vivid-viewer-chew 1.05s ease-in-out infinite !important;
+}
+
+/* Body — soft hoodie feel */
+.vivid-home-viewer-body{
+  position: absolute !important;
+  left: 40px !important;
+  top: 62px !important;
+  width: 100px !important;
+  height: 98px !important;
+  border-radius: 46px 46px 26px 26px !important;
+  background:
+    linear-gradient(160deg, #2c323e 0%, #161a22 60%, #0f1218 100%) !important;
+  border: 1px solid rgba(255,255,255,.09) !important;
+  box-shadow:
+    0 16px 30px rgba(0,0,0,.28),
+    inset 0 1px 0 rgba(255,255,255,.06) !important;
+}
+.vivid-home-viewer-body:before{
+  content: "" !important;
+  position: absolute !important;
+  left: 18px !important;
+  top: 16px !important;
+  width: 64px !important;
+  height: 38px !important;
+  border-radius: 50% !important;
+  background:
+    radial-gradient(circle at 25% 30%, rgba(255,255,255,.12), transparent 4px),
+    linear-gradient(150deg, rgba(255,255,255,.08), transparent 55%) !important;
+}
+
+/* Arms */
+.vivid-home-viewer-arm{
+  position: absolute !important;
+  z-index: 4 !important;
+  width: 17px !important;
+  height: 86px !important;
+  border-radius: 999px !important;
+  transform-origin: 50% 10px !important;
+  box-shadow: inset -2px 0 0 rgba(0,0,0,.12) !important;
+}
+.vivid-home-viewer-arm.viewer-arm-left{
+  left: 32px !important;
+  top: 80px !important;
+  transform: rotate(22deg) !important;
+  background: linear-gradient(180deg, #d4a07a, #b87852) !important;
+}
+.vivid-home-viewer-arm.viewer-arm-right{
+  left: 122px !important;
+  top: 78px !important;
+  transform: rotate(-42deg) !important;
+  background: linear-gradient(180deg, #d4a07a, #b87852) !important;
+  animation: vivid-viewer-eat 4.2s cubic-bezier(.3,.7,.2,1) infinite !important;
+}
+.vivid-home-viewer-hand{
+  position: absolute !important;
+  left: -3px !important;
+  bottom: -5px !important;
+  width: 24px !important;
+  height: 24px !important;
+  border-radius: 50% !important;
+  background: linear-gradient(145deg, #e0b08a, #c07a55) !important;
+  box-shadow: 0 2px 4px rgba(0,0,0,.2) !important;
+}
+
+/* Popcorn bucket + kernels */
+.vivid-home-viewer-popcorn{
+  position: absolute !important;
+  z-index: 3 !important;
+  right: 2px !important;
+  top: 138px !important;
+  width: 50px !important;
+  height: 48px !important;
+  border-radius: 6px 6px 12px 12px !important;
+  background: repeating-linear-gradient(90deg, #f4f3f0 0 9px, #1e2128 9px 18px) !important;
+  border: 1px solid rgba(255,255,255,.14) !important;
+  transform: rotate(-6deg) !important;
+  box-shadow: 0 10px 18px rgba(0,0,0,.28) !important;
+  animation: vivid-popcorn-bucket 4.2s ease-in-out infinite !important;
+}
+.vivid-home-viewer-popcorn:before{
+  content: "" !important;
+  position: absolute !important;
+  left: 3px !important;
+  right: 3px !important;
+  top: -16px !important;
+  height: 28px !important;
+  border-radius: 50% !important;
+  background:
+    radial-gradient(circle at 12% 60%, #f7f2e4 0 7px, transparent 8px),
+    radial-gradient(circle at 36% 38%, #f7f2e4 0 8px, transparent 9px),
+    radial-gradient(circle at 58% 58%, #f7f2e4 0 8px, transparent 9px),
+    radial-gradient(circle at 82% 40%, #f7f2e4 0 7px, transparent 8px),
+    radial-gradient(circle at 48% 70%, #efe8d6 0 6px, transparent 7px) !important;
+  animation: vivid-popcorn-kernels 4.2s ease-in-out infinite !important;
+}
+.vivid-home-viewer-popcorn .kernel{
+  display: none;
+}
+
+/* Legs — seated angle */
+.vivid-home-viewer-leg{
+  position: absolute !important;
+  top: 145px !important;
+  width: 36px !important;
+  height: 72px !important;
+  border-radius: 18px 18px 12px 12px !important;
+  background: linear-gradient(180deg, #1c2028, #101318) !important;
+  transform-origin: top center !important;
+  box-shadow: 0 8px 14px rgba(0,0,0,.2) !important;
+}
+.vivid-home-viewer-leg.leg-left{
+  left: 46px !important;
+  transform: rotate(26deg) !important;
+}
+.vivid-home-viewer-leg.leg-right{
+  left: 96px !important;
+  transform: rotate(-20deg) !important;
+}
+
+/* Copy stays readable above everything */
+.vivid-home-breathe-copy{
+  top: 360px !important;
+  z-index: 8 !important;
+}
+
+/* ——— Keyframes ——— */
+@keyframes vivid-tv-float{
+  0%, 100%{ transform: translateX(-50%) translateY(2px) rotate(-.3deg); }
+  50%{ transform: translateX(-50%) translateY(-5px) rotate(.3deg); }
+}
+@keyframes vivid-tv-aura{
+  0%, 100%{ opacity: .4; transform: scaleX(.9); }
+  50%{ opacity: .9; transform: scaleX(1.08); }
+}
+@keyframes vivid-viewer-idle{
+  0%, 100%{ transform: scale(.8) translateY(2px) rotate(1.2deg); }
+  40%{ transform: scale(.8) translateY(-3px) rotate(-.8deg); }
+  70%{ transform: scale(.8) translateY(1px) rotate(.6deg); }
+}
+@keyframes vivid-viewer-head{
+  0%, 100%{ transform: rotate(-9deg) translateY(0); }
+  35%{ transform: rotate(-12deg) translateY(1px); }
+  65%{ transform: rotate(-6deg) translateY(-1px); }
+}
+@keyframes vivid-viewer-blink{
+  0%, 42%, 48%, 100%{ transform: scaleY(1); }
+  45%{ transform: scaleY(.08); }
+}
+@keyframes vivid-viewer-chew{
+  0%, 100%{ transform: scaleY(1) scaleX(1); }
+  30%{ transform: scaleY(.35) scaleX(1.15); }
+  55%{ transform: scaleY(1.2) scaleX(.9); }
+  75%{ transform: scaleY(.55) scaleX(1.05); }
+}
+@keyframes vivid-viewer-eat{
+  0%, 18%, 100%{ transform: rotate(-42deg) translate(0, 0); }
+  28%{ transform: rotate(-58deg) translate(-4px, 6px); }
+  38%{ transform: rotate(-78deg) translate(-8px, 14px); }
+  48%{ transform: rotate(-95deg) translate(-6px, 10px); }
+  58%{ transform: rotate(-70deg) translate(-2px, 2px); }
+  68%{ transform: rotate(-55deg) translate(0, 0); }
+  78%{ transform: rotate(-42deg) translate(0, 0); }
+}
+@keyframes vivid-popcorn-bucket{
+  0%, 25%, 100%{ transform: rotate(-6deg); }
+  35%{ transform: rotate(-14deg) translateY(2px); }
+  45%{ transform: rotate(-4deg); }
+}
+@keyframes vivid-popcorn-kernels{
+  0%, 30%, 100%{ transform: translateY(0) scale(1); }
+  38%{ transform: translateY(-3px) scale(1.04); }
+  48%{ transform: translateY(1px) scale(.97); }
+}
+
+/* Mobile */
+@media (max-width: 760px){
+  .vivid-home-breathe{ min-height: 500px !important; }
+  .vivid-home-tv{ width: min(400px, 78vw) !important; }
+  .vivid-home-viewer{
+    right: calc(50% - 250px) !important;
+    top: 138px !important;
+    transform: scale(.66) !important;
+    animation-name: vivid-viewer-idle-sm !important;
+  }
+  .vivid-home-breathe-copy{ top: 340px !important; }
+  @keyframes vivid-viewer-idle-sm{
+    0%, 100%{ transform: scale(.66) translateY(2px) rotate(1.2deg); }
+    40%{ transform: scale(.66) translateY(-3px) rotate(-.8deg); }
+    70%{ transform: scale(.66) translateY(1px) rotate(.6deg); }
+  }
+}
+@media (max-width: 520px){
+  .vivid-home-breathe{ min-height: 490px !important; }
+  .vivid-home-tv{ width: min(340px, 84vw) !important; top: 16px !important; }
+  .vivid-home-viewer{
+    right: calc(50% - 168px) !important;
+    top: 128px !important;
+    transform: scale(.56) !important;
+    animation-name: vivid-viewer-idle-xs !important;
+  }
+  .vivid-home-breathe-copy{ top: 320px !important; padding-inline: 14px; }
+  @keyframes vivid-viewer-idle-xs{
+    0%, 100%{ transform: scale(.56) translateY(2px) rotate(1deg); }
+    40%{ transform: scale(.56) translateY(-2px) rotate(-.6deg); }
+    70%{ transform: scale(.56) translateY(1px) rotate(.4deg); }
+  }
+}
+
+@media (prefers-reduced-motion: reduce){
+  .vivid-home-tv,
+  .vivid-home-tv:before,
+  .vivid-home-tv-screen:after,
+  .vivid-home-viewer,
+  .vivid-home-viewer-head,
+  .vivid-home-viewer-eye,
+  .vivid-home-viewer-mouth,
+  .vivid-home-viewer-arm.viewer-arm-right,
+  .vivid-home-viewer-popcorn,
+  .vivid-home-viewer-popcorn:before{
+    animation: none !important;
+  }
+}
