@@ -1131,9 +1131,17 @@ body.vivid-landing .landing-faq-item{
   body.vivid-landing .landing-header{padding:14px 16px!important}
 }
 
-/* Keep the launch moment visually dominant only for its brief lifetime. */
+/* Reduced-motion users still get the branded launch moment; only the scale/blur motion is removed. */
 @media(prefers-reduced-motion:reduce){
-  body::before,body::after{display:none!important}
+  body::before,
+  body::after{
+    display:block!important;
+    animation:vivid-launch-out 1s linear .15s forwards!important;
+  }
+  body::after{
+    transform:translateY(-50%)!important;
+    filter:none!important;
+  }
 }
 
 
