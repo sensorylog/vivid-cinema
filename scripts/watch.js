@@ -24,8 +24,8 @@ let primaryHealthy = false;
 let fallbackTimer = null;
 let imdbId = "";
 let tmdbId = "";
-const PRIMARY_FALLBACK_MS = 5000;
-const ANIME_FALLBACK_MS = 3200;
+const PRIMARY_FALLBACK_MS = 15000;
+const ANIME_FALLBACK_MS = 15000;
 
 function getParams() {
   const id = route.params.get("id");
@@ -262,7 +262,7 @@ function renderShell(params) {
       current.textContent = "Playback is taking longer than expected. The player is still loading.";
       current.classList.add("is-warning");
     }
-  }, fallbackDelayMs() + 1000);
+  }, fallbackDelayMs() + 2500);
   recordHistory();
   recordBehavior("watch_started", media, { season: params.season, episode: params.episode, resumeAt });
 }
