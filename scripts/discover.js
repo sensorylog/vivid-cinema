@@ -1,5 +1,5 @@
 import { tmdbApi } from "./tmdb.js";
-import { CURATED_CATEGORIES, getCuratedPage } from "./content.js";
+import { BROWSE_CATEGORIES, CURATED_CATEGORIES, getCuratedPage } from "./content.js";
 import { getImageUrl, getMediaUrl, normalizeResults } from "./media.js";
 import { escapeHtml, getErrorMessage } from "./utils.js";
 import { getRoute } from "./routes.js";
@@ -23,7 +23,7 @@ const state = {
   totalPages: 1,
   requestId: 0
 };
-if (!CURATED_CATEGORIES[state.category]) state.category = "";
+if (!CURATED_CATEGORIES[state.category] && !BROWSE_CATEGORIES.some((category) => category.key === state.category)) state.category = "";
 if (["quickEpisode", "episode", "longEpisode"].includes(state.runtime)) state.type = "tv";
 if (["short", "standard", "long"].includes(state.runtime)) state.type = "movie";
 let genres = { movie: [], tv: [] };
@@ -75,28 +75,42 @@ function rankByMood(items) {
 }
 
 
-function renderFeaturedCollections() {
-  const container = $("featured-collections");
+function renderBrowseCategories() {
+  const container = $("browse-category-groups");
   if (!container) return;
-  const entries = Object.entries(CURATED_CATEGORIES).filter(([, category]) => category.featured).slice(0, 8);
-  container.innerHTML = entries.map(([key, category]) =>
-    '<button class="vivid-collection-card" type="button" data-collection="' + escapeHtml(key) + '">' +
-    '<span class="vivid-collection-card-kicker">VIVID</span><strong>' + escapeHtml(category.label) + '</strong><small>' + escapeHtml(category.description) + '</small><span class="vivid-collection-card-arrow"><i class="bi bi-arrow-up-right"></i></span></button>'
-  ).join("");
-  container.querySelectorAll("[data-collection]").forEach((button) => button.addEventListener("click", () => {
-    state.category = button.dataset.collection || "";
-    state.page = 1;
-    const category = CURATED_CATEGORIES[state.category];
-    if (category) {
-      state.type = category.type;
-      document.querySelectorAll("[data-type]").forEach((item) => item.classList.toggle("is-active", item.dataset.type === state.type));
-      $("category-filter").value = state.category;
-      populateGenres();
-    }
-    fetchDiscovery();
-    document.querySelector(".vivid-discovery-results")?.scrollIntoView({ behavior: "smooth", block: "start" });
-  }));
+  const groups = [...new Set(BROWSE_CATEGORIES.map((category) => category.group))];
+  container.innerHTML = groups.map((group) => {
+    const categories = BROWSE_CATEGORIES.filter((category) => category.group === group);
+    return '<section class="vivid-browse-category-group" aria-labelledby="browse-' + escapeHtml(group.toLowerCase()) + '">' +
+      '<div class="vivid-browse-category-head"><div><span class="vivid-discovery-kicker">' + escapeHtml(group.toUpperCase()) + '</span><h2 id="browse-' + escapeHtml(group.toLowerCase()) + '">' + escapeHtml(group === "Featured" ? "Featured categories" : group === "Vivid" ? "Vivid collections" : group) + '</h2></div><span>' + categories.length + '</span></div>' +
+      '<div class="vivid-browse-category-grid">' +
+      categories.map((category, index) =>
+        '<a class="vivid-browse-category-card" href="discover.html?category=' + encodeURIComponent(category.key) + '">' +
+          '<span class="vivid-browse-category-art art-' + (index % 6) + '"><i class="bi ' + (["bi-stars","bi-moon-stars","bi-film","bi-compass","bi-lightning-charge","bi-globe2"][index % 6]) + '" aria-hidden="true"></i></span>' +
+          '<span class="vivid-browse-category-copy"><strong>' + escapeHtml(category.label) + '</strong><small>' + escapeHtml(category.description) + '</small></span>' +
+          '<i class="bi bi-chevron-right vivid-browse-category-arrow" aria-hidden="true"></i>' +
+        '</a>'
+      ).join("") +
+      '</div></section>';
+  }).join("");
 }
+
+function updateBrowseMode() {
+  const landing = !state.category && !state.query && !state.type && !state.genre && !state.year && !state.rating && !state.region && !state.provider && !state.mood && !state.runtime;
+  document.body.classList.toggle("vivid-browse-landing", landing);
+  $("browse-category-groups")?.closest(".vivid-browse-categories")?.toggleAttribute("hidden", !landing);
+  $("browse-results-shell")?.toggleAttribute("hidden", landing);
+  if (!landing && state.category) {
+    const category = BROWSE_CATEGORIES.find((item) => item.key === state.category) || CURATED_CATEGORIES[state.category];
+    if (category) {
+      const heading = $("discovery-heading");
+      const copy = $("discovery-copy");
+      if (heading) heading.textContent = category.label;
+      if (copy) copy.textContent = category.description;
+    }
+  }
+}
+
 
 function currentGenres() {
   if (state.type === "tv") return genres.tv;
@@ -462,7 +476,7 @@ function wire() {
   document.querySelectorAll("[data-type]").forEach((button) =>
     button.addEventListener("click", () => setType(button.dataset.type))
   );
-  renderFeaturedCollections();
+  renderBrowseCategories();
   $("category-filter")?.addEventListener("change", () => {
     state.category = $("category-filter").value;
     state.page = 1;
@@ -606,7 +620,7 @@ async function init() {
   populateYears();
   if ($("category-filter")) {
     $("category-filter").innerHTML = '<option value="">All catalogue</option>' +
-      Object.entries(CURATED_CATEGORIES).map(([key, category]) =>
+      Object.entries({...CURATED_CATEGORIES, ...Object.fromEntries(BROWSE_CATEGORIES.map((category) => [category.key, category]))}).map(([key, category]) =>
         '<option value="' + escapeHtml(key) + '">' + escapeHtml(category.label) + '</option>'
       ).join("");
     $("category-filter").value = state.category;
@@ -615,6 +629,7 @@ async function init() {
   }
   wire();
   syncControlsFromUrl();
+  updateBrowseMode();
   $("discovery-search").value = state.query;
   $("clear-search").hidden = !state.query;
   // Do not block the first catalogue render on secondary metadata requests.
