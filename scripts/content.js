@@ -2,16 +2,33 @@ import { tmdbApi } from "./tmdb.js";
 import { normalizeResults } from "./media.js";
 import { getProviderCountry } from "./provider-region.js";
 
-async function providerDiscover(providerId, type, page = 1) {
-  const params = { page, watch_region: getProviderCountry(), with_watch_monetization_types: "flatrate", with_watch_providers: String(providerId), sort_by: "popularity.desc", "vote_count.gte": "20" };
+async function providerDiscover(providerId, type, page = 1, useRegion = true) {
+  const params = { page, with_watch_monetization_types: "flatrate", with_watch_providers: String(providerId), sort_by: "popularity.desc", "vote_count.gte": "20" };
+  if (useRegion) params.watch_region = getProviderCountry();
   return type === "movie" ? tmdbApi.discoverMovies(params) : tmdbApi.discoverTv(params);
 }
 async function providerHome(providerId) {
-  const results = await Promise.allSettled([providerDiscover(providerId, "movie"), providerDiscover(providerId, "tv")]);
-  const items = [];
-  results.forEach((result, index) => {
-    if (result.status === "fulfilled") items.push(...normalizeResults(result.value?.results || [], index === 0 ? "movie" : "tv"));
+  const regional = await Promise.allSettled([
+    providerDiscover(providerId, "movie", 1, true),
+    providerDiscover(providerId, "tv", 1, true)
+  ]);
+  let items = [];
+  regional.forEach((result, index) => {
+    if (result.status === "fulfilled") {
+      items.push(...normalizeResults(result.value?.results || [], index === 0 ? "movie" : "tv"));
+    }
   });
+  if (!items.length) {
+    const global = await Promise.allSettled([
+      providerDiscover(providerId, "movie", 1, false),
+      providerDiscover(providerId, "tv", 1, false)
+    ]);
+    global.forEach((result, index) => {
+      if (result.status === "fulfilled") {
+        items.push(...normalizeResults(result.value?.results || [], index === 0 ? "movie" : "tv"));
+      }
+    });
+  }
   items.sort((a,b) => Number(b.raw?.popularity||0)-Number(a.raw?.popularity||0) || Number(b.vote_average||0)-Number(a.vote_average||0));
   return { page: 1, total_pages: 1, results: items.slice(0, 20) };
 }
