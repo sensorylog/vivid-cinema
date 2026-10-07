@@ -11,7 +11,7 @@ let loading=false;
 
 function card(item){
   const type=item.media_type==="tv"?"SERIES":"FILM";
-  return '<a class="vivid-anime-card" href="'+escapeHtml(getMediaUrl(item))+'"><div class="vivid-anime-poster"><img loading="lazy" src="'+getImageUrl(item.poster_path,"w342")+'" alt="'+escapeHtml(item.title)+'"><span>'+type+'</span><b>★ '+(item.vote_average?item.vote_average.toFixed(1):"—")+'</b></div><div class="vivid-anime-card-copy"><strong>'+escapeHtml(item.title)+'</strong><small>'+escapeHtml(item.year||"")+'</small></div></a>';
+  return '<a class="vivid-anime-card" href="'+escapeHtml(getMediaUrl(item)+"&anime=1")+'"><div class="vivid-anime-poster"><img loading="lazy" src="'+getImageUrl(item.poster_path,"w342")+'" alt="'+escapeHtml(item.title)+'"><span>'+type+'</span><b>★ '+(item.vote_average?item.vote_average.toFixed(1):"—")+'</b></div><div class="vivid-anime-card-copy"><strong>'+escapeHtml(item.title)+'</strong><small>'+escapeHtml(item.year||"")+'</small></div></a>';
 }
 function paint(items,append=false){
   if(!append)grid.innerHTML="";
