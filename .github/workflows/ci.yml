@@ -77,6 +77,33 @@ jobs:
           }
           NODE
 
+
+      - name: Validate app shell and service worker assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          node - <<'NODE'
+          const fs = require("fs");
+          const path = require("path");
+          const root = process.cwd();
+          const requiredPages = ["home.html","discover.html","library.html","news.html","search.html","title.html","watch.html","collection.html","anime.html","person.html","account.html","auth.html","login.html"];
+          const failures = [];
+          for (const file of requiredPages) {
+            const source = fs.readFileSync(file, "utf8");
+            if (!/<main\b/i.test(source)) failures.push(file + " -> missing <main>");
+            if (!/scripts\/app-shell\.js/.test(source)) failures.push(file + " -> missing app shell");
+          }
+          const sw = fs.readFileSync("service-worker.js", "utf8");
+          const shell = [...sw.matchAll(/"((?:\.\/)[^"]+)"/g)].map(match => match[1]).filter(asset => asset.startsWith("./"));
+          for (const asset of shell) {
+            if (!fs.existsSync(path.resolve(root, asset))) failures.push("service-worker.js -> missing " + asset);
+          }
+          if (failures.length) {
+            console.error(failures.join("\n"));
+            process.exit(1);
+          }
+          NODE
+
       - name: Validate local HTML/CSS/JS references
         shell: bash
         run: |
