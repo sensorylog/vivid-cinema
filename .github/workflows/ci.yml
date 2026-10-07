@@ -64,7 +64,7 @@ jobs:
           const missing = [];
           for (const file of files) {
             const source = fs.readFileSync(file, "utf8");
-            const refs = [...source.matchAll(/(?:href|src|url)\\s*=\\s*["']([^"']+)["']/gi)].map(m => m[1]);
+            const refs = [...source.matchAll(/(?:href|src)\s*=\s*["']([^"']+)["']|url\(\s*["']?([^"')]+)["']?\s*\)/gi)].map(m => m[1] || m[2]);
             for (let ref of refs) {
               if (!ref || /^(?:https?:|data:|blob:|mailto:|tel:|#)/i.test(ref)) continue;
               ref = ref.split("#")[0].split("?")[0];
