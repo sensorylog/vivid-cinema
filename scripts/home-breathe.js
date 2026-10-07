@@ -6,6 +6,8 @@ const meta = document.querySelector(".vivid-home-tv-meta");
 let items = [];
 let index = 0;
 let timer = null;
+let animationObserver = null;
+let liveAnimations = [];
 
 function collectTrending() {
   if (!rail) return [];
@@ -53,8 +55,24 @@ function refreshTrending() {
   }
 }
 
+function startLiveMotion() {
+  const viewer = document.querySelector(".vivid-home-viewer");
+  const arm = document.querySelector(".vivid-home-viewer-arm.viewer-arm-right");
+  const mouth = document.querySelector(".vivid-home-viewer-mouth");
+  const tv = document.querySelector(".vivid-home-tv");
+  if (!viewer || !window.matchMedia || window.matchMedia("(prefers-reduced-motion: reduce)").matches || !Element.prototype.animate) return;
+  liveAnimations.forEach((animation) => animation.cancel());
+  liveAnimations = [
+    viewer.animate([{transform:"translate3d(0,3px,0) rotate(1deg)"},{transform:"translate3d(0,-2px,0) rotate(-1deg)"},{transform:"translate3d(0,3px,0) rotate(1deg)"}],{duration:4800,iterations:Infinity,easing:"ease-in-out"}),
+    arm?.animate([{transform:"rotate(-48deg)"},{transform:"rotate(-58deg)"},{transform:"rotate(-82deg) translate(-3px,7px)"},{transform:"rotate(-50deg)"}],{duration:3600,iterations:Infinity,easing:"cubic-bezier(.2,.8,.2,1)"}),
+    mouth?.animate([{transform:"scaleY(1)"},{transform:"scaleY(.45)"},{transform:"scaleY(1.1)"},{transform:"scaleY(1)"}],{duration:900,iterations:Infinity,easing:"ease-in-out"}),
+    tv?.animate([{transform:"translate3d(-50%,3px,0) rotate(-.35deg)"},{transform:"translate3d(-50%,-7px,0) rotate(.35deg)"},{transform:"translate3d(-50%,3px,0) rotate(-.35deg)"}],{duration:5600,iterations:Infinity,easing:"ease-in-out"})
+  ].filter(Boolean);
+}
+
 if (rail) {
   refreshTrending();
+  startLiveMotion();
   const observer = new MutationObserver(refreshTrending);
   observer.observe(rail, {childList: true, subtree: true});
   window.setTimeout(() => observer.disconnect(), 15000);
