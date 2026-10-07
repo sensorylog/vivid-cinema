@@ -34,7 +34,6 @@ function syncVividBranding() {
   apple.href = appleTouchIconPath;
   let manifest = document.querySelector('link[rel="manifest"]');
   if (!manifest) { manifest = document.createElement("link"); manifest.rel = "manifest"; document.head.appendChild(manifest); }
-  manifest.href = "./manifest.json";
 
   document.querySelectorAll(".vivid-brand, .vivid-legal-brand, .logo").forEach(brand => {
     if (brand.dataset.vividBrandReady === "true") return;
@@ -44,15 +43,85 @@ function syncVividBranding() {
     brand.style.display = "inline-flex";
     brand.style.alignItems = "center";
     brand.style.gap = "9px";
-    const icon = brand.querySelector(".vivid-brand-icon");
-    if (icon) {
-      icon.style.width = "32px";
-      icon.style.height = "32px";
-      icon.style.flex = "0 0 32px";
-      icon.style.display = "block";
-      icon.style.objectFit = "contain";
-    }
   });
+}
+
+function currentPage() {
+  return document.body?.dataset?.vividPage || document.documentElement.dataset.vividPage || "";
+}
+
+function isBrowsePage(page = currentPage()) {
+  return ["discover", "collection", "anime"].includes(page);
+}
+
+function navLink(href, icon, label, active = false) {
+  return '<a href="' + href + '"' + (active ? ' aria-current="page"' : '') + '><i class="bi ' + icon + '" aria-hidden="true"></i><span>' + label + '</span></a>';
+}
+
+function buildPrimaryLinks(page) {
+  return [
+    navLink("home.html", "bi-house-fill", "Home", page === "home"),
+    navLink("discover.html", "bi-grid-fill", "Browse", isBrowsePage(page)),
+    navLink("library.html", "bi-bookmark-fill", "Library", page === "library"),
+    navLink("search.html", "bi-search", "Search", page === "search")
+  ].join("");
+}
+
+function buildSearchControl() {
+  return '<a class="vivid-search-trigger vivid-shell-search-link" href="search.html" aria-label="Search Vivid Cinema"><i class="bi bi-search" aria-hidden="true"></i><span>Search</span><kbd>⌘K</kbd></a>';
+}
+
+function syncDesktopNavigation() {
+  const page = currentPage();
+  const nav = document.querySelector(".vivid-nav, .vivid-unified-nav");
+  if (!nav) return;
+
+  const oldNotification = nav.querySelector("#release-alert-button");
+  const oldAuth = nav.querySelector(".vivid-nav-action[data-vivid-nav-auth], #auth-link, #discover-auth, #library-auth, #collection-auth, #title-auth, #watch-auth, .vivid-nav-action");
+  const auth = oldAuth || Object.assign(document.createElement("a"), { className: "vivid-nav-action", href: "auth.html", textContent: "Sign in" });
+  auth.classList.add("vivid-nav-action");
+  if (!auth.getAttribute("href")) auth.setAttribute("href", "auth.html");
+
+  nav.innerHTML = "";
+  const brand = document.createElement("a");
+  brand.className = "vivid-brand";
+  brand.href = "home.html";
+  brand.innerHTML = '<img class="vivid-brand-icon" src="./icons/vivid-icon.svg" alt="" aria-hidden="true" decoding="async"><span class="vivid-brand-wordmark">Vivid<span>Cinema</span></span>';
+  nav.appendChild(brand);
+
+  const links = document.createElement("div");
+  links.className = "vivid-navlinks";
+  links.innerHTML = buildPrimaryLinks(page);
+  nav.appendChild(links);
+
+  nav.insertAdjacentHTML("beforeend", buildSearchControl());
+
+  if (oldNotification) nav.appendChild(oldNotification);
+  nav.appendChild(auth);
+  nav.classList.add("vivid-v2-nav");
+}
+
+function syncMobileNavigation() {
+  const page = currentPage();
+  let nav = document.querySelector(".vivid-mobile-nav");
+  if (!nav) {
+    nav = document.createElement("nav");
+    nav.className = "vivid-mobile-nav";
+    nav.setAttribute("aria-label", "Mobile navigation");
+    document.body.appendChild(nav);
+  }
+  nav.innerHTML = [
+    navLink("home.html", "bi-house-fill", "Home", page === "home"),
+    navLink("discover.html", "bi-grid-fill", "Browse", isBrowsePage(page)),
+    navLink("library.html", "bi-bookmark-fill", "Library", page === "library"),
+    navLink("search.html", "bi-search", "Search", page === "search")
+  ].join("");
+  nav.classList.add("vivid-v2-mobile-nav");
+}
+
+function syncNavigation() {
+  syncDesktopNavigation();
+  syncMobileNavigation();
 }
 
 function initThemeToggle() {
@@ -84,29 +153,6 @@ function initThemeToggle() {
   else nav.appendChild(button);
 }
 
-function syncAnimeNavigation() {
-  const addLink = (container, mobile = false) => {
-    if (!container || container.querySelector('a[href="anime.html"]')) return;
-    const link = document.createElement("a");
-    link.href = "anime.html";
-    link.dataset.vividAnimeNav = "true";
-    link.innerHTML = '<i class="bi bi-stars" aria-hidden="true"></i><span>Anime</span>';
-    if (mobile) container.appendChild(link);
-    else {
-      const news = Array.from(container.querySelectorAll("a")).find(a => a.getAttribute("href") === "news.html");
-      news ? news.before(link) : container.appendChild(link);
-    }
-  };
-  addLink(document.querySelector(".vivid-navlinks"));
-  addLink(document.querySelector(".vivid-mobile-nav"), true);
-  if (document.body?.dataset?.vividPage === "anime") {
-    document.querySelectorAll('a[data-vivid-anime-nav]').forEach(link => {
-      link.classList.add("is-active");
-      link.setAttribute("aria-current", "page");
-    });
-  }
-}
-
 function setPageIdentity() {
   const page = document.body?.dataset?.vividPage || "unknown";
   document.documentElement.dataset.vividPage = page;
@@ -117,16 +163,15 @@ function setPageIdentity() {
 }
 
 function ensureBackControl() {
-  // Keep an existing page-specific Back control; create one only when a page lacks it.
-  const main=document.querySelector("main");
-  if(!main || document.querySelector("[data-vivid-back]")) return;
-  const page=document.body?.dataset?.vividPage||"";
-  if(["home","landing"].includes(page)) return;
-  const back=document.createElement("a");
-  back.className="vivid-page-back";
-  back.href="home.html";
-  back.dataset.vividBack="true";
-  back.innerHTML='<span aria-hidden="true">‹</span><span>Back</span>';
+  const main = document.querySelector("main");
+  if (!main || document.querySelector("[data-vivid-back]")) return;
+  const page = document.body?.dataset?.vividPage || "";
+  if (["home", "landing"].includes(page)) return;
+  const back = document.createElement("a");
+  back.className = "vivid-page-back";
+  back.href = "home.html";
+  back.dataset.vividBack = "true";
+  back.innerHTML = '<span aria-hidden="true">‹</span><span>Back</span>';
   main.prepend(back);
 }
 
@@ -142,7 +187,7 @@ function initAppShell() {
   setConnectionState();
   setPageIdentity();
   syncVividBranding();
-  syncAnimeNavigation();
+  syncNavigation();
   initThemeToggle();
   ensureBackControl();
 
@@ -150,7 +195,17 @@ function initAppShell() {
   window.addEventListener("online", setConnectionState);
   window.addEventListener("offline", setConnectionState);
 
-  document.addEventListener("click", event => { const back=event.target.closest("[data-vivid-back]"); if(!back) return; if(event.metaKey||event.ctrlKey||event.shiftKey||event.altKey) return; if(window.history.length>1){try{const ref=document.referrer?new URL(document.referrer,location.href):null;if(ref?.origin===location.origin){event.preventDefault();window.history.back();}}catch{}} });
+  document.addEventListener("click", event => {
+    const back = event.target.closest("[data-vivid-back]");
+    if (!back) return;
+    if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    if (window.history.length > 1) {
+      try {
+        const ref = document.referrer ? new URL(document.referrer, location.href) : null;
+        if (ref?.origin === location.origin) { event.preventDefault(); window.history.back(); }
+      } catch {}
+    }
+  });
 
   requestAnimationFrame(() => {
     document.documentElement.dataset.vividReady = "true";
