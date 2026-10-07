@@ -1,8 +1,9 @@
 import { tmdbApi } from "./tmdb.js";
 import { normalizeResults } from "./media.js";
+import { getProviderCountry } from "./provider-region.js";
 
 async function providerDiscover(providerId, type, page = 1) {
-  const params = { page, watch_region: "US", with_watch_monetization_types: "flatrate", with_watch_providers: String(providerId), sort_by: "popularity.desc", "vote_count.gte": "20" };
+  const params = { page, watch_region: getProviderCountry(), with_watch_monetization_types: "flatrate", with_watch_providers: String(providerId), sort_by: "popularity.desc", "vote_count.gte": "20" };
   return type === "movie" ? tmdbApi.discoverMovies(params) : tmdbApi.discoverTv(params);
 }
 async function providerHome(providerId) {
