@@ -47,11 +47,11 @@ body.vivid-cinema-home{background:transparent;color:#f5f7fa;overflow-x:hidden}
 .vivid-section-wrap{width:min(1440px,100%);margin:auto;padding:0 var(--vivid-page-gutter)}
 .vivid-rails{padding:18px 0 20px}
 .vivid-rail-head{display:flex;justify-content:space-between;align-items:end;gap:16px;margin-bottom:14px}
-.vivid-rail-head h2{font-size:clamp(1.25rem,2vw,1.7rem);letter-spacing:-.03em;margin:0}
+.vivid-rail-head h2{font-size:22px;line-height:1.15;font-weight:700;letter-spacing:-.03em;margin:0;color:#fff}
 .vivid-rail-head p{margin:4px 0 0;color:#7f858f;font-size:.85rem}
 .vivid-rail-controls{display:flex;gap:7px}
 .vivid-rail-controls button{width:38px;height:38px;border-radius:50%;border:1px solid rgba(255,255,255,.11);background:rgba(255,255,255,.05);color:#fff;cursor:pointer}
-.vivid-rail{display:flex;gap:12px;overflow-x:auto;scroll-behavior:smooth;scroll-snap-type:x proximity;scrollbar-width:none;padding:4px 2px 12px}
+.vivid-rail{display:flex;gap:12px;overflow-x:auto;scroll-behavior:smooth;scroll-snap-type:x mandatory;scroll-padding-inline:2px;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding:4px 2px 12px}
 .vivid-rail::-webkit-scrollbar{display:none}
 .vivid-card{position:relative;flex:0 0 clamp(142px,15vw,190px);scroll-snap-align:start;border-radius:16px;overflow:hidden;background:#101217;border:1px solid rgba(255,255,255,.08);cursor:pointer;transition:transform .22s ease,border-color .22s ease}
 .vivid-card:hover{transform:translateY(-4px);border-color:rgba(255,255,255,.2)}
@@ -59,8 +59,8 @@ body.vivid-cinema-home{background:transparent;color:#f5f7fa;overflow-x:hidden}
 .vivid-card-media img{width:100%;height:100%;object-fit:cover;transition:transform .45s ease}
 .vivid-card:hover img{transform:scale(1.035)}
 .vivid-card-info{padding:10px 11px 12px}
-.vivid-card-title{font-size:.86rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.vivid-card-sub{font-size:.72rem;color:#818791;margin-top:4px}
+.vivid-card-title{font-size:15px;font-weight:600;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vivid-card-sub{font-size:13px;font-weight:400;color:#8e8e93;margin-top:4px}
 .vivid-rating{position:absolute;top:8px;right:8px;padding:5px 7px;border-radius:999px;background:rgba(5,6,8,.7);backdrop-filter:blur(12px);font-size:.68rem;color:#fff}
 .vivid-loading{display:flex;gap:12px;overflow:hidden}
 .vivid-skeleton-card{flex:0 0 clamp(142px,15vw,190px);aspect-ratio:2/3;border-radius:16px;background:linear-gradient(100deg,#101217 25%,#1a1d23 40%,#101217 60%);background-size:300% 100%;animation:vivid-home-shimmer 1.4s infinite}
