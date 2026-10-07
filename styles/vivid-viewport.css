@@ -11,6 +11,8 @@ body{
   max-width:100%;
   overflow-x:clip;
   overscroll-behavior-x:none;
+  overscroll-behavior-y:none;
+  scrollbar-gutter:stable;
 }
 body.vivid-cinema-home,
 .vivid-home,
@@ -41,7 +43,7 @@ body.vivid-cinema-home,
   min-width:0;
   max-width:100%;
   box-sizing:border-box;
-  overscroll-behavior-x:contain;
+  overscroll-behavior-x:none;
   -webkit-overflow-scrolling:touch;
 }
 .vivid-rail{
@@ -465,3 +467,74 @@ html[data-vivid-theme="light"] .vivid-search-window{background:#f8f9fb;color:#10
 @media(min-width:900px){.vivid-search-trigger kbd{display:inline-block}}
 @media(max-width:640px){.vivid-search-backdrop{background:#080a0e;backdrop-filter:none;-webkit-backdrop-filter:none}.vivid-search-window{max-width:none}.vivid-search-top{padding:calc(10px + env(safe-area-inset-top,0px)) 12px 10px}.vivid-search-content{padding:0 12px calc(22px + env(safe-area-inset-bottom,0px))}.vivid-search-intro{padding:26px 4px 18px}.vivid-search-results{grid-template-columns:1fr;gap:6px}.vivid-search-result{min-height:72px}}
 @media(prefers-reduced-motion:reduce){.vivid-search-spinner{animation:none}}@media(pointer:coarse){.vivid-search-trigger{min-height:44px}}
+
+
+/* Final viewport discipline: Vivid should feel anchored, not like a webpage sliding inside a frame. */
+html,
+body{
+  min-width:320px;
+  max-width:100%;
+  overflow-x:hidden!important;
+}
+body{
+  overscroll-behavior:none!important;
+  -webkit-overflow-scrolling:touch;
+}
+.vivid-app-shell,
+.vivid-home,
+.vivid-section-wrap,
+.vivid-discovery-main,
+.vivid-collection-main,
+.vivid-library-main,
+.vivid-title-page,
+.vivid-watch-page,
+.vivid-news-page,
+.vivid-search-page{
+  width:100%;
+  max-width:100%;
+  box-sizing:border-box;
+}
+.vivid-section-wrap,
+.vivid-discovery-main,
+.vivid-collection-main{
+  margin-inline:auto;
+}
+
+/* Rails stop exactly at their content boundary — no fake trailing space to push into. */
+.vivid-rail,
+.vivid-feature-track{
+  overscroll-behavior-x:none!important;
+  scroll-padding-inline:0!important;
+}
+.vivid-rail::after,
+.vivid-cinema-home .vivid-rail::after{
+  content:none!important;
+  display:none!important;
+}
+.vivid-rail{
+  padding-right:0!important;
+}
+.vivid-feature-track{
+  padding-right:0!important;
+}
+
+/* Prevent accidental horizontal drag from moving the whole document. */
+.vivid-rail,
+.vivid-feature-track{
+  touch-action:pan-x;
+}
+@media(pointer:coarse){
+  .vivid-rail,
+  .vivid-feature-track{
+    touch-action:pan-x;
+    scroll-snap-type:x mandatory;
+  }
+}
+
+/* Keep the page at the browser's natural 100% scale. */
+html{
+  zoom:1!important;
+}
+@supports not (zoom:1){
+  html{transform:none!important}
+}
