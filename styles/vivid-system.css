@@ -376,3 +376,13 @@ body{
 #recommended-rail .vivid-card-info,
 #because-rail .vivid-card-info{min-height:66px}
 @media(max-width:640px){.vivid-card-reason{font-size:9px}}
+
+
+/* Phase K — shared design-system normalization. */
+:where(body){font-family:var(--vivid-font-text)}
+:where(a,button,input,select,textarea){font-family:var(--vivid-font-text)}
+:where(:focus-visible){outline:2px solid rgba(255,255,255,.9);outline-offset:3px}
+@media(prefers-reduced-motion:reduce){
+  :where(html){scroll-behavior:auto!important}
+  :where(*,::before,::after){animation-duration:.001ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.001ms!important}
+}
