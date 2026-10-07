@@ -45,3 +45,52 @@
 }
 
 .account-sync{display:flex;align-items:center;gap:12px;margin:16px 0;padding:12px 14px;border:1px solid rgba(255,255,255,.08);border-radius:14px;background:rgba(255,255,255,.035)}.account-sync>div{min-width:0;flex:1}.account-sync strong,.account-sync small{display:block}.account-sync strong{font-size:.88rem}.account-sync small{margin-top:3px;color:#818994}.account-sync-dot{width:9px;height:9px;border-radius:50%;background:#7b838d;box-shadow:0 0 0 5px rgba(123,131,141,.08);flex:0 0 auto}.account-sync-dot[data-state=success]{background:#73d99b;box-shadow:0 0 0 5px rgba(115,217,155,.08)}.account-sync-dot[data-state=syncing]{background:#f0c674;animation:vivid-sync-pulse 1s ease-in-out infinite}.account-sync-dot[data-state=error]{background:#ff7b7b}.account-security-card p{color:#8d949f;line-height:1.55}.account-security-card .account-status{margin-top:12px}@keyframes vivid-sync-pulse{50%{opacity:.35;transform:scale(.7)}}@media(max-width:700px){.account-sync{align-items:flex-start}.account-sync .vivid-button{padding:8px 10px;white-space:nowrap}}
+
+/* Account / Profile redesign — identity first, settings second. */
+.account-page .account-shell{width:min(1160px,calc(100% - 2*var(--vivid-page-gutter,1rem)))}
+.account-page .account-header{padding:34px 0 30px;margin-bottom:0}
+.account-page .account-kicker,
+.account-page .account-card-kicker{display:block;font-size:.66rem;letter-spacing:.16em;font-weight:700;color:#8f97a3}
+.account-page .account-heading-copy h1{margin:8px 0 8px;font-size:clamp(2.5rem,6vw,4.8rem);line-height:.95;letter-spacing:-.06em}
+.account-page .account-heading-copy p{max-width:560px;font-size:1rem}
+.account-page .account-grid{grid-template-columns:minmax(0,1.5fr) minmax(300px,.7fr);gap:14px}
+.account-page .account-card{padding:22px;border-radius:22px}
+.account-page .account-profile-card{grid-row:span 2}
+.account-profile-hero{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:15px;margin-bottom:24px}
+.account-avatar{width:68px;height:68px;border-radius:20px;display:grid;place-items:center;background:linear-gradient(145deg,#f4f5f7,#aeb4bd);color:#08090b;font-size:1.7rem;font-weight:800;letter-spacing:-.05em;box-shadow:0 14px 35px rgba(0,0,0,.3)}
+.account-profile-copy h2{margin:4px 0 2px;font-size:1.35rem;letter-spacing:-.03em}
+.account-profile-copy p{margin:0;color:#858d98;font-size:.82rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.account-profile-hero .account-badge{align-self:start;margin-top:3px}
+.account-page .account-meta{padding-top:4px}
+.account-page .account-meta-row{padding:12px 0}
+.account-page .account-field{margin-bottom:14px}
+.account-page .account-field input,.account-page .account-field select{background:rgba(0,0,0,.18);min-height:48px}
+.account-page .account-field small{color:#737b86;line-height:1.45}
+.account-page .account-actions{padding-top:4px}
+.account-page .account-security-card,
+.account-page .account-library-card{min-height:0}
+.account-page .account-section-heading{display:flex;justify-content:space-between;align-items:start;gap:16px}
+.account-page .account-section-heading h2{margin:5px 0 0}
+.account-page .account-section-heading a{color:#b9c0ca;text-decoration:none;font-size:.75rem;white-space:nowrap}
+.account-page .account-section-heading a:hover{color:#fff}
+.account-page .account-stats{gap:8px;margin-top:18px}
+.account-page .account-stat{padding:15px;background:rgba(255,255,255,.035)}
+.account-page .account-stat strong{font-size:1.7rem}
+.account-page .account-sync{background:rgba(255,255,255,.025)}
+@media(max-width:760px){
+  .account-page .account-header{padding:24px 0 22px}
+  .account-page .account-heading-copy h1{font-size:2.7rem}
+  .account-page .account-grid{grid-template-columns:1fr}
+  .account-page .account-profile-card{grid-row:auto}
+  .account-profile-hero{grid-template-columns:auto minmax(0,1fr);gap:12px}
+  .account-profile-hero .account-badge{grid-column:2;margin-top:-6px}
+}
+@media(max-width:480px){
+  .account-page .account-card{padding:17px;border-radius:18px}
+  .account-avatar{width:58px;height:58px;border-radius:17px;font-size:1.45rem}
+  .account-profile-copy h2{font-size:1.15rem}
+  .account-page .account-actions button{flex:1 1 100%}
+  .account-page .account-stats{grid-template-columns:repeat(3,1fr)}
+  .account-page .account-stat{padding:12px 9px}
+  .account-page .account-stat strong{font-size:1.4rem}
+}
