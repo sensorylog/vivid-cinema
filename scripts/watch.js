@@ -24,7 +24,6 @@ let primaryHealthy = false;
 let fallbackTimer = null;
 let imdbId = "";
 let tmdbId = "";
-const PRIMARY_FALLBACK_MS = 5000;
 const YENIME_FALLBACK_MS = 3500;
 let malId = "";
 let animeProvider = false;
@@ -131,26 +130,8 @@ function isLikelyAnime() {
   return isAnimation && originalLanguage === "ja";
 }
 
-function fallbackDelayMs() {
-  return PRIMARY_FALLBACK_MS;
-}
-
 function hasFallbackId() {
   return Boolean(tmdbId || imdbId);
-}
-
-function triggerVidsrcFallback(reason = "primary_error") {
-  if (activeSource !== "vidapi" || !currentParams || !hasFallbackId()) return false;
-  clearFallbackTimer();
-  const status = $("player-status");
-  if (status) {
-    status.textContent = "Primary source unavailable — switching to alternate…";
-    status.classList.add("is-warning");
-    status.hidden = false;
-  }
-  console.warn("Vivid playback fallback:", reason);
-  setPlayerSource("vidsrc", currentParams, Number(getPlaybackProgress(progressKey())?.progress || route.params.get("startAt") || 0));
-  return true;
 }
 
 function clearFallbackTimer() {
@@ -164,11 +145,7 @@ function updateSourceLabel() {
   const label = document.getElementById("player-source-label");
   if (label) label.textContent = activeSource === "yenime" ? "Powered by Yenime" : activeSource === "vidsrc" ? "Alternate source" : "Powered by VidAPI";
   const switchBtn = document.getElementById("player-switch-source");
-  if (switchBtn) {
-    const canSwitch = hasFallbackId() || Boolean(malId);
-    switchBtn.hidden = !canSwitch;
-    switchBtn.textContent = activeSource === "vidsrc" ? "Try primary source" : activeSource === "yenime" ? "Try VidAPI" : "Try alternate source";
-  }
+  if (switchBtn) switchBtn.hidden = true;
 }
 
 function setPlayerSource(source, params, startAt = 0) {
@@ -208,13 +185,7 @@ function setPlayerSource(source, params, startAt = 0) {
       status.classList.remove("is-warning");
       status.hidden = false;
     }
-    // Auto-fallback only when we have the title ID and primary never signals health.
-    if (hasFallbackId()) {
-      fallbackTimer = window.setTimeout(() => {
-        if (primaryHealthy || activeSource !== "vidapi") return;
-        triggerVidsrcFallback("primary_timeout");
-      }, fallbackDelayMs());
-    }
+
   }
   updateSourceLabel();
 }
@@ -328,27 +299,12 @@ function renderShell(params) {
         }
       }, 450);
     });
-    player.addEventListener("error", () => {
-      triggerVidsrcFallback("iframe_error");
-    });
-    // Metadata is loaded asynchronously. Start with the existing VidAPI path so
-    // non-anime playback is unchanged, then switch to Yenime when anime + MAL resolve.
+
+    // Metadata is loaded asynchronously. Start with the VidAPI path for normal titles;
+    // anime switches to Yenime only after its MAL ID is resolved.
     setPlayerSource("vidapi", params, resumeAt);
-    const switchBtn = $("player-switch-source");
-    if (switchBtn) {
-      switchBtn.addEventListener("click", () => {
-        const next = activeSource === "yenime" ? "vidapi" : activeSource === "vidsrc" ? "vidapi" : animeProvider && malId ? "yenime" : "vidsrc";
-        setPlayerSource(next, params, resumeAt);
-      });
-    }
+
   }
-  window.setTimeout(() => {
-    const current = $("player-status");
-    if (current && current.isConnected && !current.hidden && activeSource === "vidapi" && !primaryHealthy) {
-      current.textContent = "Playback is taking longer than expected. The player is still loading.";
-      current.classList.add("is-warning");
-    }
-  }, fallbackDelayMs() + 1000);
   recordHistory();
   recordBehavior("watch_started", media, { season: params.season, episode: params.episode, resumeAt });
 }
@@ -500,14 +456,7 @@ async function load() {
       const saved = getPlaybackProgress(progressKey());
       const resumeAt = Number(saved?.progress || route.params.get("startAt") || 0);
       setPlayerSource("yenime", currentParams, resumeAt);
-    } else if (hasFallbackId() && activeSource === "vidapi" && !primaryHealthy && !fallbackTimer) {
-      const saved = getPlaybackProgress(progressKey());
-      const resumeAt = Number(saved?.progress || route.params.get("startAt") || 0);
-      fallbackTimer = window.setTimeout(() => {
-        if (primaryHealthy || activeSource !== "vidapi") return;
-        triggerVidsrcFallback("primary_timeout_after_metadata");
-      }, fallbackDelayMs());
-    }
+
   } catch (error) {
     console.warn("Vivid metadata unavailable while playback is active:", error);
     const overviewNode = $("watch-overview");
