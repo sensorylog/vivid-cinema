@@ -328,6 +328,19 @@ function clearFallbackTimer() {
   }
 }
 
+function reloadActivePlayer() {
+  const player = $("vidapi-player");
+  if (!player || !currentParams) return;
+  const saved = getPlaybackProgress(progressKey());
+  const resumeAt = Number(saved?.progress || route.params.get("startAt") || 0);
+  const source = activeSource;
+  player.src = "";
+  window.setTimeout(() => {
+    if (!player.isConnected || !currentParams) return;
+    setPlayerSource(source, currentParams, resumeAt);
+  }, 40);
+}
+
 function updateSourceLabel() {
   const label = document.getElementById("player-source-label");
   if (label) label.textContent = activeSource === "yenime" ? "Powered by Yenime" : activeSource === "vidsrc" ? "Alternate source" : "Powered by VidAPI";
@@ -486,7 +499,7 @@ function renderShell(params) {
       '<div id="player-status" class="vivid-player-status" role="status" aria-live="polite">' + (resumeAt > 5 ? "Resuming where you left off…" : "Preparing playback…") + '</div>' +
       '<div id="yenime-fallback" class="vivid-player-fallback" hidden><span>Player not loading?</span><a id="yenime-fallback-link" class="vivid-button vivid-button--secondary" target="_blank" rel="noopener noreferrer">Open Yenime</a></div>' +
       '<iframe id="vidapi-player" title="' + escapeHtml(title) + ' player" allow="autoplay; fullscreen; picture-in-picture; encrypted-media; clipboard-write; web-share" allowfullscreen referrerpolicy="origin" loading="eager"></iframe>' +
-    '</div><div class="vivid-player-bar"><div><i class="bi bi-shield-check"></i><span id="player-source-label">Powered by VidAPI</span></div><div class="vivid-player-bar-actions"><button type="button" id="player-switch-source" class="vivid-player-switch" hidden>Try alternate source</button><a href="' + escapeHtml(buildTitleUrl(media.id, media.media_type)) + '">Back to title</a></div></div></section>' +
+    '</div><div class="vivid-player-bar"><div><i class="bi bi-shield-check"></i><span id="player-source-label">Powered by VidAPI</span></div><div class="vivid-player-bar-actions"><button type="button" id="player-reload" class="vivid-player-switch">Reload player</button><button type="button" id="player-switch-source" class="vivid-player-switch" hidden>Try alternate source</button><a href="' + escapeHtml(buildTitleUrl(media.id, media.media_type)) + '">Back to title</a></div></div></section>' +
     (isTv ? '<section class="vivid-watch-note"><i class="bi bi-collection-play"></i><div><strong>Episode playback</strong><span>Use the episode list on the title page to switch seasons and episodes.</span></div></section>' : "") +
     '<section class="vivid-watch-recommendations"><div class="vivid-section-heading"><div><span>AFTER WATCHING</span><h2>More like this</h2></div></div><div id="watch-recommendations" class="vivid-watch-rec-rail">' + recommendationCards() + '</div></section>';
 
@@ -501,12 +514,9 @@ function renderShell(params) {
       // can load while the actual media source is still unavailable, so PLAYER_EVENT
       // continues to be the health signal used for VidAPI fallback.
       if (activeSource === "yenime" || activeSource === "vidsrc") {
-        clearFallbackTimer();
-        window.setTimeout(() => {
-          if (status && status.isConnected && (activeSource === "yenime" || activeSource === "vidsrc")) {
-            status.hidden = true;
-          }
-        }, 500);
+        // A cross-origin iframe "load" event does not prove the player is usable.
+        // Browsers intentionally fire load even when an embedded document is blocked
+        // or renders an unusable shell, so keep our watchdog/status alive.
         return;
       }
       // A cross-origin iframe load only proves the document loaded; VidAPI still
@@ -538,6 +548,8 @@ function renderShell(params) {
       if (yenimeFallback) yenimeFallback.hidden = true;
       setPlayerSource("vidapi", params, resumeAt);
     }
+    const reloadBtn = $("player-reload");
+    if (reloadBtn) reloadBtn.addEventListener("click", reloadActivePlayer);
     const switchBtn = $("player-switch-source");
     if (yenimeFallbackLink) {
       yenimeFallbackLink.href = buildYenimeWebUrl(params);
