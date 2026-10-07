@@ -192,3 +192,26 @@ html[data-vivid-theme="light"] body.vivid-discovery-page .vivid-discovery-nav na
   .vivid-filter-row select,
   .vivid-filter-reset{min-height:44px}
 }
+
+/* Discover density pass — fewer words, clearer controls, stronger provider logos. */
+.vivid-discovery-page .vivid-discovery-intro{margin-bottom:24px}
+.vivid-discovery-page .vivid-discovery-intro p{font-size:.92rem}
+.vivid-discovery-page .vivid-filter-panel{padding:16px;margin-bottom:30px}
+.vivid-discovery-page .vivid-filter-row label{min-width:120px}
+.vivid-discovery-page .vivid-provider-heading{margin-bottom:12px}
+.vivid-discovery-page .vivid-provider-heading span{font-size:.7rem;color:#b7bdc7}
+.vivid-discovery-page .vivid-provider-heading small{font-size:.72rem;color:#747b86}
+.vivid-discovery-page .vivid-provider-chip{min-height:54px;padding:7px 12px;border-radius:14px;gap:10px}
+.vivid-discovery-page .vivid-provider-logo,
+.vivid-discovery-page .vivid-provider-chip img,
+.vivid-discovery-page .vivid-provider-all-icon{width:32px;height:32px;border-radius:8px}
+.vivid-discovery-page .vivid-provider-chip img{object-fit:contain;background:rgba(255,255,255,.06);padding:3px;box-sizing:border-box}
+.vivid-discovery-page .vivid-provider-name{font-size:.78rem;font-weight:600;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@media(max-width:560px){
+  .vivid-discovery-page .vivid-discovery-intro h1{font-size:2.45rem}
+  .vivid-discovery-page .vivid-filter-panel{padding:12px}
+  .vivid-discovery-page .vivid-provider-chip{min-height:52px;padding:7px 10px}
+  .vivid-discovery-page .vivid-provider-logo,
+  .vivid-discovery-page .vivid-provider-chip img,
+  .vivid-discovery-page .vivid-provider-all-icon{width:30px;height:30px}
+}
