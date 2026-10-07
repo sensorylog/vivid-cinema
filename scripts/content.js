@@ -302,7 +302,7 @@ function categoryParams(category, type, page, filters = {}, keywordId = "") {
 }
 
 export async function getCuratedPage(key, page = 1, filters = {}) {
-  const category = CURATED_CATEGORIES[key];
+  const category = CURATED_CATEGORIES[key] || BROWSE_CATEGORIES.find((item) => item.key === key);
   if (!category) throw new Error("Unknown curated category: " + key);
   let keywordId = "";
   if (Array.isArray(category.keywords) && category.keywords.length) {
