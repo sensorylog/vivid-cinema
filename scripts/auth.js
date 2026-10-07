@@ -64,7 +64,7 @@ async function googleSignIn(){
   await setPersistence(auth,browserLocalPersistence);
   const mobile=window.matchMedia?.("(pointer:coarse)")?.matches || window.innerWidth<700;
   if(mobile){
-    try{sessionStorage.setItem("vivid:google-redirect","1");}catch{}
+    try{localStorage.setItem("vivid:google-redirect","1");}catch{}
     await signInWithRedirect(auth,provider);
     return;
   }
@@ -73,31 +73,41 @@ async function googleSignIn(){
 }
 async function finishPendingGoogleRedirect(){
   let pending=false;
-  try{pending=sessionStorage.getItem("vivid:google-redirect")==="1";}catch{}
-  if(!pending)return;
+  try{pending=localStorage.getItem("vivid:google-redirect")==="1";}catch{}
+  // Always ask Firebase for a redirect result on auth pages. This is important
+  // on iOS/PWA browsers where the redirect can restore auth state without
+  // preserving sessionStorage.
   try{
     const result=await withTimeout(getRedirectResult(auth),30000,"Google sign-in redirect timed out.");
     if(result?.user){
-      try{sessionStorage.removeItem("vivid:google-redirect");}catch{}
-      await finishGoogleSignIn(result);return;
+      try{localStorage.removeItem("vivid:google-redirect");}catch{}
+      await finishGoogleSignIn(result);
+      return;
     }
-    // Some mobile/PWA browsers complete the redirect and restore the Firebase
-    // session before getRedirectResult resolves with a credential. In that case
-    // the auth-state event is the reliable completion signal.
-    await new Promise(resolve=>{
-      let settled=false;
-      const done=()=>{if(!settled){settled=true;resolve();}};
-      const timer=window.setTimeout(done,2500);
-      import("https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js").then(({onAuthStateChanged})=>{
-        const unsubscribe=onAuthStateChanged(auth,user=>{
-          if(user){clearTimeout(timer);unsubscribe();try{sessionStorage.removeItem("vivid:google-redirect");}catch{}void finishGoogleSignIn({user}).finally(done);}
-        });
-      }).catch(done);
-    });
+    if(!pending)return;
   }catch(error){
     console.error("Google redirect sign-in failed:",error);
     if(error?.code!=="auth/timeout")showMessage(friendlyError(error));
+    return;
   }
+
+  // Fallback: some mobile/PWA browsers finish the OAuth redirect by restoring
+  // the Firebase session, while getRedirectResult() returns null.
+  await new Promise(resolve=>{
+    let settled=false;
+    const done=()=>{if(!settled){settled=true;resolve();}};
+    const timer=window.setTimeout(done,4000);
+    const unsubscribe=import("https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js").then(({onAuthStateChanged})=>{
+      return onAuthStateChanged(auth,user=>{
+        if(user){
+          clearTimeout(timer);
+          unsubscribe?.();
+          try{localStorage.removeItem("vivid:google-redirect");}catch{}
+          void finishGoogleSignIn({user}).finally(done);
+        }
+      });
+    }).catch(done);
+  });
 }
 googleButtons.forEach(button=>button.addEventListener("click",async()=>{
   button.disabled=true;showMessage("Connecting to Google…",true);
