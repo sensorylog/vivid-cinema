@@ -8,6 +8,7 @@ import {
   signInWithPopup,
   signInWithRedirect,
   getRedirectResult,
+  onAuthStateChanged,
   setPersistence,
   browserLocalPersistence,
   signOut,
@@ -51,7 +52,7 @@ async function finishGoogleSignIn(credential){
   if(!credential?.user)return;
   if(googleFinishPromise)return googleFinishPromise;
   googleFinishPromise=(async()=>{
-    try{await createUserRecord(credential.user,credential.user.displayName||"");}
+    try{await withTimeout(createUserRecord(credential.user,credential.user.displayName||""),7000,"Google profile sync timed out.");}
     catch(error){console.warn("Google sign-in succeeded but profile sync failed:",error);}
     void startLibrarySync();
     window.location.replace("home.html");
@@ -72,46 +73,54 @@ async function googleSignIn(){
     return;
   }catch(error){
     if(error?.code!=="auth/popup-blocked" && error?.code!=="auth/operation-not-supported-in-this-environment") throw error;
-    try{localStorage.setItem("vivid:google-redirect","1");}catch{}
+    try{localStorage.setItem("vivid:google-redirect","1");sessionStorage.setItem("vivid:google-redirect","1");}catch{}
     await signInWithRedirect(auth,provider);
   }
 }
 async function finishPendingGoogleRedirect(){
   let pending=false;
-  try{pending=localStorage.getItem("vivid:google-redirect")==="1";}catch{}
+  try{
+    pending=localStorage.getItem("vivid:google-redirect")==="1" || sessionStorage.getItem("vivid:google-redirect")==="1";
+  }catch{}
 
-  // Firebase can restore the Google session even when the browser returns
-  // without a redirect credential. Listen for that restored user as a second
-  // completion path, especially for iOS/PWA navigation.
-  const authStatePromise=new Promise(resolve=>{
+  // On iOS/Safari, Firebase can restore the redirected Google user through
+  // auth state while getRedirectResult() is empty. Keep both paths alive.
+  const statePromise=new Promise(resolve=>{
     let settled=false;
-    const done=()=>{if(!settled){settled=true;resolve();}};
-    const timer=window.setTimeout(done,4000);
-    import("https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js").then(({onAuthStateChanged})=>{
-      let unsubscribe=()=>{};
-      unsubscribe=onAuthStateChanged(auth,user=>{
-        if(user && pending){
-          clearTimeout(timer);
-          unsubscribe();
-          try{localStorage.removeItem("vivid:google-redirect");}catch{}
-          void finishGoogleSignIn({user}).finally(done);
-        }
-      });
-    }).catch(done);
+    let unsubscribe=()=>{};
+    const finish=()=>{
+      if(settled)return;
+      settled=true;
+      clearTimeout(timer);
+      try{unsubscribe();}catch{}
+      resolve();
+    };
+    const timer=window.setTimeout(finish,10000);
+    unsubscribe=onAuthStateChanged(auth,user=>{
+      if(!user)return;
+      try{
+        localStorage.removeItem("vivid:google-redirect");
+        sessionStorage.removeItem("vivid:google-redirect");
+      }catch{}
+      void finishGoogleSignIn({user}).finally(finish);
+    });
   });
 
   try{
     const result=await withTimeout(getRedirectResult(auth),30000,"Google sign-in redirect timed out.");
     if(result?.user){
-      try{localStorage.removeItem("vivid:google-redirect");}catch{}
+      try{
+        localStorage.removeItem("vivid:google-redirect");
+        sessionStorage.removeItem("vivid:google-redirect");
+      }catch{}
       await finishGoogleSignIn(result);
       return;
     }
-    if(!pending){
-      await authStatePromise;
+    if(auth.currentUser){
+      await finishGoogleSignIn({user:auth.currentUser});
       return;
     }
-    await authStatePromise;
+    if(pending) await statePromise;
   }catch(error){
     console.error("Google redirect sign-in failed:",error);
     if(error?.code!=="auth/timeout")showMessage(friendlyError(error));
