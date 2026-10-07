@@ -32,6 +32,22 @@ const HOME_LOADERS = Object.freeze({
   appleTvPlus: () => providerHome(PROVIDER_IDS.appleTvPlus),
   hulu: () => providerHome(PROVIDER_IDS.hulu),
   paramountPlus: () => providerHome(PROVIDER_IDS.paramountPlus),
+  newReleases: () => {
+    const now = new Date();
+    const from = new Date(now); from.setDate(from.getDate() - 45);
+    const to = new Date(now); to.setDate(to.getDate() + 14);
+    return Promise.allSettled([
+      tmdbApi.newMovies(1, from.toISOString().slice(0,10), to.toISOString().slice(0,10)),
+      tmdbApi.newTv(1, from.toISOString().slice(0,10), to.toISOString().slice(0,10))
+    ]).then(results => {
+      const items = [];
+      results.forEach((result,index) => {
+        if(result.status==="fulfilled") items.push(...normalizeResults(result.value?.results||[], index===0?"movie":"tv"));
+      });
+      items.sort((a,b)=>Number(b.raw?.popularity||0)-Number(a.raw?.popularity||0));
+      return {page:1,total_pages:1,results:items.slice(0,20)};
+    });
+  },
   upcoming: (page) => {
     const now = new Date();
     const from = now.toISOString().slice(0, 10);
@@ -58,7 +74,8 @@ export const HOME_SECTION_META = Object.freeze({
   disneyPlus: { title: "Trending on Disney+", description: "Popular titles currently surfacing on Disney+.", type: "all" },
   appleTvPlus: { title: "Trending on Apple TV+", description: "Popular titles currently surfacing on Apple TV+.", type: "all" },
   hulu: { title: "Trending on Hulu", description: "Popular titles currently surfacing on Hulu.", type: "all" },
-  paramountPlus: { title: "Trending on Paramount+", description: "Popular titles currently surfacing on Paramount+.", type: "all" }
+  paramountPlus: { title: "Trending on Paramount+", description: "Popular titles currently surfacing on Paramount+.", type: "all" },
+  newReleases: { title: "New releases", description: "Fresh movies and series from the current release window.", type: "all" }
 });
 
 export const CURATED_CATEGORIES = Object.freeze({
