@@ -2031,3 +2031,156 @@ body{font-weight:400;}
   transform:scale(.985);
   opacity:.92;
 }
+
+/* ========================================================================== */
+/* BEAST MODE — FOCUS, PHYSICALITY, AND INTERRUPTIBLE WEB MOTION              */
+/* ========================================================================== */
+
+/* Focus is a real visual state for keyboard, gamepad, and TV-style navigation. */
+.vivid-cinema-home .vivid-card:focus-visible,
+.vivid-cinema-home .vivid-feature-card:focus-visible,
+.vivid-library-page .vivid-library-card:focus-visible,
+.vivid-library-page .vivid-library-tabs button:focus-visible,
+.vivid-title-page .vivid-cast:focus-visible,
+.vivid-title-page .vivid-similar-card:focus-visible,
+.vivid-title-page .vivid-video-card:focus-visible,
+.vivid-title-page .vivid-button:focus-visible,
+.vivid-watch-page .vivid-watch-rec-card:focus-visible,
+.vivid-watch-page .vivid-player-switch:focus-visible{
+  outline:0;
+  transform:translateY(-2px) scale(1.045);
+  box-shadow:0 16px 42px rgba(0,0,0,.5),0 0 0 2px rgba(255,255,255,.95);
+  z-index:5;
+  position:relative;
+}
+.vivid-cinema-home .vivid-card,
+.vivid-cinema-home .vivid-feature-card,
+.vivid-library-page .vivid-library-card,
+.vivid-library-page .vivid-library-tabs button,
+.vivid-title-page .vivid-cast,
+.vivid-title-page .vivid-similar-card,
+.vivid-title-page .vivid-video-card,
+.vivid-title-page .vivid-button,
+.vivid-watch-page .vivid-watch-rec-card,
+.vivid-watch-page .vivid-player-switch{
+  transition:transform .22s cubic-bezier(.22,1,.36,1),box-shadow .22s cubic-bezier(.22,1,.36,1),opacity .18s ease;
+}
+
+/* Touch gets the same physical feedback without turning every tap into a long animation. */
+@media (hover:none),(pointer:coarse){
+  .vivid-cinema-home .vivid-card:active,
+  .vivid-cinema-home .vivid-feature-card:active,
+  .vivid-library-page .vivid-library-card:active,
+  .vivid-title-page .vivid-cast:active,
+  .vivid-title-page .vivid-similar-card:active,
+  .vivid-title-page .vivid-video-card:active,
+  .vivid-watch-page .vivid-watch-rec-card:active{
+    transform:scale(.985);
+    opacity:.9;
+  }
+}
+
+/* Title pages: primary playback action leads; secondary actions recede. */
+.vivid-title-page .vivid-title-actions .vivid-button--primary{
+  min-width:142px;
+  min-height:44px;
+  padding-inline:17px;
+  border-radius:10px;
+  font-size:14px;
+  font-weight:700;
+}
+.vivid-title-page .vivid-title-actions .vivid-button--secondary{
+  min-height:44px;
+  border-radius:10px;
+}
+.vivid-title-page .vivid-title-library-actions{
+  opacity:.82;
+  margin-top:10px!important;
+}
+.vivid-title-page .vivid-title-library-actions .vivid-button{
+  min-height:36px;
+}
+.vivid-title-page .vivid-title-actions + .vivid-title-library-actions{
+  border-top:0;
+}
+
+/* Detail-page shelves follow the same two-axis, content-first rhythm. */
+.vivid-title-page .vivid-similar,
+.vivid-title-page .vivid-video-grid,
+.vivid-title-page .vivid-cast-grid{
+  scroll-snap-type:x mandatory;
+  scroll-padding-inline:2px;
+  overscroll-behavior-x:contain;
+  -webkit-overflow-scrolling:touch;
+}
+.vivid-title-page .vivid-similar-card,
+.vivid-title-page .vivid-video-card,
+.vivid-title-page .vivid-cast{
+  scroll-snap-align:start;
+}
+
+/* Adaptive atmosphere: the backdrop remains the source of color, never a hard panel. */
+.vivid-title-page .vivid-title-backdrop-overlay{
+  background:
+    linear-gradient(90deg,rgba(0,0,0,.94) 0%,rgba(0,0,0,.68) 34%,rgba(0,0,0,.16) 70%,rgba(0,0,0,.3) 100%),
+    linear-gradient(0deg,#000 0%,rgba(0,0,0,.12) 44%,rgba(0,0,0,.2) 100%);
+}
+.vivid-title-page .vivid-title-info{
+  margin-top:clamp(-145px,-11vw,-70px);
+}
+
+/* Watch page: the picture gets priority over the surrounding application chrome. */
+.vivid-watch-page{
+  background:#000!important;
+}
+.vivid-watch-page .vivid-watch-backdrop{
+  background-image:
+    linear-gradient(90deg,rgba(0,0,0,.98),rgba(0,0,0,.64) 50%,rgba(0,0,0,.9)),
+    linear-gradient(0deg,#000 0%,transparent 72%),
+    var(--watch-backdrop);
+}
+.vivid-watch-page .vivid-player-frame{
+  border:0;
+  border-radius:12px;
+  box-shadow:0 24px 80px rgba(0,0,0,.48);
+}
+.vivid-watch-page .vivid-player-bar{
+  border-top:1px solid rgba(255,255,255,.06);
+}
+.vivid-watch-page .vivid-watch-rec-rail{
+  scroll-snap-type:x mandatory;
+  scroll-padding-inline:2px;
+}
+.vivid-watch-page .vivid-watch-rec-card{
+  scroll-snap-align:start;
+}
+.vivid-watch-page .vivid-watch-rec-card img{
+  border:0;
+  border-radius:12px;
+}
+
+/* Avoid fake linear "motion physics" under reduced motion. */
+@media(prefers-reduced-motion:reduce){
+  .vivid-cinema-home .vivid-card,
+  .vivid-cinema-home .vivid-feature-card,
+  .vivid-library-page .vivid-library-card,
+  .vivid-library-page .vivid-library-tabs button,
+  .vivid-title-page .vivid-cast,
+  .vivid-title-page .vivid-similar-card,
+  .vivid-title-page .vivid-video-card,
+  .vivid-title-page .vivid-button,
+  .vivid-watch-page .vivid-watch-rec-card,
+  .vivid-watch-page .vivid-player-switch{
+    transition:none!important;
+  }
+  .vivid-cinema-home .vivid-card:focus-visible,
+  .vivid-cinema-home .vivid-feature-card:focus-visible,
+  .vivid-library-page .vivid-library-card:focus-visible,
+  .vivid-title-page .vivid-cast:focus-visible,
+  .vivid-title-page .vivid-similar-card:focus-visible,
+  .vivid-title-page .vivid-video-card:focus-visible,
+  .vivid-title-page .vivid-button:focus-visible,
+  .vivid-watch-page .vivid-watch-rec-card:focus-visible{
+    transform:none;
+  }
+}
