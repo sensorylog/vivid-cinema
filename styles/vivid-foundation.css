@@ -1,5 +1,21 @@
-/* Compatibility layer: legacy foundation selectors remain stable while A2 provides richer tokens. */
-/* Vivid 3.0 compatibility tokens — legacy components inherit the same system. */
+/* Vivid Cinema — shared design tokens. Kept intentionally small so page-specific CSS stays composable. */
 :root{
-  --vivid-glass-blur:var(--vivid-ui-blur,28px);
+  --vivid-bg:#07090d;
+  --vivid-surface:#1c1c1e;
+  --vivid-surface-strong:#242426;
+  --vivid-text:#f5f5f7;
+  --vivid-text-secondary:#d1d1d6;
+  --vivid-muted:#8e8e93;
+  --vivid-line:rgba(255,255,255,.08);
+  --vivid-line-strong:rgba(255,255,255,.14);
+  --vivid-radius-sm:9px;
+  --vivid-radius-md:12px;
+  --vivid-radius-lg:14px;
+  --vivid-gutter:16px;
+  --vivid-shell-height:64px;
+  --vivid-mobile-nav-height:64px;
+  --vivid-ui-blur:18px;
+  --vivid-ui-shadow:0 12px 36px rgba(0,0,0,.24);
+  --vivid-font-display:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text",sans-serif;
+  --vivid-font-text:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display",sans-serif;
 }
