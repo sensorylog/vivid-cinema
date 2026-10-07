@@ -38,7 +38,8 @@ const SECTION_RAIL_IDS=Object.freeze({
  disneyPlus:"disney-plus-rail",
  appleTvPlus:"apple-tv-plus-rail",
  hulu:"hulu-rail",
- paramountPlus:"paramount-plus-rail"
+ paramountPlus:"paramount-plus-rail",
+ newReleases:"new-releases-rail"
 });
 
 function skeleton(container,count=8){if(!container)return;container.innerHTML='<div class="vivid-loading">'+Array.from({length:count},()=>'<div class="vivid-skeleton-card"></div>').join("")+'</div>'}
@@ -413,7 +414,7 @@ async function maybeShowColdStart(){
 }
 
 async function loadHome(){
- const ids=["trending-rail","now-playing-rail","movies-rail","top-rated-rail","tv-rail","top-tv-rail","upcoming-rail","netflix-rail","prime-video-rail","hbo-max-rail","disney-plus-rail","apple-tv-plus-rail","hulu-rail","paramount-plus-rail"];
+ const ids=["trending-rail","now-playing-rail","movies-rail","top-rated-rail","tv-rail","top-tv-rail","upcoming-rail","new-releases-rail","netflix-rail","prime-video-rail","hbo-max-rail","disney-plus-rail","apple-tv-plus-rail","hulu-rail","paramount-plus-rail"];
  ids.forEach(id=>skeleton($(id)));
  renderContinueWatching();
 
@@ -425,7 +426,7 @@ async function loadHome(){
  const loadSecondary=async()=>{
    // Keep secondary shelves from creating a seven-request burst. Each small
    // batch can paint before the next one starts, keeping scrolling responsive.
-   for(const batch of [["topRatedMovies","popularTv"],["topRatedTv"],["upcoming"],["netflix","primeVideo"],["hboMax","disneyPlus"],["appleTvPlus","hulu"],["paramountPlus"]]){
+   for(const batch of [["topRatedMovies","popularTv"],["topRatedTv"],["upcoming","newReleases"],["netflix","primeVideo"],["hboMax","disneyPlus"],["appleTvPlus","hulu"],["paramountPlus"]]){
      try{await loadSectionBatch(batch)}catch(error){console.warn("Vivid secondary home load failed:",batch,error)}
      await new Promise(resolve=>window.setTimeout(resolve,80));
    }
