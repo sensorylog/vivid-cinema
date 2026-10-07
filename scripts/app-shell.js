@@ -156,6 +156,18 @@ function initThemeToggle() {
   else nav.appendChild(button);
 }
 
+function ensureSkipLink() {
+  const main = document.querySelector("main");
+  if (!main) return;
+  if (!main.id) main.id = "main-content";
+  if (document.querySelector(".vivid-skip-link")) return;
+  const skip = document.createElement("a");
+  skip.className = "vivid-skip-link";
+  skip.href = "#" + main.id;
+  skip.textContent = "Skip to main content";
+  document.body.prepend(skip);
+}
+
 function setPageIdentity() {
   const page = document.body?.dataset?.vividPage || "unknown";
   document.documentElement.dataset.vividPage = page;
@@ -193,6 +205,7 @@ function initAppShell() {
   syncNavigation();
   initThemeToggle();
   ensureBackControl();
+  ensureSkipLink();
 
   window.addEventListener("resize", setViewportState, { passive: true });
   window.addEventListener("online", setConnectionState);
