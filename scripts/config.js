@@ -8,7 +8,7 @@ export const VIVID_CONFIG = Object.freeze({
     jikanBaseUrl: "https://api.jikan.moe/v4",
     animapBaseUrl: "https://animap.id",
     vidapiEmbedBaseUrl: "https://vaplayer.ru",
-    vidsrcEmbedBaseUrl: "https://vidsrc.to",
+    vidsrcEmbedBaseUrl: "https://vidsrc.sh",
     multiembedBaseUrl: "https://multiembed.mov",
     language: "en-US"
   }),
