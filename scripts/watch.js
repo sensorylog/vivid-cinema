@@ -99,7 +99,7 @@ async function resolveAnimeMalId() {
   // when there is no direct TMDB -> MAL row for the specific TMDB record.
   const animapBase = String(
     VIVID_CONFIG.api.animapBaseUrl || "https://animap.id"
-  ).replace(/\\/+$/, "");
+  ).replace(/\/+$/, "");
 
   for (const title of titles) {
     try {
@@ -117,15 +117,8 @@ async function resolveAnimeMalId() {
 
       if (!response.ok) continue;
 
-      const results = Array.isArray(await response.json())
-        ? await fetch(
-            animapBase + "/api/search?" + new URLSearchParams({
-              q: query,
-              limit: "25"
-            }),
-            { headers: { Accept: "application/json" }, cache: "force-cache" }
-          ).then(r => r.json()).catch(() => [])
-        : [];
+      const results = await response.json();
+      if (!Array.isArray(results)) continue;
 
       const wanted = normalizeAnimeTitle(title);
 
