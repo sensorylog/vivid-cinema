@@ -186,6 +186,67 @@ export const CURATED_CATEGORIES = Object.freeze({
   }
 });
 
+
+/* Apple TV-style Browse catalogue: editorial categories are the landing surface.
+   Search remains a separate destination; these keys route into the existing
+   curated discovery engine so the Browse UI stays data-driven. */
+export const BROWSE_CATEGORIES = Object.freeze([
+  { key:"naturalWonders", label:"Natural Wonders", description:"Oceans, mountains, wild places and the planet at its most spectacular.", group:"Featured", type:"all", params:{ with_genres:"99|12", sort_by:"popularity.desc" } },
+  { key:"psychologicalTerror", label:"Psychological Terror", description:"Mind games, paranoia and horror that gets under your skin.", group:"Featured", type:"all", params:{ with_genres:"27|53", sort_by:"popularity.desc" }, keywords:["psychological"] },
+  { key:"dramedies", label:"Dramedies", description:"Where sharp comedy meets stories with something real to say.", group:"Featured", type:"all", params:{ with_genres:"35,18", sort_by:"popularity.desc" } },
+  { key:"periodDramas", label:"Period Dramas", description:"Sweeping stories shaped by another time.", group:"Featured", type:"all", params:{ with_genres:"18|36", sort_by:"popularity.desc" } },
+  { key:"cultComedies", label:"Cult Comedies", description:"Offbeat, endlessly quotable comedies with a devoted following.", group:"Featured", type:"all", params:{ with_genres:"35", sort_by:"popularity.desc" }, keywords:["cult"] },
+  { key:"fantasyAdventures", label:"Fantasy Adventures", description:"Epic quests, impossible worlds and journeys beyond the ordinary.", group:"Featured", type:"all", params:{ with_genres:"14,12", sort_by:"popularity.desc" } },
+  { key:"darkLaughs", label:"Dark Laughs", description:"Morbid, wicked and seriously funny.", group:"Featured", type:"all", params:{ with_genres:"35", sort_by:"popularity.desc" }, keywords:["dark comedy"] },
+  { key:"musicDocs", label:"Music Docs", description:"Artists, performances and the stories behind the sound.", group:"Featured", type:"movie", params:{ with_genres:"99", sort_by:"popularity.desc" }, keywords:["music"] },
+  { key:"darkFantasy", label:"Dark Fantasy", description:"Magic, monsters and worlds with a shadow over them.", group:"Featured", type:"all", params:{ with_genres:"14,27", sort_by:"popularity.desc" } },
+  { key:"heistsCapers", label:"Heists & Capers", description:"Big scores, clever crews and plans that never go to plan.", group:"Featured", type:"all", params:{ with_genres:"80|35", sort_by:"popularity.desc" }, keywords:["heist"] },
+  { key:"legalDramas", label:"Legal Dramas", description:"Courtrooms, cases, verdicts and the people behind them.", group:"Stories", type:"all", params:{ with_genres:"18", sort_by:"popularity.desc" }, keywords:["legal"] },
+  { key:"explorersAdventurers", label:"Explorers & Adventurers", description:"Journeys to the edge of the map and beyond.", group:"Stories", type:"all", params:{ with_genres:"12", sort_by:"popularity.desc" } },
+  { key:"alienInvaders", label:"Alien Invaders", description:"First contact, hostile worlds and visitors from beyond.", group:"Stories", type:"all", params:{ with_genres:"878", sort_by:"popularity.desc" }, keywords:["alien"] },
+  { key:"familyMovieNight", label:"Family Movie Night", description:"Big-hearted picks everyone can watch together.", group:"Stories", type:"all", params:{ with_genres:"10751", sort_by:"popularity.desc" } },
+  { key:"actionThrillers", label:"Action Thrillers", description:"High stakes, hard turns and no time to slow down.", group:"Stories", type:"all", params:{ with_genres:"28,53", sort_by:"popularity.desc" } },
+  { key:"romComs", label:"Rom-Coms", description:"Chemistry, chaos and falling in love.", group:"Stories", type:"all", params:{ with_genres:"10749,35", sort_by:"popularity.desc" } },
+  { key:"crimeDramas", label:"Crime Dramas", description:"Power, loyalty, consequence and the long way down.", group:"Stories", type:"all", params:{ with_genres:"80,18", sort_by:"popularity.desc" } },
+  { key:"superheroesVillains", label:"Superheroes & Villains", description:"Heroes, antiheroes and the forces that challenge them.", group:"Stories", type:"all", params:{ with_genres:"28", sort_by:"popularity.desc" }, keywords:["superhero"] },
+  { key:"frontierGrit", label:"Frontier Grit", description:"Dust, danger and hard lives on the edge of civilisation.", group:"Stories", type:"all", params:{ with_genres:"37", sort_by:"popularity.desc" } },
+  { key:"musicMovies", label:"Music Movies", description:"Stories where music is part of the journey.", group:"Stories", type:"all", params:{ with_genres:"10402", sort_by:"popularity.desc" } },
+  { key:"youngLove", label:"Young Love", description:"First loves, coming of age and everything in between.", group:"Stories", type:"all", params:{ with_genres:"10749,18", sort_by:"popularity.desc" } },
+  { key:"basedOnABook", label:"Based on a Book", description:"Stories that began on the page.", group:"Stories", type:"all", params:{ sort_by:"popularity.desc" }, keywords:["based on novel"] },
+  { key:"spies", label:"Spies", description:"Secrets, double lives and missions in the shadows.", group:"Stories", type:"all", params:{ with_genres:"53|28", sort_by:"popularity.desc" }, keywords:["spy"] },
+  { key:"historicalRomance", label:"Historical Romance", description:"Love stories set against another chapter of history.", group:"Stories", type:"all", params:{ with_genres:"10749,36", sort_by:"popularity.desc" } },
+  { key:"americana", label:"Americana", description:"Stories rooted in the people, places and myths of America.", group:"Stories", type:"all", params:{ with_origin_country:"US", sort_by:"popularity.desc" } },
+  { key:"sportsStories", label:"Sports Stories", description:"Competition, ambition, teamwork and the stories behind the score.", group:"Stories", type:"all", params:{ with_genres:"18|99", sort_by:"popularity.desc" }, keywords:["sports"] },
+  { key:"kidsFamily", label:"Kids & Family", description:"Animation, adventure and stories made for all ages.", group:"Genres", type:"all", params:{ with_genres:"10751|16", sort_by:"popularity.desc" } },
+  { key:"comedy", label:"Comedy", description:"Find something funny.", group:"Genres", type:"all", params:{ with_genres:"35", sort_by:"popularity.desc" } },
+  { key:"drama", label:"Drama", description:"Character-driven stories with something to say.", group:"Genres", type:"all", params:{ with_genres:"18", sort_by:"popularity.desc" } },
+  { key:"sciFi", label:"Sci-Fi", description:"Future worlds, strange ideas and impossible technology.", group:"Genres", type:"all", params:{ with_genres:"878", sort_by:"popularity.desc" } },
+  { key:"romance", label:"Romance", description:"Stories about love and connection.", group:"Genres", type:"all", params:{ with_genres:"10749", sort_by:"popularity.desc" } },
+  { key:"horror", label:"Horror", description:"Something is waiting in the dark.", group:"Genres", type:"all", params:{ with_genres:"27", sort_by:"popularity.desc" } },
+  { key:"action", label:"Action", description:"Move fast. Hit hard.", group:"Genres", type:"all", params:{ with_genres:"28", sort_by:"popularity.desc" } },
+  { key:"crime", label:"Crime", description:"Underworlds, investigations and dangerous choices.", group:"Genres", type:"all", params:{ with_genres:"80", sort_by:"popularity.desc" } },
+  { key:"reality", label:"Reality", description:"Unscripted stories, competition and real lives.", group:"Genres", type:"tv", params:{ with_genres:"10764", sort_by:"popularity.desc" } },
+  { key:"animatedHijinks", label:"Animated Hijinks", description:"Animated comedy, chaos and unforgettable characters.", group:"Genres", type:"all", params:{ with_genres:"16,35", sort_by:"popularity.desc" } },
+  { key:"sciFiThrillers", label:"Sci-Fi Thrillers", description:"Future-facing stories with the tension turned up.", group:"Genres", type:"all", params:{ with_genres:"878,53", sort_by:"popularity.desc" } },
+  { key:"independent", label:"Independent", description:"Distinctive films outside the mainstream.", group:"Genres", type:"movie", params:{ sort_by:"vote_average.desc", "vote_count.gte":"100" }, keywords:["independent film"] },
+  { key:"historicalEpics", label:"Historical Epics", description:"Large-scale stories from the pages of history.", group:"Genres", type:"all", params:{ with_genres:"36,18", sort_by:"popularity.desc" } },
+  { key:"workplaceComedies", label:"Workplace Comedies", description:"Office politics, colleagues and comedy on the clock.", group:"Genres", type:"tv", params:{ with_genres:"35", sort_by:"popularity.desc" }, keywords:["workplace"] },
+  { key:"anime", label:"Anime", description:"Japanese animation and anime worlds.", group:"Vivid", type:"all", params:{ with_genres:"16", with_original_language:"ja", sort_by:"popularity.desc" } },
+  { key:"africanCinema", label:"African Cinema", description:"Stories from Ghana, Nigeria and across the continent.", group:"Vivid", type:"all", params:{ with_origin_country:"GH|NG|ZA|KE|SN|EG|MA|DZ|TN|ET|TZ|UG", sort_by:"popularity.desc" } },
+  { key:"nollywood", label:"Nollywood", description:"Movies and series from Nigeria.", group:"Vivid", type:"all", params:{ with_origin_country:"NG", sort_by:"popularity.desc" } },
+  { key:"kDrama", label:"K-Dramas", description:"Korean-language series and stories.", group:"Vivid", type:"tv", params:{ with_origin_country:"KR", with_original_language:"ko", sort_by:"popularity.desc" } },
+  { key:"bollywood", label:"Bollywood", description:"Hindi-language Indian movies and series.", group:"Vivid", type:"all", params:{ with_origin_country:"IN", with_original_language:"hi", sort_by:"popularity.desc" } },
+  { key:"cDrama", label:"C-Dramas", description:"Chinese-language series and stories.", group:"Vivid", type:"tv", params:{ with_origin_country:"CN", with_original_language:"zh", sort_by:"popularity.desc" } },
+  { key:"turkishDrama", label:"Turkish Dramas", description:"Series and stories from Türkiye.", group:"Vivid", type:"tv", params:{ with_origin_country:"TR", with_original_language:"tr", sort_by:"popularity.desc" } },
+  { key:"british", label:"British", description:"Movies and TV from the United Kingdom.", group:"Vivid", type:"all", params:{ with_origin_country:"GB", sort_by:"popularity.desc" } },
+  { key:"french", label:"French Cinema", description:"French-language movies and series.", group:"Vivid", type:"all", params:{ with_original_language:"fr", sort_by:"popularity.desc" } },
+  { key:"japanese", label:"Japanese", description:"Japanese movies and TV beyond anime.", group:"Vivid", type:"all", params:{ with_origin_country:"JP", with_original_language:"ja", sort_by:"popularity.desc" } },
+  { key:"hiddenGems", label:"Hidden Gems", description:"Strongly rated titles that deserve a bigger audience.", group:"Vivid", type:"all", params:{ "vote_average.gte":"7", "vote_count.gte":"100", sort_by:"vote_average.desc" } },
+  { key:"awardWinners", label:"Award-Worthy", description:"Critically acclaimed stories worth discovering.", group:"Vivid", type:"movie", params:{ "vote_average.gte":"7.5", "vote_count.gte":"500", sort_by:"vote_average.desc" } },
+  { key:"oneNight", label:"One-Night Movies", description:"Easy-to-finish movies for a single evening.", group:"Vivid", type:"movie", params:{ "with_runtime.gte":"1", "with_runtime.lte":"120", sort_by:"popularity.desc" } },
+  { key:"under100", label:"Under 100 Minutes", description:"Great picks when time is limited.", group:"Vivid", type:"movie", params:{ "with_runtime.gte":"1", "with_runtime.lte":"99", sort_by:"popularity.desc" } }
+]);
+
 const keywordCache = new Map();
 
 function normalizeHome(key, data) {
