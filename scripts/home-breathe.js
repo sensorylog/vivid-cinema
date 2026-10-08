@@ -1,3 +1,6 @@
+import { tmdbApi } from "./tmdb.js";
+import { getImageUrl } from "./media.js";
+
 const rail = document.getElementById("trending-rail");
 const art = document.querySelector(".vivid-home-tv-art");
 const title = document.querySelector(".vivid-home-tv-title");
@@ -7,6 +10,20 @@ let items = [];
 let index = 0;
 let timer = null;
 let liveAnimations = [];
+
+async function loadDirectTrending() {
+  try {
+    const data = await tmdbApi.trending("all", "week");
+    return (data?.results || []).filter(item => item?.poster_path || item?.backdrop_path).slice(0, 12).map(item => ({
+      src: getImageUrl(item.backdrop_path || item.poster_path, "w780"),
+      title: item.title || item.name || "Trending now",
+      meta: `${(item.release_date || item.first_air_date || "").slice(0, 4) || "Now"} · ${item.media_type === "tv" ? "Series" : "Movie"}`
+    }));
+  } catch (error) {
+    console.warn("Vivid Moment artwork fallback failed:", error);
+    return [];
+  }
+}
 
 function collectTrending() {
   if (!rail) return [];
@@ -36,8 +53,17 @@ function showTrendingItem(item) {
   meta.textContent = item.meta;
 }
 
-function refreshTrending() {
+async function refreshTrending() {
   const next = collectTrending();
+  if (!next.length) {
+    const direct = await loadDirectTrending();
+    if (direct.length) {
+      items = direct;
+      index = 0;
+      showTrendingItem(items[index]);
+      index = 1 % items.length;
+    }
+  }
   if (!next.length) return;
   items = next;
   index %= items.length;
@@ -53,3 +79,9 @@ function refreshTrending() {
     }, 4200);
   }
 }
+
+
+// The Trending rail can still be loading when the cinema moment appears.
+// Pull the same TMDB trending feed directly so the TV artwork never depends
+// on another rail's lazy-image timing.
+window.setTimeout(() => { void refreshTrending(); }, 700);
