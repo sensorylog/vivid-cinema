@@ -27,6 +27,41 @@ function normalizeApi(channelsData,streamsData,countriesData){
  });
  return [...grouped.values()].filter(c=>c.sources.length);
 }
+function parseM3U(text,provider){
+ const lines=String(text||"").split(/\\r?\\n/);
+ const rows=[];
+ let meta=null;
+ for(const line of lines){
+   const value=line.trim();
+   if(value.startsWith("#EXTINF:")){
+     const comma=value.indexOf(",");
+     const attrs=comma>=0?value.slice(0,comma):value;
+     const name=comma>=0?value.slice(comma+1).trim():"Live";
+     const attr=(key)=>{const m=attrs.match(new RegExp(key+'="([^"]*)"', "i"));return m?m[1]:""};
+     meta={name:name||"Live",logo:attr("tvg-logo"),category:attr("group-title")||"general",country:attr("tvg-country")||"",language:attr("tvg-language")||""};
+   }else if(meta&&value&&!value.startsWith("#")){
+     if(!/^https?:\\/\\//i.test(value)){meta=null;continue}
+     const isYouTube=/((youtube\\.com|youtu\\.be)\\/)/i.test(value);
+     rows.push({meta,source:{type:isYouTube?"iframe":"video",url:value,quality:"public",labels:[provider]},provider});
+     meta=null;
+   }
+ }
+ return rows;
+}
+function normalizeM3U(rows){
+ const grouped=new Map();
+ rows.forEach(({meta,source,provider})=>{
+   const name=meta.name||"Live";
+   const key=name.toLowerCase().replace(/[^a-z0-9]+/g,"");
+   if(!key)return;
+   if(!grouped.has(key))grouped.set(key,{id:provider+"-"+key,name,altNames:[],country:meta.country||"International",countryCode:"",logo:meta.logo||"",language:meta.language||"",category:meta.category||"general",categories:[meta.category||"general"],provider,sources:[]});
+   const row=grouped.get(key);
+   if(!row.logo&&meta.logo)row.logo=meta.logo;
+   if(!row.sources.some(x=>x.url===source.url)&&row.sources.length<3)row.sources.push(source);
+ });
+ return [...grouped.values()].filter(c=>c.sources.length);
+}
+
 function renderFilters(){
  if(!filtersRoot)return;
  const cats=[...new Set(channels.flatMap(c=>c.categories?.length?c.categories:[c.category]).filter(Boolean))].sort();
@@ -116,20 +151,31 @@ frame?.addEventListener("load",()=>{if(playerLoading)playerLoading.hidden=true})
 search?.addEventListener("input",()=>{page=1;render()});
 (async()=>{
  try{
-   const [seedRes,channelsRes,streamsRes,countriesRes]=await Promise.all([
+   const [seedRes,channelsRes,streamsRes,countriesRes,freeTvRes,curatedRes]=await Promise.all([
      fetch("./data/live-channels.json",{cache:"no-store"}),
      fetch("https://iptv-org.github.io/api/channels.json",{cache:"no-store"}),
      fetch("https://iptv-org.github.io/api/streams.json",{cache:"no-store"}),
-     fetch("https://iptv-org.github.io/api/countries.json",{cache:"no-store"})
+     fetch("https://iptv-org.github.io/api/countries.json",{cache:"no-store"}),
+     fetch("https://raw.githubusercontent.com/Free-TV/IPTV/master/playlist.m3u8",{cache:"no-store"}),
+     fetch("https://raw.githubusercontent.com/RW1986/IPTV/main/lineup.m3u8",{cache:"no-store"})
    ]);
    const seed=seedRes.ok?await seedRes.json():FALLBACK;
    const apiChannels=channelsRes.ok?await channelsRes.json():[];
    const apiStreams=streamsRes.ok?await streamsRes.json():[];
    const countries=countriesRes.ok?await countriesRes.json():[];
+   const freeTv=freeTvRes.ok?normalizeM3U(parseM3U(await freeTvRes.text(),"Free-TV")):[];
+   const curated=curatedRes.ok?normalizeM3U(parseM3U(await curatedRes.text(),"Curated FAST")):[];
    const fallbackSeed=(Array.isArray(seed)?seed:[]).map(c=>({...c,provider:"2embed",sources:[{type:"iframe",url:c.streamUrl}]}));
    const api=normalizeApi(apiChannels,apiStreams,countries);
    const byName=new Map();
-   [...fallbackSeed,...api].forEach(c=>{const key=c.name.toLowerCase().replace(/[^a-z0-9]+/g,"");const old=byName.get(key);if(!old)byName.set(key,c);else if(c.provider==="2embed"){c.sources=[...c.sources,...old.sources];byName.set(key,c)}});
+   [...freeTv,...curated,...api,...fallbackSeed].forEach(c=>{
+     const key=c.name.toLowerCase().replace(/[^a-z0-9]+/g,"");
+     const old=byName.get(key);
+     if(!old){byName.set(key,c);return}
+     const sources=[...old.sources,...c.sources].filter((s,i,a)=>s?.url&&a.findIndex(x=>x.url===s.url)===i).slice(0,3);
+     const preferred=c.provider==="2embed"?c:old;
+     byName.set(key,{...preferred,sources,logo:preferred.logo||old.logo||c.logo});
+   });
    channels=[...byName.values()];
    if(!channels.length)throw Error("No live channels returned");
  }catch(e){console.warn("Live catalogue fallback:",e);channels=FALLBACK}
