@@ -420,6 +420,41 @@ function handlePlayerEvent(event) {
     Number(eventData.player_progress) > 0;
   if (!isPlaybackSignal) return;
   const data = payload.data;
+  if (isVidLink) {
+    const vidlinkMediaType = String(data.mediaType || "").toLowerCase();
+    const vidlinkId = String(data.tmdbId || data.tmdb || "").trim();
+    if (vidlinkMediaType && vidlinkMediaType !== String(media?.media_type || "").toLowerCase()) return;
+    if (vidlinkId && vidlinkId !== String(media?.id || "")) return;
+    primaryHealthy = true;
+    clearFallbackTimer();
+    const status = $("player-status");
+    if (status) status.hidden = true;
+    const progress = Number(data.currentTime) || 0;
+    const duration = Number(data.duration) || 0;
+    const season = data.season ?? currentParams?.season;
+    const episode = data.episode ?? currentParams?.episode;
+    if (progress > 0) {
+      savePlaybackProgress(progressKey(), {
+        progress, duration, season, episode,
+        title: media.title, media_type: media.media_type, id: media.id
+      });
+      recordWatchActivity(progress, duration);
+      recordBehavior("playback_progress", media, {
+        progress, duration,
+        percentage: duration ? Math.round(progress / duration * 100) : 0,
+        season, episode
+      });
+    }
+    if (/^(ended|completed)$/i.test(String(data.event || ""))) {
+      recordBehavior("watch_completed", media, { duration, season, episode });
+      upsertLibraryItem("history", { ...historyItem(), completion: 100, completedAt: Date.now(), updatedAt: Date.now() });
+      completePlaybackProgress(progressKey(), {
+        duration, season, episode,
+        title: media.title, media_type: media.media_type, id: media.id
+      });
+    }
+    return;
+  }
   const info = data.player_info || {};
   // Validate the event before marking the source healthy. Cross-origin players can
   // emit generic events, and an unrelated/late event must never suppress fallback.
