@@ -33,3 +33,12 @@
   .vivid-watch-head p{font-size:.78rem}
   .vivid-player-section{padding-top:6px}
 }
+
+
+.vivid-player-source-group{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.vivid-player-source-caption{display:inline-flex;align-items:center;gap:5px;color:#858d99;margin-right:3px}
+.vivid-player-source{appearance:none;border:1px solid rgba(255,255,255,.13);background:rgba(255,255,255,.045);color:#aeb5bf;border-radius:999px;padding:6px 12px;font:inherit;font-size:.72rem;cursor:pointer;transition:background .15s ease,color .15s ease,border-color .15s ease}
+.vivid-player-source:hover:not(:disabled){background:rgba(255,255,255,.1);color:#fff}
+.vivid-player-source.is-active{background:#fff;color:#08090b;border-color:#fff;font-weight:700}
+.vivid-player-source:disabled{opacity:.45;cursor:not-allowed}
+@media(max-width:700px){.vivid-player-bar{align-items:flex-start}.vivid-player-source-group{width:100%}.vivid-player-bar-actions{width:100%;justify-content:space-between}.vivid-player-source{padding:6px 10px}}
