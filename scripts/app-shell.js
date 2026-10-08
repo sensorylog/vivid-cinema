@@ -95,6 +95,18 @@ function syncDesktopNavigation() {
   links.innerHTML = buildPrimaryLinks(page);
   nav.appendChild(links);
 
+  const account = document.createElement("a");
+  account.className = "vivid-nav-account";
+  account.id = "auth-link";
+  account.href = "auth.html";
+  account.setAttribute("aria-label", "Sign in");
+  account.innerHTML = '<i class="bi bi-person-fill" aria-hidden="true"></i><span>Account</span>';
+  nav.appendChild(account);
+
+  const language = document.createElement("div");
+  language.className = "vivid-nav-language-slot";
+  nav.appendChild(language);
+
   nav.classList.remove("vivid-v2-nav");
 }
 
