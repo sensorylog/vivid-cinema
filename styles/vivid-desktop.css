@@ -1,0 +1,215 @@
+/* Vivid Cinema — Desktop Cinema System v1
+   Desktop-only visual normalization. No data, routing, playback or mobile behavior changes. */
+@media (min-width: 901px){
+  :root{
+    --vivid-content-width: 1320px;
+    --vivid-page-gutter: clamp(28px,3vw,48px);
+    --vivid-section-gap: clamp(42px,4vw,64px);
+  }
+
+  body.vivid-cinema-home{
+    background:#07080a;
+    color:#f5f7fa;
+  }
+
+  /* One restrained desktop header: less pill-heavy, more Apple-TV-like. */
+  body.vivid-cinema-home .vivid-topbar{
+    padding:14px max(24px,3vw) 12px;
+    background:linear-gradient(180deg,rgba(5,6,8,.92),rgba(5,6,8,.58) 78%,transparent)!important;
+    border:0!important;
+    box-shadow:none!important;
+    backdrop-filter:blur(24px) saturate(140%)!important;
+    -webkit-backdrop-filter:blur(24px) saturate(140%)!important;
+  }
+  body.vivid-cinema-home .vivid-nav{
+    width:min(1320px,100%);
+    min-height:50px;
+    gap:22px;
+  }
+  body.vivid-cinema-home .vivid-brand{
+    font-size:1.08rem;
+    margin-right:6px;
+  }
+  body.vivid-cinema-home .vivid-navlinks{
+    gap:2px;
+  }
+  body.vivid-cinema-home .vivid-navlinks a{
+    padding:8px 11px;
+    border-radius:10px;
+    font-size:.78rem;
+    color:#9da3ad!important;
+  }
+  body.vivid-cinema-home .vivid-navlinks a:hover,
+  body.vivid-cinema-home .vivid-navlinks a[aria-current=true]{
+    color:#fff!important;
+    background:rgba(255,255,255,.075);
+  }
+  body.vivid-cinema-home .vivid-search-trigger{
+    margin-left:auto;
+    height:38px;
+    min-width:38px;
+    padding:0 11px;
+    border-color:rgba(255,255,255,.10);
+    background:rgba(255,255,255,.055);
+  }
+  body.vivid-cinema-home .vivid-search-trigger kbd{display:inline-block}
+  body.vivid-cinema-home .vivid-nav-action{
+    padding:8px 12px;
+    border-radius:9px;
+    font-size:.76rem;
+    background:#fff;
+    color:#08090b;
+  }
+
+  /* Hero: cinematic, but not an oversized wall of content. */
+  body.vivid-cinema-home .vivid-hero{
+    height:min(820px,82svh);
+    min-height:650px;
+  }
+  body.vivid-cinema-home .vivid-hero-media::after{
+    background:
+      linear-gradient(90deg,rgba(3,4,6,.97) 0%,rgba(3,4,6,.78) 31%,rgba(3,4,6,.24) 66%,rgba(3,4,6,.44) 100%),
+      linear-gradient(0deg,#07080a 0%,transparent 32%,rgba(0,0,0,.16) 100%);
+  }
+  body.vivid-cinema-home .vivid-hero-content{
+    width:min(1320px,100%);
+    padding:150px var(--vivid-page-gutter) 175px;
+  }
+  body.vivid-cinema-home .vivid-kicker{
+    margin-bottom:10px;
+    font-size:.66rem;
+    letter-spacing:.18em;
+    color:#b8bec8;
+  }
+  body.vivid-cinema-home .vivid-hero-title{
+    max-width:700px;
+    margin-bottom:12px;
+    font-size:clamp(3.2rem,5.3vw,5.4rem);
+    line-height:.94;
+  }
+  body.vivid-cinema-home .vivid-hero-copy{
+    max-width:500px;
+    font-size:.91rem;
+    line-height:1.5;
+  }
+  body.vivid-cinema-home .vivid-meta{
+    margin:12px 0;
+    font-size:.76rem;
+  }
+  body.vivid-cinema-home .vivid-actions{gap:7px}
+  body.vivid-cinema-home .vivid-actions .vivid-button{
+    min-height:40px;
+    padding:.58rem .88rem;
+    font-size:.78rem;
+  }
+
+  /* Featured selector belongs to the hero, not a second full-width section. */
+  body.vivid-cinema-home .vivid-feature-strip{
+    bottom:20px;
+    width:min(1320px,100%);
+    left:50%;
+    right:auto;
+    transform:translateX(-50%);
+    padding:0 var(--vivid-page-gutter);
+    background:transparent;
+  }
+  body.vivid-cinema-home .vivid-feature-track{
+    gap:9px;
+    padding:5px 2px 8px;
+  }
+  body.vivid-cinema-home .vivid-feature-card{
+    flex:0 0 184px;
+    height:104px;
+    border-radius:11px;
+  }
+
+  /* Main catalogue: consistent desktop rhythm and less vertical dead space. */
+  body.vivid-cinema-home .vivid-catalogue-explore,
+  body.vivid-cinema-home .vivid-section-wrap{
+    width:min(1320px,100%);
+  }
+  body.vivid-cinema-home .vivid-catalogue-explore{
+    padding-top:30px;
+    padding-bottom:8px;
+  }
+  body.vivid-cinema-home .vivid-section-wrap{
+    padding-inline:var(--vivid-page-gutter);
+  }
+  body.vivid-cinema-home .vivid-rails{
+    padding:24px 0 12px;
+  }
+  body.vivid-cinema-home .vivid-rail-head{
+    margin-bottom:10px;
+    align-items:center;
+  }
+  body.vivid-cinema-home .vivid-rail-head h2{
+    font-size:1.22rem;
+  }
+  body.vivid-cinema-home .vivid-rail-head p{
+    max-width:560px;
+    font-size:.69rem!important;
+  }
+  body.vivid-cinema-home .vivid-rail{
+    gap:10px;
+    padding:4px 2px 16px;
+  }
+  body.vivid-cinema-home .vivid-card{
+    flex-basis:168px;
+    border-radius:12px;
+    border-color:rgba(255,255,255,.075);
+  }
+  body.vivid-cinema-home .vivid-card-info{
+    padding:8px 9px 10px;
+    min-height:48px;
+  }
+  body.vivid-cinema-home .vivid-card-title{font-size:.76rem}
+  body.vivid-cinema-home .vivid-card-sub{font-size:.65rem}
+  body.vivid-cinema-home .vivid-card:hover{
+    transform:translateY(-3px)!important;
+  }
+  body.vivid-cinema-home .vivid-card:hover img{
+    transform:scale(1.025);
+  }
+
+  /* Keep the personalized module premium rather than oversized. */
+  body.vivid-cinema-home .vivid-tonight-inline{
+    grid-template-columns:minmax(0,1fr) 190px;
+    gap:40px;
+    padding:30px 0;
+  }
+  body.vivid-cinema-home .vivid-tonight-card{
+    max-height:285px;
+  }
+
+  /* News module should read as one editorial feature, not another card pile. */
+  body.vivid-cinema-home .vivid-news-home-card{
+    margin:28px 0 22px;
+    border-radius:18px;
+    padding:28px;
+  }
+
+  /* Provider rails are supporting content: quieter than the primary discovery rails. */
+  body.vivid-cinema-home .vivid-provider-shelf{
+    opacity:.96;
+  }
+
+  /* Remove excessive desktop-only motion/transparency stacking. */
+  body.vivid-cinema-home .vivid-rail-controls button,
+  body.vivid-cinema-home .vivid-hero-control,
+  body.vivid-cinema-home .vivid-hero-tools button{
+    width:38px;
+    height:38px;
+    backdrop-filter:blur(16px) saturate(140%);
+    -webkit-backdrop-filter:blur(16px) saturate(140%);
+  }
+}
+
+@media (min-width: 1500px){
+  body.vivid-cinema-home .vivid-hero-title{font-size:5.4rem}
+  body.vivid-cinema-home .vivid-card{flex-basis:176px}
+  body.vivid-cinema-home .vivid-feature-card{flex-basis:196px}
+}
+
+@media (prefers-reduced-motion:reduce){
+  body.vivid-cinema-home .vivid-card:hover{transform:none!important}
+}
