@@ -1,278 +1,246 @@
-/* Vivid Cinema — Desktop Progressive Enhancement
-   Mobile/base styles remain the source of truth.
-   This file only adds space, hierarchy and interaction as the viewport grows.
+/* Vivid Cinema — desktop correction layer
+   Desktop uses the exact same home composition as mobile/base.
+   Only sizing, containment and desktop chrome are changed here.
+   Do not add new sections or alternate components.
 */
 
 @media (min-width:901px){
-  :root{
-    --vivid-desktop-max:1440px;
-    --vivid-desktop-gutter:clamp(24px,4vw,64px);
-    --vivid-desktop-section-gap:clamp(34px,4vw,58px);
-  }
-
   html,body{overflow-x:hidden}
-  body{background:#06070a}
+  body.vivid-cinema-home{background:#000}
 
-  /* Shared shell */
-  .vivid-topbar,
-  .vivid-discovery-nav,
-  .vivid-library-nav,
-  .vivid-title-nav,
-  .vivid-watch-nav{
-    padding-left:var(--vivid-desktop-gutter);
-    padding-right:var(--vivid-desktop-gutter);
+  /* HEADER — use the classes that actually exist in home.html. */
+  .vivid-topbar{
+    padding:12px clamp(24px,4vw,64px);
   }
-
-  .vivid-nav,
-  .vivid-section-wrap,
-  .vivid-discovery-main,
-  .vivid-collection-main,
-  .vivid-library-main,
-  .vivid-watch-head,
-  .vivid-player-section,
-  .vivid-watch-note,
-  .vivid-watch-recommendations{
-    width:min(var(--vivid-desktop-max),100%);
+  .vivid-nav{
+    width:min(1440px,100%);
+    min-height:56px;
     margin-inline:auto;
+    display:flex;
+    align-items:center;
+    gap:14px;
+  }
+  .vivid-brand{
+    flex:0 0 auto;
+    font-size:1.2rem;
+  }
+  .vivid-navlinks{
+    display:flex;
+    align-items:center;
+    gap:2px;
+    min-width:0;
+  }
+  .vivid-navlinks a{
+    min-height:40px;
+    padding:9px 11px;
+    font-size:.84rem;
+    white-space:nowrap;
   }
 
-  .vivid-nav{min-height:58px;gap:16px}
-  .vivid-navlinks{gap:2px}
-  .vivid-navlinks a{padding:9px 11px;font-size:.84rem}
-  .vivid-nav-search{width:min(23vw,280px)}
+  .vivid-search-trigger{
+    margin-left:auto;
+    display:inline-flex;
+    align-items:center;
+    justify-content:flex-start;
+    gap:8px;
+    width:min(240px,22vw);
+    min-width:150px;
+    height:40px;
+    padding:0 12px;
+    border:1px solid rgba(255,255,255,.1);
+    border-radius:999px;
+    background:rgba(255,255,255,.055);
+    color:#aeb4bd;
+    font:600 .8rem/1 var(--vivid-font-sans);
+    cursor:pointer;
+  }
+  .vivid-search-trigger i{font-size:.88rem}
+  .vivid-search-trigger kbd{
+    margin-left:auto;
+    padding:3px 6px;
+    border:1px solid rgba(255,255,255,.1);
+    border-radius:6px;
+    color:#747b85;
+    background:rgba(255,255,255,.035);
+    font:500 .62rem/1 ui-monospace,SFMono-Regular,monospace;
+  }
+  .vivid-search-trigger:hover,
+  .vivid-search-trigger:focus-visible{
+    color:#fff;
+    background:rgba(255,255,255,.075);
+    border-color:rgba(255,255,255,.18);
+  }
+  .vivid-notification-button{
+    flex:0 0 40px;
+    width:40px;
+    height:40px;
+  }
+  .vivid-nav-action{
+    flex:0 0 auto;
+    min-height:40px;
+    padding:9px 12px;
+    white-space:nowrap;
+  }
 
-  /* HOME — same composition as mobile, simply given more breathing room */
+  /* HERO — same cinematic composition, more room only. */
   .vivid-cinema-home .vivid-hero{
-    height:min(780px,78svh);
-    min-height:620px;
+    height:min(820px,88svh);
+    min-height:650px;
   }
   .vivid-cinema-home .vivid-hero-content{
-    width:min(var(--vivid-desktop-max),100%);
-    padding:clamp(110px,14vh,150px) var(--vivid-desktop-gutter) 190px;
+    width:min(1440px,100%);
+    height:100%;
     margin-inline:auto;
+    padding:clamp(120px,14vh,155px) clamp(24px,4vw,64px) 190px;
   }
   .vivid-cinema-home .vivid-hero-title{
     max-width:780px;
-    font-size:clamp(3.4rem,6.2vw,6.4rem);
-    line-height:.91;
+    font-size:clamp(3.5rem,6vw,6.2rem);
+    line-height:.92;
   }
-  .vivid-cinema-home .vivid-hero-copy{
-    max-width:580px;
-    font-size:1rem;
-  }
-  .vivid-cinema-home .vivid-hero-control{
-    width:44px;height:44px;
+  .vivid-cinema-home .vivid-hero-copy{max-width:580px}
+  .vivid-cinema-home .vivid-hero-tools{
+    right:clamp(24px,4vw,64px);
+    bottom:158px;
   }
   .vivid-cinema-home .vivid-hero-control.prev{left:24px}
   .vivid-cinema-home .vivid-hero-control.next{right:24px}
-  .vivid-cinema-home .vivid-hero-tools{
-    right:var(--vivid-desktop-gutter);
-    bottom:158px;
-  }
+
+  /* FEATURE STRIP — remains attached to the hero, never part of the rails. */
   .vivid-cinema-home .vivid-feature-strip{
-    bottom:18px;
-    width:min(var(--vivid-desktop-max),100%);
     left:50%;
     right:auto;
+    bottom:14px;
+    width:min(1440px,100%);
+    padding-inline:clamp(24px,4vw,64px);
     transform:translateX(-50%);
-    padding-inline:var(--vivid-desktop-gutter);
+  }
+  .vivid-cinema-home .vivid-feature-viewport{width:100%;overflow:hidden}
+  .vivid-cinema-home .vivid-feature-track{
+    display:flex;
+    flex-wrap:nowrap;
+    gap:12px;
+    overflow-x:auto;
+    width:100%;
   }
   .vivid-cinema-home .vivid-feature-card{
-    flex-basis:clamp(170px,13vw,205px);
-    height:104px;
-    border-radius:14px;
+    flex:0 0 clamp(180px,14vw,220px);
+    height:112px;
   }
 
-  /* HOME rails — preserve the mobile card language, expand only the rhythm */
+  /* HOME CONTENT — one vertical stack of horizontal cinema rails.
+     This is the critical fix: sections never become columns and cards never wrap. */
   .vivid-cinema-home .vivid-section-wrap{
-    padding-inline:var(--vivid-desktop-gutter);
+    width:min(1440px,100%);
+    margin-inline:auto;
+    padding-inline:clamp(24px,4vw,64px);
+    display:block;
   }
   .vivid-cinema-home .vivid-rails{
-    padding:24px 0;
+    display:block!important;
+    width:100%;
+    margin:0;
+    clear:both;
+    padding:28px 0 10px;
+    position:relative;
+  }
+  .vivid-cinema-home .vivid-rails+.vivid-rails{
+    margin-top:0;
   }
   .vivid-cinema-home .vivid-rail-head{
+    display:flex;
+    align-items:flex-end;
+    justify-content:space-between;
+    gap:18px;
+    width:100%;
     margin-bottom:14px;
   }
-  .vivid-cinema-home .vivid-rail-head h2{
-    font-size:clamp(1.25rem,1.7vw,1.55rem);
-  }
   .vivid-cinema-home .vivid-rail{
+    display:flex!important;
+    flex-direction:row!important;
+    flex-wrap:nowrap!important;
+    align-items:flex-start;
+    width:100%;
+    max-width:none;
+    min-width:0;
     gap:14px;
-    padding-bottom:14px;
+    overflow-x:auto!important;
+    overflow-y:hidden;
+    padding:4px 2px 16px;
+    margin:0;
+    box-sizing:border-box;
   }
   .vivid-cinema-home .vivid-card{
-    flex-basis:clamp(160px,12vw,182px);
-    border-radius:13px;
-  }
-
-  /* Discovery / collection — true catalogue grids, not oversized desktop cards */
-  .vivid-discovery-main,
-  .vivid-collection-main{
-    padding-top:clamp(38px,5vw,70px);
-    padding-left:var(--vivid-desktop-gutter);
-    padding-right:var(--vivid-desktop-gutter);
-  }
-  .vivid-discovery-intro{
-    grid-template-columns:minmax(0,1fr) minmax(360px,460px);
-    gap:40px;
-    margin-bottom:26px;
-  }
-  .vivid-discovery-intro h1,
-  .vivid-collection-intro h1{
-    font-size:clamp(3rem,5.2vw,5rem);
-  }
-  .vivid-filter-panel{
-    border-radius:16px;
-    margin-bottom:28px;
-    padding:14px;
-  }
-  .vivid-discovery-grid{
-    grid-template-columns:repeat(6,minmax(0,1fr));
-    gap:20px 14px;
-  }
-  .vivid-discovery-copy strong{font-size:.8rem}
-  .vivid-discovery-copy small{font-size:.68rem}
-
-  .vivid-collection-grid{
-    grid-template-columns:repeat(6,minmax(0,1fr));
-    gap:14px;
-  }
-  .vivid-collection-card{
+    flex:0 0 clamp(160px,12vw,182px)!important;
+    width:clamp(160px,12vw,182px);
     min-width:0;
-    padding:14px;
   }
 
-  /* Library — editorial personal shelf, not a cramped dashboard */
-  .vivid-library-main{
-    padding-top:clamp(34px,5vw,70px);
-    padding-left:var(--vivid-desktop-gutter);
-    padding-right:var(--vivid-desktop-gutter);
-  }
-  .vivid-library-header{
-    padding:20px 0 30px;
-  }
-  .vivid-library-header h1{font-size:clamp(3rem,5.2vw,5rem)}
-  .vivid-library-tabs{
-    margin-bottom:26px;
-  }
-  .vivid-library-grid{
-    grid-template-columns:repeat(6,minmax(0,1fr));
-    gap:18px 14px;
-  }
-  .vivid-library-card-copy{padding:9px 2px 12px}
-  .vivid-library-card strong{font-size:.8rem}
+  /* Optional/conditional rows keep their natural hidden state. */
+  .vivid-cinema-home .vivid-rails[hidden]{display:none!important}
 
-  /* Title — one strong hero composition shared with the mobile hierarchy */
-  .vivid-title-hero{
-    min-height:680px;
-    padding:120px var(--vivid-desktop-gutter) 72px;
-  }
-  .vivid-title-hero-inner{
-    width:min(1240px,100%);
-    grid-template-columns:280px minmax(0,760px);
-    gap:52px;
-  }
-  .vivid-title-poster{border-radius:18px}
-  .vivid-title-copy h1{
-    font-size:clamp(3.4rem,6vw,6rem);
-  }
-  .vivid-title-section{
-    width:min(1240px,100%);
-    padding-left:var(--vivid-desktop-gutter);
-    padding-right:var(--vivid-desktop-gutter);
-    padding-top:48px;
-  }
-  .vivid-cast-grid{grid-template-columns:repeat(8,minmax(0,1fr))}
-  .vivid-provider-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
-
-  /* Watch — player owns the page */
-  .vivid-watch-hero{min-height:220px}
-  .vivid-watch-head{
-    padding-top:42px;
-    padding-bottom:26px;
-  }
-  .vivid-player-section{padding-top:8px}
-  .vivid-player-frame{
+  /* Tonight stays a single row in the same stack; it does not push itself
+     beside Trending/Top 10 or turn the catalogue into a dashboard. */
+  .vivid-cinema-home .vivid-tonight-inline{
+    display:block;
     width:100%;
-    aspect-ratio:16/9;
-    min-height:0;
-    max-height:810px;
-    border-radius:14px;
-  }
-  .vivid-watch-recommendations{
-    padding-top:42px;
-    padding-left:var(--vivid-desktop-gutter);
-    padding-right:var(--vivid-desktop-gutter);
   }
 
-  /* Search — focused, centered utility surface */
-  .vivid-search-main{
-    width:min(100% - (var(--vivid-desktop-gutter) * 2),1180px);
-    padding-top:clamp(96px,10vw,132px);
-  }
-  .vivid-search-page-head h1{font-size:clamp(3rem,5vw,4.2rem)}
-  .vivid-search-page-field{max-width:900px}
-
-  /* News — preserve the editorial desktop composition */
-  .vivid-news-main{
-    max-width:1500px;
-    padding-left:var(--vivid-desktop-gutter);
-    padding-right:var(--vivid-desktop-gutter);
-  }
-  .vivid-news-hero{
-    min-height:min(620px,70vh);
-    margin-bottom:52px;
-  }
-  .vivid-news-grid{
-    display:grid;
-    grid-template-columns:repeat(4,minmax(0,1fr));
-    gap:18px;
-    overflow:visible;
-  }
-
-  /* Footer and utility surfaces align with the same visual container */
-  .vivid-footer{
-    width:min(var(--vivid-desktop-max),100%);
+  /* Catalogue entry strip uses the same page container. */
+  .vivid-cinema-home .vivid-catalogue-explore{
+    width:min(1440px,100%);
     margin-inline:auto;
-    padding-left:var(--vivid-desktop-gutter);
-    padding-right:var(--vivid-desktop-gutter);
+    padding-inline:clamp(24px,4vw,64px);
   }
 
-  /* Desktop-only hover: quiet lift, never layout movement */
+  /* Keep desktop spacing calmer than mobile without changing hierarchy. */
+  .vivid-cinema-home .vivid-rail-head h2{font-size:22px}
+  .vivid-cinema-home .vivid-rail-head p{font-size:.8rem}
+  .vivid-cinema-home .vivid-rail-controls{flex:0 0 auto}
+
+  /* Desktop-only interaction; no layout movement. */
   @media (hover:hover) and (pointer:fine){
-    .vivid-card:hover{transform:translateY(-3px)}
-    .vivid-card:hover img{transform:scale(1.025)}
-    .vivid-feature-card:hover{transform:translateY(-2px)}
+    .vivid-cinema-home .vivid-card:hover{transform:translateY(-3px)}
+    .vivid-cinema-home .vivid-card:hover img{transform:scale(1.025)}
+    .vivid-cinema-home .vivid-feature-card:hover{transform:translateY(-2px)}
   }
 
   :where(a,button,input,select):focus-visible{
-    outline:2px solid rgba(255,255,255,.78);
+    outline:2px solid rgba(255,255,255,.8);
     outline-offset:3px;
   }
 }
 
-/* Laptop: keep the same composition, reduce density only where content demands it. */
+/* Laptop desktop: same composition, simply less density. */
 @media (min-width:901px) and (max-width:1180px){
   .vivid-nav{gap:8px}
-  .vivid-navlinks a{padding-inline:7px;font-size:.75rem}
-  .vivid-nav-search{width:190px}
-  .vivid-cinema-home .vivid-hero-title{font-size:clamp(3rem,6.4vw,5rem)}
-  .vivid-discovery-grid,
-  .vivid-library-grid{grid-template-columns:repeat(5,minmax(0,1fr))}
-  .vivid-collection-grid{grid-template-columns:repeat(5,minmax(0,1fr))}
-  .vivid-title-hero-inner{grid-template-columns:240px minmax(0,1fr);gap:38px}
+  .vivid-navlinks a{padding-inline:7px;font-size:.76rem}
+  .vivid-search-trigger{
+    width:42px;
+    min-width:42px;
+    justify-content:center;
+    padding:0;
+  }
+  .vivid-search-trigger span,
+  .vivid-search-trigger kbd{display:none}
+  .vivid-cinema-home .vivid-card{
+    flex-basis:160px!important;
+    width:160px;
+  }
+  .vivid-cinema-home .vivid-hero-title{font-size:clamp(3rem,6.5vw,5.2rem)}
 }
 
 @media (min-width:1600px){
-  .vivid-cinema-home .vivid-card{flex-basis:190px}
-  .vivid-discovery-grid,
-  .vivid-library-grid{grid-template-columns:repeat(7,minmax(0,1fr))}
-  .vivid-collection-grid{grid-template-columns:repeat(7,minmax(0,1fr))}
+  .vivid-cinema-home .vivid-card{
+    flex-basis:190px!important;
+    width:190px;
+  }
 }
 
 @media (prefers-reduced-motion:reduce){
-  .vivid-card,
-  .vivid-card img,
-  .vivid-feature-card,
-  .vivid-feature-card img{transition:none!important}
+  .vivid-cinema-home .vivid-card,
+  .vivid-cinema-home .vivid-card img,
+  .vivid-cinema-home .vivid-feature-card{
+    transition:none!important;
+  }
 }
