@@ -42,3 +42,760 @@
 .vivid-cinema-home .vivid-rail.is-expanded{display:flex;grid-template-columns:none;overflow-x:auto;overflow-y:hidden;gap:clamp(10px,1vw,16px)}
 @media(max-width:900px){.vivid-cinema-home .vivid-card{flex-basis:clamp(148px,24vw,184px);width:clamp(148px,24vw,184px)}}
 @media(max-width:640px){.vivid-cinema-home .vivid-rails{padding:18px 0 22px}.vivid-cinema-home .vivid-rail-head{margin-bottom:10px}.vivid-cinema-home .vivid-rail-head p{display:none}.vivid-cinema-home .vivid-rail-controls button{width:36px;height:36px}.vivid-cinema-home .vivid-rail{gap:10px;padding:4px 0 14px;scroll-snap-type:x mandatory}.vivid-cinema-home .vivid-card{flex-basis:calc((100vw - 46px)/2.35);width:calc((100vw - 46px)/2.35);min-width:132px;max-width:158px}.vivid-cinema-home .vivid-card-info{padding-top:8px}.vivid-cinema-home .vivid-card-title{font-size:.74rem}.vivid-cinema-home .vivid-card-sub{font-size:.64rem}}
+
+/* Extracted from the cross-viewport audit: Home owns these rules. */
+
+/* Home hero: the trailer scales from the hero container, not the viewport height. */
+@media(max-width:640px){
+  .vivid-hero-media{
+    height:clamp(400px,62svh,560px)!important;
+    min-height:400px!important;
+    max-height:560px!important;
+  }
+  .vivid-hero-video{
+    width:177.78%!important;
+    height:100%!important;
+    min-width:0!important;
+    max-width:none!important;
+    left:50%!important;
+    top:0!important;
+    transform:translateX(-50%) scale(1.02)!important;
+  }
+}
+@media(max-width:380px){
+  .vivid-hero-media{height:clamp(380px,60svh,500px)!important;min-height:380px!important}
+}
+
+/* The feature strip belongs visually to the hero even though it is a sibling in the DOM. */
+.vivid-feature-strip{
+  position:relative!important;
+  left:auto!important;
+  right:auto!important;
+  bottom:auto!important;
+  width:min(1440px,100%)!important;
+  margin:-116px auto 0!important;
+  padding:8px var(--vivid-page-gutter) 18px!important;
+  box-sizing:border-box;
+  z-index:7!important;
+}
+.vivid-feature-viewport{width:100%!important;padding:0!important}
+@media(max-width:640px){
+  .vivid-feature-strip{
+    margin:-92px auto 0!important;
+    padding:8px 12px 14px!important;
+  }
+}
+
+
+/* Home catalogue: Load more expands the rail into visible rows instead of hiding page 2 off-screen. */
+body[data-vivid-page="home"] .vivid-rail.is-expanded{
+  display:grid;
+  grid-template-columns:repeat(6,minmax(0,1fr));
+  gap:16px;
+  overflow:visible;
+  scroll-snap-type:none;
+}
+@media (max-width:1100px){body[data-vivid-page="home"] .vivid-rail.is-expanded{grid-template-columns:repeat(5,minmax(0,1fr));}}
+@media (max-width:850px){body[data-vivid-page="home"] .vivid-rail.is-expanded{grid-template-columns:repeat(4,minmax(0,1fr));}}
+@media (max-width:640px){body[data-vivid-page="home"] .vivid-rail.is-expanded{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;overflow:visible;padding-right:2px;}}
+
+
+
+
+/* Home hero trailer: match the artwork frame exactly; crop only the YouTube player chrome. */
+.vivid-cinema-home .vivid-hero-media{
+  overflow:hidden!important;
+  isolation:isolate;
+}
+.vivid-cinema-home .vivid-hero-video{
+  position:absolute!important;
+  inset:0!important;
+  width:100%!important;
+  height:100%!important;
+  max-width:none!important;
+  max-height:none!important;
+  border:0!important;
+  transform:scale(1.12)!important;
+  transform-origin:center center!important;
+}
+@media(max-width:640px){
+  .vivid-cinema-home .vivid-hero-video{
+    inset:0!important;
+    width:100%!important;
+    height:100%!important;
+    transform:scale(1.08)!important;
+  }
+}
+
+/* FINAL HOME HERO OVERRIDE — YouTube's 16:9 player must cover the tall mobile artwork frame. */
+.vivid-cinema-home .vivid-hero{
+  overflow:hidden!important;
+}
+.vivid-cinema-home .vivid-hero-media{
+  position:absolute!important;
+  inset:0!important;
+  width:100%!important;
+  height:100%!important;
+  min-height:0!important;
+  max-height:none!important;
+  overflow:hidden!important;
+}
+.vivid-cinema-home .vivid-hero-video{
+  position:absolute!important;
+  top:50%!important;
+  left:50%!important;
+  right:auto!important;
+  bottom:auto!important;
+  width:100%!important;
+  height:100%!important;
+  min-width:0!important;
+  max-width:none!important;
+  transform:translate(-50%,-50%) scale(1.12)!important;
+  transform-origin:center center!important;
+}
+@media(max-width:640px){
+  .vivid-cinema-home .vivid-hero{
+    height:100svh!important;
+    min-height:100svh!important;
+    overflow:hidden!important;
+  }
+  .vivid-cinema-home .vivid-hero-media{
+    position:absolute!important;
+    inset:0!important;
+    width:100%!important;
+    height:100%!important;
+  }
+  .vivid-cinema-home .vivid-hero-video{
+    top:50%!important;
+    left:50%!important;
+    width:177.78%!important;
+    height:100%!important;
+    min-width:0!important;
+    transform:translate(-50%,-50%) scale(1.04)!important;
+  }
+  .vivid-cinema-home .vivid-hero-fallback{
+    position:absolute!important;
+    inset:0!important;
+    width:100%!important;
+    height:100%!important;
+    background-size:cover!important;
+    background-position:center!important;
+  }
+  .vivid-cinema-home .vivid-hero-content{
+    position:absolute!important;
+    inset:0!important;
+    width:100%!important;
+    height:100%!important;
+    padding:calc(100px + env(safe-area-inset-top,0px)) 16px 190px!important;
+    justify-content:flex-end!important;
+  }
+}
+
+
+
+
+/* FINAL HOME HERO MEDIA — preserve the trailer's native 16:9 frame.
+   Mobile uses width expansion to cover the tall hero; no extra scale transform. */
+.vivid-cinema-home .vivid-hero-video{
+  top:50%!important;
+  left:50%!important;
+  width:100%!important;
+  height:100%!important;
+  min-width:0!important;
+  max-width:none!important;
+  transform:translate(-50%,-50%)!important;
+  transform-origin:center center!important;
+}
+@media(max-width:640px){
+  .vivid-cinema-home .vivid-hero-video{
+    top:50%!important;
+    left:50%!important;
+    width:177.78%!important;
+    height:100%!important;
+    min-width:0!important;
+    max-width:none!important;
+    transform:translate(-50%,-50%)!important;
+  }
+}
+
+
+
+
+body.vivid-cinema-home .vivid-hero{
+  padding-top:env(safe-area-inset-top);
+}
+
+
+
+
+/* Content deference: the artwork is the surface, not a boxed dashboard. */
+.vivid-cinema-home .vivid-card{
+  background:transparent;
+  border:0;
+  box-shadow:none;
+  transition:transform .18s ease,opacity .18s ease;
+}
+.vivid-cinema-home .vivid-card-media{
+  border:0;
+  box-shadow:none;
+  border-radius:12px;
+}
+.vivid-cinema-home .vivid-card:active{
+  transform:scale(.985);
+  opacity:.9;
+}
+@media (hover:none), (pointer:coarse){
+  .vivid-cinema-home .vivid-card:active{transform:scale(.985)!important}
+}
+
+/* Top 10: ranking is a visual object, not another metadata label. */
+.vivid-cinema-home .vivid-top10-card{
+  position:relative;
+  flex-basis:clamp(184px,14.5vw,244px);
+  width:clamp(184px,14.5vw,244px);
+  padding-left:34px;
+}
+.vivid-cinema-home .vivid-top10-card .vivid-top10-rank{
+  position:absolute;
+  left:-1px;
+  bottom:28px;
+  z-index:4;
+  color:#fff;
+  font-family:var(--vivid-font-display);
+  font-size:clamp(3.2rem,5.4vw,5.8rem);
+  line-height:.78;
+  font-weight:700;
+  letter-spacing:-.09em;
+  text-shadow:0 8px 24px rgba(0,0,0,.65);
+  pointer-events:none;
+}
+.vivid-cinema-home .vivid-top10-card .vivid-card-media{
+  aspect-ratio:2/3;
+}
+.vivid-cinema-home .vivid-top10-card .vivid-card-info{padding-left:0;}
+.vivid-cinema-home .vivid-top10-card .vivid-card-title{font-weight:600;}
+@media(max-width:640px){
+  .vivid-cinema-home .vivid-top10-card{
+    flex-basis:calc((100vw - 34px)/2.35);
+    width:calc((100vw - 34px)/2.35);
+    min-width:150px;
+    padding-left:30px;
+  }
+  .vivid-cinema-home .vivid-top10-card .vivid-top10-rank{
+    font-size:3.3rem;
+    bottom:27px;
+  }
+}
+
+/* Continue Watching: resolve context at a glance with landscape artwork and time left. */
+.vivid-cinema-home .vivid-continue-card{
+  flex-basis:clamp(270px,32vw,420px);
+  width:clamp(270px,32vw,420px);
+}
+.vivid-cinema-home .vivid-continue-card .vivid-card-media{
+  aspect-ratio:16/9;
+  border-radius:12px;
+}
+.vivid-cinema-home .vivid-continue-card .vivid-card-media img{
+  object-fit:cover;
+}
+.vivid-cinema-home .vivid-continue-card .vivid-card-info{
+  padding-top:8px;
+}
+.vivid-cinema-home .vivid-continue-card .vivid-continue-remaining{
+  position:absolute;
+  left:10px;
+  bottom:10px;
+  z-index:3;
+  color:#fff;
+  font-size:11px;
+  line-height:1;
+  font-weight:600;
+  letter-spacing:.02em;
+  text-shadow:0 1px 8px rgba(0,0,0,.8);
+}
+.vivid-cinema-home .vivid-continue-card .vivid-card-progress{
+  bottom:0;
+  left:0;
+  right:0;
+  height:3px;
+  border-radius:0;
+}
+@media(max-width:640px){
+  .vivid-cinema-home .vivid-continue-card{
+    flex-basis:78vw;
+    width:78vw;
+    min-width:270px;
+  }
+}
+
+/* Section headings are guidance, not chrome. */
+.vivid-cinema-home .vivid-rail-head h2{
+  font-size:22px;
+  line-height:1.15;
+  font-weight:700;
+}
+.vivid-cinema-home .vivid-rail-head p{
+  color:#8e8e93;
+}
+
+
+
+.vivid-rail::after,
+.vivid-cinema-home .vivid-rail::after{
+  content:none!important;
+  display:none!important;
+}
+
+/* Home-only rules extracted from the shared audit layer. */
+
+html[data-vivid-theme="light"] body.vivid-cinema-home .vivid-rails + .vivid-rails{
+  border-top:1px solid rgba(17,18,22,.055);
+}
+html[data-vivid-theme="light"] body.vivid-cinema-home .vivid-card{
+  background:transparent!important;
+  border-color:transparent!important;
+  box-shadow:none!important;
+}
+html[data-vivid-theme="light"] body.vivid-cinema-home .vivid-card-media{
+  background:#e9ebef!important;
+  border-color:rgba(17,18,22,.08)!important;
+  box-shadow:0 7px 20px rgba(17,18,22,.08)!important;
+}
+html[data-vivid-theme="light"] body.vivid-cinema-home .vivid-card:hover .vivid-card-media{
+  border-color:rgba(17,18,22,.15)!important;
+  box-shadow:0 15px 32px rgba(17,18,22,.13)!important;
+}
+html[data-vivid-theme="light"] body.vivid-cinema-home .vivid-rating{
+  color:#111216!important;
+  background:rgba(255,255,255,.90)!important;
+  border-color:rgba(17,18,22,.10)!important;
+}
+
+.vivid-cinema-home .vivid-rail-head h2,
+.vivid-library-section-head h2,
+.vivid-library-shelf-head h2{font-size:22px;line-height:1.15;font-weight:700;color:#fff;}
+.vivid-cinema-home .vivid-card-title,
+.vivid-library-shelf .vivid-library-card-copy strong{font-size:15px;line-height:1.25;font-weight:600;}
+.vivid-cinema-home .vivid-card-sub,
+.vivid-library-shelf .vivid-library-card-copy small{font-size:13px;line-height:1.3;font-weight:400;color:#8e8e93;}
+.vivid-cinema-home .vivid-rail,
+.vivid-library-continue-rail,
+.vivid-library-shelf{scroll-snap-type:x mandatory;scroll-padding-inline:2px;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;}
+.vivid-cinema-home .vivid-rail{touch-action:pan-x;}
+
+.vivid-cinema-home .vivid-feature-card:active,
+.vivid-library-page .vivid-library-continue-card:active{
+  transform:scale(.985);
+  opacity:.92;
+}
+
+.vivid-cinema-home .vivid-card:focus-visible,
+.vivid-cinema-home .vivid-feature-card:focus-visible,
+.vivid-library-page .vivid-library-card:focus-visible,
+.vivid-library-page .vivid-library-tabs button:focus-visible,
+.vivid-title-page .vivid-cast:focus-visible,
+.vivid-title-page .vivid-similar-card:focus-visible,
+.vivid-title-page .vivid-video-card:focus-visible,
+.vivid-title-page .vivid-button:focus-visible,
+.vivid-watch-page .vivid-watch-rec-card:focus-visible,
+.vivid-watch-page .vivid-player-switch:focus-visible{
+  outline:0;
+  transform:translateY(-2px) scale(1.045);
+  box-shadow:0 16px 42px rgba(0,0,0,.5),0 0 0 2px rgba(255,255,255,.95);
+  z-index:5;
+  position:relative;
+}
+
+.vivid-cinema-home .vivid-card,
+.vivid-cinema-home .vivid-feature-card,
+.vivid-library-page .vivid-library-card,
+.vivid-library-page .vivid-library-tabs button,
+.vivid-title-page .vivid-cast,
+.vivid-title-page .vivid-similar-card,
+.vivid-title-page .vivid-video-card,
+.vivid-title-page .vivid-button,
+.vivid-watch-page .vivid-watch-rec-card,
+.vivid-watch-page .vivid-player-switch{
+  transition:transform .22s cubic-bezier(.22,1,.36,1),box-shadow .22s cubic-bezier(.22,1,.36,1),opacity .18s ease;
+}
+
+/* Home breathe composition — page-owned decorative scene. */
+
+/* ==========================================================================
+   HOME CINEMA MOMENT — personality + realism pass (final)
+   Only this decorative beat. Everything else untouched.
+   ========================================================================== */
+
+.vivid-home-breathe{
+  min-height: 520px !important;
+}
+.vivid-home-breathe-scene{
+  min-height: 460px !important;
+  width: min(900px, 94vw) !important;
+}
+
+/* TV — calmer float, richer presence */
+.vivid-home-tv{
+  z-index: 3 !important;
+  top: 22px !important;
+  width: min(520px, 70vw) !important;
+  filter: drop-shadow(0 28px 50px rgba(0,0,0,.38)) !important;
+  animation: vivid-tv-float 6.4s ease-in-out infinite !important;
+}
+.vivid-home-tv:before{
+  content: "" !important;
+  position: absolute !important;
+  z-index: -1 !important;
+  left: 10% !important;
+  right: 10% !important;
+  bottom: 6px !important;
+  height: 36px !important;
+  border-radius: 50% !important;
+  background: radial-gradient(ellipse, rgba(140,165,255,.22), transparent 70%) !important;
+  filter: blur(20px) !important;
+  animation: vivid-tv-aura 5.2s ease-in-out infinite !important;
+}
+.vivid-home-tv-screen{
+  border-width: 8px !important;
+  border-color: #14171d !important;
+  border-radius: 22px !important;
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,.1),
+    inset 0 1px 0 rgba(255,255,255,.1),
+    0 20px 50px rgba(0,0,0,.38) !important;
+}
+.vivid-home-tv-stand{
+  width: 120px !important;
+  height: 26px !important;
+  background: linear-gradient(180deg, #2a2e38, #0e1014) !important;
+}
+
+/* Viewer — staged as a person sitting slightly in front / to the side */
+.vivid-home-viewer{
+  position: absolute !important;
+  z-index: 6 !important;
+  right: calc(50% - 420px) !important;
+  top: 128px !important;
+  width: 188px !important;
+  height: 220px !important;
+  transform: scale(.8) !important;
+  transform-origin: 50% 100% !important;
+  animation: vivid-viewer-idle 5.2s ease-in-out infinite !important;
+  filter: drop-shadow(0 18px 22px rgba(0,0,0,.28));
+}
+
+/* Head — warmer skin, hair silhouette, cheeks, better eyes */
+.vivid-home-viewer-head{
+  position: absolute !important;
+  top: 2px !important;
+  left: 58px !important;
+  width: 72px !important;
+  height: 72px !important;
+  border-radius: 50% !important;
+  background:
+    radial-gradient(circle at 32% 28%, rgba(255,220,190,.35), transparent 42%),
+    linear-gradient(155deg, #e0b08a, #c07a55 55%, #a85f42) !important;
+  border: 2px solid rgba(80,35,25,.28) !important;
+  box-shadow:
+    inset -10px -9px 0 rgba(120,50,35,.14),
+    inset 4px 6px 10px rgba(255,230,200,.18),
+    -6px 8px 18px rgba(0,0,0,.22) !important;
+  transform: rotate(-9deg) !important;
+  transform-origin: 50% 80% !important;
+  z-index: 5 !important;
+  animation: vivid-viewer-head 7s ease-in-out infinite !important;
+}
+/* Hair */
+.vivid-home-viewer-head:before{
+  content: "" !important;
+  position: absolute !important;
+  left: 5px !important;
+  top: -6px !important;
+  width: 62px !important;
+  height: 28px !important;
+  border-radius: 60% 55% 30% 35% !important;
+  background: linear-gradient(180deg, #1a1c22, #0e1014) !important;
+  transform: rotate(-6deg) !important;
+  box-shadow: 2px 2px 0 rgba(0,0,0,.15) !important;
+}
+/* Soft cheek / nose hint */
+.vivid-home-viewer-head:after{
+  content: "" !important;
+  position: absolute !important;
+  left: 28px !important;
+  top: 34px !important;
+  width: 14px !important;
+  height: 10px !important;
+  border-radius: 50% !important;
+  background: radial-gradient(circle, rgba(200,90,70,.22), transparent 70%) !important;
+  pointer-events: none !important;
+}
+
+/* Eyes — white + pupil, blink */
+.vivid-home-viewer-eye{
+  position: absolute !important;
+  top: 30px !important;
+  width: 11px !important;
+  height: 9px !important;
+  border-radius: 50% !important;
+  background: #f5f2eb !important;
+  box-shadow: inset 0 -1px 0 rgba(0,0,0,.12), 0 0 0 1px rgba(0,0,0,.1) !important;
+  overflow: hidden !important;
+  animation: vivid-viewer-blink 4.8s ease-in-out infinite !important;
+}
+.vivid-home-viewer-eye.eye-left{
+  left: 14px !important;
+  top: 29px !important;
+  transform: rotate(-4deg) !important;
+  animation-delay: 0s !important;
+  background:
+    radial-gradient(circle at 55% 48%, #1a1c22 0 3.2px, transparent 3.4px),
+    #f5f2eb !important;
+}
+.vivid-home-viewer-eye.eye-right{
+  right: 22px !important;
+  left: auto !important;
+  top: 30px !important;
+  transform: rotate(-4deg) !important;
+  animation-delay: .12s !important;
+  background:
+    radial-gradient(circle at 45% 48%, #1a1c22 0 3.2px, transparent 3.4px),
+    #f5f2eb !important;
+}
+
+/* Mouth — expressive chew */
+.vivid-home-viewer-mouth{
+  position: absolute !important;
+  left: 30px !important;
+  top: 48px !important;
+  width: 14px !important;
+  height: 8px !important;
+  border: none !important;
+  border-radius: 0 0 14px 14px !important;
+  background: #6a2e28 !important;
+  box-shadow: inset 0 2px 3px rgba(0,0,0,.25) !important;
+  transform-origin: 50% 0 !important;
+  animation: vivid-viewer-chew 1.05s ease-in-out infinite !important;
+}
+
+/* Body — soft hoodie feel */
+.vivid-home-viewer-body{
+  position: absolute !important;
+  left: 40px !important;
+  top: 62px !important;
+  width: 100px !important;
+  height: 98px !important;
+  border-radius: 46px 46px 26px 26px !important;
+  background:
+    linear-gradient(160deg, #2c323e 0%, #161a22 60%, #0f1218 100%) !important;
+  border: 1px solid rgba(255,255,255,.09) !important;
+  box-shadow:
+    0 16px 30px rgba(0,0,0,.28),
+    inset 0 1px 0 rgba(255,255,255,.06) !important;
+}
+.vivid-home-viewer-body:before{
+  content: "" !important;
+  position: absolute !important;
+  left: 18px !important;
+  top: 16px !important;
+  width: 64px !important;
+  height: 38px !important;
+  border-radius: 50% !important;
+  background:
+    radial-gradient(circle at 25% 30%, rgba(255,255,255,.12), transparent 4px),
+    linear-gradient(150deg, rgba(255,255,255,.08), transparent 55%) !important;
+}
+
+/* Arms */
+.vivid-home-viewer-arm{
+  position: absolute !important;
+  z-index: 4 !important;
+  width: 17px !important;
+  height: 86px !important;
+  border-radius: 999px !important;
+  transform-origin: 50% 10px !important;
+  box-shadow: inset -2px 0 0 rgba(0,0,0,.12) !important;
+}
+.vivid-home-viewer-arm.viewer-arm-left{
+  left: 32px !important;
+  top: 80px !important;
+  transform: rotate(22deg) !important;
+  background: linear-gradient(180deg, #d4a07a, #b87852) !important;
+}
+.vivid-home-viewer-arm.viewer-arm-right{
+  left: 122px !important;
+  top: 78px !important;
+  transform: rotate(-42deg) !important;
+  background: linear-gradient(180deg, #d4a07a, #b87852) !important;
+  animation: vivid-viewer-eat 4.2s cubic-bezier(.3,.7,.2,1) infinite !important;
+}
+.vivid-home-viewer-hand{
+  position: absolute !important;
+  left: -3px !important;
+  bottom: -5px !important;
+  width: 24px !important;
+  height: 24px !important;
+  border-radius: 50% !important;
+  background: linear-gradient(145deg, #e0b08a, #c07a55) !important;
+  box-shadow: 0 2px 4px rgba(0,0,0,.2) !important;
+}
+
+/* Popcorn bucket + kernels */
+.vivid-home-viewer-popcorn{
+  position: absolute !important;
+  z-index: 3 !important;
+  right: 2px !important;
+  top: 138px !important;
+  width: 50px !important;
+  height: 48px !important;
+  border-radius: 6px 6px 12px 12px !important;
+  background: repeating-linear-gradient(90deg, #f4f3f0 0 9px, #1e2128 9px 18px) !important;
+  border: 1px solid rgba(255,255,255,.14) !important;
+  transform: rotate(-6deg) !important;
+  box-shadow: 0 10px 18px rgba(0,0,0,.28) !important;
+  animation: vivid-popcorn-bucket 4.2s ease-in-out infinite !important;
+}
+.vivid-home-viewer-popcorn:before{
+  content: "" !important;
+  position: absolute !important;
+  left: 3px !important;
+  right: 3px !important;
+  top: -16px !important;
+  height: 28px !important;
+  border-radius: 50% !important;
+  background:
+    radial-gradient(circle at 12% 60%, #f7f2e4 0 7px, transparent 8px),
+    radial-gradient(circle at 36% 38%, #f7f2e4 0 8px, transparent 9px),
+    radial-gradient(circle at 58% 58%, #f7f2e4 0 8px, transparent 9px),
+    radial-gradient(circle at 82% 40%, #f7f2e4 0 7px, transparent 8px),
+    radial-gradient(circle at 48% 70%, #efe8d6 0 6px, transparent 7px) !important;
+  animation: vivid-popcorn-kernels 4.2s ease-in-out infinite !important;
+}
+.vivid-home-viewer-popcorn .kernel{
+  display: none;
+}
+
+/* Legs — seated angle */
+.vivid-home-viewer-leg{
+  position: absolute !important;
+  top: 145px !important;
+  width: 36px !important;
+  height: 72px !important;
+  border-radius: 18px 18px 12px 12px !important;
+  background: linear-gradient(180deg, #1c2028, #101318) !important;
+  transform-origin: top center !important;
+  box-shadow: 0 8px 14px rgba(0,0,0,.2) !important;
+}
+.vivid-home-viewer-leg.leg-left{
+  left: 46px !important;
+  transform: rotate(26deg) !important;
+}
+.vivid-home-viewer-leg.leg-right{
+  left: 96px !important;
+  transform: rotate(-20deg) !important;
+}
+
+/* Copy stays readable above everything */
+.vivid-home-breathe-copy{
+  top: 360px !important;
+  z-index: 8 !important;
+}
+
+/* ——— Keyframes ——— */
+@keyframes vivid-tv-float{
+  0%, 100%{ transform: translateX(-50%) translateY(2px) rotate(-.3deg); }
+  50%{ transform: translateX(-50%) translateY(-5px) rotate(.3deg); }
+}
+@keyframes vivid-tv-aura{
+  0%, 100%{ opacity: .4; transform: scaleX(.9); }
+  50%{ opacity: .9; transform: scaleX(1.08); }
+}
+@keyframes vivid-viewer-idle{
+  0%, 100%{ transform: scale(.8) translateY(2px) rotate(1.2deg); }
+  40%{ transform: scale(.8) translateY(-3px) rotate(-.8deg); }
+  70%{ transform: scale(.8) translateY(1px) rotate(.6deg); }
+}
+@keyframes vivid-viewer-head{
+  0%, 100%{ transform: rotate(-9deg) translateY(0); }
+  35%{ transform: rotate(-12deg) translateY(1px); }
+  65%{ transform: rotate(-6deg) translateY(-1px); }
+}
+@keyframes vivid-viewer-blink{
+  0%, 42%, 48%, 100%{ transform: scaleY(1); }
+  45%{ transform: scaleY(.08); }
+}
+@keyframes vivid-viewer-chew{
+  0%, 100%{ transform: scaleY(1) scaleX(1); }
+  30%{ transform: scaleY(.35) scaleX(1.15); }
+  55%{ transform: scaleY(1.2) scaleX(.9); }
+  75%{ transform: scaleY(.55) scaleX(1.05); }
+}
+@keyframes vivid-viewer-eat{
+  0%, 18%, 100%{ transform: rotate(-42deg) translate(0, 0); }
+  28%{ transform: rotate(-58deg) translate(-4px, 6px); }
+  38%{ transform: rotate(-78deg) translate(-8px, 14px); }
+  48%{ transform: rotate(-95deg) translate(-6px, 10px); }
+  58%{ transform: rotate(-70deg) translate(-2px, 2px); }
+  68%{ transform: rotate(-55deg) translate(0, 0); }
+  78%{ transform: rotate(-42deg) translate(0, 0); }
+}
+@keyframes vivid-popcorn-bucket{
+  0%, 25%, 100%{ transform: rotate(-6deg); }
+  35%{ transform: rotate(-14deg) translateY(2px); }
+  45%{ transform: rotate(-4deg); }
+}
+@keyframes vivid-popcorn-kernels{
+  0%, 30%, 100%{ transform: translateY(0) scale(1); }
+  38%{ transform: translateY(-3px) scale(1.04); }
+  48%{ transform: translateY(1px) scale(.97); }
+}
+
+/* Mobile */
+@media (max-width: 760px){
+  .vivid-home-breathe{ min-height: 500px !important; }
+  .vivid-home-tv{ width: min(400px, 78vw) !important; }
+  .vivid-home-viewer{
+    right: calc(50% - 250px) !important;
+    top: 138px !important;
+    transform: scale(.66) !important;
+    animation-name: vivid-viewer-idle-sm !important;
+  }
+  .vivid-home-breathe-copy{ top: 340px !important; }
+  @keyframes vivid-viewer-idle-sm{
+    0%, 100%{ transform: scale(.66) translateY(2px) rotate(1.2deg); }
+    40%{ transform: scale(.66) translateY(-3px) rotate(-.8deg); }
+    70%{ transform: scale(.66) translateY(1px) rotate(.6deg); }
+  }
+}
+@media (max-width: 520px){
+  .vivid-home-breathe{ min-height: 490px !important; }
+  .vivid-home-tv{ width: min(340px, 84vw) !important; top: 16px !important; }
+  .vivid-home-viewer{
+    right: calc(50% - 168px) !important;
+    top: 128px !important;
+    transform: scale(.56) !important;
+    animation-name: vivid-viewer-idle-xs !important;
+  }
+  .vivid-home-breathe-copy{ top: 320px !important; padding-inline: 14px; }
+  @keyframes vivid-viewer-idle-xs{
+    0%, 100%{ transform: scale(.56) translateY(2px) rotate(1deg); }
+    40%{ transform: scale(.56) translateY(-2px) rotate(-.6deg); }
+    70%{ transform: scale(.56) translateY(1px) rotate(.4deg); }
+  }
+}
+
+@media (prefers-reduced-motion: reduce){
+  .vivid-home-tv,
+  .vivid-home-tv:before,
+  .vivid-home-tv-screen:after,
+  .vivid-home-viewer,
+  .vivid-home-viewer-head,
+  .vivid-home-viewer-eye,
+  .vivid-home-viewer-mouth,
+  .vivid-home-viewer-arm.viewer-arm-right,
+  .vivid-home-viewer-popcorn,
+  .vivid-home-viewer-popcorn:before{
+    animation: none !important;
+  }
+}
