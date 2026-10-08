@@ -49,10 +49,15 @@ function card(c){
  return `<button class="vivid-live-channel" type="button" data-channel-id="${esc(c.id)}"><span class="vivid-live-channel-art" aria-hidden="true"><i class="bi bi-broadcast"></i></span><span class="vivid-live-channel-copy"><strong>${esc(c.name)}</strong><small>${esc([c.country,label(c.category)].filter(Boolean).join(" · ")||"Live")} · ${esc(badge)}</small></span><span class="vivid-live-channel-play" aria-hidden="true"><i class="bi bi-play-fill"></i></span></button>`;
 }
 function render(){
- const list=visible(),page=list.slice(0,shown);
+ const list=visible();
+ const totalPages=Math.max(1,Math.ceil(list.length/PAGE_SIZE));
+ page=Math.min(page,totalPages);
+ const startIndex=(page-1)*PAGE_SIZE;
+ const pageItems=list.slice(startIndex,startIndex+PAGE_SIZE);
  grid.innerHTML=pageItems.length?pageItems.map(card).join(""):`<div class="vivid-live-empty"><i class="bi bi-tv"></i><strong>No channels found</strong><span>Try another search or filter.</span></div>`;
- const totalPages=Math.max(1,Math.ceil(list.length/PAGE_SIZE));\n const pager=`<div class="vivid-live-pagination" aria-label="Channel pages"><button type="button" data-live-page="prev" ${page<=1?"disabled":""}><i class="bi bi-chevron-left"></i> Previous</button><span>Page ${page} of ${totalPages}</span><button type="button" data-live-page="next" ${page>=totalPages?"disabled":""}>Next <i class="bi bi-chevron-right"></i></button></div>`;\n grid.insertAdjacentHTML("beforeend",pager);
- if(guideStatus)guideStatus.textContent=`${list.length.toLocaleString()} channels · Page ${page} of ${Math.max(1,Math.ceil(list.length/PAGE_SIZE))}`;
+ const pager=`<div class="vivid-live-pagination" aria-label="Channel pages"><button type="button" data-live-page="prev" ${page<=1?"disabled":""}><i class="bi bi-chevron-left"></i> Previous</button><span>Page ${page} of ${totalPages}</span><button type="button" data-live-page="next" ${page>=totalPages?"disabled":""}>Next <i class="bi bi-chevron-right"></i></button></div>`;
+ grid.insertAdjacentHTML("beforeend",pager);
+ if(guideStatus)guideStatus.textContent=`${list.length.toLocaleString()} channels · Page ${page} of ${totalPages}`;
 }
 function stopMedia(){try{video.pause()}catch{}video.removeAttribute("src");video.load();frame.src="about:blank";}
 function showError(){if(playerLoading)playerLoading.hidden=true;if(playerError)playerError.hidden=false;}
@@ -78,8 +83,16 @@ function play(c){
 }
 function close(){stopMedia();player.hidden=true;if(playerLoading)playerLoading.hidden=true;if(playerError)playerError.hidden=true;}
 grid?.addEventListener("click",e=>{
- const more=e.target.closest("[data-live-more]");if(more){return}
- const b=e.target.closest("[data-channel-id]");if(b)play(channels.find(c=>c.id===b.dataset.channelId));
+ const pager=e.target.closest("[data-live-page]");
+ if(pager){
+   const total=Math.max(1,Math.ceil(visible().length/PAGE_SIZE));
+   page=pager.dataset.livePage==="prev"?Math.max(1,page-1):Math.min(total,page+1);
+   render();
+   grid.scrollIntoView({behavior:"smooth",block:"start"});
+   return;
+ }
+ const b=e.target.closest("[data-channel-id]");
+ if(b)play(channels.find(c=>c.id===b.dataset.channelId));
 });
 closePlayer?.addEventListener("click",close);
 video?.addEventListener("error",()=>{if(sourceIndex<currentSources.length-1){sourceIndex++;playSource()}else showError()});
