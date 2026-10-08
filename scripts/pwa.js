@@ -6,6 +6,15 @@ const INSTALL_GUIDE_DISMISSED = "vivid:install-guide:dismissed";
 function installGuideDismissed() {
   try { return localStorage.getItem(INSTALL_GUIDE_DISMISSED) === "1"; } catch { return false; }
 }
+function ensurePwaStyles() {
+  if (document.querySelector('[data-vivid-pwa-styles]')) return;
+  const link = document.createElement("link");
+  link.rel = "stylesheet";
+  link.href = "./styles/vivid-pwa.css";
+  link.dataset.vividPwaStyles = "true";
+  document.head.appendChild(link);
+}
+
 function dismissInstallGuide() {
   try { localStorage.setItem(INSTALL_GUIDE_DISMISSED, "1"); } catch {}
 }
@@ -105,14 +114,10 @@ function createUpdateControl(registration) {
   updateControl = button;
 
   const markDone = () => {
-    try { localStorage.setItem("vivid:update-prompt:v1", "1"); } catch {}
     button.hidden = true;
   };
 
   const show = () => {
-    try {
-      if (localStorage.getItem("vivid:update-prompt:v1") === "1") return;
-    } catch {}
     button.hidden = false;
   };
 
@@ -175,6 +180,7 @@ function markIosStandalone() {
 }
 
 function initPwa() {
+  ensurePwaStyles();
   markIosStandalone();
   createInstallControl();
   createNetworkStatus();
