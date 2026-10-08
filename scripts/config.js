@@ -9,7 +9,7 @@ export const VIVID_CONFIG = Object.freeze({
     animapBaseUrl: "https://animap.id",
     vidapiEmbedBaseUrl: "https://vaplayer.ru",
     vidsrcEmbedBaseUrl: "https://vidsrc.sh",
-    twoEmbedBaseUrl: "https://www.2embed.online",
+    vidlinkEmbedBaseUrl: "https://vidlink.pro",
     vidplusEmbedBaseUrl: "https://player.vidplus.to",
     language: "en-US"
   }),
