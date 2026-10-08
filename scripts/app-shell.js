@@ -78,16 +78,11 @@ function syncDesktopNavigation() {
   const nav = document.querySelector(".vivid-nav, .vivid-unified-nav");
   if (!nav) return;
 
-  const oldNotification = nav.querySelector("#release-alert-button");
-  const oldAuth = nav.querySelector(".vivid-nav-action[data-vivid-nav-auth], #auth-link, #discover-auth, #library-auth, #collection-auth, #title-auth, #watch-auth, .vivid-nav-action");
-  const auth = oldAuth || Object.assign(document.createElement("a"), { className: "vivid-nav-action", href: "auth.html", textContent: "Sign in" });
-  auth.classList.add("vivid-nav-action", "vivid-account-control");
-  auth.dataset.vividNavAuth = "true";
-  if (!auth.getAttribute("href")) auth.setAttribute("href", "auth.html");
-  auth.innerHTML = '<i class="bi bi-person-circle" aria-hidden="true"></i><span class="vivid-account-label">Account</span>';
-  auth.setAttribute("aria-label", "Account");
-
+  // Desktop uses the same quiet navigation hierarchy as mobile:
+  // brand + primary destinations only. Do not resurrect legacy search,
+  // notification, account, language, or theme controls in the shell.
   nav.innerHTML = "";
+
   const brand = document.createElement("a");
   brand.className = "vivid-brand";
   brand.href = "home.html";
@@ -99,15 +94,7 @@ function syncDesktopNavigation() {
   links.innerHTML = buildPrimaryLinks(page);
   nav.appendChild(links);
 
-  nav.insertAdjacentHTML("beforeend", buildSearchControl());
-
-  if (oldNotification) nav.appendChild(oldNotification);
-
-  // Clean three-zone shell: brand left, account centered, language far right.
-  nav.appendChild(auth);
-  nav.classList.add("vivid-v2-nav");
-  const language = nav.querySelector(".vivid-language");
-  if (language) nav.appendChild(language);
+  nav.classList.remove("vivid-v2-nav");
 }
 
 function syncMobileNavigation() {
@@ -135,8 +122,12 @@ function syncNavigation() {
 }
 
 function initThemeToggle() {
+  // Theme remains available to the document state, but the app shell stays
+  // visually identical to the compact mobile navigation. Do not inject the
+  // legacy light/dark control into app-page headers.
+  if (currentPage() !== "landing") return;
   const root = document.documentElement;
-  const nav = document.querySelector(".vivid-unified-nav, .vivid-nav, .vivid-discovery-nav, .vivid-library-nav, .vivid-title-nav, .vivid-watch-nav, .landing-header");
+  const nav = document.querySelector(".landing-header");
   if (!nav || nav.querySelector(".vivid-theme-toggle")) return;
 
   const button = document.createElement("button");
