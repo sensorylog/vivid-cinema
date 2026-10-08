@@ -104,7 +104,7 @@ function normalizeApiFallback(channelsData,streamsData,countriesData){
 function normalizeNexusOnline(data){
  const rows=Array.isArray(data)?data:[];
  return rows.filter(c=>c&&!c.is_nsfw&&!c.closed&&Array.isArray(c.streams)&&c.streams.length).map(c=>({
-   id:c.id,name:c.name,altNames:c.alt_names||[],country:c.country||"International",countryCode:c.country||"",logo:c.logo||"",language:(c.languages||[])[0]||"",category:(c.categories||[])[0]||"general",categories:c.categories||["general"],provider:"Nexus",sources:c.streams.filter(s=>s&&/^https?:\\/\\//i.test(s.url)).slice(0,5).map(s=>({type:/youtube\\.com|youtu\\.be/i.test(s.url)?"iframe":"video",url:s.url,quality:s.quality||"",labels:s.labels||[],score:Number(s.health?.score??s.score??s.rank??c.score??0)||0,provider:"Nexus"}))
+   id:c.id,name:c.name,altNames:c.alt_names||[],country:c.country||"International",countryCode:c.country||"",logo:c.logo||"",language:(c.languages||[])[0]||"",category:(c.categories||[])[0]||"general",categories:c.categories||["general"],provider:"Nexus",sources:c.streams.filter(s=>s&&/^https?:\/\//i.test(s.url)).slice(0,5).map(s=>({type:/youtube\\.com|youtu\\.be/i.test(s.url)?"iframe":"video",url:s.url,quality:s.quality||"",labels:s.labels||[],score:Number(s.health?.score??s.score??s.rank??c.score??0)||0,provider:"Nexus"}))
  })).filter(c=>c.sources.length);
 }
 
