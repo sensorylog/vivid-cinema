@@ -10,7 +10,7 @@ import { recordBehavior, startIntelligenceSync } from "./intelligence.js";
 const $ = (id) => document.getElementById(id);
 const route = getRoute();
 const VIDAPI_ORIGINS = new Set([new URL(VIVID_CONFIG.api.vidapiEmbedBaseUrl).origin, "https://vidapi.ru"]);
-const TWOEMBED_ORIGIN = "https://www.2embed.online";
+const VIDLINK_ORIGIN = "https://vidlink.pro";
 const VIDPLUS_ORIGIN = "https://player.vidplus.to";
 const VIDSRC_ORIGIN = (() => {
   try { return new URL(VIVID_CONFIG.api.vidsrcEmbedBaseUrl || "https://vidsrc.cc").origin; }
@@ -28,7 +28,6 @@ let tmdbId = "";
 let aniListId = "";
 const PRIMARY_FALLBACK_MS = 15000;
 const ANIME_FALLBACK_MS = 9000;
-const TWOEMBED_LOAD_TIMEOUT_MS = 12000;
 
 function getParams() {
   const id = route.params.get("id");
@@ -58,12 +57,16 @@ function buildVidapiEmbedUrl(params, startAt = 0) {
     : base + "/embed/movie/" + encodeURIComponent(params.id) + "?" + query;
 }
 
-function buildTwoEmbedUrl(params) {
-  const base = String(VIVID_CONFIG.api.twoEmbedBaseUrl || "https://www.2embed.online").replace(/\/+$/, "");
+function buildVidlinkEmbedUrl(params) {
+  const base = String(VIVID_CONFIG.api.vidlinkEmbedBaseUrl || "https://vidlink.pro").replace(/\/+$/, "");
+  if (route.params.get("anime") === "1") {
+    if (!aniListId) return "";
+    return base + "/anime/" + encodeURIComponent(aniListId) + "/" + params.episode + "/sub?fallback=true";
+  }
   const id = encodeURIComponent(tmdbId || imdbId || params.id);
   return params.type === "tv"
-    ? base + "/embed/tv/" + id + "/" + params.season + "/" + params.episode
-    : base + "/embed/movie/" + id;
+    ? base + "/tv/" + id + "/" + params.season + "/" + params.episode
+    : base + "/movie/" + id;
 }
 
 function buildVidsrcEmbedUrl(params) {
@@ -95,13 +98,13 @@ async function resolveAniListId(title) {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({
-        query: "query($search:String!){Media(search:$search,type:ANIME){id title{romaji english native}}}",
+        query: "query($search:String!){Media(search:$search,type:ANIME){id idMal title{romaji english native}}}",
         variables: { search: title }
       })
     });
     if (!response.ok) return "";
     const data = await response.json();
-    return String(data?.data?.Media?.id || "");
+    return String(data?.data?.Media?.idMal || "");
   } catch {
     return "";
   }
@@ -123,15 +126,15 @@ function hasFallbackId() {
 
 function getNextSource(source) {
   if (source === "vidapi") return "vidsrc";
-  if (source === "vidsrc") return "2embed";
-  if (source === "2embed") return "vidplus";
+  if (source === "vidsrc") return "vidlink";
+  if (source === "vidlink") return "vidplus";
   if (source === "vidplus") return "vidapi";
   return null;
 }
 
 function getSourceLabel(source) {
   if (source === "vidsrc") return "VidSrc alternate source";
-  if (source === "2embed") return "2Embed alternate source";
+  if (source === "vidlink") return "VidLink alternate source";
   if (source === "vidplus") return "VidPlus alternate source";
   return "Powered by VidAPI";
 }
@@ -176,23 +179,23 @@ function setPlayerSource(source, params, startAt = 0) {
   const player = $("vidapi-player");
   if (!player || !params) return;
   clearFallbackTimer();
-  if (!["vidapi", "vidsrc", "2embed", "vidplus"].includes(source)) return;
+  if (!["vidapi", "vidsrc", "vidlink", "vidplus"].includes(source)) return;
   activeSource = source;
   const status = $("player-status");
 
-  if (source === "2embed") {
-    if (!hasFallbackId()) return;
+  if (source === "vidlink") {
+    if (route.params.get("anime") === "1" ? !aniListId : !hasFallbackId()) return;
     primaryHealthy = false;
-    const twoEmbedUrl = buildTwoEmbedUrl(params);
-    console.info("Vivid 2Embed playback:", twoEmbedUrl);
-    player.src = twoEmbedUrl;
+    const vidlinkUrl = buildVidlinkEmbedUrl(params);
+    if (!vidlinkUrl) return;
+    player.src = vidlinkUrl;
     if (status) {
-      status.textContent = "Loading 2Embed alternate source…";
+      status.textContent = "Loading VidLink alternate source…";
       status.classList.remove("is-warning");
       status.hidden = false;
     }
     fallbackTimer = window.setTimeout(() => {
-      if (primaryHealthy || activeSource !== "2embed") return;
+      if (primaryHealthy || activeSource !== "vidlink") return;
       const next = getNextSource(activeSource);
       if (next) setPlayerSource(next, currentParams, Number(getPlaybackProgress(progressKey())?.progress || route.params.get("startAt") || 0));
     }, PRIMARY_FALLBACK_MS);
@@ -321,7 +324,7 @@ function renderShell(params) {
     '<section class="vivid-player-section" aria-label="Video player"><div class="vivid-player-frame">' +
       '<div id="player-status" class="vivid-player-status" role="status" aria-live="polite">' + (resumeAt > 5 ? "Resuming where you left off…" : "Preparing playback…") + '</div>' +
       '<iframe id="vidapi-player" title="' + escapeHtml(title) + ' player" allow="autoplay; fullscreen; picture-in-picture; encrypted-media; clipboard-write" allowfullscreen referrerpolicy="origin" loading="eager"></iframe>' +
-    '</div><div class="vivid-player-bar"><div class="vivid-player-source-group" role="group" aria-label="Choose player source"><span class="vivid-player-source-caption"><i class="bi bi-broadcast-pin"></i> PLAYER</span><button type="button" class="vivid-player-source" data-player-source="vidapi" aria-pressed="true">VidAPI</button><button type="button" class="vivid-player-source" data-player-source="vidsrc" aria-pressed="false">VidSrc</button><button type="button" class="vivid-player-source" data-player-source="2embed" aria-pressed="false">2Embed</button><button type="button" class="vivid-player-source" data-player-source="vidplus" aria-pressed="false">VidPlus</button></div><div class="vivid-player-bar-actions"><span id="player-source-label">Powered by VidAPI</span><a href="' + escapeHtml(buildTitleUrl(media.id, media.media_type)) + '">Back to title</a></div></div></section>' +
+    '</div><div class="vivid-player-bar"><div class="vivid-player-source-group" role="group" aria-label="Choose player source"><span class="vivid-player-source-caption"><i class="bi bi-broadcast-pin"></i> PLAYER</span><button type="button" class="vivid-player-source" data-player-source="vidapi" aria-pressed="true">VidAPI</button><button type="button" class="vivid-player-source" data-player-source="vidsrc" aria-pressed="false">VidSrc</button><button type="button" class="vivid-player-source" data-player-source="vidlink" aria-pressed="false">VidLink</button><button type="button" class="vivid-player-source" data-player-source="vidplus" aria-pressed="false">VidPlus</button></div><div class="vivid-player-bar-actions"><span id="player-source-label">Powered by VidAPI</span><a href="' + escapeHtml(buildTitleUrl(media.id, media.media_type)) + '">Back to title</a></div></div></section>' +
     (isTv ? '<section class="vivid-watch-note"><i class="bi bi-collection-play"></i><div><strong>Episode playback</strong><span>Use the episode list on the title page to switch seasons and episodes.</span></div></section>' : "") +
     '<section class="vivid-watch-recommendations"><div class="vivid-section-heading"><div><span>AFTER WATCHING</span><h2>More like this</h2></div></div><div id="watch-recommendations" class="vivid-watch-rec-rail">' + recommendationCards() + '</div></section>';
 
@@ -340,13 +343,12 @@ function renderShell(params) {
     player.addEventListener("error", () => {
       triggerFallback("iframe_error");
     });
-    // Start on VidAPI. Users can explicitly choose VidSrc or 2Embed below;\n    // automatic fallback only moves forward from a failed provider.
+    // Start on VidAPI. Users can explicitly choose any alternate source below;\n    // automatic fallback only moves forward from a failed provider.
     setPlayerSource("vidapi", params, resumeAt);
-    const switchBtn = $("player-switch-source");
     document.querySelectorAll("[data-player-source]").forEach(button => {
       button.addEventListener("click", () => {
         const source = button.getAttribute("data-player-source");
-        if (!["vidapi", "vidsrc", "2embed", "vidplus"].includes(source) || !hasFallbackId()) return;
+        if (!["vidapi", "vidsrc", "vidlink", "vidplus"].includes(source) || !hasFallbackId()) return;
         setPlayerSource(source, params, resumeAt);
       });
     });
@@ -385,9 +387,9 @@ function handlePlayerEvent(event) {
   if (!player || event.source !== player.contentWindow) return;
   const isVidapi = VIDAPI_ORIGINS.has(event.origin);
   const isFallback = event.origin === VIDSRC_ORIGIN;
-  const isTwoEmbed = event.origin === TWOEMBED_ORIGIN;
+  const isVidLink = event.origin === VIDLINK_ORIGIN;
   const isVidPlus = event.origin === VIDPLUS_ORIGIN;
-  if (!isVidapi && !isFallback && !isTwoEmbed && !isVidPlus) return;
+  if (!isVidapi && !isFallback && !isVidLink && !isVidPlus) return;
   const payload = event.data;
   if (!payload || typeof payload !== "object") return;
 
@@ -402,7 +404,7 @@ function handlePlayerEvent(event) {
     /(^|\D)(404|403|500|502|503)(\D|$)/.test(errorValue) ||
     /(error|failed|failure|not.?found|unavailable|offline|load.?failed|source.?failed)/.test(statusValue + " " + errorValue);
 
-  if (looksLikeFailure && (activeSource === "vidapi" || activeSource === "vidsrc" || activeSource === "2embed" || activeSource === "vidplus")) {
+  if (looksLikeFailure && (activeSource === "vidapi" || activeSource === "vidsrc" || activeSource === "vidlink" || activeSource === "vidplus")) {
     triggerFallback((isVidapi ? "vidapi_" : activeSource + "_") + (numericCode || statusValue || "error"));
     return;
   }
@@ -411,7 +413,7 @@ function handlePlayerEvent(event) {
   // VidAPI has a formal PLAYER_EVENT contract; fallbacks may expose simpler
   // playback messages. Only treat explicit playback/progress signals as healthy.
   const isPlaybackSignal =
-    isTwoEmbed ||
+    isVidLink ||
     isVidPlus ||
     payload.type === "PLAYER_EVENT" ||
     /^(play|playing|timeupdate|progress|loadedmetadata|canplay|ready|started)$/i.test(statusValue) ||
