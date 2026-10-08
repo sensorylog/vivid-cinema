@@ -104,8 +104,10 @@ function addLanguagePicker(){
  LANGUAGES.forEach(([code,name])=>{const o=document.createElement("option");o.value=code;o.textContent=code.toUpperCase();o.title=name;o.selected=code===lang;select.appendChild(o)});
  select.addEventListener("change",()=>{localStorage.setItem(VIVID_LANG_KEY,select.value);translateChrome(select.value);select.setAttribute("aria-label",COPY[select.value].language)});
  wrap.appendChild(select);
+ const slot=document.querySelector(".vivid-nav-language-slot");
  const nav=document.querySelector(".vivid-nav,.vivid-discovery-nav,.vivid-library-nav,.vivid-title-nav,.vivid-watch-nav");
- if(nav)nav.appendChild(wrap);
+ if(slot)slot.appendChild(wrap);
+ else if(nav)nav.appendChild(wrap);
  else document.body.appendChild(Object.assign(wrap,{style:"position:fixed;top:12px;right:14px;z-index:3000"}));
 }
 function enhanceFooter(){
