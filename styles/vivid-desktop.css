@@ -483,3 +483,141 @@
     grid-template-columns:repeat(8,minmax(0,1fr));
   }
 }
+
+
+/* Final desktop polish — hierarchy, containment, and edge-case cleanup. */
+@media (min-width:901px){
+  html,body{overflow-x:hidden;}
+
+  /* Keep the navigation stable on laptop widths. */
+  .vivid-unified-header .vivid-nav,
+  body.vivid-cinema-home .vivid-nav{
+    min-width:0;
+    max-width:1320px;
+  }
+  .vivid-unified-header .vivid-brand,
+  body.vivid-cinema-home .vivid-brand{
+    flex:0 0 auto;
+    white-space:nowrap;
+  }
+  .vivid-unified-header .vivid-navlinks,
+  body.vivid-cinema-home .vivid-navlinks{
+    min-width:0;
+    flex:1 1 auto;
+    overflow:hidden;
+  }
+  .vivid-unified-header .vivid-navlinks a,
+  body.vivid-cinema-home .vivid-navlinks a{
+    white-space:nowrap;
+  }
+
+  /* Give every desktop page the same readable left/right rhythm. */
+  .vivid-unified-header + main,
+  body.vivid-atmosphere .vivid-search-main{
+    padding-inline:var(--vivid-page-gutter);
+  }
+
+  /* Hero content should never collide with the featured-title strip. */
+  body.vivid-cinema-home .vivid-hero-content{
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    min-height:100%;
+    box-sizing:border-box;
+    padding-top:120px;
+    padding-bottom:210px;
+  }
+  body.vivid-cinema-home .vivid-hero-title{
+    text-wrap:balance;
+  }
+  body.vivid-cinema-home .vivid-hero-copy{
+    text-wrap:pretty;
+  }
+
+  /* Rails: predictable controls and no accidental vertical jumps from long titles. */
+  body.vivid-cinema-home .vivid-rail,
+  .vivid-discovery-main .vivid-rail,
+  .vivid-collection-main .vivid-rail,
+  .vivid-library-main .vivid-rail{
+    scroll-padding-inline:2px;
+    overscroll-behavior-inline:contain;
+  }
+  .vivid-card-title,
+  .vivid-discovery-copy strong,
+  .vivid-library-card strong{
+    display:-webkit-box;
+    -webkit-box-orient:vertical;
+    -webkit-line-clamp:2;
+    overflow:hidden;
+  }
+
+  /* Keep catalogue cards visually equal even when metadata lengths differ. */
+  .vivid-discovery-main .vivid-card,
+  .vivid-collection-main .vivid-card,
+  .vivid-library-main .vivid-card{
+    min-width:0;
+  }
+
+  /* Title pages: prevent artwork/detail columns from drifting on ultrawide screens. */
+  .vivid-title-page .vivid-title-hero-inner{
+    max-width:1280px;
+    margin-inline:auto;
+  }
+  .vivid-title-page .vivid-title-backdrop{
+    max-width:none;
+  }
+
+  /* Watch: lock the player to a cinematic frame instead of letting width dictate height. */
+  .vivid-watch-page .vivid-player-frame{
+    width:100%;
+    aspect-ratio:16 / 9;
+    max-height:740px;
+    margin-inline:auto;
+  }
+
+  /* Search/news/collection headers get the same breathing room as catalogue pages. */
+  .vivid-search-page .vivid-search-main,
+  .vivid-news-page main,
+  .vivid-collection-page .vivid-collection-main{
+    padding-top:clamp(36px,4vw,58px);
+  }
+}
+
+@media (min-width:901px) and (max-width:1200px){
+  /* Laptop: preserve density without squeezing the navigation or cards. */
+  body.vivid-cinema-home .vivid-navlinks a,
+  .vivid-unified-header .vivid-navlinks a{
+    padding-inline:7px;
+    font-size:.71rem;
+  }
+  body.vivid-cinema-home .vivid-nav{
+    gap:12px;
+  }
+  .vivid-unified-header .vivid-nav{
+    gap:10px;
+  }
+  body.vivid-cinema-home .vivid-hero-title{
+    max-width:620px;
+  }
+  .vivid-discovery-page .vivid-discovery-grid,
+  .vivid-library-page .vivid-library-grid{
+    grid-template-columns:repeat(6,minmax(0,1fr));
+  }
+}
+
+@media (min-width:1500px){
+  .vivid-title-page .vivid-title-hero-inner{
+    max-width:1320px;
+  }
+  .vivid-watch-page .vivid-player-frame{
+    max-height:760px;
+  }
+}
+
+@media (prefers-reduced-motion:reduce){
+  .vivid-discovery-main .vivid-card img,
+  .vivid-collection-main .vivid-card img,
+  .vivid-library-main .vivid-card img{
+    transition:none!important;
+  }
+}
