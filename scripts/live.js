@@ -75,13 +75,28 @@ function playSource(){
    const p=video.play();if(p?.catch)p.catch(()=>{});
  }
 }
+let lastFocusedChannel=null;
 function play(c){
  if(!c?.sources?.length)return;
+ lastFocusedChannel=document.activeElement;
  currentSources=c.sources;sourceIndex=0;
  if(playerTitle)playerTitle.textContent=c.name;
- player.hidden=false;player.scrollIntoView({behavior:"smooth",block:"start"});playSource();
+ player.hidden=false;
+ player.classList.add("is-open");
+ document.body.classList.add("vivid-live-player-open");
+ playSource();
+ window.setTimeout(()=>closePlayer?.focus(),0);
 }
-function close(){stopMedia();player.hidden=true;if(playerLoading)playerLoading.hidden=true;if(playerError)playerError.hidden=true;}
+function close(){
+ stopMedia();
+ player.classList.remove("is-open");
+ player.hidden=true;
+ document.body.classList.remove("vivid-live-player-open");
+ if(playerLoading)playerLoading.hidden=true;
+ if(playerError)playerError.hidden=true;
+ if(lastFocusedChannel?.isConnected)lastFocusedChannel.focus();
+}
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!player.hidden)close()});
 grid?.addEventListener("click",e=>{
  const pager=e.target.closest("[data-live-page]");
  if(pager){
