@@ -213,3 +213,61 @@
 @media (prefers-reduced-motion:reduce){
   body.vivid-cinema-home .vivid-card:hover{transform:none!important}
 }
+
+/* Shared desktop chrome for secondary Vivid surfaces. */
+@media (min-width:901px){
+  body.vivid-atmosphere .vivid-unified-header{
+    position:sticky!important;
+    top:0;
+    z-index:1000;
+    padding:12px max(24px,3vw)!important;
+    background:rgba(8,9,11,.78)!important;
+    border:0!important;
+    box-shadow:0 1px 0 rgba(255,255,255,.06)!important;
+    backdrop-filter:blur(24px) saturate(145%)!important;
+    -webkit-backdrop-filter:blur(24px) saturate(145%)!important;
+  }
+  body.vivid-atmosphere .vivid-unified-header .vivid-nav{
+    width:min(1320px,100%);
+    min-height:48px;
+    margin-inline:auto;
+    gap:18px;
+  }
+  body.vivid-atmosphere .vivid-unified-header .vivid-navlinks{gap:2px;min-width:0;}
+  body.vivid-atmosphere .vivid-unified-header .vivid-navlinks a{
+    padding:8px 10px;
+    border-radius:9px;
+    font-size:.76rem;
+  }
+  body.vivid-atmosphere .vivid-unified-header .vivid-nav-action{
+    margin-left:auto;
+    padding:8px 12px;
+    border-radius:9px;
+    font-size:.76rem;
+    background:#fff;
+    color:#08090b;
+  }
+  body.vivid-atmosphere .vivid-discovery-main,
+  body.vivid-atmosphere .vivid-collection-main,
+  body.vivid-atmosphere .vivid-library-main,
+  body.vivid-atmosphere .vivid-title-page main,
+  body.vivid-atmosphere .vivid-watch-page main,
+  body.vivid-atmosphere .vivid-news-page main,
+  body.vivid-atmosphere .vivid-search-main{
+    width:min(1320px,calc(100% - 80px));
+    margin-inline:auto;
+  }
+  body.vivid-atmosphere .vivid-page-back{margin-top:24px;}
+  body.vivid-atmosphere :is(.vivid-discovery-main h1,.vivid-collection-main h1,.vivid-library-main h1){
+    font-size:clamp(2.2rem,3.8vw,3.8rem);
+    letter-spacing:-.05em;
+  }
+  body.vivid-atmosphere :is(.vivid-discovery-main,.vivid-collection-main,.vivid-library-main) .vivid-card{
+    border-radius:12px;
+  }
+  body.vivid-atmosphere :is(.vivid-discovery-main,.vivid-collection-main,.vivid-library-main) .vivid-card:hover{
+    transform:translateY(-3px)!important;
+  }
+  body.vivid-atmosphere .vivid-search-main{padding-bottom:72px;}
+  body.vivid-atmosphere .vivid-search-page-head{padding-top:54px;}
+}
