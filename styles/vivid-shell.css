@@ -504,3 +504,17 @@ html:not([data-vivid-ready="true"]) .vivid-mobile-nav{
     font-size:1.22rem!important;
   }
 }
+
+/* Canonical app shell — all content pages share the same topbar/nav geometry.
+   Legacy page-specific shell classes remain as compatibility hooks for JS. */
+.vivid-topbar{position:relative;z-index:1000;width:100%;box-sizing:border-box;padding:12px var(--vivid-page-gutter)}
+.vivid-topbar .vivid-nav{width:min(100%,1440px);min-height:56px;margin-inline:auto;display:flex;align-items:center;gap:10px}
+.vivid-topbar .vivid-brand{flex:0 0 auto;margin-right:8px}
+.vivid-topbar .vivid-navlinks{display:flex;align-items:center;gap:2px;min-width:0}
+.vivid-topbar .vivid-navlinks a,.vivid-topbar .vivid-nav-action{display:inline-flex;align-items:center;gap:7px;min-height:40px;padding:9px 11px;border:0;border-radius:10px;background:transparent;color:#969ca6;text-decoration:none;font:600 .82rem/1 var(--vivid-font-sans);white-space:nowrap;cursor:pointer;transition:color .18s ease,background .18s ease}
+.vivid-topbar .vivid-navlinks a:hover,.vivid-topbar .vivid-navlinks a[aria-current="page"],.vivid-topbar .vivid-nav-action:hover{color:#fff;background:rgba(255,255,255,.065)}
+.vivid-topbar .vivid-nav-action{margin-left:auto}
+@media(max-width:900px){.vivid-topbar .vivid-navlinks{overflow-x:auto;scrollbar-width:none}.vivid-topbar .vivid-navlinks::-webkit-scrollbar{display:none}.vivid-topbar .vivid-navlinks a{flex:0 0 auto}}
+@media(max-width:640px){.vivid-topbar{padding:calc(6px + var(--vivid-safe-top)) 14px 6px;border-bottom:0}.vivid-topbar .vivid-nav{min-height:50px;gap:8px}.vivid-topbar .vivid-navlinks,.vivid-topbar .vivid-nav-action{display:none}}
+html[data-vivid-theme="light"] .vivid-topbar .vivid-navlinks a,html[data-vivid-theme="light"] .vivid-topbar .vivid-nav-action{color:#59616d}
+html[data-vivid-theme="light"] .vivid-topbar .vivid-navlinks a:hover,html[data-vivid-theme="light"] .vivid-topbar .vivid-navlinks a[aria-current="page"],html[data-vivid-theme="light"] .vivid-topbar .vivid-nav-action:hover{color:#10131a;background:rgba(20,28,40,.07)}
