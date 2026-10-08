@@ -25,7 +25,8 @@ let fallbackTimer = null;
 let imdbId = "";
 let tmdbId = "";
 const PRIMARY_FALLBACK_MS = 15000;
-const ANIME_FALLBACK_MS = 9000;\nconst TWOEMBED_LOAD_TIMEOUT_MS = 10000;
+const ANIME_FALLBACK_MS = 9000;
+const TWOEMBED_LOAD_TIMEOUT_MS = 12000;
 
 function getParams() {
   const id = route.params.get("id");
@@ -90,6 +91,7 @@ function hasFallbackId() {
 function getNextSource(source) {
   if (source === "vidapi") return "vidsrc";
   if (source === "vidsrc") return "2embed";
+  if (source === "2embed") return "vidapi";
   return null;
 }
 
@@ -146,7 +148,9 @@ function setPlayerSource(source, params, startAt = 0) {
   if (source === "2embed") {
     if (!hasFallbackId()) return;
     primaryHealthy = false;
-    player.src = buildTwoEmbedUrl(params);
+    const twoEmbedUrl = buildTwoEmbedUrl(params);
+    console.info("Vivid 2Embed playback:", twoEmbedUrl);
+    player.src = twoEmbedUrl;
     if (status) {
       status.textContent = "Loading 2Embed alternate source…";
       status.classList.remove("is-warning");
@@ -285,7 +289,7 @@ function renderShell(params) {
     player.addEventListener("error", () => {
       triggerFallback("iframe_error");
     });
-    // Start on VidAPI, then fall back to VidSrc, then 2Embed if needed.
+    // Start on VidAPI. Users can explicitly choose VidSrc or 2Embed below;\n    // automatic fallback only moves forward from a failed provider.
     setPlayerSource("vidapi", params, resumeAt);
     const switchBtn = $("player-switch-source");
     document.querySelectorAll("[data-player-source]").forEach(button => {
