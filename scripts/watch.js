@@ -14,10 +14,6 @@ const VIDSRC_ORIGIN = (() => {
   try { return new URL(VIVID_CONFIG.api.vidsrcEmbedBaseUrl || "https://vidsrc.cc").origin; }
   catch { return "https://vidsrc.cc"; }
 })();
-const CINEPRO_ORIGIN = (() => {
-  try { return new URL(VIVID_CONFIG.api.cineproBaseUrl || "https://ui.cinepro.cc").origin; }
-  catch { return "https://ui.cinepro.cc"; }
-})();
 let media = null;
 let details = null;
 let currentParams = null;
@@ -69,44 +65,14 @@ function buildVidsrcEmbedUrl(params) {
   return base + "/embed/movie/" + id;
 }
 
-function resolveCineproOmssUrl() {
-  const fromRoute = String(route.params.get("cineproOmssUrl") || "").trim();
-  const fromStorage = (() => {
-    try { return String(localStorage.getItem("vivid.cinepro.omssUrl") || "").trim(); }
-    catch { return ""; }
-  })();
-  const configured = String(VIVID_CONFIG.api.cineproOmssUrl || "").trim();
-  if (fromRoute) return fromRoute.replace(/\/+$/, "");
-  if (fromStorage) return fromStorage.replace(/\/+$/, "");
-  if (configured) return configured.replace(/\/+$/, "");
-  const host = String(window.location.hostname || "").toLowerCase();
-  if (host === "localhost" || host === "127.0.0.1" || host === "::1") return "http://localhost:3000";
-  return "";
-}
-
-function buildCineproUrl(params) {
-  const uiBase = String(VIVID_CONFIG.api.cineproBaseUrl || "https://ui.cinepro.cc").replace(/\/+$/, "");
-  const omssUrl = resolveCineproOmssUrl();
-  const mediaId = encodeURIComponent(tmdbId || params.id);
-  const path = uiBase + "/watch/" + (params.type === "tv" ? "tv/" : "movie/") + mediaId;
-  const query = new URLSearchParams();
-  if (omssUrl) query.set("omssurl", omssUrl);
-  if (params.type === "tv") {
-    query.set("s", String(params.season));
-    query.set("e", String(params.episode));
-  }
-  return path + (query.toString() ? "?" + query.toString() : "");
-}
-
 function getNextSource(source) {
   if (source === "vidapi") return "vidsrc";
-  if (source === "vidsrc") return "cinepro";
+  if (source === "vidsrc") return null;
   return null;
 }
 
 function getSourceLabel(source) {
   if (source === "vidsrc") return "VidSrc alternate source";
-  if (source === "cinepro") return "CinePro fallback";
   return "Powered by VidAPI";
 }
 
@@ -160,9 +126,7 @@ function updateSourceLabel() {
     switchBtn.hidden = !canSwitch;
     switchBtn.textContent = activeSource === "vidapi"
       ? "Try alternate source"
-      : activeSource === "vidsrc"
-        ? "Open CinePro"
-        : "Back to CinePro";
+      : "Back to primary source";
   }
 }
 
@@ -172,7 +136,7 @@ function setPlayerSource(source, params, startAt = 0) {
   clearFallbackTimer();
   activeSource = source;
   const status = $("player-status");
-  if (!["vidapi", "vidsrc", "cinepro"].includes(source)) return;
+  if (!["vidapi", "vidsrc"].includes(source)) return;
   if (source === "vidsrc") {
     if (!hasFallbackId()) return;
     primaryHealthy = false;
@@ -188,32 +152,6 @@ function setPlayerSource(source, params, startAt = 0) {
         triggerFallback("vidsrc_timeout");
       }, fallbackDelayMs());
     }
-  } else if (source === "cinepro") {
-    primaryHealthy = false;
-    const omssUrl = resolveCineproOmssUrl();
-    if (!omssUrl) {
-      if (status) {
-        status.textContent = "CinePro needs a reachable OMSS/Core URL. Configure cineproOmssUrl first.";
-        status.classList.add("is-warning");
-        status.hidden = false;
-      }
-      updateSourceLabel();
-      return;
-    }
-    player.src = buildCineproUrl(params);
-    if (status) {
-      status.textContent = "Opening CinePro fallback…";
-      status.classList.remove("is-warning");
-      status.hidden = false;
-    }
-    fallbackTimer = window.setTimeout(() => {
-      if (activeSource !== "cinepro" || primaryHealthy) return;
-      if (status) {
-        status.textContent = "CinePro is taking longer than expected. Check that the OMSS/Core URL is reachable.";
-        status.classList.add("is-warning");
-        status.hidden = false;
-      }
-    }, 10000);
   } else {
     primaryHealthy = false;
     player.src = buildVidapiEmbedUrl(params, startAt);
@@ -335,16 +273,14 @@ function renderShell(params) {
     player.addEventListener("error", () => {
       triggerFallback("iframe_error");
     });
-    // Start on primary (VidAPI), then fall through VidSrc → CinePro if needed.
+    // Start on primary (VidAPI), then fall through to VidSrc if needed.
     setPlayerSource("vidapi", params, resumeAt);
     const switchBtn = $("player-switch-source");
     if (switchBtn) {
       switchBtn.addEventListener("click", () => {
         const next = activeSource === "vidapi"
           ? "vidsrc"
-          : activeSource === "vidsrc"
-            ? "cinepro"
-            : "vidapi";
+          : "vidapi";
         setPlayerSource(next, params, resumeAt);
       });
     }
@@ -395,7 +331,7 @@ function handlePlayerEvent(event) {
   const player = $("vidapi-player");
   if (!player || event.source !== player.contentWindow) return;
   const isVidapi = VIDAPI_ORIGINS.has(event.origin);
-  const isFallback = event.origin === VIDSRC_ORIGIN || event.origin === CINEPRO_ORIGIN;
+  const isFallback = event.origin === VIDSRC_ORIGIN;
   if (!isVidapi && !isFallback) return;
   const payload = event.data;
   if (!payload || typeof payload !== "object") return;
