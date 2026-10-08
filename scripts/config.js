@@ -10,6 +10,7 @@ export const VIVID_CONFIG = Object.freeze({
     vidapiEmbedBaseUrl: "https://vaplayer.ru",
     vidsrcEmbedBaseUrl: "https://vidsrc.sh",
     twoEmbedBaseUrl: "https://www.2embed.online",
+    vidplusEmbedBaseUrl: "https://player.vidplus.to",
     language: "en-US"
   }),
   routes: Object.freeze({
