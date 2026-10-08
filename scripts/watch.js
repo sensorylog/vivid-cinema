@@ -69,20 +69,33 @@ function buildVidsrcEmbedUrl(params) {
   return base + "/embed/movie/" + id;
 }
 
+function resolveCineproOmssUrl() {
+  const fromRoute = String(route.params.get("cineproOmssUrl") || "").trim();
+  const fromStorage = (() => {
+    try { return String(localStorage.getItem("vivid.cinepro.omssUrl") || "").trim(); }
+    catch { return ""; }
+  })();
+  const configured = String(VIVID_CONFIG.api.cineproOmssUrl || "").trim();
+  if (fromRoute) return fromRoute.replace(/\/+$/, "");
+  if (fromStorage) return fromStorage.replace(/\/+$/, "");
+  if (configured) return configured.replace(/\/+$/, "");
+  const host = String(window.location.hostname || "").toLowerCase();
+  if (host === "localhost" || host === "127.0.0.1" || host === "::1") return "http://localhost:3000";
+  return "";
+}
+
 function buildCineproUrl(params) {
-  // CinePro's UI needs the OMSS/Core backend URL. The local Core installer
-  // runs on localhost:3000 and the UI reads this value from ?omssurl=...
-  // before removing it from the browser URL.
   const uiBase = String(VIVID_CONFIG.api.cineproBaseUrl || "https://ui.cinepro.cc").replace(/\/+$/, "");
-  const omssUrl = "http://localhost:3000";
+  const omssUrl = resolveCineproOmssUrl();
   const mediaId = encodeURIComponent(tmdbId || params.id);
   const path = uiBase + "/watch/" + (params.type === "tv" ? "tv/" : "movie/") + mediaId;
-  const query = new URLSearchParams({ omssurl: omssUrl });
+  const query = new URLSearchParams();
+  if (omssUrl) query.set("omssurl", omssUrl);
   if (params.type === "tv") {
     query.set("s", String(params.season));
     query.set("e", String(params.episode));
   }
-  return path + "?" + query.toString();
+  return path + (query.toString() ? "?" + query.toString() : "");
 }
 
 function getNextSource(source) {
@@ -149,7 +162,7 @@ function updateSourceLabel() {
       ? "Try alternate source"
       : activeSource === "vidsrc"
         ? "Open CinePro"
-        : "Open CinePro";
+        : "Back to CinePro";
   }
 }
 
@@ -177,8 +190,17 @@ function setPlayerSource(source, params, startAt = 0) {
     }
   } else if (source === "cinepro") {
     primaryHealthy = false;
-    const cineproUrl = buildCineproUrl(params);
-    player.src = cineproUrl;
+    const omssUrl = resolveCineproOmssUrl();
+    if (!omssUrl) {
+      if (status) {
+        status.textContent = "CinePro needs a reachable OMSS/Core URL. Configure cineproOmssUrl first.";
+        status.classList.add("is-warning");
+        status.hidden = false;
+      }
+      updateSourceLabel();
+      return;
+    }
+    player.src = buildCineproUrl(params);
     if (status) {
       status.textContent = "Opening CinePro fallback…";
       status.classList.remove("is-warning");
@@ -187,7 +209,7 @@ function setPlayerSource(source, params, startAt = 0) {
     fallbackTimer = window.setTimeout(() => {
       if (activeSource !== "cinepro" || primaryHealthy) return;
       if (status) {
-        status.textContent = "CinePro is taking longer than expected. You can open it directly.";
+        status.textContent = "CinePro is taking longer than expected. Check that the OMSS/Core URL is reachable.";
         status.classList.add("is-warning");
         status.hidden = false;
       }
