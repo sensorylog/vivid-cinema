@@ -26,6 +26,7 @@ let fallbackTimer = null;
 let imdbId = "";
 let tmdbId = "";
 let aniListId = "";
+let malId = "";
 const PRIMARY_FALLBACK_MS = 15000;
 const ANIME_FALLBACK_MS = 9000;
 
@@ -60,8 +61,8 @@ function buildVidapiEmbedUrl(params, startAt = 0) {
 function buildVidlinkEmbedUrl(params) {
   const base = String(VIVID_CONFIG.api.vidlinkEmbedBaseUrl || "https://vidlink.pro").replace(/\/+$/, "");
   if (route.params.get("anime") === "1") {
-    if (!aniListId) return "";
-    return base + "/anime/" + encodeURIComponent(aniListId) + "/" + params.episode + "/sub?fallback=true";
+    if (!malId) return "";
+    return base + "/anime/" + encodeURIComponent(malId) + "/" + params.episode + "/sub?fallback=true";
   }
   const id = encodeURIComponent(tmdbId || imdbId || params.id);
   return params.type === "tv"
@@ -91,8 +92,8 @@ function buildVidplusEmbedUrl(params) {
     : base + "/embed/movie/" + id;
 }
 
-async function resolveAniListId(title) {
-  if (route.params.get("anime") !== "1" || !title) return "";
+async function resolveAnimeIds(title) {
+  if (route.params.get("anime") !== "1" || !title) return { aniListId: "", malId: "" };
   try {
     const response = await fetch("https://graphql.anilist.co", {
       method: "POST",
@@ -102,11 +103,15 @@ async function resolveAniListId(title) {
         variables: { search: title }
       })
     });
-    if (!response.ok) return "";
+    if (!response.ok) return { aniListId: "", malId: "" };
     const data = await response.json();
-    return String(data?.data?.Media?.idMal || "");
+    const media = data?.data?.Media;
+    return {
+      aniListId: String(media?.id || ""),
+      malId: String(media?.idMal || "")
+    };
   } catch {
-    return "";
+    return { aniListId: "", malId: "" };
   }
 }
 
@@ -140,7 +145,7 @@ function getSourceLabel(source) {
 }
 
 function triggerFallback(reason = "source_error") {
-  if (!currentParams || !hasFallbackId()) return false;
+  if (!currentParams || (route.params.get("anime") === "1" ? !aniListId : !hasFallbackId())) return false;
   const nextSource = getNextSource(activeSource);
   if (!nextSource) return false;
 
@@ -170,7 +175,7 @@ function updateSourceLabel() {
   document.querySelectorAll("[data-player-source]").forEach(button => {
     const source = button.getAttribute("data-player-source");
     button.classList.toggle("is-active", source === activeSource);
-    button.disabled = !hasFallbackId();
+    button.disabled = route.params.get("anime") === "1" ? !aniListId : !hasFallbackId();
     button.setAttribute("aria-pressed", source === activeSource ? "true" : "false");
   });
 }
@@ -184,7 +189,7 @@ function setPlayerSource(source, params, startAt = 0) {
   const status = $("player-status");
 
   if (source === "vidlink") {
-    if (route.params.get("anime") === "1" ? !aniListId : !hasFallbackId()) return;
+    if (route.params.get("anime") === "1" ? !malId : !hasFallbackId()) return;
     primaryHealthy = false;
     const vidlinkUrl = buildVidlinkEmbedUrl(params);
     if (!vidlinkUrl) return;
@@ -204,10 +209,15 @@ function setPlayerSource(source, params, startAt = 0) {
     primaryHealthy = false;
     player.src = buildVidsrcEmbedUrl(params);
     if (status) {
-      status.textContent = "Loading alternate source…";
+      status.textContent = "Loading VidSrc alternate source…";
       status.classList.remove("is-warning");
       status.hidden = false;
     }
+    fallbackTimer = window.setTimeout(() => {
+      if (primaryHealthy || activeSource !== "vidsrc") return;
+      const next = getNextSource(activeSource);
+      if (next) setPlayerSource(next, currentParams, Number(getPlaybackProgress(progressKey())?.progress || route.params.get("startAt") || 0));
+    }, PRIMARY_FALLBACK_MS);
   } else if (source === "vidplus") {
     if (route.params.get("anime") === "1" ? !aniListId : !hasFallbackId()) return;
     primaryHealthy = false;
@@ -512,7 +522,9 @@ async function load() {
     media = normalizeMedia(details, currentParams.type);
     imdbId = resolveImdbId(details);
     tmdbId = /^\d+$/.test(String(currentParams.id || "")) ? String(currentParams.id) : String(details?.id || "");
-    aniListId = await resolveAniListId(media?.title || details?.name || details?.title || "");
+    const animeIds = await resolveAnimeIds(media?.title || details?.name || details?.title || "");
+    aniListId = animeIds.aniListId;
+    malId = animeIds.malId;
     if (currentParams.type === "tv") {
       details.episode = await tmdbApi.tvSeason(currentParams.id, currentParams.season)
         .then(season => (season.episodes || []).find(ep => Number(ep.episode_number) === Number(currentParams.episode)) || null)
