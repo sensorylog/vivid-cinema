@@ -126,12 +126,43 @@ function createUpdateControl(registration) {
     button.disabled = true;
     button.textContent = "Updating…";
     markDone();
-    try { await registration.update(); } catch {}
-    if (registration.waiting) {
-      registration.waiting.postMessage({ type: "SKIP_WAITING" });
+
+    const activateWaiting = () => {
+      if (registration.waiting) {
+        registration.waiting.postMessage({ type: "SKIP_WAITING" });
+        return true;
+      }
+      return false;
+    };
+
+    if (activateWaiting()) return;
+
+    try {
+      await registration.update();
+    } catch {
+      button.disabled = false;
+      button.textContent = "Update Vivid";
       return;
     }
-    window.location.reload();
+
+    if (activateWaiting()) return;
+
+    const worker = registration.installing;
+    if (worker) {
+      const finish = () => {
+        if (worker.state === "installed" && navigator.serviceWorker.controller) {
+          worker.postMessage({ type: "SKIP_WAITING" });
+        }
+      };
+      worker.addEventListener("statechange", finish);
+      finish();
+      return;
+    }
+
+    // No new worker was found; restore the control instead of reloading
+    // the page and potentially showing stale application code again.
+    button.disabled = false;
+    button.textContent = "Update Vivid";
   });
 
   // Existing controlled visitors get this migration prompt once.
