@@ -444,3 +444,42 @@
     padding-top:54px;
   }
 }
+
+
+@media (min-width:901px){
+  /* Desktop accessibility: visible keyboard focus without adding visual noise. */
+  .vivid-unified-header a:focus-visible,
+  .vivid-card:focus-visible,
+  .vivid-discovery-card:focus-visible,
+  .vivid-library-card:focus-visible,
+  .vivid-button:focus-visible,
+  button:focus-visible,
+  input:focus-visible,
+  select:focus-visible{
+    outline:2px solid rgba(255,255,255,.8);
+    outline-offset:3px;
+  }
+
+  /* Wide-screen restraint: stop content becoming comically stretched. */
+  .vivid-title-page .vivid-title-section,
+  .vivid-watch-page .vivid-watch-recommendations,
+  .vivid-discovery-page .vivid-discovery-main,
+  .vivid-library-page .vivid-library-main{
+    max-width:1320px;
+  }
+
+  /* Keep desktop scrollbar from changing card geometry while preserving native scrolling. */
+  .vivid-rail,
+  .vivid-watch-rec-rail,
+  .vivid-similar,
+  .vivid-library-continue-rail{
+    scrollbar-width:thin;
+  }
+}
+
+@media (min-width:1700px){
+  .vivid-discovery-page .vivid-discovery-grid,
+  .vivid-library-page .vivid-library-grid{
+    grid-template-columns:repeat(8,minmax(0,1fr));
+  }
+}
