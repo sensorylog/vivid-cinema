@@ -69,14 +69,17 @@
   .vivid-cinema-home .vivid-hero-control.prev{left:24px}
   .vivid-cinema-home .vivid-hero-control.next{right:24px}
 
-  /* FEATURE STRIP — remains attached to the hero, never part of the rails. */
+  /* FEATURE STRIP — one clean row directly after the trailer/info surface. */
   .vivid-cinema-home .vivid-feature-strip{
-    left:50%;
-    right:auto;
-    bottom:14px;
-    width:min(1440px,100%);
-    padding-inline:clamp(24px,4vw,64px);
-    transform:translateX(-50%);
+    position:relative!important;
+    left:auto!important;
+    right:auto!important;
+    bottom:auto!important;
+    width:min(1440px,100%)!important;
+    margin:-116px auto 0!important;
+    padding:8px clamp(24px,4vw,64px) 18px!important;
+    transform:none!important;
+    box-sizing:border-box;
   }
   .vivid-cinema-home .vivid-feature-viewport{
     width:100%;
@@ -95,7 +98,8 @@
     min-width:100%;
   }
   .vivid-cinema-home .vivid-feature-card{
-    flex:0 0 clamp(180px,14vw,220px);
+    flex:0 0 clamp(176px,13vw,204px);
+    width:clamp(176px,13vw,204px);
     height:112px;
   }
 
@@ -150,11 +154,41 @@
   /* Optional/conditional rows keep their natural hidden state. */
   .vivid-cinema-home .vivid-rails[hidden]{display:none!important}
 
-  /* Tonight stays a single row in the same stack; it does not push itself
-     beside Trending/Top 10 or turn the catalogue into a dashboard. */
+  /* Tonight's Pick is its own isolated module. Decorative Home Moment art
+     must never participate in this card's layout or overflow into it. */
   .vivid-cinema-home .vivid-tonight-inline{
-    display:block;
+    position:relative!important;
+    z-index:2!important;
+    isolation:isolate;
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr) 220px!important;
+    grid-template-areas:"copy poster"!important;
     width:100%;
+    min-height:0;
+    overflow:hidden;
+  }
+  .vivid-cinema-home .vivid-tonight-card{
+    position:relative!important;
+    z-index:1!important;
+    grid-area:poster!important;
+    width:220px!important;
+    max-height:330px!important;
+    justify-self:end!important;
+    overflow:hidden!important;
+  }
+  .vivid-cinema-home .vivid-tonight-card img{
+    position:relative!important;
+    z-index:1!important;
+    width:100%!important;
+    height:100%!important;
+    object-fit:cover!important;
+  }
+  .vivid-cinema-home .vivid-home-breathe{
+    position:relative!important;
+    clear:both!important;
+    isolation:isolate;
+    z-index:1!important;
+    overflow:hidden;
   }
 
   /* Catalogue entry strip uses the same page container. */
