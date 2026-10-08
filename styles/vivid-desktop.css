@@ -271,3 +271,76 @@
   body.vivid-atmosphere .vivid-search-main{padding-bottom:72px;}
   body.vivid-atmosphere .vivid-search-page-head{padding-top:54px;}
 }
+
+
+@media (min-width:901px){
+  /* Desktop grid/rail discipline */
+  .vivid-discovery-main .vivid-rail,
+  .vivid-collection-main .vivid-rail,
+  .vivid-library-main .vivid-rail{
+    gap:14px!important;
+    padding-bottom:22px!important;
+  }
+  .vivid-discovery-main .vivid-card,
+  .vivid-collection-main .vivid-card,
+  .vivid-library-main .vivid-card{
+    flex:0 0 182px!important;
+    overflow:hidden;
+  }
+  .vivid-discovery-main .vivid-card img,
+  .vivid-collection-main .vivid-card img,
+  .vivid-library-main .vivid-card img{
+    transition:transform .22s ease,filter .22s ease;
+  }
+  .vivid-discovery-main .vivid-card:hover img,
+  .vivid-collection-main .vivid-card:hover img,
+  .vivid-library-main .vivid-card:hover img{
+    transform:scale(1.025);
+  }
+
+  /* Title page: make the artwork the hero, metadata the supporting column. */
+  .vivid-title-page .vivid-title-hero,
+  .vivid-title-page .vivid-title-backdrop{
+    max-width:1320px;
+    margin-inline:auto;
+  }
+  .vivid-title-page .vivid-title-hero{
+    min-height:620px;
+  }
+
+  /* Watch page: player owns the viewport; controls stay visually subordinate. */
+  .vivid-watch-page .vivid-watch-main,
+  .vivid-watch-page .vivid-player-shell{
+    max-width:1320px;
+    margin-inline:auto;
+  }
+  .vivid-watch-page .vivid-player-shell{
+    border-radius:16px;
+    overflow:hidden;
+    box-shadow:0 28px 80px rgba(0,0,0,.35);
+  }
+
+  /* Search: one strong search surface instead of a collection of floating boxes. */
+  .vivid-search-page-field{
+    max-width:980px;
+    border-radius:16px!important;
+    margin-top:22px!important;
+  }
+  .vivid-search-quick{
+    margin-top:56px!important;
+  }
+
+  /* Editorial pages */
+  .vivid-news-page .vivid-news-grid{
+    gap:18px;
+  }
+  .vivid-news-page .vivid-news-card{
+    border-radius:14px;
+  }
+
+  /* Keep the footer visually quiet on wide screens. */
+  footer.vivid-footer{
+    max-width:1320px;
+    margin-inline:auto;
+  }
+}
