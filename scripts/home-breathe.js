@@ -54,24 +54,19 @@ function showTrendingItem(item) {
 }
 
 async function refreshTrending() {
-  const next = collectTrending();
-  if (!next.length) {
-    const direct = await loadDirectTrending();
-    if (direct.length) {
-      items = direct;
-      index = 0;
-      showTrendingItem(items[index]);
-      index = 1 % items.length;
-    }
-  }
+  let next = collectTrending();
+  if (!next.length) next = await loadDirectTrending();
   if (!next.length) return;
+
   items = next;
   index %= items.length;
   showTrendingItem(items[index]);
   index = (index + 1) % items.length;
+
   if (!timer) {
-    timer = window.setInterval(() => {
-      const latest = collectTrending();
+    timer = window.setInterval(async () => {
+      let latest = collectTrending();
+      if (!latest.length) latest = await loadDirectTrending();
       if (latest.length) items = latest;
       if (!items.length) return;
       showTrendingItem(items[index % items.length]);
