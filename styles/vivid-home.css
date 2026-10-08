@@ -993,3 +993,54 @@ html[data-vivid-theme="light"] body.vivid-cinema-home .vivid-rating{
   background-size: cover !important;
   background-position: center center !important;
 }
+/* =========================================================
+   HERO TRAILER — true object-fit:cover for YouTube 16:9
+   Fixes black letterbox. Does not touch nav, rails, cards, JS.
+   ========================================================= */
+
+.vivid-cinema-home .vivid-hero-media {
+  overflow: hidden !important;
+  isolation: isolate;
+}
+
+/* Iframe itself must be a real 16:9 box, sized to COVER the media box */
+.vivid-cinema-home .vivid-hero-video {
+  position: absolute !important;
+  top: 50% !important;
+  left: 50% !important;
+  right: auto !important;
+  bottom: auto !important;
+
+  /* Critical: force 16:9 aspect, then grow until both axes are covered */
+  width: auto !important;
+  height: auto !important;
+  min-width: 100% !important;
+  min-height: 100% !important;
+  aspect-ratio: 16 / 9 !important;
+  max-width: none !important;
+  max-height: none !important;
+
+  border: 0 !important;
+  transform: translate(-50%, -50%) !important;
+  transform-origin: center center !important;
+  z-index: 1 !important;
+  pointer-events: none;
+}
+
+/* Fallback artwork already covers correctly — leave alone */
+.vivid-cinema-home .vivid-hero-fallback {
+  background-size: cover !important;
+  background-position: center center !important;
+}
+
+/* Mobile: same rule, no special 177% hack */
+@media (max-width: 640px) {
+  .vivid-cinema-home .vivid-hero-video {
+    width: auto !important;
+    height: auto !important;
+    min-width: 100% !important;
+    min-height: 100% !important;
+    aspect-ratio: 16 / 9 !important;
+    transform: translate(-50%, -50%) !important;
+  }
+}
