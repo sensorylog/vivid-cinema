@@ -78,31 +78,6 @@ function parseM3U(text,provider){
  return rows;
 }
 
-function normalizeApi(channelsData,streamsData,countriesData){
- const names=new Map(channelsData.filter(c=>c&&c.id&&!c.is_nsfw&&!c.closed).map(c=>[c.id,c]));
- const countryNames=new Map(countriesData.filter(c=>c&&c.code).map(c=>[c.code,c.name]));
- const grouped=new Map();
- streamsData.filter(s=>s&&s.channel&&/^https?:\/\//i.test(s.url)).forEach(s=>{
-   const c=names.get(s.channel);if(!c)return;
-   const key=c.id;
-   if(!grouped.has(key))grouped.set(key,{
-     id:key,name:c.name,altNames:c.alt_names||[],
-     country:countryNames.get(c.country)||c.country||"International",
-     countryCode:c.country,logo:"",language:"",
-     category:(c.categories||[])[0]||"general",
-     categories:c.categories||["general"],provider:"IPTV-org",sources:[]
-   });
-   const row=grouped.get(key);
-   if(row.sources.length<4&&!row.sources.some(x=>x.url===s.url)){
-     row.sources.push({
-       type:"video",url:s.url,quality:s.quality||"",labels:s.labels||[],
-       score:0,provider:"IPTV-org",feed:s.feed||""
-     });
-   }
- });
- return [...grouped.values()].filter(c=>c.sources.length);
-}
-
 function mergeCatalogue(groups){
  const byKey=new Map();
  const aliases=new Map();
