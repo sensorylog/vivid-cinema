@@ -1,4 +1,4 @@
-const CACHE_NAME = "vivid-cinema-shell-v82";
+const CACHE_NAME = "vivid-cinema-shell-v83";
 const APP_SHELL = [
   "./","./index.html","./home.html","./person.html","./discover.html","./collection.html","./title.html","./watch.html",
   "./library.html","./auth.html","./login.html","./forgot-password.html","./account.html","./terms.html","./privacy.html","./contact.html",
@@ -12,7 +12,7 @@ const APP_SHELL = [
   "./scripts/config.js","./scripts/utils.js","./scripts/content.js","./scripts/media.js","./scripts/tmdb.js",
   "./scripts/nav-auth.js","./scripts/library.js","./scripts/library-page.js","./scripts/discover.js",
   "./scripts/collection.js","./scripts/person.js","./scripts/recommendations.js","./scripts/release-alerts.js","./scripts/cinema-reminders.js","./scripts/push-notifications.js","./scripts/news.js","./scripts/title.js","./scripts/watch.js","./scripts/external-providers.js","./scripts/landing.js",
-  "./scripts/account.js","./scripts/auth.js","./scripts/live.js","./script.js"
+  "./scripts/account.js","./scripts/auth.js","./scripts/live.js","./data/live-channels.json","./script.js"
 ];
 
 async function cacheShell(){
