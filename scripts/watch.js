@@ -79,6 +79,14 @@ function hasFallbackId() {
   return Boolean(tmdbId || imdbId);
 }
 
+function getNextSource(source) {
+  return source === "vidapi" ? "vidsrc" : null;
+}
+
+function getSourceLabel(source) {
+  return source === "vidsrc" ? "VidSrc alternate source" : "Powered by VidAPI";
+}
+
 function triggerFallback(reason = "source_error") {
   if (!currentParams || !hasFallbackId()) return false;
   const nextSource = getNextSource(activeSource);
