@@ -932,7 +932,7 @@ body.vivid-landing::after{
     display:block!important;
     animation:vivid-launch-out 1s linear .15s forwards!important;
   }
-  body::after{
+  body.vivid-landing::after{
     transform:translateY(-50%)!important;
     filter:none!important;
   }
