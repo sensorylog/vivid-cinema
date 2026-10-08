@@ -216,7 +216,7 @@
 
 /* Shared desktop chrome for secondary Vivid surfaces. */
 @media (min-width:901px){
-  body.vivid-atmosphere .vivid-unified-header{
+  .vivid-unified-header{
     position:sticky!important;
     top:0;
     z-index:1000;
@@ -227,19 +227,19 @@
     backdrop-filter:blur(24px) saturate(145%)!important;
     -webkit-backdrop-filter:blur(24px) saturate(145%)!important;
   }
-  body.vivid-atmosphere .vivid-unified-header .vivid-nav{
+  .vivid-unified-header .vivid-nav{
     width:min(1320px,100%);
     min-height:48px;
     margin-inline:auto;
     gap:18px;
   }
-  body.vivid-atmosphere .vivid-unified-header .vivid-navlinks{gap:2px;min-width:0;}
-  body.vivid-atmosphere .vivid-unified-header .vivid-navlinks a{
+  .vivid-unified-header .vivid-navlinks{gap:2px;min-width:0;}
+  .vivid-unified-header .vivid-navlinks a{
     padding:8px 10px;
     border-radius:9px;
     font-size:.76rem;
   }
-  body.vivid-atmosphere .vivid-unified-header .vivid-nav-action{
+  .vivid-unified-header .vivid-nav-action{
     margin-left:auto;
     padding:8px 12px;
     border-radius:9px;
