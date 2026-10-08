@@ -1,21 +1,109 @@
 const frame=document.getElementById("live-frame");
+const video=document.getElementById("live-video");
 const player=document.getElementById("live-player");
 const closePlayer=document.getElementById("live-close");
 const playerTitle=document.getElementById("live-player-title");
 const playerMeta=document.getElementById("live-player-meta");
 const playerLoading=document.getElementById("live-player-loading");
+const playerError=document.getElementById("live-player-error");
 const search=document.getElementById("live-search");
 const grid=document.getElementById("live-channel-grid");
 const guideStatus=document.getElementById("live-guide-status");
 const filtersRoot=document.querySelector(".vivid-live-filters");
-const FALLBACK=[{id:"atv-international",name:"&TV International",category:"international",country:"India",language:"hin",streamUrl:"https://www.2embed.online/iptv/stream.php?url=N2lFS2R2cHpjbmFSSFRCNG5TOTI3MDFaS2xKWW1saFVwOUdVRDRqMEhlRXdMcmc4NHpLTERrWTZOY2NIdGdmblVXOWJKMFRYTmZzdE1HcWNoemdMZUk3NUZPUUdHMi92L1RUMkZYZ291NHlGZTRTOTJOUTVnZnA1Vm1QSzdvUGs4b0NtNS9qaTlJcVFMWERyZW92REF5QnFMM24yWkhnZEh2bHRyUTY3ZGg4PTo6DPl8NG74VB9DVg1WkNPVKg%3D%3D&title=%26TV+International&qualities=Auto,1080p,720p,480p,360p"}];
-let channels=[],activeFilter="all";
-const esc=v=>String(v).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-function renderFilters(){if(!filtersRoot)return;const cats=[...new Set(channels.map(c=>c.category).filter(Boolean))].sort(),countries=[...new Set(channels.map(c=>c.country).filter(Boolean))].sort();const opts=[["all","All"],...cats.map(v=>["category:"+v,v]),...countries.map(v=>["country:"+v,v])];filtersRoot.innerHTML=opts.map((o,i)=>`<button class="${i?"":"is-active"}" type="button" data-live-filter="${esc(o[0])}">${esc(o[1])}</button>`).join("");filtersRoot.querySelectorAll("[data-live-filter]").forEach(b=>b.onclick=()=>{activeFilter=b.dataset.liveFilter;filtersRoot.querySelectorAll("[data-live-filter]").forEach(x=>x.classList.toggle("is-active",x===b));render()})}
-function visible(){const q=(search?.value||"").trim().toLowerCase();return channels.filter(c=>(activeFilter==="all"||activeFilter==="category:"+c.category||activeFilter==="country:"+c.country)&&(!q||[c.name,c.country,c.category,c.language].filter(Boolean).join(" ").toLowerCase().includes(q)))}
-function render(){const list=visible();grid.innerHTML=list.length?list.map(c=>`<button class="vivid-live-channel" type="button" data-channel-id="${esc(c.id)}"><span class="vivid-live-channel-art" aria-hidden="true"><i class="bi bi-broadcast"></i></span><span class="vivid-live-channel-copy"><strong>${esc(c.name)}</strong><small>${esc([c.country,c.language].filter(Boolean).join(" · ")||"Live")}</small></span><span class="vivid-live-channel-play" aria-hidden="true"><i class="bi bi-play-fill"></i></span></button>`).join(""):`<div class="vivid-live-empty"><i class="bi bi-tv"></i><strong>No channels found</strong><span>Try another search or filter.</span></div>`;if(guideStatus)guideStatus.textContent=`${list.length.toLocaleString()} of ${channels.length.toLocaleString()} channels in this guide.`}
-function play(c){if(!c?.streamUrl)return;if(playerTitle)playerTitle.textContent=c.name;if(playerMeta)playerMeta.textContent=`${c.country||"International"} · 2Embed live stream`;if(playerLoading)playerLoading.hidden=false;player.hidden=false;frame.src=c.streamUrl;player.scrollIntoView({behavior:"smooth",block:"start"})}
-function close(){frame.src="about:blank";player.hidden=true;if(playerLoading)playerLoading.hidden=true}
-grid?.addEventListener("click",e=>{const b=e.target.closest("[data-channel-id]");if(b)play(channels.find(c=>c.id===b.dataset.channelId))});
-closePlayer?.addEventListener("click",close);frame?.addEventListener("load",()=>{if(playerLoading)playerLoading.hidden=true});search?.addEventListener("input",render);
-(async()=>{try{const r=await fetch("./data/live-channels.json",{cache:"no-store"});if(!r.ok)throw Error(r.status);channels=await r.json();if(!Array.isArray(channels)||!channels.length)throw Error("empty")}catch(e){console.warn("Vivid Live catalogue unavailable; using verified seed.",e);channels=FALLBACK}renderFilters();render()})();
+const FALLBACK=[{id:"atv-international",name:"&TV International",category:"international",country:"IN",language:"hin",provider:"2embed",sources:[{type:"iframe",url:"https://www.2embed.online/iptv/stream.php?url=N2lFS2R2cHpjbmFSSFRCNG5TOTI3MDFaS2xKWW1saFVwOUdVRDRqMEhlRXdMcmc4NHpLTERrWTZOY2NIdGdmblVXOWJKMFRYTmZzdE1HcWNoemdMZUk3NUZPUUdHMi92L1RUMkZYZ291NHlGZTRTOTJOUTVnZnA1Vm1QSzdvUGs4b0NtNS9qaTlJcVFMWERyZW92REF5QnFMM24yWkhnZEh2bHRyUTY3ZGg4PTo6DPl8NG74VB9DVg1WkNPVKg%3D%3D&title=%26TV+International&qualities=Auto,1080p,720p,480p,360p"}]}];
+let channels=[],activeFilter="all",shown=240,currentSources=[],sourceIndex=0;
+const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const label=v=>String(v||"").replace(/[-_]+/g," ").replace(/\b\w/g,m=>m.toUpperCase());
+function normalizeApi(channelsData,streamsData,countriesData){
+ const names=new Map(channelsData.filter(c=>c&&c.id&&!c.is_nsfw).map(c=>[c.id,c]));
+ const countryNames=new Map(countriesData.filter(c=>c&&c.code).map(c=>[c.code,c.name]));
+ const grouped=new Map();
+ streamsData.filter(s=>s&&s.channel&&/^https?:\/\//i.test(s.url)).forEach(s=>{
+   const c=names.get(s.channel);if(!c)return;
+   const key=c.id;
+   if(!grouped.has(key))grouped.set(key,{id:key,name:c.name,altNames:c.alt_names||[],country:countryNames.get(c.country)||c.country||"International",countryCode:c.country,language:(s.languages||[])[0]||"",category:(c.categories||[])[0]||"general",categories:c.categories||[],provider:"iptv-org",sources:[]});
+   const row=grouped.get(key);
+   if(row.sources.length<3&&!row.sources.some(x=>x.url===s.url))row.sources.push({type:"video",url:s.url,quality:s.quality||"",labels:s.labels||[]});
+ });
+ return [...grouped.values()].filter(c=>c.sources.length);
+}
+function renderFilters(){
+ if(!filtersRoot)return;
+ const cats=[...new Set(channels.flatMap(c=>c.categories?.length?c.categories:[c.category]).filter(Boolean))].sort();
+ const countries=[...new Set(channels.map(c=>c.country).filter(Boolean))].sort();
+ const opts=[["all","All"],...cats.map(v=>["category:"+v,label(v)]),...countries.map(v=>["country:"+v,v])];
+ filtersRoot.innerHTML=opts.map((o,i)=>`<button class="${i?"":"is-active"}" type="button" data-live-filter="${esc(o[0])}">${esc(o[1])}</button>`).join("");
+ filtersRoot.querySelectorAll("[data-live-filter]").forEach(b=>b.onclick=()=>{activeFilter=b.dataset.liveFilter;shown=240;filtersRoot.querySelectorAll("[data-live-filter]").forEach(x=>x.classList.toggle("is-active",x===b));render()});
+}
+function visible(){
+ const q=(search?.value||"").trim().toLowerCase();
+ return channels.filter(c=>{
+   const hay=[c.name,...(c.altNames||[]),c.country,c.category,...(c.categories||[]),c.language].filter(Boolean).join(" ").toLowerCase();
+   const okFilter=activeFilter==="all"||c.categories?.includes(activeFilter.slice(9))||activeFilter==="category:"+c.category||activeFilter==="country:"+c.country;
+   return okFilter&&(!q||hay.includes(q));
+ });
+}
+function card(c){
+ const source=c.sources?.[0];
+ const badge=c.provider==="2embed"?"2Embed":"Live";
+ return `<button class="vivid-live-channel" type="button" data-channel-id="${esc(c.id)}"><span class="vivid-live-channel-art" aria-hidden="true"><i class="bi bi-broadcast"></i></span><span class="vivid-live-channel-copy"><strong>${esc(c.name)}</strong><small>${esc([c.country,label(c.category)].filter(Boolean).join(" · ")||"Live")} · ${esc(badge)}</small></span><span class="vivid-live-channel-play" aria-hidden="true"><i class="bi bi-play-fill"></i></span></button>`;
+}
+function render(){
+ const list=visible(),page=list.slice(0,shown);
+ grid.innerHTML=page.length?page.map(card).join(""):`<div class="vivid-live-empty"><i class="bi bi-tv"></i><strong>No channels found</strong><span>Try another search or filter.</span></div>`;
+ if(list.length>shown)grid.insertAdjacentHTML("beforeend",`<button class="vivid-live-channel vivid-live-load-more" type="button" data-live-more><span class="vivid-live-channel-art"><i class="bi bi-plus-lg"></i></span><span class="vivid-live-channel-copy"><strong>Load more channels</strong><small>${(list.length-shown).toLocaleString()} remaining</small></span></button>`);
+ if(guideStatus)guideStatus.textContent=`${list.length.toLocaleString()} of ${channels.length.toLocaleString()} channels available.`;
+}
+function stopMedia(){try{video.pause()}catch{}video.removeAttribute("src");video.load();frame.src="about:blank";}
+function showError(){if(playerLoading)playerLoading.hidden=true;if(playerError)playerError.hidden=false;}
+function playSource(){
+ const s=currentSources[sourceIndex];
+ if(!s)return showError();
+ if(playerError)playerError.hidden=true;
+ if(playerLoading)playerLoading.hidden=false;
+ if(s.type==="iframe"){
+   video.hidden=true;stopMedia();frame.hidden=false;frame.src=s.url;
+   if(playerMeta)playerMeta.textContent="2Embed live stream";
+ }else{
+   frame.hidden=true;frame.src="about:blank";video.hidden=false;video.src=s.url;
+   if(playerMeta)playerMeta.textContent=`Live stream · ${s.quality||"public source"}`;
+   const p=video.play();if(p?.catch)p.catch(()=>{});
+ }
+}
+function play(c){
+ if(!c?.sources?.length)return;
+ currentSources=c.sources;sourceIndex=0;
+ if(playerTitle)playerTitle.textContent=c.name;
+ player.hidden=false;player.scrollIntoView({behavior:"smooth",block:"start"});playSource();
+}
+function close(){stopMedia();player.hidden=true;if(playerLoading)playerLoading.hidden=true;if(playerError)playerError.hidden=true;}
+grid?.addEventListener("click",e=>{
+ const more=e.target.closest("[data-live-more]");if(more){shown+=240;render();return}
+ const b=e.target.closest("[data-channel-id]");if(b)play(channels.find(c=>c.id===b.dataset.channelId));
+});
+closePlayer?.addEventListener("click",close);
+video?.addEventListener("error",()=>{if(sourceIndex<currentSources.length-1){sourceIndex++;playSource()}else showError()});
+video?.addEventListener("playing",()=>{if(playerLoading)playerLoading.hidden=true});
+frame?.addEventListener("load",()=>{if(playerLoading)playerLoading.hidden=true});
+search?.addEventListener("input",()=>{shown=240;render()});
+(async()=>{
+ try{
+   const [seedRes,channelsRes,streamsRes,countriesRes]=await Promise.all([
+     fetch("./data/live-channels.json",{cache:"no-store"}),
+     fetch("https://iptv-org.github.io/api/channels.json",{cache:"no-store"}),
+     fetch("https://iptv-org.github.io/api/streams.json",{cache:"no-store"}),
+     fetch("https://iptv-org.github.io/api/countries.json",{cache:"no-store"})
+   ]);
+   const seed=seedRes.ok?await seedRes.json():FALLBACK;
+   const apiChannels=channelsRes.ok?await channelsRes.json():[];
+   const apiStreams=streamsRes.ok?await streamsRes.json():[];
+   const countries=countriesRes.ok?await countriesRes.json():[];
+   const fallbackSeed=(Array.isArray(seed)?seed:[]).map(c=>({...c,provider:"2embed",sources:[{type:"iframe",url:c.streamUrl}]}));
+   const api=normalizeApi(apiChannels,apiStreams,countries);
+   const byName=new Map();
+   [...fallbackSeed,...api].forEach(c=>{const key=c.name.toLowerCase().replace(/[^a-z0-9]+/g,"");const old=byName.get(key);if(!old)byName.set(key,c);else if(c.provider==="2embed"){c.sources=[...c.sources,...old.sources];byName.set(key,c)}});
+   channels=[...byName.values()];
+   if(!channels.length)throw Error("No live channels returned");
+ }catch(e){console.warn("Live catalogue fallback:",e);channels=FALLBACK}
+ renderFilters();render();
+})();
