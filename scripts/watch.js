@@ -70,9 +70,19 @@ function buildVidsrcEmbedUrl(params) {
 }
 
 function buildCineproUrl(params) {
-  const base = String(VIVID_CONFIG.api.cineproBaseUrl || "https://ui.cinepro.cc").replace(/\/+$/, "") + "/watch/" + (params.type === "tv" ? "tv/" : "movie/") + encodeURIComponent(tmdbId || params.id);
-  if (params.type === "tv") return base + "?s=" + params.season + "&e=" + params.episode;
-  return base;
+  // CinePro's UI needs the OMSS/Core backend URL. The local Core installer
+  // runs on localhost:3000 and the UI reads this value from ?omssurl=...
+  // before removing it from the browser URL.
+  const uiBase = String(VIVID_CONFIG.api.cineproBaseUrl || "https://ui.cinepro.cc").replace(/\/+$/, "");
+  const omssUrl = "http://localhost:3000";
+  const mediaId = encodeURIComponent(tmdbId || params.id);
+  const path = uiBase + "/watch/" + (params.type === "tv" ? "tv/" : "movie/") + mediaId;
+  const query = new URLSearchParams({ omssurl: omssUrl });
+  if (params.type === "tv") {
+    query.set("s", String(params.season));
+    query.set("e", String(params.episode));
+  }
+  return path + "?" + query.toString();
 }
 
 function getNextSource(source) {
