@@ -950,3 +950,46 @@ html[data-vivid-theme="light"] body.vivid-cinema-home .vivid-rating{
     70%{transform:translateX(-50%) scale(.56) translateY(1px) rotate(.4deg)}
   }
 }
+/* =========================================================
+   HOME HERO TRAILER — true cover (no black bars)
+   Artwork stays perfect. Video fills the same frame.
+   Does not touch nav, rails, cards, or any other UI.
+   ========================================================= */
+
+.vivid-cinema-home .vivid-hero-media {
+  overflow: hidden !important;
+  isolation: isolate;
+}
+
+/* Cover technique: size the 16:9 iframe so it always fills the box */
+.vivid-cinema-home .vivid-hero-video {
+  position: absolute !important;
+  top: 50% !important;
+  left: 50% !important;
+  right: auto !important;
+  bottom: auto !important;
+  width: max(100%, 177.7778%) !important;   /* at least full width OR 16:9 of height */
+  height: max(100%, 56.25%) !important;     /* at least full height OR 16:9 of width */
+  min-width: 0 !important;
+  max-width: none !important;
+  max-height: none !important;
+  border: 0 !important;
+  transform: translate(-50%, -50%) !important;
+  transform-origin: center center !important;
+  pointer-events: none; /* keep hero controls clickable */
+}
+
+/* Mobile: same math, slightly tighter crop so chrome stays hidden */
+@media (max-width: 640px) {
+  .vivid-cinema-home .vivid-hero-video {
+    width: max(100%, 177.7778%) !important;
+    height: max(100%, 56.25%) !important;
+    transform: translate(-50%, -50%) !important;
+  }
+}
+
+/* Fallback artwork already covers correctly — leave it alone */
+.vivid-cinema-home .vivid-hero-fallback {
+  background-size: cover !important;
+  background-position: center center !important;
+}
