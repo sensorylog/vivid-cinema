@@ -37,49 +37,12 @@
     white-space:nowrap;
   }
 
-  .vivid-search-trigger{
-    margin-left:auto;
-    display:inline-flex;
-    align-items:center;
-    justify-content:flex-start;
-    gap:8px;
-    width:min(240px,22vw);
-    min-width:150px;
-    height:40px;
-    padding:0 12px;
-    border:1px solid rgba(255,255,255,.1);
-    border-radius:999px;
-    background:rgba(255,255,255,.055);
-    color:#aeb4bd;
-    font:600 .8rem/1 var(--vivid-font-sans);
-    cursor:pointer;
-  }
-  .vivid-search-trigger i{font-size:.88rem}
-  .vivid-search-trigger kbd{
-    margin-left:auto;
-    padding:3px 6px;
-    border:1px solid rgba(255,255,255,.1);
-    border-radius:6px;
-    color:#747b85;
-    background:rgba(255,255,255,.035);
-    font:500 .62rem/1 ui-monospace,SFMono-Regular,monospace;
-  }
-  .vivid-search-trigger:hover,
-  .vivid-search-trigger:focus-visible{
-    color:#fff;
-    background:rgba(255,255,255,.075);
-    border-color:rgba(255,255,255,.18);
-  }
-  .vivid-notification-button{
-    flex:0 0 40px;
-    width:40px;
-    height:40px;
-  }
-  .vivid-nav-action{
-    flex:0 0 auto;
-    min-height:40px;
-    padding:9px 12px;
-    white-space:nowrap;
+  /* No legacy desktop search/bell/account controls. The shell is intentionally quiet. */
+  .vivid-search-trigger,
+  .vivid-notification-button,
+  .vivid-nav-action,
+  .vivid-theme-toggle{
+    display:none!important;
   }
 
   /* HERO — same cinematic composition, more room only. */
@@ -115,13 +78,21 @@
     padding-inline:clamp(24px,4vw,64px);
     transform:translateX(-50%);
   }
-  .vivid-cinema-home .vivid-feature-viewport{width:100%;overflow:hidden}
+  .vivid-cinema-home .vivid-feature-viewport{
+    width:100%;
+    overflow-x:auto;
+    overflow-y:hidden;
+    scrollbar-width:none;
+    -webkit-overflow-scrolling:touch;
+  }
+  .vivid-cinema-home .vivid-feature-viewport::-webkit-scrollbar{display:none}
   .vivid-cinema-home .vivid-feature-track{
     display:flex;
     flex-wrap:nowrap;
     gap:12px;
-    overflow-x:auto;
-    width:100%;
+    overflow:visible;
+    width:max-content;
+    min-width:100%;
   }
   .vivid-cinema-home .vivid-feature-card{
     flex:0 0 clamp(180px,14vw,220px);
@@ -171,8 +142,8 @@
     box-sizing:border-box;
   }
   .vivid-cinema-home .vivid-card{
-    flex:0 0 clamp(160px,12vw,182px)!important;
-    width:clamp(160px,12vw,182px);
+    flex:0 0 clamp(168px,11vw,180px)!important;
+    width:clamp(168px,11vw,180px);
     min-width:0;
   }
 
@@ -215,25 +186,21 @@
 @media (min-width:901px) and (max-width:1180px){
   .vivid-nav{gap:8px}
   .vivid-navlinks a{padding-inline:7px;font-size:.76rem}
-  .vivid-search-trigger{
-    width:42px;
-    min-width:42px;
-    justify-content:center;
-    padding:0;
-  }
-  .vivid-search-trigger span,
-  .vivid-search-trigger kbd{display:none}
+  .vivid-search-trigger,
+  .vivid-notification-button,
+  .vivid-nav-action,
+  .vivid-theme-toggle{display:none!important}
   .vivid-cinema-home .vivid-card{
-    flex-basis:160px!important;
-    width:160px;
+    flex-basis:168px!important;
+    width:168px;
   }
   .vivid-cinema-home .vivid-hero-title{font-size:clamp(3rem,6.5vw,5.2rem)}
 }
 
 @media (min-width:1600px){
   .vivid-cinema-home .vivid-card{
-    flex-basis:190px!important;
-    width:190px;
+    flex-basis:180px!important;
+    width:180px;
   }
 }
 
