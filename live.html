@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#06070a"><meta name="description" content="Vivid Live — live television on Vivid Cinema.">
+<title>Vivid Live · Vivid Cinema</title>
+<link rel="icon" href="icons/vivid-icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" sizes="180x180" href="icons/vivid-icon-180.png">
+<link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="styles/vivid-foundation.css">
+<link rel="stylesheet" href="styles/vivid-system.css">
+<link rel="stylesheet" href="styles/vivid-shell.css">
+<link rel="stylesheet" href="styles/vivid-live.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.9.1/font/bootstrap-icons.css">
+</head>
+<body data-vivid-page="live" class="vivid-live-page">
+<header class="vivid-topbar"><nav class="vivid-nav" aria-label="Primary"></nav></header>
+<main id="main-content" class="vivid-live-main">
+<section class="vivid-live-hero">
+  <div class="vivid-live-kicker"><span class="vivid-live-dot"></span> VIVID LIVE</div>
+  <h1>Live television.<br><span>One Vivid destination.</span></h1>
+  <p>Browse the 2Embed live-TV directory and open channels without leaving Vivid Cinema.</p>
+  <div class="vivid-live-actions">
+    <a class="vivid-button vivid-button--primary" href="#live-player"><i class="bi bi-broadcast-pin"></i> Open Live TV</a>
+    <a class="vivid-button vivid-button--secondary" href="https://www.2embed.online/iptv/" target="_blank" rel="noopener noreferrer"><i class="bi bi-box-arrow-up-right"></i> Open channel directory</a>
+  </div>
+</section>
+<section id="live-player" class="vivid-live-stage" aria-label="Vivid Live TV">
+  <div class="vivid-live-stage-head">
+    <div><span>LIVE TELEVISION</span><h2>2Embed channel guide</h2><p>Select a channel inside the guide to start watching.</p></div>
+    <button id="live-refresh" type="button"><i class="bi bi-arrow-clockwise"></i><span>Refresh</span></button>
+  </div>
+  <div class="vivid-live-frame-wrap">
+    <iframe id="live-frame" title="2Embed live TV channel directory" src="https://www.2embed.online/iptv/" allow="autoplay; fullscreen; picture-in-picture; encrypted-media" allowfullscreen referrerpolicy="strict-origin-when-cross-origin" loading="eager"></iframe>
+  </div>
+</section>
+<section class="vivid-live-info">
+  <article><i class="bi bi-tv"></i><div><strong>Live channels</strong><span>2Embed currently lists thousands of channels across countries and languages.</span></div></article>
+  <article><i class="bi bi-search"></i><div><strong>Find a channel</strong><span>Use the channel search and country/category filters in the live guide.</span></div></article>
+  <article><i class="bi bi-phone"></i><div><strong>Built for Vivid</strong><span>The Live destination has its own route and stays separate from the movie and series catalogue.</span></div></article>
+</section>
+</main>
+<footer class="vivid-footer">&copy; 2026 Vivid Cinema <span class="vivid-footer-links"><a href="about.html">About</a><a href="terms.html">Terms</a><a href="privacy.html">Privacy</a><a href="contact.html">Contact</a></span></footer>
+<nav class="vivid-mobile-nav" aria-label="Mobile navigation"></nav>
+<script type="module" src="scripts/app-shell.js"></script>
+<script type="module" src="scripts/live.js"></script>
+</body>
+</html>
