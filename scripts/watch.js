@@ -399,9 +399,7 @@ function handlePlayerEvent(event) {
       duration, season: info.season ?? currentParams?.season, episode: info.episode ?? currentParams?.episode,
       title: media.title, media_type: media.media_type, id: media.id
     });
-    if (media.media_type === "tv" && nextEpisode) {
-      // Stay on the current player after completion. Next-episode navigation is explicit only.
-    }
+    // Stay on the current player after completion. Next-episode navigation is explicit only.
   }
 }
 
