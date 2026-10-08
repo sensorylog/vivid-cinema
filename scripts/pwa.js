@@ -136,7 +136,6 @@ function createUpdateControl(registration) {
 
   // Existing controlled visitors get this migration prompt once.
   // First-time visitors are never interrupted by it.
-  if (navigator.serviceWorker.controller) show();
   if (registration.waiting) show();
 
   registration.addEventListener("updatefound", () => {
