@@ -394,28 +394,7 @@ html[data-vivid-theme="light"] :is(
 }
 
 /* Home rails: preserve the cinematic catalogue feel in daylight. */
-html[data-vivid-theme="light"] body.vivid-cinema-home .vivid-rails + .vivid-rails{
-  border-top:1px solid rgba(17,18,22,.055);
-}
-html[data-vivid-theme="light"] body.vivid-cinema-home .vivid-card{
-  background:transparent!important;
-  border-color:transparent!important;
-  box-shadow:none!important;
-}
-html[data-vivid-theme="light"] body.vivid-cinema-home .vivid-card-media{
-  background:#e9ebef!important;
-  border-color:rgba(17,18,22,.08)!important;
-  box-shadow:0 7px 20px rgba(17,18,22,.08)!important;
-}
-html[data-vivid-theme="light"] body.vivid-cinema-home .vivid-card:hover .vivid-card-media{
-  border-color:rgba(17,18,22,.15)!important;
-  box-shadow:0 15px 32px rgba(17,18,22,.13)!important;
-}
-html[data-vivid-theme="light"] body.vivid-cinema-home .vivid-rating{
-  color:#111216!important;
-  background:rgba(255,255,255,.90)!important;
-  border-color:rgba(17,18,22,.10)!important;
-}
+
 
 /* Discovery/provider chips should read like a designed filter system. */
 html[data-vivid-theme="light"] :is(
@@ -1608,28 +1587,14 @@ body.vivid-atmosphere .vivid-brand{
 }
 html,body{background:#000;}
 body.vivid-atmosphere{background:#000;}
-.vivid-cinema-home .vivid-rail-head h2,
-.vivid-library-section-head h2,
-.vivid-library-shelf-head h2{font-size:22px;line-height:1.15;font-weight:700;color:#fff;}
-.vivid-cinema-home .vivid-card-title,
-.vivid-library-shelf .vivid-library-card-copy strong{font-size:15px;line-height:1.25;font-weight:600;}
-.vivid-cinema-home .vivid-card-sub,
-.vivid-library-shelf .vivid-library-card-copy small{font-size:13px;line-height:1.3;font-weight:400;color:#8e8e93;}
-.vivid-cinema-home .vivid-rail,
-.vivid-library-continue-rail,
-.vivid-library-shelf{scroll-snap-type:x mandatory;scroll-padding-inline:2px;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;}
-.vivid-cinema-home .vivid-rail{touch-action:pan-x;}
+
 .vivid-library-continue-rail,
 .vivid-library-shelf{touch-action:pan-x;}
 @media(max-width:640px){
-  body.vivid-cinema-home{background:#000;}
-  .vivid-cinema-home .vivid-section-wrap{padding-inline:16px;}
-  .vivid-cinema-home .vivid-rail-head{padding-inline:0;}
   .vivid-v2-mobile-nav{background:rgba(20,20,23,.94)!important;border-top-color:#2c2c2e!important;backdrop-filter:blur(24px) saturate(125%);-webkit-backdrop-filter:blur(24px) saturate(125%);}
   .vivid-v2-mobile-nav a[aria-current="page"],.vivid-v2-mobile-nav a.is-active{color:#0a84ff!important;}
 }
 @media(prefers-reduced-motion:reduce){
-  .vivid-cinema-home .vivid-rail,
   .vivid-library-continue-rail,
   .vivid-library-shelf{scroll-behavior:auto;}
 }
@@ -1699,50 +1664,18 @@ body{font-weight:400;}
 }
 
 /* Touch feedback is immediate; motion stays restrained on touch devices. */
-.vivid-cinema-home .vivid-feature-card:active,
-.vivid-library-page .vivid-library-continue-card:active{
-  transform:scale(.985);
-  opacity:.92;
-}
+
 
 /* ========================================================================== */
 /* BEAST MODE — FOCUS, PHYSICALITY, AND INTERRUPTIBLE WEB MOTION              */
 /* ========================================================================== */
 
 /* Focus is a real visual state for keyboard, gamepad, and TV-style navigation. */
-.vivid-cinema-home .vivid-card:focus-visible,
-.vivid-cinema-home .vivid-feature-card:focus-visible,
-.vivid-library-page .vivid-library-card:focus-visible,
-.vivid-library-page .vivid-library-tabs button:focus-visible,
-.vivid-title-page .vivid-cast:focus-visible,
-.vivid-title-page .vivid-similar-card:focus-visible,
-.vivid-title-page .vivid-video-card:focus-visible,
-.vivid-title-page .vivid-button:focus-visible,
-.vivid-watch-page .vivid-watch-rec-card:focus-visible,
-.vivid-watch-page .vivid-player-switch:focus-visible{
-  outline:0;
-  transform:translateY(-2px) scale(1.045);
-  box-shadow:0 16px 42px rgba(0,0,0,.5),0 0 0 2px rgba(255,255,255,.95);
-  z-index:5;
-  position:relative;
-}
-.vivid-cinema-home .vivid-card,
-.vivid-cinema-home .vivid-feature-card,
-.vivid-library-page .vivid-library-card,
-.vivid-library-page .vivid-library-tabs button,
-.vivid-title-page .vivid-cast,
-.vivid-title-page .vivid-similar-card,
-.vivid-title-page .vivid-video-card,
-.vivid-title-page .vivid-button,
-.vivid-watch-page .vivid-watch-rec-card,
-.vivid-watch-page .vivid-player-switch{
-  transition:transform .22s cubic-bezier(.22,1,.36,1),box-shadow .22s cubic-bezier(.22,1,.36,1),opacity .18s ease;
-}
+
+
 
 /* Touch gets the same physical feedback without turning every tap into a long animation. */
 @media (hover:none),(pointer:coarse){
-  .vivid-cinema-home .vivid-card:active,
-  .vivid-cinema-home .vivid-feature-card:active,
   .vivid-library-page .vivid-library-card:active,
   .vivid-title-page .vivid-cast:active,
   .vivid-title-page .vivid-similar-card:active,
@@ -1834,8 +1767,6 @@ body{font-weight:400;}
 
 /* Avoid fake linear "motion physics" under reduced motion. */
 @media(prefers-reduced-motion:reduce){
-  .vivid-cinema-home .vivid-card,
-  .vivid-cinema-home .vivid-feature-card,
   .vivid-library-page .vivid-library-card,
   .vivid-library-page .vivid-library-tabs button,
   .vivid-title-page .vivid-cast,
@@ -1846,8 +1777,6 @@ body{font-weight:400;}
   .vivid-watch-page .vivid-player-switch{
     transition:none!important;
   }
-  .vivid-cinema-home .vivid-card:focus-visible,
-  .vivid-cinema-home .vivid-feature-card:focus-visible,
   .vivid-library-page .vivid-library-card:focus-visible,
   .vivid-title-page .vivid-cast:focus-visible,
   .vivid-title-page .vivid-similar-card:focus-visible,
