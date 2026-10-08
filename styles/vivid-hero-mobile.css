@@ -17,22 +17,7 @@
     background: #090a0d;
   }
 
-  /* Cover the media box: expand width so 16:9 fills height, center horizontally */
-  .vivid-hero-video {
-    position: absolute !important;
-    top: 0 !important;
-    left: 50% !important;
-    right: auto !important;
-    bottom: auto !important;
-    width: 177.78% !important;
-    max-width: none !important;
-    height: 100% !important;
-    min-width: 100% !important;
-    transform: translateX(-50%) scale(1.02) !important;
-    transform-origin: center center !important;
-    border: 0;
-    z-index: 1;
-  }
+  /* Hero video sizing is owned by the canonical rule in vivid-home.css. */
 
   .vivid-hero-fallback {
     background-size: cover !important;
