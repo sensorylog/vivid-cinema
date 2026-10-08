@@ -15,7 +15,7 @@ const PAGE_SIZE=30; let channels=[],activeFilter="all",page=1,currentSources=[],
 const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const label=v=>String(v||"").replace(/[-_]+/g," ").replace(/\b\w/g,m=>m.toUpperCase());
 function normalizeApi(channelsData,streamsData,countriesData){
- const names=new Map(channelsData.filter(c=>c&&c.id&&!c.is_nsfw).map(c=>[c.id,c]));
+ const names=new Map(channelsData.filter(c=>c&&c.id&&!c.is_nsfw&&!c.closed).map(c=>[c.id,c]));
  const countryNames=new Map(countriesData.filter(c=>c&&c.code).map(c=>[c.code,c.name]));
  const grouped=new Map();
  streamsData.filter(s=>s&&s.channel&&/^https?:\/\//i.test(s.url)).forEach(s=>{
@@ -80,7 +80,7 @@ function visible(){
 }
 function card(c){
  const source=c.sources?.[0];
- const badge=c.provider==="2embed"?"2Embed":"Live";
+ const badge=c.provider==="2embed"?"2Embed":c.provider==="Free-TV"?"Free-TV":c.provider==="Curated FAST"?"FAST":"IPTV";
  return `<button class="vivid-live-channel" type="button" data-channel-id="${esc(c.id)}"><span class="vivid-live-channel-art">${c.logo?`<img src="${esc(c.logo)}" alt="" loading="lazy" decoding="async">`:`<i class="bi bi-broadcast" aria-hidden="true"></i>`}<span class="vivid-live-channel-play" aria-hidden="true"><i class="bi bi-play-fill"></i></span></span><span class="vivid-live-channel-copy"><strong>${esc(c.name)}</strong><small>${esc([c.country,label(c.category)].filter(Boolean).join(" · ")||"Live")} · ${esc(badge)}</small></span></button>`;
 }
 function render(){
