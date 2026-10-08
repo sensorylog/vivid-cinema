@@ -28,7 +28,7 @@ function normalizeApi(channelsData,streamsData,countriesData){
  return [...grouped.values()].filter(c=>c.sources.length);
 }
 function parseM3U(text,provider){
- const lines=String(text||"").split(/\\r?\\n/);
+ const lines=String(text||"").split(/\r?\n/);
  const rows=[];
  let meta=null;
  for(const line of lines){
@@ -40,8 +40,8 @@ function parseM3U(text,provider){
      const attr=(key)=>{const m=attrs.match(new RegExp(key+'="([^"]*)"', "i"));return m?m[1]:""};
      meta={name:name||"Live",logo:attr("tvg-logo"),category:attr("group-title")||"general",country:attr("tvg-country")||"",language:attr("tvg-language")||""};
    }else if(meta&&value&&!value.startsWith("#")){
-     if(!/^https?:\\/\\//i.test(value)){meta=null;continue}
-     const isYouTube=/((youtube\\.com|youtu\\.be)\\/)/i.test(value);
+     if(!/^https?:\/\//i.test(value)){meta=null;continue}
+     const isYouTube=/((youtube\.com|youtu\.be)\/)/i.test(value);
      rows.push({meta,source:{type:isYouTube?"iframe":"video",url:value,quality:"public",labels:[provider]},provider});
      meta=null;
    }
@@ -151,20 +151,21 @@ frame?.addEventListener("load",()=>{if(playerLoading)playerLoading.hidden=true})
 search?.addEventListener("input",()=>{page=1;render()});
 (async()=>{
  try{
-   const [seedRes,channelsRes,streamsRes,countriesRes,freeTvRes,curatedRes]=await Promise.all([
+   const requests=[
      fetch("./data/live-channels.json",{cache:"no-store"}),
      fetch("https://iptv-org.github.io/api/channels.json",{cache:"no-store"}),
      fetch("https://iptv-org.github.io/api/streams.json",{cache:"no-store"}),
      fetch("https://iptv-org.github.io/api/countries.json",{cache:"no-store"}),
      fetch("https://raw.githubusercontent.com/Free-TV/IPTV/master/playlist.m3u8",{cache:"no-store"}),
      fetch("https://raw.githubusercontent.com/RW1986/IPTV/main/lineup.m3u8",{cache:"no-store"})
-   ]);
-   const seed=seedRes.ok?await seedRes.json():FALLBACK;
-   const apiChannels=channelsRes.ok?await channelsRes.json():[];
-   const apiStreams=streamsRes.ok?await streamsRes.json():[];
-   const countries=countriesRes.ok?await countriesRes.json():[];
-   const freeTv=freeTvRes.ok?normalizeM3U(parseM3U(await freeTvRes.text(),"Free-TV")):[];
-   const curated=curatedRes.ok?normalizeM3U(parseM3U(await curatedRes.text(),"Curated FAST")):[];
+   ];
+   const [seedRes,channelsRes,streamsRes,countriesRes,freeTvRes,curatedRes]=await Promise.all(requests.map(p=>p.catch(()=>null)));
+   const seed=seedRes?.ok?await seedRes.json():FALLBACK;
+   const apiChannels=channelsRes?.ok?await channelsRes.json():[];
+   const apiStreams=streamsRes?.ok?await streamsRes.json():[];
+   const countries=countriesRes?.ok?await countriesRes.json():[];
+   const freeTv=freeTvRes?.ok?normalizeM3U(parseM3U(await freeTvRes.text(),"Free-TV")):[];
+   const curated=curatedRes?.ok?normalizeM3U(parseM3U(await curatedRes.text(),"Curated FAST")):[];
    const fallbackSeed=(Array.isArray(seed)?seed:[]).map(c=>({...c,provider:"2embed",sources:[{type:"iframe",url:c.streamUrl}]}));
    const api=normalizeApi(apiChannels,apiStreams,countries);
    const byName=new Map();
