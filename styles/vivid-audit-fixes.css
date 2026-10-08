@@ -1581,3 +1581,212 @@ html[data-vivid-theme="light"] .vivid-mobile-nav a.is-active{
   background:rgba(255,255,255,.78)!important;
   border-color:rgba(17,18,22,.09)!important;
 }
+
+/* ==========================================================================
+   FINAL LIQUID GLASS SYSTEM — canonical override
+   Keep this block last so legacy shell rules cannot flatten the material.
+   ========================================================================== */
+.vivid-topbar{
+  position:sticky!important;
+  top:0!important;
+  z-index:1000!important;
+  width:100%!important;
+  box-sizing:border-box!important;
+  padding:0 var(--vivid-page-gutter)!important;
+  background:rgba(8,9,12,.58)!important;
+  border-bottom:1px solid rgba(255,255,255,.075)!important;
+  box-shadow:0 12px 40px rgba(0,0,0,.16)!important;
+  isolation:isolate;
+  backdrop-filter:blur(24px) saturate(150%)!important;
+  -webkit-backdrop-filter:blur(24px) saturate(150%)!important;
+}
+.vivid-topbar .vivid-nav{
+  width:min(100%,1440px)!important;
+  min-height:110px!important;
+  margin-inline:auto!important;
+  display:grid!important;
+  grid-template-columns:minmax(180px,1fr) auto minmax(180px,1fr)!important;
+  grid-template-rows:58px 52px!important;
+  align-items:center!important;
+  gap:0 18px!important;
+}
+.vivid-topbar .vivid-brand{
+  grid-column:1!important;
+  grid-row:1!important;
+  justify-self:start!important;
+  margin:0!important;
+  z-index:2;
+}
+.vivid-topbar .vivid-navlinks{
+  grid-column:1 / -1!important;
+  grid-row:2!important;
+  justify-self:center!important;
+  display:flex!important;
+  align-items:center!important;
+  gap:2px!important;
+  min-width:0!important;
+  padding:4px!important;
+  overflow:visible!important;
+  border:1px solid rgba(255,255,255,.105)!important;
+  border-radius:17px!important;
+  background:rgba(255,255,255,.045)!important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.12),
+    inset 0 -1px 0 rgba(0,0,0,.12),
+    0 8px 30px rgba(0,0,0,.16)!important;
+  backdrop-filter:blur(28px) saturate(155%)!important;
+  -webkit-backdrop-filter:blur(28px) saturate(155%)!important;
+}
+.vivid-topbar .vivid-navlinks a,
+.vivid-topbar .vivid-nav-action{
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:7px!important;
+  min-height:38px!important;
+  padding:8px 13px!important;
+  border:1px solid transparent!important;
+  border-radius:12px!important;
+  background:transparent!important;
+  color:rgba(235,239,245,.68)!important;
+  box-shadow:none!important;
+  text-shadow:none!important;
+  font:600 .78rem/1 var(--vivid-font-sans)!important;
+  transition:background .18s ease,color .18s ease,border-color .18s ease,box-shadow .18s ease!important;
+}
+.vivid-topbar .vivid-navlinks a:hover,
+.vivid-topbar .vivid-navlinks a[aria-current="page"],
+.vivid-topbar .vivid-nav-action:hover{
+  color:#fff!important;
+  background:rgba(255,255,255,.085)!important;
+  border-color:rgba(255,255,255,.105)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.11)!important;
+  transform:none!important;
+}
+.vivid-topbar .vivid-navlinks a[aria-current="page"]{
+  background:rgba(255,255,255,.13)!important;
+  border-color:rgba(255,255,255,.145)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.17),0 3px 12px rgba(0,0,0,.1)!important;
+}
+.vivid-nav-account{
+  grid-column:2!important;
+  grid-row:1!important;
+  justify-self:center!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:7px!important;
+  min-width:42px!important;
+  min-height:42px!important;
+  padding:0 12px!important;
+  border:1px solid rgba(255,255,255,.11)!important;
+  border-radius:13px!important;
+  background:rgba(255,255,255,.055)!important;
+  color:rgba(240,243,248,.82)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 7px 24px rgba(0,0,0,.14)!important;
+  backdrop-filter:blur(22px) saturate(150%)!important;
+  -webkit-backdrop-filter:blur(22px) saturate(150%)!important;
+}
+.vivid-nav-account:hover{
+  color:#fff!important;
+  background:rgba(255,255,255,.1)!important;
+  border-color:rgba(255,255,255,.17)!important;
+  transform:none!important;
+}
+.vivid-nav-language-slot{
+  grid-column:3!important;
+  grid-row:1!important;
+  justify-self:end!important;
+  min-width:58px!important;
+  display:flex!important;
+  justify-content:flex-end!important;
+}
+.vivid-nav-language-slot .vivid-language{margin:0!important}
+.vivid-nav-language-slot .vivid-language select{
+  height:42px!important;
+  min-width:58px!important;
+  padding:0 27px 0 10px!important;
+  border:1px solid rgba(255,255,255,.11)!important;
+  border-radius:13px!important;
+  background:rgba(255,255,255,.055)!important;
+  color:#f5f7fa!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 7px 24px rgba(0,0,0,.14)!important;
+  backdrop-filter:blur(22px) saturate(150%)!important;
+  -webkit-backdrop-filter:blur(22px) saturate(150%)!important;
+}
+.vivid-nav-language-slot .vivid-language:after{right:9px!important}
+.vivid-mobile-nav{
+  background:rgba(8,9,12,.62)!important;
+  border:1px solid rgba(255,255,255,.1)!important;
+  border-bottom:0!important;
+  box-shadow:0 -8px 30px rgba(0,0,0,.18),inset 0 1px 0 rgba(255,255,255,.11)!important;
+  backdrop-filter:blur(24px) saturate(150%)!important;
+  -webkit-backdrop-filter:blur(24px) saturate(150%)!important;
+}
+.vivid-mobile-nav a{
+  border:1px solid transparent!important;
+  border-radius:13px!important;
+  background:transparent!important;
+}
+.vivid-mobile-nav a:hover,
+.vivid-mobile-nav a.is-active,
+.vivid-mobile-nav a[aria-current="page"]{
+  background:rgba(255,255,255,.095)!important;
+  border-color:rgba(255,255,255,.11)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.12)!important;
+}
+@media(max-width:900px){
+  .vivid-topbar .vivid-nav{
+    min-height:58px!important;
+    grid-template-columns:1fr auto auto!important;
+    grid-template-rows:58px!important;
+    gap:8px!important;
+  }
+  .vivid-topbar .vivid-brand{grid-column:1!important;grid-row:1!important}
+  .vivid-nav-account{grid-column:2!important;grid-row:1!important}
+  .vivid-nav-language-slot{grid-column:3!important;grid-row:1!important}
+  .vivid-topbar .vivid-navlinks{display:none!important}
+}
+@media(max-width:640px){
+  .vivid-topbar{
+    padding:calc(4px + var(--vivid-safe-top)) 12px 4px!important;
+  }
+  .vivid-topbar .vivid-nav{min-height:50px!important}
+  .vivid-nav-account{min-width:40px!important;width:40px!important;padding:0!important;border-radius:12px!important}
+  .vivid-nav-account span{display:none!important}
+  .vivid-nav-language-slot .vivid-language select{height:40px!important;min-width:52px!important;border-radius:12px!important}
+}
+html[data-vivid-theme="light"] .vivid-topbar{
+  background:rgba(255,255,255,.62)!important;
+  border-bottom-color:rgba(17,18,22,.08)!important;
+  box-shadow:0 10px 30px rgba(17,18,22,.06)!important;
+}
+html[data-vivid-theme="light"] .vivid-topbar .vivid-navlinks,
+html[data-vivid-theme="light"] .vivid-nav-account,
+html[data-vivid-theme="light"] .vivid-nav-language-slot .vivid-language select{
+  background:rgba(255,255,255,.58)!important;
+  border-color:rgba(17,18,22,.09)!important;
+  color:#22252b!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 7px 24px rgba(17,18,22,.07)!important;
+}
+html[data-vivid-theme="light"] .vivid-topbar .vivid-navlinks a,
+html[data-vivid-theme="light"] .vivid-topbar .vivid-nav-action{
+  color:#626873!important;
+}
+html[data-vivid-theme="light"] .vivid-topbar .vivid-navlinks a:hover,
+html[data-vivid-theme="light"] .vivid-topbar .vivid-navlinks a[aria-current="page"],
+html[data-vivid-theme="light"] .vivid-topbar .vivid-nav-action:hover{
+  color:#111216!important;
+  background:rgba(255,255,255,.72)!important;
+  border-color:rgba(17,18,22,.08)!important;
+}
+html[data-vivid-theme="light"] .vivid-mobile-nav{
+  background:rgba(255,255,255,.68)!important;
+  border-color:rgba(17,18,22,.08)!important;
+}
+html[data-vivid-theme="light"] .vivid-mobile-nav a.is-active,
+html[data-vivid-theme="light"] .vivid-mobile-nav a[aria-current="page"]{
+  color:#111216!important;
+  background:rgba(255,255,255,.74)!important;
+  border-color:rgba(17,18,22,.08)!important;
+}
