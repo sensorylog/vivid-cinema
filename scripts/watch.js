@@ -1,6 +1,6 @@
 import { tmdbApi } from "./tmdb.js";
 import { getImageUrl, getMediaUrl, normalizeMedia, normalizeResults } from "./media.js";
-import { buildTitleUrl, buildWatchUrl, getRoute } from "./routes.js";
+import { buildTitleUrl, getRoute } from "./routes.js";
 import { escapeHtml } from "./utils.js";
 import { getLocalLibrary, saveLocalLibrary, upsertLibraryItem, startLibrarySync } from "./library.js";
 import { getPlaybackProgress, savePlaybackProgress, flushPlaybackProgress, completePlaybackProgress, startPlaybackSync } from "./recommendations.js";
@@ -18,7 +18,6 @@ const VIDSRC_ORIGIN = (() => {
 let media = null;
 let details = null;
 let currentParams = null;
-let nextEpisode = null;
 let lastHistorySyncAt = 0;
 let activeSource = "vidapi";
 let primaryHealthy = false;
@@ -128,12 +127,6 @@ function clearFallbackTimer() {
 function updateSourceLabel() {
   const label = document.getElementById("player-source-label");
   if (label) label.textContent = getSourceLabel(activeSource);
-  const switchBtn = document.getElementById("player-switch-source");
-  if (switchBtn) {
-    const canSwitch = hasFallbackId();
-    switchBtn.hidden = !canSwitch;
-    switchBtn.textContent = activeSource === "vidapi" ? "Try alternate source" : activeSource === "vidsrc" ? "Try 2Embed" : "Back to VidAPI";
-  }
   document.querySelectorAll("[data-player-source]").forEach(button => {
     const source = button.getAttribute("data-player-source");
     button.classList.toggle("is-active", source === activeSource);
@@ -332,19 +325,6 @@ function hydrateWatchDetails(params) {
   document.title = (episodeTitle ? episodeTitle + " · " : "") + title + " · Vivid Cinema";
 }
 
-async function prepareNextEpisode(params) {
-  if (params.type !== "tv") return null;
-  try {
-    const season = await tmdbApi.tvSeason(params.id, params.season);
-    const current = Number(params.episode);
-    const next = (season.episodes || []).find(ep => Number(ep.episode_number) === current + 1);
-    if (next) return { season: params.season, episode: current + 1, title: next.name };
-    const seasons = (details?.seasons || []).filter(s => Number(s.season_number) > Number(params.season) && Number(s.episode_count) > 0);
-    if (seasons[0]) return { season: Number(seasons[0].season_number), episode: 1, title: "Episode 1" };
-  } catch (_) {}
-  return null;
-}
-
 function handlePlayerEvent(event) {
   const player = $("vidapi-player");
   if (!player || event.source !== player.contentWindow) return;
@@ -444,7 +424,6 @@ async function load() {
       details.episode = await tmdbApi.tvSeason(currentParams.id, currentParams.season)
         .then(season => (season.episodes || []).find(ep => Number(ep.episode_number) === Number(currentParams.episode)) || null)
         .catch(() => null);
-      nextEpisode = await prepareNextEpisode(currentParams);
     }
     hydrateWatchDetails(currentParams);
     // Metadata arrived after shell — re-arm
