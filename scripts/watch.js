@@ -11,6 +11,7 @@ const $ = (id) => document.getElementById(id);
 const route = getRoute();
 const VIDAPI_ORIGINS = new Set([new URL(VIVID_CONFIG.api.vidapiEmbedBaseUrl).origin, "https://vidapi.ru"]);
 const TWOEMBED_ORIGIN = "https://www.2embed.online";
+const VIDPLUS_ORIGIN = "https://player.vidplus.to";
 const VIDSRC_ORIGIN = (() => {
   try { return new URL(VIVID_CONFIG.api.vidsrcEmbedBaseUrl || "https://vidsrc.cc").origin; }
   catch { return "https://vidsrc.cc"; }
@@ -74,6 +75,14 @@ function buildVidsrcEmbedUrl(params) {
   return base + "/embed/movie/" + id;
 }
 
+function buildVidplusEmbedUrl(params) {
+  const base = String(VIVID_CONFIG.api.vidplusEmbedBaseUrl || "https://player.vidplus.to").replace(/\/+$/, "");
+  const id = encodeURIComponent(tmdbId || params.id);
+  return params.type === "tv"
+    ? base + "/embed/tv/" + id + "/" + params.season + "/" + params.episode
+    : base + "/embed/movie/" + id;
+}
+
 function isLikelyAnime() {
   const genres = Array.isArray(details?.genres) ? details.genres : [];
   const isAnimation = genres.some(g => Number(g?.id) === 16 || String(g?.name || "").toLowerCase() === "animation");
@@ -91,13 +100,15 @@ function hasFallbackId() {
 function getNextSource(source) {
   if (source === "vidapi") return "vidsrc";
   if (source === "vidsrc") return "2embed";
-  if (source === "2embed") return "vidapi";
+  if (source === "2embed") return "vidplus";
+  if (source === "vidplus") return "vidapi";
   return null;
 }
 
 function getSourceLabel(source) {
   if (source === "vidsrc") return "VidSrc alternate source";
   if (source === "2embed") return "2Embed alternate source";
+  if (source === "vidplus") return "VidPlus alternate source";
   return "Powered by VidAPI";
 }
 
@@ -141,7 +152,7 @@ function setPlayerSource(source, params, startAt = 0) {
   const player = $("vidapi-player");
   if (!player || !params) return;
   clearFallbackTimer();
-  if (!["vidapi", "vidsrc", "2embed"].includes(source)) return;
+  if (!["vidapi", "vidsrc", "2embed", "vidplus"].includes(source)) return;
   activeSource = source;
   const status = $("player-status");
 
@@ -170,6 +181,20 @@ function setPlayerSource(source, params, startAt = 0) {
       status.classList.remove("is-warning");
       status.hidden = false;
     }
+  } else if (source === "vidplus") {
+    if (!hasFallbackId()) return;
+    primaryHealthy = false;
+    player.src = buildVidplusEmbedUrl(params);
+    if (status) {
+      status.textContent = "Loading VidPlus alternate source…";
+      status.classList.remove("is-warning");
+      status.hidden = false;
+    }
+    fallbackTimer = window.setTimeout(() => {
+      if (primaryHealthy || activeSource !== "vidplus") return;
+      const next = getNextSource(activeSource);
+      if (next) setPlayerSource(next, currentParams, Number(getPlaybackProgress(progressKey())?.progress || route.params.get("startAt") || 0));
+    }, PRIMARY_FALLBACK_MS);
   } else {
     primaryHealthy = false;
     player.src = buildVidapiEmbedUrl(params, startAt);
@@ -270,7 +295,7 @@ function renderShell(params) {
     '<section class="vivid-player-section" aria-label="Video player"><div class="vivid-player-frame">' +
       '<div id="player-status" class="vivid-player-status" role="status" aria-live="polite">' + (resumeAt > 5 ? "Resuming where you left off…" : "Preparing playback…") + '</div>' +
       '<iframe id="vidapi-player" title="' + escapeHtml(title) + ' player" allow="autoplay; fullscreen; picture-in-picture; encrypted-media; clipboard-write" allowfullscreen referrerpolicy="origin" loading="eager"></iframe>' +
-    '</div><div class="vivid-player-bar"><div class="vivid-player-source-group" role="group" aria-label="Choose player source"><span class="vivid-player-source-caption"><i class="bi bi-broadcast-pin"></i> PLAYER</span><button type="button" class="vivid-player-source" data-player-source="vidapi" aria-pressed="true">VidAPI</button><button type="button" class="vivid-player-source" data-player-source="vidsrc" aria-pressed="false">VidSrc</button><button type="button" class="vivid-player-source" data-player-source="2embed" aria-pressed="false">2Embed</button></div><div class="vivid-player-bar-actions"><span id="player-source-label">Powered by VidAPI</span><a href="' + escapeHtml(buildTitleUrl(media.id, media.media_type)) + '">Back to title</a></div></div></section>' +
+    '</div><div class="vivid-player-bar"><div class="vivid-player-source-group" role="group" aria-label="Choose player source"><span class="vivid-player-source-caption"><i class="bi bi-broadcast-pin"></i> PLAYER</span><button type="button" class="vivid-player-source" data-player-source="vidapi" aria-pressed="true">VidAPI</button><button type="button" class="vivid-player-source" data-player-source="vidsrc" aria-pressed="false">VidSrc</button><button type="button" class="vivid-player-source" data-player-source="2embed" aria-pressed="false">2Embed</button><button type="button" class="vivid-player-source" data-player-source="vidplus" aria-pressed="false">VidPlus</button></div><div class="vivid-player-bar-actions"><span id="player-source-label">Powered by VidAPI</span><a href="' + escapeHtml(buildTitleUrl(media.id, media.media_type)) + '">Back to title</a></div></div></section>' +
     (isTv ? '<section class="vivid-watch-note"><i class="bi bi-collection-play"></i><div><strong>Episode playback</strong><span>Use the episode list on the title page to switch seasons and episodes.</span></div></section>' : "") +
     '<section class="vivid-watch-recommendations"><div class="vivid-section-heading"><div><span>AFTER WATCHING</span><h2>More like this</h2></div></div><div id="watch-recommendations" class="vivid-watch-rec-rail">' + recommendationCards() + '</div></section>';
 
@@ -295,7 +320,7 @@ function renderShell(params) {
     document.querySelectorAll("[data-player-source]").forEach(button => {
       button.addEventListener("click", () => {
         const source = button.getAttribute("data-player-source");
-        if (!["vidapi", "vidsrc", "2embed"].includes(source) || !hasFallbackId()) return;
+        if (!["vidapi", "vidsrc", "2embed", "vidplus"].includes(source) || !hasFallbackId()) return;
         setPlayerSource(source, params, resumeAt);
       });
     });
@@ -335,7 +360,8 @@ function handlePlayerEvent(event) {
   const isVidapi = VIDAPI_ORIGINS.has(event.origin);
   const isFallback = event.origin === VIDSRC_ORIGIN;
   const isTwoEmbed = event.origin === TWOEMBED_ORIGIN;
-  if (!isVidapi && !isFallback && !isTwoEmbed) return;
+  const isVidPlus = event.origin === VIDPLUS_ORIGIN;
+  if (!isVidapi && !isFallback && !isTwoEmbed && !isVidPlus) return;
   const payload = event.data;
   if (!payload || typeof payload !== "object") return;
 
@@ -350,7 +376,7 @@ function handlePlayerEvent(event) {
     /(^|\D)(404|403|500|502|503)(\D|$)/.test(errorValue) ||
     /(error|failed|failure|not.?found|unavailable|offline|load.?failed|source.?failed)/.test(statusValue + " " + errorValue);
 
-  if (looksLikeFailure && (activeSource === "vidapi" || activeSource === "vidsrc" || activeSource === "2embed")) {
+  if (looksLikeFailure && (activeSource === "vidapi" || activeSource === "vidsrc" || activeSource === "2embed" || activeSource === "vidplus")) {
     triggerFallback((isVidapi ? "vidapi_" : activeSource + "_") + (numericCode || statusValue || "error"));
     return;
   }
@@ -360,6 +386,7 @@ function handlePlayerEvent(event) {
   // playback messages. Only treat explicit playback/progress signals as healthy.
   const isPlaybackSignal =
     isTwoEmbed ||
+    isVidPlus ||
     payload.type === "PLAYER_EVENT" ||
     /^(play|playing|timeupdate|progress|loadedmetadata|canplay|ready|started)$/i.test(statusValue) ||
     Number(eventData.player_progress) > 0;
