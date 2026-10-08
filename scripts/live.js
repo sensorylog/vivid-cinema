@@ -25,6 +25,16 @@ const label=v=>String(v||"").replace(/[-_]+/g," ").replace(/\b\w/g,m=>m.toUpperC
 const normalize=v=>String(v||"").toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]+/g,"");
 const sourceRank={Nexus:3,"Free-TV":2,"IPTV-org":1};
 
+async function fetchJsonWithTimeout(url){
+ const controller=new AbortController();
+ const timer=setTimeout(()=>controller.abort(),CATALOG_TIMEOUT_MS);
+ try{
+   const res=await fetch(url,{cache:"no-store",signal:controller.signal});
+   if(!res.ok)throw Error("HTTP "+res.status);
+   return await res.json();
+ }finally{clearTimeout(timer)}
+}
+
 function fetchWithTimeout(url){
  const controller=new AbortController();
  const timer=setTimeout(()=>controller.abort(),CATALOG_TIMEOUT_MS);
@@ -89,6 +99,13 @@ function normalizeApiFallback(channelsData,streamsData,countriesData){
    if(row.sources.length<4&&!row.sources.some(x=>x.url===s.url))row.sources.push({type:"video",url:s.url,quality:s.quality||"",labels:s.labels||[],score:0,provider:"IPTV-org"});
  });
  return [...grouped.values()].filter(c=>c.sources.length);
+}
+
+function normalizeNexusOnline(data){
+ const rows=Array.isArray(data)?data:[];
+ return rows.filter(c=>c&&!c.is_nsfw&&!c.closed&&Array.isArray(c.streams)&&c.streams.length).map(c=>({
+   id:c.id,name:c.name,altNames:c.alt_names||[],country:c.country||"International",countryCode:c.country||"",logo:c.logo||"",language:(c.languages||[])[0]||"",category:(c.categories||[])[0]||"general",categories:c.categories||["general"],provider:"Nexus",sources:c.streams.filter(s=>s&&/^https?:\\/\\//i.test(s.url)).slice(0,5).map(s=>({type:/youtube\\.com|youtu\\.be/i.test(s.url)?"iframe":"video",url:s.url,quality:s.quality||"",labels:s.labels||[],score:Number(s.health?.score??s.score??s.rank??c.score??0)||0,provider:"Nexus"}))
+ })).filter(c=>c.sources.length);
 }
 
 function mergeCatalogue(groups){
@@ -286,20 +303,34 @@ search?.addEventListener("input",()=>{page=1;render()});
 
 (async()=>{
  try{
-   const results=await Promise.all(SOURCES.map(s=>fetchWithTimeout(s.url).catch(()=>null)));
-   const parsed=await Promise.all(results.map(async(res,i)=>res?.ok?normalizeM3U(await res.text(),SOURCES[i].name==="IPTV-org"?"IPTV-org":SOURCES[i].name==="Free-TV"?"Free-TV":"Nexus"):[]));
-   if(!parsed.some(x=>x.length)){
-     const [channelsRes,streamsRes,countriesRes]=await Promise.all([
-       fetchWithTimeout("https://iptv-org.github.io/api/channels.json").catch(()=>null),
-       fetchWithTimeout("https://iptv-org.github.io/api/streams.json").catch(()=>null),
-       fetchWithTimeout("https://iptv-org.github.io/api/countries.json").catch(()=>null)
-     ]);
-     const api=channelsRes?.ok&&streamsRes?.ok?normalizeApiFallback(await channelsRes.json(),await streamsRes.json(),countriesRes?.ok?await countriesRes.json():[]):[];
-     parsed.push(api);
+   if(guideStatus)guideStatus.textContent="Loading health-checked live channels…";
+   const parsed=[];
+   try{
+     const nexus=await fetchJsonWithTimeout("https://dearbulut.github.io/iptv/api/v1/channels.online.json");
+     const online=normalizeNexusOnline(nexus);
+     if(online.length)parsed.push(online);
+   }catch(e){console.warn("Nexus API unavailable:",e)}
+
+   if(!parsed.length){
+     const results=await Promise.all(SOURCES.map(s=>fetchWithTimeout(s.url).catch(()=>null)));
+     const m3u=await Promise.all(results.map(async(res,i)=>res?.ok?normalizeM3U(await res.text(),SOURCES[i].name==="IPTV-org"?"IPTV-org":SOURCES[i].name==="Free-TV"?"Free-TV":"Nexus"):[]));
+     parsed.push(...m3u.filter(Boolean));
    }
+
+   if(!parsed.some(x=>x.length)){
+     try{
+       const [channelsData,streamsData,countriesData]=await Promise.all([
+         fetchJsonWithTimeout("https://iptv-org.github.io/api/channels.json"),
+         fetchJsonWithTimeout("https://iptv-org.github.io/api/streams.json"),
+         fetchJsonWithTimeout("https://iptv-org.github.io/api/countries.json")
+       ]);
+       parsed.push(normalizeApiFallback(channelsData,streamsData,countriesData));
+     }catch(e){console.warn("IPTV-org API fallback unavailable:",e)}
+   }
+
    channels=mergeCatalogue(parsed);
    if(!channels.length)throw Error("No live channels returned");
-   if(guideStatus)guideStatus.textContent=channels.length.toLocaleString()+" health-filtered channels ready";
+   if(guideStatus)guideStatus.textContent=channels.length.toLocaleString()+" verified live channels ready";
  }catch(e){
    console.warn("Live catalogue load failed:",e);
    channels=[];
