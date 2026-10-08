@@ -10,6 +10,7 @@ import { recordBehavior, startIntelligenceSync } from "./intelligence.js";
 const $ = (id) => document.getElementById(id);
 const route = getRoute();
 const VIDAPI_ORIGINS = new Set([new URL(VIVID_CONFIG.api.vidapiEmbedBaseUrl).origin, "https://vidapi.ru"]);
+const TWOEMBED_ORIGIN = "https://www.2embed.online";
 const VIDSRC_ORIGIN = (() => {
   try { return new URL(VIVID_CONFIG.api.vidsrcEmbedBaseUrl || "https://vidsrc.cc").origin; }
   catch { return "https://vidsrc.cc"; }
@@ -55,6 +56,14 @@ function buildVidapiEmbedUrl(params, startAt = 0) {
     : base + "/embed/movie/" + encodeURIComponent(params.id) + "?" + query;
 }
 
+function buildTwoEmbedUrl(params) {
+  const base = String(VIVID_CONFIG.api.twoEmbedBaseUrl || "https://www.2embed.online").replace(/\/+$/, "");
+  const id = encodeURIComponent(tmdbId || imdbId || params.id);
+  return params.type === "tv"
+    ? base + "/embed/tv/" + id + "/" + params.season + "/" + params.episode
+    : base + "/embed/movie/" + id;
+}
+
 function buildVidsrcEmbedUrl(params) {
   const base = String(VIVID_CONFIG.api.vidsrcEmbedBaseUrl || "https://vidsrc.sh").replace(/\/+$/, "");
   // VidSrc accepts numeric TMDB IDs, so the fallback stays fully TMDB-based.
@@ -80,11 +89,15 @@ function hasFallbackId() {
 }
 
 function getNextSource(source) {
-  return source === "vidapi" ? "vidsrc" : null;
+  if (source === "vidapi") return "vidsrc";
+  if (source === "vidsrc") return "2embed";
+  return null;
 }
 
 function getSourceLabel(source) {
-  return source === "vidsrc" ? "VidSrc alternate source" : "Powered by VidAPI";
+  if (source === "vidsrc") return "VidSrc alternate source";
+  if (source === "2embed") return "2Embed alternate source";
+  return "Powered by VidAPI";
 }
 
 function triggerFallback(reason = "source_error") {
@@ -119,7 +132,7 @@ function updateSourceLabel() {
   if (switchBtn) {
     const canSwitch = hasFallbackId();
     switchBtn.hidden = !canSwitch;
-    switchBtn.textContent = activeSource === "vidapi" ? "Try alternate source" : "Back to VidAPI";
+    switchBtn.textContent = activeSource === "vidapi" ? "Try alternate source" : activeSource === "vidsrc" ? "Try 2Embed" : "Back to VidAPI";
   }
 }
 
@@ -127,11 +140,25 @@ function setPlayerSource(source, params, startAt = 0) {
   const player = $("vidapi-player");
   if (!player || !params) return;
   clearFallbackTimer();
-  if (!["vidapi", "vidsrc"].includes(source)) return;
+  if (!["vidapi", "vidsrc", "2embed"].includes(source)) return;
   activeSource = source;
   const status = $("player-status");
 
-  if (source === "vidsrc") {
+  if (source === "2embed") {
+    if (!hasFallbackId()) return;
+    primaryHealthy = false;
+    player.src = buildTwoEmbedUrl(params);
+    if (status) {
+      status.textContent = "Loading 2Embed alternate source…";
+      status.classList.remove("is-warning");
+      status.hidden = false;
+    }
+    fallbackTimer = window.setTimeout(() => {
+      if (primaryHealthy || activeSource !== "2embed") return;
+      const next = getNextSource(activeSource);
+      if (next) setPlayerSource(next, currentParams, Number(getPlaybackProgress(progressKey())?.progress || route.params.get("startAt") || 0));
+    }, PRIMARY_FALLBACK_MS);
+  } else if (source === "vidsrc") {
     if (!hasFallbackId()) return;
     primaryHealthy = false;
     player.src = buildVidsrcEmbedUrl(params);
@@ -259,12 +286,12 @@ function renderShell(params) {
     player.addEventListener("error", () => {
       triggerFallback("iframe_error");
     });
-    // Start on primary (VidAPI), then fall back to VidSrc if needed.
+    // Start on VidAPI, then fall back to VidSrc, then 2Embed if needed.
     setPlayerSource("vidapi", params, resumeAt);
     const switchBtn = $("player-switch-source");
     if (switchBtn) {
       switchBtn.addEventListener("click", () => {
-        const next = activeSource === "vidapi" ? "vidsrc" : "vidapi";
+        const next = activeSource === "vidapi" ? "vidsrc" : activeSource === "vidsrc" ? "2embed" : "vidapi";
         setPlayerSource(next, params, resumeAt);
       });
     }
@@ -316,7 +343,8 @@ function handlePlayerEvent(event) {
   if (!player || event.source !== player.contentWindow) return;
   const isVidapi = VIDAPI_ORIGINS.has(event.origin);
   const isFallback = event.origin === VIDSRC_ORIGIN;
-  if (!isVidapi && !isFallback) return;
+  const isTwoEmbed = event.origin === TWOEMBED_ORIGIN;
+  if (!isVidapi && !isFallback && !isTwoEmbed) return;
   const payload = event.data;
   if (!payload || typeof payload !== "object") return;
 
@@ -331,7 +359,7 @@ function handlePlayerEvent(event) {
     /(^|\D)(404|403|500|502|503)(\D|$)/.test(errorValue) ||
     /(error|failed|failure|not.?found|unavailable|offline|load.?failed|source.?failed)/.test(statusValue + " " + errorValue);
 
-  if (looksLikeFailure && activeSource === "vidapi") {
+  if (looksLikeFailure && (activeSource === "vidapi" || activeSource === "vidsrc" || activeSource === "2embed")) {
     triggerFallback((isVidapi ? "vidapi_" : activeSource + "_") + (numericCode || statusValue || "error"));
     return;
   }
@@ -340,6 +368,7 @@ function handlePlayerEvent(event) {
   // VidAPI has a formal PLAYER_EVENT contract; fallbacks may expose simpler
   // playback messages. Only treat explicit playback/progress signals as healthy.
   const isPlaybackSignal =
+    isTwoEmbed ||
     payload.type === "PLAYER_EVENT" ||
     /^(play|playing|timeupdate|progress|loadedmetadata|canplay|ready|started)$/i.test(statusValue) ||
     Number(eventData.player_progress) > 0;
