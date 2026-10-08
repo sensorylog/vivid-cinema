@@ -245,3 +245,196 @@
     transition:none!important;
   }
 }
+\n
+/* HOME FULL COMPOSITION LOCK — final desktop flow.
+   This intentionally supersedes earlier desktop positioning rules.
+   Mobile is untouched. */
+@media (min-width:901px){
+  .vivid-cinema-home .vivid-hero{
+    position:relative!important;
+    overflow:hidden!important;
+  }
+
+  /* Trailer/info owns the hero. Feature cards are NOT overlaid on it. */
+  .vivid-cinema-home .vivid-feature-strip{
+    position:relative!important;
+    inset:auto!important;
+    left:auto!important;
+    right:auto!important;
+    bottom:auto!important;
+    transform:none!important;
+    width:min(1440px,100%)!important;
+    margin:0 auto!important;
+    padding:20px clamp(24px,4vw,64px) 14px!important;
+    box-sizing:border-box!important;
+    z-index:2!important;
+  }
+  .vivid-cinema-home .vivid-feature-viewport{
+    width:100%!important;
+    overflow-x:auto!important;
+    overflow-y:hidden!important;
+    scrollbar-width:none!important;
+  }
+  .vivid-cinema-home .vivid-feature-viewport::-webkit-scrollbar{display:none}
+  .vivid-cinema-home .vivid-feature-track{
+    display:flex!important;
+    flex-wrap:nowrap!important;
+    width:max-content!important;
+    min-width:100%!important;
+    overflow:visible!important;
+    gap:12px!important;
+  }
+  .vivid-cinema-home .vivid-feature-card{
+    flex:0 0 clamp(176px,13vw,204px)!important;
+    width:clamp(176px,13vw,204px)!important;
+    height:112px!important;
+    min-width:0!important;
+  }
+
+  /* One predictable vertical page flow. */
+  .vivid-cinema-home .vivid-catalogue-explore,
+  .vivid-cinema-home .vivid-section-wrap{
+    width:min(1440px,100%)!important;
+    margin-inline:auto!important;
+    padding-inline:clamp(24px,4vw,64px)!important;
+    box-sizing:border-box!important;
+  }
+  .vivid-cinema-home .vivid-section-wrap{
+    display:block!important;
+    overflow:visible!important;
+  }
+  .vivid-cinema-home .vivid-rails{
+    display:block!important;
+    position:relative!important;
+    clear:both!important;
+    width:100%!important;
+    margin:0!important;
+    padding:28px 0 12px!important;
+    box-sizing:border-box!important;
+  }
+  .vivid-cinema-home .vivid-rails[hidden]{display:none!important}
+  .vivid-cinema-home .vivid-rail-head{
+    display:flex!important;
+    align-items:flex-end!important;
+    justify-content:space-between!important;
+    gap:18px!important;
+    width:100%!important;
+    margin:0 0 14px!important;
+  }
+  .vivid-cinema-home .vivid-rail{
+    display:flex!important;
+    flex-direction:row!important;
+    flex-wrap:nowrap!important;
+    align-items:flex-start!important;
+    width:100%!important;
+    min-width:0!important;
+    max-width:none!important;
+    gap:14px!important;
+    overflow-x:auto!important;
+    overflow-y:hidden!important;
+    margin:0!important;
+    padding:4px 2px 18px!important;
+    box-sizing:border-box!important;
+    scrollbar-width:none!important;
+  }
+  .vivid-cinema-home .vivid-rail::-webkit-scrollbar{display:none}
+  .vivid-cinema-home .vivid-card{
+    flex:0 0 clamp(168px,11vw,180px)!important;
+    width:clamp(168px,11vw,180px)!important;
+    max-width:180px!important;
+    min-width:0!important;
+    box-sizing:border-box!important;
+  }
+
+  /* Tonight's Pick is a standalone module, never a poster rail. */
+  .vivid-cinema-home .vivid-tonight-inline{
+    position:relative!important;
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr) 220px!important;
+    grid-template-areas:"copy poster"!important;
+    align-items:center!important;
+    gap:28px!important;
+    width:100%!important;
+    min-height:300px!important;
+    margin:28px 0!important;
+    padding:30px!important;
+    overflow:hidden!important;
+    isolation:isolate!important;
+    z-index:3!important;
+    box-sizing:border-box!important;
+    border-radius:24px!important;
+  }
+  .vivid-cinema-home .vivid-tonight-inline .vivid-rail-head{
+    grid-area:copy!important;
+    display:block!important;
+    margin:0!important;
+  }
+  .vivid-cinema-home .vivid-tonight-actions{
+    display:flex!important;
+    flex-wrap:wrap!important;
+    gap:8px!important;
+    margin-top:16px!important;
+  }
+  .vivid-cinema-home .vivid-tonight-card{
+    position:relative!important;
+    grid-area:poster!important;
+    width:220px!important;
+    height:300px!important;
+    max-height:none!important;
+    justify-self:end!important;
+    overflow:hidden!important;
+    z-index:1!important;
+    border-radius:16px!important;
+  }
+  .vivid-cinema-home .vivid-tonight-card img{
+    display:block!important;
+    position:relative!important;
+    width:100%!important;
+    height:100%!important;
+    object-fit:cover!important;
+    z-index:1!important;
+  }
+
+  /* Vivid Moment is LAST decorative content and is fully self-contained. */
+  .vivid-cinema-home .vivid-home-breathe{
+    position:relative!important;
+    display:block!important;
+    clear:both!important;
+    width:100%!important;
+    margin:48px 0 0!important;
+    overflow:hidden!important;
+    isolation:isolate!important;
+    z-index:1!important;
+  }
+  .vivid-cinema-home .vivid-home-breathe-scene{
+    position:relative!important;
+    width:min(900px,100%)!important;
+    margin-inline:auto!important;
+    overflow:hidden!important;
+  }
+  .vivid-cinema-home .vivid-home-viewer{z-index:6!important}
+  .vivid-cinema-home .vivid-support-bottom{
+    position:relative!important;
+    clear:both!important;
+    z-index:2!important;
+  }
+
+  /* No desktop card can grow into a giant poster. */
+  .vivid-cinema-home .vivid-card-media{
+    width:100%!important;
+    aspect-ratio:2/3!important;
+  }
+}
+@media (min-width:901px) and (max-width:1180px){
+  .vivid-cinema-home .vivid-card{
+    flex-basis:168px!important;
+    width:168px!important;
+  }
+  .vivid-cinema-home .vivid-tonight-inline{
+    grid-template-columns:minmax(0,1fr) 190px!important;
+  }
+  .vivid-cinema-home .vivid-tonight-card{
+    width:190px!important;
+    height:270px!important;
+  }
+}
