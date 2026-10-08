@@ -799,3 +799,49 @@ html[data-vivid-theme="light"] body.vivid-cinema-home .vivid-rating{
     animation: none !important;
   }
 }
+/* DESKTOP VIVID MOMENT — balanced two-subject composition.
+   Keep the TV and viewer visually connected instead of pushing both to one side. */
+@media (min-width:901px){
+  .vivid-cinema-home .vivid-home-breathe{
+    min-height:560px!important;
+    padding:28px 0 18px!important;
+    box-sizing:border-box!important;
+  }
+  .vivid-cinema-home .vivid-home-breathe-scene{
+    position:relative!important;
+    width:min(980px,100%)!important;
+    min-height:500px!important;
+    margin:0 auto!important;
+    display:block!important;
+    overflow:hidden!important;
+  }
+  .vivid-cinema-home .vivid-home-tv{
+    top:34px!important;
+    left:50%!important;
+    right:auto!important;
+    width:460px!important;
+    transform:translateX(-50%)!important;
+  }
+  .vivid-cinema-home .vivid-home-viewer{
+    top:210px!important;
+    right:calc(50% - 390px)!important;
+    left:auto!important;
+    transform:scale(.78)!important;
+    transform-origin:50% 100%!important;
+  }
+  .vivid-cinema-home .vivid-home-breathe-copy{
+    position:absolute!important;
+    left:50%!important;
+    bottom:22px!important;
+    top:auto!important;
+    width:min(620px,90%)!important;
+    transform:translateX(-50%)!important;
+    text-align:center!important;
+    z-index:8!important;
+  }
+}
+@media (min-width:901px) and (max-width:1180px){
+  .vivid-cinema-home .vivid-home-breathe-scene{min-height:460px!important}
+  .vivid-cinema-home .vivid-home-tv{width:400px!important}
+  .vivid-cinema-home .vivid-home-viewer{right:calc(50% - 320px)!important;top:190px!important}
+}
