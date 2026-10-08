@@ -33,8 +33,8 @@ body.vivid-live-page{background:#06070a;color:#f3f4f6}
 .vivid-live-player-head{padding:18px 22px}
 .vivid-live-icon-button{display:grid;place-items:center;width:38px;height:38px;border:1px solid rgba(255,255,255,.1);border-radius:10px;background:rgba(255,255,255,.05);color:#c6cbd2;cursor:pointer}
 .vivid-live-icon-button:hover{background:rgba(255,255,255,.09);color:#fff}
-.vivid-live-player-stage{position:relative;aspect-ratio:16/9;min-height:520px;background:#000}
-.vivid-live-player-stage iframe{display:block;width:100%;height:100%;min-height:520px;border:0;background:#000}
+.vivid-live-player-stage{position:relative;aspect-ratio:16/9;min-height:0;background:#000}
+.vivid-live-player-stage iframe{display:block;width:100%;height:100%;min-height:0;border:0;background:#000}
 .vivid-live-player-loading{position:absolute;inset:0;display:grid;place-items:center;align-content:center;gap:12px;background:rgba(0,0,0,.68);color:#fff;pointer-events:none}
 .vivid-live-player-loading strong{font-size:.78rem}
 .vivid-live-spinner{width:28px;height:28px;border:2px solid rgba(255,255,255,.2);border-top-color:#fff;border-radius:50%;animation:vivid-live-spin .8s linear infinite}
@@ -46,6 +46,7 @@ body.vivid-live-page{background:#06070a;color:#f3f4f6}
 .vivid-live-info strong{font-size:.78rem}
 .vivid-live-info span{margin-top:5px;color:#69717c;font-size:.66rem;line-height:1.5}
 @media(max-width:980px){.vivid-live-channel-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(max-width:760px){.vivid-live-main{width:min(100% - 20px,1440px);padding:24px 0 50px}.vivid-live-hero{padding:26px 0 20px}.vivid-live-guide,.vivid-live-player{border-radius:18px}.vivid-live-guide-head,.vivid-live-player-head{padding:15px;align-items:flex-start;flex-direction:column}.vivid-live-search{width:100%}.vivid-live-filters{padding:14px 15px 0}.vivid-live-channel-grid{grid-template-columns:1fr;padding:15px}.vivid-live-player-stage,.vivid-live-player-stage iframe{min-height:420px}.vivid-live-info{grid-template-columns:1fr}.vivid-live-info article{padding:15px}}
-@media(max-width:480px){.vivid-live-player-stage,.vivid-live-player-stage iframe{min-height:360px}}
-\n.vivid-live-pagination{grid-column:1/-1;display:flex;align-items:center;justify-content:center;gap:14px;padding:4px 0 2px}.vivid-live-pagination button{display:inline-flex;align-items:center;gap:7px;border:1px solid rgba(255,255,255,.1);border-radius:999px;background:rgba(255,255,255,.045);color:#d7dbe0;padding:9px 14px;cursor:pointer;font:inherit;font-size:.7rem}.vivid-live-pagination button:hover:not(:disabled){background:#fff;color:#090a0c;border-color:#fff}.vivid-live-pagination button:disabled{opacity:.3;cursor:not-allowed}.vivid-live-pagination span{min-width:86px;text-align:center;color:#69717c;font-size:.68rem}
+@media(max-width:760px){.vivid-live-main{width:min(100% - 20px,1440px);padding:24px 0 50px}.vivid-live-hero{padding:26px 0 20px}.vivid-live-guide,.vivid-live-player{border-radius:18px}.vivid-live-guide-head,.vivid-live-player-head{padding:15px;align-items:flex-start;flex-direction:column}.vivid-live-search{width:100%}.vivid-live-filters{padding:14px 15px 0}.vivid-live-channel-grid{grid-template-columns:1fr;padding:15px}.vivid-live-player-stage,.vivid-live-player-stage iframe{min-height:0}.vivid-live-info{grid-template-columns:1fr}.vivid-live-info article{padding:15px}}
+@media(max-width:480px){.vivid-live-player-stage,.vivid-live-player-stage iframe{min-height:0}}
+
+.vivid-live-pagination{grid-column:1/-1;display:flex;align-items:center;justify-content:center;gap:14px;padding:4px 0 2px}.vivid-live-pagination button{display:inline-flex;align-items:center;gap:7px;border:1px solid rgba(255,255,255,.1);border-radius:999px;background:rgba(255,255,255,.045);color:#d7dbe0;padding:9px 14px;cursor:pointer;font:inherit;font-size:.7rem}.vivid-live-pagination button:hover:not(:disabled){background:#fff;color:#090a0c;border-color:#fff}.vivid-live-pagination button:disabled{opacity:.3;cursor:not-allowed}.vivid-live-pagination span{min-width:86px;text-align:center;color:#69717c;font-size:.68rem}
