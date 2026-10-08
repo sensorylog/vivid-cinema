@@ -251,8 +251,8 @@ body.vivid-cinema-home .vivid-hero{
 /* Top 10: ranking is a visual object, not another metadata label. */
 .vivid-cinema-home .vivid-top10-card{
   position:relative;
-  flex-basis:clamp(184px,14.5vw,244px);
-  width:clamp(184px,14.5vw,244px);
+  flex-basis:clamp(168px,11vw,180px);
+  width:clamp(168px,11vw,180px);
   padding-left:34px;
 }
 .vivid-cinema-home .vivid-top10-card .vivid-top10-rank{
@@ -278,7 +278,7 @@ body.vivid-cinema-home .vivid-hero{
   .vivid-cinema-home .vivid-top10-card{
     flex-basis:calc((100vw - 34px)/2.35);
     width:calc((100vw - 34px)/2.35);
-    min-width:150px;
+    min-width:132px;
     padding-left:30px;
   }
   .vivid-cinema-home .vivid-top10-card .vivid-top10-rank{
