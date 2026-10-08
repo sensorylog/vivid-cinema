@@ -1516,3 +1516,27 @@ html[data-vivid-theme="light"] .vivid-topbar .vivid-navlinks a[aria-current="pag
   background:rgba(255,255,255,.78)!important;
   border-color:rgba(17,18,22,.09)!important;
 }
+
+/* Header geometry finalization: logo left, account centered, EN at far right. */
+@media(min-width:901px){
+  .vivid-topbar .vivid-nav{
+    grid-template-columns:minmax(180px,1fr) auto minmax(180px,1fr)!important;
+    grid-template-rows:58px 52px!important;
+    gap:0 18px!important;
+  }
+  .vivid-topbar .vivid-brand{grid-column:1!important;grid-row:1!important}
+  .vivid-nav-account{grid-column:2!important;grid-row:1!important;justify-self:center!important}
+  .vivid-nav-language-slot{grid-column:3!important;grid-row:1!important}
+  .vivid-topbar .vivid-navlinks{grid-column:1 / -1!important;grid-row:2!important}
+}
+@media(max-width:900px){
+  .vivid-topbar .vivid-nav{
+    grid-template-columns:1fr auto auto!important;
+    grid-template-rows:50px!important;
+    gap:8px!important;
+  }
+  .vivid-topbar .vivid-brand{grid-column:1!important;grid-row:1!important}
+  .vivid-nav-account{grid-column:2!important;grid-row:1!important;justify-self:center!important}
+  .vivid-nav-language-slot{grid-column:3!important;grid-row:1!important;justify-self:end!important}
+  .vivid-topbar .vivid-navlinks{display:none!important}
+}
