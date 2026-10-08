@@ -344,3 +344,103 @@
     margin-inline:auto;
   }
 }
+
+
+@media (min-width:901px){
+  /* Title */
+  .vivid-title-page .vivid-title-hero{
+    min-height:680px;
+    padding-top:118px;
+    padding-bottom:72px;
+  }
+  .vivid-title-page .vivid-title-hero-inner{
+    width:min(1280px,100%);
+    grid-template-columns:300px minmax(0,760px);
+    gap:56px;
+  }
+  .vivid-title-page .vivid-title-copy h1{
+    font-size:clamp(3.2rem,5.4vw,5.6rem);
+  }
+  .vivid-title-page .vivid-title-section{
+    width:min(1280px,100%);
+    padding-top:52px;
+  }
+  .vivid-title-page .vivid-facts-grid{grid-template-columns:repeat(6,minmax(0,1fr));}
+
+  /* Watch */
+  .vivid-watch-page .vivid-watch-hero{
+    min-height:160px;
+    max-width:none;
+  }
+  .vivid-watch-page .vivid-watch-head{
+    width:min(1320px,100%);
+    padding-top:34px;
+  }
+  .vivid-watch-page .vivid-player-section{
+    width:min(1320px,100%);
+    padding-top:6px;
+  }
+  .vivid-watch-page .vivid-player-frame{
+    border-radius:12px;
+    box-shadow:0 22px 70px rgba(0,0,0,.46);
+  }
+  .vivid-watch-page .vivid-watch-recommendations{
+    width:min(1320px,100%);
+    padding-top:44px;
+  }
+
+  /* Browse */
+  .vivid-discovery-page .vivid-discovery-main{
+    padding-top:56px;
+  }
+  .vivid-discovery-page .vivid-discovery-intro{
+    grid-template-columns:minmax(0,1fr) 430px;
+    margin-bottom:24px;
+  }
+  .vivid-discovery-page .vivid-discovery-intro h1{
+    font-size:clamp(3rem,4.8vw,4.8rem);
+  }
+  .vivid-discovery-page .vivid-filter-panel{
+    border-radius:14px;
+    padding:12px;
+    margin-bottom:30px;
+    box-shadow:none;
+  }
+  .vivid-discovery-page .vivid-discovery-grid{
+    grid-template-columns:repeat(7,minmax(0,1fr));
+    gap:18px 14px;
+  }
+  .vivid-discovery-page .vivid-discovery-poster{border-radius:11px;}
+  .vivid-discovery-page .vivid-discovery-copy strong{font-size:.8rem;}
+  .vivid-discovery-page .vivid-discovery-copy small{font-size:.68rem;}
+
+  /* Library */
+  .vivid-library-page .vivid-library-main{
+    padding-top:42px;
+  }
+  .vivid-library-page .vivid-library-header{
+    padding-bottom:26px;
+  }
+  .vivid-library-page .vivid-library-tabs{
+    top:72px;
+    border-radius:10px;
+    padding:4px 6px 8px;
+  }
+  .vivid-library-page .vivid-library-grid{
+    grid-template-columns:repeat(7,minmax(0,1fr));
+    gap:16px 14px;
+  }
+  .vivid-library-page .vivid-library-card a{
+    border-radius:11px;
+  }
+  .vivid-library-page .vivid-library-card-copy{
+    padding:8px 9px 10px;
+  }
+  .vivid-library-page .vivid-library-card strong{font-size:.76rem;}
+  .vivid-library-page .vivid-library-card small{font-size:.65rem;}
+
+  /* Collection */
+  .vivid-collection-page .vivid-collection-main{
+    padding-top:54px;
+  }
+}
