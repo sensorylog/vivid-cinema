@@ -21,7 +21,7 @@ function normalizeApi(channelsData,streamsData,countriesData){
  streamsData.filter(s=>s&&s.channel&&/^https?:\/\//i.test(s.url)).forEach(s=>{
    const c=names.get(s.channel);if(!c)return;
    const key=c.id;
-   if(!grouped.has(key))grouped.set(key,{id:key,name:c.name,altNames:c.alt_names||[],country:countryNames.get(c.country)||c.country||"International",countryCode:c.country,language:(s.languages||[])[0]||"",category:(c.categories||[])[0]||"general",categories:c.categories||[],provider:"iptv-org",sources:[]});
+   if(!grouped.has(key))grouped.set(key,{id:key,name:c.name,altNames:c.alt_names||[],country:countryNames.get(c.country)||c.country||"International",countryCode:c.country,logo:c.logo||"",language:(s.languages||[])[0]||"",category:(c.categories||[])[0]||"general",categories:c.categories||[],provider:"iptv-org",sources:[]});
    const row=grouped.get(key);
    if(row.sources.length<3&&!row.sources.some(x=>x.url===s.url))row.sources.push({type:"video",url:s.url,quality:s.quality||"",labels:s.labels||[]});
  });
@@ -46,7 +46,7 @@ function visible(){
 function card(c){
  const source=c.sources?.[0];
  const badge=c.provider==="2embed"?"2Embed":"Live";
- return `<button class="vivid-live-channel" type="button" data-channel-id="${esc(c.id)}"><span class="vivid-live-channel-art" aria-hidden="true"><i class="bi bi-broadcast"></i></span><span class="vivid-live-channel-copy"><strong>${esc(c.name)}</strong><small>${esc([c.country,label(c.category)].filter(Boolean).join(" · ")||"Live")} · ${esc(badge)}</small></span><span class="vivid-live-channel-play" aria-hidden="true"><i class="bi bi-play-fill"></i></span></button>`;
+ return `<button class="vivid-live-channel" type="button" data-channel-id="${esc(c.id)}"><span class="vivid-live-channel-art">${c.logo?`<img src="${esc(c.logo)}" alt="" loading="lazy" decoding="async">`:`<i class="bi bi-broadcast" aria-hidden="true"></i>`}<span class="vivid-live-channel-play" aria-hidden="true"><i class="bi bi-play-fill"></i></span></span><span class="vivid-live-channel-copy"><strong>${esc(c.name)}</strong><small>${esc([c.country,label(c.category)].filter(Boolean).join(" · ")||"Live")} · ${esc(badge)}</small></span></button>`;
 }
 function render(){
  const list=visible();
