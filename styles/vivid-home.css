@@ -851,3 +851,102 @@ html[data-vivid-theme="light"] body.vivid-cinema-home .vivid-rating{
   .vivid-cinema-home .vivid-home-tv{width:400px!important}
   .vivid-cinema-home .vivid-home-viewer{right:calc(50% - 320px)!important;top:190px!important}
 }
+
+
+/* FINAL VIVID MOMENT COMPOSITION — centered TV + seated viewer in front.
+   Keep the supporting copy in its own clean reading zone on every viewport. */
+.vivid-cinema-home .vivid-home-breathe{
+  min-height:620px!important;
+}
+.vivid-cinema-home .vivid-home-breathe-scene{
+  width:min(980px,100%)!important;
+  min-height:560px!important;
+  margin:0 auto!important;
+  position:relative!important;
+  overflow:hidden!important;
+}
+.vivid-cinema-home .vivid-home-tv{
+  left:50%!important;
+  right:auto!important;
+  top:30px!important;
+  width:min(460px,72vw)!important;
+  transform:translateX(-50%)!important;
+  z-index:3!important;
+}
+.vivid-cinema-home .vivid-home-viewer{
+  left:50%!important;
+  right:auto!important;
+  top:auto!important;
+  bottom:118px!important;
+  transform:translateX(-50%) scale(.78)!important;
+  z-index:6!important;
+  animation-name:vivid-viewer-idle-centered!important;
+}
+.vivid-cinema-home .vivid-home-breathe-copy{
+  left:50%!important;
+  right:auto!important;
+  top:auto!important;
+  bottom:16px!important;
+  width:min(640px,92%)!important;
+  transform:translateX(-50%)!important;
+  text-align:center!important;
+  z-index:8!important;
+}
+@keyframes vivid-viewer-idle-centered{
+  0%,100%{transform:translateX(-50%) scale(.78) translateY(2px) rotate(1deg)}
+  40%{transform:translateX(-50%) scale(.78) translateY(-3px) rotate(-.7deg)}
+  70%{transform:translateX(-50%) scale(.78) translateY(1px) rotate(.5deg)}
+}
+
+@media(max-width:900px){
+  .vivid-cinema-home .vivid-home-breathe{
+    min-height:570px!important;
+  }
+  .vivid-cinema-home .vivid-home-breathe-scene{
+    min-height:530px!important;
+  }
+  .vivid-cinema-home .vivid-home-tv{
+    top:22px!important;
+    width:min(400px,78vw)!important;
+  }
+  .vivid-cinema-home .vivid-home-viewer{
+    bottom:108px!important;
+    transform:translateX(-50%) scale(.66)!important;
+    animation-name:vivid-viewer-idle-centered-sm!important;
+  }
+  .vivid-cinema-home .vivid-home-breathe-copy{
+    bottom:14px!important;
+    width:min(620px,92%)!important;
+  }
+  @keyframes vivid-viewer-idle-centered-sm{
+    0%,100%{transform:translateX(-50%) scale(.66) translateY(2px) rotate(1deg)}
+    40%{transform:translateX(-50%) scale(.66) translateY(-3px) rotate(-.7deg)}
+    70%{transform:translateX(-50%) scale(.66) translateY(1px) rotate(.5deg)}
+  }
+}
+@media(max-width:520px){
+  .vivid-cinema-home .vivid-home-breathe{
+    min-height:550px!important;
+  }
+  .vivid-cinema-home .vivid-home-breathe-scene{
+    min-height:510px!important;
+  }
+  .vivid-cinema-home .vivid-home-tv{
+    top:16px!important;
+    width:min(340px,84vw)!important;
+  }
+  .vivid-cinema-home .vivid-home-viewer{
+    bottom:102px!important;
+    transform:translateX(-50%) scale(.56)!important;
+    animation-name:vivid-viewer-idle-centered-xs!important;
+  }
+  .vivid-cinema-home .vivid-home-breathe-copy{
+    bottom:10px!important;
+    width:calc(100% - 28px)!important;
+  }
+  @keyframes vivid-viewer-idle-centered-xs{
+    0%,100%{transform:translateX(-50%) scale(.56) translateY(2px) rotate(1deg)}
+    40%{transform:translateX(-50%) scale(.56) translateY(-2px) rotate(-.6deg)}
+    70%{transform:translateX(-50%) scale(.56) translateY(1px) rotate(.4deg)}
+  }
+}
