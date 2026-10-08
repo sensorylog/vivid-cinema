@@ -181,7 +181,7 @@ function ensureBackControl() {
   const main = document.querySelector("main");
   if (!main || document.querySelector("[data-vivid-back]")) return;
   const page = document.body?.dataset?.vividPage || "";
-  if (["home", "landing"].includes(page)) return;
+  if (["home", "landing", "live"].includes(page)) return;
   const back = document.createElement("a");
   back.className = "vivid-page-back";
   back.href = "home.html";
