@@ -25,7 +25,7 @@ let fallbackTimer = null;
 let imdbId = "";
 let tmdbId = "";
 const PRIMARY_FALLBACK_MS = 15000;
-const ANIME_FALLBACK_MS = 9000;
+const ANIME_FALLBACK_MS = 9000;\nconst TWOEMBED_LOAD_TIMEOUT_MS = 10000;
 
 function getParams() {
   const id = route.params.get("id");
