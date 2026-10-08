@@ -78,6 +78,19 @@ function parseM3U(text,provider){
  return rows;
 }
 
+function normalizeApiFallback(channelsData,streamsData,countriesData){
+ const names=new Map((channelsData||[]).filter(c=>c&&c.id&&!c.is_nsfw&&!c.closed).map(c=>[c.id,c]));
+ const countryNames=new Map((countriesData||[]).filter(c=>c&&c.code).map(c=>[c.code,c.name]));
+ const grouped=new Map();
+ (streamsData||[]).filter(s=>s&&s.channel&&/^https?:\/\//i.test(s.url)).forEach(s=>{
+   const ch=names.get(s.channel);if(!ch)return;
+   if(!grouped.has(ch.id))grouped.set(ch.id,{id:ch.id,name:ch.name,altNames:ch.alt_names||[],country:countryNames.get(ch.country)||ch.country||"International",countryCode:ch.country,logo:ch.logo||"",language:"",category:(ch.categories||[])[0]||"general",categories:ch.categories||["general"],provider:"IPTV-org",sources:[]});
+   const row=grouped.get(ch.id);
+   if(row.sources.length<4&&!row.sources.some(x=>x.url===s.url))row.sources.push({type:"video",url:s.url,quality:s.quality||"",labels:s.labels||[],score:0,provider:"IPTV-org"});
+ });
+ return [...grouped.values()].filter(c=>c.sources.length);
+}
+
 function mergeCatalogue(groups){
  const byKey=new Map();
  const aliases=new Map();
@@ -274,11 +287,17 @@ search?.addEventListener("input",()=>{page=1;render()});
 (async()=>{
  try{
    const results=await Promise.all(SOURCES.map(s=>fetchWithTimeout(s.url).catch(()=>null)));
-   const nexusRes=results[0],freeTvRes=results[1],iptvRes=results[2];
-   const nexus=nexusRes?.ok?normalizeM3U(await nexusRes.text(),"Nexus"):[];
-   const freeTv=freeTvRes?.ok?normalizeM3U(await freeTvRes.text(),"Free-TV"):[];
-   const iptv=iptvRes?.ok?normalizeM3U(await iptvRes.text(),"IPTV-org"):[];
-   channels=mergeCatalogue([nexus,freeTv,iptv]);
+   const parsed=await Promise.all(results.map(async(res,i)=>res?.ok?normalizeM3U(await res.text(),SOURCES[i].name==="IPTV-org"?"IPTV-org":SOURCES[i].name==="Free-TV"?"Free-TV":"Nexus"):[]));
+   if(!parsed.some(x=>x.length)){
+     const [channelsRes,streamsRes,countriesRes]=await Promise.all([
+       fetchWithTimeout("https://iptv-org.github.io/api/channels.json").catch(()=>null),
+       fetchWithTimeout("https://iptv-org.github.io/api/streams.json").catch(()=>null),
+       fetchWithTimeout("https://iptv-org.github.io/api/countries.json").catch(()=>null)
+     ]);
+     const api=channelsRes?.ok&&streamsRes?.ok?normalizeApiFallback(await channelsRes.json(),await streamsRes.json(),countriesRes?.ok?await countriesRes.json():[]):[];
+     parsed.push(api);
+   }
+   channels=mergeCatalogue(parsed);
    if(!channels.length)throw Error("No live channels returned");
    if(guideStatus)guideStatus.textContent=channels.length.toLocaleString()+" health-filtered channels ready";
  }catch(e){
