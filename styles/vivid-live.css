@@ -50,3 +50,17 @@ body.vivid-live-page{background:#06070a;color:#f3f4f6}
 @media(max-width:480px){.vivid-live-player-stage,.vivid-live-player-stage iframe{min-height:0}}
 
 .vivid-live-pagination{grid-column:1/-1;display:flex;align-items:center;justify-content:center;gap:14px;padding:4px 0 2px}.vivid-live-pagination button{display:inline-flex;align-items:center;gap:7px;border:1px solid rgba(255,255,255,.1);border-radius:999px;background:rgba(255,255,255,.045);color:#d7dbe0;padding:9px 14px;cursor:pointer;font:inherit;font-size:.7rem}.vivid-live-pagination button:hover:not(:disabled){background:#fff;color:#090a0c;border-color:#fff}.vivid-live-pagination button:disabled{opacity:.3;cursor:not-allowed}.vivid-live-pagination span{min-width:86px;text-align:center;color:#69717c;font-size:.68rem}
+/* Vivid Live — catalogue cards, matching the main movie-card language. */
+.vivid-live-channel-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;padding:20px 22px 24px}
+.vivid-live-channel{display:block;padding:0;overflow:hidden;border-radius:14px;text-align:left;background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.08);box-shadow:0 10px 28px rgba(0,0,0,.18);transition:transform .2s ease,border-color .2s ease,background .2s ease}
+.vivid-live-channel:hover{transform:translateY(-4px);border-color:rgba(255,255,255,.18);background:rgba(255,255,255,.045)}
+.vivid-live-channel-art{display:grid;place-items:center;position:relative;width:100%;height:auto;aspect-ratio:16/9;overflow:hidden;border-radius:0;background:linear-gradient(145deg,#20242a,#0e1014);color:#d7dbe0}
+.vivid-live-channel-art img{display:block;width:100%;height:100%;object-fit:cover;padding:22px;filter:drop-shadow(0 10px 18px rgba(0,0,0,.3))}
+.vivid-live-channel-art i{font-size:2rem}
+.vivid-live-channel-copy{display:block;padding:12px 13px 13px}
+.vivid-live-channel-copy strong{font-size:.82rem;line-height:1.25}
+.vivid-live-channel-copy small{margin-top:5px;font-size:.64rem}
+.vivid-live-channel-play{position:absolute;right:10px;bottom:10px;z-index:2;display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:#fff;color:#090a0c;box-shadow:0 8px 18px rgba(0,0,0,.3)}
+.vivid-live-channel-art{position:relative}
+@media(max-width:980px){.vivid-live-channel-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:560px){.vivid-live-channel-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;padding:12px}.vivid-live-channel-copy{padding:10px}.vivid-live-channel-copy strong{font-size:.72rem}.vivid-live-channel-copy small{font-size:.58rem}.vivid-live-channel-play{width:30px;height:30px;right:7px;bottom:7px}}
