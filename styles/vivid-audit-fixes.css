@@ -1466,7 +1466,7 @@ body{
 }
 .vivid-nav-account i{font-size:1rem}
 .vivid-nav-account span{font-size:.72rem;font-weight:700}
-.vivid-nav-language-slot{justify-self:end;min-width:58px;display:flex;justify-content:flex-end}
+.vivid-nav-language-slot{grid-column:3;grid-row:1;justify-self:end;min-width:58px;display:flex;justify-content:flex-end}
 .vivid-nav-language-slot .vivid-language{margin:0!important}
 .vivid-nav-language-slot .vivid-language select{
   height:42px!important;
@@ -1484,8 +1484,8 @@ body{
     gap:10px;
   }
   .vivid-topbar .vivid-navlinks{display:none!important}
-  .vivid-nav-account{justify-self:end}
-  .vivid-nav-language-slot{display:none}
+  .vivid-nav-account{grid-column:2;grid-row:1;justify-self:end}
+  .vivid-nav-language-slot{display:flex;grid-column:3;grid-row:1}
 }
 @media(max-width:640px){
   .vivid-topbar{
@@ -1493,8 +1493,8 @@ body{
     padding:calc(6px + var(--vivid-safe-top)) 14px 6px!important;
   }
   .vivid-topbar .vivid-nav{min-height:50px}
-  .vivid-nav-account{min-width:40px;width:40px;padding:0;border-radius:13px}
-  .vivid-nav-account span{display:none}
+  .vivid-nav-account{grid-column:2;min-width:40px;width:40px;padding:0;border-radius:13px}
+  .vivid-nav-account span{display:none}.vivid-nav-language-slot{display:flex!important;grid-column:3;grid-row:1}.vivid-nav-language-slot .vivid-language select{height:40px!important;min-width:52px!important}
 }
 html[data-vivid-theme="light"] .vivid-topbar{
   background:rgba(255,255,255,.62)!important;
