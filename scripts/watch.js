@@ -25,6 +25,7 @@ let primaryHealthy = false;
 let fallbackTimer = null;
 let imdbId = "";
 let tmdbId = "";
+let aniListId = "";
 const PRIMARY_FALLBACK_MS = 15000;
 const ANIME_FALLBACK_MS = 9000;
 const TWOEMBED_LOAD_TIMEOUT_MS = 12000;
@@ -77,10 +78,33 @@ function buildVidsrcEmbedUrl(params) {
 
 function buildVidplusEmbedUrl(params) {
   const base = String(VIVID_CONFIG.api.vidplusEmbedBaseUrl || "https://player.vidplus.to").replace(/\/+$/, "");
+  if (route.params.get("anime") === "1") {
+    if (!aniListId) return "";
+    return base + "/embed/anime/" + encodeURIComponent(aniListId) + "/" + params.episode + "?dub=false";
+  }
   const id = encodeURIComponent(tmdbId || params.id);
   return params.type === "tv"
     ? base + "/embed/tv/" + id + "/" + params.season + "/" + params.episode
     : base + "/embed/movie/" + id;
+}
+
+async function resolveAniListId(title) {
+  if (route.params.get("anime") !== "1" || !title) return "";
+  try {
+    const response = await fetch("https://graphql.anilist.co", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        query: "query($search:String!){Media(search:$search,type:ANIME){id title{romaji english native}}}",
+        variables: { search: title }
+      })
+    });
+    if (!response.ok) return "";
+    const data = await response.json();
+    return String(data?.data?.Media?.id || "");
+  } catch {
+    return "";
+  }
 }
 
 function isLikelyAnime() {
@@ -182,9 +206,11 @@ function setPlayerSource(source, params, startAt = 0) {
       status.hidden = false;
     }
   } else if (source === "vidplus") {
-    if (!hasFallbackId()) return;
+    if (route.params.get("anime") === "1" ? !aniListId : !hasFallbackId()) return;
     primaryHealthy = false;
-    player.src = buildVidplusEmbedUrl(params);
+    const vidplusUrl = buildVidplusEmbedUrl(params);
+    if (!vidplusUrl) return;
+    player.src = vidplusUrl;
     if (status) {
       status.textContent = "Loading VidPlus alternate source…";
       status.classList.remove("is-warning");
@@ -449,6 +475,7 @@ async function load() {
     media = normalizeMedia(details, currentParams.type);
     imdbId = resolveImdbId(details);
     tmdbId = /^\d+$/.test(String(currentParams.id || "")) ? String(currentParams.id) : String(details?.id || "");
+    aniListId = await resolveAniListId(media?.title || details?.name || details?.title || "");
     if (currentParams.type === "tv") {
       details.episode = await tmdbApi.tvSeason(currentParams.id, currentParams.season)
         .then(season => (season.episodes || []).find(ep => Number(ep.episode_number) === Number(currentParams.episode)) || null)
@@ -458,7 +485,7 @@ async function load() {
     // Metadata arrived after shell — re-arm
     // the primary timer if the player is still waiting.
     updateSourceLabel();
-    if (hasFallbackId() && activeSource === "vidapi" && !primaryHealthy && !fallbackTimer) {
+    if ((hasFallbackId() || aniListId) && activeSource === "vidapi" && !primaryHealthy && !fallbackTimer) {
       const saved = getPlaybackProgress(progressKey());
       const resumeAt = Number(saved?.progress || route.params.get("startAt") || 0);
       fallbackTimer = window.setTimeout(() => {
