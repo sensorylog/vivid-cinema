@@ -134,6 +134,12 @@ function updateSourceLabel() {
     switchBtn.hidden = !canSwitch;
     switchBtn.textContent = activeSource === "vidapi" ? "Try alternate source" : activeSource === "vidsrc" ? "Try 2Embed" : "Back to VidAPI";
   }
+  document.querySelectorAll("[data-player-source]").forEach(button => {
+    const source = button.getAttribute("data-player-source");
+    button.classList.toggle("is-active", source === activeSource);
+    button.disabled = !hasFallbackId();
+    button.setAttribute("aria-pressed", source === activeSource ? "true" : "false");
+  });
 }
 
 function setPlayerSource(source, params, startAt = 0) {
@@ -289,12 +295,13 @@ function renderShell(params) {
     // Start on VidAPI, then fall back to VidSrc, then 2Embed if needed.
     setPlayerSource("vidapi", params, resumeAt);
     const switchBtn = $("player-switch-source");
-    if (switchBtn) {
-      switchBtn.addEventListener("click", () => {
-        const next = activeSource === "vidapi" ? "vidsrc" : activeSource === "vidsrc" ? "2embed" : "vidapi";
-        setPlayerSource(next, params, resumeAt);
+    document.querySelectorAll("[data-player-source]").forEach(button => {
+      button.addEventListener("click", () => {
+        const source = button.getAttribute("data-player-source");
+        if (!["vidapi", "vidsrc", "2embed"].includes(source) || !hasFallbackId()) return;
+        setPlayerSource(source, params, resumeAt);
       });
-    }
+    });
   }
   window.setTimeout(() => {
     const current = $("player-status");
@@ -413,8 +420,7 @@ function handlePlayerEvent(event) {
       title: media.title, media_type: media.media_type, id: media.id
     });
     if (media.media_type === "tv" && nextEpisode) {
-      const target = buildWatchUrl(media.id, "tv", nextEpisode.season, nextEpisode.episode);
-      window.setTimeout(() => { window.location.href = target; }, 1200);
+      // Stay on the current player after completion. Next-episode navigation is explicit only.
     }
   }
 }
