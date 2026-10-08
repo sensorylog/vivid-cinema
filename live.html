@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#06070a"><meta name="description" content="Vivid Live — live television on Vivid Cinema.">
+<meta name="theme-color" content="#06070a"><meta name="description" content="Vivid Live — live television inside Vivid Cinema.">
 <title>Vivid Live · Vivid Cinema</title>
 <link rel="icon" href="icons/vivid-icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" sizes="180x180" href="icons/vivid-icon-180.png">
@@ -15,31 +15,61 @@
 </head>
 <body data-vivid-page="live" class="vivid-live-page">
 <header class="vivid-topbar"><nav class="vivid-nav" aria-label="Primary"></nav></header>
+
 <main id="main-content" class="vivid-live-main">
 <section class="vivid-live-hero">
   <div class="vivid-live-kicker"><span class="vivid-live-dot"></span> VIVID LIVE</div>
-  <h1>Live television.<br><span>One Vivid destination.</span></h1>
-  <p>Browse the 2Embed live-TV directory and open channels without leaving Vivid Cinema.</p>
-  <div class="vivid-live-actions">
-    <a class="vivid-button vivid-button--primary" href="#live-player"><i class="bi bi-broadcast-pin"></i> Open Live TV</a>
-    <a class="vivid-button vivid-button--secondary" href="https://www.2embed.online/iptv/" target="_blank" rel="noopener noreferrer"><i class="bi bi-box-arrow-up-right"></i> Open channel directory</a>
+  <h1>Live television.<br><span>Made for Vivid.</span></h1>
+  <p>Pick a channel from Vivid's live guide. The broadcast opens in Vivid's own player — 2Embed supplies the stream behind the scenes.</p>
+</section>
+
+<section class="vivid-live-guide" aria-labelledby="live-guide-title">
+  <div class="vivid-live-guide-head">
+    <div>
+      <span class="vivid-live-eyebrow">CHANNEL GUIDE</span>
+      <h2 id="live-guide-title">What's on live</h2>
+      <p id="live-guide-status">Select a channel to start watching.</p>
+    </div>
+    <label class="vivid-live-search" for="live-search">
+      <i class="bi bi-search" aria-hidden="true"></i>
+      <input id="live-search" type="search" placeholder="Search channels" autocomplete="off" spellcheck="false">
+    </label>
+  </div>
+  <div class="vivid-live-filters" role="group" aria-label="Channel categories">
+    <button class="is-active" type="button" data-live-filter="all">All</button>
+    <button type="button" data-live-filter="news">News</button>
+    <button type="button" data-live-filter="international">International</button>
+  </div>
+  <div id="live-channel-grid" class="vivid-live-channel-grid" aria-live="polite"></div>
+</section>
+
+<section id="live-player" class="vivid-live-player" aria-labelledby="live-player-title" hidden>
+  <div class="vivid-live-player-head">
+    <div>
+      <span class="vivid-live-eyebrow">NOW PLAYING</span>
+      <h2 id="live-player-title">Vivid Live</h2>
+      <p id="live-player-meta">2Embed live stream</p>
+    </div>
+    <button id="live-close" class="vivid-live-icon-button" type="button" aria-label="Close player">
+      <i class="bi bi-x-lg" aria-hidden="true"></i>
+    </button>
+  </div>
+  <div class="vivid-live-player-stage">
+    <iframe id="live-frame" title="Vivid Live channel player" src="about:blank" allow="autoplay; fullscreen; picture-in-picture; encrypted-media" allowfullscreen referrerpolicy="strict-origin-when-cross-origin" loading="lazy"></iframe>
+    <div id="live-player-loading" class="vivid-live-player-loading" hidden>
+      <span class="vivid-live-spinner" aria-hidden="true"></span>
+      <strong>Connecting to the live channel…</strong>
+    </div>
   </div>
 </section>
-<section id="live-player" class="vivid-live-stage" aria-label="Vivid Live TV">
-  <div class="vivid-live-stage-head">
-    <div><span>LIVE TELEVISION</span><h2>2Embed channel guide</h2><p>Select a channel inside the guide to start watching.</p></div>
-    <button id="live-refresh" type="button"><i class="bi bi-arrow-clockwise"></i><span>Refresh</span></button>
-  </div>
-  <div class="vivid-live-frame-wrap">
-    <iframe id="live-frame" title="2Embed live TV channel directory" src="https://www.2embed.online/iptv/" allow="autoplay; fullscreen; picture-in-picture; encrypted-media" allowfullscreen referrerpolicy="strict-origin-when-cross-origin" loading="eager"></iframe>
-  </div>
-</section>
+
 <section class="vivid-live-info">
-  <article><i class="bi bi-tv"></i><div><strong>Live channels</strong><span>2Embed currently lists thousands of channels across countries and languages.</span></div></article>
-  <article><i class="bi bi-search"></i><div><strong>Find a channel</strong><span>Use the channel search and country/category filters in the live guide.</span></div></article>
-  <article><i class="bi bi-phone"></i><div><strong>Built for Vivid</strong><span>The Live destination has its own route and stays separate from the movie and series catalogue.</span></div></article>
+  <article><i class="bi bi-broadcast-pin"></i><div><strong>Vivid-native guide</strong><span>Channels are presented as Vivid cards instead of sending you to the 2Embed IPTV website.</span></div></article>
+  <article><i class="bi bi-play-circle"></i><div><strong>Watch inside Vivid</strong><span>Tap a channel and the exact 2Embed stream player opens inside the Vivid Live page.</span></div></article>
+  <article><i class="bi bi-shield-check"></i><div><strong>2Embed as the source</strong><span>Vivid controls the experience while 2Embed handles the underlying live stream.</span></div></article>
 </section>
 </main>
+
 <footer class="vivid-footer">&copy; 2026 Vivid Cinema <span class="vivid-footer-links"><a href="about.html">About</a><a href="terms.html">Terms</a><a href="privacy.html">Privacy</a><a href="contact.html">Contact</a></span></footer>
 <nav class="vivid-mobile-nav" aria-label="Mobile navigation"></nav>
 <script type="module" src="scripts/app-shell.js"></script>
