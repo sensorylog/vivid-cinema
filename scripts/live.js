@@ -11,7 +11,7 @@ const grid=document.getElementById("live-channel-grid");
 const guideStatus=document.getElementById("live-guide-status");
 const filtersRoot=document.querySelector(".vivid-live-filters");
 const FALLBACK=[{id:"atv-international",name:"&TV International",category:"international",country:"IN",language:"hin",provider:"2embed",sources:[{type:"iframe",url:"https://www.2embed.online/iptv/stream.php?url=N2lFS2R2cHpjbmFSSFRCNG5TOTI3MDFaS2xKWW1saFVwOUdVRDRqMEhlRXdMcmc4NHpLTERrWTZOY2NIdGdmblVXOWJKMFRYTmZzdE1HcWNoemdMZUk3NUZPUUdHMi92L1RUMkZYZ291NHlGZTRTOTJOUTVnZnA1Vm1QSzdvUGs4b0NtNS9qaTlJcVFMWERyZW92REF5QnFMM24yWkhnZEh2bHRyUTY3ZGg4PTo6DPl8NG74VB9DVg1WkNPVKg%3D%3D&title=%26TV+International&qualities=Auto,1080p,720p,480p,360p"}]}];
-let channels=[],activeFilter="all",shown=240,currentSources=[],sourceIndex=0;
+const PAGE_SIZE=30; let channels=[],activeFilter="all",page=1,currentSources=[],sourceIndex=0;
 const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const label=v=>String(v||"").replace(/[-_]+/g," ").replace(/\b\w/g,m=>m.toUpperCase());
 function normalizeApi(channelsData,streamsData,countriesData){
@@ -33,7 +33,7 @@ function renderFilters(){
  const countries=[...new Set(channels.map(c=>c.country).filter(Boolean))].sort();
  const opts=[["all","All"],...cats.map(v=>["category:"+v,label(v)]),...countries.map(v=>["country:"+v,v])];
  filtersRoot.innerHTML=opts.map((o,i)=>`<button class="${i?"":"is-active"}" type="button" data-live-filter="${esc(o[0])}">${esc(o[1])}</button>`).join("");
- filtersRoot.querySelectorAll("[data-live-filter]").forEach(b=>b.onclick=()=>{activeFilter=b.dataset.liveFilter;shown=240;filtersRoot.querySelectorAll("[data-live-filter]").forEach(x=>x.classList.toggle("is-active",x===b));render()});
+ filtersRoot.querySelectorAll("[data-live-filter]").forEach(b=>b.onclick=()=>{activeFilter=b.dataset.liveFilter;page=1;filtersRoot.querySelectorAll("[data-live-filter]").forEach(x=>x.classList.toggle("is-active",x===b));render()});
 }
 function visible(){
  const q=(search?.value||"").trim().toLowerCase();
@@ -50,9 +50,9 @@ function card(c){
 }
 function render(){
  const list=visible(),page=list.slice(0,shown);
- grid.innerHTML=page.length?page.map(card).join(""):`<div class="vivid-live-empty"><i class="bi bi-tv"></i><strong>No channels found</strong><span>Try another search or filter.</span></div>`;
- if(list.length>shown)grid.insertAdjacentHTML("beforeend",`<button class="vivid-live-channel vivid-live-load-more" type="button" data-live-more><span class="vivid-live-channel-art"><i class="bi bi-plus-lg"></i></span><span class="vivid-live-channel-copy"><strong>Load more channels</strong><small>${(list.length-shown).toLocaleString()} remaining</small></span></button>`);
- if(guideStatus)guideStatus.textContent=`${list.length.toLocaleString()} of ${channels.length.toLocaleString()} channels available.`;
+ grid.innerHTML=pageItems.length?pageItems.map(card).join(""):`<div class="vivid-live-empty"><i class="bi bi-tv"></i><strong>No channels found</strong><span>Try another search or filter.</span></div>`;
+ const totalPages=Math.max(1,Math.ceil(list.length/PAGE_SIZE));\n const pager=`<div class="vivid-live-pagination" aria-label="Channel pages"><button type="button" data-live-page="prev" ${page<=1?"disabled":""}><i class="bi bi-chevron-left"></i> Previous</button><span>Page ${page} of ${totalPages}</span><button type="button" data-live-page="next" ${page>=totalPages?"disabled":""}>Next <i class="bi bi-chevron-right"></i></button></div>`;\n grid.insertAdjacentHTML("beforeend",pager);
+ if(guideStatus)guideStatus.textContent=`${list.length.toLocaleString()} channels · Page ${page} of ${Math.max(1,Math.ceil(list.length/PAGE_SIZE))}`;
 }
 function stopMedia(){try{video.pause()}catch{}video.removeAttribute("src");video.load();frame.src="about:blank";}
 function showError(){if(playerLoading)playerLoading.hidden=true;if(playerError)playerError.hidden=false;}
@@ -78,14 +78,14 @@ function play(c){
 }
 function close(){stopMedia();player.hidden=true;if(playerLoading)playerLoading.hidden=true;if(playerError)playerError.hidden=true;}
 grid?.addEventListener("click",e=>{
- const more=e.target.closest("[data-live-more]");if(more){shown+=240;render();return}
+ const more=e.target.closest("[data-live-more]");if(more){return}
  const b=e.target.closest("[data-channel-id]");if(b)play(channels.find(c=>c.id===b.dataset.channelId));
 });
 closePlayer?.addEventListener("click",close);
 video?.addEventListener("error",()=>{if(sourceIndex<currentSources.length-1){sourceIndex++;playSource()}else showError()});
 video?.addEventListener("playing",()=>{if(playerLoading)playerLoading.hidden=true});
 frame?.addEventListener("load",()=>{if(playerLoading)playerLoading.hidden=true});
-search?.addEventListener("input",()=>{shown=240;render()});
+search?.addEventListener("input",()=>{page=1;render()});
 (async()=>{
  try{
    const [seedRes,channelsRes,streamsRes,countriesRes]=await Promise.all([
