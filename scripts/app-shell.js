@@ -270,6 +270,7 @@ function initAppShell() {
   initialized = true;
 
   document.documentElement.dataset.vividReady = "false";
+  void import("./google-tag.js").catch(() => {});
   void import("./analytics.js").catch(() => {});
   const storedTheme = (() => { try { return localStorage.getItem("vivid:theme"); } catch { return null; } })();
   document.documentElement.dataset.vividTheme = storedTheme === "light" ? "light" : "dark";
