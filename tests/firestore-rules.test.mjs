@@ -149,6 +149,10 @@ test("publisher approval and manual article publishing are moderator-only", asyn
     ...article, sourceId: "unapproved.example", publisher: "Unapproved Publisher",
     sourceUrl: "https://unapproved.example/story", canonicalUrl: "https://unapproved.example/story"
   }));
+  await assertFails(setDoc(doc(moderator(), "articles", "foreign-source-host"), {
+    ...article, sourceUrl: "https://impostor.example/story",
+    canonicalUrl: "https://impostor.example/story"
+  }));
 });
 
 test("members cannot write moderator claims or read private account records for other users", async () => {
