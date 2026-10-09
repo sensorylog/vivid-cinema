@@ -799,3 +799,67 @@ html[data-vivid-theme="light"] .vivid-anime-provider-card{background:rgba(130,10
 }
 
 .vivid-title-page .vivid-title-rating-note{display:block;margin-top:3px;color:#8e8e93;font-size:12px;font-weight:400;line-height:1.5}
+
+
+/* Title-page cleanup: balanced hero, readable copy, consistent section rhythm. */
+body.vivid-title-page .vivid-title-backdrop{min-height:clamp(300px,40vw,500px)}
+body.vivid-title-page .vivid-title-backdrop-label{left:max(18px,calc((100vw - 1180px)/2));bottom:16px}
+body.vivid-title-page .vivid-title-info{margin-top:-104px}
+body.vivid-title-page .vivid-title-info-inner{
+  display:grid;grid-template-columns:190px minmax(0,1fr);gap:28px;
+  align-items:end;width:min(1180px,100%);margin:0 auto;padding:0 var(--vivid-page-gutter)
+}
+body.vivid-title-page .vivid-title-poster{display:block;width:100%;overflow:hidden}
+body.vivid-title-page .vivid-title-poster img{display:block;width:100%;aspect-ratio:2/3;object-fit:cover}
+body.vivid-title-page .vivid-title-copy{min-width:0;max-width:760px;padding-bottom:2px}
+body.vivid-title-page .vivid-title-copy h1{
+  font-size:clamp(2rem,4.8vw,4.2rem);line-height:1.02;
+  letter-spacing:-.045em;margin:7px 0 12px
+}
+body.vivid-title-page .vivid-title-copy>p{font-size:14px;line-height:1.62;margin:12px 0 18px;max-width:680px}
+body.vivid-title-page .vivid-title-genres{margin:12px 0}
+body.vivid-title-page .vivid-title-actions{gap:8px}
+body.vivid-title-page .vivid-title-section{padding-top:32px}
+body.vivid-title-page .vivid-title-section + .vivid-title-section{margin-top:0}
+body.vivid-title-page .vivid-section-heading{margin-bottom:12px}
+body.vivid-title-page .vivid-section-heading h2{font-size:clamp(1.25rem,2vw,1.6rem);line-height:1.15;margin-top:3px}
+body.vivid-title-page .vivid-section-heading>div>span{font-size:.62rem;letter-spacing:.12em}
+body.vivid-title-page .vivid-title-section:has(.vivid-similar) .vivid-section-heading>div>span{display:none}
+body.vivid-title-page .vivid-title-section:has(.vivid-similar) .vivid-section-heading h2{margin-top:0}
+body.vivid-title-page .vivid-similar{gap:12px;padding-bottom:14px}
+body.vivid-title-page .vivid-similar-card{flex-basis:142px}
+body.vivid-title-page .vivid-similar-card img{border-radius:10px}
+body.vivid-title-page .vivid-similar-card span{font-size:13px;line-height:1.3;margin-top:7px}
+body.vivid-title-page .vivid-similar-card small{font-size:12px;margin-top:3px}
+@media(max-width:800px){
+  body.vivid-title-page .vivid-title-backdrop{min-height:330px}
+  body.vivid-title-page .vivid-title-info{margin-top:-72px}
+  body.vivid-title-page .vivid-title-info-inner{grid-template-columns:112px minmax(0,1fr);gap:18px;align-items:start}
+  body.vivid-title-page .vivid-title-copy h1{font-size:clamp(1.8rem,6vw,3rem);line-height:1.03}
+  body.vivid-title-page .vivid-title-copy>p{font-size:13px;line-height:1.55}
+  body.vivid-title-page .vivid-title-section{padding-top:28px}
+}
+@media(max-width:520px){
+  body.vivid-title-page .vivid-title-backdrop{min-height:270px}
+  body.vivid-title-page .vivid-title-info{margin-top:-44px}
+  body.vivid-title-page .vivid-title-info-inner{grid-template-columns:86px minmax(0,1fr);gap:13px;padding-inline:16px}
+  body.vivid-title-page .vivid-title-poster{display:block;border-radius:9px}
+  body.vivid-title-page .vivid-title-copy h1{font-size:clamp(1.55rem,7.5vw,2.25rem);letter-spacing:-.035em;margin:6px 0 9px}
+  body.vivid-title-page .vivid-title-kicker{font-size:10px;letter-spacing:.12em}
+  body.vivid-title-page .vivid-title-meta{font-size:12px;gap:6px}
+  body.vivid-title-page .vivid-title-genres{gap:5px;margin:9px 0}
+  body.vivid-title-page .vivid-title-genres a{font-size:11px;padding:4px 7px}
+  body.vivid-title-page .vivid-title-copy>p{font-size:12px;line-height:1.5;margin:9px 0 12px}
+  body.vivid-title-page .vivid-title-actions{display:flex;gap:7px}
+  body.vivid-title-page .vivid-title-actions .vivid-button{width:auto;min-height:38px;padding:0 10px;font-size:12px}
+  body.vivid-title-page .vivid-title-section{padding-top:24px}
+  body.vivid-title-page .vivid-section-heading{margin-bottom:10px}
+  body.vivid-title-page .vivid-section-heading h2{font-size:1.25rem}
+  body.vivid-title-page .vivid-title-section:has(.vivid-similar) .vivid-section-heading>div>span{display:none}
+  body.vivid-title-page .vivid-similar-card{flex-basis:124px}
+}
+@media(max-width:380px){
+  body.vivid-title-page .vivid-title-info-inner{grid-template-columns:74px minmax(0,1fr);gap:10px}
+  body.vivid-title-page .vivid-title-copy h1{font-size:1.5rem}
+  body.vivid-title-page .vivid-title-actions .vivid-button{padding-inline:8px;font-size:11px}
+}
