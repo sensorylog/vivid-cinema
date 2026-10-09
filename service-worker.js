@@ -10,7 +10,7 @@ const APP_SHELL = [
   "./styles/vivid-legal.css","./styles/vivid-live.css","./styles/vivid-audit-fixes.css","./scripts/app-shell.js","./scripts/google-tag.js","./scripts/analytics.js","./scripts/provider-region.js","./scripts/search.js","./scripts/search-page.js","./scripts/intelligence.js","./scripts/firebase.js","./scripts/pwa.js","./scripts/home-catalogue-fallback.js",
   "./scripts/atmosphere.js","./scripts/i18n.js","./scripts/routes.js","./scripts/config.js","./scripts/utils.js","./scripts/content.js","./scripts/media.js","./scripts/tmdb.js",
   "./scripts/nav-auth.js","./scripts/library.js","./scripts/library-page.js","./scripts/discover.js","./scripts/collection.js","./scripts/person.js","./scripts/recommendations.js","./scripts/release-alerts.js","./scripts/cinema-reminders.js","./scripts/push-notifications.js","./scripts/news.js","./scripts/title.js","./scripts/watch.js","./scripts/external-providers.js","./scripts/landing.js",
-  "./scripts/account.js","./scripts/auth.js","./scripts/live.js","./data/live-channels.json","./script.js"
+  "./scripts/account.js","./scripts/auth.js","./scripts/anime.js","./scripts/live.js","./data/live-channels.json","./script.js"
 ];
 async function cacheShell(){const cache=await caches.open(CACHE_NAME);await Promise.allSettled(APP_SHELL.map(asset=>cache.add(asset)));}
 self.addEventListener("install",event=>{event.waitUntil(cacheShell().then(()=>self.skipWaiting()));});
