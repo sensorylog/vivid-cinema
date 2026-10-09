@@ -86,7 +86,7 @@ jobs:
           const fs = require("fs");
           const path = require("path");
           const root = process.cwd();
-          const requiredPages = ["home.html","discover.html","library.html","news.html","search.html","title.html","watch.html","collection.html","anime.html","person.html","account.html","auth.html","login.html","community.html","news-story.html"];
+          const requiredPages = ["home.html","discover.html","library.html","news.html","search.html","title.html","watch.html","collection.html","anime.html","person.html","account.html","auth.html","login.html","community.html","news-story.html","moderator.html"];
           const failures = [];
           for (const file of requiredPages) {
             const source = fs.readFileSync(file, "utf8");
