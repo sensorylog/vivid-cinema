@@ -1,11 +1,7 @@
 const PAYSTACK_PUBLIC_KEY = "pk_live_d43279760e5f3ea84aed449e8026da10fab2f1ad";
 
 const CURRENCIES = {
-  GHS: { symbol: "₵", presets: [5, 10, 20, 50], min: 0.10 },
-  NGN: { symbol: "₦", presets: [500, 1000, 2000, 5000], min: 50 },
-  KES: { symbol: "KSh", presets: [100, 250, 500, 1000], min: 3 },
-  ZAR: { symbol: "R", presets: [20, 50, 100, 200], min: 1 },
-  USD: { symbol: "$", presets: [2, 5, 10, 20], min: 2 }
+  GHS: { symbol: "₵", presets: [5, 10, 20, 50], min: 0.10 }
 };
 
 const form = document.getElementById("donation-form");
