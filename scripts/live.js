@@ -11,6 +11,12 @@ const search=document.getElementById("live-search");
 const grid=document.getElementById("live-channel-grid");
 const guideStatus=document.getElementById("live-guide-status");
 const filtersRoot=document.querySelector(".vivid-live-filters");
+const favoritesToggle=document.getElementById("live-favorites-toggle");
+const recentRoot=document.getElementById("live-recent-grid");
+const STORAGE_FAVORITES="vivid-live-favorites-v1",STORAGE_RECENT="vivid-live-recent-v1";
+function readStored(key,fallback){try{return JSON.parse(localStorage.getItem(key)||"null")??fallback}catch{return fallback}}
+function writeStored(key,value){try{localStorage.setItem(key,JSON.stringify(value))}catch{}}
+let favorites=new Set(readStored(STORAGE_FAVORITES,[])),recentIds=readStored(STORAGE_RECENT,[]).filter(id=>typeof id==="string").slice(0,8),favoritesOnly=false;
 
 const PAGE_SIZE=30;
 const CATALOG_TIMEOUT_MS=20000;
@@ -195,7 +201,7 @@ function visible(){
    const countryOk=activeCountry==="all"||c.country===activeCountry||c.countryCode===activeCountry;
    const languageValues=[c.language,...(c.languages||[])].filter(Boolean);
    const languageOk=activeLanguage==="all"||languageValues.includes(activeLanguage);
-   return okFilter&&countryOk&&languageOk&&(!q||hay.includes(q));
+   return okFilter&&countryOk&&languageOk&&(!favoritesOnly||favorites.has(String(c.id)))&&(!q||hay.includes(q));
  });
 }
 
@@ -203,9 +209,15 @@ function card(c){
  const source=c.sources?.[0];
  const badge=source?.provider||c.provider||"Live";
  const health=source?.score>0?" · "+Math.round(source.score)+"% health":"";
- return '<button class="vivid-live-channel" type="button" data-channel-id="'+esc(c.id)+'"><span class="vivid-live-channel-art">'+(c.logo?'<img src="'+esc(c.logo)+'" alt="" loading="lazy" decoding="async">':'<i class="bi bi-broadcast" aria-hidden="true"></i>')+'<span class="vivid-live-channel-play" aria-hidden="true"><i class="bi bi-play-fill"></i></span></span><span class="vivid-live-channel-copy"><strong>'+esc(c.name)+'</strong><small>'+esc([c.country,label(c.category)].filter(Boolean).join(" · ")||"Live")+' · '+esc(badge+health)+'</small></span></button>';
+ const id=String(c.id),saved=favorites.has(id);
+ return '<article class="vivid-live-card"><button class="vivid-live-channel" type="button" data-channel-id="'+esc(id)+'" aria-label="Play '+esc(c.name)+'"><span class="vivid-live-channel-art">'+(c.logo?'<img src="'+esc(c.logo)+'" alt="" loading="lazy" decoding="async">':'<i class="bi bi-broadcast" aria-hidden="true"></i>')+'<span class="vivid-live-channel-play" aria-hidden="true"><i class="bi bi-play-fill"></i></span></span><span class="vivid-live-channel-copy"><strong>'+esc(c.name)+'</strong><small>'+esc([c.country,label(c.category)].filter(Boolean).join(" · ")||"Live")+' · '+esc(badge+health)+'</small></span></button><button class="vivid-live-favorite" type="button" data-favorite-id="'+esc(id)+'" aria-pressed="'+saved+'" aria-label="'+(saved?"Remove ":"Add ")+esc(c.name)+(saved?" from":" to")+' favorites"><i class="bi '+(saved?"bi-heart-fill":"bi-heart")+'" aria-hidden="true"></i></button></article>';
 }
 
+function renderRecent(){
+ if(!recentRoot)return;
+ const list=recentIds.map(id=>channels.find(c=>String(c.id)===id)).filter(Boolean);
+ recentRoot.innerHTML=list.length?list.map(card).join(""):'<p class="vivid-live-recent-empty">Channels you play will appear here on this device.</p>';
+}
 function render(){
  const list=visible();
  const totalPages=Math.max(1,Math.ceil(list.length/PAGE_SIZE));
@@ -215,6 +227,8 @@ function render(){
  grid.innerHTML=pageItems.length?pageItems.map(card).join(""):'<div class="vivid-live-empty"><i class="bi bi-tv"></i><strong>No channels found</strong><span>Try another search or filter.</span></div>';
  grid.insertAdjacentHTML("beforeend",'<div class="vivid-live-pagination" aria-label="Channel pages"><button type="button" data-live-page="prev" '+(page<=1?"disabled":"")+'><i class="bi bi-chevron-left"></i> Previous</button><span>Page '+page+" of "+totalPages+'</span><button type="button" data-live-page="next" '+(page>=totalPages?"disabled":"")+'>Next <i class="bi bi-chevron-right"></i></button></div>');
  if(guideStatus)guideStatus.textContent=list.length.toLocaleString()+" channels shown · Page "+page+" of "+totalPages;
+ if(favoritesToggle){favoritesToggle.setAttribute("aria-pressed",String(favoritesOnly));favoritesToggle.classList.toggle("is-active",favoritesOnly);favoritesToggle.innerHTML=favoritesOnly?'<i class="bi bi-heart-fill" aria-hidden="true"></i> Show all channels':'<i class="bi bi-heart" aria-hidden="true"></i> Favorites only';}
+ renderRecent();
 }
 
 function destroyHls(){
@@ -315,6 +329,7 @@ function playSource(){
 
 function play(c){
  if(!c?.sources?.length)return;
+ const id=String(c.id);recentIds=[id,...recentIds.filter(item=>item!==id)].slice(0,8);writeStored(STORAGE_RECENT,recentIds);renderRecent();
  lastFocusedChannel=document.activeElement;
  currentSources=c.sources;sourceIndex=0;
  if(playerTitle)playerTitle.textContent=c.name;
@@ -336,6 +351,8 @@ function close(){
 
 document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!player.hidden)close()});
 grid?.addEventListener("click",e=>{
+ const favorite=e.target.closest("[data-favorite-id]");
+ if(favorite){toggleFavorite(favorite.dataset.favoriteId);return;}
  const pager=e.target.closest("[data-live-page]");
  if(pager){
    const total=Math.max(1,Math.ceil(visible().length/PAGE_SIZE));
@@ -346,6 +363,17 @@ grid?.addEventListener("click",e=>{
  }
  const b=e.target.closest("[data-channel-id]");
  if(b)play(channels.find(c=>c.id===b.dataset.channelId));
+});
+function toggleFavorite(id){
+ if(favorites.has(String(id)))favorites.delete(String(id));else favorites.add(String(id));
+ writeStored(STORAGE_FAVORITES,[...favorites]);render();
+}
+favoritesToggle?.addEventListener("click",()=>{favoritesOnly=!favoritesOnly;page=1;render()});
+recentRoot?.addEventListener("click",e=>{
+ const favorite=e.target.closest("[data-favorite-id]");
+ if(favorite){toggleFavorite(favorite.dataset.favoriteId);return;}
+ const b=e.target.closest("[data-channel-id]");
+ if(b)play(channels.find(c=>String(c.id)===b.dataset.channelId));
 });
 closePlayer?.addEventListener("click",close);
 tryNext?.addEventListener("click",advanceSourceOrFail);
