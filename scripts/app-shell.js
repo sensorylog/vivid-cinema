@@ -60,14 +60,21 @@ function navLink(href, icon, label, active = false) {
 }
 
 function buildPrimaryLinks(page) {
-  return [
+  const links = [
     navLink("home.html", "bi-house-fill", "Home", page === "home"),
     navLink("discover.html", "bi-grid-fill", "Browse", isBrowsePage(page)),
     navLink("live.html", "bi-broadcast-pin", "Live", page === "live"),
     navLink("library.html", "bi-bookmark-fill", "Library", page === "library"),
-    navLink("news.html", "bi-newspaper", "News", page === "news"),
-    navLink("search.html", "bi-search", "Search", page === "search")
-  ].join("");
+    navLink("news.html", "bi-newspaper", "News", page === "news")
+  ];
+  // Home has a working in-page search dialog; keep its trigger instead of
+  // replacing it with a plain route link when the shell is rebuilt.
+  if (page === "home") {
+    links.push('<button class="vivid-nav-search-modal" type="button" data-search-trigger aria-label="Open search"><i class="bi bi-search" aria-hidden="true"></i><span>Search</span></button>');
+  } else {
+    links.push(navLink("search.html", "bi-search", "Search", page === "search"));
+  }
+  return links.join("");
 }
 
 function buildSearchControl() {
@@ -79,9 +86,8 @@ function syncDesktopNavigation() {
   const nav = document.querySelector(".vivid-nav, .vivid-unified-nav");
   if (!nav) return;
 
-  // Desktop uses the same quiet navigation hierarchy as mobile:
-  // brand + primary destinations only. Do not resurrect legacy search,
-  // notification, account, language, or theme controls in the shell.
+  // Preserve existing Home controls that have behavior wired by script.js.
+  const notification = nav.querySelector("#release-alert-button");
   nav.innerHTML = "";
 
   const brand = document.createElement("a");
@@ -93,6 +99,7 @@ function syncDesktopNavigation() {
   const links = document.createElement("div");
   links.className = "vivid-navlinks";
   links.innerHTML = buildPrimaryLinks(page);
+  if (notification && page === "home") links.appendChild(notification);
   nav.appendChild(links);
 
   const account = document.createElement("a");
