@@ -2,6 +2,7 @@ const frame=document.getElementById("live-frame");
 const video=document.getElementById("live-video");
 const player=document.getElementById("live-player");
 const closePlayer=document.getElementById("live-close");
+const tryNext=document.getElementById("live-try-next");
 const playerTitle=document.getElementById("live-player-title");
 const playerMeta=document.getElementById("live-player-meta");
 const playerLoading=document.getElementById("live-player-loading");
@@ -319,6 +320,7 @@ grid?.addEventListener("click",e=>{
  if(b)play(channels.find(c=>c.id===b.dataset.channelId));
 });
 closePlayer?.addEventListener("click",close);
+tryNext?.addEventListener("click",()=>{if(sourceIndex<currentSources.length-1){sourceIndex++;playSource();}else showError();});
 video?.addEventListener("error",()=>{
  if(sourceIndex<currentSources.length-1){sourceIndex++;playSource()}else showError();
 });
