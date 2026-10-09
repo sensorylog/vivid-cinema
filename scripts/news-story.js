@@ -40,7 +40,7 @@ function renderArticle(article) {
     (article.updatedAt ? '<span>Updated ' + escapeHtml(dateText(article.updatedAt)) + '</span>' : '') + '</div>' + image +
     (article.summary ? '<p class="vivid-story-summary">' + escapeHtml(article.summary) + '</p>' : '') +
     '<div class="vivid-story-source-note">Vivid links to the original publisher. This summary is not a replacement for the original report.</div>' +
-    '<div class="vivid-story-actions"><a class="vivid-story-source" href="' + escapeHtml(article.sourceUrl) + '" target="_blank" rel="noopener noreferrer">Read original report ↗</a><button type="button" id="news-story-share">Share story</button></div>' +
+    '<div class="vivid-story-actions"><a class="vivid-story-source" href="' + escapeHtml(article.sourceUrl) + '" target="_blank" rel="noopener noreferrer">Read original report ↗</a><button type="button" id="news-story-share">Share story</button><button type="button" id="news-story-report">Report story</button></div>' +
     '<div class="vivid-story-discussion-intro"><span>THE CONVERSATION</span><h2>Talk about the story, not past each other.</h2><p>Be curious, stay respectful, and separate confirmed facts from speculation.</p></div>';
   $("news-story-share")?.addEventListener("click", async () => {
     const shareData = {title:article.headline || "Vivid Cinema News",url:location.href};
@@ -48,6 +48,18 @@ function renderArticle(article) {
       if (navigator.share) await navigator.share(shareData);
       else { await navigator.clipboard.writeText(location.href); say("Story link copied."); }
     } catch (error) { if (error?.name !== "AbortError") say("Could not share this story from this browser."); }
+  });
+  $("news-story-report")?.addEventListener("click", async () => {
+    if (!requireUser()) return;
+    const reason = prompt("Why are you reporting this story? (misinformation, source issue, rights, other)");
+    if (!reason) return;
+    try {
+      await addDoc(collection(db,"communityReports"),{
+        reporterId:currentUser.uid,targetType:"article",targetId:articleId,articleId,
+        reason:String(reason).trim().slice(0,240),status:"open",createdAt:serverTimestamp()
+      });
+      say("Story report sent to the moderation team.");
+    } catch (error) { console.warn(error); say("Could not report this story. Please try again."); }
   });
 }
 function renderComments(snapshot) {
