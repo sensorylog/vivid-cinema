@@ -18,7 +18,7 @@ async function hideReported(report){
  if(!moderator||!report)return;
  if(!confirm("Hide this content from public view and mark the report resolved?"))return;
  try{
-  if(report.targetType==="communityPost")await updateDoc(doc(db,"communityPosts",report.targetId),{status:"hidden",moderatedAt:serverTimestamp(),moderatedBy:auth.currentUser.uid});
+  if(report.targetType==="communityPost")await updateDoc(doc(db,"communityPosts",report.targetId),{status:"hidden",moderatedAt:serverTimestamp(),moderatedBy:auth.currentUser.uid});\n  else if(report.targetType==="communityPoll")await updateDoc(doc(db,"communityPolls",report.targetId),{status:"hidden",moderatedAt:serverTimestamp(),moderatedBy:auth.currentUser.uid});
   else if(report.targetType==="communityComment"&&report.postId)await updateDoc(doc(db,"communityPosts",report.postId,"comments",report.targetId),{status:"hidden",moderatedAt:serverTimestamp(),moderatedBy:auth.currentUser.uid});
   else if(report.targetType==="articleComment"&&report.articleId)await updateDoc(doc(db,"articles",report.articleId,"comments",report.targetId),{status:"hidden",moderatedAt:serverTimestamp(),moderatedBy:auth.currentUser.uid});
   else {message("This report type needs an account-level or article moderation action not available in this desk yet.");return;}
