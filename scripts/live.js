@@ -20,7 +20,7 @@ const SOURCES=[
  {id:"iptv-org",name:"IPTV-org",url:"https://iptv-org.github.io/iptv/index.m3u",priority:70}
 ];
 
-let channels=[],activeFilter="all",page=1,currentSources=[],sourceIndex=0,lastFocusedChannel=null,hls=null,playAttempt=0;
+let channels=[],activeFilter="all",activeCountry="all",activeLanguage="all",page=1,currentSources=[],sourceIndex=0,lastFocusedChannel=null,hls=null,playAttempt=0,sourceTimeout=null,videoAttempt=0;
 const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const label=v=>String(v||"").replace(/[-_]+/g," ").replace(/\b\w/g,m=>m.toUpperCase());
 const normalize=v=>String(v||"").toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]+/g,"");
@@ -166,22 +166,36 @@ function mergeCatalogue(groups){
 function renderFilters(){
  if(!filtersRoot)return;
  const cats=[...new Set(channels.flatMap(c=>c.categories?.length?c.categories:[c.category]).filter(Boolean))].sort();
- const countries=[...new Set(channels.map(c=>c.country).filter(Boolean))].sort();
- const opts=[["all","All"],...cats.map(v=>["category:"+v,label(v)]),...countries.map(v=>["country:"+v,v])];
- filtersRoot.innerHTML=opts.map((o,i)=>'<button class="'+(i?"":"is-active")+'" type="button" data-live-filter="'+esc(o[0])+'">'+esc(o[1])+"</button>").join("");
+ const opts=[["all","All categories"],...cats.map(v=>["category:"+v,label(v)])];
+ filtersRoot.innerHTML=opts.map(o=>'<button class="'+(o[0]===activeFilter?"is-active":"")+'" type="button" data-live-filter="'+esc(o[0])+'" aria-pressed="'+(o[0]===activeFilter?"true":"false")+'">'+esc(o[1])+"</button>").join("");
  filtersRoot.querySelectorAll("[data-live-filter]").forEach(b=>b.onclick=()=>{
    activeFilter=b.dataset.liveFilter;page=1;
-   filtersRoot.querySelectorAll("[data-live-filter]").forEach(x=>x.classList.toggle("is-active",x===b));
+   filtersRoot.querySelectorAll("[data-live-filter]").forEach(x=>{x.classList.toggle("is-active",x===b);x.setAttribute("aria-pressed",x===b?"true":"false")});
    render();
  });
+ const countries=[...new Set(channels.map(c=>c.country).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
+ const languages=[...new Set(channels.flatMap(c=>[c.language,...(c.languages||[])]).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
+ const countrySelect=document.getElementById("live-country");
+ const languageSelect=document.getElementById("live-language");
+ if(countrySelect){
+   countrySelect.innerHTML='<option value="all">All countries</option>'+countries.map(v=>'<option value="'+esc(v)+'">'+esc(v)+'</option>').join("");
+   countrySelect.value=activeCountry;
+ }
+ if(languageSelect){
+   languageSelect.innerHTML='<option value="all">All languages</option>'+languages.map(v=>'<option value="'+esc(v)+'">'+esc(v)+'</option>').join("");
+   languageSelect.value=activeLanguage;
+ }
 }
 
 function visible(){
  const q=(search?.value||"").trim().toLowerCase();
  return channels.filter(c=>{
    const hay=[c.name,...(c.altNames||[]),c.country,c.category,...(c.categories||[]),c.language].filter(Boolean).join(" ").toLowerCase();
-   const okFilter=activeFilter==="all"||c.categories?.includes(activeFilter.slice(9))||activeFilter==="category:"+c.category||activeFilter==="country:"+c.country;
-   return okFilter&&(!q||hay.includes(q));
+   const okFilter=activeFilter==="all"||c.categories?.includes(activeFilter.slice(9))||activeFilter==="category:"+c.category;
+   const countryOk=activeCountry==="all"||c.country===activeCountry||c.countryCode===activeCountry;
+   const languageValues=[c.language,...(c.languages||[])].filter(Boolean);
+   const languageOk=activeLanguage==="all"||languageValues.includes(activeLanguage);
+   return okFilter&&countryOk&&languageOk&&(!q||hay.includes(q));
  });
 }
 
@@ -200,14 +214,23 @@ function render(){
  const pageItems=list.slice(startIndex,startIndex+PAGE_SIZE);
  grid.innerHTML=pageItems.length?pageItems.map(card).join(""):'<div class="vivid-live-empty"><i class="bi bi-tv"></i><strong>No channels found</strong><span>Try another search or filter.</span></div>';
  grid.insertAdjacentHTML("beforeend",'<div class="vivid-live-pagination" aria-label="Channel pages"><button type="button" data-live-page="prev" '+(page<=1?"disabled":"")+'><i class="bi bi-chevron-left"></i> Previous</button><span>Page '+page+" of "+totalPages+'</span><button type="button" data-live-page="next" '+(page>=totalPages?"disabled":"")+'>Next <i class="bi bi-chevron-right"></i></button></div>');
- if(guideStatus)guideStatus.textContent=list.length.toLocaleString()+" channels · Page "+page+" of "+totalPages;
+ if(guideStatus)guideStatus.textContent=list.length.toLocaleString()+" channels shown · Page "+page+" of "+totalPages;
 }
 
 function destroyHls(){
  if(hls){try{hls.destroy()}catch{}hls=null;}
 }
 
+function clearSourceTimeout(){if(sourceTimeout){clearTimeout(sourceTimeout);sourceTimeout=null;}}
+
+function advanceSourceOrFail(){
+ clearSourceTimeout();
+ if(sourceIndex<currentSources.length-1){sourceIndex++;playSource();return;}
+ showError();
+}
+
 function stopMedia(){
+ clearSourceTimeout();
  playAttempt++;
  destroyHls();
  try{video.pause()}catch{}
@@ -217,6 +240,7 @@ function stopMedia(){
 }
 
 function showError(){
+ clearSourceTimeout();
  if(playerLoading)playerLoading.hidden=true;
  if(playerError)playerError.hidden=false;
 }
@@ -237,6 +261,7 @@ function loadHlsScript(){
 
 async function playVideoSource(s){
  const attempt=++playAttempt;
+ videoAttempt=attempt;
  destroyHls();
  video.hidden=false;
  frame.hidden=true;
@@ -252,10 +277,7 @@ async function playVideoSource(s){
      hls=new Hls({enableWorker:true,lowLatencyMode:true,backBufferLength:30});
      hls.on(Hls.Events.ERROR,(event,data)=>{
        if(attempt!==playAttempt)return;
-       if(data?.fatal){
-         destroyHls();
-         if(sourceIndex<currentSources.length-1){sourceIndex++;playSource();}else showError();
-       }
+       if(data?.fatal)advanceSourceOrFail();
      });
      hls.on(Hls.Events.MANIFEST_PARSED,()=>{if(attempt===playAttempt)video.play().catch(()=>{});});
      hls.loadSource(s.url);
@@ -269,6 +291,7 @@ async function playVideoSource(s){
 function playSource(){
  const s=currentSources[sourceIndex];
  if(!s)return showError();
+ clearSourceTimeout();
  if(playerError)playerError.hidden=true;
  if(playerLoading)playerLoading.hidden=false;
  if(s.type==="iframe"){
@@ -278,11 +301,16 @@ function playSource(){
    video.removeAttribute("src");
    try{video.load()}catch{}
    video.hidden=true;frame.hidden=false;frame.src=s.url;
-   if(playerMeta)playerMeta.textContent="Live stream · "+(s.provider||"public source");
+   if(playerMeta)playerMeta.textContent="Embedded player · "+(s.provider||"public source");
  }else{
-   if(playerMeta)playerMeta.textContent="Live stream · "+(s.provider||"public source")+(s.score?" · health "+Math.round(s.score)+"%":"");
+   if(playerMeta)playerMeta.textContent="Live stream · "+(s.provider||"public source")+(s.score?" · source score "+Math.round(s.score)+"%":"");
    playVideoSource(s);
  }
+ const attempt=playAttempt;
+ sourceTimeout=setTimeout(()=>{
+   if(attempt!==playAttempt||player.hidden)return;
+   advanceSourceOrFail();
+ },25000);
 }
 
 function play(c){
@@ -320,17 +348,17 @@ grid?.addEventListener("click",e=>{
  if(b)play(channels.find(c=>c.id===b.dataset.channelId));
 });
 closePlayer?.addEventListener("click",close);
-tryNext?.addEventListener("click",()=>{if(sourceIndex<currentSources.length-1){sourceIndex++;playSource();}else showError();});
-video?.addEventListener("error",()=>{
- if(sourceIndex<currentSources.length-1){sourceIndex++;playSource()}else showError();
-});
-video?.addEventListener("playing",()=>{if(playerLoading)playerLoading.hidden=true});
-frame?.addEventListener("load",()=>{if(playerLoading)playerLoading.hidden=true});
-search?.addEventListener("input",()=>{page=1;render()});
+tryNext?.addEventListener("click",advanceSourceOrFail);
+ video?.addEventListener("error",()=>{if(videoAttempt===playAttempt)advanceSourceOrFail()});
+ video?.addEventListener("playing",()=>{clearSourceTimeout();if(playerLoading)playerLoading.hidden=true});
+ frame?.addEventListener("load",()=>{if(frame.src!=="about:blank"&&playerLoading)playerLoading.hidden=true});
+ search?.addEventListener("input",()=>{page=1;render()});
+ document.getElementById("live-country")?.addEventListener("change",e=>{activeCountry=e.target.value;page=1;render()});
+ document.getElementById("live-language")?.addEventListener("change",e=>{activeLanguage=e.target.value;page=1;render()});
 
 (async()=>{
  try{
-   if(guideStatus)guideStatus.textContent="Loading health-checked live channels…";
+   if(guideStatus)guideStatus.textContent="Loading public live-channel listings…";
    const parsed=[];
    try{
      const nexus=await fetchJsonWithTimeout("https://dearbulut.github.io/iptv/api/v1/channels.online.json");
@@ -357,7 +385,7 @@ search?.addEventListener("input",()=>{page=1;render()});
 
    channels=mergeCatalogue(parsed);
    if(!channels.length)throw Error("No live channels returned");
-   if(guideStatus)guideStatus.textContent=channels.length.toLocaleString()+" verified live channels ready";
+   if(guideStatus)guideStatus.textContent=channels.length.toLocaleString()+" channel listings loaded · stream availability varies";
  }catch(e){
    console.warn("Live catalogue load failed:",e);
    channels=[];
