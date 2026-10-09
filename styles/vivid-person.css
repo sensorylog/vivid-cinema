@@ -1,15 +1,48 @@
-body.vivid-person-page{background:#06070a;color:#f5f7fa;min-height:100dvh}.vivid-person-app{min-height:100dvh}.vivid-person-hero{position:relative;min-height:620px;padding:150px var(--vivid-page-gutter) 72px;overflow:hidden;background:#08090c}.vivid-person-hero-backdrop{position:absolute;inset:0;background:radial-gradient(circle at 70% 35%,rgba(255,255,255,.07),transparent 30%),linear-gradient(90deg,#06070a 0%,rgba(6,7,10,.78) 42%,rgba(6,7,10,.94) 100%);}.vivid-person-hero-inner{position:relative;z-index:2;width:min(1180px,100%);margin:auto;display:grid;grid-template-columns:280px minmax(0,760px);gap:52px;align-items:center}.vivid-person-profile{width:280px;border-radius:24px;overflow:hidden;border:1px solid rgba(255,255,255,.12);background:#101217;box-shadow:0 30px 90px rgba(0,0,0,.5)}.vivid-person-profile img{display:block;width:100%;aspect-ratio:2/3;object-fit:cover}.vivid-person-copy h1{font-size:clamp(3rem,7vw,6rem);line-height:.9;letter-spacing:-.06em;margin:10px 0 12px}.vivid-person-role{color:#c0c5ce;font-size:.9rem;text-transform:uppercase;letter-spacing:.12em}.vivid-person-bio{max-width:760px;color:#aeb5bf;line-height:1.8;font-size:.96rem;margin-top:22px}.vivid-person-section{width:min(1280px,100%);margin:auto;padding:38px var(--vivid-page-gutter) 0}.vivid-person-facts{padding-top:28px}.vivid-person-credit-rail{display:flex;gap:14px;overflow-x:auto;padding:2px 2px 20px;scrollbar-width:thin}.vivid-person-credit{flex:0 0 156px;color:#fff;text-decoration:none;transition:transform .28s ease}.vivid-person-credit:hover{transform:translateY(-5px)}.vivid-person-credit-poster{aspect-ratio:2/3;border-radius:14px;overflow:hidden;background:#101217;border:1px solid rgba(255,255,255,.08)}.vivid-person-credit-poster img{display:block;width:100%;height:100%;object-fit:cover}.vivid-person-credit strong{display:block;margin-top:8px;font-size:.78rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.vivid-person-credit small{display:block;margin-top:3px;color:#777f8b;font-size:.68rem;line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.vivid-person-page .vivid-section-heading{margin-bottom:16px}.vivid-person-page .vivid-section-heading::after{content:"";width:52px;height:1px;margin-bottom:4px;background:rgba(255,255,255,.28)}.vivid-person-loading{min-height:80vh;display:grid;place-items:center;gap:10px;padding-top:100px}.vivid-person-loading div{width:min(1180px,80%);height:18px;border-radius:8px;background:rgba(255,255,255,.06)}@media(max-width:800px){.vivid-person-hero{min-height:0;padding:105px 16px 42px}.vivid-person-hero-inner{grid-template-columns:150px 1fr;gap:24px;align-items:end}.vivid-person-profile{width:150px;border-radius:18px}.vivid-person-copy h1{font-size:clamp(2.1rem,7vw,3.5rem)}.vivid-person-bio{font-size:.86rem;line-height:1.65}.vivid-person-section{padding-left:16px;padding-right:16px}.vivid-person-credit{flex-basis:132px}}@media(max-width:520px){.vivid-person-hero{padding-top:92px}.vivid-person-hero-inner{grid-template-columns:1fr;gap:20px}.vivid-person-profile{width:132px}.vivid-person-copy h1{font-size:clamp(2.4rem,12vw,3.7rem)}.vivid-person-bio{max-height:11em;overflow:auto}.vivid-person-section{padding-top:30px}.vivid-person-credit{flex-basis:126px}}@media(prefers-reduced-motion:reduce){.vivid-person-credit{transition:none}}
-/* Consistent credit-card geometry and resilient poster rendering. */
-.vivid-person-credit-rail{align-items:stretch;gap:16px;overscroll-behavior-x:contain;scroll-snap-type:x proximity}
-.vivid-person-credit{display:flex;flex-direction:column;min-width:0;scroll-snap-align:start}
-.vivid-person-credit-poster{width:100%;aspect-ratio:2/3;flex:0 0 auto}
-.vivid-person-credit-poster img{width:100%;height:100%;aspect-ratio:2/3;object-fit:cover}
-.vivid-person-credit strong{line-height:1.35;min-height:2.7em;white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.vivid-person-credit small{line-height:1.4;min-height:1.4em}
-.vivid-person-grid{grid-template-columns:repeat(auto-fill,minmax(142px,1fr));align-items:start;gap:18px}
-.vivid-person-grid .vivid-card{min-width:0;width:100%;overflow:hidden}
-.vivid-person-grid .vivid-card-media{aspect-ratio:2/3;overflow:hidden}
-.vivid-person-grid .vivid-card-media img{width:100%;height:100%;object-fit:cover;display:block}
-.vivid-person-grid .vivid-card-info{min-width:0}
-.vivid-person-grid .vivid-card-title,.vivid-person-grid .vivid-card-sub{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-@media(max-width:520px){.vivid-person-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.vivid-person-credit{flex-basis:126px}}
+/* TMDB-inspired person profile layout, adapted to Vivid Cinema. */
+body.vivid-person-page{min-height:100dvh;background:#06070a;color:#f5f7fa}
+.vivid-person-app{min-height:100dvh}
+.vivid-person-page #person-content{width:min(1320px,100%);margin:0 auto;padding:0 var(--vivid-page-gutter,24px) 64px}
+.vivid-person-page .vivid-page-back{display:inline-flex;margin:24px 0 18px}
+.vivid-person-layout{display:grid;grid-template-columns:260px minmax(0,1fr);gap:34px;align-items:start}
+.vivid-person-sidebar{min-width:0}
+.vivid-person-profile{width:100%;overflow:hidden;border-radius:12px;background:#111319;border:1px solid rgba(255,255,255,.12);box-shadow:0 12px 36px rgba(0,0,0,.25)}
+.vivid-person-profile img{display:block;width:100%;aspect-ratio:2/3;object-fit:cover}
+.vivid-person-info{margin-top:28px}
+.vivid-person-info h2,.vivid-person-subheading{margin:0 0 14px;color:#f7f8fa;font-size:1.25rem;line-height:1.3;font-weight:700;letter-spacing:-.02em}
+.vivid-person-info dl{margin:0;display:grid;gap:15px}
+.vivid-person-info-item{min-width:0}
+.vivid-person-info-item dt{font-size:.94rem;font-weight:700;color:#f2f3f5;margin:0 0 3px}
+.vivid-person-info-item dd{margin:0;color:#b8bdc7;font-size:.9rem;line-height:1.5;overflow-wrap:anywhere}
+.vivid-person-main{min-width:0}
+.vivid-person-overview{padding:5px 0 4px}
+.vivid-person-copy h1,.vivid-person-overview h1{margin:0 0 8px;font-size:clamp(2.2rem,4.3vw,3.5rem);line-height:1.08;letter-spacing:-.045em;overflow-wrap:anywhere}
+.vivid-person-role{margin:0 0 26px;color:#b6bbc5;font-size:1rem}
+.vivid-person-subheading{margin:22px 0 8px}
+.vivid-person-bio{margin:0;max-width:900px;color:#d0d3da;font-size:.98rem;line-height:1.72;overflow-wrap:anywhere;white-space:pre-line}
+.vivid-person-section{width:100%;margin:28px 0 0;padding:0}
+.vivid-person-page .vivid-section-heading{margin:0 0 14px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.vivid-person-page .vivid-section-heading>div>span{display:block;margin-bottom:4px;color:#9299a5;font-size:.7rem;font-weight:700;letter-spacing:.13em}
+.vivid-person-page .vivid-section-heading h2{margin:0;color:#f5f7fa;font-size:1.45rem;line-height:1.25;letter-spacing:-.025em}
+.vivid-person-page .vivid-section-heading::after{content:none}
+.vivid-person-credit-rail{display:flex;align-items:stretch;gap:14px;overflow-x:auto;padding:2px 2px 16px;scrollbar-width:thin;overscroll-behavior-x:contain;scroll-snap-type:x proximity}
+.vivid-person-credit{display:flex;flex:0 0 140px;min-width:0;flex-direction:column;scroll-snap-align:start;color:#f5f7fa;text-decoration:none;transition:transform .2s ease}
+.vivid-person-credit:hover{transform:translateY(-3px)}
+.vivid-person-credit-poster{width:100%;aspect-ratio:2/3;flex:0 0 auto;overflow:hidden;border-radius:9px;background:#15171c;border:1px solid rgba(255,255,255,.1)}
+.vivid-person-credit-poster img{display:block;width:100%;height:100%;object-fit:cover}
+.vivid-person-credit strong{display:-webkit-box;min-height:2.7em;margin-top:8px;overflow:hidden;font-size:.82rem;line-height:1.35;white-space:normal;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.vivid-person-credit small{display:block;min-height:1.4em;margin-top:3px;color:#a4aab4;font-size:.72rem;line-height:1.4;overflow-wrap:anywhere}
+.vivid-person-credit-table-wrap{width:100%;overflow-x:auto;border-top:1px solid rgba(255,255,255,.14)}
+.vivid-person-credit-table{width:100%;border-collapse:collapse;text-align:left;font-size:.9rem}
+.vivid-person-credit-table th{padding:11px 12px;color:#9ea5b1;font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;border-bottom:1px solid rgba(255,255,255,.13)}
+.vivid-person-credit-table td{padding:12px;border-bottom:1px solid rgba(255,255,255,.09);vertical-align:top;color:#c5cad2;line-height:1.4}
+.vivid-person-credit-table td:first-child,.vivid-person-credit-table th:first-child{width:68px;padding-left:4px}
+.vivid-person-credit-table td:last-child{width:32%;overflow-wrap:anywhere}
+.vivid-person-credit-table a{color:#f5f7fa;text-decoration:none;font-weight:600}
+.vivid-person-credit-table a:hover{text-decoration:underline}
+.vivid-person-credit-table small{display:block;margin-top:3px;color:#9299a5;font-size:.72rem;font-weight:400}
+.vivid-person-loading{min-height:70vh;display:grid;place-items:center;gap:10px;padding-top:80px}
+.vivid-person-loading div{width:min(900px,80%);height:18px;border-radius:8px;background:rgba(255,255,255,.06)}
+@media(max-width:900px){.vivid-person-layout{grid-template-columns:220px minmax(0,1fr);gap:26px}.vivid-person-credit{flex-basis:126px}}
+@media(max-width:640px){.vivid-person-page #person-content{padding:0 16px 44px}.vivid-person-page .vivid-page-back{margin:16px 0}.vivid-person-layout{grid-template-columns:minmax(0,1fr);gap:24px}.vivid-person-sidebar{display:grid;grid-template-columns:120px minmax(0,1fr);gap:18px;align-items:start}.vivid-person-profile{width:120px;border-radius:9px}.vivid-person-info{margin-top:0}.vivid-person-info h2{font-size:1.08rem;margin-bottom:10px}.vivid-person-info dl{gap:9px}.vivid-person-info-item dt{font-size:.78rem}.vivid-person-info-item dd{font-size:.78rem;line-height:1.4}.vivid-person-overview h1{font-size:clamp(2rem,9vw,2.8rem)}.vivid-person-role{margin-bottom:18px}.vivid-person-bio{font-size:.92rem;line-height:1.65}.vivid-person-section{margin-top:26px}.vivid-person-credit{flex-basis:116px}.vivid-person-credit-table{font-size:.82rem}.vivid-person-credit-table th{padding:9px 7px}.vivid-person-credit-table td{padding:10px 7px}.vivid-person-credit-table td:first-child,.vivid-person-credit-table th:first-child{width:48px}.vivid-person-credit-table td:last-child{width:38%}}
+@media(max-width:380px){.vivid-person-sidebar{grid-template-columns:100px minmax(0,1fr);gap:12px}.vivid-person-profile{width:100px}.vivid-person-info dl{gap:7px}.vivid-person-info-item dt,.vivid-person-info-item dd{font-size:.74rem}.vivid-person-credit{flex-basis:108px}}
+@media(prefers-reduced-motion:reduce){.vivid-person-credit{transition:none}}
