@@ -553,7 +553,8 @@ service cloud.firestore {
       return request.resource.data.keys().hasOnly(['headline','publisher','author','sourceUrl','canonicalUrl','sourceId','category','region','summary','body','imageUrl','imageAlt','publishedAt','updatedAt','ingestedAt','status','origin','featured','editorialReviewed','correction','topics'])
         && request.resource.data.keys().hasAll(['headline','publisher','author','sourceUrl','canonicalUrl','sourceId','category','region','summary','body','imageUrl','imageAlt','publishedAt','updatedAt','ingestedAt','status','origin','featured','editorialReviewed','correction','topics'])
         && request.resource.data.sourceId is string
-        && request.resource.data.sourceId.matches('^[a-z0-9.-]+
+        && request.resource.data.sourceId.matches('^[a-z0-9.-]+$')
+        && exists(sourcePath)
         && get(sourcePath).data.status == 'approved'
         && get(sourcePath).data.domain == request.resource.data.sourceId
         && get(sourcePath).data.publisher == request.resource.data.publisher
@@ -573,6 +574,7 @@ service cloud.firestore {
         && request.resource.data.category in ['film','streaming','celebrity','trailers','awards','industry','ghana','nollywood','africa']
         && request.resource.data.region in ['global','ghana','nigeria','africa']
         && request.resource.data.summary is string
+        && request.resource.data.summary.size() >= 1
         && request.resource.data.summary.size() <= 700
         && request.resource.data.body is string
         && request.resource.data.body.size() <= 4000
@@ -593,54 +595,6 @@ service cloud.firestore {
         && request.resource.data.publisher.size() <= 120
         && request.resource.data.correction is string
         && request.resource.data.correction.size() <= 500
-        && request.resource.data.publishedAt is timestamp
-        && request.resource.data.publishedAt <= request.time
-        && request.resource.data.updatedAt == request.resource.data.publishedAt
-        && request.resource.data.ingestedAt == request.time
-        && request.resource.data.status == 'published'
-        && request.resource.data.origin == 'editorial'
-        && request.resource.data.featured is bool
-        && request.resource.data.editorialReviewed == true
-        && request.resource.data.topics is list
-        && request.resource.data.topics.size() == 2;
-    }
-
-    match /newsSources/{sourceId} {
-      allow get, list: if isModerator();
-      allow create: if isModerator() && validNewsSource(sourceId) && request.resource.data.createdAt == request.time;
-      allow update: if isModerator() && validNewsSource(sourceId) && request.resource.data.createdAt == resource.data.createdAt;
-      allow delete: if isModerator();
-    }
-
-    match /articles/{articleId} {
-      allow create: if isModerator() && validEditorialArticle();
-      allow update: if isModerator() && validEditorialArticle() && request.resource.data.sourceId == resource.data.sourceId;
-      allow delete: if isModerator();
-    }
-
-    match /{document=**} {
-      allow read, write: if false;
-    }
-  }
-}
-)
-        && exists(sourcePath)
-        && get(sourcePath).data.status == 'approved'
-        && get(sourcePath).data.domain == request.resource.data.sourceId
-        && get(sourcePath).data.publisher == request.resource.data.publisher
-        && request.resource.data.headline is string
-        && request.resource.data.headline.size() >= 8
-        && request.resource.data.headline.size() <= 240
-        && request.resource.data.sourceUrl is string
-        && request.resource.data.sourceUrl.matches('^https://.*')
-        && request.resource.data.canonicalUrl is string
-        && request.resource.data.canonicalUrl.matches('^https://.*')
-        && request.resource.data.summary is string
-        && request.resource.data.summary.size() <= 700
-        && request.resource.data.body is string
-        && request.resource.data.body.size() <= 4000
-        && request.resource.data.imageUrl is string
-        && (request.resource.data.imageUrl == '' || get(sourcePath).data.imageUsageApproved == true)
         && request.resource.data.publishedAt is timestamp
         && request.resource.data.publishedAt <= request.time
         && request.resource.data.updatedAt == request.resource.data.publishedAt
