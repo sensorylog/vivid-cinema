@@ -1,5 +1,6 @@
 import { auth, db } from "./firebase.js";
-import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, limit, onAuthStateChanged, onSnapshot, orderBy, query, serverTimestamp, setDoc, where } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
+import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, limit, onSnapshot, orderBy, query, serverTimestamp, setDoc, where } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
 
 const $ = id => document.getElementById(id);
 const feed = $("vivid-community-feed");
