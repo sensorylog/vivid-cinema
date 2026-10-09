@@ -120,3 +120,12 @@ body.vivid-live-player-open{overflow:hidden}
 .vivid-live-try-next:hover{background:#dfe2e6}
 .vivid-live-try-next:focus-visible,.vivid-live-icon-button:focus-visible,.vivid-live-channel:focus-visible{outline:2px solid #fff;outline-offset:3px}
 .vivid-live-channel-art img{width:100%;height:100%;object-fit:contain}
+
+/* Live guide controls: compact and usable on touch screens. */
+.vivid-live-tools{display:grid;grid-template-columns:minmax(180px,1.4fr) repeat(2,minmax(130px,.8fr));gap:9px;align-items:end}
+.vivid-live-select{display:grid;gap:5px;color:#89919c;font-size:.62rem}
+.vivid-live-select span{padding-left:2px}
+.vivid-live-select select{width:100%;min-width:0;padding:10px 11px;border:1px solid rgba(255,255,255,.09);border-radius:12px;background:#111317;color:#f3f4f6;font:inherit;font-size:.72rem}
+.vivid-live-tools select:focus-visible,.vivid-live-search:focus-within{outline:2px solid #fff;outline-offset:2px}
+.vivid-live-filters button:focus-visible,.vivid-live-pagination button:focus-visible{outline:2px solid #fff;outline-offset:3px}
+@media(max-width:760px){.vivid-live-tools{width:100%;grid-template-columns:1fr 1fr}.vivid-live-tools .vivid-live-search{grid-column:1/-1;width:100%}}
