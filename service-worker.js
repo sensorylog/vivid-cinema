@@ -1,9 +1,9 @@
-const CACHE_NAME = "vivid-cinema-shell-v91";
+const CACHE_NAME = "vivid-cinema-shell-v92";
 const APP_SHELL = [
   "./","./index.html","./home.html","./person.html","./discover.html","./collection.html","./title.html","./watch.html",
   "./library.html","./auth.html","./login.html","./forgot-password.html","./account.html","./terms.html","./privacy.html","./contact.html",
   "./offline.html","./live.html","./news.html","./search.html","./anime.html","./help.html","./about.html","./accessibility.html","./cookies.html","./404.html","./manifest.json","./robots.txt","./icons/vivid-icon.svg",
-  "./styles/vivid-foundation.css","./styles/vivid-system.css","./styles/vivid-shell.css","./styles/vivid-cinematic.css",
+  "./styles/vivid-foundation.css","./styles/vivid-system.css","./styles/vivid-liquid-glass.css","./styles/vivid-shell.css","./styles/vivid-cinematic.css",
   "./styles/vivid-title.css","./styles/vivid-watch.css","./styles/vivid-library.css","./styles/vivid-discovery.css",
   "./styles/vivid-collection.css","./styles/vivid-auth.css","./styles/vivid-account.css","./styles/vivid-pwa.css",
   "./styles/vivid-atmosphere.css","./styles/vivid-search-standalone.css","./styles/vivid-landing.css","./styles/vivid-landing-final.css","./styles/vivid-hero-mobile.css","./styles/vivid-home-breathe.css","./styles/vivid-news.css","./styles/vivid-anime.css","./styles/vivid-viewport.css",
