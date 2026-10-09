@@ -863,3 +863,9 @@ body.vivid-title-page .vivid-similar-card small{font-size:12px;margin-top:3px}
   body.vivid-title-page .vivid-title-copy h1{font-size:1.5rem}
   body.vivid-title-page .vivid-title-actions .vivid-button{padding-inline:8px;font-size:11px}
 }
+
+
+/* TMDB artwork: show complete poster artwork without clipping. Backdrops remain cinematic crops. */
+body.vivid-title-page .vivid-title-poster{background:#101217;}
+body.vivid-title-page .vivid-title-poster img{height:auto;object-fit:contain;object-position:center;background:#101217;}
+body.vivid-title-page .vivid-title-backdrop-image{object-fit:cover;object-position:center center;}
