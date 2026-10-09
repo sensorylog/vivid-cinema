@@ -24,7 +24,11 @@
 <section class="vivid-live-guide" aria-labelledby="live-guide-title">
   <div class="vivid-live-guide-head">
     <div><span class="vivid-live-eyebrow">CHANNEL GUIDE</span><h2 id="live-guide-title">What's on live</h2><p id="live-guide-status">Loading live channels…</p></div>
-    <label class="vivid-live-search" for="live-search"><i class="bi bi-search" aria-hidden="true"></i><input id="live-search" type="search" placeholder="Search channels" autocomplete="off" spellcheck="false"></label>
+    <div class="vivid-live-tools">
+      <label class="vivid-live-search" for="live-search"><i class="bi bi-search" aria-hidden="true"></i><input id="live-search" type="search" placeholder="Search channels" autocomplete="off" spellcheck="false"></label>
+      <label class="vivid-live-select"><span>Country</span><select id="live-country" aria-label="Filter by country"><option value="all">All countries</option></select></label>
+      <label class="vivid-live-select"><span>Language</span><select id="live-language" aria-label="Filter by language"><option value="all">All languages</option></select></label>
+    </div>
   </div>
   <div class="vivid-live-filters" role="group" aria-label="Channel categories"></div>
   <div id="live-channel-grid" class="vivid-live-channel-grid" aria-live="polite"></div>
@@ -43,13 +47,13 @@
 </section>
 <section class="vivid-live-info">
   <article><i class="bi bi-broadcast-pin"></i><div><strong>Vivid-native guide</strong><span>Channels stay inside Vivid instead of sending viewers to an IPTV website.</span></div></article>
-  <article><i class="bi bi-play-circle"></i><div><strong>Multiple live sources</strong><span>Health-checked public sources are ranked by stream quality and availability, while additional providers keep the guide resilient.</span></div></article>
+  <article><i class="bi bi-play-circle"></i><div><strong>Multiple live sources</strong><span>Channel listings can include multiple public providers. Playback compatibility and availability can vary by region and source.</span></div></article>
   <article><i class="bi bi-shield-check"></i><div><strong>Automatic fallback</strong><span>Vivid can move to another available stream for the same channel when the first one fails.</span></div></article>
 </section>
 </main>
 <footer class="vivid-footer">&copy; 2026 Vivid Cinema <span class="vivid-footer-links"><a href="about.html">About</a><a href="terms.html">Terms</a><a href="privacy.html">Privacy</a><a href="contact.html">Contact</a></span></footer>
 <nav class="vivid-mobile-nav" aria-label="Mobile navigation"></nav>
 <script type="module" src="scripts/app-shell.js"></script>
-<script type="module" src="scripts/live.js?v=live5"></script>
+<script type="module" src="scripts/live.js?v=live6"></script>
 </body>
 </html>
