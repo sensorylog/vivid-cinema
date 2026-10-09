@@ -1,4 +1,4 @@
-const CACHE_NAME = "vivid-cinema-shell-v98";
+const CACHE_NAME = "vivid-cinema-shell-v99";
 const APP_SHELL = [
   "./","./index.html","./home.html","./person.html","./discover.html","./collection.html","./title.html","./watch.html",
   "./library.html","./auth.html","./login.html","./forgot-password.html","./account.html","./terms.html","./privacy.html","./contact.html",
@@ -6,7 +6,7 @@ const APP_SHELL = [
   "./styles/vivid-foundation.css","./styles/vivid-system.css","./styles/vivid-liquid-glass.css","./styles/vivid-shell.css","./styles/vivid-cinematic.css",
   "./styles/vivid-title.css","./styles/vivid-person.css","./styles/vivid-watch.css","./styles/vivid-library.css","./styles/vivid-discovery.css",
   "./styles/vivid-collection.css","./styles/vivid-auth.css","./styles/vivid-account.css","./styles/vivid-pwa.css",
-  "./styles/vivid-atmosphere.css","./styles/vivid-search-standalone.css","./styles/vivid-landing.css","./styles/vivid-landing-final.css","./styles/vivid-hero-mobile.css","./styles/vivid-home-breathe.css","./styles/vivid-news.css","./styles/vivid-anime.css","./styles/vivid-viewport.css",
+  "./styles/vivid-atmosphere.css","./styles/vivid-search-standalone.css","./styles/vivid-desktop.css","./styles/vivid-landing.css","./styles/vivid-landing-final.css","./styles/vivid-hero-mobile.css","./styles/vivid-home-breathe.css","./styles/vivid-news.css","./styles/vivid-anime.css","./styles/vivid-viewport.css",
   "./styles/vivid-legal.css","./styles/vivid-live.css","./styles/vivid-audit-fixes.css","./scripts/app-shell.js","./scripts/google-tag.js","./scripts/analytics.js","./scripts/provider-region.js","./scripts/search.js","./scripts/search-page.js","./scripts/intelligence.js","./scripts/firebase.js","./scripts/pwa.js","./scripts/home-catalogue-fallback.js",
   "./scripts/atmosphere.js","./scripts/i18n.js","./scripts/routes.js","./scripts/config.js","./scripts/utils.js","./scripts/content.js","./scripts/media.js","./scripts/tmdb.js",
   "./scripts/nav-auth.js","./scripts/library.js","./scripts/library-page.js","./scripts/discover.js","./scripts/collection.js","./scripts/person.js","./scripts/recommendations.js","./scripts/release-alerts.js","./scripts/cinema-reminders.js","./scripts/push-notifications.js","./scripts/news.js","./scripts/title.js","./scripts/watch.js","./scripts/external-providers.js","./scripts/landing.js",
