@@ -355,19 +355,26 @@ export async function getCuratedPage(key, page = 1, filters = {}) {
 
 export async function getAnimePage(page = 1, filters = {}) {
   const type = filters.type === "movie" || filters.type === "tv" ? filters.type : "";
-  const params = { page, with_genres: "16", with_original_language: "ja", sort_by: filters.sort_by || "popularity.desc" };
-  if (filters.year) {
-    if (type === "tv") params.first_air_date_year = filters.year;
-    if (type === "movie") params.primary_release_year = filters.year;
-  }
-  if (filters.rating) params["vote_average.gte"] = filters.rating;
+  const makeParams = mediaType => {
+    const requestedSort = filters.sort_by || "popularity.desc";
+    const sortBy = requestedSort === "first_air_date.desc" && mediaType === "movie"
+      ? "primary_release_date.desc"
+      : requestedSort;
+    const params = { page, with_genres: "16", with_original_language: "ja", sort_by: sortBy };
+    if (filters.year) {
+      if (mediaType === "tv") params.first_air_date_year = filters.year;
+      if (mediaType === "movie") params.primary_release_year = filters.year;
+    }
+    if (filters.rating) params["vote_average.gte"] = filters.rating;
+    return params;
+  };
   const requests = type === "movie"
-    ? [tmdbApi.discoverMovies(params).then(data => ({ data, type: "movie" }))]
+    ? [tmdbApi.discoverMovies(makeParams("movie")).then(data => ({ data, type: "movie" }))]
     : type === "tv"
-      ? [tmdbApi.discoverTv(params).then(data => ({ data, type: "tv" }))]
+      ? [tmdbApi.discoverTv(makeParams("tv")).then(data => ({ data, type: "tv" }))]
       : [
-          tmdbApi.discoverTv(params).then(data => ({ data, type: "tv" })),
-          tmdbApi.discoverMovies(params).then(data => ({ data, type: "movie" }))
+          tmdbApi.discoverTv(makeParams("tv")).then(data => ({ data, type: "tv" })) ,
+          tmdbApi.discoverMovies(makeParams("movie")).then(data => ({ data, type: "movie" }))
         ];
   const results = await Promise.allSettled(requests);
   const successful = results.filter(result => result.status === "fulfilled").map(result => result.value);
