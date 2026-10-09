@@ -991,3 +991,42 @@ html[data-vivid-theme="light"] body.vivid-atmosphere :is(
   box-shadow:none;
  }
 }
+
+
+/* Preserve functional Home controls inside the navigation rail. */
+.vivid-topbar .vivid-navlinks .vivid-nav-search-modal,
+.vivid-topbar .vivid-navlinks .vivid-notification-button{
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:7px!important;
+  flex:0 0 auto!important;
+  min-height:38px!important;
+  padding:8px 13px!important;
+  border:1px solid transparent!important;
+  border-radius:12px!important;
+  background:transparent!important;
+  color:rgba(235,239,245,.68)!important;
+  box-shadow:none!important;
+  font:600 .78rem/1 var(--vivid-font-sans)!important;
+  white-space:nowrap!important;
+  cursor:pointer;
+}
+.vivid-topbar .vivid-navlinks .vivid-nav-search-modal:hover,
+.vivid-topbar .vivid-navlinks .vivid-notification-button:hover{
+  color:#fff!important;
+  background:rgba(255,255,255,.085)!important;
+  border-color:rgba(255,255,255,.105)!important;
+}
+.vivid-topbar .vivid-navlinks .vivid-notification-button #release-alert-count:not([hidden]){
+  display:inline-grid!important;
+  place-items:center;
+  min-width:18px;
+  height:18px;
+  padding:0 4px;
+  border-radius:999px;
+  background:#e6e8ec;
+  color:#111216;
+  font-size:.65rem;
+  font-weight:700;
+}
