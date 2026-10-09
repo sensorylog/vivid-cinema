@@ -400,3 +400,90 @@ body.vivid-cinema-home{min-height:100vh;overflow-x:hidden;overflow-y:auto!import
 }
 .vivid-story-actions button:hover{background:rgba(255,255,255,.09)}
 .vivid-story-actions button:focus-visible{outline:2px solid #d8c6ff;outline-offset:3px}
+
+.vivid-community-highlights{
+  margin:38px 0 54px;
+  padding:28px 0 34px;
+  border-top:1px solid rgba(255,255,255,.08);
+  border-bottom:1px solid rgba(255,255,255,.08);
+}
+.vivid-community-highlights-head{
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  gap:24px;
+  margin-bottom:22px;
+}
+.vivid-community-highlights-head>div>span{
+  color:#c3b3ff;
+  font-size:10px;
+  font-weight:800;
+  letter-spacing:.16em;
+}
+.vivid-community-highlights-head h2{
+  margin:8px 0;
+  font-size:clamp(24px,3vw,36px);
+  letter-spacing:-.035em;
+}
+.vivid-community-highlights-head p{
+  max-width:650px;
+  color:#a7a7b2;
+  line-height:1.65;
+  font-size:13px;
+}
+.vivid-community-highlights-head>a,.vivid-community-highlight-card>a{
+  color:#e4d9ff;
+  font-size:12px;
+  font-weight:750;
+  text-decoration:none;
+}
+.vivid-community-highlight-grid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:12px;
+}
+.vivid-community-highlight-card{
+  min-width:0;
+  padding:18px;
+  border:1px solid rgba(255,255,255,.09);
+  border-radius:15px;
+  background:linear-gradient(145deg,rgba(255,255,255,.055),rgba(255,255,255,.018));
+}
+.vivid-community-highlight-meta{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  color:#a8a8b3;
+  font-size:10px;
+}
+.vivid-community-highlight-meta span{
+  color:#d3c7ff;
+  font-weight:800;
+  letter-spacing:.04em;
+}
+.vivid-community-highlight-topic{
+  display:inline-block;
+  margin-top:18px;
+  color:#a7a7b2;
+  font-size:10px;
+}
+.vivid-community-highlight-card h3{
+  margin:7px 0;
+  font-size:13px;
+}
+.vivid-community-highlight-card p{
+  min-height:68px;
+  color:#d0d0d8;
+  font-size:13px;
+  line-height:1.65;
+  overflow-wrap:anywhere;
+}
+.vivid-community-highlight-card>a{display:inline-block;margin-top:8px}
+@media(max-width:760px){
+  .vivid-community-highlights-head{align-items:flex-start;flex-direction:column;gap:8px}
+  .vivid-community-highlight-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:480px){
+  .vivid-community-highlight-grid{grid-template-columns:1fr}
+  .vivid-community-highlight-card p{min-height:0}
+}
