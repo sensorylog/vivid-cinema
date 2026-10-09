@@ -50,6 +50,31 @@ function creditCards(credits) {
   }).join("") : '<p class="vivid-muted">No credits are available for this person yet.</p>';
 }
 
+function creditTable(credits, includeMediaType = false) {
+  const seen = new Set();
+  const items = (credits || [])
+    .filter(item => item && item.id && item.media_type)
+    .filter(item => {
+      const key = item.media_type + ":" + item.id + ":" + (item.character || item.job || "");
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    })
+    .sort((a, b) => String(mediaDate(b)).localeCompare(String(mediaDate(a))));
+  if (!items.length) return '<p class="vivid-muted">No credits are available for this person yet.</p>';
+  return '<div class="vivid-person-credit-table-wrap"><table class="vivid-person-credit-table"><thead><tr><th scope="col">Year</th><th scope="col">Title</th><th scope="col">Role</th></tr></thead><tbody>' +
+    items.map(item => {
+      const title = mediaTitle(item);
+      const year = mediaDate(item).slice(0, 4) || '—';
+      const role = item.character || item.job || item.department || '—';
+      const mediaType = item.media_type === 'tv' ? 'TV' : 'Movie';
+      return '<tr><td class="vivid-person-credit-year">' + escapeHtml(year) + '</td><td><a href="' +
+        escapeHtml(getMediaUrl({ ...item, title, media_type: item.media_type })) + '">' +
+        escapeHtml(title) + '</a>' + (includeMediaType ? '<small>' + mediaType + '</small>' : '') +
+        '</td><td>' + escapeHtml(role) + '</td></tr>';
+    }).join('') + '</tbody></table></div>';
+}
+
 function render(person) {
   const credits = person.combined_credits || {};
   const cast = Array.isArray(credits.cast) ? credits.cast : [];
@@ -77,28 +102,37 @@ function render(person) {
   const age = ageFromBirthday(person.birthday, person.deathday);
   const facts = [
     ["Known for", person.known_for_department || ""],
-    ["Born", formatDate(person.birthday)],
-    ["Age", age],
+    ["Known credits", String(new Set([...cast, ...crew].filter(item => item?.id && item?.media_type).map(item => item.media_type + ":" + item.id)).size)],
+    ["Gender", person.gender === 1 ? "Female" : person.gender === 2 ? "Male" : ""],
+    ["Birthday", formatDate(person.birthday)],
+    ["Day of death", formatDate(person.deathday)],
     ["Place of birth", person.place_of_birth || ""],
-    ["Also known as", Array.isArray(person.also_known_as) ? person.also_known_as.slice(0,2).join(", ") : ""],
-    ["Credits", String(cast.length || crew.length || 0)]
+    ["Also known as", Array.isArray(person.also_known_as) ? person.also_known_as.slice(0, 3).join(", ") : ""]
   ].filter(([,value]) => value);
 
+  const actingCredits = cast;
+  const crewCredits = crew;
   document.title = person.name + " · Vivid Cinema";
   $("person-content").innerHTML =
-    '<section class="vivid-person-hero"><div class="vivid-person-hero-backdrop"></div><div class="vivid-person-hero-inner">' +
-      '<div class="vivid-person-profile"><img src="' + getImageUrl(profile, "w500") + '" alt="' + escapeHtml(person.name) + '"></div>' +
-      '<div class="vivid-person-copy"><span class="vivid-title-kicker">CAST & CREW</span><h1>' + escapeHtml(person.name) + '</h1>' +
-      (person.known_for_department ? '<p class="vivid-person-role">' + escapeHtml(person.known_for_department) + '</p>' : '') +
-      '<p class="vivid-person-bio">' + escapeHtml(person.biography || "No biography is available for this person yet.") + '</p>' +
-      '</div></div></section>' +
-    '<section class="vivid-person-section vivid-person-facts"><div class="vivid-facts-grid">' +
-      facts.map(([label,value]) => '<div class="vivid-fact"><span>' + escapeHtml(label) + '</span><strong>' + escapeHtml(value) + '</strong></div>').join("") +
-    '</div></section>' +
-    (allKnownFor.length ? '<section class="vivid-person-section"><div class="vivid-section-heading"><div><span>KNOWN FOR</span><h2>Featured work</h2></div></div><div class="vivid-person-credit-rail">' + creditCards(allKnownFor) + '</div></section>' : '') +
-    '<section class="vivid-person-section"><div class="vivid-section-heading"><div><span>MOVIES</span><h2>Film credits</h2></div></div><div class="vivid-person-credit-rail">' + creditCards(movieCast) + '</div></section>' +
-    '<section class="vivid-person-section"><div class="vivid-section-heading"><div><span>TELEVISION</span><h2>TV & series credits</h2></div></div><div class="vivid-person-credit-rail">' + creditCards(tvCast) + '</div></section>' +
-    (crew.length ? '<section class="vivid-person-section"><div class="vivid-section-heading"><div><span>BEHIND THE CAMERA</span><h2>Crew credits</h2></div></div><div class="vivid-person-credit-rail">' + creditCards(crew) + '</div></section>' : '');
+    '<div class="vivid-person-layout">' +
+      '<aside class="vivid-person-sidebar" aria-label="Person details">' +
+        '<div class="vivid-person-profile"><img src="' + getImageUrl(profile, "w500") + '" alt="' + escapeHtml(person.name) + '"></div>' +
+        '<section class="vivid-person-info"><h2>Personal Info</h2><dl>' +
+          facts.map(([label,value]) => '<div class="vivid-person-info-item"><dt>' + escapeHtml(label) + '</dt><dd>' + escapeHtml(value) + '</dd></div>').join("") +
+        '</dl></section>' +
+      '</aside>' +
+      '<div class="vivid-person-main">' +
+        '<section class="vivid-person-overview">' +
+          '<span class="vivid-title-kicker">CAST & CREW</span><h1>' + escapeHtml(person.name) + '</h1>' +
+          (person.known_for_department ? '<p class="vivid-person-role">' + escapeHtml(person.known_for_department) + '</p>' : '') +
+          '<h2 class="vivid-person-subheading">Biography</h2>' +
+          '<p class="vivid-person-bio">' + escapeHtml(person.biography || "No biography is available for this person yet.") + '</p>' +
+        '</section>' +
+        (allKnownFor.length ? '<section class="vivid-person-section"><div class="vivid-section-heading"><div><span>KNOWN FOR</span><h2>Known For</h2></div></div><div class="vivid-person-credit-rail">' + creditCards(allKnownFor) + '</div></section>' : '') +
+        '<section class="vivid-person-section"><div class="vivid-section-heading"><div><span>FILMOGRAPHY</span><h2>Acting</h2></div></div>' + creditTable(actingCredits, true) + '</section>' +
+        (crewCredits.length ? '<section class="vivid-person-section"><div class="vivid-section-heading"><div><span>FILMOGRAPHY</span><h2>Production & crew</h2></div></div>' + creditTable(crewCredits, true) + '</section>' : '') +
+      '</div>' +
+    '</div>';
 }
 
 async function init() {
