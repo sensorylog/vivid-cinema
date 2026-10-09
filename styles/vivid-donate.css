@@ -29,3 +29,9 @@ body.vivid-donate-page{margin:0;min-height:100vh;background:radial-gradient(circ
 .donate-trust{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin-top:22px;color:rgba(255,255,255,.35);font-size:11px}
 .donate-back{margin-top:24px;color:rgba(255,255,255,.48);font-size:12px;text-decoration:none}.donate-back:hover{color:#fff}
 @media(max-width:560px){.donate-shell{padding:22px 14px}.donate-brand{margin-bottom:24px}.donate-card{padding:26px 20px;border-radius:22px}.donate-grid{grid-template-columns:1fr}.donate-card h1{font-size:38px}}
+.donate-international{margin-top:24px;padding-top:22px;border-top:1px solid rgba(255,255,255,.09)}
+.donate-international-label{display:block;color:rgba(255,255,255,.76);font-size:13px;font-weight:750;text-align:center}
+.donate-international p{margin:7px 0 14px;color:rgba(255,255,255,.45);font-size:12px;line-height:1.5;text-align:center}
+.donate-gumroad-link{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;box-sizing:border-box;padding:14px 16px;border:1px solid rgba(255,255,255,.14);border-radius:14px;background:rgba(255,255,255,.045);color:#fff;text-decoration:none;font:inherit;font-size:13px;font-weight:750;transition:background .18s ease,border-color .18s ease,transform .18s ease}
+.donate-gumroad-link:hover{background:rgba(255,255,255,.09);border-color:rgba(255,255,255,.28);transform:translateY(-1px)}
+.donate-gumroad-link span:last-child{font-size:17px;color:rgba(255,255,255,.58)}
