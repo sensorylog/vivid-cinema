@@ -1,19 +1,7 @@
 import { getAnalytics, isSupported, logEvent, setAnalyticsCollectionEnabled } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-analytics.js";
 import { app } from "./firebase.js";
 
-// Initialize GA4 once using the measurement ID configured for this Firebase project.
-const GOOGLE_ANALYTICS_ID = "G-TKXLVSEFL4";
-if (!window.__vividGtagLoaded) {
-  window.__vividGtagLoaded = true;
-  window.dataLayer = window.dataLayer || [];
-  window.gtag = window.gtag || function(){ window.dataLayer.push(arguments); };
-  window.gtag("js", new Date());
-  window.gtag("config", GOOGLE_ANALYTICS_ID);
-  const googleTag = document.createElement("script");
-  googleTag.async = true;
-  googleTag.src = "https://www.googletagmanager.com/gtag/js?id=" + GOOGLE_ANALYTICS_ID;
-  document.head.appendChild(googleTag);
-}
+// Google tag loading is centralized in google-tag.js; this module handles Firebase Analytics events.
 
 let analytics = null;
 
