@@ -39,7 +39,7 @@ function renderArticle(article) {
     '<div class="vivid-story-byline"><span>' + escapeHtml(article.publisher || "Original publisher") + '</span><span>Published ' + escapeHtml(dateText(article.publishedAt)) + '</span>' +
     (article.updatedAt ? '<span>Updated ' + escapeHtml(dateText(article.updatedAt)) + '</span>' : '') + '</div>' + image +
     (article.summary ? '<p class="vivid-story-summary">' + escapeHtml(article.summary) + '</p>' : '') +
-    (article.body ? '<div class="vivid-story-body">' + escapeHtml(article.body).replace(/\\n/g,'<br>') + '</div>' : '') +
+    (article.body ? '<div class="vivid-story-body">' + escapeHtml(article.body).replace(/\n/g,'<br>') + '</div>' : '') +
     '<div class="vivid-story-source-note">Vivid links to the original publisher. This summary is not a replacement for the original report.</div>' +
     '<div class="vivid-story-actions"><a class="vivid-story-source" href="' + escapeHtml(article.sourceUrl) + '" target="_blank" rel="noopener noreferrer">Read original report ↗</a><button type="button" id="news-story-share">Share story</button><button type="button" id="news-story-report">Report story</button></div>' +
     '<div class="vivid-story-discussion-intro"><span>THE CONVERSATION</span><h2>Talk about the story, not past each other.</h2><p>Be curious, stay respectful, and separate confirmed facts from speculation.</p></div>';
