@@ -337,7 +337,7 @@ service cloud.firestore {
         allow create: if verifiedMember()
           && get(/databases/$(database)/documents/articles/$(articleId)).data.status == 'published'
           && validCommunityComment();
-        allow update: if verifiedMember()
+        allow update: if isModerator() || (verifiedMember()
           && resource.data.authorId == request.auth.uid
           && request.resource.data.authorId == resource.data.authorId
           && request.resource.data.authorName == resource.data.authorName
@@ -346,8 +346,8 @@ service cloud.firestore {
           && request.resource.data.body is string
           && request.resource.data.body.size() >= 2
           && request.resource.data.body.size() <= 1800
-          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['body','updatedAt']);
-        allow delete: if verifiedMember() && resource.data.authorId == request.auth.uid;
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['body','updatedAt']));
+        allow delete: if isModerator() || (verifiedMember() && resource.data.authorId == request.auth.uid);
       }
 
       match /reactions/{userId} {
