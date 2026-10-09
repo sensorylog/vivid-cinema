@@ -2,7 +2,7 @@ import { auth, db } from "./firebase.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
 import {
   addDoc, collection, deleteDoc, doc, getDoc, getDocs, limit, onSnapshot,
-  orderBy, query, serverTimestamp, setDoc, where
+  orderBy, query, serverTimestamp, setDoc, updateDoc, where
 } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
 
 const $ = id => document.getElementById(id);
@@ -29,11 +29,11 @@ async function loadPersonalLists(){
 function postMarkup(p){
  const name=esc(p.authorName||"Vivid member"),topic=esc(topics[p.topic]||"Culture room");
  const content=p.spoiler?'<details class="vivid-post-spoiler-content"><summary>Spoiler ahead — reveal post</summary><p class="vivid-post-body">'+esc(p.body)+'</p></details>':'<p class="vivid-post-body">'+esc(p.body)+'</p>';
- return '<article class="vivid-community-post" data-post-id="'+p.id+'"><div class="vivid-post-head"><div class="vivid-post-avatar">'+esc(Array.from(name)[0]||"V")+'</div><div class="vivid-post-author"><strong>'+name+'</strong><small>'+esc(dateLabel(p.createdAt))+' · Vivid member</small></div><button type="button" class="vivid-post-menu" data-post-menu="'+p.id+'">•••</button></div><span class="vivid-post-topic">'+topic+'</span>'+content+'<div class="vivid-post-actions"><button type="button" data-post-like="'+p.id+'">♡ Appreciate</button><button type="button" data-post-replies="'+p.id+'">Open conversation</button><button type="button" data-post-report="'+p.id+'">Report</button></div><div class="vivid-post-replies" id="replies-'+p.id+'" hidden><div class="vivid-replies-list"></div><form class="vivid-reply-form" data-reply-form="'+p.id+'"><input maxlength="700" aria-label="Reply" placeholder="Add a thoughtful reply…" required><button type="submit">Reply</button></form></div></article>';
+ return '<article class="vivid-community-post" data-post-id="'+p.id+'"><div class="vivid-post-head"><div class="vivid-post-avatar">'+esc(Array.from(name)[0]||"V")+'</div><div class="vivid-post-author"><strong>'+name+'</strong><small>'+esc(dateLabel(p.createdAt))+' · Vivid member</small></div><button type="button" class="vivid-post-menu" data-post-menu="'+p.id+'">•••</button></div><span class="vivid-post-topic">'+topic+'</span>'+content+'<div class="vivid-post-actions"><button type="button" data-post-like="'+p.id+'">♡ Appreciate</button><button type="button" data-post-replies="'+p.id+'">Open conversation</button><button type="button" data-post-report="'+p.id+'">Report</button>'+(state.user?.uid===p.authorId?'<button type="button" data-post-edit="'+p.id+'">Edit</button><button type="button" data-post-delete="'+p.id+'">Delete</button>':'')+'</div><div class="vivid-post-replies" id="replies-'+p.id+'" hidden><div class="vivid-replies-list"></div><form class="vivid-reply-form" data-reply-form="'+p.id+'"><input maxlength="700" aria-label="Reply" placeholder="Add a thoughtful reply…" required><button type="submit">Reply</button></form></div></article>';
 }
 function pollMarkup(p){
  const options=(p.options||[]).map((option,index)=>'<button type="button" class="vivid-poll-choice" data-poll-choice="'+index+'" data-poll-id="'+p.id+'" aria-pressed="'+(state.selections[p.id]===index?'true':'false')+'"><span>'+esc(option)+'</span><i></i></button>').join("");
- return '<article class="vivid-community-post vivid-community-poll" data-poll-card="'+p.id+'"><div class="vivid-post-head"><div class="vivid-post-avatar">?</div><div class="vivid-post-author"><strong>'+esc(p.authorName||"Vivid member")+'</strong><small>'+esc(dateLabel(p.createdAt))+' · Community poll</small></div><button type="button" class="vivid-post-menu" data-poll-report="'+p.id+'">•••</button></div><span class="vivid-post-topic">'+esc(topics[p.topic]||"Culture room")+'</span><h3 class="vivid-poll-question">'+esc(p.question)+'</h3><div class="vivid-poll-options">'+options+'</div><div class="vivid-post-actions"><button type="button" data-poll-vote="'+p.id+'">Cast vote</button><button type="button" data-poll-results="'+p.id+'">View results</button><button type="button" data-poll-report="'+p.id+'">Report</button></div><div class="vivid-poll-results" id="poll-results-'+p.id+'" hidden></div></article>';
+ return '<article class="vivid-community-post vivid-community-poll" data-poll-card="'+p.id+'"><div class="vivid-post-head"><div class="vivid-post-avatar">?</div><div class="vivid-post-author"><strong>'+esc(p.authorName||"Vivid member")+'</strong><small>'+esc(dateLabel(p.createdAt))+' · Community poll</small></div><button type="button" class="vivid-post-menu" data-poll-report="'+p.id+'">•••</button></div><span class="vivid-post-topic">'+esc(topics[p.topic]||"Culture room")+'</span><h3 class="vivid-poll-question">'+esc(p.question)+'</h3><div class="vivid-poll-options">'+options+'</div><div class="vivid-post-actions"><button type="button" data-poll-vote="'+p.id+'">Cast vote</button><button type="button" data-poll-results="'+p.id+'">View results</button><button type="button" data-poll-report="'+p.id+'">Report</button>'+(state.user?.uid===p.authorId?'<button type="button" data-poll-delete="'+p.id+'">Delete poll</button>':'')+'</div><div class="vivid-poll-results" id="poll-results-'+p.id+'" hidden></div></article>';
 }
 function render(){
  if(!feed)return;
@@ -98,6 +98,36 @@ function wire(){
  }));
  feed.querySelectorAll("[data-post-replies]").forEach(b=>b.addEventListener("click",()=>loadReplies(b.dataset.postReplies)));
  feed.querySelectorAll("[data-post-report]").forEach(b=>b.addEventListener("click",()=>report("communityPost",b.dataset.postReport)));
+ feed.querySelectorAll("[data-post-edit]").forEach(b=>b.addEventListener("click",async()=>{
+  if(!participate())return;
+  const post=state.posts.find(item=>item.id===b.dataset.postEdit);
+  if(!post||post.authorId!==state.user.uid)return;
+  const draft=prompt("Edit your post (1,600 characters max):",post.body||"");
+  if(draft===null)return;
+  const body=String(draft).trim();
+  if(body.length<3||body.length>1600){say("Posts must be between 3 and 1,600 characters.");return;}
+  b.disabled=true;
+  try{await updateDoc(doc(db,"communityPosts",post.id),{body,updatedAt:serverTimestamp()});say("Post updated.");}
+  catch(e){console.warn(e);say("Could not edit this post.");}finally{b.disabled=false;}
+ }));
+ feed.querySelectorAll("[data-post-delete]").forEach(b=>b.addEventListener("click",async()=>{
+  if(!participate())return;
+  const post=state.posts.find(item=>item.id===b.dataset.postDelete);
+  if(!post||post.authorId!==state.user.uid)return;
+  if(!confirm("Delete your post? This cannot be undone."))return;
+  b.disabled=true;
+  try{await deleteDoc(doc(db,"communityPosts",post.id));say("Post deleted.");}
+  catch(e){console.warn(e);say("Could not delete this post.");}finally{b.disabled=false;}
+ }));
+ feed.querySelectorAll("[data-poll-delete]").forEach(b=>b.addEventListener("click",async()=>{
+  if(!participate())return;
+  const poll=state.polls.find(item=>item.id===b.dataset.pollDelete);
+  if(!poll||poll.authorId!==state.user.uid)return;
+  if(!confirm("Delete your poll? This cannot be undone."))return;
+  b.disabled=true;
+  try{await deleteDoc(doc(db,"communityPolls",poll.id));say("Poll deleted.");}
+  catch(e){console.warn(e);say("Could not delete this poll.");}finally{b.disabled=false;}
+ }));
  feed.querySelectorAll("[data-post-menu]").forEach(b=>b.addEventListener("click",()=>{
   const post=state.posts.find(p=>p.id===b.dataset.postMenu);if(!post)return;
   const choice=prompt("Type REPORT to report this post, BLOCK to hide this member, or FOLLOW to follow them.");
