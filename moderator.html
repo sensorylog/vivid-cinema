@@ -2,5 +2,34 @@
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#08090b"><title>Moderation Desk · Vivid Cinema</title>
 <link rel="stylesheet" href="styles/vivid-foundation.css"><link rel="stylesheet" href="styles/vivid-system.css"><link rel="stylesheet" href="styles/vivid-shell.css"><link rel="stylesheet" href="styles/vivid-community.css"><link rel="stylesheet" href="styles/vivid-legal.css"><link rel="stylesheet" href="styles/vivid-moderation.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"></head>
 <body class="vivid-cinema-home"><header class="vivid-topbar vivid-unified-header"><nav class="vivid-nav vivid-unified-nav" aria-label="Primary"><a class="vivid-brand" href="home.html">Vivid<span>Cinema</span></a><div class="vivid-navlinks"><a href="news.html">Newsroom</a><a href="community.html">Community</a></div><a class="vivid-nav-action" href="account.html">Account</a></nav></header>
-<main class="vivid-community-main"><section class="vivid-community-intro"><span class="vivid-community-eyebrow">VIVID / TRUST & SAFETY</span><h1>Moderation desk.</h1><p>Review reports with context. Remove harmful content when needed, and keep an auditable record of decisions.</p></section><div id="vivid-moderation-status" role="status" aria-live="polite">Checking moderator access…</div><section id="vivid-moderation-queue" class="vivid-moderation-queue"></section></main>
+<main class="vivid-community-main"><section class="vivid-community-intro"><span class="vivid-community-eyebrow">VIVID / TRUST & SAFETY</span><h1>Moderation desk.</h1><p>Review reports with context. Remove harmful content when needed, and keep an auditable record of decisions.</p></section><div id="vivid-moderation-status" role="status" aria-live="polite">Checking moderator access…</div><section id="vivid-moderation-queue" class="vivid-moderation-queue"></section>
+<section class="vivid-moderation-section vivid-editorial-publish" id="source-registry-panel" hidden>
+  <div class="vivid-community-eyebrow">SOURCE REGISTRY</div><h2>Approve a publisher</h2>
+  <p>Review reliability, regional relevance and reuse terms first. Feed ingestion permission and image permission are separate approvals.</p>
+  <form id="source-form" class="vivid-editorial-form">
+    <label>Publisher name<input id="source-publisher" maxlength="120" required></label>
+    <label>Publisher domain<input id="source-domain" maxlength="200" required placeholder="example.com"></label>
+    <div class="vivid-editorial-form-row"><label>Coverage<select id="source-region"><option value="global">Global</option><option value="ghana">Ghana</option><option value="nigeria">Nigeria / Nollywood</option><option value="africa">Wider Africa</option></select></label><label>Category<select id="source-category"><option value="film">Film & TV</option><option value="streaming">Streaming</option><option value="celebrity">People & culture</option><option value="trailers">Trailers</option><option value="awards">Awards</option><option value="industry">Industry</option></select></label></div>
+    <label>RSS / Atom feed URL (optional)<input id="source-feed-url" type="url" placeholder="https://example.com/feed.xml"></label>
+    <label class="vivid-editorial-confirm"><input id="source-feed-approved" type="checkbox"><span>I verified the publisher permits this feed to be used for ingestion.</span></label>
+    <label class="vivid-editorial-confirm"><input id="source-image-approved" type="checkbox"><span>Publisher terms permit display of images supplied by this feed.</span></label>
+    <label>Review notes<textarea id="source-review-notes" maxlength="1000" rows="3" required></textarea></label>
+    <label class="vivid-editorial-confirm"><input id="source-reviewed" type="checkbox" required><span>I reviewed this publisher and its reuse/display terms.</span></label>
+    <button id="source-submit" type="submit">Approve publisher</button><div id="source-feedback" role="status" aria-live="polite"></div>
+  </form>
+</section>
+<section class="vivid-moderation-section vivid-editorial-publish" id="editorial-publish-panel" hidden>
+  <div class="vivid-community-eyebrow">EDITORIAL DESK</div><h2>Publish a verified story</h2>
+  <p>Use a concise original summary and link to the original report. Do not republish full articles or unlicensed images.</p>
+  <form id="editorial-form" class="vivid-editorial-form">
+    <label>Headline<input id="editorial-headline" maxlength="240" required></label><label>Publisher<input id="editorial-publisher" maxlength="120" required></label>
+    <label>Original source URL<input id="editorial-source" type="url" required placeholder="https://publisher.example/story"></label><label>Author, if credited<input id="editorial-author" maxlength="120"></label>
+    <div class="vivid-editorial-form-row"><label>Category<select id="editorial-category"><option value="film">Film & TV</option><option value="streaming">Streaming</option><option value="celebrity">People & culture</option><option value="trailers">Trailers</option><option value="awards">Awards</option><option value="industry">Industry</option><option value="ghana">Ghana</option><option value="nollywood">Nollywood</option><option value="africa">African cinema</option></select></label><label>Coverage<select id="editorial-region"><option value="global">Global</option><option value="ghana">Ghana</option><option value="nigeria">Nigeria / Nollywood</option><option value="africa">Wider Africa</option></select></label></div>
+    <label>Publisher publication date/time<input id="editorial-published" type="datetime-local" required></label><label>Vivid summary<textarea id="editorial-summary" rows="3" maxlength="700" required></textarea></label>
+    <label>Additional original context (optional)<textarea id="editorial-body" rows="4" maxlength="4000"></textarea></label><label>Image URL (optional; source image permission must be approved)<input id="editorial-image" type="url" placeholder="https://…"></label>
+    <label class="vivid-editorial-confirm"><input id="editorial-featured" type="checkbox"><span>Feature as editorial lead.</span></label><label class="vivid-editorial-confirm"><input id="editorial-reviewed" type="checkbox" required><span>I checked the source, headline and date, and confirmed image rights or left the image blank.</span></label>
+    <button id="editorial-submit" type="submit">Publish to Newsroom</button><div id="editorial-feedback" role="status" aria-live="polite"></div>
+  </form>
+</section>
+</main>
 <script type="module" src="scripts/app-shell.js"></script><script type="module" src="scripts/moderation.js"></script><script type="module" src="scripts/editorial-desk.js"></script></body></html>
