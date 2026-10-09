@@ -129,7 +129,7 @@ test("publisher approval and manual article publishing are moderator-only", asyn
     summary: "An original short summary that links readers to the publisher's report.", body: "",
     imageUrl: "", imageAlt: "A verified entertainment story", publishedAt, updatedAt: publishedAt,
     ingestedAt: serverTimestamp(), status: "published", origin: "editorial", featured: false,
-    correction: "", topics: ["film", "global"]
+    editorialReviewed: true, correction: "", topics: ["film", "global"]
   };
   await assertSucceeds(setDoc(doc(moderator(), "articles", "manual-story"), article));
   await assertFails(setDoc(doc(member("ordinary", "Ordinary Member"), "articles", "forged-story"), article));
