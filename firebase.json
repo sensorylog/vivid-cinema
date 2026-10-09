@@ -15,139 +15,46 @@
       {
         "source": "**/*.html",
         "headers": [
-          {
-            "key": "X-Content-Type-Options",
-            "value": "nosniff"
-          },
-          {
-            "key": "Referrer-Policy",
-            "value": "strict-origin-when-cross-origin"
-          },
-          {
-            "key": "Cache-Control",
-            "value": "no-cache, max-age=0, must-revalidate"
-          },
-          {
-            "key": "Permissions-Policy",
-            "value": "camera=(), microphone=(), geolocation=(), payment=(self \"https://checkout.paystack.com\"), fullscreen=(self \"https://www.youtube.com\" \"https://www.youtube-nocookie.com\" \"https://vaplayer.ru\" \"https://vidsrc.sh\" \"https://vidlink.pro\" \"https://player.vidplus.to\" \"https://api.yenime.net\"), autoplay=(self \"https://www.youtube.com\" \"https://www.youtube-nocookie.com\" \"https://youtube.com\" \"https://vaplayer.ru\" \"https://vidsrc.sh\" \"https://vidlink.pro\" \"https://player.vidplus.to\" \"https://api.yenime.net\")"
-          },
-          {
-            "key": "X-Frame-Options",
-            "value": "SAMEORIGIN"
-          }
+          {"key":"X-Content-Type-Options","value":"nosniff"},
+          {"key":"Referrer-Policy","value":"strict-origin-when-cross-origin"},
+          {"key":"Cache-Control","value":"no-cache, max-age=0, must-revalidate"},
+          {"key":"Permissions-Policy","value":"camera=(), microphone=(), geolocation=(), payment=(self \"https://checkout.paystack.com\"), fullscreen=(self \"https://www.youtube.com\" \"https://www.youtube-nocookie.com\" \"https://vaplayer.ru\" \"https://vidsrc.sh\" \"https://vidlink.pro\" \"https://player.vidplus.to\" \"https://api.yenime.net\"), autoplay=(self \"https://www.youtube.com\" \"https://www.youtube-nocookie.com\" \"https://youtube.com\" \"https://vaplayer.ru\" \"https://vidsrc.sh\" \"https://vidlink.pro\" \"https://player.vidplus.to\" \"https://api.yenime.net\")"},
+          {"key":"X-Frame-Options","value":"SAMEORIGIN"}
         ]
       },
       {
         "source": "**/*.js",
         "headers": [
-          {
-            "key": "X-Content-Type-Options",
-            "value": "nosniff"
-          },
-          {
-            "key": "Referrer-Policy",
-            "value": "strict-origin-when-cross-origin"
-          },
-          {
-            "key": "Cache-Control",
-            "value": "public, max-age=3600, stale-while-revalidate=86400"
-          }
+          {"key":"X-Content-Type-Options","value":"nosniff"},
+          {"key":"Referrer-Policy","value":"strict-origin-when-cross-origin"},
+          {"key":"Cache-Control","value":"public, max-age=3600, stale-while-revalidate=86400"}
         ]
       },
       {
         "source": "**/*.css",
         "headers": [
-          {
-            "key": "Cache-Control",
-            "value": "public, max-age=3600, stale-while-revalidate=86400"
-          }
+          {"key":"Cache-Control","value":"public, max-age=3600, stale-while-revalidate=86400"}
         ]
       },
+      {"source":"**/*.png","headers":[{"key":"Cache-Control","value":"public,max-age=86400"}]},
+      {"source":"**/*.jpg","headers":[{"key":"Cache-Control","value":"public,max-age=86400"}]},
+      {"source":"**/*.jpeg","headers":[{"key":"Cache-Control","value":"public,max-age=86400"}]},
+      {"source":"**/*.webp","headers":[{"key":"Cache-Control","value":"public,max-age=86400"}]},
       {
-        "source": "**/*.png",
-        "headers": [
-          {
-            "key": "Cache-Control",
-            "value": "public,max-age=86400"
-          }
+        "source":"**/*",
+        "headers":[
+          {"key":"Strict-Transport-Security","value":"max-age=31536000; includeSubDomains"},
+          {"key":"X-Content-Type-Options","value":"nosniff"},
+          {"key":"X-Permitted-Cross-Domain-Policies","value":"none"},
+          {"key":"X-DNS-Prefetch-Control","value":"off"},
+          {"key":"Cross-Origin-Resource-Policy","value":"same-site"},
+          {"key":"Origin-Agent-Cluster","value":"?1"},
+          {"key":"Referrer-Policy","value":"strict-origin-when-cross-origin"},
+          {"key":"Content-Security-Policy","value":"default-src 'self'; base-uri 'none'; object-src 'none'; frame-ancestors 'self'; form-action 'self' https://formspree.io; script-src 'self' https://js.paystack.co https://www.gstatic.com https://apis.google.com https://cdn.jsdelivr.net https://www.googletagmanager.com; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; img-src 'self' data: blob: https:; font-src 'self' https://cdn.jsdelivr.net data:; connect-src 'self' https://api.themoviedb.org https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://firestore.googleapis.com https://firebaseinstallations.googleapis.com https://firebaseappcheck.googleapis.com https://recaptchaenterprise.googleapis.com https://www.googleapis.com https://apis.google.com https://accounts.google.com https://www.google.com https://www.recaptcha.net https://vivid-cinema.firebaseapp.com https://*.firebaseio.com https://www.google-analytics.com https://region1.google-analytics.com https://analytics.google.com https://api.paystack.co https://js.paystack.co https://checkout.paystack.com https://iptv-org.github.io https://raw.githubusercontent.com https://dearbulut.github.io https://graphql.anilist.co; frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com https://vaplayer.ru https://api.yenime.net https://vidsrc.sh https://vidsrc.cc https://vidlink.pro https://player.vidplus.to https://vivid-cinema.firebaseapp.com https://accounts.google.com https://apis.google.com https://www.google.com https://checkout.paystack.com https://www.recaptcha.net; media-src 'self' blob: https:; worker-src 'self' blob:; manifest-src 'self'; upgrade-insecure-requests"}
         ]
       },
-      {
-        "source": "**/*.jpg",
-        "headers": [
-          {
-            "key": "Cache-Control",
-            "value": "public,max-age=86400"
-          }
-        ]
-      },
-      {
-        "source": "**/*.jpeg",
-        "headers": [
-          {
-            "key": "Cache-Control",
-            "value": "public,max-age=86400"
-          }
-        ]
-      },
-      {
-        "source": "**/*.webp",
-        "headers": [
-          {
-            "key": "Cache-Control",
-            "value": "public,max-age=86400"
-          }
-        ]
-      },
-      {
-        "source": "**/*",
-        "headers": [
-          {
-            "key": "Strict-Transport-Security",
-            "value": "max-age=31536000; includeSubDomains"
-          },
-          {
-            "key": "X-Content-Type-Options",
-            "value": "nosniff"
-          },
-          {
-            "key": "X-Permitted-Cross-Domain-Policies",
-            "value": "none"
-          },
-          {
-            "key": "X-DNS-Prefetch-Control",
-            "value": "off"
-          },
-          {
-            "key": "Cross-Origin-Resource-Policy",
-            "value": "same-site"
-          },
-          {
-            "key": "Origin-Agent-Cluster",
-            "value": "?1"
-          },
-          {
-            "key": "Referrer-Policy",
-            "value": "strict-origin-when-cross-origin"
-          },
-          {
-            "key": "Content-Security-Policy",
-            "value": "default-src 'self'; base-uri 'none'; object-src 'none'; frame-ancestors 'self'; form-action 'self' https://formspree.io; script-src 'self' https://js.paystack.co https://www.gstatic.com https://apis.google.com https://cdn.jsdelivr.net https://www.googletagmanager.com; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; img-src 'self' data: blob: https:; font-src 'self' https://cdn.jsdelivr.net data:; connect-src 'self' https://api.themoviedb.org https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://firestore.googleapis.com https://firebaseinstallations.googleapis.com https://firebaseappcheck.googleapis.com https://recaptchaenterprise.googleapis.com https://www.googleapis.com https://apis.google.com https://accounts.google.com https://www.google.com https://www.recaptcha.net https://vivid-cinema.firebaseapp.com https://*.firebaseio.com https://www.google-analytics.com https://region1.google-analytics.com https://analytics.google.com https://api.paystack.co https://js.paystack.co https://checkout.paystack.com https://iptv-org.github.io https://raw.githubusercontent.com https://dearbulut.github.io https://graphql.anilist.co; frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com https://vaplayer.ru https://api.yenime.net https://vidsrc.sh https://vidsrc.cc https://vidlink.pro https://player.vidplus.to https://vivid-cinema.firebaseapp.com https://accounts.google.com https://apis.google.com https://www.google.com https://checkout.paystack.com https://www.recaptcha.net; media-src 'self' blob: https:; worker-src 'self' blob:; manifest-src 'self'; upgrade-insecure-requests"
-          }
-        ]
-      },
-      {
-        "source": "init.json",
-        "headers": [
-          {
-            "key": "Cache-Control",
-            "value": "no-store, max-age=0"
-          }
-        ]
-      }
+      {"source":"init.json","headers":[{"key":"Cache-Control","value":"no-store, max-age=0"}]}
     ]
   },
-  "firestore": {
-    "rules": "firestore.rules"
-  }
+  "firestore":{"rules":"firestore.rules"}
 }
