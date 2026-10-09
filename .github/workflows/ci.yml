@@ -21,7 +21,7 @@ jobs:
           set -euo pipefail
           while IFS= read -r -d '' file; do
             node --check "$file"
-          done < <(find . -type f -name '*.js' -not -path './.git/*' -print0)
+          done < <(find . -type f \( -name '*.js' -o -name '*.mjs' \) -not -path './.git/*' -print0)
 
       - name: Validate JSON
         shell: bash
@@ -162,7 +162,11 @@ jobs:
           const missing = [];
           for (const file of files) {
             const source = fs.readFileSync(file, "utf8");
-            const refs = [...source.matchAll(/(?:href|src)\s*=\s*["']([^"']+)["']|url\(\s*["']?([^"')]+)["']?\s*\)/gi)].map(m => m[1] || m[2]);
+            const refs = [];
+            if (file.endsWith(".html")) {
+              refs.push(...[...source.matchAll(/(?:href|src)\s*=\s*["']([^"']+)["']/gi)].map(match => match[1]));
+            }
+            refs.push(...[...source.matchAll(/url\(\s*["']?([^"')]+)["']?\s*\)/gi)].map(match => match[1]));
             for (let ref of refs) {
               if (!ref || /^(?:https?:|data:|blob:|mailto:|tel:|about:|#|javascript:)/i.test(ref)) continue;
               ref = ref.split("#")[0].split("?")[0];

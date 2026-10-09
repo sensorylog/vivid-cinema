@@ -36,7 +36,7 @@ for(const reminderDoc of snapshot.docs){
         keys:{p256dh:sub.keys.p256dh,auth:sub.keys.auth}
       },JSON.stringify({
         title:"Vivid Cinema",
-        body=(reminder.title||"Your Vivid Cinema reminder")+" is now available.",
+        body:(reminder.title||"Your Vivid Cinema reminder")+" is now available.",
         tag:"vivid-"+reminder.id,
         url:"./title.html?id="+encodeURIComponent(reminder.contentId||"")+"&type="+encodeURIComponent(reminder.mediaType||"movie")
       }),{TTL:86400});
