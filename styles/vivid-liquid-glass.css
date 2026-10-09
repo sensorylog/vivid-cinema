@@ -978,3 +978,16 @@ html[data-vivid-theme="light"] body.vivid-atmosphere :is(
 @media(prefers-reduced-motion:reduce){
  .vivid-button,.vivid-icon-button,.vivid-nav-action,.vivid-notification-button,.vivid-mode-chip,.vivid-provider-chip,.vivid-pill,.vivid-card,.vivid-feature-card,.vivid-discovery-card,.vivid-collection-card,.vivid-library-card,.vivid-watch-rec-card{transition:none!important;animation:none!important}
 }
+
+
+/* v4.1 accessibility hardening: make keyboard focus visible even when a component has no prior outline. */
+:where(a,button,input,select,textarea,[tabindex]:not([tabindex="-1"])):focus-visible{
+ outline:2px solid rgba(205,224,255,.98);
+ outline-offset:3px;
+ box-shadow:0 0 0 4px rgba(110,155,255,.2);
+}
+@media(prefers-reduced-transparency:reduce){
+ :where(a,button,input,select,textarea,[tabindex]:not([tabindex="-1"])):focus-visible{
+  box-shadow:none;
+ }
+}
