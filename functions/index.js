@@ -4,7 +4,6 @@ import { getFirestore, Timestamp } from "firebase-admin/firestore";
 import { onSchedule } from "firebase-functions/v2/scheduler";
 import { logger } from "firebase-functions";
 import Parser from "rss-parser";
-import { NEWS_SOURCES } from "./news-sources.js";
 
 initializeApp();
 const db = getFirestore();
@@ -75,13 +74,68 @@ function parsePublishedAt(item) {
   return date;
 }
 
+
+async function fetchFeedText(source, initialUrl) {
+  let current = new URL(initialUrl);
+  for (let redirects = 0; redirects <= 3; redirects++) {
+    const host = current.hostname.toLowerCase();
+    if (current.protocol !== "https:" || !(host === source.domain || host.endsWith("." + source.domain))) {
+      throw new Error("Feed redirect left the approved HTTPS publisher domain: " + source.id);
+    }
+    if (host === "localhost" || host.endsWith(".local") || host.endsWith(".internal") || /^\d+(?:\.\d+){3}$/.test(host) || host.startsWith("[")) {
+      throw new Error("Feed host is not a permitted public publisher hostname: " + source.id);
+    }
+    const response = await fetch(current, {
+      method: "GET",
+      redirect: "manual",
+      signal: AbortSignal.timeout(12000),
+      headers: {
+        "User-Agent": "VividCinemaNewsBot/1.0 (+https://vivid-cinema.web.app/news.html)",
+        "Accept": "application/rss+xml, application/atom+xml, application/xml, text/xml, text/plain;q=0.9"
+      }
+    });
+    if ([301, 302, 303, 307, 308].includes(response.status)) {
+      const location = response.headers.get("location");
+      if (!location || redirects === 3) throw new Error("Feed redirected too many times or omitted its redirect target: " + source.id);
+      current = new URL(location, current);
+      continue;
+    }
+    if (!response.ok) throw new Error("Feed request failed with HTTP " + response.status + ": " + source.id);
+    const contentType = response.headers.get("content-type") || "";
+    if (!/(xml|rss|atom|text\/plain)/i.test(contentType)) throw new Error("Publisher feed returned an unexpected content type: " + source.id);
+    const declaredLength = Number(response.headers.get("content-length") || 0);
+    if (declaredLength > 2_000_000) throw new Error("Publisher feed exceeded the 2 MB limit: " + source.id);
+    const reader = response.body?.getReader();
+    if (!reader) {
+      const text = await response.text();
+      if (Buffer.byteLength(text, "utf8") > 2_000_000) throw new Error("Publisher feed exceeded the 2 MB limit: " + source.id);
+      return text;
+    }
+    const chunks = [];
+    let total = 0;
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      total += value.byteLength;
+      if (total > 2_000_000) {
+        await reader.cancel();
+        throw new Error("Publisher feed exceeded the 2 MB limit: " + source.id);
+      }
+      chunks.push(Buffer.from(value));
+    }
+    return Buffer.concat(chunks).toString("utf8");
+  }
+  throw new Error("Feed redirect handling failed: " + source.id);
+}
+
 async function ingestSource(source) {
   if (!source.approvedForUse || !source.feedUrl) return { source: source.id, skipped: true, reason: "not approved" };
   const feedUrl = new URL(source.feedUrl);
   if (feedUrl.protocol !== "https:" || (feedUrl.hostname !== source.domain && !feedUrl.hostname.endsWith("." + source.domain))) {
     throw new Error("Feed host is not on the approved source domain: " + source.id);
   }
-  const feed = await parser.parseURL(feedUrl.toString());
+  const xml = await fetchFeedText(source, feedUrl.toString());
+  const feed = await parser.parseString(xml);
   let written = 0;
   for (const item of (feed.items || []).slice(0, MAX_ITEMS_PER_SOURCE)) {
     const sourceUrl = canonicalUrl(item.link, source);
@@ -131,9 +185,24 @@ export const ingestVividNews = onSchedule({
     logger.info("Vivid News ingestion is disabled; source approval is required.");
     return;
   }
-  const approved = NEWS_SOURCES.filter(source => source.approvedForUse && source.feedUrl);
+  const sourceSnapshot = await db.collection("newsSources")
+    .where("status", "==", "approved")
+    .where("feedApproved", "==", true)
+    .get();
+  const regionLabels = { global: "Global", ghana: "Ghana", nigeria: "Nigeria / Nollywood", africa: "Wider Africa" };
+  const approved = sourceSnapshot.docs.map(document => {
+    const source = document.data();
+    return {
+      ...source,
+      id: document.id,
+      region: source.defaultRegion,
+      regionLabel: regionLabels[source.defaultRegion] || "Global",
+      category: source.defaultCategory || "industry",
+      approvedForUse: source.feedApproved === true
+    };
+  }).filter(source => source.feedUrl && source.domain && source.publisher);
   if (!approved.length) {
-    logger.warn("News ingestion enabled, but no source is approved in news-sources.js.");
+    logger.info("News ingestion has no approved feed sources in the moderator registry.");
     return;
   }
   const results = await Promise.allSettled(approved.map(ingestSource));
