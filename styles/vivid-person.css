@@ -69,3 +69,7 @@ body.vivid-person-page{background:#06070a;color:#f5f7fa;min-height:100dvh}.vivid
  .vivid-person-page .vivid-person-credit-rail{gap:12px}
 }
 @media(prefers-reduced-motion:reduce){.vivid-person-page .vivid-person-credit{transition:none}}
+
+/* Override the legacy mobile scrollbox: expanded biographies should flow naturally. */
+.vivid-person-page .vivid-person-bio{max-height:none;overflow:visible}
+.vivid-person-page .vivid-person-bio.is-collapsed{overflow:hidden}
