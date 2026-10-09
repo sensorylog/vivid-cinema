@@ -21,6 +21,7 @@ let details = null;
 let currentParams = null;
 let lastHistorySyncAt = 0;
 let activeSource = "vidapi";
+const sourceAttempted = new Set();
 let primaryHealthy = false;
 let fallbackTimer = null;
 let imdbId = "";
