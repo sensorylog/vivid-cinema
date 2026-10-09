@@ -130,11 +130,9 @@ function hasFallbackId() {
 }
 
 function getNextSource(source) {
-  if (source === "vidapi") return "vidsrc";
-  if (source === "vidsrc") return "vidlink";
-  if (source === "vidlink") return "vidplus";
-  if (source === "vidplus") return "vidapi";
-  return null;
+  const order = ["vidapi", "vidsrc", "vidlink", "vidplus"];
+  const index = order.indexOf(source);
+  return order.slice(index + 1).find(candidate => !sourceAttempted.has(candidate)) || null;
 }
 
 function getSourceLabel(source) {
@@ -147,7 +145,15 @@ function getSourceLabel(source) {
 function triggerFallback(reason = "source_error") {
   if (!currentParams || (route.params.get("anime") === "1" ? !aniListId : !hasFallbackId())) return false;
   const nextSource = getNextSource(activeSource);
-  if (!nextSource) return false;
+  if (!nextSource) {
+    const status = $("player-status");
+    if (status) {
+      status.textContent = "This title could not start on the available players. Choose another source or try again later.";
+      status.classList.add("is-warning");
+      status.hidden = false;
+    }
+    return false;
+  }
 
   clearFallbackTimer();
   const status = $("player-status");
@@ -186,6 +192,7 @@ function setPlayerSource(source, params, startAt = 0) {
   clearFallbackTimer();
   if (!["vidapi", "vidsrc", "vidlink", "vidplus"].includes(source)) return;
   activeSource = source;
+  sourceAttempted.add(source);
   const status = $("player-status");
 
   if (source === "vidlink") {
@@ -354,11 +361,13 @@ function renderShell(params) {
       triggerFallback("iframe_error");
     });
     // Start on VidAPI. Users can explicitly choose any alternate source below;\n    // automatic fallback only moves forward from a failed provider.
+    sourceAttempted.clear();
     setPlayerSource("vidapi", params, resumeAt);
     document.querySelectorAll("[data-player-source]").forEach(button => {
       button.addEventListener("click", () => {
         const source = button.getAttribute("data-player-source");
         if (!["vidapi", "vidsrc", "vidlink", "vidplus"].includes(source) || !hasFallbackId()) return;
+        sourceAttempted.clear();
         setPlayerSource(source, params, resumeAt);
       });
     });
