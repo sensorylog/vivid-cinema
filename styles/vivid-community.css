@@ -135,3 +135,14 @@
 .vivid-poll-result-row strong{font-size:10px;color:#c7c7ce}
 .vivid-poll-result-track{height:5px;border-radius:999px;background:#ffffff12;overflow:hidden}
 .vivid-poll-result-track i{display:block;height:100%;border-radius:999px;background:#dcd7ca}
+
+.vivid-report-dialog{width:min(92vw,470px);border:1px solid #ffffff20;border-radius:18px;padding:0;background:#15171c;color:#f5f5f7;box-shadow:0 24px 90px #000b}
+.vivid-report-dialog::backdrop{background:#030407bd;backdrop-filter:blur(8px)}
+.vivid-report-dialog form{display:flex;flex-direction:column;gap:10px;padding:22px}
+.vivid-report-dialog form>span{font-size:9px;letter-spacing:.18em;font-weight:850;color:#a4a4ad}
+.vivid-report-dialog h2{font-size:24px;letter-spacing:-.04em;margin:0 0 6px}
+.vivid-report-dialog label{font-size:11px;font-weight:800;color:#c7c7ce}
+.vivid-report-dialog select,.vivid-report-dialog textarea{width:100%;min-width:0;border:1px solid #ffffff18;border-radius:10px;background:#0c0e12;color:#f5f5f7;padding:11px;font:inherit;font-size:12px}
+.vivid-report-dialog form>div{display:flex;justify-content:flex-end;gap:8px;margin-top:8px}
+.vivid-report-dialog form>div button{border:1px solid #ffffff18;border-radius:9px;background:#ffffff08;color:#eee;padding:10px 12px;font-weight:800;font-size:11px;cursor:pointer}
+.vivid-report-dialog form>div button[type="submit"]{background:#f5f5f7;color:#08090b}
