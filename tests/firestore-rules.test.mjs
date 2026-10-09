@@ -136,6 +136,15 @@ test("publisher approval and manual article publishing are moderator-only", asyn
   await assertFails(setDoc(doc(moderator(), "articles", "image-without-rights"), {
     ...article, imageUrl: "https://example.com/image.jpg"
   }));
+  await assertSucceeds(updateDoc(doc(moderator(), "newsSources", "example.com"), {
+    imageUsageApproved: true, verifiedAt: serverTimestamp(), updatedAt: serverTimestamp()
+  }));
+  await assertSucceeds(setDoc(doc(moderator(), "articles", "approved-publisher-image"), {
+    ...article, imageUrl: "https://example.com/image.jpg"
+  }));
+  await assertFails(setDoc(doc(moderator(), "articles", "foreign-image-host"), {
+    ...article, imageUrl: "https://images.other.example/image.jpg"
+  }));
   await assertFails(setDoc(doc(moderator(), "articles", "unapproved-source"), {
     ...article, sourceId: "unapproved.example", publisher: "Unapproved Publisher",
     sourceUrl: "https://unapproved.example/story", canonicalUrl: "https://unapproved.example/story"
