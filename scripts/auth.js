@@ -30,6 +30,16 @@ try {
 } catch {}
 
 function showMessage(text,good=false){if(!errorEl)return;errorEl.textContent=text;errorEl.style.color=good?"#7ee787":"#ff6b6b";}
+function postAuthDestination(){
+  const raw=new URLSearchParams(window.location.search).get("returnTo");
+  if(!raw)return "home.html";
+  try{
+    const target=new URL(raw,window.location.origin);
+    if(target.origin!==window.location.origin||!target.pathname.endsWith(".html"))return "home.html";
+    if(["/auth.html","/login.html","/forgot-password.html"].includes(target.pathname))return "home.html";
+    return target.pathname.replace(/^\//,"")+target.search+target.hash;
+  }catch{return "home.html";}
+}
 function withTimeout(promise,ms,label){
   return Promise.race([
     promise,
@@ -53,7 +63,7 @@ async function finishGoogleSignIn(credential){
     try{await withTimeout(createUserRecord(credential.user,credential.user.displayName||""),7000,"Google profile sync timed out.");}
     catch(error){console.warn("Google sign-in succeeded but profile sync failed:",error);}
     void startLibrarySync();
-    window.location.replace("home.html");
+    window.location.replace(postAuthDestination());
   })();
   return googleFinishPromise;
 }
@@ -151,7 +161,7 @@ loginForm?.addEventListener("submit",async(event)=>{
     const credential=await withTimeout(signInWithEmailAndPassword(auth,email,password),15000,"Email sign-in timed out.");
     if(!credential.user.emailVerified){await signOut(auth);showMessage("Please verify your email before signing in. Check your inbox.");button.disabled=false;return;}
     void startLibrarySync();
-    window.location.href="home.html";
+    window.location.href=postAuthDestination();
   }catch(error){console.error(error);showMessage(friendlyError(error));button.disabled=false;}
 });
 document.getElementById("resend-verification")?.addEventListener("click",async()=>{
