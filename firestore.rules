@@ -472,6 +472,17 @@ service cloud.firestore {
       allow delete: if isOwner(userId);
     }
 
+    match /users/{userId}/followedTopics/{topicId} {
+      allow get, list: if isOwner(userId);
+      allow create: if verifiedMember() && isOwner(userId)
+        && topicId in ['general','ghana','nollywood','african-cinema','film','television','streaming','celebrity','theory']
+        && request.resource.data.keys().hasOnly(['topicId','createdAt'])
+        && request.resource.data.topicId == topicId
+        && request.resource.data.createdAt == request.time;
+      allow update: if false;
+      allow delete: if isOwner(userId);
+    }
+
     match /{document=**} {
       allow read, write: if false;
     }
