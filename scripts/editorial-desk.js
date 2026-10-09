@@ -83,8 +83,14 @@ editorialForm?.addEventListener("submit", async event => {
   publishedDate=new Date(publishedValue);
   if(!publishedValue || Number.isNaN(publishedDate.getTime()) || publishedDate.getTime()>Date.now()+60000) return message("editorial-feedback","Use the publisher's real publication date, not a future date.");
   if(headline.length<8 || headline.length>240 || !publisher || !summary || summary.length>700 || body.length>4000) return message("editorial-feedback","Check the headline, publisher, summary and context lengths.");
-  if(imageUrl) { try { const img=new URL(imageUrl); if(img.protocol!=="https:") throw new Error("HTTPS required"); } catch { return message("editorial-feedback","Image URLs must use HTTPS or be left blank."); } }
   const domain=domainFromUrl(sourceUrl);
+  if(imageUrl) {
+    try {
+      const img=new URL(imageUrl);
+      const imageHost=img.hostname.toLowerCase().replace(/^www\\./,"");
+      if(img.protocol!=="https:" || imageHost!==domain) throw new Error("Publisher-hosted image required");
+    } catch { return message("editorial-feedback","Use an HTTPS image hosted on the approved publisher's domain, or leave the image blank."); }
+  }
   const button=$("editorial-submit"); button.disabled=true;
   try {
     const sourceSnap=await getDoc(doc(db,"newsSources",domain));
