@@ -103,7 +103,7 @@ editorialForm?.addEventListener("submit", async event => {
       category,region,summary,body,imageUrl,imageAlt:headline,
       publishedAt,updatedAt:publishedAt,ingestedAt:serverTimestamp(),
       status:"published",origin:"editorial",featured:$("editorial-featured").checked,
-      correction:"",topics:[category,region]
+      editorialReviewed:$("editorial-reviewed").checked,correction:"",topics:[category,region]
     });
     message("editorial-feedback","Published successfully. Story ID: "+ref.id);
     editorialForm.reset(); $("editorial-published").value=localDateTimeValue();
