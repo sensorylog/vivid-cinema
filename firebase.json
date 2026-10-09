@@ -9,7 +9,11 @@
       ".github/**",
       "automation/**",
       "README.md",
-      "LICENSE"
+      "LICENSE",
+      "firestore.indexes.json",
+      "functions/**",
+      "docs/**",
+      "tests/**"
     ],
     "headers": [
       {
@@ -148,7 +152,8 @@
     ]
   },
   "firestore": {
-    "rules": "firestore.rules"
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
   },
   "functions": [
     {
