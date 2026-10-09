@@ -81,7 +81,7 @@ function render(person) {
     ["Age", age],
     ["Place of birth", person.place_of_birth || ""],
     ["Also known as", Array.isArray(person.also_known_as) ? person.also_known_as.slice(0,2).join(", ") : ""],
-    ["Credits", String(cast.length || crew.length || 0)]
+    ["Credits", String(new Set([...cast, ...crew].filter(item => item?.id && item?.media_type).map(item => item.media_type + ":" + item.id)).size)]
   ].filter(([,value]) => value);
 
   document.title = person.name + " · Vivid Cinema";
@@ -90,7 +90,8 @@ function render(person) {
       '<div class="vivid-person-profile"><img src="' + getImageUrl(profile, "w500") + '" alt="' + escapeHtml(person.name) + '"></div>' +
       '<div class="vivid-person-copy"><span class="vivid-title-kicker">CAST & CREW</span><h1>' + escapeHtml(person.name) + '</h1>' +
       (person.known_for_department ? '<p class="vivid-person-role">' + escapeHtml(person.known_for_department) + '</p>' : '') +
-      '<p class="vivid-person-bio">' + escapeHtml(person.biography || "No biography is available for this person yet.") + '</p>' +
+      '<p class="vivid-person-bio' + ((person.biography || "").length > 240 ? ' is-collapsed' : '') + '" id="person-biography">' + escapeHtml(person.biography || "No biography is available for this person yet.") + '</p>' +
+      ((person.biography || "").length > 240 ? '<button class="vivid-person-bio-toggle" type="button" aria-expanded="false" aria-controls="person-biography">Read full biography <i class="bi bi-chevron-down" aria-hidden="true"></i></button>' : '') +
       '</div></div></section>' +
     '<section class="vivid-person-section vivid-person-facts"><div class="vivid-facts-grid">' +
       facts.map(([label,value]) => '<div class="vivid-fact"><span>' + escapeHtml(label) + '</span><strong>' + escapeHtml(value) + '</strong></div>').join("") +
@@ -117,3 +118,17 @@ async function init() {
 }
 
 document.addEventListener("DOMContentLoaded", init);
+
+
+document.addEventListener("click", (event) => {
+  const button = event.target.closest(".vivid-person-bio-toggle");
+  if (!button) return;
+  const bio = document.getElementById(button.getAttribute("aria-controls"));
+  if (!bio) return;
+  const expanded = button.getAttribute("aria-expanded") === "true";
+  button.setAttribute("aria-expanded", String(!expanded));
+  bio.classList.toggle("is-collapsed", expanded);
+  button.innerHTML = expanded
+    ? 'Read full biography <i class="bi bi-chevron-down" aria-hidden="true"></i>'
+    : 'Show less <i class="bi bi-chevron-up" aria-hidden="true"></i>';
+});
