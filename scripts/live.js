@@ -19,7 +19,7 @@ const SOURCES=[
  {id:"iptv-org",name:"IPTV-org",url:"https://iptv-org.github.io/iptv/index.m3u",priority:70}
 ];
 
-let channels=[],activeFilter="all",page=1,currentSources=[],sourceIndex=0,lastFocusedChannel=null,hls=null;
+let channels=[],activeFilter="all",page=1,currentSources=[],sourceIndex=0,lastFocusedChannel=null,hls=null,playAttempt=0;
 const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const label=v=>String(v||"").replace(/[-_]+/g," ").replace(/\b\w/g,m=>m.toUpperCase());
 const normalize=v=>String(v||"").toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]+/g,"");
@@ -49,6 +49,21 @@ function parseAttrs(text){
  return attrs;
 }
 
+function normalizeYoutubeEmbed(rawUrl) {
+ try {
+  const url=new URL(rawUrl);
+  const host=url.hostname.toLowerCase().replace(/^www\./,"");
+  let id="";
+  if(host==="youtu.be")id=url.pathname.split("/").filter(Boolean)[0]||"";
+  else if(["youtube.com","m.youtube.com","youtube-nocookie.com"].includes(host)){
+   if(url.pathname==="/watch")id=url.searchParams.get("v")||"";
+   else if(/^\/(embed|live|shorts)\//.test(url.pathname))id=url.pathname.split("/")[2]||"";
+  }
+  if(!/^[\w-]{11}$/.test(id))return rawUrl;
+  return "https://www.youtube-nocookie.com/embed/"+id+"?autoplay=1&rel=0";
+ }catch{return rawUrl}
+}
+
 function parseM3U(text,provider){
  const lines=String(text||"").split(/\r?\n/);
  const rows=[];
@@ -75,7 +90,7 @@ function parseM3U(text,provider){
        meta,
        source:{
          type:isYouTube?"iframe":"video",
-         url:value,
+         url:isYouTube?normalizeYoutubeEmbed(value):value,
          quality:"public",
          score:meta.score,
          labels:[],
@@ -104,7 +119,7 @@ function normalizeApiFallback(channelsData,streamsData,countriesData){
 function normalizeNexusOnline(data){
  const rows=Array.isArray(data)?data:[];
  return rows.filter(c=>c&&!c.is_nsfw&&!c.closed&&Array.isArray(c.streams)&&c.streams.length).map(c=>({
-   id:c.id,name:c.name,altNames:c.alt_names||[],country:c.country||"International",countryCode:c.country||"",logo:c.logo||"",language:(c.languages||[])[0]||"",category:(c.categories||[])[0]||"general",categories:c.categories||["general"],provider:"Nexus",sources:c.streams.filter(s=>s&&/^https?:\/\//i.test(s.url)).slice(0,5).map(s=>({type:/youtube\\.com|youtu\\.be/i.test(s.url)?"iframe":"video",url:s.url,quality:s.quality||"",labels:s.labels||[],score:Number(s.health?.score??s.score??s.rank??c.score??0)||0,provider:"Nexus"}))
+   id:c.id,name:c.name,altNames:c.alt_names||[],country:c.country||"International",countryCode:c.country||"",logo:c.logo||"",language:(c.languages||[])[0]||"",category:(c.categories||[])[0]||"general",categories:c.categories||["general"],provider:"Nexus",sources:c.streams.filter(s=>s&&/^https?:\/\//i.test(s.url)).slice(0,5).map(s=>({type:/youtube\.com|youtu\.be/i.test(s.url)?"iframe":"video",url:/youtube\.com|youtu\.be/i.test(s.url)?normalizeYoutubeEmbed(s.url):s.url,quality:s.quality||"",labels:s.labels||[],score:Number(s.health?.score??s.score??s.rank??c.score??0)||0,provider:"Nexus"}))
  })).filter(c=>c.sources.length);
 }
 
@@ -192,6 +207,7 @@ function destroyHls(){
 }
 
 function stopMedia(){
+ playAttempt++;
  destroyHls();
  try{video.pause()}catch{}
  video.removeAttribute("src");
@@ -219,6 +235,7 @@ function loadHlsScript(){
 }
 
 async function playVideoSource(s){
+ const attempt=++playAttempt;
  destroyHls();
  video.hidden=false;
  frame.hidden=true;
@@ -230,18 +247,21 @@ async function playVideoSource(s){
    try{
      const Hls=await loadHlsScript();
      if(!Hls.isSupported())throw Error("HLS not supported");
+     if(attempt!==playAttempt)return;
      hls=new Hls({enableWorker:true,lowLatencyMode:true,backBufferLength:30});
      hls.on(Hls.Events.ERROR,(event,data)=>{
+       if(attempt!==playAttempt)return;
        if(data?.fatal){
          destroyHls();
          if(sourceIndex<currentSources.length-1){sourceIndex++;playSource();}else showError();
        }
      });
-     hls.on(Hls.Events.MANIFEST_PARSED,()=>video.play().catch(()=>{}));
+     hls.on(Hls.Events.MANIFEST_PARSED,()=>{if(attempt===playAttempt)video.play().catch(()=>{});});
      hls.loadSource(s.url);
      return;
    }catch{}
  }
+ if(attempt!==playAttempt)return;
  const p=video.play();if(p?.catch)p.catch(()=>{});
 }
 
@@ -251,7 +271,12 @@ function playSource(){
  if(playerError)playerError.hidden=true;
  if(playerLoading)playerLoading.hidden=false;
  if(s.type==="iframe"){
-   destroyHls();video.hidden=true;stopMedia();frame.hidden=false;frame.src=s.url;
+   playAttempt++;
+   destroyHls();
+   try{video.pause()}catch{}
+   video.removeAttribute("src");
+   try{video.load()}catch{}
+   video.hidden=true;frame.hidden=false;frame.src=s.url;
    if(playerMeta)playerMeta.textContent="Live stream · "+(s.provider||"public source");
  }else{
    if(playerMeta)playerMeta.textContent="Live stream · "+(s.provider||"public source")+(s.score?" · health "+Math.round(s.score)+"%":"");
