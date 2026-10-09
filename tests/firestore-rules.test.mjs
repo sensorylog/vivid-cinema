@@ -133,6 +133,13 @@ test("publisher approval and manual article publishing are moderator-only", asyn
   };
   await assertSucceeds(setDoc(doc(moderator(), "articles", "manual-story"), article));
   await assertFails(setDoc(doc(member("ordinary", "Ordinary Member"), "articles", "forged-story"), article));
+  await assertFails(setDoc(doc(moderator(), "articles", "image-without-rights"), {
+    ...article, imageUrl: "https://example.com/image.jpg"
+  }));
+  await assertFails(setDoc(doc(moderator(), "articles", "unapproved-source"), {
+    ...article, sourceId: "unapproved.example", publisher: "Unapproved Publisher",
+    sourceUrl: "https://unapproved.example/story", canonicalUrl: "https://unapproved.example/story"
+  }));
 });
 
 test("members cannot write moderator claims or read private account records for other users", async () => {
