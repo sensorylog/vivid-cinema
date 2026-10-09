@@ -164,7 +164,7 @@ jobs:
             const source = fs.readFileSync(file, "utf8");
             const refs = [...source.matchAll(/(?:href|src)\s*=\s*["']([^"']+)["']|url\(\s*["']?([^"')]+)["']?\s*\)/gi)].map(m => m[1] || m[2]);
             for (let ref of refs) {
-              if (!ref || /^(?:https?:|data:|blob:|mailto:|tel:|#|javascript:)/i.test(ref)) continue;
+              if (!ref || /^(?:https?:|data:|blob:|mailto:|tel:|about:|#|javascript:)/i.test(ref)) continue;
               ref = ref.split("#")[0].split("?")[0];
               if (!ref) continue;
               const target = path.resolve(path.dirname(file), ref);
