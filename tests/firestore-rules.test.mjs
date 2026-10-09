@@ -108,6 +108,33 @@ test("reports are private to moderators and moderators can hide reported posts",
   await assertFails(getDoc(doc(env.unauthenticatedContext().firestore(), "communityPosts", "moderated-post")));
 });
 
+
+test("publisher approval and manual article publishing are moderator-only", async () => {
+  const source = {
+    publisher: "Example Entertainment Desk", domain: "example.com", status: "approved",
+    defaultRegion: "global", defaultCategory: "film", feedUrl: "", feedApproved: false,
+    imageUsageApproved: false, reviewNotes: "Reviewed ownership, editorial standards and display terms.",
+    verifiedBy: "mod-1", verifiedAt: serverTimestamp(), createdAt: serverTimestamp(), updatedAt: serverTimestamp()
+  };
+  await assertSucceeds(setDoc(doc(moderator(), "newsSources", "example.com"), source));
+  await assertFails(setDoc(doc(member("ordinary", "Ordinary Member"), "newsSources", "other.example"), {
+    ...source, domain: "other.example", verifiedBy: "ordinary"
+  }));
+
+  const publishedAt = new Date(Date.now() - 60_000);
+  const article = {
+    headline: "A verified entertainment story", publisher: "Example Entertainment Desk", author: "",
+    sourceUrl: "https://example.com/story", canonicalUrl: "https://example.com/story", sourceId: "example.com",
+    category: "film", region: "global",
+    summary: "An original short summary that links readers to the publisher's report.", body: "",
+    imageUrl: "", imageAlt: "A verified entertainment story", publishedAt, updatedAt: publishedAt,
+    ingestedAt: serverTimestamp(), status: "published", origin: "editorial", featured: false,
+    correction: "", topics: ["film", "global"]
+  };
+  await assertSucceeds(setDoc(doc(moderator(), "articles", "manual-story"), article));
+  await assertFails(setDoc(doc(member("ordinary", "Ordinary Member"), "articles", "forged-story"), article));
+});
+
 test("members cannot write moderator claims or read private account records for other users", async () => {
   await assertFails(setDoc(doc(member("regular", "Regular"), "communityReports", "fake-report"), {
     reporterId: "regular", targetType: "communityPost", targetId: "x",
