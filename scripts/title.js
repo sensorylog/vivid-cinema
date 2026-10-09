@@ -342,7 +342,7 @@ function render(details, externalCertification = "", externalCertificationNote =
     renderInformation(details, country, externalCertification, externalCertificationNote)+
     renderTrailerSection(details)+
     '<section class="vivid-title-section"><div class="vivid-section-heading"><div><span>CAST</span><h2>People in the story</h2></div></div><div class="vivid-cast-grid">'+
-      (cast.length?cast.map((person)=>'<a class="vivid-cast" href="title.html?person='+encodeURIComponent(person.id)+'"><img loading="lazy" src="'+getImageUrl(person.profile_path,"w185")+'" alt="'+escapeHtml(person.name)+'"><strong>'+escapeHtml(person.name)+'</strong><small>'+escapeHtml(person.character||"Cast")+'</small></a>').join(""):'<p class="vivid-muted">Cast information is unavailable.</p>')+
+      (cast.length?cast.map((person)=>'<a class="vivid-cast" href="person.html?id='+encodeURIComponent(person.id)+'"><img loading="lazy" src="'+getImageUrl(person.profile_path,"w185")+'" alt="'+escapeHtml(person.name)+'"><strong>'+escapeHtml(person.name)+'</strong><small>'+escapeHtml(person.character||"Cast")+'</small></a>').join(""):'<p class="vivid-muted">Cast information is unavailable.</p>')+
     '</div></section>'+renderSeasons(details)+renderProviderGroups(details,country)+
     '<section class="vivid-title-section"><div class="vivid-section-heading"><div><span>RECOMMENDED</span><h2>More like this</h2></div></div><div class="vivid-similar" id="recommendation-rail">'+renderRecommendationCards(related)+'</div></section>';
 
@@ -352,14 +352,26 @@ function render(details, externalCertification = "", externalCertificationNote =
 }
 
 function renderPersonPage(person) {
-  const credits = Array.isArray(person?.combined_credits?.cast) ? person.combined_credits.cast
-    .filter((item) => item?.id && (item?.title || item?.name))
-    .sort((a,b) => (Number(b.popularity)||0) - (Number(a.popularity)||0))
-    .slice(0,24) : [];
-  const known = Array.isArray(person?.combined_credits?.crew) ? person.combined_credits.crew
-    .filter((item) => item?.id && (item?.title || item?.name))
-    .sort((a,b) => (Number(b.popularity)||0) - (Number(a.popularity)||0))
-    .slice(0,8) : [];
+  const cast = Array.isArray(person?.combined_credits?.cast) ? person.combined_credits.cast : [];
+  const crew = Array.isArray(person?.combined_credits?.crew) ? person.combined_credits.crew : [];
+  const department = String(person?.known_for_department || "").toLowerCase();
+  const source = department === "acting" ? cast
+    : department === "directing" || department === "writing"
+      ? crew.filter(item => String(item.department || "").toLowerCase() === department ||
+          String(item.job || "").toLowerCase().includes(department === "directing" ? "director" : "writer"))
+      : [...cast, ...crew];
+  const unique = new Map();
+  const score = value => (Number(value.popularity) || 0) +
+    Math.log10(1 + Math.max(0, Number(value.vote_count) || 0)) * 8 +
+    (Number(value.vote_average) || 0) * 1.5;
+  for (const item of source) {
+    if (!item?.id || !item?.media_type || !item?.poster_path || !(item?.title || item?.name)) continue;
+    const key = item.media_type + ":" + item.id;
+    const previous = unique.get(key);
+    if (!previous || score(item) > score(previous)) unique.set(key, item);
+  }
+  const credits = [...unique.values()].sort((a,b) => score(b) - score(a)).slice(0,24);
+  const known = crew.filter(item => item?.job || item?.department).slice(0,8);
   const creditsHtml = credits.map((item) => {
     const type = item.media_type === "tv" ? "tv" : "movie";
     const name = item.title || item.name || "Untitled";
@@ -373,7 +385,6 @@ function renderPersonPage(person) {
     (bio ? '<section class="vivid-title-section vivid-person-bio"><div class="vivid-section-heading"><div><span>BIOGRAPHY</span><h2>About '+escapeHtml(person.name||"them")+'</h2></div></div><p>'+escapeHtml(bio)+'</p></section>' : '')+
     '<section class="vivid-title-section"><div class="vivid-section-heading"><div><span>ON VIVID</span><h2>Known for</h2></div></div><div class="vivid-cast-grid vivid-person-grid">'+(creditsHtml || '<p class="vivid-muted">No credits available.</p>')+'</div></section>';
 }
-
 async function init() {
   const personId = route.params.get("person");
   if (personId) {
