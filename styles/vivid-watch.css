@@ -103,3 +103,9 @@ body.vivid-watch-page .vivid-watch-rec-card img{border-radius:10px}
   body.vivid-watch-page .vivid-watch-artwork{width:68px}
   body.vivid-watch-page .vivid-watch-head p{-webkit-line-clamp:2}
 }
+
+
+/* Artwork integrity: keep full TMDB posters visible and avoid blank images. */
+body.vivid-watch-page .vivid-watch-artwork{flex:0 0 auto;}
+body.vivid-watch-page .vivid-watch-artwork img{height:auto;object-fit:contain;object-position:center;background:#101217;}
+body.vivid-watch-page .vivid-watch-backdrop{background-color:#101217;}
