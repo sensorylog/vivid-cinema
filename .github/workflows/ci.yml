@@ -182,3 +182,21 @@ jobs:
             process.exit(1);
           }
           NODE
+
+  firestore-rules:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install rules-test dependencies
+        run: npm install --prefix tests
+
+      - name: Run Firestore Emulator security tests
+        run: npm --prefix tests run test:rules
