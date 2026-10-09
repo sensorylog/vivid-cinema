@@ -148,7 +148,8 @@ function getNextSource(source) {
     ? ["vidplus", "vidlink"]
     : ["vidapi", "vidsrc", "vidlink", "vidplus"];
   const index = order.indexOf(source);
-  return order.slice(index + 1).find(candidate => !sourceAttempted.has(candidate) && sourceAvailable(candidate)) || null;
+  const candidates = isAnimePlayback() ? order.filter(candidate => candidate !== source) : order.slice(index + 1);
+  return candidates.find(candidate => !sourceAttempted.has(candidate) && sourceAvailable(candidate)) || null;
 }
 
 function getSourceLabel(source) {
