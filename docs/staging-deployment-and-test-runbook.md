@@ -37,12 +37,11 @@ Before deploying, verify that the selected project ID is the staging ID and that
 ```bash
 npm --prefix functions install
 npm --prefix functions run check
-firebase emulators:exec --project demo-vivid-cinema --only firestore "echo Emulator command is available"
+npm install --prefix tests
+npm --prefix tests run test:rules
 ```
 
-The repository CI also checks JavaScript syntax, JSON, local imports, app-shell assets, navigation targets, and runs Firestore Rules tests. Run the CI checks from the latest merged `main` commit before staging.
-
-If the Firestore Emulator test workflow is the source of truth for your local setup, follow its exact emulator command in `.github/workflows/ci.yml`; do not substitute a production project ID for the emulator project.
+The repository CI also checks JavaScript syntax, JSON, local imports, app-shell assets, navigation targets, and runs Firestore Rules tests. The commands above run the Functions syntax check and the same Firestore Rules test script used by CI. The full static checks are run by GitHub Actions; confirm a green run on the latest merged `main` commit before staging.
 
 ## 2. Deploy the UI and Firestore policy first (no Functions yet)
 
