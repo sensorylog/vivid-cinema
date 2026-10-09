@@ -34,13 +34,13 @@ function creditCards(credits) {
   const seen = new Set();
   const items = (credits || [])
     .filter((item) => item && item.id && item.media_type && item.poster_path)
-    .sort((a,b) => (Number(b.popularity)||0) - (Number(a.popularity)||0))
     .filter((item) => {
       const key = item.media_type + ":" + item.id;
       if (seen.has(key)) return false;
       seen.add(key);
       return true;
     })
+    .sort((a,b) => (Number(b.popularity)||0) - (Number(a.popularity)||0))
     .slice(0, 40);
   return items.length ? items.map((item) => {
     const title = mediaTitle(item);
@@ -56,7 +56,23 @@ function render(person) {
   const crew = Array.isArray(credits.crew) ? credits.crew : [];
   const movieCast = cast.filter((item) => item.media_type === "movie");
   const tvCast = cast.filter((item) => item.media_type === "tv");
-  const allKnownFor = [...cast].sort((a,b) => (Number(b.popularity)||0) - (Number(a.popularity)||0)).slice(0,8);
+  const department = String(person.known_for_department || "").toLowerCase();
+  const relevantCredits = department === "acting" ? cast
+    : department === "directing" || department === "writing"
+      ? crew.filter(item => String(item.department || "").toLowerCase() === department ||
+          String(item.job || "").toLowerCase().includes(department === "directing" ? "director" : "writer"))
+      : [...cast, ...crew];
+  const uniqueKnownFor = new Map();
+  const creditScore = item => (Number(item.popularity) || 0) +
+    Math.log10(1 + Math.max(0, Number(item.vote_count) || 0)) * 8 +
+    (Number(item.vote_average) || 0) * 1.5;
+  for (const item of relevantCredits) {
+    if (!item?.id || !item?.media_type || !item?.poster_path) continue;
+    const key = item.media_type + ":" + item.id;
+    const previous = uniqueKnownFor.get(key);
+    if (!previous || creditScore(item) > creditScore(previous)) uniqueKnownFor.set(key, item);
+  }
+  const allKnownFor = [...uniqueKnownFor.values()].sort((a,b) => creditScore(b) - creditScore(a)).slice(0,8);
   const profile = person.profile_path || person.images?.profiles?.[0]?.file_path || "";
   const age = ageFromBirthday(person.birthday, person.deathday);
   const facts = [
