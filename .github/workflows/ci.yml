@@ -96,7 +96,7 @@ jobs:
           const sw = fs.readFileSync("service-worker.js", "utf8");
           const shell = [...sw.matchAll(/"((?:\.\/)[^"]+)"/g)].map(match => match[1]).filter(asset => asset.startsWith("./"));
           for (const asset of shell) {
-            if (!fs.existsSync(path.resolve(root, asset))) failures.push("service-worker.js -> missing " + asset);
+            if (!fs.existsSync(path.resolve(root, asset.split("?")[0].split("#")[0]))) failures.push("service-worker.js -> missing " + asset);
           }
           if (failures.length) {
             console.error(failures.join("\n"));
