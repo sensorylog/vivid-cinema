@@ -1,4 +1,5 @@
-const CACHE_NAME = "vivid-cinema-shell-v112";
+// Bump this version whenever the precached app shell changes.
+const CACHE_NAME = "vivid-cinema-shell-v113";
 const APP_SHELL = [
   "./","./index.html","./home.html","./person.html","./discover.html","./collection.html","./title.html","./watch.html",
   "./library.html","./auth.html","./login.html","./forgot-password.html","./account.html","./terms.html","./privacy.html","./contact.html",
@@ -21,11 +22,22 @@ async function networkFirst(request){
  try{const response=await fetch(request,{signal:controller.signal,cache:"no-store"});if(response.ok&&response.type==="basic"){const cache=await caches.open(CACHE_NAME);await cache.put(request,response.clone());}return response;}
  catch{return (await caches.match(request))||new Response("",{status:504,statusText:"Offline"});}finally{clearTimeout(timeout);}
 }
-async function staleWhileRevalidate(request){
- const cached=await caches.match(request);
+async function staleWhileRevalidate(request,event,isNavigation=false){
+ // Start the refresh before awaiting the cache, then keep the fetch event alive
+ // so a cached response does not cause the browser to cancel the background update.
+ const cachedPromise=caches.match(request);
  const refresh=fetch(request,{cache:"no-store"}).then(async response=>{if(response.ok&&response.type==="basic"){const cache=await caches.open(CACHE_NAME);await cache.put(request,response.clone());}return response;}).catch(()=>null);
- return cached||await refresh||(await caches.match("./offline.html"))||new Response("",{status:504,statusText:"Offline"});
+ event.waitUntil(refresh.then(()=>undefined));
+ const cached=await cachedPromise;
+ if(cached)return cached;
+ const fresh=await refresh;
+ if(fresh)return fresh;
+ // Only document navigations should receive HTML as an offline fallback.
+ if(isNavigation)return (await caches.match("./offline.html"))||new Response("",{status:504,statusText:"Offline"});
+ // Returning offline.html for a missing script, stylesheet, or image can break
+ // the page with an unexpected HTML response. Fail the asset request instead.
+ return new Response("",{status:504,statusText:"Offline"});
 }
 self.addEventListener("push",event=>{event.waitUntil((async()=>{let data={};try{data=event.data?.json?.()||{};}catch{try{data=JSON.parse(event.data?.text?.()||"{}");}catch{}}const title=data.title||"Vivid Cinema";await self.registration.showNotification(title,{body:data.body||"Your Vivid Cinema reminder is ready.",icon:"./icons/vivid-icon.svg",badge:"./icons/vivid-icon.svg",tag:data.tag||"vivid-cinema-reminder",renotify:false,data:{url:data.url||"./home.html"}});})());});
-self.addEventListener("fetch",event=>{const request=event.request;if(request.method!=="GET")return;const url=new URL(request.url);if(url.origin!==self.location.origin)return;if(request.mode==="navigate"){event.respondWith(staleWhileRevalidate(request));return;}const isCodeOrStyle=/\.(?:js|css)$/.test(url.pathname);const isHtml=/\.html$/.test(url.pathname);event.respondWith(isCodeOrStyle?staleWhileRevalidate(request):isHtml?networkFirst(request):staleWhileRevalidate(request));});
+self.addEventListener("fetch",event=>{const request=event.request;if(request.method!=="GET")return;const url=new URL(request.url);if(url.origin!==self.location.origin)return;if(request.mode==="navigate"){event.respondWith(staleWhileRevalidate(request,event,true));return;}const isCodeOrStyle=/\.(?:js|css)$/.test(url.pathname);const isHtml=/\.html$/.test(url.pathname);event.respondWith(isCodeOrStyle?staleWhileRevalidate(request,event):isHtml?networkFirst(request):staleWhileRevalidate(request,event));});
 self.addEventListener("notificationclick",event=>{event.notification.close();const target=event.notification.data?.url||"./home.html";event.waitUntil(clients.matchAll({type:"window",includeUncontrolled:true}).then(list=>{const existing=list.find(client=>client.url.includes(self.location.origin));if(existing){existing.navigate(new URL(target,self.location.origin).href);return existing.focus();}return clients.openWindow(new URL(target,self.location.origin).href);}));});
