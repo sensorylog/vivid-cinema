@@ -119,6 +119,20 @@
           "order": "DESCENDING"
         }
       ]
+    },
+    {
+      "collectionGroup": "newsSources",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "feedApproved",
+          "order": "ASCENDING"
+        }
+      ]
     }
   ],
   "fieldOverrides": []
