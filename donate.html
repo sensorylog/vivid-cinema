@@ -1,78 +1,153 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#06070a">
-<meta name="description" content="Support Vivid Cinema with a small optional contribution.">
-<title>Support Vivid Cinema</title>
-<link rel="icon" href="icons/vivid-icon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="styles/vivid-foundation.css">
-<link rel="stylesheet" href="styles/vivid-system.css">
-<link rel="stylesheet" href="styles/vivid-donate.css">
-<script src="https://js.paystack.co/v2/inline.js"></script>
-<link rel="stylesheet" href="styles/vivid-liquid-glass.css?v=lg4">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#08090d">
+  <meta name="description" content="Help Vivid Cinema keep getting better. Optional support for an independent movie and TV discovery experience.">
+  <title>Support Vivid Cinema</title>
+  <link rel="icon" href="icons/vivid-icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles/vivid-foundation.css">
+  <link rel="stylesheet" href="styles/vivid-system.css">
+  <link rel="stylesheet" href="styles/vivid-liquid-glass.css?v=lg4">
+  <link rel="stylesheet" href="styles/vivid-donate.css?v=support2">
+  <script src="https://js.paystack.co/v2/inline.js"></script>
 </head>
 <body class="vivid-donate-page">
-<main class="donate-shell">
-  <a class="donate-brand" href="home.html" aria-label="Back to Vivid Cinema">
-    <img src="icons/vivid-icon.svg" alt="" aria-hidden="true">
-    <span>Vivid<span>Cinema</span></span>
-  </a>
-
-  <section class="donate-card" aria-labelledby="donate-title">
-    <div class="donate-mark" aria-hidden="true">♥</div>
-    <span class="donate-eyebrow">OPTIONAL SUPPORT</span>
-    <h1 id="donate-title">Keep Vivid Cinema moving.</h1>
-    <p class="donate-lede">If you enjoy Vivid and want to help with hosting, development and future improvements, you can leave a small contribution. No pressure — Vivid works without donating.</p>
-
-    <form id="donation-form" novalidate>
-      <div class="donate-field">
-        <label for="donation-email">Email</label>
-        <input id="donation-email" name="email" type="email" autocomplete="email" inputmode="email" placeholder="you@example.com" required>
-      </div>
-
-      <div class="donate-grid">
-        <div class="donate-field">
-          <label for="donation-currency">Currency · Ghana only</label>
-          <select id="donation-currency" name="currency">
-            <option value="GHS">🇬🇭 GHS — Ghanaian Cedi</option>
-          </select>
-          <small id="currency-note">Paystack support is currently available in Ghanaian cedis (GHS) only. For international support, use Gumroad below.</small>
-        </div>
-        <div class="donate-field">
-          <label for="donation-amount">Amount</label>
-          <div class="donate-amount-wrap"><span id="currency-symbol">₵</span><input id="donation-amount" name="amount" type="number" min="0.10" step="0.01" inputmode="decimal" placeholder="10.00" required></div>
-        </div>
-      </div>
-
-      <div class="donate-presets" id="donation-presets" aria-label="Suggested donation amounts"></div>
-
-      <button class="donate-submit" id="donate-submit" type="submit">
-        <span id="donate-submit-text">Support Vivid</span>
-        <span aria-hidden="true">→</span>
-      </button>
-      <p class="donate-status" id="donate-status" role="status" aria-live="polite"></p>
-    </form>
-
-    <div class="donate-trust">
-      <span>Secure checkout by Paystack</span>
-      <span>•</span>
-      <span>You choose the amount</span>
-    </div>
-
-    <div class="donate-international" aria-label="International support option">
-      <span class="donate-international-label">For international supporters</span>
-      <p>Outside Ghana? Use Gumroad’s international checkout to support Vivid Cinema.</p>
-      <a class="donate-gumroad-link" href="https://jbstoresfind.gumroad.com/coffee?wanted=true" target="_blank" rel="noopener noreferrer">
-        <span>Support internationally with Gumroad</span>
-        <span aria-hidden="true">↗</span>
+  <main class="donate-shell">
+    <header class="donate-topbar">
+      <a class="donate-brand" href="home.html" aria-label="Vivid Cinema home">
+        <img src="icons/vivid-icon.svg" alt="" aria-hidden="true">
+        <span>Vivid<span>Cinema</span></span>
       </a>
-    </div>
-  </section>
+      <a class="donate-back donate-back-top" href="home.html"><span aria-hidden="true">←</span> Back to Vivid</a>
+    </header>
 
-  <a class="donate-back" href="home.html">← Back to Vivid Cinema</a>
-</main>
-<script type="module" src="scripts/donate.js"></script>
-<script type="module" src="scripts/google-tag.js"></script></body>
+    <section class="donate-hero" aria-labelledby="donate-title">
+      <div class="donate-hero-copy">
+        <span class="donate-eyebrow"><span class="donate-live-dot" aria-hidden="true"></span> MADE FOR THE LOVE OF WHAT'S NEXT</span>
+        <h1 id="donate-title">Good stories deserve<br><span>a place to be found.</span></h1>
+        <p class="donate-lede">Vivid helps you find your next film, series or unexpected favourite. If it has made choosing what to watch a little better, you can help us keep building it.</p>
+        <div class="donate-principles" aria-label="Our support principles">
+          <span><span aria-hidden="true">✳</span> Always optional</span>
+          <span><span aria-hidden="true">↗</span> Any amount you choose</span>
+          <span><span aria-hidden="true">♡</span> No pressure, ever</span>
+        </div>
+      </div>
+      <aside class="donate-note" aria-label="A note from Vivid">
+        <span class="donate-note-mark" aria-hidden="true">“</span>
+        <p>Every great discovery starts somewhere. Your support helps give this little corner of cinema more room to grow.</p>
+        <span class="donate-note-signoff">THE VIVID IDEA</span>
+      </aside>
+    </section>
+
+    <section class="donate-work" aria-labelledby="donate-work-title">
+      <div class="donate-section-heading">
+        <span class="donate-section-index">01 / WHY IT MATTERS</span>
+        <h2 id="donate-work-title">Help make the next version possible.</h2>
+        <p>Contributions go toward the work behind the experience—not a promise of a particular feature or release date.</p>
+      </div>
+      <div class="donate-impact-grid">
+        <article class="donate-impact-card">
+          <span class="donate-impact-icon" aria-hidden="true">◌</span>
+          <h3>Keep it running</h3>
+          <p>Help with hosting, essential services and the practical costs of keeping Vivid available.</p>
+        </article>
+        <article class="donate-impact-card">
+          <span class="donate-impact-icon" aria-hidden="true">✳</span>
+          <h3>Make discovery better</h3>
+          <p>Support careful improvements to search, recommendations, collections and the details that help you choose.</p>
+        </article>
+        <article class="donate-impact-card">
+          <span class="donate-impact-icon" aria-hidden="true">↗</span>
+          <h3>Build with intention</h3>
+          <p>Give independent development more room for testing, accessibility, reliability and thoughtful new ideas.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="donate-checkout-section" aria-labelledby="donate-checkout-title">
+      <div class="donate-checkout-intro">
+        <span class="donate-section-index">02 / IF YOU'D LIKE TO HELP</span>
+        <h2 id="donate-checkout-title">Support in the way that works for you.</h2>
+        <p>Choose a contribution below. Supporting Vivid is entirely your choice, and using the site does not depend on donating.</p>
+        <div class="donate-reassurance">
+          <span aria-hidden="true">✓</span>
+          <div><strong>Your choice stays yours.</strong><small>Pick an amount that feels comfortable—or simply keep enjoying Vivid.</small></div>
+        </div>
+      </div>
+
+      <div class="donate-card">
+        <div class="donate-card-head">
+          <span class="donate-card-kicker">SUPPORT VIVID</span>
+          <span class="donate-optional-pill">OPTIONAL</span>
+        </div>
+        <p class="donate-card-copy">A little support can help. There is no required amount.</p>
+
+        <form id="donation-form" novalidate>
+          <div class="donate-field">
+            <label for="donation-email">Email for your payment</label>
+            <input id="donation-email" name="email" type="email" autocomplete="email" inputmode="email" placeholder="you@example.com" required>
+            <small>Enter the email you want to use for checkout.</small>
+          </div>
+
+          <div class="donate-grid">
+            <div class="donate-field">
+              <label for="donation-currency">Local support</label>
+              <select id="donation-currency" name="currency" aria-describedby="currency-note">
+                <option value="GHS">🇬🇭 Ghanaian cedi (GHS)</option>
+              </select>
+              <small id="currency-note">Checkout is currently set up for Ghanaian cedis through Paystack. Available payment methods are shown at checkout.</small>
+            </div>
+            <div class="donate-field">
+              <label for="donation-amount">Your amount</label>
+              <div class="donate-amount-wrap"><span id="currency-symbol" aria-hidden="true">₵</span><input id="donation-amount" name="amount" type="number" min="0.10" step="0.01" inputmode="decimal" placeholder="10.00" aria-describedby="amount-note" required></div>
+              <small id="amount-note">Choose an amount that feels right for you.</small>
+            </div>
+          </div>
+
+          <div class="donate-presets" id="donation-presets" aria-label="Suggested contribution amounts"></div>
+
+          <button class="donate-submit" id="donate-submit" type="submit">
+            <span id="donate-submit-text">Continue to secure checkout</span>
+            <span class="donate-submit-arrow" aria-hidden="true">↗</span>
+          </button>
+          <p class="donate-status" id="donate-status" role="status" aria-live="polite"></p>
+        </form>
+
+        <div class="donate-trust">
+          <span aria-hidden="true">▣</span>
+          <span>Checkout handled by Paystack</span>
+          <span class="donate-trust-divider" aria-hidden="true"></span>
+          <span>You choose the amount</span>
+        </div>
+
+        <div class="donate-international" aria-labelledby="donate-international-title">
+          <div class="donate-international-heading">
+            <span class="donate-international-icon" aria-hidden="true">◎</span>
+            <div><h3 id="donate-international-title">Supporting from outside Ghana?</h3><p>Use our international support option instead.</p></div>
+          </div>
+          <a class="donate-gumroad-link" href="https://jbstoresfind.gumroad.com/coffee?wanted=true" target="_blank" rel="noopener noreferrer">
+            <span><strong>Support internationally</strong><small>Continue with Gumroad</small></span>
+            <span class="donate-external-arrow" aria-hidden="true">↗</span>
+          </a>
+          <small class="donate-external-note">You'll leave Vivid Cinema to complete checkout on Gumroad.</small>
+        </div>
+      </div>
+    </section>
+
+    <section class="donate-close" aria-label="A final note">
+      <span class="donate-close-symbol" aria-hidden="true">✦</span>
+      <p>Whether you contribute, share Vivid with a friend, or simply find something brilliant to watch, <strong>you're welcome here.</strong></p>
+    </section>
+
+    <footer class="donate-footer">
+      <a class="donate-footer-brand" href="home.html">Vivid<span>Cinema</span></a>
+      <span>Built for the next thing you'll love.</span>
+      <nav aria-label="Support page footer"><a href="privacy.html">Privacy</a><a href="contact.html">Contact</a><a href="home.html">Explore Vivid</a></nav>
+    </footer>
+  </main>
+  <script type="module" src="scripts/donate.js"></script>
+  <script type="module" src="scripts/google-tag.js"></script>
+</body>
 </html>
