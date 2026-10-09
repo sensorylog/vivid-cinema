@@ -11,7 +11,7 @@ body{
   max-width:100%;
   overflow-x:clip;
   overscroll-behavior-x:none;
-  overscroll-behavior-y:none;
+  overscroll-behavior-y:auto;
   scrollbar-gutter:stable;
 }
 body.vivid-cinema-home,
@@ -477,7 +477,8 @@ body{
   overflow-x:hidden!important;
 }
 body{
-  overscroll-behavior:none!important;
+  overscroll-behavior-x:none!important;
+  overscroll-behavior-y:auto!important;
   -webkit-overflow-scrolling:touch;
 }
 .vivid-app-shell,
