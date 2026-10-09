@@ -367,6 +367,35 @@ function recommendationCards() {
     : '<p class="vivid-muted">More recommendations will appear as you explore Vivid.</p>';
 }
 
+async function loadWatchRecommendations(params) {
+  const rail = $("watch-recommendations");
+  if (!rail || !media || !params?.id) return;
+
+  const hasResults = () =>
+    (details?.recommendations?.results || []).length > 0 ||
+    (details?.similar?.results || []).length > 0;
+
+  if (!hasResults()) {
+    try {
+      const recommendations = params.type === "tv"
+        ? await tmdbApi.tvRecommendations(params.id)
+        : await tmdbApi.movieRecommendations(params.id);
+      if ((recommendations?.results || []).length) {
+        details.recommendations = recommendations;
+      } else {
+        const similar = params.type === "tv"
+          ? await tmdbApi.tvSimilar(params.id)
+          : await tmdbApi.movieSimilar(params.id);
+        if ((similar?.results || []).length) details.similar = similar;
+      }
+    } catch (error) {
+      console.warn("Vivid watch recommendations unavailable:", error);
+    }
+  }
+
+  if (rail.isConnected) rail.innerHTML = recommendationCards();
+}
+
 function renderShell(params) {
   const isTv = params.type === "tv";
   const title = media.title || "Vivid Cinema";
@@ -604,6 +633,7 @@ async function load() {
         .catch(() => null);
     }
     hydrateWatchDetails(currentParams);
+    void loadWatchRecommendations(currentParams);
     // Metadata arrived after shell — re-arm
     // the primary timer if the player is still waiting.
     updateSourceLabel();
