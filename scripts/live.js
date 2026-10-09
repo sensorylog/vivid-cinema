@@ -320,11 +320,13 @@ function playSource(){
    if(playerMeta)playerMeta.textContent="Live stream · "+(s.provider||"public source")+(s.score?" · source score "+Math.round(s.score)+"%":"");
    playVideoSource(s);
  }
- const attempt=playAttempt;
- sourceTimeout=setTimeout(()=>{
-   if(attempt!==playAttempt||player.hidden)return;
-   advanceSourceOrFail();
- },25000);
+ if(s.type!=="iframe"){
+   const attempt=playAttempt;
+   sourceTimeout=setTimeout(()=>{
+     if(attempt!==playAttempt||player.hidden)return;
+     advanceSourceOrFail();
+   },25000);
+ }
 }
 
 function play(c){
