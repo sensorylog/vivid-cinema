@@ -129,10 +129,26 @@ function hasFallbackId() {
   return Boolean(tmdbId || imdbId);
 }
 
+function isAnimePlayback() {
+  return route.params.get("anime") === "1";
+}
+
+function sourceAvailable(source) {
+  if (isAnimePlayback()) {
+    if (source === "vidplus") return Boolean(aniListId);
+    if (source === "vidlink") return Boolean(malId);
+    return false;
+  }
+  if (source === "vidapi") return true;
+  return hasFallbackId();
+}
+
 function getNextSource(source) {
-  const order = ["vidapi", "vidsrc", "vidlink", "vidplus"];
+  const order = isAnimePlayback()
+    ? ["vidplus", "vidlink"]
+    : ["vidapi", "vidsrc", "vidlink", "vidplus"];
   const index = order.indexOf(source);
-  return order.slice(index + 1).find(candidate => !sourceAttempted.has(candidate)) || null;
+  return order.slice(index + 1).find(candidate => !sourceAttempted.has(candidate) && sourceAvailable(candidate)) || null;
 }
 
 function getSourceLabel(source) {
@@ -143,7 +159,7 @@ function getSourceLabel(source) {
 }
 
 function triggerFallback(reason = "source_error") {
-  if (!currentParams || (route.params.get("anime") === "1" ? !aniListId : !hasFallbackId())) return false;
+  if (!currentParams || (isAnimePlayback() ? !(aniListId || malId) : !hasFallbackId())) return false;
   const nextSource = getNextSource(activeSource);
   if (!nextSource) {
     const status = $("player-status");
@@ -181,7 +197,8 @@ function updateSourceLabel() {
   document.querySelectorAll("[data-player-source]").forEach(button => {
     const source = button.getAttribute("data-player-source");
     button.classList.toggle("is-active", source === activeSource);
-    button.disabled = route.params.get("anime") === "1" ? !aniListId : !hasFallbackId();
+    button.hidden = isAnimePlayback() && !["vidplus", "vidlink"].includes(source);
+    button.disabled = !sourceAvailable(source);
     button.setAttribute("aria-pressed", source === activeSource ? "true" : "false");
   });
 }
@@ -190,7 +207,7 @@ function setPlayerSource(source, params, startAt = 0) {
   const player = $("vidapi-player");
   if (!player || !params) return;
   clearFallbackTimer();
-  if (!["vidapi", "vidsrc", "vidlink", "vidplus"].includes(source)) return;
+  if (!["vidapi", "vidsrc", "vidlink", "vidplus"].includes(source) || !sourceAvailable(source)) return;
   activeSource = source;
   sourceAttempted.add(source);
   const status = $("player-status");
@@ -385,12 +402,17 @@ function renderShell(params) {
       triggerFallback("iframe_error");
     });
     // Start on VidAPI. Users can explicitly choose any alternate source below;\n    // automatic fallback only moves forward from a failed provider.
-    sourceAttempted.clear();
-    setPlayerSource("vidapi", params, resumeAt);
+    if (isAnimePlayback()) {
+      if (status) status.textContent = "Matching this title to an anime player…";
+      updateSourceLabel();
+    } else {
+      sourceAttempted.clear();
+      setPlayerSource("vidapi", params, resumeAt);
+    }
     document.querySelectorAll("[data-player-source]").forEach(button => {
       button.addEventListener("click", () => {
         const source = button.getAttribute("data-player-source");
-        if (!["vidapi", "vidsrc", "vidlink", "vidplus"].includes(source) || !hasFallbackId()) return;
+        if (!["vidapi", "vidsrc", "vidlink", "vidplus"].includes(source) || !sourceAvailable(source)) return;
         sourceAttempted.clear();
         setPlayerSource(source, params, resumeAt);
       });
@@ -398,7 +420,7 @@ function renderShell(params) {
   }
   window.setTimeout(() => {
     const current = $("player-status");
-    if (current && current.isConnected && !current.hidden && activeSource === "vidapi" && !primaryHealthy) {
+    if (!isAnimePlayback() && current && current.isConnected && !current.hidden && activeSource === "vidapi" && !primaryHealthy) {
       current.textContent = "Playback is taking longer than expected. The player is still loading.";
       current.classList.add("is-warning");
     }
@@ -558,6 +580,23 @@ async function load() {
     const animeIds = await resolveAnimeIds(media?.title || details?.name || details?.title || "");
     aniListId = animeIds.aniListId;
     malId = animeIds.malId;
+    updateSourceLabel();
+    if (isAnimePlayback()) {
+      const saved = getPlaybackProgress(progressKey());
+      const resumeAt = Number(saved?.progress || route.params.get("startAt") || 0);
+      sourceAttempted.clear();
+      const firstAnimeSource = aniListId ? "vidplus" : malId ? "vidlink" : "";
+      if (firstAnimeSource) {
+        setPlayerSource(firstAnimeSource, currentParams, resumeAt);
+      } else {
+        const status = $("player-status");
+        if (status) {
+          status.textContent = "This title could not be matched to an anime player. Try another title or return to the anime catalogue.";
+          status.classList.add("is-warning");
+          status.hidden = false;
+        }
+      }
+    }
     if (currentParams.type === "tv") {
       details.episode = await tmdbApi.tvSeason(currentParams.id, currentParams.season)
         .then(season => (season.episodes || []).find(ep => Number(ep.episode_number) === Number(currentParams.episode)) || null)
@@ -567,7 +606,7 @@ async function load() {
     // Metadata arrived after shell — re-arm
     // the primary timer if the player is still waiting.
     updateSourceLabel();
-    if ((hasFallbackId() || aniListId) && activeSource === "vidapi" && !primaryHealthy && !fallbackTimer) {
+    if (!isAnimePlayback() && hasFallbackId() && activeSource === "vidapi" && !primaryHealthy && !fallbackTimer) {
       const saved = getPlaybackProgress(progressKey());
       const resumeAt = Number(saved?.progress || route.params.get("startAt") || 0);
       fallbackTimer = window.setTimeout(() => {
