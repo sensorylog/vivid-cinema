@@ -4,10 +4,13 @@
     "ignore": [
       "firebase.json",
       "firestore.rules",
+      "firestore.indexes.json",
       ".git/**",
       "node_modules/**",
       ".github/**",
       "automation/**",
+      "functions/**",
+      "docs/**",
       "README.md",
       "LICENSE"
     ],
@@ -56,5 +59,6 @@
       {"source":"init.json","headers":[{"key":"Cache-Control","value":"no-store, max-age=0"}]}
     ]
   },
-  "firestore":{"rules":"firestore.rules"}
+  "firestore":{"rules":"firestore.rules","indexes":"firestore.indexes.json"},
+  "functions":{"source":"functions","runtime":"nodejs20"}
 }

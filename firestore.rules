@@ -273,6 +273,234 @@ service cloud.firestore {
       }
     }
 
+    // News/community authorization is enforced here, not only in browser controls.
+    function isVerifiedMember() {
+      return signedIn() && request.auth.token.email_verified == true;
+    }
+    function isModerator() {
+      return signedIn() && request.auth.token.moderator == true;
+    }
+    function communityUserActive(userId) {
+      return !exists(/databases/$(database)/documents/communityUsers/$(userId))
+        || get(/databases/$(database)/documents/communityUsers/$(userId)).data.status != 'suspended';
+    }
+    function validCommunityTopic(topic) {
+      return topic in ['film','ghana','nollywood','african','anime','theories','streaming'];
+    }
+    function profileNameMatches(userId, authorName) {
+      return exists(/databases/$(database)/documents/users/$(userId))
+        && get(/databases/$(database)/documents/users/$(userId)).data.displayName is string
+        && get(/databases/$(database)/documents/users/$(userId)).data.displayName == authorName;
+    }
+    function validCommunityPost() {
+      return request.resource.data.keys().hasOnly(['authorId','authorName','body','topic','status','createdAt','updatedAt','commentCount'])
+        && request.resource.data.keys().hasAll(['authorId','authorName','body','topic','status','createdAt','updatedAt'])
+        && request.resource.data.authorId == request.auth.uid
+        && request.resource.data.authorName is string
+        && request.resource.data.authorName.size() >= 1
+        && request.resource.data.authorName.size() <= 100
+        && profileNameMatches(request.auth.uid, request.resource.data.authorName)
+        && request.resource.data.body is string
+        && request.resource.data.body.size() >= 2
+        && request.resource.data.body.size() <= 2000
+        && validCommunityTopic(request.resource.data.topic)
+        && request.resource.data.status == 'published'
+        && request.resource.data.createdAt == request.time
+        && request.resource.data.updatedAt == request.time
+        && (!request.resource.data.keys().hasAny(['commentCount']) || (request.resource.data.commentCount is number && request.resource.data.commentCount == 0));
+    }
+    function validCommunityComment() {
+      return request.resource.data.keys().hasOnly(['authorId','authorName','body','status','createdAt','updatedAt'])
+        && request.resource.data.keys().hasAll(['authorId','authorName','body','status','createdAt','updatedAt'])
+        && request.resource.data.authorId == request.auth.uid
+        && request.resource.data.authorName is string
+        && request.resource.data.authorName.size() >= 1
+        && request.resource.data.authorName.size() <= 100
+        && profileNameMatches(request.auth.uid, request.resource.data.authorName)
+        && request.resource.data.body is string
+        && request.resource.data.body.size() >= 1
+        && request.resource.data.body.size() <= 1000
+        && request.resource.data.status == 'published'
+        && request.resource.data.createdAt == request.time
+        && request.resource.data.updatedAt == request.time;
+    }
+
+    match /newsSources/{sourceId} {
+      allow get, list: if isModerator();
+      allow create, update: if isModerator()
+        && request.resource.data.keys().hasOnly(['publisher','domain','status','defaultRegion','defaultCategory','feedUrl','feedApproved','imageUsageApproved','verifiedAt','verifiedBy','reviewNotes','createdAt','updatedAt'])
+        && request.resource.data.publisher is string
+        && request.resource.data.publisher.size() >= 2
+        && request.resource.data.publisher.size() <= 120
+        && request.resource.data.domain == sourceId
+        && request.resource.data.status in ['approved','disabled']
+        && request.resource.data.defaultRegion in ['global','ghana','nigeria','africa']
+        && request.resource.data.defaultCategory in ['film-tv','streaming','celebrity','trailers','awards','box-office']
+        && request.resource.data.feedUrl is string
+        && request.resource.data.feedUrl.size() <= 1000
+        && request.resource.data.feedApproved is bool
+        && (!request.resource.data.feedApproved || (request.resource.data.feedUrl.size() > 0 && request.resource.data.feedUrl.matches('^https://[^ ]+$')))
+        && request.resource.data.imageUsageApproved is bool
+        && request.resource.data.verifiedAt == request.time
+        && request.resource.data.verifiedBy == request.auth.uid
+        && request.resource.data.reviewNotes is string
+        && request.resource.data.reviewNotes.size() >= 10
+        && request.resource.data.reviewNotes.size() <= 1000
+        && request.resource.data.createdAt == request.time
+        && request.resource.data.updatedAt == request.time;
+      allow delete: if isModerator();
+    }
+
+    match /articles/{articleId} {
+      allow get, list: if isModerator() || resource.data.status == 'published';
+      allow create: if isModerator()
+        && request.resource.data.status == 'published'
+        && request.resource.data.keys().hasOnly(['headline','summary','body','publisher','author','sourceUrl','imageUrl','imageAlt','category','region','publishedAt','updatedAt','ingestedAt','status','correction','sourceId','canonicalUrl','topics','sourceUpdatedAt','origin','featured'])
+        && request.resource.data.headline is string
+        && request.resource.data.headline.size() >= 5
+        && request.resource.data.headline.size() <= 240
+        && request.resource.data.summary is string
+        && request.resource.data.summary.size() <= 700
+        && (!request.resource.data.keys().hasAny(['featured']) || request.resource.data.featured is bool)
+        && request.resource.data.sourceUrl is string
+        && request.resource.data.sourceUrl.matches('^https://[^ ]+$')
+        && request.resource.data.publisher is string
+        && request.resource.data.publisher.size() <= 120
+        && request.resource.data.sourceId is string
+        && request.resource.data.sourceId.size() <= 200
+        && exists(/databases/$(database)/documents/newsSources/$(request.resource.data.sourceId))
+        && get(/databases/$(database)/documents/newsSources/$(request.resource.data.sourceId)).data.status == 'approved'
+        && get(/databases/$(database)/documents/newsSources/$(request.resource.data.sourceId)).data.publisher == request.resource.data.publisher
+        && request.resource.data.publishedAt is timestamp
+        && request.resource.data.publishedAt <= request.time
+        && request.resource.data.updatedAt is timestamp;
+      allow update, delete: if isModerator();
+
+      match /comments/{commentId} {
+        allow get, list: if isModerator() || (get(/databases/$(database)/documents/articles/$(articleId)).data.status == 'published' && resource.data.status == 'published');
+        allow create: if isVerifiedMember()
+          && communityUserActive(request.auth.uid)
+          && get(/databases/$(database)/documents/articles/$(articleId)).data.status == 'published'
+          && validCommunityComment();
+        allow update: if isModerator()
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','moderatedAt','moderationNote'])
+          && request.resource.data.status in ['published','hidden']
+          && request.resource.data.moderatedAt == request.time;
+        allow delete: if isModerator() || (isVerifiedMember() && resource.data.authorId == request.auth.uid);
+      }
+    }
+
+    match /communityPosts/{postId} {
+      allow get, list: if isModerator() || resource.data.status == 'published';
+      allow create: if isVerifiedMember() && communityUserActive(request.auth.uid) && validCommunityPost();
+      allow update: if (isModerator()
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','moderatedAt','moderationNote'])
+          && request.resource.data.status in ['published','hidden','locked']
+          && request.resource.data.moderatedAt == request.time)
+        || (isVerifiedMember()
+          && resource.data.authorId == request.auth.uid
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['body','updatedAt'])
+          && request.resource.data.authorId == resource.data.authorId
+          && request.resource.data.authorName == resource.data.authorName
+          && request.resource.data.topic == resource.data.topic
+          && request.resource.data.status == resource.data.status
+          && request.resource.data.body is string
+          && request.resource.data.body.size() >= 2
+          && request.resource.data.body.size() <= 2000
+          && request.resource.data.updatedAt == request.time);
+      allow delete: if isModerator() || (isVerifiedMember() && resource.data.authorId == request.auth.uid);
+
+      match /comments/{commentId} {
+        allow get, list: if isModerator() || (get(/databases/$(database)/documents/communityPosts/$(postId)).data.status == 'published' && resource.data.status == 'published');
+        allow create: if isVerifiedMember()
+          && communityUserActive(request.auth.uid)
+          && get(/databases/$(database)/documents/communityPosts/$(postId)).data.status == 'published'
+          && validCommunityComment();
+        allow update: if isModerator()
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','moderatedAt','moderationNote'])
+          && request.resource.data.status in ['published','hidden']
+          && request.resource.data.moderatedAt == request.time;
+        allow delete: if isModerator() || (isVerifiedMember() && resource.data.authorId == request.auth.uid);
+      }
+
+      match /reactions/{userId} {
+        allow get: if isVerifiedMember() && request.auth.uid == userId;
+        allow list: if false;
+        allow create: if isVerifiedMember()
+          && communityUserActive(request.auth.uid)
+          && request.auth.uid == userId
+          && get(/databases/$(database)/documents/communityPosts/$(postId)).data.status == 'published'
+          && request.resource.data.keys().hasOnly(['userId','type','createdAt'])
+          && request.resource.data.userId == request.auth.uid
+          && request.resource.data.type == 'like'
+          && request.resource.data.createdAt == request.time;
+        allow update: if false;
+        allow delete: if isVerifiedMember() && request.auth.uid == userId;
+      }
+    }
+
+    match /communityReports/{reportId} {
+      allow create: if isVerifiedMember()
+        && request.resource.data.keys().hasOnly(['reporterId','targetType','targetId','reason','details','status','createdAt'])
+        && request.resource.data.keys().hasAll(['reporterId','targetType','targetId','reason','details','status','createdAt'])
+        && request.resource.data.reporterId == request.auth.uid
+        && request.resource.data.targetType in ['post','community_comment','article_comment','user','article']
+        && request.resource.data.targetId is string
+        && request.resource.data.targetId.size() >= 1
+        && request.resource.data.targetId.size() <= 240
+        && request.resource.data.reason in ['harassment','hate','spam','spoiler','impersonation','privacy','misinformation','other']
+        && request.resource.data.details is string
+        && request.resource.data.details.size() <= 1000
+        && request.resource.data.status == 'open'
+        && request.resource.data.createdAt == request.time;
+      allow get, list: if isModerator() || (isVerifiedMember() && resource.data.reporterId == request.auth.uid);
+      allow update: if isModerator()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','moderatedBy','moderatedAt','resolution'])
+        && request.resource.data.status in ['open','reviewing','resolved','action_taken']
+        && request.resource.data.moderatedBy == request.auth.uid
+        && request.resource.data.moderatedAt == request.time
+        && request.resource.data.resolution is string
+        && request.resource.data.resolution.size() <= 1000;
+      allow delete: if false;
+    }
+
+    match /communityUsers/{userId} {
+      allow get: if isModerator() || isOwner(userId);
+      allow list: if isModerator();
+      allow create, update: if isModerator()
+        && request.resource.data.keys().hasOnly(['status','reason','updatedAt','updatedBy'])
+        && request.resource.data.status in ['active','suspended']
+        && request.resource.data.reason is string
+        && request.resource.data.reason.size() <= 1000
+        && request.resource.data.updatedAt == request.time
+        && request.resource.data.updatedBy == request.auth.uid;
+      allow delete: if isModerator();
+    }
+
+    match /users/{userId}/blockedUsers/{targetId} {
+      allow get, list: if isOwner(userId);
+      allow create: if isOwner(userId)
+        && targetId != userId
+        && request.resource.data.keys().hasOnly(['targetId','createdAt'])
+        && request.resource.data.targetId == targetId
+        && request.resource.data.createdAt == request.time;
+      allow update: if false;
+      allow delete: if isOwner(userId);
+    }
+
+    match /users/{userId}/followingTopics/{topicId} {
+      allow get, list: if isOwner(userId);
+      allow create: if isOwner(userId)
+        && isVerifiedMember()
+        && communityUserActive(userId)
+        && validCommunityTopic(topicId)
+        && request.resource.data.keys().hasOnly(['topicId','createdAt'])
+        && request.resource.data.topicId == topicId
+        && request.resource.data.createdAt == request.time;
+      allow update: if false;
+      allow delete: if isOwner(userId) && validCommunityTopic(topicId);
+    }
+
     match /{document=**} {
       allow read, write: if false;
     }
