@@ -1189,3 +1189,14 @@ body.vivid-atmosphere .vivid-nav-action {
   body.vivid-atmosphere .vivid-nav-account,
   body.vivid-atmosphere .vivid-nav-action { width: 34px !important; min-width: 34px !important; max-width: 34px !important; height: 34px !important; }
 }
+
+
+/* Search already lives in the bottom navigation; remove duplicate top-header search controls. */
+body.vivid-atmosphere .vivid-topbar .vivid-search-trigger,
+body.vivid-atmosphere .vivid-topbar .vivid-nav-search,
+body.vivid-atmosphere .vivid-topbar .vivid-navlinks > a[href="search.html"],
+body.vivid-atmosphere .vivid-unified-header .vivid-search-trigger,
+body.vivid-atmosphere .vivid-unified-header .vivid-nav-search,
+body.vivid-atmosphere .vivid-unified-header .vivid-navlinks > a[href="search.html"] {
+  display: none !important;
+}
