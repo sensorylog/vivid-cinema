@@ -1,8 +1,8 @@
 // Bump this version whenever the precached app shell changes.
-const CACHE_NAME = "vivid-cinema-shell-v117";
+const CACHE_NAME = "vivid-cinema-shell-v118";
 const APP_SHELL = [
   "./","./index.html","./home.html","./person.html","./discover.html","./collection.html","./title.html","./watch.html",
-  "./library.html","./auth.html","./login.html","./forgot-password.html","./account.html","./terms.html","./privacy.html","./contact.html",
+  "./library.html","./auth.html","./login.html","./forgot-password.html","./account.html","./terms.html","./privacy.html","./contact.html","./donate.html","./donation-success.html",
   "./offline.html","./live.html","./news.html","./community.html","./news-story.html","./moderator.html","./search.html","./anime.html","./help.html","./about.html","./accessibility.html","./cookies.html","./404.html","./manifest.json","./robots.txt","./icons/vivid-icon.svg",
   "./styles/vivid-foundation.css","./styles/vivid-system.css","./styles/vivid-liquid-glass.css","./styles/vivid-liquid-glass.css?v=lg4","./styles/vivid-home.css","./styles/vivid-donate.css","./styles/vivid-shell.css","./styles/vivid-cinematic.css",
   "./styles/vivid-title.css","./styles/vivid-person.css","./styles/vivid-watch.css","./styles/vivid-library.css","./styles/vivid-discovery.css",
