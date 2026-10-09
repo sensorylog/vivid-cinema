@@ -60,6 +60,6 @@ No moderator claim was assigned and no Firebase service was deployed by these fe
 
 ## Current status
 
-Static syntax, JSON, imports, app-shell assets and local-reference checks pass on the current draft iterations. Firestore Emulator tests have passed on the latest security-rule revision, including publisher-domain/image-rights enforcement and moderator story takedown; the newest community editing/highlights iteration is receiving its final CI run. Browser/device QA, staging deployment, live ingestion verification and production rollout have not been completed.
+CI runs static validation and Firestore Emulator security tests for every PR commit. Recent completed runs passed both jobs; check the PR's Checks tab for the latest commit-specific result. Browser/device QA, mobile accessibility checks, staging deployment, live ingestion verification and production rollout remain outstanding.
 
 **Do not merge or deploy until the owner explicitly approves after review.**
