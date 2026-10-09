@@ -210,6 +210,14 @@ function setPlayerSource(source, params, startAt = 0) {
       if (primaryHealthy || activeSource !== "vidlink") return;
       const next = getNextSource(activeSource);
       if (next) setPlayerSource(next, currentParams, Number(getPlaybackProgress(progressKey())?.progress || route.params.get("startAt") || 0));
+      else {
+        const currentStatus = $("player-status");
+        if (currentStatus) {
+          currentStatus.textContent = "No other player sources are available for this title. Try selecting a source again later.";
+          currentStatus.classList.add("is-warning");
+          currentStatus.hidden = false;
+        }
+      }
     }, PRIMARY_FALLBACK_MS);
   } else if (source === "vidsrc") {
     if (!hasFallbackId()) return;
@@ -224,6 +232,14 @@ function setPlayerSource(source, params, startAt = 0) {
       if (primaryHealthy || activeSource !== "vidsrc") return;
       const next = getNextSource(activeSource);
       if (next) setPlayerSource(next, currentParams, Number(getPlaybackProgress(progressKey())?.progress || route.params.get("startAt") || 0));
+      else {
+        const currentStatus = $("player-status");
+        if (currentStatus) {
+          currentStatus.textContent = "No other player sources are available for this title. Try selecting a source again later.";
+          currentStatus.classList.add("is-warning");
+          currentStatus.hidden = false;
+        }
+      }
     }, PRIMARY_FALLBACK_MS);
   } else if (source === "vidplus") {
     if (route.params.get("anime") === "1" ? !aniListId : !hasFallbackId()) return;
@@ -240,6 +256,14 @@ function setPlayerSource(source, params, startAt = 0) {
       if (primaryHealthy || activeSource !== "vidplus") return;
       const next = getNextSource(activeSource);
       if (next) setPlayerSource(next, currentParams, Number(getPlaybackProgress(progressKey())?.progress || route.params.get("startAt") || 0));
+      else {
+        const currentStatus = $("player-status");
+        if (currentStatus) {
+          currentStatus.textContent = "No other player sources are available for this title. Try selecting a source again later.";
+          currentStatus.classList.add("is-warning");
+          currentStatus.hidden = false;
+        }
+      }
     }, PRIMARY_FALLBACK_MS);
   } else {
     primaryHealthy = false;
