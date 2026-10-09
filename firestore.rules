@@ -616,7 +616,7 @@ service cloud.firestore {
 
     match /articles/{articleId} {
       allow create: if isModerator() && validEditorialArticle();
-      allow update: if isModerator() && validEditorialArticle() && request.resource.data.sourceId == resource.data.sourceId;
+      allow update: if isModerator() && ((validEditorialArticle() && request.resource.data.sourceId == resource.data.sourceId) || (resource.data.status == 'published' && request.resource.data.status == 'hidden' && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','moderatedAt','moderatedBy']) && request.resource.data.moderatedAt == request.time && request.resource.data.moderatedBy == request.auth.uid));
       allow delete: if isModerator();
     }
 
