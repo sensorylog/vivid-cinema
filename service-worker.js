@@ -1,16 +1,16 @@
 // Bump this version whenever the precached app shell changes.
-const CACHE_NAME = "vivid-cinema-shell-v113";
+const CACHE_NAME = "vivid-cinema-shell-v114";
 const APP_SHELL = [
   "./","./index.html","./home.html","./person.html","./discover.html","./collection.html","./title.html","./watch.html",
   "./library.html","./auth.html","./login.html","./forgot-password.html","./account.html","./terms.html","./privacy.html","./contact.html",
-  "./offline.html","./live.html","./news.html","./search.html","./anime.html","./help.html","./about.html","./accessibility.html","./cookies.html","./404.html","./manifest.json","./robots.txt","./icons/vivid-icon.svg",
+  "./offline.html","./live.html","./news.html","./community.html","./news-story.html","./search.html","./anime.html","./help.html","./about.html","./accessibility.html","./cookies.html","./404.html","./manifest.json","./robots.txt","./icons/vivid-icon.svg",
   "./styles/vivid-foundation.css","./styles/vivid-system.css","./styles/vivid-liquid-glass.css","./styles/vivid-liquid-glass.css?v=lg4","./styles/vivid-home.css","./styles/vivid-donate.css","./styles/vivid-shell.css","./styles/vivid-cinematic.css",
   "./styles/vivid-title.css","./styles/vivid-person.css","./styles/vivid-watch.css","./styles/vivid-library.css","./styles/vivid-discovery.css",
   "./styles/vivid-collection.css","./styles/vivid-auth.css","./styles/vivid-account.css","./styles/vivid-pwa.css",
-  "./styles/vivid-atmosphere.css","./styles/vivid-search-standalone.css","./styles/vivid-desktop.css","./styles/vivid-landing.css","./styles/vivid-landing-final.css","./styles/vivid-hero-mobile.css","./styles/vivid-home-breathe.css","./styles/vivid-news.css","./styles/vivid-anime.css","./styles/vivid-viewport.css",
+  "./styles/vivid-atmosphere.css","./styles/vivid-search-standalone.css","./styles/vivid-desktop.css","./styles/vivid-landing.css","./styles/vivid-landing-final.css","./styles/vivid-hero-mobile.css","./styles/vivid-home-breathe.css","./styles/vivid-news.css","./styles/vivid-community.css","./styles/vivid-anime.css","./styles/vivid-viewport.css",
   "./styles/vivid-legal.css","./styles/vivid-live.css","./styles/vivid-audit-fixes.css","./scripts/app-shell.js","./scripts/donate.js","./scripts/google-tag.js","./scripts/analytics.js","./scripts/provider-region.js","./scripts/search.js","./scripts/search-page.js","./scripts/intelligence.js","./scripts/firebase.js","./scripts/pwa.js",
   "./scripts/atmosphere.js","./scripts/i18n.js","./scripts/routes.js","./scripts/config.js","./scripts/utils.js","./scripts/content.js","./scripts/media.js","./scripts/tmdb.js",
-  "./scripts/nav-auth.js","./scripts/library.js","./scripts/library-page.js","./scripts/discover.js","./scripts/collection.js","./scripts/person.js","./scripts/recommendations.js","./scripts/release-alerts.js","./scripts/cinema-reminders.js","./scripts/push-notifications.js","./scripts/news.js","./scripts/title.js","./scripts/watch.js","./scripts/landing.js",
+  "./scripts/nav-auth.js","./scripts/library.js","./scripts/library-page.js","./scripts/discover.js","./scripts/collection.js","./scripts/person.js","./scripts/recommendations.js","./scripts/release-alerts.js","./scripts/cinema-reminders.js","./scripts/push-notifications.js","./scripts/news.js","./scripts/newsroom.js","./scripts/news-community.js","./scripts/news-story.js","./scripts/title.js","./scripts/watch.js","./scripts/landing.js",
   "./scripts/account.js","./scripts/auth.js","./scripts/auth.js?v=20261007-1","./scripts/anime.js","./scripts/live.js","./scripts/live.js?v=live7","./scripts/home-breathe.js","./data/live-channels.json","./script.js","./script.js?v=20261006-2"
 ];
 async function cacheShell(){const cache=await caches.open(CACHE_NAME);await Promise.allSettled(APP_SHELL.map(asset=>cache.add(asset)));}
