@@ -66,7 +66,7 @@ async function report(type,id,postId){
    finally{if(submitButton)submitButton.disabled=false;}
   };
   form.addEventListener("submit",onSubmit);$("vivid-report-cancel")?.addEventListener("click",onCancel);dialog.addEventListener("close",onClose);
-  if(typeof dialog.showModal==="function")dialog.showModal();else say("This browser does not support the report dialog.");
+  if(typeof dialog.showModal==="function")dialog.showModal();else{say("This browser does not support the report dialog.");finish();}
  });
 }
 async function loadReplies(postId){
@@ -136,7 +136,7 @@ async function block(authorId){
 }
 async function followUser(authorId){
  if(!participate())return;if(!authorId||authorId===state.user.uid){say("You cannot follow your own account.");return;}
- try{await setDoc(doc(db,"users",state.user.uid,"following",authorId),{targetUid:authorId,createdAt:serverTimestamp()});say("Member followed.");}
+ try{const ref=doc(db,"users",state.user.uid,"following",authorId);const existing=await getDoc(ref);if(existing.exists()){say("You already follow this member.");return;}await setDoc(ref,{targetUid:authorId,createdAt:serverTimestamp()});say("Member followed.");}
  catch(e){console.warn(e);say("Could not follow this member.");}
 }
 async function toggleTopic(topic,button){
