@@ -70,6 +70,26 @@ Before testing, confirm:
 
 Use clearly labelled test content in staging. Do not copy real users' private data into the staging project.
 
+## No-Blaze route — the plan we will use
+
+If you cannot add a payment method, **stay on Firebase Spark**. Do not upgrade, link a billing account, or deploy Functions. The Newsroom and Community UI can still be developed and tested, provided the Firebase services already used by your project remain within Spark limits.
+
+Use this route:
+1. Deploy only Hosting and the Firestore rules/indexes you need:
+   ```bash
+   firebase deploy --project "$VIVID_STAGING_PROJECT_ID" --only hosting,firestore:rules,firestore:indexes
+   ```
+2. Test authentication, public article reads, article discussions, the community feed and polls using staging accounts.
+3. Use the existing moderator/editor workflow to publish approved stories manually. Keep publisher/source approval and Firestore rules in force.
+4. Keep scheduled ingestion disabled. Do not scrape publisher pages or try to imitate scheduled server-side work from browser JavaScript; that would be unreliable and could expose credentials or bypass controls.
+5. For ingestion-related development, use the Firebase Local Emulator Suite and local test fixtures. This lets you test parsing and validation without deploying a cloud function.
+6. If you later need automated ingestion, choose a separately hosted scheduler/backend with a genuinely usable free tier and keep all privileged credentials server-side. We will not select or depend on one until we compare its current limits and setup requirements.
+
+Important limits:
+- Spark can be used without linking a billing account, but individual services have quotas and some Google Cloud services are unavailable. Cloud Functions deployment requires Blaze. See [Firebase pricing plans](https://firebase.google.com/docs/projects/billing/firebase-pricing-plans) and [Cloud Functions billing requirements](https://firebase.google.com/docs/functions/faq-and-troubleshooting).
+- This means manual editorial publishing is the intended first release path; automatic RSS ingestion is a later optional capability, not a blocker for testing or launching the core Newsroom.
+- Do not deploy to production until staging checks pass and you explicitly choose to launch.
+
 ## 4. Optional Functions deployment — requires Blaze
 
 The scheduled RSS/Atom ingestion is a Cloud Function. **Firebase requires the Blaze pay-as-you-go plan to deploy Cloud Functions.** You can deploy Hosting and Firestore rules/indexes first without deploying the Functions codebase; do not enable billing just to test the UI.
