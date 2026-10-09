@@ -19,7 +19,7 @@
 <section class="vivid-live-hero">
   <div class="vivid-live-kicker"><span class="vivid-live-dot"></span> VIVID LIVE</div>
   <h1>Live television.<br><span>Made for Vivid.</span></h1>
-  <p>Search Vivid's live guide and watch channels inside Vivid. Health-checked public streams are ranked first, with multiple providers available when a channel has more than one source.</p>
+  <p>Explore public live-stream listings and play compatible channels inside Vivid. Availability varies by region, provider, and stream permissions.</p>
 </section>
 <section class="vivid-live-guide" aria-labelledby="live-guide-title">
   <div class="vivid-live-guide-head">
@@ -38,7 +38,7 @@
     <iframe id="live-frame" title="Vivid Live channel player" src="about:blank" allow="autoplay; fullscreen; picture-in-picture; encrypted-media" allowfullscreen referrerpolicy="strict-origin-when-cross-origin" loading="lazy"></iframe>
     <video id="live-video" playsinline controls preload="metadata" hidden></video>
     <div id="live-player-loading" class="vivid-live-player-loading" hidden><span class="vivid-live-spinner" aria-hidden="true"></span><strong>Connecting to the live channel…</strong></div>
-    <div id="live-player-error" class="vivid-live-empty" hidden><i class="bi bi-exclamation-triangle"></i><strong>That stream is unavailable right now.</strong><span>Try another channel or provider.</span></div>
+    <div id="live-player-error" class="vivid-live-empty" hidden><i class="bi bi-exclamation-triangle"></i><strong>That stream is unavailable right now.</strong><span>Try another channel or provider.</span><button id="live-try-next" class="vivid-live-try-next" type="button">Try next source</button></div>
   </div>
 </section>
 <section class="vivid-live-info">
