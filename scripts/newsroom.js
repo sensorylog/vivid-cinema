@@ -43,7 +43,11 @@ if (root) {
       root.innerHTML = '<div class="vivid-editorial-empty"><span class="vivid-editorial-empty-mark">V</span><h3>Good stories deserve good sources.</h3><p>We’re preparing this newsroom’s approved publisher feeds. The existing Vivid release and discovery feed is still available below.</p><span class="vivid-editorial-empty-note">No unverified headlines or invented timestamps.</span></div>';
       return;
     }
-    root.innerHTML = '<div class="vivid-editorial-grid">' + filtered.slice(0, 18).map((item, index) => card(item, index === 0)).join("") + '</div>';
+    const lead = filtered.find(item => item.featured === true);
+    const cards = lead
+      ? [card(lead, true), ...filtered.filter(item => item.id !== lead.id).slice(0, 17).map(item => card(item, false))]
+      : filtered.slice(0, 18).map(item => card(item, false));
+    root.innerHTML = '<div class="vivid-editorial-grid">' + cards.join("") + '</div>';
   }
 
   filters.forEach(button => button.addEventListener("click", () => {
