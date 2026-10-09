@@ -45,10 +45,29 @@ function render(){
 }
 async function report(type,id,postId){
  if(!participate())return;
- const reason=prompt("Why report this? (spam, harassment, hate, misinformation, spoiler, impersonation, other)");
- if(!reason)return;
- try{await addDoc(collection(db,"communityReports"),{reporterId:state.user.uid,targetType:type,targetId:id,postId:postId||null,reason:String(reason).trim().slice(0,240),status:"open",createdAt:serverTimestamp()});say("Report sent to the moderation team.");}
- catch(e){console.warn(e);say("Could not send report. Please try again.");}
+ const dialog=$("vivid-report-dialog"),form=$("vivid-report-form");
+ if(!dialog||!form){say("Reporting is temporarily unavailable.");return;}
+ const reasonField=$("vivid-report-reason"),detailsField=$("vivid-report-details");
+ if(detailsField)detailsField.value="";
+ return new Promise(resolve=>{
+  let settled=false;
+  const finish=()=>{if(settled)return;settled=true;form.removeEventListener("submit",onSubmit);$("vivid-report-cancel")?.removeEventListener("click",onCancel);dialog.removeEventListener("close",onClose);resolve();};
+  const onClose=()=>finish();
+  const onCancel=()=>{dialog.close();finish();};
+  const onSubmit=async event=>{
+   event.preventDefault();
+   const submitButton=form.querySelector('button[type="submit"]');if(submitButton)submitButton.disabled=true;
+   const reason=String(reasonField?.value||"other");
+   const details=String(detailsField?.value||"").trim();
+   try{
+    await addDoc(collection(db,"communityReports"),{reporterId:state.user.uid,targetType:type,targetId:id,postId:postId||null,reason:(reason+(details?": "+details:"")).slice(0,240),status:"open",createdAt:serverTimestamp()});
+    say("Report sent to the moderation team.");dialog.close();finish();
+   }catch(e){console.warn(e);say("Could not send report. Please try again.");}
+   finally{if(submitButton)submitButton.disabled=false;}
+  };
+  form.addEventListener("submit",onSubmit);$("vivid-report-cancel")?.addEventListener("click",onCancel);dialog.addEventListener("close",onClose);
+  if(typeof dialog.showModal==="function")dialog.showModal();else say("This browser does not support the report dialog.");
+ });
 }
 async function loadReplies(postId){
  const host=$("replies-"+postId);if(!host)return;host.hidden=false;
