@@ -18,7 +18,7 @@ async function loadBlocked(){state.blocked.clear();state.followedTopics.clear();
 function render(){
  if(!feed)return;
  let items=state.posts.filter(p=>!state.blocked.has(p.authorId));
- if(state.sort==="discussed")items=items.filter(p=>Number(p.replyCount)>0).sort((a,b)=>Number(b.replyCount)-Number(a.replyCount));
+ if(state.sort==="following")items=items.filter(p=>state.followedTopics.has(p.topic));
  if(!items.length){feed.innerHTML='<div class="vivid-community-loading"><strong>The room is open.</strong><p>Start a thoughtful conversation: a question, a film theory or a celebration of work that deserves attention.</p></div>';return;}
  feed.innerHTML=items.slice(0,40).map(p=>{
   const name=esc(p.authorName||"Vivid member"), topic=esc(topics[p.topic]||"Culture room");
