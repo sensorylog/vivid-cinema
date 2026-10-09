@@ -7,14 +7,14 @@ const feed = $("vivid-community-feed");
 const bodyField = $("vivid-post-body");
 const submit = $("vivid-post-submit");
 const notice = $("vivid-community-compose-notice");
-const state = { user:null, posts:[], blocked:new Set(), sort:"latest", stop:null };
+const state = { user:null, posts:[], blocked:new Set(), followedTopics:new Set(), sort:"latest", stop:null };
 const topics = {general:"Culture room",ghana:"Ghanaian cinema",nollywood:"Nollywood","african-cinema":"African cinema",film:"Film craft",television:"Television",streaming:"Streaming",celebrity:"People & culture",theory:"Fan theories"};
 const esc = value => String(value ?? "").replace(/[&<>"']/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
 const nameOf = user => String(user?.displayName || "Vivid member").trim().slice(0,80) || "Vivid member";
 function say(text){ if(notice) notice.textContent=text; }
 function dateLabel(value){ const d=value?.toDate?value.toDate():value?new Date(value):null; return d&&!Number.isNaN(d.getTime())?new Intl.DateTimeFormat(undefined,{month:"short",day:"numeric",hour:"numeric",minute:"2-digit"}).format(d):"Just now"; }
 function participate(){ if(!state.user){location.href="auth.html?returnTo="+encodeURIComponent("community.html");return false;} if(state.user.emailVerified!==true){say("Please verify your email before joining the community.");return false;} return true; }
-async function loadBlocked(){state.blocked.clear();if(!state.user)return;try{const snap=await getDocs(query(collection(db,"users",state.user.uid,"blockedUsers"),limit(300)));snap.docs.forEach(d=>state.blocked.add(d.id));}catch(e){console.warn("Blocked list unavailable:",e);}}
+async function loadBlocked(){state.blocked.clear();state.followedTopics.clear();if(!state.user)return;try{const snap=await getDocs(query(collection(db,"users",state.user.uid,"blockedUsers"),limit(300)));snap.docs.forEach(d=>state.blocked.add(d.id));}catch(e){console.warn("Blocked list unavailable:",e);}try{const snap=await getDocs(query(collection(db,"users",state.user.uid,"followedTopics"),limit(100)));snap.docs.forEach(d=>state.followedTopics.add(d.id));}catch(e){console.warn("Followed topics unavailable:",e);}document.querySelectorAll("[data-follow-topic]").forEach(b=>{const followed=state.followedTopics.has(b.dataset.followTopic);b.textContent=followed?"Following":"Follow";b.setAttribute("aria-pressed",String(followed));});}
 function render(){
  if(!feed)return;
  let items=state.posts.filter(p=>!state.blocked.has(p.authorId));
@@ -54,9 +54,9 @@ function wire(){
  feed.querySelectorAll("[data-post-report]").forEach(b=>b.addEventListener("click",()=>report("communityPost",b.dataset.postReport)));
  feed.querySelectorAll("[data-post-menu]").forEach(b=>b.addEventListener("click",()=>{
   const post=state.posts.find(p=>p.id===b.dataset.postMenu);if(!post)return;
-  const choice=prompt("Type REPORT to report this post, or BLOCK to hide this member.");
+  const choice=prompt("Type REPORT to report this post, BLOCK to hide this member, or FOLLOW to follow them.");
   if(choice?.trim().toLowerCase()==="report")void report("communityPost",post.id);
-  if(choice?.trim().toLowerCase()==="block")void block(post.authorId);
+  if(choice?.trim().toLowerCase()==="block")void block(post.authorId);\n  if(choice?.trim().toLowerCase()==="follow")void followUser(post.authorId);
  }));
  feed.querySelectorAll("[data-reply-form]").forEach(form=>form.addEventListener("submit",async e=>{
   e.preventDefault();if(!participate())return;const input=form.querySelector("input"),text=input.value.trim();
@@ -72,7 +72,19 @@ async function block(authorId){
  try{await setDoc(doc(db,"users",state.user.uid,"blockedUsers",authorId),{blockedUid:authorId,createdAt:serverTimestamp()});state.blocked.add(authorId);render();say("Member blocked.");}
  catch(e){console.warn(e);say("Could not block this member.");}
 }
-submit?.addEventListener("click",async()=>{
+
+async function followUser(authorId){
+ if(!participate())return;if(!authorId||authorId===state.user.uid){say("You cannot follow your own account.");return;}
+ try{await setDoc(doc(db,"users",state.user.uid,"following",authorId),{targetUid:authorId,createdAt:serverTimestamp()});say("Member followed.");}
+ catch(e){console.warn(e);say("Could not follow this member.");}
+}
+async function toggleTopic(topic,button){
+ if(!participate())return;const ref=doc(db,"users",state.user.uid,"followedTopics",topic);button.disabled=true;
+ try{if(state.followedTopics.has(topic)){await deleteDoc(ref);state.followedTopics.delete(topic);button.textContent="Follow";button.setAttribute("aria-pressed","false");}else{await setDoc(ref,{topicId:topic,createdAt:serverTimestamp()});state.followedTopics.add(topic);button.textContent="Following";button.setAttribute("aria-pressed","true");}say(state.followedTopics.has(topic)?"Topic followed. Your feed can use this preference.":"Topic unfollowed.");}
+ catch(e){console.warn(e);say("Could not update topic follow. Please try again.");}finally{button.disabled=false;}
+}
+document.querySelectorAll("[data-follow-topic]").forEach(button=>button.addEventListener("click",()=>void toggleTopic(button.dataset.followTopic,button)));
+\nsubmit?.addEventListener("click",async()=>{
  if(!participate())return;const body=String(bodyField?.value||"").trim();
  if(body.length<3||body.length>1600){say("Posts must be between 3 and 1,600 characters.");return;}
  submit.disabled=true;
