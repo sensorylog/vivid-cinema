@@ -331,9 +331,9 @@ function render(details, externalCertification = "", externalCertificationNote =
   document.title=title+" · Vivid Cinema";
   const country=getInitialCountry(details);
   $("title-content").innerHTML=
-    '<section class="vivid-title-backdrop"><img class="vivid-title-backdrop-image" src="'+escapeHtml(backdropUrl)+'" alt="" aria-hidden="true" loading="eager" decoding="async" onerror="this.remove()"><div class="vivid-title-backdrop-overlay"></div><div class="vivid-title-backdrop-label">'+(media.media_type==="tv"?"SERIES":"FEATURE")+'</div></section>'+
+    '<section class="vivid-title-backdrop"><img class="vivid-title-backdrop-image" src="'+escapeHtml(backdropUrl)+'" alt="" aria-hidden="true" loading="eager" decoding="async" onerror="if(this.dataset.fallbackTried){this.remove();}else{this.dataset.fallbackTried='1';this.src='icons/vivid-icon.svg';this.style.objectFit='contain';this.style.padding='10%';}"><div class="vivid-title-backdrop-overlay"></div><div class="vivid-title-backdrop-label">'+(media.media_type==="tv"?"SERIES":"FEATURE")+'</div></section>'+
     '<section class="vivid-title-info"><div class="vivid-title-info-inner">'+
-      '<div class="vivid-title-poster"><img src="'+getImageUrl(media.poster_path,"w500")+'" alt="'+escapeHtml(title)+' poster"></div>'+
+      '<div class="vivid-title-poster"><img src="'+getImageUrl(media.poster_path,"w500")+'" alt="'+escapeHtml(title)+' poster" onerror="this.onerror=null;this.src='icons/vivid-icon.svg'"></div>'+
       '<div class="vivid-title-copy"><span class="vivid-title-kicker">'+(media.media_type==="tv"?"TV SERIES":"MOVIE")+'</span><h1>'+escapeHtml(title)+'</h1>'+
       '<div class="vivid-title-meta"><span>'+escapeHtml(year)+'</span>'+(runtime?'<i></i><span>'+escapeHtml(runtime)+'</span>':"")+'<i></i><span>★ '+rating+'</span></div>'+
       '<div class="vivid-title-genres">'+genres+'</div><p>'+escapeHtml(media.overview||"No synopsis is available for this title yet.")+'</p>'+
