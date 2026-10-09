@@ -1030,3 +1030,162 @@ html[data-vivid-theme="light"] body.vivid-atmosphere :is(
   font-size:.65rem;
   font-weight:700;
 }
+
+
+/* Unified floating glass header: match the compact bottom navigation. */
+body.vivid-atmosphere .vivid-topbar,
+body.vivid-atmosphere .vivid-unified-header,
+body.vivid-atmosphere .vivid-discovery-nav,
+body.vivid-atmosphere .vivid-title-nav,
+body.vivid-atmosphere .vivid-library-nav,
+body.vivid-atmosphere .vivid-watch-nav {
+  box-sizing: border-box !important;
+  width: calc(100% - 24px) !important;
+  max-width: 1480px !important;
+  margin: 10px auto 0 !important;
+  border: 1px solid var(--lg-glass-edge, rgba(255,255,255,.18)) !important;
+  border-bottom: 1px solid var(--lg-glass-edge, rgba(255,255,255,.18)) !important;
+  border-radius: 24px !important;
+  background: linear-gradient(145deg, rgba(255,255,255,.085), rgba(255,255,255,.018) 56%), var(--lg-glass-surface, rgba(20,22,27,.66)) !important;
+  box-shadow: var(--lg-glass-shadow, 0 16px 48px rgba(0,0,0,.24), inset 0 1px 0 rgba(255,255,255,.07)) !important;
+  overflow: visible !important;
+}
+body.vivid-atmosphere .vivid-nav,
+body.vivid-atmosphere .vivid-unified-nav,
+body.vivid-atmosphere .vivid-discovery-nav,
+body.vivid-atmosphere .vivid-title-nav,
+body.vivid-atmosphere .vivid-library-nav,
+body.vivid-atmosphere .vivid-watch-nav {
+  box-sizing: border-box !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: clamp(6px, 1vw, 14px) !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  padding: 8px clamp(10px, 1.5vw, 18px) !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+body.vivid-atmosphere .vivid-brand {
+  flex: 0 1 auto !important;
+  min-width: 0 !important;
+  white-space: nowrap !important;
+}
+body.vivid-atmosphere .vivid-navlinks {
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  gap: clamp(2px, .45vw, 7px) !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  scrollbar-width: none !important;
+  -webkit-overflow-scrolling: touch;
+}
+body.vivid-atmosphere .vivid-navlinks::-webkit-scrollbar { display: none !important; }
+body.vivid-atmosphere .vivid-navlinks a,
+body.vivid-atmosphere .vivid-navlinks button,
+body.vivid-atmosphere .vivid-nav-account,
+body.vivid-atmosphere .vivid-nav-action,
+body.vivid-atmosphere .vivid-search-trigger,
+body.vivid-atmosphere .vivid-notification-button {
+  box-sizing: border-box !important;
+  flex: 0 0 auto !important;
+  min-width: 38px !important;
+  min-height: 38px !important;
+  border-radius: 14px !important;
+  white-space: nowrap !important;
+}
+body.vivid-atmosphere .vivid-navlinks a,
+body.vivid-atmosphere .vivid-navlinks button {
+  padding: 8px clamp(7px, .8vw, 12px) !important;
+}
+body.vivid-atmosphere .vivid-nav-account,
+body.vivid-atmosphere .vivid-nav-action {
+  margin: 0 !important;
+  padding: 8px 11px !important;
+}
+@media (max-width: 900px) {
+  body.vivid-atmosphere .vivid-topbar,
+  body.vivid-atmosphere .vivid-unified-header,
+  body.vivid-atmosphere .vivid-discovery-nav,
+  body.vivid-atmosphere .vivid-title-nav,
+  body.vivid-atmosphere .vivid-library-nav,
+  body.vivid-atmosphere .vivid-watch-nav {
+    width: calc(100% - 20px) !important;
+    margin-top: 8px !important;
+    border-radius: 22px !important;
+  }
+  body.vivid-atmosphere .vivid-nav,
+  body.vivid-atmosphere .vivid-unified-nav,
+  body.vivid-atmosphere .vivid-discovery-nav,
+  body.vivid-atmosphere .vivid-title-nav,
+  body.vivid-atmosphere .vivid-library-nav,
+  body.vivid-atmosphere .vivid-watch-nav {
+    gap: 6px !important;
+    padding: 7px 9px !important;
+  }
+  body.vivid-atmosphere .vivid-navlinks {
+    display: flex !important;
+    flex: 0 1 auto !important;
+    justify-content: flex-end !important;
+    margin: 0 !important;
+    overflow: visible !important;
+  }
+  body.vivid-atmosphere .vivid-navlinks > a:not([href="search.html"]),
+  body.vivid-atmosphere .vivid-navlinks > a:not([href="search.html"]) span,
+  body.vivid-atmosphere .vivid-navlinks > button span:not(#release-alert-count) {
+    display: none !important;
+  }
+  body.vivid-atmosphere .vivid-navlinks > a[href="search.html"],
+  body.vivid-atmosphere .vivid-navlinks > button.vivid-nav-search-modal,
+  body.vivid-atmosphere .vivid-navlinks > .vivid-notification-button {
+    display: inline-grid !important;
+    place-items: center !important;
+    width: 38px !important;
+    min-width: 38px !important;
+    max-width: 38px !important;
+    height: 38px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+  body.vivid-atmosphere .vivid-navlinks > a[href="search.html"] span,
+  body.vivid-atmosphere .vivid-navlinks > button.vivid-nav-search-modal span {
+    display: none !important;
+  }
+  body.vivid-atmosphere .vivid-navlinks > a[href="search.html"] i,
+  body.vivid-atmosphere .vivid-navlinks > button.vivid-nav-search-modal i,
+  body.vivid-atmosphere .vivid-navlinks > .vivid-notification-button i {
+    margin: 0 !important;
+    font-size: 1.05rem !important;
+  }
+  body.vivid-atmosphere .vivid-nav-account,
+  body.vivid-atmosphere .vivid-nav-action {
+    display: inline-grid !important;
+    place-items: center !important;
+    width: 38px !important;
+    min-width: 38px !important;
+    max-width: 38px !important;
+    height: 38px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+  }
+  body.vivid-atmosphere .vivid-nav-account span,
+  body.vivid-atmosphere .vivid-nav-action span { display: none !important; }
+  body.vivid-atmosphere .vivid-nav-account::before,
+  body.vivid-atmosphere .vivid-nav-action::before { content: none !important; }
+  body.vivid-atmosphere .vivid-navlinks > a[href="search.html"] i,
+  body.vivid-atmosphere .vivid-nav-account i { display: inline-block !important; }
+}
+@media (max-width: 380px) {
+  body.vivid-atmosphere .vivid-brand-wordmark { font-size: .88rem !important; }
+  body.vivid-atmosphere .vivid-nav,
+  body.vivid-atmosphere .vivid-unified-nav { padding-inline: 7px !important; }
+  body.vivid-atmosphere .vivid-navlinks > a[href="search.html"],
+  body.vivid-atmosphere .vivid-navlinks > button.vivid-nav-search-modal,
+  body.vivid-atmosphere .vivid-navlinks > .vivid-notification-button,
+  body.vivid-atmosphere .vivid-nav-account,
+  body.vivid-atmosphere .vivid-nav-action { width: 34px !important; min-width: 34px !important; max-width: 34px !important; height: 34px !important; }
+}
