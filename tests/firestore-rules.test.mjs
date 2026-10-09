@@ -133,6 +133,11 @@ test("publisher approval and manual article publishing are moderator-only", asyn
   };
   await assertSucceeds(setDoc(doc(moderator(), "articles", "manual-story"), article));
   await assertFails(setDoc(doc(member("ordinary", "Ordinary Member"), "articles", "forged-story"), article));
+  await assertSucceeds(setDoc(doc(moderator(), "articles", "moderated-story"), article));
+  await assertSucceeds(updateDoc(doc(moderator(), "articles", "moderated-story"), {
+    status: "hidden", moderatedAt: serverTimestamp(), moderatedBy: "mod-1"
+  }));
+  await assertFails(getDoc(doc(env.unauthenticatedContext().firestore(), "articles", "moderated-story")));
   await assertFails(setDoc(doc(moderator(), "articles", "image-without-rights"), {
     ...article, imageUrl: "https://example.com/image.jpg"
   }));
