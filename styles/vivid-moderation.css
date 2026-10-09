@@ -1,1 +1,17 @@
 .vivid-moderation-queue{display:flex;flex-direction:column;gap:12px;margin-top:20px}.vivid-moderation-item{padding:18px;border:1px solid #ffffff14;border-radius:15px;background:#ffffff04}.vivid-moderation-item-head{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;color:#a4a4ad;font-size:10px;text-transform:uppercase;letter-spacing:.08em}.vivid-moderation-item h2{font-size:19px;line-height:1.3;margin:12px 0}.vivid-moderation-item p{color:#a3a3ac;font-size:12px;overflow-wrap:anywhere}.vivid-moderation-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}.vivid-moderation-actions button{border:1px solid #ffffff18;border-radius:9px;background:#ffffff08;color:#eee;padding:10px 12px;font-weight:750;font-size:11px;cursor:pointer}.vivid-moderation-actions button:first-child{background:#f5f5f7;color:#08090b;border-color:transparent}
+/* Editorial controls stay hidden until the trusted moderator claim is verified. */
+#source-registry-panel[hidden],#editorial-publish-panel[hidden]{display:none!important}
+.vivid-editorial-publish{margin:26px 0;padding:22px;border:1px solid #ffffff14;border-radius:18px;background:#ffffff04}
+.vivid-editorial-publish h2{font-size:22px;margin:8px 0}
+.vivid-editorial-publish>p{max-width:760px;color:#a6a6b0;font-size:13px;line-height:1.6}
+.vivid-editorial-form{display:grid;gap:13px;margin-top:18px}
+.vivid-editorial-form label{display:grid;gap:7px;color:#c9c9d1;font-size:12px;font-weight:700}
+.vivid-editorial-form input:not([type=checkbox]),.vivid-editorial-form select,.vivid-editorial-form textarea{width:100%;min-width:0;border:1px solid #ffffff18;border-radius:10px;background:#0c0d11;color:#f5f5f7;padding:11px 12px;font:inherit;font-weight:450}
+.vivid-editorial-form textarea{resize:vertical;line-height:1.5}
+.vivid-editorial-form-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.vivid-editorial-form .vivid-editorial-confirm{display:flex;align-items:flex-start;gap:9px;font-weight:500;line-height:1.5}
+.vivid-editorial-form .vivid-editorial-confirm input{margin-top:3px;flex:none}
+.vivid-editorial-form button{justify-self:start;border:0;border-radius:10px;background:#f5f5f7;color:#08090b;padding:11px 15px;font-weight:800;cursor:pointer}
+.vivid-editorial-form button:disabled{opacity:.55;cursor:wait}
+#source-feedback,#editorial-feedback{color:#a6a6b0;font-size:12px;line-height:1.5}
+@media(max-width:620px){.vivid-editorial-publish{padding:15px}.vivid-editorial-form-row{grid-template-columns:1fr}}
