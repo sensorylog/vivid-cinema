@@ -34,7 +34,7 @@ if (root) {
         '<div class="vivid-community-highlight-meta"><span>' + escapeHtml(item.kind) + '</span><time>' + escapeHtml(formatDate(item.createdAt)) + '</time></div>' +
         '<span class="vivid-community-highlight-topic">' + escapeHtml(labels[item.topic] || "Culture room") + '</span>' +
         '<h3>' + escapeHtml(item.authorName || "Vivid member") + '</h3>' +
-        '<p>' + escapeHtml(item.text).slice(0,240) + (item.text.length > 240 ? "…" : "") + '</p>' +
+        '<p>' + escapeHtml(item.text.slice(0,240)) + (item.text.length > 240 ? "…" : "") + '</p>' +
         '<a href="community.html">Join the conversation ↗</a>' +
       '</article>'
     ).join("") + '</div>';
