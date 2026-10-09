@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#08090b"><meta name="description" content="A thoughtful community for film, television and entertainment culture.">
+<title>Community · Vivid Cinema</title>
+<link rel="manifest" href="manifest.json"><link rel="icon" href="icons/vivid-icon.svg">
+<link rel="stylesheet" href="styles/vivid-foundation.css"><link rel="stylesheet" href="styles/vivid-system.css"><link rel="stylesheet" href="styles/vivid-shell.css"><link rel="stylesheet" href="styles/vivid-cinematic.css"><link rel="stylesheet" href="styles/vivid-viewport.css"><link rel="stylesheet" href="styles/vivid-news.css"><link rel="stylesheet" href="styles/vivid-community.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+</head>
+<body data-vivid-page="community" class="vivid-cinema-home">
+<header class="vivid-topbar vivid-unified-header"><nav class="vivid-nav vivid-unified-nav" aria-label="Primary"><a class="vivid-brand" href="home.html">Vivid<span>Cinema</span></a><div class="vivid-navlinks"><a href="home.html">Home</a><a href="news.html">Newsroom</a><a href="community.html" aria-current="page">Community</a><a href="library.html">Library</a></div><a class="vivid-nav-action" data-vivid-nav-auth="true" href="auth.html">Sign in</a></nav></header>
+<main class="vivid-community-main">
+<section class="vivid-community-intro"><span class="vivid-community-eyebrow">VIVID / THE CULTURE ROOM</span><h1>More than a hot take.</h1><p>A place to trade film theories, celebrate African cinema, compare notes and disagree without making the conversation worse.</p><div class="vivid-community-principles"><span>Curiosity over clout</span><span>Context over pile-ons</span><span>People over metrics</span></div></section>
+<section class="vivid-community-layout">
+<div class="vivid-community-main-column">
+<div class="vivid-community-tabs" role="tablist" aria-label="Community sorting"><button class="is-active" data-community-sort="latest" aria-pressed="true">Latest</button><button data-community-sort="discussed" aria-pressed="false">Most discussed</button></div>
+<section class="vivid-compose-card"><div class="vivid-compose-avatar" id="vivid-compose-avatar">V</div><div class="vivid-compose-body"><label for="vivid-post-body">What are you thinking about?</label><textarea id="vivid-post-body" maxlength="1600" placeholder="A theory, a question, a take worth discussing…" rows="3"></textarea><div class="vivid-compose-controls"><select id="vivid-post-topic" aria-label="Choose a topic"><option value="general">Culture room</option><option value="ghana">Ghanaian cinema</option><option value="nollywood">Nollywood</option><option value="african-cinema">African cinema</option><option value="film">Film</option><option value="television">Television</option><option value="streaming">Streaming</option><option value="celebrity">People & culture</option><option value="theory">Fan theories</option></select><label class="vivid-spoiler-label"><input type="checkbox" id="vivid-post-spoiler"> Contains spoilers</label><button id="vivid-post-submit" type="button">Post to the room <span aria-hidden="true">↗</span></button></div><p id="vivid-community-compose-notice" role="status" aria-live="polite"></p></div></section>
+<div id="vivid-community-feed" class="vivid-community-feed" aria-live="polite"><div class="vivid-community-loading">Opening the culture room…</div></div>
+</div>
+<aside class="vivid-community-aside"><section class="vivid-aside-card"><span class="vivid-aside-label">THE HOUSE RULE</span><h2>Strong opinions. Better conversations.</h2><p>Critique the work, not the person. Mark spoilers. Don't present rumours as confirmed news. Harassment, impersonation and spam don't belong here.</p><a href="terms.html">Community standards ↗</a></section><section class="vivid-aside-card"><span class="vivid-aside-label">IN THE ROOM</span><h2>Find your corner.</h2><div class="vivid-topic-list"><button data-topic-pick="ghana">Ghanaian cinema <span>GH</span></button><button data-topic-pick="nollywood">Nollywood <span>NG</span></button><button data-topic-pick="african-cinema">African cinema <span>AF</span></button><button data-topic-pick="film">Film craft <span>01</span></button><button data-topic-pick="theory">Fan theories <span>02</span></button></div></section><section class="vivid-aside-note"><span>YOUR SPACE, YOUR CONTROL</span><p>Every post can be reported. You can block members. Moderators can remove harmful content and lock discussions.</p></section></aside>
+</section>
+</main>
+<nav class="vivid-mobile-nav" aria-label="Mobile navigation"><a href="home.html"><i class="bi bi-house-fill"></i><span>Home</span></a><a href="news.html"><i class="bi bi-newspaper"></i><span>News</span></a><a href="community.html" class="is-active"><i class="bi bi-chat-square-heart"></i><span>Community</span></a><a href="library.html"><i class="bi bi-bookmark-fill"></i><span>Library</span></a></nav>
+<script type="module" src="scripts/app-shell.js"></script><script type="module" src="scripts/nav-auth.js"></script><script type="module" src="scripts/news-community.js"></script>
+</body></html>
