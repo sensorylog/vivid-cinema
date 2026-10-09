@@ -8,13 +8,15 @@ The product direction is a hybrid of editorial selection, latest stories, trendi
 
 ## News source and ingestion policy
 
-- `functions/news-sources.js` is a candidate registry, not proof that any source is approved for reuse.
+- `functions/news-sources.js` is a code-side research shortlist only; the scheduled job does not ingest from that shortlist.
+- The scheduled job reads the moderator-managed Firestore `newsSources` registry and selects only records with `status: approved` and `feedApproved: true`.
 - All candidate feeds must remain `approvedForUse: false` until source reliability, feed terms, attribution/display permissions and any image rights have been reviewed.
 - Pulse Ghana is a manual editorial candidate only; do not scrape its website. Confirm an official permitted feed/API before any automation.
 - `VIVID_NEWS_INGESTION_ENABLED` must remain unset or anything other than `true` until an authorized owner explicitly approves the source set.
 - The ingestion job stores bounded metadata/excerpts and links to the original report. It does not republish full articles or feed images.
+- Each feed request is HTTPS-only, capped at 2 MB, limited to three redirects, and checked against the approved publisher domain at every redirect hop.
 - The scheduled Firebase Function has not been deployed or verified against live feeds. Check billing, quotas, scheduler availability and source-specific terms before staging.
-- The current implementation does not yet provide the manual publisher registry/editorial desk from the earlier foundation branch. That capability must be reconciled into this branch before launch if manual publishing is required.
+- The moderator page now includes a publisher registry and manual editorial desk. Source approval and manual publication are enforced by Firestore rules, not just by hidden UI panels.
 
 ## Moderator identity
 
