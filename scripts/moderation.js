@@ -31,6 +31,7 @@ async function resolveReport(report){
  catch(error){console.warn(error);message("Could not resolve this report. Check moderator access.");}
 }
 onAuthStateChanged(auth,async user=>{
+ unsubscribe?.();unsubscribe=null;moderator=false;
  if(!user){message("Moderator sign-in required.");queue.innerHTML='<div class="vivid-editorial-empty"><h3>Restricted desk</h3><p>Sign in with an authorized moderator account to continue.</p><a href="auth.html?returnTo=moderator.html">Sign in ↗</a></div>';return;}
  try{
   const token=await user.getIdTokenResult(true);
