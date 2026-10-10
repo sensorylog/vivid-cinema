@@ -425,7 +425,7 @@ function renderShell(params) {
   const status = $("player-status");
   const tryNextButton = $("player-try-next");
   const overlay = $("player-overlay");
-  if (overlay) document.body.classList.add("vivid-player-open");
+  // Keep the page interactive until the viewer opens the cinema window.
   const openPlayer = $("watch-open-player");
   const closePlayer = $("player-close");
   const serverMenu = $("player-server-menu");
