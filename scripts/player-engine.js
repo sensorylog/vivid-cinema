@@ -88,6 +88,7 @@ function loadScript(url, globalName) {
     };
     const onError = () => {
       cleanup();
+      script.remove();
       reject(new Error("Unable to load the playback library. Check the connection and content-security policy."));
     };
     script.addEventListener("load", onLoad, { once: true });
