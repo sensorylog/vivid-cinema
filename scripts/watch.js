@@ -236,6 +236,8 @@ function setPlayerSource(source, params, startAt = 0) {
   const player = $("vidapi-player");
   if (!player || !params) return;
   clearFallbackTimer();
+  const tryNextButton = $("player-try-next");
+  if (tryNextButton) tryNextButton.hidden = true;
   if (!["vidapi", "vidsrc", "vidlink", "vidplus"].includes(source) || !sourceAvailable(source)) return;
   activeSource = source;
   sourceAttempted.add(source);
@@ -644,6 +646,7 @@ function handlePlayerEvent(event) {
   updateSourceLabel();
   const status = $("player-status");
   if (status) status.hidden = true;
+  if ($("player-try-next")) $("player-try-next").hidden = true;
   const progress = Number(data.player_progress) || 0;
   const duration = Number(data.player_duration) || 0;
   if (progress > 0) {
