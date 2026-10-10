@@ -523,3 +523,118 @@ body.vivid-title-page .vivid-title-backdrop-image {
     height: clamp(190px, 56.25vw, 310px);
   }
 }
+
+
+/* Cinematic hero refresh: keep the artwork full-bleed and bring title details
+   into the lower edge of the image, while retaining the existing data/actions. */
+body.vivid-title-page .vivid-title-backdrop {
+  height: clamp(360px, 53vw, 690px);
+  min-height: 360px;
+  background: #07080c;
+}
+body.vivid-title-page .vivid-title-backdrop-image {
+  object-fit: cover;
+  object-position: center 30%;
+  opacity: .88;
+  filter: saturate(.96) contrast(1.05);
+  transform: scale(1.005);
+}
+body.vivid-title-page .vivid-title-backdrop-overlay {
+  background:
+    linear-gradient(180deg, rgba(7,8,12,.04) 0%, rgba(7,8,12,.02) 24%, rgba(7,8,12,.35) 48%, rgba(7,8,12,.88) 78%, #07080c 100%),
+    linear-gradient(90deg, rgba(7,8,12,.5) 0%, rgba(7,8,12,.12) 52%, rgba(7,8,12,.18) 100%);
+}
+body.vivid-title-page .vivid-title-info {
+  margin-top: -210px;
+  background: linear-gradient(180deg, transparent 0, rgba(7,8,12,.32) 72px, #07080c 250px);
+}
+body.vivid-title-page .vivid-title-info-inner {
+  align-items: end;
+  grid-template-columns: clamp(150px, 16vw, 210px) minmax(0, 1fr);
+  gap: clamp(22px, 3.4vw, 48px);
+  padding-bottom: 26px;
+}
+body.vivid-title-page .vivid-title-copy {
+  padding-top: 8px;
+  max-width: 900px;
+}
+body.vivid-title-page .vivid-title-copy h1 {
+  max-width: 16ch;
+  font-size: clamp(2.4rem, 5vw, 4.7rem);
+  line-height: 1;
+  margin: 8px 0 13px;
+  text-wrap: balance;
+}
+body.vivid-title-page .vivid-title-copy > p {
+  max-width: 72ch;
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+body.vivid-title-page .vivid-title-actions .vivid-button--primary {
+  min-height: 48px;
+  padding-inline: 24px;
+  box-shadow: 0 10px 34px rgba(124, 58, 237, .28);
+}
+body.vivid-title-page .vivid-title-poster {
+  box-shadow: 0 22px 60px rgba(0,0,0,.52), 0 0 0 1px rgba(255,255,255,.08);
+}
+body.vivid-title-page .vivid-title-backdrop-image[src=""],
+body.vivid-title-page .vivid-title-backdrop-image:not([src]) {
+  display: none;
+}
+@media (max-width: 800px) {
+  body.vivid-title-page .vivid-title-backdrop {
+    height: clamp(290px, 62vw, 440px);
+    min-height: 290px;
+  }
+  body.vivid-title-page .vivid-title-info {
+    margin-top: -112px;
+  }
+  body.vivid-title-page .vivid-title-info-inner {
+    align-items: start;
+    padding-bottom: 18px;
+  }
+  body.vivid-title-page .vivid-title-copy h1 {
+    font-size: clamp(2rem, 5.5vw, 3.2rem);
+  }
+}
+@media (max-width: 520px) {
+  body.vivid-title-page .vivid-title-backdrop {
+    height: 270px;
+    min-height: 270px;
+  }
+  body.vivid-title-page .vivid-title-backdrop-image {
+    object-position: center 24%;
+  }
+  body.vivid-title-page .vivid-title-backdrop-overlay {
+    background: linear-gradient(180deg, rgba(7,8,12,.02) 0%, rgba(7,8,12,.12) 36%, rgba(7,8,12,.78) 72%, #07080c 100%);
+  }
+  body.vivid-title-page .vivid-title-info {
+    margin-top: -54px;
+    background: linear-gradient(180deg, transparent, #07080c 76px);
+  }
+  body.vivid-title-page .vivid-title-info-inner {
+    align-items: start;
+    padding-bottom: 10px;
+  }
+  body.vivid-title-page .vivid-title-copy h1 {
+    font-size: clamp(1.65rem, 7.2vw, 2.3rem);
+    line-height: 1.02;
+    margin: 5px 0 8px;
+  }
+  body.vivid-title-page .vivid-title-copy > p {
+    -webkit-line-clamp: 5;
+  }
+  body.vivid-title-page .vivid-title-actions .vivid-button--primary {
+    min-height: 44px;
+    padding-inline: 16px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  body.vivid-title-page .vivid-title-backdrop-image,
+  body.vivid-title-page .vivid-title-poster {
+    transform: none;
+  }
+}
