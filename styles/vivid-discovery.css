@@ -268,3 +268,57 @@ html[data-vivid-theme="light"] body.vivid-discovery-page .vivid-discovery-nav na
 .vivid-browse-landing .vivid-page-back{display:none}
 @media(max-width:640px){.vivid-discovery-main{padding-left:16px;padding-right:16px}.vivid-browse-category-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.vivid-browse-category-card{border-radius:12px}}
 @media(prefers-reduced-motion:reduce){.vivid-browse-category-image{transition:none}}
+
+
+/* Intentional Browse rhythm: separate discovery, filters, and results into clear stages. */
+.vivid-discovery-page .vivid-discovery-main {
+  padding-bottom: clamp(40px, 6vw, 80px);
+}
+.vivid-discovery-page .vivid-discovery-intro {
+  margin-bottom: clamp(28px, 4vw, 52px);
+}
+.vivid-discovery-page .vivid-discovery-intro h1 {
+  text-wrap: balance;
+}
+.vivid-discovery-page .vivid-browse-categories {
+  margin-bottom: clamp(42px, 6vw, 76px);
+}
+.vivid-discovery-page .vivid-browse-title-row {
+  margin-bottom: clamp(18px, 2.5vw, 28px);
+}
+.vivid-discovery-page .vivid-browse-category-group + .vivid-browse-category-group {
+  margin-top: clamp(30px, 4vw, 46px);
+  padding-top: clamp(22px, 3vw, 32px);
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+}
+.vivid-discovery-page .vivid-filter-panel {
+  gap: 18px;
+}
+.vivid-discovery-page .vivid-results-head {
+  gap: 16px;
+  align-items: end;
+}
+.vivid-discovery-page .vivid-results-head h2 {
+  text-wrap: balance;
+}
+.vivid-discovery-page .vivid-discovery-grid:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.65);
+  outline-offset: 5px;
+}
+@media (max-width: 800px) {
+  .vivid-discovery-page .vivid-browse-category-group + .vivid-browse-category-group {
+    margin-top: 28px;
+    padding-top: 22px;
+    border-top-color: rgba(255, 255, 255, 0.055);
+  }
+  .vivid-discovery-page .vivid-filter-panel {
+    gap: 14px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .vivid-discovery-page .vivid-browse-category-card,
+  .vivid-discovery-page .vivid-browse-category-media img,
+  .vivid-discovery-page .vivid-browse-category-image {
+    transition: none !important;
+  }
+}
