@@ -558,7 +558,11 @@ function handlePlayerEvent(event) {
     const vidlinkId = String(data.tmdbId || data.mtmdbId || data.tmdb || "").trim();
     if (payload.type !== "PLAYER_EVENT" || !/^(play|pause|seeked|ended|timeupdate)$/i.test(vidlinkEvent)) return;
     if (!vidlinkMediaType || vidlinkMediaType !== String(media?.media_type || "").toLowerCase()) return;
-    if (vidlinkId && vidlinkId !== String(media?.id || tmdbId || "")) return;
+    if (vidlinkId && vidlinkId !== String(tmdbId || media?.id || "")) return;
+    if (currentParams?.type === "tv") {
+      if (data.season != null && Number(data.season) !== Number(currentParams.season)) return;
+      if (data.episode != null && Number(data.episode) !== Number(currentParams.episode)) return;
+    }
     primaryHealthy = true;
     clearFallbackTimer();
     const status = $("player-status");
