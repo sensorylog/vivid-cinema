@@ -12,6 +12,7 @@ const route = getRoute();
 const VIDAPI_ORIGINS = new Set([new URL(VIVID_CONFIG.api.vidapiEmbedBaseUrl).origin, "https://vidapi.ru"]);
 const VIDLINK_ORIGIN = "https://vidlink.pro";
 const VIDPLUS_ORIGIN = "https://player.vidplus.to";
+const VIDKING_ORIGIN = "https://www.vidking.net";
 const VIDSRC_ORIGIN = (() => {
   try { return new URL(VIVID_CONFIG.api.vidsrcEmbedBaseUrl || "https://vidsrc.cc").origin; }
   catch { return "https://vidsrc.cc"; }
@@ -102,6 +103,17 @@ function buildVidplusEmbedUrl(params, startAt = 0) {
   return base + path + "?" + query;
 }
 
+// CINEXTMA documents VidKing as an additional movie/TV source. Its current
+// progress-seeking parameter is unreliable, so we intentionally do not pass it.
+function buildVidkingEmbedUrl(params) {
+  const id = encodeURIComponent(tmdbId || params.id);
+  const query = new URLSearchParams({ color: "e50914", autoplay: "false" });
+  const path = params.type === "tv"
+    ? "/embed/tv/" + id + "/" + params.season + "/" + params.episode
+    : "/embed/movie/" + id;
+  return "https://www.vidking.net" + path + "?" + query;
+}
+
 async function resolveAnimeIds(title) {
   if (route.params.get("anime") !== "1" || !title) return { aniListId: "", malId: "" };
   try {
@@ -150,6 +162,7 @@ function sourceAvailable(source) {
     return false;
   }
   if (source === "vidapi") return true;
+  if (source === "vidking") return hasFallbackId();
   return hasFallbackId();
 }
 
@@ -158,7 +171,7 @@ function getNextSource(source) {
   // VidPlus remains manual-only for standard movie/TV playback until coverage is verified.
   const order = isAnimePlayback()
     ? ["vidplus", "vidlink"]
-    : ["vidapi", "vidsrc", "vidlink"];
+    : ["vidapi", "vidsrc", "vidlink", "vidking"];
   const index = order.indexOf(source);
   const candidates = isAnimePlayback() ? order.filter(candidate => candidate !== source) : order.slice(index + 1);
   return candidates.find(candidate => !sourceAttempted.has(candidate) && sourceAvailable(candidate)) || null;
@@ -168,6 +181,7 @@ function getSourceLabel(source) {
   if (source === "vidsrc") return "VidSrc alternate source";
   if (source === "vidlink") return "VidLink alternate source";
   if (source === "vidplus") return "VidPlus alternate source";
+  if (source === "vidking") return "VidKing alternate source · resume seeking may be unavailable";
   return "Powered by VidAPI";
 }
 
@@ -208,7 +222,7 @@ function showFallbackPrompt(source) {
   if (activeSource !== source) return;
   const status = $("player-status");
   const nextButton = $("player-try-next");
-  const label = source === "vidplus" ? "VidPlus" : source === "vidlink" ? "VidLink" : source === "vidsrc" ? "VidSrc" : "VidAPI";
+  const label = source === "vidplus" ? "VidPlus" : source === "vidking" ? "VidKing" : source === "vidlink" ? "VidLink" : source === "vidsrc" ? "VidSrc" : "VidAPI";
   if (status) {
     status.textContent = label + " is taking longer than expected. It may still start; we will not switch servers unless you choose to.";
     status.classList.add("is-warning");
@@ -239,7 +253,7 @@ function setPlayerSource(source, params, startAt = 0) {
   clearFallbackTimer();
   const tryNextButton = $("player-try-next");
   if (tryNextButton) tryNextButton.hidden = true;
-  if (!["vidapi", "vidsrc", "vidlink", "vidplus"].includes(source) || !sourceAvailable(source)) return;
+  if (!["vidapi", "vidsrc", "vidlink", "vidplus", "vidking"].includes(source) || !sourceAvailable(source)) return;
   activeSource = source;
   sourceAttempted.add(source);
   const status = $("player-status");
@@ -289,6 +303,20 @@ function setPlayerSource(source, params, startAt = 0) {
       fallbackTimer = null;
       if (primaryHealthy || activeSource !== "vidplus") return;
       showFallbackPrompt("vidplus");
+    }, 25000);
+  } else if (source === "vidking") {
+    if (isAnimePlayback() || !hasFallbackId()) return;
+    primaryHealthy = false;
+    player.src = buildVidkingEmbedUrl(params);
+    if (status) {
+      status.textContent = "Loading VidKing alternate source… Resume seeking may not be supported by this provider.";
+      status.classList.remove("is-warning");
+      status.hidden = false;
+    }
+    fallbackTimer = window.setTimeout(() => {
+      fallbackTimer = null;
+      if (primaryHealthy || activeSource !== "vidking") return;
+      showFallbackPrompt("vidking");
     }, 25000);
   } else {
     primaryHealthy = false;
@@ -418,7 +446,7 @@ function renderShell(params) {
         '<h1 id="watch-title">' + escapeHtml(episodeTitle || title) + '</h1><p id="watch-overview">' + escapeHtml(isTv && details?.episode?.overview ? details.episode.overview : media.overview || "") + '</p>' +
       '</div><a class="vivid-button vivid-button--secondary" href="' + escapeHtml(buildTitleUrl(media.id, media.media_type)) + '"><i class="bi bi-info-circle"></i> Details</a></div></section>' +
     '<section class="vivid-player-launch" aria-label="Start watching"><div class="vivid-player-launch-card"><div class="vivid-player-launch-copy"><span class="vivid-watch-kicker">YOUR SCREENING ROOM</span><strong>Ready when you are.</strong><span>Open the player in its own cinema window. Close it any time without leaving this page.</span></div><button type="button" id="watch-open-player" class="vivid-player-open"><i class="bi bi-play-fill" aria-hidden="true"></i><span>Watch now</span></button></div><div class="vivid-player-launch-foot"><span><i class="bi bi-shield-check" aria-hidden="true"></i> Choose a server if playback stalls</span><a href="' + escapeHtml(buildTitleUrl(media.id, media.media_type)) + '">Title details <i class="bi bi-arrow-up-right" aria-hidden="true"></i></a></div></section>' +
-    '<div id="player-overlay" hidden class="vivid-player-overlay" role="presentation"><section class="vivid-player-dialog" role="dialog" aria-modal="true" aria-labelledby="player-dialog-title"><header class="vivid-player-dialog-head"><div class="vivid-player-dialog-heading"><span class="vivid-player-live-dot" aria-hidden="true"></span><div><span class="vivid-player-dialog-eyebrow">VIVID CINEMA · NOW PLAYING</span><h2 id="player-dialog-title">' + escapeHtml(episodeTitle || title) + '</h2><span id="player-source-label" class="vivid-player-current-source">Connecting to a server…</span></div></div><div class="vivid-player-dialog-actions"><div class="vivid-server-picker"><button type="button" id="player-server-menu" class="vivid-player-switch vivid-server-menu" aria-expanded="false" aria-controls="player-server-panel"><i class="bi bi-hdd-network" aria-hidden="true"></i> Servers <i class="bi bi-chevron-down" aria-hidden="true"></i></button><div id="player-server-panel" class="vivid-server-panel" hidden><div class="vivid-server-panel-heading"><strong>Available servers</strong><span>Tap to switch</span></div><button type="button" class="vivid-player-source" data-player-source="vidapi" aria-pressed="true"><span class="vivid-server-dot"></span><span><strong>VidAPI</strong><small>Primary server</small></span><span class="vivid-server-state" data-server-state="vidapi">Ready</span></button><button type="button" class="vivid-player-source" data-player-source="vidsrc" aria-pressed="false"><span class="vivid-server-dot"></span><span><strong>VidSrc</strong><small>Alternate server</small></span><span class="vivid-server-state" data-server-state="vidsrc">Available</span></button><button type="button" class="vivid-player-source" data-player-source="vidlink" aria-pressed="false"><span class="vivid-server-dot"></span><span><strong>VidLink</strong><small>Alternate server</small></span><span class="vivid-server-state" data-server-state="vidlink">Available</span></button><button type="button" class="vivid-player-source" data-player-source="vidplus" aria-pressed="false"><span class="vivid-server-dot"></span><span><strong>VidPlus</strong><small>Experimental · manual selection</small></span><span class="vivid-server-state" data-server-state="vidplus">Available</span></button><p>Servers depend on title availability and provider uptime.</p></div></div><button type="button" id="player-close" class="vivid-player-close" aria-label="Close player"><i class="bi bi-x-lg" aria-hidden="true"></i></button></div></header><div class="vivid-player-frame"><div id="player-status" class="vivid-player-status" role="status" aria-live="polite">' + (resumeAt > 5 ? "Resuming where you left off…" : "Preparing playback…") + '</div><button type="button" id="player-try-next" class="vivid-player-try-next" hidden>Try next server</button><iframe id="vidapi-player" title="' + escapeHtml(title) + ' player" allow="autoplay; fullscreen; picture-in-picture; encrypted-media; clipboard-write" allowfullscreen referrerpolicy="origin" loading="eager"></iframe></div><footer class="vivid-player-dialog-foot"><span><i class="bi bi-lightning-charge" aria-hidden="true"></i> You control when the server changes</span><a href="' + escapeHtml(buildTitleUrl(media.id, media.media_type)) + '">Title details</a></footer></section></div>' +
+    '<div id="player-overlay" hidden class="vivid-player-overlay" role="presentation"><section class="vivid-player-dialog" role="dialog" aria-modal="true" aria-labelledby="player-dialog-title"><header class="vivid-player-dialog-head"><div class="vivid-player-dialog-heading"><span class="vivid-player-live-dot" aria-hidden="true"></span><div><span class="vivid-player-dialog-eyebrow">VIVID CINEMA · NOW PLAYING</span><h2 id="player-dialog-title">' + escapeHtml(episodeTitle || title) + '</h2><span id="player-source-label" class="vivid-player-current-source">Connecting to a server…</span></div></div><div class="vivid-player-dialog-actions"><div class="vivid-server-picker"><button type="button" id="player-server-menu" class="vivid-player-switch vivid-server-menu" aria-expanded="false" aria-controls="player-server-panel"><i class="bi bi-hdd-network" aria-hidden="true"></i> Servers <i class="bi bi-chevron-down" aria-hidden="true"></i></button><div id="player-server-panel" class="vivid-server-panel" hidden><div class="vivid-server-panel-heading"><strong>Available servers</strong><span>Tap to switch</span></div><button type="button" class="vivid-player-source" data-player-source="vidapi" aria-pressed="true"><span class="vivid-server-dot"></span><span><strong>VidAPI</strong><small>Primary server</small></span><span class="vivid-server-state" data-server-state="vidapi">Ready</span></button><button type="button" class="vivid-player-source" data-player-source="vidsrc" aria-pressed="false"><span class="vivid-server-dot"></span><span><strong>VidSrc</strong><small>Alternate server</small></span><span class="vivid-server-state" data-server-state="vidsrc">Available</span></button><button type="button" class="vivid-player-source" data-player-source="vidlink" aria-pressed="false"><span class="vivid-server-dot"></span><span><strong>VidLink</strong><small>Alternate server</small></span><span class="vivid-server-state" data-server-state="vidlink">Available</span></button><button type="button" class="vivid-player-source" data-player-source="vidplus" aria-pressed="false"><span class="vivid-server-dot"></span><span><strong>VidPlus</strong><small>Experimental · manual selection</small></span><span class="vivid-server-state" data-server-state="vidplus">Available</span></button><button type="button" class="vivid-player-source" data-player-source="vidking" aria-pressed="false"><span class="vivid-server-dot"></span><span><strong>VidKing</strong><small>Extra source · resume seeking may be unavailable</small></span><span class="vivid-server-state" data-server-state="vidking">Available</span></button><p>Third-party servers vary in availability, ads, and playback support.</p></div></div><button type="button" id="player-close" class="vivid-player-close" aria-label="Close player"><i class="bi bi-x-lg" aria-hidden="true"></i></button></div></header><div class="vivid-player-frame"><div id="player-status" class="vivid-player-status" role="status" aria-live="polite">' + (resumeAt > 5 ? "Resuming where you left off…" : "Preparing playback…") + '</div><button type="button" id="player-try-next" class="vivid-player-try-next" hidden>Try next server</button><iframe id="vidapi-player" title="' + escapeHtml(title) + ' player" allow="autoplay; fullscreen; picture-in-picture; encrypted-media; clipboard-write" allowfullscreen referrerpolicy="origin" loading="eager"></iframe></div><footer class="vivid-player-dialog-foot"><span><i class="bi bi-lightning-charge" aria-hidden="true"></i> You control when the server changes</span><a href="' + escapeHtml(buildTitleUrl(media.id, media.media_type)) + '">Title details</a></footer></section></div>' +
     (isTv ? '<section class="vivid-watch-note"><i class="bi bi-collection-play"></i><div><strong>Episode playback</strong><span>Use the episode list on the title page to switch seasons and episodes.</span></div></section>' : "") +
     '<section class="vivid-watch-recommendations"><div class="vivid-section-heading"><div><span>AFTER WATCHING</span><h2>More like this</h2></div></div><div id="watch-recommendations" class="vivid-watch-rec-rail">' + recommendationCards() + '</div></section>';
 
@@ -503,7 +531,7 @@ function renderShell(params) {
     document.querySelectorAll("[data-player-source]").forEach(button => {
       button.addEventListener("click", () => {
         const source = button.getAttribute("data-player-source");
-        if (!["vidapi", "vidsrc", "vidlink", "vidplus"].includes(source) || !sourceAvailable(source)) return;
+        if (!["vidapi", "vidsrc", "vidlink", "vidplus", "vidking"].includes(source) || !sourceAvailable(source)) return;
         sourceAttempted.clear();
         setServerMenuOpen(false);
         const latestProgress = Number(getPlaybackProgress(progressKey())?.progress || route.params.get("startAt") || resumeAt || 0);
@@ -554,12 +582,14 @@ function handlePlayerEvent(event) {
   const isFallback = event.origin === VIDSRC_ORIGIN;
   const isVidLink = event.origin === VIDLINK_ORIGIN;
   const isVidPlus = event.origin === VIDPLUS_ORIGIN;
-  if (!isVidapi && !isFallback && !isVidLink && !isVidPlus) return;
+  const isVidKing = event.origin === VIDKING_ORIGIN;
+  if (!isVidapi && !isFallback && !isVidLink && !isVidPlus && !isVidKing) return;
   const originMatchesActiveSource =
     (activeSource === "vidapi" && isVidapi) ||
     (activeSource === "vidsrc" && isFallback) ||
     (activeSource === "vidlink" && isVidLink) ||
-    (activeSource === "vidplus" && isVidPlus);
+    (activeSource === "vidplus" && isVidPlus) ||
+    (activeSource === "vidking" && isVidKing);
   // Ignore delayed messages from a previous iframe document after the user switches source.
   if (!originMatchesActiveSource) return;
   const payload = event.data;
@@ -592,6 +622,49 @@ function handlePlayerEvent(event) {
     Number(eventData.currentTime) > 0;
   if (!isPlaybackSignal) return;
   const data = payload.data;
+  if (isVidKing) {
+    const eventName = String(data.event || "").toLowerCase();
+    const mediaType = String(data.mediaType || "").toLowerCase();
+    const sourceId = String(data.id ?? "").trim();
+    const expectedId = String(tmdbId || media?.id || "");
+    if (payload.type !== "PLAYER_EVENT" || !/^(play|pause|seeked|ended|timeupdate)$/i.test(eventName)) return;
+    if (mediaType !== String(media?.media_type || "").toLowerCase()) return;
+    if (!sourceId || sourceId !== expectedId) return;
+    if (currentParams?.type === "tv") {
+      if (data.season != null && Number(data.season) !== Number(currentParams.season)) return;
+      if (data.episode != null && Number(data.episode) !== Number(currentParams.episode)) return;
+    }
+    primaryHealthy = true;
+    clearFallbackTimer();
+    updateSourceLabel();
+    const status = $("player-status");
+    if (status) status.hidden = true;
+    const progress = Math.max(0, Number(data.currentTime ?? data.progress) || 0);
+    const duration = Math.max(0, Number(data.duration) || 0);
+    const season = data.season ?? currentParams?.season;
+    const episode = data.episode ?? currentParams?.episode;
+    if (progress > 0) {
+      savePlaybackProgress(progressKey(), {
+        progress, duration, season, episode,
+        title: media.title, media_type: media.media_type, id: media.id
+      });
+      recordWatchActivity(progress, duration);
+      recordBehavior("playback_progress", media, {
+        progress, duration,
+        percentage: duration ? Math.round(progress / duration * 100) : 0,
+        season, episode
+      });
+    }
+    if (/^(ended|completed)$/i.test(eventName)) {
+      recordBehavior("watch_completed", media, { duration, season, episode });
+      upsertLibraryItem("history", { ...historyItem(), completion: 100, completedAt: Date.now(), updatedAt: Date.now() });
+      completePlaybackProgress(progressKey(), {
+        duration, season, episode,
+        title: media.title, media_type: media.media_type, id: media.id
+      });
+    }
+    return;
+  }
   if (isVidLink) {
     const vidlinkEvent = String(data.event || "").toLowerCase();
     const vidlinkMediaType = String(data.mediaType || "").toLowerCase();
