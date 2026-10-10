@@ -11,7 +11,7 @@
   --vivid-space-6:1.5rem; --vivid-space-8:2rem; --vivid-space-10:2.5rem; --vivid-space-12:3rem; --vivid-space-16:4rem; --vivid-space-20:5rem;
   --vivid-content-width:1500px; --vivid-reading-width:720px; --vivid-page-gutter:clamp(1rem,2.8vw,3rem);
   --vivid-section-gap:clamp(2.5rem,6vw,5rem); --vivid-grid-gap:clamp(.7rem,1.3vw,1.25rem);
-  --vivid-bg:#08090b; --vivid-bg-elevated:#0d0f12; --vivid-surface-solid:#121419; --vivid-surface:rgba(18,20,25,.72);
+  --vivid-bg:#071426; --vivid-bg-elevated:#0b1a2d; --vivid-surface-solid:#121419; --vivid-surface:rgba(18,20,25,.72);
   --vivid-surface-soft:rgba(255,255,255,.055); --vivid-surface-strong:rgba(255,255,255,.09);
   --vivid-text:#f5f7fa; --vivid-text-muted:#a8adb7; --vivid-text-subtle:#747a85; --vivid-accent:#fff;
   --vivid-danger:#ff5f56; --vivid-success:#32d583; --vivid-border:rgba(255,255,255,.12); --vivid-border-strong:rgba(255,255,255,.2);
