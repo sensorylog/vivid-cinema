@@ -140,3 +140,65 @@ body.vivid-library-page{background:#06070a;color:#f5f7fa;min-height:100dvh}.vivi
 .vivid-library-tabs button:focus-visible{outline:2px solid #fff;outline-offset:2px}
 .vivid-library-tabs span{font-size:12px;opacity:.7}
 @media(max-width:700px){.vivid-library-tabs{top:calc(var(--vivid-mobile-nav-height,64px) + 8px);margin-bottom:22px;border-radius:12px}.vivid-library-tabs button{padding-inline:14px}}
+
+
+/* Library page rhythm: keep the current list, continue-watching rail, and tabs easy to scan. */
+.vivid-library-page .vivid-library-header {
+  margin-bottom: clamp(22px, 3vw, 34px);
+}
+.vivid-library-page .vivid-library-sync-line {
+  line-height: 1.5;
+}
+.vivid-library-page .vivid-library-continue {
+  padding-bottom: 4px;
+  border-bottom: 1px solid rgba(255,255,255,.07);
+}
+.vivid-library-page .vivid-library-shelf-head {
+  margin-top: 2px;
+  margin-bottom: 18px;
+}
+.vivid-library-page .vivid-library-shelf-head h2 {
+  text-wrap: balance;
+}
+.vivid-library-page .vivid-library-shelf {
+  scroll-padding-inline: 16px;
+  -webkit-overflow-scrolling: touch;
+}
+.vivid-library-page .vivid-library-shelf .vivid-library-card:focus-within,
+.vivid-library-page .vivid-library-continue-card:focus-visible {
+  outline: 2px solid rgba(255,255,255,.78);
+  outline-offset: 3px;
+}
+.vivid-library-page .vivid-library-remove:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 3px;
+}
+.vivid-library-page .vivid-library-empty {
+  margin-bottom: 24px;
+}
+@media (max-width: 700px) {
+  .vivid-library-page .vivid-library-header {
+    padding-top: 18px;
+    padding-bottom: 24px;
+    gap: 18px;
+  }
+  .vivid-library-page .vivid-library-continue {
+    margin-top: 0;
+    padding-bottom: 20px;
+  }
+  .vivid-library-page .vivid-library-shelf-head {
+    margin-bottom: 14px;
+  }
+  .vivid-library-page .vivid-library-shelf {
+    scroll-padding-inline: 12px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .vivid-library-page .vivid-library-card,
+  .vivid-library-page .vivid-library-card img,
+  .vivid-library-page .vivid-library-continue-art img,
+  .vivid-library-page .vivid-library-tabs button {
+    transition: none !important;
+    scroll-behavior: auto;
+  }
+}
