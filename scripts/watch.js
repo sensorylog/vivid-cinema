@@ -59,38 +59,47 @@ function buildVidapiEmbedUrl(params, startAt = 0) {
     : base + "/embed/movie/" + encodeURIComponent(params.id) + "?" + query;
 }
 
-function buildVidlinkEmbedUrl(params) {
+function buildVidlinkEmbedUrl(params, startAt = 0) {
   const base = String(VIVID_CONFIG.api.vidlinkEmbedBaseUrl || "https://vidlink.pro").replace(/\/+$/, "");
+  const query = new URLSearchParams({ primaryColor: "e50914", secondaryColor: "1b1b1b", iconColor: "ffffff", title: "false", poster: "false" });
+  if (Number(startAt) > 5) query.set("startAt", String(Math.floor(Number(startAt))));
   if (route.params.get("anime") === "1") {
     if (!malId) return "";
-    return base + "/anime/" + encodeURIComponent(malId) + "/" + params.episode + "/sub?fallback=true";
+    query.set("fallback", "true");
+    return base + "/anime/" + encodeURIComponent(malId) + "/" + params.episode + "/sub?" + query;
   }
   const id = encodeURIComponent(tmdbId || imdbId || params.id);
-  return params.type === "tv"
-    ? base + "/tv/" + id + "/" + params.season + "/" + params.episode
-    : base + "/movie/" + id;
+  const path = params.type === "tv"
+    ? "/tv/" + id + "/" + params.season + "/" + params.episode
+    : "/movie/" + id;
+  return base + path + "?" + query;
 }
 
-function buildVidsrcEmbedUrl(params) {
+function buildVidsrcEmbedUrl(params, startAt = 0) {
   const base = String(VIVID_CONFIG.api.vidsrcEmbedBaseUrl || "https://vidsrc.sh").replace(/\/+$/, "");
-  // VidSrc accepts numeric TMDB IDs, so the fallback stays fully TMDB-based.
   const id = encodeURIComponent(tmdbId || imdbId);
-  if (params.type === "tv") {
-    return base + "/embed/tv/" + id + "/" + params.season + "/" + params.episode;
-  }
-  return base + "/embed/movie/" + id;
+  const path = params.type === "tv"
+    ? "/embed/tv/" + id + "/" + params.season + "/" + params.episode
+    : "/embed/movie/" + id;
+  const query = new URLSearchParams({ ds_lang: "en" });
+  if (Number(startAt) > 5) query.set("startAt", String(Math.floor(Number(startAt))));
+  return base + path + "?" + query;
 }
 
-function buildVidplusEmbedUrl(params) {
+function buildVidplusEmbedUrl(params, startAt = 0) {
   const base = String(VIVID_CONFIG.api.vidplusEmbedBaseUrl || "https://player.vidplus.to").replace(/\/+$/, "");
+  const query = new URLSearchParams({ autoplay: "false", primarycolor: "e50914", secondarycolor: "171717", iconcolor: "ffffff" });
+  if (Number(startAt) > 5) query.set("startAt", String(Math.floor(Number(startAt))));
   if (route.params.get("anime") === "1") {
     if (!aniListId) return "";
-    return base + "/embed/anime/" + encodeURIComponent(aniListId) + "/" + params.episode + "?dub=false";
+    query.set("dub", "false");
+    return base + "/embed/anime/" + encodeURIComponent(aniListId) + "/" + params.episode + "?" + query;
   }
   const id = encodeURIComponent(tmdbId || params.id);
-  return params.type === "tv"
-    ? base + "/embed/tv/" + id + "/" + params.season + "/" + params.episode
-    : base + "/embed/movie/" + id;
+  const path = params.type === "tv"
+    ? "/embed/tv/" + id + "/" + params.season + "/" + params.episode
+    : "/embed/movie/" + id;
+  return base + path + "?" + query;
 }
 
 async function resolveAnimeIds(title) {
@@ -219,7 +228,7 @@ function setPlayerSource(source, params, startAt = 0) {
     primaryHealthy = false;
     const vidlinkUrl = buildVidlinkEmbedUrl(params);
     if (!vidlinkUrl) return;
-    player.src = vidlinkUrl;
+    player.src = buildVidlinkEmbedUrl(params, startAt);
     if (status) {
       status.textContent = "Loading VidLink alternate source…";
       status.classList.remove("is-warning");
@@ -241,7 +250,7 @@ function setPlayerSource(source, params, startAt = 0) {
   } else if (source === "vidsrc") {
     if (!hasFallbackId()) return;
     primaryHealthy = false;
-    player.src = buildVidsrcEmbedUrl(params);
+    player.src = buildVidsrcEmbedUrl(params, startAt);
     if (status) {
       status.textContent = "Loading VidSrc alternate source…";
       status.classList.remove("is-warning");
@@ -265,7 +274,7 @@ function setPlayerSource(source, params, startAt = 0) {
     primaryHealthy = false;
     const vidplusUrl = buildVidplusEmbedUrl(params);
     if (!vidplusUrl) return;
-    player.src = vidplusUrl;
+    player.src = buildVidplusEmbedUrl(params, startAt);
     if (status) {
       status.textContent = "Loading VidPlus alternate source…";
       status.classList.remove("is-warning");
@@ -419,6 +428,20 @@ function renderShell(params) {
 
   const player = $("vidapi-player");
   const status = $("player-status");
+  const cinemaToggle = $("player-cinema-toggle");
+  if (cinemaToggle) {
+    const setCinemaMode = enabled => {
+      document.body.classList.toggle("vivid-cinema-mode", enabled);
+      cinemaToggle.setAttribute("aria-pressed", enabled ? "true" : "false");
+      cinemaToggle.innerHTML = enabled
+        ? '<i class="bi bi-fullscreen-exit" aria-hidden="true"></i> Exit cinema mode'
+        : '<i class="bi bi-arrows-fullscreen" aria-hidden="true"></i> Cinema mode';
+    };
+    cinemaToggle.addEventListener("click", () => setCinemaMode(!document.body.classList.contains("vivid-cinema-mode")));
+    document.addEventListener("keydown", event => {
+      if (event.key === "Escape" && document.body.classList.contains("vivid-cinema-mode")) setCinemaMode(false);
+    });
+  }
   if (player) {
     player.addEventListener("load", () => {
       // A cross-origin iframe load only proves the document loaded; it does not prove
@@ -513,19 +536,21 @@ function handlePlayerEvent(event) {
   if (!payload.data) return;
   // VidAPI has a formal PLAYER_EVENT contract; fallbacks may expose simpler
   // playback messages. Only treat explicit playback/progress signals as healthy.
+  const explicitStatus = /^(play|playing|pause|paused|timeupdate|progress|seeked|ended|completed|loadedmetadata|canplay|ready|started)$/i.test(statusValue);
   const isPlaybackSignal =
-    isVidLink ||
-    isVidPlus ||
     payload.type === "PLAYER_EVENT" ||
-    /^(play|playing|timeupdate|progress|loadedmetadata|canplay|ready|started)$/i.test(statusValue) ||
-    Number(eventData.player_progress) > 0;
+    explicitStatus ||
+    Number(eventData.player_progress) > 0 ||
+    Number(eventData.currentTime) > 0;
   if (!isPlaybackSignal) return;
   const data = payload.data;
   if (isVidLink) {
+    const vidlinkEvent = String(data.event || "").toLowerCase();
     const vidlinkMediaType = String(data.mediaType || "").toLowerCase();
-    const vidlinkId = String(data.tmdbId || data.tmdb || "").trim();
-    if (vidlinkMediaType && vidlinkMediaType !== String(media?.media_type || "").toLowerCase()) return;
-    if (vidlinkId && vidlinkId !== String(media?.id || "")) return;
+    const vidlinkId = String(data.tmdbId || data.mtmdbId || data.tmdb || "").trim();
+    if (payload.type !== "PLAYER_EVENT" || !/^(play|pause|seeked|ended|timeupdate)$/i.test(vidlinkEvent)) return;
+    if (!vidlinkMediaType || vidlinkMediaType !== String(media?.media_type || "").toLowerCase()) return;
+    if (vidlinkId && vidlinkId !== String(media?.id || tmdbId || "")) return;
     primaryHealthy = true;
     clearFallbackTimer();
     const status = $("player-status");
@@ -546,7 +571,7 @@ function handlePlayerEvent(event) {
         season, episode
       });
     }
-    if (/^(ended|completed)$/i.test(String(data.event || ""))) {
+    if (/^(ended|completed)$/i.test(vidlinkEvent)) {
       recordBehavior("watch_completed", media, { duration, season, episode });
       upsertLibraryItem("history", { ...historyItem(), completion: 100, completedAt: Date.now(), updatedAt: Date.now() });
       completePlaybackProgress(progressKey(), {
