@@ -836,3 +836,19 @@ html[data-vivid-theme="light"] body.vivid-cinema-home .vivid-rating{
   background-size: cover !important;
   background-position: center center !important;
 }
+
+
+/* Share Vivid Cinema — restrained desktop QR and compact mobile share action */
+.vivid-qr-share{display:flex;align-items:center;justify-content:center;gap:12px;padding:14px 0 10px;color:inherit}
+.vivid-qr-share img{display:block;width:84px;height:84px;object-fit:contain;border-radius:8px;background:#fff}
+.vivid-qr-share span{display:flex;flex-direction:column;gap:4px}
+.vivid-qr-share strong{font-size:.9rem;font-weight:650;letter-spacing:.01em}
+.vivid-qr-share small{font-size:.76rem;opacity:.72}
+.vivid-footer-bottom{display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap}
+.vivid-mobile-share{display:none}
+@media(max-width:700px){
+  .vivid-qr-share{display:none}
+  .vivid-footer-bottom{gap:8px}
+  .vivid-mobile-share{display:inline-flex;align-items:center;justify-content:center;gap:8px;margin:10px auto 0;padding:9px 14px;border:1px solid rgba(255,255,255,.14);border-radius:999px;background:rgba(255,255,255,.05);color:inherit;font:inherit;font-size:.82rem;cursor:pointer}
+  .vivid-footer{display:flex;flex-direction:column;align-items:center}
+}
