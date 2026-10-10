@@ -468,7 +468,8 @@ function renderShell(params) {
         const source = button.getAttribute("data-player-source");
         if (!["vidapi", "vidsrc", "vidlink", "vidplus"].includes(source) || !sourceAvailable(source)) return;
         sourceAttempted.clear();
-        setPlayerSource(source, params, resumeAt);
+        const latestProgress = Number(getPlaybackProgress(progressKey())?.progress || route.params.get("startAt") || resumeAt || 0);
+        setPlayerSource(source, params, latestProgress);
       });
     });
   }
