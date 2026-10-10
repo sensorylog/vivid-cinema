@@ -11,6 +11,8 @@ export const VIVID_CONFIG = Object.freeze({
     vidsrcEmbedBaseUrl: "https://vidsrc.sh",
     vidlinkEmbedBaseUrl: "https://vidlink.pro",
     vidplusEmbedBaseUrl: "https://player.vidplus.to",
+    // Add exact HTTPS hostnames only after verifying an authorized direct-stream provider.
+    directStreamHosts: Object.freeze([]),
     language: "en-US"
   }),
   routes: Object.freeze({
