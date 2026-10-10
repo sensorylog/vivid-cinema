@@ -891,3 +891,21 @@ html[data-vivid-theme="light"] body.vivid-cinema-home .vivid-rating{
     transition: none !important;
   }
 }
+
+
+/* Keep Home shelf actions close to the last visible card row. */
+body[data-vivid-page="home"] .vivid-rail-footer {
+  margin-top: 0;
+  padding-top: 0;
+}
+body[data-vivid-page="home"] .vivid-rail.is-expanded {
+  row-gap: 14px;
+}
+@media (max-width: 640px) {
+  body[data-vivid-page="home"] .vivid-rail.is-expanded {
+    row-gap: 10px;
+  }
+  body[data-vivid-page="home"] .vivid-rail-footer {
+    padding-top: 2px;
+  }
+}
