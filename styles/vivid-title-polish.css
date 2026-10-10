@@ -425,3 +425,69 @@ body.vivid-title-page .vivid-title-genres a:focus-visible {
     transform: none;
   }
 }
+
+
+/* On narrow screens, keep the title block beside the poster but let the
+   synopsis and controls use the full available width below it. */
+@media (max-width: 520px) {
+  body.vivid-title-page .vivid-title-info-inner {
+    display: grid;
+    grid-template-columns: 94px minmax(0, 1fr);
+    grid-template-rows: auto auto auto auto auto auto auto;
+    column-gap: 15px;
+    row-gap: 0;
+    align-items: start;
+  }
+  body.vivid-title-page .vivid-title-poster {
+    grid-column: 1;
+    grid-row: 1 / 5;
+    width: 100%;
+    align-self: start;
+  }
+  body.vivid-title-page .vivid-title-copy {
+    display: contents;
+  }
+  body.vivid-title-page .vivid-title-kicker {
+    grid-column: 2;
+    grid-row: 1;
+    align-self: end;
+  }
+  body.vivid-title-page .vivid-title-copy h1 {
+    grid-column: 2;
+    grid-row: 2;
+    align-self: center;
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+  body.vivid-title-page .vivid-title-meta {
+    grid-column: 2;
+    grid-row: 3;
+    align-self: start;
+  }
+  body.vivid-title-page .vivid-title-genres {
+    grid-column: 2;
+    grid-row: 4;
+    align-self: start;
+  }
+  body.vivid-title-page .vivid-title-copy > p {
+    grid-column: 1 / -1;
+    grid-row: 5;
+    min-width: 0;
+    margin-top: 20px;
+  }
+  body.vivid-title-page .vivid-title-actions {
+    grid-column: 1 / -1;
+    grid-row: 6;
+  }
+  body.vivid-title-page .vivid-title-library-actions {
+    grid-column: 1 / -1;
+    grid-row: 7;
+  }
+}
+
+@media (max-width: 380px) {
+  body.vivid-title-page .vivid-title-info-inner {
+    grid-template-columns: 80px minmax(0, 1fr);
+    column-gap: 12px;
+  }
+}
