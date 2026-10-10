@@ -147,11 +147,27 @@ function youtubeUrl(key,muted=true){
  return "https://www.youtube.com/embed/"+encodeURIComponent(key)+"?"+params.toString();
 }
 
-function sendHeroPlayerCommand(func){
+function sendHeroPlayerCommand(func,args=[]){
  const iframe=$("hero-video");
  if(!iframe?.contentWindow)return false;
- try{iframe.contentWindow.postMessage(JSON.stringify({event:"command",func,args:[]}),"https://www.youtube.com");return true}catch{return false}
+ try{iframe.contentWindow.postMessage(JSON.stringify({event:"command",func,args}),"https://www.youtube.com");return true}catch{return false}
 }
+
+// YouTube fires iframe load even when its embedded page shows an error.
+// Only reveal the video after the player reports that playback has actually started.
+window.addEventListener("message",event=>{
+ const iframe=$("hero-video");
+ if(!iframe||event.source!==iframe.contentWindow||!/^https:\/\/(www\.)?youtube(-nocookie)?\.com$/.test(event.origin))return;
+ let message;
+ try{message=typeof event.data==="string"?JSON.parse(event.data):event.data}catch{return}
+ if(message?.event==="onStateChange"&&Number(message.info)===1){
+   iframe.classList.add("is-ready");
+   $("hero-fallback")?.classList.remove("is-visible");
+ }else if(message?.event==="onError"){
+   iframe.classList.remove("is-ready");
+   $("hero-fallback")?.classList.add("is-visible");
+ }
+});
 
 async function loadHeroVideo(item){
  const iframe=$("hero-video"),fallback=$("hero-fallback");
@@ -172,12 +188,12 @@ async function loadHeroVideo(item){
    if(!trailer?.key){iframe.removeAttribute("src");iframe.dataset.videoKey="";return false;}
    iframe.onload=()=>{
      if(token!==heroLoadToken)return;
-     iframe.classList.add("is-ready");
-     fallback.classList.remove("is-visible");
+     // Subscribe to player state. Do not hide the artwork on iframe load alone:
+     // YouTube also fires load for its "video unavailable" error page.
+     sendHeroPlayerCommand("addEventListener",["onStateChange"]);
+     sendHeroPlayerCommand("addEventListener",["onError"]);
      if(!heroPlaying){sendHeroPlayerCommand("pauseVideo");return;}
-     // Some browsers/YouTube player loads ignore the first autoplay attempt even
-     // when the embed is muted. Retry through the documented IFrame API command
-     // channel without rebuilding the iframe or changing the current title.
+     // Retry muted autoplay on browsers that ignore the initial embed parameter.
      [250,800,1800,3200].forEach(delay=>setTimeout(()=>{
        if(token!==heroLoadToken||!heroPlaying)return;
        sendHeroPlayerCommand("playVideo");
