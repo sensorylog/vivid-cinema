@@ -1,6 +1,6 @@
 /* Vivid Cinema — shared design tokens. Kept intentionally small so page-specific CSS stays composable. */
 :root{
-  --vivid-bg:#000000;
+  --vivid-bg:#071426;
   --vivid-surface:#1c1c1e;
   --vivid-surface-strong:#242426;
   --vivid-text:#f5f5f7;
