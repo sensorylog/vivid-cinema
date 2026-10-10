@@ -722,9 +722,10 @@ async function load() {
       const saved = getPlaybackProgress(progressKey());
       const resumeAt = Number(saved?.progress || route.params.get("startAt") || 0);
       fallbackTimer = window.setTimeout(() => {
+        fallbackTimer = null;
         if (primaryHealthy || activeSource !== "vidapi") return;
-        triggerFallback("primary_timeout_after_metadata");
-      }, fallbackDelayMs());
+        showFallbackPrompt("vidapi");
+      }, 25000);
     }
   } catch (error) {
     console.warn("Vivid metadata unavailable while playback is active:", error);
