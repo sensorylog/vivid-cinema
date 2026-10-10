@@ -91,10 +91,19 @@
 </section>
 <a class="vivid-support-bottom" href="donate.html"><i class="bi bi-heart-fill" aria-hidden="true"></i><span>Support Vivid Cinema</span><small>Help keep the project moving</small><i class="bi bi-arrow-up-right" aria-hidden="true"></i></a>
 </div></div></main>
-<footer class="vivid-footer">&copy; 2026 Vivid Cinema <span class="vivid-footer-links"><a href="about.html">About</a><a href="terms.html">Terms</a><a href="privacy.html">Privacy</a><a href="contact.html">Contact</a></span></footer>
+<footer class="vivid-footer">
+  <section class="vivid-qr-share" aria-label="Share Vivid Cinema">
+    <img src="assets/images/IMG_6099.jpeg" alt="QR code to visit Vivid Cinema" loading="lazy" decoding="async">
+    <span><strong>Share Vivid Cinema</strong><small>Scan to visit Vivid Cinema</small></span>
+  </section>
+  <div class="vivid-footer-bottom">&copy; 2026 Vivid Cinema <span class="vivid-footer-links"><a href="about.html">About</a><a href="terms.html">Terms</a><a href="privacy.html">Privacy</a><a href="contact.html">Contact</a></span></div>
+  <button class="vivid-mobile-share" type="button" data-vivid-share><i class="bi bi-share" aria-hidden="true"></i> Share Vivid Cinema</button>
+</footer>
 <nav class="vivid-mobile-nav" aria-label="Mobile navigation"><a href="#home" class="is-active"><i class="bi bi-house-fill" aria-hidden="true"></i><span>Home</span></a><a href="discover.html"><i class="bi bi-grid-3x3-gap-fill" aria-hidden="true"></i><span>Browse</span></a><a href="library.html"><i class="bi bi-bookmark-fill" aria-hidden="true"></i><span>Library</span></a><a href="news.html"><i class="bi bi-newspaper" aria-hidden="true"></i><span>News</span></a><a href="#search" data-search-trigger aria-label="Search Vivid Cinema"><i class="bi bi-search" aria-hidden="true"></i><span>Search</span></a></nav>
 </div>
 <script type="module" src="scripts/app-shell.js"></script><script type="module" src="script.js?v=20261006-2"></script><script type="module" src="scripts/nav-auth.js"></script>
 <script type="module" src="scripts/atmosphere.js"></script><script src="scripts/home-breathe.js" defer></script>
 <script type="module" src="scripts/i18n.js"></script>
-<script type="module" src="scripts/pwa.js"></script></body></html>
+<script type="module" src="scripts/pwa.js"></script><script>
+(()=>{const button=document.querySelector("[data-vivid-share]");if(!button)return;button.addEventListener("click",async()=>{const data={title:"Vivid Cinema",text:"Discover movies and series on Vivid Cinema.",url:location.origin+location.pathname.replace(/[^/]*$/,"")};try{if(navigator.share){await navigator.share(data);}else if(navigator.clipboard?.writeText){await navigator.clipboard.writeText(data.url);const label=button.innerHTML;button.textContent="Link copied";setTimeout(()=>{button.innerHTML=label;},1800);}else{location.href="mailto:?subject="+encodeURIComponent(data.title)+"&body="+encodeURIComponent(data.text+" "+data.url);}}catch(error){if(error?.name!=="AbortError")console.warn("Vivid Cinema share was not completed.",error);}});})();
+</script></body></html>
