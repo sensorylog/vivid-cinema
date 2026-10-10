@@ -677,7 +677,7 @@ window.addEventListener("message", handlePlayerEvent);
 
 async function load() {
   currentParams = getParams();
-  tmdbId = /^\\d+$/.test(String(currentParams.id || "")) ? String(currentParams.id) : "";
+  tmdbId = /^\d+$/.test(String(currentParams.id || "")) ? String(currentParams.id) : "";
   if (!currentParams.id) {
     $("watch-content").innerHTML = '<section class="vivid-watch-error"><i class="bi bi-exclamation-circle"></i><h1>Playback link is incomplete.</h1><p>Choose a title from Vivid Cinema and start playback again.</p><a class="vivid-button vivid-button--secondary" href="home.html">Browse titles</a></section>';
     return;
