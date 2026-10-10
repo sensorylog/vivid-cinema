@@ -639,7 +639,7 @@ function handlePlayerEvent(event) {
     updateSourceLabel();
     const status = $("player-status");
     if (status) status.hidden = true;
-    const progress = Math.max(0, Number(data.currentTime ?? data.progress) || 0);
+    const progress = Math.max(0, Number(data.currentTime) || 0);
     const duration = Math.max(0, Number(data.duration) || 0);
     const season = data.season ?? currentParams?.season;
     const episode = data.episode ?? currentParams?.episode;
