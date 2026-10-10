@@ -228,3 +228,72 @@ body.vivid-player-open{overflow:hidden;overscroll-behavior:none}
  .vivid-player-dialog-foot{padding:5px 12px}
 }
 @media(prefers-reduced-motion:reduce){.vivid-player-overlay,.vivid-player-open,.vivid-player-close{animation:none;transition:none}}
+
+
+/* Intentional playback sizing: a comfortable desktop cinema window, not an oversized zoom. */
+.vivid-player-overlay {
+  padding: clamp(14px, 3vh, 30px) clamp(14px, 3vw, 36px);
+}
+.vivid-player-dialog {
+  width: min(1160px, 100%);
+  max-height: calc(100dvh - 2 * clamp(14px, 3vh, 30px));
+  overflow: hidden;
+  border-radius: 18px;
+}
+.vivid-player-dialog-head { padding: 11px 15px; }
+.vivid-player-dialog .vivid-player-frame {
+  width: 100%;
+  max-height: calc(100dvh - 180px);
+  aspect-ratio: 16 / 9;
+  flex: 0 1 auto;
+}
+.vivid-player-dialog .vivid-player-frame iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+  aspect-ratio: 16 / 9;
+}
+.vivid-player-dialog-foot { padding: 9px 15px 11px; }
+.vivid-server-panel {
+  width: min(280px, calc(100vw - 32px));
+  padding: 8px;
+}
+.vivid-server-panel .vivid-player-source {
+  min-height: 48px;
+  padding: 7px 9px;
+}
+.vivid-server-panel-heading { padding: 5px 7px 7px; }
+.vivid-player-try-next {
+  position: absolute;
+  z-index: 2;
+  left: 50%;
+  bottom: 16px;
+  transform: translateX(-50%);
+  border: 1px solid rgba(255,255,255,.2);
+  border-radius: 999px;
+  background: #f5f5f5;
+  color: #090a0d;
+  padding: 10px 17px;
+  font: inherit;
+  font-size: .8rem;
+  font-weight: 750;
+  cursor: pointer;
+  box-shadow: 0 8px 30px rgba(0,0,0,.45);
+}
+.vivid-player-try-next[hidden] { display: none !important; }
+@media (max-width: 700px) {
+  .vivid-player-overlay { padding: 0; }
+  .vivid-player-dialog { width: 100%; max-height: 100dvh; border-radius: 0; }
+  .vivid-player-dialog-head { padding: calc(9px + env(safe-area-inset-top)) 11px 10px; }
+  .vivid-player-dialog .vivid-player-frame { width: 100%; max-height: calc(100dvh - 125px); }
+  .vivid-player-dialog-foot { padding: 9px 12px calc(9px + env(safe-area-inset-bottom)); }
+  .vivid-server-panel { width: min(260px, calc(100vw - 24px)); }
+  .vivid-player-try-next { bottom: calc(12px + env(safe-area-inset-bottom)); }
+}
+@media (max-height: 600px) and (orientation: landscape) {
+  .vivid-player-overlay { padding: 8px 18px; }
+  .vivid-player-dialog { width: min(960px, 100%); max-height: calc(100dvh - 16px); }
+  .vivid-player-dialog-head { padding: 5px 10px; }
+  .vivid-player-dialog .vivid-player-frame { max-height: calc(100dvh - 88px); }
+  .vivid-player-dialog-foot { padding: 5px 10px; }
+}
