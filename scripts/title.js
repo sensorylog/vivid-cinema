@@ -12,6 +12,7 @@ const route = getRoute();
 let media = null;
 let currentDetails = null;
 let trailerKeydownBound = false;
+let seasonLoadSequence = 0;
 const PROVIDER_COUNTRIES = [
   ["US", "United States"],
   ["GH", "Ghana"],
@@ -125,12 +126,15 @@ function renderSeasons(details) {
 async function loadSeason(id, seasonNumber) {
   const container = $("episode-list");
   if (!container) return;
+  const requestId = ++seasonLoadSequence;
   container.innerHTML = '<p class="vivid-muted">Loading episodes…</p>';
   try {
     const data = await tmdbApi.tvSeason(id, seasonNumber);
+    if (requestId !== seasonLoadSequence || !container.isConnected) return;
     const episodes = data.episodes || [];
     container.innerHTML = episodes.length ? episodes.map((episode) => '<article class="vivid-episode"><div class="vivid-episode-thumb"><img loading="lazy" src="' + getImageUrl(episode.still_path, "w500") + '" alt="" onerror="this.style.visibility=\'hidden\'"></div><div class="vivid-episode-copy"><div class="vivid-episode-line"><strong>Episode ' + episode.episode_number + '</strong><span>★ ' + (episode.vote_average ? Number(episode.vote_average).toFixed(1) : "—") + '</span></div><h3>' + escapeHtml(episode.name || ("Episode " + episode.episode_number)) + '</h3><small>' + escapeHtml(episode.air_date || "Air date unavailable") + '</small><p>' + escapeHtml(episode.overview || "No episode synopsis is available.") + '</p><a class="vivid-button vivid-button--secondary vivid-episode-watch" href="' + escapeHtml(buildWatchUrl(media.id, "tv", seasonNumber, episode.episode_number)) + '"><i class="bi bi-play-fill"></i> Play episode</a></div></article>').join("") : '<p class="vivid-muted">No episodes are available for this season.</p>';
   } catch (error) {
+    if (requestId !== seasonLoadSequence || !container.isConnected) return;
     container.innerHTML = '<p class="vivid-muted">' + escapeHtml(getErrorMessage(error)) + '</p>';
   }
 }
