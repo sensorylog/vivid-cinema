@@ -154,9 +154,10 @@ function sourceAvailable(source) {
 }
 
 function getNextSource(source) {
-  // Keep VidPlus manual-only until its playback coverage is verified.
+  // Anime providers use different catalog IDs; try only providers with a resolved ID.
+  // VidPlus remains manual-only for standard movie/TV playback until coverage is verified.
   const order = isAnimePlayback()
-    ? ["vidlink"]
+    ? ["vidplus", "vidlink"]
     : ["vidapi", "vidsrc", "vidlink"];
   const index = order.indexOf(source);
   const candidates = isAnimePlayback() ? order.filter(candidate => candidate !== source) : order.slice(index + 1);
@@ -443,7 +444,16 @@ function renderShell(params) {
     const saved = getPlaybackProgress(progressKey());
     const startAt = Number(saved?.progress || route.params.get("startAt") || resumeAt || 0);
     sourceAttempted.clear();
-    setPlayerSource(activeSource || "vidapi", params, startAt);
+    const initialSource = isAnimePlayback() && !sourceAvailable(activeSource)
+      ? (aniListId ? "vidplus" : malId ? "vidlink" : "")
+      : (activeSource || "vidapi");
+    if (initialSource) {
+      setPlayerSource(initialSource, params, startAt);
+    } else if (status) {
+      status.textContent = "This title could not be matched to an anime player. Try another title or return to the anime catalogue.";
+      status.classList.add("is-warning");
+      status.hidden = false;
+    }
     closePlayer?.focus({ preventScroll: true });
   };
   const closePlayerWindow = () => {
@@ -691,20 +701,16 @@ async function load() {
     malId = animeIds.malId;
     updateSourceLabel();
     if (isAnimePlayback()) {
-      const saved = getPlaybackProgress(progressKey());
-      const resumeAt = Number(saved?.progress || route.params.get("startAt") || 0);
-      sourceAttempted.clear();
-      const firstAnimeSource = aniListId ? "vidplus" : malId ? "vidlink" : "";
-      if (firstAnimeSource) {
-        setPlayerSource(firstAnimeSource, currentParams, resumeAt);
-      } else {
-        const status = $("player-status");
-        if (status) {
-          status.textContent = "This title could not be matched to an anime player. Try another title or return to the anime catalogue.";
-          status.classList.add("is-warning");
-          status.hidden = false;
-        }
+      // Resolve anime IDs now, but do not load a third-party iframe until the
+      // viewer explicitly opens the player.
+      const status = $("player-status");
+      if (status) {
+        status.textContent = aniListId || malId
+          ? "Anime player ready. Select Watch now to begin."
+          : "Matching this title to an anime player…";
+        status.hidden = false;
       }
+      updateSourceLabel();
     }
     if (currentParams.type === "tv") {
       details.episode = await tmdbApi.tvSeason(currentParams.id, currentParams.season)
