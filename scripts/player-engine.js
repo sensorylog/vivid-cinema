@@ -9,6 +9,7 @@ const SHAKA_LIBRARY_URL = "https://cdn.jsdelivr.net/npm/shaka-player@5.2.12/dist
 let activeHls = null;
 let activeShaka = null;
 let activeVideo = null;
+let directPlaybackGeneration = 0;
 const scriptLoads = new Map();
 
 function allowedHosts() {
@@ -105,24 +106,31 @@ function loadScript(url, globalName) {
   return promise;
 }
 
-export function stopDirectStream(video) {
+function disposeActiveStream(video) {
   if (activeHls) {
     try { activeHls.destroy(); } catch {}
     activeHls = null;
   }
+  let destroyPromise = Promise.resolve();
   if (activeShaka) {
     const player = activeShaka;
     activeShaka = null;
-    Promise.resolve(player.destroy()).catch(() => {});
+    destroyPromise = Promise.resolve(player.destroy()).catch(() => {});
   }
   const target = video || activeVideo;
   if (target) {
-    target.pause();
+    try { target.pause(); } catch {}
     target.removeAttribute("src");
     target.querySelectorAll("source, track").forEach(node => node.remove());
     try { target.load(); } catch {}
   }
   if (!video || activeVideo === video) activeVideo = null;
+  return destroyPromise;
+}
+
+export function stopDirectStream(video) {
+  directPlaybackGeneration += 1;
+  return disposeActiveStream(video);
 }
 
 export async function playDirectStream(video, stream, { startAt = 0, onError = () => {} } = {}) {
@@ -132,7 +140,9 @@ export async function playDirectStream(video, stream, { startAt = 0, onError = (
   const type = inferStreamType(url, stream?.type);
   if (!type) throw new Error("Unsupported direct stream format.");
 
-  stopDirectStream(video);
+  const requestGeneration = ++directPlaybackGeneration;
+  await disposeActiveStream(video);
+  if (requestGeneration !== directPlaybackGeneration) throw new Error("Playback request was superseded.");
   activeVideo = video;
   video.controls = true;
   video.playsInline = true;
@@ -167,7 +177,7 @@ export async function playDirectStream(video, stream, { startAt = 0, onError = (
       }
       throw error;
     }
-    if (activeVideo !== video) throw new Error("Playback request was superseded.");
+    if (activeVideo !== video || requestGeneration !== directPlaybackGeneration) throw new Error("Playback request was superseded.");
     if (Hls.isSupported()) {
       const hls = new Hls({ enableWorker: true, lowLatencyMode: false, backBufferLength: 90, maxBufferLength: 30 });
       activeHls = hls;
@@ -198,7 +208,7 @@ export async function playDirectStream(video, stream, { startAt = 0, onError = (
   const player = new shaka.Player();
   activeShaka = player;
   await player.attach(video);
-  if (activeVideo !== video || activeShaka !== player) {
+  if (activeVideo !== video || activeShaka !== player || requestGeneration !== directPlaybackGeneration) {
     await player.destroy();
     throw new Error("Playback request was superseded.");
   }
@@ -210,5 +220,9 @@ export async function playDirectStream(video, stream, { startAt = 0, onError = (
     if (activeShaka === player) onError(new Error(event?.detail?.message || "The DASH stream failed to play."));
   });
   await player.load(url.href, Number(startAt) > 5 ? Number(startAt) : undefined);
+  if (activeVideo !== video || activeShaka !== player || requestGeneration !== directPlaybackGeneration) {
+    await player.destroy().catch(() => {});
+    throw new Error("Playback request was superseded.");
+  }
   return { type, engine: "shaka", destroy: () => stopDirectStream(video) };
 }
