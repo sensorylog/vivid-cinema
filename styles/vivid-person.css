@@ -46,3 +46,38 @@ body.vivid-person-page{min-height:100dvh;background:#06070a;color:#f5f7fa}
 @media(max-width:640px){.vivid-person-page #person-content{padding:0 16px 44px}.vivid-person-page .vivid-page-back{margin:16px 0}.vivid-person-layout{grid-template-columns:minmax(0,1fr);gap:24px}.vivid-person-sidebar{display:grid;grid-template-columns:120px minmax(0,1fr);gap:18px;align-items:start}.vivid-person-profile{width:120px;border-radius:9px}.vivid-person-info{margin-top:0}.vivid-person-info h2{font-size:1.08rem;margin-bottom:10px}.vivid-person-info dl{gap:9px}.vivid-person-info-item dt{font-size:.78rem}.vivid-person-info-item dd{font-size:.78rem;line-height:1.4}.vivid-person-overview h1{font-size:clamp(2rem,9vw,2.8rem)}.vivid-person-role{margin-bottom:18px}.vivid-person-bio{font-size:.92rem;line-height:1.65}.vivid-person-section{margin-top:26px}.vivid-person-credit{flex-basis:116px}.vivid-person-credit-table{font-size:.82rem}.vivid-person-credit-table th{padding:9px 7px}.vivid-person-credit-table td{padding:10px 7px}.vivid-person-credit-table td:first-child,.vivid-person-credit-table th:first-child{width:48px}.vivid-person-credit-table td:last-child{width:38%}}
 @media(max-width:380px){.vivid-person-sidebar{grid-template-columns:100px minmax(0,1fr);gap:12px}.vivid-person-profile{width:100px}.vivid-person-info dl{gap:7px}.vivid-person-info-item dt,.vivid-person-info-item dd{font-size:.74rem}.vivid-person-credit{flex-basis:108px}}
 @media(prefers-reduced-motion:reduce){.vivid-person-credit{transition:none}}
+
+
+/* Profile-page finishing pass: clearer scan lines, keyboard focus, and calmer scrolling. */
+body.vivid-person-page .vivid-person-section{
+  scroll-margin-top:88px;
+}
+body.vivid-person-page .vivid-person-credit-rail{
+  padding-bottom:18px;
+  scrollbar-color:rgba(255,255,255,.22) transparent;
+}
+body.vivid-person-page .vivid-person-credit:focus-visible,
+body.vivid-person-page .vivid-person-credit-table a:focus-visible{
+  outline:2px solid #f5f7fa;
+  outline-offset:4px;
+  border-radius:8px;
+}
+body.vivid-person-page .vivid-person-credit-table tbody tr:hover td{
+  background:rgba(255,255,255,.025);
+}
+body.vivid-person-page .vivid-person-credit-table td,
+body.vivid-person-page .vivid-person-credit-table th{
+  overflow-wrap:anywhere;
+}
+@media(max-width:640px){
+  body.vivid-person-page .vivid-person-section{margin-top:24px}
+  body.vivid-person-page .vivid-person-page-back{scroll-margin-top:72px}
+  body.vivid-person-page .vivid-person-credit-rail{
+    margin-inline:-2px;
+    scroll-padding-inline:2px;
+    -webkit-overflow-scrolling:touch;
+  }
+}
+@media(prefers-reduced-motion:reduce){
+  body.vivid-person-page .vivid-person-credit-rail{scroll-behavior:auto}
+}
