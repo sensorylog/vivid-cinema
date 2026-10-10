@@ -514,6 +514,13 @@ function handlePlayerEvent(event) {
   const isVidLink = event.origin === VIDLINK_ORIGIN;
   const isVidPlus = event.origin === VIDPLUS_ORIGIN;
   if (!isVidapi && !isFallback && !isVidLink && !isVidPlus) return;
+  const originMatchesActiveSource =
+    (activeSource === "vidapi" && isVidapi) ||
+    (activeSource === "vidsrc" && isFallback) ||
+    (activeSource === "vidlink" && isVidLink) ||
+    (activeSource === "vidplus" && isVidPlus);
+  // Ignore delayed messages from a previous iframe document after the user switches source.
+  if (!originMatchesActiveSource) return;
   const payload = event.data;
   if (!payload || typeof payload !== "object") return;
 
@@ -585,7 +592,9 @@ function handlePlayerEvent(event) {
   // Validate the event before marking the source healthy. Cross-origin players can
   // emit generic events, and an unrelated/late event must never suppress fallback.
   if (String(info.mediaType || "") !== String(media?.media_type || "")) return;
-  if (isVidapi && info.tmdb != null && String(info.tmdb) !== String(media?.id)) return;
+  const expectedTmdbId = String(tmdbId || media?.id || "");
+  if (info.tmdb != null && expectedTmdbId && String(info.tmdb) !== expectedTmdbId) return;
+  if (info.imdb && imdbId && String(info.imdb) !== String(imdbId)) return;
   if (currentParams?.type === "tv") {
     if (info.season != null && Number(info.season) !== Number(currentParams.season)) return;
     if (info.episode != null && Number(info.episode) !== Number(currentParams.episode)) return;
