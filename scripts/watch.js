@@ -31,6 +31,49 @@ let aniListId = "";
 let malId = "";
 const PRIMARY_FALLBACK_MS = 11000;
 const ANIME_FALLBACK_MS = 11000;
+const SOURCE_PREFERENCES_KEY = "vivid:playback-source-preferences:v1";
+const MAX_REMEMBERED_SOURCES = 100;
+
+function readSourcePreferences() {
+  try {
+    const value = JSON.parse(localStorage.getItem(SOURCE_PREFERENCES_KEY) || "{}");
+    return value && typeof value === "object" && !Array.isArray(value) ? value : {};
+  } catch {
+    return {};
+  }
+}
+
+function sourcePreferenceKey() {
+  const type = media?.media_type || currentParams?.type || "movie";
+  const id = media?.id || currentParams?.id;
+  return id == null ? "" : String(type) + ":" + String(id);
+}
+
+function getRememberedSource() {
+  if (isAnimePlayback()) return null;
+  const key = sourcePreferenceKey();
+  const source = key ? readSourcePreferences()[key]?.source : null;
+  return ["vidapi", "vidsrc", "vidlink", "vidplus", "vidking"].includes(source) && sourceAvailable(source)
+    ? source
+    : null;
+}
+
+function rememberSuccessfulSource(source) {
+  if (isAnimePlayback() || !media?.id ||
+      !["vidapi", "vidsrc", "vidlink", "vidplus", "vidking"].includes(source)) return;
+  const key = sourcePreferenceKey();
+  if (!key) return;
+  try {
+    const preferences = readSourcePreferences();
+    preferences[key] = { source, updatedAt: Date.now() };
+    const recent = Object.entries(preferences)
+      .sort((a, b) => Number(b[1]?.updatedAt || 0) - Number(a[1]?.updatedAt || 0))
+      .slice(0, MAX_REMEMBERED_SOURCES);
+    localStorage.setItem(SOURCE_PREFERENCES_KEY, JSON.stringify(Object.fromEntries(recent)));
+  } catch {
+    // Playback must continue even when browser storage is unavailable or full.
+  }
+}
 
 function getParams() {
   const id = route.params.get("id");
@@ -173,7 +216,11 @@ function getNextSource(source) {
     ? ["vidplus", "vidlink"]
     : ["vidapi", "vidsrc", "vidlink", "vidking"];
   const index = order.indexOf(source);
-  const candidates = isAnimePlayback() ? order.filter(candidate => candidate !== source) : order.slice(index + 1);
+  // Cycle through alternatives so a remembered last-position provider can still recover
+  // to the primary source instead of getting stuck with no next server.
+  const candidates = isAnimePlayback()
+    ? order.filter(candidate => candidate !== source)
+    : [...order.slice(index + 1), ...order.slice(0, Math.max(0, index))];
   return candidates.find(candidate => !sourceAttempted.has(candidate) && sourceAvailable(candidate)) || null;
 }
 
@@ -464,6 +511,7 @@ function renderShell(params) {
     serverMenu.setAttribute("aria-expanded", open ? "true" : "false");
     serverPanel.hidden = !open;
   };
+  let playerHasOpened = false;
   const openPlayerWindow = () => {
     if (!overlay) return;
     overlay.hidden = false;
@@ -471,10 +519,12 @@ function renderShell(params) {
     if (openPlayer) openPlayer.setAttribute("aria-expanded", "true");
     const saved = getPlaybackProgress(progressKey());
     const startAt = Number(saved?.progress || route.params.get("startAt") || resumeAt || 0);
+    const rememberedSource = !playerHasOpened ? getRememberedSource() : null;
+    playerHasOpened = true;
     sourceAttempted.clear();
     const initialSource = isAnimePlayback() && !sourceAvailable(activeSource)
       ? (aniListId ? "vidplus" : malId ? "vidlink" : "")
-      : (activeSource || "vidapi");
+      : (rememberedSource || activeSource || "vidapi");
     if (initialSource) {
       setPlayerSource(initialSource, params, startAt);
     } else if (status) {
@@ -635,6 +685,7 @@ function handlePlayerEvent(event) {
       if (data.episode != null && Number(data.episode) !== Number(currentParams.episode)) return;
     }
     primaryHealthy = true;
+    rememberSuccessfulSource(activeSource);
     clearFallbackTimer();
     updateSourceLabel();
     const status = $("player-status");
@@ -677,6 +728,7 @@ function handlePlayerEvent(event) {
       if (data.episode != null && Number(data.episode) !== Number(currentParams.episode)) return;
     }
     primaryHealthy = true;
+    rememberSuccessfulSource(activeSource);
     clearFallbackTimer();
     updateSourceLabel();
     const status = $("player-status");
@@ -720,6 +772,7 @@ function handlePlayerEvent(event) {
   }
   // A validated playback/progress event means the active embed is alive.
   primaryHealthy = true;
+  rememberSuccessfulSource(activeSource);
   clearFallbackTimer();
   updateSourceLabel();
   const status = $("player-status");
