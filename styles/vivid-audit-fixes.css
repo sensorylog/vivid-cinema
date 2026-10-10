@@ -1805,3 +1805,18 @@ html[data-vivid-theme="light"] .vivid-mobile-nav a[aria-current="page"]{
   background:rgba(255,255,255,.74)!important;
   border-color:rgba(17,18,22,.08)!important;
 }
+
+/* Extend the shared canvas to the remaining full-page dark surfaces.
+   This deliberately does not recolor hero art, cards, controls, dialogs, or video players. */
+html:not([data-vivid-theme="light"]) body.vivid-anime-page,
+html:not([data-vivid-theme="light"]) body.vivid-collection-page,
+html:not([data-vivid-theme="light"]) body.vivid-live-page,
+html:not([data-vivid-theme="light"]) body.vivid-landing{
+  background-color:#071426!important;
+}
+html:not([data-vivid-theme="light"]) body.vivid-collection-page .vivid-collection-app,
+html:not([data-vivid-theme="light"]) body.vivid-landing .vivid-landing-shell,
+html:not([data-vivid-theme="light"]) body.account-page,
+html:not([data-vivid-theme="light"]) .account-page{
+  background-color:#071426!important;
+}
