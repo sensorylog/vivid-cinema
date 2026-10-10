@@ -103,3 +103,25 @@ body.vivid-collection-page{background:#06070a;color:#f5f7fa;min-height:100dvh}.v
     transform: none !important;
   }
 }
+
+
+/* Bring Load more/status directly under the final collection poster row. */
+.vivid-collection-page #collection-grid {
+  row-gap: 16px;
+  margin-bottom: 0;
+}
+.vivid-collection-page .vivid-collection-more {
+  padding: 14px 0 6px;
+  margin-top: 0;
+}
+.vivid-collection-page #collection-status {
+  line-height: 1.4;
+}
+@media (max-width: 600px) {
+  .vivid-collection-page #collection-grid {
+    row-gap: 12px;
+  }
+  .vivid-collection-page .vivid-collection-more {
+    padding-top: 10px;
+  }
+}

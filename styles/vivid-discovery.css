@@ -322,3 +322,21 @@ html[data-vivid-theme="light"] body.vivid-discovery-page .vivid-discovery-nav na
     transition: none !important;
   }
 }
+
+
+/* Keep pagination close to the final poster row on both desktop and mobile. */
+.vivid-discovery-page .vivid-discovery-results .vivid-discovery-grid {
+  row-gap: 18px;
+}
+.vivid-discovery-page .vivid-pagination {
+  margin-top: 0;
+  padding: 16px 0 8px;
+}
+@media (max-width: 560px) {
+  .vivid-discovery-page .vivid-discovery-results .vivid-discovery-grid {
+    row-gap: 14px;
+  }
+  .vivid-discovery-page .vivid-pagination {
+    padding-top: 12px;
+  }
+}
