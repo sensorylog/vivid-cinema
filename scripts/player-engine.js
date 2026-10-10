@@ -179,7 +179,19 @@ export async function playDirectStream(video, stream, { startAt = 0, onError = (
     }
     if (activeVideo !== video || requestGeneration !== directPlaybackGeneration) throw new Error("Playback request was superseded.");
     if (Hls.isSupported()) {
-      const hls = new Hls({ enableWorker: true, lowLatencyMode: false, backBufferLength: 90, maxBufferLength: 30 });
+      const hls = new Hls({
+        enableWorker: true,
+        lowLatencyMode: false,
+        backBufferLength: 90,
+        maxBufferLength: 30,
+        fetchSetup: (context, initParams) => {
+          if (!validateDirectStreamUrl(context.url)) throw new Error("HLS resource host is not allowlisted.");
+          return new Request(context.url, initParams);
+        },
+        xhrSetup: (_xhr, requestUrl) => {
+          if (!validateDirectStreamUrl(requestUrl)) throw new Error("HLS resource host is not allowlisted.");
+        }
+      });
       activeHls = hls;
       hls.on(Hls.Events.ERROR, (_event, data) => {
         if (!data?.fatal || activeHls !== hls) return;
@@ -215,6 +227,12 @@ export async function playDirectStream(video, stream, { startAt = 0, onError = (
   player.configure({
     abr: { enabled: true },
     streaming: { bufferingGoal: 30, rebufferingGoal: 2, bufferBehind: 30 }
+  });
+  player.getNetworkingEngine()?.registerRequestFilter((_requestType, request) => {
+    if (!Array.isArray(request?.uris) || !request.uris.length) throw new Error("DASH request has no resource URL.");
+    for (const uri of request.uris) {
+      if (!validateDirectStreamUrl(uri)) throw new Error("DASH resource host is not allowlisted.");
+    }
   });
   player.addEventListener("error", event => {
     if (activeShaka === player) onError(new Error(event?.detail?.message || "The DASH stream failed to play."));
