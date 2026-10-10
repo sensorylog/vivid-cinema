@@ -1106,13 +1106,28 @@ body.vivid-atmosphere .vivid-brand{
 
 /* Apple TV precision pass — preserve Vivid IA while tightening the mobile presentation. */
 :root{
-  --vivid-bg:#000;
+  --vivid-bg:#071426;
   --vivid-page-gutter:16px;
   --vivid-apple-secondary:#8e8e93;
   --vivid-apple-blue:#0a84ff;
 }
-html,body{background:#000;}
-body.vivid-atmosphere{background:#000;}
+html:not([data-vivid-theme="light"]),
+html:not([data-vivid-theme="light"]) body{
+  background-color:#071426!important;
+}
+html:not([data-vivid-theme="light"]) body.vivid-atmosphere{
+  background-color:#071426!important;
+}
+/* Only page-sized canvases change; cards, media, dialogs and player surfaces retain their own colors. */
+html:not([data-vivid-theme="light"]) body.vivid-cinema-home .vivid-home,
+html:not([data-vivid-theme="light"]) body.vivid-discovery-page .vivid-discovery-app,
+html:not([data-vivid-theme="light"]) body.vivid-library-page .vivid-library-app,
+html:not([data-vivid-theme="light"]) body.vivid-title-page .vivid-title-app,
+html:not([data-vivid-theme="light"]) body.vivid-watch-page .vivid-watch-app,
+html:not([data-vivid-theme="light"]) body.vivid-person-page .vivid-person-app,
+html:not([data-vivid-theme="light"]) body.vivid-search-page .vivid-search-main{
+  background-color:#071426!important;
+}
 
 .vivid-library-continue-rail,
 .vivid-library-shelf{touch-action:pan-x;}
