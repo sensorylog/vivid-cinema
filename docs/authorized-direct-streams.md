@@ -4,7 +4,7 @@ Vivid's direct player is an adapter, not a content catalog. No direct stream pro
 
 ## Enablement contract
 
-1. Add only exact, lowercase HTTPS hostnames controlled by an authorized streaming provider to `VIVID_CONFIG.api.directStreamHosts` in `scripts/config.js`.
+1. Add only exact, lowercase HTTPS hostnames controlled by an authorized streaming provider to `VIVID_CONFIG.api.directStreamHosts` in `scripts/config.js`. Include every host needed for manifests, segments, captions, and other media resources; HLS.js and Shaka enforce the allowlist on their media requests too.
 2. Load a first-party provider integration before `scripts/watch.js`. It must set `window.VIVID_DIRECT_STREAM_RESOLVER` to an async function.
 3. The resolver receives:
    - `media: { id, media_type, title }`
