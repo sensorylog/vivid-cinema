@@ -207,7 +207,7 @@ function updateSourceLabel() {
   if (label) label.textContent = getSourceLabel(activeSource);
   document.querySelectorAll("[data-server-state]").forEach(node => {
     const source = node.getAttribute("data-server-state");
-    node.textContent = source === activeSource ? (primaryHealthy ? "Playing" : "Connecting") : (sourceAvailable(source) ? "Available" : "Unavailable");
+    node.textContent = source === activeSource ? (primaryHealthy ? "Playing" : "Connecting") : (sourceAvailable(source) ? "Ready to try" : "Unavailable");
   });
   document.querySelectorAll("[data-player-source]").forEach(button => {
     const source = button.getAttribute("data-player-source");
