@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 
-const source = readFileSync(new URL("../scripts/direct-stream-validation.js", import.meta.url), "utf8");
+const source = readFileSync(new URL("../scripts/playback/direct-stream-validation.js", import.meta.url), "utf8");
 const { createAllowlistedFetchRequest, inferAuthorizedStreamType, normalizeAllowedHosts, validateAllowedHttpsUrl } = await import("data:text/javascript;base64," + Buffer.from(source).toString("base64"));
 
 const hosts = ["media.example.com", "cdn.example.com"];
