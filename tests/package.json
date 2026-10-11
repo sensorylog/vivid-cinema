@@ -3,7 +3,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test:rules": "firebase emulators:exec --config ../firebase.json --only firestore --project demo-vivid-cinema \"node --test firestore-rules.test.mjs\""
+    "test:rules": "firebase emulators:exec --config ../firebase.json --only firestore --project demo-vivid-cinema \"node --test firestore-rules.test.mjs\"",
+    "test:playback": "node --test playback-servers.test.mjs"
   },
   "dependencies": {
     "@firebase/rules-unit-testing": "5.0.2",
