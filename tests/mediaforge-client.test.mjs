@@ -46,12 +46,16 @@ test("resolveStream sends authenticated movie requests and accepts same-origin s
   assert.equal(mock.calls[0].options.redirect, "error");
 });
 
-test("TV and anime require valid episode identity", async () => {
-  const mock = mockFetch([]);
+test("TV and anime require valid episode identity and send season/episode fields", async () => {
+  const mock = mockFetch([jsonResponse({ stream: { url: "/anime/episode.m3u8", type: "hls" } })]);
   const client = createMediaForgeClient({ baseUrl, getIdToken: async () => "token", fetchImpl: mock.fetchImpl });
   await assert.rejects(client.resolveStream({ id: "show1", type: "tv" }, { season: 1 }), /season and episode/);
-  await assert.rejects(client.resolveStream({ id: "show1", type: "anime" }, { season: 1, episode: 2 }), /season and episode/);
   assert.equal(mock.calls.length, 0);
+  const stream = await client.resolveStream({ id: "show1", type: "anime" }, { season: 1, episode: 2 });
+  assert.equal(stream.type, "hls");
+  assert.deepEqual(JSON.parse(mock.calls[0].options.body), {
+    mediaId: "show1", mediaType: "anime", season: 1, episode: 2
+  });
 });
 
 test("rejects streams and download links on untrusted origins", async () => {
