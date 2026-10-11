@@ -28,6 +28,8 @@ jobs:
 
       - name: Test built-in playback provider URLs
         run: node --test tests/playback-urls.test.mjs
+      - name: Test canonical media layout and trailer behavior
+        run: node --test tests/media-layout.test.mjs
 
       - name: Test direct-stream URL validation
         run: node --test tests/direct-stream-validation.test.mjs
