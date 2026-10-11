@@ -148,9 +148,3 @@ body.vivid-watch-page.vivid-player-open{overflow:hidden;overscroll-behavior:none
 .vivid-secondary-player-open{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:42px;padding:10px 15px;border:1px solid rgba(255,255,255,.24);border-radius:999px;background:rgba(255,255,255,.08);color:#fff;font-size:.8rem;font-weight:700;text-decoration:none}
 .vivid-secondary-player-open:focus-visible{outline:2px solid #93c5fd;outline-offset:3px}
 .vivid-secondary-player-open:hover{background:rgba(255,255,255,.15)}
-.vivid-secondary-player-buttons{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.vivid-secondary-player-fallback{display:inline-flex;align-items:center;justify-content:center;min-height:42px;padding:10px 15px;border:1px solid rgba(229,9,20,.65);border-radius:999px;background:rgba(229,9,20,.12);color:#fff;font:inherit;font-size:.8rem;font-weight:750;cursor:pointer}
-.vivid-secondary-player-fallback:hover{background:rgba(229,9,20,.24)}
-.vivid-secondary-player-fallback:focus-visible{outline:2px solid #fca5a5;outline-offset:3px}
-.vivid-secondary-player-fallback[data-active="vidlink"]{border-color:rgba(255,255,255,.24);background:rgba(255,255,255,.08)}
-@media(max-width:520px){.vivid-secondary-player-buttons{width:100%}.vivid-secondary-player-buttons>*{flex:1 1 auto}}
