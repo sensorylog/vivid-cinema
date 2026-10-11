@@ -39,6 +39,7 @@ test("watch player is constrained for both inline and modal layouts", () => {
   assert.match(css, /\.vivid-player-overlay:not\(\.vivid-player-inline\) \.vivid-player-dialog/);
   assert.match(css, /calc\(177\.78dvh - 250px\)/);
   assert.match(css, /\.vivid-player-frame/);
+  assert.match(css, /\.flickv4-player-frame/);
 });
 
 test("canonical layout is loaded app-wide and refreshed by the service worker", () => {
