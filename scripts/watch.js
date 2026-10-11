@@ -6,11 +6,11 @@ import { getLocalLibrary, saveLocalLibrary, upsertLibraryItem, startLibrarySync 
 import { getPlaybackProgress, savePlaybackProgress, flushPlaybackProgress, completePlaybackProgress, startPlaybackSync } from "./recommendations.js";
 import { VIVID_CONFIG } from "./config.js";
 import { recordBehavior, startIntelligenceSync } from "./intelligence.js";
-import { hasDirectStreamIntegration, playDirectStream, resolveDirectStream, stopDirectStream } from "./player-engine.js";
-import { buildCustomEmbedUrl, getCustomPlaybackServer, listCustomPlaybackServers } from "./playback-servers.js";
-import { mountPlaybackServerSettings } from "./server-settings.js";
-import { buildVidapiEmbedUrl, buildVidsrcEmbedUrl, buildVidlinkEmbedUrl, buildVidplusEmbedUrl, buildVidkingEmbedUrl } from "./playback-urls.js";
-import { mountTflixSecondaryPlayer } from "./tflix-secondary-player.js";
+import { hasDirectStreamIntegration, playDirectStream, resolveDirectStream, stopDirectStream } from "./playback/player-engine.js";
+import { buildCustomEmbedUrl, getCustomPlaybackServer, listCustomPlaybackServers } from "./playback/playback-servers.js";
+import { mountPlaybackServerSettings } from "./playback/server-settings.js";
+import { buildVidapiEmbedUrl, buildVidsrcEmbedUrl, buildVidlinkEmbedUrl, buildVidplusEmbedUrl, buildVidkingEmbedUrl } from "./playback/playback-urls.js";
+import { mountTflixSecondaryPlayer } from "./playback/tflix-secondary-player.js";
 
 const $ = (id) => document.getElementById(id);
 const route = getRoute();
