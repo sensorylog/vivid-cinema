@@ -1,4 +1,4 @@
-import { VIVID_CONFIG } from "./config.js";
+import { VIVID_CONFIG } from "../config.js";
 
 const cleanBase = (value, fallback) => String(value || fallback).replace(/\/+$/, "");
 const isResumePoint = value => Number.isFinite(Number(value)) && Number(value) > 5;
