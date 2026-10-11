@@ -261,4 +261,4 @@ body.vivid-watch-page.vivid-player-open{overflow:hidden;overscroll-behavior:none
 
 /* Keep the primary layout rules authoritative after the shared media-layout stylesheet loads. */
 body.vivid-watch-page .vivid-player-overlay.vivid-player-inline .vivid-player-dialog{width:min(1420px,100%)!important;max-height:none!important;overflow:visible!important}
-body.vivid-watch-page .vivid-player-overlay.vivid-player-inline{display:block!important;max-width:100%!important}
+body.vivid-watch-page .vivid-player-overlay.vivid-player-inline{max-width:100%!important}
