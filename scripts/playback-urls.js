@@ -44,7 +44,8 @@ export function buildVidsrcEmbedUrl(params, { tmdbId = "", imdbId = "", startAt 
 
 export function buildVidlinkEmbedUrl(params, { tmdbId = "", malId = "", anime = false, startAt = 0 } = {}) {
   const base = cleanBase(VIVID_CONFIG.api.vidlinkEmbedBaseUrl, "https://vidlink.pro");
-  const query = new URLSearchParams({ primaryColor: "e50914", secondaryColor: "1b1b1b", iconColor: "ffffff", title: "false", poster: "false" });
+  // Vivid's server-picker tap is the user's play intent; ask the provider to begin playback.
+  const query = new URLSearchParams({ primaryColor: "e50914", secondaryColor: "1b1b1b", iconColor: "ffffff", title: "false", poster: "false", autoplay: "true" });
   addResume(query, "startAt", startAt);
   if (anime) {
     if (!/^\d+$/.test(String(malId || ""))) return "";
@@ -61,7 +62,7 @@ export function buildVidlinkEmbedUrl(params, { tmdbId = "", malId = "", anime = 
 
 export function buildVidplusEmbedUrl(params, { tmdbId = "", aniListId = "", anime = false, startAt = 0 } = {}) {
   const base = cleanBase(VIVID_CONFIG.api.vidplusEmbedBaseUrl, "https://player.vidplus.to");
-  const query = new URLSearchParams({ autoplay: "false", primarycolor: "e50914", secondarycolor: "171717", iconcolor: "ffffff" });
+  const query = new URLSearchParams({ autoplay: "true", primarycolor: "e50914", secondarycolor: "171717", iconcolor: "ffffff" });
   if (anime) {
     if (!/^\d+$/.test(String(aniListId || ""))) return "";
     query.set("dub", "false");
@@ -79,8 +80,8 @@ export function buildVidplusEmbedUrl(params, { tmdbId = "", aniListId = "", anim
 export function buildVidkingEmbedUrl(params, { tmdbId = "", startAt = 0 } = {}) {
   const id = tmdbOnlyId(params, tmdbId);
   if (!id) return "";
-  const query = new URLSearchParams({ color: "e50914", autoPlay: "false" });
-  // VidKing documents progress as a timestamp in seconds; unlike VidAPI it does not use resumeAt.
+  const query = new URLSearchParams({ color: "e50914", autoPlay: "true" });
+  // VidKing documents progress as a timestamp in seconds.
   addResume(query, "progress", startAt);
   const path = params.type === "tv"
     ? "/embed/tv/" + encodeURIComponent(id) + "/" + Math.max(1, Number(params.season) || 1) + "/" + Math.max(1, Number(params.episode) || 1)
