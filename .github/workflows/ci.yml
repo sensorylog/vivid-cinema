@@ -26,6 +26,9 @@ jobs:
       - name: Test custom playback server registry
         run: node --test tests/playback-servers.test.mjs
 
+      - name: Test direct-stream URL validation
+        run: node --test tests/direct-stream-validation.test.mjs
+
       - name: Validate JSON
         shell: bash
         run: |
