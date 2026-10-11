@@ -19,7 +19,12 @@ body :is(
   .vivid-onboarding-card,
   .vivid-tonight-card,
   .vivid-tonight-poster,
-  .vivid-home-tv-screen
+  .vivid-home-tv-screen,
+  .vivid-person-credit-poster,
+  .vivid-anime-poster,
+  .vivid-browse-category-media,
+  .vivid-person-profile,
+  .vivid-video-thumb
 ) {
   min-width: 0;
   box-sizing: border-box;
@@ -40,7 +45,14 @@ body :is(
   .vivid-onboarding-card,
   .vivid-tonight-card,
   .vivid-tonight-poster,
-  .vivid-home-tv-screen
+  .vivid-home-tv-screen,
+  .vivid-person-credit-poster,
+  .vivid-anime-poster,
+  .vivid-browse-category-media,
+  .vivid-person-profile,
+  .vivid-video-thumb,
+  .vivid-similar-card,
+  .vivid-cast
 ) img {
   max-width: 100% !important;
   object-fit: contain !important;
@@ -62,7 +74,12 @@ body .vivid-video-card,
 body .vivid-onboarding-card,
 body .vivid-tonight-card,
 body .vivid-tonight-poster,
-body .vivid-home-tv-screen {
+body .vivid-home-tv-screen,
+body .vivid-person-credit-poster,
+body .vivid-anime-poster,
+body .vivid-browse-category-media,
+body .vivid-person-profile,
+body .vivid-video-thumb {
   overflow: hidden;
   background-color: #0b0d12;
 }
@@ -82,7 +99,14 @@ body .vivid-onboarding-card img,
 body .vivid-watch-artwork img,
 body .vivid-tonight-card img,
 body .vivid-tonight-poster img,
-body .vivid-home-tv-screen img {
+body .vivid-home-tv-screen img,
+body .vivid-person-credit-poster img,
+body .vivid-anime-poster img,
+body .vivid-browse-category-media img,
+body .vivid-person-profile img,
+body .vivid-video-thumb img,
+body .vivid-similar-card img,
+body .vivid-cast img {
   object-fit: contain !important;
   object-position: center !important;
   transform: none !important;
