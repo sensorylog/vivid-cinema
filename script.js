@@ -141,7 +141,7 @@ function setHeroText(item){
 }
 function youtubeUrl(key,muted=true){
  const params=new URLSearchParams({
-   autoplay:"0",mute:muted?"1":"0",controls:"0",playsinline:"1",rel:"0",
+   autoplay:"1",mute:"1",controls:"0",playsinline:"1",rel:"0",
    iv_load_policy:"3",enablejsapi:"1",origin:window.location.origin
  });
  return "https://www.youtube.com/embed/"+encodeURIComponent(key)+"?"+params.toString();
@@ -161,6 +161,7 @@ window.addEventListener("message",event=>{
  let message;
  try{message=typeof event.data==="string"?JSON.parse(event.data):event.data}catch{return}
  if(message?.event==="onStateChange"&&Number(message.info)===1){
+  if(!heroMuted)sendHeroPlayerCommand("unMute");
   iframe.classList.add("is-ready");
   $("hero-fallback")?.classList.remove("is-visible");
   if(heroPlaying&&!document.hidden){
@@ -214,7 +215,7 @@ async function loadHeroVideo(item){
    iframe.onerror=()=>{if(token!==heroLoadToken)return;iframe.classList.remove("is-ready");fallback.classList.add("is-visible");};
    const setTrailer=()=>{
      if(token!==heroLoadToken)return;
-     iframe.src=youtubeUrl(trailer.key,heroMuted);
+     iframe.src=youtubeUrl(trailer.key,true);
      iframe.dataset.videoKey=trailer.key;
    };
    // Let the cinematic artwork establish the scene before the auto-preview starts.
