@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 
 const source = readFileSync(new URL("../scripts/direct-stream-validation.js", import.meta.url), "utf8");
-const { inferAuthorizedStreamType, normalizeAllowedHosts, validateAllowedHttpsUrl } = await import("data:text/javascript;base64," + Buffer.from(source).toString("base64"));
+const { createAllowlistedFetchRequest, inferAuthorizedStreamType, normalizeAllowedHosts, validateAllowedHttpsUrl } = await import("data:text/javascript;base64," + Buffer.from(source).toString("base64"));
 
 const hosts = ["media.example.com", "cdn.example.com"];
 
@@ -44,4 +44,14 @@ test("accepts explicit supported types and rejects unknown declared types by inf
   assert.equal(inferAuthorizedStreamType(url, "dash"), "dash");
   assert.equal(inferAuthorizedStreamType(url, "file"), "file");
   assert.equal(inferAuthorizedStreamType(url, "unknown"), "");
+});
+
+test("HLS fetch requests reject redirects and disallowed resource hosts", () => {
+  const request = createAllowlistedFetchRequest("https://media.example.com/segment.ts", { method: "GET" }, hosts);
+  assert.equal(request.redirect, "error");
+  assert.equal(request.url, "https://media.example.com/segment.ts");
+  assert.throws(
+    () => createAllowlistedFetchRequest("https://untrusted.example/segment.ts", {}, hosts),
+    /not allowlisted/
+  );
 });
