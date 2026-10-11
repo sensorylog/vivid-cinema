@@ -118,11 +118,7 @@ select,
 textarea{
   font-weight:var(--vivid-type-ui);
 }
-h1,h2,h3,h4,h5,h6,
-.vivid-hero-title,
-.landing-hero h1,
-.landing-section h2,
-.landing-cta h2{
+h1, h2, h3, h4, h5, h6, .landing-hero h1, .landing-section h2, .landing-cta h2{
   font-weight:var(--vivid-type-display);
 }
 .vivid-brand,
@@ -359,19 +355,7 @@ html[data-vivid-theme="light"] :is(
   box-shadow:0 14px 34px rgba(17,18,22,.09),inset 0 1px 0 #fff!important;
 }
 
-/* Typography hierarchy. Secondary copy should be readable, not washed out. */
-html[data-vivid-theme="light"] :is(
-  h1,h2,h3,h4,h5,h6,
-  .vivid-hero-title,
-  .vivid-card-title,
-  .vivid-rail-head h2,
-  .vivid-section-heading h2,
-  .vivid-discovery-intro h1,
-  .vivid-library-header h1,
-  .account-header h1,
-  .account-title,
-  .account-profile-name
-){
+/* Typography hierarchy. Secondary copy should be readable{
   color:#111216!important;
 }
 html[data-vivid-theme="light"] :is(

@@ -493,7 +493,3 @@
     height:104px!important;
   }
 }
-@media (min-width:901px) and (max-width:1180px){
-  .vivid-cinema-home .vivid-hero-content{padding-inline:48px!important}
-  .vivid-cinema-home .vivid-hero-title{max-width:560px!important;font-size:clamp(2.8rem,5.2vw,4.2rem)!important}
-}

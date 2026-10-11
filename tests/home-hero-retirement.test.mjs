@@ -10,6 +10,12 @@ test("home hero and embedded trailer are removed while the featured-card strip r
   assert.doesNotMatch(home, /id="hero-(?:video|fallback|title|meta|copy|watch|more|prev|next|sound|pause)"/);
   assert.doesNotMatch(home, /youtube\.com|ytimg\.com/);
   assert.match(home, /<div class="vivid-feature-strip">/);
+  const cinematicCss = read("../styles/vivid-cinematic.css").replace(/\/\*[\\s\\S]*?\\*\//g, "");
+  const homeCss = read("../styles/vivid-home.css").replace(/\/\*[\\s\\S]*?\\*\//g, "");
+  const mediaCss = read("../styles/vivid-media-layout.css").replace(/\/\*[\\s\\S]*?\\*\//g, "");
+  assert.doesNotMatch(cinematicCss, /\\.vivid-hero(?:-[a-z0-9_-]+)?|#hero-[a-z0-9_-]+/i);
+  assert.doesNotMatch(homeCss, /\\.vivid-hero(?:-[a-z0-9_-]+)?|#hero-[a-z0-9_-]+/i);
+  assert.doesNotMatch(mediaCss, /\\.vivid-hero(?:-[a-z0-9_-]+)?|#hero-[a-z0-9_-]+/i);
   assert.match(home, /<div class="vivid-feature-track" id="feature-track" aria-label="Featured titles carousel"><\/div>/);
 });
 
