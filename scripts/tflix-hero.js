@@ -2,8 +2,6 @@
    Source reference: https://github.com/TomasTNunes/tflix/blob/main/index.html */
 import { tmdbApi } from "./tmdb.js";
 import { getImageUrl, getMediaUrl, normalizeResults } from "./media.js";
-import { escapeHtml } from "./utils.js";
-
 let heroSlides = [];
 let heroIndex = 0;
 let heroTimer = null;
@@ -45,6 +43,7 @@ function goToHero(index) {
   heroIndex = next;
   slides[heroIndex]?.classList.add("active");
   dots[heroIndex]?.classList.add("active");
+  dots.forEach((dot, index) => dot.setAttribute("aria-pressed", String(index === heroIndex)));
 
   const bg = slides[heroIndex]?.querySelector(".hero-bg");
   if (bg) {
