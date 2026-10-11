@@ -2,7 +2,12 @@ import { VIVID_CONFIG } from "./config.js";
 import { getMediaDate, getMediaTitle, getMediaType } from "./utils.js";
 
 export function normalizeMedia(item = {}, type = null) {
-  const mediaType = type || getMediaType(item);
+  // Mixed-media sections use "all" as a filter, not a real media type.
+  // Only trust explicit movie/tv overrides; otherwise preserve the item's TMDB type.
+  const detectedType = getMediaType(item);
+  const mediaType = type === "movie" || type === "tv"
+    ? type
+    : detectedType === "tv" ? "tv" : "movie";
   const id = item.id == null ? "" : String(item.id);
   return Object.freeze({
     id,
