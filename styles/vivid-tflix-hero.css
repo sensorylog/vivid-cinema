@@ -1,6 +1,6 @@
 /* TFLIX hero billboard — adapted from TomasTNunes/tflix index.html.
    The existing Vivid navigation and featured-card strip stay independently owned. */
-body.vivid-cinema-home {
+body.vivid-cinema-home #hero {
   --bg: #0a0a0d;
   --bg-elev: #111116;
   --card: #18181f;
