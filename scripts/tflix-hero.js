@@ -219,7 +219,7 @@ async function loadHero() {
     if (!items.length && mediaType === "all") {
       // Keep the billboard useful if the mixed trending feed has no usable backdrops.
       mediaType = "movie";
-      data = await tmdbApi.trending("movie", "day", 1, { cache: false });
+      data = await tmdbApi.trending("movie", "day", 1);
       items = getHeroItems(data, mediaType);
     }
     if (items[0]?.backdrop_path) {
