@@ -47,7 +47,7 @@ test("canonical layout is loaded app-wide and refreshed by the service worker", 
   const serviceWorker = read("../service-worker.js");
   const landing = read("../index.html");
   assert.match(appShell, /vivid-media-layout\.css\?v=1/);
-  assert.match(serviceWorker, /vivid-cinema-shell-v143/);
+  assert.match(serviceWorker, /vivid-cinema-shell-v144/);
   assert.match(serviceWorker, /vivid-media-layout\.css\?v=1/);
   assert.match(landing, /vivid-media-layout\.css\?v=1/);
 });
@@ -56,4 +56,15 @@ test("obsolete appended media override blocks are removed", () => {
   assert.doesNotMatch(read("../styles/vivid-home.css"), /Home hero: preserve the whole trailer/);
   assert.doesNotMatch(read("../styles/vivid-liquid-glass.css"), /MEDIA CONTAINMENT — artwork/);
   assert.doesNotMatch(read("../styles/vivid-watch-polish.css"), /Inline playback must size to the viewport/);
+});
+
+
+test("primary watch player uses its own responsive server rail", () => {
+  const css = read("../styles/vivid-watch.css");
+  const watch = read("../scripts/watch.js");
+  assert.match(css, /\.vivid-player-layout\{display:grid;grid-template-columns:minmax\(0,1fr\) minmax\(245px,300px\)/);
+  assert.match(css, /@media\(max-width:860px\)/);
+  assert.match(watch, /aria-label="Vivid Cinema playback servers"/);
+  assert.match(watch, /serverPanel\?\.scrollIntoView/);
+  assert.doesNotMatch(watch, /document\.body\.appendChild\(serverPanel\)/);
 });
