@@ -215,6 +215,11 @@ export function mountTflixSecondaryPlayer({ root, params, media, details, title,
         selectEpisode(playbackParams.season, episodeData[currentIndex + 1].episode_number);
         return;
       }
+      // Keep Next Episode useful even if TMDB's detailed episode request fails.
+      if (currentIndex < 0 && playbackParams.episode < Number(currentSeasonSummary(playbackParams.season)?.episode_count || 0)) {
+        selectEpisode(playbackParams.season, playbackParams.episode + 1);
+        return;
+      }
       const nextSeason = seasons.find(item => Number(item.season_number) > playbackParams.season);
       if (nextSeason) {
         await fetchSeasonEpisodes(nextSeason.season_number, 1);
