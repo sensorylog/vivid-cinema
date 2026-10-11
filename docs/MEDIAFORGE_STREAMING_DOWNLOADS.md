@@ -4,11 +4,13 @@ This integration intentionally excludes MediaForge's library/dashboard UI. The r
 
 - resolve and play a movie, TV episode, or anime episode in Vivid's existing player;
 - submit downloads and poll job progress;
-- save completed files to persistent backend storage and provide an authenticated download URL.
+- save completed files to persistent object storage and provide an authenticated download URL.
 
 ## Current state
 
-The browser-side client in `scripts/mediaforge-client.js` is an integration seam, not a live service. The public backend URL is intentionally not configured yet, so no user-facing playback behavior changes and no secrets are shipped to Vivid's static site. The client never accepts MediaForge API keys; it sends a signed-in user's bearer token to the first-party backend.
+The browser-side client in `scripts/mediaforge-client.js` is an integration seam, not a live service. The backend URL is intentionally not configured, so no user-facing playback behavior changes and no secrets are shipped to Vivid's static site. The client sends a signed-in user's Firebase ID token to the first-party backend and never accepts a MediaForge API key.
+
+The Cloudflare Worker foundation is documented in [CLOUDFLARE_MEDIAFORGE_BACKEND.md](CLOUDFLARE_MEDIAFORGE_BACKEND.md). Firebase Hosting and Firestore remain unchanged. The Worker currently fails closed with HTTP 503 for stream/download operations because the real MediaForge processing worker is not deployed.
 
 ## Required backend contract
 
@@ -28,7 +30,7 @@ For TV/anime:
 { "mediaId": "show-id", "mediaType": "tv", "season": 1, "episode": 2 }
 ```
 
-Response:
+Response contract:
 ```json
 {
   "stream": {
@@ -41,7 +43,7 @@ Response:
 }
 ```
 
-The media URL must be served or proxied from the same backend origin and use a short-lived, unguessable session token. The server must validate the upstream source and reject private-network, loopback, link-local, and metadata-service targets to prevent SSRF. It must not expose upstream credentials to the browser.
+The media URL must be served by the same backend origin and use a short-lived, unguessable session token. The server must validate upstream sources and reject private-network, loopback, link-local, and metadata-service targets to prevent SSRF. Upstream credentials must never be exposed to the browser.
 
 ### Start a download
 
@@ -61,22 +63,24 @@ The media URL must be served or proxied from the same backend origin and use a s
 }
 ```
 
-Allowed states: `queued`, `resolving`, `downloading`, `processing`, `ready`, `failed`, `cancelled`. A ready job may include `downloadUrl`, which must remain on the same backend origin. The server must scope job access to the requesting user.
+Allowed states: `queued`, `resolving`, `downloading`, `processing`, `ready`, `failed`, `cancelled`. A ready job may include `downloadUrl`, which must remain on the configured backend origin. Job access must be scoped to the requesting user.
 
 ## Storage and operations
 
-- Use persistent object/file storage; never rely on ephemeral function filesystem or process memory for completed downloads.
-- Run downloads/transcoding as background jobs, not inside a short-lived Vercel request.
-- Store metadata (owner, media identity, size, checksum, status, expiry) separately from file bytes.
-- Use signed/authorized downloads, quotas, size limits, cancellation, cleanup/retention policies, and rate limiting.
+- Keep Firebase Hosting for the website and Firestore for existing app data.
+- Use Cloudflare R2 for completed authorized media objects, within free-tier limits and with retention/cleanup policies.
+- Do not use a Worker request's memory or ephemeral filesystem for completed downloads.
+- Cloudflare Workers does not run a conventional persistent Python/FFmpeg service. A compatible processing worker still has to be deployed separately; reliable always-on processing is not guaranteed to be free.
+- Use signed/authorized downloads, per-user quotas, size limits, cancellation, cleanup, and rate limiting.
 - Do not enable a public resolver or downloads until source rights and distribution permissions are confirmed.
 
 ## Next steps before production
 
-1. Implement the authenticated backend and worker against this contract.
-2. Deploy it with persistent storage and a supported source resolver.
-3. Configure the backend URL and the Vivid player allowlist for that backend host.
-4. Wire the resolver into the existing player and expose download progress in the title/watch UI.
-5. Run end-to-end tests for movie, TV, anime, audio/subtitles, failures, cancellation, storage persistence, and authorization.
+1. Deploy the Cloudflare Worker and verify its health endpoint and Firebase token validation.
+2. Select a compatible MediaForge processing worker. Do not configure a public backend URL while this component is missing.
+3. Connect the worker to R2 for completed objects and use trusted authorization for per-user job metadata.
+4. Configure the backend URL and the Vivid player allowlist only after actual playback is implemented.
+5. Wire the resolver into the existing player and expose download progress in the title/watch UI.
+6. Run end-to-end tests for movie, TV, anime, audio/subtitles, failures, cancellation, storage persistence, and authorization.
 
-The client currently provides the tested API boundary only; it does not pretend that the backend or storage already exists.
+The client and Cloudflare Worker currently provide the tested API boundary/foundation only; they do not claim the resolver, media worker, or production storage delivery is already live.
