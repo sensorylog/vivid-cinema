@@ -160,6 +160,14 @@ body.vivid-cinema-home .vivid-home-tv-art {
   transform: none !important;
 }
 
+@media (orientation: landscape) and (max-height: 520px) {
+  body.vivid-cinema-home .vivid-hero-media {
+    height: 100svh !important;
+    min-height: 0 !important;
+    max-height: 100svh !important;
+  }
+}
+
 /* Watch player: constrain the entire dialog by both viewport axes.
    In short landscape screens, reduce width so the 16:9 frame fits vertically. */
 body.vivid-watch-page .vivid-player-overlay:not(.vivid-player-inline) {
