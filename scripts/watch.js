@@ -9,6 +9,7 @@ import { recordBehavior, startIntelligenceSync } from "./intelligence.js";
 import { hasDirectStreamIntegration, playDirectStream, resolveDirectStream, stopDirectStream } from "./player-engine.js";
 import { buildCustomEmbedUrl, getCustomPlaybackServer, listCustomPlaybackServers } from "./playback-servers.js";
 import { mountPlaybackServerSettings } from "./server-settings.js";
+import { mountFlickv4WebPlayer } from "./flickv4-web-player.js";
 
 const $ = (id) => document.getElementById(id);
 const route = getRoute();
@@ -582,12 +583,16 @@ function renderShell(params) {
 
   document.title = (episodeTitle ? episodeTitle + " · " : "") + title + " · Vivid Cinema";
   $("watch-content").innerHTML =
-    '<section class="vivid-watch-hero"><div id="watch-backdrop" class="vivid-watch-backdrop" style="--watch-backdrop:url(\'' + getImageUrl(media.backdrop_path, "w1280") + '\')"></div>' +
-      '<div class="vivid-watch-head"><div class="vivid-watch-artwork"><img src="' + getImageUrl(media.poster_path, "w342") + '" alt="' + escapeHtml(title) + ' poster" loading="eager" decoding="async"></div><div class="vivid-watch-copy"><span id="watch-kicker" class="vivid-watch-kicker">' + (isAnimePlayback() ? (isTv ? "ANIME · SEASON " + params.season + " · EPISODE " + params.episode : "ANIME FILM") : isTv ? "TV · SEASON " + params.season + " · EPISODE " + params.episode : "MOVIE") + '</span>' +
-        '<h1 id="watch-title">' + escapeHtml(episodeTitle || title) + '</h1><p id="watch-overview">' + escapeHtml(isTv && details?.episode?.overview ? details.episode.overview : media.overview || "") + '</p>' +
-      '</div><div class="vivid-watch-actions"><button type="button" id="watch-open-player" class="vivid-watch-play" aria-label="Play ' + escapeHtml(episodeTitle || title) + '"><i class="bi bi-play-fill" aria-hidden="true"></i><span>Play</span></button><a class="vivid-watch-details" href="' + escapeHtml(buildTitleUrl(media.id, media.media_type)) + '"><i class="bi bi-info-circle" aria-hidden="true"></i><span>Details</span></a></div></div></section>' +
-    '<div id="player-overlay" hidden class="vivid-player-overlay" role="presentation"><section class="vivid-player-dialog" role="dialog" aria-modal="true" aria-labelledby="player-dialog-title"><header class="vivid-player-dialog-head"><div class="vivid-player-dialog-heading"><span class="vivid-player-live-dot" aria-hidden="true"></span><div><span class="vivid-player-dialog-eyebrow">VIVID CINEMA · NOW PLAYING</span><h2 id="player-dialog-title">' + escapeHtml(episodeTitle || title) + '</h2><span id="player-source-label" class="vivid-player-current-source">Connecting to a server…</span></div></div><div class="vivid-player-dialog-actions"><div class="vivid-server-picker"><button type="button" id="player-server-menu" class="vivid-player-switch vivid-server-menu" aria-expanded="false" aria-controls="player-server-panel"><i class="bi bi-hdd-network" aria-hidden="true"></i> Servers <i class="bi bi-chevron-down" aria-hidden="true"></i></button><div id="player-server-panel" class="vivid-server-panel" hidden><div class="vivid-server-panel-heading"><strong>Available servers</strong><span>Tap to switch</span></div><button type="button" class="vivid-player-source" data-player-source="vidapi" aria-pressed="true"><span class="vivid-server-dot"></span><span><strong>VidAPI</strong><small>Primary server</small></span><span class="vivid-server-state" data-server-state="vidapi">Ready</span></button><button type="button" class="vivid-player-source" data-player-source="vidsrc" aria-pressed="false"><span class="vivid-server-dot"></span><span><strong>VidSrc</strong><small>Alternate server</small></span><span class="vivid-server-state" data-server-state="vidsrc">Available</span></button><button type="button" class="vivid-player-source" data-player-source="vidlink" aria-pressed="false"><span class="vivid-server-dot"></span><span><strong>VidLink</strong><small>Alternate server</small></span><span class="vivid-server-state" data-server-state="vidlink">Available</span></button><button type="button" class="vivid-player-source" data-player-source="vidplus" aria-pressed="false"><span class="vivid-server-dot"></span><span><strong>VidPlus</strong><small>Experimental · manual selection</small></span><span class="vivid-server-state" data-server-state="vidplus">Available</span></button><button type="button" class="vivid-player-source" data-player-source="vidking" aria-pressed="false"><span class="vivid-server-dot"></span><span><strong>VidKing</strong><small>Extra source · resume seeking may be unavailable</small></span><span class="vivid-server-state" data-server-state="vidking">Available</span></button><button type="button" class="vivid-player-source" data-player-source="direct" aria-pressed="false" hidden><span class="vivid-server-dot"></span><span><strong>Direct stream</strong><small>Authorized HLS/DASH · adaptive quality</small></span><span class="vivid-server-state" data-server-state="direct">Unavailable</span></button><p>Direct streams require an authorized provider integration. Third-party servers vary in availability, ads, and playback support.</p></div></div><button type="button" id="player-close" class="vivid-player-close" aria-label="Close player"><i class="bi bi-x-lg" aria-hidden="true"></i></button></div></header><div class="vivid-player-frame"><div id="player-status" class="vivid-player-status" role="status" aria-live="polite">' + (resumeAt > 5 ? "Resuming where you left off…" : "Preparing playback…") + '</div><button type="button" id="player-try-next" class="vivid-player-try-next" hidden>Try next server</button><iframe id="vidapi-player" title="' + escapeHtml(title) + ' player" allow="autoplay; fullscreen; picture-in-picture; encrypted-media; clipboard-write" allowfullscreen referrerpolicy="origin" loading="eager"></iframe><video id="vivid-direct-player" title="' + escapeHtml(title) + ' direct stream player" controls playsinline preload="metadata" hidden></video></div><footer class="vivid-player-dialog-foot"><span><i class="bi bi-keyboard" aria-hidden="true"></i> Press Esc to close</span><a href="' + escapeHtml(buildTitleUrl(media.id, media.media_type)) + '">Title details</a></footer></section></div>' +
+    '<section class="vivid-watch-inline-heading"><div><span class="vivid-watch-kicker">' + (isTv ? "TV · SEASON " + params.season + " · EPISODE " + params.episode : "MOVIE") + '</span><h1>' + escapeHtml(episodeTitle || title) + '</h1></div><a class="vivid-watch-details" href="' + escapeHtml(buildTitleUrl(media.id, media.media_type)) + '"><i class="bi bi-info-circle" aria-hidden="true"></i><span>Details</span></a></section>' +
+    '<div id="player-overlay" class="vivid-player-overlay vivid-player-inline" role="presentation"><section class="vivid-player-dialog" role="region" aria-label="Vivid player" aria-labelledby="player-dialog-title"><header class="vivid-player-dialog-head"><div class="vivid-player-dialog-heading"><span class="vivid-player-live-dot" aria-hidden="true"></span><div><span class="vivid-player-dialog-eyebrow">VIVID CINEMA · NOW PLAYING</span><h2 id="player-dialog-title">' + escapeHtml(episodeTitle || title) + '</h2><span id="player-source-label" class="vivid-player-current-source">Connecting to a server…</span></div></div><div class="vivid-player-dialog-actions"><div class="vivid-server-picker"><button type="button" id="player-server-menu" class="vivid-player-switch vivid-server-menu" aria-expanded="false" aria-controls="player-server-panel"><i class="bi bi-hdd-network" aria-hidden="true"></i> Servers <i class="bi bi-chevron-down" aria-hidden="true"></i></button><div id="player-server-panel" class="vivid-server-panel" hidden><div class="vivid-server-panel-heading"><strong>Available servers</strong><span>Tap to switch</span></div><button type="button" class="vivid-player-source" data-player-source="vidapi" aria-pressed="true"><span class="vivid-server-dot"></span><span><strong>VidAPI</strong><small>Primary server</small></span><span class="vivid-server-state" data-server-state="vidapi">Ready</span></button><button type="button" class="vivid-player-source" data-player-source="vidsrc" aria-pressed="false"><span class="vivid-server-dot"></span><span><strong>VidSrc</strong><small>Alternate server</small></span><span class="vivid-server-state" data-server-state="vidsrc">Available</span></button><button type="button" class="vivid-player-source" data-player-source="vidlink" aria-pressed="false"><span class="vivid-server-dot"></span><span><strong>VidLink</strong><small>Alternate server</small></span><span class="vivid-server-state" data-server-state="vidlink">Available</span></button><button type="button" class="vivid-player-source" data-player-source="vidplus" aria-pressed="false"><span class="vivid-server-dot"></span><span><strong>VidPlus</strong><small>Experimental · manual selection</small></span><span class="vivid-server-state" data-server-state="vidplus">Available</span></button><button type="button" class="vivid-player-source" data-player-source="vidking" aria-pressed="false"><span class="vivid-server-dot"></span><span><strong>VidKing</strong><small>Extra source · resume seeking may be unavailable</small></span><span class="vivid-server-state" data-server-state="vidking">Available</span></button><button type="button" class="vivid-player-source" data-player-source="direct" aria-pressed="false" hidden><span class="vivid-server-dot"></span><span><strong>Direct stream</strong><small>Authorized HLS/DASH · adaptive quality</small></span><span class="vivid-server-state" data-server-state="direct">Unavailable</span></button><p>Direct streams require an authorized provider integration. Third-party servers vary in availability, ads, and playback support.</p></div></div></div></header><div class="vivid-player-frame"><div id="player-status" class="vivid-player-status" role="status" aria-live="polite">' + (resumeAt > 5 ? "Resuming where you left off…" : "Preparing playback…") + '</div><button type="button" id="player-try-next" class="vivid-player-try-next" hidden>Try next server</button><iframe id="vidapi-player" title="' + escapeHtml(title) + ' player" allow="autoplay; fullscreen; picture-in-picture; encrypted-media; clipboard-write" allowfullscreen referrerpolicy="origin" loading="eager"></iframe><video id="vivid-direct-player" title="' + escapeHtml(title) + ' direct stream player" controls playsinline preload="metadata" hidden></video></div><footer class="vivid-player-dialog-foot"><span><i class="bi bi-keyboard" aria-hidden="true"></i> Vivid player · inline playback</span><a href="' + escapeHtml(buildTitleUrl(media.id, media.media_type)) + '">Title details</a></footer></section></div>' +
+    '<section class="flickv4-web-player" id="flickv4-player" data-media-id="' + escapeHtml(params.id) + '" data-media-type="' + escapeHtml(params.type) + '" data-season="' + params.season + '" data-episode="' + params.episode + '" data-tmdb-id="' + escapeHtml(tmdbId || params.id) + '" data-imdb-id="' + escapeHtml(imdbId || "") + '">' +
+      '<div class="flickv4-player-heading"><div><span class="flickv4-eyebrow">SECOND PLAYER</span><h2>Flickv4 Player</h2><p>Choose a server and press Play. If one server fails, try another.</p></div><span class="flickv4-pill">Movies &amp; TV</span></div>' +
+      '<div class="flickv4-player-controls"><label for="flickv4-server">Streaming server</label><select id="flickv4-server"><option value="vidlink">VidLink</option><option value="vidsrc">VidSrc</option><option value="vidplus">VidPlus</option><option value="vidking">VidKing</option></select><button type="button" id="flickv4-play"><i class="bi bi-play-fill" aria-hidden="true"></i> Play</button><button type="button" id="flickv4-stop" class="flickv4-stop">Stop</button></div>' +
+      '<div class="flickv4-player-frame"><div id="flickv4-status" role="status">Choose a server, then tap Play to load the stream.</div><iframe id="flickv4-iframe" title="Flickv4 web playback" allow="autoplay; fullscreen; picture-in-picture; encrypted-media" allowfullscreen referrerpolicy="origin" loading="lazy"></iframe></div>' +
+      '<p class="flickv4-footnote">Playback depends on the selected provider and browser support. Vivid’s player above remains separate.</p></section>' +
     '<section class="vivid-watch-recommendations"><div class="vivid-section-heading"><div><span>MORE TO DISCOVER</span><h2>You might also like</h2></div></div><div id="watch-recommendations" class="vivid-watch-rec-rail">' + recommendationCards() + '</div></section>';
+
+  mountFlickv4WebPlayer($("flickv4-player"));
 
   const player = $("vidapi-player");
   const directPlayer = $("vivid-direct-player");
@@ -599,10 +604,44 @@ function renderShell(params) {
   const closePlayer = $("player-close");
   const serverMenu = $("player-server-menu");
   const serverPanel = $("player-server-panel");
+  const serverPanelHome = serverPanel?.parentNode || null;
+  const serverPanelAnchor = serverPanel?.nextSibling || null;
   const setServerMenuOpen = open => {
     if (!serverMenu || !serverPanel) return;
     serverMenu.setAttribute("aria-expanded", open ? "true" : "false");
-    serverPanel.hidden = !open;
+    if (open) {
+      // Render the menu at the document root so the player iframe, rounded
+      // containers and mobile viewport cannot clip or cover its options.
+      if (serverPanel.parentNode !== document.body) document.body.appendChild(serverPanel);
+      serverPanel.hidden = false;
+      const trigger = serverMenu.getBoundingClientRect();
+      const panelWidth = Math.min(340, Math.max(240, window.innerWidth - 24));
+      const panelHeight = Math.min(Math.max(serverPanel.scrollHeight, 180), Math.max(180, window.innerHeight - 24));
+      const below = trigger.bottom + 8;
+      const top = below + panelHeight <= window.innerHeight - 12
+        ? below
+        : Math.max(12, trigger.top - panelHeight - 8);
+      const left = Math.max(12, Math.min(trigger.right - panelWidth, window.innerWidth - panelWidth - 12));
+      Object.assign(serverPanel.style, {
+        position: "fixed",
+        top: top + "px",
+        left: left + "px",
+        right: "auto",
+        bottom: "auto",
+        width: panelWidth + "px",
+        maxWidth: "calc(100vw - 24px)",
+        maxHeight: Math.max(180, window.innerHeight - 24) + "px",
+        overflowY: "auto",
+        zIndex: "10060"
+      });
+    } else {
+      serverPanel.hidden = true;
+      if (serverPanelHome && serverPanel.parentNode !== serverPanelHome) {
+        const anchor = serverPanelAnchor?.parentNode === serverPanelHome ? serverPanelAnchor : null;
+        serverPanelHome.insertBefore(serverPanel, anchor);
+      }
+      serverPanel.removeAttribute("style");
+    }
   };
   mountPlaybackServerSettings(serverPanel, () => {
     if (activeSource.startsWith("custom:") && !sourceAvailable(activeSource)) {
@@ -616,7 +655,7 @@ function renderShell(params) {
   const openPlayerWindow = () => {
     if (!overlay) return;
     overlay.hidden = false;
-    document.body.classList.add("vivid-player-open");
+    if (!overlay.classList.contains("vivid-player-inline")) document.body.classList.add("vivid-player-open");
     if (openPlayer) openPlayer.setAttribute("aria-expanded", "true");
     const saved = getPlaybackProgress(progressKey());
     const startAt = Number(saved?.progress || route.params.get("startAt") || resumeAt || 0);
@@ -639,7 +678,7 @@ function renderShell(params) {
     if (!overlay) return;
     clearFallbackTimer();
     overlay.hidden = true;
-    document.body.classList.remove("vivid-player-open");
+    if (!overlay.classList.contains("vivid-player-inline")) document.body.classList.remove("vivid-player-open");
     if (openPlayer) openPlayer.setAttribute("aria-expanded", "false");
     setServerMenuOpen(false);
     directLoadGeneration += 1;
@@ -652,6 +691,8 @@ function renderShell(params) {
   };
   openPlayer?.addEventListener("click", openPlayerWindow);
   closePlayer?.addEventListener("click", closePlayerWindow);
+  // The watch route is the player page: load Vivid inline without another Play/hero screen.
+  openPlayerWindow();
   tryNextButton?.addEventListener("click", () => {
     const next = getNextSource(activeSource);
     if (!next) return showFallbackPrompt(activeSource);
@@ -662,11 +703,25 @@ function renderShell(params) {
     if (event.target === overlay) closePlayerWindow();
   });
   serverMenu?.addEventListener("click", () => setServerMenuOpen(serverMenu.getAttribute("aria-expanded") !== "true"));
-  document.addEventListener("keydown", event => {
-    if (event.key === "Escape" && overlay && !overlay.hidden) {
-      if (serverPanel && !serverPanel.hidden) setServerMenuOpen(false);
-      else closePlayerWindow();
+  document.addEventListener("pointerdown", event => {
+    if (serverPanel && !serverPanel.hidden && !serverPanel.contains(event.target) && !serverMenu?.contains(event.target)) {
+      setServerMenuOpen(false);
     }
+  });
+  window.addEventListener("resize", () => {
+    if (serverPanel && !serverPanel.hidden) setServerMenuOpen(false);
+  });
+  window.addEventListener("scroll", () => {
+    if (serverPanel && !serverPanel.hidden) setServerMenuOpen(false);
+  }, true);
+  document.addEventListener("keydown", event => {
+    if (event.key !== "Escape") return;
+    if (serverPanel && !serverPanel.hidden) {
+      setServerMenuOpen(false);
+      serverMenu?.focus({ preventScroll: true });
+      return;
+    }
+    if (overlay && !overlay.hidden && !overlay.classList.contains("vivid-player-inline")) closePlayerWindow();
   });
   if (directPlayer) {
     let lastDirectProgressSaveAt = 0;
