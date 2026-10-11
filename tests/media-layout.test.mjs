@@ -60,12 +60,14 @@ test("obsolete appended media override blocks are removed", () => {
 });
 
 
-test("primary watch player uses its own responsive server rail", () => {
+test("primary watch player exposes a responsive dropdown server picker", () => {
   const css = read("../styles/vivid-watch.css");
   const watch = read("../scripts/watch.js");
-  assert.match(css, /\.vivid-player-layout\{display:grid;grid-template-columns:minmax\(0,1fr\) minmax\(245px,300px\)/);
+  assert.match(css, /\.vivid-player-layout\{display:grid;grid-template-columns:minmax\(0,1fr\)/);
+  assert.match(css, /\.vivid-player-overlay\.vivid-player-inline \.vivid-server-panel\{position:absolute/);
   assert.match(css, /@media\(max-width:860px\)/);
   assert.match(watch, /aria-label="Vivid Cinema playback servers"/);
-  assert.match(watch, /serverPanel\?\.scrollIntoView/);
+  assert.match(watch, /picker\.append\(serverMenu, serverPanel\)/);
+  assert.match(watch, /serverMenu\?\.addEventListener\("click", toggleServerMenu\)/);
   assert.doesNotMatch(watch, /document\.body\.appendChild\(serverPanel\)/);
 });

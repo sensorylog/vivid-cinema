@@ -75,7 +75,7 @@ function createSlide(item, index) {
 
   const backdrop = document.createElement("div");
   backdrop.className = "hero-bg";
-  backdrop.style.backgroundImage = "url(\"" + getImageUrl(item.backdrop_path, "original") + "\")";
+  backdrop.style.backgroundImage = "url(\"" + getImageUrl(item.backdrop_path, "w1280") + "\")";
   backdrop.setAttribute("aria-hidden", "true");
 
   const content = document.createElement("div");
@@ -83,7 +83,8 @@ function createSlide(item, index) {
 
   const badge = document.createElement("div");
   badge.className = "hero-badge";
-  badge.innerHTML = '<span class="bolt" aria-hidden="true">●</span> #' + (index + 1) + ' Trending Today';
+  const trendingRank = Number(item.trending_rank || 0);
+  badge.innerHTML = '<span class="bolt" aria-hidden="true">●</span> ' + (trendingRank > 0 ? "#" + trendingRank + " Trending Today" : "Featured on Vivid");
 
   const heading = document.createElement("h1");
   heading.className = "hero-title";
@@ -151,12 +152,6 @@ function renderHero(items) {
 
   hero.classList.toggle("empty", !items.length);
   notifyHeroChange();
-  if (items[0]?.backdrop_path) {
-    const preload = new Image();
-    preload.decoding = "async";
-    preload.fetchPriority = "high";
-    preload.src = getImageUrl(items[0].backdrop_path, "original");
-  }
   startHeroTimer();
 }
 
@@ -179,6 +174,8 @@ function selectHeroItem(item) {
   }
 
   const selected = { ...item, media_type: mediaType };
+  // A manually selected weekly feature is not assigned a false daily-trending rank.
+  selected.trending_rank = null;
   heroSlides = [
     selected,
     ...heroSlides.filter((slide) =>
@@ -199,7 +196,8 @@ function getHeroItems(data, mediaType) {
   });
   return normalizeResults(eligible, mediaType === "movie" ? "movie" : null)
     .filter((item) => item.backdrop_path)
-    .slice(0, 5);
+    .slice(0, 5)
+    .map((item, index) => ({ ...item, trending_rank: index + 1 }));
 }
 
 async function loadHero() {
@@ -210,19 +208,25 @@ async function loadHero() {
     let data;
     let mediaType = "all";
     try {
-      data = await tmdbApi.trending("all", "day", 1, { cache: false });
+      data = await tmdbApi.trending("all", "day", 1);
     } catch (error) {
       console.warn("Vivid daily trending (all) unavailable; falling back to movies:", error);
       mediaType = "movie";
-      data = await tmdbApi.trending("movie", "day", 1, { cache: false });
+      data = await tmdbApi.trending("movie", "day", 1);
     }
 
     let items = getHeroItems(data, mediaType);
     if (!items.length && mediaType === "all") {
       // Keep the billboard useful if the mixed trending feed has no usable backdrops.
       mediaType = "movie";
-      data = await tmdbApi.trending("movie", "day", 1, { cache: false });
+      data = await tmdbApi.trending("movie", "day", 1);
       items = getHeroItems(data, mediaType);
+    }
+    if (items[0]?.backdrop_path) {
+      const preload = new Image();
+      preload.decoding = "async";
+      preload.fetchPriority = "high";
+      preload.src = getImageUrl(items[0].backdrop_path, "w1280");
     }
     renderHero(items);
   } catch (error) {

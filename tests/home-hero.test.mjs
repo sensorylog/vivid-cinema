@@ -27,6 +27,9 @@ test("TFLIX-style trending billboard is restored above the unchanged featured-ca
   assert.match(heroCss, /env\(safe-area-inset-top, 0px\)/, "header must respect the iPhone notch/Dynamic Island safe area");
   assert.match(heroCss, /env\(safe-area-inset-bottom, 0px\)/, "hero actions must sit above the home indicator");
   assert.match(heroCss, /height: clamp\(520px, 74svh, 680px\)/, "mobile hero uses the small viewport-aware height");
+  assert.match(heroCss, /transition: opacity 1\.1s/, "hero artwork cross-fades between titles");
+  assert.match(heroCss, /animation: heroZoom 18s ease-out forwards/, "active hero artwork slowly zooms in");
+  assert.ok(heroCss.includes("from { transform: scale(1.02); }") && heroCss.includes("to { transform: scale(1.10); }"), "hero artwork zooms in subtly rather than zooming out");
   assert.doesNotMatch(heroCss, /margin-bottom:\s*-8vh/, "hero must not overlap the following content");
 
   const desktopCss = read("../styles/vivid-desktop.css");
@@ -62,16 +65,19 @@ test("TFLIX-style trending billboard is restored above the unchanged featured-ca
 
 test("TFLIX-style hero uses TMDB stills and routes to Vivid title details without embedding a trailer", () => {
   const js = read("../scripts/tflix-hero.js");
-  assert.match(js, /tmdbApi\.trending\("all",\s*"day",\s*1,\s*\{\s*cache:\s*false\s*\}\)/);
-  assert.match(js, /getImageUrl\(item\.backdrop_path,\s*"original"\)/);
+  assert.match(js, /tmdbApi\.trending\("all",\s*"day",\s*1\)/);
+  assert.match(js, /getImageUrl\(item\.backdrop_path,\s*"w1280"\)/);
   assert.match(js, /getMediaUrl\(item\)/);
   assert.match(js, /startHeroTimer\(\)/);
   assert.match(js, /aria-hidden", "true"/);
   assert.match(js, /\.inert = true/);
-  assert.match(js, /tmdbApi\.trending\("movie", "day", 1, \{ cache: false \}\)/, "a fresh fallback feed is available");
+  assert.match(js, /tmdbApi\.trending\("movie", "day", 1\)/, "a cached fallback feed is available");
+  assert.doesNotMatch(js, /cache:\s*false/, "hero trending requests should use the shared TMDB cache");
   assert.match(js, /slide\.inert = index !== 0/);
   assert.match(js, /window\.vividCinemaSelectHero = selectHeroItem/);
   assert.match(js, /new CustomEvent\("vivid:hero-change"/);
+  assert.match(js, /trending_rank/);
+  assert.match(js, /Featured on Vivid/);
 
   const api = read("../scripts/tmdb.js");
   assert.match(api, /trending: \(mediaType = "all", timeWindow = "week", page = 1, options = \{\}\) => tmdb\("trending\/" \+ mediaType \+ "\/" \+ timeWindow, \{ page \}, options\)/);
@@ -87,7 +93,9 @@ test("TFLIX-style hero uses TMDB stills and routes to Vivid title details withou
 
 test("service worker shell cache includes the new hero assets", () => {
   const sw = read("../service-worker.js");
-  assert.match(sw, /const CACHE_NAME = "vivid-cinema-shell-v151";/);
+  assert.match(sw, /const CACHE_NAME = "vivid-cinema-shell-v153";/);
   assert.match(sw, /\.\/styles\/vivid-tflix-hero\.css/);
+  assert.match(sw, /\.\/styles\/vivid-tflix-hero\.css\?v=hero-motion-2/);
+  assert.match(home, /vivid-tflix-hero\.css\?v=hero-motion-2/);
   assert.match(sw, /\.\/scripts\/tflix-hero\.js/);
 });
