@@ -69,6 +69,15 @@ Do not silently route existing Vivid Watch Now or Play Episode actions through M
 - Deployment, authentication, storage limits, and license review are documented.
 
 
+## Confirmed API boundary (source inspection)
+
+The upstream MediaForge code confirms the blocker for a native Vivid adapter:
+- The stable `/api/v1/*` interface currently exposes read-oriented status, queue, library, statistics, AutoSync, uptime, update, media-scan, upscale-status, and history routes. It does not currently declare a versioned source-search, stream-resolution, or download-enqueue endpoint.
+- The built-in UI uses unversioned internal routes such as `/api/series`, `/api/stream/*`, and `POST /api/download`. These are not the documented stable external contract; the app's security code explicitly notes that cross-origin JSON requests are not allowed by its CORS policy.
+- Therefore, a direct browser integration from Vivid cannot safely use the API key against those internal endpoints, and a server-side Vivid proxy cannot reach a MediaForge instance that is only running on the user's PC. Do not work around this by placing credentials in query strings or using session-authenticated internal routes as if they were public APIs.
+
+The next safe step for a full native integration is to add/obtain a maintainer-supported, scoped API contract for source search, playback resolution, and download creation, plus a reachable HTTPS MediaForge deployment (or a separately reviewed local companion bridge for local-only use). Until then, the isolated launcher is the only implementation that is honest about the available contract.
+
 ## Local launcher implementation status
 
 The first code slice is now on this feature branch: `mediaforge.html` provides a separate MediaForge launch page, linked from the Vivid home navigation. It defaults to `http://localhost:8080`, accepts only localhost HTTP or HTTPS for remote instances, remembers the base URL in browser-local storage, and opens the service in a separate tab. It does not collect API keys, embed the service, or modify the existing VidAPI playback code. The service worker shell cache was bumped to include this page and its assets.
