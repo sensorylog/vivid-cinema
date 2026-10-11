@@ -104,3 +104,26 @@ body.vivid-watch-page.vivid-player-open{overflow:hidden;overscroll-behavior:none
 }
 @media(hover:none){.vivid-watch-rec-card:hover img{transform:none}}
 @media(prefers-reduced-motion:reduce){.vivid-watch-loading div,.vivid-player-overlay,.vivid-watch-rec-card img,.vivid-watch-play,.vivid-watch-details{animation:none;transition:none}}
+
+/* Custom playback server management — compact, accessible, and responsive. */
+.vivid-custom-server-tools{margin:12px 0 0;border-top:1px solid rgba(255,255,255,.1);padding-top:10px}
+.vivid-custom-server-heading{padding:7px 10px;color:var(--vivid-muted,#a6a8b1);font-size:.68rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase}
+.vivid-custom-server-row{display:flex;align-items:center;gap:6px;margin:4px 0}
+.vivid-custom-server-row .vivid-custom-source{flex:1;min-width:0}
+.vivid-custom-server-copy{display:flex;flex:1;min-width:0;flex-direction:column;gap:3px;text-align:left}
+.vivid-custom-server-copy strong,.vivid-custom-server-copy small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.vivid-custom-server-copy small{color:var(--vivid-muted,#a6a8b1);font-size:.7rem}
+.vivid-custom-server-remove{display:grid;width:34px;height:34px;flex:0 0 34px;place-items:center;border:1px solid rgba(255,255,255,.12);border-radius:10px;background:rgba(255,255,255,.04);color:#f2a2a2;cursor:pointer}
+.vivid-custom-server-empty,.vivid-custom-server-help,.vivid-custom-server-license-note{margin:8px 10px;color:var(--vivid-muted,#a6a8b1);font-size:.76rem;line-height:1.5}
+.vivid-custom-server-settings{margin-top:10px;padding:10px;border:1px solid rgba(255,255,255,.1);border-radius:12px;background:rgba(255,255,255,.025)}
+.vivid-custom-server-settings summary{display:flex;align-items:center;gap:8px;cursor:pointer;font-size:.82rem;font-weight:750;list-style:none}
+.vivid-custom-server-settings summary::-webkit-details-marker{display:none}
+.vivid-custom-server-settings form{display:grid;gap:7px;margin-top:12px}
+.vivid-custom-server-settings label{color:var(--vivid-muted,#a6a8b1);font-size:.73rem;font-weight:700}
+.vivid-custom-server-settings input{width:100%;min-width:0;padding:10px 11px;border:1px solid rgba(255,255,255,.14);border-radius:9px;background:#0c0d12;color:#fff;font:inherit;font-size:.78rem;outline-offset:2px}
+.vivid-custom-server-settings input:focus-visible,.vivid-custom-server-remove:focus-visible,.vivid-custom-server-save:focus-visible{outline:2px solid var(--vivid-accent,#e50914);outline-offset:2px}
+.vivid-custom-server-save{display:flex;align-items:center;justify-content:center;gap:7px;min-height:38px;margin-top:4px;padding:9px 12px;border:0;border-radius:9px;background:var(--vivid-accent,#e50914);color:#fff;font:inherit;font-size:.8rem;font-weight:800;cursor:pointer}
+.vivid-custom-server-status{min-height:1.1em;margin:0;color:#9de2b0;font-size:.75rem;line-height:1.45}
+.vivid-custom-server-status.is-warning{color:#ffb6a9}
+.vivid-custom-server-license-note{font-size:.7rem}
+@media(max-width:520px){.vivid-custom-server-row .vivid-server-state{display:none}.vivid-custom-server-settings input{font-size:16px}}
