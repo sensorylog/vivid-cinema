@@ -1,4 +1,4 @@
-const $ = (root, id) => root?.querySelector("#" + id);
+const $ = (id, root) => root?.querySelector("#" + id);
 
 export function getNextServer(current, available) {
   const servers = Array.isArray(available) ? available.filter(Boolean) : [];
