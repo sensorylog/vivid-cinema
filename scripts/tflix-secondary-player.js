@@ -47,7 +47,7 @@ export function mountTflixSecondaryPlayer({ root, params, media, details, title,
     '<div class="vivid-tflix-card">' +
       '<header class="vivid-tflix-topbar"><a class="vivid-tflix-logo" href="#vivid-tflix-player" aria-label="TFLIX-style secondary player">TFLIX</a><div class="vivid-tflix-now-title" id="vivid-tflix-now-title"></div><span class="vivid-tflix-player-tag">PLAYER 2</span></header>' +
       '<div class="vivid-tflix-layout"><div class="vivid-tflix-player-col">' +
-        '<div class="vivid-tflix-screen" id="vivid-tflix-screen"><div class="vivid-tflix-loading" id="vivid-tflix-loading" hidden><span class="vivid-tflix-spinner"></span><span>Loading player…</span></div><div class="vivid-tflix-placeholder" id="vivid-tflix-placeholder"><i class="bi bi-play-circle" aria-hidden="true"></i><strong>Ready to stream</strong><span>Choose one of the six servers to start playback.</span></div><iframe id="vivid-tflix-frame" title="Additional streaming player" allow="autoplay *; encrypted-media *; picture-in-picture *; fullscreen *; web-share *" allowfullscreen referrerpolicy="origin" loading="eager" hidden></iframe><div class="vivid-tflix-status" id="vivid-tflix-status" role="status" aria-live="polite" hidden></div></div>' +
+        '<div class="vivid-tflix-screen" id="vivid-tflix-screen"><div class="vivid-tflix-loading" id="vivid-tflix-loading" hidden><span class="vivid-tflix-spinner"></span><span>Loading player…</span></div><div class="vivid-tflix-placeholder" id="vivid-tflix-placeholder"><i class="bi bi-play-circle" aria-hidden="true"></i><strong>Ready to stream</strong><span>Choose a server to begin playback.</span><button type="button" id="vivid-tflix-start">Start Player 2</button></div><iframe id="vivid-tflix-frame" title="Additional streaming player" allow="autoplay *; encrypted-media *; picture-in-picture *; fullscreen *; web-share *" allowfullscreen referrerpolicy="origin" loading="eager" hidden></iframe><div class="vivid-tflix-status" id="vivid-tflix-status" role="status" aria-live="polite" hidden></div></div>' +
       '</div><aside class="vivid-tflix-sidebar">' +
         (isTv ? '<section class="vivid-tflix-panel" id="vivid-tflix-tv-panel"><div class="vivid-tflix-panel-title">Episode</div><div class="vivid-tflix-selectors"><label><span>Season</span><select id="vivid-tflix-season" class="vivid-tflix-select"></select></label><label><span>Episode</span><select id="vivid-tflix-episode" class="vivid-tflix-select"></select></label></div><button type="button" id="vivid-tflix-next" class="vivid-tflix-next">Next Episode <span aria-hidden="true">▶</span></button></section>' : '') +
         '<section class="vivid-tflix-panel"><div class="vivid-tflix-panel-title">Streaming Servers</div><div class="vivid-tflix-server-grid" id="vivid-tflix-server-grid"></div></section>' +
@@ -63,7 +63,6 @@ export function mountTflixSecondaryPlayer({ root, params, media, details, title,
   const buttons = new Map();
   function updateTitle() {
     nowTitle.textContent = isTv ? titleText + " · S" + playbackParams.season + " E" + playbackParams.episode : titleText;
-    document.title = titleText + " — TFLIX Player 2";
   }
   function updateButtons() {
     for (const server of SERVERS) {
@@ -101,12 +100,14 @@ export function mountTflixSecondaryPlayer({ root, params, media, details, title,
     frame.loading = "eager";
     frame.addEventListener("load", () => {
       if (thisGeneration !== generation) return;
+      if (loadTimer) window.clearTimeout(loadTimer);
       loading.hidden = true;
       setStatus(server.name + " loaded. If playback does not start, try another server.");
       window.setTimeout(() => { if (thisGeneration === generation) status.hidden = true; }, 5000);
     });
     frame.addEventListener("error", () => {
       if (thisGeneration !== generation) return;
+      if (loadTimer) window.clearTimeout(loadTimer);
       loading.hidden = true;
       setStatus(server.name + " could not be loaded. Try another server.");
     });
@@ -168,5 +169,20 @@ export function mountTflixSecondaryPlayer({ root, params, media, details, title,
   }
   updateTitle();
   updateButtons();
-  return { loadServer, getSelectedServer: () => selectedServer, destroy: () => { generation++; if (loadTimer) window.clearTimeout(loadTimer); const frame = screen.querySelector("#vivid-tflix-frame"); if (frame) frame.src = "about:blank"; } };
+  const startButton = root.querySelector("#vivid-tflix-start");
+  if (startButton) startButton.addEventListener("click", () => loadServer(selectedServer));
+  let started = false;
+  let observer = null;
+  if ("IntersectionObserver" in window) {
+    observer = new IntersectionObserver(entries => {
+      if (started || !entries.some(entry => entry.isIntersecting)) return;
+      started = true;
+      observer.disconnect();
+      loadServer(selectedServer);
+    }, { rootMargin: "100px" });
+    observer.observe(root);
+  } else if (startButton) {
+    startButton.hidden = false;
+  }
+  return { loadServer, getSelectedServer: () => selectedServer, destroy: () => { generation++; if (loadTimer) window.clearTimeout(loadTimer); if (observer) observer.disconnect(); const frame = screen.querySelector("#vivid-tflix-frame"); if (frame) frame.src = "about:blank"; } };
 }
