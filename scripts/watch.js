@@ -528,8 +528,18 @@ function renderShell(params) {
     secondaryPlayerQuery.set("e", String(params.episode || 1));
   }
   const secondaryPlayerUrl = "https://movie-scraper-lovat-three.vercel.app/?" + secondaryPlayerQuery.toString();
+  const secondaryPlayerFallbackQuery = new URLSearchParams({
+    autoplay: "true", primaryColor: "e50914", secondaryColor: "1b1b1b",
+    iconColor: "ffffff", title: "false", poster: "false"
+  });
+  if (resumeAt > 5) secondaryPlayerFallbackQuery.set("startAt", String(Math.floor(resumeAt)));
+  const secondaryPlayerFallbackUrl = "https://vidlink.pro/" +
+    (isTv
+      ? "tv/" + encodeURIComponent(String(media.id)) + "/" + Math.max(1, Number(params.season) || 1) + "/" + Math.max(1, Number(params.episode) || 1)
+      : "movie/" + encodeURIComponent(String(media.id))) +
+    "?" + secondaryPlayerFallbackQuery.toString();
   const secondaryPlayerMarkup = !isAnimePlayback() && /^\d+$/.test(String(media.id || ""))
-    ? '<section class="vivid-secondary-player" aria-labelledby="vivid-secondary-player-title"><div class="vivid-secondary-player-heading"><div><span>ALTERNATIVE PLAYBACK</span><h2 id="vivid-secondary-player-title">Player 2 · Movie Scraper</h2><p>If the first player does not work, try this independent player below.</p></div><span class="vivid-secondary-player-badge">SECOND PLAYER</span></div><div class="vivid-secondary-player-frame"><iframe title="' + escapeHtml((episodeTitle || title) + " alternative player") + '" src="' + escapeHtml(secondaryPlayerUrl) + '" loading="lazy" allow="autoplay; fullscreen; picture-in-picture; encrypted-media" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe></div><div class="vivid-secondary-player-actions"><p class="vivid-secondary-player-note">If the embedded player stays blank, open the same movie or episode directly in Movie Scraper.</p><a class="vivid-secondary-player-open" href="' + escapeHtml(secondaryPlayerUrl) + '" target="_blank" rel="noopener noreferrer">Open Player 2 directly <span aria-hidden="true">↗</span></a></div></section>'
+    ? '<section class="vivid-secondary-player" aria-labelledby="vivid-secondary-player-title"><div class="vivid-secondary-player-heading"><div><span>ALTERNATIVE PLAYBACK</span><h2 id="vivid-secondary-player-title">Player 2 · Movie Scraper</h2><p>If the first player does not work, try this independent player below.</p></div><span class="vivid-secondary-player-badge">SECOND PLAYER</span></div><div class="vivid-secondary-player-frame"><iframe id="vivid-secondary-player-frame" title="' + escapeHtml((episodeTitle || title) + " alternative player") + '" src="' + escapeHtml(secondaryPlayerUrl) + '" loading="lazy" allow="autoplay; fullscreen; picture-in-picture; encrypted-media" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe></div><div class="vivid-secondary-player-actions"><p id="vivid-secondary-player-note" class="vivid-secondary-player-note">If Movie Scraper cannot load a playlist, switch to the independent VidLink player without losing the selected movie or episode.</p><div class="vivid-secondary-player-buttons"><button type="button" id="vivid-secondary-player-fallback" class="vivid-secondary-player-fallback" data-active="scraper">Try VidLink fallback</button><a id="vivid-secondary-player-open" class="vivid-secondary-player-open" href="' + escapeHtml(secondaryPlayerUrl) + '" target="_blank" rel="noopener noreferrer">Open Player 2 directly <span aria-hidden="true">↗</span></a></div></div></section>'
     : "";
 
   document.title = (episodeTitle ? episodeTitle + " · " : "") + title + " · Vivid Cinema";
@@ -544,6 +554,24 @@ function renderShell(params) {
 
   const player = $("vidapi-player");
   const directPlayer = $("vivid-direct-player");
+  const secondaryPlayerFrame = $("vivid-secondary-player-frame");
+  const secondaryPlayerFallback = $("vivid-secondary-player-fallback");
+  const secondaryPlayerOpen = $("vivid-secondary-player-open");
+  const secondaryPlayerNote = $("vivid-secondary-player-note");
+  secondaryPlayerFallback?.addEventListener("click", () => {
+    if (!secondaryPlayerFrame || !secondaryPlayerOpen) return;
+    const showingFallback = secondaryPlayerFallback.dataset.active === "vidlink";
+    const nextUrl = showingFallback ? secondaryPlayerUrl : secondaryPlayerFallbackUrl;
+    secondaryPlayerFrame.src = nextUrl;
+    secondaryPlayerOpen.href = nextUrl;
+    secondaryPlayerFallback.dataset.active = showingFallback ? "scraper" : "vidlink";
+    secondaryPlayerFallback.textContent = showingFallback ? "Try VidLink fallback" : "Back to Movie Scraper";
+    if (secondaryPlayerNote) {
+      secondaryPlayerNote.textContent = showingFallback
+        ? "Movie Scraper selected. If it cannot load a playlist, switch to VidLink."
+        : "VidLink selected with the same movie or TV episode. You can switch back to Movie Scraper at any time.";
+    }
+  });
   const status = $("player-status");
   const tryNextButton = $("player-try-next");
   const overlay = $("player-overlay");
