@@ -34,7 +34,11 @@ form.addEventListener("submit", (event) => {
     return;
   }
   try { localStorage.setItem(STORAGE_KEY, target); } catch { /* Opening the service must not depend on storage. */ }
-  const opened = window.open(target, "_blank", "noopener,noreferrer");
-  if (opened) setStatus("MediaForge opened in a new tab. Sign in there if your instance asks you to.", "success");
-  else setStatus("Your browser blocked the new tab. Allow pop-ups for this site, then try again.", "error");
+  const opened = window.open(target, "_blank");
+  if (opened) {
+    opened.opener = null;
+    setStatus("MediaForge opened in a new tab. Sign in there if your instance asks you to.", "success");
+  } else {
+    setStatus("Your browser blocked the new tab. Allow pop-ups for this site, then try again.", "error");
+  }
 });
