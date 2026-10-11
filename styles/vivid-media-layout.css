@@ -1,0 +1,269 @@
+/* Vivid Cinema — canonical media sizing.
+   One final layer for artwork, the YouTube hero, and the watch player.
+   Keep frames responsible for layout; media never dictates page geometry. */
+
+/* Artwork: preserve the complete poster/still inside its existing frame. */
+body :is(
+  .vivid-card-media,
+  .vivid-discovery-card,
+  .vivid-discovery-poster,
+  .vivid-title-poster,
+  .vivid-person-photo,
+  .vivid-watch-artwork,
+  .vivid-watch-rec-card,
+  .vivid-episode-thumb,
+  .vivid-library-card,
+  .vivid-collection-card,
+  .landing-poster,
+  .vivid-video-card,
+  .vivid-onboarding-card,
+  .vivid-tonight-card,
+  .vivid-tonight-poster,
+  .vivid-home-tv-screen,
+  .vivid-person-credit-poster,
+  .vivid-anime-poster,
+  .vivid-browse-category-media,
+  .vivid-person-profile,
+  .vivid-video-thumb
+) {
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+body :is(
+  .vivid-card-media,
+  .vivid-discovery-poster,
+  .vivid-title-poster,
+  .vivid-person-photo,
+  .vivid-watch-artwork,
+  .vivid-watch-rec-card,
+  .vivid-episode-thumb,
+  .vivid-library-card,
+  .vivid-collection-card,
+  .landing-poster,
+  .vivid-video-card,
+  .vivid-onboarding-card,
+  .vivid-tonight-card,
+  .vivid-tonight-poster,
+  .vivid-home-tv-screen,
+  .vivid-person-credit-poster,
+  .vivid-anime-poster,
+  .vivid-browse-category-media,
+  .vivid-person-profile,
+  .vivid-video-thumb,
+  .vivid-similar-card,
+  .vivid-cast
+) img {
+  max-width: 100% !important;
+  object-fit: contain !important;
+  object-position: center center !important;
+  transform: none !important;
+}
+
+body .vivid-card-media,
+body .vivid-discovery-poster,
+body .vivid-title-poster,
+body .vivid-person-photo,
+body .vivid-watch-artwork,
+body .vivid-watch-rec-card,
+body .vivid-episode-thumb,
+body .vivid-library-card,
+body .vivid-collection-card,
+body .landing-poster,
+body .vivid-video-card,
+body .vivid-onboarding-card,
+body .vivid-tonight-card,
+body .vivid-tonight-poster,
+body .vivid-home-tv-screen,
+body .vivid-person-credit-poster,
+body .vivid-anime-poster,
+body .vivid-browse-category-media,
+body .vivid-person-profile,
+body .vivid-video-thumb {
+  overflow: hidden;
+  background-color: #0b0d12;
+}
+
+body .vivid-card-media img,
+body .vivid-discovery-card img,
+body .vivid-discovery-poster img,
+body .vivid-title-poster img,
+body .vivid-person-photo img,
+body .vivid-watch-rec-card img,
+body .vivid-episode-thumb img,
+body .vivid-library-card img,
+body .vivid-collection-card img,
+body .landing-poster img,
+body .vivid-video-card img,
+body .vivid-onboarding-card img,
+body .vivid-watch-artwork img,
+body .vivid-tonight-card img,
+body .vivid-tonight-poster img,
+body .vivid-home-tv-screen img,
+body .vivid-person-credit-poster img,
+body .vivid-anime-poster img,
+body .vivid-browse-category-media img,
+body .vivid-person-profile img,
+body .vivid-video-thumb img,
+body .vivid-similar-card img,
+body .vivid-cast img {
+  object-fit: contain !important;
+  object-position: center !important;
+  transform: none !important;
+}
+
+/* Home hero: an iframe is a viewport, not an image.
+   Keep the YouTube viewport at 16:9 and center it inside the taller hero. */
+body.vivid-cinema-home .vivid-hero-media {
+  position: absolute;
+  inset: 0;
+  overflow: hidden !important;
+  isolation: isolate;
+  background: #06070a;
+}
+
+body.vivid-cinema-home iframe.vivid-hero-video,
+body.vivid-cinema-home iframe.vivid-hero-video.is-ready {
+  position: absolute !important;
+  inset: auto !important;
+  left: 50% !important;
+  top: 50% !important;
+  right: auto !important;
+  bottom: auto !important;
+  display: block !important;
+  width: min(100%, 177.78svh) !important;
+  height: min(100%, 56.25vw) !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  max-width: 100% !important;
+  max-height: 100% !important;
+  aspect-ratio: 16 / 9 !important;
+  border: 0 !important;
+  object-fit: fill !important;
+  transform: translate(-50%, -50%) !important;
+  transform-origin: center center !important;
+}
+
+body.vivid-cinema-home .vivid-hero-fallback {
+  background-size: contain !important;
+  background-position: center center !important;
+  background-repeat: no-repeat !important;
+  background-color: #06070a;
+}
+
+body.vivid-cinema-home .vivid-home-tv-screen img,
+body.vivid-cinema-home .vivid-home-tv-art {
+  max-width: 100% !important;
+  max-height: 100% !important;
+  object-fit: contain !important;
+  object-position: center !important;
+  transform: none !important;
+}
+
+/* Third-party direct player wrapper: never exceed the same content column. */
+body.vivid-watch-page .flickv4-web-player,
+body.vivid-watch-page .flickv4-player-frame {
+  width: min(1320px, 100%);
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+body.vivid-watch-page .flickv4-player-frame iframe,
+body.vivid-watch-page .flickv4-player-frame video {
+  max-width: 100%;
+  max-height: 100%;
+  box-sizing: border-box;
+}
+
+@media (orientation: landscape) and (max-height: 520px) {
+  body.vivid-cinema-home .vivid-hero-media {
+    height: 100svh !important;
+    min-height: 0 !important;
+    max-height: 100svh !important;
+  }
+}
+
+/* Watch player: constrain the entire dialog by both viewport axes.
+   In short landscape screens, reduce width so the 16:9 frame fits vertically. */
+body.vivid-watch-page .vivid-player-overlay:not(.vivid-player-inline) {
+  box-sizing: border-box;
+  overflow: auto;
+}
+
+body.vivid-watch-page .vivid-player-overlay:not(.vivid-player-inline) .vivid-player-dialog {
+  width: min(1320px, 100%, max(280px, calc(177.78dvh - 250px))) !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  max-height: calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 16px) !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+}
+
+body.vivid-watch-page .vivid-player-overlay:not(.vivid-player-inline) .vivid-player-frame {
+  width: 100% !important;
+  height: auto !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  max-width: 100% !important;
+  max-height: calc(100dvh - 150px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)) !important;
+  aspect-ratio: 16 / 9 !important;
+  flex: 0 1 auto !important;
+}
+
+body.vivid-watch-page .vivid-player-overlay.vivid-player-inline {
+  box-sizing: border-box !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+}
+
+body.vivid-watch-page .vivid-player-overlay.vivid-player-inline .vivid-player-dialog {
+  width: min(1240px, 100%, max(280px, calc(177.78dvh - 250px))) !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+}
+
+body.vivid-watch-page .vivid-player-overlay.vivid-player-inline .vivid-player-frame {
+  position: relative !important;
+  width: 100% !important;
+  height: auto !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  max-width: 100% !important;
+  aspect-ratio: 16 / 9 !important;
+  flex: 0 1 auto !important;
+}
+
+body.vivid-watch-page .vivid-player-overlay .vivid-player-frame iframe,
+body.vivid-watch-page .vivid-player-overlay .vivid-player-frame video {
+  position: absolute !important;
+  inset: 0 !important;
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  max-width: 100% !important;
+  max-height: 100% !important;
+  border: 0 !important;
+}
+
+@media (orientation: landscape) and (max-height: 520px) {
+  body.vivid-watch-page .vivid-player-overlay:not(.vivid-player-inline) {
+    padding: max(4px, env(safe-area-inset-top, 0px)) max(4px, env(safe-area-inset-right, 0px)) max(4px, env(safe-area-inset-bottom, 0px)) max(4px, env(safe-area-inset-left, 0px));
+  }
+  body.vivid-watch-page .vivid-player-overlay:not(.vivid-player-inline) .vivid-player-dialog-head {
+    padding: 5px 10px;
+  }
+  body.vivid-watch-page .vivid-player-overlay:not(.vivid-player-inline) .vivid-player-dialog-foot {
+    padding: 5px 10px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body.vivid-cinema-home .vivid-hero-video,
+  body.vivid-cinema-home .vivid-hero-fallback {
+    transition: none !important;
+  }
+}
