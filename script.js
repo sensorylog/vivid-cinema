@@ -141,7 +141,7 @@ function setHeroText(item){
 }
 function youtubeUrl(key,muted=true){
  const params=new URLSearchParams({
-   autoplay:"1",mute:muted?"1":"0",controls:"0",playsinline:"1",rel:"0",
+   autoplay:"0",mute:muted?"1":"0",controls:"0",playsinline:"1",rel:"0",
    iv_load_policy:"3",enablejsapi:"1",origin:window.location.origin
  });
  return "https://www.youtube.com/embed/"+encodeURIComponent(key)+"?"+params.toString();
@@ -203,11 +203,13 @@ async function loadHeroVideo(item){
      sendHeroPlayerCommand("addEventListener",["onStateChange"]);
      sendHeroPlayerCommand("addEventListener",["onError"]);
      if(!heroPlaying){sendHeroPlayerCommand("pauseVideo");return;}
-     // Retry muted autoplay on browsers that ignore the initial embed parameter.
-     [250,800,1800,3200].forEach(delay=>setTimeout(()=>{
-       if(token!==heroLoadToken||!heroPlaying)return;
-       sendHeroPlayerCommand("playVideo");
-     },delay));
+     // Register events before requesting playback so the first state change is not missed.
+      [250,800,1800,3200].forEach(delay=>setTimeout(()=>{
+        if(token!==heroLoadToken||!heroPlaying)return;
+        sendHeroPlayerCommand("addEventListener",["onStateChange"]);
+        sendHeroPlayerCommand("addEventListener",["onError"]);
+        sendHeroPlayerCommand("playVideo");
+      },delay));
    };
    iframe.onerror=()=>{if(token!==heroLoadToken)return;iframe.classList.remove("is-ready");fallback.classList.add("is-visible");};
    const setTrailer=()=>{
