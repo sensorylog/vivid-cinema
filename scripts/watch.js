@@ -304,8 +304,6 @@ function updateSourceLabel() {
 }
 
 function setPlayerSource(source, params, startAt = 0) {
-  mountFlickv4WebPlayer($("flickv4-player"));
-
   const player = $("vidapi-player");
   const directPlayer = $("vivid-direct-player");
   if (!player || !params) return;
@@ -593,6 +591,8 @@ function renderShell(params) {
       '<div class="flickv4-player-frame"><div id="flickv4-status" role="status">Choose a server, then tap Play to load the stream.</div><iframe id="flickv4-iframe" title="Flickv4 web playback" allow="autoplay; fullscreen; picture-in-picture; encrypted-media" allowfullscreen referrerpolicy="origin" loading="lazy"></iframe></div>' +
       '<p class="flickv4-footnote">Playback depends on the selected provider and browser support. Vivid’s player above remains separate.</p></section>' +
     '<section class="vivid-watch-recommendations"><div class="vivid-section-heading"><div><span>MORE TO DISCOVER</span><h2>You might also like</h2></div></div><div id="watch-recommendations" class="vivid-watch-rec-rail">' + recommendationCards() + '</div></section>';
+
+  mountFlickv4WebPlayer($("flickv4-player"));
 
   const player = $("vidapi-player");
   const directPlayer = $("vivid-direct-player");
