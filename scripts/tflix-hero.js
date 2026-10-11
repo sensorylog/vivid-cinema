@@ -40,9 +40,17 @@ function goToHero(index) {
   const dots = hero?.querySelectorAll(".hero-dot") || [];
   slides[heroIndex]?.classList.remove("active");
   dots[heroIndex]?.classList.remove("active");
+  if (slides[heroIndex]) {
+    slides[heroIndex].setAttribute("aria-hidden", "true");
+    slides[heroIndex].inert = true;
+  }
   heroIndex = next;
   slides[heroIndex]?.classList.add("active");
   dots[heroIndex]?.classList.add("active");
+  if (slides[heroIndex]) {
+    slides[heroIndex].setAttribute("aria-hidden", "false");
+    slides[heroIndex].inert = false;
+  }
   dots.forEach((dot, index) => dot.setAttribute("aria-pressed", String(index === heroIndex)));
 
   const bg = slides[heroIndex]?.querySelector(".hero-bg");
@@ -61,6 +69,8 @@ function createSlide(item, index) {
   const slide = document.createElement("article");
   slide.className = "hero-slide" + (index === 0 ? " active" : "");
   slide.setAttribute("aria-label", title);
+  slide.setAttribute("aria-hidden", String(index !== 0));
+  slide.inert = index !== 0;
 
   const backdrop = document.createElement("div");
   backdrop.className = "hero-bg";
@@ -148,23 +158,43 @@ function renderHero(items) {
   startHeroTimer();
 }
 
+function getHeroItems(data, mediaType) {
+  const eligible = (data?.results || []).filter((item) => {
+    if (!item?.backdrop_path) return false;
+    if (mediaType === "movie") return !item.media_type || item.media_type === "movie";
+    return item.media_type === "movie" || item.media_type === "tv";
+  });
+  return normalizeResults(eligible, mediaType === "movie" ? "movie" : null)
+    .filter((item) => item.backdrop_path)
+    .slice(0, 5);
+}
+
 async function loadHero() {
   const hero = document.getElementById("hero");
   if (!hero) return;
+
   try {
     let data;
+    let mediaType = "all";
     try {
       data = await tmdbApi.trending("all", "day");
     } catch (error) {
-      console.warn("Vivid trending hero fallback:", error);
+      console.warn("Vivid daily trending (all) unavailable; falling back to movies:", error);
+      mediaType = "movie";
       data = await tmdbApi.trending("movie", "day");
     }
-    const items = normalizeResults(data?.results || [])
-      .filter(item => item.backdrop_path && (item.media_type === "movie" || item.media_type === "tv"))
-      .slice(0, 5);
+
+    let items = getHeroItems(data, mediaType);
+    if (!items.length && mediaType === "all") {
+      // Keep the billboard useful if the mixed trending feed has no usable backdrops.
+      mediaType = "movie";
+      data = await tmdbApi.trending("movie", "day");
+      items = getHeroItems(data, mediaType);
+    }
     renderHero(items);
   } catch (error) {
     console.warn("Vivid trending hero unavailable:", error);
+    stopHeroTimer();
     hero.classList.add("empty");
   }
 }
