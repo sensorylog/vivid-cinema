@@ -49,7 +49,7 @@ test("cycles the second player to the next configured server", () => {
 test("second player keeps its watchdog active after the iframe page loads", () => {
   const source = readFileSync(new URL("../scripts/flickv4-web-player.js", import.meta.url), "utf8");
   const loadHandler = source.split('frame.addEventListener("load", () => {')[1]?.split("});")[0] || "";
-  assert.match(loadHandler, /does not confirm that a video stream is playable/);
+  assert.match(loadHandler, /not proof of playback/);
   assert.doesNotMatch(loadHandler, /clearLoadTimer\(\)/);
   assert.match(source, /playback has not been confirmed/);
   const css = readFileSync(new URL("../styles/flickv4-web-player.css", import.meta.url), "utf8");
