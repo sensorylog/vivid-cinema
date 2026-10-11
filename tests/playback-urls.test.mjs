@@ -27,14 +27,14 @@ test("VidLink uses TMDB IDs for standard content and MAL IDs for anime", () => {
   assert.equal(buildVidlinkEmbedUrl(movie, { tmdbId: "27205" }), "https://vidlink.pro/movie/27205?primaryColor=e50914&secondaryColor=1b1b1b&iconColor=ffffff&title=false&poster=false");
   assert.equal(buildVidlinkEmbedUrl(tv, { tmdbId: "1399", startAt: 90 }), "https://vidlink.pro/tv/1399/2/7?primaryColor=e50914&secondaryColor=1b1b1b&iconColor=ffffff&title=false&poster=false&startAt=90");
   assert.equal(buildVidlinkEmbedUrl({ ...tv, episode: 3 }, { anime: true, malId: "21" }), "https://vidlink.pro/anime/21/3/sub?primaryColor=e50914&secondaryColor=1b1b1b&iconColor=ffffff&title=false&poster=false&fallback=true");
-  assert.equal(buildVidlinkEmbedUrl(movie, { imdbId: "tt0133093" }), "");
+  assert.equal(buildVidlinkEmbedUrl({ ...movie, id: "tt0133093" }, { imdbId: "tt0133093" }), "");
 });
 
 test("VidPlus uses TMDB for movies/TV, AniList for anime, and progress for resume", () => {
   assert.equal(buildVidplusEmbedUrl(movie, { tmdbId: "27205" }), "https://player.vidplus.to/embed/movie/27205?autoplay=false&primarycolor=e50914&secondarycolor=171717&iconcolor=ffffff");
   assert.equal(buildVidplusEmbedUrl(tv, { tmdbId: "1399", startAt: 600 }), "https://player.vidplus.to/embed/tv/1399/2/7?autoplay=false&primarycolor=e50914&secondarycolor=171717&iconcolor=ffffff&progress=600");
   assert.equal(buildVidplusEmbedUrl({ ...tv, episode: 3 }, { anime: true, aniListId: "21" }), "https://player.vidplus.to/embed/anime/21/3?autoplay=false&primarycolor=e50914&secondarycolor=171717&iconcolor=ffffff&dub=false");
-  assert.equal(buildVidplusEmbedUrl(movie, { imdbId: "tt0133093" }), "");
+  assert.equal(buildVidplusEmbedUrl({ ...movie, id: "tt0133093" }, { imdbId: "tt0133093" }), "");
 });
 
 test("VidKing uses TMDB embed routes and its documented progress parameter", () => {
