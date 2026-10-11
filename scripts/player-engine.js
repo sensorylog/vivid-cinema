@@ -1,5 +1,5 @@
 import { VIVID_CONFIG } from "./config.js";
-import { inferAuthorizedStreamType, normalizeAllowedHosts, validateAllowedHttpsUrl } from "./direct-stream-validation.js";
+import { createAllowlistedFetchRequest, inferAuthorizedStreamType, normalizeAllowedHosts, validateAllowedHttpsUrl } from "./direct-stream-validation.js";
 
 // Unified playback engine for authorized, first-party direct stream integrations.
 // This module deliberately has no default catalog or stream endpoint: a trusted
@@ -169,8 +169,7 @@ export async function playDirectStream(video, stream, { startAt = 0, onError = (
         backBufferLength: 90,
         maxBufferLength: 30,
         fetchSetup: (context, initParams) => {
-          if (!validateDirectStreamUrl(context.url)) throw new Error("HLS resource host is not allowlisted.");
-          // Fetch-based HLS requests fail closed on redirects so an allowlisted URL cannot silently redirect to another host.\n          return new Request(context.url, { ...initParams, redirect: "error" });
+          return createAllowlistedFetchRequest(context.url, initParams, allowedHosts());
         },
         xhrSetup: (_xhr, requestUrl) => {
           if (!validateDirectStreamUrl(requestUrl)) throw new Error("HLS resource host is not allowlisted.");
