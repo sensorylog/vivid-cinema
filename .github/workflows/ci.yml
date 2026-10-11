@@ -31,6 +31,8 @@ jobs:
 
       - name: Test direct-stream URL validation
         run: node --test tests/direct-stream-validation.test.mjs
+      - name: Test mixed-media identity normalization
+        run: node --test tests/media-normalization.test.mjs
 
       - name: Validate JSON
         shell: bash
