@@ -21,6 +21,8 @@ jobs:
           node-version: 22
       - name: Install test dependencies
         run: npm install --no-audit --no-fund
+      - name: Check JavaScript syntax
+        run: npm run check:syntax
       - name: Test playback URL builders and service-worker assets
         run: npm test
       - name: Test Firestore security rules in the emulator
