@@ -35,3 +35,10 @@ test("Player 2 preserves the scraper ID and TV season/episode query parameters",
   assert.match(source, /secondaryPlayerQuery\.set\("s", String\(params\.season \|\| 1\)\)/);
   assert.match(source, /secondaryPlayerQuery\.set\("e", String\(params\.episode \|\| 1\)\)/);
 });
+
+test("Player 2 starts on VidLink so a known scraper playlist error does not leave a blank default", () => {
+  assert.match(source, /src="' \+ escapeHtml\(secondaryPlayerFallbackUrl\) \+ '"/);
+  assert.match(source, /href="' \+ escapeHtml\(secondaryPlayerFallbackUrl\) \+ '"/);
+  assert.match(source, /data-active="vidlink">Try Movie Scraper/);
+  assert.match(source, /secondaryPlayerFallback\.textContent = showingFallback \? "Try VidLink fallback" : "Try Movie Scraper"/);
+});
