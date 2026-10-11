@@ -14,6 +14,7 @@ test("home hero and embedded trailer are removed while the featured-card strip r
   assert.match(home, /<div class="vivid-feature-track" id="feature-track" aria-label="Featured titles carousel"><\/div>/);
   for (const path of [
     "../styles/vivid-cinematic.css",
+    "../styles/vivid-atmosphere.css",
     "../styles/vivid-viewport.css",
     "../styles/vivid-home.css",
     "../styles/vivid-home-breathe.css",
