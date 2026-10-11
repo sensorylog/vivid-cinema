@@ -22,16 +22,6 @@ test("player iframe sends only the origin referrer for provider domain checks wi
   assert.doesNotMatch(source, /<iframe[^>]*sandbox=/);
 });
 
-test("Player 2 uses Movie Scraper directly and preserves movie/TV identifiers", () => {
-  assert.match(source, /movie-scraper-lovat-three\.vercel\.app\/\?/);
-  assert.match(source, /new URLSearchParams\(\{ id: String\(media\.id \|\| ""\) \}\)/);
-  assert.match(source, /secondaryPlayerQuery\.set\("s", String\(params\.season \|\| 1\)\)/);
-  assert.match(source, /secondaryPlayerQuery\.set\("e", String\(params\.episode \|\| 1\)\)/);
-  assert.match(source, /Open Player 2 directly/);
-  assert.doesNotMatch(source, /secondaryPlayerFallbackUrl|vivid-secondary-player-fallback/);
-});
-
-test("Player 2 identifies upstream extraction errors without silently switching to a Vivid server", () => {
-  assert.match(source, /upstream stream extraction has failed/);
-  assert.doesNotMatch(source, /vivid-secondary-player-fallback/);
+test("watch page no longer contains the removed Movie Scraper Player 2 integration", () => {
+  assert.doesNotMatch(source, /movie-scraper-lovat-three|secondaryPlayerMarkup|vivid-secondary-player|Player 2|upstream stream extraction has failed/);
 });
