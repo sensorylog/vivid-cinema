@@ -1,0 +1,34 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import { readFile, access } from "node:fs/promises";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const source = await readFile(path.join(root, "service-worker.js"), "utf8");
+
+test("service worker has a versioned cache and required offline shell", () => {
+  assert.match(source, /const CACHE_NAME = "vivid-cinema-shell-v\d+"/);
+  assert.match(source, /const REQUIRED_APP_SHELL = \["\.\/", "\.\/index\.html", "\.\/home\.html", "\.\/offline\.html", "\.\/manifest\.json"\]/);
+  assert.match(source, /failedRequired\.length/);
+  assert.match(source, /optional assets were not precached/);
+});
+
+test("every precached asset exists in the repository", async () => {
+  const match = source.match(/const APP_SHELL = \[([\s\S]*?)\n\];/);
+  assert.ok(match, "APP_SHELL array must be discoverable");
+  const assets = [...match[1].matchAll(/"([^"]+)"/g)].map(entry => entry[1]);
+  const paths = [...new Set(assets.map(asset => asset.replace(/^\.\//, "").split("?")[0]))];
+  const missing = [];
+  for (const asset of paths) {
+    if (!asset || asset === ".") continue;
+    try { await access(path.join(root, asset)); }
+    catch { missing.push(asset); }
+  }
+  assert.deepEqual(missing, [], "Missing precache assets: " + missing.join(", "));
+});
+
+test("notification navigation is restricted to the app origin", () => {
+  assert.match(source, /function safeNotificationUrl\(/);
+  assert.match(source, /url\.origin===self\.location\.origin/);
+});
