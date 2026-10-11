@@ -160,7 +160,7 @@ function sourceAvailable(source) {
 
 function getNextSource(source) {
   // Anime providers use different catalog IDs; try only providers with a resolved ID.
-  // VidPlus remains manual-only for standard movie/TV playback until coverage is verified.
+  // Standard movie/TV providers use the documented TMDB-based URL builders.
   const order = isAnimePlayback()
     ? ["vidplus", "vidlink"]
     : ["vidapi", "vidsrc", "vidlink", "vidplus", "vidking", ...(sourceAvailable("direct") ? ["direct"] : []), ...listCustomPlaybackServers().map(server => "custom:" + server.id)];
