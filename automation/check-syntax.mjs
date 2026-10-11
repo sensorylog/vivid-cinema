@@ -8,6 +8,7 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 // as part of this scoped hardening pass.
 const files = [
   "service-worker.js",
+  "scripts/mediaforge.js",
   "scripts/watch.js",
   "scripts/playback-urls.js",
   "scripts/config.js",
