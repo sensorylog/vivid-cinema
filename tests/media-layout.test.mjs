@@ -47,7 +47,7 @@ test("canonical layout is loaded app-wide and refreshed by the service worker", 
   const serviceWorker = read("../service-worker.js");
   const landing = read("../index.html");
   assert.match(appShell, /vivid-media-layout\.css\?v=1/);
-  assert.match(serviceWorker, /vivid-cinema-shell-v142/);
+  assert.match(serviceWorker, /vivid-cinema-shell-v143/);
   assert.match(serviceWorker, /vivid-media-layout\.css\?v=1/);
   assert.match(landing, /vivid-media-layout\.css\?v=1/);
 });

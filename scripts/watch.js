@@ -532,7 +532,7 @@ function renderShell(params) {
     '<section id="vivid-tflix-player" class="vivid-tflix-player" aria-label="Additional streaming player"></section>' +
     '<section class="vivid-watch-recommendations"><div class="vivid-section-heading"><div><span>MORE TO DISCOVER</span><h2>You might also like</h2></div></div><div id="watch-recommendations" class="vivid-watch-rec-rail">' + recommendationCards() + '</div></section>';
 
-  mountTflixSecondaryPlayer({ root: $("vivid-tflix-player"), params, media, title: episodeTitle || title, isAnime: isAnimePlayback() });
+  mountTflixSecondaryPlayer({ root: $("vivid-tflix-player"), params, media, details, title: episodeTitle || title, isAnime: isAnimePlayback() });
 
   const player = $("vidapi-player");
   const directPlayer = $("vivid-direct-player");
