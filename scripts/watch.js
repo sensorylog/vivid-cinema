@@ -670,7 +670,7 @@ function renderShell(params) {
   });
   serverMenu?.addEventListener("click", () => setServerMenuOpen(serverMenu.getAttribute("aria-expanded") !== "true"));
   document.addEventListener("keydown", event => {
-    if (event.key === "Escape" && overlay && !overlay.hidden) {
+    if (event.key === "Escape" && overlay && !overlay.hidden && !overlay.classList.contains("vivid-player-inline")) {
       if (serverPanel && !serverPanel.hidden) setServerMenuOpen(false);
       else closePlayerWindow();
     }
