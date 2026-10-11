@@ -1,5 +1,5 @@
 // Bump this version whenever the precached app shell changes.
-const CACHE_NAME = "vivid-cinema-shell-v139";
+const CACHE_NAME = "vivid-cinema-shell-v140";
 const APP_SHELL = [
   "./","./index.html","./home.html","./person.html","./discover.html","./collection.html","./title.html","./watch.html",
   "./library.html","./auth.html","./login.html","./forgot-password.html","./account.html","./terms.html","./privacy.html","./contact.html","./donate.html","./donation-success.html",
@@ -13,7 +13,21 @@ const APP_SHELL = [
   "./scripts/nav-auth.js","./scripts/library.js","./scripts/library-page.js","./scripts/discover.js","./scripts/collection.js","./scripts/person.js","./scripts/recommendations.js","./scripts/release-alerts.js","./scripts/cinema-reminders.js","./scripts/push-notifications.js","./scripts/news.js","./scripts/newsroom.js","./scripts/news-community-highlights.js","./scripts/news-community.js","./scripts/news-story.js","./scripts/moderation.js","./scripts/editorial-desk.js","./scripts/title.js","./scripts/player-engine.js","./scripts/playback-servers.js","./scripts/server-settings.js","./scripts/watch.js","./scripts/playback-urls.js","./scripts/landing.js",
   "./scripts/account.js","./scripts/auth.js","./scripts/auth.js?v=20261007-1","./scripts/anime.js","./scripts/live.js","./scripts/live.js?v=live7","./scripts/home-breathe.js","./data/live-channels.json","./script.js","./script.js?v=20261006-2"
 ];
-async function cacheShell(){const cache=await caches.open(CACHE_NAME);await Promise.allSettled(APP_SHELL.map(asset=>cache.add(asset)));}
+const REQUIRED_APP_SHELL = ["./", "./index.html", "./home.html", "./offline.html", "./manifest.json"];
+async function cacheShell(){
+ const cache=await caches.open(CACHE_NAME);
+ const requiredResults=await Promise.allSettled(REQUIRED_APP_SHELL.map(asset=>cache.add(asset)));
+ const failedRequired=requiredResults.map((result,index)=>result.status==="rejected"?REQUIRED_APP_SHELL[index]:null).filter(Boolean);
+ if(failedRequired.length){
+  await caches.delete(CACHE_NAME);
+  throw new Error("Required Vivid shell assets failed to cache: "+failedRequired.join(", "));
+ }
+ const requiredSet=new Set(REQUIRED_APP_SHELL);
+ const optional=[...new Set(APP_SHELL)].filter(asset=>!requiredSet.has(asset));
+ const results=await Promise.allSettled(optional.map(asset=>cache.add(asset)));
+ const failures=results.map((result,index)=>result.status==="rejected"?optional[index]:null).filter(Boolean);
+ if(failures.length) console.warn("Vivid shell: optional assets were not precached",failures);
+}
 self.addEventListener("install",event=>{event.waitUntil(cacheShell().then(()=>self.skipWaiting()));});
 self.addEventListener("activate",event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key.startsWith("vivid-cinema-shell-")&&key!==CACHE_NAME).map(key=>caches.delete(key)))).then(()=>self.clients.claim()));});
 self.addEventListener("message",event=>{if(event.data?.type==="SKIP_WAITING")self.skipWaiting();});
@@ -40,4 +54,8 @@ async function staleWhileRevalidate(request,event,isNavigation=false){
 }
 self.addEventListener("push",event=>{event.waitUntil((async()=>{let data={};try{data=event.data?.json?.()||{};}catch{try{data=JSON.parse(event.data?.text?.()||"{}");}catch{}}const title=data.title||"Vivid Cinema";await self.registration.showNotification(title,{body:data.body||"Your Vivid Cinema reminder is ready.",icon:"./icons/vivid-icon.svg",badge:"./icons/vivid-icon.svg",tag:data.tag||"vivid-cinema-reminder",renotify:false,data:{url:data.url||"./home.html"}});})());});
 self.addEventListener("fetch",event=>{const request=event.request;if(request.method!=="GET")return;const url=new URL(request.url);if(url.origin!==self.location.origin)return;if(request.mode==="navigate"){event.respondWith(staleWhileRevalidate(request,event,true));return;}const isCodeOrStyle=/\.(?:js|css)$/.test(url.pathname);const isHtml=/\.html$/.test(url.pathname);event.respondWith(isCodeOrStyle?staleWhileRevalidate(request,event):isHtml?networkFirst(request):staleWhileRevalidate(request,event));});
-self.addEventListener("notificationclick",event=>{event.notification.close();const target=event.notification.data?.url||"./home.html";event.waitUntil(clients.matchAll({type:"window",includeUncontrolled:true}).then(list=>{const existing=list.find(client=>client.url.includes(self.location.origin));if(existing){existing.navigate(new URL(target,self.location.origin).href);return existing.focus();}return clients.openWindow(new URL(target,self.location.origin).href);}));});
+function safeNotificationUrl(value){
+ try{const url=new URL(value||"./home.html",self.location.origin);return url.origin===self.location.origin?url.href:new URL("./home.html",self.location.origin).href;}
+ catch{return new URL("./home.html",self.location.origin).href;}
+}
+self.addEventListener("notificationclick",event=>{event.notification.close();const target=safeNotificationUrl(event.notification.data?.url);event.waitUntil(clients.matchAll({type:"window",includeUncontrolled:true}).then(list=>{const existing=list.find(client=>{try{return new URL(client.url).origin===self.location.origin;}catch{return false;}});if(existing){existing.navigate(target);return existing.focus();}return clients.openWindow(target);}));});
