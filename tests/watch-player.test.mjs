@@ -17,7 +17,7 @@ test("known provider origin aliases are recognized without trusting arbitrary or
   assert.match(source, /event\.source !== player\.contentWindow/);
 });
 
-test("player iframe suppresses referrer details without sandboxing providers that require full iframe features", () => {
-  assert.match(source, /referrerpolicy="no-referrer"/);
+test("player iframe sends only the origin referrer for provider domain checks without sandboxing embeds", () => {
+  assert.match(source, /referrerpolicy="origin"/);
   assert.doesNotMatch(source, /<iframe[^>]*sandbox=/);
 });
