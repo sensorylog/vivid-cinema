@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 import { initializeApp } from "firebase-admin/app";
 import { getFirestore, Timestamp } from "firebase-admin/firestore";
 import { onSchedule } from "firebase-functions/v2/scheduler";
+import { onCall, HttpsError } from "firebase-functions/v2/https";
 import { logger } from "firebase-functions";
 import Parser from "rss-parser";
 
@@ -213,4 +214,31 @@ export const ingestVividNews = onSchedule({
     });
     else logger.info("News source ingestion finished", result.value);
   });
+});
+
+
+// Return aggregate poll results without exposing individual vote documents to clients.
+export const getCommunityPollResults = onCall({ region: "us-central1", maxInstances: 20 }, async (request) => {
+  if (!request.auth || request.auth.token.email_verified !== true) {
+    throw new HttpsError("unauthenticated", "Verified sign-in is required to view poll results.");
+  }
+  const pollId = request.data?.pollId;
+  if (typeof pollId !== "string" || !/^[A-Za-z0-9_-]{1,150}$/.test(pollId)) {
+    throw new HttpsError("invalid-argument", "A valid poll ID is required.");
+  }
+  const pollSnapshot = await db.collection("communityPolls").doc(pollId).get();
+  if (!pollSnapshot.exists || pollSnapshot.data().status !== "published") {
+    throw new HttpsError("not-found", "This poll is not available.");
+  }
+  const options = pollSnapshot.data().options;
+  if (!Array.isArray(options) || options.length < 2 || options.length > 4) {
+    throw new HttpsError("failed-precondition", "This poll has invalid options.");
+  }
+  const votes = await db.collection("communityPolls").doc(pollId).collection("votes").limit(500).get();
+  const counts = options.map(() => 0);
+  for (const vote of votes.docs) {
+    const index = vote.data().optionIndex;
+    if (Number.isInteger(index) && index >= 0 && index < counts.length) counts[index]++;
+  }
+  return { counts, total: counts.reduce((sum, count) => sum + count, 0) };
 });

@@ -1,4 +1,5 @@
-import { auth, db } from "./firebase.js";
+import { app, auth, db } from "./firebase.js";
+import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-functions.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
 import {
   addDoc, collection, deleteDoc, doc, getDoc, getDocs, limit, onSnapshot,
@@ -83,10 +84,10 @@ async function showPollResults(pollId){
  const host=$("poll-results-"+pollId);const poll=state.polls.find(p=>p.id===pollId);if(!host||!poll)return;
  host.hidden=false;host.textContent="Counting votes…";
  try{
-  const snap=await getDocs(query(collection(db,"communityPolls",pollId,"votes"),limit(500)));
-  const counts=(poll.options||[]).map(()=>0);
-  snap.docs.forEach(d=>{const index=Number(d.data().optionIndex);if(Number.isInteger(index)&&index>=0&&index<counts.length)counts[index]++;});
-  const total=counts.reduce((sum,count)=>sum+count,0);
+  const getResults=httpsCallable(getFunctions(app,"us-central1"),"getCommunityPollResults");
+  const result=await getResults({pollId});
+  const counts=Array.isArray(result.data?.counts)?result.data.counts:(poll.options||[]).map(()=>0);
+  const total=Number(result.data?.total)||0;
   host.innerHTML='<p class="vivid-poll-total">'+total+' '+(total===1?'vote':'votes')+'</p>'+poll.options.map((option,index)=>{const percent=total?Math.round(counts[index]*100/total):0;return '<div class="vivid-poll-result-row"><div><span>'+esc(option)+'</span><strong>'+percent+'%</strong></div><div class="vivid-poll-result-track"><i style="width:'+percent+'%"></i></div></div>';}).join("");
  }catch(e){console.warn(e);host.textContent="Poll results are unavailable.";}
 }

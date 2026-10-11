@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { initializeTestEnvironment, assertFails, assertSucceeds } from "@firebase/rules-unit-testing";
-import { doc, setDoc, getDoc } from "firebase/firestore";
+import { doc, setDoc, getDoc, getDocs, collection, query, limit } from "firebase/firestore";
 
 const rules = await readFile(new URL("../firestore.rules", import.meta.url), "utf8");
 const env = await initializeTestEnvironment({
@@ -69,4 +69,28 @@ test("unauthenticated users cannot read private user documents", async () => {
 
 test.after(async () => {
   await env.cleanup();
+});
+
+
+test("poll votes are private to the voter and cannot be listed by clients", async () => {
+  await env.withSecurityRulesDisabled(async context => {
+    const db = context.firestore();
+    await setDoc(doc(db, "communityPolls/poll-private"), {
+      authorId: "alice", authorName: "Alice", question: "Which film?",
+      options: ["One", "Two"], topic: "film", status: "published",
+      createdAt: new Date(), updatedAt: new Date()
+    });
+    await setDoc(doc(db, "communityPolls/poll-private/votes/alice"), {
+      userId: "alice", optionIndex: 0, createdAt: new Date()
+    });
+    await setDoc(doc(db, "communityPolls/poll-private/votes/bob"), {
+      userId: "bob", optionIndex: 1, createdAt: new Date()
+    });
+  });
+  const alice = env.authenticatedContext("alice", { email_verified: true }).firestore();
+  const bob = env.authenticatedContext("bob", { email_verified: true }).firestore();
+  await assertSucceeds(getDoc(doc(alice, "communityPolls/poll-private/votes/alice")));
+  await assertFails(getDoc(doc(alice, "communityPolls/poll-private/votes/bob")));
+  await assertFails(getDocs(query(collection(alice, "communityPolls/poll-private/votes"), limit(10))));
+  await assertSucceeds(getDoc(doc(bob, "communityPolls/poll-private/votes/bob")));
 });
