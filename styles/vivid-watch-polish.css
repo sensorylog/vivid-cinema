@@ -1,0 +1,331 @@
+/* Vivid Cinema — final watch-page layout pass.
+   Scoped to the watch route; preserves the existing player engine and server controls. */
+body.vivid-watch-page,
+body.vivid-watch-page * {
+  box-sizing: border-box;
+}
+html:has(body.vivid-watch-page) {
+  min-width: 320px;
+  overflow-x: clip;
+}
+body.vivid-watch-page {
+  min-width: 320px;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: clip;
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
+}
+body.vivid-watch-page .vivid-watch-app,
+body.vivid-watch-page #watch-content {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+}
+body.vivid-watch-page .vivid-watch-hero {
+  padding: clamp(12px, 2vw, 24px) clamp(16px, 3.2vw, 42px) 10px;
+}
+body.vivid-watch-page .vivid-watch-hero .vivid-watch-head {
+  width: min(1240px, 100%);
+  min-width: 0;
+  gap: clamp(12px, 2vw, 24px);
+}
+body.vivid-watch-page .vivid-watch-hero .vivid-watch-copy {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+body.vivid-watch-page .vivid-watch-hero .vivid-watch-copy h1 {
+  max-width: 100%;
+  font-size: clamp(1.15rem, 2.2vw, 1.65rem);
+  line-height: 1.22;
+  letter-spacing: -.03em;
+}
+body.vivid-watch-page .vivid-watch-kicker {
+  font-size: .64rem;
+  line-height: 1.45;
+  letter-spacing: .12em;
+}
+body.vivid-watch-page .vivid-watch-hero .vivid-watch-actions {
+  min-width: 0;
+  gap: 8px;
+}
+body.vivid-watch-page .vivid-watch-hero .vivid-watch-play,
+body.vivid-watch-page .vivid-watch-hero .vivid-watch-details {
+  min-height: 42px;
+  padding-inline: 15px;
+  font-size: .82rem;
+}
+body.vivid-watch-page .vivid-player-overlay.vivid-player-inline {
+  padding-inline: clamp(16px, 3.2vw, 42px);
+}
+body.vivid-watch-page .vivid-player-overlay.vivid-player-inline .vivid-player-dialog {
+  width: min(1240px, 100%);
+  min-width: 0;
+  border-radius: 13px;
+  overflow: visible;
+}
+body.vivid-watch-page .vivid-player-overlay.vivid-player-inline .vivid-player-dialog-head {
+  min-width: 0;
+  gap: 12px;
+  padding: 11px clamp(12px, 1.8vw, 20px);
+}
+body.vivid-watch-page .vivid-player-dialog-heading {
+  flex: 1 1 180px;
+  min-width: 0;
+}
+body.vivid-watch-page .vivid-player-dialog-heading > div {
+  min-width: 0;
+}
+body.vivid-watch-page .vivid-player-dialog-head h2 {
+  max-width: 100%;
+  font-size: .9rem;
+}
+body.vivid-watch-page .vivid-player-current-source {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+body.vivid-watch-page .vivid-player-dialog-actions {
+  flex: 0 0 auto;
+  min-width: 0;
+}
+body.vivid-watch-page .vivid-player-overlay.vivid-player-inline .vivid-player-frame {
+  width: 100%;
+  min-width: 0;
+  min-height: 0 !important;
+  aspect-ratio: 16 / 9;
+  flex: 0 1 auto;
+  border-radius: 0;
+}
+body.vivid-watch-page .vivid-player-overlay.vivid-player-inline .vivid-player-frame iframe,
+body.vivid-watch-page .vivid-player-overlay.vivid-player-inline .vivid-player-frame video {
+  min-height: 0 !important;
+}
+body.vivid-watch-page .vivid-player-dialog-foot {
+  flex-wrap: wrap;
+  padding: 10px clamp(12px, 1.8vw, 20px);
+  line-height: 1.45;
+}
+body.vivid-watch-page .vivid-watch-recommendations {
+  width: min(1240px, 100%);
+  padding: clamp(24px, 3vw, 36px) clamp(16px, 3.2vw, 42px) calc(32px + env(safe-area-inset-bottom, 0px));
+}
+body.vivid-watch-page .vivid-watch-recommendations .vivid-section-heading {
+  align-items: center;
+  margin-bottom: 14px;
+}
+body.vivid-watch-page .vivid-watch-recommendations .vivid-section-heading > div > span {
+  font-size: .61rem;
+  letter-spacing: .13em;
+}
+body.vivid-watch-page .vivid-watch-recommendations h2 {
+  font-size: clamp(1.18rem, 2vw, 1.55rem);
+  line-height: 1.2;
+  letter-spacing: -.03em;
+}
+body.vivid-watch-page .vivid-watch-rec-rail {
+  min-width: 0;
+  gap: clamp(10px, 1.2vw, 15px);
+  padding: 2px 2px 12px;
+  scroll-padding-inline: 2px;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+}
+body.vivid-watch-page .vivid-watch-rec-card {
+  flex: 0 0 clamp(116px, 12vw, 158px);
+  min-width: 0;
+}
+body.vivid-watch-page .vivid-watch-rec-card img {
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  border-radius: 9px;
+}
+body.vivid-watch-page .vivid-watch-rec-card strong {
+  margin-top: 8px;
+  font-size: .8rem;
+  line-height: 1.35;
+}
+body.vivid-watch-page .vivid-watch-rec-card small {
+  font-size: .72rem;
+}
+body.vivid-watch-page .vivid-footer {
+  max-width: 100%;
+  padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+}
+body.vivid-watch-page .vivid-server-panel {
+  max-width: calc(100vw - 24px);
+  max-height: calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 24px);
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+body.vivid-watch-page .vivid-player-overlay:not(.vivid-player-inline) {
+  padding-top: max(12px, env(safe-area-inset-top, 0px));
+  padding-right: max(12px, env(safe-area-inset-right, 0px));
+  padding-bottom: max(12px, env(safe-area-inset-bottom, 0px));
+  padding-left: max(12px, env(safe-area-inset-left, 0px));
+}
+body.vivid-watch-page .vivid-player-overlay:not(.vivid-player-inline) .vivid-player-dialog-head {
+  padding-top: max(12px, env(safe-area-inset-top, 0px));
+}
+body.vivid-watch-page .vivid-player-overlay:not(.vivid-player-inline) .vivid-player-dialog-foot {
+  padding-bottom: max(10px, env(safe-area-inset-bottom, 0px));
+}
+body.vivid-watch-page :is(a, button) {
+  -webkit-tap-highlight-color: transparent;
+}
+body.vivid-watch-page :is(a, button):focus-visible {
+  outline-offset: 3px;
+}
+
+@media (min-width: 1500px) {
+  body.vivid-watch-page .vivid-watch-hero .vivid-watch-head,
+  body.vivid-watch-page .vivid-player-overlay.vivid-player-inline .vivid-player-dialog,
+  body.vivid-watch-page .vivid-watch-recommendations {
+    width: min(1240px, 100%);
+  }
+}
+@media (max-width: 760px) {
+  body.vivid-watch-page .vivid-watch-hero {
+    padding: 14px 16px 8px;
+  }
+  body.vivid-watch-page .vivid-watch-hero .vivid-watch-head {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    align-items: start;
+    gap: 12px;
+  }
+  body.vivid-watch-page .vivid-watch-hero .vivid-watch-copy h1 {
+    font-size: clamp(1.12rem, 4.8vw, 1.45rem);
+    line-height: 1.22;
+  }
+  body.vivid-watch-page .vivid-watch-hero .vivid-watch-actions {
+    display: flex;
+    flex-wrap: wrap;
+    width: 100%;
+    padding: 0;
+  }
+  body.vivid-watch-page .vivid-watch-hero .vivid-watch-play,
+  body.vivid-watch-page .vivid-watch-hero .vivid-watch-details {
+    min-height: 40px;
+    padding-inline: 15px;
+  }
+  body.vivid-watch-page .vivid-player-overlay.vivid-player-inline {
+    padding-inline: 0;
+  }
+  body.vivid-watch-page .vivid-player-overlay.vivid-player-inline .vivid-player-dialog {
+    width: 100%;
+    border-right: 0;
+    border-left: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+  body.vivid-watch-page .vivid-player-overlay.vivid-player-inline .vivid-player-dialog-head {
+    gap: 8px;
+    padding: 10px 12px;
+  }
+  body.vivid-watch-page .vivid-player-dialog-heading {
+    flex-basis: 120px;
+  }
+  body.vivid-watch-page .vivid-player-dialog-head h2 {
+    font-size: .82rem;
+  }
+  body.vivid-watch-page .vivid-player-current-source {
+    max-width: 44vw;
+    font-size: .66rem;
+    line-height: 1.35;
+  }
+  body.vivid-watch-page .vivid-player-dialog-actions {
+    gap: 6px;
+  }
+  body.vivid-watch-page .vivid-player-switch {
+    min-height: 38px;
+    padding-inline: 10px;
+    font-size: .73rem;
+  }
+  body.vivid-watch-page .vivid-player-close {
+    width: 38px;
+    min-height: 38px;
+  }
+  body.vivid-watch-page .vivid-watch-recommendations {
+    padding: 24px 16px calc(30px + env(safe-area-inset-bottom, 0px));
+  }
+  body.vivid-watch-page .vivid-watch-rec-card {
+    flex-basis: clamp(108px, 31vw, 136px);
+  }
+  body.vivid-watch-page .vivid-watch-rec-card strong {
+    font-size: .78rem;
+  }
+  body.vivid-watch-page .vivid-watch-rec-rail {
+    margin-right: -16px;
+    padding-right: 16px;
+  }
+  body.vivid-watch-page .vivid-player-overlay:not(.vivid-player-inline) {
+    padding: 0;
+    align-items: center;
+  }
+  body.vivid-watch-page .vivid-player-overlay:not(.vivid-player-inline) .vivid-player-dialog {
+    width: 100%;
+    max-width: 100%;
+    max-height: 100dvh;
+    border: 0;
+    border-radius: 0;
+  }
+  body.vivid-watch-page .vivid-player-overlay:not(.vivid-player-inline) .vivid-player-dialog-head {
+    padding: max(12px, env(safe-area-inset-top, 0px)) 12px 10px;
+  }
+  body.vivid-watch-page .vivid-player-overlay:not(.vivid-player-inline) .vivid-player-dialog-foot {
+    padding: 10px 12px max(12px, env(safe-area-inset-bottom, 0px));
+  }
+}
+@media (max-width: 390px) {
+  body.vivid-watch-page .vivid-watch-hero {
+    padding-inline: 14px;
+  }
+  body.vivid-watch-page .vivid-watch-hero .vivid-watch-copy h1 {
+    font-size: 1.08rem;
+  }
+  body.vivid-watch-page .vivid-player-dialog-heading {
+    flex-basis: 95px;
+  }
+  body.vivid-watch-page .vivid-player-dialog-eyebrow {
+    font-size: .5rem;
+    letter-spacing: .09em;
+  }
+  body.vivid-watch-page .vivid-player-switch {
+    gap: 5px;
+    padding-inline: 8px;
+  }
+  body.vivid-watch-page .vivid-watch-recommendations {
+    padding-inline: 14px;
+  }
+  body.vivid-watch-page .vivid-watch-rec-card {
+    flex-basis: 108px;
+  }
+}
+@media (max-width: 350px) {
+  body.vivid-watch-page .vivid-player-dialog-head {
+    align-items: flex-start;
+  }
+  body.vivid-watch-page .vivid-player-dialog-heading {
+    flex-basis: 100%;
+  }
+  body.vivid-watch-page .vivid-player-dialog-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+}
+@media (orientation: landscape) and (max-height: 520px) {
+  body.vivid-watch-page .vivid-player-overlay:not(.vivid-player-inline) {
+    padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px);
+  }
+  body.vivid-watch-page .vivid-player-overlay:not(.vivid-player-inline) .vivid-player-dialog-head {
+    padding: 5px 12px;
+  }
+  body.vivid-watch-page .vivid-player-overlay:not(.vivid-player-inline) .vivid-player-frame {
+    max-height: calc(100dvh - 90px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  body.vivid-watch-page .vivid-watch-rec-card img {
+    transition: none;
+  }
+}
