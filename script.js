@@ -247,7 +247,6 @@ async function showHero(index,userAction=false){
  }
  clearTimeout(heroTimer);
  void loadHeroVideo(item);
- heroTimer=setTimeout(()=>showHero(activeIndex+1),HERO_TRAILER_DURATION);
 }
 async function initHero(){
  try{
@@ -277,8 +276,6 @@ function handleHeroVisibility(){
  heroVisibilityPaused=false;
  if(heroPlaying){
    sendHeroPlayerCommand("playVideo");
-   clearTimeout(heroTimer);
-   heroTimer=setTimeout(()=>showHero(activeIndex+1),HERO_TRAILER_DURATION);
  }
 }
 
@@ -290,7 +287,7 @@ function togglePause(){
  sendHeroPlayerCommand(heroPlaying?"playVideo":"pauseVideo");
  const button=$("hero-pause");
  if(button){button.innerHTML='<i class="bi bi-'+(heroPlaying?"pause-fill":"play-fill")+'"></i>';button.setAttribute("aria-label",heroPlaying?"Pause trailer":"Play trailer");}
- if(heroPlaying)heroTimer=setTimeout(()=>showHero(activeIndex+1),HERO_TRAILER_DURATION);
+ if(!heroPlaying)clearTimeout(heroTimer);
 }
 
 function wireRails(){
