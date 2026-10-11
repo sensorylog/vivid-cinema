@@ -9,7 +9,7 @@ globalThis.localStorage = {
   removeItem: key => values.delete(key)
 };
 
-const source = readFileSync(new URL("../scripts/playback-servers.js", import.meta.url), "utf8");
+const source = readFileSync(new URL("../scripts/playback/playback-servers.js", import.meta.url), "utf8");
 const api = await import("data:text/javascript;base64," + Buffer.from(source).toString("base64"));
 
 beforeEach(() => values.clear());
