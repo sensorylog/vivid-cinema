@@ -203,7 +203,7 @@ function isAnimePlayback() {
 }
 
 function sourceAvailable(source) {
-  if (typeof source === "string" && source.startsWith("custom:")) return !isAnimePlayback() && Boolean(getCustomPlaybackServer(source.slice(7))) && hasFallbackId();
+  if (typeof source === "string" && source.startsWith("custom:")) return !isAnimePlayback() && Boolean(getCustomPlaybackServer(source.slice(7))) && Boolean(tmdbId || imdbId || currentParams?.id);
   if (source === "direct") return !isAnimePlayback() && hasDirectStreamIntegration();
   if (isAnimePlayback()) {
     if (source === "vidplus") return Boolean(aniListId);
@@ -376,6 +376,7 @@ function setPlayerSource(source, params, startAt = 0) {
         episode: params.episode
       });
     } catch (error) {
+      player.src = "";
       if (status) {
         status.textContent = error instanceof Error ? error.message : "This custom server URL is invalid.";
         status.classList.add("is-warning");
