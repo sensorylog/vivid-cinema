@@ -1,4 +1,5 @@
 import { VIVID_CONFIG } from "./config.js";
+import { inferAuthorizedStreamType, normalizeAllowedHosts, validateAllowedHttpsUrl } from "./direct-stream-validation.js";
 
 // Unified playback engine for authorized, first-party direct stream integrations.
 // This module deliberately has no default catalog or stream endpoint: a trusted
@@ -13,8 +14,7 @@ let directPlaybackGeneration = 0;
 const scriptLoads = new Map();
 
 function allowedHosts() {
-  const hosts = VIVID_CONFIG.api.directStreamHosts;
-  return Array.isArray(hosts) ? hosts.map(host => String(host).trim().toLowerCase()).filter(Boolean) : [];
+  return normalizeAllowedHosts(VIVID_CONFIG.api.directStreamHosts);
 }
 
 export function hasDirectStreamIntegration() {
@@ -22,18 +22,11 @@ export function hasDirectStreamIntegration() {
 }
 
 export function validateDirectStreamUrl(value) {
-  if (typeof value !== "string" || !value.trim()) return null;
-  let url;
-  try {
-    url = new URL(value);
-  } catch {
-    return null;
-  }
-  if (url.protocol !== "https:" || url.username || url.password) return null;
-  if (!allowedHosts().includes(url.hostname.toLowerCase())) return null;
-  if (url.port && url.port !== "443") return null;
-  return url;
+  return validateAllowedHttpsUrl(value, allowedHosts());
 }
+
+function inferStreamType(url, declaredType) {
+  return inferAuthorizedStreamType(url, declaredType);
 
 function inferStreamType(url, declaredType) {
   const type = String(declaredType || "").toLowerCase();
@@ -186,7 +179,7 @@ export async function playDirectStream(video, stream, { startAt = 0, onError = (
         maxBufferLength: 30,
         fetchSetup: (context, initParams) => {
           if (!validateDirectStreamUrl(context.url)) throw new Error("HLS resource host is not allowlisted.");
-          return new Request(context.url, initParams);
+          // Fetch-based HLS requests fail closed on redirects so an allowlisted URL cannot silently redirect to another host.\n          return new Request(context.url, { ...initParams, redirect: "error" });
         },
         xhrSetup: (_xhr, requestUrl) => {
           if (!validateDirectStreamUrl(requestUrl)) throw new Error("HLS resource host is not allowlisted.");
