@@ -13,7 +13,7 @@ export function listTflixSecondaryServers() { return SERVERS.map(server => ({ ..
 /** Independently implemented embed routes matching TFLIX's public player choices. */
 export function buildTflixSecondaryServerUrl(serverId, params = {}) {
   const id = String(params.tmdbId || params.id || "").trim();
-  if (!/^\\d+$/.test(id) || (params.type !== "movie" && params.type !== "tv")) return "";
+  if (!/^\d+$/.test(id) || (params.type !== "movie" && params.type !== "tv")) return "";
   const isTv = params.type === "tv", season = positiveInteger(params.season), episode = positiveInteger(params.episode);
   switch (serverId) {
     case "vixsrc": return isTv ? "https://vixsrc.to/tv/" + id + "/" + season + "/" + episode + "?autoPlay=true&lang=en" : "https://vixsrc.to/movie/" + id + "?autoPlay=true&lang=en";
@@ -34,7 +34,7 @@ function rememberServer(serverId) { try { localStorage.setItem(STORAGE_KEY, serv
 export function mountTflixSecondaryPlayer({ root, params, media, details, title, isAnime = false } = {}) {
   if (!root) return null;
   const tmdbId = String(media?.id || params?.id || "").trim();
-  if (isAnime || !/^\\d+$/.test(tmdbId) || !["movie", "tv"].includes(params?.type)) { root.hidden = true; return null; }
+  if (isAnime || !/^\d+$/.test(tmdbId) || !["movie", "tv"].includes(params?.type)) { root.hidden = true; return null; }
   root.hidden = false;
   const isTv = params.type === "tv";
   const titleText = String(title || media?.title || media?.name || "Selected title");
