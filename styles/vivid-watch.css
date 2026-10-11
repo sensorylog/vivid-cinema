@@ -144,7 +144,7 @@ body.vivid-watch-page.vivid-player-open{overflow:hidden;overscroll-behavior:none
 .vivid-tflix-screen iframe[hidden]{display:none!important}
 .vivid-tflix-placeholder{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;padding:20px;background:radial-gradient(ellipse at center,rgba(35,37,45,.72),#050608 70%);text-align:center}
 .vivid-tflix-placeholder[hidden]{display:none!important}
-.vivid-tflix-placeholder>i{color:#e50914;font-size:2.6rem}.vivid-tflix-placeholder strong{color:#fff;font-size:1.02rem;font-weight:680}
+.vivid-tflix-placeholder>i{color:#f4f4f7;font-size:2.6rem}.vivid-tflix-placeholder strong{color:#fff;font-size:1.02rem;font-weight:680}
 .vivid-tflix-placeholder span{max-width:420px;color:#a8adb7;font-size:.8rem;line-height:1.5}
 .vivid-tflix-placeholder button{min-height:42px;margin-top:4px;padding:0 18px;border:0;border-radius:999px;background:#f5f5f7;color:#090a0d;font:inherit;font-size:.8rem;font-weight:700;cursor:pointer}
 .vivid-tflix-placeholder button:hover{background:#dedfe4}
@@ -169,7 +169,7 @@ body.vivid-watch-page.vivid-player-open{overflow:hidden;overscroll-behavior:none
 .vivid-tflix-player{width:min(1500px,100%);margin:24px auto 0;padding:0 var(--watch-gutter);color:#f4f4f7}
 .vivid-tflix-card{overflow:hidden;border:1px solid rgba(255,255,255,.08);border-radius:16px;background:#0a0a0d;box-shadow:0 18px 50px rgba(0,0,0,.45)}
 .vivid-tflix-topbar{display:flex;align-items:center;gap:clamp(12px,2vw,28px);height:64px;padding:0 clamp(14px,2.5vw,32px);border-bottom:1px solid rgba(255,255,255,.08);background:rgba(9,9,12,.92)}
-.vivid-tflix-logo{flex-shrink:0;color:#e50914;text-shadow:0 0 22px rgba(229,9,20,.35);font-family:system-ui,sans-serif;font-size:1.5rem;font-weight:900;letter-spacing:-.06em;text-decoration:none}
+.vivid-player-brand{display:inline-flex;flex-shrink:0;gap:4px;color:#f4f4f7;font-family:system-ui,sans-serif;font-size:1.18rem;font-weight:800;letter-spacing:-.05em;text-decoration:none}.vivid-player-brand span{color:#9a9aa6}
 .vivid-tflix-now-title{flex:1;min-width:0;overflow:hidden;color:#f4f4f7;font-size:.94rem;font-weight:650;text-overflow:ellipsis;white-space:nowrap}
 .vivid-tflix-player-tag{flex-shrink:0;color:#9a9aa6;font-size:.64rem;font-weight:750;letter-spacing:.14em}
 .vivid-tflix-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(265px,320px);gap:clamp(12px,1.7vw,22px);padding:clamp(12px,1.8vw,24px);align-items:start}
@@ -181,7 +181,7 @@ body.vivid-watch-page.vivid-player-open{overflow:hidden;overscroll-behavior:none
 .vivid-tflix-placeholder>i{color:#e50914;font-size:2.6rem}.vivid-tflix-placeholder strong{color:#fff;font-size:1rem;font-weight:750}.vivid-tflix-placeholder span{max-width:420px;color:#9a9aa6;font-size:.8rem;line-height:1.5}
 .vivid-tflix-loading{position:absolute;z-index:3;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;background:rgba(8,8,11,.88);color:#f4f4f7;font-size:.82rem}
 .vivid-tflix-loading[hidden]{display:none!important}
-.vivid-tflix-spinner{width:38px;height:38px;border:3px solid rgba(255,255,255,.12);border-top-color:#e50914;border-radius:50%;animation:vivid-tflix-spin .7s linear infinite}
+.vivid-tflix-spinner{width:38px;height:38px;border:3px solid rgba(255,255,255,.12);border-top-color:#f4f4f7;border-radius:50%;animation:vivid-tflix-spin .7s linear infinite}
 @keyframes vivid-tflix-spin{to{transform:rotate(360deg)}}
 .vivid-tflix-status{position:absolute;z-index:4;right:10px;bottom:10px;left:10px;padding:10px 12px;border:1px solid rgba(255,255,255,.1);border-radius:8px;background:rgba(8,8,11,.88);color:#e5e7eb;font-size:.75rem;line-height:1.45;pointer-events:none}
 .vivid-tflix-status[hidden]{display:none!important}.vivid-tflix-status.is-loading{inset:0;display:grid;place-items:center}
@@ -212,11 +212,11 @@ body.vivid-watch-page.vivid-player-open{overflow:hidden;overscroll-behavior:none
 .vivid-player-overlay.vivid-player-inline .vivid-player-dialog{width:min(1420px,100%);max-height:none;margin:0 auto;border:0;border-radius:0;background:transparent;box-shadow:none;overflow:visible}
 .vivid-player-dialog-head{padding:14px var(--watch-gutter);gap:12px}
 .vivid-player-dialog-actions{flex-shrink:0}
-.vivid-player-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(245px,300px);gap:clamp(12px,1.5vw,22px);align-items:start;padding:0 var(--watch-gutter)}
+.vivid-player-layout{display:grid;grid-template-columns:minmax(0,1fr);gap:clamp(12px,1.5vw,22px);align-items:start;padding:0 var(--watch-gutter)}
 .vivid-player-main{min-width:0;overflow:hidden;border:1px solid rgba(255,255,255,.1);border-radius:14px;background:#050507;box-shadow:0 16px 48px rgba(0,0,0,.25)}
 .vivid-player-overlay.vivid-player-inline .vivid-player-frame{width:100%;max-width:none;min-height:0;aspect-ratio:16/9;margin:0;border:0;border-radius:0;background:#000;box-shadow:none}
 .vivid-player-overlay.vivid-player-inline .vivid-player-dialog-foot{padding:11px 14px;border-top:1px solid rgba(255,255,255,.08);background:#0d0e12}
-.vivid-player-overlay.vivid-player-inline .vivid-server-panel{position:static;display:flex;flex-direction:column;width:auto;max-width:none;max-height:none;overflow:visible;padding:12px;border:1px solid rgba(255,255,255,.1);border-radius:14px;background:linear-gradient(180deg,#13151b,#0d0e12);box-shadow:none}
+.vivid-player-overlay.vivid-player-inline .vivid-server-panel{position:absolute;top:calc(100% + 9px);right:0;z-index:10;display:flex;flex-direction:column;width:min(340px,calc(100vw - 28px));max-width:none;max-height:min(62dvh,480px);overflow:auto;padding:8px;border:1px solid rgba(255,255,255,.15);border-radius:14px;background:rgba(17,19,24,.98);box-shadow:0 20px 55px rgba(0,0,0,.65)}
 .vivid-player-overlay.vivid-player-inline .vivid-server-panel[hidden]{display:none!important}
 .vivid-server-panel-heading{padding:5px 5px 13px;margin-bottom:8px}
 .vivid-server-panel-heading>div{display:grid;gap:4px}
