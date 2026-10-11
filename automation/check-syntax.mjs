@@ -9,17 +9,18 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const files = [
   "service-worker.js",
   "scripts/watch.js",
-  "scripts/playback-urls.js",
-  "scripts/tflix-secondary-player.js",
+  "scripts/playback/playback-urls.js",
+  "scripts/playback/tflix-secondary-player.js",
   "scripts/config.js",
   "scripts/routes.js",
   "scripts/utils.js",
   "scripts/library.js",
   "scripts/recommendations.js",
   "scripts/intelligence.js",
-  "scripts/player-engine.js",
-  "scripts/playback-servers.js",
-  "scripts/server-settings.js",
+  "scripts/playback/player-engine.js",
+  "scripts/playback/playback-servers.js",
+  "scripts/playback/server-settings.js",
+  "scripts/playback/direct-stream-validation.js",
   "scripts/tmdb.js"
 ];
 
