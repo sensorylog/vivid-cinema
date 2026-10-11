@@ -128,3 +128,39 @@ body.vivid-watch-page.vivid-player-open{overflow:hidden;overscroll-behavior:none
 .vivid-custom-server-status.is-warning{color:#ffb6a9}
 .vivid-custom-server-license-note{font-size:.7rem}
 @media(max-width:520px){.vivid-custom-server-row .vivid-server-state{display:none}.vivid-custom-server-settings input{font-size:16px}}
+
+
+/* TFLIX-inspired secondary player, isolated from Vivid's existing player. */
+.vivid-tflix-player{width:min(1320px,100%);margin:0 auto;padding:8px var(--watch-gutter) 0;color:#f5f5f7}
+.vivid-tflix-player[hidden]{display:none!important}
+.vivid-tflix-card{overflow:hidden;border:1px solid rgba(255,255,255,.12);border-radius:16px;background:linear-gradient(145deg,rgba(20,22,28,.98),rgba(10,11,15,.98));box-shadow:0 18px 54px rgba(0,0,0,.22)}
+.vivid-tflix-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;padding:22px 22px 18px}
+.vivid-tflix-eyebrow{display:block;margin-bottom:6px;color:#a8adb7;font-size:.65rem;font-weight:700;letter-spacing:.15em}
+.vivid-tflix-heading h2{margin:0;color:#fff;font-size:clamp(1.35rem,2.5vw,1.8rem);font-weight:720;letter-spacing:-.04em}
+.vivid-tflix-heading p{max-width:660px;margin:7px 0 0;color:#a8adb7;font-size:.82rem;line-height:1.55}
+.vivid-tflix-badge{flex-shrink:0;padding:6px 10px;border:1px solid rgba(255,255,255,.14);border-radius:999px;color:#d5d7dd;font-size:.68rem;font-weight:650;white-space:nowrap}
+.vivid-tflix-screen{position:relative;overflow:hidden;aspect-ratio:16/9;min-height:220px;background:#000;border-block:1px solid rgba(255,255,255,.09)}
+.vivid-tflix-screen iframe{position:absolute;inset:0;display:block;width:100%;height:100%;border:0;background:#000}
+.vivid-tflix-screen iframe[hidden]{display:none!important}
+.vivid-tflix-placeholder{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;padding:20px;background:radial-gradient(ellipse at center,rgba(35,37,45,.72),#050608 70%);text-align:center}
+.vivid-tflix-placeholder[hidden]{display:none!important}
+.vivid-tflix-placeholder>i{color:#e50914;font-size:2.6rem}.vivid-tflix-placeholder strong{color:#fff;font-size:1.02rem;font-weight:680}
+.vivid-tflix-placeholder span{max-width:420px;color:#a8adb7;font-size:.8rem;line-height:1.5}
+.vivid-tflix-placeholder button{min-height:42px;margin-top:4px;padding:0 18px;border:0;border-radius:999px;background:#f5f5f7;color:#090a0d;font:inherit;font-size:.8rem;font-weight:700;cursor:pointer}
+.vivid-tflix-placeholder button:hover{background:#dedfe4}
+.vivid-tflix-status{position:absolute;z-index:2;right:12px;bottom:12px;left:12px;padding:11px 13px;border:1px solid rgba(255,255,255,.13);border-radius:9px;background:rgba(5,6,8,.82);color:#e5e7eb;font-size:.77rem;line-height:1.45;pointer-events:none;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+.vivid-tflix-status[hidden]{display:none!important}.vivid-tflix-status.is-loading{inset:0;display:grid;place-items:center;border:0;border-radius:0;background:rgba(5,6,8,.72);font-size:.84rem;text-align:center}
+.vivid-tflix-server-heading{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:18px 20px 10px}
+.vivid-tflix-server-heading strong{font-size:.86rem;font-weight:700}.vivid-tflix-server-heading span{color:#9ca3af;font-size:.72rem}
+.vivid-tflix-server-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;padding:0 20px 18px}
+.vivid-tflix-server{display:flex;align-items:center;gap:10px;min-width:0;min-height:65px;padding:11px 12px;border:1px solid rgba(255,255,255,.1);border-radius:11px;background:rgba(255,255,255,.035);color:#f5f5f7;text-align:left;cursor:pointer;transition:background .16s,border-color .16s,transform .16s}
+.vivid-tflix-server:hover{background:rgba(255,255,255,.075);border-color:rgba(255,255,255,.24);transform:translateY(-1px)}
+.vivid-tflix-server[aria-pressed=true]{border-color:rgba(229,9,20,.72);background:rgba(229,9,20,.11)}
+.vivid-tflix-server-dot{width:8px;height:8px;flex:0 0 auto;border-radius:50%;background:#7b818d}.vivid-tflix-server[aria-pressed=true] .vivid-tflix-server-dot{background:#e50914;box-shadow:0 0 10px rgba(229,9,20,.55)}
+.vivid-tflix-server-copy{display:block;min-width:0;flex:1}.vivid-tflix-server-copy strong,.vivid-tflix-server-copy small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.vivid-tflix-server-copy strong{font-size:.79rem;font-weight:700}.vivid-tflix-server-copy small{margin-top:4px;color:#9ca3af;font-size:.65rem}
+.vivid-tflix-server-state{color:#a8adb7;font-size:.63rem;white-space:nowrap}.vivid-tflix-server[aria-pressed=true] .vivid-tflix-server-state{color:#ff777f}
+.vivid-tflix-footnote{margin:0;padding:0 20px 19px;color:#858c98;font-size:.7rem;line-height:1.55}
+.vivid-tflix-server:focus-visible,.vivid-tflix-placeholder button:focus-visible{outline:2px solid #fff;outline-offset:3px}
+@media(max-width:760px){.vivid-tflix-heading{padding:18px 16px 15px}.vivid-tflix-badge{font-size:.62rem}.vivid-tflix-server-grid{grid-template-columns:repeat(2,minmax(0,1fr));padding-inline:12px}.vivid-tflix-server-heading{padding-inline:12px}.vivid-tflix-footnote{padding-inline:12px}.vivid-tflix-screen{min-height:190px}}
+@media(max-width:420px){.vivid-tflix-heading{flex-direction:column;gap:10px}.vivid-tflix-server{gap:7px;padding:10px 8px}.vivid-tflix-server-state{font-size:.58rem}.vivid-tflix-server-copy strong{font-size:.74rem}.vivid-tflix-server-copy small{font-size:.6rem}}
