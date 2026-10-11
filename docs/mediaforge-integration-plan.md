@@ -67,3 +67,11 @@ Do not silently route existing Vivid Watch Now or Play Episode actions through M
 - A German-only source is clearly labelled German; no fake English option is shown.
 - Streaming and downloading each have working, separately tested workflows.
 - Deployment, authentication, storage limits, and license review are documented.
+
+
+## Local launcher implementation status
+
+The first code slice is now on this feature branch: `mediaforge.html` provides a separate MediaForge launch page, linked from the Vivid home navigation. It defaults to `http://localhost:8080`, accepts only localhost HTTP or HTTPS for remote instances, remembers the base URL in browser-local storage, and opens the service in a separate tab. It does not collect API keys, embed the service, or modify the existing VidAPI playback code. The service worker shell cache was bumped to include this page and its assets.
+
+**Scope boundary:** this is a local-instance launcher, not yet a native Vivid search/player/download integration. The documented external v1 API currently focuses on library, queue, status, and administration; source discovery and stream resolution must be verified against the running instance's actual routes before a server adapter can safely be built. Browser-level checks on the user's PC and production deployment checks remain outstanding.
+
