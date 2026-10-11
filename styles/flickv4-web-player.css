@@ -16,3 +16,15 @@
 #flickv4-status{position:absolute;z-index:1;left:12px;right:12px;bottom:12px;width:fit-content;max-width:calc(100% - 24px);padding:7px 10px;border:1px solid rgba(255,255,255,.12);border-radius:8px;background:rgba(0,0,0,.76);color:#e4e5e9;font-size:.75rem;line-height:1.4;pointer-events:none}
 .flickv4-footnote{margin:10px 0 0;color:var(--watch-muted);font-size:.75rem;line-height:1.5}
 @media(max-width:600px){.flickv4-web-player{padding-top:18px}.flickv4-player-heading{align-items:flex-start}.flickv4-pill{font-size:.65rem}.flickv4-player-controls{gap:8px}.flickv4-player-controls label{width:100%}.flickv4-player-controls select{max-width:none;min-width:0;width:100%;flex-basis:100%}.flickv4-player-controls button{flex:1}.flickv4-player-frame{min-height:190px}.flickv4-player-frame iframe{min-height:190px}}
+
+/* The watch route is a player page, not a second title/hero page. */
+.vivid-watch-inline-heading{width:min(1320px,100%);margin:0 auto;padding:22px var(--watch-gutter) 14px;display:flex;align-items:center;justify-content:space-between;gap:16px;color:#f5f5f7}
+.vivid-watch-inline-heading h1{margin:4px 0 0;font-size:clamp(1.15rem,2.4vw,1.8rem);font-weight:700;letter-spacing:-.035em}
+.vivid-player-overlay.vivid-player-inline{position:relative;z-index:auto;inset:auto;display:block;place-items:initial;padding:0;overflow:visible;background:transparent;backdrop-filter:none;-webkit-backdrop-filter:none;animation:none}
+.vivid-player-overlay.vivid-player-inline .vivid-player-dialog{width:min(1320px,100%);max-height:none;margin:0 auto;border-radius:14px;overflow:visible}
+.vivid-player-overlay.vivid-player-inline .vivid-player-dialog-head{padding:12px 14px}
+.vivid-player-overlay.vivid-player-inline .vivid-player-frame{position:relative;aspect-ratio:16/9;min-height:220px;flex:none}
+.vivid-player-overlay.vivid-player-inline .vivid-player-frame iframe,.vivid-player-overlay.vivid-player-inline .vivid-player-frame video{width:100%;height:100%;min-height:220px;aspect-ratio:16/9}
+.vivid-player-overlay.vivid-player-inline .vivid-player-dialog-foot{display:flex}
+.vivid-watch-recommendations{padding-top:20px}
+@media(max-width:600px){.vivid-watch-inline-heading{padding-top:18px}.vivid-player-overlay.vivid-player-inline .vivid-player-dialog-head{padding:10px}.vivid-player-overlay.vivid-player-inline .vivid-player-dialog-heading{gap:8px}.vivid-player-overlay.vivid-player-inline .vivid-player-frame{min-height:190px}.vivid-player-overlay.vivid-player-inline .vivid-player-frame iframe,.vivid-player-overlay.vivid-player-inline .vivid-player-frame video{min-height:190px}}
