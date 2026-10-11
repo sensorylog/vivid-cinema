@@ -1,3 +1,5 @@
+import { tmdbApi } from "../tmdb.js";
+
 const STORAGE_KEY = "vivid:tflix-secondary-server:v1";
 const SERVERS = Object.freeze([
   { id: "moviesapi", name: "Bard", provider: "MoviesAPI", note: "Recommended for recently released movies." },
@@ -56,7 +58,7 @@ export function mountTflixSecondaryPlayer({ root, params, media, details, title,
   const status = root.querySelector("#vivid-tflix-status");
   const grid = root.querySelector("#vivid-tflix-server-grid");
   const nowTitle = root.querySelector("#vivid-tflix-now-title");
-  let selectedServer = readRememberedServer(), generation = 0, loadTimer = 0;
+  let selectedServer = readRememberedServer(), generation = 0, loadTimer = 0, started = false;
   const playbackParams = { id: tmdbId, tmdbId, type: params.type, season: positiveInteger(params.season), episode: positiveInteger(params.episode) };
   const buttons = new Map();
   function updateTitle() {
@@ -77,6 +79,7 @@ export function mountTflixSecondaryPlayer({ root, params, media, details, title,
     status.classList.toggle("is-loading", mode === "loading");
   }
   function loadServer(serverId) {
+    started = true;
     const server = SERVERS.find(item => item.id === serverId);
     const url = buildTflixSecondaryServerUrl(serverId, playbackParams);
     if (!server || !url) { setStatus("This title does not have a valid TMDB ID for this server."); return; }
@@ -136,33 +139,99 @@ export function mountTflixSecondaryPlayer({ root, params, media, details, title,
     const seasonSelect = root.querySelector("#vivid-tflix-season");
     const episodeSelect = root.querySelector("#vivid-tflix-episode");
     const nextButton = root.querySelector("#vivid-tflix-next");
-    const seasons = seasonData.length ? seasonData.filter(item => Number(item.season_number) > 0) : [{ season_number: initialSeason, episode_count: episodeCount(initialSeason) }];
-    seasonSelect.innerHTML = seasons.map(item => '<option value="' + Number(item.season_number) + '">Season ' + Number(item.season_number) + ' · ' + Math.max(1, Number(item.episode_count) || 1) + ' ep</option>').join("");
-    seasonSelect.value = String(initialSeason);
-    function fillEpisodes() {
-      const count = episodeCount(seasonSelect.value);
-      episodeSelect.innerHTML = Array.from({ length: count }, (_, index) => '<option value="' + (index + 1) + '">Episode ' + (index + 1) + '</option>').join("");
-      episodeSelect.value = String(Math.min(positiveInteger(playbackParams.episode), count));
-    }
-    function goToEpisode(season, episode) {
+    const seasons = seasonData.filter(item => Number(item.season_number) > 0)
+      .sort((a, b) => Number(a.season_number) - Number(b.season_number));
+    if (!seasons.length) seasons.push({ season_number: initialSeason, episode_count: episodeCount(initialSeason) });
+    seasonSelect.innerHTML = seasons.map(item => '<option value="' + Number(item.season_number) + '">Season ' + Number(item.season_number) + '</option>').join("");
+    seasonSelect.value = String(seasons.some(item => Number(item.season_number) === initialSeason) ? initialSeason : seasons[0].season_number);
+    let episodeData = [];
+    const currentSeasonSummary = season => seasons.find(item => Number(item.season_number) === Number(season));
+    function updateUrl() {
       const url = new URL(window.location.href);
       url.searchParams.set("type", "tv");
       url.searchParams.set("id", tmdbId);
-      url.searchParams.set("season", String(positiveInteger(season)));
-      url.searchParams.set("episode", String(positiveInteger(episode)));
-      window.location.href = url.pathname + url.search + url.hash;
+      url.searchParams.set("season", String(playbackParams.season));
+      url.searchParams.set("episode", String(playbackParams.episode));
+      window.history.replaceState(window.history.state, "", url.pathname + url.search + url.hash);
     }
-    fillEpisodes();
-    seasonSelect.addEventListener("change", () => { fillEpisodes(); goToEpisode(seasonSelect.value, 1); });
-    episodeSelect.addEventListener("change", () => goToEpisode(seasonSelect.value, episodeSelect.value));
-    nextButton.addEventListener("click", () => {
-      const count = episodeCount(playbackParams.season);
-      if (playbackParams.episode < count) goToEpisode(playbackParams.season, playbackParams.episode + 1);
-      else {
-        const next = seasons.find(item => Number(item.season_number) > playbackParams.season);
-        if (next) goToEpisode(next.season_number, 1);
-        else setStatus("No next episode is listed for this season.");
+    function populateEpisodes(episodes, preferredEpisode) {
+      episodeData = Array.isArray(episodes) ? episodes.filter(ep => Number(ep?.episode_number) > 0)
+        .sort((a, b) => Number(a.episode_number) - Number(b.episode_number)) : [];
+      if (episodeData.length) {
+        episodeSelect.innerHTML = episodeData.map(ep => {
+          const number = Number(ep.episode_number);
+          const name = String(ep.name || "").trim();
+          const label = "Episode " + number + (name ? " · " + name : "");
+          return '<option value="' + number + '">' + label.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;") + '</option>';
+        }).join("");
+      } else {
+        const count = Math.max(1, Number(currentSeasonSummary(seasonSelect.value)?.episode_count) || 1);
+        episodeSelect.innerHTML = Array.from({ length: count }, (_, index) => '<option value="' + (index + 1) + '">Episode ' + (index + 1) + '</option>').join("");
       }
+      const available = Array.from(episodeSelect.options).map(option => Number(option.value));
+      const target = available.includes(Number(preferredEpisode)) ? Number(preferredEpisode) : (available[0] || 1);
+      episodeSelect.value = String(target);
+      playbackParams.season = positiveInteger(seasonSelect.value);
+      playbackParams.episode = target;
+      updateTitle();
+    }
+    function selectEpisode(season, episode) {
+      playbackParams.season = positiveInteger(season);
+      playbackParams.episode = positiveInteger(episode);
+      seasonSelect.value = String(playbackParams.season);
+      if (String(episodeSelect.value) !== String(playbackParams.episode)) episodeSelect.value = String(playbackParams.episode);
+      updateTitle();
+      updateUrl();
+      if (started) {
+        loadServer(selectedServer);
+      } else {
+        placeholder.hidden = false;
+        loading.hidden = true;
+        setStatus("Selected Season " + playbackParams.season + ", Episode " + playbackParams.episode + ". Tap Start playback when ready.");
+      }
+    }
+    async function fetchSeasonEpisodes(seasonNumber, preferredEpisode = 1) {
+      playbackParams.season = positiveInteger(seasonNumber);
+      seasonSelect.value = String(playbackParams.season);
+      setStatus("Loading episode list…", "loading");
+      try {
+        const season = await tmdbApi.tvSeason(tmdbId, playbackParams.season);
+        populateEpisodes(season.episodes || [], preferredEpisode);
+        status.hidden = true;
+      } catch {
+        populateEpisodes([], preferredEpisode);
+        setStatus("Episode names are temporarily unavailable. You can still choose an episode number.");
+      }
+    }
+    seasonSelect.addEventListener("change", async () => {
+      const season = positiveInteger(seasonSelect.value);
+      await fetchSeasonEpisodes(season, 1);
+      selectEpisode(season, positiveInteger(episodeSelect.value));
+    });
+    episodeSelect.addEventListener("change", () => selectEpisode(seasonSelect.value, episodeSelect.value));
+    nextButton.addEventListener("click", async () => {
+      const currentIndex = episodeData.findIndex(ep => Number(ep.episode_number) === playbackParams.episode);
+      if (currentIndex >= 0 && currentIndex + 1 < episodeData.length) {
+        selectEpisode(playbackParams.season, episodeData[currentIndex + 1].episode_number);
+        return;
+      }
+      // Keep Next Episode useful even if TMDB's detailed episode request fails.
+      if (currentIndex < 0 && playbackParams.episode < Number(currentSeasonSummary(playbackParams.season)?.episode_count || 0)) {
+        selectEpisode(playbackParams.season, playbackParams.episode + 1);
+        return;
+      }
+      const nextSeason = seasons.find(item => Number(item.season_number) > playbackParams.season);
+      if (nextSeason) {
+        await fetchSeasonEpisodes(nextSeason.season_number, 1);
+        selectEpisode(nextSeason.season_number, positiveInteger(episodeSelect.value));
+      } else {
+        setStatus("No next episode is listed for this series.");
+      }
+    });
+    void fetchSeasonEpisodes(playbackParams.season, playbackParams.episode).then(() => {
+      seasonSelect.value = String(playbackParams.season);
+      episodeSelect.value = String(playbackParams.episode);
+      updateTitle();
     });
   }
   updateTitle();
