@@ -607,10 +607,37 @@ function renderShell(params) {
   const closePlayer = $("player-close");
   const serverMenu = $("player-server-menu");
   const serverPanel = $("player-server-panel");
+  const serverPanelHome = serverPanel?.parentNode || null;
+  const serverPanelAnchor = serverPanel?.nextSibling || null;
   const setServerMenuOpen = open => {
     if (!serverMenu || !serverPanel) return;
     serverMenu.setAttribute("aria-expanded", open ? "true" : "false");
-    serverPanel.hidden = !open;
+    if (open) {
+      if (serverPanel.parentNode !== document.body) document.body.appendChild(serverPanel);
+      serverPanel.hidden = false;
+      const trigger = serverMenu.getBoundingClientRect();
+      const panelWidth = Math.min(340, Math.max(240, window.innerWidth - 24));
+      const panelHeight = Math.min(Math.max(serverPanel.scrollHeight, 180), Math.max(180, window.innerHeight - 24));
+      const below = trigger.bottom + 8;
+      const top = below + panelHeight <= window.innerHeight - 12
+        ? below
+        : Math.max(12, trigger.top - panelHeight - 8);
+      const left = Math.max(12, Math.min(trigger.right - panelWidth, window.innerWidth - panelWidth - 12));
+      Object.assign(serverPanel.style, {
+        position: "fixed", top: top + "px", left: left + "px",
+        right: "auto", bottom: "auto", width: panelWidth + "px",
+        maxWidth: "calc(100vw - 24px)",
+        maxHeight: Math.max(180, window.innerHeight - 24) + "px",
+        overflowY: "auto", zIndex: "10060"
+      });
+    } else {
+      serverPanel.hidden = true;
+      if (serverPanelHome && serverPanel.parentNode !== serverPanelHome) {
+        const anchor = serverPanelAnchor?.parentNode === serverPanelHome ? serverPanelAnchor : null;
+        serverPanelHome.insertBefore(serverPanel, anchor);
+      }
+      serverPanel.removeAttribute("style");
+    }
   };
   mountPlaybackServerSettings(serverPanel, () => {
     if (activeSource.startsWith("custom:") && !sourceAvailable(activeSource)) {
@@ -624,7 +651,7 @@ function renderShell(params) {
   const openPlayerWindow = () => {
     if (!overlay) return;
     overlay.hidden = false;
-    document.body.classList.add("vivid-player-open");
+    if (!overlay.classList.contains("vivid-player-inline")) document.body.classList.add("vivid-player-open");
     if (openPlayer) openPlayer.setAttribute("aria-expanded", "true");
     const saved = getPlaybackProgress(progressKey());
     const startAt = Number(saved?.progress || route.params.get("startAt") || resumeAt || 0);
@@ -647,7 +674,7 @@ function renderShell(params) {
     if (!overlay) return;
     clearFallbackTimer();
     overlay.hidden = true;
-    document.body.classList.remove("vivid-player-open");
+    if (!overlay.classList.contains("vivid-player-inline")) document.body.classList.remove("vivid-player-open");
     if (openPlayer) openPlayer.setAttribute("aria-expanded", "false");
     setServerMenuOpen(false);
     directLoadGeneration += 1;
@@ -672,6 +699,17 @@ function renderShell(params) {
     if (event.target === overlay) closePlayerWindow();
   });
   serverMenu?.addEventListener("click", () => setServerMenuOpen(serverMenu.getAttribute("aria-expanded") !== "true"));
+  document.addEventListener("pointerdown", event => {
+    if (serverPanel && !serverPanel.hidden && !serverPanel.contains(event.target) && !serverMenu?.contains(event.target)) {
+      setServerMenuOpen(false);
+    }
+  });
+  window.addEventListener("resize", () => {
+    if (serverPanel && !serverPanel.hidden) setServerMenuOpen(false);
+  });
+  window.addEventListener("scroll", () => {
+    if (serverPanel && !serverPanel.hidden) setServerMenuOpen(false);
+  }, true);
   document.addEventListener("keydown", event => {
     if (event.key === "Escape" && overlay && !overlay.hidden) {
       if (serverPanel && !serverPanel.hidden) setServerMenuOpen(false);
