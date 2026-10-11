@@ -8,7 +8,7 @@
   },
   "type": "module",
   "scripts": {
-    "check": "node --check index.js && node --check news-sources.js"
+    "check": "node --check index.js && node --check news-sources.js && node --check email-verification.js"
   },
   "dependencies": {
     "firebase-admin": "^13.5.0",
