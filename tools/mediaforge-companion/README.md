@@ -42,6 +42,7 @@ Stop with Ctrl+C. Do not paste the key into Vivid frontend code, commit it, put 
 - Exact-origin CORS allowlist; CORS is not authentication, so keep the service local and use a scoped key.
 - Fixed upstream routes only; no user-controlled URL or path forwarding.
 - Five-second upstream timeout and 2 MiB response cap.
+- Upstream redirects are rejected so the API-key-bearing request cannot be forwarded to another host.
 - Upstream errors are reduced to safe error codes.
 - No write methods, download enqueue, stream URLs, or audio-track claims.
 - A hosted HTTPS Vivid page is not configured to call this local bridge. Local development is the intended environment until HTTPS/local-network behavior is separately reviewed.
