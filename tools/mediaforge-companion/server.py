@@ -3,7 +3,7 @@
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlsplit
-from urllib.request import Request, urlopen
+from urllib.request import HTTPRedirectHandler, Request, build_opener
 import json, os
 HOST = "127.0.0.1"
 PORT = int(os.environ.get("VIVID_MEDIAFORGE_COMPANION_PORT", "8765"))
@@ -12,6 +12,11 @@ API_KEY = os.environ.get("MEDIAFORGE_API_KEY", "").strip()
 ALLOWED_ORIGINS = {v.strip().rstrip("/") for v in os.environ.get("VIVID_ALLOWED_ORIGINS", "http://localhost:5500,http://127.0.0.1:5500").split(",") if v.strip()}
 ROUTES = {"/api/status": "/api/v1/status", "/api/queue": "/api/v1/queue", "/api/library": "/api/v1/library"}
 MAX_RESPONSE_BYTES = 2 * 1024 * 1024
+
+class NoRedirectHandler(HTTPRedirectHandler):
+    """Never forward the API-key-bearing request to a redirect target."""
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        return None
 
 def validate_config():
     parsed = urlsplit(BASE_URL)
@@ -68,7 +73,8 @@ class Handler(BaseHTTPRequestHandler):
             return
         request = Request(BASE_URL + upstream_path, headers={"X-Api-Key": API_KEY, "Accept": "application/json"}, method="GET")
         try:
-            with urlopen(request, timeout=5) as response:
+            opener = build_opener(NoRedirectHandler())
+            with opener.open(request, timeout=5) as response:
                 data = response.read(MAX_RESPONSE_BYTES + 1)
                 if len(data) > MAX_RESPONSE_BYTES:
                     self._json(502, {"error": "upstream_response_too_large"}, origin)
