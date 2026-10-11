@@ -59,7 +59,7 @@ The service worker maintains an explicit shell asset list and a cache version. C
 
 The root `package.json` defines `test`, `test:rules`, and `check:syntax`; `tests/package.json` separately defines emulator/test commands and dependency versions. CI also runs targeted tests directly in `.github/workflows/ci.yml`.
 
-The root rules-test command references `tests/firestore.rules.test.mjs`, while the nested package script references `firestore-rules.test.mjs`. Verify the tracked filenames and intended canonical command before changing either script. The root and nested package manifests also pin different Firebase-related dependency ranges; this may be intentional, but should be documented and made reproducible.
+Both test files exist: the root `test:rules` script targets `tests/firestore.rules.test.mjs`, while `tests/package.json` targets `firestore-rules.test.mjs`. These are distinct test suites, and the two workflows invoke different commands. Confirm the intended differences and whether both suites are necessary before consolidating anything. The root and nested package manifests also pin different Firebase-related dependency ranges; this may be intentional, but should be documented and made reproducible.
 
 **Do not consolidate workflows or dependency manifests until** every check has an identified owner and the resulting CI matrix demonstrably retains equivalent coverage.
 
