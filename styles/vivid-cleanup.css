@@ -200,3 +200,65 @@ body.vivid-watch-page .flickv4-player-frame iframe{position:absolute;inset:0}
   body.vivid-title-page *,
   body.vivid-watch-page *{scroll-behavior:auto!important;transition-duration:0s!important}
 }
+
+
+/* Player-first watch layout, while preserving the existing playback engine and controls. */
+body.vivid-watch-page .vivid-watch-hero{
+  position:relative;
+  min-height:0;
+  margin:0 auto;
+  padding:18px clamp(16px,4vw,48px) 12px;
+  background:transparent;
+  overflow:visible;
+}
+body.vivid-watch-page .vivid-watch-hero .vivid-watch-backdrop,
+body.vivid-watch-page .vivid-watch-hero .vivid-watch-artwork,
+body.vivid-watch-page .vivid-watch-hero #watch-overview{display:none!important}
+body.vivid-watch-page .vivid-watch-hero .vivid-watch-head{
+  width:min(1320px,100%);
+  margin-inline:auto;
+  padding:0;
+  display:flex;
+  align-items:center;
+  gap:16px;
+}
+body.vivid-watch-page .vivid-watch-hero .vivid-watch-copy{min-width:0;flex:1}
+body.vivid-watch-page .vivid-watch-hero .vivid-watch-copy h1{
+  margin:4px 0 0;
+  font-size:clamp(1.2rem,2.5vw,1.8rem);
+  line-height:1.2;
+  overflow-wrap:anywhere;
+}
+body.vivid-watch-page .vivid-watch-hero .vivid-watch-actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  align-items:center;
+}
+body.vivid-watch-page .vivid-watch-hero .vivid-watch-play,
+body.vivid-watch-page .vivid-watch-hero .vivid-watch-details{white-space:nowrap}
+body.vivid-watch-page .vivid-watch-hero .vivid-watch-play{min-height:42px}
+body.vivid-watch-page .vivid-player-overlay.vivid-player-inline{
+  position:relative;
+  inset:auto;
+  z-index:1;
+  width:100%;
+  box-sizing:border-box;
+  margin:0 auto;
+  padding:0 clamp(16px,4vw,48px);
+}
+body.vivid-watch-page .vivid-player-overlay.vivid-player-inline .vivid-player-dialog{
+  box-sizing:border-box;
+  box-shadow:0 12px 42px rgba(0,0,0,.28);
+}
+body.vivid-watch-page .flickv4-web-player{
+  width:min(1320px,100%);
+  margin:24px auto 0;
+  padding-inline:clamp(16px,4vw,48px);
+}
+@media(max-width:560px){
+  body.vivid-watch-page .vivid-watch-hero .vivid-watch-head{align-items:flex-start;gap:10px}
+  body.vivid-watch-page .vivid-watch-hero .vivid-watch-actions{flex:0 0 auto}
+  body.vivid-watch-page .vivid-watch-hero .vivid-watch-play,
+  body.vivid-watch-page .vivid-watch-hero .vivid-watch-details{padding-inline:10px;font-size:.8rem}
+}
