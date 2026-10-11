@@ -214,3 +214,46 @@ body.vivid-cinema-home .hero-dot:focus-visible {
   body.vivid-cinema-home .hero-bg,
   body.vivid-cinema-home .hero-content { animation: none !important; transition: none !important; }
 }
+
+
+/* Compact home header: the glass layer's generic auth rule must not squeeze
+   the text action into a 40px icon box. Keep each control independently sized. */
+@media (max-width: 900px) {
+  body.vivid-cinema-home .vivid-topbar .vivid-nav {
+    min-width: 0 !important;
+    gap: 8px !important;
+  }
+  body.vivid-cinema-home .vivid-topbar .vivid-nav-action {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex: 0 0 auto !important;
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    height: 40px !important;
+    margin: 0 !important;
+    padding: 0 10px !important;
+    white-space: nowrap !important;
+    font-size: .76rem !important;
+  }
+  body.vivid-cinema-home .vivid-topbar .vivid-notification-button {
+    display: inline-grid !important;
+    place-items: center !important;
+    flex: 0 0 38px !important;
+    width: 38px !important;
+    min-width: 38px !important;
+    height: 38px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+}
+@media (max-width: 380px) {
+  body.vivid-cinema-home .vivid-topbar .vivid-nav {
+    gap: 6px !important;
+  }
+  body.vivid-cinema-home .vivid-topbar .vivid-nav-action {
+    padding-inline: 7px !important;
+    font-size: .72rem !important;
+  }
+}
