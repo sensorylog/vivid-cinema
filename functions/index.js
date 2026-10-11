@@ -242,3 +242,5 @@ export const getCommunityPollResults = onCall({ region: "us-central1", maxInstan
   }
   return { counts, total: counts.reduce((sum, count) => sum + count, 0) };
 });
+
+export { sendVividVerificationEmail } from "./email-verification.js";
