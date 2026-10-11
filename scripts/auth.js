@@ -147,8 +147,8 @@ signupForm?.addEventListener("submit",async(event)=>{
     if(name)await withTimeout(updateProfile(credential.user,{displayName:name}),10000,"Profile update timed out.");
     try{await withTimeout(createUserRecord(credential.user,name),10000,"Profile sync timed out.");}
     catch(profileError){console.warn("Profile sync skipped after account creation:",profileError);}
-    await withTimeout(sendEmailVerification(credential.user),15000,"Verification email request timed out.");
-    showMessage("Account created. Check your email to verify your address, then log in.",true);
+    await withTimeout(sendEmailVerification(credential.user,{url:new URL("verify-email.html",window.location.href).href,handleCodeInApp:false}),15000,"Verification email request timed out.");
+    showMessage("Account created. Open the verification email and tap Verify Email Address. After verification, Vivid will show a success screen so you can sign in.",true);
     await signOut(auth);
     button.disabled=false;
   }catch(error){console.error(error);showMessage(friendlyError(error));button.disabled=false;}
