@@ -1,5 +1,13 @@
 /* TFLIX hero billboard — adapted from TomasTNunes/tflix index.html.
    The existing Vivid navigation and featured-card strip stay independently owned. */
+/* The header owns its safe-area inset; the hero starts below it and never
+   slides underneath the brand or relies on negative margins to meet the cards. */
+body.vivid-cinema-home .vivid-topbar {
+  box-sizing: border-box;
+  padding-top: calc(6px + env(safe-area-inset-top, 0px));
+  padding-left: env(safe-area-inset-left, 0px);
+  padding-right: env(safe-area-inset-right, 0px);
+}
 body.vivid-cinema-home #hero {
   --bg: var(--vivid-site-ink, #07090d);
   --accent: #f5f7fa;
@@ -12,10 +20,10 @@ body.vivid-cinema-home #hero {
   --gutter: clamp(1rem, 4vw, 3.75rem);
   position: relative;
   width: 100%;
-  height: min(90vh, 760px);
-  height: min(90svh, 760px);
-  min-height: 520px;
-  margin-bottom: -8vh;
+  height: min(78vh, 720px);
+  height: min(78svh, 720px);
+  min-height: 500px;
+  margin: 0;
   isolation: isolate;
   overflow: hidden;
   background: var(--bg);
@@ -53,8 +61,8 @@ body.vivid-cinema-home .hero-bg::after {
 body.vivid-cinema-home .hero-content {
   position: absolute;
   left: var(--gutter);
-  bottom: 16vh;
-  max-width: 640px;
+  bottom: clamp(56px, 10vh, 104px);
+  max-width: min(640px, calc(100% - 2 * var(--gutter)));
   z-index: 2;
   animation: heroRise .9s var(--ease) both;
 }
@@ -135,7 +143,7 @@ body.vivid-cinema-home .hero-actions .btn-ghost:hover { background: rgba(110,110
 body.vivid-cinema-home .hero-dots {
   position: absolute;
   right: var(--gutter);
-  bottom: 16vh;
+  bottom: clamp(56px, 10vh, 104px);
   z-index: 2;
   display: flex;
   gap: .5rem;
@@ -156,19 +164,37 @@ body.vivid-cinema-home .hero-dot:focus-visible {
   outline-offset: 5px;
 }
 @media (max-width: 860px) {
-  body.vivid-cinema-home #hero { height: 78vh; height: 78svh; min-height: 460px; }
-  body.vivid-cinema-home .hero-content { bottom: 14vh; max-width: 90%; }
+  body.vivid-cinema-home #hero { height: min(74vh, 680px); height: min(74svh, 680px); min-height: 500px; }
+  body.vivid-cinema-home .hero-content { bottom: clamp(72px, 10vh, 96px); max-width: calc(100% - 2 * var(--gutter)); }
   body.vivid-cinema-home .hero-dots { display: none; }
   body.vivid-cinema-home .hero-overview { -webkit-line-clamp: 2; }
 }
 @media (max-width: 560px) {
-  body.vivid-cinema-home #hero { min-height: 460px; }
-  body.vivid-cinema-home .hero-content { bottom: 11vh; left: 20px; max-width: calc(100% - 40px); }
-  body.vivid-cinema-home .hero-title { font-size: clamp(2.25rem, 11vw, 3.4rem); }
-  body.vivid-cinema-home .hero-meta { gap: .55rem; font-size: .82rem; margin-bottom: .8rem; }
-  body.vivid-cinema-home .hero-overview { font-size: .9rem; margin-bottom: 1.15rem; }
-  body.vivid-cinema-home .hero-actions .btn { padding: .72rem 1.2rem; }
+  body.vivid-cinema-home #hero {
+    height: clamp(520px, 74svh, 680px);
+    min-height: 520px;
+  }
+  body.vivid-cinema-home .hero-content {
+    bottom: calc(82px + env(safe-area-inset-bottom, 0px));
+    left: max(16px, env(safe-area-inset-left, 0px));
+    max-width: calc(100% - 2 * max(16px, env(safe-area-inset-left, 0px)));
+  }
+  body.vivid-cinema-home .hero-title {
+    font-size: clamp(2.1rem, 9.5vw, 3.25rem);
+    line-height: 1.02;
+    overflow-wrap: anywhere;
+    margin-bottom: .85rem;
+  }
+  body.vivid-cinema-home .hero-badge { margin-bottom: .65rem; }
+  body.vivid-cinema-home .hero-meta { gap: .55rem; font-size: .82rem; margin-bottom: .7rem; }
+  body.vivid-cinema-home .hero-overview { font-size: .9rem; line-height: 1.45; margin-bottom: 1rem; }
+  body.vivid-cinema-home .hero-actions .btn { min-height: 44px; padding: .72rem 1.2rem; }
 }
+@media (max-width: 380px) {
+  body.vivid-cinema-home .hero-meta { column-gap: .5rem; row-gap: .4rem; }
+  body.vivid-cinema-home .hero-overview { -webkit-line-clamp: 2; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   body.vivid-cinema-home .hero-slide,
   body.vivid-cinema-home .hero-bg,
