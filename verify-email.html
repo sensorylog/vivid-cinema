@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
+  <meta name="theme-color" content="#08090b">
+  <meta name="description" content="Verify your email address to finish setting up your Vivid Cinema account.">
+  <title>Verify Email · Vivid Cinema</title>
+  <link rel="stylesheet" href="styles/vivid-system.css">
+  <link rel="stylesheet" href="styles/vivid-shell.css">
+  <link rel="stylesheet" href="styles/vivid-auth.css">
+  <link rel="stylesheet" href="styles/vivid-atmosphere.css">
+  <link rel="stylesheet" href="styles/vivid-liquid-glass.css?v=lg4">
+</head>
+<body class="vivid-atmosphere" data-vivid-page="auth">
+  <header class="nav container"><a href="home.html" class="logo vivid-site-brand"><img class="vivid-brand-icon" src="icons/vivid-icon.svg" alt="" aria-hidden="true"><span class="vivid-brand-wordmark">Vivid<span>Cinema</span></span></a></header>
+  <main class="auth-container" aria-live="polite">
+    <div id="verification-mark" aria-hidden="true" style="font-size:2.5rem;margin-bottom:1rem">✦</div>
+    <h1 id="verification-title">Verifying your email…</h1>
+    <p id="verification-message">Please keep this page open while Vivid Cinema confirms your email address.</p>
+    <div class="error-msg" id="verification-error" role="status"></div>
+    <a id="verification-action" class="watch-btn" href="login.html" style="display:none;text-align:center;text-decoration:none;box-sizing:border-box;padding:14px 18px;margin-top:1rem">Continue to Log In</a>
+    <p id="verification-help" style="margin-top:1rem;color:#8e959f;font-size:.9rem"></p>
+  </main>
+  <script type="module" src="scripts/app-shell.js"></script>
+  <script type="module" src="scripts/verify-email.js?v=20261011-1"></script>
+  <script type="module" src="scripts/atmosphere.js"></script>
+  <script type="module" src="scripts/i18n.js"></script>
+</body>
+</html>

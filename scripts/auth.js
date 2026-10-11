@@ -1,8 +1,7 @@
-import { auth, db } from "./firebase.js";
+import { app, auth, db } from "./firebase.js";
 import {
   createUserWithEmailAndPassword,
   GoogleAuthProvider,
-  sendEmailVerification,
   sendPasswordResetEmail,
   signInWithEmailAndPassword,
   signInWithPopup,
@@ -14,6 +13,9 @@ import {
 } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
 import { doc, serverTimestamp, setDoc } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
 import { startLibrarySync } from "./library.js";
+import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-functions.js";
+
+const sendVividVerificationEmail = httpsCallable(getFunctions(app, "us-central1"), "sendVividVerificationEmail");
 
 const signupForm=document.getElementById("signup-form");
 const loginForm=document.getElementById("login-form");
@@ -147,8 +149,8 @@ signupForm?.addEventListener("submit",async(event)=>{
     if(name)await withTimeout(updateProfile(credential.user,{displayName:name}),10000,"Profile update timed out.");
     try{await withTimeout(createUserRecord(credential.user,name),10000,"Profile sync timed out.");}
     catch(profileError){console.warn("Profile sync skipped after account creation:",profileError);}
-    await withTimeout(sendEmailVerification(credential.user),15000,"Verification email request timed out.");
-    showMessage("Account created. Check your email to verify your address, then log in.",true);
+    await withTimeout(sendVividVerificationEmail(),20000,"Verification email request timed out.");
+    showMessage("Account created! Check your inbox for a Vivid Cinema email and tap Verify My Email.",true);
     await signOut(auth);
     button.disabled=false;
   }catch(error){console.error(error);showMessage(friendlyError(error));button.disabled=false;}
@@ -173,7 +175,7 @@ document.getElementById("resend-verification")?.addEventListener("click",async()
   try{
     const credential=await withTimeout(signInWithEmailAndPassword(auth,email,password),15000,"Verification sign-in timed out.");
     if(credential.user.emailVerified) showMessage("Your email is already verified. You can log in normally.",true);
-    else{await withTimeout(sendEmailVerification(credential.user),15000,"Verification email request timed out.");showMessage("Verification email sent. Check your inbox and spam folder.",true);}
+    else{await withTimeout(sendVividVerificationEmail(),20000,"Verification email request timed out.");showMessage("Your Vivid Cinema verification email is on its way. Check your inbox and spam folder.",true);}
     await signOut(auth);
   }catch(error){console.error(error);showMessage(friendlyError(error));}
   finally{button.disabled=false;}
