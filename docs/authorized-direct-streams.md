@@ -16,7 +16,7 @@ The browser validates HTTPS, rejects URL credentials and non-allowlisted hosts, 
 
 ## Request-validation boundaries
 
-The initial stream URL is checked against the exact HTTPS hostname allowlist before playback. HLS.js checks each resource URL it handles, and its fetch-based requests use `redirect: "error"` to fail closed when the server redirects. Shaka checks each DASH resource URL before requesting it. Browser-managed native HLS playback and direct video-file playback do not expose a reliable JavaScript hook for validating every redirect or every nested request; do not treat the client-side allowlist as a complete network security boundary. Configure the authorized provider/CDN to serve manifests, segments, captions, and files from the expected allowlisted hosts without cross-host redirects. The unit tests cover URL validation and stream-type inference, not end-to-end playback on real devices.
+The initial stream URL is checked against the exact HTTPS hostname allowlist before playback. HLS.js checks each resource URL it handles, and its fetch-based requests use `redirect: "error"` to fail closed when the server redirects. Shaka checks each DASH resource URL before requesting it. Browser-managed native HLS playback and direct video-file playback do not expose a reliable JavaScript hook for validating every redirect or every nested request; do not treat the client-side allowlist as a complete network security boundary. Configure the authorized provider/CDN to serve manifests, segments, captions, and files from the expected allowlisted hosts without cross-host redirects. The unit tests cover URL validation, stream-type inference, and the redirect-safe fetch request helper, not end-to-end playback on real devices.
 
 ## Resolver example shape
 
