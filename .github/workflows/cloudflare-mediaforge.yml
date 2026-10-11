@@ -1,0 +1,24 @@
+name: Cloudflare MediaForge Worker
+
+on:
+  pull_request:
+  push:
+    branches: ["main"]
+
+permissions:
+  contents: read
+
+jobs:
+  worker-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Test Firebase token validation and Worker routes
+        run: node --test tests/cloudflare-mediaforge-worker.test.mjs
+      - name: Validate Worker JavaScript syntax
+        run: node --check cloudflare/src/index.js
