@@ -12,6 +12,7 @@ test("TFLIX-style trending billboard is restored above the unchanged featured-ca
   assert.match(home, /<div class="vivid-feature-track" id="feature-track" aria-label="Featured titles carousel"><\/div>/);
   assert.ok(home.indexOf('<section id="hero"') < home.indexOf('<div class="vivid-feature-strip">'));
   assert.match(home, /vivid-tflix-hero\.css/);
+  assert.match(home, /scripts\/tflix-hero\.js/);
   assert.match(home, /fonts\.googleapis\.com/);
 
   for (const path of [
