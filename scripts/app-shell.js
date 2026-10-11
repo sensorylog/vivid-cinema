@@ -272,10 +272,20 @@ function initCinematicFocusNavigation() {
   }, true);
 }
 
+function ensureMediaLayoutStyles() {
+  if (document.querySelector('link[data-vivid-media-layout]')) return;
+  const link = document.createElement("link");
+  link.rel = "stylesheet";
+  link.href = "./styles/vivid-media-layout.css?v=1";
+  link.dataset.vividMediaLayout = "true";
+  document.head.appendChild(link);
+}
+
 function initAppShell() {
   if (initialized) return;
   initialized = true;
 
+  ensureMediaLayoutStyles();
   document.documentElement.dataset.vividReady = "false";
   void import("./google-tag.js").catch(() => {});
   void import("./analytics.js").catch(() => {});
