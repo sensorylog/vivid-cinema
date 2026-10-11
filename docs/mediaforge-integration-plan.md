@@ -14,33 +14,39 @@ Do not silently route existing Vivid Watch Now or Play Episode actions through M
 
 - Vivid Cinema is a static Firebase Hosting app with Firebase Cloud Functions.
 - MediaForge is a separate Python web application with its own web UI, authentication, REST API, media storage, and runtime requirements.
-- A MediaForge process running on a developer's PC is only suitable for local integration tests. Production needs an always-on, secured deployment.
+- The MediaForge external API uses an `X-Api-Key` header at `/api/v1/*`; its OpenAPI document is exposed at `/api/v1/openapi.json`. API keys support scopes. The currently identified v1 endpoints cover status, queue, library, stats, AutoSync, uptime, update status, media scan, upscale, and history. Do not assume these endpoints provide source discovery, playback resolution, or download creation until the live OpenAPI contract confirms it.
+- A MediaForge process running on a developer's PC is only suitable for local integration tests. A deployed Vivid page cannot use `localhost:8080` to reach the developer's PC from a visitor's device. HTTPS pages also cannot safely rely on direct HTTP localhost fetches across browsers; CORS, browser mixed-content rules, and MediaForge authentication must be verified.
+- For the first proof of concept, test from the same PC with an explicitly configured local development setup. Do not put a MediaForge API key in frontend JavaScript or commit it to the repository. Do not expose the local service to the public internet. If a remote Vivid page must call the local instance, design and review a secure tunnel or local companion approach first.
+- Production needs an always-on, secured deployment with durable storage and a supported authentication arrangement.
 - Keep MediaForge as a separately deployed service. Do not copy its implementation into Vivid or expose its unauthenticated/internal endpoints directly to browsers.
-- Review MediaForge's GPL-3.0 license and API/authentication documentation before choosing a distribution or deployment arrangement. Do not port any proprietary/solver components.
+- Review MediaForge's GPL-3.0-or-later license and API/authentication documentation before choosing a distribution or deployment arrangement. Do not port any proprietary/solver components.
 
 ## Proposed integration shape
 
 1. Create a dedicated Vivid page/entry point for MediaForge; do not modify the existing player route.
-2. Configure the MediaForge service URL server-side, never hard-code credentials into frontend code.
+2. Configure the MediaForge service URL server-side or in a local-only development configuration; never hard-code credentials into frontend code.
 3. Put a narrow Vivid backend adapter in front of the service where needed. Require authenticated access, validate requests and responses, apply rate limits, and do not accept arbitrary proxy URLs from users.
 4. Use MediaForge's documented API/authentication mechanism. Prefer a supported OIDC/SSO flow or another supported secure account arrangement; never share an admin password or expose an admin token to the browser.
-5. Display only source, server, audio, subtitle, quality and download metadata actually returned by the service. Prefer English when a source exposes language metadata, but show every verified available dub. Never imply an English audio track exists when it does not.
-6. Keep streaming and download actions separate and label them clearly.
+5. Confirm the supported endpoints for source search/details, playback/source resolution, download enqueue, queue status, and download/library file access before implementing these flows. Use only documented, scoped API permissions.
+6. Display only source, server, audio, subtitle, quality and download metadata actually returned by the service. Prefer English when a source exposes language metadata, but show every verified available dub. Never imply an English audio track exists when it does not.
+7. Keep streaming and download actions separate and label them clearly.
 
 ## Delivery phases
 
 ### Phase 0 — compatibility and API verification
-- Inspect MediaForge REST API, authentication, CORS/reverse-proxy behavior, stream playback response, queue/download endpoints, and storage model.
+- Inspect the current MediaForge OpenAPI contract, authentication, CORS/reverse-proxy behavior, stream playback response, and queue/download endpoints.
+- Confirm whether the public v1 API supports the required stream/download operations. If not, use only supported alternatives or pause for a maintainer-supported API rather than coupling to undocumented internal UI endpoints.
 - Confirm deployment options, network boundaries, authentication integration, and license implications.
 - Record API contract and supported source/language metadata before implementing UI.
 
-### Phase 1 — isolated proof of concept
+### Phase 1 — isolated local proof of concept
+- Start with a non-production MediaForge instance on the user's PC and a local-only development workflow.
 - Add only a new feature entry point/page and service adapter.
-- Use a non-production MediaForge instance and test titles.
 - Do not alter existing Vivid player files or existing Watch Now/Play Episode handlers.
+- Do not commit local URLs, credentials, tokens, downloaded media, or machine-specific paths.
 
 ### Phase 2 — stream and download workflows
-- Add server/source selection and playback.
+- Add server/source selection and playback using documented APIs.
 - Add download enqueue, progress/status, errors, and safe file access.
 - Add English-first ranking while retaining all reported languages and a manual selection.
 
@@ -55,6 +61,7 @@ Do not silently route existing Vivid Watch Now or Play Episode actions through M
 - Existing Vivid streaming works exactly as before.
 - MediaForge is accessed only through a separately configured service.
 - No secrets or admin credentials are shipped to the browser.
+- Local proof of concept works from the intended local test environment, with the localhost/network boundary clearly understood.
 - English is preferred when the source explicitly offers it.
 - All other audio languages actually reported by the source remain selectable.
 - A German-only source is clearly labelled German; no fake English option is shown.
