@@ -1,22 +1,33 @@
-# Email verification flow setup
+# Vivid Cinema custom verification email setup
 
-The repository now includes a Vivid-branded verification landing page that applies Firebase's one-time email action code and then offers a clear sign-in action.
+The app uses a Firebase callable Cloud Function to generate the one-time email verification link with the Firebase Admin SDK and send a custom HTML email through Resend. The Admin SDK and Resend key are server-only; they are never included in browser code.
 
-## Required Firebase Console configuration
+## One-time provider setup
 
-This part cannot be changed from repository code alone.
+1. Create a Resend account and verify a sending domain you control. Do not use an address/domain you do not own.
+2. In Resend, create an API key with permission to send email.
+3. Configure the Firebase Functions secrets from the repository root:
 
-1. Open Firebase Console → Authentication → Templates → Email address verification.
-2. Customize the action URL to the deployed Vivid page, for example `https://YOUR_VIVID_HOST/verify-email.html`. Use the actual public hosting domain for this project.
-3. Save the template and confirm that the domain is authorized in Authentication settings.
-4. Send a fresh verification email and test the link on desktop and mobile.
+```sh
+npx firebase-tools functions:secrets:set RESEND_API_KEY
+npx firebase-tools functions:secrets:set VIVID_EMAIL_FROM
+```
 
-Firebase will append parameters such as `mode=verifyEmail` and `oobCode` to the configured action URL. The page calls Firebase `applyActionCode`; it only displays success after Firebase accepts that one-time code.
+When prompted for `VIVID_EMAIL_FROM`, enter a verified sender such as `Vivid Cinema <verify@your-verified-domain.example>`, replacing the example with the real verified domain. Do not commit the key to Git or put it in frontend configuration.
 
-## Email appearance limitation
+4. Deploy the function after reviewing the target project and deployment plan:
 
-The Firebase client SDK sends Firebase-managed email templates. The code change does not replace Firebase's email delivery or grant full control over its HTML. Update the template's wording and sender details in Firebase Console. If the project needs a fully custom HTML email with a branded CTA button and custom sender domain, use a trusted server-side email service with Firebase Admin SDK-generated verification links; never generate or send Admin SDK action links from browser code.
+```sh
+npx firebase-tools deploy --only functions:sendVividVerificationEmail
+```
 
-## After verification
+Firebase may ask to enable billing/Cloud Functions services and to authorize secret access. Review the project and target before confirming.
 
-The success page provides a sign-in button rather than silently creating a new session. The signup flow signs out unverified users, and the verification email may be opened in a different browser or device, where the original password/session is not available. The user can then sign in normally with their verified email and password.
+## Email flow
+
+- Signup creates the Firebase user, then calls the authenticated callable function.
+- The function checks the signed-in UID and canonical Firebase user record, restricts requests to email/password accounts, and rate-limits sends to one per minute per UID.
+- Firebase Admin SDK generates the verification link. Resend delivers the branded HTML and plain-text email.
+- The browser verification page applies the action code and only shows success when Firebase confirms it.
+
+The sender address must be verified by Resend. The existing Firebase email-template action URL / authorized-domain settings must also remain configured for Vivid's verification handler. Test with a real inbox after secrets are set and the function is deployed.
