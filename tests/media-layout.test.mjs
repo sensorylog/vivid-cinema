@@ -23,6 +23,7 @@ test("home YouTube viewport is centered and constrained to a landscape frame", (
   assert.match(css, /height:\s*min\(100%,\s*56\.25vw\)/);
   assert.match(css, /translate\(-50%,\s*-50%\)/);
   assert.match(css, /background-size:\s*contain\s*!important/);
+  assert.match(css, /height: 100svh !important/);
 });
 
 test("home trailer requests muted autoplay and preserves the user's sound choice", () => {
