@@ -1,25 +1,36 @@
 const $ = (root, id) => root?.querySelector("#" + id);
 
-function buildServerUrl(server, { type, id, season, episode, imdbId }) {
-  const mediaId = encodeURIComponent(String(id || ""));
+export function buildServerUrl(server, { type, id, season, episode, startAt = 0 } = {}) {
+  const rawId = String(id || "").trim();
+  if (!/^(?:\d+|tt\d+)$/i.test(rawId)) return "";
+  const mediaId = encodeURIComponent(rawId);
   const isTv = type === "tv";
-  const suffix = isTv ? "/tv/" + mediaId + "/" + season + "/" + episode : "/movie/" + mediaId;
-  const imdb = /^tt\d+$/i.test(String(imdbId || "")) ? encodeURIComponent(imdbId) : "";
+  const safeSeason = Math.max(1, Number.parseInt(season || "1", 10) || 1);
+  const safeEpisode = Math.max(1, Number.parseInt(episode || "1", 10) || 1);
+  const suffix = isTv ? "/tv/" + mediaId + "/" + safeSeason + "/" + safeEpisode : "/movie/" + mediaId;
+  const resume = Number(startAt);
+  const startAtQuery = Number.isFinite(resume) && resume > 5 ? String(Math.floor(resume)) : "";
+
   switch (server) {
     case "vidlink": {
-      const base = "https://vidlink.pro";
-      const path = isTv ? "/tv/" + mediaId + "/" + season + "/" + episode : "/movie/" + mediaId;
+      const path = isTv ? "/tv/" + mediaId + "/" + safeSeason + "/" + safeEpisode : "/movie/" + mediaId;
       const query = new URLSearchParams({ primaryColor: "e50914", secondaryColor: "1b1b1b", iconColor: "ffffff", title: "false", poster: "false" });
-      return base + path + "?" + query;
+      if (startAtQuery) query.set("startAt", startAtQuery);
+      return "https://vidlink.pro" + path + "?" + query;
     }
-    case "vidsrc":
-      return "https://vidsrc.sh/embed" + suffix;
+    case "vidsrc": {
+      const query = new URLSearchParams();
+      if (startAtQuery) query.set("startAt", startAtQuery);
+      return "https://vidsrc.sh/embed" + suffix + (query.size ? "?" + query : "");
+    }
     case "vidplus": {
-      const path = isTv ? "/embed/tv/" + mediaId + "/" + season + "/" + episode : "/embed/movie/" + mediaId;
-      return "https://player.vidplus.to" + path + "?autoplay=false&primarycolor=e50914&secondarycolor=171717&iconcolor=ffffff";
+      const path = isTv ? "/embed/tv/" + mediaId + "/" + safeSeason + "/" + safeEpisode : "/embed/movie/" + mediaId;
+      const query = new URLSearchParams({ autoplay: "false", primarycolor: "e50914", secondarycolor: "171717", iconcolor: "ffffff" });
+      if (startAtQuery) query.set("startAt", startAtQuery);
+      return "https://player.vidplus.to" + path + "?" + query;
     }
     case "vidking": {
-      const path = isTv ? "/embed/tv/" + mediaId + "/" + season + "/" + episode : "/embed/movie/" + mediaId;
+      const path = isTv ? "/embed/tv/" + mediaId + "/" + safeSeason + "/" + safeEpisode : "/embed/movie/" + mediaId;
       return "https://www.vidking.net" + path + "?color=e50914&autoplay=false";
     }
     default:
@@ -41,7 +52,16 @@ export function mountFlickv4WebPlayer(root) {
     type: root.dataset.mediaType === "tv" ? "tv" : "movie",
     season: Math.max(1, Number.parseInt(root.dataset.season || "1", 10) || 1),
     episode: Math.max(1, Number.parseInt(root.dataset.episode || "1", 10) || 1),
-    imdbId: root.dataset.imdbId || "",
+    startAt: Number(root.dataset.startAt || 0),
+  };
+
+  let loadSequence = 0;
+  let loadTimer = null;
+  const clearLoadTimer = () => {
+    if (loadTimer !== null) {
+      window.clearTimeout(loadTimer);
+      loadTimer = null;
+    }
   };
 
   const loadSelectedServer = () => {
@@ -50,13 +70,22 @@ export function mountFlickv4WebPlayer(root) {
       status.textContent = "This server is not available for the selected title.";
       return;
     }
+    const sequence = ++loadSequence;
+    clearLoadTimer();
     status.textContent = "Loading " + serverSelect.options[serverSelect.selectedIndex].text + "…";
-    frame.src = url;
     frame.hidden = false;
+    frame.src = url;
+    loadTimer = window.setTimeout(() => {
+      if (sequence !== loadSequence) return;
+      status.textContent = "This server is taking too long to respond. Try another server.";
+      loadTimer = null;
+    }, 15000);
   };
 
   playButton.addEventListener("click", loadSelectedServer);
   stopButton.addEventListener("click", () => {
+    loadSequence += 1;
+    clearLoadTimer();
     frame.src = "about:blank";
     frame.hidden = true;
     status.textContent = "Playback stopped. Choose a server and press Play to start again.";
@@ -64,9 +93,13 @@ export function mountFlickv4WebPlayer(root) {
   serverSelect.addEventListener("change", () => {
     status.textContent = "Selected " + serverSelect.options[serverSelect.selectedIndex].text + ". Press Play to load it.";
   });
+  frame.addEventListener("error", () => {
+    clearLoadTimer();
+    status.textContent = "The selected server could not be loaded. Try another server.";
+  });
   frame.addEventListener("load", () => {
-    if (frame.src && frame.src !== "about:blank") {
-      status.textContent = "Server page loaded. If video does not start, try another server.";
-    }
+    if (!frame.src || frame.src === "about:blank") return;
+    clearLoadTimer();
+    status.textContent = "Server page loaded. If video does not start, try another server.";
   });
 }
