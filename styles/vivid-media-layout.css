@@ -160,6 +160,21 @@ body.vivid-cinema-home .vivid-home-tv-art {
   transform: none !important;
 }
 
+/* Third-party direct player wrapper: never exceed the same content column. */
+body.vivid-watch-page .flickv4-web-player,
+body.vivid-watch-page .flickv4-player-frame {
+  width: min(1320px, 100%);
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+body.vivid-watch-page .flickv4-player-frame iframe,
+body.vivid-watch-page .flickv4-player-frame video {
+  max-width: 100%;
+  max-height: 100%;
+  box-sizing: border-box;
+}
+
 @media (orientation: landscape) and (max-height: 520px) {
   body.vivid-cinema-home .vivid-hero-media {
     height: 100svh !important;
