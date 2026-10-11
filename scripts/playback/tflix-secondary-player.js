@@ -1,6 +1,5 @@
 const STORAGE_KEY = "vivid:tflix-secondary-server:v1";
 const SERVERS = Object.freeze([
-  { id: "vixsrc", name: "Rakan", provider: "VixSrc", note: "Generally better quality." },
   { id: "moviesapi", name: "Bard", provider: "MoviesAPI", note: "Recommended for recently released movies." },
   { id: "vidsrc-embed", name: "Xayah", provider: "VidSrc Embed", note: "Recommended for recently released movies." },
   { id: "cinesrc", name: "Ekko", provider: "CineSRC", note: "May have 4K. Generally better quality." },
@@ -16,7 +15,6 @@ export function buildTflixSecondaryServerUrl(serverId, params = {}) {
   if (!/^\d+$/.test(id) || (params.type !== "movie" && params.type !== "tv")) return "";
   const isTv = params.type === "tv", season = positiveInteger(params.season), episode = positiveInteger(params.episode);
   switch (serverId) {
-    case "vixsrc": return isTv ? "https://vixsrc.to/tv/" + id + "/" + season + "/" + episode + "?autoPlay=true&lang=en" : "https://vixsrc.to/movie/" + id + "?autoPlay=true&lang=en";
     case "moviesapi": return isTv ? "https://moviesapi.to/tv/" + id + "-" + season + "-" + episode : "https://moviesapi.to/movie/" + id;
     case "vidsrc-embed": return isTv ? "https://vidsrc-embed.ru/embed/tv?tmdb=" + id + "&season=" + season + "&episode=" + episode + "&autoplay=1" : "https://vidsrc-embed.ru/embed/movie?tmdb=" + id + "&autoplay=1";
     case "cinesrc": return isTv ? "https://cinesrc.st/embed/tv/" + id + "?s=" + season + "&e=" + episode + "&autoplay=true&autonext=true&prioritize=true&lastserver=wave" : "https://cinesrc.st/embed/movie/" + id + "?autoplay=true&prioritize=true&lastserver=wave";
@@ -26,8 +24,8 @@ export function buildTflixSecondaryServerUrl(serverId, params = {}) {
   }
 }
 function readRememberedServer() {
-  try { const value = localStorage.getItem(STORAGE_KEY); return SERVERS.some(server => server.id === value) ? value : "vixsrc"; }
-  catch { return "vixsrc"; }
+  try { const value = localStorage.getItem(STORAGE_KEY); return SERVERS.some(server => server.id === value) ? value : "moviesapi"; }
+  catch { return "moviesapi"; }
 }
 function rememberServer(serverId) { try { localStorage.setItem(STORAGE_KEY, serverId); } catch { /* Player works without storage. */ } }
 
@@ -171,18 +169,6 @@ export function mountTflixSecondaryPlayer({ root, params, media, details, title,
   updateButtons();
   const startButton = root.querySelector("#vivid-tflix-start");
   if (startButton) startButton.addEventListener("click", () => loadServer(selectedServer));
-  let started = false;
-  let observer = null;
-  if ("IntersectionObserver" in window) {
-    observer = new IntersectionObserver(entries => {
-      if (started || !entries.some(entry => entry.isIntersecting)) return;
-      started = true;
-      observer.disconnect();
-      loadServer(selectedServer);
-    }, { rootMargin: "100px" });
-    observer.observe(root);
-  } else if (startButton) {
-    startButton.hidden = false;
-  }
-  return { loadServer, getSelectedServer: () => selectedServer, destroy: () => { generation++; if (loadTimer) window.clearTimeout(loadTimer); if (observer) observer.disconnect(); const frame = screen.querySelector("#vivid-tflix-frame"); if (frame) frame.src = "about:blank"; } };
+  // Player 2 loads only after an explicit tap on Start playback or a server choice.
+  return { loadServer, getSelectedServer: () => selectedServer, destroy: () => { generation++; if (loadTimer) window.clearTimeout(loadTimer); const frame = screen.querySelector("#vivid-tflix-frame"); if (frame) frame.src = "about:blank"; } };
 }
