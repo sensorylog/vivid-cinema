@@ -31,10 +31,10 @@ service cloud.firestore {
       && request.resource.data.poster_path.size() <= 500
       && request.resource.data.backdrop_path is string
       && request.resource.data.backdrop_path.size() <= 500
-      && (!request.resource.data.keys().hasAny(['updatedAt']) || request.resource.data.updatedAt is number)
-      && (!request.resource.data.keys().hasAny(['startedAt']) || request.resource.data.startedAt is number)
-      && (!request.resource.data.keys().hasAny(['lastWatchedAt']) || request.resource.data.lastWatchedAt is number)
-      && (!request.resource.data.keys().hasAny(['watchedSeconds']) || request.resource.data.watchedSeconds is number)
+      && (!request.resource.data.keys().hasAny(['updatedAt']) || (request.resource.data.updatedAt is number && request.resource.data.updatedAt >= 0))
+      && (!request.resource.data.keys().hasAny(['startedAt']) || (request.resource.data.startedAt is number && request.resource.data.startedAt >= 0))
+      && (!request.resource.data.keys().hasAny(['lastWatchedAt']) || (request.resource.data.lastWatchedAt is number && request.resource.data.lastWatchedAt >= 0))
+      && (!request.resource.data.keys().hasAny(['watchedSeconds']) || (request.resource.data.watchedSeconds is number && request.resource.data.watchedSeconds >= 0 && request.resource.data.watchedSeconds <= 10000000))
       && (!request.resource.data.keys().hasAny(['completion']) || (
         request.resource.data.completion is number &&
         request.resource.data.completion >= 0 &&
@@ -53,8 +53,10 @@ service cloud.firestore {
       && request.resource.data.media_type in ['movie','tv']
       && request.resource.data.progress is number
       && request.resource.data.progress >= 0
+      && request.resource.data.progress <= 10000000
       && request.resource.data.duration is number
       && request.resource.data.duration >= 0
+      && request.resource.data.duration <= 10000000
       && request.resource.data.percentage is number
       && request.resource.data.percentage >= 0
       && request.resource.data.percentage <= 100
@@ -94,14 +96,16 @@ service cloud.firestore {
         'id','type','contentId','mediaType','occurredAt','sessionId','metadata'
       ])
       && request.resource.data.id is string
+      && request.resource.data.id.size() <= 100
       && request.resource.data.type is string
+      && request.resource.data.type.size() >= 1
       && request.resource.data.type.size() <= 60
       && request.resource.data.occurredAt is number
       && request.resource.data.sessionId is string
       && request.resource.data.sessionId.size() <= 100
       && (!request.resource.data.keys().hasAny(['contentId']) || request.resource.data.contentId == null || request.resource.data.contentId.matches('^(movie|tv):[0-9]+$'))
       && (!request.resource.data.keys().hasAny(['mediaType']) || request.resource.data.mediaType == null || request.resource.data.mediaType in ['movie','tv'])
-      && (!request.resource.data.keys().hasAny(['metadata']) || request.resource.data.metadata is map);
+      && (!request.resource.data.keys().hasAny(['metadata']) || (request.resource.data.metadata is map && request.resource.data.metadata.keys().size() <= 20));
     }
 
     function validTasteData() {
@@ -109,13 +113,15 @@ service cloud.firestore {
         'version','genres','languages','countries','actors','directors','media','decades','updatedAt'
       ])
       && request.resource.data.version is number
-      && request.resource.data.genres is map
-      && request.resource.data.languages is map
-      && request.resource.data.countries is map
-      && request.resource.data.actors is map
-      && request.resource.data.directors is map
-      && request.resource.data.media is map
-      && request.resource.data.decades is map
+      && request.resource.data.version >= 1
+      && request.resource.data.version <= 10
+      && request.resource.data.genres is map && request.resource.data.genres.keys().size() <= 100
+      && request.resource.data.languages is map && request.resource.data.languages.keys().size() <= 100
+      && request.resource.data.countries is map && request.resource.data.countries.keys().size() <= 100
+      && request.resource.data.actors is map && request.resource.data.actors.keys().size() <= 100
+      && request.resource.data.directors is map && request.resource.data.directors.keys().size() <= 100
+      && request.resource.data.media is map && request.resource.data.media.keys().size() <= 100
+      && request.resource.data.decades is map && request.resource.data.decades.keys().size() <= 100
       && request.resource.data.updatedAt is number;
     }
 
