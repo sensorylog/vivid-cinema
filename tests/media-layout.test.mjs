@@ -29,7 +29,7 @@ test("home YouTube viewport is centered and constrained to a landscape frame", (
 test("home trailer requests muted autoplay and preserves the user's sound choice", () => {
   const js = read("../script.js");
   assert.match(js, /autoplay:\s*"1",\s*mute:\s*"1"/);
-  assert.match(js, /iframe\.src=youtubeUrl\(trailer\.key,true\)/);
+  assert.match(js, /iframe\.src=youtubeUrl\(trailer\.key\)/);
   assert.match(js, /if\(!heroMuted\)sendHeroPlayerCommand\("unMute"\)/);
 });
 
