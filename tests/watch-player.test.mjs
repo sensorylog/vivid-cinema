@@ -22,23 +22,16 @@ test("player iframe sends only the origin referrer for provider domain checks wi
   assert.doesNotMatch(source, /<iframe[^>]*sandbox=/);
 });
 
-test("Player 2 offers a same-title VidLink fallback and can switch back to Movie Scraper", () => {
-  assert.match(source, /secondaryPlayerFallbackUrl = "https:\/\/vidlink\.pro\/"\s*\+/);
-  assert.match(source, /"tv\/" \+ encodeURIComponent\(String\(media\.id\)\) \+ "\/" \+ Math\.max\(1, Number\(params\.season\) \|\| 1\) \+ "\/" \+ Math\.max\(1, Number\(params\.episode\) \|\| 1\)/);
-  assert.match(source, /"movie\/" \+ encodeURIComponent\(String\(media\.id\)\)/);
-  assert.match(source, /secondaryPlayerFallback\.dataset\.active = showingFallback \? "scraper" : "vidlink"/);
-  assert.match(source, /secondaryPlayerOpen\.href = nextUrl/);
-});
-
-test("Player 2 preserves the scraper ID and TV season/episode query parameters", () => {
+test("Player 2 uses Movie Scraper directly and preserves movie/TV identifiers", () => {
+  assert.match(source, /movie-scraper-lovat-three\.vercel\.app\/\?/);
   assert.match(source, /new URLSearchParams\(\{ id: String\(media\.id \|\| ""\) \}\)/);
   assert.match(source, /secondaryPlayerQuery\.set\("s", String\(params\.season \|\| 1\)\)/);
   assert.match(source, /secondaryPlayerQuery\.set\("e", String\(params\.episode \|\| 1\)\)/);
+  assert.match(source, /Open Player 2 directly/);
+  assert.doesNotMatch(source, /vidlink\.pro\/|secondaryPlayerFallbackUrl/);
 });
 
-test("Player 2 starts on VidLink so a known scraper playlist error does not leave a blank default", () => {
-  assert.match(source, /src="' \+ escapeHtml\(secondaryPlayerFallbackUrl\) \+ '"/);
-  assert.match(source, /href="' \+ escapeHtml\(secondaryPlayerFallbackUrl\) \+ '"/);
-  assert.match(source, /data-active="vidlink">Try Movie Scraper/);
-  assert.match(source, /secondaryPlayerFallback\.textContent = showingFallback \? "Try VidLink fallback" : "Try Movie Scraper"/);
+test("Player 2 identifies upstream extraction errors without silently switching to a Vivid server", () => {
+  assert.match(source, /upstream stream extraction has failed/);
+  assert.doesNotMatch(source, /vivid-secondary-player-fallback/);
 });
