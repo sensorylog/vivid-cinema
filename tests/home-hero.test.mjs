@@ -35,6 +35,7 @@ test("TFLIX-style trending billboard is restored above the unchanged featured-ca
   const shellCss = read("../styles/vivid-shell.css");
   assert.match(shellCss, /var\(--vivid-safe-left,0px\)/, "shared header includes left safe-area inset");
   assert.match(shellCss, /var\(--vivid-safe-right,0px\)/, "shared header includes right safe-area inset");
+  assert.match(heroCss, /vivid-topbar \.vivid-nav-action[\s\S]*?display: inline-flex !important/, "mobile sign-in remains a readable text action instead of a clipped icon box");
 
   const watchPolish = read("../styles/vivid-watch-polish.css");
   assert.match(watchPolish, /orientation:\s*landscape\) and \(min-height:\s*521px\)/, "landscape playback is height-aware on desktop");
@@ -86,7 +87,7 @@ test("TFLIX-style hero uses TMDB stills and routes to Vivid title details withou
 
 test("service worker shell cache includes the new hero assets", () => {
   const sw = read("../service-worker.js");
-  assert.match(sw, /const CACHE_NAME = "vivid-cinema-shell-v150";/);
+  assert.match(sw, /const CACHE_NAME = "vivid-cinema-shell-v151";/);
   assert.match(sw, /\.\/styles\/vivid-tflix-hero\.css/);
   assert.match(sw, /\.\/scripts\/tflix-hero\.js/);
 });
