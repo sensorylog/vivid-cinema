@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#06070a"><meta name="description" content="Vivid Cinema — discover movies and series in a premium cinematic experience.">
-<title>Vivid Cinema</title><link rel="preconnect" href="https://api.themoviedb.org"><link rel="preconnect" href="https://image.tmdb.org"><link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin><link rel="icon" href="icons/vivid-icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" sizes="180x180" href="icons/vivid-icon-180.png">
+<title>Vivid Cinema</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Hanken+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet"><link rel="preconnect" href="https://api.themoviedb.org"><link rel="preconnect" href="https://image.tmdb.org"><link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin><link rel="icon" href="icons/vivid-icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" sizes="180x180" href="icons/vivid-icon-180.png">
 <link rel="stylesheet" href="styles/vivid-foundation.css"><link rel="stylesheet" href="styles/vivid-system.css"><link rel="stylesheet" href="styles/vivid-shell.css"><link rel="stylesheet" href="styles/vivid-cinematic.css">
 
 <link rel="stylesheet" href="styles/vivid-viewport.css">
@@ -11,7 +11,7 @@
   <link rel="stylesheet" href="styles/vivid-pwa.css">
 <link rel="stylesheet" href="styles/vivid-atmosphere.css"><link rel="stylesheet" href="styles/vivid-audit-fixes.css"><link rel="stylesheet" href="styles/vivid-home.css"><link rel="stylesheet" href="styles/vivid-home-breathe.css"><link rel="stylesheet" href="styles/vivid-desktop.css">
 <meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Vivid"><link rel="manifest" href="manifest.json">
-<link rel="stylesheet" href="styles/vivid-liquid-glass.css?v=lg4">
+<link rel="stylesheet" href="styles/vivid-liquid-glass.css?v=lg4"><link rel="stylesheet" href="styles/vivid-tflix-hero.css">
 </head>
 <body data-vivid-page="home" class="vivid-cinema-home vivid-atmosphere">
 <div class="vivid-home">
@@ -28,6 +28,7 @@
 <div class="vivid-release-footnote"><i class="bi bi-shield-check"></i><span>Only titles you follow are checked. You stay in control.</span></div>
 </aside>
 <main id="home">
+<section id="hero" class="empty" aria-label="Trending today" aria-roledescription="carousel"></section>
 <div class="vivid-feature-strip"><div class="vivid-feature-viewport"><div class="vivid-feature-track" id="feature-track" aria-label="Featured titles carousel"></div></div></div>
 <section class="vivid-catalogue-explore" aria-labelledby="catalogue-explore-title">
 <div class="vivid-catalogue-explore-head"><div><span>EXPLORE THE CATALOGUE</span><h2 id="catalogue-explore-title">More ways into Vivid.</h2><p>Browse by world, mood and culture — not just the latest releases.</p></div><a href="discover.html">Open full catalogue <i class="bi bi-arrow-up-right"></i></a></div>
