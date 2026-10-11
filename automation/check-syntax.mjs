@@ -11,6 +11,7 @@ const files = [
   "scripts/mediaforge.js",
   "scripts/watch.js",
   "scripts/playback-urls.js",
+  "scripts/tflix-secondary-player.js",
   "scripts/config.js",
   "scripts/routes.js",
   "scripts/utils.js",
