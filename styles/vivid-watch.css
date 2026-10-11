@@ -258,3 +258,7 @@ body.vivid-watch-page.vivid-player-open{overflow:hidden;overscroll-behavior:none
  .vivid-player-overlay.vivid-player-inline .vivid-server-panel .vivid-server-grid{grid-template-columns:minmax(0,1fr)}
  .vivid-player-overlay.vivid-player-inline .vivid-server-panel .vivid-player-source{min-height:52px;padding:9px}
 }
+
+/* Keep the primary layout rules authoritative after the shared media-layout stylesheet loads. */
+body.vivid-watch-page .vivid-player-overlay.vivid-player-inline .vivid-player-dialog{width:min(1420px,100%)!important;max-height:none!important;overflow:visible!important}
+body.vivid-watch-page .vivid-player-overlay.vivid-player-inline{display:block!important;max-width:100%!important}
