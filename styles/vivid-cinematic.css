@@ -81,44 +81,6 @@ body.vivid-cinema-home{background:transparent;color:#f5f7fa;overflow-x:hidden}
 
 /* Mobile composition: give the hero its own media, content and carousel space. */
 @media(max-width:640px){
-  /* Mobile hero: keep the trailer/artwork as one full-screen cinematic surface. */
-  .vivid-hero{
-    height:100svh;
-    min-height:640px;
-    overflow:hidden;
-    display:block;
-    background:#06070a;
-  }
-  .vivid-hero-media{
-    position:absolute;
-    inset:0;
-    width:100%;
-    height:100%;
-    min-height:0;
-    max-height:none;
-  }
-  .vivid-hero-content{
-    position:relative;
-    z-index:5;
-    width:100%;
-    height:100%;
-    padding:125px 16px 180px;
-    justify-content:flex-end;
-  }
-  .vivid-hero-title{
-    max-width:100%;
-    margin-bottom:14px;
-  }
-  .vivid-hero-copy{
-    max-width:620px;
-    margin-bottom:4px;
-  }
-  .vivid-hero-tools{
-    position:absolute;
-    top:auto;
-    right:16px;
-    bottom:148px;
-  }
   .vivid-feature-strip{
     position:absolute;
     z-index:7;

@@ -683,33 +683,6 @@ html[data-vivid-theme="light"] body.vivid-atmosphere :is(
   border-color:#111216!important;
   box-shadow:none!important;
 }
-
-/* Don't fake glass when the device asks for reduced transparency. */
-@media(prefers-reduced-transparency:reduce){
-  body.vivid-atmosphere :is(
-    .vivid-topbar,
-    .vivid-discovery-nav,
-    .vivid-title-nav,
-    .vivid-library-nav,
-    .vivid-watch-nav,
-    .vivid-unified-header,
-    .vivid-search-window,
-    .vivid-search-dialog,
-    .vivid-release-popover,
-    .vivid-notification-popover,
-    .vivid-hero-control,
-    .vivid-hero-tools button,
-    .vivid-rail-controls button,
-    .vivid-notification-button,
-    .vivid-page-back
-  ){
-    backdrop-filter:none!important;
-    -webkit-backdrop-filter:none!important;
-    background:var(--vivid-surface-solid)!important;
-    border-color:var(--vivid-border)!important;
-    box-shadow:var(--vivid-shadow-md)!important;
-  }
-}
 /* =========================================================
    Vivid Cinema — True Liquid Glass NAV ONLY
    Matches Apple TV floating glass. Does not touch other UI.
