@@ -332,3 +332,39 @@ body.vivid-watch-page :is(a, button):focus-visible {
     transition: none;
   }
 }
+
+
+/* Landscape playback keeps the player viewport itself at 16:9. Constrain the
+   dialog width by usable viewport height so its header/footer never force a
+   wide iframe into a short, distorted rectangle. */
+@media (orientation: landscape) and (min-height: 521px) {
+  body.vivid-watch-page .vivid-player-overlay:not(.vivid-player-inline) .vivid-player-dialog {
+    width: min(100%, calc(177.78dvh - 284px));
+    max-width: 1320px;
+  }
+  body.vivid-watch-page .vivid-player-overlay:not(.vivid-player-inline) .vivid-player-frame {
+    width: 100%;
+    max-width: 100%;
+    max-height: none;
+    aspect-ratio: 16 / 9;
+    flex: 0 1 auto;
+  }
+}
+@media (orientation: landscape) and (max-height: 520px) {
+  body.vivid-watch-page .vivid-player-overlay:not(.vivid-player-inline) {
+    padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px);
+  }
+  body.vivid-watch-page .vivid-player-overlay:not(.vivid-player-inline) .vivid-player-dialog {
+    width: 100%;
+    max-width: 100%;
+    max-height: 100dvh;
+  }
+  body.vivid-watch-page .vivid-player-overlay:not(.vivid-player-inline) .vivid-player-frame {
+    width: min(100%, calc(177.78dvh - 200px));
+    max-width: 100%;
+    max-height: none;
+    aspect-ratio: 16 / 9;
+    flex: 0 1 auto;
+    align-self: center;
+  }
+}

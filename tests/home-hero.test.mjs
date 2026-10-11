@@ -29,6 +29,21 @@ test("TFLIX-style trending billboard is restored above the unchanged featured-ca
   assert.match(heroCss, /height: clamp\(520px, 74svh, 680px\)/, "mobile hero uses the small viewport-aware height");
   assert.doesNotMatch(heroCss, /margin-bottom:\s*-8vh/, "hero must not overlap the following content");
 
+  const desktopCss = read("../styles/vivid-desktop.css");
+  assert.doesNotMatch(desktopCss, /\.vivid-feature-strip\s*\{[^}]*margin:\s*-\d+px/is, "desktop featured strip must never overlap the hero");
+
+  const shellCss = read("../styles/vivid-shell.css");
+  assert.match(shellCss, /var\(--vivid-safe-left,0px\)/, "shared header includes left safe-area inset");
+  assert.match(shellCss, /var\(--vivid-safe-right,0px\)/, "shared header includes right safe-area inset");
+  assert.match(heroCss, /vivid-topbar \.vivid-nav-action[\s\S]*?display: inline-flex !important/, "mobile sign-in remains a readable text action instead of a clipped icon box");
+
+  const watchPolish = read("../styles/vivid-watch-polish.css");
+  assert.match(watchPolish, /orientation:\s*landscape\) and \(min-height:\s*521px\)/, "landscape playback is height-aware on desktop");
+  assert.match(watchPolish, /177\.78dvh - 284px/, "desktop player width accounts for its header and footer");
+  assert.match(watchPolish, /177\.78dvh - 200px/, "short landscape player fits its controls and safe frame");
+  assert.match(watchPolish, /aspect-ratio:\s*16\s*\/\s*9/, "player preserves a 16:9 frame");
+  assert.match(read("../watch.html"), /vivid-watch-polish\.css\?v=2/, "watch page uses refreshed responsive playback styles");
+
   for (const path of [
     "../styles/vivid-cinematic.css",
     "../styles/vivid-atmosphere.css",
@@ -72,7 +87,7 @@ test("TFLIX-style hero uses TMDB stills and routes to Vivid title details withou
 
 test("service worker shell cache includes the new hero assets", () => {
   const sw = read("../service-worker.js");
-  assert.match(sw, /const CACHE_NAME = "vivid-cinema-shell-v149";/);
+  assert.match(sw, /const CACHE_NAME = "vivid-cinema-shell-v151";/);
   assert.match(sw, /\.\/styles\/vivid-tflix-hero\.css/);
   assert.match(sw, /\.\/scripts\/tflix-hero\.js/);
 });
