@@ -10,7 +10,7 @@ import { hasDirectStreamIntegration, playDirectStream, resolveDirectStream, stop
 import { buildCustomEmbedUrl, getCustomPlaybackServer, listCustomPlaybackServers } from "./playback/playback-servers.js";
 import { mountPlaybackServerSettings } from "./playback/server-settings.js";
 import { buildVidapiEmbedUrl, buildVidsrcEmbedUrl, buildVidlinkEmbedUrl, buildVidplusEmbedUrl, buildVidkingEmbedUrl } from "./playback/playback-urls.js";
-import { mountTflixSecondaryPlayer } from "./playback/tflix-secondary-player.js?tv-episodes-3";
+import { mountTflixSecondaryPlayer } from "./playback/tflix-secondary-player.js";
 
 const $ = (id) => document.getElementById(id);
 const route = getRoute();
