@@ -109,10 +109,7 @@ body.vivid-watch-page .vivid-player-overlay.vivid-player-inline{
   animation:none;
 }
 body.vivid-watch-page .vivid-player-overlay.vivid-player-inline .vivid-player-dialog{
-  width:min(1320px,100%);
-  max-height:none;
   margin-inline:auto;
-  overflow:visible;
   border-radius:14px;
 }
 body.vivid-watch-page .vivid-player-overlay.vivid-player-inline .vivid-player-dialog-head{
@@ -125,19 +122,7 @@ body.vivid-watch-page .vivid-player-overlay.vivid-player-inline .vivid-player-di
 }
 body.vivid-watch-page .vivid-player-dialog-heading{min-width:0;flex:1 1 180px}
 body.vivid-watch-page .vivid-player-dialog-actions{flex:0 0 auto}
-body.vivid-watch-page .vivid-player-overlay.vivid-player-inline .vivid-player-frame{
-  position:relative;
-  width:100%;
-  aspect-ratio:16/9;
-  min-height:220px;
-  flex:none;
-}
-body.vivid-watch-page .vivid-player-overlay.vivid-player-inline .vivid-player-frame iframe,
-body.vivid-watch-page .vivid-player-overlay.vivid-player-inline .vivid-player-frame video{
-  width:100%;
-  height:100%;
-  min-height:220px;
-}
+body.vivid-watch-page .vivid-player-overlay.vivid-player-inline .vivid-player-frame{position:relative;}
 body.vivid-watch-page .vivid-player-overlay.vivid-player-inline .vivid-player-dialog-foot{display:flex}
 body.vivid-watch-page .vivid-server-panel{
   position:fixed;
@@ -180,9 +165,6 @@ body.vivid-watch-page .flickv4-player-frame iframe{position:absolute;inset:0}
   body.vivid-watch-page .vivid-watch-inline-heading{padding-top:18px}
   body.vivid-watch-page .vivid-player-overlay.vivid-player-inline .vivid-player-dialog{border-radius:0}
   body.vivid-watch-page .vivid-player-overlay.vivid-player-inline .vivid-player-dialog-head{padding:10px 12px}
-  body.vivid-watch-page .vivid-player-overlay.vivid-player-inline .vivid-player-frame,
-  body.vivid-watch-page .vivid-player-overlay.vivid-player-inline .vivid-player-frame iframe,
-  body.vivid-watch-page .vivid-player-overlay.vivid-player-inline .vivid-player-frame video{min-height:190px}
   body.vivid-watch-page .flickv4-web-player{padding-top:18px}
   body.vivid-watch-page .flickv4-player-controls{gap:8px}
 }
