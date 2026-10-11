@@ -58,7 +58,7 @@ export function mountTflixSecondaryPlayer({ root, params, media, details, title,
   const status = root.querySelector("#vivid-tflix-status");
   const grid = root.querySelector("#vivid-tflix-server-grid");
   const nowTitle = root.querySelector("#vivid-tflix-now-title");
-  let selectedServer = readRememberedServer(), generation = 0, loadTimer = 0;
+  let selectedServer = readRememberedServer(), generation = 0, loadTimer = 0, started = false;
   const playbackParams = { id: tmdbId, tmdbId, type: params.type, season: positiveInteger(params.season), episode: positiveInteger(params.episode) };
   const buttons = new Map();
   function updateTitle() {
@@ -145,7 +145,6 @@ export function mountTflixSecondaryPlayer({ root, params, media, details, title,
     seasonSelect.innerHTML = seasons.map(item => '<option value="' + Number(item.season_number) + '">Season ' + Number(item.season_number) + '</option>').join("");
     seasonSelect.value = String(seasons.some(item => Number(item.season_number) === initialSeason) ? initialSeason : seasons[0].season_number);
     let episodeData = [];
-    let started = false;
     const currentSeasonSummary = season => seasons.find(item => Number(item.season_number) === Number(season));
     function updateUrl() {
       const url = new URL(window.location.href);
