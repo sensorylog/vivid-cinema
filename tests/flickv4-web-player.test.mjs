@@ -58,9 +58,9 @@ test("second player keeps its watchdog active after the iframe page loads", () =
 
 test("watch page defaults to VidSrc and does not reuse old VidAPI preferences", () => {
   const watch = readFileSync(new URL("../scripts/watch.js", import.meta.url), "utf8");
-  assert.match(watch, /let activeSource = "vidsrc"/);
-  assert.match(watch, /activeSource = "vidsrc"/);
-  assert.match(watch, /SOURCE_PREFERENCES_KEY = "vivid:playback-source-preferences:v2"/);
+  assert.match(watch, /let activeSource = "vidapi"/);
+  assert.match(watch, /activeSource = "vidapi"/);
+  assert.match(watch, /SOURCE_PREFERENCES_KEY = "vivid:playback-source-preferences:v3"/);
   assert.match(watch, /VidAPI alternate source/);
 });
 
@@ -70,4 +70,18 @@ test("Flickv4 player selector helper matches its call signature so controls can 
   for (const id of ["flickv4-server", "flickv4-play", "flickv4-stop", "flickv4-iframe", "flickv4-status"]) {
     assert.ok(source.includes('$("' + id + '", root)'), "missing correctly scoped lookup for " + id);
   }
+});
+
+test("secondary player initialization errors cannot break the main watch page", () => {
+  const watch = readFileSync(new URL("../scripts/watch.js", import.meta.url), "utf8");
+  assert.match(watch, /optional second player must never be able to break Vivid's original player/);
+  assert.match(watch, /Flickv4 secondary player failed to initialize/);
+  assert.match(watch, /Watch page could not load/);
+});
+
+test("watch page restores VidAPI as the original primary server", () => {
+  const watch = readFileSync(new URL("../scripts/watch.js", import.meta.url), "utf8");
+  assert.match(watch, /<strong>VidAPI<\/strong><small>Primary server/);
+  assert.match(watch, /<strong>VidSrc<\/strong><small>Alternate server/);
+  assert.match(watch, /SOURCE_PREFERENCES_KEY = "vivid:playback-source-preferences:v3"/);
 });
