@@ -55,3 +55,11 @@ test("second player keeps its watchdog active after the iframe page loads", () =
   const css = readFileSync(new URL("../styles/flickv4-web-player.css", import.meta.url), "utf8");
   assert.match(css, /\.flickv4-player-controls button\[hidden\]\s*\{\s*display:\s*none\s*!important/);
 });
+
+test("watch page defaults to VidSrc and does not reuse old VidAPI preferences", () => {
+  const watch = readFileSync(new URL("../scripts/watch.js", import.meta.url), "utf8");
+  assert.match(watch, /let activeSource = "vidsrc"/);
+  assert.match(watch, /activeSource = "vidsrc"/);
+  assert.match(watch, /SOURCE_PREFERENCES_KEY = "vivid:playback-source-preferences:v2"/);
+  assert.match(watch, /VidAPI alternate source/);
+});
