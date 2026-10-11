@@ -4,7 +4,7 @@ Vivid's direct player is an adapter, not a content catalog. No direct stream pro
 
 ## Enablement contract
 
-1. Add only exact, lowercase HTTPS hostnames controlled by an authorized streaming provider to `VIVID_CONFIG.api.directStreamHosts` in `scripts/config.js`. Include every host needed for manifests, segments, captions, and other media resources; HLS.js and Shaka enforce the allowlist on their media requests too.
+1. Add only exact HTTPS hostnames controlled by an authorized streaming provider to `VIVID_CONFIG.api.directStreamHosts` in `scripts/config.js`. The code normalizes case and rejects entries containing schemes, paths, credentials, or ports. Include every host needed for manifests, segments, captions, and other media resources.
 2. Load a first-party provider integration before `scripts/watch.js`. It must set `window.VIVID_DIRECT_STREAM_RESOLVER` to an async function.
 3. The resolver receives:
    - `media: { id, media_type, title }`
@@ -13,6 +13,10 @@ Vivid's direct player is an adapter, not a content catalog. No direct stream pro
 5. Never put signed URLs, API keys, or other credentials in the watch-page query string or local playback preferences.
 
 The browser validates HTTPS, rejects URL credentials and non-allowlisted hosts, and supports HLS (`.m3u8`), DASH (`.mpd`), and direct video files (`.mp4`, `.m4v`, `.webm`, `.mov`, `.ogv`). HLS/DASH resources must permit browser playback with the correct CORS headers. DRM/license-server configuration is intentionally not guessed or enabled.
+
+## Request-validation boundaries
+
+The initial stream URL is checked against the exact HTTPS hostname allowlist before playback. HLS.js checks each resource URL it handles, and its fetch-based requests use `redirect: "error"` to fail closed when the server redirects. Shaka checks each DASH resource URL before requesting it. Browser-managed native HLS playback and direct video-file playback do not expose a reliable JavaScript hook for validating every redirect or every nested request; do not treat the client-side allowlist as a complete network security boundary. Configure the authorized provider/CDN to serve manifests, segments, captions, and files from the expected allowlisted hosts without cross-host redirects. The unit tests cover URL validation and stream-type inference, not end-to-end playback on real devices.
 
 ## Resolver example shape
 
