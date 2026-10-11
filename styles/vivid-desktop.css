@@ -230,12 +230,6 @@
    This intentionally supersedes earlier desktop positioning rules.
    Mobile is untouched. */
 @media (min-width:901px){
-  .vivid-cinema-home .vivid-hero{
-    position:relative!important;
-    overflow:hidden!important;
-  }
-
-  /* Trailer/info owns the hero. Feature cards are NOT overlaid on it. */
   .vivid-cinema-home .vivid-feature-strip{
     position:relative!important;
     inset:auto!important;
