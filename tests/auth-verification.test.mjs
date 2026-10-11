@@ -2,13 +2,14 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
-const [auth, handler, page, worker, emailFunction, functionsIndex] = await Promise.all([
+const [auth, handler, page, worker, emailFunction, functionsIndex, firebaseConfig] = await Promise.all([
   readFile(new URL("../scripts/auth.js", import.meta.url), "utf8"),
   readFile(new URL("../scripts/verify-email.js", import.meta.url), "utf8"),
   readFile(new URL("../verify-email.html", import.meta.url), "utf8"),
   readFile(new URL("../service-worker.js", import.meta.url), "utf8"),
   readFile(new URL("../functions/email-verification.js", import.meta.url), "utf8"),
-  readFile(new URL("../functions/index.js", import.meta.url), "utf8")
+  readFile(new URL("../functions/index.js", import.meta.url), "utf8"),
+  readFile(new URL("../firebase.json", import.meta.url), "utf8")
 ]);
 
 test("signup and resend use the server-side custom email sender", () => {
@@ -34,6 +35,7 @@ test("custom email function keeps Admin SDK and provider secrets server-side", (
   assert.match(emailFunction, /emailVerificationRateLimits/);
   assert.match(emailFunction, /request\.auth\.uid/);
   assert.match(functionsIndex, /sendVividVerificationEmail.*email-verification\.js/);
+  assert.match(firebaseConfig, /https:\/\/us-central1-vivid-cinema\.cloudfunctions\.net/);
 });
 
 test("verification page is precached and loads its handler", () => {
