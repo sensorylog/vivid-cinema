@@ -63,3 +63,11 @@ test("watch page defaults to VidSrc and does not reuse old VidAPI preferences", 
   assert.match(watch, /SOURCE_PREFERENCES_KEY = "vivid:playback-source-preferences:v2"/);
   assert.match(watch, /VidAPI alternate source/);
 });
+
+test("Flickv4 player selector helper matches its call signature so controls can initialize", () => {
+  const source = readFileSync(new URL("../scripts/flickv4-web-player.js", import.meta.url), "utf8");
+  assert.match(source, /const \$ = \(id, root\) => root\?\.querySelector\("#" \+ id\);/);
+  for (const id of ["flickv4-server", "flickv4-play", "flickv4-stop", "flickv4-iframe", "flickv4-status"]) {
+    assert.ok(source.includes('$("' + id + '", root)'), "missing correctly scoped lookup for " + id);
+  }
+});
