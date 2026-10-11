@@ -14,27 +14,12 @@ body.vivid-cinema-home{background:transparent;color:#f5f7fa;overflow-x:hidden}
 .vivid-navlinks a:hover,.vivid-nav-action:hover,.vivid-navlinks a[aria-current=true]{color:#fff;background:rgba(255,255,255,.07)}
 .vivid-nav-search{margin-left:auto;position:relative;width:min(28vw,300px)}
 .vivid-nav-search input{width:100%;height:42px;border-radius:999px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);color:#fff;padding:0 16px 0 40px;outline:0}
-.vivid-nav-search i{position:absolute;left:15px;top:12px;color:#9da3ad};pointer-events:none
-.vivid-hero{position:relative;min-height:min(860px,100svh);height:clamp(650px,88svh,900px);overflow:hidden;background:#090a0d}
-.vivid-hero-media,.vivid-hero-media::after{position:absolute;inset:0}
-.vivid-hero-media::after{content:"";background:linear-gradient(90deg,rgba(4,5,7,.96) 0%,rgba(4,5,7,.72) 34%,rgba(4,5,7,.22) 70%,rgba(4,5,7,.55) 100%),linear-gradient(0deg,#06070a 0%,transparent 35%,rgba(0,0,0,.18) 100%);z-index:1;pointer-events:none}
-.vivid-hero-video{position:absolute;inset:0;width:100%;height:100%;border:0;object-fit:cover;transform:scale(1.08);opacity:0;z-index:2;transition:opacity .55s ease}
-.vivid-hero-video.is-ready{opacity:1}
-.vivid-hero-fallback{position:absolute;inset:0;background-size:cover;background-position:center;opacity:0;transition:opacity .35s ease}
-.vivid-hero-fallback.is-visible{opacity:1}
-.vivid-hero-content{position:relative;z-index:5;width:min(1440px,100%);height:100%;margin:auto;padding:clamp(140px,20vh,220px) var(--vivid-page-gutter) 190px;display:flex;flex-direction:column;justify-content:center;align-items:flex-start}
+.vivid-nav-search i{position:absolute;left:15px;top:12px;color:#9da3ad};
 .vivid-kicker{font-size:.78rem;letter-spacing:.16em;text-transform:uppercase;color:#c8ccd3;margin-bottom:12px}
-.vivid-hero-title{font-size:clamp(2.8rem,7vw,6.8rem);line-height:.92;letter-spacing:-.06em;max-width:850px;margin:0 0 20px}
-.vivid-hero-copy{max-width:620px;color:#c1c5cc;font-size:clamp(.95rem,1.4vw,1.1rem);line-height:1.6;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
 .vivid-meta{display:flex;flex-wrap:wrap;gap:9px;align-items:center;margin:20px 0;color:#d9dce1;font-size:.86rem}
 .vivid-meta span{display:inline-flex;align-items:center;gap:5px}
 .vivid-dot{width:3px;height:3px;border-radius:50%;background:#7f858f}
 .vivid-actions{display:flex;gap:10px;flex-wrap:wrap}
-.vivid-hero-control{position:absolute;z-index:8;top:50%;transform:translateY(-50%);width:46px;height:46px;border-radius:50%;border:1px solid rgba(255,255,255,.16);background:rgba(10,11,14,.4);color:#fff;backdrop-filter:blur(16px);cursor:pointer;display:grid;place-items:center}
-.vivid-hero-control:hover{background:rgba(255,255,255,.12)}
-.vivid-hero-control.prev{left:20px}.vivid-hero-control.next{right:20px}
-.vivid-hero-tools{position:absolute;z-index:9;right:var(--vivid-page-gutter);bottom:168px;display:flex;gap:8px}
-.vivid-hero-tools button{width:42px;height:42px;border-radius:50%;border:1px solid rgba(255,255,255,.15);background:rgba(10,11,14,.42);color:#fff;backdrop-filter:blur(16px);cursor:pointer}
 .vivid-feature-strip{position:absolute;z-index:7;left:0;right:0;bottom:22px}
 .vivid-feature-viewport{width:min(1440px,100%);margin:auto;padding:0 var(--vivid-page-gutter);overflow:hidden}
 .vivid-feature-track{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;padding:8px 2px 14px}
@@ -75,13 +60,12 @@ body.vivid-cinema-home{background:transparent;color:#f5f7fa;overflow-x:hidden}
 .vivid-search-result small{color:#7e8590}
 .vivid-mobile-nav{display:none}
 @media(max-width:900px){
- .vivid-navlinks{display:none}.vivid-nav-search{width:auto;margin-left:auto}.vivid-nav-search input{width:42px;padding:0;font-size:0}.vivid-nav-search i{left:13px}.vivid-hero{height:78svh;min-height:620px}.vivid-hero-content{padding-top:130px;padding-bottom:175px}.vivid-hero-control{display:none}.vivid-hero-tools{bottom:150px}.vivid-feature-card{flex-basis:145px;height:94px}
+ .vivid-navlinks{display:none}.vivid-nav-search{width:auto;margin-left:auto}.vivid-nav-search input{width:42px;padding:0;font-size:0}.vivid-nav-search i{left:13px}.vivid-feature-card{flex-basis:145px;height:94px}
 }
 @media(max-width:640px){
- .vivid-topbar{padding:calc(8px + var(--vivid-safe-top,0px)) 12px 8px}.vivid-nav{min-height:50px}.vivid-brand{font-size:1.05rem}.vivid-nav-action{padding:9px}.vivid-hero{height:78svh;min-height:600px}.vivid-hero-media::after{background:linear-gradient(0deg,#06070a 0%,rgba(4,5,7,.45) 38%,rgba(4,5,7,.42) 100%),linear-gradient(90deg,rgba(4,5,7,.72),rgba(4,5,7,.1))}
- .vivid-hero-content{padding:125px 16px 170px;justify-content:flex-end}.vivid-hero-title{font-size:clamp(2.5rem,13vw,4rem);max-width:100%}.vivid-hero-copy{-webkit-line-clamp:2;font-size:.9rem}.vivid-meta{margin:12px 0}.vivid-hero-tools{right:16px;bottom:148px}.vivid-feature-strip{bottom:7px}.vivid-feature-viewport{padding:0 16px}.vivid-feature-card{flex-basis:132px;height:86px}.vivid-section-wrap{padding:0 16px}.vivid-rails{padding:14px 0}.vivid-card{flex-basis:145px}.vivid-mobile-nav{position:fixed;display:flex;z-index:1100;left:12px;right:12px;bottom:12px;height:62px;border:1px solid rgba(255,255,255,.12);border-radius:20px;background:rgba(12,14,18,.76);backdrop-filter:blur(22px);justify-content:space-around;align-items:center;padding-bottom:env(safe-area-inset-bottom,0px)}.vivid-mobile-nav a{display:flex;flex-direction:column;align-items:center;gap:4px;color:#7f858f;text-decoration:none;font-size:.65rem}.vivid-mobile-nav a.is-active{color:#fff}.vivid-mobile-nav i{font-size:1.15rem}.vivid-footer{padding-bottom:100px}
+ .vivid-topbar{padding:calc(8px + var(--vivid-safe-top,0px)) 12px 8px}.vivid-nav{min-height:50px}.vivid-brand{font-size:1.05rem}.vivid-nav-action{padding:9px}.vivid-meta{margin:12px 0}.vivid-feature-strip{bottom:7px}.vivid-feature-viewport{padding:0 16px}.vivid-feature-card{flex-basis:132px;height:86px}.vivid-section-wrap{padding:0 16px}.vivid-rails{padding:14px 0}.vivid-card{flex-basis:145px}.vivid-mobile-nav{position:fixed;display:flex;z-index:1100;left:12px;right:12px;bottom:12px;height:62px;border:1px solid rgba(255,255,255,.12);border-radius:20px;background:rgba(12,14,18,.76);backdrop-filter:blur(22px);justify-content:space-around;align-items:center;padding-bottom:env(safe-area-inset-bottom,0px)}.vivid-mobile-nav a{display:flex;flex-direction:column;align-items:center;gap:4px;color:#7f858f;text-decoration:none;font-size:.65rem}.vivid-mobile-nav a.is-active{color:#fff}.vivid-mobile-nav i{font-size:1.15rem}.vivid-footer{padding-bottom:100px}
 }
-@media(prefers-reduced-motion:reduce){.vivid-hero-video,.vivid-hero-fallback,.vivid-card-media img,.vivid-feature-card,.vivid-card{transition:none}.vivid-rail{scroll-behavior:auto}.vivid-skeleton-card{animation:none}}
+@media(prefers-reduced-motion:reduce){.vivid-card-media img, .vivid-feature-card, .vivid-card{transition:none}.vivid-rail{scroll-behavior:auto}.vivid-skeleton-card{animation:none}}
 
 .vivid-rail-controls[hidden]{display:none}
 .vivid-rails+.vivid-rails{border-top:1px solid rgba(255,255,255,.035)}
@@ -97,44 +81,6 @@ body.vivid-cinema-home{background:transparent;color:#f5f7fa;overflow-x:hidden}
 
 /* Mobile composition: give the hero its own media, content and carousel space. */
 @media(max-width:640px){
-  /* Mobile hero: keep the trailer/artwork as one full-screen cinematic surface. */
-  .vivid-hero{
-    height:100svh;
-    min-height:640px;
-    overflow:hidden;
-    display:block;
-    background:#06070a;
-  }
-  .vivid-hero-media{
-    position:absolute;
-    inset:0;
-    width:100%;
-    height:100%;
-    min-height:0;
-    max-height:none;
-  }
-  .vivid-hero-content{
-    position:relative;
-    z-index:5;
-    width:100%;
-    height:100%;
-    padding:125px 16px 180px;
-    justify-content:flex-end;
-  }
-  .vivid-hero-title{
-    max-width:100%;
-    margin-bottom:14px;
-  }
-  .vivid-hero-copy{
-    max-width:620px;
-    margin-bottom:4px;
-  }
-  .vivid-hero-tools{
-    position:absolute;
-    top:auto;
-    right:16px;
-    bottom:148px;
-  }
   .vivid-feature-strip{
     position:absolute;
     z-index:7;
@@ -176,9 +122,6 @@ body.vivid-cinema-home{background:transparent;color:#f5f7fa;overflow-x:hidden}
   }
 }
 @media(max-width:380px){
-  .vivid-hero-media{height:46svh;min-height:290px}
-  .vivid-hero-tools{top:calc(46svh - 58px)}
-  .vivid-hero-title{font-size:clamp(2.25rem,12vw,3.2rem)}
   .vivid-card{flex-basis:138px}
 }
 
@@ -195,69 +138,13 @@ body.vivid-cinema-home{background:transparent;color:#f5f7fa;overflow-x:hidden}
 
 
 /* Phase I — final streaming UX pass.
-   The hero remains one cinematic surface: trailer, metadata and actions share the same frame. */
-.vivid-hero-media{
+   The hero remains one cinematic surface: trailer{
   position:relative;
   width:100%;
   height:min(78svh,820px);
   min-height:620px;
   overflow:hidden;
   background:#090a0d;
-}
-.vivid-hero-media::after{
-  content:"";
-  position:absolute;
-  inset:0;
-  z-index:2;
-  pointer-events:none;
-  background:
-    linear-gradient(90deg,rgba(4,5,7,.97) 0%,rgba(4,5,7,.78) 28%,rgba(4,5,7,.24) 64%,rgba(4,5,7,.48) 100%),
-    linear-gradient(0deg,#06070a 0%,rgba(6,7,10,.18) 27%,transparent 62%);
-}
-.vivid-hero-video,
-.vivid-hero-fallback{
-  position:absolute;
-  inset:0;
-  width:100%;
-  height:100%;
-}
-.vivid-hero-video{
-  z-index:1;
-  transform:scale(1.08);
-  opacity:0;
-  border:0;
-}
-.vivid-hero-video.is-ready{opacity:1}
-.vivid-hero-fallback{
-  z-index:0;
-  background-size:cover;
-  background-position:center;
-}
-.vivid-hero-content{
-  position:absolute;
-  inset:0;
-  z-index:5;
-  width:min(1440px,100%);
-  height:100%;
-  margin:auto;
-  padding:clamp(110px,18vh,170px) var(--vivid-page-gutter) 150px;
-  display:flex;
-  flex-direction:column;
-  justify-content:center;
-  align-items:flex-start;
-  background:transparent;
-  pointer-events:none;
-}
-.vivid-hero-content>*{pointer-events:auto}
-.vivid-hero-title{
-  max-width:min(850px,68vw);
-  text-wrap:balance;
-}
-.vivid-hero-copy{
-  max-width:620px;
-}
-.vivid-hero-tools{
-  bottom:32px;
 }
 .vivid-feature-strip{
   position:relative;
@@ -321,56 +208,9 @@ body.vivid-cinema-home{background:transparent;color:#f5f7fa;overflow-x:hidden}
   text-overflow:ellipsis;
 }
 @media(max-width:900px){
-  .vivid-hero-media{height:66svh;min-height:520px}
-  .vivid-hero-content{padding:110px 24px 110px}
-  .vivid-hero-title{max-width:82vw}
   .vivid-feature-strip{padding-left:24px;padding-right:24px}
 }
 @media(max-width:640px){
-  .vivid-hero-media{
-    height:72svh;
-    min-height:540px;
-    max-height:none;
-  }
-  /* Mobile keeps the full backdrop visible instead of cropping the sides. */
-  .vivid-hero-fallback{
-    background-size:auto 100%;
-    background-position:center center;
-    background-repeat:no-repeat;
-    background-color:#090a0d;
-  }
-  .vivid-hero-media::after{
-    background:
-      linear-gradient(90deg,rgba(4,5,7,.9),rgba(4,5,7,.28) 72%,rgba(4,5,7,.38)),
-      linear-gradient(0deg,#06070a 0%,rgba(6,7,10,.2) 38%,rgba(0,0,0,.18) 100%);
-  }
-  .vivid-hero-content{
-    position:absolute;
-    inset:0;
-    width:100%;
-    height:100%;
-    padding:88px 16px 92px;
-    justify-content:flex-end;
-  }
-  .vivid-hero-title{
-    max-width:100%;
-    font-size:clamp(2.45rem,13vw,4rem);
-  }
-  .vivid-hero-copy{
-    max-width:100%;
-    -webkit-line-clamp:3;
-  }
-  .vivid-hero-tools{
-    right:16px;
-    bottom:16px;
-  }
-  .vivid-hero-control{
-    top:50%;
-    width:40px;
-    height:40px;
-  }
-  .vivid-hero-control.prev{left:12px}
-  .vivid-hero-control.next{right:12px}
   .vivid-feature-strip{
     padding:0 16px 18px;
   }
@@ -400,19 +240,8 @@ body.vivid-cinema-home{
   overscroll-behavior-x:none;
   -webkit-overflow-scrolling:touch;
 }
-.vivid-hero,
-.vivid-hero-media,
-.vivid-feature-strip,
-.vivid-section-wrap{
+.vivid-feature-strip, .vivid-section-wrap{
   max-width:100%;
-}
-.vivid-hero{
-  contain:layout paint;
-}
-.vivid-hero-video{
-  display:block;
-  pointer-events:none;
-  will-change:opacity;
 }
 .vivid-feature-track{
   overscroll-behavior-x:contain;
@@ -431,10 +260,6 @@ body.vivid-cinema-home{
   }
 }
 @media(max-width:640px){
-  .vivid-hero{
-    overflow:hidden;
-    contain:layout paint;
-  }
   .vivid-feature-strip{
     padding:12px 16px 20px;
     overflow:hidden;
@@ -467,38 +292,6 @@ body.vivid-cinema-home{
   .vivid-feature-track{transform:none!important}
 }
 
-.vivid-hero-video > iframe,
-.vivid-hero-youtube{
-  width:100%!important;
-  height:100%!important;
-  display:block;
-  border:0;
-}
-
-/* Ensure YouTube iframe fully covers the hero media frame. */
-.vivid-hero-video,
-.vivid-hero-video.is-ready{
-  position:absolute;
-  inset:0;
-  width:100%;
-  height:100%;
-  overflow:hidden;
-}
-.vivid-hero-video > iframe,
-.vivid-hero-youtube,
-.vivid-hero-youtube iframe{
-  position:absolute!important;
-  inset:0!important;
-  width:100%!important;
-  height:100%!important;
-  max-width:none!important;
-  border:0!important;
-  pointer-events:none;
-  object-fit:cover;
-  transform:scale(1.15);
-  transform-origin:center center;
-}
-
 
 /* Bottom catalogue index — streaming-service style A–Z browsing. */
 .vivid-alphabet{margin-top:20px;padding:34px 0 48px;border-top:1px solid rgba(255,255,255,.06)}
@@ -511,25 +304,9 @@ body.vivid-cinema-home{
 .vivid-alphabet-status{min-height:20px;margin:16px 2px 4px;color:#777e89;font-size:.76rem}
 .vivid-alphabet .vivid-rail{padding-top:14px}
 @media(max-width:640px){.vivid-alphabet{padding:28px 0 34px}.vivid-alphabet-list{gap:6px;margin-top:18px}.vivid-alphabet-list button{min-width:36px;height:36px;padding:0 8px}}
-
-/* Phase 5 — hero choreography. Preserve the existing iframe player architecture. */
-.vivid-cinema-home .vivid-hero-media{
-  --hero-progress:0;
-}
-.vivid-cinema-home .vivid-hero-media::before{
-  transition:opacity .7s ease,background-position .7s ease;
-}
-.vivid-cinema-home .vivid-hero-content{
-  transition:transform .18s linear,opacity .18s linear;
-  will-change:transform;
-}
-.vivid-cinema-home .vivid-hero-title,
-.vivid-cinema-home .vivid-hero-copy,
-.vivid-cinema-home .vivid-meta,
-.vivid-cinema-home .vivid-actions{
+.vivid-cinema-home .vivid-meta, .vivid-cinema-home .vivid-actions{
   animation:vividHeroContentIn .7s cubic-bezier(.2,.8,.2,1) both;
 }
-.vivid-cinema-home .vivid-hero-copy{animation-delay:70ms}
 .vivid-cinema-home .vivid-meta{animation-delay:35ms}
 .vivid-cinema-home .vivid-actions{animation-delay:120ms}
 @keyframes vividHeroContentIn{
@@ -547,18 +324,8 @@ body.vivid-cinema-home{
   border-color:rgba(255,255,255,.22);
   box-shadow:0 18px 50px rgba(0,0,0,.36);
 }
-@media(max-width:640px){
-  .vivid-cinema-home .vivid-hero-content{
-    transition:none;
-    will-change:auto;
-  }
-}
 @media(prefers-reduced-motion:reduce){
-  .vivid-cinema-home .vivid-hero-content,
-  .vivid-cinema-home .vivid-hero-title,
-  .vivid-cinema-home .vivid-hero-copy,
-  .vivid-cinema-home .vivid-meta,
-  .vivid-cinema-home .vivid-actions{animation:none;transition:none}
+  .vivid-cinema-home .vivid-meta, .vivid-cinema-home .vivid-actions{animation:none;transition:none}
   .vivid-cinema-home .vivid-feature-track{scroll-behavior:auto;scroll-snap-type:none}
 }
 
@@ -803,24 +570,6 @@ body.vivid-onboarding-active{overflow:hidden;background:#06070a!important}
     justify-self:start;
   }
 }
-
-
-/* Home hero density pass: give the first screen a calmer hierarchy on every viewport. */
-.vivid-hero-content{
-  padding-top:clamp(96px,14vh,145px);
-  padding-bottom:clamp(110px,14vh,145px);
-}
-.vivid-hero-title{
-  font-size:clamp(2.45rem,6.2vw,5.7rem);
-  max-width:760px;
-  margin-bottom:14px;
-}
-.vivid-hero-copy{
-  max-width:540px;
-  font-size:clamp(.9rem,1.15vw,1rem);
-  line-height:1.5;
-  -webkit-line-clamp:2;
-}
 .vivid-meta{
   margin:14px 0;
   gap:7px;
@@ -832,19 +581,9 @@ body.vivid-onboarding-active{overflow:hidden;background:#06070a!important}
   height:124px;
 }
 @media(max-width:900px){
-  .vivid-hero-media{height:64svh;min-height:500px}
-  .vivid-hero-content{padding:96px 24px 104px}
-  .vivid-hero-title{max-width:78vw}
   .vivid-feature-card{flex-basis:180px;height:102px}
 }
 @media(max-width:640px){
-  .vivid-hero-media{height:64svh;min-height:470px}
-  .vivid-hero-content{padding:82px 16px 74px}
-  .vivid-hero-title{
-    font-size:clamp(2.25rem,12vw,3.5rem);
-    margin-bottom:10px;
-  }
-  .vivid-hero-copy{font-size:.86rem;-webkit-line-clamp:2}
   .vivid-meta{margin:9px 0}
   .vivid-feature-strip{padding:8px 12px 14px}
   .vivid-feature-card{flex-basis:150px;height:86px}

@@ -16,21 +16,22 @@ test("canonical media layout keeps poster artwork inside its frames", () => {
   assert.match(css, /\.vivid-person-credit-poster img/);
 });
 
-test("home YouTube viewport is centered and constrained to a landscape frame", () => {
+test("retired home hero is absent while shared media layout remains for other surfaces", () => {
   const css = read("../styles/vivid-media-layout.css");
-  assert.match(css, /aspect-ratio:\s*16\s*\/\s*9\s*!important/);
-  assert.match(css, /width:\s*min\(100%,\s*177\.78svh\)/);
-  assert.match(css, /height:\s*min\(100%,\s*56\.25vw\)/);
-  assert.match(css, /translate\(-50%,\s*-50%\)/);
-  assert.match(css, /background-size:\s*contain\s*!important/);
-  assert.match(css, /height: 100svh !important/);
+  const home = read("../home.html");
+  const js = read("../script.js");
+  assert.match(css, /\.vivid-card-media/);
+  assert.match(css, /\.vivid-watch-page/);
+  assert.doesNotMatch(home, /class="vivid-hero"/);
+  assert.doesNotMatch(js, /loadHeroVideo|sendHeroPlayerCommand|youtubeUrl|hero-video/);
 });
 
-test("home trailer requests muted autoplay and preserves the user's sound choice", () => {
+test("featured cards load independently of the removed trailer player", () => {
   const js = read("../script.js");
-  assert.match(js, /autoplay:\s*"1",\s*mute:\s*"1"/);
-  assert.match(js, /iframe\.src=youtubeUrl\(trailer\.key\)/);
-  assert.match(js, /if\(!heroMuted\)sendHeroPlayerCommand\("unMute"\)/);
+  assert.match(js, /function renderFeatureStrip\(\)/);
+  assert.match(js, /async function initFeatureStrip\(\)/);
+  assert.match(js, /initFeatureStrip\(\);void loadHome\(\)/);
+  assert.doesNotMatch(js, /autoplay:\s*"1"|heroMuted|sendHeroPlayerCommand|loadHeroVideo/);
 });
 
 test("watch player is constrained for both inline and modal layouts", () => {

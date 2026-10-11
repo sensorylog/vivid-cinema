@@ -804,39 +804,6 @@ html[data-vivid-theme="light"] body.vivid-cinema-home .vivid-rating{
   }
 }
 
-/* =========================================================
-   HERO TRAILER — single source of truth (cover, no letterbox)
-   ========================================================= */
-.vivid-cinema-home .vivid-hero-media {
-  overflow: hidden !important;
-  isolation: isolate;
-}
-
-.vivid-cinema-home .vivid-hero-video {
-  position: absolute !important;
-  top: 50% !important;
-  left: 50% !important;
-  right: auto !important;
-  bottom: auto !important;
-  width: auto !important;
-  height: auto !important;
-  min-width: 100% !important;
-  min-height: 100% !important;
-  aspect-ratio: 16 / 9 !important;
-  max-width: none !important;
-  max-height: none !important;
-  border: 0 !important;
-  transform: translate(-50%, -50%) !important;
-  transform-origin: center center !important;
-  z-index: 1 !important;
-  pointer-events: none;
-}
-
-.vivid-cinema-home .vivid-hero-fallback {
-  background-size: cover !important;
-  background-position: center center !important;
-}
-
 
 /* Share Vivid Cinema — restrained desktop QR and compact mobile share action */
 .vivid-qr-share{display:flex;align-items:center;justify-content:center;gap:12px;padding:14px 0 10px;color:inherit}

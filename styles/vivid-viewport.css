@@ -14,16 +14,7 @@ body{
   overscroll-behavior-y:auto;
   scrollbar-gutter:stable;
 }
-body.vivid-cinema-home,
-.vivid-home,
-.vivid-hero,
-.vivid-hero-media,
-.vivid-feature-strip,
-.vivid-section-wrap,
-.vivid-rails,
-.vivid-nav,
-.vivid-rail-head,
-.vivid-rail-head > div:first-child{
+body.vivid-cinema-home, .vivid-home, .vivid-feature-strip, .vivid-section-wrap, .vivid-rails, .vivid-nav, .vivid-rail-head, .vivid-rail-head > div:first-child{
   min-width:0;
   max-width:100%;
   box-sizing:border-box;
