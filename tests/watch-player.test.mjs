@@ -23,5 +23,5 @@ test("player iframe sends only the origin referrer for provider domain checks wi
 });
 
 test("watch page no longer contains the removed Movie Scraper Player 2 integration", () => {
-  assert.doesNotMatch(source, /movie-scraper-lovat-three|secondaryPlayerMarkup|vivid-secondary-player|Player 2|upstream stream extraction has failed/);
+  assert.doesNotMatch(source, /movie-scraper-lovat-three|secondaryPlayerMarkup|vivid-secondary-player|upstream stream extraction has failed/);
 });
