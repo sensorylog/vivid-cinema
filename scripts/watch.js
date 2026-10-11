@@ -603,7 +603,14 @@ function renderShell(params) {
     serverMenu.setAttribute("aria-expanded", open ? "true" : "false");
     serverPanel.hidden = !open;
   };
-  mountPlaybackServerSettings(serverPanel, updateSourceLabel);
+  mountPlaybackServerSettings(serverPanel, () => {
+    if (activeSource.startsWith("custom:") && !sourceAvailable(activeSource)) {
+      activeSource = "vidapi";
+      const activeFrame = $("vidapi-player");
+      if (activeFrame) activeFrame.src = "";
+    }
+    updateSourceLabel();
+  });
   let playerHasOpened = false;
   const openPlayerWindow = () => {
     if (!overlay) return;
