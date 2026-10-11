@@ -1,0 +1,202 @@
+/* Vivid Cinema — restrained production cleanup for title and watch routes. */
+:root{
+  --vivid-clean-gutter:clamp(16px,4vw,48px);
+  --vivid-clean-line:rgba(255,255,255,.11);
+  --vivid-clean-muted:#aeb4bf;
+}
+body.vivid-title-page #title-content,
+body.vivid-watch-page #watch-content{min-width:0}
+body.vivid-title-page .vivid-title-info-inner{
+  width:min(1180px,100%);
+  margin-inline:auto;
+  grid-template-columns:clamp(112px,17vw,210px) minmax(0,1fr);
+  gap:clamp(20px,3.5vw,44px);
+  align-items:end;
+}
+body.vivid-title-page .vivid-title-copy{min-width:0;max-width:780px}
+body.vivid-title-page .vivid-title-copy h1{
+  max-width:18ch;
+  font-size:clamp(2rem,5vw,4.6rem);
+  line-height:1.02;
+  letter-spacing:-.045em;
+  overflow-wrap:anywhere;
+}
+body.vivid-title-page .vivid-title-meta{display:flex;flex-wrap:wrap;gap:8px 11px;line-height:1.5}
+body.vivid-title-page .vivid-title-genres{display:flex;flex-wrap:wrap;gap:7px;margin:14px 0}
+body.vivid-title-page .vivid-title-copy>p{
+  max-width:66ch;
+  margin:0 0 18px;
+  color:var(--title-muted,#b3b8c5);
+  font-size:clamp(.9rem,1.1vw,1rem);
+  line-height:1.7;
+  overflow-wrap:anywhere;
+}
+body.vivid-title-page .vivid-title-actions{display:flex;flex-wrap:wrap;gap:9px}
+body.vivid-title-page .vivid-title-actions .vivid-button{
+  min-height:42px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:7px;
+  white-space:normal;
+  line-height:1.3;
+}
+body.vivid-title-page .vivid-title-library-actions{
+  width:min(1180px,100%);
+  box-sizing:border-box;
+  margin:14px auto 0;
+  padding:0 var(--vivid-page-gutter,clamp(16px,4vw,48px));
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+}
+body.vivid-title-page .vivid-title-section{
+  width:min(1180px,100%);
+  box-sizing:border-box;
+  padding:36px var(--vivid-page-gutter,clamp(16px,4vw,48px)) 0;
+}
+body.vivid-title-page .vivid-section-heading{
+  gap:14px;
+  flex-wrap:wrap;
+  margin-bottom:16px;
+}
+body.vivid-title-page .vivid-section-heading h2{line-height:1.2;text-wrap:balance}
+body.vivid-title-page .vivid-title-information-grid,
+body.vivid-title-page .vivid-story-grid{min-width:0}
+body.vivid-title-page .vivid-title-information-row dd,
+body.vivid-title-page .vivid-title-language-row strong,
+body.vivid-title-page .vivid-fact strong,
+body.vivid-title-page .vivid-credit-panel strong{overflow-wrap:anywhere}
+body.vivid-title-page .vivid-cast-grid{grid-template-columns:repeat(auto-fit,minmax(105px,1fr));gap:12px}
+body.vivid-title-page .vivid-cast,
+body.vivid-title-page .vivid-similar-card,
+body.vivid-title-page .vivid-video-card{min-width:0}
+body.vivid-title-page .vivid-cast strong,
+body.vivid-title-page .vivid-cast small,
+body.vivid-title-page .vivid-similar-card span,
+body.vivid-title-page .vivid-video-card strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+body.vivid-title-page .vivid-provider-grid{grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:12px}
+body.vivid-title-page .vivid-provider-note{line-height:1.6}
+body.vivid-title-page .vivid-similar{gap:12px;padding-bottom:12px;overscroll-behavior-x:contain}
+body.vivid-title-page .vivid-title-error p{max-width:60ch;line-height:1.65}
+body.vivid-title-page :is(a,button,select):focus-visible,
+body.vivid-watch-page :is(a,button,select):focus-visible{outline-offset:3px}
+body.vivid-watch-page .vivid-watch-inline-heading{
+  width:min(1320px,100%);
+  box-sizing:border-box;
+  margin-inline:auto;
+  padding:22px var(--watch-gutter,clamp(16px,4vw,48px)) 14px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+}
+body.vivid-watch-page .vivid-watch-inline-heading>div{min-width:0}
+body.vivid-watch-page .vivid-watch-inline-heading h1{
+  margin:4px 0 0;
+  font-size:clamp(1.1rem,2.4vw,1.65rem);
+  line-height:1.2;
+  letter-spacing:-.025em;
+  overflow-wrap:anywhere;
+}
+body.vivid-watch-page .vivid-player-overlay.vivid-player-inline{
+  display:block;
+  padding:0;
+  overflow:visible;
+  background:transparent;
+  backdrop-filter:none;
+  -webkit-backdrop-filter:none;
+  animation:none;
+}
+body.vivid-watch-page .vivid-player-overlay.vivid-player-inline .vivid-player-dialog{
+  width:min(1320px,100%);
+  max-height:none;
+  margin-inline:auto;
+  overflow:visible;
+  border-radius:14px;
+}
+body.vivid-watch-page .vivid-player-overlay.vivid-player-inline .vivid-player-dialog-head{
+  position:relative;
+  z-index:4;
+  min-width:0;
+  overflow:visible;
+  flex-wrap:wrap;
+  padding:12px 14px;
+}
+body.vivid-watch-page .vivid-player-dialog-heading{min-width:0;flex:1 1 180px}
+body.vivid-watch-page .vivid-player-dialog-actions{flex:0 0 auto}
+body.vivid-watch-page .vivid-player-overlay.vivid-player-inline .vivid-player-frame{
+  position:relative;
+  width:100%;
+  aspect-ratio:16/9;
+  min-height:220px;
+  flex:none;
+}
+body.vivid-watch-page .vivid-player-overlay.vivid-player-inline .vivid-player-frame iframe,
+body.vivid-watch-page .vivid-player-overlay.vivid-player-inline .vivid-player-frame video{
+  width:100%;
+  height:100%;
+  min-height:220px;
+}
+body.vivid-watch-page .vivid-player-overlay.vivid-player-inline .vivid-player-dialog-foot{display:flex}
+body.vivid-watch-page .vivid-server-panel{
+  position:fixed;
+  z-index:10060;
+  width:min(340px,calc(100vw - 24px));
+  max-height:calc(100dvh - 24px);
+  overflow:auto;
+  box-sizing:border-box;
+  color-scheme:dark;
+  background:#15171d;
+  border:1px solid rgba(255,255,255,.17);
+  box-shadow:0 18px 50px rgba(0,0,0,.6);
+  overscroll-behavior:contain;
+  -webkit-overflow-scrolling:touch;
+}
+body.vivid-watch-page .vivid-server-panel[hidden]{display:none!important}
+body.vivid-watch-page .vivid-server-panel .vivid-player-source{min-width:0;line-height:1.35}
+body.vivid-watch-page .vivid-server-panel .vivid-player-source strong,
+body.vivid-watch-page .vivid-server-panel .vivid-player-source small{overflow-wrap:anywhere;white-space:normal}
+body.vivid-watch-page .flickv4-web-player{box-sizing:border-box}
+body.vivid-watch-page .flickv4-player-heading p,
+body.vivid-watch-page .flickv4-footnote{line-height:1.55}
+body.vivid-watch-page .flickv4-player-controls select{min-width:0;max-width:100%}
+body.vivid-watch-page .flickv4-player-frame iframe{position:absolute;inset:0}
+@media(max-width:700px){
+  body.vivid-title-page .vivid-title-info-inner{
+    grid-template-columns:clamp(88px,26vw,124px) minmax(0,1fr);
+    align-items:start;
+    gap:14px;
+  }
+  body.vivid-title-page .vivid-title-copy{padding-top:2px}
+  body.vivid-title-page .vivid-title-copy h1{font-size:clamp(1.75rem,7.4vw,2.7rem);line-height:1.04}
+  body.vivid-title-page .vivid-title-copy>p{font-size:.88rem;line-height:1.62}
+  body.vivid-title-page .vivid-title-actions .vivid-button{min-height:40px;padding-inline:12px;font-size:.78rem}
+  body.vivid-title-page .vivid-title-library-actions{margin-top:12px}
+  body.vivid-title-page .vivid-title-section{padding-top:30px}
+  body.vivid-title-page .vivid-cast-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}
+  body.vivid-title-page .vivid-title-information-header{align-items:flex-start;flex-wrap:wrap}
+  body.vivid-title-page .vivid-title-capabilities{display:flex;flex-wrap:wrap;gap:6px}
+  body.vivid-watch-page .vivid-watch-inline-heading{padding-top:18px}
+  body.vivid-watch-page .vivid-player-overlay.vivid-player-inline .vivid-player-dialog{border-radius:0}
+  body.vivid-watch-page .vivid-player-overlay.vivid-player-inline .vivid-player-dialog-head{padding:10px 12px}
+  body.vivid-watch-page .vivid-player-overlay.vivid-player-inline .vivid-player-frame,
+  body.vivid-watch-page .vivid-player-overlay.vivid-player-inline .vivid-player-frame iframe,
+  body.vivid-watch-page .vivid-player-overlay.vivid-player-inline .vivid-player-frame video{min-height:190px}
+  body.vivid-watch-page .flickv4-web-player{padding-top:18px}
+  body.vivid-watch-page .flickv4-player-controls{gap:8px}
+}
+@media(max-width:390px){
+  body.vivid-title-page .vivid-title-info-inner{grid-template-columns:84px minmax(0,1fr);gap:12px}
+  body.vivid-title-page .vivid-title-copy h1{font-size:1.7rem}
+  body.vivid-title-page .vivid-title-meta{gap:5px 7px;font-size:10px}
+  body.vivid-title-page .vivid-title-genres{gap:5px;margin:10px 0}
+  body.vivid-title-page .vivid-title-genres a{padding:5px 7px;font-size:10px}
+  body.vivid-title-page .vivid-title-actions{gap:7px}
+  body.vivid-title-page .vivid-title-actions .vivid-button{padding-inline:9px;font-size:.72rem}
+  body.vivid-watch-page .vivid-player-dialog-heading{flex-basis:140px}
+}
+@media(prefers-reduced-motion:reduce){
+  body.vivid-title-page *,
+  body.vivid-watch-page *{scroll-behavior:auto!important;transition-duration:0s!important}
+}
