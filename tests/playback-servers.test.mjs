@@ -40,7 +40,7 @@ test("rejects insecure base URLs and URL patterns that leave the configured orig
     name: "Cross origin",
     url: "https://media.example",
     movieUrlPattern: "https://elsewhere.example/{url}/movie/{tmdbId}"
-  }), /same HTTPS origin/);
+  }), /configured HTTPS server/);
 });
 
 test("supports explicit patterns and safe slug placeholders", () => {
