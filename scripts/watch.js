@@ -528,7 +528,7 @@ function renderShell(params) {
     secondaryPlayerQuery.set("e", String(params.episode || 1));
   }
   const secondaryPlayerUrl = "https://movie-scraper-lovat-three.vercel.app/?" + secondaryPlayerQuery.toString();
-  const secondaryPlayerMarkup = !isAnimePlayback() && /^\\d+$/.test(String(media.id || ""))
+  const secondaryPlayerMarkup = !isAnimePlayback() && /^\d+$/.test(String(media.id || ""))
     ? '<section class="vivid-secondary-player" aria-labelledby="vivid-secondary-player-title"><div class="vivid-secondary-player-heading"><div><span>ALTERNATIVE PLAYBACK</span><h2 id="vivid-secondary-player-title">Player 2 · Movie Scraper</h2><p>If the first player does not work, try this independent player below.</p></div><span class="vivid-secondary-player-badge">SECOND PLAYER</span></div><div class="vivid-secondary-player-frame"><iframe title="' + escapeHtml((episodeTitle || title) + " alternative player") + '" src="' + escapeHtml(secondaryPlayerUrl) + '" loading="lazy" allow="autoplay; fullscreen; picture-in-picture; encrypted-media" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe></div><p class="vivid-secondary-player-note">Playback and availability are provided by the separate Movie Scraper service.</p></section>'
     : "";
 
