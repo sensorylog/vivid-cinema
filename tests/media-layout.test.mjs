@@ -11,6 +11,9 @@ test("canonical media layout keeps poster artwork inside its frames", () => {
   assert.match(css, /transform:\s*none\s*!important/);
   assert.match(css, /\.vivid-watch-artwork/);
   assert.match(css, /\.vivid-card-media/);
+  assert.match(css, /\.vivid-anime-poster img/);
+  assert.match(css, /\.vivid-similar-card img/);
+  assert.match(css, /\.vivid-person-credit-poster img/);
 });
 
 test("home YouTube viewport is centered and constrained to a landscape frame", () => {
