@@ -528,7 +528,17 @@ function renderShell(params) {
       '<div class="vivid-watch-head"><div class="vivid-watch-artwork"><img src="' + getImageUrl(media.poster_path, "w342") + '" alt="' + escapeHtml(title) + ' poster" loading="eager" decoding="async"></div><div class="vivid-watch-copy"><span id="watch-kicker" class="vivid-watch-kicker">' + (isAnimePlayback() ? (isTv ? "ANIME · SEASON " + params.season + " · EPISODE " + params.episode : "ANIME FILM") : isTv ? "TV · SEASON " + params.season + " · EPISODE " + params.episode : "MOVIE") + '</span>' +
         '<h1 id="watch-title">' + escapeHtml(episodeTitle || title) + '</h1><p id="watch-overview">' + escapeHtml(isTv && details?.episode?.overview ? details.episode.overview : media.overview || "") + '</p>' +
       '</div><div class="vivid-watch-actions"><button type="button" id="watch-open-player" class="vivid-watch-play" aria-label="Play ' + escapeHtml(episodeTitle || title) + '"><i class="bi bi-play-fill" aria-hidden="true"></i><span>Play</span></button><a class="vivid-watch-details" href="' + escapeHtml(buildTitleUrl(media.id, media.media_type)) + '"><i class="bi bi-info-circle" aria-hidden="true"></i><span>Details</span></a></div></div></section>' +
-    '<div id="player-overlay" class="vivid-player-overlay vivid-player-inline" role="presentation"><section class="vivid-player-dialog" role="dialog" aria-modal="true" aria-labelledby="player-dialog-title"><header class="vivid-player-dialog-head"><div class="vivid-player-dialog-heading"><span class="vivid-player-live-dot" aria-hidden="true"></span><div><span class="vivid-player-dialog-eyebrow">VIVID CINEMA · NOW PLAYING</span><h2 id="player-dialog-title">' + escapeHtml(episodeTitle || title) + '</h2><span id="player-source-label" class="vivid-player-current-source">Connecting to a server…</span></div></div><div class="vivid-player-dialog-actions"><div class="vivid-server-picker"><button type="button" id="player-server-menu" class="vivid-player-switch vivid-server-menu" aria-expanded="false" aria-controls="player-server-panel"><i class="bi bi-hdd-network" aria-hidden="true"></i> Servers <i class="bi bi-chevron-down" aria-hidden="true"></i></button><div id="player-server-panel" class="vivid-server-panel" hidden><div class="vivid-server-panel-heading"><strong>Available servers</strong><span>Tap to switch</span></div><button type="button" class="vivid-player-source" data-player-source="vidapi" aria-pressed="true"><span class="vivid-server-dot"></span><span><strong>VidAPI</strong><small>Primary server · may require domain approval</small></span><span class="vivid-server-state" data-server-state="vidapi">Ready</span></button><button type="button" class="vivid-player-source" data-player-source="vidsrc" aria-pressed="false"><span class="vivid-server-dot"></span><span><strong>VidSrc</strong><small>Alternate server</small></span><span class="vivid-server-state" data-server-state="vidsrc">Available</span></button><button type="button" class="vivid-player-source" data-player-source="vidlink" aria-pressed="false"><span class="vivid-server-dot"></span><span><strong>VidLink</strong><small>Alternate server</small></span><span class="vivid-server-state" data-server-state="vidlink">Available</span></button><button type="button" class="vivid-player-source" data-player-source="vidplus" aria-pressed="false"><span class="vivid-server-dot"></span><span><strong>VidPlus</strong><small>Experimental · manual selection</small></span><span class="vivid-server-state" data-server-state="vidplus">Available</span></button><button type="button" class="vivid-player-source" data-player-source="vidking" aria-pressed="false"><span class="vivid-server-dot"></span><span><strong>VidKing</strong><small>Extra source · resume seeking may be unavailable</small></span><span class="vivid-server-state" data-server-state="vidking">Available</span></button><button type="button" class="vivid-player-source" data-player-source="direct" aria-pressed="false" hidden><span class="vivid-server-dot"></span><span><strong>Direct stream</strong><small>Authorized HLS/DASH · adaptive quality</small></span><span class="vivid-server-state" data-server-state="direct">Unavailable</span></button><p>Direct streams require an authorized provider integration. Third-party servers vary in availability, ads, and playback support.</p></div></div><button type="button" id="player-close" class="vivid-player-close" aria-label="Close player"><i class="bi bi-x-lg" aria-hidden="true"></i></button></div></header><div class="vivid-player-frame"><div id="player-status" class="vivid-player-status" role="status" aria-live="polite">' + (resumeAt > 5 ? "Resuming where you left off…" : "Preparing playback…") + '</div><button type="button" id="player-try-next" class="vivid-player-try-next" hidden>Try next server</button><iframe id="vidapi-player" title="' + escapeHtml(title) + ' player" allow="autoplay; fullscreen; picture-in-picture; encrypted-media; clipboard-write" allowfullscreen referrerpolicy="origin" loading="eager"></iframe><video id="vivid-direct-player" title="' + escapeHtml(title) + ' direct stream player" controls playsinline preload="metadata" hidden></video></div><footer class="vivid-player-dialog-foot"><span><i class="bi bi-keyboard" aria-hidden="true"></i> Press Esc to close</span><a href="' + escapeHtml(buildTitleUrl(media.id, media.media_type)) + '">Title details</a></footer></section></div>' +
+    '<div id="player-overlay" class="vivid-player-overlay vivid-player-inline" role="presentation"><section class="vivid-player-dialog" role="region" aria-labelledby="player-dialog-title">' +
+      '<header class="vivid-player-dialog-head"><div class="vivid-player-dialog-heading"><span class="vivid-player-live-dot" aria-hidden="true"></span><div><span class="vivid-player-dialog-eyebrow">VIVID CINEMA · NOW PLAYING</span><h2 id="player-dialog-title">' + escapeHtml(episodeTitle || title) + '</h2><span id="player-source-label" class="vivid-player-current-source">Connecting to a server…</span></div></div><div class="vivid-player-dialog-actions"><button type="button" id="player-server-menu" class="vivid-player-switch vivid-server-menu" aria-controls="player-server-panel"><i class="bi bi-hdd-network" aria-hidden="true"></i> Servers <i class="bi bi-arrow-down" aria-hidden="true"></i></button><button type="button" id="player-close" class="vivid-player-close" aria-label="Close player"><i class="bi bi-x-lg" aria-hidden="true"></i></button></div></header>' +
+      '<div class="vivid-player-layout"><div class="vivid-player-main"><div class="vivid-player-frame"><div id="player-status" class="vivid-player-status" role="status" aria-live="polite">' + (resumeAt > 5 ? "Resuming where you left off…" : "Preparing playback…") + '</div><button type="button" id="player-try-next" class="vivid-player-try-next" hidden>Try next server</button><iframe id="vidapi-player" title="' + escapeHtml(title) + ' player" allow="autoplay; fullscreen; picture-in-picture; encrypted-media; clipboard-write" allowfullscreen referrerpolicy="origin" loading="eager"></iframe><video id="vivid-direct-player" title="' + escapeHtml(title) + ' direct stream player" controls playsinline preload="metadata" hidden></video></div><footer class="vivid-player-dialog-foot"><span><i class="bi bi-keyboard" aria-hidden="true"></i> Press Esc to close</span><a href="' + escapeHtml(buildTitleUrl(media.id, media.media_type)) + '">Title details</a></footer></div>' +
+      '<aside id="player-server-panel" class="vivid-server-panel" aria-label="Vivid Cinema playback servers"><div class="vivid-server-panel-heading"><div><strong>Playback servers</strong><span>Choose a source</span></div><span class="vivid-server-count">5+ sources</span></div>' +
+      '<button type="button" class="vivid-player-source" data-player-source="vidapi" aria-pressed="true"><span class="vivid-server-dot"></span><span><strong>VidAPI</strong><small>Primary server · may require domain approval</small></span><span class="vivid-server-state" data-server-state="vidapi">Ready</span></button>' +
+      '<button type="button" class="vivid-player-source" data-player-source="vidsrc" aria-pressed="false"><span class="vivid-server-dot"></span><span><strong>VidSrc</strong><small>Alternate streaming source</small></span><span class="vivid-server-state" data-server-state="vidsrc">Available</span></button>' +
+      '<button type="button" class="vivid-player-source" data-player-source="vidlink" aria-pressed="false"><span class="vivid-server-dot"></span><span><strong>VidLink</strong><small>Alternate streaming source</small></span><span class="vivid-server-state" data-server-state="vidlink">Available</span></button>' +
+      '<button type="button" class="vivid-player-source" data-player-source="vidplus" aria-pressed="false"><span class="vivid-server-dot"></span><span><strong>VidPlus</strong><small>Additional source · support varies</small></span><span class="vivid-server-state" data-server-state="vidplus">Available</span></button>' +
+      '<button type="button" class="vivid-player-source" data-player-source="vidking" aria-pressed="false"><span class="vivid-server-dot"></span><span><strong>VidKing</strong><small>Extra source · resume seeking may vary</small></span><span class="vivid-server-state" data-server-state="vidking">Available</span></button>' +
+      '<button type="button" class="vivid-player-source" data-player-source="direct" aria-pressed="false" hidden><span class="vivid-server-dot"></span><span><strong>Direct stream</strong><small>Authorized HLS/DASH · adaptive quality</small></span><span class="vivid-server-state" data-server-state="direct">Unavailable</span></button>' +
+      '<p>Choose another source if playback does not start. Direct streams appear only when an authorized integration is available.</p></aside></div></section></div>' +
     '<section id="vivid-tflix-player" class="vivid-tflix-player" aria-label="Additional streaming player"></section>' +
     '<section class="vivid-watch-recommendations"><div class="vivid-section-heading"><div><span>MORE TO DISCOVER</span><h2>You might also like</h2></div></div><div id="watch-recommendations" class="vivid-watch-rec-rail">' + recommendationCards() + '</div></section>';
 
@@ -544,37 +554,9 @@ function renderShell(params) {
   const closePlayer = $("player-close");
   const serverMenu = $("player-server-menu");
   const serverPanel = $("player-server-panel");
-  const serverPanelHome = serverPanel?.parentNode || null;
-  const serverPanelAnchor = serverPanel?.nextSibling || null;
-  const setServerMenuOpen = open => {
-    if (!serverMenu || !serverPanel) return;
-    serverMenu.setAttribute("aria-expanded", open ? "true" : "false");
-    if (open) {
-      if (serverPanel.parentNode !== document.body) document.body.appendChild(serverPanel);
-      serverPanel.hidden = false;
-      const trigger = serverMenu.getBoundingClientRect();
-      const panelWidth = Math.min(340, Math.max(240, window.innerWidth - 24));
-      const panelHeight = Math.min(Math.max(serverPanel.scrollHeight, 180), Math.max(180, window.innerHeight - 24));
-      const below = trigger.bottom + 8;
-      const top = below + panelHeight <= window.innerHeight - 12
-        ? below
-        : Math.max(12, trigger.top - panelHeight - 8);
-      const left = Math.max(12, Math.min(trigger.right - panelWidth, window.innerWidth - panelWidth - 12));
-      Object.assign(serverPanel.style, {
-        position: "fixed", top: top + "px", left: left + "px",
-        right: "auto", bottom: "auto", width: panelWidth + "px",
-        maxWidth: "calc(100vw - 24px)",
-        maxHeight: Math.max(180, window.innerHeight - 24) + "px",
-        overflowY: "auto", zIndex: "10060"
-      });
-    } else {
-      serverPanel.hidden = true;
-      if (serverPanelHome && serverPanel.parentNode !== serverPanelHome) {
-        const anchor = serverPanelAnchor?.parentNode === serverPanelHome ? serverPanelAnchor : null;
-        serverPanelHome.insertBefore(serverPanel, anchor);
-      }
-      serverPanel.removeAttribute("style");
-    }
+  const focusServerMenu = () => {
+    serverPanel?.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "nearest" });
+    serverPanel?.querySelector("[data-player-source].is-active:not([hidden]):not(:disabled), [data-player-source]:not([hidden]):not(:disabled)")?.focus({ preventScroll: true });
   };
   mountPlaybackServerSettings(serverPanel, () => {
     if (activeSource.startsWith("custom:") && !sourceAvailable(activeSource)) {
@@ -613,7 +595,6 @@ function renderShell(params) {
     overlay.hidden = true;
     if (!overlay.classList.contains("vivid-player-inline")) document.body.classList.remove("vivid-player-open");
     if (openPlayer) openPlayer.setAttribute("aria-expanded", "false");
-    setServerMenuOpen(false);
     directLoadGeneration += 1;
     stopDirectStream(directPlayer);
     if (directPlayer) directPlayer.hidden = true;
@@ -635,22 +616,10 @@ function renderShell(params) {
   overlay?.addEventListener("click", event => {
     if (event.target === overlay) closePlayerWindow();
   });
-  serverMenu?.addEventListener("click", () => setServerMenuOpen(serverMenu.getAttribute("aria-expanded") !== "true"));
-  document.addEventListener("pointerdown", event => {
-    if (serverPanel && !serverPanel.hidden && !serverPanel.contains(event.target) && !serverMenu?.contains(event.target)) {
-      setServerMenuOpen(false);
-    }
-  });
-  window.addEventListener("resize", () => {
-    if (serverPanel && !serverPanel.hidden) setServerMenuOpen(false);
-  });
-  window.addEventListener("scroll", () => {
-    if (serverPanel && !serverPanel.hidden) setServerMenuOpen(false);
-  }, true);
+  serverMenu?.addEventListener("click", focusServerMenu);
   document.addEventListener("keydown", event => {
     if (event.key === "Escape" && overlay && !overlay.hidden) {
-      if (serverPanel && !serverPanel.hidden) setServerMenuOpen(false);
-      else closePlayerWindow();
+      closePlayerWindow();
     }
   });
   if (directPlayer) {
@@ -728,7 +697,6 @@ function renderShell(params) {
       const source = button.getAttribute("data-player-source");
       if ((!["vidapi", "vidsrc", "vidlink", "vidplus", "vidking", "direct"].includes(source) && !(source?.startsWith("custom:"))) || !sourceAvailable(source)) return;
       sourceAttempted.clear();
-      setServerMenuOpen(false);
       const latestProgress = Number(getPlaybackProgress(progressKey())?.progress || route.params.get("startAt") || resumeAt || 0);
       setPlayerSource(source, params, latestProgress);
     });
