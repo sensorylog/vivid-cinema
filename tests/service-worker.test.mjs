@@ -38,5 +38,5 @@ test("MediaForge launcher assets are included in the offline shell", () => {
   assert.match(source, /"\.\/mediaforge\.html"/);
   assert.match(source, /"\.\/styles\/vivid-mediaforge\.css"/);
   assert.match(source, /"\.\/scripts\/mediaforge\.js"/);
-  assert.match(source, /vivid-cinema-shell-v141/);
+  assert.match(source, /vivid-cinema-shell-v142/);
 });
