@@ -1200,3 +1200,116 @@ body.vivid-atmosphere .vivid-unified-header .vivid-nav-search,
 body.vivid-atmosphere .vivid-unified-header .vivid-navlinks > a[href="search.html"] {
   display: none !important;
 }
+
+
+/* ==========================================================================
+   SITE-WIDE BREATHING ROOM — compact shared shell and calmer page density.
+   Preserve the existing page layouts, routes, player, and mobile touch targets.
+   ========================================================================== */
+:root {
+  --vivid-content-width: 1360px;
+  --vivid-page-gutter: clamp(14px, 2.35vw, 36px);
+  --vivid-section-gap: clamp(2rem, 4.2vw, 3.75rem);
+  --vivid-grid-gap: clamp(.65rem, 1vw, 1rem);
+}
+
+/* The oversized two-row glass header was making every desktop page feel zoomed in. */
+@media (min-width: 901px) {
+  .vivid-topbar {
+    padding-block: 3px !important;
+  }
+  .vivid-topbar .vivid-nav {
+    min-height: 56px !important;
+    grid-template-columns: auto minmax(0, 1fr) auto auto !important;
+    grid-template-rows: 56px !important;
+    gap: 0 14px !important;
+  }
+  .vivid-topbar .vivid-brand {
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+    align-self: center !important;
+  }
+  .vivid-topbar .vivid-navlinks {
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    justify-self: center !important;
+    align-self: center !important;
+    width: max-content !important;
+    max-width: 100% !important;
+    gap: 2px !important;
+    padding: 3px !important;
+    border-radius: 999px !important;
+  }
+  .vivid-topbar .vivid-navlinks a {
+    min-height: 36px !important;
+    padding: 8px 11px !important;
+    border-radius: 999px !important;
+    font-size: .76rem !important;
+  }
+  .vivid-topbar .vivid-nav-account {
+    grid-column: 3 !important;
+    grid-row: 1 !important;
+    justify-self: end !important;
+    min-height: 38px !important;
+    height: 38px !important;
+  }
+  .vivid-topbar .vivid-nav-language-slot {
+    grid-column: 4 !important;
+    grid-row: 1 !important;
+    align-self: center !important;
+  }
+}
+
+/* Keep all common content edges aligned and avoid oversized reading surfaces. */
+.vivid-shell,
+.vivid-section-wrap,
+.vivid-discovery-main,
+.vivid-collection-main {
+  box-sizing: border-box;
+}
+.vivid-rail-head {
+  gap: 12px;
+}
+.vivid-rail-head h2,
+.vivid-section-heading h2 {
+  text-wrap: balance;
+}
+.vivid-rail-head p {
+  line-height: 1.5;
+}
+.vivid-button,
+.vivid-icon-button,
+.vivid-page-back {
+  -webkit-tap-highlight-color: transparent;
+}
+@media (max-width: 900px) {
+  :root {
+    --vivid-page-gutter: 16px;
+    --vivid-section-gap: 2.25rem;
+    --vivid-grid-gap: .75rem;
+  }
+}
+@media (max-width: 640px) {
+  :root {
+    --vivid-page-gutter: 14px;
+    --vivid-section-gap: 1.9rem;
+    --vivid-grid-gap: .65rem;
+  }
+  .vivid-topbar {
+    padding-inline: max(12px, var(--vivid-safe-left, 0px)) !important;
+    padding-right: max(12px, var(--vivid-safe-right, 0px)) !important;
+  }
+  .vivid-topbar .vivid-nav {
+    min-height: 50px !important;
+  }
+  .vivid-mobile-nav {
+    max-width: calc(100vw - 20px - var(--vivid-safe-left, 0px) - var(--vivid-safe-right, 0px));
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .vivid-topbar *,
+  .vivid-mobile-nav * {
+    scroll-behavior: auto !important;
+    transition-duration: 0s !important;
+  }
+}
