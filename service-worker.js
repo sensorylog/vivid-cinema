@@ -58,4 +58,4 @@ function safeNotificationUrl(value){
  try{const url=new URL(value||"./home.html",self.location.origin);return url.origin===self.location.origin?url.href:new URL("./home.html",self.location.origin).href;}
  catch{return new URL("./home.html",self.location.origin).href;}
 }
-self.addEventListener("notificationclick",event=>{event.notification.close();const target=safeNotificationUrl(event.notification.data?.url);event.waitUntil(clients.matchAll({type:"window",includeUncontrolled:true}).then(list=>{const existing=list.find(client=>client.url.startsWith(self.location.origin));if(existing){existing.navigate(target);return existing.focus();}return clients.openWindow(target);}));});
+self.addEventListener("notificationclick",event=>{event.notification.close();const target=safeNotificationUrl(event.notification.data?.url);event.waitUntil(clients.matchAll({type:"window",includeUncontrolled:true}).then(list=>{const existing=list.find(client=>{try{return new URL(client.url).origin===self.location.origin;}catch{return false;}});if(existing){existing.navigate(target);return existing.focus();}return clients.openWindow(target);}));});
