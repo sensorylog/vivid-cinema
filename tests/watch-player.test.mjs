@@ -28,7 +28,7 @@ test("Player 2 uses Movie Scraper directly and preserves movie/TV identifiers", 
   assert.match(source, /secondaryPlayerQuery\.set\("s", String\(params\.season \|\| 1\)\)/);
   assert.match(source, /secondaryPlayerQuery\.set\("e", String\(params\.episode \|\| 1\)\)/);
   assert.match(source, /Open Player 2 directly/);
-  assert.doesNotMatch(source, /vidlink\.pro\/|secondaryPlayerFallbackUrl/);
+  assert.doesNotMatch(source, /secondaryPlayerFallbackUrl|vivid-secondary-player-fallback/);
 });
 
 test("Player 2 identifies upstream extraction errors without silently switching to a Vivid server", () => {
