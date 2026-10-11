@@ -30,6 +30,12 @@ export function validateAllowedHttpsUrl(value, hosts) {
   return url;
 }
 
+export function createAllowlistedFetchRequest(value, initParams, hosts) {
+  const url = validateAllowedHttpsUrl(value, hosts);
+  if (!url) throw new Error("HLS resource host is not allowlisted.");
+  return new Request(url.href, { ...(initParams || {}), redirect: "error" });
+}
+
 export function inferAuthorizedStreamType(url, declaredType) {
   const type = String(declaredType || "").toLowerCase();
   if (["hls", "dash", "file"].includes(type)) return type;
