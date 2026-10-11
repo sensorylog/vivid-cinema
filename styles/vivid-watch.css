@@ -1,294 +1,106 @@
-/* Vivid Cinema watch experience — one consolidated, responsive stylesheet. */
-:root {
-  --watch-canvas: #08090c;
-  --watch-panel: #111318;
-  --watch-muted: #a8adb7;
-  --watch-subtle: #777f8c;
-  --watch-line: rgba(255,255,255,.12);
-  --watch-gutter: var(--vivid-page-gutter, clamp(18px, 4.2vw, 64px));
+/* Vivid Cinema watch page: consolidated cinematic system. */
+:root{--watch-canvas:#08090c;--watch-panel:#111318;--watch-muted:#a8adb7;--watch-subtle:#777f8c;--watch-line:rgba(255,255,255,.12);--watch-gutter:var(--vivid-page-gutter,clamp(18px,4.2vw,64px))}
+body.vivid-watch-page{background:var(--watch-canvas);color:#f5f5f7}
+body.vivid-watch-page.vivid-player-open{overflow:hidden;overscroll-behavior:none}
+.vivid-watch-app{min-height:100dvh}
+.vivid-watch-hero{position:relative;isolation:isolate;min-height:320px;overflow:hidden}
+.vivid-watch-backdrop{position:absolute;z-index:-1;inset:0;background-image:linear-gradient(90deg,rgba(8,9,12,.96),rgba(8,9,12,.72) 44%,rgba(8,9,12,.42) 74%,rgba(8,9,12,.7)),linear-gradient(0deg,var(--watch-canvas),rgba(8,9,12,.15) 65%),var(--watch-backdrop);background-size:cover;background-position:center 35%;background-color:#101217;transform:scale(1.015)}
+.vivid-watch-head{width:min(1320px,100%);min-height:320px;margin:auto;padding:clamp(38px,5vw,68px) var(--watch-gutter) 28px;display:grid;grid-template-columns:124px minmax(0,1fr) auto;align-items:end;gap:clamp(18px,2.5vw,34px)}
+.vivid-watch-artwork{width:124px;min-width:0}
+.vivid-watch-artwork img{display:block;width:100%;height:auto;aspect-ratio:2/3;object-fit:cover;border-radius:12px;border:1px solid rgba(255,255,255,.18);background:var(--watch-panel);box-shadow:0 16px 44px rgba(0,0,0,.38)}
+.vivid-watch-copy{min-width:0;padding-bottom:2px}
+.vivid-watch-kicker{display:block;color:rgba(245,245,247,.72);font-size:.68rem;font-weight:650;letter-spacing:.16em;line-height:1.5;text-transform:uppercase}
+.vivid-watch-head h1{max-width:800px;margin:9px 0 10px;color:#fff;font-size:clamp(2rem,4.2vw,4.25rem);font-weight:720;letter-spacing:-.055em;line-height:.99;text-wrap:balance}
+.vivid-watch-head p{max-width:720px;margin:0;color:rgba(235,237,242,.78);font-size:.92rem;line-height:1.65;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden}
+.vivid-watch-actions{display:flex;align-items:center;gap:10px;padding-bottom:2px}
+.vivid-watch-play,.vivid-watch-details{min-height:46px;display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:0 21px;border-radius:999px;text-decoration:none;font:inherit;font-size:.88rem;font-weight:680;white-space:nowrap;transition:transform .16s ease,background .16s ease,border-color .16s ease}
+.vivid-watch-play{border:1px solid #fff;background:#fff;color:#090a0d;cursor:pointer}
+.vivid-watch-play i{font-size:1.2rem}
+.vivid-watch-play:hover{background:#e9e9ed;transform:translateY(-1px)}
+.vivid-watch-details{border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.08);color:#f5f5f7;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+.vivid-watch-details:hover{background:rgba(255,255,255,.15);border-color:rgba(255,255,255,.35)}
+.vivid-watch-play:focus-visible,.vivid-watch-details:focus-visible,.vivid-player-close:focus-visible,.vivid-player-switch:focus-visible,.vivid-player-source:focus-visible,.vivid-player-try-next:focus-visible,.vivid-watch-rec-card:focus-visible{outline:2px solid #fff;outline-offset:4px}
+.vivid-watch-recommendations{width:min(1320px,100%);margin:auto;padding:34px var(--watch-gutter) calc(58px + env(safe-area-inset-bottom))}
+.vivid-watch-recommendations .vivid-section-heading{display:flex;align-items:end;justify-content:space-between;margin-bottom:16px}
+.vivid-watch-recommendations .vivid-section-heading>div>span{display:block;margin-bottom:5px;color:var(--watch-muted);font-size:.65rem;font-weight:650;letter-spacing:.15em}
+.vivid-watch-recommendations h2{margin:0;color:#f5f5f7;font-size:clamp(1.3rem,2.2vw,1.75rem);font-weight:680;letter-spacing:-.035em}
+.vivid-watch-rec-rail{display:flex;gap:14px;overflow-x:auto;padding:3px 2px 14px;scrollbar-width:none;overscroll-behavior-x:contain;scroll-snap-type:x proximity}
+.vivid-watch-rec-rail::-webkit-scrollbar{display:none}
+.vivid-watch-rec-card{display:block;flex:0 0 156px;min-width:0;color:#f5f5f7;text-decoration:none;scroll-snap-align:start}
+.vivid-watch-rec-card img{display:block;width:100%;aspect-ratio:2/3;object-fit:cover;border:1px solid rgba(255,255,255,.08);border-radius:10px;background:var(--watch-panel);transition:transform .2s ease,border-color .2s ease}
+.vivid-watch-rec-card strong,.vivid-watch-rec-card small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.vivid-watch-rec-card strong{margin-top:9px;font-size:.82rem;font-weight:620}
+.vivid-watch-rec-card small{margin-top:4px;color:var(--watch-subtle);font-size:.74rem}
+.vivid-watch-rec-card:hover img{transform:translateY(-3px);border-color:rgba(255,255,255,.25)}
+.vivid-watch-note{width:min(1320px,100%);margin:18px auto 0;padding:14px var(--watch-gutter);display:flex;align-items:start;gap:12px;color:var(--watch-muted)}
+.vivid-watch-note div{display:grid;gap:4px}.vivid-watch-note strong{color:#f5f5f7;font-size:.84rem}.vivid-watch-note span{font-size:.78rem;line-height:1.5}
+.vivid-watch-error{width:min(680px,100%);margin:64px auto;padding:32px 20px;text-align:center}
+.vivid-watch-error>i{font-size:2rem}.vivid-watch-error h1{margin:14px 0 8px;font-size:1.8rem;letter-spacing:-.035em}.vivid-watch-error p{margin:0 0 20px;color:var(--watch-muted);line-height:1.6}
+.vivid-watch-loading{width:min(1320px,100%);margin:auto;padding:34px var(--watch-gutter)}
+.vivid-watch-loading div{height:min(54vw,520px);min-height:230px;border-radius:16px;background:linear-gradient(100deg,rgba(255,255,255,.035) 20%,rgba(255,255,255,.08) 45%,rgba(255,255,255,.035) 70%);background-size:220% 100%;animation:vivid-watch-shimmer 1.6s ease-in-out infinite}
+@keyframes vivid-watch-shimmer{to{background-position-x:-220%}}
+/* Player window */
+.vivid-player-overlay[hidden],.vivid-server-panel[hidden],.vivid-player-status[hidden],.vivid-player-try-next[hidden],.vivid-player-frame iframe[hidden],.vivid-player-frame video[hidden]{display:none!important}
+.vivid-player-overlay{position:fixed;z-index:3000;inset:0;display:grid;place-items:center;padding:clamp(12px,2.5vw,30px);overflow:auto;background:rgba(3,4,7,.88);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);animation:vivid-watch-fade-in .16s ease-out}
+@keyframes vivid-watch-fade-in{from{opacity:0}to{opacity:1}}
+.vivid-player-dialog{position:relative;display:flex;flex-direction:column;width:min(1320px,100%);max-height:calc(100dvh - 2 * clamp(12px,2.5vw,30px));border:1px solid rgba(255,255,255,.14);border-radius:16px;background:#08090c;box-shadow:0 32px 110px rgba(0,0,0,.68)}
+.vivid-player-dialog-head{position:relative;z-index:4;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 18px}
+.vivid-player-dialog-heading{display:flex;align-items:center;gap:12px;min-width:0}
+.vivid-player-live-dot{flex:0 0 auto;width:7px;height:7px;border-radius:50%;background:#a7adb8;box-shadow:0 0 0 4px rgba(255,255,255,.07)}
+.vivid-player-dialog-heading>div{min-width:0}
+.vivid-player-dialog-eyebrow{display:block;color:var(--watch-muted);font-size:.6rem;font-weight:650;letter-spacing:.13em}
+.vivid-player-dialog-head h2{overflow:hidden;margin:3px 0 2px;color:#fff;font-size:.98rem;font-weight:650;letter-spacing:-.02em;text-overflow:ellipsis;white-space:nowrap}
+.vivid-player-current-source{display:block;color:var(--watch-muted);font-size:.72rem}
+.vivid-player-dialog-actions{display:flex;align-items:center;gap:8px}
+.vivid-player-close,.vivid-player-switch{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:38px;border:1px solid var(--watch-line);border-radius:999px;background:rgba(255,255,255,.055);color:#f5f5f7;cursor:pointer;font:inherit;font-size:.78rem;font-weight:560}
+.vivid-player-close{width:38px;padding:0;font-size:.86rem}.vivid-player-close:hover,.vivid-player-switch:hover{background:rgba(255,255,255,.13)}
+.vivid-server-picker{position:relative}.vivid-server-menu{padding:0 13px}.vivid-server-menu[aria-expanded="true"]{background:rgba(255,255,255,.14)}
+.vivid-server-panel{position:absolute;top:calc(100% + 9px);right:0;z-index:10;width:min(340px,calc(100vw - 28px));max-height:min(62dvh,480px);overflow:auto;padding:8px;border:1px solid rgba(255,255,255,.15);border-radius:14px;background:rgba(17,19,24,.98);box-shadow:0 20px 55px rgba(0,0,0,.65)}
+.vivid-server-panel-heading{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:8px 8px 10px;border-bottom:1px solid rgba(255,255,255,.08)}
+.vivid-server-panel-heading strong{color:#f5f5f7;font-size:.8rem}.vivid-server-panel-heading span{color:var(--watch-subtle);font-size:.68rem}
+.vivid-server-panel .vivid-player-source{display:flex;align-items:center;width:100%;min-height:54px;gap:10px;padding:9px 8px;border:0;border-radius:9px;background:transparent;color:#d9dce2;text-align:left;cursor:pointer}
+.vivid-server-panel .vivid-player-source:hover{background:rgba(255,255,255,.07)}.vivid-server-panel .vivid-player-source.is-active{background:rgba(255,255,255,.1);color:#fff}
+.vivid-server-panel .vivid-player-source>span:nth-child(2){display:grid;flex:1;min-width:0;gap:3px}
+.vivid-server-panel .vivid-player-source strong{font-size:.79rem;font-weight:630}.vivid-server-panel .vivid-player-source small{color:var(--watch-muted);font-size:.68rem;line-height:1.3}
+.vivid-server-dot{flex:0 0 auto;width:7px;height:7px;border-radius:50%;background:#727986}
+.vivid-server-panel .vivid-player-source.is-active .vivid-server-dot{background:#f5f5f7}
+.vivid-server-state{flex:0 0 auto;color:var(--watch-subtle);font-size:.66rem}.vivid-server-panel .vivid-player-source.is-active .vivid-server-state{color:#e8eaee}
+.vivid-server-panel>p{margin:8px 8px 5px;color:var(--watch-subtle);font-size:.68rem;line-height:1.5}
+.vivid-player-dialog .vivid-player-frame{width:100%;max-width:none;min-height:0;aspect-ratio:16/9;margin:0;border:0;border-radius:0;background:#000;box-shadow:none}
+.vivid-player-frame{position:relative;overflow:hidden;background:#000}
+.vivid-player-frame iframe,.vivid-player-frame video{position:absolute;inset:0;display:block;width:100%;height:100%;border:0;background:#000;object-fit:contain}
+.vivid-player-status{position:absolute;z-index:2;inset:0;display:grid;place-items:center;padding:24px;background:rgba(5,6,8,.72);color:#d0d4dc;font-size:.82rem;line-height:1.55;text-align:center;pointer-events:none}
+.vivid-player-status.is-warning{background:rgba(5,6,8,.82);color:#f5f5f7}
+.vivid-player-try-next{position:absolute;z-index:3;right:18px;bottom:18px;min-height:40px;padding:0 16px;border:1px solid rgba(255,255,255,.2);border-radius:999px;background:#f5f5f7;color:#08090c;font:inherit;font-size:.78rem;font-weight:680;cursor:pointer}
+.vivid-player-try-next:hover{background:#dedfe4}
+.vivid-player-dialog-foot{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 16px;color:var(--watch-subtle);font-size:.7rem}
+.vivid-player-dialog-foot>span{display:inline-flex;align-items:center;gap:7px}.vivid-player-dialog-foot a{color:#d7dbe2;text-decoration:none}.vivid-player-dialog-foot a:hover{color:#fff}
+@media(min-width:1500px){.vivid-watch-head,.vivid-watch-recommendations{width:min(1400px,100%)}}
+@media(max-width:760px){
+.vivid-watch-hero{min-height:0}.vivid-watch-backdrop{background-image:linear-gradient(90deg,rgba(8,9,12,.78),rgba(8,9,12,.55)),linear-gradient(0deg,var(--watch-canvas),rgba(8,9,12,.18) 70%),var(--watch-backdrop);background-position:center top}
+.vivid-watch-head{min-height:0;grid-template-columns:78px minmax(0,1fr);align-items:center;gap:14px;padding:34px 18px 22px}
+.vivid-watch-artwork{width:78px}.vivid-watch-artwork img{border-radius:8px}
+.vivid-watch-head h1{margin:6px 0 7px;font-size:clamp(1.55rem,6.5vw,2.3rem);line-height:1.02}.vivid-watch-head p{font-size:.8rem;line-height:1.5;-webkit-line-clamp:3}
+.vivid-watch-kicker{font-size:.6rem;letter-spacing:.12em}.vivid-watch-actions{grid-column:1/-1;padding-top:4px}
+.vivid-watch-play,.vivid-watch-details{min-height:42px;padding:0 18px}
+.vivid-watch-recommendations{padding:25px 18px calc(42px + env(safe-area-inset-bottom))}.vivid-watch-rec-rail{gap:11px}.vivid-watch-rec-card{flex-basis:126px}
+.vivid-player-overlay{padding:0;align-items:center}.vivid-player-dialog{width:100%;max-height:100dvh;border:0;border-radius:0;box-shadow:none}
+.vivid-player-dialog-head{gap:10px;padding:max(12px,env(safe-area-inset-top)) 12px 12px}.vivid-player-dialog-heading{gap:9px}
+.vivid-player-dialog-eyebrow{font-size:.54rem}.vivid-player-dialog-head h2{max-width:42vw;font-size:.85rem}
+.vivid-player-current-source{max-width:45vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.66rem}
+.vivid-player-dialog-actions{gap:6px}.vivid-player-close,.vivid-player-switch{min-height:36px}.vivid-player-close{width:36px}
+.vivid-server-menu{padding:0 10px;font-size:.72rem}.vivid-player-dialog .vivid-player-frame{flex:0 0 auto}
+.vivid-player-dialog-foot{padding:12px 12px max(12px,env(safe-area-inset-bottom))}.vivid-player-try-next{right:12px;bottom:12px}
 }
-body.vivid-watch-page { background: var(--watch-canvas); color: #f5f5f7; }
-body.vivid-watch-page.vivid-player-open { overflow: hidden; overscroll-behavior: none; }
-.vivid-watch-app { min-height: 100dvh; }
-.vivid-watch-hero { position: relative; isolation: isolate; min-height: 320px; overflow: hidden; }
-.vivid-watch-backdrop {
-  position: absolute; z-index: -1; inset: 0;
-  background-image: linear-gradient(90deg,rgba(8,9,12,.96) 0%,rgba(8,9,12,.72) 44%,rgba(8,9,12,.42) 74%,rgba(8,9,12,.7) 100%),linear-gradient(0deg,var(--watch-canvas) 0%,rgba(8,9,12,.18) 58%,rgba(8,9,12,.28) 100%),var(--watch-backdrop);
-  background-size: cover; background-position: center 35%; background-color: #101217;
-  transform: scale(1.015);
+@media(max-width:380px){
+.vivid-watch-head{grid-template-columns:66px minmax(0,1fr);gap:11px;padding-left:15px;padding-right:15px}.vivid-watch-artwork{width:66px}
+.vivid-watch-head h1{font-size:1.42rem}.vivid-watch-head p{-webkit-line-clamp:2}.vivid-watch-actions{gap:8px}
+.vivid-watch-play,.vivid-watch-details{padding:0 15px}.vivid-player-dialog-heading{gap:7px}.vivid-player-live-dot{display:none}
+.vivid-player-dialog-head h2{max-width:34vw}.vivid-server-menu{padding:0 8px;gap:5px}
 }
-.vivid-watch-head {
-  width: min(1320px,100%); min-height: 320px; margin: 0 auto;
-  padding: clamp(38px,5vw,68px) var(--watch-gutter) 28px;
-  display: grid; grid-template-columns: 124px minmax(0,1fr) auto;
-  align-items: end; gap: clamp(18px,2.5vw,34px);
+@media(orientation:landscape) and (max-height:520px){
+.vivid-player-overlay{padding:0}.vivid-player-dialog{width:100%;max-height:100dvh;border-radius:0}
+.vivid-player-dialog-head{padding:6px 12px}.vivid-player-dialog .vivid-player-frame{max-height:calc(100dvh - 86px)}.vivid-player-dialog-foot{padding:5px 12px}
 }
-.vivid-watch-artwork { width: 124px; min-width: 0; }
-.vivid-watch-artwork img {
-  display: block; width: 100%; height: auto; aspect-ratio: 2/3; object-fit: cover;
-  border-radius: 12px; border: 1px solid rgba(255,255,255,.18);
-  background: var(--watch-panel); box-shadow: 0 16px 44px rgba(0,0,0,.38);
-}
-.vivid-watch-copy { min-width: 0; padding-bottom: 2px; }
-.vivid-watch-kicker {
-  display: block; color: rgba(245,245,247,.72); font-size: .68rem;
-  font-weight: 650; letter-spacing: .16em; line-height: 1.5; text-transform: uppercase;
-}
-.vivid-watch-head h1 {
-  max-width: 800px; margin: 9px 0 10px; color: #fff;
-  font-size: clamp(2rem,4.2vw,4.25rem); font-weight: 720;
-  letter-spacing: -.055em; line-height: .99; text-wrap: balance;
-}
-.vivid-watch-head p {
-  max-width: 720px; margin: 0; color: rgba(235,237,242,.78);
-  font-size: .92rem; line-height: 1.65;
-  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden;
-}
-.vivid-watch-actions { display: flex; align-items: center; gap: 10px; padding-bottom: 2px; }
-.vivid-watch-play,.vivid-watch-details {
-  min-height: 46px; display: inline-flex; align-items: center; justify-content: center;
-  gap: 8px; padding: 0 21px; border-radius: 999px; text-decoration: none;
-  font: inherit; font-size: .88rem; font-weight: 680; white-space: nowrap;
-  transition: transform .16s ease,background .16s ease,border-color .16s ease;
-}
-.vivid-watch-play {
-  border: 1px solid #fff; background: #fff; color: #090a0d; cursor: pointer;
-}
-.vivid-watch-play i { font-size: 1.2rem; }
-.vivid-watch-play:hover { background: #e9e9ed; transform: translateY(-1px); }
-.vivid-watch-details {
-  border: 1px solid rgba(255,255,255,.2); background: rgba(255,255,255,.08);
-  color: #f5f5f7; backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
-}
-.vivid-watch-details:hover { background: rgba(255,255,255,.15); border-color: rgba(255,255,255,.35); }
-.vivid-watch-play:focus-visible,.vivid-watch-details:focus-visible,
-.vivid-player-close:focus-visible,.vivid-player-switch:focus-visible,
-.vivid-player-source:focus-visible,.vivid-player-try-next:focus-visible,
-.vivid-watch-rec-card:focus-visible { outline: 2px solid #fff; outline-offset: 4px; }
-.vivid-watch-recommendations {
-  width: min(1320px,100%); margin: 0 auto;
-  padding: 34px var(--watch-gutter) calc(58px + env(safe-area-inset-bottom));
-}
-.vivid-watch-recommendations .vivid-section-heading {
-  display: flex; align-items: end; justify-content: space-between; margin-bottom: 16px;
-}
-.vivid-watch-recommendations .vivid-section-heading>div>span {
-  display: block; margin-bottom: 5px; color: var(--watch-muted);
-  font-size: .65rem; font-weight: 650; letter-spacing: .15em;
-}
-.vivid-watch-recommendations h2 {
-  margin: 0; color: #f5f5f7; font-size: clamp(1.3rem,2.2vw,1.75rem);
-  font-weight: 680; letter-spacing: -.035em;
-}
-.vivid-watch-rec-rail {
-  display: flex; gap: 14px; overflow-x: auto; padding: 3px 2px 14px;
-  scrollbar-width: none; overscroll-behavior-x: contain; scroll-snap-type: x proximity;
-}
-.vivid-watch-rec-rail::-webkit-scrollbar { display: none; }
-.vivid-watch-rec-card {
-  display: block; flex: 0 0 156px; min-width: 0; color: #f5f5f7;
-  text-decoration: none; scroll-snap-align: start;
-}
-.vivid-watch-rec-card img {
-  display: block; width: 100%; aspect-ratio: 2/3; object-fit: cover;
-  border: 1px solid rgba(255,255,255,.08); border-radius: 10px;
-  background: var(--watch-panel); transition: transform .2s ease,border-color .2s ease;
-}
-.vivid-watch-rec-card strong,.vivid-watch-rec-card small {
-  display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-}
-.vivid-watch-rec-card strong { margin-top: 9px; font-size: .82rem; font-weight: 620; }
-.vivid-watch-rec-card small { margin-top: 4px; color: var(--watch-subtle); font-size: .74rem; }
-.vivid-watch-rec-card:hover img { transform: translateY(-3px); border-color: rgba(255,255,255,.25); }
-.vivid-watch-note {
-  width: min(1320px,100%); margin: 18px auto 0; padding: 14px var(--watch-gutter);
-  display: flex; align-items: start; gap: 12px; color: var(--watch-muted);
-}
-.vivid-watch-note div { display: grid; gap: 4px; }
-.vivid-watch-note strong { color: #f5f5f7; font-size: .84rem; }
-.vivid-watch-note span { font-size: .78rem; line-height: 1.5; }
-.vivid-watch-error { width: min(680px,100%); margin: 64px auto; padding: 32px 20px; text-align: center; }
-.vivid-watch-error>i { font-size: 2rem; }
-.vivid-watch-error h1 { margin: 14px 0 8px; font-size: 1.8rem; letter-spacing: -.035em; }
-.vivid-watch-error p { margin: 0 0 20px; color: var(--watch-muted); line-height: 1.6; }
-.vivid-watch-loading { width: min(1320px,100%); margin: auto; padding: 34px var(--watch-gutter); }
-.vivid-watch-loading div {
-  height: min(54vw,520px); min-height: 230px; border-radius: 16px;
-  background: linear-gradient(100deg,rgba(255,255,255,.035) 20%,rgba(255,255,255,.08) 45%,rgba(255,255,255,.035) 70%);
-  background-size: 220% 100%; animation: vivid-watch-shimmer 1.6s ease-in-out infinite;
-}
-@keyframes vivid-watch-shimmer { to { background-position-x: -220%; } }
-
-/* Focused player window: quiet controls, generous 16:9 frame, no competing chrome. */
-.vivid-player-overlay[hidden],.vivid-server-panel[hidden],.vivid-player-status[hidden],
-.vivid-player-try-next[hidden],.vivid-player-frame iframe[hidden],
-.vivid-player-frame video[hidden] { display: none !important; }
-.vivid-player-overlay {
-  position: fixed; z-index: 3000; inset: 0; display: grid; place-items: center;
-  padding: clamp(12px,2.5vw,30px); overflow: auto;
-  background: rgba(3,4,7,.88); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-  animation: vivid-watch-fade-in .16s ease-out;
-}
-@keyframes vivid-watch-fade-in { from { opacity: 0; } to { opacity: 1; } }
-.vivid-player-dialog {
-  position: relative; display: flex; flex-direction: column; width: min(1320px,100%);
-  max-height: calc(100dvh - 2 * clamp(12px,2.5vw,30px));
-  border: 1px solid rgba(255,255,255,.14); border-radius: 16px;
-  background: #08090c; box-shadow: 0 32px 110px rgba(0,0,0,.68);
-}
-.vivid-player-dialog-head {
-  position: relative; z-index: 4; display: flex; align-items: center;
-  justify-content: space-between; gap: 16px; padding: 14px 18px;
-}
-.vivid-player-dialog-heading { display: flex; align-items: center; gap: 12px; min-width: 0; }
-.vivid-player-live-dot {
-  flex: 0 0 auto; width: 7px; height: 7px; border-radius: 50%;
-  background: #a7adb8; box-shadow: 0 0 0 4px rgba(255,255,255,.07);
-}
-.vivid-player-dialog-heading>div { min-width: 0; }
-.vivid-player-dialog-eyebrow {
-  display: block; color: var(--watch-muted); font-size: .6rem;
-  font-weight: 650; letter-spacing: .13em;
-}
-.vivid-player-dialog-head h2 {
-  overflow: hidden; margin: 3px 0 2px; color: #fff;
-  font-size: .98rem; font-weight: 650; letter-spacing: -.02em;
-  text-overflow: ellipsis; white-space: nowrap;
-}
-.vivid-player-current-source { display: block; color: var(--watch-muted); font-size: .72rem; }
-.vivid-player-dialog-actions { display: flex; align-items: center; gap: 8px; }
-.vivid-player-close,.vivid-player-switch {
-  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-  min-height: 38px; border: 1px solid var(--watch-line); border-radius: 999px;
-  background: rgba(255,255,255,.055); color: #f5f5f7; cursor: pointer;
-  font: inherit; font-size: .78rem; font-weight: 560;
-}
-.vivid-player-close { width: 38px; padding: 0; font-size: .86rem; }
-.vivid-player-close:hover,.vivid-player-switch:hover { background: rgba(255,255,255,.13); }
-.vivid-server-picker { position: relative; }
-.vivid-server-menu { padding: 0 13px; }
-.vivid-server-menu[aria-expanded="true"] { background: rgba(255,255,255,.14); }
-.vivid-server-panel {
-  position: absolute; top: calc(100% + 9px); right: 0; z-index: 10;
-  width: min(340px,calc(100vw - 28px)); max-height: min(62dvh,480px); overflow: auto;
-  padding: 8px; border: 1px solid rgba(255,255,255,.15); border-radius: 14px;
-  background: rgba(17,19,24,.98); box-shadow: 0 20px 55px rgba(0,0,0,.65);
-}
-.vivid-server-panel-heading {
-  display: flex; justify-content: space-between; align-items: center; gap: 12px;
-  padding: 8px 8px 10px; border-bottom: 1px solid rgba(255,255,255,.08);
-}
-.vivid-server-panel-heading strong { color: #f5f5f7; font-size: .8rem; }
-.vivid-server-panel-heading span { color: var(--watch-subtle); font-size: .68rem; }
-.vivid-server-panel .vivid-player-source {
-  display: flex; align-items: center; width: 100%; min-height: 54px; gap: 10px;
-  padding: 9px 8px; border: 0; border-radius: 9px; background: transparent;
-  color: #d9dce2; text-align: left; cursor: pointer;
-}
-.vivid-server-panel .vivid-player-source:hover { background: rgba(255,255,255,.07); }
-.vivid-server-panel .vivid-player-source.is-active { background: rgba(255,255,255,.1); color: #fff; }
-.vivid-server-panel .vivid-player-source>span:nth-child(2) { display: grid; flex: 1; min-width: 0; gap: 3px; }
-.vivid-server-panel .vivid-player-source strong { font-size: .79rem; font-weight: 630; }
-.vivid-server-panel .vivid-player-source small { color: var(--watch-muted); font-size: .68rem; line-height: 1.3; }
-.vivid-server-dot { flex: 0 0 auto; width: 7px; height: 7px; border-radius: 50%; background: #727986; }
-.vivid-server-panel .vivid-player-source.is-active .vivid-server-dot { background: #f5f5f7; }
-.vivid-server-state { flex: 0 0 auto; color: var(--watch-subtle); font-size: .66rem; }
-.vivid-server-panel .vivid-player-source.is-active .vivid-server-state { color: #e8eaee; }
-.vivid-server-panel>p { margin: 8px 8px 5px; color: var(--watch-subtle); font-size: .68rem; line-height: 1.5; }
-.vivid-player-dialog .vivid-player-frame {
-  width: 100%; max-width: none; min-height: 0; aspect-ratio: 16/9;
-  margin: 0; border: 0; border-radius: 0; background: #000; box-shadow: none;
-}
-.vivid-player-frame { position: relative; overflow: hidden; background: #000; }
-.vivid-player-frame iframe,.vivid-player-frame video {
-  position: absolute; inset: 0; display: block; width: 100%; height: 100%;
-  border: 0; background: #000; object-fit: contain;
-}
-.vivid-player-status {
-  position: absolute; z-index: 2; inset: 0; display: grid; place-items: center;
-  padding: 24px; background: rgba(5,6,8,.72); color: #d0d4dc;
-  font-size: .82rem; line-height: 1.55; text-align: center; pointer-events: none;
-}
-.vivid-player-status.is-warning { background: rgba(5,6,8,.82); color: #f5f5f7; }
-.vivid-player-try-next {
-  position: absolute; z-index: 3; right: 18px; bottom: 18px; min-height: 40px;
-  padding: 0 16px; border: 1px solid rgba(255,255,255,.2); border-radius: 999px;
-  background: #f5f5f7; color: #08090c; font: inherit; font-size: .78rem;
-  font-weight: 680; cursor: pointer;
-}
-.vivid-player-try-next:hover { background: #dedfe4; }
-.vivid-player-dialog-foot {
-  display: flex; align-items: center; justify-content: space-between; gap: 12px;
-  padding: 10px 16px; color: var(--watch-subtle); font-size: .7rem;
-}
-.vivid-player-dialog-foot>span { display: inline-flex; align-items: center; gap: 7px; }
-.vivid-player-dialog-foot a { color: #d7dbe2; text-decoration: none; }
-.vivid-player-dialog-foot a:hover { color: #fff; }
-
-@media (min-width: 1500px) {
-  .vivid-watch-head,.vivid-watch-recommendations { width: min(1400px,100%); }
-}
-@media (max-width: 760px) {
-  .vivid-watch-hero { min-height: 0; }
-  .vivid-watch-backdrop {
-    background-image: linear-gradient(90deg,rgba(8,9,12,.78),rgba(8,9,12,.55)),linear-gradient(0deg,var(--watch-canvas) 0%,rgba(8,9,12,.18) 70%),var(--watch-backdrop);
-    background-position: center top;
-  }
-  .vivid-watch-head {
-    min-height: 0; grid-template-columns: 78px minmax(0,1fr); align-items: center;
-    gap: 14px; padding: 34px 18px 22px;
-  }
-  .vivid-watch-artwork { width: 78px; }
-  .vivid-watch-artwork img { border-radius: 8px; }
-  .vivid-watch-head h1 { margin: 6px 0 7px; font-size: clamp(1.55rem,6.5vw,2.3rem); line-height: 1.02; }
-  .vivid-watch-head p { font-size: .8rem; line-height: 1.5; -webkit-line-clamp: 3; }
-  .vivid-watch-kicker { font-size: .6rem; letter-spacing: .12em; }
-  .vivid-watch-actions { grid-column: 1 / -1; padding-top: 4px; }
-  .vivid-watch-play,.vivid-watch-details { min-height: 42px; padding: 0 18px; }
-  .vivid-watch-recommendations { padding: 25px 18px calc(42px + env(safe-area-inset-bottom)); }
-  .vivid-watch-rec-rail { gap: 11px; }
-  .vivid-watch-rec-card { flex-basis: 126px; }
-  .vivid-player-overlay { padding: 0; align-items: center; }
-  .vivid-player-dialog {
-    width: 100%; max-height: 100dvh; border: 0; border-radius: 0;
-    box-shadow: none;
-  }
-  .vivid-player-dialog-head { gap: 10px; padding: max(12px,env(safe-area-inset-top)) 12px 12px; }
-  .vivid-player-dialog-heading { gap: 9px; }
-  .vivid-player-dialog-eyebrow { font-size: .54rem; }
-  .vivid-player-dialog-head h2 { max-width: 42vw; font-size: .85rem; }
-  .vivid-player-current-source { max-width: 45vw; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: .66rem; }
-  .vivid-player-dialog-actions { gap: 6px; }
-  .vivid-player-close,.vivid-player-switch { min-height: 36px; }
-  .vivid-player-close { width: 36px; }
-  .vivid-server-menu { padding: 0 10px; font-size: .72rem; }
-  .vivid-player-dialog .vivid-player-frame { flex: 0 0 auto; }
-  .vivid-player-dialog-foot { padding: 12px 12px max(12px,env(safe-area-inset-bottom)); }
-  .vivid-player-try-next { right: 12px; bottom: 12px; }
-}
-@media (max-width: 380px) {
-  .vivid-watch-head { grid-template-columns: 66px minmax(0,1fr); gap: 11px; padding-left: 15px; padding-right: 15px; }
-  .vivid-watch-artwork { width: 66px; }
-  .vivid-watch-head h1 { font-size: 1.42rem; }
-  .vivid-watch-head p { -webkit-line-clamp: 2; }
-  .vivid-watch-actions { gap: 8px; }
-  .vivid-watch-play,.vivid-watch-details { padding: 0 15px; }
-  .vivid-player-dialog-heading { gap: 7px; }
-  .vivid-player-live-dot { display: none; }
-  .vivid-player-dialog-head h2 { max-width: 34vw; }
-  .vivid-server-menu { padding: 0 8px; gap: 5px; }
-}
-@media (orientation: landscape) and (max-height: 520px) {
-  .vivid-player-overlay { padding: 0; }
-  .vivid-player-dialog { width: 100%; max-height: 100dvh; border-radius: 0; }
-  .vivid-player-dialog-head { padding: 6px 12px; }
-  .vivid-player-dialog .vivid-player-frame { max-height: calc(100dvh - 86px); }
-  .vivid-player-dialog-foot { padding: 5px 12px; }
-}
-@media (hover: none) {
-  .vivid-watch-rec-card:hover img { transform: none; }
-}
-@media (prefers-reduced-motion: reduce) {
-  .vivid-watch-loading div,.vivid-player-overlay,.vivid-watch-rec-card img,
-  .vivid-watch-play,.vivid-watch-details { animation: none; transition: none; }
-}
+@media(hover:none){.vivid-watch-rec-card:hover img{transform:none}}
+@media(prefers-reduced-motion:reduce){.vivid-watch-loading div,.vivid-player-overlay,.vivid-watch-rec-card img,.vivid-watch-play,.vivid-watch-details{animation:none;transition:none}}
