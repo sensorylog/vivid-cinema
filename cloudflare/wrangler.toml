@@ -1,0 +1,21 @@
+name = "vivid-mediaforge-api"
+main = "src/index.js"
+compatibility_date = "2026-10-01"
+workers_dev = true
+
+[vars]
+FIREBASE_PROJECT_ID = "vivid-cinema"
+# Add your custom Firebase Hosting domain here if it differs.
+ALLOWED_ORIGIN = "https://vivid-cinema.web.app"
+
+[[r2_buckets]]
+binding = "MEDIA_BUCKET"
+bucket_name = "vivid-mediaforge-media"
+
+# Create the R2 bucket before deploying:
+#   npx wrangler r2 bucket create vivid-mediaforge-media
+# Then deploy from this directory:
+#   npx wrangler deploy
+#
+# This worker deliberately returns 503 for playback/download routes until a
+# real MediaForge processing worker is connected. R2 is not a video transcoder.
