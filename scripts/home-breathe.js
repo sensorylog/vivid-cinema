@@ -42,12 +42,13 @@ function collectTrending() {
 function showTrendingItem(item) {
   if (!item || !art || !title || !meta) return;
   art.classList.remove("is-changing");
-  void art.offsetWidth;
-  art.classList.add("is-changing");
   title.classList.remove("is-changing");
-  void title.offsetWidth;
-  title.classList.add("is-changing");
   art.src = item.src;
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  window.requestAnimationFrame(() => {
+    art.classList.add("is-changing");
+    title.classList.add("is-changing");
+  });
   art.alt = "";
   title.textContent = item.title;
   meta.textContent = item.meta;
@@ -63,10 +64,10 @@ async function refreshTrending() {
   showTrendingItem(items[index]);
   index = (index + 1) % items.length;
 
-  if (!timer) {
-    timer = window.setInterval(async () => {
-      let latest = collectTrending();
-      if (!latest.length) latest = await loadDirectTrending();
+  if (!timer && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    timer = window.setInterval(() => {
+      if (document.hidden) return;
+      const latest = collectTrending();
       if (latest.length) items = latest;
       if (!items.length) return;
       showTrendingItem(items[index % items.length]);
