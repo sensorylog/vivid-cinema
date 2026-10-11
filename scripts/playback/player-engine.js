@@ -1,4 +1,4 @@
-import { VIVID_CONFIG } from "./config.js";
+import { VIVID_CONFIG } from "../config.js";
 import { createAllowlistedFetchRequest, inferAuthorizedStreamType, normalizeAllowedHosts, validateAllowedHttpsUrl } from "./direct-stream-validation.js";
 
 // Unified playback engine for authorized, first-party direct stream integrations.
