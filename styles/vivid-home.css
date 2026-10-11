@@ -45,23 +45,23 @@
 
 /* Extracted from the cross-viewport audit: Home owns these rules. */
 
-/* The feature strip belongs visually to the hero even though it is a sibling in the DOM. */
+/* Featured titles sit immediately after the billboard without overlapping it. */
 .vivid-feature-strip{
   position:relative!important;
   left:auto!important;
   right:auto!important;
   bottom:auto!important;
   width:min(1440px,100%)!important;
-  margin:-42px auto 0!important;
-  padding:8px var(--vivid-page-gutter) 18px!important;
+  margin:0 auto!important;
+  padding:14px var(--vivid-page-gutter) 16px!important;
   box-sizing:border-box;
-  z-index:7!important;
+  z-index:1!important;
 }
-.vivid-feature-viewport{width:100%!important;padding:0!important}
+.vivid-feature-viewport{width:100%!important;padding:0!important;min-width:0}
 @media(max-width:640px){
   .vivid-feature-strip{
-    margin:-34px auto 0!important;
-    padding:8px 12px 14px!important;
+    margin:0 auto!important;
+    padding:12px 12px 14px!important;
   }
 }
 
