@@ -28,3 +28,6 @@
 .vivid-player-overlay.vivid-player-inline .vivid-player-dialog-foot{display:flex}
 .vivid-watch-recommendations{padding-top:20px}
 @media(max-width:600px){.vivid-watch-inline-heading{padding-top:18px}.vivid-player-overlay.vivid-player-inline .vivid-player-dialog-head{padding:10px}.vivid-player-overlay.vivid-player-inline .vivid-player-dialog-heading{gap:8px}.vivid-player-overlay.vivid-player-inline .vivid-player-frame{min-height:190px}.vivid-player-overlay.vivid-player-inline .vivid-player-frame iframe,.vivid-player-overlay.vivid-player-inline .vivid-player-frame video{min-height:190px}}
+
+/* Author button styles must not override the hidden state of failover controls. */
+.flickv4-player-controls button[hidden]{display:none!important}

@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { buildServerUrl } from "../scripts/flickv4-web-player.js";
+import { buildServerUrl, getNextServer } from "../scripts/flickv4-web-player.js";
 
 test("builds valid movie embed URLs for each second-player provider", () => {
   assert.match(buildServerUrl("vidlink", { type: "movie", id: 550 }), /^https:\/\/vidlink\.pro\/movie\/550\?/);
@@ -36,4 +36,30 @@ test("Firebase policies allow providers offered by the player controls", () => {
     assert.ok(frameSrc.includes(origin), "CSP frame-src missing " + origin);
     assert.ok(permissions.includes(origin), "Permissions-Policy missing " + origin);
   }
+});
+
+test("cycles the second player to the next configured server", () => {
+  const servers = ["vidlink", "vidsrc", "vidplus", "vidking"];
+  assert.equal(getNextServer("vidlink", servers), "vidsrc");
+  assert.equal(getNextServer("vidking", servers), "vidlink");
+  assert.equal(getNextServer("unknown", servers), "vidlink");
+  assert.equal(getNextServer("vidlink", []), "");
+});
+
+test("second player keeps its watchdog active after the iframe page loads", () => {
+  const source = readFileSync(new URL("../scripts/flickv4-web-player.js", import.meta.url), "utf8");
+  const loadHandler = source.split('frame.addEventListener("load", () => {')[1]?.split("});")[0] || "";
+  assert.match(loadHandler, /not proof of playback/);
+  assert.doesNotMatch(loadHandler, /clearLoadTimer\(\)/);
+  assert.match(source, /playback has not been confirmed/);
+  const css = readFileSync(new URL("../styles/flickv4-web-player.css", import.meta.url), "utf8");
+  assert.match(css, /\.flickv4-player-controls button\[hidden\]\s*\{\s*display:\s*none\s*!important/);
+});
+
+test("watch page defaults to VidSrc and does not reuse old VidAPI preferences", () => {
+  const watch = readFileSync(new URL("../scripts/watch.js", import.meta.url), "utf8");
+  assert.match(watch, /let activeSource = "vidsrc"/);
+  assert.match(watch, /activeSource = "vidsrc"/);
+  assert.match(watch, /SOURCE_PREFERENCES_KEY = "vivid:playback-source-preferences:v2"/);
+  assert.match(watch, /VidAPI alternate source/);
 });
