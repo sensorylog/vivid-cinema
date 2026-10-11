@@ -1,5 +1,19 @@
 const $ = (root, id) => root?.querySelector("#" + id);
 
+export function getNextServer(current, available) {
+  const servers = Array.isArray(available) ? available.filter(Boolean) : [];
+  if (!servers.length) return "";
+  const index = servers.indexOf(current);
+  return servers[(index + 1 + servers.length) % servers.length];
+}
+
+function isPlaybackStarted(message) {
+  if (!message || typeof message !== "object" || message.type !== "PLAYER_EVENT") return false;
+  const data = message.data && typeof message.data === "object" ? message.data : message;
+  const state = String(data.player_status || data.event || data.status || "").toLowerCase();
+  return state === "playing" || state === "play";
+}
+
 export function buildServerUrl(server, { type, id, season, episode, startAt = 0 } = {}) {
   const rawId = String(id || "").trim();
   if (!/^(?:\d+|tt\d+)$/i.test(rawId)) return "";
