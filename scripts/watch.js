@@ -975,6 +975,9 @@ async function load() {
         .catch(() => null);
     }
     hydrateWatchDetails(currentParams);
+    // Re-mount Player 2 after TMDB metadata arrives so its season and episode
+    // selectors use the actual series seasons, not the early loading shell.
+    mountTflixSecondaryPlayer({ root: $("vivid-tflix-player"), params: currentParams, media, details, title: details.episode?.name || media.title || media.name, isAnime: isAnimePlayback() });
     void loadWatchRecommendations(currentParams);
     // Metadata arrived after shell — re-arm
     // the primary timer if the player is still waiting.
