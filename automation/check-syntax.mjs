@@ -21,7 +21,8 @@ const files = [
   "scripts/playback/server-settings.js",
   "scripts/playback/direct-stream-validation.js",
   "scripts/tmdb.js",
-  "scripts/tflix-hero.js"
+  "scripts/tflix-hero.js",
+  "script.js"
 ];
 
 let failures = 0;
