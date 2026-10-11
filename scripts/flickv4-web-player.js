@@ -8,7 +8,7 @@ function buildServerUrl(server, { type, id, season, episode, imdbId }) {
   switch (server) {
     case "vidlink": {
       const base = "https://vidlink.pro";
-      const path = isTv ? "/tv/" + (imdb || mediaId) + "/" + season + "/" + episode : "/movie/" + (imdb || mediaId);
+      const path = isTv ? "/tv/" + mediaId + "/" + season + "/" + episode : "/movie/" + mediaId;
       const query = new URLSearchParams({ primaryColor: "e50914", secondaryColor: "1b1b1b", iconColor: "ffffff", title: "false", poster: "false" });
       return base + path + "?" + query;
     }
