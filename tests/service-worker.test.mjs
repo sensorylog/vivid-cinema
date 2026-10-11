@@ -31,4 +31,5 @@ test("every precached asset exists in the repository", async () => {
 test("notification navigation is restricted to the app origin", () => {
   assert.match(source, /function safeNotificationUrl\(/);
   assert.match(source, /url\.origin===self\.location\.origin/);
+  assert.match(source, /new URL\(client\.url\)\.origin===self\.location\.origin/);
 });
