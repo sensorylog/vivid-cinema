@@ -33,6 +33,9 @@ jobs:
 
       - name: Test direct-stream URL validation
         run: node --test tests/direct-stream-validation.test.mjs
+
+      - name: Test MediaForge streaming and download client
+        run: node --test tests/mediaforge-client.test.mjs
       - name: Test mixed-media identity normalization
         run: node --test tests/media-normalization.test.mjs
 
