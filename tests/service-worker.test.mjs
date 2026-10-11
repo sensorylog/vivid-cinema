@@ -34,9 +34,11 @@ test("notification navigation is restricted to the app origin", () => {
   assert.match(source, /new URL\(client\.url\)\.origin===self\.location\.origin/);
 });
 
-test("MediaForge launcher assets are included in the offline shell", () => {
-  assert.match(source, /"\.\/mediaforge\.html"/);
-  assert.match(source, /"\.\/styles\/vivid-mediaforge\.css"/);
-  assert.match(source, /"\.\/scripts\/mediaforge\.js"/);
-  assert.match(source, /vivid-cinema-shell-v142/);
+test("legacy MediaForge entry points are absent from the offline shell", async () => {
+  assert.doesNotMatch(source, /mediaforge/i);
+  const home = await readFile(path.join(root, "home.html"), "utf8");
+  assert.doesNotMatch(home, /mediaforge/i);
+  await assert.rejects(access(path.join(root, "mediaforge.html")));
+  await assert.rejects(access(path.join(root, "scripts", "mediaforge.js")));
+  await assert.rejects(access(path.join(root, "styles", "vivid-mediaforge.css")));
 });
