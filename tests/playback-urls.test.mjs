@@ -6,7 +6,7 @@ import {
   buildVidlinkEmbedUrl,
   buildVidplusEmbedUrl,
   buildVidkingEmbedUrl
-} from "../scripts/playback-urls.js";
+} from "../scripts/playback/playback-urls.js";
 
 const movie = { id: "27205", type: "movie", season: 1, episode: 1 };
 const tv = { id: "1399", type: "tv", season: 2, episode: 7 };
