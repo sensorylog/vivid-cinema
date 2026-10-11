@@ -56,14 +56,21 @@ body.vivid-cinema-home .hero-bg {
   inset: 0;
   background-size: cover;
   background-position: center 18%;
-  transform: scale(1.05);
-  animation: heroZoom 12s ease forwards;
+  transform: scale(1.02);
+  animation: none;
   will-change: transform;
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
 }
-body.vivid-cinema-home .hero-slide.active .hero-bg { animation: heroZoom 12s ease forwards; }
-@keyframes heroZoom { from { transform: scale(1.12); } to { transform: scale(1); } }
+/* Restart the gentle push-in each time a title becomes active. The artwork
+   moves independently, keeping the title and playback actions steady. */
+body.vivid-cinema-home .hero-slide.active .hero-bg {
+  animation: heroZoom 18s ease-out forwards;
+}
+@keyframes heroZoom {
+  from { transform: scale(1.02); }
+  to { transform: scale(1.10); }
+}
 body.vivid-cinema-home .hero-bg::after {
   content: '';
   position: absolute;
