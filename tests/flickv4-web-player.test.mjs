@@ -52,4 +52,6 @@ test("second player keeps its watchdog active after the iframe page loads", () =
   assert.match(loadHandler, /does not confirm that a video stream is playable/);
   assert.doesNotMatch(loadHandler, /clearLoadTimer\(\)/);
   assert.match(source, /playback has not been confirmed/);
+  const css = readFileSync(new URL("../styles/flickv4-web-player.css", import.meta.url), "utf8");
+  assert.match(css, /\.flickv4-player-controls button\[hidden\]\s*\{\s*display:\s*none\s*!important/);
 });
