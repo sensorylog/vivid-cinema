@@ -26,8 +26,8 @@ jobs:
       - name: Test custom playback server registry
         run: node --test tests/playback-servers.test.mjs
 
-      - name: Test Flickv4 provider URL generation and embed policy
-        run: node --test tests/flickv4-web-player.test.mjs
+      - name: Test built-in playback provider URLs
+        run: node --test tests/playback-urls.test.mjs
 
       - name: Test direct-stream URL validation
         run: node --test tests/direct-stream-validation.test.mjs
