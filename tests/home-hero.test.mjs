@@ -69,6 +69,7 @@ test("TFLIX-style hero uses TMDB stills and routes to Vivid title details withou
   assert.match(js, /aria-hidden", "true"/);
   assert.match(js, /\.inert = true/);
   assert.match(js, /tmdbApi\.trending\("movie", "day", 1\)/, "a cached fallback feed is available");
+  assert.doesNotMatch(js, /cache:\s*false/, "hero trending requests should use the shared TMDB cache");
   assert.match(js, /slide\.inert = index !== 0/);
   assert.match(js, /window\.vividCinemaSelectHero = selectHeroItem/);
   assert.match(js, /new CustomEvent\("vivid:hero-change"/);
