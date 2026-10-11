@@ -1,4 +1,4 @@
-import test from "node:test";
+import test, { beforeEach } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 
@@ -12,7 +12,7 @@ globalThis.localStorage = {
 const source = readFileSync(new URL("../scripts/playback-servers.js", import.meta.url), "utf8");
 const api = await import("data:text/javascript;base64," + Buffer.from(source).toString("base64"));
 
-test.beforeEach(() => values.clear());
+beforeEach(() => values.clear());
 
 test("saves a custom HTTPS server and builds movie and episode URLs", () => {
   const id = api.saveCustomPlaybackServer({
