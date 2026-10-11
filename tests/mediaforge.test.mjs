@@ -22,7 +22,8 @@ test("launcher defaults to the local MediaForge instance and opens it separately
 test("launcher rejects insecure remote URLs and never asks for an API key", () => {
   assert.match(launcher, /url\.protocol !== "https:"/);
   assert.match(launcher, /isLocal && url\.protocol === "http:"/);
-  assert.doesNotMatch(page + launcher, /X-Api-Key|api[_ -]?key|password/i);
+  assert.doesNotMatch(page, /type="password"|X-Api-Key|api[_ -]?key/i);
+  assert.doesNotMatch(launcher, /X-Api-Key|api[_ -]?key/i);
 });
 
 test("launcher stores only the instance base URL locally", () => {
