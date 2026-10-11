@@ -5,13 +5,16 @@ import { readFileSync } from "node:fs";
 const read = (path) => readFileSync(new URL(path, import.meta.url), "utf8");
 const stripComments = (css) => css.replace(/\/\*[\s\S]*?\*\//g, "");
 
-test("home hero and embedded trailer are removed while the featured-card strip remains", () => {
+test("TFLIX-style trending billboard is restored above the unchanged featured-card strip", () => {
   const home = read("../home.html");
-  assert.doesNotMatch(home, /class="vivid-hero"/);
-  assert.doesNotMatch(home, /id="hero-(?:video|fallback|title|meta|copy|watch|more|prev|next|sound|pause)"/);
-  assert.doesNotMatch(home, /youtube\.com|ytimg\.com/);
+  assert.match(home, /<section id="hero" class="empty" aria-label="Trending today"/);
   assert.match(home, /<div class="vivid-feature-strip">/);
   assert.match(home, /<div class="vivid-feature-track" id="feature-track" aria-label="Featured titles carousel"><\/div>/);
+  assert.ok(home.indexOf('<section id="hero"') < home.indexOf('<div class="vivid-feature-strip">'));
+  assert.match(home, /vivid-tflix-hero\.css/);
+  assert.match(home, /scripts\/tflix-hero\.js/);
+  assert.match(home, /fonts\.googleapis\.com/);
+
   for (const path of [
     "../styles/vivid-cinematic.css",
     "../styles/vivid-atmosphere.css",
@@ -24,19 +27,27 @@ test("home hero and embedded trailer are removed while the featured-card strip r
     "../styles/vivid-media-layout.css"
   ]) {
     const css = stripComments(read(path));
-    assert.doesNotMatch(css, /\.vivid-hero(?:-[a-z0-9_-]+)?|#hero-[a-z0-9_-]+/i, path);
+    assert.doesNotMatch(css, /\.vivid-hero(?:-[a-z0-9_-]+)?|#hero-(?:video|fallback|title|meta|copy|watch|more|prev|next|sound|pause)/i, path);
   }
 });
 
-test("home script loads the existing featured cards without trailer/player behavior", () => {
-  const js = read("../script.js");
-  assert.match(js, /function renderFeatureStrip\(\)/);
-  assert.match(js, /async function initFeatureStrip\(\)/);
-  assert.match(js, /initFeatureStrip\(\);void loadHome\(\)/);
-  assert.doesNotMatch(js, /loadHeroVideo|sendHeroPlayerCommand|youtubeUrl|initHero\(|showHero\(|hero-video|hero-sound|hero-pause|wireHeroSwipe|HERO_TRAILER/);
+test("TFLIX-style hero uses TMDB stills and routes to Vivid title details without embedding a trailer", () => {
+  const js = read("../scripts/tflix-hero.js");
+  assert.match(js, /tmdbApi\.trending\("all",\s*"day"\)/);
+  assert.match(js, /getImageUrl\(item\.backdrop_path,\s*"original"\)/);
+  assert.match(js, /getMediaUrl\(item\)/);
+  assert.match(js, /startHeroTimer\(\)/);
+  assert.doesNotMatch(js, /youtube\.com|ytimg\.com|iframe|HERO_TRAILER/i);
+
+  const homeScript = read("../script.js");
+  assert.match(homeScript, /function renderFeatureStrip\(\)/);
+  assert.match(homeScript, /async function initFeatureStrip\(\)/);
+  assert.match(homeScript, /initFeatureStrip\(\);void loadHome\(\)/);
 });
 
-test("service worker shell cache is bumped for the homepage shell change", () => {
+test("service worker shell cache includes the new hero assets", () => {
   const sw = read("../service-worker.js");
-  assert.match(sw, /const CACHE_NAME = "vivid-cinema-shell-v146";/);
+  assert.match(sw, /const CACHE_NAME = "vivid-cinema-shell-v147";/);
+  assert.match(sw, /\.\/styles\/vivid-tflix-hero\.css/);
+  assert.match(sw, /\.\/scripts\/tflix-hero\.js/);
 });
