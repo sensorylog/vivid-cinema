@@ -1,24 +1,15 @@
 /* TFLIX hero billboard — adapted from TomasTNunes/tflix index.html.
    The existing Vivid navigation and featured-card strip stay independently owned. */
 body.vivid-cinema-home #hero {
-  --bg: #0a0a0d;
-  --bg-elev: #111116;
-  --card: #18181f;
-  --card-h: #21212a;
-  --line: rgba(255,255,255,0.08);
-  --accent: #e50914;
-  --accent-h: #ff222e;
-  --accent-soft: rgba(229,9,20,0.16);
-  --text: #f4f4f7;
-  --muted: #9a9aa6;
-  --green: #4ad17e;
-  --radius: 8px;
-  --radius-lg: 16px;
-  --shadow: 0 18px 50px rgba(0,0,0,0.6);
+  --bg: var(--vivid-site-ink, #07090d);
+  --accent: #f5f7fa;
+  --accent-h: #fff;
+  --accent-soft: rgba(255,255,255,.12);
+  --text: var(--vivid-site-text, #f4f6f8);
+  --muted: var(--vivid-site-muted, #a4abb5);
+  --green: var(--vivid-success, #32d583);
   --ease: cubic-bezier(.2,.7,.2,1);
   --gutter: clamp(1rem, 4vw, 3.75rem);
-}
-body.vivid-cinema-home #hero {
   position: relative;
   width: 100%;
   height: min(90vh, 760px);
