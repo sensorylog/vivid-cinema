@@ -62,16 +62,18 @@ test("TFLIX-style trending billboard is restored above the unchanged featured-ca
 
 test("TFLIX-style hero uses TMDB stills and routes to Vivid title details without embedding a trailer", () => {
   const js = read("../scripts/tflix-hero.js");
-  assert.match(js, /tmdbApi\.trending\("all",\s*"day",\s*1,\s*\{\s*cache:\s*false\s*\}\)/);
-  assert.match(js, /getImageUrl\(item\.backdrop_path,\s*"original"\)/);
+  assert.match(js, /tmdbApi\.trending\("all",\s*"day",\s*1\)/);
+  assert.match(js, /getImageUrl\(item\.backdrop_path,\s*"w1280"\)/);
   assert.match(js, /getMediaUrl\(item\)/);
   assert.match(js, /startHeroTimer\(\)/);
   assert.match(js, /aria-hidden", "true"/);
   assert.match(js, /\.inert = true/);
-  assert.match(js, /tmdbApi\.trending\("movie", "day", 1, \{ cache: false \}\)/, "a fresh fallback feed is available");
+  assert.match(js, /tmdbApi\.trending\("movie", "day", 1\)/, "a cached fallback feed is available");
   assert.match(js, /slide\.inert = index !== 0/);
   assert.match(js, /window\.vividCinemaSelectHero = selectHeroItem/);
   assert.match(js, /new CustomEvent\("vivid:hero-change"/);
+  assert.match(js, /trending_rank/);
+  assert.match(js, /Featured on Vivid/);
 
   const api = read("../scripts/tmdb.js");
   assert.match(api, /trending: \(mediaType = "all", timeWindow = "week", page = 1, options = \{\}\) => tmdb\("trending\/" \+ mediaType \+ "\/" \+ timeWindow, \{ page \}, options\)/);
@@ -87,7 +89,7 @@ test("TFLIX-style hero uses TMDB stills and routes to Vivid title details withou
 
 test("service worker shell cache includes the new hero assets", () => {
   const sw = read("../service-worker.js");
-  assert.match(sw, /const CACHE_NAME = "vivid-cinema-shell-v151";/);
+  assert.match(sw, /const CACHE_NAME = "vivid-cinema-shell-v152";/);
   assert.match(sw, /\.\/styles\/vivid-tflix-hero\.css/);
   assert.match(sw, /\.\/scripts\/tflix-hero\.js/);
 });
