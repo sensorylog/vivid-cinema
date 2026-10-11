@@ -11,6 +11,10 @@ test("TFLIX-style trending billboard is restored above the unchanged featured-ca
   assert.match(home, /<div class="vivid-feature-strip">/);
   assert.match(home, /<div class="vivid-feature-track" id="feature-track" aria-label="Featured titles carousel"><\/div>/);
   assert.ok(home.indexOf('<section id="hero"') < home.indexOf('<div class="vivid-feature-strip">'));
+  const homeCss = read("../styles/vivid-home.css");
+  const stripCss = homeCss.slice(homeCss.indexOf("/* Featured titles sit immediately after"), homeCss.indexOf("/* Home catalogue:"));
+  assert.match(stripCss, /margin:0 auto!important/);
+  assert.doesNotMatch(stripCss, /margin:-\d+px/, "featured strip must not overlap the hero");
   assert.match(home, /vivid-tflix-hero\.css/);
   assert.match(home, /scripts\/tflix-hero\.js/);
   assert.match(home, /fonts\.googleapis\.com/);
@@ -20,6 +24,10 @@ test("TFLIX-style trending billboard is restored above the unchanged featured-ca
   assert.match(heroCss, /--accent:\s*#f5f7fa/);
   assert.match(heroCss, /--accent-h:\s*#fff/);
   assert.doesNotMatch(heroCss, /#e50914|#ff222e|rgba\(229,\s*9,\s*20/i, "hero must keep Vivid's neutral palette");
+  assert.match(heroCss, /env\(safe-area-inset-top, 0px\)/, "header must respect the iPhone notch/Dynamic Island safe area");
+  assert.match(heroCss, /env\(safe-area-inset-bottom, 0px\)/, "hero actions must sit above the home indicator");
+  assert.match(heroCss, /height: clamp\(520px, 74svh, 680px\)/, "mobile hero uses the small viewport-aware height");
+  assert.doesNotMatch(heroCss, /margin-bottom:\s*-8vh/, "hero must not overlap the following content");
 
   for (const path of [
     "../styles/vivid-cinematic.css",
