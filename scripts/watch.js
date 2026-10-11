@@ -180,7 +180,7 @@ function getSourceLabel(source) {
   if (source === "vidlink") return "VidLink alternate source";
   if (source === "vidplus") return "VidPlus alternate source";
   if (source === "vidking") return "VidKing alternate source · resume seeking may be unavailable";
-  return "VidAPI alternate source";
+  return "VidAPI primary source";
 }
 
 function triggerFallback(reason = "source_error") {
