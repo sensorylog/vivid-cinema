@@ -27,15 +27,6 @@ export function validateDirectStreamUrl(value) {
 
 function inferStreamType(url, declaredType) {
   return inferAuthorizedStreamType(url, declaredType);
-
-function inferStreamType(url, declaredType) {
-  const type = String(declaredType || "").toLowerCase();
-  if (["hls", "dash", "file"].includes(type)) return type;
-  const pathname = url.pathname.toLowerCase();
-  if (pathname.endsWith(".m3u8")) return "hls";
-  if (pathname.endsWith(".mpd")) return "dash";
-  if (/\.(mp4|m4v|webm|mov|ogv)$/.test(pathname)) return "file";
-  return "";
 }
 
 export async function resolveDirectStream(media, params) {
