@@ -141,7 +141,7 @@ function setHeroText(item){
 }
 function youtubeUrl(key,muted=true){
  const params=new URLSearchParams({
-   autoplay:"1",mute:muted?"1":"0",controls:"0",playsinline:"1",rel:"0",
+   autoplay:"0",mute:muted?"1":"0",controls:"0",playsinline:"1",rel:"0",
    iv_load_policy:"3",enablejsapi:"1",origin:window.location.origin
  });
  return "https://www.youtube.com/embed/"+encodeURIComponent(key)+"?"+params.toString();
@@ -161,11 +161,21 @@ window.addEventListener("message",event=>{
  let message;
  try{message=typeof event.data==="string"?JSON.parse(event.data):event.data}catch{return}
  if(message?.event==="onStateChange"&&Number(message.info)===1){
-   iframe.classList.add("is-ready");
-   $("hero-fallback")?.classList.remove("is-visible");
+  iframe.classList.add("is-ready");
+  $("hero-fallback")?.classList.remove("is-visible");
+  if(heroPlaying&&!document.hidden){
+    clearTimeout(heroTimer);
+    heroTimer=setTimeout(()=>{if(heroPlaying&&!document.hidden)showHero(activeIndex+1)},HERO_TRAILER_DURATION);
+  }
+ }else if(message?.event==="onStateChange"&&Number(message.info)===2){
+  clearTimeout(heroTimer);
+ }else if(message?.event==="onStateChange"&&Number(message.info)===0){
+  clearTimeout(heroTimer);
+  if(heroPlaying&&!document.hidden)showHero(activeIndex+1);
  }else if(message?.event==="onError"){
-   iframe.classList.remove("is-ready");
-   $("hero-fallback")?.classList.add("is-visible");
+  clearTimeout(heroTimer);
+  iframe.classList.remove("is-ready");
+  $("hero-fallback")?.classList.add("is-visible");
  }
 });
 
@@ -193,11 +203,13 @@ async function loadHeroVideo(item){
      sendHeroPlayerCommand("addEventListener",["onStateChange"]);
      sendHeroPlayerCommand("addEventListener",["onError"]);
      if(!heroPlaying){sendHeroPlayerCommand("pauseVideo");return;}
-     // Retry muted autoplay on browsers that ignore the initial embed parameter.
-     [250,800,1800,3200].forEach(delay=>setTimeout(()=>{
-       if(token!==heroLoadToken||!heroPlaying)return;
-       sendHeroPlayerCommand("playVideo");
-     },delay));
+     // Register events before requesting playback so the first state change is not missed.
+      [250,800,1800,3200].forEach(delay=>setTimeout(()=>{
+        if(token!==heroLoadToken||!heroPlaying)return;
+        sendHeroPlayerCommand("addEventListener",["onStateChange"]);
+        sendHeroPlayerCommand("addEventListener",["onError"]);
+        sendHeroPlayerCommand("playVideo");
+      },delay));
    };
    iframe.onerror=()=>{if(token!==heroLoadToken)return;iframe.classList.remove("is-ready");fallback.classList.add("is-visible");};
    const setTrailer=()=>{
@@ -237,7 +249,6 @@ async function showHero(index,userAction=false){
  }
  clearTimeout(heroTimer);
  void loadHeroVideo(item);
- heroTimer=setTimeout(()=>showHero(activeIndex+1),HERO_TRAILER_DURATION);
 }
 async function initHero(){
  try{
@@ -267,8 +278,6 @@ function handleHeroVisibility(){
  heroVisibilityPaused=false;
  if(heroPlaying){
    sendHeroPlayerCommand("playVideo");
-   clearTimeout(heroTimer);
-   heroTimer=setTimeout(()=>showHero(activeIndex+1),HERO_TRAILER_DURATION);
  }
 }
 
@@ -280,7 +289,7 @@ function togglePause(){
  sendHeroPlayerCommand(heroPlaying?"playVideo":"pauseVideo");
  const button=$("hero-pause");
  if(button){button.innerHTML='<i class="bi bi-'+(heroPlaying?"pause-fill":"play-fill")+'"></i>';button.setAttribute("aria-label",heroPlaying?"Pause trailer":"Play trailer");}
- if(heroPlaying)heroTimer=setTimeout(()=>showHero(activeIndex+1),HERO_TRAILER_DURATION);
+ if(!heroPlaying)clearTimeout(heroTimer);
 }
 
 function wireRails(){
