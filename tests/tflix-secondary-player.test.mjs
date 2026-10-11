@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { buildTflixSecondaryServerUrl, listTflixSecondaryServers } from "../scripts/tflix-secondary-player.js";
+import { buildTflixSecondaryServerUrl, listTflixSecondaryServers } from "../scripts/playback/tflix-secondary-player.js";
 const movie={id:"27205",tmdbId:"27205",type:"movie"};
 const episode={id:"1399",tmdbId:"1399",type:"tv",season:2,episode:7};
 test("secondary player exposes six TFLIX server choices",()=>{const servers=listTflixSecondaryServers();assert.equal(servers.length,6);assert.equal(new Set(servers.map(server=>server.id)).size,6);assert.deepEqual(servers.map(server=>server.id),["vixsrc","moviesapi","vidsrc-embed","cinesrc","vidfast","vidlink"]);assert.deepEqual(servers.map(server=>server.name),["Rakan","Bard","Xayah","Ekko","Naafiri","Ryze"]);});
