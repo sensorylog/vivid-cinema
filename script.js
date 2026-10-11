@@ -161,11 +161,21 @@ window.addEventListener("message",event=>{
  let message;
  try{message=typeof event.data==="string"?JSON.parse(event.data):event.data}catch{return}
  if(message?.event==="onStateChange"&&Number(message.info)===1){
-   iframe.classList.add("is-ready");
-   $("hero-fallback")?.classList.remove("is-visible");
+  iframe.classList.add("is-ready");
+  $("hero-fallback")?.classList.remove("is-visible");
+  if(heroPlaying&&!document.hidden){
+    clearTimeout(heroTimer);
+    heroTimer=setTimeout(()=>{if(heroPlaying&&!document.hidden)showHero(activeIndex+1)},HERO_TRAILER_DURATION);
+  }
+ }else if(message?.event==="onStateChange"&&Number(message.info)===2){
+  clearTimeout(heroTimer);
+ }else if(message?.event==="onStateChange"&&Number(message.info)===0){
+  clearTimeout(heroTimer);
+  if(heroPlaying&&!document.hidden)showHero(activeIndex+1);
  }else if(message?.event==="onError"){
-   iframe.classList.remove("is-ready");
-   $("hero-fallback")?.classList.add("is-visible");
+  clearTimeout(heroTimer);
+  iframe.classList.remove("is-ready");
+  $("hero-fallback")?.classList.add("is-visible");
  }
 });
 
