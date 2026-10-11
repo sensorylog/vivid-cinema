@@ -471,7 +471,9 @@ service cloud.firestore {
       allow delete: if isModerator() || (verifiedMember() && resource.data.authorId == request.auth.uid);
 
       match /votes/{userId} {
-        allow get, list: if get(/databases/$(database)/documents/communityPolls/$(pollId)).data.status == 'published';
+        allow get: if signedIn() && request.auth.uid == userId
+          && get(/databases/$(database)/documents/communityPolls/$(pollId)).data.status == 'published';
+        allow list: if false;
         allow create: if verifiedMember() && request.auth.uid == userId
           && get(/databases/$(database)/documents/communityPolls/$(pollId)).data.status == 'published'
           && request.resource.data.keys().hasOnly(['userId','optionIndex','createdAt'])
