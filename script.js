@@ -139,7 +139,7 @@ function setHeroText(item){
  $("hero-more").onclick=()=>location.href=getMediaUrl(item);
  $("hero-fallback").style.backgroundImage=item.backdrop_path?'url("'+getImageUrl(item.backdrop_path,"w1280")+'")':"none";
 }
-function youtubeUrl(key,muted=true){
+function youtubeUrl(key){
  const params=new URLSearchParams({
    autoplay:"1",mute:"1",controls:"0",playsinline:"1",rel:"0",
    iv_load_policy:"3",enablejsapi:"1",origin:window.location.origin
@@ -215,7 +215,7 @@ async function loadHeroVideo(item){
    iframe.onerror=()=>{if(token!==heroLoadToken)return;iframe.classList.remove("is-ready");fallback.classList.add("is-visible");};
    const setTrailer=()=>{
      if(token!==heroLoadToken)return;
-     iframe.src=youtubeUrl(trailer.key,true);
+     iframe.src=youtubeUrl(trailer.key);
      iframe.dataset.videoKey=trailer.key;
    };
    // Let the cinematic artwork establish the scene before the auto-preview starts.
