@@ -33,3 +33,10 @@ test("notification navigation is restricted to the app origin", () => {
   assert.match(source, /url\.origin===self\.location\.origin/);
   assert.match(source, /new URL\(client\.url\)\.origin===self\.location\.origin/);
 });
+
+test("MediaForge launcher assets are included in the offline shell", () => {
+  assert.match(source, /"\.\/mediaforge\.html"/);
+  assert.match(source, /"\.\/styles\/vivid-mediaforge\.css"/);
+  assert.match(source, /"\.\/scripts\/mediaforge\.js"/);
+  assert.match(source, /vivid-cinema-shell-v141/);
+});
