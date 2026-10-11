@@ -184,6 +184,9 @@ body.vivid-watch-page :is(a, button):focus-visible {
   }
 }
 @media (max-width: 760px) {
+  body.vivid-watch-page {
+    padding-bottom: calc(var(--vivid-mobile-nav-height, 64px) + env(safe-area-inset-bottom, 0px));
+  }
   body.vivid-watch-page .vivid-watch-hero {
     padding: 14px 16px 8px;
   }
