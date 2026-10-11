@@ -9,6 +9,7 @@ import { recordBehavior, startIntelligenceSync } from "./intelligence.js";
 import { hasDirectStreamIntegration, playDirectStream, resolveDirectStream, stopDirectStream } from "./player-engine.js";
 import { buildCustomEmbedUrl, getCustomPlaybackServer, listCustomPlaybackServers } from "./playback-servers.js";
 import { mountPlaybackServerSettings } from "./server-settings.js";
+import { buildVidapiEmbedUrl, buildVidsrcEmbedUrl, buildVidlinkEmbedUrl, buildVidplusEmbedUrl, buildVidkingEmbedUrl } from "./playback-urls.js";
 
 const $ = (id) => document.getElementById(id);
 const route = getRoute();
@@ -98,69 +99,6 @@ function resolveImdbId(source) {
   return /^tt\d+$/i.test(id) ? id : "";
 }
 
-function buildVidapiEmbedUrl(params, startAt = 0) {
-  const base = String(VIVID_CONFIG.api.vidapiEmbedBaseUrl || "").replace(/\/+$/, "");
-  const query = new URLSearchParams({ autoplay: "1", controls: "1", overlay: "1" });
-  if (Number(startAt) > 5) query.set("resumeAt", String(Math.floor(Number(startAt))));
-  return params.type === "tv"
-    ? base + "/embed/tv/" + encodeURIComponent(params.id) + "/" + params.season + "/" + params.episode + "?" + query
-    : base + "/embed/movie/" + encodeURIComponent(params.id) + "?" + query;
-}
-
-function buildVidlinkEmbedUrl(params, startAt = 0) {
-  const base = String(VIVID_CONFIG.api.vidlinkEmbedBaseUrl || "https://vidlink.pro").replace(/\/+$/, "");
-  const query = new URLSearchParams({ primaryColor: "e50914", secondaryColor: "1b1b1b", iconColor: "ffffff", title: "false", poster: "false" });
-  if (Number(startAt) > 5) query.set("startAt", String(Math.floor(Number(startAt))));
-  if (route.params.get("anime") === "1") {
-    if (!malId) return "";
-    query.set("fallback", "true");
-    return base + "/anime/" + encodeURIComponent(malId) + "/" + params.episode + "/sub?" + query;
-  }
-  const id = encodeURIComponent(tmdbId || imdbId || params.id);
-  const path = params.type === "tv"
-    ? "/tv/" + id + "/" + params.season + "/" + params.episode
-    : "/movie/" + id;
-  return base + path + "?" + query;
-}
-
-function buildVidsrcEmbedUrl(params, startAt = 0) {
-  const base = String(VIVID_CONFIG.api.vidsrcEmbedBaseUrl || "https://vidsrc.sh").replace(/\/+$/, "");
-  const id = encodeURIComponent(tmdbId || imdbId);
-  const path = params.type === "tv"
-    ? "/embed/tv/" + id + "/" + params.season + "/" + params.episode
-    : "/embed/movie/" + id;
-  const query = new URLSearchParams({ ds_lang: "en" });
-  if (Number(startAt) > 5) query.set("startAt", String(Math.floor(Number(startAt))));
-  return base + path + "?" + query;
-}
-
-function buildVidplusEmbedUrl(params, startAt = 0) {
-  const base = String(VIVID_CONFIG.api.vidplusEmbedBaseUrl || "https://player.vidplus.to").replace(/\/+$/, "");
-  const query = new URLSearchParams({ autoplay: "false", primarycolor: "e50914", secondarycolor: "171717", iconcolor: "ffffff" });
-  if (Number(startAt) > 5) query.set("startAt", String(Math.floor(Number(startAt))));
-  if (route.params.get("anime") === "1") {
-    if (!aniListId) return "";
-    query.set("dub", "false");
-    return base + "/embed/anime/" + encodeURIComponent(aniListId) + "/" + params.episode + "?" + query;
-  }
-  const id = encodeURIComponent(tmdbId || params.id);
-  const path = params.type === "tv"
-    ? "/embed/tv/" + id + "/" + params.season + "/" + params.episode
-    : "/embed/movie/" + id;
-  return base + path + "?" + query;
-}
-
-// CINEXTMA documents VidKing as an additional movie/TV source. Its current
-// progress-seeking parameter is unreliable, so we intentionally do not pass it.
-function buildVidkingEmbedUrl(params) {
-  const id = encodeURIComponent(tmdbId || params.id);
-  const query = new URLSearchParams({ color: "e50914", autoplay: "false" });
-  const path = params.type === "tv"
-    ? "/embed/tv/" + id + "/" + params.season + "/" + params.episode
-    : "/embed/movie/" + id;
-  return "https://www.vidking.net" + path + "?" + query;
-}
-
 async function resolveAnimeIds(title) {
   if (route.params.get("anime") !== "1" || !title) return { aniListId: "", malId: "" };
   try {
@@ -195,7 +133,11 @@ function fallbackDelayMs() {
 }
 
 function hasFallbackId() {
-  return Boolean(tmdbId || imdbId);
+  return Boolean(tmdbId || imdbId || /^tt\d+$/i.test(String(currentParams?.id || "")));
+}
+
+function hasTmdbId() {
+  return Boolean(tmdbId || /^\d+$/.test(String(currentParams?.id || "")));
 }
 
 function isAnimePlayback() {
@@ -210,17 +152,18 @@ function sourceAvailable(source) {
     if (source === "vidlink") return Boolean(malId);
     return false;
   }
-  if (source === "vidapi") return true;
-  if (source === "vidking") return hasFallbackId();
-  return hasFallbackId();
+  if (source === "vidapi") return hasFallbackId();
+  if (source === "vidsrc") return hasFallbackId();
+  if (source === "vidlink" || source === "vidplus" || source === "vidking") return hasTmdbId();
+  return false;
 }
 
 function getNextSource(source) {
   // Anime providers use different catalog IDs; try only providers with a resolved ID.
-  // VidPlus remains manual-only for standard movie/TV playback until coverage is verified.
+  // Standard movie/TV providers use the documented TMDB-based URL builders.
   const order = isAnimePlayback()
     ? ["vidplus", "vidlink"]
-    : ["vidapi", "vidsrc", "vidlink", "vidking", ...(sourceAvailable("direct") ? ["direct"] : []), ...listCustomPlaybackServers().map(server => "custom:" + server.id)];
+    : ["vidapi", "vidsrc", "vidlink", "vidplus", "vidking", ...(sourceAvailable("direct") ? ["direct"] : []), ...listCustomPlaybackServers().map(server => "custom:" + server.id)];
   const index = order.indexOf(source);
   // Cycle through alternatives so a remembered last-position provider can still recover
   // to the primary source instead of getting stuck with no next server.
@@ -233,11 +176,11 @@ function getNextSource(source) {
 function getSourceLabel(source) {
   if (typeof source === "string" && source.startsWith("custom:")) return (getCustomPlaybackServer(source.slice(7))?.name || "Custom server") + " · external embed";
   if (source === "direct") return "Authorized direct stream · HLS/DASH";
-  if (source === "vidsrc") return "Powered by VidSrc · primary source";
+  if (source === "vidsrc") return "VidSrc alternate source";
   if (source === "vidlink") return "VidLink alternate source";
   if (source === "vidplus") return "VidPlus alternate source";
   if (source === "vidking") return "VidKing alternate source · resume seeking may be unavailable";
-  return "VidAPI alternate source";
+  return "VidAPI primary source";
 }
 
 function triggerFallback(reason = "source_error") {
@@ -403,9 +346,9 @@ function setPlayerSource(source, params, startAt = 0) {
   if (source === "vidlink") {
     if (route.params.get("anime") === "1" ? !malId : !hasFallbackId()) return;
     primaryHealthy = false;
-    const vidlinkUrl = buildVidlinkEmbedUrl(params);
+    const vidlinkUrl = buildVidlinkEmbedUrl(params, { tmdbId, malId, anime: isAnimePlayback(), startAt });
     if (!vidlinkUrl) return;
-    player.src = buildVidlinkEmbedUrl(params, startAt);
+    player.src = vidlinkUrl;
     if (status) {
       status.textContent = "Loading VidLink alternate source…";
       status.classList.remove("is-warning");
@@ -419,7 +362,7 @@ function setPlayerSource(source, params, startAt = 0) {
   } else if (source === "vidsrc") {
     if (!hasFallbackId()) return;
     primaryHealthy = false;
-    player.src = buildVidsrcEmbedUrl(params, startAt);
+    player.src = buildVidsrcEmbedUrl(params, { tmdbId, imdbId, startAt });
     if (status) {
       status.textContent = "Loading VidSrc alternate source…";
       status.classList.remove("is-warning");
@@ -433,9 +376,9 @@ function setPlayerSource(source, params, startAt = 0) {
   } else if (source === "vidplus") {
     if (route.params.get("anime") === "1" ? !aniListId : !hasFallbackId()) return;
     primaryHealthy = false;
-    const vidplusUrl = buildVidplusEmbedUrl(params);
+    const vidplusUrl = buildVidplusEmbedUrl(params, { tmdbId, aniListId, anime: isAnimePlayback(), startAt });
     if (!vidplusUrl) return;
-    player.src = buildVidplusEmbedUrl(params, startAt);
+    player.src = vidplusUrl;
     if (status) {
       status.textContent = "Loading VidPlus alternate source…";
       status.classList.remove("is-warning");
@@ -449,7 +392,7 @@ function setPlayerSource(source, params, startAt = 0) {
   } else if (source === "vidking") {
     if (isAnimePlayback() || !hasFallbackId()) return;
     primaryHealthy = false;
-    player.src = buildVidkingEmbedUrl(params);
+    player.src = buildVidkingEmbedUrl(params, { tmdbId, startAt });
     if (status) {
       status.textContent = "Loading VidKing alternate source… Resume seeking may not be supported by this provider.";
       status.classList.remove("is-warning");
@@ -462,7 +405,7 @@ function setPlayerSource(source, params, startAt = 0) {
     }, 25000);
   } else {
     primaryHealthy = false;
-    player.src = buildVidapiEmbedUrl(params, startAt);
+    player.src = buildVidapiEmbedUrl(params, { startAt });
     if (status) {
       status.textContent = Number(startAt) > 5 ? "Resuming where you left off…" : "Preparing playback…";
       status.classList.remove("is-warning");
@@ -792,9 +735,8 @@ function renderShell(params) {
       if (status) status.textContent = "Matching this title to an anime player…";
       updateSourceLabel();
     } else {
-      // Do not load an external stream until the viewer explicitly opens the player.
-      sourceAttempted.clear();
-      activeSource = "vidapi";
+      // Keep the source chosen by openPlayerWindow (including a remembered server).
+      // Resetting activeSource here would make the iframe and event/fallback state disagree.
       updateSourceLabel();
     };
   }
@@ -856,7 +798,7 @@ function handlePlayerEvent(event) {
     /(^|\D)(404|403|500|502|503)(\D|$)/.test(errorValue) ||
     /(error|failed|failure|not.?found|unavailable|offline|load.?failed|source.?failed)/.test(statusValue + " " + errorValue);
 
-  if (looksLikeFailure && (activeSource === "vidapi" || activeSource === "vidsrc" || activeSource === "vidlink" || activeSource === "vidplus")) {
+  if (looksLikeFailure && ["vidapi", "vidsrc", "vidlink", "vidplus", "vidking"].includes(activeSource)) {
     triggerFallback((isVidapi ? "vidapi_" : activeSource + "_") + (numericCode || statusValue || "error"));
     return;
   }
@@ -1020,7 +962,7 @@ async function load() {
   try {
     details = currentParams.type === "tv" ? await tmdbApi.tvDetails(currentParams.id) : await tmdbApi.movieDetails(currentParams.id);
     media = normalizeMedia(details, currentParams.type);
-    imdbId = resolveImdbId(details);
+    imdbId = resolveImdbId(details) || (/^tt\d+$/i.test(String(currentParams.id || "")) ? String(currentParams.id) : "");
     tmdbId = /^\d+$/.test(String(currentParams.id || "")) ? String(currentParams.id) : String(details?.id || "");
     const animeIds = await resolveAnimeIds(media?.title || details?.name || details?.title || "");
     aniListId = animeIds.aniListId;
