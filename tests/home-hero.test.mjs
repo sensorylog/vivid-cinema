@@ -93,7 +93,7 @@ test("TFLIX-style hero uses TMDB stills and routes to Vivid title details withou
 
 test("service worker shell cache includes the new hero assets", () => {
   const sw = read("../service-worker.js");
-  assert.match(sw, /const CACHE_NAME = "vivid-cinema-shell-v153";/);
+  assert.match(sw, /const CACHE_NAME = "vivid-cinema-shell-v158";/);
   assert.match(sw, /\.\/styles\/vivid-tflix-hero\.css/);
   assert.match(sw, /\.\/styles\/vivid-tflix-hero\.css\?v=hero-motion-2/);
   assert.match(home, /vivid-tflix-hero\.css\?v=hero-motion-2/);

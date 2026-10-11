@@ -624,3 +624,8 @@ body.vivid-atmosphere :where(a,button,input,select,textarea,[tabindex]):focus-vi
   outline:2px solid var(--vivid-focus);
   outline-offset:3px;
 }
+
+
+/* Keep the streaming surface cheaper to composite on desktop GPUs. The watch page retains its static cinematic backdrop without the full-screen blur drift and blend overlay. */
+body.vivid-watch-page.vivid-atmosphere::before{animation:none;filter:none;opacity:.42}
+body.vivid-watch-page.vivid-atmosphere::after{display:none}
