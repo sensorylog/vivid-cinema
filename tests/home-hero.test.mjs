@@ -15,6 +15,12 @@ test("TFLIX-style trending billboard is restored above the unchanged featured-ca
   assert.match(home, /scripts\/tflix-hero\.js/);
   assert.match(home, /fonts\.googleapis\.com/);
 
+  const heroCss = read("../styles/vivid-tflix-hero.css");
+  assert.match(heroCss, /--bg:\s*var\(--vivid-site-ink,\s*#07090d\)/);
+  assert.match(heroCss, /--accent:\s*#f5f7fa/);
+  assert.match(heroCss, /--accent-h:\s*#fff/);
+  assert.doesNotMatch(heroCss, /#e50914|#ff222e|rgba\(229,\s*9,\s*20/i, "hero must keep Vivid's neutral palette");
+
   for (const path of [
     "../styles/vivid-cinematic.css",
     "../styles/vivid-atmosphere.css",
@@ -33,21 +39,32 @@ test("TFLIX-style trending billboard is restored above the unchanged featured-ca
 
 test("TFLIX-style hero uses TMDB stills and routes to Vivid title details without embedding a trailer", () => {
   const js = read("../scripts/tflix-hero.js");
-  assert.match(js, /tmdbApi\.trending\("all",\s*"day"\)/);
+  assert.match(js, /tmdbApi\.trending\("all",\s*"day",\s*1,\s*\{\s*cache:\s*false\s*\}\)/);
   assert.match(js, /getImageUrl\(item\.backdrop_path,\s*"original"\)/);
   assert.match(js, /getMediaUrl\(item\)/);
   assert.match(js, /startHeroTimer\(\)/);
+  assert.match(js, /aria-hidden", "true"/);
+  assert.match(js, /\.inert = true/);
+  assert.match(js, /tmdbApi\.trending\("movie", "day", 1, \{ cache: false \}\)/, "a fresh fallback feed is available");
+  assert.match(js, /slide\.inert = index !== 0/);
+  assert.match(js, /window\.vividCinemaSelectHero = selectHeroItem/);
+  assert.match(js, /new CustomEvent\("vivid:hero-change"/);
+
+  const api = read("../scripts/tmdb.js");
+  assert.match(api, /trending: \(mediaType = "all", timeWindow = "week", page = 1, options = \{\}\) => tmdb\("trending\/" \+ mediaType \+ "\/" \+ timeWindow, \{ page \}, options\)/);
   assert.doesNotMatch(js, /youtube\.com|ytimg\.com|iframe|HERO_TRAILER/i);
 
   const homeScript = read("../script.js");
   assert.match(homeScript, /function renderFeatureStrip\(\)/);
   assert.match(homeScript, /async function initFeatureStrip\(\)/);
   assert.match(homeScript, /initFeatureStrip\(\);void loadHome\(\)/);
+  assert.match(homeScript, /window\.vividCinemaSelectHero/);
+  assert.match(homeScript, /addEventListener\("vivid:hero-change"/);
 });
 
 test("service worker shell cache includes the new hero assets", () => {
   const sw = read("../service-worker.js");
-  assert.match(sw, /const CACHE_NAME = "vivid-cinema-shell-v147";/);
+  assert.match(sw, /const CACHE_NAME = "vivid-cinema-shell-v148";/);
   assert.match(sw, /\.\/styles\/vivid-tflix-hero\.css/);
   assert.match(sw, /\.\/scripts\/tflix-hero\.js/);
 });

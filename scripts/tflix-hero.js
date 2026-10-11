@@ -40,10 +40,19 @@ function goToHero(index) {
   const dots = hero?.querySelectorAll(".hero-dot") || [];
   slides[heroIndex]?.classList.remove("active");
   dots[heroIndex]?.classList.remove("active");
+  if (slides[heroIndex]) {
+    slides[heroIndex].setAttribute("aria-hidden", "true");
+    slides[heroIndex].inert = true;
+  }
   heroIndex = next;
   slides[heroIndex]?.classList.add("active");
   dots[heroIndex]?.classList.add("active");
+  if (slides[heroIndex]) {
+    slides[heroIndex].setAttribute("aria-hidden", "false");
+    slides[heroIndex].inert = false;
+  }
   dots.forEach((dot, index) => dot.setAttribute("aria-pressed", String(index === heroIndex)));
+  notifyHeroChange();
 
   const bg = slides[heroIndex]?.querySelector(".hero-bg");
   if (bg) {
@@ -61,6 +70,8 @@ function createSlide(item, index) {
   const slide = document.createElement("article");
   slide.className = "hero-slide" + (index === 0 ? " active" : "");
   slide.setAttribute("aria-label", title);
+  slide.setAttribute("aria-hidden", String(index !== 0));
+  slide.inert = index !== 0;
 
   const backdrop = document.createElement("div");
   backdrop.className = "hero-bg";
@@ -139,6 +150,7 @@ function renderHero(items) {
   }
 
   hero.classList.toggle("empty", !items.length);
+  notifyHeroChange();
   if (items[0]?.backdrop_path) {
     const preload = new Image();
     preload.decoding = "async";
@@ -148,23 +160,74 @@ function renderHero(items) {
   startHeroTimer();
 }
 
+function notifyHeroChange() {
+  const item = heroSlides[heroIndex] || null;
+  const detail = item ? { id: String(item.id), media_type: item.media_type } : null;
+  window.vividCinemaActiveHero = detail;
+  window.dispatchEvent(new CustomEvent("vivid:hero-change", { detail }));
+}
+
+function selectHeroItem(item) {
+  if (!item || item.id == null || !item.backdrop_path) return false;
+  const mediaType = item.media_type === "tv" ? "tv" : "movie";
+  const existingIndex = heroSlides.findIndex((slide) =>
+    String(slide.id) === String(item.id) && slide.media_type === mediaType
+  );
+  if (existingIndex >= 0) {
+    goToHero(existingIndex);
+    return true;
+  }
+
+  const selected = { ...item, media_type: mediaType };
+  heroSlides = [
+    selected,
+    ...heroSlides.filter((slide) =>
+      !(String(slide.id) === String(selected.id) && slide.media_type === mediaType)
+    )
+  ].slice(0, 5);
+  renderHero(heroSlides);
+  return true;
+}
+
+window.vividCinemaSelectHero = selectHeroItem;
+
+function getHeroItems(data, mediaType) {
+  const eligible = (data?.results || []).filter((item) => {
+    if (!item?.backdrop_path) return false;
+    if (mediaType === "movie") return !item.media_type || item.media_type === "movie";
+    return item.media_type === "movie" || item.media_type === "tv";
+  });
+  return normalizeResults(eligible, mediaType === "movie" ? "movie" : null)
+    .filter((item) => item.backdrop_path)
+    .slice(0, 5);
+}
+
 async function loadHero() {
   const hero = document.getElementById("hero");
   if (!hero) return;
+
   try {
     let data;
+    let mediaType = "all";
     try {
-      data = await tmdbApi.trending("all", "day");
+      data = await tmdbApi.trending("all", "day", 1, { cache: false });
     } catch (error) {
-      console.warn("Vivid trending hero fallback:", error);
-      data = await tmdbApi.trending("movie", "day");
+      console.warn("Vivid daily trending (all) unavailable; falling back to movies:", error);
+      mediaType = "movie";
+      data = await tmdbApi.trending("movie", "day", 1, { cache: false });
     }
-    const items = normalizeResults(data?.results || [])
-      .filter(item => item.backdrop_path && (item.media_type === "movie" || item.media_type === "tv"))
-      .slice(0, 5);
+
+    let items = getHeroItems(data, mediaType);
+    if (!items.length && mediaType === "all") {
+      // Keep the billboard useful if the mixed trending feed has no usable backdrops.
+      mediaType = "movie";
+      data = await tmdbApi.trending("movie", "day", 1, { cache: false });
+      items = getHeroItems(data, mediaType);
+    }
     renderHero(items);
   } catch (error) {
     console.warn("Vivid trending hero unavailable:", error);
+    stopHeroTimer();
     hero.classList.add("empty");
   }
 }

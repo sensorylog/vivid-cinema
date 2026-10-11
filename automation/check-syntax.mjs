@@ -3,9 +3,8 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-// Keep this gate focused on the playback/security files touched by this change and
-// their direct browser-module dependencies. Unrelated legacy files are not rewritten
-// as part of this scoped hardening pass.
+// Check runtime-critical browser modules, including the home-page trending hero,
+// alongside playback/security modules and their direct dependencies.
 const files = [
   "service-worker.js",
   "scripts/watch.js",
@@ -21,7 +20,9 @@ const files = [
   "scripts/playback/playback-servers.js",
   "scripts/playback/server-settings.js",
   "scripts/playback/direct-stream-validation.js",
-  "scripts/tmdb.js"
+  "scripts/tmdb.js",
+  "scripts/tflix-hero.js",
+  "script.js"
 ];
 
 let failures = 0;

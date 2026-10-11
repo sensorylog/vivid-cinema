@@ -90,7 +90,7 @@ export const tmdbApi = Object.freeze({
   popularTv: (page = 1) => tmdb("tv/popular", { page }),
   topRatedTv: (page = 1) => tmdb("tv/top_rated", { page }),
   airingTodayTv: (page = 1) => tmdb("tv/airing_today", { page }),
-  trending: (mediaType = "all", timeWindow = "week", page = 1) => tmdb("trending/" + mediaType + "/" + timeWindow, { page }),
+  trending: (mediaType = "all", timeWindow = "week", page = 1, options = {}) => tmdb("trending/" + mediaType + "/" + timeWindow, { page }, options),
   searchMovies: (query, page = 1) => tmdb("search/movie", { query, page }),
   searchTv: (query, page = 1) => tmdb("search/tv", { query, page }),
   searchMulti: (query, page = 1) => tmdb("search/multi", { query, page }),
