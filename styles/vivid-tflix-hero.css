@@ -69,7 +69,7 @@ body.vivid-cinema-home .hero-slide.active .hero-bg {
 }
 @keyframes heroZoom {
   from { transform: scale(1.02); }
-  to { transform: scale(1.10); }
+  to { transform: scale(1.035); }
 }
 body.vivid-cinema-home .hero-bg::after {
   content: '';
@@ -263,4 +263,48 @@ body.vivid-cinema-home .hero-dot:focus-visible {
     padding-inline: 7px !important;
     font-size: .72rem !important;
   }
+}
+
+
+/* Hero framing and autoplay polish: avoid the aggressive push-in that crops faces
+   and keep the billboard content inside the visible mobile viewport. */
+body.vivid-cinema-home .hero-bg {
+  background-position: center center;
+  transform: scale(1);
+}
+body.vivid-cinema-home .hero-slide.active .hero-bg {
+  animation: heroZoom 24s ease-out forwards;
+}
+@keyframes heroZoom {
+  from { transform: scale(1); }
+  to { transform: scale(1.035); }
+}
+@media (max-width: 560px) {
+  body.vivid-cinema-home #hero {
+    height: clamp(490px, 70svh, 620px);
+    min-height: 490px;
+    max-height: 620px;
+  }
+  body.vivid-cinema-home .hero-bg {
+    background-position: center center;
+    transform: none;
+  }
+  body.vivid-cinema-home .hero-slide.active .hero-bg {
+    animation: none;
+  }
+  body.vivid-cinema-home .hero-content {
+    bottom: calc(66px + env(safe-area-inset-bottom, 0px));
+    max-height: calc(100% - 100px - env(safe-area-inset-bottom, 0px));
+  }
+  body.vivid-cinema-home .hero-overview {
+    -webkit-line-clamp: 2;
+    margin-bottom: .8rem;
+  }
+  body.vivid-cinema-home .hero-title {
+    margin-bottom: .7rem;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  body.vivid-cinema-home .hero-slide { transition-duration: .2s; }
+  body.vivid-cinema-home .hero-bg { animation: none !important; }
 }
