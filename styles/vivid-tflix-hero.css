@@ -310,8 +310,9 @@ body.vivid-cinema-home .hero-slide.active .hero-bg {
 }
 
 
-/* Trailer layer: same exact hero bounds as the retained backdrop artwork.
-   The iframe is sized as a 16:9 cover and center-cropped, never stretched. */
+/* Full-bleed trailer background. The YouTube player itself must be larger
+   than the hero viewport, then center-cropped by the clipped layer. This avoids
+   the small, letterboxed mobile-player look while preserving the 16:9 ratio. */
 body.vivid-cinema-home #hero {
   container-type: size;
 }
@@ -325,7 +326,7 @@ body.vivid-cinema-home .hero-trailer-layer {
   overflow: hidden;
   opacity: 0;
   pointer-events: none;
-  background: transparent;
+  background: #000;
   transition: opacity .55s ease;
 }
 body.vivid-cinema-home .hero-trailer-layer.is-ready {
@@ -336,11 +337,15 @@ body.vivid-cinema-home .hero-trailer-frame {
   top: 50%;
   left: 50%;
   display: block;
-  /* Viewport-based cover fallback for browsers without container query units. */
-  width: max(100%, 177.78vh);
-  height: max(100%, 100vh);
+  /* 16:9 cover fallback: size to the viewport, not the phone's player box. */
+  width: max(100vw, 177.78vh);
+  height: max(100vh, 56.25vw);
+  min-width: 100%;
+  min-height: 100%;
+  aspect-ratio: 16 / 9;
   border: 0;
-  transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%) scale(1.08);
+  transform-origin: center;
   pointer-events: none;
 }
 body.vivid-cinema-home .hero-trailer-shade {
@@ -360,10 +365,9 @@ body.vivid-cinema-home .hero-content {
     transition: none;
   }
 }
-
 @supports (width: 1cqh) and (height: 1cqw) {
   body.vivid-cinema-home .hero-trailer-frame {
-    width: max(100%, 177.78cqh);
-    height: max(100%, 56.25cqw);
+    width: max(100cqw, 177.78cqh);
+    height: max(100cqh, 56.25cqw);
   }
 }
