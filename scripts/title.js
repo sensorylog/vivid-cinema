@@ -335,6 +335,7 @@ function render(details, externalCertification = "", externalCertificationNote =
   document.title=title+" · Vivid Cinema";
   const country=getInitialCountry(details);
   $("title-content").innerHTML=
+    '<div class="vivid-title-page-artwork" aria-hidden="true" style="--title-page-artwork: url(&quot;' + escapeHtml(backdropUrl) + '&quot;)"></div>'+
     '<section class="vivid-title-backdrop"><img class="vivid-title-backdrop-image" src="'+escapeHtml(backdropUrl)+'" alt="" aria-hidden="true" loading="eager" decoding="async" onerror="this.remove()"><div class="vivid-title-backdrop-overlay"></div><div class="vivid-title-backdrop-label">'+(media.media_type==="tv"?"SERIES":"FEATURE")+'</div></section>'+
     '<section class="vivid-title-info"><div class="vivid-title-info-inner">'+
       '<div class="vivid-title-poster"><img src="'+getImageUrl(media.poster_path,"w500")+'" alt="'+escapeHtml(title)+' poster" onerror="this.onerror=null;this.src=&quot;icons/vivid-icon.svg&quot;"></div>'+
