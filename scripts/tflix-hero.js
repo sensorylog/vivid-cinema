@@ -85,11 +85,8 @@ function activateCurrentHero() {
   const item = heroSlides[heroIndex];
   if (!item || document.hidden) return;
 
-  // Respect reduced-motion settings; the original artwork remains intact.
-  if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) {
-    heroTimer = window.setTimeout(advanceHero, NO_TRAILER_HOLD_MS);
-    return;
-  }
+  // Trailer autoplay is an explicit feature of this billboard. Reduced-motion
+  // CSS still disables decorative movement, but must not silently disable video.
 
   // Start looking up the trailer while the artwork is still on screen, so the
   // video can begin promptly after the short artwork-first moment.
