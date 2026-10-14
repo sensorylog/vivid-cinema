@@ -29,7 +29,7 @@ test("TFLIX-style trending billboard is restored above the unchanged featured-ca
   assert.match(heroCss, /height: clamp\(520px, 74svh, 680px\)/, "mobile hero uses the small viewport-aware height");
   assert.match(heroCss, /transition: opacity 1\.1s/, "hero artwork cross-fades between titles");
   assert.match(heroCss, /animation: heroZoom 18s ease-out forwards/, "active hero artwork slowly zooms in");
-  assert.match(heroCss, /@keyframes heroZoom[\\s\\S]*?to \\{ transform: scale\\(1\\.035\\); \\}/, "hero artwork uses a restrained push-in to avoid cropping faces");
+  assert.ok(heroCss.includes("to { transform: scale(1.035); }"), "hero artwork uses a restrained push-in to avoid cropping faces");
   assert.doesNotMatch(heroCss, /margin-bottom:\s*-8vh/, "hero must not overlap the following content");
 
   const desktopCss = read("../styles/vivid-desktop.css");
