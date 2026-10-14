@@ -1,0 +1,219 @@
+/* Vivid Cinema — Apple TV+-inspired mobile composition.
+   A single continuous canvas: tighter rhythm, edge-aligned artwork and quiet chrome.
+   Scope is limited to the Home page on compact touch screens. */
+@media (max-width: 640px) {
+  body.vivid-cinema-home {
+    background: #050608;
+    overflow-x: clip;
+  }
+
+  body.vivid-cinema-home .vivid-home,
+  body.vivid-cinema-home #home {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  /* Keep the header compact and respect notches/home indicators. */
+  body.vivid-cinema-home .vivid-topbar {
+    padding-top: calc(4px + env(safe-area-inset-top, 0px));
+    padding-bottom: 4px;
+  }
+  body.vivid-cinema-home .vivid-nav {
+    min-height: 44px;
+    gap: 7px;
+  }
+
+  /* The feature strip and catalogue chips read as part of the same canvas. */
+  body.vivid-cinema-home .vivid-feature-strip {
+    padding: 8px 14px 10px !important;
+  }
+  body.vivid-cinema-home .vivid-feature-viewport {
+    overflow-x: auto;
+    overflow-y: hidden;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  body.vivid-cinema-home .vivid-feature-viewport::-webkit-scrollbar {
+    display: none;
+  }
+  body.vivid-cinema-home .vivid-feature-track {
+    gap: 8px;
+  }
+  body.vivid-cinema-home .vivid-feature-card {
+    flex: 0 0 clamp(132px, 37vw, 150px);
+    width: clamp(132px, 37vw, 150px);
+    height: 78px;
+    border-radius: 9px;
+  }
+
+  body.vivid-cinema-home .vivid-catalogue-explore {
+    padding: 8px 14px 2px;
+  }
+  body.vivid-cinema-home .vivid-catalogue-explore-head {
+    margin-bottom: 9px;
+  }
+  body.vivid-cinema-home .vivid-catalogue-explore-head h2 {
+    margin: 4px 0 0;
+    font-size: 1.2rem;
+    line-height: 1.1;
+    letter-spacing: -.035em;
+  }
+  body.vivid-cinema-home .vivid-catalogue-explore-head p {
+    display: none;
+  }
+  body.vivid-cinema-home .vivid-catalogue-chips {
+    gap: 7px;
+  }
+  body.vivid-cinema-home .vivid-catalogue-chips a {
+    padding: 7px 10px;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+
+  /* Shelves visually bleed to the viewport edge while their labels keep a
+     consistent inset. This removes the nested-card/boxed-page feeling. */
+  body.vivid-cinema-home .vivid-section-wrap {
+    padding: 0 14px calc(92px + env(safe-area-inset-bottom, 0px));
+    overflow: visible;
+  }
+  body.vivid-cinema-home .vivid-rails {
+    margin-inline: -14px;
+    padding: 15px 0 12px !important;
+    border: 0;
+    background: transparent;
+  }
+  body.vivid-cinema-home .vivid-rail-head {
+    margin: 0 0 8px !important;
+    padding: 0 14px !important;
+    gap: 8px;
+    align-items: center;
+  }
+  body.vivid-cinema-home .vivid-rail-head h2 {
+    font-size: 1.06rem;
+    line-height: 1.15;
+    letter-spacing: -.025em;
+  }
+  body.vivid-cinema-home .vivid-rail-head p {
+    display: none !important;
+  }
+  body.vivid-cinema-home .vivid-rail-controls {
+    gap: 5px;
+  }
+  body.vivid-cinema-home .vivid-rail-controls button {
+    width: 30px;
+    height: 30px;
+    flex-basis: 30px;
+  }
+
+  body.vivid-cinema-home .vivid-rail {
+    gap: 9px !important;
+    margin: 0 !important;
+    padding: 2px 14px 10px !important;
+    scroll-padding-inline: 14px;
+    scroll-snap-type: x proximity;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+  body.vivid-cinema-home .vivid-card {
+    flex: 0 0 clamp(122px, 37vw, 150px) !important;
+    width: clamp(122px, 37vw, 150px) !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    border-radius: 0;
+  }
+  body.vivid-cinema-home .vivid-card-media {
+    border-radius: 9px !important;
+    background: #0b0d12;
+    box-shadow: none !important;
+  }
+  body.vivid-cinema-home .vivid-card-info {
+    padding: 7px 1px 2px !important;
+    min-height: 0;
+  }
+  body.vivid-cinema-home .vivid-card-title {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+    font-size: .73rem;
+    line-height: 1.25;
+    font-weight: 650;
+  }
+  body.vivid-cinema-home .vivid-card-sub {
+    margin-top: 3px;
+    font-size: .63rem;
+  }
+  body.vivid-cinema-home .vivid-rating {
+    top: 6px;
+    right: 6px;
+    padding: 3px 5px;
+  }
+
+  /* Ranking numerals stay outside the artwork without widening the whole rail. */
+  body.vivid-cinema-home .vivid-top10-card {
+    flex-basis: clamp(122px, 37vw, 150px) !important;
+    width: clamp(122px, 37vw, 150px) !important;
+    padding-left: 27px;
+  }
+  body.vivid-cinema-home .vivid-top10-card .vivid-top10-rank {
+    left: -1px;
+    bottom: 25px;
+    font-size: 3.05rem;
+  }
+
+  /* Keep landscape Continue Watching cards distinct from poster shelves. */
+  body.vivid-cinema-home .vivid-continue-card {
+    flex-basis: min(78vw, 320px) !important;
+    width: min(78vw, 320px) !important;
+    min-width: 0 !important;
+  }
+  body.vivid-cinema-home .vivid-continue-card .vivid-card-media {
+    border-radius: 9px !important;
+  }
+
+  body.vivid-cinema-home .vivid-tonight-inline,
+  body.vivid-cinema-home .vivid-news-home-card,
+  body.vivid-cinema-home .vivid-home-breathe {
+    margin-inline: 0;
+    border-radius: 14px;
+  }
+
+  /* The page remains one continuous vertical scroll; only shelves pan sideways. */
+  body.vivid-cinema-home .vivid-rail,
+  body.vivid-cinema-home .vivid-feature-viewport {
+    touch-action: pan-x pan-y;
+  }
+}
+
+@media (max-width: 380px) {
+  body.vivid-cinema-home .vivid-topbar .vivid-nav {
+    gap: 5px;
+  }
+  body.vivid-cinema-home .vivid-brand {
+    font-size: .94rem;
+  }
+  body.vivid-cinema-home .vivid-rail-head h2 {
+    font-size: 1rem;
+  }
+  body.vivid-cinema-home .vivid-card {
+    flex-basis: clamp(116px, 36vw, 136px) !important;
+    width: clamp(116px, 36vw, 136px) !important;
+  }
+  body.vivid-cinema-home .vivid-top10-card {
+    flex-basis: clamp(116px, 36vw, 136px) !important;
+    width: clamp(116px, 36vw, 136px) !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body.vivid-cinema-home .vivid-rail,
+  body.vivid-cinema-home .vivid-feature-viewport,
+  body.vivid-cinema-home .vivid-card,
+  body.vivid-cinema-home .vivid-card img {
+    scroll-behavior: auto !important;
+    transition: none !important;
+    animation: none !important;
+  }
+}
