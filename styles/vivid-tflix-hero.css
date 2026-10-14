@@ -336,8 +336,9 @@ body.vivid-cinema-home .hero-trailer-frame {
   top: 50%;
   left: 50%;
   display: block;
-  width: max(100%, 177.78cqh);
-  height: max(100%, 56.25cqw);
+  /* Viewport-based cover fallback for browsers without container query units. */
+  width: max(100%, 177.78vh);
+  height: max(100%, 100vh);
   border: 0;
   transform: translate(-50%, -50%);
   pointer-events: none;
@@ -357,5 +358,12 @@ body.vivid-cinema-home .hero-content {
 @media (prefers-reduced-motion: reduce) {
   body.vivid-cinema-home .hero-trailer-layer {
     transition: none;
+  }
+}
+
+@supports (width: 1cqh) and (height: 1cqw) {
+  body.vivid-cinema-home .hero-trailer-frame {
+    width: max(100%, 177.78cqh);
+    height: max(100%, 56.25cqw);
   }
 }
