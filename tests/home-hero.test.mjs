@@ -34,6 +34,9 @@ test("TFLIX-style trending billboard is restored above the unchanged featured-ca
 
   const desktopCss = read("../styles/vivid-desktop.css");
   assert.doesNotMatch(desktopCss, /\.vivid-feature-strip\s*\{[^}]*margin:\s*-\d+px/is, "desktop featured strip must never overlap the hero");
+  const parsedDesktopCss = stripComments(desktopCss);
+  assert.match(parsedDesktopCss, /\.vivid-cinema-home\s+#hero\s*\{/, "desktop hero sizing must remain active outside comments");
+  assert.match(parsedDesktopCss, /height:\s*min\(820px,\s*88vh\)/, "desktop hero includes a viewport-height fallback for Safari");
 
   const shellCss = read("../styles/vivid-shell.css");
   assert.match(shellCss, /var\(--vivid-safe-left,0px\)/, "shared header includes left safe-area inset");
@@ -68,7 +71,7 @@ test("TFLIX-style hero uses TMDB stills, plays listed trailers, and routes to Vi
   assert.match(js, /tmdbApi\.trending\("all",\s*"day",\s*1\)/);
   assert.match(js, /getImageUrl\(item\.backdrop_path,\s*"w1280"\)/);
   assert.match(js, /getMediaUrl\(item\)/);
-  assert.match(js, /startHeroTimer\(\)/);
+  assert.match(js, /TRAILER_WINDOW_MS = 30000/);
   assert.match(js, /aria-hidden", "true"/);
   assert.match(js, /\.inert = true/);
   assert.match(js, /tmdbApi\.trending\("movie", "day", 1\)/, "a cached fallback feed is available");
@@ -81,7 +84,8 @@ test("TFLIX-style hero uses TMDB stills, plays listed trailers, and routes to Vi
 
   const api = read("../scripts/tmdb.js");
   assert.match(api, /trending: \(mediaType = "all", timeWindow = "week", page = 1, options = \{\}\) => tmdb\("trending\/" \+ mediaType \+ "\/" \+ timeWindow, \{ page \}, options\)/);
-  assert.doesNotMatch(js, /youtube\.com|ytimg\.com|iframe|HERO_TRAILER/i);
+  assert.match(js, /youtube-nocookie\.com\/embed/, "the active hero may play a listed trailer inline");
+  assert.match(js, /hero-trailer-layer/, "trailer playback stays inside the hero layer");
 
   const homeScript = read("../script.js");
   assert.match(homeScript, /function renderFeatureStrip\(\)/);
@@ -96,7 +100,7 @@ test("service worker shell cache includes the new hero assets", () => {
   const home = read("../home.html");
   assert.match(sw, /const CACHE_NAME = "vivid-cinema-shell-v165";/);
   assert.match(sw, /\.\/styles\/vivid-tflix-hero\.css/);
-  assert.match(sw, /\.\/styles\/vivid-tflix-hero\.css\?v=hero-motion-2/);
-  assert.match(home, /vivid-tflix-hero\.css\?v=hero-motion-2/);
-  assert.match(sw, /\.\/scripts\/tflix-hero\.js/);
+  assert.match(sw, /\.\/styles\/vivid-tflix-hero\.css\?v=hero-trailer-full-bleed-1/);
+  assert.match(home, /vivid-tflix-hero\.css\?v=hero-trailer-full-bleed-1/);
+  assert.match(sw, /\.\/scripts\/tflix-hero\.js\?v=hero-trailer-autoplay-2/);
 });
