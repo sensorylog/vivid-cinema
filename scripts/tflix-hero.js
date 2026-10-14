@@ -1,10 +1,20 @@
 /* TFLIX-style trending billboard adapted for Vivid Cinema.
-   Source reference: https://github.com/TomasTNunes/tflix/blob/main/index.html */
+   Each featured title keeps its existing artwork, then plays its own TMDB-listed
+   YouTube trailer muted/inline before the billboard advances. */
 import { tmdbApi } from "./tmdb.js";
 import { getImageUrl, getMediaUrl, normalizeResults } from "./media.js";
+
+const ARTWORK_HOLD_MS = 2400;
+const TRAILER_WINDOW_MS = 30000;
+const NO_TRAILER_HOLD_MS = 8000;
+const TRAILER_LOAD_FAILSAFE_MS = 40000;
+const trailerCache = new Map();
+
 let heroSlides = [];
 let heroIndex = 0;
 let heroTimer = null;
+let artworkTimer = null;
+let heroRunToken = 0;
 
 function matchPct(value) {
   const rating = Number(value || 0);
@@ -19,15 +29,111 @@ function rating(value) {
   return Number(value) ? Number(value).toFixed(1) : "—";
 }
 
-function stopHeroTimer() {
-  if (heroTimer !== null) window.clearInterval(heroTimer);
+function clearPlaybackTimers() {
+  if (heroTimer !== null) window.clearTimeout(heroTimer);
+  if (artworkTimer !== null) window.clearTimeout(artworkTimer);
   heroTimer = null;
+  artworkTimer = null;
 }
 
-function startHeroTimer() {
-  stopHeroTimer();
-  if (heroSlides.length < 2 || document.hidden) return;
-  heroTimer = window.setInterval(() => goToHero(heroIndex + 1), 8000);
+function removeHeroVideos() {
+  const hero = document.getElementById("hero");
+  if (!hero) return;
+  hero.querySelectorAll(".hero-trailer-layer").forEach((layer) => layer.remove());
+}
+
+function advanceHero() {
+  if (heroSlides.length > 1) goToHero(heroIndex + 1);
+  else activateCurrentHero();
+}
+
+function chooseTrailer(data) {
+  const videos = (data?.results || []).filter((video) =>
+    video?.site === "YouTube" &&
+    typeof video.key === "string" &&
+    /^[\w-]{6,}$/.test(video.key)
+  );
+  const priority = (video) => {
+    const type = String(video.type || "").toLowerCase();
+    return (video.official ? 0 : 10) +
+      (type === "trailer" ? 0 : type === "teaser" ? 2 : type === "clip" ? 4 : 8) +
+      (/en(-us)?/i.test(video.iso_639_1 || "") ? 0 : 1);
+  };
+  videos.sort((a, b) => priority(a) - priority(b));
+  return videos[0] || null;
+}
+
+function getTrailer(item) {
+  const type = item.media_type === "tv" ? "tv" : "movie";
+  const cacheKey = type + ":" + String(item.id);
+  if (!trailerCache.has(cacheKey)) {
+    const request = (type === "tv" ? tmdbApi.tvVideos(item.id) : tmdbApi.movieVideos(item.id))
+      .then(chooseTrailer)
+      .catch((error) => {
+        console.warn("Vivid hero trailer unavailable for " + cacheKey + ":", error);
+        return null;
+      });
+    trailerCache.set(cacheKey, request);
+  }
+  return trailerCache.get(cacheKey);
+}
+
+function activateCurrentHero() {
+  clearPlaybackTimers();
+  removeHeroVideos();
+  const token = ++heroRunToken;
+  const item = heroSlides[heroIndex];
+  if (!item || document.hidden) return;
+
+  // Respect reduced-motion settings; the original artwork remains intact.
+  if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) {
+    heroTimer = window.setTimeout(advanceHero, NO_TRAILER_HOLD_MS);
+    return;
+  }
+
+  // Start looking up the trailer while the artwork is still on screen, so the
+  // video can begin promptly after the short artwork-first moment.
+  const trailerPromise = getTrailer(item);
+  artworkTimer = window.setTimeout(async () => {
+    const trailer = await trailerPromise;
+    if (token !== heroRunToken || document.hidden) return;
+
+    if (!trailer) {
+      // Some catalogue titles have no embeddable trailer; never show a blank hero.
+      heroTimer = window.setTimeout(advanceHero, NO_TRAILER_HOLD_MS);
+      return;
+    }
+
+    const slide = document.querySelectorAll("#hero .hero-slide")[heroIndex];
+    if (!slide) return;
+    const layer = document.createElement("div");
+    layer.className = "hero-trailer-layer";
+    layer.setAttribute("aria-hidden", "true");
+
+    const iframe = document.createElement("iframe");
+    iframe.className = "hero-trailer-frame";
+    iframe.title = "Trailer for " + (item.title || "featured title");
+    iframe.loading = "eager";
+    iframe.allow = "autoplay; encrypted-media; picture-in-picture";
+    iframe.referrerPolicy = "strict-origin-when-cross-origin";
+    iframe.tabIndex = -1;
+    iframe.src = "https://www.youtube-nocookie.com/embed/" + encodeURIComponent(trailer.key) +
+      "?autoplay=1&mute=1&playsinline=1&controls=0&rel=0&modestbranding=1" +
+      "&iv_load_policy=3&disablekb=1&fs=0&start=0";
+    iframe.addEventListener("load", () => {
+      if (token !== heroRunToken || document.hidden || !iframe.isConnected) return;
+      layer.classList.add("is-ready");
+      if (heroTimer !== null) window.clearTimeout(heroTimer);
+      heroTimer = window.setTimeout(advanceHero, TRAILER_WINDOW_MS);
+    }, { once: true });
+
+    layer.append(iframe);
+    // Keep the artwork visible beneath the video until the iframe has loaded.
+    slide.insertBefore(layer, slide.querySelector(".hero-content"));
+    heroTimer = window.setTimeout(() => {
+      if (token === heroRunToken) advanceHero();
+    }, TRAILER_LOAD_FAILSAFE_MS);
+  }, ARTWORK_HOLD_MS);
 }
 
 function goToHero(index) {
@@ -44,6 +150,7 @@ function goToHero(index) {
     slides[heroIndex].setAttribute("aria-hidden", "true");
     slides[heroIndex].inert = true;
   }
+
   heroIndex = next;
   slides[heroIndex]?.classList.add("active");
   dots[heroIndex]?.classList.add("active");
@@ -51,15 +158,16 @@ function goToHero(index) {
     slides[heroIndex].setAttribute("aria-hidden", "false");
     slides[heroIndex].inert = false;
   }
-  dots.forEach((dot, index) => dot.setAttribute("aria-pressed", String(index === heroIndex)));
-  notifyHeroChange();
+  dots.forEach((dot, dotIndex) => dot.setAttribute("aria-pressed", String(dotIndex === heroIndex)));
 
   const bg = slides[heroIndex]?.querySelector(".hero-bg");
   if (bg) {
     bg.style.animation = "none";
     requestAnimationFrame(() => requestAnimationFrame(() => { bg.style.animation = ""; }));
   }
-  startHeroTimer();
+
+  notifyHeroChange();
+  activateCurrentHero();
 }
 
 function createSlide(item, index) {
@@ -78,13 +186,18 @@ function createSlide(item, index) {
   backdrop.style.backgroundImage = "url(\"" + getImageUrl(item.backdrop_path, "w1280") + "\")";
   backdrop.setAttribute("aria-hidden", "true");
 
+  const shade = document.createElement("div");
+  shade.className = "hero-trailer-shade";
+  shade.setAttribute("aria-hidden", "true");
+
   const content = document.createElement("div");
   content.className = "hero-content";
 
   const badge = document.createElement("div");
   badge.className = "hero-badge";
   const trendingRank = Number(item.trending_rank || 0);
-  badge.innerHTML = '<span class="bolt" aria-hidden="true">●</span> ' + (trendingRank > 0 ? "#" + trendingRank + " Trending Today" : "Featured on Vivid");
+  badge.innerHTML = '<span class="bolt" aria-hidden="true">●</span> ' +
+    (trendingRank > 0 ? "#" + trendingRank + " Trending Today" : "Featured on Vivid");
 
   const heading = document.createElement("h1");
   heading.className = "hero-title";
@@ -121,13 +234,15 @@ function createSlide(item, index) {
   actions.append(play);
 
   content.append(badge, heading, meta, overview, actions);
-  slide.append(backdrop, content);
+  slide.append(backdrop, shade, content);
   return slide;
 }
 
 function renderHero(items) {
   const hero = document.getElementById("hero");
   if (!hero) return;
+  clearPlaybackTimers();
+  heroRunToken += 1;
   hero.replaceChildren();
   heroSlides = items;
   heroIndex = 0;
@@ -152,7 +267,7 @@ function renderHero(items) {
 
   hero.classList.toggle("empty", !items.length);
   notifyHeroChange();
-  startHeroTimer();
+  activateCurrentHero();
 }
 
 function notifyHeroChange() {
@@ -231,13 +346,18 @@ async function loadHero() {
     renderHero(items);
   } catch (error) {
     console.warn("Vivid trending hero unavailable:", error);
-    stopHeroTimer();
+    clearPlaybackTimers();
     hero.classList.add("empty");
   }
 }
 
 document.addEventListener("visibilitychange", () => {
-  if (document.hidden) stopHeroTimer();
-  else startHeroTimer();
+  if (document.hidden) {
+    clearPlaybackTimers();
+    heroRunToken += 1;
+    removeHeroVideos();
+  } else {
+    activateCurrentHero();
+  }
 });
 void loadHero();
