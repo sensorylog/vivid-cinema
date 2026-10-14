@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
-import { getAuth, browserLocalPersistence, setPersistence } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
+import { getAuth } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
 import { getFirestore } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
 
 async function loadFirebaseConfig() {
@@ -44,11 +44,7 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// Keep auth local across page changes and browser restarts. Do not await this
-// in a click handler: doing so can consume the user-activation window that
-// mobile browsers require before opening Google's OAuth popup.
-void setPersistence(auth, browserLocalPersistence).catch(error => {
-  console.warn("Firebase local auth persistence could not be enabled:", error);
-});
+// Firebase Auth uses browser-local persistence by default. Avoid a separate
+// asynchronous persistence change racing with the first sign-in request.
 
 export { app, auth, db };
