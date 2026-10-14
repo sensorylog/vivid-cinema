@@ -254,3 +254,101 @@ body.vivid-library-page{background:#06070a;color:#f5f7fa;min-height:100dvh}.vivi
 @media (prefers-reduced-motion: reduce) {
   .vivid-library-page .vivid-library-shelf { scroll-behavior: auto; }
 }
+
+
+/* Mobile library repair: keep the content in normal flow and reserve space for the fixed app navigation. */
+.vivid-library-page,
+.vivid-library-page .vivid-library-app,
+.vivid-library-page .vivid-library-main {
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+.vivid-library-page .vivid-library-main {
+  margin-inline: auto;
+}
+.vivid-library-page .vivid-library-tabs {
+  position: relative;
+  top: auto;
+  z-index: 2;
+  margin-top: 0;
+  margin-bottom: 18px;
+}
+.vivid-library-page #library-list {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  padding-top: 0;
+  margin: 0;
+}
+.vivid-library-page .vivid-library-shelf {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+.vivid-library-page .vivid-library-card {
+  min-width: 0;
+  max-width: 100%;
+}
+.vivid-library-page .vivid-library-card img {
+  max-width: 100%;
+}
+@media (max-width: 700px) {
+  .vivid-library-page .vivid-library-main {
+    padding-top: 18px !important;
+    padding-bottom: calc(100px + env(safe-area-inset-bottom, 0px));
+    padding-left: max(14px, env(safe-area-inset-left, 0px));
+    padding-right: max(14px, env(safe-area-inset-right, 0px));
+  }
+  .vivid-library-page .vivid-library-header {
+    padding: 10px 0 18px;
+    margin-bottom: 18px;
+    gap: 14px;
+  }
+  .vivid-library-page .vivid-library-header::before {
+    max-width: 100%;
+    pointer-events: none;
+  }
+  .vivid-library-page .vivid-library-header .vivid-button {
+    width: 100%;
+    min-height: 48px;
+  }
+  .vivid-library-page .vivid-library-tabs {
+    display: flex;
+    position: relative;
+    top: auto;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    overflow-x: auto;
+    margin: 0 0 18px;
+    padding: 5px;
+    gap: 4px;
+  }
+  .vivid-library-page .vivid-library-tabs button {
+    flex: 1 0 auto;
+    min-width: 0;
+    padding: 10px 9px;
+    font-size: 13px;
+  }
+  .vivid-library-page .vivid-library-grid {
+    padding-top: 0;
+  }
+  .vivid-library-page .vivid-library-shelf {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    padding: 0 0 24px;
+  }
+  .vivid-library-page .vivid-library-shelf-head {
+    margin: 0 0 14px;
+  }
+  .vivid-library-page .vivid-library-shelf .vivid-library-card-copy {
+    min-width: 0;
+    padding: 9px 10px 11px;
+  }
+  .vivid-library-page .vivid-library-footer,
+  .vivid-library-page .vivid-footer {
+    padding-bottom: calc(100px + env(safe-area-inset-bottom, 0px));
+  }
+}
