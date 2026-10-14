@@ -159,3 +159,51 @@ html:not([data-vivid-ready="true"]) .vivid-mobile-nav{
 @media(max-width:640px){.vivid-topbar{padding:calc(6px + var(--vivid-safe-top,0px)) calc(14px + var(--vivid-safe-right,0px)) 6px calc(14px + var(--vivid-safe-left,0px));border-bottom:0}.vivid-topbar .vivid-nav{min-height:50px;gap:8px}.vivid-topbar .vivid-navlinks,.vivid-topbar .vivid-nav-action{display:none}}
 html[data-vivid-theme="light"] .vivid-topbar .vivid-navlinks a,html[data-vivid-theme="light"] .vivid-topbar .vivid-nav-action{color:#59616d}
 html[data-vivid-theme="light"] .vivid-topbar .vivid-navlinks a:hover,html[data-vivid-theme="light"] .vivid-topbar .vivid-navlinks a[aria-current="page"],html[data-vivid-theme="light"] .vivid-topbar .vivid-nav-action:hover{color:#10131a;background:rgba(20,28,40,.07)}
+
+
+/* iPhone safe-area protection shared by every Vivid page.
+   viewport-fit=cover is already enabled in the page templates; apply the
+   safe-area inset at fixed/sticky chrome too, not just normal-flow headers. */
+:root {
+  --vivid-safe-top: env(safe-area-inset-top, 0px);
+  --vivid-safe-right: env(safe-area-inset-right, 0px);
+  --vivid-safe-bottom: env(safe-area-inset-bottom, 0px);
+  --vivid-safe-left: env(safe-area-inset-left, 0px);
+}
+html, body {
+  max-width: 100%;
+}
+body {
+  padding-left: var(--vivid-safe-left);
+  padding-right: var(--vivid-safe-right);
+  box-sizing: border-box;
+}
+.vivid-topbar,
+.vivid-unified-header {
+  padding-top: calc(12px + var(--vivid-safe-top)) !important;
+  padding-left: calc(var(--vivid-page-gutter, 14px) + var(--vivid-safe-left)) !important;
+  padding-right: calc(var(--vivid-page-gutter, 14px) + var(--vivid-safe-right)) !important;
+  box-sizing: border-box;
+}
+.vivid-mobile-nav,
+.vivid-bottom-nav,
+.vivid-mobile-tabbar {
+  padding-bottom: calc(8px + var(--vivid-safe-bottom));
+}
+@media (max-width: 640px) {
+  .vivid-topbar,
+  .vivid-unified-header {
+    padding-top: calc(8px + var(--vivid-safe-top)) !important;
+    padding-left: calc(14px + var(--vivid-safe-left)) !important;
+    padding-right: calc(14px + var(--vivid-safe-right)) !important;
+  }
+  .vivid-mobile-nav,
+  .vivid-bottom-nav,
+  .vivid-mobile-tabbar {
+    bottom: 0;
+    padding-bottom: calc(8px + var(--vivid-safe-bottom));
+  }
+  body :is(dialog, .vivid-search-dialog, .vivid-search-window, .vivid-release-popover) {
+    max-width: calc(100vw - 2 * max(14px, var(--vivid-safe-left)) - 2 * max(14px, var(--vivid-safe-right)));
+  }
+}
