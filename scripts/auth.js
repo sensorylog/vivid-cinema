@@ -1,4 +1,4 @@
-import { auth, db } from "./firebase.js";
+import { auth, db } from "./firebase.js?v=auth-init-fix1";
 import {
   createUserWithEmailAndPassword,
   GoogleAuthProvider,
