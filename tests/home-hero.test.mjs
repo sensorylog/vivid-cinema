@@ -29,7 +29,7 @@ test("TFLIX-style trending billboard is restored above the unchanged featured-ca
   assert.match(heroCss, /height: clamp\(520px, 74svh, 680px\)/, "mobile hero uses the small viewport-aware height");
   assert.match(heroCss, /transition: opacity 1\.1s/, "hero artwork cross-fades between titles");
   assert.match(heroCss, /animation: heroZoom 18s ease-out forwards/, "active hero artwork slowly zooms in");
-  assert.ok(heroCss.includes("from { transform: scale(1.02); }") && heroCss.includes("to { transform: scale(1.10); }"), "hero artwork zooms in subtly rather than zooming out");
+  assert.match(heroCss, /@keyframes heroZoom[\\s\\S]*?to \\{ transform: scale\\(1\\.035\\); \\}/, "hero artwork uses a restrained push-in to avoid cropping faces");
   assert.doesNotMatch(heroCss, /margin-bottom:\s*-8vh/, "hero must not overlap the following content");
 
   const desktopCss = read("../styles/vivid-desktop.css");
@@ -63,7 +63,7 @@ test("TFLIX-style trending billboard is restored above the unchanged featured-ca
   }
 });
 
-test("TFLIX-style hero uses TMDB stills and routes to Vivid title details without embedding a trailer", () => {
+test("TFLIX-style hero uses TMDB stills, plays listed trailers, and routes to Vivid title details", () => {
   const js = read("../scripts/tflix-hero.js");
   assert.match(js, /tmdbApi\.trending\("all",\s*"day",\s*1\)/);
   assert.match(js, /getImageUrl\(item\.backdrop_path,\s*"w1280"\)/);
@@ -94,7 +94,7 @@ test("TFLIX-style hero uses TMDB stills and routes to Vivid title details withou
 test("service worker shell cache includes the new hero assets", () => {
   const sw = read("../service-worker.js");
   const home = read("../home.html");
-  assert.match(sw, /const CACHE_NAME = "vivid-cinema-shell-v160";/);
+  assert.match(sw, /const CACHE_NAME = "vivid-cinema-shell-v165";/);
   assert.match(sw, /\.\/styles\/vivid-tflix-hero\.css/);
   assert.match(sw, /\.\/styles\/vivid-tflix-hero\.css\?v=hero-motion-2/);
   assert.match(home, /vivid-tflix-hero\.css\?v=hero-motion-2/);
