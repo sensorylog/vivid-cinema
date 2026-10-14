@@ -45,9 +45,11 @@
     display:none!important;
   }
 
-  /* HERO — same cinematic composition{
-    height:min(820px,88svh);
-    min-height:650px;
+  /* HERO — preserve the cinematic composition on desktop. */
+  .vivid-cinema-home #hero {
+    height: min(820px, 88vh);
+    height: min(820px, 88svh);
+    min-height: 560px;
   }
 
   /* FEATURE STRIP — one clean row directly after the trailer/info surface. */
