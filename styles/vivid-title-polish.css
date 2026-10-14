@@ -638,3 +638,70 @@ body.vivid-title-page .vivid-title-backdrop-image:not([src]) {
     transform: none;
   }
 }
+
+
+/* Full-page cinematic artwork backdrop for movie and series detail pages. */
+body.vivid-title-page {
+  position: relative;
+  isolation: isolate;
+  background: #07080c !important;
+}
+body.vivid-title-page .vivid-title-app {
+  position: relative;
+  isolation: isolate;
+  min-height: 100dvh;
+  background: transparent;
+}
+body.vivid-title-page .vivid-title-page-artwork {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    linear-gradient(180deg, rgba(7,8,12,.58) 0%, rgba(7,8,12,.76) 32%, rgba(7,8,12,.88) 68%, #07080c 100%),
+    linear-gradient(90deg, rgba(7,8,12,.48), rgba(7,8,12,.12) 48%, rgba(7,8,12,.48)),
+    var(--title-page-artwork);
+  background-position: center top, center, center top;
+  background-size: cover, cover, cover;
+  background-repeat: no-repeat;
+  opacity: .92;
+}
+body.vivid-title-page .vivid-title-backdrop {
+  background-color: transparent;
+}
+body.vivid-title-page .vivid-title-backdrop-image {
+  opacity: .64;
+  filter: saturate(.88) contrast(1.06);
+}
+body.vivid-title-page .vivid-title-info,
+body.vivid-title-page .vivid-title-info-inner,
+body.vivid-title-page .vivid-title-section,
+body.vivid-title-page .vivid-title-library-actions {
+  background-color: transparent;
+}
+body.vivid-title-page .vivid-title-info {
+  background: linear-gradient(180deg, rgba(7,8,12,.12), rgba(7,8,12,.7) 130px, rgba(7,8,12,.24) 100%) !important;
+}
+body.vivid-title-page .vivid-title-section {
+  position: relative;
+}
+body.vivid-title-page .vivid-title-section::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.08), transparent);
+  pointer-events: none;
+}
+body.vivid-title-page .vivid-title-page-artwork ~ * {
+  position: relative;
+}
+@media (max-width: 520px) {
+  body.vivid-title-page .vivid-title-page-artwork {
+    background-position: center top, center, 54% top;
+    background-size: cover, cover, auto 100vh;
+  }
+  body.vivid-title-page .vivid-title-backdrop-image {
+    opacity: .5;
+  }
+}
