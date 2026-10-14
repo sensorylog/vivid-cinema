@@ -8,6 +8,12 @@ const SERVERS = Object.freeze([
   { id: "vidfast", name: "Naafiri", provider: "VidFast", note: "May have 4K. Generally better quality." },
   { id: "vidlink", name: "Ryze", provider: "VidLink", note: "Generally better quality." }
 ]);
+// Temporary title-scoped safety guard for the reported provider mismatch.
+// TMDB 1477104 is Shaun the Sheep: The Beast of Mossy Bottom; Ekko and Naafiri
+// were observed returning a different film. Leave all other titles untouched.
+const TITLE_SPECIFIC_PROVIDER_BLOCKS = Object.freeze({
+  "1477104": new Set(["cinesrc", "vidfast"])
+});
 const positiveInteger = value => Math.max(1, Math.trunc(Number(value) || 1));
 export function listTflixSecondaryServers() { return SERVERS.map(server => ({ ...server })); }
 
@@ -34,6 +40,7 @@ function rememberServer(serverId) { try { localStorage.setItem(STORAGE_KEY, serv
 export function mountTflixSecondaryPlayer({ root, params, media, details, title, isAnime = false } = {}) {
   if (!root) return null;
   const tmdbId = String(media?.id || params?.id || "").trim();
+  const blockedServers = params?.type === "movie" ? (TITLE_SPECIFIC_PROVIDER_BLOCKS[tmdbId] || new Set()) : new Set();
   if (isAnime || !/^\d+$/.test(tmdbId) || !["movie", "tv"].includes(params?.type)) { root.hidden = true; return null; }
   root.hidden = false;
   const isTv = params.type === "tv";
@@ -79,8 +86,12 @@ export function mountTflixSecondaryPlayer({ root, params, media, details, title,
     status.classList.toggle("is-loading", mode === "loading");
   }
   function loadServer(serverId) {
-    started = true;
     const server = SERVERS.find(item => item.id === serverId);
+    if (blockedServers.has(serverId)) {
+      setStatus(server.name + " has been reported to play the wrong title for this movie. Please choose another server.");
+      return;
+    }
+    started = true;
     const url = buildTflixSecondaryServerUrl(serverId, playbackParams);
     if (!server || !url) { setStatus("This title does not have a valid TMDB ID for this server."); return; }
     generation++;
@@ -125,12 +136,15 @@ export function mountTflixSecondaryPlayer({ root, params, media, details, title,
   for (const server of SERVERS) {
     const button = document.createElement("button");
     button.type = "button";
-    button.className = "vivid-tflix-server" + (server.id === selectedServer ? " selected" : "");
+    const blockedForTitle = blockedServers.has(server.id);
+    button.disabled = blockedForTitle;
+    button.title = blockedForTitle ? "Reported to play the wrong title for this movie" : server.note;
+    button.className = "vivid-tflix-server" + (server.id === selectedServer ? " selected" : "") + (blockedForTitle ? " unavailable" : "");
     button.dataset.tflixServer = server.id;
     button.setAttribute("aria-pressed", server.id === selectedServer ? "true" : "false");
     button.innerHTML = '<span class="vivid-tflix-server-dot" aria-hidden="true"></span><span class="vivid-tflix-server-copy"><strong></strong><small></small></span>';
     button.querySelector("strong").textContent = server.name;
-    button.querySelector("small").textContent = server.note;
+    button.querySelector("small").textContent = blockedForTitle ? "Unavailable for this title · reported mismatch" : server.note;
     button.addEventListener("click", () => loadServer(server.id));
     grid.appendChild(button);
     buttons.set(server.id, button);
