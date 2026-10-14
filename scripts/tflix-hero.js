@@ -39,10 +39,7 @@ function clearPlaybackTimers() {
 function removeHeroVideos() {
   const hero = document.getElementById("hero");
   if (!hero) return;
-  hero.querySelectorAll(".hero-trailer-frame").forEach((frame) => frame.remove());
-  hero.querySelectorAll(".hero-trailer-layer.is-ready").forEach((layer) => {
-    layer.classList.remove("is-ready");
-  });
+  hero.querySelectorAll(".hero-trailer-layer").forEach((layer) => layer.remove());
 }
 
 function advanceHero() {
