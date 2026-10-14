@@ -268,8 +268,13 @@ export const BROWSE_CATEGORIES = Object.freeze([
 const keywordCache = new Map();
 
 function normalizeHome(key, data) {
+  // Mixed-media TMDB endpoints (notably trending/all) include a per-result
+  // media_type. Passing the section's "all" value through as an override
+  // coerces TV IDs into movies, so title.html fetches a different title.
+  const sectionType = HOME_SECTION_META[key]?.type;
+  const typeOverride = sectionType === "movie" || sectionType === "tv" ? sectionType : null;
   return {
-    items: normalizeResults(data?.results || [], HOME_SECTION_META[key]?.type || null),
+    items: normalizeResults(data?.results || [], typeOverride),
     page: Number(data?.page || 1),
     totalPages: Math.min(500, Number(data?.total_pages || 1))
   };
