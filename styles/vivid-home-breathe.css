@@ -50,3 +50,8 @@
 @keyframes vivid-mascot-spark{0%,100%{opacity:.65;translate:0 0}50%{opacity:1;translate:0 -8px}}
 @media(max-width:520px){.vivid-cinema-home .vivid-mascot{transform:scale(.88)!important;margin-bottom:4px!important}.vivid-cinema-home .mascot-spark-one{left:calc(50% + 95px)!important}.vivid-cinema-home .mascot-spark-two{left:calc(50% - 135px)!important}}
 @media(prefers-reduced-motion:reduce){.vivid-cinema-home .vivid-mascot,.vivid-cinema-home .vivid-mascot-spark{animation:none!important}}
+
+/* User-provided animated mascot video */
+.vivid-cinema-home .vivid-mascot-video{display:block!important;position:relative!important;width:min(420px,86vw)!important;height:auto!important;max-height:340px!important;aspect-ratio:4/3!important;object-fit:contain!important;margin:0 auto 16px!important;border:0!important;border-radius:20px!important;background:transparent!important;box-shadow:none!important;z-index:6!important}
+@media(max-width:520px){.vivid-cinema-home .vivid-mascot-video{width:min(340px,90vw)!important;max-height:280px!important;margin-bottom:8px!important}}
+@media(prefers-reduced-motion:reduce){.vivid-cinema-home .vivid-mascot-video{animation:none!important}}
