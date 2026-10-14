@@ -78,14 +78,9 @@ async function finishGoogleSignIn(credential){
 async function googleSignIn(){
   const provider=new GoogleAuthProvider();
   provider.setCustomParameters({prompt:"select_account"});
-  // iOS browsers handle OAuth more reliably with a full-page redirect.
-  // Desktop browsers keep the popup flow.
-  const mobileBrowser = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-  if (mobileBrowser) {
-    try{localStorage.setItem("vivid:google-redirect","1");sessionStorage.setItem("vivid:google-redirect","1");}catch{}
-    await signInWithRedirect(auth,provider);
-    return;
-  }
+  // Use the popup first on every device. Redirect sign-in can lose its
+  // pending OAuth state in iOS/Safari and embedded browsers when storage is
+  // partitioned. Only fall back when the browser explicitly blocks popups.
   try{
     const credential=await withTimeout(signInWithPopup(auth,provider),45000,"Google sign-in timed out.");
     await finishGoogleSignIn(credential);
