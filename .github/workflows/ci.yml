@@ -78,7 +78,7 @@ jobs:
           for (const file of files) {
             const source = fs.readFileSync(file, "utf8");
             for (const match of source.matchAll(/(?:from|import)\s*\(?\s*["'](\.\/?[^"']+)["']/g)) {
-              const ref = match[1];
+              const ref = match[1].split(/[?#]/, 1)[0];
               const candidates = [ref, ref + ".js", ref + "/index.js"];
               if (!candidates.some(candidate => fs.existsSync(path.resolve(path.dirname(file), candidate)))) {
                 missing.push(file + " -> " + ref);
