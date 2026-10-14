@@ -718,7 +718,6 @@ body.vivid-title-page .vivid-title-page-artwork {
 }
 body.vivid-title-page #title-content {
   min-width: 0;
-  overflow: clip;
 }
 body.vivid-title-page .vivid-title-info-inner,
 body.vivid-title-page .vivid-title-section,
