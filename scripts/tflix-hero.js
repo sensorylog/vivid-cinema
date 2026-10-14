@@ -26,7 +26,7 @@ function stopHeroTimer() {
 
 function startHeroTimer() {
   stopHeroTimer();
-  if (heroSlides.length < 2 || document.hidden || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  if (heroSlides.length < 2 || document.hidden) return;
   heroTimer = window.setInterval(() => goToHero(heroIndex + 1), 8000);
 }
 
