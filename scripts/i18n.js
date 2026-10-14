@@ -82,7 +82,7 @@ function translateElement(el, lang) {
       if (!(attr in saved)) saved[attr] = el.getAttribute(attr);
       const source = saved[attr];
       const translated = dictionary[source];
-      if (translated !== undefined) el.setAttribute(attr, translated);
+      if (translated !== undefined && el.getAttribute(attr) !== translated) el.setAttribute(attr, translated);
     }
   }
   if (el instanceof HTMLInputElement && ["button","submit","reset"].includes(el.type)) {
