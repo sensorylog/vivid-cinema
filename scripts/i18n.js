@@ -35,6 +35,7 @@ ko: {
 
 const FOOTER = [["terms.html","Terms"],["privacy.html","Privacy"],["contact.html","Contact"],["about.html","About"],["help.html","Help & FAQ"],["accessibility.html","Accessibility"],["cookies.html","Cookie Policy"]];
 const originalText = new WeakMap();
+const lastTranslatedText = new WeakMap();
 const originalAttrs = new WeakMap();
 let currentLanguage = "en";
 let translating = false;
@@ -61,7 +62,10 @@ function translateTextNode(node, lang) {
   if (node.parentElement.closest("script,style,code,pre,textarea,[data-i18n-skip],.vivid-brand-wordmark")) return;
   const source = rememberText(node);
   const translated = translateValue(source, lang);
-  if (node.nodeValue !== translated) node.nodeValue = translated;
+  if (node.nodeValue !== translated) {
+    lastTranslatedText.set(node, translated);
+    node.nodeValue = translated;
+  }
 }
 function translateElement(el, lang) {
   if (!(el instanceof Element) || el.matches("script,style,code,pre,[data-i18n-skip]")) return;
@@ -175,7 +179,13 @@ function initI18n() {
   const observer = new MutationObserver(records => {
     if (translating) return;
     for (const record of records) {
-      if (record.type === "characterData") translateTextNode(record.target, currentLanguage);
+      if (record.type === "characterData") {
+        const node = record.target;
+        if (lastTranslatedText.has(node) && node.nodeValue === lastTranslatedText.get(node)) continue;
+        originalText.set(node, node.nodeValue);
+        translateTextNode(node, currentLanguage);
+      }
+      if (record.type === "attributes") translateElement(record.target, currentLanguage);
       for (const node of record.addedNodes || []) {
         if (node.nodeType === Node.TEXT_NODE) translateTextNode(node, currentLanguage);
         else if (node.nodeType === Node.ELEMENT_NODE) {
@@ -188,7 +198,7 @@ function initI18n() {
       }
     }
   });
-  observer.observe(document.body, {subtree:true, childList:true, characterData:true});
+  observer.observe(document.body, {subtree:true, childList:true, characterData:true, attributes:true, attributeFilter:["placeholder","aria-label","title","alt","value","data-i18n"]});
   document.addEventListener("vivid:languagechange", event => {
     document.querySelectorAll("[data-i18n]").forEach(el => translateElement(el, event.detail.language));
   });
