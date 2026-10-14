@@ -50,6 +50,6 @@ test("verification page is precached and loads its handler", () => {
   assert.match(page, /scripts\/verify-email\.js/);
   assert.match(worker, /"\.\/verify-email\.html"/);
   assert.match(worker, /"\.\/scripts\/verify-email\.js"/);
-  assert.match(worker, /const CACHE_NAME = "vivid-cinema-shell-v\\d+"/);
-  assert.match(worker, /scripts\/auth\.js\?v=20261011-2/);
+  assert.match(worker, /const CACHE_NAME = "vivid-cinema-shell-v\d+"/);
+  assert.match(worker, /scripts\/auth\.js\?v=20261014-authfix2/);
 });
