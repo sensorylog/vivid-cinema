@@ -98,9 +98,9 @@ test("TFLIX-style hero uses TMDB stills, plays listed trailers, and routes to Vi
 test("service worker shell cache includes the new hero assets", () => {
   const sw = read("../service-worker.js");
   const home = read("../home.html");
-  assert.match(sw, /const CACHE_NAME = "vivid-cinema-shell-v165";/);
+  assert.match(sw, /const CACHE_NAME = "vivid-cinema-shell-v166";/);
   assert.match(sw, /\.\/styles\/vivid-tflix-hero\.css/);
   assert.match(sw, /\.\/styles\/vivid-tflix-hero\.css\?v=hero-trailer-full-bleed-1/);
   assert.match(home, /vivid-tflix-hero\.css\?v=hero-trailer-full-bleed-1/);
-  assert.match(sw, /\.\/scripts\/tflix-hero\.js\?v=hero-trailer-autoplay-2/);
+  assert.match(sw, /\.\/scripts\/tflix-hero\.js\?v=hero-trailer-autoplay-2/);\n  assert.match(home, /vivid-apple-tv-mobile\.css\?v=apple-tv-mobile-1/);\n  assert.match(sw, /\.\/styles\/vivid-apple-tv-mobile\.css\?v=apple-tv-mobile-1/);\n  const mobileCss = stripComments(read("../styles/vivid-apple-tv-mobile.css"));\n  assert.match(mobileCss, /@media \\(max-width: 640px\\)/);\n  assert.match(mobileCss, /scroll-snap-type: x proximity/);\n  assert.match(mobileCss, /env\\(safe-area-inset-bottom, 0px\\)/);\n  assert.match(mobileCss, /prefers-reduced-motion: reduce/);
 });
