@@ -2,6 +2,7 @@ import { auth, db } from "./firebase.js";
 import {
   createUserWithEmailAndPassword,
   GoogleAuthProvider,
+  sendEmailVerification,
   sendPasswordResetEmail,
   signInWithEmailAndPassword,
   signInWithPopup,
@@ -13,25 +14,13 @@ import {
 } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
 import { doc, serverTimestamp, setDoc } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
 import { startLibrarySync } from "./library.js";
-const VERIFICATION_API_URL = "https://vivid-cinema-api.vercel.app/api/send-verification";
-
 async function sendVividVerificationEmail() {
   const user = auth.currentUser;
   if (!user) throw Object.assign(new Error("Please sign in and try again."), { code: "vivid/missing-user" });
-  const token = await user.getIdToken();
-  const response = await fetch(VERIFICATION_API_URL, {
-    method: "POST",
-    headers: { Authorization: "Bearer " + token, "Content-Type": "application/json" },
-    body: "{}",
-    cache: "no-store"
+  await sendEmailVerification(user, {
+    url: new URL("verified-welcome", window.location.origin).href,
+    handleCodeInApp: false
   });
-  const result = await response.json().catch(() => ({}));
-  if (!response.ok) {
-    throw Object.assign(new Error(result.message || "Verification email could not be sent."), {
-      code: result.code || "vivid/email-service-error"
-    });
-  }
-  return result;
 }
 
 const signupForm=document.getElementById("signup-form");
@@ -66,7 +55,7 @@ function withTimeout(promise,ms,label){
   ]);
 }
 function friendlyError(error){
-  const messages={"auth/internal-error":"Google sign-in could not finish in this browser. Please try again.","auth/web-storage-unsupported":"This browser is blocking secure sign-in storage. Please allow site storage for Vivid Cinema and try again.","auth/cancelled-popup-request":"Another Google sign-in is already in progress. Please try again.","auth/popup-closed-by-user":"Google sign-in was cancelled.","auth/email-already-in-use":"An account already exists for this email.","auth/invalid-email":"Please enter a valid email address.","auth/weak-password":"Choose a stronger password.","auth/invalid-credential":"Email or password is incorrect.","auth/user-disabled":"This account has been disabled.","auth/too-many-requests":"Too many attempts. Please wait and try again.","auth/popup-blocked":"Your browser blocked the Google sign-in window. Allow pop-ups for Vivid Cinema, then try again.","auth/account-exists-with-different-credential":"An account already exists with a different sign-in method.","auth/network-request-failed":"Connection problem. Check your internet connection and try again.","auth/requires-recent-login":"For security, please sign in again and retry.","auth/timeout":"Firebase sign-in is taking too long. Check your connection and try again.","vivid/rate-limited":"Please wait a minute before requesting another verification email.","vivid/email-send-failed":"We couldn’t send the verification email right now. Please try again in a minute.","vivid/email-service-error":"The verification email service is temporarily unavailable. Please try again shortly.","vivid/origin-not-allowed":"This Vivid email service is not configured for this website yet.","vivid/missing-user":"Please sign in and try again."};
+  const messages={"auth/internal-error":"Google sign-in could not finish in this browser. Please try again.","auth/web-storage-unsupported":"This browser is blocking secure sign-in storage. Please allow site storage for Vivid Cinema and try again.","auth/cancelled-popup-request":"Another Google sign-in is already in progress. Please try again.","auth/popup-closed-by-user":"Google sign-in was cancelled.","auth/email-already-in-use":"An account already exists for this email.","auth/invalid-email":"Please enter a valid email address.","auth/weak-password":"Choose a stronger password.","auth/invalid-credential":"Email or password is incorrect.","auth/user-disabled":"This account has been disabled.","auth/too-many-requests":"Too many attempts. Please wait and try again.","auth/popup-blocked":"Your browser blocked the Google sign-in window. Allow pop-ups for Vivid Cinema, then try again.","auth/account-exists-with-different-credential":"An account already exists with a different sign-in method.","auth/network-request-failed":"Connection problem. Check your internet connection and try again.","auth/requires-recent-login":"For security, please sign in again and retry.","auth/timeout":"Firebase sign-in is taking too long. Check your connection and try again.","vivid/rate-limited":"Please wait a minute before requesting another verification email.","vivid/missing-user":"Please sign in and try again."};
   if(error?.code==="auth/unauthorized-domain") return "Google sign-in is not enabled for this Vivid domain yet.";
   if(error?.code==="auth/operation-not-allowed") return "Google sign-in is currently disabled. Please use email and password for now.";
   return messages[error?.code]||"Something went wrong. Please try again.";
@@ -89,10 +78,14 @@ async function finishGoogleSignIn(credential){
 async function googleSignIn(){
   const provider=new GoogleAuthProvider();
   provider.setCustomParameters({prompt:"select_account"});
-  // Prefer a popup on every device. Mobile browsers can return from a
-  // redirect before Firebase has restored the credential, which can make the
-  // UI immediately look signed out. Only fall back to redirect when the popup
-  // is actually blocked/unavailable.
+  // iOS browsers handle OAuth more reliably with a full-page redirect.
+  // Desktop browsers keep the popup flow.
+  const mobileBrowser = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+  if (mobileBrowser) {
+    try{localStorage.setItem("vivid:google-redirect","1");sessionStorage.setItem("vivid:google-redirect","1");}catch{}
+    await signInWithRedirect(auth,provider);
+    return;
+  }
   try{
     const credential=await withTimeout(signInWithPopup(auth,provider),45000,"Google sign-in timed out.");
     await finishGoogleSignIn(credential);
