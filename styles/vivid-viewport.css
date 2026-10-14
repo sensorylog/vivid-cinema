@@ -530,3 +530,54 @@ html{
 @supports not (zoom:1){
   html{transform:none!important}
 }
+
+
+/* Consistent page-edge gutters and horizontal containment across Vivid.
+   Keep fixed navigation and intentional horizontal carousels independently sized. */
+:root {
+  --vivid-page-gutter: clamp(14px, 3.2vw, 40px);
+}
+html, body {
+  max-width: 100%;
+  overflow-x: clip;
+}
+body {
+  box-sizing: border-box;
+}
+body :is(main, .vivid-home, .vivid-section-wrap, .vivid-discovery-main,
+  .vivid-collection-main, .vivid-title-main, .vivid-person-main,
+  .vivid-news-main, .vivid-community-main, .vivid-account-main,
+  .vivid-auth-main, .vivid-live-main, .vivid-search-main) {
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+body.vivid-cinema-home #hero {
+  width: calc(100% - 2 * var(--vivid-page-gutter));
+  max-width: calc(100% - 2 * var(--vivid-page-gutter));
+  margin-inline: auto;
+  border-radius: clamp(12px, 2vw, 24px);
+  overflow: hidden;
+}
+body.vivid-cinema-home .vivid-feature-strip,
+body.vivid-cinema-home .vivid-section-wrap {
+  width: 100%;
+  padding-inline: var(--vivid-page-gutter);
+  box-sizing: border-box;
+}
+body.vivid-cinema-home .vivid-feature-track,
+body.vivid-cinema-home .vivid-rail {
+  max-width: 100%;
+  min-width: 0;
+}
+@media (max-width: 640px) {
+  :root { --vivid-page-gutter: 14px; }
+  body.vivid-cinema-home #hero {
+    width: calc(100% - 28px);
+    max-width: calc(100% - 28px);
+  }
+  body.vivid-cinema-home .vivid-feature-strip,
+  body.vivid-cinema-home .vivid-section-wrap {
+    padding-inline: 14px;
+  }
+}
