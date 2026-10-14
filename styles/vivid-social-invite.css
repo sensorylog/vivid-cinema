@@ -1,0 +1,17 @@
+/* Vivid Cinema social welcome card — lightweight, non-blocking and responsive. */
+.vivid-social-invite{position:fixed;z-index:1200;right:max(16px,env(safe-area-inset-right));bottom:calc(18px + env(safe-area-inset-bottom));width:min(440px,calc(100vw - 32px));box-sizing:border-box;padding:22px;border:1px solid rgba(255,255,255,.22);border-radius:24px;background:linear-gradient(135deg,#6565f5 0%,#4b51d9 100%);color:#fff;box-shadow:0 18px 55px rgba(0,0,0,.42);font-family:inherit;opacity:0;transform:translateY(18px);transition:opacity .28s ease,transform .28s ease}
+.vivid-social-invite.is-visible{opacity:1;transform:translateY(0)}
+.vivid-social-invite[hidden]{display:none}
+.vivid-social-invite-head{display:flex;align-items:flex-start;gap:12px}
+.vivid-social-invite-mark{display:grid;place-items:center;flex:0 0 48px;height:48px;border-radius:16px;background:rgba(255,255,255,.18);font-size:24px}
+.vivid-social-invite-copy{min-width:0;flex:1}
+.vivid-social-invite h2{margin:0 0 4px;font-size:22px;line-height:1.15;font-weight:800;color:#fff}
+.vivid-social-invite p{margin:0;color:rgba(255,255,255,.86);font-size:15px;line-height:1.4}
+.vivid-social-invite-close{flex:0 0 34px;width:34px;height:34px;border:0;border-radius:50%;background:rgba(255,255,255,.12);color:#fff;font-size:24px;line-height:1;cursor:pointer}
+.vivid-social-invite-links{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin-top:18px}
+.vivid-social-invite-links a{display:flex;align-items:center;justify-content:center;gap:7px;min-height:48px;padding:8px 5px;border:1px solid rgba(255,255,255,.25);border-radius:14px;background:rgba(255,255,255,.12);color:#fff;text-decoration:none;text-align:center;font-size:14px;font-weight:800;transition:background .18s ease,transform .18s ease}
+.vivid-social-invite-links a:hover,.vivid-social-invite-links a:focus-visible{background:rgba(255,255,255,.25);transform:translateY(-1px)}
+.vivid-social-invite-links a:focus-visible,.vivid-social-invite-close:focus-visible{outline:3px solid #fff;outline-offset:3px}
+.vivid-social-invite-note{display:block;margin-top:12px;text-align:center;font-size:12px;color:rgba(255,255,255,.76)}
+@media(max-width:480px){.vivid-social-invite{right:12px;bottom:calc(12px + env(safe-area-inset-bottom));width:calc(100vw - 24px);padding:18px;border-radius:21px}.vivid-social-invite h2{font-size:20px}.vivid-social-invite p{font-size:14px}.vivid-social-invite-links{gap:7px;margin-top:15px}.vivid-social-invite-links a{font-size:13px;min-height:46px;gap:4px}}
+@media(prefers-reduced-motion:reduce){.vivid-social-invite{transition:none}}
