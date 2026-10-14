@@ -857,3 +857,25 @@ body.vivid-title-page .vivid-video-card {
     transition: none;
   }
 }
+
+
+/* The full-page artwork is the only backdrop; remove the legacy top-only hero image. */
+body.vivid-title-page .vivid-title-backdrop {
+  display: none !important;
+}
+body.vivid-title-page .vivid-title-info {
+  margin-top: 0 !important;
+  padding-top: clamp(24px, 4vw, 48px);
+}
+@media (max-width: 800px) {
+  body.vivid-title-page .vivid-title-info {
+    margin-top: 0 !important;
+    padding-top: 24px;
+  }
+}
+@media (max-width: 520px) {
+  body.vivid-title-page .vivid-title-info {
+    margin-top: 0 !important;
+    padding-top: 18px;
+  }
+}
