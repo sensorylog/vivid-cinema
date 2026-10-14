@@ -66,12 +66,23 @@ function render() {
   }));
 }
 
-document.addEventListener("DOMContentLoaded",async()=>{
-  const syncStatus=document.getElementById("library-sync-status"); const syncDot=document.getElementById("library-sync-dot");
+document.addEventListener("DOMContentLoaded",()=>{
+  const syncStatus=document.getElementById("library-sync-status");
+  const syncDot=document.getElementById("library-sync-dot");
   const setSync=(message,state)=>{if(syncStatus)syncStatus.textContent=message;if(syncDot)syncDot.dataset.state=state;};
-  setSync("Checking cloud library…","syncing");
+
+  // Paint device-saved titles immediately; never hold the library UI behind a
+  // Firebase Auth/Firestore round trip.
+  render();
   renderContinueWatching();
-  try{await startLibrarySync();setSync("Synced to your account or saved locally.","success");}catch{setSync("Local library available. Cloud sync is unavailable.","error");}
+  setSync("Showing saved titles · checking cloud sync…","syncing");
+
+  // Re-render when local changes or the remote merge updates the local snapshot.
+  window.addEventListener("vivid:library-changed",()=>{
+    render();
+    renderContinueWatching();
+  });
+
   document.querySelectorAll("[data-library-tab]").forEach((tab)=>tab.addEventListener("click",()=>{
     activeCollection=tab.dataset.libraryTab;
     document.querySelectorAll("[data-library-tab]").forEach((item)=>{const active=item===tab;item.classList.toggle("is-active",active);item.setAttribute("aria-selected",String(active));});
@@ -81,5 +92,12 @@ document.addEventListener("DOMContentLoaded",async()=>{
   $("library-clear")?.addEventListener("click",()=>{
     if(getLocalLibrary()[activeCollection]?.length&&window.confirm("Clear this library list on this device?")){clearLibraryCollection(activeCollection);render();renderContinueWatching();}
   });
-  render();
+
+  void startLibrarySync().then(()=>{
+    render();
+    renderContinueWatching();
+    setSync("Library is up to date.","success");
+  }).catch(()=>{
+    setSync("Showing device-saved titles · cloud sync unavailable.","error");
+  });
 });
