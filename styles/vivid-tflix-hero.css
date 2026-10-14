@@ -308,3 +308,54 @@ body.vivid-cinema-home .hero-slide.active .hero-bg {
   body.vivid-cinema-home .hero-slide { transition-duration: .2s; }
   body.vivid-cinema-home .hero-bg { animation: none !important; }
 }
+
+
+/* Trailer layer: same exact hero bounds as the retained backdrop artwork.
+   The iframe is sized as a 16:9 cover and center-cropped, never stretched. */
+body.vivid-cinema-home #hero {
+  container-type: size;
+}
+body.vivid-cinema-home .hero-bg {
+  z-index: 0;
+}
+body.vivid-cinema-home .hero-trailer-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+  background: transparent;
+  transition: opacity .55s ease;
+}
+body.vivid-cinema-home .hero-trailer-layer.is-ready {
+  opacity: 1;
+}
+body.vivid-cinema-home .hero-trailer-frame {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  display: block;
+  width: max(100%, 177.78cqh);
+  height: max(100%, 56.25cqw);
+  border: 0;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+body.vivid-cinema-home .hero-trailer-shade {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background:
+    linear-gradient(to right, rgba(8,8,11,.76) 0%, rgba(8,8,11,.32) 38%, rgba(8,8,11,.06) 72%),
+    linear-gradient(to top, var(--bg, #07090d) 2%, rgba(8,8,11,.3) 30%, transparent 60%);
+}
+body.vivid-cinema-home .hero-content {
+  z-index: 3;
+}
+@media (prefers-reduced-motion: reduce) {
+  body.vivid-cinema-home .hero-trailer-layer {
+    transition: none;
+  }
+}
