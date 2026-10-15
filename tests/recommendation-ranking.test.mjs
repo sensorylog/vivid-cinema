@@ -47,6 +47,18 @@ test("explicit likes boost candidates and not-for-me exclusions are respected", 
   assert.deepEqual(ranked.map(item => item.id).sort(), ["1", "2"]);
 });
 
+test("not-for-me feedback lowers similar-genre recommendations without excluding other genres", () => {
+  const candidates = [
+    candidate(1, { raw: { genre_ids: [35], original_language: "en", release_date: "2022-04-01" } }),
+    candidate(2, { raw: { genre_ids: [18], original_language: "en", release_date: "2022-04-01" } })
+  ];
+  const ranked = rankIntentCandidates(candidates, {
+    feedback: { "movie:99": { kind: "not_for_me", genre_ids: [35] } },
+    limit: 2
+  });
+  assert.deepEqual(ranked.map(item => item.id), ["2", "1"]);
+});
+
 test("filtered ranking deduplicates typed title identities", () => {
   const ranked = rankIntentCandidates([candidate(7), candidate(7), candidate(8)], { limit: 10 });
   assert.equal(ranked.length, 2);
