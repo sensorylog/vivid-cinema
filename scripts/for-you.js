@@ -20,6 +20,7 @@ const $ = id => document.getElementById(id);
 let activeType = "all";
 let currentItems = [];
 let becauseItems = [];
+let lastDismissedItem = null;
 let requestId = 0;
 let removedFilters = new Set();
 let suppressInvalidationRefresh = false;
@@ -75,6 +76,12 @@ function intentChipEntries(intent) {
   if (intent.year) entries.push({ key: "year", label: String(intent.year) });
   if (intent.language && !intent.anime) entries.push({ key: "language", label: LANGUAGE_LABELS[intent.language] || intent.language });
   return entries;
+}
+
+function showFeedbackUndo(item) {
+  lastDismissedItem = item;
+  $("feedback-undo-copy").textContent = "We will show fewer picks like " + (item.title || item.name || "this title") + ".";
+  $("feedback-undo").hidden = false;
 }
 
 function showStatus(message) {
@@ -260,6 +267,14 @@ document.addEventListener("DOMContentLoaded", () => {
     setActiveType("all");
     void loadRecommendations();
   });
+  $("undo-feedback")?.addEventListener("click", () => {
+    const item = lastDismissedItem;
+    if (!item) return;
+    lastDismissedItem = null;
+    $("feedback-undo").hidden = true;
+    setFeedback(item, "not_for_me");
+  });
+
   $("refresh-recommendations")?.addEventListener("click", () => void loadRecommendations({ refresh: true }));
   $("retry-recommendations")?.addEventListener("click", () => void loadRecommendations());
 
@@ -269,8 +284,9 @@ document.addEventListener("DOMContentLoaded", () => {
       const item = currentItems[Number(button.dataset.index)];
       if (!item) return;
       const kind = button.dataset.feedback;
-      setFeedback(item, kind);
-      if (kind === "not_for_me") {
+      const nextFeedback = setFeedback(item, kind);
+      if (kind === "not_for_me" && nextFeedback === "not_for_me") {
+        showFeedbackUndo(item);
         currentItems = currentItems.filter(candidate => !(candidate.id === item.id && candidate.media_type === item.media_type));
         renderItems(currentItems);
         if (!currentItems.length) void loadRecommendations();
@@ -298,8 +314,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const item = becauseItems[Number(button.dataset.index)];
     if (!item) return;
     const kind = button.dataset.feedback;
-    setFeedback(item, kind);
-    if (kind === "not_for_me") {
+    const nextFeedback = setFeedback(item, kind);
+    if (kind === "not_for_me" && nextFeedback === "not_for_me") {
+      showFeedbackUndo(item);
       becauseItems = becauseItems.filter(candidate => !(candidate.id === item.id && candidate.media_type === item.media_type));
       $("because-section").hidden = !becauseItems.length;
       $("because-grid").innerHTML = becauseItems.map((candidate, index) => cardMarkup(candidate, index, true)).join("");
