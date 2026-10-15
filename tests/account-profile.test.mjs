@@ -71,8 +71,9 @@ test("library mutations retry through one deduplicated sync path and preserve pe
   assert.match(library, /const syncInFlight = new Map\(\)|const syncInFlight=new Map\(\)/);
   assert.match(library, /await syncLibraryForUser\(auth\.currentUser\)/);
   assert.match(library, /window\.addEventListener\("online"/);
-  assert.match(library, /accountStorageKey\(STORAGE_KEY,owner\)/);
-  assert.match(library, /accountStorageKey\(STORAGE_KEY,uid\)/);
+  assert.match(library, /switchLocalOwner\(/);
+  assert.match(library, /ownerKey:LOCAL_OWNER_KEY/);
+  assert.match(library, /activeKeys:\[STORAGE_KEY,TOMBSTONE_STORAGE_KEY\]/);
   assert.match(library, /void startLibrarySync\(\)/);
 });
 
