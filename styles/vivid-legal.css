@@ -47,3 +47,24 @@
 .vivid-legal-footer a{color:#8f96a0;text-decoration:none}.vivid-legal-footer a:hover{color:#fff}
 @media(max-width:760px){.vivid-legal-nav{height:64px}.vivid-legal-navlinks{display:none}.vivid-legal-main{padding:32px 0 64px}.vivid-legal-main>h1{font-size:clamp(2.5rem,14vw,4.2rem)}.vivid-legal-intro{font-size:.92rem;margin:18px 0 38px}.vivid-legal-card h2{margin-top:38px}.vivid-legal-card p,.vivid-legal-card li{font-size:.88rem;line-height:1.72}.vivid-contact-grid{grid-template-columns:1fr}.vivid-contact-lead{margin-bottom:28px}}
 @media(prefers-reduced-motion:reduce){.vivid-legal-navlinks a{transition:none}}
+
+
+/* Third-party catalogue attribution, kept legible without competing with Vivid branding. */
+.vivid-tmdb-attribution {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin: 18px 0 22px;
+  padding: 16px 18px;
+  border-radius: 12px;
+  background: #fff;
+  color: #203040;
+}
+.vivid-tmdb-attribution a { display: inline-flex; flex: 0 0 auto; align-items: center; }
+.vivid-tmdb-attribution img { display: block; width: 112px; max-width: 30vw; height: auto; }
+.vivid-tmdb-attribution p { margin: 0; color: #203040; font-size: .88rem; line-height: 1.55; }
+.vivid-provider-note a { color: inherit; text-decoration: underline; text-underline-offset: .16em; }
+@media(max-width:560px) {
+  .vivid-tmdb-attribution { align-items: flex-start; flex-direction: column; gap: 10px; }
+  .vivid-tmdb-attribution img { width: 100px; max-width: 45vw; }
+}
