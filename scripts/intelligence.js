@@ -31,7 +31,7 @@ function write(v){try{localStorage.setItem(KEY,JSON.stringify(v))}catch{};window
 function key(x){return x?String(x.media_type||x.mediaType||"movie")+":"+String(x.id):""}
 function safe(x){return{id:String(x?.id||""),media_type:x?.media_type||x?.mediaType||"movie",title:String(x?.title||x?.name||"Untitled").slice(0,300),year:String(x?.year||"").slice(0,10),poster_path:String(x?.poster_path||"").slice(0,500),backdrop_path:String(x?.backdrop_path||"").slice(0,500)}}
 function sid(){if(sessionId)return sessionId;sessionId=localStorage.getItem(SESSION_KEY)||Date.now().toString(36)+"-"+Math.random().toString(36).slice(2,8);try{localStorage.setItem(SESSION_KEY,sessionId)}catch{}return sessionId}
-async function fb(){if(!firebasePromise)firebasePromise=Promise.all([import("./firebase.js"),import("https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js"),import("https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js")]).then(([f,a,s])=>({...f,onAuthStateChanged:a.onAuthStateChanged,collection:s.collection,doc:s.doc,getDocs:s.getDocs,setDoc:s.setDoc})).catch(e=>{firebasePromise=null;throw e});return firebasePromise}
+async function fb(){if(!firebasePromise)firebasePromise=Promise.all([import("./firebase.js"),import("https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js"),import("https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js")]).then(([f,a,s])=>({...f,onAuthStateChanged:a.onAuthStateChanged,collection:s.collection,doc:s.doc,getDocs:s.getDocs,getDocsFromServer:s.getDocsFromServer,setDoc:s.setDoc})).catch(e=>{firebasePromise=null;throw e});return firebasePromise}
 async function user(){
  try{
   const {auth,onAuthStateChanged}=await fb();
@@ -137,8 +137,8 @@ export async function syncIntelligenceForUser(u){
  ensureIntelligenceOwner(u?.uid || null);
  if(!u)return read();
  try{
-  const {db,collection,getDocs,doc,setDoc}=await fb();
-  const [f,t]=await Promise.all([getDocs(collection(db,"users",u.uid,"feedback")),getDocs(collection(db,"users",u.uid,"taste"))]);
+  const {db,collection,getDocsFromServer,doc,setDoc}=await fb();
+  const [f,t]=await Promise.all([getDocsFromServer(collection(db,"users",u.uid,"feedback")),getDocsFromServer(collection(db,"users",u.uid,"taste"))]);
   const {auth}=await fb();
   if(String(auth?.currentUser?.uid || "")!==String(u.uid) ||
      (localStorage.getItem(LOCAL_OWNER_KEY) || "guest")!==String(u.uid)){
@@ -181,6 +181,11 @@ export async function syncIntelligenceForUser(u){
    s.taste=remote;
   }else if(Number(s.taste.updatedAt||0)>0&&Number(s.taste.updatedAt||0)>Number(remote?.updatedAt||0)){
    await setDoc(doc(db,"users",u.uid,"taste","profile"),{version:1,...s.taste},{merge:true});
+  }
+  const {auth:finalAuth}=await fb();
+  if(String(finalAuth?.currentUser?.uid || "")!==String(u.uid) ||
+     (localStorage.getItem(LOCAL_OWNER_KEY) || "guest")!==String(u.uid)){
+   throw new Error("The signed-in account changed before intelligence state could be reconciled. Please retry.");
   }
   write(s);invalidateRecommendationCaches();
   window.dispatchEvent(new CustomEvent("vivid:sync-status",{detail:{store:"intelligence",status:"synced"}}));
