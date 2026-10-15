@@ -91,7 +91,7 @@ test("playback sync uploads local-only records and keeps auth listeners for late
 
 test("intelligence writes and taste rebuilds are guarded against account switches", () => {
   const intelligence = readFileSync(new URL("../scripts/intelligence.js", import.meta.url), "utf8");
-  assert.match(intelligence, /const ownerAtWrite=localStorage\.getItem\(LOCAL_OWNER_KEY\)/);
+  assert.match(intelligence, /ownerAtWrite=localStorage\\.getItem\(LOCAL_OWNER_KEY\)/);
   assert.match(intelligence, /auth\?\.currentUser\|\|String\(auth\.currentUser\.uid\)!==String\(u\.uid\)/);
   assert.match(intelligence, /ownerAtStart&&localStorage\.getItem\(LOCAL_OWNER_KEY\)!==ownerAtStart/);
   assert.match(intelligence, /localFeedbackWrites\.push\(setDoc\(/);
