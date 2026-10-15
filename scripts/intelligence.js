@@ -149,18 +149,48 @@ export function getTasteStrength(){const s=read(),l=getLocalLibrary();return Mat
 export function shouldShowColdStart(){const s=read(),l=getLocalLibrary();return !s.onboarding.completed&&!s.onboarding.dismissed&&!Object.keys(s.feedback).length&&!(l.history||[]).length&&!(l.favorites||[]).length}
 export async function completeColdStart(items=[]){const s=read(),seen=new Set;items.slice(0,6).forEach(x=>{const i=safe(x),k=key(i);if(!k||seen.has(k))return;seen.add(k);const updatedAt=Date.now();s.feedback[k]={...i,kind:"like",updatedAt};delete s.feedbackCleared[k];cloud(["feedback",k],{...i,kind:"like",updatedAt});recordBehavior("cold_start_like",i)});s.onboarding={completed:true,dismissed:false,completedAt:Date.now()};write(s);invalidateRecommendationCaches();await rebuildTasteProfile();return s}
 export function dismissColdStart(){const s=read();s.onboarding={...s.onboarding,dismissed:true};write(s)}
+export function mergeBehaviorEvents(localEvents = [], remoteEvents = [], limit = 300) {
+ const byId = new Map();
+ const addEvent = event => {
+  if (!event || typeof event !== "object" || !event.id || !event.sessionId) return;
+  const id = String(event.sessionId) + "_" + String(event.id);
+  const current = byId.get(id);
+  if (!current || Number(event.occurredAt || 0) > Number(current.occurredAt || 0)) byId.set(id, event);
+ };
+ [...localEvents, ...remoteEvents].forEach(addEvent);
+ const safeLimit = Math.max(1, Math.min(300, Number(limit) || 300));
+ return [...byId.values()]
+  .sort((a, b) => Number(a.occurredAt || 0) - Number(b.occurredAt || 0))
+  .slice(-safeLimit);
+}
+
 export async function syncIntelligenceForUser(u){
  ensureIntelligenceOwner(u?.uid || null);
  if(!u)return read();
  try{
   const {db,collection,getDocsFromServer,doc,setDoc}=await fb();
-  const [f,t]=await Promise.all([getDocsFromServer(collection(db,"users",u.uid,"feedback")),getDocsFromServer(collection(db,"users",u.uid,"taste"))]);
+  const [f,e,t]=await Promise.all([getDocsFromServer(collection(db,"users",u.uid,"feedback")),getDocsFromServer(collection(db,"users",u.uid,"events")),getDocsFromServer(collection(db,"users",u.uid,"taste"))]);
   const {auth}=await fb();
   if(String(auth?.currentUser?.uid || "")!==String(u.uid) ||
      (localStorage.getItem(LOCAL_OWNER_KEY) || "guest")!==String(u.uid)){
    throw new Error("The signed-in account changed during intelligence sync. Please retry.");
   }
   const s=read();const stateAtSync=localStorage.getItem(KEY)||"";let feedbackChanged=false;
+  const localEventIds=new Set(s.events.map(event=>String(event.sessionId||"")+"_"+String(event.id||"")));
+  const remoteEvents=e.docs.map(d=>d.data()||{}).filter(event=>event.id&&event.sessionId);
+  const mergedEvents=mergeBehaviorEvents(s.events,remoteEvents,300);
+  const remoteEventIds=new Set(e.docs.map(d=>d.id));
+  for(const event of s.events){
+   const eventDocId=String(event.sessionId||"")+"_"+String(event.id||"");
+   if(event.id&&event.sessionId&&!remoteEventIds.has(eventDocId)){
+    await setDoc(doc(db,"users",u.uid,"events",eventDocId),event,{merge:true});
+   }
+  }
+  const remoteAddedTasteSignal=mergedEvents.some(event=>
+   !localEventIds.has(String(event.sessionId||"")+"_"+String(event.id||""))&&TASTE_SIGNAL_TYPES.has(event.type)
+  );
+  s.events=mergedEvents;
+  if(remoteAddedTasteSignal){s.taste.updatedAt=0;s.taste.dirty=true;}
   const remoteFeedback=new Map(f.docs.map(d=>[d.id,d.data()||{}]));
   for(const [id,localItem] of Object.entries(s.feedback)){
    const remoteItem=remoteFeedback.get(id);
