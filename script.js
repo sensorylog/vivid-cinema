@@ -659,3 +659,8 @@ document.addEventListener("DOMContentLoaded",()=>{
     if(needsColdStart)document.body.classList.remove("vivid-onboarding-active");
   })();
 });
+
+window.addEventListener("vivid:search-history-ready", () => {
+  const dialog = $("vivid-search-dialog");
+  if (dialog && !dialog.hidden && !searchInput?.value.trim()) showRecentSearches();
+});
