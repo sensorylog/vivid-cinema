@@ -3,7 +3,7 @@ import { getLocalLibrary } from "./library.js";
 import { normalizeResults } from "./media.js";
 import { getTasteProfile, getNotForMeKeys, getFeedbackState, getTasteStrength, getRecommendationMemory, recordBehavior } from "./intelligence.js";
 import { switchLocalOwner } from "./local-owner.js";
-import { buildPlotKeywordQueries, scorePlotCandidate } from "./plot-search.js";
+import { buildPlotKeywordQueries, scorePlotCandidate, scorePlotCandidates } from "./plot-search.js";
 
 const PROGRESS_KEY = "vivid:progress:v1";
 const FOR_YOU_CACHE_KEY = "vivid:for-you:v1";
@@ -772,15 +772,50 @@ export async function getPlotMatchRecommendations(intent = {}, limit = 18) {
   }
   const responses = await Promise.allSettled(calls);
   if (currentProgressOwner() !== ownerAtStart) return [];
-  const candidates = collectIntentCandidates(responses);
-  const scored = new Map();
-  for (const item of uniqueByKey(candidates)) {
-    const plotScore = scorePlotCandidate(intent.query || "", item);
-    if (plotScore <= 0) continue;
-    const previous = scored.get(keyFor(item));
-    if (!previous || plotScore > previous.plotScore) scored.set(keyFor(item), { ...item, plotScore });
+  let candidates = [];
+  try { candidates = collectIntentCandidates(responses); } catch {}
+  let scored = scorePlotCandidates(intent.query || "", uniqueByKey(candidates));
+
+  // TMDB keyword tagging is incomplete. If it yields no plausible plot match,
+  // scan a small popularity-ordered catalogue slice with the same verified
+  // constraints and score the actual overviews instead of returning an
+  // immediate empty state. This is a fallback, not a claim of exhaustive search.
+  if (!scored.length) {
+    const fallbackCalls = [];
+    for (const type of mediaTypes) {
+      const genreId = intent.genreIds?.[type] ?? intent.genre?.[type === "movie" ? "movieId" : "tvId"];
+      if (intent.genre && !genreId) continue;
+      const params = {
+        sort_by: "popularity.desc",
+        page: 1,
+        include_adult: false,
+        "vote_count.gte": type === "movie" ? 10 : 5
+      };
+      if (genreId) params.with_genres = String(genreId);
+      if (intent.runtimeMax) params["with_runtime.lte"] = String(Math.max(1, Number(intent.runtimeMax)));
+      if (intent.year) {
+        if (type === "movie") params.primary_release_year = String(intent.year);
+        else params.first_air_date_year = String(intent.year);
+      }
+      if (intent.language) params.with_original_language = String(intent.language);
+      if (intent.anime) {
+        params.with_original_language = "ja";
+        if (type === "tv") params.with_origin_country = "JP";
+      }
+      fallbackCalls.push((type === "tv" ? tmdbApi.discoverTv(params) : tmdbApi.discoverMovies(params))
+        .then(response => normalizeResults(response?.results || [], type)));
+    }
+    const fallbackResponses = await Promise.allSettled(fallbackCalls);
+    if (currentProgressOwner() !== ownerAtStart) return [];
+    try {
+      candidates = collectIntentCandidates(fallbackResponses);
+    } catch (error) {
+      if (!responses.some(result => result.status === "fulfilled")) throw error;
+      candidates = [];
+    }
+    scored = scorePlotCandidates(intent.query || "", uniqueByKey(candidates));
   }
-  if (!scored.size) return [];
+  if (!scored.length) return [];
 
   const library = getLocalLibrary();
   const feedback = getFeedbackState();
@@ -797,7 +832,7 @@ export async function getPlotMatchRecommendations(intent = {}, limit = 18) {
       .flatMap(item => item.genre_ids || item.raw?.genre_ids || [])
       .map(Number)
   );
-  const ranked = rankIntentCandidates([...scored.values()], {
+  const ranked = rankIntentCandidates(scored, {
     taste, progress, feedback, excluded, limit: Math.min(40, Math.max(1, Number(limit) || 18)),
     recentGenres, recommendationMemory: getRecommendationMemory()
   });
