@@ -429,7 +429,26 @@ function scoreCandidate(item, taste, progress, feedback, recentGenres = new Set(
   const releaseTime = Date.parse(releaseValue);
   const ageDays = Number.isFinite(releaseTime) ? Math.max(0, (Date.now() - releaseTime) / 86400000) : Infinity;
   const freshness = Number.isFinite(ageDays) ? Math.max(0, 1 - (ageDays / 180)) : 0;
-  return genreScore * 5.4 + mediaScore * 1.9 + languageScore * .55 + countryScore * .35 + decadeScore * .3 + quality * 1.4 + popularity * .8 + feedbackBoost + recentGenreBoost + freshness * .55 - seenPenalty + clickRecovery;
+
+  // Playback progress is account-local and keyed by media identity. Movies use
+  // movie:<id>; TV episodes use tv:<id>:<season>:<episode>, so inspect episode
+  // keys as well as the series-level key when ranking a TV candidate.
+  const progressKey = keyFor(item);
+  const exactProgress = progress[progressKey];
+  const episodeProgress = item.media_type === "tv"
+    ? Object.entries(progress)
+        .filter(([key, value]) => key.startsWith(progressKey + ":") && value && !value.completed)
+        .sort((a, b) => Number(b[1].updatedAt || 0) - Number(a[1].updatedAt || 0))[0]?.[1]
+    : null;
+  const activeProgress = exactProgress && !exactProgress.completed ? exactProgress : episodeProgress;
+  const progressPercent = Math.max(0, Math.min(100, Number(activeProgress?.percentage) || 0));
+  const progressPenalty = item.media_type !== "tv" && exactProgress?.completed
+    ? 10
+    : activeProgress
+      ? progressPercent >= 92 ? 5 : progressPercent >= 50 ? 2.5 : 1.2
+      : 0;
+
+  return genreScore * 5.4 + mediaScore * 1.9 + languageScore * .55 + countryScore * .35 + decadeScore * .3 + quality * 1.4 + popularity * .8 + feedbackBoost + recentGenreBoost + freshness * .55 - seenPenalty + clickRecovery - progressPenalty;
 }
 
 function rankForYou(candidates, taste, progress, feedback, excluded, limit, recentGenres = new Set(), recommendationMemory = new Map(), enforceDiversity = true) {
