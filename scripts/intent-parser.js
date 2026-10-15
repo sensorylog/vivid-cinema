@@ -280,7 +280,7 @@ export function parseIntent(input = "") {
     const titleCandidate = buildProviderTitleQuery(text, providerRegion);
     const nonTypeWords = titleCandidate.replace(/\b(?:movie|movies|film|films|tv|series|show|shows)\b/gi, " ").replace(/[\s,]+/g, " ").trim();
     const hasStructuredFilters = Boolean(intent.genre || intent.year || intent.decade || intent.country || intent.language || intent.runtimeMax || intent.anime);
-    if (nonTypeWords && !hasStructuredFilters) intent.titleQuery = titleCandidate;
+    if (nonTypeWords && !hasStructuredFilters) intent.titleQuery = nonTypeWords;
   }
 
   const unsupportedRules = [
