@@ -41,7 +41,8 @@ The audit found several correctness gaps in the Phase 2/3 integration. The accom
 
 - The personalized-results cache fingerprint includes feedback, playback progress, recent history, all observed Library collections, taste timestamps, daily rotation, and recommendation impression/click memory.
 - A changed recommendation-memory signal can therefore invalidate a cached ranking instead of remaining invisible until an unrelated cache input changes.
-- Main results and the asynchronous “Because you liked…” section guard against older requests overwriting a newer result set.
+- Personalized recommendation, Tonight, and “Because you liked…” reads verify the active owner after asynchronous catalogue work before returning or caching results.
+- For You and Home guard stale requests; Home clears personalized shelves and refreshes when account ownership changes, and Continue Watching now clears when the active owner's progress is empty.
 
 ### 5. Owner isolation and data semantics
 
