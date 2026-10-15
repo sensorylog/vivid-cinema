@@ -147,7 +147,7 @@ export async function syncIntelligenceForUser(u){
      (localStorage.getItem(LOCAL_OWNER_KEY) || "guest")!==String(u.uid)){
    throw new Error("The signed-in account changed during intelligence sync. Please retry.");
   }
-  const s=read();let feedbackChanged=false;
+  const s=read();const stateAtSync=localStorage.getItem(KEY)||"";let feedbackChanged=false;
   const remoteFeedback=new Map(f.docs.map(d=>[d.id,d.data()||{}]));
   for(const [id,localItem] of Object.entries(s.feedback)){
    const remoteItem=remoteFeedback.get(id);
@@ -189,6 +189,9 @@ export async function syncIntelligenceForUser(u){
   if(String(finalAuth?.currentUser?.uid || "")!==String(u.uid) ||
      (localStorage.getItem(LOCAL_OWNER_KEY) || "guest")!==String(u.uid)){
    throw new Error("The signed-in account changed before intelligence state could be reconciled. Please retry.");
+  }
+  if((localStorage.getItem(KEY)||"")!==stateAtSync){
+   throw new Error("Local intelligence changed during sync; newer local state was retained. Please retry.");
   }
   write(s);invalidateRecommendationCaches();
   window.dispatchEvent(new CustomEvent("vivid:sync-status",{detail:{store:"intelligence",status:"synced"}}));
