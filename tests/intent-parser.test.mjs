@@ -136,4 +136,8 @@ test("recognizes supported streaming providers but does not apply provider filte
 
   assert.equal(parseIntent("Disney Plus movies").provider.id, 337);
   assert.equal(parseIntent("Prime Video series").provider.id, 9);
+  const appleTv = parseIntent("Apple TV Plus");
+  assert.equal(appleTv.provider.id, 350);
+  assert.equal(appleTv.mediaType, "all");
+  assert.equal(appleTv.providerOnly, true);
 });
