@@ -3,17 +3,33 @@ const COLLECTIONS=["favorites","watchLater","history"];
 const emptyLibrary=()=>({favorites:[],watchLater:[],history:[]});
 const TOMBSTONE_STORAGE_KEY="vivid:library-tombstones:v1";
 const LOCAL_OWNER_KEY="vivid:library-owner:v1";
+function accountStorageKey(key,uid){return key+":user:"+String(uid);}
 function ensureLocalOwner(uid){
   if(!uid)return;
   try{
     const owner=localStorage.getItem(LOCAL_OWNER_KEY);
-    if(!owner){localStorage.setItem(LOCAL_OWNER_KEY,String(uid));return;}
+    if(!owner){
+      // First sign-in claims the existing local library rather than discarding it.
+      localStorage.setItem(LOCAL_OWNER_KEY,String(uid));
+      return;
+    }
     if(owner===String(uid))return;
-    localStorage.setItem(STORAGE_KEY,JSON.stringify(emptyLibrary()));
-    localStorage.setItem(TOMBSTONE_STORAGE_KEY,JSON.stringify({}));
+
+    // Preserve the previous account's unsynced local data before switching.
+    localStorage.setItem(accountStorageKey(STORAGE_KEY,owner),localStorage.getItem(STORAGE_KEY)||JSON.stringify(emptyLibrary()));
+    localStorage.setItem(accountStorageKey(TOMBSTONE_STORAGE_KEY,owner),localStorage.getItem(TOMBSTONE_STORAGE_KEY)||"{}");
+
+    // Restore this user's prior device snapshot, or start clean to prevent
+    // one signed-in account from seeing another account's local library.
+    const nextLibrary=localStorage.getItem(accountStorageKey(STORAGE_KEY,uid));
+    const nextTombstones=localStorage.getItem(accountStorageKey(TOMBSTONE_STORAGE_KEY,uid));
+    localStorage.setItem(STORAGE_KEY,nextLibrary||JSON.stringify(emptyLibrary()));
+    localStorage.setItem(TOMBSTONE_STORAGE_KEY,nextTombstones||"{}");
     localStorage.setItem(LOCAL_OWNER_KEY,String(uid));
     window.dispatchEvent(new CustomEvent("vivid:account-switched",{detail:{uid:String(uid)}}));
-  }catch{}
+  }catch(error){
+    console.warn("Vivid could not switch account-local library snapshots:",error);
+  }
 }
 
 function itemKey(item){return String(item.media_type||item.mediaType||"movie")+":"+String(item.id);}
@@ -253,7 +269,7 @@ async function mapLimit(items,limit,worker){
   await Promise.all(workers);
 }
 
-export async function syncLibraryForUser(user=null){
+async function performLibrarySyncForUser(user=null){
   if(user?.uid)ensureLocalOwner(user.uid);
   const local=readLocal();
   if(!user)return local;
@@ -341,13 +357,25 @@ export async function syncLibraryForUser(user=null){
   return merged;
 }
 
+const syncInFlight=new Map();
+export function syncLibraryForUser(user=null){
+  if(!user?.uid)return Promise.resolve(readLocal());
+  const uid=String(user.uid);
+  if(syncInFlight.has(uid))return syncInFlight.get(uid);
+  const task=performLibrarySyncForUser(user).finally(()=>syncInFlight.delete(uid));
+  syncInFlight.set(uid,task);
+  return task;
+}
+
 export async function syncLocalItem(collection,item){
   try{
     const auth=await getFirebaseAuth();
     if(!auth?.currentUser)return;
-    await setRemoteItem(auth.currentUser.uid,collection,item);
+    // Reconcile through the same guarded path as manual sync so failed writes
+    // remain in local storage and can be retried without stale overwrites.
+    await syncLibraryForUser(auth.currentUser);
   }catch(error){
-    console.warn("Vivid library remote sync unavailable:",error);
+    console.warn("Vivid library remote sync unavailable; local changes are retained for retry:",error);
   }
 }
 
@@ -355,42 +383,40 @@ export async function removeSyncedLibraryItem(collection,item,deletedAt=Date.now
   try{
     const auth=await getFirebaseAuth();
     if(!auth?.currentUser)return;
-    await deleteRemoteItem(auth.currentUser.uid,collection,item,deletedAt);
+    await syncLibraryForUser(auth.currentUser);
   }catch(error){
-    console.warn("Vivid remote library removal unavailable:",error);
+    console.warn("Vivid library removal sync unavailable; deletion is retained for retry:",error);
   }
 }
 
-let syncPromise=null;
-export function startLibrarySync(){
-  if(syncPromise)return syncPromise;
-
-  syncPromise=(async()=>{
-    try{
-      const {auth,onAuthStateChanged}=await getFirebase();
-      return await new Promise(resolve=>{
-        let settled=false;
-        const finish=value=>{
-          if(settled)return;
-          settled=true;
-          unsubscribe?.();
-          resolve(value);
-        };
-        const unsubscribe=onAuthStateChanged(auth,async user=>{
-          if(!user){
-            finish(readLocal());
-            return;
-          }
-          finish(await syncLibraryForUser(user));
+let authSyncStarted=false;
+export async function startLibrarySync(){
+  if(authSyncStarted)return;
+  authSyncStarted=true;
+  try{
+    const {auth,onAuthStateChanged}=await getFirebase();
+    onAuthStateChanged(auth,user=>{
+      if(user){
+        void syncLibraryForUser(user).catch(error=>{
+          console.warn("Vivid automatic cloud library sync failed; local data is retained:",error);
         });
-      });
-    }catch(error){
-      console.warn("Vivid Firebase library sync unavailable:",error);
-      return readLocal();
-    }
-  })();
+      }
+    });
+  }catch(error){
+    authSyncStarted=false;
+    console.warn("Vivid automatic library sync could not start:",error);
+  }
+}
 
-  return syncPromise;
+if(typeof window!=="undefined"){
+  void startLibrarySync();
+  window.addEventListener("online",()=>{
+    void getFirebaseAuth().then(auth=>{
+      if(auth?.currentUser)return syncLibraryForUser(auth.currentUser);
+    }).catch(error=>{
+      console.warn("Vivid library sync retry after reconnect failed:",error);
+    });
+  });
 }
 
 export function getFollowedTitles(){
