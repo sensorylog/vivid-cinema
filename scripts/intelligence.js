@@ -214,6 +214,9 @@ export function startIntelligenceSync(){
  return syncPromise;
 }
 if(typeof window!=="undefined"){
+ // Keep account ownership aligned on every surface that imports Intelligence,
+ // not only the watch page.
+ void startIntelligenceSync();
  window.addEventListener("online",()=>{
   void user().then(u=>u&&syncIntelligenceForUser(u)).catch(()=>{});
  });
