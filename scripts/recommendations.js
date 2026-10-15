@@ -12,23 +12,38 @@ const PROGRESS_SYNC_DEBOUNCE = 1800;
 const LOCAL_OWNER_KEY = "vivid:progress-owner:v1";
 
 function ensureProgressOwner(uid){
+  let changed=false;
   try{
     const result=switchLocalOwner({
       storage:localStorage,
       ownerKey:LOCAL_OWNER_KEY,
-      activeKeys:[PROGRESS_KEY,FOR_YOU_CACHE_KEY,TONIGHT_SESSION_KEY],
+      activeKeys:[PROGRESS_KEY,FOR_YOU_CACHE_KEY],
       uid,
-      emptyValues:{[PROGRESS_KEY]:"{}",[FOR_YOU_CACHE_KEY]:"",[TONIGHT_SESSION_KEY]:""}
+      emptyValues:{[PROGRESS_KEY]:"{}",[FOR_YOU_CACHE_KEY]:""}
     });
-    if(result.changed){
-      for(const timer of progressTimers.values())window.clearTimeout(timer);
-      progressTimers.clear();
-      pendingProgress.clear();
-      window.dispatchEvent(new CustomEvent("vivid:account-switched",{detail:{uid:uid?String(uid):null}}));
-      window.dispatchEvent(new CustomEvent("vivid:progress-changed",{detail:readProgress()}));
-    }
+    changed=changed||result.changed;
   }catch(error){
     console.warn("Vivid could not switch account-local progress snapshots:",error);
+  }
+  // Tonight's rejected picks live in sessionStorage, not localStorage.
+  try{
+    const result=switchLocalOwner({
+      storage:sessionStorage,
+      ownerKey:"vivid:tonight-owner:v1",
+      activeKeys:[TONIGHT_SESSION_KEY],
+      uid,
+      emptyValues:{[TONIGHT_SESSION_KEY]:""}
+    });
+    changed=changed||result.changed;
+  }catch(error){
+    console.warn("Vivid could not switch account-local Tonight state:",error);
+  }
+  if(changed){
+    for(const timer of progressTimers.values())window.clearTimeout(timer);
+    progressTimers.clear();
+    pendingProgress.clear();
+    window.dispatchEvent(new CustomEvent("vivid:account-switched",{detail:{uid:uid?String(uid):null}}));
+    window.dispatchEvent(new CustomEvent("vivid:progress-changed",{detail:readProgress()}));
   }
 }
 
