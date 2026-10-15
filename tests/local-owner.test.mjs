@@ -7,7 +7,7 @@ function memoryStorage(initial = {}) {
   return {
     getItem(key) { return values.has(key) ? values.get(key) : null; },
     setItem(key, value) { values.set(String(key), String(value)); },
-    removeItem(key) { values.delete(key); },
+    removeItem(key) { values.delete(String(key)); },
     dump() { return Object.fromEntries(values); }
   };
 }
@@ -29,7 +29,7 @@ test("first sign-in preserves guest state and snapshots a guest copy", () => {
   assert.equal(storage.getItem("progress:guest"), '{"movie:1":{"progress":12}}');
 });
 
-test("switching accounts snapshots the outgoing state and never carries it into a new account", () => {
+test("switching accounts snapshots outgoing state and restores only the incoming account", () => {
   const storage = memoryStorage({ owner: "user-a", library: '{"favorites":["A"]}', progress: '{"movie:1":{"progress":40}}' });
   setup(storage, "user-b");
   assert.equal(storage.getItem("library:user:user-a"), '{"favorites":["A"]}');
@@ -57,7 +57,7 @@ test("sign-out restores guest state rather than exposing the last signed-in acco
   assert.equal(storage.getItem("library"), '{"favorites":["A"]}');
 });
 
-test("movie and TV identities stay distinct and episode progress keys are preserved", () => {
+test("movie and TV identities and episode progress keys remain distinct", () => {
   const storage = memoryStorage({ owner: "user-a", progress: '{"movie:12":{"progress":5},"tv:12:1:2":{"progress":60}}' });
   setup(storage, "user-b");
   setup(storage, "user-a");
@@ -67,9 +67,34 @@ test("movie and TV identities stay distinct and episode progress keys are preser
   });
 });
 
-test("a guest first sign-in uses its local state when the account has no prior snapshot", () => {
+test("guest state is inherited on first sign-in when no account snapshot exists", () => {
   const storage = memoryStorage({ owner: "guest", library: '{"favorites":["guest"]}', progress: '{"movie:2":{"progress":10}}' });
   setup(storage, "user-a");
   assert.equal(storage.getItem("library"), '{"favorites":["guest"]}');
   assert.equal(storage.getItem("progress"), '{"movie:2":{"progress":10}}');
+});
+
+test("partial account snapshots cannot inherit another owner's missing store", () => {
+  const storage = memoryStorage({
+    owner: "guest",
+    library: '{"favorites":["guest"]}',
+    progress: '{"movie:2":{"progress":10}}',
+    "library:user:user-a": '{"favorites":["A"]}'
+  });
+  setup(storage, "user-a");
+  assert.equal(storage.getItem("library"), '{"favorites":["A"]}');
+  assert.equal(storage.getItem("progress"), "{}");
+});
+
+test("a missing owner marker cannot make guest state overwrite an existing account snapshot", () => {
+  const storage = memoryStorage({
+    library: '{"favorites":["guest"]}',
+    progress: '{"movie:9":{"progress":9}}',
+    "library:user:user-a": '{"favorites":["A"]}',
+    "progress:user:user-a": '{"movie:9":{"progress":80}}'
+  });
+  setup(storage, "user-a");
+  assert.equal(storage.getItem("library"), '{"favorites":["A"]}');
+  assert.equal(storage.getItem("progress"), '{"movie:9":{"progress":80}}');
+  assert.equal(storage.getItem("library:guest"), '{"favorites":["guest"]}');
 });

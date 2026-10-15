@@ -1,33 +1,27 @@
+import { switchLocalOwner } from "./local-owner.js";
+
 const STORAGE_KEY="vivid:library:v2";
 const COLLECTIONS=["favorites","watchLater","history"];
 const emptyLibrary=()=>({favorites:[],watchLater:[],history:[]});
 const TOMBSTONE_STORAGE_KEY="vivid:library-tombstones:v1";
 const LOCAL_OWNER_KEY="vivid:library-owner:v1";
 let localMutationRevision=0;
-function accountStorageKey(key,uid){return key+":user:"+String(uid);}
 function ensureLocalOwner(uid){
-  if(!uid)return;
   try{
-    const owner=localStorage.getItem(LOCAL_OWNER_KEY);
-    if(!owner){
-      // First sign-in claims the existing local library rather than discarding it.
-      localStorage.setItem(LOCAL_OWNER_KEY,String(uid));
-      return;
+    const result=switchLocalOwner({
+      storage:localStorage,
+      ownerKey:LOCAL_OWNER_KEY,
+      activeKeys:[STORAGE_KEY,TOMBSTONE_STORAGE_KEY],
+      uid,
+      emptyValues:{
+        [STORAGE_KEY]:JSON.stringify(emptyLibrary()),
+        [TOMBSTONE_STORAGE_KEY]:"{}"
+      }
+    });
+    if(result.changed){
+      window.dispatchEvent(new CustomEvent("vivid:account-switched",{detail:{uid:uid?String(uid):null}}));
+      window.dispatchEvent(new CustomEvent("vivid:library-changed",{detail:readLocal()}));
     }
-    if(owner===String(uid))return;
-
-    // Preserve the previous account's unsynced local data before switching.
-    localStorage.setItem(accountStorageKey(STORAGE_KEY,owner),localStorage.getItem(STORAGE_KEY)||JSON.stringify(emptyLibrary()));
-    localStorage.setItem(accountStorageKey(TOMBSTONE_STORAGE_KEY,owner),localStorage.getItem(TOMBSTONE_STORAGE_KEY)||"{}");
-
-    // Restore this user's prior device snapshot, or start clean to prevent
-    // one signed-in account from seeing another account's local library.
-    const nextLibrary=localStorage.getItem(accountStorageKey(STORAGE_KEY,uid));
-    const nextTombstones=localStorage.getItem(accountStorageKey(TOMBSTONE_STORAGE_KEY,uid));
-    localStorage.setItem(STORAGE_KEY,nextLibrary||JSON.stringify(emptyLibrary()));
-    localStorage.setItem(TOMBSTONE_STORAGE_KEY,nextTombstones||"{}");
-    localStorage.setItem(LOCAL_OWNER_KEY,String(uid));
-    window.dispatchEvent(new CustomEvent("vivid:account-switched",{detail:{uid:String(uid)}}));
   }catch(error){
     console.warn("Vivid could not switch account-local library snapshots:",error);
   }
@@ -422,6 +416,7 @@ export async function startLibrarySync(){
   try{
     const {auth,onAuthStateChanged}=await getFirebase();
     onAuthStateChanged(auth,user=>{
+      ensureLocalOwner(user?.uid || null);
       if(user){
         void syncLibraryForUser(user).catch(error=>{
           console.warn("Vivid automatic cloud library sync failed; local data is retained:",error);
