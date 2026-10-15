@@ -20,7 +20,9 @@ export function isPlotDescriptionQuery(query = "") {
   const text = String(query || "").trim().toLowerCase();
   if (!text) return false;
   const cue = /\b(?:i remember|i watched|i saw|can't remember|cannot remember|forgot the title|what(?:'s| is) the (?:movie|film|show)|which (?:movie|film|show)|there(?:'s| is) (?:a )?(?:movie|film|show)|(?:movie|film|show) (?:where|about|in which)|story (?:where|about)|plot (?:where|about|is)|the one where|a (?:man|woman|boy|girl|kid|child|family|person) who)\b/i;
-  return cue.test(text) && words(text).length >= 2;
+  const narrative = /\b(?:discovers|finds|wakes|relives|gets stuck|is trapped|escapes|tries to|has to|turns out|meets|must save|falls in love|travels back|goes back|survives|becomes|is forced to|searches for|repeats the same)\b/i;
+  const wordCount = words(text).length;
+  return (cue.test(text) && wordCount >= 2) || (wordCount >= 6 && narrative.test(text));
 }
 
 export function buildPlotKeywordQueries(query = "", limit = 8) {
