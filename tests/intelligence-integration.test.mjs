@@ -29,6 +29,7 @@ test("playback start, progress and completion still feed the canonical Memory st
 test("dirty local taste is rebuilt instead of being overwritten by a newer remote timestamp", () => {
   assert.match(intelligence, /t\.updatedAt&&!t\.dirty/);
   assert.match(intelligence, /if\(feedbackChanged\|\|s\.taste\.dirty\)/);
+  assert.match(intelligence, /localItem\.kind===x\.kind/);
   assert.match(intelligence, /s\.taste=\{\.\.\.remote,dirty:false\}/);
 });
 
