@@ -266,6 +266,10 @@ test("provider intent is explicit and resolves provider IDs from TMDB's regional
   assert.equal(parseWatchProviderIntent("Netflix movies").name, "Netflix");
   assert.equal(parseWatchProviderIntent("movies like Netflix"), null);
   assert.equal(parseWatchProviderIntent("TV shows streaming on Disney+").key, "disney-plus");
+  assert.equal(parseWatchProviderIntent("movies on Apple TV+").key, "apple-tv");
+  assert.equal(parseWatchProviderIntent("movies on Paramount+").key, "paramount-plus");
+  assert.equal(parseWatchProviderIntent("movies on MUBI").key, "mubi");
+  assert.ok(parseIntent("movies on MUBI").unsupported.length > 0);
 
   const netflix = findWatchProviderId({
     results: [
