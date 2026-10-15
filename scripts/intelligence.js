@@ -1,22 +1,29 @@
 import { tmdbApi } from "./tmdb.js";
 import { getLocalLibrary } from "./library.js";
 
+import { switchLocalOwner } from "./local-owner.js";
+
 const KEY="vivid:intelligence:v1";
 const SESSION_KEY="vivid:session:v1";
+const TASTE_CACHE_KEY="vivid:taste:v1";
 const empty=()=>({version:1,feedback:{},events:[],taste:{genres:{},languages:{},countries:{},actors:{},directors:{},media:{movie:0,tv:0},decades:{},updatedAt:0},onboarding:{completed:false,dismissed:false,completedAt:0}});
 let firebasePromise=null, syncPromise=null, sessionId=null;
 const LOCAL_OWNER_KEY="vivid:intelligence-owner:v1";
 function ensureIntelligenceOwner(uid){
  try{
-  const owner=localStorage.getItem(LOCAL_OWNER_KEY);
-  if(!owner){localStorage.setItem(LOCAL_OWNER_KEY,String(uid));return;}
-  if(owner===String(uid))return;
-  localStorage.removeItem(KEY);
-  localStorage.removeItem(SESSION_KEY);
-  localStorage.setItem(LOCAL_OWNER_KEY,String(uid));
-  sessionId=null;
-  window.dispatchEvent(new CustomEvent("vivid:account-switched",{detail:{uid:String(uid)}}));
- }catch{}
+  const result=switchLocalOwner({
+   storage:localStorage,
+   ownerKey:LOCAL_OWNER_KEY,
+   activeKeys:[KEY,SESSION_KEY,TASTE_CACHE_KEY],
+   uid,
+   emptyValues:{[KEY]:JSON.stringify(empty()),[SESSION_KEY]:"",[TASTE_CACHE_KEY]:""}
+  });
+  if(result.changed){
+   sessionId=null;
+   window.dispatchEvent(new CustomEvent("vivid:account-switched",{detail:{uid:uid?String(uid):null}}));
+   window.dispatchEvent(new CustomEvent("vivid:intelligence-changed",{detail:read()}));
+  }
+ }catch(error){console.warn("Vivid could not switch account-local intelligence snapshots:",error)}
 }
 
 function read(){try{const v=JSON.parse(localStorage.getItem(KEY));const d=empty();return {...d,...v,feedback:{...d.feedback,...(v?.feedback||{})},events:Array.isArray(v?.events)?v.events:[],taste:{...d.taste,...(v?.taste||{})},onboarding:{...d.onboarding,...(v?.onboarding||{})}}}catch{return empty()}}
@@ -38,7 +45,21 @@ async function user(){
   });
  }catch{return null}
 }
-function cloud(path,data){void user().then(u=>u&&fb().then(({db,doc,setDoc})=>setDoc(doc(db,"users",u.uid,...path),data,{merge:true}))).catch(()=>{})}
+function cloud(path,data){
+ const ownerAtCall=localStorage.getItem(LOCAL_OWNER_KEY)||"guest";
+ return user().then(async u=>{
+  if(!u||ownerAtCall==="guest"||String(u.uid)!==ownerAtCall||
+     (localStorage.getItem(LOCAL_OWNER_KEY)||"guest")!==ownerAtCall)return {status:"local"};
+  const {db,doc,setDoc}=await fb();
+  await setDoc(doc(db,"users",u.uid,...path),data,{merge:true});
+  window.dispatchEvent(new CustomEvent("vivid:sync-status",{detail:{store:"intelligence",status:"synced",path:path.join("/")}}));
+  return {status:"synced"};
+ }).catch(error=>{
+  window.dispatchEvent(new CustomEvent("vivid:sync-status",{detail:{store:"intelligence",status:"error",path:path.join("/")}}));
+  console.warn("Vivid intelligence cloud write failed; local state is retained for the next sync:",error);
+  return {status:"error"};
+ });
+}
 
 export function getFeedback(x){return read().feedback[typeof x==="string"?x:key(x)]?.kind||null}
 export function getFeedbackState(){return read().feedback}
@@ -104,7 +125,7 @@ export async function rebuildTasteProfile(){
  apply(l.favorites,3.5,false);apply(l.watchLater,1.2,false);apply(l.history,2.2,true);Object.values(s.feedback).forEach(x=>{if(x.kind==="like")add(t.media,x.media_type||"movie",4.5*decay(x.updatedAt,75))});
  const ss=await seeds();const details=await Promise.allSettled(ss.slice(0,8).map(x=>x.item.media_type==="tv"?tmdbApi.tvDetails(x.item.id):tmdbApi.movieDetails(x.item.id)));
  details.forEach((r,i)=>{if(r.status!=="fulfilled")return;const d=r.value,w=ss[i].w*(1+Math.min(.75,eventSignal(s,key(ss[i].item))));(d.genres||[]).forEach(g=>add(t.genres,String(g.id),w));if(d.original_language)add(t.languages,d.original_language,w*.8);(d.production_countries||[]).forEach(c=>add(t.countries,c.iso_3166_1,w*.55));const y=Number(String(d.release_date||d.first_air_date||"").slice(0,4));if(y>=1900)add(t.decades,String(Math.floor(y/10)*10),w*.45);(d.credits?.cast||[]).slice(0,10).forEach(p=>add(t.actors,String(p.id),w*.42));(d.credits?.crew||[]).filter(p=>["Director","Creator"].includes(p.job)).slice(0,5).forEach(p=>add(t.directors,String(p.id),w*.5))});
- s.taste={genres:top(t.genres,20),languages:top(t.languages,10),countries:top(t.countries,12),actors:top(t.actors,20),directors:top(t.directors,12),media:t.media,decades:top(t.decades,8),updatedAt:Date.now()};write(s);try{localStorage.setItem("vivid:taste:v1",JSON.stringify(s.taste))}catch{};cloud(["taste","profile"],{version:1,...s.taste});return s.taste
+ s.taste={genres:top(t.genres,20),languages:top(t.languages,10),countries:top(t.countries,12),actors:top(t.actors,20),directors:top(t.directors,12),media:t.media,decades:top(t.decades,8),updatedAt:Date.now()};write(s);try{localStorage.setItem(TASTE_CACHE_KEY,JSON.stringify(s.taste))}catch{};cloud(["taste","profile"],{version:1,...s.taste});return s.taste
 }
 export async function getTasteProfile(){const t=read().taste;return t.updatedAt? t:rebuildTasteProfile()}
 export function getTasteStrength(){const s=read(),l=getLocalLibrary();return Math.min(1,Object.keys(s.feedback).length*.16+(l.history||[]).length*.05)}
@@ -112,6 +133,72 @@ export function shouldShowColdStart(){const s=read(),l=getLocalLibrary();return 
 export async function completeColdStart(items=[]){const s=read(),seen=new Set;items.slice(0,6).forEach(x=>{const i=safe(x),k=key(i);if(!k||seen.has(k))return;seen.add(k);const updatedAt=Date.now();s.feedback[k]={...i,kind:"like",updatedAt};cloud(["feedback",k],{...i,kind:"like",updatedAt});recordBehavior("cold_start_like",i)});s.onboarding={completed:true,dismissed:false,completedAt:Date.now()};write(s);invalidateRecommendationCaches();await rebuildTasteProfile();return s}
 export function dismissColdStart(){const s=read();s.onboarding={...s.onboarding,dismissed:true};write(s)}
 export async function syncIntelligenceForUser(u){
+ ensureIntelligenceOwner(u?.uid || null);
  if(!u)return read();
- ensureIntelligenceOwner(u.uid);try{const {db,collection,getDocs}=await fb();const [f,t]=await Promise.all([getDocs(collection(db,"users",u.uid,"feedback")),getDocs(collection(db,"users",u.uid,"taste"))]);const s=read();let feedbackChanged=false;f.docs.forEach(d=>{const x=d.data()||{};if(x.kind==="cleared"){if(s.feedback[d.id]){delete s.feedback[d.id];feedbackChanged=true}}else if(!s.feedback[d.id]||Number(x.updatedAt||0)>Number(s.feedback[d.id].updatedAt||0)){s.feedback[d.id]=x;feedbackChanged=true}});if(feedbackChanged)s.taste.updatedAt=0;const remote=t.docs.find(d=>d.id==="profile")?.data();if(remote&&Number(remote.updatedAt||0)>Number(s.taste.updatedAt||0))s.taste=remote;write(s);invalidateRecommendationCaches();return s}catch(e){console.warn("Vivid intelligence sync unavailable:",e);return read()}}
-export function startIntelligenceSync(){if(syncPromise)return syncPromise;syncPromise=(async()=>{try{const {auth,onAuthStateChanged}=await fb();return await new Promise(resolve=>{let done=false;const finish=x=>{if(done)return;done=true;unsub?.();resolve(x)};const unsub=onAuthStateChanged(auth,u=>u?syncIntelligenceForUser(u).then(finish):finish(read()))})}catch{return read()}})();return syncPromise}
+ try{
+  const {db,collection,getDocs,doc,setDoc}=await fb();
+  const [f,t]=await Promise.all([getDocs(collection(db,"users",u.uid,"feedback")),getDocs(collection(db,"users",u.uid,"taste"))]);
+  const {auth}=await fb();
+  if(String(auth?.currentUser?.uid || "")!==String(u.uid) ||
+     (localStorage.getItem(LOCAL_OWNER_KEY) || "guest")!==String(u.uid)){
+   throw new Error("The signed-in account changed during intelligence sync. Please retry.");
+  }
+  const s=read();let feedbackChanged=false;
+  const remoteFeedback=new Map(f.docs.map(d=>[d.id,d.data()||{}]));
+  for(const [id,localItem] of Object.entries(s.feedback)){
+   const remoteItem=remoteFeedback.get(id);
+   if(!remoteItem || Number(localItem.updatedAt||0)>Number(remoteItem.updatedAt||0)){
+    await setDoc(doc(db,"users",u.uid,"feedback",id),localItem,{merge:true});
+   }
+  }
+  f.docs.forEach(d=>{
+   const x=d.data()||{};
+   if(x.kind==="cleared"){
+    if(s.feedback[d.id] && Number(x.updatedAt||0)>=Number(s.feedback[d.id].updatedAt||0)){delete s.feedback[d.id];feedbackChanged=true}
+   }else if(!s.feedback[d.id]||Number(x.updatedAt||0)>Number(s.feedback[d.id].updatedAt||0)){
+    s.feedback[d.id]=x;feedbackChanged=true
+   }
+  });
+  if(feedbackChanged)s.taste.updatedAt=0;
+  const remote=t.docs.find(d=>d.id==="profile")?.data();
+  if(remote&&Number(remote.updatedAt||0)>Number(s.taste.updatedAt||0)){
+   s.taste=remote;
+  }else if(Number(s.taste.updatedAt||0)>0&&Number(s.taste.updatedAt||0)>Number(remote?.updatedAt||0)){
+   await setDoc(doc(db,"users",u.uid,"taste","profile"),{version:1,...s.taste},{merge:true});
+  }
+  write(s);invalidateRecommendationCaches();
+  window.dispatchEvent(new CustomEvent("vivid:sync-status",{detail:{store:"intelligence",status:"synced"}}));
+  return s
+ }catch(e){
+  window.dispatchEvent(new CustomEvent("vivid:sync-status",{detail:{store:"intelligence",status:"error"}}));
+  console.warn("Vivid intelligence sync unavailable; local state is retained for retry:",e);
+  return read()
+ }
+}
+export function startIntelligenceSync(){
+ if(syncPromise)return syncPromise;
+ syncPromise=(async()=>{
+  try{
+   const {auth,onAuthStateChanged}=await fb();
+   return await new Promise(resolve=>{
+    let initialStateHandled=false;
+    onAuthStateChanged(auth,u=>{
+     ensureIntelligenceOwner(u?.uid || null);
+     if(!u){
+      if(!initialStateHandled){initialStateHandled=true;resolve(read())}
+      return;
+     }
+     void syncIntelligenceForUser(u).then(value=>{
+      if(!initialStateHandled){initialStateHandled=true;resolve(value)}
+     });
+    });
+   });
+  }catch{return read()}
+ })();
+ return syncPromise;
+}
+if(typeof window!=="undefined"){
+ window.addEventListener("online",()=>{
+  void user().then(u=>u&&syncIntelligenceForUser(u)).catch(()=>{});
+ });
+}
