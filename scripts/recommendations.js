@@ -481,6 +481,16 @@ function rankForYou(candidates, taste, progress, feedback, excluded, limit, rece
   return out;
 }
 
+export function rankIntentCandidates(candidates, options = {}) {
+  const taste = options.taste || {};
+  const progress = options.progress || {};
+  const feedback = options.feedback || {};
+  const excluded = options.excluded instanceof Set ? options.excluded : new Set(options.excluded || []);
+  const limit = Math.max(1, Math.min(40, Number(options.limit) || 18));
+  const recentGenres = options.recentGenres instanceof Set ? options.recentGenres : new Set(options.recentGenres || []);
+  return rankForYou(candidates, taste, progress, feedback, excluded, limit, recentGenres, options.recommendationMemory || new Map(), false);
+}
+
 async function getRecommendationSeeds() {
   const library = getLocalLibrary();
   const feedback = getFeedbackState();
@@ -662,17 +672,15 @@ export async function getIntentRecommendations(intent = {}, limit = 18) {
       .flatMap(item => item.genre_ids || item.raw?.genre_ids || [])
       .map(Number)
   );
-  const ranked = rankForYou(
-    candidates,
+  const ranked = rankIntentCandidates(candidates, {
     taste,
     progress,
     feedback,
     excluded,
-    safeLimit,
+    limit: safeLimit,
     recentGenres,
-    getRecommendationMemory(),
-    false
-  );
+    recommendationMemory: getRecommendationMemory()
+  });
   return ranked.map(item => ({
     ...item,
     recommendationReason: intent.constraints?.length
