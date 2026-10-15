@@ -1,6 +1,9 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import { rankIntentCandidates, collectIntentCandidates } from "../scripts/recommendations.js";
+
+const recommendationsSource = readFileSync(new URL("../scripts/recommendations.js", import.meta.url), "utf8");
 
 function candidate(id, extra = {}) {
   return {
@@ -13,6 +16,10 @@ function candidate(id, extra = {}) {
     ...extra
   };
 }
+
+test("genre-constrained searches skip media types without a supported genre ID", () => {
+  assert.match(recommendationsSource, /if \(intent\.genre && !genreId\) return \[\]/);
+});
 
 test("filtered ranking preserves a useful number of results in one requested genre", () => {
   const candidates = Array.from({ length: 8 }, (_, index) => candidate(index + 1));
