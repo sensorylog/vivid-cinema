@@ -406,6 +406,25 @@ function writeForYouCache(value) {
   try { localStorage.setItem(FOR_YOU_CACHE_KEY, JSON.stringify(value)); } catch {}
 }
 
+export function scoreRecommendationExposure(memory, now = Date.now()) {
+  if (!memory || typeof memory !== "object") return { seenPenalty: 0, clickRecovery: 0 };
+  const impressions = Math.max(0, Number(memory.impressions) || 0);
+  const clicks = Math.max(0, Number(memory.clicks) || 0);
+  if (!impressions && !clicks) return { seenPenalty: 0, clickRecovery: 0 };
+
+  // Recent exposure matters most; old impressions should fade instead of
+  // permanently burying a title. Missing timestamps get a modest, not full,
+  // penalty so legacy memory cannot dominate ranking indefinitely.
+  const lastSeen = Number(memory.lastSeen) || 0;
+  const ageDays = lastSeen > 0 ? Math.max(0, (now - lastSeen) / 86400000) : 21;
+  const recency = Math.pow(0.5, ageDays / 21);
+  const seenPenalty = Math.min(5, Math.log2(1 + impressions) * 1.8) * recency;
+  // A click is evidence of interest, but does not make the same title immune
+  // to rotation. Recovery is deliberately capped below the exposure penalty.
+  const clickRecovery = Math.min(seenPenalty * 0.75, clicks * 1.1 * recency);
+  return { seenPenalty, clickRecovery };
+}
+
 function scoreCandidate(item, taste, progress, feedback, recentGenres = new Set(), recommendationMemory = new Map()) {
   const source = item.raw || item;
   const genreIds = source.genre_ids || item.genre_ids || [];
@@ -428,9 +447,8 @@ function scoreCandidate(item, taste, progress, feedback, recentGenres = new Set(
     .filter(entry => entry?.kind === "not_for_me" && Array.isArray(entry.genre_ids))
     .flatMap(entry => entry.genre_ids.map(Number).filter(Number.isFinite));
   const dislikePenalty = Math.min(4, genreIds.filter(id => notForMeGenres.includes(Number(id))).length * 1.25);
-  const memory = recommendationMemory.get(keyFor(item));
-  const seenPenalty = memory ? Math.min(1.8, memory.impressions * .28) : 0;
-  const clickRecovery = memory ? Math.min(1.2, memory.clicks * .6) : 0;
+  const exposure = scoreRecommendationExposure(recommendationMemory.get(keyFor(item))); 
+  const { seenPenalty, clickRecovery } = exposure;
   const recentGenreBoost = genreIds.filter(id => recentGenres.has(Number(id))).slice(0, 2).length * .75;
   const releaseValue = source.release_date || source.first_air_date || item.date || "";
   const releaseTime = Date.parse(releaseValue);
