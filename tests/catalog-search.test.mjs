@@ -203,6 +203,7 @@ test("person-credit intent recognizes explicit director, cast, writer and creato
   assert.equal(parsePersonCreditIntent("movies by Christopher Nolan").role, "director");
   assert.equal(parsePersonCreditIntent("Christopher Nolan movies"), null);
   assert.equal(parsePersonCreditIntent("with a twist"), null);
+  assert.equal(parsePersonCreditIntent("by the sea"), null);
 });
 
 test("person search resolution prefers an exact name and the requested professional department", () => {
