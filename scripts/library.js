@@ -3,6 +3,7 @@ const COLLECTIONS=["favorites","watchLater","history"];
 const emptyLibrary=()=>({favorites:[],watchLater:[],history:[]});
 const TOMBSTONE_STORAGE_KEY="vivid:library-tombstones:v1";
 const LOCAL_OWNER_KEY="vivid:library-owner:v1";
+let localMutationRevision=0;
 function accountStorageKey(key,uid){return key+":user:"+String(uid);}
 function ensureLocalOwner(uid){
   if(!uid)return;
@@ -70,6 +71,7 @@ export function hasLibraryItem(collection,item){
 }
 
 export function upsertLibraryItem(collection,item){
+  localMutationRevision++;
   const library=readLocal();
   const safe={...item,updatedAt:Number(item.updatedAt)||Date.now()};
   const items=Array.isArray(library[collection])?library[collection]:[];
@@ -85,6 +87,7 @@ export function upsertLibraryItem(collection,item){
 }
 
 export function removeLibraryItem(collection,id,mediaType="movie"){
+  localMutationRevision++;
   const library=readLocal();
   const key=String(mediaType)+":"+String(id);
   const removed=(library[collection]||[]).find(entry=>itemKey(entry)===key);
@@ -108,6 +111,7 @@ export function toggleLibraryItem(collection,item){
 }
 
 export function clearLibraryCollection(collection){
+  localMutationRevision++;
   const library=readLocal();
   const removed=library[collection]||[];
   library[collection]=[];
@@ -358,12 +362,25 @@ async function performLibrarySyncForUser(user=null){
 }
 
 const syncInFlight=new Map();
+let syncQueue=Promise.resolve();
 export function syncLibraryForUser(user=null){
   if(!user?.uid)return Promise.resolve(readLocal());
   const uid=String(user.uid);
   if(syncInFlight.has(uid))return syncInFlight.get(uid);
-  const task=performLibrarySyncForUser(user).finally(()=>syncInFlight.delete(uid));
+
+  // Serialize different accounts, and repeat a pass if local mutations arrive
+  // while a snapshot is being reconciled so a fast click cannot be missed.
+  const task=syncQueue.catch(()=>{}).then(async()=>{
+    let result;
+    let syncedRevision;
+    do{
+      syncedRevision=localMutationRevision;
+      result=await performLibrarySyncForUser(user);
+    }while(syncedRevision!==localMutationRevision);
+    return result;
+  }).finally(()=>syncInFlight.delete(uid));
   syncInFlight.set(uid,task);
+  syncQueue=task.catch(()=>{});
   return task;
 }
 
