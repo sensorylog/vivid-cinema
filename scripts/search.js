@@ -59,7 +59,7 @@ export function getSearchIntent(query) {
     .flatMap(([, ids]) => ids)
     .filter((id, index, list) => list.indexOf(id) === index);
   const type = Object.entries(TYPE_HINTS).find(([label]) => new RegExp("\\b" + label + "\\b").test(q))?.[1] || null;
-  const similarity = q.match(/^(?:(?:movies?|films?|tv shows?|series)\\s+)?(?:like|similar to|similar)\\s+(.+)$/i)?.[1]?.trim() || "";
+  const similarity = q.match(/^(?:(?:movies?|films?|tv shows?|series)\s+)?(?:like|similar to|similar)\s+(.+)$/i)?.[1]?.trim() || "";
   const people = /\b(actor|actress|director|creator|cast)\b/.test(q);
   return { query: normalizeQuery(query), genres, type, similarity, people };
 }
@@ -209,11 +209,13 @@ export async function searchIntelligently(query, options = {}) {
     ]);
     const targetItems = targetResponse.status === "fulfilled" ? targetResponse.value : [];
     const target = chooseSimilarityTarget(targetItems, searchIntent.similarity, searchIntent.type);
+    let similarityRequestSucceeded = false;
     if (target) {
       try {
         const response = target.media_type === "tv"
           ? await tmdbApi.tvSimilar(target.id, page)
           : await tmdbApi.movieSimilar(target.id, page);
+        similarityRequestSucceeded = true;
         const similarItems = normalizeResults(response?.results || [], target.media_type)
           .filter(item => item.id !== target.id);
         if (similarItems.length) {
@@ -237,6 +239,18 @@ export async function searchIntelligently(query, options = {}) {
       try { ranked = await rankSearchResults(ranked, q, options); }
       catch { ranked = ranked.slice(0, Number(options.limit || 8)); }
       return { items: ranked, intent: { ...searchIntent, filters: parsed, structured: false }, recent: getRecentSearches() };
+    }
+    if (similarityRequestSucceeded) {
+      return {
+        items: [],
+        intent: {
+          ...searchIntent,
+          filters: parsed,
+          structured: false,
+          ...(target ? { similarityTarget: { id: target.id, title: target.title || target.name || "", media_type: target.media_type } } : {})
+        },
+        recent: getRecentSearches()
+      };
     }
     if (targetResponse.status === "rejected") throw targetResponse.reason;
     throw fallbackResponse.reason || new Error("Catalogue search is temporarily unavailable.");
