@@ -6,6 +6,7 @@ test("detects remembered plot descriptions but not ordinary structured filters",
   assert.equal(isPlotDescriptionQuery("I watched a movie where a man relives the same day"), true);
   assert.equal(isPlotDescriptionQuery("A funny movie under 2 hours"), false);
   assert.equal(isPlotDescriptionQuery("Korean thriller series"), false);
+  assert.equal(isPlotDescriptionQuery("A man wakes up in the same place every day and cannot leave"), true);
 });
 
 test("extracts searchable plot phrases and distinctive clue words", () => {
