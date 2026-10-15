@@ -629,6 +629,8 @@ export function getRecommendationStrength() {
 }
 
 if (typeof window !== "undefined") {
+  // Keep progress ownership aligned on Library and recommendation surfaces too.
+  void startPlaybackSync();
   window.addEventListener("online", () => {
     void getFirebaseAuth().then(auth => {
       if (auth?.currentUser) return syncPlaybackProgressForUser(auth.currentUser);
