@@ -177,5 +177,11 @@ test("recent search storage is isolated by account and waits for auth ownership"
   assert.match(source, /recentSearchOwnerReady \? readRecent\(recentSearchOwner\) : \[\]/);
   assert.match(source, /vivid:auth-ready/);
   assert.match(source, /localStorage\.removeItem\(LEGACY_RECENT_KEY\)/);
+  const page = readFileSync(new URL("../scripts/search-page.js", import.meta.url), "utf8");
+  const home = readFileSync(new URL("../script.js", import.meta.url), "utf8");
+  assert.match(page, /rememberSearch\(query, searchOwnerAtStart\)/);
+  assert.match(home, /rememberSearch\(query,searchOwnerAtStart\)/);
+  assert.match(page, /if \(changedOwner\)/);
+  assert.match(home, /if \(changedOwner\)/);
   assert.doesNotMatch(source, /localStorage\.getItem\(RECENT_KEY\)/);
 });
