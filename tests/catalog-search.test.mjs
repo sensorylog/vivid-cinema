@@ -65,12 +65,14 @@ test("structured search builds verified TMDB genre, language, year and type filt
   assert.equal(movie.with_genres, "53");
   assert.equal(movie.with_original_language, "ko");
   assert.equal(movie.primary_release_year, "2020");
+  assert.equal(movie.with_origin_country, "KR");
   assert.equal(movie.page, 2);
 
   const tv = buildStructuredSearchParams(intent, "tv", 3);
   assert.equal(tv.with_genres, "9648");
   assert.equal(tv.with_original_language, "ko");
   assert.equal(tv.first_air_date_year, "2020");
+  assert.equal(tv.with_origin_country, "KR");
   assert.equal(tv.page, 3);
 });
 
@@ -91,19 +93,19 @@ test("structured text supplements must satisfy the requested genre, year and lan
   const intent = parseIntent("Korean thrillers from 2020");
   const matching = {
     media_type: "movie",
-    raw: { genre_ids: [53], original_language: "ko", release_date: "2020-08-01" }
+    raw: { genre_ids: [53], original_language: "ko", origin_country: ["KR"], release_date: "2020-08-01" }
   };
   const wrongGenre = {
     media_type: "movie",
-    raw: { genre_ids: [35], original_language: "ko", release_date: "2020-08-01" }
+    raw: { genre_ids: [35], original_language: "ko", origin_country: ["KR"], release_date: "2020-08-01" }
   };
   const wrongYear = {
     media_type: "movie",
-    raw: { genre_ids: [53], original_language: "ko", release_date: "2019-08-01" }
+    raw: { genre_ids: [53], original_language: "ko", origin_country: ["KR"], release_date: "2019-08-01" }
   };
   const wrongLanguage = {
     media_type: "movie",
-    raw: { genre_ids: [53], original_language: "en", release_date: "2020-08-01" }
+    raw: { genre_ids: [53], original_language: "en", origin_country: ["KR"], release_date: "2020-08-01" }
   };
   assert.equal(matchesStructuredSearchIntent(matching, intent), true);
   assert.equal(matchesStructuredSearchIntent(wrongGenre, intent), false);
@@ -111,12 +113,41 @@ test("structured text supplements must satisfy the requested genre, year and lan
   assert.equal(matchesStructuredSearchIntent(wrongLanguage, intent), false);
 });
 
+
+test("structured discovery applies inclusive decade and origin-country filters", () => {
+  const intent = parseIntent("Nigerian movies from the 90s");
+  assert.equal(intent.country, "NG");
+  assert.equal(intent.decade, 1990);
+
+  const movie = buildStructuredSearchParams(intent, "movie", 1);
+  assert.equal(movie.with_origin_country, "NG");
+  assert.equal(movie["primary_release_date.gte"], "1990-01-01");
+  assert.equal(movie["primary_release_date.lte"], "1999-12-31");
+
+  const tv = buildStructuredSearchParams(intent, "tv", 1);
+  assert.equal(tv.with_origin_country, "NG");
+  assert.equal(tv["first_air_date.gte"], "1990-01-01");
+  assert.equal(tv["first_air_date.lte"], "1999-12-31");
+
+  const matching = { media_type: "movie", raw: { origin_country: ["NG"], release_date: "1995-06-01" } };
+  const wrongCountry = { media_type: "movie", raw: { origin_country: ["GH"], release_date: "1995-06-01" } };
+  const wrongDecade = { media_type: "movie", raw: { origin_country: ["NG"], release_date: "2005-06-01" } };
+  assert.equal(matchesStructuredSearchIntent(matching, intent), true);
+  assert.equal(matchesStructuredSearchIntent(wrongCountry, intent), false);
+  assert.equal(matchesStructuredSearchIntent(wrongDecade, intent), false);
+});
+
 test("intent-aware search combines structured discovery with verified text matches", () => {
   const source = readFileSync(new URL("../scripts/search.js", import.meta.url), "utf8");
   assert.match(source, /tmdbApi\.discoverMovies\(params\)/);
   assert.match(source, /tmdbApi\.discoverTv\(params\)/);
+  assert.match(source, /primary_release_date\.gte/);
+  assert.match(source, /first_air_date\.gte/);
   assert.match(source, /matchesStructuredSearchIntent\(item, parsed\)/);
   assert.match(source, /mergeSearchCatalogueResults\(\[discovered, relevantTextItems\]\)/);
+  const recommendations = readFileSync(new URL("../scripts/recommendations.js", import.meta.url), "utf8");
+  assert.match(recommendations, /intent\.decade/);
+  assert.match(recommendations, /intent\.country/);
 });
 
 
