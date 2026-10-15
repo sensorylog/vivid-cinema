@@ -470,11 +470,11 @@ function openSearch(){
   searchBackgroundInert=[...document.body.children].filter(el=>el!==dialog).map(el=>({el,inert:el.inert}));
   searchBackgroundInert.forEach(({el})=>{el.inert=true;});
   dialog.hidden=false;
-  requestAnimationFrame(()=>{
-    lockSearchScroll();
-    searchInput?.focus({preventScroll:true});
-    if(!searchInput?.value.trim())showRecentSearches();
-  });
+  // Focus synchronously inside the trusted tap/click. iOS Safari may not open
+  // its virtual keyboard when focus is deferred to requestAnimationFrame.
+  lockSearchScroll();
+  searchInput?.focus({preventScroll:true});
+  if(!searchInput?.value.trim())showRecentSearches();
 }
 function closeSearch(){
   if(!searchDialog || searchDialog.hidden)return;
@@ -547,9 +547,12 @@ async function runSearch(q){
 }
 const search=debounce((q)=>void runSearch(q),260);
 function wireSearch(){
-  const trigger=document.querySelector("[data-search-trigger]");
-  if(!trigger)return;
-  trigger.addEventListener("click",openSearch);
+  const triggers=document.querySelectorAll("[data-search-trigger]");
+  if(!triggers.length)return;
+  triggers.forEach(trigger=>trigger.addEventListener("click",event=>{
+    event.preventDefault();
+    openSearch();
+  }));
   document.addEventListener("keydown",e=>{
     if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==="k"){e.preventDefault();openSearch()}
     if(e.key==="Escape"&&searchDialog&&!searchDialog.hidden)closeSearch();
