@@ -163,7 +163,7 @@ export async function syncIntelligenceForUser(u){
    const localItem=s.feedback[d.id];
    const localClear=s.feedbackCleared[d.id];
    const localVersion=Math.max(Number(localItem?.updatedAt||0),Number(localClear?.updatedAt||0));
-   if(Number(x.updatedAt||0)<=localVersion)return;
+   if(Number(x.updatedAt||0)<localVersion)return;
    if(x.kind==="cleared"){
     delete s.feedback[d.id];
     s.feedbackCleared[d.id]={updatedAt:Number(x.updatedAt)||0};
