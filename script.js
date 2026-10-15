@@ -661,7 +661,18 @@ document.addEventListener("DOMContentLoaded",()=>{
   })();
 });
 
-window.addEventListener("vivid:search-history-ready", () => {
+let searchHistoryOwner = null;
+window.addEventListener("vivid:search-history-ready", event => {
+  const nextOwner = event.detail?.owner || "guest";
+  const changedOwner = searchHistoryOwner !== null && searchHistoryOwner !== nextOwner;
+  searchHistoryOwner = nextOwner;
   const dialog = $("vivid-search-dialog");
-  if (dialog && !dialog.hidden && !searchInput?.value.trim()) showRecentSearches();
+  if (!dialog || dialog.hidden) return;
+  if (changedOwner) {
+    searchRequestId++;
+    if (searchInput) searchInput.value = "";
+    showRecentSearches();
+  } else if (!searchInput?.value.trim()) {
+    showRecentSearches();
+  }
 });
