@@ -153,7 +153,7 @@ export function isStructuredSearchIntent(intent = {}, query = "") {
     .replace(/[\s,]+/g, " ")
     .trim();
   return Boolean(
-    intent.genre || intent.year || intent.language || intent.runtimeMax || intent.anime || intent.provider ||
+    intent.genre || intent.year || intent.decade || intent.country || intent.language || intent.runtimeMax || intent.anime || intent.provider ||
     (intent.mediaType !== "all" && !typeOnlyQuery)
   );
 }
@@ -175,6 +175,11 @@ export function buildStructuredSearchParams(intent = {}, type, page = 1, provide
   if (intent.year) {
     params[type === "movie" ? "primary_release_year" : "first_air_date_year"] = String(intent.year);
   }
+  if (intent.decade) {
+    params[type === "movie" ? "primary_release_date.gte" : "first_air_date.gte"] = String(intent.decade) + "-01-01";
+    params[type === "movie" ? "primary_release_date.lte" : "first_air_date.lte"] = String(Number(intent.decade) + 9) + "-12-31";
+  }
+  if (intent.country) params.with_origin_country = String(intent.country);
   if (intent.language) params.with_original_language = String(intent.language);
   if (provider?.id && provider?.region) {
     params.with_watch_providers = String(provider.id);
@@ -183,7 +188,7 @@ export function buildStructuredSearchParams(intent = {}, type, page = 1, provide
   }
   if (intent.anime) {
     params.with_original_language = "ja";
-    if (type === "tv") params.with_origin_country = "JP";
+    if (type === "tv" && !intent.country) params.with_origin_country = "JP";
   }
   return params;
 }
@@ -194,6 +199,17 @@ export function matchesStructuredSearchIntent(item = {}, intent = {}) {
   if (["movie", "tv"].includes(intent.mediaType) && type !== intent.mediaType) return false;
 
   const raw = item.raw || item;
+  if (intent.country) {
+    const countries = [
+      ...(Array.isArray(raw.origin_country) ? raw.origin_country : []),
+      ...(Array.isArray(raw.production_countries) ? raw.production_countries.map(country => country?.iso_3166_1) : [])
+    ].filter(Boolean).map(value => String(value).toUpperCase());
+    if (!countries.includes(String(intent.country).toUpperCase())) return false;
+  }
+  if (intent.decade) {
+    const year = Number(String(raw.release_date || raw.first_air_date || item.date || "").slice(0, 4));
+    if (!Number.isFinite(year) || year < Number(intent.decade) || year > Number(intent.decade) + 9) return false;
+  }
   const genreId = intent.genreIds?.[type] ??
     intent.genre?.[type === "movie" ? "movieId" : "tvId"];
   if (intent.genre && (!genreId || !(raw.genre_ids || item.genre_ids || []).map(Number).includes(Number(genreId)))) {
