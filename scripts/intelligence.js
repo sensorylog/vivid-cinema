@@ -1,6 +1,6 @@
 import { tmdbApi } from "./tmdb.js";
-import { getLocalLibrary } from "./library.js";
 import { switchAccountStorage } from "./account-storage.js";
+import { getLocalLibrary } from "./library.js";
 
 const KEY="vivid:intelligence:v1";
 const SESSION_KEY="vivid:session:v1";
