@@ -270,6 +270,7 @@ test("provider intent is explicit and resolves provider IDs from TMDB's regional
   assert.equal(parseWatchProviderIntent("movies on Paramount+").key, "paramount-plus");
   assert.equal(parseWatchProviderIntent("movies on MUBI").key, "mubi");
   assert.ok(parseIntent("movies on MUBI").unsupported.length > 0);
+  assert.equal(parseIntent("Mad Max movies").unsupported.length, 0, "the film title Mad Max must not be mistaken for the Max streaming service");
 
   const netflix = findWatchProviderId({
     results: [
