@@ -59,6 +59,17 @@ test("intent result collection keeps partial successes when one catalogue reques
   ]), results);
 });
 
+test("intent result collection reports partial failure when the only successful request is empty", () => {
+  const failure = new Error("TV catalogue unavailable");
+  assert.throws(
+    () => collectIntentCandidates([
+      { status: "fulfilled", value: [] },
+      { status: "rejected", reason: failure }
+    ]),
+    error => error === failure
+  );
+});
+
 test("intent result collection treats successful empty responses as no matches", () => {
   assert.deepEqual(collectIntentCandidates([
     { status: "fulfilled", value: [] },
