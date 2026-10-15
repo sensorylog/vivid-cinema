@@ -56,7 +56,7 @@ test("library sync propagates Firestore failures so the account UI cannot report
   );
   assert.doesNotMatch(syncBody, /catch\s*\([^)]*\)\s*\{[\s\S]*?return local;/);
   assert.match(syncBody, /await Promise\.all\(\[/);
-  assert.match(syncBody, /Do not replace local data until all required cloud operations have been[\\s\\S]*?acknowledged/);
+  assert.match(syncBody, /Do not replace local data until all required cloud operations have been[\s\S]*?acknowledged/);
 });
 
 test("library sync reconciles deletions and avoids rewriting every unchanged remote item", () => {
