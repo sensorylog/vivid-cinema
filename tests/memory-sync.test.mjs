@@ -36,6 +36,8 @@ test("playback writes are bound to the owner active when queued", () => {
   assert.match(intelligence, /getDocsFromServer\(collection\(db,"users",u\.uid,"feedback"\)\)/);
   assert.match(intelligence, /getDocsFromServer\(collection\(db,"users",u\.uid,"taste"\)\)/);
   assert.match(intelligence, /The signed-in account changed before intelligence state could be reconciled/);
+  assert.match(intelligence, /const s=read\(\);const stateAtSync=localStorage\.getItem\(KEY\)\|\|""/);
+  assert.match(intelligence, /Local intelligence changed during sync; newer local state was retained/);
   assert.match(intelligence, /const ownerAtStart=localStorage\.getItem\(LOCAL_OWNER_KEY\)\|\|"guest"/);
   assert.match(intelligence, /\(localStorage\.getItem\(KEY\)\|\|""\)!==stateAtStart/);
 });
