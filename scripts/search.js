@@ -113,7 +113,15 @@ const WATCH_PROVIDER_HINTS = Object.freeze([
   { key: "prime-video", name: "Prime Video", aliases: ["prime video", "amazon prime video", "amazon prime"], pattern: /\b(?:amazon\s+)?prime\s+video\b|\bamazon\s+prime\b/i },
   { key: "disney-plus", name: "Disney+", aliases: ["disney plus", "disney+"], pattern: /\bdisney\s+plus\b|\bdisney\s*\+/i },
   { key: "hulu", name: "Hulu", aliases: ["hulu"], pattern: /\bhulu\b/i },
-  { key: "crunchyroll", name: "Crunchyroll", aliases: ["crunchyroll"], pattern: /\bcrunchyroll\b/i }
+  { key: "crunchyroll", name: "Crunchyroll", aliases: ["crunchyroll"], pattern: /\bcrunchyroll\b/i },
+  { key: "apple-tv", name: "Apple TV+", aliases: ["apple tv+", "apple tv plus", "apple tv"], pattern: /\bapple\s+tv(?:\s+plus\b|\s*\+)?/i },
+  { key: "max", name: "Max", aliases: ["max", "hbo max"], pattern: /\b(?:hbo\s+)?max\b/i },
+  { key: "paramount-plus", name: "Paramount+", aliases: ["paramount+", "paramount plus"], pattern: /\bparamount(?:\s+plus\b|\s*\+)/i },
+  { key: "peacock", name: "Peacock", aliases: ["peacock"], pattern: /\bpeacock\b/i },
+  { key: "tubi", name: "Tubi", aliases: ["tubi"], pattern: /\btubi\b/i },
+  { key: "mubi", name: "MUBI", aliases: ["mubi"], pattern: /\bmubi\b/i },
+  { key: "starz", name: "STARZ", aliases: ["starz"], pattern: /\bstarz\b/i },
+  { key: "youtube", name: "YouTube", aliases: ["youtube"], pattern: /\byoutube\b/i }
 ]);
 
 function normalizeProviderName(value) {
@@ -123,7 +131,7 @@ function normalizeProviderName(value) {
 export function parseWatchProviderIntent(query = "") {
   const q = normalizeQuery(query).toLowerCase();
   const hasProviderContext = /\b(?:on|available|streaming|watch)\b/i.test(q) ||
-    /^(?:netflix|prime video|amazon prime video|amazon prime|disney\s*(?:plus|\+)|hulu|crunchyroll)\s+(?:movies?|films?|tv shows?|series|shows?)\b/i.test(q);
+    /^(?:netflix|prime video|amazon prime video|amazon prime|disney\s*(?:plus|\+)|hulu|crunchyroll|apple\s+tv(?:\s*(?:plus|\+))?|(?:hbo\s+)?max|paramount\s*(?:plus|\+)|peacock|tubi|mubi|starz|youtube)\s+(?:movies?|films?|tv shows?|series|shows?)\b/i.test(q);
   if (!hasProviderContext) return null;
   const provider = WATCH_PROVIDER_HINTS.find(item => item.pattern.test(q));
   return provider ? { key: provider.key, name: provider.name, aliases: provider.aliases } : null;
