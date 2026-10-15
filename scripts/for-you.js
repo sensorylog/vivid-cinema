@@ -27,6 +27,7 @@ let requestId = 0;
 let removedFilters = new Set();
 let suppressInvalidationRefresh = false;
 let secondaryRequestId = 0;
+let recommendationImpressionObserver = null;
 const LANGUAGE_LABELS = { en: "English", ko: "Korean", ja: "Japanese", fr: "French", es: "Spanish", hi: "Hindi", zh: "Chinese", de: "German", it: "Italian", pt: "Portuguese", th: "Thai", ar: "Arabic", tr: "Turkish", ta: "Tamil", te: "Telugu", yo: "Yoruba" };
 
 function intentForPage() {
@@ -130,7 +131,7 @@ function cardMarkup(item, index, compact = false) {
   const feedback = getFeedback(item);
   const href = getMediaUrl(item);
   const reason = item.recommendationReason || (item.sourceLabel === "trending" ? "A popular place to start" : "Picked for you");
-  return `<article class="vivid-for-you-card${compact ? " vivid-for-you-card-compact" : ""}">
+  return `<article class="vivid-for-you-card${compact ? " vivid-for-you-card-compact" : ""}" data-impression-index="${index}">
     <a class="vivid-for-you-poster" href="${escapeHtml(href)}" data-open-index="${index}" aria-label="Explore ${escapeHtml(title)}">
       <img src="${escapeHtml(poster)}" alt="Poster for ${escapeHtml(title)}" loading="lazy" decoding="async">
       ${rating > 0 ? '<span class="vivid-for-you-rating"><i class="bi bi-star-fill" aria-hidden="true"></i> ' + rating.toFixed(1) + "</span>" : ""}
@@ -147,13 +148,47 @@ function cardMarkup(item, index, compact = false) {
   </article>`;
 }
 
+function clearRecommendationImpressionObserver() {
+  recommendationImpressionObserver?.disconnect();
+  recommendationImpressionObserver = null;
+}
+
+function observeRecommendationImpressions(items) {
+  clearRecommendationImpressionObserver();
+  const grid = $("recommendation-grid");
+  // Without viewability support, do not invent impression events for unseen cards.
+  if (!grid || typeof IntersectionObserver !== "function") return;
+  const seen = new Set();
+  const observer = new IntersectionObserver(entries => {
+    for (const entry of entries) {
+      if (!entry.isIntersecting || entry.intersectionRatio < 0.5) continue;
+      const index = Number(entry.target.dataset.impressionIndex);
+      const item = items[index];
+      if (item) {
+        const identity = (item.media_type || "movie") + ":" + item.id;
+        if (!seen.has(identity)) {
+          seen.add(identity);
+          recordBehavior("recommendation_impression", item, {
+            surface: "for_you",
+            visibility: "at_least_50_percent"
+          });
+        }
+      }
+      observer.unobserve(entry.target);
+    }
+  }, { threshold: 0.5 });
+  recommendationImpressionObserver = observer;
+  grid.querySelectorAll("[data-impression-index]").forEach(card => observer.observe(card));
+}
+
 function renderItems(items) {
   const grid = $("recommendation-grid");
+  clearRecommendationImpressionObserver();
   currentItems = items;
   grid.innerHTML = items.map((item, index) => cardMarkup(item, index)).join("");
   $("recommendation-empty").hidden = items.length > 0;
   if (items.length) {
-    items.slice(0, 12).forEach(item => recordBehavior("recommendation_impression", item, { surface: "for_you" }));
+    observeRecommendationImpressions(items);
     showStatus(items.length + (items.length === 1 ? " pick ready." : " picks ready."));
   } else {
     showStatus("");
@@ -189,6 +224,7 @@ async function loadSecondarySections(expectedRequestId = requestId) {
 }
 
 async function loadRecommendations({ refresh = false } = {}) {
+  clearRecommendationImpressionObserver();
   const thisRequest = ++requestId;
   const intent = intentForPage();
   renderIntent(intent);
@@ -356,6 +392,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // before starting a fresh load for the newly active account.
     requestId++;
     secondaryRequestId++;
+    clearRecommendationImpressionObserver();
     currentItems = [];
     becauseItems = [];
     lastDismissedItem = null;
