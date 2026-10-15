@@ -296,6 +296,17 @@ test("provider intent is explicit and resolves provider IDs from TMDB's regional
   assert.equal(parseWatchProviderIntent("Korean horror movies on Netflix").key, "netflix");
   assert.equal(parseWatchProviderIntent("Netflix movies").name, "Netflix");
   assert.equal(parseWatchProviderIntent("movies like Netflix"), null);
+  assert.equal(parseWatchProviderIntent("Inception on Netflix"), null);
+  assert.equal(parseWatchProviderIntent("Inception movie on Netflix"), null);
+  assert.equal(parseWatchProviderIntent("movies on Netflix in Ghana").key, "netflix");
+  const titleWithProvider = parseIntent("Inception on Netflix in Ghana");
+  assert.equal(titleWithProvider.titleQuery, "Inception");
+  assert.equal(titleWithProvider.providerRegion, "GH");
+  assert.equal(titleWithProvider.country, null);
+  assert.equal(parseIntent("movies on Netflix in Ghana").providerRegion, "GH");
+  assert.equal(parseIntent("movies on Netflix in Ghana").country, null);
+  assert.equal(parseIntent("Apple TV Plus").mediaType, "all");
+  assert.equal(getSearchIntent("Apple TV Plus").type, null);
   assert.equal(parseWatchProviderIntent("TV shows streaming on Disney+").key, "disney-plus");
   assert.equal(parseWatchProviderIntent("movies on Apple TV+").key, "apple-tv");
   assert.equal(parseWatchProviderIntent("movies on Paramount+").key, "paramount-plus");
