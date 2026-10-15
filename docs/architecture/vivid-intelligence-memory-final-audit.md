@@ -28,6 +28,7 @@ The audit found several correctness gaps in the Phase 2/3 integration. The accom
 - TV genre metadata is not identical to movie genre metadata. Combined categories and missing TV categories are now labelled and disclosed rather than silently presented as exact filters.
 - Anime-film requests remain movie searches with Japanese-language animation filters.
 - A mixed movie/TV runtime limit is described separately as movie runtime and per-episode runtime.
+- Meaningful title, trailer, watch, progress, and recommendation-click signals mark the taste profile stale and can seed the next rebuild; impression-only events do not repeatedly invalidate taste.
 - Mood, dub/subtitle, and provider availability claims remain explicitly unsupported where catalogue metadata cannot verify them.
 
 ### 3. Catalogue failure states
