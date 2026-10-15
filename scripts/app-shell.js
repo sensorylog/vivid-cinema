@@ -65,7 +65,6 @@ function buildPrimaryLinks(page) {
     navLink("home.html", "bi-house-fill", "Home", page === "home"),
     navLink("discover.html", "bi-grid-fill", "Browse", isBrowsePage(page)),
     navLink("for-you.html", "bi-stars", "For You", page === "for-you"),
-    navLink("for-you.html", "bi-stars", "For You", page === "for-you"),
     navLink("live.html", "bi-broadcast-pin", "Live", page === "live"),
     navLink("library.html", "bi-bookmark-fill", "Library", page === "library"),
     navLink("news.html", "bi-newspaper", "News", page === "news")
@@ -132,6 +131,7 @@ function syncMobileNavigation() {
   nav.innerHTML = [
     navLink("home.html", "bi-house-fill", "Home", page === "home"),
     navLink("discover.html", "bi-grid-fill", "Browse", isBrowsePage(page)),
+    navLink("for-you.html", "bi-stars", "For You", page === "for-you"),
     navLink("live.html", "bi-broadcast-pin", "Live", page === "live"),
     navLink("library.html", "bi-bookmark-fill", "Library", page === "library"),
     navLink("news.html", "bi-newspaper", "News", page === "news"),
