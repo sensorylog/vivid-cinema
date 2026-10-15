@@ -46,7 +46,7 @@ test("future-module contracts explicitly reuse existing Memory and Intelligence 
     "recordBehavior()",
     "getTasteProfile()",
     "getRecommendationMemory()",
-    "getContinueWatching",
+    "getContinueWatching()",
     "No Cloud Functions"
   ]) {
     assert.ok(contract.includes(required), "contract should document " + required);
