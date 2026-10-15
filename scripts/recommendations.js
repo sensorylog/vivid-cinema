@@ -649,14 +649,17 @@ export async function getIntentRecommendations(intent = {}, limit = 18) {
   const safeLimit = Math.max(1, Math.min(40, Number(limit) || 18));
   const requestedType = ["movie", "tv"].includes(intent.mediaType) ? intent.mediaType : "all";
   const mediaTypes = requestedType === "all" ? ["movie", "tv"] : [requestedType];
-  const calls = mediaTypes.map(type => {
+  const calls = mediaTypes.flatMap(type => {
+    const genreId = intent.genreIds?.[type] ?? intent.genre?.[type === "movie" ? "movieId" : "tvId"];
+    // Do not fill a genre-constrained search with unrelated TV titles when
+    // the catalogue has no corresponding TV genre filter.
+    if (intent.genre && !genreId) return [];
     const params = {
       sort_by: "popularity.desc",
       page: 1,
       include_adult: false,
       "vote_count.gte": type === "movie" ? 40 : 20
     };
-    const genreId = intent.genreIds?.[type] ?? intent.genre?.[type === "movie" ? "movieId" : "tvId"];
     if (genreId) params.with_genres = String(genreId);
     if (intent.runtimeMax) params["with_runtime.lte"] = String(Math.max(1, Number(intent.runtimeMax)));
     if (intent.year) {
@@ -668,8 +671,8 @@ export async function getIntentRecommendations(intent = {}, limit = 18) {
       params.with_original_language = "ja";
       if (type === "tv") params.with_origin_country = "JP";
     }
-    return (type === "tv" ? tmdbApi.discoverTv(params) : tmdbApi.discoverMovies(params))
-      .then(response => normalizeResults(response?.results || [], type));
+    return [(type === "tv" ? tmdbApi.discoverTv(params) : tmdbApi.discoverMovies(params))
+      .then(response => normalizeResults(response?.results || [], type))];
   });
 
   const responses = await Promise.allSettled(calls);
