@@ -2,7 +2,7 @@ import { searchContent, mergeSearchCatalogueResults } from "./content.js";
 import { tmdbApi } from "./tmdb.js";
 import { normalizeResults } from "./media.js";
 import { parseIntent } from "./intent-parser.js";
-import { getTasteProfile, getNotForMeKeys } from "./intelligence.js";
+import { getTasteProfile } from "./intelligence.js";
 
 const RECENT_KEY = "vivid:search:recent:v1";
 const MAX_RECENT = 8;
@@ -144,12 +144,10 @@ export async function rankSearchResults(items, query, options = {}) {
 
   const intent = getSearchIntent(q);
   const taste = await getTasteProfile().catch(() => ({ genres: {} }));
-  const notForMe = getNotForMeKeys();
   const queryTokens = tokens(q.replace(/\b(?:movies?|films?|series|shows?)\b/gi, ""));
   const exact = q.toLowerCase();
 
   const ranked = items
-    .filter(item => !notForMe.has(item.content_id))
     .map((item, index) => {
       const title = String(item.title || "").toLowerCase();
       const raw = item.raw || {};
