@@ -109,3 +109,11 @@ test("intent-aware search combines structured discovery with verified text match
   assert.match(source, /matchesStructuredSearchIntent\(item, parsed\)/);
   assert.match(source, /mergeSearchCatalogueResults\(\[discovered, relevantTextItems\]\)/);
 });
+
+
+test("search results disclose unsupported mood, subtitle, and provider constraints", () => {
+  const source = readFileSync(new URL("../scripts/search-page.js", import.meta.url), "utf8");
+  assert.match(source, /currentSearchNotes = result\.intent\?\.filters\?\.unsupported/);
+  assert.match(source, /vivid-search-filter-note/);
+  assert.match(source, /notes\.map\(note => '<li>' \+ escapeHtml\(note\)/);
+});
