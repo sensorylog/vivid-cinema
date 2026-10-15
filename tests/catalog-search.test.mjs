@@ -117,3 +117,10 @@ test("search results disclose unsupported mood, subtitle, and provider constrain
   assert.match(source, /vivid-search-filter-note/);
   assert.match(source, /notes\.map\(note => '<li>' \+ escapeHtml\(note\)/);
 });
+
+
+test("explicit catalogue search never hides a title because of recommendation feedback", () => {
+  const source = readFileSync(new URL("../scripts/search.js", import.meta.url), "utf8");
+  assert.doesNotMatch(source, /getNotForMeKeys/);
+  assert.doesNotMatch(source, /filter\(item => !notForMe\.has\(item\.content_id\)\)/);
+});
