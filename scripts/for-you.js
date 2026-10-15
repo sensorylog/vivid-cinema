@@ -33,6 +33,11 @@ function intentForPage() {
     intent.language = "ja";
     intent.genre = { key: "animation", name: "Animation", movieId: 16, tvId: 16 };
   } else if (activeType !== "all") {
+    if (intent.anime) {
+      intent.anime = false;
+      if (intent.genre?.key === "animation") intent.genre = null;
+      intent.language = null;
+    }
     intent.mediaType = activeType;
   }
 
