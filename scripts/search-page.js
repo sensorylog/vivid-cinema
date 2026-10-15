@@ -9,6 +9,7 @@ let currentPage = 1;
 let currentItems = [];
 let currentSearchNotes = [];
 let currentSimilarityTarget = null;
+let currentPersonTarget = null;
 let currentSearchHistoryOwner = null;
 
 const escapeHtml = value => String(value ?? "").replace(/[&<>"']/g, char => ({
@@ -44,7 +45,7 @@ function renderRecent() {
   });
 }
 
-function renderResults(items, query, canLoadMore = false, notes = currentSearchNotes, similarityTarget = currentSimilarityTarget) {
+function renderResults(items, query, canLoadMore = false, notes = currentSearchNotes, similarityTarget = currentSimilarityTarget, personTarget = currentPersonTarget) {
   const movies = items.filter(item => item.media_type === "movie");
   const shows = items.filter(item => item.media_type === "tv");
   const people = items.filter(item => item.media_type === "person");
@@ -71,9 +72,19 @@ function renderResults(items, query, canLoadMore = false, notes = currentSearchN
       notes.map(note => '<li>' + escapeHtml(note) + '</li>').join("") +
       '</ul></aside>'
     : '';
+  const personRoleLabels = {
+    actor: "FEATURING",
+    director: "DIRECTED BY",
+    director_writer: "WRITTEN AND DIRECTED BY",
+    writer: "WRITTEN BY",
+    creator: "CREATED BY",
+    producer: "PRODUCED BY"
+  };
   const resultHeading = similarityTarget?.title
     ? 'SIMILAR TO “' + escapeHtml(similarityTarget.title) + '”'
-    : 'RESULTS FOR “' + escapeHtml(query) + '”';
+    : personTarget?.name
+      ? escapeHtml(personRoleLabels[personTarget.role] || "CREDITS FOR") + ' “' + escapeHtml(personTarget.name) + '”'
+      : 'RESULTS FOR “' + escapeHtml(query) + '”';
   content.innerHTML =
     '<div class="vivid-search-page-label">' + resultHeading + '</div>' +
     notesMarkup +
@@ -97,6 +108,8 @@ async function runSearch(value, { append = false } = {}) {
     currentQuery = query;
     currentPage = 1;
     currentItems = [];
+    currentPersonTarget = null;
+    currentSimilarityTarget = null;
     content.innerHTML = '<div class="vivid-search-loading"><span></span><strong>Searching…</strong></div>';
   } else {
     if (query !== currentQuery) return;
@@ -114,14 +127,15 @@ async function runSearch(value, { append = false } = {}) {
     const pageItems = result.items || [];
     currentSearchNotes = result.intent?.filters?.unsupported || [];
     currentSimilarityTarget = result.intent?.similarityTarget || null;
+    currentPersonTarget = result.intent?.personTarget || null;
     const identities = new Set(currentItems.map(item => item.media_type + ":" + item.id));
     const newItems = pageItems.filter(item => !identities.has(item.media_type + ":" + item.id));
     currentItems = [...currentItems, ...newItems];
     currentPage = requestedPage;
-    renderResults(currentItems, query, pageItems.length >= PAGE_SIZE, currentSearchNotes, currentSimilarityTarget);
+    renderResults(currentItems, query, pageItems.length >= PAGE_SIZE, currentSearchNotes, currentSimilarityTarget, currentPersonTarget);
   } catch (error) {
     if (append && currentItems.length) {
-      renderResults(currentItems, query, true, currentSearchNotes, currentSimilarityTarget);
+      renderResults(currentItems, query, true, currentSearchNotes, currentSimilarityTarget, currentPersonTarget);
       const loadButton = content.querySelector("[data-search-load-more]");
       if (loadButton) loadButton.textContent = "Try loading more";
     } else {

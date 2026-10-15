@@ -195,6 +195,110 @@ export function chooseSimilarityTarget(items = [], query = "", preferredType = n
   return candidates[0]?.item || null;
 }
 
+
+function normalizePersonName(value = "") {
+  return normalizeQuery(value).normalize("NFKD").replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+}
+
+export function parsePersonCreditIntent(query = "") {
+  const q = normalizeQuery(query);
+  const match = q.match(/^(?:(movies?|films?|tv shows?|series|shows?)\s+)?(written and directed by|directed by|written by|created by|produced by|starring|starred by|featuring|with|by)\s+(.+)$/i);
+  if (!match) return null;
+
+  const prefix = String(match[1] || "").toLowerCase();
+  const directive = String(match[2] || "").toLowerCase();
+  const personName = String(match[3] || "").trim().replace(/[?.!,]+$/, "").trim();
+  if (!personName || personName.split(/\s+/).length > 6) return null;
+  const firstNameToken = personName.split(/\s+/)[0].toLowerCase();
+  if (["a", "an", "the", "some", "any", "my", "your", "this", "that", "someone", "something"].includes(firstNameToken)) return null;
+  // Ambiguous prepositions should not turn plot phrases such as "movies with a twist" into a person lookup.
+  if ((directive === "with" || directive === "by") && !prefix) return null;
+
+  let role = "director";
+  if (directive === "written and directed by") role = "director_writer";
+  else if (directive === "written by") role = "writer";
+  else if (directive === "created by") role = "creator";
+  else if (directive === "produced by") role = "producer";
+  else if (["starring", "starred by", "featuring", "with"].includes(directive)) role = "actor";
+
+  const mediaType = /^(?:tv shows?|series|shows?)$/.test(prefix)
+    ? "tv"
+    : /^(?:movies?|films?)$/.test(prefix)
+      ? "movie"
+      : "all";
+  return { personName, role, mediaType, query: q };
+}
+
+export function choosePersonSearchResult(results = [], query = "", role = "director") {
+  const wanted = normalizePersonName(query);
+  if (!wanted) return null;
+  const wantedTokens = wanted.split(/\s+/).filter(Boolean);
+  const wantedSet = new Set(wantedTokens);
+  const preferredDepartments = {
+    actor: ["acting"],
+    director: ["directing"],
+    director_writer: ["directing", "writing"],
+    writer: ["writing"],
+    creator: ["writing", "directing"],
+    producer: ["production"]
+  }[role] || [];
+
+  const candidates = (results || [])
+    .filter(item => item && item.id != null && item.name && (item.media_type === "person" || (!item.media_type && !item.title && !item.original_title)))
+    .map((item, index) => {
+      const name = normalizePersonName(item.name);
+      const nameTokens = name.split(/\s+/).filter(Boolean);
+      const overlap = nameTokens.filter(token => wantedSet.has(token)).length;
+      const overlapRatio = wantedTokens.length ? overlap / wantedTokens.length : 0;
+      let score = overlapRatio * 100;
+      if (name === wanted) score += 1000;
+      else if (name.startsWith(wanted)) score += 550;
+      else if (name.includes(wanted)) score += 350;
+      if (!overlap) score = -Infinity;
+
+      const department = String(item.known_for_department || "").toLowerCase();
+      if (preferredDepartments.includes(department)) score += 25;
+      return { item, score: score - index * 0.01 };
+    })
+    .filter(candidate => Number.isFinite(candidate.score) && candidate.score >= 45)
+    .sort((a, b) => b.score - a.score);
+  return candidates[0]?.item || null;
+}
+
+function creditMatchesRole(credit, role) {
+  if (role === "actor") return true;
+  const job = String(credit.job || "").toLowerCase();
+  if (role === "director") return job === "director";
+  if (role === "writer") return /\b(writer|screenplay|story|teleplay|author)\b/.test(job);
+  if (role === "producer") return /producer/.test(job);
+  if (role === "creator") return /creator|created by|developed by/.test(job);
+  if (role === "director_writer") return job === "director" || /\b(writer|screenplay|story|teleplay|author)\b/.test(job);
+  return false;
+}
+
+export function buildPersonCreditResults(details = {}, role = "director", mediaType = "all", page = 1, limit = 12) {
+  const credits = details.combined_credits || details;
+  const source = role === "actor" ? (credits.cast || []) : (credits.crew || []).filter(item => creditMatchesRole(item, role));
+  const eligible = source.filter(item => {
+    const type = item.media_type || (item.title ? "movie" : item.name ? "tv" : "");
+    return ["movie", "tv"].includes(type) && (mediaType === "all" || type === mediaType);
+  });
+
+  const normalized = mergeSearchCatalogueResults([
+    normalizeResults(eligible.filter(item => (item.media_type || (item.title ? "movie" : "tv")) === "movie"), "movie"),
+    normalizeResults(eligible.filter(item => (item.media_type || (item.title ? "movie" : "tv")) === "tv"), "tv")
+  ]).sort((a, b) =>
+    Number(b.raw?.popularity || 0) - Number(a.raw?.popularity || 0) ||
+    Number(b.vote_average || 0) - Number(a.vote_average || 0) ||
+    String(b.year || "").localeCompare(String(a.year || ""))
+  );
+
+  const safePage = Math.max(1, Math.min(500, Number(page) || 1));
+  const safeLimit = Math.max(1, Math.min(50, Number(limit) || 12));
+  return normalized.slice((safePage - 1) * safeLimit, safePage * safeLimit);
+}
+
 export async function rankSearchResults(items, query, options = {}) {
   const q = normalizeQuery(query);
   if (!q) return [];
@@ -235,6 +339,71 @@ export async function searchIntelligently(query, options = {}) {
   const page = Math.max(1, Math.min(500, Number(options.page || 1)));
   const searchIntent = getSearchIntent(q);
   const parsed = parseIntent(q);
+  const personIntent = parsePersonCreditIntent(q);
+
+  if (personIntent) {
+    let personResponse;
+    try {
+      personResponse = await tmdbApi.searchPeople(personIntent.personName, 1);
+    } catch {
+      const fallbackItems = await searchContent(q, page);
+      let ranked = fallbackItems;
+      try { ranked = await rankSearchResults(fallbackItems, q, options); }
+      catch { ranked = fallbackItems.slice(0, Number(options.limit || 8)); }
+      const note = "Person-credit search is temporarily unavailable; showing text-search matches instead.";
+      return {
+        items: ranked,
+        intent: { ...searchIntent, filters: { ...parsed, unsupported: [...(parsed.unsupported || []), note] }, structured: false },
+        recent: getRecentSearches()
+      };
+    }
+
+    const person = choosePersonSearchResult(personResponse?.results || [], personIntent.personName, personIntent.role);
+    if (person) {
+      try {
+        const details = await tmdbApi.personDetails(person.id);
+        const items = buildPersonCreditResults(
+          details,
+          personIntent.role,
+          personIntent.mediaType === "all" ? parsed.mediaType : personIntent.mediaType,
+          page,
+          options.limit || 8
+        );
+        return {
+          items,
+          intent: {
+            ...searchIntent,
+            filters: parsed,
+            structured: false,
+            personTarget: { id: String(person.id), name: person.name, role: personIntent.role, mediaType: personIntent.mediaType }
+          },
+          recent: getRecentSearches()
+        };
+      } catch {
+        const fallbackItems = await searchContent(personIntent.personName, page);
+        let ranked = fallbackItems;
+        try { ranked = await rankSearchResults(fallbackItems, personIntent.personName, options); }
+        catch { ranked = fallbackItems.slice(0, Number(options.limit || 8)); }
+        const note = "The person's filmography could not be loaded; showing text matches for their name instead.";
+        return {
+          items: ranked,
+          intent: { ...searchIntent, filters: { ...parsed, unsupported: [...(parsed.unsupported || []), note] }, structured: false },
+          recent: getRecentSearches()
+        };
+      }
+    }
+
+    const fallbackItems = await searchContent(personIntent.personName, page);
+    let ranked = fallbackItems;
+    try { ranked = await rankSearchResults(fallbackItems, personIntent.personName, options); }
+    catch { ranked = fallbackItems.slice(0, Number(options.limit || 8)); }
+    const note = "Vivid could not confidently identify that person, so these are text matches for the name.";
+    return {
+      items: ranked,
+      intent: { ...searchIntent, filters: { ...parsed, unsupported: [...(parsed.unsupported || []), note] }, structured: false },
+      recent: getRecentSearches()
+    };
+  }
 
   // Similarity is a different intent from searching for a title that literally
   // contains the words "like" or "similar". Resolve the reference title first,

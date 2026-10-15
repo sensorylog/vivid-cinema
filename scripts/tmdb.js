@@ -94,6 +94,7 @@ export const tmdbApi = Object.freeze({
   searchMovies: (query, page = 1) => tmdb("search/movie", { query, page }),
   searchTv: (query, page = 1) => tmdb("search/tv", { query, page }),
   searchMulti: (query, page = 1) => tmdb("search/multi", { query, page }),
+  searchPeople: (query, page = 1) => tmdb("search/person", { query, page }),
   searchKeywords: (query, page = 1) => tmdb("search/keyword", { query, page }),
   discoverMovies: (params = {}) => tmdb("discover/movie", params),
   discoverTv: (params = {}) => tmdb("discover/tv", params),
