@@ -61,8 +61,8 @@ The existing Intelligence record stores explicit feedback, a derived taste profi
 | Watch Later | `watchLater/{movie:<id> or tv:<id>}` | Same as Favorites |
 | History | `history/{movie:<id> or tv:<id>}` | Same as Favorites |
 | Library deletion tombstones | `libraryTombstones/{collection:<contentId>}` | Newest `deletedAt` |
-| Progress | `progress/{existing progress key}` | Newest `updatedAt`; episode keys stay separate |
-| Feedback | `feedback/{movie:<id> or tv:<id>}` | Newest `updatedAt`; `kind: "cleared"` is a deletion tombstone |
+| Progress | `progress/{existing progress key}` | Newest `updatedAt`; remote wins positive timestamp ties; episode keys stay separate |
+| Feedback | `feedback/{movie:<id> or tv:<id>}` | Newest `updatedAt`; remote wins timestamp ties; `kind: "cleared"` is a deletion tombstone |
 | Taste profile | `taste/profile` | Newest `updatedAt`; profile is rebuildable from canonical signals |
 | Behavior events | `events/{sessionId_eventId}` | Write-only in rules; device-local reads drive ranking |
 
