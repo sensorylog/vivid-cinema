@@ -118,6 +118,9 @@ test("parses production-country queries for African and international catalogues
   assert.equal(parseIntent("Ghanaian films").country, "GH");
   assert.equal(parseIntent("British crime series").country, "GB");
   assert.equal(parseIntent("South Korean thrillers").country, "KR");
+  assert.equal(parseIntent("French-language movies").country, null);
+  assert.equal(parseIntent("French-language movies").language, "fr");
+  assert.equal(parseIntent("French-language movies from France").country, "FR");
 });
 
 test("recognizes supported streaming providers but does not apply provider filters to a specific title search", () => {
