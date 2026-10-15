@@ -140,6 +140,7 @@ export function matchesStructuredSearchIntent(item = {}, intent = {}) {
 
 export function chooseSimilarityTarget(items = [], query = "", preferredType = null) {
   const wanted = normalizeQuery(query).toLowerCase();
+  if (!wanted) return null;
   const candidates = (items || [])
     .filter(item => ["movie", "tv"].includes(item?.media_type))
     .filter(item => !["movie", "tv"].includes(preferredType) || item.media_type === preferredType)
@@ -150,10 +151,12 @@ export function chooseSimilarityTarget(items = [], query = "", preferredType = n
       const exact = title === wanted || original === wanted;
       const prefix = title.startsWith(wanted) || original.startsWith(wanted);
       const contains = title.includes(wanted) || original.includes(wanted);
-      const score = (exact ? 1000 : prefix ? 500 : contains ? 250 : 0) +
-        Math.min(20, Number(raw.popularity || 0) / 20) - index * 0.01;
+      // Popularity must never turn an unrelated title into a similarity seed.
+      const matchScore = exact ? 1000 : prefix ? 500 : contains ? 250 : -Infinity;
+      const score = matchScore + Math.min(20, Number(raw.popularity || 0) / 20) - index * 0.01;
       return { item, score };
     })
+    .filter(candidate => Number.isFinite(candidate.score))
     .sort((a, b) => b.score - a.score);
   return candidates[0]?.item || null;
 }
