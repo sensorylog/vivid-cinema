@@ -114,6 +114,16 @@ test("structured text supplements must satisfy the requested genre, year and lan
 });
 
 
+test("explicit language overrides the default Japanese anime filter", () => {
+  const intent = parseIntent("Korean anime movies");
+  assert.equal(intent.anime, true);
+  assert.equal(intent.language, "ko");
+  assert.equal(intent.country, "KR");
+  const params = buildStructuredSearchParams(intent, "movie", 1);
+  assert.equal(params.with_original_language, "ko");
+  assert.equal(params.with_origin_country, "KR");
+});
+
 test("structured discovery applies inclusive decade and origin-country filters", () => {
   const intent = parseIntent("Nigerian movies from the 90s");
   assert.equal(intent.country, "NG");
