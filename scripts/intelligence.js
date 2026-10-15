@@ -180,11 +180,15 @@ export async function syncIntelligenceForUser(u){
   const remoteEvents=e.docs.map(d=>d.data()||{}).filter(event=>event.id&&event.sessionId);
   const mergedEvents=mergeBehaviorEvents(s.events,remoteEvents,300);
   const remoteEventIds=new Set(e.docs.map(d=>d.id));
-  for(const event of s.events){
+  const eventsToUpload=s.events.filter(event=>{
    const eventDocId=String(event.sessionId||"")+"_"+String(event.id||"");
-   if(event.id&&event.sessionId&&!remoteEventIds.has(eventDocId)){
-    await setDoc(doc(db,"users",u.uid,"events",eventDocId),event,{merge:true});
-   }
+   return event.id&&event.sessionId&&!remoteEventIds.has(eventDocId);
+  });
+  for(let i=0;i<eventsToUpload.length;i+=20){
+   await Promise.all(eventsToUpload.slice(i,i+20).map(event=>{
+    const eventDocId=String(event.sessionId)+"_"+String(event.id);
+    return setDoc(doc(db,"users",u.uid,"events",eventDocId),event,{merge:true});
+   }));
   }
   const remoteAddedTasteSignal=mergedEvents.some(event=>
    !localEventIds.has(String(event.sessionId||"")+"_"+String(event.id||""))&&TASTE_SIGNAL_TYPES.has(event.type)
