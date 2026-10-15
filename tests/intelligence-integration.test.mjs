@@ -35,7 +35,7 @@ test("dirty local taste is rebuilt instead of being overwritten by a newer remot
 
 test("meaningful viewing signals stale the taste profile and can seed it", () => {
   assert.match(intelligence, /TASTE_SIGNAL_TYPES=new Set/);
-  assert.match(intelligence, /if\(TASTE_SIGNAL_TYPES\.has\(type\)\)s\.taste\.updatedAt=0/);
+  assert.match(intelligence, /if\(TASTE_SIGNAL_TYPES\.has\(type\)\)\{s\.taste\.updatedAt=0;s\.taste\.dirty=true;/);
   assert.match(intelligence, /const behavioralItems=new Map/);
   assert.match(intelligence, /const typeFromKey=parts\.shift\(\)/);
   assert.match(intelligence, /all\.push\(\.\.\.eventBoosted,\.\.\.behavioralItems\.values\(\)\)/);
