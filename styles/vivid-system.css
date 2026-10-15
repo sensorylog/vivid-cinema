@@ -429,3 +429,19 @@ body{
 /* Shared native-scroll polish — affects programmatic/anchor scrolling, not finger or wheel speed. */
 :where(html){scroll-behavior:smooth;}
 @media(prefers-reduced-motion:reduce){:where(html){scroll-behavior:auto!important;}}
+
+
+/* Vivid Cinema — true bold typography, enforced consistently across every page.
+   Use the loaded bold font face (700) instead of relying on lighter defaults.
+   Keep icon glyphs and SVG artwork untouched. */
+body,
+body :where(*):not(i):not(svg):not(path):not([class*="bi-"]):not([aria-hidden="true"]) {
+  font-weight: 700 !important;
+  font-synthesis: weight;
+}
+body :is(h1,h2,h3,.vivid-page-title,.vivid-hero-title,.vivid-brand-wordmark) {
+  font-weight: 800 !important;
+}
+body :is(h4,h5,h6,strong,b,th,legend,label,button,[role="button"]) {
+  font-weight: 700 !important;
+}
