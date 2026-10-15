@@ -83,3 +83,10 @@ test("sync repeats when a library mutation arrives mid-sync and aborts safely on
   assert.match(library, /The signed-in account changed during library sync/);
   assert.match(library, /const activeAuth=await getFirebaseAuth\(\)/);
 });
+
+
+test("account country selector uses the shared dynamic provider-country list", () => {
+  assert.match(script, /getSupportedProviderCountryOptions/);
+  assert.match(script, /loadSupportedProviderCountries/);
+  assert.doesNotMatch(script, /const PROVIDER_COUNTRIES = \[/);
+});
