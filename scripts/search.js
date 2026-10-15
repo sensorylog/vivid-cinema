@@ -3,6 +3,7 @@ import { tmdbApi } from "./tmdb.js";
 import { normalizeResults } from "./media.js";
 import { parseIntent } from "./intent-parser.js";
 import { getTasteProfile } from "./intelligence.js";
+import { getProviderCountry } from "./provider-region.js";
 
 const RECENT_KEY_PREFIX = "vivid:search:recent:v2:";
 const LEGACY_RECENT_KEY = "vivid:search:recent:v1";
@@ -107,6 +108,44 @@ function tokenOverlap(queryTokens, title) {
   return queryTokens.reduce((score, token) => score + (titleTokens.has(token) ? 1 : 0), 0);
 }
 
+const WATCH_PROVIDER_HINTS = Object.freeze([
+  { key: "netflix", name: "Netflix", aliases: ["netflix"], pattern: /\bnetflix\b/i },
+  { key: "prime-video", name: "Prime Video", aliases: ["prime video", "amazon prime video", "amazon prime"], pattern: /\b(?:amazon\s+)?prime\s+video\b|\bamazon\s+prime\b/i },
+  { key: "disney-plus", name: "Disney+", aliases: ["disney plus", "disney+"], pattern: /\bdisney\s+plus\b|\bdisney\s*\+/i },
+  { key: "hulu", name: "Hulu", aliases: ["hulu"], pattern: /\bhulu\b/i },
+  { key: "crunchyroll", name: "Crunchyroll", aliases: ["crunchyroll"], pattern: /\bcrunchyroll\b/i },
+  { key: "apple-tv", name: "Apple TV+", aliases: ["apple tv+", "apple tv plus", "apple tv"], pattern: /\bapple\s+tv(?:\s+plus\b|\s*\+)?/i },
+  { key: "max", name: "Max", aliases: ["max", "hbo max"], pattern: /\b(?:hbo\s+)?max\b/i },
+  { key: "paramount-plus", name: "Paramount+", aliases: ["paramount+", "paramount plus"], pattern: /\bparamount(?:\s+plus\b|\s*\+)/i },
+  { key: "peacock", name: "Peacock", aliases: ["peacock"], pattern: /\bpeacock\b/i },
+  { key: "tubi", name: "Tubi", aliases: ["tubi"], pattern: /\btubi\b/i },
+  { key: "mubi", name: "MUBI", aliases: ["mubi"], pattern: /\bmubi\b/i },
+  { key: "starz", name: "STARZ", aliases: ["starz"], pattern: /\bstarz\b/i },
+  { key: "youtube", name: "YouTube", aliases: ["youtube"], pattern: /\byoutube\b/i }
+]);
+
+function normalizeProviderName(value) {
+  return String(value || "").toLowerCase().replace(/[^a-z0-9]+/g, "");
+}
+
+export function parseWatchProviderIntent(query = "") {
+  const q = normalizeQuery(query).toLowerCase();
+  const hasProviderContext = /\b(?:on|available|streaming|watch)\b/i.test(q) ||
+    /^(?:netflix|prime video|amazon prime video|amazon prime|disney\s*(?:plus|\+)|hulu|crunchyroll|apple\s+tv(?:\s*(?:plus|\+))?|hbo\s+max|paramount\s*(?:plus|\+)|peacock|tubi|mubi|starz|youtube)\s+(?:movies?|films?|tv shows?|series|shows?)\b/i.test(q);
+  if (!hasProviderContext) return null;
+  const provider = WATCH_PROVIDER_HINTS.find(item => item.pattern.test(q));
+  return provider ? { key: provider.key, name: provider.name, aliases: provider.aliases } : null;
+}
+
+export function findWatchProviderId(response = {}, providerIntent = {}) {
+  const aliases = new Set((providerIntent.aliases || [providerIntent.name]).map(normalizeProviderName));
+  const provider = (response?.results || []).find(item =>
+    aliases.has(normalizeProviderName(item.provider_name || item.name))
+  );
+  const id = provider?.provider_id ?? provider?.id;
+  return id == null ? null : String(id);
+}
+
 export function isStructuredSearchIntent(intent = {}, query = "") {
   const q = normalizeQuery(query).toLowerCase();
   const typeOnlyQuery = q
@@ -114,12 +153,12 @@ export function isStructuredSearchIntent(intent = {}, query = "") {
     .replace(/[\s,]+/g, " ")
     .trim();
   return Boolean(
-    intent.genre || intent.year || intent.language || intent.runtimeMax || intent.anime ||
+    intent.genre || intent.year || intent.language || intent.runtimeMax || intent.anime || intent.provider ||
     (intent.mediaType !== "all" && !typeOnlyQuery)
   );
 }
 
-export function buildStructuredSearchParams(intent = {}, type, page = 1) {
+export function buildStructuredSearchParams(intent = {}, type, page = 1, provider = null) {
   if (type !== "movie" && type !== "tv") return null;
   const genreId = intent.genreIds?.[type] ??
     intent.genre?.[type === "movie" ? "movieId" : "tvId"];
@@ -137,6 +176,11 @@ export function buildStructuredSearchParams(intent = {}, type, page = 1) {
     params[type === "movie" ? "primary_release_year" : "first_air_date_year"] = String(intent.year);
   }
   if (intent.language) params.with_original_language = String(intent.language);
+  if (provider?.id && provider?.region) {
+    params.with_watch_providers = String(provider.id);
+    params.watch_region = String(provider.region);
+    params.with_watch_monetization_types = "flatrate|free|ads";
+  }
   if (intent.anime) {
     params.with_original_language = "ja";
     if (type === "tv") params.with_origin_country = "JP";
@@ -340,6 +384,44 @@ export async function searchIntelligently(query, options = {}) {
   const searchIntent = getSearchIntent(q);
   const parsed = parseIntent(q);
   const personIntent = parsePersonCreditIntent(q);
+  const providerIntent = !personIntent && !searchIntent.similarity ? parseWatchProviderIntent(q) : null;
+  let providerRegion = "";
+  let providerIds = { movie: null, tv: null };
+  let providerTarget = null;
+  let providerUnsupportedNote = "";
+
+  if (providerIntent) {
+    providerRegion = getProviderCountry();
+    providerTarget = { name: providerIntent.name, region: providerRegion };
+    const [movieProviders, tvProviders] = await Promise.allSettled([
+      tmdbApi.movieWatchProviders(providerRegion),
+      tmdbApi.tvWatchProviders(providerRegion)
+    ]);
+    providerIds = {
+      movie: movieProviders.status === "fulfilled" ? findWatchProviderId(movieProviders.value, providerIntent) : null,
+      tv: tvProviders.status === "fulfilled" ? findWatchProviderId(tvProviders.value, providerIntent) : null
+    };
+    const providerStatuses = { movie: movieProviders.status, tv: tvProviders.status };
+    const requestedTypes = ["movie", "tv"].filter(type => parsed.mediaType === "all" || parsed.mediaType === type);
+    if (!requestedTypes.some(type => providerIds[type])) {
+      providerUnsupportedNote = "TMDB could not verify " + providerIntent.name + " availability for the requested media type in " + providerRegion + ". Try another provider region or search the title directly.";
+      return {
+        items: [],
+        intent: {
+          ...searchIntent,
+          filters: {
+            ...parsed,
+            unsupported: [...new Set([...(parsed.unsupported || []).filter(note => note !== "Streaming availability varies by region and needs a separate provider check."), providerUnsupportedNote])]
+          },
+          structured: true,
+          providerTarget
+        },
+        recent: getRecentSearches()
+      };
+    } else if (requestedTypes.some(type => providerStatuses[type] === "rejected")) {
+      providerUnsupportedNote = "TMDB could not verify " + providerIntent.name + " availability for all requested media types in " + providerRegion + "; results may be incomplete.";
+    }
+  }
 
   if (personIntent) {
     let personResponse;
@@ -462,15 +544,18 @@ export async function searchIntelligently(query, options = {}) {
     throw fallbackResponse.reason || new Error("Catalogue search is temporarily unavailable.");
   }
 
-  const structured = isStructuredSearchIntent(parsed, q);
+  const structuredIntent = providerIntent ? { ...parsed, provider: providerIntent } : parsed;
+  const structured = isStructuredSearchIntent(structuredIntent, q);
   const calls = [searchContent(q, page)];
 
   if (structured) {
     const types = ["movie", "tv"].filter(type =>
-      parsed.mediaType === "all" || parsed.mediaType === type
+      (parsed.mediaType === "all" || parsed.mediaType === type) &&
+      (!providerIntent || providerIds[type])
     );
     for (const type of types) {
-      const params = buildStructuredSearchParams(parsed, type, page);
+      const provider = providerIntent ? { id: providerIds[type], region: providerRegion } : null;
+      const params = buildStructuredSearchParams(parsed, type, page, provider);
       if (!params) continue;
       calls.push((type === "tv" ? tmdbApi.discoverTv(params) : tmdbApi.discoverMovies(params))
         .then(response => normalizeResults(response?.results || [], type)));
@@ -485,11 +570,16 @@ export async function searchIntelligently(query, options = {}) {
   }
 
   const textItems = responses[0]?.status === "fulfilled" ? responses[0].value : [];
-  const discovered = responses.slice(1).flatMap(result =>
+  const providerDiscoveryResponses = responses.slice(1);
+  if (providerIntent && providerDiscoveryResponses.some(result => result.status === "rejected")) {
+    const note = "TMDB could not complete every provider-filtered catalogue request for " + providerIntent.name + " in " + providerRegion + "; results may be incomplete.";
+    providerUnsupportedNote = providerUnsupportedNote ? providerUnsupportedNote + " " + note : note;
+  }
+  const discovered = providerDiscoveryResponses.flatMap(result =>
     result.status === "fulfilled" ? result.value : []
   );
   const relevantTextItems = structured
-    ? textItems.filter(item => matchesStructuredSearchIntent(item, parsed))
+    ? providerIntent ? [] : textItems.filter(item => matchesStructuredSearchIntent(item, parsed))
     : textItems;
   // Structured discovery is the primary source for filter queries. Text search
   // supplements it only when the returned metadata verifies the requested filters.
@@ -503,5 +593,23 @@ export async function searchIntelligently(query, options = {}) {
   } catch {
     ranked = items.slice(0, Number(options.limit || 8));
   }
-  return { items: ranked, intent: { ...searchIntent, filters: parsed, structured }, recent: getRecentSearches() };
+  const filters = providerIntent
+    ? {
+        ...parsed,
+        unsupported: [
+          ...(parsed.unsupported || []).filter(note => note !== "Streaming availability varies by region and needs a separate provider check."),
+          ...(providerUnsupportedNote ? [providerUnsupportedNote] : [])
+        ]
+      }
+    : parsed;
+  return {
+    items: ranked,
+    intent: {
+      ...searchIntent,
+      filters,
+      structured,
+      ...(providerTarget ? { providerTarget } : {})
+    },
+    recent: getRecentSearches()
+  };
 }
