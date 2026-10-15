@@ -239,7 +239,7 @@ export function parseIntent(input = "") {
     intent.provider = { id: provider.id, name: provider.name };
     intent.providerOnly = isProviderCollectionQuery(text, provider);
     const providerFilterable = Boolean(
-      intent.providerOnly || intent.mediaType !== "all" || intent.genre || intent.runtimeMax ||
+      intent.providerOnly || intent.genre || intent.runtimeMax ||
       intent.year || intent.decade || intent.country || intent.language || intent.anime
     );
     if (providerFilterable) {
@@ -277,7 +277,8 @@ export function parseIntent(input = "") {
 }
 
 export function intentHasFilters(intent = {}) {
-  return Boolean(intent.mediaType !== "all" || intent.genre || intent.runtimeMax || intent.year || intent.decade || intent.country || intent.language || (intent.provider && intent.providerOnly));
+  const explicitFilters = Boolean(intent.genre || intent.runtimeMax || intent.year || intent.decade || intent.country || intent.language || intent.anime);
+  return Boolean(explicitFilters || (intent.provider ? intent.providerOnly : intent.mediaType !== "all"));
 }
 
 export function describeIntent(intent = {}) {
