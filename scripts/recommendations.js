@@ -11,6 +11,10 @@ const TONIGHT_SESSION_KEY = "vivid:tonight:v1";
 const PROGRESS_SYNC_DEBOUNCE = 1800;
 const LOCAL_OWNER_KEY = "vivid:progress-owner:v1";
 
+function currentProgressOwner() {
+  try { return localStorage.getItem(LOCAL_OWNER_KEY) || "guest"; } catch { return "guest"; }
+}
+
 function ensureProgressOwner(uid){
   let changed=false;
   try{
@@ -527,14 +531,17 @@ function tonightScore(item, taste, progress, feedback) {
   return genre * 5.8 + media * 1.5 + quality * 2.2 + popularity * .65 + liked + unfinished;
 }
 export async function getTonightPick(options = {}) {
+  const ownerAtStart = currentProgressOwner();
   const limit = Math.max(1, Math.min(20, Number(options.limit) || 12));
   const taste = await getTasteProfile();
+  if (currentProgressOwner() !== ownerAtStart) return [];
   const progress = readProgress();
   const feedback = getFeedbackState();
   const library = getLocalLibrary();
   const excluded = new Set([...getNotForMeKeys(), ...getTonightRejected()]);
   const watched = new Set((library.history || []).map(keyFor));
   const seeds = await getRecommendationSeeds();
+  if (currentProgressOwner() !== ownerAtStart) return [];
   const calls = [];
   seeds.slice(0, 6).forEach(seed => calls.push(seed.media_type === "tv" ? tmdbApi.tvRecommendations(seed.id) : tmdbApi.movieRecommendations(seed.id)));
   const topGenres = Object.entries(taste.genres || {}).sort((a,b) => Number(b[1]) - Number(a[1])).slice(0, 4).map(([id]) => id).join("|");
@@ -546,6 +553,7 @@ export async function getTonightPick(options = {}) {
     calls.push(tmdbApi.popularMovies(1));
   }
   const responses = await Promise.allSettled(calls);
+  if (currentProgressOwner() !== ownerAtStart) return [];
   const candidates = uniqueByKey(responses.flatMap(result => result.status === "fulfilled" ? normalizeResults(result.value?.results || []) : []))
     .filter(item => !excluded.has(keyFor(item)) && !watched.has(keyFor(item)));
   return candidates.map(item => ({ ...item, tonightScore: tonightScore(item, taste, progress, feedback) }))
@@ -560,12 +568,15 @@ export function dismissTonightPick(item) {
 }
 
 export async function getPersonalRecommendations(limit = 12) {
+  const ownerAtStart = currentProgressOwner();
   const library = getLocalLibrary();
   const progress = readProgress();
   const feedback = getFeedbackState();
   const taste = await getTasteProfile();
+  if (currentProgressOwner() !== ownerAtStart) return [];
   const observed = [...(library.history || []), ...(library.favorites || []), ...(library.watchLater || [])];
   const seeds = await getRecommendationSeeds();
+  if (currentProgressOwner() !== ownerAtStart) return [];
   if (!seeds.length && !Object.keys(taste.genres || {}).length) return [];
 
   const excluded = new Set([
@@ -623,6 +634,7 @@ export async function getPersonalRecommendations(limit = 12) {
     discoveryCalls.push(tmdbApi.discoverMovies({ sort_by: "vote_average.desc", vote_count_gte: 250, with_original_language: preferredLanguages[0], page: 1 }));
   }
   const discoveryResponses = await Promise.allSettled(discoveryCalls);
+  if (currentProgressOwner() !== ownerAtStart) return [];
   const discoveryCandidates = discoveryResponses.flatMap(result =>
     result.status === "fulfilled" ? normalizeResults(result.value?.results || []) : []
   );
@@ -713,6 +725,7 @@ export async function getIntentRecommendations(intent = {}, limit = 18) {
 }
 
 export async function getBecauseYouLiked(limit = 12) {
+  const ownerAtStart = currentProgressOwner();
   const feedback = getFeedbackState();
   const liked = Object.values(feedback)
     .filter(item => item.kind === "like")
@@ -724,6 +737,7 @@ export async function getBecauseYouLiked(limit = 12) {
     const response = seed.media_type === "tv"
       ? await tmdbApi.tvRecommendations(seed.id)
       : await tmdbApi.movieRecommendations(seed.id);
+    if (currentProgressOwner() !== ownerAtStart) return [];
     const excluded = new Set([...getNotForMeKeys(), keyFor(seed)]);
     const items = normalizeResults(response?.results || [])
       .filter(item => !excluded.has(keyFor(item)))
