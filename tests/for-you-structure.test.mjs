@@ -23,7 +23,7 @@ test("For You page is registered as a real, accessible destination", () => {
 });
 
 test("For You provides loading, empty, retry and secondary Memory states", () => {
-  for (const id of ["recommendation-status", "recommendation-empty", "recommendation-error", "retry-recommendations", "continue-section", "because-section", "intent-summary"]) {
+  for (const id of ["recommendation-status", "recommendation-empty", "recommendation-error", "retry-recommendations", "feedback-undo", "undo-feedback", "continue-section", "because-section", "intent-summary"]) {
     assert.ok(html.includes('id="' + id + '"'), "missing UI state: " + id);
   }
 });
