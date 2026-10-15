@@ -6,7 +6,7 @@ import { switchLocalOwner } from "./local-owner.js";
 const KEY="vivid:intelligence:v1";
 const SESSION_KEY="vivid:session:v1";
 const TASTE_CACHE_KEY="vivid:taste:v1";
-const empty=()=>({version:1,feedback:{},events:[],taste:{genres:{},languages:{},countries:{},actors:{},directors:{},media:{movie:0,tv:0},decades:{},updatedAt:0},onboarding:{completed:false,dismissed:false,completedAt:0}});
+const empty=()=>({version:1,feedback:{},feedbackCleared:{},events:[],taste:{genres:{},languages:{},countries:{},actors:{},directors:{},media:{movie:0,tv:0},decades:{},updatedAt:0},onboarding:{completed:false,dismissed:false,completedAt:0}});
 let firebasePromise=null, syncPromise=null, sessionId=null;
 const LOCAL_OWNER_KEY="vivid:intelligence-owner:v1";
 function ensureIntelligenceOwner(uid){
@@ -26,7 +26,7 @@ function ensureIntelligenceOwner(uid){
  }catch(error){console.warn("Vivid could not switch account-local intelligence snapshots:",error)}
 }
 
-function read(){try{const v=JSON.parse(localStorage.getItem(KEY));const d=empty();return {...d,...v,feedback:{...d.feedback,...(v?.feedback||{})},events:Array.isArray(v?.events)?v.events:[],taste:{...d.taste,...(v?.taste||{})},onboarding:{...d.onboarding,...(v?.onboarding||{})}}}catch{return empty()}}
+function read(){try{const v=JSON.parse(localStorage.getItem(KEY));const d=empty();return {...d,...v,feedback:{...d.feedback,...(v?.feedback||{})},feedbackCleared:{...d.feedbackCleared,...(v?.feedbackCleared||{})},events:Array.isArray(v?.events)?v.events:[],taste:{...d.taste,...(v?.taste||{})},onboarding:{...d.onboarding,...(v?.onboarding||{})}}}catch{return empty()}}
 function write(v){try{localStorage.setItem(KEY,JSON.stringify(v))}catch{};window.dispatchEvent(new CustomEvent("vivid:intelligence-changed",{detail:v}))}
 function key(x){return x?String(x.media_type||x.mediaType||"movie")+":"+String(x.id):""}
 function safe(x){return{id:String(x?.id||""),media_type:x?.media_type||x?.mediaType||"movie",title:String(x?.title||x?.name||"Untitled").slice(0,300),year:String(x?.year||"").slice(0,10),poster_path:String(x?.poster_path||"").slice(0,500),backdrop_path:String(x?.backdrop_path||"").slice(0,500)}}
@@ -94,9 +94,10 @@ export function recordBehavior(type,item=null,metadata={}){
 export function setFeedback(item,kind){
  const x=safe(item),k=key(x);if(!k||!["like","not_for_me"].includes(kind))return null;
  const s=read(),next=s.feedback[k]?.kind===kind?null:kind;
- if(next)s.feedback[k]={...x,kind:next,updatedAt:Date.now()};else delete s.feedback[k];
+ if(next){s.feedback[k]={...x,kind:next,updatedAt:Date.now()};delete s.feedbackCleared[k]}
+ else{delete s.feedback[k];s.feedbackCleared[k]={updatedAt:Date.now()}}
  s.taste.updatedAt=0;write(s);invalidateRecommendationCaches();
- cloud(["feedback",k],next?{...x,kind:next,updatedAt:s.feedback[k].updatedAt}:{kind:"cleared",updatedAt:Date.now()});
+ cloud(["feedback",k],next?{...x,kind:next,updatedAt:s.feedback[k].updatedAt}:{kind:"cleared",updatedAt:s.feedbackCleared[k].updatedAt});
  recordBehavior(next||"feedback_cleared",x,{feedback:next||""});void rebuildTasteProfile();return next
 }
 
@@ -151,17 +152,32 @@ export async function syncIntelligenceForUser(u){
     await setDoc(doc(db,"users",u.uid,"feedback",id),localItem,{merge:true});
    }
   }
+  for(const [id,tombstone] of Object.entries(s.feedbackCleared)){
+   const remoteItem=remoteFeedback.get(id);
+   if(!remoteItem || Number(tombstone.updatedAt||0)>Number(remoteItem.updatedAt||0)){
+    await setDoc(doc(db,"users",u.uid,"feedback",id),{kind:"cleared",updatedAt:Number(tombstone.updatedAt)||Date.now()},{merge:true});
+   }
+  }
   f.docs.forEach(d=>{
    const x=d.data()||{};
+   const localItem=s.feedback[d.id];
+   const localClear=s.feedbackCleared[d.id];
+   const localVersion=Math.max(Number(localItem?.updatedAt||0),Number(localClear?.updatedAt||0));
+   if(Number(x.updatedAt||0)<=localVersion)return;
    if(x.kind==="cleared"){
-    if(s.feedback[d.id] && Number(x.updatedAt||0)>=Number(s.feedback[d.id].updatedAt||0)){delete s.feedback[d.id];feedbackChanged=true}
-   }else if(!s.feedback[d.id]||Number(x.updatedAt||0)>Number(s.feedback[d.id].updatedAt||0)){
-    s.feedback[d.id]=x;feedbackChanged=true
+    delete s.feedback[d.id];
+    s.feedbackCleared[d.id]={updatedAt:Number(x.updatedAt)||0};
+    feedbackChanged=true;
+   }else{
+    s.feedback[d.id]=x;
+    delete s.feedbackCleared[d.id];
+    feedbackChanged=true;
    }
   });
-  if(feedbackChanged)s.taste.updatedAt=0;
   const remote=t.docs.find(d=>d.id==="profile")?.data();
-  if(remote&&Number(remote.updatedAt||0)>Number(s.taste.updatedAt||0)){
+  if(feedbackChanged){
+   s.taste.updatedAt=0;
+  }else if(remote&&Number(remote.updatedAt||0)>Number(s.taste.updatedAt||0)){
    s.taste=remote;
   }else if(Number(s.taste.updatedAt||0)>0&&Number(s.taste.updatedAt||0)>Number(remote?.updatedAt||0)){
    await setDoc(doc(db,"users",u.uid,"taste","profile"),{version:1,...s.taste},{merge:true});
