@@ -71,3 +71,11 @@ test("plot matching has a constrained catalogue-overview fallback when keyword m
   assert.match(source, /tmdbApi\.discoverMovies\(params\)/);
   assert.match(source, /tmdbApi\.discoverTv\(params\)/);
 });
+
+
+test("remembered-plot search does not hide watched or disliked titles", () => {
+  const source = readFileSync(new URL("../scripts/recommendations.js", import.meta.url), "utf8");
+  assert.match(source, /A remembered-plot query is direct search/);
+  assert.match(source, /excluded: new Set\(\)/);
+  assert.doesNotMatch(source, /const excluded = new Set\(\[\.\.\.observed\.map\(keyFor\), \.\.\.getNotForMeKeys\(\)\]\)/);
+});
