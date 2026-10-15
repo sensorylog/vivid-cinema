@@ -29,6 +29,7 @@ The audit found several correctness gaps in the Phase 2/3 integration. The accom
 - Anime-film requests remain movie searches with Japanese-language animation filters.
 - A mixed movie/TV runtime limit is described separately as movie runtime and per-episode runtime.
 - Meaningful title, trailer, watch, progress, and recommendation-click signals mark the taste profile stale and can seed the next rebuild; impression-only events do not repeatedly invalidate taste.
+- A locally dirty taste profile is not replaced merely because a remote profile has a newer timestamp; local device-only behavior signals must be included in the next rebuild.
 - Mood, dub/subtitle, and provider availability claims remain explicitly unsupported where catalogue metadata cannot verify them.
 
 ### 3. Catalogue failure states
