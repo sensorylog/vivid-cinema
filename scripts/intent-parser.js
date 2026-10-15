@@ -128,6 +128,33 @@ function findCountry(text) {
   return null;
 }
 
+
+function findProviderRegion(text) {
+  if (/\bin\s+(?:the\s+)?(?:us|u\.s\.a\.?)\b/i.test(text)) {
+    return COUNTRY_HINTS.find(country => country.code === "US") || { code: "US", name: "United States", aliases: ["us", "usa", "united states"] };
+  }
+  for (const country of COUNTRY_HINTS) {
+    for (const alias of country.aliases) {
+      const escaped = alias.replace(/[+]/g, "\\+");
+      const regionPhrase = new RegExp("\\b(?:available|streaming|watchable)\\s+in\\s+(?:the\\s+)?" + escaped + "\\b|\\bin\\s+(?:the\\s+)?" + escaped + "\\b", "i");
+      if (regionPhrase.test(text)) return country;
+    }
+  }
+  return null;
+}
+
+function removeProviderRegionPhrase(text, country) {
+  let cleaned = String(text || "");
+  const aliases = [...(country?.aliases || [])];
+  if (country?.code === "US") aliases.push("us");
+  for (const alias of aliases.sort((a, b) => b.length - a.length)) {
+    const escaped = alias.replace(/[+]/g, "\\+");
+    cleaned = cleaned.replace(new RegExp("\\b(?:available|streaming|watchable)\\s+in\\s+(?:the\\s+)?" + escaped + "\\b", "gi"), " ");
+    cleaned = cleaned.replace(new RegExp("\\bin\\s+(?:the\\s+)?" + escaped + "\\b", "gi"), " ");
+  }
+  return cleaned.replace(/[\s,]+/g, " ").trim();
+}
+
 function findStreamingProvider(text) {
   for (const provider of STREAMING_PROVIDERS) {
     if (provider.aliases.some(alias => includesPhrase(text, alias))) return provider;
@@ -181,6 +208,7 @@ export function parseIntent(input = "") {
     country: null,
     countryName: null,
     provider: null,
+    providerRegion: null,
     providerOnly: false,
     language: null,
     unsupported: [],
@@ -235,17 +263,21 @@ export function parseIntent(input = "") {
     intent.constraints.push(String(intent.year));
   }
 
-  const country = findCountry(text);
+  const provider = findStreamingProvider(text);
+  const providerRegion = provider ? findProviderRegion(text) : null;
+  const countryText = providerRegion ? removeProviderRegionPhrase(text, providerRegion) : text;
+  const country = findCountry(countryText);
   if (country) {
     intent.country = country.code;
     intent.countryName = country.name;
     intent.constraints.push("Origin: " + country.name);
   }
 
-  const provider = findStreamingProvider(text);
   if (provider) {
     intent.provider = { id: provider.id, name: provider.name };
-    intent.providerOnly = isProviderCollectionQuery(text, provider);
+    intent.providerRegion = providerRegion?.code || null;
+    const providerQueryText = providerRegion ? removeProviderRegionPhrase(text, providerRegion) : text;
+    intent.providerOnly = isProviderCollectionQuery(providerQueryText, provider);
     const providerFilterable = Boolean(
       intent.providerOnly || intent.genre || intent.runtimeMax ||
       intent.year || intent.decade || intent.country || intent.language || intent.anime
