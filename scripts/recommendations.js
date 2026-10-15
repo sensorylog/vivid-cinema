@@ -737,10 +737,15 @@ export async function getPlotMatchRecommendations(intent = {}, limit = 18) {
   }
 
   // A title lookup is a useful fallback when the description accidentally
-  // contains a remembered title or subtitle; it never fabricates catalogue IDs.
-  calls.push(tmdbApi.searchMovies(intent.query || "").then(response =>
-    normalizeResults(response?.results || [], "movie")
-  ));
+  // contains a remembered title or subtitle. Only use it when there are no
+  // structured filters to bypass, and respect the requested media type.
+  const hasSpecificFilters = Boolean(intent.genre || intent.runtimeMax || intent.year || intent.language || intent.anime);
+  if (!hasSpecificFilters) {
+    for (const type of mediaTypes) {
+      calls.push((type === "tv" ? tmdbApi.searchTv(intent.query || "") : tmdbApi.searchMovies(intent.query || ""))
+        .then(response => normalizeResults(response?.results || [], type)));
+    }
+  }
   const responses = await Promise.allSettled(calls);
   if (currentProgressOwner() !== ownerAtStart) return [];
   const candidates = collectIntentCandidates(responses);
