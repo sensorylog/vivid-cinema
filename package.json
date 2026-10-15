@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "test": "node --test tests/playback-urls.test.mjs tests/service-worker.test.mjs tests/watch-player.test.mjs tests/tflix-secondary-player.test.mjs tests/playback-structure.test.mjs tests/home-hero.test.mjs tests/google-tag.test.mjs tests/performance.test.mjs tests/auth-verification.test.mjs",
+    "test": "node --test tests/playback-urls.test.mjs tests/service-worker.test.mjs tests/watch-player.test.mjs tests/tflix-secondary-player.test.mjs tests/playback-structure.test.mjs tests/home-hero.test.mjs tests/google-tag.test.mjs tests/performance.test.mjs tests/auth-verification.test.mjs tests/push-notifications.test.mjs",
     "test:rules": "firebase emulators:exec --project vivid-cinema-rules-test --only firestore \"node --test tests/firestore.rules.test.mjs\"",
     "check:syntax": "node automation/check-syntax.mjs"
   },
