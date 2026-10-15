@@ -56,21 +56,39 @@ export async function enableCinemaPush(){
   return {subscription,userId:user.uid};
 }
 export async function disableCinemaPush(){
+  let subscription=null;
   try{
-    if(!("serviceWorker" in navigator))return false;
-    const registration=await navigator.serviceWorker.ready;
-    const subscription=await registration.pushManager?.getSubscription();
-    if(subscription)await subscription.unsubscribe();
-  }catch{}
+    if("serviceWorker" in navigator){
+      const registration=await navigator.serviceWorker.ready;
+      subscription=await registration.pushManager?.getSubscription()||null;
+    }
+  }catch(error){
+    console.warn("Vivid push subscription lookup failed:",error);
+    return false;
+  }
+
+  // A browser can have several devices registered to the same account.
+  // Remove only this browser's endpoint; never erase the user's other devices.
+  let remoteRemovalSucceeded=true;
   try{
     const {auth}=await getFirebase();
     const user=auth.currentUser;
-    if(!user)return false;
-    const {db,doc,deleteDoc}=await getFirebase();
-    const snapshot=await import("https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js").then(fs=>fs.getDocs(fs.collection(db,"users",user.uid,SUBS_COLLECTION)));
-    await Promise.all(snapshot.docs.map(item=>deleteDoc(doc(db,"users",user.uid,SUBS_COLLECTION,item.id))));
-  }catch{}
-  return true;
+    if(user&&subscription?.endpoint){
+      const {db,doc,deleteDoc}=await getFirebase();
+      await deleteDoc(doc(db,"users",user.uid,SUBS_COLLECTION,keyId(subscription.endpoint)));
+    }
+  }catch(error){
+    remoteRemovalSucceeded=false;
+    console.warn("Vivid push subscription cleanup failed:",error);
+  }
+
+  try{
+    if(subscription)await subscription.unsubscribe();
+  }catch(error){
+    console.warn("Vivid browser push unsubscribe failed:",error);
+    return false;
+  }
+  return remoteRemovalSucceeded;
 }
 
 export async function getServerReleaseAlerts(){
