@@ -26,6 +26,10 @@ test("playback writes are bound to the owner active when queued", () => {
   assert.match(progress, /activeOwner === ownerAtQueue/);
   assert.match(progress, /String\(auth\?\.currentUser\?\.uid \|\| ""\) === ownerAtQueue/);
   assert.match(progress, /The signed-in account changed during playback progress sync/);
+  assert.match(progress, /getDocsFromServer\(collection\(db, "users", user\.uid, "progress"\)\)/);
+  assert.match(intelligence, /getDocsFromServer\(collection\(db,"users",u\.uid,"feedback"\)\)/);
+  assert.match(intelligence, /getDocsFromServer\(collection\(db,"users",u\.uid,"taste"\)\)/);
+  assert.match(intelligence, /The signed-in account changed before intelligence state could be reconciled/);
 });
 
 test("auth listeners continue handling later account changes", () => {
