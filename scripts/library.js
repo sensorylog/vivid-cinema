@@ -274,9 +274,11 @@ async function mapLimit(items,limit,worker){
 }
 
 async function performLibrarySyncForUser(user=null){
-  if(user?.uid)ensureLocalOwner(user.uid);
+  if(!user?.uid)return readLocal();
+  const auth=await getFirebaseAuth();
+  if(!auth?.currentUser||String(auth.currentUser.uid)!==String(user.uid))return readLocal();
+  ensureLocalOwner(user.uid);
   const local=readLocal();
-  if(!user)return local;
 
   // Server-only reads are intentional: a cache-only/offline response must never
   // be reported to the user as a successful cloud sync.
@@ -346,6 +348,11 @@ async function performLibrarySyncForUser(user=null){
     const {db,doc,deleteDoc}=await getFirebase();
     await deleteDoc(doc(db,"users",user.uid,"libraryTombstones",String(item.collection)+":"+String(item.contentId)));
   });
+
+  // Do not let a sync started for a previous account overwrite the current
+  // account's local snapshot if authentication changed while requests were in flight.
+  const activeAuth=await getFirebaseAuth();
+  if(!activeAuth?.currentUser||String(activeAuth.currentUser.uid)!==String(user.uid))return readLocal();
 
   // Do not replace local data until all required cloud operations have been
   // acknowledged. Any error propagates so the UI can truthfully offer retry.
