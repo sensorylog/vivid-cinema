@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#06070a">
+<meta name="description" content="Vivid Intelligence learns what you enjoy and helps you find your next film or series.">
+<title>For You · Vivid Cinema</title>
+<link rel="preconnect" href="https://api.themoviedb.org" crossorigin>
+<link rel="preconnect" href="https://image.tmdb.org" crossorigin>
+<link rel="icon" href="icons/vivid-icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icons/vivid-icon.svg">
+<link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="styles/vivid-foundation.css">
+<link rel="stylesheet" href="styles/vivid-system.css">
+<link rel="stylesheet" href="styles/vivid-shell.css">
+<link rel="stylesheet" href="styles/vivid-pwa.css">
+<link rel="stylesheet" href="styles/vivid-atmosphere.css">
+<link rel="stylesheet" href="styles/vivid-audit-fixes.css">
+<link rel="stylesheet" href="styles/vivid-desktop.css">
+<link rel="stylesheet" href="styles/vivid-liquid-glass.css?v=lg4">
+<link rel="stylesheet" href="styles/vivid-for-you.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.9.1/font/bootstrap-icons.css">
+</head>
+<body data-vivid-page="for-you" class="vivid-for-you vivid-atmosphere">
+<header class="vivid-topbar vivid-unified-header">
+  <nav class="vivid-nav vivid-unified-nav" aria-label="Primary">
+    <a class="vivid-brand" href="home.html">Vivid<span>Cinema</span></a>
+    <div class="vivid-navlinks">
+      <a href="home.html"><i class="bi bi-house-fill" aria-hidden="true"></i><span>Home</span></a>
+      <a href="discover.html"><i class="bi bi-compass" aria-hidden="true"></i><span>Discover</span></a>
+      <a href="for-you.html" aria-current="page"><i class="bi bi-stars" aria-hidden="true"></i><span>For You</span></a>
+      <a href="library.html"><i class="bi bi-bookmark-fill" aria-hidden="true"></i><span>Library</span></a>
+      <a href="news.html"><i class="bi bi-newspaper" aria-hidden="true"></i><span>News</span></a>
+    </div>
+    <a class="vivid-nav-action" id="for-you-auth" data-vivid-nav-auth="true" href="auth.html">Sign in</a>
+  </nav>
+</header>
+<main class="vivid-for-you-main">
+  <section class="vivid-for-you-hero" aria-labelledby="for-you-title">
+    <div class="vivid-for-you-eyebrow"><span class="vivid-for-you-orb" aria-hidden="true"></span> VIVID INTELLIGENCE <span class="vivid-for-you-memory">POWERED BY YOUR MEMORY</span></div>
+    <h1 id="for-you-title">Your next favourite<br><em>starts here.</em></h1>
+    <p class="vivid-for-you-lede">Tell Vivid what you're in the mood for. Your saved titles, feedback and viewing progress help shape the picks — and you stay in control.</p>
+    <form id="intent-form" class="vivid-intent-form">
+      <label class="vivid-intent-label" for="intent-query">What do you feel like watching?</label>
+      <div class="vivid-intent-input-wrap">
+        <i class="bi bi-stars" aria-hidden="true"></i>
+        <input id="intent-query" name="intent" type="search" autocomplete="off" maxlength="180" placeholder="A funny movie under 2 hours…" aria-describedby="intent-help">
+        <button type="submit"><span>Find my next watch</span><i class="bi bi-arrow-up-right" aria-hidden="true"></i></button>
+      </div>
+      <p id="intent-help" class="vivid-intent-help">Try a genre, a year, a language or a runtime. Your words are interpreted on this device.</p>
+    </form>
+    <div class="vivid-intent-examples" aria-label="Example searches">
+      <button type="button" data-example="A funny movie under 2 hours">Funny movie · under 2 hours</button>
+      <button type="button" data-example="Japanese anime under 25 minutes">Anime · short episodes</button>
+      <button type="button" data-example="Korean thriller series">Korean thriller series</button>
+    </div>
+  </section>
+
+  <section class="vivid-for-you-controls" aria-label="Quick content filters">
+    <span>SHOW ME</span>
+    <div class="vivid-for-you-type-chips" role="group" aria-label="Content type">
+      <button type="button" data-type="all" class="is-active" aria-pressed="true">For you</button>
+      <button type="button" data-type="movie" aria-pressed="false">Movies</button>
+      <button type="button" data-type="tv" aria-pressed="false">Series</button>
+      <button type="button" data-type="anime" aria-pressed="false">Anime</button>
+    </div>
+    <button type="button" id="clear-intent" class="vivid-for-you-clear">Clear filters</button>
+  </section>
+
+  <section id="intent-summary" class="vivid-intent-summary" aria-live="polite" hidden>
+    <div><span class="vivid-for-you-kicker">YOUR FILTERS</span><div id="intent-chips" class="vivid-intent-chips"></div></div>
+    <p id="intent-limitations" class="vivid-intent-limitations" hidden></p>
+  </section>
+
+  <section class="vivid-for-you-results-section" aria-labelledby="recommendation-heading">
+    <div class="vivid-for-you-section-head">
+      <div><span class="vivid-for-you-kicker" id="recommendation-kicker">A LITTLE MORE YOU</span><h2 id="recommendation-heading">Picks for your next watch</h2><p id="recommendation-copy">A mix of familiar taste and something new to discover.</p></div>
+      <button type="button" id="refresh-recommendations" class="vivid-for-you-refresh" aria-label="Refresh recommendations"><i class="bi bi-arrow-clockwise" aria-hidden="true"></i><span>Refresh</span></button>
+    </div>
+    <div id="recommendation-status" class="vivid-for-you-status" role="status" aria-live="polite">Finding your next watch…</div>
+    <div id="recommendation-grid" class="vivid-for-you-grid" aria-live="polite"></div>
+    <div id="recommendation-empty" class="vivid-for-you-empty" hidden>
+      <i class="bi bi-compass" aria-hidden="true"></i><h3>We couldn't find a match just yet.</h3>
+      <p>Try a broader genre, remove a filter, or explore the full catalogue.</p><a href="discover.html">Explore Discover <i class="bi bi-arrow-up-right" aria-hidden="true"></i></a>
+    </div>
+    <div id="recommendation-error" class="vivid-for-you-empty" hidden>
+      <i class="bi bi-cloud-slash" aria-hidden="true"></i><h3>Recommendations couldn't load.</h3><p>Your Memory is still here. Check your connection and try again.</p><button id="retry-recommendations" type="button">Try again</button>
+    </div>
+  </section>
+
+  <section id="continue-section" class="vivid-for-you-secondary" hidden aria-labelledby="continue-heading">
+    <div class="vivid-for-you-section-head"><div><span class="vivid-for-you-kicker">YOUR JOURNEY</span><h2 id="continue-heading">Pick up where you left off</h2></div><a href="library.html">Open Library <i class="bi bi-arrow-up-right" aria-hidden="true"></i></a></div>
+    <div id="continue-grid" class="vivid-for-you-continue-grid"></div>
+  </section>
+
+  <section id="because-section" class="vivid-for-you-secondary" hidden aria-labelledby="because-heading">
+    <div class="vivid-for-you-section-head"><div><span class="vivid-for-you-kicker">CONNECTED BY TASTE</span><h2 id="because-heading">Because you liked…</h2><p>Stories connected to titles you've explicitly liked.</p></div></div>
+    <div id="because-grid" class="vivid-for-you-grid vivid-for-you-grid-compact"></div>
+  </section>
+
+  <p class="vivid-for-you-privacy"><i class="bi bi-shield-check" aria-hidden="true"></i> Vivid Intelligence uses catalogue metadata and your Vivid Memory. No paid AI service is required, and unsupported details are called out instead of guessed.</p>
+</main>
+<script type="module" src="scripts/app-shell.js"></script>
+<script type="module" src="scripts/nav-auth.js"></script>
+<script type="module" src="scripts/for-you.js"></script>
+<script type="module" src="scripts/atmosphere.js"></script>
+<script type="module" src="scripts/i18n.js"></script>
+</body>
+</html>
