@@ -4,8 +4,26 @@ import { normalizeResults } from "./media.js";
 import { parseIntent } from "./intent-parser.js";
 import { getTasteProfile } from "./intelligence.js";
 
-const RECENT_KEY = "vivid:search:recent:v1";
+const RECENT_KEY_PREFIX = "vivid:search:recent:v2:";
+const LEGACY_RECENT_KEY = "vivid:search:recent:v1";
 const MAX_RECENT = 8;
+let recentSearchOwner = "guest";
+let recentSearchOwnerReady = false;
+
+export function recentSearchStorageKey(owner) {
+  return RECENT_KEY_PREFIX + encodeURIComponent(owner ? String(owner) : "guest");
+}
+
+export function setRecentSearchOwner(uid = null) {
+  recentSearchOwner = uid ? String(uid) : "guest";
+  recentSearchOwnerReady = true;
+  try { localStorage.removeItem(LEGACY_RECENT_KEY); } catch {}
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new CustomEvent("vivid:search-history-ready", {
+      detail: { owner: recentSearchOwner }
+    }));
+  }
+}
 
 const GENRE_HINTS = Object.freeze({
   action: [28], adventure: [12], animation: [16], comedy: [35], crime: [80],
@@ -25,8 +43,9 @@ function normalizeQuery(value) {
 }
 
 function readRecent() {
+  if (!recentSearchOwnerReady) return [];
   try {
-    const value = JSON.parse(localStorage.getItem(RECENT_KEY) || "[]");
+    const value = JSON.parse(localStorage.getItem(recentSearchStorageKey(recentSearchOwner)) || "[]");
     return Array.isArray(value) ? value.filter(Boolean).slice(0, MAX_RECENT) : [];
   } catch {
     return [];
@@ -34,7 +53,10 @@ function readRecent() {
 }
 
 function writeRecent(items) {
-  try { localStorage.setItem(RECENT_KEY, JSON.stringify(items.slice(0, MAX_RECENT))); } catch {}
+  if (!recentSearchOwnerReady) return;
+  try {
+    localStorage.setItem(recentSearchStorageKey(recentSearchOwner), JSON.stringify(items.slice(0, MAX_RECENT)));
+  } catch {}
 }
 
 export function getRecentSearches() {
@@ -43,13 +65,20 @@ export function getRecentSearches() {
 
 export function rememberSearch(query) {
   const q = normalizeQuery(query);
-  if (q.length < 2) return;
+  if (!recentSearchOwnerReady || q.length < 2) return;
   const next = [q, ...readRecent().filter(item => item.toLowerCase() !== q.toLowerCase())];
   writeRecent(next);
 }
 
 export function clearRecentSearches() {
-  try { localStorage.removeItem(RECENT_KEY); } catch {}
+  if (!recentSearchOwnerReady) return;
+  try { localStorage.removeItem(recentSearchStorageKey(recentSearchOwner)); } catch {}
+}
+
+if (typeof window !== "undefined") {
+  window.addEventListener("vivid:auth-ready", event => {
+    setRecentSearchOwner(event.detail?.uid || null);
+  });
 }
 
 export function getSearchIntent(query) {
