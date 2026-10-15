@@ -26,6 +26,13 @@ test("playback start, progress and completion still feed the canonical Memory st
   assert.match(watch, /upsertLibraryItem\("history"/);
 });
 
+test("meaningful viewing signals stale the taste profile and can seed it", () => {
+  assert.match(intelligence, /TASTE_SIGNAL_TYPES=new Set/);
+  assert.match(intelligence, /if\(TASTE_SIGNAL_TYPES\.has\(type\)\)s\.taste\.updatedAt=0/);
+  assert.match(intelligence, /const behavioralItems=new Map/);
+  assert.match(intelligence, /all\.push\(\.\.\.eventBoosted,\.\.\.behavioralItems\.values\(\)\)/);
+});
+
 test("behavior deduplication is bounded and events remain capped", () => {
   assert.match(intelligence, /duplicateWindow=.*title_opened.*trailer_started.*watch_started/);
   assert.match(intelligence, /s\.events\.length>300/);
