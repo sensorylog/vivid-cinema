@@ -145,6 +145,7 @@ test("provider discovery is region-aware and does not trust unverified text resu
   assert.equal(matchesStructuredSearchIntent(textResult, intent), false);
   assert.equal(isStructuredSearchIntent(parseIntent("movies on Netflix"), "movies on Netflix"), true);
   assert.equal(isStructuredSearchIntent(parseIntent("Inception on Netflix"), "Inception on Netflix"), false);
+  assert.equal(getSearchIntent("Apple TV Plus").type, null);
 
   const recommendations = readFileSync(new URL("../scripts/recommendations.js", import.meta.url), "utf8");
   assert.match(recommendations, /params\.with_watch_providers = String\(intent\.provider\.id\)/);
