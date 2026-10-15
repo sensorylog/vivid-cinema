@@ -25,6 +25,62 @@ const LANGUAGES = Object.freeze({
   telugu: "te", yoruba: "yo"
 });
 
+
+const COUNTRY_HINTS = Object.freeze([
+  { code: "NG", name: "Nigeria", aliases: ["nigerian", "nigeria", "nollywood"] },
+  { code: "GH", name: "Ghana", aliases: ["ghanaian", "ghana"] },
+  { code: "GB", name: "United Kingdom", aliases: ["british", "britain", "united kingdom", "uk"] },
+  { code: "US", name: "United States", aliases: ["american", "united states", "usa"] },
+  { code: "CA", name: "Canada", aliases: ["canadian", "canada"] },
+  { code: "AU", name: "Australia", aliases: ["australian", "australia"] },
+  { code: "ZA", name: "South Africa", aliases: ["south african", "south africa"] },
+  { code: "IN", name: "India", aliases: ["indian", "india"] },
+  { code: "KR", name: "South Korea", aliases: ["south korean", "south korea", "korean", "korea"] },
+  { code: "JP", name: "Japan", aliases: ["japanese", "japan"] },
+  { code: "FR", name: "France", aliases: ["french", "france"] },
+  { code: "ES", name: "Spain", aliases: ["spanish", "spain"] },
+  { code: "DE", name: "Germany", aliases: ["german", "germany"] },
+  { code: "IT", name: "Italy", aliases: ["italian", "italy"] },
+  { code: "BR", name: "Brazil", aliases: ["brazilian", "brazil"] },
+  { code: "MX", name: "Mexico", aliases: ["mexican", "mexico"] },
+  { code: "TR", name: "Turkey", aliases: ["turkish", "turkey"] },
+  { code: "TH", name: "Thailand", aliases: ["thai", "thailand"] },
+  { code: "PH", name: "Philippines", aliases: ["filipino", "philippines"] },
+  { code: "EG", name: "Egypt", aliases: ["egyptian", "egypt"] },
+  { code: "SE", name: "Sweden", aliases: ["swedish", "sweden"] },
+  { code: "DK", name: "Denmark", aliases: ["danish", "denmark"] },
+  { code: "NO", name: "Norway", aliases: ["norwegian", "norway"] },
+  { code: "RU", name: "Russia", aliases: ["russian", "russia"] },
+  { code: "IR", name: "Iran", aliases: ["iranian", "iran"] },
+  { code: "ID", name: "Indonesia", aliases: ["indonesian", "indonesia"] },
+  { code: "IE", name: "Ireland", aliases: ["irish", "ireland"] },
+  { code: "NZ", name: "New Zealand", aliases: ["new zealand", "new zealander"] },
+  { code: "CN", name: "China", aliases: ["chinese", "china"] },
+  { code: "HK", name: "Hong Kong", aliases: ["hong kong"] },
+  { code: "TW", name: "Taiwan", aliases: ["taiwanese", "taiwan"] },
+  { code: "AR", name: "Argentina", aliases: ["argentinian", "argentina"] },
+  { code: "CO", name: "Colombia", aliases: ["colombian", "colombia"] },
+  { code: "PL", name: "Poland", aliases: ["polish", "poland"] },
+  { code: "NL", name: "Netherlands", aliases: ["dutch", "netherlands"] },
+  { code: "PT", name: "Portugal", aliases: ["portuguese", "portugal"] },
+  { code: "FI", name: "Finland", aliases: ["finnish", "finland"] },
+  { code: "IS", name: "Iceland", aliases: ["icelandic", "iceland"] },
+  { code: "KE", name: "Kenya", aliases: ["kenyan", "kenya"] },
+  { code: "UG", name: "Uganda", aliases: ["ugandan", "uganda"] },
+  { code: "TZ", name: "Tanzania", aliases: ["tanzanian", "tanzania"] },
+  { code: "ET", name: "Ethiopia", aliases: ["ethiopian", "ethiopia"] },
+  { code: "MA", name: "Morocco", aliases: ["moroccan", "morocco"] },
+  { code: "SA", name: "Saudi Arabia", aliases: ["saudi arabia", "saudi"] },
+  { code: "IL", name: "Israel", aliases: ["israeli", "israel"] },
+  { code: "PK", name: "Pakistan", aliases: ["pakistani", "pakistan"] },
+  { code: "BD", name: "Bangladesh", aliases: ["bangladeshi", "bangladesh"] },
+  { code: "LK", name: "Sri Lanka", aliases: ["sri lankan", "sri lanka"] },
+  { code: "MY", name: "Malaysia", aliases: ["malaysian", "malaysia"] },
+  { code: "VN", name: "Vietnam", aliases: ["vietnamese", "vietnam"] },
+  { code: "SG", name: "Singapore", aliases: ["singaporean", "singapore"] }
+]);
+const LANGUAGE_COUNTRY_ADJECTIVES = new Set(["korean", "south korean", "japanese", "french", "spanish", "german", "italian", "turkish", "thai", "russian", "chinese", "portuguese", "dutch", "polish", "swedish", "danish", "norwegian"]);
+
 function includesPhrase(text, phrase) {
   return new RegExp("(^|[^a-z0-9])" + phrase.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "([^a-z0-9]|$)", "i").test(text);
 }
@@ -48,6 +104,32 @@ function findGenre(text) {
   return null;
 }
 
+
+function findCountry(text) {
+  const explicitlyLanguageBased = /\b(?:language|speaking|spoken)\b/i.test(text) ||
+    new RegExp("\\bin\\s+(?:" + [...LANGUAGE_COUNTRY_ADJECTIVES].join("|") + ")\\b", "i").test(text);
+  for (const country of COUNTRY_HINTS) {
+    if (country.aliases.some(alias => {
+      if (explicitlyLanguageBased && LANGUAGE_COUNTRY_ADJECTIVES.has(alias) &&
+          !includesPhrase(text, country.name.toLowerCase())) return false;
+      return includesPhrase(text, alias);
+    })) return country;
+  }
+  return null;
+}
+
+function parseDecade(text) {
+  const match = text.match(/\b(?:in|from|during|released in|made in)\s+(?:the\s+)?(19\d0s|20\d0s|['’]?\d0s)\b/i)
+    || text.match(/\b(19\d0s|20\d0s|['’]?\d0s)\s+(?:movies?|films?|series|shows?)\b/i)
+    || text.match(/\b(?:the\s+)?(19\d0s|20\d0s|['’]?\d0s)\b/i);
+  if (!match) return null;
+  const raw = match[1].replace(/[’']/g, "");
+  if (/^(?:19|20)\d0s$/.test(raw)) return Number(raw.slice(0, 4));
+  const short = Number(raw.slice(0, -1));
+  if (!Number.isFinite(short) || short < 0 || short > 90 || short % 10 !== 0) return null;
+  return short <= 20 ? 2000 + short : 1900 + short;
+}
+
 function parseRuntime(text) {
   const hours = text.match(/(?:under|below|less than|no more than|within|at most)\s+(\d+(?:\.\d+)?)\s*hours?/i);
   if (hours) return Math.max(1, Math.round(Number(hours[1]) * 60));
@@ -67,6 +149,9 @@ export function parseIntent(input = "") {
     genre: null,
     runtimeMax: parseRuntime(text),
     year: null,
+    decade: null,
+    country: null,
+    countryName: null,
     language: null,
     unsupported: [],
     constraints: []
@@ -107,11 +192,24 @@ export function parseIntent(input = "") {
     intent.constraints.push(runtimeConstraint);
   }
 
+  const decade = parseDecade(text);
+  if (decade != null) {
+    intent.decade = decade;
+    intent.constraints.push(String(decade) + "s");
+  }
+
   const yearMatch = text.match(/\b(?:in|from|released in|made in|during)\s+(19\d{2}|20\d{2})\b/i)
     || text.match(/\b(19\d{2}|20\d{2})\s+(?:movie|film|series|show)\b/i);
   if (yearMatch) {
     intent.year = Number(yearMatch[1]);
     intent.constraints.push(String(intent.year));
+  }
+
+  const country = findCountry(text);
+  if (country) {
+    intent.country = country.code;
+    intent.countryName = country.name;
+    intent.constraints.push("Origin: " + country.name);
   }
 
   for (const [name, code] of Object.entries(LANGUAGES)) {
@@ -141,7 +239,7 @@ export function parseIntent(input = "") {
 }
 
 export function intentHasFilters(intent = {}) {
-  return Boolean(intent.mediaType !== "all" || intent.genre || intent.runtimeMax || intent.year || intent.language);
+  return Boolean(intent.mediaType !== "all" || intent.genre || intent.runtimeMax || intent.year || intent.decade || intent.country || intent.language);
 }
 
 export function describeIntent(intent = {}) {
