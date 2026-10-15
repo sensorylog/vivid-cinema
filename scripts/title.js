@@ -108,12 +108,12 @@ function renderProviderGroups(details, countryCode) {
     .join("");
 
   if (!groups.length) {
-    return '<section class="vivid-title-section"><div class="vivid-section-heading"><div><span>WHERE TO WATCH</span><h2>Provider availability</h2></div><label class="vivid-country-picker"><span>Country</span><select id="provider-country">' + countryOptions + '</select></label></div><p class="vivid-muted">No streaming, rental or purchase listings are currently reported for this country.</p></section>';
+    return '<section class="vivid-title-section"><div class="vivid-section-heading"><div><span>WHERE TO WATCH</span><h2>Provider availability</h2></div><label class="vivid-country-picker"><span>Country</span><select id="provider-country">' + countryOptions + '</select></label></div><p class="vivid-muted">No streaming, rental or purchase listings are currently reported for this country.</p><p class="vivid-provider-note">Availability data source: <a href="https://www.justwatch.com/" target="_blank" rel="noopener noreferrer">JustWatch</a> via <a href="https://www.themoviedb.org/" target="_blank" rel="noopener noreferrer">TMDB</a>.</p></section>';
   }
 
   return '<section class="vivid-title-section"><div class="vivid-section-heading"><div><span>WHERE TO WATCH</span><h2>Available through providers</h2></div><label class="vivid-country-picker"><span>Country</span><select id="provider-country">' + countryOptions + '</select></label></div><div class="vivid-provider-grid">' +
     groups.map(([label, items]) => '<div class="vivid-provider-group"><h3>' + label + '</h3><div>' + items.slice(0, 6).map((provider) => '<a href="' + escapeHtml(country.link || "#") + '" target="_blank" rel="noopener noreferrer" class="vivid-provider"><img loading="lazy" src="' + getImageUrl(provider.logo_path, "w92") + '" alt=""><span>' + escapeHtml(provider.provider_name) + '</span></a>').join("") + '</div></div>').join("") +
-    '</div><p class="vivid-provider-note">Availability is supplied by TMDB and varies by country. Vivid Cinema does not host or provide titles.</p></section>';
+    '</div><p class="vivid-provider-note">Streaming availability data is provided by <a href="https://www.justwatch.com/" target="_blank" rel="noopener noreferrer">JustWatch</a> via <a href="https://www.themoviedb.org/" target="_blank" rel="noopener noreferrer">TMDB</a> and varies by country. Vivid Cinema does not host or provide titles.</p></section>';
 }
 
 function renderSeasons(details) {
