@@ -2,6 +2,7 @@ const STORAGE_KEY="vivid:provider-country";
 const SUPPORTED=Object.freeze(["US","GH","GB","CA","NG","ZA","AU"]);
 
 function browserCountry(){
+  if (typeof navigator === "undefined") return null;
   const languages=Array.isArray(navigator.languages)&&navigator.languages.length?navigator.languages:[navigator.language||""];
   for(const language of languages){
     const match=String(language).match(/[-_]([A-Z]{2})$/i);
