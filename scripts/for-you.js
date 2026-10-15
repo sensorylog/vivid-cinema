@@ -355,6 +355,21 @@ document.addEventListener("DOMContentLoaded", () => {
     $("because-section").hidden = true;
     void loadRecommendations();
   });
+  window.addEventListener("vivid:account-switched", () => {
+    // Remove the previous owner's visible recommendations immediately, before
+    // async auth/library reconciliation finishes.
+    requestId++;
+    currentItems = [];
+    becauseItems = [];
+    $("recommendation-grid").innerHTML = "";
+    $("because-grid").innerHTML = "";
+    $("continue-grid").innerHTML = "";
+    $("because-section").hidden = true;
+    $("continue-section").hidden = true;
+    $("recommendation-empty").hidden = true;
+    $("recommendation-error").hidden = true;
+    showStatus("Refreshing recommendations for this account…");
+  });
   window.addEventListener("vivid:recommendations-invalidated", () => {
     if (!suppressInvalidationRefresh && document.visibilityState === "visible") void loadRecommendations();
   });
