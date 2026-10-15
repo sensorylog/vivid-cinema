@@ -428,7 +428,7 @@ function scoreCandidate(item, taste, progress, feedback, recentGenres = new Set(
   return genreScore * 5.4 + mediaScore * 1.9 + languageScore * .55 + countryScore * .35 + decadeScore * .3 + quality * 1.4 + popularity * .8 + feedbackBoost + recentGenreBoost + freshness * .55 - seenPenalty + clickRecovery;
 }
 
-function rankForYou(candidates, taste, progress, feedback, excluded, limit, recentGenres = new Set(), recommendationMemory = new Map()) {
+function rankForYou(candidates, taste, progress, feedback, excluded, limit, recentGenres = new Set(), recommendationMemory = new Map(), enforceDiversity = true) {
   const ranked = uniqueByKey(candidates)
     .filter(item => !excluded.has(keyFor(item)))
     .map(item => ({ item, score: scoreCandidate(item, taste, progress, feedback, recentGenres, recommendationMemory) }))
@@ -445,8 +445,8 @@ function rankForYou(candidates, taste, progress, feedback, excluded, limit, rece
     const genres = (item.raw?.genre_ids || item.genre_ids || []).filter(id => taste.genres?.[id]);
     const dominantGenre = genres[0];
     const secondaryGenre = genres.find(id => id !== dominantGenre);
-    if (dominantGenre && (genreCounts.get(dominantGenre) || 0) >= 3) continue;
-    if (out.length >= 5 && typeCounts[type] >= Math.ceil(limit * .7)) continue;
+    if (enforceDiversity && dominantGenre && (genreCounts.get(dominantGenre) || 0) >= 3) continue;
+    if (enforceDiversity && out.length >= 5 && typeCounts[type] >= Math.ceil(limit * .7)) continue;
 
     // Penalize a title that only repeats an already dominant genre.
     // The score remains visible so strong matches can still win.
@@ -479,6 +479,16 @@ function rankForYou(candidates, taste, progress, feedback, excluded, limit, rece
     );
   }
   return out;
+}
+
+export function rankIntentCandidates(candidates, options = {}) {
+  const taste = options.taste || {};
+  const progress = options.progress || {};
+  const feedback = options.feedback || {};
+  const excluded = options.excluded instanceof Set ? options.excluded : new Set(options.excluded || []);
+  const limit = Math.max(1, Math.min(40, Number(options.limit) || 18));
+  const recentGenres = options.recentGenres instanceof Set ? options.recentGenres : new Set(options.recentGenres || []);
+  return rankForYou(candidates, taste, progress, feedback, excluded, limit, recentGenres, options.recommendationMemory || new Map(), false);
 }
 
 async function getRecommendationSeeds() {
@@ -615,6 +625,68 @@ export async function getPersonalRecommendations(limit = 12) {
   writeForYouCache({ version: 3, fingerprint, updatedAt: Date.now(), items });
 
   return items;
+}
+
+export async function getIntentRecommendations(intent = {}, limit = 18) {
+  const safeLimit = Math.max(1, Math.min(40, Number(limit) || 18));
+  const requestedType = ["movie", "tv"].includes(intent.mediaType) ? intent.mediaType : "all";
+  const mediaTypes = requestedType === "all" ? ["movie", "tv"] : [requestedType];
+  const calls = mediaTypes.map(type => {
+    const params = {
+      sort_by: "popularity.desc",
+      page: 1,
+      include_adult: false,
+      "vote_count.gte": type === "movie" ? 40 : 20
+    };
+    const genreId = intent.genreIds?.[type] ?? intent.genre?.[type === "movie" ? "movieId" : "tvId"];
+    if (genreId) params.with_genres = String(genreId);
+    if (intent.runtimeMax) params["with_runtime.lte"] = String(Math.max(1, Number(intent.runtimeMax)));
+    if (intent.year) {
+      if (type === "movie") params.primary_release_year = String(intent.year);
+      else params.first_air_date_year = String(intent.year);
+    }
+    if (intent.language) params.with_original_language = String(intent.language);
+    if (intent.anime) {
+      params.with_original_language = "ja";
+      if (type === "tv") params.with_origin_country = "JP";
+    }
+    return (type === "tv" ? tmdbApi.discoverTv(params) : tmdbApi.discoverMovies(params))
+      .then(response => normalizeResults(response?.results || [], type));
+  });
+
+  const responses = await Promise.allSettled(calls);
+  const candidates = responses.flatMap(result => result.status === "fulfilled" ? result.value : []);
+  if (!candidates.length) return [];
+
+  const library = getLocalLibrary();
+  const feedback = getFeedbackState();
+  const progress = readProgress();
+  const taste = await getTasteProfile();
+  const observed = [...(library.history || []), ...(library.favorites || []), ...(library.watchLater || [])];
+  const excluded = new Set([...observed.map(keyFor), ...getNotForMeKeys()]);
+  const recentGenres = new Set(
+    (library.history || [])
+      .slice()
+      .sort((a, b) => Number(b.lastWatchedAt || b.updatedAt || 0) - Number(a.lastWatchedAt || a.updatedAt || 0))
+      .slice(0, 5)
+      .flatMap(item => item.genre_ids || item.raw?.genre_ids || [])
+      .map(Number)
+  );
+  const ranked = rankIntentCandidates(candidates, {
+    taste,
+    progress,
+    feedback,
+    excluded,
+    limit: safeLimit,
+    recentGenres,
+    recommendationMemory: getRecommendationMemory()
+  });
+  return ranked.map(item => ({
+    ...item,
+    recommendationReason: intent.constraints?.length
+      ? "Matches your filters: " + intent.constraints.slice(0, 3).join(" · ")
+      : item.recommendationReason
+  }));
 }
 
 export async function getBecauseYouLiked(limit = 12) {
