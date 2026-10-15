@@ -14,6 +14,7 @@ import { enableCinemaPush, getServerReleaseAlerts, dismissServerReleaseAlert } f
 const $=id=>document.getElementById(id);
 let featured=[],activeIndex=0;
 let homeRecommendationRequestId=0;
+let tonightPickRequestId=0;
 let homeRefreshQueued=false;
 
 const rails={};
@@ -88,11 +89,12 @@ function wireCards(container){
 }
 
 async function renderTonightPick(expectedRequestId = homeRecommendationRequestId) {
+  const requestId = ++tonightPickRequestId;
   const section = $("tonight-section");
   if (!section) return;
   try {
     const items = await getTonightPick({ limit: 8 });
-    if (expectedRequestId !== homeRecommendationRequestId) return;
+    if (expectedRequestId !== homeRecommendationRequestId || requestId !== tonightPickRequestId) return;
     const item = items[0];
     if (!item) { section.hidden = true; return; }
     section.hidden = false;
@@ -104,7 +106,7 @@ async function renderTonightPick(expectedRequestId = homeRecommendationRequestId
     $("tonight-another").onclick = async () => { dismissTonightPick(item); await renderTonightPick(); };
     $("tonight-not-tonight").onclick = async () => { dismissTonightPick(item); await renderTonightPick(); };
   } catch {
-    if (expectedRequestId === homeRecommendationRequestId) section.hidden = true;
+    if (expectedRequestId === homeRecommendationRequestId && requestId === tonightPickRequestId) section.hidden = true;
   }
 }
 function renderRail(id,items=[],options={}){
@@ -303,6 +305,7 @@ async function renderRecommendations(){
 
 function clearPersonalizedHome(){
  homeRecommendationRequestId++;
+ tonightPickRequestId++;
  ["continue-section","recommended-section","because-section","tonight-section"].forEach(id=>{const section=$(id);if(section)section.hidden=true;});
  ["continue-rail","recommended-rail","because-rail"].forEach(id=>{const rail=$(id);if(rail)rail.innerHTML="";});
 }
