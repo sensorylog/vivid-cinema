@@ -268,11 +268,12 @@ service cloud.firestore {
       }
 
       match /events/{eventId} {
-        // Behavior events are private to their account owner and are immutable
-        // after creation; sync may read and create, but never edit or delete.
+        // Behavior events are append-only, but owners may delete their own
+        // events for privacy requests and bounded-retention cleanup.
         allow read: if isOwner(userId);
         allow create: if isOwner(userId) && validEventData();
-        allow update, delete: if false;
+        allow update: if false;
+        allow delete: if isOwner(userId);
       }
 
       match /taste/{tasteId} {

@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { mergeBehaviorEvents } from "../scripts/intelligence.js";
+import { mergeBehaviorEvents, removeLegacySearchQueryEvents } from "../scripts/intelligence.js";
+import { readFileSync } from "node:fs";
 
 const event = (sessionId, id, occurredAt, extra = {}) => ({
   sessionId, id, occurredAt, type: "title_opened", contentId: "movie:42", ...extra
@@ -38,4 +39,22 @@ test("ignores malformed events that cannot be assigned a stable identity", () =>
   assert.deepEqual(mergeBehaviorEvents([{ id: "missing-session" }, event("s", "valid", 1)], []), [
     event("s", "valid", 1)
   ]);
+});
+
+
+test("removes retired raw search-query events while preserving recommendation signals", () => {
+  const kept = removeLegacySearchQueryEvents([
+    event("s", "search", 10, { type: "search_query", metadata: { query: "private query" } }),
+    event("s", "click", 20, { type: "recommendation_clicked" }),
+    event("s", "watch", 30, { type: "watch_completed" })
+  ]);
+  assert.deepEqual(kept.map(item => item.id), ["click", "watch"]);
+});
+
+test("intelligence sync prunes legacy query telemetry and events outside the retained window", () => {
+  const source = readFileSync(new URL("../scripts/intelligence.js", import.meta.url), "utf8");
+  assert.match(source, /event\.type==="search_query"\|\|!event\.id\|\|!event\.sessionId\|\|!mergedEventIds\.has\(d\.id\)/);
+  assert.match(source, /deleteDoc\(eventDoc\.ref\)/);
+  assert.match(source, /mergedEventIds\.has\(eventDocId\)/);
+  assert.match(source, /ownerIsCurrent\(\)/);
 });

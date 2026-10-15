@@ -172,7 +172,7 @@ test("members cannot write moderator claims or read private account records for 
   await assertFails(getDoc(doc(member("other-user", "Other User"), "users", "owner-private")));
 });
 
-test("behavior events can be read only by their owner and remain immutable", async () => {
+test("behavior events are owner-private, append-only, and deletable only by their owner", async () => {
   const event = {
     id: "event-1", type: "title_opened", contentId: "movie:42", mediaType: "movie",
     occurredAt: Date.now(), sessionId: "session-1", metadata: { surface: "title" }
@@ -184,5 +184,8 @@ test("behavior events can be read only by their owner and remain immutable", asy
   await assertSucceeds(getDocs(collection(ownerDb, "users", "event-owner", "events")));
   await assertFails(getDoc(doc(member("event-intruder", "Intruder"), "users", "event-owner", "events", "session-1_event-1")));
   await assertFails(updateDoc(eventRef, { type: "changed" }));
-  await assertFails(deleteDoc(eventRef));
+  await assertSucceeds(deleteDoc(eventRef));
+  const secondEventRef = doc(ownerDb, "users", "event-owner", "events", "session-1_event-2");
+  await assertSucceeds(setDoc(secondEventRef, { ...event, id: "event-2" }));
+  await assertFails(deleteDoc(doc(member("event-intruder", "Intruder"), "users", "event-owner", "events", "session-1_event-2")));
 });
