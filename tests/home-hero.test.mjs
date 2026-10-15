@@ -125,3 +125,12 @@ test("mobile Home v2 has an immersive billboard and connected full-bleed shelves
   assert.match(read("../home.html"), /vivid-apple-tv-mobile\.css\?v=apple-tv-mobile-2/);
   assert.match(read("../service-worker.js"), /vivid-cinema-shell-v167/);
 });
+
+
+test("Vivid typography uses real bold weights consistently across the shared design system", () => {
+  const systemCss = stripComments(read("../styles/vivid-system.css"));
+  assert.match(systemCss, /font-weight:\\s*700\\s*!important/);
+  assert.match(systemCss, /font-weight:\\s*800\\s*!important/);
+  assert.match(systemCss, /font-synthesis:\\s*weight/);
+  assert.match(read("../service-worker.js"), /vivid-cinema-shell-v168/);
+});
