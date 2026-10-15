@@ -85,11 +85,12 @@ export async function rankSearchResults(items, query, options = {}) {
     .map((item, index) => {
       const title = String(item.title || "").toLowerCase();
       const raw = item.raw || {};
+      const originalTitle = String(raw.original_title || raw.original_name || "").toLowerCase();
       let score = Math.max(0, 60 - index);
-      if (title === exact) score += 120;
-      else if (title.startsWith(exact)) score += 70;
-      else if (title.includes(exact)) score += 35;
-      score += tokenOverlap(queryTokens, item.title) * 18;
+      if (title === exact || originalTitle === exact) score += 120;
+      else if (title.startsWith(exact) || originalTitle.startsWith(exact)) score += 70;
+      else if (title.includes(exact) || originalTitle.includes(exact)) score += 35;
+      score += Math.max(tokenOverlap(queryTokens, item.title), tokenOverlap(queryTokens, originalTitle)) * 18;
       if (intent.type && item.media_type === intent.type) score += 24;
       if (intent.genres.some(id => (raw.genre_ids || []).includes(id))) score += 28;
       const tasteGenres = Object.keys(taste.genres || {});
