@@ -39,7 +39,21 @@ async function user(){
   });
  }catch{return null}
 }
-function cloud(path,data){void user().then(u=>u&&fb().then(({db,doc,setDoc})=>setDoc(doc(db,"users",u.uid,...path),data,{merge:true}))).catch(()=>{})}
+function cloud(path,data){
+ const ownerAtWrite=localStorage.getItem(LOCAL_OWNER_KEY);
+ void user().then(u=>{
+  if(!u)return;
+  const activeOwner=localStorage.getItem(LOCAL_OWNER_KEY);
+  if(ownerAtWrite&&(ownerAtWrite!==String(u.uid)||activeOwner!==ownerAtWrite))return;
+  if(!ownerAtWrite&&activeOwner&&activeOwner!==String(u.uid))return;
+  return fb().then(({auth,db,doc,setDoc})=>{
+   if(!auth?.currentUser||String(auth.currentUser.uid)!==String(u.uid))return;
+   const latestOwner=localStorage.getItem(LOCAL_OWNER_KEY);
+   if(latestOwner&&latestOwner!==String(u.uid))return;
+   return setDoc(doc(db,"users",u.uid,...path),data,{merge:true})
+  })
+ }).catch(()=>{})
+}
 
 export function getFeedback(x){return read().feedback[typeof x==="string"?x:key(x)]?.kind||null}
 export function getFeedbackState(){return read().feedback}
@@ -100,10 +114,12 @@ async function seeds(){
  const m=new Map;all.forEach(x=>{const k=key(x.item),cur=m.get(k);if(k&&(!cur||x.w>cur.w))m.set(k,x)});return [...m.values()].sort((a,b)=>b.w-a.w).slice(0,12)
 }
 export async function rebuildTasteProfile(){
+ const ownerAtStart=localStorage.getItem(LOCAL_OWNER_KEY);
  const s=read(),l=getLocalLibrary(),t={genres:{},languages:{},countries:{},actors:{},directors:{},media:{movie:0,tv:0},decades:{}};
  const apply=(items,base,completion)=>{(items||[]).forEach(x=>{let w=base*decay(x.updatedAt||x.lastWatchedAt);if(completion){const c=Number(x.completion||0);w*=c>=80?1.8:c>=40?1.15:.55}add(t.media,x.media_type||"movie",w)})};
  apply(l.favorites,3.5,false);apply(l.watchLater,1.2,false);apply(l.history,2.2,true);Object.values(s.feedback).forEach(x=>{if(x.kind==="like")add(t.media,x.media_type||"movie",4.5*decay(x.updatedAt,75))});
  const ss=await seeds();const details=await Promise.allSettled(ss.slice(0,8).map(x=>x.item.media_type==="tv"?tmdbApi.tvDetails(x.item.id):tmdbApi.movieDetails(x.item.id)));
+ if(ownerAtStart&&localStorage.getItem(LOCAL_OWNER_KEY)!==ownerAtStart)return read().taste;
  details.forEach((r,i)=>{if(r.status!=="fulfilled")return;const d=r.value,w=ss[i].w*(1+Math.min(.75,eventSignal(s,key(ss[i].item))));(d.genres||[]).forEach(g=>add(t.genres,String(g.id),w));if(d.original_language)add(t.languages,d.original_language,w*.8);(d.production_countries||[]).forEach(c=>add(t.countries,c.iso_3166_1,w*.55));const y=Number(String(d.release_date||d.first_air_date||"").slice(0,4));if(y>=1900)add(t.decades,String(Math.floor(y/10)*10),w*.45);(d.credits?.cast||[]).slice(0,10).forEach(p=>add(t.actors,String(p.id),w*.42));(d.credits?.crew||[]).filter(p=>["Director","Creator"].includes(p.job)).slice(0,5).forEach(p=>add(t.directors,String(p.id),w*.5))});
  s.taste={genres:top(t.genres,20),languages:top(t.languages,10),countries:top(t.countries,12),actors:top(t.actors,20),directors:top(t.directors,12),media:t.media,decades:top(t.decades,8),updatedAt:Date.now()};write(s);try{localStorage.setItem("vivid:taste:v1",JSON.stringify(s.taste))}catch{};cloud(["taste","profile"],{version:1,...s.taste});return s.taste
 }
@@ -115,7 +131,7 @@ export function dismissColdStart(){const s=read();s.onboarding={...s.onboarding,
 export async function syncIntelligenceForUser(u){
  if(!u?.uid)return read();
  try{
-  const {auth,db,collection,getDocs}=await fb();
+  const {auth,db,collection,doc,getDocs,setDoc}=await fb();
   if(!auth?.currentUser||String(auth.currentUser.uid)!==String(u.uid))return read();
   ensureIntelligenceOwner(u.uid);
   const [f,t]=await Promise.all([
@@ -126,18 +142,30 @@ export async function syncIntelligenceForUser(u){
   if(!auth.currentUser||String(auth.currentUser.uid)!==String(u.uid)||
      localStorage.getItem(LOCAL_OWNER_KEY)!==String(u.uid))return read();
   const s=read();let feedbackChanged=false;
+  const remoteFeedback=new Map(f.docs.map(d=>[d.id,d.data()||{}]));
   f.docs.forEach(d=>{
    const x=d.data()||{};
+   const local= s.feedback[d.id];
    if(x.kind==="cleared"){
-    if(s.feedback[d.id]){delete s.feedback[d.id];feedbackChanged=true}
-   }else if(!s.feedback[d.id]||Number(x.updatedAt||0)>Number(s.feedback[d.id].updatedAt||0)){
+    if(local&&Number(x.updatedAt||0)>=Number(local.updatedAt||0)){delete s.feedback[d.id];feedbackChanged=true}
+   }else if(!local||Number(x.updatedAt||0)>Number(local.updatedAt||0)){
     s.feedback[d.id]=x;feedbackChanged=true
    }
   });
   if(feedbackChanged)s.taste.updatedAt=0;
+  const localFeedbackWrites=[];
+  Object.entries(s.feedback).forEach(([id,item])=>{
+   const remoteItem=remoteFeedback.get(id);
+   if(!remoteItem||remoteItem.kind==="cleared"||Number(item.updatedAt||0)>Number(remoteItem.updatedAt||0)){
+    localFeedbackWrites.push(setDoc(doc(db,"users",u.uid,"feedback",id),item,{merge:true}));
+   }
+  });
   const remote=t.docs.find(d=>d.id==="profile")?.data();
   if(remote&&Number(remote.updatedAt||0)>Number(s.taste.updatedAt||0))s.taste=remote;
-  write(s);invalidateRecommendationCaches();return s
+  write(s);invalidateRecommendationCaches();
+  const writes=await Promise.allSettled(localFeedbackWrites);
+  if(writes.some(result=>result.status==="rejected"))console.warn("Some local Vivid feedback could not sync yet.");
+  return s
  }catch(e){console.warn("Vivid intelligence sync unavailable:",e);return read()}
 }
 export function startIntelligenceSync(){
