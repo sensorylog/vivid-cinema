@@ -26,6 +26,12 @@ test("playback start, progress and completion still feed the canonical Memory st
   assert.match(watch, /upsertLibraryItem\("history"/);
 });
 
+test("dirty local taste is rebuilt instead of being overwritten by a newer remote timestamp", () => {
+  assert.match(intelligence, /t\.updatedAt&&!t\.dirty/);
+  assert.match(intelligence, /if\(feedbackChanged\|\|s\.taste\.dirty\)/);
+  assert.match(intelligence, /s\.taste=\{\.\.\.remote,dirty:false\}/);
+});
+
 test("meaningful viewing signals stale the taste profile and can seed it", () => {
   assert.match(intelligence, /TASTE_SIGNAL_TYPES=new Set/);
   assert.match(intelligence, /if\(TASTE_SIGNAL_TYPES\.has\(type\)\)s\.taste\.updatedAt=0/);
