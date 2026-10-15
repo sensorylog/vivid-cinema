@@ -75,7 +75,10 @@ test("plot matching has a constrained catalogue-overview fallback when keyword m
 
 test("remembered-plot search does not hide watched or disliked titles", () => {
   const source = readFileSync(new URL("../scripts/recommendations.js", import.meta.url), "utf8");
-  assert.match(source, /A remembered-plot query is direct search/);
-  assert.match(source, /excluded: new Set\(\)/);
-  assert.doesNotMatch(source, /const excluded = new Set\(\[\.\.\.observed\.map\(keyFor\), \.\.\.getNotForMeKeys\(\)\]\)/);
+  const start = source.indexOf("export async function getPlotMatchRecommendations");
+  const end = source.indexOf("export async function getIntentRecommendations", start);
+  const plotSource = source.slice(start, end);
+  assert.match(plotSource, /A remembered-plot query is direct search/);
+  assert.match(plotSource, /excluded: new Set\(\)/);
+  assert.doesNotMatch(plotSource, /const excluded = new Set\(\[\.\.\.observed\.map\(keyFor\), \.\.\.getNotForMeKeys\(\)\]\)/);
 });
