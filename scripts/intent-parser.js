@@ -117,7 +117,7 @@ function findGenre(text) {
 
 
 function findCountry(text) {
-  const explicitlyLanguageBased = /\b(?:language|speaking|spoken)\b/i.test(text);
+  const explicitlyLanguageBased = /\b(?:language|speaking|spoken)\b/i.test(text) || new RegExp("\\bin\\s+(?:" + [...LANGUAGE_COUNTRY_ADJECTIVES].map(value => value.replace(/[+]/g, "\\+")).join("|") + ")\\b", "i").test(text);
   for (const country of COUNTRY_HINTS) {
     if (country.aliases.some(alias => {
       if (explicitlyLanguageBased && LANGUAGE_COUNTRY_ADJECTIVES.has(alias) &&
@@ -135,6 +135,7 @@ function findProviderRegion(text) {
   }
   for (const country of COUNTRY_HINTS) {
     for (const alias of country.aliases) {
+      if (LANGUAGE_COUNTRY_ADJECTIVES.has(alias) && !includesPhrase(text, country.name.toLowerCase())) continue;
       const escaped = alias.replace(/[+]/g, "\\+");
       const regionPhrase = new RegExp("\\b(?:available|streaming|watchable)\\s+in\\s+(?:the\\s+)?" + escaped + "\\b|\\bin\\s+(?:the\\s+)?" + escaped + "\\b", "i");
       if (regionPhrase.test(text)) return country;
