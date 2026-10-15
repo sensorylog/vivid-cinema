@@ -42,32 +42,37 @@ function normalizeQuery(value) {
   return String(value || "").trim().replace(/\s+/g, " ").slice(0, 120);
 }
 
-function readRecent() {
-  if (!recentSearchOwnerReady) return [];
+function readRecent(owner = recentSearchOwner) {
+  if (owner == null) return [];
   try {
-    const value = JSON.parse(localStorage.getItem(recentSearchStorageKey(recentSearchOwner)) || "[]");
+    const value = JSON.parse(localStorage.getItem(recentSearchStorageKey(owner)) || "[]");
     return Array.isArray(value) ? value.filter(Boolean).slice(0, MAX_RECENT) : [];
   } catch {
     return [];
   }
 }
 
-function writeRecent(items) {
-  if (!recentSearchOwnerReady) return;
+function writeRecent(items, owner = recentSearchOwner) {
+  if (owner == null) return;
   try {
-    localStorage.setItem(recentSearchStorageKey(recentSearchOwner), JSON.stringify(items.slice(0, MAX_RECENT)));
+    localStorage.setItem(recentSearchStorageKey(owner), JSON.stringify(items.slice(0, MAX_RECENT)));
   } catch {}
 }
 
-export function getRecentSearches() {
-  return readRecent();
+export function getRecentSearchOwner() {
+  return recentSearchOwnerReady ? recentSearchOwner : null;
 }
 
-export function rememberSearch(query) {
+export function getRecentSearches() {
+  return recentSearchOwnerReady ? readRecent(recentSearchOwner) : [];
+}
+
+export function rememberSearch(query, owner = undefined) {
   const q = normalizeQuery(query);
-  if (!recentSearchOwnerReady || q.length < 2) return;
-  const next = [q, ...readRecent().filter(item => item.toLowerCase() !== q.toLowerCase())];
-  writeRecent(next);
+  const targetOwner = owner === undefined ? getRecentSearchOwner() : owner;
+  if (targetOwner == null || q.length < 2) return;
+  const next = [q, ...readRecent(targetOwner).filter(item => item.toLowerCase() !== q.toLowerCase())];
+  writeRecent(next, targetOwner);
 }
 
 export function clearRecentSearches() {
