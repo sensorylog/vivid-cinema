@@ -2,6 +2,7 @@ import { auth, db } from "./firebase.js";
 import { onAuthStateChanged, sendPasswordResetEmail, signOut, updateProfile } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
 import { doc, getDoc, serverTimestamp, setDoc } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
 import { getLocalLibrary, syncLibraryForUser } from "./library.js";
+import { getSupportedProviderCountryOptions, loadSupportedProviderCountries } from "./provider-region.js";
 
 const $ = (id) => document.getElementById(id);
 const statusEl = $("account-status");
@@ -32,25 +33,7 @@ const counts = {
   history: $("history-count")
 };
 
-const PROVIDER_COUNTRIES = [
-  ["US", "United States"], ["GH", "Ghana"], ["GB", "United Kingdom"],
-  ["CA", "Canada"], ["NG", "Nigeria"], ["ZA", "South Africa"],
-  ["AU", "Australia"], ["DE", "Germany"], ["FR", "France"],
-  ["ES", "Spain"], ["IT", "Italy"], ["NL", "Netherlands"],
-  ["BE", "Belgium"], ["CH", "Switzerland"], ["AT", "Austria"],
-  ["IE", "Ireland"], ["PT", "Portugal"], ["SE", "Sweden"],
-  ["NO", "Norway"], ["DK", "Denmark"], ["FI", "Finland"],
-  ["PL", "Poland"], ["GR", "Greece"], ["TR", "Türkiye"],
-  ["IN", "India"], ["PK", "Pakistan"], ["BD", "Bangladesh"],
-  ["PH", "Philippines"], ["ID", "Indonesia"], ["MY", "Malaysia"],
-  ["SG", "Singapore"], ["TH", "Thailand"], ["JP", "Japan"],
-  ["KR", "South Korea"], ["CN", "China"], ["BR", "Brazil"],
-  ["MX", "Mexico"], ["AR", "Argentina"], ["CL", "Chile"],
-  ["CO", "Colombia"], ["EG", "Egypt"], ["KE", "Kenya"],
-  ["UG", "Uganda"], ["TZ", "Tanzania"], ["RW", "Rwanda"],
-  ["AE", "United Arab Emirates"], ["SA", "Saudi Arabia"],
-  ["IL", "Israel"], ["NZ", "New Zealand"]
-];
+
 
 let initialValues = null;
 let isSaving = false;
@@ -133,7 +116,7 @@ function renderAvatar(user, displayName) {
 
 function fillCountryOptions(selected) {
   if (!countryEl) return;
-  const known = new Map(PROVIDER_COUNTRIES);
+  const known = new Map(getSupportedProviderCountryOptions());
   if (selected && !known.has(selected)) known.set(selected, selected + " (saved region)");
   countryEl.replaceChildren();
   for (const [code, label] of known) {
@@ -143,6 +126,13 @@ function fillCountryOptions(selected) {
     countryEl.append(option);
   }
   countryEl.value = selected && known.has(selected) ? selected : "US";
+}
+
+function refreshCountryOptionsWhenAvailable(user, selected) {
+  void loadSupportedProviderCountries().then(() => {
+    if (currentUser?.uid !== user.uid) return;
+    fillCountryOptions(countryEl?.value || selected);
+  });
 }
 
 function loadLocalPreferences() {
@@ -194,6 +184,7 @@ async function loadUser(user) {
   if (createdEl) createdEl.textContent = formatCreatedDate(user, profile);
   renderAvatar(user, displayName);
   fillCountryOptions(preferences.providerCountry);
+  refreshCountryOptionsWhenAvailable(user, preferences.providerCountry);
   if (autoplayEl) autoplayEl.checked = preferences.autoplayTrailers !== false;
   if (reducedMotionEl) reducedMotionEl.checked = preferences.reducedMotion === true;
   document.documentElement.dataset.vividReducedMotion = preferences.reducedMotion ? "true" : "false";
@@ -303,6 +294,7 @@ onAuthStateChanged(auth, async (user) => {
     currentUser = user;
     const local = loadLocalPreferences();
     fillCountryOptions(local.providerCountry);
+    refreshCountryOptionsWhenAvailable(user, local.providerCountry);
     if (nameEl) nameEl.value = user.displayName || user.email?.split("@")[0] || "Vivid member";
     if (profileTitleEl) profileTitleEl.textContent = nameEl?.value || "Vivid member";
     if (profileSummaryEl) profileSummaryEl.textContent = user.email || "Your personal cinema profile";
