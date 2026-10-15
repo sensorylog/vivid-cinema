@@ -238,8 +238,16 @@ export function parseIntent(input = "") {
   if (provider) {
     intent.provider = { id: provider.id, name: provider.name };
     intent.providerOnly = isProviderCollectionQuery(text, provider);
-    intent.constraints.push("Available on " + provider.name);
-    intent.unsupported.push("Streaming availability is region-specific and depends on TMDB provider data.");
+    const providerFilterable = Boolean(
+      intent.providerOnly || intent.mediaType !== "all" || intent.genre || intent.runtimeMax ||
+      intent.year || intent.decade || intent.country || intent.language || intent.anime
+    );
+    if (providerFilterable) {
+      intent.constraints.push("Available on " + provider.name);
+      intent.unsupported.push("Streaming availability is region-specific and depends on TMDB provider data.");
+    } else {
+      intent.unsupported.push("This looks like a specific-title search; provider availability is not verified by text search.");
+    }
   }
 
   for (const [name, code] of Object.entries(LANGUAGES)) {
