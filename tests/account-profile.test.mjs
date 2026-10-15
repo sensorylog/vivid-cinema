@@ -51,7 +51,7 @@ test("cloud library sync reads authoritative server data rather than cache-only 
 test("library sync propagates Firestore failures so the account UI cannot report false success", () => {
   const library = readFileSync(new URL("../scripts/library.js", import.meta.url), "utf8");
   const syncBody = library.slice(
-    library.indexOf("export async function syncLibraryForUser"),
+    library.indexOf("async function performLibrarySyncForUser"),
     library.indexOf("export async function syncLocalItem")
   );
   assert.doesNotMatch(syncBody, /catch\s*\([^)]*\)\s*\{[\s\S]*?return local;/);
@@ -64,4 +64,14 @@ test("library sync reconciles deletions and avoids rewriting every unchanged rem
   assert.match(library, /deleteDoc\(doc\(db,\s*"users",\s*user\.uid,\s*tombstone\.collection,\s*contentId\)\)/);
   assert.match(library, /if\(!remote \|\| Number\(item\.updatedAt\|\|0\)>Number\(remote\.updatedAt\|\|0\)\)/);
   assert.match(library, /await mapLimit\(writes,8/);
+});
+
+test("library mutations retry through one deduplicated sync path and preserve per-account local snapshots", () => {
+  const library = readFileSync(new URL("../scripts/library.js", import.meta.url), "utf8");
+  assert.match(library, /const syncInFlight = new Map\(\)|const syncInFlight=new Map\(\)/);
+  assert.match(library, /await syncLibraryForUser\(auth\.currentUser\)/);
+  assert.match(library, /window\.addEventListener\("online"/);
+  assert.match(library, /accountStorageKey\(STORAGE_KEY,owner\)/);
+  assert.match(library, /accountStorageKey\(STORAGE_KEY,uid\)/);
+  assert.match(library, /void startLibrarySync\(\)/);
 });
