@@ -8,6 +8,9 @@ import {
   isStructuredSearchIntent,
   matchesStructuredSearchIntent,
   chooseSimilarityTarget,
+  parsePersonCreditIntent,
+  choosePersonSearchResult,
+  buildPersonCreditResults,
   getSearchIntent,
   recentSearchStorageKey,
   getRecentSearchOwner
@@ -184,4 +187,65 @@ test("recent search storage is isolated by account and waits for auth ownership"
   assert.match(page, /if \(changedOwner\)/);
   assert.match(home, /if \(changedOwner\)/);
   assert.doesNotMatch(source, /localStorage\.getItem\(RECENT_KEY\)/);
+});
+
+
+test("person-credit intent recognizes explicit director, cast, writer and creator searches", () => {
+  assert.deepEqual(parsePersonCreditIntent("movies directed by Christopher Nolan"), {
+    personName: "Christopher Nolan",
+    role: "director",
+    mediaType: "movie",
+    query: "movies directed by Christopher Nolan"
+  });
+  assert.equal(parsePersonCreditIntent("TV shows starring Pedro Pascal").role, "actor");
+  assert.equal(parsePersonCreditIntent("written by Greta Gerwig").role, "writer");
+  assert.equal(parsePersonCreditIntent("series created by Vince Gilligan").role, "creator");
+  assert.equal(parsePersonCreditIntent("movies by Christopher Nolan").role, "director");
+  assert.equal(parsePersonCreditIntent("Christopher Nolan movies"), null);
+});
+
+test("person search resolution prefers an exact name and the requested professional department", () => {
+  const people = [
+    { id: 11, media_type: "person", name: "Christopher Nolan", known_for_department: "Directing", popularity: 80 },
+    { id: 12, media_type: "person", name: "Christopher Nolan Jr.", known_for_department: "Acting", popularity: 99 },
+    { id: 13, media_type: "movie", title: "Nolan" }
+  ];
+  assert.equal(choosePersonSearchResult(people, "Christopher Nolan", "director").id, 11);
+  assert.equal(choosePersonSearchResult(people, "not a real person", "director"), null);
+});
+
+test("person credits filter by job, media type and page without mixing cast with crew", () => {
+  const details = {
+    combined_credits: {
+      cast: [
+        { id: 1, media_type: "movie", title: "Actor Movie", release_date: "2022-01-01", popularity: 10 },
+        { id: 2, media_type: "tv", name: "Actor Series", first_air_date: "2021-01-01", popularity: 20 }
+      ],
+      crew: [
+        { id: 3, media_type: "movie", title: "Directed Film", release_date: "2020-01-01", job: "Director", popularity: 30 },
+        { id: 4, media_type: "movie", title: "Written Film", release_date: "2019-01-01", job: "Writer", popularity: 25 },
+        { id: 5, media_type: "tv", name: "Directed Series", first_air_date: "2018-01-01", job: "Director", popularity: 15 }
+      ]
+    }
+  };
+  const directors = buildPersonCreditResults(details, "director", "movie", 1, 12);
+  assert.deepEqual(directors.map(item => item.title), ["Directed Film"]);
+
+  const actorPage1 = buildPersonCreditResults(details, "actor", "all", 1, 1);
+  const actorPage2 = buildPersonCreditResults(details, "actor", "all", 2, 1);
+  assert.equal(actorPage1.length, 1);
+  assert.equal(actorPage2.length, 1);
+  assert.notEqual(actorPage1[0].id, actorPage2[0].id);
+  assert.ok([actorPage1[0].media_type, actorPage2[0].media_type].includes("movie"));
+  assert.ok([actorPage1[0].media_type, actorPage2[0].media_type].includes("tv"));
+});
+
+test("person-credit search uses TMDB people search and combined credits, and labels results", () => {
+  const searchSource = readFileSync(new URL("../scripts/search.js", import.meta.url), "utf8");
+  const pageSource = readFileSync(new URL("../scripts/search-page.js", import.meta.url), "utf8");
+  assert.match(searchSource, /tmdbApi\.searchMulti\(personIntent\.personName, 1\)/);
+  assert.match(searchSource, /tmdbApi\.personDetails\(person\.id\)/);
+  assert.match(searchSource, /buildPersonCreditResults\(/);
+  assert.match(pageSource, /personRoleLabels/);
+  assert.match(pageSource, /currentPersonTarget = result\.intent\?\.personTarget/);
 });
