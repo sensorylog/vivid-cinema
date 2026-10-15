@@ -39,5 +39,8 @@ test("For You wires deterministic intent parsing and canonical recommendation/fe
   assert.match(script, /getContinueWatching/);
   assert.match(script, /setFeedback/);
   assert.match(script, /data-remove-filter/);
+  assert.match(script, /expectedRequestId !== requestId/);
+  assert.match(script, /TV episodes ≤ /);
+  assert.match(script, /parsed.anime && parsed.mediaType !== "movie"/);
   assert.match(script, /recordBehavior\("recommendation_clicked"/);
 });
