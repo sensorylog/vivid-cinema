@@ -627,6 +627,16 @@ export async function getPersonalRecommendations(limit = 12) {
   return items;
 }
 
+export function collectIntentCandidates(responses = []) {
+  const successful = responses.filter(result => result?.status === "fulfilled");
+  if (!successful.length) {
+    const failure = responses.find(result => result?.status === "rejected");
+    if (failure) throw failure.reason;
+    return [];
+  }
+  return successful.flatMap(result => Array.isArray(result.value) ? result.value : []);
+}
+
 export async function getIntentRecommendations(intent = {}, limit = 18) {
   const safeLimit = Math.max(1, Math.min(40, Number(limit) || 18));
   const requestedType = ["movie", "tv"].includes(intent.mediaType) ? intent.mediaType : "all";
@@ -655,7 +665,9 @@ export async function getIntentRecommendations(intent = {}, limit = 18) {
   });
 
   const responses = await Promise.allSettled(calls);
-  const candidates = responses.flatMap(result => result.status === "fulfilled" ? result.value : []);
+  // Distinguish a genuine zero-match result from total catalogue/network failure.
+  // Partial success is still useful; only reject when every request failed.
+  const candidates = collectIntentCandidates(responses);
   if (!candidates.length) return [];
 
   const library = getLocalLibrary();
