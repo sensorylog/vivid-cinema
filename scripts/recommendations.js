@@ -617,6 +617,69 @@ export async function getPersonalRecommendations(limit = 12) {
   return items;
 }
 
+export async function getIntentRecommendations(intent = {}, limit = 18) {
+  const safeLimit = Math.max(1, Math.min(40, Number(limit) || 18));
+  const requestedType = ["movie", "tv"].includes(intent.mediaType) ? intent.mediaType : "all";
+  const mediaTypes = requestedType === "all" ? ["movie", "tv"] : [requestedType];
+  const calls = mediaTypes.map(type => {
+    const params = {
+      sort_by: "popularity.desc",
+      page: 1,
+      include_adult: false,
+      "vote_count.gte": type === "movie" ? 40 : 20
+    };
+    const genreId = intent.genreIds?.[type] ?? intent.genre?.[type === "movie" ? "movieId" : "tvId"];
+    if (genreId) params.with_genres = String(genreId);
+    if (intent.runtimeMax) params["with_runtime.lte"] = String(Math.max(1, Number(intent.runtimeMax)));
+    if (intent.year) {
+      if (type === "movie") params.primary_release_year = String(intent.year);
+      else params.first_air_date_year = String(intent.year);
+    }
+    if (intent.language) params.with_original_language = String(intent.language);
+    if (intent.anime) {
+      params.with_original_language = "ja";
+      if (type === "tv") params.with_origin_country = "JP";
+    }
+    return (type === "tv" ? tmdbApi.discoverTv(params) : tmdbApi.discoverMovies(params))
+      .then(response => normalizeResults(response?.results || [], type));
+  });
+
+  const responses = await Promise.allSettled(calls);
+  const candidates = responses.flatMap(result => result.status === "fulfilled" ? result.value : []);
+  if (!candidates.length) return [];
+
+  const library = getLocalLibrary();
+  const feedback = getFeedbackState();
+  const progress = readProgress();
+  const taste = await getTasteProfile();
+  const observed = [...(library.history || []), ...(library.favorites || []), ...(library.watchLater || [])];
+  const excluded = new Set([...observed.map(keyFor), ...getNotForMeKeys()]);
+  const recentGenres = new Set(
+    (library.history || [])
+      .slice()
+      .sort((a, b) => Number(b.lastWatchedAt || b.updatedAt || 0) - Number(a.lastWatchedAt || a.updatedAt || 0))
+      .slice(0, 5)
+      .flatMap(item => item.genre_ids || item.raw?.genre_ids || [])
+      .map(Number)
+  );
+  const ranked = rankForYou(
+    candidates,
+    taste,
+    progress,
+    feedback,
+    excluded,
+    safeLimit,
+    recentGenres,
+    getRecommendationMemory()
+  );
+  return ranked.map(item => ({
+    ...item,
+    recommendationReason: intent.constraints?.length
+      ? "Matches your filters: " + intent.constraints.slice(0, 3).join(" · ")
+      : item.recommendationReason
+  }));
+}
+
 export async function getBecauseYouLiked(limit = 12) {
   const feedback = getFeedbackState();
   const liked = Object.values(feedback)
