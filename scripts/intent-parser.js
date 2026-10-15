@@ -80,6 +80,8 @@ const COUNTRY_HINTS = Object.freeze([
   { code: "SG", name: "Singapore", aliases: ["singaporean", "singapore"] }
 ]);
 
+const LANGUAGE_COUNTRY_ADJECTIVES = new Set(["korean", "south korean", "japanese", "french", "spanish", "german", "italian", "turkish", "thai", "russian", "chinese", "portuguese", "dutch", "polish", "swedish", "danish", "norwegian"]);
+
 const STREAMING_PROVIDERS = Object.freeze([
   { id: 8, name: "Netflix", aliases: ["netflix"] },
   { id: 9, name: "Prime Video", aliases: ["amazon prime video", "prime video"] },
@@ -115,8 +117,13 @@ function findGenre(text) {
 
 
 function findCountry(text) {
+  const explicitlyLanguageBased = /\b(?:language|speaking|spoken)\b/i.test(text);
   for (const country of COUNTRY_HINTS) {
-    if (country.aliases.some(alias => includesPhrase(text, alias))) return country;
+    if (country.aliases.some(alias => {
+      if (explicitlyLanguageBased && LANGUAGE_COUNTRY_ADJECTIVES.has(alias) &&
+          !includesPhrase(text, country.name.toLowerCase())) return false;
+      return includesPhrase(text, alias);
+    })) return country;
   }
   return null;
 }
