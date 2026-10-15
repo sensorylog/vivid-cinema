@@ -297,6 +297,6 @@ test("provider search uses regional streaming filters and never mixes unverified
   assert.match(source, /providerIntent \? \[\] : textItems\.filter/);
   assert.match(source, /TMDB could not verify/);
   const page = readFileSync(new URL("../scripts/search-page.js", import.meta.url), "utf8");
-  assert.match(page, /AVAILABLE ON/);
+  assert.match(page, /STREAMING ON/);
   assert.match(page, /providerTarget\.region/);
 });
