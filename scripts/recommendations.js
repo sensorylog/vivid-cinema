@@ -422,6 +422,12 @@ function scoreCandidate(item, taste, progress, feedback, recentGenres = new Set(
   const quality = Math.min(1, Math.max(0, Number(item.vote_average || 0) / 10));
   const popularity = Math.min(1, Math.log10(1 + Math.max(0, Number(item.popularity || 0))) / 4);
   const feedbackBoost = feedback[keyFor(item)]?.kind === "like" ? 6 : 0;
+  // Negative feedback should influence similar titles, not only exclude the exact title.
+  // Genre metadata is captured with new feedback; missing legacy metadata is ignored safely.
+  const notForMeGenres = Object.values(feedback)
+    .filter(entry => entry?.kind === "not_for_me" && Array.isArray(entry.genre_ids))
+    .flatMap(entry => entry.genre_ids.map(Number).filter(Number.isFinite));
+  const dislikePenalty = Math.min(4, genreIds.filter(id => notForMeGenres.includes(Number(id))).length * 1.25);
   const memory = recommendationMemory.get(keyFor(item));
   const seenPenalty = memory ? Math.min(1.8, memory.impressions * .28) : 0;
   const clickRecovery = memory ? Math.min(1.2, memory.clicks * .6) : 0;
@@ -449,7 +455,7 @@ function scoreCandidate(item, taste, progress, feedback, recentGenres = new Set(
       ? progressPercent >= 92 ? 5 : progressPercent >= 50 ? 2.5 : 1.2
       : 0;
 
-  return genreScore * 5.4 + mediaScore * 1.9 + languageScore * .55 + countryScore * .35 + decadeScore * .3 + quality * 1.4 + popularity * .8 + feedbackBoost + recentGenreBoost + freshness * .55 - seenPenalty + clickRecovery - progressPenalty;
+  return genreScore * 5.4 + mediaScore * 1.9 + languageScore * .55 + countryScore * .35 + decadeScore * .3 + quality * 1.4 + popularity * .8 + feedbackBoost + recentGenreBoost + freshness * .55 - seenPenalty + clickRecovery - progressPenalty - dislikePenalty;
 }
 
 function rankForYou(candidates, taste, progress, feedback, excluded, limit, recentGenres = new Set(), recommendationMemory = new Map(), enforceDiversity = true) {
