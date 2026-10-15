@@ -178,13 +178,16 @@ export async function syncIntelligenceForUser(u){
    const x=d.data()||{};
    const localItem=s.feedback[d.id];
    const localClear=s.feedbackCleared[d.id];
+   const remoteUpdatedAt=Number(x.updatedAt||0);
    const localVersion=Math.max(Number(localItem?.updatedAt||0),Number(localClear?.updatedAt||0));
-   if(Number(x.updatedAt||0)<localVersion)return;
+   if(remoteUpdatedAt<localVersion)return;
    if(x.kind==="cleared"){
+    if(!localItem&&localClear&&Number(localClear.updatedAt||0)===remoteUpdatedAt)return;
     delete s.feedback[d.id];
-    s.feedbackCleared[d.id]={updatedAt:Number(x.updatedAt)||0};
+    s.feedbackCleared[d.id]={updatedAt:remoteUpdatedAt};
     feedbackChanged=true;
    }else{
+    if(localItem&&localItem.kind===x.kind&&Number(localItem.updatedAt||0)===remoteUpdatedAt&&!localClear)return;
     s.feedback[d.id]=x;
     delete s.feedbackCleared[d.id];
     feedbackChanged=true;
