@@ -61,6 +61,9 @@ export function scorePlotCandidate(query = "", candidate = {}) {
       score += titleSearchable.includes(" " + word + " ") ? 2.5 : 1;
     }
   }
+  // One generic overlap (for example, just “man” or “day”) is not enough
+  // to claim a plot match for a detailed description.
+  if (matches < (queryWords.length >= 4 ? 2 : 1)) return 0;
   const coverage = matches / queryWords.length;
-  return matches ? Number((score + coverage * 5).toFixed(3)) : 0;
+  return Number((score + coverage * 5).toFixed(3));
 }
