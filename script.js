@@ -13,6 +13,9 @@ import { enableCinemaPush, getServerReleaseAlerts, dismissServerReleaseAlert } f
 
 const $=id=>document.getElementById(id);
 let featured=[],activeIndex=0;
+let homeRecommendationRequestId=0;
+let tonightPickRequestId=0;
+let homeRefreshQueued=false;
 
 const rails={};
 let serverReleaseAlerts=[];
@@ -85,11 +88,13 @@ function wireCards(container){
  });
 }
 
-async function renderTonightPick() {
+async function renderTonightPick(expectedRequestId = homeRecommendationRequestId) {
+  const requestId = ++tonightPickRequestId;
   const section = $("tonight-section");
   if (!section) return;
   try {
     const items = await getTonightPick({ limit: 8 });
+    if (expectedRequestId !== homeRecommendationRequestId || requestId !== tonightPickRequestId) return;
     const item = items[0];
     if (!item) { section.hidden = true; return; }
     section.hidden = false;
@@ -101,7 +106,7 @@ async function renderTonightPick() {
     $("tonight-another").onclick = async () => { dismissTonightPick(item); await renderTonightPick(); };
     $("tonight-not-tonight").onclick = async () => { dismissTonightPick(item); await renderTonightPick(); };
   } catch {
-    section.hidden = true;
+    if (expectedRequestId === homeRecommendationRequestId && requestId === tonightPickRequestId) section.hidden = true;
   }
 }
 function renderRail(id,items=[],options={}){
@@ -249,33 +254,71 @@ async function loadMoreSection(key,button){
 }
 
 function renderContinueWatching(){
+ const section=$("continue-section"),rail=$("continue-rail");
  const progressItems=getContinueWatching(10);
- if(!progressItems.length)return;
+ if(!progressItems.length){
+  if(section)section.hidden=true;
+  if(rail)rail.innerHTML="";
+  return;
+ }
  const library=getLocalLibrary();
  const all=[...(library.history||[]),...(library.favorites||[]),...(library.watchLater||[])];
  const byKey=new Map(all.map(item=>[item.media_type+":"+item.id,item]));
  const resolved=progressItems.map(item=>byKey.get(item.content_id)).filter(Boolean);
- if(!resolved.length)return;
+ if(!resolved.length){
+  if(section)section.hidden=true;
+  if(rail)rail.innerHTML="";
+  return;
+ }
  const progressMap=Object.fromEntries(progressItems.map(item=>[item.content_id,item]));
- $("continue-section").hidden=false;
+ section.hidden=false;
  renderRail("continue-rail",resolved,{progressMap,continueWatching:true});
 }
 
 async function renderRecommendations(){
+ const requestId=++homeRecommendationRequestId;
  try{
    const [items,because]=await Promise.all([getPersonalRecommendations(12),getBecauseYouLiked(12)]);
-     await renderTonightPick();
+   if(requestId!==homeRecommendationRequestId)return;
+   await renderTonightPick(requestId);
+   if(requestId!==homeRecommendationRequestId)return;
    if(items.length){
      $("recommended-section").hidden=false;
      renderRail("recommended-rail",items);
+   }else{
+     $("recommended-section").hidden=true;
+     $("recommended-rail").innerHTML="";
    }
    if(because.length){
      const seed=because[0]?.recommendationReason?.replace(/^Because you liked /,"");
      if(seed) $("because-title").textContent="Because you liked "+seed;
      $("because-section").hidden=false;
      renderRail("because-rail",because);
+   }else{
+     $("because-section").hidden=true;
+     $("because-rail").innerHTML="";
    }
- }catch(error){console.warn("Recommendations unavailable:",error)}
+ }catch(error){
+   if(requestId===homeRecommendationRequestId)console.warn("Recommendations unavailable:",error);
+ }
+}
+
+function clearPersonalizedHome(){
+ homeRecommendationRequestId++;
+ tonightPickRequestId++;
+ ["continue-section","recommended-section","because-section","tonight-section"].forEach(id=>{const section=$(id);if(section)section.hidden=true;});
+ ["continue-rail","recommended-rail","because-rail"].forEach(id=>{const rail=$(id);if(rail)rail.innerHTML="";});
+}
+
+function queuePersonalizedHomeRefresh({clear=false}={}){
+ if(clear)clearPersonalizedHome();
+ if(homeRefreshQueued)return;
+ homeRefreshQueued=true;
+ queueMicrotask(()=>{
+  homeRefreshQueued=false;
+  renderContinueWatching();
+  void renderRecommendations().then(composeHomepage);
+ });
 }
 async function composeHomepage() {
   const strength = getTasteStrength();
@@ -593,6 +636,10 @@ document.addEventListener("DOMContentLoaded",()=>{
   // Paint Home immediately. Intelligence/auth sync is optional enrichment and must
   // never be allowed to block the catalogue from loading.
   wireRails();wireSearch();wireAlphabet();wireReleaseAlerts();
+  window.addEventListener("vivid:account-switched",()=>queuePersonalizedHomeRefresh({clear:true}));
+  window.addEventListener("vivid:library-changed",()=>queuePersonalizedHomeRefresh());
+  window.addEventListener("vivid:progress-changed",()=>renderContinueWatching());
+  window.addEventListener("vivid:recommendations-invalidated",()=>queuePersonalizedHomeRefresh());
   initFeatureStrip();void loadHome();void refreshReleaseAlerts();void refreshServerReleaseCenter();
 
   // Personalization runs in the background after the core Home UI has started.

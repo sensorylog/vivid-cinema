@@ -8,6 +8,7 @@ const watch = read("../scripts/watch.js");
 const intelligence = read("../scripts/intelligence.js");
 const recommendations = read("../scripts/recommendations.js");
 const forYou = read("../scripts/for-you.js");
+const home = read("../script.js");
 const serviceWorker = read("../service-worker.js");
 
 test("title detail opens and trailer starts feed bounded Intelligence signals", () => {
@@ -25,6 +26,21 @@ test("playback start, progress and completion still feed the canonical Memory st
   assert.match(watch, /upsertLibraryItem\("history"/);
 });
 
+test("dirty local taste is rebuilt instead of being overwritten by a newer remote timestamp", () => {
+  assert.match(intelligence, /t\.updatedAt&&!t\.dirty/);
+  assert.match(intelligence, /if\(feedbackChanged\|\|s\.taste\.dirty\)/);
+  assert.match(intelligence, /localItem\.kind===x\.kind/);
+  assert.match(intelligence, /s\.taste=\{\.\.\.remote,dirty:false\}/);
+});
+
+test("meaningful viewing signals stale the taste profile and can seed it", () => {
+  assert.match(intelligence, /TASTE_SIGNAL_TYPES=new Set/);
+  assert.match(intelligence, /if\(TASTE_SIGNAL_TYPES\.has\(type\)\)s\.taste\.updatedAt=0/);
+  assert.match(intelligence, /const behavioralItems=new Map/);
+  assert.match(intelligence, /const typeFromKey=parts\.shift\(\)/);
+  assert.match(intelligence, /all\.push\(\.\.\.eventBoosted,\.\.\.behavioralItems\.values\(\)\)/);
+});
+
 test("behavior deduplication is bounded and events remain capped", () => {
   assert.match(intelligence, /duplicateWindow=.*title_opened.*trailer_started.*watch_started/);
   assert.match(intelligence, /s\.events\.length>300/);
@@ -32,6 +48,7 @@ test("behavior deduplication is bounded and events remain capped", () => {
 
 test("recommendation cache fingerprint includes all observed library collections and progress", () => {
   assert.match(recommendations, /"library:" \+ observed\.map/);
+  assert.match(recommendations, /"recommendationMemory:" \+ recommendationMemoryFingerprint/);
   assert.match(recommendations, /"taste:" \+ Number\(taste\.updatedAt \|\| 0\)/);
   assert.match(recommendations, /"rotation:" \+ new Date\(\)\.toISOString\(\)\.slice\(0, 10\)/);
 });
@@ -42,6 +59,16 @@ test("For You rejects stale overlapping requests and reacts to canonical change 
   assert.match(forYou, /vivid:recommendations-invalidated/);
   assert.match(forYou, /vivid:library-changed/);
   assert.match(forYou, /vivid:progress-changed/);
+});
+
+test("Home clears and refreshes personalized shelves on owner changes and guards stale requests", () => {
+  assert.match(home, /homeRecommendationRequestId/);
+  assert.match(home, /tonightPickRequestId/);
+  assert.match(home, /expectedRequestId !== homeRecommendationRequestId/);
+  assert.match(home, /vivid:account-switched/);
+  assert.match(home, /vivid:library-changed/);
+  assert.match(recommendations, /const ownerAtStart = currentProgressOwner\(\)/);
+  assert.match(recommendations, /if \(currentProgressOwner\(\) !== ownerAtStart\) return \[\]/);
 });
 
 test("service worker keeps the integration shell versioned and For You assets precached", () => {

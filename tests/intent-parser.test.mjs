@@ -43,6 +43,37 @@ test("unsupported tone, subtitle and provider constraints are surfaced rather th
   assert.ok(intent.unsupported.some(value => value.includes("Streaming availability")));
 });
 
+test("TV genre approximations are disclosed instead of labelled as exact matches", () => {
+  const intent = parseIntent("Korean thriller series");
+  assert.equal(intent.mediaType, "tv");
+  assert.equal(intent.genre.tvLabel, "Mystery (closest TV category)");
+  assert.ok(intent.unsupported.some(value => value.startsWith("Catalogue limitation:") && value.includes("no distinct TV Thriller")));
+});
+
+test("genres absent from the TV catalogue are not sent as invalid TV genre IDs", () => {
+  for (const phrase of ["horror series", "romance series", "historical series"]) {
+    const intent = parseIntent(phrase);
+    assert.equal(intent.mediaType, "tv");
+    assert.equal(intent.genre.tvId, null, phrase + " should not use a movie-only genre ID");
+    assert.ok(intent.unsupported.some(value => value.startsWith("Catalogue limitation:")), phrase + " should disclose the missing TV filter");
+  }
+});
+
+test("anime movie requests stay movies and preserve Japanese animation filters", () => {
+  const intent = parseIntent("Japanese anime movie under 2 hours");
+  assert.equal(intent.mediaType, "movie");
+  assert.equal(intent.anime, true);
+  assert.equal(intent.language, "ja");
+  assert.equal(intent.genre.key, "animation");
+  assert.equal(intent.runtimeMax, 120);
+});
+
+test("mixed-media runtime constraints distinguish movie runtime from episode runtime", () => {
+  const intent = parseIntent("funny under 2 hours");
+  assert.equal(intent.mediaType, "all");
+  assert.ok(intent.constraints.some(value => value.includes("Movies up to 120 min; TV episodes up to 120 min")));
+});
+
 test("empty input stays a genuine cold-start request", () => {
   const intent = parseIntent("");
   assert.equal(intent.mediaType, "all");

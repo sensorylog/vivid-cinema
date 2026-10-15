@@ -11,6 +11,10 @@ const TONIGHT_SESSION_KEY = "vivid:tonight:v1";
 const PROGRESS_SYNC_DEBOUNCE = 1800;
 const LOCAL_OWNER_KEY = "vivid:progress-owner:v1";
 
+function currentProgressOwner() {
+  try { return localStorage.getItem(LOCAL_OWNER_KEY) || "guest"; } catch { return "guest"; }
+}
+
 function ensureProgressOwner(uid){
   let changed=false;
   try{
@@ -527,14 +531,17 @@ function tonightScore(item, taste, progress, feedback) {
   return genre * 5.8 + media * 1.5 + quality * 2.2 + popularity * .65 + liked + unfinished;
 }
 export async function getTonightPick(options = {}) {
+  const ownerAtStart = currentProgressOwner();
   const limit = Math.max(1, Math.min(20, Number(options.limit) || 12));
   const taste = await getTasteProfile();
+  if (currentProgressOwner() !== ownerAtStart) return [];
   const progress = readProgress();
   const feedback = getFeedbackState();
   const library = getLocalLibrary();
   const excluded = new Set([...getNotForMeKeys(), ...getTonightRejected()]);
   const watched = new Set((library.history || []).map(keyFor));
   const seeds = await getRecommendationSeeds();
+  if (currentProgressOwner() !== ownerAtStart) return [];
   const calls = [];
   seeds.slice(0, 6).forEach(seed => calls.push(seed.media_type === "tv" ? tmdbApi.tvRecommendations(seed.id) : tmdbApi.movieRecommendations(seed.id)));
   const topGenres = Object.entries(taste.genres || {}).sort((a,b) => Number(b[1]) - Number(a[1])).slice(0, 4).map(([id]) => id).join("|");
@@ -546,6 +553,7 @@ export async function getTonightPick(options = {}) {
     calls.push(tmdbApi.popularMovies(1));
   }
   const responses = await Promise.allSettled(calls);
+  if (currentProgressOwner() !== ownerAtStart) return [];
   const candidates = uniqueByKey(responses.flatMap(result => result.status === "fulfilled" ? normalizeResults(result.value?.results || []) : []))
     .filter(item => !excluded.has(keyFor(item)) && !watched.has(keyFor(item)));
   return candidates.map(item => ({ ...item, tonightScore: tonightScore(item, taste, progress, feedback) }))
@@ -560,12 +568,15 @@ export function dismissTonightPick(item) {
 }
 
 export async function getPersonalRecommendations(limit = 12) {
+  const ownerAtStart = currentProgressOwner();
   const library = getLocalLibrary();
   const progress = readProgress();
   const feedback = getFeedbackState();
   const taste = await getTasteProfile();
+  if (currentProgressOwner() !== ownerAtStart) return [];
   const observed = [...(library.history || []), ...(library.favorites || []), ...(library.watchLater || [])];
   const seeds = await getRecommendationSeeds();
+  if (currentProgressOwner() !== ownerAtStart) return [];
   if (!seeds.length && !Object.keys(taste.genres || {}).length) return [];
 
   const excluded = new Set([
@@ -581,12 +592,17 @@ export async function getPersonalRecommendations(limit = 12) {
       .flatMap(item => item.genre_ids || [])
       .map(Number)
   );
+  const recommendationMemoryFingerprint = [...recommendationMemory.entries()]
+    .sort(([left], [right]) => left.localeCompare(right))
+    .map(([contentId, memory]) => contentId + ":" + memory.impressions + ":" + memory.clicks + ":" + memory.lastSeen)
+    .join(",");
 
   const fingerprint = [
     ...Object.entries(feedback).map(([k, v]) => k + ":" + v.kind + ":" + v.updatedAt),
     ...Object.entries(progress).map(([k, v]) => k + ":" + v.updatedAt),
     "recent:" + (library.history || []).slice(0, 5).map(item => keyFor(item) + ":" + (item.lastWatchedAt || item.updatedAt || "")).join(","),
     "library:" + observed.map(item => keyFor(item) + ":" + Number(item.updatedAt || item.lastWatchedAt || 0)).sort().join(","),
+    "recommendationMemory:" + recommendationMemoryFingerprint,
     "taste:" + Number(taste.updatedAt || 0),
     "rotation:" + new Date().toISOString().slice(0, 10)
   ].sort().join("|");
@@ -618,6 +634,7 @@ export async function getPersonalRecommendations(limit = 12) {
     discoveryCalls.push(tmdbApi.discoverMovies({ sort_by: "vote_average.desc", vote_count_gte: 250, with_original_language: preferredLanguages[0], page: 1 }));
   }
   const discoveryResponses = await Promise.allSettled(discoveryCalls);
+  if (currentProgressOwner() !== ownerAtStart) return [];
   const discoveryCandidates = discoveryResponses.flatMap(result =>
     result.status === "fulfilled" ? normalizeResults(result.value?.results || []) : []
   );
@@ -630,26 +647,32 @@ export async function getPersonalRecommendations(limit = 12) {
 
 export function collectIntentCandidates(responses = []) {
   const successful = responses.filter(result => result?.status === "fulfilled");
-  if (!successful.length) {
-    const failure = responses.find(result => result?.status === "rejected");
-    if (failure) throw failure.reason;
-    return [];
-  }
-  return successful.flatMap(result => Array.isArray(result.value) ? result.value : []);
+  const candidates = successful.flatMap(result => Array.isArray(result.value) ? result.value : []);
+  if (candidates.length || successful.length === responses.length) return candidates;
+
+  // An empty success plus a failed sibling request is not proof that the
+  // whole mixed-media search had zero matches.
+  const failure = responses.find(result => result?.status === "rejected");
+  if (failure) throw failure.reason;
+  return candidates;
 }
 
 export async function getIntentRecommendations(intent = {}, limit = 18) {
+  const ownerAtStart = currentProgressOwner();
   const safeLimit = Math.max(1, Math.min(40, Number(limit) || 18));
   const requestedType = ["movie", "tv"].includes(intent.mediaType) ? intent.mediaType : "all";
   const mediaTypes = requestedType === "all" ? ["movie", "tv"] : [requestedType];
-  const calls = mediaTypes.map(type => {
+  const calls = mediaTypes.flatMap(type => {
+    const genreId = intent.genreIds?.[type] ?? intent.genre?.[type === "movie" ? "movieId" : "tvId"];
+    // Do not fill a genre-constrained search with unrelated TV titles when
+    // the catalogue has no corresponding TV genre filter.
+    if (intent.genre && !genreId) return [];
     const params = {
       sort_by: "popularity.desc",
       page: 1,
       include_adult: false,
       "vote_count.gte": type === "movie" ? 40 : 20
     };
-    const genreId = intent.genreIds?.[type] ?? intent.genre?.[type === "movie" ? "movieId" : "tvId"];
     if (genreId) params.with_genres = String(genreId);
     if (intent.runtimeMax) params["with_runtime.lte"] = String(Math.max(1, Number(intent.runtimeMax)));
     if (intent.year) {
@@ -661,11 +684,12 @@ export async function getIntentRecommendations(intent = {}, limit = 18) {
       params.with_original_language = "ja";
       if (type === "tv") params.with_origin_country = "JP";
     }
-    return (type === "tv" ? tmdbApi.discoverTv(params) : tmdbApi.discoverMovies(params))
-      .then(response => normalizeResults(response?.results || [], type));
+    return [(type === "tv" ? tmdbApi.discoverTv(params) : tmdbApi.discoverMovies(params))
+      .then(response => normalizeResults(response?.results || [], type))];
   });
 
   const responses = await Promise.allSettled(calls);
+  if (currentProgressOwner() !== ownerAtStart) return [];
   // Distinguish a genuine zero-match result from total catalogue/network failure.
   // Partial success is still useful; only reject when every request failed.
   const candidates = collectIntentCandidates(responses);
@@ -675,6 +699,7 @@ export async function getIntentRecommendations(intent = {}, limit = 18) {
   const feedback = getFeedbackState();
   const progress = readProgress();
   const taste = await getTasteProfile();
+  if (currentProgressOwner() !== ownerAtStart) return [];
   const observed = [...(library.history || []), ...(library.favorites || []), ...(library.watchLater || [])];
   const excluded = new Set([...observed.map(keyFor), ...getNotForMeKeys()]);
   const recentGenres = new Set(
@@ -703,6 +728,7 @@ export async function getIntentRecommendations(intent = {}, limit = 18) {
 }
 
 export async function getBecauseYouLiked(limit = 12) {
+  const ownerAtStart = currentProgressOwner();
   const feedback = getFeedbackState();
   const liked = Object.values(feedback)
     .filter(item => item.kind === "like")
@@ -714,6 +740,7 @@ export async function getBecauseYouLiked(limit = 12) {
     const response = seed.media_type === "tv"
       ? await tmdbApi.tvRecommendations(seed.id)
       : await tmdbApi.movieRecommendations(seed.id);
+    if (currentProgressOwner() !== ownerAtStart) return [];
     const excluded = new Set([...getNotForMeKeys(), keyFor(seed)]);
     const items = normalizeResults(response?.results || [])
       .filter(item => !excluded.has(keyFor(item)))

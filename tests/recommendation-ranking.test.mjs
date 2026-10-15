@@ -1,6 +1,9 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import { rankIntentCandidates, collectIntentCandidates } from "../scripts/recommendations.js";
+
+const recommendationsSource = readFileSync(new URL("../scripts/recommendations.js", import.meta.url), "utf8");
 
 function candidate(id, extra = {}) {
   return {
@@ -13,6 +16,15 @@ function candidate(id, extra = {}) {
     ...extra
   };
 }
+
+test("filtered recommendation requests guard results across account switches", () => {
+  assert.match(recommendationsSource, /export async function getIntentRecommendations\(intent = \{\}, limit = 18\) \{\s*const ownerAtStart = currentProgressOwner\(\);/);
+  assert.match(recommendationsSource, /const responses = await Promise\.allSettled\(calls\);\s*if \(currentProgressOwner\(\) !== ownerAtStart\) return \[\];/);
+});
+
+test("genre-constrained searches skip media types without a supported genre ID", () => {
+  assert.match(recommendationsSource, /if \(intent\.genre && !genreId\) return \[\]/);
+});
 
 test("filtered ranking preserves a useful number of results in one requested genre", () => {
   const candidates = Array.from({ length: 8 }, (_, index) => candidate(index + 1));
@@ -57,6 +69,17 @@ test("intent result collection keeps partial successes when one catalogue reques
     { status: "fulfilled", value: results },
     { status: "rejected", reason: new Error("TV catalogue unavailable") }
   ]), results);
+});
+
+test("intent result collection reports partial failure when the only successful request is empty", () => {
+  const failure = new Error("TV catalogue unavailable");
+  assert.throws(
+    () => collectIntentCandidates([
+      { status: "fulfilled", value: [] },
+      { status: "rejected", reason: failure }
+    ]),
+    error => error === failure
+  );
 });
 
 test("intent result collection treats successful empty responses as no matches", () => {

@@ -6,9 +6,10 @@ import { switchLocalOwner } from "./local-owner.js";
 const KEY="vivid:intelligence:v1";
 const SESSION_KEY="vivid:session:v1";
 const TASTE_CACHE_KEY="vivid:taste:v1";
-const empty=()=>({version:1,feedback:{},feedbackCleared:{},events:[],taste:{genres:{},languages:{},countries:{},actors:{},directors:{},media:{movie:0,tv:0},decades:{},updatedAt:0},onboarding:{completed:false,dismissed:false,completedAt:0}});
+const empty=()=>({version:1,feedback:{},feedbackCleared:{},events:[],taste:{genres:{},languages:{},countries:{},actors:{},directors:{},media:{movie:0,tv:0},decades:{},updatedAt:0,dirty:false},onboarding:{completed:false,dismissed:false,completedAt:0}});
 let firebasePromise=null, syncPromise=null, sessionId=null;
 const LOCAL_OWNER_KEY="vivid:intelligence-owner:v1";
+const TASTE_SIGNAL_TYPES=new Set(["title_opened","trailer_started","watch_started","playback_progress","watch_completed","recommendation_clicked"]);
 function ensureIntelligenceOwner(uid){
  try{
   const result=switchLocalOwner({
@@ -88,7 +89,7 @@ export function recordBehavior(type,item=null,metadata={}){
  if(duplicate)return;
  const clean={};Object.entries(metadata||{}).slice(0,10).forEach(([k,v])=>{if(typeof v==="string")clean[k.slice(0,40)]=v.slice(0,160);else if(typeof v==="number"||typeof v==="boolean")clean[k.slice(0,40)]=v});
  const event={id:now.toString(36)+"-"+Math.random().toString(36).slice(2,7),type:String(type).slice(0,60),contentId:x?key(x):null,mediaType:x?.media_type||null,occurredAt:now,sessionId:sid(),metadata:clean};
- s.events.push(event);if(s.events.length>300)s.events.splice(0,s.events.length-300);write(s);cloud(["events",event.sessionId+"_"+event.id],event)
+ s.events.push(event);if(s.events.length>300)s.events.splice(0,s.events.length-300);if(TASTE_SIGNAL_TYPES.has(type)){s.taste.updatedAt=0;s.taste.dirty=true;}write(s);cloud(["events",event.sessionId+"_"+event.id],event)
 }
 
 export function setFeedback(item,kind){
@@ -96,7 +97,7 @@ export function setFeedback(item,kind){
  const s=read(),next=s.feedback[k]?.kind===kind?null:kind;
  if(next){s.feedback[k]={...x,kind:next,updatedAt:Date.now()};delete s.feedbackCleared[k]}
  else{delete s.feedback[k];s.feedbackCleared[k]={updatedAt:Date.now()}}
- s.taste.updatedAt=0;write(s);invalidateRecommendationCaches();
+ s.taste.updatedAt=0;s.taste.dirty=true;write(s);invalidateRecommendationCaches();
  cloud(["feedback",k],next?{...x,kind:next,updatedAt:s.feedback[k].updatedAt}:{kind:"cleared",updatedAt:s.feedbackCleared[k].updatedAt});
  recordBehavior(next||"feedback_cleared",x,{feedback:next||""});void rebuildTasteProfile();return next
 }
@@ -116,8 +117,20 @@ function eventSignal(s,k){
 function top(m,n){return Object.fromEntries(Object.entries(m).sort((a,b)=>b[1]-a[1]).slice(0,n))}
 async function seeds(){
  const l=getLocalLibrary(),s=read(),all=[...(l.favorites||[]).map(x=>({item:x,w:4})),...(l.history||[]).filter(x=>Number(x.completion||0)>=25).map(x=>({item:x,w:2.5*Number(x.completion||0)/100})),...(l.watchLater||[]).map(x=>({item:x,w:1})),...Object.values(s.feedback).filter(x=>x.kind==="like").map(x=>({item:x,w:5}))];
- const eventBoosted=(l.history||[]).map(item=>({item,w:eventSignal(s,key(item))})).filter(x=>x.w>0);
- all.push(...eventBoosted);
+  const eventBoosted=(l.history||[]).map(item=>({item,w:eventSignal(s,key(item))})).filter(x=>x.w>0);
+  const behavioralItems=new Map;
+  for(const event of s.events){
+   if(!event?.contentId||!TASTE_SIGNAL_TYPES.has(event.type))continue;
+   const parts=String(event.contentId).split(":");
+   const typeFromKey=parts.shift();
+   const media_type=event.mediaType||typeFromKey;
+   const id=parts.join(":");
+   if(!id||!media_type)continue;
+   const item={id,media_type,title:"",updatedAt:Number(event.occurredAt||0)};
+   const k=key(item),w=eventSignal(s,k),cur=behavioralItems.get(k);
+   if(w>0&&(!cur||w>cur.w))behavioralItems.set(k,{item,w});
+  }
+  all.push(...eventBoosted,...behavioralItems.values());
  const m=new Map;all.forEach(x=>{const k=key(x.item),cur=m.get(k);if(k&&(!cur||x.w>cur.w))m.set(k,x)});return [...m.values()].sort((a,b)=>b.w-a.w).slice(0,12)
 }
 export async function rebuildTasteProfile(){
@@ -129,9 +142,9 @@ export async function rebuildTasteProfile(){
  const ss=await seeds();const details=await Promise.allSettled(ss.slice(0,8).map(x=>x.item.media_type==="tv"?tmdbApi.tvDetails(x.item.id):tmdbApi.movieDetails(x.item.id)));
  if((localStorage.getItem(LOCAL_OWNER_KEY)||"guest")!==ownerAtStart || (localStorage.getItem(KEY)||"")!==stateAtStart)return read().taste;
  details.forEach((r,i)=>{if(r.status!=="fulfilled")return;const d=r.value,w=ss[i].w*(1+Math.min(.75,eventSignal(s,key(ss[i].item))));(d.genres||[]).forEach(g=>add(t.genres,String(g.id),w));if(d.original_language)add(t.languages,d.original_language,w*.8);(d.production_countries||[]).forEach(c=>add(t.countries,c.iso_3166_1,w*.55));const y=Number(String(d.release_date||d.first_air_date||"").slice(0,4));if(y>=1900)add(t.decades,String(Math.floor(y/10)*10),w*.45);(d.credits?.cast||[]).slice(0,10).forEach(p=>add(t.actors,String(p.id),w*.42));(d.credits?.crew||[]).filter(p=>["Director","Creator"].includes(p.job)).slice(0,5).forEach(p=>add(t.directors,String(p.id),w*.5))});
- s.taste={genres:top(t.genres,20),languages:top(t.languages,10),countries:top(t.countries,12),actors:top(t.actors,20),directors:top(t.directors,12),media:t.media,decades:top(t.decades,8),updatedAt:Date.now()};write(s);try{localStorage.setItem(TASTE_CACHE_KEY,JSON.stringify(s.taste))}catch{};cloud(["taste","profile"],{version:1,...s.taste});return s.taste
+ s.taste={genres:top(t.genres,20),languages:top(t.languages,10),countries:top(t.countries,12),actors:top(t.actors,20),directors:top(t.directors,12),media:t.media,decades:top(t.decades,8),updatedAt:Date.now(),dirty:false};write(s);try{localStorage.setItem(TASTE_CACHE_KEY,JSON.stringify(s.taste))}catch{};cloud(["taste","profile"],{version:1,...s.taste});return s.taste
 }
-export async function getTasteProfile(){const t=read().taste;return t.updatedAt? t:rebuildTasteProfile()}
+export async function getTasteProfile(){const t=read().taste;return t.updatedAt&&!t.dirty? t:rebuildTasteProfile()}
 export function getTasteStrength(){const s=read(),l=getLocalLibrary();return Math.min(1,Object.keys(s.feedback).length*.16+(l.history||[]).length*.05)}
 export function shouldShowColdStart(){const s=read(),l=getLocalLibrary();return !s.onboarding.completed&&!s.onboarding.dismissed&&!Object.keys(s.feedback).length&&!(l.history||[]).length&&!(l.favorites||[]).length}
 export async function completeColdStart(items=[]){const s=read(),seen=new Set;items.slice(0,6).forEach(x=>{const i=safe(x),k=key(i);if(!k||seen.has(k))return;seen.add(k);const updatedAt=Date.now();s.feedback[k]={...i,kind:"like",updatedAt};delete s.feedbackCleared[k];cloud(["feedback",k],{...i,kind:"like",updatedAt});recordBehavior("cold_start_like",i)});s.onboarding={completed:true,dismissed:false,completedAt:Date.now()};write(s);invalidateRecommendationCaches();await rebuildTasteProfile();return s}
@@ -165,25 +178,31 @@ export async function syncIntelligenceForUser(u){
    const x=d.data()||{};
    const localItem=s.feedback[d.id];
    const localClear=s.feedbackCleared[d.id];
+   const remoteUpdatedAt=Number(x.updatedAt||0);
    const localVersion=Math.max(Number(localItem?.updatedAt||0),Number(localClear?.updatedAt||0));
-   if(Number(x.updatedAt||0)<localVersion)return;
+   if(remoteUpdatedAt<localVersion)return;
    if(x.kind==="cleared"){
+    if(!localItem&&localClear&&Number(localClear.updatedAt||0)===remoteUpdatedAt)return;
     delete s.feedback[d.id];
-    s.feedbackCleared[d.id]={updatedAt:Number(x.updatedAt)||0};
+    s.feedbackCleared[d.id]={updatedAt:remoteUpdatedAt};
     feedbackChanged=true;
    }else{
+    if(localItem&&localItem.kind===x.kind&&Number(localItem.updatedAt||0)===remoteUpdatedAt&&!localClear)return;
     s.feedback[d.id]=x;
     delete s.feedbackCleared[d.id];
     feedbackChanged=true;
    }
   });
   const remote=t.docs.find(d=>d.id==="profile")?.data();
-  if(feedbackChanged){
-   s.taste.updatedAt=0;
-  }else if(remote&&Number(remote.updatedAt||0)>Number(s.taste.updatedAt||0)){
-   s.taste=remote;
-  }else if(Number(s.taste.updatedAt||0)>0&&Number(s.taste.updatedAt||0)>Number(remote?.updatedAt||0)){
-   await setDoc(doc(db,"users",u.uid,"taste","profile"),{version:1,...s.taste},{merge:true});
+   if(feedbackChanged||s.taste.dirty){
+    // Keep local behavior/feedback changes dirty; a newer remote timestamp
+    // cannot represent local device-only behavior events.
+    s.taste.updatedAt=0;
+    s.taste.dirty=true;
+   }else if(remote&&Number(remote.updatedAt||0)>Number(s.taste.updatedAt||0)){
+    s.taste={...remote,dirty:false};
+   }else if(Number(s.taste.updatedAt||0)>0&&Number(s.taste.updatedAt||0)>Number(remote?.updatedAt||0)){
+    await setDoc(doc(db,"users",u.uid,"taste","profile"),{version:1,...s.taste},{merge:true});
   }
   const {auth:finalAuth}=await fb();
   if(String(finalAuth?.currentUser?.uid || "")!==String(u.uid) ||

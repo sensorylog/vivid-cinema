@@ -24,6 +24,7 @@ let lastDismissedItem = null;
 let requestId = 0;
 let removedFilters = new Set();
 let suppressInvalidationRefresh = false;
+let secondaryRequestId = 0;
 const LANGUAGE_LABELS = { en: "English", ko: "Korean", ja: "Japanese", fr: "French", es: "Spanish", hi: "Hindi", zh: "Chinese", de: "German", it: "Italian", pt: "Portuguese", th: "Thai", ar: "Arabic", tr: "Turkish", ta: "Tamil", te: "Telugu", yo: "Yoruba" };
 
 function intentForPage() {
@@ -34,10 +35,12 @@ function intentForPage() {
     intent.language = "ja";
     intent.genre = { key: "animation", name: "Animation", movieId: 16, tvId: 16 };
   } else if (activeType !== "all") {
-    if (intent.anime) {
+    // Keep an explicit anime-film request as a movie; the Movies chip must not
+    // erase its Japanese-language and animation constraints.
+    if (intent.anime && (activeType !== "movie" || !/\b(movie|movies|film|films|feature film)\b/i.test(intent.query))) {
       intent.anime = false;
       if (intent.genre?.key === "animation") intent.genre = null;
-      intent.language = null;
+      if (intent.language === "ja") intent.language = null;
     }
     intent.mediaType = activeType;
   }
@@ -55,12 +58,24 @@ function intentForPage() {
   if (removedFilters.has("language")) intent.language = null;
 
   intent.genreIds = intent.genre ? { movie: intent.genre.movieId, tv: intent.genre.tvId } : null;
+  intent.unsupported = (intent.unsupported || []).filter(note => !note.startsWith("Catalogue limitation:"));
+  if (intent.mediaType !== "movie" && intent.genre?.tvNote && !intent.anime) {
+    intent.unsupported.push("Catalogue limitation: " + intent.genre.tvNote);
+  }
+
   const constraints = [];
-  if (intent.anime) constraints.push("Anime (Japanese-language animation)");
+  if (intent.anime) constraints.push(intent.mediaType === "movie" ? "Anime movies (Japanese-language animation)" : "Anime (Japanese-language animation)");
   else if (intent.mediaType === "movie") constraints.push("Movies");
   else if (intent.mediaType === "tv") constraints.push("TV series");
-  if (intent.genre && !intent.anime) constraints.push(intent.genre.name);
-  if (intent.runtimeMax) constraints.push("Up to " + intent.runtimeMax + " min" + (intent.mediaType === "tv" ? " per episode" : ""));
+  if (intent.genre && !intent.anime) constraints.push(intent.mediaType === "tv" && intent.genre.tvLabel ? intent.genre.tvLabel : intent.genre.name);
+  if (intent.runtimeMax) {
+    const runtimeConstraint = intent.mediaType === "tv"
+      ? "Up to " + intent.runtimeMax + " min per episode"
+      : intent.mediaType === "all"
+        ? "Movies up to " + intent.runtimeMax + " min; TV episodes up to " + intent.runtimeMax + " min"
+        : "Up to " + intent.runtimeMax + " min";
+    constraints.push(runtimeConstraint);
+  }
   if (intent.year) constraints.push(String(intent.year));
   if (intent.language && !intent.anime) constraints.push(LANGUAGE_LABELS[intent.language] || intent.language);
   intent.constraints = [...new Set(constraints)];
@@ -69,10 +84,10 @@ function intentForPage() {
 
 function intentChipEntries(intent) {
   const entries = [];
-  if (intent.anime) entries.push({ key: "anime", label: "Anime · Japanese" });
+  if (intent.anime) entries.push({ key: "anime", label: intent.mediaType === "movie" ? "Anime movies · Japanese" : "Anime · Japanese" });
   else if (intent.mediaType !== "all") entries.push({ key: "mediaType", label: intent.mediaType === "movie" ? "Movies" : "TV series" });
-  if (intent.genre && !intent.anime) entries.push({ key: "genre", label: intent.genre.name });
-  if (intent.runtimeMax) entries.push({ key: "runtime", label: "Up to " + intent.runtimeMax + " min" });
+  if (intent.genre && !intent.anime) entries.push({ key: "genre", label: intent.mediaType === "tv" && intent.genre.tvLabel ? intent.genre.tvLabel : intent.genre.name });
+  if (intent.runtimeMax) entries.push({ key: "runtime", label: intent.mediaType === "tv" ? "Up to " + intent.runtimeMax + " min / episode" : intent.mediaType === "all" ? "Movies ≤ " + intent.runtimeMax + " min · TV episodes ≤ " + intent.runtimeMax + " min" : "Up to " + intent.runtimeMax + " min" });
   if (intent.year) entries.push({ key: "year", label: String(intent.year) });
   if (intent.language && !intent.anime) entries.push({ key: "language", label: LANGUAGE_LABELS[intent.language] || intent.language });
   return entries;
@@ -101,7 +116,7 @@ function renderIntent(intent) {
   summary.hidden = !hasVisibleIntent;
   chips.innerHTML = entries.map(entry => '<button type="button" class="vivid-intent-chip" data-remove-filter="' + entry.key + '" aria-label="Remove ' + escapeHtml(entry.label) + ' filter">' + escapeHtml(entry.label) + '<i class="bi bi-x" aria-hidden="true"></i></button>').join("");
   limitations.hidden = !(intent.unsupported || []).length;
-  limitations.textContent = (intent.unsupported || []).length ? (intent.unsupported || []).join(" ") + " Vivid has not applied these details as filters." : "";
+  limitations.textContent = (intent.unsupported || []).join(" ");
 }
 
 function cardMarkup(item, index, compact = false) {
@@ -143,7 +158,8 @@ function renderItems(items) {
   }
 }
 
-async function loadSecondarySections() {
+async function loadSecondarySections(expectedRequestId = requestId) {
+  const thisSecondaryRequest = ++secondaryRequestId;
   const continueItems = getContinueWatching(6);
   $("continue-section").hidden = !continueItems.length;
   $("continue-grid").innerHTML = continueItems.map(item => {
@@ -158,10 +174,13 @@ async function loadSecondarySections() {
   }).join("");
 
   try {
-    becauseItems = await getBecauseYouLiked(8);
+    const nextBecauseItems = await getBecauseYouLiked(8);
+    if (expectedRequestId !== requestId || thisSecondaryRequest !== secondaryRequestId) return;
+    becauseItems = nextBecauseItems;
     $("because-section").hidden = !becauseItems.length;
     $("because-grid").innerHTML = becauseItems.map((item, index) => cardMarkup(item, index, true)).join("");
   } catch {
+    if (expectedRequestId !== requestId || thisSecondaryRequest !== secondaryRequestId) return;
     $("because-section").hidden = true;
     $("because-grid").innerHTML = "";
   }
@@ -207,7 +226,7 @@ async function loadRecommendations({ refresh = false } = {}) {
       $("recommendation-empty").hidden = false;
       showStatus("");
     }
-    await loadSecondarySections();
+    await loadSecondarySections(thisRequest);
   } catch (error) {
     if (thisRequest !== requestId) return;
     console.error("Vivid For You recommendations failed:", error);
@@ -232,7 +251,7 @@ document.addEventListener("DOMContentLoaded", () => {
     event.preventDefault();
     removedFilters.clear();
     const parsed = parseIntent($("intent-query").value);
-    if (parsed.anime) setActiveType("anime");
+    if (parsed.anime && parsed.mediaType !== "movie") setActiveType("anime");
     else if (parsed.mediaType !== "all") setActiveType(parsed.mediaType);
     else setActiveType("all");
     void loadRecommendations();
@@ -242,7 +261,7 @@ document.addEventListener("DOMContentLoaded", () => {
     $("intent-query").value = button.dataset.example || "";
     removedFilters.clear();
     const parsed = parseIntent($("intent-query").value);
-    setActiveType(parsed.anime ? "anime" : parsed.mediaType);
+    setActiveType(parsed.anime && parsed.mediaType !== "movie" ? "anime" : parsed.mediaType);
     void loadRecommendations();
   }));
 
@@ -326,6 +345,35 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+  window.addEventListener("vivid:account-switched", () => {
+    currentItems = [];
+    becauseItems = [];
+    $("intent-query").value = "";
+    removedFilters.clear();
+    setActiveType("all");
+    renderIntent(parseIntent(""));
+    $("recommendation-grid").innerHTML = "";
+    $("because-grid").innerHTML = "";
+    $("continue-grid").innerHTML = "";
+    $("continue-section").hidden = true;
+    $("because-section").hidden = true;
+    void loadRecommendations();
+  });
+  window.addEventListener("vivid:account-switched", () => {
+    // Remove the previous owner's visible recommendations immediately, before
+    // async auth/library reconciliation finishes.
+    requestId++;
+    currentItems = [];
+    becauseItems = [];
+    $("recommendation-grid").innerHTML = "";
+    $("because-grid").innerHTML = "";
+    $("continue-grid").innerHTML = "";
+    $("because-section").hidden = true;
+    $("continue-section").hidden = true;
+    $("recommendation-empty").hidden = true;
+    $("recommendation-error").hidden = true;
+    showStatus("Refreshing recommendations for this account…");
+  });
   window.addEventListener("vivid:recommendations-invalidated", () => {
     if (!suppressInvalidationRefresh && document.visibilityState === "visible") void loadRecommendations();
   });

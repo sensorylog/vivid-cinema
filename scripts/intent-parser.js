@@ -1,20 +1,20 @@
 const GENRES = Object.freeze({
-  action: { name: "Action", movieId: 28, tvId: 10759, aliases: ["action-packed", "intense"] },
-  adventure: { name: "Adventure", movieId: 12, tvId: 10759, aliases: ["adventurous"] },
+  action: { name: "Action", movieId: 28, tvId: 10759, tvLabel: "Action & Adventure", tvNote: "TMDB combines TV Action and Adventure into one genre, so series results may include both.", aliases: ["action-packed", "intense"] },
+  adventure: { name: "Adventure", movieId: 12, tvId: 10759, tvLabel: "Action & Adventure", tvNote: "TMDB combines TV Action and Adventure into one genre, so series results may include both.", aliases: ["adventurous"] },
   animation: { name: "Animation", movieId: 16, tvId: 16, aliases: ["animated"] },
   comedy: { name: "Comedy", movieId: 35, tvId: 35, aliases: ["funny", "hilarious", "comedic"] },
   crime: { name: "Crime", movieId: 80, tvId: 80, aliases: ["gangster", "gangsta"] },
   documentary: { name: "Documentary", movieId: 99, tvId: 99, aliases: ["real stories", "nonfiction", "non-fiction"] },
   drama: { name: "Drama", movieId: 18, tvId: 18, aliases: ["dramatic"] },
   family: { name: "Family", movieId: 10751, tvId: 10751, aliases: ["family-friendly", "for the family"] },
-  fantasy: { name: "Fantasy", movieId: 14, tvId: 10765, aliases: ["magical"] },
-  history: { name: "History", movieId: 36, tvId: 36, aliases: ["historical"] },
-  horror: { name: "Horror", movieId: 27, tvId: 27, aliases: ["scary", "terrifying", "spooky"] },
+  fantasy: { name: "Fantasy", movieId: 14, tvId: 10765, tvLabel: "Sci-Fi & Fantasy", tvNote: "TMDB combines TV Science Fiction and Fantasy into one genre, so series results may include both.", aliases: ["magical"] },
+  history: { name: "History", movieId: 36, tvId: null, tvLabel: "History (not available as TV filter)", tvNote: "TMDB does not expose a distinct TV History genre; TV results are omitted rather than shown without a verified History filter.", aliases: ["historical"] },
+  horror: { name: "Horror", movieId: 27, tvId: null, tvLabel: "Horror (not available as TV filter)", tvNote: "TMDB does not expose a distinct TV Horror genre; TV results are omitted rather than shown without a verified Horror filter.", aliases: ["scary", "terrifying", "spooky"] },
   mystery: { name: "Mystery", movieId: 9648, tvId: 9648, aliases: ["mysterious"] },
-  romance: { name: "Romance", movieId: 10749, tvId: 10749, aliases: ["romantic", "love story", "love stories"] },
-  "science fiction": { name: "Science fiction", movieId: 878, tvId: 10765, aliases: ["sci-fi", "scifi", "science-fiction"] },
-  thriller: { name: "Thriller", movieId: 53, tvId: 9648, aliases: ["suspense", "suspenseful"] },
-  war: { name: "War", movieId: 10752, tvId: 10768, aliases: ["military"] },
+  romance: { name: "Romance", movieId: 10749, tvId: null, tvLabel: "Romance (not available as TV filter)", tvNote: "TMDB does not expose a distinct TV Romance genre; TV results are omitted rather than shown without a verified Romance filter.", aliases: ["romantic", "love story", "love stories"] },
+  "science fiction": { name: "Science fiction", movieId: 878, tvId: 10765, tvLabel: "Sci-Fi & Fantasy", tvNote: "TMDB combines TV Science Fiction and Fantasy into one genre, so series results may include both.", aliases: ["sci-fi", "scifi", "science-fiction"] },
+  thriller: { name: "Thriller", movieId: 53, tvId: 9648, tvLabel: "Mystery (closest TV category)", tvNote: "TMDB has no distinct TV Thriller genre; TV results use the broader Mystery category.", aliases: ["suspense", "suspenseful"] },
+  war: { name: "War", movieId: 10752, tvId: 10768, tvLabel: "War & Politics", tvNote: "TMDB combines TV War and Politics into one genre.", aliases: ["military"] },
   western: { name: "Western", movieId: 37, tvId: 37, aliases: ["cowboy"] }
 });
 
@@ -60,13 +60,14 @@ export function parseIntent(input = "") {
     constraints: []
   };
 
+  const mentionsMovie = /\b(movie|movies|film|films|feature film)\b/i.test(text);
   if (/\b(anime|anim[eé])\b/i.test(text)) {
     intent.anime = true;
-    intent.mediaType = "tv";
+    intent.mediaType = mentionsMovie ? "movie" : "tv";
     intent.language = "ja";
     intent.genre = { key: "animation", ...GENRES.animation };
-    intent.constraints.push("Anime (Japanese-language animated series)");
-  } else if (/\b(movie|movies|film|films|feature film)\b/i.test(text)) {
+    intent.constraints.push(mentionsMovie ? "Anime movies (Japanese-language animation)" : "Anime (Japanese-language animated series)");
+  } else if (mentionsMovie) {
     intent.mediaType = "movie";
     intent.constraints.push("Movies");
   } else if (/\b(tv|series|show|shows|drama series|episode|episodes)\b/i.test(text)) {
@@ -78,12 +79,20 @@ export function parseIntent(input = "") {
     const genre = findGenre(text);
     if (genre) {
       intent.genre = genre;
-      intent.constraints.push(genre.name);
+      intent.constraints.push(intent.mediaType === "tv" && genre.tvLabel ? genre.tvLabel : genre.name);
+      if (intent.mediaType !== "movie" && genre.tvNote) {
+        intent.unsupported.push("Catalogue limitation: " + genre.tvNote);
+      }
     }
   }
 
   if (intent.runtimeMax) {
-    intent.constraints.push("Up to " + intent.runtimeMax + " min" + (intent.mediaType === "tv" ? " per episode" : ""));
+    const runtimeConstraint = intent.mediaType === "tv"
+      ? "Up to " + intent.runtimeMax + " min per episode"
+      : intent.mediaType === "all"
+        ? "Movies up to " + intent.runtimeMax + " min; TV episodes up to " + intent.runtimeMax + " min"
+        : "Up to " + intent.runtimeMax + " min";
+    intent.constraints.push(runtimeConstraint);
   }
 
   const yearMatch = text.match(/\b(?:in|from|released in|made in|during)\s+(19\d{2}|20\d{2})\b/i)
