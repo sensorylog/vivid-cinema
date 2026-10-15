@@ -211,7 +211,7 @@ export function parsePersonCreditIntent(query = "") {
   const personName = String(match[3] || "").trim().replace(/[?.!,]+$/, "").trim();
   if (!personName || personName.split(/\s+/).length > 6) return null;
   // "with a twist" and similar plot phrases are not cast searches without a media cue.
-  if (directive === "with" && !prefix) return null;
+  if ((directive === "with" || directive === "by") && !prefix) return null;
 
   let role = "director";
   if (directive === "written and directed by") role = "director_writer";
