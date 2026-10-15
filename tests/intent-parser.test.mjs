@@ -96,3 +96,42 @@ test("plural genre words are parsed for natural catalogue queries", () => {
   const mysteries = parseIntent("mysteries series");
   assert.equal(mysteries.genre.key, "mystery");
 });
+
+
+test("parses decades as date ranges instead of mistaking them for single years", () => {
+  const short = parseIntent("90s thrillers");
+  assert.equal(short.decade, 1990);
+  assert.equal(short.year, null);
+  assert.equal(short.genre.key, "thriller");
+
+  const long = parseIntent("movies from the 1990s");
+  assert.equal(long.mediaType, "movie");
+  assert.equal(long.decade, 1990);
+
+  const recent = parseIntent("2020s TV shows");
+  assert.equal(recent.mediaType, "tv");
+  assert.equal(recent.decade, 2020);
+});
+
+test("parses production-country queries for African and international catalogues", () => {
+  assert.equal(parseIntent("Nigerian movies").country, "NG");
+  assert.equal(parseIntent("Ghanaian films").country, "GH");
+  assert.equal(parseIntent("British crime series").country, "GB");
+  assert.equal(parseIntent("South Korean thrillers").country, "KR");
+});
+
+test("recognizes supported streaming providers but does not apply provider filters to a specific title search", () => {
+  const collection = parseIntent("movies on Netflix");
+  assert.deepEqual(collection.provider, { id: 8, name: "Netflix" });
+  assert.equal(collection.providerOnly, true);
+  assert.equal(intentHasFilters(collection), true);
+  assert.ok(collection.unsupported.some(value => value.includes("region-specific")));
+
+  const title = parseIntent("Inception on Netflix");
+  assert.equal(title.providerOnly, false);
+  assert.equal(intentHasFilters(title), false);
+  assert.ok(title.unsupported.some(value => value.includes("specific-title")));
+
+  assert.equal(parseIntent("Disney Plus movies").provider.id, 337);
+  assert.equal(parseIntent("Prime Video series").provider.id, 9);
+});
