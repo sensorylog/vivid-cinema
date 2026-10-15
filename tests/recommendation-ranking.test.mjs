@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { rankIntentCandidates } from "../scripts/recommendations.js";
+import { rankIntentCandidates, collectIntentCandidates } from "../scripts/recommendations.js";
 
 function candidate(id, extra = {}) {
   return {
@@ -38,4 +38,30 @@ test("explicit likes boost candidates and not-for-me exclusions are respected", 
 test("filtered ranking deduplicates typed title identities", () => {
   const ranked = rankIntentCandidates([candidate(7), candidate(7), candidate(8)], { limit: 10 });
   assert.equal(ranked.length, 2);
+});
+
+test("intent result collection throws when every catalogue request fails", () => {
+  const failure = new Error("TMDB unavailable");
+  assert.throws(
+    () => collectIntentCandidates([
+      { status: "rejected", reason: failure },
+      { status: "rejected", reason: new Error("timeout") }
+    ]),
+    error => error === failure
+  );
+});
+
+test("intent result collection keeps partial successes when one catalogue request fails", () => {
+  const results = [{ id: "movie-1" }, { id: "movie-2" }];
+  assert.deepEqual(collectIntentCandidates([
+    { status: "fulfilled", value: results },
+    { status: "rejected", reason: new Error("TV catalogue unavailable") }
+  ]), results);
+});
+
+test("intent result collection treats successful empty responses as no matches", () => {
+  assert.deepEqual(collectIntentCandidates([
+    { status: "fulfilled", value: [] },
+    { status: "fulfilled", value: [] }
+  ]), []);
 });
