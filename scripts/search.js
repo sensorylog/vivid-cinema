@@ -139,8 +139,8 @@ function isProviderCollectionQuery(query, provider, intent = {}) {
     const escaped = alias.replace(/[+]/g, "\\+");
     cleaned = cleaned.replace(new RegExp("(^|[^a-z0-9])" + escaped + "([^a-z0-9]|$)", "gi"), " ");
   }
-  cleaned = cleaned.replace(/\\b(?:movie|movies|film|films|tv|series|show|shows|available|streaming|watch|on|where|can|i|find|search|me|the|best|top|all|some|please|from|in)\\b/gi, " ");
-  return !cleaned.replace(/[\\s,]+/g, " ").trim();
+  cleaned = cleaned.replace(/\b(?:movie|movies|film|films|tv|series|show|shows|available|streaming|watch|on|where|can|i|find|search|me|the|best|top|all|some|please|from|in)\b/gi, " ");
+  return !cleaned.replace(/[\s,]+/g, " ").trim();
 }
 
 export function parseWatchProviderIntent(query = "") {
