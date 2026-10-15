@@ -428,7 +428,7 @@ function scoreCandidate(item, taste, progress, feedback, recentGenres = new Set(
   return genreScore * 5.4 + mediaScore * 1.9 + languageScore * .55 + countryScore * .35 + decadeScore * .3 + quality * 1.4 + popularity * .8 + feedbackBoost + recentGenreBoost + freshness * .55 - seenPenalty + clickRecovery;
 }
 
-function rankForYou(candidates, taste, progress, feedback, excluded, limit, recentGenres = new Set(), recommendationMemory = new Map()) {
+function rankForYou(candidates, taste, progress, feedback, excluded, limit, recentGenres = new Set(), recommendationMemory = new Map(), enforceDiversity = true) {
   const ranked = uniqueByKey(candidates)
     .filter(item => !excluded.has(keyFor(item)))
     .map(item => ({ item, score: scoreCandidate(item, taste, progress, feedback, recentGenres, recommendationMemory) }))
@@ -445,8 +445,8 @@ function rankForYou(candidates, taste, progress, feedback, excluded, limit, rece
     const genres = (item.raw?.genre_ids || item.genre_ids || []).filter(id => taste.genres?.[id]);
     const dominantGenre = genres[0];
     const secondaryGenre = genres.find(id => id !== dominantGenre);
-    if (dominantGenre && (genreCounts.get(dominantGenre) || 0) >= 3) continue;
-    if (out.length >= 5 && typeCounts[type] >= Math.ceil(limit * .7)) continue;
+    if (enforceDiversity && dominantGenre && (genreCounts.get(dominantGenre) || 0) >= 3) continue;
+    if (enforceDiversity && out.length >= 5 && typeCounts[type] >= Math.ceil(limit * .7)) continue;
 
     // Penalize a title that only repeats an already dominant genre.
     // The score remains visible so strong matches can still win.
@@ -670,7 +670,8 @@ export async function getIntentRecommendations(intent = {}, limit = 18) {
     excluded,
     safeLimit,
     recentGenres,
-    getRecommendationMemory()
+    getRecommendationMemory(),
+    false
   );
   return ranked.map(item => ({
     ...item,
