@@ -76,7 +76,7 @@ function tokenOverlap(queryTokens, title) {
 export function isStructuredSearchIntent(intent = {}, query = "") {
   const q = normalizeQuery(query).toLowerCase();
   const typeOnlyQuery = q
-    .replace(/\b(?:movie|movies|film|films|tv|series|show|shows)\\b/g, " ")
+    .replace(/\b(?:movie|movies|film|films|tv|series|show|shows)\b/g, " ")
     .replace(/[\s,]+/g, " ")
     .trim();
   return Boolean(
