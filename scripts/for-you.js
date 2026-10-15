@@ -22,6 +22,7 @@ let currentItems = [];
 let becauseItems = [];
 let requestId = 0;
 let removedFilters = new Set();
+let suppressInvalidationRefresh = false;
 const LANGUAGE_LABELS = { en: "English", ko: "Korean", ja: "Japanese", fr: "French", es: "Spanish", hi: "Hindi", zh: "Chinese", de: "German", it: "Italian", pt: "Portuguese", th: "Thai", ar: "Arabic", tr: "Turkish", ta: "Tamil", te: "Telugu", yo: "Yoruba" };
 
 function intentForPage() {
@@ -169,7 +170,11 @@ async function loadRecommendations({ refresh = false } = {}) {
     : "A mix of familiar taste and something new to discover.";
 
   try {
-    if (refresh) invalidateRecommendationCaches();
+    if (refresh) {
+      suppressInvalidationRefresh = true;
+      invalidateRecommendationCaches();
+      suppressInvalidationRefresh = false;
+    }
     let items;
     if (intentHasFilters(intent)) {
       items = await getIntentRecommendations(intent, 24);
@@ -230,6 +235,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }));
 
   document.querySelectorAll("[data-type]").forEach(button => button.addEventListener("click", () => {
+    removedFilters.clear();
     setActiveType(button.dataset.type);
     void loadRecommendations();
   }));
@@ -294,8 +300,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   window.addEventListener("vivid:recommendations-invalidated", () => {
-    // Avoid duplicate refreshes while the initial request is still in flight.
-    if (document.visibilityState === "visible") void loadRecommendations();
+    if (!suppressInvalidationRefresh && document.visibilityState === "visible") void loadRecommendations();
   });
   window.addEventListener("vivid:library-changed", () => void loadRecommendations());
   window.addEventListener("vivid:progress-changed", () => void loadSecondarySections());
