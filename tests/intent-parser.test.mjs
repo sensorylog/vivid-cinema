@@ -130,6 +130,8 @@ test("recognizes supported streaming providers but does not apply provider filte
   const title = parseIntent("Inception on Netflix");
   assert.equal(title.providerOnly, false);
   assert.equal(intentHasFilters(title), false);
+  assert.equal(intentHasFilters(parseIntent("Inception movie on Netflix")), false);
+  assert.equal(intentHasFilters(parseIntent("horror movies on Netflix")), true);
   assert.ok(title.unsupported.some(value => value.includes("specific-title")));
 
   assert.equal(parseIntent("Disney Plus movies").provider.id, 337);
