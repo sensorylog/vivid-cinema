@@ -88,3 +88,40 @@ test("intent result collection treats successful empty responses as no matches",
     { status: "fulfilled", value: [] }
   ]), []);
 });
+
+
+test("active movie playback progress lowers its ranking against an otherwise equal unseen title", () => {
+  const candidates = [candidate(1), candidate(2)];
+  const ranked = rankIntentCandidates(candidates, {
+    progress: {
+      "movie:1": { progress: 700, duration: 1000, percentage: 70, completed: false, updatedAt: 2 }
+    },
+    limit: 2
+  });
+  assert.deepEqual(ranked.map(item => item.id), ["2", "1"]);
+});
+
+test("completed movies receive a stronger playback penalty than unseen titles", () => {
+  const candidates = [candidate(1), candidate(2)];
+  const ranked = rankIntentCandidates(candidates, {
+    progress: {
+      "movie:1": { progress: 1000, duration: 1000, percentage: 100, completed: true, updatedAt: 2 }
+    },
+    limit: 2
+  });
+  assert.deepEqual(ranked.map(item => item.id), ["2", "1"]);
+});
+
+test("unfinished TV episode progress is applied to the parent series recommendation", () => {
+  const candidates = [
+    candidate(1, { media_type: "tv", raw: { genre_ids: [35], original_language: "en", first_air_date: "2022-04-01" } }),
+    candidate(2, { media_type: "tv", raw: { genre_ids: [35], original_language: "en", first_air_date: "2022-04-01" } })
+  ];
+  const ranked = rankIntentCandidates(candidates, {
+    progress: {
+      "tv:1:1:3": { progress: 800, duration: 1000, percentage: 80, completed: false, updatedAt: 2 }
+    },
+    limit: 2
+  });
+  assert.deepEqual(ranked.map(item => item.id), ["2", "1"]);
+});
