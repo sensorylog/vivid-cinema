@@ -22,5 +22,6 @@ test("Home search focuses the input synchronously so iOS can open its keyboard",
 
 test("Home search refreshes recent suggestions when account-scoped history becomes ready", () => {
   assert.match(script, /vivid:search-history-ready/);
-  assert.match(script, /!searchInput\?\.value\.trim\(\)\) showRecentSearches\(\)/);
+  assert.match(script, /if \(changedOwner\)/);
+  assert.match(script, /searchRequestId\+\+/);
 });
