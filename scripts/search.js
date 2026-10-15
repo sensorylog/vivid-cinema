@@ -3,7 +3,7 @@ import { tmdbApi } from "./tmdb.js";
 import { normalizeResults } from "./media.js";
 import { parseIntent } from "./intent-parser.js";
 import { getTasteProfile } from "./intelligence.js";
-import { getProviderCountry } from "./provider-region.js";
+import { getProviderCountry, getProviderCountryName, loadSupportedProviderCountries } from "./provider-region.js";
 
 const RECENT_KEY_PREFIX = "vivid:search:recent:v2:";
 const LEGACY_RECENT_KEY = "vivid:search:recent:v1";
@@ -391,8 +391,9 @@ export async function searchIntelligently(query, options = {}) {
   let providerUnsupportedNote = "";
 
   if (providerIntent) {
+    await loadSupportedProviderCountries();
     providerRegion = getProviderCountry();
-    providerTarget = { name: providerIntent.name, region: providerRegion };
+    providerTarget = { name: providerIntent.name, region: providerRegion, regionLabel: getProviderCountryName(providerRegion) };
     const [movieProviders, tvProviders] = await Promise.allSettled([
       tmdbApi.movieWatchProviders(providerRegion),
       tmdbApi.tvWatchProviders(providerRegion)
