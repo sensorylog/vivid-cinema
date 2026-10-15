@@ -763,7 +763,7 @@ export async function getPlotMatchRecommendations(intent = {}, limit = 18) {
       if (intent.country) params.with_origin_country = String(intent.country);
       if (intent.provider) {
         params.with_watch_providers = String(intent.provider.id);
-        params.watch_region = getProviderCountry();
+        params.watch_region = intent.providerRegion || getProviderCountry();
         params.with_watch_monetization_types = "flatrate";
       }
       if (intent.language) params.with_original_language = String(intent.language);
@@ -825,7 +825,7 @@ export async function getPlotMatchRecommendations(intent = {}, limit = 18) {
       if (intent.country) params.with_origin_country = String(intent.country);
       if (intent.provider) {
         params.with_watch_providers = String(intent.provider.id);
-        params.watch_region = getProviderCountry();
+        params.watch_region = intent.providerRegion || getProviderCountry();
         params.with_watch_monetization_types = "flatrate";
       }
       if (intent.language) params.with_original_language = String(intent.language);
@@ -908,7 +908,7 @@ export async function getIntentRecommendations(intent = {}, limit = 18) {
     if (intent.country) params.with_origin_country = String(intent.country);
     if (intent.provider) {
       params.with_watch_providers = String(intent.provider.id);
-      params.watch_region = getProviderCountry();
+      params.watch_region = intent.providerRegion || getProviderCountry();
       params.with_watch_monetization_types = "flatrate";
     }
     if (intent.language) params.with_original_language = String(intent.language);
