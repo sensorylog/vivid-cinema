@@ -25,3 +25,12 @@ test("Home search refreshes recent suggestions when account-scoped history becom
   assert.match(script, /if \(changedOwner\)/);
   assert.match(script, /searchRequestId\+\+/);
 });
+
+
+test("Home search does not upload raw query text as behavior-event metadata", () => {
+  assert.doesNotMatch(script, /recordBehavior\("search_query",\s*null,\s*\{\s*query\s*\}\)/);
+  assert.match(script, /rememberSearch\(query,searchOwnerAtStart\)/);
+  const privacy = readFileSync(new URL("../privacy.html", import.meta.url), "utf8");
+  assert.match(privacy, /Search terms are sent to TMDB/);
+  assert.match(privacy, /raw search text is not uploaded as behaviour-event metadata/);
+});
