@@ -145,7 +145,7 @@ export function buildStructuredSearchParams(intent = {}, type, page = 1) {
   if (intent.country) params.with_origin_country = String(intent.country);
   if (intent.provider) {
     params.with_watch_providers = String(intent.provider.id);
-    params.watch_region = getProviderCountry();
+    params.watch_region = intent.providerRegion || getProviderCountry();
     params.with_watch_monetization_types = "flatrate";
   }
   if (intent.language) params.with_original_language = String(intent.language);
@@ -530,7 +530,7 @@ export async function searchIntelligently(query, options = {}) {
     ranked = items.slice(0, Number(options.limit || 8));
   }
   const filterNotes = parsed.provider && structured
-    ? [...(parsed.unsupported || []), "Provider results checked for region " + getProviderCountry() + "."]
+    ? [...(parsed.unsupported || []), "Provider results checked for region " + (parsed.providerRegion || getProviderCountry()) + "."]
     : parsed.unsupported || [];
   return {
     items: ranked,
