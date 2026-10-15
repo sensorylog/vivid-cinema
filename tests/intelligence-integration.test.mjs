@@ -32,6 +32,7 @@ test("behavior deduplication is bounded and events remain capped", () => {
 
 test("recommendation cache fingerprint includes all observed library collections and progress", () => {
   assert.match(recommendations, /"library:" \+ observed\.map/);
+  assert.match(recommendations, /"recommendationMemory:" \+ recommendationMemoryFingerprint/);
   assert.match(recommendations, /"taste:" \+ Number\(taste\.updatedAt \|\| 0\)/);
   assert.match(recommendations, /"rotation:" \+ new Date\(\)\.toISOString\(\)\.slice\(0, 10\)/);
 });
