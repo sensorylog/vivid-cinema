@@ -150,7 +150,7 @@ export function buildStructuredSearchParams(intent = {}, type, page = 1) {
   if (intent.language) params.with_original_language = String(intent.language);
   if (intent.anime) {
     params.with_original_language = "ja";
-    if (type === "tv") params.with_origin_country = "JP";
+    if (type === "tv" && !intent.country) params.with_origin_country = "JP";
   }
   return params;
 }
