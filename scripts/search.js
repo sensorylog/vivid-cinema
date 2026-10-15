@@ -529,5 +529,12 @@ export async function searchIntelligently(query, options = {}) {
   } catch {
     ranked = items.slice(0, Number(options.limit || 8));
   }
-  return { items: ranked, intent: { ...searchIntent, filters: parsed, structured }, recent: getRecentSearches() };
+  const filterNotes = parsed.provider && structured
+    ? [...(parsed.unsupported || []), "Provider results checked for region " + getProviderCountry() + "."]
+    : parsed.unsupported || [];
+  return {
+    items: ranked,
+    intent: { ...searchIntent, filters: { ...parsed, unsupported: filterNotes }, structured },
+    recent: getRecentSearches()
+  };
 }
