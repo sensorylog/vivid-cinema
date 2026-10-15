@@ -137,3 +137,26 @@ test("unfinished TV episode progress is applied to the parent series recommendat
   });
   assert.deepEqual(ranked.map(item => item.id), ["2", "1"]);
 });
+
+
+test("recent repeated impressions receive a meaningful but bounded rotation penalty", async () => {
+  const { scoreRecommendationExposure } = await import("../scripts/recommendations.js");
+  const now = 1_800_000_000_000;
+  const unseen = scoreRecommendationExposure(null, now);
+  const seen = scoreRecommendationExposure({ impressions: 5, clicks: 0, lastSeen: now }, now);
+  assert.equal(unseen.seenPenalty, 0);
+  assert.ok(seen.seenPenalty >= 4);
+  assert.ok(seen.seenPenalty <= 5);
+  assert.equal(seen.clickRecovery, 0);
+});
+
+test("exposure penalty fades over time and clicks soften but do not erase repetition", async () => {
+  const { scoreRecommendationExposure } = await import("../scripts/recommendations.js");
+  const now = 1_800_000_000_000;
+  const recent = scoreRecommendationExposure({ impressions: 5, clicks: 0, lastSeen: now }, now);
+  const old = scoreRecommendationExposure({ impressions: 5, clicks: 0, lastSeen: now - 42 * 86400000 }, now);
+  const clicked = scoreRecommendationExposure({ impressions: 5, clicks: 1, lastSeen: now }, now);
+  assert.ok(old.seenPenalty < recent.seenPenalty);
+  assert.ok(clicked.clickRecovery > 0);
+  assert.ok(clicked.clickRecovery < clicked.seenPenalty);
+});
