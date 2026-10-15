@@ -131,7 +131,7 @@ function normalizeProviderName(value) {
 export function parseWatchProviderIntent(query = "") {
   const q = normalizeQuery(query).toLowerCase();
   const hasProviderContext = /\b(?:on|available|streaming|watch)\b/i.test(q) ||
-    /^(?:netflix|prime video|amazon prime video|amazon prime|disney\s*(?:plus|\+)|hulu|crunchyroll|apple\s+tv(?:\s*(?:plus|\+))?|(?:hbo\s+)?max|paramount\s*(?:plus|\+)|peacock|tubi|mubi|starz|youtube)\s+(?:movies?|films?|tv shows?|series|shows?)\b/i.test(q);
+    /^(?:netflix|prime video|amazon prime video|amazon prime|disney\s*(?:plus|\+)|hulu|crunchyroll|apple\s+tv(?:\s*(?:plus|\+))?|hbo\s+max|paramount\s*(?:plus|\+)|peacock|tubi|mubi|starz|youtube)\s+(?:movies?|films?|tv shows?|series|shows?)\b/i.test(q);
   if (!hasProviderContext) return null;
   const provider = WATCH_PROVIDER_HINTS.find(item => item.pattern.test(q));
   return provider ? { key: provider.key, name: provider.name, aliases: provider.aliases } : null;
