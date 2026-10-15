@@ -48,3 +48,11 @@ test("For You wires deterministic intent parsing and canonical recommendation/fe
   assert.match(script, /parsed.anime && parsed.mediaType !== "movie"/);
   assert.match(script, /recordBehavior\("recommendation_clicked"/);
 });
+
+test("For You avoids undeclared intent state and consolidates account-switch recovery", () => {
+  assert.doesNotMatch(script, /\bcurrentIntent\s*=/, "unused undeclared currentIntent assignment must not crash strict-mode modules");
+  assert.equal((script.match(/window\.addEventListener\("vivid:account-switched"/g) || []).length, 1, "account switching must have one coordinated handler");
+  assert.match(script, /requestId\+\+;\s*secondaryRequestId\+\+;/);
+  assert.match(script, /showStatus\("Refreshing recommendations for this account…"\);\s*void loadRecommendations\(\);/);
+  assert.match(script, /lastDismissedItem = null;/);
+});
