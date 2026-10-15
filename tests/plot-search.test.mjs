@@ -67,5 +67,7 @@ test("plot matching has a constrained catalogue-overview fallback when keyword m
   assert.match(source, /TMDB keyword tagging is incomplete/);
   assert.match(source, /const fallbackCalls = \[\]/);
   assert.match(source, /scorePlotCandidates\(intent\.query \|\| "", uniqueByKey\(candidates\)\)/);
-  assert.match(source, /same verified\s+constraints/);
+  assert.match(source, /same verified/);
+  assert.match(source, /tmdbApi\\.discoverMovies\\(params\\)/);
+  assert.match(source, /tmdbApi\\.discoverTv\\(params\\)/);
 });
