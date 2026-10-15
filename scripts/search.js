@@ -512,8 +512,13 @@ export async function searchIntelligently(query, options = {}) {
   }
 
   const textItems = responses[0]?.status === "fulfilled" ? responses[0].value : [];
-  const discovered = responses.slice(1).flatMap(result =>
+  const discoveryResponses = responses.slice(1);
+  const discovered = discoveryResponses.flatMap(result =>
     result.status === "fulfilled" ? result.value : []
+  );
+  const providerDiscoveryFailed = Boolean(
+    structured && parsed.provider && discoveryResponses.length &&
+    !discoveryResponses.some(result => result.status === "fulfilled")
   );
   const relevantTextItems = structured
     ? textItems.filter(item => matchesStructuredSearchIntent(item, parsed))
@@ -531,7 +536,12 @@ export async function searchIntelligently(query, options = {}) {
     ranked = items.slice(0, Number(options.limit || 8));
   }
   const filterNotes = parsed.provider && structured
-    ? [...(parsed.unsupported || []), "Provider results checked for region " + (parsed.providerRegion || getProviderCountry()) + "."]
+    ? [
+        ...(parsed.unsupported || []),
+        ...(providerDiscoveryFailed
+          ? ["Provider availability could not be checked because catalogue discovery failed; unverified text results were withheld."]
+          : ["Provider results checked for region " + (parsed.providerRegion || getProviderCountry()) + "."])
+      ]
     : parsed.unsupported || [];
   return {
     items: ranked,
