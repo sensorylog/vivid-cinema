@@ -8,6 +8,7 @@ let currentQuery = "";
 let currentPage = 1;
 let currentItems = [];
 let currentSearchNotes = [];
+let currentSimilarityTarget = null;
 
 const escapeHtml = value => String(value ?? "").replace(/[&<>"']/g, char => ({
   "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
@@ -42,7 +43,7 @@ function renderRecent() {
   });
 }
 
-function renderResults(items, query, canLoadMore = false, notes = currentSearchNotes) {
+function renderResults(items, query, canLoadMore = false, notes = currentSearchNotes, similarityTarget = currentSimilarityTarget) {
   const movies = items.filter(item => item.media_type === "movie");
   const shows = items.filter(item => item.media_type === "tv");
   const people = items.filter(item => item.media_type === "person");
@@ -69,8 +70,11 @@ function renderResults(items, query, canLoadMore = false, notes = currentSearchN
       notes.map(note => '<li>' + escapeHtml(note) + '</li>').join("") +
       '</ul></aside>'
     : '';
+  const resultHeading = similarityTarget?.title
+    ? 'SIMILAR TO “' + escapeHtml(similarityTarget.title) + '”'
+    : 'RESULTS FOR “' + escapeHtml(query) + '”';
   content.innerHTML =
-    '<div class="vivid-search-page-label">RESULTS FOR “' + escapeHtml(query) + '”</div>' +
+    '<div class="vivid-search-page-label">' + resultHeading + '</div>' +
     notesMarkup +
     (items.length
       ? renderGroup("Movies", movies) + renderGroup("TV Shows", shows) + renderGroup("People", people)
@@ -107,14 +111,15 @@ async function runSearch(value, { append = false } = {}) {
     if (!append) rememberSearch(query);
     const pageItems = result.items || [];
     currentSearchNotes = result.intent?.filters?.unsupported || [];
+    currentSimilarityTarget = result.intent?.similarityTarget || null;
     const identities = new Set(currentItems.map(item => item.media_type + ":" + item.id));
     const newItems = pageItems.filter(item => !identities.has(item.media_type + ":" + item.id));
     currentItems = [...currentItems, ...newItems];
     currentPage = requestedPage;
-    renderResults(currentItems, query, pageItems.length >= PAGE_SIZE, currentSearchNotes);
+    renderResults(currentItems, query, pageItems.length >= PAGE_SIZE, currentSearchNotes, currentSimilarityTarget);
   } catch (error) {
     if (append && currentItems.length) {
-      renderResults(currentItems, query, true, currentSearchNotes);
+      renderResults(currentItems, query, true, currentSearchNotes, currentSimilarityTarget);
       const loadButton = content.querySelector("[data-search-load-more]");
       if (loadButton) loadButton.textContent = "Try loading more";
     } else {
