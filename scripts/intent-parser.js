@@ -276,7 +276,7 @@ export function parseIntent(input = "") {
     }
   }
 
-  const providerQualifier = /\b(?:available|streaming|watchable)\s+on\s+(?:amazon\s+prime\s+video|prime\s+video|amazon\s+prime|disney\s*(?:plus|\+)|netflix|hulu|crunchyroll|apple\s+tv(?:\s*(?:plus|\+))?|hbo\s+max|paramount\s*(?:plus|\+)|peacock|tubi|mubi|starz|youtube)(?=$|[^a-z0-9])|\bon\s+(?:amazon\s+prime\s+video|prime\s+video|amazon\s+prime|disney\s*(?:plus|\+)|netflix|hulu|crunchyroll|apple\s+tv(?:\s*(?:plus|\+))?|hbo\s+max|paramount\s*(?:plus|\+)|peacock|tubi|mubi|starz|youtube)(?=$|[^a-z0-9])/i.test(text);
+  const providerQualifier = /\b(?:available|streaming|watchable)\s+on\s+(?:amazon\s+prime\s+video|prime\s+video|amazon\s+prime|disney\s*(?:plus|\+)|netflix|hulu|crunchyroll|apple\s+tv(?:\s*(?:plus|\+))?|hbo\s+max|max|paramount\s*(?:plus|\+)|peacock|tubi|mubi|starz|youtube)(?=$|[^a-z0-9])|\bon\s+(?:amazon\s+prime\s+video|prime\s+video|amazon\s+prime|disney\s*(?:plus|\+)|netflix|hulu|crunchyroll|apple\s+tv(?:\s*(?:plus|\+))?|hbo\s+max|max|paramount\s*(?:plus|\+)|peacock|tubi|mubi|starz|youtube)(?=$|[^a-z0-9])/i.test(text);
   if (providerMentioned && providerQualifier) {
     const titleCandidate = buildProviderTitleQuery(text, providerRegion);
     const nonTypeWords = titleCandidate.replace(/\b(?:movie|movies|film|films|tv|series|show|shows)\b/gi, " ").replace(/[\s,]+/g, " ").trim();
