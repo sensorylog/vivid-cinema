@@ -3,6 +3,10 @@ import { searchIntelligently, getRecentSearches, rememberSearch, clearRecentSear
 const input = document.getElementById("search-page-input");
 const clear = document.getElementById("search-page-clear");
 const content = document.getElementById("search-page-content");
+const PAGE_SIZE = 12;
+let currentQuery = "";
+let currentPage = 1;
+let currentItems = [];
 
 const escapeHtml = value => String(value ?? "").replace(/[&<>"']/g, char => ({
   "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
@@ -37,7 +41,7 @@ function renderRecent() {
   });
 }
 
-function renderResults(items, query) {
+function renderResults(items, query, canLoadMore = false) {
   const movies = items.filter(item => item.media_type === "movie");
   const shows = items.filter(item => item.media_type === "tv");
   const people = items.filter(item => item.media_type === "person");
@@ -63,22 +67,51 @@ function renderResults(items, query) {
     '<div class="vivid-search-page-label">RESULTS FOR “' + escapeHtml(query) + '”</div>' +
     (items.length
       ? renderGroup("Movies", movies) + renderGroup("TV Shows", shows) + renderGroup("People", people)
-      : '<div class="vivid-search-empty-page"><i class="bi bi-search"></i><strong>No matches found</strong><span>Try another title, person, genre, or shorter search.</span></div>');
+      : '<div class="vivid-search-empty-page"><i class="bi bi-search"></i><strong>No matches found</strong><span>Try another title, person, genre, or shorter search.</span></div>') +
+    (canLoadMore ? '<div class="vivid-search-load-more-wrap"><button type="button" class="vivid-search-load-more" data-search-load-more>Load more results</button></div>' : '');
+  content.querySelector("[data-search-load-more]")?.addEventListener("click", () => {
+    void runSearch(query, { append: true });
+  });
 }
 
-async function runSearch(value) {
+async function runSearch(value, { append = false } = {}) {
   const query = String(value || "").trim();
   if (!query) {
     renderRecent();
     return;
   }
-  content.innerHTML = '<div class="vivid-search-loading"><span></span><strong>Searching…</strong></div>';
+  if (!append) {
+    currentQuery = query;
+    currentPage = 1;
+    currentItems = [];
+    content.innerHTML = '<div class="vivid-search-loading"><span></span><strong>Searching…</strong></div>';
+  } else {
+    if (query !== currentQuery) return;
+    const loadButton = content.querySelector("[data-search-load-more]");
+    if (loadButton) {
+      loadButton.disabled = true;
+      loadButton.textContent = "Loading…";
+    }
+  }
+  const requestedPage = append ? currentPage + 1 : 1;
   try {
-    const result = await searchIntelligently(query, { limit: 12 });
-    rememberSearch(query);
-    renderResults(result.items, query);
+    const result = await searchIntelligently(query, { limit: PAGE_SIZE, page: requestedPage });
+    if (query !== currentQuery) return;
+    if (!append) rememberSearch(query);
+    const pageItems = result.items || [];
+    const identities = new Set(currentItems.map(item => item.media_type + ":" + item.id));
+    const newItems = pageItems.filter(item => !identities.has(item.media_type + ":" + item.id));
+    currentItems = [...currentItems, ...newItems];
+    currentPage = requestedPage;
+    renderResults(currentItems, query, pageItems.length >= PAGE_SIZE);
   } catch (error) {
-    content.innerHTML = '<div class="vivid-search-empty-page"><i class="bi bi-exclamation-circle"></i><strong>Search is temporarily unavailable</strong><span>' + escapeHtml(error?.message || "Please try again.") + '</span></div>';
+    if (append && currentItems.length) {
+      renderResults(currentItems, query, true);
+      const loadButton = content.querySelector("[data-search-load-more]");
+      if (loadButton) loadButton.textContent = "Try loading more";
+    } else {
+      content.innerHTML = '<div class="vivid-search-empty-page"><i class="bi bi-exclamation-circle"></i><strong>Search is temporarily unavailable</strong><span>' + escapeHtml(error?.message || "Please try again.") + '</span></div>';
+    }
   }
 }
 

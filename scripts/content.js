@@ -428,28 +428,66 @@ export async function getHomeSectionPage(key, page = 1) {
   return normalizeHome(key, await loadHomeKey(key, page));
 }
 
+export function mergeSearchCatalogueResults(groups = []) {
+  const byIdentity = new Map();
+  for (const group of groups) {
+    for (const item of group || []) {
+      const type = item?.media_type;
+      const id = String(item?.id || "");
+      if (!id || !["movie", "tv", "person"].includes(type)) continue;
+      const key = type + ":" + id;
+      const existing = byIdentity.get(key);
+      // Prefer the richer record (search/movie or search/tv) when multi-search
+      // returns the same title, but preserve the first stable result position.
+      if (!existing || (!existing.overview && item.overview) || (!existing.poster_path && item.poster_path)) {
+        byIdentity.set(key, { ...existing, ...item });
+      }
+    }
+  }
+  return [...byIdentity.values()];
+}
+
 export async function searchContent(query, page = 1) {
   const q = String(query || "").trim();
   if (!q) return [];
-  const data = await tmdbApi.searchMulti(q, page);
-  return (data.results || [])
-    .filter(item => ["movie", "tv", "person"].includes(item.media_type))
-    .map(item => item.media_type === "person"
-      ? {
-          id: String(item.id),
-          media_type: "person",
-          content_id: "person:" + item.id,
-          title: item.name || "Unknown person",
-          year: "",
-          overview: "",
-          poster_path: item.profile_path || "",
-          backdrop_path: "",
-          vote_average: 0,
-          raw: item
-        }
-      : normalizeResults([item], item.media_type)[0]
-    )
-    .filter(Boolean);
+  // TMDB's multi-search is useful for people, but can omit title results that
+  // appear in the dedicated movie/TV indexes. Search all three indexes in
+  // parallel and merge them into one catalogue result set.
+  const results = await Promise.allSettled([
+    tmdbApi.searchMulti(q, page),
+    tmdbApi.searchMovies(q, page),
+    tmdbApi.searchTv(q, page)
+  ]);
+  const groups = results.map((result, index) => {
+    if (result.status !== "fulfilled") return [];
+    const items = result.value?.results || [];
+    if (index === 0) {
+      return items
+        .filter(item => ["movie", "tv", "person"].includes(item.media_type))
+        .map(item => item.media_type === "person"
+          ? {
+              id: String(item.id),
+              media_type: "person",
+              content_id: "person:" + item.id,
+              title: item.name || "Unknown person",
+              year: "",
+              overview: "",
+              poster_path: item.profile_path || "",
+              backdrop_path: "",
+              vote_average: 0,
+              raw: item
+            }
+          : normalizeResults([item], item.media_type)[0]
+        ).filter(Boolean);
+    }
+    const type = index === 1 ? "movie" : "tv";
+    return normalizeResults(items, type).filter(Boolean);
+  });
+  const merged = mergeSearchCatalogueResults(groups);
+  if (!merged.length && results.every(result => result.status === "rejected")) {
+    throw results[0].reason || new Error("Catalogue search is temporarily unavailable.");
+  }
+  return merged;
 }
 
 export async function discoverMovies(params = {}) {
