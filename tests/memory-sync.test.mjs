@@ -43,6 +43,7 @@ test("intelligence sync reports outcomes and retries when the device reconnects"
   assert.match(intelligence, /window\.addEventListener\("online"/);
   assert.match(intelligence, /localItem\.updatedAt/);
   assert.match(intelligence, /feedbackCleared/);
+  assert.match(intelligence, /s\.feedback\[k\]=\{\.\.\.i,kind:"like",updatedAt\};delete s\.feedbackCleared\[k\]/);
   assert.match(intelligence, /kind:"cleared",updatedAt:Number\(tombstone\.updatedAt\)/);
   assert.match(intelligence, /Vivid intelligence sync unavailable; local state is retained for retry/);
 });
