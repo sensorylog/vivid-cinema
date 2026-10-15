@@ -17,6 +17,8 @@ test("library, progress, and intelligence use the shared owner snapshot policy",
   assert.match(library, /TOMBSTONE_STORAGE_KEY/);
   assert.match(progress, /FOR_YOU_CACHE_KEY/);
   assert.match(intelligence, /TASTE_CACHE_KEY/);
+  assert.match(progress, /void startPlaybackSync\(\)/);
+  assert.match(intelligence, /void startIntelligenceSync\(\)/);
 });
 
 test("playback writes are bound to the owner active when queued", () => {
@@ -36,6 +38,8 @@ test("intelligence sync reports outcomes and retries when the device reconnects"
   assert.match(intelligence, /vivid:sync-status/);
   assert.match(intelligence, /window\.addEventListener\("online"/);
   assert.match(intelligence, /localItem\.updatedAt/);
+  assert.match(intelligence, /feedbackCleared/);
+  assert.match(intelligence, /kind:"cleared",updatedAt:Number\(tombstone\.updatedAt\)/);
   assert.match(intelligence, /Vivid intelligence sync unavailable; local state is retained for retry/);
 });
 
