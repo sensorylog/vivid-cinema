@@ -122,7 +122,8 @@ async function seeds(){
   for(const event of s.events){
    if(!event?.contentId||!TASTE_SIGNAL_TYPES.has(event.type))continue;
    const parts=String(event.contentId).split(":");
-   const media_type=event.mediaType||parts.shift();
+   const typeFromKey=parts.shift();
+   const media_type=event.mediaType||typeFromKey;
    const id=parts.join(":");
    if(!id||!media_type)continue;
    const item={id,media_type,title:"",updatedAt:Number(event.occurredAt||0)};
