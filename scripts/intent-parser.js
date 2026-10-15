@@ -253,7 +253,7 @@ export function parseIntent(input = "") {
     intent.constraints.push(String(intent.year));
   }
 
-  const providerMentioned = new RegExp("\\b(?:" + PROVIDER_QUERY_ALIASES.map(alias => alias.replace(/[+]/g, "\\\\+")).join("|") + ")\\b", "i").test(text);
+  const providerMentioned = new RegExp("\\b(?:" + PROVIDER_QUERY_ALIASES.map(alias => alias.replace(/[+]/g, "\\+")).join("|") + ")\\b", "i").test(text);
   const providerRegion = providerMentioned ? findProviderRegion(text) : null;
   if (providerRegion) {
     intent.providerRegion = providerRegion.code;
