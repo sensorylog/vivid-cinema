@@ -41,3 +41,27 @@ test("profile controls retain visible keyboard focus and reduced-motion support"
   assert.match(styles, /prefers-reduced-motion:reduce/);
   assert.match(page, /aria-live="polite"/);
 });
+
+test("cloud library sync reads authoritative server data rather than cache-only snapshots", () => {
+  const library = readFileSync(new URL("../scripts/library.js", import.meta.url), "utf8");
+  assert.match(library, /getDocsFromServer\(firestoreCollection\(db,\s*"users",\s*uid,\s*collection\)\)/);
+  assert.match(library, /getDocsFromServer\(firestoreCollection\(db,\s*"users",\s*uid,\s*"libraryTombstones"\)\)/);
+});
+
+test("library sync propagates Firestore failures so the account UI cannot report false success", () => {
+  const library = readFileSync(new URL("../scripts/library.js", import.meta.url), "utf8");
+  const syncBody = library.slice(
+    library.indexOf("export async function syncLibraryForUser"),
+    library.indexOf("export async function syncLocalItem")
+  );
+  assert.doesNotMatch(syncBody, /catch\s*\([^)]*\)\s*\{[\s\S]*?return local;/);
+  assert.match(syncBody, /await Promise\.all\(\[/);
+  assert.match(syncBody, /Do not replace local data until all required cloud operations have been acknowledged/);
+});
+
+test("library sync reconciles deletions and avoids rewriting every unchanged remote item", () => {
+  const library = readFileSync(new URL("../scripts/library.js", import.meta.url), "utf8");
+  assert.match(library, /deleteDoc\(doc\(db,\s*"users",\s*user\.uid,\s*tombstone\.collection,\s*contentId\)\)/);
+  assert.match(library, /if\(!remote \|\| Number\(item\.updatedAt\|\|0\)>Number\(remote\.updatedAt\|\|0\)\)/);
+  assert.match(library, /await mapLimit\(writes,8/);
+});
