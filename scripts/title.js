@@ -6,6 +6,7 @@ import { escapeHtml, getErrorMessage } from "./utils.js";
 import { hasLibraryItem, startLibrarySync, toggleLibraryItem, upsertLibraryItem } from "./library.js";
 import { getProviderCountry, setProviderCountry } from "./provider-region.js";
 import { getLatestPlaybackProgress } from "./recommendations.js";
+import { recordBehavior } from "./intelligence.js";
 
 const $ = (id) => document.getElementById(id);
 const route = getRoute();
@@ -148,6 +149,7 @@ function wireSeasons(details) {
 }
 
 function openTrailer(key, name) {
+  if (media) recordBehavior("trailer_started", media, { surface: "title" });
   let modal = $("trailer-modal");
   if (!modal) {
     modal = document.createElement("div");
@@ -308,6 +310,7 @@ function isAnimeTitle(details) { return (details?.genres || []).some(g => Number
 function render(details, externalCertification = "", externalCertificationNote = "") {
   currentDetails=details;
   media=normalizeMedia(details,route.params.get("type")==="tv"?"tv":"movie");
+  recordBehavior("title_opened", media, { surface: "title" });
   const title=media.title;
   const year=media.year||"—";
   const rating=media.vote_average?media.vote_average.toFixed(1):"—";
@@ -352,6 +355,15 @@ function render(details, externalCertification = "", externalCertificationNote =
 
   upsertLibraryItem("history",libraryItem());
   wireSeasons(details);wireProviders(details);wireTrailers();wireLibraryActions();
+  $("recommendation-rail")?.addEventListener("click", event => {
+    const link = event.target.closest("a");
+    if (!link) return;
+    const url = new URL(link.href, window.location.href);
+    const id = url.searchParams.get("id");
+    const type = url.searchParams.get("type") || "movie";
+    const item = related.find(candidate => String(candidate.id) === String(id) && String(candidate.media_type || "movie") === type);
+    if (item) recordBehavior("recommendation_clicked", item, { surface: "title" });
+  });
   if(firstTrailer)$("hero-trailer").addEventListener("click",()=>openTrailer(firstTrailer.key,firstTrailer.name||"Trailer"));
 }
 

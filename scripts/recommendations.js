@@ -586,6 +586,7 @@ export async function getPersonalRecommendations(limit = 12) {
     ...Object.entries(feedback).map(([k, v]) => k + ":" + v.kind + ":" + v.updatedAt),
     ...Object.entries(progress).map(([k, v]) => k + ":" + v.updatedAt),
     "recent:" + (library.history || []).slice(0, 5).map(item => keyFor(item) + ":" + (item.lastWatchedAt || item.updatedAt || "")).join(","),
+    "library:" + observed.map(item => keyFor(item) + ":" + Number(item.updatedAt || item.lastWatchedAt || 0)).sort().join(","),
     "taste:" + Number(taste.updatedAt || 0),
     "rotation:" + new Date().toISOString().slice(0, 10)
   ].sort().join("|");
