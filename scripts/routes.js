@@ -5,6 +5,7 @@ export const VIVID_ROUTES = Object.freeze({
   title: { path: VIVID_CONFIG.routes.title, page: "title" },
   watch: { path: VIVID_CONFIG.routes.watch, page: "watch" },
   discover: { path: VIVID_CONFIG.routes.discover, page: "discover" },
+  forYou: { path: VIVID_CONFIG.routes.forYou, page: "for-you" },
   anime: { path: VIVID_CONFIG.routes.anime, page: "anime" },
   collection: { path: VIVID_CONFIG.routes.collection, page: "collection" },
   library: { path: VIVID_CONFIG.routes.library, page: "library" },
