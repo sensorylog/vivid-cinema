@@ -197,19 +197,19 @@ export function chooseSimilarityTarget(items = [], query = "", preferredType = n
 
 
 function normalizePersonName(value = "") {
-  return normalizeQuery(value).normalize("NFKD").replace(/[\\u0300-\\u036f]/g, "")
+  return normalizeQuery(value).normalize("NFKD").replace(/[\u0300-\u036f]/g, "")
     .toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
 }
 
 export function parsePersonCreditIntent(query = "") {
   const q = normalizeQuery(query);
-  const match = q.match(/^(?:(movies?|films?|tv shows?|series|shows?)\\s+)?(written and directed by|directed by|written by|created by|produced by|starring|starred by|featuring|with|by)\\s+(.+)$/i);
+  const match = q.match(/^(?:(movies?|films?|tv shows?|series|shows?)\s+)?(written and directed by|directed by|written by|created by|produced by|starring|starred by|featuring|with|by)\s+(.+)$/i);
   if (!match) return null;
 
   const prefix = String(match[1] || "").toLowerCase();
   const directive = String(match[2] || "").toLowerCase();
   const personName = String(match[3] || "").trim().replace(/[?.!,]+$/, "").trim();
-  if (!personName || personName.split(/\\s+/).length > 6) return null;
+  if (!personName || personName.split(/\s+/).length > 6) return null;
 
   let role = "director";
   if (directive === "written and directed by") role = "director_writer";
@@ -229,7 +229,7 @@ export function parsePersonCreditIntent(query = "") {
 export function choosePersonSearchResult(results = [], query = "", role = "director") {
   const wanted = normalizePersonName(query);
   if (!wanted) return null;
-  const wantedTokens = wanted.split(/\\s+/).filter(Boolean);
+  const wantedTokens = wanted.split(/\s+/).filter(Boolean);
   const wantedSet = new Set(wantedTokens);
   const preferredDepartments = {
     actor: ["acting"],
@@ -244,7 +244,7 @@ export function choosePersonSearchResult(results = [], query = "", role = "direc
     .filter(item => item && item.id != null && item.media_type === "person" && item.name)
     .map((item, index) => {
       const name = normalizePersonName(item.name);
-      const nameTokens = name.split(/\\s+/).filter(Boolean);
+      const nameTokens = name.split(/\s+/).filter(Boolean);
       const overlap = nameTokens.filter(token => wantedSet.has(token)).length;
       const overlapRatio = wantedTokens.length ? overlap / wantedTokens.length : 0;
       let score = overlapRatio * 100;
@@ -266,10 +266,10 @@ function creditMatchesRole(credit, role) {
   if (role === "actor") return true;
   const job = String(credit.job || "").toLowerCase();
   if (role === "director") return job === "director";
-  if (role === "writer") return /\\b(writer|screenplay|story|teleplay|author)\\b/.test(job);
+  if (role === "writer") return /\b(writer|screenplay|story|teleplay|author)\b/.test(job);
   if (role === "producer") return /producer/.test(job);
   if (role === "creator") return /creator|created by|developed by/.test(job);
-  if (role === "director_writer") return job === "director" || /\\b(writer|screenplay|story|teleplay|author)\\b/.test(job);
+  if (role === "director_writer") return job === "director" || /\b(writer|screenplay|story|teleplay|author)\b/.test(job);
   return false;
 }
 
