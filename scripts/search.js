@@ -2,6 +2,7 @@ import { searchContent, mergeSearchCatalogueResults } from "./content.js";
 import { tmdbApi } from "./tmdb.js";
 import { normalizeResults } from "./media.js";
 import { parseIntent } from "./intent-parser.js";
+import { getProviderCountry } from "./provider-region.js";
 import { getTasteProfile } from "./intelligence.js";
 
 const RECENT_KEY_PREFIX = "vivid:search:recent:v2:";
@@ -92,7 +93,8 @@ export function getSearchIntent(query) {
     .filter(([label]) => q.includes(label))
     .flatMap(([, ids]) => ids)
     .filter((id, index, list) => list.indexOf(id) === index);
-  const type = Object.entries(TYPE_HINTS).find(([label]) => new RegExp("\\b" + label + "\\b").test(q))?.[1] || null;
+  const typeQuery = q.replace(/\bapple\s+tv(?:\+| plus)?\b/gi, " ");
+  const type = Object.entries(TYPE_HINTS).find(([label]) => new RegExp("\\b" + label + "\\b").test(typeQuery))?.[1] || null;
   const similarity = q.match(/^(?:(?:movies?|films?|tv shows?|series)\s+)?(?:like|similar to|similar)\s+(.+)$/i)?.[1]?.trim() || "";
   const people = /\b(actor|actress|director|creator|cast)\b/.test(q);
   return { query: normalizeQuery(query), genres, type, similarity, people };
@@ -114,7 +116,7 @@ export function isStructuredSearchIntent(intent = {}, query = "") {
     .replace(/[\s,]+/g, " ")
     .trim();
   return Boolean(
-    intent.genre || intent.year || intent.language || intent.runtimeMax || intent.anime ||
+    intent.genre || intent.year || intent.decade || intent.country || intent.language || intent.runtimeMax || intent.anime || (intent.provider && intent.providerOnly) ||
     (intent.mediaType !== "all" && !typeOnlyQuery)
   );
 }
@@ -136,10 +138,20 @@ export function buildStructuredSearchParams(intent = {}, type, page = 1) {
   if (intent.year) {
     params[type === "movie" ? "primary_release_year" : "first_air_date_year"] = String(intent.year);
   }
+  if (intent.decade) {
+    params[type === "movie" ? "primary_release_date.gte" : "first_air_date.gte"] = String(intent.decade) + "-01-01";
+    params[type === "movie" ? "primary_release_date.lte" : "first_air_date.lte"] = String(Number(intent.decade) + 9) + "-12-31";
+  }
+  if (intent.country) params.with_origin_country = String(intent.country);
+  if (intent.provider) {
+    params.with_watch_providers = String(intent.provider.id);
+    params.watch_region = getProviderCountry();
+    params.with_watch_monetization_types = "flatrate";
+  }
   if (intent.language) params.with_original_language = String(intent.language);
   if (intent.anime) {
     params.with_original_language = "ja";
-    if (type === "tv") params.with_origin_country = "JP";
+    if (type === "tv" && !intent.country) params.with_origin_country = "JP";
   }
   return params;
 }
@@ -150,6 +162,20 @@ export function matchesStructuredSearchIntent(item = {}, intent = {}) {
   if (["movie", "tv"].includes(intent.mediaType) && type !== intent.mediaType) return false;
 
   const raw = item.raw || item;
+  // Text search responses do not include provider availability, so never
+  // supplement a provider-filtered discovery query with unverifiable text hits.
+  if (intent.provider) return false;
+  if (intent.country) {
+    const countries = [
+      ...(Array.isArray(raw.origin_country) ? raw.origin_country : []),
+      ...(Array.isArray(raw.production_countries) ? raw.production_countries.map(country => country?.iso_3166_1) : [])
+    ].filter(Boolean).map(value => String(value).toUpperCase());
+    if (!countries.includes(String(intent.country).toUpperCase())) return false;
+  }
+  if (intent.decade) {
+    const year = Number(String(raw.release_date || raw.first_air_date || item.date || "").slice(0, 4));
+    if (!Number.isFinite(year) || year < Number(intent.decade) || year > Number(intent.decade) + 9) return false;
+  }
   const genreId = intent.genreIds?.[type] ??
     intent.genre?.[type === "movie" ? "movieId" : "tvId"];
   if (intent.genre && (!genreId || !(raw.genre_ids || item.genre_ids || []).map(Number).includes(Number(genreId)))) {
@@ -503,5 +529,12 @@ export async function searchIntelligently(query, options = {}) {
   } catch {
     ranked = items.slice(0, Number(options.limit || 8));
   }
-  return { items: ranked, intent: { ...searchIntent, filters: parsed, structured }, recent: getRecentSearches() };
+  const filterNotes = parsed.provider && structured
+    ? [...(parsed.unsupported || []), "Provider results checked for region " + getProviderCountry() + "."]
+    : parsed.unsupported || [];
+  return {
+    items: ranked,
+    intent: { ...searchIntent, filters: { ...parsed, unsupported: filterNotes }, structured },
+    recent: getRecentSearches()
+  };
 }
