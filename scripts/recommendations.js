@@ -822,8 +822,8 @@ export async function getPlotMatchRecommendations(intent = {}, limit = 18) {
   const progress = readProgress();
   const taste = await getTasteProfile();
   if (currentProgressOwner() !== ownerAtStart) return [];
-  const observed = [...(library.history || []), ...(library.favorites || []), ...(library.watchLater || [])];
-  const excluded = new Set([...observed.map(keyFor), ...getNotForMeKeys()]);
+  // A remembered-plot query is direct search, not a recommendation request.
+  // Previously watched, favorited, or disliked titles must remain discoverable.
   const recentGenres = new Set(
     (library.history || [])
       .slice()
@@ -833,7 +833,7 @@ export async function getPlotMatchRecommendations(intent = {}, limit = 18) {
       .map(Number)
   );
   const ranked = rankIntentCandidates(scored, {
-    taste, progress, feedback, excluded, limit: Math.min(40, Math.max(1, Number(limit) || 18)),
+    taste, progress, feedback, excluded: new Set(), limit: Math.min(40, Math.max(1, Number(limit) || 18)),
     recentGenres, recommendationMemory: getRecommendationMemory()
   });
   return ranked
