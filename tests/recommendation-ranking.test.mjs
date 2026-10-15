@@ -17,6 +17,11 @@ function candidate(id, extra = {}) {
   };
 }
 
+test("filtered recommendation requests guard results across account switches", () => {
+  assert.match(recommendationsSource, /export async function getIntentRecommendations\(intent = \{\}, limit = 18\) \{\s*const ownerAtStart = currentProgressOwner\(\);/);
+  assert.match(recommendationsSource, /const responses = await Promise\.allSettled\(calls\);\s*if \(currentProgressOwner\(\) !== ownerAtStart\) return \[\];/);
+});
+
 test("genre-constrained searches skip media types without a supported genre ID", () => {
   assert.match(recommendationsSource, /if \(intent\.genre && !genreId\) return \[\]/);
 });
