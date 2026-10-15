@@ -6,7 +6,9 @@ import { parseIntent } from "../scripts/intent-parser.js";
 import {
   buildStructuredSearchParams,
   isStructuredSearchIntent,
-  matchesStructuredSearchIntent
+  matchesStructuredSearchIntent,
+  chooseSimilarityTarget,
+  getSearchIntent
 } from "../scripts/search.js";
 
 test("catalogue search merges multi-search and dedicated title indexes without duplicates", () => {
@@ -123,4 +125,30 @@ test("explicit catalogue search never hides a title because of recommendation fe
   const source = readFileSync(new URL("../scripts/search.js", import.meta.url), "utf8");
   assert.doesNotMatch(source, /getNotForMeKeys/);
   assert.doesNotMatch(source, /filter\(item => !notForMe\.has\(item\.content_id\)\)/);
+});
+
+
+test("similarity intent resolves a reference title instead of treating the whole phrase as a title search", () => {
+  assert.equal(getSearchIntent("movies like Inception").similarity, "inception");
+  assert.equal(getSearchIntent("TV shows similar to Breaking Bad").similarity, "breaking bad");
+  assert.equal(getSearchIntent("I like Inception").similarity, "");
+});
+
+test("similarity target resolution prefers exact title matches and respects media type", () => {
+  const items = [
+    { id: "2", media_type: "tv", title: "Inception: The Series", raw: { original_name: "Inception: The Series", popularity: 100 } },
+    { id: "1", media_type: "movie", title: "Inception", raw: { original_title: "Inception", popularity: 20 } },
+    { id: "3", media_type: "movie", title: "Inception 2", raw: { original_title: "Inception 2", popularity: 500 } }
+  ];
+  assert.equal(chooseSimilarityTarget(items, "Inception", "movie").id, "1");
+  assert.equal(chooseSimilarityTarget(items, "Inception", "tv").id, "2");
+  assert.equal(chooseSimilarityTarget(items, "Inception").id, "1");
+});
+
+test("similarity search calls the matching movie or TV catalogue endpoint and has a text fallback", () => {
+  const source = readFileSync(new URL("../scripts/search.js", import.meta.url), "utf8");
+  assert.match(source, /tmdbApi\.movieSimilar\(target\.id, page\)/);
+  assert.match(source, /tmdbApi\.tvSimilar\(target\.id, page\)/);
+  assert.match(source, /searchContent\(searchIntent\.similarity, 1\)/);
+  assert.match(source, /Fall through to the regular text-search results/);
 });
