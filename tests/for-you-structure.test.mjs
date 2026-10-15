@@ -56,3 +56,9 @@ test("For You avoids undeclared intent state and consolidates account-switch rec
   assert.match(script, /showStatus\("Refreshing recommendations for this account…"\);\s*void loadRecommendations\(\);/);
   assert.match(script, /lastDismissedItem = null;/);
 });
+
+test("For You routes remembered-plot descriptions to catalogue matching", () => {
+  assert.match(forYou, /isPlotDescriptionQuery\(intent\.query\)/);
+  assert.match(forYou, /getPlotMatchRecommendations\(intent, 24\)/);
+  assert.match(forYou, /real catalogue keywords and plot summaries/);
+});
