@@ -159,6 +159,7 @@ test("intent-aware search combines structured discovery with verified text match
   assert.match(source, /tmdbApi\.discoverMovies\(params\)/);
   assert.match(source, /tmdbApi\.discoverTv\(params\)/);
   assert.match(source, /params\.with_watch_providers = String\(intent\.provider\.id\)/);
+  assert.match(source, /Provider results checked for region/);
   assert.match(source, /primary_release_date\.gte/);
   assert.match(source, /first_air_date\.gte/);
   assert.match(source, /matchesStructuredSearchIntent\(item, parsed\)/);
