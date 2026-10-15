@@ -284,7 +284,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
   $("because-grid")?.addEventListener("click", event => {
     const button = event.target.closest("[data-feedback]");
-    if (!button) return;
+    if (!button) {
+      const anchor = event.target.closest("[data-open-index]");
+      const item = anchor ? becauseItems[Number(anchor.dataset.openIndex)] : null;
+      if (item) recordBehavior("recommendation_clicked", item, { surface: "because_you_liked" });
+      return;
+    }
     const item = becauseItems[Number(button.dataset.index)];
     if (!item) return;
     const kind = button.dataset.feedback;
