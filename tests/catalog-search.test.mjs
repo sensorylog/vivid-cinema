@@ -13,7 +13,9 @@ import {
   buildPersonCreditResults,
   getSearchIntent,
   recentSearchStorageKey,
-  getRecentSearchOwner
+  getRecentSearchOwner,
+  parseWatchProviderIntent,
+  findWatchProviderId
 } from "../scripts/search.js";
 
 test("catalogue search merges multi-search and dedicated title indexes without duplicates", () => {
@@ -256,4 +258,41 @@ test("person-credit search uses TMDB people search and combined credits, and lab
   assert.match(searchSource, /buildPersonCreditResults\(/);
   assert.match(pageSource, /personRoleLabels/);
   assert.match(pageSource, /currentPersonTarget = result\.intent\?\.personTarget/);
+});
+
+
+test("provider intent is explicit and resolves provider IDs from TMDB's regional list", () => {
+  assert.equal(parseWatchProviderIntent("Korean horror movies on Netflix").key, "netflix");
+  assert.equal(parseWatchProviderIntent("Netflix movies").name, "Netflix");
+  assert.equal(parseWatchProviderIntent("movies like Netflix"), null);
+  assert.equal(parseWatchProviderIntent("TV shows streaming on Disney+").key, "disney-plus");
+
+  const netflix = findWatchProviderId({
+    results: [
+      { provider_id: 8, provider_name: "Netflix" },
+      { provider_id: 119, provider_name: "Amazon Prime Video" }
+    ]
+  }, parseWatchProviderIntent("movies on Netflix"));
+  const prime = findWatchProviderId({
+    results: [{ provider_id: 119, provider_name: "Amazon Prime Video" }]
+  }, parseWatchProviderIntent("movies on Prime Video"));
+  assert.equal(netflix, "8");
+  assert.equal(prime, "119");
+});
+
+test("provider search uses regional streaming filters and never mixes unverified text results", () => {
+  const intent = parseIntent("Korean horror movies");
+  const params = buildStructuredSearchParams(intent, "movie", 2, { id: "8", region: "GH" });
+  assert.equal(params.with_watch_providers, "8");
+  assert.equal(params.watch_region, "GH");
+  assert.equal(params.with_watch_monetization_types, "flatrate|free|ads");
+
+  const source = readFileSync(new URL("../scripts/search.js", import.meta.url), "utf8");
+  assert.match(source, /tmdbApi\.movieWatchProviders\(providerRegion\)/);
+  assert.match(source, /tmdbApi\.tvWatchProviders\(providerRegion\)/);
+  assert.match(source, /providerIntent \? \[\] : textItems\.filter/);
+  assert.match(source, /TMDB could not verify/);
+  const page = readFileSync(new URL("../scripts/search-page.js", import.meta.url), "utf8");
+  assert.match(page, /AVAILABLE ON/);
+  assert.match(page, /providerTarget\.region/);
 });
