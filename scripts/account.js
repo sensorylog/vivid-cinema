@@ -11,6 +11,7 @@ const providerEl = $("user-provider");
 const verificationEl = $("user-verification");
 const avatarEl = $("account-avatar");
 const profileSummaryEl = $("profile-summary");
+const profileTitleEl = $("profile-title");
 const accountTypeEl = $("account-type");
 const createdEl = $("account-created");
 const countryEl = $("provider-country");
@@ -182,6 +183,7 @@ async function loadUser(user) {
   currentUser = user;
   if (emailEl) emailEl.value = user.email || "";
   if (nameEl) nameEl.value = displayName;
+  if (profileTitleEl) profileTitleEl.textContent = displayName;
   if (profileSummaryEl) profileSummaryEl.textContent = user.email || "Your personal cinema profile";
   if (accountTypeEl) accountTypeEl.textContent = providerLabel(user);
   if (providerEl) providerEl.textContent = providerLabel(user);
@@ -256,6 +258,7 @@ async function saveAccount() {
     const localSaved = saveLocalPreferences(preferences);
     document.documentElement.dataset.vividReducedMotion = preferences.reducedMotion ? "true" : "false";
     renderAvatar(user, values.displayName);
+    if (profileTitleEl) profileTitleEl.textContent = values.displayName;
     if (profileSummaryEl) profileSummaryEl.textContent = user.email || "Your personal cinema profile";
     snapshotForm();
 
@@ -301,6 +304,8 @@ onAuthStateChanged(auth, async (user) => {
     const local = loadLocalPreferences();
     fillCountryOptions(local.providerCountry);
     if (nameEl) nameEl.value = user.displayName || user.email?.split("@")[0] || "Vivid member";
+    if (profileTitleEl) profileTitleEl.textContent = nameEl?.value || "Vivid member";
+    if (profileSummaryEl) profileSummaryEl.textContent = user.email || "Your personal cinema profile";
     if (emailEl) emailEl.value = user.email || "";
     if (providerEl) providerEl.textContent = providerLabel(user);
     if (accountTypeEl) accountTypeEl.textContent = providerLabel(user);
