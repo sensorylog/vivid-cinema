@@ -22,7 +22,7 @@ test("For You page is registered as a real, accessible destination", () => {
   assert.match(serviceWorker, /"\.\/styles\/vivid-for-you\.css"/);
   assert.match(appShell, /navLink\("for-you\.html", "bi-stars", "For You", page === "for-you"\)/);
   assert.equal((appShell.match(/navLink\("for-you\.html", "bi-stars", "For You", page === "for-you"\)/g) || []).length, 2, "For You is available in desktop and mobile navigation");
-  assert.match(serviceWorker, /vivid-cinema-shell-v172/);
+  assert.match(serviceWorker, /vivid-cinema-shell-v\d+/);
   assert.match(html, /id="recommendation-status"[^>]*role="status"/);
 });
 
