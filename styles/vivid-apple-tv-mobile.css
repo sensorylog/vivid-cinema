@@ -217,3 +217,284 @@
     animation: none !important;
   }
 }
+
+
+/* V2: make the mobile Home feel like an immersive streaming destination,
+   not a desktop catalogue squeezed into a phone. */
+@media (max-width: 640px) {
+  body.vivid-cinema-home {
+    background:
+      radial-gradient(ellipse at 50% 0%, rgba(42,48,62,.22), transparent 38%),
+      #050608;
+  }
+
+  body.vivid-cinema-home .vivid-topbar {
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    background: rgba(5,6,8,.78);
+    border-bottom: 1px solid rgba(255,255,255,.07);
+    -webkit-backdrop-filter: blur(22px) saturate(135%);
+    backdrop-filter: blur(22px) saturate(135%);
+  }
+
+  /* A proper cinematic billboard: tall artwork, readable copy and a deep fade
+     into the next shelf instead of a detached banner above a catalogue. */
+  body.vivid-cinema-home #hero {
+    height: clamp(610px, 82svh, 790px) !important;
+    min-height: 610px !important;
+    margin-bottom: 0 !important;
+    background: #050608;
+  }
+  body.vivid-cinema-home .hero-bg {
+    background-position: 58% 24%;
+    transform: scale(1.045);
+  }
+  body.vivid-cinema-home .hero-bg::after {
+    background:
+      linear-gradient(0deg, #050608 0%, rgba(5,6,8,.86) 13%, rgba(5,6,8,.28) 42%, rgba(5,6,8,.04) 72%),
+      linear-gradient(90deg, rgba(5,6,8,.52) 0%, transparent 82%),
+      linear-gradient(180deg, rgba(5,6,8,.10), transparent 22%);
+  }
+  body.vivid-cinema-home .hero-content {
+    left: max(20px, env(safe-area-inset-left, 0px));
+    bottom: calc(142px + env(safe-area-inset-bottom, 0px)) !important;
+    max-width: min(500px, calc(100% - 40px));
+    animation-duration: .65s;
+  }
+  body.vivid-cinema-home .hero-badge {
+    gap: 7px;
+    margin-bottom: 10px;
+    font-size: .62rem;
+    letter-spacing: .16em;
+    color: rgba(255,255,255,.78);
+  }
+  body.vivid-cinema-home .hero-title {
+    max-width: 560px;
+    margin-bottom: 10px;
+    font-size: clamp(2.55rem, 12vw, 4.25rem) !important;
+    line-height: .93 !important;
+    letter-spacing: -.055em;
+    text-wrap: balance;
+    text-shadow: 0 5px 35px rgba(0,0,0,.5);
+  }
+  body.vivid-cinema-home .hero-meta {
+    gap: 8px;
+    margin-bottom: 12px;
+    font-size: .75rem;
+  }
+  body.vivid-cinema-home .hero-overview {
+    max-width: 360px;
+    margin-bottom: 16px;
+    font-size: .84rem;
+    line-height: 1.42;
+    -webkit-line-clamp: 2;
+  }
+  body.vivid-cinema-home .hero-actions {
+    gap: 9px;
+  }
+  body.vivid-cinema-home .hero-actions .btn {
+    min-height: 44px;
+    padding: 0 17px;
+    border-radius: 8px;
+    font-size: .84rem;
+    font-weight: 750;
+  }
+
+  /* The featured tiles intentionally float into the billboard's lower fade,
+     visually connecting the hero to the first horizontal shelf. */
+  body.vivid-cinema-home .vivid-feature-strip {
+    position: relative !important;
+    z-index: 5 !important;
+    width: 100% !important;
+    margin: -100px 0 0 !important;
+    padding: 0 0 15px !important;
+    overflow: visible;
+  }
+  body.vivid-cinema-home .vivid-feature-viewport {
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 0 20px !important;
+    scroll-padding-inline: 20px;
+    scroll-snap-type: x mandatory;
+  }
+  body.vivid-cinema-home .vivid-feature-track {
+    gap: 10px;
+  }
+  body.vivid-cinema-home .vivid-feature-card {
+    flex: 0 0 clamp(150px, 43vw, 184px) !important;
+    width: clamp(150px, 43vw, 184px) !important;
+    height: 96px !important;
+    border: 1px solid rgba(255,255,255,.13);
+    border-radius: 11px !important;
+    box-shadow: 0 12px 28px rgba(0,0,0,.24);
+    scroll-snap-align: start;
+  }
+
+  /* Remove the boxed catalogue treatment. Each shelf shares one canvas,
+     with consistent inset headings and art rails that swipe independently. */
+  body.vivid-cinema-home .vivid-catalogue-explore {
+    padding: 12px 20px 16px !important;
+  }
+  body.vivid-cinema-home .vivid-catalogue-explore-head {
+    margin-bottom: 11px !important;
+  }
+  body.vivid-cinema-home .vivid-catalogue-explore-head > div > span {
+    font-size: .57rem;
+    letter-spacing: .15em;
+    color: #a7abb4;
+  }
+  body.vivid-cinema-home .vivid-catalogue-explore-head h2 {
+    margin-top: 5px !important;
+    font-size: 1.36rem !important;
+    letter-spacing: -.045em;
+  }
+  body.vivid-cinema-home .vivid-catalogue-explore-head > a {
+    font-size: .68rem;
+    white-space: nowrap;
+  }
+  body.vivid-cinema-home .vivid-catalogue-chips {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    margin-inline: -20px;
+    padding: 0 20px 5px;
+    scroll-snap-type: x proximity;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  body.vivid-cinema-home .vivid-catalogue-chips::-webkit-scrollbar { display: none; }
+  body.vivid-cinema-home .vivid-catalogue-chips a {
+    flex: 0 0 auto;
+    padding: 8px 12px;
+    border: 1px solid rgba(255,255,255,.11);
+    background: rgba(255,255,255,.045);
+    font-size: .72rem;
+    scroll-snap-align: start;
+  }
+
+  body.vivid-cinema-home .vivid-section-wrap {
+    padding: 0 0 calc(88px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+  body.vivid-cinema-home .vivid-rails {
+    position: relative;
+    margin: 0 !important;
+    padding: 18px 0 20px !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+  }
+  body.vivid-cinema-home .vivid-rails + .vivid-rails::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 20px;
+    right: 20px;
+    height: 1px;
+    background: linear-gradient(90deg, rgba(255,255,255,.11), rgba(255,255,255,.025));
+  }
+  body.vivid-cinema-home .vivid-rail-head {
+    margin: 0 0 11px !important;
+    padding: 0 20px !important;
+    align-items: center;
+  }
+  body.vivid-cinema-home .vivid-rail-head h2 {
+    font-size: 1.18rem !important;
+    font-weight: 750;
+    letter-spacing: -.04em;
+  }
+  body.vivid-cinema-home .vivid-rail-head .vivid-section-kicker {
+    font-size: .56rem;
+    letter-spacing: .16em;
+    color: #a8adb7;
+  }
+  body.vivid-cinema-home .vivid-rail-controls button {
+    width: 31px !important;
+    height: 31px !important;
+    border-radius: 50%;
+    background: rgba(255,255,255,.07);
+  }
+  body.vivid-cinema-home .vivid-rail {
+    gap: 11px !important;
+    margin: 0 !important;
+    padding: 0 20px 8px !important;
+    scroll-padding-inline: 20px;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+  }
+  body.vivid-cinema-home .vivid-rail::-webkit-scrollbar { display: none; }
+  body.vivid-cinema-home .vivid-card {
+    flex: 0 0 clamp(142px, 43vw, 178px) !important;
+    width: clamp(142px, 43vw, 178px) !important;
+    max-width: none !important;
+    scroll-snap-align: start;
+  }
+  body.vivid-cinema-home .vivid-card-media {
+    aspect-ratio: 2 / 3;
+    border: 1px solid rgba(255,255,255,.09);
+    border-radius: 11px !important;
+    box-shadow: 0 10px 24px rgba(0,0,0,.28) !important;
+    overflow: hidden;
+  }
+  body.vivid-cinema-home .vivid-card-media img {
+    transform: none !important;
+  }
+  body.vivid-cinema-home .vivid-card-info {
+    padding: 9px 1px 0 !important;
+  }
+  body.vivid-cinema-home .vivid-card-title {
+    font-size: .79rem !important;
+    line-height: 1.24 !important;
+    font-weight: 700;
+  }
+  body.vivid-cinema-home .vivid-card-sub {
+    margin-top: 4px !important;
+    font-size: .66rem !important;
+  }
+  body.vivid-cinema-home .vivid-top10-card {
+    padding-left: 28px;
+    flex-basis: clamp(142px, 43vw, 178px) !important;
+    width: clamp(142px, 43vw, 178px) !important;
+  }
+  body.vivid-cinema-home .vivid-top10-card .vivid-top10-rank {
+    font-size: 3.4rem;
+    bottom: 26px;
+  }
+  body.vivid-cinema-home .vivid-continue-card {
+    flex-basis: min(84vw, 360px) !important;
+    width: min(84vw, 360px) !important;
+  }
+  body.vivid-cinema-home .vivid-continue-card .vivid-card-media {
+    aspect-ratio: 16 / 9;
+  }
+  body.vivid-cinema-home .vivid-news-home-card {
+    margin: 8px 20px 20px !important;
+    padding: 20px !important;
+    border: 1px solid rgba(255,255,255,.1);
+    border-radius: 16px !important;
+    background:
+      radial-gradient(ellipse at top right, rgba(255,255,255,.09), transparent 55%),
+      linear-gradient(140deg, rgba(255,255,255,.055), rgba(255,255,255,.018)) !important;
+  }
+  body.vivid-cinema-home .vivid-news-home-copy h2 {
+    font-size: 1.7rem;
+    letter-spacing: -.05em;
+  }
+}
+
+@media (max-width: 380px) {
+  body.vivid-cinema-home #hero { height: clamp(590px, 84svh, 730px) !important; }
+  body.vivid-cinema-home .hero-content { bottom: calc(134px + env(safe-area-inset-bottom, 0px)) !important; }
+  body.vivid-cinema-home .hero-title { font-size: clamp(2.35rem, 11.7vw, 3.1rem) !important; }
+  body.vivid-cinema-home .vivid-card { flex-basis: 42vw !important; width: 42vw !important; }
+  body.vivid-cinema-home .vivid-top10-card { flex-basis: 42vw !important; width: 42vw !important; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body.vivid-cinema-home .hero-slide,
+  body.vivid-cinema-home .hero-content,
+  body.vivid-cinema-home .hero-slide.active .hero-bg {
+    animation: none !important;
+    transition: none !important;
+  }
+}
