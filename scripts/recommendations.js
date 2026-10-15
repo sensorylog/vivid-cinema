@@ -79,6 +79,7 @@ async function getFirebase() {
       deleteDoc: firestoreSdk.deleteDoc,
       doc: firestoreSdk.doc,
       getDocs: firestoreSdk.getDocs,
+      getDocsFromServer: firestoreSdk.getDocsFromServer,
       setDoc: firestoreSdk.setDoc
     })).catch(error => {
       firebasePromise = null;
@@ -262,8 +263,8 @@ export async function syncPlaybackProgressForUser(user = null) {
   ensureProgressOwner(user?.uid || null);
   if (!user) return readProgress();
   try {
-    const { db, collection, getDocs } = await getFirebase();
-    const snapshot = await getDocs(collection(db, "users", user.uid, "progress"));
+    const { db, collection, getDocsFromServer } = await getFirebase();
+    const snapshot = await getDocsFromServer(collection(db, "users", user.uid, "progress"));
     const auth = await getFirebaseAuth();
     if (String(auth?.currentUser?.uid || "") !== String(user.uid) ||
         (localStorage.getItem(LOCAL_OWNER_KEY) || "guest") !== String(user.uid)) {
