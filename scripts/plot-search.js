@@ -10,6 +10,11 @@ const STOPWORDS = new Set([
 ]);
 
 const GENERIC_PLOT_WORDS = new Set(["man","woman","boy","girl","kid","child","family","person","people","day","time","life","world","friend","friends","year","home","city","town","young","old"]);
+const HIGH_VALUE_CLUES = new Set([
+  "time loop","same day","time travel","time machine","magic remote","body swap",
+  "memory loss","parallel universe","alternate reality","haunted house","alien invasion",
+  "secret identity","serial killer","groundhog day","repeats day"
+]);
 
 function words(value) {
   return String(value || "").toLowerCase()
@@ -36,7 +41,7 @@ export function buildPlotKeywordQueries(query = "", limit = 8) {
     const parts = phrase.split(" ");
     const specificity = parts.reduce((sum, token) =>
       sum + (GENERIC_PLOT_WORDS.has(token) ? 0.45 : 1.15) + Math.min(token.length, 10) * 0.08, 0);
-    groups[size].push({ phrase, weight: specificity + size * 0.45 });
+    groups[size].push({ phrase, weight: specificity + size * 0.45 + (HIGH_VALUE_CLUES.has(phrase) ? 5 : 0) });
   };
 
   for (const size of [3, 2]) {
@@ -76,7 +81,7 @@ export function scorePlotCandidate(query = "", candidate = {}) {
   const queryWords = [...new Set(words(query))];
   if (!queryWords.length) return 0;
   const normalizeText = value => String(value || "").toLowerCase()
-    .normalize("NFKD").replace(/[\\u0300-\\u036f]/g, "")
+    .normalize("NFKD").replace(/[\u0300-\u036f]/g, "")
     .replace(/[^a-z0-9]+/g, " ");
   const title = normalizeText(candidate.title || candidate.name || candidate.raw?.title || candidate.raw?.name);
   const overview = normalizeText(candidate.overview || candidate.raw?.overview || "");
