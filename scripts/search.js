@@ -93,7 +93,8 @@ export function getSearchIntent(query) {
     .filter(([label]) => q.includes(label))
     .flatMap(([, ids]) => ids)
     .filter((id, index, list) => list.indexOf(id) === index);
-  const type = Object.entries(TYPE_HINTS).find(([label]) => new RegExp("\\b" + label + "\\b").test(q))?.[1] || null;
+  const typeQuery = q.replace(/\bapple\s+tv(?:\+| plus)?\b/gi, " ");
+  const type = Object.entries(TYPE_HINTS).find(([label]) => new RegExp("\\b" + label + "\\b").test(typeQuery))?.[1] || null;
   const similarity = q.match(/^(?:(?:movies?|films?|tv shows?|series)\s+)?(?:like|similar to|similar)\s+(.+)$/i)?.[1]?.trim() || "";
   const people = /\b(actor|actress|director|creator|cast)\b/.test(q);
   return { query: normalizeQuery(query), genres, type, similarity, people };
