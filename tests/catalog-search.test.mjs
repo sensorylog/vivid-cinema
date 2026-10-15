@@ -212,9 +212,11 @@ test("person search resolution prefers an exact name and the requested professio
   const people = [
     { id: 11, media_type: "person", name: "Christopher Nolan", known_for_department: "Directing", popularity: 80 },
     { id: 12, media_type: "person", name: "Christopher Nolan Jr.", known_for_department: "Acting", popularity: 99 },
+    { id: 14, name: "Christopher Nolan", known_for_department: "Directing", popularity: 40 },
     { id: 13, media_type: "movie", title: "Nolan" }
   ];
   assert.equal(choosePersonSearchResult(people, "Christopher Nolan", "director").id, 11);
+  assert.equal(choosePersonSearchResult([{ id: 14, name: "Christopher Nolan", known_for_department: "Directing" }], "Christopher Nolan", "director").id, 14);
   assert.equal(choosePersonSearchResult(people, "not a real person", "director"), null);
 });
 
@@ -247,8 +249,10 @@ test("person credits filter by job, media type and page without mixing cast with
 test("person-credit search uses TMDB people search and combined credits, and labels results", () => {
   const searchSource = readFileSync(new URL("../scripts/search.js", import.meta.url), "utf8");
   const pageSource = readFileSync(new URL("../scripts/search-page.js", import.meta.url), "utf8");
-  assert.match(searchSource, /tmdbApi\.searchMulti\(personIntent\.personName, 1\)/);
+  assert.match(searchSource, /tmdbApi\.searchPeople\(personIntent\.personName, 1\)/);
   assert.match(searchSource, /tmdbApi\.personDetails\(person\.id\)/);
+  const tmdbSource = readFileSync(new URL("../scripts/tmdb.js", import.meta.url), "utf8");
+  assert.match(tmdbSource, /searchPeople: \(query, page = 1\) => tmdb\("search\/person", \{ query, page \}\)/);
   assert.match(searchSource, /buildPersonCreditResults\(/);
   assert.match(pageSource, /personRoleLabels/);
   assert.match(pageSource, /currentPersonTarget = result\.intent\?\.personTarget/);
