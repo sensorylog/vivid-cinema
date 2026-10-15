@@ -338,6 +338,8 @@ test("provider search uses regional streaming filters and never mixes unverified
   assert.match(source, /tmdbApi\.movieWatchProviders\(providerRegion\)/);
   assert.match(source, /tmdbApi\.tvWatchProviders\(providerRegion\)/);
   assert.match(source, /providerIntent \? \[\] : textItems\.filter/);
+  assert.match(source, /const titleSearchQuery = !providerIntent && parsed\.titleQuery \? parsed\.titleQuery : q/);
+  assert.match(source, /searchContent\(titleSearchQuery, page\)/);
   assert.match(source, /TMDB could not verify/);
   assert.match(source, /TMDB could not complete every provider-filtered catalogue request/);
   const page = readFileSync(new URL("../scripts/search-page.js", import.meta.url), "utf8");
