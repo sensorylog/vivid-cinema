@@ -2,6 +2,12 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { mergeSearchCatalogueResults } from "../scripts/content.js";
+import { parseIntent } from "../scripts/intent-parser.js";
+import {
+  buildStructuredSearchParams,
+  isStructuredSearchIntent,
+  matchesStructuredSearchIntent
+} from "../scripts/search.js";
 
 test("catalogue search merges multi-search and dedicated title indexes without duplicates", () => {
   const merged = mergeSearchCatalogueResults([
@@ -39,4 +45,67 @@ test("search page requests can be paginated without changing catalogue identity 
   assert.match(pageSource, /data-search-load-more/);
   assert.match(pageSource, /currentPage \+ 1/);
   assert.match(pageSource, /item\.media_type \+ ":" \+ item\.id/);
+});
+
+
+test("structured search builds verified TMDB genre, language, year and type filters", () => {
+  const intent = parseIntent("Korean thrillers from 2020");
+  assert.equal(isStructuredSearchIntent(intent, intent.query), true);
+
+  const movie = buildStructuredSearchParams(intent, "movie", 2);
+  assert.equal(movie.with_genres, "53");
+  assert.equal(movie.with_original_language, "ko");
+  assert.equal(movie.primary_release_year, "2020");
+  assert.equal(movie.page, 2);
+
+  const tv = buildStructuredSearchParams(intent, "tv", 3);
+  assert.equal(tv.with_genres, "9648");
+  assert.equal(tv.with_original_language, "ko");
+  assert.equal(tv.first_air_date_year, "2020");
+  assert.equal(tv.page, 3);
+});
+
+test("structured search never broadens a genre unsupported by the TV catalogue", () => {
+  const intent = parseIntent("horror movies");
+  assert.equal(buildStructuredSearchParams(intent, "movie", 1).with_genres, "27");
+  assert.equal(buildStructuredSearchParams(intent, "tv", 1), null);
+});
+
+test("type-only searches use discovery, but named text searches keep their text intent", () => {
+  assert.equal(isStructuredSearchIntent(parseIntent("movies"), "movies"), true);
+  assert.equal(isStructuredSearchIntent(parseIntent("TV shows"), "TV shows"), true);
+  assert.equal(isStructuredSearchIntent(parseIntent("Christopher Nolan movies"), "Christopher Nolan movies"), false);
+  assert.equal(isStructuredSearchIntent(parseIntent("movies like Inception"), "movies like Inception"), false);
+});
+
+test("structured text supplements must satisfy the requested genre, year and language", () => {
+  const intent = parseIntent("Korean thrillers from 2020");
+  const matching = {
+    media_type: "movie",
+    raw: { genre_ids: [53], original_language: "ko", release_date: "2020-08-01" }
+  };
+  const wrongGenre = {
+    media_type: "movie",
+    raw: { genre_ids: [35], original_language: "ko", release_date: "2020-08-01" }
+  };
+  const wrongYear = {
+    media_type: "movie",
+    raw: { genre_ids: [53], original_language: "ko", release_date: "2019-08-01" }
+  };
+  const wrongLanguage = {
+    media_type: "movie",
+    raw: { genre_ids: [53], original_language: "en", release_date: "2020-08-01" }
+  };
+  assert.equal(matchesStructuredSearchIntent(matching, intent), true);
+  assert.equal(matchesStructuredSearchIntent(wrongGenre, intent), false);
+  assert.equal(matchesStructuredSearchIntent(wrongYear, intent), false);
+  assert.equal(matchesStructuredSearchIntent(wrongLanguage, intent), false);
+});
+
+test("intent-aware search combines structured discovery with verified text matches", () => {
+  const source = readFileSync(new URL("../scripts/search.js", import.meta.url), "utf8");
+  assert.match(source, /tmdbApi\.discoverMovies\(params\)/);
+  assert.match(source, /tmdbApi\.discoverTv\(params\)/);
+  assert.match(source, /matchesStructuredSearchIntent\(item, parsed\)/);
+  assert.match(source, /mergeSearchCatalogueResults\(\[discovered, relevantTextItems\]\)/);
 });
