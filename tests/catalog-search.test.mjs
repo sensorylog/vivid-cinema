@@ -152,3 +152,11 @@ test("similarity search calls the matching movie or TV catalogue endpoint and ha
   assert.match(source, /searchContent\(searchIntent\.similarity, 1\)/);
   assert.match(source, /Fall through to the regular text-search results/);
 });
+
+
+test("similar-title results identify the resolved reference title in the results heading", () => {
+  const pageSource = readFileSync(new URL("../scripts/search-page.js", import.meta.url), "utf8");
+  assert.match(pageSource, /currentSimilarityTarget = result\.intent\?\.similarityTarget/);
+  assert.match(pageSource, /SIMILAR TO/);
+  assert.match(pageSource, /escapeHtml\(similarityTarget\.title\)/);
+});
