@@ -750,10 +750,20 @@ export async function getPlotMatchRecommendations(intent = {}, limit = 18) {
         if (type === "movie") params.primary_release_year = String(intent.year);
         else params.first_air_date_year = String(intent.year);
       }
+      if (intent.decade) {
+        if (type === "movie") {
+          params["primary_release_date.gte"] = String(intent.decade) + "-01-01";
+          params["primary_release_date.lte"] = String(Number(intent.decade) + 9) + "-12-31";
+        } else {
+          params["first_air_date.gte"] = String(intent.decade) + "-01-01";
+          params["first_air_date.lte"] = String(Number(intent.decade) + 9) + "-12-31";
+        }
+      }
+      if (intent.country) params.with_origin_country = String(intent.country);
       if (intent.language) params.with_original_language = String(intent.language);
       if (intent.anime) {
         params.with_original_language = "ja";
-        if (type === "tv") params.with_origin_country = "JP";
+        if (type === "tv" && !intent.country) params.with_origin_country = "JP";
       }
       calls.push((type === "tv" ? tmdbApi.discoverTv(params) : tmdbApi.discoverMovies(params))
         .then(response => normalizeResults(response?.results || [], type)));
@@ -763,7 +773,7 @@ export async function getPlotMatchRecommendations(intent = {}, limit = 18) {
   // A title lookup is a useful fallback when the description accidentally
   // contains a remembered title or subtitle. Only use it when there are no
   // structured filters to bypass, and respect the requested media type.
-  const hasSpecificFilters = Boolean(intent.genre || intent.runtimeMax || intent.year || intent.language || intent.anime);
+  const hasSpecificFilters = Boolean(intent.genre || intent.runtimeMax || intent.year || intent.decade || intent.country || intent.language || intent.anime);
   if (!hasSpecificFilters) {
     for (const type of mediaTypes) {
       calls.push((type === "tv" ? tmdbApi.searchTv(intent.query || "") : tmdbApi.searchMovies(intent.query || ""))
@@ -797,6 +807,16 @@ export async function getPlotMatchRecommendations(intent = {}, limit = 18) {
         if (type === "movie") params.primary_release_year = String(intent.year);
         else params.first_air_date_year = String(intent.year);
       }
+      if (intent.decade) {
+        if (type === "movie") {
+          params["primary_release_date.gte"] = String(intent.decade) + "-01-01";
+          params["primary_release_date.lte"] = String(Number(intent.decade) + 9) + "-12-31";
+        } else {
+          params["first_air_date.gte"] = String(intent.decade) + "-01-01";
+          params["first_air_date.lte"] = String(Number(intent.decade) + 9) + "-12-31";
+        }
+      }
+      if (intent.country) params.with_origin_country = String(intent.country);
       if (intent.language) params.with_original_language = String(intent.language);
       if (intent.anime) {
         params.with_original_language = "ja";
@@ -865,6 +885,16 @@ export async function getIntentRecommendations(intent = {}, limit = 18) {
       if (type === "movie") params.primary_release_year = String(intent.year);
       else params.first_air_date_year = String(intent.year);
     }
+    if (intent.decade) {
+      if (type === "movie") {
+        params["primary_release_date.gte"] = String(intent.decade) + "-01-01";
+        params["primary_release_date.lte"] = String(Number(intent.decade) + 9) + "-12-31";
+      } else {
+        params["first_air_date.gte"] = String(intent.decade) + "-01-01";
+        params["first_air_date.lte"] = String(Number(intent.decade) + 9) + "-12-31";
+      }
+    }
+    if (intent.country) params.with_origin_country = String(intent.country);
     if (intent.language) params.with_original_language = String(intent.language);
     if (intent.anime) {
       params.with_original_language = "ja";
