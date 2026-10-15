@@ -8,6 +8,7 @@ const watch = read("../scripts/watch.js");
 const intelligence = read("../scripts/intelligence.js");
 const recommendations = read("../scripts/recommendations.js");
 const forYou = read("../scripts/for-you.js");
+const home = read("../script.js");
 const serviceWorker = read("../service-worker.js");
 
 test("title detail opens and trailer starts feed bounded Intelligence signals", () => {
@@ -43,6 +44,15 @@ test("For You rejects stale overlapping requests and reacts to canonical change 
   assert.match(forYou, /vivid:recommendations-invalidated/);
   assert.match(forYou, /vivid:library-changed/);
   assert.match(forYou, /vivid:progress-changed/);
+});
+
+test("Home clears and refreshes personalized shelves on owner changes and guards stale requests", () => {
+  assert.match(home, /homeRecommendationRequestId/);
+  assert.match(home, /expectedRequestId !== homeRecommendationRequestId/);
+  assert.match(home, /vivid:account-switched/);
+  assert.match(home, /vivid:library-changed/);
+  assert.match(recommendations, /const ownerAtStart = currentProgressOwner\(\)/);
+  assert.match(recommendations, /if \(currentProgressOwner\(\) !== ownerAtStart\) return \[\]/);
 });
 
 test("service worker keeps the integration shell versioned and For You assets precached", () => {
