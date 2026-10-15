@@ -9,6 +9,7 @@ let currentPage = 1;
 let currentItems = [];
 let currentSearchNotes = [];
 let currentSimilarityTarget = null;
+let currentSearchHistoryOwner = null;
 
 const escapeHtml = value => String(value ?? "").replace(/[&<>"']/g, char => ({
   "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
@@ -149,6 +150,19 @@ clear?.addEventListener("click", () => {
 
 renderRecent();
 
-window.addEventListener("vivid:search-history-ready", () => {
+window.addEventListener("vivid:search-history-ready", event => {
+  const nextOwner = event.detail?.owner || "guest";
+  const changedOwner = currentSearchHistoryOwner !== null && currentSearchHistoryOwner !== nextOwner;
+  currentSearchHistoryOwner = nextOwner;
+  if (changedOwner) {
+    currentQuery = "";
+    currentPage = 1;
+    currentItems = [];
+    currentSearchNotes = [];
+    currentSimilarityTarget = null;
+    if (input) input.value = "";
+    if (clear) clear.hidden = true;
+    content.innerHTML = "";
+  }
   if (!currentQuery && !input?.value.trim()) renderRecent();
 });
