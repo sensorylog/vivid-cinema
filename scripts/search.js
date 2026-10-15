@@ -570,7 +570,12 @@ export async function searchIntelligently(query, options = {}) {
   }
 
   const textItems = responses[0]?.status === "fulfilled" ? responses[0].value : [];
-  const discovered = responses.slice(1).flatMap(result =>
+  const providerDiscoveryResponses = responses.slice(1);
+  if (providerIntent && providerDiscoveryResponses.some(result => result.status === "rejected")) {
+    const note = "TMDB could not complete every provider-filtered catalogue request for " + providerIntent.name + " in " + providerRegion + "; results may be incomplete.";
+    providerUnsupportedNote = providerUnsupportedNote ? providerUnsupportedNote + " " + note : note;
+  }
+  const discovered = providerDiscoveryResponses.flatMap(result =>
     result.status === "fulfilled" ? result.value : []
   );
   const relevantTextItems = structured
