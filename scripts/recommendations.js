@@ -3,6 +3,7 @@ import { getLocalLibrary } from "./library.js";
 import { normalizeResults } from "./media.js";
 import { getTasteProfile, getNotForMeKeys, getFeedbackState, getTasteStrength, getRecommendationMemory, recordBehavior } from "./intelligence.js";
 import { switchLocalOwner } from "./local-owner.js";
+import { buildPlotKeywordQueries, scorePlotCandidate } from "./plot-search.js";
 
 const PROGRESS_KEY = "vivid:progress:v1";
 const FOR_YOU_CACHE_KEY = "vivid:for-you:v1";
@@ -674,6 +675,113 @@ export function collectIntentCandidates(responses = []) {
   const failure = responses.find(result => result?.status === "rejected");
   if (failure) throw failure.reason;
   return candidates;
+}
+
+export async function getPlotMatchRecommendations(intent = {}, limit = 18) {
+  const ownerAtStart = currentProgressOwner();
+  const queries = buildPlotKeywordQueries(intent.query || "");
+  if (!queries.length) return [];
+
+  // TMDB keyword search gives us real catalogue identifiers. Discover then
+  // returns valid movie/series records with plot summaries to rank locally.
+  const keywordResponses = await Promise.allSettled(
+    queries.map(query => tmdbApi.searchKeywords(query))
+  );
+  if (currentProgressOwner() !== ownerAtStart) return [];
+
+  const keywordMap = new Map();
+  keywordResponses.forEach((result, index) => {
+    if (result.status !== "fulfilled") return;
+    (result.value?.results || []).slice(0, 5).forEach(keyword => {
+      if (keyword?.id == null || !keyword?.name) return;
+      const relevance = scorePlotCandidate(intent.query || "", { title: keyword.name, overview: keyword.name });
+      const existing = keywordMap.get(String(keyword.id));
+      if (!existing || relevance > existing.relevance) {
+        keywordMap.set(String(keyword.id), { id: String(keyword.id), relevance, queryIndex: index });
+      }
+    });
+  });
+  const keywordIds = [...keywordMap.values()]
+    .sort((a, b) => b.relevance - a.relevance || a.queryIndex - b.queryIndex)
+    .slice(0, 8)
+    .map(item => item.id);
+
+  const requestedType = ["movie", "tv"].includes(intent.mediaType) ? intent.mediaType : "all";
+  const mediaTypes = requestedType === "all" ? ["movie", "tv"] : [requestedType];
+  const calls = [];
+  if (keywordIds.length) {
+    for (const type of mediaTypes) {
+      const genreId = intent.genreIds?.[type] ?? intent.genre?.[type === "movie" ? "movieId" : "tvId"];
+      if (intent.genre && !genreId) continue;
+      const params = {
+        with_keywords: keywordIds.join("|"),
+        sort_by: "popularity.desc",
+        page: 1,
+        include_adult: false,
+        "vote_count.gte": type === "movie" ? 10 : 5
+      };
+      if (genreId) params.with_genres = String(genreId);
+      if (intent.runtimeMax) params["with_runtime.lte"] = String(Math.max(1, Number(intent.runtimeMax)));
+      if (intent.year) {
+        if (type === "movie") params.primary_release_year = String(intent.year);
+        else params.first_air_date_year = String(intent.year);
+      }
+      if (intent.language) params.with_original_language = String(intent.language);
+      if (intent.anime) {
+        params.with_original_language = "ja";
+        if (type === "tv") params.with_origin_country = "JP";
+      }
+      calls.push((type === "tv" ? tmdbApi.discoverTv(params) : tmdbApi.discoverMovies(params))
+        .then(response => normalizeResults(response?.results || [], type)));
+    }
+  }
+
+  // A title lookup is a useful fallback when the description accidentally
+  // contains a remembered title or subtitle. Only use it when there are no
+  // structured filters to bypass, and respect the requested media type.
+  const hasSpecificFilters = Boolean(intent.genre || intent.runtimeMax || intent.year || intent.language || intent.anime);
+  if (!hasSpecificFilters) {
+    for (const type of mediaTypes) {
+      calls.push((type === "tv" ? tmdbApi.searchTv(intent.query || "") : tmdbApi.searchMovies(intent.query || ""))
+        .then(response => normalizeResults(response?.results || [], type)));
+    }
+  }
+  const responses = await Promise.allSettled(calls);
+  if (currentProgressOwner() !== ownerAtStart) return [];
+  const candidates = collectIntentCandidates(responses);
+  const scored = new Map();
+  for (const item of uniqueByKey(candidates)) {
+    const plotScore = scorePlotCandidate(intent.query || "", item);
+    if (plotScore <= 0) continue;
+    const previous = scored.get(keyFor(item));
+    if (!previous || plotScore > previous.plotScore) scored.set(keyFor(item), { ...item, plotScore });
+  }
+  if (!scored.size) return [];
+
+  const library = getLocalLibrary();
+  const feedback = getFeedbackState();
+  const progress = readProgress();
+  const taste = await getTasteProfile();
+  if (currentProgressOwner() !== ownerAtStart) return [];
+  const observed = [...(library.history || []), ...(library.favorites || []), ...(library.watchLater || [])];
+  const excluded = new Set([...observed.map(keyFor), ...getNotForMeKeys()]);
+  const recentGenres = new Set(
+    (library.history || [])
+      .slice()
+      .sort((a, b) => Number(b.lastWatchedAt || b.updatedAt || 0) - Number(a.lastWatchedAt || a.updatedAt || 0))
+      .slice(0, 5)
+      .flatMap(item => item.genre_ids || item.raw?.genre_ids || [])
+      .map(Number)
+  );
+  const ranked = rankIntentCandidates([...scored.values()], {
+    taste, progress, feedback, excluded, limit: Math.min(40, Math.max(1, Number(limit) || 18)),
+    recentGenres, recommendationMemory: getRecommendationMemory()
+  });
+  return ranked
+    .map(item => ({ ...item, recommendationReason: "Possible match for your remembered plot", plotMatchScore: item.plotScore }))
+    .sort((a, b) => Number(b.plotMatchScore || 0) - Number(a.plotMatchScore || 0) ||
+      Number(b.recommendationScore || 0) - Number(a.recommendationScore || 0))
+    .slice(0, Math.min(40, Math.max(1, Number(limit) || 18)));
 }
 
 export async function getIntentRecommendations(intent = {}, limit = 18) {

@@ -5,6 +5,7 @@ import {
   getBecauseYouLiked,
   getContinueWatching,
   getIntentRecommendations,
+  getPlotMatchRecommendations,
   getPersonalRecommendations,
   formatProgress
 } from "./recommendations.js";
@@ -15,6 +16,7 @@ import {
   invalidateRecommendationCaches
 } from "./intelligence.js";
 import { parseIntent, intentHasFilters } from "./intent-parser.js";
+import { isPlotDescriptionQuery } from "./plot-search.js";
 
 const $ = id => document.getElementById(id);
 let activeType = "all";
@@ -194,10 +196,13 @@ async function loadRecommendations({ refresh = false } = {}) {
   $("recommendation-empty").hidden = true;
   $("recommendation-grid").innerHTML = "";
   showStatus("Finding picks that fit…");
-  $("recommendation-heading").textContent = intent.constraints.length ? "Matches for your mood" : "Picks for your next watch";
-  $("recommendation-copy").textContent = intent.constraints.length
-    ? "These results use catalogue filters we can verify."
-    : "A mix of familiar taste and something new to discover.";
+  const plotSearch = isPlotDescriptionQuery(intent.query);
+  $("recommendation-heading").textContent = plotSearch ? "Movies that may match your memory" : intent.constraints.length ? "Matches for your mood" : "Picks for your next watch";
+  $("recommendation-copy").textContent = plotSearch
+    ? "Possible matches are ranked using real catalogue keywords and plot summaries. Open a title to check its details."
+    : intent.constraints.length
+      ? "These results use catalogue filters we can verify."
+      : "A mix of familiar taste and something new to discover.";
 
   try {
     if (refresh) {
@@ -206,7 +211,9 @@ async function loadRecommendations({ refresh = false } = {}) {
       suppressInvalidationRefresh = false;
     }
     let items;
-    if (intentHasFilters(intent)) {
+    if (isPlotDescriptionQuery(intent.query)) {
+      items = await getPlotMatchRecommendations(intent, 24);
+    } else if (intentHasFilters(intent)) {
       items = await getIntentRecommendations(intent, 24);
     } else {
       items = await getPersonalRecommendations(24);
