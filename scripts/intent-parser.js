@@ -118,6 +118,51 @@ function findCountry(text) {
   return null;
 }
 
+
+const PROVIDER_QUERY_ALIASES = Object.freeze([
+  "amazon prime video", "prime video", "amazon prime", "disney plus", "disney+",
+  "netflix", "hulu", "crunchyroll", "apple tv plus", "apple tv+", "apple tv",
+  "hbo max", "paramount plus", "paramount+", "peacock", "tubi", "mubi", "starz", "youtube"
+]);
+
+function findProviderRegion(text) {
+  if (/\bin\s+(?:the\s+)?(?:us|u\.s\.a\.?)\b/i.test(text)) {
+    return COUNTRY_HINTS.find(country => country.code === "US") || { code: "US", name: "United States", aliases: ["us", "usa", "united states"] };
+  }
+  for (const country of COUNTRY_HINTS) {
+    for (const alias of country.aliases) {
+      if (LANGUAGE_COUNTRY_ADJECTIVES.has(alias) && !includesPhrase(text, country.name.toLowerCase())) continue;
+      const escaped = alias.replace(/[+]/g, "\\+");
+      const regionPhrase = new RegExp("\\b(?:available|streaming|watchable)\\s+in\\s+(?:the\\s+)?" + escaped + "\\b|\\bin\\s+(?:the\\s+)?" + escaped + "\\b", "i");
+      if (regionPhrase.test(text)) return country;
+    }
+  }
+  return null;
+}
+
+function removeProviderRegionPhrase(text, country) {
+  let cleaned = String(text || "");
+  const aliases = [...(country?.aliases || [])];
+  if (country?.code === "US") aliases.push("us");
+  for (const alias of aliases.sort((a, b) => b.length - a.length)) {
+    const escaped = alias.replace(/[+]/g, "\\+");
+    cleaned = cleaned.replace(new RegExp("\\b(?:available|streaming|watchable)\\s+in\\s+(?:the\\s+)?" + escaped + "\\b", "gi"), " ");
+    cleaned = cleaned.replace(new RegExp("\\bin\\s+(?:the\\s+)?" + escaped + "\\b", "gi"), " ");
+  }
+  return cleaned.replace(/[\s,]+/g, " ").trim();
+}
+
+function buildProviderTitleQuery(text, providerRegion) {
+  let cleaned = providerRegion ? removeProviderRegionPhrase(text, providerRegion) : String(text || "");
+  for (const alias of [...PROVIDER_QUERY_ALIASES].sort((a, b) => b.length - a.length)) {
+    const escaped = alias.replace(/[+]/g, "\\+");
+    cleaned = cleaned.replace(new RegExp("\\b(?:available|streaming|watchable)\\s+on\\s+" + escaped + "\\b", "gi"), " ");
+    cleaned = cleaned.replace(new RegExp("\\bon\\s+" + escaped + "\\b", "gi"), " ");
+  }
+  cleaned = cleaned.replace(/^\s*(?:where\s+can\s+i\s+watch|where\s+to\s+watch)\s+/i, "");
+  return cleaned.replace(/[\s,]+/g, " ").trim();
+}
+
 function parseDecade(text) {
   const match = text.match(/\b(?:in|from|during|released in|made in)\s+(?:the\s+)?(19\d0s|20\d0s|['’]?\d0s)\b/i)
     || text.match(/\b(19\d0s|20\d0s|['’]?\d0s)\s+(?:movies?|films?|series|shows?)\b/i)
@@ -152,6 +197,9 @@ export function parseIntent(input = "") {
     decade: null,
     country: null,
     countryName: null,
+    providerRegion: null,
+    providerRegionName: null,
+    titleQuery: null,
     language: null,
     unsupported: [],
     constraints: []
@@ -205,7 +253,14 @@ export function parseIntent(input = "") {
     intent.constraints.push(String(intent.year));
   }
 
-  const country = findCountry(text);
+  const providerMentioned = new RegExp("\\b(?:" + PROVIDER_QUERY_ALIASES.map(alias => alias.replace(/[+]/g, "\\\\+")).join("|") + ")\\b", "i").test(text);
+  const providerRegion = providerMentioned ? findProviderRegion(text) : null;
+  if (providerRegion) {
+    intent.providerRegion = providerRegion.code;
+    intent.providerRegionName = providerRegion.name;
+  }
+  const countryText = providerRegion ? removeProviderRegionPhrase(text, providerRegion) : text;
+  const country = findCountry(countryText);
   if (country) {
     intent.country = country.code;
     intent.countryName = country.name;
@@ -218,6 +273,14 @@ export function parseIntent(input = "") {
       intent.constraints.push(name[0].toUpperCase() + name.slice(1));
       break;
     }
+  }
+
+  const providerQualifier = /\b(?:available|streaming|watchable)\s+on\s+(?:amazon\s+prime\s+video|prime\s+video|amazon\s+prime|disney\s*(?:plus|\+)|netflix|hulu|crunchyroll|apple\s+tv(?:\s*(?:plus|\+))?|hbo\s+max|paramount\s*(?:plus|\+)|peacock|tubi|mubi|starz|youtube)\b|\bon\s+(?:amazon\s+prime\s+video|prime\s+video|amazon\s+prime|disney\s*(?:plus|\+)|netflix|hulu|crunchyroll|apple\s+tv(?:\s*(?:plus|\+))?|hbo\s+max|paramount\s*(?:plus|\+)|peacock|tubi|mubi|starz|youtube)\b/i.test(text);
+  if (providerMentioned && providerQualifier) {
+    const titleCandidate = buildProviderTitleQuery(text, providerRegion);
+    const nonTypeWords = titleCandidate.replace(/\b(?:movie|movies|film|films|tv|series|show|shows)\b/gi, " ").replace(/[\s,]+/g, " ").trim();
+    const hasStructuredFilters = Boolean(intent.genre || intent.year || intent.decade || intent.country || intent.language || intent.runtimeMax || intent.anime);
+    if (nonTypeWords && !hasStructuredFilters) intent.titleQuery = titleCandidate;
   }
 
   const unsupportedRules = [
