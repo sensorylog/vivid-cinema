@@ -8,19 +8,23 @@ const FOR_YOU_CACHE_KEY = "vivid:for-you:v1";
 const FOR_YOU_CACHE_TTL = 30 * 60 * 1000;
 const TONIGHT_SESSION_KEY = "vivid:tonight:v1";
 const PROGRESS_SYNC_DEBOUNCE = 1800;
+import { switchAccountStorage } from "./account-storage.js";
+
 const LOCAL_OWNER_KEY = "vivid:progress-owner:v1";
 function ensureProgressOwner(uid){
-  if(!uid)return;
-  try{
-    const owner=localStorage.getItem(LOCAL_OWNER_KEY);
-    if(!owner){localStorage.setItem(LOCAL_OWNER_KEY,String(uid));return;}
-    if(owner===String(uid))return;
-    localStorage.removeItem(PROGRESS_KEY);
-    localStorage.removeItem(FOR_YOU_CACHE_KEY);
-    localStorage.removeItem(TONIGHT_SESSION_KEY);
-    localStorage.setItem(LOCAL_OWNER_KEY,String(uid));
-    window.dispatchEvent(new CustomEvent("vivid:account-switched",{detail:{uid:String(uid)}}));
-  }catch{}
+  const result = switchAccountStorage({
+    storage: localStorage,
+    ownerKey: LOCAL_OWNER_KEY,
+    keys: [PROGRESS_KEY],
+    clearKeys: [FOR_YOU_CACHE_KEY, "vivid:for-you:v2", "vivid:taste:v1"],
+    uid
+  });
+  if(!result.changed)return;
+  for(const timer of progressTimers.values()) window.clearTimeout(timer);
+  progressTimers.clear();
+  pendingProgress.clear();
+  try{sessionStorage.removeItem(TONIGHT_SESSION_KEY)}catch{}
+  window.dispatchEvent(new CustomEvent("vivid:account-switched",{detail:{uid:String(uid)}}));
 }
 
 let firebasePromise = null;
@@ -105,18 +109,26 @@ async function deleteRemoteProgress(uid, contentId) {
 }
 
 function queueRemoteProgress(contentId, item) {
-  pendingProgress.set(contentId, { ...item });
+  pendingProgress.set(contentId, {
+    data: { ...item },
+    owner: localStorage.getItem(LOCAL_OWNER_KEY)
+  });
   if (progressTimers.has(contentId)) return;
   const timer = window.setTimeout(async () => {
     progressTimers.delete(contentId);
-    const pending = pendingProgress.get(contentId);
+    const entry = pendingProgress.get(contentId);
     pendingProgress.delete(contentId);
-    if (!pending) return;
+    if (!entry?.data) return;
     try {
       const auth = await getFirebaseAuth();
-      if (auth?.currentUser) await setRemoteProgress(auth.currentUser.uid, contentId, pending);
+      if (!auth?.currentUser) return;
+      const activeOwner = localStorage.getItem(LOCAL_OWNER_KEY);
+      const ownerStillMatches = entry.owner
+        ? activeOwner === entry.owner && entry.owner === String(auth.currentUser.uid)
+        : !activeOwner || activeOwner === String(auth.currentUser.uid);
+      if (ownerStillMatches) await setRemoteProgress(auth.currentUser.uid, contentId, entry.data);
     } catch (error) {
-      pendingProgress.set(contentId, pending);
+      pendingProgress.set(contentId, entry);
       console.warn("Vivid playback progress sync unavailable:", error);
     }
   }, PROGRESS_SYNC_DEBOUNCE);
@@ -213,12 +225,17 @@ export function removePlaybackProgress(contentId) {
 }
 
 export async function syncPlaybackProgressForUser(user = null) {
-  if (user?.uid) ensureProgressOwner(user.uid);
-  if (!user) return readProgress();
+  if (!user?.uid) return readProgress();
   try {
-    const { db, collection, getDocs } = await getFirebase();
+    const { auth, db, collection, getDocs } = await getFirebase();
+    if (!auth?.currentUser || String(auth.currentUser.uid) !== String(user.uid)) return readProgress();
+    ensureProgressOwner(user.uid);
     const snapshot = await getDocs(collection(db, "users", user.uid, "progress"));
+    if (!auth.currentUser || String(auth.currentUser.uid) !== String(user.uid) ||
+        localStorage.getItem(LOCAL_OWNER_KEY) !== String(user.uid)) return readProgress();
+
     const local = readProgress();
+    const remoteIds = new Set(snapshot.docs.map(snapshotDoc => snapshotDoc.id));
     let changed = false;
 
     snapshot.docs.forEach(snapshotDoc => {
@@ -227,15 +244,16 @@ export async function syncPlaybackProgressForUser(user = null) {
       const remoteUpdated = Number(data.updatedAt) || 0;
       const localUpdated = Number(local[contentId]?.updatedAt) || 0;
       if (remoteUpdated > localUpdated) {
-        local[contentId] = {
-          ...local[contentId],
-          ...data,
-          updatedAt: remoteUpdated
-        };
+        local[contentId] = { ...local[contentId], ...data, updatedAt: remoteUpdated };
         changed = true;
       } else if (localUpdated > remoteUpdated && local[contentId]) {
         queueRemoteProgress(contentId, local[contentId]);
       }
+    });
+
+    // Upload local-only progress too; otherwise first-device records never sync.
+    Object.entries(local).forEach(([contentId, item]) => {
+      if (!remoteIds.has(contentId)) queueRemoteProgress(contentId, item);
     });
 
     if (changed) writeProgress(local);
@@ -246,26 +264,32 @@ export async function syncPlaybackProgressForUser(user = null) {
   }
 }
 
+let progressSyncStarted = false;
 export function startPlaybackSync() {
-  if (progressSyncPromise) return progressSyncPromise;
+  if (progressSyncStarted) return progressSyncPromise;
+  progressSyncStarted = true;
 
   progressSyncPromise = (async () => {
     try {
       const { auth, onAuthStateChanged } = await getFirebase();
       return await new Promise(resolve => {
-        let settled = false;
-        const finish = value => {
-          if (settled) return;
-          settled = true;
-          unsubscribe?.();
-          resolve(value);
-        };
-        const unsubscribe = onAuthStateChanged(auth, user => {
+        let initialStateResolved = false;
+        // Keep the listener alive so sign-out and account changes switch memory
+        // snapshots and trigger a fresh sync instead of permanently using the first user.
+        onAuthStateChanged(auth, user => {
           if (!user) {
-            finish(readProgress());
+            if (!initialStateResolved) {
+              initialStateResolved = true;
+              resolve(readProgress());
+            }
             return;
           }
-          void syncPlaybackProgressForUser(user).then(finish);
+          void syncPlaybackProgressForUser(user).then(value => {
+            if (!initialStateResolved) {
+              initialStateResolved = true;
+              resolve(value);
+            }
+          });
         });
       });
     } catch (error) {
