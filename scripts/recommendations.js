@@ -581,12 +581,17 @@ export async function getPersonalRecommendations(limit = 12) {
       .flatMap(item => item.genre_ids || [])
       .map(Number)
   );
+  const recommendationMemoryFingerprint = [...recommendationMemory.entries()]
+    .sort(([left], [right]) => left.localeCompare(right))
+    .map(([contentId, memory]) => contentId + ":" + memory.impressions + ":" + memory.clicks + ":" + memory.lastSeen)
+    .join(",");
 
   const fingerprint = [
     ...Object.entries(feedback).map(([k, v]) => k + ":" + v.kind + ":" + v.updatedAt),
     ...Object.entries(progress).map(([k, v]) => k + ":" + v.updatedAt),
     "recent:" + (library.history || []).slice(0, 5).map(item => keyFor(item) + ":" + (item.lastWatchedAt || item.updatedAt || "")).join(","),
     "library:" + observed.map(item => keyFor(item) + ":" + Number(item.updatedAt || item.lastWatchedAt || 0)).sort().join(","),
+    "recommendationMemory:" + recommendationMemoryFingerprint,
     "taste:" + Number(taste.updatedAt || 0),
     "rotation:" + new Date().toISOString().slice(0, 10)
   ].sort().join("|");
@@ -630,12 +635,14 @@ export async function getPersonalRecommendations(limit = 12) {
 
 export function collectIntentCandidates(responses = []) {
   const successful = responses.filter(result => result?.status === "fulfilled");
-  if (!successful.length) {
-    const failure = responses.find(result => result?.status === "rejected");
-    if (failure) throw failure.reason;
-    return [];
-  }
-  return successful.flatMap(result => Array.isArray(result.value) ? result.value : []);
+  const candidates = successful.flatMap(result => Array.isArray(result.value) ? result.value : []);
+  if (candidates.length || successful.length === responses.length) return candidates;
+
+  // An empty success plus a failed sibling request is not proof that the
+  // whole mixed-media search had zero matches.
+  const failure = responses.find(result => result?.status === "rejected");
+  if (failure) throw failure.reason;
+  return candidates;
 }
 
 export async function getIntentRecommendations(intent = {}, limit = 18) {
