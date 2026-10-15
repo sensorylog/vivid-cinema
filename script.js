@@ -7,7 +7,7 @@ import { escapeHtml, debounce, getErrorMessage } from "./scripts/utils.js";
 import { buildWatchUrl } from "./scripts/routes.js";
 import { checkForReleaseAlerts, deliverReleaseAlerts, getPendingReleaseAlerts, requestReleaseAlerts, dismissReleaseAlert, clearReleaseAlerts, getReleaseAlertState } from "./scripts/release-alerts.js";
 import { startIntelligenceSync, shouldShowColdStart, completeColdStart, dismissColdStart, recordBehavior, getTasteProfile, getTasteStrength } from "./scripts/intelligence.js";
-import { searchIntelligently, getRecentSearches, rememberSearch, clearRecentSearches } from "./scripts/search.js";
+import { searchIntelligently, getRecentSearches, getRecentSearchOwner, rememberSearch, clearRecentSearches } from "./scripts/search.js";
 import { startCinemaReminderLoop } from "./scripts/cinema-reminders.js";
 import { enableCinemaPush, getServerReleaseAlerts, dismissServerReleaseAlert } from "./scripts/push-notifications.js";
 
@@ -531,13 +531,14 @@ function showSearch(items,intent,query=""){
 async function runSearch(q){
   const requestId=++searchRequestId;
   const query=String(q||"").trim();
+  const searchOwnerAtStart=getRecentSearchOwner();
   if(!query){showRecentSearches();return}
   showSearchLoading(query);
   try{
     try{recordBehavior("search_query",null,{query})}catch{}
     const result=await searchIntelligently(query);
     if(requestId!==searchRequestId)return;
-    rememberSearch(query);
+    rememberSearch(query,searchOwnerAtStart);
     showSearch(result.items,result.intent,query);
   }catch(error){
     if(requestId!==searchRequestId)return;
@@ -658,4 +659,20 @@ document.addEventListener("DOMContentLoaded",()=>{
     }catch{}
     if(needsColdStart)document.body.classList.remove("vivid-onboarding-active");
   })();
+});
+
+let searchHistoryOwner = null;
+window.addEventListener("vivid:search-history-ready", event => {
+  const nextOwner = event.detail?.owner || "guest";
+  const changedOwner = searchHistoryOwner !== null && searchHistoryOwner !== nextOwner;
+  searchHistoryOwner = nextOwner;
+  const dialog = $("vivid-search-dialog");
+  if (!dialog || dialog.hidden) return;
+  if (changedOwner) {
+    searchRequestId++;
+    if (searchInput) searchInput.value = "";
+    showRecentSearches();
+  } else if (!searchInput?.value.trim()) {
+    showRecentSearches();
+  }
 });

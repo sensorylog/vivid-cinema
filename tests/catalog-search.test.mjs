@@ -8,7 +8,9 @@ import {
   isStructuredSearchIntent,
   matchesStructuredSearchIntent,
   chooseSimilarityTarget,
-  getSearchIntent
+  getSearchIntent,
+  recentSearchStorageKey,
+  getRecentSearchOwner
 } from "../scripts/search.js";
 
 test("catalogue search merges multi-search and dedicated title indexes without duplicates", () => {
@@ -162,4 +164,24 @@ test("similar-title results identify the resolved reference title in the results
   assert.match(pageSource, /currentSimilarityTarget = result\.intent\?\.similarityTarget/);
   assert.match(pageSource, /SIMILAR TO/);
   assert.match(pageSource, /escapeHtml\(similarityTarget\.title\)/);
+});
+
+
+test("recent search storage is isolated by account and waits for auth ownership", () => {
+  const source = readFileSync(new URL("../scripts/search.js", import.meta.url), "utf8");
+  assert.notEqual(recentSearchStorageKey("account-a"), recentSearchStorageKey("account-b"));
+  assert.notEqual(recentSearchStorageKey("account-a"), recentSearchStorageKey(null));
+  assert.equal(getRecentSearchOwner(), null, "history remains unavailable until auth ownership resolves in a non-browser test");
+  assert.match(source, /vivid:search:recent:v2:/);
+  assert.match(source, /recentSearchStorageKey\(recentSearchOwner\)/);
+  assert.match(source, /recentSearchOwnerReady \? readRecent\(recentSearchOwner\) : \[\]/);
+  assert.match(source, /vivid:auth-ready/);
+  assert.match(source, /localStorage\.removeItem\(LEGACY_RECENT_KEY\)/);
+  const page = readFileSync(new URL("../scripts/search-page.js", import.meta.url), "utf8");
+  const home = readFileSync(new URL("../script.js", import.meta.url), "utf8");
+  assert.match(page, /rememberSearch\(query, searchOwnerAtStart\)/);
+  assert.match(home, /rememberSearch\(query,searchOwnerAtStart\)/);
+  assert.match(page, /if \(changedOwner\)/);
+  assert.match(home, /if \(changedOwner\)/);
+  assert.doesNotMatch(source, /localStorage\.getItem\(RECENT_KEY\)/);
 });

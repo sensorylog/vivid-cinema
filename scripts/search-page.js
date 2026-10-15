@@ -1,4 +1,4 @@
-import { searchIntelligently, getRecentSearches, rememberSearch, clearRecentSearches } from "./search.js";
+import { searchIntelligently, getRecentSearches, getRecentSearchOwner, rememberSearch, clearRecentSearches } from "./search.js";
 
 const input = document.getElementById("search-page-input");
 const clear = document.getElementById("search-page-clear");
@@ -9,6 +9,7 @@ let currentPage = 1;
 let currentItems = [];
 let currentSearchNotes = [];
 let currentSimilarityTarget = null;
+let currentSearchHistoryOwner = null;
 
 const escapeHtml = value => String(value ?? "").replace(/[&<>"']/g, char => ({
   "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
@@ -87,6 +88,7 @@ function renderResults(items, query, canLoadMore = false, notes = currentSearchN
 
 async function runSearch(value, { append = false } = {}) {
   const query = String(value || "").trim();
+  const searchOwnerAtStart = getRecentSearchOwner();
   if (!query) {
     renderRecent();
     return;
@@ -108,7 +110,7 @@ async function runSearch(value, { append = false } = {}) {
   try {
     const result = await searchIntelligently(query, { limit: PAGE_SIZE, page: requestedPage });
     if (query !== currentQuery) return;
-    if (!append) rememberSearch(query);
+    if (!append) rememberSearch(query, searchOwnerAtStart);
     const pageItems = result.items || [];
     currentSearchNotes = result.intent?.filters?.unsupported || [];
     currentSimilarityTarget = result.intent?.similarityTarget || null;
@@ -147,3 +149,20 @@ clear?.addEventListener("click", () => {
 });
 
 renderRecent();
+
+window.addEventListener("vivid:search-history-ready", event => {
+  const nextOwner = event.detail?.owner || "guest";
+  const changedOwner = currentSearchHistoryOwner !== null && currentSearchHistoryOwner !== nextOwner;
+  currentSearchHistoryOwner = nextOwner;
+  if (changedOwner) {
+    currentQuery = "";
+    currentPage = 1;
+    currentItems = [];
+    currentSearchNotes = [];
+    currentSimilarityTarget = null;
+    if (input) input.value = "";
+    if (clear) clear.hidden = true;
+    content.innerHTML = "";
+  }
+  if (!currentQuery && !input?.value.trim()) renderRecent();
+});

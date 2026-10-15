@@ -18,3 +18,10 @@ test("Home search focuses the input synchronously so iOS can open its keyboard",
   assert.match(openSearch, /dialog\.hidden=false;[\s\S]*?searchInput\?\.focus\(\{preventScroll:true\}\)/);
   assert.doesNotMatch(openSearch, /requestAnimationFrame\([\s\S]*?searchInput\?\.focus/);
 });
+
+
+test("Home search refreshes recent suggestions when account-scoped history becomes ready", () => {
+  assert.match(script, /vivid:search-history-ready/);
+  assert.match(script, /if \(changedOwner\)/);
+  assert.match(script, /searchRequestId\+\+/);
+});
