@@ -162,6 +162,7 @@ function parseRuntime(text) {
 export function parseIntent(input = "") {
   const query = String(input || "").trim().replace(/\s+/g, " ");
   const text = query.toLowerCase();
+  const mediaTypeText = text.replace(/\bapple\s+tv(?:\+| plus)?\b/gi, " ");
   const intent = {
     query,
     mediaType: "all",
@@ -179,7 +180,7 @@ export function parseIntent(input = "") {
     constraints: []
   };
 
-  const mentionsMovie = /\b(movie|movies|film|films|feature film)\b/i.test(text);
+  const mentionsMovie = /\b(movie|movies|film|films|feature film)\b/i.test(mediaTypeText);
   if (/\b(anime|anim[eé])\b/i.test(text)) {
     intent.anime = true;
     intent.mediaType = mentionsMovie ? "movie" : "tv";
@@ -189,7 +190,7 @@ export function parseIntent(input = "") {
   } else if (mentionsMovie) {
     intent.mediaType = "movie";
     intent.constraints.push("Movies");
-  } else if (/\b(tv|series|show|shows|drama series|episode|episodes)\b/i.test(text)) {
+  } else if (/\b(tv|series|show|shows|drama series|episode|episodes)\b/i.test(mediaTypeText)) {
     intent.mediaType = "tv";
     intent.constraints.push("TV series");
   }
