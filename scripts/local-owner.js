@@ -49,14 +49,15 @@ export function switchLocalOwner({
   if (currentOwner === targetOwner) return { changed: false, owner: targetOwner };
 
   writeSnapshot(currentOwner);
+  const hasIncomingSnapshot = activeKeys.some(key => storage.getItem(snapshotKey(key, targetOwner)) != null);
 
   for (const key of activeKeys) {
     const incoming = storage.getItem(snapshotKey(key, targetOwner));
     if (incoming != null) {
       storage.setItem(key, incoming);
-    } else if (currentOwner === "guest" && targetOwner !== "guest") {
-      // A guest's first account on this device inherits the guest state only
-      // when that account has no saved snapshot for this store.
+    } else if (currentOwner === "guest" && targetOwner !== "guest" && !hasIncomingSnapshot) {
+      // A first account on this device inherits guest state only when there is
+      // no saved snapshot at all for that account.
       continue;
     } else {
       storage.setItem(key, String(emptyValues[key] ?? "{}"));
