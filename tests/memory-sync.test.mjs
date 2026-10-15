@@ -28,6 +28,10 @@ test("playback writes are bound to the owner active when queued", () => {
   assert.match(progress, /The signed-in account changed during playback progress sync/);
   assert.match(progress, /getDocsFromServer\(collection\(db, "users", user\.uid, "progress"\)\)/);
   assert.match(progress, /remoteUpdated > 0 && remoteUpdated >= localUpdated/);
+  assert.match(progress, /JSON\.stringify\(merged\) !== JSON\.stringify\(local\[contentId\]\)/);
+  assert.match(progress, /vivid:sync-status/);
+  assert.match(progress, /progressSyncStatus\("error", user\.uid, "sync"\)/);
+  assert.match(progress, /progressSyncStatus\("synced", uid, contentId\)/);
   assert.match(intelligence, /if\(Number\(x\.updatedAt\|\|0\)<localVersion\)return/);
   assert.match(intelligence, /getDocsFromServer\(collection\(db,"users",u\.uid,"feedback"\)\)/);
   assert.match(intelligence, /getDocsFromServer\(collection\(db,"users",u\.uid,"taste"\)\)/);
