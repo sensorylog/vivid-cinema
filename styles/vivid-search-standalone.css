@@ -305,3 +305,26 @@ body.vivid-search-page .vivid-search-result-group{
     scroll-behavior:auto;
   }
 }
+
+
+/* Explain unsupported natural-language constraints instead of implying they were applied. */
+.vivid-search-filter-note {
+  margin: 0 0 1.25rem;
+  padding: .9rem 1rem;
+  border: 1px solid var(--vivid-border, rgba(255,255,255,.14));
+  border-radius: 12px;
+  color: var(--vivid-text-secondary, #b9bac4);
+  background: var(--vivid-surface, rgba(255,255,255,.04));
+  font-size: .9rem;
+  line-height: 1.5;
+}
+.vivid-search-filter-note strong {
+  display: block;
+  margin-bottom: .25rem;
+  color: var(--vivid-text, #f5f5f7);
+}
+.vivid-search-filter-note ul {
+  margin: .25rem 0 0;
+  padding-inline-start: 1.2rem;
+}
+.vivid-search-filter-note li + li { margin-top: .2rem; }

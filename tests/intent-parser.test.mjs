@@ -81,3 +81,18 @@ test("empty input stays a genuine cold-start request", () => {
   assert.equal(intent.runtimeMax, null);
   assert.equal(intentHasFilters(intent), false);
 });
+
+
+test("plural genre words are parsed for natural catalogue queries", () => {
+  const thrillers = parseIntent("Korean thrillers from 2020");
+  assert.equal(thrillers.genre.key, "thriller");
+  assert.equal(thrillers.language, "ko");
+  assert.equal(thrillers.year, 2020);
+
+  const comedies = parseIntent("funny comedies from 1998");
+  assert.equal(comedies.genre.key, "comedy");
+  assert.equal(comedies.year, 1998);
+
+  const mysteries = parseIntent("mysteries series");
+  assert.equal(mysteries.genre.key, "mystery");
+});

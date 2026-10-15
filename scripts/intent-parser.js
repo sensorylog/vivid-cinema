@@ -29,9 +29,21 @@ function includesPhrase(text, phrase) {
   return new RegExp("(^|[^a-z0-9])" + phrase.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "([^a-z0-9]|$)", "i").test(text);
 }
 
+function pluralPhrase(phrase) {
+  const parts = phrase.split(" ");
+  const last = parts.pop() || "";
+  let plural;
+  if (/[bcdfghjklmnpqrstvwxyz]y$/i.test(last)) plural = last.slice(0, -1) + "ies";
+  else if (/(s|x|z|ch|sh)$/i.test(last)) plural = last + "es";
+  else plural = last + "s";
+  return [...parts, plural].join(" ");
+}
+
 function findGenre(text) {
   for (const [key, genre] of Object.entries(GENRES)) {
-    if ([key, ...genre.aliases].some(alias => includesPhrase(text, alias))) return { key, ...genre };
+    if ([key, ...genre.aliases].some(alias =>
+      includesPhrase(text, alias) || includesPhrase(text, pluralPhrase(alias))
+    )) return { key, ...genre };
   }
   return null;
 }

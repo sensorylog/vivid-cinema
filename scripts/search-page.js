@@ -7,6 +7,7 @@ const PAGE_SIZE = 12;
 let currentQuery = "";
 let currentPage = 1;
 let currentItems = [];
+let currentSearchNotes = [];
 
 const escapeHtml = value => String(value ?? "").replace(/[&<>"']/g, char => ({
   "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
@@ -41,7 +42,7 @@ function renderRecent() {
   });
 }
 
-function renderResults(items, query, canLoadMore = false) {
+function renderResults(items, query, canLoadMore = false, notes = currentSearchNotes) {
   const movies = items.filter(item => item.media_type === "movie");
   const shows = items.filter(item => item.media_type === "tv");
   const people = items.filter(item => item.media_type === "person");
@@ -63,8 +64,14 @@ function renderResults(items, query, canLoadMore = false) {
           '<i class="bi bi-chevron-right"></i></a>';
       }).join("") + '</div></section>';
 
+  const notesMarkup = notes.length
+    ? '<aside class="vivid-search-filter-note" role="status"><strong>Search limitations</strong><ul>' +
+      notes.map(note => '<li>' + escapeHtml(note) + '</li>').join("") +
+      '</ul></aside>'
+    : '';
   content.innerHTML =
     '<div class="vivid-search-page-label">RESULTS FOR “' + escapeHtml(query) + '”</div>' +
+    notesMarkup +
     (items.length
       ? renderGroup("Movies", movies) + renderGroup("TV Shows", shows) + renderGroup("People", people)
       : '<div class="vivid-search-empty-page"><i class="bi bi-search"></i><strong>No matches found</strong><span>Try another title, person, genre, or shorter search.</span></div>') +
@@ -99,14 +106,15 @@ async function runSearch(value, { append = false } = {}) {
     if (query !== currentQuery) return;
     if (!append) rememberSearch(query);
     const pageItems = result.items || [];
+    currentSearchNotes = result.intent?.filters?.unsupported || [];
     const identities = new Set(currentItems.map(item => item.media_type + ":" + item.id));
     const newItems = pageItems.filter(item => !identities.has(item.media_type + ":" + item.id));
     currentItems = [...currentItems, ...newItems];
     currentPage = requestedPage;
-    renderResults(currentItems, query, pageItems.length >= PAGE_SIZE);
+    renderResults(currentItems, query, pageItems.length >= PAGE_SIZE, currentSearchNotes);
   } catch (error) {
     if (append && currentItems.length) {
-      renderResults(currentItems, query, true);
+      renderResults(currentItems, query, true, currentSearchNotes);
       const loadButton = content.querySelector("[data-search-load-more]");
       if (loadButton) loadButton.textContent = "Try loading more";
     } else {
