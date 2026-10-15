@@ -85,3 +85,16 @@ test("partial account snapshots cannot inherit another owner's missing store", (
   assert.equal(storage.getItem("library"), '{"favorites":["A"]}');
   assert.equal(storage.getItem("progress"), "{}");
 });
+
+test("a missing owner marker cannot make guest state overwrite an existing account snapshot", () => {
+  const storage = memoryStorage({
+    library: '{"favorites":["guest"]}',
+    progress: '{"movie:9":{"progress":9}}',
+    "library:user:user-a": '{"favorites":["A"]}',
+    "progress:user:user-a": '{"movie:9":{"progress":80}}'
+  });
+  setup(storage, "user-a");
+  assert.equal(storage.getItem("library"), '{"favorites":["A"]}');
+  assert.equal(storage.getItem("progress"), '{"movie:9":{"progress":80}}');
+  assert.equal(storage.getItem("library:guest"), '{"favorites":["guest"]}');
+});
