@@ -1,4 +1,4 @@
-import { searchIntelligently, getRecentSearches, rememberSearch, clearRecentSearches } from "./search.js";
+import { searchIntelligently, getRecentSearches, getRecentSearchOwner, rememberSearch, clearRecentSearches } from "./search.js";
 
 const input = document.getElementById("search-page-input");
 const clear = document.getElementById("search-page-clear");
@@ -87,6 +87,7 @@ function renderResults(items, query, canLoadMore = false, notes = currentSearchN
 
 async function runSearch(value, { append = false } = {}) {
   const query = String(value || "").trim();
+  const searchOwnerAtStart = getRecentSearchOwner();
   if (!query) {
     renderRecent();
     return;
@@ -108,7 +109,7 @@ async function runSearch(value, { append = false } = {}) {
   try {
     const result = await searchIntelligently(query, { limit: PAGE_SIZE, page: requestedPage });
     if (query !== currentQuery) return;
-    if (!append) rememberSearch(query);
+    if (!append) rememberSearch(query, searchOwnerAtStart);
     const pageItems = result.items || [];
     currentSearchNotes = result.intent?.filters?.unsupported || [];
     currentSimilarityTarget = result.intent?.similarityTarget || null;
