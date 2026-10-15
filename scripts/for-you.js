@@ -83,7 +83,7 @@ function intentForPage() {
 
 function intentChipEntries(intent) {
   const entries = [];
-  if (intent.anime) entries.push({ key: "anime", label: "Anime · Japanese" });
+  if (intent.anime) entries.push({ key: "anime", label: intent.mediaType === "movie" ? "Anime movies · Japanese" : "Anime · Japanese" });
   else if (intent.mediaType !== "all") entries.push({ key: "mediaType", label: intent.mediaType === "movie" ? "Movies" : "TV series" });
   if (intent.genre && !intent.anime) entries.push({ key: "genre", label: intent.mediaType === "tv" && intent.genre.tvLabel ? intent.genre.tvLabel : intent.genre.name });
   if (intent.runtimeMax) entries.push({ key: "runtime", label: intent.mediaType === "tv" ? "Up to " + intent.runtimeMax + " min / episode" : intent.mediaType === "all" ? "Movies ≤ " + intent.runtimeMax + " min · TV episodes ≤ " + intent.runtimeMax + " min" : "Up to " + intent.runtimeMax + " min" });
