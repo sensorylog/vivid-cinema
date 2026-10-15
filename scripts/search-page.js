@@ -147,3 +147,7 @@ clear?.addEventListener("click", () => {
 });
 
 renderRecent();
+
+window.addEventListener("vivid:search-history-ready", () => {
+  if (!currentQuery && !input?.value.trim()) renderRecent();
+});
