@@ -9,7 +9,8 @@ import {
   matchesStructuredSearchIntent,
   chooseSimilarityTarget,
   getSearchIntent,
-  recentSearchStorageKey
+  recentSearchStorageKey,
+  getRecentSearchOwner
 } from "../scripts/search.js";
 
 test("catalogue search merges multi-search and dedicated title indexes without duplicates", () => {
@@ -170,9 +171,10 @@ test("recent search storage is isolated by account and waits for auth ownership"
   const source = readFileSync(new URL("../scripts/search.js", import.meta.url), "utf8");
   assert.notEqual(recentSearchStorageKey("account-a"), recentSearchStorageKey("account-b"));
   assert.notEqual(recentSearchStorageKey("account-a"), recentSearchStorageKey(null));
+  assert.equal(getRecentSearchOwner(), null, "history remains unavailable until auth ownership resolves in a non-browser test");
   assert.match(source, /vivid:search:recent:v2:/);
   assert.match(source, /recentSearchStorageKey\(recentSearchOwner\)/);
-  assert.match(source, /if \(!recentSearchOwnerReady\) return \[\]/);
+  assert.match(source, /recentSearchOwnerReady \? readRecent\(recentSearchOwner\) : \[\]/);
   assert.match(source, /vivid:auth-ready/);
   assert.match(source, /localStorage\.removeItem\(LEGACY_RECENT_KEY\)/);
   assert.doesNotMatch(source, /localStorage\.getItem\(RECENT_KEY\)/);
