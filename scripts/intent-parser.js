@@ -122,7 +122,7 @@ function findCountry(text) {
 const PROVIDER_QUERY_ALIASES = Object.freeze([
   "amazon prime video", "prime video", "amazon prime", "disney plus", "disney+",
   "netflix", "hulu", "crunchyroll", "apple tv plus", "apple tv+", "apple tv",
-  "hbo max", "paramount plus", "paramount+", "peacock", "tubi", "mubi", "starz", "youtube"
+  "hbo max", "max", "paramount plus", "paramount+", "peacock", "tubi", "mubi", "starz", "youtube"
 ]);
 
 function findProviderRegion(text) {
