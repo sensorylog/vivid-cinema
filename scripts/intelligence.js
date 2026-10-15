@@ -9,6 +9,7 @@ const TASTE_CACHE_KEY="vivid:taste:v1";
 const empty=()=>({version:1,feedback:{},feedbackCleared:{},events:[],taste:{genres:{},languages:{},countries:{},actors:{},directors:{},media:{movie:0,tv:0},decades:{},updatedAt:0},onboarding:{completed:false,dismissed:false,completedAt:0}});
 let firebasePromise=null, syncPromise=null, sessionId=null;
 const LOCAL_OWNER_KEY="vivid:intelligence-owner:v1";
+const TASTE_SIGNAL_TYPES=new Set(["title_opened","trailer_started","watch_started","playback_progress","watch_completed","recommendation_clicked"]);
 function ensureIntelligenceOwner(uid){
  try{
   const result=switchLocalOwner({
@@ -88,7 +89,7 @@ export function recordBehavior(type,item=null,metadata={}){
  if(duplicate)return;
  const clean={};Object.entries(metadata||{}).slice(0,10).forEach(([k,v])=>{if(typeof v==="string")clean[k.slice(0,40)]=v.slice(0,160);else if(typeof v==="number"||typeof v==="boolean")clean[k.slice(0,40)]=v});
  const event={id:now.toString(36)+"-"+Math.random().toString(36).slice(2,7),type:String(type).slice(0,60),contentId:x?key(x):null,mediaType:x?.media_type||null,occurredAt:now,sessionId:sid(),metadata:clean};
- s.events.push(event);if(s.events.length>300)s.events.splice(0,s.events.length-300);write(s);cloud(["events",event.sessionId+"_"+event.id],event)
+ s.events.push(event);if(s.events.length>300)s.events.splice(0,s.events.length-300);if(TASTE_SIGNAL_TYPES.has(type))s.taste.updatedAt=0;write(s);cloud(["events",event.sessionId+"_"+event.id],event)
 }
 
 export function setFeedback(item,kind){
@@ -116,8 +117,19 @@ function eventSignal(s,k){
 function top(m,n){return Object.fromEntries(Object.entries(m).sort((a,b)=>b[1]-a[1]).slice(0,n))}
 async function seeds(){
  const l=getLocalLibrary(),s=read(),all=[...(l.favorites||[]).map(x=>({item:x,w:4})),...(l.history||[]).filter(x=>Number(x.completion||0)>=25).map(x=>({item:x,w:2.5*Number(x.completion||0)/100})),...(l.watchLater||[]).map(x=>({item:x,w:1})),...Object.values(s.feedback).filter(x=>x.kind==="like").map(x=>({item:x,w:5}))];
- const eventBoosted=(l.history||[]).map(item=>({item,w:eventSignal(s,key(item))})).filter(x=>x.w>0);
- all.push(...eventBoosted);
+  const eventBoosted=(l.history||[]).map(item=>({item,w:eventSignal(s,key(item))})).filter(x=>x.w>0);
+  const behavioralItems=new Map;
+  for(const event of s.events){
+   if(!event?.contentId||!TASTE_SIGNAL_TYPES.has(event.type))continue;
+   const parts=String(event.contentId).split(":");
+   const media_type=event.mediaType||parts.shift();
+   const id=parts.join(":");
+   if(!id||!media_type)continue;
+   const item={id,media_type,title:"",updatedAt:Number(event.occurredAt||0)};
+   const k=key(item),w=eventSignal(s,k),cur=behavioralItems.get(k);
+   if(w>0&&(!cur||w>cur.w))behavioralItems.set(k,{item,w});
+  }
+  all.push(...eventBoosted,...behavioralItems.values());
  const m=new Map;all.forEach(x=>{const k=key(x.item),cur=m.get(k);if(k&&(!cur||x.w>cur.w))m.set(k,x)});return [...m.values()].sort((a,b)=>b.w-a.w).slice(0,12)
 }
 export async function rebuildTasteProfile(){
