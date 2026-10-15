@@ -189,7 +189,6 @@ async function loadSecondarySections(expectedRequestId = requestId) {
 async function loadRecommendations({ refresh = false } = {}) {
   const thisRequest = ++requestId;
   const intent = intentForPage();
-  currentIntent = intent;
   renderIntent(intent);
   $("recommendation-error").hidden = true;
   $("recommendation-empty").hidden = true;
@@ -346,8 +345,13 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   window.addEventListener("vivid:account-switched", () => {
+    // Invalidate every in-flight request and clear the previous owner's data
+    // before starting a fresh load for the newly active account.
+    requestId++;
+    secondaryRequestId++;
     currentItems = [];
     becauseItems = [];
+    lastDismissedItem = null;
     $("intent-query").value = "";
     removedFilters.clear();
     setActiveType("all");
@@ -357,22 +361,11 @@ document.addEventListener("DOMContentLoaded", () => {
     $("continue-grid").innerHTML = "";
     $("continue-section").hidden = true;
     $("because-section").hidden = true;
-    void loadRecommendations();
-  });
-  window.addEventListener("vivid:account-switched", () => {
-    // Remove the previous owner's visible recommendations immediately, before
-    // async auth/library reconciliation finishes.
-    requestId++;
-    currentItems = [];
-    becauseItems = [];
-    $("recommendation-grid").innerHTML = "";
-    $("because-grid").innerHTML = "";
-    $("continue-grid").innerHTML = "";
-    $("because-section").hidden = true;
-    $("continue-section").hidden = true;
     $("recommendation-empty").hidden = true;
     $("recommendation-error").hidden = true;
+    $("feedback-undo").hidden = true;
     showStatus("Refreshing recommendations for this account…");
+    void loadRecommendations();
   });
   window.addEventListener("vivid:recommendations-invalidated", () => {
     if (!suppressInvalidationRefresh && document.visibilityState === "visible") void loadRecommendations();
