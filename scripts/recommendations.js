@@ -257,6 +257,7 @@ export async function syncPlaybackProgressForUser(user = null) {
     const local = readProgress();
     let changed = false;
 
+    const remoteKeys = new Set(snapshot.docs.map(snapshotDoc => snapshotDoc.id));
     snapshot.docs.forEach(snapshotDoc => {
       const data = snapshotDoc.data() || {};
       const contentId = snapshotDoc.id;
@@ -271,6 +272,11 @@ export async function syncPlaybackProgressForUser(user = null) {
         changed = true;
       } else if (localUpdated > remoteUpdated && local[contentId]) {
         queueRemoteProgress(contentId, local[contentId]);
+      }
+    });
+    Object.entries(local).forEach(([contentId, item]) => {
+      if (!remoteKeys.has(contentId) && Number(item?.updatedAt || 0) > 0) {
+        queueRemoteProgress(contentId, item);
       }
     });
 
@@ -605,4 +611,14 @@ export async function getBecauseYouLiked(limit = 12) {
 
 export function getRecommendationStrength() {
   return getTasteStrength();
+}
+
+if (typeof window !== "undefined") {
+  window.addEventListener("online", () => {
+    void getFirebaseAuth().then(auth => {
+      if (auth?.currentUser) return syncPlaybackProgressForUser(auth.currentUser);
+    }).catch(error => {
+      console.warn("Vivid playback progress retry after reconnect failed:", error);
+    });
+  });
 }
