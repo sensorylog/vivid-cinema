@@ -245,7 +245,7 @@ export function choosePersonSearchResult(results = [], query = "", role = "direc
   }[role] || [];
 
   const candidates = (results || [])
-    .filter(item => item && item.id != null && item.media_type === "person" && item.name)
+    .filter(item => item && item.id != null && item.name && (item.media_type === "person" || (!item.media_type && !item.title && !item.original_title)))
     .map((item, index) => {
       const name = normalizePersonName(item.name);
       const nameTokens = name.split(/\s+/).filter(Boolean);
@@ -344,7 +344,7 @@ export async function searchIntelligently(query, options = {}) {
   if (personIntent) {
     let personResponse;
     try {
-      personResponse = await tmdbApi.searchMulti(personIntent.personName, 1);
+      personResponse = await tmdbApi.searchPeople(personIntent.personName, 1);
     } catch {
       const fallbackItems = await searchContent(q, page);
       let ranked = fallbackItems;
