@@ -23,3 +23,8 @@ test("ranks catalogue entries by actual title and plot-summary overlap", () => {
   assert.ok(likely > 0);
   assert.equal(unrelated, 0);
 });
+test("rejects generic one-word overlap for a detailed plot description", () => {
+  const query = "I watched a movie where a man relives the same day";
+  assert.equal(scorePlotCandidate(query, { title: "Man", overview: "A man faces a difficult decision." }), 0);
+});
+
