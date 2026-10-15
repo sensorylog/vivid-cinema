@@ -94,3 +94,29 @@
   .account-page .account-stat{padding:12px 9px}
   .account-page .account-stat strong{font-size:1.4rem}
 }
+
+
+/* Profile reliability and accessibility upgrade */
+.account-page .account-avatar{position:relative;overflow:hidden;flex-shrink:0}
+.account-page .account-avatar img{display:block;width:100%;height:100%;object-fit:cover;border-radius:inherit}
+.account-page .account-status[data-state="error"]{color:#ff9a9a}
+.account-page .account-field input:focus-visible,
+.account-page .account-field select:focus-visible,
+.account-page .account-actions button:focus-visible,
+.account-page .account-sync button:focus-visible,
+.account-page .account-security-card button:focus-visible,
+.account-page a:focus-visible,
+.account-page .account-toggle input:focus-visible{outline:2px solid #f5f7fa;outline-offset:3px}
+.account-page button:disabled{opacity:.52;cursor:not-allowed}
+.account-page .account-actions button{min-height:46px}
+.account-page .account-toggle{min-height:58px}
+.account-page .account-sync-dot[data-state="error"]{background:#ff8585;box-shadow:0 0 0 5px rgba(255,133,133,.1)}
+@media(max-width:480px){
+  .account-page .account-sync{flex-wrap:wrap}
+  .account-page .account-sync .vivid-button{margin-left:auto;min-height:42px}
+  .account-page .account-meta-row{align-items:flex-start}
+  .account-page .account-meta-row span:last-child{max-width:60%;overflow-wrap:anywhere}
+}
+@media(prefers-reduced-motion:reduce){
+  .account-page *, .account-page *::before, .account-page *::after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.01ms!important}
+}
