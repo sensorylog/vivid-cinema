@@ -348,6 +348,10 @@ document.addEventListener("DOMContentLoaded", () => {
   window.addEventListener("vivid:account-switched", () => {
     currentItems = [];
     becauseItems = [];
+    $("intent-query").value = "";
+    removedFilters.clear();
+    setActiveType("all");
+    renderIntent(parseIntent(""));
     $("recommendation-grid").innerHTML = "";
     $("because-grid").innerHTML = "";
     $("continue-grid").innerHTML = "";
