@@ -9,11 +9,11 @@ const intelligence = read("../scripts/intelligence.js");
 
 test("library, progress, and intelligence use the shared owner snapshot policy", () => {
   for (const source of [library, progress, intelligence]) {
-    assert.match(source, /switchLocalOwner\\(/);
+    assert.match(source, /switchLocalOwner\(/);
   }
-  assert.match(library, /ensureLocalOwner\\(user\\?\\.uid \\|\\| null\\)/);
-  assert.match(progress, /ensureProgressOwner\\(user\\?\\.uid \\|\\| null\\)/);
-  assert.match(intelligence, /ensureIntelligenceOwner\\(u\\?\\.uid \\|\\| null\\)/);
+  assert.match(library, /ensureLocalOwner\(user\?\.uid \|\| null\)/);
+  assert.match(progress, /ensureProgressOwner\(user\?\.uid \|\| null\)/);
+  assert.match(intelligence, /ensureIntelligenceOwner\(u\?\.uid \|\| null\)/);
   assert.match(library, /TOMBSTONE_STORAGE_KEY/);
   assert.match(progress, /FOR_YOU_CACHE_KEY/);
   assert.match(intelligence, /TASTE_CACHE_KEY/);
