@@ -222,5 +222,5 @@ export async function searchIntelligently(query, options = {}) {
   } catch {
     ranked = items.slice(0, Number(options.limit || 8));
   }
-  return { items: ranked, intent: { ...getSearchIntent(q), structured: structured ? parsed : null }, recent: getRecentSearches() };
+  return { items: ranked, intent: { ...getSearchIntent(q), filters: parsed, structured }, recent: getRecentSearches() };
 }
