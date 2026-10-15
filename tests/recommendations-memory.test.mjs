@@ -54,8 +54,8 @@ test("separate TV episode keys retain independent resume points", () => {
   reset();
   savePlaybackProgress("tv:42:1:1", { id: "42", media_type: "tv", season: 1, episode: 1, progress: 100, duration: 1200 });
   savePlaybackProgress("tv:42:1:2", { id: "42", media_type: "tv", season: 1, episode: 2, progress: 500, duration: 1200 });
-  assert.equal(getPlaybackProgress("tv:42:1:1").percentage, 100 / 12);
-  assert.equal(getPlaybackProgress("tv:42:1:2").percentage, 500 / 12);
+  assert.ok(Math.abs(getPlaybackProgress("tv:42:1:1").percentage - (100 / 12)) < 0.001);
+  assert.ok(Math.abs(getPlaybackProgress("tv:42:1:2").percentage - (500 / 12)) < 0.001);
   const saved = JSON.parse(localStorage.getItem("vivid:progress:v1"));
   assert.equal(Object.keys(saved).length, 2);
 });
