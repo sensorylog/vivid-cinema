@@ -210,7 +210,9 @@ export function parsePersonCreditIntent(query = "") {
   const directive = String(match[2] || "").toLowerCase();
   const personName = String(match[3] || "").trim().replace(/[?.!,]+$/, "").trim();
   if (!personName || personName.split(/\s+/).length > 6) return null;
-  // "with a twist" and similar plot phrases are not cast searches without a media cue.
+  const firstNameToken = personName.split(/\s+/)[0].toLowerCase();
+  if (["a", "an", "the", "some", "any", "my", "your", "this", "that", "someone", "something"].includes(firstNameToken)) return null;
+  // Ambiguous prepositions should not turn plot phrases such as "movies with a twist" into a person lookup.
   if ((directive === "with" || directive === "by") && !prefix) return null;
 
   let role = "director";
