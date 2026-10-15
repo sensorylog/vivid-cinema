@@ -21,7 +21,8 @@ let activeType = "all";
 let currentItems = [];
 let becauseItems = [];
 let requestId = 0;
-let currentIntent = parseIntent("");
+let removedFilters = new Set();
+const LANGUAGE_LABELS = { en: "English", ko: "Korean", ja: "Japanese", fr: "French", es: "Spanish", hi: "Hindi", zh: "Chinese", de: "German", it: "Italian", pt: "Portuguese", th: "Thai", ar: "Arabic", tr: "Turkish", ta: "Tamil", te: "Telugu", yo: "Yoruba" };
 
 function intentForPage() {
   const intent = parseIntent($("intent-query")?.value || "");
@@ -30,13 +31,44 @@ function intentForPage() {
     intent.anime = true;
     intent.language = "ja";
     intent.genre = { key: "animation", name: "Animation", movieId: 16, tvId: 16 };
-    intent.genreIds = { movie: 16, tv: 16 };
-    intent.constraints = [...new Set([...intent.constraints, "Anime", "Japanese-language", "Animation"])];
   } else if (activeType !== "all") {
     intent.mediaType = activeType;
-    intent.constraints = [...new Set([...intent.constraints, activeType === "movie" ? "Movies" : "TV series"])];
   }
+
+  if (removedFilters.has("anime")) {
+    intent.anime = false;
+    if (intent.genre?.key === "animation") intent.genre = null;
+    if (intent.language === "ja") intent.language = null;
+    if (intent.mediaType === "tv" && /anime/i.test(intent.query)) intent.mediaType = "all";
+  }
+  if (removedFilters.has("mediaType")) intent.mediaType = "all";
+  if (removedFilters.has("genre")) intent.genre = null;
+  if (removedFilters.has("runtime")) intent.runtimeMax = null;
+  if (removedFilters.has("year")) intent.year = null;
+  if (removedFilters.has("language")) intent.language = null;
+
+  intent.genreIds = intent.genre ? { movie: intent.genre.movieId, tv: intent.genre.tvId } : null;
+  const constraints = [];
+  if (intent.anime) constraints.push("Anime (Japanese-language animation)");
+  else if (intent.mediaType === "movie") constraints.push("Movies");
+  else if (intent.mediaType === "tv") constraints.push("TV series");
+  if (intent.genre && !intent.anime) constraints.push(intent.genre.name);
+  if (intent.runtimeMax) constraints.push("Up to " + intent.runtimeMax + " min" + (intent.mediaType === "tv" ? " per episode" : ""));
+  if (intent.year) constraints.push(String(intent.year));
+  if (intent.language && !intent.anime) constraints.push(LANGUAGE_LABELS[intent.language] || intent.language);
+  intent.constraints = [...new Set(constraints)];
   return intent;
+}
+
+function intentChipEntries(intent) {
+  const entries = [];
+  if (intent.anime) entries.push({ key: "anime", label: "Anime · Japanese" });
+  else if (intent.mediaType !== "all") entries.push({ key: "mediaType", label: intent.mediaType === "movie" ? "Movies" : "TV series" });
+  if (intent.genre && !intent.anime) entries.push({ key: "genre", label: intent.genre.name });
+  if (intent.runtimeMax) entries.push({ key: "runtime", label: "Up to " + intent.runtimeMax + " min" });
+  if (intent.year) entries.push({ key: "year", label: String(intent.year) });
+  if (intent.language && !intent.anime) entries.push({ key: "language", label: LANGUAGE_LABELS[intent.language] || intent.language });
+  return entries;
 }
 
 function showStatus(message) {
@@ -51,9 +83,10 @@ function renderIntent(intent) {
   const summary = $("intent-summary");
   const chips = $("intent-chips");
   const limitations = $("intent-limitations");
-  const hasVisibleIntent = Boolean(intent.constraints?.length || intent.unsupported?.length);
+  const entries = intentChipEntries(intent);
+  const hasVisibleIntent = Boolean(entries.length || intent.unsupported?.length);
   summary.hidden = !hasVisibleIntent;
-  chips.innerHTML = (intent.constraints || []).map(value => '<span class="vivid-intent-chip">' + escapeHtml(value) + "</span>").join("");
+  chips.innerHTML = entries.map(entry => '<button type="button" class="vivid-intent-chip" data-remove-filter="' + entry.key + '" aria-label="Remove ' + escapeHtml(entry.label) + ' filter">' + escapeHtml(entry.label) + '<i class="bi bi-x" aria-hidden="true"></i></button>').join("");
   limitations.hidden = !(intent.unsupported || []).length;
   limitations.textContent = (intent.unsupported || []).length ? (intent.unsupported || []).join(" ") + " Vivid has not applied these details as filters." : "";
 }
@@ -180,6 +213,7 @@ function setActiveType(type) {
 document.addEventListener("DOMContentLoaded", () => {
   $("intent-form")?.addEventListener("submit", event => {
     event.preventDefault();
+    removedFilters.clear();
     const parsed = parseIntent($("intent-query").value);
     if (parsed.anime) setActiveType("anime");
     else if (parsed.mediaType !== "all") setActiveType(parsed.mediaType);
@@ -189,6 +223,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   document.querySelectorAll("[data-example]").forEach(button => button.addEventListener("click", () => {
     $("intent-query").value = button.dataset.example || "";
+    removedFilters.clear();
     const parsed = parseIntent($("intent-query").value);
     setActiveType(parsed.anime ? "anime" : parsed.mediaType);
     void loadRecommendations();
@@ -199,8 +234,18 @@ document.addEventListener("DOMContentLoaded", () => {
     void loadRecommendations();
   }));
 
+  $("intent-chips")?.addEventListener("click", event => {
+    const button = event.target.closest("[data-remove-filter]");
+    if (!button) return;
+    const filter = button.dataset.removeFilter;
+    removedFilters.add(filter);
+    if (filter === "anime" || filter === "mediaType") setActiveType("all");
+    void loadRecommendations();
+  });
+
   $("clear-intent")?.addEventListener("click", () => {
     $("intent-query").value = "";
+    removedFilters.clear();
     setActiveType("all");
     void loadRecommendations();
   });
