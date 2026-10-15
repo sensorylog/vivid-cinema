@@ -762,7 +762,7 @@ export async function getPlotMatchRecommendations(intent = {}, limit = 18) {
       if (intent.country) params.with_origin_country = String(intent.country);
       if (intent.language) params.with_original_language = String(intent.language);
       if (intent.anime) {
-        params.with_original_language = "ja";
+        if (!intent.language) params.with_original_language = "ja";
         if (type === "tv" && !intent.country) params.with_origin_country = "JP";
       }
       calls.push((type === "tv" ? tmdbApi.discoverTv(params) : tmdbApi.discoverMovies(params))
