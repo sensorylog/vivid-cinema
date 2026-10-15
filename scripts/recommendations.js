@@ -115,13 +115,25 @@ function progressDocData(contentId, item) {
   };
 }
 
+function progressSyncStatus(status, uid, contentId) {
+  window.dispatchEvent(new CustomEvent("vivid:sync-status", {
+    detail: { store: "progress", status, uid: String(uid || ""), ...(contentId ? { contentId } : {}) }
+  }));
+}
+
 async function setRemoteProgress(uid, contentId, item) {
-  const { db, doc, setDoc } = await getFirebase();
-  await setDoc(
-    doc(db, "users", uid, "progress", contentId),
-    progressDocData(contentId, item),
-    { merge: true }
-  );
+  try {
+    const { db, doc, setDoc } = await getFirebase();
+    await setDoc(
+      doc(db, "users", uid, "progress", contentId),
+      progressDocData(contentId, item),
+      { merge: true }
+    );
+    progressSyncStatus("synced", uid, contentId);
+  } catch (error) {
+    progressSyncStatus("error", uid, contentId);
+    throw error;
+  }
 }
 
 async function deleteRemoteProgress(uid, contentId) {
@@ -280,12 +292,15 @@ export async function syncPlaybackProgressForUser(user = null) {
       const remoteUpdated = Number(data.updatedAt) || 0;
       const localUpdated = Number(local[contentId]?.updatedAt) || 0;
       if (remoteUpdated > 0 && remoteUpdated >= localUpdated) {
-        local[contentId] = {
+        const merged = {
           ...local[contentId],
           ...data,
           updatedAt: remoteUpdated
         };
-        changed = true;
+        if (remoteUpdated > localUpdated || JSON.stringify(merged) !== JSON.stringify(local[contentId])) {
+          local[contentId] = merged;
+          changed = true;
+        }
       } else if (localUpdated > remoteUpdated && local[contentId]) {
         queueRemoteProgress(contentId, local[contentId]);
       }
@@ -299,6 +314,7 @@ export async function syncPlaybackProgressForUser(user = null) {
     if (changed) writeProgress(local);
     return local;
   } catch (error) {
+    progressSyncStatus("error", user.uid, "sync");
     console.warn("Vivid playback progress sync failed:", error);
     return readProgress();
   }
