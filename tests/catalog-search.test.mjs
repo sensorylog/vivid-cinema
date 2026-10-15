@@ -143,6 +143,9 @@ test("similarity target resolution prefers exact title matches and respects medi
   assert.equal(chooseSimilarityTarget(items, "Inception", "movie").id, "1");
   assert.equal(chooseSimilarityTarget(items, "Inception", "tv").id, "2");
   assert.equal(chooseSimilarityTarget(items, "Inception").id, "1");
+  assert.equal(chooseSimilarityTarget([
+    { id: "99", media_type: "movie", title: "Unrelated Blockbuster", raw: { popularity: 9999 } }
+  ], "an obscure misspelled title"), null);
 });
 
 test("similarity search calls the matching movie or TV catalogue endpoint and has a text fallback", () => {
