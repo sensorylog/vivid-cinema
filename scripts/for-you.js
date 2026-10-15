@@ -24,6 +24,7 @@ let lastDismissedItem = null;
 let requestId = 0;
 let removedFilters = new Set();
 let suppressInvalidationRefresh = false;
+let secondaryRequestId = 0;
 const LANGUAGE_LABELS = { en: "English", ko: "Korean", ja: "Japanese", fr: "French", es: "Spanish", hi: "Hindi", zh: "Chinese", de: "German", it: "Italian", pt: "Portuguese", th: "Thai", ar: "Arabic", tr: "Turkish", ta: "Tamil", te: "Telugu", yo: "Yoruba" };
 
 function intentForPage() {
@@ -158,6 +159,7 @@ function renderItems(items) {
 }
 
 async function loadSecondarySections(expectedRequestId = requestId) {
+  const thisSecondaryRequest = ++secondaryRequestId;
   const continueItems = getContinueWatching(6);
   $("continue-section").hidden = !continueItems.length;
   $("continue-grid").innerHTML = continueItems.map(item => {
@@ -173,12 +175,12 @@ async function loadSecondarySections(expectedRequestId = requestId) {
 
   try {
     const nextBecauseItems = await getBecauseYouLiked(8);
-    if (expectedRequestId !== requestId) return;
+    if (expectedRequestId !== requestId || thisSecondaryRequest !== secondaryRequestId) return;
     becauseItems = nextBecauseItems;
     $("because-section").hidden = !becauseItems.length;
     $("because-grid").innerHTML = becauseItems.map((item, index) => cardMarkup(item, index, true)).join("");
   } catch {
-    if (expectedRequestId !== requestId) return;
+    if (expectedRequestId !== requestId || thisSecondaryRequest !== secondaryRequestId) return;
     $("because-section").hidden = true;
     $("because-grid").innerHTML = "";
   }
@@ -343,6 +345,16 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+  window.addEventListener("vivid:account-switched", () => {
+    currentItems = [];
+    becauseItems = [];
+    $("recommendation-grid").innerHTML = "";
+    $("because-grid").innerHTML = "";
+    $("continue-grid").innerHTML = "";
+    $("continue-section").hidden = true;
+    $("because-section").hidden = true;
+    void loadRecommendations();
+  });
   window.addEventListener("vivid:recommendations-invalidated", () => {
     if (!suppressInvalidationRefresh && document.visibilityState === "visible") void loadRecommendations();
   });
