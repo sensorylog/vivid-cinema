@@ -45,7 +45,21 @@ async function user(){
   });
  }catch{return null}
 }
-function cloud(path,data){void user().then(u=>u&&fb().then(({db,doc,setDoc})=>setDoc(doc(db,"users",u.uid,...path),data,{merge:true}))).catch(()=>{})}
+function cloud(path,data){
+ const ownerAtCall=localStorage.getItem(LOCAL_OWNER_KEY)||"guest";
+ return user().then(async u=>{
+  if(!u||ownerAtCall==="guest"||String(u.uid)!==ownerAtCall||
+     (localStorage.getItem(LOCAL_OWNER_KEY)||"guest")!==ownerAtCall)return {status:"local"};
+  const {db,doc,setDoc}=await fb();
+  await setDoc(doc(db,"users",u.uid,...path),data,{merge:true});
+  window.dispatchEvent(new CustomEvent("vivid:sync-status",{detail:{store:"intelligence",status:"synced",path:path.join("/")}}));
+  return {status:"synced"};
+ }).catch(error=>{
+  window.dispatchEvent(new CustomEvent("vivid:sync-status",{detail:{store:"intelligence",status:"error",path:path.join("/")}}));
+  console.warn("Vivid intelligence cloud write failed; local state is retained for the next sync:",error);
+  return {status:"error"};
+ });
+}
 
 export function getFeedback(x){return read().feedback[typeof x==="string"?x:key(x)]?.kind||null}
 export function getFeedbackState(){return read().feedback}
@@ -122,7 +136,7 @@ export async function syncIntelligenceForUser(u){
  ensureIntelligenceOwner(u?.uid || null);
  if(!u)return read();
  try{
-  const {db,collection,getDocs}=await fb();
+  const {db,collection,getDocs,doc,setDoc}=await fb();
   const [f,t]=await Promise.all([getDocs(collection(db,"users",u.uid,"feedback")),getDocs(collection(db,"users",u.uid,"taste"))]);
   const {auth}=await fb();
   if(String(auth?.currentUser?.uid || "")!==String(u.uid) ||
@@ -130,6 +144,13 @@ export async function syncIntelligenceForUser(u){
    throw new Error("The signed-in account changed during intelligence sync. Please retry.");
   }
   const s=read();let feedbackChanged=false;
+  const remoteFeedback=new Map(f.docs.map(d=>[d.id,d.data()||{}]));
+  for(const [id,localItem] of Object.entries(s.feedback)){
+   const remoteItem=remoteFeedback.get(id);
+   if(!remoteItem || Number(localItem.updatedAt||0)>Number(remoteItem.updatedAt||0)){
+    await setDoc(doc(db,"users",u.uid,"feedback",id),localItem,{merge:true});
+   }
+  }
   f.docs.forEach(d=>{
    const x=d.data()||{};
    if(x.kind==="cleared"){
@@ -140,9 +161,19 @@ export async function syncIntelligenceForUser(u){
   });
   if(feedbackChanged)s.taste.updatedAt=0;
   const remote=t.docs.find(d=>d.id==="profile")?.data();
-  if(remote&&Number(remote.updatedAt||0)>Number(s.taste.updatedAt||0))s.taste=remote;
-  write(s);invalidateRecommendationCaches();return s
- }catch(e){console.warn("Vivid intelligence sync unavailable; local state is retained:",e);return read()}
+  if(remote&&Number(remote.updatedAt||0)>Number(s.taste.updatedAt||0)){
+   s.taste=remote;
+  }else if(Number(s.taste.updatedAt||0)>0&&Number(s.taste.updatedAt||0)>Number(remote?.updatedAt||0)){
+   await setDoc(doc(db,"users",u.uid,"taste","profile"),{version:1,...s.taste},{merge:true});
+  }
+  write(s);invalidateRecommendationCaches();
+  window.dispatchEvent(new CustomEvent("vivid:sync-status",{detail:{store:"intelligence",status:"synced"}}));
+  return s
+ }catch(e){
+  window.dispatchEvent(new CustomEvent("vivid:sync-status",{detail:{store:"intelligence",status:"error"}}));
+  console.warn("Vivid intelligence sync unavailable; local state is retained for retry:",e);
+  return read()
+ }
 }
 export function startIntelligenceSync(){
  if(syncPromise)return syncPromise;
@@ -165,4 +196,9 @@ export function startIntelligenceSync(){
   }catch{return read()}
  })();
  return syncPromise;
+}
+if(typeof window!=="undefined"){
+ window.addEventListener("online",()=>{
+  void user().then(u=>u&&syncIntelligenceForUser(u)).catch(()=>{});
+ });
 }
