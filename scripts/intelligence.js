@@ -40,7 +40,8 @@ async function user(){
  }catch{return null}
 }
 function cloud(path,data){
- const ownerAtWrite=localStorage.getItem(LOCAL_OWNER_KEY);
+ let ownerAtWrite=null;
+ try{ownerAtWrite=localStorage.getItem(LOCAL_OWNER_KEY)}catch{}
  void user().then(u=>{
   if(!u)return;
   const activeOwner=localStorage.getItem(LOCAL_OWNER_KEY);
@@ -114,7 +115,8 @@ async function seeds(){
  const m=new Map;all.forEach(x=>{const k=key(x.item),cur=m.get(k);if(k&&(!cur||x.w>cur.w))m.set(k,x)});return [...m.values()].sort((a,b)=>b.w-a.w).slice(0,12)
 }
 export async function rebuildTasteProfile(){
- const ownerAtStart=localStorage.getItem(LOCAL_OWNER_KEY);
+ let ownerAtStart=null;
+ try{ownerAtStart=localStorage.getItem(LOCAL_OWNER_KEY)}catch{}
  const s=read(),l=getLocalLibrary(),t={genres:{},languages:{},countries:{},actors:{},directors:{},media:{movie:0,tv:0},decades:{}};
  const apply=(items,base,completion)=>{(items||[]).forEach(x=>{let w=base*decay(x.updatedAt||x.lastWatchedAt);if(completion){const c=Number(x.completion||0);w*=c>=80?1.8:c>=40?1.15:.55}add(t.media,x.media_type||"movie",w)})};
  apply(l.favorites,3.5,false);apply(l.watchLater,1.2,false);apply(l.history,2.2,true);Object.values(s.feedback).forEach(x=>{if(x.kind==="like")add(t.media,x.media_type||"movie",4.5*decay(x.updatedAt,75))});
