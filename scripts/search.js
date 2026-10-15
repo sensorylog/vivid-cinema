@@ -489,7 +489,8 @@ export async function searchIntelligently(query, options = {}) {
   }
 
   const structured = isStructuredSearchIntent(parsed, q);
-  const calls = [searchContent(q, page)];
+  const textQuery = parsed.provider && !structured && parsed.titleQuery ? parsed.titleQuery : q;
+  const calls = [searchContent(textQuery, page)];
 
   if (structured) {
     const types = ["movie", "tv"].filter(type =>
@@ -525,7 +526,7 @@ export async function searchIntelligently(query, options = {}) {
 
   let ranked = items;
   try {
-    ranked = await rankSearchResults(items, q, options);
+    ranked = await rankSearchResults(items, structured ? q : textQuery, options);
   } catch {
     ranked = items.slice(0, Number(options.limit || 8));
   }
