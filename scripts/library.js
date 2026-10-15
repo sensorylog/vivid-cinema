@@ -276,7 +276,8 @@ async function mapLimit(items,limit,worker){
 async function performLibrarySyncForUser(user=null){
   if(!user?.uid)return readLocal();
   const auth=await getFirebaseAuth();
-  if(!auth?.currentUser||String(auth.currentUser.uid)!==String(user.uid))return readLocal();
+  if(!auth?.currentUser)throw new Error("Authentication is unavailable during library sync.");
+  if(String(auth.currentUser.uid)!==String(user.uid))throw new Error("The signed-in account changed during library sync. Please retry.");
   ensureLocalOwner(user.uid);
   const local=readLocal();
 
@@ -352,7 +353,8 @@ async function performLibrarySyncForUser(user=null){
   // Do not let a sync started for a previous account overwrite the current
   // account's local snapshot if authentication changed while requests were in flight.
   const activeAuth=await getFirebaseAuth();
-  if(!activeAuth?.currentUser||String(activeAuth.currentUser.uid)!==String(user.uid))return readLocal();
+  if(!activeAuth?.currentUser)throw new Error("Authentication is unavailable during library sync.");
+  if(String(activeAuth.currentUser.uid)!==String(user.uid))throw new Error("The signed-in account changed during library sync. Please retry.");
 
   // Do not replace local data until all required cloud operations have been
   // acknowledged. Any error propagates so the UI can truthfully offer retry.
