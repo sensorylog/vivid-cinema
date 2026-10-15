@@ -47,7 +47,7 @@ Future modules consume existing state; they must not create parallel stores for 
 - Library: `getLocalLibrary()`, `upsertLibraryItem()`, `removeLibraryItem()`, and the existing collection APIs.
 - Feedback and signals: `getFeedback()`, `setFeedback()`, and `recordBehavior()`.
 - Taste and recommendation memory: `getTasteProfile()`, `getRecommendationMemory()`, and the existing recommendation functions.
-- Playback progress and Continue Watching: the current `scripts/recommendations.js` progress APIs.
+- Playback progress and Continue Watching: `getContinueWatching()` and the current `scripts/recommendations.js` progress APIs.
 
 Use the existing change/invalidation events rather than maintaining an independent cache that can go stale. Keep behavior events bounded and device-local unless a separately reviewed, rules-compatible sync design changes that explicit contract. A local write or a green unit test is not evidence of cloud sync.
 
