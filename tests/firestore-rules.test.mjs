@@ -5,7 +5,7 @@ import {
   assertFails, assertSucceeds, initializeTestEnvironment
 } from "@firebase/rules-unit-testing";
 import {
-  collection, deleteDoc, doc, getDoc, serverTimestamp, setDoc, updateDoc
+  collection, deleteDoc, doc, getDoc, getDocs, serverTimestamp, setDoc, updateDoc
 } from "firebase/firestore";
 
 let env;
@@ -170,4 +170,19 @@ test("members cannot write moderator claims or read private account records for 
     await setDoc(doc(context.firestore(), "users", "owner-private"), { email: "private@example.test" });
   });
   await assertFails(getDoc(doc(member("other-user", "Other User"), "users", "owner-private")));
+});
+
+test("behavior events can be read only by their owner and remain immutable", async () => {
+  const event = {
+    id: "event-1", type: "title_opened", contentId: "movie:42", mediaType: "movie",
+    occurredAt: Date.now(), sessionId: "session-1", metadata: { surface: "title" }
+  };
+  const ownerDb = member("event-owner", "Event Owner");
+  const eventRef = doc(ownerDb, "users", "event-owner", "events", "session-1_event-1");
+  await assertSucceeds(setDoc(eventRef, event));
+  await assertSucceeds(getDoc(eventRef));
+  await assertSucceeds(getDocs(collection(ownerDb, "users", "event-owner", "events")));
+  await assertFails(getDoc(doc(member("event-intruder", "Intruder"), "users", "event-owner", "events", "session-1_event-1")));
+  await assertFails(updateDoc(eventRef, { type: "changed" }));
+  await assertFails(deleteDoc(eventRef));
 });

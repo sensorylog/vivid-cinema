@@ -77,3 +77,16 @@ test("service worker keeps the integration shell versioned and For You assets pr
   assert.match(serviceWorker, /"\.\/scripts\/for-you\.js"/);
   assert.match(serviceWorker, /"\.\/scripts\/intelligence\.js"/);
 });
+
+test("behavior event sync downloads remote events, merges by session and event identity, and marks taste dirty", () => {
+  assert.match(intelligence, /collection\(db,"users",u\.uid,"events"\)/);
+  assert.match(intelligence, /mergeBehaviorEvents\(s\.events,remoteEvents,300\)/);
+  assert.match(intelligence, /remoteAddedTasteSignal/);
+  assert.match(intelligence, /eventsToUpload\.slice\(i,i\+20\)/);
+});
+
+test("behavior events are deduplicated and bounded when local and remote histories merge", () => {
+  assert.match(intelligence, /export function mergeBehaviorEvents\(localEvents = \[\], remoteEvents = \[\], limit = 300\)/);
+  assert.match(intelligence, /byId\.set\(id, event\)/);
+  assert.match(intelligence, /\.slice\(-safeLimit\)/);
+});
