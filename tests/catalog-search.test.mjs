@@ -65,12 +65,14 @@ test("structured search builds verified TMDB genre, language, year and type filt
   assert.equal(movie.with_genres, "53");
   assert.equal(movie.with_original_language, "ko");
   assert.equal(movie.primary_release_year, "2020");
+  assert.equal(movie.with_origin_country, "KR");
   assert.equal(movie.page, 2);
 
   const tv = buildStructuredSearchParams(intent, "tv", 3);
   assert.equal(tv.with_genres, "9648");
   assert.equal(tv.with_original_language, "ko");
   assert.equal(tv.first_air_date_year, "2020");
+  assert.equal(tv.with_origin_country, "KR");
   assert.equal(tv.page, 3);
 });
 
@@ -91,19 +93,19 @@ test("structured text supplements must satisfy the requested genre, year and lan
   const intent = parseIntent("Korean thrillers from 2020");
   const matching = {
     media_type: "movie",
-    raw: { genre_ids: [53], original_language: "ko", release_date: "2020-08-01" }
+    raw: { genre_ids: [53], original_language: "ko", origin_country: ["KR"], release_date: "2020-08-01" }
   };
   const wrongGenre = {
     media_type: "movie",
-    raw: { genre_ids: [35], original_language: "ko", release_date: "2020-08-01" }
+    raw: { genre_ids: [35], original_language: "ko", origin_country: ["KR"], release_date: "2020-08-01" }
   };
   const wrongYear = {
     media_type: "movie",
-    raw: { genre_ids: [53], original_language: "ko", release_date: "2019-08-01" }
+    raw: { genre_ids: [53], original_language: "ko", origin_country: ["KR"], release_date: "2019-08-01" }
   };
   const wrongLanguage = {
     media_type: "movie",
-    raw: { genre_ids: [53], original_language: "en", release_date: "2020-08-01" }
+    raw: { genre_ids: [53], original_language: "en", origin_country: ["KR"], release_date: "2020-08-01" }
   };
   assert.equal(matchesStructuredSearchIntent(matching, intent), true);
   assert.equal(matchesStructuredSearchIntent(wrongGenre, intent), false);
@@ -111,12 +113,41 @@ test("structured text supplements must satisfy the requested genre, year and lan
   assert.equal(matchesStructuredSearchIntent(wrongLanguage, intent), false);
 });
 
+
+test("structured discovery applies inclusive decade and origin-country filters", () => {
+  const intent = parseIntent("Nigerian movies from the 90s");
+  assert.equal(intent.country, "NG");
+  assert.equal(intent.decade, 1990);
+
+  const movie = buildStructuredSearchParams(intent, "movie", 1);
+  assert.equal(movie.with_origin_country, "NG");
+  assert.equal(movie["primary_release_date.gte"], "1990-01-01");
+  assert.equal(movie["primary_release_date.lte"], "1999-12-31");
+
+  const tv = buildStructuredSearchParams(intent, "tv", 1);
+  assert.equal(tv.with_origin_country, "NG");
+  assert.equal(tv["first_air_date.gte"], "1990-01-01");
+  assert.equal(tv["first_air_date.lte"], "1999-12-31");
+
+  const matching = { media_type: "movie", raw: { origin_country: ["NG"], release_date: "1995-06-01" } };
+  const wrongCountry = { media_type: "movie", raw: { origin_country: ["GH"], release_date: "1995-06-01" } };
+  const wrongDecade = { media_type: "movie", raw: { origin_country: ["NG"], release_date: "2005-06-01" } };
+  assert.equal(matchesStructuredSearchIntent(matching, intent), true);
+  assert.equal(matchesStructuredSearchIntent(wrongCountry, intent), false);
+  assert.equal(matchesStructuredSearchIntent(wrongDecade, intent), false);
+});
+
 test("intent-aware search combines structured discovery with verified text matches", () => {
   const source = readFileSync(new URL("../scripts/search.js", import.meta.url), "utf8");
   assert.match(source, /tmdbApi\.discoverMovies\(params\)/);
   assert.match(source, /tmdbApi\.discoverTv\(params\)/);
+  assert.match(source, /primary_release_date\.gte/);
+  assert.match(source, /first_air_date\.gte/);
   assert.match(source, /matchesStructuredSearchIntent\(item, parsed\)/);
   assert.match(source, /mergeSearchCatalogueResults\(\[discovered, relevantTextItems\]\)/);
+  const recommendations = readFileSync(new URL("../scripts/recommendations.js", import.meta.url), "utf8");
+  assert.match(recommendations, /intent\.decade/);
+  assert.match(recommendations, /intent\.country/);
 });
 
 
@@ -265,6 +296,17 @@ test("provider intent is explicit and resolves provider IDs from TMDB's regional
   assert.equal(parseWatchProviderIntent("Korean horror movies on Netflix").key, "netflix");
   assert.equal(parseWatchProviderIntent("Netflix movies").name, "Netflix");
   assert.equal(parseWatchProviderIntent("movies like Netflix"), null);
+  assert.equal(parseWatchProviderIntent("Inception on Netflix"), null);
+  assert.equal(parseWatchProviderIntent("Inception movie on Netflix"), null);
+  assert.equal(parseWatchProviderIntent("movies on Netflix in Ghana").key, "netflix");
+  const titleWithProvider = parseIntent("Inception on Netflix in Ghana");
+  assert.equal(titleWithProvider.titleQuery, "Inception");
+  assert.equal(titleWithProvider.providerRegion, "GH");
+  assert.equal(titleWithProvider.country, null);
+  assert.equal(parseIntent("movies on Netflix in Ghana").providerRegion, "GH");
+  assert.equal(parseIntent("movies on Netflix in Ghana").country, null);
+  assert.equal(parseIntent("Apple TV Plus").mediaType, "all");
+  assert.equal(getSearchIntent("Apple TV Plus").type, null);
   assert.equal(parseWatchProviderIntent("TV shows streaming on Disney+").key, "disney-plus");
   assert.equal(parseWatchProviderIntent("movies on Apple TV+").key, "apple-tv");
   assert.equal(parseWatchProviderIntent("movies on Paramount+").key, "paramount-plus");
@@ -296,6 +338,8 @@ test("provider search uses regional streaming filters and never mixes unverified
   assert.match(source, /tmdbApi\.movieWatchProviders\(providerRegion\)/);
   assert.match(source, /tmdbApi\.tvWatchProviders\(providerRegion\)/);
   assert.match(source, /providerIntent \? \[\] : textItems\.filter/);
+  assert.match(source, /const titleSearchQuery = !providerIntent && parsed\.titleQuery \? parsed\.titleQuery : q/);
+  assert.match(source, /searchContent\(titleSearchQuery, page\)/);
   assert.match(source, /TMDB could not verify/);
   assert.match(source, /TMDB could not complete every provider-filtered catalogue request/);
   const page = readFileSync(new URL("../scripts/search-page.js", import.meta.url), "utf8");
