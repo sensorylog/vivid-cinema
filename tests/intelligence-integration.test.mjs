@@ -48,6 +48,7 @@ test("For You rejects stale overlapping requests and reacts to canonical change 
 
 test("Home clears and refreshes personalized shelves on owner changes and guards stale requests", () => {
   assert.match(home, /homeRecommendationRequestId/);
+  assert.match(home, /tonightPickRequestId/);
   assert.match(home, /expectedRequestId !== homeRecommendationRequestId/);
   assert.match(home, /vivid:account-switched/);
   assert.match(home, /vivid:library-changed/);
