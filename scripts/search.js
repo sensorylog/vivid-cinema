@@ -208,7 +208,7 @@ export function buildStructuredSearchParams(intent = {}, type, page = 1, provide
     params.with_watch_monetization_types = "flatrate|free|ads";
   }
   if (intent.anime) {
-    params.with_original_language = "ja";
+    if (!intent.language) params.with_original_language = "ja";
     if (type === "tv" && !intent.country) params.with_origin_country = "JP";
   }
   return params;
