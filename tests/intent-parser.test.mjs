@@ -96,3 +96,30 @@ test("plural genre words are parsed for natural catalogue queries", () => {
   const mysteries = parseIntent("mysteries series");
   assert.equal(mysteries.genre.key, "mystery");
 });
+
+
+test("parses decades into inclusive era filters", () => {
+  const short = parseIntent("90s thrillers");
+  assert.equal(short.decade, 1990);
+  assert.equal(short.year, null);
+  assert.equal(short.genre.key, "thriller");
+  assert.equal(intentHasFilters(short), true);
+
+  const long = parseIntent("movies from the 1990s");
+  assert.equal(long.mediaType, "movie");
+  assert.equal(long.decade, 1990);
+
+  const recent = parseIntent("2020s TV shows");
+  assert.equal(recent.mediaType, "tv");
+  assert.equal(recent.decade, 2020);
+});
+
+test("parses production countries while preserving explicit language-only intent", () => {
+  assert.equal(parseIntent("Nigerian movies").country, "NG");
+  assert.equal(parseIntent("Ghanaian films").country, "GH");
+  assert.equal(parseIntent("British crime series").country, "GB");
+  assert.equal(parseIntent("South Korean thrillers").country, "KR");
+  assert.equal(parseIntent("French-language movies").country, null);
+  assert.equal(parseIntent("French-language movies").language, "fr");
+  assert.equal(parseIntent("French-language movies from France").country, "FR");
+});
