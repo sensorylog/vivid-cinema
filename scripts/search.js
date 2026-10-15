@@ -1,4 +1,7 @@
-import { searchContent } from "./content.js";
+import { searchContent, mergeSearchCatalogueResults } from "./content.js";
+import { tmdbApi } from "./tmdb.js";
+import { normalizeResults } from "./media.js";
+import { parseIntent } from "./intent-parser.js";
 import { getTasteProfile, getNotForMeKeys } from "./intelligence.js";
 
 const RECENT_KEY = "vivid:search:recent:v1";
@@ -70,6 +73,71 @@ function tokenOverlap(queryTokens, title) {
   return queryTokens.reduce((score, token) => score + (titleTokens.has(token) ? 1 : 0), 0);
 }
 
+export function isStructuredSearchIntent(intent = {}, query = "") {
+  const q = normalizeQuery(query).toLowerCase();
+  const typeOnlyQuery = q
+    .replace(/\\b(?:movie|movies|film|films|tv|series|show|shows)\\b/g, " ")
+    .replace(/[\\s,]+/g, " ")
+    .trim();
+  return Boolean(
+    intent.genre || intent.year || intent.language || intent.runtimeMax || intent.anime ||
+    (intent.mediaType !== "all" && !typeOnlyQuery)
+  );
+}
+
+export function buildStructuredSearchParams(intent = {}, type, page = 1) {
+  if (type !== "movie" && type !== "tv") return null;
+  const genreId = intent.genreIds?.[type] ??
+    intent.genre?.[type === "movie" ? "movieId" : "tvId"];
+  // Never silently broaden a genre that the catalogue cannot filter for this type.
+  if (intent.genre && !genreId) return null;
+
+  const params = {
+    page: Math.max(1, Math.min(500, Number(page) || 1)),
+    sort_by: "popularity.desc",
+    include_adult: false
+  };
+  if (genreId) params.with_genres = String(genreId);
+  if (intent.runtimeMax) params["with_runtime.lte"] = String(Math.max(1, Number(intent.runtimeMax)));
+  if (intent.year) {
+    params[type === "movie" ? "primary_release_year" : "first_air_date_year"] = String(intent.year);
+  }
+  if (intent.language) params.with_original_language = String(intent.language);
+  if (intent.anime) {
+    params.with_original_language = "ja";
+    if (type === "tv") params.with_origin_country = "JP";
+  }
+  return params;
+}
+
+export function matchesStructuredSearchIntent(item = {}, intent = {}) {
+  const type = item.media_type;
+  if (type !== "movie" && type !== "tv") return false;
+  if (["movie", "tv"].includes(intent.mediaType) && type !== intent.mediaType) return false;
+
+  const raw = item.raw || item;
+  const genreId = intent.genreIds?.[type] ??
+    intent.genre?.[type === "movie" ? "movieId" : "tvId"];
+  if (intent.genre && (!genreId || !(raw.genre_ids || item.genre_ids || []).map(Number).includes(Number(genreId)))) {
+    return false;
+  }
+  if (intent.year) {
+    const date = String(raw.release_date || raw.first_air_date || item.date || "").slice(0, 4);
+    if (date !== String(intent.year)) return false;
+  }
+  if (intent.language && String(raw.original_language || "") !== String(intent.language)) return false;
+  if (intent.runtimeMax) {
+    const runtimes = type === "tv"
+      ? (Array.isArray(raw.episode_run_time) ? raw.episode_run_time : [])
+      : [raw.runtime];
+    const known = runtimes.map(Number).filter(value => Number.isFinite(value) && value > 0);
+    if (!known.length || !known.some(value => value <= Number(intent.runtimeMax))) return false;
+  }
+  if (intent.anime && type === "tv" &&
+      !(raw.origin_country || []).includes("JP")) return false;
+  return true;
+}
+
 export async function rankSearchResults(items, query, options = {}) {
   const q = normalizeQuery(query);
   if (!q) return [];
@@ -110,7 +178,42 @@ export async function searchIntelligently(query, options = {}) {
   const q = normalizeQuery(query);
   if (!q) return { items: [], intent: getSearchIntent(""), recent: getRecentSearches() };
   const page = Math.max(1, Math.min(500, Number(options.page || 1)));
-  const items = await searchContent(q, page);
+  const parsed = parseIntent(q);
+  const structured = isStructuredSearchIntent(parsed, q);
+  const calls = [searchContent(q, page)];
+
+  if (structured) {
+    const types = ["movie", "tv"].filter(type =>
+      parsed.mediaType === "all" || parsed.mediaType === type
+    );
+    for (const type of types) {
+      const params = buildStructuredSearchParams(parsed, type, page);
+      if (!params) continue;
+      calls.push((type === "tv" ? tmdbApi.discoverTv(params) : tmdbApi.discoverMovies(params))
+        .then(response => normalizeResults(response?.results || [], type)));
+    }
+  }
+
+  const responses = await Promise.allSettled(calls);
+  const successful = responses.filter(result => result.status === "fulfilled");
+  if (!successful.length) {
+    throw responses.find(result => result.status === "rejected")?.reason ||
+      new Error("Catalogue search is temporarily unavailable.");
+  }
+
+  const textItems = responses[0]?.status === "fulfilled" ? responses[0].value : [];
+  const discovered = responses.slice(1).flatMap(result =>
+    result.status === "fulfilled" ? result.value : []
+  );
+  const relevantTextItems = structured
+    ? textItems.filter(item => matchesStructuredSearchIntent(item, parsed))
+    : textItems;
+  // Structured discovery is the primary source for filter queries. Text search
+  // supplements it only when the returned metadata verifies the requested filters.
+  const items = structured
+    ? mergeSearchCatalogueResults([discovered, relevantTextItems])
+    : mergeSearchCatalogueResults([textItems]);
+
   // Search must remain useful even if personalization/taste data is unavailable.
   // Catalogue results are the source of truth; ranking is an enhancement.
   let ranked = items;
@@ -119,5 +222,5 @@ export async function searchIntelligently(query, options = {}) {
   } catch {
     ranked = items.slice(0, Number(options.limit || 8));
   }
-  return { items: ranked, intent: getSearchIntent(q), recent: getRecentSearches() };
+  return { items: ranked, intent: { ...getSearchIntent(q), structured: structured ? parsed : null }, recent: getRecentSearches() };
 }
