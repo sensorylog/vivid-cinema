@@ -40,10 +40,18 @@ export function switchLocalOwner({
   };
 
   if (!currentOwner) {
-    // Preserve a guest copy while allowing first sign-in to keep its local work.
+    // Preserve a guest copy, but restore an existing account snapshot if one
+    // survived while the owner marker was missing.
     writeSnapshot("guest");
+    const hasIncomingSnapshot = activeKeys.some(key => storage.getItem(snapshotKey(key, targetOwner)) != null);
+    if (hasIncomingSnapshot) {
+      for (const key of activeKeys) {
+        const incoming = storage.getItem(snapshotKey(key, targetOwner));
+        storage.setItem(key, incoming == null ? String(emptyValues[key] ?? "{}") : incoming);
+      }
+    }
     storage.setItem(ownerKey, targetOwner);
-    return { changed: true, previousOwner: "guest", owner: targetOwner, firstClaim: true };
+    return { changed: true, previousOwner: "guest", owner: targetOwner, firstClaim: !hasIncomingSnapshot };
   }
 
   if (currentOwner === targetOwner) return { changed: false, owner: targetOwner };
