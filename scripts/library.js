@@ -149,6 +149,7 @@ async function getFirebase(){
       deleteDoc:firestoreSdk.deleteDoc,
       doc:firestoreSdk.doc,
       getDocs:firestoreSdk.getDocs,
+      getDocsFromServer:firestoreSdk.getDocsFromServer,
       setDoc:firestoreSdk.setDoc
     })).catch(error=>{
       firebasePromise=null;
@@ -197,15 +198,15 @@ async function deleteRemoteItem(uid,collection,item,deletedAt){
 }
 
 async function fetchRemote(uid,collection){
-  const {db,firestoreCollection,getDocs}=await getFirebase();
-  const snapshot=await getDocs(firestoreCollection(db,"users",uid,collection));
+  const {db,firestoreCollection,getDocsFromServer}=await getFirebase();
+  const snapshot=await getDocsFromServer(firestoreCollection(db,"users",uid,collection));
   return snapshot.docs.map(item=>item.data());
 }
 
 async function fetchTombstones(uid){
-  const {db,firestoreCollection,getDocs}=await getFirebase();
-  const snapshot=await getDocs(firestoreCollection(db,"users",uid,"libraryTombstones"));
-  return snapshot.docs.map(item=>item.data());
+  const {db,firestoreCollection,getDocsFromServer}=await getFirebase();
+  const snapshot=await getDocsFromServer(firestoreCollection(db,"users",uid,"libraryTombstones"));
+  return snapshot.docs.map(item=>({...item.data(),_documentId:item.id}));
 }
 
 function mergeTombstones(remote){
@@ -214,7 +215,9 @@ function mergeTombstones(remote){
     if(!item.collection||!item.contentId)return;
     const key=String(item.collection)+":"+String(item.contentId);
     const existing=merged[key];
-    if(!existing || Number(item.deletedAt||0)>Number(existing.deletedAt||0)) merged[key]=item;
+    if(!existing || Number(item.deletedAt||0)>Number(existing.deletedAt||0)) {
+      merged[key]={collection:item.collection,contentId:item.contentId,deletedAt:Number(item.deletedAt)||0};
+    }
   });
   return merged;
 }
@@ -224,12 +227,13 @@ function mergeCollection(localItems,remoteItems,tombstones,collection){
   const relevant=Object.values(tombstones).filter(item=>item.collection===collection);
   const tombstoneMap=new Map(relevant.map(item=>[String(item.contentId),Number(item.deletedAt)||0]));
 
+  // Prefer the newest version; remote wins ties so equal timestamps don't cause
+  // devices to repeatedly overwrite one another.
   [...remoteItems,...localItems].forEach(item=>{
     const key=itemKey(item);
     const deletedAt=tombstoneMap.get(key)||0;
     const updatedAt=Number(item.updatedAt)||0;
     if(deletedAt && deletedAt>=updatedAt)return;
-
     const current=map.get(key);
     if(!current || updatedAt>Number(current.updatedAt||0)) map.set(key,item);
   });
@@ -237,50 +241,104 @@ function mergeCollection(localItems,remoteItems,tombstones,collection){
   return Array.from(map.values()).sort((a,b)=>(Number(b.updatedAt)||0)-(Number(a.updatedAt)||0));
 }
 
+async function mapLimit(items,limit,worker){
+  let next=0;
+  const workers=Array.from({length:Math.min(limit,items.length)},async()=>{
+    while(true){
+      const index=next++;
+      if(index>=items.length)return;
+      await worker(items[index],index);
+    }
+  });
+  await Promise.all(workers);
+}
+
 export async function syncLibraryForUser(user=null){
   if(user?.uid)ensureLocalOwner(user.uid);
   const local=readLocal();
   if(!user)return local;
 
-  try{
-    const [remoteCollections,remoteTombstones]=await Promise.all([
-      Promise.all(COLLECTIONS.map(key=>fetchRemote(user.uid,key))),
-      fetchTombstones(user.uid)
-    ]);
+  // Server-only reads are intentional: a cache-only/offline response must never
+  // be reported to the user as a successful cloud sync.
+  const [remoteCollections,remoteTombstones]=await Promise.all([
+    Promise.all(COLLECTIONS.map(key=>fetchRemote(user.uid,key))),
+    fetchTombstones(user.uid)
+  ]);
+  const tombstones=mergeTombstones(remoteTombstones);
+  const merged=emptyLibrary();
 
-    const tombstones=mergeTombstones(remoteTombstones);
-    const merged=emptyLibrary();
+  COLLECTIONS.forEach((key,index)=>{
+    merged[key]=mergeCollection(local[key]||[],remoteCollections[index]||[],tombstones,key);
+  });
 
-    COLLECTIONS.forEach((key,index)=>{
-      merged[key]=mergeCollection(local[key]||[],remoteCollections[index]||[],tombstones,key);
-    });
+  const activeKeys=new Set(
+    COLLECTIONS.flatMap(key=>merged[key].map(item=>key+":"+itemKey(item)))
+  );
+  const remoteTombstoneMap=new Map(remoteTombstones
+    .filter(item=>item.collection&&item.contentId)
+    .map(item=>[String(item.collection)+":"+String(item.contentId),item]));
 
-    const activeKeys=new Set(
-      COLLECTIONS.flatMap(key=>merged[key].map(item=>key+":"+itemKey(item)))
-    );
+  // Apply tombstones before uploading active items. This prevents stale remote
+  // copies from reappearing on another device after a deletion.
+  const tombstoneEntries=Object.entries(tombstones).filter(([key,item])=>
+    item.collection&&item.contentId&&!activeKeys.has(key)
+  );
+  await mapLimit(tombstoneEntries,8,async([key,tombstone])=>{
+    const remote=remoteTombstoneMap.get(key);
+    if(!remote || Number(remote.deletedAt||0)<Number(tombstone.deletedAt||0)){
+      await setRemoteTombstone(user.uid,tombstone);
+    }
+    if(!COLLECTIONS.includes(tombstone.collection))return;
+    const contentId=String(tombstone.contentId);
+    if(!/^(movie|tv):[0-9]+$/.test(contentId))return;
+    const {db,doc,deleteDoc}=await getFirebase();
+    // A delete of a missing document is safe and idempotent.
+    await deleteDoc(doc(db,"users",user.uid,tombstone.collection,contentId));
+  });
 
-    const tombstoneEntries=Object.values(tombstones).filter(item=>item.collection&&item.contentId);
-    await Promise.all(tombstoneEntries.map(tombstone=>{
-      const key=tombstone.collection+":"+tombstone.contentId;
-      if(activeKeys.has(key)) return Promise.resolve();
-      return setRemoteTombstone(user.uid,tombstone);
-    }));
+  const remoteByCollection=Object.fromEntries(COLLECTIONS.map((key,index)=>[
+    key,new Map((remoteCollections[index]||[]).map(item=>[itemKey(item),item]))
+  ]));
+  const writes=[];
+  COLLECTIONS.forEach(key=>{
+    const remoteMap=remoteByCollection[key];
+    for(const item of merged[key]){
+      const remote=remoteMap.get(itemKey(item));
+      // Remote data already won the merge or is identical/newer; don't rewrite
+      // it on every sync. Only upload a local winner or a missing remote item.
+      if(!remote || Number(item.updatedAt||0)>Number(remote.updatedAt||0)){
+        writes.push({collection:key,item});
+      }
+    }
+  });
+  await mapLimit(writes,8,async({collection,item})=>{
+    await setRemoteItem(user.uid,collection,item);
+  });
 
-    await Promise.all(
-      COLLECTIONS.flatMap(key=>merged[key].map(item=>setRemoteItem(user.uid,key,item)))
-    );
+  // A tombstone defeated by a newer active item can now be removed remotely.
+  const staleTombstones=remoteTombstones.filter(item=>{
+    const key=String(item.collection)+":"+String(item.contentId);
+    return activeKeys.has(key);
+  });
+  await mapLimit(staleTombstones,8,async(item)=>{
+    const winning=merged[item.collection]?.find(entry=>itemKey(entry)===String(item.contentId));
+    if(!winning || Number(winning.updatedAt||0)<=Number(item.deletedAt||0))return;
+    const {db,doc,deleteDoc}=await getFirebase();
+    await deleteDoc(doc(db,"users",user.uid,"libraryTombstones",String(item.collection)+":"+String(item.contentId)));
+  });
 
-    saveLocalLibrary(merged);
-    saveLocalTombstones(
-      Object.fromEntries(
-        Object.entries(tombstones).filter(([key])=>!activeKeys.has(key))
-      )
-    );
-    return merged;
-  }catch(error){
-    console.error("Vivid library sync failed:",error);
-    return local;
-  }
+  // Do not replace local data until all required cloud operations have been
+  // acknowledged. Any error propagates so the UI can truthfully offer retry.
+  saveLocalLibrary(merged);
+  const remainingTombstones=Object.fromEntries(
+    Object.entries(tombstones).filter(([key,item])=>{
+      if(!activeKeys.has(key))return true;
+      const winner=merged[item.collection]?.find(entry=>itemKey(entry)===String(item.contentId));
+      return !winner || Number(item.deletedAt||0)>=Number(winner.updatedAt||0);
+    })
+  );
+  saveLocalTombstones(remainingTombstones);
+  return merged;
 }
 
 export async function syncLocalItem(collection,item){
