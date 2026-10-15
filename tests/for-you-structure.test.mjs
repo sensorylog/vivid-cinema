@@ -7,6 +7,7 @@ const script = readFileSync(new URL("../scripts/for-you.js", import.meta.url), "
 const routes = readFileSync(new URL("../scripts/routes.js", import.meta.url), "utf8");
 const config = readFileSync(new URL("../scripts/config.js", import.meta.url), "utf8");
 const serviceWorker = readFileSync(new URL("../service-worker.js", import.meta.url), "utf8");
+const appShell = readFileSync(new URL("../scripts/app-shell.js", import.meta.url), "utf8");
 
 test("For You page is registered as a real, accessible destination", () => {
   assert.match(html, /data-vivid-page="for-you"/);
@@ -19,6 +20,9 @@ test("For You page is registered as a real, accessible destination", () => {
   assert.match(serviceWorker, /"\.\/for-you\.html"/);
   assert.match(serviceWorker, /"\.\/scripts\/intent-parser\.js"/);
   assert.match(serviceWorker, /"\.\/styles\/vivid-for-you\.css"/);
+  assert.match(appShell, /navLink\("for-you\.html", "bi-stars", "For You", page === "for-you"\)/);
+  assert.equal((appShell.match(/navLink\("for-you\.html", "bi-stars", "For You", page === "for-you"\)/g) || []).length, 2, "For You is available in desktop and mobile navigation");
+  assert.match(serviceWorker, /vivid-cinema-shell-v172/);
   assert.match(html, /id="recommendation-status"[^>]*role="status"/);
 });
 

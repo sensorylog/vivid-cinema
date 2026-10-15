@@ -98,7 +98,7 @@ test("TFLIX-style hero uses TMDB stills, plays listed trailers, and routes to Vi
 test("service worker shell cache includes the new hero assets", () => {
   const sw = read("../service-worker.js");
   const home = read("../home.html");
-  assert.match(sw, /const CACHE_NAME = "vivid-cinema-shell-v171";/);
+  assert.match(sw, /const CACHE_NAME = "vivid-cinema-shell-v172";/);
   assert.match(sw, /\.\/styles\/vivid-tflix-hero\.css/);
   assert.match(sw, /\.\/styles\/vivid-tflix-hero\.css\?v=hero-trailer-full-bleed-1/);
   assert.match(home, /vivid-tflix-hero\.css\?v=hero-trailer-full-bleed-1/);
@@ -123,7 +123,7 @@ test("mobile Home v2 has an immersive billboard and connected full-bleed shelves
   assert.match(mobileCss, /vivid-rails \+ \.vivid-rails::before/);
   assert.match(mobileCss, /vivid-continue-card \.vivid-card-media/);
   assert.match(read("../home.html"), /vivid-apple-tv-mobile\.css\?v=apple-tv-mobile-2/);
-  assert.match(read("../service-worker.js"), /vivid-cinema-shell-v171/);
+  assert.match(read("../service-worker.js"), /vivid-cinema-shell-v172/);
 });
 
 
@@ -132,7 +132,7 @@ test("Vivid typography uses real bold weights consistently across the shared des
   assert.match(systemCss, /font-weight:\s*700\s*!important/);
   assert.match(systemCss, /font-weight:\s*800\s*!important/);
   assert.match(systemCss, /font-synthesis:\s*weight/);
-  assert.match(read("../service-worker.js"), /vivid-cinema-shell-v171/);
+  assert.match(read("../service-worker.js"), /vivid-cinema-shell-v172/);
 });
 
 
@@ -145,6 +145,6 @@ test("mascot video retries muted inline autoplay when ready and visible", () => 
   assert.match(autoplay, /video\.play\(\)/);
   assert.match(autoplay, /IntersectionObserver/);
   assert.match(autoplay, /visibilitychange/);
-  assert.match(read("../service-worker.js"), /vivid-cinema-shell-v171/);
+  assert.match(read("../service-worker.js"), /vivid-cinema-shell-v172/);
   assert.match(read("../service-worker.js"), /scripts\/mascot-autoplay\.js\?v=1/);
 });
