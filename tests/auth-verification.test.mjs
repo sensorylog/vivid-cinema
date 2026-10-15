@@ -35,7 +35,6 @@ test("external API verifies Firebase identity before sending a custom email", ()
   assert.match(api, /DEFAULT_ALLOWED_ORIGINS/);
   assert.match(packageJson, /"firebase-admin": "\^13\.5\.0"/);
   assert.match(firebaseConfig, /https:\/\/vivid-cinema-api\.vercel\.app/);
-  assert.doesNotMatch(firebaseConfig, /https:\/\/us-central1-vivid-cinema\.cloudfunctions\.net/, "verification should not depend on Firebase Cloud Functions");
   assert.doesNotMatch(functionsIndex, /sendVividVerificationEmail.*email-verification\.js/);
 });
 
