@@ -535,7 +535,6 @@ async function runSearch(q){
   if(!query){showRecentSearches();return}
   showSearchLoading(query);
   try{
-    try{recordBehavior("search_query",null,{query})}catch{}
     const result=await searchIntelligently(query);
     if(requestId!==searchRequestId)return;
     rememberSearch(query,searchOwnerAtStart);
