@@ -279,7 +279,7 @@ export async function syncPlaybackProgressForUser(user = null) {
       const contentId = snapshotDoc.id;
       const remoteUpdated = Number(data.updatedAt) || 0;
       const localUpdated = Number(local[contentId]?.updatedAt) || 0;
-      if (remoteUpdated > localUpdated) {
+      if (remoteUpdated > 0 && remoteUpdated >= localUpdated) {
         local[contentId] = {
           ...local[contentId],
           ...data,
