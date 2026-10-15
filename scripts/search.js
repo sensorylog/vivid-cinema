@@ -401,6 +401,7 @@ export async function searchIntelligently(query, options = {}) {
       movie: movieProviders.status === "fulfilled" ? findWatchProviderId(movieProviders.value, providerIntent) : null,
       tv: tvProviders.status === "fulfilled" ? findWatchProviderId(tvProviders.value, providerIntent) : null
     };
+    const providerStatuses = { movie: movieProviders.status, tv: tvProviders.status };
     const requestedTypes = ["movie", "tv"].filter(type => parsed.mediaType === "all" || parsed.mediaType === type);
     if (!requestedTypes.some(type => providerIds[type])) {
       providerUnsupportedNote = "TMDB could not verify " + providerIntent.name + " availability for the requested media type in " + providerRegion + ". Try another provider region or search the title directly.";
@@ -417,6 +418,8 @@ export async function searchIntelligently(query, options = {}) {
         },
         recent: getRecentSearches()
       };
+    } else if (requestedTypes.some(type => providerStatuses[type] === "rejected")) {
+      providerUnsupportedNote = "TMDB could not verify " + providerIntent.name + " availability for all requested media types in " + providerRegion + "; results may be incomplete.";
     }
   }
 
@@ -588,7 +591,10 @@ export async function searchIntelligently(query, options = {}) {
   const filters = providerIntent
     ? {
         ...parsed,
-        unsupported: (parsed.unsupported || []).filter(note => note !== "Streaming availability varies by region and needs a separate provider check.")
+        unsupported: [
+          ...(parsed.unsupported || []).filter(note => note !== "Streaming availability varies by region and needs a separate provider check."),
+          ...(providerUnsupportedNote ? [providerUnsupportedNote] : [])
+        ]
       }
     : parsed;
   return {
