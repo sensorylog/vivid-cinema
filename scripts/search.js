@@ -59,7 +59,7 @@ export function getSearchIntent(query) {
     .flatMap(([, ids]) => ids)
     .filter((id, index, list) => list.indexOf(id) === index);
   const type = Object.entries(TYPE_HINTS).find(([label]) => new RegExp("\\b" + label + "\\b").test(q))?.[1] || null;
-  const similarity = q.match(/(?:like|similar to|similar)\\s+(.+)$/i)?.[1]?.trim() || "";
+  const similarity = q.match(/^(?:(?:movies?|films?|tv shows?|series)\\s+)?(?:like|similar to|similar)\\s+(.+)$/i)?.[1]?.trim() || "";
   const people = /\b(actor|actress|director|creator|cast)\b/.test(q);
   return { query: normalizeQuery(query), genres, type, similarity, people };
 }
@@ -138,6 +138,26 @@ export function matchesStructuredSearchIntent(item = {}, intent = {}) {
   return true;
 }
 
+export function chooseSimilarityTarget(items = [], query = "", preferredType = null) {
+  const wanted = normalizeQuery(query).toLowerCase();
+  const candidates = (items || [])
+    .filter(item => ["movie", "tv"].includes(item?.media_type))
+    .filter(item => !["movie", "tv"].includes(preferredType) || item.media_type === preferredType)
+    .map((item, index) => {
+      const raw = item.raw || {};
+      const title = String(item.title || item.name || "").toLowerCase();
+      const original = String(raw.original_title || raw.original_name || "").toLowerCase();
+      const exact = title === wanted || original === wanted;
+      const prefix = title.startsWith(wanted) || original.startsWith(wanted);
+      const contains = title.includes(wanted) || original.includes(wanted);
+      const score = (exact ? 1000 : prefix ? 500 : contains ? 250 : 0) +
+        Math.min(20, Number(raw.popularity || 0) / 20) - index * 0.01;
+      return { item, score };
+    })
+    .sort((a, b) => b.score - a.score);
+  return candidates[0]?.item || null;
+}
+
 export async function rankSearchResults(items, query, options = {}) {
   const q = normalizeQuery(query);
   if (!q) return [];
@@ -176,7 +196,52 @@ export async function searchIntelligently(query, options = {}) {
   const q = normalizeQuery(query);
   if (!q) return { items: [], intent: getSearchIntent(""), recent: getRecentSearches() };
   const page = Math.max(1, Math.min(500, Number(options.page || 1)));
+  const searchIntent = getSearchIntent(q);
   const parsed = parseIntent(q);
+
+  // Similarity is a different intent from searching for a title that literally
+  // contains the words "like" or "similar". Resolve the reference title first,
+  // then use the catalogue's similarity index.
+  if (searchIntent.similarity) {
+    const [targetResponse, fallbackResponse] = await Promise.allSettled([
+      searchContent(searchIntent.similarity, 1),
+      searchContent(q, page)
+    ]);
+    const targetItems = targetResponse.status === "fulfilled" ? targetResponse.value : [];
+    const target = chooseSimilarityTarget(targetItems, searchIntent.similarity, searchIntent.type);
+    if (target) {
+      try {
+        const response = target.media_type === "tv"
+          ? await tmdbApi.tvSimilar(target.id, page)
+          : await tmdbApi.movieSimilar(target.id, page);
+        const similarItems = normalizeResults(response?.results || [], target.media_type)
+          .filter(item => item.id !== target.id);
+        if (similarItems.length) {
+          return {
+            items: similarItems.slice(0, Number(options.limit || 8)),
+            intent: {
+              ...searchIntent,
+              filters: parsed,
+              structured: false,
+              similarityTarget: { id: target.id, title: target.title || target.name || "", media_type: target.media_type }
+            },
+            recent: getRecentSearches()
+          };
+        }
+      } catch {
+        // Fall through to the regular text-search results if similarity is unavailable.
+      }
+    }
+    if (fallbackResponse.status === "fulfilled") {
+      let ranked = fallbackResponse.value;
+      try { ranked = await rankSearchResults(ranked, q, options); }
+      catch { ranked = ranked.slice(0, Number(options.limit || 8)); }
+      return { items: ranked, intent: { ...searchIntent, filters: parsed, structured: false }, recent: getRecentSearches() };
+    }
+    if (targetResponse.status === "rejected") throw targetResponse.reason;
+    throw fallbackResponse.reason || new Error("Catalogue search is temporarily unavailable.");
+  }
+
   const structured = isStructuredSearchIntent(parsed, q);
   const calls = [searchContent(q, page)];
 
@@ -212,13 +277,11 @@ export async function searchIntelligently(query, options = {}) {
     ? mergeSearchCatalogueResults([discovered, relevantTextItems])
     : mergeSearchCatalogueResults([textItems]);
 
-  // Search must remain useful even if personalization/taste data is unavailable.
-  // Catalogue results are the source of truth; ranking is an enhancement.
   let ranked = items;
   try {
     ranked = await rankSearchResults(items, q, options);
   } catch {
     ranked = items.slice(0, Number(options.limit || 8));
   }
-  return { items: ranked, intent: { ...getSearchIntent(q), filters: parsed, structured }, recent: getRecentSearches() };
+  return { items: ranked, intent: { ...searchIntent, filters: parsed, structured }, recent: getRecentSearches() };
 }
