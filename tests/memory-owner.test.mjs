@@ -68,3 +68,24 @@ test("an account with no local snapshot starts clean", () => {
   assert.equal(storage.getItem("vivid:progress:v1"), null);
   assert.equal(storage.getItem("vivid:progress:v1:user:alice"), '{"movie:11":{"progress":45}}');
 });
+
+import { readFileSync } from "node:fs";
+
+test("playback and intelligence modules use account-scoped snapshots", () => {
+  const progress = readFileSync(new URL("../scripts/recommendations.js", import.meta.url), "utf8");
+  const intelligence = readFileSync(new URL("../scripts/intelligence.js", import.meta.url), "utf8");
+  assert.match(progress, /switchAccountStorage\(/);
+  assert.match(intelligence, /switchAccountStorage\(/);
+  assert.match(progress, /localStorage\.getItem\(LOCAL_OWNER_KEY\) !== String\(user\.uid\)/);
+  assert.match(intelligence, /localStorage\.getItem\(LOCAL_OWNER_KEY\)!==String\(u\.uid\)/);
+});
+
+test("playback sync uploads local-only records and keeps auth listeners for later account changes", () => {
+  const progress = readFileSync(new URL("../scripts/recommendations.js", import.meta.url), "utf8");
+  const intelligence = readFileSync(new URL("../scripts/intelligence.js", import.meta.url), "utf8");
+  assert.match(progress, /if \(!remoteIds\.has\(contentId\)\) queueRemoteProgress\(contentId, item\)/);
+  assert.match(progress, /onAuthStateChanged\(auth, user =>/);
+  assert.match(intelligence, /onAuthStateChanged\(auth,u=>/);
+  assert.doesNotMatch(progress.slice(progress.indexOf("export function startPlaybackSync"), progress.indexOf("export function getLatestPlaybackProgress")), /unsubscribe/);
+  assert.doesNotMatch(intelligence.slice(intelligence.indexOf("export function startIntelligenceSync")), /unsub\?\./);
+});
