@@ -27,6 +27,8 @@ test("playback writes are bound to the owner active when queued", () => {
   assert.match(progress, /String\(auth\?\.currentUser\?\.uid \|\| ""\) === ownerAtQueue/);
   assert.match(progress, /The signed-in account changed during playback progress sync/);
   assert.match(progress, /getDocsFromServer\(collection\(db, "users", user\.uid, "progress"\)\)/);
+  assert.match(progress, /remoteUpdated > 0 && remoteUpdated >= localUpdated/);
+  assert.match(intelligence, /if\(Number\(x\.updatedAt\|\|0\)<localVersion\)return/);
   assert.match(intelligence, /getDocsFromServer\(collection\(db,"users",u\.uid,"feedback"\)\)/);
   assert.match(intelligence, /getDocsFromServer\(collection\(db,"users",u\.uid,"taste"\)\)/);
   assert.match(intelligence, /The signed-in account changed before intelligence state could be reconciled/);
