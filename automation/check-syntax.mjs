@@ -4,7 +4,7 @@ import { fileURLToPath } from "node:url";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 // Check runtime-critical browser modules, including the home-page trending hero,
-// alongside playback/security modules and their direct dependencies.
+// alongside playback/security modules and the Vivid Intelligence entry point.
 const files = [
   "service-worker.js",
   "scripts/watch.js",
@@ -15,6 +15,8 @@ const files = [
   "scripts/utils.js",
   "scripts/library.js",
   "scripts/recommendations.js",
+  "scripts/intent-parser.js",
+  "scripts/for-you.js",
   "scripts/intelligence.js",
   "scripts/playback/player-engine.js",
   "scripts/playback/playback-servers.js",
@@ -38,5 +40,5 @@ if (failures) {
   process.stderr.write("\n" + failures + " of " + files.length + " scoped JavaScript files failed syntax checks.\n");
   process.exitCode = 1;
 } else {
-  process.stdout.write("Syntax checked " + files.length + " playback/security JavaScript files.\n");
+  process.stdout.write("Syntax checked " + files.length + " scoped JavaScript files.\n");
 }
