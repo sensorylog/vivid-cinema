@@ -15,6 +15,20 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install repository test dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Run repository regression tests
+        run: npm test
+
+      - name: Run scoped syntax checks
+        run: npm run check:syntax
+
       - name: Validate JavaScript syntax
         shell: bash
         run: |
