@@ -156,6 +156,18 @@ function removeProviderRegionPhrase(text, country) {
   return cleaned.replace(/[\s,]+/g, " ").trim();
 }
 
+
+function buildProviderTitleQuery(text, provider, providerRegion) {
+  let cleaned = providerRegion ? removeProviderRegionPhrase(text, providerRegion) : String(text || "");
+  for (const alias of [...(provider?.aliases || [])].sort((a, b) => b.length - a.length)) {
+    const escaped = alias.replace(/[+]/g, "\\+");
+    cleaned = cleaned.replace(new RegExp("\\b(?:available|streaming|watchable)\\s+on\\s+" + escaped + "\\b", "gi"), " ");
+    cleaned = cleaned.replace(new RegExp("\\bon\\s+" + escaped + "\\b", "gi"), " ");
+  }
+  cleaned = cleaned.replace(/^\s*(?:where\s+can\s+i\s+watch|where\s+to\s+watch)\s+/i, "");
+  return cleaned.replace(/[\s,]+/g, " ").trim();
+}
+
 function findStreamingProvider(text) {
   for (const provider of STREAMING_PROVIDERS) {
     if (provider.aliases.some(alias => includesPhrase(text, alias))) return provider;
@@ -211,6 +223,7 @@ export function parseIntent(input = "") {
     provider: null,
     providerRegion: null,
     providerOnly: false,
+    titleQuery: null,
     language: null,
     unsupported: [],
     constraints: []
@@ -287,6 +300,7 @@ export function parseIntent(input = "") {
       intent.constraints.push("Available on " + provider.name);
       intent.unsupported.push("Streaming availability is region-specific and depends on TMDB provider data.");
     } else {
+      intent.titleQuery = buildProviderTitleQuery(text, provider, providerRegion) || null;
       intent.unsupported.push("This looks like a specific-title search; provider availability is not verified by text search.");
     }
   }
