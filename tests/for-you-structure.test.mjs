@@ -63,3 +63,12 @@ test("For You routes remembered-plot descriptions to catalogue matching", () => 
   assert.match(script, /getPlotMatchRecommendations\(intent, 24\)/);
   assert.match(script, /real catalogue keywords and plot summaries/);
 });
+
+
+test("For You records impressions only after a recommendation is actually viewable", () => {
+  assert.match(script, /new IntersectionObserver\(/);
+  assert.match(script, /entry\.intersectionRatio < 0\.5/);
+  assert.match(script, /data-impression-index/);
+  assert.match(script, /visibility: "at_least_50_percent"/);
+  assert.doesNotMatch(script, /items\.slice\(0, 12\)\.forEach\(item => recordBehavior\("recommendation_impression"/);
+});
