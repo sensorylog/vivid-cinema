@@ -86,7 +86,7 @@ function renderResults(items, query, canLoadMore = false, notes = currentSearchN
     : personTarget?.name
       ? escapeHtml(personRoleLabels[personTarget.role] || "CREDITS FOR") + ' “' + escapeHtml(personTarget.name) + '”'
       : providerTarget?.name
-        ? 'STREAMING ON ' + escapeHtml(providerTarget.name) + ' IN ' + escapeHtml(providerTarget.region)
+        ? 'STREAMING ON ' + escapeHtml(providerTarget.name) + ' IN ' + escapeHtml(providerTarget.regionLabel || providerTarget.region)
         : 'RESULTS FOR “' + escapeHtml(query) + '”';
   content.innerHTML =
     '<div class="vivid-search-page-label">' + resultHeading + '</div>' +
