@@ -15,13 +15,27 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install repository test dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Run repository regression tests
+        run: npm test
+
+      - name: Run scoped syntax checks
+        run: npm run check:syntax
+
       - name: Validate JavaScript syntax
         shell: bash
         run: |
           set -euo pipefail
           while IFS= read -r -d '' file; do
             node --check "$file"
-          done < <(find . -type f \( -name '*.js' -o -name '*.mjs' \) -not -path './.git/*' -print0)
+          done < <(find . -type d \( -name .git -o -name node_modules \) -prune -o -type f \( -name '*.js' -o -name '*.mjs' \) -print0)
 
       - name: Test custom playback server registry
         run: node --test tests/playback-servers.test.mjs
