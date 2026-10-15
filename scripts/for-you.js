@@ -19,6 +19,7 @@ import { parseIntent, intentHasFilters } from "./intent-parser.js";
 const $ = id => document.getElementById(id);
 let activeType = "all";
 let currentItems = [];
+let becauseItems = [];
 let requestId = 0;
 let currentIntent = parseIntent("");
 
@@ -54,7 +55,7 @@ function renderIntent(intent) {
   summary.hidden = !hasVisibleIntent;
   chips.innerHTML = (intent.constraints || []).map(value => '<span class="vivid-intent-chip">' + escapeHtml(value) + "</span>").join("");
   limitations.hidden = !(intent.unsupported || []).length;
-  limitations.textContent = (intent.unsupported || []).join(" ");
+  limitations.textContent = (intent.unsupported || []).length ? (intent.unsupported || []).join(" ") + " Vivid has not applied these details as filters." : "";
 }
 
 function cardMarkup(item, index, compact = false) {
@@ -111,9 +112,9 @@ async function loadSecondarySections() {
   }).join("");
 
   try {
-    const because = await getBecauseYouLiked(8);
-    $("because-section").hidden = !because.length;
-    $("because-grid").innerHTML = because.map((item, index) => cardMarkup(item, index, true)).join("");
+    becauseItems = await getBecauseYouLiked(8);
+    $("because-section").hidden = !becauseItems.length;
+    $("because-grid").innerHTML = becauseItems.map((item, index) => cardMarkup(item, index, true)).join("");
   } catch {
     $("because-section").hidden = true;
     $("because-grid").innerHTML = "";
@@ -155,10 +156,6 @@ async function loadRecommendations({ refresh = false } = {}) {
     if (!items.length) {
       $("recommendation-empty").hidden = false;
       showStatus("");
-    }
-    if (intent.unsupported?.length) {
-      const prior = $("intent-limitations").textContent;
-      $("intent-limitations").textContent = prior + " Vivid hasn't applied these details as filters.";
     }
     await loadSecondarySections();
   } catch (error) {
@@ -237,8 +234,18 @@ document.addEventListener("DOMContentLoaded", () => {
   $("because-grid")?.addEventListener("click", event => {
     const button = event.target.closest("[data-feedback]");
     if (!button) return;
-    const item = currentItems[Number(button.dataset.index)];
-    if (item) setFeedback(item, button.dataset.feedback);
+    const item = becauseItems[Number(button.dataset.index)];
+    if (!item) return;
+    const kind = button.dataset.feedback;
+    setFeedback(item, kind);
+    if (kind === "not_for_me") {
+      becauseItems = becauseItems.filter(candidate => !(candidate.id === item.id && candidate.media_type === item.media_type));
+      $("because-section").hidden = !becauseItems.length;
+      $("because-grid").innerHTML = becauseItems.map((candidate, index) => cardMarkup(candidate, index, true)).join("");
+    } else {
+      button.classList.toggle("is-active", getFeedback(item) === "like");
+      button.setAttribute("aria-pressed", String(getFeedback(item) === "like"));
+    }
   });
 
   window.addEventListener("vivid:recommendations-invalidated", () => {
