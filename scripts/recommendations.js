@@ -2,6 +2,7 @@ import { tmdbApi } from "./tmdb.js";
 import { getLocalLibrary } from "./library.js";
 import { normalizeResults } from "./media.js";
 import { getTasteProfile, getNotForMeKeys, getFeedbackState, getTasteStrength, getRecommendationMemory, recordBehavior } from "./intelligence.js";
+import { switchLocalOwner } from "./local-owner.js";
 
 const PROGRESS_KEY = "vivid:progress:v1";
 const FOR_YOU_CACHE_KEY = "vivid:for-you:v1";
@@ -9,7 +10,6 @@ const FOR_YOU_CACHE_TTL = 30 * 60 * 1000;
 const TONIGHT_SESSION_KEY = "vivid:tonight:v1";
 const PROGRESS_SYNC_DEBOUNCE = 1800;
 const LOCAL_OWNER_KEY = "vivid:progress-owner:v1";
-import { switchLocalOwner } from "./local-owner.js";
 
 function ensureProgressOwner(uid){
   try{
