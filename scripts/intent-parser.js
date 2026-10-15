@@ -126,7 +126,7 @@ export function parseIntent(input = "") {
     [/\b(dubbed|dubs|subbed|subtitles|subtitle|dub)\b/i, "Dub/subtitle availability is not reliably represented in catalogue metadata."],
     [/\b(less violent|no violence|low violence|dark|mind[- ]?bending|plot twist|based on a true story|thoughtful|emotional|escapist|relaxing|wholesome|fast[- ]?paced|late[- ]night|tonight)\b/i, "That mood or theme is not a dependable structured catalogue filter yet."],
     [/\b(short|long|quick|brief)\s+(episode|episodes|movie|film|series)\b/i, "Please give a runtime limit in minutes or hours; vague length words cannot be filtered reliably."],
-    [/\b(netflix|prime video|disney\+|hulu|crunchyroll|where can i watch)\b/i, "Streaming availability varies by region and needs a separate provider check."]
+    [/\b(?:netflix|prime video|disney plus|disney\+|hulu|crunchyroll|apple tv|apple tv plus|apple tv\+|hbo max|max|paramount plus|paramount\+|peacock|tubi|mubi|starz|youtube|where can i watch)(?:\b|(?=\\s|$))/i, "Streaming availability varies by region and needs a separate provider check."]
   ];
   for (const [pattern, message] of unsupportedRules) {
     if (pattern.test(text)) intent.unsupported.push(message);
