@@ -109,11 +109,11 @@ function tokenOverlap(queryTokens, title) {
 }
 
 const WATCH_PROVIDER_HINTS = Object.freeze([
-  { key: "netflix", name: "Netflix", aliases: ["netflix"], pattern: /\\bnetflix\\b/i },
-  { key: "prime-video", name: "Prime Video", aliases: ["prime video", "amazon prime video", "amazon prime"], pattern: /\\b(?:amazon\\s+)?prime\\s+video\\b|\\bamazon\\s+prime\\b/i },
-  { key: "disney-plus", name: "Disney+", aliases: ["disney plus", "disney+"], pattern: /\\bdisney\\s+plus\\b|\\bdisney\\s*\\+/i },
-  { key: "hulu", name: "Hulu", aliases: ["hulu"], pattern: /\\bhulu\\b/i },
-  { key: "crunchyroll", name: "Crunchyroll", aliases: ["crunchyroll"], pattern: /\\bcrunchyroll\\b/i }
+  { key: "netflix", name: "Netflix", aliases: ["netflix"], pattern: /\bnetflix\b/i },
+  { key: "prime-video", name: "Prime Video", aliases: ["prime video", "amazon prime video", "amazon prime"], pattern: /\b(?:amazon\s+)?prime\s+video\b|\bamazon\s+prime\b/i },
+  { key: "disney-plus", name: "Disney+", aliases: ["disney plus", "disney+"], pattern: /\bdisney\s+plus\b|\bdisney\s*\+/i },
+  { key: "hulu", name: "Hulu", aliases: ["hulu"], pattern: /\bhulu\b/i },
+  { key: "crunchyroll", name: "Crunchyroll", aliases: ["crunchyroll"], pattern: /\bcrunchyroll\b/i }
 ]);
 
 function normalizeProviderName(value) {
@@ -122,8 +122,8 @@ function normalizeProviderName(value) {
 
 export function parseWatchProviderIntent(query = "") {
   const q = normalizeQuery(query).toLowerCase();
-  const hasProviderContext = /\\b(?:on|available|streaming|watch)\\b/i.test(q) ||
-    /^(?:netflix|prime video|amazon prime video|amazon prime|disney\\s*(?:plus|\\+)|hulu|crunchyroll)\\s+(?:movies?|films?|tv shows?|series|shows?)\\b/i.test(q);
+  const hasProviderContext = /\b(?:on|available|streaming|watch)\b/i.test(q) ||
+    /^(?:netflix|prime video|amazon prime video|amazon prime|disney\s*(?:plus|\+)|hulu|crunchyroll)\s+(?:movies?|films?|tv shows?|series|shows?)\b/i.test(q);
   if (!hasProviderContext) return null;
   const provider = WATCH_PROVIDER_HINTS.find(item => item.pattern.test(q));
   return provider ? { key: provider.key, name: provider.name, aliases: provider.aliases } : null;
@@ -131,7 +131,7 @@ export function parseWatchProviderIntent(query = "") {
 
 export function findWatchProviderId(response = {}, providerIntent = {}) {
   const aliases = new Set((providerIntent.aliases || [providerIntent.name]).map(normalizeProviderName));
-  const provider = (response.results || []).find(item =>
+  const provider = (response?.results || []).find(item =>
     aliases.has(normalizeProviderName(item.provider_name || item.name))
   );
   const id = provider?.provider_id ?? provider?.id;
