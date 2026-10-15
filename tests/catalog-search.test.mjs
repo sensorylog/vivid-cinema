@@ -140,6 +140,8 @@ test("provider discovery is region-aware and does not trust unverified text resu
   assert.equal(params.with_watch_providers, "8");
   assert.equal(params.with_watch_monetization_types, "flatrate");
   assert.ok(["US", "GH", "GB", "CA", "NG", "ZA", "AU"].includes(params.watch_region));
+  const explicitRegion = buildStructuredSearchParams(parseIntent("movies on Netflix in Ghana"), "movie", 1);
+  assert.equal(explicitRegion.watch_region, "GH");
 
   const textResult = { media_type: "movie", raw: { title: "Example", release_date: "2024-01-01" } };
   assert.equal(matchesStructuredSearchIntent(textResult, intent), false);
@@ -150,6 +152,7 @@ test("provider discovery is region-aware and does not trust unverified text resu
   const recommendations = readFileSync(new URL("../scripts/recommendations.js", import.meta.url), "utf8");
   assert.match(recommendations, /params\.with_watch_providers = String\(intent\.provider\.id\)/);
   assert.match(recommendations, /getProviderCountry\(\)/);
+  assert.match(recommendations, /intent\.providerRegion \|\| getProviderCountry\(\)/);
   assert.match(recommendations, /intent\.decade/);
   assert.match(recommendations, /intent\.country/);
 });
