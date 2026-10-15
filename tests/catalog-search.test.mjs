@@ -49,6 +49,7 @@ test("search page requests can be paginated without changing catalogue identity 
   const source = readFileSync(new URL("../scripts/search.js", import.meta.url), "utf8");
   const pageSource = readFileSync(new URL("../scripts/search-page.js", import.meta.url), "utf8");
   assert.match(source, /searchContent\(q, page\)/);
+  assert.match(source, /searchContent\(textQuery, page\)/);
   assert.match(pageSource, /data-search-load-more/);
   assert.match(pageSource, /currentPage \+ 1/);
   assert.match(pageSource, /item\.media_type \+ ":" \+ item\.id/);
