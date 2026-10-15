@@ -75,3 +75,10 @@ test("library mutations retry through one deduplicated sync path and preserve pe
   assert.match(library, /accountStorageKey\(STORAGE_KEY,uid\)/);
   assert.match(library, /void startLibrarySync\(\)/);
 });
+
+test("sync repeats when a library mutation arrives mid-sync and aborts safely on account changes", () => {
+  const library = readFileSync(new URL("../scripts/library.js", import.meta.url), "utf8");
+  assert.match(library, /do\{\s*syncedRevision=localMutationRevision;\s*result=await performLibrarySyncForUser\(user\);\s*\}while\(syncedRevision!==localMutationRevision\)/);
+  assert.match(library, /The signed-in account changed during library sync/);
+  assert.match(library, /const activeAuth=await getFirebaseAuth\(\)/);
+});
