@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import { switchAccountStorage } from "../scripts/account-storage.js";
 
 function createStorage(initial = {}) {
@@ -69,8 +70,6 @@ test("an account with no local snapshot starts clean", () => {
   assert.equal(storage.getItem("vivid:progress:v1:user:alice"), '{"movie:11":{"progress":45}}');
 });
 
-import { readFileSync } from "node:fs";
-
 test("playback and intelligence modules use account-scoped snapshots", () => {
   const progress = readFileSync(new URL("../scripts/recommendations.js", import.meta.url), "utf8");
   const intelligence = readFileSync(new URL("../scripts/intelligence.js", import.meta.url), "utf8");
@@ -88,4 +87,12 @@ test("playback sync uploads local-only records and keeps auth listeners for late
   assert.match(intelligence, /onAuthStateChanged\(auth,u=>/);
   assert.doesNotMatch(progress.slice(progress.indexOf("export function startPlaybackSync"), progress.indexOf("export function getLatestPlaybackProgress")), /unsubscribe/);
   assert.doesNotMatch(intelligence.slice(intelligence.indexOf("export function startIntelligenceSync")), /unsub\?\./);
+});
+
+test("intelligence writes and taste rebuilds are guarded against account switches", () => {
+  const intelligence = readFileSync(new URL("../scripts/intelligence.js", import.meta.url), "utf8");
+  assert.match(intelligence, /const ownerAtWrite=localStorage\.getItem\(LOCAL_OWNER_KEY\)/);
+  assert.match(intelligence, /auth\?\.currentUser\|\|String\(auth\.currentUser\.uid\)!==String\(u\.uid\)/);
+  assert.match(intelligence, /ownerAtStart&&localStorage\.getItem\(LOCAL_OWNER_KEY\)!==ownerAtStart/);
+  assert.match(intelligence, /localFeedbackWrites\.push\(setDoc\(/);
 });
