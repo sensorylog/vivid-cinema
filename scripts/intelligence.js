@@ -6,6 +6,9 @@ import { switchLocalOwner } from "./local-owner.js";
 const KEY="vivid:intelligence:v1";
 const SESSION_KEY="vivid:session:v1";
 const TASTE_CACHE_KEY="vivid:taste:v1";
+export function removeLegacySearchQueryEvents(events = []) {
+ return (Array.isArray(events) ? events : []).filter(event => event?.type !== "search_query");
+}
 const empty=()=>({version:1,feedback:{},feedbackCleared:{},events:[],taste:{genres:{},languages:{},countries:{},actors:{},directors:{},media:{movie:0,tv:0},decades:{},updatedAt:0,dirty:false},onboarding:{completed:false,dismissed:false,completedAt:0}});
 let firebasePromise=null, syncPromise=null, sessionId=null;
 const LOCAL_OWNER_KEY="vivid:intelligence-owner:v1";
@@ -27,12 +30,12 @@ function ensureIntelligenceOwner(uid){
  }catch(error){console.warn("Vivid could not switch account-local intelligence snapshots:",error)}
 }
 
-function read(){try{const v=JSON.parse(localStorage.getItem(KEY));const d=empty();return {...d,...v,feedback:{...d.feedback,...(v?.feedback||{})},feedbackCleared:{...d.feedbackCleared,...(v?.feedbackCleared||{})},events:Array.isArray(v?.events)?v.events:[],taste:{...d.taste,...(v?.taste||{})},onboarding:{...d.onboarding,...(v?.onboarding||{})}}}catch{return empty()}}
+function read(){try{const v=JSON.parse(localStorage.getItem(KEY));const d=empty();const events=removeLegacySearchQueryEvents(v?.events);const state={...d,...v,feedback:{...d.feedback,...(v?.feedback||{})},feedbackCleared:{...d.feedbackCleared,...(v?.feedbackCleared||{})},events,taste:{...d.taste,...(v?.taste||{})},onboarding:{...d.onboarding,...(v?.onboarding||{})}};if(Array.isArray(v?.events)&&events.length!==v.events.length){try{localStorage.setItem(KEY,JSON.stringify(state))}catch{}}return state}catch{return empty()}}
 function write(v){try{localStorage.setItem(KEY,JSON.stringify(v))}catch{};window.dispatchEvent(new CustomEvent("vivid:intelligence-changed",{detail:v}))}
 function key(x){return x?String(x.media_type||x.mediaType||"movie")+":"+String(x.id):""}
 function safe(x){return{id:String(x?.id||""),media_type:x?.media_type||x?.mediaType||"movie",title:String(x?.title||x?.name||"Untitled").slice(0,300),year:String(x?.year||"").slice(0,10),poster_path:String(x?.poster_path||"").slice(0,500),backdrop_path:String(x?.backdrop_path||"").slice(0,500),genre_ids:[...new Set((x?.genre_ids||x?.raw?.genre_ids||[]).map(Number).filter(id=>Number.isFinite(id)&&id>0))].slice(0,20)} }
 function sid(){if(sessionId)return sessionId;sessionId=localStorage.getItem(SESSION_KEY)||Date.now().toString(36)+"-"+Math.random().toString(36).slice(2,8);try{localStorage.setItem(SESSION_KEY,sessionId)}catch{}return sessionId}
-async function fb(){if(!firebasePromise)firebasePromise=Promise.all([import("./firebase.js"),import("https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js"),import("https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js")]).then(([f,a,s])=>({...f,onAuthStateChanged:a.onAuthStateChanged,collection:s.collection,doc:s.doc,getDocs:s.getDocs,getDocsFromServer:s.getDocsFromServer,setDoc:s.setDoc})).catch(e=>{firebasePromise=null;throw e});return firebasePromise}
+async function fb(){if(!firebasePromise)firebasePromise=Promise.all([import("./firebase.js"),import("https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js"),import("https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js")]).then(([f,a,s])=>({...f,onAuthStateChanged:a.onAuthStateChanged,collection:s.collection,doc:s.doc,getDocs:s.getDocs,getDocsFromServer:s.getDocsFromServer,setDoc:s.setDoc,deleteDoc:s.deleteDoc})).catch(e=>{firebasePromise=null;throw e});return firebasePromise}
 async function user(){
  try{
   const {auth,onAuthStateChanged}=await fb();
@@ -168,7 +171,7 @@ export async function syncIntelligenceForUser(u){
  ensureIntelligenceOwner(u?.uid || null);
  if(!u)return read();
  try{
-  const {db,collection,getDocsFromServer,doc,setDoc}=await fb();
+  const {db,collection,getDocsFromServer,doc,setDoc,deleteDoc}=await fb();
   const [f,e,t]=await Promise.all([getDocsFromServer(collection(db,"users",u.uid,"feedback")),getDocsFromServer(collection(db,"users",u.uid,"events")),getDocsFromServer(collection(db,"users",u.uid,"taste"))]);
   const {auth}=await fb();
   if(String(auth?.currentUser?.uid || "")!==String(u.uid) ||
@@ -177,14 +180,27 @@ export async function syncIntelligenceForUser(u){
   }
   const s=read();const stateAtSync=localStorage.getItem(KEY)||"";let feedbackChanged=false;
   const localEventIds=new Set(s.events.map(event=>String(event.sessionId||"")+"_"+String(event.id||"")));
-  const remoteEvents=e.docs.map(d=>d.data()||{}).filter(event=>event.id&&event.sessionId);
+  const remoteEvents=e.docs.map(d=>d.data()||{}).filter(event=>event.id&&event.sessionId&&event.type!=="search_query");
   const mergedEvents=mergeBehaviorEvents(s.events,remoteEvents,300);
-  const remoteEventIds=new Set(e.docs.map(d=>d.id));
+  const mergedEventIds=new Set(mergedEvents.map(event=>String(event.sessionId||"")+"_"+String(event.id||"")));
+  const eventDocsToDelete=e.docs.filter(d=>{
+   const event=d.data()||{};
+   return event.type==="search_query"||!event.id||!event.sessionId||!mergedEventIds.has(d.id);
+  });
+  const eventDocIdsToDelete=new Set(eventDocsToDelete.map(d=>d.id));
+  const retainedRemoteEventIds=new Set(e.docs.filter(d=>!eventDocIdsToDelete.has(d.id)).map(d=>d.id));
+  const ownerIsCurrent=()=>String(auth?.currentUser?.uid||"")===String(u.uid)&&
+   (localStorage.getItem(LOCAL_OWNER_KEY)||"guest")===String(u.uid);
+  for(let i=0;i<eventDocsToDelete.length;i+=20){
+   if(!ownerIsCurrent())throw new Error("The signed-in account changed during event retention cleanup. Please retry.");
+   await Promise.all(eventDocsToDelete.slice(i,i+20).map(eventDoc=>deleteDoc(eventDoc.ref)));
+  }
   const eventsToUpload=s.events.filter(event=>{
    const eventDocId=String(event.sessionId||"")+"_"+String(event.id||"");
-   return event.id&&event.sessionId&&!remoteEventIds.has(eventDocId);
+   return event.id&&event.sessionId&&mergedEventIds.has(eventDocId)&&!retainedRemoteEventIds.has(eventDocId);
   });
   for(let i=0;i<eventsToUpload.length;i+=20){
+   if(!ownerIsCurrent())throw new Error("The signed-in account changed during event sync. Please retry.");
    await Promise.all(eventsToUpload.slice(i,i+20).map(event=>{
     const eventDocId=String(event.sessionId)+"_"+String(event.id);
     return setDoc(doc(db,"users",u.uid,"events",eventDocId),event,{merge:true});
