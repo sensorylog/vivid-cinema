@@ -658,6 +658,7 @@ export function collectIntentCandidates(responses = []) {
 }
 
 export async function getIntentRecommendations(intent = {}, limit = 18) {
+  const ownerAtStart = currentProgressOwner();
   const safeLimit = Math.max(1, Math.min(40, Number(limit) || 18));
   const requestedType = ["movie", "tv"].includes(intent.mediaType) ? intent.mediaType : "all";
   const mediaTypes = requestedType === "all" ? ["movie", "tv"] : [requestedType];
@@ -688,6 +689,7 @@ export async function getIntentRecommendations(intent = {}, limit = 18) {
   });
 
   const responses = await Promise.allSettled(calls);
+  if (currentProgressOwner() !== ownerAtStart) return [];
   // Distinguish a genuine zero-match result from total catalogue/network failure.
   // Partial success is still useful; only reject when every request failed.
   const candidates = collectIntentCandidates(responses);
@@ -697,6 +699,7 @@ export async function getIntentRecommendations(intent = {}, limit = 18) {
   const feedback = getFeedbackState();
   const progress = readProgress();
   const taste = await getTasteProfile();
+  if (currentProgressOwner() !== ownerAtStart) return [];
   const observed = [...(library.history || []), ...(library.favorites || []), ...(library.watchLater || [])];
   const excluded = new Set([...observed.map(keyFor), ...getNotForMeKeys()]);
   const recentGenres = new Set(
