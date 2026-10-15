@@ -36,6 +36,8 @@
 .vivid-for-you-section-head > a { color: #aaa5ff; font-size: .82rem; text-decoration: none; white-space: nowrap; }
 .vivid-for-you-refresh { display: inline-flex; align-items: center; gap: 8px; min-height: 38px; padding: 0 12px; border: 1px solid rgba(255,255,255,.13); border-radius: 999px; color: #c8c8d6; background: rgba(255,255,255,.035); font: inherit; font-size: .78rem; cursor: pointer; }
 .vivid-for-you-status { margin: 0 0 18px; color: #aaaabd; font-size: .85rem; }
+.vivid-feedback-undo { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin: 0 0 18px; padding: 12px 14px; border: 1px solid rgba(184,176,255,.25); border-radius: 12px; color: #d9d7ee; background: rgba(141,123,255,.08); font-size: .8rem; }
+.vivid-feedback-undo button { flex: 0 0 auto; border: 0; color: #c5bdff; background: transparent; font: inherit; font-weight: 800; cursor: pointer; }
 .vivid-for-you-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 18px; }
 .vivid-for-you-card { min-width: 0; overflow: hidden; border: 1px solid rgba(255,255,255,.09); border-radius: 17px; background: rgba(255,255,255,.035); transition: transform .2s ease, border-color .2s ease; }
 .vivid-for-you-card:hover { transform: translateY(-4px); border-color: rgba(184,176,255,.4); }
