@@ -6,8 +6,10 @@ const STOPWORDS = new Set([
   "does","did","can","could","would","should","will","might","must","as","if","then","than",
   "movie","movies","film","films","show","series","title","remember","remembered","watched",
   "watch","saw","seen","one","something","someone","thing","kind","sort","like","really",
-  "find","looking","trying","trying","what","whats","name","called","forgot","forget"
+  "find","looking","trying","what","whats","name","called","forgot","forget"
 ]);
+
+const GENERIC_PLOT_WORDS = new Set(["man","woman","boy","girl","kid","child","family","person","people","day","time","life","world","friend","friends","year","home","city","town","young","old"]);
 
 function words(value) {
   return String(value || "").toLowerCase()
@@ -28,44 +30,90 @@ export function isPlotDescriptionQuery(query = "") {
 export function buildPlotKeywordQueries(query = "", limit = 8) {
   const tokens = words(query);
   if (!tokens.length) return [];
-  const phrases = [];
+  const groups = { 3: [], 2: [], 1: [] };
+  const add = (phrase, size) => {
+    if (!phrase || groups[size].some(item => item.phrase === phrase)) return;
+    const parts = phrase.split(" ");
+    const specificity = parts.reduce((sum, token) =>
+      sum + (GENERIC_PLOT_WORDS.has(token) ? 0.45 : 1.15) + Math.min(token.length, 10) * 0.08, 0);
+    groups[size].push({ phrase, weight: specificity + size * 0.45 });
+  };
+
   for (const size of [3, 2]) {
     for (let i = 0; i <= tokens.length - size; i++) {
-      const phrase = tokens.slice(i, i + size).join(" ");
-      if (phrase.length >= 7) phrases.push({ phrase, size, weight: phrase.length + (size === 2 ? 2 : 0) });
+      add(tokens.slice(i, i + size).join(" "), size);
     }
   }
-  const unique = new Map();
-  phrases.sort((a, b) => b.weight - a.weight).forEach(item => {
-    if (!unique.has(item.phrase)) unique.set(item.phrase, item);
-  });
-  // Single concepts help when the description contains only one distinctive clue.
-  tokens.slice().sort((a, b) => b.length - a.length).forEach(token => {
-    if (!unique.has(token)) unique.set(token, { phrase: token, size: 1, weight: token.length - 1 });
-  });
-  return [...unique.values()].sort((a, b) => b.weight - a.weight).slice(0, Math.max(1, Math.min(10, limit))).map(item => item.phrase);
+  tokens.forEach(token => add(token, 1));
+  for (const size of [3, 2, 1]) {
+    groups[size].sort((a, b) => b.weight - a.weight || b.phrase.length - a.phrase.length);
+  }
+
+  // Rotate across phrase sizes so a long three-word phrase cannot crowd out
+  // useful two-word catalogue keywords such as "time loop" or "magic remote".
+  const order = [2, 3, 1];
+  const cursors = { 3: 0, 2: 0, 1: 0 };
+  const selected = [];
+  const seen = new Set();
+  const safeLimit = Math.max(1, Math.min(10, Number(limit) || 8));
+  while (selected.length < safeLimit) {
+    let added = false;
+    for (const size of order) {
+      const item = groups[size][cursors[size]++];
+      if (!item) continue;
+      added = true;
+      if (seen.has(item.phrase)) continue;
+      seen.add(item.phrase);
+      selected.push(item.phrase);
+      if (selected.length >= safeLimit) break;
+    }
+    if (!added) break;
+  }
+  return selected;
 }
 
 export function scorePlotCandidate(query = "", candidate = {}) {
   const queryWords = [...new Set(words(query))];
   if (!queryWords.length) return 0;
-  const title = String(candidate.title || candidate.name || candidate.raw?.title || candidate.raw?.name || "").toLowerCase();
-  const overview = String(candidate.overview || candidate.raw?.overview || "").toLowerCase();
-  const searchable = " " + (title + " " + overview).replace(/[^a-z0-9]+/g, " ") + " ";
-  const titleSearchable = " " + title.replace(/[^a-z0-9]+/g, " ") + " ";
+  const normalizeText = value => String(value || "").toLowerCase()
+    .normalize("NFKD").replace(/[\\u0300-\\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, " ");
+  const title = normalizeText(candidate.title || candidate.name || candidate.raw?.title || candidate.raw?.name);
+  const overview = normalizeText(candidate.overview || candidate.raw?.overview || "");
+  const searchable = " " + (title + " " + overview).trim() + " ";
+  const titleSearchable = " " + title + " ";
   let matches = 0;
+  let strongMatches = 0;
   let score = 0;
   for (const word of queryWords) {
     const stem = word.length > 5 ? word.replace(/(?:ing|ed|es|s)$/, "") : word;
-    const matched = searchable.includes(" " + word + " ") || (stem.length >= 3 && searchable.includes(" " + stem + " "));
-    if (matched) {
-      matches++;
-      score += titleSearchable.includes(" " + word + " ") ? 2.5 : 1;
-    }
+    const matched = searchable.includes(" " + word + " ") ||
+      (stem.length >= 3 && searchable.includes(" " + stem + " "));
+    if (!matched) continue;
+    matches++;
+    const generic = GENERIC_PLOT_WORDS.has(word);
+    if (!generic) strongMatches++;
+    const weight = generic ? 0.55 : word.length >= 7 ? 1.35 : 1;
+    score += (titleSearchable.includes(" " + word + " ") ? 2.5 : 1) * weight;
   }
-  // One generic overlap (for example, just “man” or “day”) is not enough
-  // to claim a plot match for a detailed description.
+  // A single generic overlap ("man", "day", "family") is not evidence enough.
   if (matches < (queryWords.length >= 4 ? 2 : 1)) return 0;
+  if (queryWords.length >= 4 && strongMatches < 2 && matches < 3) return 0;
   const coverage = matches / queryWords.length;
   return Number((score + coverage * 5).toFixed(3));
+}
+
+export function scorePlotCandidates(query = "", candidates = []) {
+  const scored = new Map();
+  for (const item of candidates || []) {
+    if (item?.id == null) continue;
+    const identity = (item.media_type || "movie") + ":" + String(item.id);
+    const plotScore = scorePlotCandidate(query, item);
+    if (plotScore <= 0) continue;
+    const previous = scored.get(identity);
+    if (!previous || plotScore > previous.plotScore) {
+      scored.set(identity, { ...item, plotScore });
+    }
+  }
+  return [...scored.values()].sort((a, b) => b.plotScore - a.plotScore);
 }
