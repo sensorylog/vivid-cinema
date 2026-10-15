@@ -37,7 +37,7 @@ function intentForPage() {
   } else if (activeType !== "all") {
     // Keep an explicit anime-film request as a movie; the Movies chip must not
     // erase its Japanese-language and animation constraints.
-    if (intent.anime && activeType !== "movie") {
+    if (intent.anime && (activeType !== "movie" || !/\b(movie|movies|film|films|feature film)\b/i.test(intent.query))) {
       intent.anime = false;
       if (intent.genre?.key === "animation") intent.genre = null;
       if (intent.language === "ja") intent.language = null;
