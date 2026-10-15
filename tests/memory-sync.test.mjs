@@ -32,7 +32,7 @@ test("playback writes are bound to the owner active when queued", () => {
   assert.match(progress, /vivid:sync-status/);
   assert.match(progress, /progressSyncStatus\("error", user\.uid, "sync"\)/);
   assert.match(progress, /progressSyncStatus\("synced", uid, contentId\)/);
-  assert.match(intelligence, /if\(Number\(x\.updatedAt\|\|0\)<localVersion\)return/);
+  assert.match(intelligence, /if\(remoteUpdatedAt<localVersion\)return/);
   assert.match(intelligence, /getDocsFromServer\(collection\(db,"users",u\.uid,"feedback"\)\)/);
   assert.match(intelligence, /getDocsFromServer\(collection\(db,"users",u\.uid,"taste"\)\)/);
   assert.match(intelligence, /The signed-in account changed before intelligence state could be reconciled/);
