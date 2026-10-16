@@ -711,7 +711,20 @@ export async function getPlotMatchRecommendations(intent = {}, limit = 18) {
   const mediaTypes = requestedType === "all" ? ["movie", "tv"] : [requestedType];
   // Gemini interprets the remembered story semantically. TMDB remains the
   // source of truth: model suggestions are never rendered unless TMDB verifies them.
-  const semanticPromise = findSemanticPlotMatches(intent.query || "", requestedType)
+  // Never let a stalled Gemini/App Check request keep the entire search spinner running.
+  // The catalogue path continues after 12 seconds even if the AI request never settles.
+  let semanticTimeout;
+  const semanticPromise = Promise.race([
+    findSemanticPlotMatches(intent.query || "", requestedType),
+    new Promise((_, reject) => {
+      semanticTimeout = window.setTimeout(() => {
+        const error = new Error("Gemini request timed out after 12 seconds");
+        error.code = "gemini/timeout";
+        reject(error);
+      }, 12000);
+    })
+  ])
+    .finally(() => window.clearTimeout(semanticTimeout))
     .catch(error => {
       console.error("Vivid Gemini plot search failed; using catalogue fallback:", error);
       return { clues: [], candidates: [], error };
