@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="theme-color" content="#08090b">
+  <title>Auth Diagnostics · Vivid Cinema</title>
+  <style>
+    :root{color-scheme:dark;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#08090b;color:#f5f7fa}
+    body{margin:0;min-height:100vh;display:grid;place-items:center;padding:24px;box-sizing:border-box}
+    main{width:min(760px,100%);background:#111318;border:1px solid #2b2f38;border-radius:18px;padding:clamp(20px,4vw,36px);box-sizing:border-box}
+    h1{font-size:clamp(24px,4vw,34px);margin:0 0 10px}
+    p{color:#c4c9d2;line-height:1.6}
+    pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#08090b;border:1px solid #2b2f38;border-radius:12px;padding:16px;line-height:1.6;font-size:13px}
+    a,button{color:#08090b;background:#f5f7fa;border:0;border-radius:9px;padding:11px 15px;font:inherit;font-weight:650;text-decoration:none;cursor:pointer;display:inline-block;margin:4px 8px 4px 0}
+    button{color:#f5f7fa;background:#292d36}
+    small{color:#969eaa}
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Sign-in diagnostics</h1>
+    <p>This page checks whether the deployed Firebase configuration loads and whether the browser can reach Firebase Authentication. It does <strong>not</strong> sign in, create an account, or send any email. Do not enter your password here.</p>
+    <pre id="diagnostics-output" aria-live="polite">Running safe checks…</pre>
+    <button id="copy-results" type="button">Select results</button>
+    <a href="login.html">Back to login</a>
+    <p><small>Share the results with support. They contain no password or account credentials.</small></p>
+  </main>
+  <script type="module" src="scripts/auth-diagnostics.js?v=20261016-auth-diagnostics-1"></script>
+</body>
+</html>
