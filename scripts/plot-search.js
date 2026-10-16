@@ -27,11 +27,14 @@ export function isPlotDescriptionQuery(query = "") {
   const text = String(query || "").trim().toLowerCase();
   if (!text) return false;
   const cue = /\b(?:i remember|i watched|i saw|can't remember|cannot remember|forgot the title|what(?:'s| is) the (?:movie|film|show)|which (?:movie|film|show)|there(?:'s| is) (?:a )?(?:movie|film|show)|(?:movie|film|show) (?:where|about|in which)|story (?:where|about)|plot (?:where|about|is)|the one where|a (?:man|woman|boy|girl|kid|child|family|person) who)\b/i;
-  const narrative = /\b(?:discovers|finds|wakes|relives|gets stuck|is trapped|escapes|tries to|has to|turns out|meets|must save|falls in love|travels back|goes back|survives|becomes|is forced to|searches for|repeats the same)\b/i;
-  const wordCount = words(text).length;
-  return (cue.test(text) && wordCount >= 2) || (wordCount >= 6 && narrative.test(text));
+  const narrative = /\b(?:discovers?|finds?|wakes?|relives?|gets? stuck|gets? lost|is trapped|is chased|tries? to|has to|turns? out|meets?|must save|falls? in love|travels? back|goes? back|survives?|becomes?|is forced to|searches? for|repeats? the same|lives? in|works? as|ends? up|takes? place|follows?|returns?|enters?|leaves?|loses?|hides?|reveals?|starts? to|wants? to|needs? to|accidentally|secretly)\b/i;
+  const rawWordCount = text.match(/[a-z0-9]+/g)?.length || 0;
+  const contentWordCount = words(text).length;
+  // Catch natural plot recollections even when they lack "I remember" or
+  // "the movie where" phrasing, before they fall into ordinary recommendations.
+  const sentenceLikePlot = rawWordCount >= 8 && contentWordCount >= 5 && narrative.test(text);
+  return (cue.test(text) && contentWordCount >= 2) || sentenceLikePlot || (contentWordCount >= 6 && narrative.test(text));
 }
-
 export function buildPlotKeywordQueries(query = "", limit = 8) {
   const tokens = words(query);
   if (!tokens.length) return [];
