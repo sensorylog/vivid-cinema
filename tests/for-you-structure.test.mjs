@@ -61,7 +61,7 @@ test("For You avoids undeclared intent state and consolidates account-switch rec
 test("For You routes remembered-plot descriptions to catalogue matching", () => {
   assert.match(script, /isPlotDescriptionQuery\(intent\.query\)/);
   assert.match(script, /getPlotMatchRecommendations\(intent, 24\)/);
-  assert.match(script, /real catalogue keywords and plot summaries/);
+  assert.match(script, /Gemini interprets your plot description/);
 });
 
 
