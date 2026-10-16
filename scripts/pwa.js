@@ -194,7 +194,16 @@ async function registerServiceWorker() {
 
     // iOS Home Screen apps can retain an older worker/cache longer than Safari.
     // updateViaCache:"none" makes the worker update check bypass the HTTP cache.
-    void registration.update().catch(() => {});
+    const checkForAppUpdate = () => {
+      if (document.visibilityState === "visible") {
+        void registration.update().catch(() => {});
+      }
+    };
+    // Check on initial load and whenever an installed PWA is reopened or
+    // returns to the foreground; iOS may suspend Home Screen apps for hours.
+    checkForAppUpdate();
+    window.addEventListener("pageshow", checkForAppUpdate);
+    document.addEventListener("visibilitychange", checkForAppUpdate);
 
     return registration;
   } catch (error) {
