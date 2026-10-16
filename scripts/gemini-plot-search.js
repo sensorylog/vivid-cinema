@@ -6,9 +6,14 @@ async function getPlotModel() {
   if (!modelPromise) {
     modelPromise = Promise.all([
       import("./firebase.js"),
-      import("https://www.gstatic.com/firebasejs/12.14.0/firebase-ai.js")
+      import("https://www.gstatic.com/firebasejs/12.19.0/firebase-ai.js")
     ]).then(([{ app }, { getAI, getGenerativeModel, GoogleAIBackend }]) => {
-      const ai = getAI(app, { backend: new GoogleAIBackend() });
+      // Match AXIS's Firebase AI Logic setup: App Check limited-use tokens are
+      // important when Firebase AI Logic App Check enforcement is enabled.
+      const ai = getAI(app, {
+        backend: new GoogleAIBackend(),
+        useLimitedUseAppCheckTokens: true
+      });
       return getGenerativeModel(ai, {
         model: MODEL_NAME,
         generationConfig: {
