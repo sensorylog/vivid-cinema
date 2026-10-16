@@ -119,7 +119,7 @@ test("account page and account runtime are network-first for installed PWA fresh
   assert.match(page, /scripts\/account\.js\?v=20261016-account-runtime-2/);
   assert.match(worker, /vivid-cinema-shell-v195/);
   assert.match(worker, /auth-diagnostics\|account\)\\\.html/);
-  assert.match(worker, /auth-diagnostics\|app-shell\|account\)\\\.js/);
+  assert.match(worker, /auth-diagnostics\|app-shell\|account\|account-bootstrap\)\\\.js/);
 });
 
 
