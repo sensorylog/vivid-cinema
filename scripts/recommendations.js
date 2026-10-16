@@ -4,6 +4,7 @@ import { normalizeResults } from "./media.js";
 import { getTasteProfile, getNotForMeKeys, getFeedbackState, getTasteStrength, getRecommendationMemory, recordBehavior } from "./intelligence.js";
 import { switchLocalOwner } from "./local-owner.js";
 import { buildPlotKeywordQueries, scorePlotCandidate, scorePlotCandidates } from "./plot-search.js";
+import { findSemanticPlotMatches } from "./gemini-plot-search.js";
 
 const PROGRESS_KEY = "vivid:progress:v1";
 const FOR_YOU_CACHE_KEY = "vivid:for-you:v1";
@@ -706,19 +707,36 @@ export async function getPlotMatchRecommendations(intent = {}, limit = 18) {
   const queries = buildPlotKeywordQueries(intent.query || "");
   if (!queries.length) return [];
 
-  // TMDB keyword search gives us real catalogue identifiers. Discover then
-  // returns valid movie/series records with plot summaries to rank locally.
-  const keywordResponses = await Promise.allSettled(
-    queries.map(query => tmdbApi.searchKeywords(query))
-  );
+  const requestedType = ["movie", "tv"].includes(intent.mediaType) ? intent.mediaType : "all";
+  const mediaTypes = requestedType === "all" ? ["movie", "tv"] : [requestedType];
+  // Gemini interprets the remembered story semantically. TMDB remains the
+  // source of truth: model suggestions are never rendered unless TMDB verifies them.
+  const semanticPromise = findSemanticPlotMatches(intent.query || "", requestedType)
+    .catch(error => {
+      console.warn("Vivid Gemini plot search unavailable; using catalogue matching:", error);
+      return { clues: [], candidates: [] };
+    });
+  const [keywordResponses, semantic] = await Promise.all([
+    Promise.allSettled(queries.map(query => tmdbApi.searchKeywords(query))),
+    semanticPromise
+  ]);
   if (currentProgressOwner() !== ownerAtStart) return [];
 
+  const semanticKeywordResponses = await Promise.allSettled(
+    (semantic.clues || []).slice(0, 6).map(query => tmdbApi.searchKeywords(query))
+  );
+  if (currentProgressOwner() !== ownerAtStart) return [];
+  const allKeywordResponses = [...keywordResponses, ...semanticKeywordResponses];
+
   const keywordMap = new Map();
-  keywordResponses.forEach((result, index) => {
+  allKeywordResponses.forEach((result, index) => {
     if (result.status !== "fulfilled") return;
     (result.value?.results || []).slice(0, 5).forEach(keyword => {
       if (keyword?.id == null || !keyword?.name) return;
-      const relevance = scorePlotCandidate(intent.query || "", { title: keyword.name, overview: keyword.name });
+      const relevance = Math.max(
+        scorePlotCandidate(intent.query || "", { title: keyword.name, overview: keyword.name }),
+        scorePlotCandidate((semantic.clues || []).join(" "), { title: keyword.name, overview: keyword.name })
+      );
       const existing = keywordMap.get(String(keyword.id));
       if (!existing || relevance > existing.relevance) {
         keywordMap.set(String(keyword.id), { id: String(keyword.id), relevance, queryIndex: index });
@@ -730,9 +748,28 @@ export async function getPlotMatchRecommendations(intent = {}, limit = 18) {
     .slice(0, 8)
     .map(item => item.id);
 
-  const requestedType = ["movie", "tv"].includes(intent.mediaType) ? intent.mediaType : "all";
-  const mediaTypes = requestedType === "all" ? ["movie", "tv"] : [requestedType];
   const calls = [];
+  const hasSpecificFilters = Boolean(intent.genre || intent.runtimeMax || intent.year || intent.decade || intent.country || intent.language || intent.anime);
+  const normalizeTitleForMatch = value => String(value || "").toLocaleLowerCase()
+    .normalize("NFKD").replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, " ").trim();
+  const aiSuggestions = hasSpecificFilters ? [] : (semantic.candidates || []).slice(0, 8);
+  aiSuggestions.forEach((suggestion, suggestionIndex) => {
+    const types = suggestion.mediaType === "movie" || suggestion.mediaType === "tv"
+      ? [suggestion.mediaType]
+      : mediaTypes;
+    for (const type of types) {
+      const search = type === "tv" ? tmdbApi.searchTv : tmdbApi.searchMovies;
+      calls.push(search(suggestion.title).then(response => normalizeResults(response?.results || [], type)
+        .filter(item => normalizeTitleForMatch(item.title || item.name) === normalizeTitleForMatch(suggestion.title))
+        .map(item => ({
+          ...item,
+          aiPlotRank: suggestionIndex,
+          aiPlotConfidence: suggestion.confidence,
+          aiPlotReason: suggestion.reason
+        }))));
+    }
+  });
   if (keywordIds.length) {
     for (const type of mediaTypes) {
       const genreId = intent.genreIds?.[type] ?? intent.genre?.[type === "movie" ? "movieId" : "tvId"];
@@ -773,7 +810,6 @@ export async function getPlotMatchRecommendations(intent = {}, limit = 18) {
   // A title lookup is a useful fallback when the description accidentally
   // contains a remembered title or subtitle. Only use it when there are no
   // structured filters to bypass, and respect the requested media type.
-  const hasSpecificFilters = Boolean(intent.genre || intent.runtimeMax || intent.year || intent.decade || intent.country || intent.language || intent.anime);
   if (!hasSpecificFilters) {
     for (const type of mediaTypes) {
       calls.push((type === "tv" ? tmdbApi.searchTv(intent.query || "") : tmdbApi.searchMovies(intent.query || ""))
@@ -785,6 +821,23 @@ export async function getPlotMatchRecommendations(intent = {}, limit = 18) {
   let candidates = [];
   try { candidates = collectIntentCandidates(responses); } catch {}
   let scored = scorePlotCandidates(intent.query || "", uniqueByKey(candidates));
+
+  // Preserve verified Gemini title matches even when catalogue synopsis wording differs.
+  const mergedScores = new Map(scored.map(item => [keyFor(item), item]));
+  const verifiedAiCandidates = candidates.filter(item => Number.isFinite(Number(item.aiPlotRank)));
+  for (const item of verifiedAiCandidates) {
+    const identity = keyFor(item);
+    const previous = mergedScores.get(identity);
+    const confidence = Math.max(0, Math.min(1, Number(item.aiPlotConfidence) || 0));
+    const semanticScore = Math.max(1, 28 + confidence * 8 - Math.max(0, Number(item.aiPlotRank) || 0) * 0.35);
+    mergedScores.set(identity, {
+      ...(previous || {}),
+      ...item,
+      plotScore: Math.max(Number(previous?.plotScore) || 0, semanticScore),
+      aiPlotMatch: true
+    });
+  }
+  scored = [...mergedScores.values()].sort((a, b) => Number(b.plotScore || 0) - Number(a.plotScore || 0));
 
   // TMDB keyword tagging is incomplete. If it yields no plausible plot match,
   // scan a small popularity-ordered catalogue slice with the same verified

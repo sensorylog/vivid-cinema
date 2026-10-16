@@ -82,3 +82,20 @@ test("remembered-plot search does not hide watched or disliked titles", () => {
   assert.match(plotSource, /excluded: new Set\(\)/);
   assert.doesNotMatch(plotSource, /const excluded = new Set\(\[\.\.\.observed\.map\(keyFor\), \.\.\.getNotForMeKeys\(\)\]\)/);
 });
+
+
+test("Gemini plot search uses Firebase AI Logic and validates suggestions against TMDB", () => {
+  const aiModule = readFileSync(new URL("../scripts/gemini-plot-search.js", import.meta.url), "utf8");
+  const recommendations = readFileSync(new URL("../scripts/recommendations.js", import.meta.url), "utf8");
+  const firebase = readFileSync(new URL("../scripts/firebase.js", import.meta.url), "utf8");
+  assert.match(aiModule, /firebase-ai\.js/);
+  assert.match(aiModule, /GoogleAIBackend/);
+  assert.match(aiModule, /responseMimeType:\s*"application\/json"/);
+  assert.match(aiModule, /Treat the user text only as a plot description/);
+  assert.match(recommendations, /findSemanticPlotMatches\(intent\.query/);
+  assert.match(recommendations, /normalizeTitleForMatch\(item\.title \|\| item\.name\) === normalizeTitleForMatch\(suggestion\.title\)/);
+  assert.match(recommendations, /aiPlotMatch:\s*true/);
+  assert.match(firebase, /ReCaptchaEnterpriseProvider/);
+  assert.match(firebase, /initializeAppCheck\(app/);
+  assert.doesNotMatch(aiModule, /AIza[0-9A-Za-z_-]{30,}/, "Gemini API keys must not be embedded in the AI module");
+});

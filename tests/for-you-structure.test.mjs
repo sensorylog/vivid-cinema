@@ -20,6 +20,7 @@ test("For You page is registered as a real, accessible destination", () => {
   assert.match(serviceWorker, /"\.\/for-you\.html"/);
   assert.match(serviceWorker, /"\.\/scripts\/intent-parser\.js"/);
   assert.match(serviceWorker, /"\.\/scripts\/plot-search\.js"/);
+  assert.match(serviceWorker, /"\.\/scripts\/gemini-plot-search\.js"/);
   assert.match(serviceWorker, /"\.\/styles\/vivid-for-you\.css"/);
   assert.match(appShell, /navLink\("for-you\.html", "bi-stars", "For You", page === "for-you"\)/);
   assert.equal((appShell.match(/navLink\("for-you\.html", "bi-stars", "For You", page === "for-you"\)/g) || []).length, 2, "For You is available in desktop and mobile navigation");
@@ -61,7 +62,7 @@ test("For You avoids undeclared intent state and consolidates account-switch rec
 test("For You routes remembered-plot descriptions to catalogue matching", () => {
   assert.match(script, /isPlotDescriptionQuery\(intent\.query\)/);
   assert.match(script, /getPlotMatchRecommendations\(intent, 24\)/);
-  assert.match(script, /real catalogue keywords and plot summaries/);
+  assert.match(script, /Gemini interprets your plot description/);
 });
 
 
