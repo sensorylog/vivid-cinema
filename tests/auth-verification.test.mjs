@@ -115,3 +115,18 @@ test("Firebase App Check reCAPTCHA scripts are allowed by Hosting CSP", () => {
   assert.match(scriptSrc, /https:\/\/www\.recaptcha\.net/);
   assert.match(policy, /https:\/\/recaptchaenterprise\.googleapis\.com/);
 });
+
+test("successful sign-in and Google account creation show a visible confirmation after redirect", async () => {
+  const [auth, shell] = await Promise.all([
+    readFile(new URL("../scripts/auth.js", import.meta.url), "utf8"),
+    readFile(new URL("../scripts/app-shell.js", import.meta.url), "utf8")
+  ]);
+  assert.match(auth, /setPostAuthNotice\("Welcome back!/);
+  assert.match(auth, /getAdditionalUserInfo\(credential\)/);
+  assert.match(auth, /Account created successfully with Google!/);
+  assert.match(auth, /sessionStorage\.setItem\("vivid:auth-success",message\)/);
+  assert.match(shell, /function showPostAuthNotice\(\)/);
+  assert.match(shell, /sessionStorage\.getItem\("vivid:auth-success"\)/);
+  assert.match(shell, /setAttribute\("aria-live", "polite"\)/);
+  assert.match(shell, /window\.setTimeout\(\(\) => \{/);
+});
