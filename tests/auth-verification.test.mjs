@@ -66,14 +66,15 @@ test("auth-related Firebase modules use one SDK version and fresh cache keys", a
     readFile(new URL("../auth.html", import.meta.url), "utf8")
   ]);
   const source = [auth, firebaseInit, library, account].join("\n");
-  const versions = [...source.matchAll(/https:\\/\\/www\\.gstatic\\.com\\/firebasejs\\/(\\d+\\.\\d+\\.\\d+)\\/firebase-(?:app|auth|firestore|app-check)\\.js/g)]
-    .map((match) => match[1]);
+  const versions = source.split("\n")
+    .filter((line) => line.includes("https://www.gstatic.com/firebasejs/"))
+    .map((line) => line.split("/firebasejs/")[1]?.split("/")[0]);
   assert.ok(versions.length >= 9, "expected to inspect all shared Firebase SDK imports");
   assert.ok(versions.every((version) => version === "12.19.0"), "Firebase SDK imports must be version-aligned");
-  assert.match(auth, /firebase\.js\?v=20261016-auth-sdk-refresh/);
-  assert.match(worker, /vivid-cinema-shell-v190/);
-  assert.match(worker, /scripts\\/firebase\\.js\\?v=20261016-auth-sdk-refresh/);
-  assert.match(worker, /scripts\\/auth\\.js\\?v=20261016-google-popup-gesture-fix/);
-  assert.match(loginPage, /scripts\\/auth\\.js\\?v=20261016-google-popup-gesture-fix/);
-  assert.match(signupPage, /scripts\\/auth\\.js\\?v=20261016-google-popup-gesture-fix/);
+  assert.ok(auth.includes("./firebase.js?v=20261016-auth-sdk-refresh"));
+  assert.ok(worker.includes("vivid-cinema-shell-v190"));
+  assert.ok(worker.includes("./scripts/firebase.js?v=20261016-auth-sdk-refresh"));
+  assert.ok(worker.includes("./scripts/auth.js?v=20261016-google-popup-gesture-fix"));
+  assert.ok(loginPage.includes("scripts/auth.js?v=20261016-google-popup-gesture-fix"));
+  assert.ok(signupPage.includes("scripts/auth.js?v=20261016-google-popup-gesture-fix"));
 });
