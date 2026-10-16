@@ -1,6 +1,9 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
 import { getAuth } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
 import { getFirestore } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+import { initializeAppCheck, ReCaptchaEnterpriseProvider } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app-check.js";
+
+const RECAPTCHA_ENTERPRISE_SITE_KEY = "6LfSuCArAAAAANqKO_UmgvT_0_gvZ9nLqiah3FpY";
 
 function validFirebaseConfig(config) {
   return Boolean(
@@ -54,8 +57,25 @@ async function loadFirebaseConfig() {
 
 const firebaseConfig = await loadFirebaseConfig();
 const app = initializeApp(firebaseConfig);
+
+// App Check must be initialized before Firebase services that use it. The site
+// key is public; Gemini authorization remains behind the Firebase AI Logic proxy.
+let appCheck = null;
+if (RECAPTCHA_ENTERPRISE_SITE_KEY && !["localhost", "127.0.0.1"].includes(window.location.hostname)) {
+  try {
+    appCheck = initializeAppCheck(app, {
+      provider: new ReCaptchaEnterpriseProvider(RECAPTCHA_ENTERPRISE_SITE_KEY),
+      isTokenAutoRefreshEnabled: true
+    });
+  } catch (error) {
+    // Keep the rest of Vivid usable if App Check setup needs attention.
+    // Firebase AI Logic requests will still require a valid App Check token.
+    console.warn("Vivid App Check could not initialize:", error);
+  }
+}
+
 const auth = getAuth(app);
 const db = getFirestore(app);
 
 // Firebase Auth uses browser-local persistence by default.
-export { app, auth, db };
+export { app, appCheck, auth, db };
