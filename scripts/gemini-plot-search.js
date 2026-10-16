@@ -39,7 +39,21 @@ function cleanTitle(value) {
  * Ask Gemini to interpret a remembered story and suggest likely catalogue titles.
  * Suggestions are only leads: callers must verify every title against TMDB.
  */
-export async function findSemanticPlotMatches(description = "", mediaType = "all") {
+export async function findSemanticPlotMatches(description = "", mediaType = "all", options = {}) {
+  const reportStage = stage => {
+    if (typeof options?.onStage === "function") options.onStage(stage);
+  };
+  const tagStageError = (error, stage) => {
+    const failure = error instanceof Error ? error : new Error(String(error || "Unknown Gemini error"));
+    if (!failure.plotSearchStage) failure.plotSearchStage = stage;
+    // Never log the remembered plot itself; only operational diagnostics.
+    console.error("[Vivid Gemini] plot search failed", {
+      stage: failure.plotSearchStage,
+      code: failure.code || null,
+      message: failure.message
+    });
+    return failure;
+  };
   const query = String(description || "").trim().slice(0, MAX_DESCRIPTION_LENGTH);
   if (query.length < 8) return { clues: [], candidates: [] };
 
@@ -58,9 +72,29 @@ export async function findSemanticPlotMatches(description = "", mediaType = "all
     "Remembered plot: " + JSON.stringify(query)
   ].join("\n");
 
-  const model = await getPlotModel();
-  const result = await model.generateContent(prompt);
-  const rawText = result?.response?.text?.();
+  reportStage("firebase-init");
+  let model;
+  try {
+    model = await getPlotModel();
+  } catch (error) {
+    throw tagStageError(error, "firebase-init");
+  }
+
+  reportStage("generate-content");
+  let result;
+  try {
+    result = await model.generateContent(prompt);
+  } catch (error) {
+    throw tagStageError(error, "generate-content");
+  }
+
+  reportStage("parse-response");
+  let rawText;
+  try {
+    rawText = result?.response?.text?.();
+  } catch (error) {
+    throw tagStageError(error, "parse-response");
+  }
   if (!rawText) return { clues: [], candidates: [] };
 
   let parsed;
