@@ -8,8 +8,6 @@ import {
   signInWithRedirect,
   getRedirectResult,
   onAuthStateChanged,
-  setPersistence,
-  browserLocalPersistence,
   signOut,
   updateProfile
 } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
@@ -93,17 +91,19 @@ async function finishGoogleSignIn(credential){
 async function googleSignIn(){
   const provider=new GoogleAuthProvider();
   provider.setCustomParameters({prompt:"select_account"});
-  await setPersistence(auth,browserLocalPersistence);
-  // Restore the earlier mobile behavior: redirect on touch/coarse-pointer
-  // devices, popup on desktop. This avoids popup flows that can hang on iOS.
-  const mobile=window.matchMedia?.("(pointer:coarse)")?.matches || window.innerWidth<700;
-  if(mobile){
+
+  // Keep the popup call directly inside the click's user-activation window.
+  // Redirect is only a fallback when this browser explicitly blocks popups.
+  try{
+    const credential=await withTimeout(signInWithPopup(auth,provider),45000,"Google sign-in timed out.");
+    await finishGoogleSignIn(credential);
+  }catch(error){
+    const canFallback=error?.code==="auth/popup-blocked" ||
+      error?.code==="auth/operation-not-supported-in-this-environment";
+    if(!canFallback)throw error;
     try{localStorage.setItem("vivid:google-redirect","1");sessionStorage.setItem("vivid:google-redirect","1");}catch{}
     await signInWithRedirect(auth,provider);
-    return;
   }
-  const credential=await withTimeout(signInWithPopup(auth,provider),45000,"Google sign-in timed out.");
-  await finishGoogleSignIn(credential);
 }
 async function finishPendingGoogleRedirect(){
   let pending=false;
