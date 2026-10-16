@@ -83,3 +83,20 @@ test("sync repeats when a library mutation arrives mid-sync and aborts safely on
   assert.match(library, /The signed-in account changed during library sync/);
   assert.match(library, /const activeAuth=await getFirebaseAuth\(\)/);
 });
+
+
+test("shared navigation resolves the account destination from Firebase auth state", async () => {
+  const shell = readFileSync(new URL("../scripts/app-shell.js", import.meta.url), "utf8");
+  assert.match(shell, /account\.href = "account\.html"/);
+  assert.match(shell, /function syncAccountNavigation\(\)/);
+  assert.match(shell, /onAuthStateChanged\(auth, \(user\) => \{/);
+  assert.match(shell, /const destination = user \? "account\.html" : "auth\.html"/);
+  assert.match(shell, /syncAccountNavigation\(\)/);
+});
+
+test("Google profile sync preserves the original membership date", () => {
+  const auth = readFileSync(new URL("../scripts/auth.js", import.meta.url), "utf8");
+  assert.match(auth, /import \{ doc, getDoc, serverTimestamp, setDoc \}/);
+  assert.match(auth, /if\(!snapshot\.exists\(\)\|\|!snapshot\.data\(\)\?\.createdAt\)profile\.createdAt=serverTimestamp\(\)/);
+  assert.match(auth, /provider:\(user\.providerData\|\|\[\]\)\.some\(item=>item\.providerId==="google\.com"\)\?"google\.com":"password"/);
+});
