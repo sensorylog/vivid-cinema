@@ -1,4 +1,4 @@
-import { auth, db } from "./firebase.js?v=20261016-auth-sdk-refresh";
+import { auth, db } from "./firebase.js?v=20261016-auth-runtime-audit1";
 import {
   createUserWithEmailAndPassword,
   GoogleAuthProvider,

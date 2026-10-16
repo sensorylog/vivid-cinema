@@ -57,19 +57,20 @@ test("verification page is precached and loads its handler", () => {
   assert.match(worker, /"\.\/verify-email\.html"/);
   assert.match(worker, /"\.\/scripts\/verify-email\.js"/);
   assert.match(worker, /const CACHE_NAME = "vivid-cinema-shell-v\d+"/);
-  assert.ok(worker.includes("./scripts/auth.js?v=20261016-google-popup-gesture-fix"));
+  assert.ok(worker.includes("./scripts/auth.js?v=20261016-auth-runtime-audit1"));
 });
 
 
 test("auth-related Firebase modules use one SDK version and fresh cache keys", async () => {
-  const [auth, firebaseInit, library, account, worker, loginPage, signupPage] = await Promise.all([
+  const [auth, firebaseInit, library, account, worker, loginPage, signupPage, navAuth] = await Promise.all([
     readFile(new URL("../scripts/auth.js", import.meta.url), "utf8"),
     readFile(new URL("../scripts/firebase.js", import.meta.url), "utf8"),
     readFile(new URL("../scripts/library.js", import.meta.url), "utf8"),
     readFile(new URL("../scripts/account.js", import.meta.url), "utf8"),
     readFile(new URL("../service-worker.js", import.meta.url), "utf8"),
     readFile(new URL("../login.html", import.meta.url), "utf8"),
-    readFile(new URL("../auth.html", import.meta.url), "utf8")
+    readFile(new URL("../auth.html", import.meta.url), "utf8"),
+    readFile(new URL("../scripts/nav-auth.js", import.meta.url), "utf8")
   ]);
   const source = [auth, firebaseInit, library, account].join("\n");
   const versions = source.split("\n")
@@ -77,10 +78,13 @@ test("auth-related Firebase modules use one SDK version and fresh cache keys", a
     .map((line) => line.split("/firebasejs/")[1]?.split("/")[0]);
   assert.ok(versions.length >= 9, "expected to inspect all shared Firebase SDK imports");
   assert.ok(versions.every((version) => version === "12.19.0"), "Firebase SDK imports must be version-aligned");
-  assert.ok(auth.includes("./firebase.js?v=20261016-auth-sdk-refresh"));
-  assert.ok(worker.includes("vivid-cinema-shell-v190"));
-  assert.ok(worker.includes("./scripts/firebase.js?v=20261016-auth-sdk-refresh"));
-  assert.ok(worker.includes("./scripts/auth.js?v=20261016-google-popup-gesture-fix"));
-  assert.ok(loginPage.includes("scripts/auth.js?v=20261016-google-popup-gesture-fix"));
-  assert.ok(signupPage.includes("scripts/auth.js?v=20261016-google-popup-gesture-fix"));
+  assert.ok(auth.includes("./firebase.js?v=20261016-auth-runtime-audit1"));
+  assert.ok(worker.includes("vivid-cinema-shell-v191"));
+  assert.ok(worker.includes("./scripts/firebase.js?v=20261016-auth-runtime-audit1"));
+  assert.ok(worker.includes("./scripts/auth.js?v=20261016-auth-runtime-audit1"));
+  assert.ok(loginPage.includes("scripts/auth.js?v=20261016-auth-runtime-audit1"));
+  assert.ok(signupPage.includes("scripts/auth.js?v=20261016-auth-runtime-audit1"));
+  assert.match(worker, /isAuthDocument\|\|isAuthRuntime\)\{event\.respondWith\(networkFirst\(request\)\);return;/);
+  assert.match(worker, /isAuthRuntime=.*auth\|firebase\|nav-auth/);
+  assert.match(navAuth, /firebasejs\/12\.19\.0\/firebase-auth\.js/);
 });
