@@ -50,6 +50,22 @@ test("plot scoring downweights generic overlaps and normalizes accented text", (
   assert.ok(accented > 0);
 });
 
+
+test("semantic clues improve remembered-plot ranking when the user's wording differs from TMDB synopsis text", () => {
+  const query = "A boy finds a strange object and everything in his life changes";
+  const candidate = {
+    id: "1",
+    media_type: "movie",
+    title: "Click",
+    overview: "A workaholic architect gets a magical universal remote that allows him to control time."
+  };
+  assert.equal(scorePlotCandidates(query, [candidate]).length, 0);
+  const ranked = scorePlotCandidates(query, [candidate], ["magic remote", "control time"]);
+  assert.equal(ranked.length, 1);
+  assert.equal(ranked[0].title, "Click");
+  assert.ok(ranked[0].plotScore > 0);
+});
+
 test("plot candidates deduplicate by typed identity and rank the strongest plot overlap first", () => {
   const ranked = scorePlotCandidates("a man relives the same day", [
     { id: 1, media_type: "movie", title: "Groundhog Day", overview: "A man relives the same day." },
@@ -66,7 +82,7 @@ test("plot matching has a constrained catalogue-overview fallback when keyword m
   const source = readFileSync(new URL("../scripts/recommendations.js", import.meta.url), "utf8");
   assert.match(source, /TMDB keyword tagging is incomplete/);
   assert.match(source, /const fallbackCalls = \[\]/);
-  assert.match(source, /scorePlotCandidates\(intent\.query \|\| "", uniqueByKey\(candidates\)\)/);
+  assert.match(source, /scorePlotCandidates\(intent\.query \|\| "", candidates, semantic\.clues \|\| \[\]\)/);
   assert.match(source, /same verified/);
   assert.match(source, /tmdbApi\.discoverMovies\(params\)/);
   assert.match(source, /tmdbApi\.discoverTv\(params\)/);
