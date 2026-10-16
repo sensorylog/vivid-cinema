@@ -100,3 +100,24 @@ test("Google profile sync preserves the original membership date", () => {
   assert.match(auth, /if\(!snapshot\.exists\(\)\|\|!snapshot\.data\(\)\?\.createdAt\)profile\.createdAt=serverTimestamp\(\)/);
   assert.match(auth, /provider:\(user\.providerData\|\|\[\]\)\.some\(item=>item\.providerId==="google\.com"\)\?"google\.com":"password"/);
 });
+
+test("account renders signed-in identity before cloud profile fetch completes", () => {
+  assert.match(script, /function renderSignedInIdentity\(user\)/);
+  assert.match(script, /renderSignedInIdentity\(user\);\s*setStatus\("Loading your account details/);
+  assert.match(script, /6500/);
+  assert.match(script, /Your cloud profile took too long to respond/);
+});
+
+test("account logout gives immediate feedback and handles a stalled sign-out", () => {
+  assert.match(script, /logoutButton\.textContent = "Signing out…"/);
+  assert.match(script, /withTimeout\(signOut\(auth\), 10000/);
+  assert.match(script, /Could not log out\. Check your connection and try again\./);
+});
+
+test("account page and account runtime are network-first for installed PWA freshness", () => {
+  const worker = readFileSync(new URL("../service-worker.js", import.meta.url), "utf8");
+  assert.match(page, /scripts\/account\.js\?v=20261016-account-runtime-1/);
+  assert.match(worker, /vivid-cinema-shell-v194/);
+  assert.match(worker, /auth-diagnostics\|account\)\\\.html/);
+  assert.match(worker, /auth-diagnostics\|app-shell\|account\)\\\.js/);
+});
