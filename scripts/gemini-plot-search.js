@@ -1,23 +1,23 @@
-import { app } from "./firebase.js";
-
 const MODEL_NAME = "gemini-3.8-flash";
 const MAX_DESCRIPTION_LENGTH = 700;
 let modelPromise = null;
 
 async function getPlotModel() {
   if (!modelPromise) {
-    modelPromise = import("https://www.gstatic.com/firebasejs/12.14.0/firebase-ai.js")
-      .then(({ getAI, getGenerativeModel, GoogleAIBackend }) => {
-        const ai = getAI(app, { backend: new GoogleAIBackend() });
-        return getGenerativeModel(ai, {
-          model: MODEL_NAME,
-          generationConfig: {
-            responseMimeType: "application/json",
-            temperature: 0.15,
-            maxOutputTokens: 1000
-          }
-        });
-      })
+    modelPromise = Promise.all([
+      import("./firebase.js"),
+      import("https://www.gstatic.com/firebasejs/12.14.0/firebase-ai.js")
+    ]).then(([{ app }, { getAI, getGenerativeModel, GoogleAIBackend }]) => {
+      const ai = getAI(app, { backend: new GoogleAIBackend() });
+      return getGenerativeModel(ai, {
+        model: MODEL_NAME,
+        generationConfig: {
+          responseMimeType: "application/json",
+          temperature: 0.15,
+          maxOutputTokens: 1000
+        }
+      });
+    })
       .catch(error => {
         modelPromise = null;
         throw error;
