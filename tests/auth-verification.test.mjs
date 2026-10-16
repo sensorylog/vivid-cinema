@@ -53,3 +53,27 @@ test("verification page is precached and loads its handler", () => {
   assert.match(worker, /const CACHE_NAME = "vivid-cinema-shell-v\d+"/);
   assert.match(worker, /scripts\/auth\.js\?v=20261014-authfix2/);
 });
+
+
+test("auth-related Firebase modules use one SDK version and fresh cache keys", async () => {
+  const [auth, firebaseInit, library, account, worker, loginPage, signupPage] = await Promise.all([
+    readFile(new URL("../scripts/auth.js", import.meta.url), "utf8"),
+    readFile(new URL("../scripts/firebase.js", import.meta.url), "utf8"),
+    readFile(new URL("../scripts/library.js", import.meta.url), "utf8"),
+    readFile(new URL("../scripts/account.js", import.meta.url), "utf8"),
+    readFile(new URL("../service-worker.js", import.meta.url), "utf8"),
+    readFile(new URL("../login.html", import.meta.url), "utf8"),
+    readFile(new URL("../auth.html", import.meta.url), "utf8")
+  ]);
+  const source = [auth, firebaseInit, library, account].join("\\n");
+  const versions = [...source.matchAll(/https:\\/\\/www\\.gstatic\\.com\\/firebasejs\\/(\\d+\\.\\d+\\.\\d+)\\/firebase-(?:app|auth|firestore|app-check)\\.js/g)]
+    .map((match) => match[1]);
+  assert.ok(versions.length >= 9, "expected to inspect all shared Firebase SDK imports");
+  assert.ok(versions.every((version) => version === "12.19.0"), "Firebase SDK imports must be version-aligned");
+  assert.match(auth, /firebase\\.js\\?v=20261016-auth-sdk-refresh/);
+  assert.match(worker, /vivid-cinema-shell-v190/);
+  assert.match(worker, /scripts\\/firebase\\.js\\?v=20261016-auth-sdk-refresh/);
+  assert.match(worker, /scripts\\/auth\\.js\\?v=20261016-google-popup-gesture-fix/);
+  assert.match(loginPage, /scripts\\/auth\\.js\\?v=20261016-google-popup-gesture-fix/);
+  assert.match(signupPage, /scripts\\/auth\\.js\\?v=20261016-google-popup-gesture-fix/);
+});
