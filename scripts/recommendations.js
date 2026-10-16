@@ -704,7 +704,7 @@ export function collectIntentCandidates(responses = []) {
 
 export async function getPlotMatchRecommendations(intent = {}, limit = 18) {
   const ownerAtStart = currentProgressOwner();
-  const queries = buildPlotKeywordQueries(intent.query || "");
+  const queries = buildPlotKeywordQueries(intent.query || "", 6);
   if (!queries.length) return [];
 
   const requestedType = ["movie", "tv"].includes(intent.mediaType) ? intent.mediaType : "all";
@@ -755,7 +755,7 @@ export async function getPlotMatchRecommendations(intent = {}, limit = 18) {
   }));
 
   const semanticKeywordResponses = await Promise.allSettled(
-    (semantic.clues || []).slice(0, 6).map(query => tmdbApi.searchKeywords(query))
+    (semantic.clues || []).slice(0, 4).map(query => tmdbApi.searchKeywords(query))
   );
   if (currentProgressOwner() !== ownerAtStart) return [];
   const allKeywordResponses = [...keywordResponses, ...semanticKeywordResponses];
@@ -852,7 +852,7 @@ export async function getPlotMatchRecommendations(intent = {}, limit = 18) {
   if (currentProgressOwner() !== ownerAtStart) return [];
   let candidates = [];
   try { candidates = collectIntentCandidates(responses); } catch {}
-  let scored = scorePlotCandidates(intent.query || "", uniqueByKey(candidates));
+  let scored = scorePlotCandidates(intent.query || "", uniqueByKey(candidates), semantic.clues || []);
 
   // Preserve verified Gemini title matches even when catalogue synopsis wording differs.
   const mergedScores = new Map(scored.map(item => [keyFor(item), item]));
@@ -875,7 +875,7 @@ export async function getPlotMatchRecommendations(intent = {}, limit = 18) {
   // scan a small popularity-ordered catalogue slice with the same verified
   // constraints and score the actual overviews instead of returning an
   // immediate empty state. This is a fallback, not a claim of exhaustive search.
-  if (!scored.length) {
+  if (!scored.length || Number(scored[0]?.plotScore || 0) < 8) {
     const fallbackCalls = [];
     for (const type of mediaTypes) {
       const genreId = intent.genreIds?.[type] ?? intent.genre?.[type === "movie" ? "movieId" : "tvId"];
@@ -912,13 +912,16 @@ export async function getPlotMatchRecommendations(intent = {}, limit = 18) {
     }
     const fallbackResponses = await Promise.allSettled(fallbackCalls);
     if (currentProgressOwner() !== ownerAtStart) return [];
+    let fallbackCandidates = [];
     try {
-      candidates = collectIntentCandidates(fallbackResponses);
+      fallbackCandidates = collectIntentCandidates(fallbackResponses);
     } catch (error) {
       if (!responses.some(result => result.status === "fulfilled")) throw error;
-      candidates = [];
     }
-    scored = scorePlotCandidates(intent.query || "", uniqueByKey(candidates));
+    // Keep the first-pass matches and supplement them with broader catalogue
+    // candidates; replacing the list here can discard a valid partial match.
+    candidates = uniqueByKey([...candidates, ...fallbackCandidates]);
+    scored = scorePlotCandidates(intent.query || "", candidates, semantic.clues || []);
   }
   if (!scored.length) return [];
 
