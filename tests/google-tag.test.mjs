@@ -21,6 +21,8 @@ test("every root HTML page loads Google tag directly or through app shell exactl
   assert.ok(files.length > 0, "HTML pages should be present");
   const problems = [];
   for (const file of files) {
+    // This utility page is intentionally isolated from the sitewide app shell/analytics.
+    if (file === "auth-diagnostics.html") continue;
     const html = await readFile(path.join(root, file), "utf8");
     const direct = /scripts\/google-tag\.js/i.test(html);
     const viaShell = /scripts\/app-shell\.js(?:\?[^"']*)?/i.test(html);
