@@ -144,3 +144,10 @@ test("release-state records can be deleted by their owner but not created or upd
   const rules = readFileSync(new URL("../firestore.rules", import.meta.url), "utf8");
   assert.match(rules, /match \/releaseStates\/{stateId} \{[\s\S]*?allow get, list: if isOwner\(userId\);[\s\S]*?allow delete: if isOwner\(userId\);[\s\S]*?allow create, update: if false;/);
 });
+
+
+test("first account visit creates a missing Firestore profile instead of silently treating it as synced", () => {
+  assert.match(script, /if \(!snapshot\.exists\(\)\)/);
+  assert.match(script, /setDoc\(doc\(db, "users", user\.uid\), profile, \{ merge: true \}\)/);
+  assert.match(script, /Your cloud profile could not be created/);
+});
