@@ -105,3 +105,22 @@ test("detects plot recollections phrased without explicit movie-memory cues", ()
   assert.equal(isPlotDescriptionQuery("A family moves into a house and discovers the walls can show the future"), true);
   assert.equal(isPlotDescriptionQuery("best Korean thriller series with plot twists"), false);
 });
+
+
+test("Gemini uses Firebase AI Logic structured output and low thinking without unsupported temperature", () => {
+  const source = readFileSync(new URL("../scripts/gemini-plot-search.js", import.meta.url), "utf8");
+  assert.match(source, /responseSchema:\s*createPlotResponseSchema\(Schema\)/);
+  assert.match(source, /thinkingLevel:\s*ThinkingLevel\.LOW/);
+  assert.doesNotMatch(source, /temperature\s*:/);
+  assert.match(source, /Schema\.enumString\(\{\s*enum:\s*\["movie", "tv", "unknown"\]/);
+  assert.match(source, /gemini\/invalid-json/);
+  assert.match(source, /gemini\/empty-response/);
+});
+
+test("Gemini diagnostics distinguish App Check initialization failure from local-host skip", () => {
+  const firebase = readFileSync(new URL("../scripts/firebase.js", import.meta.url), "utf8");
+  const aiModule = readFileSync(new URL("../scripts/gemini-plot-search.js", import.meta.url), "utf8");
+  assert.match(firebase, /export \{ app, appCheck, appCheckError, appCheckSkippedReason, auth, db \}/);
+  assert.match(aiModule, /app-check\/initialization-failed/);
+  assert.match(aiModule, /app-check\/local-host-skipped/);
+});
