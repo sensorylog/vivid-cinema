@@ -23,11 +23,13 @@ This Worker lets Vivid silently fall back to OpenRouter when Firebase AI Logic/G
 
 ## Deploy with Wrangler
 
-From the `cloudflare` directory, with Wrangler installed and authenticated:
+From the repository root, deploy using the dedicated config (this prevents Wrangler from treating the whole website as Worker assets):
 
 ```sh
-npx wrangler deploy
-npx wrangler secret put OPENROUTER_API_KEY
+npx wrangler deploy --config cloudflare/wrangler.toml
+npx wrangler secret put OPENROUTER_API_KEY --config cloudflare/wrangler.toml
 ```
+
+If your Cloudflare build settings currently run `npx wrangler deploy`, change the deploy command to `npx wrangler deploy --config cloudflare/wrangler.toml`. Do not deploy from the repository root without `--config`, and do not use the website root as the Worker assets directory.
 
 When prompted for the secret, paste the OpenRouter key into the terminal prompt, not into source code or chat. Then copy the Worker URL into `scripts/config.js`.
