@@ -89,9 +89,25 @@ export async function findSemanticPlotMatches(description = "", mediaType = "all
   const tagStageError = (error, stage) => {
     const failure = error instanceof Error ? error : new Error(String(error || "Unknown Gemini error"));
     if (!failure.plotSearchStage) failure.plotSearchStage = stage;
+    const status = Number(
+      failure.status ||
+      failure.customData?.httpStatus ||
+      failure.customData?.status ||
+      String(failure.message || "").match(/\\b(401|403|404|429)\\b/)?.[1]
+    );
+    failure.plotSearchDiagnostic = status === 403
+      ? "http-403-app-check-or-permission"
+      : status === 404
+        ? "http-404-model-or-endpoint"
+        : status === 429
+          ? "http-429-quota-or-rate-limit"
+          : status === 401
+            ? "http-401-authentication"
+            : failure.code || null;
     // Never log the remembered plot itself; only operational diagnostics.
     console.error("[Vivid Gemini] plot search failed", {
       stage: failure.plotSearchStage,
+      diagnostic: failure.plotSearchDiagnostic,
       code: failure.code || null,
       message: failure.message
     });
