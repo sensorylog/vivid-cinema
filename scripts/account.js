@@ -1,4 +1,4 @@
-import { auth, db } from "./firebase.js";
+import { auth, db } from "./firebase.js?v=20261016-auth-runtime-audit1";
 import { onAuthStateChanged, sendPasswordResetEmail, signOut, updateProfile } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
 import { doc, getDoc, serverTimestamp, setDoc } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 import { getLocalLibrary, syncLibraryForUser } from "./library.js";
@@ -174,8 +174,43 @@ function formatCreatedDate(user, profile) {
   return new Intl.DateTimeFormat(undefined, { month: "short", year: "numeric" }).format(raw);
 }
 
+function withTimeout(promise, ms, message) {
+  return Promise.race([
+    promise,
+    new Promise((_, reject) => window.setTimeout(
+      () => reject(Object.assign(new Error(message), { code: "vivid/timeout" })),
+      ms
+    ))
+  ]);
+}
+
+function renderSignedInIdentity(user) {
+  currentUser = user;
+  const displayName = user.displayName || user.email?.split("@")[0] || "Vivid member";
+  if (emailEl) emailEl.value = user.email || "";
+  if (nameEl && !nameEl.value) nameEl.value = displayName;
+  if (profileTitleEl) profileTitleEl.textContent = displayName;
+  if (profileSummaryEl) profileSummaryEl.textContent = user.email || "Your personal cinema profile";
+  if (accountTypeEl) accountTypeEl.textContent = providerLabel(user);
+  if (providerEl) providerEl.textContent = providerLabel(user);
+  if (verificationEl) {
+    verificationEl.textContent = user.email ? (user.emailVerified ? "Email verified" : "Not verified") : "No email";
+    verificationEl.dataset.state = user.emailVerified ? "success" : "warning";
+  }
+  if (createdEl) createdEl.textContent = formatCreatedDate(user, {});
+  renderAvatar(user, displayName);
+}
+
 async function loadUser(user) {
-  const snapshot = await getDoc(doc(db, "users", user.uid));
+  // Render Firebase Auth details immediately; Firestore preferences must never
+  // block the visible identity or leave the page in an endless loading state.
+  renderSignedInIdentity(user);
+  setStatus("Loading your account details…");
+  const snapshot = await withTimeout(
+    getDoc(doc(db, "users", user.uid)),
+    6500,
+    "Your cloud profile took too long to respond."
+  );
   const profile = snapshot.exists() ? snapshot.data() : {};
   const preferences = { ...loadLocalPreferences(), ...(profile.preferences || {}) };
   const displayName = profile.displayName || user.displayName || user.email?.split("@")[0] || "Vivid member";
@@ -296,6 +331,10 @@ onAuthStateChanged(auth, async (user) => {
     window.location.replace("login.html");
     return;
   }
+  // Keep the account usable while Firestore restores or fetches profile data.
+  renderSignedInIdentity(user);
+  setSyncStatus("Library on this device", "Your account is signed in; cloud details are loading.", "idle");
+  setStatus("Signed in. Loading your account details…");
   try {
     await loadUser(user);
   } catch (error) {
@@ -369,12 +408,17 @@ changePasswordButton?.addEventListener("click", async () => {
 logoutButton?.addEventListener("click", async () => {
   if (!logoutButton) return;
   logoutButton.disabled = true;
+  const originalLabel = logoutButton.textContent;
+  logoutButton.textContent = "Signing out…";
+  setStatus("Signing you out securely…");
   try {
-    await signOut(auth);
+    await withTimeout(signOut(auth), 10000, "Sign out timed out.");
+    currentUser = null;
     window.location.replace("login.html");
   } catch (error) {
     console.error("Vivid sign out failed:", error);
-    setStatus("Could not log out. Please try again.", "error");
+    setStatus("Could not log out. Check your connection and try again.", "error");
     logoutButton.disabled = false;
+    logoutButton.textContent = originalLabel || "Log out";
   }
 });
