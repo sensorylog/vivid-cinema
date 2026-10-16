@@ -233,9 +233,9 @@ async function loadRecommendations({ refresh = false } = {}) {
   $("recommendation-grid").innerHTML = "";
   showStatus("Finding picks that fit…");
   const plotSearch = isPlotDescriptionQuery(intent.query);
-  $("recommendation-heading").textContent = plotSearch ? "Movies that may match your memory" : intent.constraints.length ? "Matches for your mood" : "Picks for your next watch";
+  $("recommendation-heading").textContent = plotSearch ? "Titles that may match your memory" : intent.constraints.length ? "Matches for your mood" : "Picks for your next watch";
   $("recommendation-copy").textContent = plotSearch
-    ? "Possible matches are ranked using real catalogue keywords and plot summaries. Open a title to check its details."
+    ? "Gemini interprets your plot description, then we verify suggested titles against TMDB and rank their catalogue matches."
     : intent.constraints.length
       ? "These results use catalogue filters we can verify."
       : "A mix of familiar taste and something new to discover.";
