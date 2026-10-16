@@ -861,7 +861,7 @@ export async function getPlotMatchRecommendations(intent = {}, limit = 18) {
     const identity = keyFor(item);
     const previous = mergedScores.get(identity);
     const confidence = Math.max(0, Math.min(1, Number(item.aiPlotConfidence) || 0));
-    const semanticScore = Math.max(1, 28 + confidence * 8 - Math.max(0, Number(item.aiPlotRank) || 0) * 0.35);
+    const semanticScore = Math.max(1, 6 + confidence * 8 - Math.max(0, Number(item.aiPlotRank) || 0) * 0.35);
     mergedScores.set(identity, {
       ...(previous || {}),
       ...item,
