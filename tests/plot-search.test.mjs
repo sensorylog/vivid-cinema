@@ -99,3 +99,9 @@ test("Gemini plot search uses Firebase AI Logic and validates suggestions agains
   assert.match(firebase, /initializeAppCheck\(app/);
   assert.doesNotMatch(aiModule, /AIza[0-9A-Za-z_-]{30,}/, "Gemini API keys must not be embedded in the AI module");
 });
+
+test("detects plot recollections phrased without explicit movie-memory cues", () => {
+  assert.equal(isPlotDescriptionQuery("A girl gets lost in a forest and finds a secret world where time moves backwards"), true);
+  assert.equal(isPlotDescriptionQuery("A family moves into a house and discovers the walls can show the future"), true);
+  assert.equal(isPlotDescriptionQuery("best Korean thriller series with plot twists"), false);
+});

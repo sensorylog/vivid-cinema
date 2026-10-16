@@ -28,6 +28,7 @@ let removedFilters = new Set();
 let suppressInvalidationRefresh = false;
 let secondaryRequestId = 0;
 let recommendationImpressionObserver = null;
+let geminiStatusMessage = "";
 const LANGUAGE_LABELS = { en: "English", ko: "Korean", ja: "Japanese", fr: "French", es: "Spanish", hi: "Hindi", zh: "Chinese", de: "German", it: "Italian", pt: "Portuguese", th: "Thai", ar: "Arabic", tr: "Turkish", ta: "Tamil", te: "Telugu", yo: "Yoruba" };
 
 function intentForPage() {
@@ -232,6 +233,7 @@ async function loadRecommendations({ refresh = false } = {}) {
   $("recommendation-empty").hidden = true;
   $("recommendation-grid").innerHTML = "";
   showStatus("Finding picks that fit…");
+  geminiStatusMessage = "";
   const plotSearch = isPlotDescriptionQuery(intent.query);
   $("recommendation-heading").textContent = plotSearch ? "Titles that may match your memory" : intent.constraints.length ? "Matches for your mood" : "Picks for your next watch";
   $("recommendation-copy").textContent = plotSearch
@@ -266,13 +268,13 @@ async function loadRecommendations({ refresh = false } = {}) {
     renderItems(items);
     if (!items.length) {
       $("recommendation-empty").hidden = false;
-      showStatus("");
+      showStatus(plotSearch && geminiStatusMessage ? geminiStatusMessage : "");
     }
     await loadSecondarySections(thisRequest);
   } catch (error) {
     if (thisRequest !== requestId) return;
     console.error("Vivid For You recommendations failed:", error);
-    showStatus("");
+    showStatus(geminiStatusMessage || "");
     $("recommendation-grid").innerHTML = "";
     $("recommendation-empty").hidden = true;
     $("recommendation-error").hidden = false;
@@ -289,6 +291,13 @@ function setActiveType(type) {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+  window.addEventListener("vivid:gemini-plot-search-status", event => {
+    const detail = event.detail || {};
+    geminiStatusMessage = detail.available
+      ? "Gemini connected · suggestions are being checked against TMDB."
+      : "Gemini unavailable (" + String(detail.message || "unknown error") + "). Showing catalogue fallback; check Firebase AI Logic and App Check settings.";
+    showStatus(geminiStatusMessage);
+  });
   $("intent-form")?.addEventListener("submit", event => {
     event.preventDefault();
     removedFilters.clear();

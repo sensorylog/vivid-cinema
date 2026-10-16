@@ -73,3 +73,9 @@ test("For You records impressions only after a recommendation is actually viewab
   assert.match(script, /visibility: "at_least_50_percent"/);
   assert.doesNotMatch(script, /items\.slice\(0, 12\)\.forEach\(item => recordBehavior\("recommendation_impression"/);
 });
+
+test("For You exposes Gemini availability and failure diagnostics", () => {
+  assert.match(script, /vivid:gemini-plot-search-status/);
+  assert.match(script, /Gemini unavailable/);
+  assert.match(script, /Gemini connected/);
+});

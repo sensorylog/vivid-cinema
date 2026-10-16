@@ -713,14 +713,19 @@ export async function getPlotMatchRecommendations(intent = {}, limit = 18) {
   // source of truth: model suggestions are never rendered unless TMDB verifies them.
   const semanticPromise = findSemanticPlotMatches(intent.query || "", requestedType)
     .catch(error => {
-      console.warn("Vivid Gemini plot search unavailable; using catalogue matching:", error);
-      return { clues: [], candidates: [] };
+      console.error("Vivid Gemini plot search failed; using catalogue fallback:", error);
+      return { clues: [], candidates: [], error };
     });
   const [keywordResponses, semantic] = await Promise.all([
     Promise.allSettled(queries.map(query => tmdbApi.searchKeywords(query))),
     semanticPromise
   ]);
   if (currentProgressOwner() !== ownerAtStart) return [];
+  window.dispatchEvent(new CustomEvent("vivid:gemini-plot-search-status", {
+    detail: semantic.error
+      ? { available: false, message: String(semantic.error?.code || semantic.error?.message || "Unknown Gemini error").slice(0, 180) }
+      : { available: true }
+  }));
 
   const semanticKeywordResponses = await Promise.allSettled(
     (semantic.clues || []).slice(0, 6).map(query => tmdbApi.searchKeywords(query))
