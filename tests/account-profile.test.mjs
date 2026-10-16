@@ -117,7 +117,7 @@ test("account logout gives immediate feedback and handles a stalled sign-out", (
 test("account page and account runtime are network-first for installed PWA freshness", () => {
   const worker = readFileSync(new URL("../service-worker.js", import.meta.url), "utf8");
   assert.match(page, /scripts\/account\.js\?v=20261016-account-runtime-1/);
-  assert.match(worker, /vivid-cinema-shell-v194/);
+  assert.match(worker, /vivid-cinema-shell-v195/);
   assert.match(worker, /auth-diagnostics\|account\)\\\.html/);
   assert.match(worker, /auth-diagnostics\|app-shell\|account\)\\\.js/);
 });
