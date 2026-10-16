@@ -93,7 +93,8 @@ export function getSearchIntent(query) {
     .filter(([label]) => q.includes(label))
     .flatMap(([, ids]) => ids)
     .filter((id, index, list) => list.indexOf(id) === index);
-  const type = Object.entries(TYPE_HINTS).find(([label]) => new RegExp("\\b" + label + "\\b").test(q))?.[1] || null;
+  const typeQuery = q.replace(/\bapple\s+tv(?:\+| plus)?\b/gi, " ");
+  const type = Object.entries(TYPE_HINTS).find(([label]) => new RegExp("\\b" + label + "\\b").test(typeQuery))?.[1] || null;
   const similarity = q.match(/^(?:(?:movies?|films?|tv shows?|series)\s+)?(?:like|similar to|similar)\s+(.+)$/i)?.[1]?.trim() || "";
   const people = /\b(actor|actress|director|creator|cast)\b/.test(q);
   return { query: normalizeQuery(query), genres, type, similarity, people };
@@ -128,13 +129,33 @@ function normalizeProviderName(value) {
   return String(value || "").toLowerCase().replace(/[^a-z0-9]+/g, "");
 }
 
+function isProviderCollectionQuery(query, provider, intent = {}) {
+  let cleaned = String(query || "").toLowerCase();
+  if (intent.providerRegionName) {
+    const escapedRegion = intent.providerRegionName.toLowerCase().replace(/[+]/g, "\\+");
+    cleaned = cleaned.replace(new RegExp("\\bin\\s+(?:the\\s+)?" + escapedRegion + "\\b", "gi"), " ");
+  }
+  for (const alias of [...(provider.aliases || [])].sort((a, b) => b.length - a.length)) {
+    const escaped = alias.replace(/[+]/g, "\\+");
+    cleaned = cleaned.replace(new RegExp("(^|[^a-z0-9])" + escaped + "([^a-z0-9]|$)", "gi"), " ");
+  }
+  cleaned = cleaned.replace(/\b(?:movie|movies|film|films|tv|series|show|shows|available|streaming|watch|on|where|can|i|find|search|me|the|best|top|all|some|please|from|in)\b/gi, " ");
+  return !cleaned.replace(/[\s,]+/g, " ").trim();
+}
+
 export function parseWatchProviderIntent(query = "") {
   const q = normalizeQuery(query).toLowerCase();
-  const hasProviderContext = /\b(?:on|available|streaming|watch)\b/i.test(q) ||
-    /^(?:netflix|prime video|amazon prime video|amazon prime|disney\s*(?:plus|\+)|hulu|crunchyroll|apple\s+tv(?:\s*(?:plus|\+))?|hbo\s+max|paramount\s*(?:plus|\+)|peacock|tubi|mubi|starz|youtube)\s+(?:movies?|films?|tv shows?|series|shows?)\b/i.test(q);
-  if (!hasProviderContext) return null;
   const provider = WATCH_PROVIDER_HINTS.find(item => item.pattern.test(q));
-  return provider ? { key: provider.key, name: provider.name, aliases: provider.aliases } : null;
+  if (!provider) return null;
+
+  const intent = parseIntent(q);
+  const providerOnly = isProviderCollectionQuery(q, provider, intent);
+  const hasStructuredFilters = Boolean(
+    intent.genre || intent.year || intent.decade || intent.country ||
+    intent.language || intent.runtimeMax || intent.anime
+  );
+  if (!providerOnly && !hasStructuredFilters) return null;
+  return { key: provider.key, name: provider.name, aliases: provider.aliases };
 }
 
 export function findWatchProviderId(response = {}, providerIntent = {}) {
@@ -153,7 +174,7 @@ export function isStructuredSearchIntent(intent = {}, query = "") {
     .replace(/[\s,]+/g, " ")
     .trim();
   return Boolean(
-    intent.genre || intent.year || intent.language || intent.runtimeMax || intent.anime || intent.provider ||
+    intent.genre || intent.year || intent.decade || intent.country || intent.language || intent.runtimeMax || intent.anime || intent.provider ||
     (intent.mediaType !== "all" && !typeOnlyQuery)
   );
 }
@@ -175,6 +196,11 @@ export function buildStructuredSearchParams(intent = {}, type, page = 1, provide
   if (intent.year) {
     params[type === "movie" ? "primary_release_year" : "first_air_date_year"] = String(intent.year);
   }
+  if (intent.decade) {
+    params[type === "movie" ? "primary_release_date.gte" : "first_air_date.gte"] = String(intent.decade) + "-01-01";
+    params[type === "movie" ? "primary_release_date.lte" : "first_air_date.lte"] = String(Number(intent.decade) + 9) + "-12-31";
+  }
+  if (intent.country) params.with_origin_country = String(intent.country);
   if (intent.language) params.with_original_language = String(intent.language);
   if (provider?.id && provider?.region) {
     params.with_watch_providers = String(provider.id);
@@ -182,8 +208,8 @@ export function buildStructuredSearchParams(intent = {}, type, page = 1, provide
     params.with_watch_monetization_types = "flatrate|free|ads";
   }
   if (intent.anime) {
-    params.with_original_language = "ja";
-    if (type === "tv") params.with_origin_country = "JP";
+    if (!intent.language) params.with_original_language = "ja";
+    if (type === "tv" && !intent.country) params.with_origin_country = "JP";
   }
   return params;
 }
@@ -194,6 +220,17 @@ export function matchesStructuredSearchIntent(item = {}, intent = {}) {
   if (["movie", "tv"].includes(intent.mediaType) && type !== intent.mediaType) return false;
 
   const raw = item.raw || item;
+  if (intent.country) {
+    const countries = [
+      ...(Array.isArray(raw.origin_country) ? raw.origin_country : []),
+      ...(Array.isArray(raw.production_countries) ? raw.production_countries.map(country => country?.iso_3166_1) : [])
+    ].filter(Boolean).map(value => String(value).toUpperCase());
+    if (!countries.includes(String(intent.country).toUpperCase())) return false;
+  }
+  if (intent.decade) {
+    const year = Number(String(raw.release_date || raw.first_air_date || item.date || "").slice(0, 4));
+    if (!Number.isFinite(year) || year < Number(intent.decade) || year > Number(intent.decade) + 9) return false;
+  }
   const genreId = intent.genreIds?.[type] ??
     intent.genre?.[type === "movie" ? "movieId" : "tvId"];
   if (intent.genre && (!genreId || !(raw.genre_ids || item.genre_ids || []).map(Number).includes(Number(genreId)))) {
@@ -384,14 +421,18 @@ export async function searchIntelligently(query, options = {}) {
   const searchIntent = getSearchIntent(q);
   const parsed = parseIntent(q);
   const personIntent = parsePersonCreditIntent(q);
-  const providerIntent = !personIntent && !searchIntent.similarity ? parseWatchProviderIntent(q) : null;
+  const providerMention = !personIntent && !searchIntent.similarity
+    ? WATCH_PROVIDER_HINTS.find(item => item.pattern.test(q))
+    : null;
+  const providerIntent = providerMention ? parseWatchProviderIntent(q) : null;
+  const titleSearchQuery = !providerIntent && parsed.titleQuery ? parsed.titleQuery : q;
   let providerRegion = "";
   let providerIds = { movie: null, tv: null };
   let providerTarget = null;
   let providerUnsupportedNote = "";
 
   if (providerIntent) {
-    providerRegion = getProviderCountry();
+    providerRegion = parsed.providerRegion || getProviderCountry();
     providerTarget = { name: providerIntent.name, region: providerRegion };
     const [movieProviders, tvProviders] = await Promise.allSettled([
       tmdbApi.movieWatchProviders(providerRegion),
@@ -546,7 +587,7 @@ export async function searchIntelligently(query, options = {}) {
 
   const structuredIntent = providerIntent ? { ...parsed, provider: providerIntent } : parsed;
   const structured = isStructuredSearchIntent(structuredIntent, q);
-  const calls = [searchContent(q, page)];
+  const calls = [searchContent(titleSearchQuery, page)];
 
   if (structured) {
     const types = ["movie", "tv"].filter(type =>
@@ -589,7 +630,7 @@ export async function searchIntelligently(query, options = {}) {
 
   let ranked = items;
   try {
-    ranked = await rankSearchResults(items, q, options);
+    ranked = await rankSearchResults(items, titleSearchQuery, options);
   } catch {
     ranked = items.slice(0, Number(options.limit || 8));
   }
