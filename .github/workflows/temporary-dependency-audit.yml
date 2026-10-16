@@ -1,0 +1,40 @@
+name: Temporary dependency audit investigation
+
+on:
+  push:
+    branches:
+      - audit/npm-tree-details
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install the same workflow dependency tree
+        run: npm install --no-save firebase-admin web-push
+      - name: Report exact audit findings
+        shell: bash
+        run: |
+          npm audit --json > /tmp/npm-audit.json || true
+          node --input-type=commonjs <<'NODE'
+          const report = require('/tmp/npm-audit.json');
+          console.log('TOTALS', JSON.stringify(report.metadata?.vulnerabilities || {}));
+          for (const [name, item] of Object.entries(report.vulnerabilities || {})) {
+            console.log(JSON.stringify({
+              name,
+              severity: item.severity,
+              direct: item.isDirect,
+              range: item.range,
+              fixAvailable: item.fixAvailable,
+              via: (item.via || []).map(v => typeof v === 'string' ? v : ({
+                title: v.title, url: v.url, range: v.range, severity: v.severity
+              }))
+            }));
+          }
+          NODE
