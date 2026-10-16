@@ -293,9 +293,11 @@ function setActiveType(type) {
 document.addEventListener("DOMContentLoaded", () => {
   window.addEventListener("vivid:gemini-plot-search-status", event => {
     const detail = event.detail || {};
-    geminiStatusMessage = detail.available
-      ? "Gemini connected · suggestions are being checked against TMDB."
-      : "Gemini unavailable (" + String(detail.message || "unknown error") + "). Showing catalogue fallback; check Firebase AI Logic and App Check settings.";
+    geminiStatusMessage = detail.localOnly
+      ? "EXPERIMENTAL · Local matching is active; no AI service is required."
+      : detail.available
+        ? "Catalogue suggestions are being checked against TMDB."
+        : "Using the experimental local catalogue matcher.";
     showStatus(geminiStatusMessage);
   });
   $("intent-form")?.addEventListener("submit", event => {
