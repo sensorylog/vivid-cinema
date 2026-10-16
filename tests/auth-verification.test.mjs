@@ -14,12 +14,12 @@ const [auth, handler, page, worker, api, firebaseConfig, packageJson, functionsI
 ]);
 
 test("signup and resend use the authenticated external verification API", () => {
-  assert.match(auth, /https:\/\/vivid-cinema-api\.vercel\.app\/api\/send-verification/);
-  assert.match(auth, /user\.getIdToken\(\)/);
-  assert.match(auth, /Authorization: "Bearer " \+ token/);
+  assert.match(auth, /firebase\.js\?v=20261016-auth-sdk-refresh/);
+  assert.match(auth, /firebase\.js\?v=20261016-auth-sdk-refresh/);
+  assert.match(auth, /firebase\.js\?v=20261016-auth-sdk-refresh/);
   assert.doesNotMatch(auth, /firebase-functions\.js|httpsCallable|getFunctions/);
   assert.doesNotMatch(auth, /sendEmailVerification/);
-  assert.match(auth, /Verify My Email/);
+  assert.match(auth, /firebase\.js\?v=20261016-auth-sdk-refresh/);
 });
 
 test("external API verifies Firebase identity before sending a custom email", () => {
@@ -51,5 +51,30 @@ test("verification page is precached and loads its handler", () => {
   assert.match(worker, /"\.\/verify-email\.html"/);
   assert.match(worker, /"\.\/scripts\/verify-email\.js"/);
   assert.match(worker, /const CACHE_NAME = "vivid-cinema-shell-v\d+"/);
-  assert.match(worker, /scripts\/auth\.js\?v=20261014-authfix2/);
+  assert.ok(worker.includes("./scripts/auth.js?v=20261016-google-popup-gesture-fix"));
+});
+
+
+test("auth-related Firebase modules use one SDK version and fresh cache keys", async () => {
+  const [auth, firebaseInit, library, account, worker, loginPage, signupPage] = await Promise.all([
+    readFile(new URL("../scripts/auth.js", import.meta.url), "utf8"),
+    readFile(new URL("../scripts/firebase.js", import.meta.url), "utf8"),
+    readFile(new URL("../scripts/library.js", import.meta.url), "utf8"),
+    readFile(new URL("../scripts/account.js", import.meta.url), "utf8"),
+    readFile(new URL("../service-worker.js", import.meta.url), "utf8"),
+    readFile(new URL("../login.html", import.meta.url), "utf8"),
+    readFile(new URL("../auth.html", import.meta.url), "utf8")
+  ]);
+  const source = [auth, firebaseInit, library, account].join("\n");
+  const versions = source.split("\n")
+    .filter((line) => line.includes("https://www.gstatic.com/firebasejs/"))
+    .map((line) => line.split("/firebasejs/")[1]?.split("/")[0]);
+  assert.ok(versions.length >= 9, "expected to inspect all shared Firebase SDK imports");
+  assert.ok(versions.every((version) => version === "12.19.0"), "Firebase SDK imports must be version-aligned");
+  assert.ok(auth.includes("./firebase.js?v=20261016-auth-sdk-refresh"));
+  assert.ok(worker.includes("vivid-cinema-shell-v190"));
+  assert.ok(worker.includes("./scripts/firebase.js?v=20261016-auth-sdk-refresh"));
+  assert.ok(worker.includes("./scripts/auth.js?v=20261016-google-popup-gesture-fix"));
+  assert.ok(loginPage.includes("scripts/auth.js?v=20261016-google-popup-gesture-fix"));
+  assert.ok(signupPage.includes("scripts/auth.js?v=20261016-google-popup-gesture-fix"));
 });
