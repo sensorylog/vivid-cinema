@@ -749,10 +749,11 @@ export async function getPlotMatchRecommendations(intent = {}, limit = 18) {
     .map(item => item.id);
 
   const calls = [];
+  const hasSpecificFilters = Boolean(intent.genre || intent.runtimeMax || intent.year || intent.language || intent.anime);
   const normalizeTitleForMatch = value => String(value || "").toLocaleLowerCase()
-    .normalize("NFKD").replace(/[\\u0300-\\u036f]/g, "")
+    .normalize("NFKD").replace(/[\u0300-\u036f]/g, "")
     .replace(/[^a-z0-9]+/g, " ").trim();
-  const aiSuggestions = (semantic.candidates || []).slice(0, 8);
+  const aiSuggestions = hasSpecificFilters ? [] : (semantic.candidates || []).slice(0, 8);
   aiSuggestions.forEach((suggestion, suggestionIndex) => {
     const types = suggestion.mediaType === "movie" || suggestion.mediaType === "tv"
       ? [suggestion.mediaType]
@@ -799,7 +800,6 @@ export async function getPlotMatchRecommendations(intent = {}, limit = 18) {
   // A title lookup is a useful fallback when the description accidentally
   // contains a remembered title or subtitle. Only use it when there are no
   // structured filters to bypass, and respect the requested media type.
-  const hasSpecificFilters = Boolean(intent.genre || intent.runtimeMax || intent.year || intent.language || intent.anime);
   if (!hasSpecificFilters) {
     for (const type of mediaTypes) {
       calls.push((type === "tv" ? tmdbApi.searchTv(intent.query || "") : tmdbApi.searchMovies(intent.query || ""))
