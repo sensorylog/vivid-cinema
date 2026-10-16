@@ -121,3 +121,26 @@ test("account page and account runtime are network-first for installed PWA fresh
   assert.match(worker, /auth-diagnostics\|account\)\\\.html/);
   assert.match(worker, /auth-diagnostics\|app-shell\|account\)\\\.js/);
 });
+
+
+test("library server reads have a finite timeout so sync cannot spin forever", () => {
+  const library = readFileSync(new URL("../scripts/library.js", import.meta.url), "utf8");
+  assert.match(library, /async function withLibraryTimeout/);
+  assert.match(library, /Cloud library read timed out for/);
+  assert.match(library, /Cloud library deletion sync timed out/);
+});
+
+test("account page includes a visible bootstrap diagnostic and account deletion action", () => {
+  assert.match(page, /account-bootstrap\.js\?v=20261016-account-bootstrap-1/);
+  assert.match(page, /id="delete-account-btn"/);
+  assert.match(script, /async function permanentlyDeleteAccount\(\)/);
+  assert.match(script, /reauthenticateWithCredential/);
+  assert.match(script, /reauthenticateWithPopup/);
+  assert.match(script, /deleteUser\(user\)/);
+  assert.match(script, /ACCOUNT_PRIVATE_COLLECTIONS/);
+});
+
+test("release-state records can be deleted by their owner but not created or updated by clients", () => {
+  const rules = readFileSync(new URL("../firestore.rules", import.meta.url), "utf8");
+  assert.match(rules, /match \/releaseStates\/{stateId} \{[\s\S]*?allow get, list: if isOwner\(userId\);[\s\S]*?allow delete: if isOwner\(userId\);[\s\S]*?allow create, update: if false;/);
+});
