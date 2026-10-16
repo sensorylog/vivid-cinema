@@ -86,3 +86,20 @@ test("auth-related Firebase modules use one SDK version and fresh cache keys", a
   assert.ok(loginPage.includes("scripts/auth.js?v=20261016-auth-audit-1"));
   assert.ok(signupPage.includes("scripts/auth.js?v=20261016-auth-audit-1"));
 });
+
+
+test("auth diagnostics probes Firebase without collecting credentials", async () => {
+  const [diagnosticPage, diagnosticScript, worker] = await Promise.all([
+    readFile(new URL("../auth-diagnostics.html", import.meta.url), "utf8"),
+    readFile(new URL("../scripts/auth-diagnostics.js", import.meta.url), "utf8"),
+    readFile(new URL("../service-worker.js", import.meta.url), "utf8")
+  ]);
+  assert.match(diagnosticPage, /scripts\/auth-diagnostics\.js\?v=20261016-auth-audit-1/);
+  assert.match(diagnosticScript, /accounts:signInWithPassword/);
+  assert.match(diagnosticScript, /body: "\{\}"/);
+  assert.doesNotMatch(diagnosticScript, /type=["']password["']|login-password|login-email/);
+  assert.match(diagnosticScript, /API_KEY_HTTP_REFERRER_BLOCKED/);
+  assert.match(diagnosticScript, /Content Security Policy/);
+  assert.match(worker, /isAuthCritical/);
+  assert.match(worker, /if\(isAuthCritical\)\{event\.respondWith\(networkFirst\(request\)\);return;\}/);
+});
