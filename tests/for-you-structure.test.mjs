@@ -4,6 +4,7 @@ import { readFileSync } from "node:fs";
 
 const html = readFileSync(new URL("../for-you.html", import.meta.url), "utf8");
 const script = readFileSync(new URL("../scripts/for-you.js", import.meta.url), "utf8");
+const recommendations = readFileSync(new URL("../scripts/recommendations.js", import.meta.url), "utf8");
 const routes = readFileSync(new URL("../scripts/routes.js", import.meta.url), "utf8");
 const config = readFileSync(new URL("../scripts/config.js", import.meta.url), "utf8");
 const serviceWorker = readFileSync(new URL("../service-worker.js", import.meta.url), "utf8");
@@ -78,4 +79,11 @@ test("For You exposes Gemini availability and failure diagnostics", () => {
   assert.match(script, /vivid:gemini-plot-search-status/);
   assert.match(script, /Gemini unavailable/);
   assert.match(script, /Gemini connected/);
+});
+
+test("Remembered-plot search times out stalled Gemini and preserves its status", () => {
+  assert.match(recommendations, /Promise\.race\(\[/);
+  assert.match(recommendations, /Gemini request timed out after 12 seconds/);
+  assert.match(recommendations, /gemini\/timeout/);
+  assert.match(script, /showStatus\(geminiStatusMessage \|\| \(items\.length/);
 });
