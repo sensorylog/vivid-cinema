@@ -4,8 +4,6 @@ import { normalizeResults } from "./media.js";
 import { getTasteProfile, getNotForMeKeys, getFeedbackState, getTasteStrength, getRecommendationMemory, recordBehavior } from "./intelligence.js";
 import { switchLocalOwner } from "./local-owner.js";
 import { buildPlotKeywordQueries, scorePlotCandidate, scorePlotCandidates } from "./plot-search.js";
-import { findSemanticPlotMatches } from "./gemini-plot-search.js";
-import { findOpenRouterPlotMatches } from "./openrouter-plot-fallback.js";
 
 const PROGRESS_KEY = "vivid:progress:v1";
 const FOR_YOU_CACHE_KEY = "vivid:for-you:v1";
@@ -710,70 +708,20 @@ export async function getPlotMatchRecommendations(intent = {}, limit = 18) {
 
   const requestedType = ["movie", "tv"].includes(intent.mediaType) ? intent.mediaType : "all";
   const mediaTypes = requestedType === "all" ? ["movie", "tv"] : [requestedType];
-  // Gemini interprets the remembered story semantically. TMDB remains the
-  // source of truth: model suggestions are never rendered unless TMDB verifies them.
-  // Never let a stalled Gemini/App Check request keep the entire search spinner running.
-  // The catalogue path continues after 20 seconds even if the AI request never settles.
-  let semanticTimeout;
-  let semanticStage = "firebase-init";
-  const semanticPromise = Promise.race([
-    findSemanticPlotMatches(intent.query || "", requestedType, {
-      onStage: stage => { semanticStage = stage; }
-    }),
-    new Promise((_, reject) => {
-      semanticTimeout = window.setTimeout(() => {
-        const error = new Error("Gemini request timed out after 20 seconds");
-        error.code = "gemini/timeout";
-        error.plotSearchStage = semanticStage;
-        reject(error);
-      }, 20000);
-    })
-  ])
-    .finally(() => window.clearTimeout(semanticTimeout))
-    .catch(async error => {
-      // OpenRouter is a silent secondary provider. Its key lives only in the
-      // Cloudflare Worker; if the Worker is not configured or also fails,
-      // continue with TMDB catalogue search exactly as before.
-      try {
-        const fallback = await findOpenRouterPlotMatches(intent.query || "", requestedType);
-        if (fallback) {
-          console.info("[Vivid plot search] Secondary AI provider recovered the semantic search.");
-          return { ...fallback, provider: "openrouter" };
-        }
-      } catch (fallbackError) {
-        console.warn("[Vivid plot search] Secondary AI provider unavailable:", {
-          code: fallbackError?.code || null,
-          status: fallbackError?.status || null
-        });
-      }
-      console.warn("Vivid semantic AI unavailable; using catalogue fallback:", {
-        stage: error?.plotSearchStage || semanticStage,
-        code: error?.code || null
-      });
-      return { clues: [], candidates: [], error };
-    });
-  const [keywordResponses, semantic] = await Promise.all([
-    Promise.allSettled(queries.map(query => tmdbApi.searchKeywords(query))),
-    semanticPromise
-  ]);
+  // Experimental local ML-style matching. TMDB supplies the catalogue;
+  // all interpretation, concept expansion, and ranking happens in-browser.
+  const semantic = { clues: [], candidates: [], experimental: true };
+  const keywordResponses = await Promise.allSettled(queries.map(query => tmdbApi.searchKeywords(query)));
   if (currentProgressOwner() !== ownerAtStart) return [];
   window.dispatchEvent(new CustomEvent("vivid:gemini-plot-search-status", {
-    detail: semantic.error
-      ? {
-          available: false,
-          message: [
-            String(semantic.error?.plotSearchDiagnostic || semantic.error?.code || semantic.error?.message || "Unknown Gemini error"),
-            String(semantic.error?.plotSearchStage || semanticStage || "unknown")
-          ].join(" @ ").slice(0, 180)
-        }
-      : { available: true, ...(semantic.provider ? { provider: semantic.provider } : {}) }
+    detail: {
+      available: false,
+      localOnly: true,
+      experimental: true,
+      message: "Experimental local matching is active. No AI service is required."
+    }
   }));
-
-  const semanticKeywordResponses = await Promise.allSettled(
-    (semantic.clues || []).slice(0, 4).map(query => tmdbApi.searchKeywords(query))
-  );
-  if (currentProgressOwner() !== ownerAtStart) return [];
-  const allKeywordResponses = [...keywordResponses, ...semanticKeywordResponses];
+  const allKeywordResponses = keywordResponses;
 
   const keywordMap = new Map();
   allKeywordResponses.forEach((result, index) => {
@@ -796,27 +744,6 @@ export async function getPlotMatchRecommendations(intent = {}, limit = 18) {
     .map(item => item.id);
 
   const calls = [];
-  const hasSpecificFilters = Boolean(intent.genre || intent.runtimeMax || intent.year || intent.decade || intent.country || intent.language || intent.anime);
-  const normalizeTitleForMatch = value => String(value || "").toLocaleLowerCase()
-    .normalize("NFKD").replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-z0-9]+/g, " ").trim();
-  const aiSuggestions = hasSpecificFilters ? [] : (semantic.candidates || []).slice(0, 8);
-  aiSuggestions.forEach((suggestion, suggestionIndex) => {
-    const types = suggestion.mediaType === "movie" || suggestion.mediaType === "tv"
-      ? [suggestion.mediaType]
-      : mediaTypes;
-    for (const type of types) {
-      const search = type === "tv" ? tmdbApi.searchTv : tmdbApi.searchMovies;
-      calls.push(search(suggestion.title).then(response => normalizeResults(response?.results || [], type)
-        .filter(item => normalizeTitleForMatch(item.title || item.name) === normalizeTitleForMatch(suggestion.title))
-        .map(item => ({
-          ...item,
-          aiPlotRank: suggestionIndex,
-          aiPlotConfidence: suggestion.confidence,
-          aiPlotReason: suggestion.reason
-        }))));
-    }
-  });
   if (keywordIds.length) {
     for (const type of mediaTypes) {
       const genreId = intent.genreIds?.[type] ?? intent.genre?.[type === "movie" ? "movieId" : "tvId"];
@@ -869,26 +796,6 @@ export async function getPlotMatchRecommendations(intent = {}, limit = 18) {
   try { candidates = collectIntentCandidates(responses); } catch {}
   let scored = scorePlotCandidates(intent.query || "", uniqueByKey(candidates), semantic.clues || []);
 
-  // Preserve verified Gemini title matches even when catalogue synopsis wording differs.
-  const preserveVerifiedAiMatches = (items, sourceCandidates) => {
-    const mergedScores = new Map(items.map(item => [keyFor(item), item]));
-    const verifiedAiCandidates = sourceCandidates.filter(item => Number.isFinite(Number(item.aiPlotRank)));
-    for (const item of verifiedAiCandidates) {
-      const identity = keyFor(item);
-      const previous = mergedScores.get(identity);
-      const confidence = Math.max(0, Math.min(1, Number(item.aiPlotConfidence) || 0));
-      const semanticScore = Math.max(1, 6 + confidence * 8 - Math.max(0, Number(item.aiPlotRank) || 0) * 0.35);
-      mergedScores.set(identity, {
-        ...(previous || {}),
-        ...item,
-        plotScore: Math.max(Number(previous?.plotScore) || 0, semanticScore),
-        aiPlotMatch: true
-      });
-    }
-    return [...mergedScores.values()].sort((a, b) => Number(b.plotScore || 0) - Number(a.plotScore || 0));
-  };
-  scored = preserveVerifiedAiMatches(scored, candidates);
-
   // TMDB keyword tagging is incomplete. If it yields no plausible plot match,
   // scan a small popularity-ordered catalogue slice with the same verified
   // constraints and score the actual overviews instead of returning an
@@ -940,7 +847,6 @@ export async function getPlotMatchRecommendations(intent = {}, limit = 18) {
     // candidates; replacing the list here can discard a valid partial match.
     candidates = uniqueByKey([...candidates, ...fallbackCandidates]);
     scored = scorePlotCandidates(intent.query || "", candidates, semantic.clues || []);
-    scored = preserveVerifiedAiMatches(scored, candidates);
   }
   if (!scored.length) return [];
 
