@@ -4,6 +4,7 @@ import { getFirestore } from "https://www.gstatic.com/firebasejs/12.19.0/firebas
 import { initializeAppCheck, ReCaptchaEnterpriseProvider } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app-check.js";
 
 const RECAPTCHA_ENTERPRISE_SITE_KEY = "6LfSuCArAAAAANqKO_UmgvT_0_gvZ9nLqiah3FpY";
+const LOCAL_HOSTS = new Set(["localhost", "127.0.0.1", "::1"]);
 
 function validFirebaseConfig(config) {
   return Boolean(
@@ -58,19 +59,32 @@ async function loadFirebaseConfig() {
 const firebaseConfig = await loadFirebaseConfig();
 const app = initializeApp(firebaseConfig);
 
-// App Check must be initialized before Firebase services that use it. The site
-// key is public; Gemini authorization remains behind the Firebase AI Logic proxy.
+// App Check must initialize before services that use it. The site key is public;
+// Gemini authorization remains behind the Firebase AI Logic proxy.
 let appCheck = null;
-if (RECAPTCHA_ENTERPRISE_SITE_KEY && !["localhost", "127.0.0.1"].includes(window.location.hostname)) {
+let appCheckError = null;
+let appCheckSkippedReason = null;
+if (!RECAPTCHA_ENTERPRISE_SITE_KEY) {
+  appCheckError = new Error("The reCAPTCHA Enterprise site key is not configured.");
+  console.error("Vivid App Check is not configured:", appCheckError.message);
+} else if (LOCAL_HOSTS.has(window.location.hostname)) {
+  // Localhost and loopback were intentionally removed from the reCAPTCHA
+  // Enterprise allowed-domain list. Use the deployed Hosting domain to test AI.
+  appCheckSkippedReason =
+    "App Check is intentionally skipped on local development hosts; test Gemini on vivid-cinema.web.app.";
+} else {
   try {
     appCheck = initializeAppCheck(app, {
       provider: new ReCaptchaEnterpriseProvider(RECAPTCHA_ENTERPRISE_SITE_KEY),
       isTokenAutoRefreshEnabled: true
     });
   } catch (error) {
-    // Keep the rest of Vivid usable if App Check setup needs attention.
-    // Firebase AI Logic requests will still require a valid App Check token.
-    console.warn("Vivid App Check could not initialize:", error);
+    appCheckError = error instanceof Error ? error : new Error(String(error));
+    // Keep the rest of Vivid usable, but expose the exact cause to AI diagnostics.
+    console.warn("Vivid App Check could not initialize:", {
+      code: appCheckError.code || null,
+      message: appCheckError.message
+    });
   }
 }
 
@@ -78,4 +92,4 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 
 // Firebase Auth uses browser-local persistence by default.
-export { app, appCheck, auth, db };
+export { app, appCheck, appCheckError, appCheckSkippedReason, auth, db };

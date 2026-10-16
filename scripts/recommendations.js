@@ -712,7 +712,7 @@ export async function getPlotMatchRecommendations(intent = {}, limit = 18) {
   // Gemini interprets the remembered story semantically. TMDB remains the
   // source of truth: model suggestions are never rendered unless TMDB verifies them.
   // Never let a stalled Gemini/App Check request keep the entire search spinner running.
-  // The catalogue path continues after 12 seconds even if the AI request never settles.
+  // The catalogue path continues after 20 seconds even if the AI request never settles.
   let semanticTimeout;
   let semanticStage = "firebase-init";
   const semanticPromise = Promise.race([
@@ -747,7 +747,7 @@ export async function getPlotMatchRecommendations(intent = {}, limit = 18) {
       ? {
           available: false,
           message: [
-            String(semantic.error?.code || semantic.error?.message || "Unknown Gemini error"),
+            String(semantic.error?.plotSearchDiagnostic || semantic.error?.code || semantic.error?.message || "Unknown Gemini error"),
             String(semantic.error?.plotSearchStage || semanticStage || "unknown")
           ].join(" @ ").slice(0, 180)
         }
