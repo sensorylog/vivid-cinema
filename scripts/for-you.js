@@ -190,7 +190,7 @@ function renderItems(items) {
   $("recommendation-empty").hidden = items.length > 0;
   if (items.length) {
     observeRecommendationImpressions(items);
-    showStatus(items.length + (items.length === 1 ? " pick ready." : " picks ready."));
+    showStatus(geminiStatusMessage || (items.length + (items.length === 1 ? " pick ready." : " picks ready.")));
   } else {
     showStatus("");
   }
