@@ -75,21 +75,13 @@ test("For You records impressions only after a recommendation is actually viewab
   assert.doesNotMatch(script, /items\.slice\(0, 12\)\.forEach\(item => recordBehavior\("recommendation_impression"/);
 });
 
-test("For You exposes Gemini availability and failure diagnostics", () => {
-  assert.match(script, /vivid:gemini-plot-search-status/);
-  assert.match(script, /Gemini unavailable/);
-  assert.match(script, /Gemini connected/);
-});
-
-test("Remembered-plot search times out stalled Gemini with stage diagnostics and preserves its status", () => {
-  assert.match(recommendations, /Promise\.race\(\[/);
-  assert.match(recommendations, /Gemini request timed out after 20 seconds/);
-  assert.match(recommendations, /plotSearchStage = semanticStage/);
-  assert.match(recommendations, /onStage: stage => \{ semanticStage = stage; \}/);
-  assert.match(recommendations, /plotSearchStage \|\| semanticStage/);
-  assert.match(readFileSync(new URL("../scripts/gemini-plot-search.js", import.meta.url), "utf8"), /tagStageError\(error, "generate-content"\)/);
-  assert.match(recommendations, /gemini\/timeout/);
+test("For You exposes the experimental local matcher status", () => {
+  assert.match(recommendations, /localOnly:\s*true/);
+  assert.match(recommendations, /Experimental local matching is active/);
+  assert.match(script, /EXPERIMENTAL · Local matching is active/);
+  assert.match(script, /Using the experimental local catalogue matcher/);
   assert.match(script, /showStatus\(geminiStatusMessage \|\| \(items\.length/);
+  assert.doesNotMatch(recommendations, /findSemanticPlotMatches/);
 });
 
 test("Gemini plot search matches AXIS Firebase AI Logic and App Check setup", async () => {
