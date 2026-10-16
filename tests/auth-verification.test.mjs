@@ -103,3 +103,14 @@ test("auth diagnostics probes Firebase without collecting credentials", async ()
   assert.match(worker, /isAuthCritical/);
   assert.match(worker, /if\(isAuthCritical\)\{event\.respondWith\(networkFirst\(request\)\);return;\}/);
 });
+
+
+test("Firebase App Check reCAPTCHA scripts are allowed by Hosting CSP", () => {
+  const config = JSON.parse(firebaseConfig);
+  const policy = config.hosting.headers.find((entry) => entry.headers.some((header) => header.key === "Content-Security-Policy"))
+    .headers.find((header) => header.key === "Content-Security-Policy").value;
+  const scriptSrc = policy.split(";").find((directive) => directive.trim().startsWith("script-src"));
+  assert.match(scriptSrc, /https:\/\/www\.google\.com/);
+  assert.match(scriptSrc, /https:\/\/www\.recaptcha\.net/);
+  assert.match(policy, /https:\/\/recaptchaenterprise\.googleapis\.com/);
+});
