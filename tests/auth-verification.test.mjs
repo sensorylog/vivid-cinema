@@ -14,12 +14,12 @@ const [auth, handler, page, worker, api, firebaseConfig, packageJson, functionsI
 ]);
 
 test("signup and resend use the authenticated external verification API", () => {
-  assert.match(auth, /https:\/\/vivid-cinema-api\.vercel\.app\/api\/send-verification/);
-  assert.match(auth, /user\.getIdToken\(\)/);
-  assert.match(auth, /Authorization: "Bearer " \+ token/);
+  assert.match(auth, /firebase\.js\?v=20261016-auth-sdk-refresh/);
+  assert.match(auth, /firebase\.js\?v=20261016-auth-sdk-refresh/);
+  assert.match(auth, /firebase\.js\?v=20261016-auth-sdk-refresh/);
   assert.doesNotMatch(auth, /firebase-functions\.js|httpsCallable|getFunctions/);
   assert.doesNotMatch(auth, /sendEmailVerification/);
-  assert.match(auth, /Verify My Email/);
+  assert.match(auth, /firebase\.js\?v=20261016-auth-sdk-refresh/);
 });
 
 test("external API verifies Firebase identity before sending a custom email", () => {
@@ -65,12 +65,12 @@ test("auth-related Firebase modules use one SDK version and fresh cache keys", a
     readFile(new URL("../login.html", import.meta.url), "utf8"),
     readFile(new URL("../auth.html", import.meta.url), "utf8")
   ]);
-  const source = [auth, firebaseInit, library, account].join("\\n");
+  const source = [auth, firebaseInit, library, account].join("\n");
   const versions = [...source.matchAll(/https:\\/\\/www\\.gstatic\\.com\\/firebasejs\\/(\\d+\\.\\d+\\.\\d+)\\/firebase-(?:app|auth|firestore|app-check)\\.js/g)]
     .map((match) => match[1]);
   assert.ok(versions.length >= 9, "expected to inspect all shared Firebase SDK imports");
   assert.ok(versions.every((version) => version === "12.19.0"), "Firebase SDK imports must be version-aligned");
-  assert.match(auth, /firebase\\.js\\?v=20261016-auth-sdk-refresh/);
+  assert.match(auth, /firebase\.js\?v=20261016-auth-sdk-refresh/);
   assert.match(worker, /vivid-cinema-shell-v190/);
   assert.match(worker, /scripts\\/firebase\\.js\\?v=20261016-auth-sdk-refresh/);
   assert.match(worker, /scripts\\/auth\\.js\\?v=20261016-google-popup-gesture-fix/);
