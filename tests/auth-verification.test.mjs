@@ -33,7 +33,7 @@ test("external API verifies Firebase identity before sending a custom email", ()
   assert.match(api, /emailVerificationRateLimits/);
   assert.match(api, /Access-Control-Allow-Origin/);
   assert.match(api, /DEFAULT_ALLOWED_ORIGINS/);
-  assert.match(packageJson, /"firebase-admin": "\^13\.5\.0"/);
+  assert.match(packageJson, /"firebase-admin": "\\^14\\.5\\.0"/);
   assert.match(firebaseConfig, /https:\/\/vivid-cinema-api\.vercel\.app/);
   assert.doesNotMatch(functionsIndex, /sendVividVerificationEmail.*email-verification\.js/);
 });
