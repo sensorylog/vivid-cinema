@@ -87,3 +87,12 @@ test("Remembered-plot search times out stalled Gemini and preserves its status",
   assert.match(recommendations, /gemini\/timeout/);
   assert.match(script, /showStatus\(geminiStatusMessage \|\| \(items\.length/);
 });
+
+test("Gemini plot search matches AXIS Firebase AI Logic and App Check setup", async () => {
+  const firebaseClient = readFileSync(new URL("../scripts/firebase.js", import.meta.url), "utf8");
+  const gemini = readFileSync(new URL("../scripts/gemini-plot-search.js", import.meta.url), "utf8");
+  assert.match(firebaseClient, /firebasejs\/12\.19\.0\/firebase-app\.js/);
+  assert.match(firebaseClient, /firebasejs\/12\.19\.0\/firebase-app-check\.js/);
+  assert.match(gemini, /firebasejs\/12\.19\.0\/firebase-ai\.js/);
+  assert.match(gemini, /useLimitedUseAppCheckTokens:\s*true/);
+});
