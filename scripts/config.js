@@ -11,6 +11,9 @@ export const VIVID_CONFIG = Object.freeze({
     vidsrcEmbedBaseUrl: "https://vidsrc.sh",
     vidlinkEmbedBaseUrl: "https://vidlink.pro",
     vidplusEmbedBaseUrl: "https://player.vidplus.to",
+    // Set to the deployed Cloudflare Worker URL to enable silent OpenRouter fallback.
+    // Keep empty until the Worker secret is configured; never put an API key here.
+    plotAiFallbackUrl: "",
     // Add exact HTTPS hostnames only after verifying an authorized direct-stream provider.
     directStreamHosts: Object.freeze([]),
     language: "en-US"

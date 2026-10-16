@@ -140,3 +140,19 @@ test("Gemini diagnostics distinguish App Check initialization failure from local
   assert.match(aiModule, /app-check\/initialization-failed/);
   assert.match(aiModule, /app-check\/local-host-skipped/);
 });
+
+
+test("OpenRouter is an optional private fallback and never exposes its key to the browser", async () => {
+  const client = readFileSync(new URL("../scripts/openrouter-plot-fallback.js", import.meta.url), "utf8");
+  const worker = readFileSync(new URL("../cloudflare/plot-ai-worker.js", import.meta.url), "utf8");
+  const config = readFileSync(new URL("../scripts/config.js", import.meta.url), "utf8");
+  const recommendations = readFileSync(new URL("../scripts/recommendations.js", import.meta.url), "utf8");
+  assert.match(client, /VIVID_CONFIG\.api\.plotAiFallbackUrl/);
+  assert.match(client, /credentials:\s*"omit"/);
+  assert.match(config, /plotAiFallbackUrl:\s*""/);
+  assert.match(recommendations, /findOpenRouterPlotMatches/);
+  assert.match(worker, /env\.OPENROUTER_API_KEY/);
+  assert.match(worker, /https:\/\/openrouter\.ai\/api\/v1\/chat\/completions/);
+  assert.match(worker, /ALLOWED_ORIGINS/);
+  assert.doesNotMatch(client, /sk-or-v1-[A-Za-z0-9_-]{20,}/);
+});

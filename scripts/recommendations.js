@@ -5,6 +5,7 @@ import { getTasteProfile, getNotForMeKeys, getFeedbackState, getTasteStrength, g
 import { switchLocalOwner } from "./local-owner.js";
 import { buildPlotKeywordQueries, scorePlotCandidate, scorePlotCandidates } from "./plot-search.js";
 import { findSemanticPlotMatches } from "./gemini-plot-search.js";
+import { findOpenRouterPlotMatches } from "./openrouter-plot-fallback.js";
 
 const PROGRESS_KEY = "vivid:progress:v1";
 const FOR_YOU_CACHE_KEY = "vivid:for-you:v1";
@@ -729,11 +730,25 @@ export async function getPlotMatchRecommendations(intent = {}, limit = 18) {
     })
   ])
     .finally(() => window.clearTimeout(semanticTimeout))
-    .catch(error => {
-      console.error("Vivid Gemini plot search failed; using catalogue fallback:", {
+    .catch(async error => {
+      // OpenRouter is a silent secondary provider. Its key lives only in the
+      // Cloudflare Worker; if the Worker is not configured or also fails,
+      // continue with TMDB catalogue search exactly as before.
+      try {
+        const fallback = await findOpenRouterPlotMatches(intent.query || "", requestedType);
+        if (fallback) {
+          console.info("[Vivid plot search] Secondary AI provider recovered the semantic search.");
+          return { ...fallback, provider: "openrouter" };
+        }
+      } catch (fallbackError) {
+        console.warn("[Vivid plot search] Secondary AI provider unavailable:", {
+          code: fallbackError?.code || null,
+          status: fallbackError?.status || null
+        });
+      }
+      console.warn("Vivid semantic AI unavailable; using catalogue fallback:", {
         stage: error?.plotSearchStage || semanticStage,
-        code: error?.code || null,
-        message: error?.message || String(error)
+        code: error?.code || null
       });
       return { clues: [], candidates: [], error };
     });
@@ -751,7 +766,7 @@ export async function getPlotMatchRecommendations(intent = {}, limit = 18) {
             String(semantic.error?.plotSearchStage || semanticStage || "unknown")
           ].join(" @ ").slice(0, 180)
         }
-      : { available: true }
+      : { available: true, ...(semantic.provider ? { provider: semantic.provider } : {}) }
   }));
 
   const semanticKeywordResponses = await Promise.allSettled(
