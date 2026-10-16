@@ -25,6 +25,8 @@ jobs:
         run: |
           npm audit --json > /tmp/npm-audit.json || true
           node --input-type=commonjs <<'NODE'
+          console.log('VERSIONS');
+          require('child_process').execSync('npm ls --depth=0 firebase firebase-tools firebase-admin @firebase/rules-unit-testing', {stdio: 'inherit'});
           const report = require('/tmp/npm-audit.json');
           console.log('TOTALS', JSON.stringify(report.metadata?.vulnerabilities || {}));
           for (const [name, item] of Object.entries(report.vulnerabilities || {})) {
@@ -40,3 +42,5 @@ jobs:
             }));
           }
           NODE
+          npm audit --omit=dev --json > /tmp/npm-audit-production.json || true
+          node --input-type=commonjs -e "const r=require('/tmp/npm-audit-production.json'); console.log('PRODUCTION_TOTALS', JSON.stringify(r.metadata?.vulnerabilities || {})); for (const [name, v] of Object.entries(r.vulnerabilities || {})) console.log('PRODUCTION', JSON.stringify({name,severity:v.severity,fixAvailable:v.fixAvailable}));"
