@@ -173,6 +173,47 @@ function syncAccountNavigation() {
   })();
 }
 
+function showPostAuthNotice() {
+  let message = "";
+  try {
+    message = sessionStorage.getItem("vivid:auth-success") || "";
+    sessionStorage.removeItem("vivid:auth-success");
+  } catch {}
+  if (!message || document.getElementById("vivid-auth-success")) return;
+
+  const notice = document.createElement("div");
+  notice.id = "vivid-auth-success";
+  notice.setAttribute("role", "status");
+  notice.setAttribute("aria-live", "polite");
+  notice.textContent = message;
+  Object.assign(notice.style, {
+    position: "fixed",
+    top: "calc(env(safe-area-inset-top, 0px) + 16px)",
+    left: "50%",
+    transform: "translateX(-50%)",
+    width: "max-content",
+    maxWidth: "min(92vw, 560px)",
+    boxSizing: "border-box",
+    zIndex: "2147483000",
+    padding: "14px 18px",
+    border: "1px solid rgba(126, 231, 135, .45)",
+    borderRadius: "14px",
+    background: "rgba(15, 24, 19, .97)",
+    color: "#b7f7c0",
+    boxShadow: "0 12px 36px rgba(0, 0, 0, .35)",
+    font: "600 14px/1.45 system-ui, sans-serif",
+    textAlign: "center",
+    opacity: "0",
+    transition: "opacity 180ms ease"
+  });
+  document.body.appendChild(notice);
+  requestAnimationFrame(() => { notice.style.opacity = "1"; });
+  window.setTimeout(() => {
+    notice.style.opacity = "0";
+    window.setTimeout(() => notice.remove(), 220);
+  }, 5200);
+}
+
 function initThemeToggle() {
   // Theme remains available to the document state, but the app shell stays
   // visually identical to the compact mobile navigation. Do not inject the
@@ -326,6 +367,7 @@ function initAppShell() {
   setConnectionState();
   setPageIdentity();
   syncVividBranding();
+  showPostAuthNotice();
   syncNavigation();
   syncAccountNavigation();
   initThemeToggle();
