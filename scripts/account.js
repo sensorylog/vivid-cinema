@@ -212,7 +212,23 @@ async function loadUser(user) {
     6500,
     "Your cloud profile took too long to respond."
   );
-  const profile = snapshot.exists() ? snapshot.data() : {};
+  let profile = snapshot.exists() ? snapshot.data() : {};
+  if (!snapshot.exists()) {
+    // Older Auth accounts may not have a Firestore profile yet. Create it on
+    // first account visit instead of treating a missing document as "synced".
+    profile = {
+      displayName: (user.displayName || user.email?.split("@")[0] || "Vivid member").slice(0, 100),
+      email: user.email || null,
+      provider: (user.providerData || []).some((item) => item.providerId === "google.com") ? "google.com" : "password",
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp()
+    };
+    await withTimeout(
+      setDoc(doc(db, "users", user.uid), profile, { merge: true }),
+      6500,
+      "Your cloud profile could not be created."
+    );
+  }
   const preferences = { ...loadLocalPreferences(), ...(profile.preferences || {}) };
   const displayName = profile.displayName || user.displayName || user.email?.split("@")[0] || "Vivid member";
 
