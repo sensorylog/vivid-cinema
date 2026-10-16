@@ -111,12 +111,25 @@ export function scorePlotCandidate(query = "", candidate = {}) {
   return Number((score + coverage * 5).toFixed(3));
 }
 
-export function scorePlotCandidates(query = "", candidates = []) {
+export function scorePlotCandidates(query = "", candidates = [], clues = []) {
+  const semanticClues = [...new Set((Array.isArray(clues) ? clues : [])
+    .map(clue => String(clue || "").trim().slice(0, 100))
+    .filter(clue => clue.length >= 3))].slice(0, 8);
   const scored = new Map();
   for (const item of candidates || []) {
     if (item?.id == null) continue;
     const identity = (item.media_type || "movie") + ":" + String(item.id);
-    const plotScore = scorePlotCandidate(query, item);
+    const queryScore = scorePlotCandidate(query, item);
+    // Gemini clues often paraphrase the user's memory more closely than the
+    // catalogue synopsis. Treat them as additional evidence, never as titles.
+    const clueScores = semanticClues
+      .map(clue => scorePlotCandidate(clue, item))
+      .filter(score => score > 0)
+      .sort((a, b) => b - a);
+    const bestClueScore = clueScores[0] || 0;
+    const corroboration = Math.min(4, (clueScores[1] || 0) * 0.25);
+    const semanticScore = bestClueScore ? bestClueScore * 0.9 + corroboration : 0;
+    const plotScore = Number(Math.max(queryScore, semanticScore).toFixed(3));
     if (plotScore <= 0) continue;
     const previous = scored.get(identity);
     if (!previous || plotScore > previous.plotScore) {
