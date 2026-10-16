@@ -211,15 +211,35 @@ async function deleteRemoteItem(uid,collection,item,deletedAt){
   await deleteDoc(doc(db,"users",uid,collection,id));
 }
 
+async function withLibraryTimeout(promise,ms,message){
+  let timer;
+  try{
+    return await Promise.race([
+      promise,
+      new Promise((_,reject)=>{timer=setTimeout(()=>reject(new Error(message)),ms);})
+    ]);
+  }finally{
+    clearTimeout(timer);
+  }
+}
+
 async function fetchRemote(uid,collection){
   const {db,firestoreCollection,getDocsFromServer}=await getFirebase();
-  const snapshot=await getDocsFromServer(firestoreCollection(db,"users",uid,collection));
+  const snapshot=await withLibraryTimeout(
+    getDocsFromServer(firestoreCollection(db,"users",uid,collection)),
+    12000,
+    "Cloud library read timed out for "+collection+"."
+  );
   return snapshot.docs.map(item=>item.data());
 }
 
 async function fetchTombstones(uid){
   const {db,firestoreCollection,getDocsFromServer}=await getFirebase();
-  const snapshot=await getDocsFromServer(firestoreCollection(db,"users",uid,"libraryTombstones"));
+  const snapshot=await withLibraryTimeout(
+    getDocsFromServer(firestoreCollection(db,"users",uid,"libraryTombstones")),
+    12000,
+    "Cloud library deletion sync timed out."
+  );
   return snapshot.docs.map(item=>({...item.data(),_documentId:item.id}));
 }
 

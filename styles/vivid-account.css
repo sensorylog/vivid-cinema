@@ -120,3 +120,9 @@
 @media(prefers-reduced-motion:reduce){
   .account-page *, .account-page *::before, .account-page *::after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.01ms!important}
 }
+
+.account-page .account-danger-zone{margin-top:1.4rem;padding-top:1.2rem;border-top:1px solid rgba(255,123,123,.22)}
+.account-page .account-danger-zone h3{margin:0 0 .45rem;font-size:.95rem;color:#ff9b9b}
+.account-page .account-danger-zone p{font-size:.82rem;line-height:1.5;color:#a8adb7}
+.account-page .vivid-button--danger{border:1px solid rgba(255,105,105,.45);background:rgba(145,30,40,.2);color:#ffb3b3}
+.account-page .vivid-button--danger:hover{background:rgba(145,30,40,.38)}

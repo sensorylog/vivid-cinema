@@ -18,7 +18,7 @@ concurrency:
 
 jobs:
   deploy:
-    name: Deploy Hosting only
+    name: Deploy Hosting and Firestore rules
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -31,3 +31,13 @@ jobs:
           firebaseServiceAccount: "${{ secrets.FIREBASE_SERVICE_ACCOUNT_VIVID_CINEMA }}"
           projectId: vivid-cinema
           channelId: live
+
+      - name: Deploy Firestore security rules
+        env:
+          FIREBASE_SERVICE_ACCOUNT_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_VIVID_CINEMA }}
+        run: |
+          printf '%s' "$FIREBASE_SERVICE_ACCOUNT_JSON" > "$RUNNER_TEMP/firebase-service-account.json"
+          export GOOGLE_APPLICATION_CREDENTIALS="$RUNNER_TEMP/firebase-service-account.json"
+          npx --yes firebase-tools@14 deploy --only firestore:rules --project vivid-cinema --non-interactive
+
+

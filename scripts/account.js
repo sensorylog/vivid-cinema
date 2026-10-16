@@ -1,6 +1,6 @@
 import { auth, db } from "./firebase.js?v=20261016-auth-runtime-audit1";
-import { onAuthStateChanged, sendPasswordResetEmail, signOut, updateProfile } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
-import { doc, getDoc, serverTimestamp, setDoc } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+import { deleteUser, EmailAuthProvider, GoogleAuthProvider, onAuthStateChanged, reauthenticateWithCredential, reauthenticateWithPopup, sendPasswordResetEmail, signOut, updateProfile } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
+import { collection, deleteDoc, doc, getDocsFromServer, getDoc, serverTimestamp, setDoc, writeBatch } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 import { getLocalLibrary, syncLibraryForUser } from "./library.js";
 
 const $ = (id) => document.getElementById(id);
@@ -26,6 +26,7 @@ const syncLabel = $("sync-label");
 const syncDetail = $("sync-detail");
 const changePasswordButton = $("change-password-btn");
 const securityStatus = $("security-status");
+const deleteAccountButton = $("delete-account-btn");
 const counts = {
   favorites: $("favorites-count"),
   watchLater: $("watch-later-count"),
@@ -211,7 +212,23 @@ async function loadUser(user) {
     6500,
     "Your cloud profile took too long to respond."
   );
-  const profile = snapshot.exists() ? snapshot.data() : {};
+  let profile = snapshot.exists() ? snapshot.data() : {};
+  if (!snapshot.exists()) {
+    // Older Auth accounts may not have a Firestore profile yet. Create it on
+    // first account visit instead of treating a missing document as "synced".
+    profile = {
+      displayName: (user.displayName || user.email?.split("@")[0] || "Vivid member").slice(0, 100),
+      email: user.email || null,
+      provider: (user.providerData || []).some((item) => item.providerId === "google.com") ? "google.com" : "password",
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp()
+    };
+    await withTimeout(
+      setDoc(doc(db, "users", user.uid), profile, { merge: true }),
+      6500,
+      "Your cloud profile could not be created."
+    );
+  }
   const preferences = { ...loadLocalPreferences(), ...(profile.preferences || {}) };
   const displayName = profile.displayName || user.displayName || user.email?.split("@")[0] || "Vivid member";
 
@@ -404,6 +421,113 @@ changePasswordButton?.addEventListener("click", async () => {
     changePasswordButton.disabled = false;
   }
 });
+
+
+const ACCOUNT_PRIVATE_COLLECTIONS = [
+  "pushSubscriptions", "releaseAlerts", "releaseStates", "cinemaReminders",
+  "favorites", "watchLater", "history", "progress", "libraryTombstones",
+  "feedback", "events", "taste", "blockedUsers", "following", "followedTopics"
+];
+
+async function reauthenticateForDeletion(user) {
+  const providerIds = (user.providerData || []).map((item) => item.providerId);
+  if (providerIds.includes("password") && user.email) {
+    const password = window.prompt("Enter your password to confirm account deletion.");
+    if (password === null) throw new Error("Account deletion cancelled.");
+    if (!password) throw new Error("Enter your password to continue.");
+    await reauthenticateWithCredential(user, EmailAuthProvider.credential(user.email, password));
+    return;
+  }
+  if (providerIds.includes("google.com")) {
+    await reauthenticateWithPopup(user, new GoogleAuthProvider());
+    return;
+  }
+  throw new Error("This sign-in method cannot be reauthenticated here. Sign out, sign in again, then retry.");
+}
+
+async function deleteOwnedDocuments(uid, collectionName) {
+  const snapshot = await withTimeout(
+    getDocsFromServer(collection(db, "users", uid, collectionName)),
+    12000,
+    "Could not read your " + collectionName + " records for deletion."
+  );
+  const documents = snapshot.docs;
+  for (let offset = 0; offset < documents.length; offset += 400) {
+    const batch = writeBatch(db);
+    documents.slice(offset, offset + 400).forEach((item) => batch.delete(item.ref));
+    await withTimeout(batch.commit(), 12000, "Could not delete your " + collectionName + " records.");
+  }
+}
+
+async function permanentlyDeleteAccount() {
+  const user = auth.currentUser;
+  if (!user || deleteAccountButton?.disabled) return;
+  const confirmed = window.confirm(
+    "Permanently delete your Vivid Cinema account and its private profile, preferences, and saved library data? This cannot be undone."
+  );
+  if (!confirmed) return;
+
+  if (deleteAccountButton) {
+    deleteAccountButton.disabled = true;
+    deleteAccountButton.textContent = "Confirming identity…";
+  }
+  setStatus("Confirming your identity before account deletion…");
+  if (securityStatus) securityStatus.textContent = "Your account will be deleted only after security verification.";
+
+  try {
+    await reauthenticateForDeletion(user);
+    if (deleteAccountButton) deleteAccountButton.textContent = "Deleting private data…";
+    setStatus("Deleting your private account data…");
+
+    for (const collectionName of ACCOUNT_PRIVATE_COLLECTIONS) {
+      await deleteOwnedDocuments(user.uid, collectionName);
+    }
+    await withTimeout(deleteDoc(doc(db, "users", user.uid)), 12000, "Could not delete your profile document.");
+
+    // Clear this browser's Vivid-owned data after the server-side private data is gone.
+    for (const storage of [window.localStorage, window.sessionStorage]) {
+      try {
+        for (let index = storage.length - 1; index >= 0; index--) {
+          const key = storage.key(index);
+          if (key && key.startsWith("vivid:")) storage.removeItem(key);
+        }
+      } catch (storageError) {
+        console.warn("Vivid could not clear all local account data:", storageError);
+      }
+    }
+
+    if (deleteAccountButton) deleteAccountButton.textContent = "Deleting account…";
+    await withTimeout(deleteUser(user), 15000, "Firebase account deletion timed out.");
+    currentUser = null;
+    window.location.replace("login.html?accountDeleted=1");
+  } catch (error) {
+    console.error("Vivid account deletion failed:", error);
+    const code = error?.code || "";
+    let message = error?.message || "Account deletion failed.";
+    if (code === "auth/requires-recent-login") {
+      message = "For security, sign in again and retry deleting your account.";
+    } else if (code === "auth/popup-blocked" || code === "auth/popup-closed-by-user") {
+      message = "Google verification did not finish. Allow the sign-in window, then try again.";
+    } else if (code === "permission-denied" || code === "firestore/permission-denied") {
+      message = "Firestore denied access while deleting private data. Your account has not been deleted; contact support.";
+    } else if (message.includes("timed out")) {
+      message = "Deletion timed out before it could finish. Your account may still exist; retry after checking your connection.";
+    } else if (message === "Account deletion cancelled.") {
+      message = "Account deletion cancelled.";
+    } else if (!message || message === error?.code) {
+      message = "Could not delete the account. Check your connection and try again.";
+    }
+    setStatus(message, "error");
+    if (securityStatus) securityStatus.textContent = "Deletion did not complete. Your account may still be active; review the message above before retrying.";
+    if (deleteAccountButton) {
+      deleteAccountButton.disabled = false;
+      deleteAccountButton.textContent = "Delete account permanently";
+    }
+  }
+}
+
+deleteAccountButton?.addEventListener("click", permanentlyDeleteAccount);
+
 
 logoutButton?.addEventListener("click", async () => {
   if (!logoutButton) return;
