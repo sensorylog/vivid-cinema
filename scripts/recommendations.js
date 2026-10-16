@@ -703,7 +703,7 @@ export function collectIntentCandidates(responses = []) {
 
 export async function getPlotMatchRecommendations(intent = {}, limit = 18) {
   const ownerAtStart = currentProgressOwner();
-  const queries = buildPlotKeywordQueries(intent.query || "", 6);
+  const queries = buildPlotKeywordQueries(intent.query || "", 8);
   if (!queries.length) return [];
 
   const requestedType = ["movie", "tv"].includes(intent.mediaType) ? intent.mediaType : "all";
@@ -743,6 +743,7 @@ export async function getPlotMatchRecommendations(intent = {}, limit = 18) {
     .slice(0, 8)
     .map(item => item.id);
 
+  const hasSpecificFilters = Boolean(intent.genre || intent.runtimeMax || intent.year || intent.decade || intent.country || intent.language || intent.anime);
   const calls = [];
   if (keywordIds.length) {
     for (const type of mediaTypes) {
