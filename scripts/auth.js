@@ -1,4 +1,4 @@
-import { auth, db } from "./firebase.js?v=20261016-auth-runtime-audit1";
+import { auth, db } from "./firebase.js?v=20261016-auth-runtime-audit2";
 import {
   createUserWithEmailAndPassword,
   GoogleAuthProvider,
@@ -107,12 +107,30 @@ async function finishGoogleSignIn(credential){
   })();
   return googleFinishPromise;
 }
+function isStandaloneApp(){
+  return window.matchMedia?.("(display-mode: standalone)")?.matches ||
+    window.navigator.standalone === true;
+}
+function markGoogleRedirectPending(){
+  try{localStorage.setItem("vivid:google-redirect","1");sessionStorage.setItem("vivid:google-redirect","1");}catch{}
+}
+async function beginGoogleRedirect(provider){
+  markGoogleRedirectPending();
+  await signInWithRedirect(auth,provider);
+}
 async function googleSignIn(){
   const provider=new GoogleAuthProvider();
   provider.setCustomParameters({prompt:"select_account"});
 
-  // Keep the popup call directly inside the click's user-activation window.
-  // Redirect is only a fallback when this browser explicitly blocks popups.
+  // Installed PWAs should use a full-page OAuth flow instead of opening a
+  // popup, which may be suppressed or never return control to the standalone app.
+  if(isStandaloneApp()){
+    await beginGoogleRedirect(provider);
+    return;
+  }
+
+  // In ordinary browsers, keep popup sign-in directly inside the click's
+  // user-activation window; use redirect only when popups are unsupported.
   try{
     const credential=await withTimeout(signInWithPopup(auth,provider),45000,"Google sign-in timed out.");
     await finishGoogleSignIn(credential);
@@ -120,8 +138,7 @@ async function googleSignIn(){
     const canFallback=error?.code==="auth/popup-blocked" ||
       error?.code==="auth/operation-not-supported-in-this-environment";
     if(!canFallback)throw error;
-    try{localStorage.setItem("vivid:google-redirect","1");sessionStorage.setItem("vivid:google-redirect","1");}catch{}
-    await signInWithRedirect(auth,provider);
+    await beginGoogleRedirect(provider);
   }
 }
 async function finishPendingGoogleRedirect(){
