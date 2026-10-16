@@ -1,5 +1,5 @@
 // Bump this version whenever the precached app shell changes.
-const CACHE_NAME = "vivid-cinema-shell-v192";
+const CACHE_NAME = "vivid-cinema-shell-v193";
 const APP_SHELL = [
   "./","./index.html","./home.html","./for-you.html","./person.html","./discover.html","./collection.html","./title.html","./watch.html",
   "./library.html","./auth.html","./login.html","./verify-email.html","./forgot-password.html","./account.html","./terms.html","./privacy.html","./contact.html","./donate.html","./donation-success.html",
@@ -61,7 +61,7 @@ self.addEventListener("fetch",event=>{
  // Authentication must not depend on stale cached documents or SDK bundles.
  // Always try the network first for auth pages, auth modules and Firebase config.
  const isAuthDocument=/\/(?:login|auth|forgot-password|verify-email|auth-diagnostics)\.html$/.test(url.pathname);
- const isAuthRuntime=/\/scripts\/(?:auth|firebase|nav-auth|auth-diagnostics)\.js$/.test(url.pathname)||/\/init\.json$/.test(url.pathname);
+ const isAuthRuntime=/\/scripts\/(?:auth|firebase|nav-auth|auth-diagnostics|app-shell)\.js$/.test(url.pathname)||/\/init\.json$/.test(url.pathname);
  if(isAuthDocument||isAuthRuntime){event.respondWith(networkFirst(request));return;}
  if(request.mode==="navigate"){event.respondWith(staleWhileRevalidate(request,event,true));return;}
  const isCodeOrStyle=/\.(?:js|css)$/.test(url.pathname);

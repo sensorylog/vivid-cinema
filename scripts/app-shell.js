@@ -107,7 +107,7 @@ function syncDesktopNavigation() {
   const account = document.createElement("a");
   account.className = "vivid-nav-account";
   account.id = "auth-link";
-  account.href = "auth.html";
+  account.href = "account.html";
   account.setAttribute("aria-label", "Sign in");
   account.innerHTML = '<i class="bi bi-person-fill" aria-hidden="true"></i><span>Account</span>';
   nav.appendChild(account);
@@ -143,6 +143,34 @@ function syncMobileNavigation() {
 function syncNavigation() {
   syncDesktopNavigation();
   syncMobileNavigation();
+}
+
+function syncAccountNavigation() {
+  // The shared shell rebuilds the header on every page, so account routing must
+  // follow Firebase's restored session instead of a hard-coded sign-up URL.
+  void (async () => {
+    try {
+      const [{ auth }, { onAuthStateChanged }] = await Promise.all([
+        import("./firebase.js"),
+        import("https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js")
+      ]);
+
+      onAuthStateChanged(auth, (user) => {
+        const destination = user ? "account.html" : "auth.html";
+        document.querySelectorAll("#auth-link, [data-vivid-nav-auth], .vivid-nav-account, .vivid-nav-action").forEach((link) => {
+          link.href = destination;
+          link.setAttribute("aria-label", user ? "Open account" : "Sign in");
+          const label = link.querySelector("span");
+          if (label) label.textContent = "Account";
+        });
+        window.dispatchEvent(new CustomEvent("vivid:auth-ready", { detail: user }));
+      });
+    } catch (error) {
+      console.warn("Vivid account navigation could not resolve the auth session:", error);
+      document.querySelectorAll("#auth-link, [data-vivid-nav-auth], .vivid-nav-account, .vivid-nav-action")
+        .forEach((link) => { if (!link.getAttribute("href")) link.href = "auth.html"; });
+    }
+  })();
 }
 
 function initThemeToggle() {
@@ -299,6 +327,7 @@ function initAppShell() {
   setPageIdentity();
   syncVividBranding();
   syncNavigation();
+  syncAccountNavigation();
   initThemeToggle();
   ensureBackControl();
   ensureSkipLink();

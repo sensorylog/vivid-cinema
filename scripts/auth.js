@@ -11,7 +11,7 @@ import {
   signOut,
   updateProfile
 } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
-import { doc, serverTimestamp, setDoc } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+import { doc, getDoc, serverTimestamp, setDoc } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 import { startLibrarySync } from "./library.js";
 async function sendVividVerificationEmail() {
   const user = auth.currentUser;
@@ -76,7 +76,17 @@ function friendlyError(error){
   return messages[error?.code]||(`Sign-in failed (${error?.code||"unknown"}). Please try again.`);
 }
 async function createUserRecord(user,name){
-  await setDoc(doc(db,"users",user.uid),{displayName:name,email:user.email||null,provider:user.providerData?.[0]?.providerId||"password",updatedAt:serverTimestamp(),createdAt:serverTimestamp()},{merge:true});
+  const profileRef=doc(db,"users",user.uid);
+  const snapshot=await getDoc(profileRef);
+  const profile={
+    displayName:name||user.displayName||"",
+    email:user.email||null,
+    provider:(user.providerData||[]).some(item=>item.providerId==="google.com")?"google.com":"password",
+    updatedAt:serverTimestamp()
+  };
+  // Preserve the original membership date when Google signs in again.
+  if(!snapshot.exists()||!snapshot.data()?.createdAt)profile.createdAt=serverTimestamp();
+  await setDoc(profileRef,profile,{merge:true});
 }
 let googleFinishPromise=null;
 async function finishGoogleSignIn(credential){
