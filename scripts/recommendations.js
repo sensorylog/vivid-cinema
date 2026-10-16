@@ -714,19 +714,27 @@ export async function getPlotMatchRecommendations(intent = {}, limit = 18) {
   // Never let a stalled Gemini/App Check request keep the entire search spinner running.
   // The catalogue path continues after 12 seconds even if the AI request never settles.
   let semanticTimeout;
+  let semanticStage = "firebase-init";
   const semanticPromise = Promise.race([
-    findSemanticPlotMatches(intent.query || "", requestedType),
+    findSemanticPlotMatches(intent.query || "", requestedType, {
+      onStage: stage => { semanticStage = stage; }
+    }),
     new Promise((_, reject) => {
       semanticTimeout = window.setTimeout(() => {
-        const error = new Error("Gemini request timed out after 12 seconds");
+        const error = new Error("Gemini request timed out after 20 seconds");
         error.code = "gemini/timeout";
+        error.plotSearchStage = semanticStage;
         reject(error);
-      }, 12000);
+      }, 20000);
     })
   ])
     .finally(() => window.clearTimeout(semanticTimeout))
     .catch(error => {
-      console.error("Vivid Gemini plot search failed; using catalogue fallback:", error);
+      console.error("Vivid Gemini plot search failed; using catalogue fallback:", {
+        stage: error?.plotSearchStage || semanticStage,
+        code: error?.code || null,
+        message: error?.message || String(error)
+      });
       return { clues: [], candidates: [], error };
     });
   const [keywordResponses, semantic] = await Promise.all([
@@ -736,7 +744,13 @@ export async function getPlotMatchRecommendations(intent = {}, limit = 18) {
   if (currentProgressOwner() !== ownerAtStart) return [];
   window.dispatchEvent(new CustomEvent("vivid:gemini-plot-search-status", {
     detail: semantic.error
-      ? { available: false, message: String(semantic.error?.code || semantic.error?.message || "Unknown Gemini error").slice(0, 180) }
+      ? {
+          available: false,
+          message: [
+            String(semantic.error?.code || semantic.error?.message || "Unknown Gemini error"),
+            String(semantic.error?.plotSearchStage || semanticStage || "unknown")
+          ].join(" @ ").slice(0, 180)
+        }
       : { available: true }
   }));
 

@@ -81,9 +81,13 @@ test("For You exposes Gemini availability and failure diagnostics", () => {
   assert.match(script, /Gemini connected/);
 });
 
-test("Remembered-plot search times out stalled Gemini and preserves its status", () => {
+test("Remembered-plot search times out stalled Gemini with stage diagnostics and preserves its status", () => {
   assert.match(recommendations, /Promise\.race\(\[/);
-  assert.match(recommendations, /Gemini request timed out after 12 seconds/);
+  assert.match(recommendations, /Gemini request timed out after 20 seconds/);
+  assert.match(recommendations, /plotSearchStage = semanticStage/);
+  assert.match(recommendations, /onStage: stage => \{ semanticStage = stage; \}/);
+  assert.match(recommendations, /plotSearchStage \|\| semanticStage/);
+  assert.match(readFileSync(new URL("../scripts/gemini-plot-search.js", import.meta.url), "utf8"), /tagStageError\(error, "generate-content"\)/);
   assert.match(recommendations, /gemini\/timeout/);
   assert.match(script, /showStatus\(geminiStatusMessage \|\| \(items\.length/);
 });
