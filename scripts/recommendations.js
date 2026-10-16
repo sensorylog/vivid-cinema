@@ -855,21 +855,24 @@ export async function getPlotMatchRecommendations(intent = {}, limit = 18) {
   let scored = scorePlotCandidates(intent.query || "", uniqueByKey(candidates), semantic.clues || []);
 
   // Preserve verified Gemini title matches even when catalogue synopsis wording differs.
-  const mergedScores = new Map(scored.map(item => [keyFor(item), item]));
-  const verifiedAiCandidates = candidates.filter(item => Number.isFinite(Number(item.aiPlotRank)));
-  for (const item of verifiedAiCandidates) {
-    const identity = keyFor(item);
-    const previous = mergedScores.get(identity);
-    const confidence = Math.max(0, Math.min(1, Number(item.aiPlotConfidence) || 0));
-    const semanticScore = Math.max(1, 6 + confidence * 8 - Math.max(0, Number(item.aiPlotRank) || 0) * 0.35);
-    mergedScores.set(identity, {
-      ...(previous || {}),
-      ...item,
-      plotScore: Math.max(Number(previous?.plotScore) || 0, semanticScore),
-      aiPlotMatch: true
-    });
-  }
-  scored = [...mergedScores.values()].sort((a, b) => Number(b.plotScore || 0) - Number(a.plotScore || 0));
+  const preserveVerifiedAiMatches = (items, sourceCandidates) => {
+    const mergedScores = new Map(items.map(item => [keyFor(item), item]));
+    const verifiedAiCandidates = sourceCandidates.filter(item => Number.isFinite(Number(item.aiPlotRank)));
+    for (const item of verifiedAiCandidates) {
+      const identity = keyFor(item);
+      const previous = mergedScores.get(identity);
+      const confidence = Math.max(0, Math.min(1, Number(item.aiPlotConfidence) || 0));
+      const semanticScore = Math.max(1, 6 + confidence * 8 - Math.max(0, Number(item.aiPlotRank) || 0) * 0.35);
+      mergedScores.set(identity, {
+        ...(previous || {}),
+        ...item,
+        plotScore: Math.max(Number(previous?.plotScore) || 0, semanticScore),
+        aiPlotMatch: true
+      });
+    }
+    return [...mergedScores.values()].sort((a, b) => Number(b.plotScore || 0) - Number(a.plotScore || 0));
+  };
+  scored = preserveVerifiedAiMatches(scored, candidates);
 
   // TMDB keyword tagging is incomplete. If it yields no plausible plot match,
   // scan a small popularity-ordered catalogue slice with the same verified
@@ -922,6 +925,7 @@ export async function getPlotMatchRecommendations(intent = {}, limit = 18) {
     // candidates; replacing the list here can discard a valid partial match.
     candidates = uniqueByKey([...candidates, ...fallbackCandidates]);
     scored = scorePlotCandidates(intent.query || "", candidates, semantic.clues || []);
+    scored = preserveVerifiedAiMatches(scored, candidates);
   }
   if (!scored.length) return [];
 
