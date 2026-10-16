@@ -38,9 +38,9 @@
 </header>
 <main class="vivid-for-you-main">
   <section class="vivid-for-you-hero" aria-labelledby="for-you-title">
-    <div class="vivid-for-you-eyebrow"><span class="vivid-for-you-orb" aria-hidden="true"></span> VIVID INTELLIGENCE <span class="vivid-for-you-memory">POWERED BY YOUR MEMORY</span></div>
+    <div class="vivid-for-you-eyebrow"><span class="vivid-for-you-orb" aria-hidden="true"></span> VIVID DISCOVERY LAB <span class="vivid-for-you-memory">EXPERIMENTAL · LOCAL ML</span></div>
     <h1 id="for-you-title">Your next favourite<br><em>starts here.</em></h1>
-    <p class="vivid-for-you-lede">Tell Vivid what you're in the mood for. Your saved titles, feedback and viewing progress help shape the picks — and you stay in control.</p>
+    <p class="vivid-for-you-lede">Tell Vivid what you're in the mood for. This experimental browser-side recommendation model uses your saved titles, feedback, viewing progress and catalogue metadata. Results can be imperfect, and you stay in control.</p>
     <form id="intent-form" class="vivid-intent-form">
       <label class="vivid-intent-label" for="intent-query">What do you feel like watching?</label>
       <div class="vivid-intent-input-wrap">
@@ -48,7 +48,7 @@
         <input id="intent-query" name="intent" type="search" autocomplete="off" maxlength="500" placeholder="I remember a movie where a man relives the same day…" aria-describedby="intent-help">
         <button type="submit"><span>Find my next watch</span><i class="bi bi-arrow-up-right" aria-hidden="true"></i></button>
       </div>
-      <p id="intent-help" class="vivid-intent-help">Forgot a title? Describe the plot, characters or a scene. You can also filter by genre, year, language or runtime.</p>
+      <p id="intent-help" class="vivid-intent-help">Forgot a title? Describe the plot, characters or a scene. Experimental local text matching looks for clues in catalogue summaries and keywords; it may miss vague or unusual descriptions.</p>
     </form>
     <div class="vivid-intent-examples" aria-label="Example searches">
       <button type="button" data-example="A funny movie under 2 hours">Funny movie · under 2 hours</button>
@@ -101,7 +101,7 @@
     <div id="because-grid" class="vivid-for-you-grid vivid-for-you-grid-compact"></div>
   </section>
 
-  <p class="vivid-for-you-privacy"><i class="bi bi-shield-check" aria-hidden="true"></i> Vivid Intelligence uses catalogue metadata and your Vivid Memory. No paid AI service is required, and unsupported details are called out instead of guessed.</p>
+  <p class="vivid-for-you-privacy"><i class="bi bi-shield-check" aria-hidden="true"></i> EXPERIMENTAL FEATURE: Vivid uses browser-side, machine-learning-inspired text ranking plus catalogue metadata and your Vivid Memory. It is not a trained language model, may return imperfect matches, and requires no paid AI service or Cloud Functions.</p>
 </main>
 <script type="module" src="scripts/app-shell.js"></script>
 <script type="module" src="scripts/nav-auth.js"></script>

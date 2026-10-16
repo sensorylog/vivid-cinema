@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { buildPlotKeywordQueries, isPlotDescriptionQuery, scorePlotCandidate, scorePlotCandidates } from "../scripts/plot-search.js";
+import { buildPlotKeywordQueries, getPlotConceptPhrases, isPlotDescriptionQuery, scorePlotCandidate, scorePlotCandidates } from "../scripts/plot-search.js";
 import { readFileSync } from "node:fs";
 
 test("detects remembered plot descriptions but not ordinary structured filters", () => {
@@ -82,7 +82,7 @@ test("plot matching has a constrained catalogue-overview fallback when keyword m
   const source = readFileSync(new URL("../scripts/recommendations.js", import.meta.url), "utf8");
   assert.match(source, /TMDB keyword tagging is incomplete/);
   assert.match(source, /const fallbackCalls = \[\]/);
-  assert.match(source, /scorePlotCandidates\(intent\.query \|\| "", candidates, semantic\.clues \|\| \[\]\)/);
+  assert.match(source, /scorePlotCandidates\(intent\.query \|\| "", uniqueByKey\(candidates\), semantic\.clues \|\| \[\]\)/);
   assert.match(source, /same verified/);
   assert.match(source, /tmdbApi\.discoverMovies\(params\)/);
   assert.match(source, /tmdbApi\.discoverTv\(params\)/);
@@ -100,20 +100,33 @@ test("remembered-plot search does not hide watched or disliked titles", () => {
 });
 
 
-test("Gemini plot search uses Firebase AI Logic and validates suggestions against TMDB", () => {
+test("legacy Gemini module remains validated but the live For You path is local-only", () => {
   const aiModule = readFileSync(new URL("../scripts/gemini-plot-search.js", import.meta.url), "utf8");
   const recommendations = readFileSync(new URL("../scripts/recommendations.js", import.meta.url), "utf8");
   const firebase = readFileSync(new URL("../scripts/firebase.js", import.meta.url), "utf8");
-  assert.match(aiModule, /firebase-ai\.js/);
+  assert.ok(aiModule.includes("firebase-ai.js"));
   assert.match(aiModule, /GoogleAIBackend/);
-  assert.match(aiModule, /responseMimeType:\s*"application\/json"/);
+  assert.ok(aiModule.includes('responseMimeType: "application/json"'));
   assert.match(aiModule, /Treat the user text only as a plot description/);
-  assert.match(recommendations, /findSemanticPlotMatches\(intent\.query/);
-  assert.match(recommendations, /normalizeTitleForMatch\(item\.title \|\| item\.name\) === normalizeTitleForMatch\(suggestion\.title\)/);
-  assert.match(recommendations, /aiPlotMatch:\s*true/);
+  assert.doesNotMatch(recommendations, /findSemanticPlotMatches/);
+  assert.doesNotMatch(recommendations, /findOpenRouterPlotMatches/);
+  assert.doesNotMatch(recommendations, /aiPlotMatch:\s*true/);
+  assert.match(recommendations, /local ML-style matching/);
   assert.match(firebase, /ReCaptchaEnterpriseProvider/);
-  assert.match(firebase, /initializeAppCheck\(app/);
   assert.doesNotMatch(aiModule, /AIza[0-9A-Za-z_-]{30,}/, "Gemini API keys must not be embedded in the AI module");
+});
+
+test("local concept expansion recognises common plot devices without a hosted model", () => {
+  assert.ok(getPlotConceptPhrases("A woman keeps reliving the same day").includes("time loop"));
+  assert.ok(getPlotConceptPhrases("A man uses a magic remote to stop time").includes("control time"));
+  assert.ok(getPlotConceptPhrases("Two people swap bodies overnight").includes("body swap"));
+});
+
+test("For You UI clearly labels the recommendation engine experimental", () => {
+  const html = readFileSync(new URL("../for-you.html", import.meta.url), "utf8");
+  assert.match(html, /EXPERIMENTAL · LOCAL ML/);
+  assert.match(html, /EXPERIMENTAL FEATURE/);
+  assert.match(html, /not a trained language model/i);
 });
 
 test("detects plot recollections phrased without explicit movie-memory cues", () => {
@@ -142,7 +155,7 @@ test("Gemini diagnostics distinguish App Check initialization failure from local
 });
 
 
-test("OpenRouter is an optional private fallback and never exposes its key to the browser", async () => {
+test("OpenRouter remains isolated from the experimental local matcher and never exposes its key to the browser", async () => {
   const client = readFileSync(new URL("../scripts/openrouter-plot-fallback.js", import.meta.url), "utf8");
   const worker = readFileSync(new URL("../cloudflare/plot-ai-worker.js", import.meta.url), "utf8");
   const config = readFileSync(new URL("../scripts/config.js", import.meta.url), "utf8");
@@ -150,7 +163,7 @@ test("OpenRouter is an optional private fallback and never exposes its key to th
   assert.match(client, /VIVID_CONFIG\.api\.plotAiFallbackUrl/);
   assert.match(client, /credentials:\s*"omit"/);
   assert.match(config, /plotAiFallbackUrl:\s*""/);
-  assert.match(recommendations, /findOpenRouterPlotMatches/);
+  assert.doesNotMatch(recommendations, /findOpenRouterPlotMatches/);
   assert.match(worker, /env\.OPENROUTER_API_KEY/);
   assert.match(worker, /https:\/\/openrouter\.ai\/api\/v1\/chat\/completions/);
   assert.match(worker, /ALLOWED_ORIGINS/);
