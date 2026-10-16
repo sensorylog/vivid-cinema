@@ -19,7 +19,7 @@ jobs:
       - name: Install the same workflow dependency tree
         run: npm install --no-save firebase-admin web-push
       - name: Generate a temporary lockfile for the audit
-        run: npm install --package-lock-only --ignore-scripts --no-save firebase-admin web-push
+        run: npm install --package-lock-only --ignore-scripts firebase-admin web-push
       - name: Report exact audit findings
         shell: bash
         run: |
