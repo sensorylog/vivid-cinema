@@ -14,12 +14,18 @@ const [auth, handler, page, worker, api, firebaseConfig, packageJson, functionsI
 ]);
 
 test("signup and resend use the authenticated external verification API", () => {
-  assert.match(auth, /firebase\.js\?v=20261016-auth-sdk-refresh/);
-  assert.match(auth, /firebase\.js\?v=20261016-auth-sdk-refresh/);
-  assert.match(auth, /firebase\.js\?v=20261016-auth-sdk-refresh/);
+  assert.match(auth, /https:\/\/vivid-cinema-api\.vercel\.app\/api\/send-verification/);
+  assert.match(auth, /user\.getIdToken\(\)/);
+  assert.match(auth, /Authorization: "Bearer " \+ token/);
   assert.doesNotMatch(auth, /firebase-functions\.js|httpsCallable|getFunctions/);
   assert.doesNotMatch(auth, /sendEmailVerification/);
-  assert.match(auth, /firebase\.js\?v=20261016-auth-sdk-refresh/);
+  assert.match(auth, /Verify My Email/);
+});
+
+test("Google redirect recovery only runs when a redirect was explicitly started", () => {
+  assert.match(auth, /if\(!pending\)return/);
+  assert.match(auth, /getRedirectResult\(auth\)/);
+  assert.match(auth, /auth\/api-key-not-valid/);
 });
 
 test("external API verifies Firebase identity before sending a custom email", () => {

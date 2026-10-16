@@ -69,9 +69,11 @@ function withTimeout(promise,ms,label){
 }
 function friendlyError(error){
   const messages={"auth/internal-error":"Google sign-in could not finish in this browser. Please try again.","auth/web-storage-unsupported":"This browser is blocking secure sign-in storage. Please allow site storage for Vivid Cinema and try again.","auth/cancelled-popup-request":"Another Google sign-in is already in progress. Please try again.","auth/popup-closed-by-user":"Google sign-in was cancelled.","auth/email-already-in-use":"An account already exists for this email.","auth/invalid-email":"Please enter a valid email address.","auth/weak-password":"Choose a stronger password.","auth/invalid-credential":"Email or password is incorrect.","auth/user-disabled":"This account has been disabled.","auth/too-many-requests":"Too many attempts. Please wait and try again.","auth/popup-blocked":"Your browser blocked the Google sign-in window. Allow pop-ups for Vivid Cinema, then try again.","auth/account-exists-with-different-credential":"An account already exists with a different sign-in method.","auth/network-request-failed":"Connection problem. Check your internet connection and try again.","auth/requires-recent-login":"For security, please sign in again and retry.","auth/timeout":"Firebase sign-in is taking too long. Check your connection and try again.","vivid/rate-limited":"Please wait a minute before requesting another verification email.","vivid/missing-user":"Please sign in and try again."};
-  if(error?.code==="auth/unauthorized-domain") return "Google sign-in is not enabled for this Vivid domain yet.";
-  if(error?.code==="auth/operation-not-allowed") return "Google sign-in is currently disabled. Please use email and password for now.";
-  return messages[error?.code]||"Something went wrong. Please try again.";
+  if(error?.code==="auth/unauthorized-domain") return "This Vivid domain is not authorized in Firebase Authentication.";
+  if(error?.code==="auth/operation-not-allowed") return "This sign-in method is disabled in Firebase Authentication.";
+  if(error?.code==="auth/api-key-not-valid" || error?.code==="auth/invalid-api-key") return "Firebase rejected this app's API key. Check the Firebase web app configuration.";
+  if(error?.code==="auth/app-not-authorized" || error?.code==="auth/requests-to-this-api-are-blocked") return "Firebase blocked this app's API key or domain. Check the API key restrictions and Firebase Auth settings.";
+  return messages[error?.code]||(`Sign-in failed (${error?.code||"unknown"}). Please try again.`);
 }
 async function createUserRecord(user,name){
   await setDoc(doc(db,"users",user.uid),{displayName:name,email:user.email||null,provider:user.providerData?.[0]?.providerId||"password",updatedAt:serverTimestamp(),createdAt:serverTimestamp()},{merge:true});
@@ -110,6 +112,10 @@ async function finishPendingGoogleRedirect(){
   try{
     pending=localStorage.getItem("vivid:google-redirect")==="1" || sessionStorage.getItem("vivid:google-redirect")==="1";
   }catch{}
+
+  // Only inspect redirect results after this app explicitly started a redirect.
+  // Avoid a competing redirect-result operation during ordinary sign-in.
+  if(!pending)return;
 
   // On iOS/Safari, Firebase can restore the redirected Google user through
   // auth state while getRedirectResult() is empty. Keep both paths alive.
@@ -221,4 +227,8 @@ resetLink?.addEventListener("click",async(event)=>{
 });
 document.querySelectorAll("[data-logout]").forEach(button=>button.addEventListener("click",async(event)=>{event.preventDefault();await signOut(auth);window.location.href="login.html";}));
 
-void finishPendingGoogleRedirect();
+// Only recover a redirect that this app explicitly initiated.
+void finishPendingGoogleRedirect().catch(error=>{
+  console.error("Vivid pending Google redirect recovery failed:",{code:error?.code||null,message:error?.message||String(error)});
+  showMessage(friendlyError(error));
+});
