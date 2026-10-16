@@ -79,7 +79,7 @@ test("auth-related Firebase modules use one SDK version and fresh cache keys", a
   assert.ok(versions.length >= 9, "expected to inspect all shared Firebase SDK imports");
   assert.ok(versions.every((version) => version === "12.19.0"), "Firebase SDK imports must be version-aligned");
   assert.ok(auth.includes("./firebase.js?v=20261016-auth-runtime-audit1"));
-  assert.ok(worker.includes("vivid-cinema-shell-v191"));
+  assert.ok(worker.includes("vivid-cinema-shell-v192"));
   assert.ok(worker.includes("./scripts/firebase.js?v=20261016-auth-runtime-audit1"));
   assert.ok(worker.includes("./scripts/auth.js?v=20261016-auth-runtime-audit1"));
   assert.ok(loginPage.includes("scripts/auth.js?v=20261016-auth-runtime-audit1"));
@@ -87,4 +87,31 @@ test("auth-related Firebase modules use one SDK version and fresh cache keys", a
   assert.match(worker, /isAuthDocument\|\|isAuthRuntime\)\{event\.respondWith\(networkFirst\(request\)\);return;/);
   assert.match(worker, /isAuthRuntime=.*auth\|firebase\|nav-auth/);
   assert.match(navAuth, /firebasejs\/12\.19\.0\/firebase-auth\.js/);
+});
+
+
+test("auth diagnostics probes Firebase without collecting credentials", async () => {
+  const [diagnosticPage, diagnosticScript, worker] = await Promise.all([
+    readFile(new URL("../auth-diagnostics.html", import.meta.url), "utf8"),
+    readFile(new URL("../scripts/auth-diagnostics.js", import.meta.url), "utf8"),
+    readFile(new URL("../service-worker.js", import.meta.url), "utf8")
+  ]);
+  assert.match(diagnosticPage, /scripts\/auth-diagnostics\.js\?v=20261016-auth-diagnostics-1/);
+  assert.match(diagnosticScript, /accounts:signInWithPassword/);
+  assert.match(diagnosticScript, /body: "\{\}"/);
+  assert.doesNotMatch(diagnosticScript, /type=["']password["']|login-password|login-email/);
+  assert.match(diagnosticScript, /API_KEY_HTTP_REFERRER_BLOCKED/);
+  assert.match(diagnosticScript, /Content Security Policy/);
+  assert.match(worker, /isAuthDocument\|\|isAuthRuntime/);
+  assert.match(worker, /auth-diagnostics/);
+});
+
+test("Firebase App Check reCAPTCHA scripts are allowed by Hosting CSP", () => {
+  const config = JSON.parse(firebaseConfig);
+  const headerGroup = config.hosting.headers.find((entry) => entry.headers.some((header) => header.key === "Content-Security-Policy"));
+  const policy = headerGroup.headers.find((header) => header.key === "Content-Security-Policy").value;
+  const scriptSrc = policy.split(";").find((directive) => directive.trim().startsWith("script-src"));
+  assert.match(scriptSrc, /https:\/\/www\.google\.com/);
+  assert.match(scriptSrc, /https:\/\/www\.recaptcha\.net/);
+  assert.match(policy, /https:\/\/recaptchaenterprise\.googleapis\.com/);
 });
