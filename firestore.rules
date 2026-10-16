@@ -221,7 +221,11 @@ service cloud.firestore {
       }
 
       match /releaseStates/{stateId} {
-        allow read, write: if false;
+        // Owners may inspect and erase their own release-state records when
+        // deleting an account; the client cannot create or modify them.
+        allow get, list: if isOwner(userId);
+        allow delete: if isOwner(userId);
+        allow create, update: if false;
       }
 
 
