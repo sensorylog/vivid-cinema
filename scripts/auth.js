@@ -7,6 +7,7 @@ import {
   signInWithPopup,
   signInWithRedirect,
   getRedirectResult,
+  getAdditionalUserInfo,
   onAuthStateChanged,
   signOut,
   updateProfile
@@ -51,6 +52,9 @@ try {
 } catch {}
 
 function showMessage(text,good=false){if(!errorEl)return;errorEl.textContent=text;errorEl.style.color=good?"#7ee787":"#ff6b6b";}
+function setPostAuthNotice(message){
+  try{sessionStorage.setItem("vivid:auth-success",message);}catch{}
+}
 function postAuthDestination(){
   const raw=new URLSearchParams(window.location.search).get("returnTo");
   if(!raw)return "home.html";
@@ -96,6 +100,9 @@ async function finishGoogleSignIn(credential){
     try{await withTimeout(createUserRecord(credential.user,credential.user.displayName||""),7000,"Google profile sync timed out.");}
     catch(error){console.warn("Google sign-in succeeded but profile sync failed:",error);}
     void startLibrarySync();
+    let details=null;
+    try{details=getAdditionalUserInfo(credential);}catch{}
+    setPostAuthNotice(details?.isNewUser?"Account created successfully with Google! Welcome to Vivid Cinema.":"Successfully signed in with Google! Welcome back.");
     window.location.replace(postAuthDestination());
   })();
   return googleFinishPromise;
@@ -198,6 +205,7 @@ loginForm?.addEventListener("submit",async(event)=>{
     const credential=await withTimeout(signInWithEmailAndPassword(auth,email,password),15000,"Email sign-in timed out.");
     if(!credential.user.emailVerified){await signOut(auth);showMessage("Please verify your email before signing in. Check your inbox.");button.disabled=false;return;}
     void startLibrarySync();
+    setPostAuthNotice("Welcome back! You’ve successfully signed in.");
     window.location.href=postAuthDestination();
   }catch(error){console.error(error);showMessage(friendlyError(error));button.disabled=false;}
 });
