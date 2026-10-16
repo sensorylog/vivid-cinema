@@ -90,3 +90,7 @@
   .vivid-for-you-continue-grid { grid-template-columns: 1fr; }
 }
 @media (prefers-reduced-motion: reduce) { .vivid-for-you-card,.vivid-intent-input-wrap button,.vivid-for-you-empty button { transition: none; } .vivid-for-you-card:hover { transform: none; } }
+
+/* Experimental local recommendation label */
+.vivid-for-you-memory { display: inline-flex; align-items: center; margin-left: 6px; padding: 5px 8px; border: 1px solid rgba(184,176,255,.32); border-radius: 999px; color: #d2ccff; background: rgba(141,123,255,.12); font-size: .62rem; letter-spacing: .08em; }
+.vivid-for-you-privacy { padding-top: 14px; border-top: 1px solid rgba(255,255,255,.08); }
