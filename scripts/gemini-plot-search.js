@@ -93,7 +93,7 @@ export async function findSemanticPlotMatches(description = "", mediaType = "all
       failure.status ||
       failure.customData?.httpStatus ||
       failure.customData?.status ||
-      String(failure.message || "").match(/\\b(401|403|404|429)\\b/)?.[1]
+      String(failure.message || "").match(/\b(401|403|404|429)\b/)?.[1]
     );
     failure.plotSearchDiagnostic = status === 403
       ? "http-403-app-check-or-permission"
