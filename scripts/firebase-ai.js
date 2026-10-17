@@ -160,7 +160,7 @@ export async function sendRecallChatMessage(messages, mediaType = "all") {
 
   const result = await Promise.race([
     model.generateContent(prompt),
-    new Promise((_, reject) => setTimeout(() => reject(new Error("Gemini chat timed out. Please try again.")), 20000))
+    new Promise((_, reject) => setTimeout(() => reject(new Error("Gemini chat timed out after 60 seconds. Check the Firebase AI Logic request in DevTools Network for its HTTP status and response body.")), 60000))
   ]);
   let payload;
   try {
