@@ -168,7 +168,7 @@ async function sendMessage(text) {
       details: error?.customData || error?.details || null,
       error
     });
-    const code = cleanText(errorCode || errorMessage, 160);
+    const code = cleanText([errorCode, errorMessage].filter(Boolean).join(" · ") || "Unknown error", 180);
     const userFacingError = needsSignIn
       ? "Gemini returned 401 (unauthenticated). Firebase AI Logic may be set to allow signed-in users only. Sign in to Vivid Cinema, or change that AI Logic setting if guest chat should be allowed."
       : "Gemini couldn’t connect this time. Your clues are still saved in this chat, and I’ve switched to local catalogue search. The status below shows the actual error so we can diagnose it.";
