@@ -823,7 +823,7 @@ export async function getPlotMatchRecommendations(intent = {}, limit = 18) {
   try { candidates = collectIntentCandidates(responses); } catch {}
   let scored = scorePlotCandidates(intent.query || "", uniqueByKey(candidates), plotClues);
 
-  // Keyword tagging and natural-language title search are incomplete. Broaden
+  // TMDB keyword tagging is incomplete, and natural-language title search is also weak. Broaden
   // the catalogue scan when the first pass returns too few candidates or only
   // weak evidence; use two pages per requested media type, still respecting
   // the same verified user constraints. This is not an exhaustive catalogue scan.
