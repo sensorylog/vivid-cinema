@@ -11,9 +11,9 @@ export const VIVID_CONFIG = Object.freeze({
     vidsrcEmbedBaseUrl: "https://vidsrc.sh",
     vidlinkEmbedBaseUrl: "https://vidlink.pro",
     vidplusEmbedBaseUrl: "https://player.vidplus.to",
-    // Set to the deployed Cloudflare Worker URL to enable optional Airforce AI clue expansion.
-    // Keep empty until the Worker is deployed and its AIRFORCE_API_KEY secret is configured; never put an API key here.
-    plotAiFallbackUrl: "",
+    // TEMPORARY DIRECT-AIRFORCE TEST: this browser key is visible to anyone inspecting the deployed site.
+    // Use a newly rotated test key only; remove it after testing and never use a production key here.
+    airforceApiKey: "PASTE_AIRFORCE_API_KEY_HERE",
     // Add exact HTTPS hostnames only after verifying an authorized direct-stream provider.
     directStreamHosts: Object.freeze([]),
     language: "en-US"
