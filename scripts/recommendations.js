@@ -534,9 +534,9 @@ function rankForYou(candidates, taste, progress, feedback, excluded, limit, rece
     const actorMatch = Object.entries(taste.actors || {}).some(([id, weight]) => Number(weight) > 0 && castIds.has(String(id)));
     const directorMatch = Object.entries(taste.directors || {}).some(([id, weight]) => Number(weight) > 0 && directorIds.has(String(id)));
     let recommendationReason = "Picked for you";
-    if (exploration > .5) recommendationReason = "A discovery that fits your taste";
-    else if (actorMatch) recommendationReason = "Because you like this cast";
+    if (actorMatch) recommendationReason = "Because you like this cast";
     else if (directorMatch) recommendationReason = "Because you like this director";
+    else if (exploration > .5) recommendationReason = "A discovery that fits your taste";
     else if (dominantGenre) recommendationReason = "Because it matches your taste";
     else if (recentMatch) recommendationReason = "Because you've been watching this lately";
     else if (languageMatch) recommendationReason = "Because you enjoy this language";
