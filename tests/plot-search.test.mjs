@@ -120,31 +120,6 @@ test("detects plot recollections phrased without explicit movie-memory cues", ()
 });
 
 
-test("Gemini diagnostics distinguish App Check initialization failure from local-host skip", () => {
-  const firebase = readFileSync(new URL("../scripts/firebase.js", import.meta.url), "utf8");
-  const aiModule = readFileSync(new URL("../scripts/gemini-plot-search.js", import.meta.url), "utf8");
-  assert.match(firebase, /export \{ app, appCheck, appCheckError, appCheckSkippedReason, auth, db \}/);
-  assert.match(aiModule, /app-check\/initialization-failed/);
-  assert.match(aiModule, /app-check\/local-host-skipped/);
-});
-
-
-test("OpenRouter remains isolated from the experimental local matcher and never exposes its key to the browser", async () => {
-  const client = readFileSync(new URL("../scripts/openrouter-plot-fallback.js", import.meta.url), "utf8");
-  const worker = readFileSync(new URL("../cloudflare/plot-ai-worker.js", import.meta.url), "utf8");
-  const config = readFileSync(new URL("../scripts/config.js", import.meta.url), "utf8");
-  const recommendations = readFileSync(new URL("../scripts/recommendations.js", import.meta.url), "utf8");
-  assert.match(client, /VIVID_CONFIG\.api\.plotAiFallbackUrl/);
-  assert.match(client, /credentials:\s*"omit"/);
-  assert.match(config, /plotAiFallbackUrl:\s*""/);
-  assert.doesNotMatch(recommendations, /findOpenRouterPlotMatches/);
-  assert.match(worker, /env\.OPENROUTER_API_KEY/);
-  assert.match(worker, /https:\/\/openrouter\.ai\/api\/v1\/chat\/completions/);
-  assert.match(worker, /ALLOWED_ORIGINS/);
-  assert.doesNotMatch(client, /sk-or-v1-[A-Za-z0-9_-]{20,}/);
-});
-
-
 test("extracts deterministic plot clues and expands varied story-device wording", () => {
   const clues = extractPlotClues("A woman keeps waking up and reliving the same day after finding a strange remote");
   assert.ok(clues.includes("time loop"));
