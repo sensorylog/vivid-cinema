@@ -23,7 +23,7 @@ Airforce's native cross-model fallback is used in a single request, to avoid spe
 3. `llama-instant`
 4. `rnj-1`
 
-Airforce's model catalogue and account permissions can change. Confirm current model IDs and pricing in the dashboard or `GET /v1/models`. If a model is unavailable, Airforce should try the next configured fallback.
+Airforce's model catalogue and account permissions can change. Confirm current model IDs and pricing in the dashboard or `GET /v1/models`. If a model is unavailable, Airforce should try the next configured fallback. Airforce's published Quickstart currently lists the Free plan at 1 request per minute (and 1,000 requests per day); this is account-wide request throttling, not four separate free requests. Multi-turn chat may therefore need a pause between AI replies, and Vivid falls back to local matching when rate-limited.
 
 ## Enable the browser integration
 
