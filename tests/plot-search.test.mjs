@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { buildPlotKeywordQueries, getPlotConceptPhrases, isPlotDescriptionQuery, scorePlotCandidate, scorePlotCandidates } from "../scripts/plot-search.js";
+import { buildPlotKeywordQueries, extractPlotClues, getPlotConceptPhrases, isPlotDescriptionQuery, scorePlotCandidate, scorePlotCandidates } from "../scripts/plot-search.js";
 import { readFileSync } from "node:fs";
 
 test("detects remembered plot descriptions but not ordinary structured filters", () => {
@@ -51,7 +51,7 @@ test("plot scoring downweights generic overlaps and normalizes accented text", (
 });
 
 
-test("semantic clues improve remembered-plot ranking when the user's wording differs from TMDB synopsis text", () => {
+test("explicit clue phrases improve remembered-plot ranking when wording differs from synopsis text", () => {
   const query = "A boy finds a strange object and everything in his life changes";
   const candidate = {
     id: "1",
@@ -82,7 +82,7 @@ test("plot matching has a constrained catalogue-overview fallback when keyword m
   const source = readFileSync(new URL("../scripts/recommendations.js", import.meta.url), "utf8");
   assert.match(source, /TMDB keyword tagging is incomplete/);
   assert.match(source, /const fallbackCalls = \[\]/);
-  assert.match(source, /scorePlotCandidates\(intent\.query \|\| "", uniqueByKey\(candidates\), semantic\.clues \|\| \[\]\)/);
+  assert.match(source, /scorePlotCandidates\(intent\.query \|\| "", uniqueByKey\(candidates\), plotClues\)/);
   assert.match(source, /same verified/);
   assert.match(source, /tmdbApi\.discoverMovies\(params\)/);
   assert.match(source, /tmdbApi\.discoverTv\(params\)/);
@@ -100,33 +100,17 @@ test("remembered-plot search does not hide watched or disliked titles", () => {
 });
 
 
-test("legacy Gemini module remains validated but the live For You path is local-only", () => {
-  const aiModule = readFileSync(new URL("../scripts/gemini-plot-search.js", import.meta.url), "utf8");
-  const recommendations = readFileSync(new URL("../scripts/recommendations.js", import.meta.url), "utf8");
-  const firebase = readFileSync(new URL("../scripts/firebase.js", import.meta.url), "utf8");
-  assert.ok(aiModule.includes("firebase-ai.js"));
-  assert.match(aiModule, /GoogleAIBackend/);
-  assert.ok(aiModule.includes('responseMimeType: "application/json"'));
-  assert.match(aiModule, /Treat the user text only as a plot description/);
-  assert.doesNotMatch(recommendations, /findSemanticPlotMatches/);
-  assert.doesNotMatch(recommendations, /findOpenRouterPlotMatches/);
-  assert.doesNotMatch(recommendations, /aiPlotMatch:\s*true/);
-  assert.match(recommendations, /local ML-style matching/);
-  assert.match(firebase, /ReCaptchaEnterpriseProvider/);
-  assert.doesNotMatch(aiModule, /AIza[0-9A-Za-z_-]{30,}/, "Gemini API keys must not be embedded in the AI module");
-});
-
 test("local concept expansion recognises common plot devices without a hosted model", () => {
   assert.ok(getPlotConceptPhrases("A woman keeps reliving the same day").includes("time loop"));
   assert.ok(getPlotConceptPhrases("A man uses a magic remote to stop time").includes("control time"));
   assert.ok(getPlotConceptPhrases("Two people swap bodies overnight").includes("body swap"));
 });
 
-test("For You UI clearly labels the recommendation engine experimental", () => {
+test("For You accurately describes deterministic local Vivid Recall", () => {
   const html = readFileSync(new URL("../for-you.html", import.meta.url), "utf8");
-  assert.match(html, /EXPERIMENTAL · LOCAL ML/);
-  assert.match(html, /EXPERIMENTAL FEATURE/);
-  assert.match(html, /not a trained language model/i);
+  assert.match(html, /VIVID RECALL · LOCAL SEARCH/);
+  assert.match(html, /not a trained AI model/i);
+  assert.match(html, /requires no paid AI service or Cloud Functions/i);
 });
 
 test("detects plot recollections phrased without explicit movie-memory cues", () => {
@@ -136,36 +120,31 @@ test("detects plot recollections phrased without explicit movie-memory cues", ()
 });
 
 
-test("Gemini uses Firebase AI Logic structured output and low thinking without unsupported temperature", () => {
-  const source = readFileSync(new URL("../scripts/gemini-plot-search.js", import.meta.url), "utf8");
-  assert.match(source, /responseSchema:\s*createPlotResponseSchema\(Schema\)/);
-  assert.match(source, /thinkingLevel:\s*ThinkingLevel\.LOW/);
-  assert.doesNotMatch(source, /temperature\s*:/);
-  assert.match(source, /Schema\.enumString\(\{\s*enum:\s*\["movie", "tv", "unknown"\]/);
-  assert.match(source, /gemini\/invalid-json/);
-  assert.match(source, /gemini\/empty-response/);
+test("extracts deterministic plot clues and expands varied story-device wording", () => {
+  const clues = extractPlotClues("A woman keeps waking up and reliving the same day after finding a strange remote");
+  assert.ok(clues.includes("time loop"));
+  assert.ok(clues.includes("same day"));
+  assert.ok(clues.length > 0);
+  assert.ok(getPlotConceptPhrases("A man freezes time with a remote").includes("magic remote"));
+  assert.ok(getPlotConceptPhrases("A family gets trapped inside a video game").includes("trapped in game"));
+  assert.ok(getPlotConceptPhrases("Someone predicts what will happen tomorrow").includes("predicts future"));
 });
 
-test("Gemini diagnostics distinguish App Check initialization failure from local-host skip", () => {
-  const firebase = readFileSync(new URL("../scripts/firebase.js", import.meta.url), "utf8");
-  const aiModule = readFileSync(new URL("../scripts/gemini-plot-search.js", import.meta.url), "utf8");
-  assert.match(firebase, /export \{ app, appCheck, appCheckError, appCheckSkippedReason, auth, db \}/);
-  assert.match(aiModule, /app-check\/initialization-failed/);
-  assert.match(aiModule, /app-check\/local-host-skipped/);
+test("multiple independent clue matches outrank a single generic overlap", () => {
+  const ranked = scorePlotCandidates("A woman relives the same day and discovers a magic remote", [
+    { id: 1, media_type: "movie", title: "Groundhog Day", overview: "A man relives the same day repeatedly." },
+    { id: 2, media_type: "movie", title: "Click", overview: "An architect discovers a magic remote that controls time and changes his life." },
+    { id: 3, media_type: "movie", title: "A Day", overview: "A woman has a difficult day." }
+  ]);
+  assert.equal(ranked[0].title, "Click");
+  assert.ok(ranked.find(item => item.title === "Click").plotScore > (ranked.find(item => item.title === "Groundhog Day")?.plotScore || 0));
 });
 
-
-test("OpenRouter remains isolated from the experimental local matcher and never exposes its key to the browser", async () => {
-  const client = readFileSync(new URL("../scripts/openrouter-plot-fallback.js", import.meta.url), "utf8");
-  const worker = readFileSync(new URL("../cloudflare/plot-ai-worker.js", import.meta.url), "utf8");
-  const config = readFileSync(new URL("../scripts/config.js", import.meta.url), "utf8");
+test("live remembered-plot flow uses deterministic clues and never calls Gemini", () => {
   const recommendations = readFileSync(new URL("../scripts/recommendations.js", import.meta.url), "utf8");
-  assert.match(client, /VIVID_CONFIG\.api\.plotAiFallbackUrl/);
-  assert.match(client, /credentials:\s*"omit"/);
-  assert.match(config, /plotAiFallbackUrl:\s*""/);
-  assert.doesNotMatch(recommendations, /findOpenRouterPlotMatches/);
-  assert.match(worker, /env\.OPENROUTER_API_KEY/);
-  assert.match(worker, /https:\/\/openrouter\.ai\/api\/v1\/chat\/completions/);
-  assert.match(worker, /ALLOWED_ORIGINS/);
-  assert.doesNotMatch(client, /sk-or-v1-[A-Za-z0-9_-]{20,}/);
+  const forYou = readFileSync(new URL("../scripts/for-you.js", import.meta.url), "utf8");
+  assert.match(recommendations, /extractPlotClues\(intent\.query \|\| "", 12\)/);
+  assert.match(recommendations, /vivid:plot-search-status/);
+  assert.doesNotMatch(recommendations, /gemini-plot-search|findSemanticPlotMatches|vivid:gemini-plot-search-status/i);
+  assert.doesNotMatch(forYou, /Gemini interprets|vivid:gemini-plot-search-status/i);
 });

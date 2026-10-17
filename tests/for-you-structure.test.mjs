@@ -21,7 +21,7 @@ test("For You page is registered as a real, accessible destination", () => {
   assert.match(serviceWorker, /"\.\/for-you\.html"/);
   assert.match(serviceWorker, /"\.\/scripts\/intent-parser\.js"/);
   assert.match(serviceWorker, /"\.\/scripts\/plot-search\.js"/);
-  assert.match(serviceWorker, /"\.\/scripts\/gemini-plot-search\.js"/);
+  assert.doesNotMatch(serviceWorker, /gemini-plot-search/);
   assert.match(serviceWorker, /"\.\/styles\/vivid-for-you\.css"/);
   assert.match(appShell, /navLink\("for-you\.html", "bi-stars", "For You", page === "for-you"\)/);
   assert.equal((appShell.match(/navLink\("for-you\.html", "bi-stars", "For You", page === "for-you"\)/g) || []).length, 2, "For You is available in desktop and mobile navigation");
@@ -60,10 +60,10 @@ test("For You avoids undeclared intent state and consolidates account-switch rec
   assert.match(script, /lastDismissedItem = null;/);
 });
 
-test("For You routes remembered-plot descriptions to catalogue matching", () => {
+test("For You routes remembered-plot descriptions to deterministic catalogue matching", () => {
   assert.match(script, /isPlotDescriptionQuery\(intent\.query\)/);
   assert.match(script, /getPlotMatchRecommendations\(intent, 24\)/);
-  assert.match(script, /Gemini interprets your plot description/);
+  assert.match(script, /extracts story clues locally, searches TMDB through multiple routes/i);
 });
 
 
@@ -75,20 +75,13 @@ test("For You records impressions only after a recommendation is actually viewab
   assert.doesNotMatch(script, /items\.slice\(0, 12\)\.forEach\(item => recordBehavior\("recommendation_impression"/);
 });
 
-test("For You exposes the experimental local matcher status", () => {
+test("For You exposes local Vivid Recall status without an AI dependency", () => {
   assert.match(recommendations, /localOnly:\s*true/);
-  assert.match(recommendations, /Experimental local matching is active/);
-  assert.match(script, /EXPERIMENTAL · Local matching is active/);
-  assert.match(script, /Using the experimental local catalogue matcher/);
-  assert.match(script, /showStatus\(geminiStatusMessage \|\| \(items\.length/);
-  assert.doesNotMatch(recommendations, /findSemanticPlotMatches/);
+  assert.match(recommendations, /Vivid Recall is using local clue extraction and catalogue matching/);
+  assert.match(script, /VIVID RECALL · Local clue matching is active/);
+  assert.match(script, /Using Vivid Recall’s local catalogue matcher/);
+  assert.match(script, /showStatus\(recallStatusMessage \|\| \(items\.length/);
+  assert.doesNotMatch(recommendations, /findSemanticPlotMatches|gemini-plot-search/i);
+  assert.doesNotMatch(script, /Gemini interprets|vivid:gemini-plot-search-status/i);
 });
 
-test("Gemini plot search matches AXIS Firebase AI Logic and App Check setup", async () => {
-  const firebaseClient = readFileSync(new URL("../scripts/firebase.js", import.meta.url), "utf8");
-  const gemini = readFileSync(new URL("../scripts/gemini-plot-search.js", import.meta.url), "utf8");
-  assert.match(firebaseClient, /firebasejs\/12\.19\.0\/firebase-app\.js/);
-  assert.match(firebaseClient, /firebasejs\/12\.19\.0\/firebase-app-check\.js/);
-  assert.match(gemini, /firebasejs\/12\.19\.0\/firebase-ai\.js/);
-  assert.match(gemini, /useLimitedUseAppCheckTokens:\s*true/);
-});

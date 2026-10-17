@@ -3,7 +3,7 @@ import { getLocalLibrary } from "./library.js";
 import { normalizeResults } from "./media.js";
 import { getTasteProfile, getNotForMeKeys, getFeedbackState, getTasteStrength, getRecommendationMemory, recordBehavior } from "./intelligence.js";
 import { switchLocalOwner } from "./local-owner.js";
-import { buildPlotKeywordQueries, scorePlotCandidate, scorePlotCandidates } from "./plot-search.js";
+import { buildPlotKeywordQueries, extractPlotClues, scorePlotCandidate, scorePlotCandidates } from "./plot-search.js";
 
 const PROGRESS_KEY = "vivid:progress:v1";
 const FOR_YOU_CACHE_KEY = "vivid:for-you:v1";
@@ -708,17 +708,15 @@ export async function getPlotMatchRecommendations(intent = {}, limit = 18) {
 
   const requestedType = ["movie", "tv"].includes(intent.mediaType) ? intent.mediaType : "all";
   const mediaTypes = requestedType === "all" ? ["movie", "tv"] : [requestedType];
-  // Experimental local ML-style matching. TMDB supplies the catalogue;
-  // all interpretation, concept expansion, and ranking happens in-browser.
-  const semantic = { clues: [], candidates: [], experimental: true };
+  // Deterministic, browser-side clue extraction. No hosted model or AI service is called.
+  const plotClues = extractPlotClues(intent.query || "", 12);
   const keywordResponses = await Promise.allSettled(queries.map(query => tmdbApi.searchKeywords(query)));
   if (currentProgressOwner() !== ownerAtStart) return [];
-  window.dispatchEvent(new CustomEvent("vivid:gemini-plot-search-status", {
+  window.dispatchEvent(new CustomEvent("vivid:plot-search-status", {
     detail: {
       available: false,
       localOnly: true,
-      experimental: true,
-      message: "Experimental local matching is active. No AI service is required."
+      message: "Vivid Recall is using local clue extraction and catalogue matching. No AI service is required."
     }
   }));
   const allKeywordResponses = keywordResponses;
@@ -730,7 +728,7 @@ export async function getPlotMatchRecommendations(intent = {}, limit = 18) {
       if (keyword?.id == null || !keyword?.name) return;
       const relevance = Math.max(
         scorePlotCandidate(intent.query || "", { title: keyword.name, overview: keyword.name }),
-        scorePlotCandidate((semantic.clues || []).join(" "), { title: keyword.name, overview: keyword.name })
+        scorePlotCandidate((plotClues).join(" "), { title: keyword.name, overview: keyword.name })
       );
       const existing = keywordMap.get(String(keyword.id));
       if (!existing || relevance > existing.relevance) {
@@ -795,7 +793,7 @@ export async function getPlotMatchRecommendations(intent = {}, limit = 18) {
   if (currentProgressOwner() !== ownerAtStart) return [];
   let candidates = [];
   try { candidates = collectIntentCandidates(responses); } catch {}
-  let scored = scorePlotCandidates(intent.query || "", uniqueByKey(candidates), semantic.clues || []);
+  let scored = scorePlotCandidates(intent.query || "", uniqueByKey(candidates), plotClues);
 
   // TMDB keyword tagging is incomplete. If it yields no plausible plot match,
   // scan a small popularity-ordered catalogue slice with the same verified
@@ -847,7 +845,7 @@ export async function getPlotMatchRecommendations(intent = {}, limit = 18) {
     // Keep the first-pass matches and supplement them with broader catalogue
     // candidates; replacing the list here can discard a valid partial match.
     candidates = uniqueByKey([...candidates, ...fallbackCandidates]);
-    scored = scorePlotCandidates(intent.query || "", candidates, semantic.clues || []);
+    scored = scorePlotCandidates(intent.query || "", candidates, plotClues);
   }
   if (!scored.length) return [];
 
