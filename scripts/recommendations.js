@@ -741,7 +741,9 @@ export async function getPlotMatchRecommendations(intent = {}, limit = 18) {
 
   // AI is optional. The browser calls only our Cloudflare proxy; the Airforce
   // API key remains a Worker secret and is never sent to the browser.
-  const aiEndpoint = VIVID_CONFIG.api.plotAiFallbackUrl;
+  const localOnlyRequested = window.__vividRecallLocalOnlyOnce === true;
+  if (localOnlyRequested) window.__vividRecallLocalOnlyOnce = false;
+  const aiEndpoint = localOnlyRequested ? "" : VIVID_CONFIG.api.plotAiFallbackUrl;
   if (aiEndpoint && query.length >= 8) {
     try {
       const response = await fetch(aiEndpoint, {
