@@ -4,6 +4,7 @@ import { normalizeResults } from "./media.js";
 import { getTasteProfile, getNotForMeKeys, getFeedbackState, getTasteStrength, getRecommendationMemory, recordBehavior } from "./intelligence.js";
 import { switchLocalOwner } from "./local-owner.js";
 import { buildPlotKeywordQueries, extractPlotClues, scorePlotCandidate, scorePlotCandidates } from "./plot-search.js";
+import { VIVID_CONFIG } from "./config.js";
 
 const PROGRESS_KEY = "vivid:progress:v1";
 const FOR_YOU_CACHE_KEY = "vivid:for-you:v1";
@@ -731,22 +732,64 @@ export function collectIntentCandidates(responses = []) {
 
 export async function getPlotMatchRecommendations(intent = {}, limit = 18) {
   const ownerAtStart = currentProgressOwner();
-  const queries = buildPlotKeywordQueries(intent.query || "", 10);
-  if (!queries.length) return [];
-
+  const query = String(intent.query || "").trim();
   const requestedType = ["movie", "tv"].includes(intent.mediaType) ? intent.mediaType : "all";
   const mediaTypes = requestedType === "all" ? ["movie", "tv"] : [requestedType];
-  // Deterministic, browser-side clue extraction. No hosted model or AI service is called.
-  const plotClues = extractPlotClues(intent.query || "", 12);
-  const keywordResponses = await Promise.allSettled(queries.map(query => tmdbApi.searchKeywords(query)));
-  if (currentProgressOwner() !== ownerAtStart) return [];
-  window.dispatchEvent(new CustomEvent("vivid:plot-search-status", {
-    detail: {
-      available: false,
-      localOnly: true,
-      message: "Vivid Recall is using local clue extraction and catalogue matching. No AI service is required."
+  const localQueries = buildPlotKeywordQueries(query, 10);
+  const localClues = extractPlotClues(query, 12);
+  let aiResult = null;
+
+  // AI is optional. The browser calls only our Cloudflare proxy; the Airforce
+  // API key remains a Worker secret and is never sent to the browser.
+  const localOnlyRequested = window.__vividRecallLocalOnlyOnce === true;
+  if (localOnlyRequested) window.__vividRecallLocalOnlyOnce = false;
+  const aiEndpoint = localOnlyRequested ? "" : VIVID_CONFIG.api.plotAiFallbackUrl;
+  if (aiEndpoint && query.length >= 8) {
+    try {
+      const response = await fetch(aiEndpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ description: query.slice(0, 700), mediaType: requestedType }),
+        signal: AbortSignal.timeout(27_000)
+      });
+      if (response.ok) {
+        const payload = await response.json();
+        if (Array.isArray(payload?.clues) && Array.isArray(payload?.candidates)) {
+          aiResult = {
+            clues: payload.clues.filter(item => typeof item === "string").slice(0, 8),
+            candidates: payload.candidates.filter(item => item && typeof item.title === "string").slice(0, 4),
+            model: typeof payload.model === "string" ? payload.model : ""
+          };
+        }
+      }
+    } catch {
+      // A Worker/provider failure must never break local Recall.
     }
-  }));
+  }
+
+  const plotClues = [...new Set([...localClues, ...(aiResult?.clues || [])])].slice(0, 12);
+  const queries = [...new Set([...localQueries, ...(aiResult?.clues || [])])].slice(0, 10);
+  if (!queries.length) return [];
+  const keywordResponses = await Promise.allSettled(queries.map(searchQuery => tmdbApi.searchKeywords(searchQuery)));
+  if (currentProgressOwner() !== ownerAtStart) return [];
+  if (aiResult) {
+    window.dispatchEvent(new CustomEvent("vivid:plot-search-status", {
+      detail: {
+        available: true,
+        localOnly: false,
+        model: aiResult.model,
+        message: "AI clue expansion is active; candidate titles are checked against TMDB."
+      }
+    }));
+  } else {
+    window.dispatchEvent(new CustomEvent("vivid:plot-search-status", {
+      detail: {
+        available: false,
+        localOnly: true,
+        message: "Vivid Recall is using local clue extraction and catalogue matching. No AI service is required."
+      }
+    }));
+  }
   const allKeywordResponses = keywordResponses;
 
   const keywordMap = new Map();
@@ -813,8 +856,19 @@ export async function getPlotMatchRecommendations(intent = {}, limit = 18) {
   // structured filters to bypass, and respect the requested media type.
   if (!hasSpecificFilters) {
     for (const type of mediaTypes) {
-      calls.push((type === "tv" ? tmdbApi.searchTv(intent.query || "") : tmdbApi.searchMovies(intent.query || ""))
+      calls.push((type === "tv" ? tmdbApi.searchTv(query) : tmdbApi.searchMovies(query))
         .then(response => normalizeResults(response?.results || [], type)));
+    }
+    // Model-suggested names are retrieval hints only. Every displayed title
+    // still has to exist in TMDB and is scored using its real catalogue data.
+    for (const suggestion of (aiResult?.candidates || []).slice(0, 4)) {
+      const suggestedTypes = ["movie", "tv"].includes(suggestion.mediaType)
+        ? [suggestion.mediaType]
+        : mediaTypes;
+      for (const type of suggestedTypes.filter(value => mediaTypes.includes(value))) {
+        calls.push((type === "tv" ? tmdbApi.searchTv(suggestion.title) : tmdbApi.searchMovies(suggestion.title))
+          .then(response => normalizeResults(response?.results || [], type)));
+      }
     }
   }
   const responses = await Promise.allSettled(calls);

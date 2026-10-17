@@ -1,6 +1,0 @@
-name = "vivid-cinema-plot-fallback"
-main = "plot-ai-worker.js"
-compatibility_date = "2026-10-16"
-
-[vars]
-OPENROUTER_MODEL = "openai/gpt-oss-20b:free"

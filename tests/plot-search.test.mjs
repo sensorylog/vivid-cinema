@@ -106,11 +106,16 @@ test("local concept expansion recognises common plot devices without a hosted mo
   assert.ok(getPlotConceptPhrases("Two people swap bodies overnight").includes("body swap"));
 });
 
-test("For You accurately describes deterministic local Vivid Recall", () => {
+test("For You describes optional AI assistance and keeps local fallback", () => {
   const html = readFileSync(new URL("../for-you.html", import.meta.url), "utf8");
+  const recommendations = readFileSync(new URL("../scripts/recommendations.js", import.meta.url), "utf8");
   assert.match(html, /YOUR STORY, FOUND/);
-  assert.match(html, /not a trained AI model/i);
-  assert.match(html, /requires no paid AI service or Cloud Functions/i);
+  assert.match(html, /Conversational AI/i);
+  assert.match(html, /Local matching fallback/i);
+  assert.match(html, /No Cloud Functions/i);
+  assert.match(recommendations, /VIVID_CONFIG\.api\.plotAiFallbackUrl/);
+  assert.match(recommendations, /extractPlotClues\(query, 12\)/);
+  assert.match(readFileSync(new URL("../scripts/vivid-recall-chat.js", import.meta.url), "utf8"), /mode: "chat"/);
 });
 
 test("detects plot recollections phrased without explicit movie-memory cues", () => {
@@ -143,7 +148,7 @@ test("multiple independent clue matches outrank a single generic overlap", () =>
 test("live remembered-plot flow uses deterministic clues and never calls Gemini", () => {
   const recommendations = readFileSync(new URL("../scripts/recommendations.js", import.meta.url), "utf8");
   const forYou = readFileSync(new URL("../scripts/for-you.js", import.meta.url), "utf8");
-  assert.match(recommendations, /extractPlotClues\(intent\.query \|\| "", 12\)/);
+  assert.match(recommendations, /const localClues = extractPlotClues\(query, 12\)/);
   assert.match(recommendations, /vivid:plot-search-status/);
   assert.doesNotMatch(recommendations, /gemini-plot-search|findSemanticPlotMatches|vivid:gemini-plot-search-status/i);
   assert.doesNotMatch(forYou, /Gemini interprets|vivid:gemini-plot-search-status/i);
@@ -226,4 +231,20 @@ test("Recall ranks corroborated plot evidence above generic overlap across a sma
     const ranked = scorePlotCandidates(fixture.query, fixture.candidates);
     assert.equal(ranked[0]?.title, fixture.expected, fixture.query);
   }
+});
+
+test("Vivid Recall exposes a multi-turn chat UI with verified result cards and a fallback path", () => {
+  const html = readFileSync(new URL("../for-you.html", import.meta.url), "utf8");
+  const chat = readFileSync(new URL("../scripts/vivid-recall-chat.js", import.meta.url), "utf8");
+  const worker = readFileSync(new URL("../cloudflare/plot-ai-worker.js", import.meta.url), "utf8");
+  assert.match(html, /id="recall-chat-form"/);
+  assert.match(html, /id="recall-chat-messages"/);
+  assert.match(html, /id="recall-chat-input"/);
+  assert.match(html, /scripts\/vivid-recall-chat\.js/);
+  assert.match(chat, /mode: "chat"/);
+  assert.match(chat, /verifyCandidates/);
+  assert.match(chat, /TMDB-verified matches/);
+  assert.match(chat, /switching to local Recall/);
+  assert.match(worker, /conversational text chat/);
+  assert.match(worker, /role: "system"/);
 });
