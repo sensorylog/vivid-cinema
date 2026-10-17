@@ -156,7 +156,7 @@ export async function sendRecallChatMessage(messages, mediaType = "all") {
     "Return only a JSON object with string field reply and array field candidates.",
     "Each candidates item must contain title, mediaType (movie, tv, or all), and reason (short string).",
     "Conversation so far:\n" + transcript
-  ].join("\\n");
+  ].join("\n");
 
   const result = await Promise.race([
     model.generateContent(prompt),
