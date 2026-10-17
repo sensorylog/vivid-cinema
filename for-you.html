@@ -40,23 +40,7 @@
   <section class="vivid-for-you-hero" aria-labelledby="for-you-title">
     <div class="vivid-for-you-eyebrow"><span class="vivid-for-you-orb" aria-hidden="true"></span> VIVID RECALL <span class="vivid-for-you-memory">YOUR STORY, FOUND</span></div>
     <h1 id="for-you-title">Find your next<br><em>favourite story.</em></h1>
-    <p class="vivid-for-you-lede">Search by mood, or describe a movie you half remember.</p>
-    <form id="intent-form" class="vivid-intent-form">
-      <label class="vivid-intent-label" for="intent-query">Search by mood or memory</label>
-      <div class="vivid-intent-input-wrap">
-        <i class="bi bi-stars" aria-hidden="true"></i>
-        <input id="intent-query" name="intent" type="search" autocomplete="off" maxlength="500" placeholder="A movie where time keeps resetting…" aria-describedby="intent-help">
-        <button type="submit"><span>Find matches</span><i class="bi bi-arrow-up-right" aria-hidden="true"></i></button>
-      </div>
-      <p id="intent-help" class="vivid-intent-help">Describe a plot, scene, character or object. Vivid Recall matches clues against TMDB and ranks likely titles.</p>
-    </form>
-    <div class="vivid-intent-examples" aria-label="Example searches">
-      <button type="button" data-example="A funny movie under 2 hours">Funny · under 2 hours</button>
-      <button type="button" data-example="Japanese anime under 25 minutes">Anime · short</button>
-      <button type="button" data-example="Korean thriller series">Korean thriller series</button>
-      <button type="button" data-example="I remember a movie where a man relives the same day">Remembered plot · time loop</button>
-    </div>
-
+    <p class="vivid-for-you-lede">Chat with Vivid Recall to identify a story you half remember, or use quick search to explore by mood.</p>
     <section class="recall-chat-panel" aria-labelledby="recall-chat-heading">
       <div class="recall-chat-heading">
         <div>
@@ -90,6 +74,23 @@
       </div>
       <p class="recall-chat-note"><i class="bi bi-shield-check" aria-hidden="true"></i> AI suggestions are checked against TMDB before title cards appear. If AI is unavailable, the regular local Recall search still works.</p>
     </section>
+
+    <form id="intent-form" class="vivid-intent-form">
+      <label class="vivid-intent-label" for="intent-query">Quick search by mood or filter</label>
+      <div class="vivid-intent-input-wrap">
+        <i class="bi bi-stars" aria-hidden="true"></i>
+        <input id="intent-query" name="intent" type="search" autocomplete="off" maxlength="500" placeholder="A movie where time keeps resetting…" aria-describedby="intent-help">
+        <button type="submit"><span>Find matches</span><i class="bi bi-arrow-up-right" aria-hidden="true"></i></button>
+      </div>
+      <p id="intent-help" class="vivid-intent-help">Use quick search for moods and filters. For a half-remembered story, chat with Vivid Recall above.</p>
+    </form>
+    <div class="vivid-intent-examples" aria-label="Example searches">
+      <button type="button" data-example="A funny movie under 2 hours">Funny · under 2 hours</button>
+      <button type="button" data-example="Japanese anime under 25 minutes">Anime · short</button>
+      <button type="button" data-example="Korean thriller series">Korean thriller series</button>
+    </div>
+
+
   </section>
 
   <section class="vivid-for-you-controls" aria-label="Quick content filters">
