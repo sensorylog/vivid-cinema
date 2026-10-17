@@ -170,7 +170,7 @@ test("Vivid Recall expands everyday wording into catalogue concepts", () => {
   assert.ok(getPlotConceptPhrases("A guy turns invisible and nobody can see him").includes("invisibility"));
   assert.ok(getPlotConceptPhrases("A kid gets stuck inside a video game").includes("trapped in game"));
   assert.ok(getPlotConceptPhrases("Someone goes back in time to change the future").includes("time travel"));
-  assert.ok(getPlotConceptPhrases("A robot wants to become a real person").includes("artificial intelligence"));
+  assert.ok(getPlotConceptPhrases("A sentient robot becomes human").includes("artificial intelligence"));
   assert.ok(getPlotConceptPhrases("A woman wakes up as someone else").includes("body swap"));
 });
 
