@@ -75,8 +75,8 @@ async function getFirebase() {
   if (!firebasePromise) {
     firebasePromise = Promise.all([
       import("./firebase.js"),
-      import("https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js"),
-      import("https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js")
+      import("https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js"),
+      import("https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js")
     ]).then(([firebase, authSdk, firestoreSdk]) => ({
       ...firebase,
       onAuthStateChanged: authSdk.onAuthStateChanged,
