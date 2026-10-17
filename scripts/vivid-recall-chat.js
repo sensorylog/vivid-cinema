@@ -161,14 +161,14 @@ async function sendMessage(text) {
     if (version !== requestVersion) return;
     const errorCode = String(error?.code || "");
     const errorMessage = String(error?.message || error || "Unknown error");
-    const needsSignIn = /unauthenticated/i.test(errorCode + " " + errorMessage) || /\\b401\\b/.test(errorMessage);
+    const needsSignIn = /unauthenticated/i.test(errorCode + " " + errorMessage) || /\b401\b/.test(errorMessage);
     console.warn("Vivid Recall Gemini chat failed:", {
       code: errorCode || null,
       message: errorMessage,
       details: error?.customData || error?.details || null,
       error
     });
-    const code = cleanText(errorCode || errorMessage, 160);
+    const code = cleanText([errorCode, errorMessage].filter(Boolean).join(" · ") || "Unknown error", 180);
     const userFacingError = needsSignIn
       ? "Gemini returned 401 (unauthenticated). Firebase AI Logic may be set to allow signed-in users only. Sign in to Vivid Cinema, or change that AI Logic setting if guest chat should be allowed."
       : "Gemini couldn’t connect this time. Your clues are still saved in this chat, and I’ve switched to local catalogue search. The status below shows the actual error so we can diagnose it.";

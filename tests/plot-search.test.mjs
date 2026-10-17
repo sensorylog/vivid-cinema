@@ -106,23 +106,35 @@ test("local concept expansion recognises common plot devices without a hosted mo
   assert.ok(getPlotConceptPhrases("Two people swap bodies overnight").includes("body swap"));
 });
 
-test("Vivid Recall starts from a clean local-only baseline", () => {
+test("Vivid Recall keeps local plot matching and adds isolated Gemini chat with safe fallback", () => {
   const html = readFileSync(new URL("../for-you.html", import.meta.url), "utf8");
   const recommendations = readFileSync(new URL("../scripts/recommendations.js", import.meta.url), "utf8");
   const config = readFileSync(new URL("../scripts/config.js", import.meta.url), "utf8");
   const worker = readFileSync(new URL("../service-worker.js", import.meta.url), "utf8");
   const csp = readFileSync(new URL("../firebase.json", import.meta.url), "utf8");
+  const ai = readFileSync(new URL("../scripts/firebase-ai.js", import.meta.url), "utf8");
+  const chat = readFileSync(new URL("../scripts/vivid-recall-chat.js", import.meta.url), "utf8");
   assert.match(html, /YOUR STORY, FOUND/);
   assert.match(html, /Describe the plot, a scene, a character/);
+  assert.match(html, /id="recall-chat-form"/);
+  assert.match(html, /scripts\/vivid-recall-chat\.js/);
   assert.match(recommendations, /extractPlotClues\(query, 12\)/);
-  assert.match(recommendations, /No AI service is connected/);
+  assert.match(recommendations, /Gemini is unavailable right now; local clue extraction is still active/);
   assert.doesNotMatch(recommendations, /plotAiFallbackUrl|AIRFORCE|aiResult|fetch\(aiEndpoint/i);
   assert.doesNotMatch(config, /airforceApiKey|AIRFORCE_API_KEY/i);
   assert.doesNotMatch(csp, /api\.airforce/i);
-  assert.doesNotMatch(worker, /vivid-recall-chat/);
-  assert.doesNotMatch(html, /recall-chat|vivid-recall-chat|Conversational AI|Airforce/i);
+  assert.match(ai, /useLimitedUseAppCheckTokens:\s*true/);
+  assert.match(ai, /firebasevertexai\.googleapis\.com|GoogleAIBackend/);
+  assert.match(chat, /fallbackToLocalSearch\(version\)/);
+  assert.match(chat, /Gemini connection failed/);
+  assert.ok(chat.includes(String.raw`/\b401\b/`), "HTTP 401 detection must use word boundaries");
+  assert.ok(ai.includes(String.raw`].join("\n");`), "Gemini prompt must use real line breaks");
+  assert.ok(!ai.includes(String.raw`].join("\\n");`), "Gemini prompt must not contain literal backslash-n separators");
+  assert.match(worker, /\.\/scripts\/vivid-recall-chat\.js/);
+  assert.match(worker, /\.\/scripts\/firebase-ai\.js/);
+  assert.doesNotMatch(worker, /vivid-recall-chat[^"]*\.html/);
+  assert.doesNotMatch(html, /Airforce/i);
 });
-
 test("detects plot recollections phrased without explicit movie-memory cues", () => {
   assert.equal(isPlotDescriptionQuery("A girl gets lost in a forest and finds a secret world where time moves backwards"), true);
   assert.equal(isPlotDescriptionQuery("A family moves into a house and discovers the walls can show the future"), true);
