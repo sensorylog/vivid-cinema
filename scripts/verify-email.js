@@ -1,5 +1,5 @@
 import { auth } from "./firebase.js";
-import { applyActionCode } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
+import { applyActionCode } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
 
 const title = document.getElementById("verification-title");
 const message = document.getElementById("verification-message");
