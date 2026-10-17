@@ -76,12 +76,14 @@ async function verifyCandidates(candidates, version) {
           : await tmdbApi.searchMulti(title);
       if (version !== requestVersion) return [];
       const results = (data?.results || []).filter(item => {
-        const actualType = item.media_type || (item.first_air_date || item.name ? "tv" : "movie");
-        return (type === "all" || actualType === type) && exactTitleMatch({ title }, item);
+        const actualType = item.media_type || (item.first_air_date ? "tv" : item.release_date ? "movie" : item.title ? "movie" : "unknown");
+        return ["movie", "tv"].includes(actualType) &&
+          (type === "all" || actualType === type) &&
+          exactTitleMatch({ title }, item);
       });
       const result = results[0];
       if (result) {
-        const actualType = result.media_type || (result.first_air_date || result.name ? "tv" : "movie");
+        const actualType = result.media_type || (result.first_air_date ? "tv" : "movie");
         if (!verified.some(item => String(item.id) === String(result.id) && item.media_type === actualType)) {
           verified.push({ ...result, media_type: actualType, recallReason: cleanText(candidate.reason, 140) });
         }
