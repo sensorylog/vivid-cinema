@@ -293,12 +293,9 @@ function setActiveType(type) {
 document.addEventListener("DOMContentLoaded", () => {
   window.addEventListener("vivid:plot-search-status", event => {
     const detail = event.detail || {};
-    recallStatusMessage = detail.localOnly
-      ? "VIVID RECALL · Local clue matching is active; no AI service is required."
-      : detail.available
-        ? "VIVID RECALL · AI clue expansion" + (detail.model ? " (" + detail.model + ")" : "") + "; checking real titles against TMDB."
-        : "Using Vivid Recall’s local catalogue matcher.";
-    showStatus(recallStatusMessage);
+    if (detail.localOnly) {
+      recallStatusMessage = "VIVID RECALL · Local clue matching is active";
+    }
   });
   $("intent-form")?.addEventListener("submit", event => {
     event.preventDefault();

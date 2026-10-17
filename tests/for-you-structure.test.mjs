@@ -75,15 +75,13 @@ test("For You records impressions only after a recommendation is actually viewab
   assert.doesNotMatch(script, /items\.slice\(0, 12\)\.forEach\(item => recordBehavior\("recommendation_impression"/);
 });
 
-test("For You exposes AI-assisted status and retains local Vivid Recall fallback", () => {
+test("For You exposes the local-only Recall baseline before AI integration", () => {
   assert.match(recommendations, /localOnly:\s*true/);
   assert.match(recommendations, /Vivid Recall is using local clue extraction and catalogue matching/);
-  assert.match(recommendations, /AI clue expansion is active/);
   assert.match(script, /VIVID RECALL · Local clue matching is active/);
-  assert.match(script, /AI clue expansion/);
-  assert.match(script, /Using Vivid Recall’s local catalogue matcher/);
-  assert.match(script, /showStatus\(recallStatusMessage \|\| \(items\.length/);
-  assert.doesNotMatch(recommendations, /findSemanticPlotMatches|gemini-plot-search/i);
-  assert.doesNotMatch(script, /Gemini interprets|vivid:gemini-plot-search-status/i);
+  assert.match(script, /VIVID RECALL · Local clue matching is active/);
+  assert.match(html, /No AI service connected/);
+  assert.doesNotMatch(recommendations, /plotAiFallbackUrl|AIRFORCE|aiResult|AI clue expansion|Gemini/i);
+  assert.doesNotMatch(script, /AI clue expansion|Gemini interprets|Airforce/i);
+  assert.doesNotMatch(html, /recall-chat|vivid-recall-chat|Conversational AI|Airforce/i);
 });
-

@@ -40,41 +40,7 @@
   <section class="vivid-for-you-hero" aria-labelledby="for-you-title">
     <div class="vivid-for-you-eyebrow"><span class="vivid-for-you-orb" aria-hidden="true"></span> VIVID RECALL <span class="vivid-for-you-memory">YOUR STORY, FOUND</span></div>
     <h1 id="for-you-title">Find your next<br><em>favourite story.</em></h1>
-    <p class="vivid-for-you-lede">Chat with Vivid Recall to identify a story you half remember, or use quick search to explore by mood.</p>
-    <section class="recall-chat-panel" aria-labelledby="recall-chat-heading">
-      <div class="recall-chat-heading">
-        <div>
-          <span class="vivid-for-you-kicker">YOUR AI MEMORY DETECTIVE</span>
-          <h2 id="recall-chat-heading">Let’s figure out that movie.</h2>
-          <p>Talk it through. Add clues, correct guesses, and narrow it down together.</p>
-        </div>
-        <button type="button" id="recall-chat-reset" class="recall-chat-reset" aria-label="Start a new Vivid Recall conversation"><i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i><span>New chat</span></button>
-      </div>
-      <div id="recall-chat-messages" class="recall-chat-messages" role="log" aria-live="polite" aria-relevant="additions text"></div>
-      <form id="recall-chat-form" class="recall-chat-form">
-        <label class="vivid-intent-label" for="recall-chat-input">What do you remember?</label>
-        <div class="recall-chat-input-wrap">
-          <textarea id="recall-chat-input" name="message" rows="2" maxlength="700" placeholder="A guy finds a remote that lets him skip parts of his life…" autocomplete="off" required></textarea>
-          <button id="recall-chat-send" type="submit">Send <i class="bi bi-arrow-up-right" aria-hidden="true"></i></button>
-        </div>
-        <div class="recall-chat-footer">
-          <label for="recall-chat-type">Looking for</label>
-          <select id="recall-chat-type" aria-label="Type of title">
-            <option value="all">Movie or series</option>
-            <option value="movie">Movie</option>
-            <option value="tv">TV series</option>
-          </select>
-          <span id="recall-chat-status" role="status" aria-live="polite">Airforce AI · Real catalogue checks</span>
-        </div>
-      </form>
-      <div class="recall-chat-starters" aria-label="Example memories">
-        <button type="button" data-recall-prompt="I remember a movie where someone could see what would happen before it happened.">Predicting the future</button>
-        <button type="button" data-recall-prompt="It was about a family trapped inside a house where strange things kept happening.">A strange house</button>
-        <button type="button" data-recall-prompt="I only remember one scene: a child talks to someone who has died.">One scene I remember</button>
-      </div>
-      <p class="recall-chat-note"><i class="bi bi-shield-check" aria-hidden="true"></i> AI suggestions are checked against TMDB before title cards appear. If AI is unavailable, the regular local Recall search still works.</p>
-    </section>
-
+    <p class="vivid-for-you-lede">Describe a story you half remember, or search by mood. Vivid Recall will match your clues against the catalogue.</p>
     <form id="intent-form" class="vivid-intent-form">
       <label class="vivid-intent-label" for="intent-query">Quick search by mood or filter</label>
       <div class="vivid-intent-input-wrap">
@@ -82,7 +48,7 @@
         <input id="intent-query" name="intent" type="search" autocomplete="off" maxlength="500" placeholder="A movie where time keeps resetting…" aria-describedby="intent-help">
         <button type="submit"><span>Find matches</span><i class="bi bi-arrow-up-right" aria-hidden="true"></i></button>
       </div>
-      <p id="intent-help" class="vivid-intent-help">Use quick search for moods and filters. For a half-remembered story, chat with Vivid Recall above.</p>
+      <p id="intent-help" class="vivid-intent-help">Describe the plot, a scene, a character, or a strange detail to find matching titles.</p>
     </form>
     <div class="vivid-intent-examples" aria-label="Example searches">
       <button type="button" data-example="A funny movie under 2 hours">Funny · under 2 hours</button>
@@ -136,12 +102,11 @@
     <div id="because-grid" class="vivid-for-you-grid vivid-for-you-grid-compact"></div>
   </section>
 
-  <p class="vivid-for-you-privacy"><i class="bi bi-shield-check" aria-hidden="true"></i> VIVID RECALL · Airforce conversational AI · TMDB-verified titles · Local matching fallback · No Cloud Functions.</p>
+  <p class="vivid-for-you-privacy"><i class="bi bi-shield-check" aria-hidden="true"></i> VIVID RECALL · Local clue matching · TMDB catalogue · No AI service connected.</p>
 </main>
 <script type="module" src="scripts/app-shell.js"></script>
 <script type="module" src="scripts/nav-auth.js"></script>
 <script type="module" src="scripts/for-you.js"></script>
-<script type="module" src="scripts/vivid-recall-chat.js"></script>
 <script type="module" src="scripts/atmosphere.js"></script>
 <script type="module" src="scripts/i18n.js"></script>
 </body>

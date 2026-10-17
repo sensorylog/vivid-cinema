@@ -11,9 +11,6 @@ export const VIVID_CONFIG = Object.freeze({
     vidsrcEmbedBaseUrl: "https://vidsrc.sh",
     vidlinkEmbedBaseUrl: "https://vidlink.pro",
     vidplusEmbedBaseUrl: "https://player.vidplus.to",
-    // TEMPORARY DIRECT-AIRFORCE TEST: this browser key is visible to anyone inspecting the deployed site.
-    // Use a newly rotated test key only; remove it after testing and never use a production key here.
-    airforceApiKey: "sk-air-lWTyIUgQBrLlmQxNQYzh9c1piVyto9zE7UjFTNX2SzGBeWZT",
     // Add exact HTTPS hostnames only after verifying an authorized direct-stream provider.
     directStreamHosts: Object.freeze([]),
     language: "en-US"

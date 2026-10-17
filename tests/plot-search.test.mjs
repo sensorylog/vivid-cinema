@@ -106,16 +106,21 @@ test("local concept expansion recognises common plot devices without a hosted mo
   assert.ok(getPlotConceptPhrases("Two people swap bodies overnight").includes("body swap"));
 });
 
-test("For You describes optional AI assistance and keeps local fallback", () => {
+test("Vivid Recall starts from a clean local-only baseline", () => {
   const html = readFileSync(new URL("../for-you.html", import.meta.url), "utf8");
   const recommendations = readFileSync(new URL("../scripts/recommendations.js", import.meta.url), "utf8");
+  const config = readFileSync(new URL("../scripts/config.js", import.meta.url), "utf8");
+  const worker = readFileSync(new URL("../service-worker.js", import.meta.url), "utf8");
+  const csp = readFileSync(new URL("../firebase.json", import.meta.url), "utf8");
   assert.match(html, /YOUR STORY, FOUND/);
-  assert.match(html, /Conversational AI/i);
-  assert.match(html, /Local matching fallback/i);
-  assert.match(html, /No Cloud Functions/i);
-  assert.match(recommendations, /VIVID_CONFIG\.api\.plotAiFallbackUrl/);
+  assert.match(html, /Describe the plot, a scene, a character/);
   assert.match(recommendations, /extractPlotClues\(query, 12\)/);
-  assert.match(readFileSync(new URL("../scripts/vivid-recall-chat.js", import.meta.url), "utf8"), /mode: "chat"/);
+  assert.match(recommendations, /No AI service is connected/);
+  assert.doesNotMatch(recommendations, /plotAiFallbackUrl|AIRFORCE|aiResult|fetch\(aiEndpoint/i);
+  assert.doesNotMatch(config, /airforceApiKey|AIRFORCE_API_KEY/i);
+  assert.doesNotMatch(csp, /api\.airforce/i);
+  assert.doesNotMatch(worker, /vivid-recall-chat/);
+  assert.doesNotMatch(html, /recall-chat|vivid-recall-chat|Conversational AI|Airforce/i);
 });
 
 test("detects plot recollections phrased without explicit movie-memory cues", () => {
@@ -233,18 +238,3 @@ test("Recall ranks corroborated plot evidence above generic overlap across a sma
   }
 });
 
-test("Vivid Recall exposes a multi-turn chat UI with verified result cards and a fallback path", () => {
-  const html = readFileSync(new URL("../for-you.html", import.meta.url), "utf8");
-  const chat = readFileSync(new URL("../scripts/vivid-recall-chat.js", import.meta.url), "utf8");
-  const worker = readFileSync(new URL("../cloudflare/plot-ai-worker.js", import.meta.url), "utf8");
-  assert.match(html, /id="recall-chat-form"/);
-  assert.match(html, /id="recall-chat-messages"/);
-  assert.match(html, /id="recall-chat-input"/);
-  assert.match(html, /scripts\/vivid-recall-chat\.js/);
-  assert.match(chat, /mode: "chat"/);
-  assert.match(chat, /verifyCandidates/);
-  assert.match(chat, /TMDB-verified matches/);
-  assert.match(chat, /switching to local Recall/);
-  assert.match(worker, /conversational text chat/);
-  assert.match(worker, /role: "system"/);
-});
