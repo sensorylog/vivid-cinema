@@ -3,7 +3,7 @@ import { getLocalLibrary } from "./library.js";
 import { normalizeResults } from "./media.js";
 import { getTasteProfile, getNotForMeKeys, getFeedbackState, getTasteStrength, getRecommendationMemory, recordBehavior } from "./intelligence.js";
 import { switchLocalOwner } from "./local-owner.js";
-import { buildPlotKeywordQueries, scorePlotCandidate, scorePlotCandidates } from "./plot-search.js";
+import { buildPlotKeywordQueries, extractPlotClues, scorePlotCandidate, scorePlotCandidates } from "./plot-search.js";
 
 const PROGRESS_KEY = "vivid:progress:v1";
 const FOR_YOU_CACHE_KEY = "vivid:for-you:v1";
@@ -708,17 +708,15 @@ export async function getPlotMatchRecommendations(intent = {}, limit = 18) {
 
   const requestedType = ["movie", "tv"].includes(intent.mediaType) ? intent.mediaType : "all";
   const mediaTypes = requestedType === "all" ? ["movie", "tv"] : [requestedType];
-  // Experimental local ML-style matching. TMDB supplies the catalogue;
-  // all interpretation, concept expansion, and ranking happens in-browser.
-  const semantic = { clues: [], candidates: [], experimental: true };
+  // Deterministic, browser-side clue extraction. No hosted model or AI service is called.
+  const semantic = { clues: extractPlotClues(intent.query || "", 12), candidates: [], localOnly: true };
   const keywordResponses = await Promise.allSettled(queries.map(query => tmdbApi.searchKeywords(query)));
   if (currentProgressOwner() !== ownerAtStart) return [];
-  window.dispatchEvent(new CustomEvent("vivid:gemini-plot-search-status", {
+  window.dispatchEvent(new CustomEvent("vivid:plot-search-status", {
     detail: {
       available: false,
       localOnly: true,
-      experimental: true,
-      message: "Experimental local matching is active. No AI service is required."
+      message: "Vivid Recall is using local clue extraction and catalogue matching. No AI service is required."
     }
   }));
   const allKeywordResponses = keywordResponses;
