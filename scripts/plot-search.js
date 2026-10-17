@@ -297,7 +297,7 @@ export function scorePlotCandidates(query = "", candidates = [], clues = []) {
     // Reward candidates that support multiple distinct story devices, not just
     // one highly repeated trope such as a character reliving the same day.
     const conceptCorroboration = Math.min(6, Math.max(0, conceptHits - 1) * 2.25);
-    const distinctiveObjectHit = /\\b(?:remote|device|watch|button|phone|mirror|door|book|tape|camera|mask|key|letter|toy|machine)\\b/i.test(query) && semanticClues.some(clue => /\\b(?:remote|device|watch|button|phone|mirror|door|book|tape|camera|mask|key|letter|toy|machine)\\b/i.test(clue) && words(clue).every(term => termMatches(term, candidateTerms)));
+    const distinctiveObjectHit = /\b(?:remote|device|watch|button|phone|mirror|door|book|tape|camera|mask|key|letter|toy|machine)\b/i.test(query) && semanticClues.some(clue => /\b(?:remote|device|watch|button|phone|mirror|door|book|tape|camera|mask|key|letter|toy|machine)\b/i.test(clue) && words(clue).every(term => termMatches(term, candidateTerms)));
     const objectCorroboration = distinctiveObjectHit ? 2.2 : 0;
     const plotScore = Number((baseScore * (0.78 + Math.min(1.25, idf * 0.35)) + corroboration + queryCoverage * 1.2 + conceptCorroboration + objectCorroboration).toFixed(3));
     const previous = scored.get(identity);
