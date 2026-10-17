@@ -148,3 +148,19 @@ test("live remembered-plot flow uses deterministic clues and never calls Gemini"
   assert.doesNotMatch(recommendations, /gemini-plot-search|findSemanticPlotMatches|vivid:gemini-plot-search-status/i);
   assert.doesNotMatch(forYou, /Gemini interprets|vivid:gemini-plot-search-status/i);
 });
+
+
+test("matches equivalent magic/magical wording and ranks the distinctive object above a generic time-loop match", () => {
+  const ranked = scorePlotCandidates("A woman relives the same day and discovers a magic remote", [
+    { id: 1, media_type: "movie", title: "Groundhog Day", overview: "A man relives the same day repeatedly." },
+    { id: 2, media_type: "movie", title: "Click", overview: "An architect discovers a magical universal remote that lets him control time and changes his life." }
+  ]);
+  assert.equal(ranked[0].title, "Click");
+  assert.ok(ranked[0].plotScore > ranked[1].plotScore);
+});
+
+test("weak or sparse Recall results trigger a wider but still constrained catalogue fallback", () => {
+  const source = readFileSync(new URL("../scripts/recommendations.js", import.meta.url), "utf8");
+  assert.match(source, /if \(scored\.length < 3 \|\| Number\(scored\[0\]\?\.plotScore \|\| 0\) < 12\)/);
+  assert.match(source, /for \(const page of \[1, 2\]\)/);
+});

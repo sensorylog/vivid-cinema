@@ -196,8 +196,16 @@ function candidateFields(candidate = {}) {
 
 function termMatches(term, searchable) {
   if (searchable.has(term)) return true;
+  // Catalogue synopses often use "magical" where a user says "magic".
+  // Treat this as a narrow synonym, not a broad fuzzy match that creates noise.
+  if ((term === "magic" && searchable.has("magical")) ||
+      (term === "magical" && searchable.has("magic"))) return true;
   const stem = term.length > 5 ? term.replace(/(?:ing|ed|es|s)$/, "") : term;
-  return stem.length >= 3 && searchable.has(stem);
+  if (stem.length >= 3 && searchable.has(stem)) return true;
+  return term.length > 5 && [...searchable].some(word =>
+    word.length > 5 && (word.startsWith(term) || term.startsWith(word)) &&
+    Math.abs(word.length - term.length) <= 3
+  );
 }
 
 /**
