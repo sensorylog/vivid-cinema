@@ -51,7 +51,7 @@ test("plot scoring downweights generic overlaps and normalizes accented text", (
 });
 
 
-test("semantic clues improve remembered-plot ranking when the user's wording differs from TMDB synopsis text", () => {
+test("explicit clue phrases improve remembered-plot ranking when wording differs from synopsis text", () => {
   const query = "A boy finds a strange object and everything in his life changes";
   const candidate = {
     id: "1",
