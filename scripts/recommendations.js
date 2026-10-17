@@ -439,9 +439,9 @@ function scoreCandidate(item, taste, progress, feedback, recentGenres = new Set(
   const countryScore = Math.max(0, Math.min(3, countryCodes.reduce((sum, code) => sum + Number(taste.countries?.[code] || 0), 0)));
   const year = Number(String(source.release_date || source.first_air_date || item.date || "").slice(0, 4));
   const decade = year >= 1900 ? String(Math.floor(year / 10) * 10) : "";
-  const decadeScore = decade ? Math.max(0, Math.min(3, Number(taste.decades?.[decade] || 0)) : 0;
+  const decadeScore = decade ? Math.max(0, Math.min(3, Number(taste.decades?.[decade] || 0))) : 0;
   const quality = Math.min(1, Math.max(0, Number(item.vote_average || 0) / 10));
-  const popularity = Math.min(1, Math.log10(1 + Math.max(0, Number(item.popularity || 0)) / 4);
+  const popularity = Math.min(1, Math.log10(1 + Math.max(0, Number(item.popularity || 0))) / 4);
   const feedbackBoost = feedback[keyFor(item)]?.kind === "like" ? 6 : 0;
 
   // Negative feedback is a soft, explainable preference penalty in addition
@@ -465,7 +465,7 @@ function scoreCandidate(item, taste, progress, feedback, recentGenres = new Set(
     sum + (directorIds.has(String(id)) ? Math.max(0, Number(weight) || 0) : 0), 0));
 
   const { seenPenalty, clickRecovery } = scoreRecommendationExposure(recommendationMemory.get(keyFor(item)));
-  const recentGenreBoost = genreIds.filter(id => recentGenres.has(Number(id)).slice(0, 2).length * .75;
+  const recentGenreBoost = genreIds.filter(id => recentGenres.has(Number(id))).slice(0, 2).length * .75;
   const releaseValue = source.release_date || source.first_air_date || item.date || "";
   const releaseTime = Date.parse(releaseValue);
   const ageDays = Number.isFinite(releaseTime) ? Math.max(0, (Date.now() - releaseTime) / 86400000) : Infinity;
