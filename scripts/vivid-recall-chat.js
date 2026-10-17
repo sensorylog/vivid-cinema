@@ -47,6 +47,44 @@ function setStatus(text) {
   if (status) status.textContent = text;
 }
 
+function errorDiagnostic(error) {
+  const customData = error?.customData || null;
+  const rawResponse = customData?.serverResponse ||
+    customData?.response ||
+    customData?.serverResponseText ||
+    error?.details ||
+    null;
+  let responseText = "";
+  if (rawResponse) {
+    if (typeof rawResponse === "string") {
+      try {
+        const parsed = JSON.parse(rawResponse);
+        const serverError = parsed?.error || parsed;
+        responseText = [
+          serverError?.status,
+          serverError?.code,
+          serverError?.message
+        ].filter(Boolean).join(" · ") || rawResponse;
+      } catch {
+        responseText = rawResponse;
+      }
+    } else {
+      const serverError = rawResponse?.error || rawResponse;
+      responseText = [
+        serverError?.status,
+        serverError?.code,
+        serverError?.message
+      ].filter(Boolean).join(" · ") || JSON.stringify(rawResponse);
+    }
+  }
+  return cleanText([
+    error?.code,
+    error?.status ? "HTTP " + error.status : "",
+    error?.message,
+    responseText && responseText !== error?.message ? "Server: " + responseText : ""
+  ].filter(Boolean).join(" · ") || "Unknown error", 420);
+}
+
 function normalizeTitle(value) {
   return String(value || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "")
     .toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
@@ -174,7 +212,7 @@ async function sendMessage(text) {
       : "Gemini couldn’t connect this time. Your clues are still saved in this chat, and I’ve switched to local catalogue search. The status below shows the actual error so we can diagnose it.";
     addMessage("assistant", userFacingError);
     fallbackToLocalSearch(version);
-    setStatus((needsSignIn ? "Gemini 401 · " : "Gemini connection failed · ") + code);
+    setStatus((needsSignIn ? "Gemini 401 · " : quotaFailure ? "Gemini 429 · " : "Gemini connection failed · ") + fullDiagnostic);
   } finally {
     if (version === requestVersion) {
       setBusy(false);
