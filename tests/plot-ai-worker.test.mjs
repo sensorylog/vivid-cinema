@@ -75,3 +75,54 @@ test("Airforce Worker rejects an unapproved origin without calling the provider"
     globalThis.fetch = originalFetch;
   }
 });
+
+test("Vivid Recall Worker supports conversational turns and returns a natural chat reply", async () => {
+  const originalFetch = globalThis.fetch;
+  let requestBody;
+  globalThis.fetch = async (_url, init) => {
+    requestBody = JSON.parse(init.body);
+    return new Response(JSON.stringify({
+      model: "gpt-oss-20b",
+      choices: [{
+        message: {
+          content: JSON.stringify({
+            reply: "That sounds like a time-loop story. Do you remember whether the main character was stuck reliving one day?",
+            clues: ["time loop", "repeating day"],
+            candidates: []
+          })
+        }
+      }]
+    }), { status: 200, headers: { "Content-Type": "application/json" } });
+  };
+
+  try {
+    const request = new Request("https://worker.test/api/recall", {
+      method: "POST",
+      headers: {
+        Origin: "https://vivid-cinema.web.app",
+        "Content-Type": "application/json",
+        "CF-Connecting-IP": "worker-chat-test"
+      },
+      body: JSON.stringify({
+        mode: "chat",
+        mediaType: "all",
+        messages: [
+          { role: "user", content: "I remember a guy stuck in the same day." },
+          { role: "assistant", content: "Do you remember anything unusual about how it happened?" },
+          { role: "user", content: "He kept waking up and it started again." }
+        ]
+      })
+    });
+    const response = await worker.fetch(request, { AIRFORCE_API_KEY: "test-secret" });
+    const payload = await response.json();
+    assert.equal(response.status, 200);
+    assert.equal(requestBody.messages[0].role, "system");
+    assert.match(requestBody.messages[0].content, /conversational text chat/i);
+    assert.deepEqual(requestBody.messages.slice(-3).map(item => item.role), ["user", "assistant", "user"]);
+    assert.match(payload.reply, /time-loop story/i);
+    assert.deepEqual(payload.clues, ["time loop", "repeating day"]);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
