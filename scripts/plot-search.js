@@ -287,7 +287,7 @@ export function scorePlotCandidates(query = "", candidates = [], clues = []) {
       ? matchedTerms.reduce((sum, term) => sum + Math.log(1 + (totalDocuments - (documentFrequency.get(term) || 0) + 0.5) / ((documentFrequency.get(term) || 0) + 0.5)), 0) / matchedTerms.length
       : 0;
     // Multiple independently matching clues are stronger evidence than one broad word.
-    const corroboration = Math.min(5, (clueScores[1] || 0) * 0.24 + Math.max(0, distinctClues - 2) * 0.65);
+    const corroboration = Math.min(7, (clueScores[1] || 0) * 0.6 + Math.max(0, distinctClues - 2) * 0.9);
     const queryCoverage = Math.min(1, matchedTerms.length / Math.max(2, queryTerms.length));
     const conceptPhrases = getPlotConceptPhrases(query);
     const conceptHits = conceptPhrases.filter(phrase => {
@@ -296,8 +296,10 @@ export function scorePlotCandidates(query = "", candidates = [], clues = []) {
     }).length;
     // Reward candidates that support multiple distinct story devices, not just
     // one highly repeated trope such as a character reliving the same day.
-    const conceptCorroboration = Math.min(4, Math.max(0, conceptHits - 1) * 1.5);
-    const plotScore = Number((baseScore * (0.78 + Math.min(1.25, idf * 0.35)) + corroboration + queryCoverage * 1.2 + conceptCorroboration).toFixed(3));
+    const conceptCorroboration = Math.min(6, Math.max(0, conceptHits - 1) * 2.25);
+    const distinctiveObjectHit = /\\b(?:remote|device|watch|button|phone|mirror|door|book|tape|camera|mask|key|letter|toy|machine)\\b/i.test(query) && semanticClues.some(clue => /\\b(?:remote|device|watch|button|phone|mirror|door|book|tape|camera|mask|key|letter|toy|machine)\\b/i.test(clue) && words(clue).every(term => termMatches(term, candidateTerms)));
+    const objectCorroboration = distinctiveObjectHit ? 2.2 : 0;
+    const plotScore = Number((baseScore * (0.78 + Math.min(1.25, idf * 0.35)) + corroboration + queryCoverage * 1.2 + conceptCorroboration + objectCorroboration).toFixed(3));
     const previous = scored.get(identity);
     if (!previous || plotScore > previous.plotScore) scored.set(identity, { ...item, plotScore });
   });
