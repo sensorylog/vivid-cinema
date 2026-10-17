@@ -127,7 +127,7 @@ export async function sendRecallChatMessage(messages, mediaType = "all") {
     throw new Error("Gemini chat requires the deployed Hosting site because App Check is skipped on localhost.");
   }
   if (appCheckError) {
-    throw new Error("Firebase App Check did not initialize. Local catalogue search is still available.");
+    throw new Error("Firebase App Check did not initialize" + (appCheckError?.code ? " (" + appCheckError.code + ")" : "") + (appCheckError?.message ? ": " + String(appCheckError.message).slice(0, 220) : ".") + " Local catalogue search is still available.");
   }
   const safeMessages = (Array.isArray(messages) ? messages : [])
     .filter(item => item && ["user", "assistant"].includes(item.role))
@@ -144,7 +144,7 @@ export async function sendRecallChatMessage(messages, mediaType = "all") {
   const model = await getRecallChatModel();
   const transcript = safeMessages.map(item =>
     (item.role === "user" ? "USER" : "VIVID RECALL") + ": " + item.content
-  ).join("\\n");
+  ).join("\n");
   const prompt = [
     "You are Vivid Recall, a warm, natural conversational movie and TV memory detective.",
     "Your primary job is to chat naturally with a user trying to identify a movie or TV show they half remember.",
@@ -155,7 +155,7 @@ export async function sendRecallChatMessage(messages, mediaType = "all") {
     "The user is looking for: " + (["movie", "tv"].includes(mediaType) ? mediaType === "tv" ? "TV series" : "movies" : "movies or TV series") + ".",
     "Return only a JSON object with string field reply and array field candidates.",
     "Each candidates item must contain title, mediaType (movie, tv, or all), and reason (short string).",
-    "Conversation so far:\\n" + transcript
+    "Conversation so far:\n" + transcript
   ].join("\\n");
 
   const result = await Promise.race([
