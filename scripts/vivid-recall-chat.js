@@ -137,7 +137,7 @@ async function sendMessage(text) {
       body: JSON.stringify({
         mode: "chat",
         mediaType: $("recall-chat-type")?.value || "all",
-        messages: history.slice(-10)
+        messages: history.slice(-6).map(item => ({ role: item.role, content: item.content.slice(0, 500) }))
       }),
       signal: AbortSignal.timeout(27000)
     });
