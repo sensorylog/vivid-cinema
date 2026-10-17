@@ -42,5 +42,7 @@ If the URL is left empty, Vivid Recall remains fully functional with determinist
 - Set `AIRFORCE_API_KEY` using Wrangler secrets, never `[vars]`.
 - The Worker validates the origin, bounds the request text, limits request frequency best-effort, and uses a bounded timeout.
 - Configure an additional Cloudflare rate-limit rule for the Worker endpoint if it is publicly reachable.
-- AI-suggested titles are retrieval hints only. Vivid searches TMDB and uses real catalogue records rather than trusting generated titles.
-- If the Worker, Airforce, or all configured models fail, the browser continues with local Recall.
+- Vivid Recall is a multi-turn AI chat: it can ask one useful follow-up question, incorporate corrections and new clues, and suggest possible titles as the conversation develops.
+- The browser verifies candidate titles against TMDB before rendering result cards. Model-generated titles alone are never treated as verified catalogue records.
+- Each chat request sends only a bounded recent conversation window. If the Worker, Airforce, or all configured models fail, the chat explains the fallback and launches the existing local Recall search.
+- The model's reply is conversational; the `clues` and `candidates` fields are structured search aids used by the UI.
