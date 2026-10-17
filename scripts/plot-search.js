@@ -256,7 +256,10 @@ const PLOT_TERM_EQUIVALENTS = [
   ["funny", "comedy", "hilarious"],
   ["love", "romance", "romantic"],
   ["future", "tomorrow", "upcoming"],
-  ["past", "history", "earlier"]
+  ["past", "history", "earlier"],
+  ["simulation", "simulated", "simulate", "simulator"],
+  ["talk", "talks", "communicate", "communicates", "speak", "speaks"],
+  ["dead", "deceased", "departed", "the dead"]
 ].map(group => new Set(group));
 
 function termMatches(term, searchable) {
