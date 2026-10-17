@@ -145,7 +145,7 @@ async function sendMessage(text) {
       "Never claim certainty without evidence. Suggest at most five plausible catalogue titles; do not invent release years or plot details.",
       'Return ONLY valid JSON in this shape: {"reply":"short natural conversational response","candidates":[{"title":"exact known title","mediaType":"movie or tv","reason":"brief clue match"}]}.',
       "If more details are needed, ask a concise question in reply and return an empty candidates array. If you have plausible matches, explain briefly and return them."
-    ].join("\\n");
+    ].join("\n");
     const response = await fetch(AIRFORCE_URL, {
       method: "POST",
       headers: {
