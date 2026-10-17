@@ -106,7 +106,7 @@ const PLOT_CONCEPTS = [
   { pattern: /\b(?:kidnapp?ed|held hostage|trapped in|can't escape|cannot escape|locked in|locked room)\b/i, phrases: ["kidnapping", "held hostage", "trapped escape", "locked room mystery"] },
   { pattern: /\b(?:falls? in love|love triangle|fake dating|pretend(?:s|ing)? to date|pretends? to be (?:a )?couple)\b/i, phrases: ["love story", "fake dating", "love triangle"] },
   { pattern: /\b(?:travels? back in time|time travel|goes? back in time|future self|visits? the future)\b/i, phrases: ["time travel", "future self", "past and future"] },
-  { pattern: /\b(?:predicts? the future|sees? the future|visions? of the future|dreams? (?:about|of) (?:what happens|the future))\b/i, phrases: ["predicts future", "precognition", "future visions"] },
+  { pattern: /\b(?:predicts? (?:the future|what will happen|tomorrow)|sees? the future|visions? of the future|dreams? (?:about|of) (?:what happens|the future))\b/i, phrases: ["predicts future", "precognition", "future visions"] },
   { pattern: /\b(?:invisible|turns? invisible|becomes? invisible|can'?t be seen)\b/i, phrases: ["invisibility", "invisible person", "invisible man"] },
   { pattern: /\b(?:shrinks?|gets? smaller|tiny people|miniature world)\b/i, phrases: ["shrinking", "miniature world", "tiny people"] },
   { pattern: /\b(?:trapped in a (?:video )?game|inside a video game|game becomes? real|video game world)\b/i, phrases: ["trapped in game", "video game world", "game world"] },
