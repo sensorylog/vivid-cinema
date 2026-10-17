@@ -192,11 +192,21 @@ async function sendMessage(text) {
   } catch (error) {
     if (version !== requestVersion) return;
     const rateLimited = error?.status === 429 || error?.message === "AIRFORCE_RATE_LIMIT";
+    const httpFailure = /^AIRFORCE_HTTP_/.test(error?.message || "");
+    const invalidResponse = error?.code === "AIRFORCE_INVALID_RESPONSE";
+    const missingKey = error?.code === "AIRFORCE_KEY_MISSING";
     const fallback = rateLimited
-      ? "I hit Airforce’s request limit for the moment. Some free-tier access is limited to about one request per minute, so let’s use Vivid’s local matcher for now. You can keep adding clues here and retry the AI later."
-      : "I can keep helping with your memory, but the AI chat service is not connected right now. I’ll run Vivid’s local Recall search for your clue instead.";
+      ? "Airforce is rate-limiting requests right now. I’ll use Vivid’s local matcher for this clue; wait a little before trying AI again."
+      : missingKey
+        ? "Airforce isn’t configured yet. Check airforceApiKey in scripts/config.js."
+        : httpFailure
+          ? "Airforce rejected the request. The status below shows the actual HTTP error."
+          : invalidResponse
+            ? "Airforce returned a response Vivid couldn’t read. Check the request in the browser console."
+            : "Vivid couldn’t connect to Airforce. This can be a network or browser CORS issue; check the browser console and Network tab for the exact error.";
     addMessage("assistant", fallback);
-    setStatus(rateLimited ? "Airforce rate limit · switching to local Recall." : "Airforce unavailable · switching to local Recall.");
+    const diagnostic = missingKey ? "Missing API key · check scripts/config.js" : rateLimited ? "Airforce HTTP 429 · rate limited" : httpFailure ? cleanText(error.message, 260) : invalidResponse ? "Invalid Airforce response" : cleanText(error?.message || "Network/CORS error", 180);
+    setStatus(diagnostic + " · local Recall fallback");
     const search = $("intent-query");
     const form = $("intent-form");
     if (search && form) {
