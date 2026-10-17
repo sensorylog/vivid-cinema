@@ -162,8 +162,8 @@ async function sendMessage(text) {
     console.warn("Vivid Recall Gemini chat failed:", { code: error?.code || null, message: error?.message || String(error) });
     const code = cleanText(error?.code || error?.message || "Unknown error", 110);
     addMessage("assistant", "Gemini couldn’t connect this time. Your clues are still saved in this chat, and I’ve switched to local catalogue search. If this keeps happening, the status below includes the error clue needed to diagnose the connection.");
-    setStatus("Gemini connection failed · " + code);
     fallbackToLocalSearch(version);
+    setStatus("Gemini connection failed · " + code);
   } finally {
     if (version === requestVersion) {
       setBusy(false);
