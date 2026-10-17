@@ -97,3 +97,15 @@ The existing repository tests are regression guards, not yet a measured producti
 ## Non-goals
 
 No Cloud Functions, Blaze requirement, paid AI endpoint, duplicate library/progress store, fabricated metadata, or change to canonical public routes. Vivid Recall remains deterministic and local; stronger matching is heuristic catalogue ranking, not a trained AI model.
+
+
+## Vivid Recall follow-up hardening
+
+The follow-up branch improves deterministic plot recall without claiming semantic-AI behavior:
+
+- Narrowly normalizes common synopsis wording such as “magic” / “magical” and uses conservative morphological matching.
+- Triggers a wider search when the first pass returns fewer than three plausible candidates or weak top evidence.
+- Scans pages 1 and 2 of the same constrained movie/TV discovery query and merges candidates with the first pass before reranking.
+- Adds regressions where a distinctive object clue must outrank a generic time-loop overlap and where sparse results must trigger the wider fallback.
+
+The broader scan is still bounded by TMDB pagination and its available synopsis/keyword metadata. It does not guarantee finding every title, and unsupported plot details are not treated as verified facts.
