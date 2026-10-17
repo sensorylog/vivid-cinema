@@ -131,7 +131,7 @@ function cardMarkup(item, index, compact = false) {
   const mediaLabel = item.media_type === "tv" ? "Series" : "Movie";
   const feedback = getFeedback(item);
   const href = getMediaUrl(item);
-  const reason = item.recommendationReason || (item.sourceLabel === "trending" ? "A popular place to start" : "Picked for you");
+  const reason = item.recommendationReason || (item.sourceLabel === "trending" ? "Popular now" : "Picked for you");
   return `<article class="vivid-for-you-card${compact ? " vivid-for-you-card-compact" : ""}" data-impression-index="${index}">
     <a class="vivid-for-you-poster" href="${escapeHtml(href)}" data-open-index="${index}" aria-label="Explore ${escapeHtml(title)}">
       <img src="${escapeHtml(poster)}" alt="Poster for ${escapeHtml(title)}" loading="lazy" decoding="async">
@@ -198,7 +198,7 @@ function renderItems(items) {
 
 async function loadSecondarySections(expectedRequestId = requestId) {
   const thisSecondaryRequest = ++secondaryRequestId;
-  const continueItems = getContinueWatching(6);
+  const continueItems = getContinueWatching(4);
   $("continue-section").hidden = !continueItems.length;
   $("continue-grid").innerHTML = continueItems.map(item => {
     const title = item.title || item.name || "Continue watching";
@@ -212,7 +212,7 @@ async function loadSecondarySections(expectedRequestId = requestId) {
   }).join("");
 
   try {
-    const nextBecauseItems = await getBecauseYouLiked(8);
+    const nextBecauseItems = await getBecauseYouLiked(6);
     if (expectedRequestId !== requestId || thisSecondaryRequest !== secondaryRequestId) return;
     becauseItems = nextBecauseItems;
     $("because-section").hidden = !becauseItems.length;
@@ -237,10 +237,10 @@ async function loadRecommendations({ refresh = false } = {}) {
   const plotSearch = isPlotDescriptionQuery(intent.query);
   $("recommendation-heading").textContent = plotSearch ? "Titles that may match your memory" : intent.constraints.length ? "Matches for your mood" : "Picks for your next watch";
   $("recommendation-copy").textContent = plotSearch
-    ? "Vivid extracts story clues locally, searches TMDB through multiple routes, and ranks candidates by matching plot evidence."
+    ? "Ranked by matching story clues."
     : intent.constraints.length
-      ? "These results use catalogue filters we can verify."
-      : "A mix of familiar taste and something new to discover.";
+      ? "Filtered to fit your search."
+      : "A little familiar. A little unexpected.";
 
   try {
     if (refresh) {
@@ -250,11 +250,11 @@ async function loadRecommendations({ refresh = false } = {}) {
     }
     let items;
     if (isPlotDescriptionQuery(intent.query)) {
-      items = await getPlotMatchRecommendations(intent, 24);
+      items = await getPlotMatchRecommendations(intent, 16);
     } else if (intentHasFilters(intent)) {
-      items = await getIntentRecommendations(intent, 24);
+      items = await getIntentRecommendations(intent, 16);
     } else {
-      items = await getPersonalRecommendations(24);
+      items = await getPersonalRecommendations(16);
       if (!items.length) {
         const response = await tmdbApi.trending("all", "week", 1);
         items = normalizeResults(response?.results || []).map(item => ({

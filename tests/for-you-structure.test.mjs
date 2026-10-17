@@ -62,8 +62,8 @@ test("For You avoids undeclared intent state and consolidates account-switch rec
 
 test("For You routes remembered-plot descriptions to deterministic catalogue matching", () => {
   assert.match(script, /isPlotDescriptionQuery\(intent\.query\)/);
-  assert.match(script, /getPlotMatchRecommendations\(intent, 24\)/);
-  assert.match(script, /extracts story clues locally, searches TMDB through multiple routes/i);
+  assert.match(script, /getPlotMatchRecommendations\(intent, 16\)/);
+  assert.match(script, /Ranked by matching story clues/i);
 });
 
 

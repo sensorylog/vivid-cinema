@@ -108,7 +108,7 @@ test("local concept expansion recognises common plot devices without a hosted mo
 
 test("For You accurately describes deterministic local Vivid Recall", () => {
   const html = readFileSync(new URL("../for-you.html", import.meta.url), "utf8");
-  assert.match(html, /VIVID RECALL · LOCAL SEARCH/);
+  assert.match(html, /YOUR STORY, FOUND/);
   assert.match(html, /not a trained AI model/i);
   assert.match(html, /requires no paid AI service or Cloud Functions/i);
 });
@@ -185,4 +185,45 @@ test("simple everyday nouns can match common catalogue wording", () => {
 test("Recall searches a wider bounded set of catalogue pages when first results are weak", () => {
   const source = readFileSync(new URL("../scripts/recommendations.js", import.meta.url), "utf8");
   assert.match(source, /for \(const page of \[1, 2, 3\]\)/);
+});
+
+
+test("Recall understands plain-language simulation, ghost, and second-chance descriptions", () => {
+  assert.ok(getPlotConceptPhrases("A guy discovers his whole world is a simulation").includes("simulation"));
+  assert.ok(getPlotConceptPhrases("A child talks to dead people").includes("talks to the dead"));
+  assert.ok(getPlotConceptPhrases("A woman gets a second chance at life").includes("second chance at life"));
+  assert.ok(getPlotConceptPhrases("A man receives messages from his future self").includes("message from the future"));
+});
+
+test("Recall ranks corroborated plot evidence above generic overlap across a small benchmark", () => {
+  const fixtures = [
+    {
+      query: "A woman relives the same day and finds a magic remote",
+      expected: "Click",
+      candidates: [
+        { id: 1, media_type: "movie", title: "Groundhog Day", overview: "A man relives the same day over and over." },
+        { id: 2, media_type: "movie", title: "Click", overview: "An architect discovers a magical universal remote that lets him control time." }
+      ]
+    },
+    {
+      query: "A kid talks to dead people",
+      expected: "The Sixth Sense",
+      candidates: [
+        { id: 3, media_type: "movie", title: "The Sixth Sense", overview: "A boy communicates with spirits and sees dead people." },
+        { id: 4, media_type: "movie", title: "The Parent Trap", overview: "Two children meet at camp and discover they are twins." }
+      ]
+    },
+    {
+      query: "A guy discovers his whole world is a simulation",
+      expected: "The Matrix",
+      candidates: [
+        { id: 5, media_type: "movie", title: "The Matrix", overview: "A hacker discovers reality is a simulated world controlled by machines." },
+        { id: 6, media_type: "movie", title: "The Truman Show", overview: "A man lives in a constructed television world without knowing it." }
+      ]
+    }
+  ];
+  for (const fixture of fixtures) {
+    const ranked = scorePlotCandidates(fixture.query, fixture.candidates);
+    assert.equal(ranked[0]?.title, fixture.expected, fixture.query);
+  }
 });

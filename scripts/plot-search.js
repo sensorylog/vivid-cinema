@@ -152,6 +152,11 @@ const PLOT_CONCEPTS = [
   { pattern: /\b(?:finds? a secret room|hidden room behind|secret door in|discovers? a hidden passage|mysterious door leads?)\b/i, phrases: ["secret room", "hidden passage", "secret door"] },
   { pattern: /\b(?:loses? all (?:his|her|their) memories|wakes? up with no memory|can't remember who (?:they|he|she) is|forgets? (?:his|her|their) past)\b/i, phrases: ["amnesia", "memory loss", "lost memories"] },
   { pattern: /\b(?:people disappear overnight|whole town disappears|everyone vanishes|mysterious disappearances?)\b/i, phrases: ["mass disappearance", "people vanish", "mysterious disappearance"] },
+  { pattern: /\b(?:lives? in a simulation|world is a simulation|fake reality|reality is not real|virtual world is real|simulation controls? (?:their|his|her) life)\b/i, phrases: ["simulation", "virtual reality", "artificial reality"] },
+  { pattern: /\b(?:talks? to dead people|can see dead people|sees? dead people|communicates? with the dead|dead people speak to (?:him|her|them))\b/i, phrases: ["talks to the dead", "can see ghosts", "supernatural haunting"] },
+  { pattern: /\b(?:gets? a second chance at life|relives? (?:his|her|their) life|starts? life over|restarts? (?:his|her|their) life|redo(?:es)? (?:his|her|their) life)\b/i, phrases: ["second chance at life", "life reset", "time loop"] },
+  { pattern: /\b(?:receives? messages? from (?:the |his |her |their )?future(?: self)?|message from (?:his|her|their) future self|warns? (?:him|her|them) about the future|future self warns?)\b/i, phrases: ["future self", "message from the future", "time travel"] },
+  { pattern: /\b(?:people are replaced by clones|replaced by copies|duplicate people|everyone has a double|copies replace people)\b/i, phrases: ["human clone", "duplicate person", "secret identity"] },
 ];
 
 export function getPlotConceptPhrases(query = "") {
@@ -251,7 +256,10 @@ const PLOT_TERM_EQUIVALENTS = [
   ["funny", "comedy", "hilarious"],
   ["love", "romance", "romantic"],
   ["future", "tomorrow", "upcoming"],
-  ["past", "history", "earlier"]
+  ["past", "history", "earlier"],
+  ["simulation", "simulated", "simulate", "simulator"],
+  ["talk", "talks", "communicate", "communicates", "speak", "speaks"],
+  ["dead", "deceased", "departed", "the dead"]
 ].map(group => new Set(group));
 
 function termMatches(term, searchable) {

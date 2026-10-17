@@ -38,23 +38,23 @@
 </header>
 <main class="vivid-for-you-main">
   <section class="vivid-for-you-hero" aria-labelledby="for-you-title">
-    <div class="vivid-for-you-eyebrow"><span class="vivid-for-you-orb" aria-hidden="true"></span> VIVID DISCOVERY LAB <span class="vivid-for-you-memory">VIVID RECALL · LOCAL SEARCH</span></div>
-    <h1 id="for-you-title">Your next favourite<br><em>starts here.</em></h1>
-    <p class="vivid-for-you-lede">Tell Vivid what you're in the mood for. Vivid combines your saved titles, feedback, viewing progress and catalogue metadata to make personalized picks. Results can be imperfect, and you stay in control.</p>
+    <div class="vivid-for-you-eyebrow"><span class="vivid-for-you-orb" aria-hidden="true"></span> VIVID RECALL <span class="vivid-for-you-memory">YOUR STORY, FOUND</span></div>
+    <h1 id="for-you-title">Find your next<br><em>favourite story.</em></h1>
+    <p class="vivid-for-you-lede">Search by mood, or describe a movie you half remember.</p>
     <form id="intent-form" class="vivid-intent-form">
-      <label class="vivid-intent-label" for="intent-query">What do you feel like watching?</label>
+      <label class="vivid-intent-label" for="intent-query">Search by mood or memory</label>
       <div class="vivid-intent-input-wrap">
         <i class="bi bi-stars" aria-hidden="true"></i>
-        <input id="intent-query" name="intent" type="search" autocomplete="off" maxlength="500" placeholder="I remember a movie where a man relives the same day…" aria-describedby="intent-help">
-        <button type="submit"><span>Find my next watch</span><i class="bi bi-arrow-up-right" aria-hidden="true"></i></button>
+        <input id="intent-query" name="intent" type="search" autocomplete="off" maxlength="500" placeholder="A movie where time keeps resetting…" aria-describedby="intent-help">
+        <button type="submit"><span>Find matches</span><i class="bi bi-arrow-up-right" aria-hidden="true"></i></button>
       </div>
-      <p id="intent-help" class="vivid-intent-help">Forgot a title? Describe the plot, characters, an object or a scene. Vivid Recall extracts clues in your browser, searches catalogue keywords and summaries, then ranks likely matches. Specific details help most.</p>
+      <p id="intent-help" class="vivid-intent-help">Describe a plot, scene, character or object. Vivid Recall matches clues against TMDB and ranks likely titles.</p>
     </form>
     <div class="vivid-intent-examples" aria-label="Example searches">
-      <button type="button" data-example="A funny movie under 2 hours">Funny movie · under 2 hours</button>
-      <button type="button" data-example="Japanese anime under 25 minutes">Anime · short episodes</button>
+      <button type="button" data-example="A funny movie under 2 hours">Funny · under 2 hours</button>
+      <button type="button" data-example="Japanese anime under 25 minutes">Anime · short</button>
       <button type="button" data-example="Korean thriller series">Korean thriller series</button>
-      <button type="button" data-example="I remember a movie where a man relives the same day">Remembered plot · same day repeats</button>
+      <button type="button" data-example="I remember a movie where a man relives the same day">Remembered plot · time loop</button>
     </div>
   </section>
 
@@ -66,7 +66,7 @@
       <button type="button" data-type="tv" aria-pressed="false">Series</button>
       <button type="button" data-type="anime" aria-pressed="false">Anime</button>
     </div>
-    <button type="button" id="clear-intent" class="vivid-for-you-clear">Clear filters</button>
+    <a href="live.html" class="vivid-for-you-live-link"><i class="bi bi-broadcast-pin" aria-hidden="true"></i> Live TV</a><button type="button" id="clear-intent" class="vivid-for-you-clear">Reset</button>
   </section>
 
   <section id="intent-summary" class="vivid-intent-summary" aria-live="polite" hidden>
@@ -101,7 +101,7 @@
     <div id="because-grid" class="vivid-for-you-grid vivid-for-you-grid-compact"></div>
   </section>
 
-  <p class="vivid-for-you-privacy"><i class="bi bi-shield-check" aria-hidden="true"></i> VIVID RECALL: plot descriptions are processed in your browser using deterministic clue extraction and catalogue-evidence ranking. It is not a trained AI model, may return imperfect matches, and requires no paid AI service or Cloud Functions.</p>
+  <p class="vivid-for-you-privacy"><i class="bi bi-shield-check" aria-hidden="true"></i> VIVID RECALL · Local matching (not a trained AI model) · TMDB search · Requires no paid AI service or Cloud Functions.</p>
 </main>
 <script type="module" src="scripts/app-shell.js"></script>
 <script type="module" src="scripts/nav-auth.js"></script>
