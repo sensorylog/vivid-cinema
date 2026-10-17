@@ -135,7 +135,9 @@ async function sendMessage(text) {
 
   try {
     if (!apiKey() || apiKey() === "PASTE_AIRFORCE_API_KEY_HERE") {
-      throw new Error("Add your Airforce API key in scripts/config.js to enable the test.");
+      const error = new Error("AIRFORCE_KEY_MISSING");
+      error.code = "AIRFORCE_KEY_MISSING";
+      throw error;
     }
     const mediaType = $("recall-chat-type")?.value || "all";
     const systemPrompt = [
@@ -165,11 +167,22 @@ async function sendMessage(text) {
       signal: AbortSignal.timeout(27000)
     });
     if (!response.ok) {
-      const error = new Error(response.status === 429 ? "AIRFORCE_RATE_LIMIT" : "Vivid Recall could not reach its AI models.");
+      let detail = "";
+      try {
+        const body = await response.json();
+        detail = cleanText(body?.error?.message || body?.message || body?.error || "", 220);
+      } catch { /* Response may not contain JSON. */ }
+      const error = new Error(response.status === 429 ? "AIRFORCE_RATE_LIMIT" : "AIRFORCE_HTTP_" + response.status + (detail ? ": " + detail : ""));
       error.status = response.status;
       throw error;
     }
-    const apiPayload = await response.json();
+    let apiPayload;
+    try { apiPayload = await response.json(); }
+    catch {
+      const error = new Error("AIRFORCE_INVALID_RESPONSE");
+      error.code = "AIRFORCE_INVALID_RESPONSE";
+      throw error;
+    }
     if (version !== requestVersion) return;
     const rawContent = apiPayload?.choices?.[0]?.message?.content;
     let payload = {};
