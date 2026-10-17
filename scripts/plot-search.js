@@ -155,7 +155,7 @@ const PLOT_CONCEPTS = [
   { pattern: /\b(?:lives? in a simulation|world is a simulation|fake reality|reality is not real|virtual world is real|simulation controls? (?:their|his|her) life)\b/i, phrases: ["simulation", "virtual reality", "artificial reality"] },
   { pattern: /\b(?:talks? to dead people|can see dead people|sees? dead people|communicates? with the dead|dead people speak to (?:him|her|them))\b/i, phrases: ["talks to the dead", "can see ghosts", "supernatural haunting"] },
   { pattern: /\b(?:gets? a second chance at life|relives? (?:his|her|their) life|starts? life over|restarts? (?:his|her|their) life|redo(?:es)? (?:his|her|their) life)\b/i, phrases: ["second chance at life", "life reset", "time loop"] },
-  { pattern: /\b(?:receives? messages? from the future|message from (?:his|her|their) future self|warns? (?:him|her|them) about the future|future self warns?)\b/i, phrases: ["future self", "message from the future", "time travel"] },
+  { pattern: /\b(?:receives? messages? from (?:the |his |her |their )?future(?: self)?|message from (?:his|her|their) future self|warns? (?:him|her|them) about the future|future self warns?)\b/i, phrases: ["future self", "message from the future", "time travel"] },
   { pattern: /\b(?:people are replaced by clones|replaced by copies|duplicate people|everyone has a double|copies replace people)\b/i, phrases: ["human clone", "duplicate person", "secret identity"] },
 ];
 
