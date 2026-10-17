@@ -110,11 +110,12 @@ test("For You describes optional AI assistance and keeps local fallback", () => 
   const html = readFileSync(new URL("../for-you.html", import.meta.url), "utf8");
   const recommendations = readFileSync(new URL("../scripts/recommendations.js", import.meta.url), "utf8");
   assert.match(html, /YOUR STORY, FOUND/);
-  assert.match(html, /Optional AI clue expansion/i);
+  assert.match(html, /Conversational AI/i);
   assert.match(html, /Local matching fallback/i);
   assert.match(html, /No Cloud Functions/i);
   assert.match(recommendations, /VIVID_CONFIG\.api\.plotAiFallbackUrl/);
   assert.match(recommendations, /extractPlotClues\(query, 12\)/);
+  assert.match(readFileSync(new URL("../scripts/vivid-recall-chat.js", import.meta.url), "utf8"), /mode: "chat"/);
 });
 
 test("detects plot recollections phrased without explicit movie-memory cues", () => {
