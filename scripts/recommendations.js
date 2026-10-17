@@ -823,11 +823,11 @@ export async function getPlotMatchRecommendations(intent = {}, limit = 18) {
   try { candidates = collectIntentCandidates(responses); } catch {}
   let scored = scorePlotCandidates(intent.query || "", uniqueByKey(candidates), plotClues);
 
-  // TMDB keyword tagging is incomplete. If it yields no plausible plot match,
-  // scan a small popularity-ordered catalogue slice with the same verified
-  // constraints and score the actual overviews instead of returning an
-  // immediate empty state. This is a fallback, not a claim of exhaustive search.
-  if (!scored.length || Number(scored[0]?.plotScore || 0) < 8) {
+  // Keyword tagging and natural-language title search are incomplete. Broaden
+  // the catalogue scan when the first pass returns too few candidates or only
+  // weak evidence; use two pages per requested media type, still respecting
+  // every supported user constraint. This is not an exhaustive catalogue scan.
+  if (scored.length < 3 || Number(scored[0]?.plotScore || 0) < 12) {
     const fallbackCalls = [];
     for (const type of mediaTypes) {
       const genreId = intent.genreIds?.[type] ?? intent.genre?.[type === "movie" ? "movieId" : "tvId"];
@@ -859,8 +859,12 @@ export async function getPlotMatchRecommendations(intent = {}, limit = 18) {
         params.with_original_language = "ja";
         if (type === "tv") params.with_origin_country = "JP";
       }
-      fallbackCalls.push((type === "tv" ? tmdbApi.discoverTv(params) : tmdbApi.discoverMovies(params))
-        .then(response => normalizeResults(response?.results || [], type)));
+      for (const page of [1, 2]) {
+        fallbackCalls.push((type === "tv"
+          ? tmdbApi.discoverTv({ ...params, page })
+          : tmdbApi.discoverMovies({ ...params, page }))
+          .then(response => normalizeResults(response?.results || [], type)));
+      }
     }
     const fallbackResponses = await Promise.allSettled(fallbackCalls);
     if (currentProgressOwner() !== ownerAtStart) return [];
