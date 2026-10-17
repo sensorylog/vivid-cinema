@@ -731,7 +731,7 @@ export function collectIntentCandidates(responses = []) {
 
 export async function getPlotMatchRecommendations(intent = {}, limit = 18) {
   const ownerAtStart = currentProgressOwner();
-  const queries = buildPlotKeywordQueries(intent.query || "", 8);
+  const queries = buildPlotKeywordQueries(intent.query || "", 10);
   if (!queries.length) return [];
 
   const requestedType = ["movie", "tv"].includes(intent.mediaType) ? intent.mediaType : "all";
@@ -859,7 +859,7 @@ export async function getPlotMatchRecommendations(intent = {}, limit = 18) {
         params.with_original_language = "ja";
         if (type === "tv") params.with_origin_country = "JP";
       }
-      for (const page of [1, 2]) {
+      for (const page of [1, 2, 3]) {
         fallbackCalls.push((type === "tv"
           ? tmdbApi.discoverTv({ ...params, page })
           : tmdbApi.discoverMovies({ ...params, page }))

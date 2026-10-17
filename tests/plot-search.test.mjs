@@ -162,5 +162,27 @@ test("matches equivalent magic/magical wording and ranks the distinctive object 
 test("weak or sparse Recall results trigger a wider but still constrained catalogue fallback", () => {
   const source = readFileSync(new URL("../scripts/recommendations.js", import.meta.url), "utf8");
   assert.match(source, /if \(scored\.length < 3 \|\| Number\(scored\[0\]\?\.plotScore \|\| 0\) < 12\)/);
-  assert.match(source, /for \(const page of \[1, 2\]\)/);
+  assert.match(source, /for \(const page of \[1, 2, 3\]\)/);
+});
+
+
+test("Vivid Recall expands everyday wording into catalogue concepts", () => {
+  assert.ok(getPlotConceptPhrases("A guy turns invisible and nobody can see him").includes("invisibility"));
+  assert.ok(getPlotConceptPhrases("A kid gets stuck inside a video game").includes("trapped in game"));
+  assert.ok(getPlotConceptPhrases("Someone goes back in time to change the future").includes("time travel"));
+  assert.ok(getPlotConceptPhrases("A sentient robot becomes human").includes("artificial intelligence"));
+  assert.ok(getPlotConceptPhrases("A woman wakes up as someone else").includes("body swap"));
+});
+
+test("simple everyday nouns can match common catalogue wording", () => {
+  const score = scorePlotCandidate("A kid finds a magic machine", {
+    title: "The Strange Machine",
+    overview: "A child discovers an enchanted device that changes everything."
+  });
+  assert.ok(score > 0);
+});
+
+test("Recall searches a wider bounded set of catalogue pages when first results are weak", () => {
+  const source = readFileSync(new URL("../scripts/recommendations.js", import.meta.url), "utf8");
+  assert.match(source, /for \(const page of \[1, 2, 3\]\)/);
 });

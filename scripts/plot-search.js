@@ -119,7 +119,39 @@ const PLOT_CONCEPTS = [
   { pattern: /\b(?:hidden world|secret world|magical kingdom|secret passage|discovers? a hidden)\b/i, phrases: ["hidden world", "secret world", "magical kingdom"] },
   { pattern: /\b(?:robot becomes? human|android|artificial intelligence|sentient robot|robot falls? in love)\b/i, phrases: ["sentient robot", "android", "artificial intelligence"] },
   { pattern: /\b(?:heist|steals? a (?:diamond|jewel|fortune|painting)|robbery crew|bank robbery)\b/i, phrases: ["heist", "bank robbery", "jewel theft"] },
-  { pattern: /\b(?:treasure hunt|searches? for treasure|lost treasure|ancient artifact)\b/i, phrases: ["treasure hunt", "lost treasure", "ancient artifact"] }
+  { pattern: /\b(?:treasure hunt|searches? for treasure|lost treasure|ancient artifact)\b/i, phrases: ["treasure hunt", "lost treasure", "ancient artifact"] },
+
+  { pattern: /\b(?:turns? invisible|becomes? invisible|can(?:not|'t) be seen|disappears? from sight|invisibility|unseen by everyone)\b/i, phrases: ["invisibility", "invisible person", "disappears from sight"] },
+  { pattern: /\b(?:shrinks?|gets? smaller|becomes? tiny|miniatur(?:e|ized)|tiny person|small as an? (?:ant|bug)|grows? huge)\b/i, phrases: ["shrinking", "tiny person", "giant"] },
+  { pattern: /\b(?:goes? back in time|travels? to the past|travels? through time|visits? the future|from the future|future self|past and future)\b/i, phrases: ["time travel", "travels through time", "future self"] },
+  { pattern: /\b(?:enters? (?:someone'?s? )?dreams?|dreams? become real|dream world|trapped in a dream|can't wake up|nightmare comes? true)\b/i, phrases: ["dream world", "enters dreams", "nightmare becomes real"] },
+  { pattern: /\b(?:pets? (?:can )?talk|talking animals?|animals? speak|animals? act like people|dog talks?|cat talks?)\b/i, phrases: ["talking animals", "talking dog", "talking cat"] },
+  { pattern: /\b(?:reads? minds?|hears? people'?s? thoughts|controls? minds?|mind control|takes? over (?:his|her|their) mind)\b/i, phrases: ["mind reading", "mind control", "telepathy"] },
+  { pattern: /\b(?:can fly|flies? without wings|super strength|superpowers?|special powers?|has powers?|mutant powers?)\b/i, phrases: ["superpowers", "super strength", "mutant powers"] },
+  { pattern: /\b(?:never ages?|does(?:n't| not) get old|lives? forever|cannot die|can't die|immortal|lives? for centuries)\b/i, phrases: ["immortality", "never ages", "cannot die"] },
+  { pattern: /\b(?:comes? back to life|brought back to life|returns? from the dead|resurrected|revived after death)\b/i, phrases: ["resurrection", "returns from the dead", "brought back to life"] },
+  { pattern: /\b(?:wakes? up as someone else|wakes? up in another body|becomes? another person|lives? someone else'?s? life|switch(?:es|ed)? lives?)\b/i, phrases: ["body swap", "identity swap", "someone else's life"] },
+  { pattern: /\b(?:secret twin|evil twin|long lost twin|identical twin appears?|has a twin they never knew)\b/i, phrases: ["secret twin", "evil twin", "long lost twin"] },
+  { pattern: /\b(?:kidnapped|taken hostage|held hostage|hostage situation|someone abducts?|abducted)\b/i, phrases: ["kidnapping", "hostage", "abduction"] },
+  { pattern: /\b(?:stranded on an? island|marooned on an? island|lost at sea|shipwrecked|survives? on a deserted island)\b/i, phrases: ["stranded island", "lost at sea", "shipwreck survival"] },
+  { pattern: /\b(?:stuck in space|lost in space|spaceship breaks? down|astronauts? stranded|space station disaster)\b/i, phrases: ["lost in space", "stranded in space", "space survival"] },
+  { pattern: /\b(?:virtual reality|inside a video game|trapped in (?:a|the) game|game becomes? real|video game world|game is not real)\b/i, phrases: ["virtual reality", "trapped in game", "video game world"] },
+  { pattern: /\b(?:experiment goes wrong|lab experiment|scientific experiment|experiment creates? a monster|test subject escapes?)\b/i, phrases: ["experiment gone wrong", "scientific experiment", "lab experiment"] },
+  { pattern: /\b(?:framed for (?:a )?murder|wrongly accused|accused of a crime they didn't commit|innocent person on the run|falsely accused)\b/i, phrases: ["wrongly accused", "framed for murder", "innocent on the run"] },
+  { pattern: /\b(?:undercover cop|cop goes undercover|pretends? to be a criminal|secret agent|undercover detective|fake identity)\b/i, phrases: ["undercover cop", "secret identity", "undercover agent"] },
+  { pattern: /\b(?:pretends? to be rich|poor person becomes? rich|rich person becomes? poor|switch(?:es|ed)? places? with a rich person|rich and poor swap lives)\b/i, phrases: ["rich and poor", "switched lives", "becomes rich"] },
+  { pattern: /\b(?:falls? into a parallel world|finds? a portal|portal to another world|enters? another dimension|doorway to another world)\b/i, phrases: ["portal to another world", "parallel universe", "another dimension"] },
+  { pattern: /\b(?:curse follows?|cursed by a witch|witch puts? a spell|spell goes wrong|magical curse|bewitched)\b/i, phrases: ["curse", "witch spell", "magical curse"] },
+  { pattern: /\b(?:chosen one|ancient prophecy|prophecy says?|destined to save|destiny to save the world)\b/i, phrases: ["chosen one", "ancient prophecy", "save the world"] },
+  { pattern: /\b(?:fake relationship|pretend to be married|fake marriage|pretend couple|pretends? to date)\b/i, phrases: ["fake relationship", "pretend couple", "fake marriage"] },
+  { pattern: /\b(?:witnesses? a murder|serial killer is after|killer hunts? them|detective tracks? a killer|murder mystery)\b/i, phrases: ["murder mystery", "serial killer", "killer hunt"] },
+  { pattern: /\b(?:escapes? from prison|breaks? out of jail|wrongfully imprisoned|prison break|locked up for a crime)\b/i, phrases: ["prison escape", "prison break", "wrongful imprisonment"] },
+  { pattern: /\b(?:lost child finds? (?:their )?family|orphan discovers? their parents|searches? for (?:his|her|their) real parents|adopted child discovers?)\b/i, phrases: ["lost child", "orphan", "search for real parents"] },
+  { pattern: /\b(?:robot has feelings|robot wants? to be human|machine becomes? self aware|computer becomes? conscious|AI takes? over)\b/i, phrases: ["sentient robot", "artificial intelligence", "machine becomes conscious"] },
+  { pattern: /\b(?:dinosaur(?:s)? (?:come back|return|escape)|brings? dinosaurs? back|prehistoric creatures? escape|park full of dinosaurs?)\b/i, phrases: ["dinosaurs", "prehistoric creatures", "dinosaur park"] },
+  { pattern: /\b(?:finds? a secret room|hidden room behind|secret door in|discovers? a hidden passage|mysterious door leads?)\b/i, phrases: ["secret room", "hidden passage", "secret door"] },
+  { pattern: /\b(?:loses? all (?:his|her|their) memories|wakes? up with no memory|can't remember who (?:they|he|she) is|forgets? (?:his|her|their) past)\b/i, phrases: ["amnesia", "memory loss", "lost memories"] },
+  { pattern: /\b(?:people disappear overnight|whole town disappears|everyone vanishes|mysterious disappearances?)\b/i, phrases: ["mass disappearance", "people vanish", "mysterious disappearance"] },
 ];
 
 export function getPlotConceptPhrases(query = "") {
@@ -194,12 +226,41 @@ function candidateFields(candidate = {}) {
   return { title, overview, all: " " + title + " " + overview + " " };
 }
 
+const PLOT_TERM_EQUIVALENTS = [
+  ["kid", "child", "children", "little one"],
+  ["guy", "man", "dude", "fellow"],
+  ["lady", "woman"],
+  ["cop", "police", "officer", "detective"],
+  ["alien", "extraterrestrial"],
+  ["robot", "android", "machine"],
+  ["ghost", "spirit", "phantom"],
+  ["monster", "creature", "beast"],
+  ["magic", "magical", "enchanted"],
+  ["tiny", "small", "little", "miniature"],
+  ["invisible", "unseen", "invisibility"],
+  ["rich", "wealthy", "millionaire"],
+  ["poor", "broke", "penniless"],
+  ["car", "vehicle", "automobile"],
+  ["spaceship", "spacecraft", "starship"],
+  ["steal", "stole", "stolen", "rob"],
+  ["find", "found", "discover", "discovers", "discovered"],
+  ["kill", "murder", "slay"],
+  ["die", "dies", "dead", "death", "dies"],
+  ["kidnap", "kidnapped", "abduct", "abducted"],
+  ["scared", "afraid", "terrified", "frightened"],
+  ["funny", "comedy", "hilarious"],
+  ["love", "romance", "romantic"],
+  ["future", "tomorrow", "upcoming"],
+  ["past", "history", "earlier"]
+].map(group => new Set(group));
+
 function termMatches(term, searchable) {
   if (searchable.has(term)) return true;
   // Catalogue synopses often use "magical" where a user says "magic".
   // Treat this as a narrow synonym, not a broad fuzzy match that creates noise.
   if ((term === "magic" && searchable.has("magical")) ||
       (term === "magical" && searchable.has("magic"))) return true;
+  if (PLOT_TERM_EQUIVALENTS.some(group => group.has(term) && [...group].some(word => searchable.has(word)))) return true;
   const stem = term.length > 5 ? term.replace(/(?:ing|ed|es|s)$/, "") : term;
   if (stem.length >= 3 && searchable.has(stem)) return true;
   return term.length > 5 && [...searchable].some(word =>
