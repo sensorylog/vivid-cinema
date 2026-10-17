@@ -2,14 +2,13 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import worker from "../cloudflare/plot-ai-worker.js";
 
-test("Airforce Worker falls through free models in the configured order", async () => {
+test("Airforce Worker sends the four free models as a native fallback chain", async () => {
   const originalFetch = globalThis.fetch;
-  const attempted = [];
+  let requestBody;
   globalThis.fetch = async (_url, init) => {
-    const body = JSON.parse(init.body);
-    attempted.push(body.model);
-    if (attempted.length < 3) return new Response("temporarily unavailable", { status: 503 });
+    requestBody = JSON.parse(init.body);
     return new Response(JSON.stringify({
+      model: "llama-instant",
       choices: [{
         message: {
           content: JSON.stringify({
@@ -42,7 +41,8 @@ test("Airforce Worker falls through free models in the configured order", async 
     const response = await worker.fetch(request, { AIRFORCE_API_KEY: "test-secret" });
     const payload = await response.json();
     assert.equal(response.status, 200);
-    assert.deepEqual(attempted, ["glm-4.7-flash", "gpt-oss-20b", "llama-instant"]);
+    assert.equal(requestBody.model, "glm-4.7-flash");
+    assert.deepEqual(requestBody.models, ["gpt-oss-20b", "llama-instant", "rnj-1"]);
     assert.equal(payload.model, "llama-instant");
     assert.equal(payload.candidates[0].title, "Groundhog Day");
     assert.equal(JSON.stringify(payload).includes("test-secret"), false);
