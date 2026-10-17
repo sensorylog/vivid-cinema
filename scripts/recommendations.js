@@ -826,7 +826,7 @@ export async function getPlotMatchRecommendations(intent = {}, limit = 18) {
   // Keyword tagging and natural-language title search are incomplete. Broaden
   // the catalogue scan when the first pass returns too few candidates or only
   // weak evidence; use two pages per requested media type, still respecting
-  // every supported user constraint. This is not an exhaustive catalogue scan.
+  // the same verified user constraints. This is not an exhaustive catalogue scan.
   if (scored.length < 3 || Number(scored[0]?.plotScore || 0) < 12) {
     const fallbackCalls = [];
     for (const type of mediaTypes) {
