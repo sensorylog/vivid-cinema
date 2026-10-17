@@ -8,8 +8,8 @@ From the repository root:
 
 ```sh
 npx wrangler login
-npx wrangler secret put AIRFORCE_API_KEY --config cloudflare/wrangler.toml
 npx wrangler deploy --config cloudflare/wrangler.toml
+npx wrangler secret put AIRFORCE_API_KEY --config cloudflare/wrangler.toml
 ```
 
 When prompted, paste the **newly rotated** Airforce API key into the terminal prompt. Do not put the key in source code, Firebase Hosting files, GitHub, or chat. The deploy output will show the Worker URL.
