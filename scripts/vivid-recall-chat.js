@@ -4,7 +4,9 @@ import { getImageUrl, getMediaUrl } from "./media.js";
 import { escapeHtml } from "./utils.js";
 
 const $ = id => document.getElementById(id);
-const endpoint = () => String(VIVID_CONFIG.api.plotAiFallbackUrl || "").trim();
+const AIRFORCE_URL = "https://api.airforce/v1/chat/completions";
+const AIRFORCE_MODELS = ["glm-4.7-flash", "gpt-oss-20b", "llama-instant", "rnj-1"];
+const apiKey = () => String(VIVID_CONFIG.api.airforceApiKey || "").trim();
 const history = [];
 let busy = false;
 let requestVersion = 0;
@@ -132,14 +134,33 @@ async function sendMessage(text) {
   const version = ++requestVersion;
 
   try {
-    if (!endpoint()) throw new Error("Vivid Recall AI chat has not been connected yet.");
-    const response = await fetch(endpoint(), {
+    if (!apiKey() || apiKey() === "PASTE_AIRFORCE_API_KEY_HERE") {
+      throw new Error("Add your Airforce API key in scripts/config.js to enable the test.");
+    }
+    const mediaType = $("recall-chat-type")?.value || "all";
+    const systemPrompt = [
+      "You are Vivid Recall, a friendly movie and TV memory detective inside Vivid Cinema.",
+      "Help identify titles from incomplete memories. Understand ordinary wording, ask one focused follow-up when useful, accept corrections, and use the full conversation rather than treating each message independently.",
+      "Media type requested: " + mediaType + ". Prefer that type unless the clues clearly point elsewhere.",
+      "Never claim certainty without evidence. Suggest at most five plausible catalogue titles; do not invent release years or plot details.",
+      'Return ONLY valid JSON in this shape: {"reply":"short natural conversational response","candidates":[{"title":"exact known title","mediaType":"movie or tv","reason":"brief clue match"}]}.',
+      "If more details are needed, ask a concise question in reply and return an empty candidates array. If you have plausible matches, explain briefly and return them."
+    ].join("\\n");
+    const response = await fetch(AIRFORCE_URL, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + apiKey()
+      },
       body: JSON.stringify({
-        mode: "chat",
-        mediaType: $("recall-chat-type")?.value || "all",
-        messages: history.slice(-6).map(item => ({ role: item.role, content: item.content.slice(0, 500) }))
+        model: AIRFORCE_MODELS[0],
+        models: AIRFORCE_MODELS.slice(1),
+        messages: [
+          { role: "system", content: systemPrompt },
+          ...history.slice(-6).map(item => ({ role: item.role, content: item.content.slice(0, 500) }))
+        ],
+        temperature: 0.4,
+        max_tokens: 650
       }),
       signal: AbortSignal.timeout(27000)
     });
@@ -148,8 +169,16 @@ async function sendMessage(text) {
       error.status = response.status;
       throw error;
     }
-    const payload = await response.json();
+    const apiPayload = await response.json();
     if (version !== requestVersion) return;
+    const rawContent = apiPayload?.choices?.[0]?.message?.content;
+    let payload = {};
+    if (typeof rawContent === "string") {
+      const cleaned = rawContent.trim().replace(/^\x60{3}(?:json)?\s*/i, "").replace(/\s*\x60{3}$/i, "");
+      try { payload = JSON.parse(cleaned); }
+      catch { payload = { reply: cleaned, candidates: [] }; }
+    }
+    payload.model = apiPayload?.model || apiPayload?.choices?.[0]?.model || AIRFORCE_MODELS[0];
     const reply = cleanText(payload?.reply, 700) ||
       "I’m following your clues. What is one more detail you remember?";
     history.push({ role: "assistant", content: reply });
@@ -167,7 +196,7 @@ async function sendMessage(text) {
       ? "I hit Airforce’s request limit for the moment. Some free-tier access is limited to about one request per minute, so let’s use Vivid’s local matcher for now. You can keep adding clues here and retry the AI later."
       : "I can keep helping with your memory, but the AI chat service is not connected right now. I’ll run Vivid’s local Recall search for your clue instead.";
     addMessage("assistant", fallback);
-    setStatus(rateLimited ? "Airforce rate limit · switching to local Recall." : "AI chat unavailable · switching to local Recall.");
+    setStatus(rateLimited ? "Airforce rate limit · switching to local Recall." : "Airforce unavailable · switching to local Recall.");
     const search = $("intent-query");
     const form = $("intent-form");
     if (search && form) {
