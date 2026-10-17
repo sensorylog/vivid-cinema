@@ -1,23 +1,38 @@
-import { getAI, getGenerativeModel, GoogleAIBackend } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-ai.js";
+import {
+  getAI,
+  getGenerativeModel,
+  GoogleAIBackend,
+  ThinkingLevel
+} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-ai.js";
 import { app, appCheckError, appCheckSkippedReason } from "./firebase.js";
+
+const RECALL_MODEL = "gemini-3.5-flash-lite";
+const CLUE_TIMEOUT_MS = 12000;
+const CHAT_TIMEOUT_MS = 30000;
 
 let modelPromise = null;
 
+function createRecallModel(maxOutputTokens) {
+  const ai = getAI(app, {
+    backend: new GoogleAIBackend(),
+    useLimitedUseAppCheckTokens: true
+  });
+  return getGenerativeModel(ai, {
+    model: RECALL_MODEL,
+    generationConfig: {
+      responseMimeType: "application/json",
+      maxOutputTokens,
+      // Flash-Lite supports minimal thinking; keep tokens focused on the JSON answer.
+      thinkingConfig: {
+        thinkingLevel: ThinkingLevel.MINIMAL
+      }
+    }
+  });
+}
+
 function getRecallModel() {
   if (!modelPromise) {
-    modelPromise = Promise.resolve().then(() => {
-      const ai = getAI(app, {
-        backend: new GoogleAIBackend(),
-        useLimitedUseAppCheckTokens: true
-      });
-      return getGenerativeModel(ai, {
-        model: "gemini-3.8-flash",
-        generationConfig: {
-          responseMimeType: "application/json",
-          maxOutputTokens: 300
-        }
-      });
-    }).catch(error => {
+    modelPromise = Promise.resolve().then(() => createRecallModel(300)).catch(error => {
       modelPromise = null;
       throw error;
     });
@@ -39,6 +54,29 @@ function parseClues(raw) {
     .map(value => value.trim().replace(/\s+/g, " ").slice(0, 90))
     .filter(value => value.length >= 3 && value.length <= 90))]
     .slice(0, 10);
+}
+
+async function generateWithTimeout(model, prompt, timeoutMs, operation) {
+  const controller = new AbortController();
+  let timeoutId;
+  try {
+    return await Promise.race([
+      model.generateContent(prompt, { signal: controller.signal }),
+      new Promise((_, reject) => {
+        timeoutId = setTimeout(() => {
+          const error = new Error(
+            operation + " timed out after " + Math.round(timeoutMs / 1000) +
+            " seconds; cancellation of the client request was attempted."
+          );
+          error.name = "TimeoutError";
+          reject(error);
+          controller.abort();
+        }, timeoutMs);
+      })
+    ]);
+  } finally {
+    clearTimeout(timeoutId);
+  }
 }
 
 export async function getRecallClues(query, fallbackClues = []) {
@@ -65,16 +103,16 @@ export async function getRecallClues(query, fallbackClues = []) {
 
   try {
     const model = await getRecallModel();
-    const result = await Promise.race([
-      model.generateContent(
-        "You help identify movies and TV shows from a person's remembered plot. " +
-        "Extract 5 to 10 short, distinctive clues from the description below. " +
-        "Prefer concrete events, unusual objects, plot devices, setting, relationships, and memorable details. " +
-        "Do not guess or invent the title. Avoid generic words. Return only a JSON array of strings. " +
-        "Description: " + JSON.stringify(cleanQuery)
-      ),
-      new Promise((_, reject) => setTimeout(() => reject(new Error("Gemini clue extraction timed out.")), 8000))
-    ]);
+    const result = await generateWithTimeout(
+      model,
+      "You help identify movies and TV shows from a person's remembered plot. " +
+      "Extract 5 to 10 short, distinctive clues from the description below. " +
+      "Prefer concrete events, unusual objects, plot devices, setting, relationships, and memorable details. " +
+      "Do not guess or invent the title. Avoid generic words. Return only a JSON array of strings. " +
+      "Description: " + JSON.stringify(cleanQuery),
+      CLUE_TIMEOUT_MS,
+      "Gemini clue extraction"
+    );
     const responseText = result?.response?.text?.() || "";
     const aiClues = parseClues(responseText);
     if (!aiClues.length) {
@@ -83,12 +121,14 @@ export async function getRecallClues(query, fallbackClues = []) {
     return {
       clues: [...new Set([...aiClues, ...fallback])].slice(0, 12),
       available: true,
-      message: "Gemini-enhanced plot clue extraction is active."
+      message: "Gemini Flash-Lite clue extraction is active."
     };
   } catch (error) {
     console.warn("Vivid Recall AI unavailable; using local clue extraction.", {
       code: error?.code || null,
-      message: error?.message || String(error)
+      message: error?.message || String(error),
+      customData: error?.customData || null,
+      details: error?.details || null
     });
     return {
       clues: fallback,
@@ -102,19 +142,7 @@ let chatModelPromise = null;
 
 function getRecallChatModel() {
   if (!chatModelPromise) {
-    chatModelPromise = Promise.resolve().then(() => {
-      const ai = getAI(app, {
-        backend: new GoogleAIBackend(),
-        useLimitedUseAppCheckTokens: true
-      });
-      return getGenerativeModel(ai, {
-        model: "gemini-3.8-flash",
-        generationConfig: {
-          responseMimeType: "application/json",
-          maxOutputTokens: 900
-        }
-      });
-    }).catch(error => {
+    chatModelPromise = Promise.resolve().then(() => createRecallModel(700)).catch(error => {
       chatModelPromise = null;
       throw error;
     });
@@ -155,13 +183,11 @@ export async function sendRecallChatMessage(messages, mediaType = "all") {
     "The user is looking for: " + (["movie", "tv"].includes(mediaType) ? mediaType === "tv" ? "TV series" : "movies" : "movies or TV series") + ".",
     "Return only a JSON object with string field reply and array field candidates.",
     "Each candidates item must contain title, mediaType (movie, tv, or all), and reason (short string).",
+    "Keep the reply concise and use no more than 5 candidates.",
     "Conversation so far:\n" + transcript
   ].join("\n");
 
-  const result = await Promise.race([
-    model.generateContent(prompt),
-    new Promise((_, reject) => setTimeout(() => reject(new Error("Gemini chat timed out after 60 seconds. Check the Firebase AI Logic request in DevTools Network for its HTTP status and response body.")), 60000))
-  ]);
+  const result = await generateWithTimeout(model, prompt, CHAT_TIMEOUT_MS, "Gemini chat");
   let payload;
   try {
     payload = JSON.parse(result?.response?.text?.() || "{}");
@@ -179,5 +205,5 @@ export async function sendRecallChatMessage(messages, mediaType = "all") {
     }))
     .filter(item => item.title);
   if (!reply) throw new Error("Gemini returned an empty reply. Please try again.");
-  return { reply, candidates, model: "Gemini 3.8 Flash" };
+  return { reply, candidates, model: "Gemini 3.5 Flash-Lite" };
 }
