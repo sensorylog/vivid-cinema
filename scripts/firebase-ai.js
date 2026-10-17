@@ -128,7 +128,7 @@ export async function sendRecallChatMessage(messages, mediaType = "all") {
     .slice(-8)
     .map(item => ({
       role: item.role,
-      content: String(item.content || "").replace(/[\\u0000-\\u001f]/g, " ").trim().slice(0, 700)
+      content: String(item.content || "").replace(/[\u0000-\u001f]/g, " ").trim().slice(0, 700)
     }))
     .filter(item => item.content);
   if (!safeMessages.length || safeMessages[safeMessages.length - 1].role !== "user") {
