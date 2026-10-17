@@ -95,3 +95,84 @@ export async function getRecallClues(query, fallbackClues = []) {
     };
   }
 }
+
+let chatModelPromise = null;
+
+function getRecallChatModel() {
+  if (!chatModelPromise) {
+    chatModelPromise = Promise.resolve().then(() => {
+      const ai = getAI(app, { backend: new GoogleAIBackend() });
+      return getGenerativeModel(ai, {
+        model: "gemini-3.8-flash",
+        generationConfig: {
+          responseMimeType: "application/json",
+          maxOutputTokens: 900
+        }
+      });
+    }).catch(error => {
+      chatModelPromise = null;
+      throw error;
+    });
+  }
+  return chatModelPromise;
+}
+
+export async function sendRecallChatMessage(messages, mediaType = "all") {
+  if (appCheckSkippedReason) {
+    throw new Error("Gemini chat requires the deployed Hosting site because App Check is skipped on localhost.");
+  }
+  if (appCheckError) {
+    throw new Error("Firebase App Check did not initialize. Local catalogue search is still available.");
+  }
+  const safeMessages = (Array.isArray(messages) ? messages : [])
+    .filter(item => item && ["user", "assistant"].includes(item.role))
+    .slice(-8)
+    .map(item => ({
+      role: item.role,
+      content: String(item.content || "").replace(/[\\u0000-\\u001f]/g, " ").trim().slice(0, 700)
+    }))
+    .filter(item => item.content);
+  if (!safeMessages.length || safeMessages[safeMessages.length - 1].role !== "user") {
+    throw new Error("Enter a message to start the conversation.");
+  }
+
+  const model = await getRecallChatModel();
+  const transcript = safeMessages.map(item =>
+    (item.role === "user" ? "USER" : "VIVID RECALL") + ": " + item.content
+  ).join("\\n");
+  const prompt = [
+    "You are Vivid Recall, a warm, natural conversational movie and TV memory detective.",
+    "Your primary job is to chat naturally with a user trying to identify a movie or TV show they half remember.",
+    "Respond to their actual question. Ask one useful follow-up question when the memory is vague.",
+    "When there are enough clues, suggest up to 5 plausible real titles and explain briefly why each might fit.",
+    "Never claim a title is verified. The app separately checks suggested titles against TMDB.",
+    "Do not invent plot details. It is fine to say you are uncertain.",
+    "The user is looking for: " + (["movie", "tv"].includes(mediaType) ? mediaType === "tv" ? "TV series" : "movies" : "movies or TV series") + ".",
+    "Return only a JSON object with string field reply and array field candidates.",
+    "Each candidates item must contain title, mediaType (movie, tv, or all), and reason (short string).",
+    "Conversation so far:\\n" + transcript
+  ].join("\\n");
+
+  const result = await Promise.race([
+    model.generateContent(prompt),
+    new Promise((_, reject) => setTimeout(() => reject(new Error("Gemini chat timed out. Please try again.")), 20000))
+  ]);
+  let payload;
+  try {
+    payload = JSON.parse(result?.response?.text?.() || "{}");
+  } catch {
+    throw new Error("Gemini returned an unreadable chat response. Please try again.");
+  }
+  const reply = String(payload?.reply || "").trim().slice(0, 900);
+  const candidates = (Array.isArray(payload?.candidates) ? payload.candidates : [])
+    .filter(item => item && typeof item.title === "string")
+    .slice(0, 5)
+    .map(item => ({
+      title: String(item.title).trim().slice(0, 120),
+      mediaType: ["movie", "tv"].includes(item.mediaType) ? item.mediaType : "all",
+      reason: String(item.reason || "").trim().slice(0, 180)
+    }))
+    .filter(item => item.title);
+  if (!reply) throw new Error("Gemini returned an empty reply. Please try again.");
+  return { reply, candidates, model: "Gemini 3.8 Flash" };
+}
