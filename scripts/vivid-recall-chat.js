@@ -157,7 +157,7 @@ async function sendMessage(text) {
     if (version !== requestVersion) return;
     const extra = renderVerifiedCards(verified);
     addMessage("assistant", reply, extra);
-    if (verified.length) setStatus("Checked " + verified.length + " title" + (verified.length === 1 ? "" : "s") + " against TMDB.");
+    if (verified.length) setStatus("Checked " + verified.length + " title" + (verified.length === 1 ? "" : "s") + " against TMDB" + (payload?.model ? " · " + cleanText(payload.model, 80) : "") + ".");
     else if (Array.isArray(payload?.candidates) && payload.candidates.length) setStatus("I found possible titles, but none matched the TMDB catalogue closely enough yet.");
     else setStatus(payload?.model ? "Powered by " + cleanText(payload.model, 100) + " · Ask another question to narrow it down." : "Ask another question to narrow it down.");
   } catch (error) {
