@@ -1,5 +1,5 @@
 import { getAI, getGenerativeModel, GoogleAIBackend } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-ai.js";
-import { app } from "./firebase.js";
+import { app, appCheckError, appCheckSkippedReason } from "./firebase.js";
 
 let modelPromise = null;
 
@@ -45,6 +45,20 @@ export async function getRecallClues(query, fallbackClues = []) {
     .map(value => String(value || "").trim()).filter(Boolean))].slice(0, 12);
   if (cleanQuery.length < 8) {
     return { clues: fallback, available: false, message: "The description is too short for AI clue extraction." };
+  }
+  if (appCheckSkippedReason) {
+    return {
+      clues: fallback,
+      available: false,
+      message: "Gemini testing requires the deployed Hosting site because App Check is skipped on localhost."
+    };
+  }
+  if (appCheckError) {
+    return {
+      clues: fallback,
+      available: false,
+      message: "Firebase App Check did not initialize; local clue extraction is still active."
+    };
   }
 
   try {
