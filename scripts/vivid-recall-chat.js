@@ -141,7 +141,11 @@ async function sendMessage(text) {
       }),
       signal: AbortSignal.timeout(27000)
     });
-    if (!response.ok) throw new Error("Vivid Recall could not reach its AI models.");
+    if (!response.ok) {
+      const error = new Error(response.status === 429 ? "AIRFORCE_RATE_LIMIT" : "Vivid Recall could not reach its AI models.");
+      error.status = response.status;
+      throw error;
+    }
     const payload = await response.json();
     if (version !== requestVersion) return;
     const reply = cleanText(payload?.reply, 700) ||
@@ -156,13 +160,17 @@ async function sendMessage(text) {
     else setStatus(payload?.model ? "Powered by " + cleanText(payload.model, 100) + " · Ask another question to narrow it down." : "Ask another question to narrow it down.");
   } catch (error) {
     if (version !== requestVersion) return;
-    const fallback = "I can keep helping with your memory, but the AI chat service is not connected right now. I’ll run Vivid’s local Recall search for your clue instead.";
+    const rateLimited = error?.status === 429 || error?.message === "AIRFORCE_RATE_LIMIT";
+    const fallback = rateLimited
+      ? "I hit Airforce’s request limit for the moment. Some free-tier access is limited to about one request per minute, so let’s use Vivid’s local matcher for now. You can keep adding clues here and retry the AI later."
+      : "I can keep helping with your memory, but the AI chat service is not connected right now. I’ll run Vivid’s local Recall search for your clue instead.";
     addMessage("assistant", fallback);
-    setStatus("AI chat unavailable · switching to local Recall.");
+    setStatus(rateLimited ? "Airforce rate limit · switching to local Recall." : "AI chat unavailable · switching to local Recall.");
     const search = $("intent-query");
     const form = $("intent-form");
     if (search && form) {
       search.value = history.filter(item => item.role === "user").map(item => item.content).join(" ");
+      window.__vividRecallLocalOnlyOnce = true;
       form.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }));
     }
   } finally {
