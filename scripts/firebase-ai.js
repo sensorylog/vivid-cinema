@@ -11,7 +11,6 @@ function getRecallModel() {
         model: "gemini-3.8-flash",
         generationConfig: {
           responseMimeType: "application/json",
-          temperature: 0.2,
           maxOutputTokens: 300
         }
       });
