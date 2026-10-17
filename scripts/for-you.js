@@ -28,7 +28,7 @@ let removedFilters = new Set();
 let suppressInvalidationRefresh = false;
 let secondaryRequestId = 0;
 let recommendationImpressionObserver = null;
-let geminiStatusMessage = "";
+let recallStatusMessage = "";
 const LANGUAGE_LABELS = { en: "English", ko: "Korean", ja: "Japanese", fr: "French", es: "Spanish", hi: "Hindi", zh: "Chinese", de: "German", it: "Italian", pt: "Portuguese", th: "Thai", ar: "Arabic", tr: "Turkish", ta: "Tamil", te: "Telugu", yo: "Yoruba" };
 
 function intentForPage() {
@@ -190,7 +190,7 @@ function renderItems(items) {
   $("recommendation-empty").hidden = items.length > 0;
   if (items.length) {
     observeRecommendationImpressions(items);
-    showStatus(geminiStatusMessage || (items.length + (items.length === 1 ? " pick ready." : " picks ready.")));
+    showStatus(recallStatusMessage || (items.length + (items.length === 1 ? " pick ready." : " picks ready.")));
   } else {
     showStatus("");
   }
@@ -233,11 +233,11 @@ async function loadRecommendations({ refresh = false } = {}) {
   $("recommendation-empty").hidden = true;
   $("recommendation-grid").innerHTML = "";
   showStatus("Finding picks that fit…");
-  geminiStatusMessage = "";
+  recallStatusMessage = "";
   const plotSearch = isPlotDescriptionQuery(intent.query);
   $("recommendation-heading").textContent = plotSearch ? "Titles that may match your memory" : intent.constraints.length ? "Matches for your mood" : "Picks for your next watch";
   $("recommendation-copy").textContent = plotSearch
-    ? "Gemini interprets your plot description, then we verify suggested titles against TMDB and rank their catalogue matches."
+    ? "Vivid extracts story clues locally, searches TMDB through multiple routes, and ranks candidates by matching plot evidence."
     : intent.constraints.length
       ? "These results use catalogue filters we can verify."
       : "A mix of familiar taste and something new to discover.";
@@ -268,13 +268,13 @@ async function loadRecommendations({ refresh = false } = {}) {
     renderItems(items);
     if (!items.length) {
       $("recommendation-empty").hidden = false;
-      showStatus(plotSearch && geminiStatusMessage ? geminiStatusMessage : "");
+      showStatus(plotSearch && recallStatusMessage ? recallStatusMessage : "");
     }
     await loadSecondarySections(thisRequest);
   } catch (error) {
     if (thisRequest !== requestId) return;
     console.error("Vivid For You recommendations failed:", error);
-    showStatus(geminiStatusMessage || "");
+    showStatus(recallStatusMessage || "");
     $("recommendation-grid").innerHTML = "";
     $("recommendation-empty").hidden = true;
     $("recommendation-error").hidden = false;
@@ -291,14 +291,14 @@ function setActiveType(type) {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  window.addEventListener("vivid:gemini-plot-search-status", event => {
+  window.addEventListener("vivid:plot-search-status", event => {
     const detail = event.detail || {};
-    geminiStatusMessage = detail.localOnly
-      ? "EXPERIMENTAL · Local matching is active; no AI service is required."
+    recallStatusMessage = detail.localOnly
+      ? "VIVID RECALL · Local clue matching is active; no AI service is required."
       : detail.available
         ? "Catalogue suggestions are being checked against TMDB."
-        : "Using the experimental local catalogue matcher.";
-    showStatus(geminiStatusMessage);
+        : "Using Vivid Recall’s local catalogue matcher.";
+    showStatus(recallStatusMessage);
   });
   $("intent-form")?.addEventListener("submit", event => {
     event.preventDefault();
