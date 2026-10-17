@@ -106,11 +106,15 @@ test("local concept expansion recognises common plot devices without a hosted mo
   assert.ok(getPlotConceptPhrases("Two people swap bodies overnight").includes("body swap"));
 });
 
-test("For You accurately describes deterministic local Vivid Recall", () => {
+test("For You describes optional AI assistance and keeps local fallback", () => {
   const html = readFileSync(new URL("../for-you.html", import.meta.url), "utf8");
+  const recommendations = readFileSync(new URL("../scripts/recommendations.js", import.meta.url), "utf8");
   assert.match(html, /YOUR STORY, FOUND/);
-  assert.match(html, /not a trained AI model/i);
-  assert.match(html, /requires no paid AI service or Cloud Functions/i);
+  assert.match(html, /Optional AI clue expansion/i);
+  assert.match(html, /Local matching fallback/i);
+  assert.match(html, /No Cloud Functions/i);
+  assert.match(recommendations, /VIVID_CONFIG\.api\.plotAiFallbackUrl/);
+  assert.match(recommendations, /extractPlotClues\(query, 12\)/);
 });
 
 test("detects plot recollections phrased without explicit movie-memory cues", () => {
