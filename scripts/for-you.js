@@ -296,7 +296,7 @@ document.addEventListener("DOMContentLoaded", () => {
     recallStatusMessage = detail.localOnly
       ? "VIVID RECALL · Local clue matching is active; no AI service is required."
       : detail.available
-        ? "Catalogue suggestions are being checked against TMDB."
+        ? "VIVID RECALL · AI clue expansion" + (detail.model ? " (" + detail.model + ")" : "") + "; checking real titles against TMDB."
         : "Using Vivid Recall’s local catalogue matcher.";
     showStatus(recallStatusMessage);
   });
