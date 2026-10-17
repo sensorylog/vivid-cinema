@@ -1,4 +1,4 @@
-import { getAnalytics, isSupported, logEvent, setAnalyticsCollectionEnabled } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-analytics.js";
+import { getAnalytics, isSupported, logEvent, setAnalyticsCollectionEnabled } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-analytics.js";
 import { app } from "./firebase.js";
 
 // Google tag loading is centralized in google-tag.js; this module handles Firebase Analytics events.
