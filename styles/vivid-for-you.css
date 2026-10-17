@@ -217,3 +217,100 @@
   #recall-chat-status { width:100%; margin-left:0; }
 }
 @media (prefers-reduced-motion:reduce) { .recall-chat-starters button,.recall-chat-result { transition:none; } .recall-chat-messages { scroll-behavior:auto; } .recall-chat-spinner { animation:none; } }
+
+
+/* Vivid Recall — refined, premium chat surface and clearer interaction states. */
+.recall-chat-panel {
+  max-width: 100%;
+  margin-top: 28px;
+  padding: clamp(18px, 3vw, 30px);
+  overflow: hidden;
+  border-color: rgba(170,165,255,.24);
+  border-radius: 26px;
+  background:
+    radial-gradient(ellipse at 100% 0%, rgba(119,102,255,.13), transparent 38%),
+    linear-gradient(145deg, rgba(14,15,29,.96), rgba(7,8,15,.94));
+  box-shadow: 0 26px 80px rgba(0,0,0,.26), inset 0 1px rgba(255,255,255,.035);
+}
+.recall-chat-heading { align-items: center; margin-bottom: 22px; }
+.recall-chat-heading > div { min-width: 0; }
+.recall-chat-heading h2 { margin-top: 9px; font-size: clamp(1.5rem, 2.7vw, 2.15rem); letter-spacing: -.045em; }
+.recall-chat-heading p { max-width: 560px; font-size: .88rem; }
+.recall-chat-reset { min-height: 38px; padding: 0 13px; transition: background .18s ease, border-color .18s ease, transform .18s ease; }
+.recall-chat-reset:hover { transform: translateY(-1px); }
+.recall-chat-messages {
+  gap: 17px;
+  min-height: 210px;
+  max-height: 440px;
+  padding: 22px 2px;
+  border-top-color: rgba(255,255,255,.065);
+  border-bottom-color: rgba(255,255,255,.065);
+}
+.recall-chat-message { max-width: min(88%, 760px); gap: 11px; animation: recall-message-in .22s ease both; }
+.recall-chat-avatar { flex-basis: 34px; width: 34px; height: 34px; border-radius: 12px; }
+.recall-chat-message.is-assistant .recall-chat-avatar { color: #f1eeff; background: linear-gradient(145deg, #8272ff, #4d3bb2); border-color: rgba(197,189,255,.38); box-shadow: 0 5px 20px rgba(100,80,255,.18); }
+.recall-chat-bubble { padding: 13px 16px; border-color: rgba(255,255,255,.075); border-radius: 5px 18px 18px 18px; background: rgba(255,255,255,.045); }
+.recall-chat-message.is-user .recall-chat-bubble { border-radius: 18px 5px 18px 18px; border-color: rgba(170,165,255,.22); background: linear-gradient(135deg, rgba(112,94,255,.2), rgba(83,69,169,.13)); }
+.recall-chat-role { margin-bottom: 7px; font-size: .64rem; letter-spacing: .11em; text-transform: uppercase; }
+.recall-chat-bubble > p { font-size: .9rem; line-height: 1.7; }
+.recall-chat-form { margin-top: 20px; }
+.recall-chat-input-wrap {
+  align-items: flex-end;
+  gap: 12px;
+  padding: 9px;
+  border-color: rgba(170,165,255,.28);
+  border-radius: 19px;
+  background: rgba(3,4,11,.74);
+  box-shadow: 0 8px 28px rgba(0,0,0,.16), inset 0 1px rgba(255,255,255,.025);
+  transition: border-color .18s ease, box-shadow .18s ease;
+}
+.recall-chat-input-wrap:focus-within { border-color: rgba(170,165,255,.7); box-shadow: 0 0 0 3px rgba(127,108,255,.1), 0 8px 28px rgba(0,0,0,.16); }
+.recall-chat-input-wrap textarea { min-height: 58px; padding: 12px 13px; font-size: .92rem; }
+.recall-chat-input-wrap textarea:focus-visible { outline: none; }
+.recall-chat-input-wrap button {
+  min-height: 44px;
+  padding: 0 19px;
+  border-radius: 13px;
+  background: linear-gradient(135deg, #a79aff, #7662f5 58%, #6550df);
+  color: #100e22;
+  box-shadow: 0 5px 16px rgba(112,94,255,.2);
+  transition: transform .18s ease, filter .18s ease, opacity .18s ease;
+}
+.recall-chat-input-wrap button:hover:not(:disabled) { transform: translateY(-1px); filter: brightness(1.08); }
+.recall-chat-input-wrap button:focus-visible, .recall-chat-starters button:focus-visible, .recall-chat-reset:focus-visible, .recall-chat-result:focus-visible { outline: 2px solid #c5bdff; outline-offset: 3px; }
+.recall-chat-footer { margin-top: 12px; gap: 10px; }
+.recall-chat-footer select { min-height: 30px; padding: 4px 9px; }
+#recall-chat-status { max-width: 100%; color: #a7a5bd; font-size: .7rem; overflow-wrap: anywhere; }
+.recall-chat-starters { gap: 8px; margin-top: 18px; }
+.recall-chat-starters button { min-height: 35px; padding: 0 13px; border-color: rgba(255,255,255,.105); background: rgba(255,255,255,.035); transition: transform .18s ease, background .18s ease, border-color .18s ease; }
+.recall-chat-starters button:hover { transform: translateY(-1px); background: rgba(143,126,255,.13); border-color: rgba(170,165,255,.4); }
+.recall-chat-note { margin-top: 18px; padding-top: 13px; border-top: 1px solid rgba(255,255,255,.06); font-size: .72rem; }
+.recall-chat-results { gap: 9px; margin-top: 15px; }
+.recall-chat-results-label { margin-bottom: 3px; }
+.recall-chat-result { padding: 9px; border-radius: 14px; background: rgba(3,4,11,.42); }
+.recall-chat-result img { width: 54px; height: 78px; flex-basis: 54px; border-radius: 9px; }
+.recall-chat-result-copy strong { font-size: .86rem; }
+.recall-chat-result-copy > span { font-size: .7rem; }
+.recall-chat-result-copy small { font-size: .73rem; line-height: 1.5; }
+@keyframes recall-message-in { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+@media (max-width: 600px) {
+  .recall-chat-panel { margin-top: 22px; padding: 15px; border-radius: 20px; }
+  .recall-chat-heading { align-items: flex-start; gap: 10px; }
+  .recall-chat-heading h2 { font-size: 1.4rem; }
+  .recall-chat-heading p { font-size: .8rem; }
+  .recall-chat-reset { width: 38px; height: 38px; min-height: 38px; justify-content: center; padding: 0; }
+  .recall-chat-reset span { display: none; }
+  .recall-chat-messages { min-height: 180px; max-height: 380px; padding: 16px 0; gap: 13px; }
+  .recall-chat-message { max-width: 100%; gap: 8px; }
+  .recall-chat-avatar { flex-basis: 29px; width: 29px; height: 29px; border-radius: 10px; }
+  .recall-chat-bubble { padding: 11px 12px; }
+  .recall-chat-bubble > p { font-size: .85rem; }
+  .recall-chat-input-wrap { align-items: stretch; flex-direction: column; gap: 6px; padding: 7px; }
+  .recall-chat-input-wrap textarea { min-height: 72px; padding: 9px 8px; font-size: .88rem; }
+  .recall-chat-input-wrap button { align-self: stretch; min-height: 43px; }
+  .recall-chat-footer { align-items: center; }
+  #recall-chat-status { width: 100%; margin-left: 0; }
+  .recall-chat-starters { gap: 7px; }
+  .recall-chat-starters button { min-height: 34px; font-size: .7rem; }
+}
+@media (prefers-reduced-motion: reduce) { .recall-chat-message { animation: none; } }
