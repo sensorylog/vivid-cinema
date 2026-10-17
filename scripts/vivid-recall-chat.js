@@ -161,7 +161,7 @@ async function sendMessage(text) {
     if (version !== requestVersion) return;
     const errorCode = String(error?.code || "");
     const errorMessage = String(error?.message || error || "Unknown error");
-    const needsSignIn = /unauthenticated/i.test(errorCode + " " + errorMessage) || /\\b401\\b/.test(errorMessage);
+    const needsSignIn = /unauthenticated/i.test(errorCode + " " + errorMessage) || /\b401\b/.test(errorMessage);
     console.warn("Vivid Recall Gemini chat failed:", {
       code: errorCode || null,
       message: errorMessage,
