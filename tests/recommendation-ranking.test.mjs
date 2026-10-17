@@ -160,3 +160,23 @@ test("exposure penalty fades over time and clicks soften but do not erase repeti
   assert.ok(clicked.clickRecovery > 0);
   assert.ok(clicked.clickRecovery < clicked.seenPenalty);
 });
+
+
+test("available cast and director metadata contributes to a bounded taste match", () => {
+  const candidates = [
+    candidate(11, { raw: { genre_ids: [], original_language: "en", release_date: "2022-01-01", credits: { cast: [{ id: 700 }], crew: [{ id: 900, job: "Director" }] } } }),
+    candidate(12, { raw: { genre_ids: [], original_language: "en", release_date: "2022-01-01", credits: { cast: [{ id: 701 }], crew: [{ id: 901, job: "Director" }] } } })
+  ];
+  const ranked = rankIntentCandidates(candidates, {
+    taste: { actors: { "700": 3 }, directors: { "900": 3 } },
+    limit: 2
+  });
+  assert.equal(ranked[0].id, "11");
+});
+
+test("personalized ranking cache versions its score and includes the requested result limit", () => {
+  assert.match(recommendationsSource, /"rankingVersion:4"/);
+  assert.match(recommendationsSource, /"limit:" \+ Math\.max\(1, Math\.min\(40, Number\(limit\) \|\| 12\)\)/);
+  assert.match(recommendationsSource, /cached\?\.version === 4/);
+  assert.match(recommendationsSource, /writeForYouCache\(\{ version: 4, fingerprint, updatedAt: Date\.now\(\), items \}\)/);
+});
