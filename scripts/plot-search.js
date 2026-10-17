@@ -84,7 +84,9 @@ export function buildPlotKeywordQueries(query = "", limit = 8) {
     }
     if (!added) break;
   }
-  const result = [...selected];
+  // Reserve a couple of retrieval slots for recognized story devices so a long
+  // description cannot crowd its strongest concept out of TMDB keyword search.
+  const result = [...new Set([...getPlotConceptPhrases(query).slice(0, 2), ...selected])].slice(0, safeLimit);
   for (const phrase of getPlotConceptPhrases(query)) {
     if (result.length >= safeLimit) break;
     if (!result.includes(phrase)) result.push(phrase);
