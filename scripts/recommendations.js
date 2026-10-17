@@ -427,37 +427,51 @@ export function scoreRecommendationExposure(memory, now = Date.now()) {
 
 function scoreCandidate(item, taste, progress, feedback, recentGenres = new Set(), recommendationMemory = new Map()) {
   const source = item.raw || item;
-  const genreIds = source.genre_ids || item.genre_ids || [];
+  const genreIds = (source.genre_ids || item.genre_ids || []).map(Number);
   const genres = new Set(genreIds);
-  const genreScore = Object.entries(taste.genres || {}).reduce((sum, [id, weight]) =>
-    sum + (genres.has(Number(id)) ? Number(weight) : 0), 0);
-  const mediaScore = Number(taste.media?.[item.media_type || "movie"] || 0);
-  const languageScore = taste.languages?.[source.original_language] ? Number(taste.languages[source.original_language]) : 0;
+  // Keep any single preference family bounded so accumulated metadata cannot
+  // overwhelm explicit feedback, freshness, or negative preferences.
+  const genreScore = Math.min(8, Object.entries(taste.genres || {}).reduce((sum, [id, weight]) =>
+    sum + (genres.has(Number(id)) ? Math.max(0, Number(weight) || 0) : 0), 0));
+  const mediaScore = Math.max(0, Math.min(3, Number(taste.media?.[item.media_type || "movie"] || 0)));
+  const languageScore = Math.max(0, Math.min(3, Number(taste.languages?.[source.original_language] || 0)));
   const countryCodes = source.origin_country || (source.production_countries || []).map(country => country.iso_3166_1).filter(Boolean);
-  const countryScore = countryCodes.reduce((sum, code) => sum + Number(taste.countries?.[code] || 0), 0);
+  const countryScore = Math.max(0, Math.min(3, countryCodes.reduce((sum, code) => sum + Number(taste.countries?.[code] || 0), 0)));
   const year = Number(String(source.release_date || source.first_air_date || item.date || "").slice(0, 4));
   const decade = year >= 1900 ? String(Math.floor(year / 10) * 10) : "";
-  const decadeScore = decade ? Number(taste.decades?.[decade] || 0) : 0;
+  const decadeScore = decade ? Math.max(0, Math.min(3, Number(taste.decades?.[decade] || 0))) : 0;
   const quality = Math.min(1, Math.max(0, Number(item.vote_average || 0) / 10));
   const popularity = Math.min(1, Math.log10(1 + Math.max(0, Number(item.popularity || 0))) / 4);
   const feedbackBoost = feedback[keyFor(item)]?.kind === "like" ? 6 : 0;
-  // Negative feedback should influence similar titles, not only exclude the exact title.
-  // Genre metadata is captured with new feedback; missing legacy metadata is ignored safely.
-  const notForMeGenres = Object.values(feedback)
+
+  // Negative feedback is a soft, explainable preference penalty in addition
+  // to exact-title exclusion. Legacy feedback without metadata remains safe.
+  const notForMeGenres = new Set(Object.values(feedback)
     .filter(entry => entry?.kind === "not_for_me" && Array.isArray(entry.genre_ids))
-    .flatMap(entry => entry.genre_ids.map(Number).filter(Number.isFinite));
-  const dislikePenalty = Math.min(4, genreIds.filter(id => notForMeGenres.includes(Number(id))).length * 1.25);
-  const exposure = scoreRecommendationExposure(recommendationMemory.get(keyFor(item))); 
-  const { seenPenalty, clickRecovery } = exposure;
+    .flatMap(entry => entry.genre_ids.map(Number).filter(Number.isFinite)));
+  const dislikePenalty = Math.min(5, genreIds.filter(id => notForMeGenres.has(Number(id))).length * 1.5);
+
+  // Use cast/crew affinity when a candidate response actually contains credits.
+  // Most discovery responses do not, so missing metadata never triggers a request
+  // or invents an actor/director match.
+  const credits = source.credits || item.credits || {};
+  const castIds = new Set((credits.cast || source.cast || item.cast || []).map(person => String(person.id ?? person)));
+  const directorIds = new Set([...(credits.crew || source.crew || item.crew || [])]
+    .filter(person => !person.job || ["Director", "Creator"].includes(person.job))
+    .map(person => String(person.id ?? person)));
+  const actorScore = Math.min(2.5, Object.entries(taste.actors || {}).reduce((sum, [id, weight]) =>
+    sum + (castIds.has(String(id)) ? Math.max(0, Number(weight) || 0) : 0), 0));
+  const directorScore = Math.min(2.5, Object.entries(taste.directors || {}).reduce((sum, [id, weight]) =>
+    sum + (directorIds.has(String(id)) ? Math.max(0, Number(weight) || 0) : 0), 0));
+
+  const { seenPenalty, clickRecovery } = scoreRecommendationExposure(recommendationMemory.get(keyFor(item)));
   const recentGenreBoost = genreIds.filter(id => recentGenres.has(Number(id))).slice(0, 2).length * .75;
   const releaseValue = source.release_date || source.first_air_date || item.date || "";
   const releaseTime = Date.parse(releaseValue);
   const ageDays = Number.isFinite(releaseTime) ? Math.max(0, (Date.now() - releaseTime) / 86400000) : Infinity;
   const freshness = Number.isFinite(ageDays) ? Math.max(0, 1 - (ageDays / 180)) : 0;
 
-  // Playback progress is account-local and keyed by media identity. Movies use
-  // movie:<id>; TV episodes use tv:<id>:<season>:<episode>, so inspect episode
-  // keys as well as the series-level key when ranking a TV candidate.
+  // Progress uses typed identities and preserves independent TV episode records.
   const progressKey = keyFor(item);
   const exactProgress = progress[progressKey];
   const episodeProgress = item.media_type === "tv"
@@ -473,7 +487,10 @@ function scoreCandidate(item, taste, progress, feedback, recentGenres = new Set(
       ? progressPercent >= 92 ? 5 : progressPercent >= 50 ? 2.5 : 1.2
       : 0;
 
-  return genreScore * 5.4 + mediaScore * 1.9 + languageScore * .55 + countryScore * .35 + decadeScore * .3 + quality * 1.4 + popularity * .8 + feedbackBoost + recentGenreBoost + freshness * .55 - seenPenalty + clickRecovery - progressPenalty - dislikePenalty;
+  return genreScore * 5.4 + mediaScore * 1.9 + languageScore * .55 + countryScore * .35 +
+    decadeScore * .3 + actorScore * 1.1 + directorScore * 1.25 + quality * 1.4 +
+    popularity * .8 + feedbackBoost + recentGenreBoost + freshness * .55 -
+    seenPenalty + clickRecovery - progressPenalty - dislikePenalty;
 }
 
 function rankForYou(candidates, taste, progress, feedback, excluded, limit, recentGenres = new Set(), recommendationMemory = new Map(), enforceDiversity = true) {
@@ -509,8 +526,17 @@ function rankForYou(candidates, taste, progress, feedback, excluded, limit, rece
     const languageMatch = Boolean(source.original_language && taste.languages?.[source.original_language]);
     const countryMatch = (source.origin_country || []).some(code => taste.countries?.[code]);
     const recentMatch = (source.genre_ids || []).some(id => recentGenres.has(Number(id)));
+    const credits = source.credits || item.credits || {};
+    const castIds = new Set((credits.cast || source.cast || item.cast || []).map(person => String(person.id ?? person)));
+    const directorIds = new Set([...(credits.crew || source.crew || item.crew || [])]
+      .filter(person => !person.job || ["Director", "Creator"].includes(person.job))
+      .map(person => String(person.id ?? person)));
+    const actorMatch = Object.entries(taste.actors || {}).some(([id, weight]) => Number(weight) > 0 && castIds.has(String(id)));
+    const directorMatch = Object.entries(taste.directors || {}).some(([id, weight]) => Number(weight) > 0 && directorIds.has(String(id)));
     let recommendationReason = "Picked for you";
-    if (exploration > .5) recommendationReason = "A discovery that fits your taste";
+    if (actorMatch) recommendationReason = "Because you like this cast";
+    else if (directorMatch) recommendationReason = "Because you like this director";
+    else if (exploration > .5) recommendationReason = "A discovery that fits your taste";
     else if (dominantGenre) recommendationReason = "Because it matches your taste";
     else if (recentMatch) recommendationReason = "Because you've been watching this lately";
     else if (languageMatch) recommendationReason = "Because you enjoy this language";
@@ -642,6 +668,8 @@ export async function getPersonalRecommendations(limit = 12) {
     .join(",");
 
   const fingerprint = [
+    "rankingVersion:4",
+    "limit:" + Math.max(1, Math.min(40, Number(limit) || 12)),
     ...Object.entries(feedback).map(([k, v]) => k + ":" + v.kind + ":" + v.updatedAt),
     ...Object.entries(progress).map(([k, v]) => k + ":" + v.updatedAt),
     "recent:" + (library.history || []).slice(0, 5).map(item => keyFor(item) + ":" + (item.lastWatchedAt || item.updatedAt || "")).join(","),
@@ -652,7 +680,7 @@ export async function getPersonalRecommendations(limit = 12) {
   ].sort().join("|");
 
   const cached = readForYouCache();
-  if (cached?.fingerprint === fingerprint && Date.now() - Number(cached.updatedAt || 0) < FOR_YOU_CACHE_TTL) {
+  if (cached?.version === 4 && cached?.fingerprint === fingerprint && Date.now() - Number(cached.updatedAt || 0) < FOR_YOU_CACHE_TTL) {
     return (cached.items || []).filter(item => !excluded.has(keyFor(item))).slice(0, limit);
   }
 
@@ -684,7 +712,7 @@ export async function getPersonalRecommendations(limit = 12) {
   );
 
   const items = rankForYou([...candidates, ...discoveryCandidates], taste, progress, feedback, excluded, limit, recentGenres, recommendationMemory);
-  writeForYouCache({ version: 3, fingerprint, updatedAt: Date.now(), items });
+  writeForYouCache({ version: 4, fingerprint, updatedAt: Date.now(), items });
 
   return items;
 }
