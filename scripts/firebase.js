@@ -3,7 +3,7 @@ import { getAuth } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-aut
 import { getFirestore } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 import { initializeAppCheck, ReCaptchaEnterpriseProvider } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app-check.js";
 
-const RECAPTCHA_ENTERPRISE_SITE_KEY = "6LfSuCArAAAAANqKO_UmgvT_0_gvZ9nLqiah3FpY";
+const RECAPTCHA_ENTERPRISE_SITE_KEY = "6Lfs5PMtAAAAAAH8_fR_A6g4uAftFvAv0uNsehTB";
 const LOCAL_HOSTS = new Set(["localhost", "127.0.0.1", "::1"]);
 
 function validFirebaseConfig(config) {
