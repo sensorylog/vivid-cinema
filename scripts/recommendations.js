@@ -709,7 +709,7 @@ export async function getPlotMatchRecommendations(intent = {}, limit = 18) {
   const requestedType = ["movie", "tv"].includes(intent.mediaType) ? intent.mediaType : "all";
   const mediaTypes = requestedType === "all" ? ["movie", "tv"] : [requestedType];
   // Deterministic, browser-side clue extraction. No hosted model or AI service is called.
-  const semantic = { clues: extractPlotClues(intent.query || "", 12), candidates: [], localOnly: true };
+  const plotClues = extractPlotClues(intent.query || "", 12);
   const keywordResponses = await Promise.allSettled(queries.map(query => tmdbApi.searchKeywords(query)));
   if (currentProgressOwner() !== ownerAtStart) return [];
   window.dispatchEvent(new CustomEvent("vivid:plot-search-status", {
@@ -728,7 +728,7 @@ export async function getPlotMatchRecommendations(intent = {}, limit = 18) {
       if (keyword?.id == null || !keyword?.name) return;
       const relevance = Math.max(
         scorePlotCandidate(intent.query || "", { title: keyword.name, overview: keyword.name }),
-        scorePlotCandidate((semantic.clues || []).join(" "), { title: keyword.name, overview: keyword.name })
+        scorePlotCandidate((plotClues).join(" "), { title: keyword.name, overview: keyword.name })
       );
       const existing = keywordMap.get(String(keyword.id));
       if (!existing || relevance > existing.relevance) {
@@ -793,7 +793,7 @@ export async function getPlotMatchRecommendations(intent = {}, limit = 18) {
   if (currentProgressOwner() !== ownerAtStart) return [];
   let candidates = [];
   try { candidates = collectIntentCandidates(responses); } catch {}
-  let scored = scorePlotCandidates(intent.query || "", uniqueByKey(candidates), semantic.clues || []);
+  let scored = scorePlotCandidates(intent.query || "", uniqueByKey(candidates), plotClues);
 
   // TMDB keyword tagging is incomplete. If it yields no plausible plot match,
   // scan a small popularity-ordered catalogue slice with the same verified
@@ -845,7 +845,7 @@ export async function getPlotMatchRecommendations(intent = {}, limit = 18) {
     // Keep the first-pass matches and supplement them with broader catalogue
     // candidates; replacing the list here can discard a valid partial match.
     candidates = uniqueByKey([...candidates, ...fallbackCandidates]);
-    scored = scorePlotCandidates(intent.query || "", candidates, semantic.clues || []);
+    scored = scorePlotCandidates(intent.query || "", candidates, plotClues);
   }
   if (!scored.length) return [];
 
