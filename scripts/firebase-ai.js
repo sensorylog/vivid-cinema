@@ -6,7 +6,10 @@ let modelPromise = null;
 function getRecallModel() {
   if (!modelPromise) {
     modelPromise = Promise.resolve().then(() => {
-      const ai = getAI(app, { backend: new GoogleAIBackend() });
+      const ai = getAI(app, {
+        backend: new GoogleAIBackend(),
+        useLimitedUseAppCheckTokens: true
+      });
       return getGenerativeModel(ai, {
         model: "gemini-3.8-flash",
         generationConfig: {
@@ -100,7 +103,10 @@ let chatModelPromise = null;
 function getRecallChatModel() {
   if (!chatModelPromise) {
     chatModelPromise = Promise.resolve().then(() => {
-      const ai = getAI(app, { backend: new GoogleAIBackend() });
+      const ai = getAI(app, {
+        backend: new GoogleAIBackend(),
+        useLimitedUseAppCheckTokens: true
+      });
       return getGenerativeModel(ai, {
         model: "gemini-3.8-flash",
         generationConfig: {
