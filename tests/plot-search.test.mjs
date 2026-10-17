@@ -108,7 +108,7 @@ test("local concept expansion recognises common plot devices without a hosted mo
 
 test("For You accurately describes deterministic local Vivid Recall", () => {
   const html = readFileSync(new URL("../for-you.html", import.meta.url), "utf8");
-  assert.match(html, /VIVID RECALL · LOCAL SEARCH/);
+  assert.match(html, /YOUR STORY, FOUND/);
   assert.match(html, /not a trained AI model/i);
   assert.match(html, /requires no paid AI service or Cloud Functions/i);
 });
