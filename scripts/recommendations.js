@@ -526,8 +526,17 @@ function rankForYou(candidates, taste, progress, feedback, excluded, limit, rece
     const languageMatch = Boolean(source.original_language && taste.languages?.[source.original_language]);
     const countryMatch = (source.origin_country || []).some(code => taste.countries?.[code]);
     const recentMatch = (source.genre_ids || []).some(id => recentGenres.has(Number(id)));
+    const credits = source.credits || item.credits || {};
+    const castIds = new Set((credits.cast || source.cast || item.cast || []).map(person => String(person.id ?? person)));
+    const directorIds = new Set([...(credits.crew || source.crew || item.crew || [])]
+      .filter(person => !person.job || ["Director", "Creator"].includes(person.job))
+      .map(person => String(person.id ?? person)));
+    const actorMatch = Object.entries(taste.actors || {}).some(([id, weight]) => Number(weight) > 0 && castIds.has(String(id)));
+    const directorMatch = Object.entries(taste.directors || {}).some(([id, weight]) => Number(weight) > 0 && directorIds.has(String(id)));
     let recommendationReason = "Picked for you";
     if (exploration > .5) recommendationReason = "A discovery that fits your taste";
+    else if (actorMatch) recommendationReason = "Because you like this cast";
+    else if (directorMatch) recommendationReason = "Because you like this director";
     else if (dominantGenre) recommendationReason = "Because it matches your taste";
     else if (recentMatch) recommendationReason = "Because you've been watching this lately";
     else if (languageMatch) recommendationReason = "Because you enjoy this language";
