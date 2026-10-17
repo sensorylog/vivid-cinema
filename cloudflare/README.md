@@ -1,35 +1,46 @@
-# Vivid Cinema plot-search fallback (Cloudflare Worker)
+# Vivid Recall AI fallback (Cloudflare Worker)
 
-This Worker lets Vivid silently fall back to OpenRouter when Firebase AI Logic/Gemini fails. It keeps the OpenRouter API key server-side and does not require users to sign in or require Firebase Blaze.
+This Worker provides optional Airforce-powered clue expansion for Vivid Recall. It does not use Firebase Cloud Functions or require Firebase Blaze. The Airforce API key stays server-side in a Cloudflare Worker secret.
 
-## One-time setup
+## Deploy
 
-1. In Cloudflare, open **Workers & Pages** and create a Worker named `vivid-cinema-plot-fallback`.
-2. Deploy the contents of `plot-ai-worker.js` as the Worker entry point (or deploy this folder with Wrangler).
-3. In the Worker settings, add a **Secret** named `OPENROUTER_API_KEY`. Paste the key there only; never put it in Vivid's browser files or GitHub.
-4. Keep `OPENROUTER_MODEL` set to `openai/gpt-oss-20b:free` initially. Free model availability and quotas can change; choose another compatible model in Worker variables if needed.
-5. Add a Cloudflare rate-limiting rule for the Worker endpoint. The code includes a small best-effort per-isolate throttle, but it is not a global abuse-prevention system.
-6. Copy the deployed Worker HTTPS URL and set `plotAiFallbackUrl` in `scripts/config.js` to that URL, then deploy Firebase Hosting.
-
-## Behavior
-
-- Gemini remains the primary provider.
-- OpenRouter is called only when the Gemini semantic request fails or times out.
-- The Worker key is never sent to the browser.
-- All model-suggested titles must still be verified against TMDB before they appear in results.
-- If the Worker is unset, unavailable, rate-limited, or its model fails, Vivid continues with the existing TMDB catalogue fallback.
-- The Worker allows browser requests only from the production Firebase Hosting origins and localhost development origins listed in the file. Add another exact origin only if you intentionally use it.
-- OpenRouter usage is subject to the selected model's current availability, rate limits, and pricing. Keep provider limits enabled.
-
-## Deploy with Wrangler
-
-From the repository root, deploy using the dedicated config (this prevents Wrangler from treating the whole website as Worker assets):
+From the repository root:
 
 ```sh
+npx wrangler login
+npx wrangler secret put AIRFORCE_API_KEY --config cloudflare/wrangler.toml
 npx wrangler deploy --config cloudflare/wrangler.toml
-npx wrangler secret put OPENROUTER_API_KEY --config cloudflare/wrangler.toml
 ```
 
-If your Cloudflare build settings currently run `npx wrangler deploy`, change the deploy command to `npx wrangler deploy --config cloudflare/wrangler.toml`. Do not deploy from the repository root without `--config`, and do not use the website root as the Worker assets directory.
+When prompted, paste the **newly rotated** Airforce API key into the terminal prompt. Do not put the key in source code, Firebase Hosting files, GitHub, or chat. The deploy output will show the Worker URL.
 
-When prompted for the secret, paste the OpenRouter key into the terminal prompt, not into source code or chat. Then copy the Worker URL into `scripts/config.js`.
+## Model fallback order
+
+Airforce's native cross-model fallback is used in a single request, to avoid spending the free tier's per-minute request allowance on separate model calls:
+
+1. `glm-4.7-flash`
+2. `gpt-oss-20b`
+3. `llama-instant`
+4. `rnj-1`
+
+Airforce's model catalogue and account permissions can change. Confirm current model IDs and pricing in the dashboard or `GET /v1/models`. If a model is unavailable, Airforce should try the next configured fallback.
+
+## Enable the browser integration
+
+After deployment, copy the exact HTTPS Worker URL from Wrangler into `plotAiFallbackUrl` in `scripts/config.js`:
+
+```js
+plotAiFallbackUrl: "https://YOUR-DEPLOYED-WORKER-URL.workers.dev",
+```
+
+Replace the example with the exact URL Wrangler returns, then deploy Firebase Hosting as usual. The existing Firebase Hosting Content Security Policy already permits `*.workers.dev` connections. The Worker accepts requests only from the production Vivid Cinema origins and the local Firebase emulator origins.
+
+If the URL is left empty, Vivid Recall remains fully functional with deterministic local matching and TMDB search.
+
+## Security and behavior
+
+- Set `AIRFORCE_API_KEY` using Wrangler secrets, never `[vars]`.
+- The Worker validates the origin, bounds the request text, limits request frequency best-effort, and uses a bounded timeout.
+- Configure an additional Cloudflare rate-limit rule for the Worker endpoint if it is publicly reachable.
+- AI-suggested titles are retrieval hints only. Vivid searches TMDB and uses real catalogue records rather than trusting generated titles.
+- If the Worker, Airforce, or all configured models fail, the browser continues with local Recall.
