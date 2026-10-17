@@ -8,7 +8,7 @@ let busy = false;
 let requestVersion = 0;
 
 function cleanText(value, max = 900) {
-  return String(value ?? "").replace(/[\\u0000-\\u001f]/g, " ").trim().slice(0, max);
+  return String(value ?? "").replace(/[\u0000-\u001f]/g, " ").trim().slice(0, max);
 }
 
 function addMessage(role, text, extra = "") {
@@ -48,7 +48,7 @@ function setStatus(text) {
 }
 
 function normalizeTitle(value) {
-  return String(value || "").normalize("NFD").replace(/[\\u0300-\\u036f]/g, "")
+  return String(value || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "")
     .toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
 }
 
