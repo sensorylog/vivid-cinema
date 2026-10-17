@@ -172,6 +172,7 @@ test("available cast and director metadata contributes to a bounded taste match"
     limit: 2
   });
   assert.equal(ranked[0].id, "11");
+  assert.equal(ranked[0].recommendationReason, "Because you like this cast");
 });
 
 test("personalized ranking cache versions its score and includes the requested result limit", () => {
