@@ -151,6 +151,7 @@ export default {
             },
             { role: "user", content: prompt }
           ],
+          response_format: { type: "json_object" },
           max_tokens: 900,
           temperature: 0.1
         }),
