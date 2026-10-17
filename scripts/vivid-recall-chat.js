@@ -199,17 +199,24 @@ async function sendMessage(text) {
     if (version !== requestVersion) return;
     const errorCode = String(error?.code || "");
     const errorMessage = String(error?.message || error || "Unknown error");
-    const needsSignIn = /unauthenticated/i.test(errorCode + " " + errorMessage) || /\b401\b/.test(errorMessage);
-    console.warn("Vivid Recall Gemini chat failed:", {
+    const fullDiagnostic = errorDiagnostic(error);
+    const diagnosticText = errorCode + " " + errorMessage + " " + fullDiagnostic;
+    const needsSignIn = /unauthenticated/i.test(diagnosticText) || /\b401\b/.test(diagnosticText);
+    const quotaFailure = /\b429\b|resource[_ ]exhausted|quota|rate.?limit/i.test(diagnosticText);
+    console.warn("Vivid Recall Gemini chat failed (full diagnostic):", {
       code: errorCode || null,
+      status: error?.status || error?.customData?.httpStatus || null,
       message: errorMessage,
-      details: error?.customData || error?.details || null,
+      customData: error?.customData || null,
+      details: error?.details || null,
+      diagnostic: fullDiagnostic,
       error
     });
-    const code = cleanText([errorCode, errorMessage].filter(Boolean).join(" · ") || "Unknown error", 180);
     const userFacingError = needsSignIn
       ? "Gemini returned 401 (unauthenticated). Firebase AI Logic may be set to allow signed-in users only. Sign in to Vivid Cinema, or change that AI Logic setting if guest chat should be allowed."
-      : "Gemini couldn’t connect this time. Your clues are still saved in this chat, and I’ve switched to local catalogue search. The status below shows the actual error so we can diagnose it.";
+      : quotaFailure
+        ? "Gemini returned a quota or capacity error (429). Your clues are still here, and local catalogue search is active. The status below includes the server diagnostic so we can identify the exact limit."
+        : "Gemini couldn’t connect this time. Your clues are still saved in this chat, and I’ve switched to local catalogue search. The status below shows the expanded error details.";
     addMessage("assistant", userFacingError);
     fallbackToLocalSearch(version);
     setStatus((needsSignIn ? "Gemini 401 · " : quotaFailure ? "Gemini 429 · " : "Gemini connection failed · ") + fullDiagnostic);
