@@ -16,6 +16,13 @@ const HIGH_VALUE_CLUES = new Set([
   "secret identity","serial killer","groundhog day","repeats day"
 ]);
 
+const PLOT_ACTION_WORDS = new Set([
+  "finds","found","discovers","discovered","uncovers","opens","inherits","steals","receives",
+  "changes","changed","everything","something","someone","gets","getting","stops","stopped",
+  "relives","wakes","waking","tries","attempts","save","stop","escape","protect","rescue",
+  "kill","defeat","turns","becomes","starts","begins","reveals","returns","travels","goes"
+]);
+
 function words(value) {
   return String(value || "").toLowerCase()
     .normalize("NFKD").replace(/[\u0300-\u036f]/g, "")
@@ -134,10 +141,12 @@ export function extractPlotClues(query = "", limit = 12) {
   const clues = [];
   const seen = new Set();
   const add = value => {
-    const clue = String(value || "").toLowerCase().replace(/[^a-z0-9 ]+/g, " ").replace(/\s+/g, " ").trim();
-    if (!clue || clue.length < 4 || clue.length > 64 || seen.has(clue)) return;
-    const terms = words(clue);
+    const rawClue = String(value || "").toLowerCase().replace(/[^a-z0-9 ]+/g, " ").replace(/\s+/g, " ").trim();
+    if (!rawClue || rawClue.length < 4 || rawClue.length > 64) return;
+    const terms = words(rawClue).filter(term => !PLOT_ACTION_WORDS.has(term));
     if (!terms.length || terms.every(term => GENERIC_PLOT_WORDS.has(term))) return;
+    const clue = terms.join(" ");
+    if (clue.length < 4 || seen.has(clue)) return;
     seen.add(clue);
     clues.push(clue);
   };
