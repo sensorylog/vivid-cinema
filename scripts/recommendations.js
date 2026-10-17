@@ -736,19 +736,35 @@ export async function getPlotMatchRecommendations(intent = {}, limit = 18) {
   const mediaTypes = requestedType === "all" ? ["movie", "tv"] : [requestedType];
   const localQueries = buildPlotKeywordQueries(query, 10);
   const localClues = extractPlotClues(query, 12);
-  // Vivid Recall is intentionally local-only until a new AI provider is integrated.
-  const plotClues = localClues;
-  const queries = localQueries;
-  if (!queries.length) return [];
-  const keywordResponses = await Promise.allSettled(queries.map(searchQuery => tmdbApi.searchKeywords(searchQuery)));
+  let recallResult = {
+    clues: localClues,
+    available: false,
+    message: "Gemini is unavailable right now; local clue extraction is still active."
+  };
+  try {
+    const { getRecallClues } = await import("./firebase-ai.js");
+    recallResult = await getRecallClues(query, localClues);
+  } catch (error) {
+    // A missing SDK, disabled AI Logic service, or App Check failure must not
+    // prevent the existing local Vivid Recall search from working.
+    console.warn("Vivid Recall AI setup is not ready; keeping local matching.", error);
+  }
   if (currentProgressOwner() !== ownerAtStart) return [];
+  const plotClues = Array.isArray(recallResult?.clues) && recallResult.clues.length
+    ? recallResult.clues
+    : localClues;
+  const aiQueries = buildPlotKeywordQueries([query, ...plotClues.slice(0, 4)].join(" "), 10);
+  const queries = [...new Set([...localQueries, ...aiQueries])].slice(0, 12);
+  if (!queries.length) return [];
   window.dispatchEvent(new CustomEvent("vivid:plot-search-status", {
     detail: {
-      available: false,
-      localOnly: true,
-      message: "Vivid Recall is using local clue extraction and catalogue matching. No AI service is connected."
+      available: Boolean(recallResult?.available),
+      localOnly: !recallResult?.available,
+      message: String(recallResult?.message || "Vivid Recall is using local clue extraction and catalogue matching.")
     }
   }));
+  const keywordResponses = await Promise.allSettled(queries.map(searchQuery => tmdbApi.searchKeywords(searchQuery)));
+  if (currentProgressOwner() !== ownerAtStart) return [];
   const allKeywordResponses = keywordResponses;
 
   const keywordMap = new Map();
