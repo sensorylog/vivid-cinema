@@ -43,6 +43,7 @@ test("Airforce Worker sends the four free models as a native fallback chain", as
     assert.equal(response.status, 200);
     assert.equal(requestBody.model, "glm-4.7-flash");
     assert.deepEqual(requestBody.models, ["gpt-oss-20b", "llama-instant", "rnj-1"]);
+    assert.deepEqual(requestBody.response_format, { type: "json_object" });
     assert.equal(payload.model, "llama-instant");
     assert.equal(payload.candidates[0].title, "Groundhog Day");
     assert.equal(JSON.stringify(payload).includes("test-secret"), false);
