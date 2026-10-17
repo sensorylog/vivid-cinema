@@ -86,17 +86,31 @@ export function buildPlotKeywordQueries(query = "", limit = 8) {
 }
 
 const PLOT_CONCEPTS = [
-  { pattern: /\b(?:reliv\w*|repeats? the same day|same day repeats?|time loop|looping time|day repeats?)\b/i, phrases: ["time loop", "same day", "groundhog day", "repeats day"] },
-  { pattern: /\b(?:magic\w* remote|remote control|control(?:s|led|ling)? time|stop(?:s|ped|ping)? time|pause(?:s|d)? time)\b/i, phrases: ["magic remote", "control time", "time manipulation"] },
-  { pattern: /\b(?:body swap|swap(?:s|ped)? bodies|switch(?:es|ed)? bodies|wake up in each other(?:'s)? bodies)\b/i, phrases: ["body swap", "identity swap"] },
-  { pattern: /\b(?:lose(?:s|d)? (?:their |his |her )?memory|memory loss|can't remember who|amnesia)\b/i, phrases: ["memory loss", "amnesia", "lost memories"] },
-  { pattern: /\b(?:parallel universe|alternate reality|another dimension|multiverse)\b/i, phrases: ["parallel universe", "alternate reality", "multiverse"] },
-  { pattern: /\b(?:haunted house|ghosts?|haunting|possessed)\b/i, phrases: ["haunted house", "ghost", "supernatural haunting"] },
-  { pattern: /\b(?:alien invasion|aliens? (?:attack|arrive|invade)|extraterrestrial)\b/i, phrases: ["alien invasion", "extraterrestrial", "first contact"] },
-  { pattern: /\b(?:serial killer|multiple murders|detective investigates|investigates? a murder)\b/i, phrases: ["serial killer", "murder investigation", "detective mystery"] },
-  { pattern: /\b(?:kidnapp?ed|held hostage|trapped in|can't escape|cannot escape)\b/i, phrases: ["kidnapping", "held hostage", "trapped escape"] },
-  { pattern: /\b(?:falls? in love|love triangle|fake dating|pretend(?:s|ing)? to date)\b/i, phrases: ["love story", "fake dating", "love triangle"] },
-  { pattern: /\b(?:travels? back in time|time travel|goes? back in time|future self)\b/i, phrases: ["time travel", "future self", "past and future"] }
+  { pattern: /\b(?:reliv\w*|repeats? the same day|same day repeats?|time loop|looping time|day repeats?|stuck in a loop|day starts? over)\b/i, phrases: ["time loop", "same day", "groundhog day", "repeats day"] },
+  { pattern: /\b(?:magic\w* remote|remote control|control(?:s|led|ling)? time|stop(?:s|ped|ping)? time|pause(?:s|d)? time|freezes? time)\b/i, phrases: ["magic remote", "control time", "time manipulation"] },
+  { pattern: /\b(?:body swap|swap(?:s|ped)? bodies|switch(?:es|ed)? bodies|wake up in each other(?:'s)? bodies|trades? bodies)\b/i, phrases: ["body swap", "identity swap"] },
+  { pattern: /\b(?:lose(?:s|d)? (?:their |his |her )?memory|memory loss|can't remember who|amnesia|memories? (?:are )?erased)\b/i, phrases: ["memory loss", "amnesia", "lost memories"] },
+  { pattern: /\b(?:parallel universe|alternate reality|another dimension|multiverse|different timeline)\b/i, phrases: ["parallel universe", "alternate reality", "multiverse"] },
+  { pattern: /\b(?:haunted house|ghosts?|haunting|possessed|evil spirit)\b/i, phrases: ["haunted house", "ghost", "supernatural haunting"] },
+  { pattern: /\b(?:alien invasion|aliens? (?:attack|arrive|invade)|extraterrestrial|from another planet)\b/i, phrases: ["alien invasion", "extraterrestrial", "first contact"] },
+  { pattern: /\b(?:serial killer|multiple murders|detective investigates|investigates? a murder|solves? a murder)\b/i, phrases: ["serial killer", "murder investigation", "detective mystery"] },
+  { pattern: /\b(?:kidnapp?ed|held hostage|trapped in|can't escape|cannot escape|locked in|locked room)\b/i, phrases: ["kidnapping", "held hostage", "trapped escape", "locked room mystery"] },
+  { pattern: /\b(?:falls? in love|love triangle|fake dating|pretend(?:s|ing)? to date|pretends? to be (?:a )?couple)\b/i, phrases: ["love story", "fake dating", "love triangle"] },
+  { pattern: /\b(?:travels? back in time|time travel|goes? back in time|future self|visits? the future)\b/i, phrases: ["time travel", "future self", "past and future"] },
+  { pattern: /\b(?:predicts? the future|sees? the future|visions? of the future|dreams? (?:about|of) (?:what happens|the future))\b/i, phrases: ["predicts future", "precognition", "future visions"] },
+  { pattern: /\b(?:invisible|turns? invisible|becomes? invisible|can'?t be seen)\b/i, phrases: ["invisibility", "invisible person", "invisible man"] },
+  { pattern: /\b(?:shrinks?|gets? smaller|tiny people|miniature world)\b/i, phrases: ["shrinking", "miniature world", "tiny people"] },
+  { pattern: /\b(?:trapped in a (?:video )?game|inside a video game|game becomes? real|video game world)\b/i, phrases: ["trapped in game", "video game world", "game world"] },
+  { pattern: /\b(?:stranded on (?:an? )?island|desert island|survives? (?:alone|on an island)|shipwrecked)\b/i, phrases: ["stranded island", "desert island", "survival story"] },
+  { pattern: /\b(?:secret twin|long lost twin|mistaken identity|pretends? to be someone else|assumes? another identity)\b/i, phrases: ["secret twin", "mistaken identity", "secret identity"] },
+  { pattern: /\b(?:cloned|clone|copies? of (?:himself|herself|themselves)|human replica)\b/i, phrases: ["human clone", "cloning", "duplicate person"] },
+  { pattern: /\b(?:cursed object|ancient curse|curse follows|haunted doll|evil doll)\b/i, phrases: ["cursed object", "ancient curse", "haunted doll"] },
+  { pattern: /\b(?:survival game|forced to compete|fight to survive|death game|last one standing)\b/i, phrases: ["survival game", "death game", "fight to survive"] },
+  { pattern: /\b(?:zombie apocalypse|outbreak turns people|end of the world|world ends|last survivor)\b/i, phrases: ["zombie apocalypse", "apocalypse survival", "end of the world"] },
+  { pattern: /\b(?:hidden world|secret world|magical kingdom|secret passage|discovers? a hidden)\b/i, phrases: ["hidden world", "secret world", "magical kingdom"] },
+  { pattern: /\b(?:robot becomes? human|android|artificial intelligence|sentient robot|robot falls? in love)\b/i, phrases: ["sentient robot", "android", "artificial intelligence"] },
+  { pattern: /\b(?:heist|steals? a (?:diamond|jewel|fortune|painting)|robbery crew|bank robbery)\b/i, phrases: ["heist", "bank robbery", "jewel theft"] },
+  { pattern: /\b(?:treasure hunt|searches? for treasure|lost treasure|ancient artifact)\b/i, phrases: ["treasure hunt", "lost treasure", "ancient artifact"] }
 ];
 
 export function getPlotConceptPhrases(query = "") {
@@ -107,6 +121,53 @@ export function getPlotConceptPhrases(query = "") {
     for (const phrase of concept.phrases) if (!phrases.includes(phrase)) phrases.push(phrase);
   }
   return phrases.slice(0, 10);
+}
+
+/**
+ * Extract high-signal, deterministic plot clues from a natural-language memory.
+ * This is rule-based text processing, not an AI/model call.
+ */
+export function extractPlotClues(query = "", limit = 12) {
+  const raw = String(query || "").trim();
+  if (!raw) return [];
+  const normalized = raw.toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "");
+  const clues = [];
+  const seen = new Set();
+  const add = value => {
+    const clue = String(value || "").toLowerCase().replace(/[^a-z0-9 ]+/g, " ").replace(/\s+/g, " ").trim();
+    if (!clue || clue.length < 4 || clue.length > 64 || seen.has(clue)) return;
+    const terms = words(clue);
+    if (!terms.length || terms.every(term => GENERIC_PLOT_WORDS.has(term))) return;
+    seen.add(clue);
+    clues.push(clue);
+  };
+
+  // Recognize story devices even when users describe them without the usual label.
+  getPlotConceptPhrases(normalized).forEach(add);
+
+  // Preserve meaningful action/object phrases as separate retrieval and ranking clues.
+  const cluePatterns = [
+    /(?:finds?|discovers?|uncovers?|opens?|inherits?|steals?|receives?)\s+(?:a|an|the|his|her|their)?\s*([a-z0-9]+(?:\s+[a-z0-9]+){0,2})/g,
+    /(?:trapped|locked|stuck|stranded|lost)\s+(?:inside|in|on|at)?\s*(?:a|an|the)?\s*([a-z0-9]+(?:\s+[a-z0-9]+){0,2})/g,
+    /(?:must|has to|tries to|attempts to)\s+(?:save|stop|escape|protect|find|rescue|kill|defeat)\s+(?:a|an|the|his|her|their)?\s*([a-z0-9]+(?:\s+[a-z0-9]+){0,2})/g
+  ];
+  for (const pattern of cluePatterns) {
+    for (const match of normalized.matchAll(pattern)) {
+      const value = match[1] || "";
+      if (!/^(?:man|woman|boy|girl|kid|child|person|people|thing|something|someone|place|way|lot|life|world|time|day)$/i.test(value.trim())) add(value);
+    }
+  }
+
+  // A few high-information adjacent phrases give catalogue search alternate wording.
+  const tokens = words(normalized);
+  for (const size of [3, 2]) {
+    for (let i = 0; i <= tokens.length - size; i++) {
+      const phrase = tokens.slice(i, i + size).join(" ");
+      const specificity = tokens.slice(i, i + size).filter(term => !GENERIC_PLOT_WORDS.has(term)).length;
+      if (specificity === size && phrase.length >= 8) add(phrase);
+    }
+  }
+  return clues.slice(0, Math.max(1, Math.min(16, Number(limit) || 12)));
 }
 
 function normalizeSearchText(value) {
@@ -184,9 +245,11 @@ export function scorePlotCandidate(query = "", candidate = {}) {
  * distinctive clues count more than terms shared by almost every synopsis.
  */
 export function scorePlotCandidates(query = "", candidates = [], clues = []) {
-  const semanticClues = [...new Set((Array.isArray(clues) ? clues : [])
-    .map(clue => String(clue || "").trim().slice(0, 100))
-    .filter(clue => clue.length >= 3))].slice(0, 8);
+  const semanticClues = [...new Set([
+    ...extractPlotClues(query, 12),
+    ...(Array.isArray(clues) ? clues : [])
+  ].map(clue => String(clue || "").trim().slice(0, 100))
+    .filter(clue => clue.length >= 3))].slice(0, 12);
   const input = (candidates || []).filter(item => item?.id != null);
   const corpus = input.map(item => {
     const fields = candidateFields(item);
@@ -201,6 +264,7 @@ export function scorePlotCandidates(query = "", candidates = [], clues = []) {
     const identity = (item.media_type || "movie") + ":" + String(item.id);
     const queryScore = scorePlotCandidate(query, item);
     const clueScores = semanticClues.map(clue => scorePlotCandidate(clue, item)).filter(score => score > 0).sort((a, b) => b - a);
+    const distinctClues = clueScores.length;
     const baseScore = Math.max(queryScore, clueScores[0] || 0);
     if (baseScore <= 0) return;
 
@@ -211,8 +275,10 @@ export function scorePlotCandidates(query = "", candidates = [], clues = []) {
     const idf = matchedTerms.length
       ? matchedTerms.reduce((sum, term) => sum + Math.log(1 + (totalDocuments - (documentFrequency.get(term) || 0) + 0.5) / ((documentFrequency.get(term) || 0) + 0.5)), 0) / matchedTerms.length
       : 0;
-    const corroboration = Math.min(3, (clueScores[1] || 0) * 0.2);
-    const plotScore = Number((baseScore * (0.8 + Math.min(1.2, idf * 0.35)) + corroboration).toFixed(3));
+    // Multiple independently matching clues are stronger evidence than one broad word.
+    const corroboration = Math.min(5, (clueScores[1] || 0) * 0.24 + Math.max(0, distinctClues - 2) * 0.65);
+    const queryCoverage = Math.min(1, matchedTerms.length / Math.max(2, queryTerms.length));
+    const plotScore = Number((baseScore * (0.78 + Math.min(1.25, idf * 0.35)) + corroboration + queryCoverage * 1.2).toFixed(3));
     const previous = scored.get(identity);
     if (!previous || plotScore > previous.plotScore) scored.set(identity, { ...item, plotScore });
   });
