@@ -119,7 +119,7 @@ test("Vivid Recall keeps local plot matching and adds isolated Gemini chat with 
   assert.match(html, /id="recall-chat-form"/);
   assert.match(html, /scripts\/vivid-recall-chat\.js/);
   assert.match(recommendations, /extractPlotClues\(query, 12\)/);
-  assert.match(recommendations, /No AI service is connected/);
+  assert.match(recommendations, /Gemini is unavailable right now; local clue extraction is still active/);
   assert.doesNotMatch(recommendations, /plotAiFallbackUrl|AIRFORCE|aiResult|fetch\(aiEndpoint/i);
   assert.doesNotMatch(config, /airforceApiKey|AIRFORCE_API_KEY/i);
   assert.doesNotMatch(csp, /api\.airforce/i);
