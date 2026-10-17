@@ -147,7 +147,7 @@ test("multiple independent clue matches outrank a single generic overlap", () =>
 test("live remembered-plot flow uses deterministic clues and never calls Gemini", () => {
   const recommendations = readFileSync(new URL("../scripts/recommendations.js", import.meta.url), "utf8");
   const forYou = readFileSync(new URL("../scripts/for-you.js", import.meta.url), "utf8");
-  assert.match(recommendations, /extractPlotClues\(intent\.query \|\| "", 12\)/);
+  assert.match(recommendations, /const localClues = extractPlotClues\(query, 12\)/);
   assert.match(recommendations, /vivid:plot-search-status/);
   assert.doesNotMatch(recommendations, /gemini-plot-search|findSemanticPlotMatches|vivid:gemini-plot-search-status/i);
   assert.doesNotMatch(forYou, /Gemini interprets|vivid:gemini-plot-search-status/i);
