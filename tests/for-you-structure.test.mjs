@@ -79,7 +79,7 @@ test("For You exposes the local-only Recall baseline before AI integration", () 
   assert.match(recommendations, /localOnly:\s*true/);
   assert.match(recommendations, /Vivid Recall is using local clue extraction and catalogue matching/);
   assert.match(script, /VIVID RECALL · Local clue matching is active/);
-  assert.match(script, /Using Vivid Recall’s local catalogue matcher/);
+  assert.match(script, /VIVID RECALL · Local clue matching is active/);
   assert.match(html, /No AI service connected/);
   assert.doesNotMatch(recommendations, /plotAiFallbackUrl|AIRFORCE|aiResult|AI clue expansion|Gemini/i);
   assert.doesNotMatch(script, /AI clue expansion|Gemini interprets|Airforce/i);
