@@ -76,7 +76,7 @@ test("For You records impressions only after a recommendation is actually viewab
 });
 
 test("For You preserves local matching alongside the isolated Gemini Recall chat", () => {
-  assert.match(recommendations, /localOnly:\s*true/);
+  assert.match(recommendations, /localOnly:\s*!recallResult\?\.available/);
   assert.match(recommendations, /Vivid Recall is using local clue extraction and catalogue matching/);
   assert.match(recommendations, /getRecallClues/);
   assert.match(script, /VIVID RECALL · Local clue matching is active/);
