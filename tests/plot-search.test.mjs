@@ -231,3 +231,19 @@ test("Recall ranks corroborated plot evidence above generic overlap across a sma
     assert.equal(ranked[0]?.title, fixture.expected, fixture.query);
   }
 });
+
+test("Vivid Recall exposes a multi-turn chat UI with verified result cards and a fallback path", () => {
+  const html = readFileSync(new URL("../for-you.html", import.meta.url), "utf8");
+  const chat = readFileSync(new URL("../scripts/vivid-recall-chat.js", import.meta.url), "utf8");
+  const worker = readFileSync(new URL("../cloudflare/plot-ai-worker.js", import.meta.url), "utf8");
+  assert.match(html, /id="recall-chat-form"/);
+  assert.match(html, /id="recall-chat-messages"/);
+  assert.match(html, /id="recall-chat-input"/);
+  assert.match(html, /scripts\/vivid-recall-chat\.js/);
+  assert.match(chat, /mode: "chat"/);
+  assert.match(chat, /verifyCandidates/);
+  assert.match(chat, /TMDB-verified matches/);
+  assert.match(chat, /switching to local Recall/);
+  assert.match(worker, /conversational text chat/);
+  assert.match(worker, /role: "system"/);
+});
