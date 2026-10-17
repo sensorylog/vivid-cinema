@@ -289,7 +289,15 @@ export function scorePlotCandidates(query = "", candidates = [], clues = []) {
     // Multiple independently matching clues are stronger evidence than one broad word.
     const corroboration = Math.min(5, (clueScores[1] || 0) * 0.24 + Math.max(0, distinctClues - 2) * 0.65);
     const queryCoverage = Math.min(1, matchedTerms.length / Math.max(2, queryTerms.length));
-    const plotScore = Number((baseScore * (0.78 + Math.min(1.25, idf * 0.35)) + corroboration + queryCoverage * 1.2).toFixed(3));
+    const conceptPhrases = getPlotConceptPhrases(query);
+    const conceptHits = conceptPhrases.filter(phrase => {
+      const phraseTerms = words(phrase);
+      return phraseTerms.length > 0 && phraseTerms.every(term => termMatches(term, candidateTerms));
+    }).length;
+    // Reward candidates that support multiple distinct story devices, not just
+    // one highly repeated trope such as a character reliving the same day.
+    const conceptCorroboration = Math.min(4, Math.max(0, conceptHits - 1) * 1.5);
+    const plotScore = Number((baseScore * (0.78 + Math.min(1.25, idf * 0.35)) + corroboration + queryCoverage * 1.2 + conceptCorroboration).toFixed(3));
     const previous = scored.get(identity);
     if (!previous || plotScore > previous.plotScore) scored.set(identity, { ...item, plotScore });
   });
