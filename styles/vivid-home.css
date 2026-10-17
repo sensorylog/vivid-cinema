@@ -876,3 +876,18 @@ body[data-vivid-page="home"] .vivid-rail.is-expanded {
     padding-top: 2px;
   }
 }
+
+
+/* Premium Home: fewer words competing with the artwork, tighter shelf rhythm. */
+body[data-vivid-page="home"] .vivid-rail-head p { display: none; }
+body[data-vivid-page="home"] .vivid-catalogue-explore-head p { display: none; }
+body[data-vivid-page="home"] .vivid-catalogue-explore-head { margin-bottom: 12px; }
+body[data-vivid-page="home"] .vivid-rails { padding-top: clamp(18px, 2vw, 26px); padding-bottom: clamp(18px, 2vw, 26px); }
+body[data-vivid-page="home"] .vivid-rails + .vivid-rails { border-top-color: rgba(255,255,255,.055); }
+body[data-vivid-page="home"] .vivid-rail-head { margin-bottom: 12px; }
+body[data-vivid-page="home"] .vivid-rail-head h2 { font-size: clamp(1.25rem, 2vw, 1.7rem); letter-spacing: -.035em; }
+body[data-vivid-page="home"] .vivid-news-home-copy p { display: -webkit-box; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+@media (max-width: 640px) {
+  body[data-vivid-page="home"] .vivid-rails { padding-top: 16px; padding-bottom: 16px; }
+  body[data-vivid-page="home"] .vivid-rail-head { margin-bottom: 9px; }
+}
