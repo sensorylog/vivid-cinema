@@ -127,6 +127,9 @@ test("Vivid Recall keeps local plot matching and adds isolated Gemini chat with 
   assert.match(ai, /firebasevertexai\.googleapis\.com|GoogleAIBackend/);
   assert.match(chat, /fallbackToLocalSearch\(version\)/);
   assert.match(chat, /Gemini connection failed/);
+  assert.ok(chat.includes(String.raw`/\b401\b/`), "HTTP 401 detection must use word boundaries");
+  assert.ok(ai.includes(String.raw`].join("\n");`), "Gemini prompt must use real line breaks");
+  assert.ok(!ai.includes(String.raw`].join("\\n");`), "Gemini prompt must not contain literal backslash-n separators");
   assert.match(worker, /\.\/scripts\/vivid-recall-chat\.js/);
   assert.match(worker, /\.\/scripts\/firebase-ai\.js/);
   assert.doesNotMatch(worker, /vivid-recall-chat[^"]*\.html/);
