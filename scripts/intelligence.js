@@ -170,9 +170,12 @@ export function mergeBehaviorEvents(localEvents = [], remoteEvents = [], limit =
 export async function syncIntelligenceForUser(u){
  ensureIntelligenceOwner(u?.uid || null);
  if(!u)return read();
+ let syncStage="initializing Firestore";
  try{
   const {db,collection,getDocsFromServer,doc,setDoc,deleteDoc}=await fb();
+  syncStage="reading remote feedback, events, and taste";
   const [f,e,t]=await Promise.all([getDocsFromServer(collection(db,"users",u.uid,"feedback")),getDocsFromServer(collection(db,"users",u.uid,"events")),getDocsFromServer(collection(db,"users",u.uid,"taste"))]);
+  syncStage="checking signed-in account";
   const {auth}=await fb();
   if(String(auth?.currentUser?.uid || "")!==String(u.uid) ||
      (localStorage.getItem(LOCAL_OWNER_KEY) || "guest")!==String(u.uid)){
@@ -191,14 +194,17 @@ export async function syncIntelligenceForUser(u){
   const retainedRemoteEventIds=new Set(e.docs.filter(d=>!eventDocIdsToDelete.has(d.id)).map(d=>d.id));
   const ownerIsCurrent=()=>String(auth?.currentUser?.uid||"")===String(u.uid)&&
    (localStorage.getItem(LOCAL_OWNER_KEY)||"guest")===String(u.uid);
+  syncStage="cleaning up invalid remote events";
   for(let i=0;i<eventDocsToDelete.length;i+=20){
    if(!ownerIsCurrent())throw new Error("The signed-in account changed during event retention cleanup. Please retry.");
    await Promise.all(eventDocsToDelete.slice(i,i+20).map(eventDoc=>deleteDoc(eventDoc.ref)));
   }
+  syncStage="preparing local events for upload";
   const eventsToUpload=s.events.filter(event=>{
    const eventDocId=String(event.sessionId||"")+"_"+String(event.id||"");
    return event.id&&event.sessionId&&mergedEventIds.has(eventDocId)&&!retainedRemoteEventIds.has(eventDocId);
   });
+  syncStage="uploading local events";
   for(let i=0;i<eventsToUpload.length;i+=20){
    if(!ownerIsCurrent())throw new Error("The signed-in account changed during event sync. Please retry.");
    await Promise.all(eventsToUpload.slice(i,i+20).map(event=>{
@@ -206,6 +212,7 @@ export async function syncIntelligenceForUser(u){
     return setDoc(doc(db,"users",u.uid,"events",eventDocId),event,{merge:true});
    }));
   }
+  syncStage="reconciling feedback";
   const remoteAddedTasteSignal=mergedEvents.some(event=>
    !localEventIds.has(String(event.sessionId||"")+"_"+String(event.id||""))&&TASTE_SIGNAL_TYPES.has(event.type)
   );
@@ -243,6 +250,7 @@ export async function syncIntelligenceForUser(u){
     feedbackChanged=true;
    }
   });
+  syncStage="reconciling taste profile";
   const remote=t.docs.find(d=>d.id==="profile")?.data();
    if(feedbackChanged||s.taste.dirty){
     // Keep local behavior/feedback changes dirty; a newer remote timestamp
@@ -254,6 +262,7 @@ export async function syncIntelligenceForUser(u){
    }else if(Number(s.taste.updatedAt||0)>0&&Number(s.taste.updatedAt||0)>Number(remote?.updatedAt||0)){
     await setDoc(doc(db,"users",u.uid,"taste","profile"),{version:1,...s.taste},{merge:true});
   }
+  syncStage="finalizing sync";
   const {auth:finalAuth}=await fb();
   if(String(finalAuth?.currentUser?.uid || "")!==String(u.uid) ||
      (localStorage.getItem(LOCAL_OWNER_KEY) || "guest")!==String(u.uid)){
