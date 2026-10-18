@@ -19,90 +19,116 @@
   <link rel="stylesheet" href="styles/vivid-audit-fixes.css">
   
 <link rel="stylesheet" href="styles/vivid-liquid-glass.css?v=lg4">
+  <link rel="stylesheet" href="styles/vivid-account-cinematic.css?v=20261018-cinematic-1">
 </head>
 <body data-vivid-page="account" class="account-page vivid-atmosphere">
   <header class="vivid-unified-header"><nav class="vivid-nav vivid-unified-nav" aria-label="Primary"><a class="vivid-brand" href="home.html">Vivid<span>Cinema</span></a><div class="vivid-navlinks"><a href="home.html"><i class="bi bi-house-fill" aria-hidden="true"></i><span>Home</span></a><a href="discover.html"><i class="bi bi-compass" aria-hidden="true"></i><span>Discover</span></a><a href="home.html#trending"><i class="bi bi-fire" aria-hidden="true"></i><span>Trending</span></a><a href="collection.html?collection=movies"><i class="bi bi-film" aria-hidden="true"></i><span>Movies</span></a><a href="collection.html?collection=tv"><i class="bi bi-tv" aria-hidden="true"></i><span>TV</span></a><a href="library.html"><i class="bi bi-bookmark" aria-hidden="true"></i><span>Library</span></a><a href="news.html"><i class="bi bi-newspaper" aria-hidden="true"></i><span>News</span></a></div><a class="vivid-nav-action" id="account-auth" data-vivid-nav-auth="true" href="account.html">Account</a></nav></header>
 
-  <main class="account-shell"><a class="vivid-page-back" data-vivid-back href="home.html"><i class="bi bi-chevron-left" aria-hidden="true"></i><span>Back</span></a>
+  <main class="account-shell account-redesign">
+    <a class="vivid-page-back" data-vivid-back href="home.html"><i class="bi bi-chevron-left" aria-hidden="true"></i><span>Back</span></a>
     <header class="account-header">
       <div class="account-heading-copy">
-        <span class="account-kicker">ACCOUNT</span>
-        <h1>Make Vivid yours.</h1>
-        <p>Your profile, preferences and library — all in one place.</p>
+        <span class="account-kicker">YOUR VIVID SPACE</span>
+        <h1>Make it yours.</h1>
+        <p>Your profile, your preferences, your cinema journey — thoughtfully organized in one place.</p>
       </div>
     </header>
 
-    <div class="account-grid">
-      <section class="account-card account-profile-card" aria-labelledby="profile-title">
-        <div class="account-profile-hero">
+    <div class="account-dashboard">
+      <aside class="account-rail" aria-label="Account navigation">
+        <section class="account-rail-profile" aria-label="Your profile">
           <div class="account-avatar" id="account-avatar" aria-hidden="true">V</div>
-          <div class="account-profile-copy">
+          <div class="account-rail-profile-copy">
             <span class="account-card-kicker">YOUR PROFILE</span>
-            <h2 id="profile-title">Profile</h2>
+            <h2 id="profile-title">Your profile</h2>
             <p id="profile-summary">Your identity on Vivid.</p>
           </div>
           <span id="user-verification" class="account-badge">Loading…</span>
-        </div>
-        <div class="account-meta">
-          <div class="account-meta-row"><span>Sign-in method</span><span id="user-provider">Loading…</span></div>
-          <div class="account-meta-row"><span>Sign-in account</span><span id="account-type">Personal</span></div>
-          <div class="account-meta-row"><span>Member since</span><span id="account-created">—</span></div>
-        </div>
+        </section>
+        <nav class="account-rail-links" aria-label="Account sections">
+          <a href="#profile-section"><i class="bi bi-person" aria-hidden="true"></i><span>Profile</span></a>
+          <a href="#preferences-section"><i class="bi bi-sliders" aria-hidden="true"></i><span>Preferences</span></a>
+          <a href="#activity-section"><i class="bi bi-collection-play" aria-hidden="true"></i><span>Your activity</span></a>
+          <a href="#achievements-section"><i class="bi bi-award" aria-hidden="true"></i><span>Achievements</span></a>
+          <a href="#security-section"><i class="bi bi-shield-lock" aria-hidden="true"></i><span>Security</span></a>
+        </nav>
+        <div class="account-rail-note"><strong>Your cinema, your way.</strong><p>Fine-tune how Vivid feels, then get back to discovering your next favorite.</p></div>
+      </aside>
 
-        <div class="account-field">
-          <label for="user-email">Email</label>
-          <input id="user-email" type="email" disabled autocomplete="email">
-        </div>
-        <div class="account-field">
-          <label for="user-name">Display name</label>
-          <input id="user-name" type="text" maxlength="80" autocomplete="name" placeholder="Your name">
-        </div>
+      <div class="account-content-grid">
+        <section class="account-card account-profile-card" id="profile-section" aria-labelledby="profile-details-title">
+          <span class="account-card-kicker">PERSONAL DETAILS</span>
+          <h2 id="profile-details-title">Profile</h2>
+          <div class="account-meta">
+            <div class="account-meta-row"><span>Sign-in method</span><span id="user-provider">Loading…</span></div>
+            <div class="account-meta-row"><span>Account type</span><span id="account-type">Personal</span></div>
+            <div class="account-meta-row"><span>Member since</span><span id="account-created">—</span></div>
+          </div>
+          <div class="account-field">
+            <label for="user-email">Email address</label>
+            <input id="user-email" type="email" disabled autocomplete="email">
+          </div>
+          <div class="account-field">
+            <label for="user-name">Display name</label>
+            <input id="user-name" type="text" maxlength="80" autocomplete="name" placeholder="Your name">
+          </div>
+          <p id="account-status" class="account-status" aria-live="polite">Checking your session…</p>
+          <div class="account-actions">
+            <button id="save-btn" class="vivid-button vivid-button--primary" type="button" disabled>Save changes</button>
+            <button id="cancel-btn" class="vivid-button vivid-button--ghost" type="button" disabled>Discard edits</button>
+            <button id="logout-btn" class="vivid-button vivid-button--secondary" type="button">Log out</button>
+          </div>
+        </section>
 
-        <p id="account-status" class="account-status" aria-live="polite">Checking your session…</p><div class="account-sync"><span class="account-sync-dot" id="sync-dot"></span><div><strong id="sync-label">Sync status</strong><small id="sync-detail">Checking your cloud library…</small></div><button id="sync-btn" class="vivid-button vivid-button--ghost" type="button">Sync now</button></div>
-        <div class="account-actions">
-          <button id="save-btn" class="vivid-button vivid-button--primary" type="button" disabled>Save changes</button>
-          <button id="cancel-btn" class="vivid-button vivid-button--ghost" type="button" disabled>Discard edits</button>
-          <button id="logout-btn" class="vivid-button vivid-button--secondary" type="button">Log out</button>
-        </div>
-      </section>
+        <section class="account-card" id="preferences-section" aria-labelledby="preferences-title">
+          <span class="account-card-kicker">TUNED TO YOU</span>
+          <h2 id="preferences-title">Viewing preferences</h2>
+          <div class="account-field">
+            <label for="provider-country">Provider region</label>
+            <select id="provider-country" aria-describedby="provider-help"></select>
+            <small id="provider-help">Used to show legal streaming, rent and buy availability for your region.</small>
+          </div>
+          <label class="account-toggle">
+            <span><strong>Trailer autoplay</strong><small>Let featured trailers play automatically when supported.</small></span>
+            <input id="autoplay-trailers" type="checkbox">
+          </label>
+          <label class="account-toggle">
+            <span><strong>Reduced motion</strong><small>Keep the experience calmer by reducing decorative motion.</small></span>
+            <input id="reduced-motion" type="checkbox">
+          </label>
+        </section>
 
-      <section class="account-card account-security-card" aria-labelledby="security-title"><span class="account-card-kicker">PROTECTION</span><h2 id="security-title">Security</h2><p>Keep your account protected and your library yours.</p><button id="change-password-btn" class="vivid-button vivid-button--secondary" type="button">Send password reset</button><p id="security-status" class="account-status" aria-live="polite"></p><div class="account-danger-zone"><h3>Delete account</h3><p>Permanently remove your account, private profile and saved library data. This action cannot be undone.</p><button id="delete-account-btn" class="vivid-button vivid-button--danger" type="button">Delete account permanently</button></div></section>
+        <section class="account-card account-library-card" id="activity-section" aria-labelledby="library-summary-title">
+          <div class="account-section-heading"><div><span class="account-card-kicker">YOUR ACTIVITY</span><h2 id="library-summary-title">Your library</h2></div><a href="library.html">Open library <i class="bi bi-arrow-up-right" aria-hidden="true"></i></a></div>
+          <div class="account-stats">
+            <div class="account-stat"><strong id="favorites-count">0</strong><span>Favorites</span></div>
+            <div class="account-stat"><strong id="watch-later-count">0</strong><span>Watch later</span></div>
+            <div class="account-stat"><strong id="history-count">0</strong><span>History</span></div>
+          </div>
+          <div class="account-sync"><span class="account-sync-dot" id="sync-dot"></span><div><strong id="sync-label">Sync status</strong><small id="sync-detail">Checking your cloud library…</small></div><button id="sync-btn" class="vivid-button vivid-button--ghost" type="button">Sync now</button></div>
+        </section>
 
-      <section class="account-card" aria-labelledby="preferences-title">
-        <span class="account-card-kicker">YOUR EXPERIENCE</span>
-        <h2 id="preferences-title">Viewing preferences</h2>
-        <div class="account-field">
-          <label for="provider-country">Provider region</label>
-          <select id="provider-country" aria-describedby="provider-help"></select>
-          <small id="provider-help">Used when showing legal streaming, rent and buy availability.</small>
-        </div>
-        <label class="account-toggle">
-          <span><strong>Trailer autoplay</strong><small>Allow featured trailers to autoplay when supported.</small></span>
-          <input id="autoplay-trailers" type="checkbox">
-        </label>
-        <label class="account-toggle">
-          <span><strong>Reduced motion</strong><small>Reduce Vivid's decorative motion without changing content.</small></span>
-          <input id="reduced-motion" type="checkbox">
-        </label>
-      </section>
+        <section class="account-card account-achievements-card" id="achievements-section" aria-labelledby="achievements-title">
+          <div class="account-achievements-preview">
+            <div class="account-achievements-preview-copy">
+              <span class="account-card-kicker">MILESTONES, MADE PERSONAL</span>
+              <h2 id="achievements-title">Your cinema story.</h2>
+              <p>Discover custom-designed milestones inspired by the way you collect, explore and finish stories. Each one has its own artwork and unlock moment.</p>
+              <a class="account-achievement-link" href="achievements.html">Explore your achievements <i class="bi bi-arrow-up-right" aria-hidden="true"></i></a>
+            </div>
+            <div class="account-achievement-symbols" aria-hidden="true"><span class="account-achievement-symbol">✦</span><span class="account-achievement-symbol">◈</span><span class="account-achievement-symbol">✺</span></div>
+          </div>
+        </section>
 
-      <section class="account-card account-library-card" aria-labelledby="library-summary-title">
-        <div class="account-section-heading"><div><span class="account-card-kicker">YOUR ACTIVITY</span><h2 id="library-summary-title">Library</h2></div><a href="library.html">Open library <i class="bi bi-arrow-up-right"></i></a></div>
-        <div class="account-stats">
-          <div class="account-stat"><strong id="favorites-count">0</strong><span>Liked</span></div>
-          <div class="account-stat"><strong id="watch-later-count">0</strong><span>Watch later</span></div>
-          <div class="account-stat"><strong id="history-count">0</strong><span>Watched</span></div>
-        </div>
-      </section>
-
-      <section class="account-card account-achievements-card" aria-labelledby="achievements-title">
-        <div class="account-achievements-head">
-          <div><span class="account-card-kicker">YOUR CINEMA JOURNEY</span><h2 id="achievements-title">Milestones</h2><p id="achievement-summary" aria-live="polite">Discover what your cinema journey unlocks.</p></div>
-          <div class="account-achievements-count"><span>Collection progress</span><span class="account-achievements-meter" id="achievement-progress" role="progressbar" aria-label="Milestones unlocked" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span></span></span></div>
-        </div>
-        <div class="achievement-grid" id="achievement-grid"></div>
-        <button class="account-achievement-view-all" id="achievement-view-all" type="button" aria-expanded="false" hidden>View all</button>
-      </section>
+        <section class="account-card account-security-card" id="security-section" aria-labelledby="security-title">
+          <span class="account-card-kicker">ACCOUNT PROTECTION</span>
+          <h2 id="security-title">Security</h2>
+          <p>Keep your sign-in secure and your private library yours.</p>
+          <button id="change-password-btn" class="vivid-button vivid-button--secondary" type="button">Send password reset</button>
+          <p id="security-status" class="account-status" aria-live="polite"></p>
+          <div class="account-danger-zone"><h3>Delete account</h3><p>Permanently remove your account, private profile and saved library data. This action cannot be undone.</p><button id="delete-account-btn" class="vivid-button vivid-button--danger" type="button">Delete account permanently</button></div>
+        </section>
+      </div>
     </div>
   </main>
 
