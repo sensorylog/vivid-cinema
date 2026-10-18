@@ -33,12 +33,12 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          if git diff --quiet -- data/news-feed.json; then
+          git add -f data/news-feed.json
+          if git diff --cached --quiet -- data/news-feed.json; then
             echo "News feed unchanged; no commit needed."
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/news-feed.json
           git commit -m "Refresh automatically collected news headlines"
           git push
