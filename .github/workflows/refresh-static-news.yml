@@ -29,24 +29,7 @@ jobs:
           node-version: 22
       - name: Fetch attributed headlines from public RSS feeds
         run: node automation/build-static-news-feed.mjs
-      - name: Commit feed when it changes
-        id: commit
-        shell: bash
-        run: |
-          set -euo pipefail
-          git add -f data/news-feed.json
-          if git diff --cached --quiet -- data/news-feed.json; then
-            echo "changed=false" >> "$GITHUB_OUTPUT"
-            echo "News feed unchanged; no commit needed."
-            exit 0
-          fi
-          echo "changed=true" >> "$GITHUB_OUTPUT"
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git commit -m "Refresh automatically collected news headlines"
-          git push
       - name: Publish updated static feed to Firebase Hosting
-        if: steps.commit.outputs.changed == 'true' || github.event_name == 'push' || github.event_name == 'workflow_dispatch'
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: "${{ secrets.GITHUB_TOKEN }}"
