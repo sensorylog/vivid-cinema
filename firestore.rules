@@ -598,7 +598,7 @@ service cloud.firestore {
         && request.resource.data.publisher.size() <= 120
         && request.resource.data.status == 'approved'
         && request.resource.data.defaultRegion in ['global','hollywood','india','africa','asia','europe','latin-america','middle-east','ghana','nigeria']
-        && request.resource.data.defaultCategory in ['film','streaming','celebrity','trailers','awards','industry','africa','india','asia','hollywood','europe','latin-america','middle-east','ghana','nollywood']
+        && request.resource.data.defaultCategory in ['film','television','streaming','music','gaming','anime','animation','box-office','celebrity','trailers','awards','festivals','production','business','legal','industry','comics','theatre','podcasts','creators','ghana','nollywood','africa','india','asia','hollywood','europe','latin-america','middle-east']
         && request.resource.data.feedUrl is string
         && request.resource.data.feedApproved is bool
         && request.resource.data.imageUsageApproved is bool
@@ -637,7 +637,7 @@ service cloud.firestore {
         && request.resource.data.canonicalUrl.size() <= 2000
         && request.resource.data.canonicalUrl.split('/').size() >= 4
         && request.resource.data.canonicalUrl.split('/')[2] in [request.resource.data.sourceId, 'www.' + request.resource.data.sourceId]
-        && request.resource.data.category in ['film','streaming','celebrity','trailers','awards','industry','ghana','nollywood','africa','india','asia','hollywood','europe','latin-america','middle-east']
+        && request.resource.data.category in ['film','television','streaming','music','gaming','anime','animation','box-office','celebrity','trailers','awards','festivals','production','business','legal','industry','comics','theatre','podcasts','creators','ghana','nollywood','africa','india','asia','hollywood','europe','latin-america','middle-east']
         && request.resource.data.region in ['global','hollywood','india','africa','asia','europe','latin-america','middle-east','ghana','nigeria']
         && request.resource.data.summary is string
         && request.resource.data.summary.size() >= 1
