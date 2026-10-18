@@ -21,8 +21,8 @@ const REGION_LABELS = {global:"Global",hollywood:"Hollywood / Americas",india:"I
 function message(id, value) { const el=$(id); if(el) el.textContent=value; }
 function normalizedDomain(value) { return String(value||"").trim().toLowerCase().replace(/^https?:\/\//,"").replace(/^www\./,"").replace(/\/$/,""); }
 function domainFromUrl(value) { const url=new URL(value); return url.hostname.toLowerCase().replace(/^www\./,""); }
-function validStoryHost(url, domain) { const host=url.hostname.toLowerCase().replace(/^www\./,""); return host===domain; }
-function validFeedHost(url, domain) { const host=url.hostname.toLowerCase().replace(/^www\./,""); return host===domain || host.endsWith("."+domain); }
+function validStoryHost(url, domain) { const host=url.hostname.toLowerCase().replace(/^www\./,""); return url.protocol==="https:" && !url.port && !url.username && !url.password && host===domain; }
+function validFeedHost(url, domain) { const host=url.hostname.toLowerCase().replace(/^www\./,""); return url.protocol==="https:" && !url.port && !url.username && !url.password && (host===domain || host.endsWith("."+domain)); }
 function localDateTimeValue(date=new Date()) { const pad=n=>String(n).padStart(2,"0"); return date.getFullYear()+"-"+pad(date.getMonth()+1)+"-"+pad(date.getDate())+"T"+pad(date.getHours())+":"+pad(date.getMinutes()); }
 
 sourceForm?.addEventListener("submit", async event => {
@@ -210,7 +210,7 @@ async function publishDiscoveredStory(id) {
     sourceUrl = new URL(item.sourceUrl);
     canonicalUrl = new URL(item.canonicalUrl);
     const domain = String(item.sourceId || "").toLowerCase().replace(/^www\./,"");
-    if (sourceUrl.protocol !== "https:" || canonicalUrl.protocol !== "https:" ||
+    if (sourceUrl.protocol !== "https:" || canonicalUrl.protocol !== "https:" || sourceUrl.port || canonicalUrl.port || sourceUrl.username || canonicalUrl.username || sourceUrl.password || canonicalUrl.password ||
         sourceUrl.hostname.toLowerCase().replace(/^www\./,"") !== domain ||
         canonicalUrl.hostname.toLowerCase().replace(/^www\./,"") !== domain) throw new Error("Publisher domain mismatch");
   } catch {
