@@ -26,4 +26,4 @@ export const NEWS_SOURCES = [
  {id:"guardian-film",publisher:"The Guardian",domain:"theguardian.com",sourceUrl:"https://www.theguardian.com/film",feedUrl:"https://www.theguardian.com/film/rss",category:"film",region:"europe",approvedForUse:false,ingestionEnabled:false,note:"Verify applicable RSS licence and display terms."}
 ];
 export const NEWS_REGIONS = ["global","hollywood","india","africa","asia","europe","latin-america","middle-east","ghana","nigeria"];
-export const NEWS_CATEGORIES = ["film","streaming","celebrity","trailers","awards","industry","africa","india","asia","hollywood","europe","latin-america","middle-east","ghana","nollywood"];
+export const NEWS_CATEGORIES = ["film","television","streaming","music","gaming","anime","animation","box-office","celebrity","trailers","awards","festivals","production","business","legal","industry","comics","theatre","podcasts","creators","africa","india","asia","hollywood","europe","latin-america","middle-east","ghana","nollywood"];
