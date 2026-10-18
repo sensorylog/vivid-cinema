@@ -14,7 +14,7 @@ const discoveryStatus = $("news-discovery-status");
 let moderator = false;
 let queueUnsubscribe = null;
 let queueCandidates = [];
-const ALLOWED_CATEGORIES = ["film","streaming","celebrity","trailers","awards","industry","africa","india","asia","hollywood","europe","latin-america","middle-east","ghana","nollywood"];
+const ALLOWED_CATEGORIES = ["film","television","streaming","music","gaming","anime","animation","box-office","celebrity","trailers","awards","festivals","production","business","legal","industry","comics","theatre","podcasts","creators","africa","india","asia","hollywood","europe","latin-america","middle-east","ghana","nollywood"];
 const ALLOWED_REGIONS = ["global","hollywood","india","africa","asia","europe","latin-america","middle-east","ghana","nigeria"];
 const REGION_LABELS = {global:"Global",hollywood:"Hollywood / Americas",india:"India",africa:"Africa",asia:"Asia & Asia-Pacific",europe:"Europe","latin-america":"Latin America","middle-east":"Middle East",ghana:"Ghana",nigeria:"Nigeria"};
 
