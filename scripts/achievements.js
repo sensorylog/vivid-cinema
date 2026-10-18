@@ -52,26 +52,27 @@ function contextFor(library){
   return {counts:{favorites:count(library,"favorites"),watchLater:count(library,"watchLater"),history:count(library,"history")},favorites:compact(library.favorites),watchLater:compact(library.watchLater),history:compact(library.history)};
 }
 function fallbackSpark(a,library){
-  const title=contextFor(library).favorites[0]?.title;
-  if(title&&a.id==="favorites-5")return "Your shelf started with “"+title+"”. The fun part now is noticing which future favorites feel like its distant cousins.";
-  const messages={
-    "first-favorite":"Every personal cinema starts with one story you want to keep close. Your shelf has its first anchor.",
-    "favorites-5":"Five favorites is less a ranking than a tiny map of stories you may want to return to.",
-    "favorites-10":"Your favorites are becoming a taste fingerprint: not just what is popular, but what keeps calling you back.",
-    "favorites-25":"You have enough saved stories to start spotting your own patterns. Your next great find may sit beside an old favorite.",
-    "queue-first":"A good watchlist is a promise to your future mood. You just made the first one.",
-    "queue-5":"Your next movie night has options before it even has a mood. That is a very Vivid kind of preparation.",
-    "queue-10":"Ten possibilities means you can choose by feeling, not endless scrolling. Your future self says thanks.",
-    "history-first":"One title can be the start of a surprisingly personal cinema timeline. This is frame one.",
-    "history-5":"Your history is starting to look less like a record and more like a trail of choices about what moves you.",
-    "history-10":"Ten titles in, you are building a private map of stories you chose to spend time with.",
-    "completion-first":"There is a particular satisfaction in reaching an ending on purpose. One more story now has a full stop.",
-    "completion-5":"Five endings reached. You are collecting complete experiences, not just posters and possibilities.",
-    "whole-picture":"You have a place for what you love, what you might watch, and what you have seen. That is your own small cinema system.",
-    "feature-focus":"Your movie shelf has a point of view now. Keep an eye on the kinds of stories that earn a second look.",
-    "series-scout":"Series have a different rhythm from films. Your collection is making room for stories that stay with you longer.",
-    "library-25":"Twenty-five distinct titles is a real personal catalogue. The interesting part is the connections between them."
-  };return messages[a.id]||"Your cinema collection is taking on a shape that belongs to you.";
+  const firstTitle=contextFor(library).favorites[0]?.title;
+  const sparks={
+    "first-favorite":"Film history has a survival bias: what we can watch today is only a fraction of what was made. Early prints were often discarded or lost to deterioration, so preserving and finding stories matters.",
+    "favorites-5":"Editors create meaning between shots. Place the same neutral face beside a meal, then beside a coffin, and viewers can infer different emotions. This is the Kuleshov effect: context changes what we think we see.",
+    "favorites-10":"A film's color can act like a quiet second script. Costumes, sets, and lighting may repeat or shift a palette to hint at a character's change before anyone explains it in dialogue.",
+    "favorites-25":"Cinema isn't preserved by popularity alone. Many silent films are lost because prints were discarded, reused, or deteriorated; what survives shapes what later generations call film history.",
+    "queue-first":"The 180-degree rule helps viewers track where characters are in a scene. Directors sometimes break it deliberately to make a moment feel unstable, unfamiliar, or emotionally off-balance.",
+    "queue-5":"A watchlist solves a small decision-design problem: it moves the question from “What exists?” to “Which of these fits tonight?” A little curation can make choosing feel easier than endless browsing.",
+    "queue-10":"Finished-film sound is layered. Dialogue, room tone, effects, footsteps, and music may be recorded separately and mixed later; the realism you hear is often carefully assembled, not simply captured.",
+    "history-first":"Motion pictures did not emerge from one lone inventor. Cinema grew through several experiments in photography, sequential images, cameras, and projection—a useful reminder that big creative leaps are usually networks of ideas.",
+    "history-5":"A jump cut removes a portion of continuous action, making time visibly leap forward. Editors use that break to create speed, tension, or the feeling that a character's world is unstable.",
+    "history-10":"The familiar 24-frames-per-second cinema standard became widely established with synchronized sound. Silent-era projection speeds varied, which is one reason some older films can look unusually fast today.",
+    "completion-first":"An ending can change how earlier scenes feel. Once you know the outcome, small details can suddenly look like clues; a strong story often gives its earlier moments a second meaning on the way out.",
+    "completion-5":"Film editing does more than shorten footage: it shapes causality. When one shot follows another, viewers instinctively search for a relationship—even when the images were filmed separately.",
+    "whole-picture":"A personal film library answers three different questions: what moved you, what you might explore, and what you've actually experienced. Keeping those intentions distinct can make future recommendations more useful.",
+    "feature-focus":"Genre labels are promises to the audience. Filmmakers can satisfy, bend, or break those expectations; surprise often works best when a story first teaches you what rules to expect.",
+    "series-scout":"A series can let character change accumulate through small choices over many episodes. That longer runway is one reason a detail that seems minor early on can become meaningful much later.",
+    "library-25":"A soundtrack can change how the same scene feels because sound guides attention and expectation. A gentle melody over an image of danger can create unease precisely because the signals disagree."
+  };
+  if(firstTitle&&a.id==="favorites-5")return "The Kuleshov effect shows how editing changes what a face seems to express. Your shelf began with “"+firstTitle+"”; notice how the stories around a favorite can change what you see in it.";
+  return sparks[a.id]||"A useful cinema lesson: what we notice depends not only on what is shown, but on the context, timing, and details that guide our attention.";
 }
 function ensureStyles(){
   if(document.querySelector('link[data-vivid-achievement-styles]'))return;
