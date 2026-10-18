@@ -1,57 +1,26 @@
-// Candidate registry for Vivid Cinema's curated newsroom.
-// A feed stays disabled until its reuse/display terms and source quality have been reviewed.
-// Do not turn a source on just because its RSS endpoint is reachable.
+// Candidate registry only: nothing is enabled until a moderator reviews source reliability,
+// attribution/display terms, feed permissions and image rights. Feed access is not republication permission.
 export const NEWS_SOURCES = [
-  {
-    id: "variety",
-    publisher: "Variety",
-    feedUrl: "https://variety.com/feed/",
-    domain: "variety.com",
-    category: "industry",
-    region: "global",
-    regionLabel: "Global",
-    approvedForUse: false
-  },
-  {
-    id: "deadline",
-    publisher: "Deadline",
-    feedUrl: "https://deadline.com/feed/",
-    domain: "deadline.com",
-    category: "industry",
-    region: "global",
-    regionLabel: "Global",
-    approvedForUse: false
-  },
-  {
-    id: "punch-entertainment",
-    publisher: "PUNCH",
-    feedUrl: "https://rss.punchng.com/v1/category/entertainment",
-    domain: "punchng.com",
-    category: "nollywood",
-    region: "africa",
-    regionLabel: "Nigeria / African cinema",
-    approvedForUse: false
-  },
-  {
-    id: "bellanaija",
-    publisher: "BellaNaija",
-    feedUrl: "https://www.bellanaija.com/feed/",
-    domain: "bellanaija.com",
-    category: "africa",
-    region: "africa",
-    regionLabel: "African entertainment",
-    approvedForUse: false
-  },
-  {
-    id: "pulse-ghana",
-    publisher: "Pulse Ghana",
-    feedUrl: null,
-    sourceUrl: "https://www.pulse.com.gh/entertainment",
-    domain: "pulse.com.gh",
-    category: "ghana",
-    region: "ghana",
-    regionLabel: "Ghana",
-    approvedForUse: false,
-    note: "Use as a manual editorial candidate until an approved feed/API and display terms are verified. Do not scrape the page."
-  }
+ {id:"variety",publisher:"Variety",domain:"variety.com",sourceUrl:"https://variety.com/",feedUrl:"https://variety.com/feed/",category:"industry",region:"global",approvedForUse:false,ingestionEnabled:false},
+ {id:"deadline",publisher:"Deadline",domain:"deadline.com",sourceUrl:"https://deadline.com/",feedUrl:"https://deadline.com/feed/",category:"industry",region:"global",approvedForUse:false,ingestionEnabled:false},
+ {id:"hollywood-reporter",publisher:"The Hollywood Reporter",domain:"hollywoodreporter.com",sourceUrl:"https://www.hollywoodreporter.com/",feedUrl:null,category:"industry",region:"hollywood",approvedForUse:false,ingestionEnabled:false,note:"Verify official feed/API and current reuse terms."},
+ {id:"indiewire",publisher:"IndieWire",domain:"indiewire.com",sourceUrl:"https://www.indiewire.com/",feedUrl:null,category:"film",region:"hollywood",approvedForUse:false,ingestionEnabled:false},
+ {id:"techcrunch",publisher:"TechCrunch",domain:"techcrunch.com",sourceUrl:"https://techcrunch.com/",feedUrl:"https://techcrunch.com/feed/",category:"industry",region:"global",approvedForUse:false,ingestionEnabled:false,note:"Review official RSS terms and attribution requirements."},
+ {id:"indian-express",publisher:"The Indian Express",domain:"indianexpress.com",sourceUrl:"https://indianexpress.com/rss/",feedUrl:"https://indianexpress.com/section/entertainment/bollywood/feed/",category:"film",region:"india",approvedForUse:false,ingestionEnabled:false},
+ {id:"hindustan-times-bollywood",publisher:"Hindustan Times",domain:"hindustantimes.com",sourceUrl:"https://www.hindustantimes.com/rss",feedUrl:"https://www.hindustantimes.com/feeds/rss/entertainment/bollywood/rssfeed.xml",category:"film",region:"india",approvedForUse:false,ingestionEnabled:false},
+ {id:"hindustan-times-hollywood",publisher:"Hindustan Times",domain:"hindustantimes.com",sourceUrl:"https://www.hindustantimes.com/rss",feedUrl:"https://www.hindustantimes.com/feeds/rss/entertainment/hollywood/rssfeed.xml",category:"film",region:"hollywood",approvedForUse:false,ingestionEnabled:false},
+ {id:"hindustan-times-anime",publisher:"Hindustan Times",domain:"hindustantimes.com",sourceUrl:"https://www.hindustantimes.com/rss",feedUrl:"https://www.hindustantimes.com/feeds/rss/entertainment/anime/rssfeed.xml",category:"film",region:"asia",approvedForUse:false,ingestionEnabled:false},
+ {id:"bollywood-hungama",publisher:"Bollywood Hungama",domain:"bollywoodhungama.com",sourceUrl:"https://www.bollywoodhungama.com/rss-feed/",feedUrl:null,category:"film",region:"india",approvedForUse:false,ingestionEnabled:false,note:"Verify exact feed URL and terms."},
+ {id:"punch-entertainment",publisher:"PUNCH",domain:"punchng.com",sourceUrl:"https://punchng.com/entertainment/",feedUrl:"https://rss.punchng.com/v1/category/entertainment",category:"nollywood",region:"africa",approvedForUse:false,ingestionEnabled:false},
+ {id:"bellanaija",publisher:"BellaNaija",domain:"bellanaija.com",sourceUrl:"https://www.bellanaija.com/",feedUrl:"https://www.bellanaija.com/feed/",category:"africa",region:"africa",approvedForUse:false,ingestionEnabled:false},
+ {id:"pulse-ghana",publisher:"Pulse Ghana",domain:"pulse.com.gh",sourceUrl:"https://www.pulse.com.gh/entertainment",feedUrl:null,category:"africa",region:"africa",approvedForUse:false,ingestionEnabled:false,note:"Manual candidate only until official permitted feed/API is verified; do not scrape."},
+ {id:"channel24",publisher:"Channel24",domain:"channel24.co.za",sourceUrl:"https://www.channel24.co.za/",feedUrl:null,category:"africa",region:"africa",approvedForUse:false,ingestionEnabled:false,note:"South African source candidate; verify feed and terms."},
+ {id:"okayafrica",publisher:"OkayAfrica",domain:"okayafrica.com",sourceUrl:"https://www.okayafrica.com/",feedUrl:null,category:"africa",region:"africa",approvedForUse:false,ingestionEnabled:false,note:"Pan-African culture candidate; verify feed and terms."},
+ {id:"africanews",publisher:"Africanews",domain:"africanews.com",sourceUrl:"https://www.africanews.com/",feedUrl:null,category:"africa",region:"africa",approvedForUse:false,ingestionEnabled:false,note:"Pan-African candidate; verify entertainment feed and terms."},
+ {id:"anime-news-network",publisher:"Anime News Network",domain:"animenewsnetwork.com",sourceUrl:"https://www.animenewsnetwork.com/",feedUrl:null,category:"film",region:"asia",approvedForUse:false,ingestionEnabled:false,note:"Verify official feed/API and terms."},
+ {id:"korea-herald",publisher:"The Korea Herald",domain:"koreaherald.com",sourceUrl:"https://www.koreaherald.com/",feedUrl:null,category:"film",region:"asia",approvedForUse:false,ingestionEnabled:false,note:"Korean entertainment candidate; verify feed and terms."},
+ {id:"scmp",publisher:"South China Morning Post",domain:"scmp.com",sourceUrl:"https://www.scmp.com/",feedUrl:null,category:"film",region:"asia",approvedForUse:false,ingestionEnabled:false,note:"Asia-Pacific candidate; verify entertainment feed and terms."},
+ {id:"guardian-film",publisher:"The Guardian",domain:"theguardian.com",sourceUrl:"https://www.theguardian.com/film",feedUrl:"https://www.theguardian.com/film/rss",category:"film",region:"europe",approvedForUse:false,ingestionEnabled:false,note:"Verify applicable RSS licence and display terms."}
 ];
+export const NEWS_REGIONS = ["global","hollywood","india","africa","asia","europe","latin-america","middle-east"];
+export const NEWS_CATEGORIES = ["film","streaming","celebrity","trailers","awards","industry","africa","india","asia","hollywood","europe","latin-america","middle-east","ghana","nollywood"];
