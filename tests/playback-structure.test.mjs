@@ -37,3 +37,15 @@ test("watch controller and service worker use the grouped playback paths", async
     assert.ok(!serviceWorker.includes(`./scripts/${file}`), `service worker must not retain the old ${file} path`);
   }
 });
+
+
+test("direct-stream diagnostics observe stalls and buffer-ahead without controlling playback", async () => {
+  const engine = await readFile(path.join(root, "scripts", "playback", "player-engine.js"), "utf8");
+  for (const event of ["waiting", "stalled", "playing", "error", "progress"]) {
+    assert.ok(engine.includes('"' + event + '"'), "direct player diagnostics should observe " + event);
+  }
+  assert.match(engine, /onDiagnostics = null/);
+  assert.match(engine, /bufferedAhead/);
+  assert.match(engine, /Diagnostics must never interrupt playback/);
+  assert.match(engine, /target\\.removeEventListener\\(eventName, listener\\)/);
+});
