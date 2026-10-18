@@ -2,10 +2,11 @@ import { escapeHtml } from "./utils.js";
 
 const root = document.getElementById("vivid-editorial-feed");
 if (root) {
-  const filters = document.querySelectorAll("[data-editorial-filter]");
+  const filters = [...document.querySelectorAll("[data-editorial-filter]")];
   const status = document.getElementById("vivid-editorial-status");
   let activeFilter = "all";
   let articles = [];
+  let lastTrigger = null;
 
   const labelFor = value => ({
     film:"Film", television:"TV", streaming:"Streaming", celebrity:"People", music:"Music",
@@ -45,31 +46,83 @@ if (root) {
       return url.protocol === "https:" ? url.href : "";
     } catch { return ""; }
   }
+  function ensureReader() {
+    let modal = document.getElementById("vivid-news-reader");
+    if (modal) return modal;
+    modal = document.createElement("div");
+    modal.id = "vivid-news-reader";
+    modal.className = "vivid-news-reader";
+    modal.hidden = true;
+    modal.setAttribute("role","dialog");
+    modal.setAttribute("aria-modal","true");
+    modal.setAttribute("aria-labelledby","vivid-news-reader-title");
+    modal.innerHTML = '<div class="vivid-news-reader-backdrop" data-reader-close></div><section class="vivid-news-reader-panel" role="document"><header class="vivid-news-reader-header"><span class="vivid-news-reader-mark">VIVID / NEWS</span><button type="button" class="vivid-news-reader-close" data-reader-close aria-label="Close article reader">×</button></header><div class="vivid-news-reader-content"><div class="vivid-news-reader-meta" id="vivid-news-reader-meta"></div><h2 id="vivid-news-reader-title"></h2><p class="vivid-news-reader-summary" id="vivid-news-reader-summary"></p><div class="vivid-news-reader-footer"><span id="vivid-news-reader-date"></span><a id="vivid-news-reader-original" target="_blank" rel="noopener noreferrer">Continue at publisher <span aria-hidden="true">↗</span></a></div></div></section>';
+    document.body.append(modal);
+    modal.addEventListener("click", event => {
+      if (event.target.closest("[data-reader-close]")) closeReader();
+    });
+    document.addEventListener("keydown", event => {
+      if (event.key === "Escape" && !modal.hidden) closeReader();
+    });
+    return modal;
+  }
+  function openReader(article, trigger) {
+    const url = safeUrl(article.sourceUrl);
+    if (!url) return;
+    lastTrigger = trigger || document.activeElement;
+    const modal = ensureReader();
+    const publisher = article.publisher || "Original publisher";
+    document.getElementById("vivid-news-reader-meta").textContent =
+      labelFor(article.category) + "  /  " + publisher;
+    document.getElementById("vivid-news-reader-title").textContent = article.headline || "Entertainment news";
+    document.getElementById("vivid-news-reader-summary").textContent =
+      String(article.summary || "").trim() || "This publisher’s RSS feed did not include a readable summary. Open the original report for the complete story.";
+    document.getElementById("vivid-news-reader-date").textContent = formatDate(article.publishedAt);
+    const original = document.getElementById("vivid-news-reader-original");
+    original.href = url;
+    original.setAttribute("aria-label","Continue reading at " + publisher);
+    modal.hidden = false;
+    document.body.classList.add("vivid-news-reader-open");
+    modal.querySelector(".vivid-news-reader-close").focus();
+  }
+  function closeReader() {
+    const modal = document.getElementById("vivid-news-reader");
+    if (!modal || modal.hidden) return;
+    modal.hidden = true;
+    document.body.classList.remove("vivid-news-reader-open");
+    lastTrigger?.focus?.();
+  }
   function card(article, featured = false) {
     const url = safeUrl(article.sourceUrl);
     const title = escapeHtml(article.headline || "Entertainment news");
     const publisher = escapeHtml(article.publisher || "Original publisher");
-    const region = labelFor(article.region);
     const category = labelFor(article.category);
-    const link = url || safeUrl(article.publisherUrl) || "https://news.google.com/";
-    return '<article class="vivid-editorial-card' + (featured ? ' is-featured' : '') + '">' +
-      '<a class="vivid-editorial-art vivid-editorial-art-placeholder" href="' + escapeHtml(link) + '" target="_blank" rel="noopener noreferrer" aria-label="Read original story"><span>VIVID / NEWS</span></a>' +
+    const summary = escapeHtml(String(article.summary || "").trim() || "Open this story in Vivid for a quick brief and a link to the full report.");
+    const source = url || safeUrl(article.publisherUrl) || "https://news.google.com/";
+    const id = escapeHtml(article.id || "");
+    return '<article class="vivid-editorial-card' + (featured ? ' is-featured' : '') + '" data-story-id="' + id + '">' +
+      '<button class="vivid-editorial-art vivid-editorial-art-placeholder vivid-editorial-open" type="button" data-open-story="' + id + '" aria-label="Read ' + title + ' in Vivid"><span>VIVID / NEWS</span><i class="bi bi-arrow-up-right" aria-hidden="true"></i></button>' +
       '<div class="vivid-editorial-card-copy"><div class="vivid-editorial-meta"><span>' + escapeHtml(category) + '</span><span>' + publisher + '</span></div>' +
-      '<h3><a href="' + escapeHtml(link) + '" target="_blank" rel="noopener noreferrer">' + title + '</a></h3>' +
-      '<p>Reported by ' + publisher + '. Open the original report to read the full story.</p>' +
-      '<div class="vivid-editorial-foot"><time>' + escapeHtml(formatDate(article.publishedAt)) + '</time><a href="' + escapeHtml(link) + '" target="_blank" rel="noopener noreferrer">Read original <span aria-hidden="true">↗</span></a></div></div></article>';
+      '<h3><button type="button" class="vivid-editorial-title-button" data-open-story="' + id + '">' + title + '</button></h3>' +
+      '<p>' + summary + '</p>' +
+      '<div class="vivid-editorial-foot"><time>' + escapeHtml(formatDate(article.publishedAt)) + '</time><div><button type="button" class="vivid-editorial-read" data-open-story="' + id + '">Read in Vivid</button><a href="' + escapeHtml(source) + '" target="_blank" rel="noopener noreferrer">Original ↗</a></div></div></div></article>';
   }
   function render() {
     const filtered = articles.filter(article => matchesFilter(article, activeFilter));
     if (!filtered.length) {
       root.setAttribute("aria-busy","false");
-      root.innerHTML = '<div class="vivid-editorial-empty"><span class="vivid-editorial-empty-mark">V</span><h3>No stories in this section yet.</h3><p>Try Global or another region. The feed refreshes automatically from public news RSS results.</p></div>';
+      root.innerHTML = '<div class="vivid-editorial-empty"><span class="vivid-editorial-empty-mark">V</span><h3>No stories in this section yet.</h3><p>Try Global or another topic. The feed refreshes automatically from public news RSS sources.</p></div>';
       return;
     }
-    const cards = filtered.slice(0,30).map((article,index)=>card(article,index===0)).join("");
-    root.innerHTML = '<div class="vivid-editorial-grid">' + cards + '</div>';
+    root.innerHTML = '<div class="vivid-editorial-count">' + filtered.length + ' stories in this view</div><div class="vivid-editorial-grid">' + filtered.slice(0,36).map((article,index)=>card(article,index===0)).join("") + '</div>';
     root.setAttribute("aria-busy","false");
   }
+  root.addEventListener("click", event => {
+    const button = event.target.closest("[data-open-story]");
+    if (!button) return;
+    const article = articles.find(item => String(item.id || "") === button.dataset.openStory);
+    if (article) openReader(article, button);
+  });
   filters.forEach(button => button.addEventListener("click", () => {
     activeFilter = button.dataset.editorialFilter || "all";
     filters.forEach(item => {
@@ -78,6 +131,7 @@ if (root) {
       item.setAttribute("aria-pressed",active ? "true" : "false");
     });
     render();
+    document.getElementById("vivid-editorial-heading")?.scrollIntoView({behavior:"smooth",block:"start"});
   }));
 
   fetch("./data/news-feed.json",{cache:"no-store"})
@@ -96,7 +150,8 @@ if (root) {
     .catch(error => {
       console.error("Vivid static news feed unavailable:",error);
       root.setAttribute("aria-busy","false");
-      root.innerHTML = '<div class="vivid-editorial-empty"><h3>The live web-news feed has not been generated yet.</h3><p>Open the repository Actions tab and run “Refresh Vivid Cinema web news”. Once the first feed is generated, stories will appear here automatically.</p><a href="https://github.com/sensorylog/vivid-cinema/actions/workflows/refresh-static-news.yml" target="_blank" rel="noopener noreferrer">Open news feed workflow ↗</a></div>';
-      if (status) status.textContent = "Waiting for first web-news refresh";
+      root.innerHTML = '<div class="vivid-editorial-empty"><h3>The web-news feed is temporarily unavailable.</h3><p>Try again shortly. The newsroom refreshes automatically from public news RSS sources.</p><button type="button" class="vivid-editorial-retry" id="vivid-news-retry">Try again</button></div>';
+      document.getElementById("vivid-news-retry")?.addEventListener("click", () => location.reload());
+      if (status) status.textContent = "News feed unavailable · retry";
     });
 }
