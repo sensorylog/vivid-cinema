@@ -42,6 +42,7 @@ test("achievement Sparks reuse the existing Recall model and App Check protectio
   assert.match(aiSource, /if \(appCheckError\)/);
   assert.match(aiSource, /Do not fabricate historical claims, dates, quotations, statistics/);
   assert.match(aiSource, /35 to 65 words maximum/);
+  assert.match(aiSource, /payload\?\.confidence !== "high"/);
   assert.match(aiSource, /export async function getRecallClues/);
   assert.match(aiSource, /export async function sendRecallChatMessage/);
 });
