@@ -163,14 +163,14 @@ function render(filter = "all") {
   }
   const by = category => all.filter(x => x.category === category);
   const forYou = by("forYou");
-  feed.innerHTML =
-    section("Fresh today", "TODAY", by("today"), "today-feed", "New releases and episodes that are actually dated for today.") +
-    section("This week", "THIS WEEK", by("week"), "week-feed", "A focused shortlist of what is newly arriving around the current week.") +
+  const sections =
+    section("Fresh today", "TODAY", by("today"), "today-feed", "New releases and episodes dated for today.") +
+    section("This week", "THIS WEEK", by("week"), "week-feed", "A focused shortlist of new arrivals around the current week.") +
     section("Coming up", "RELEASE RADAR", by("coming"), "coming-feed", "Upcoming titles only — past releases are rejected before they reach this feed.") +
     section(forYou.length ? "Picked for you" : "Worth a look", forYou.length ? "PERSONALIZED" : "CURATED", forYou, "for-you-feed", forYou.length ? "Built from your Vivid taste signals." : "Strong catalogue picks while Vivid learns what you like.") +
     section("On the radar", "TRENDING", by("trending"), "trending-feed", "Titles gaining attention right now.") +
-    section("Trailer watch", "TRAILERS", by("trailers"), "trailer-feed", "Titles with fresh video material worth checking out.") ||
-    emptyState();
+    section("Trailer watch", "TRAILERS", by("trailers"), "trailer-feed", "Titles with fresh video material worth checking out.");
+  feed.innerHTML = all.some(item => item && item.id) ? sections : emptyState();
   wire();
   updateStatus(all.length);
 }
@@ -178,7 +178,7 @@ function updateStatus(count) {
   const status = $("news-status");
   if (status) status.textContent = count + " useful updates · refreshed " + new Date(state.lastUpdated || Date.now()).toLocaleTimeString([], {hour:"numeric",minute:"2-digit"});
   const updated = $("news-updated");
-  if (updated) updated.textContent = "TMDB catalogue checked live";
+  if (updated) updated.textContent = "Catalogue data · TMDB";
 }
 function addUnique(target, seen, s) {
   if (!s?.id) return;
