@@ -208,6 +208,27 @@ service cloud.firestore {
       allow update: if isOwner(userId) && validProfile();
       allow delete: if isOwner(userId);
 
+      match /achievements/{achievementId} {
+        // Personal milestone records only; the app evaluates progress locally.
+        // These records are not trusted as competitive proof or transferable rewards.
+        allow read: if isOwner(userId);
+        allow create, update: if isOwner(userId)
+          && achievementId in [
+            'first-favorite','favorites-5','favorites-10','favorites-25',
+            'queue-first','queue-5','queue-10',
+            'history-first','history-5','history-10',
+            'completion-first','completion-5','whole-picture',
+            'feature-focus','series-scout','library-25'
+          ]
+          && request.resource.data.keys().hasOnly(['id','unlockedAt','schemaVersion'])
+          && request.resource.data.keys().hasAll(['id','unlockedAt','schemaVersion'])
+          && request.resource.data.id == achievementId
+          && request.resource.data.unlockedAt is number
+          && request.resource.data.unlockedAt >= 0
+          && request.resource.data.schemaVersion == 1;
+        allow delete: if isOwner(userId);
+      }
+
       match /pushSubscriptions/{subscriptionId} {
         allow read: if isOwner(userId);
         allow create, update: if isOwner(userId) && validPushSubscription();

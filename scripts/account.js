@@ -426,7 +426,7 @@ changePasswordButton?.addEventListener("click", async () => {
 const ACCOUNT_PRIVATE_COLLECTIONS = [
   "pushSubscriptions", "releaseAlerts", "releaseStates", "cinemaReminders",
   "favorites", "watchLater", "history", "progress", "libraryTombstones",
-  "feedback", "events", "taste", "blockedUsers", "following", "followedTopics"
+  "feedback", "events", "taste", "achievements", "blockedUsers", "following", "followedTopics"
 ];
 
 async function reauthenticateForDeletion(user) {
