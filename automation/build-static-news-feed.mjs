@@ -3,16 +3,16 @@ import { dirname } from "node:path";
 
 const OUTPUT = "data/news-feed.json";
 const FEEDS = [
-  { region: "hollywood", category: "film", q: 'Hollywood movie film entertainment news when:7d' },
-  { region: "hollywood", category: "streaming", q: 'Netflix Disney+ streaming television entertainment news when:7d' },
-  { region: "india", category: "film", q: 'Bollywood Indian cinema entertainment news when:7d' },
-  { region: "africa", category: "film", q: 'Nollywood Nigerian film entertainment news when:7d' },
-  { region: "africa", category: "celebrity", q: 'Ghana entertainment movie music celebrity news when:7d' },
-  { region: "africa", category: "film", q: 'African cinema film festival entertainment news when:7d' },
-  { region: "asia", category: "anime", q: 'anime manga Japanese animation entertainment news when:7d' },
-  { region: "asia", category: "television", q: 'K-drama Korean television entertainment news when:7d' },
-  { region: "global", category: "box-office", q: 'global box office film industry entertainment news when:7d' },
-  { region: "global", category: "awards", q: 'film television awards entertainment industry news when:7d' }
+  { region: "hollywood", category: "film", q: "Hollywood movie film entertainment news when:7d" },
+  { region: "hollywood", category: "streaming", q: "Netflix Disney+ streaming television entertainment news when:7d" },
+  { region: "india", category: "film", q: "Bollywood Indian cinema entertainment news when:7d" },
+  { region: "africa", category: "film", q: "Nollywood Nigerian film entertainment news when:7d" },
+  { region: "africa", category: "celebrity", q: "Ghana entertainment movie music celebrity news when:7d" },
+  { region: "africa", category: "film", q: "African cinema film festival entertainment news when:7d" },
+  { region: "asia", category: "anime", q: "anime manga Japanese animation entertainment news when:7d" },
+  { region: "asia", category: "television", q: "K-drama Korean television entertainment news when:7d" },
+  { region: "global", category: "box-office", q: "global box office film industry entertainment news when:7d" },
+  { region: "global", category: "awards", q: "film television awards entertainment industry news when:7d" }
 ];
 
 function decode(value = "") {
@@ -42,25 +42,20 @@ async function fetchFeed(feed) {
   const response = await fetch(url, { headers: { "User-Agent": "VividCinemaNews/1.0 (+https://vivid-cinema.web.app/news.html)", "Accept": "application/rss+xml, application/xml, text/xml" }, signal: AbortSignal.timeout(15000) });
   if (!response.ok) throw new Error("RSS HTTP " + response.status + " for " + feed.region + "/" + feed.category);
   const xml = await response.text();
-  return [...xml.matchAll(/<item(?:\\s[^>]*)?>([\\s\\S]*?)</item>/gi)].map(([, item]) => {
+  return [...xml.matchAll(/<item(?:\s[^>]*)?>([\s\S]*?)<\/item>/gi)].map(([, item]) => {
     const title = tag(item, "title");
     const url = tag(item, "link");
-    const sourceTag = item.match(/<source\\b([^>]*)>([\\s\\S]*?)</source>/i);
+    const sourceTag = item.match(/<source\b([^>]*)>([\s\S]*?)<\/source>/i);
     const publisher = sourceTag ? decode(sourceTag[2]).replace(/<[^>]+>/g, "").trim() : "News publisher";
     const publisherUrl = sourceTag ? attr(sourceTag[1], "url") : "";
     const publishedAt = tag(item, "pubDate");
-    if (!title || !/^https?:\\/\\//i.test(url)) return null;
-    const cleanTitle = title.replace(/\\s+-\\s+[^-]+$/, "").trim() || title;
+    if (!title || !/^https?:\/\//i.test(url)) return null;
+    const cleanTitle = title.replace(/\s+-\s+[^-]+$/, "").trim() || title;
     const timestamp = Date.parse(publishedAt);
     return {
-      id: stableId(url, cleanTitle),
-      headline: cleanTitle,
-      publisher,
-      publisherUrl,
-      sourceUrl: url,
-      publishedAt: Number.isFinite(timestamp) ? new Date(timestamp).toISOString() : null,
-      region: feed.region,
-      category: feed.category
+      id: stableId(url, cleanTitle), headline: cleanTitle, publisher, publisherUrl,
+      sourceUrl: url, publishedAt: Number.isFinite(timestamp) ? new Date(timestamp).toISOString() : null,
+      region: feed.region, category: feed.category
     };
   }).filter(Boolean);
 }
