@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { cleanExcerpt, isAllowedPublisherUrl, normalizeStoryUrl, parseFeedXml, queueDocumentId, runIngestion, fetchApprovedFeed } from "../automation/newsroom-ingest.mjs";
+import { cleanExcerpt, isAllowedFeedUrl, isAllowedPublisherUrl, normalizeStoryUrl, parseFeedXml, queueDocumentId, runIngestion, fetchApprovedFeed } from "../automation/newsroom-ingest.mjs";
 
 const source = { domain:"example.com", publisher:"Example Entertainment", defaultCategory:"film", defaultRegion:"india" };
 const item = (title,url,date,summary) => "<item><title>"+title+"</title><link>"+url+"</link><pubDate>"+date+"</pubDate><description><![CDATA["+summary+"]]></description><dc:creator>Reporter One</dc:creator></item>";
@@ -10,6 +10,9 @@ test("source URL validation requires HTTPS and the approved host",()=>{
  assert.equal(isAllowedPublisherUrl("https://www.example.com/story","example.com"),true);
  assert.equal(isAllowedPublisherUrl("http://example.com/story","example.com"),false);
  assert.equal(isAllowedPublisherUrl("https://example.com.invalid/story","example.com"),false);
+ assert.equal(isAllowedPublisherUrl("https://rss.example.com/story","example.com"),false);
+ assert.equal(isAllowedFeedUrl("https://rss.example.com/feed.xml","example.com"),true);
+ assert.equal(isAllowedFeedUrl("https://rss.example.com:8443/feed.xml","example.com"),false);
 });
 
 test("canonical URL strips tracking parameters and fragments",()=>{
