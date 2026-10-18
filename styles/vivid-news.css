@@ -725,3 +725,56 @@ body[data-vivid-page="news"] button:focus-visible,body[data-vivid-page="news"] a
 @media(prefers-reduced-motion:reduce){body[data-vivid-page="news"] .vivid-region-tile,body[data-vivid-page="news"] .vivid-region-tile:after{transition:none}}
 
 body[data-vivid-page="news"] .vivid-region-tile.is-active,body[data-vivid-page="news"] .vivid-region-tile[aria-pressed="true"]{border-color:var(--vn-accent);box-shadow:inset 0 0 0 1px #c7ff5540,0 8px 30px #0005}
+
+
+/* Vivid newsroom reader + compact responsive category navigation */
+body[data-vivid-page="news"] .vivid-editorial-filters{position:sticky;top:4px;z-index:30;padding:9px 10px 12px;margin:0 -10px 17px;background:rgba(9,10,13,.94);backdrop-filter:blur(18px);border:1px solid #ffffff12;border-radius:15px;box-shadow:0 12px 32px #0003}
+body[data-vivid-page="news"] .vivid-editorial-title-button{padding:0;border:0;background:none;color:#f5f4f0;text-align:left;font:inherit;line-height:inherit;letter-spacing:inherit;cursor:pointer}
+body[data-vivid-page="news"] .vivid-editorial-title-button:hover{color:var(--vn-accent)}
+body[data-vivid-page="news"] .vivid-editorial-art{width:100%;border:0;text-align:left;cursor:pointer;color:inherit}
+body[data-vivid-page="news"] .vivid-editorial-art-placeholder{position:relative;justify-content:space-between}
+body[data-vivid-page="news"] .vivid-editorial-art-placeholder i{font-size:18px;color:var(--vn-accent)}
+body[data-vivid-page="news"] .vivid-editorial-card-copy p{display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
+body[data-vivid-page="news"] .vivid-editorial-foot{align-items:center}
+body[data-vivid-page="news"] .vivid-editorial-foot>div{display:flex;align-items:center;gap:12px}
+body[data-vivid-page="news"] .vivid-editorial-foot a,body[data-vivid-page="news"] .vivid-editorial-read{border:0;background:transparent;padding:0;color:var(--vn-accent);font:inherit;font-size:10px;font-weight:800;white-space:nowrap;cursor:pointer;text-decoration:none}
+body[data-vivid-page="news"] .vivid-editorial-count{font-size:11px;color:#a8a8ae;margin:0 0 12px}
+.vivid-news-reader[hidden]{display:none!important}
+.vivid-news-reader{position:fixed;inset:0;z-index:99999;display:grid;place-items:center;padding:clamp(12px,4vw,40px);box-sizing:border-box}
+.vivid-news-reader-backdrop{position:absolute;inset:0;background:rgba(2,3,5,.82);backdrop-filter:blur(12px)}
+.vivid-news-reader-panel{position:relative;width:min(100%,780px);max-height:min(86dvh,900px);overflow:auto;background:linear-gradient(145deg,#1b1d22,#0d0e12 75%);border:1px solid #ffffff20;border-radius:24px;box-shadow:0 32px 120px #000a;color:#f4f2ed;animation:vividReaderIn .2s ease-out}
+.vivid-news-reader-header{position:sticky;top:0;display:flex;justify-content:space-between;align-items:center;padding:18px 22px;background:#111217ed;backdrop-filter:blur(14px);border-bottom:1px solid #ffffff12;z-index:1}
+.vivid-news-reader-mark{font-size:10px;font-weight:900;letter-spacing:.2em;color:var(--vn-accent)}
+.vivid-news-reader-close{width:38px;height:38px;border:1px solid #ffffff20;border-radius:50%;background:#ffffff08;color:#fff;font-size:27px;line-height:1;cursor:pointer}
+.vivid-news-reader-content{padding:clamp(24px,5vw,52px)}
+.vivid-news-reader-meta{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--vn-accent);font-weight:800}
+.vivid-news-reader-content h2{font-family:var(--vn-serif);font-size:clamp(30px,5vw,52px);line-height:1.08;letter-spacing:-.04em;margin:18px 0 22px}
+.vivid-news-reader-summary{font-size:clamp(15px,2vw,18px);line-height:1.85;color:#d2d2d6;white-space:pre-line}
+.vivid-news-reader-footer{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;margin-top:32px;padding-top:18px;border-top:1px solid #ffffff18;color:#a8a8b0;font-size:12px}
+.vivid-news-reader-footer a{display:inline-flex;align-items:center;gap:8px;padding:12px 15px;background:var(--vn-accent);color:#10120c;border-radius:12px;font-weight:850;text-decoration:none}
+body.vivid-news-reader-open{overflow:hidden}
+@keyframes vividReaderIn{from{opacity:0;transform:translateY(12px) scale(.99)}to{opacity:1;transform:translateY(0) scale(1)}}
+@media(max-width:650px){
+ body[data-vivid-page="news"] .vivid-editorial-room{margin:30px 0 48px}
+ body[data-vivid-page="news"] .vivid-editorial-room-head{margin-bottom:12px;gap:8px}
+ body[data-vivid-page="news"] .vivid-editorial-room-head h2{font-size:36px;margin:8px 0}
+ body[data-vivid-page="news"] .vivid-editorial-room-head p{font-size:12px}
+ body[data-vivid-page="news"] .vivid-editorial-status{white-space:normal;text-align:right;max-width:46%;padding:7px 9px;line-height:1.35}
+ body[data-vivid-page="news"] .vivid-editorial-filters{top:0;margin:0 -4px 13px;padding:8px 5px 10px;border-radius:12px;gap:6px}
+ body[data-vivid-page="news"] .vivid-editorial-filters button{padding:9px 12px;font-size:11px}
+ body[data-vivid-page="news"] .vivid-region-rail{margin-top:12px;margin-bottom:13px}
+ body[data-vivid-page="news"] .vivid-editorial-card:not(.is-featured) .vivid-editorial-art{aspect-ratio:16/7}
+ body[data-vivid-page="news"] .vivid-editorial-card-copy{padding:15px}
+ body[data-vivid-page="news"] .vivid-editorial-card h3{font-size:23px;margin:9px 0}
+ body[data-vivid-page="news"] .vivid-editorial-card-copy p{-webkit-line-clamp:3;font-size:12px}
+ body[data-vivid-page="news"] .vivid-editorial-foot{margin-top:12px;padding-top:10px}
+ .vivid-news-reader{padding:0;align-items:end}
+ .vivid-news-reader-panel{width:100%;max-height:92dvh;border-radius:22px 22px 0 0;border-bottom:0;animation:vividReaderIn .18s ease-out}
+ .vivid-news-reader-header{padding:13px 17px}
+ .vivid-news-reader-content{padding:24px 20px calc(24px + env(safe-area-inset-bottom))}
+ .vivid-news-reader-content h2{font-size:32px;margin:14px 0 17px}
+ .vivid-news-reader-summary{font-size:15px;line-height:1.75}
+ .vivid-news-reader-footer{align-items:flex-start;flex-direction:column}
+ .vivid-news-reader-footer a{width:100%;justify-content:center;box-sizing:border-box}
+}
+@media(prefers-reduced-motion:reduce){.vivid-news-reader-panel{animation:none}}
