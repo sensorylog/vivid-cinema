@@ -276,7 +276,7 @@ export async function syncIntelligenceForUser(u){
   return s
  }catch(e){
   window.dispatchEvent(new CustomEvent("vivid:sync-status",{detail:{store:"intelligence",status:"error"}}));
-  console.warn("Vivid intelligence sync unavailable at stage ["+syncStage+"]; local state is retained for retry:",e);
+  console.warn("Vivid intelligence sync unavailable; local state is retained for retry (stage ["+syncStage+"]):",e);
   return read()
  }
 }
