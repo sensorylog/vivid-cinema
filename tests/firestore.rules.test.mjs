@@ -114,3 +114,25 @@ test("poll votes are private to the voter and cannot be listed by clients", asyn
   await assertFails(getDocs(query(collection(alice, "communityPolls/poll-private/votes"), limit(10))));
   await assertSucceeds(getDoc(doc(bob, "communityPolls/poll-private/votes/bob")));
 });
+
+
+test("news discovery candidates are readable only by trusted moderators", async () => {
+  await env.withSecurityRulesDisabled(async context => {
+    await setDoc(doc(context.firestore(), "newsQueue/candidate-private"), {
+      headline: "A global entertainment candidate", publisher: "Example Publisher",
+      sourceId: "example.com", sourceUrl: "https://example.com/story",
+      canonicalUrl: "https://example.com/story", category: "film", region: "global",
+      excerpt: "A short source excerpt.", publishedAt: new Date(),
+      discoveredAt: new Date(), status: "pending_review"
+    });
+  });
+  const moderatorDb = env.authenticatedContext("trusted-moderator", { moderator: true }).firestore();
+  const memberDb = env.authenticatedContext("regular-member", { email_verified: true }).firestore();
+  const signedOut = env.unauthenticatedContext().firestore();
+  await assertSucceeds(getDoc(doc(moderatorDb, "newsQueue/candidate-private")));
+  await assertFails(getDoc(doc(memberDb, "newsQueue/candidate-private")));
+  await assertFails(getDoc(doc(signedOut, "newsQueue/candidate-private")));
+  await assertFails(setDoc(doc(memberDb, "newsQueue/forged-candidate"), {
+    status: "pending_review", headline: "A forged candidate"
+  }));
+});
