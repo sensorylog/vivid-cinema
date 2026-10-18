@@ -4,7 +4,7 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#08090b">
 <meta name="description" content="Vivid Cinema News — sourced entertainment reporting, culture conversations, releases and discoveries.">
-<title>Newsroom · Vivid Cinema</title>
+<title>Entertainment News & Cinema Culture · Vivid Cinema</title>
 <link rel="manifest" href="manifest.json"><link rel="preconnect" href="https://api.themoviedb.org" crossorigin>
 <link rel="preconnect" href="https://image.tmdb.org" crossorigin>
 <link rel="icon" href="icons/vivid-icon.svg">
@@ -17,14 +17,27 @@
 <header class="vivid-topbar vivid-unified-header"><nav class="vivid-nav vivid-unified-nav" aria-label="Primary"><a class="vivid-brand" href="home.html">Vivid<span>Cinema</span></a><div class="vivid-navlinks"><a href="home.html"><i class="bi bi-house-fill" aria-hidden="true"></i><span>Home</span></a><a href="discover.html"><i class="bi bi-compass" aria-hidden="true"></i><span>Discover</span></a><a href="home.html#trending"><i class="bi bi-fire" aria-hidden="true"></i><span>Trending</span></a><a href="collection.html?collection=movies"><i class="bi bi-film" aria-hidden="true"></i><span>Movies</span></a><a href="collection.html?collection=tv"><i class="bi bi-tv" aria-hidden="true"></i><span>TV</span></a><a href="library.html"><i class="bi bi-bookmark" aria-hidden="true"></i><span>Library</span></a><a href="news.html" aria-current="page"><i class="bi bi-newspaper" aria-hidden="true"></i><span>Newsroom</span></a><a href="community.html"><i class="bi bi-chat-square-heart" aria-hidden="true"></i><span>Community</span></a></div><a class="vivid-nav-action" id="news-auth" data-vivid-nav-auth="true" href="auth.html">Sign in</a></nav></header>
 <main class="vivid-news-main">
 <section class="vivid-news-hero" id="news-hero" aria-label="Cinema news lead">
-<div class="vivid-news-hero-copy"><span class="vivid-news-kicker">VIVID CINEMA · WHAT'S NEW</span><h1>Know what to watch before you go looking.</h1><p>Release dates, new episodes, trailers, trends and personalized picks — gathered into one living cinema feed.</p><div class="vivid-news-hero-actions"><a class="vivid-news-primary" href="#today-feed">See what's new <i class="bi bi-arrow-down"></i></a><a class="vivid-news-secondary" href="discover.html">Browse the catalogue <i class="bi bi-arrow-up-right"></i></a></div></div>
+<div class="vivid-news-hero-copy"><span class="vivid-news-kicker">VIVID CINEMA · ENTERTAINMENT BRIEFING</span><h1>The stories shaping what we watch.</h1><p>Entertainment reporting, film and TV culture, African cinema, release intelligence and trailers — brought together in one considered newsroom.</p><div class="vivid-news-hero-actions"><a class="vivid-news-primary" href="#today-feed">See what's new <i class="bi bi-arrow-down"></i></a><a class="vivid-news-secondary" href="discover.html">Browse the catalogue <i class="bi bi-arrow-up-right"></i></a></div></div>
 <div class="vivid-news-hero-art" id="news-hero-art"><div class="vivid-news-hero-shade"></div><div class="vivid-news-hero-meta" id="news-hero-meta"></div></div>
 </section>
-<section class="vivid-coming-soon-section" aria-labelledby="vivid-editorial-title">
-  <div class="vivid-coming-soon-card"><span class="vivid-coming-soon-label">COMING SOON</span><h2 id="vivid-editorial-title">The Vivid Newsroom</h2><p>Original entertainment stories, trusted reporting and deeper reads are in development. This section isn't ready yet.</p></div>
-</section>
-<section class="vivid-coming-soon-section" aria-labelledby="vivid-community-highlights-title">
-  <div class="vivid-coming-soon-card"><span class="vivid-coming-soon-label">COMING SOON</span><h2 id="vivid-community-highlights-title">Community & Discussion</h2><p>Film conversations, member stories and comments are being built. We’ll open this space when it’s ready.</p></div>
+<section class="vivid-editorial-room" aria-labelledby="vivid-editorial-heading">
+  <div class="vivid-editorial-room-head">
+    <div><span class="vivid-editorial-eyebrow">THE VIVID NEWS DESK</span><h2 id="vivid-editorial-heading">Entertainment, with context.</h2><p>Published stories from Vivid’s editorial desk, with publisher attribution and a clear path to the original report.</p></div>
+    <span class="vivid-editorial-status" id="vivid-editorial-status" role="status" aria-live="polite">Checking the newsroom…</span>
+  </div>
+  <div class="vivid-editorial-filters" role="group" aria-label="Filter entertainment news">
+    <button type="button" class="is-active" data-editorial-filter="all" aria-pressed="true">Top stories</button>
+    <button type="button" data-editorial-filter="film" aria-pressed="false">Film</button>
+    <button type="button" data-editorial-filter="television" aria-pressed="false">TV</button>
+    <button type="button" data-editorial-filter="streaming" aria-pressed="false">Streaming</button>
+    <button type="button" data-editorial-filter="celebrity" aria-pressed="false">People</button>
+    <button type="button" data-editorial-filter="awards" aria-pressed="false">Awards</button>
+    <button type="button" data-editorial-filter="ghana" aria-pressed="false">Ghana</button>
+    <button type="button" data-editorial-filter="nollywood" aria-pressed="false">Nollywood</button>
+    <button type="button" data-editorial-filter="africa" aria-pressed="false">African cinema</button>
+    <button type="button" data-editorial-filter="industry" aria-pressed="false">Industry</button>
+  </div>
+  <div id="vivid-editorial-feed" aria-live="polite" aria-busy="true"></div>
 </section>
 <section class="vivid-news-finder" aria-label="Cinema finder"><div><span>ASK VIVID</span><h2>Looking for a movie, show or story?</h2><p>Search the Vivid catalogue first—then open the title for trailers, cast, release dates, ratings and where it can be watched.</p></div><form id="news-search-form" class="vivid-news-search"><i class="bi bi-search" aria-hidden="true"></i><input id="news-search" type="search" autocomplete="off" placeholder="Search a movie or series…" aria-label="Search movies and series"><button type="submit">Find</button></form></section><section id="news-search-results" class="vivid-news-search-results" aria-live="polite" hidden></section><div class="vivid-news-toolbar">
 <div class="vivid-news-filters" role="tablist" aria-label="News filters">
@@ -36,9 +49,15 @@
 <div id="news-loading">Finding the latest releases, episodes, trailers and trends…</div>
 <section class="vivid-news-calendar" id="news-calendar" aria-label="Release calendar"></section>
 <section class="vivid-news-feed" id="news-feed" aria-live="polite"></section>
+<section class="vivid-coming-soon-section" aria-labelledby="vivid-editorial-title">
+  <div class="vivid-coming-soon-card"><span class="vivid-coming-soon-label">COMING SOON</span><h2 id="vivid-editorial-title">The Vivid Newsroom</h2><p>Original entertainment stories, trusted reporting and deeper reads are in development. This section isn't ready yet.</p></div>
+</section>
+<section class="vivid-coming-soon-section" aria-labelledby="vivid-community-highlights-title">
+  <div class="vivid-coming-soon-card"><span class="vivid-coming-soon-label">COMING SOON</span><h2 id="vivid-community-highlights-title">Community & Discussion</h2><p>Film conversations, member stories and comments are being built. We’ll open this space when it’s ready.</p></div>
+</section>
 <div class="vivid-news-toast" id="news-toast" hidden></div>
 </main>
 <nav class="vivid-mobile-nav" aria-label="Mobile navigation"><a href="home.html"><i class="bi bi-house-fill"></i><span>Home</span></a><a href="discover.html"><i class="bi bi-compass"></i><span>Discover</span></a><a href="collection.html?collection=movies"><i class="bi bi-film"></i><span>Movies</span></a><a href="collection.html?collection=tv"><i class="bi bi-tv-fill"></i><span>TV</span></a><a href="news.html" class="is-active"><i class="bi bi-newspaper"></i><span>News</span></a><a href="library.html"><i class="bi bi-bookmark-fill"></i><span>Library</span></a></nav>
-<script type="module" src="scripts/app-shell.js"></script><script type="module" src="scripts/nav-auth.js"></script><script type="module" src="scripts/news.js"></script>
+<script type="module" src="scripts/app-shell.js"></script><script type="module" src="scripts/nav-auth.js"></script><script type="module" src="scripts/newsroom.js"></script><script type="module" src="scripts/news.js"></script>
 <script type="module" src="scripts/analytics.js"></script>
 </body></html>
