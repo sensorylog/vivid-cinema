@@ -793,6 +793,15 @@ function handlePlayerEvent(event) {
   }
   if (!payload || typeof payload !== "object" || Array.isArray(payload)) return;
 
+  // Opt-in, sanitized telemetry for provider messages. Never log full payloads or URLs.
+  if (route.params.get("playbackDebug") === "1") {
+    const debugData = payload.data && typeof payload.data === "object" ? payload.data : payload;
+    const debugEvent = String(debugData.event || debugData.player_status || debugData.status || payload.type || "").slice(0, 48);
+    if (/(buffer|wait|stall|error|fail|load|play|ready|canplay|pause)/i.test(debugEvent)) {
+      console.info("[Vivid iframe diagnostics]", { source: activeSource, origin: event.origin, type: String(payload.type || "").slice(0, 32), event: debugEvent });
+    }
+  }
+
   // VidAPI can report provider/player failures through postMessage. Catch common
   // status/code/error shapes before treating any PLAYER_EVENT as a healthy player.
   const eventData = payload.data || payload;
