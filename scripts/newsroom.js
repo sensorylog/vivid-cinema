@@ -1,5 +1,5 @@
 import { db } from "./firebase.js";
-import { collection, limit, onSnapshot, orderBy, query, where } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+import { collection, limit, onSnapshot, orderBy, query, where } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 import { escapeHtml } from "./utils.js";
 
 const root = document.getElementById("vivid-editorial-feed");
