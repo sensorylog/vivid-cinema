@@ -1,13 +1,22 @@
 import { auth, db } from "./firebase.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
-import { addDoc, collection, doc, getDoc, serverTimestamp, setDoc, Timestamp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+import { addDoc, collection, doc, getDoc, limit, onSnapshot, query, serverTimestamp, setDoc, Timestamp, updateDoc, where, writeBatch } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+import { escapeHtml } from "./utils.js";
 
 const $ = id => document.getElementById(id);
 const sourcePanel = $("source-registry-panel");
 const editorialPanel = $("editorial-publish-panel");
 const sourceForm = $("source-form");
 const editorialForm = $("editorial-form");
+const discoveryPanel = $("news-discovery-panel");
+const discoveryRoot = $("news-discovery-queue");
+const discoveryStatus = $("news-discovery-status");
 let moderator = false;
+let queueUnsubscribe = null;
+let queueCandidates = [];
+const ALLOWED_CATEGORIES = ["film","streaming","celebrity","trailers","awards","industry","africa","india","asia","hollywood","europe","latin-america","middle-east","ghana","nollywood"];
+const ALLOWED_REGIONS = ["global","hollywood","india","africa","asia","europe","latin-america","middle-east","ghana","nigeria"];
+const REGION_LABELS = {global:"Global",hollywood:"Hollywood / Americas",india:"India",africa:"Africa",asia:"Asia & Asia-Pacific",europe:"Europe","latin-america":"Latin America","middle-east":"Middle East",ghana:"Ghana",nigeria:"Nigeria"};
 
 function message(id, value) { const el=$(id); if(el) el.textContent=value; }
 function normalizedDomain(value) { return String(value||"").trim().toLowerCase().replace(/^https?:\/\//,"").replace(/^www\./,"").replace(/\/$/,""); }
@@ -23,6 +32,7 @@ sourceForm?.addEventListener("submit", async event => {
   const reviewNotes=$("source-review-notes").value.trim();
   const feedUrl=$("source-feed-url").value.trim();
   const feedApproved=$("source-feed-approved").checked;
+  const ingestionEnabled=$("source-ingestion-enabled").checked;
   const imageUsageApproved=$("source-image-approved").checked;
   if(!publisher || publisher.length>120 || !/^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,}$/i.test(domain)) return message("source-feedback","Enter a valid publisher name and domain.");
   if(reviewNotes.length<10) return message("source-feedback","Add meaningful source-review notes before approval.");
@@ -32,6 +42,7 @@ sourceForm?.addEventListener("submit", async event => {
       if(url.protocol!=="https:" || !validStoryHost(url,domain) || !feedApproved) throw new Error("Feed host or permission check failed.");
     } catch { return message("source-feedback","Feed URL must use HTTPS, belong to this publisher, and have explicit feed-use approval."); }
   } else if(feedApproved) return message("source-feedback","Add a feed URL or turn off feed-use approval.");
+  if(ingestionEnabled && (!feedUrl || !feedApproved)) return message("source-feedback","Automated discovery requires a feed URL and verified feed-use permission.");
   const button=$("source-submit"); button.disabled=true;
   try {
     const ref=doc(db,"newsSources",domain);
@@ -41,7 +52,7 @@ sourceForm?.addEventListener("submit", async event => {
       publisher,domain,status:"approved",
       defaultRegion:$("source-region").value,
       defaultCategory:$("source-category").value,
-      feedUrl,feedApproved,imageUsageApproved,
+      feedUrl,feedApproved,ingestionEnabled,imageUsageApproved,
       reviewNotes,verifiedBy:auth.currentUser.uid,
       verifiedAt:now,updatedAt:now,
       createdAt:previous.exists() ? previous.data().createdAt : now
