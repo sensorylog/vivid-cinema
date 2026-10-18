@@ -1,7 +1,7 @@
 import {tmdbApi, clearTmdbCache} from "./tmdb.js";
 import {getImageUrl, getMediaUrl} from "./media.js";
 import {escapeHtml} from "./utils.js";
-import {getTasteProfile, getNotForMeKeys} from "./intelligence.js?v=20261018-sync-stage-1";
+import {getTasteProfile, getNotForMeKeys} from "./intelligence.js?v=20261018-feedback-payload-2";
 import {addCinemaReminder, addCinemaReminderToCalendar, getCinemaReminders, hasCinemaReminder, startCinemaReminderLoop} from "./cinema-reminders.js";
 import {enableCinemaPush, savePushReminder} from "./push-notifications.js";
 
