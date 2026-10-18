@@ -218,7 +218,19 @@ async function load() {
     tmdbApi.popularMovies(1),
     tmdbApi.popularTv(1)
   ]);
+  const coreNames = ["trending","new movies today","new TV today","movies this week","TV this week","future movies","future TV","popular movies","popular TV"];
+  const failedCore = core.map((result, i) => result.status === "rejected" ? {endpoint:coreNames[i], error:String(result.reason?.message || result.reason || "Unknown error")} : null).filter(Boolean);
+  if (failedCore.length) console.warn("Vivid News catalogue requests failed:", failedCore);
   const value = i => core[i]?.status === "fulfilled" ? core[i].value : {results:[]};
+  if (failedCore.length === core.length) {
+    console.error("Vivid News cannot load any catalogue data. Check TMDB API key, network/CSP, and request failures above.", failedCore);
+    const feed = $("news-feed");
+    if (feed) feed.innerHTML = '<div class="vivid-news-empty"><i class="bi bi-wifi-off"></i><h2>We couldn’t reach the cinema catalogue.</h2><p>The news feed is online, but all catalogue requests failed. Check your connection and try Refresh.</p><button type="button" id="news-retry-core">Try again</button></div>';
+    const loading = $("news-loading"); if (loading) loading.hidden = true;
+    const status = $("news-status"); if (status) status.textContent = "Catalogue connection failed";
+    $("news-retry-core")?.addEventListener("click", () => { clearTmdbCache(); load().catch(error => console.error("Vivid News retry failed:", error)); });
+    return;
+  }
   const seen = new Set(), stories = [];
   const add = s => addUnique(stories, seen, s);
 
