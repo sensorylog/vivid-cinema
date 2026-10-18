@@ -6,7 +6,7 @@
 2. Automated discovery is a separate opt-in. It is disabled by default.
 3. GitHub Actions runs the feed discovery workflow every six hours and on manual dispatch.
 4. The ingestion script reads only Firestore sources marked approved, feed-approved and ingestion-enabled.
-5. RSS/Atom metadata is deduplicated into the private \`newsQueue\` collection as \`pending_review\`; the workflow never publishes stories directly.
+5. RSS/Atom metadata is deduplicated into the private `newsQueue` collection as `pending_review`; the workflow never publishes stories directly.
 6. A moderator checks the original report and date, writes a fresh Vivid summary, chooses a region/category and records a verification note.
 7. Publishing creates the public article and records the queue decision in one Firestore batch.
 
@@ -18,7 +18,7 @@ After authentication is configured, run **Actions → Vivid News discovery → R
 
 ## Source and copyright controls
 
-- Entries in \`functions/news-sources.js\` are candidates, not legal approvals. Every entry starts disabled.
+- Entries in `functions/news-sources.js` are candidates, not legal approvals. Every entry starts disabled.
 - Review current source terms, attribution, reliability, feed permissions and image rights before enabling a source.
 - Feed requests require HTTPS, are limited to 2 MB, time out, allow at most three same-publisher redirects and reject off-domain links.
 - The pipeline stores a headline, byline, date, canonical source link and a bounded feed excerpt. It does not ingest full articles or images.
@@ -29,11 +29,11 @@ After authentication is configured, run **Actions → Vivid News discovery → R
 
 ## Validation
 
-\`\`\`sh
+```sh
 npm install --no-audit --no-fund
 node --test tests/newsroom-ingest.test.mjs
 npm run check:syntax
 npm run test:rules
-\`\`\`
+```
 
 The scheduled pipeline is not live-verified until the owner configures authentication and at least one source is reviewed and enabled.
