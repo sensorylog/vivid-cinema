@@ -21,7 +21,8 @@ const REGION_LABELS = {global:"Global",hollywood:"Hollywood / Americas",india:"I
 function message(id, value) { const el=$(id); if(el) el.textContent=value; }
 function normalizedDomain(value) { return String(value||"").trim().toLowerCase().replace(/^https?:\/\//,"").replace(/^www\./,"").replace(/\/$/,""); }
 function domainFromUrl(value) { const url=new URL(value); return url.hostname.toLowerCase().replace(/^www\./,""); }
-function validStoryHost(url, domain) { const host=url.hostname.toLowerCase().replace(/^www\./,""); return host===domain || host.endsWith("."+domain); }
+function validStoryHost(url, domain) { const host=url.hostname.toLowerCase().replace(/^www\./,""); return host===domain; }
+function validFeedHost(url, domain) { const host=url.hostname.toLowerCase().replace(/^www\./,""); return host===domain || host.endsWith("."+domain); }
 function localDateTimeValue(date=new Date()) { const pad=n=>String(n).padStart(2,"0"); return date.getFullYear()+"-"+pad(date.getMonth()+1)+"-"+pad(date.getDate())+"T"+pad(date.getHours())+":"+pad(date.getMinutes()); }
 
 sourceForm?.addEventListener("submit", async event => {
@@ -39,7 +40,7 @@ sourceForm?.addEventListener("submit", async event => {
   if(feedUrl) {
     try {
       const url=new URL(feedUrl);
-      if(url.protocol!=="https:" || !validStoryHost(url,domain) || !feedApproved) throw new Error("Feed host or permission check failed.");
+      if(url.protocol!=="https:" || !validFeedHost(url,domain) || !feedApproved) throw new Error("Feed host or permission check failed.");
     } catch { return message("source-feedback","Feed URL must use HTTPS, belong to this publisher, and have explicit feed-use approval."); }
   } else if(feedApproved) return message("source-feedback","Add a feed URL or turn off feed-use approval.");
   if(ingestionEnabled && (!feedUrl || !feedApproved)) return message("source-feedback","Automated discovery requires a feed URL and verified feed-use permission.");
