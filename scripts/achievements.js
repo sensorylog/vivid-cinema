@@ -14,7 +14,7 @@ const typeOf = (item) => item?.media_type || item?.mediaType || "movie";
 
 let currentUid = null, initialized = false, remoteVersion = 0, modalOpen = false, lastFocus = null;
 
-function emptyStore(){return {version:VERSION,earned:{}}}
+function emptyStore(){return {version:VERSION,earned:{},sparkHistory:[]}}
 function readStore(){try{const value=JSON.parse(localStorage.getItem(STORAGE_KEY)||"null");return {...emptyStore(),...(value||{}),earned:{...(value?.earned||{})}}}catch{return emptyStore()}}
 function snapshot(library=getLocalLibrary()){
   const store=readStore();
@@ -141,7 +141,7 @@ function init(){
   if(initialized||typeof window==="undefined")return;initialized=true;ensureStyles();render();
   $("achievement-view-all")?.addEventListener("click",()=>{const grid=$("achievement-grid");if(!grid)return;grid.dataset.showAll=grid.dataset.showAll==="true"?"false":"true";render()});
   window.addEventListener("vivid:library-changed",()=>evaluate({notify:true}));
-  window.addEventListener("vivid:account-switched",()=>evaluate({notify:false}));
+  window.addEventListener("vivid:account-switched",()=>{if(modalOpen)closeModal();evaluate({notify:false})});
   window.addEventListener("vivid:achievements-changed",render);
   window.addEventListener("storage",event=>{if(event.key===STORAGE_KEY||event.key==="vivid:library:v2")render()});
   void (async()=>{try{
