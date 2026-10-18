@@ -9,9 +9,6 @@ const $ = (id) => document.getElementById(id);
 const list = (library, key) => Array.isArray(library?.[key]) ? library[key] : [];
 const count = (library, key) => list(library, key).length;
 const typeOf = (item) => item?.media_type || item?.mediaType || "movie";
-const unique = (items) => [...new Map(items.map((item) => [typeOf(item) + ":" + item.id, item])).values()];
-const allItems = (library) => ["favorites", "watchLater", "history"].flatMap((key) => list(library, key).filter((item) => item?.id != null));
-const completed = (library) => list(library, "history").filter((item) => Number(item?.completion || 0) >= 90 || Number(item?.completedAt || 0) > 0 || item?.completed === true);
 
 
 
