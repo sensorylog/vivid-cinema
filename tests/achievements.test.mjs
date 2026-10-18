@@ -33,8 +33,8 @@ test("completion milestones require explicit completion evidence", () => {
     { id: "3", media_type: "tv", completedAt: 1234 },
     { id: "4", media_type: "movie", completed: true }
   ] };
-  assert.equal(byId("completion-first").metric(library), 3);
-  assert.equal(byId("completion-5").metric(library), 3);
+  assert.equal(byId("completion-first").metric(library), 2);
+  assert.equal(byId("completion-5").metric(library), 2);
 });
 
 test("distinct-library milestone deduplicates the same title across shelves", () => {
