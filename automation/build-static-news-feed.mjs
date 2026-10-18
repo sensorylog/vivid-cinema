@@ -3,16 +3,27 @@ import { dirname } from "node:path";
 
 const OUTPUT = "data/news-feed.json";
 const FEEDS = [
-  { region: "hollywood", category: "film", q: "Hollywood movie film entertainment news when:7d" },
-  { region: "hollywood", category: "streaming", q: "Netflix Disney+ streaming television entertainment news when:7d" },
+  { region: "hollywood", category: "film", q: "Hollywood movie film studio entertainment news when:7d" },
+  { region: "hollywood", category: "television", q: "US television series TV entertainment news when:7d" },
+  { region: "hollywood", category: "streaming", q: "Netflix Disney+ Max Prime Video streaming news when:7d" },
+  { region: "hollywood", category: "celebrity", q: "Hollywood actors celebrities entertainment news when:7d" },
+  { region: "global", category: "music", q: "film soundtrack music industry artist entertainment news when:7d" },
+  { region: "global", category: "gaming", q: "video game industry gaming entertainment news when:7d" },
+  { region: "asia", category: "anime", q: "anime manga Japanese animation entertainment news when:7d" },
+  { region: "asia", category: "television", q: "K-drama Korean television entertainment news when:7d" },
+  { region: "global", category: "box-office", q: "global box office weekend film industry news when:7d" },
+  { region: "global", category: "festivals", q: "film festival premieres cinema festival news when:7d" },
+  { region: "global", category: "awards", q: "film television awards entertainment industry news when:7d" },
+  { region: "global", category: "business", q: "Hollywood film studio streaming entertainment business industry deals news when:7d" },
   { region: "india", category: "film", q: "Bollywood Indian cinema entertainment news when:7d" },
+  { region: "india", category: "music", q: "Indian film music Bollywood music industry news when:7d" },
   { region: "africa", category: "film", q: "Nollywood Nigerian film entertainment news when:7d" },
   { region: "africa", category: "celebrity", q: "Ghana entertainment movie music celebrity news when:7d" },
   { region: "africa", category: "film", q: "African cinema film festival entertainment news when:7d" },
-  { region: "asia", category: "anime", q: "anime manga Japanese animation entertainment news when:7d" },
-  { region: "asia", category: "television", q: "K-drama Korean television entertainment news when:7d" },
-  { region: "global", category: "box-office", q: "global box office film industry entertainment news when:7d" },
-  { region: "global", category: "awards", q: "film television awards entertainment industry news when:7d" }
+  { region: "europe", category: "film", q: "European cinema film production entertainment news when:7d" },
+  { region: "europe", category: "television", q: "UK European television streaming entertainment news when:7d" },
+  { region: "latin-america", category: "film", q: "Latin American cinema Mexican Brazilian film entertainment news when:7d" },
+  { region: "middle-east", category: "film", q: "Middle East Arab cinema film entertainment news when:7d" }
 ];
 
 function decode(value = "") {
@@ -55,7 +66,8 @@ async function fetchFeed(feed) {
     return {
       id: stableId(url, cleanTitle), headline: cleanTitle, publisher, publisherUrl,
       sourceUrl: url, publishedAt: Number.isFinite(timestamp) ? new Date(timestamp).toISOString() : null,
-      region: feed.region, category: feed.category
+      region: feed.region, category: feed.category,
+      summary: tag(item, "description").replace(/\\s+/g, " ").trim().slice(0, 1800)
     };
   }).filter(Boolean);
 }
@@ -72,8 +84,20 @@ const unique = stories.filter(story => {
   if (seen.has(key)) return false;
   seen.add(key);
   return true;
-}).sort((a,b) => Date.parse(b.publishedAt || 0) - Date.parse(a.publishedAt || 0)).slice(0, 100);
-const payload = JSON.stringify({ generatedAt: new Date().toISOString(), source: "Google News RSS search feeds", count: unique.length, failedQueries: failed.length, articles: unique }, null, 2) + "\n";
+}).sort((a,b) => Date.parse(b.publishedAt || 0) - Date.parse(a.publishedAt || 0));
+// Reserve space for every topic/region before filling remaining slots by recency.
+const selected = [];
+const selectedIds = new Set();
+for (const feed of FEEDS) {
+  const batch = unique.filter(story => story.region === feed.region && story.category === feed.category && !selectedIds.has(story.id)).slice(0, 4);
+  for (const story of batch) { selected.push(story); selectedIds.add(story.id); }
+}
+for (const story of unique) {
+  if (selected.length >= 120) break;
+  if (!selectedIds.has(story.id)) { selected.push(story); selectedIds.add(story.id); }
+}
+const finalStories = selected.slice(0, 120);
+const payload = JSON.stringify({ generatedAt: new Date().toISOString(), source: "Google News RSS search feeds", count: finalStories.length, failedQueries: failed.length, feedCount: FEEDS.length, articles: finalStories }, null, 2) + "\n";
 await mkdir(dirname(OUTPUT), { recursive: true });
 let previous = "";
 try { previous = await readFile(OUTPUT, "utf8"); } catch {}
