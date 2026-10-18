@@ -62,7 +62,18 @@ export function isAllowedPublisherUrl(value, domain) {
     const url = new URL(value);
     const host = url.hostname.toLowerCase().replace(/^www\./, "");
     const expected = String(domain || "").toLowerCase().replace(/^www\./, "");
-    return url.protocol === "https:" && Boolean(expected) && host === expected;
+    return url.protocol === "https:" && !url.port && !url.username && !url.password && Boolean(expected) && host === expected;
+  } catch {
+    return false;
+  }
+}
+
+export function isAllowedFeedUrl(value, domain) {
+  try {
+    const url = new URL(value);
+    const host = url.hostname.toLowerCase().replace(/^www\./, "");
+    const expected = String(domain || "").toLowerCase().replace(/^www\./, "");
+    return url.protocol === "https:" && !url.port && !url.username && !url.password && Boolean(expected) && (host === expected || host.endsWith("." + expected));
   } catch {
     return false;
   }
@@ -146,7 +157,7 @@ async function readResponseLimited(response) {
 
 export async function fetchApprovedFeed(feedUrl, domain, fetchImpl = fetch) {
   let current = new URL(feedUrl);
-  if (!isAllowedPublisherUrl(current.href, domain)) throw new Error("Feed URL must be HTTPS on the approved publisher domain.");
+  if (!isAllowedFeedUrl(current.href, domain)) throw new Error("Feed URL must be HTTPS on the approved publisher domain.");
   for (let redirects = 0; redirects <= MAX_REDIRECTS; redirects += 1) {
     const response = await fetchImpl(current.href, {
       method: "GET",
@@ -159,7 +170,7 @@ export async function fetchApprovedFeed(feedUrl, domain, fetchImpl = fetch) {
       const location = response.headers.get("location");
       if (!location) throw new Error("Feed redirect omitted its location.");
       current = new URL(location, current);
-      if (!isAllowedPublisherUrl(current.href, domain)) throw new Error("Feed redirected outside the approved publisher domain.");
+      if (!isAllowedFeedUrl(current.href, domain)) throw new Error("Feed redirected outside the approved publisher domain.");
       continue;
     }
     if (!response.ok) throw new Error("Feed returned HTTP " + response.status + ".");
@@ -182,7 +193,7 @@ function validSource(source, domain) {
     typeof source.publisher === "string" &&
     source.publisher.trim().length >= 2 &&
     typeof source.feedUrl === "string" &&
-    isAllowedPublisherUrl(source.feedUrl, domain);
+    isAllowedFeedUrl(source.feedUrl, domain);
 }
 
 export async function runIngestion({ apply = false, db, fetchImpl = fetch, now = new Date(), log = console.log } = {}) {
