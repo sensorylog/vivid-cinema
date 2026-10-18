@@ -282,7 +282,8 @@ export async function generateAchievementSpark(input = {}) {
     throw new Error("Gemini returned an unreadable Vivid Spark.");
   }
   const spark = safeText(payload?.spark, 650);
+  const wordCount = spark.split(/\\s+/).filter(Boolean).length;
   if (payload?.confidence !== "high") throw new Error("Gemini could not confidently ground this Vivid Spark.");
-  if (spark.length < 45) throw new Error("Gemini returned an incomplete Vivid Spark.");
+  if (wordCount < 28 || wordCount > 70) throw new Error("Gemini returned a Spark outside the concise reading length.");
   return { spark, model: "Gemini 3.5 Flash-Lite" };
 }
