@@ -47,5 +47,5 @@ test("direct-stream diagnostics observe stalls and buffer-ahead without controll
   assert.match(engine, /onDiagnostics = null/);
   assert.match(engine, /bufferedAhead/);
   assert.match(engine, /Diagnostics must never interrupt playback/);
-  assert.match(engine, /target\\.removeEventListener\\(eventName, listener\\)/);
+  assert.ok(engine.includes("target.removeEventListener(eventName, listener)"));
 });
