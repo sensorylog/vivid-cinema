@@ -15,6 +15,7 @@ const files = [
   "scripts/utils.js",
   "scripts/library.js",
   "scripts/achievements.js",
+  "scripts/achievements-page.js",
   "scripts/achievement-catalog.js",
   "scripts/firebase-ai.js",
   "scripts/recommendations.js",
