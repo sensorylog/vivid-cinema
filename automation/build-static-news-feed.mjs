@@ -67,7 +67,7 @@ async function fetchFeed(feed) {
       id: stableId(url, cleanTitle), headline: cleanTitle, publisher, publisherUrl,
       sourceUrl: url, publishedAt: Number.isFinite(timestamp) ? new Date(timestamp).toISOString() : null,
       region: feed.region, category: feed.category,
-      summary: tag(item, "description").replace(/\s+/g, " ").trim().slice(0, 1800)
+      summary: tag(item, "description").replace(/&nbsp;|&#160;/gi, " ").replace(/\s+/g, " ").trim().slice(0, 1800)
     };
   }).filter(Boolean);
 }
