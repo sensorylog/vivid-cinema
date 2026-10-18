@@ -1,6 +1,10 @@
 name: Refresh Vivid Cinema web news
 
 on:
+  push:
+    paths:
+      - ".github/workflows/refresh-static-news.yml"
+      - "automation/build-static-news-feed.mjs"
   schedule:
     - cron: "11,41 * * * *"
   workflow_dispatch:
