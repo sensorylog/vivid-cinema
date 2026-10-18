@@ -49,7 +49,7 @@ jobs:
         if: steps.commit.outputs.changed == 'true' || github.event_name == 'push' || github.event_name == 'workflow_dispatch'
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
-          repoToken: "\${{ secrets.GITHUB_TOKEN }}"
-          firebaseServiceAccount: "\${{ secrets.FIREBASE_SERVICE_ACCOUNT_VIVID_CINEMA }}"
+          repoToken: "${{ secrets.GITHUB_TOKEN }}"
+          firebaseServiceAccount: "${{ secrets.FIREBASE_SERVICE_ACCOUNT_VIVID_CINEMA }}"
           projectId: vivid-cinema
           channelId: live
