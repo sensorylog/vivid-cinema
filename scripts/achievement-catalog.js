@@ -3,7 +3,7 @@ const count=(l,k)=>list(l,k).length;
 const type=i=>i?.media_type||i?.mediaType||"movie";
 const unique=a=>[...new Map(a.map(i=>[type(i)+":"+i.id,i])).values()];
 const all=l=>["favorites","watchLater","history"].flatMap(k=>list(l,k).filter(i=>i?.id!=null));
-const finished=l=>list(l,"history").filter(i=>Number(i?.completion||0)>=90||Number(i?.completedAt||0)>0||i?.completed===true);
+const finished=l=>list(l,"history").filter(i=>Number(i?.completion||0)>=100||Number(i?.completedAt||0)>0||i?.completed===true);
 export const ACHIEVEMENTS=[
 {id:"first-favorite",title:"First Love",category:"Your library",description:"Save a title you want to keep close.",icon:"♥",target:1,unit:"favorite",metric:l=>count(l,"favorites")},
 {id:"favorites-5",title:"A Personal Shelf",category:"Your library",description:"Five titles, chosen by you.",icon:"✦",target:5,unit:"favorites",metric:l=>count(l,"favorites")},
