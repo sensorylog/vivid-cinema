@@ -222,13 +222,13 @@ export async function syncIntelligenceForUser(u){
   for(const [id,localItem] of Object.entries(s.feedback)){
    const remoteItem=remoteFeedback.get(id);
    if(!remoteItem || Number(localItem.updatedAt||0)>Number(remoteItem.updatedAt||0)){
-    await setDoc(doc(db,"users",u.uid,"feedback",id),{id:localItem.id,media_type:localItem.media_type,title:localItem.title,year:localItem.year,poster_path:localItem.poster_path,backdrop_path:localItem.backdrop_path,kind:localItem.kind,updatedAt:localItem.updatedAt},{merge:true});
+    await setDoc(doc(db,"users",u.uid,"feedback",id),{id:localItem.id,media_type:localItem.media_type,title:localItem.title,year:localItem.year,poster_path:localItem.poster_path,backdrop_path:localItem.backdrop_path,kind:localItem.kind,updatedAt:localItem.updatedAt});
    }
   }
   for(const [id,tombstone] of Object.entries(s.feedbackCleared)){
    const remoteItem=remoteFeedback.get(id);
    if(!remoteItem || Number(tombstone.updatedAt||0)>Number(remoteItem.updatedAt||0)){
-    await setDoc(doc(db,"users",u.uid,"feedback",id),{kind:"cleared",updatedAt:Number(tombstone.updatedAt)||Date.now()},{merge:true});
+    await setDoc(doc(db,"users",u.uid,"feedback",id),{kind:"cleared",updatedAt:Number(tombstone.updatedAt)||Date.now()});
    }
   }
   f.docs.forEach(d=>{
