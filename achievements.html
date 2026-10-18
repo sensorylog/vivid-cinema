@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#08090b">
+  <meta name="description" content="A cinematic collection of your Vivid Cinema achievements and milestones.">
+  <title>Achievements · Vivid Cinema</title>
+  <link rel="icon" href="icons/vivid-icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles/vivid-foundation.css">
+  <link rel="stylesheet" href="styles/vivid-system.css">
+  <link rel="stylesheet" href="styles/vivid-shell.css">
+  <link rel="stylesheet" href="styles/vivid-achievements.css?v=20261018-achievements-1">
+  <link rel="stylesheet" href="styles/vivid-achievements-page.css?v=20261018-cinematic-1">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.9.1/font/bootstrap-icons.css">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icons/vivid-icon.svg">
+  <link rel="stylesheet" href="styles/vivid-pwa.css">
+  <link rel="stylesheet" href="styles/vivid-atmosphere.css">
+  <link rel="stylesheet" href="styles/vivid-liquid-glass.css?v=lg4">
+</head>
+<body data-vivid-page="achievements" class="achievements-page vivid-atmosphere">
+  <header class="vivid-unified-header"><nav class="vivid-nav vivid-unified-nav" aria-label="Primary"><a class="vivid-brand" href="home.html">Vivid<span>Cinema</span></a><div class="vivid-navlinks"><a href="home.html"><i class="bi bi-house-fill" aria-hidden="true"></i><span>Home</span></a><a href="discover.html"><i class="bi bi-compass" aria-hidden="true"></i><span>Discover</span></a><a href="home.html#trending"><i class="bi bi-fire" aria-hidden="true"></i><span>Trending</span></a><a href="collection.html?collection=movies"><i class="bi bi-film" aria-hidden="true"></i><span>Movies</span></a><a href="collection.html?collection=tv"><i class="bi bi-tv" aria-hidden="true"></i><span>TV</span></a><a href="library.html"><i class="bi bi-bookmark" aria-hidden="true"></i><span>Library</span></a><a href="news.html"><i class="bi bi-newspaper" aria-hidden="true"></i><span>News</span></a></div><a class="vivid-nav-action" id="account-auth" data-vivid-nav-auth="true" href="account.html">Account</a></nav></header>
+  <main class="achievements-shell">
+    <a class="achievements-back" href="account.html"><i class="bi bi-chevron-left" aria-hidden="true"></i> Back to account</a>
+    <section class="achievements-hero" aria-labelledby="achievements-page-title">
+      <div class="achievements-hero-copy">
+        <span class="achievements-kicker">YOUR CINEMA JOURNEY</span>
+        <h1 id="achievements-page-title">Every story<br>leaves a mark.</h1>
+        <p>A collection of the moments, discoveries and stories that make your cinema journey yours.</p>
+        <div class="achievements-summary" aria-label="Achievement collection summary">
+          <div class="achievement-summary-stat"><strong id="achievement-earned-count">0</strong><span>Unlocked</span></div>
+          <div class="achievement-summary-stat"><strong id="achievement-total-count">16</strong><span>To discover</span></div>
+          <div class="achievement-summary-stat"><strong id="achievement-completion-count">0%</strong><span>Collection</span></div>
+        </div>
+        <div class="achievement-progress-track" id="achievement-hero-progress" role="progressbar" aria-label="Overall achievement completion" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span></span></div>
+      </div>
+      <article class="achievements-featured" id="achievement-featured" aria-labelledby="achievement-featured-title">
+        <div id="achievement-featured-art"></div>
+        <div class="achievements-featured-copy">
+          <span class="achievement-category" id="achievement-featured-category">NEXT MILESTONE</span>
+          <h2 id="achievement-featured-title">Your next chapter</h2>
+          <p id="achievement-featured-description">Keep exploring to reveal your next achievement.</p>
+          <div class="achievement-progress-copy"><span>Progress</span><strong id="achievement-featured-progress-label">0 / 1</strong></div>
+          <div class="achievement-progress-track" id="achievement-featured-progress"><span></span></div>
+          <a class="account-achievement-link" id="achievement-featured-link" href="library.html">Keep building your library <i class="bi bi-arrow-up-right" aria-hidden="true"></i></a>
+        </div>
+      </article>
+    </section>
+
+    <section class="achievement-collection" aria-labelledby="achievement-collection-title">
+      <div class="achievement-filters-row">
+        <h2 id="achievement-collection-title">Your collection</h2>
+        <div class="achievement-filters" role="group" aria-label="Filter achievements">
+          <button class="achievement-filter" type="button" data-achievement-filter="all" aria-pressed="true">All milestones</button>
+          <button class="achievement-filter" type="button" data-achievement-filter="earned" aria-pressed="false">Unlocked</button>
+          <button class="achievement-filter" type="button" data-achievement-filter="locked" aria-pressed="false">Still ahead</button>
+        </div>
+      </div>
+      <div class="achievement-gallery" id="achievement-gallery" aria-live="polite"></div>
+    </section>
+  </main>
+  <dialog class="achievement-detail-dialog" id="achievement-detail-dialog" aria-labelledby="achievement-detail-title">
+    <button class="achievement-detail-close" id="achievement-detail-close" type="button" aria-label="Close achievement details">×</button>
+    <div class="achievement-detail-content">
+      <div id="achievement-detail-art"></div>
+      <span class="achievement-category" id="achievement-detail-category"></span>
+      <h2 id="achievement-detail-title">Achievement</h2>
+      <p id="achievement-detail-description"></p>
+      <span class="achievement-detail-status" id="achievement-detail-status"></span>
+      <div class="achievement-detail-progress" id="achievement-detail-progress">
+        <div class="achievement-progress-copy"><span>Progress</span><strong id="achievement-detail-progress-copy"></strong></div>
+        <div class="achievement-progress-track"><span></span></div>
+      </div>
+      <button class="achievement-detail-done" id="achievement-detail-done" type="button">Back to collection</button>
+    </div>
+  </dialog>
+  <footer class="vivid-footer">© 2026 Vivid Cinema <span class="vivid-footer-links"><a href="about.html">About</a><a href="terms.html">Terms</a><a href="privacy.html">Privacy</a><a href="contact.html">Contact</a></span></footer>
+  <script type="module" src="scripts/app-shell.js"></script>
+  <script type="module" src="scripts/achievements-page.js?v=20261018-cinematic-1"></script>
+  <script type="module" src="scripts/atmosphere.js"></script>
+  <script type="module" src="scripts/i18n.js"></script>
+</body>
+</html>
