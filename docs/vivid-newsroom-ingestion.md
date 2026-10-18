@@ -12,7 +12,7 @@
 
 ## Setup
 
-The workflow intentionally does nothing until the repository owner configures its Firebase Admin authentication in GitHub Actions. Use a dedicated, least-privilege service account, store credentials only in GitHub Actions secrets, restrict repository access and rotate credentials if exposed. Never put credentials in the repository or workflow logs. Keyless GitHub OIDC / Workload Identity Federation is preferred for production.
+The workflow intentionally does nothing until the repository owner configures its Firebase Admin authentication in GitHub Actions. Use a dedicated service account with the minimum Firestore IAM role needed, store credentials only in GitHub Actions secrets, restrict repository access and rotate credentials if exposed. Firestore IAM permissions are not collection-level; the Admin SDK bypasses Firestore rules, so treat this account as privileged and keep its use confined to the reviewed workflow. Never put credentials in the repository or workflow logs. Keyless GitHub OIDC / Workload Identity Federation is preferred for production.
 
 After authentication is configured, run **Actions → Vivid News discovery → Run workflow**. No source is fetched until a moderator has explicitly approved its feed terms and enabled ingestion. This workflow uses GitHub Actions and the Firebase Admin SDK; it does not deploy or invoke Cloud Functions.
 
