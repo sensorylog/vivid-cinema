@@ -8,16 +8,15 @@ The product direction is a hybrid of editorial selection, latest stories, trendi
 
 ## News source and ingestion policy
 
-- `functions/news-sources.js` is a code-side research shortlist only; the scheduled job does not ingest from that shortlist.
-- The scheduled job reads the moderator-managed Firestore `newsSources` registry and selects only records with `status: approved` and `feedApproved: true`.
-- All candidate feeds must remain `approvedForUse: false` until source reliability, feed terms, attribution/display permissions and any image rights have been reviewed.
-- Pulse Ghana is a manual editorial candidate only; do not scrape its website. Confirm an official permitted feed/API before any automation.
-- `VIVID_NEWS_INGESTION_ENABLED` must remain unset or anything other than `true` until an authorized owner explicitly approves the source set.
-- The ingestion job stores bounded metadata/excerpts and links to the original report. It does not republish full articles or feed images.
-- Each feed request is HTTPS-only, capped at 2 MB, limited to three redirects, and checked against the approved publisher domain at every redirect hop.
-- The scheduled Firebase Function has not been deployed or verified against live feeds. Check billing, quotas, scheduler availability and source-specific terms before staging.
-- The moderator page now includes a publisher registry and manual editorial desk. Source approval and manual publication are enforced by Firestore rules, not just by hidden UI panels.
-- Manual story source URLs must match the approved publisher domain; image reuse requires explicit source approval and the image URL must be hosted on that publisher's domain (root or `www`).
+- `functions/news-sources.js` is a research shortlist, not a live allowlist. Every candidate starts with `approvedForUse: false` and `ingestionEnabled: false`.
+- The scheduled GitHub Actions workflow reads the moderator-managed Firestore `newsSources` registry and processes only records with `status: approved`, `feedApproved: true`, and `ingestionEnabled: true`.
+- Feed permission, automated ingestion permission, and image-use permission are separate approvals. Confirm the publisher's current terms, attribution requirements, regional relevance and source reliability before enabling any feed.
+- The workflow does not use Cloud Functions, deploy Firebase services, scrape article pages, or download story images. It stores only a bounded headline, source URL, date, byline and short feed excerpt.
+- Every discovered item is written to the private `newsQueue` collection as `pending_review`. It never writes directly to the public `articles` collection.
+- The feed client requires HTTPS, caps responses at 2 MB, limits redirects to three, rejects redirects outside the approved publisher host, deduplicates canonical URLs and ignores stories older than 14 days or dated more than five minutes in the future.
+- A moderator must open the original report, verify the source and date, write a fresh Vivid summary, choose category/region, and add a review note before publication. Feed excerpts are shown for reference only; images are never copied by the pipeline.
+- Pulse Ghana and any other source without an explicitly permitted feed/API remain manual candidates. Do not scrape their websites.
+- No source is enabled by default. Automated discovery remains idle until an owner configures GitHub Actions credentials and a moderator explicitly approves a feed and enables ingestion.
 
 ## Moderator identity
 
@@ -29,8 +28,8 @@ No moderator claim was assigned and no Firebase service was deployed by these fe
 
 - `firestore.rules` is the authorization boundary; client-side checks are only for usability.
 - `firestore.indexes.json` declares composite indexes for newsroom, community, comments, reports and polls.
-- `firebase.json` wires the rules, indexes and scheduled-function codebase. It also excludes server code, docs, tests and the index definition from the public Hosting directory.
-- Deploy rules/indexes/functions to a staging Firebase project first. Review the generated deployment plan and project ID before any deployment.
+- `firebase.json` wires Firestore rules and indexes and retains the repository's existing functions codebase configuration; this newsroom pipeline does not deploy or invoke Cloud Functions.
+- Deploy the Firestore rules to a staging project and run the emulator tests before production rollout. Do not deploy functions as part of this work.
 - Community participation is intended for registered, email-verified accounts. Recheck every write path against the rules, including edit/delete, poll votes, reports, blocks, follows and moderator actions.
 
 ## Required pre-launch validation

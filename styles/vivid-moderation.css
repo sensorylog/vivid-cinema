@@ -15,3 +15,39 @@
 .vivid-editorial-form button:disabled{opacity:.55;cursor:wait}
 #source-feedback,#editorial-feedback{color:#a6a6b0;font-size:12px;line-height:1.5}
 @media(max-width:620px){.vivid-editorial-publish{padding:15px}.vivid-editorial-form-row{grid-template-columns:1fr}}
+
+
+/* Global newsroom discovery queue — source metadata is private until review. */
+.vivid-news-discovery-queue{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-top:18px}
+.vivid-news-discovery-card,.vivid-news-discovery-empty{min-width:0;padding:20px;border:1px solid var(--vivid-border,rgba(255,255,255,.12));border-radius:18px;background:var(--vivid-panel,rgba(255,255,255,.035));}
+.vivid-news-discovery-meta{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font-size:11px;color:var(--vivid-muted,#aaa);text-transform:uppercase;letter-spacing:.07em}
+.vivid-news-discovery-card h3{font-size:clamp(19px,2vw,25px);line-height:1.2;margin:14px 0 10px;overflow-wrap:anywhere}
+.vivid-news-discovery-excerpt{font-size:13px;line-height:1.65;color:var(--vivid-muted,#aaa);overflow-wrap:anywhere}
+.vivid-news-discovery-source{margin:14px 0;color:var(--vivid-accent,#c7ff55);font-size:13px}
+.vivid-news-discovery-fields{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.vivid-news-discovery-card label{display:grid;gap:7px;margin:13px 0;font-size:12px;font-weight:650}
+.vivid-news-discovery-card textarea,.vivid-news-discovery-card select{box-sizing:border-box;width:100%;min-width:0;padding:11px 12px;border:1px solid var(--vivid-border,rgba(255,255,255,.16));border-radius:10px;background:rgba(0,0,0,.2);color:inherit;font:inherit;font-weight:400}
+.vivid-news-discovery-card textarea{resize:vertical;line-height:1.5}
+.vivid-news-discovery-actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:16px}
+.vivid-news-discovery-actions button{padding:11px 14px;border:1px solid var(--vivid-accent,#c7ff55);border-radius:999px;background:var(--vivid-accent,#c7ff55);color:#111;font-weight:750;cursor:pointer}
+.vivid-news-discovery-actions .vivid-news-discovery-dismiss{background:transparent;color:inherit;border-color:var(--vivid-border,rgba(255,255,255,.18))}
+.vivid-news-discovery-actions button:disabled{opacity:.6;cursor:wait}
+.vivid-news-discovery-feedback{margin-top:12px;font-size:12px;line-height:1.5;color:var(--vivid-accent,#c7ff55);overflow-wrap:anywhere}
+.vivid-news-discovery-empty{display:flex;flex-direction:column;gap:8px;color:var(--vivid-muted,#aaa)}
+.vivid-news-discovery-empty strong{color:inherit;font-size:17px}
+@media(max-width:760px){.vivid-news-discovery-queue{grid-template-columns:1fr}.vivid-news-discovery-card{padding:16px}.vivid-news-discovery-fields{grid-template-columns:1fr 1fr}}
+@media(max-width:420px){.vivid-news-discovery-fields{grid-template-columns:1fr}}
+
+.vivid-source-registry-current{margin-top:28px;padding-top:22px;border-top:1px solid var(--vivid-border,rgba(255,255,255,.12))}
+.vivid-source-registry-current h3{margin:0 0 6px;font-size:20px}
+.vivid-source-registry-current>p{font-size:13px;line-height:1.6;color:var(--vivid-muted,#aaa)}
+.vivid-source-registry-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:14px}
+.vivid-source-registry-card,.vivid-source-registry-empty{padding:16px;border:1px solid var(--vivid-border,rgba(255,255,255,.12));border-radius:14px;background:var(--vivid-panel,rgba(255,255,255,.025));min-width:0}
+.vivid-source-registry-card-head strong,.vivid-source-registry-card-head span{display:block;overflow-wrap:anywhere}
+.vivid-source-registry-card-head strong{font-size:15px}
+.vivid-source-registry-card-head span{font-size:11px;color:var(--vivid-muted,#aaa);margin-top:3px}
+.vivid-source-registry-tags{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0}
+.vivid-source-registry-tags span{padding:5px 8px;border:1px solid var(--vivid-border,rgba(255,255,255,.12));border-radius:999px;font-size:10px;color:var(--vivid-muted,#bbb)}
+.vivid-source-registry-card p{font-size:12px;line-height:1.55;color:var(--vivid-muted,#aaa);margin:8px 0 0;overflow-wrap:anywhere}
+.vivid-source-registry-empty{font-size:13px;color:var(--vivid-muted,#aaa)}
+@media(max-width:760px){.vivid-source-registry-list{grid-template-columns:1fr}}

@@ -1,0 +1,39 @@
+name: Vivid News discovery
+
+on:
+  schedule:
+    - cron: "17 */6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: vivid-news-discovery
+  cancel-in-progress: false
+
+jobs:
+  discover:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+      - name: Stage candidates from explicitly enabled sources
+        env:
+          VIVID_NEWS_INGESTION_CLI: "true"
+          VIVID_NEWS_SERVICE_ACCOUNT_JSON: ${{ secrets.VIVID_NEWS_SERVICE_ACCOUNT_JSON }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -z "${VIVID_NEWS_SERVICE_ACCOUNT_JSON:-}" ]; then
+            echo "::warning::VIVID_NEWS_SERVICE_ACCOUNT_JSON is not configured. No feeds were fetched and no data was written."
+            exit 0
+          fi
+          node automation/newsroom-ingest.mjs --apply
