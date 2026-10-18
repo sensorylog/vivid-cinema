@@ -40,7 +40,8 @@ if (root) {
     const filtered = activeFilter === "all" ? articles : articles.filter(article =>
       article.category === activeFilter || article.region === activeFilter || (article.tags || []).includes(activeFilter));
     if (!filtered.length) {
-      root.innerHTML = '<div class="vivid-editorial-empty"><span class="vivid-editorial-empty-mark">V</span><h3>Good stories deserve good sources.</h3><p>We’re preparing this newsroom’s approved publisher feeds. The existing Vivid release and discovery feed is still available below.</p><span class="vivid-editorial-empty-note">No unverified headlines or invented timestamps.</span></div>';
+      root.setAttribute("aria-busy", "false");
+      root.innerHTML = '<div class="vivid-editorial-empty"><span class="vivid-editorial-empty-mark">V</span><h3>Good stories deserve good sources.</h3><p>The newsroom is being curated. We publish source-attributed stories only after editorial review. The release radar and discovery feed remain available below.</p><span class="vivid-editorial-empty-note">No unverified headlines or invented timestamps.</span></div>';
       return;
     }
     const lead = filtered.find(item => item.featured === true);
@@ -48,6 +49,7 @@ if (root) {
       ? [card(lead, true), ...filtered.filter(item => item.id !== lead.id).slice(0, 17).map(item => card(item, false))]
       : filtered.slice(0, 18).map(item => card(item, false));
     root.innerHTML = '<div class="vivid-editorial-grid">' + cards.join("") + '</div>';
+    root.setAttribute("aria-busy", "false");
   }
 
   filters.forEach(button => button.addEventListener("click", () => {
@@ -69,9 +71,16 @@ if (root) {
     }, error => {
       console.warn("Vivid editorial feed unavailable:", error);
       root.innerHTML = '<div class="vivid-editorial-empty"><h3>The newsroom is temporarily unavailable.</h3><p>Your release calendar and cinema discovery feed remain available below.</p></div>';
+      root.setAttribute("aria-busy", "false");
+      const status = document.getElementById("vivid-editorial-status");
+      if (status) status.textContent = "Newsroom temporarily unavailable";
     });
   } catch (error) {
     console.warn("Vivid editorial feed could not start:", error);
+    root.setAttribute("aria-busy", "false");
+    root.innerHTML = '<div class="vivid-editorial-empty"><h3>The newsroom could not start.</h3><p>Your release calendar and cinema discovery feed remain available below.</p></div>';
+    const status = document.getElementById("vivid-editorial-status");
+    if (status) status.textContent = "Newsroom temporarily unavailable";
   }
 
   window.addEventListener("pagehide", () => unsubscribe?.(), {once:true});
