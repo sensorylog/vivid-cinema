@@ -8,7 +8,7 @@ const MAX_AGE_DAYS = 14;
 const FETCH_TIMEOUT_MS = 12000;
 const MAX_REDIRECTS = 3;
 const ALLOWED_REGIONS = new Set(["global", "hollywood", "india", "africa", "asia", "europe", "latin-america", "middle-east", "ghana", "nigeria"]);
-const ALLOWED_CATEGORIES = new Set(["film", "streaming", "celebrity", "trailers", "awards", "industry", "africa", "india", "asia", "hollywood", "europe", "latin-america", "middle-east", "ghana", "nollywood"]);
+const ALLOWED_CATEGORIES = new Set(["film", "television", "streaming", "music", "gaming", "anime", "animation", "box-office", "celebrity", "trailers", "awards", "festivals", "production", "business", "legal", "industry", "comics", "theatre", "podcasts", "creators", "africa", "india", "asia", "hollywood", "europe", "latin-america", "middle-east", "ghana", "nollywood"]);
 
 export function decodeXml(value = "") {
   const named = { amp: "&", lt: "<", gt: ">", quot: '"', apos: "'", nbsp: " " };
