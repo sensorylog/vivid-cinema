@@ -362,6 +362,33 @@ service cloud.firestore {
       && request.resource.data.updatedAt == request.time;
     }
 
+    match /newsQueue/{queueId} {
+      // Only trusted moderators can inspect discovered feed candidates.
+      // Admin SDK ingestion is server-side and bypasses client rules.
+      allow get, list: if isModerator();
+      allow create, delete: if false;
+      allow update: if isModerator()
+        && resource.data.status == 'pending_review'
+        && request.resource.data.status in ['published','dismissed']
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','reviewedAt','reviewedBy','reviewNotes','articleId'])
+        && request.resource.data.reviewedAt == request.time
+        && request.resource.data.reviewedBy == request.auth.uid
+        && request.resource.data.reviewNotes is string
+        && request.resource.data.reviewNotes.size() >= 10
+        && request.resource.data.reviewNotes.size() <= 500
+        && (
+          (request.resource.data.status == 'dismissed' && !request.resource.data.keys().hasAny(['articleId']))
+          ||
+          (request.resource.data.status == 'published'
+            && request.resource.data.articleId is string
+            && request.resource.data.articleId.size() > 0
+            && existsAfter(/databases/$(database)/documents/articles/$(request.resource.data.articleId))
+            && getAfter(/databases/$(database)/documents/articles/$(request.resource.data.articleId)).data.status == 'published'
+            && getAfter(/databases/$(database)/documents/articles/$(request.resource.data.articleId)).data.canonicalUrl == resource.data.canonicalUrl
+            && getAfter(/databases/$(database)/documents/articles/$(request.resource.data.articleId)).data.sourceId == resource.data.sourceId)
+        );
+    }
+
     match /articles/{articleId} {
       allow get, list: if resource.data.status == 'published';
       allow create, update, delete: if false;
@@ -564,18 +591,20 @@ service cloud.firestore {
 
 
     function validNewsSource(sourceId) {
-      return request.resource.data.keys().hasOnly(['publisher','domain','status','defaultRegion','defaultCategory','feedUrl','feedApproved','imageUsageApproved','reviewNotes','verifiedBy','verifiedAt','createdAt','updatedAt'])
+      return request.resource.data.keys().hasOnly(['publisher','domain','status','defaultRegion','defaultCategory','feedUrl','feedApproved','ingestionEnabled','imageUsageApproved','reviewNotes','verifiedBy','verifiedAt','createdAt','updatedAt'])
         && request.resource.data.domain == sourceId
         && request.resource.data.publisher is string
         && request.resource.data.publisher.size() >= 2
         && request.resource.data.publisher.size() <= 120
         && request.resource.data.status == 'approved'
-        && request.resource.data.defaultRegion in ['global','ghana','nigeria','africa']
-        && request.resource.data.defaultCategory in ['film','streaming','celebrity','trailers','awards','industry']
+        && request.resource.data.defaultRegion in ['global','hollywood','india','africa','asia','europe','latin-america','middle-east','ghana','nigeria']
+        && request.resource.data.defaultCategory in ['film','streaming','celebrity','trailers','awards','industry','africa','india','asia','hollywood','europe','latin-america','middle-east','ghana','nollywood']
         && request.resource.data.feedUrl is string
         && request.resource.data.feedApproved is bool
         && request.resource.data.imageUsageApproved is bool
-        && ((request.resource.data.feedUrl == '' && !request.resource.data.feedApproved) || (request.resource.data.feedUrl.matches('^https://.*') && request.resource.data.feedApproved))
+        && request.resource.data.ingestionEnabled is bool
+        && ((request.resource.data.feedUrl == '' && !request.resource.data.feedApproved && !request.resource.data.ingestionEnabled) || (request.resource.data.feedUrl.matches('^https://.*') && request.resource.data.feedApproved))
+        && (!request.resource.data.ingestionEnabled || (request.resource.data.feedApproved && request.resource.data.feedUrl.matches('^https://.*')))
         && request.resource.data.reviewNotes is string
         && request.resource.data.reviewNotes.size() >= 10
         && request.resource.data.reviewNotes.size() <= 1000
@@ -608,8 +637,8 @@ service cloud.firestore {
         && request.resource.data.canonicalUrl.size() <= 2000
         && request.resource.data.canonicalUrl.split('/').size() >= 4
         && request.resource.data.canonicalUrl.split('/')[2] in [request.resource.data.sourceId, 'www.' + request.resource.data.sourceId]
-        && request.resource.data.category in ['film','streaming','celebrity','trailers','awards','industry','ghana','nollywood','africa']
-        && request.resource.data.region in ['global','ghana','nigeria','africa']
+        && request.resource.data.category in ['film','streaming','celebrity','trailers','awards','industry','ghana','nollywood','africa','india','asia','hollywood','europe','latin-america','middle-east']
+        && request.resource.data.region in ['global','hollywood','india','africa','asia','europe','latin-america','middle-east','ghana','nigeria']
         && request.resource.data.summary is string
         && request.resource.data.summary.size() >= 1
         && request.resource.data.summary.size() <= 700
