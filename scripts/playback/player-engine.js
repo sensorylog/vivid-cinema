@@ -12,6 +12,41 @@ let activeShaka = null;
 let activeVideo = null;
 let directPlaybackGeneration = 0;
 const scriptLoads = new Map();
+let activeVideoDiagnostics = [];
+
+// Optional, privacy-preserving telemetry for streams Vivid is allowed to play directly.
+// Embedded cross-origin provider iframes remain outside this element's event boundary.
+function attachVideoDiagnostics(video, callback) {
+  if (typeof callback !== "function") return;
+  const events = ["loadstart", "loadedmetadata", "canplay", "playing", "waiting", "stalled", "suspend", "error", "progress"];
+  activeVideoDiagnostics = events.map(eventName => {
+    const listener = () => {
+      let bufferedAhead = 0;
+      try {
+        for (let i = 0; i < video.buffered.length; i += 1) {
+          const start = video.buffered.start(i);
+          const end = video.buffered.end(i);
+          if (start <= video.currentTime && end >= video.currentTime) {
+            bufferedAhead = Math.max(0, end - video.currentTime);
+            break;
+          }
+        }
+      } catch { /* Some browsers can reject TimeRanges reads during teardown. */ }
+      const sample = {
+        event: eventName,
+        currentTime: Number.isFinite(video.currentTime) ? Math.round(video.currentTime * 10) / 10 : null,
+        bufferedAhead: Math.round(bufferedAhead * 10) / 10,
+        readyState: Number(video.readyState),
+        networkState: Number(video.networkState),
+        errorCode: eventName === "error" ? Number(video.error?.code || 0) : null
+      };
+      try { callback(sample); } catch { /* Diagnostics must never interrupt playback. */ }
+    };
+    video.addEventListener(eventName, listener);
+    return { video, eventName, listener };
+  });
+}
+
 
 function allowedHosts() {
   return normalizeAllowedHosts(VIVID_CONFIG.api.directStreamHosts);
@@ -91,6 +126,10 @@ function loadScript(url, globalName) {
 }
 
 function disposeActiveStream(video) {
+  for (const { video: target, eventName, listener } of activeVideoDiagnostics) {
+    target.removeEventListener(eventName, listener);
+  }
+  activeVideoDiagnostics = [];
   if (activeHls) {
     try { activeHls.destroy(); } catch {}
     activeHls = null;
@@ -117,7 +156,7 @@ export function stopDirectStream(video) {
   return disposeActiveStream(video);
 }
 
-export async function playDirectStream(video, stream, { startAt = 0, onError = () => {} } = {}) {
+export async function playDirectStream(video, stream, { startAt = 0, onError = () => {}, onDiagnostics = null } = {}) {
   if (!(video instanceof HTMLVideoElement)) throw new Error("A video element is required.");
   const url = validateDirectStreamUrl(stream?.url);
   if (!url) throw new Error("Direct stream URL failed the host allowlist check.");
@@ -128,6 +167,7 @@ export async function playDirectStream(video, stream, { startAt = 0, onError = (
   await disposeActiveStream(video);
   if (requestGeneration !== directPlaybackGeneration) throw new Error("Playback request was superseded.");
   activeVideo = video;
+  attachVideoDiagnostics(video, onDiagnostics);
   video.controls = true;
   video.playsInline = true;
   video.preload = "metadata";
