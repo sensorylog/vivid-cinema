@@ -8,11 +8,11 @@ The product direction is a hybrid of editorial selection, latest stories, trendi
 
 ## News source and ingestion policy
 
-- \`functions/news-sources.js\` is a research shortlist, not a live allowlist. Every candidate starts with \`approvedForUse: false\` and \`ingestionEnabled: false\`.
-- The scheduled GitHub Actions workflow reads the moderator-managed Firestore \`newsSources\` registry and processes only records with \`status: approved\`, \`feedApproved: true\`, and \`ingestionEnabled: true\`.
+- `functions/news-sources.js` is a research shortlist, not a live allowlist. Every candidate starts with `approvedForUse: false` and `ingestionEnabled: false`.
+- The scheduled GitHub Actions workflow reads the moderator-managed Firestore `newsSources` registry and processes only records with `status: approved`, `feedApproved: true`, and `ingestionEnabled: true`.
 - Feed permission, automated ingestion permission, and image-use permission are separate approvals. Confirm the publisher's current terms, attribution requirements, regional relevance and source reliability before enabling any feed.
 - The workflow does not use Cloud Functions, deploy Firebase services, scrape article pages, or download story images. It stores only a bounded headline, source URL, date, byline and short feed excerpt.
-- Every discovered item is written to the private \`newsQueue\` collection as \`pending_review\`. It never writes directly to the public \`articles\` collection.
+- Every discovered item is written to the private `newsQueue` collection as `pending_review`. It never writes directly to the public `articles` collection.
 - The feed client requires HTTPS, caps responses at 2 MB, limits redirects to three, rejects redirects outside the approved publisher host, deduplicates canonical URLs and ignores stories older than 14 days or dated more than five minutes in the future.
 - A moderator must open the original report, verify the source and date, write a fresh Vivid summary, choose category/region, and add a review note before publication. Feed excerpts are shown for reference only; images are never copied by the pipeline.
 - Pulse Ghana and any other source without an explicitly permitted feed/API remain manual candidates. Do not scrape their websites.
