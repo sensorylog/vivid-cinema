@@ -11,9 +11,29 @@ if (root) {
 
   const labelFor = value => ({
     film: "Film", television: "Television", celebrity: "People", streaming: "Streaming",
-    awards: "Awards", ghana: "Ghana", nollywood: "Nollywood", africa: "African cinema",
+    awards: "Awards", ghana: "Ghana", nollywood: "Nollywood", africa: "Africa",
+    asia: "Asia", india: "India", hollywood: "Hollywood", global: "Global",
+    europe: "Europe", "latin-america": "Latin America", "middle-east": "Middle East",
     trailers: "Trailers", industry: "Industry"
   }[value] || "Entertainment");
+
+  const regionAliases = {
+    hollywood: ["hollywood", "us", "usa", "united-states", "north-america"],
+    india: ["india", "south-asia"],
+    africa: ["africa", "west-africa", "east-africa", "north-africa", "southern-africa", "central-africa"],
+    asia: ["asia", "east-asia", "southeast-asia", "south-east-asia", "asia-pacific"],
+    europe: ["europe", "uk", "united-kingdom"],
+    "latin-america": ["latin-america", "south-america", "central-america"],
+    "middle-east": ["middle-east", "mena"]
+  };
+
+  function matchesFilter(article, filter) {
+    if (filter === "all") return true;
+    const values = [article.region, article.country, article.countryCode, article.category, ...(Array.isArray(article.tags) ? article.tags : [])]
+      .filter(Boolean).map(value => String(value).toLowerCase().trim().replace(/[_ ]+/g, "-"));
+    if (values.includes(filter)) return true;
+    return (regionAliases[filter] || []).some(alias => values.includes(alias) || values.some(value => value.startsWith(alias + "-")));
+  }
 
   const formatDate = value => {
     const date = value?.toDate ? value.toDate() : value ? new Date(value) : null;
@@ -37,8 +57,7 @@ if (root) {
   }
 
   function render() {
-    const filtered = activeFilter === "all" ? articles : articles.filter(article =>
-      article.category === activeFilter || article.region === activeFilter || (article.tags || []).includes(activeFilter));
+    const filtered = articles.filter(article => matchesFilter(article, activeFilter));
     if (!filtered.length) {
       root.setAttribute("aria-busy", "false");
       root.innerHTML = '<div class="vivid-editorial-empty"><span class="vivid-editorial-empty-mark">V</span><h3>Good stories deserve good sources.</h3><p>The newsroom is being curated. We publish source-attributed stories only after editorial review. The release radar and discovery feed remain available below.</p><span class="vivid-editorial-empty-note">No unverified headlines or invented timestamps.</span></div>';
@@ -52,14 +71,16 @@ if (root) {
     root.setAttribute("aria-busy", "false");
   }
 
-  filters.forEach(button => button.addEventListener("click", () => {
-    filters.forEach(item => {
-      item.classList.toggle("is-active", item === button);
-      item.setAttribute("aria-pressed", item === button ? "true" : "false");
-    });
+  function activateFilter(button) {
     activeFilter = button.dataset.editorialFilter || "all";
+    filters.forEach(item => {
+      const active = item.dataset.editorialFilter === activeFilter;
+      item.classList.toggle("is-active", active);
+      item.setAttribute("aria-pressed", active ? "true" : "false");
+    });
     render();
-  }));
+  }
+  filters.forEach(button => button.addEventListener("click", () => activateFilter(button)));
 
   try {
     const feedQuery = query(collection(db, "articles"), where("status", "==", "published"), orderBy("publishedAt", "desc"), limit(60));
