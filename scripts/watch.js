@@ -284,6 +284,11 @@ function setPlayerSource(source, params, startAt = 0) {
           if (requestGeneration !== directLoadGeneration || activeSource !== "direct") return;
           console.warn("Vivid direct-stream playback error:", error);
           triggerFallback("direct_stream_error");
+        },
+        onDiagnostics: sample => {
+          if (route.params.get("playbackDebug") === "1") {
+            console.info("[Vivid playback diagnostics]", sample);
+          }
         }
       });
     }).then(result => {
