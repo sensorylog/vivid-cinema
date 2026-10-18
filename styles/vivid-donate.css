@@ -207,7 +207,6 @@ body.vivid-donate-page::before {
   .donate-purpose-item { border: 1px solid CanvasText; }
 }
 
-
 /* Premium support-page refinement */
 .donate-shell{width:min(1160px,100%);padding:26px 32px 32px}
 .donate-header{padding:4px 0 20px;border-bottom-color:rgba(255,255,255,.09)}
