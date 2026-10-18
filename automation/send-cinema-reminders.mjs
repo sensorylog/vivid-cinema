@@ -1,13 +1,14 @@
-import admin from "firebase-admin";
+import { cert, initializeApp } from "firebase-admin/app";
+import { FieldValue, getFirestore } from "firebase-admin/firestore";
 import webpush from "web-push";
 
-const serviceAccount=JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_JSON||"");
+const serviceAccount=JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_JSON||"{}");
 const vapidPrivateKey=process.env.VAPID_PRIVATE_KEY||"";
 if(!serviceAccount.project_id)throw new Error("Missing FIREBASE_SERVICE_ACCOUNT_JSON");
 if(!vapidPrivateKey)throw new Error("Missing VAPID_PRIVATE_KEY");
 
-admin.initializeApp({credential:admin.credential.cert(serviceAccount)});
-const db=admin.firestore();
+initializeApp({credential:cert(serviceAccount)});
+const db=getFirestore();
 webpush.setVapidDetails("mailto:notifications@vividcinema.app","BGZNNqdOPr-XJjdPnJMKPHvErIXftdRM0P8VxpjElqRs5AwpyY94lownEeUE2W-8GnFyvNd3-u7tmRu2b-5dEIg",vapidPrivateKey);
 
 const now=Date.now();
@@ -49,7 +50,7 @@ for(const reminderDoc of snapshot.docs){
   }
   await reminderDoc.ref.set({
     sent:true,
-    sentAt:admin.firestore.FieldValue.serverTimestamp(),
+    sentAt:FieldValue.serverTimestamp(),
     deliveryStatus:delivered?"delivered":"no-active-subscription"
   },{merge:true});
 }
