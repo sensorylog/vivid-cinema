@@ -15,7 +15,7 @@ A viable no-cost *test source* is a clearly licensed/public-domain video with a 
 ## Safe rollout
 
 1. Keep this change on a separate branch and review the pull request before merging.
-2. Test a known, authorized MP4/HLS/DASH source on desktop Chrome and iOS Safari. Pass `onDiagnostics: sample => console.info("[Vivid playback]", sample)` only during local testing; do not log stream URLs or user data.
+2. Test a known, authorized MP4/HLS/DASH source on desktop Chrome and iOS Safari. Add `?playbackDebug=1` to the watch URL to opt in to console diagnostics for the direct player; remove it after testing. Do not log stream URLs or user data.
 3. Compare `waiting`/`stalled` events and `bufferedAhead` on the same title, network, and device. If only the iframe player buffers, the fault is likely within its upstream player/source/network path and cannot be fixed by the parent page's video-element controls.
 4. Only configure `directStreamHosts` and `VIVID_DIRECT_STREAM_RESOLVER` after verifying authorization, URL stability, CORS/range support, and license terms. Preserve the existing iframe sources as fallback.
 
