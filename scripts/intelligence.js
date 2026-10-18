@@ -101,7 +101,7 @@ export function setFeedback(item,kind){
  if(next){s.feedback[k]={...x,kind:next,updatedAt:Date.now()};delete s.feedbackCleared[k]}
  else{delete s.feedback[k];s.feedbackCleared[k]={updatedAt:Date.now()}}
  s.taste.updatedAt=0;s.taste.dirty=true;write(s);invalidateRecommendationCaches();
- cloud(["feedback",k],next?{...x,kind:next,updatedAt:s.feedback[k].updatedAt}:{kind:"cleared",updatedAt:s.feedbackCleared[k].updatedAt});
+ cloud(["feedback",k],next?{id:x.id,media_type:x.media_type,title:x.title,year:x.year,poster_path:x.poster_path,backdrop_path:x.backdrop_path,kind:next,updatedAt:s.feedback[k].updatedAt}:{kind:"cleared",updatedAt:s.feedbackCleared[k].updatedAt});
  recordBehavior(next||"feedback_cleared",x,{feedback:next||""});void rebuildTasteProfile();return next
 }
 
@@ -222,7 +222,7 @@ export async function syncIntelligenceForUser(u){
   for(const [id,localItem] of Object.entries(s.feedback)){
    const remoteItem=remoteFeedback.get(id);
    if(!remoteItem || Number(localItem.updatedAt||0)>Number(remoteItem.updatedAt||0)){
-    await setDoc(doc(db,"users",u.uid,"feedback",id),localItem,{merge:true});
+    await setDoc(doc(db,"users",u.uid,"feedback",id),{id:localItem.id,media_type:localItem.media_type,title:localItem.title,year:localItem.year,poster_path:localItem.poster_path,backdrop_path:localItem.backdrop_path,kind:localItem.kind,updatedAt:localItem.updatedAt},{merge:true});
    }
   }
   for(const [id,tombstone] of Object.entries(s.feedbackCleared)){
