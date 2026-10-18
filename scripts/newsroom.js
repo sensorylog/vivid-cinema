@@ -20,11 +20,11 @@ if (root) {
   const regionAliases = {
     hollywood: ["hollywood", "us", "usa", "united-states", "north-america"],
     india: ["india", "south-asia"],
-    africa: ["africa", "west-africa", "east-africa", "north-africa", "southern-africa", "central-africa"],
-    asia: ["asia", "east-asia", "southeast-asia", "south-east-asia", "asia-pacific"],
-    europe: ["europe", "uk", "united-kingdom"],
-    "latin-america": ["latin-america", "south-america", "central-america"],
-    "middle-east": ["middle-east", "mena"]
+    africa: ["africa", "west-africa", "east-africa", "north-africa", "southern-africa", "central-africa", "ghana", "nigeria", "kenya", "south-africa", "egypt", "morocco", "senegal", "ivory-coast", "cote-d-ivoire", "ethiopia", "tanzania", "uganda", "rwanda", "cameroon", "algeria", "tunisia", "angola", "zimbabwe", "zambia", "mozambique", "namibia", "botswana", "democratic-republic-of-the-congo"],
+    asia: ["asia", "east-asia", "southeast-asia", "south-east-asia", "asia-pacific", "south-korea", "korea", "japan", "china", "hong-kong", "taiwan", "thailand", "indonesia", "philippines", "vietnam", "malaysia", "singapore"],
+    europe: ["europe", "uk", "united-kingdom", "france", "germany", "italy", "spain", "sweden", "poland"],
+    "latin-america": ["latin-america", "south-america", "central-america", "mexico", "brazil", "argentina", "colombia", "chile"],
+    "middle-east": ["middle-east", "mena", "saudi-arabia", "united-arab-emirates", "uae", "israel", "turkey", "lebanon", "qatar"]
   };
 
   function matchesFilter(article, filter) {
