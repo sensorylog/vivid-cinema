@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"><style id="vivid-first-paint-style">
-#vivid-first-paint{position:fixed;inset:0;z-index:2147483647;display:grid;place-items:center;background:#030509;color:#f7f8fc;opacity:1;visibility:visible;transition:opacity .32s ease,visibility .32s ease;isolation:isolate}
-#vivid-first-paint.is-hidden{opacity:0;visibility:hidden;pointer-events:none}
+#vivid-first-paint{position:fixed;inset:0;z-index:2147483647;display:none;place-items:center;background:#030509;color:#f7f8fc;opacity:1;visibility:visible;transition:opacity .32s ease,visibility .32s ease;isolation:isolate}
+html.vivid-standalone #vivid-first-paint{display:grid}#vivid-first-paint.is-hidden{opacity:0;visibility:hidden;pointer-events:none}
 #vivid-first-paint .vivid-first-paint-brand{display:flex;flex-direction:column;align-items:center;gap:18px;padding:24px;text-align:center}
 #vivid-first-paint img{display:block;width:clamp(76px,19vw,112px);height:auto;filter:drop-shadow(0 0 26px rgba(80,105,255,.2));animation:vivid-first-paint-arrive .65s cubic-bezier(.2,.7,.2,1) both}
 #vivid-first-paint .vivid-first-paint-wordmark{font:700 clamp(25px,6vw,34px)/1 -apple-system,BlinkMacSystemFont,"SF Pro Display",sans-serif;letter-spacing:-1.3px}
@@ -15,7 +15,7 @@
 @media(prefers-reduced-motion:reduce){#vivid-first-paint img,#vivid-first-paint .vivid-first-paint-loader:after{animation:none}#vivid-first-paint{transition:none}}
 </style>
 <script>
-(()=>{let hidden=false;const hide=()=>{if(hidden)return;hidden=true;const splash=document.getElementById("vivid-first-paint");if(!splash)return;splash.classList.add("is-hidden");window.setTimeout(()=>splash.remove(),380)};window.addEventListener("load",()=>window.setTimeout(hide,450),{once:true});window.setTimeout(hide,10000)})();
+(()=>{if(!(window.matchMedia&&window.matchMedia("(display-mode: standalone)").matches)&&navigator.standalone!==true)return;document.documentElement.classList.add("vivid-standalone");let hidden=false;const hide=()=>{if(hidden)return;hidden=true;const splash=document.getElementById("vivid-first-paint");if(!splash)return;splash.classList.add("is-hidden");window.setTimeout(()=>splash.remove(),380)};window.addEventListener("load",()=>window.setTimeout(hide,450),{once:true});window.setTimeout(hide,10000)})();
 </script><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#050608"><meta name="description" content="Vivid Cinema — discover movies and series worth watching.">
 <meta name="robots" content="index,follow">
