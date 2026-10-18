@@ -1,5 +1,9 @@
-import { db } from "./firebase.js";
-import { collection, limit, onSnapshot, orderBy, query, where } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+import { app } from "./firebase.js";
+import { collection, getFirestore, limit, onSnapshot, orderBy, query, where } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+
+// Create the Firestore handle from the exact SDK module used by this page.
+// This avoids passing a handle created by a different cached SDK module instance.
+const db = getFirestore(app);
 import { escapeHtml } from "./utils.js";
 
 const root = document.getElementById("vivid-editorial-feed");
