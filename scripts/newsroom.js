@@ -6,6 +6,7 @@ if (root) {
   const status = document.getElementById("vivid-editorial-status");
   let activeFilter = "all";
   let articles = [];
+  let visibleCount = 12;
   let lastTrigger = null;
 
   const labelFor = value => ({
@@ -114,10 +115,12 @@ if (root) {
       root.innerHTML = '<div class="vivid-editorial-empty"><span class="vivid-editorial-empty-mark">V</span><h3>No stories in this section yet.</h3><p>Try Global or another topic. The feed refreshes automatically from public news RSS sources.</p></div>';
       return;
     }
-    root.innerHTML = '<div class="vivid-editorial-count">' + filtered.length + ' stories in this view</div><div class="vivid-editorial-grid">' + filtered.slice(0,36).map((article,index)=>card(article,index===0)).join("") + '</div>';
+    root.innerHTML = '<div class="vivid-editorial-count">' + filtered.length + ' stories in this view</div><div class="vivid-editorial-grid">' + filtered.slice(0,visibleCount).map((article,index)=>card(article,index===0)).join("") + '</div>' + (filtered.length > visibleCount ? '<div class="vivid-editorial-more-wrap"><button type="button" class="vivid-editorial-more" data-load-more>Load more stories <span>' + Math.min(12, filtered.length-visibleCount) + ' more</span></button></div>' : '');
     root.setAttribute("aria-busy","false");
   }
   root.addEventListener("click", event => {
+    const more = event.target.closest("[data-load-more]");
+    if (more) { visibleCount += 12; render(); return; }
     const button = event.target.closest("[data-open-story]");
     if (!button) return;
     const article = articles.find(item => String(item.id || "") === button.dataset.openStory);
@@ -125,6 +128,7 @@ if (root) {
   });
   filters.forEach(button => button.addEventListener("click", () => {
     activeFilter = button.dataset.editorialFilter || "all";
+    visibleCount = 12;
     filters.forEach(item => {
       const active = item.dataset.editorialFilter === activeFilter;
       item.classList.toggle("is-active",active);
