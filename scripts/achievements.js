@@ -13,6 +13,7 @@ const typeOf = (item) => item?.media_type || item?.mediaType || "movie";
 
 
 let currentUid = null, initialized = false, remoteVersion = 0, modalOpen = false, lastFocus = null;
+const pendingUnlocks = [];
 
 function emptyStore(){return {version:VERSION,earned:{},sparkHistory:[]}}
 function readStore(){try{const value=JSON.parse(localStorage.getItem(STORAGE_KEY)||"null");return {...emptyStore(),...(value||{}),earned:{...(value?.earned||{})}}}catch{return emptyStore()}}
@@ -81,6 +82,8 @@ function ensureStyles(){
 function closeModal(){
   $("vivid-achievement-modal")?.remove();modalOpen=false;document.removeEventListener("keydown",onModalKey);
   if(lastFocus?.isConnected)lastFocus.focus({preventScroll:true});
+  const next=pendingUnlocks.shift();
+  if(next)Promise.resolve().then(()=>showUnlock(next.achievement,next.others,next.library));
 }
 function onModalKey(event){
   if(event.key==="Escape"){event.preventDefault();closeModal();return}
@@ -91,7 +94,9 @@ function onModalKey(event){
   else if(!event.shiftKey&&document.activeElement===buttons.at(-1)){event.preventDefault();buttons[0].focus()}
 }
 async function showUnlock(a,others,library){
-  if(modalOpen||!document.body)return;modalOpen=true;lastFocus=document.activeElement;const ownerAtStart=currentUid;
+  if(!document.body)return;
+  if(modalOpen){pendingUnlocks.push({achievement:a,others,library});return}
+  modalOpen=true;lastFocus=document.activeElement;const ownerAtStart=currentUid;
   const modal=document.createElement("div");modal.id="vivid-achievement-modal";modal.className="vivid-achievement-overlay";
   modal.innerHTML='<section class="vivid-achievement-dialog" role="dialog" aria-modal="true" aria-labelledby="vivid-achievement-title" aria-describedby="vivid-achievement-description"><button class="vivid-achievement-close" type="button" aria-label="Close achievement moment">×</button><div class="vivid-achievement-mark" aria-hidden="true"></div><span class="vivid-achievement-eyebrow">VIVID MILESTONE UNLOCKED</span><h2 id="vivid-achievement-title"></h2><p id="vivid-achievement-description"></p><div class="vivid-spark-panel"><span class="vivid-spark-label"><span aria-hidden="true">✦</span> VIVID SPARK</span><p id="vivid-achievement-spark" aria-live="polite"></p></div><p class="vivid-achievement-extra" id="vivid-achievement-extra"></p><button class="vivid-achievement-continue" type="button">Keep exploring <span aria-hidden="true">↗</span></button></section>';
   modal.querySelector(".vivid-achievement-mark").textContent=a.icon;
@@ -110,8 +115,9 @@ async function showUnlock(a,others,library){
     if(spark&&result?.spark){
       spark.textContent=result.spark;
       modal.querySelector(".vivid-spark-panel")?.classList.add("is-personalized");
-      store.sparkHistory=[...(Array.isArray(store.sparkHistory)?store.sparkHistory:[]),{achievementId:a.id,spark:result.spark,at:Date.now()}].slice(-8);
-      try{localStorage.setItem(STORAGE_KEY,JSON.stringify(store))}catch{}
+      const latestStore=readStore();
+      latestStore.sparkHistory=[...(Array.isArray(latestStore.sparkHistory)?latestStore.sparkHistory:[]),{achievementId:a.id,spark:result.spark,at:Date.now()}].slice(-8);
+      try{localStorage.setItem(STORAGE_KEY,JSON.stringify(latestStore))}catch{}
     }
   }catch(error){console.info("Vivid Spark stayed in local fallback mode:",error?.code||error?.message||error)}
 }
@@ -148,7 +154,7 @@ function init(){
   if(initialized||typeof window==="undefined")return;initialized=true;ensureStyles();render();
   $("achievement-view-all")?.addEventListener("click",()=>{const grid=$("achievement-grid");if(!grid)return;grid.dataset.showAll=grid.dataset.showAll==="true"?"false":"true";render()});
   window.addEventListener("vivid:library-changed",()=>evaluate({notify:true}));
-  window.addEventListener("vivid:account-switched",()=>{if(modalOpen)closeModal();evaluate({notify:false})});
+  window.addEventListener("vivid:account-switched",()=>{pendingUnlocks.length=0;if(modalOpen)closeModal();evaluate({notify:false})});
   window.addEventListener("vivid:achievements-changed",render);
   window.addEventListener("storage",event=>{if(event.key===STORAGE_KEY||event.key==="vivid:library:v2")render()});
   void (async()=>{try{
