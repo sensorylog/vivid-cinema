@@ -358,6 +358,7 @@ function initAppShell() {
   initialized = true;
 
   ensureMediaLayoutStyles();
+  void import("./achievements.js").catch(error => console.warn("Vivid achievements could not initialize:", error));
   document.documentElement.dataset.vividReady = "false";
   void import("./google-tag.js").catch(() => {});
   void import("./analytics.js").catch(() => {});
