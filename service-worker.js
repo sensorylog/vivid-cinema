@@ -61,8 +61,9 @@ self.addEventListener("fetch",event=>{
  // Authentication must not depend on stale cached documents or SDK bundles.
  // Always try the network first for auth pages, auth modules and Firebase config.
  const isAuthDocument=/\/(?:login|auth|forgot-password|verify-email|auth-diagnostics|account)\.html$/.test(url.pathname);
- const isAuthRuntime=/\/scripts\/(?:auth|firebase|nav-auth|auth-diagnostics|app-shell|account|account-bootstrap|newsroom|intelligence)\.js$/.test(url.pathname)||/\/init\.json$/.test(url.pathname);
- if(isAuthDocument||isAuthRuntime){event.respondWith(networkFirst(request));return;}
+ const isAuthRuntime=/\/scripts\/(?:auth|firebase|nav-auth|auth-diagnostics|app-shell|account|account-bootstrap)\.js$/.test(url.pathname)||/\/init\.json$/.test(url.pathname);
+ const isFreshNewsRuntime=/\/scripts\/(?:newsroom|intelligence)\.js$/.test(url.pathname);
+ if(isAuthDocument||isAuthRuntime||isFreshNewsRuntime){event.respondWith(networkFirst(request));return;}
  if(request.mode==="navigate"){event.respondWith(staleWhileRevalidate(request,event,true));return;}
  const isCodeOrStyle=/\.(?:js|css)$/.test(url.pathname);
  const isHtml=/\.html$/.test(url.pathname);
