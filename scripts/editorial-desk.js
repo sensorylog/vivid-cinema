@@ -283,8 +283,10 @@ function startDiscoveryQueue() {
 
 onAuthStateChanged(auth, async user => {
   moderator=false;
+  queueUnsubscribe?.(); queueUnsubscribe=null; queueCandidates=[];
   if(sourcePanel) sourcePanel.hidden=true;
   if(editorialPanel) editorialPanel.hidden=true;
+  if(discoveryPanel) discoveryPanel.hidden=true;
   if(!user) return;
   try {
     const token=await user.getIdTokenResult(true);
@@ -292,7 +294,11 @@ onAuthStateChanged(auth, async user => {
     if(moderator) {
       if(sourcePanel) sourcePanel.hidden=false;
       if(editorialPanel) editorialPanel.hidden=false;
+      if(discoveryPanel) discoveryPanel.hidden=false;
       $("editorial-published").value=localDateTimeValue();
+      startDiscoveryQueue();
     }
   } catch(error) { console.warn("Moderator claim check failed",error); }
 });
+
+window.addEventListener("pagehide", () => queueUnsubscribe?.(), {once:true});
