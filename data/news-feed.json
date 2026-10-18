@@ -1,0 +1,1008 @@
+{
+  "generatedAt": "2026-10-18T23:41:38.473Z",
+  "source": "Google News RSS search feeds",
+  "count": 100,
+  "failedQueries": 0,
+  "articles": [
+    {
+      "id": "1rsgro6",
+      "headline": "UN Hails ‌‌‍‍⁠⁠‍⁠‌‍‍‍‍‌Nigeria’s $4.77m Budget Payment, Celebrates Nollywood, Twins’ Capital",
+      "publisher": "New National Star",
+      "publisherUrl": "https://newnationalstar.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMiugFBVV95cUxNWmRSMmRIUkFhMHF4MlU4ajNhbDlPREE0RUZ1QU0yR3Q5aVprX1lPWWRPSzdtazVLdmhnMUgwVll2NjF6RGsyTk55bHptVjBFOVlUVWx5MU0tTGN0bEpRVC1wQ01DWXZzdDJpWXN2VU1BWkdXczBBYkNzOVVMMmhiNUI4cGJ1b3RWV3c3NXJxODlnTE1XcHpjUnZQSDd4X212eFhzdmpMb3FpTGJjS0JZVXpvMGIzeC13aFE?oc=5",
+      "publishedAt": "2026-10-18T23:12:36.000Z",
+      "region": "africa",
+      "category": "film"
+    },
+    {
+      "id": "1gv5clz",
+      "headline": "Jesse Eisenberg Reveals TV Show Details as ‘The Debut’ Closes a Star-Studded London Film Festival",
+      "publisher": "The Hollywood Reporter",
+      "publisherUrl": "https://www.hollywoodreporter.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMiwAFBVV95cUxPNzhUODV6TE5wY295OEgtRWdaYTc4czUxR1hlWjU3ekJPTUxDU0VZQkptb2ZiSWFDTHF3eGdIX2diZmRlVDRXY194X29ycVh0bGdyTG1UcE9VUndiamE3VFRzQ2lBdDhrQWpvWVY2cTRPZTJMQXdWSnBaZklqNlNSczFFckNlN3ZFcU1WZ19Ta2FScG5QdW1HdHQ2OXZSMENjX2p3c2poaEFsSHFJR3RrRjNCSlNnY3B2bTYzdncycnQ?oc=5",
+      "publishedAt": "2026-10-18T22:25:07.000Z",
+      "region": "hollywood",
+      "category": "film"
+    },
+    {
+      "id": "19eug15",
+      "headline": "Tiger Shroff car firing: FWICE condemns firing incident, seeks immediate security for actor and family",
+      "publisher": "The Times of India",
+      "publisherUrl": "https://timesofindia.indiatimes.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMiogJBVV95cUxPb1NkSzZ1N0NvUGF5VWQ3SGUyaURGdnY2d0hsaVZESXBoak05SlFfWk90ZXR5X014aGFqZnkwdldiYjVnQW5udWp2Sk42MU9RVXdpZ3lDamlvelBzVjNnTGY4anBqV3NTUzZnam05REZHN2pfRF9fd0piVGhrWGJYWWoyeGJfMmFLbG02U1FoOTlMTFRrei0tYnBYcXBHTTdkUkVBVkhEU2lwTFhWQ01HYjV4WU5XYVhDNU5iYlR6dExfR3J3VkdRUmpCaC1oVlZGWG5nZUxkTlBIMkE1Tm9UVElsY0VYN044UDRxTTZGV0gzQjBFQlhFckdJV2cwUHBOQjhZUmpUbG1nWkEwTEhrOFhFTkRhM09zN285MzNGNlZOQdIBpwJBVV95cUxQTjlWVjVCcUpEeUNIbm5jcmd4VmhYbDFTZzRJNVpvQ0hZdTlqWlB5MUVpemlLcVRQd3dvZXM2WTJFdk5QcEVtVDhETE9kY21RU2hERjF5U0pyN25vNmxtVlBlajh2T3lvd3V3eXlGaGpFYWFWelBKaGZkWWNHdVZCNHZtNF9MQ0hiaUJBRVp2YjFuWjllMWczbk5SemQzUFRMajRMeTV4WlctZW5weHB6WkRlR21KbDFHVE9WUXp3SGlyWVhKdWhpR0N3bTExSEl6TGdTRnJ2VUZSZ1VlU2ozRUplMEdXOFRBZlVZWHI4TENtNnBROTBUbHdoY1FBZjVKYmR4MDM3ZF9OV1ZnOFQ2bmxHYkRQaTNRX2xzalFJeVcyR18xN3Vj?oc=5",
+      "publishedAt": "2026-10-18T22:06:00.000Z",
+      "region": "india",
+      "category": "film"
+    },
+    {
+      "id": "1ayrvkx",
+      "headline": "From Jamie Lee Curtis to Neve Campbell: How much are Hollywood’s biggest horror stars worth?",
+      "publisher": "The Times of India",
+      "publisherUrl": "https://timesofindia.indiatimes.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMilwJBVV95cUxNVmdmRVlnNTFEM2lMNThsd25CY0lsMUtUS2dETENkUUZ3QVFobGN3Nk9JbFktczh5TWt4aWRRQ2o2bGNuV3NlSERJQ3hDMEZOcWNjY2YzN1lZWEFWb0p5aGFub0QyaUs5ZmVic0psZG1VSGpERy1ieEpNRXJGSWticGNlOXdKN0dmNDdWVlpBZGZtVGp5dnVQQmpIVnFVdFVma3ZtcHhJQmpNazJmOHhRc1d4VUlmdGxxYU9rZU03U2RMejBlLW50YnZUbDBWV0NwWDZPQjN6NGhNM0psY2VUa0JKOXdSWXN4dGdDNUM4amdaYnJpQnpiSEpTMFJORkFKcEtCdXBoQ0k4NjRkaHJaUWQ1SUM2MGPSAZwCQVVfeXFMTkE2dlNFVkpnMVJDSFN6X0ZkV0c2bDEzdUgtMXZuZ2lJdXMyNy01UW90ektfeFdPQVdmeFBDMGZjcWlTUmRYbFJoNlpFU2hTdmRiSDdtN0d6T1lLMmo0aUQzRE5lVlVNMUU2SHc4SExaNjNlamUyU2tDMy00TUxxZDRYTjVoeDVCYnpNNHNkQzQzMzJWc0oyeDBqcXN0VndjZGIyT3NsYjdvOGE3cVZob0ZPY2pWYXNZT3FySVllcXJjSzZxVlZuOWp6NjZQSDJDU0QwWU80azRhOVplV25pZjUtXzluV2NocTVKNjJReDZUNC1RSTBzZXlGU256a3FvZzVzak9lcnFCOVMtZEhpRlZJTTZ1WmhoaGlvLWQ?oc=5",
+      "publishedAt": "2026-10-18T21:30:00.000Z",
+      "region": "hollywood",
+      "category": "film"
+    },
+    {
+      "id": "g2xqrk",
+      "headline": "Tracey Moore Receives 2026 Queen City Film Festival Legacy Award",
+      "publisher": "TAPinto",
+      "publisherUrl": "https://www.tapinto.net",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMi3wFBVV95cUxOc1AyVXRqM0tnckNkakZzVUpJVUxZSEJXVktqRUo3bFZJX2ZxbG5fQlhUX2RIOWYwZHE4T3lKYldBYjJRa0pmWG1iZFd0Wmlmel9DUDdrMG5TU0oxY056Qk1WS052UTE4TEd3d0tKMUNGRUF4d0UwNkhQMDRTNzU0aHRVWm1uYjRUazRvQXJKQTlXcUxFejh5MFUzME5BRkJHUXZNNW5PWVg3QTg0U08tZ2NOMF93b285LXFWU3o5d3RPdUhET1A0dk5HVXFvOHhWSWwzNXdLdFFDQmlCOFJR?oc=5",
+      "publishedAt": "2026-10-18T21:06:11.000Z",
+      "region": "global",
+      "category": "awards"
+    },
+    {
+      "id": "167zhqj",
+      "headline": "Manny’S Movie Minute: Taylor Swift Stuns Hollywood, Netflix Shake-up, Street Fighter Rules The Box Office & More!",
+      "publisher": "IMDb",
+      "publisherUrl": "https://www.imdb.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMiZ0FVX3lxTFByZmhTazc1dGhIM0R2QmFLQmJ2M0FyQkZpcDI2Zm16UmJrMUloNFpKdy1KakRQSnQxelMxT0FqU0JsbEZKbVN1Yl9RdWpYNm5CMmtHYTZJQXM3cGxYejVzanNHTXBjUkE?oc=5",
+      "publishedAt": "2026-10-18T20:47:38.000Z",
+      "region": "hollywood",
+      "category": "film"
+    },
+    {
+      "id": "lj03p7",
+      "headline": "AMAA 2026: Nigerian Films To Adaego With Love, The Herd Lead Country’s Bid for African Cinema Glory",
+      "publisher": "TG NEWS",
+      "publisherUrl": "https://tgnews.com.ng",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMiuwFBVV95cUxPOGtfcHhXLW5hTFBsYl9zNmoybzl1Q242cGFzLUxINmRWaXhHRDI4UEpBalQ5RUV0QjVocVowbGpmT283YUtEakN3WUxoSGprQkJkQklLMVNCeXFoeHpvYWJNT0wxd1RFc3lmMWxEVXNDMzVLbTN5ZGpyWk55OEpMSUZzeWVWU3ZvNFdJYWhiUkx5N2psYnZLUGhzdE8tTHZETlA5bFZBYnNtaGpPZlFyc0ctS2p5QlY4dFBj?oc=5",
+      "publishedAt": "2026-10-18T20:39:38.000Z",
+      "region": "africa",
+      "category": "film"
+    },
+    {
+      "id": "1tpjqi8",
+      "headline": "Top 7 Hollywood movies that explore Halloween lore: From 'Halloween' to 'Sleepy Hollow'",
+      "publisher": "The Times of India",
+      "publisherUrl": "https://timesofindia.indiatimes.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMijgJBVV95cUxPWjdnZGlhQWZUM2JhZXl2YjhWMzhRTnJISEpuZzFJLUY2Y3dWWkFSSGdwTVVhbHlaU2FpV0x2R3pRZUY2dk1NRk96SHBLdmRsTmlfZnRzNEJsbXEtNURISE9KQkszdHVrYWlrcFJReVlLUDhRV3kyaXQ4cTN1NmV5Q3JtdTI2MjVLUmRJOGtsR2x4N0FjYzVObEo1UlZJaDUxUXVtaHdod2VOeHN4eHZyRmYtSEV4eWhrUTNSWVRsTmFyX1E1M0xkNWluSjFyRXVpOWJ3Z3FOcVM4aUFTQURNWTRrcWtLNXhhMEdfV085Vi01b1pCVlhpTm8wcFdFcUZXT0FfSHdfc2JialoyeGfSAZMCQVVfeXFMUDBjSzBWbWJncmJKeDNvN1ZoY0VST3NYc0FfT1RHZUZydGxhX0NWQlRHVC1KS2gtQlVnWkEyWlltSjV0SFhBZG9pRmpaMWJqMEptV050TmZmSEpUVGlzOGg0QV9jT3d6YVVTSFdzNnZ4c0lrVmNZUXFrQWJNN29pd2VGQlZkb2wtejAtUGgxclU1S2UxVXF6NVQyZkg0TW04UEVyTDRJMVNRLUlKaXpfbnB6RjJFaWFUR3FyajFjekoxa2dZM0REQjdlVjJ6YUJiMUV4YkxBeEhhcGo5NVRJcndhRWFxUGYzSHN3Qkdkc0lJUElRTzhBOXdzd3hmUDVnTmFhMDdOajM3MWdIVEtqemcwNlE?oc=5",
+      "publishedAt": "2026-10-18T20:30:00.000Z",
+      "region": "hollywood",
+      "category": "film"
+    },
+    {
+      "id": "8wppf0",
+      "headline": "Streaming’s Biggest Show Returns…and a Buzzy Genre Struggles",
+      "publisher": "The Entertainment Strategy Guy | Substack",
+      "publisherUrl": "https://entertainment.substack.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMie0FVX3lxTE5mYWpVS2pnUGcwbVlEM0gwSGgtY2Naa1VKMUd6OURINFkyOFlDWktiUW5NYXRoLXAtMUFNYjNRa0NfNXkyVS1yZU9tTk1fcWRuR0NXZThKck15V1ltSmg4cFc3a3duUHFfc3J0WEo2clFMc1ZHcTBZRVQ5UQ?oc=5",
+      "publishedAt": "2026-10-18T19:59:24.000Z",
+      "region": "hollywood",
+      "category": "streaming"
+    },
+    {
+      "id": "1500myf",
+      "headline": "‘Today it is Tiger Shroff. Who is next?’ AICWA questions Mumbai’s law and order after firing incidents in",
+      "publisher": "The Times of India",
+      "publisherUrl": "https://timesofindia.indiatimes.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMiiANBVV95cUxOa2lZM3BIN3U2enhNeUdaS1dRX2lMUl8wMHp0NEdoOHh0Z0VYQUYwQU9rRWF5VDVTZDVMSl90V05IMlBDU0U3WTh0N3dLcjEtbFotaUR2VFJIeWIwTVpVYVpLVHRhb2ZVd3NaTVQ2bk9MWUVWeW1USmVucnlFbk9zUWtTMS1vaFg0SVFrTDRkVjBBUG4xVkxra2hqUUZVVS1CZzU1c2U3X2xWM2VrNzM5SmRkMjdvS3hVNDNaRV9pcndGRy1BN2Z6QWxhbTM0VmlqblZ0RE5qS2Y5eHhwMVl4UERuSHJpVUJMMV9yRGZMM2t0OTNCbEZyQm1LNGRMOGo4Y1ZNN3JwLUZhMUpzNzhoRXR4MFlBcTBrSWotM21QbFh3ZkdNQTlmdFVaVVIta0xPajFwMGtjUUZJQmxNZ2J3SlFodkpDNHo2b0xEUm90WWRRMWJ0a3Ezc2NKclE5SzFKdFBjakJIQlpBbndmNnJ2aElTSW5zd3dGb0t6cEJTa2d1M0hrNlY5ZdIBjgNBVV95cUxNdlVyOE1EWU1tOGhnNVMzeDVhMUFQclJjYjdVZndVbGppb1JkdzBKU1AybUE2X1NlQjc0Sm5ReHZqTlI5dFV2MTFvWXloS2U1T3UzWDQ5LTA3QlF1MVplZUhiT0NZTGF0bmRXQTg5WkNWU2MycmJ0XzFfQV9WcE9FT2x6dkNsQ01GSlMyTXU5aEVuNjhvdTR1bHpiSTIzUkNoSldxTTVYVzRvUGcteDVUb0RDSHNDeVZMZ3I1enhCWHJkcWxSalp6MlRaaTZNbl96ZmhnOHpnSUpzM2RhbDc4YXN0NU9YR0JKX3J0bmFVYmtkTWVhNGd4QnMwZFR2OXltbU0wSmlrcDJiMXpnNzE0N0VDUTdPdXRwZGdySU03dUJfYkszTW55Qm9mY2wtYURubmpFT0tLQWRSOENfSl9YdUhMZ29sNE96MXZBdnotNHVpd3I0ZnpJTWZESDl2Nmx5M3NacVdLOUlQMkpJY2x6cGl0TWFEdG84UHE0Z0xQdlhNNmlKV21CM2xVRkx3Zw?oc=5",
+      "publishedAt": "2026-10-18T19:53:00.000Z",
+      "region": "india",
+      "category": "film"
+    },
+    {
+      "id": "1iuicki",
+      "headline": "Woodstock Film Fest Names Jessica Edwards Executive Director",
+      "publisher": "Deadline",
+      "publisherUrl": "https://deadline.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMioAFBVV95cUxQLTVhMDh4V2RDWF9wdzJsT1dxX25Wc19jY3k4MzV0VmFHNzBzemtSdTRGOVFIMTQyU04yb3pwYTExS1lOei1Nb0ZtZTNlclNrUl9RMTNOMW9NS3ZhTk9wWXJ3TEppaWFNWGQ0bHlHM0pfZ2lfSlZBaml0S3FOanYyNS1FeEg0ckZPTG9pYndtSEs4WGloOGlic1pZZFhDck1j?oc=5",
+      "publishedAt": "2026-10-18T18:50:00.000Z",
+      "region": "global",
+      "category": "awards"
+    },
+    {
+      "id": "szscl4",
+      "headline": "Missing Nigerian TikToker Sarah Lizzy reportedly found dead days after visiting a man she met online",
+      "publisher": "Intel Region",
+      "publisherUrl": "https://www.intelregion.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMiowFBVV95cUxOTkVVaEVqX0RlRVlKRmc2bHN2VFhaNlpaZmpUZWYxdlp2Y1otSTJfS2g4WWJ0cXVoTEhnQkp6NUZSYm9CZlhZMm1HYWxMRGp1WnBUek5QenNBUWlxWGphck5TRzVoRzU3SDFMUkQxNy1RSzYxVTIxazMtNnp0YTAzZFIydjRYbmZpNzZHa1pldGtUS0toaF81QXlQOFE5dHJiLWxJ?oc=5",
+      "publishedAt": "2026-10-18T17:59:41.000Z",
+      "region": "africa",
+      "category": "film"
+    },
+    {
+      "id": "kkxu73",
+      "headline": "James Cameron Lauds Marvel, As Avengers: Endgame Beats Avatar To Become Highest-Grossing Film Again",
+      "publisher": "ABP Live English",
+      "publisherUrl": "https://news.abplive.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMi5gFBVV95cUxQZ3NRSHZyVDZWbFp0azZieGwxWGVnOWtaak1NZW1oUXFBVXEycGlOWFJlY0YyaDZXZEQwTVNURWFuZjNoVEpESDl5SXlDc09CaG1xYm5CTHlDOF8xWFg1dUVselRhU241ZF80MmpoOGVxSzMwN2M3Y0M3Rk1aeHNDU2FaREkzTUhBVEVFU1ZTRVlrdjJyR3Y2NVNBc0NxeFlYUU9WTG9iX2FSZWt4WVpzaEpPMHlSeTR5QjJFa0tZQUROM3hteFg0Ty1EQmVZd3JNam9tbnhGSFJwSExPQ2Vta21ua21yd9IB6wFBVV95cUxNMU5sVHFlcUFWWEl3WV9aOXVhVnB5U0dadXFpa2RNamd0RXNHU0xHRTVEUXFLLWFMb1pEOC1tVDVrOHhxQTRaeWJpcHpBRjNrRUgwSlNwVVFDamhmem90SGE2VDBRSHZfR3dTcVVNeW44aHRxSFJ3ZUIxOGFyRTdSdmdtR19mVHk4VWhCTm5XdFZvNlcxV0pJa3hmNHpxcEQtWVRxeENEbkdXekVTQWRrMkFSUUlLQWxfdF9UVkNfcTlyalNiOHY2NDY3T0diVG5zbjJxdW94YVFyMURLYXJXTjktZldWTnZQREtR?oc=5",
+      "publishedAt": "2026-10-18T17:39:18.000Z",
+      "region": "global",
+      "category": "box-office"
+    },
+    {
+      "id": "qiau3j",
+      "headline": "‘Street Fighter’ Opens at No. 1 at Box Office With $51 Million Worldwide",
+      "publisher": "Just Jared",
+      "publisherUrl": "https://www.justjared.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMijAFBVV95cUxNNmh6VzZVWS1yQ0RTWHRneG5ueWVXQ0dRQVN3OWh6OFJacXB5SWdHck1GbVNWREtCNGQ0SHNxaHpWR0ZsM2xyNi1PVUFZM25SaWFWMm05T0V0YW5qSzgyNV9WZlZNcW5wX3RjaWFMT3U3eW9hU01VWFAxbk5qU21ZYjMwcHRjQ0xxeW4yUA?oc=5",
+      "publishedAt": "2026-10-18T16:01:19.000Z",
+      "region": "global",
+      "category": "box-office"
+    },
+    {
+      "id": "13cvjt3",
+      "headline": "Netizens react to Rashmika Mandanna asking Vijay Deverakonda to marry 100 times | Koffee With Karan 9 - Mid-Day",
+      "publisher": "Mid-Day",
+      "publisherUrl": "https://www.mid-day.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMi8gFBVV95cUxOUTI4RHNlc20tcjRxaHFpb21DeVRUa0dGRFVHUUxLblc1dlp5SWdjdW5WaWV6d2pyX2xWVE13eTR2YUFOaG5hWGY0MVo5SlVnbXc2bTVlMnlBd3NxaWJPMi1OaEVnMW5tME56Y2tSNjM4U29ub1pSWHlYQnVRT1hHemZZalZISDZPb3h5VlEzd2JOMlZKZ1FRRFRTX3hpejVKODA0d0s0dTJnaUt0S1hyRUpZRHlMYkoycVNBRVNaWXVXMktLbk41bmZjZEZwX1o2VFFCTkRjdDV1anl5ZTBkRHZoTTlTQ3FFRUIwN21sQ3R6UdIB8gFBVV95cUxOUTI4RHNlc20tcjRxaHFpb21DeVRUa0dGRFVHUUxLblc1dlp5SWdjdW5WaWV6d2pyX2xWVE13eTR2YUFOaG5hWGY0MVo5SlVnbXc2bTVlMnlBd3NxaWJPMi1OaEVnMW5tME56Y2tSNjM4U29ub1pSWHlYQnVRT1hHemZZalZISDZPb3h5VlEzd2JOMlZKZ1FRRFRTX3hpejVKODA0d0s0dTJnaUt0S1hyRUpZRHlMYkoycVNBRVNaWXVXMktLbk41bmZjZEZwX1o2VFFCTkRjdDV1anl5ZTBkRHZoTTlTQ3FFRUIwN21sQ3R6UQ?oc=5",
+      "publishedAt": "2026-10-18T15:51:00.000Z",
+      "region": "india",
+      "category": "film"
+    },
+    {
+      "id": "1vkxgpj",
+      "headline": "AFRIFF at 15: Nigeria pledges policy reforms to drive African cinema",
+      "publisher": "Businessday NG",
+      "publisherUrl": "https://businessday.ng",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMirAFBVV95cUxQTnpBM1VPYlk5SG9IaXAxRFVNX3pXTnllUGE4UWdJUE9BSFRTcFlSaXpiSjJxd3lsX1V2VUNrN0dWMDZ3c0dYTGF2QWpnOVFZME1WSVdDUWJuTVRwdm5mTDR6TEJUZnRycGNVN0JaX1ZQU1ZnTTJzVmx5Z2hMdElVZ0c5TVpqS096SVFBVVZfWGpyc19MNWlOckVjd1JzT080TFBELUh5dGl3QlRP0gGsAUFVX3lxTFBOekEzVU9iWTlIb0hpcDFEVU1feldOeWVQYThRZ0lQT0FIVFNwWVJpemJKMnF3eWxfVXZVQ2s3R1YwNndzR1hMYXZBamc5UVkwTVZJV0NRYm5NVHB2bmZMNHpMQlRmdHJwY1U3QlpfVlBTVmdNMnNWbHlnaEx0SVVnRzlNWmpLT3pJUUFVVl9YanJzX0w1aU5yRWN3UnNPTzRMUEQtSHl0aXdCVE8?oc=5",
+      "publishedAt": "2026-10-18T14:44:31.000Z",
+      "region": "africa",
+      "category": "film"
+    },
+    {
+      "id": "1t9zt0p",
+      "headline": "MOVIE REVIEW: Agbara Nla remake casts old spell on new generation",
+      "publisher": "Premium Times Nigeria",
+      "publisherUrl": "https://www.premiumtimesng.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMiywFBVV95cUxNR0JKclZ1VG9WWnp0SUYwYVFVUmFMdTN2aEl6d3pRZnVoS0F5SFNaTG5HNVlEVHBiZnN0bDhSWURaX3h3OTZrX1JzN1J0UWx3c0xjR1NvNE5JdFlpLTRKZTJGNVdZTk1QRVNuNWNBZGdLQnNwUWZpeEM0dXI3NDJDQjZlakR4XzdMUGgxRUxYUGtObG16V0ZiY0E3dVJpVFhKcnVqWmM3T1NfRUJKYXF2QXh5Mk4tbU1qbVhqdHZOZ0FsbnFYZEJDNXlQcw?oc=5",
+      "publishedAt": "2026-10-18T13:54:17.000Z",
+      "region": "africa",
+      "category": "film"
+    },
+    {
+      "id": "1b78p6h",
+      "headline": "Amina Khalil to Participate in Ramadan 2027 Drama Marathon",
+      "publisher": "Sada Elbalad English",
+      "publisherUrl": "https://see.news",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMigAFBVV95cUxOamV6WTlOTDl6dy1tWGFfSUw2T01sTDNqbTB1NloyeUo5M0U0UWFpTE5uLU5pd3dwdkxFbUJXai1TUy0tZGhYbmhoV1Bhbzk0MWlCbXlmUHd2d1RMTDV6TGhITGNsMW95SHN3ZzBqWkIwUkd1TVZsaFdiRFd1RGwweg?oc=5",
+      "publishedAt": "2026-10-18T13:22:45.000Z",
+      "region": "asia",
+      "category": "television"
+    },
+    {
+      "id": "kgovym",
+      "headline": "BoI Targeting 2 Million On Board GEEP Programme, Says Pitan",
+      "publisher": "New Telegraph",
+      "publisherUrl": "https://newtelegraphng.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMijwFBVV95cUxNWnBHVUJvUHBfNnluS3hXbGtWZTFrZWxXdnFtNGpFM2hXOFMtR2U1ZHhxNnpUQmVFOTJNZ1NjZU9VdndDQkFuNWwzMmp1Vi1pVV81Q2NrQkpzZ1A0VUJBOFRVWFRMZlRxTkl5RkRUeWRkWGs2V0prSWdGenVRZkRXN2h3SlFqSDBBZjVxZWdJcw?oc=5",
+      "publishedAt": "2026-10-18T13:02:19.000Z",
+      "region": "africa",
+      "category": "film"
+    },
+    {
+      "id": "2eckqg",
+      "headline": "BOI NollyFund: How Nigerian Filmmakers Can Access ₦50 Million",
+      "publisher": "within nigeria",
+      "publisherUrl": "https://www.withinnigeria.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMitwFBVV95cUxPeE80NFluYXB4a2RpNi14NWNVcWNGaVZHNmRSTmtKb0lHcUVHUVV4bVNWaFlrU3VGRlFqRGtSaGFqTGJzSTdTOUtGZi0yS0VLWnR4ZUcyV0tiQ0Jsd2JHVVpLOFp1ZnFwWmpZWGpPb3lQUENYY1FRaVpBVExFRHZtUnJGZENSZzY3OUhkTi1KMFJ0RkVwX0dpOUZ2RWpzSEFTLU9nMDFWb2JCeEVtd3AyQk1QWEJFd1HSAbcBQVVfeXFMT3hPNDRZbmFweGtkaTYteDVjVXFjRmlWRzZkUk5rSm9JR3FFR1FVeG1TVmhZa1N1RkZRakRrUmhhakxic0k3UzlLRmYtMktFS1p0eGVHMldLYkNCbHdiR1VaSzhadWZxcFpqWVhqT295UFBDWGNRUWlaQVRMRUR2bVJyRmRDUmc2NzlIZE4tSjBSdEZFcF9HaTlGdkVqc0hBUy1PZzAxVm9iQnhFbXdwMkJNUFhCRXdR?oc=5",
+      "publishedAt": "2026-10-18T12:45:00.000Z",
+      "region": "africa",
+      "category": "film"
+    },
+    {
+      "id": "zthl44",
+      "headline": "Kola Olaiya joins Other Yoruba Actors in questioning Pete Edochie’s place in Nigerian Acting History – Full Details",
+      "publisher": "within nigeria",
+      "publisherUrl": "https://www.withinnigeria.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMi6gFBVV95cUxOQkNKcVZaYUc2bG1sZTNNQmxrQWFaYnctWjlKVUFCdlJmamdGakM2VkZJWW1sRzltOWExTFJEYmhRMzhqRFJCUG5NTk1YVXVZb1Q1Z2MtdG1CRVNUbUdLeUhlQ1ZVYzRLQnBER0JNdXgtRV8xQkdvcFk3SVRaeldWMnV4TnJjMXVLc29DcmhWMWFaZVB5Tl8wTEZkWVp5d3pjQ01nUVhhbThFa1pTVFFQWTlFczEzN2txMllhbHpVUjdUazdaaUZEQVhfNG9WWTNaQmhCd3FXSEZJMVFRWXI5QkVQdWVLUDRYSHfSAfIBQVVfeXFMUElidUw3MTlOSmdLZVNGSDFLRVFSOVZoWWVCTFVoeWNEbjFyNndCNTZZUEwtREJIVk53eFJ4bTFVNUNhVVE5Q0ZNUmFRb25lOWE3M0w0UUlSX0RiSDZhMVhPNm1ONy12Z1NPVUZiQ1B4OGc3N1ZyY1ZTaGJfcFQ4aUdXZXRvY0pVSXQyQXN5bXZFdU1iOXg5V2RPUE16OFVEU3duVkJaNVEwTkw1TXhoMkJtRWtFRDZIcUtRRDZMb0hjNDFaang5cjB4Umd0QTJlSkhsSm9xTE1aRXAwVlBtRExnRjdNMUJOVF9NWWp1Tmo1M0E?oc=5",
+      "publishedAt": "2026-10-18T12:37:18.000Z",
+      "region": "africa",
+      "category": "film"
+    },
+    {
+      "id": "8a2iyt",
+      "headline": "Jailer 2 box office day 3: Rajinikanth film crosses Rs 300 crore worldwide",
+      "publisher": "Storyboard18",
+      "publisherUrl": "https://www.storyboard18.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMi2AFBVV95cUxOdE1WdzY2bFdCWUFCRzBZdFFYMXprYlpObzFUZjgzT01iaG51NlRJTHhUYnpSWk9EQ09sYUIwQkhJT0xGX01CajB1aGZWYTVLVnZKUS04Ykt5a1pNeTU2NjRFRlpjUTlYM1ZsejA4WVZILWlhd2xSZnlXNzJ4OHlNbDExNDdSY1BRaGU5ektQTzU2STQzWk5fdS1PZHVYZzAyWFdxcVdqeU1Rbndad1JEUWNmbEYzc0RPcWhvbUlqbTZ5bnNLeGg5Z3gyR2hVTjVVZTBhM1lpNkPSAdgBQVVfeXFMTnRNVnc2NmxXQllBQkcwWXRRWDF6a2JaTm8xVGY4M09NYmhudTZUSUx4VGJ6UlpPRENPbGFCMEJISU9MRl9NQmowdWhmVmE1S1Z2SlEtOGJLeWtaTXk1NjY0RUZaY1E5WDNWbHowOFlWSC1pYXdsUmZ5VzcyeDh5TWwxMTQ3UmNQUWhlOXpLUE81Nkk0M1pOX3UtT2R1WGcwMlhXcXFXanlNUW53WndSRFFjZmxGM3NET3Fob21Jam02eW5zS3hoOWd4MkdoVU41VWUwYTNZaTZD?oc=5",
+      "publishedAt": "2026-10-18T12:35:02.000Z",
+      "region": "global",
+      "category": "box-office"
+    },
+    {
+      "id": "1bqclpr",
+      "headline": "Carrie Wong admits her initial impression of Lee Joon-gi changed after working on new drama together",
+      "publisher": "AsiaOne.com",
+      "publisherUrl": "https://www.asiaone.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMimwFBVV95cUxNdGNUbGxabDM5dmFUaWd3TXI3ZktZTHdfMHd6dTN5WS1ocVFsNHRBd2ZIQTRySHdEY1NrUWx4c29ZWG0xRFA2VGJyS213aGIwZjNMcUhrc1EzMDEyUXgwMjVnQ3AxRUNYRkR3b0tWazcybkJNSFlUTE1hZ3dkY1I0bjhNdERWNTlrS24wVDRycUc1YTZoVi1tb1QtQQ?oc=5",
+      "publishedAt": "2026-10-18T12:15:00.000Z",
+      "region": "asia",
+      "category": "television"
+    },
+    {
+      "id": "1t70ms4",
+      "headline": "Jailer 2 Worldwide Box Office: Takes Only 72 Hours To Deliver 4th Highest Grossing Film Of Rajinikanth's Career!",
+      "publisher": "Koimoi",
+      "publisherUrl": "https://www.koimoi.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMi3AFBVV95cUxPUlRYSWZwYWtXX2Z2ZE9BVGJaQlBheV9mU1gzSFE1MktVRVlRUnhDNHRyS2xTQjJSdXpUQ2lnX1Vkd05Nc2gtdFNfRDNDTGdUV2Q4dVZmanZxTFQwd2hSTTl4Wmp2dlpNZmJNQ0xLeXJnMU0yN2hib1EzNkxVUnNRQi0waTlMLXAtNVlpamczN1Z0RkRLYXRwdkp4Wmx2cjI4X3Y1aEtpdGFpd091S3lFc21BeXVrR1B6V1FOREEzeFhZTlhBZjlZdlZBeEJuRnY0TUdmaVdyeDNZRG1E?oc=5",
+      "publishedAt": "2026-10-18T12:06:56.000Z",
+      "region": "global",
+      "category": "box-office"
+    },
+    {
+      "id": "w00rhh",
+      "headline": "\"Sad loss\": Tears as major tragedy hits popular GH content creator Small Pin",
+      "publisher": "Yen News",
+      "publisherUrl": "https://yen.com.gh",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMi1AFBVV95cUxNTEM1UkVDNU82MXFWUUZkdmlRelM3eU1RT0dwV2N3VmdabDJ6SEpIUjVXbC1QeXc1NFFLZFJRcnNUZktLZ2ZrT0JmMDA0WnA2UVB1TGJpcFdIUm1Bc2Y4NURpMFRHbWZ1YWJIMGE0elVZUVNCclhMZkdOcXZLUEVQNkUwdUlfNTBEcGlVdXpvRV9Ncl9yWHRZZkduY3BPdWswSUpuQ2FkbVlOSjdBaVhDNGs0OVZUdXNkaDZ2MnFRcW1hMm0zTjNwRnpxanN2WGFNWHkzcw?oc=5",
+      "publishedAt": "2026-10-18T11:55:40.000Z",
+      "region": "africa",
+      "category": "celebrity"
+    },
+    {
+      "id": "1xqytga",
+      "headline": "'Agbara Nla: The Return' Becomes Highest-Grossing Nollywood Title Ever For October Release",
+      "publisher": "Modern Ghana",
+      "publisherUrl": "https://www.modernghana.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMimgFBVV95cUxOM2ZaV3lmWVpaTnZZLVBkdDRYdmZqRlNFM2l4UmtfX2ZUaHRnTlRDWi00cHB4X0p5SGFsclYteklfRVVOVW43S1NVNFpHN1BTd2NvNmY5TDk1ekcwSG9Nb1VhMno5M2xpVWR1Q1h5eTB6bm1sNl9qN3hpb2Q2MFhjUFkzbVZ2d2hfQ1VlOWVZOHRnaE0zRlNwSG130gGaAUFVX3lxTE4zZlpXeWZZWlpOdlktUGR0NFh2ZmpGU0UzaXhSa19fZlRodGdOVENaLTRwcHhfSnlIYWxyVi16SV9FVU5VbjdLU1U0Wkc3UFN3Y282ZjlMOTV6RzBIb01vVWEyejkzbGlVZHVDWHl5MHpubWw2X2o3eGlvZDYwWGNQWTNtVnZ3aF9DVWU5ZVk4dGdoTTNGU3BIbXc?oc=5",
+      "publishedAt": "2026-10-18T11:51:34.000Z",
+      "region": "africa",
+      "category": "film"
+    },
+    {
+      "id": "8x9rn8",
+      "headline": "October 2026 OTT releases: From The Diplomat season 4 to Lupin season 4; what to watch on Netflix, Prime V",
+      "publisher": "The Economic Times",
+      "publisherUrl": "https://m.economictimes.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMisAJBVV95cUxPYkNUQWVqcTlKdm1sUDI3LVd6OXRnVGRFTkF4bzhmX05POXhXVHBpOEpOelM5dFdKeV9paG9UdFZ1V3dtb3R0Q1VuTDl1U1RnbzYtdlJqZF9lQTQtNXZxNl9hRzItUmxsM295NE4ycnRBVm95d3hZWlRNSjhySVlIaEhGamhnTkpRYjZ5b1EzNHBWYV80YTJxLXZfb0RvNmZQSWE3RmFsTUxkRXFyd1hOVm9IQk1zcm5PUWEzNkNHcVIwRFhnTVJjYldteDVaWlBnb3ZOLXRNSVg1TXotdFpnc2ZwdTVyaXBiNGFmS1IwTUsza20wNFU0SkxqZXpET2JZTTY2UEIydnpMQlloR0V5eEtDYjFuZkJxXzZET0otb056RDlSQVR6eVZkdDkyaHZG0gGwAkFVX3lxTE9iQ1RBZWpxOUp2bWxQMjctV3o5dGdUZEVOQXhvOGZfTk85eFdUcGk4Sk56Uzl0V0p5X2lob1R0VnVXd21vdHRDVW5MOXVTVGdvNi12UmpkX2VBNC01dnE2X2FHMi1SbGwzb3k0TjJydEFWb3l3eFlaVE1KOHJJWUhoSEZqaGdOSlFiNnlvUTM0cFZhXzRhMnEtdl9vRG82ZlBJYTdGYWxNTGRFcXJ3WE5Wb0hCTXNybk9RYTM2Q0dxUjBEWGdNUmNiV214NVpaUGdvdk4tdE1JWDVNei10WmdzZnB1NXJpcGI0YWZLUjBNSzNrbTA0VTRKTGplekRPYllNNjZQQjJ2ekxCWWhHRXl4S0NiMW5mQnFfNkRPSi1vTnpEOVJBVHp5VmR0OTJodkY?oc=5",
+      "publishedAt": "2026-10-18T11:08:00.000Z",
+      "region": "hollywood",
+      "category": "streaming"
+    },
+    {
+      "id": "19v5erq",
+      "headline": "Eve Esin at 45: From Idemili to Hello Trouble, 5 movies that showcase the Nollywood actress’s talent",
+      "publisher": "within nigeria",
+      "publisherUrl": "https://www.withinnigeria.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMi3gFBVV95cUxNSC1aY3g3U3FHc251UFlJNFlURFZxN2VCQ1l2dmVWckJRMm51ZTRNN1MtSkZzNm5WdUg2RW1WZnJnRklTekxzSDRZZ1JsOTBxTTJhZ2J4V2tCNU9MR1FZaEJJcjBvdDczaXk3Q2RuWEpyN1dZazdLampXRDR0Z2wyWENacHdGM3U2QzZENm5Ub2lfZkJfSW5HN0Z0QzhjUW5KenJqeElVSVVyYWtVdERiVWo0ZUNYQXd4OW1VWHpRTk1HS1VUUFNCQ1IwTFMtNEVoWnd0dVU5TnhoY1ZMWVHSAd4BQVVfeXFMTUgtWmN4N1NxR3NudVBZSTRZVERWcTdlQkNZdnZlVnJCUTJudWU0TTdTLUpGczZuVnVINkVtVmZyZ0ZJU3pMc0g0WWdSbDkwcU0yYWdieFdrQjVPTEdRWWhCSXIwb3Q3M2l5N0NkblhKcjdXWWs3S2pqV0Q0dGdsMlhDWnB3RjN1NkM2RDZuVG9pX2ZCX0luRzdGdEM4Y1FuSnpyanhJVUlVcmFrVXREYlVqNGVDWEF3eDltVVh6UU5NR0tVVFBTQkNSMExTLTRFaFp3dHVVOU54aGNWTFlR?oc=5",
+      "publishedAt": "2026-10-18T11:00:06.000Z",
+      "region": "africa",
+      "category": "film"
+    },
+    {
+      "id": "wb1m3x",
+      "headline": "Ranbir Kapoor’s ‘Ramayana’ to hold Diwali-themed red carpet world premiere at Los Angeles’ Academy Museum",
+      "publisher": "The Times of India",
+      "publisherUrl": "https://timesofindia.indiatimes.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMimgNBVV95cUxNSWFvVGNwZTVlVGxxNC1CQ2szNFkwNExaNFdqNXlMZ0F1RlNINnVHaDdrSzhhYUQta3dWekE3My1FbnRkWGMzczZZcTNwM245WFV2RkozTElRUkhjRkdtNk82ZkhTbUEtTU9Ua1QxR0ZpbXJwZHJVY1Z5SzJPZURiSnNGTXc5Zjk0RDNXOURNc3p2andLUXRaQkRUMVVkSWE2X1FkRFczdGNsbnBKQlY5c2VPSVJyR2JGbHc3X2JLSzEwR185YjJSZ19sZkV0TWxxazhFUkZjT3NJbWc2SENWUHlZN2VWMXhaTTFWVWdWZ2F5TjNudXpMenlBNEY1eW5naTg2eXkzV2x5dHJZWDMwVzE4QzZWRzlFN2xibUlIOFdUR0ZxMzFCMms4eVdyWUVkSlpEaU53b3dmT2ZTT1l2NGpUZDRmVENBY1lwN1pSMG5CbW1DTjdCMklSbFViaVB1T25qRTB0RWRzQmF1OElnNnF4NkhQNm8zMEt3QS1PZmJVS09nOVV1ZFRSNDZ5V3dWVENkOU12cHp1UdIBnwNBVV95cUxNZm9PbklDX2lGdTRoQ2JxaHJrd3oxNl9Lb3ZGUVhqdjR6b25RdkJURnhfbVRMZVAwQ0VvTlg0Z2RIVm5LN1dneUdCVG83ZFk2WnlkMGhfNU5BbHNpbXlzdTBIampLWWFEc05sNXdjaTZrR3NKdUhBSlVEZnN0VFd2b29KcDJfQ1FqSXFfM3RyQXVzb21hNG1KNmpDSDZGY0F4SmlIbENJc250MjllYS15TXhabGMxLTlFOE1tT2EzS2NteHlpSk5MLWJJSC1tY0tjSldvWG83VHRPV2c5ZmRKeVhjbGtNY1ppcjdfd1ZTYmpaSXVvZ045Y2ViTkxwd2tQRmE4bDhsWE16elRWWnhEZFdqZ0puZmtORzlCYnFGVzdVbEt6NEFuLUNNTFIweEczbURnWE9UNTU1emozSVBwOG83V1dsaFF5VGpRU1hqYkc5SHY4eGo1U2hkTllCcWpyY3o4ZXY0YzNTQXVsTEpXNlpIRXZnRUxNT2xCM21hZ204MXhDQWVZdXktNC1FeXpRcXMyXzRubEpsd1g5Z1pv?oc=5",
+      "publishedAt": "2026-10-18T10:56:00.000Z",
+      "region": "global",
+      "category": "box-office"
+    },
+    {
+      "id": "btwhde",
+      "headline": "Fact check on Johnny Lever’s death rumours: Viral death hoax targeting veteran comedian debunked as daughter Jamie Lever says, ‘Don’t want to pay any attention to this’",
+      "publisher": "The Times of India",
+      "publisherUrl": "https://timesofindia.indiatimes.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMi9gJBVV95cUxNTE5GQmNWNU9qc3ZPRzdVQnRzS3ZnUlhieWphczFrVVNSVnN1ZXZ1aHd0NnVUZGJUbFRBVktHR2xDVWs1S3hSbHA0NlR0Uld4V2J6aEpESDlUcDgyR043SEFPY0U2T00tNkhhQXE0VVdQanAtaEJHOC1Ca09kVmJydnNaNWlpdWdaNFR1bndFbTFlREZIcGIyNmxweFVJWnZ3TFB5UGtCUkhKRmp4ZUJhUWg5Wkp3TnhXTFR1M2ducVZ0MjQ3SE5LZjdWdnBGMHpkSE9qc0VkWVBQX29uR29vbU1GZEg1MV9rYk9lT21vb2s4S0pNYzJaX1FVZ1pXWi00aXJWODdaaURfZHF5Y05oemJfb3RuMWItRktfU2VvamlQbTNrLU5xRkV2LVpZVDc4NHRBODRNcmMtalZJUkdHOXlpZmtmMDJMRHo3RktwRjVmYXJZVk93M3B4eWxRWEgwdVkwcEpaejFLbDJZOEtlS0dHYl9kUQ?oc=5",
+      "publishedAt": "2026-10-18T10:27:00.000Z",
+      "region": "india",
+      "category": "film"
+    },
+    {
+      "id": "avj665",
+      "headline": "‘Nothing beats seeing the audience celebrate it’: Nelson Dilipkumar thanks fans as Rajinikanth starrer ‘J",
+      "publisher": "The Times of India",
+      "publisherUrl": "https://timesofindia.indiatimes.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMi5gJBVV95cUxQX2k2MWhwLTBjeEdpMm5OS3NXR3Job2twNGl4bHpxY0FPTHByNndsLURCT0c2QVo0OEk3WC1STFNzZnRMdVkwbkRlVnNpWmVZSEdpY2tRTVM2VjhvOWxIbTNlUTI1Sm1wVGVyZFI5SkVSQkJrLWpaZ1FNTXVGWEgyVXpDU1NRUzg4OXE1ZnZBTzNGWVQyVmlIVWFRYlV1Q0llamJHdGFHZWEwam1VRFY2M1pWSlJBc1BHam9qdkNJNFJQdE02WlFLalNSQjJKcmM5R0NBS2NiR1NYZEVDcnd1RF85bDVQS2JybGhKOTRxcHJUQlNlTThRcVZtZFJ5TkFrNVRjM2hyXzlBX1psT3BTWElXZm1pS0JHX1hPNHdOZmVXX1I0SzFqZUhEaDJIZWNqV3NIV29lQTVIRUl0UTduQXRLLW1Cb1FZbW5ueEpDaUpsdkx1V3daMDdmYzFraWVjMGEycnh30gHrAkFVX3lxTE1uUExOai1EdURYb0tmb2Z3LXJVX1JGNk1KS3JaR1RmV3FIdk5GY3g5bzAwY2dLbnNfY1RJNUMxY0xyTWt4R2wwMXJicVJ2V1NXN09ZMnBKVm1Obmt0aUthWTBjelFRcEF3OHZiSlNfZUY5SDk1eERrME4zVzRjcFhHV3hfTldMR2FmZXVuSF9VM0ZZbXhfeUNDdFpIZ09mcC01aUxNWWczVlhHM2s2QnNkSzNJeGVfZWQ5dk9nVnIwNVZTdFBiSk00dkxuTkFDM0tMcXhaTWR4TWZleTVHUDZDZ2dxbElTeGRZOGdQaXI0N3pkaDZPdHBsRXRpMjhyaU5VMG5HM2N0dTJCZG5vLTV0RWVSYmpQSlEtME9ieW1wenJyOTNfZFhxSlBNUzBXTnhmSGhYN0RSMGE4MFZaSGZrdWJoaDVaM3VINXNCLWhHamhMMUhVeDNTR3d3akwwbWViOENkZFQtVHlmTQ?oc=5",
+      "publishedAt": "2026-10-18T09:52:00.000Z",
+      "region": "global",
+      "category": "box-office"
+    },
+    {
+      "id": "2hi2u",
+      "headline": "Spirit release date announced: Prabhas, Sandeep Reddy Vanga’s film to hit theatres on Diwali 2027 - Mid-Day",
+      "publisher": "Mid-Day",
+      "publisherUrl": "https://www.mid-day.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMijgJBVV95cUxQamdZNlFNYlptXzJ6emtMcC1seXRDRzRra24wbXFVazdrQWZYOUJkakpQSDhDeVliaG0tWnkzUWhiMGNkUTNCRWkxNWFQZFBkWXp0ekRyNVQxR2xoTXhIbndYZzF5MHZkQmZkOGZ6UDVJbWNsTERSZklzNWtEMlRwSHFPdFZSaHk4V1JZaXQySjQ4TTU0MnhhUkVEOHRQaGZlNTNzSWFQQUZLb0d5eFdYdGw5ZHM2czI0ckVrdjVOVkZkZzlydDZXU3hjdDAxdTNWN1ZoNWtzN1lYRFBONG5Odnlxd2xjdThfZmNUOEZ6bl9JZ1pjLUdBbzFENWdVbFJNaDNzVEdBQkdtZlpaenfSAY4CQVVfeXFMUGpnWTZRTWJabV8yenprTHAtbHl0Q0c0a2tuMG1xVWs3a0FmWDlCZGpKUEg4Q3lZYmhtLVp5M1FoYjBjZFEzQkVpMTVhUGRQZFl6dHpEcjVUMUdsaE14SG53WGcxeTB2ZEJmZDhmelA1SW1jbExEUmZJczVrRDJUcEhxT3RWUmh5OFdSWWl0Mko0OE01NDJ4YVJFRDh0UGhmZTUzc0lhUEFGS29HeXhXWHRsOWRzNnMyNHJFa3Y1TlZGZGc5cnQ2V1N4Y3QwMXUzVjdWaDVrczdZWERQTjRuTnZ5cXdsY3U4X2ZjVDhGem5fSWdaYy1HQW8xRDVnVWxSTWgzc1RHQUJHbWZaWnp3?oc=5",
+      "publishedAt": "2026-10-18T09:32:00.000Z",
+      "region": "india",
+      "category": "film"
+    },
+    {
+      "id": "dqo70w",
+      "headline": "'Drishyam 3 The Conclusion' box office collection Day 17: Ajay Devgn thriller earns Rs 6.15 crore in Indi",
+      "publisher": "The Times of India",
+      "publisherUrl": "https://timesofindia.indiatimes.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMingNBVV95cUxQU1N6VWFQdWV5SjktTFZEdDBpeE1BTnFUTTN4OGttSGw1Q3NpMnNZenc1cHd4dW5rQ1JLbGpUaEZxaFI5UGxMLVBFTDFQWDcwdHRUR0pYSXFkWXkzeEp2a3FESHhaRmlfWkRIZkZILXBDUF8ybnFYZ29HRTNwc2R6ZGlxNWF6T19PMUIyd2ZxclY5S184UUh3TjlMUWoyV0hxNU1RaVA0NmNFN09qVW5uMW5mZ2RSbzd5N2pNbHpxNnZobmY0Q1hyVk1CdndSUjRyQ0w2b3FEdmdYaUo3dEgtb1lZQUxHSF9kNEhxZ2RyOExUeXRWTFZFeUxXN3RTa2wtRmRsaC1iYm1nWFNUQWNXRldyWHFhTVBSZ2k5Mkw2N3ZHYTRuanYyd202VHluV0ZENmNjVXJUMTdPdW5mMVNHdnJDNVFpU0FiVWJlWjltQWFOWkQ0UHhVU25RUHNUeThEOGYyZWQ3UDlubUR3RmRuOHdiWUlsQ00wRmZjNTRDR3l2R3FDN0xwdzdFQjctYW5TOHNvc0pJT1kxQnJrUWfSAaMDQVVfeXFMT0JMU0JFeThQTGZtNUdqX25oUEZJNUhrQXVOUWlaaGl2aGVTUmtLdG1LUm5wamRJZV9qRjRvNzBZYVVqT0g1NWJETXJEenNiUmVUZk51aDdQZFBFUW9KblNZZnhySEpCME40ZUFTUWp4ZUtPOTNwWUJlcjdxcjhKTGtIZ09WaWxUWC1IQkc0eXdpS2lwSTBXMF9XY1VMZFE5Q2F1ZlppMi1jUThYNUxWejNkZ1V6MjU1SG5GU0Qxd0xFU1pYYU5ib21obzNnR0J2LTRzNi05Z1RweWc5RG9ybUg5TXJiR0dra0pGeEdES2gtNjJIeERQODNEX3NDNFJhZUU5OGttVFRURTdSVzRUamVUQnZWRUpPS25mMlZKdGZ1dzYzbDJNTjR1MFYtMzUwMTEwNFlIc1lRVnNfSlRBbmo2bTlsTk9aVG5HZHdZMGs1YWRDRXE3ME5pUkIxODhuR3pweWtsSndSa1VXOTJvcEhnMW1MUE9nc2xIMGJyTTVGakk3MUpSUHRPdUwwOV9VZVU4bG5LWmpYcW5tN1NlR1pfTmc?oc=5",
+      "publishedAt": "2026-10-18T09:30:00.000Z",
+      "region": "india",
+      "category": "film"
+    },
+    {
+      "id": "y6702k",
+      "headline": "IIFTA Season 3 Concludes in Mumbai With a Star-Studded Celebration of Indian Cinema, Television, and Entertainment!",
+      "publisher": "CineBuster",
+      "publisherUrl": "https://www.cinebuster.in",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMi1gFBVV95cUxPSFBzbkZESWdCSmx0c2hjYjBVcXhOYUZUZlduNWl6UkR2NHRFUWZvdXBKQ053LVNtRlFqZm5GS210ZzlESHlZdkpDcE1CUkEzQXNLNTZLVjg0NnlJR0hNMkdvX1VYaFdNZjMwRlZkNGpZcG1NYlJsVlNzT05GalMyQmNvVmRUbWVFOU5aRVVCUXk4Skp4RWhaYzAyM2J3WDNZSWlyeTJBQVUtZXVGclRUNVR4Sm00Wk9iN3hKYXpuUFZCMjVQS0dVcGpDbVBEYnd3ZHN6RFVB?oc=5",
+      "publishedAt": "2026-10-18T09:18:28.000Z",
+      "region": "global",
+      "category": "awards"
+    },
+    {
+      "id": "13va91v",
+      "headline": "‘What Belongs to Others’ Wins Top Warsaw Film Festival Award",
+      "publisher": "The Hollywood Reporter",
+      "publisherUrl": "https://www.hollywoodreporter.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMixgFBVV95cUxQaW9XWXdXVmpKaXE2VXVURW1aYW1wMk9CWG5odk41Y3dCSW5oNHhHMzV3dk9mMHdhaVBraFNReWM1UFlJOHUzdGJ1d2V3ejBoNDcwTUFybnpWWFJVRzlzaWxVUGtpbUZQVGN0OS1UQ0RKQ1R3cS13UHBSQnN2QW54dzF6cF91Tk95WTl6cDZHUjB5TWpmZUxsTHFoQ01sd3FZMko0S190N1JINkg0aXJFUm93NVctZVpNcEF0ZjBsTlpqdXg5T1E?oc=5",
+      "publishedAt": "2026-10-18T09:10:24.000Z",
+      "region": "hollywood",
+      "category": "film"
+    },
+    {
+      "id": "17anjgb",
+      "headline": "Jailer 2 Hits Rs. 316 Crore in Global Box Office in First Three Days",
+      "publisher": "The CSR Journal",
+      "publisherUrl": "https://thecsrjournal.in",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMingJBVV95cUxNdk4yVGlRSHp4SEktakx6YXZqYTRRQXFEZjJQQW1NZDFFSUI3UjVDZklKMjVYZF90UVdseHh0V053c3dqQy1pekhwY19POENxei1lMlZJNVZGN3hWY050STBzcGFDV0s0d2tyZmNIT0N0MldNRFM4WUg5MHpyb3M0MzJfeFduNkNDVFlRM1ZrcTVpYXhLTjFfWEcxUWFraGQwYTlrcHVQNGtobTBzRGRESlk0Rml1dThpaFBhMnNTSzVDWEFWbTctMUc1d19Od0ZxbS1CUm4yNXZIU0ZIVjdxQ1lMTTdDZmVYLTg1Q2o5TUxscTBOOUpMX0Z5MDBMZGpvS3pvSnF6dWVqWXc5MEpkMjhfVS1GbmtWdVRVT1NR?oc=5",
+      "publishedAt": "2026-10-18T08:56:24.000Z",
+      "region": "global",
+      "category": "box-office"
+    },
+    {
+      "id": "hlr34f",
+      "headline": "“One day we will leave this world”: ActressTenia Abraham dies, last post emerges",
+      "publisher": "Tuko News",
+      "publisherUrl": "https://www.tuko.co.ke",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMitgFBVV95cUxPM2xOaTRJSHlicmt0NjNBenR5RjY2VGpJQmdoN2RQV3lfMmQwVUxncVR6MEVMWjlJNS1rODF5b2w2bXV1b2VaUGkzTnN3eFBpdnF1QTlUV0RKdV9TY1NBRkI3R1BrSm41Ymw3TGxtdVFmUEN2a3laaXRxWVBSZXl6Z0NwdXY1alNPWEp6SlNMbE1ZbkJ0cFhGMkk2TVFLWHpRaTZ2VjdZVGJRNDRfZS1rQnQ3ZUNodw?oc=5",
+      "publishedAt": "2026-10-18T08:49:32.000Z",
+      "region": "africa",
+      "category": "film"
+    },
+    {
+      "id": "ukavwp",
+      "headline": "‘Ranabaali is our Indian version of these films’: Vijay Deverakonda compares his period drama to ‘Bravehe",
+      "publisher": "The Times of India",
+      "publisherUrl": "https://timesofindia.indiatimes.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMihwNBVV95cUxNSUNxTG5tU2NKcjJhNFNSa2laWjVleHFLb1pOTEpYZkgxcnZqZUd3aWhsMkdjZVN1Y21uZnFjSV90RG5EREtYQzMtNzNVR0J2TDZYUmxLUjU0d3UycXhuSzVObjN5ZUJOWTMwNUFLNU5CWXBwNVRTUHRycUs5aUU4ZEJhZGd1VWtZWW9jLXFnUlA3dWcxS00yMXhRbV93SHVobFdEelJlcEVmSWpMWWRyY013b1NyclVQUkQzbHVEYWN2UFRQbGlreG9sQTFTVEg2S1pfdDVPdVJhMWdPanZLWDZmTWZZZVEyalozUFU3QTNBTHk5LWNjUTNOaU9OdlFnNHY0cGRKd2haVlVMUHNfeWIyb1dmUWE0Ul9KNWRybDFLdjBIcG1zVmQ1YkVoeUNfTHFERmpuN05jOVA4SmNNblZsVE1yM1dEZUV2amFPQTJ0QldCOUd3aE9lMDBOMjZ4VGliNldmcEExV0k3Y21TOF93aFZDdmhELWRoVGc3YVU3NHZHRW9R0gGMA0FVX3lxTE9CT21wOV9TSlJDZnA1Uk5kV01iSTZrRktORFYyWnJEX3JjbDJ0R3dEZ1hZc2NxSzVIUHFqWFA2dDJDRjFuOHNVMjgzVk94T1JUZDBlVldQQURuLUVseHRDQlpfUVloc2Q1MzJrMlh5NUhtQWloam1mRHM2d2tvSGNPTDdsUmx2WVZ1S0RKZWRGQnU1TXVfZS1FbFFXZnVhZk1mQThRQmo2VVpsS0ZIUFR5d3MydExlTktuVUdPZU9TMzBER3hPY0l6bk1YdUdnNnYwZFFKX2NjX0N4SVZ1LVNEZU1YWXgwVWFpX0w5aUxTTjZQQm1pajItVzhnY0lDX3M2TUdLTk9nZFN2cjNLdTFRQmE1NFN4VlcwWHJXcjFWbHRZb3hWaWRVdDR5NDduQzE3elNEZXdILWdYanFOTkpIOF9UajFrcDE5ZWxnM1BienpfNEdPNjBxQ2duendJbWRzQndlZVBGLUdZSU5odTNNSW9PR0NaUFB0UURKNXA0Y2lWS1JWczZ5RHNEUA?oc=5",
+      "publishedAt": "2026-10-18T08:26:00.000Z",
+      "region": "hollywood",
+      "category": "film"
+    },
+    {
+      "id": "oslgne",
+      "headline": "‘Jailer 2’ box office collection Day 4 [LIVE]: Rajinikanth starrer crosses Rs 200 crore gross on first Su",
+      "publisher": "The Times of India",
+      "publisherUrl": "https://timesofindia.indiatimes.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMisANBVV95cUxNcElzdEFzS1VrdDIxSVBlazEzUjRhMDZ5dzA4VlBLbGdjSVhOVEZleFZnSksycUktcjNjRVROdXplNGhoNEZ2UVB4cUNGTk1zcUVLSUdDZ0N5V0Y2cm13MTIzaGJLY0pmamw5NTBXUzZJZTZ1WTlpN3FwWEtKMU5pRDRWRXZEVm5UbllPczhNU3FpRlBpOGVGbUJiWC0tN0JhWmNMMXBKd0pPd0RKY3k5YlRDMWQycFZqSE94X0E1eHNqNHV1SzNTWXlKNEdqVUlUTW9uSDhWd3Ntek5HMTlxRk00b2NQWGI1dXZnQk85ZGZSQV9Kb2tHbm8zU1dxZFMtbHV2X0FERm1rMm1tb3lKbnpPX25LY0g1dFk1bXR3Z0phd05VV2Y3TnpmSnk2UW1udmY1TzJTLUtnbGxYSG9OM3UxQTIyVWJrZUxCWVlnSVVfMk5EclVUTlp0a3RtN1RqV2FkYmdRaF9hd3I1ZTZkRFNWMkJtaHhwXzhaT2lQT1VLaG5PcV9ZcnQweVIwNUxFZzFhQXRkTVBnaGZWZjJwZERPQ0MwQWFwSmVCbi1wSlrSAbYDQVVfeXFMTlNlQ0xJT0NTeDNIVXVpelRUblMtYmlRbTJhTVdTS0llRHdVNEk0SXRZcm55dU0yZ0F5MlhSdUpGWmpYT0FPeW1FOHhjeE9DeU9MaTVQRWJKRkVuUk5iX2NBWkhlQ19tWU9IQXk4N2ozVTNsekFzeWpDeUhjbERab3ZNZlRuRkNDTVZvUWJrZWVoVnFZUC1zQnU0eldZX1JIeV9obkhuVXV1RGxEbEtHSEUtVkRON0tLNkpwTTU4cUpsWkt5VVctMU9tZ2NKR2RkM0oxcDhVb2I1MDVCcjRrbXBHc28xYkc3VHdNYmpMYzgyYUpQaWw4aGJ2UEFlSDV1Um9vX1BYZDYtLVJST2xTcDJFLW1FaVllS1M2Sl82MVFiSTQ4WVFhcmstWWR0SHFiVDBrdzBUWVFOMzZKako1U0dzbURWU3ZwbEhiWFZ4NkZUOFMxelkyUGtPSFc4cnczM0lSckxSLUU5QWotd0NUM2JYQ29tOTZONks0QnB5cGhGbW5Ua0xXbU9HOWVYX3ZOemhESDRjdVdCNF95M251VmNnbGstVWprY1YwUE9LOVhWWHhJWXln?oc=5",
+      "publishedAt": "2026-10-18T08:15:00.000Z",
+      "region": "global",
+      "category": "box-office"
+    },
+    {
+      "id": "1phz3fb",
+      "headline": "100 Days Of Deception Episode 4 OTT Release In India: Date, Time, Recap And What To Expect From The Kdrama?",
+      "publisher": "The Daily Jagran",
+      "publisherUrl": "https://www.thedailyjagran.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMi9AFBVV95cUxQOEVLUUpOS2tHak5LVGlfWm5LTXI1Y29MRFJKUmU3VVZ0a3FvdlJ0dk1CMWVGeXdzbm43MDUxWWsxbklfYnVCRjBiRC1TS0o5bXhlWk82OXhULVN2U1lrODg3eHBQNU1VQU1PR1BZTGE1V1QxbVVyUUMtYmJ0U2JqZDc1dlJZSm5IQ2dHTk9kWElvZkY2dXBLXy1EMzRhblRHSXQtOFFIc1A3UzQzQ2JOZkYtWlBqQTRBblFCWUtaM0pMdzJoSTN3RjZVMFBFY2l0eHZ4WGg1cWtUSzYxYkhDNFdmQzdweENET1diVmF1NjJ4ajB50gH7AUFVX3lxTE1lVERQekwtUUZ3S3hNME9Vc2t2TU01SGREMklTT1lETGZqX2xvaXFueHoycUJCWHRVZFd2R2Y3RmtNRU02d1lfZWFLdFdtU0R5ZEoyLTJzOE1HN0dCLVZSWTBiWkNYazhZY2N1S2wtWjFUS3lZbU41bUR1YWpJbTUwLUlUX3dRbFFSZlRHNi1nNDJ5dGhyRWhjNld5QU43VEVOT2stRktSUndrendoRmRzOEJCOVF6alVkZlludTV1MTMxUXN3MkFwT1UtSXlXbTA0eGphMFdGSm5LQTdTRVA2OEd6eE1wMXJhQVhfQmt3UTJkQzRaTnlMTjl3?oc=5",
+      "publishedAt": "2026-10-18T08:06:00.000Z",
+      "region": "asia",
+      "category": "television"
+    },
+    {
+      "id": "pfap2e",
+      "headline": "‘Every Indian storyteller grows up aspiring to tell’: SS Rajamouli praises Nitesh Tiwari and Namit Malhot",
+      "publisher": "The Times of India",
+      "publisherUrl": "https://timesofindia.indiatimes.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMitwNBVV95cUxQU3dFdGZjajI2WUlmcEF0T29nckZLY3RNT1U5eFpMQi13SDcydTBXay12cFFxYUxvSmY1dUF1M1ZqUWVrOGJZU0dBdW16X2MtWVVZWHF6RFFqSEcyUFlQSGdKNGZFRE5ucjZoRWJJcWQtcVJVdDlRdF84UzhPQk1QejRudkVwQmtNU3Y4ZXJPREFUWlMtOUxLcXBRTnRodTdpbi0wdFNaazlGam9KX0huRnpySXNReDZ2UFU5c2JwamJOeXJjdE1BRWNGUHRrZlJKQUFpVHpFcXVPY1YyLWhOTDV0eFYwRVdZby14SFRWMWUwa2tXWE5xR2syMFpISGltVVVXTHNOMUpfbG1sZ3YydmNtanNOTFhCdGRySUx5RFNIcnZoR0hEemMtbGVuNXdpcUNfRGlSOTRpdVRMY3luMG40Qm84Tk5HeHlzdzRoeFM5eU5ZZUZRRV80SVhpRkxrZGpOYlYtWi1ZZkw5ZmhOMWY5Q2NPNFMzU25CczgtRjNGejNUa09YeTkwTEtleDI2cy1EZEJrS2lVQnhaMWp3cjVScHJNR3c1OHRhWEN3VVZVQV8xVzhj0gG8A0FVX3lxTE8zcEJRektGdGljVndJN2xueGIyZzV0R21oNFpBbkNhNmlNcjZER0VFYm5VUDlrOU52UHg1T2k1Wno0T0lFaDctbXBXQXZ5TDJKUEs1aWlDaGxveGlaN1F4Y0tvcTA4enBRUk5UWXBBN3FGOWJtZzNmaUIyak9hWlZFWVhEQ0gxUjhZZDNTcU9IQlhDUk5wQmZ3aHUxRTQ3Q3B0cE1hOGw2R2pZczhpZUVSektDOGRvaG12MDgxNjNPbGtnaWxLYUt3aFM5RVY5ZDVaQ1hqcnRzVWVaVDJUcm1QeWZGSWFYdUE5RV84dF9FUUpTaVFpaUxoZlB6cnBxUENFMkY2b0tSbnJzTzJtTkltdUpiZUJtS2hmTjQ0VnE1bUg2QkZGQ1FMdzItN19Nc0FiaGhybG9HRmJROEhXMmkyR2Y3UEl1WDR2ZnZnOUZvWnV4Sk42MUhrUGZrSVkwX2h5OVdYNWVHbThPbkpab3FzM3lYSEhSVzV2bllqcy1NQlJHNHFlaXpXamZ0TTdQY0JxTTkxUUlHRXBzamp4eDRXQXlodl82MlloZlFrWW81SnQ1ZkhMYm5qdmRnWg?oc=5",
+      "publishedAt": "2026-10-18T07:34:00.000Z",
+      "region": "india",
+      "category": "film"
+    },
+    {
+      "id": "z0fxf",
+      "headline": "Aamir Khan in talks with ‘Kung Fu Hustle’ director Stephen Chow for an action-heavy film blending martial",
+      "publisher": "The Times of India",
+      "publisherUrl": "https://timesofindia.indiatimes.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMijgNBVV95cUxOLWVfcEhBTHo2U3k1S2pKZlhqaGFTY0Z1ZVllOGhQT21uTDJmS0JoOG90dXQ4QmRucW41WjZKNjFxNWJWdEtyRXdoZzZwdVBLbW1SWHlFd1V0Z2xwR3JZRVFUOUtIRmNZREtnMnpJS0ZfM29lVWxQYkktMGdZajdnSXJEalVFWkRjT0JqZURILS1YVEdoSkVGLU1WMXhQV1RpU3AyNUxhTS1CTm95VGRwOUpWNFV5OThPRTAway1hZXM0eUl5QUpVdkhMbUtiOEJhZ3BtcGVCYU5oOFRvb1hzeTJhOUtNRUpTYnJDOHBRUTVUZXYtMmVKOTVrNUd5TkEwNWJtZks4TFp6LWFYZ056S3lnS2pWZVgxaElTNVZ5SlBhQ3RERTZZdUpKUkN0WGNCeFNUNWU3eFlwLWl2eTdrOC1oQjlJQ0lYZUxyTGM3NF8wdWVDMkFHaTdIMjZ3bzQyQzE0dG9Eb1o1MHd0eEVvb0poQVB2UnBDWWl2OG1QLWxXNTNtY2FYNGl0b21uZ9IBkwNBVV95cUxQbWlZMUtVZ0VLcTdGazlDbjMzWmxFUFoyS1Z2RmVzelpTWVo5c2x1TjFuaEpmcVlRY1NfVFFwN01ia29XVENrUjdrcy1Xb0w1TzZnT011SE8wWjF4Yk5UVFRxbjY2MlpIRmFzWDRBTlpYMS1YUGE5bnBBemEzQTJPaGROQ0xfOEQxMG5sSTh4TWxqYmt5TmNfQVhIS3F0N1g1QlBZSGhlVWxQYnUtT29malE5MFBtNi1zZmJreDZQeVg2RXRPYUFIRmRIU1BnRDRDZC10eVd3Mm04Z1B1UlZKelVFOWJUX2pXOUtwTGZYUHVNdnlUeWJqdW50RlIxbnNRTWQxdHl6ekJXM29Hd2hDN3NzcXZDRG1feVFKWGtBejhCcmFiWG1qXy1RSnpNQ01RSWpHUGRTV2FDd1BQM3E2SzR5ZjNUWjR3bFkteGw2b3E3STBtR1dXSE5telpseEFHMzN3ZWkyQmMydmJQYkR0blNoQUVrTGc5aWZzV0xOUl9HWWRLOUFLMFpnaWdBZG5XN0pR?oc=5",
+      "publishedAt": "2026-10-18T06:36:00.000Z",
+      "region": "global",
+      "category": "box-office"
+    },
+    {
+      "id": "10khkty",
+      "headline": "Sam Idiagbonya: Keeping the cameras rolling in Abuja",
+      "publisher": "The Guardian Nigeria News",
+      "publisherUrl": "https://guardian.ng",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMiSEFVX3lxTE1xYVlsUjduYlZUUXU1S3UyMjZIN21WYUg0M3FBbV9EYjd2NENGcHZONEpkcllFbkZZZWhIdl95bTQ5OXdoY2dHeQ?oc=5",
+      "publishedAt": "2026-10-18T05:58:37.000Z",
+      "region": "africa",
+      "category": "film"
+    },
+    {
+      "id": "1dxjoeu",
+      "headline": "'Jailer 2' box office collection Day 3: Rajinikanth, Nelson Dilipkumar, and Anirudh Ravichander’s film cr",
+      "publisher": "The Times of India",
+      "publisherUrl": "https://timesofindia.indiatimes.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMi7wJBVV95cUxPd0pYb1V6REZSWkhucGZHdllDWHVsR0ZMdXUwcGNncjRQdVdVX0tUazBONHV4UWJib3pPWG1jZVB0b3VEb1FFU1QzNGc3TlFVRlBWcU5RUDZFaHNDQ2tSeUNkcGFteUtjZkdacElkQ3RBaGNJX3phTHVIMnctNERjN09lZDNzR29hUmxHT1lIeWlKcnl6TVJyYlYzdFJMU2p5M0JnVWt0UVBSbkFDcTlseTZMRnFENzc2Uld6clZQUzJwM2hwUVp5NDF3N3Q1U1d1d1A3bU10anVLQkU0ZTkyOFJUalh6YjF6WUJHVG5hLVVWS0xSZGNZbWNMOTZwczR6dy1mZTFMazJCLWFDaW1aOUZscVJjMC1GN1VZbzdHN2hmb1lnY2pDdE1hYk1oTGl0MUtfU0l1NDBudlZBdDFJV0NaMjBJZUFndmdHaF81WFZ2Z3J1alZkRktVTFhTUWtmU1k4LU9sSnp0andlaTVn0gH0AkFVX3lxTFBmRkQ3MExCZnV4d1VsN1pEZW5GcGJxY3NXaWM3WWJxOTF6a3VQY3dWM0NYZE1MdDVSSE5hazB1N1JpRTJjMDEyZ004Q01oLVUwMnlsblRjWDI2R0lPYlQwN0ZYYjdGY3VhYmR5YkpXZWpXdUl0NUM1cFNGWS15NDNJOERSR1QyaWJaM1ZGZ0VmeGQ1Y2VPcHNFY2d3MjNkY0t3S2pzVVNMMjhzWW94NjNVbVlsbmFsdW5rTnNHZkQ5ZGFwZHp4ajNYcnhCS2RGbGdfQUpLZE55Vml5b3pOVlNLdDVsTE1tbXZZOXBQOGkyWlpfX1Y1bHYwdWZMSGV4dHdZRGJ1QUhhNU1MUjExM2lBeUVXN21STDhQb1pXRG00TC0yS3VjdTlQUl9uX2x4bXNDeEVzZk9Sc2VQT0VXc3VzUkFkdGVYMDktRDRNalczU3B3UF93S2JCVEs0TVpPbWNodkFMZzFhbERPN2h2SkYxaTRFWg?oc=5",
+      "publishedAt": "2026-10-18T05:58:00.000Z",
+      "region": "global",
+      "category": "box-office"
+    },
+    {
+      "id": "qwjah9",
+      "headline": "YoonA Takes on a Forensic Pathologist in \"Unnatural\" for 2027, After a Chin-Length Bob Shoot",
+      "publisher": "미디어파인",
+      "publisherUrl": "https://global.mediafine.co.kr",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMiiwFBVV95cUxPZThjTkhDN3d2Z1pqeGwtYWFqYnZqeTVuRGxka1Nvb0MtTFNDVERhbkN3TlVyMDBCRTVkVVJmOUgzLWR5V2FYQXJOS2lZaDlkQ3lELVczRFVWM1ZVbkRoVnRrT2tzNVZKU0NXYkVOOW41ZEtBMDgtSEZnSkZnaW95ZV9QYWNreWF2RjZF?oc=5",
+      "publishedAt": "2026-10-18T05:50:33.000Z",
+      "region": "asia",
+      "category": "television"
+    },
+    {
+      "id": "14p0cmz",
+      "headline": "Drishyam 3 Box Office Collection Day 16: Becomes Bollywood's 3rd Highest-Grosser Of 2026 In India, Overtakes Hanuman Ansh",
+      "publisher": "Koimoi",
+      "publisherUrl": "https://www.koimoi.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMi6AFBVV95cUxQeU95N1dTWnFkN3VaOV8zR0Ewb19xVzV0QklEMU1hNUZ0UWlFNzM0NFBGMjVZSEJEYm5VdlpNbTlWWTk5Z3pLX2wyRW1HMFh0Uzd5NE5GSDh2QktJTlplUWZTak9HMHExclFSR0FWWGN2SlhsRnYxRENESzl4VE9iNzlpY3FQVGRxaDQtVU9jUVJBYnNBZnBmWl8xMEIzZ0NZSzNPU01aaEZNN2RkMlNnbFZFeU1yT2VwTGNsS1hqU19SenhPZml1NW1uczhPOTk4cmpiZ1B6aThVekVwQzJWZzRJWFJtcEg3?oc=5",
+      "publishedAt": "2026-10-18T05:40:11.000Z",
+      "region": "india",
+      "category": "film"
+    },
+    {
+      "id": "3pdq0p",
+      "headline": "Art Docent Jeong Woo-cheol, Who Had Given Up on Marriage, Weds YTN Anchor Eom Ji-min",
+      "publisher": "미디어파인",
+      "publisherUrl": "https://global.mediafine.co.kr",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMiekFVX3lxTE9NS2tJd1FFVGtkMURNOGtQU0pXOVZxR21ZNGZtSHlyRU5BcWdCRExoTGZtLXB4ZzdURnNURFl6bGhpNF8xdUFMbXN4QWs3REMxZkJoSHkteWpfbnExVVU5YUlBSmJaRkdDblk1ZUEyS2ZubnNjTGM2NUJn?oc=5",
+      "publishedAt": "2026-10-18T05:27:09.000Z",
+      "region": "asia",
+      "category": "television"
+    },
+    {
+      "id": "zq7pl4",
+      "headline": "7 new K-dramas to binge-watch this October",
+      "publisher": "IndulgExpress",
+      "publisherUrl": "https://www.indulgexpress.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMipAFBVV95cUxOUEVWcS1mVElWS05aaktLcU1ZZ3VyZ29xc1k4bjNzX3VaUTVyeG53N3ktblh5ZFAycEt0V2RjOGNHNWJDcDNaNnRPZzVEcU9Zc05HaVJaUXB3Tk5Pa0xfMGVrek5LVmdwVEp6NjhSUGNtOHM4YTFBZGVoWGJBdk1pYjFUQ0o1cDV3VHo5R2lRbklWaUtveHhkM1pzLWRuNmFkTlFnUNIBsgFBVV95cUxNUHhwMG9FZkdtTHVXRGxpYlVEb2haNmhtLWJ2NENBcjF4MEJfcUQ0SmZUMm1FdWxIalhuaTdJU3pPRUowMW5lWDdaNXotd2ZFYVhPNmw5SmNiWFZmeDFkWWRXd2poZEV0RHpGVDVhVUU0N1NvNmJaNlB2Q1RKcldPbU0wV0U5ZjJUWEZQbW9yV0JzSXVXWUhFNXA1aEJJa2IwejRCWGtaTlpYLWFKZWo4X29R?oc=5",
+      "publishedAt": "2026-10-18T05:05:00.000Z",
+      "region": "asia",
+      "category": "television"
+    },
+    {
+      "id": "r1tvyb",
+      "headline": "Jailer 2 box office collection day 3: Rajinikanth film beats Dhurandhar 2 for biggest International opening of 2026 - Mid-Day",
+      "publisher": "Mid-Day",
+      "publisherUrl": "https://www.mid-day.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMiqAJBVV95cUxQRnhRVkw0dHUxcXE5Z1ZmV3NwV2lUS1N3RHZLd0R2dXliOXVKT2RDUHBVb0MyVWlvekJxSkQ5c3dYWWpOc2F5ZUZ2VTlGZm13aDNjRV9lWklUdTFWUlZ2WE01T3hFQ1JBTUkydzVEMXJVa0lrNkkwcnVwYkl1cDlRWUpXRExET3dfbWx0bEdNbGxiMklyR3dqR1dCWUlpTVItckxIM0hhZzI1Y25XWTE4V19yb0pMUVBWbzJhX3VpSDlubWtfMmMzdjZXS1lwMzRvS2ZNU2VWcFVqWjgxT0F2V3FsSHVoZURLX1JUa1k4WW1Eb2thbkh4NFMwSWVoZEV6VXVjb3ZFOEZYaktTeGV5UGNXLU9QSHNoamI5bHkteHhTbFhjR0JNZdIBqAJBVV95cUxQRnhRVkw0dHUxcXE5Z1ZmV3NwV2lUS1N3RHZLd0R2dXliOXVKT2RDUHBVb0MyVWlvekJxSkQ5c3dYWWpOc2F5ZUZ2VTlGZm13aDNjRV9lWklUdTFWUlZ2WE01T3hFQ1JBTUkydzVEMXJVa0lrNkkwcnVwYkl1cDlRWUpXRExET3dfbWx0bEdNbGxiMklyR3dqR1dCWUlpTVItckxIM0hhZzI1Y25XWTE4V19yb0pMUVBWbzJhX3VpSDlubWtfMmMzdjZXS1lwMzRvS2ZNU2VWcFVqWjgxT0F2V3FsSHVoZURLX1JUa1k4WW1Eb2thbkh4NFMwSWVoZEV6VXVjb3ZFOEZYaktTeGV5UGNXLU9QSHNoamI5bHkteHhTbFhjR0JNZQ?oc=5",
+      "publishedAt": "2026-10-18T04:41:00.000Z",
+      "region": "india",
+      "category": "film"
+    },
+    {
+      "id": "q6zcac",
+      "headline": "Jailer 2 Box Office Collection Day 3: Rajinikanth’s Film Crosses Rs 300 Crore Worldwide, Can It Break Records?",
+      "publisher": "The Sunday Guardian",
+      "publisherUrl": "https://sundayguardianlive.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMi_AFBVV95cUxOdUk1OTVrUW94eHJfOEVBdXlxWW5haVJWVURNclZDWDc0anlLcTIxWXNzN3RJRjAtSENubkozdnlqb0dBaHdydmFhTzNaVm53enhkci1SU191ekNkM2F3c3lXYVBsd1hzZGNPck1CMnF5NXp0bmNJZXlLeUxQWUlGZVRTNXItd0ZQVWRKejJ4c1IxR1QwdzdPaFFXTmIwUmw4dFN0a1hMZy1TMmxWb0JneVp4M1l3eTRsMllLdGtFRkhoOXZ2b2puUG81OEFubHNWaDdDeU41RE1UTUV4SWNXUTZTRV9NYUxLSFIyZ09aZ0NjTXN1Qm5YYUdyVkTSAfwBQVVfeXFMTnVJNTk1a1FveHhyXzhFQXV5cVluYWlSVlVETXJWQ1g3NGp5S3EyMVlzczd0SUYwLUhDbm5KM3Z5am9HQWh3cnZhYU8zWlZud3p4ZHItUlNfdXpDZDNhd3N5V2FQbHdYc2RjT3JNQjJxeTV6dG5jSWV5S3lMUFlJRmVUUzVyLXdGUFVkSnoyeHNSMUdUMHc3T2hRV05iMFJsOHRTdGtYTGctUzJsVm9CZ3laeDNZd3k0bDJZS3RrRUZIaDl2dm9qblBvNThBbmxzVmg3Q3lONURNVE1FeEljV1E2U0VfTWFMS0hSMmdPWmdDY01zdUJuWGFHclZE?oc=5",
+      "publishedAt": "2026-10-18T03:47:34.000Z",
+      "region": "global",
+      "category": "box-office"
+    },
+    {
+      "id": "elpqhp",
+      "headline": "Complaint filed seeking counselling for Sidhu Moosewala’s younger brother over alleged gunfire gestures - Mid-Day",
+      "publisher": "Mid-Day",
+      "publisherUrl": "https://www.mid-day.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMimAJBVV95cUxQTkxDZTlLNjY4VzhrVmh0VThEekFHWjRIYWtwYS1kaHMzUmk2U1J1NVBYbi1wUi1jYi1xRzNzMmw2cEp3QlMwbmluSHVKWmMtdUdYemNOVVVhN0NGcXZWOVZqanBvZU9qM3ZKYldoRllUUHJmQUVSMnJXeHBzTGhGbHAzX1AzVzJISkl4akdBQ09CMjNydmNYZDhiQ0xCbUQ3aHZ1NG80X1dnSTJuWUdvUG5sMHVxTUpKTXJQblZ1TDg1azVUT2xPZnhqSmF4OGNRc2hYd1kzRGxQZmZGT1AtV2FPTVBVMXFfY1ZHNHB0X0JjSTdrMjJvdW5PQ0QyaEpDLWRsOHJFamtiVFUzN2dVU3B6UGMtMlpl0gGYAkFVX3lxTFBOTENlOUs2NjhXOGtWaHRVOER6QUdaNEhha3BhLWRoczNSaTZTUnU1UFhuLXBSLWNiLXFHM3MybDZwSndCUzBuaW5IdUpaYy11R1h6Y05VVWE3Q0ZxdlY5VmpqcG9lT2ozdkpiV2hGWVRQcmZBRVIycld4cHNMaEZscDNfUDNXMkhKSXhqR0FDT0IyM3J2Y1hkOGJDTEJtRDdodnU0bzRfV2dJMm5ZR29QbmwwdXFNSkpNclBuVnVMODVrNVRPbE9meGpKYXg4Y1FzaFh3WTNEbFBmZkZPUC1XYU9NUFUxcV9jVkc0cHRfQmNJN2syMm91bk9DRDJoSkMtZGw4ckVqa2JUVTM3Z1VTcHpQYy0yWmU?oc=5",
+      "publishedAt": "2026-10-18T03:18:00.000Z",
+      "region": "india",
+      "category": "film"
+    },
+    {
+      "id": "g8r82o",
+      "headline": "'Hanuman Ansh' box office collection day 72: Vishal Chaturvedi's film earns Rs 449.38 cr worldwide; Satur",
+      "publisher": "The Times of India",
+      "publisherUrl": "https://timesofindia.indiatimes.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMi9wJBVV95cUxObkE5b1F5cDd3bGZheEd3YmEyMUE2V3o0b1l5WnQxaC1sazYyZWJVTUNoR3pZbkhIdVMwb2JtendwVnNEcS1HV0pTZE1kY0FPSnZ1TkYwT0IxTUtWbDVCZzdqcHhVVDVyb3ZMRGIyNWdmeDhKSWFJRHc5azFsYnFnTEh0TWdfTmtTNUp6a0d6dEJUempLa1FGeDRKM3RGaG5IZWJDVEswRXhXUnptTDFjaU4xTzZnN2habWJ1V0MwWTZEc09wQjd1YzBhelpiemxIZjZPSXNkQWJSUnJmNDB3QnVZZ0JudTIzTDVwRjZ2Tko0Xy1oWEVweXZzTk45Qk5fck9VVUV4NGtUdW9saGdiZXRFVVVUQjJQWHZGUExZTTlGV3VKZ3ZkbWFxd0Rnd0J3UWV0dlRwQ2F0VlVneDdRSFR1MDNhbzE1OFNSdVVkMmNlU2hLblZsN3V3dUczLWFXaThwQlFZN2FlbTY2Ykk5NlVuMkV2WmfSAfwCQVVfeXFMT2E0NXZGOTVZT3RVR0hqcXBmNnM0b3AwbTJZbWx3VTNyODJuSTF2UGpjOWhpYUtGLTloU2xxS3pYY0EyU1NpajRuR3dNYVlWcGtqUkY5MWVpa3RkS3Jic01GMHltcDdvOWpzQzRET0pUd1NQY0Q2WFM3ZEpwNVQwdnowcHZTVzBsMmltSHdQV3lMMGhLOXMwWk1lYThMQkhUcEpSNGhaRFVBaldWcE9Wa2JyaWZkWWhLc3UtR2xRaUNldUJ6bDZ1ZGhMRFhZNWVxUUkycF9zclVPQXIyTnp6b24zUjZtaHY4SnJ5TXVuQllKVVpPZjZKbTJHNHo0MkQteTFyaWJoRm5SQzNLRlhZWldQa0lxN1FlVVZ6SXc2bDFCNl9hWUp6V3BGZ2h0LUpzbkZOQktWVUYzaFZXUVo2bWhvMndRVWxfZ2hOQzlqR2NRcU1LVGYzUWNockhtSlVPTkYzcS1VOWNiZmI2UC1UbFprcXVTWkVreXlHbFQ?oc=5",
+      "publishedAt": "2026-10-18T02:42:00.000Z",
+      "region": "india",
+      "category": "film"
+    },
+    {
+      "id": "h0alul",
+      "headline": "'Prahaar - The Ujjwal Nikam Story' box office collection day 2: Rajkummar Rao's film earns Rs 7.98 cr wor",
+      "publisher": "The Times of India",
+      "publisherUrl": "https://timesofindia.indiatimes.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMi_wJBVV95cUxNOVhpQldPQkNoRFotTlB2VkgtamdhSTlTR3pvVFA1TTJEVTNlajF6cXZfQ3E5MTBReTR3bG1Kb1hYeUNVbk5CVXRjdGpsSmVkS3Z3VHVodVBKMk5aY05wb2hvOUFIbzJCMHFQLXZHWnROUE0zcWFEWW1sMktmcVBfOFhDemNST0ttZ19Oa25TN181U2RLeXU5bzFOWFNjbjhtbWlkcWNmQVNRMDAyMXBjVmRLbUt5Y1lKc0lvTHF4VHdRNEhGa0FJU0YyNHF2M1h5Uk9vYWxWWTItMjJlbzJlazJqSWNkTUNjZENYM01JSTZ5TkZOamd2N25pMlRBUFdkMk1CLWY2RnR5RFdBWWxfVE4xZ0RvdnU3LUNXMFBzVFV4aUhGeFR5MThidV8xLV9RUHd2U2NwbGRfdl9JQk9jTnFXSVA2bVlQRXU1eGc5MnhKUkhtWGNhZXVRamMxWHBpdlZXY2JaUzFIdUFGRkZ2MlEtMFR2QVBYUVV1YUY3WdIBhANBVV95cUxQZERuWGRSTFpDcHV3LW1ZRWVzQ1lWcGt5Wjg0STAzS2FkcVN1dEF0ZEZVblBaRnNZdUQxMDlNMVA4b2FfbldraDlpclJ2d1VmblpCTnpldzJlUGRoa25IRGlhUFF6NmJvTk5CdkRmRnZXbDNYZXhtQ3lhTjNMOEdxZWYzZ3NLNnR5ejVuU0NFc1N0aEZsMEN6NTVuNGdrZ1phUW5fQlp0ZlBiYU1UQldkWWp6SENpbTJEYW9GcXVFREZ1NC1FMUQ3eDJLVUFMUFNmcm5GSVRqLWh2cjRPUkhYSWRuWDhwdFhqQTI3M092a2gwY3FwVUJKdWVGQnRocUpOU2lRYWU4RjdDOVEtR1c3cW5HWFpwWmVCUDllOENsaXBqcWFpbzJxWlN4X2VlZm9nSmNyZ28zTFJxendZYVVWZHhIWmFFNTFFSFQ2aElEa2FLWDZkb3B6SHp4aHl4VWQxaXBvWVN2b2lXOXgwenJPc25GbGdtdk9pNl8xalhJRmJCUHBv?oc=5",
+      "publishedAt": "2026-10-18T01:48:00.000Z",
+      "region": "india",
+      "category": "film"
+    },
+    {
+      "id": "17cr0pr",
+      "headline": "Why India is falling for C-dramas",
+      "publisher": "The Hindu",
+      "publisherUrl": "https://www.thehindu.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMi7gFBVV95cUxOM29sMjZjN1h6SnlXZVlnaWo5QnphUUdCZE9DSnhadE1sUnNmNnRQUTNOZmhzUFdoUHczaE9pRGwzdmpRd3VVeGVDNmRMNnc3eGl6akVzZ3cwSnRIYmRwRjNZdWFZN214Wm5rYjJFbmxkdWlZdmhLNTNxVUJOMXExck9kQ3hBcDBuMkhZMHFlZFRwQVk5cnBoVUwwUnRMWHg2dnB4VmJfWFlfQWg4SU5hcWE1N3o1OHdjYjdiSFJPX29XMHI4NjE0MU9vLXJBTXh2OC1zZkZXRHptWUlkbC1EMDdDbmZEbVpHWUZLTE1R0gH0AUFVX3lxTFB4SlJWdG1yUGowNjBXTmdqam92dWtKR0JaWTZVWlJQbnFDM2o0d1k3aUFXLWZBMUJheWRwRDZWOFk0ZVBVekh1NFJEX3hRZmVTMmJtcmtLMm00MkZzUF9pX2FGZDh4WHo1Qi1PZzFzUkJ2aGtMUWlQUTMzVUJEazdpM0tZR2lYN3plb1VKVVp0UVdhSi1tc3hXQ2Jsb0NZY0xJQzI4UmhwZHJZd0xTRnpxOFVUMndCR0h4ejRlbHg4SVQ4UjB4N1d1NFB6NUxfZU1qa1phTUhwUXFoX01FZnZFT0lTeHMyVGhDZlNFNWZmdHZDS1Y?oc=5",
+      "publishedAt": "2026-10-18T01:47:22.000Z",
+      "region": "asia",
+      "category": "television"
+    },
+    {
+      "id": "uuv3c7",
+      "headline": "'Nayyi Navelli' box office collection day 2: Yami Gautam's film earns Rs 4 cr; worldwide gross reaches Rs",
+      "publisher": "The Times of India",
+      "publisherUrl": "https://timesofindia.indiatimes.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMi2AJBVV95cUxNZmY4QUJlUXUyRUpDVFJWdEFnV3VfVjh2Y3Q5T0JDLWhRY294UVUtc3FoNUQ3dGRJVUdqMGpIdkZOMXU4d2oySS01aUNLemRSaUc0VHRiWFBnZmwtLW9OejVDX2RZOGNJTEFmVWpjeVlXbENYWnM2RDB4eVk3dWVyUzRQTkc4dnNNWktGbWVaUGtiX05ackZ3OWoxWm80Mi13OGJjckkxRWRlODV6WFJKTHNxWUI3TEpOVnRsd29YX3dvZDZ6VFhGREV2UXdyT2NGVWNPN0F6c3dqc2JsUi05dnRBMGZUS2lLV0swdXJtYTFac3RaMF84QkRCVGxMd1ZjUGdqN3BTcWxfRk50NEhtREZncmdqaEp4SEIwejRNdm4zZWVzWVBrY0hKaHg5X3Z5dlBxQUJsNkdfT0dNQzdFbzdiN1VISm1LQ2hQME56VEJ5cXYtVl9mdNIB3gJBVV95cUxPSGN2VEJlVjc5Z2dZZUE0a3ladV9NOW0tdkZuMk90aWZ6UGpLV0JVZ2lsS2xQVUE0YW41ajEySEprWENFU0MzRWExZ2JBYzd2UDRWUS1POWRCRUJ0akprTzZhN3JKVnRhUXE0VFd3Tk54SUdlRkVTb1gxYUhjVkdjQmsyelRLSTJrNnZuR005YlBUXzlPenNLakNaT0RBNm1lYWlrN0UtWnp0YmNoUzhyWmdaNjFQTEU0R0VPM3RLN2VHa2sxYl9BU3gwSWw3c2h0aUhuTFRObDZmU2M0bkYyRWdaN1V1Umc5Y3l5TE80TnBEVkVFQTlMZGQ0dFEySWM1Qy1KVm5jSzVJYUtZeDRPQUNxU3FSYkdkNjdHRWVQMzRNeUxGcWViSFdSbFBYWU1xMTZYUmJCa203MXN1UzFvNGM1OTMzZXQxbllGUUlNSldWWFlYeVlWZWJNaDQxQQ?oc=5",
+      "publishedAt": "2026-10-18T00:45:00.000Z",
+      "region": "india",
+      "category": "film"
+    },
+    {
+      "id": "5tl79",
+      "headline": "'Ranabaali' box office collection day 2: Vijay Deverakonda, Rashmika Mandanna film earns Rs 26.65 cr worl",
+      "publisher": "The Times of India",
+      "publisherUrl": "https://timesofindia.indiatimes.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMi-gJBVV95cUxPS3FBSmtfdGRtRUZtdjNNU0s2NVpNbXNyYXpDbGxaSHBOV01CbzRLVEp4bHhzVXVhM0lUYTRBNzJlZ3dRODViOHlKMW52MVVYOFpZM21mOVV4ME1fZldFejNTYkJVOEthRktTTVJVdVV1RDFld1VBTEg1bDVfRGxUVlRLNWo2QUJvWEdtX1hPWW9YUi1fTVFDSkp2QkFqSXV2ZmxMaWV1c2gtQmx5YWhjYUFsX0VLUXVLeVZJNWRBV2sxM1pSWVlEYnd0YzJPQlhFTmM5d2kwYVJtZVFJNkZGbkJrWFN6V0loLVdMbU9BbUtMQXpPZXF6S2libFZJRFZsODBTX1ZSTkprZWJOSV9rTnNiTlBUZmNWbTA4MnowSjBqQ0paN3NUam5udXJYUHkyelIxRloxRW1wVThUM0pVX0FrU2YtWjBKUG9RYnFid3dINGNKalNGUFE0LVdsY042N2FybzFYdzlMN2lNckI3OVg4U2NVZTZKMkHSAf8CQVVfeXFMTk1CNTRCdnBTMW4zby0xY1o4a2M4bFdRYkFRdlNLNlQyU19LRUlISDdJcXRabFkxODdwNmF5cHFrWWVPb21ydTZwSnhIZWVOQmMwOURrTk5jTG96UGllcWVqb19GYlR5eGRMTWQ4eDFQc2ZLMllwUkhQS0hvTV9nRXJLZDJXR3hQa2Y2V0IyalZ5MWpuSm8yZ09OQXpuTUNGRXBTN2ZlVVBpOWE5WDllSkcwWWNnaWhnNWJjMDAzRE5xc0ZpOFY3VDJPWGVjNU1xb04tVG13Z2U3VTQ1emMtbXNjY0s5NE1FS3FLa2ZHUGUtOUcwaG93alpHTmJxLTZxR1lvZXZYLUhQc1VBSVlJQnhmS2JORnlOYWFaNW01bXVZUjZhekFNaGdwTzRKVUwtYTJRMXhHTHZKa3ZrNWk5eXRuWnVNNk53cmdaRkR4ZnF6ZS1pYS1qRzF5Rk94SE9VQ01yRTRsSXpQMzU3YUVpNEhVMXk2ZkhLOWJXNTdUNzA?oc=5",
+      "publishedAt": "2026-10-18T00:35:00.000Z",
+      "region": "global",
+      "category": "box-office"
+    },
+    {
+      "id": "1yzaf4e",
+      "headline": "'Drishyam 3: The Conclusion' box office collection day 16: Ajay Devgn's film earns Rs 5 cr; worldwide gro",
+      "publisher": "The Times of India",
+      "publisherUrl": "https://timesofindia.indiatimes.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMi7gJBVV95cUxOa2taVkU5U3JVUGc3RkJtNHhBUGVtNWJUQmJCRmJONmFJcjRlenZZMGdVbVJfcTJLTFRPZ1pDUVdrX08xbVUtVEdZWXdYdC1VMkMxMzAzbk54UU9BRzdRNFBjSl9iQjIyZVpTcFFUVEtMb3AtaTdaYjktZXZTQ2VwUWVqNzFUUGd5dzFrbHRwYU9Sc0hIZVQtSXdjMzhYYTJ4QXF4RHNZUXVhendVTW1wM0JOdUxyMHJvUTBjVFhSajZyUkkySGVUNkUtZ1ozbzZYMEhaV09zbllzSUtxZnc0bmtqQXphZnRFMndFUFpNaXpicFd2SGNVYjZrVmswUkMydkFWck1DWVNyM3N3OThXMnBkRVM0YkxXMl9WVkhuWjVVWVNuLTN1RnBSME9oUk1SY1NkSTc3OEwwUmU2eEhSWVJvTUFNcHBvakRYRU9IWW41ZE15WVVhblgtMkJpWWl0U2JMTll2Nkt6VXUyakHSAfMCQVVfeXFMUE5Bb3dubEdJQzdVVlUxTklTMUl3Q0xVTlB6WU9jSlh6elphcFlNdHJBLWhpcE1xYk4xanhGUWVIbGpOTGM0X3Q2bTBJT09NZVZsZEhMRURaTUhJM01VSldPeTZ3SUppMmRfbHJoWlRST0drTEUzaFJ0UTRtTjdweVZWaEE5WEEtYjFBUUt2N2huOFlvOXJjLS0zdTlETjlmdzdDV0hseFZQMzZDWkpxZ1JiV2tNakQ4cjVtZDdCLWR1ZjNJOVNERnZqWFpyS0dVU2xnZF80eHVnYkZ0TFRoNTBGNVp1ZnVock5TQUdUV0hnX0tMM3RVa2k4R19BVHZrVmdnbWYzM1p2bzkxQ2EzLWtRNWZVZ3dsN0tQa2NxYVFxblVwekd4QlM5LUZNY0NkSjV6clE2WUZWYmdLSzVfX21GUTNvU0NnY3RRVmVHOUxyczlOY3RBUHc2QzM2VG1MMmwxWWhabUNyMThfTFpWTXh5d3c?oc=5",
+      "publishedAt": "2026-10-18T00:22:00.000Z",
+      "region": "india",
+      "category": "film"
+    },
+    {
+      "id": "thp5vo",
+      "headline": "Lee Kyu-han Once Said He Couldn't Bear Seeing His Mother Sit Alone at His Wedding, Now He Is Marrying Solbi",
+      "publisher": "미디어파인",
+      "publisherUrl": "https://global.mediafine.co.kr",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMiiAFBVV95cUxPb3h0NVQ4Vkx0MnUxR2Q3VnFQQjh6NU96U1h1TXhGYXVUMy1GMlp2amhVWGFMekp6d3RLTXBaSncyTU9aVllJekdoOUR5TE9SVFNWWkZ6VWZGSXJEX0dDUGlaY19RTzNsejdRVmYtX3pYRWJZTXBJMDY5UnhZdzNRQ1BoUnB0TWNv?oc=5",
+      "publishedAt": "2026-10-18T00:11:53.000Z",
+      "region": "asia",
+      "category": "television"
+    },
+    {
+      "id": "rq4le9",
+      "headline": "'Jailer 2' box office collection day 3: Rajinikanth, Mohanlal, Shiva Rajkumar film crosses Rs 300 cr worl",
+      "publisher": "The Times of India",
+      "publisherUrl": "https://timesofindia.indiatimes.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMiywJBVV95cUxQZURwUm54Y0dBRkEtSDhrN0xyaDExYkM3aEp6N28wUlQ5NHNQcVNZV05OcGcxVGpneWM4V1ZnLXNtblZobi1mUWsyMUo1Z1Flc0tUOWVabHdtLXlJTmtaNFc1S3Ywb2xzeTRmeWJOb1RRTlZDVE00Ylp4dVJZS2R4V3I2Rkc4RzVZcXNkeTZqMWp5NUt1UVFndzlrVlJ2c2VjVFNpc1VjbFpzN0tkUDZiaklIN2VjN3c1bXZqVy1yNmtCdWZDeVpzbmVvR1VVTHVQMXBsSHBiTzc1MnkzZ1hUeGtjMEprVUItaGYwcnByb0s4dGw0WGpRMVpkOFNFejhlVk5ySWszVFd1MFpwektwcVdFdENxUFFUVVVhVy1nNEw0eDdYWWtIQXFuR0NNQmJPWWRXQmZEZmhzdXh4cFZudDRPalBWM09QRWJz0gHQAkFVX3lxTE5qeTNkUWhiQmlJSDNTWFhZS21OZ2R5NFlBeG9tR0VQNnNPTlRsWENfcDNuNl9objJRdGFnVjE0cUFvdl9yaEVaQzNBdm5Idk5XdmwzOHdqWTQzWUJUQnVKYWRVQXBEeFZHbmxEWjJCZkZNRUVxX3hTZzZESmdYdDkxN2VfWmswNU5KampTb1ppVTg1MExCVjZpS3hwemdPUlhCaE9xQUVfcndOUy11S2gyZUlNMVFTcWw2WVNfak43eVRVRmZNVFZFNEtXcnVYUlNPdm5HVTVId1ZFV0E3OFNPTUFhRTRuUXFCcWJIZDhya0dqRzh1RHNuT2M3LTBfMFlWU042eGVCcVpFOGxKVkV6aG9TN2FycTlsXy1jX3pqcU1oVkRxOS1BNUp3RnRpODk5c1VTTzFMUEFYZ0FBdGRGeUVMNER5bFdqQzBWY0lIeQ?oc=5",
+      "publishedAt": "2026-10-18T00:09:00.000Z",
+      "region": "global",
+      "category": "box-office"
+    },
+    {
+      "id": "1ytrwh5",
+      "headline": "US Consulate General honours 8 Nigerian creatives",
+      "publisher": "Tribune Online",
+      "publisherUrl": "https://tribuneonlineng.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMiigFBVV95cUxNVHZMcWxrc0t4QlU2cENEdDdyaU45bVBsNjhfRV9UMXMxNGFMcUNnVmxQTXMxZk1IMDVTTG5SUkVjZE5jSmc4ZGpHbTVpeVduQ29zRTRBczNzZEhuMkdJUExvRXJqQTNRS3RUMldZVGtxYnJBamhieGNudGh5Ul9nWHRER2pXQ3ExdWc?oc=5",
+      "publishedAt": "2026-10-18T00:07:54.000Z",
+      "region": "africa",
+      "category": "film"
+    },
+    {
+      "id": "f7w3w9",
+      "headline": "Pluto TV Now Has Over 400 Free Live Channels: A Great Way To Save Money After Disney+’s Recent Price Hike",
+      "publisher": "| Cord Cutters News",
+      "publisherUrl": "https://cordcuttersnews.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMiywFBVV95cUxNVndXMjBzXzBiam9WakpENjE1cjFlYlhBaHlSVDJ1STlCWDhuU1JWQllWWjRZQ0dnSE9YY1J5M2FTWUpfU0UtOFIxODBTSERqWDFXaWhoQVNmSFpOb2hHSTljYUMzME4yWjVvdFctMktUYTZLMDZqOWdBZVJ4eGotWVF2RVJGb0ZFUURjYWRtRk1ZWWItb1F3SDBzZU1PNUhCUVVwNnFYVk9OT0VKUHlFY2xnX0JmMEFhNk5yQmItZHp0N0owOC1QYWRoUdIB0wFBVV95cUxOMmNhLVNRR2hPZVBBVlZ0NWR1bjI2NjcwcFNCWFA1SXVvLUlFeWZwb1lvS29CRjAwd2xMOWlvUGRFY1JTTjg0N1l5cHE0NWQyVEZwWklvcU1FOVdqTlhDeDFFNzE4X0Z2Q01weV90aU1tZEU1c3I5Tm9INHFUUjRZcDg4SWZHVE9kam5hcGt5cml4UzZJTXdqQThzZGVVQ01FWTVBcUNNUlNYb0hQSF9xbTVfb3lQYmhlaHY3X21hUXFSMkhWdFZtTVFwMTc3ck5uMFFR?oc=5",
+      "publishedAt": "2026-10-17T21:24:46.000Z",
+      "region": "hollywood",
+      "category": "streaming"
+    },
+    {
+      "id": "htssxu",
+      "headline": "Disney's D23: Everything announced, from rides to movies and more - ABC News",
+      "publisher": "ABC News - Breaking News, Latest News and Videos",
+      "publisherUrl": "https://abcnews.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMiowFBVV95cUxNX2tGemhTaVY5cDVWRWExVFpzVlRmSUNjc09feVRmSkNpRlVkNVZDYk50S09FYkJrMGFYc0dOVVhjRlBFRGlhQkNJemlIdkNLUTBFM0ZwY25qQm95bWFiLXRyY3o4Q3VYNktnNGZ3cTBBLWFQbHM4Ni0wXzlrOGdIZkNUTUNpN1pBMS1Vb0xFLTcyN002NkUxRmltOEJZaGRoN0xz0gGoAUFVX3lxTE5hNkZsZ3B6b0c3MHQtWXBqRWE4Y0g3OU5ReVpLTFBucWk4aDkxTm4wTXhycUhFbDFUVWVzcTdyUTl0djFUVl9wM1ktejNHUG5sS2l0NnBaT0pJN0JMU1RGN095VzZ4c2dQUVczUGJQdUlzbzliSERtM1Zqa01nU1JYM1pLbEZtREY2cEJpV3VvUWgtS2Njd25SM3RUYktVRGs4MVJiRGhJWg?oc=5",
+      "publishedAt": "2026-10-17T21:12:58.000Z",
+      "region": "hollywood",
+      "category": "film"
+    },
+    {
+      "id": "1c832j7",
+      "headline": "Oscars 2026: Everything to know about the 98th Academy Awards - ABC News",
+      "publisher": "ABC News - Breaking News, Latest News and Videos",
+      "publisherUrl": "https://abcnews.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMigAFBVV95cUxPVzByVWVaY1BVdmt1ejlZWW8yako4UjVXQU56dUtzcGtPRVptdXF5NThOZXFxdWdXazliQ0NocUlzeVMwbmwzM2laUUd5TnNJRTZ1Z1hpSWVtcGVrUWVtQmdoTmtyVFB0SHQyc1Rodm03NlIwblpHUGlGTkE4OHZmdtIBhgFBVV95cUxOMjMzbFZWcXl6aVY3dzBVYk1ETWJ3T20xa1VGZlc3emx1eVRnQmRFdGkxd1E4akFqNk1KV1NpYkEtTjdoXzVqeGo4bm53WEJ0MlZObWRmOEtJN1BPMlF2bkhZMXpHcnJ2ZnBsOVk4c2s3SXZ2aUMybHY5ZlBJcjllY3RhNXpXUQ?oc=5",
+      "publishedAt": "2026-10-17T20:52:06.000Z",
+      "region": "global",
+      "category": "awards"
+    },
+    {
+      "id": "1fw259h",
+      "headline": "REEL BALANCE: Pan-African Film Festival Gender Equity Project- Launches At The 17thDurban FilmMART - Brand",
+      "publisher": "Brand Spur",
+      "publisherUrl": "https://brandspurng.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMizAFBVV95cUxQc0tXc2licmdfeDhMNmtKei1NOF91WmFFajNKdlRrVDRINFd0cFdoWXh3VTN2NGxxYVM3ejhldldHQ3p6STREXzQwcG01czNocjRHTFhVMkxCSW51NDdPZlpTMmFubGlBQktMWlVOREJHYjRsaEk3NFhIMVZWMnFnN2FFenVGZWpNam5JUDM4QUxRYS1ZaXUtRDNpaEdxR0ZNZlMyWm5BbmIwa0RJZ3BOc3BFT1lJUU92SlZZaklmZDlkUUxGVU9Ja3NTd3DSAdIBQVVfeXFMTVRickZvdFVRLTR3elpmWnhWeUpVV3d5SUxmRWwtal9fS1BUbjFNZmtsLUJJNUdSUlNjMXlkZU9LNVRRWWVhU2RxVnVmbExIczJtZ1hyOUhOV2x2SzRwYXJ0TWN2MVlzeGxWMnZoTlNoamxHTVVKQ2syRkctOEhEMnBNaWNCbzdCaFlrZ3dLMXBFSWp6LTdXdjFSRnJkV1pIbHJhU0N6bm9fV256eURBREtpaHduWGlGYVQ4ZnoyX09tRmxxQUFWak83UUVlS3BZQzVR?oc=5",
+      "publishedAt": "2026-10-17T20:32:45.000Z",
+      "region": "africa",
+      "category": "film"
+    },
+    {
+      "id": "1u8sghj",
+      "headline": "IIFTA SEASON 3 Successfully Celebrates Indian Cinema, Television & Entertainment",
+      "publisher": "BollyWood ki Baten",
+      "publisherUrl": "https://www.bollywoodkibaten.in",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMiyAFBVV95cUxOX0tuQ3k0ZnZPMFdBQlFPcXpIblFLVTJWWTNHMmY4WGNmRVhMYkxLMHFadHpkMGIwNjNncWdhRVYtU2o3Z0pyTU56d3hma2wyM0RmVmRBZ3RGQXNlZ0ZpbGJLcWV4emQ0d0Uzc1hUSGpOd2pzeEhaXzFfa0Mxb2ZpMEM0UjBmdXRUdGpvd2pLREJIRE5lSzM0a2JsNTlRcHM1a2pCdmVUOXNScVJreFg1UDZDU2lUQlN5OVB4dThYV29NMWJZc2M1Sw?oc=5",
+      "publishedAt": "2026-10-17T20:11:07.000Z",
+      "region": "global",
+      "category": "awards"
+    },
+    {
+      "id": "vh3epl",
+      "headline": "Taylor Swift Heroine Clara Bow’s Breakout Movie ‘It’ Leads Carlotta Films, Artcraft Pictures French Distribution Deal of Hollywood Classics",
+      "publisher": "IMDb",
+      "publisherUrl": "https://www.imdb.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMiZkFVX3lxTE12d1NobWlIR2xxMkE3QmF0aEJlNjRCX2ZFRlVuSG5TRkU4ZU9OdUJ1UHJVSy1DLVVNbFdxb0RUWDc4aG1fMTdwT19ac3ZTQjVXTkZCUk1VV0h6Y1Q4bTNRX3ZNY0pwZw?oc=5",
+      "publishedAt": "2026-10-17T19:54:29.000Z",
+      "region": "hollywood",
+      "category": "film"
+    },
+    {
+      "id": "wcxtjb",
+      "headline": "U.S. Honours Olu Jacobs, RMD, Six Others as Hollywood–Nollywood Partnership Gains Momentum",
+      "publisher": "Tell News Magazine",
+      "publisherUrl": "https://www.tell.ng",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMirAFBVV95cUxOOXZEMzhMYmszdHlCTENhdzJseFdfNEVzUHlpQUhoTGd4S3FGUHVkcDRoMHItY3Z6M2RnSk9kNlhLbDUzOU9pR1BuLUFxbUFwQ3NHRy1tNW5xUlJIMG1wM1pHZFgwWnRKMlhmNXFqemphSURrYkJxWVozRG0yZWZfS0lYWUI0aF8xOEEtQ3pnTHhZTUVvUHNLVzU3d3g0XzdmeGNPSHpyNTltRkEt?oc=5",
+      "publishedAt": "2026-10-17T19:06:23.000Z",
+      "region": "africa",
+      "category": "film"
+    },
+    {
+      "id": "15z67rp",
+      "headline": "Actress Tenia laid to rest after succumbing to Kidney infection at 32",
+      "publisher": "TheNewsGuru",
+      "publisherUrl": "https://thenewsguru.ng",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMiswFBVV95cUxNWU4wdkFsQXpfNXFGR094dm94eUFRMDNpSXFIZ1YzenJwNG15ak1XclJXMlFldkxjb1ZwM1pJTDk3d2VDYlY1Y0VFTDIwczdYa2JpRWZFM1BfLW9KWHE4OVB1dkx0ZUMzdzAyM2l6UzFERTBIZ3J6SnVhdlpFRmhkemRKWVJQS0h5ZTJzcWw2ampiLVMxQUtsR3VMOHF1SkNUODNWMkVMWmxaZ3RGWFZIaFFvVQ?oc=5",
+      "publishedAt": "2026-10-17T18:55:39.000Z",
+      "region": "africa",
+      "category": "film"
+    },
+    {
+      "id": "1riuqng",
+      "headline": "Nollywood’ Agbara Nla ranks fourth highest-grossing 2026 movie",
+      "publisher": "TheNewsGuru",
+      "publisherUrl": "https://thenewsguru.ng",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMioAFBVV95cUxNdFhkZGFGR0RfLXFiTUJzWVJMeTh4aW5ZOF8yR3l4ekxrY0lpNE9pRURqS0hhMWZaQVVHdGs5TjcwajE1VXRrYmlMWWwyeWRsQ1c0blFIT0lqTVBrMm1UNEVsZXFKU1o2cjNrQjlUVVdIcEh2RUYxalpnem8yMmRpLVBxSk85SWo3cmZETGZ6dFJMa0JYNkJNNG5qZjdnWDdu?oc=5",
+      "publishedAt": "2026-10-17T17:45:00.000Z",
+      "region": "africa",
+      "category": "film"
+    },
+    {
+      "id": "1lpxvvx",
+      "headline": "Kim Ji-won Starrer Doctor X Mafia In White Breaks Rating Records: How Her Last 2 K-Dramas Fared? Verdict",
+      "publisher": "Filmibeat",
+      "publisherUrl": "https://www.filmibeat.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMi3gFBVV95cUxQN2tseHdGLVVud21SYk55SDFhU3hqNnY5RnJ3enJfYXpucnFrN0MzQU9OUWRSb3VYQ0w3c2hzTzhxODJ5dDdDdzdaU3BpTnUwTi1EcXNUem96SnNVaE85T0daNkFSel9lRnVyLV9QcXBQWjlxYTdfN0I3ZmtwcTJialFzSU93ZFN3MzF4Q2FqYjI5bC1EWkRaVXpDYVBxU1BHb2JTb0JhT3VYX2R1eDQyUDlQczFFeDFsUU9QN09NQlRTSk5BcnkxX3Q4YTZXcUVub3huVHBkMC1qZmk0a1E?oc=5",
+      "publishedAt": "2026-10-17T17:37:33.000Z",
+      "region": "asia",
+      "category": "television"
+    },
+    {
+      "id": "ipjbf6",
+      "headline": "How NBC Brought Live Musicals Back to Television",
+      "publisher": "Variety",
+      "publisherUrl": "https://variety.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMinwFBVV95cUxOcklHQS0tRDBmRnZROUJZLUlHb1cxdktMNGcySTJ6cUxoZHF6b0dUeWo2OEd0bWhyQk9iSklzS2Q0X29JYng5NjNaRnhjeEtWbkd3YmdJV19JaWs2aUZpSUZDbG5PcVRJeFdrTldKdGV3S2FMbUlRUWNIcUliTGpMV0lpc1J0eGExLUNXejJGdm5md1l1RXoxR1o2WG9Fenc?oc=5",
+      "publishedAt": "2026-10-17T17:03:00.000Z",
+      "region": "global",
+      "category": "awards"
+    },
+    {
+      "id": "vsbrbk",
+      "headline": "The Next Hollywood Trailer May Talk Back: Tech CEO Predicts Interactive Technology Could Change How Audiences Experience Movies",
+      "publisher": "AOL.com",
+      "publisherUrl": "https://www.aol.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMigAFBVV95cUxOenhfYXpmVVFoUThaNlJkVWFBLTJuYmZaMGdsZ1VLekhCRjBYMkpoVEdPczBXSkN5X2Nhc0RUc0JfYXY4MGY5WU94ZDNlVmVWakczdExZY0RRcU8zUWVQM3hZMmhZSTRSc2ZRT3VmTWNoZGd3VGZpLUtSY2JFdTJRNw?oc=5",
+      "publishedAt": "2026-10-17T16:00:19.000Z",
+      "region": "hollywood",
+      "category": "film"
+    },
+    {
+      "id": "1v30lpg",
+      "headline": "‘You Can See Everything’ Triumphs With $15M as ‘Street Fighter’ Wins Weekend",
+      "publisher": "The Hollywood Reporter",
+      "publisherUrl": "https://www.hollywoodreporter.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMivwFBVV95cUxPNDJjSjdLeWJfa0ZGaEtLcjU0ZDJzLUlvc0V2bUQ1QnFLMV80eXg5ZUZQTlAtWTUwbGxQank1OHdIYnprT09NNFpvMlpMTU1KNG13Sm9GWkplaE5xdEI3NkRXU3J2a2ZMTHZyeG9odXl6cHhtTGNwNDFzUEZ0cXFjUC1xcHdtQ0RlTzR6UlBCTlpkLVFYTnFGOEJHaTVUcUhTRnBLdmhNeFFpQXpZWno5Wi1FbU0xOXhUN2s4VExjWQ?oc=5",
+      "publishedAt": "2026-10-17T15:56:55.000Z",
+      "region": "hollywood",
+      "category": "film"
+    },
+    {
+      "id": "18cnxm2",
+      "headline": "14th Middleburg Film Festival Days 1 and 2: ‘Fjord,’ ‘The Debut,’ ‘Gentle Monster,’ and Guitarricadelafuente Sings!",
+      "publisher": "Awards Watch",
+      "publisherUrl": "https://awardswatch.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMiyAFBVV95cUxPWUU0RTZIelhnamlqUGIyNVdkSFpOeXlnY2JLdnVrXzBtNkFsM3Z1bmJNQTRlV3kyUXRuWEdGb1NScEhwbDYzVVd2MGdzYnVWbThZTGdFVjVSWW93aVpIdjh5a0p0ZnZpblVnQzVBSy1TMWVZQjNraC1vcE1YQVBsUEc5MEEyZkFxQnpsbnV5SDVRZnBaZFFjeW1Kenpid2VxdGZkZXNDeE8ydFBFTUxhZ0VsUXoxZDRZXzR3MGg1dzJtSWxwejdpVQ?oc=5",
+      "publishedAt": "2026-10-17T15:39:17.000Z",
+      "region": "global",
+      "category": "awards"
+    },
+    {
+      "id": "mxbwg0",
+      "headline": "3rd San Quentin Film Festival Announces Opening, Centerpiece, Closing Night Films",
+      "publisher": "Awards Watch",
+      "publisherUrl": "https://awardswatch.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMipwFBVV95cUxPb3AyQ1ZqSjYyR1Zfc1Qyd0tmaWF6M3FHcFlDNkl4Tk9TLVR4T3ZDS2s3UG1HakpUWFVfTkU2Zmx5V19aU1BFYTlBVk9DVzFIZ3lsSFRsY1IxZjVaRlZURkV1SC10di1ZVUVhYnhkemYtdGF0MzlGamE1alJMZlhGbjFjVHVjNG9paUlBSmZtb0c1TUlGTElOTWQ0M1UxYWNKc2wxdUZPMA?oc=5",
+      "publishedAt": "2026-10-17T15:09:17.000Z",
+      "region": "global",
+      "category": "awards"
+    },
+    {
+      "id": "1s6gg5d",
+      "headline": "“I still have hope”: Pete Edochie, opens up about struggling to walk, sends his heartbreaking prayer to God",
+      "publisher": "TV47 Digital",
+      "publisherUrl": "https://www.tv47.digital",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMi0AFBVV95cUxOLTRfZGNMS201OW5DaUwxakhVaXlfOXZkZ3JNSFdNQ0dOMm8tRkx0X25qR004T1Nsb2RyUEtvNlBlUkZCVFRPWlVjdVNjaVA3VXVPQk5sTEptR09pNVAxTjhZODljVDJiMXN2X3R0UGpLbzRLWUU3YTF5OEZOSnQ1QnMzbEFjWWVGTC1lY2FDSVRYVno0OURHYW9ETnR1azJ2dzh1VUJwZGtnbk84SWJKa21kM0xIaVhFdVFXSG5QQ0VTRVBEZUd0YkQ3UEI3cmJV?oc=5",
+      "publishedAt": "2026-10-17T14:13:47.000Z",
+      "region": "africa",
+      "category": "film"
+    },
+    {
+      "id": "ij46ub",
+      "headline": "Global VTuber Project ‘IZIGENIA’ Announces Debut Dates for New Members",
+      "publisher": "Kitsap Sun",
+      "publisherUrl": "https://www.kitsapsun.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMivwFBVV95cUxQQjlsajU4ZlFqRTVTWE90RWZjR3hmNkRYOFZlMHBwY19kcnV4b0J0Ums3cFB4cTRuQWRlVzloejVyUHBKTkQ5eTBnSzNpUkJhSTJISXRmSVdxMERMLUszNFNsYWNfZHlBZnpHVzg0OTRxTTAzZ0RRWUItLTlOZ3JZb29hSUZDV20xSV9DZkRITGFHQUNCODlONEtFSUdoaG5ob08wOU5PRFRIUlNWZU5rSGN1SVVaNmZnczk1dEl2VQ?oc=5",
+      "publishedAt": "2026-10-17T13:02:17.000Z",
+      "region": "asia",
+      "category": "anime"
+    },
+    {
+      "id": "1gm7di4",
+      "headline": "10 Most Disappointing TV Show Cancellations Of All Time, Ranked",
+      "publisher": "TVLine",
+      "publisherUrl": "https://www.tvline.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMihgFBVV95cUxQaGhKQmlEN0xRaVQ5Q0pMc1A0bE5mb2otb3NOemV0d1E2NHUwZmlVbEJNNlhpQ2FMXzBTOFdRYk0xQWEwcS1aQ0MyOFZGMmlESzdOYUhpVXlNbUxiVjl5NW5JSWdOcFdIeFk2ZUN2T25aM1E1d3ZEVndlY2poTWZQZlBGQWFOdw?oc=5",
+      "publishedAt": "2026-10-17T13:02:00.000Z",
+      "region": "global",
+      "category": "awards"
+    },
+    {
+      "id": "1g73s82",
+      "headline": "Bringing the 'Art of Manga' to the Brooklyn Museum",
+      "publisher": "Anime News Network",
+      "publisherUrl": "https://www.animenewsnetwork.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMirAFBVV95cUxQWWtmZ0VyVFV3bmxLSWxPU3RmMk51QkZWSUZMWjZSVW9xdThfVVJMQjBSdXVZOVpsRThacktVc01xOUREWVBTNklwTzEyeHRJQzlfM1cwT2o4TlpIVndSal8zVFcxMnVlSFVtMGtJZ2xqZ1ZTVEdhNk5NeXh0bnhQblVqM0lTUE5iazcwZzRKSlU5aXVDd2hJZXFteVY1S0h4d3RNbzc2REJvODBD?oc=5",
+      "publishedAt": "2026-10-17T13:00:00.000Z",
+      "region": "asia",
+      "category": "anime"
+    },
+    {
+      "id": "wxt5w",
+      "headline": "Prostitution Can’t Bring Lasting Success — Kiitan Bukola",
+      "publisher": "New Telegraph",
+      "publisherUrl": "https://newtelegraphng.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMiiAFBVV95cUxNUU16YnpLaEJTM2JkZFh5SzJIYVB2OVNkZzRhRm9TaGNnbTlPVS1oLTFEbWY4Znk4M1hyQVNyeTFfTEhXckFMcW5UVk9PQWZFMTRieGtmY19oa1BKdW9SWmxqWktwWnd6V01nYjhlSkdQa18zUmVmVFpLY1psS1BEaXBRUmowQXk1?oc=5",
+      "publishedAt": "2026-10-17T12:57:35.000Z",
+      "region": "africa",
+      "category": "film"
+    },
+    {
+      "id": "ktjo8k",
+      "headline": "Entertainment News",
+      "publisher": "LatestLY",
+      "publisherUrl": "https://www.latestly.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMipAJBVV95cUxPNEx1ZVdCNVdDV0tvcTM0NTZ4Z00wSzZvbUowX2VOY1NWVThCNHM2Z2lCcGI4SnNCSnh6N2VzNENKNmFEVEtLbDhaYWdLNlpGOTRyaUZIN3VpUHdiMldndzJRZEZyVVByN1hGQm5DQ2xjTk5rdXNXTlc0WTlZcEdfX0F3NF94N1ZpaVdqTUd2RGU4RXdQRjNsU1hSN0ZZOXg4b0tPSUFUTEQ0RnltVUotSWVfLUNOeFpRMmN5U3dFdTlSSHdvcERNNFRMUXV6QXBEZ1JGalk5TDdDbE5Ybm5vNi1NMzM2M05TaWJUanZ4OHFFRmZLTGdaMXVQVDYwMGlsQzRBWWdGbFByRFY2RERvWlpHaDh3V1IzT2h0SVlIaTUxaE5Y0gGqAkFVX3lxTE5XT3F2MkpldVV6TTFjT1BZb3dMZGFJTzlvNnU3QTZHckpVM1RBZHhUU1N6RWh5N1FybHY3WkhOWk84X3Z1QzJjNU84OHM2Ml9NVXAzVXhCdEhRVnNLMUh2TGxVdXF4dThxOUdIVEJOODl4ZUdyZTlxYlZIdnVDQWJjc1VwUUtqU0FXcHpmdXNUWWFNRzF3ZFN0MnBvTEZkM2xCbTU2RjRfSnY3VEdWUU5jZlFSanJjaU5LSmZGdEJrQ1RoUVAxUmZiTGRWOEFyQ1NmWjQyNnFfX1RELUVycFVnQ3FyU0t5QWpqNHdzSjRxM0NpSjl4b3Y5ZHZhdHZOQ0dzaGJKRk9rZ3BSQ295WHI3eW5EcUxTcmw2akp1LXdTUUhneU1fZ0FEZ3c?oc=5",
+      "publishedAt": "2026-10-17T12:36:21.000Z",
+      "region": "global",
+      "category": "box-office"
+    },
+    {
+      "id": "7jsav7",
+      "headline": "Lee Je-hoon shares message for Filipino fans ahead of PH fan meeting - ABS-CBN",
+      "publisher": "ABS-CBN",
+      "publisherUrl": "https://www.abs-cbn.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMi0wFBVV95cUxPdXRTVm9VWUNtMU8xUVhSd3JrcXlaYzBwODdmdEpVcVN2NWI0cmJvZWZya3gyUjlmSmFJWURUVXd6WUNmcFdxUlV3SGFiRVZ0ZnZEaWVMcU5rNmlKSE9wc3liZUx5cWNZRnE4a25JR2VZVWpFRHNyVjRkWG4tY2NLNlZaTkp4Z3JTS0Y2Z0ZZN2syYVFJaS0zREd3WTg0dXZiLXdvQnNDWDhMcWttajI1LTQxMjRDdUJfdXA3ckdXM3pnSEluN0Y5S3hTRmcwalBxZzQw?oc=5",
+      "publishedAt": "2026-10-17T12:33:45.000Z",
+      "region": "asia",
+      "category": "television"
+    },
+    {
+      "id": "ri34en",
+      "headline": "Jeffrey Nortey meets Nollywood star Kanayo O. Kanayo after viral wordplay",
+      "publisher": "Asaase Radio",
+      "publisherUrl": "https://asaaseradio.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMingFBVV95cUxPWFJlY1cwU2U2TXV5TmdraDBaYk5xazdjNVRMekdQVWZmWDkzNm1fajdEa1VlQ1NXX0k2c3BNTlJSWWlfWHVOamlhbUg0VHJqMVZPRjY2c2x5Q0RFNHU5aUFKMU8zUzE5Tkhlc2dDYUp5RnBOVHU3U3VoMXc4c29pSVloM1lfR0l3cEpYVjF6THo4aTZMbE9pMGdCU1NBdw?oc=5",
+      "publishedAt": "2026-10-17T12:19:53.000Z",
+      "region": "africa",
+      "category": "celebrity"
+    },
+    {
+      "id": "1ib3995",
+      "headline": "\"He's the GOAT\": Ghanaian rapper Sarkodie breaks silence on O2 Arena challenge",
+      "publisher": "Yen News",
+      "publisherUrl": "https://yen.com.gh",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMivgFBVV95cUxONEVvbmR6dW1ORTE1VHhIRklrMFZBSVBlNDZvQUM1a1lPSDJVRUNabTVoNUVHVUVDUFF6ZmVFTG1FaDVJdENxOE04TnZKM3Faa0ZyZzBsMXVRWkxtdnhVM2w2TmoyU1lxTDI0b2p3LUpXYVhPREYtYmF5U3l2eVBWVktGaExvYWVySFp4U3hGeDVHN1RrY0hiaU5Rem9oR3lITTVqdVBlYTg3YnBsUEVUYnkyaktieDJkTnNiMnRR?oc=5",
+      "publishedAt": "2026-10-17T12:19:50.000Z",
+      "region": "africa",
+      "category": "celebrity"
+    },
+    {
+      "id": "1qbsifv",
+      "headline": "Nollywood: Meet 7 producers making box office history in 2026",
+      "publisher": "Nairametrics",
+      "publisherUrl": "https://nairametrics.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMingFBVV95cUxPMlJOQWxOM1ItY2UyUjhEUk9zR21ZLTV3TDFnTUxUYUc2bXM4bG1QeU1FLU52eE5PWHppWXJ4dGctRzhtQzBDbS1jdWFudzd0UUR2S1kyOGE4ZFJIQy1zQ1lEb3NieHd5YVpzMjJ5Zmo3QlZfakNBSXJFdXRxMnVpSERMUEVISlNoQlRxTjVQTDh1TnJLdnBicUN1aHhNUQ?oc=5",
+      "publishedAt": "2026-10-17T12:16:42.000Z",
+      "region": "africa",
+      "category": "film"
+    },
+    {
+      "id": "rmm1ag",
+      "headline": "TV: Recaps, Show News, Schedules, and More",
+      "publisher": "Showbiz Cheat Sheet",
+      "publisherUrl": "https://www.cheatsheet.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMiS0FVX3lxTE5iVWp6LVpGSDF1YmdtYTBqUjZ0QnNfTXNGZEhGXzV5d3FHU3V6Yk5ydEJXNXhnYXcwMU11LVlPV0VFTUlqX0RkNFlydw?oc=5",
+      "publishedAt": "2026-10-17T12:07:00.000Z",
+      "region": "hollywood",
+      "category": "streaming"
+    },
+    {
+      "id": "o7mxgp",
+      "headline": "Jailer 2 box office collection Day 2: Rajinikanth's film crosses Rs 200 crore worldwide",
+      "publisher": "Storyboard18",
+      "publisherUrl": "https://www.storyboard18.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMi6AFBVV95cUxPd05kY3cwU2xXeUpCbVdjeVBTbHNNSlJqNnpMQVNFSUh5eDRiQkE1S3NNanZIUm10bFE0M3dwQzZDWmlJRk5lcFdVUWdscVVyQm4xZWpKcV94WElNX3lnMDNNTU80RXd1cWF0am94aEYxdmMtRmJlbmZvRUtic196R3hUR0FHLWlQZXlXU0xiazdpM29hdVlTSDZ5VHBzQUxSRFM4SDdDaDNfRTJxQ2FmWURSckVzMmNRR3p2ZGNtNzA3WXVtUEZYMHd3X29mMldad1UyRWhUWVhxVFExZldJMEl2Xy1KWVFq0gHoAUFVX3lxTE93TmRjdzBTbFd5SkJtV2N5UFNsc01KUmo2ekxBU0VJSHl4NGJCQTVLc01qdkhSbXRsUTQzd3BDNkNaaUlGTmVwV1VRZ2xxVXJCbjFlakpxX3hYSU1feWcwM01NTzRFd3VxYXRqb3hoRjF2Yy1GYmVuZm9FS2JzX3pHeFRHQUctaVBleVdTTGJrN2kzb2F1WVNINnlUcHNBTFJEUzhIN0NoM19FMnFDYWZZRFJyRXMyY1FHenZkY203MDdZdW1QRlgwd3dfb2YyV1p3VTJFaFRZWHFUUTFmV0kwSXZfLUpZUWo?oc=5",
+      "publishedAt": "2026-10-17T12:01:01.000Z",
+      "region": "global",
+      "category": "box-office"
+    },
+    {
+      "id": "1xblv4w",
+      "headline": "Box Office: Hanuman Ansh Hits This Milestone For The 50th Time - Only 4 Films Did The Same In The History Of Indian Cinema!",
+      "publisher": "Koimoi",
+      "publisherUrl": "https://www.koimoi.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMi6gFBVV95cUxOUXBGdjJib2FMal9Rcmd5RW9IYmNweElMMXlNQzRJWTVkWXhuN1U5M1RKWWFLTVNQa0J4NU5PX09QanNqQWY3X3NDMTBEWnhqOFJ6eWhWaFlXdUlyWVMxOVMyNThlYWFvaW9RTDBFMUwwN1UxWFZ3NVN6VUV2Zk9MWHpWUXhuUUFxcDBxeFhyQmhIWUxkcERnY1Rkb2VYbEhhUkZxX096UG4wU3l2NllscTBWTGZMcTlvNE5DUlpQYWRWTzRib2dFUnVjZ2xnSVIwZVFiMlJIRjBsMHBrV1RwSWoyNjR5eUJWNWc?oc=5",
+      "publishedAt": "2026-10-17T11:43:14.000Z",
+      "region": "india",
+      "category": "film"
+    },
+    {
+      "id": "1l1ked0",
+      "headline": "List of top Ghanaian personalities behind Obama's documentary about Nkrumah",
+      "publisher": "Yen News",
+      "publisherUrl": "https://yen.com.gh",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMipgFBVV95cUxPc3phMkpBWXh0Y0JkTW5PTFhaTk5sSnNkbE9oOUIxNVB3TG1oUmpYSEgwSVBLUDdiNEc3OE5Uc1pfai0wbzFaMjdVT1R2Q2NxSk5GR3lYMzVuLUtSc08yMlZIVEtYazJZalRNOGhmY3ZvT2tuN2NXM1JMeVVLT25BX2g1OHFFc0VKQUpjVDE0SXlDQ1l4bmtBVDBJWTVYVm1VOFdLdmZB?oc=5",
+      "publishedAt": "2026-10-17T10:31:37.000Z",
+      "region": "africa",
+      "category": "celebrity"
+    },
+    {
+      "id": "xh9s5l",
+      "headline": "Jagun Jagun 2 Cast Features Late Actor Ogogo, Funke Akindele, Kwam1, Others",
+      "publisher": "New Telegraph",
+      "publisherUrl": "https://newtelegraphng.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMiogFBVV95cUxObF83aXBrUWZvWkxEcFBSOTUyWkg1ZTNFOTlBbDAyM3RCZDNSQm1MeE1NQ2dJX3RPN3Nyc28wMy1DeGxzVTRQY2NtMjVETTc1YVlMbEpVSjhKclVrSlJYUzdIUWVRYUVQeC1JdG5vR3U5QkFGV3VYRXlzbnJ0ZzRQVnRENzN0MFcyREpRV1FucUc5RVA5MS1sRzFFYW1GU2o3NVE?oc=5",
+      "publishedAt": "2026-10-17T10:02:33.000Z",
+      "region": "africa",
+      "category": "film"
+    },
+    {
+      "id": "5869n",
+      "headline": "UK government wants to include streaming platforms in BBC licensing fee to fix ‘outdated’ funding model — so if you watch Netflix on your TV, this includes you",
+      "publisher": "TechRadar",
+      "publisherUrl": "https://www.techradar.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMigwJBVV95cUxQaHhPZjJGNENTd2F3QmttaHp5ejdjc1VyX1M4RkNndGZfdEZZeXJQZTJWVlhOVzZNakVIUGE3elRWcHo5RHpPZktnSWVxd1FpN2k4dlhqMHlXNHMwWmdUejE4SnkzUXZfZ2FER184U3hZMXlOT0pmYUwtQ1R0aVgxWmdkNnJpYWRRbl9Kb01nQ0MyUFZvWHdkMFVyOG44U2dKVzQ2RTRrWmtWRkk1cV9vX1lRRmZIODZGM1F1dTRIdDlYcjJBS3NwYWNkdFpza0VLMkxURjlTNmcwV0tuQi1vanYwdTlsVDlabV9jd2tfTjRVZnRHYTZwdy10Nkt2dVJzMlJJ?oc=5",
+      "publishedAt": "2026-10-17T10:00:00.000Z",
+      "region": "hollywood",
+      "category": "streaming"
+    },
+    {
+      "id": "bflibk",
+      "headline": "‘Black Clover’ Season 2 Episode 4 Release Date, Time and Where to Watch",
+      "publisher": "Comic Basics",
+      "publisherUrl": "https://www.comicbasics.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMingFBVV95cUxQbWtOeXZwWnJ0OHAwMGV3amdUTVJ0dUthSlRuSUp2ZlFJYU5fWDBhaEROXzI3UkkyaFNGazF1N0pod3FIUHhxb3c5R3NHZDNoajZVdmNqNjhQdlJqeVU0TDg1bjN2bWVkc0JZTmJVdnFYTWd2R1hmV3R6NTRwaFNNdXQ0aERkdlpIZmh1eUU5Qi1Mbk1ZWG9tVS1RUkcwQQ?oc=5",
+      "publishedAt": "2026-10-17T10:00:00.000Z",
+      "region": "asia",
+      "category": "anime"
+    },
+    {
+      "id": "1ywc4nv",
+      "headline": "Streaming today, October 17, 2026: All the news on Netflix, Prime Video, Disney+, and other platforms",
+      "publisher": "Napolike.com",
+      "publisherUrl": "https://www.napolike.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMikwFBVV95cUxOYUt2anoyajVIUWQ4MUQzM21oTlJBS0IzUlRmbG9uUUlVT0FGcFJZNHMtbkVKNmNHSDB6TWZIZnJ2dWY0U3R4Rk5ZcjhFR2tlb2FHRWp3a2xGV3ZTZTBzTFZ3NEI3ZzR6a3F3TUpRUGxxb2RQZFlYZkEwemR2QXZXYjVBbjRTckltVTh2dkd0Rkx0RUU?oc=5",
+      "publishedAt": "2026-10-17T09:32:39.000Z",
+      "region": "hollywood",
+      "category": "streaming"
+    },
+    {
+      "id": "1opuf11",
+      "headline": "Coen Brothers Bring Their Trademark Humor to Lumière Award Ceremony With a Profane Thank-You to Cinema’s Inventors",
+      "publisher": "Yahoo",
+      "publisherUrl": "https://www.yahoo.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMipAFBVV95cUxQRjF4am5FdWd3Rk9uWVYwa3NKcmViQ0VWYUF2ZWVqOFdaREVOSi1ROVo0RFZnZkhud3p1UWEwMXlRMHljQ2c3TEJ2bUdvUlhWaDBpVDIxSWhDbHlfRWZjWGNmYjh2dXNWbzVvVDVqbWFKMDR3WHJvbExGVG44N2FqajgwWHlNeFdqbkxBQUExUWVEcmlnbW9qNklJZ1pGTG56ZDV2cQ?oc=5",
+      "publishedAt": "2026-10-17T09:20:02.000Z",
+      "region": "africa",
+      "category": "film"
+    },
+    {
+      "id": "d9b1wu",
+      "headline": "Pastor Elvis sheds tears as he recounts alleged attacks from senior pastors",
+      "publisher": "Yen News",
+      "publisherUrl": "https://yen.com.gh",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMitAFBVV95cUxOalZGRkF4YmNhN3YtZ3ZjV210dVktRl9NcUpsVmtpRWEtaUJmbGtsN09uTGlUX3Qtb2ZneFA3aUtXeFMwR2ZjaXQ5ZndqLUk2c3ZTMmhlTGZuNnlINTRrU0ZjZ0tDbkZ6V3JydjV2VDRNOHdUTVlienFhRXNPRnBibE1qTVRmSkJzclNiSE9oRFhoNnZXeUZ2RmM1cWJFalAzQWZrWF90ak5VcUc4WHg0RlBWWHk?oc=5",
+      "publishedAt": "2026-10-17T09:19:43.000Z",
+      "region": "africa",
+      "category": "celebrity"
+    },
+    {
+      "id": "ujx700",
+      "headline": "\"A woman of class\": 3 reasons why Sessinam deserves to be crowned GMB queen",
+      "publisher": "Yen News",
+      "publisherUrl": "https://yen.com.gh",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMisgFBVV95cUxNTGw3dEVXcnA3cVR0VFJTR2MzNFBnYlZrMWphRlpMMmNOX3JSN1pJSUVhcUZraktDbW5CN3VmbE9QSVk3Z1RFZ09hT18yNFUyNWR5NXk5OVI1bjhmQkhOdkJrQVllaW9CY1dJOFlIb0JERy1RZ2ZySWs5djRZbWZGUzRUbGx2NWZMdUVMVWNPN2FUcXJGTmxRTE9QdW9HQnBqeUtMMFBXb3FZSGtZSlFiM3FB?oc=5",
+      "publishedAt": "2026-10-17T08:50:26.000Z",
+      "region": "africa",
+      "category": "celebrity"
+    },
+    {
+      "id": "vxv76o",
+      "headline": "\"History makers\": Akua GMB, Selorm & full list of GMB winners from 2007 to 2025",
+      "publisher": "Yen News",
+      "publisherUrl": "https://yen.com.gh",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMimAFBVV95cUxOWHdZZmphY0M0VFFoVnFwNWpjU3M2WTM1TWV6YUFwUWdKV1VfaWJ4ZHZqajNKTVZXTklkSXlYTnl6MkV4WVVFZDZjaml4ZzRmdEE5R211QWFJZXpaWkZmTk5zZkhydTlxdERkR3JaMVBjNmF5RVhqQnpWWkwySTBqLTVDMmVNRWVOcXlVQVBSOXBQaE1nVHd0Zg?oc=5",
+      "publishedAt": "2026-10-17T08:48:58.000Z",
+      "region": "africa",
+      "category": "celebrity"
+    },
+    {
+      "id": "e8q1gk",
+      "headline": "Women dominate 15th AFRIFF as 135 movies set for festival",
+      "publisher": "The Guardian Nigeria News",
+      "publisherUrl": "https://guardian.ng",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMikgFBVV95cUxNanhOZk1CbWx0ZWEzdmVBeVE2MTBJWnNRclFZbnlDQ0RlV1VPOXFxM21ONHoyczdRanJ2LWZwMENyWnBjUV9DcGZBTDZGNm1nbWZEUWNtQ3FVVmszWE1wUXdsb1FmSzRTN3FhWWI0dkR3OHVMaWh0T0x4NHRZeEFwQ01oQ0lSNjNGVFdveEUxa0lNUQ?oc=5",
+      "publishedAt": "2026-10-17T08:42:01.000Z",
+      "region": "africa",
+      "category": "film"
+    },
+    {
+      "id": "1fva4os",
+      "headline": "The Digger disaster: what an epic movie flop means for Tom Cruise and Hollywood",
+      "publisher": "The Guardian",
+      "publisherUrl": "https://www.theguardian.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMi1AFBVV95cUxQdlFKd1JVSmNZSHpIWVc3YW1MaXdjcUMxV1V6Y3VGWFF6a0xyTFROZDZrNkJ5Tl9RX3hDT3BJdllIRGNpRmdzUnZsSVp4azMycU1BOWJ6R2lQNjRuMjZacnFibThwUkM1cVY4ZGEzV2RiTlp4REh1LWxtSDBWbWdrOFJYT2duZnRtVnB4d1doQWROSEwzTGEyQnpxUGstMW9mM0NTV2tqOG9WMEFmNWtWRy1XS19kazBGOS12ODFPeU9UMEh1VXhKRlloSFg2SnZzcUNRVg?oc=5",
+      "publishedAt": "2026-10-17T08:12:00.000Z",
+      "region": "hollywood",
+      "category": "film"
+    },
+    {
+      "id": "85rmqr",
+      "headline": "Shreya Ghoshal announces Durban, Pretoria shows on ‘Unstoppable Tour’",
+      "publisher": "The Assam Tribune",
+      "publisherUrl": "https://assamtribune.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMiswFBVV95cUxQVTZTQ3NVMmkxdWVUeS1qNklRcVRIYTZVZG0zX19yUThGV2lyRVd6VGpVZ2l5Z01GNXBoQUtrNEYxQ2JDUkQ5QkRGcUlCOHh5OVZiQ0RBU0tValFmc2dyTGFaNHJuTUFwMHp2d1UtNTRMTzJuVnZTNm83ZlN3emZyNWVuZ0dFdk9EWjBYaXVWSEFxTmxLc05jOU1DNmFRYVVwVDlTemRheGN4dUpiTHBhNHQxd9IBuAFBVV95cUxONUY5b1VTa3ZxV2tMbllyMlhlMmk2Rlp6TEU4YXdVMU10emZCV0IzUE85ZTV2Q0ZHdDQtcG5fQlFXMV9ZNmt3T2ZqcWtaS3lFczBjSlR2TzFUMExDT0R1el9UcVdlQnR4TDZyM1NaN2tsSjlzSG1kc00yVGUzdU9TVTJmUGp3RWJEZ0VrQnRrTE00OGhLNWRZX0NVWW52RWZ4ZzFkT2NQS0FjM3lKQkFWd25pcWxady1i?oc=5",
+      "publishedAt": "2026-10-17T07:57:10.000Z",
+      "region": "africa",
+      "category": "film"
+    }
+  ]
+}
