@@ -55,6 +55,26 @@ test("taste profile maps are bounded", async () => {
   }));
 });
 
+test("owners can persist only known personal achievement records", async () => {
+  const db = env.authenticatedContext("alice").firestore();
+  await assertSucceeds(setDoc(doc(db, "users/alice/achievements/first-favorite"), {
+    id: "first-favorite", unlockedAt: Date.now(), schemaVersion: 1
+  }));
+  await assertFails(setDoc(doc(db, "users/alice/achievements/not-a-real-achievement"), {
+    id: "not-a-real-achievement", unlockedAt: Date.now(), schemaVersion: 1
+  }));
+  await assertFails(setDoc(doc(db, "users/alice/achievements/queue-first"), {
+    id: "queue-first", unlockedAt: Date.now(), schemaVersion: 1, rewardPoints: 1000
+  }));
+});
+
+test("achievement records remain private to their owner", async () => {
+  const db = env.authenticatedContext("alice").firestore();
+  await assertFails(setDoc(doc(db, "users/bob/achievements/first-favorite"), {
+    id: "first-favorite", unlockedAt: Date.now(), schemaVersion: 1
+  }));
+});
+
 test("unauthenticated users cannot read private user documents", async () => {
   await env.withSecurityRulesDisabled(async context => {
     await setDoc(doc(context.firestore(), "users/alice/favorites/movie:550"), {
