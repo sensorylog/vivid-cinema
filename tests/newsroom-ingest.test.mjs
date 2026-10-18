@@ -61,10 +61,10 @@ test("feed redirects stay on the approved domain", async () => {
     if (calls === 1) return new Response(null,{status:302,headers:{location:"/feed-v2.xml"}});
     return new Response("<rss/>",{status:200});
   };
-  assert.equal(await fetchApprovedFeed(source.feedUrl,source.domain,goodFetch),"<rss/>");
+  assert.equal(await fetchApprovedFeed("https://example.com/feed.xml",source.domain,goodFetch),"<rss/>");
   assert.equal(calls,2);
   const badFetch = async () => new Response(null,{status:302,headers:{location:"https://elsewhere.example/feed.xml"}});
-  await assert.rejects(fetchApprovedFeed(source.feedUrl,source.domain,badFetch),/outside the approved publisher domain/);
+  await assert.rejects(fetchApprovedFeed("https://example.com/feed.xml",source.domain,badFetch),/outside the approved publisher domain/);
 });
 
 test("ingestion only stages new pending-review metadata for explicitly enabled sources", async () => {
