@@ -5,7 +5,7 @@ import {
   assertFails, assertSucceeds, initializeTestEnvironment
 } from "@firebase/rules-unit-testing";
 import {
-  collection, deleteDoc, doc, getDoc, getDocs, serverTimestamp, setDoc, updateDoc
+  collection, deleteDoc, doc, getDoc, getDocs, serverTimestamp, setDoc, updateDoc, writeBatch
 } from "firebase/firestore";
 
 let env;
@@ -113,7 +113,7 @@ test("publisher approval and manual article publishing are moderator-only", asyn
   const source = {
     publisher: "Example Entertainment Desk", domain: "example.com", status: "approved",
     defaultRegion: "global", defaultCategory: "film", feedUrl: "", feedApproved: false,
-    imageUsageApproved: false, reviewNotes: "Reviewed ownership, editorial standards and display terms.",
+    ingestionEnabled: false, imageUsageApproved: false, reviewNotes: "Reviewed ownership, editorial standards and display terms.",
     verifiedBy: "mod-1", verifiedAt: serverTimestamp(), createdAt: serverTimestamp(), updatedAt: serverTimestamp()
   };
   await assertSucceeds(setDoc(doc(moderator(), "newsSources", "example.com"), source));
@@ -188,4 +188,54 @@ test("behavior events are owner-private, append-only, and deletable only by thei
   const secondEventRef = doc(ownerDb, "users", "event-owner", "events", "session-1_event-2");
   await assertSucceeds(setDoc(secondEventRef, { ...event, id: "event-2" }));
   await assertFails(deleteDoc(doc(member("event-intruder", "Intruder"), "users", "event-owner", "events", "session-1_event-2")));
+});
+
+
+test("discovery queue is private and publication is coupled to an article write", async () => {
+  const publishedAt = new Date(Date.now() - 60_000);
+  const queueData = {
+    headline: "A verified global cinema announcement", publisher: "Example Entertainment",
+    author: "Reporter One", sourceUrl: "https://example.com/story", canonicalUrl: "https://example.com/story",
+    sourceId: "example.com", category: "film", region: "global", excerpt: "Short feed excerpt only.",
+    publishedAt, discoveredAt: new Date(), createdAt: new Date(), updatedAt: new Date(),
+    status: "pending_review", ingestRunId: "test-run"
+  };
+  await env.withSecurityRulesDisabled(async context => {
+    await setDoc(doc(context.firestore(), "newsSources", "example.com"), {
+      publisher: "Example Entertainment", domain: "example.com", status: "approved",
+      defaultRegion: "global", defaultCategory: "film", feedUrl: "https://example.com/feed.xml",
+      feedApproved: true, ingestionEnabled: true, imageUsageApproved: false,
+      reviewNotes: "Verified official feed-use terms and publisher attribution policy.",
+      verifiedBy: "mod-1", verifiedAt: new Date(), createdAt: new Date(), updatedAt: new Date()
+    });
+    await setDoc(doc(context.firestore(), "newsQueue", "candidate-1"), queueData);
+  });
+  const regular = member("regular-reader", "Regular Reader");
+  const trusted = moderator();
+  await assertFails(getDoc(doc(regular, "newsQueue", "candidate-1")));
+  await assertSucceeds(getDoc(doc(trusted, "newsQueue", "candidate-1")));
+  await assertFails(updateDoc(doc(trusted, "newsQueue", "candidate-1"), {
+    status: "published", reviewedAt: serverTimestamp(), reviewedBy: "mod-1",
+    reviewNotes: "Reviewed source and facts.", articleId: "missing-article"
+  }));
+
+  const articleRef = doc(trusted, "articles", "queue-article-1");
+  const queueRef = doc(trusted, "newsQueue", "candidate-1");
+  const article = {
+    headline: queueData.headline, publisher: queueData.publisher, author: queueData.author,
+    sourceUrl: queueData.sourceUrl, canonicalUrl: queueData.canonicalUrl, sourceId: queueData.sourceId,
+    category: "film", region: "global", summary: "An original editorial summary written after source verification.",
+    body: "", imageUrl: "", imageAlt: queueData.headline, publishedAt, updatedAt: publishedAt,
+    ingestedAt: serverTimestamp(), status: "published", origin: "editorial", featured: false,
+    editorialReviewed: true, correction: "", topics: ["film", "global"]
+  };
+  const batch = writeBatch(trusted);
+  batch.set(articleRef, article);
+  batch.update(queueRef, {
+    status: "published", articleId: articleRef.id, reviewedAt: serverTimestamp(),
+    reviewedBy: "mod-1", reviewNotes: "Verified source, publication date and summary."
+  });
+  await assertSucceeds(batch.commit());
+  await assertSucceeds(getDoc(doc(env.unauthenticatedContext().firestore(), "articles", "queue-article-1")));
+  await assertFails(updateDoc(queueRef, { status: "dismissed", reviewedAt: serverTimestamp(), reviewedBy: "mod-1", reviewNotes: "Trying to change published decision." }));
 });
