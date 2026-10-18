@@ -33,3 +33,15 @@ test("Recall keeps detailed quota and provider errors visible for diagnosis", ()
 test("service worker cache version changes with the updated AI modules", () => {
   assert.match(workerSource, /vivid-cinema-shell-v205/);
 });
+
+test("achievement Sparks reuse the existing Recall model and App Check protections", () => {
+  assert.match(aiSource, /export async function generateAchievementSpark/);
+  assert.match(aiSource, /const SPARK_TIMEOUT_MS = 10000/);
+  assert.match(aiSource, /const model = await getRecallModel\(\)/);
+  assert.match(aiSource, /if \(appCheckSkippedReason\)/);
+  assert.match(aiSource, /if \(appCheckError\)/);
+  assert.match(aiSource, /Do not fabricate historical claims, dates, quotations, statistics/);
+  assert.match(aiSource, /35 to 65 words maximum/);
+  assert.match(aiSource, /export async function getRecallClues/);
+  assert.match(aiSource, /export async function sendRecallChatMessage/);
+});
