@@ -1,5 +1,6 @@
 import crypto from "node:crypto";
-import admin from "firebase-admin";
+import { cert, initializeApp } from "firebase-admin/app";
+import { getFirestore } from "firebase-admin/firestore";
 import webpush from "web-push";
 
 const serviceAccount=JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_JSON||"{}");
@@ -7,8 +8,8 @@ const vapidPrivateKey=process.env.VAPID_PRIVATE_KEY||"";
 const tmdbApiKey=process.env.TMDB_API_KEY||"6a46c44a2b36f3b6c206e5f19cafa558";
 if(!serviceAccount.project_id)throw new Error("Missing FIREBASE_SERVICE_ACCOUNT_JSON");
 if(!vapidPrivateKey)throw new Error("Missing VAPID_PRIVATE_KEY");
-admin.initializeApp({credential:admin.credential.cert(serviceAccount)});
-const db=admin.firestore();
+initializeApp({credential:cert(serviceAccount)});
+const db=getFirestore();
 webpush.setVapidDetails("mailto:notifications@vividcinema.app","BGZNNqdOPr-XJjdPnJMKPHvErIXftdRM0P8VxpjElqRs5AwpyY94lownEeUE2W-8GnFyvNd3-u7tmRu2b-5dEIg",vapidPrivateKey);
 
 const TMDB="https://api.themoviedb.org/3";
