@@ -25,3 +25,18 @@ test("player iframe sends only the origin referrer for provider domain checks wi
 test("watch page no longer contains the removed Movie Scraper Player 2 integration", () => {
   assert.doesNotMatch(source, /movie-scraper-lovat-three|secondaryPlayerMarkup|vivid-secondary-player|upstream stream extraction has failed/);
 });
+
+
+test("direct-stream diagnostics require an explicit playbackDebug query flag", () => {
+  assert.match(source, /route\.params\.get\("playbackDebug"\) === "1"/);
+  assert.match(source, /onDiagnostics:\s*sample\s*=>/);
+  assert.match(source, /\[Vivid playback diagnostics\]/);
+});
+
+
+test("iframe diagnostics are opt-in and do not log raw provider payloads", () => {
+  assert.match(source, /\[Vivid iframe diagnostics\]/);
+  assert.match(source, /debugData\.event \|\| debugData\.player_status/);
+  assert.match(source, /route\.params\.get\("playbackDebug"\) === "1"/);
+  assert.doesNotMatch(source, /console\.info\("\[Vivid iframe diagnostics\]",\s*payload/);
+});
