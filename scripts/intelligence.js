@@ -260,7 +260,7 @@ export async function syncIntelligenceForUser(u){
    }else if(remote&&Number(remote.updatedAt||0)>Number(s.taste.updatedAt||0)){
     s.taste={...remote,dirty:false};
    }else if(Number(s.taste.updatedAt||0)>0&&Number(s.taste.updatedAt||0)>Number(remote?.updatedAt||0)){
-    await setDoc(doc(db,"users",u.uid,"taste","profile"),{version:1,...s.taste},{merge:true});
+    await setDoc(doc(db,"users",u.uid,"taste","profile"),{version:1,genres:s.taste.genres||{},languages:s.taste.languages||{},countries:s.taste.countries||{},actors:s.taste.actors||{},directors:s.taste.directors||{},media:s.taste.media||{movie:0,tv:0},decades:s.taste.decades||{},updatedAt:Number(s.taste.updatedAt)||0});
   }
   syncStage="finalizing sync";
   const {auth:finalAuth}=await fb();
