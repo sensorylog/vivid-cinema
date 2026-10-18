@@ -20,8 +20,10 @@ function makeArt(item, className = "") {
 
 function setProgress(track, item) {
   if (!track) return;
-  track.style.setProperty("--progress", item.percentage + "%");
-  const fill = track.querySelector("span");
+  const target = track.classList.contains("achievement-progress-track") ? track : track.querySelector(".achievement-progress-track");
+  if (!target) return;
+  target.style.setProperty("--progress", item.percentage + "%");
+  const fill = target.querySelector(":scope > span");
   if (fill) fill.style.width = item.percentage + "%";
 }
 
@@ -53,7 +55,8 @@ function render() {
   $("achievement-earned-count").textContent = String(earned);
   $("achievement-completion-count").textContent = percent + "%";
   $("achievement-hero-progress").style.setProperty("--progress", percent + "%");
-  $("achievement-hero-progress").querySelector("span").style.width = percent + "%";
+  $("achievement-hero-progress").setAttribute("aria-valuenow", String(percent));
+  $("achievement-hero-progress").querySelector(":scope > span").style.width = percent + "%";
 
   const next = data.items.filter(item => !item.earned)
     .sort((a, b) => b.percentage - a.percentage || a.title.localeCompare(b.title))[0];
@@ -96,7 +99,8 @@ function render() {
     const category = document.createElement("span");
     category.className = "achievement-category";
     category.textContent = item.category;
-    const title = document.createElement("h3");
+    const title = document.createElement("span");
+    title.className = "achievement-card-title";
     title.textContent = item.title;
     const footer = document.createElement("span");
     footer.className = "achievement-card-footer";
