@@ -13,9 +13,18 @@ const presets = document.getElementById("donation-presets");
 const status = document.getElementById("donate-status");
 const submit = document.getElementById("donate-submit");
 const submitText = document.getElementById("donate-submit-text");
+const defaultSubmitText = submitText.textContent;
 
 function config() {
   return CURRENCIES[currency.value] || CURRENCIES.GHS;
+}
+
+function syncPresetSelection(selectedValue = "") {
+  presets.querySelectorAll(".donate-preset").forEach(button => {
+    const selected = button.dataset.amount === String(selectedValue);
+    button.classList.toggle("is-selected", selected);
+    button.setAttribute("aria-pressed", String(selected));
+  });
 }
 
 function renderCurrency() {
@@ -24,14 +33,14 @@ function renderCurrency() {
   amount.min = String(c.min);
   amount.placeholder = Number(c.presets[1]).toFixed(2);
   presets.innerHTML = c.presets.map(value =>
-    '<button type="button" class="donate-preset" data-amount="' + value + '">' +
+    '<button type="button" class="donate-preset" data-amount="' + value + '" aria-pressed="false">' +
     c.symbol + Number(value).toLocaleString() + '</button>'
   ).join("");
   presets.querySelectorAll(".donate-preset").forEach(button => {
     button.addEventListener("click", () => {
       amount.value = button.dataset.amount;
-      presets.querySelectorAll(".donate-preset").forEach(x => x.classList.remove("is-selected"));
-      button.classList.add("is-selected");
+      syncPresetSelection(button.dataset.amount);
+      amount.setCustomValidity("");
     });
   });
 }
@@ -44,10 +53,14 @@ function setStatus(message, kind = "") {
 function setBusy(busy) {
   submit.disabled = busy;
   submit.setAttribute("aria-busy", busy ? "true" : "false");
-  submitText.textContent = busy ? "Opening Paystack…" : "Support Vivid";
+  submitText.textContent = busy ? "Opening Paystack…" : defaultSubmitText;
 }
 
 currency.addEventListener("change", renderCurrency);
+
+amount.addEventListener("input", () => {
+  syncPresetSelection(amount.value);
+});
 
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
