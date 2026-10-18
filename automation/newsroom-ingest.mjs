@@ -24,6 +24,7 @@ export function cleanExcerpt(value = "", maxLength = 450) {
     .replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, " ")
     .replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, " ")
     .replace(/<[^>]*>/g, " ")
+    .replace(/\s+([,.;:!?])/g, "$1")
     .replace(/\s+/g, " ")
     .trim();
   if (plain.length <= maxLength) return plain;
