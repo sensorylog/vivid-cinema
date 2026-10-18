@@ -32,3 +32,11 @@ test("direct-stream diagnostics require an explicit playbackDebug query flag", (
   assert.match(source, /onDiagnostics:\s*sample\s*=>/);
   assert.match(source, /\[Vivid playback diagnostics\]/);
 });
+
+
+test("iframe diagnostics are opt-in and do not log raw provider payloads", () => {
+  assert.match(source, /\[Vivid iframe diagnostics\]/);
+  assert.match(source, /debugData\.event \|\| debugData\.player_status/);
+  assert.match(source, /route\.params\.get\("playbackDebug"\) === "1"/);
+  assert.doesNotMatch(source, /console\.info\("\[Vivid iframe diagnostics\]",\s*payload/);
+});
