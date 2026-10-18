@@ -103,7 +103,7 @@ export function parseFeedXml(xml, source) {
     const rawDate = firstTag(block, ["pubDate", "published", "updated", "date"]);
     const publishedAt = rawDate ? new Date(rawDate) : null;
     const author = cleanExcerpt(firstTag(block, ["creator", "author"]), 120);
-    const excerpt = cleanExcerpt(firstTag(block, ["description", "summary", "content"]), 450);
+    const excerpt = cleanExcerpt(firstTag(block, ["description", "summary", "content:encoded", "content"]), 450);
     if (!headline || headline.length < 8 || !sourceUrl || !publishedAt || Number.isNaN(publishedAt.getTime())) continue;
     const canonicalUrl = sourceUrl;
     if (seen.has(canonicalUrl)) continue;
@@ -174,7 +174,9 @@ export async function fetchApprovedFeed(feedUrl, domain, fetchImpl = fetch) {
       continue;
     }
     if (!response.ok) throw new Error("Feed returned HTTP " + response.status + ".");
-    return await readResponseLimited(response);
+    const xml = await readResponseLimited(response);
+    if (!/<(?:[A-Za-z0-9_-]+:)?(?:rss|feed|RDF)\b/i.test(xml.slice(0, 12000))) throw new Error("Response did not contain an RSS or Atom feed document.");
+    return xml;
   }
   throw new Error("Feed could not be fetched.");
 }
