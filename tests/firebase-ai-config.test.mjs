@@ -31,7 +31,7 @@ test("Recall keeps detailed quota and provider errors visible for diagnosis", ()
 });
 
 test("service worker cache version changes with the updated AI modules", () => {
-  assert.match(workerSource, /vivid-cinema-shell-v205/);
+  assert.match(workerSource, /vivid-cinema-shell-v206/);
 });
 
 test("achievement Sparks reuse the existing Recall model and App Check protections", () => {
