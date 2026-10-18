@@ -25,5 +25,5 @@ export const NEWS_SOURCES = [
  {id:"adorocinema",publisher:"AdoroCinema",domain:"adorocinema.com",sourceUrl:"https://www.adorocinema.com/",feedUrl:null,category:"film",region:"latin-america",approvedForUse:false,ingestionEnabled:false,note:"Brazilian cinema candidate; verify official feed and terms."},
  {id:"guardian-film",publisher:"The Guardian",domain:"theguardian.com",sourceUrl:"https://www.theguardian.com/film",feedUrl:"https://www.theguardian.com/film/rss",category:"film",region:"europe",approvedForUse:false,ingestionEnabled:false,note:"Verify applicable RSS licence and display terms."}
 ];
-export const NEWS_REGIONS = ["global","hollywood","india","africa","asia","europe","latin-america","middle-east"];
+export const NEWS_REGIONS = ["global","hollywood","india","africa","asia","europe","latin-america","middle-east","ghana","nigeria"];
 export const NEWS_CATEGORIES = ["film","streaming","celebrity","trailers","awards","industry","africa","india","asia","hollywood","europe","latin-america","middle-east","ghana","nollywood"];
