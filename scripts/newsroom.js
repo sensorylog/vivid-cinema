@@ -10,7 +10,7 @@ if (root) {
   let unsubscribe = null;
 
   const labelFor = value => ({
-    film: "Film", television: "Television", celebrity: "People", streaming: "Streaming",
+    film: "Film", television: "TV", celebrity: "People", streaming: "Streaming", music: "Music", gaming: "Gaming", anime: "Anime", animation: "Animation", "box-office": "Box office", festivals: "Festivals", production: "Production", business: "Business", legal: "Legal", comics: "Comics", theatre: "Theatre", podcasts: "Podcasts", creators: "Creators",
     awards: "Awards", ghana: "Ghana", nollywood: "Nollywood", africa: "Africa",
     asia: "Asia", india: "India", hollywood: "Hollywood", global: "Global",
     europe: "Europe", "latin-america": "Latin America", "middle-east": "Middle East",
