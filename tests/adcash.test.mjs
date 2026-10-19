@@ -40,5 +40,5 @@ test("Adcash host is allowed without widening unrelated CSP directives and the s
   const config = await readFile(path.join(root, "firebase.json"), "utf8");
   const serviceWorker = await readFile(path.join(root, "service-worker.js"), "utf8");
   assert.match(config, /script-src 'self' https:\/\/acscdn\.com/);
-  assert.match(serviceWorker, /const CACHE_NAME = "vivid-cinema-shell-v230"/);
+  assert.match(serviceWorker, /const CACHE_NAME = "vivid-cinema-shell-v231"/);
 });
