@@ -10,10 +10,10 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
-  group: vivid-static-news-feed
+  group: firebase-hosting-live
   cancel-in-progress: false
 
 jobs:
