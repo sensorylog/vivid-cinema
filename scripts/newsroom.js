@@ -113,14 +113,28 @@ if (root) {
       cleanSummary(article.summary, publisher) || "This publisher’s RSS feed did not include a readable summary. Open the original report for the complete story.";
     document.getElementById("vivid-news-reader-date").textContent = formatDate(article.publishedAt);
     const imageUrl = safeImageUrl(article.imageUrl);
+    const imageFallbackUrl = safeImageUrl(article.imageFallbackUrl);
     const imageWrap = document.getElementById("vivid-news-reader-image-wrap");
     const readerImage = document.getElementById("vivid-news-reader-image");
     if (imageUrl) {
-      readerImage.onerror = () => { imageWrap.hidden = true; readerImage.removeAttribute("src"); };
+      readerImage.dataset.fallbackSrc = imageFallbackUrl;
+      readerImage.onerror = () => {
+        const fallback = readerImage.dataset.fallbackSrc;
+        if (fallback && readerImage.src !== fallback && !readerImage.dataset.fallbackTried) {
+          readerImage.dataset.fallbackTried = "true";
+          readerImage.src = fallback;
+          return;
+        }
+        imageWrap.hidden = true;
+        readerImage.removeAttribute("src");
+      };
+      delete readerImage.dataset.fallbackTried;
       readerImage.src = imageUrl;
       imageWrap.hidden = false;
     } else {
       readerImage.removeAttribute("src");
+      delete readerImage.dataset.fallbackSrc;
+      delete readerImage.dataset.fallbackTried;
       imageWrap.hidden = true;
     }
     const original = document.getElementById("vivid-news-reader-original");
@@ -145,6 +159,8 @@ if (root) {
     const summary = escapeHtml(cleanSummary(article.summary, article.publisher) || "This publisher has not provided a preview. Open the original report for the full story.");
     const source = url || safeUrl(article.publisherUrl) || "https://news.google.com/";
     const imageUrl = safeImageUrl(article.imageUrl);
+    const imageFallbackUrl = safeImageUrl(article.imageFallbackUrl);
+    const imageFallbackAttr = imageFallbackUrl ? ' data-fallback-src="' + escapeHtml(imageFallbackUrl) + '"' : "";
     const id = escapeHtml(article.id || "");
     const artContent = imageUrl
       ? '<img src="' + escapeHtml(imageUrl) + '" alt="" aria-hidden="true" loading="lazy" decoding="async"><span class="vivid-editorial-image-label">VIVID / NEWS</span><strong class="vivid-editorial-art-category">' + escapeHtml(category) + '</strong>'
@@ -169,6 +185,12 @@ if (root) {
   root.addEventListener("error", event => {
     if (!event.target.matches(".vivid-editorial-art img")) return;
     const art = event.target.closest(".vivid-editorial-art");
+    const fallback = event.target.dataset.fallbackSrc;
+    if (fallback && event.target.src !== fallback && !event.target.dataset.fallbackTried) {
+      event.target.dataset.fallbackTried = "true";
+      event.target.src = fallback;
+      return;
+    }
     event.target.remove();
     art?.classList.remove("has-image");
     art?.classList.add("vivid-editorial-art-placeholder");
@@ -200,7 +222,11 @@ if (root) {
       return response.json();
     })
     .then(data => {
-      articles = Array.isArray(data.articles) ? data.articles : [];
+      articles = (Array.isArray(data.articles) ? data.articles : []).slice().sort((a, b) => {
+        const timeA = Date.parse(a.publishedAt || "");
+        const timeB = Date.parse(b.publishedAt || "");
+        return (Number.isFinite(timeB) ? timeB : 0) - (Number.isFinite(timeA) ? timeA : 0);
+      });
       render();
       if (status) {
         const time = data.generatedAt ? new Date(data.generatedAt).toLocaleString() : "recently";
