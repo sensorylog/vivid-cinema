@@ -59,10 +59,15 @@ export async function cacheArticleThumbnails(stories = [], {
           "User-Agent": "Mozilla/5.0 (compatible; VividCinemaNews/1.0; +https://vivid-cinema.web.app/news.html)",
           "Accept": "image/avif,image/webp,image/apng,image/*,*/*;q=0.8"
         };
-        try {
-          const source = new URL(story.sourceUrl);
-          if (source.protocol === "https:") headers.Referer = source.href;
-        } catch {}
+        for (const candidate of [story.sourceUrl, story.publisherUrl]) {
+          try {
+            const source = new URL(candidate);
+            if (source.protocol === "https:" && !/(^|\.)news\.google\.com$/i.test(source.hostname)) {
+              headers.Referer = source.href;
+              break;
+            }
+          } catch {}
+        }
         const response = await fetchImpl(remoteUrl, {
           redirect: "follow",
           headers,
