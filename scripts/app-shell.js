@@ -1,4 +1,5 @@
 import "./google-tag.js";
+import "./adcash.js";
 import "./pwa.js";
 import { VIVID_CONFIG } from "./config.js";
 
