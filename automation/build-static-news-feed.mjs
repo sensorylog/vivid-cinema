@@ -177,4 +177,6 @@ let previous = "";
 try { previous = await readFile(OUTPUT, "utf8"); } catch {}
 await writeFile(OUTPUT, payload);
 console.log("Built " + unique.length + " attributed headlines from " + (FEEDS.length - failed.length) + "/" + FEEDS.length + " RSS queries.");
+const imageCount = finalStories.filter(story => Boolean(story.imageUrl)).length;
+console.log("Article thumbnails: " + imageCount + "/" + finalStories.length);
 console.log("Updated feed: " + (payload !== previous));
