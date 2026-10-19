@@ -18,8 +18,8 @@ function safeImageUrl(value, baseUrl = "") {
   try {
     const url = new URL(decode(value), baseUrl || undefined);
     if (url.protocol !== "https:" || url.username || url.password) return "";
-    if (/(?:^|[\\/_-])(?:logo|avatar|favicon|sprite|tracking|pixel|placeholder|blank|gravatar)(?:[\\/_-]|\\.|$)/i.test(url.pathname)) return "";
-    if (/^(?:news\\.)?google\\.com$/i.test(url.hostname) &&
+    if (/(?:^|[\/_-])(?:logo|avatar|favicon|sprite|tracking|pixel|placeholder|blank|gravatar)(?:[\/_-]|\.)/i.test(url.pathname)) return "";
+    if (/^(?:news\.)?google\.com$/i.test(url.hostname) &&
         /(?:branding|logo|favicon)/i.test(url.pathname)) return "";
     return url.href;
   } catch {
@@ -70,7 +70,7 @@ export async function cacheArticleThumbnails(stories = [], {
         });
         if (!response.ok) return { ...story, imageUrl: "" };
         const contentType = response.headers.get("content-type") || "";
-        if (!/^image\\/(?:jpeg|png|webp|avif|gif)(?:\\s*;|$)/i.test(contentType)) {
+        if (!/^image\/(?:jpeg|png|webp|avif|gif)(?:\s*;|$)/i.test(contentType)) {
           return { ...story, imageUrl: "" };
         }
         const bytes = new Uint8Array(await response.arrayBuffer());
@@ -82,7 +82,7 @@ export async function cacheArticleThumbnails(stories = [], {
         const filename = id + "." + extension;
         await writeFile(join(outputDir, filename), bytes);
         cached += 1;
-        return { ...story, imageUrl: publicPathPrefix.replace(/\\/$/, "") + "/" + filename };
+        return { ...story, imageUrl: publicPathPrefix.replace(/\/$/, "") + "/" + filename };
       } catch {
         return { ...story, imageUrl: "" };
       }
