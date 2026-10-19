@@ -563,3 +563,26 @@ body[data-vivid-page="news"] .vivid-editorial-filters button{min-height:40px}
  .vivid-news-reader-image-wrap,.vivid-news-reader-image-wrap img{max-height:220px}
 }
 @media(prefers-reduced-motion:reduce){body[data-vivid-page="news"] .vivid-editorial-art.has-image img{transition:none}}
+
+
+/* Compact mobile entry point and distinct editorial art when publishers supply no image. */
+body[data-vivid-page="news"] .vivid-editorial-art-placeholder{display:flex;flex-direction:column;align-items:flex-start;justify-content:space-between;gap:18px;padding:clamp(16px,2.4vw,26px);background:radial-gradient(ellipse at 80% 12%,rgba(199,255,85,.18),transparent 44%),linear-gradient(135deg,#24272b,#101116 72%)}
+body[data-vivid-page="news"] .vivid-editorial-art-category{display:block;max-width:92%;font-family:var(--vn-serif);font-size:clamp(28px,4vw,52px);font-weight:500;line-height:.98;letter-spacing:-.045em;color:#f3f1e9;text-wrap:balance}
+body[data-vivid-page="news"] .vivid-editorial-card[data-category="anime"] .vivid-editorial-art-placeholder{background:radial-gradient(ellipse at 82% 15%,#db8fc555,transparent 48%),linear-gradient(135deg,#3a223b,#101116 75%)}
+body[data-vivid-page="news"] .vivid-editorial-card[data-category="business"] .vivid-editorial-art-placeholder{background:radial-gradient(ellipse at 82% 15%,#83b9a355,transparent 48%),linear-gradient(135deg,#1c3835,#101116 75%)}
+body[data-vivid-page="news"] .vivid-editorial-card[data-category="gaming"] .vivid-editorial-art-placeholder{background:radial-gradient(ellipse at 82% 15%,#8f8de155,transparent 48%),linear-gradient(135deg,#282a52,#101116 75%)}
+body[data-vivid-page="news"] .vivid-editorial-card[data-category="music"] .vivid-editorial-art-placeholder{background:radial-gradient(ellipse at 82% 15%,#e5b76a55,transparent 48%),linear-gradient(135deg,#49341f,#101116 75%)}
+body[data-vivid-page="news"] .vivid-editorial-card[data-category="streaming"] .vivid-editorial-art-placeholder{background:radial-gradient(ellipse at 82% 15%,#df8a7455,transparent 48%),linear-gradient(135deg,#4a2424,#101116 75%)}
+body[data-vivid-page="news"] .vivid-editorial-card[data-category="television"] .vivid-editorial-art-placeholder{background:radial-gradient(ellipse at 82% 15%,#8bb6d855,transparent 48%),linear-gradient(135deg,#233748,#101116 75%)}
+@media(max-width:650px){
+ body[data-vivid-page="news"] .vivid-news-hero-art{min-height:145px}
+ body[data-vivid-page="news"] .vivid-news-hero-copy{padding:20px 18px 22px}
+ body[data-vivid-page="news"] .vivid-news-hero h1{font-size:clamp(38px,10vw,48px);margin:12px 0}
+ body[data-vivid-page="news"] .vivid-news-hero p{font-size:12px;line-height:1.5;margin:0}
+ body[data-vivid-page="news"] .vivid-news-hero-actions{margin-top:14px;gap:8px}
+ body[data-vivid-page="news"] .vivid-news-primary,body[data-vivid-page="news"] .vivid-news-secondary{padding:10px 12px;font-size:11px}
+ body[data-vivid-page="news"] .vivid-editorial-room{margin-top:34px}
+ body[data-vivid-page="news"] .vivid-editorial-room-head h2{font-size:36px}
+ body[data-vivid-page="news"] .vivid-editorial-card:not(.is-featured) .vivid-editorial-art{aspect-ratio:16/6}
+ body[data-vivid-page="news"] .vivid-editorial-art-category{font-size:30px}
+}
