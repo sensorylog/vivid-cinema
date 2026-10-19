@@ -81,3 +81,7 @@ body.vivid-person-page .vivid-person-credit-table th{
 @media(prefers-reduced-motion:reduce){
   body.vivid-person-page .vivid-person-credit-rail{scroll-behavior:auto}
 }
+
+/* Person page editorial heading and accent. */
+body.vivid-person-page .vivid-person-name{font-family:Georgia,"Times New Roman",serif;letter-spacing:-.045em}
+body.vivid-person-page :where(.vivid-person-kicker,.vivid-person-section-head span){color:#c7ff55}
