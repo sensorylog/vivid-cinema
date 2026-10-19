@@ -891,3 +891,9 @@ body[data-vivid-page="home"] .vivid-news-home-copy p { display: -webkit-box; ove
   body[data-vivid-page="home"] .vivid-rails { padding-top: 16px; padding-bottom: 16px; }
   body[data-vivid-page="home"] .vivid-rail-head { margin-bottom: 9px; }
 }
+
+
+/* Newsroom-derived accent and heading rhythm — keep poster artwork untouched. */
+body[data-vivid-page="home"] .vivid-rail-head h2{font-family:Georgia,"Times New Roman",serif;letter-spacing:-.025em}
+body[data-vivid-page="home"] :where(.vivid-home-section-kicker,.vivid-rail-kicker){color:#c7ff55}
+body[data-vivid-page="home"] :where(.vivid-home-quick-action:focus-visible,.vivid-card:focus-visible){outline:2px solid #c7ff55;outline-offset:3px}
