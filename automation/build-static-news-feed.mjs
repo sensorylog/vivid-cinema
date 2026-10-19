@@ -174,7 +174,7 @@ for (const story of unique) {
   if (selected.length >= 120) break;
   if (!selectedIds.has(story.id)) { selected.push(story); selectedIds.add(story.id); }
 }
-const finalStories = await enrichStories(selected.slice(0, 120));
+const finalStories = await enrichStories(selected.slice(0, 120).sort((a,b) => Date.parse(b.publishedAt || 0) - Date.parse(a.publishedAt || 0)));
 const payload = JSON.stringify({ generatedAt: new Date().toISOString(), source: "Google News RSS search feeds", count: finalStories.length, failedQueries: failed.length, feedCount: FEEDS.length, articles: finalStories }, null, 2) + "\n";
 await mkdir(dirname(OUTPUT), { recursive: true });
 let previous = "";
