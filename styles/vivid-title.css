@@ -869,3 +869,9 @@ body.vivid-title-page .vivid-similar-card small{font-size:12px;margin-top:3px}
 body.vivid-title-page .vivid-title-poster{background:#101217;}
 body.vivid-title-page .vivid-title-poster img{height:auto;object-fit:contain;object-position:center;background:#101217;}
 body.vivid-title-page .vivid-title-backdrop-image{object-fit:cover;object-position:center center;}
+
+
+/* Cinematic detail-page typography and action states. */
+body.vivid-title-page .vivid-title-copy h1{font-family:Georgia,"Times New Roman",serif;letter-spacing:-.05em}
+body.vivid-title-page :where(.vivid-title-kicker,.vivid-section-heading>div>span){color:#c7ff55}
+body.vivid-title-page :where(.vivid-title-actions .vivid-button:focus-visible,.vivid-title-nav a:focus-visible){outline:2px solid #c7ff55;outline-offset:3px}
