@@ -262,3 +262,7 @@ body.vivid-watch-page.vivid-player-open{overflow:hidden;overscroll-behavior:none
 /* Keep the primary layout rules authoritative after the shared media-layout stylesheet loads. */
 body.vivid-watch-page .vivid-player-overlay.vivid-player-inline .vivid-player-dialog{width:min(1420px,100%)!important;max-height:none!important;overflow:visible!important}
 body.vivid-watch-page .vivid-player-overlay.vivid-player-inline{max-width:100%!important}
+
+/* Player chrome uses the newsroom accent for keyboard focus and page labels. */
+body.vivid-watch-page :where(.vivid-player-play,.vivid-watch-play):focus-visible{outline:2px solid #c7ff55;outline-offset:3px}
+body.vivid-watch-page :where(.vivid-watch-kicker,.vivid-watch-section-head span){color:#c7ff55}
