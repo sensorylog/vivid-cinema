@@ -37,14 +37,12 @@ if (root) {
   }
   function cleanSummary(value, publisher = "") {
     let summary = String(value || "")
-      .replace(/&nbsp;|&#160;|&#xA0;/gi, " ")
+      .replace(/&(?:nbsp|#160|#xA0);/gi, " ")
       .replace(/\u00a0/g, " ")
       .replace(/\s+/g, " ")
       .trim();
-    if (publisher) {
-      const escaped = publisher.replace(/[.*+?^$()|[\]\\]/g, "\\  function formatDate(value) {
-    const date = value ? new Date(value) : null;");
-      summary = summary.replace(new RegExp("(?:\\s*[|–—-]\\s*)?" + escaped + "\\s*$", "i"), "").trim();
+    if (publisher && summary.toLowerCase().endsWith(publisher.toLowerCase())) {
+      summary = summary.slice(0, -publisher.length).replace(/[\s|–—-]+$/, "").trim();
     }
     return summary;
   }
