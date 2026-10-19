@@ -5,8 +5,13 @@ on:
     paths:
       - ".github/workflows/refresh-static-news.yml"
       - "automation/build-static-news-feed.mjs"
+      - "automation/static-news-images.mjs"
+      - "scripts/newsroom.js"
+      - "styles/vivid-news.css"
+      - "news.html"
+      - "service-worker.js"
   schedule:
-    - cron: "17,47 * * * *"
+    - cron: "*/15 * * * *"
   workflow_dispatch:
 
 permissions:

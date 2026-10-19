@@ -13,6 +13,14 @@ function attribute(attrs, name) {
   return match ? decode(match[2]).trim() : "";
 }
 
+export function sortStoriesNewestFirst(stories = []) {
+  const timestamp = value => {
+    const parsed = Date.parse(value || "");
+    return Number.isFinite(parsed) ? parsed : Number.NEGATIVE_INFINITY;
+  };
+  return [...stories].sort((a, b) => timestamp(b.publishedAt) - timestamp(a.publishedAt));
+}
+
 function safeImageUrl(value, baseUrl = "") {
   if (!value) return "";
   try {
@@ -49,11 +57,13 @@ export async function cacheArticleThumbnails(stories = [], {
 } = {}) {
   await mkdir(outputDir, { recursive: true });
   let cached = 0;
+  let remoteFallback = 0;
+  let missing = 0;
   const results = [];
   for (let index = 0; index < stories.length; index += 12) {
     const batch = await Promise.all(stories.slice(index, index + 12).map(async story => {
       const remoteUrl = safeImageUrl(story.imageUrl, story.sourceUrl);
-      if (!remoteUrl) return { ...story, imageUrl: "" };
+      if (!remoteUrl) { missing += 1; return { ...story, imageUrl: "", imageFallbackUrl: "" }; }
       try {
         const headers = {
           "User-Agent": "Mozilla/5.0 (compatible; VividCinemaNews/1.0; +https://vivid-cinema.web.app/news.html)",
@@ -73,28 +83,29 @@ export async function cacheArticleThumbnails(stories = [], {
           headers,
           signal: AbortSignal.timeout(8000)
         });
-        if (!response.ok) return { ...story, imageUrl: "" };
+        if (!response.ok) { remoteFallback += 1; return { ...story, imageUrl: remoteUrl, imageFallbackUrl: remoteUrl }; }
         const contentType = response.headers.get("content-type") || "";
         if (!/^image\/(?:jpeg|png|webp|avif|gif)(?:\s*;|$)/i.test(contentType)) {
-          return { ...story, imageUrl: "" };
+          remoteFallback += 1; return { ...story, imageUrl: remoteUrl, imageFallbackUrl: remoteUrl };
         }
         const bytes = new Uint8Array(await response.arrayBuffer());
-        if (bytes.length < 1024 || bytes.length > maxBytes) return { ...story, imageUrl: "" };
+        if (bytes.length < 1024 || bytes.length > maxBytes) { remoteFallback += 1; return { ...story, imageUrl: remoteUrl, imageFallbackUrl: remoteUrl }; }
         const extension = imageExtension(contentType, bytes);
-        if (!extension) return { ...story, imageUrl: "" };
+        if (!extension) { remoteFallback += 1; return { ...story, imageUrl: remoteUrl, imageFallbackUrl: remoteUrl }; }
         const id = String(story.id || "").replace(/[^a-z0-9_-]/gi, "");
         if (!id) return { ...story, imageUrl: "" };
         const filename = id + "." + extension;
         await writeFile(join(outputDir, filename), bytes);
         cached += 1;
-        return { ...story, imageUrl: publicPathPrefix.replace(/\/$/, "") + "/" + filename };
+        return { ...story, imageUrl: publicPathPrefix.replace(/\/$/, "") + "/" + filename, imageFallbackUrl: remoteUrl };
       } catch {
-        return { ...story, imageUrl: "" };
+        remoteFallback += 1;
+        return { ...story, imageUrl: remoteUrl, imageFallbackUrl: remoteUrl };
       }
     }));
     results.push(...batch);
   }
-  return { stories: results, cached };
+  return { stories: results, cached, remoteFallback, missing };
 }
 
 export function extractRssImageUrl(item = "", description = "", baseUrl = "") {
@@ -114,11 +125,23 @@ export function extractRssImageUrl(item = "", description = "", baseUrl = "") {
     const attrs = match[1];
     candidates.push(attribute(attrs, "href"), attribute(attrs, "url"), attribute(attrs, "src"));
   }
-  for (const match of xml.matchAll(/<img\b([^>]*)>/gi)) {
+  for (const match of xml.matchAll(/<(?:img|source)\b([^>]*)>/gi)) {
     const attrs = match[1];
-    candidates.push(attribute(attrs, "src"), attribute(attrs, "data-src"));
-    const srcset = attribute(attrs, "srcset");
-    if (srcset) candidates.push(srcset.split(",")[0].trim().split(/\s+/)[0]);
+    candidates.push(
+      attribute(attrs, "data-src"),
+      attribute(attrs, "data-lazy-src"),
+      attribute(attrs, "data-original"),
+      attribute(attrs, "src")
+    );
+    const srcset = attribute(attrs, "data-srcset") || attribute(attrs, "srcset");
+    if (srcset) {
+      const best = srcset.split(",").map(part => part.trim()).filter(Boolean).map(part => {
+        const pieces = part.split(/\s+/);
+        const score = Number.parseInt(pieces[1], 10) || 0;
+        return {url: pieces[0], score};
+      }).sort((a, b) => b.score - a.score)[0];
+      if (best?.url) candidates.push(best.url);
+    }
   }
   for (const candidate of candidates) {
     const image = safeImageUrl(candidate, baseUrl);

@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { extractHtmlImageUrl, extractRssImageUrl } from "../automation/static-news-images.mjs";
+import { extractHtmlImageUrl, extractRssImageUrl, sortStoriesNewestFirst } from "../automation/static-news-images.mjs";
 
 test("RSS thumbnail extraction supports media, enclosure, and description images", () => {
   assert.equal(
@@ -14,6 +14,14 @@ test("RSS thumbnail extraction supports media, enclosure, and description images
   assert.equal(
     extractRssImageUrl('<item><description><![CDATA[<img src="https://cdn.example.com/story.png">]]></description></item>'),
     "https://cdn.example.com/story.png"
+  );
+  assert.equal(
+    extractRssImageUrl('<item><description><![CDATA[<img data-lazy-src="/lazy.jpg">]]></description></item>', "", "https://publisher.example/rss"),
+    "https://publisher.example/lazy.jpg"
+  );
+  assert.equal(
+    extractRssImageUrl('<item><description><![CDATA[<source srcset="/small.jpg 320w, /large.jpg 1280w">]]></description></item>', "", "https://publisher.example/rss"),
+    "https://publisher.example/large.jpg"
   );
 });
 
@@ -79,13 +87,14 @@ test("thumbnail cache only publishes verified local image files", async () => {
     });
     assert.equal(result.cached, 1);
     assert.equal(result.stories[0].imageUrl, "./data/news-thumbnails/story-1.jpg");
+    assert.equal(result.stories[0].imageFallbackUrl, "https://cdn.example/story.jpg");
     assert.deepEqual(new Uint8Array(await readFile(join(directory, "story-1.jpg"))), bytes);
   } finally {
     await rm(directory, { recursive: true, force: true });
   }
 });
 
-test("thumbnail cache drops invalid or blocked remote image URLs", async () => {
+test("thumbnail cache preserves a remote fallback when the publisher blocks caching", async () => {
   const { mkdtemp, rm } = await import("node:fs/promises");
   const { tmpdir } = await import("node:os");
   const { join } = await import("node:path");
@@ -101,8 +110,22 @@ test("thumbnail cache drops invalid or blocked remote image URLs", async () => {
       fetchImpl: async () => new Response("<html>blocked</html>", { headers: { "content-type": "text/html" } })
     });
     assert.equal(result.cached, 0);
-    assert.equal(result.stories[0].imageUrl, "");
+    assert.equal(result.remoteFallback, 1);
+    assert.equal(result.stories[0].imageUrl, "https://cdn.example/story.jpg");
+    assert.equal(result.stories[0].imageFallbackUrl, "https://cdn.example/story.jpg");
   } finally {
     await rm(directory, { recursive: true, force: true });
   }
+});
+
+
+test("news stories are always sorted newest first with invalid dates last", () => {
+  const stories = [
+    { id: "old", publishedAt: "2026-10-16T10:00:00Z" },
+    { id: "invalid", publishedAt: null },
+    { id: "newest", publishedAt: "2026-10-19T02:00:00Z" },
+    { id: "middle", publishedAt: "2026-10-18T20:00:00Z" }
+  ];
+  assert.deepEqual(sortStoriesNewestFirst(stories).map(story => story.id), ["newest", "middle", "old", "invalid"]);
+  assert.equal(stories[0].id, "old", "sorting does not mutate the input array");
 });

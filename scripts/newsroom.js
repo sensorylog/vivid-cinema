@@ -113,14 +113,28 @@ if (root) {
       cleanSummary(article.summary, publisher) || "This publisher’s RSS feed did not include a readable summary. Open the original report for the complete story.";
     document.getElementById("vivid-news-reader-date").textContent = formatDate(article.publishedAt);
     const imageUrl = safeImageUrl(article.imageUrl);
+    const imageFallbackUrl = safeImageUrl(article.imageFallbackUrl);
     const imageWrap = document.getElementById("vivid-news-reader-image-wrap");
     const readerImage = document.getElementById("vivid-news-reader-image");
     if (imageUrl) {
-      readerImage.onerror = () => { imageWrap.hidden = true; readerImage.removeAttribute("src"); };
+      readerImage.dataset.fallbackSrc = imageFallbackUrl;
+      readerImage.onerror = () => {
+        const fallback = readerImage.dataset.fallbackSrc;
+        if (fallback && readerImage.src !== fallback && !readerImage.dataset.fallbackTried) {
+          readerImage.dataset.fallbackTried = "true";
+          readerImage.src = fallback;
+          return;
+        }
+        imageWrap.hidden = true;
+        readerImage.removeAttribute("src");
+      };
+      delete readerImage.dataset.fallbackTried;
       readerImage.src = imageUrl;
       imageWrap.hidden = false;
     } else {
       readerImage.removeAttribute("src");
+      delete readerImage.dataset.fallbackSrc;
+      delete readerImage.dataset.fallbackTried;
       imageWrap.hidden = true;
     }
     const original = document.getElementById("vivid-news-reader-original");
@@ -145,9 +159,11 @@ if (root) {
     const summary = escapeHtml(cleanSummary(article.summary, article.publisher) || "This publisher has not provided a preview. Open the original report for the full story.");
     const source = url || safeUrl(article.publisherUrl) || "https://news.google.com/";
     const imageUrl = safeImageUrl(article.imageUrl);
+    const imageFallbackUrl = safeImageUrl(article.imageFallbackUrl);
+    const imageFallbackAttr = imageFallbackUrl ? ' data-fallback-src="' + escapeHtml(imageFallbackUrl) + '"' : "";
     const id = escapeHtml(article.id || "");
     const artContent = imageUrl
-      ? '<img src="' + escapeHtml(imageUrl) + '" alt="" aria-hidden="true" loading="lazy" decoding="async"><span class="vivid-editorial-image-label">VIVID / NEWS</span><strong class="vivid-editorial-art-category">' + escapeHtml(category) + '</strong>'
+      ? '<img src="' + escapeHtml(imageUrl) + '"' + imageFallbackAttr + ' alt="" aria-hidden="true" loading="lazy" decoding="async"><span class="vivid-editorial-image-label">VIVID / NEWS</span><strong class="vivid-editorial-art-category">' + escapeHtml(category) + '</strong>'
       : '<span class="vivid-editorial-image-label">VIVID / NEWS</span><strong class="vivid-editorial-art-category">' + escapeHtml(category) + '</strong>';
     return '<article class="vivid-editorial-card' + (featured ? ' is-featured' : '') + '" data-story-id="' + id + '" data-category="' + escapeHtml(article.category || "film") + '">' +
       '<button class="vivid-editorial-art vivid-editorial-open' + (imageUrl ? ' has-image' : ' vivid-editorial-art-placeholder') + '" type="button" data-open-story="' + id + '" aria-label="Read ' + title + ' in Vivid">' + artContent + '<i class="bi bi-arrow-up-right" aria-hidden="true"></i></button>' +
@@ -169,6 +185,12 @@ if (root) {
   root.addEventListener("error", event => {
     if (!event.target.matches(".vivid-editorial-art img")) return;
     const art = event.target.closest(".vivid-editorial-art");
+    const fallback = event.target.dataset.fallbackSrc;
+    if (fallback && event.target.src !== fallback && !event.target.dataset.fallbackTried) {
+      event.target.dataset.fallbackTried = "true";
+      event.target.src = fallback;
+      return;
+    }
     event.target.remove();
     art?.classList.remove("has-image");
     art?.classList.add("vivid-editorial-art-placeholder");
@@ -194,24 +216,43 @@ if (root) {
     render();
   }));
 
-  fetch("./data/news-feed.json",{cache:"no-store"})
-    .then(response => {
+  let lastGeneratedAt = "";
+  async function loadNewsFeed({ quiet = false } = {}) {
+    try {
+      const response = await fetch("./data/news-feed.json", { cache: "no-store" });
       if (!response.ok) throw new Error("Static news feed returned HTTP " + response.status);
-      return response.json();
-    })
-    .then(data => {
-      articles = Array.isArray(data.articles) ? data.articles : [];
+      const data = await response.json();
+      if (!Array.isArray(data.articles)) throw new Error("Static news feed has no article list");
+      if (lastGeneratedAt && data.generatedAt === lastGeneratedAt) return;
+      articles = data.articles.slice().sort((a, b) => {
+        const timeA = Date.parse(a.publishedAt || "");
+        const timeB = Date.parse(b.publishedAt || "");
+        return (Number.isFinite(timeB) ? timeB : 0) - (Number.isFinite(timeA) ? timeA : 0);
+      });
+      lastGeneratedAt = data.generatedAt || "";
       render();
       if (status) {
         const time = data.generatedAt ? new Date(data.generatedAt).toLocaleString() : "recently";
-        status.textContent = articles.length + " web headlines · updated " + time;
+        status.textContent = articles.length + " web headlines · updated " + time + " · auto-refresh on";
       }
-    })
-    .catch(error => {
-      console.error("Vivid static news feed unavailable:",error);
-      root.setAttribute("aria-busy","false");
+    } catch (error) {
+      if (quiet && articles.length) {
+        if (status) status.textContent = "News refresh unavailable · showing the last loaded headlines";
+        return;
+      }
+      console.error("Vivid static news feed unavailable:", error);
+      if (articles.length) return;
+      root.setAttribute("aria-busy", "false");
       root.innerHTML = '<div class="vivid-editorial-empty"><h3>The web-news feed is temporarily unavailable.</h3><p>Try again shortly. The newsroom refreshes automatically from public news RSS sources.</p><button type="button" class="vivid-editorial-retry" id="vivid-news-retry">Try again</button></div>';
-      document.getElementById("vivid-news-retry")?.addEventListener("click", () => location.reload());
+      document.getElementById("vivid-news-retry")?.addEventListener("click", () => loadNewsFeed());
       if (status) status.textContent = "News feed unavailable · retry";
-    });
+    }
+  }
+  loadNewsFeed();
+  window.setInterval(() => {
+    if (!document.hidden) loadNewsFeed({ quiet: true });
+  }, 5 * 60 * 1000);
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden) loadNewsFeed({ quiet: true });
+  });
 }

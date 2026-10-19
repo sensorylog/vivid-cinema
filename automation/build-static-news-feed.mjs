@@ -1,30 +1,30 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
-import { cacheArticleThumbnails, extractHtmlImageUrl, extractRssImageUrl } from "./static-news-images.mjs";
+import { cacheArticleThumbnails, extractHtmlImageUrl, extractRssImageUrl, sortStoriesNewestFirst } from "./static-news-images.mjs";
 import { dirname } from "node:path";
 
 const OUTPUT = "data/news-feed.json";
 const FEEDS = [
-  { region: "hollywood", category: "film", q: "Hollywood movie film studio entertainment news when:7d" },
-  { region: "hollywood", category: "television", q: "US television series TV entertainment news when:7d" },
-  { region: "hollywood", category: "streaming", q: "Netflix Disney+ Max Prime Video streaming news when:7d" },
-  { region: "hollywood", category: "celebrity", q: "Hollywood actors celebrities entertainment news when:7d" },
-  { region: "global", category: "music", q: "film soundtrack music industry artist entertainment news when:7d" },
-  { region: "global", category: "gaming", q: "video game industry gaming entertainment news when:7d" },
-  { region: "asia", category: "anime", q: "anime manga Japanese animation entertainment news when:7d" },
-  { region: "asia", category: "television", q: "K-drama Korean television entertainment news when:7d" },
-  { region: "global", category: "box-office", q: "global box office weekend film industry news when:7d" },
-  { region: "global", category: "festivals", q: "film festival premieres cinema festival news when:7d" },
-  { region: "global", category: "awards", q: "film television awards entertainment industry news when:7d" },
-  { region: "global", category: "business", q: "Hollywood film studio streaming entertainment business industry deals news when:7d" },
-  { region: "india", category: "film", q: "Bollywood Indian cinema entertainment news when:7d" },
-  { region: "india", category: "music", q: "Indian film music Bollywood music industry news when:7d" },
-  { region: "africa", category: "film", q: "Nollywood Nigerian film entertainment news when:7d" },
-  { region: "africa", category: "celebrity", q: "Ghana entertainment movie music celebrity news when:7d" },
-  { region: "africa", category: "film", q: "African cinema film festival entertainment news when:7d" },
-  { region: "europe", category: "film", q: "European cinema film production entertainment news when:7d" },
-  { region: "europe", category: "television", q: "UK European television streaming entertainment news when:7d" },
-  { region: "latin-america", category: "film", q: "Latin American cinema Mexican Brazilian film entertainment news when:7d" },
-  { region: "middle-east", category: "film", q: "Middle East Arab cinema film entertainment news when:7d" }
+  { region: "hollywood", category: "film", q: "Hollywood movie film studio entertainment news when:3d" },
+  { region: "hollywood", category: "television", q: "US television series TV entertainment news when:3d" },
+  { region: "hollywood", category: "streaming", q: "Netflix Disney+ Max Prime Video streaming news when:3d" },
+  { region: "hollywood", category: "celebrity", q: "Hollywood actors celebrities entertainment news when:3d" },
+  { region: "global", category: "music", q: "film soundtrack music industry artist entertainment news when:3d" },
+  { region: "global", category: "gaming", q: "video game industry gaming entertainment news when:3d" },
+  { region: "asia", category: "anime", q: "anime manga Japanese animation entertainment news when:3d" },
+  { region: "asia", category: "television", q: "K-drama Korean television entertainment news when:3d" },
+  { region: "global", category: "box-office", q: "global box office weekend film industry news when:3d" },
+  { region: "global", category: "festivals", q: "film festival premieres cinema festival news when:3d" },
+  { region: "global", category: "awards", q: "film television awards entertainment industry news when:3d" },
+  { region: "global", category: "business", q: "Hollywood film studio streaming entertainment business industry deals news when:3d" },
+  { region: "india", category: "film", q: "Bollywood Indian cinema entertainment news when:3d" },
+  { region: "india", category: "music", q: "Indian film music Bollywood music industry news when:3d" },
+  { region: "africa", category: "film", q: "Nollywood Nigerian film entertainment news when:3d" },
+  { region: "africa", category: "celebrity", q: "Ghana entertainment movie music celebrity news when:3d" },
+  { region: "africa", category: "film", q: "African cinema film festival entertainment news when:3d" },
+  { region: "europe", category: "film", q: "European cinema film production entertainment news when:3d" },
+  { region: "europe", category: "television", q: "UK European television streaming entertainment news when:3d" },
+  { region: "latin-america", category: "film", q: "Latin American cinema Mexican Brazilian film entertainment news when:3d" },
+  { region: "middle-east", category: "film", q: "Middle East Arab cinema film entertainment news when:3d" }
 ];
 
 function decode(value = "") {
@@ -153,12 +153,19 @@ if (!stories.length) {
   throw new Error("Every news RSS query failed; refusing to overwrite the last working feed. Failures: " + failed.map(x => String(x.reason)).join(" | "));
 }
 const seen = new Set();
-const unique = stories.filter(story => {
+const freshnessCutoff = Date.now() - 72 * 60 * 60 * 1000;
+const unique = sortStoriesNewestFirst(stories).filter(story => {
+  const timestamp = Date.parse(story.publishedAt || "");
+  return Number.isFinite(timestamp) && timestamp <= Date.now() + 5 * 60 * 1000 && timestamp >= freshnessCutoff;
+}).filter(story => {
   const key = story.headline.toLocaleLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
   if (seen.has(key)) return false;
   seen.add(key);
   return true;
-}).sort((a,b) => Date.parse(b.publishedAt || 0) - Date.parse(a.publishedAt || 0));
+});
+if (!unique.length) {
+  throw new Error("No valid headlines from the last 72 hours; refusing to overwrite the previous feed.");
+}
 // Reserve space for every topic/region before filling remaining slots by recency.
 const selected = [];
 const selectedIds = new Set();
@@ -170,13 +177,14 @@ for (const story of unique) {
   if (selected.length >= 120) break;
   if (!selectedIds.has(story.id)) { selected.push(story); selectedIds.add(story.id); }
 }
-const enrichedStories = await enrichStories(selected.slice(0, 120).sort((a,b) => Date.parse(b.publishedAt || 0) - Date.parse(a.publishedAt || 0)));
-const { stories: finalStories, cached: cachedImageCount } = await cacheArticleThumbnails(enrichedStories);
+const enrichedStories = await enrichStories(sortStoriesNewestFirst(selected).slice(0, 120));
+const { stories: cachedStories, cached: cachedImageCount, remoteFallback: remoteFallbackCount, missing: missingImageCount } = await cacheArticleThumbnails(enrichedStories);
+const finalStories = sortStoriesNewestFirst(cachedStories);
 const payload = JSON.stringify({ generatedAt: new Date().toISOString(), source: "Google News RSS search feeds", count: finalStories.length, failedQueries: failed.length, feedCount: FEEDS.length, articles: finalStories }, null, 2) + "\n";
 await mkdir(dirname(OUTPUT), { recursive: true });
 let previous = "";
 try { previous = await readFile(OUTPUT, "utf8"); } catch {}
 await writeFile(OUTPUT, payload);
 console.log("Built " + unique.length + " attributed headlines from " + (FEEDS.length - failed.length) + "/" + FEEDS.length + " RSS queries.");
-console.log("Article thumbnails cached locally: " + cachedImageCount + "/" + finalStories.length);
+console.log("Article thumbnails: " + cachedImageCount + " cached locally, " + remoteFallbackCount + " remote fallback, " + missingImageCount + " without an image source (of " + finalStories.length + ").");
 console.log("Updated feed: " + (payload !== previous));
