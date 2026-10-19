@@ -35,9 +35,12 @@ function decode(value = "") {
     .replace(/&#x([\da-f]+);/gi, (_, n) => String.fromCodePoint(parseInt(n, 16)))
     .trim();
 }
-function tag(xml, name) {
+function rawTag(xml, name) {
   const match = xml.match(new RegExp("<" + name + "(?:\\s[^>]*)?>([\\s\\S]*?)</" + name + ">", "i"));
-  return match ? decode(match[1]).replace(/<[^>]+>/g, "").trim() : "";
+  return match ? decode(match[1]).trim() : "";
+}
+function tag(xml, name) {
+  return rawTag(xml, name).replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
 }
 function attr(xml, name) {
   const match = xml.match(new RegExp("\\b" + name + '="([^"]*)"', "i"));
@@ -60,14 +63,24 @@ async function fetchFeed(feed) {
     const publisher = sourceTag ? decode(sourceTag[2]).replace(/<[^>]+>/g, "").trim() : "News publisher";
     const publisherUrl = sourceTag ? attr(sourceTag[1], "url") : "";
     const publishedAt = tag(item, "pubDate");
+    const rawDescription = rawTag(item, "description");
+    const imageMatch = rawDescription.match(/<img\b[^>]*\bsrc=["']([^"']+)["']/i);
+    let imageUrl = "";
+    try {
+      const candidate = new URL(imageMatch?.[1] || "");
+      if (candidate.protocol === "https:") imageUrl = candidate.href;
+    } catch {}
+    const summary = rawDescription.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, " ")
+      .replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, " ")
+      .replace(/<[^>]+>/g, " ").replace(/&nbsp;|&#160;/gi, " ")
+      .replace(/\s+/g, " ").trim().slice(0, 1800);
     if (!title || !/^https?:\/\//i.test(url)) return null;
     const cleanTitle = title.replace(/\s+-\s+[^-]+$/, "").trim() || title;
     const timestamp = Date.parse(publishedAt);
     return {
       id: stableId(url, cleanTitle), headline: cleanTitle, publisher, publisherUrl,
       sourceUrl: url, publishedAt: Number.isFinite(timestamp) ? new Date(timestamp).toISOString() : null,
-      region: feed.region, category: feed.category,
-      summary: tag(item, "description").replace(/&nbsp;|&#160;/gi, " ").replace(/\s+/g, " ").trim().slice(0, 1800)
+      region: feed.region, category: feed.category, summary, imageUrl
     };
   }).filter(Boolean);
 }
