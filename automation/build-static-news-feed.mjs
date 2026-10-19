@@ -1,5 +1,5 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
-import { extractHtmlImageUrl, extractRssImageUrl } from "./static-news-images.mjs";
+import { cacheArticleThumbnails, extractHtmlImageUrl, extractRssImageUrl } from "./static-news-images.mjs";
 import { dirname } from "node:path";
 
 const OUTPUT = "data/news-feed.json";
@@ -170,13 +170,13 @@ for (const story of unique) {
   if (selected.length >= 120) break;
   if (!selectedIds.has(story.id)) { selected.push(story); selectedIds.add(story.id); }
 }
-const finalStories = await enrichStories(selected.slice(0, 120).sort((a,b) => Date.parse(b.publishedAt || 0) - Date.parse(a.publishedAt || 0)));
+const enrichedStories = await enrichStories(selected.slice(0, 120).sort((a,b) => Date.parse(b.publishedAt || 0) - Date.parse(a.publishedAt || 0)));
+const { stories: finalStories, cached: cachedImageCount } = await cacheArticleThumbnails(enrichedStories);
 const payload = JSON.stringify({ generatedAt: new Date().toISOString(), source: "Google News RSS search feeds", count: finalStories.length, failedQueries: failed.length, feedCount: FEEDS.length, articles: finalStories }, null, 2) + "\n";
 await mkdir(dirname(OUTPUT), { recursive: true });
 let previous = "";
 try { previous = await readFile(OUTPUT, "utf8"); } catch {}
 await writeFile(OUTPUT, payload);
 console.log("Built " + unique.length + " attributed headlines from " + (FEEDS.length - failed.length) + "/" + FEEDS.length + " RSS queries.");
-const imageCount = finalStories.filter(story => Boolean(story.imageUrl)).length;
-console.log("Article thumbnails: " + imageCount + "/" + finalStories.length);
+console.log("Article thumbnails cached locally: " + cachedImageCount + "/" + finalStories.length);
 console.log("Updated feed: " + (payload !== previous));
