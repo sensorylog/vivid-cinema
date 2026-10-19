@@ -72,8 +72,11 @@ async function fetchFeed(feed) {
     } catch {}
     const summary = rawDescription.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, " ")
       .replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, " ")
-      .replace(/<[^>]+>/g, " ").replace(/&nbsp;|&#160;/gi, " ")
-      .replace(/\s+/g, " ").trim().slice(0, 1800);
+      .replace(/<[^>]+>/g, " ").replace(/&(?:nbsp|#160|#xA0);/gi, " ")
+      .replace(/\u00a0/g, " ").replace(/\s+/g, " ").trim()
+      .replace(new RegExp("(?:\\s*[|–—-]\\s*)?" + publisher.replace(/[.*+?^$()|[\]\\]/g, "\\.replace(/<[^>]+>/g, " ").replace(/&nbsp;|&#160;/gi, " ")
+      .replace(/\s+/g, " ").trim().slice(0, 1800);") + "\\s*$", "i"), "")
+      .trim().slice(0, 1800);
     if (!title || !/^https?:\/\//i.test(url)) return null;
     const cleanTitle = title.replace(/\s+-\s+[^-]+$/, "").trim() || title;
     const timestamp = Date.parse(publishedAt);
