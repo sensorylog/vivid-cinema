@@ -1804,3 +1804,49 @@ html:not([data-vivid-theme="light"]) body.account-page,
 html:not([data-vivid-theme="light"]) .account-page{
   background-color:#071426!important;
 }
+
+
+/* Vivid Editorial System — shared across desktop, mobile web and installed PWA.
+   Keep this foundational: page-specific layouts and product colors remain intact. */
+:root{
+  --vivid-editorial-accent:#c7ff55;
+  --vivid-editorial-bg:#080a0e;
+  --vivid-editorial-surface:#111318;
+  --vivid-editorial-raised:#191b21;
+  --vivid-editorial-ink:#f4f2ed;
+  --vivid-editorial-muted:#b7b6bc;
+  --vivid-editorial-dim:#92939a;
+  --vivid-editorial-serif:Georgia,"Times New Roman",serif;
+  --vivid-editorial-sans:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+}
+html{color-scheme:dark}
+body{
+  color:var(--vivid-editorial-ink);
+  font-family:var(--vivid-editorial-sans);
+  text-rendering:optimizeLegibility;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+}
+:where(h1,h2,h3,.vivid-page-title,.vivid-section-title){
+  text-wrap:balance;
+}
+:where(button,input,select,textarea){font-family:inherit}
+:where(input,select,textarea){
+  color:var(--vivid-editorial-ink);
+}
+:where(a,button){
+  -webkit-tap-highlight-color:rgba(199,255,85,.12);
+}
+:where(a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible){
+  outline:2px solid var(--vivid-editorial-accent);
+  outline-offset:3px;
+}
+:where(.vivid-button,.vivid-nav-action,.vivid-search-submit){
+  transition:background-color .18s ease,border-color .18s ease,color .18s ease,transform .18s ease;
+}
+@media(hover:hover){
+  :where(.vivid-button,.vivid-nav-action):hover{border-color:rgba(199,255,85,.38)}
+}
+@media(prefers-reduced-motion:reduce){
+  :where(*, *::before, *::after){scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+}
