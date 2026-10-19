@@ -1,7 +1,7 @@
 /* Vivid Cinema — shared design system. */
 :root {
   color-scheme: dark;
-  --vivid-font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --vivid-font-sans: Inter, -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   --vivid-font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   --vivid-text-xs:.75rem; --vivid-text-sm:.875rem; --vivid-text-md:1rem; --vivid-text-lg:1.125rem;
   --vivid-text-xl:1.375rem; --vivid-text-2xl:clamp(1.75rem,3vw,2.5rem); --vivid-text-3xl:clamp(2.25rem,5vw,4.5rem);
@@ -11,10 +11,10 @@
   --vivid-space-6:1.5rem; --vivid-space-8:2rem; --vivid-space-10:2.5rem; --vivid-space-12:3rem; --vivid-space-16:4rem; --vivid-space-20:5rem;
   --vivid-content-width:1500px; --vivid-reading-width:720px; --vivid-page-gutter:clamp(1rem,2.8vw,3rem);
   --vivid-section-gap:clamp(2.5rem,6vw,5rem); --vivid-grid-gap:clamp(.7rem,1.3vw,1.25rem);
-  --vivid-bg:#071426; --vivid-bg-elevated:#0b1a2d; --vivid-surface-solid:#121419; --vivid-surface:rgba(18,20,25,.72);
+  --vivid-bg:#080a0e; --vivid-bg-elevated:#0d1015; --vivid-surface-solid:#111318; --vivid-surface:rgba(17,19,24,.82);
   --vivid-surface-soft:rgba(255,255,255,.055); --vivid-surface-strong:rgba(255,255,255,.09);
-  --vivid-text:#f5f7fa; --vivid-text-muted:#a8adb7; --vivid-text-subtle:#747a85; --vivid-accent:#fff;
-  --vivid-danger:#ff5f56; --vivid-success:#32d583; --vivid-border:rgba(255,255,255,.12); --vivid-border-strong:rgba(255,255,255,.2);
+  --vivid-text:#f4f2ed; --vivid-text-muted:#b7b6bc; --vivid-text-subtle:#92939a; --vivid-accent:#c7ff55;
+  --vivid-danger:#ff5f56; --vivid-success:#32d583; --vivid-border:rgba(255,255,255,.09); --vivid-border-strong:rgba(255,255,255,.16);
   --vivid-radius-xs:8px; --vivid-radius-sm:12px; --vivid-radius-md:16px; --vivid-radius-lg:24px; --vivid-radius-xl:32px; --vivid-radius-pill:999px;
   --vivid-shadow-sm:0 8px 24px rgba(0,0,0,.18); --vivid-shadow-md:0 18px 50px rgba(0,0,0,.28); --vivid-shadow-lg:0 28px 90px rgba(0,0,0,.42);
   --vivid-glass-blur:22px; --vivid-ease-out:cubic-bezier(.2,.7,.2,1); --vivid-duration-fast:160ms; --vivid-duration-standard:280ms; --vivid-duration-slow:500ms;
