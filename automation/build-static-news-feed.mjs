@@ -70,12 +70,12 @@ async function fetchFeed(feed) {
       const candidate = new URL(imageMatch?.[1] || "");
       if (candidate.protocol === "https:") imageUrl = candidate.href;
     } catch {}
-    const summary = rawDescription.replace(/<script\\b[^>]*>[\\s\\S]*?<\\/script>/gi, " ")
-      .replace(/<style\\b[^>]*>[\\s\\S]*?<\\/style>/gi, " ")
+    const summary = rawDescription.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, " ")
+      .replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, " ")
       .replace(/<[^>]+>/g, " ").replace(/&(?:nbsp|#160|#xA0);/gi, " ")
-      .replace(/\\u00a0/g, " ").replace(/\\s+/g, " ").trim();
+      .replace(/\u00a0/g, " ").replace(/\s+/g, " ").trim();
     const cleanedSummary = publisher && summary.toLowerCase().endsWith(publisher.toLowerCase())
-      ? summary.slice(0, -publisher.length).replace(/[\\s|–—-]+$/, "").trim()
+      ? summary.slice(0, -publisher.length).replace(/[\s|–—-]+$/, "").trim()
       : summary;
     if (!title || !/^https?:\/\//i.test(url)) return null;
     const cleanTitle = title.replace(/\s+-\s+[^-]+$/, "").trim() || title;
