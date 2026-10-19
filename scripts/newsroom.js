@@ -120,8 +120,8 @@ if (root) {
     const id = escapeHtml(article.id || "");
     const artContent = imageUrl
       ? '<img src="' + escapeHtml(imageUrl) + '" alt="" aria-hidden="true" loading="lazy" decoding="async" referrerpolicy="no-referrer"><span class="vivid-editorial-image-label">VIVID / NEWS</span>'
-      : '<span>VIVID / NEWS</span>';
-    return '<article class="vivid-editorial-card' + (featured ? ' is-featured' : '') + '" data-story-id="' + id + '">' +
+      : '<span class="vivid-editorial-image-label">VIVID / NEWS</span><strong class="vivid-editorial-art-category">' + escapeHtml(category) + '</strong>';
+    return '<article class="vivid-editorial-card' + (featured ? ' is-featured' : '') + '" data-story-id="' + id + '" data-category="' + escapeHtml(article.category || "film") + '">' +
       '<button class="vivid-editorial-art vivid-editorial-open' + (imageUrl ? ' has-image' : ' vivid-editorial-art-placeholder') + '" type="button" data-open-story="' + id + '" aria-label="Read ' + title + ' in Vivid">' + artContent + '<i class="bi bi-arrow-up-right" aria-hidden="true"></i></button>' +
       '<div class="vivid-editorial-card-copy"><div class="vivid-editorial-meta"><span>' + escapeHtml(category) + '</span><span>' + publisher + '</span></div>' +
       '<h3><button type="button" class="vivid-editorial-title-button" data-open-story="' + id + '">' + title + '</button></h3>' +
