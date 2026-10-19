@@ -88,6 +88,68 @@ async function fetchFeed(feed) {
   }).filter(Boolean);
 }
 
+
+function metaValue(html, names) {
+  const wanted = new Set(names.map(value => value.toLowerCase()));
+  for (const meta of html.match(/<meta\b[^>]*>/gi) || []) {
+    const key = meta.match(/\b(?:property|name|itemprop)=["']([^"']+)["']/i)?.[1]?.toLowerCase();
+    if (!key || !wanted.has(key)) continue;
+    const value = meta.match(/\bcontent=["']([^"']*)["']/i)?.[1];
+    if (value) return decode(value).replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+  }
+  return "";
+}
+async function enrichArticle(story) {
+  const baseSummary = story.summary || "";
+  const hasUsefulSummary = baseSummary.length > 100 &&
+    baseSummary.toLowerCase() !== String(story.headline || "").toLowerCase();
+  if (hasUsefulSummary && story.imageUrl) return story;
+  try {
+    const response = await fetch(story.sourceUrl, {
+      redirect: "follow",
+      headers: {
+        "User-Agent": "Mozilla/5.0 (compatible; VividCinemaNews/1.0; +https://vivid-cinema.web.app/news.html)",
+        "Accept": "text/html,application/xhtml+xml"
+      },
+      signal: AbortSignal.timeout(5000)
+    });
+    if (!response.ok || !/text\/html|application\/xhtml\+xml/i.test(response.headers.get("content-type") || "")) return story;
+    const html = (await response.text()).slice(0, 1200000);
+    let sourceUrl = story.sourceUrl;
+    try {
+      const finalUrl = new URL(response.url);
+      if (finalUrl.protocol === "https:" && !/(^|\.)news\.google\.com$/i.test(finalUrl.hostname)) {
+        sourceUrl = finalUrl.href;
+      }
+    } catch {}
+    const description = metaValue(html, ["og:description", "twitter:description", "description"]);
+    const imageValue = metaValue(html, ["og:image", "twitter:image"]);
+    let imageUrl = story.imageUrl || "";
+    try {
+      const candidate = new URL(imageValue, sourceUrl);
+      if (candidate.protocol === "https:") imageUrl = candidate.href;
+    } catch {}
+    const usefulDescription = description.length > 40 &&
+      description.toLowerCase() !== String(story.headline || "").toLowerCase();
+    return {
+      ...story,
+      sourceUrl,
+      summary: usefulDescription ? description.slice(0, 700) : baseSummary,
+      imageUrl
+    };
+  } catch {
+    return story;
+  }
+}
+async function enrichStories(stories) {
+  const enriched = [];
+  for (let index = 0; index < stories.length; index += 12) {
+    const batch = await Promise.all(stories.slice(index, index + 12).map(enrichArticle));
+    enriched.push(...batch);
+  }
+  return enriched;
+}
+
 const batches = await Promise.allSettled(FEEDS.map(fetchFeed));
 const failed = batches.filter(x => x.status === "rejected");
 const stories = batches.filter(x => x.status === "fulfilled").flatMap(x => x.value);
@@ -112,7 +174,7 @@ for (const story of unique) {
   if (selected.length >= 120) break;
   if (!selectedIds.has(story.id)) { selected.push(story); selectedIds.add(story.id); }
 }
-const finalStories = selected.slice(0, 120);
+const finalStories = await enrichStories(selected.slice(0, 120));
 const payload = JSON.stringify({ generatedAt: new Date().toISOString(), source: "Google News RSS search feeds", count: finalStories.length, failedQueries: failed.length, feedCount: FEEDS.length, articles: finalStories }, null, 2) + "\n";
 await mkdir(dirname(OUTPUT), { recursive: true });
 let previous = "";
