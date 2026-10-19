@@ -79,5 +79,42 @@ export function extractHtmlImageUrl(html = "", baseUrl = "") {
     const image = safeImageUrl(match[1], baseUrl);
     if (image) return image;
   }
+  const candidates = [];
+  for (const match of markup.matchAll(/<img\b([^>]*)>/gi)) {
+    const attrs = match[1];
+    const context = [
+      attribute(attrs, "alt"), attribute(attrs, "class"),
+      attribute(attrs, "id"), attribute(attrs, "title")
+    ].join(" ").toLowerCase();
+    if (/(?:logo|avatar|favicon|icon|sprite|tracking|pixel|placeholder|spinner|emoji|badge|author|profile|social|share)/i.test(context)) continue;
+    const width = Number.parseInt(attribute(attrs, "width"), 10) || 0;
+    const height = Number.parseInt(attribute(attrs, "height"), 10) || 0;
+    if ((width && width < 90) || (height && height < 55)) continue;
+    const urls = [
+      attribute(attrs, "data-src"),
+      attribute(attrs, "data-lazy-src"),
+      attribute(attrs, "data-original"),
+      attribute(attrs, "src")
+    ];
+    const srcset = attribute(attrs, "data-srcset") || attribute(attrs, "srcset");
+    if (srcset) {
+      const best = srcset.split(",").map(part => part.trim()).filter(Boolean).map(part => {
+        const pieces = part.split(/\s+/);
+        const descriptor = pieces[1] || "";
+        const score = Number.parseInt(descriptor, 10) || (descriptor.endsWith("w") ? Number.parseInt(descriptor, 10) : 0);
+        return {url: pieces[0], score};
+      }).sort((a, b) => b.score - a.score)[0];
+      if (best?.url) urls.unshift(best.url);
+    }
+    const image = urls.map(value => safeImageUrl(value, baseUrl)).find(Boolean);
+    if (!image) continue;
+    if (/\.(?:svg)(?:[?#]|$)/i.test(new URL(image).pathname)) continue;
+    if (/(?:logo|avatar|favicon|icon|sprite|placeholder|blank|pixel|tracking|gravatar)/i.test(new URL(image).pathname)) continue;
+    const classScore = /(?:article|story|hero|feature|lead|main|content|thumbnail|thumb|media|image)/i.test(context) ? 10 : 0;
+    const sizeScore = Math.min(width || 300, 1200) + Math.min(height || 180, 800);
+    candidates.push({image, score: classScore + sizeScore});
+  }
+  candidates.sort((a, b) => b.score - a.score);
+  if (candidates.length) return candidates[0].image;
   return "";
 }
