@@ -436,3 +436,9 @@
     height:104px!important;
   }
 }
+
+/* Shared editorial identity: align desktop headings and interactive focus states. */
+@media (min-width:901px){
+  .vivid-cinema-home :where(h1,h2,.vivid-section-title){text-wrap:balance;letter-spacing:-.025em}
+  .vivid-cinema-home :where(a:focus-visible,button:focus-visible){outline:2px solid #c7ff55;outline-offset:3px}
+}
