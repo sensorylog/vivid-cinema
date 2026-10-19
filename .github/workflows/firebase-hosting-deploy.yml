@@ -24,6 +24,15 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Set up Node.js for the static newsroom feed
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Refresh static web-news feed before hosting deploy
+        run: node automation/build-static-news-feed.mjs
+        continue-on-error: true
+
       - name: Deploy Firestore security rules before hosting
         env:
           FIREBASE_SERVICE_ACCOUNT_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_VIVID_CINEMA }}
