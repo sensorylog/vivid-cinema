@@ -35,6 +35,19 @@ if (root) {
     if (region === filter || category === filter) return true;
     return (regionAliases[filter] || []).includes(region);
   }
+  function cleanSummary(value, publisher = "") {
+    let summary = String(value || "")
+      .replace(/&nbsp;|&#160;|&#xA0;/gi, " ")
+      .replace(/\u00a0/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+    if (publisher) {
+      const escaped = publisher.replace(/[.*+?^$()|[\]\\]/g, "\\  function formatDate(value) {
+    const date = value ? new Date(value) : null;");
+      summary = summary.replace(new RegExp("(?:\\s*[|–—-]\\s*)?" + escaped + "\\s*$", "i"), "").trim();
+    }
+    return summary;
+  }
   function formatDate(value) {
     const date = value ? new Date(value) : null;
     return date && !Number.isNaN(date.getTime())
@@ -77,7 +90,7 @@ if (root) {
       labelFor(article.category) + "  /  " + publisher;
     document.getElementById("vivid-news-reader-title").textContent = article.headline || "Entertainment news";
     document.getElementById("vivid-news-reader-summary").textContent =
-      String(article.summary || "").trim() || "This publisher’s RSS feed did not include a readable summary. Open the original report for the complete story.";
+      cleanSummary(article.summary, publisher) || "This publisher’s RSS feed did not include a readable summary. Open the original report for the complete story.";
     document.getElementById("vivid-news-reader-date").textContent = formatDate(article.publishedAt);
     const imageUrl = safeUrl(article.imageUrl);
     const imageWrap = document.getElementById("vivid-news-reader-image-wrap");
@@ -103,7 +116,7 @@ if (root) {
     const title = escapeHtml(article.headline || "Entertainment news");
     const publisher = escapeHtml(article.publisher || "Original publisher");
     const category = labelFor(article.category);
-    const summary = escapeHtml(String(article.summary || "").trim() || "This publisher has not provided a preview. Open the original report for the full story.");
+    const summary = escapeHtml(cleanSummary(article.summary, article.publisher) || "This publisher has not provided a preview. Open the original report for the full story.");
     const source = url || safeUrl(article.publisherUrl) || "https://news.google.com/";
     const imageUrl = safeUrl(article.imageUrl);
     const id = escapeHtml(article.id || "");
@@ -131,9 +144,11 @@ if (root) {
     const more = event.target.closest("[data-load-more]");
     if (more) { visibleCount += 12; render(); return; }
     const button = event.target.closest("[data-open-story]");
-    if (!button) return;
-    const article = articles.find(item => String(item.id || "") === button.dataset.openStory);
-    if (article) openReader(article, button);
+    const cardElement = event.target.closest(".vivid-editorial-card");
+    if (!button && (!cardElement || event.target.closest("a,button"))) return;
+    const storyId = button?.dataset.openStory || cardElement?.dataset.storyId;
+    const article = articles.find(item => String(item.id || "") === storyId);
+    if (article) openReader(article, button || cardElement);
   });
   filters.forEach(button => button.addEventListener("click", () => {
     activeFilter = button.dataset.editorialFilter || "all";
@@ -144,7 +159,6 @@ if (root) {
       item.setAttribute("aria-pressed",active ? "true" : "false");
     });
     render();
-    document.getElementById("vivid-editorial-heading")?.scrollIntoView({behavior:"smooth",block:"start"});
   }));
 
   fetch("./data/news-feed.json",{cache:"no-store"})
