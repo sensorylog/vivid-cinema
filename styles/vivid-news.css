@@ -586,3 +586,17 @@ body[data-vivid-page="news"] .vivid-editorial-card[data-category="television"] .
  body[data-vivid-page="news"] .vivid-editorial-card:not(.is-featured) .vivid-editorial-art{aspect-ratio:16/6}
  body[data-vivid-page="news"] .vivid-editorial-art-category{font-size:30px}
 }
+
+/* Mobile editorial card rhythm: keep the lead story as compact as the rest. */
+@media(max-width:650px){
+ body[data-vivid-page="news"] .vivid-editorial-grid{grid-template-columns:minmax(0,1fr);gap:12px}
+ body[data-vivid-page="news"] .vivid-editorial-card.is-featured{display:flex;flex-direction:column;grid-column:auto}
+ body[data-vivid-page="news"] .vivid-editorial-card.is-featured .vivid-editorial-art,
+ body[data-vivid-page="news"] .vivid-editorial-card:not(.is-featured) .vivid-editorial-art{width:100%;height:auto;min-height:0;aspect-ratio:16/7}
+ body[data-vivid-page="news"] .vivid-editorial-card.is-featured .vivid-editorial-card-copy{padding:15px;justify-content:flex-start}
+ body[data-vivid-page="news"] .vivid-editorial-card.is-featured h3,
+ body[data-vivid-page="news"] .vivid-editorial-card h3{font-size:clamp(22px,6vw,25px);line-height:1.13;letter-spacing:-.03em;margin:9px 0}
+ body[data-vivid-page="news"] .vivid-editorial-card-copy p{-webkit-line-clamp:3;font-size:12px;line-height:1.55}
+ body[data-vivid-page="news"] .vivid-editorial-foot{margin-top:12px;padding-top:10px;flex-wrap:wrap}
+ body[data-vivid-page="news"] .vivid-news-main{padding-bottom:calc(var(--vivid-mobile-nav-height,64px) + env(safe-area-inset-bottom) + 28px)}
+}
