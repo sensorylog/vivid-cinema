@@ -125,11 +125,23 @@ export function extractRssImageUrl(item = "", description = "", baseUrl = "") {
     const attrs = match[1];
     candidates.push(attribute(attrs, "href"), attribute(attrs, "url"), attribute(attrs, "src"));
   }
-  for (const match of xml.matchAll(/<img\b([^>]*)>/gi)) {
+  for (const match of xml.matchAll(/<(?:img|source)\b([^>]*)>/gi)) {
     const attrs = match[1];
-    candidates.push(attribute(attrs, "src"), attribute(attrs, "data-src"));
-    const srcset = attribute(attrs, "srcset");
-    if (srcset) candidates.push(srcset.split(",")[0].trim().split(/\s+/)[0]);
+    candidates.push(
+      attribute(attrs, "data-src"),
+      attribute(attrs, "data-lazy-src"),
+      attribute(attrs, "data-original"),
+      attribute(attrs, "src")
+    );
+    const srcset = attribute(attrs, "data-srcset") || attribute(attrs, "srcset");
+    if (srcset) {
+      const best = srcset.split(",").map(part => part.trim()).filter(Boolean).map(part => {
+        const pieces = part.split(/\s+/);
+        const score = Number.parseInt(pieces[1], 10) || 0;
+        return {url: pieces[0], score};
+      }).sort((a, b) => b.score - a.score)[0];
+      if (best?.url) candidates.push(best.url);
+    }
   }
   for (const candidate of candidates) {
     const image = safeImageUrl(candidate, baseUrl);
