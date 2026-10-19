@@ -328,3 +328,8 @@ body.vivid-search-page .vivid-search-result-group{
   padding-inline-start: 1.2rem;
 }
 .vivid-search-filter-note li + li { margin-top: .2rem; }
+
+/* Consistent focus and accent treatment in search, including installed iOS app mode. */
+:where(.vivid-nav-search input,.vivid-discovery-search input,#search-page-input):focus{border-color:rgba(199,255,85,.52)!important;box-shadow:0 0 0 3px rgba(199,255,85,.09)!important}
+:where(.vivid-search-page-head h1,.vivid-search-page-head h2){font-family:Georgia,"Times New Roman",serif;letter-spacing:-.045em}
+:where(.vivid-search-kicker,.vivid-search-page-label){color:#c7ff55}
