@@ -1,28 +1,30 @@
 /* Vivid Cinema — shared design tokens. Kept intentionally small so page-specific CSS stays composable. */
 :root{
-  --vivid-bg:#071426;
-  --vivid-surface:#1c1c1e;
-  --vivid-surface-strong:#242426;
-  --vivid-text:#f5f5f7;
-  --vivid-text-secondary:#d1d1d6;
-  --vivid-muted:#8e8e93;
-  --vivid-line:rgba(255,255,255,.08);
-  --vivid-line-strong:rgba(255,255,255,.14);
-  --vivid-radius-sm:9px;
-  --vivid-radius-md:12px;
-  --vivid-radius-lg:14px;
+  /* Shared Vivid editorial palette — inspired by the Newsroom. */
+  --vivid-bg:#080a0e;
+  --vivid-surface:#111318;
+  --vivid-surface-strong:#191b21;
+  --vivid-text:#f4f2ed;
+  --vivid-text-secondary:#c1c0c4;
+  --vivid-muted:#92939a;
+  --vivid-accent:#c7ff55;
+  --vivid-accent-strong:#d2ff72;
+  --vivid-line:rgba(255,255,255,.09);
+  --vivid-line-strong:rgba(255,255,255,.16);
+  --vivid-radius-sm:10px;
+  --vivid-radius-md:14px;
+  --vivid-radius-lg:20px;
   --vivid-gutter:16px;
-  --vivid-page-gutter:16px;
-  --vivid-section-title-size:22px;
-  --vivid-card-title-size:15px;
-  --vivid-card-meta-size:13px;
+  --vivid-page-gutter:clamp(14px,3vw,48px);
+  --vivid-section-title-size:clamp(24px,3vw,36px);
+  --vivid-card-title-size:clamp(16px,1.5vw,22px);
+  --vivid-card-meta-size:12px;
   --vivid-search-text-size:16px;
   --vivid-shell-height:64px;
-  --vivid-mobile-nav-height:64px;
+  --vivid-mobile-nav-height:68px;
   --vivid-ui-blur:18px;
-  /* Legacy compatibility: older components may still read this alias. */
   --vivid-glass-blur:var(--vivid-ui-blur,18px);
-  --vivid-ui-shadow:0 12px 36px rgba(0,0,0,.24);
-  --vivid-font-display:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text",sans-serif;
-  --vivid-font-text:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display",sans-serif;
+  --vivid-ui-shadow:0 16px 44px rgba(0,0,0,.3);
+  --vivid-font-display:Georgia,"Times New Roman",serif;
+  --vivid-font-text:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
 }
