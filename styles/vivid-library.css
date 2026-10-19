@@ -359,3 +359,9 @@ body.vivid-library-page .vivid-library-header h1{font-family:Georgia,"Times New 
 body.vivid-library-page .vivid-library-kicker{color:#c7ff55}
 body.vivid-library-page .vivid-library-tabs button.is-active{background:#c7ff55;color:#10120b}
 body.vivid-library-page :where(.vivid-library-nav nav a[aria-current=page],.vivid-library-tabs button:focus-visible){outline-color:#c7ff55}
+
+/* Shared editorial accents for saved-content controls. */
+body.vivid-library-page .vivid-library-header h1{font-family:Georgia,"Times New Roman",serif;letter-spacing:-.05em}
+body.vivid-library-page .vivid-library-kicker{color:#c7ff55}
+body.vivid-library-page .vivid-library-tabs button.is-active{background:#c7ff55;color:#10120b}
+body.vivid-library-page :where(.vivid-library-tabs button:focus-visible){outline-color:#c7ff55}
