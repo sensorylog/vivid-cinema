@@ -375,3 +375,9 @@
   .recall-chat-messages { min-height: 180px; max-height: 250px; }
 }
 
+
+/* Bring For You into the shared visual identity without changing recommendation logic. */
+.vivid-for-you-eyebrow,.vivid-for-you-kicker{color:#c7ff55}
+.vivid-for-you-orb{background:#c7ff55;box-shadow:0 0 16px rgba(199,255,85,.42)}
+.vivid-for-you-hero h1 em{color:#c7ff55}
+.vivid-for-you-hero{background:radial-gradient(ellipse at 82% 0%,rgba(199,255,85,.09),transparent 38%),radial-gradient(ellipse at 0% 100%,rgba(255,255,255,.035),transparent 35%),rgba(255,255,255,.035)}
