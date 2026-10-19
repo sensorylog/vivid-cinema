@@ -16,7 +16,11 @@ test("RSS thumbnail extraction supports media, enclosure, and description images
     "https://cdn.example.com/story.png"
   );
   assert.equal(
-    extractRssImageUrl('<item><description><![CDATA[<img data-lazy-src="/lazy.jpg"><source srcset="/small.jpg 320w, /large.jpg 1280w">]]></description></item>', "", "https://publisher.example/rss"),
+    extractRssImageUrl('<item><description><![CDATA[<img data-lazy-src="/lazy.jpg">]]></description></item>', "", "https://publisher.example/rss"),
+    "https://publisher.example/lazy.jpg"
+  );
+  assert.equal(
+    extractRssImageUrl('<item><description><![CDATA[<source srcset="/small.jpg 320w, /large.jpg 1280w">]]></description></item>', "", "https://publisher.example/rss"),
     "https://publisher.example/large.jpg"
   );
 });
