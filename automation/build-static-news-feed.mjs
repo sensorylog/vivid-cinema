@@ -163,6 +163,9 @@ const unique = sortStoriesNewestFirst(stories).filter(story => {
   seen.add(key);
   return true;
 });
+if (!unique.length) {
+  throw new Error("No valid headlines from the last 72 hours; refusing to overwrite the previous feed.");
+}
 // Reserve space for every topic/region before filling remaining slots by recency.
 const selected = [];
 const selectedIds = new Set();
