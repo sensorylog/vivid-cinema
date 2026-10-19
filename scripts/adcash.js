@@ -23,7 +23,12 @@ if (
 
   library.addEventListener("load", () => {
     if (window.aclib && typeof window.aclib.runAutoTag === "function") {
-      window.aclib.runAutoTag({ zoneId: ADCASH_ZONE_ID });
+      try {
+        window.aclib.runAutoTag({ zoneId: ADCASH_ZONE_ID });
+      } catch (error) {
+        window.__vividAdcashAutotagStarted = false;
+        console.error("Adcash Autotag initialization failed:", error);
+      }
     } else {
       window.__vividAdcashAutotagStarted = false;
       console.warn("Adcash library loaded without the Autotag API.");
