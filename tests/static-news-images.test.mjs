@@ -40,3 +40,20 @@ test("article HTML image extraction supports Open Graph, Twitter, image_src, and
 test("HTML image extraction ignores insecure image metadata", () => {
   assert.equal(extractHtmlImageUrl('<meta property="og:image" content="http://cdn.example.com/story.jpg">'), "");
 });
+
+
+test("article HTML falls back to a real content image when metadata is absent", () => {
+  const html = '<img class="site-logo" src="/logo.png" width="40" height="40"><img class="article-hero" alt="Film still" src="/images/film-still.jpg" width="1200" height="675">';
+  assert.equal(
+    extractHtmlImageUrl(html, "https://publisher.example/news/story"),
+    "https://publisher.example/images/film-still.jpg"
+  );
+});
+
+test("article HTML image fallback supports lazy-loaded images and ignores tiny tracking pixels", () => {
+  const html = '<img src="/pixel.gif" width="1" height="1"><img data-src="/images/story.webp" class="story-image" width="640" height="360">';
+  assert.equal(
+    extractHtmlImageUrl(html, "https://publisher.example/story"),
+    "https://publisher.example/images/story.webp"
+  );
+});
