@@ -15,7 +15,7 @@ test("Adcash Autotag is configured once and skips the watch/player page", async 
   assert.match(loader, /acscdn\.com\/script\/aclib\.js/);
   assert.match(loader, /runAutoTag\(\{ zoneId: ADCASH_ZONE_ID \}\)/);
   assert.match(loader, /__vividAdcashAutotagStarted/);
-  assert.match(loader, /data-vivid-page.*watch|watch\.html/);
+  assert.match(loader, /vividPage\s*===\s*"watch"/);\n  assert.match(loader, /watch\\.html/);
   assert.match(shell, /import ["']\.\/adcash\.js["']/);
   assert.doesNotMatch(watch, /scripts\/adcash\.js/);
 });
@@ -39,6 +39,6 @@ test("every non-watch root HTML page uses the shared shell or standalone Adcash 
 test("Adcash host is allowed without widening unrelated CSP directives and the shell cache is bumped", async () => {
   const config = await readFile(path.join(root, "firebase.json"), "utf8");
   const serviceWorker = await readFile(path.join(root, "service-worker.js"), "utf8");
-  assert.match(config, /script-src 'self' https:\/\/acscdn\.com/);
+  assert.match(config, /script-src 'self' https:\/\/acscdn\.com https:\/\/\\*\.acscdn\.com/);\n  assert.match(config, /connect-src 'self' https:\/\/acscdn\.com https:\/\/\\*\.acscdn\.com/);\n  assert.match(config, /frame-src 'self' https:\/\/acscdn\.com https:\/\/\\*\.acscdn\.com/);
   assert.match(serviceWorker, /const CACHE_NAME = "vivid-cinema-shell-v231"/);
 });
