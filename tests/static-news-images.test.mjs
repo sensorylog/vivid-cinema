@@ -57,3 +57,52 @@ test("article HTML image fallback supports lazy-loaded images and ignores tiny t
     "https://publisher.example/images/story.webp"
   );
 });
+
+
+test("thumbnail cache only publishes verified local image files", async () => {
+  const { mkdtemp, readFile, rm } = await import("node:fs/promises");
+  const { tmpdir } = await import("node:os");
+  const { join } = await import("node:path");
+  const { cacheArticleThumbnails } = await import("../automation/static-news-images.mjs");
+  const directory = await mkdtemp(join(tmpdir(), "vivid-news-thumbs-"));
+  try {
+    const bytes = new Uint8Array(2048);
+    bytes.set([0xff, 0xd8, 0xff, 0xe0]);
+    const result = await cacheArticleThumbnails([{
+      id: "story-1",
+      sourceUrl: "https://publisher.example/story",
+      imageUrl: "https://cdn.example/story.jpg"
+    }], {
+      outputDir: directory,
+      publicPathPrefix: "./data/news-thumbnails",
+      fetchImpl: async () => new Response(bytes, { headers: { "content-type": "image/jpeg" } })
+    });
+    assert.equal(result.cached, 1);
+    assert.equal(result.stories[0].imageUrl, "./data/news-thumbnails/story-1.jpg");
+    assert.deepEqual(new Uint8Array(await readFile(join(directory, "story-1.jpg"))), bytes);
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+});
+
+test("thumbnail cache drops invalid or blocked remote image URLs", async () => {
+  const { mkdtemp, rm } = await import("node:fs/promises");
+  const { tmpdir } = await import("node:os");
+  const { join } = await import("node:path");
+  const { cacheArticleThumbnails } = await import("../automation/static-news-images.mjs");
+  const directory = await mkdtemp(join(tmpdir(), "vivid-news-thumbs-"));
+  try {
+    const result = await cacheArticleThumbnails([{
+      id: "blocked-story",
+      sourceUrl: "https://publisher.example/story",
+      imageUrl: "https://cdn.example/story.jpg"
+    }], {
+      outputDir: directory,
+      fetchImpl: async () => new Response("<html>blocked</html>", { headers: { "content-type": "text/html" } })
+    });
+    assert.equal(result.cached, 0);
+    assert.equal(result.stories[0].imageUrl, "");
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+});

@@ -58,6 +58,13 @@ if (root) {
       return url.protocol === "https:" ? url.href : "";
     } catch { return ""; }
   }
+  function safeImageUrl(value) {
+    try {
+      const url = new URL(value, location.href);
+      if (url.origin === location.origin && url.pathname.startsWith("/data/news-thumbnails/")) return url.href;
+      return url.protocol === "https:" ? url.href : "";
+    } catch { return ""; }
+  }
   function ensureReader() {
     let modal = document.getElementById("vivid-news-reader");
     if (modal) return modal;
@@ -105,7 +112,7 @@ if (root) {
     document.getElementById("vivid-news-reader-summary").textContent =
       cleanSummary(article.summary, publisher) || "This publisher’s RSS feed did not include a readable summary. Open the original report for the complete story.";
     document.getElementById("vivid-news-reader-date").textContent = formatDate(article.publishedAt);
-    const imageUrl = safeUrl(article.imageUrl);
+    const imageUrl = safeImageUrl(article.imageUrl);
     const imageWrap = document.getElementById("vivid-news-reader-image-wrap");
     const readerImage = document.getElementById("vivid-news-reader-image");
     if (imageUrl) {
@@ -137,10 +144,10 @@ if (root) {
     const category = labelFor(article.category);
     const summary = escapeHtml(cleanSummary(article.summary, article.publisher) || "This publisher has not provided a preview. Open the original report for the full story.");
     const source = url || safeUrl(article.publisherUrl) || "https://news.google.com/";
-    const imageUrl = safeUrl(article.imageUrl);
+    const imageUrl = safeImageUrl(article.imageUrl);
     const id = escapeHtml(article.id || "");
     const artContent = imageUrl
-      ? '<img src="' + escapeHtml(imageUrl) + '" alt="" aria-hidden="true" loading="lazy" decoding="async" referrerpolicy="no-referrer"><span class="vivid-editorial-image-label">VIVID / NEWS</span><strong class="vivid-editorial-art-category">' + escapeHtml(category) + '</strong>'
+      ? '<img src="' + escapeHtml(imageUrl) + '" alt="" aria-hidden="true" loading="lazy" decoding="async"><span class="vivid-editorial-image-label">VIVID / NEWS</span><strong class="vivid-editorial-art-category">' + escapeHtml(category) + '</strong>'
       : '<span class="vivid-editorial-image-label">VIVID / NEWS</span><strong class="vivid-editorial-art-category">' + escapeHtml(category) + '</strong>';
     return '<article class="vivid-editorial-card' + (featured ? ' is-featured' : '') + '" data-story-id="' + id + '" data-category="' + escapeHtml(article.category || "film") + '">' +
       '<button class="vivid-editorial-art vivid-editorial-open' + (imageUrl ? ' has-image' : ' vivid-editorial-art-placeholder') + '" type="button" data-open-story="' + id + '" aria-label="Read ' + title + ' in Vivid">' + artContent + '<i class="bi bi-arrow-up-right" aria-hidden="true"></i></button>' +

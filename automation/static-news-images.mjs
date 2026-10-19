@@ -1,3 +1,6 @@
+import { mkdir, writeFile } from "node:fs/promises";
+import { join } from "node:path";
+
 const decode = value => String(value || "")
   .replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, "$1")
   .replace(/&amp;/gi, "&").replace(/&quot;/gi, '"')
@@ -15,12 +18,83 @@ function safeImageUrl(value, baseUrl = "") {
   try {
     const url = new URL(decode(value), baseUrl || undefined);
     if (url.protocol !== "https:" || url.username || url.password) return "";
+    if (/(?:^|[\/_-])(?:logo|avatar|favicon|sprite|tracking|pixel|placeholder|blank|gravatar)(?:[\/_-]|\.)/i.test(url.pathname)) return "";
     if (/^(?:news\.)?google\.com$/i.test(url.hostname) &&
         /(?:branding|logo|favicon)/i.test(url.pathname)) return "";
     return url.href;
   } catch {
     return "";
   }
+}
+
+function imageExtension(contentType, bytes) {
+  const type = String(contentType || "").split(";")[0].trim().toLowerCase();
+  if (type === "image/jpeg" && bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff) return "jpg";
+  if (type === "image/png" && bytes.length >= 8 &&
+      bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4e && bytes[3] === 0x47 &&
+      bytes[4] === 0x0d && bytes[5] === 0x0a && bytes[6] === 0x1a && bytes[7] === 0x0a) return "png";
+  if (type === "image/webp" && String.fromCharCode(...bytes.slice(0, 4)) === "RIFF" &&
+      String.fromCharCode(...bytes.slice(8, 12)) === "WEBP") return "webp";
+  if (type === "image/avif" && String.fromCharCode(...bytes.slice(4, 8)) === "ftyp" &&
+      /^(?:avif|avis)$/.test(String.fromCharCode(...bytes.slice(8, 12)))) return "avif";
+  if (type === "image/gif" && /^(?:GIF87a|GIF89a)$/.test(String.fromCharCode(...bytes.slice(0, 6)))) return "gif";
+  return "";
+}
+
+export async function cacheArticleThumbnails(stories = [], {
+  outputDir = "data/news-thumbnails",
+  publicPathPrefix = "./data/news-thumbnails",
+  fetchImpl = globalThis.fetch,
+  maxBytes = 1_500_000
+} = {}) {
+  await mkdir(outputDir, { recursive: true });
+  let cached = 0;
+  const results = [];
+  for (let index = 0; index < stories.length; index += 12) {
+    const batch = await Promise.all(stories.slice(index, index + 12).map(async story => {
+      const remoteUrl = safeImageUrl(story.imageUrl, story.sourceUrl);
+      if (!remoteUrl) return { ...story, imageUrl: "" };
+      try {
+        const headers = {
+          "User-Agent": "Mozilla/5.0 (compatible; VividCinemaNews/1.0; +https://vivid-cinema.web.app/news.html)",
+          "Accept": "image/avif,image/webp,image/apng,image/*,*/*;q=0.8"
+        };
+        for (const candidate of [story.sourceUrl, story.publisherUrl]) {
+          try {
+            const source = new URL(candidate);
+            if (source.protocol === "https:" && !/(^|\.)news\.google\.com$/i.test(source.hostname)) {
+              headers.Referer = source.href;
+              break;
+            }
+          } catch {}
+        }
+        const response = await fetchImpl(remoteUrl, {
+          redirect: "follow",
+          headers,
+          signal: AbortSignal.timeout(8000)
+        });
+        if (!response.ok) return { ...story, imageUrl: "" };
+        const contentType = response.headers.get("content-type") || "";
+        if (!/^image\/(?:jpeg|png|webp|avif|gif)(?:\s*;|$)/i.test(contentType)) {
+          return { ...story, imageUrl: "" };
+        }
+        const bytes = new Uint8Array(await response.arrayBuffer());
+        if (bytes.length < 1024 || bytes.length > maxBytes) return { ...story, imageUrl: "" };
+        const extension = imageExtension(contentType, bytes);
+        if (!extension) return { ...story, imageUrl: "" };
+        const id = String(story.id || "").replace(/[^a-z0-9_-]/gi, "");
+        if (!id) return { ...story, imageUrl: "" };
+        const filename = id + "." + extension;
+        await writeFile(join(outputDir, filename), bytes);
+        cached += 1;
+        return { ...story, imageUrl: publicPathPrefix.replace(/\/$/, "") + "/" + filename };
+      } catch {
+        return { ...story, imageUrl: "" };
+      }
+    }));
+    results.push(...batch);
+  }
+  return { stories: results, cached };
 }
 
 export function extractRssImageUrl(item = "", description = "", baseUrl = "") {

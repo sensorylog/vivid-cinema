@@ -683,3 +683,77 @@ body[data-vivid-page="news"] .vivid-editorial-art.has-image i {
     font-size: clamp(18px, 5vw, 26px);
   }
 }
+
+
+/* Final mobile newsroom correction: two real cards per row, including the lead story. */
+@media (max-width: 650px) {
+  body[data-vivid-page="news"] .vivid-editorial-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    align-items: stretch;
+  }
+  body[data-vivid-page="news"] .vivid-editorial-card,
+  body[data-vivid-page="news"] .vivid-editorial-card.is-featured {
+    display: flex;
+    flex-direction: column;
+    grid-column: auto;
+    min-width: 0;
+    height: 100%;
+  }
+  body[data-vivid-page="news"] .vivid-editorial-card .vivid-editorial-art,
+  body[data-vivid-page="news"] .vivid-editorial-card.is-featured .vivid-editorial-art {
+    flex: none;
+    width: 100%;
+    min-height: 0;
+    height: auto;
+    aspect-ratio: 4 / 3;
+    padding: 10px;
+  }
+  body[data-vivid-page="news"] .vivid-editorial-card-copy,
+  body[data-vivid-page="news"] .vivid-editorial-card.is-featured .vivid-editorial-card-copy {
+    min-width: 0;
+    padding: 11px;
+    justify-content: flex-start;
+  }
+  body[data-vivid-page="news"] .vivid-editorial-card h3,
+  body[data-vivid-page="news"] .vivid-editorial-card.is-featured h3 {
+    font-size: clamp(13px, 3.8vw, 17px);
+    line-height: 1.18;
+    overflow-wrap: anywhere;
+    margin: 8px 0;
+  }
+  body[data-vivid-page="news"] .vivid-editorial-card-copy > p {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+    font-size: 11px;
+    line-height: 1.4;
+  }
+  body[data-vivid-page="news"] .vivid-editorial-meta {
+    gap: 4px;
+    font-size: 8px;
+    letter-spacing: .04em;
+  }
+  body[data-vivid-page="news"] .vivid-editorial-foot {
+    margin-top: 10px;
+    padding-top: 8px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 6px;
+    font-size: 9px;
+  }
+  body[data-vivid-page="news"] .vivid-editorial-foot > div {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+  }
+  body[data-vivid-page="news"] .vivid-editorial-foot .vivid-editorial-read {
+    padding: 7px;
+    font-size: 9px;
+  }
+  body[data-vivid-page="news"] .vivid-editorial-foot a {
+    font-size: 9px;
+  }
+}
