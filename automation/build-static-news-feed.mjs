@@ -1,4 +1,5 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { extractHtmlImageUrl, extractRssImageUrl } from "./static-news-images.mjs";
 import { dirname } from "node:path";
 
 const OUTPUT = "data/news-feed.json";
@@ -64,12 +65,7 @@ async function fetchFeed(feed) {
     const publisherUrl = sourceTag ? attr(sourceTag[1], "url") : "";
     const publishedAt = tag(item, "pubDate");
     const rawDescription = rawTag(item, "description");
-    const imageMatch = rawDescription.match(/<img\b[^>]*\bsrc=["']([^"']+)["']/i);
-    let imageUrl = "";
-    try {
-      const candidate = new URL(imageMatch?.[1] || "");
-      if (candidate.protocol === "https:") imageUrl = candidate.href;
-    } catch {}
+    const imageUrl = extractRssImageUrl(item, rawDescription, url);
     const summary = rawDescription.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, " ")
       .replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, " ")
       .replace(/<[^>]+>/g, " ").replace(/&(?:nbsp|#160|#xA0);/gi, " ")
@@ -123,7 +119,7 @@ async function enrichArticle(story) {
       }
     } catch {}
     const description = metaValue(html, ["og:description", "twitter:description", "description"]);
-    const imageValue = metaValue(html, ["og:image", "twitter:image"]);
+    const imageValue = extractHtmlImageUrl(html, sourceUrl);
     let imageUrl = story.imageUrl || "";
     try {
       const candidate = new URL(imageValue, sourceUrl);
