@@ -97,3 +97,7 @@
 .achievement-art[data-achievement="feature-focus"]{--art-clip:polygon(0 15%,100% 0,100% 100%,0 100%)}
 .achievement-art[data-achievement="series-scout"]{--art-clip:inset(4% round 10%)}
 .achievement-art[data-achievement="library-25"]{--art-clip:polygon(0 10%,40% 0,50% 10%,60% 0,100% 10%,100% 90%,60% 100%,50% 90%,40% 100%,0 90%)}
+
+/* Achievement headings and focus align with the shared Vivid system. */
+:where(.vivid-achievements-page h1,.achievements-header h1){font-family:Georgia,"Times New Roman",serif;letter-spacing:-.045em}
+:where(.vivid-achievements-page a:focus-visible,.vivid-achievements-page button:focus-visible){outline:2px solid #c7ff55;outline-offset:3px}
