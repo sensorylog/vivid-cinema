@@ -600,3 +600,9 @@ body[data-vivid-page="news"] .vivid-editorial-card[data-category="television"] .
  body[data-vivid-page="news"] .vivid-editorial-foot{margin-top:12px;padding-top:10px;flex-wrap:wrap}
  body[data-vivid-page="news"] .vivid-news-main{padding-bottom:calc(var(--vivid-mobile-nav-height,64px) + env(safe-area-inset-bottom) + 28px)}
 }
+
+/* Newsroom identity: editorial headline, lime active filters and clear keyboard focus. */
+.vivid-news-hero h1,.vivid-news-section-head h2{font-family:Georgia,"Times New Roman",serif;letter-spacing:-.04em}
+.vivid-news-kicker,.vivid-news-section-head span,.vivid-calendar-head span{color:#c7ff55}
+.vivid-news-primary,.vivid-news-filter.is-active,.vivid-news-image .vivid-news-play,.vivid-news-empty a{background:#c7ff55;color:#10120b;border-color:#c7ff55}
+:where(.vivid-news-main a:focus-visible,.vivid-news-main button:focus-visible){outline:2px solid #c7ff55;outline-offset:3px}
