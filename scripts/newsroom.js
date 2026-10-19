@@ -57,7 +57,7 @@ if (root) {
     modal.setAttribute("role","dialog");
     modal.setAttribute("aria-modal","true");
     modal.setAttribute("aria-labelledby","vivid-news-reader-title");
-    modal.innerHTML = '<div class="vivid-news-reader-backdrop" data-reader-close></div><section class="vivid-news-reader-panel" role="document"><header class="vivid-news-reader-header"><span class="vivid-news-reader-mark">VIVID / NEWS</span><button type="button" class="vivid-news-reader-close" data-reader-close aria-label="Close article reader">×</button></header><div class="vivid-news-reader-content"><div class="vivid-news-reader-meta" id="vivid-news-reader-meta"></div><h2 id="vivid-news-reader-title"></h2><p class="vivid-news-reader-summary" id="vivid-news-reader-summary"></p><div class="vivid-news-reader-footer"><span id="vivid-news-reader-date"></span><a id="vivid-news-reader-original" target="_blank" rel="noopener noreferrer">Continue at publisher <span aria-hidden="true">↗</span></a></div></div></section>';
+    modal.innerHTML = '<div class="vivid-news-reader-backdrop" data-reader-close></div><section class="vivid-news-reader-panel" role="document"><header class="vivid-news-reader-header"><span class="vivid-news-reader-mark">VIVID / NEWS</span><button type="button" class="vivid-news-reader-close" data-reader-close aria-label="Close article reader">×</button></header><figure class="vivid-news-reader-image-wrap" id="vivid-news-reader-image-wrap" hidden><img id="vivid-news-reader-image" alt="" decoding="async"></figure><div class="vivid-news-reader-content"><div class="vivid-news-reader-meta" id="vivid-news-reader-meta"></div><h2 id="vivid-news-reader-title"></h2><p class="vivid-news-reader-summary" id="vivid-news-reader-summary"></p><div class="vivid-news-reader-footer"><span id="vivid-news-reader-date"></span><a id="vivid-news-reader-original" target="_blank" rel="noopener noreferrer">Continue at publisher <span aria-hidden="true">↗</span></a></div></div></section>';
     document.body.append(modal);
     modal.addEventListener("click", event => {
       if (event.target.closest("[data-reader-close]")) closeReader();
@@ -79,6 +79,11 @@ if (root) {
     document.getElementById("vivid-news-reader-summary").textContent =
       String(article.summary || "").trim() || "This publisher’s RSS feed did not include a readable summary. Open the original report for the complete story.";
     document.getElementById("vivid-news-reader-date").textContent = formatDate(article.publishedAt);
+    const imageUrl = safeUrl(article.imageUrl);
+    const imageWrap = document.getElementById("vivid-news-reader-image-wrap");
+    const readerImage = document.getElementById("vivid-news-reader-image");
+    readerImage.src = imageUrl;
+    imageWrap.hidden = !imageUrl;
     const original = document.getElementById("vivid-news-reader-original");
     original.href = url;
     original.setAttribute("aria-label","Continue reading at " + publisher);
@@ -98,11 +103,15 @@ if (root) {
     const title = escapeHtml(article.headline || "Entertainment news");
     const publisher = escapeHtml(article.publisher || "Original publisher");
     const category = labelFor(article.category);
-    const summary = escapeHtml(String(article.summary || "").trim() || "Open this story in Vivid for a quick brief and a link to the full report.");
+    const summary = escapeHtml(String(article.summary || "").trim() || "This publisher has not provided a preview. Open the original report for the full story.");
     const source = url || safeUrl(article.publisherUrl) || "https://news.google.com/";
+    const imageUrl = safeUrl(article.imageUrl);
     const id = escapeHtml(article.id || "");
+    const artContent = imageUrl
+      ? '<img src="' + escapeHtml(imageUrl) + '" alt="" aria-hidden="true" loading="lazy" decoding="async" referrerpolicy="no-referrer"><span class="vivid-editorial-image-label">VIVID / NEWS</span>'
+      : '<span>VIVID / NEWS</span>';
     return '<article class="vivid-editorial-card' + (featured ? ' is-featured' : '') + '" data-story-id="' + id + '">' +
-      '<button class="vivid-editorial-art vivid-editorial-art-placeholder vivid-editorial-open" type="button" data-open-story="' + id + '" aria-label="Read ' + title + ' in Vivid"><span>VIVID / NEWS</span><i class="bi bi-arrow-up-right" aria-hidden="true"></i></button>' +
+      '<button class="vivid-editorial-art vivid-editorial-open' + (imageUrl ? ' has-image' : ' vivid-editorial-art-placeholder') + '" type="button" data-open-story="' + id + '" aria-label="Read ' + title + ' in Vivid">' + artContent + '<i class="bi bi-arrow-up-right" aria-hidden="true"></i></button>' +
       '<div class="vivid-editorial-card-copy"><div class="vivid-editorial-meta"><span>' + escapeHtml(category) + '</span><span>' + publisher + '</span></div>' +
       '<h3><button type="button" class="vivid-editorial-title-button" data-open-story="' + id + '">' + title + '</button></h3>' +
       '<p>' + summary + '</p>' +
