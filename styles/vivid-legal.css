@@ -68,3 +68,7 @@
   .vivid-tmdb-attribution { align-items: flex-start; flex-direction: column; gap: 10px; }
   .vivid-tmdb-attribution img { width: 100px; max-width: 45vw; }
 }
+
+/* Legal pages: editorial headline and accessible focus treatment. */
+:where(.vivid-legal-main h1,.vivid-legal-header h1,.vivid-legal-content h1){font-family:Georgia,"Times New Roman",serif;letter-spacing:-.045em}
+:where(.vivid-legal-main a:focus-visible,.vivid-legal-main button:focus-visible){outline:2px solid #c7ff55;outline-offset:3px}
