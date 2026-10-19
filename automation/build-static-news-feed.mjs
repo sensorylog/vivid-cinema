@@ -70,20 +70,20 @@ async function fetchFeed(feed) {
       const candidate = new URL(imageMatch?.[1] || "");
       if (candidate.protocol === "https:") imageUrl = candidate.href;
     } catch {}
-    const summary = rawDescription.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, " ")
-      .replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, " ")
+    const summary = rawDescription.replace(/<script\\b[^>]*>[\\s\\S]*?<\\/script>/gi, " ")
+      .replace(/<style\\b[^>]*>[\\s\\S]*?<\\/style>/gi, " ")
       .replace(/<[^>]+>/g, " ").replace(/&(?:nbsp|#160|#xA0);/gi, " ")
-      .replace(/\u00a0/g, " ").replace(/\s+/g, " ").trim()
-      .replace(new RegExp("(?:\\s*[|–—-]\\s*)?" + publisher.replace(/[.*+?^$()|[\]\\]/g, "\\.replace(/<[^>]+>/g, " ").replace(/&nbsp;|&#160;/gi, " ")
-      .replace(/\s+/g, " ").trim().slice(0, 1800);") + "\\s*$", "i"), "")
-      .trim().slice(0, 1800);
+      .replace(/\\u00a0/g, " ").replace(/\\s+/g, " ").trim();
+    const cleanedSummary = publisher && summary.toLowerCase().endsWith(publisher.toLowerCase())
+      ? summary.slice(0, -publisher.length).replace(/[\\s|–—-]+$/, "").trim()
+      : summary;
     if (!title || !/^https?:\/\//i.test(url)) return null;
     const cleanTitle = title.replace(/\s+-\s+[^-]+$/, "").trim() || title;
     const timestamp = Date.parse(publishedAt);
     return {
       id: stableId(url, cleanTitle), headline: cleanTitle, publisher, publisherUrl,
       sourceUrl: url, publishedAt: Number.isFinite(timestamp) ? new Date(timestamp).toISOString() : null,
-      region: feed.region, category: feed.category, summary, imageUrl
+      region: feed.region, category: feed.category, summary: cleanedSummary.slice(0, 1800), imageUrl
     };
   }).filter(Boolean);
 }
