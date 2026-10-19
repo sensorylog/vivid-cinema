@@ -216,28 +216,43 @@ if (root) {
     render();
   }));
 
-  fetch("./data/news-feed.json",{cache:"no-store"})
-    .then(response => {
+  let lastGeneratedAt = "";
+  async function loadNewsFeed({ quiet = false } = {}) {
+    try {
+      const response = await fetch("./data/news-feed.json", { cache: "no-store" });
       if (!response.ok) throw new Error("Static news feed returned HTTP " + response.status);
-      return response.json();
-    })
-    .then(data => {
-      articles = (Array.isArray(data.articles) ? data.articles : []).slice().sort((a, b) => {
+      const data = await response.json();
+      if (!Array.isArray(data.articles)) throw new Error("Static news feed has no article list");
+      if (lastGeneratedAt && data.generatedAt === lastGeneratedAt) return;
+      articles = data.articles.slice().sort((a, b) => {
         const timeA = Date.parse(a.publishedAt || "");
         const timeB = Date.parse(b.publishedAt || "");
         return (Number.isFinite(timeB) ? timeB : 0) - (Number.isFinite(timeA) ? timeA : 0);
       });
+      lastGeneratedAt = data.generatedAt || "";
       render();
       if (status) {
         const time = data.generatedAt ? new Date(data.generatedAt).toLocaleString() : "recently";
-        status.textContent = articles.length + " web headlines · updated " + time;
+        status.textContent = articles.length + " web headlines · updated " + time + " · auto-refresh on";
       }
-    })
-    .catch(error => {
-      console.error("Vivid static news feed unavailable:",error);
-      root.setAttribute("aria-busy","false");
+    } catch (error) {
+      if (quiet && articles.length) {
+        if (status) status.textContent = "News refresh unavailable · showing the last loaded headlines";
+        return;
+      }
+      console.error("Vivid static news feed unavailable:", error);
+      if (articles.length) return;
+      root.setAttribute("aria-busy", "false");
       root.innerHTML = '<div class="vivid-editorial-empty"><h3>The web-news feed is temporarily unavailable.</h3><p>Try again shortly. The newsroom refreshes automatically from public news RSS sources.</p><button type="button" class="vivid-editorial-retry" id="vivid-news-retry">Try again</button></div>';
-      document.getElementById("vivid-news-retry")?.addEventListener("click", () => location.reload());
+      document.getElementById("vivid-news-retry")?.addEventListener("click", () => loadNewsFeed());
       if (status) status.textContent = "News feed unavailable · retry";
-    });
+    }
+  }
+  loadNewsFeed();
+  window.setInterval(() => {
+    if (!document.hidden) loadNewsFeed({ quiet: true });
+  }, 5 * 60 * 1000);
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden) loadNewsFeed({ quiet: true });
+  });
 }
