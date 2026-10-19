@@ -340,3 +340,10 @@ html[data-vivid-theme="light"] body.vivid-discovery-page .vivid-discovery-nav na
     padding-top: 12px;
   }
 }
+
+
+/* Editorial accents for discovery controls; preserve the existing responsive grid. */
+.vivid-discovery-page .vivid-discovery-intro h1{font-family:Georgia,"Times New Roman",serif;letter-spacing:-.05em}
+.vivid-discovery-page :where(.vivid-discovery-kicker,.vivid-filter-panel>label){color:#c7ff55}
+.vivid-discovery-page .vivid-discovery-search input:focus{border-color:rgba(199,255,85,.5);box-shadow:0 0 0 3px rgba(199,255,85,.09)}
+.vivid-discovery-page :where(.vivid-discovery-nav nav a.is-active,.vivid-filter-chip.is-active,.vivid-filter-button.is-active){border-color:rgba(199,255,85,.32);color:#c7ff55}
