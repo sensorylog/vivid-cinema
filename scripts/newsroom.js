@@ -93,8 +93,14 @@ if (root) {
     const imageUrl = safeUrl(article.imageUrl);
     const imageWrap = document.getElementById("vivid-news-reader-image-wrap");
     const readerImage = document.getElementById("vivid-news-reader-image");
-    readerImage.src = imageUrl;
-    imageWrap.hidden = !imageUrl;
+    if (imageUrl) {
+      readerImage.onerror = () => { imageWrap.hidden = true; readerImage.removeAttribute("src"); };
+      readerImage.src = imageUrl;
+      imageWrap.hidden = false;
+    } else {
+      readerImage.removeAttribute("src");
+      imageWrap.hidden = true;
+    }
     const original = document.getElementById("vivid-news-reader-original");
     original.href = url;
     original.setAttribute("aria-label","Continue reading at " + publisher);
@@ -119,7 +125,7 @@ if (root) {
     const imageUrl = safeUrl(article.imageUrl);
     const id = escapeHtml(article.id || "");
     const artContent = imageUrl
-      ? '<img src="' + escapeHtml(imageUrl) + '" alt="" aria-hidden="true" loading="lazy" decoding="async" referrerpolicy="no-referrer"><span class="vivid-editorial-image-label">VIVID / NEWS</span>'
+      ? '<img src="' + escapeHtml(imageUrl) + '" alt="" aria-hidden="true" loading="lazy" decoding="async" referrerpolicy="no-referrer"><span class="vivid-editorial-image-label">VIVID / NEWS</span><strong class="vivid-editorial-art-category">' + escapeHtml(category) + '</strong>'
       : '<span class="vivid-editorial-image-label">VIVID / NEWS</span><strong class="vivid-editorial-art-category">' + escapeHtml(category) + '</strong>';
     return '<article class="vivid-editorial-card' + (featured ? ' is-featured' : '') + '" data-story-id="' + id + '" data-category="' + escapeHtml(article.category || "film") + '">' +
       '<button class="vivid-editorial-art vivid-editorial-open' + (imageUrl ? ' has-image' : ' vivid-editorial-art-placeholder') + '" type="button" data-open-story="' + id + '" aria-label="Read ' + title + ' in Vivid">' + artContent + '<i class="bi bi-arrow-up-right" aria-hidden="true"></i></button>' +
@@ -138,6 +144,13 @@ if (root) {
     root.innerHTML = '<div class="vivid-editorial-count">' + filtered.length + ' stories in this view</div><div class="vivid-editorial-grid">' + filtered.slice(0,visibleCount).map((article,index)=>card(article,index===0)).join("") + '</div>' + (filtered.length > visibleCount ? '<div class="vivid-editorial-more-wrap"><button type="button" class="vivid-editorial-more" data-load-more>Load more stories <span>' + Math.min(12, filtered.length-visibleCount) + ' more</span></button></div>' : '');
     root.setAttribute("aria-busy","false");
   }
+  root.addEventListener("error", event => {
+    if (!event.target.matches(".vivid-editorial-art img")) return;
+    const art = event.target.closest(".vivid-editorial-art");
+    event.target.remove();
+    art?.classList.remove("has-image");
+    art?.classList.add("vivid-editorial-art-placeholder");
+  }, true);
   root.addEventListener("click", event => {
     const more = event.target.closest("[data-load-more]");
     if (more) { visibleCount += 12; render(); return; }
