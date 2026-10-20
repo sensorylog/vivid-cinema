@@ -1,4 +1,5 @@
-import { mkdir, writeFile } from "node:fs/promises";
+import { mkdir, rm, writeFile } from "node:fs/promises";
+import { createHash } from "node:crypto";
 import { join } from "node:path";
 
 const decode = value => String(value || "")
@@ -27,12 +28,24 @@ function safeImageUrl(value, baseUrl = "") {
     const url = new URL(decode(value), baseUrl || undefined);
     if (url.protocol !== "https:" || url.username || url.password) return "";
     if (/(?:^|[\/_-])(?:logo|avatar|favicon|sprite|tracking|pixel|placeholder|blank|gravatar)(?:[\/_-]|\.)/i.test(url.pathname)) return "";
+    const host = url.hostname.toLowerCase();
+    if (/(?:^|\.)googleusercontent\.com$/i.test(host)) {
+      const path = url.pathname.replace(/^\/+/, "");
+      if (/^J6_coFbogxhRI9iM864NL_liGXvsQp2AupsKei7z0cNNfDvGUmWUy20nuUhkREQyrp/i.test(path)) return "";
+      // Google News uses short opaque Googleusercontent paths for its generic source icon.
+      if (path.length < 40 && !path.includes("/")) return "";
+    }
+    if (/(?:^|\.)gstatic\.com$/i.test(host) && /(?:icons?|logo|branding|googlelogo|google_logo)/i.test(url.pathname)) return "";
     if (/^(?:news\.)?google\.com$/i.test(url.hostname) &&
         /(?:branding|logo|favicon)/i.test(url.pathname)) return "";
     return url.href;
   } catch {
     return "";
   }
+}
+
+export function isArticleImageUrl(value, baseUrl = "") {
+  return Boolean(safeImageUrl(value, baseUrl));
 }
 
 function imageExtension(contentType, bytes) {
@@ -60,8 +73,11 @@ export async function cacheArticleThumbnails(stories = [], {
   let remoteFallback = 0;
   let missing = 0;
   const results = [];
+  const contentHashes = new Array(stories.length).fill("");
+  const cachedFiles = new Array(stories.length).fill("");
   for (let index = 0; index < stories.length; index += 12) {
-    const batch = await Promise.all(stories.slice(index, index + 12).map(async story => {
+    const batch = await Promise.all(stories.slice(index, index + 12).map(async (story, offset) => {
+      const storyIndex = index + offset;
       const remoteUrl = safeImageUrl(story.imageUrl, story.sourceUrl);
       if (!remoteUrl) { missing += 1; return { ...story, imageUrl: "", imageFallbackUrl: "" }; }
       try {
@@ -93,9 +109,11 @@ export async function cacheArticleThumbnails(stories = [], {
         const extension = imageExtension(contentType, bytes);
         if (!extension) { remoteFallback += 1; return { ...story, imageUrl: remoteUrl, imageFallbackUrl: remoteUrl }; }
         const id = String(story.id || "").replace(/[^a-z0-9_-]/gi, "");
-        if (!id) return { ...story, imageUrl: "" };
+        if (!id) return { ...story, imageUrl: "", imageFallbackUrl: "" };
         const filename = id + "." + extension;
-        await writeFile(join(outputDir, filename), bytes);
+        contentHashes[storyIndex] = createHash("sha256").update(bytes).digest("hex");
+        cachedFiles[storyIndex] = join(outputDir, filename);
+        await writeFile(cachedFiles[storyIndex], bytes);
         cached += 1;
         return { ...story, imageUrl: publicPathPrefix.replace(/\/$/, "") + "/" + filename, imageFallbackUrl: remoteUrl };
       } catch {
@@ -104,6 +122,21 @@ export async function cacheArticleThumbnails(stories = [], {
       }
     }));
     results.push(...batch);
+  }
+
+  const indicesByHash = new Map();
+  contentHashes.forEach((digest, index) => {
+    if (!digest) return;
+    const indices = indicesByHash.get(digest) || [];
+    indices.push(index);
+    indicesByHash.set(digest, indices);
+  });
+  const duplicateIndices = [...indicesByHash.values()].filter(indices => indices.length > 1).flat();
+  for (const index of duplicateIndices) {
+    if (cachedFiles[index]) await rm(cachedFiles[index], { force: true });
+    if (results[index]?.imageUrl) cached -= 1;
+    results[index] = { ...results[index], imageUrl: "", imageFallbackUrl: "" };
+    missing += 1;
   }
   return { stories: results, cached, remoteFallback, missing };
 }
