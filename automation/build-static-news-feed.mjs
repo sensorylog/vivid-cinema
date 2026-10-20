@@ -178,7 +178,7 @@ async function enrichArticle(story) {
 
     const description = metaValue(html, ["og:description", "twitter:description", "description"]);
     const imageValue = extractHtmlImageUrl(html, sourceUrl);
-    let imageUrl = needsImage ? "" : (story.imageUrl || "");
+    let imageUrl = needsImage ? (isGoogleHostedImage ? (story.imageUrl || "") : "") : (story.imageUrl || "");
     try {
       const candidate = new URL(imageValue, sourceUrl);
       const candidateHost = candidate.hostname.toLowerCase();
