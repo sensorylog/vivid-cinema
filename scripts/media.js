@@ -1,6 +1,25 @@
 import { VIVID_CONFIG } from "./config.js";
 import { getMediaDate, getMediaTitle, getMediaType } from "./utils.js";
 
+/**
+ * TMDB discovery/search feeds can include announced titles before their
+ * first public release. Keep unknown/missing dates for backwards compatibility,
+ * but never surface a title with a valid release date after today.
+ *
+ * The date is compared as an ISO calendar date (not a local midnight timestamp)
+ * so titles released today remain visible regardless of the user's timezone.
+ */
+export function isReleasedMedia(item = {}, today = new Date().toISOString().slice(0, 10)) {
+  const type = getMediaType(item);
+  const date = String(type === "tv"
+    ? (item.first_air_date || item.release_date || "")
+    : (item.release_date || item.first_air_date || "")).trim();
+
+  // Missing or malformed TMDB dates should not unexpectedly erase older records.
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return true;
+  return date <= today;
+}
+
 export function normalizeMedia(item = {}, type = null) {
   // Mixed-media sections use "all" as a filter, not a real media type.
   // Only trust explicit movie/tv overrides; otherwise preserve the item's TMDB type.
@@ -25,7 +44,9 @@ export function normalizeMedia(item = {}, type = null) {
 }
 
 export function normalizeResults(results = [], type = null) {
-  return results.filter((item) => item && item.id != null).map((item) => normalizeMedia(item, type));
+  return results
+    .filter((item) => item && item.id != null && isReleasedMedia(item))
+    .map((item) => normalizeMedia(item, type));
 }
 
 export function getMediaUrl(media) {
