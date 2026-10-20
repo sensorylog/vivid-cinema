@@ -1,0 +1,218 @@
+/* Vivid Cinema — universal rounded media-card system.
+   One shared finish for movie, TV, anime, search, discovery, library and recommendation cards. */
+:root {
+  --vivid-media-radius: 15px;
+  --vivid-media-radius-sm: 11px;
+  --vivid-media-border: rgba(255,255,255,.105);
+  --vivid-media-shadow: 0 12px 32px rgba(0,0,0,.22);
+  --vivid-media-shadow-hover: 0 20px 42px rgba(0,0,0,.34);
+}
+body :is(
+  .vivid-card,
+  .vivid-discovery-card,
+  .vivid-for-you-card,
+  .vivid-for-you-continue-card,
+  .vivid-anime-card,
+  .vivid-library-card,
+  .vivid-collection-card,
+  .vivid-watch-rec-card,
+  .vivid-person-credit-card,
+  .vivid-person-credit,
+  .vivid-tonight-card,
+  .vivid-browse-category-card,
+  .landing-poster,
+  .landing-showcase-card,
+  .vivid-search-result-card,
+  .vivid-search-card,
+  .vivid-title-card,
+  .vivid-media-card
+) {
+  border-radius: var(--vivid-media-radius) !important;
+  overflow: hidden;
+  isolation: isolate;
+  -webkit-tap-highlight-color: transparent;
+}
+body :is(
+  .vivid-discovery-poster,
+  .vivid-for-you-poster,
+  .vivid-anime-poster,
+  .vivid-card-media,
+  .vivid-library-card-media,
+  .vivid-watch-rec-card,
+  .vivid-person-credit-poster,
+  .vivid-browse-category-media,
+  .landing-poster,
+  .vivid-video-thumb,
+  .vivid-similar-card,
+  .vivid-cast,
+  .vivid-tonight-poster
+) {
+  border-radius: var(--vivid-media-radius) !important;
+  overflow: hidden !important;
+  background: #101218;
+  clip-path: inset(0 round var(--vivid-media-radius));
+}
+body :is(
+  .vivid-card,
+  .vivid-discovery-card,
+  .vivid-for-you-card,
+  .vivid-for-you-continue-card,
+  .vivid-anime-card,
+  .vivid-library-card,
+  .vivid-watch-rec-card,
+  .vivid-search-result-card,
+  .vivid-search-card,
+  .vivid-title-card,
+  .vivid-media-card
+) {
+  border: 1px solid var(--vivid-media-border);
+  background: linear-gradient(155deg,rgba(255,255,255,.055),rgba(255,255,255,.018));
+  box-shadow: 0 6px 20px rgba(0,0,0,.12);
+  transition: transform .24s cubic-bezier(.2,.7,.2,1), border-color .24s ease, box-shadow .24s ease, background .24s ease;
+}
+body :is(
+  .vivid-discovery-card,
+  .vivid-for-you-card,
+  .vivid-for-you-continue-card,
+  .vivid-anime-card,
+  .vivid-library-card,
+  .vivid-watch-rec-card,
+  .vivid-search-result-card,
+  .vivid-search-card,
+  .vivid-title-card,
+  .vivid-media-card
+) :is(img, picture, .vivid-discovery-poster, .vivid-for-you-poster, .vivid-anime-poster) {
+  border-radius: var(--vivid-media-radius-sm) !important;
+}
+body :is(
+  .vivid-discovery-poster,
+  .vivid-for-you-poster,
+  .vivid-anime-poster,
+  .vivid-card-media,
+  .vivid-library-card-media,
+  .vivid-watch-rec-card,
+  .vivid-person-credit-poster,
+  .vivid-browse-category-media,
+  .landing-poster,
+  .vivid-similar-card,
+  .vivid-cast
+) img,
+body :is(
+  .vivid-discovery-card,
+  .vivid-for-you-card,
+  .vivid-for-you-continue-card,
+  .vivid-anime-card,
+  .vivid-library-card,
+  .vivid-watch-rec-card,
+  .vivid-search-result-card,
+  .vivid-search-card,
+  .vivid-title-card,
+  .vivid-media-card
+) img {
+  display: block;
+  max-width: 100%;
+  border-radius: inherit;
+  object-fit: cover !important;
+  object-position: center top !important;
+  transition: transform .38s cubic-bezier(.2,.7,.2,1), filter .28s ease;
+  backface-visibility: hidden;
+}
+body :is(
+  .vivid-discovery-poster,
+  .vivid-for-you-poster,
+  .vivid-anime-poster,
+  .vivid-card-media,
+  .vivid-library-card-media,
+  .vivid-watch-rec-card,
+  .vivid-person-credit-poster,
+  .vivid-browse-category-media,
+  .landing-poster
+) img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover !important;
+}
+body :is(.vivid-discovery-card,.vivid-for-you-card,.vivid-anime-card,.vivid-library-card,.vivid-watch-rec-card) :is(h2,h3,h4,.vivid-for-you-card-title) {
+  letter-spacing: -.025em;
+  line-height: 1.25;
+}
+body :is(.vivid-discovery-card,.vivid-for-you-card,.vivid-anime-card,.vivid-library-card,.vivid-watch-rec-card) :is(.vivid-card-info,.vivid-for-you-card-body,.vivid-anime-card-copy) {
+  min-width: 0;
+}
+body :is(.vivid-discovery-card,.vivid-for-you-card,.vivid-anime-card,.vivid-library-card,.vivid-watch-rec-card):focus-within {
+  outline: 2px solid rgba(255,255,255,.78);
+  outline-offset: 3px;
+}
+@media (hover:hover) and (pointer:fine) {
+  body :is(
+    .vivid-discovery-card,
+    .vivid-for-you-card,
+    .vivid-for-you-continue-card,
+    .vivid-anime-card,
+    .vivid-library-card,
+    .vivid-watch-rec-card,
+    .vivid-search-result-card,
+    .vivid-search-card,
+    .vivid-title-card,
+    .vivid-media-card,
+    .vivid-collection-card
+  ):hover {
+    transform: translateY(-4px);
+    border-color: rgba(255,255,255,.2);
+    box-shadow: var(--vivid-media-shadow-hover);
+    background: linear-gradient(155deg,rgba(255,255,255,.075),rgba(255,255,255,.025));
+  }
+  body :is(
+    .vivid-discovery-card,
+    .vivid-for-you-card,
+    .vivid-for-you-continue-card,
+    .vivid-anime-card,
+    .vivid-library-card,
+    .vivid-watch-rec-card,
+    .vivid-search-result-card,
+    .vivid-search-card,
+    .vivid-title-card,
+    .vivid-media-card,
+    .landing-poster
+  ):hover img {
+    transform: scale(1.035);
+    filter: saturate(1.04);
+  }
+}
+body :is(.vivid-rail,.vivid-cast-grid,.vivid-similar,.vivid-library-continue-rail) {
+  scroll-padding-inline: 4px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,.18) transparent;
+}
+body :is(.vivid-rail,.vivid-cast-grid,.vivid-similar,.vivid-library-continue-rail) > * {
+  scroll-snap-align: start;
+}
+body :is(.vivid-discovery-card,.vivid-for-you-card,.vivid-anime-card,.vivid-library-card) img[loading="lazy"] {
+  background: #11141a;
+}
+body .vivid-discovery-grid,
+body .vivid-for-you-grid,
+body .vivid-for-you-continue-grid,
+body .vivid-anime-grid,
+body .vivid-library-grid {
+  align-items: start;
+}
+body .vivid-collection-card {
+  border: 1px solid rgba(255,255,255,.1) !important;
+  box-shadow: var(--vivid-media-shadow) !important;
+  transition: transform .24s ease, border-color .24s ease, box-shadow .24s ease !important;
+}
+body .vivid-collection-card::before,
+body .vivid-collection-card::after { border-radius: inherit; }
+@media (max-width: 640px) {
+  :root { --vivid-media-radius: 13px; --vivid-media-radius-sm: 10px; }
+  body :is(.vivid-discovery-card,.vivid-for-you-card,.vivid-anime-card,.vivid-library-card,.vivid-watch-rec-card) {
+    box-shadow: 0 5px 15px rgba(0,0,0,.16);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  body :is(.vivid-discovery-card,.vivid-for-you-card,.vivid-for-you-continue-card,.vivid-anime-card,.vivid-library-card,.vivid-watch-rec-card,.vivid-search-result-card,.vivid-search-card,.vivid-title-card,.vivid-media-card,.vivid-collection-card),
+  body :is(.vivid-discovery-card,.vivid-for-you-card,.vivid-for-you-continue-card,.vivid-anime-card,.vivid-library-card,.vivid-watch-rec-card,.vivid-search-result-card,.vivid-search-card,.vivid-title-card,.vivid-media-card) img {
+    transition: none !important;
+  }
+}
