@@ -317,6 +317,14 @@ function categoryParams(category, type, page, filters = {}, keywordId = "") {
     base.with_watch_monetization_types = "flatrate";
     base.with_watch_providers = filters.provider;
   }
+  // Keep future titles from occupying the newest results before the shared
+  // release-date filter removes them from the page.
+  const today = new Date().toISOString().slice(0, 10);
+  if (type === "tv") {
+    if (!base["first_air_date.lte"]) base["first_air_date.lte"] = today;
+  } else if (!base["primary_release_date.lte"]) {
+    base["primary_release_date.lte"] = today;
+  }
   base.page = page;
   base.sort_by = type === "tv"
     ? sortValue(filters).replace("primary_release_date", "first_air_date")
