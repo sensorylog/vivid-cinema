@@ -7,7 +7,7 @@ Vivid Cinema now has the first production-oriented PWA layer:
 - service worker registration
 - versioned application-shell cache
 - network-first navigation with cached fallback
-- cache-first same-origin static assets
+- network-first JavaScript/CSS with offline cached fallback; stale-while-revalidate for other same-origin assets
 - automatic cache cleanup on service-worker activation
 - browser install prompt when the platform exposes it
 - mobile-safe install control placement
