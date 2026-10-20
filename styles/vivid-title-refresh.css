@@ -302,7 +302,14 @@ body.vivid-title-page .vivid-title-loading div { background: linear-gradient(90d
   body.vivid-title-page .vivid-title-page-artwork { height: 690px; background-position: center,center,57% top; background-size: cover,cover,auto 690px; }
   body.vivid-title-page .vivid-title-info { padding-top: 250px !important; }
   body.vivid-title-page .vivid-title-info-inner { grid-template-columns: 78px minmax(0,1fr); gap: 12px; padding-inline: 14px; }
-  body.vivid-title-page .vivid-title-poster { border-radius: 9px; transform: none; }
+  body.vivid-title-page .vivid-title-poster { grid-column: 1; grid-row: 1 / 4; border-radius: 9px; transform: none; }
+  body.vivid-title-page .vivid-title-copy { display: contents; }
+  body.vivid-title-page .vivid-title-kicker { grid-column: 2; grid-row: 1; align-self: end; }
+  body.vivid-title-page .vivid-title-copy h1 { grid-column: 2; grid-row: 2; align-self: center; }
+  body.vivid-title-page .vivid-title-meta { grid-column: 2; grid-row: 3; align-self: start; }
+  body.vivid-title-page .vivid-title-genres { grid-column: 1 / -1; grid-row: 4; }
+  body.vivid-title-page .vivid-title-copy > p { grid-column: 1 / -1; grid-row: 5; }
+  body.vivid-title-page .vivid-title-actions { grid-column: 1 / -1; grid-row: 6; }
   body.vivid-title-page .vivid-title-copy { padding-top: 0 !important; }
   body.vivid-title-page .vivid-title-kicker { font-size: .58rem; letter-spacing: .14em; gap: 6px; }
   body.vivid-title-page .vivid-title-kicker::before { width: 13px; }
