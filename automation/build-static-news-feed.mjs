@@ -102,7 +102,7 @@ async function enrichArticle(story) {
   const imageHost = (() => {
     try { return new URL(story.imageUrl).hostname.toLowerCase(); } catch { return ""; }
   })();
-  const isGoogleHostedImage = /(?:^|\\.)(?:googleusercontent\\.com|gstatic\\.com|google\\.com)$/.test(imageHost);
+  const isGoogleHostedImage = /(?:^|\.)(?:googleusercontent\.com|gstatic\.com|google\.com)$/.test(imageHost);
   const needsImage = !isArticleImageUrl(story.imageUrl, story.sourceUrl) || isGoogleHostedImage;
   if (hasUsefulSummary && !needsImage) return story;
   try {
@@ -120,7 +120,7 @@ async function enrichArticle(story) {
     let landedOnGoogleNews = false;
     try {
       const finalUrl = new URL(response.url);
-      landedOnGoogleNews = /(^|\\.)news\\.google\\.com$/i.test(finalUrl.hostname);
+      landedOnGoogleNews = /(^|\.)news\.google\.com$/i.test(finalUrl.hostname);
       if (finalUrl.protocol === "https:" && !landedOnGoogleNews) sourceUrl = finalUrl.href;
     } catch {}
 
@@ -137,10 +137,10 @@ async function enrichArticle(story) {
             },
             signal: AbortSignal.timeout(5000)
           });
-          if (publisherResponse.ok && /text\\/html|application\\/xhtml\\+xml/i.test(publisherResponse.headers.get("content-type") || "")) {
+          if (publisherResponse.ok && /text\/html|application\/xhtml\\+xml/i.test(publisherResponse.headers.get("content-type") || "")) {
             html = (await publisherResponse.text()).slice(0, 1200000);
             const finalPublisherUrl = new URL(publisherResponse.url || publisherArticleUrl);
-            if (finalPublisherUrl.protocol === "https:" && !/(^|\\.)news\\.google\\.com$/i.test(finalPublisherUrl.hostname)) {
+            if (finalPublisherUrl.protocol === "https:" && !/(^|\.)news\.google\.com$/i.test(finalPublisherUrl.hostname)) {
               sourceUrl = finalPublisherUrl.href;
               landedOnGoogleNews = false;
             }
@@ -155,7 +155,7 @@ async function enrichArticle(story) {
     try {
       const candidate = new URL(imageValue, sourceUrl);
       const candidateHost = candidate.hostname.toLowerCase();
-      const googleHostedCandidate = /(?:^|\\.)(?:googleusercontent\\.com|gstatic\\.com|google\\.com)$/.test(candidateHost);
+      const googleHostedCandidate = /(?:^|\.)(?:googleusercontent\.com|gstatic\.com|google\.com)$/.test(candidateHost);
       if (candidate.protocol === "https:" && !(landedOnGoogleNews && googleHostedCandidate)) imageUrl = candidate.href;
     } catch {}
     const usefulDescription = description.length > 40 &&
