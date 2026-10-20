@@ -185,6 +185,39 @@ export function extractRssImageUrl(item = "", description = "", baseUrl = "") {
   return "";
 }
 
+export function extractPublisherArticleUrl(html = "", baseUrl = "", publisherUrl = "") {
+  const markup = String(html || "").slice(0, 1_200_000);
+  let publisherHost = "";
+  try { publisherHost = new URL(publisherUrl).hostname.toLowerCase().replace(/^www\./, ""); } catch {}
+  if (!publisherHost) return "";
+  const resolvePublisherUrl = value => {
+    try {
+      const url = new URL(value, baseUrl);
+      const host = url.hostname.toLowerCase().replace(/^www\./, "");
+      if (url.protocol !== "https:" || url.username || url.password) return "";
+      if (!(host === publisherHost || host.endsWith("." + publisherHost) || publisherHost.endsWith("." + host))) return "";
+      if (url.pathname === "/" || /\/(?:search|feed|rss|tags?|topics?|authors?|privacy|terms)(?:[/.]|$)/i.test(url.pathname)) return "";
+      return url.href;
+    } catch { return ""; }
+  };
+  const candidates = [];
+  for (const match of markup.matchAll(/<link\b([^>]*)>/gi)) {
+    const attrs = match[1];
+    if (/canonical/i.test(attribute(attrs, "rel"))) candidates.push(attribute(attrs, "href"));
+  }
+  for (const match of markup.matchAll(/<meta\b([^>]*)>/gi)) {
+    const attrs = match[1];
+    const key = (attribute(attrs, "property") || attribute(attrs, "name") || "").toLowerCase();
+    if (key === "og:url") candidates.push(attribute(attrs, "content"));
+  }
+  for (const match of markup.matchAll(/<a\b([^>]*)>/gi)) candidates.push(attribute(match[1], "href"));
+  for (const candidate of candidates) {
+    const resolved = resolvePublisherUrl(candidate);
+    if (resolved) return resolved;
+  }
+  return "";
+}
+
 export function extractHtmlImageUrl(html = "", baseUrl = "") {
   const markup = String(html || "").slice(0, 1_200_000);
   const wanted = ["og:image", "og:image:url", "twitter:image", "twitter:image:src", "image"];
