@@ -1,5 +1,5 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
-import { cacheArticleThumbnails, extractHtmlImageUrl, extractRssImageUrl, isArticleImageUrl, sortStoriesNewestFirst } from "./static-news-images.mjs";
+import { cacheArticleThumbnails, decodeGoogleNewsArticleUrl, extractHtmlImageUrl, extractPublisherArticleUrl, extractRssImageUrl, isArticleImageUrl, sortStoriesNewestFirst } from "./static-news-images.mjs";
 import { dirname } from "node:path";
 
 const OUTPUT = "data/news-feed.json";
@@ -95,11 +95,32 @@ function metaValue(html, names) {
   }
   return "";
 }
+
+function isPublisherArticleUrl(value, publisherUrl) {
+  try {
+    const candidate = new URL(value);
+    const publisher = new URL(publisherUrl);
+    const host = candidate.hostname.toLowerCase().replace(/^www\./, "");
+    const publisherHost = publisher.hostname.toLowerCase().replace(/^www\./, "");
+    return candidate.protocol === "https:" &&
+      (host === publisherHost || host.endsWith("." + publisherHost));
+  } catch {
+    return false;
+  }
+}
+
+const MAX_GOOGLE_URL_RESOLVE_ATTEMPTS = 12;
+let googleUrlResolveAttempts = 0;
+
 async function enrichArticle(story) {
   const baseSummary = story.summary || "";
   const hasUsefulSummary = baseSummary.length > 100 &&
     baseSummary.toLowerCase() !== String(story.headline || "").toLowerCase();
-  const needsImage = !isArticleImageUrl(story.imageUrl, story.sourceUrl);
+  const imageHost = (() => {
+    try { return new URL(story.imageUrl).hostname.toLowerCase(); } catch { return ""; }
+  })();
+  const isGoogleHostedImage = /(?:^|\.)(?:googleusercontent\.com|gstatic\.com|google\.com)$/.test(imageHost);
+  const needsImage = !isArticleImageUrl(story.imageUrl, story.sourceUrl) || isGoogleHostedImage;
   if (hasUsefulSummary && !needsImage) return story;
   try {
     const response = await fetch(story.sourceUrl, {
@@ -111,20 +132,58 @@ async function enrichArticle(story) {
       signal: AbortSignal.timeout(5000)
     });
     if (!response.ok || !/text\/html|application\/xhtml\+xml/i.test(response.headers.get("content-type") || "")) return story;
-    const html = (await response.text()).slice(0, 1200000);
+    let html = (await response.text()).slice(0, 1200000);
     let sourceUrl = story.sourceUrl;
+    let landedOnGoogleNews = false;
     try {
       const finalUrl = new URL(response.url);
-      if (finalUrl.protocol === "https:" && !/(^|\.)news\.google\.com$/i.test(finalUrl.hostname)) {
-        sourceUrl = finalUrl.href;
-      }
+      landedOnGoogleNews = /(^|\.)news\.google\.com$/i.test(finalUrl.hostname);
+      if (finalUrl.protocol === "https:" && !landedOnGoogleNews) sourceUrl = finalUrl.href;
     } catch {}
+
+    // Google News RSS links can land on a wrapper page rather than the publisher article.
+    if (landedOnGoogleNews) {
+      let publisherArticleUrl = "";
+      const hasGoogleSignature = /\bdata-n-a-sg\s*=\s*["'][^"']+["']/i.test(html) &&
+        /\bdata-n-a-ts\s*=\s*["']\d+["']/i.test(html);
+      if (hasGoogleSignature && googleUrlResolveAttempts < MAX_GOOGLE_URL_RESOLVE_ATTEMPTS) {
+        googleUrlResolveAttempts += 1;
+        const decodedUrl = await decodeGoogleNewsArticleUrl(story.sourceUrl, html);
+        if (isPublisherArticleUrl(decodedUrl, story.publisherUrl)) publisherArticleUrl = decodedUrl;
+      }
+      if (!publisherArticleUrl) {
+        publisherArticleUrl = extractPublisherArticleUrl(html, response.url || story.sourceUrl, story.publisherUrl);
+      }
+      if (publisherArticleUrl) {
+        try {
+          const publisherResponse = await fetch(publisherArticleUrl, {
+            redirect: "follow",
+            headers: {
+              "User-Agent": "Mozilla/5.0 (compatible; VividCinemaNews/1.0; +https://vivid-cinema.web.app/news.html)",
+              "Accept": "text/html,application/xhtml+xml"
+            },
+            signal: AbortSignal.timeout(5000)
+          });
+          if (publisherResponse.ok && /text\/html|application\/xhtml\+xml/i.test(publisherResponse.headers.get("content-type") || "")) {
+            html = (await publisherResponse.text()).slice(0, 1200000);
+            const finalPublisherUrl = new URL(publisherResponse.url || publisherArticleUrl);
+            if (finalPublisherUrl.protocol === "https:" && !/(^|\.)news\.google\.com$/i.test(finalPublisherUrl.hostname)) {
+              sourceUrl = finalPublisherUrl.href;
+              landedOnGoogleNews = false;
+            }
+          }
+        } catch {}
+      }
+    }
+
     const description = metaValue(html, ["og:description", "twitter:description", "description"]);
     const imageValue = extractHtmlImageUrl(html, sourceUrl);
-    let imageUrl = needsImage ? "" : (story.imageUrl || "");
+    let imageUrl = needsImage ? (isGoogleHostedImage ? (story.imageUrl || "") : "") : (story.imageUrl || "");
     try {
       const candidate = new URL(imageValue, sourceUrl);
-      if (candidate.protocol === "https:") imageUrl = candidate.href;
+      const candidateHost = candidate.hostname.toLowerCase();
+      const googleHostedCandidate = /(?:^|\.)(?:googleusercontent\.com|gstatic\.com|google\.com)$/.test(candidateHost);
+      if (candidate.protocol === "https:" && !(landedOnGoogleNews && googleHostedCandidate)) imageUrl = candidate.href;
     } catch {}
     const usefulDescription = description.length > 40 &&
       description.toLowerCase() !== String(story.headline || "").toLowerCase();
@@ -178,7 +237,43 @@ for (const story of unique) {
   if (selected.length >= 120) break;
   if (!selectedIds.has(story.id)) { selected.push(story); selectedIds.add(story.id); }
 }
-const enrichedStories = await enrichStories(sortStoriesNewestFirst(selected).slice(0, 120));
+async function reusePreviousPublisherImages(stories) {
+  try {
+    const response = await fetch("https://vivid-cinema.web.app/data/news-feed.json", {
+      cache: "no-store",
+      signal: AbortSignal.timeout(5000)
+    });
+    if (!response.ok) return { stories, reused: 0 };
+    const previousFeed = await response.json();
+    if (!Array.isArray(previousFeed.articles)) return { stories, reused: 0 };
+    const previousById = new Map(previousFeed.articles.map(article => [String(article.id || ""), article]));
+    let reused = 0;
+    const nextStories = stories.map(story => {
+      const previous = previousById.get(String(story.id || ""));
+      const imageUrl = String(previous?.imageFallbackUrl || "");
+      const previousSourceUrl = String(previous?.sourceUrl || "");
+      if (!imageUrl || !previousSourceUrl || !isArticleImageUrl(imageUrl, previousSourceUrl)) return story;
+      try {
+        const imageHost = new URL(imageUrl).hostname.toLowerCase();
+        const sourceHost = new URL(previousSourceUrl).hostname.toLowerCase();
+        if (/(^|\.)googleusercontent\.com$|(^|\.)gstatic\.com$|(^|\.)google\.com$/.test(imageHost)) return story;
+        if (/(^|\.)news\.google\.com$/.test(sourceHost)) return story;
+        reused += 1;
+        return { ...story, sourceUrl: previousSourceUrl, imageUrl, imageFallbackUrl: imageUrl };
+      } catch {
+        return story;
+      }
+    });
+    return { stories: nextStories, reused };
+  } catch {
+    return { stories, reused: 0 };
+  }
+}
+
+const sortedSelected = sortStoriesNewestFirst(selected).slice(0, 120);
+const { stories: storiesWithPreviousImages, reused: reusedImageCount } = await reusePreviousPublisherImages(sortedSelected);
+console.log("Reused " + reusedImageCount + " previously resolved publisher thumbnails.");
+const enrichedStories = await enrichStories(storiesWithPreviousImages);
 const { stories: cachedStories, cached: cachedImageCount, remoteFallback: remoteFallbackCount, missing: missingImageCount } = await cacheArticleThumbnails(enrichedStories);
 const finalStories = sortStoriesNewestFirst(cachedStories);
 const payload = JSON.stringify({ generatedAt: new Date().toISOString(), source: "Google News RSS search feeds", count: finalStories.length, failedQueries: failed.length, feedCount: FEEDS.length, articles: finalStories }, null, 2) + "\n";

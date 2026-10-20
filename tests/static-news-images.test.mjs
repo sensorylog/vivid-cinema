@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { extractHtmlImageUrl, extractRssImageUrl, sortStoriesNewestFirst } from "../automation/static-news-images.mjs";
+import { decodeGoogleNewsArticleUrl, extractHtmlImageUrl, extractPublisherArticleUrl, extractRssImageUrl, sortStoriesNewestFirst } from "../automation/static-news-images.mjs";
 
 test("RSS thumbnail extraction supports media, enclosure, and description images", () => {
   assert.equal(
@@ -128,4 +128,46 @@ test("news stories are always sorted newest first with invalid dates last", () =
   ];
   assert.deepEqual(sortStoriesNewestFirst(stories).map(story => story.id), ["newest", "middle", "old", "invalid"]);
   assert.equal(stories[0].id, "old", "sorting does not mutate the input array");
+});
+
+
+test("Google News wrapper HTML resolves only article URLs on the publisher domain", () => {
+  const html = '<link rel="canonical" href="https://www.example.com/entertainment/story-123"><a href="https://news.google.com/">Google News</a><a href="https://other.example/story">Other site</a>';
+  assert.equal(extractPublisherArticleUrl(html, "https://news.google.com/rss/articles/example", "https://example.com"), "https://www.example.com/entertainment/story-123");
+  assert.equal(extractPublisherArticleUrl('<a href="https://other.example/story">Story</a>', "https://news.google.com/", "https://example.com"), "");
+});
+
+
+test("Google News URL decoding uses the article signature and safely parses the publisher URL", async () => {
+  let request;
+  const inner = JSON.stringify(["garturlres", "https://publisher.example/film/story-1"]);
+  const payload = [[["wrb.fr", "Fbv4je", inner, null, null, null]]];
+  const fetchImpl = async (url, options) => {
+    request = { url, options };
+    return new Response(")]}'\n\n" + JSON.stringify(payload), {
+      status: 200,
+      headers: { "content-type": "application/json" }
+    });
+  };
+  const html = '<div data-n-a-sg="signature-value" data-n-a-ts="1770000000"></div>';
+  const result = await decodeGoogleNewsArticleUrl(
+    "https://news.google.com/rss/articles/CBMiExampleId?oc=5",
+    html,
+    { fetchImpl }
+  );
+  assert.equal(result, "https://publisher.example/film/story-1");
+  assert.equal(request.options.method, "POST");
+  assert.match(request.options.headers["Content-Type"], /application\/x-www-form-urlencoded/);
+  assert.match(request.options.body, /Fbv4je/);
+});
+
+test("Google News URL decoding skips pages without signature metadata", async () => {
+  let called = false;
+  const result = await decodeGoogleNewsArticleUrl(
+    "https://news.google.com/rss/articles/CBMiExampleId",
+    "<html><title>Google News</title></html>",
+    { fetchImpl: async () => { called = true; return new Response(""); } }
+  );
+  assert.equal(result, "");
+  assert.equal(called, false);
 });
