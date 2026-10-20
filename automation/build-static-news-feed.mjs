@@ -1,5 +1,5 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
-import { cacheArticleThumbnails, extractHtmlImageUrl, extractRssImageUrl, isArticleImageUrl, sortStoriesNewestFirst } from "./static-news-images.mjs";
+import { cacheArticleThumbnails, extractHtmlImageUrl, extractPublisherArticleUrl, extractRssImageUrl, isArticleImageUrl, sortStoriesNewestFirst } from "./static-news-images.mjs";
 import { dirname } from "node:path";
 
 const OUTPUT = "data/news-feed.json";
@@ -99,7 +99,11 @@ async function enrichArticle(story) {
   const baseSummary = story.summary || "";
   const hasUsefulSummary = baseSummary.length > 100 &&
     baseSummary.toLowerCase() !== String(story.headline || "").toLowerCase();
-  const needsImage = !isArticleImageUrl(story.imageUrl, story.sourceUrl);
+  const imageHost = (() => {
+    try { return new URL(story.imageUrl).hostname.toLowerCase(); } catch { return ""; }
+  })();
+  const isGoogleHostedImage = /(?:^|\\.)(?:googleusercontent\\.com|gstatic\\.com|google\\.com)$/.test(imageHost);
+  const needsImage = !isArticleImageUrl(story.imageUrl, story.sourceUrl) || isGoogleHostedImage;
   if (hasUsefulSummary && !needsImage) return story;
   try {
     const response = await fetch(story.sourceUrl, {
@@ -111,20 +115,48 @@ async function enrichArticle(story) {
       signal: AbortSignal.timeout(5000)
     });
     if (!response.ok || !/text\/html|application\/xhtml\+xml/i.test(response.headers.get("content-type") || "")) return story;
-    const html = (await response.text()).slice(0, 1200000);
+    let html = (await response.text()).slice(0, 1200000);
     let sourceUrl = story.sourceUrl;
+    let landedOnGoogleNews = false;
     try {
       const finalUrl = new URL(response.url);
-      if (finalUrl.protocol === "https:" && !/(^|\.)news\.google\.com$/i.test(finalUrl.hostname)) {
-        sourceUrl = finalUrl.href;
-      }
+      landedOnGoogleNews = /(^|\\.)news\\.google\\.com$/i.test(finalUrl.hostname);
+      if (finalUrl.protocol === "https:" && !landedOnGoogleNews) sourceUrl = finalUrl.href;
     } catch {}
+
+    // Google News RSS links can land on a wrapper page rather than the publisher article.
+    if (landedOnGoogleNews) {
+      const publisherArticleUrl = extractPublisherArticleUrl(html, response.url || story.sourceUrl, story.publisherUrl);
+      if (publisherArticleUrl) {
+        try {
+          const publisherResponse = await fetch(publisherArticleUrl, {
+            redirect: "follow",
+            headers: {
+              "User-Agent": "Mozilla/5.0 (compatible; VividCinemaNews/1.0; +https://vivid-cinema.web.app/news.html)",
+              "Accept": "text/html,application/xhtml+xml"
+            },
+            signal: AbortSignal.timeout(5000)
+          });
+          if (publisherResponse.ok && /text\\/html|application\\/xhtml\\+xml/i.test(publisherResponse.headers.get("content-type") || "")) {
+            html = (await publisherResponse.text()).slice(0, 1200000);
+            const finalPublisherUrl = new URL(publisherResponse.url || publisherArticleUrl);
+            if (finalPublisherUrl.protocol === "https:" && !/(^|\\.)news\\.google\\.com$/i.test(finalPublisherUrl.hostname)) {
+              sourceUrl = finalPublisherUrl.href;
+              landedOnGoogleNews = false;
+            }
+          }
+        } catch {}
+      }
+    }
+
     const description = metaValue(html, ["og:description", "twitter:description", "description"]);
     const imageValue = extractHtmlImageUrl(html, sourceUrl);
     let imageUrl = needsImage ? "" : (story.imageUrl || "");
     try {
       const candidate = new URL(imageValue, sourceUrl);
-      if (candidate.protocol === "https:") imageUrl = candidate.href;
+      const candidateHost = candidate.hostname.toLowerCase();
+      const googleHostedCandidate = /(?:^|\\.)(?:googleusercontent\\.com|gstatic\\.com|google\\.com)$/.test(candidateHost);
+      if (candidate.protocol === "https:" && !(landedOnGoogleNews && googleHostedCandidate)) imageUrl = candidate.href;
     } catch {}
     const usefulDescription = description.length > 40 &&
       description.toLowerCase() !== String(story.headline || "").toLowerCase();
