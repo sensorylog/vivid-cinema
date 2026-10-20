@@ -185,6 +185,48 @@ export function extractRssImageUrl(item = "", description = "", baseUrl = "") {
   return "";
 }
 
+export async function decodeGoogleNewsArticleUrl(articleUrl = "", articleHtml = "", { fetchImpl = globalThis.fetch } = {}) {
+  let parsed;
+  try { parsed = new URL(articleUrl); } catch { return ""; }
+  if (!/(^|\.)news\.google\.com$/i.test(parsed.hostname)) return "";
+  const id = parsed.pathname.match(/\/(?:rss\/)?articles\/([^/]+)/i)?.[1] || parsed.pathname.match(/\/read\/([^/]+)/i)?.[1] || "";
+  if (!id) return "";
+  const markup = String(articleHtml || "");
+  const signature = markup.match(/\bdata-n-a-sg\s*=\s*["']([^"']+)["']/i)?.[1] || "";
+  const timestamp = Number(markup.match(/\bdata-n-a-ts\s*=\s*["'](\d+)["']/i)?.[1] || 0);
+  if (!signature || !Number.isFinite(timestamp) || timestamp <= 0 || typeof fetchImpl !== "function") return "";
+  const inner = JSON.stringify(["garturlreq", [["X", "X", ["X", "X"], null, null, 1, 1, "US:en", null, 1, null, null, null, null, null, 0, 1], "X", "X", 1, [1, 1, 1], 1, 1, null, 0, 0, null, 0], id, timestamp, signature]);
+  const body = "f.req=" + encodeURIComponent(JSON.stringify([[["Fbv4je", inner]]]));
+  try {
+    const response = await fetchImpl("https://news.google.com/_/DotsSplashUi/data/batchexecute", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
+        "Origin": "https://news.google.com",
+        "Referer": "https://news.google.com/",
+        "X-Same-Domain": "1",
+        "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/130.0.0.0 Safari/537.36",
+        "Cookie": "CONSENT=PENDING+987"
+      },
+      body,
+      signal: AbortSignal.timeout(6000)
+    });
+    if (!response.ok) return "";
+    const raw = await response.text();
+    const separator = raw.indexOf("\n\n");
+    if (separator < 0) return "";
+    const frames = JSON.parse(raw.slice(separator + 2).trim());
+    const frame = Array.isArray(frames) ? frames.find(item => Array.isArray(item) && item[0] === "wrb.fr" && item[1] === "Fbv4je" && typeof item[2] === "string") : null;
+    if (!frame) return "";
+    const decoded = JSON.parse(frame[2]);
+    const result = Array.isArray(decoded) && decoded[0] === "garturlres" ? String(decoded[1] || "") : "";
+    const url = new URL(result);
+    return url.protocol === "https:" && !/(^|\.)news\.google\.com$/i.test(url.hostname) ? url.href : "";
+  } catch {
+    return "";
+  }
+}
+
 export function extractPublisherArticleUrl(html = "", baseUrl = "", publisherUrl = "") {
   const markup = String(html || "").slice(0, 1_200_000);
   let publisherHost = "";
