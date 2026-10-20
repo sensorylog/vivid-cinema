@@ -21,7 +21,7 @@ let favorites=new Set(readStored(STORAGE_FAVORITES,[])),recentIds=readStored(STO
 const PAGE_SIZE=30;
 const CATALOG_TIMEOUT_MS=20000;
 const SOURCES=[
- {id:"nexus",name:"IPTV Nexus",url:"https://dearbulut.github.io/iptv/playlists/online.m3u",priority:100},
+ {id:"nexus",name:"Nexus",url:"https://dearbulut.github.io/iptv/playlists/online.m3u",priority:100},
  {id:"free-tv",name:"Free-TV",url:"https://raw.githubusercontent.com/Free-TV/IPTV/master/playlist.m3u8",priority:90},
  {id:"iptv-org",name:"IPTV-org",url:"https://iptv-org.github.io/iptv/index.m3u",priority:70}
 ];
