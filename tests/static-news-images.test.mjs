@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { extractHtmlImageUrl, extractRssImageUrl, sortStoriesNewestFirst } from "../automation/static-news-images.mjs";
+import { extractHtmlImageUrl, extractPublisherArticleUrl, extractRssImageUrl, sortStoriesNewestFirst } from "../automation/static-news-images.mjs";
 
 test("RSS thumbnail extraction supports media, enclosure, and description images", () => {
   assert.equal(
@@ -128,4 +128,11 @@ test("news stories are always sorted newest first with invalid dates last", () =
   ];
   assert.deepEqual(sortStoriesNewestFirst(stories).map(story => story.id), ["newest", "middle", "old", "invalid"]);
   assert.equal(stories[0].id, "old", "sorting does not mutate the input array");
+});
+
+
+test("Google News wrapper HTML resolves only article URLs on the publisher domain", () => {
+  const html = '<link rel="canonical" href="https://www.example.com/entertainment/story-123"><a href="https://news.google.com/">Google News</a><a href="https://other.example/story">Other site</a>';
+  assert.equal(extractPublisherArticleUrl(html, "https://news.google.com/rss/articles/example", "https://example.com"), "https://www.example.com/entertainment/story-123");
+  assert.equal(extractPublisherArticleUrl('<a href="https://other.example/story">Story</a>', "https://news.google.com/", "https://example.com"), "");
 });
