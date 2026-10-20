@@ -299,8 +299,8 @@ if (root) {
       "Open the original report for the full story."
     );
     const source = url || safeUrl(article.publisherUrl) || "https://news.google.com/";
-    const imageUrl = safeImageUrl(article.imageUrl);
-    const imageFallbackUrl = safeImageUrl(article.imageFallbackUrl);
+    const imageUrl = displayImageUrl(article.imageUrl);
+    const imageFallbackUrl = displayImageUrl(article.imageFallbackUrl);
     const imageFallbackAttr = imageFallbackUrl
       ? ' data-fallback-src="' + escapeHtml(imageFallbackUrl) + '"'
       : "";
