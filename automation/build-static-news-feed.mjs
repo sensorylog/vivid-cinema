@@ -1,5 +1,5 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
-import { cacheArticleThumbnails, extractHtmlImageUrl, extractPublisherArticleUrl, extractRssImageUrl, isArticleImageUrl, sortStoriesNewestFirst } from "./static-news-images.mjs";
+import { cacheArticleThumbnails, decodeGoogleNewsArticleUrl, extractHtmlImageUrl, extractPublisherArticleUrl, extractRssImageUrl, isArticleImageUrl, sortStoriesNewestFirst } from "./static-news-images.mjs";
 import { dirname } from "node:path";
 
 const OUTPUT = "data/news-feed.json";
@@ -95,6 +95,23 @@ function metaValue(html, names) {
   }
   return "";
 }
+
+function isPublisherArticleUrl(value, publisherUrl) {
+  try {
+    const candidate = new URL(value);
+    const publisher = new URL(publisherUrl);
+    const host = candidate.hostname.toLowerCase().replace(/^www\./, "");
+    const publisherHost = publisher.hostname.toLowerCase().replace(/^www\./, "");
+    return candidate.protocol === "https:" &&
+      (host === publisherHost || host.endsWith("." + publisherHost));
+  } catch {
+    return false;
+  }
+}
+
+const MAX_GOOGLE_URL_RESOLVE_ATTEMPTS = 12;
+let googleUrlResolveAttempts = 0;
+
 async function enrichArticle(story) {
   const baseSummary = story.summary || "";
   const hasUsefulSummary = baseSummary.length > 100 &&
@@ -126,7 +143,17 @@ async function enrichArticle(story) {
 
     // Google News RSS links can land on a wrapper page rather than the publisher article.
     if (landedOnGoogleNews) {
-      const publisherArticleUrl = extractPublisherArticleUrl(html, response.url || story.sourceUrl, story.publisherUrl);
+      let publisherArticleUrl = "";
+      const hasGoogleSignature = /\bdata-n-a-sg\s*=\s*["'][^"']+["']/i.test(html) &&
+        /\bdata-n-a-ts\s*=\s*["']\d+["']/i.test(html);
+      if (hasGoogleSignature && googleUrlResolveAttempts < MAX_GOOGLE_URL_RESOLVE_ATTEMPTS) {
+        googleUrlResolveAttempts += 1;
+        const decodedUrl = await decodeGoogleNewsArticleUrl(story.sourceUrl, html);
+        if (isPublisherArticleUrl(decodedUrl, story.publisherUrl)) publisherArticleUrl = decodedUrl;
+      }
+      if (!publisherArticleUrl) {
+        publisherArticleUrl = extractPublisherArticleUrl(html, response.url || story.sourceUrl, story.publisherUrl);
+      }
       if (publisherArticleUrl) {
         try {
           const publisherResponse = await fetch(publisherArticleUrl, {
