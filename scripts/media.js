@@ -49,6 +49,38 @@ export function normalizeResults(results = [], type = null) {
     .map((item) => normalizeMedia(item, type));
 }
 
+/**
+ * Apply the selected catalogue sort to the current result page. Keep undated
+ * titles at the end for date sorts instead of letting missing dates appear first.
+ */
+export function sortMediaItems(items = [], sort = "popularity.desc") {
+  const dateValue = (item) => {
+    const date = String(item?.date || "").trim();
+    return /^\d{4}-\d{2}-\d{2}$/.test(date) ? date : "";
+  };
+  const ratingValue = (item) => Number(item?.vote_average || 0);
+  if (sort === "vote_average.desc") {
+    return [...items].sort((a, b) => ratingValue(b) - ratingValue(a));
+  }
+  if (sort === "primary_release_date.desc" || sort === "first_air_date.desc") {
+    return [...items].sort((a, b) =>
+      dateValue(b).localeCompare(dateValue(a)) ||
+      ratingValue(b) - ratingValue(a)
+    );
+  }
+  if (sort === "primary_release_date.asc" || sort === "first_air_date.asc") {
+    return [...items].sort((a, b) => {
+      const left = dateValue(a);
+      const right = dateValue(b);
+      if (!left && !right) return 0;
+      if (!left) return 1;
+      if (!right) return -1;
+      return left.localeCompare(right) || ratingValue(b) - ratingValue(a);
+    });
+  }
+  return [...items];
+}
+
 export function getMediaUrl(media) {
   const id = typeof media === "object" ? media.id : media;
   const type = typeof media === "object" ? media.media_type : "movie";

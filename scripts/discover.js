@@ -1,6 +1,6 @@
 import { tmdbApi } from "./tmdb.js";
 import { BROWSE_CATEGORIES, CURATED_CATEGORIES, getCuratedPage } from "./content.js";
-import { getImageUrl, getMediaUrl, normalizeResults } from "./media.js";
+import { getImageUrl, getMediaUrl, normalizeResults, sortMediaItems } from "./media.js";
 import { escapeHtml, getErrorMessage } from "./utils.js";
 import { getRoute } from "./routes.js";
 import { rankSearchResults } from "./search.js";
@@ -186,14 +186,7 @@ function populateYears() {
   select.value = state.year;
 }
 
-function sortItems(items) {
-  const dateValue = (item) => Date.parse(item.date || "") || 0;
-  const ratingValue = (item) => Number(item.vote_average || 0);
-  if (state.sort === "vote_average.desc") return items.sort((a, b) => ratingValue(b) - ratingValue(a));
-  if (state.sort === "primary_release_date.asc") return items.sort((a, b) => dateValue(a) - dateValue(b));
-  if (state.sort === "primary_release_date.desc") return items.sort((a, b) => dateValue(b) - dateValue(a));
-  return items;
-}
+
 
 function syncUrl() {
   const params = new URLSearchParams();
@@ -387,7 +380,7 @@ async function fetchDiscovery() {
         .filter((item) => item.media_type === "person" || !state.year || item.year === String(state.year))
         .filter((item) => item.media_type === "person" || !state.rating || Number(item.vote_average || 0) >= Number(state.rating));
       totalPages = Math.min(500, Number(data.total_pages || 1));
-      items = await rankSearchResults(items, query, { limit: items.length || 20 });
+      items = sortMediaItems(await rankSearchResults(items, query, { limit: items.length || 20 }), state.sort);
     } else if (state.category) {
       const data = await getCuratedPage(state.category, state.page, {
         genre: state.genre,
@@ -398,24 +391,24 @@ async function fetchDiscovery() {
         provider: state.provider,
         type: state.type
       });
-      items = sortItems(data.items || []);
+      items = sortMediaItems(data.items || [], state.sort);
       totalPages = Number(data.totalPages || 1);
     } else if (state.type === "all") {
       const [movies, tv] = await Promise.all([
         tmdbApi.discoverMovies(discoverParams("movie")),
         tmdbApi.discoverTv(discoverParams("tv"))
       ]);
-      items = sortItems([
+      items = sortMediaItems([
         ...normalizeResults(movies.results || [], "movie"),
         ...normalizeResults(tv.results || [], "tv")
-      ]);
+      ], state.sort);
       if (state.mood) items = rankByMood(items);
       totalPages = Math.max(Number(movies.total_pages || 1), Number(tv.total_pages || 1));
     } else {
       const data = await (state.type === "movie"
         ? tmdbApi.discoverMovies(discoverParams("movie"))
         : tmdbApi.discoverTv(discoverParams("tv")));
-      items = normalizeResults(data.results || [], state.type);
+      items = sortMediaItems(normalizeResults(data.results || [], state.type), state.sort);
       if (state.mood) items = rankByMood(items);
       totalPages = Number(data.total_pages || 1);
     }
