@@ -316,8 +316,12 @@ function discoverParams(type) {
     : effectiveSort;
   // TMDB: comma = AND, pipe = OR. Moods use OR across their genre list.
   const moodGenreQuery = mood?.genres?.length ? mood.genres.join("|") : "";
+  const today = new Date().toISOString().slice(0, 10);
   const params = {
     include_adult: false,
+    ...(type === "tv"
+      ? { "first_air_date.lte": today }
+      : { "primary_release_date.lte": today }),
     include_video: false,
     page: state.page,
     sort_by: sort,
