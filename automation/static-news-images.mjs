@@ -216,7 +216,8 @@ export async function decodeGoogleNewsArticleUrl(articleUrl = "", articleHtml = 
     const separator = raw.indexOf("\n\n");
     if (separator < 0) return "";
     const frames = JSON.parse(raw.slice(separator + 2).trim());
-    const frame = Array.isArray(frames) ? frames.find(item => Array.isArray(item) && item[0] === "wrb.fr" && item[1] === "Fbv4je" && typeof item[2] === "string") : null;
+    const frameList = Array.isArray(frames) && Array.isArray(frames[0]) && Array.isArray(frames[0][0]) ? frames.flat() : frames;
+    const frame = Array.isArray(frameList) ? frameList.find(item => Array.isArray(item) && item[0] === "wrb.fr" && item[1] === "Fbv4je" && typeof item[2] === "string") : null;
     if (!frame) return "";
     const decoded = JSON.parse(frame[2]);
     const result = Array.isArray(decoded) && decoded[0] === "garturlres" ? String(decoded[1] || "") : "";
