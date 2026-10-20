@@ -31,7 +31,7 @@ test("every precached asset exists in the repository", async () => {
 
 test("ordinary JavaScript and CSS use network-first while retaining offline cache fallback", () => {
   assert.match(source, /const CACHE_NAME = "vivid-cinema-shell-v232"/);
-  assert.match(source, /const isCodeOrStyle=\/\\\.(?:js|css)\$\/.test\(url\.pathname\)/);
+  assert.ok(source.includes('const isCodeOrStyle=/\\\\.(?:js|css)$/.test(url.pathname);'));
   assert.match(source, /event\.respondWith\(isCodeOrStyle\?networkFirst\(request\):isHtml\?networkFirst\(request\):staleWhileRevalidate\(request,event\)\)/);
   assert.match(source, /fetch\(request,\{signal:controller\.signal,cache:"no-store"\}\)/);
 });
