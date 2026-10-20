@@ -1,13 +1,13 @@
-const VAPID_PUBLIC_KEY="BGZNNqdOPr-XJjdPnJMKPHvErIXftdRM0P8VxpjElqRs5AwpyY94lownEeUE2W-8GnFyvNd3-u7tmRu2b-5dEIg";
+import { NN_APP_ID, NN_WEB_KEY } from "../native-notify/web/nativeNotifyIds.js";
+import { disableNativeNotifyWebPush, enableNativeNotifyWebPush, ensureNativeNotifyWebPush } from "../native-notify/web/native-notify-web-push.js";
+
 const SUBS_COLLECTION="pushSubscriptions";
 const REMINDERS_COLLECTION="cinemaReminders";
+// Vivid already owns the site's only service worker scope, so Native Notify
+// registers through the existing root worker (service-worker.js) instead of a
+// second worker. Its push and notificationclick listeners live there.
+const PUSH_SERVICE_WORKER="/service-worker.js";
 let firebasePromise=null;
-
-function base64ToBytes(value){
-  const padding="=".repeat((4-value.length%4)%4);
-  const raw=atob(value.replace(/-/g,"+").replace(/_/g,"/")+padding);
-  return Uint8Array.from(raw,c=>c.charCodeAt(0));
-}
 function keyId(endpoint){
   let hash=0;
   for(let i=0;i<endpoint.length;i++)hash=((hash<<5)-hash+endpoint.charCodeAt(i))|0;
@@ -27,33 +27,36 @@ async function getFirebase(){
 export async function getPushSupport(){
   return "serviceWorker" in navigator && "PushManager" in window && "Notification" in window;
 }
+// Native Notify options for this site. The VAPID public key is fetched by the
+// client at subscribe time (GET /api/universal/web-push/keys/...), so a rotated
+// key is picked up automatically and no key is hardcoded here.
+function nativeNotifyOptions(){
+  return {appId:NN_APP_ID,webKey:NN_WEB_KEY,serviceWorkerPath:PUSH_SERVICE_WORKER};
+}
 export async function enableCinemaPush(){
   if(!(await getPushSupport()))throw Error("Background notifications are not supported in this browser.");
-  const {auth}=await getFirebase();
-  const user=auth.currentUser;
-  if(!user)throw Error("Sign in to enable Vivid background notifications.");
-  const permission=Notification.permission==="default"?await Notification.requestPermission():Notification.permission;
-  if(permission!=="granted")throw Error("Notification permission was not granted.");
-  const registration=await navigator.serviceWorker.ready;
-  let subscription=await registration.pushManager.getSubscription();
-  if(!subscription){
-    subscription=await registration.pushManager.subscribe({
-      userVisibleOnly:true,
-      applicationServerKey:base64ToBytes(VAPID_PUBLIC_KEY)
-    });
+  // Ask for permission while the click's user gesture is still fresh. The
+  // Native Notify helper re-reads the granted state, so it does not prompt again.
+  if(window.Notification?.permission==="default"){
+    const permission=await Notification.requestPermission();
+    if(permission!=="granted")throw Error(permission==="denied"?"Notifications are blocked for this site in your browser settings.":"Notification permission was not granted.");
   }
-  const json=subscription.toJSON();
-  if(!json.endpoint||!json.keys?.p256dh||!json.keys?.auth)throw Error("The browser did not return a valid push subscription.");
-  const id=keyId(json.endpoint);
-  const {db,doc,setDoc}=await getFirebase();
-  await setDoc(doc(db,"users",user.uid,SUBS_COLLECTION,id),{
-    endpoint:json.endpoint,
-    expirationTime:json.expirationTime||null,
-    keys:{p256dh:json.keys.p256dh,auth:json.keys.auth},
-    userAgent:navigator.userAgent.slice(0,500),
-    updatedAt:Date.now()
-  },{merge:true});
-  return {subscription,userId:user.uid};
+  const result=await enableNativeNotifyWebPush(nativeNotifyOptions());
+  if(!result.ok)throw Error(result.message||"Background notifications could not be enabled.");
+  return {deviceId:result.deviceId};
+}
+// Silent re-register on page load: a browser that already allowed notifications
+// but lost its subscription is restored without a prompt or a click.
+export async function ensureCinemaPush(){
+  try{
+    return await ensureNativeNotifyWebPush(nativeNotifyOptions());
+  }catch(error){
+    console.warn("Vivid background notification refresh skipped:",error);
+    return {ok:false,status:"failed",message:String(error?.message||error)};
+  }
+}
+export async function disableBackgroundPush(){
+  return disableNativeNotifyWebPush(nativeNotifyOptions());
 }
 export async function disableCinemaPush(){
   let subscription=null;

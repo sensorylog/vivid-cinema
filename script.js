@@ -9,7 +9,7 @@ import { checkForReleaseAlerts, deliverReleaseAlerts, getPendingReleaseAlerts, r
 import { startIntelligenceSync, shouldShowColdStart, completeColdStart, dismissColdStart, recordBehavior, getTasteProfile, getTasteStrength } from "./scripts/intelligence.js";
 import { searchIntelligently, getRecentSearches, getRecentSearchOwner, rememberSearch, clearRecentSearches } from "./scripts/search.js";
 import { startCinemaReminderLoop } from "./scripts/cinema-reminders.js";
-import { enableCinemaPush, getServerReleaseAlerts, dismissServerReleaseAlert } from "./scripts/push-notifications.js";
+import { enableCinemaPush, ensureCinemaPush, getServerReleaseAlerts, dismissServerReleaseAlert } from "./scripts/push-notifications.js";
 
 const $=id=>document.getElementById(id);
 let featured=[],activeIndex=0;
@@ -635,6 +635,8 @@ function wireReleaseAlerts(){
 window.addEventListener("scroll",()=>{$("topbar")?.classList.toggle("is-scrolled",scrollY>18)},{passive:true});
 document.addEventListener("DOMContentLoaded",()=>{
   startCinemaReminderLoop();
+  // Keep a browser that already allowed notifications registered (no prompt).
+  void ensureCinemaPush();
 
   // Paint Home immediately. Intelligence/auth sync is optional enrichment and must
   // never be allowed to block the catalogue from loading.

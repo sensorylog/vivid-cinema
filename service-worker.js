@@ -52,7 +52,21 @@ async function staleWhileRevalidate(request,event,isNavigation=false){
  // the page with an unexpected HTML response. Fail the asset request instead.
  return new Response("",{status:504,statusText:"Offline"});
 }
-self.addEventListener("push",event=>{event.waitUntil((async()=>{let data={};try{data=event.data?.json?.()||{};}catch{try{data=JSON.parse(event.data?.text?.()||"{}");}catch{}}const title=data.title||"Vivid Cinema";await self.registration.showNotification(title,{body:data.body||"Your Vivid Cinema reminder is ready.",icon:"./icons/vivid-icon.svg",badge:"./icons/vivid-icon.svg",tag:data.tag||"vivid-cinema-reminder",renotify:false,data:{url:data.url||"./home.html"}});})());});
+// Pushes arrive from Native Notify (web push) and from the legacy reminder
+// senders. Native Notify sends {title,body,image,tag,data:{url}}; the older
+// senders send {title,body,tag,url}. Both shapes are normalised here so the
+// existing cinema reminders keep working and Native Notify deep links open
+// the right page. The click handler below is unchanged.
+self.addEventListener("push",event=>{event.waitUntil((async()=>{
+ let data={};
+ try{data=event.data?.json?.()||{};}catch{try{data=JSON.parse(event.data?.text?.()||"{}");}catch{}}
+ const nested=data.data&&typeof data.data==="object"?data.data:null;
+ const deepLink=(nested&&(nested.url||nested.link))||data.url||"./home.html";
+ const tag=(nested&&nested.tag)||data.tag||"vivid-cinema-reminder";
+ const options={body:data.body||"Your Vivid Cinema reminder is ready.",icon:"./icons/vivid-icon.svg",badge:"./icons/vivid-icon.svg",tag,renotify:false,data:{...(nested||{}),url:deepLink}};
+ if(typeof data.image==="string"&&data.image)options.image=data.image;
+ await self.registration.showNotification(data.title||"Vivid Cinema",options);
+})());});
 self.addEventListener("fetch",event=>{
  const request=event.request;
  if(request.method!=="GET")return;

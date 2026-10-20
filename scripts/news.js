@@ -350,7 +350,7 @@ function wire() {
       try {
         const reminder = addCinemaReminder({title:s.title,when:s.when,note:s.headline,contentId:s.id,mediaType:s.media_type,kind:s.kind});
         let pushEnabled = false;
-        try { await enableCinemaPush(); await savePushReminder(reminder); pushEnabled=true; } catch {}
+        try { await enableCinemaPush(); pushEnabled = await savePushReminder(reminder); } catch {}
         const toast=$("news-toast");
         if (toast) { toast.textContent=pushEnabled ? "Vivid will remind you before " + s.title + "." : "Reminder saved. Allow notifications for background delivery."; toast.hidden=false; setTimeout(()=>toast.hidden=true,3500); }
         render(document.querySelector(".vivid-news-filter.is-active")?.dataset.filter||"all");
