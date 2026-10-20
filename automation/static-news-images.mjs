@@ -195,7 +195,7 @@ export function extractPublisherArticleUrl(html = "", baseUrl = "", publisherUrl
       const url = new URL(value, baseUrl);
       const host = url.hostname.toLowerCase().replace(/^www\./, "");
       if (url.protocol !== "https:" || url.username || url.password) return "";
-      if (!(host === publisherHost || host.endsWith("." + publisherHost) || publisherHost.endsWith("." + host))) return "";
+      if (!(host === publisherHost || host.endsWith("." + publisherHost))) return "";
       if (url.pathname === "/" || /\/(?:search|feed|rss|tags?|topics?|authors?|privacy|terms)(?:[/.]|$)/i.test(url.pathname)) return "";
       return url.href;
     } catch { return ""; }
