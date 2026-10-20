@@ -88,4 +88,8 @@ function safeNotificationUrl(value){
  try{const url=new URL(value||"./home.html",self.location.origin);return url.origin===self.location.origin?url.href:new URL("./home.html",self.location.origin).href;}
  catch{return new URL("./home.html",self.location.origin).href;}
 }
-self.addEventListener("notificationclick",event=>{event.notification.close();const target=safeNotificationUrl(event.notification.data?.url);event.waitUntil(clients.matchAll({type:"window",includeUncontrolled:true}).then(list=>{const existing=list.find(client=>{try{return new URL(client.url).origin===self.location.origin;}catch{return false;}});if(existing){existing.navigate(target);return existing.focus();}return clients.openWindow(target);}));});
+// A tap must always do something: a tab this worker does not control yet cannot be
+// navigated (navigate() rejects silently), so the rejection is swallowed and the tab
+// is still focused instead of leaving the tap looking dead. Native Notify deep links
+// (data.url) and the legacy reminder links both come through here.
+self.addEventListener("notificationclick",event=>{event.notification.close();const target=safeNotificationUrl(event.notification.data?.url);event.waitUntil(clients.matchAll({type:"window",includeUncontrolled:true}).then(async list=>{const existing=list.find(client=>{try{return new URL(client.url).origin===self.location.origin;}catch{return false;}});if(existing){try{await existing.navigate(target)}catch{}return existing.focus();}return clients.openWindow(target);}));});

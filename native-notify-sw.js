@@ -12,36 +12,15 @@
  */
 // Don't wait for every tab to close: a stale worker keeps handling clicks.
 self.addEventListener('install', () => self.skipWaiting());
-self.addEventListener('activate', (event) => event.waitUntil(self.clients.claim()));
+// Self-defence: if this draft is ever registered by mistake it removes ITSELF at
+// once, so it can never replace /service-worker.js, break the offline shell or
+// claim the scope. Nothing registers it today.
+self.addEventListener('activate', (event) => event.waitUntil(self.registration.unregister().then(() => undefined)));
 
-self.addEventListener('push', (event) => {
-  let payload = {};
-  try {
-    payload = event.data ? event.data.json() : {};
-  } catch (err) {
-    payload = { title: 'Notification', body: event.data ? event.data.text() : '' };
-  }
-  event.waitUntil(
-    self.registration.showNotification(payload.title || 'Notification', {
-      body: payload.body || '',
-      image: payload.image,
-      tag: payload.tag,
-      data: payload.data || {},
-    })
-  );
-});
+// NO push listener here on purpose (Agent Notify, safety review 2026-10-20).
+// Vivid's real worker is /service-worker.js and it already handles pushes. A push
+// listener in this file would show EVERY notification twice if the two ever ran
+// together, so this draft only cleans itself up (see the activate handler).
 
-self.addEventListener('notificationclick', (event) => {
-  event.notification.close();
-  const data = event.notification.data || {};
-  // Deep links come from the push's data: send {"url": "/offers"}.
-  const url = new URL(data.url || '/', self.location.origin).href;
-  event.waitUntil(
-    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windows) => {
-      // Focus a tab already on the destination; never navigate() one — an
-      // uncontrolled tab cannot be navigated and the click would look dead.
-      const open = windows.find((client) => client.url === url);
-      return open ? open.focus().catch(() => clients.openWindow(url)) : clients.openWindow(url);
-    })
-  );
-});
+// NO notificationclick listener here either — /service-worker.js owns clicks
+// (it restricts navigation to the app origin via safeNotificationUrl).

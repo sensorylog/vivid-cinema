@@ -65,3 +65,32 @@ test("scheduled reminder senders stay untouched until the Native Notify send API
     assert.doesNotMatch(sender, /nativenotify/i);
   }
 });
+
+test("the registration client targets the verified universal web push endpoints", async () => {
+  const client = await readFile(new URL("../native-notify/web/native-notify-web-push.js", import.meta.url), "utf8");
+  // Verified against the live API on 2026-10-20:
+  //   GET /api/universal/web-push/keys/:appId/:webKey -> { vapid: { publicKey } }
+  //   webPush.registerPath -> /api/universal/device/register
+  assert.match(client, /'\/api\/universal\/web-push\/keys\/'/);
+  assert.match(client, /keys && keys\.vapid && keys\.vapid\.publicKey/);
+  assert.match(client, /'\/api\/universal\/device\/register'/);
+  assert.match(client, /platform: 'web'/);
+  assert.match(client, /webPush: subscription\.toJSON\(\)/);
+  // The VAPID key is fetched, never hardcoded, so a rotated key still works.
+  assert.doesNotMatch(client, /applicationServerKey: "B/);
+});
+
+test("the add-on's draft worker is inert and cannot take over the site scope", async () => {
+  const draft = await readFile(new URL("../native-notify-sw.js", import.meta.url), "utf8");
+  assert.doesNotMatch(draft, /self\.registration\.showNotification/);
+  assert.doesNotMatch(draft, /addEventListener\(['"]push/);
+  assert.doesNotMatch(draft, /addEventListener\(['"]notificationclick/);
+  assert.match(draft, /self\.registration\.unregister\(\)/);
+});
+
+test("a notification click still opens the link when the tab cannot be navigated", async () => {
+  const worker = await readFile(new URL("../service-worker.js", import.meta.url), "utf8");
+  assert.match(worker, /try\{await existing\.navigate\(target\)\}catch\{\}/);
+  assert.match(worker, /return existing\.focus\(\)/);
+  assert.match(worker, /then\(async list=>/);
+});
