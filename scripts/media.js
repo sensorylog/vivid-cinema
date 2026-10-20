@@ -56,7 +56,7 @@ export function normalizeResults(results = [], type = null) {
 export function sortMediaItems(items = [], sort = "popularity.desc") {
   const dateValue = (item) => {
     const date = String(item?.date || "").trim();
-    return /^\\d{4}-\\d{2}-\\d{2}$/.test(date) ? date : "";
+    return /^\d{4}-\d{2}-\d{2}$/.test(date) ? date : "";
   };
   const ratingValue = (item) => Number(item?.vote_average || 0);
   if (sort === "vote_average.desc") {
