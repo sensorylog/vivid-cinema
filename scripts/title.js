@@ -13,6 +13,7 @@ const route = getRoute();
 let media = null;
 let currentDetails = null;
 let trailerKeydownBound = false;
+let trailerReturnFocus = null;
 let seasonLoadSequence = 0;
 const PROVIDER_COUNTRIES = [
   ["US", "United States"],
@@ -118,37 +119,52 @@ function renderProviderGroups(details, countryCode) {
 
 function renderSeasons(details, isUpcoming = false) {
   if (media?.media_type !== "tv" || !Array.isArray(details.seasons) || !details.seasons.length) return "";
-  const seasons = details.seasons.filter((season) => season.season_number >= 0);
-  return '<section class="vivid-title-section vivid-seasons"><div class="vivid-section-heading"><div><span>EPISODES</span><h2>Seasons & episodes</h2></div><label class="vivid-season-picker"><span class="vivid-sr-only">Choose season</span><select id="season-select">' +
-    seasons.map((season) => '<option value="' + season.season_number + '">' + escapeHtml(season.name || ("Season " + season.season_number)) + '</option>').join("") +
-    '</select></label></div><div id="episode-list" class="vivid-episode-list"><p class="vivid-muted">Loading episodes…</p></div></section>';
+  const seasons = details.seasons
+    .filter((season) => Number.isInteger(Number(season.season_number)) && season.season_number >= 0)
+    .sort((a, b) => {
+      // Keep regular seasons first; specials remain available without becoming the default.
+      if (a.season_number === 0) return 1;
+      if (b.season_number === 0) return -1;
+      return a.season_number - b.season_number;
+    });
+  if (!seasons.length) return "";
+  const defaultSeason = seasons.find((season) => season.season_number > 0 && Number(season.episode_count) > 0)
+    || seasons.find((season) => Number(season.episode_count) > 0)
+    || seasons[0];
+  return '<section class="vivid-title-section vivid-seasons" aria-labelledby="vivid-seasons-heading"><div class="vivid-section-heading"><div><span>EPISODES</span><h2 id="vivid-seasons-heading">Seasons & episodes</h2></div><label class="vivid-season-picker"><span class="vivid-sr-only">Choose season</span><select id="season-select">' +
+    seasons.map((season) => '<option value="' + season.season_number + '"' + (season.season_number === defaultSeason.season_number ? " selected" : "") + '>' + escapeHtml(season.name || (season.season_number === 0 ? "Specials" : ("Season " + season.season_number))) + '</option>').join("") +
+    '</select></label></div><div id="episode-list" class="vivid-episode-list" aria-live="polite" aria-busy="true"><p class="vivid-muted">Loading episodes…</p></div></section>';
 }
 
-async function loadSeason(id, seasonNumber) {
+async function loadSeason(id, seasonNumber, isUpcoming = false) {
   const container = $("episode-list");
   if (!container) return;
   const requestId = ++seasonLoadSequence;
+  container.setAttribute("aria-busy", "true");
   container.innerHTML = '<p class="vivid-muted">Loading episodes…</p>';
   try {
     const data = await tmdbApi.tvSeason(id, seasonNumber);
     if (requestId !== seasonLoadSequence || !container.isConnected) return;
-    const episodes = data.episodes || [];
-    container.innerHTML = episodes.length ? episodes.map((episode) => '<article class="vivid-episode"><div class="vivid-episode-thumb"><img loading="lazy" src="' + getImageUrl(episode.still_path, "w500") + '" alt="" onerror="this.style.visibility=\'hidden\'"></div><div class="vivid-episode-copy"><div class="vivid-episode-line"><strong>Episode ' + episode.episode_number + '</strong><span>★ ' + (episode.vote_average ? Number(episode.vote_average).toFixed(1) : "—") + '</span></div><h3>' + escapeHtml(episode.name || ("Episode " + episode.episode_number)) + '</h3><small>' + escapeHtml(episode.air_date || "Air date unavailable") + '</small><p>' + escapeHtml(episode.overview || "No episode synopsis is available.") + '</p>' + (isUpcoming ? '<span class="vivid-muted vivid-episode-watch-unavailable">Trailer only · Not released yet</span>' : '<a class="vivid-button vivid-button--secondary vivid-episode-watch" href="' + escapeHtml(buildWatchUrl(media.id, "tv", seasonNumber, episode.episode_number)) + '"><i class="bi bi-play-fill"></i> Play episode</a>') + '</div></article>').join("") : '<p class="vivid-muted">No episodes are available for this season.</p>';
+    const episodes = Array.isArray(data?.episodes) ? data.episodes : [];
+    container.innerHTML = episodes.length ? episodes.map((episode) => '<article class="vivid-episode"><div class="vivid-episode-thumb"><img loading="lazy" src="' + getImageUrl(episode.still_path, "w500") + '" alt="" onerror="this.style.visibility=\'hidden\'"></div><div class="vivid-episode-copy"><div class="vivid-episode-line"><strong>Episode ' + Number(episode.episode_number || 0) + '</strong><span>★ ' + (episode.vote_average ? Number(episode.vote_average).toFixed(1) : "—") + '</span></div><h3>' + escapeHtml(episode.name || ("Episode " + episode.episode_number)) + '</h3><small>' + escapeHtml(episode.air_date || "Air date unavailable") + '</small><p>' + escapeHtml(episode.overview || "No episode synopsis is available.") + '</p>' + (isUpcoming ? '<span class="vivid-muted vivid-episode-watch-unavailable">Not released yet</span>' : '<a class="vivid-button vivid-button--secondary vivid-episode-watch" href="' + escapeHtml(buildWatchUrl(media.id, "tv", seasonNumber, episode.episode_number)) + '"><i class="bi bi-play-fill"></i> Play episode</a>') + '</div></article>').join("") : '<p class="vivid-muted">No episodes are listed for this season yet.</p>';
+    container.setAttribute("aria-busy", "false");
   } catch (error) {
     if (requestId !== seasonLoadSequence || !container.isConnected) return;
     container.innerHTML = '<p class="vivid-muted">' + escapeHtml(getErrorMessage(error)) + '</p>';
+    container.setAttribute("aria-busy", "false");
   }
 }
 
-function wireSeasons(details) {
+function wireSeasons(details, isUpcoming = false) {
   if (media?.media_type !== "tv") return;
   const select = $("season-select");
   if (!select) return;
-  select.addEventListener("change", () => loadSeason(media.id, select.value));
-  loadSeason(media.id, select.value || details.seasons?.[0]?.season_number || 0);
+  select.addEventListener("change", () => loadSeason(media.id, select.value, isUpcoming));
+  loadSeason(media.id, select.value || details.seasons?.find((season) => season.season_number > 0 && season.episode_count > 0)?.season_number || details.seasons?.[0]?.season_number || 0, isUpcoming);
 }
 
 function openTrailer(key, name) {
+  trailerReturnFocus = document.activeElement;
   if (media) recordBehavior("trailer_started", media, { surface: "title" });
   let modal = $("trailer-modal");
   if (!modal) {
@@ -173,6 +189,8 @@ function closeTrailer() {
   $("trailer-frame").src = "";
   modal.classList.remove("is-open");
   document.body.classList.remove("vivid-modal-open");
+  if (trailerReturnFocus?.isConnected && typeof trailerReturnFocus.focus === "function") trailerReturnFocus.focus();
+  trailerReturnFocus = null;
 }
 
 function wireTrailers() {
@@ -355,7 +373,7 @@ function render(details, externalCertification = "", externalCertificationNote =
     '<section class="vivid-title-section"><div class="vivid-section-heading"><div><span>RECOMMENDED</span><h2>More like this</h2></div></div><div class="vivid-similar" id="recommendation-rail">'+renderRecommendationCards(related)+'</div></section>';
 
   upsertLibraryItem("history",libraryItem());
-  wireSeasons(details);wireProviders(details);wireTrailers();wireLibraryActions();
+  wireSeasons(details, isUpcoming);wireProviders(details);wireTrailers();wireLibraryActions();
   $("recommendation-rail")?.addEventListener("click", event => {
     const link = event.target.closest("a");
     if (!link) return;
