@@ -1,5 +1,5 @@
 // Bump this version whenever the precached app shell changes.
-const CACHE_NAME = "vivid-cinema-shell-v231";
+const CACHE_NAME = "vivid-cinema-shell-v232";
 const APP_SHELL = [
   "./","./index.html","./home.html","./for-you.html","./person.html","./discover.html","./collection.html","./title.html","./watch.html",
   "./library.html","./auth.html","./login.html","./verify-email.html","./forgot-password.html","./account.html","./achievements.html","./terms.html","./privacy.html","./contact.html","./donate.html","./donation-success.html",
@@ -68,7 +68,7 @@ self.addEventListener("fetch",event=>{
  if(request.mode==="navigate"){event.respondWith(staleWhileRevalidate(request,event,true));return;}
  const isCodeOrStyle=/\.(?:js|css)$/.test(url.pathname);
  const isHtml=/\.html$/.test(url.pathname);
- event.respondWith(isCodeOrStyle?staleWhileRevalidate(request,event):isHtml?networkFirst(request):staleWhileRevalidate(request,event));
+ event.respondWith(isCodeOrStyle?networkFirst(request):isHtml?networkFirst(request):staleWhileRevalidate(request,event));
 });
 function safeNotificationUrl(value){
  try{const url=new URL(value||"./home.html",self.location.origin);return url.origin===self.location.origin?url.href:new URL("./home.html",self.location.origin).href;}

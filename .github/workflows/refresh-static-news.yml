@@ -35,6 +35,7 @@ jobs:
       - name: Fetch attributed headlines from public RSS feeds
         run: node automation/build-static-news-feed.mjs
       - name: Publish updated static feed to Firebase Hosting
+        if: github.ref == 'refs/heads/main'
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: "${{ secrets.GITHUB_TOKEN }}"

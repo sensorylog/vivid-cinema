@@ -29,6 +29,13 @@ test("every precached asset exists in the repository", async () => {
   assert.deepEqual(missing, [], "Missing precache assets: " + missing.join(", "));
 });
 
+test("ordinary JavaScript and CSS use network-first while retaining offline cache fallback", () => {
+  assert.match(source, /const CACHE_NAME = "vivid-cinema-shell-v232"/);
+  assert.match(source, /isCodeOrStyle.*networkFirst/);
+  assert.match(source, /event\.respondWith\(isCodeOrStyle\?networkFirst\(request\):isHtml\?networkFirst\(request\):staleWhileRevalidate\(request,event\)\)/);
+  assert.match(source, /fetch\(request,\{signal:controller\.signal,cache:"no-store"\}\)/);
+});
+
 test("notification navigation is restricted to the app origin", () => {
   assert.match(source, /function safeNotificationUrl\(/);
   assert.match(source, /url\.origin===self\.location\.origin/);

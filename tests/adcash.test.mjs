@@ -16,7 +16,7 @@ test("Adcash Autotag is configured once and skips the watch/player page", async 
   assert.match(loader, /runAutoTag\(\{ zoneId: ADCASH_ZONE_ID \}\)/);
   assert.match(loader, /__vividAdcashAutotagStarted/);
   assert.match(loader, /vividPage\s*===\s*"watch"/);
-  assert.match(loader, /watch\.html/);
+  assert.match(loader, /watch\\\.html/);
   assert.match(shell, /import ["']\.\/adcash\.js["']/);
   assert.doesNotMatch(watch, /scripts\/adcash\.js/);
 });
@@ -43,6 +43,6 @@ test("Adcash hosts are allowed in the scoped CSP and the shell cache is bumped",
   assert.ok(config.includes("script-src 'self' https://acscdn.com https://*.acscdn.com"));
   assert.ok(config.includes("connect-src 'self' https://acscdn.com https://*.acscdn.com"));
   assert.ok(config.includes("frame-src 'self' https://acscdn.com https://*.acscdn.com"));
-  assert.match(serviceWorker, /const CACHE_NAME = "vivid-cinema-shell-v231"/);
+  assert.match(serviceWorker, /const CACHE_NAME = "vivid-cinema-shell-v232"/);
   assert.match(serviceWorker, /"\.\/scripts\/adcash\.js"/);
 });
