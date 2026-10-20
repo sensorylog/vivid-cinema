@@ -15,8 +15,8 @@ test("Adcash Autotag is configured once and skips the watch/player page", async 
   assert.match(loader, /acscdn\.com\/script\/aclib\.js/);
   assert.match(loader, /runAutoTag\(\{ zoneId: ADCASH_ZONE_ID \}\)/);
   assert.match(loader, /__vividAdcashAutotagStarted/);
-  assert.match(loader, /watch\\\.html/);
-  assert.match(loader, /watch\\\.html/);
+  assert.match(loader, /vividPage\s*===\s*"watch"/);
+  assert.match(loader, /vividPage\s*===\s*"watch"/);
   assert.match(shell, /import ["']\.\/adcash\.js["']/);
   assert.doesNotMatch(watch, /scripts\/adcash\.js/);
 });
