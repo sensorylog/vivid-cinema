@@ -1,6 +1,6 @@
 // Vivid Cinema title renderer baseline restored from the last known-good implementation.
 import { tmdbApi } from "./tmdb.js";
-import { getImageUrl, getMediaUrl, normalizeMedia, normalizeResults } from "./media.js";
+import { getImageUrl, getMediaUrl, isReleasedMedia, normalizeMedia, normalizeResults } from "./media.js";
 import { getRoute, buildWatchUrl } from "./routes.js";
 import { escapeHtml, getErrorMessage } from "./utils.js";
 import { hasLibraryItem, startLibrarySync, toggleLibraryItem, upsertLibraryItem } from "./library.js";
@@ -116,7 +116,7 @@ function renderProviderGroups(details, countryCode) {
     '</div><p class="vivid-provider-note">Streaming availability data is provided by <a href="https://www.justwatch.com/" target="_blank" rel="noopener noreferrer">JustWatch</a> via <a href="https://www.themoviedb.org/" target="_blank" rel="noopener noreferrer">TMDB</a> and varies by country. Vivid Cinema does not host or provide titles.</p></section>';
 }
 
-function renderSeasons(details) {
+function renderSeasons(details, isUpcoming = false) {
   if (media?.media_type !== "tv" || !Array.isArray(details.seasons) || !details.seasons.length) return "";
   const seasons = details.seasons.filter((season) => season.season_number >= 0);
   return '<section class="vivid-title-section vivid-seasons"><div class="vivid-section-heading"><div><span>EPISODES</span><h2>Seasons & episodes</h2></div><label class="vivid-season-picker"><span class="vivid-sr-only">Choose season</span><select id="season-select">' +
@@ -133,7 +133,7 @@ async function loadSeason(id, seasonNumber) {
     const data = await tmdbApi.tvSeason(id, seasonNumber);
     if (requestId !== seasonLoadSequence || !container.isConnected) return;
     const episodes = data.episodes || [];
-    container.innerHTML = episodes.length ? episodes.map((episode) => '<article class="vivid-episode"><div class="vivid-episode-thumb"><img loading="lazy" src="' + getImageUrl(episode.still_path, "w500") + '" alt="" onerror="this.style.visibility=\'hidden\'"></div><div class="vivid-episode-copy"><div class="vivid-episode-line"><strong>Episode ' + episode.episode_number + '</strong><span>★ ' + (episode.vote_average ? Number(episode.vote_average).toFixed(1) : "—") + '</span></div><h3>' + escapeHtml(episode.name || ("Episode " + episode.episode_number)) + '</h3><small>' + escapeHtml(episode.air_date || "Air date unavailable") + '</small><p>' + escapeHtml(episode.overview || "No episode synopsis is available.") + '</p><a class="vivid-button vivid-button--secondary vivid-episode-watch" href="' + escapeHtml(buildWatchUrl(media.id, "tv", seasonNumber, episode.episode_number)) + '"><i class="bi bi-play-fill"></i> Play episode</a></div></article>').join("") : '<p class="vivid-muted">No episodes are available for this season.</p>';
+    container.innerHTML = episodes.length ? episodes.map((episode) => '<article class="vivid-episode"><div class="vivid-episode-thumb"><img loading="lazy" src="' + getImageUrl(episode.still_path, "w500") + '" alt="" onerror="this.style.visibility=\'hidden\'"></div><div class="vivid-episode-copy"><div class="vivid-episode-line"><strong>Episode ' + episode.episode_number + '</strong><span>★ ' + (episode.vote_average ? Number(episode.vote_average).toFixed(1) : "—") + '</span></div><h3>' + escapeHtml(episode.name || ("Episode " + episode.episode_number)) + '</h3><small>' + escapeHtml(episode.air_date || "Air date unavailable") + '</small><p>' + escapeHtml(episode.overview || "No episode synopsis is available.") + '</p>' + (isUpcoming ? '<span class="vivid-muted vivid-episode-watch-unavailable">Trailer only · Not released yet</span>' : '<a class="vivid-button vivid-button--secondary vivid-episode-watch" href="' + escapeHtml(buildWatchUrl(media.id, "tv", seasonNumber, episode.episode_number)) + '"><i class="bi bi-play-fill"></i> Play episode</a>') + '</div></article>').join("") : '<p class="vivid-muted">No episodes are available for this season.</p>';
   } catch (error) {
     if (requestId !== seasonLoadSequence || !container.isConnected) return;
     container.innerHTML = '<p class="vivid-muted">' + escapeHtml(getErrorMessage(error)) + '</p>';
@@ -322,6 +322,7 @@ function render(details, externalCertification = "", externalCertificationNote =
   const cast=(details.credits?.cast||[]).filter((person)=>person.name).slice(0,20);
   const videos=trailerVideos(details);
   const firstTrailer=videos[0];
+  const isUpcoming = !isReleasedMedia(details);
   const recommendations=normalizeResults(details.recommendations?.results||[],media.media_type).slice(0,12);
   const similar=normalizeResults(details.similar?.results||[],media.media_type).slice(0,12);
   const related=recommendations.length?recommendations:similar;
@@ -344,13 +345,13 @@ function render(details, externalCertification = "", externalCertificationNote =
       '<div class="vivid-title-copy"><span class="vivid-title-kicker">'+(media.media_type==="tv"?"TV SERIES":"MOVIE")+'</span><h1>'+escapeHtml(title)+'</h1>'+
       '<div class="vivid-title-meta"><span>'+escapeHtml(year)+'</span>'+(runtime?'<i></i><span>'+escapeHtml(runtime)+'</span>':"")+'<i></i><span>★ '+rating+'</span></div>'+
       '<div class="vivid-title-genres">'+genres+'</div><p>'+escapeHtml(media.overview||"No synopsis is available for this title yet.")+'</p>'+
-      '<div class="vivid-title-actions"><a class="vivid-button vivid-button--primary" href="'+escapeHtml(titleWatchUrl)+'"><i class="bi bi-play-fill"></i> '+(hasResume?"Resume":"Watch now")+'</a>'+(firstTrailer?'<button class="vivid-button vivid-button--secondary" id="hero-trailer" type="button"><i class="bi bi-play-circle"></i> Watch trailer</button>':"")+'<a class="vivid-button vivid-button--ghost" href="home.html"><i class="bi bi-arrow-left"></i> Browse more</a></div></div></div></section>'+
+      '<div class="vivid-title-actions">'+(isUpcoming?'<span class="vivid-title-release-status" role="status"><i class="bi bi-calendar-event"></i> Coming soon · Not released yet</span>':'<a class="vivid-button vivid-button--primary" href="'+escapeHtml(titleWatchUrl)+'"><i class="bi bi-play-fill"></i> '+(hasResume?"Resume":"Watch now")+'</a>')+(firstTrailer?'<button class="vivid-button vivid-button--secondary" id="hero-trailer" type="button"><i class="bi bi-play-circle"></i> Watch trailer</button>':(isUpcoming?'<span class="vivid-muted">Trailer not available yet</span>':""))+'<a class="vivid-button vivid-button--ghost" href="home.html"><i class="bi bi-arrow-left"></i> Browse more</a></div></div></div></section>'+
     renderLibraryActions()+
     renderInformation(details, country, externalCertification, externalCertificationNote)+
     renderTrailerSection(details)+
     '<section class="vivid-title-section"><div class="vivid-section-heading"><div><span>CAST</span><h2>People in the story</h2></div></div><div class="vivid-cast-grid">'+
       (cast.length?cast.map((person)=>'<a class="vivid-cast" href="person.html?id='+encodeURIComponent(person.id)+'"><img loading="lazy" src="'+getImageUrl(person.profile_path,"w185")+'" alt="'+escapeHtml(person.name)+'"><strong>'+escapeHtml(person.name)+'</strong><small>'+escapeHtml(person.character||"Cast")+'</small></a>').join(""):'<p class="vivid-muted">Cast information is unavailable.</p>')+
-    '</div></section>'+renderSeasons(details)+renderProviderGroups(details,country)+
+    '</div></section>'+renderSeasons(details,isUpcoming)+renderProviderGroups(details,country)+
     '<section class="vivid-title-section"><div class="vivid-section-heading"><div><span>RECOMMENDED</span><h2>More like this</h2></div></div><div class="vivid-similar" id="recommendation-rail">'+renderRecommendationCards(related)+'</div></section>';
 
   upsertLibraryItem("history",libraryItem());
