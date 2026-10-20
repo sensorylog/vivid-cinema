@@ -120,6 +120,26 @@ if (root) {
     }
   }
 
+  function isGoogleImageHost(value) {
+    try {
+      const host = new URL(value).hostname.toLowerCase();
+      return /(?:^|\.)(?:googleusercontent\.com|gstatic\.com|google\.com)$/.test(host);
+    } catch {
+      return false;
+    }
+  }
+
+  function isRepeatedGoogleImage(value) {
+    const url = safeImageUrl(value);
+    if (!url || !isGoogleImageHost(url)) return false;
+    return articles.filter(article => safeImageUrl(article.imageUrl) === url).length > 1;
+  }
+
+  function displayImageUrl(value) {
+    const url = safeImageUrl(value);
+    return url && !isRepeatedGoogleImage(url) ? url : "";
+  }
+
   function ensureReader() {
     let modal = document.getElementById("vivid-news-reader");
     if (modal) return modal;
@@ -216,8 +236,8 @@ if (root) {
     const domainEl = document.getElementById("vivid-news-reader-domain");
     if (domainEl) domainEl.textContent = domain ? domain : "";
 
-    const imageUrl = safeImageUrl(article.imageUrl);
-    const imageFallbackUrl = safeImageUrl(article.imageFallbackUrl);
+    const imageUrl = displayImageUrl(article.imageUrl);
+    const imageFallbackUrl = displayImageUrl(article.imageFallbackUrl);
     const imageWrap = document.getElementById("vivid-news-reader-image-wrap");
     const readerImage = document.getElementById("vivid-news-reader-image");
     const caption = document.getElementById("vivid-news-reader-caption");
@@ -364,7 +384,14 @@ if (root) {
     const img = event.target;
     const w = img.naturalWidth || 0;
     const h = img.naturalHeight || 0;
-    if (w > 0 && h > 0 && ((w <= 400 && h <= 400) || w <= 200 || h <= 200)) demoteArtImage(img);
+    let googleSquareLogo = false;
+    try {
+      const source = img.currentSrc || img.src;
+      googleSquareLogo = isGoogleImageHost(source) &&
+        w <= 400 && h <= 400 &&
+        Math.abs(w - h) <= Math.max(w, h) * 0.12;
+    } catch {}
+    if (w > 0 && h > 0 && ((w <= 96 && h <= 96) || googleSquareLogo)) demoteArtImage(img);
   }, true);
 
   root.addEventListener("click", event => {
