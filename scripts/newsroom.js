@@ -132,7 +132,7 @@ if (root) {
   function isRepeatedGoogleImage(value) {
     const url = safeImageUrl(value);
     if (!url || !isGoogleImageHost(url)) return false;
-    return articles.filter(article => safeImageUrl(article.imageUrl) === url).length > 1;
+    return articles.filter(article => [article.imageUrl, article.imageFallbackUrl].some(candidate => safeImageUrl(candidate) === url)).length > 1;
   }
 
   function displayImageUrl(value) {
