@@ -237,7 +237,43 @@ for (const story of unique) {
   if (selected.length >= 120) break;
   if (!selectedIds.has(story.id)) { selected.push(story); selectedIds.add(story.id); }
 }
-const enrichedStories = await enrichStories(sortStoriesNewestFirst(selected).slice(0, 120));
+async function reusePreviousPublisherImages(stories) {
+  try {
+    const response = await fetch("https://vivid-cinema.web.app/data/news-feed.json", {
+      cache: "no-store",
+      signal: AbortSignal.timeout(5000)
+    });
+    if (!response.ok) return { stories, reused: 0 };
+    const previousFeed = await response.json();
+    if (!Array.isArray(previousFeed.articles)) return { stories, reused: 0 };
+    const previousById = new Map(previousFeed.articles.map(article => [String(article.id || ""), article]));
+    let reused = 0;
+    const nextStories = stories.map(story => {
+      const previous = previousById.get(String(story.id || ""));
+      const imageUrl = String(previous?.imageFallbackUrl || "");
+      const previousSourceUrl = String(previous?.sourceUrl || "");
+      if (!imageUrl || !previousSourceUrl || !isArticleImageUrl(imageUrl, previousSourceUrl)) return story;
+      try {
+        const imageHost = new URL(imageUrl).hostname.toLowerCase();
+        const sourceHost = new URL(previousSourceUrl).hostname.toLowerCase();
+        if (/(^|\.)googleusercontent\.com$|(^|\.)gstatic\.com$|(^|\.)google\.com$/.test(imageHost)) return story;
+        if (/(^|\.)news\.google\.com$/.test(sourceHost)) return story;
+        reused += 1;
+        return { ...story, sourceUrl: previousSourceUrl, imageUrl, imageFallbackUrl: imageUrl };
+      } catch {
+        return story;
+      }
+    });
+    return { stories: nextStories, reused };
+  } catch {
+    return { stories, reused: 0 };
+  }
+}
+
+const sortedSelected = sortStoriesNewestFirst(selected).slice(0, 120);
+const { stories: storiesWithPreviousImages, reused: reusedImageCount } = await reusePreviousPublisherImages(sortedSelected);
+console.log("Reused " + reusedImageCount + " previously resolved publisher thumbnails.");
+const enrichedStories = await enrichStories(storiesWithPreviousImages);
 const { stories: cachedStories, cached: cachedImageCount, remoteFallback: remoteFallbackCount, missing: missingImageCount } = await cacheArticleThumbnails(enrichedStories);
 const finalStories = sortStoriesNewestFirst(cachedStories);
 const payload = JSON.stringify({ generatedAt: new Date().toISOString(), source: "Google News RSS search feeds", count: finalStories.length, failedQueries: failed.length, feedCount: FEEDS.length, articles: finalStories }, null, 2) + "\n";
