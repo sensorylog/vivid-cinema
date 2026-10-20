@@ -137,7 +137,7 @@ async function enrichArticle(story) {
             },
             signal: AbortSignal.timeout(5000)
           });
-          if (publisherResponse.ok && /text\/html|application\/xhtml\\+xml/i.test(publisherResponse.headers.get("content-type") || "")) {
+          if (publisherResponse.ok && /text\/html|application\/xhtml\+xml/i.test(publisherResponse.headers.get("content-type") || "")) {
             html = (await publisherResponse.text()).slice(0, 1200000);
             const finalPublisherUrl = new URL(publisherResponse.url || publisherArticleUrl);
             if (finalPublisherUrl.protocol === "https:" && !/(^|\.)news\.google\.com$/i.test(finalPublisherUrl.hostname)) {
