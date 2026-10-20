@@ -21,7 +21,7 @@ let favorites=new Set(readStored(STORAGE_FAVORITES,[])),recentIds=readStored(STO
 const PAGE_SIZE=30;
 const CATALOG_TIMEOUT_MS=20000;
 const SOURCES=[
- {id:"nexus",name:"IPTV Nexus",url:"https://dearbulut.github.io/iptv/playlists/online.m3u",priority:100},
+ {id:"nexus",name:"Nexus",url:"https://dearbulut.github.io/iptv/playlists/online.m3u",priority:100},
  {id:"free-tv",name:"Free-TV",url:"https://raw.githubusercontent.com/Free-TV/IPTV/master/playlist.m3u8",priority:90},
  {id:"iptv-org",name:"IPTV-org",url:"https://iptv-org.github.io/iptv/index.m3u",priority:70}
 ];
@@ -108,6 +108,31 @@ function parseM3U(text,provider){
    }
  }
  return rows;
+}
+
+function normalizeM3U(text,provider){
+ const grouped=new Map();
+ for(const row of parseM3U(text,provider)){
+   const meta=row.meta||{},source=row.source;
+   const name=String(meta.name||"").trim();
+   if(!name||!source?.url)continue;
+   const key=normalize(meta.id||name);
+   if(!key)continue;
+   const country=String(meta.country||"").split(/[;,]/)[0].trim()||"International";
+   const language=String(meta.language||"").split(/[;,]/)[0].trim();
+   const category=String(meta.category||"general").split(/[;,]/)[0].trim()||"general";
+   const existing=grouped.get(key);
+   if(!existing){
+     grouped.set(key,{id:meta.id||key,name,altNames:[],country,countryCode:country==="International"?"":country,logo:meta.logo||"",language,category,categories:[category],provider,sources:[source]});
+   }else{
+     if(!existing.logo&&meta.logo)existing.logo=meta.logo;
+     if(existing.country==="International"&&country!=="International")existing.country=country;
+     if(!existing.language&&language)existing.language=language;
+     if(!existing.categories.includes(category))existing.categories.push(category);
+     if(!existing.sources.some(item=>item.url===source.url)&&existing.sources.length<5)existing.sources.push(source);
+   }
+ }
+ return [...grouped.values()].filter(channel=>channel.sources.length);
 }
 
 function normalizeApiFallback(channelsData,streamsData,countriesData){
@@ -386,41 +411,71 @@ tryNext?.addEventListener("click",advanceSourceOrFail);
  document.getElementById("live-country")?.addEventListener("change",e=>{activeCountry=e.target.value;page=1;render()});
  document.getElementById("live-language")?.addEventListener("change",e=>{activeLanguage=e.target.value;page=1;render()});
 
-(async()=>{
+let catalogueLoading=false;
+let lastCatalogueRefresh=0;
+const CATALOGUE_REFRESH_MS=30*60*1000;
+
+async function loadCatalogue({silent=false}={}){
+ if(catalogueLoading)return;
+ catalogueLoading=true;
+ const refreshButton=document.getElementById("live-refresh");
+ if(refreshButton)refreshButton.disabled=true;
+ if(guideStatus&&!silent)guideStatus.textContent="Searching public live-channel sources…";
  try{
-   if(guideStatus)guideStatus.textContent="Loading public live-channel listings…";
-   const parsed=[];
-   try{
-     const nexus=await fetchJsonWithTimeout("https://dearbulut.github.io/iptv/api/v1/channels.online.json");
-     const online=normalizeNexusOnline(nexus);
-     if(online.length)parsed.push(online);
-   }catch(e){console.warn("Nexus API unavailable:",e)}
+   const tasks=[
+     fetchJsonWithTimeout("https://dearbulut.github.io/iptv/api/v1/channels.online.json")
+       .then(normalizeNexusOnline)
+       .catch(error=>{console.warn("Nexus API unavailable:",error);return [];}),
+     ...SOURCES.map(async source=>{
+       try{
+         const response=await fetchWithTimeout(source.url);
+         if(!response.ok)throw Error("HTTP "+response.status);
+         return normalizeM3U(await response.text(),source.name);
+       }catch(error){console.warn(source.name+" playlist unavailable:",error);return [];}
+     })
+   ];
+   const results=await Promise.all(tasks);
+   const parsed=results.filter(rows=>Array.isArray(rows)&&rows.length);
+   let next=mergeCatalogue(parsed);
 
-   if(!parsed.length){
-     const results=await Promise.all(SOURCES.map(s=>fetchWithTimeout(s.url).catch(()=>null)));
-     const m3u=await Promise.all(results.map(async(res,i)=>res?.ok?normalizeM3U(await res.text(),SOURCES[i].name==="IPTV-org"?"IPTV-org":SOURCES[i].name==="Free-TV"?"Free-TV":"Nexus"):[]));
-     parsed.push(...m3u.filter(Boolean));
-   }
-
-   if(!parsed.some(x=>x.length)){
+   // Use the broader metadata API only when the primary live feeds return very little.
+   if(next.length<50){
      try{
        const [channelsData,streamsData,countriesData]=await Promise.all([
          fetchJsonWithTimeout("https://iptv-org.github.io/api/channels.json"),
          fetchJsonWithTimeout("https://iptv-org.github.io/api/streams.json"),
          fetchJsonWithTimeout("https://iptv-org.github.io/api/countries.json")
        ]);
-       parsed.push(normalizeApiFallback(channelsData,streamsData,countriesData));
-     }catch(e){console.warn("IPTV-org API fallback unavailable:",e)}
+       const fallback=normalizeApiFallback(channelsData,streamsData,countriesData);
+       if(fallback.length)next=mergeCatalogue([...parsed,fallback]);
+     }catch(error){console.warn("IPTV-org API fallback unavailable:",error);}
    }
 
-   channels=mergeCatalogue(parsed);
-   if(!channels.length)throw Error("No live channels returned");
-   if(guideStatus)guideStatus.textContent=channels.length.toLocaleString()+" channel listings loaded · stream availability varies";
- }catch(e){
-   console.warn("Live catalogue load failed:",e);
-   channels=[];
-   if(guideStatus)guideStatus.textContent="Live catalogue temporarily unavailable";
+   // Keep the last working catalogue if every public endpoint is temporarily down.
+   if(!next.length)throw Error("No live channels returned");
+   channels=next;
+   lastCatalogueRefresh=Date.now();
+   const time=new Date(lastCatalogueRefresh).toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"});
+   if(guideStatus)guideStatus.textContent=channels.length.toLocaleString()+" channels · Updated "+time+" · stream availability varies";
+ }catch(error){
+   console.warn("Live catalogue refresh failed:",error);
+   if(guideStatus)guideStatus.textContent=channels.length
+     ? channels.length.toLocaleString()+" channels · Refresh unavailable; showing last results"
+     : "Live catalogue temporarily unavailable. Try refreshing.";
+ }finally{
+   catalogueLoading=false;
+   if(refreshButton)refreshButton.disabled=false;
+   renderFilters();
+   render();
  }
- renderFilters();
- render();
-})();
+}
+
+document.getElementById("live-refresh")?.addEventListener("click",()=>loadCatalogue());
+document.addEventListener("visibilitychange",()=>{
+ if(!document.hidden&&Date.now()-lastCatalogueRefresh>=CATALOGUE_REFRESH_MS)loadCatalogue({silent:true});
+});
+setInterval(()=>{
+ if(!document.hidden&&Date.now()-lastCatalogueRefresh>=CATALOGUE_REFRESH_MS)loadCatalogue({silent:true});
+},CATALOGUE_REFRESH_MS);
+
+loadCatalogue();
