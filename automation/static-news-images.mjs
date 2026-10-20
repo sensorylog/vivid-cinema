@@ -2,6 +2,8 @@ import { mkdir, rm, writeFile } from "node:fs/promises";
 import { createHash } from "node:crypto";
 import { join } from "node:path";
 
+const MAX_IDENTICAL = 1;
+
 const decode = value => String(value || "")
   .replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, "$1")
   .replace(/&amp;/gi, "&").replace(/&quot;/gi, '"')
@@ -105,13 +107,13 @@ export async function cacheArticleThumbnails(stories = [], {
           remoteFallback += 1; return { ...story, imageUrl: remoteUrl, imageFallbackUrl: remoteUrl };
         }
         const bytes = new Uint8Array(await response.arrayBuffer());
+        contentHashes[storyIndex] = createHash("sha256").update(bytes).digest("hex");
         if (bytes.length < 1024 || bytes.length > maxBytes) { remoteFallback += 1; return { ...story, imageUrl: remoteUrl, imageFallbackUrl: remoteUrl }; }
         const extension = imageExtension(contentType, bytes);
         if (!extension) { remoteFallback += 1; return { ...story, imageUrl: remoteUrl, imageFallbackUrl: remoteUrl }; }
         const id = String(story.id || "").replace(/[^a-z0-9_-]/gi, "");
         if (!id) return { ...story, imageUrl: "", imageFallbackUrl: "" };
         const filename = id + "." + extension;
-        contentHashes[storyIndex] = createHash("sha256").update(bytes).digest("hex");
         cachedFiles[storyIndex] = join(outputDir, filename);
         await writeFile(cachedFiles[storyIndex], bytes);
         cached += 1;
@@ -131,10 +133,10 @@ export async function cacheArticleThumbnails(stories = [], {
     indices.push(index);
     indicesByHash.set(digest, indices);
   });
-  const duplicateIndices = [...indicesByHash.values()].filter(indices => indices.length > 1).flat();
+  const duplicateIndices = [...indicesByHash.values()].filter(indices => indices.length > MAX_IDENTICAL).flat();
   for (const index of duplicateIndices) {
     if (cachedFiles[index]) await rm(cachedFiles[index], { force: true });
-    if (results[index]?.imageUrl) cached -= 1;
+    if (cachedFiles[index]) cached -= 1;
     results[index] = { ...results[index], imageUrl: "", imageFallbackUrl: "" };
     missing += 1;
   }
