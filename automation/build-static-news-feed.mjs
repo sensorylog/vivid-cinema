@@ -1,5 +1,5 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
-import { cacheArticleThumbnails, extractHtmlImageUrl, extractRssImageUrl, sortStoriesNewestFirst } from "./static-news-images.mjs";
+import { cacheArticleThumbnails, extractHtmlImageUrl, extractRssImageUrl, isArticleImageUrl, sortStoriesNewestFirst } from "./static-news-images.mjs";
 import { dirname } from "node:path";
 
 const OUTPUT = "data/news-feed.json";
@@ -99,7 +99,8 @@ async function enrichArticle(story) {
   const baseSummary = story.summary || "";
   const hasUsefulSummary = baseSummary.length > 100 &&
     baseSummary.toLowerCase() !== String(story.headline || "").toLowerCase();
-  if (hasUsefulSummary && story.imageUrl) return story;
+  const needsImage = !isArticleImageUrl(story.imageUrl, story.sourceUrl);
+  if (hasUsefulSummary && !needsImage) return story;
   try {
     const response = await fetch(story.sourceUrl, {
       redirect: "follow",
@@ -120,7 +121,7 @@ async function enrichArticle(story) {
     } catch {}
     const description = metaValue(html, ["og:description", "twitter:description", "description"]);
     const imageValue = extractHtmlImageUrl(html, sourceUrl);
-    let imageUrl = story.imageUrl || "";
+    let imageUrl = needsImage ? "" : (story.imageUrl || "");
     try {
       const candidate = new URL(imageValue, sourceUrl);
       if (candidate.protocol === "https:") imageUrl = candidate.href;
