@@ -36,3 +36,10 @@ test("Vivid Live exposes manual refresh and periodically refreshes while visible
   assert.match(source, /if\(!next\.length\)throw Error\("No live channels returned"\)/);
   assert.match(source, /Refresh unavailable; showing last results/);
 });
+
+
+test("Vivid Live includes a dedicated public sports M3U source", async () => {
+  const source = await read("scripts/live.js");
+  assert.match(source, /name:"IPTV-org Sports",url:"https:\\/\\/iptv-org\\.github\\.io\\/iptv\\/categories\\/sports\\.m3u"/);
+  assert.match(source, /"IPTV-org Sports":2/);
+});
