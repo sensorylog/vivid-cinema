@@ -597,7 +597,7 @@ function renderShell(params) {
     const rememberedSource = !playerHasOpened ? getRememberedSource() : null;
     playerHasOpened = true;
     sourceAttempted.clear();
-    const initialSource = isAnimePlayback() && !sourceAvailable(activeSource)
+    const initialSource = isAnimePlayback()
       ? (aniListId && params.type === "tv" ? "aniweeb" : aniListId ? "vidplus" : malId ? "vidlink" : hasFallbackId() ? "vidsrc" : "")
       : (rememberedSource || activeSource || "vidapi");
     if (initialSource) {
