@@ -23,6 +23,7 @@ const CATALOG_TIMEOUT_MS=20000;
 const SOURCES=[
  {id:"nexus",name:"Nexus",url:"https://dearbulut.github.io/iptv/playlists/online.m3u",priority:100},
  {id:"free-tv",name:"Free-TV",url:"https://raw.githubusercontent.com/Free-TV/IPTV/master/playlist.m3u8",priority:90},
+ {id:"iptv-org-sports",name:"IPTV-org Sports",url:"https://iptv-org.github.io/iptv/categories/sports.m3u",priority:80},
  {id:"iptv-org",name:"IPTV-org",url:"https://iptv-org.github.io/iptv/index.m3u",priority:70}
 ];
 
@@ -30,7 +31,7 @@ let channels=[],activeFilter="all",activeCountry="all",activeLanguage="all",page
 const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const label=v=>String(v||"").replace(/[-_]+/g," ").replace(/\b\w/g,m=>m.toUpperCase());
 const normalize=v=>String(v||"").toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]+/g,"");
-const sourceRank={Nexus:3,"Free-TV":2,"IPTV-org":1};
+const sourceRank={Nexus:3,"Free-TV":2,"IPTV-org Sports":2,"IPTV-org":1};
 
 async function fetchJsonWithTimeout(url){
  const controller=new AbortController();
