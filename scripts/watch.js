@@ -752,20 +752,12 @@ function renderShell(params) {
 
   if (player) {
     player.addEventListener("load", () => {
-      // An iframe load is not proof that the stream is playable. Keep a compact status
-      // pill rather than a full-frame veil if the provider does not emit a health event.
-      const loadedSource = activeSource;
-      window.setTimeout(() => {
-        if (!status || !status.isConnected || loadedSource !== activeSource || status.classList.contains("is-warning")) return;
-        if (primaryHealthy) {
-          status.hidden = true;
-          return;
-        }
-        if (!player.src || player.src === "about:blank") return;
-        status.textContent = "Player page loaded; waiting for stream… If the video stays blank, try another server.";
-        status.classList.add("is-compact");
-        status.hidden = false;
-      }, 1200);
+      // Embedded providers often do not send playback events back to the parent page.
+      // Once their player document loads, remove Vivid's overlay so it cannot cover a
+      // stream that has already started. Real playback errors/timeouts can show it again.
+      if (!player.src || player.src === "about:blank") return;
+      status?.classList.remove("is-compact");
+      if (status && !status.classList.contains("is-warning")) status.hidden = true;
     });
     player.addEventListener("error", () => {
       triggerFallback("iframe_error");
