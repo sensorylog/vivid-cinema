@@ -49,3 +49,17 @@ test("direct-stream diagnostics observe stalls and buffer-ahead without controll
   assert.match(engine, /Diagnostics must never interrupt playback/);
   assert.ok(engine.includes("target.removeEventListener(eventName, listener)"));
 });
+
+
+test("watch experience polish covers both players and responsive accessible controls", async () => {
+  const styles = await readFile(path.join(root, "styles", "vivid-watch-polish.css"), "utf8");
+  const watchHtml = await readFile(path.join(root, "watch.html"), "utf8");
+  for (const selector of [
+    ".vivid-player-main", ".vivid-player-frame video", ".vivid-tflix-card",
+    ".vivid-tflix-screen", "env(safe-area-inset-bottom)", "prefers-reduced-motion",
+    ":focus-visible"
+  ]) {
+    assert.ok(styles.includes(selector), "watch polish should include " + selector);
+  }
+  assert.match(watchHtml, /vivid-watch-polish\.css\?v=cinema-watch-1/);
+});
