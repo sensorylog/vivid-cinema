@@ -51,7 +51,7 @@ test("verification page is precached and loads its handler", () => {
   assert.match(worker, /"\.\/verify-email\.html"/);
   assert.match(worker, /"\.\/scripts\/verify-email\.js"/);
   assert.match(worker, /const CACHE_NAME = "vivid-cinema-shell-v\d+"/);
-  assert.ok(worker.includes("./scripts/auth.js?v=20261016-auth-runtime-audit2"));
+  assert.ok(worker.includes("./scripts/auth.js?v=20261021-firebase-auth-1"));
 });
 
 
