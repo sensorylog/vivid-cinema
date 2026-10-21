@@ -18,7 +18,6 @@ export function buildAnimeSecondaryServerUrl(serverId, { aniListId, malId, episo
   const mal = numericId(malId);
   const ep = positiveInteger(episode);
   const audio = track === "dub" ? "dub" : "sub";
-  const idPath = (id, language = audio) => id ? "/" + id + "/" + ep + "/" + language : "";
   switch (serverId) {
     case "anixo":
       if (ani) return "https://anixo.buzz/embed/ani/" + ani + "/" + ep + "?track=" + audio;
@@ -98,7 +97,6 @@ export function mountAnimeSecondaryPlayer({ root, params, media, title, aniListI
     '<p class="vivid-anime-p2-label">Streaming servers</p><div class="vivid-anime-p2-servers"></div></aside></div><div class="vivid-anime-p2-status" role="status" aria-live="polite">Ready · select a server to load its player.</div>' +
     '<div class="vivid-anime-p2-foot">Player 2 is independent of Anime Player 1. If a provider is unavailable, choose another server. Third-party availability can change.</div></div>';
 
-  const card = root.querySelector(".vivid-anime-p2");
   const screen = root.querySelector(".vivid-anime-p2-screen");
   const placeholder = root.querySelector(".vivid-anime-p2-placeholder");
   const serverGrid = root.querySelector(".vivid-anime-p2-servers");
