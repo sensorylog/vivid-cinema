@@ -332,7 +332,7 @@ function setPlayerSource(source, params, startAt = 0) {
   if (source === "aniweeb") {
     if (!isAnimePlayback() || !aniListId || params.type !== "tv") return;
     primaryHealthy = false;
-    player.src = buildAniweebEmbedUrl(params, { aniListId, track: "sub", startAt });
+    player.src = buildAniweebEmbedUrl(params, { aniListId, track: "sub" });
     if (status) {
       status.textContent = "Loading Aniweeb anime source · episode " + Math.max(1, Number(params.episode) || 1) + "…";
       status.classList.remove("is-warning");
