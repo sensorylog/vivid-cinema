@@ -4,6 +4,7 @@ import {
   GoogleAuthProvider,
   sendPasswordResetEmail,
   sendEmailVerification,
+  sendEmailVerification,
   signInWithEmailAndPassword,
   signInWithPopup,
   signInWithRedirect,
