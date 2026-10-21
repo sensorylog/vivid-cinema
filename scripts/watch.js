@@ -213,6 +213,8 @@ function showFallbackPrompt(source) {
 }
 
 function updateSourceLabel() {
+  const count = document.querySelector(".vivid-server-count");
+  if (count) count.textContent = isAnimePlayback() ? "4 sources" : "7 sources";
   const label = document.getElementById("player-source-label");
   if (label) label.textContent = getSourceLabel(activeSource);
   document.querySelectorAll("[data-server-state]").forEach(node => {
