@@ -63,8 +63,8 @@ test("new movie/TV providers use documented movie and episode routes", () => {
   assert.equal(buildMoviesApiUrl(tv, { tmdbId: "1399", startAt: 125 }), "https://moviesapi.to/tv/1399/2/7?theme=e50914&t=125");
 });
 test("new providers reject missing IDs", () => {
-  assert.equal(buildEmbedWaveUrl(movie), "");
-  assert.equal(buildEzVidApiUrl(movie), "");
+  assert.equal(buildEmbedWaveUrl({ ...movie, id: "tt0133093" }), "");
+  assert.equal(buildEzVidApiUrl({ ...movie, id: "tt0133093" }), "");
   assert.equal(buildVidFastUrl({ ...tv, id: "" }), "");
   assert.equal(buildMoviesApiUrl({ ...tv, id: "" }), "");
 });
