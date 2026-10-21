@@ -51,3 +51,13 @@ test("anime playback excludes the unverified Aniweeb source and automatically fa
   assert.match(source, /if \(isAnimePlayback\(\)\) triggerFallback\("anime_source_timeout"\)/);
   assert.match(source, /isAnimePlayback\(\) \? 12000 : 25000/);
 });
+
+
+test("movie and TV Player 1 exposes only VidAPI and VidSrc while anime providers remain separate", () => {
+  assert.match(source, /: \["vidapi", "vidsrc"\];/);
+  assert.match(source, /if \(source === "vidapi"\) return hasFallbackId\(\);\n  if \(source === "vidsrc"\) return hasFallbackId\(\);\n  return false;/);
+  assert.match(source, /button\.hidden = isAnimePlayback\(\) \? !\["vidapi", "vidsrc", "vidplus", "vidlink"\]\.includes\(source\) : !\["vidapi", "vidsrc"\]\.includes\(source\)/);
+  assert.match(source, /<span class="vivid-server-count">2 sources<\/span>/);
+  assert.doesNotMatch(source, /mountPlaybackServerSettings\(serverPanel/);
+  assert.match(source, /\? \["vidplus", "vidlink", "vidsrc", "vidapi"\]/);
+});
