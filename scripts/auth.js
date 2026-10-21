@@ -3,6 +3,7 @@ import {
   createUserWithEmailAndPassword,
   GoogleAuthProvider,
   sendPasswordResetEmail,
+  sendEmailVerification,
   signInWithEmailAndPassword,
   signInWithPopup,
   signInWithRedirect,
@@ -17,24 +18,10 @@ import { startLibrarySync } from "./library.js";
 async function sendVividVerificationEmail() {
   const user = auth.currentUser;
   if (!user) throw Object.assign(new Error("Please sign in and try again."), { code: "vivid/missing-user" });
-  const token = await user.getIdToken();
-  const response = await fetch("https://vivid-cinema-api.vercel.app/api/send-verification", {
-    method: "POST",
-    headers: {
-      Authorization: "Bearer " + token,
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({}),
-    credentials: "omit",
-    cache: "no-store"
+  await sendEmailVerification(user, {
+    url: "https://vivid-cinema.web.app/verify-email.html",
+    handleCodeInApp: false
   });
-  let result = {};
-  try { result = await response.json(); } catch {}
-  if (!response.ok || result.ok === false) {
-    throw Object.assign(new Error(result.message || "We couldn't send the verification email right now."), {
-      code: result.code || "vivid/email-service-error"
-    });
-  }
 }
 
 const signupForm=document.getElementById("signup-form");
