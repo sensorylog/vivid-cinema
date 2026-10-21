@@ -40,3 +40,12 @@ test("iframe diagnostics are opt-in and do not log raw provider payloads", () =>
   assert.match(source, /route\.params\.get\("playbackDebug"\) === "1"/);
   assert.doesNotMatch(source, /console\.info\("\[Vivid iframe diagnostics\]",\s*payload/);
 });
+
+
+test("anime player exposes alternate providers and prefers Aniweeb for series", () => {
+  assert.match(source, /data-player-source="aniweeb"/);
+  assert.match(source, /data-player-source="vidsrc"/);
+  assert.match(source, /data-player-source="vidapi"/);
+  assert.match(source, /\? \["aniweeb", "vidplus", "vidlink", "vidsrc", "vidapi"\]/);
+  assert.match(source, /aniListId && params\.type === "tv" \? "aniweeb"/);
+});
