@@ -245,30 +245,33 @@ body.vivid-watch-page .flickv4-web-player{
   body.vivid-watch-page .vivid-watch-hero .vivid-watch-details{padding-inline:10px;font-size:.8rem}
 }
 
-/* Mobile-safe server picker: keep all provider buttons inside a scrollable viewport. */
+/* Keep the server list as a simple dropdown inside the player header.
+   The list itself scrolls; it must not be repositioned as a fixed overlay. */
+body.vivid-watch-page .vivid-server-picker {
+  position: relative;
+  overflow: visible;
+}
 body.vivid-watch-page .vivid-server-panel {
-  position: fixed;
-  z-index: 10060;
-  top: auto;
-  right: auto;
-  left: 12px;
+  position: absolute;
+  top: calc(100% + 9px);
+  right: 0;
   bottom: auto;
+  left: auto;
+  z-index: 10060;
   width: min(340px, calc(100vw - 24px));
   max-width: calc(100vw - 24px);
-  max-height: min(70dvh, 420px);
+  max-height: min(62dvh, 420px);
   overflow-x: hidden;
   overflow-y: auto;
+  box-sizing: border-box;
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
   touch-action: pan-y;
-  scrollbar-width: thin;
-  padding-bottom: max(8px, env(safe-area-inset-bottom, 0px));
-}
-body.vivid-watch-page .vivid-server-panel .vivid-player-source {
-  min-height: 54px;
-  flex-shrink: 0;
-  touch-action: manipulation;
+  padding: 8px 8px max(8px, env(safe-area-inset-bottom, 0px));
 }
 body.vivid-watch-page .vivid-server-panel[hidden] {
   display: none !important;
+}
+body.vivid-watch-page .vivid-player-dialog-head {
+  overflow: visible;
 }
