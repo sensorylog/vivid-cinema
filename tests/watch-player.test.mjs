@@ -47,6 +47,7 @@ test("anime playback excludes the unverified Aniweeb source and automatically fa
   assert.doesNotMatch(source, /data-player-source="aniweeb"/);
   assert.doesNotMatch(source, /\["aniweeb", "vidplus"/);
   assert.match(source, /\? \["vidplus", "vidlink", "vidsrc", "vidapi"\]/);
+  assert.equal((source.match(/if \(isAnimePlayback\(\)\) triggerFallback\("anime_source_timeout"\)/g) || []).length, 4);
   assert.match(source, /if \(isAnimePlayback\(\)\) triggerFallback\("anime_source_timeout"\)/);
   assert.match(source, /isAnimePlayback\(\) \? 12000 : 25000/);
 });
