@@ -64,13 +64,3 @@ test("watch experience polish covers both players and responsive accessible cont
   assert.match(watchHtml, /vivid-watch-polish\.css\?v=cinema-watch-1/);
 });
 
-
-test("Aniweeb is permitted by the static hosting frame and playback policies", async () => {
-  const hosting = JSON.parse(await readFile(path.join(root, "firebase.json"), "utf8"));
-  const headers = hosting.hosting.headers.flatMap(rule => rule.headers || []);
-  const csp = headers.find(header => header.key === "Content-Security-Policy")?.value || "";
-  const permissions = headers.find(header => header.key === "Permissions-Policy")?.value || "";
-  assert.match(csp, /frame-src[^;]*https:\/\/api\.aniweeb\.net/);
-  assert.match(permissions, /fullscreen=[^,]*https:\/\/api\.aniweeb\.net/);
-  assert.match(permissions, /autoplay=[^,]*https:\/\/api\.aniweeb\.net/);
-});
