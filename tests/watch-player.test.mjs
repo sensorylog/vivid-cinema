@@ -42,10 +42,11 @@ test("iframe diagnostics are opt-in and do not log raw provider payloads", () =>
 });
 
 
-test("anime player exposes alternate providers and prefers Aniweeb for series", () => {
-  assert.match(source, /data-player-source="aniweeb"/);
-  assert.match(source, /data-player-source="vidsrc"/);
-  assert.match(source, /data-player-source="vidapi"/);
-  assert.match(source, /\? \["aniweeb", "vidplus", "vidlink", "vidsrc", "vidapi"\]/);
-  assert.match(source, /aniListId && params\.type === "tv" \? "aniweeb"/);
+
+test("anime playback excludes the unverified Aniweeb source and automatically falls back after timeout", () => {
+  assert.doesNotMatch(source, /data-player-source="aniweeb"/);
+  assert.doesNotMatch(source, /\["aniweeb", "vidplus"/);
+  assert.match(source, /\? \["vidplus", "vidlink", "vidsrc", "vidapi"\]/);
+  assert.match(source, /if \(isAnimePlayback\(\)\) triggerFallback\("anime_source_timeout"\)/);
+  assert.match(source, /isAnimePlayback\(\) \? 12000 : 25000/);
 });
