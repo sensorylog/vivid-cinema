@@ -16,6 +16,8 @@ const excludedDirectories = new Set([
   "dist",
   "functions",
   "api",
+  "android",
+  "ios",
   "docs",
   "tests",
 ]);
