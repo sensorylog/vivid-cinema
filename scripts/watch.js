@@ -166,7 +166,7 @@ function getSourceLabel(source) {
 }
 
 function triggerFallback(reason = "source_error") {
-  if (!currentParams || (isAnimePlayback() ? !(aniListId || malId) : !hasFallbackId() && !sourceAvailable("direct"))) return false;
+  if (!currentParams || (isAnimePlayback() ? !(aniListId || malId || hasFallbackId()) : !hasFallbackId() && !sourceAvailable("direct"))) return false;
   const nextSource = getNextSource(activeSource);
   if (!nextSource) {
     const status = $("player-status");
