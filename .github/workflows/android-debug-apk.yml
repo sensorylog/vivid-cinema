@@ -36,7 +36,7 @@ jobs:
 
       - name: Run tests
         run: |
-          node --test tests/auth-verification.test.mjs tests/service-worker.test.mjs tests/adcash.test.mjs tests/android-native-polish.test.mjs
+          node --test tests/auth-verification.test.mjs tests/service-worker.test.mjs tests/adcash.test.mjs tests/android-native-polish.test.mjs tests/android-icon.test.mjs
           npm run check:syntax
 
       - name: Generate Android project
