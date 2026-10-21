@@ -572,3 +572,29 @@ body.vivid-watch-page .vivid-server-panel-heading {
 body.vivid-watch-page .vivid-server-panel .vivid-player-source {
   flex: 0 0 auto;
 }
+
+
+/* Player 1 provider warnings live below the video, never over the stream. */
+body.vivid-watch-page .vivid-player-main > .vivid-player-status {
+  position: static !important;
+  inset: auto !important;
+  display: block;
+  width: auto;
+  max-width: none;
+  margin: 12px 14px 0;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: rgba(20, 24, 32, .96);
+  text-align: center;
+}
+body.vivid-watch-page .vivid-player-main > .vivid-player-status[hidden],
+body.vivid-watch-page .vivid-player-main > .vivid-player-try-next[hidden] {
+  display: none !important;
+}
+body.vivid-watch-page .vivid-player-main > .vivid-player-try-next {
+  position: static !important;
+  display: block;
+  width: fit-content;
+  max-width: calc(100% - 28px);
+  margin: 10px 14px 14px auto;
+}
