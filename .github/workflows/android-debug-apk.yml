@@ -45,6 +45,9 @@ jobs:
       - name: Bundle local website and sync Capacitor
         run: npm run cap:sync
 
+      - name: Apply shared Vivid Cinema launcher icon
+        run: node automation/apply-android-icon.mjs
+
       - name: Build debug APK
         run: |
           chmod +x android/gradlew
