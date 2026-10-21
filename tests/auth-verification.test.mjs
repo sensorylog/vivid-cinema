@@ -74,7 +74,7 @@ test("auth-related Firebase modules use one SDK version and fresh cache keys", a
   assert.ok(versions.every((version) => version === "12.19.0"), "Firebase SDK imports must be version-aligned");
   assert.ok(auth.includes("./firebase.js?v=20261016-auth-runtime-audit2"));
   assert.ok(worker.includes("./scripts/firebase.js?v=20261016-auth-runtime-audit2"));
-  assert.ok(loginPage.includes("scripts/auth.js?v=20261016-auth-runtime-audit2"));
+  assert.ok(loginPage.includes("scripts/auth.js?v=20261021-firebase-auth-1"));
   assert.ok(signupPage.includes("scripts/auth.js?v=20261016-auth-runtime-audit2"));
   assert.match(worker, /isAuthDocument\|\|isAuthRuntime\)\{event\.respondWith\(networkFirst\(request\)\);return;/);
   assert.match(worker, /isAuthRuntime=.*auth\|firebase\|nav-auth/);
