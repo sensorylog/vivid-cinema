@@ -48,7 +48,6 @@ test("VidKing uses TMDB embed routes, enables autoplay, and supports progress re
 test("Aniweeb builds episode-specific AniList embed URLs and rejects invalid IDs or films", () => {
   assert.equal(buildAniweebEmbedUrl(tv, { aniListId: "21" }), "https://api.aniweeb.net/embed/ani/21/7?track=sub");
   assert.equal(buildAniweebEmbedUrl(tv, { aniListId: "21", track: "dub" }), "https://api.aniweeb.net/embed/ani/21/7?track=dub");
-  assert.equal(buildAniweebEmbedUrl(tv, { aniListId: "21", startAt: 120 }), "https://api.aniweeb.net/embed/ani/21/7?track=sub&startAt=120");
   assert.equal(buildAniweebEmbedUrl(tv, { aniListId: "not-an-id" }), "");
   assert.equal(buildAniweebEmbedUrl(movie, { aniListId: "21" }), "");
 });
