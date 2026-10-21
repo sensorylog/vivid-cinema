@@ -252,6 +252,7 @@ function setPlayerSource(source, params, startAt = 0) {
   const customServer = typeof source === "string" && source.startsWith("custom:") ? getCustomPlaybackServer(source.slice(7)) : null;
   if ((!["vidapi", "vidsrc", "vidlink", "vidplus", "vidking", "direct", "embedwave", "vidfast", "ezvidapi", "embedapistream", "moviesapi"].includes(source) && !customServer) || !sourceAvailable(source)) return;
   activeSource = source;
+  player.closest(".vivid-player-frame")?.classList.toggle("is-embedwave", source === "embedwave");
   sourceAttempted.add(source);
   const status = $("player-status");
   status?.classList.remove("is-compact");
