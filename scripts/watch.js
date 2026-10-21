@@ -584,6 +584,30 @@ function renderShell(params) {
     serverMenu.setAttribute("aria-expanded", "false");
   }
   const serverPicker = serverMenu?.parentElement;
+  const positionServerPanel = () => {
+    if (!serverMenu || !serverPanel || serverPanel.hidden) return;
+    const anchor = serverMenu.getBoundingClientRect();
+    const viewportWidth = document.documentElement.clientWidth || window.innerWidth;
+    const viewportHeight = window.innerHeight;
+    const panelWidth = Math.min(340, Math.max(220, viewportWidth - 24));
+    serverPanel.style.width = panelWidth + "px";
+    serverPanel.style.left = Math.max(12, Math.min(anchor.right - panelWidth, viewportWidth - panelWidth - 12)) + "px";
+    serverPanel.style.right = "auto";
+    serverPanel.style.maxHeight = Math.max(120, viewportHeight - 24) + "px";
+    const availableBelow = Math.max(0, viewportHeight - anchor.bottom - 12);
+    const availableAbove = Math.max(0, anchor.top - 12);
+    const preferredHeight = Math.min(serverPanel.scrollHeight, 420);
+    const openBelow = availableBelow >= preferredHeight || availableBelow >= availableAbove;
+    const available = openBelow ? availableBelow : availableAbove;
+    const maxHeight = Math.max(120, Math.min(420, available || viewportHeight - 24));
+    serverPanel.style.maxHeight = maxHeight + "px";
+    const panelHeight = Math.min(serverPanel.scrollHeight, maxHeight);
+    const top = openBelow
+      ? Math.min(viewportHeight - panelHeight - 12, anchor.bottom + 8)
+      : Math.max(12, anchor.top - panelHeight - 8);
+    serverPanel.style.top = top + "px";
+    serverPanel.style.bottom = "auto";
+  };
   const closeServerMenu = () => {
     if (!serverMenu || !serverPanel) return;
     serverPanel.hidden = true;
@@ -594,8 +618,13 @@ function renderShell(params) {
     const open = serverPanel.hidden;
     serverPanel.hidden = !open;
     serverMenu.setAttribute("aria-expanded", String(open));
-    if (open) serverPanel.querySelector("[data-player-source].is-active:not([hidden]):not(:disabled), [data-player-source]:not([hidden]):not(:disabled)")?.focus({ preventScroll: true });
+    if (open) {
+      positionServerPanel();
+      serverPanel.querySelector("[data-player-source].is-active:not([hidden]):not(:disabled), [data-player-source]:not([hidden]):not(:disabled)")?.focus({ preventScroll: true });
+    }
   };
+  window.addEventListener("resize", positionServerPanel);
+  window.addEventListener("scroll", positionServerPanel, true);
   let playerHasOpened = false;
   const openPlayerWindow = () => {
     if (!overlay) return;
@@ -735,7 +764,7 @@ function renderShell(params) {
       const button = event.target.closest("[data-player-source]");
       if (!button || button.disabled || !serverPanel.contains(button)) return;
       const source = button.getAttribute("data-player-source");
-      if ((!["vidapi", "vidsrc", "vidlink", "vidplus", "vidking", "direct"].includes(source) && !(source?.startsWith("custom:"))) || !sourceAvailable(source)) return;
+      if ((!["vidapi", "vidsrc", "vidlink", "vidplus", "vidking", "direct", "embedwave", "vidfast", "ezvidapi", "embedapistream", "moviesapi"].includes(source) && !(source?.startsWith("custom:"))) || !sourceAvailable(source)) return;
       sourceAttempted.clear();
       const latestProgress = Number(getPlaybackProgress(progressKey())?.progress || route.params.get("startAt") || resumeAt || 0);
       setPlayerSource(source, params, latestProgress);
