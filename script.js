@@ -1,6 +1,6 @@
 import { tmdbApi } from "./scripts/tmdb.js";
 import { getHomeSections, getHomeSectionPage, searchContent } from "./scripts/content.js";
-import { getImageUrl, getMediaUrl, getPersonUrl, normalizeResults } from "./scripts/media.js";
+import { canNotifyForRelease, getImageUrl, getMediaUrl, getPersonUrl, normalizeResults, releaseReminderTimestamp } from "./scripts/media.js";
 import { getLocalLibrary } from "./scripts/library.js";
 import { getContinueWatching, getPlaybackProgress, getPersonalRecommendations, getBecauseYouLiked, getTonightPick, dismissTonightPick, formatProgress } from "./scripts/recommendations.js";
 import { escapeHtml, debounce, getErrorMessage } from "./scripts/utils.js";
@@ -8,8 +8,8 @@ import { buildWatchUrl } from "./scripts/routes.js";
 import { checkForReleaseAlerts, deliverReleaseAlerts, getPendingReleaseAlerts, requestReleaseAlerts, dismissReleaseAlert, clearReleaseAlerts, getReleaseAlertState } from "./scripts/release-alerts.js";
 import { startIntelligenceSync, shouldShowColdStart, completeColdStart, dismissColdStart, recordBehavior, getTasteProfile, getTasteStrength } from "./scripts/intelligence.js";
 import { searchIntelligently, getRecentSearches, getRecentSearchOwner, rememberSearch, clearRecentSearches } from "./scripts/search.js";
-import { startCinemaReminderLoop } from "./scripts/cinema-reminders.js";
-import { enableCinemaPush, ensureCinemaPush, getServerReleaseAlerts, dismissServerReleaseAlert } from "./scripts/push-notifications.js";
+import { addCinemaReminder, hasCinemaReminder, startCinemaReminderLoop } from "./scripts/cinema-reminders.js";
+import { enableCinemaPush, ensureCinemaPush, getServerReleaseAlerts, dismissServerReleaseAlert, savePushReminder } from "./scripts/push-notifications.js";
 
 const $=id=>document.getElementById(id);
 let featured=[],activeIndex=0;
@@ -68,12 +68,65 @@ function card(media,options={}){
  const remaining=isContinue?formatRemaining(progress):"";
  const remainingMarkup=remaining?'<span class="vivid-continue-remaining">'+escapeHtml(remaining)+"</span>":"";
  const ariaSuffix=rank?' — ranked '+rank:(recommendationReason?' — '+recommendationReason:"");
+ // The Coming Soon shelf offers the same cinema reminder the News page saves:
+ // one reminder per movie, stored locally and, when signed in, in Firestore.
+ const canNotify=Boolean(options.notify)&&canNotifyForRelease(media);
+ const reminded=canNotify&&hasCinemaReminder(media.id,"release");
+ const notifyMarkup=canNotify?'<button type="button" class="vivid-card-notify" data-coming-reminder="'+escapeHtml(media.id)+'" data-title="'+escapeHtml(title)+'" data-date="'+escapeHtml(media.date||"")+'" data-type="'+escapeHtml(media.media_type||"movie")+'"'+(reminded?' data-saved="true" disabled':'')+'><i class="bi '+(reminded?"bi-bell-fill":"bi-bell")+'" aria-hidden="true"></i><span>'+(reminded?"Reminder saved":"Notify me")+'</span></button>':"";
  return '<article class="vivid-card'+(rank?' vivid-top10-card':"")+(isContinue?' vivid-continue-card':"")+'" data-id="'+escapeHtml(media.id)+'" data-type="'+escapeHtml(media.media_type||"movie")+'" tabindex="0" role="link" aria-label="'+escapeHtml(title)+escapeHtml(ariaSuffix)+'">'+
  (rank?rankMarkup:"")+'<div class="vivid-card-media"><img src="'+getImageUrl(imagePath,imageSize)+'" alt="'+escapeHtml(title)+'" loading="lazy" decoding="async">'+
  (signal&&!rank?'<span class="vivid-card-signal">'+escapeHtml(signal)+"</span>":"")+(rating!=="0.0"&&!rank?'<span class="vivid-rating">★ '+rating+"</span>":"")+remainingMarkup+progressBar+'</div>'+
- '<div class="vivid-card-info">'+(recommendationReason?'<div class="vivid-card-reason">'+escapeHtml(recommendationReason)+'</div>':"")+'<div class="vivid-card-title">'+escapeHtml(title)+'</div><div class="vivid-card-sub">'+escapeHtml(media.year||"—")+(media.media_type==="tv"?" · Series":" · Movie")+(progress&&!isContinue?" · "+formatProgress(progress):"")+"</div></div></article>";
+ '<div class="vivid-card-info">'+(recommendationReason?'<div class="vivid-card-reason">'+escapeHtml(recommendationReason)+'</div>':"")+'<div class="vivid-card-title">'+escapeHtml(title)+'</div><div class="vivid-card-sub">'+escapeHtml(media.year||"—")+(media.media_type==="tv"?" · Series":" · Movie")+(progress&&!isContinue?" · "+formatProgress(progress):"")+"</div>"+notifyMarkup+"</div></article>";
 }
 
+let homeToastTimer;
+function showHomeToast(message){
+ // Created on demand so a document served from the offline cache still gets feedback.
+ let toast=$("home-toast");
+ if(!toast){
+   toast=document.createElement("div");
+   toast.id="home-toast";
+   toast.className="vivid-home-toast";
+   toast.setAttribute("role","status");
+   toast.setAttribute("aria-live","polite");
+   document.body.appendChild(toast);
+ }
+ toast.textContent=String(message||"");
+ toast.hidden=false;
+ window.clearTimeout(homeToastTimer);
+ homeToastTimer=window.setTimeout(()=>{toast.hidden=true;},4600);
+}
+async function saveComingSoonReminder(button){
+ if(!button||button.disabled)return;
+ const id=String(button.dataset.comingReminder||"");
+ const title=String(button.dataset.title||"").trim();
+ const date=String(button.dataset.date||"");
+ const type=button.dataset.type==="tv"?"tv":"movie";
+ const when=releaseReminderTimestamp(date);
+ if(!id||!when){showHomeToast("This title has no confirmed release date yet, so Vivid cannot schedule a reminder.");return;}
+ button.disabled=true;
+ try{
+   // The one existing reminder store: the same entry the News page writes, keyed
+   // by movie id and kind, so a second save is recognised instead of duplicated.
+   const reminder=addCinemaReminder({title,when,note:title+" arrives in cinemas "+date+".",contentId:id,mediaType:type,kind:"release"});
+   let pushEnabled=false;
+   try{await enableCinemaPush();await savePushReminder(reminder);pushEnabled=true;}
+   catch(pushError){console.warn("Vivid reminder alert unavailable:",pushError);}
+   button.dataset.saved="true";
+   const label=button.querySelector("span");
+   if(label)label.textContent="Reminder saved";
+   const icon=button.querySelector("i");
+   if(icon)icon.className="bi bi-bell-fill";
+   showHomeToast(reminder.duplicate
+     ?"You already have a reminder for "+title+"."
+     :pushEnabled
+       ?"Saved. Vivid will remind you before "+title+" is released."
+       :"Reminder saved in Vivid. Allow notifications to get an alert while you are away.");
+ }catch(error){
+   button.disabled=false;
+   showHomeToast(error?.message||"Could not save this reminder.");
+ }
+}
 function wireCards(container){
  container?.querySelectorAll(".vivid-card").forEach(c=>{
    const open=()=>{
@@ -83,8 +136,9 @@ function wireCards(container){
      const progress=getPlaybackProgress(c.dataset.type+":"+c.dataset.id);
      location.href=progress ? buildWatchUrl(c.dataset.id,c.dataset.type,progress.season,progress.episode,progress.progress) : getMediaUrl({id:c.dataset.id,media_type:c.dataset.type});
    };
+   c.querySelector("[data-coming-reminder]")?.addEventListener("click",event=>{event.preventDefault();event.stopPropagation();void saveComingSoonReminder(event.currentTarget)});
    c.addEventListener("click",open);
-   c.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();open()}});
+   c.addEventListener("keydown",e=>{if(e.target.closest?.("[data-coming-reminder]"))return;if(e.key==="Enter"||e.key===" "){e.preventDefault();open()}});
  });
 }
 
@@ -113,7 +167,7 @@ function renderRail(id,items=[],options={}){
  const el=$(id);if(!el)return;
  const normalized=items.map(x=>x.media_type?x:normalizeResults([x])[0]).filter(Boolean);
  const isRecommendation=/^(recommended-rail|because-rail)$/.test(id);
- const html=normalized.length?normalized.map((item,index)=>{const markup=card(item,{progress:options.progressMap?.[item.media_type+":"+item.id],signal:options.signal,rank:options.rankStart?options.rankStart+index:0,continueWatching:options.continueWatching});if(isRecommendation){const key=item.media_type+":"+item.id;recordBehavior("recommendation_impression",item,{surface:id,position:index});return markup.replace("<article class=\"vivid-card\"","<article data-recommendation=\"true\" data-surface=\""+id+"\" data-position=\""+index+"\" data-title=\""+escapeHtml(item.title||"").replace(/"/g,"&quot;")+"\" class=\"vivid-card\"");}return markup;}).join(""):'<div class="vivid-empty">Nothing available right now.</div>';
+ const html=normalized.length?normalized.map((item,index)=>{const markup=card(item,{progress:options.progressMap?.[item.media_type+":"+item.id],signal:options.signal,rank:options.rankStart?options.rankStart+index:0,continueWatching:options.continueWatching,notify:options.notify||id==="upcoming-rail"});if(isRecommendation){const key=item.media_type+":"+item.id;recordBehavior("recommendation_impression",item,{surface:id,position:index});return markup.replace("<article class=\"vivid-card\"","<article data-recommendation=\"true\" data-surface=\""+id+"\" data-position=\""+index+"\" data-title=\""+escapeHtml(item.title||"").replace(/"/g,"&quot;")+"\" class=\"vivid-card\"");}return markup;}).join(""):'<div class="vivid-empty">Nothing available right now.</div>';
  el.innerHTML=options.append&&el.querySelector(".vivid-card")?el.innerHTML+html:html;
  wireCards(el);
  rails[id]=el;
