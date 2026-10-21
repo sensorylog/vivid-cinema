@@ -5,7 +5,12 @@ import {
   buildVidsrcEmbedUrl,
   buildVidlinkEmbedUrl,
   buildVidplusEmbedUrl,
-  buildVidkingEmbedUrl
+  buildVidkingEmbedUrl,
+  buildEmbedWaveUrl,
+  buildVidFastUrl,
+  buildEzVidApiUrl,
+  buildEmbedApiStreamUrl,
+  buildMoviesApiUrl
 } from "../scripts/playback/playback-urls.js";
 
 const movie = { id: "27205", type: "movie", season: 1, episode: 1 };
@@ -43,3 +48,23 @@ test("VidKing uses TMDB embed routes, enables autoplay, and supports progress re
   assert.equal(buildVidkingEmbedUrl({ ...movie, id: "tt0133093" }), "");
 });
 
+
+
+test("new movie/TV providers use documented movie and episode routes", () => {
+  assert.equal(buildEmbedWaveUrl(movie, { tmdbId: "27205" }), "https://embedwave.cc/embed/movie/27205?autoplay=true");
+  assert.equal(buildEmbedWaveUrl(tv, { tmdbId: "1399" }), "https://embedwave.cc/embed/tv/1399/2/7?autoplay=true");
+  assert.equal(buildVidFastUrl(movie, { tmdbId: "27205" }), "https://vidfast.to/embed/movie/27205");
+  assert.equal(buildVidFastUrl(tv, { imdbId: "tt0944947" }), "https://vidfast.to/embed/tv/tt0944947/2/7");
+  assert.equal(buildEzVidApiUrl(movie, { tmdbId: "27205" }), "https://ezvidapi.com/embed/movie/27205");
+  assert.equal(buildEzVidApiUrl(tv, { tmdbId: "1399" }), "https://ezvidapi.com/embed/tv/1399/2/7");
+  assert.equal(buildEmbedApiStreamUrl(movie, { tmdbId: "27205" }), "https://watch.embed-api.stream/embed/movie/27205");
+  assert.equal(buildEmbedApiStreamUrl(tv, { imdbId: "tt0944947" }), "https://watch.embed-api.stream/embed/tv/tt0944947/2/7");
+  assert.equal(buildMoviesApiUrl(movie, { tmdbId: "27205" }), "https://moviesapi.to/movie/27205?theme=e50914");
+  assert.equal(buildMoviesApiUrl(tv, { tmdbId: "1399", startAt: 125 }), "https://moviesapi.to/tv/1399/2/7?theme=e50914&t=125");
+});
+test("new providers reject missing IDs", () => {
+  assert.equal(buildEmbedWaveUrl({ ...movie, id: "tt0133093" }), "");
+  assert.equal(buildEzVidApiUrl({ ...movie, id: "tt0133093" }), "");
+  assert.equal(buildVidFastUrl({ ...tv, id: "" }), "");
+  assert.equal(buildMoviesApiUrl({ ...tv, id: "" }), "");
+});
