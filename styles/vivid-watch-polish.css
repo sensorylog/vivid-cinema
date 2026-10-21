@@ -546,3 +546,29 @@ body.vivid-watch-page [aria-disabled="true"] {
     transition: none;
   }
 }
+
+
+/* Player 1 server list: JS positions this menu using viewport coordinates.
+   Keep it viewport-fixed so the dropdown is not offset/clipped by the header,
+   and make the server list itself the touch-scroll container. */
+body.vivid-watch-page .vivid-server-panel:not([hidden]) {
+  position: fixed !important;
+  display: flex !important;
+  flex-direction: column;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+  z-index: 10000 !important;
+  box-sizing: border-box;
+}
+body.vivid-watch-page .vivid-server-panel[hidden] {
+  display: none !important;
+}
+body.vivid-watch-page .vivid-server-panel-heading {
+  flex: 0 0 auto;
+}
+body.vivid-watch-page .vivid-server-panel .vivid-player-source {
+  flex: 0 0 auto;
+}
