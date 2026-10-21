@@ -802,7 +802,9 @@ function handlePlayerEvent(event) {
     try { payload = JSON.parse(payload); } catch { return; }
   }
   if (!payload || typeof payload !== "object" || Array.isArray(payload)) return;
-  if (isMoviesApi && payload.source === "moviesapi-player") payload = { data: payload };
+  if (isMoviesApi && payload.source === "moviesapi-player") {
+    payload = { type: "PLAYER_EVENT", data: { ...payload, player_status: payload.event, player_progress: payload.currentTime, player_duration: payload.duration } };
+  }
 
   // Opt-in, sanitized telemetry for provider messages. Never log full payloads or URLs.
   if (route.params.get("playbackDebug") === "1") {
