@@ -65,12 +65,12 @@ test("movie and TV Player 1 exposes seven sources while anime providers remain s
   assert.match(source, /\? \["vidplus", "vidlink", "vidsrc", "vidapi"\]/);
 });
 
-test("movie/TV server picker accepts all five added providers and keeps the list scrollable on mobile", async () => {
-  assert.match(source, /\["vidapi", "vidsrc", "vidlink", "vidplus", "vidking", "direct", "embedwave", "vidfast", "ezvidapi", "embedapistream", "moviesapi"\]\.includes\(source\)/);
-  assert.match(source, /const positionServerPanel = \(\) =>/);
-  assert.match(source, /window\.addEventListener\("resize", positionServerPanel\)/);
-  assert.match(source, /window\.addEventListener\("scroll", positionServerPanel, true\)/);
+test("movie/TV server picker keeps all providers in a simple scrollable dropdown", async () => {
+  assert.match(source, /"embedwave", "vidfast", "ezvidapi", "embedapistream", "moviesapi"\]\.includes\(source\)/);
+  assert.match(source, /const toggleServerMenu = \(\) =>/);
+  assert.doesNotMatch(source, /positionServerPanel/);
   const styles = await readFile(new URL("../styles/vivid-cleanup.css", import.meta.url), "utf8");
-  assert.match(styles, /\.vivid-server-panel[\s\S]*?overflow-y:\s*auto/);
+  assert.match(styles, /\.vivid-server-panel\s*\{[\s\S]*?position:\s*absolute/);
+  assert.match(styles, /overflow-y:\s*auto/);
   assert.match(styles, /touch-action:\s*pan-y/);
 });
