@@ -146,10 +146,14 @@ export function mountAnimeSecondaryPlayer({ root, params, media, title, aniListI
     frame.loading = "eager";
     frame.addEventListener("load", () => {
       if (thisGeneration !== generation) return;
+      if (timer) window.clearTimeout(timer);
+      timer = 0;
       setStatus(server.name + " page loaded. If video does not start, switch to another server.");
     });
     frame.addEventListener("error", () => {
       if (thisGeneration !== generation) return;
+      if (timer) window.clearTimeout(timer);
+      timer = 0;
       setStatus(server.name + " failed to load. Try another server.");
     });
     screen.appendChild(frame);
