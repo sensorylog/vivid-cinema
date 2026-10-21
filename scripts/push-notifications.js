@@ -33,6 +33,41 @@ export async function getPushSupport(){
 function nativeNotifyOptions(){
   return {appId:NN_APP_ID,webKey:NN_WEB_KEY,serviceWorkerPath:PUSH_SERVICE_WORKER};
 }
+// scripts/pwa.js registers this worker with { scope: "./", updateViaCache: "none" }.
+// The Native Notify client re-registers the same script (a browser allows one
+// worker per scope), and a plain register() call resets updateViaCache to its
+// default — which would weaken the PWA's update check. Put the site's own
+// options back immediately after the client has run.
+async function restoreWorkerRegistration(){
+  try{
+    await navigator.serviceWorker.register(PUSH_SERVICE_WORKER,{scope:"./",updateViaCache:"none"});
+  }catch(error){
+    console.warn("Vivid service worker registration refresh skipped:",error);
+  }
+}
+// The silent re-register costs two API calls (VAPID key + device register), so it
+// runs at most once per browser per window instead of on every page load.
+const ENSURE_STAMP_KEY="nn_web_push_checked_at";
+const ENSURE_INTERVAL_MS=30*60*1000;
+// Without storage the device id below would be regenerated on every load and pile
+// up duplicate devices on the server, so the silent path stays off there.
+function storageWritable(){
+  try{
+    const probe="__vivid_push_probe__";
+    window.localStorage.setItem(probe,"1");
+    window.localStorage.removeItem(probe);
+    return true;
+  }catch{return false}
+}
+function ensureAttemptedRecently(){
+  try{
+    const at=Number(window.localStorage.getItem(ENSURE_STAMP_KEY)||0);
+    return Number.isFinite(at)&&at>0&&Date.now()-at<ENSURE_INTERVAL_MS;
+  }catch{return false}
+}
+function markEnsureAttempt(){
+  try{window.localStorage.setItem(ENSURE_STAMP_KEY,String(Date.now()))}catch{}
+}
 export async function enableCinemaPush(){
   if(!(await getPushSupport()))throw Error("Background notifications are not supported in this browser.");
   // Ask for permission while the click's user gesture is still fresh. The
@@ -42,15 +77,25 @@ export async function enableCinemaPush(){
     if(permission!=="granted")throw Error(permission==="denied"?"Notifications are blocked for this site in your browser settings.":"Notification permission was not granted.");
   }
   const result=await enableNativeNotifyWebPush(nativeNotifyOptions());
+  await restoreWorkerRegistration();
+  markEnsureAttempt();
   if(!result.ok)throw Error(result.message||"Background notifications could not be enabled.");
   return {deviceId:result.deviceId};
 }
 // Silent re-register on page load: a browser that already allowed notifications
-// but lost its subscription is restored without a prompt or a click.
+// but lost its subscription is restored without a prompt or a click. It never
+// asks for permission, never runs twice in a row, and stays out of the way when
+// the browser has no storage.
 export async function ensureCinemaPush(){
   try{
-    return await ensureNativeNotifyWebPush(nativeNotifyOptions());
+    if(!storageWritable()||ensureAttemptedRecently())return {ok:false,status:"skipped",deviceId:null};
+    const result=await ensureNativeNotifyWebPush(nativeNotifyOptions());
+    if(result.status==="skipped")return result;
+    markEnsureAttempt();
+    await restoreWorkerRegistration();
+    return result;
   }catch(error){
+    markEnsureAttempt();
     console.warn("Vivid background notification refresh skipped:",error);
     return {ok:false,status:"failed",message:String(error?.message||error)};
   }
