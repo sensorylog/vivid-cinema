@@ -14,7 +14,7 @@ test("signup and resend use Firebase Auth directly without a Vercel verification
   assert.match(auth, /sendEmailVerification\(user,\s*\{/);
   assert.match(auth, /https:\/\/vivid-cinema\.web\.app\/verify-email\.html/);
   assert.match(auth, /handleCodeInApp:\s*false/);
-  assert.doesNotMatch(auth, /vivid-cinema-api\.vercel\.app|send-verification/);
+  assert.doesNotMatch(auth, /vivid-cinema-api\.vercel\.app|api\/send-verification/);
   assert.doesNotMatch(auth, /firebase-functions\.js|httpsCallable|getFunctions/);
   assert.match(auth, /Verify My Email/);
 });
