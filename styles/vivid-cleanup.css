@@ -244,3 +244,31 @@ body.vivid-watch-page .flickv4-web-player{
   body.vivid-watch-page .vivid-watch-hero .vivid-watch-play,
   body.vivid-watch-page .vivid-watch-hero .vivid-watch-details{padding-inline:10px;font-size:.8rem}
 }
+
+/* Mobile-safe server picker: keep all provider buttons inside a scrollable viewport. */
+body.vivid-watch-page .vivid-server-panel {
+  position: fixed;
+  z-index: 10060;
+  top: auto;
+  right: auto;
+  left: 12px;
+  bottom: auto;
+  width: min(340px, calc(100vw - 24px));
+  max-width: calc(100vw - 24px);
+  max-height: min(70dvh, 420px);
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+  scrollbar-width: thin;
+  padding-bottom: max(8px, env(safe-area-inset-bottom, 0px));
+}
+body.vivid-watch-page .vivid-server-panel .vivid-player-source {
+  min-height: 54px;
+  flex-shrink: 0;
+  touch-action: manipulation;
+}
+body.vivid-watch-page .vivid-server-panel[hidden] {
+  display: none !important;
+}
