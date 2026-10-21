@@ -54,6 +54,17 @@ jobs:
           cd android
           ./gradlew assembleDebug
 
+      - name: Verify Vivid icon is embedded in the APK
+        shell: bash
+        run: |
+          set -euo pipefail
+          apk="android/app/build/outputs/apk/debug/app-debug.apk"
+          expected="$(sha256sum icons/vivid-icon-180.png | cut -d ' ' -f 1)"
+          actual="$(unzip -p "$apk" res/drawable-nodpi-v4/vivid_icon_foreground.png | sha256sum | cut -d ' ' -f 1)"
+          test "$actual" = "$expected" || { echo "APK adaptive icon does not match icons/vivid-icon-180.png"; exit 1; }
+          unzip -l "$apk" | grep -q 'res/mipmap-anydpi-v26/ic_launcher.xml'
+          echo "Verified: APK adaptive launcher foreground exactly matches the Vivid Cinema icon source."
+
       - name: Upload debug APK
         uses: actions/upload-artifact@v4
         with:
