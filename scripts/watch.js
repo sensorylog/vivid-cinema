@@ -30,6 +30,7 @@ let activeSource = "vidapi";
 const sourceAttempted = new Set();
 let primaryHealthy = false;
 let fallbackTimer = null;
+let fallbackPromptDismissTimer = null;
 let directLoadGeneration = 0;
 let imdbId = "";
 let tmdbId = "";
@@ -204,12 +205,23 @@ function showFallbackPrompt(source) {
   const status = $("player-status");
   const nextButton = $("player-try-next");
   const label = getSourceLabel(source);
+  if (fallbackPromptDismissTimer) {
+    clearTimeout(fallbackPromptDismissTimer);
+    fallbackPromptDismissTimer = null;
+  }
   if (status) {
     status.textContent = label + " is taking longer than expected. It may still start; we will not switch servers unless you choose to.";
     status.classList.add("is-warning");
     status.hidden = false;
   }
   if (nextButton) nextButton.hidden = !getNextSource(source);
+  // Keep the manual server-switch option visible briefly, then clear the stale warning.
+  fallbackPromptDismissTimer = window.setTimeout(() => {
+    fallbackPromptDismissTimer = null;
+    if (activeSource !== source) return;
+    if (status) status.hidden = true;
+    if (nextButton) nextButton.hidden = true;
+  }, 5000);
 }
 
 function updateSourceLabel() {
@@ -569,6 +581,12 @@ function renderShell(params) {
   const directPlayer = $("vivid-direct-player");
   const status = $("player-status");
   const tryNextButton = $("player-try-next");
+  // Keep provider warnings outside the iframe area so they never cover a playing stream.
+  const playerFrame = status?.parentElement;
+  if (playerFrame?.classList.contains("vivid-player-frame") && playerFrame.parentElement?.classList.contains("vivid-player-main")) {
+    playerFrame.insertAdjacentElement("afterend", status);
+    if (tryNextButton) status.insertAdjacentElement("afterend", tryNextButton);
+  }
   const overlay = $("player-overlay");
   // Keep the page interactive until the viewer opens the cinema window.
   const openPlayer = $("watch-open-player");
