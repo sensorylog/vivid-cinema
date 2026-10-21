@@ -28,7 +28,6 @@ test("watch controller and service worker use the grouped playback paths", async
   for (const file of [
     "player-engine.js",
     "playback-servers.js",
-    "server-settings.js",
     "playback-urls.js",
     "tflix-secondary-player.js"
   ]) {
@@ -36,6 +35,8 @@ test("watch controller and service worker use the grouped playback paths", async
     assert.ok(serviceWorker.includes(`./scripts/playback/${file}`), `service worker should precache playback/${file}`);
     assert.ok(!serviceWorker.includes(`./scripts/${file}`), `service worker must not retain the old ${file} path`);
   }
+  assert.ok(serviceWorker.includes("./scripts/playback/server-settings.js"), "service worker may still precache the settings module");
+  assert.ok(!watch.includes("./playback/server-settings.js"), "movie/TV Player 1 must not mount custom-server settings");
 });
 
 
