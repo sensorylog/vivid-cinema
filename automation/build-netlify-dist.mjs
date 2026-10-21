@@ -1,4 +1,4 @@
-import { cp, mkdir, readdir, rm } from "node:fs/promises";
+import { cp, mkdir, readdir, readFile, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -53,6 +53,33 @@ async function copySite(source, destination, relative = "") {
   }
 }
 
+// Add presentation enhancements only to the generated bundle. The website remains
+// visually unchanged in a normal browser; only a genuine Capacitor runtime receives
+// the native class and stylesheet.
+async function addNativeEnhancements(directory) {
+  for (const entry of await readdir(directory, { withFileTypes: true })) {
+    const target = path.join(directory, entry.name);
+    if (entry.isDirectory()) {
+      await addNativeEnhancements(target);
+      continue;
+    }
+    if (!entry.isFile() || !entry.name.endsWith(".html")) continue;
+
+    let html = await readFile(target, "utf8");
+    if (!html.includes('id="vivid-native-app-enhancements"')) {
+      const enhancement = [
+        '<script id="vivid-native-app-enhancements">',
+        '(()=>{try{if(window.Capacitor?.isNativePlatform?.()){document.documentElement.classList.add("vivid-native-app");}}catch{}})();',
+        "</script>",
+        '<link rel="stylesheet" href="/styles/vivid-native-app.css">'
+      ].join("");
+      html = html.replace("</head>", enhancement + "</head>");
+      await writeFile(target, html, "utf8");
+    }
+  }
+}
+
 await rm(output, { recursive: true, force: true });
 await copySite(root, output);
-console.log("Prepared Netlify static site in dist/");
+await addNativeEnhancements(output);
+console.log("Prepared static site in dist/ with native-only Capacitor polish.");
