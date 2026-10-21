@@ -598,3 +598,13 @@ body.vivid-watch-page .vivid-player-main > .vivid-player-try-next {
   max-width: calc(100% - 28px);
   margin: 10px 14px 14px auto;
 }
+
+
+/* EmbedWave's native controls are rendered inside its cross-origin iframe.
+   Give that provider a conventional 16:9 viewport on narrow phones so its
+   own controls/settings have the expected player dimensions. */
+@media (max-width: 420px) {
+  body.vivid-watch-page .vivid-player-frame.is-embedwave {
+    aspect-ratio: 16 / 9 !important;
+  }
+}
