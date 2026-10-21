@@ -48,7 +48,7 @@ test("TFLIX-style trending billboard is restored above the unchanged featured-ca
   assert.match(watchPolish, /177\.78dvh - 284px/, "desktop player width accounts for its header and footer");
   assert.match(watchPolish, /177\.78dvh - 200px/, "short landscape player fits its controls and safe frame");
   assert.match(watchPolish, /aspect-ratio:\s*16\s*\/\s*9/, "player preserves a 16:9 frame");
-  assert.match(read("../watch.html"), /vivid-watch-polish\.css\?v=2/, "watch page uses refreshed responsive playback styles");
+  assert.match(read("../watch.html"), /vivid-watch-polish\.css\?v=cinema-watch-1/, "watch page uses the current responsive playback styles");
 
   for (const path of [
     "../styles/vivid-cinematic.css",
