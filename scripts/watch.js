@@ -402,8 +402,9 @@ function setPlayerSource(source, params, startAt = 0) {
       fallbackTimer = window.setTimeout(() => {
         fallbackTimer = null;
         if (primaryHealthy || activeSource !== "vidapi") return;
-        showFallbackPrompt("vidapi");
-      }, 25000);
+        if (isAnimePlayback()) triggerFallback("anime_source_timeout");
+        else showFallbackPrompt("vidapi");
+      }, isAnimePlayback() ? 12000 : 25000);
     }
   }
   updateSourceLabel();
