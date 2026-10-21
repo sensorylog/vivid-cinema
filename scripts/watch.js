@@ -9,7 +9,7 @@ import { VIVID_CONFIG } from "./config.js";
 import { recordBehavior, startIntelligenceSync } from "./intelligence.js";
 import { playDirectStream, resolveDirectStream, stopDirectStream } from "./playback/player-engine.js";
 import { buildCustomEmbedUrl, getCustomPlaybackServer } from "./playback/playback-servers.js";
-import { buildVidapiEmbedUrl, buildVidsrcEmbedUrl, buildVidlinkEmbedUrl, buildVidplusEmbedUrl, buildVidkingEmbedUrl } from "./playback/playback-urls.js";
+import { buildVidapiEmbedUrl, buildVidsrcEmbedUrl, buildVidlinkEmbedUrl, buildVidplusEmbedUrl, buildVidkingEmbedUrl, buildEmbedWaveUrl, buildVidFastUrl, buildEzVidApiUrl, buildEmbedApiStreamUrl, buildMoviesApiUrl } from "./playback/playback-urls.js";
 import { mountTflixSecondaryPlayer } from "./playback/tflix-secondary-player.js";
 import { mountAnimeSecondaryPlayer } from "./playback/anime-secondary-player.js";
 
@@ -20,6 +20,7 @@ const VIDLINK_ORIGINS = new Set(["https://vidlink.pro", "https://www.vidlink.pro
 const VIDPLUS_ORIGINS = new Set(["https://player.vidplus.to", "https://vidplus.to", "https://www.vidplus.to"]);
 const VIDKING_ORIGINS = new Set(["https://www.vidking.net", "https://vidking.net"]);
 const VIDSRC_ORIGINS = new Set(["https://vidsrc.sh", "https://vidsrc.cc", "https://vidsrc2.ru"]);
+const MOVIESAPI_ORIGINS = new Set(["https://moviesapi.to", "https://www.moviesapi.to"]);
 try { VIDSRC_ORIGINS.add(new URL(VIVID_CONFIG.api.vidsrcEmbedBaseUrl || "https://vidsrc.sh").origin); } catch { /* Keep the known HTTPS provider allowlist. */ }
 let media = null;
 let details = null;
@@ -58,13 +59,13 @@ function getRememberedSource() {
   if (isAnimePlayback()) return null;
   const key = sourcePreferenceKey();
   const source = key ? readSourcePreferences()[key]?.source : null;
-  return ["vidapi", "vidsrc"].includes(source) && sourceAvailable(source)
+  return ["vidapi", "vidsrc", "embedwave", "vidfast", "ezvidapi", "embedapistream", "moviesapi"].includes(source) && sourceAvailable(source)
     ? source
     : null;
 }
 
 function rememberSuccessfulSource(source) {
-  if (isAnimePlayback() || !media?.id || !["vidapi", "vidsrc"].includes(source)) return;
+  if (isAnimePlayback() || !media?.id || !["vidapi", "vidsrc", "embedwave", "vidfast", "ezvidapi", "embedapistream", "moviesapi"].includes(source)) return;
   const key = sourcePreferenceKey();
   if (!key) return;
   try {
@@ -130,8 +131,8 @@ function sourceAvailable(source) {
     if (source === "vidapi" || source === "vidsrc") return hasFallbackId();
     return false;
   }
-  if (source === "vidapi") return hasFallbackId();
-  if (source === "vidsrc") return hasFallbackId();
+  if (source === "vidapi" || source === "vidsrc" || source === "vidfast" || source === "embedapistream" || source === "moviesapi") return hasFallbackId();
+  if (source === "embedwave" || source === "ezvidapi") return hasTmdbId();
   return false;
 }
 
@@ -140,7 +141,7 @@ function getNextSource(source) {
   // Standard movie/TV providers use the documented TMDB-based URL builders.
   const order = isAnimePlayback()
     ? ["vidplus", "vidlink", "vidsrc", "vidapi"]
-    : ["vidapi", "vidsrc"];
+    : ["vidapi", "vidsrc", "embedwave", "vidfast", "ezvidapi", "embedapistream", "moviesapi"];
   const index = order.indexOf(source);
   // Cycle through alternatives so a remembered last-position provider can still recover
   // to the primary source instead of getting stuck with no next server.
@@ -157,6 +158,11 @@ function getSourceLabel(source) {
   if (source === "vidlink") return "VidLink alternate source";
   if (source === "vidplus") return "VidPlus alternate source";
   if (source === "vidking") return "VidKing alternate source · resume seeking may be unavailable";
+  if (source === "embedwave") return "EmbedWave alternate source";
+  if (source === "vidfast") return "VidFast.to alternate source";
+  if (source === "ezvidapi") return "ezvidapi alternate source";
+  if (source === "embedapistream") return "Embed API Stream alternate source";
+  if (source === "moviesapi") return "MoviesAPI.to alternate source";
   return "VidAPI primary source";
 }
 
@@ -216,7 +222,7 @@ function updateSourceLabel() {
   document.querySelectorAll("[data-player-source]").forEach(button => {
     const source = button.getAttribute("data-player-source");
     button.classList.toggle("is-active", source === activeSource);
-    button.hidden = isAnimePlayback() ? !["vidapi", "vidsrc", "vidplus", "vidlink"].includes(source) : !["vidapi", "vidsrc"].includes(source);
+    button.hidden = isAnimePlayback() ? !["vidapi", "vidsrc", "vidplus", "vidlink"].includes(source) : !["vidapi", "vidsrc", "embedwave", "vidfast", "ezvidapi", "embedapistream", "moviesapi"].includes(source);
     button.disabled = !sourceAvailable(source);
     button.setAttribute("aria-pressed", source === activeSource ? "true" : "false");
   });
@@ -230,7 +236,7 @@ function setPlayerSource(source, params, startAt = 0) {
   const tryNextButton = $("player-try-next");
   if (tryNextButton) tryNextButton.hidden = true;
   const customServer = typeof source === "string" && source.startsWith("custom:") ? getCustomPlaybackServer(source.slice(7)) : null;
-  if ((!["vidapi", "vidsrc", "vidlink", "vidplus", "vidking", "direct"].includes(source) && !customServer) || !sourceAvailable(source)) return;
+  if ((!["vidapi", "vidsrc", "vidlink", "vidplus", "vidking", "direct", "embedwave", "vidfast", "ezvidapi", "embedapistream", "moviesapi"].includes(source) && !customServer) || !sourceAvailable(source)) return;
   activeSource = source;
   sourceAttempted.add(source);
   const status = $("player-status");
@@ -374,6 +380,23 @@ function setPlayerSource(source, params, startAt = 0) {
       if (isAnimePlayback()) triggerFallback("anime_source_timeout");
       else showFallbackPrompt("vidplus");
     }, isAnimePlayback() ? 12000 : 25000);
+  } else if (["embedwave", "vidfast", "ezvidapi", "embedapistream", "moviesapi"].includes(source)) {
+    if (isAnimePlayback()) return;
+    primaryHealthy = false;
+    const builders = { embedwave: buildEmbedWaveUrl, vidfast: buildVidFastUrl, ezvidapi: buildEzVidApiUrl, embedapistream: buildEmbedApiStreamUrl, moviesapi: buildMoviesApiUrl };
+    const embedUrl = builders[source](params, { tmdbId, imdbId, startAt });
+    if (!embedUrl) return;
+    player.src = embedUrl;
+    if (status) {
+      status.textContent = "Loading " + getSourceLabel(source) + "… The embedded player reports its own playback state.";
+      status.classList.remove("is-warning");
+      status.hidden = false;
+    }
+    fallbackTimer = window.setTimeout(() => {
+      fallbackTimer = null;
+      if (primaryHealthy || activeSource !== source) return;
+      showFallbackPrompt(source);
+    }, 25000);
   } else if (source === "vidking") {
     if (isAnimePlayback() || !hasFallbackId()) return;
     primaryHealthy = false;
@@ -518,10 +541,15 @@ function renderShell(params) {
     '<div id="player-overlay" class="vivid-player-overlay vivid-player-inline" role="presentation"><section class="vivid-player-dialog" role="region" aria-labelledby="player-dialog-title">' +
       '<header class="vivid-player-dialog-head"><div class="vivid-player-dialog-heading"><span class="vivid-player-live-dot" aria-hidden="true"></span><div><span class="vivid-player-dialog-eyebrow">VIVID CINEMA · PLAYER 1</span><h2 id="player-dialog-title">' + escapeHtml(episodeTitle || title) + '</h2><span id="player-source-label" class="vivid-player-current-source">Choose a player to begin</span></div></div><div class="vivid-player-dialog-actions"><button type="button" id="player-server-menu" class="vivid-player-switch vivid-server-menu" aria-controls="player-server-panel" aria-expanded="false"><i class="bi bi-hdd-network" aria-hidden="true"></i> Servers <i class="bi bi-arrow-down" aria-hidden="true"></i></button><button type="button" id="player-close" class="vivid-player-close" aria-label="Close player"><i class="bi bi-x-lg" aria-hidden="true"></i></button></div></header>' +
       '<div class="vivid-player-layout"><div class="vivid-player-main"><div class="vivid-player-frame"><div id="player-status" class="vivid-player-status" role="status" aria-live="polite">' + (resumeAt > 5 ? "Ready to resume when you choose a player." : "Choose a player to begin playback.") + '</div><button type="button" id="player-try-next" class="vivid-player-try-next" hidden>Try next server</button><iframe id="vidapi-player" title="' + escapeHtml(title) + ' player" allow="autoplay; fullscreen; picture-in-picture; encrypted-media; clipboard-write" allowfullscreen referrerpolicy="origin" loading="eager"></iframe><video id="vivid-direct-player" title="' + escapeHtml(title) + ' direct stream player" controls playsinline preload="metadata" hidden></video></div><footer class="vivid-player-dialog-foot"><span><i class="bi bi-keyboard" aria-hidden="true"></i> Press Esc to close</span><a href="' + escapeHtml(buildTitleUrl(media.id, media.media_type)) + '">Title details</a></footer></div>' +
-      '<aside id="player-server-panel" class="vivid-server-panel" aria-label="Vivid Cinema playback servers" hidden><div class="vivid-server-panel-heading"><div><strong>Playback servers</strong><span>Choose a source</span></div><span class="vivid-server-count">2 sources</span></div>' +
+      '<aside id="player-server-panel" class="vivid-server-panel" aria-label="Vivid Cinema playback servers" hidden><div class="vivid-server-panel-heading"><div><strong>Playback servers</strong><span>Choose a source</span></div><span class="vivid-server-count">7 sources</span></div>' +
       '<button type="button" class="vivid-player-source" data-player-source="vidapi" aria-pressed="true"><span class="vivid-server-dot"></span><span><strong>VidAPI</strong><small>Primary server · may require domain approval</small></span><span class="vivid-server-state" data-server-state="vidapi">Ready</span></button>' +
       '<button type="button" class="vivid-player-source" data-player-source="vidsrc" aria-pressed="false"><span class="vivid-server-dot"></span><span><strong>VidSrc</strong><small>Alternate streaming source · anime ID fallback</small></span><span class="vivid-server-state" data-server-state="vidsrc">Available</span></button>' +
-      '<button type="button" class="vivid-player-source" data-player-source="vidlink" hidden aria-pressed="false"><span class="vivid-server-dot"></span><span><strong>VidLink</strong><small>Alternate streaming source</small></span><span class="vivid-server-state" data-server-state="vidlink">Available</span></button>' +
+      '<button type="button" class="vivid-player-source" data-player-source="vidlink" hidden aria-pressed="false"><span class="vivid-server-dot"></span><span><strong>VidLink</strong><small>Alternate streaming source</small></span><span class="vivid-server-state" data-server-state="vidlink">Available</span></button> +
+      '<button type="button" class="vivid-player-source" data-player-source="embedwave" hidden aria-pressed="false"><span class="vivid-server-dot"></span><span><strong>EmbedWave</strong><small>Alternate embed · multi-server player</small></span><span class="vivid-server-state" data-server-state="embedwave">Available</span></button> +
+      '<button type="button" class="vivid-player-source" data-player-source="vidfast" hidden aria-pressed="false"><span class="vivid-server-dot"></span><span><strong>VidFast.to</strong><small>Alternate movie/TV embed</small></span><span class="vivid-server-state" data-server-state="vidfast">Available</span></button> +
+      '<button type="button" class="vivid-player-source" data-player-source="ezvidapi" hidden aria-pressed="false"><span class="vivid-server-dot"></span><span><strong>ezvidapi</strong><small>TMDB embed · upstream availability varies</small></span><span class="vivid-server-state" data-server-state="ezvidapi">Available</span></button> +
+      '<button type="button" class="vivid-player-source" data-player-source="embedapistream" hidden aria-pressed="false"><span class="vivid-server-dot"></span><span><strong>Embed API Stream</strong><small>Alternate movie/TV embed</small></span><span class="vivid-server-state" data-server-state="embedapistream">Available</span></button> +
+      '<button type="button" class="vivid-player-source" data-player-source="moviesapi" hidden aria-pressed="false"><span class="vivid-server-dot"></span><span><strong>MoviesAPI.to</strong><small>Alternate movie/TV embed</small></span><span class="vivid-server-state" data-server-state="moviesapi">Available</span></button>'' +
       '<button type="button" class="vivid-player-source" data-player-source="vidplus" hidden aria-pressed="false"><span class="vivid-server-dot"></span><span><strong>VidPlus</strong><small>Additional source · support varies</small></span><span class="vivid-server-state" data-server-state="vidplus">Available</span></button>' +
       '<button type="button" class="vivid-player-source" data-player-source="vidking" hidden aria-pressed="false"><span class="vivid-server-dot"></span><span><strong>VidKing</strong><small>Extra source · resume seeking may vary</small></span><span class="vivid-server-state" data-server-state="vidking">Available</span></button>' +
       '<button type="button" class="vivid-player-source" data-player-source="direct" hidden aria-pressed="false" hidden><span class="vivid-server-dot"></span><span><strong>Direct stream</strong><small>Authorized HLS/DASH · adaptive quality</small></span><span class="vivid-server-state" data-server-state="direct">Unavailable</span></button>' +
@@ -754,13 +782,15 @@ function handlePlayerEvent(event) {
   const isVidLink = VIDLINK_ORIGINS.has(event.origin);
   const isVidPlus = VIDPLUS_ORIGINS.has(event.origin);
   const isVidKing = VIDKING_ORIGINS.has(event.origin);
-  if (!isVidapi && !isFallback && !isVidLink && !isVidPlus && !isVidKing) return;
+  const isMoviesApi = MOVIESAPI_ORIGINS.has(event.origin);
+  if (!isVidapi && !isFallback && !isVidLink && !isVidPlus && !isVidKing && !isMoviesApi) return;
   const originMatchesActiveSource =
     (activeSource === "vidapi" && isVidapi) ||
     (activeSource === "vidsrc" && isFallback) ||
     (activeSource === "vidlink" && isVidLink) ||
     (activeSource === "vidplus" && isVidPlus) ||
-    (activeSource === "vidking" && isVidKing);
+    (activeSource === "vidking" && isVidKing) ||
+    (activeSource === "moviesapi" && isMoviesApi);
   // Ignore delayed messages from a previous iframe document after the user switches source.
   if (!originMatchesActiveSource) return;
   let payload = event.data;
@@ -770,6 +800,7 @@ function handlePlayerEvent(event) {
     try { payload = JSON.parse(payload); } catch { return; }
   }
   if (!payload || typeof payload !== "object" || Array.isArray(payload)) return;
+  if (isMoviesApi && payload.source === "moviesapi-player") payload = { data: payload };
 
   // Opt-in, sanitized telemetry for provider messages. Never log full payloads or URLs.
   if (route.params.get("playbackDebug") === "1") {
@@ -791,7 +822,7 @@ function handlePlayerEvent(event) {
     /(^|\D)(404|403|500|502|503)(\D|$)/.test(errorValue) ||
     /(error|failed|failure|not.?found|unavailable|offline|load.?failed|source.?failed)/.test(statusValue + " " + errorValue);
 
-  if (looksLikeFailure && ["vidapi", "vidsrc", "vidlink", "vidplus", "vidking"].includes(activeSource)) {
+  if (looksLikeFailure && ["vidapi", "vidsrc", "vidlink", "vidplus", "vidking", "moviesapi"].includes(activeSource)) {
     triggerFallback((isVidapi ? "vidapi_" : activeSource + "_") + (numericCode || statusValue || "error"));
     return;
   }
