@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import {
   buildVidapiEmbedUrl,
   buildVidsrcEmbedUrl,
+  buildAniweebEmbedUrl,
   buildVidlinkEmbedUrl,
   buildVidplusEmbedUrl,
   buildVidkingEmbedUrl
@@ -41,4 +42,12 @@ test("VidKing uses TMDB embed routes, enables autoplay, and supports progress re
   assert.equal(buildVidkingEmbedUrl(movie, { tmdbId: "27205" }), "https://www.vidking.net/embed/movie/27205?color=e50914&autoPlay=true");
   assert.equal(buildVidkingEmbedUrl(tv, { tmdbId: "1399", startAt: 120 }), "https://www.vidking.net/embed/tv/1399/2/7?color=e50914&autoPlay=true&progress=120");
   assert.equal(buildVidkingEmbedUrl({ ...movie, id: "tt0133093" }), "");
+});
+
+
+test("Aniweeb builds episode-specific AniList embed URLs and rejects invalid IDs or films", () => {
+  assert.equal(buildAniweebEmbedUrl(tv, { aniListId: "21" }), "https://api.aniweeb.net/embed/ani/21/7?track=sub");
+  assert.equal(buildAniweebEmbedUrl(tv, { aniListId: "21", track: "dub" }), "https://api.aniweeb.net/embed/ani/21/7?track=dub");
+  assert.equal(buildAniweebEmbedUrl(tv, { aniListId: "not-an-id" }), "");
+  assert.equal(buildAniweebEmbedUrl(movie, { aniListId: "21" }), "");
 });
