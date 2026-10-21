@@ -2,7 +2,8 @@
 # This is intentionally a static deploy: no build command and no server functions.
 
 [build]
-  publish = "."
+  command = "node automation/build-netlify-dist.mjs"
+  publish = "dist"
 
 [[headers]]
   for = "/*"
