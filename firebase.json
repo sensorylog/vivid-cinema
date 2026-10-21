@@ -141,7 +141,6 @@
         ]
       },
       {
-      {
         "source": "**/*.json",
         "headers": [
           {
@@ -150,6 +149,7 @@
           }
         ]
       },
+      {
         "source": "init.json",
         "headers": [
           {
