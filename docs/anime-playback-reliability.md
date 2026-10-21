@@ -19,4 +19,4 @@ Public aggregator APIs and open-source extraction projects are not automatically
 
 ## Verification still required
 
-Run `npm test` and `npm run check:syntax`, then test real episodes on desktop and mobile. Confirm title-to-ID mapping, season/episode correctness, audio track availability, provider playback, fallback behavior, and errors from upstream providers. Aniweeb embed availability and playback still require live device verification; the code cannot inspect media inside arbitrary cross-origin iframes unless the provider exposes a supported messaging API. Browser-side code cannot inspect media events inside arbitrary cross-origin iframes unless the provider exposes a supported messaging API.
+Run `npm test` and `npm run check:syntax`, then test real episodes on desktop and mobile. Confirm title-to-ID mapping, season/episode correctness, audio track availability, provider playback, fallback behavior, and errors from upstream providers. Aniweeb embed availability and playback still require live device verification; the code cannot inspect media events inside arbitrary cross-origin iframes unless the provider exposes a supported messaging API.
