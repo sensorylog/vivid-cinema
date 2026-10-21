@@ -17,6 +17,14 @@ function tmdbOnlyId(params, tmdbId) {
   return /^\d+$/.test(id) ? id : "";
 }
 
+export function buildAniweebEmbedUrl(params, { aniListId = "", track = "sub", startAt = 0 } = {}) {
+  if (!/^\d+$/.test(String(aniListId || "")) || params?.type !== "tv") return "";
+  const episode = Math.max(1, Number(params.episode) || 1);
+  const query = new URLSearchParams({ track: track === "dub" ? "dub" : "sub" });
+  addResume(query, "startAt", startAt);
+  return "https://api.aniweeb.net/embed/ani/" + encodeURIComponent(String(aniListId)) + "/" + episode + "?" + query;
+}
+
 export function buildVidapiEmbedUrl(params, { startAt = 0 } = {}) {
   const id = standardId(params, "", "");
   if (!id) return "";
