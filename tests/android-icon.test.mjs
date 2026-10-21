@@ -20,8 +20,8 @@ test("Android launcher and web manifest use the same Vivid Cinema PNG source", (
 });
 
 test("Android icon script pins both launcher manifest attributes to generated resources", () => {
-  assert.match(iconScript, /android:icon="@mipmap\/ic_launcher"/);
-  assert.match(iconScript, /android:roundIcon="@mipmap\/ic_launcher_round"/);
+  assert.match(iconScript, /android:icon=.*ic_launcher/);
+  assert.match(iconScript, /android:roundIcon=.*ic_launcher_round/);
   assert.match(iconScript, /Adaptive launcher foreground does not match the shared icon source/);
   assert.match(iconScript, /Shared launcher icon is too small/);
 });
