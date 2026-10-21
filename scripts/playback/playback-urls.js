@@ -88,3 +88,40 @@ export function buildVidkingEmbedUrl(params, { tmdbId = "", startAt = 0 } = {}) 
     : "/embed/movie/" + encodeURIComponent(id);
   return "https://www.vidking.net" + path + "?" + query;
 }
+
+
+function movieTvId(params, tmdbId = "", imdbId = "") {
+  return standardId(params, tmdbId, imdbId);
+}
+function movieTvPath(params, id, prefix = "/embed") {
+  if (!id) return "";
+  return params.type === "tv"
+    ? prefix + "/tv/" + encodeURIComponent(id) + "/" + Math.max(1, Number(params.season) || 1) + "/" + Math.max(1, Number(params.episode) || 1)
+    : prefix + "/movie/" + encodeURIComponent(id);
+}
+export function buildEmbedWaveUrl(params, { tmdbId = "" } = {}) {
+  const id = tmdbOnlyId(params, tmdbId);
+  return id ? "https://embedwave.cc" + movieTvPath(params, id) + "?autoplay=true" : "";
+}
+export function buildVidFastUrl(params, { tmdbId = "", imdbId = "" } = {}) {
+  const id = movieTvId(params, tmdbId, imdbId);
+  return id ? "https://vidfast.to" + movieTvPath(params, id) : "";
+}
+export function buildEzVidApiUrl(params, { tmdbId = "" } = {}) {
+  const id = tmdbOnlyId(params, tmdbId);
+  return id ? "https://ezvidapi.com" + movieTvPath(params, id) : "";
+}
+export function buildEmbedApiStreamUrl(params, { tmdbId = "", imdbId = "" } = {}) {
+  const id = movieTvId(params, tmdbId, imdbId);
+  return id ? "https://watch.embed-api.stream" + movieTvPath(params, id) : "";
+}
+export function buildMoviesApiUrl(params, { tmdbId = "", imdbId = "", startAt = 0 } = {}) {
+  const id = movieTvId(params, tmdbId, imdbId);
+  if (!id) return "";
+  const path = params.type === "tv"
+    ? "/tv/" + encodeURIComponent(id) + "/" + Math.max(1, Number(params.season) || 1) + "/" + Math.max(1, Number(params.episode) || 1)
+    : "/movie/" + encodeURIComponent(id);
+  const query = new URLSearchParams({ theme: "e50914" });
+  addResume(query, "t", startAt);
+  return "https://moviesapi.to" + path + "?" + query;
+}
