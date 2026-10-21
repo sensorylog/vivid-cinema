@@ -10,7 +10,7 @@ import { recordBehavior, startIntelligenceSync } from "./intelligence.js";
 import { hasDirectStreamIntegration, playDirectStream, resolveDirectStream, stopDirectStream } from "./playback/player-engine.js";
 import { buildCustomEmbedUrl, getCustomPlaybackServer, listCustomPlaybackServers } from "./playback/playback-servers.js";
 import { mountPlaybackServerSettings } from "./playback/server-settings.js";
-import { buildVidapiEmbedUrl, buildVidsrcEmbedUrl, buildAniweebEmbedUrl, buildVidlinkEmbedUrl, buildVidplusEmbedUrl, buildVidkingEmbedUrl } from "./playback/playback-urls.js";
+import { buildVidapiEmbedUrl, buildVidsrcEmbedUrl, buildVidlinkEmbedUrl, buildVidplusEmbedUrl, buildVidkingEmbedUrl } from "./playback/playback-urls.js";
 import { mountTflixSecondaryPlayer } from "./playback/tflix-secondary-player.js";
 
 const $ = (id) => document.getElementById(id);
@@ -126,7 +126,6 @@ function sourceAvailable(source) {
   if (typeof source === "string" && source.startsWith("custom:")) return !isAnimePlayback() && Boolean(getCustomPlaybackServer(source.slice(7))) && Boolean(tmdbId || imdbId || currentParams?.id);
   if (source === "direct") return !isAnimePlayback() && hasDirectStreamIntegration();
   if (isAnimePlayback()) {
-    if (source === "aniweeb") return currentParams?.type === "tv" && Boolean(aniListId);
     if (source === "vidplus") return Boolean(aniListId);
     if (source === "vidlink") return Boolean(malId);
     if (source === "vidapi" || source === "vidsrc") return hasFallbackId();
@@ -142,7 +141,7 @@ function getNextSource(source) {
   // Anime providers use different catalog IDs; try only providers with a resolved ID.
   // Standard movie/TV providers use the documented TMDB-based URL builders.
   const order = isAnimePlayback()
-    ? ["aniweeb", "vidplus", "vidlink", "vidsrc", "vidapi"]
+    ? ["vidplus", "vidlink", "vidsrc", "vidapi"]
     : ["vidapi", "vidsrc", "vidlink", "vidplus", "vidking", ...(sourceAvailable("direct") ? ["direct"] : []), ...listCustomPlaybackServers().map(server => "custom:" + server.id)];
   const index = order.indexOf(source);
   // Cycle through alternatives so a remembered last-position provider can still recover
@@ -156,7 +155,6 @@ function getNextSource(source) {
 function getSourceLabel(source) {
   if (typeof source === "string" && source.startsWith("custom:")) return (getCustomPlaybackServer(source.slice(7))?.name || "Custom server") + " · external embed";
   if (source === "direct") return "Authorized direct stream · HLS/DASH";
-  if (source === "aniweeb") return "Aniweeb anime source · episode-aware";
   if (source === "vidsrc") return "VidSrc alternate source";
   if (source === "vidlink") return "VidLink alternate source";
   if (source === "vidplus") return "VidPlus alternate source";
@@ -220,7 +218,7 @@ function updateSourceLabel() {
   document.querySelectorAll("[data-player-source]").forEach(button => {
     const source = button.getAttribute("data-player-source");
     button.classList.toggle("is-active", source === activeSource);
-    button.hidden = source === "direct" ? !sourceAvailable(source) : isAnimePlayback() && !["aniweeb", "vidapi", "vidsrc", "vidplus", "vidlink"].includes(source);
+    button.hidden = source === "direct" ? !sourceAvailable(source) : isAnimePlayback() && !["vidapi", "vidsrc", "vidplus", "vidlink"].includes(source);
     button.disabled = !sourceAvailable(source);
     button.setAttribute("aria-pressed", source === activeSource ? "true" : "false");
   });
@@ -234,7 +232,7 @@ function setPlayerSource(source, params, startAt = 0) {
   const tryNextButton = $("player-try-next");
   if (tryNextButton) tryNextButton.hidden = true;
   const customServer = typeof source === "string" && source.startsWith("custom:") ? getCustomPlaybackServer(source.slice(7)) : null;
-  if ((!["vidapi", "vidsrc", "aniweeb", "vidlink", "vidplus", "vidking", "direct"].includes(source) && !customServer) || !sourceAvailable(source)) return;
+  if ((!["vidapi", "vidsrc", "vidlink", "vidplus", "vidking", "direct"].includes(source) && !customServer) || !sourceAvailable(source)) return;
   activeSource = source;
   sourceAttempted.add(source);
   const status = $("player-status");
@@ -329,21 +327,7 @@ function setPlayerSource(source, params, startAt = 0) {
     return;
   }
 
-  if (source === "aniweeb") {
-    if (!isAnimePlayback() || !aniListId || params.type !== "tv") return;
-    primaryHealthy = false;
-    player.src = buildAniweebEmbedUrl(params, { aniListId, track: "sub" });
-    if (status) {
-      status.textContent = "Loading Aniweeb anime source · episode " + Math.max(1, Number(params.episode) || 1) + "…";
-      status.classList.remove("is-warning");
-      status.hidden = false;
-    }
-    fallbackTimer = window.setTimeout(() => {
-      fallbackTimer = null;
-      if (primaryHealthy || activeSource !== "aniweeb") return;
-      showFallbackPrompt("aniweeb");
-    }, 25000);
-  } else if (source === "vidlink") {
+  if (source === "vidlink") {
     if (route.params.get("anime") === "1" ? !malId : !hasFallbackId()) return;
     primaryHealthy = false;
     const vidlinkUrl = buildVidlinkEmbedUrl(params, { tmdbId, malId, anime: isAnimePlayback(), startAt });
@@ -357,8 +341,9 @@ function setPlayerSource(source, params, startAt = 0) {
     fallbackTimer = window.setTimeout(() => {
       fallbackTimer = null;
       if (primaryHealthy || activeSource !== "vidlink") return;
-      showFallbackPrompt("vidlink");
-    }, 25000);
+      if (isAnimePlayback()) triggerFallback("anime_source_timeout");
+      else showFallbackPrompt("vidlink");
+    }, isAnimePlayback() ? 12000 : 25000);
   } else if (source === "vidsrc") {
     if (!hasFallbackId()) return;
     primaryHealthy = false;
@@ -371,8 +356,9 @@ function setPlayerSource(source, params, startAt = 0) {
     fallbackTimer = window.setTimeout(() => {
       fallbackTimer = null;
       if (primaryHealthy || activeSource !== "vidsrc") return;
-      showFallbackPrompt("vidsrc");
-    }, 25000);
+      if (isAnimePlayback()) triggerFallback("anime_source_timeout");
+      else showFallbackPrompt("vidsrc");
+    }, isAnimePlayback() ? 12000 : 25000);
   } else if (source === "vidplus") {
     if (route.params.get("anime") === "1" ? !aniListId : !hasFallbackId()) return;
     primaryHealthy = false;
@@ -387,8 +373,9 @@ function setPlayerSource(source, params, startAt = 0) {
     fallbackTimer = window.setTimeout(() => {
       fallbackTimer = null;
       if (primaryHealthy || activeSource !== "vidplus") return;
-      showFallbackPrompt("vidplus");
-    }, 25000);
+      if (isAnimePlayback()) triggerFallback("anime_source_timeout");
+      else showFallbackPrompt("vidplus");
+    }, isAnimePlayback() ? 12000 : 25000);
   } else if (source === "vidking") {
     if (isAnimePlayback() || !hasFallbackId()) return;
     primaryHealthy = false;
@@ -535,7 +522,6 @@ function renderShell(params) {
       '<aside id="player-server-panel" class="vivid-server-panel" aria-label="Vivid Cinema playback servers" hidden><div class="vivid-server-panel-heading"><div><strong>Playback servers</strong><span>Choose a source</span></div><span class="vivid-server-count">6+ sources</span></div>' +
       '<button type="button" class="vivid-player-source" data-player-source="vidapi" aria-pressed="true"><span class="vivid-server-dot"></span><span><strong>VidAPI</strong><small>Primary server · may require domain approval</small></span><span class="vivid-server-state" data-server-state="vidapi">Ready</span></button>' +
       '<button type="button" class="vivid-player-source" data-player-source="vidsrc" aria-pressed="false"><span class="vivid-server-dot"></span><span><strong>VidSrc</strong><small>Alternate streaming source · anime ID fallback</small></span><span class="vivid-server-state" data-server-state="vidsrc">Available</span></button>' +
-      '<button type="button" class="vivid-player-source" data-player-source="aniweeb" aria-pressed="false"><span class="vivid-server-dot"></span><span><strong>Aniweeb</strong><small>Anime episode API · AniList ID</small></span><span class="vivid-server-state" data-server-state="aniweeb">Available</span></button>' +
       '<button type="button" class="vivid-player-source" data-player-source="vidlink" aria-pressed="false"><span class="vivid-server-dot"></span><span><strong>VidLink</strong><small>Alternate streaming source</small></span><span class="vivid-server-state" data-server-state="vidlink">Available</span></button>' +
       '<button type="button" class="vivid-player-source" data-player-source="vidplus" aria-pressed="false"><span class="vivid-server-dot"></span><span><strong>VidPlus</strong><small>Additional source · support varies</small></span><span class="vivid-server-state" data-server-state="vidplus">Available</span></button>' +
       '<button type="button" class="vivid-player-source" data-player-source="vidking" aria-pressed="false"><span class="vivid-server-dot"></span><span><strong>VidKing</strong><small>Extra source · resume seeking may vary</small></span><span class="vivid-server-state" data-server-state="vidking">Available</span></button>' +
@@ -597,7 +583,7 @@ function renderShell(params) {
     playerHasOpened = true;
     sourceAttempted.clear();
     const initialSource = isAnimePlayback()
-      ? (aniListId && params.type === "tv" ? "aniweeb" : aniListId ? "vidplus" : malId ? "vidlink" : hasFallbackId() ? "vidsrc" : "")
+      ? (aniListId ? "vidplus" : malId ? "vidlink" : hasFallbackId() ? "vidsrc" : "")
       : (rememberedSource || activeSource || "vidapi");
     if (initialSource) {
       setPlayerSource(initialSource, params, startAt);
