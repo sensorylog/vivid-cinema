@@ -368,3 +368,181 @@ body.vivid-watch-page :is(a, button):focus-visible {
     align-self: center;
   }
 }
+
+
+/* Vivid watch experience refresh — shared finish for both independent players.
+   Keep provider controls native when an embed does not expose a playback API. */
+body.vivid-watch-page .vivid-watch-hero {
+  min-height: clamp(300px, 34vw, 440px);
+}
+body.vivid-watch-page .vivid-watch-backdrop {
+  background-image:
+    linear-gradient(90deg, rgba(6,7,10,.97) 0%, rgba(6,7,10,.78) 43%, rgba(6,7,10,.36) 76%, rgba(6,7,10,.64) 100%),
+    linear-gradient(0deg, #08090c 0%, rgba(8,9,12,.14) 60%, rgba(8,9,12,.24) 100%),
+    var(--watch-backdrop);
+}
+body.vivid-watch-page .vivid-watch-head {
+  width: min(1440px, 100%);
+  min-height: clamp(300px, 34vw, 440px);
+  padding-top: clamp(32px, 5vw, 72px);
+  padding-bottom: clamp(26px, 4vw, 48px);
+}
+body.vivid-watch-page .vivid-watch-head h1 {
+  max-width: 900px;
+  font-size: clamp(2rem, 4.7vw, 4.8rem);
+  line-height: .98;
+  letter-spacing: -.055em;
+}
+body.vivid-watch-page .vivid-player-overlay.vivid-player-inline .vivid-player-dialog {
+  width: min(1500px, 100%);
+}
+body.vivid-watch-page .vivid-player-dialog-head {
+  min-height: 74px;
+  padding-block: 17px;
+}
+body.vivid-watch-page .vivid-player-dialog-heading h2 {
+  font-size: clamp(.96rem, 1.5vw, 1.2rem);
+  letter-spacing: -.025em;
+}
+body.vivid-watch-page .vivid-player-overlay.vivid-player-inline .vivid-player-frame {
+  aspect-ratio: 16 / 9;
+  min-height: 0;
+  border-radius: 0;
+}
+body.vivid-watch-page .vivid-player-main {
+  overflow: clip;
+  border-color: rgba(255,255,255,.12);
+  border-radius: 16px;
+  background: #000;
+  box-shadow: 0 24px 72px rgba(0,0,0,.38), 0 1px 0 rgba(255,255,255,.035) inset;
+}
+body.vivid-watch-page .vivid-player-frame iframe,
+body.vivid-watch-page .vivid-player-frame video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: #000;
+}
+body.vivid-watch-page .vivid-player-frame video {
+  object-fit: contain;
+  accent-color: #e50914;
+}
+body.vivid-watch-page .vivid-player-status {
+  max-width: min(560px, calc(100% - 32px));
+  line-height: 1.55;
+  text-wrap: pretty;
+}
+body.vivid-watch-page .vivid-player-dialog-foot {
+  color: #969ba6;
+  font-size: .76rem;
+}
+body.vivid-watch-page .vivid-player-dialog-foot a {
+  color: #e8eaf0;
+  text-decoration: none;
+}
+body.vivid-watch-page .vivid-player-dialog-foot a:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+body.vivid-watch-page .vivid-player-source,
+body.vivid-watch-page .vivid-tflix-server {
+  min-height: 58px;
+  border-radius: 10px;
+}
+body.vivid-watch-page .vivid-player-source:focus-visible,
+body.vivid-watch-page .vivid-tflix-server:focus-visible,
+body.vivid-watch-page .vivid-tflix-select:focus-visible,
+body.vivid-watch-page .vivid-tflix-next:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 3px;
+}
+body.vivid-watch-page .vivid-tflix-player {
+  margin-top: clamp(28px, 4vw, 54px);
+}
+body.vivid-watch-page .vivid-tflix-card {
+  border-color: rgba(255,255,255,.1);
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0,0,0,.24);
+}
+body.vivid-watch-page .vivid-tflix-screen {
+  aspect-ratio: 16 / 9;
+  min-height: 0;
+  border-radius: 12px;
+}
+body.vivid-watch-page .vivid-tflix-screen iframe {
+  width: 100%;
+  height: 100%;
+}
+body.vivid-watch-page .vivid-tflix-sidebar {
+  gap: 14px;
+}
+body.vivid-watch-page .vivid-tflix-panel {
+  border-color: rgba(255,255,255,.09);
+  background: linear-gradient(145deg, #14151b, #0c0d11);
+}
+body.vivid-watch-page .vivid-watch-rec-card img {
+  transition: transform .22s ease, border-color .22s ease, filter .22s ease;
+}
+body.vivid-watch-page .vivid-watch-rec-card:hover img {
+  filter: brightness(1.08);
+}
+body.vivid-watch-page button:disabled,
+body.vivid-watch-page [aria-disabled="true"] {
+  cursor: not-allowed;
+  opacity: .52;
+}
+@media (max-width: 760px) {
+  body.vivid-watch-page .vivid-watch-hero,
+  body.vivid-watch-page .vivid-watch-head {
+    min-height: 0;
+  }
+  body.vivid-watch-page .vivid-watch-head {
+    padding-top: 26px;
+    padding-bottom: 26px;
+  }
+  body.vivid-watch-page .vivid-player-dialog-head {
+    min-height: 62px;
+    padding: 12px var(--watch-gutter);
+  }
+  body.vivid-watch-page .vivid-player-main {
+    border-radius: 10px;
+  }
+  body.vivid-watch-page .vivid-player-overlay.vivid-player-inline .vivid-player-frame {
+    aspect-ratio: 16 / 9;
+  }
+  body.vivid-watch-page .vivid-player-overlay.vivid-player-inline .vivid-player-dialog-foot {
+    padding-bottom: max(12px, env(safe-area-inset-bottom));
+  }
+  body.vivid-watch-page .vivid-tflix-layout {
+    padding: 10px;
+  }
+  body.vivid-watch-page .vivid-tflix-screen {
+    border-radius: 9px;
+  }
+  body.vivid-watch-page .vivid-tflix-server {
+    min-height: 56px;
+  }
+}
+@media (max-width: 420px) {
+  body.vivid-watch-page .vivid-player-dialog-heading h2 {
+    max-width: 42vw;
+    font-size: .9rem;
+  }
+  body.vivid-watch-page .vivid-player-dialog-eyebrow {
+    font-size: .57rem;
+    letter-spacing: .1em;
+  }
+  body.vivid-watch-page .vivid-player-overlay.vivid-player-inline .vivid-player-frame {
+    aspect-ratio: 16 / 10;
+  }
+  body.vivid-watch-page .vivid-watch-rec-card {
+    flex-basis: 132px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  body.vivid-watch-page .vivid-watch-rec-card img,
+  body.vivid-watch-page .vivid-player-source,
+  body.vivid-watch-page .vivid-tflix-server {
+    transition: none;
+  }
+}
