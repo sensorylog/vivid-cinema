@@ -1,12 +1,12 @@
 import {tmdbApi, clearTmdbCache} from "./tmdb.js";
-import {getImageUrl, getMediaUrl} from "./media.js";
+import {collectWeekReleases, getImageUrl, getMediaUrl, releaseStatus, weekWindow} from "./media.js";
 import {escapeHtml} from "./utils.js";
 import {getTasteProfile, getNotForMeKeys} from "./intelligence.js?v=20261018-feedback-sync-3";
 import {addCinemaReminder, addCinemaReminderToCalendar, getCinemaReminders, hasCinemaReminder, startCinemaReminderLoop} from "./cinema-reminders.js";
 import {enableCinemaPush, savePushReminder} from "./push-notifications.js";
 
 const $ = id => document.getElementById(id);
-const state = { stories: [], hero: null, calendar: [], lastUpdated: 0 };
+const state = { stories: [], hero: null, calendar: [], lastUpdated: 0, weekWindow: null, weekDateKey: "" };
 
 function localDateKey(date = new Date()) {
   const y = date.getFullYear(), m = String(date.getMonth() + 1).padStart(2, "0"), d = String(date.getDate()).padStart(2, "0");
@@ -70,8 +70,20 @@ function scoreStory(s) {
   return Number(s.vote_average || 0) * 7 + Math.min(35, Number(s.popularity || 0) / 2);
 }
 
+function releaseRow(s) {
+  const status = s.releaseStatus;
+  if (!status || !status.date) return "";
+  return '<div class="vivid-news-release is-' + escapeHtml(status.tone) + '">' +
+    '<i class="bi bi-calendar-event" aria-hidden="true"></i>' +
+    '<span>' + escapeHtml(dateLabel(status.date, {weekday:"short", month:"short", day:"numeric"})) + "</span>" +
+    "<strong>" + escapeHtml(status.label) + "</strong></div>";
+}
 function reminderMarkup(s) {
   if (!s.when || s.kind === "trend") return "";
+  // A date that already passed cannot be reminded about, so the button is only
+  // offered while the release is still ahead. This week can hold both cases.
+  const status = s.releaseStatus || releaseStatus(s.when);
+  if (!(Number(status?.days) > 0)) return "";
   const reminded = hasCinemaReminder(s.id, s.kind);
   return '<button class="vivid-notify-release" data-id="' + s.id + '" data-type="' + s.media_type + '" data-kind="' + s.kind + '" ' + (reminded ? "disabled" : "") + '>' +
     (reminded ? "Reminder saved" : "Notify me") + "</button>" +
@@ -87,6 +99,7 @@ function card(s, compact = false) {
     "</a>" +
     '<div class="vivid-news-body"><small>' + escapeHtml(meta) + (s.vote_average ? " · ★ " + s.vote_average.toFixed(1) : "") + "</small>" +
     "<h3>" + escapeHtml(s.headline) + "</h3>" +
+    releaseRow(s) +
     "<p>" + escapeHtml(s.copy) + "</p>" +
     '<div class="vivid-news-actions"><a href="' + escapeHtml(hrefFor(s)) + '">Explore <i class="bi bi-arrow-right"></i></a>' + reminderMarkup(s) + "</div></div></article>";
 }
@@ -96,6 +109,33 @@ function section(title, kicker, items, id, description = "") {
     '<div class="vivid-news-section-head"><div><span>' + escapeHtml(kicker) + "</span><h2>" + escapeHtml(title) + "</h2>" +
     (description ? "<p>" + escapeHtml(description) + "</p>" : "") + '</div><a href="discover.html">Explore more <i class="bi bi-arrow-up-right"></i></a></div>' +
     '<div class="vivid-news-grid">' + items.map(x => card(x)).join("") + "</div></section>";
+}
+function weekSection(items = []) {
+  const window = state.weekWindow || weekWindow();
+  const range = window.start && window.end
+    ? dateLabel(window.start, {weekday:"short", month:"short", day:"numeric"}) + " – " + dateLabel(window.end, {weekday:"short", month:"short", day:"numeric"})
+    : "this week";
+  const head = '<div class="vivid-news-section-head"><div><span>THIS WEEK</span><h2>This week</h2>' +
+    "<p>Releases dated inside the current week (" + escapeHtml(range) + "). Every date is checked against today, and the list rebuilds when the week changes.</p></div>" +
+    '<a href="discover.html">Explore more <i class="bi bi-arrow-up-right"></i></a></div>';
+  const dated = [...items].sort((a, b) => String(a.when || "").localeCompare(String(b.when || "")));
+  if (!dated.length) {
+    return '<section class="vivid-news-section" id="week-feed">' + head +
+      '<div class="vivid-news-empty"><i class="bi bi-calendar3"></i><h2>No dated releases in this window.</h2>' +
+      "<p>Titles without a confirmed release date stay out of this list instead of being given a guessed date. The release calendar below covers the weeks ahead.</p></div></section>";
+  }
+  return '<section class="vivid-news-section" id="week-feed">' + head +
+    '<div class="vivid-news-grid">' + dated.map(x => card(x)).join("") + "</div></section>";
+}
+function scheduleWeekRollover() {
+  window.clearTimeout(scheduleWeekRollover.timer);
+  const now = new Date();
+  const nextMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 10);
+  const delay = Math.max(5000, nextMidnight.getTime() - now.getTime());
+  scheduleWeekRollover.timer = window.setTimeout(() => {
+    clearTmdbCache();
+    load().catch(error => console.warn("Vivid week rollover failed:", error));
+  }, delay);
 }
 function renderFinderResults(results, query) {
   const el = $("news-search-results");
@@ -152,8 +192,8 @@ function render(filter = "all") {
   if (filter !== "all") list = all.filter(x => x.category === filter);
   renderCalendar(filter);
   if (filter !== "all") {
-    feed.innerHTML = list.length ? section(
-      filter === "today" ? "What's new today" : filter === "week" ? "This week's watchlist" : filter === "coming" ? "Coming up" : filter === "episodes" ? "TV to catch today" : filter === "trending" ? "Trending now" : "Picked for you",
+    feed.innerHTML = filter === "week" ? weekSection(list) : list.length ? section(
+      filter === "today" ? "What's new today" : filter === "coming" ? "Coming up" : filter === "episodes" ? "TV to catch today" : filter === "trending" ? "Trending now" : "Picked for you",
       filter === "forYou" ? "PERSONALIZED" : filter.toUpperCase(),
       list, "filtered-feed"
     ) : emptyState();
@@ -165,7 +205,7 @@ function render(filter = "all") {
   const forYou = by("forYou");
   const sections =
     section("Fresh today", "TODAY", by("today"), "today-feed", "New releases and episodes dated for today.") +
-    section("This week", "THIS WEEK", by("week"), "week-feed", "A focused shortlist of new arrivals around the current week.") +
+    weekSection(by("week")) +
     section("Coming up", "RELEASE RADAR", by("coming"), "coming-feed", "Upcoming titles only — past releases are rejected before they reach this feed.") +
     section(forYou.length ? "Picked for you" : "Worth a look", forYou.length ? "PERSONALIZED" : "CURATED", forYou, "for-you-feed", forYou.length ? "Built from your Vivid taste signals." : "Strong catalogue picks while Vivid learns what you like.") +
     section("On the radar", "TRENDING", by("trending"), "trending-feed", "Titles gaining attention right now.") +
@@ -205,14 +245,20 @@ function tasteParams(taste) {
 }
 async function load() {
   const now = localDateKey();
-  const weekEnd = addDays(now, 7);
+  // "This week" follows the current Monday–Sunday week, not a rolling seven
+  // days, so the list changes when the week changes instead of sliding daily.
+  const currentWeek = weekWindow();
+  const weekStart = currentWeek.start;
+  const weekEnd = currentWeek.end;
+  state.weekWindow = currentWeek;
+  state.weekDateKey = now;
   const futureEnd = addDays(now, 45);
   const core = await Promise.allSettled([
     tmdbApi.trending("all", "day"),
     tmdbApi.newMovies(1, now, now),
     tmdbApi.newTv(1, now, now),
-    tmdbApi.newMovies(1, now, weekEnd),
-    tmdbApi.newTv(1, now, weekEnd),
+    tmdbApi.newMovies(1, weekStart, weekEnd),
+    tmdbApi.newTv(1, weekStart, weekEnd),
     tmdbApi.futureMovies(1, now, futureEnd),
     tmdbApi.futureTv(1, now, futureEnd),
     tmdbApi.popularMovies(1),
@@ -248,18 +294,24 @@ async function load() {
       "new", now));
   });
 
-  const weekItems = [
-    ...(value(3).results || []).map(x=>({...x,media_type:"movie"})),
-    ...(value(4).results || []).map(x=>({...x,media_type:"tv"}))
-  ].filter(x => {
-    const d=x.release_date||x.first_air_date;
-    return d && d > now && d <= weekEnd;
-  }).sort((a,b)=>String(a.release_date||a.first_air_date).localeCompare(String(b.release_date||b.first_air_date)));
+  // One dated list for the current week, drawn from every catalogue request the
+  // page already makes. Titles with no usable date are counted, never guessed.
+  const week = collectWeekReleases({
+    movies: (value(3).results || []).map(x=>({...x,media_type:"movie"})),
+    tv: (value(4).results || []).map(x=>({...x,media_type:"tv"})),
+    extra: [
+      ...todayItems,
+      ...(value(5).results || []).map(x=>({...x,media_type:"movie"})),
+      ...(value(6).results || []).map(x=>({...x,media_type:"tv"}))
+    ]
+  });
+  const weekItems = week.items;
+  state.weekWindow = week.window;
 
-  weekItems.slice(0, 10).forEach(x => add(story(x,"week","THIS WEEK",
+  weekItems.slice(0, 12).forEach(x => add(story(x,"week","THIS WEEK",
     titleOf(x) + " arrives this week.",
     safeOverview(x.overview,"A newly arriving title worth keeping on your radar."),
-    "week",x.release_date||x.first_air_date)));
+    "week",x.date,{releaseStatus:x.status})));
 
   const coming = [
     ...(value(5).results || []).map(x=>({...x,media_type:"movie"})),
@@ -335,6 +387,7 @@ async function load() {
   state.stories = stories.sort((a,b) => scoreStory(b)-scoreStory(a));
   render(document.querySelector(".vivid-news-filter.is-active")?.dataset.filter || "all");
   renderHero();
+  scheduleWeekRollover();
 }
 function wire() {
   document.querySelectorAll(".vivid-news-filter").forEach(button => {
@@ -382,4 +435,11 @@ $("news-search")?.addEventListener("keydown", event => {
   if(q) window.location.href="discover.html?q="+encodeURIComponent(q);
 });
 startCinemaReminderLoop();
+// A page left open overnight must not keep yesterday's week on screen.
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState !== "visible") return;
+  if (!state.weekDateKey || state.weekDateKey === localDateKey()) return;
+  clearTmdbCache();
+  load().catch(error => console.warn("Vivid week refresh failed:", error));
+});
 load().catch(e=>{console.warn("Vivid cinema news unavailable:",e);const loading=$("news-loading");if(loading)loading.textContent="Cinema news is temporarily unavailable.";});

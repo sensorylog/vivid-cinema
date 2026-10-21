@@ -1,5 +1,5 @@
 import { tmdbApi } from "./tmdb.js";
-import { normalizeResults } from "./media.js";
+import { normalizeResults, normalizeUpcomingResults } from "./media.js";
 import { getProviderCountry } from "./provider-region.js";
 
 async function providerDiscover(providerId, type, page = 1, useRegion = true) {
@@ -273,8 +273,13 @@ function normalizeHome(key, data) {
   // coerces TV IDs into movies, so title.html fetches a different title.
   const sectionType = HOME_SECTION_META[key]?.type;
   const typeOverride = sectionType === "movie" || sectionType === "tv" ? sectionType : null;
+  // The coming-soon shelf asks TMDB for release dates from today onwards, so it
+  // must keep those future dates instead of applying the released-only gate.
+  const items = key === "upcoming"
+    ? normalizeUpcomingResults(data?.results || [])
+    : normalizeResults(data?.results || [], typeOverride);
   return {
-    items: normalizeResults(data?.results || [], typeOverride),
+    items,
     page: Number(data?.page || 1),
     totalPages: Math.min(500, Number(data?.total_pages || 1))
   };
