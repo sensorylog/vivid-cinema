@@ -1,4 +1,4 @@
-import { copyFile, mkdir, readdir, readFile, writeFile } from "node:fs/promises";
+import { copyFile, mkdir, readdir, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -7,7 +7,7 @@ const res = path.join(root, "android", "app", "src", "main", "res");
 const source = path.join(root, "icons", "vivid-icon-180.png");
 
 async function exists(file) {
-  try { await readFile(file); return true; } catch { return false; }
+  try { await stat(file); return true; } catch { return false; }
 }
 
 if (!(await exists(source))) throw new Error("Missing shared Vivid Cinema icon: icons/vivid-icon-180.png");
