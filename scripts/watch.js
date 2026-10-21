@@ -1,4 +1,5 @@
 import { tmdbApi } from "./tmdb.js";
+import { resolveAnimeIds } from "./playback/anime-id-resolver.js";
 import { getImageUrl, getMediaUrl, normalizeMedia, normalizeResults } from "./media.js";
 import { buildTitleUrl, getRoute } from "./routes.js";
 import { escapeHtml } from "./utils.js";
@@ -98,28 +99,6 @@ function resolveImdbId(source) {
   return /^tt\d+$/i.test(id) ? id : "";
 }
 
-async function resolveAnimeIds(title) {
-  if (route.params.get("anime") !== "1" || !title) return { aniListId: "", malId: "" };
-  try {
-    const response = await fetch("https://graphql.anilist.co", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({
-        query: "query($search:String!){Media(search:$search,type:ANIME){id idMal title{romaji english native}}}",
-        variables: { search: title }
-      })
-    });
-    if (!response.ok) return { aniListId: "", malId: "" };
-    const data = await response.json();
-    const media = data?.data?.Media;
-    return {
-      aniListId: String(media?.id || ""),
-      malId: String(media?.idMal || "")
-    };
-  } catch {
-    return { aniListId: "", malId: "" };
-  }
-}
 
 function isLikelyAnime() {
   const genres = Array.isArray(details?.genres) ? details.genres : [];
