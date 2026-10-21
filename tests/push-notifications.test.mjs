@@ -205,7 +205,10 @@ test("page load never asks for permission or calls the API before the visitor al
 test("enabling a browser registers it with Native Notify and reuses its subscription", async () => {
   const env = installFakeBrowser({ permission: "default" });
   const result = await pushModule.enableCinemaPush();
-  assert.equal(result.ok, true);
+  // enableCinemaPush throws when enabling fails, so reaching this line is the
+  // success signal; it returns { deviceId } (the client's own result shape is
+  // internal to the module).
+  assert.equal(typeof result.deviceId, "string");
   assert.equal(result.deviceId.startsWith("nn-"), true);
   const keys = env.calls.find((call) => call.url && call.url.includes("/api/universal/web-push/keys/" + NN_APP_ID + "/"));
   assert.ok(keys, "the VAPID key is fetched for app 33997");
@@ -226,7 +229,7 @@ test("enabling a browser registers it with Native Notify and reuses its subscrip
 test("a browser subscribed with the old VAPID key is moved onto the Native Notify key", async () => {
   const env = installFakeBrowser({ permission: "granted", legacySubscription: true });
   const result = await pushModule.enableCinemaPush();
-  assert.equal(result.ok, true);
+  assert.equal(typeof result.deviceId, "string");
   assert.equal(env.calls.some((call) => call.unsubscribe), true, "the dead legacy subscription is dropped");
   const subscribe = env.calls.find((call) => call.subscribe);
   assert.ok(subscribe, "a new subscription is created with the Native Notify key");
