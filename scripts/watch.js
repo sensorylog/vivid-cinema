@@ -17,7 +17,6 @@ const $ = (id) => document.getElementById(id);
 const route = getRoute();
 const VIDAPI_ORIGINS = new Set([new URL(VIVID_CONFIG.api.vidapiEmbedBaseUrl).origin, "https://vidapi.ru", "https://vidapi.me", "https://vidapi.to", "https://vidapi.bz", "https://vidapi.tw"]);
 const VIDLINK_ORIGINS = new Set(["https://vidlink.pro", "https://www.vidlink.pro"]);
-const ANIWEB_ORIGINS = new Set(["https://api.aniweeb.net"]);
 const VIDPLUS_ORIGINS = new Set(["https://player.vidplus.to", "https://vidplus.to", "https://www.vidplus.to"]);
 const VIDKING_ORIGINS = new Set(["https://www.vidking.net", "https://vidking.net"]);
 const VIDSRC_ORIGINS = new Set(["https://vidsrc.sh", "https://vidsrc.cc", "https://vidsrc2.ru"]);
