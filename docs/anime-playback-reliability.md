@@ -10,12 +10,10 @@
 
 ## Provider expansion
 
-- Added Aniweeb as an explicit episode-level iframe source using its documented AniList-ID route. It is available for anime series when an AniList ID resolves; sub is the default track.
-- Enabled the existing VidSrc and VidAPI embed builders in anime mode as additional TMDB-ID fallbacks, instead of hiding them from anime viewers.
-- The anime source order now tries Aniweeb first for series, then VidPlus, VidLink, VidSrc, and VidAPI where the required ID is available.
-- AniList/Jikan remain metadata resolvers, not playback sources. The anime-sdk, Ani-API, and similar self-hosted extraction projects are not browser-only drop-ins: they require a trusted server runtime and proxy/security controls, so they are not silently enabled in static Firebase Hosting.
-
-Public aggregator APIs and open-source extraction projects are not automatically licensed to redistribute or embed every title they can resolve. Provider terms/rights and live episode availability still need review; a loaded iframe is not proof that a stream plays.
+- VidPlus, VidLink, VidSrc, and VidAPI are the anime player choices, subject to the identifiers each provider requires.
+- Aniweeb was removed from the active player because its availability and real episode playback could not be verified. Do not treat a documented URL as a confirmed working source.
+- Anime source timeouts now trigger an automatic attempt at the next eligible source after 12 seconds; non-anime playback retains the existing manual fallback prompt.
+- AniList/Jikan are metadata resolvers, not playback sources. Other aggregators still need live episode, provider-terms, and security checks before production integration.
 
 ## Verification still required
 
