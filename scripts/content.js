@@ -44,9 +44,21 @@ const HOME_LOADERS = Object.freeze({
   },
   nowPlaying: (page) => tmdbApi.nowPlayingMovies(page),
   popularMovies: (page) => tmdbApi.popularMovies(page),
-  topRatedMovies: (page) => tmdbApi.topRatedMovies(page),
+  // Keep the Home rating shelf relevant to current releases instead of letting
+  // an all-time ranking permanently occupy the first page with older classics.
+  topRatedMovies: (page) => {
+    const cutoff = new Date();
+    cutoff.setFullYear(cutoff.getFullYear() - 5);
+    const from = [cutoff.getFullYear(), String(cutoff.getMonth() + 1).padStart(2, "0"), String(cutoff.getDate()).padStart(2, "0")].join("-");
+    return tmdbApi.discoverMovies({ page, sort_by: "vote_average.desc", "vote_count.gte": "100", "primary_release_date.gte": from });
+  },
   popularTv: (page) => tmdbApi.popularTv(page),
-  topRatedTv: (page) => tmdbApi.topRatedTv(page),
+  topRatedTv: (page) => {
+    const cutoff = new Date();
+    cutoff.setFullYear(cutoff.getFullYear() - 5);
+    const from = [cutoff.getFullYear(), String(cutoff.getMonth() + 1).padStart(2, "0"), String(cutoff.getDate()).padStart(2, "0")].join("-");
+    return tmdbApi.discoverTv({ page, sort_by: "vote_average.desc", "vote_count.gte": "50", "first_air_date.gte": from });
+  },
   airingToday: (page) => tmdbApi.airingTodayTv(page),
   anime: (page) => tmdbApi.discoverMovies({ page, with_genres: 16, sort_by: "popularity.desc" }),
   kdrama: (page) => tmdbApi.discoverTv({ page, with_original_language: "ko", sort_by: "popularity.desc" }),
@@ -58,18 +70,26 @@ const HOME_LOADERS = Object.freeze({
   hulu: () => providerHome(PROVIDER_IDS.hulu),
   paramountPlus: () => providerHome(PROVIDER_IDS.paramountPlus),
   newReleases: () => {
+    // Use local calendar dates (not UTC ISO dates) so the release window cannot
+    // drift a day around midnight. Sort by actual release date first: popularity
+    // alone can bury a title that came out yesterday under older viral titles.
+    const dateKey = (date) => [date.getFullYear(), String(date.getMonth() + 1).padStart(2, "0"), String(date.getDate()).padStart(2, "0")].join("-");
     const now = new Date();
     const from = new Date(now); from.setDate(from.getDate() - 45);
     const to = new Date(now); to.setDate(to.getDate() + 14);
+    const fromKey = dateKey(from), toKey = dateKey(to);
     return Promise.allSettled([
-      tmdbApi.newMovies(1, from.toISOString().slice(0,10), to.toISOString().slice(0,10)),
-      tmdbApi.newTv(1, from.toISOString().slice(0,10), to.toISOString().slice(0,10))
+      tmdbApi.newMovies(1, fromKey, toKey),
+      tmdbApi.newTv(1, fromKey, toKey)
     ]).then(results => {
       const items = [];
       results.forEach((result,index) => {
         if(result.status==="fulfilled") items.push(...normalizeResults(result.value?.results||[], index===0?"movie":"tv"));
       });
-      items.sort((a,b)=>Number(b.raw?.popularity||0)-Number(a.raw?.popularity||0));
+      items.sort((a,b) =>
+        String(b.date || "").localeCompare(String(a.date || "")) ||
+        Number(b.raw?.popularity||0)-Number(a.raw?.popularity||0)
+      );
       return {page:1,total_pages:1,results:items.slice(0,20)};
     });
   },
@@ -87,9 +107,9 @@ export const HOME_SECTION_META = Object.freeze({
   top10: { title: "Top 10 on Vivid", description: "The ten titles with the strongest current catalogue momentum.", type: "all" },
   nowPlaying: { title: "Now playing", description: "Movies currently in cinemas and in the current release cycle.", type: "movie" },
   popularMovies: { title: "Popular movies", description: "Big-screen stories worth a look.", type: "movie" },
-  topRatedMovies: { title: "Top rated", description: "Highly rated across the catalogue.", type: "movie" },
+  topRatedMovies: { title: "Top rated", description: "Strongly rated movies from the last five years, with enough votes to make the score meaningful.", type: "movie" },
   popularTv: { title: "Popular TV", description: "Series people are watching now.", type: "tv" },
-  topRatedTv: { title: "Top rated TV", description: "Highly rated series across the catalogue.", type: "tv" },
+  topRatedTv: { title: "Top rated TV", description: "Strongly rated series from the last five years, with enough votes to make the score meaningful.", type: "tv" },
   airingToday: { title: "On TV today", description: "Series with episodes airing today.", type: "tv" },
   anime: { title: "Anime", description: "Animated worlds and stories.", type: "movie" },
   kdrama: { title: "K-Dramas", description: "Popular Korean series.", type: "tv" },

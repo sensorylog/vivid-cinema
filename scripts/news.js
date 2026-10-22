@@ -262,9 +262,16 @@ async function load() {
     tmdbApi.futureMovies(1, now, futureEnd),
     tmdbApi.futureTv(1, now, futureEnd),
     tmdbApi.popularMovies(1),
-    tmdbApi.popularTv(1)
+    tmdbApi.popularTv(1),
+    // TMDB sorts discovery results by popularity, not release date. Fetch more
+    // than one page so quieter releases from Monday/Tuesday are not silently
+    // omitted from the weekly radar.
+    tmdbApi.newMovies(2, weekStart, weekEnd),
+    tmdbApi.newMovies(3, weekStart, weekEnd),
+    tmdbApi.newTv(2, weekStart, weekEnd),
+    tmdbApi.newTv(3, weekStart, weekEnd)
   ]);
-  const coreNames = ["trending","new movies today","new TV today","movies this week","TV this week","future movies","future TV","popular movies","popular TV"];
+  const coreNames = ["trending","new movies today","new TV today","movies this week","TV this week","future movies","future TV","popular movies","popular TV","movies this week page 2","movies this week page 3","TV this week page 2","TV this week page 3"];
   const failedCore = core.map((result, i) => result.status === "rejected" ? {endpoint:coreNames[i], error:String(result.reason?.message || result.reason || "Unknown error")} : null).filter(Boolean);
   if (failedCore.length) console.warn("Vivid News catalogue requests failed:", failedCore);
   const value = i => core[i]?.status === "fulfilled" ? core[i].value : {results:[]};
@@ -297,8 +304,8 @@ async function load() {
   // One dated list for the current week, drawn from every catalogue request the
   // page already makes. Titles with no usable date are counted, never guessed.
   const week = collectWeekReleases({
-    movies: (value(3).results || []).map(x=>({...x,media_type:"movie"})),
-    tv: (value(4).results || []).map(x=>({...x,media_type:"tv"})),
+    movies: [3,9,10].flatMap(i => value(i).results || []).map(x=>({...x,media_type:"movie"})),
+    tv: [4,11,12].flatMap(i => value(i).results || []).map(x=>({...x,media_type:"tv"})),
     extra: [
       ...todayItems,
       ...(value(5).results || []).map(x=>({...x,media_type:"movie"})),
@@ -308,10 +315,19 @@ async function load() {
   const weekItems = week.items;
   state.weekWindow = week.window;
 
-  weekItems.slice(0, 12).forEach(x => add(story(x,"week","THIS WEEK",
-    titleOf(x) + " arrives this week.",
-    safeOverview(x.overview,"A newly arriving title worth keeping on your radar."),
-    "week",x.date,{releaseStatus:x.status})));
+  weekItems.slice(0, 30).forEach(x => {
+    const headline = x.status.tone === "released"
+      ? titleOf(x) + " was released earlier this week."
+      : x.status.tone === "today"
+        ? titleOf(x) + " is released today."
+        : titleOf(x) + " is due later this week.";
+    const summary = x.status.tone === "released"
+      ? x.status.label + ". " + safeOverview(x.overview,"This title has already arrived this week.")
+      : x.status.tone === "today"
+        ? "Release day is today. " + safeOverview(x.overview,"A fresh title arriving today.")
+        : safeOverview(x.overview,"A newly arriving title worth keeping on your radar.");
+    add(story(x,"week","THIS WEEK",headline,summary,"week",x.date,{releaseStatus:x.status}));
+  });
 
   const coming = [
     ...(value(5).results || []).map(x=>({...x,media_type:"movie"})),
