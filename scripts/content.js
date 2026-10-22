@@ -18,17 +18,8 @@ async function providerHome(providerId) {
       items.push(...normalizeResults(result.value?.results || [], index === 0 ? "movie" : "tv"));
     }
   });
-  if (!items.length) {
-    const global = await Promise.allSettled([
-      providerDiscover(providerId, "movie", 1, false),
-      providerDiscover(providerId, "tv", 1, false)
-    ]);
-    global.forEach((result, index) => {
-      if (result.status === "fulfilled") {
-        items.push(...normalizeResults(result.value?.results || [], index === 0 ? "movie" : "tv"));
-      }
-    });
-  }
+  // Do not silently fall back to a worldwide catalogue: that can show titles
+  // unavailable in the viewer's selected country and mislabel them as local.
   items.sort((a,b) => Number(b.raw?.popularity||0)-Number(a.raw?.popularity||0) || Number(b.vote_average||0)-Number(a.vote_average||0));
   return { page: 1, total_pages: 1, results: items.slice(0, 20) };
 }
@@ -104,20 +95,20 @@ export const HOME_SECTION_META = Object.freeze({
   top10: { title: "Top 10 on Vivid", description: "A daily snapshot of titles trending across movies and series.", type: "all" },
   nowPlaying: { title: "Now playing", description: "Movies currently in cinemas and in the current release cycle.", type: "movie" },
   popularMovies: { title: "Popular movies", description: "Big-screen stories worth a look.", type: "movie" },
-  topRatedMovies: { title: "Top rated", description: "Strongly rated movies from the last five years, with enough votes to make the score meaningful.", type: "movie" },
+  topRatedMovies: { title: "Top rated", description: "The highest-rated movies across the TMDB catalogue.", type: "movie" },
   popularTv: { title: "Popular TV", description: "Series people are watching now.", type: "tv" },
-  topRatedTv: { title: "Top rated TV", description: "Strongly rated series from the last five years, with enough votes to make the score meaningful.", type: "tv" },
+  topRatedTv: { title: "Top rated TV", description: "The highest-rated series across the TMDB catalogue.", type: "tv" },
   airingToday: { title: "On TV today", description: "Series with episodes airing today.", type: "tv" },
   anime: { title: "Anime", description: "Animated worlds and stories.", type: "movie" },
   kdrama: { title: "K-Dramas", description: "Popular Korean series.", type: "tv" },
   upcoming: { title: "Coming soon", description: "Upcoming movies on the radar.", type: "movie" },
-  netflix: { title: "Trending on Netflix", description: "Popular titles currently surfacing on Netflix.", type: "all" },
-  primeVideo: { title: "Trending on Prime Video", description: "Popular titles currently surfacing on Prime Video.", type: "all" },
-  hboMax: { title: "Trending on HBO Max", description: "Popular titles currently surfacing on HBO Max.", type: "all" },
-  disneyPlus: { title: "Trending on Disney+", description: "Popular titles currently surfacing on Disney+.", type: "all" },
-  appleTvPlus: { title: "Trending on Apple TV+", description: "Popular titles currently surfacing on Apple TV+.", type: "all" },
-  hulu: { title: "Trending on Hulu", description: "Popular titles currently surfacing on Hulu.", type: "all" },
-  paramountPlus: { title: "Trending on Paramount+", description: "Popular titles currently surfacing on Paramount+.", type: "all" },
+  netflix: { title: "Trending on Netflix", description: "Popular titles available on Netflix in your selected region, ranked by current TMDB popularity.", type: "all" },
+  primeVideo: { title: "Trending on Prime Video", description: "Popular titles available on Prime Video in your selected region, ranked by current TMDB popularity.", type: "all" },
+  hboMax: { title: "Trending on HBO Max", description: "Popular titles available on HBO Max in your selected region, ranked by current TMDB popularity.", type: "all" },
+  disneyPlus: { title: "Trending on Disney+", description: "Popular titles available on Disney+ in your selected region, ranked by current TMDB popularity.", type: "all" },
+  appleTvPlus: { title: "Trending on Apple TV+", description: "Popular titles available on Apple TV+ in your selected region, ranked by current TMDB popularity.", type: "all" },
+  hulu: { title: "Trending on Hulu", description: "Popular titles available on Hulu in your selected region, ranked by current TMDB popularity.", type: "all" },
+  paramountPlus: { title: "Trending on Paramount+", description: "Popular titles available on Paramount+ in your selected region, ranked by current TMDB popularity.", type: "all" },
   newReleases: { title: "New releases", description: "Fresh movies and series from the current release window.", type: "all" }
 });
 
