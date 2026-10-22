@@ -261,6 +261,14 @@ function ensureSkipLink() {
 }
 
 function setPageIdentity() {
+  let authorMeta = document.querySelector('meta[name="author"]');
+  if (!authorMeta) {
+    authorMeta = document.createElement("meta");
+    authorMeta.name = "author";
+    document.head.appendChild(authorMeta);
+  }
+  authorMeta.content = "Johnson Kyei Baffour";
+
   const page = document.body?.dataset?.vividPage || "unknown";
   document.documentElement.dataset.vividPage = page;
   document.documentElement.dataset.vividApp = "vivid-cinema";
