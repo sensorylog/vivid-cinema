@@ -55,6 +55,7 @@ test("file and native WebView entry points redirect before Firebase modules init
   const redirect = fs.readFileSync(path.join(root, "scripts", "platform-origin-redirect.js"), "utf8");
   assert.match(redirect, /window\.location\.protocol === "file:"/);
   assert.match(redirect, /appassets\.androidplatform\.net/);
+  assert.match(redirect, /isUntrustedNativeOrigin/);
   assert.match(redirect, /https:\/\/vivid-cinema\.web\.app\//);
   assert.match(redirect, /window\.location\.replace\(target\.href\)/);
   const syntaxChecker = fs.readFileSync(path.join(root, "automation", "check-syntax.mjs"), "utf8");
