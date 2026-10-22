@@ -30,25 +30,39 @@ test("Windows installer and portable executable targets use Vivid branding", () 
   assert.ok(fs.existsSync(path.join(root, "icons", "vivid-icon.svg")));
   assert.ok(fs.existsSync(path.join(root, "icons", "vivid-icon-180.png")));
 });
-test("desktop runtime bundles the local app with a restricted renderer", () => {
+test("desktop runtime uses the trusted Firebase Hosting origin with a bundled offline fallback", () => {
   const main = fs.readFileSync(path.join(root, "desktop", "main.cjs"), "utf8");
-  assert.match(main, /app\.getAppPath\(\)/);
-  assert.match(main, /loadURL\(localOrigin \+ "\/home\.html"\)/);
-  assert.match(main, /nodeIntegration:\s*false/);
-  assert.match(main, /contextIsolation:\s*true/);
-  assert.match(main, /sandbox:\s*true/);
+  assert.match(main, /app\\.getAppPath\\(\\)/);
+  assert.match(main, /HOSTED_APP_URL = "https:\\/\\/vivid-cinema\\.web\\.app\\/home\\.html"/);
+  assert.match(main, /loadURL\\(HOSTED_APP_URL\\)/);
+  assert.match(main, /did-fail-load/);
+  assert.match(main, /localOrigin \\+ "\\/home\\.html"/);
+  assert.match(main, /nodeIntegration:\\s*false/);
+  assert.match(main, /contextIsolation:\\s*true/);
+  assert.match(main, /sandbox:\\s*true/);
   assert.match(main, /setWindowOpenHandler/);
   assert.match(main, /isFirebaseAuthPopup/);
-  assert.match(main, /contextIsolation: true/);
-  assert.match(main, /startsWith\(absoluteRoot \+ path\.sep\)/);
-  assert.match(main, /vivid-icon\.ico/);
-  assert.match(main, /win\.maximize\(\)/);
-  assert.match(main, /win\.setFullScreen\(!win\.isFullScreen\(\)\)/);
-  assert.match(main, /input\.key === "F11"/);
-  assert.match(main, /icon:\s*appIcon/);
-  assert.match(main, /setAppUserModelId\("com\.axisvision\.vividcinema"\)/);
-  assert.match(main, /win\.maximize\(\)/);
-  assert.match(main, /win\.show\(\)/);
+  assert.match(main, /startsWith\\(absoluteRoot \\+ path\\.sep\\)/);
+  assert.match(main, /vivid-icon\\.ico/);
+  assert.match(main, /win\\.maximize\\(\\)/);
+  assert.match(main, /win\\.setFullScreen\\(!win\\.isFullScreen\\(\\)\\)/);
+  assert.match(main, /input\\.key === "F11"/);
+  assert.match(main, /icon:\\s*appIcon/);
+  assert.match(main, /setAppUserModelId\\("com\\.axisvision\\.vividcinema"\\)/);
+  assert.match(main, /win\\.show\\(\\)/);
+});
+test("file and native WebView entry points redirect before Firebase modules initialize", () => {
+  const redirect = fs.readFileSync(path.join(root, "scripts", "platform-origin-redirect.js"), "utf8");
+  assert.match(redirect, /window\\.location\\.protocol === "file:"/);
+  assert.match(redirect, /appassets\\.androidplatform\\.net/);
+  assert.match(redirect, /https:\\/\\/vivid-cinema\\.web\\.app\\//);
+  assert.match(redirect, /window\\.location\\.replace\\(target\\.href\\)/);
+  for (const page of ["index.html", "home.html", "for-you.html"]) {
+    const source = fs.readFileSync(path.join(root, page), "utf8");
+    const tag = '<script src="scripts/platform-origin-redirect.js"></script>';
+    assert.ok(source.includes(tag), page + " includes the native-origin redirect");
+    assert.ok(source.indexOf(tag) < source.indexOf('type="module"'), page + " redirects before Firebase modules run");
+  }
 });
 test("Windows icon preparation creates a valid ICO container from the checked-in Vivid PNG", () => {
   const script = fs.readFileSync(path.join(root, "desktop", "make-windows-icon.cjs"), "utf8");
