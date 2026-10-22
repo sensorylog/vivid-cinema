@@ -6,7 +6,7 @@ on:
     paths:
       - "package.json"
       - "desktop/**"
-      - "tests/desktop-build.test.mjs"
+      - "tests/**"
       - ".github/workflows/windows-desktop.yml"
   push:
     tags:
@@ -30,6 +30,8 @@ jobs:
         run: npm install --no-audit --no-fund
       - name: Run desktop packaging contract tests
         run: node --test tests/desktop-build.test.mjs
+      - name: Check JavaScript syntax
+        run: npm run check:syntax
       - name: Run existing repository regression tests
         run: npm test
       - name: Build Windows installer and portable executable
