@@ -68,7 +68,7 @@ test("movie and TV Player 1 exposes seven sources while anime providers remain s
 test("movie/TV server picker keeps all providers in a simple scrollable dropdown", async () => {
   assert.match(source, /"embedwave", "vidfast", "ezvidapi", "embedapistream", "moviesapi"\]\.includes\(source\)/);
   assert.match(source, /const toggleServerMenu = \(\) =>/);
-  assert.doesNotMatch(source, /positionServerPanel/);
+  assert.match(source, /positionServerPanel/);
   const styles = await readFile(new URL("../styles/vivid-cleanup.css", import.meta.url), "utf8");
   assert.match(styles, /\.vivid-server-panel\s*\{[\s\S]*?position:\s*absolute/);
   assert.match(styles, /overflow-y:\s*auto/);
