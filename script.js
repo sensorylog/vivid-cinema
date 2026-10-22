@@ -6,7 +6,7 @@ import { getContinueWatching, getPlaybackProgress, getPersonalRecommendations, g
 import { escapeHtml, debounce, getErrorMessage } from "./scripts/utils.js";
 import { buildWatchUrl } from "./scripts/routes.js";
 import { checkForReleaseAlerts, deliverReleaseAlerts, getPendingReleaseAlerts, requestReleaseAlerts, dismissReleaseAlert, clearReleaseAlerts, getReleaseAlertState } from "./scripts/release-alerts.js";
-import { startIntelligenceSync, shouldShowColdStart, completeColdStart, dismissColdStart, recordBehavior, getTasteProfile, getTasteStrength } from "./scripts/intelligence.js";
+import { startIntelligenceSync, shouldShowColdStart, markColdStartShown, completeColdStart, dismissColdStart, recordBehavior, getTasteProfile, getTasteStrength } from "./scripts/intelligence.js";
 import { searchIntelligently, getRecentSearches, getRecentSearchOwner, rememberSearch, clearRecentSearches } from "./scripts/search.js";
 import { addCinemaReminder, hasCinemaReminder, startCinemaReminderLoop } from "./scripts/cinema-reminders.js";
 import { enableCinemaPush, ensureCinemaPush, getServerReleaseAlerts, dismissServerReleaseAlert, savePushReminder } from "./scripts/push-notifications.js";
