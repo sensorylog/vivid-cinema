@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - android-capacitor-foundation
+      - feat/windows-desktop-electron
   workflow_dispatch:
 
 permissions:
