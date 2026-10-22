@@ -8,7 +8,7 @@ const manifest = JSON.parse(await readFile(new URL("../manifest.json", import.me
 
 test("Android APK workflow applies the shared Vivid icon after Capacitor sync", () => {
   assert.match(workflow, /automation\/apply-android-icon\.mjs/);
-  assert.ok(workflow.indexOf("npm run cap:sync") < workflow.indexOf("automation/apply-android-icon.mjs"));
+  assert.ok(workflow.indexOf("npm run cap:sync") < workflow.lastIndexOf("automation/apply-android-icon.mjs"));
 });
 
 test("Android launcher and web manifest use the same Vivid Cinema PNG source", () => {
