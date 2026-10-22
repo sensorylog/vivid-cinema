@@ -5,6 +5,11 @@ on:
   pull_request:
     paths:
       - "package.json"
+      - "*.html"
+      - "scripts/**"
+      - "service-worker.js"
+      - "firebase.json"
+      - "init.json"
       - "desktop/**"
       - "icons/**"
       - "tests/**"
