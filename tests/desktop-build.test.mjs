@@ -10,6 +10,7 @@ test("desktop packaging is opt-in and preserves existing scripts", () => {
   assert.equal(pkg.scripts["desktop:start"], "electron desktop/main.cjs");
   assert.match(pkg.scripts["desktop:dist"], /make-windows-icon\.cjs/);
   assert.match(pkg.scripts["desktop:dist"], /electron-builder --win nsis portable/);
+  assert.match(pkg.scripts["desktop:dist"], /--publish never/);
   assert.match(pkg.scripts.test, /tests\/desktop-build\.test\.mjs/);
   assert.equal(pkg.scripts["check:syntax"], "node automation/check-syntax.mjs");
   assert.ok(pkg.scripts["test:rules"]);
