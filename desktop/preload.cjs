@@ -6,34 +6,39 @@ if (trustedHosts.has(location.hostname)) {
   let banner = null;
   let message = null;
   let action = null;
-  let close = null;
   let dismissedVersion = null;
 
   const createBanner = () => {
     if (banner || !document.body) return;
+    const stylesheet = document.createElement("link");
+    stylesheet.rel = "stylesheet";
+    stylesheet.href = new URL("/styles/vivid-desktop-update.css", location.origin).href;
+    stylesheet.dataset.vividDesktopUpdateStyles = "true";
+    document.head.appendChild(stylesheet);
+
     banner = document.createElement("aside");
+    banner.className = "vivid-desktop-update";
     banner.setAttribute("role", "status");
     banner.setAttribute("aria-live", "polite");
-    banner.style.cssText = "position:fixed;z-index:2147483000;top:16px;left:50%;transform:translateX(-50%);width:min(560px,calc(100vw - 28px));box-sizing:border-box;display:flex;align-items:center;gap:14px;padding:15px 16px;border:1px solid rgba(125,145,190,.35);border-radius:16px;background:#101421;color:#f6f8ff;box-shadow:0 18px 60px rgba(0,0,0,.48);font:500 14px/1.4 Segoe UI,system-ui,sans-serif";
     const brand = document.createElement("span");
+    brand.className = "vivid-desktop-update__brand";
     brand.textContent = "✦";
-    brand.style.cssText = "font-size:23px;color:#9bb7ff;flex:0 0 auto";
     const copy = document.createElement("div");
-    copy.style.cssText = "flex:1;min-width:0";
+    copy.className = "vivid-desktop-update__copy";
     const title = document.createElement("strong");
+    title.className = "vivid-desktop-update__title";
     title.textContent = "Vivid Cinema update";
-    title.style.cssText = "display:block;font-size:14px;margin-bottom:3px";
     message = document.createElement("span");
-    message.style.cssText = "display:block;color:#c3cadd;font-size:12px";
+    message.className = "vivid-desktop-update__message";
     copy.append(title, message);
     action = document.createElement("button");
     action.type = "button";
-    action.style.cssText = "flex:0 0 auto;border:0;border-radius:10px;padding:10px 13px;background:#e9edff;color:#151a2a;font:700 12px Segoe UI,system-ui,sans-serif;cursor:pointer";
-    close = document.createElement("button");
+    action.className = "vivid-desktop-update__action";
+    const close = document.createElement("button");
     close.type = "button";
+    close.className = "vivid-desktop-update__close";
     close.textContent = "×";
     close.setAttribute("aria-label", "Dismiss update notification");
-    close.style.cssText = "flex:0 0 auto;border:0;background:transparent;color:#c3cadd;font-size:22px;cursor:pointer;padding:0 2px";
     close.addEventListener("click", () => {
       if (latestStatus?.version) dismissedVersion = latestStatus.version;
       banner.hidden = true;
@@ -51,7 +56,6 @@ if (trustedHosts.has(location.hostname)) {
     if (!banner) return;
     banner.hidden = false;
     action.disabled = false;
-    action.style.opacity = "1";
     if (status.state === "available") {
       message.textContent = "Version " + status.version + " is ready. Download it when you're ready.";
       action.textContent = "Update";
@@ -65,7 +69,6 @@ if (trustedHosts.has(location.hostname)) {
       message.textContent = "Downloading your update… " + status.percent + "%";
       action.textContent = status.percent + "%";
       action.disabled = true;
-      action.style.opacity = ".75";
       action.onclick = null;
     } else if (status.state === "downloaded") {
       message.textContent = "Version " + status.version + " is downloaded and ready to install.";
