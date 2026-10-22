@@ -4,17 +4,76 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "test": "node --test tests/newest-sort.test.mjs tests/catalogue-release-filter.test.mjs tests/live-catalogue.test.mjs tests/playback-urls.test.mjs tests/anime-secondary-player.test.mjs tests/anime-secondary-player-structure.test.mjs tests/anime-id-resolver.test.mjs tests/service-worker.test.mjs tests/watch-player.test.mjs tests/tflix-secondary-player.test.mjs tests/playback-structure.test.mjs tests/home-hero.test.mjs tests/home-search.test.mjs tests/google-tag.test.mjs tests/adcash.test.mjs tests/performance.test.mjs tests/auth-verification.test.mjs tests/push-notifications.test.mjs tests/account-profile.test.mjs tests/attribution.test.mjs tests/local-owner.test.mjs tests/memory-sync.test.mjs tests/recommendations-memory.test.mjs tests/intent-parser.test.mjs tests/recommendation-ranking.test.mjs tests/for-you-structure.test.mjs tests/plot-search.test.mjs tests/catalog-search.test.mjs tests/intelligence-integration.test.mjs tests/intelligence-events.test.mjs tests/future-module-contracts.test.mjs tests/firebase-ai-config.test.mjs tests/achievements.test.mjs tests/achievements-page.test.mjs tests/release-alerts.test.mjs tests/notification-senders.test.mjs tests/newsroom-ingest.test.mjs tests/static-news-images.test.mjs",
+    "test": "node --test tests/newest-sort.test.mjs tests/catalogue-release-filter.test.mjs tests/live-catalogue.test.mjs tests/playback-urls.test.mjs tests/anime-secondary-player.test.mjs tests/anime-secondary-player-structure.test.mjs tests/anime-id-resolver.test.mjs tests/service-worker.test.mjs tests/watch-player.test.mjs tests/tflix-secondary-player.test.mjs tests/playback-structure.test.mjs tests/home-hero.test.mjs tests/home-search.test.mjs tests/google-tag.test.mjs tests/adcash.test.mjs tests/performance.test.mjs tests/auth-verification.test.mjs tests/push-notifications.test.mjs tests/account-profile.test.mjs tests/attribution.test.mjs tests/local-owner.test.mjs tests/memory-sync.test.mjs tests/recommendations-memory.test.mjs tests/intent-parser.test.mjs tests/recommendation-ranking.test.mjs tests/for-you-structure.test.mjs tests/plot-search.test.mjs tests/catalog-search.test.mjs tests/intelligence-integration.test.mjs tests/intelligence-events.test.mjs tests/future-module-contracts.test.mjs tests/firebase-ai-config.test.mjs tests/achievements.test.mjs tests/achievements-page.test.mjs tests/release-alerts.test.mjs tests/notification-senders.test.mjs tests/newsroom-ingest.test.mjs tests/static-news-images.test.mjs tests/desktop-build.test.mjs",
     "test:rules": "firebase emulators:exec --project vivid-cinema-rules-test --only firestore \"node --test tests/firestore.rules.test.mjs\"",
-    "check:syntax": "node automation/check-syntax.mjs"
+    "check:syntax": "node automation/check-syntax.mjs",
+    "desktop:start": "electron desktop/main.cjs",
+    "desktop:dist": "node desktop/make-windows-icon.cjs && electron-builder --win nsis portable"
   },
   "devDependencies": {
     "@firebase/rules-unit-testing": "^4.0.1",
     "firebase": "^11.10.0",
-    "firebase-tools": "^15.34.0"
+    "firebase-tools": "^15.34.0",
+    "electron": "^36.4.0",
+    "electron-builder": "^26.0.12"
   },
   "dependencies": {
     "firebase-admin": "^14.5.0"
   },
-  "author": "Johnson Kyei Baffour"
+  "author": "Johnson Kyei Baffour",
+  "main": "desktop/main.cjs",
+  "build": {
+    "appId": "com.axisvision.vividcinema",
+    "productName": "Vivid Cinema",
+    "directories": {
+      "output": "dist-desktop"
+    },
+    "files": [
+      "**/*",
+      "!node_modules/**",
+      "!.git/**",
+      "!.github/**",
+      "!tests/**",
+      "!functions/**",
+      "!automation/**",
+      "!docs/**",
+      "!dist-desktop/**",
+      "!coverage/**",
+      "!README.md",
+      "!LICENSE"
+    ],
+    "asar": true,
+    "win": {
+      "icon": "icons/vivid-icon.ico",
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "installerIcon": "icons/vivid-icon.ico",
+      "uninstallerIcon": "icons/vivid-icon.ico",
+      "artifactName": "Vivid-Cinema-Setup-${version}.${ext}",
+      "installerHeaderIcon": "icons/vivid-icon.ico"
+    },
+    "portable": {
+      "artifactName": "Vivid-Cinema-Portable-${version}.${ext}"
+    },
+    "artifactName": "Vivid-Cinema-${version}-${arch}.${ext}",
+    "copyright": "Copyright © 2026 Johnson Kyei Baffour"
+  }
 }
