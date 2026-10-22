@@ -7,19 +7,30 @@ async function providerDiscover(providerId, type, page = 1, useRegion = true) {
   if (useRegion) params.watch_region = getProviderCountry();
   return type === "movie" ? tmdbApi.discoverMovies(params) : tmdbApi.discoverTv(params);
 }
-async function providerHome(providerId) {
-  const regional = await Promise.allSettled([
-    providerDiscover(providerId, "movie", 1, true),
-    providerDiscover(providerId, "tv", 1, true)
-  ]);
-  let items = [];
-  regional.forEach((result, index) => {
-    if (result.status === "fulfilled") {
-      items.push(...normalizeResults(result.value?.results || [], index === 0 ? "movie" : "tv"));
-    }
-  });
-  // Do not silently fall back to a worldwide catalogue: that can show titles
-  // unavailable in the viewer's selected country and mislabel them as local.
+async function providerHome(providerId, { allowWorldwideFallback = false } = {}) {
+  const loadProviderItems = async useRegion => {
+    const results = await Promise.allSettled([
+      providerDiscover(providerId, "movie", 1, useRegion),
+      providerDiscover(providerId, "tv", 1, useRegion)
+    ]);
+    const items = [];
+    results.forEach((result, index) => {
+      if (result.status === "fulfilled") {
+        items.push(...normalizeResults(result.value?.results || [], index === 0 ? "movie" : "tv"));
+      }
+    });
+    return items;
+  };
+
+  let items = await loadProviderItems(true);
+  // Paramount+ has limited/variable TMDB watch-provider coverage by country.
+  // If the regional query cannot fill a useful shelf, use its worldwide
+  // catalogue instead of leaving a completely blank row. The UI copy makes
+  // clear that streaming availability varies by country.
+  if (allowWorldwideFallback && items.length < 8) {
+    const worldwideItems = await loadProviderItems(false);
+    if (worldwideItems.length > items.length) items = worldwideItems;
+  }
   items.sort((a,b) => Number(b.raw?.popularity||0)-Number(a.raw?.popularity||0) || Number(b.vote_average||0)-Number(a.vote_average||0));
   return { page: 1, total_pages: 1, results: items.slice(0, 20) };
 }
@@ -49,7 +60,7 @@ const HOME_LOADERS = Object.freeze({
   disneyPlus: () => providerHome(PROVIDER_IDS.disneyPlus),
   appleTvPlus: () => providerHome(PROVIDER_IDS.appleTvPlus),
   hulu: () => providerHome(PROVIDER_IDS.hulu),
-  paramountPlus: () => providerHome(PROVIDER_IDS.paramountPlus),
+  paramountPlus: () => providerHome(PROVIDER_IDS.paramountPlus, { allowWorldwideFallback: true }),
   newReleases: () => {
     // Use local calendar dates (not UTC ISO dates) so the release window cannot
     // drift a day around midnight. Sort by actual release date first: popularity
@@ -108,7 +119,7 @@ export const HOME_SECTION_META = Object.freeze({
   disneyPlus: { title: "Trending on Disney+", description: "Popular titles available on Disney+ in your selected region, ranked by current TMDB popularity.", type: "all" },
   appleTvPlus: { title: "Trending on Apple TV+", description: "Popular titles available on Apple TV+ in your selected region, ranked by current TMDB popularity.", type: "all" },
   hulu: { title: "Trending on Hulu", description: "Popular titles available on Hulu in your selected region, ranked by current TMDB popularity.", type: "all" },
-  paramountPlus: { title: "Trending on Paramount+", description: "Popular titles available on Paramount+ in your selected region, ranked by current TMDB popularity.", type: "all" },
+  paramountPlus: { title: "Trending on Paramount+", description: "Popular titles associated with Paramount+, ranked by current TMDB popularity. Streaming availability varies by country.", type: "all" },
   newReleases: { title: "New releases", description: "Fresh movies and series from the current release window.", type: "all" }
 });
 
