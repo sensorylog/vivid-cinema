@@ -1,4 +1,5 @@
-const { app, BrowserWindow, Menu, dialog, shell, session } = require("electron");
+const { app, BrowserWindow, Menu, dialog, shell, session, ipcMain } = require("electron");
+const { autoUpdater } = require("electron-updater");
 const http = require("node:http");
 const fs = require("node:fs");
 const path = require("node:path");
@@ -76,6 +77,8 @@ const HOSTED_APP_ORIGIN = new URL(HOSTED_APP_URL).origin;
 const FIREBASE_FALLBACK_URL = "https://vivid-cinema.web.app/home.html";
 const FIREBASE_FALLBACK_ORIGIN = new URL(FIREBASE_FALLBACK_URL).origin;
 const HOSTED_LOAD_TIMEOUT_MS = 12000;
+const supportsOneClickUpdates = app.isPackaged && process.platform === "win32" &&
+  !process.env.PORTABLE_EXECUTABLE_FILE && !process.env.PORTABLE_EXECUTABLE_DIR;
 const LOADING_HTML = `<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Vivid Cinema</title><style>
@@ -102,12 +105,68 @@ async function startLocalServer() {
 
 function installApplicationMenu() { Menu.setApplicationMenu(Menu.buildFromTemplate([{ label: "Vivid Cinema", submenu: [{ label: "About Vivid Cinema", click: async () => dialog.showMessageBox({ title: "About Vivid Cinema", message: "Vivid Cinema", detail: "Version " + app.getVersion() + "\\nA cinematic discovery experience by Axis Vision.", buttons: ["OK"] }) }, { type: "separator" }, { role: "quit", label: "Exit Vivid Cinema" }] }, { label: "View", submenu: [{ role: "reload", label: "Reload", accelerator: "CmdOrCtrl+R" }, { role: "forceReload", label: "Force Reload", accelerator: "CmdOrCtrl+Shift+R" }, { type: "separator" }, { label: "Toggle Full Screen", accelerator: "F11", click: () => { const win = BrowserWindow.getFocusedWindow(); if (win) win.setFullScreen(!win.isFullScreen()); } }, { type: "separator" }, { label: "Zoom In", accelerator: "CmdOrCtrl+Plus", click: () => { const win = BrowserWindow.getFocusedWindow(); if (win) win.webContents.setZoomLevel(win.webContents.getZoomLevel() + 0.5); } }, { label: "Zoom Out", accelerator: "CmdOrCtrl+-", click: () => { const win = BrowserWindow.getFocusedWindow(); if (win) win.webContents.setZoomLevel(win.webContents.getZoomLevel() - 0.5); } }, { label: "Reset Zoom", accelerator: "CmdOrCtrl+0", click: () => { const win = BrowserWindow.getFocusedWindow(); if (win) win.webContents.setZoomLevel(0); } }] }, { label: "Help", submenu: [{ label: "Vivid Cinema Website", click: () => { void shell.openExternal(HOSTED_APP_URL); } }, { label: "Report an Issue", click: () => { void shell.openExternal("https://github.com/sensorylog/vivid-cinema/issues"); } }] }])); }
 
+
+function isTrustedUpdateSender(event) {
+  try {
+    if (event.senderFrame !== event.sender.mainFrame) return false;
+    const target = new URL(event.senderFrame.url);
+    return target.origin === HOSTED_APP_ORIGIN ||
+      target.origin === FIREBASE_FALLBACK_ORIGIN ||
+      Boolean(localOrigin && target.origin === new URL(localOrigin).origin);
+  } catch { return false; }
+}
+
+function sendUpdateStatus(status) {
+  for (const win of BrowserWindow.getAllWindows()) {
+    if (!win.isDestroyed()) win.webContents.send("vivid-update-status", status);
+  }
+}
+
+function configureAutoUpdates() {
+  if (!supportsOneClickUpdates) return;
+  autoUpdater.autoDownload = false;
+  autoUpdater.autoInstallOnAppQuit = true;
+  autoUpdater.allowDowngrade = false;
+  autoUpdater.on("update-available", info => {
+    sendUpdateStatus({ state: "available", version: info.version });
+  });
+  autoUpdater.on("download-progress", progress => {
+    sendUpdateStatus({ state: "downloading", percent: Math.max(0, Math.min(100, Math.round(progress.percent || 0))) });
+  });
+  autoUpdater.on("update-downloaded", info => {
+    sendUpdateStatus({ state: "downloaded", version: info.version });
+  });
+  autoUpdater.on("error", error => {
+    console.warn("Vivid Cinema update check/install issue:", error?.message || error);
+    sendUpdateStatus({ state: "error" });
+  });
+  ipcMain.handle("vivid-update-download", async event => {
+    if (!isTrustedUpdateSender(event)) throw new Error("Untrusted update request");
+    await autoUpdater.downloadUpdate();
+    return true;
+  });
+  ipcMain.handle("vivid-update-install", event => {
+    if (!isTrustedUpdateSender(event)) throw new Error("Untrusted update request");
+    autoUpdater.quitAndInstall();
+    return true;
+  });
+}
+
+function scheduleUpdateChecks() {
+  if (!supportsOneClickUpdates) return;
+  const check = () => autoUpdater.checkForUpdates().catch(error => {
+    console.warn("Vivid Cinema update check failed:", error?.message || error);
+  });
+  setTimeout(check, 15000);
+  setInterval(check, 6 * 60 * 60 * 1000);
+}
+
 function createWindow() {
   const win = new BrowserWindow({
     width: 1440, height: 900, minWidth: 960, minHeight: 640,
     show: false, backgroundColor: "#050608", autoHideMenuBar: true, title: "Vivid Cinema",
     icon: appIcon,
-    webPreferences: { session: session.defaultSession, nodeIntegration: false, contextIsolation: true, sandbox: true, webSecurity: true }
+    webPreferences: { session: session.defaultSession, preload: path.join(__dirname, "preload.cjs"), nodeIntegration: false, contextIsolation: true, sandbox: true, webSecurity: true }
   });
 
   // Show a tiny local splash immediately; the main app then loads on its trusted HTTPS origin.
@@ -239,12 +298,14 @@ function createWindow() {
 if (hasSingleInstanceLock) {
 app.whenReady().then(async () => {
   installApplicationMenu();
+  configureAutoUpdates();
   session.defaultSession.setPermissionRequestHandler((_webContents, permission, callback) => {
     callback(["fullscreen", "media", "notifications"].includes(permission));
   });
   try {
     await startLocalServer();
     createWindow();
+    scheduleUpdateChecks();
   } catch (error) {
     console.error("Vivid Cinema desktop startup failed:", error);
     app.quit();
