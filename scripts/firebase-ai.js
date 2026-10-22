@@ -56,26 +56,64 @@ function parseClues(raw) {
     .slice(0, 10);
 }
 
+function isTransientAppCheckError(error) {
+  const details = [
+    error?.code,
+    error?.message,
+    error?.customData?.serverResponse,
+    error?.customData?.response,
+    error?.details
+  ].map(value => typeof value === "string" ? value : JSON.stringify(value || ""))
+    .join(" ").toLowerCase();
+  // A WebView can race its first reCAPTCHA/App Check token acquisition. Retry
+  // only token/network initialization failures; never retry quota, auth, policy,
+  // or model errors, which would waste time and could duplicate a billable call.
+  return /app.?check.*(?:token|network|initializ)|(?:token|recaptcha).*?(?:network|timeout|fetch|temporar|not ready)/i.test(details) &&
+    !/unauthenticated|permission.denied|resource.exhausted|quota|\b429\b|\b403\b/.test(details);
+}
+
 async function generateWithTimeout(model, prompt, timeoutMs, operation) {
-  const controller = new AbortController();
-  let timeoutId;
-  try {
-    return await Promise.race([
-      model.generateContent(prompt, { signal: controller.signal }),
-      new Promise((_, reject) => {
-        timeoutId = setTimeout(() => {
-          const error = new Error(
-            operation + " timed out after " + Math.round(timeoutMs / 1000) +
-            " seconds; cancellation of the client request was attempted."
-          );
-          error.name = "TimeoutError";
-          reject(error);
-          controller.abort();
-        }, timeoutMs);
-      })
-    ]);
-  } finally {
-    clearTimeout(timeoutId);
+  const deadline = Date.now() + timeoutMs;
+  let attempt = 0;
+  while (true) {
+    const controller = new AbortController();
+    let timeoutId;
+    try {
+      const remainingMs = deadline - Date.now();
+      if (remainingMs <= 0) {
+        const error = new Error(
+          operation + " timed out after " + Math.round(timeoutMs / 1000) + " seconds."
+        );
+        error.name = "TimeoutError";
+        throw error;
+      }
+      return await Promise.race([
+        model.generateContent(prompt, { signal: controller.signal }),
+        new Promise((_, reject) => {
+          timeoutId = setTimeout(() => {
+            const error = new Error(
+              operation + " timed out after " + Math.round(timeoutMs / 1000) +
+              " seconds; cancellation of the client request was attempted."
+            );
+            error.name = "TimeoutError";
+            reject(error);
+            controller.abort();
+          }, remainingMs);
+        })
+      ]);
+    } catch (error) {
+      if (attempt !== 0 || !isTransientAppCheckError(error) || Date.now() + 300 >= deadline) {
+        throw error;
+      }
+      attempt += 1;
+      console.warn("Vivid Recall: retrying once after a transient App Check token startup failure.", {
+        code: error?.code || null,
+        message: String(error?.message || error).slice(0, 180)
+      });
+      await new Promise(resolve => setTimeout(resolve, 250));
+    } finally {
+      clearTimeout(timeoutId);
+    }
   }
 }
 
