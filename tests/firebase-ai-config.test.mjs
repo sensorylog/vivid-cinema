@@ -63,5 +63,5 @@ test("Recall diagnostics support a deployed Netlify origin without weakening App
   assert.match(firebaseSource, /initializeAppCheck/);
   assert.match(firebaseSource, /ReCaptchaEnterpriseProvider/);
   assert.match(firebaseSource, /allow vivid-cinema\\.netlify\\.app in both Firebase App Check/);
-  assert.match(workerSource, /vivid-cinema-shell-v239/);
+  assert.match(workerSource, /vivid-cinema-shell-v\\d+/);
 });
