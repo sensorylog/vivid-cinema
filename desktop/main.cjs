@@ -78,6 +78,7 @@ function createWindow() {
   const win = new BrowserWindow({
     width: 1440, height: 900, minWidth: 960, minHeight: 640,
     show: false, backgroundColor: "#050608", autoHideMenuBar: true, title: "Vivid Cinema",
+    icon: path.join(appRoot, "icons", process.platform === "win32" ? "vivid-icon.ico" : "vivid-icon-180.png"),
     icon: appIcon,
     webPreferences: { nodeIntegration: false, contextIsolation: true, sandbox: true, webSecurity: true }
   });
