@@ -74,7 +74,7 @@ test("movie/TV server picker keeps all providers in a simple scrollable dropdown
   assert.match(source, /window\.addEventListener\("resize", repositionOpenServerMenu\)/);
   assert.match(source, /window\.addEventListener\("scroll", repositionOpenServerMenu/);
   const styles = await readFile(new URL("../styles/vivid-cleanup.css", import.meta.url), "utf8");
-  assert.match(styles, /\.vivid-server-panel\s*\{[\s\S]*?position:\s*absolute/);
+  assert.match(styles, /\.vivid-server-panel\s*\{[\s\S]*?position:\s*fixed/);
   assert.match(styles, /overflow-y:\s*auto/);
   assert.match(styles, /touch-action:\s*pan-y/);
 });
