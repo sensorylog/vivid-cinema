@@ -71,7 +71,9 @@
     "portable": {
       "artifactName": "Vivid-Cinema-Portable-${version}.${ext}"
     },
-    "artifactName": "Vivid-Cinema-${version}-${arch}.${ext}"
+    "artifactName": "Vivid-Cinema-${version}-${arch}.${ext}",
+    "copyright": "Copyright © 2026 Johnson Kyei Baffour"
   },
-  "main": "desktop/main.cjs"
+  "main": "desktop/main.cjs",
+  "author": "Johnson Kyei Baffour"
 }
