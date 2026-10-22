@@ -18,6 +18,8 @@ function readPng(buffer) {
   let bitDepth = 0;
   let colorType = 0;
   let interlace = 0;
+  let palette = null;
+  let transparency = null;
   const imageData = [];
   while (offset + 12 <= buffer.length) {
     const length = buffer.readUInt32BE(offset);
@@ -29,6 +31,10 @@ function readPng(buffer) {
       bitDepth = data[8];
       colorType = data[9];
       interlace = data[12];
+    } else if (type === "PLTE") {
+      palette = Buffer.from(data);
+    } else if (type === "tRNS") {
+      transparency = Buffer.from(data);
     } else if (type === "IDAT") {
       imageData.push(data);
     } else if (type === "IEND") {
@@ -36,30 +42,44 @@ function readPng(buffer) {
     }
     offset += length + 12;
   }
-  if (bitDepth !== 8 || colorType !== 6 || interlace !== 0 || !width || width !== height) {
-    throw new Error("Expected a non-interlaced, 8-bit RGBA square PNG for the Vivid icon");
+  if (bitDepth !== 8 || ![3, 6].includes(colorType) || interlace !== 0 || !width || width !== height) {
+    throw new Error("Expected a non-interlaced, 8-bit indexed or RGBA square PNG for the Vivid icon");
   }
 
-  const stride = width * 4;
+  const bytesPerPixel = colorType === 6 ? 4 : 1;
+  const stride = width * bytesPerPixel;
   const compressed = zlib.inflateSync(Buffer.concat(imageData));
-  const pixels = Buffer.alloc(height * stride);
+  const decoded = Buffer.alloc(height * stride);
   let sourceOffset = 0;
   for (let y = 0; y < height; y++) {
     const filter = compressed[sourceOffset++];
     const rowOffset = y * stride;
     for (let x = 0; x < stride; x++) {
       const raw = compressed[sourceOffset++];
-      const left = x >= 4 ? pixels[rowOffset + x - 4] : 0;
-      const up = y > 0 ? pixels[rowOffset - stride + x] : 0;
-      const upperLeft = y > 0 && x >= 4 ? pixels[rowOffset - stride + x - 4] : 0;
+      const left = x >= bytesPerPixel ? decoded[rowOffset + x - bytesPerPixel] : 0;
+      const up = y > 0 ? decoded[rowOffset - stride + x] : 0;
+      const upperLeft = y > 0 && x >= bytesPerPixel ? decoded[rowOffset - stride + x - bytesPerPixel] : 0;
       let predictor = 0;
       if (filter === 1) predictor = left;
       else if (filter === 2) predictor = up;
       else if (filter === 3) predictor = Math.floor((left + up) / 2);
       else if (filter === 4) predictor = paeth(left, up, upperLeft);
       else if (filter !== 0) throw new Error("Unsupported PNG filter: " + filter);
-      pixels[rowOffset + x] = (raw + predictor) & 255;
+      decoded[rowOffset + x] = (raw + predictor) & 255;
     }
+  }
+
+  if (colorType === 6) return { width, height, pixels: decoded };
+  if (!palette || palette.length % 3 !== 0) throw new Error("Indexed Vivid PNG is missing its color palette");
+  const pixels = Buffer.alloc(width * height * 4);
+  for (let i = 0; i < decoded.length; i++) {
+    const colorOffset = decoded[i] * 3;
+    if (colorOffset + 2 >= palette.length) throw new Error("Vivid PNG contains an invalid palette index");
+    const target = i * 4;
+    pixels[target] = palette[colorOffset];
+    pixels[target + 1] = palette[colorOffset + 1];
+    pixels[target + 2] = palette[colorOffset + 2];
+    pixels[target + 3] = transparency && decoded[i] < transparency.length ? transparency[decoded[i]] : 255;
   }
   return { width, height, pixels };
 }
