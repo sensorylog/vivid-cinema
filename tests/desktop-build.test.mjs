@@ -22,6 +22,9 @@ test("Windows installer and portable executable targets use Vivid branding", () 
   assert.ok(pkg.dependencies["electron-updater"]);
   assert.equal(pkg.scripts["desktop:publish"].includes("--publish always"), true);
   assert.deepEqual(pkg.build.publish[0], { provider: "github", owner: "sensorylog", repo: "vivid-cinema", releaseType: "release" });
+  assert.ok(pkg.build.files.includes("!node_modules/**"));
+  assert.ok(pkg.build.files.includes("node_modules/electron-updater/**"));
+  assert.ok(pkg.build.files.includes("node_modules/builder-util-runtime/**"));
   assert.deepEqual(pkg.build.win.target.map((target) => target.target), ["nsis", "portable"]);
   assert.equal(pkg.build.asar, true);
   assert.equal(pkg.build.win.icon, "icons/vivid-icon.ico");
