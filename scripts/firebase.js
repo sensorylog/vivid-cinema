@@ -71,7 +71,7 @@ if (!RECAPTCHA_ENTERPRISE_SITE_KEY) {
   // Localhost and loopback were intentionally removed from the reCAPTCHA
   // Enterprise allowed-domain list. Use the deployed Hosting domain to test AI.
   appCheckSkippedReason =
-    "App Check is intentionally skipped on local development hosts; test Gemini on vivid-cinema.web.app.";
+    "App Check is intentionally skipped on local development hosts; test Gemini on the deployed Netlify or Firebase Hosting site.";
 } else {
   try {
     appCheck = initializeAppCheck(app, {
@@ -82,8 +82,11 @@ if (!RECAPTCHA_ENTERPRISE_SITE_KEY) {
     appCheckError = error instanceof Error ? error : new Error(String(error));
     // Keep the rest of Vivid usable, but expose the exact cause to AI diagnostics.
     console.warn("Vivid App Check could not initialize:", {
+      hostname: window.location.hostname,
+      origin: window.location.origin,
       code: appCheckError.code || null,
-      message: appCheckError.message
+      message: appCheckError.message,
+      hint: "For Netlify, allow vivid-cinema.netlify.app in both Firebase App Check and the reCAPTCHA Enterprise site's allowed domains."
     });
   }
 }
