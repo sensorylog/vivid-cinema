@@ -76,6 +76,24 @@ function createWindow() {
   win.webContents.setWindowOpenHandler(({ url }) => {
     try {
       const target = new URL(url);
+      const isFirebaseAuthPopup =
+        target.protocol === "https:" &&
+        (target.hostname === "accounts.google.com" ||
+          target.hostname.endsWith(".firebaseapp.com") ||
+          target.hostname.endsWith(".web.app"));
+      if (isFirebaseAuthPopup) {
+        return {
+          action: "allow",
+          overrideBrowserWindowOptions: {
+            webPreferences: {
+              nodeIntegration: false,
+              contextIsolation: true,
+              sandbox: true,
+              webSecurity: true
+            }
+          }
+        };
+      }
       if (target.protocol === "https:" || target.protocol === "http:") void shell.openExternal(target.href);
     } catch { /* Ignore malformed or unsupported URLs. */ }
     return { action: "deny" };

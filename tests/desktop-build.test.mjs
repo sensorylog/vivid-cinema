@@ -28,6 +28,8 @@ test("desktop runtime bundles the local app with a restricted renderer", () => {
   assert.match(main, /contextIsolation:\s*true/);
   assert.match(main, /sandbox:\s*true/);
   assert.match(main, /setWindowOpenHandler/);
+  assert.match(main, /isFirebaseAuthPopup/);
+  assert.match(main, /contextIsolation: true/);
   assert.match(main, /startsWith\(absoluteRoot \+ path\.sep\)/);
 });
 test("Windows workflow builds on demand or on release tags", () => {
