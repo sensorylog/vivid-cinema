@@ -6,6 +6,7 @@ on:
     paths:
       - "package.json"
       - "desktop/**"
+      - "icons/**"
       - "tests/**"
       - ".github/workflows/windows-desktop.yml"
   push:
