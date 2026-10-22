@@ -48,3 +48,11 @@ test("achievement Sparks reuse the existing Recall model and App Check protectio
   assert.match(aiSource, /export async function getRecallClues/);
   assert.match(aiSource, /export async function sendRecallChatMessage/);
 });
+
+test("Vivid Recall retries only transient App Check token startup failures once", () => {
+  assert.match(aiSource, /function isTransientAppCheckError\(error\)/);
+  assert.match(aiSource, /attempt !== 0 \|\| !isTransientAppCheckError\(error\)/);
+  assert.match(aiSource, /retrying once after a transient App Check token startup failure/);
+  assert.match(aiSource, /resource\\.exhausted\|quota/);
+  assert.match(aiSource, /controller\.abort\(\)/);
+});
