@@ -156,6 +156,9 @@ function syncAccountNavigation() {
         import("https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js")
       ]);
 
+      // Do not route returning users to sign-in while Firebase is restoring its saved session.
+      if (typeof auth.authStateReady === "function") await auth.authStateReady();
+
       onAuthStateChanged(auth, (user) => {
         const destination = user ? "account.html" : "auth.html";
         document.querySelectorAll("#auth-link, [data-vivid-nav-auth], .vivid-nav-account, .vivid-nav-action").forEach((link) => {
