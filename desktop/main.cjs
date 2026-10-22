@@ -107,7 +107,7 @@ function createWindow() {
     width: 1440, height: 900, minWidth: 960, minHeight: 640,
     show: false, backgroundColor: "#050608", autoHideMenuBar: true, title: "Vivid Cinema",
     icon: appIcon,
-    webPreferences: { nodeIntegration: false, contextIsolation: true, sandbox: true, webSecurity: true }
+    webPreferences: { session: session.defaultSession, nodeIntegration: false, contextIsolation: true, sandbox: true, webSecurity: true }
   });
 
   // Show a tiny local splash immediately; the main app then loads on its trusted HTTPS origin.

@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
-import { getAuth } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
+import { initializeAuth, browserLocalPersistence, indexedDBLocalPersistence, inMemoryPersistence, browserPopupRedirectResolver } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
 import { getFirestore } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 import { initializeAppCheck, ReCaptchaEnterpriseProvider } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app-check.js";
 
@@ -91,8 +91,13 @@ if (!RECAPTCHA_ENTERPRISE_SITE_KEY) {
   }
 }
 
-const auth = getAuth(app);
+// Prefer durable localStorage persistence on desktop WebViews, then IndexedDB, with memory only as a last resort.
+// Explicitly provide the browser popup resolver so Google sign-in keeps working in supported browsers.
+const auth = initializeAuth(app, {
+  persistence: [browserLocalPersistence, indexedDBLocalPersistence, inMemoryPersistence],
+  popupRedirectResolver: browserPopupRedirectResolver
+});
 const db = getFirestore(app);
 
-// Firebase Auth uses browser-local persistence by default.
+// The configured persistence order deliberately favors durable browser-local storage.
 export { app, appCheck, appCheckError, appCheckSkippedReason, auth, db };
