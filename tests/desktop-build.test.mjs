@@ -16,6 +16,7 @@ test("desktop packaging is opt-in and preserves existing scripts", () => {
   assert.ok(pkg.scripts["test:rules"]);
 });
 test("Windows installer and portable executable targets use Vivid branding", () => {
+  assert.equal(pkg.version, "1.0.1");
   assert.ok(pkg.devDependencies.electron);
   assert.ok(pkg.devDependencies["electron-builder"]);
   assert.deepEqual(pkg.build.win.target.map((target) => target.target), ["nsis", "portable"]);
@@ -61,6 +62,15 @@ test("desktop runtime uses Netlify first, Firebase Hosting second, and a bundled
   assert.match(main, /icon:\s*appIcon/);
   assert.match(main, /setAppUserModelId\("com\.axisvision\.vividcinema"\)/);
   assert.match(main, /win\.show\(\)/);
+  assert.match(main, /requestSingleInstanceLock\(\)/);
+  assert.match(main, /second-instance/);
+  assert.match(main, /Menu\.setApplicationMenu/);
+  assert.match(main, /About Vivid Cinema/);
+  assert.match(main, /CmdOrCtrl\+R/);
+  assert.match(main, /CmdOrCtrl\+Shift\+R/);
+  assert.match(main, /CmdOrCtrl\+0/);
+  assert.match(main, /input\.key === "F12"/);
+  assert.match(main, /input\.key\.toLowerCase\(\) === "i"/);
 });
 test("file and native WebView entry points redirect before Firebase modules initialize", () => {
   const redirect = fs.readFileSync(path.join(root, "scripts", "platform-origin-redirect.js"), "utf8");
