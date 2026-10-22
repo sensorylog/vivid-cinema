@@ -1,0 +1,74 @@
+name: Android debug APK
+
+on:
+  push:
+    branches:
+      - android-capacitor-foundation
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-debug-apk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v4
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Run tests
+        run: |
+          node --test tests/auth-verification.test.mjs tests/service-worker.test.mjs tests/adcash.test.mjs tests/android-native-polish.test.mjs tests/android-icon.test.mjs
+          npm run check:syntax
+
+      - name: Generate Android project
+        run: npx cap add android
+
+      - name: Bundle local website and sync Capacitor
+        run: npm run cap:sync
+
+      - name: Apply shared Vivid Cinema launcher icon
+        run: node automation/apply-android-icon.mjs
+
+      - name: Build debug APK
+        run: |
+          chmod +x android/gradlew
+          cd android
+          ./gradlew assembleDebug
+
+      - name: Verify Vivid icon is embedded in the APK
+        shell: bash
+        run: |
+          set -euo pipefail
+          apk="android/app/build/outputs/apk/debug/app-debug.apk"
+          expected="$(sha256sum icons/vivid-icon-180.png | cut -d ' ' -f 1)"
+          actual="$(unzip -p "$apk" res/drawable-nodpi-v4/vivid_icon_foreground.png | sha256sum | cut -d ' ' -f 1)"
+          test "$actual" = "$expected" || { echo "APK adaptive icon does not match icons/vivid-icon-180.png"; exit 1; }
+          unzip -l "$apk" | grep -q 'res/mipmap-anydpi-v26/ic_launcher.xml'
+          echo "Verified: APK adaptive launcher foreground exactly matches the Vivid Cinema icon source."
+
+      - name: Upload debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: vivid-cinema-debug-apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          retention-days: 14
