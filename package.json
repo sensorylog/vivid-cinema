@@ -68,5 +68,6 @@
       "artifactName": "Vivid-Cinema-Portable-${version}.${ext}"
     },
     "artifactName": "Vivid-Cinema-${version}-${arch}.${ext}"
-  }
+  },
+  "main": "desktop/main.cjs"
 }
