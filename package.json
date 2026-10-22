@@ -15,5 +15,6 @@
   },
   "dependencies": {
     "firebase-admin": "^14.5.0"
-  }
+  },
+  "author": "Johnson Kyei Baffour"
 }
