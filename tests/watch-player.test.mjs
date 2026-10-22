@@ -55,7 +55,7 @@ test("anime playback excludes the unverified Aniweeb source and automatically fa
 
 test("movie and TV Player 1 exposes seven sources while anime providers remain separate", () => {
   assert.match(source, /: \["vidapi", "vidsrc", "embedwave", "vidfast", "ezvidapi", "embedapistream", "moviesapi"\];/);
-  assert.match(source, /if \(source === "vidapi" \|\| source === "vidsrc" \|\| source === "vidfast" \|\| source === "embedapistream" \|\| source === "moviesapi"\) return hasFallbackId\(\);\n  if \(source === "embedwave" \|\| source === "ezvidapi"\) return hasTmdbId\(\);\n  return false;/);
+  assert.match(source, /if \(source === "vidapi" \|\| source === "vidsrc" \|\| source === "vidfast" \|\| source === "embedapistream" \|\| source === "moviesapi"\) return hasFallbackId\(\);/);\n  assert.match(source, /if \(source === "embedwave" \|\| source === "ezvidapi"\) return hasTmdbId\(\);/);\n  assert.match(source, /return false;/);
   assert.match(source, /button\.hidden = isAnimePlayback\(\) \? !\["vidapi", "vidsrc", "vidplus", "vidlink"\]\.includes\(source\) : !\["vidapi", "vidsrc", "embedwave", "vidfast", "ezvidapi", "embedapistream", "moviesapi"\]\.includes\(source\)/);
   assert.match(source, /<span class="vivid-server-count">7 sources<\/span>/);
   assert.doesNotMatch(source, /mountPlaybackServerSettings\(serverPanel/);
@@ -68,7 +68,7 @@ test("movie and TV Player 1 exposes seven sources while anime providers remain s
 test("movie/TV server picker keeps all providers in a simple scrollable dropdown", async () => {
   assert.match(source, /"embedwave", "vidfast", "ezvidapi", "embedapistream", "moviesapi"\]\.includes\(source\)/);
   assert.match(source, /const toggleServerMenu = \(\) =>/);
-  assert.doesNotMatch(source, /positionServerPanel/);
+  assert.match(source, /const positionServerPanel = \(\) => \{/);\n  assert.match(source, /window\.addEventListener\("resize", repositionOpenServerMenu\)/);\n  assert.match(source, /window\.addEventListener\("scroll", repositionOpenServerMenu/);
   const styles = await readFile(new URL("../styles/vivid-cleanup.css", import.meta.url), "utf8");
   assert.match(styles, /\.vivid-server-panel\s*\{[\s\S]*?position:\s*absolute/);
   assert.match(styles, /overflow-y:\s*auto/);
