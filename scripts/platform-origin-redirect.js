@@ -6,8 +6,8 @@
   const isAndroidAssetBundle = hostname === "appassets.androidplatform.net";
   const isNativeLoopbackBundle =
     ["localhost", "127.0.0.1"].includes(hostname) &&
-    /(?:;\s*wv\)|\bCapacitor\b|\bElectron\b)/i.test(userAgent);
-  const isNativeWebView = /(?:;\s*wv\)|\bCapacitor\b|\bElectron\b)/i.test(userAgent);
+    /(?:;\s*wv\)|\bCapacitor\b)/i.test(userAgent);
+  const isNativeWebView = /(?:;\s*wv\)|\bCapacitor\b)/i.test(userAgent);
   const isUntrustedNativeOrigin = isNativeWebView &&
     !["vivid-cinema.web.app", "vivid-cinema.firebaseapp.com"].includes(hostname);
 
