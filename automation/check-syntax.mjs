@@ -7,6 +7,7 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 // alongside playback/security modules and the Vivid Intelligence entry point.
 const files = [
   "service-worker.js",
+  "scripts/platform-origin-redirect.js",
   "scripts/watch.js",
   "scripts/playback/playback-urls.js",
   "scripts/playback/tflix-secondary-player.js",
