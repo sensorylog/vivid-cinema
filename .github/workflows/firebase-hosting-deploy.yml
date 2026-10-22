@@ -1,13 +1,10 @@
 name: Deploy Vivid Cinema to Firebase Hosting
 
+# Netlify is the primary automatic host. Firebase Hosting remains a manual
+# fallback so an exhausted monthly Hosting quota does not make every push fail.
+# Run this workflow manually after Firebase Hosting quota is available again.
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - main
-    paths-ignore:
-      - "**.md"
-      - "docs/**"
 
 permissions:
   contents: read
