@@ -64,6 +64,7 @@ let localServer;
 let localOrigin;
 const HOSTED_APP_URL = "https://vivid-cinema.web.app/home.html";
 const HOSTED_APP_ORIGIN = new URL(HOSTED_APP_URL).origin;
+const HOSTED_LOAD_TIMEOUT_MS = 12000;
 
 async function startLocalServer() {
   localServer = createLocalServer(appRoot);
@@ -102,14 +103,25 @@ function createWindow() {
   });
 
   let localFallbackStarted = false;
+  let hostedAppLoaded = false;
+  let hostedLoadTimeout;
+  const fallbackToLocal = reason => {
+    if (localFallbackStarted || hostedAppLoaded) return;
+    localFallbackStarted = true;
+    if (hostedLoadTimeout) clearTimeout(hostedLoadTimeout);
+    console.warn("Vivid Cinema hosted app unavailable; opening bundled offline fallback:", reason);
+    if (localOrigin) void win.loadURL(localOrigin + "/home.html");
+  };
+  win.webContents.once("did-finish-load", () => {
+    hostedAppLoaded = true;
+    if (hostedLoadTimeout) clearTimeout(hostedLoadTimeout);
+  });
   win.webContents.on("did-fail-load", (_event, errorCode, errorDescription, validatedURL, isMainFrame) => {
-    if (!isMainFrame || localFallbackStarted || errorCode === -3) return;
+    if (!isMainFrame || localFallbackStarted || hostedAppLoaded || errorCode === -3) return;
     let failedOrigin;
     try { failedOrigin = new URL(validatedURL).origin; } catch { return; }
     if (failedOrigin !== HOSTED_APP_ORIGIN) return;
-    localFallbackStarted = true;
-    console.warn("Vivid Cinema hosted app failed to load; opening bundled offline fallback:", errorCode, errorDescription);
-    if (localOrigin) void win.loadURL(localOrigin + "/home.html");
+    fallbackToLocal(errorCode + " " + errorDescription);
   });
 
   win.webContents.setWindowOpenHandler(({ url }) => {
@@ -149,6 +161,11 @@ function createWindow() {
     event.preventDefault();
     if (target.protocol === "https:" || target.protocol === "http:") void shell.openExternal(target.href);
   });
+  // Fall back quickly if the network is unavailable instead of leaving a hidden blank window.
+  hostedLoadTimeout = setTimeout(
+    () => fallbackToLocal("hosted app load timed out after " + Math.round(HOSTED_LOAD_TIMEOUT_MS / 1000) + " seconds"),
+    HOSTED_LOAD_TIMEOUT_MS
+  );
   // Firebase AI Logic + reCAPTCHA App Check require the real HTTPS app origin.
   // Keep the packaged files as a graceful offline fallback, not the primary origin.
   void win.loadURL(HOSTED_APP_URL);
