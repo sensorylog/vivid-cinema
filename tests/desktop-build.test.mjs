@@ -37,6 +37,7 @@ test("Windows workflow builds on demand or on release tags", () => {
   assert.ok(fs.existsSync(file));
   const workflow = fs.readFileSync(file, "utf8");
   assert.match(workflow, /workflow_dispatch/);
+  assert.match(workflow, /pull_request/);
   assert.match(workflow, /windows-latest/);
   assert.match(workflow, /desktop:dist/);
   assert.match(workflow, /Vivid-Cinema-Setup/);
