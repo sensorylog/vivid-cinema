@@ -4,6 +4,10 @@ const fs = require("node:fs");
 const path = require("node:path");
 
 const appRoot = app.getAppPath();
+const windowsIcon = path.join(appRoot, "icons", "vivid-icon.ico");
+const appIcon = fs.existsSync(windowsIcon)
+  ? windowsIcon
+  : path.join(appRoot, "icons", "vivid-icon-180.png");
 const mimeTypes = {
   ".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=utf-8",
   ".mjs": "text/javascript; charset=utf-8", ".css": "text/css; charset=utf-8",
@@ -12,6 +16,10 @@ const mimeTypes = {
   ".webp": "image/webp", ".ico": "image/x-icon", ".woff": "font/woff", ".woff2": "font/woff2",
   ".mp4": "video/mp4"
 };
+
+if (process.platform === "win32") {
+  app.setAppUserModelId("com.axisvision.vividcinema");
+}
 
 function createLocalServer(root) {
   const absoluteRoot = path.resolve(root);
@@ -70,9 +78,14 @@ function createWindow() {
   const win = new BrowserWindow({
     width: 1440, height: 900, minWidth: 960, minHeight: 640,
     show: false, backgroundColor: "#050608", autoHideMenuBar: true, title: "Vivid Cinema",
+    icon: appIcon,
     webPreferences: { nodeIntegration: false, contextIsolation: true, sandbox: true, webSecurity: true }
   });
-  win.once("ready-to-show", () => win.show());
+  // Maximize before showing so the first visible frame already fills the desktop.
+  win.once("ready-to-show", () => {
+    win.maximize();
+    win.show();
+  });
   win.webContents.setWindowOpenHandler(({ url }) => {
     try {
       const target = new URL(url);
