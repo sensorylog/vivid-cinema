@@ -16,11 +16,11 @@ test("desktop packaging is opt-in and preserves existing scripts", () => {
   assert.ok(pkg.scripts["test:rules"]);
 });
 test("Windows installer and portable executable targets use Vivid branding", () => {
-  assert.equal(pkg.version, "1.0.4");
+  assert.equal(pkg.version, "1.0.5");
   assert.ok(pkg.devDependencies.electron);
   assert.ok(pkg.devDependencies["electron-builder"]);
   assert.ok(pkg.dependencies["electron-updater"]);
-  assert.match(pkg.scripts["desktop:publish"], /electron-builder --win nsis --publish always/);
+  assert.match(pkg.scripts["desktop:publish"], /electron-builder --win nsis --publish never/);
   assert.deepEqual(pkg.build.publish[0], { provider: "github", owner: "sensorylog", repo: "vivid-cinema", releaseType: "release" });
   assert.ok(pkg.build.files.includes("!node_modules/**"));
   assert.ok(pkg.build.files.includes("node_modules/electron-updater/**"));
@@ -180,8 +180,14 @@ test("Windows workflow builds on demand or on release tags", () => {
   assert.match(workflow, /git tag -a \$tag/);
   assert.match(workflow, /git push origin "refs\/tags\/\$tag"/);
   assert.match(workflow, /Verify updater metadata was generated/);
-  assert.match(workflow, /dist-desktop\/latest\.yml/);
-  assert.match(workflow, /Vivid-Cinema-Setup-\*\.exe\.blockmap/);
+  assert.match(workflow, /Build auto-updatable Windows release files/);
+  assert.match(workflow, /Publish installer and updater metadata together/);
+  assert.match(workflow, /gh release create/);
+  assert.match(workflow, /--verify-tag/);
+  assert.match(workflow, /Verify published updater assets/);
+  assert.match(workflow, /releases\/tags\/\$tag/);
+  assert.match(workflow, /Vivid-Cinema-Setup-\$version\.exe\.blockmap/);
+  assert.match(workflow, /latest\.yml/);
   assert.match(workflow, /pull_request/);
   assert.match(workflow, /windows-latest/);
   assert.match(workflow, /desktop:dist/);
