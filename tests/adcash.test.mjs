@@ -43,6 +43,6 @@ test("Adcash hosts are allowed in the scoped CSP and the shell cache is bumped",
   assert.ok(config.includes("script-src 'self' https://acscdn.com https://*.acscdn.com"));
   assert.ok(config.includes("connect-src 'self' https://acscdn.com https://*.acscdn.com"));
   assert.ok(config.includes("frame-src 'self' https://acscdn.com https://*.acscdn.com"));
-  assert.match(serviceWorker, /const CACHE_NAME = "vivid-cinema-shell-v\\d+"/);
+  assert.match(serviceWorker, /const CACHE_NAME = "vivid-cinema-shell-v\d+"/);
   assert.match(serviceWorker, /"\.\/scripts\/adcash\.js"/);
 });
