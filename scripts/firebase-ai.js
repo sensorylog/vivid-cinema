@@ -90,7 +90,7 @@ export async function getRecallClues(query, fallbackClues = []) {
     return {
       clues: fallback,
       available: false,
-      message: "Gemini testing requires the deployed Hosting site because App Check is skipped on localhost."
+      message: "Gemini testing requires a deployed site because App Check is skipped on localhost."
     };
   }
   if (appCheckError) {
@@ -152,7 +152,7 @@ function getRecallChatModel() {
 
 export async function sendRecallChatMessage(messages, mediaType = "all") {
   if (appCheckSkippedReason) {
-    throw new Error("Gemini chat requires the deployed Hosting site because App Check is skipped on localhost.");
+    throw new Error("Gemini chat requires a deployed site because App Check is skipped on localhost.");
   }
   if (appCheckError) {
     throw new Error("Firebase App Check did not initialize" + (appCheckError?.code ? " (" + appCheckError.code + ")" : "") + (appCheckError?.message ? ": " + String(appCheckError.message).slice(0, 220) : ".") + " Local catalogue search is still available.");
@@ -218,7 +218,7 @@ const SPARK_TIMEOUT_MS = 10000;
  */
 export async function generateAchievementSpark(input = {}) {
   if (appCheckSkippedReason) {
-    throw new Error("Achievement Sparks require the deployed Hosting site because App Check is skipped on localhost.");
+    throw new Error("Achievement Sparks require a deployed site because App Check is skipped on localhost.");
   }
   if (appCheckError) {
     throw new Error("Firebase App Check did not initialize.");

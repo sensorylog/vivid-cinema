@@ -8,6 +8,8 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const aiSource = await readFile(path.join(root, "scripts/firebase-ai.js"), "utf8");
 const chatSource = await readFile(path.join(root, "scripts/vivid-recall-chat.js"), "utf8");
 const workerSource = await readFile(path.join(root, "service-worker.js"), "utf8");
+const firebaseSource = await readFile(path.join(root, "scripts/firebase.js"), "utf8");
+const hostingWorkflow = await readFile(path.join(root, ".github/workflows/firebase-hosting-deploy.yml"), "utf8");
 
 test("Vivid Recall uses the stable, lower-cost Gemini Flash-Lite model", () => {
   assert.match(aiSource, /const RECALL_MODEL = "gemini-3\.5-flash-lite"/);
@@ -31,7 +33,7 @@ test("Recall keeps detailed quota and provider errors visible for diagnosis", ()
 });
 
 test("service worker cache version changes with the updated AI modules", () => {
-  assert.match(workerSource, /vivid-cinema-shell-v\d+/);
+  assert.match(workerSource, /vivid-cinema-shell-v239/);
 });
 
 test("achievement Sparks reuse the existing Recall model and App Check protections", () => {
@@ -47,4 +49,19 @@ test("achievement Sparks reuse the existing Recall model and App Check protectio
   assert.match(aiSource, /wordCount < 28 \|\| wordCount > 70/);
   assert.match(aiSource, /export async function getRecallClues/);
   assert.match(aiSource, /export async function sendRecallChatMessage/);
+});
+
+test("Netlify is the primary automatic host and Firebase Hosting is a manual fallback", () => {
+  assert.match(hostingWorkflow, /workflow_dispatch:/);
+  assert.doesNotMatch(hostingWorkflow, /^  push:/m);
+  assert.match(firebaseSource, /vivid-cinema\.netlify\.app/);
+  assert.match(firebaseSource, /reCAPTCHA Enterprise/);
+});
+
+test("Recall diagnostics support a deployed Netlify origin without weakening App Check", () => {
+  assert.match(aiSource, /requires a deployed site because App Check is skipped on localhost/);
+  assert.match(firebaseSource, /initializeAppCheck/);
+  assert.match(firebaseSource, /ReCaptchaEnterpriseProvider/);
+  assert.match(firebaseSource, /allow vivid-cinema\.netlify\.app in both Firebase App Check/);
+  assert.match(workerSource, /vivid-cinema-shell-v239/);
 });
