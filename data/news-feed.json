@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-22T21:59:53.092Z",
+  "generatedAt": "2026-10-22T22:01:17.428Z",
   "source": "Google News RSS search feeds",
   "count": 120,
   "failedQueries": 0,
@@ -45,6 +45,19 @@
       "imageFallbackUrl": "https://static0.moviewebimages.com/wordpress/wp-content/uploads/2026/10/cyberpunk__edgerunners.jpg?w=1600&h=900&fit=crop"
     },
     {
+      "id": "tdtq4",
+      "headline": "Charli xcx 'lands role in Martin Scorsese's chilling new horror film alongside Leonardo DiCaprio and Jennifer Lawrence'",
+      "publisher": "Female First",
+      "publisherUrl": "https://www.femalefirst.co.uk",
+      "sourceUrl": "https://www.femalefirst.co.uk/movies/movie-news/charli-xcx-lands-role-martin-scorseses-chilling-new-horror-film-alongside-leonardo-dicaprio-jennifer-lawrence-1452555.html",
+      "publishedAt": "2026-10-22T21:00:12.000Z",
+      "region": "europe",
+      "category": "film",
+      "summary": "Charli xcx is said to be taking her Hollywood ambitions a step further after reportedly landing a secret role in Martin Scorseses forthcoming psychological horror film, alongside Leonardo DiCaprio and Jennifer Lawrence.",
+      "imageUrl": "./data/news-thumbnails/tdtq4.jpg",
+      "imageFallbackUrl": "https://www.femalefirst.co.uk/image-library/partners/bang/land/500/s/singer-charli-xcx-aW1hZ2VzMS8yMDI2LzEwLzEyLzE3OTE4MjAzODFjcm.jpg"
+    },
+    {
       "id": "t3z0yl",
       "headline": "US actor Tom Skerritt, who starred in Top Gun and Alien, dies aged 93",
       "publisher": "ABC News & Headlines – Australian Broadcasting Corporation",
@@ -84,6 +97,19 @@
       "imageFallbackUrl": "https://www.usatoday.com/story/entertainment/tv-streaming/2026/10/22/chris-harrison-new-show-the-vow-abc-fox-legal-drama/92375382007/y0&width=96&height=96&format=pjpg&auto=webp"
     },
     {
+      "id": "1jr6850",
+      "headline": "Noah Wyle Gets Absolutely Eviscerated After Becoming Clear Favorite To Win Famous Title: “Used To Mean Something”",
+      "publisher": "AOL.com",
+      "publisherUrl": "https://www.aol.com",
+      "sourceUrl": "https://www.aol.com/articles/noah-wyle-gets-absolutely-eviscerated-201642000.html",
+      "publishedAt": "2026-10-22T20:33:36.000Z",
+      "region": "hollywood",
+      "category": "celebrity",
+      "summary": "Noah Wyle Gets Absolutely Eviscerated After Becoming Clear Favorite To Win Famous Title: “Used To Mean Something”",
+      "imageUrl": "./data/news-thumbnails/1jr6850.jpg",
+      "imageFallbackUrl": "https://hermes.media.static.aol.com/media/2026/10/22/22ada293-a0f5-3c27-a3b7-f247c37eb629/cbfa5d5b-8993-4afc-b9b4-aeac2455f052.jpg"
+    },
+    {
       "id": "8hxvz0",
       "headline": "Sphere Abacus takes “Heated Rivalry” to cinemas across five markets - Señal News",
       "publisher": "Senal News",
@@ -118,7 +144,7 @@
       "publishedAt": "2026-10-22T20:01:04.000Z",
       "region": "africa",
       "category": "film",
-      "summary": "NTDA Seeks Tourism Film Festivals To Attract Inbound Tourists",
+      "summary": "Dr Olayiwola Awakan, Director-General, Nigerian Tourism Development Authority (NTDA), has called for tourism film festivals to attract tourists from the",
       "imageUrl": "./data/news-thumbnails/g7nw86.webp",
       "imageFallbackUrl": "https://nannews.ng/wp-content/uploads/2026/10/AWAKAN.webp"
     },
@@ -136,6 +162,19 @@
       "imageFallbackUrl": "https://bloximages.newyork1.vip.townnews.com/local3news.com/content/tncms/assets/v3/editorial/1/8d/18d7c6e1-e2db-41d2-a7ae-21d9125c8e52/6ad94fe269af3.preview.jpg?crop=945%2C496%2C170%2C346"
     },
     {
+      "id": "ugt4vd",
+      "headline": "US actor Tom Skerritt, who starred in Picket Fences, Mash and Alien, dies aged 93",
+      "publisher": "BBC",
+      "publisherUrl": "https://www.bbc.com",
+      "sourceUrl": "https://www.bbc.com/news/articles/cqrkyly2p54xo",
+      "publishedAt": "2026-10-22T19:56:26.000Z",
+      "region": "hollywood",
+      "category": "television",
+      "summary": "The moustachioed star of several 20th century hit films died on Wednesday of natural causes, his family said.",
+      "imageUrl": "./data/news-thumbnails/ugt4vd.jpg",
+      "imageFallbackUrl": "https://ichef.bbci.co.uk/news/1024/branded_news/ebad/live/e0656410-ce51-11f1-a7e5-1bf3b637cfc1.jpg"
+    },
+    {
       "id": "1y4ylho",
       "headline": "Song Hye-kyo and Gong Yoo's series 'Tantara' to premiere in December - ABS-CBN",
       "publisher": "ABS-CBN",
@@ -144,6 +183,32 @@
       "publishedAt": "2026-10-22T19:54:18.000Z",
       "region": "asia",
       "category": "television",
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
+    },
+    {
+      "id": "1bd2v26",
+      "headline": "Brad Bird to Receive Lifetime Achievement Award at 2026 Infinity Festival",
+      "publisher": "IMDb",
+      "publisherUrl": "https://www.imdb.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMiYkFVX3lxTE5KZU1OakVnM0RzV3ZsQThhTUtYc3NTcVplX2M0Yklhd3dFN0JCTXNWZVRHVDRRT1ZoSEdDQ2I0ZHJhUGhDTG9CTFMwcXU0RG9NcU1LXzFvckt3cmZpQXRfeVVB?oc=5",
+      "publishedAt": "2026-10-22T19:52:09.000Z",
+      "region": "global",
+      "category": "awards",
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
+    },
+    {
+      "id": "a4qv51",
+      "headline": "Prolific Hollywood leading man dead",
+      "publisher": "News.com.au",
+      "publisherUrl": "https://www.news.com.au",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMi-gFBVV95cUxQV1hibVltVl9zdEZfREptUzN4WWxZMmxaanU4RWpGZHRCc0x3SUhITlVwRDVUOUxHd1RFNHpfTXhmVUswR1V2VEpLcWFtZUZ4emw2cWxINHZwTUFVRlJSeFZHMWwtMWtYcGxMVFFFVmt1aUdIMUVCRGJWdklrMUNIVVUzTHhzZkp5cGV4UXdGSW5OMXFXbTZudjc5ZWo3WVdkbGY1RFZVVk1TV1RjOFRYbDg1TkRRRm5RZTg4Nk9DVWdIclJlTHNhdGZWcERuLXhhV3A4STVvSDRqcGlNSHhGdFFMSjdkekhONnZtdFZldEN1dGVRelRDaE9n0gH6AUFVX3lxTFBXWGJtWW1WX3N0Rl9ESm1TM3hZbFkybFpqdThFakZkdEJzTHdJSEhOVXBENVQ5TEd3VEU0el9NeGZVSzBHVXZUSktxYW1lRnh6bDZxbEg0dnBNQVVGUlJ4VkcxbC0xa1hwbExUUUVWa3VpR0gxRUJEYlZ2SWsxQ0hVVTNMeHNmSnlwZXhRd0ZJbk4xcVdtNm52NzllajdZV2RsZjVEVlVWTVNXVGM4VFhsODVORFFGblFlODg2T0NVZ0hyUmVMc2F0ZlZwRG4teGFXcDhJNW9INGpwaU1IeEZ0UUxKN2R6SE42dm10VmV0Q3V0ZVF6VENoT2c?oc=5",
+      "publishedAt": "2026-10-22T19:49:43.000Z",
+      "region": "hollywood",
+      "category": "celebrity",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
       "imageUrl": "",
       "imageFallbackUrl": ""
@@ -160,19 +225,6 @@
       "summary": "Page Six remembers the actors, singers and celebs who died in 2026, including Hayden Panettiere, Dolly Parton and Catherine O'Hara.",
       "imageUrl": "./data/news-thumbnails/ydx3na.webp",
       "imageFallbackUrl": "https://pagesix.com/wp-content/uploads/sites/3/2026/07/celeb-deaths-eg.jpg?quality=75&strip=all&w=1200"
-    },
-    {
-      "id": "a1f4z0",
-      "headline": "US actor Tom Skerritt, who starred in Picket Fences, Mash and Alien, dies aged 93",
-      "publisher": "BBC",
-      "publisherUrl": "https://www.bbc.co.uk",
-      "sourceUrl": "https://www.bbc.co.uk/news/articles/cqrkyly2p54xo",
-      "publishedAt": "2026-10-22T19:41:30.000Z",
-      "region": "hollywood",
-      "category": "television",
-      "summary": "The moustachioed star of several 20th century hit films died on Wednesday of natural causes, his family said.",
-      "imageUrl": "./data/news-thumbnails/a1f4z0.jpg",
-      "imageFallbackUrl": "https://ichef.bbci.co.uk/ace/branded_news/1200/cpsprodpb/ebad/live/e0656410-ce51-11f1-a7e5-1bf3b637cfc1.jpg"
     },
     {
       "id": "1w7fymf",
@@ -198,7 +250,7 @@
       "category": "awards",
       "summary": "Tom Skerritt, the versatile actor who over his 60-plus year career played memorable roles in projects such as ‘Top Gun,’ ‘Picket Fences,’ ‘M*A*S*H’ and ‘Alien,’ has died at 93. His family confirmed...",
       "imageUrl": "./data/news-thumbnails/1or0hb8.jpg",
-      "imageFallbackUrl": "https://scontent-dfw5-3.xx.fbcdn.net/v/t39.99422-6/857070611_1829584388353683_5302323761324997310_n.png?stp=dst-jpg_tt6&cstp=mx1088x1344&ctp=p600x600&_nc_cat=1&ccb=1-7&_nc_sid=cae128&_nc_ohc=3SheFAQJY5cQ7kNvwE0z4Va&_nc_oc=AdqesApVwBEbTuoXow7gc4wDbVYbMScmH3j2eynp311gnZKInoCAh4vkFLAWBo-aGkA&_nc_zt=14&_nc_ht=scontent-dfw5-3.xx&_nc_gid=i3HSTkg_MyN3yW6E0p9oxg&_nc_ss=7c289&oh=00_AQPZ7tPXkXxSY4bwwqCmo-veiddDXBRA_xOFuMC84fyVAQ&oe=6AE04F16"
+      "imageFallbackUrl": "https://scontent-iad3-2.xx.fbcdn.net/v/t39.99422-6/857070611_1829584388353683_5302323761324997310_n.png?stp=dst-jpg_tt6&cstp=mx1088x1344&ctp=p600x600&_nc_cat=1&ccb=1-7&_nc_sid=cae128&_nc_ohc=3SheFAQJY5cQ7kNvwFEFv_c&_nc_oc=AdoDo4TzKCUfCGVUBYliJlGUepqcBn8LlMrT0LkTAvK2b7RT0fNyBEWxqyIxuiE3ZZc&_nc_zt=14&_nc_ht=scontent-iad3-2.xx&_nc_gid=9a3UJ-qFXBNIzOumXHW6pA&_nc_ss=7c289&oh=00_AQMAwc8_COAuLu6i477ghLMtjyuzMPb8IO5KDzQ0cXjezA&oe=6AE04F16"
     },
     {
       "id": "1v0mkmd",
@@ -244,26 +296,26 @@
       "headline": "‘You Can See Everything’ Makes Cinema Eye Honors Audience Choice List",
       "publisher": "TheWrap",
       "publisherUrl": "https://www.thewrap.com",
-      "sourceUrl": "https://www.thewrap.com/industry-news/awards/you-can-see-everything-makes-cinema-eye-honors-list/",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMingFBVV95cUxOQUtFbTctQVFzY0xkMmdmSUkzX0dfMlZaRXBBUWVVdFNGTmRsbWxQb1VXdDA2U0J0ZU9WSlVDdmdqWWlPcUZRT2RzUkJ4UGZybldlbTktUnRHWWtMaTQ5c3NEYUh4WWNydV9pVGxhWEtyMkpjQjRLOC1BQXI4a3puQlFib0FmdHR6ZFp1UncwbUxRVWN1MzhBTmdIRUJEUQ?oc=5",
       "publishedAt": "2026-10-22T19:00:00.000Z",
       "region": "global",
       "category": "awards",
-      "summary": "Another oddball documentary on the Cinema Eye Honors list is frequent Nathan Fielder collaborator John Wilson's \"The History of Concrete\"",
-      "imageUrl": "./data/news-thumbnails/5oeswz.avif",
-      "imageFallbackUrl": "https://www.thewrap.com/wp-content/uploads/2026/09/nathan-fielder-you-can-see-everything.jpg"
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
     },
     {
       "id": "12ui0s8",
       "headline": "Besiktas vs Crystal Palace: Where to watch, TV channel, live stream & kick-off time | Goal.com UK",
       "publisher": "Goal.com",
       "publisherUrl": "https://www.goal.com",
-      "sourceUrl": "https://www.goal.com/en-gb/news/live-stream-online-tv-where-to-watch-besiktas-v-crystal-palace/bltb80a32599e607857",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMitAFBVV95cUxQZ2pCYUphRUhjZTdrWWpJU1AwdVM1bHczZHRoOWtrTFdXNzBnOVRSNDlWZlNmN01kbzBnci1WT0VKLVZmMUptRHR2V2VlSzl4SFlNall4RUZoNnQ4YjNiMHBPeVd5NXd6TEpLaFo5U1NSRjl6N0tud25vMWhScm9tVWZ2RzNZdXJ4NWZvczZSZ0w0MjRsMmJNaVo2aFhfdFJPbGlVUnB5UDJ0RERCc3lhWmJGMlI?oc=5",
       "publishedAt": "2026-10-22T19:00:00.000Z",
       "region": "europe",
       "category": "television",
-      "summary": "Find out where to watch Besiktas vs Crystal Palace in the Europa League, including TV channel, live stream options, kick-off time, team news, and form guide.",
-      "imageUrl": "./data/news-thumbnails/12ui0s8.webp",
-      "imageFallbackUrl": "https://assets.goal.com/images/v3/HQeGoYz8Hh2RsJxKmQfZI_DESKTOP/image.jpg"
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
     },
     {
       "id": "oesn8b",
@@ -283,13 +335,13 @@
       "headline": "Cinema Eye Honors (CEH) Announces Unforgettables, Audience Choice Prize Longlist for 2027 Awards",
       "publisher": "Awards Watch",
       "publisherUrl": "https://awardswatch.com",
-      "sourceUrl": "https://awardswatch.com/cinema-eye-honors-ceh-announces-unforgettables-audience-choice-prize-longlist-for-2027-awards/",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMiugFBVV95cUxQT1hTVjZaNUQ2Q09sb1BiMDlaR3QtWVcwTXJSY2FMNnM1dFQwT2JidDhCZS1aTzFsUTZTVkZ6WDBWZkZiOW1SUUFPbjdoYUNXeGxoQTV3S1FobWtYT0kyVXo2VThzLU1kM0E0WnFpVG1pQTR5M2E2Zm1NOUJ0Z0dfbVRSQVN6T1lYS2x2MmpZX2pERG14Y1NxSjJsTi1ZdGs0aGVvM0ppSm9HTm9BMTFwcG91dTB1UFAzcUE?oc=5",
       "publishedAt": "2026-10-22T18:57:15.000Z",
       "region": "global",
       "category": "awards",
-      "summary": "Cinema Eye Honors, which recognizes outstanding artistic achievement in nonfiction and documentary films and series, kicked off its 20th annual celebrations today with its first awards announcements for 2027. Among the announcements were the 17 films on the Audience Choice Prize Longlist, the unveiling of this year’s Unforgettables Honorees, nominees in five Broadcast categories, this&hellip;",
-      "imageUrl": "./data/news-thumbnails/l3n2d.webp",
-      "imageFallbackUrl": "https://i0.wp.com/awardswatch.com/wp-content/uploads/2026/10/2027-cinema-eye-honors.png?fit=1200%2C900&ssl=1"
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
     },
     {
       "id": "tq3gm5",
@@ -472,6 +524,19 @@
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
       "imageUrl": "",
       "imageFallbackUrl": ""
+    },
+    {
+      "id": "1155hsv",
+      "headline": "Where to watch the Conference League: TV broadcast partners, live streams",
+      "publisher": "UEFA.com",
+      "publisherUrl": "https://www.uefa.com",
+      "sourceUrl": "https://www.uefa.com/uefaconferenceleague/news/0285-18f79eae3aac-5c7eb199a66d-1000--where-to-watch-the-conference-league-tv-broadcast-partne/",
+      "publishedAt": "2026-10-22T17:41:03.000Z",
+      "region": "europe",
+      "category": "television",
+      "summary": "Follow all the latest UEFA Conference League 2026/2027 news from the official UEFA.com site. Includes latest news stories, videos, match reports and much more.",
+      "imageUrl": "./data/news-thumbnails/1155hsv.avif",
+      "imageFallbackUrl": "https://editorial.uefa.com/resources/029d-1eb0abc810c4-6abb46757f70-1000/16x9_uecl_wtw_2025_1.jpeg"
     },
     {
       "id": "m9zj3g",
@@ -734,6 +799,19 @@
       "imageFallbackUrl": ""
     },
     {
+      "id": "m3oib6",
+      "headline": "Jailer 2 Box Office Collection Day 8",
+      "publisher": "Sacnilk",
+      "publisherUrl": "https://www.sacnilk.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMigAFBVV95cUxQUEpyT1ZmRTE4Rkg1UGtWejhYUzZNV0pKTU5JNEFYRC00d1A2NllDcTB1bEhsdWctNXBoZk83azVsM0N2ckpGdWlXd0tma2dROTVrVmRpMUREdE05VFYybkhIRm5waTZQUUMtUWdzRDF1WWo1NnBxZ2U1bVgxSTRGQw?oc=5",
+      "publishedAt": "2026-10-22T16:03:20.000Z",
+      "region": "global",
+      "category": "box-office",
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
+    },
+    {
       "id": "1d9ua9n",
       "headline": "Aardman at 50: Keeping Animation Independent and Hand-Made",
       "publisher": "The Hollywood Reporter",
@@ -929,12 +1007,12 @@
       "imageFallbackUrl": ""
     },
     {
-      "id": "1fpfeks",
+      "id": "5pmchc",
       "headline": "What Happens When Bollywood’s Old Guard Embraces Indie?",
       "publisher": "Rolling Stone India",
       "publisherUrl": "https://rollingstoneindia.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMiqgFBVV95cUxQN3VkQ1lOX09rUTlaY004Mm9KRWNKMmVEN2NUNVNuSERjWi02ZGRuUjZOM0FZVnFSZ0Q2eVJtd3pibzZraVJ2bWlYS2tRc0d2M1V2S084Tmp3VVdKQ2h1Tkc2ZWNFR1ZsOGFWVFQzRjBtdDF2dXFfYkh3WUlNSE9RUUItMUlXQ0FOOUd0NVdGYml0RlZSUUJSbWVwYi0yWmFsbjNTU1JRUGp4Z9IBrwFBVV95cUxQdWVmc3FlTjBZS1YtYXJTYzdiNHhldjJsYmxwTGdJUW1YNGFxcGplN2sxYkVlcnhYa19MUy1xN2JHcmZkanBMTV85WG1uTlpieFpFN2pab2JlOThJYWxrZG5QUC1IWFNWVlNXWXVpNWVoX3JfcGl5NWpUeFptWVB6Z1JyQ2pGVjFid3NuWHJZTnVKY2xIZTUtUkdpSnh6Sm9Ha29JSVF1MzFfUEY1aHpj?oc=5",
-      "publishedAt": "2026-10-22T15:02:53.000Z",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMiqgFBVV95cUxQN3VkQ1lOX09rUTlaY004Mm9KRWNKMmVEN2NUNVNuSERjWi02ZGRuUjZOM0FZVnFSZ0Q2eVJtd3pibzZraVJ2bWlYS2tRc0d2M1V2S084Tmp3VVdKQ2h1Tkc2ZWNFR1ZsOGFWVFQzRjBtdDF2dXFfYkh3WUlNSE9RUUItMUlXQ0FOOUd0NVdGYml0RlZSUUJSbWVwYi0yWmFsbjNTU1JRUGp4Z9IBqgFBVV95cUxQN3VkQ1lOX09rUTlaY004Mm9KRWNKMmVEN2NUNVNuSERjWi02ZGRuUjZOM0FZVnFSZ0Q2eVJtd3pibzZraVJ2bWlYS2tRc0d2M1V2S084Tmp3VVdKQ2h1Tkc2ZWNFR1ZsOGFWVFQzRjBtdDF2dXFfYkh3WUlNSE9RUUItMUlXQ0FOOUd0NVdGYml0RlZSUUJSbWVwYi0yWmFsbjNTU1JRUGp4Zw?oc=5",
+      "publishedAt": "2026-10-22T15:03:21.000Z",
       "region": "india",
       "category": "music",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
@@ -1137,19 +1215,6 @@
       "imageFallbackUrl": ""
     },
     {
-      "id": "qcycog",
-      "headline": "Aastha Tiku’s comedy drama ‘Dreamboat’ to premiere at Dharamshala International Film Festival 2026",
-      "publisher": "The News Mill",
-      "publisherUrl": "https://thenewsmill.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMixwFBVV95cUxNZ25nZ0FSYkZHVUlpM3REYnJsRnE1ZGlPLU9ma2FxYTNNb0lETFFYUTFNWVZoZV9FVVRvZXI4N2l5bXY0aWNsTVo3WGNvVU5ZQ1YwWS1jQV9KRHNHRTlITW0yYlpfQkhWQXBrM05pbTk1bUwxSC0zckMyYkVzRjBoSmxhLWxuMmk3M2NUeHF6dk42TlNYbklxdjN4Q3ZKd0h0ZG1Pc2w2TjF0RTJSX0poOHBIR3lZQWtMclRDdkpCLXVwM1hiZFg0?oc=5",
-      "publishedAt": "2026-10-22T13:32:43.000Z",
-      "region": "global",
-      "category": "festivals",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
       "id": "1p1l9o2",
       "headline": "From ‘Star Wars’ to ‘Alien: How Val Kilmer, Gene Wilder and 3 other late Hollywood stars returned to the",
       "publisher": "The Times of India",
@@ -1163,14 +1228,14 @@
       "imageFallbackUrl": ""
     },
     {
-      "id": "186abv4",
-      "headline": "Udta Teer CBFC cuts revealed: Blood on India map removed, film gets UA 13+ certificate",
-      "publisher": "News9live",
-      "publisherUrl": "https://www.news9live.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMisAFBVV95cUxPMDJ6UUZ5bFY5SHYzTlpfQjQ5ZVpSWXpPRzRUcHh1YW9zYTN1Mzc2cTlxb1JGcUJHQy1EZV9qdkhtcG1jdnVZU0JTQnBZc3l1SVRqSG9pOXNudTZWalFoZjVteWhWLVJ0aU5mTjZ6Nk5DYkZ6ZEZXVE5rakl4RkF2azlfalpzN2FGbjVORkU4X0R5X0s2TWhKU29yVVdJS3QtRU40aGwtWXAxb2RhLTlJd9IBsAFBVV95cUxPMDJ6UUZ5bFY5SHYzTlpfQjQ5ZVpSWXpPRzRUcHh1YW9zYTN1Mzc2cTlxb1JGcUJHQy1EZV9qdkhtcG1jdnVZU0JTQnBZc3l1SVRqSG9pOXNudTZWalFoZjVteWhWLVJ0aU5mTjZ6Nk5DYkZ6ZEZXVE5rakl4RkF2azlfalpzN2FGbjVORkU4X0R5X0s2TWhKU29yVVdJS3QtRU40aGwtWXAxb2RhLTlJdw?oc=5",
-      "publishedAt": "2026-10-22T13:26:17.000Z",
-      "region": "india",
-      "category": "film",
+      "id": "1wqabw8",
+      "headline": "Aastha Tiku's comedy drama 'Dreamboat' to premiere at Dharamshala International Film Festival 2026",
+      "publisher": "Devdiscourse",
+      "publisherUrl": "https://www.devdiscourse.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMi7wFBVV95cUxPa0hoNjNJM1lNTTBGS19KUVd2T1BMNFA1NVU5d3QxZlNsYkNOUGt4YUJ5NmxUOFR5cVkyWGMyRkljc0VJM0lNSnAzeWJ3NkZBRjVkME9oNDd2cVBSOWtNSHVSQjNGRHprLUVSUVZaNmdkTjl3WXl4WGoycDZldm55cnRiYXhUZE85aE1fSWQycjd4VWJ1cXNKOXVSOGFKb1VQYXE3NjJyc0w2NXl5bmgzRWNWS3FRR3M2bTV4dkYwWExSMFQxbUNmbFlfSVpOemxCLUNRb3pBOVB3UnpGRFNOWTE0MUQ3ZERFQXRHN1Zya9IB7wFBVV95cUxPa0hoNjNJM1lNTTBGS19KUVd2T1BMNFA1NVU5d3QxZlNsYkNOUGt4YUJ5NmxUOFR5cVkyWGMyRkljc0VJM0lNSnAzeWJ3NkZBRjVkME9oNDd2cVBSOWtNSHVSQjNGRHprLUVSUVZaNmdkTjl3WXl4WGoycDZldm55cnRiYXhUZE85aE1fSWQycjd4VWJ1cXNKOXVSOGFKb1VQYXE3NjJyc0w2NXl5bmgzRWNWS3FRR3M2bTV4dkYwWExSMFQxbUNmbFlfSVpOemxCLUNRb3pBOVB3UnpGRFNOWTE0MUQ3ZERFQXRHN1Zyaw?oc=5",
+      "publishedAt": "2026-10-22T13:25:41.000Z",
+      "region": "global",
+      "category": "festivals",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
       "imageUrl": "",
       "imageFallbackUrl": ""
@@ -1184,19 +1249,6 @@
       "publishedAt": "2026-10-22T13:19:01.000Z",
       "region": "latin-america",
       "category": "film",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
-      "id": "1ytmw4g",
-      "headline": "'Tantara' poster teases 1960s Korean music industry drama",
-      "publisher": "upi",
-      "publisherUrl": "https://www.upi.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMiogFBVV95cUxQbkhDamNuVlVJMGtDaWZ0MlNlYmZzQVY2WFFWYWFDTHNHOHRlMHAwYVJ6LVBwaTlFZHY1SGh5TTdsdGt3S2d5SUlUbUpVYW8tRnBwTlhrQWpLLXFkVFNMR2pTeTZBRm04ajdTRDFDZFc0djF4OGF3MTdYTjk5dWRRdnVELWFqeHc5NXluTjdqQlJyQWNkTkxJY2diSm5QLTc3MUHSAaIBQVVfeXFMUG5IQ2pjblZVSTBrQ2lmdDJTZWJmc0FWNlhRVmFhQ0xzRzh0ZTBwMGFSei1QcGk5RWR2NUhoeU03bHRrd0tneUlJVG1KVWFvLUZwcE5Ya0FqSy1xZFRTTEdqU3k2QUZtOGo3U0QxQ2RXNHYxeDhhdzE3WE45OXVkUXZ1RC1hanh3OTV5bk43akJSckFjZE5MSWNnYkpuUC03NzFB?oc=5",
-      "publishedAt": "2026-10-22T13:15:00.000Z",
-      "region": "hollywood",
-      "category": "television",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
       "imageUrl": "",
       "imageFallbackUrl": ""
@@ -1280,19 +1332,6 @@
       "imageFallbackUrl": ""
     },
     {
-      "id": "lahtxa",
-      "headline": "Acclaimed Square Enix PS5 RPG Out Now on PlayStation Store",
-      "publisher": "PlayStation LifeStyle",
-      "publisherUrl": "https://www.playstationlifestyle.net",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMimwFBVV95cUxOQW5pZG1FZVpMWTY0RGJZZ2FZc01oVklrTFVOQm53Y1VhRVE2Ql82Tng1WkFRZmVMQ3NpZ3ZXMVFNcnMzNHlXX0lfcllkRjlXZ0daUXFvZGRiU2VlNEtFazY2YmVVd0JTT24wUWJ1Y1FyMEdlLWN4ZTJ5T19ENU1vVklhU2VqT2kwbXFoT3VqanI4VG9qSmYxczZWMA?oc=5",
-      "publishedAt": "2026-10-22T12:35:10.000Z",
-      "region": "global",
-      "category": "gaming",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
       "id": "7xtgz7",
       "headline": "Sai Pallavi says Ranbir Kapoor keeps himself updated on Tamil films: 'He has a library in his mind’ - Mid-Day",
       "publisher": "Mid-Day",
@@ -1340,45 +1379,6 @@
       "publishedAt": "2026-10-22T12:02:49.000Z",
       "region": "africa",
       "category": "film",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
-      "id": "8gu4uq",
-      "headline": "Lee Da Hae admits she has become less confident about acting after a long break from Korean dramas | KStarTrend",
-      "publisher": "Howl.link",
-      "publisherUrl": "https://t.co",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMiO0FVX3lxTE1pLUdYaW56SHhrOC15dEpZYVV2VGxWNnBYSkN4TW52RVMwemxTdlJ3d2x5MU1YMHJrYWc0?oc=5",
-      "publishedAt": "2026-10-22T12:01:57.000Z",
-      "region": "asia",
-      "category": "television",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
-      "id": "zmhrh",
-      "headline": "Dolores Catania Teases ‘Real Housewives of New Jersey’ Season 15: ‘You’re Not Going to be Bored’ (Exclusive)",
-      "publisher": "Us Weekly",
-      "publisherUrl": "https://www.usmagazine.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMinAFBVV95cUxPemc0RHp4a0FpaG9Ja2pCVVFINkV1bThCZ0JCTVdQY29XRXZDWVluRkJBeGxNV2hfY0hSR0RMQUdpWFh2bnoteEIxSHVZOGkyZnNnNERBM3AwUDY0X0ZCcy1NTS1SQ2ZVdmlHTm01VUwyX2oyNzZZSDBVQ1g3UFBSdmVKTFNmRWVRQ1Vfa1EwTWJpc1k4RVhyUDZydTc?oc=5",
-      "publishedAt": "2026-10-22T12:01:32.000Z",
-      "region": "hollywood",
-      "category": "television",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
-      "id": "n5eqqb",
-      "headline": "James Acaster makes rare admission about secret girlfriend he keeps out of the spotlight",
-      "publisher": "HELLO! Magazine",
-      "publisherUrl": "https://www.hellomagazine.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMimgFBVV95cUxPTHhDVHlaeF9QTk5qaUhyaG1ZRVNSOGlaR3NqWnBlQl9zYXdOMjQwRnFhRVY1X21fS1ZSalJ6cXFDd2FOOEdQejhjbWxjQ1hiandpMk50Tm1YRTlCQjZpZGx3OHF1NWg3Zmduc1NqUDFkWWFqcjBNOF9BRnZRbDN1Y3BnQmx0VUdtZDFnVG9xbkM3SzJ0WEUyTDJ3?oc=5",
-      "publishedAt": "2026-10-22T11:57:28.000Z",
-      "region": "hollywood",
-      "category": "celebrity",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
       "imageUrl": "",
       "imageFallbackUrl": ""
@@ -1436,6 +1436,19 @@
       "imageFallbackUrl": ""
     },
     {
+      "id": "1192v2f",
+      "headline": "Rashmika Mandanna to make her IIFA debut with first-ever live performance at IIFA 2027 in Abu Dhabi",
+      "publisher": "Bollywood Hungama",
+      "publisherUrl": "https://www.bollywoodhungama.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMi4AFBVV95cUxQRUxjWTFrTFhqZmpsYklaVDJaSVVINm52TWF3cVZoNDgzSEdiUGp0cENlR0I5bTVaRmZBM2xxc0EzbG5STzJQRGpiYXRsM1VzX01BOFRVR1Z5SkdmalVkcWxHQV9SeU8yN0p3ZEpGVUkwZHpnQWFVT1lrUFdtM3Y1cURkZzdZbmRhOEdzcTFmY2NyaGZCYjdhMndSalBFT3E1cDA2bWdDbHZKeVJkYk1mTDFfUVZDUnU3eDZLaVBNVEEzS0loNk45c3ZZNFBsZ3FrRVNEanM2YjJzeFYybUdYa9IB5gFBVV95cUxQS2I4YmlxdnBrM3h5N0VHWUw5UHRWZHhFamRqdTVEdHYyVDRlS2xoNTVZaVlYMTVSdk1SZENfS3lBUWtyYlBqdmEzVzM0MUMwS3NPME5KdXdCM05LVWt0N0xRSmlBNVZObE9NWjgwS01RakpHZm90alZlampfaWFUVmNxUWR4X2JaTnR5QVl4bTNuTGlaaXBBR1NvMVhtZWVGTWhpV3lzS204UF9pMEViTGVhZ1NYVC13UTZyRXJnZnNMaUFQUGNvUGF2Q0NxSnVraENFNlVpNE1HamRFYWsxYlg0UXN5UQ?oc=5",
+      "publishedAt": "2026-10-22T10:29:16.000Z",
+      "region": "india",
+      "category": "music",
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
+    },
+    {
       "id": "1brhjkz",
       "headline": "AR Rahman reveals a person manifested in 2014 that he will compose music for 'Ramayana': 'You appeared in",
       "publisher": "The Times of India",
@@ -1449,25 +1462,25 @@
       "imageFallbackUrl": "https://static.toiimg.com/thumb/msid-135115768,width-1280,height-720,resizemode-6,overlay-toi_sw,pt-32,y_pad-600/photo.jpg"
     },
     {
-      "id": "qdl4mr",
-      "headline": "They danced with Shakira, now they are shaking a leg with Mohanlal: Why the Ghetto Kids are going viral again",
-      "publisher": "Onmanorama",
-      "publisherUrl": "https://www.onmanorama.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMiuAFBVV95cUxOQlZRMldXQkxuUVpSZ2hNWWw4ZFNDZERyTVZTTjZFc3ZaRFdvWjhVb0lzUFlQeG1hLXFvcTZXdVdKM1Fqc3c1TnpITVVibVY1aFZhLVNNQ1BUR2N1RDNLX01LT2o5LW1ZZklXVzYwUXVUOVhITVFubWRUX25KeWp2djFQMFcxSFBkR2FVcEM2VV9fTGlWaFJMV1ctSEZPZzNUWV9KTmdoUzlIY1VEU2wwSXRUQjhfUlFD?oc=5",
-      "publishedAt": "2026-10-22T09:46:20.000Z",
+      "id": "1otjvc2",
+      "headline": "Keerthy Suresh, Radhika Apte, Rana Daggubati, Huma Qureshi and Vetrimaaran: Indian Film Project announces its celeb lineup for Season 16 | Bollywood",
+      "publisher": "Hindustan Times",
+      "publisherUrl": "https://www.hindustantimes.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMisgJBVV95cUxNdFFOSjdoUU12TS1TdTNjV2VkMmhxUmlRVDk0TkhuUTBpYXFHRURyRnRiZkZ5RE1OeEJwaGxLaS13eXFzbll5Z3ItcEtCUlc4Z1ZVX0dfT0Z2U0xNNjdoam1KTVdvVktDUlJCc1pWWkh2RF96aEFINldudE1ZdGd1SzQ1WGVxM0x1UUNWT2U0aGZpaVFuTDBZQjFqVVJxUk5DNmRHa2ItRjBzVnN1QU1DVWxxbDVleVNyTXVyNEpoZTd0VzdGcDhZMkotTHhISDUyREtZQ2V4SUx2dms5NUhXaDg2OUl2aXFIMS1zLVhQaU5xY3pLRjNfVzZadzNhNmNzRmRpbE9JaGdfOUw0TlVrRXJYcmhGVUhYZnFKenRhZ3d4MGJkYm4waXJUQUI5T1RReXfSAbcCQVVfeXFMTWVpUEJPRmU1N2VYOUhVdm1Fa3NuZ21lUkRCYUp4YngweEVKQU9PY2tGcHMzZU14dURXY0VMVU1JY0Q3cHYyUmM1RGllWTl6NUJkb3EzOTNSM2NGU29yVmQ1TU9zelEyTHE0X0Jrb3RjYnBKaFhpM0FQRDJGX3B4Z1NWazVMcmZqU1JHd2g0THVpdzkxS1VSbWhNdnJqYnM4dlA5RjVhUVRwdTB0UGh6T1d1RzRPZnB0N2pnZzhOWVhQTWs4TjlNQzJ0M3dfLTVhMlZCQm5OZ0VfMXJKdkY0T0hid200eXNsb3lfTm9lVW1nd0NJMDJUdFJuYTFleHNuUlNxcTJvRmJqNTFwR2c5Vms1U0tvOXJ4SXIyRXRZVEtsQ3Z2WkdJbGtZcVZkc055c0t6YnJPQkE?oc=5",
+      "publishedAt": "2026-10-22T10:11:25.000Z",
       "region": "india",
-      "category": "music",
+      "category": "film",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
       "imageUrl": "",
       "imageFallbackUrl": ""
     },
     {
-      "id": "ddteoo",
-      "headline": "AR Rahman Recalls A 2014 Message That Predicted His Ramayana Collaboration",
-      "publisher": "NDTV",
-      "publisherUrl": "https://www.ndtv.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMitwFBVV95cUxQT2wtWGtDbGtVXzE2N2ZYTWVIX2V3aV9BODlCaWtYUDdXUXRKUklSZHh2ek1hLXl3bktFOVd4UDBHaDAxMjV4cXBwblZfbFlTanQwQ3NhUFVwT1UxSFdvb3NXTkZoY2toVTVtQWVSbjhpVHk1WXEySHVBSDVjYWlpc1UxVEp5MlVZaE9sUTNvZWtleHhzdlFaa3BLazBQNWNmd3hWT1pEdFhIaWFqSlhPVFpzRGtVQW8?oc=5",
-      "publishedAt": "2026-10-22T09:45:58.000Z",
+      "id": "vlf2x3",
+      "headline": "Sona Mohapatra doubles down on Daler Mehndi criticism amid backlash: ‘Can’t abandon accountability’",
+      "publisher": "The Indian Express",
+      "publisherUrl": "https://indianexpress.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMi9wFBVV95cUxNWUE5aFVPSGpEZkN2R0N1R0lDWlZBMXpRc1B0ak1lUXRJLTNFWFpyeGRRMVpoMHpoaUZBa3FyWU1WQ3FPTTZwWUJxTWI5VXIxRWhDcGlSRFhPNXBpWFBpODYyLVd2Ri1CMEI1U2d4Y0lJenpvNVdNcHNrSzRCUXprRURkaVRJU1BuY1NJWnIyZlRZaW9iRG5JRjl3VDduN29yZy1NaTBjMVlJWld6bjB6MXlRVE5FN2k1MGZWNWN0LXJQQkNoVS1qOWN4Uy1ldTZmbWxTU1JBRzJXUVpneUdWTi1mYmpXYXI0X0ZkS3lLTDNiWUoxQmlB0gH3AUFVX3lxTE1ZQTloVU9IakRmQ3ZHQ3VHSUNaVkExelFzUHRqTWVRdEktM0VYWnJ4ZFExWmgwemhpRkFrcXJZTVZDcU9NNnBZQnFNYjlVcjFFaENwaVJEWE81cGlYUGk4NjItV3ZGLUIwQjVTZ3hjSUl6em81V01wc2tLNEJRemtFRGRpVElTUG5jU0lacjJmVFlpb2JEbklGOXdUN243b3JnLU1pMGMxWUlaV3puMHoxeVFUTkU3aTUwZlY1Y3QtclBCQ2hVLWo5Y3hTLWV1NmZtbFNTUkFHMldRWmd5R1ZOLWZialdhcjRfRmRLeUtMM2JZSjFCaUE?oc=5",
+      "publishedAt": "2026-10-22T10:06:30.000Z",
       "region": "india",
       "category": "music",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
@@ -1507,19 +1520,6 @@
       "publisherUrl": "https://www.broadbandtvnews.com",
       "sourceUrl": "https://news.google.com/rss/articles/CBMiwAFBVV95cUxQclVxUjg0MDR3bTRxLU9HQ1I5THVBQU4zSXN2Vnh5OVFSQ2R5YkRfM3Z0XzBTVGNWcVdtNm9ZcFRlVlhOdVBRX2c2RklPdGsybHJJc3A1X2dMc25pYUlHZ1ZWbWduV2h1akpKUDhiTEhxb0pZejJPandUdXVzUEExd2N4cUFtYTBLblhBaHZkX1Axa0hDdF9ja2dnbnBFeVZXZWZDVldoRXJEM3RnNTVfU21JaHlyNGFzOTYySFZNbEo?oc=5",
       "publishedAt": "2026-10-21T17:03:49.000Z",
-      "region": "europe",
-      "category": "film",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
-      "id": "1kghy3j",
-      "headline": "‘I will always be a European actress’: Sandra Huller on her film Fatherland",
-      "publisher": "Runcorn and Widnes World",
-      "publisherUrl": "https://www.runcornandwidnesworld.co.uk",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMixgFBVV95cUxOcWo4N3ZubzhDU19Qc0FrV2hoWXdnbXVxYjk3aVBiTHhvdWNIMk5OdVpCZUUtOXBfY1FhVkFTVVpkVkRxdGcyR0FFaEprZVZIdXE1NGUtTnl0dlRweFdWcDFUMHV4ZVVvRjVodGVqMDlkWVdUUDhxZnB5N2hnai1fQnZUajdzeEQxODk1a0ppNTc1ZGo0ZGk1RjlKU0xQbWxmM1VCWnVqYVZXTHNfV29SbWNqX2xfMlpRa3lnaTJMeFpwUDVQNHc?oc=5",
-      "publishedAt": "2026-10-21T16:32:17.000Z",
       "region": "europe",
       "category": "film",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
