@@ -55,7 +55,7 @@ test("anime playback excludes the unverified Aniweeb source and automatically fa
 
 test("movie and TV Player 1 exposes seven sources while anime providers remain separate", () => {
   assert.match(source, /: \["vidapi", "vidsrc", "embedwave", "vidfast", "ezvidapi", "embedapistream", "moviesapi"\];/);
-  assert.match(source, /if \(source === "vidapi" \|\| source === "vidsrc" \|\| source === "vidfast" \|\| source === "embedapistream" \|\| source === "moviesapi"\) return hasFallbackId\(\);\n  if \(source === "embedwave" \|\| source === "ezvidapi"\) return hasTmdbId\(\);\r?\n\s*return false;/);
+  assert.match(source, /if \(source === "vidapi" \|\| source === "vidsrc" \|\| source === "vidfast" \|\| source === "embedapistream" \|\| source === "moviesapi"\) return hasFallbackId\(\);\r?\n\s*if \(source === "embedwave" \|\| source === "ezvidapi"\) return hasTmdbId\(\);\r?\n\s*return false;/);
   assert.match(source, /button\.hidden = isAnimePlayback\(\) \? !\["vidapi", "vidsrc", "vidplus", "vidlink"\]\.includes\(source\) : !\["vidapi", "vidsrc", "embedwave", "vidfast", "ezvidapi", "embedapistream", "moviesapi"\]\.includes\(source\)/);
   assert.match(source, /<span class="vivid-server-count">7 sources<\/span>/);
   assert.doesNotMatch(source, /mountPlaybackServerSettings\(serverPanel/);
