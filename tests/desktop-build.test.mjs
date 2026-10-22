@@ -57,6 +57,8 @@ test("file and native WebView entry points redirect before Firebase modules init
   assert.match(redirect, /appassets\.androidplatform\.net/);
   assert.match(redirect, /https:\/\/vivid-cinema\.web\.app\//);
   assert.match(redirect, /window\.location\.replace\(target\.href\)/);
+  const syntaxChecker = fs.readFileSync(path.join(root, "automation", "check-syntax.mjs"), "utf8");
+  assert.match(syntaxChecker, /scripts\/platform-origin-redirect\.js/);
   for (const page of ["index.html", "home.html", "for-you.html"]) {
     const source = fs.readFileSync(path.join(root, page), "utf8");
     const tag = '<script src="scripts/platform-origin-redirect.js"></script>';
