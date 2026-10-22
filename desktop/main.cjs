@@ -78,15 +78,27 @@ function createWindow() {
   const win = new BrowserWindow({
     width: 1440, height: 900, minWidth: 960, minHeight: 640,
     show: false, backgroundColor: "#050608", autoHideMenuBar: true, title: "Vivid Cinema",
-    icon: path.join(appRoot, "icons", process.platform === "win32" ? "vivid-icon.ico" : "vivid-icon-180.png"),
     icon: appIcon,
     webPreferences: { nodeIntegration: false, contextIsolation: true, sandbox: true, webSecurity: true }
   });
-  // Maximize before showing so the first visible frame already fills the desktop.
+
+  // Start in immersive cinema mode; F11 or Escape returns to the normal desktop window.
   win.once("ready-to-show", () => {
     win.maximize();
+    win.setFullScreen(true);
     win.show();
   });
+  win.webContents.on("before-input-event", (event, input) => {
+    if (input.type !== "keyDown") return;
+    if (input.key === "F11") {
+      event.preventDefault();
+      win.setFullScreen(!win.isFullScreen());
+    } else if (input.key === "Escape" && win.isFullScreen()) {
+      event.preventDefault();
+      win.setFullScreen(false);
+    }
+  });
+
   win.webContents.setWindowOpenHandler(({ url }) => {
     try {
       const target = new URL(url);
