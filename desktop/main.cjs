@@ -148,6 +148,10 @@ function createWindow() {
     fallbackToLocal(errorCode + " " + errorDescription);
   });
 
+  win.on("closed", () => {
+    if (hostedLoadTimeout) clearTimeout(hostedLoadTimeout);
+  });
+
   win.webContents.setWindowOpenHandler(({ url }) => {
     try {
       const target = new URL(url);
