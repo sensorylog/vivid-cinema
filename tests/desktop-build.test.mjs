@@ -174,7 +174,7 @@ test("Windows workflow builds on demand or on release tags", () => {
   assert.match(workflow, /desktop:publish/);
   assert.match(workflow, /GH_TOKEN:.*secrets\.GITHUB_TOKEN/);
   assert.match(workflow, /contents: write/);
-  assert.match(workflow, /Verify release tag matches app version/);
+  assert.match(workflow, /Decide whether this push publishes a release/);
   assert.match(workflow, /pull_request/);
   assert.match(workflow, /windows-latest/);
   assert.match(workflow, /desktop:dist/);
