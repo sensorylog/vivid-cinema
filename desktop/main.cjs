@@ -65,6 +65,18 @@ let localOrigin;
 const HOSTED_APP_URL = "https://vivid-cinema.web.app/home.html";
 const HOSTED_APP_ORIGIN = new URL(HOSTED_APP_URL).origin;
 const HOSTED_LOAD_TIMEOUT_MS = 12000;
+const LOADING_HTML = `<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Vivid Cinema</title><style>
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:#050608;color:#f7f8fc;font-family:Segoe UI,system-ui,sans-serif}
+body{min-height:100vh;display:grid;place-items:center;background:radial-gradient(ellipse at 50% 42%,#12172b 0%,#080a12 43%,#050608 78%)}
+main{text-align:center;padding:28px}.brand{font-size:clamp(28px,4vw,42px);font-weight:750;letter-spacing:-1.6px}.brand span{font-weight:400;color:#a8b2c7}
+p{margin:18px 0 22px;color:#9ca6bb;font-size:14px;letter-spacing:.02em}
+.track{width:118px;height:3px;margin:auto;overflow:hidden;border-radius:8px;background:#ffffff20}.track span{display:block;width:42%;height:100%;border-radius:inherit;background:linear-gradient(90deg,#16c8ff,#6a5cff,#ff8a26);animation:move 1.25s ease-in-out infinite alternate}
+@keyframes move{from{transform:translateX(-5%)}to{transform:translateX(145%)}}
+@media(prefers-reduced-motion:reduce){.track span{animation:none}}
+</style></head><body><main role="status" aria-live="polite"><div class="brand">Vivid<span>Cinema</span></div><p>Preparing your cinema experience…</p><div class="track" aria-hidden="true"><span></span></div></main></body></html>`;
+const LOADING_URL = "data:text/html;charset=utf-8," + encodeURIComponent(LOADING_HTML);
 
 async function startLocalServer() {
   localServer = createLocalServer(appRoot);
@@ -85,12 +97,8 @@ function createWindow() {
     webPreferences: { nodeIntegration: false, contextIsolation: true, sandbox: true, webSecurity: true }
   });
 
-  // Start in immersive cinema mode; F11 or Escape returns to the normal desktop window.
-  win.once("ready-to-show", () => {
-    win.maximize();
-    win.setFullScreen(true);
-    win.show();
-  });
+  // Show a tiny local splash immediately; the main app then loads on its trusted HTTPS origin.
+  // F11 or Escape returns to the normal desktop window.
   win.webContents.on("before-input-event", (event, input) => {
     if (input.type !== "keyDown") return;
     if (input.key === "F11") {
@@ -104,17 +112,33 @@ function createWindow() {
 
   let localFallbackStarted = false;
   let hostedAppLoaded = false;
+  let hostedLoadStarted = false;
   let hostedLoadTimeout;
   const fallbackToLocal = reason => {
     if (localFallbackStarted || hostedAppLoaded) return;
     localFallbackStarted = true;
     if (hostedLoadTimeout) clearTimeout(hostedLoadTimeout);
     console.warn("Vivid Cinema hosted app unavailable; opening bundled offline fallback:", reason);
-    if (localOrigin) void win.loadURL(localOrigin + "/home.html");
+    if (localOrigin) void win.loadURL(localOrigin + "/home.html").catch(() => {});
   };
-  win.webContents.once("did-finish-load", () => {
+  win.webContents.on("did-finish-load", () => {
+    let loadedOrigin;
+    try { loadedOrigin = new URL(win.webContents.getURL()).origin; } catch { return; }
+    if (loadedOrigin !== HOSTED_APP_ORIGIN) return;
     hostedAppLoaded = true;
     if (hostedLoadTimeout) clearTimeout(hostedLoadTimeout);
+  });
+  win.once("ready-to-show", () => {
+    win.maximize();
+    win.setFullScreen(true);
+    win.show();
+    if (hostedLoadStarted) return;
+    hostedLoadStarted = true;
+    hostedLoadTimeout = setTimeout(
+      () => fallbackToLocal("hosted app load timed out after " + Math.round(HOSTED_LOAD_TIMEOUT_MS / 1000) + " seconds"),
+      HOSTED_LOAD_TIMEOUT_MS
+    );
+    void win.loadURL(HOSTED_APP_URL).catch(error => fallbackToLocal(error?.message || "hosted navigation failed"));
   });
   win.webContents.on("did-fail-load", (_event, errorCode, errorDescription, validatedURL, isMainFrame) => {
     if (!isMainFrame || localFallbackStarted || hostedAppLoaded || errorCode === -3) return;
@@ -161,14 +185,14 @@ function createWindow() {
     event.preventDefault();
     if (target.protocol === "https:" || target.protocol === "http:") void shell.openExternal(target.href);
   });
-  // Fall back quickly if the network is unavailable instead of leaving a hidden blank window.
-  hostedLoadTimeout = setTimeout(
-    () => fallbackToLocal("hosted app load timed out after " + Math.round(HOSTED_LOAD_TIMEOUT_MS / 1000) + " seconds"),
-    HOSTED_LOAD_TIMEOUT_MS
-  );
-  // Firebase AI Logic + reCAPTCHA App Check require the real HTTPS app origin.
-  // Keep the packaged files as a graceful offline fallback, not the primary origin.
-  void win.loadURL(HOSTED_APP_URL);
+  // The splash is self-contained, so it appears immediately without a network request.
+  void win.loadURL(LOADING_URL).catch(error => {
+    console.error("Vivid Cinema loading splash failed:", error);
+    win.maximize();
+    win.setFullScreen(true);
+    win.show();
+    fallbackToLocal(error?.message || "loading splash failed");
+  });
 }
 
 app.whenReady().then(async () => {
