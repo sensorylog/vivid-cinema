@@ -2,16 +2,17 @@ import { cert, getApp, getApps, initializeApp } from "firebase-admin/app";
 import { getAuth } from "firebase-admin/auth";
 import { getFirestore, Timestamp } from "firebase-admin/firestore";
 
-const VERIFY_CONTINUE_URL = "https://vivid-cinema.web.app/verify-email.html";
+const VERIFY_CONTINUE_URL = "https://vivid-cinema.netlify.app/verify-email.html";
 const MIN_RESEND_INTERVAL_MS = 60_000;
 const DEFAULT_ALLOWED_ORIGINS = [
+  "https://vivid-cinema.netlify.app",
   "https://vivid-cinema.web.app",
   "https://vivid-cinema.firebaseapp.com"
 ];
 
 function allowedOrigins() {
   const configured = String(process.env.VIVID_ALLOWED_ORIGINS || "").split(",").map(value => value.trim()).filter(Boolean);
-  return new Set(configured.length ? configured : DEFAULT_ALLOWED_ORIGINS);
+  return new Set([...DEFAULT_ALLOWED_ORIGINS, ...configured]);
 }
 
 function setCors(req, res) {
