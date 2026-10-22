@@ -16,9 +16,12 @@ test("desktop packaging is opt-in and preserves existing scripts", () => {
   assert.ok(pkg.scripts["test:rules"]);
 });
 test("Windows installer and portable executable targets use Vivid branding", () => {
-  assert.equal(pkg.version, "1.0.1");
+  assert.equal(pkg.version, "1.0.2");
   assert.ok(pkg.devDependencies.electron);
   assert.ok(pkg.devDependencies["electron-builder"]);
+  assert.ok(pkg.dependencies["electron-updater"]);
+  assert.equal(pkg.scripts["desktop:publish"].includes("--publish always"), true);
+  assert.deepEqual(pkg.build.publish[0], { provider: "github", owner: "sensorylog", repo: "vivid-cinema", releaseType: "release" });
   assert.deepEqual(pkg.build.win.target.map((target) => target.target), ["nsis", "portable"]);
   assert.equal(pkg.build.asar, true);
   assert.equal(pkg.build.win.icon, "icons/vivid-icon.ico");
@@ -143,11 +146,32 @@ test("Windows icon preparation creates a valid ICO container from the checked-in
   assert.match(script, /vivid-icon\.ico/);
   assert.match(script, /writeFileSync/);
 });
+test("Windows app checks for updates and offers download plus restart-to-install", () => {
+  const main = fs.readFileSync(path.join(root, "desktop", "main.cjs"), "utf8");
+  const preloadPath = path.join(root, "desktop", "preload.cjs");
+  assert.ok(fs.existsSync(preloadPath));
+  const preload = fs.readFileSync(preloadPath, "utf8");
+  assert.match(main, /require\("electron-updater"\)/);
+  assert.match(main, /autoUpdater\.autoDownload = false/);
+  assert.match(main, /autoUpdater\.checkForUpdates\(\)/);
+  assert.match(main, /setInterval\(check, 6 \* 60 \* 60 \* 1000\)/);
+  assert.match(main, /vivid-update-download/);
+  assert.match(main, /vivid-update-install/);
+  assert.match(main, /PORTABLE_EXECUTABLE_FILE/);
+  assert.match(preload, /Vivid Cinema update/);
+  assert.match(preload, /Restart & install/);
+  assert.match(preload, /vivid-update-status/);
+});
+
 test("Windows workflow builds on demand or on release tags", () => {
   const file = path.join(root, ".github", "workflows", "windows-desktop.yml");
   assert.ok(fs.existsSync(file));
   const workflow = fs.readFileSync(file, "utf8");
   assert.match(workflow, /workflow_dispatch/);
+  assert.match(workflow, /desktop:publish/);
+  assert.match(workflow, /GH_TOKEN:.*secrets\.GITHUB_TOKEN/);
+  assert.match(workflow, /contents: write/);
+  assert.match(workflow, /Verify release tag matches app version/);
   assert.match(workflow, /pull_request/);
   assert.match(workflow, /windows-latest/);
   assert.match(workflow, /desktop:dist/);
