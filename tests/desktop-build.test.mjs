@@ -37,6 +37,8 @@ test("desktop runtime uses the trusted Firebase Hosting origin with a bundled of
   assert.match(main, /HOSTED_APP_URL = "https:\/\/vivid-cinema\.web\.app\/home\.html"/);
   assert.match(main, /loadURL\(HOSTED_APP_URL\)/);
   assert.match(main, /did-fail-load/);
+  assert.match(main, /HOSTED_LOAD_TIMEOUT_MS = 12000/);
+  assert.match(main, /hosted app load timed out after/);
   assert.match(main, /localOrigin \+ "\/home\.html"/);
   assert.match(main, /nodeIntegration:\s*false/);
   assert.match(main, /contextIsolation:\s*true/);
