@@ -33,7 +33,7 @@ test("Recall keeps detailed quota and provider errors visible for diagnosis", ()
 });
 
 test("service worker cache version changes with the updated AI modules", () => {
-  assert.match(workerSource, /vivid-cinema-shell-v\d+/);
+  assert.match(workerSource, /vivid-cinema-shell-v239/);
 });
 
 test("achievement Sparks reuse the existing Recall model and App Check protections", () => {
@@ -63,5 +63,5 @@ test("Recall diagnostics support a deployed Netlify origin without weakening App
   assert.match(firebaseSource, /initializeAppCheck/);
   assert.match(firebaseSource, /ReCaptchaEnterpriseProvider/);
   assert.match(firebaseSource, /allow vivid-cinema\.netlify\.app in both Firebase App Check/);
-  assert.match(workerSource, /vivid-cinema-shell-v\\d+/);
+  assert.match(workerSource, /vivid-cinema-shell-v239/);
 });
