@@ -16,11 +16,11 @@ test("desktop packaging is opt-in and preserves existing scripts", () => {
   assert.ok(pkg.scripts["test:rules"]);
 });
 test("Windows installer and portable executable targets use Vivid branding", () => {
-  assert.equal(pkg.version, "1.0.2");
+  assert.equal(pkg.version, "1.0.3");
   assert.ok(pkg.devDependencies.electron);
   assert.ok(pkg.devDependencies["electron-builder"]);
   assert.ok(pkg.dependencies["electron-updater"]);
-  assert.equal(pkg.scripts["desktop:publish"].includes("--publish always"), true);
+  assert.match(pkg.scripts["desktop:publish"], /electron-builder --win nsis --publish always/);
   assert.deepEqual(pkg.build.publish[0], { provider: "github", owner: "sensorylog", repo: "vivid-cinema", releaseType: "release" });
   assert.ok(pkg.build.files.includes("!node_modules/**"));
   assert.ok(pkg.build.files.includes("node_modules/electron-updater/**"));
