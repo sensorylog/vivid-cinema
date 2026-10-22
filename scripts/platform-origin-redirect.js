@@ -7,11 +7,14 @@
   const isNativeLoopbackBundle =
     ["localhost", "127.0.0.1"].includes(hostname) &&
     /(?:;\s*wv\)|\bCapacitor\b|\bElectron\b)/i.test(userAgent);
+  const isNativeWebView = /(?:;\s*wv\)|\bCapacitor\b|\bElectron\b)/i.test(userAgent);
+  const isUntrustedNativeOrigin = isNativeWebView &&
+    !["vivid-cinema.web.app", "vivid-cinema.firebaseapp.com"].includes(hostname);
 
   // Local-file and native WebView origins cannot complete the deployed site's
   // reCAPTCHA Enterprise App Check flow. Move those wrappers to the trusted
   // Firebase Hosting origin before app modules initialize Firebase or Gemini.
-  if (!isFileBundle && !isCapacitorBundle && !isAndroidAssetBundle && !isNativeLoopbackBundle) return;
+  if (!isFileBundle && !isCapacitorBundle && !isAndroidAssetBundle && !isNativeLoopbackBundle && !isUntrustedNativeOrigin) return;
 
   const filename = window.location.pathname.split("/").pop() || "home.html";
   const page = /^[a-z0-9-]+\.html$/i.test(filename) ? filename : "home.html";
