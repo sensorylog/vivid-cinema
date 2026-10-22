@@ -34,14 +34,18 @@ test("Windows installer and portable executable targets use Vivid branding", () 
 test("desktop runtime uses Netlify first, Firebase Hosting second, and a bundled offline fallback last", () => {
   const main = fs.readFileSync(path.join(root, "desktop", "main.cjs"), "utf8");
   assert.match(main, /app\.getAppPath\(\)/);
-  assert.match(main, /HOSTED_APP_URL = "https:\/\/vivid-cinema\.web\.app\/home\.html"/);
+  assert.match(main, /HOSTED_APP_URL = "https:\/\/vivid-cinema\.netlify\.app\/home\.html"/);
+  assert.match(main, /FIREBASE_FALLBACK_URL = "https:\/\/vivid-cinema\.web\.app\/home\.html"/);
+  assert.match(main, /fallbackToFirebase/);
+  assert.match(main, /FIREBASE_FALLBACK_ORIGIN/);
   assert.match(main, /loadURL\(HOSTED_APP_URL\)/);
   assert.match(main, /did-fail-load/);
   assert.match(main, /HOSTED_LOAD_TIMEOUT_MS = 12000/);
   assert.match(main, /LOADING_HTML/);
   assert.match(main, /loadURL\(LOADING_URL\)/);
   assert.match(main, /hostedLoadStarted/);
-  assert.match(main, /hosted app load timed out after/);
+  assert.match(main, /Netlify app load timed out after/);
+  assert.match(main, /Firebase Hosting fallback timed out after/);
   assert.match(main, /localOrigin \+ "\/home\.html"/);
   assert.match(main, /nodeIntegration:\s*false/);
   assert.match(main, /contextIsolation:\s*true/);
@@ -63,7 +67,7 @@ test("file and native WebView entry points redirect before Firebase modules init
   assert.match(redirect, /appassets\.androidplatform\.net/);
   assert.match(redirect, /isUntrustedNativeOrigin/);
   assert.doesNotMatch(redirect, /\\bElectron\\b/);
-  assert.match(redirect, /https:\/\/vivid-cinema\.web\.app\//);
+  assert.match(redirect, /https:\/\/vivid-cinema\.netlify\.app\//);
   assert.match(redirect, /window\.location\.replace\(target\.href\)/);
   const syntaxChecker = fs.readFileSync(path.join(root, "automation", "check-syntax.mjs"), "utf8");
   assert.match(syntaxChecker, /scripts\/platform-origin-redirect\.js/);
@@ -97,14 +101,14 @@ test("native-origin redirect routes only unsupported wrappers to trusted hosting
 
   assert.equal(
     runRedirect("file:///android_asset/www/home.html?source=apk#recall", "Android WebView"),
-    "https://vivid-cinema.web.app/home.html?source=apk#recall"
+    "https://vivid-cinema.netlify.app/home.html?source=apk#recall"
   );
   assert.equal(
     runRedirect(
       "https://deploy-preview-342--vivid-cinema.netlify.app/for-you.html?source=apk",
       "Mozilla/5.0 (Linux; Android 14; Pixel Build/UP1A; wv) AppleWebKit/537.36"
     ),
-    "https://vivid-cinema.web.app/for-you.html?source=apk"
+    "https://vivid-cinema.netlify.app/for-you.html?source=apk"
   );
   assert.equal(
     runRedirect(
