@@ -46,6 +46,8 @@ jobs:
         uses: android-actions/setup-android@v4
 
       - name: Install dependencies
+        env:
+          ELECTRON_SKIP_BINARY_DOWNLOAD: "1"
         run: npm install --no-audit --no-fund
 
       - name: Run tests
