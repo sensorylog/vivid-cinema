@@ -34,31 +34,21 @@ async function providerHome(providerId) {
 }
 const PROVIDER_IDS = Object.freeze({ netflix: 8, primeVideo: 9, hboMax: 1899, disneyPlus: 337, appleTvPlus: 350, hulu: 15, paramountPlus: 531 });
 const HOME_LOADERS = Object.freeze({
-  trending: (page) => tmdbApi.trending("all", "week", page),
-  top10: async () => {
-    const results = await Promise.allSettled([tmdbApi.popularMovies(1), tmdbApi.popularTv(1)]);
-    const items = [];
-    results.forEach((result,index) => { if(result.status === "fulfilled") items.push(...normalizeResults(result.value?.results || [], index === 0 ? "movie" : "tv")); });
-    items.sort((a,b) => Number(b.raw?.popularity || 0) - Number(a.raw?.popularity || 0) || Number(b.vote_average || 0) - Number(a.vote_average || 0));
-    return {page:1,total_pages:1,results:items.slice(0,10)};
-  },
+  // The Home shelf should reflect live daily momentum, not a weekly list that
+  // can feel stale after a title spikes or drops out of conversation.
+  trending: (page) => tmdbApi.trending("all", "day", page),
+  // Vivid's Top 10 is a transparent snapshot of the same current trend signal.
+  // It is not presented as Netflix's proprietary Top 10 chart.
+  top10: (page) => tmdbApi.trending("all", "day", page).then(data => ({
+    ...data,
+    results: (data.results || []).slice(0, 10)
+  })),
   nowPlaying: (page) => tmdbApi.nowPlayingMovies(page),
   popularMovies: (page) => tmdbApi.popularMovies(page),
-  // Keep the Home rating shelf relevant to current releases instead of letting
-  // an all-time ranking permanently occupy the first page with older classics.
-  topRatedMovies: (page) => {
-    const cutoff = new Date();
-    cutoff.setFullYear(cutoff.getFullYear() - 5);
-    const from = [cutoff.getFullYear(), String(cutoff.getMonth() + 1).padStart(2, "0"), String(cutoff.getDate()).padStart(2, "0")].join("-");
-    return tmdbApi.discoverMovies({ page, sort_by: "vote_average.desc", "vote_count.gte": "100", "primary_release_date.gte": from });
-  },
+  // Use TMDB's actual top-rated chart for a shelf called Top Rated.
+  topRatedMovies: (page) => tmdbApi.topRatedMovies(page),
   popularTv: (page) => tmdbApi.popularTv(page),
-  topRatedTv: (page) => {
-    const cutoff = new Date();
-    cutoff.setFullYear(cutoff.getFullYear() - 5);
-    const from = [cutoff.getFullYear(), String(cutoff.getMonth() + 1).padStart(2, "0"), String(cutoff.getDate()).padStart(2, "0")].join("-");
-    return tmdbApi.discoverTv({ page, sort_by: "vote_average.desc", "vote_count.gte": "50", "first_air_date.gte": from });
-  },
+  topRatedTv: (page) => tmdbApi.topRatedTv(page),
   airingToday: (page) => tmdbApi.airingTodayTv(page),
   anime: (page) => tmdbApi.discoverMovies({ page, with_genres: 16, sort_by: "popularity.desc" }),
   kdrama: (page) => tmdbApi.discoverTv({ page, with_original_language: "ko", sort_by: "popularity.desc" }),
@@ -86,10 +76,17 @@ const HOME_LOADERS = Object.freeze({
       results.forEach((result,index) => {
         if(result.status==="fulfilled") items.push(...normalizeResults(result.value?.results||[], index===0?"movie":"tv"));
       });
-      items.sort((a,b) =>
-        String(b.date || "").localeCompare(String(a.date || "")) ||
-        Number(b.raw?.popularity||0)-Number(a.raw?.popularity||0)
-      );
+      const today = dateKey(now);
+      items.sort((a,b) => {
+        const aDate = String(a.date || ""), bDate = String(b.date || "");
+        const aReleased = aDate && aDate <= today, bReleased = bDate && bDate <= today;
+        // Put titles that have already landed first, newest release first.
+        // Upcoming titles follow in soonest-release order instead of hiding
+        // yesterday's releases at the bottom of the shelf.
+        if (aReleased !== bReleased) return aReleased ? -1 : 1;
+        if (aReleased && bReleased) return bDate.localeCompare(aDate) || Number(b.raw?.popularity||0)-Number(a.raw?.popularity||0);
+        return aDate.localeCompare(bDate) || Number(b.raw?.popularity||0)-Number(a.raw?.popularity||0);
+      });
       return {page:1,total_pages:1,results:items.slice(0,20)};
     });
   },
@@ -103,8 +100,8 @@ const HOME_LOADERS = Object.freeze({
 });
 
 export const HOME_SECTION_META = Object.freeze({
-  trending: { title: "Trending now", description: "What people are discovering this week.", type: "all" },
-  top10: { title: "Top 10 on Vivid", description: "The ten titles with the strongest current catalogue momentum.", type: "all" },
+  trending: { title: "Trending now", description: "Titles gaining attention right now, refreshed from daily trend data.", type: "all" },
+  top10: { title: "Top 10 on Vivid", description: "A daily snapshot of titles trending across movies and series.", type: "all" },
   nowPlaying: { title: "Now playing", description: "Movies currently in cinemas and in the current release cycle.", type: "movie" },
   popularMovies: { title: "Popular movies", description: "Big-screen stories worth a look.", type: "movie" },
   topRatedMovies: { title: "Top rated", description: "Strongly rated movies from the last five years, with enough votes to make the score meaningful.", type: "movie" },
