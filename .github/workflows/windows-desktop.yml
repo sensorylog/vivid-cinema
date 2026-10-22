@@ -53,15 +53,7 @@ jobs:
         run: |
           $version = node -p "require('./package.json').version"
           $publish = $false
-          if ($env:GITHUB_REF -eq "refs/heads/main" -and $env:BEFORE_SHA -match '^[0-9a-f]{40}
-        with:
-          name: vivid-cinema-windows-${{ github.run_number }}
-          path: |
-            dist-desktop/Vivid-Cinema-Setup-*.exe
-            dist-desktop/Vivid-Cinema-Portable-*.exe
-          if-no-files-found: error
-          retention-days: 30
- -and $env:BEFORE_SHA -ne "0000000000000000000000000000000000000000") {
+          if ($env:GITHUB_REF -eq "refs/heads/main" -and $env:BEFORE_SHA -match '^[0-9a-f]{40}$' -and $env:BEFORE_SHA -ne "0000000000000000000000000000000000000000") {
             $previousJson = git show "$($env:BEFORE_SHA):package.json"
             if ($LASTEXITCODE -eq 0) {
               $previousVersion = ($previousJson | ConvertFrom-Json).version
