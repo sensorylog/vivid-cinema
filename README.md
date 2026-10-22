@@ -1,5 +1,15 @@
 # Vivid Cinema
 
+## Current hosting arrangement
+
+- Primary automatic static hosting: [vivid-cinema.netlify.app](https://vivid-cinema.netlify.app/).
+- Firebase remains the backend for Authentication, Firestore, and Firebase AI Logic.
+- Firebase Hosting is retained as a manual fallback; its GitHub Actions deployment is intentionally manual-only while its monthly quota is limited.
+- Netlify deployment does not automatically update an already-installed APK or a previously built Windows EXE that points at another URL.
+
+See [Netlify-primary hosting and Firebase fallback](docs/netlify-primary-firebase-fallback.md) for the quota-reset procedure and the one-time App Check domain setup needed for Vivid Recall.
+
+
 ## Phase D4 — PWA foundation and offline shell
 Vivid Cinema now has the first production-oriented PWA layer:
 - installable web-app manifest with standalone display
