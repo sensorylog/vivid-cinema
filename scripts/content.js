@@ -2,25 +2,39 @@ import { tmdbApi } from "./tmdb.js";
 import { normalizeResults, normalizeUpcomingResults } from "./media.js";
 import { getProviderCountry } from "./provider-region.js";
 
-async function providerDiscover(providerId, type, page = 1, useRegion = true) {
-  const params = { page, with_watch_monetization_types: "flatrate", with_watch_providers: String(providerId), sort_by: "popularity.desc", "vote_count.gte": "20" };
-  if (useRegion) params.watch_region = getProviderCountry();
+async function providerDiscover(providerId, type, page = 1, region = getProviderCountry()) {
+  const params = { page, with_watch_monetization_types: "flatrate", with_watch_providers: String(providerId), sort_by: "popularity.desc", "vote_count.gte": "20", watch_region: region };
   return type === "movie" ? tmdbApi.discoverMovies(params) : tmdbApi.discoverTv(params);
 }
 async function providerHome(providerId) {
-  const regional = await Promise.allSettled([
-    providerDiscover(providerId, "movie", 1, true),
-    providerDiscover(providerId, "tv", 1, true)
-  ]);
-  let items = [];
-  regional.forEach((result, index) => {
-    if (result.status === "fulfilled") {
-      items.push(...normalizeResults(result.value?.results || [], index === 0 ? "movie" : "tv"));
+  const region = getProviderCountry();
+  const loadRegion = async (country) => {
+    const results = await Promise.allSettled([
+      providerDiscover(providerId, "movie", 1, country),
+      providerDiscover(providerId, "tv", 1, country)
+    ]);
+    const fulfilled = results.filter(result => result.status === "fulfilled");
+    if (!fulfilled.length) {
+      throw results.find(result => result.status === "rejected")?.reason || new Error("Streaming provider catalogue unavailable.");
     }
-  });
-  // Do not silently fall back to a worldwide catalogue: that can show titles
-  // unavailable in the viewer's selected country and mislabel them as local.
-  items.sort((a,b) => Number(b.raw?.popularity||0)-Number(a.raw?.popularity||0) || Number(b.vote_average||0)-Number(a.vote_average||0));
+    const items = [];
+    results.forEach((result, index) => {
+      if (result.status === "fulfilled") {
+        items.push(...normalizeResults(result.value?.results || [], index === 0 ? "movie" : "tv"));
+      }
+    });
+    items.sort((a,b) => Number(b.raw?.popularity||0)-Number(a.raw?.popularity||0) || Number(b.vote_average||0)-Number(a.vote_average||0));
+    return items;
+  };
+
+  let items = await loadRegion(region);
+  // Some services (including Paramount+) have little or no catalogue data in
+  // every supported country. Keep the shelf useful by falling back to the US
+  // catalogue only when the selected region has no results. The UI describes
+  // these as popular provider titles, not a promise of local availability.
+  if (!items.length && region !== "US") {
+    items = await loadRegion("US");
+  }
   return { page: 1, total_pages: 1, results: items.slice(0, 20) };
 }
 const PROVIDER_IDS = Object.freeze({ netflix: 8, primeVideo: 9, hboMax: 1899, disneyPlus: 337, appleTvPlus: 350, hulu: 15, paramountPlus: 531 });
