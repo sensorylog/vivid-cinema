@@ -1,7 +1,7 @@
 {
   "name": "vivid-cinema",
   "private": true,
-  "version": "1.0.1",
+  "version": "1.0.2",
   "type": "module",
   "scripts": {
     "test": "node --test tests/newest-sort.test.mjs tests/catalogue-release-filter.test.mjs tests/live-catalogue.test.mjs tests/playback-urls.test.mjs tests/anime-secondary-player.test.mjs tests/anime-secondary-player-structure.test.mjs tests/anime-id-resolver.test.mjs tests/service-worker.test.mjs tests/watch-player.test.mjs tests/tflix-secondary-player.test.mjs tests/playback-structure.test.mjs tests/home-hero.test.mjs tests/home-search.test.mjs tests/google-tag.test.mjs tests/adcash.test.mjs tests/performance.test.mjs tests/auth-verification.test.mjs tests/push-notifications.test.mjs tests/account-profile.test.mjs tests/attribution.test.mjs tests/local-owner.test.mjs tests/memory-sync.test.mjs tests/recommendations-memory.test.mjs tests/intent-parser.test.mjs tests/recommendation-ranking.test.mjs tests/for-you-structure.test.mjs tests/plot-search.test.mjs tests/catalog-search.test.mjs tests/intelligence-integration.test.mjs tests/intelligence-events.test.mjs tests/future-module-contracts.test.mjs tests/firebase-ai-config.test.mjs tests/achievements.test.mjs tests/achievements-page.test.mjs tests/release-alerts.test.mjs tests/notification-senders.test.mjs tests/newsroom-ingest.test.mjs tests/static-news-images.test.mjs tests/desktop-build.test.mjs tests/home-provider-news-refresh.test.mjs tests/onboarding-auth-persistence.test.mjs tests/android-native-polish.test.mjs tests/android-icon.test.mjs",
@@ -11,7 +11,8 @@
     "desktop:dist": "node desktop/make-windows-icon.cjs && electron-builder --win nsis portable --publish never",
     "build:web": "node automation/build-netlify-dist.mjs",
     "cap:sync": "npm run build:web && cap sync android",
-    "cap:open:android": "cap open android"
+    "cap:open:android": "cap open android",
+    "desktop:publish": "node desktop/make-windows-icon.cjs && electron-builder --win nsis portable --publish always"
   },
   "devDependencies": {
     "@firebase/rules-unit-testing": "^4.0.1",
@@ -24,7 +25,8 @@
   "dependencies": {
     "firebase-admin": "^14.5.0",
     "@capacitor/android": "^8.5.3",
-    "@capacitor/core": "^8.5.3"
+    "@capacitor/core": "^8.5.3",
+    "electron-updater": "^6.6.2"
   },
   "author": "Johnson Kyei Baffour",
   "main": "desktop/main.cjs",
@@ -37,6 +39,22 @@
     "files": [
       "**/*",
       "!node_modules/**",
+      "node_modules/electron-updater/**",
+      "node_modules/builder-util-runtime/**",
+      "node_modules/fs-extra/**",
+      "node_modules/js-yaml/**",
+      "node_modules/lazy-val/**",
+      "node_modules/lodash.escaperegexp/**",
+      "node_modules/lodash.isequal/**",
+      "node_modules/semver/**",
+      "node_modules/tiny-async-pool/**",
+      "node_modules/debug/**",
+      "node_modules/sax/**",
+      "node_modules/graceful-fs/**",
+      "node_modules/jsonfile/**",
+      "node_modules/universalify/**",
+      "node_modules/argparse/**",
+      "node_modules/ms/**",
       "!.git/**",
       "!.github/**",
       "!tests/**",
@@ -83,6 +101,14 @@
       "artifactName": "Vivid-Cinema-Portable-${version}.${ext}"
     },
     "artifactName": "Vivid-Cinema-${version}-${arch}.${ext}",
-    "copyright": "Copyright © 2026 Johnson Kyei Baffour"
+    "copyright": "Copyright © 2026 Johnson Kyei Baffour",
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "sensorylog",
+        "repo": "vivid-cinema",
+        "releaseType": "release"
+      }
+    ]
   }
 }

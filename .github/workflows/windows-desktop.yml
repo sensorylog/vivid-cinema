@@ -18,10 +18,11 @@ on:
     branches:
       - main
     tags:
+      - "v*"
       - "vivid-v*"
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   windows-build:
@@ -30,6 +31,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
@@ -42,9 +45,39 @@ jobs:
         run: npm run check:syntax
       - name: Run existing repository regression tests
         run: npm test
+      - name: Decide whether this push publishes a release
+        id: release-decision
+        shell: pwsh
+        env:
+          BEFORE_SHA: ${{ github.event.before }}
+        run: |
+          $version = node -p "require('./package.json').version"
+          $publish = $false
+          if ($env:GITHUB_REF -eq "refs/heads/main" -and $env:BEFORE_SHA -match '^[0-9a-f]{40}$' -and $env:BEFORE_SHA -ne "0000000000000000000000000000000000000000") {
+            $previousJson = git show "$($env:BEFORE_SHA):package.json"
+            if ($LASTEXITCODE -eq 0) {
+              $previousVersion = ($previousJson | ConvertFrom-Json).version
+              if ($previousVersion -ne $version) { $publish = $true }
+            }
+          }
+          if ($env:GITHUB_REF -like "refs/tags/v*" -and $env:GITHUB_REF -notlike "refs/tags/vivid-v*") {
+            $expected = "v" + $version
+            if ($env:GITHUB_REF_NAME -ne $expected) {
+              throw "Release tag $env:GITHUB_REF_NAME must match package version tag $expected"
+            }
+            $publish = $true
+          }
+          "publish=$($publish.ToString().ToLower())" >> $env:GITHUB_OUTPUT
+      - name: Build and publish auto-updatable Windows release
+        if: steps.release-decision.outputs.publish == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npm run desktop:publish
       - name: Build Windows installer and portable executable
+        if: steps.release-decision.outputs.publish != 'true'
         run: npm run desktop:dist
-      - name: Upload Windows builds
+      - name: Upload Windows build artifacts
+        if: steps.release-decision.outputs.publish != 'true'
         uses: actions/upload-artifact@v4
         with:
           name: vivid-cinema-windows-${{ github.run_number }}

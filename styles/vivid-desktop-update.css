@@ -1,0 +1,49 @@
+.vivid-desktop-update {
+  position: fixed;
+  z-index: 2147483000;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(560px, calc(100vw - 28px));
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 15px 16px;
+  border: 1px solid rgba(125, 145, 190, .35);
+  border-radius: 16px;
+  background: #101421;
+  color: #f6f8ff;
+  box-shadow: 0 18px 60px rgba(0, 0, 0, .48);
+  font: 500 14px/1.4 "Segoe UI", system-ui, sans-serif;
+}
+.vivid-desktop-update[hidden] { display: none; }
+.vivid-desktop-update__brand { flex: 0 0 auto; color: #9bb7ff; font-size: 23px; }
+.vivid-desktop-update__copy { flex: 1; min-width: 0; }
+.vivid-desktop-update__title { display: block; margin-bottom: 3px; font-size: 14px; }
+.vivid-desktop-update__message { display: block; color: #c3cadd; font-size: 12px; }
+.vivid-desktop-update__action {
+  flex: 0 0 auto;
+  border: 0;
+  border-radius: 10px;
+  padding: 10px 13px;
+  background: #e9edff;
+  color: #151a2a;
+  font: 700 12px "Segoe UI", system-ui, sans-serif;
+  cursor: pointer;
+}
+.vivid-desktop-update__action:disabled { cursor: progress; opacity: .75; }
+.vivid-desktop-update__close {
+  flex: 0 0 auto;
+  border: 0;
+  padding: 0 2px;
+  background: transparent;
+  color: #c3cadd;
+  font-size: 22px;
+  cursor: pointer;
+}
+@media (max-width: 480px) {
+  .vivid-desktop-update { gap: 9px; padding: 12px; }
+  .vivid-desktop-update__brand { display: none; }
+  .vivid-desktop-update__action { padding: 9px; }
+}
