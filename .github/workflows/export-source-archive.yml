@@ -1,0 +1,30 @@
+name: Export Vivid Cinema source archive
+
+on:
+  push:
+    branches:
+      - artifact/export-vivid-cinema-source
+
+permissions:
+  contents: read
+
+jobs:
+  source-archive:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out exact repository revision
+        uses: actions/checkout@v4
+      - name: Package project source
+        uses: actions/upload-artifact@v4
+        with:
+          name: vivid-cinema-source-${{ github.sha }}
+          path: |
+            .
+            !.git/**
+            !node_modules/**
+            !dist-desktop/**
+            !coverage/**
+            !android/.gradle/**
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 3
