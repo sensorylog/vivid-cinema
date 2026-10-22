@@ -23,6 +23,10 @@ test("Windows installer and portable executable targets use Vivid branding", () 
   assert.equal(pkg.build.nsis.uninstallerIcon, "icons/vivid-icon.ico");
   assert.equal(pkg.build.nsis.oneClick, false);
   assert.equal(pkg.build.nsis.createDesktopShortcut, true);
+  assert.equal(pkg.build.win.icon, "icons/vivid-icon.ico");
+  assert.equal(pkg.build.nsis.installerIcon, "icons/vivid-icon.ico");
+  assert.equal(pkg.build.nsis.uninstallerIcon, "icons/vivid-icon.ico");
+  assert.ok(fs.existsSync(path.join(root, "icons", "vivid-icon.ico")));
   assert.ok(fs.existsSync(path.join(root, "icons", "vivid-icon.svg")));
   assert.ok(fs.existsSync(path.join(root, "icons", "vivid-icon-180.png")));
 });
@@ -37,6 +41,10 @@ test("desktop runtime bundles the local app with a restricted renderer", () => {
   assert.match(main, /isFirebaseAuthPopup/);
   assert.match(main, /contextIsolation: true/);
   assert.match(main, /startsWith\(absoluteRoot \+ path\.sep\)/);
+  assert.match(main, /vivid-icon\.ico/);
+  assert.match(main, /win\.maximize\(\)/);
+  assert.match(main, /win\.setFullScreen\(!win\.isFullScreen\(\)\)/);
+  assert.match(main, /input\.key === "F11"/);
   assert.match(main, /icon:\s*appIcon/);
   assert.match(main, /setAppUserModelId\("com\.axisvision\.vividcinema"\)/);
   assert.match(main, /win\.maximize\(\)/);
