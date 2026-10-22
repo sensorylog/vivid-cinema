@@ -150,7 +150,8 @@ export async function rebuildTasteProfile(){
 }
 export async function getTasteProfile(){const t=read().taste;return t.updatedAt&&!t.dirty? t:rebuildTasteProfile()}
 export function getTasteStrength(){const s=read(),l=getLocalLibrary();const explicit=new Set([...Object.keys(s.feedback),...(l.favorites||[]).map(key),...(l.watchLater||[]).map(key)]);const viewed=new Set((l.history||[]).map(key));const behavioral=new Set(s.events.filter(e=>TASTE_SIGNAL_TYPES.has(e.type)&&e.contentId).map(e=>String(e.contentId)));return Math.min(1,explicit.size*.14+viewed.size*.045+behavioral.size*.025)}
-export function shouldShowColdStart(){const s=read(),l=getLocalLibrary();try{if(localStorage.getItem(ONBOARDING_SEEN_KEY)==="1")return false}catch{}return !s.onboarding.completed&&!s.onboarding.dismissed&&!Object.keys(s.feedback).length&&!(l.history||[]).length&&!(l.favorites||[]).length}
+export function shouldShowColdStart(){const s=read(),l=getLocalLibrary();try{if(localStorage.getItem(ONBOARDING_SEEN_KEY)==="1")return false}catch{}return !s.onboarding.shownAt&&!s.onboarding.completed&&!s.onboarding.dismissed&&!Object.keys(s.feedback).length&&!(l.history||[]).length&&!(l.favorites||[]).length}
+export function markColdStartShown(){const s=read();if(s.onboarding.shownAt)return s;s.onboarding={...s.onboarding,shownAt:Date.now()};try{localStorage.setItem(ONBOARDING_SEEN_KEY,"1")}catch{}write(s);void cloud(["taste","profile"],{onboarding:s.onboarding});return s}
 export async function completeColdStart(items=[]){const s=read(),seen=new Set;items.slice(0,6).forEach(x=>{const i=safe(x),k=key(i);if(!k||seen.has(k))return;seen.add(k);const updatedAt=Date.now();s.feedback[k]={...i,kind:"like",updatedAt};delete s.feedbackCleared[k];cloud(["feedback",k],{...i,kind:"like",updatedAt});recordBehavior("cold_start_like",i)});s.onboarding={completed:true,dismissed:false,completedAt:Date.now(),shownAt:Number(s.onboarding.shownAt)||Date.now()};try{localStorage.setItem(ONBOARDING_SEEN_KEY,"1")}catch{}write(s);invalidateRecommendationCaches();await rebuildTasteProfile();const finalState=read();void cloud(["taste","profile"],{onboarding:finalState.onboarding});return finalState}
 export function dismissColdStart(){const s=read();s.onboarding={...s.onboarding,dismissed:true,shownAt:Number(s.onboarding.shownAt)||Date.now()};try{localStorage.setItem(ONBOARDING_SEEN_KEY,"1")}catch{}write(s);void cloud(["taste","profile"],{onboarding:s.onboarding})}
 export function mergeBehaviorEvents(localEvents = [], remoteEvents = [], limit = 300) {
@@ -255,10 +256,10 @@ export async function syncIntelligenceForUser(u){
   const remote=t.docs.find(d=>d.id==="profile")?.data();
   // Store first-run completion with the account so all platforms share it.
   const remoteOnboarding=remote?.onboarding;
-  if(remoteOnboarding?.completed||remoteOnboarding?.dismissed){
+  if(remoteOnboarding?.shownAt||remoteOnboarding?.completed||remoteOnboarding?.dismissed){
    s.onboarding={...s.onboarding,...remoteOnboarding};
    try{localStorage.setItem(ONBOARDING_SEEN_KEY,"1")}catch{}
-  }else if(s.onboarding.completed||s.onboarding.dismissed){
+  }else if(s.onboarding.shownAt||s.onboarding.completed||s.onboarding.dismissed){
    await setDoc(doc(db,"users",u.uid,"taste","profile"),{onboarding:s.onboarding},{merge:true});
   }
    if(feedbackChanged||s.taste.dirty){
