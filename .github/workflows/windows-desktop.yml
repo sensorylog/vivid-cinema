@@ -82,7 +82,7 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git tag -a $tag -m "Vivid Cinema $version"
           git push origin "refs/tags/$tag"
-      - name: Build and publish auto-updatable Windows release
+      - name: Build auto-updatable Windows release files
         if: steps.release-decision.outputs.publish == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -97,6 +97,45 @@ jobs:
           $blockMap = Get-ChildItem "dist-desktop/Vivid-Cinema-Setup-*.exe.blockmap" -ErrorAction SilentlyContinue
           if (!$blockMap) {
             throw "Installer blockmap was not generated; refusing to publish an incomplete update."
+          }
+      - name: Publish installer and updater metadata together
+        if: steps.release-decision.outputs.publish == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: pwsh
+        run: |
+          $version = node -p "require('./package.json').version"
+          $tag = "v$version"
+          $installer = Get-ChildItem "dist-desktop/Vivid-Cinema-Setup-*.exe" -ErrorAction SilentlyContinue | Select-Object -First 1
+          $blockMap = Get-ChildItem "dist-desktop/Vivid-Cinema-Setup-*.exe.blockmap" -ErrorAction SilentlyContinue | Select-Object -First 1
+          $metadata = Get-Item "dist-desktop/latest.yml" -ErrorAction SilentlyContinue
+          if (!$installer -or !$blockMap -or !$metadata) {
+            throw "Installer, blockmap, and latest.yml must all exist before publishing."
+          }
+          gh release create $tag $installer.FullName $blockMap.FullName $metadata.FullName --verify-tag --title "Vivid Cinema $version" --notes "Vivid Cinema Windows installer release $version. Includes in-app update metadata."
+          if ($LASTEXITCODE -ne 0) {
+            throw "GitHub release upload failed for $tag."
+          }
+      - name: Verify published updater assets
+        if: steps.release-decision.outputs.publish == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: pwsh
+        run: |
+          $version = node -p "require('./package.json').version"
+          $tag = "v$version"
+          $headers = @{
+            Authorization = "Bearer $env:GH_TOKEN"
+            Accept = "application/vnd.github+json"
+            "X-GitHub-Api-Version" = "2022-11-28"
+          }
+          $release = Invoke-RestMethod -Method Get -Uri "https://api.github.com/repos/sensorylog/vivid-cinema/releases/tags/$tag" -Headers $headers
+          $assetNames = @($release.assets | ForEach-Object { $_.name })
+          $requiredAssets = @("Vivid-Cinema-Setup-$version.exe", "Vivid-Cinema-Setup-$version.exe.blockmap", "latest.yml")
+          foreach ($assetName in $requiredAssets) {
+            if ($assetNames -notcontains $assetName) {
+              throw "Published release $tag is missing required updater asset: $assetName"
+            }
           }
       - name: Build Windows installer and portable executable
         if: steps.release-decision.outputs.publish != 'true'
