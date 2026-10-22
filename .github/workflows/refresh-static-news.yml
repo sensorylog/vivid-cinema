@@ -11,34 +11,43 @@ on:
       - "news.html"
       - "service-worker.js"
   schedule:
-    - cron: "*/15 * * * *"
+    - cron: "*/30 * * * *"
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
-  group: firebase-hosting-live
+  group: vivid-news-feed-refresh
   cancel-in-progress: false
 
 jobs:
   refresh:
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 12
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
+        with:
+          ref: main
+          token: ${{ secrets.GITHUB_TOKEN }}
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Fetch attributed headlines from public RSS feeds
+      - name: Fetch fresh, attributed headlines from public RSS feeds
         run: node automation/build-static-news-feed.mjs
-      - name: Publish updated static feed to Firebase Hosting
-        if: github.ref == 'refs/heads/main'
-        uses: FirebaseExtended/action-hosting-deploy@v0
-        with:
-          repoToken: "${{ secrets.GITHUB_TOKEN }}"
-          firebaseServiceAccount: "${{ secrets.FIREBASE_SERVICE_ACCOUNT_VIVID_CINEMA }}"
-          projectId: vivid-cinema
-          channelId: live
+      - name: Publish changed feed to the primary Netlify site
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/news-feed.json
+          if git diff --cached --quiet; then
+            echo "News feed did not change; no deployment commit is needed."
+            exit 0
+          fi
+          git commit -m "chore: refresh entertainment news feed"
+          git push origin HEAD:main

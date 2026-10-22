@@ -276,10 +276,19 @@ console.log("Reused " + reusedImageCount + " previously resolved publisher thumb
 const enrichedStories = await enrichStories(storiesWithPreviousImages);
 const { stories: cachedStories, cached: cachedImageCount, remoteFallback: remoteFallbackCount, missing: missingImageCount } = await cacheArticleThumbnails(enrichedStories);
 const finalStories = sortStoriesNewestFirst(cachedStories);
-const payload = JSON.stringify({ generatedAt: new Date().toISOString(), source: "Google News RSS search feeds", count: finalStories.length, failedQueries: failed.length, feedCount: FEEDS.length, articles: finalStories }, null, 2) + "\n";
 await mkdir(dirname(OUTPUT), { recursive: true });
 let previous = "";
 try { previous = await readFile(OUTPUT, "utf8"); } catch {}
+let generatedAt = new Date().toISOString();
+// Keep the feed timestamp stable when the actual stories and metadata have not
+// changed. This prevents scheduled checks from forcing pointless site deploys.
+try {
+  const previousData = JSON.parse(previous);
+  if (JSON.stringify(previousData.articles || []) === JSON.stringify(finalStories)) {
+    generatedAt = previousData.generatedAt || generatedAt;
+  }
+} catch {}
+const payload = JSON.stringify({ generatedAt, source: "Google News RSS search feeds", count: finalStories.length, failedQueries: failed.length, feedCount: FEEDS.length, articles: finalStories }, null, 2) + "\n";
 await writeFile(OUTPUT, payload);
 console.log("Built " + unique.length + " attributed headlines from " + (FEEDS.length - failed.length) + "/" + FEEDS.length + " RSS queries.");
 console.log("Article thumbnails: " + cachedImageCount + " cached locally, " + remoteFallbackCount + " remote fallback, " + missingImageCount + " without an image source (of " + finalStories.length + ").");
