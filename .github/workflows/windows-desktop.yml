@@ -68,11 +68,36 @@ jobs:
             $publish = $true
           }
           "publish=$($publish.ToString().ToLower())" >> $env:GITHUB_OUTPUT
+      - name: Ensure matching release tag exists before publishing
+        if: steps.release-decision.outputs.publish == 'true' && github.ref == 'refs/heads/main'
+        shell: pwsh
+        run: |
+          $version = node -p "require('./package.json').version"
+          $tag = "v$version"
+          $existing = git ls-remote --tags origin "refs/tags/$tag"
+          if ($existing) {
+            throw "Release tag $tag already exists. Bump package.json to a new version before publishing."
+          }
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag -a $tag -m "Vivid Cinema $version"
+          git push origin "refs/tags/$tag"
       - name: Build and publish auto-updatable Windows release
         if: steps.release-decision.outputs.publish == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: npm run desktop:publish
+      - name: Verify updater metadata was generated
+        if: steps.release-decision.outputs.publish == 'true'
+        shell: pwsh
+        run: |
+          if (!(Test-Path "dist-desktop/latest.yml")) {
+            throw "electron-builder did not generate dist-desktop/latest.yml; this release would break in-app update discovery."
+          }
+          $blockMap = Get-ChildItem "dist-desktop/Vivid-Cinema-Setup-*.exe.blockmap" -ErrorAction SilentlyContinue
+          if (!$blockMap) {
+            throw "Installer blockmap was not generated; refusing to publish an incomplete update."
+          }
       - name: Build Windows installer and portable executable
         if: steps.release-decision.outputs.publish != 'true'
         run: npm run desktop:dist
