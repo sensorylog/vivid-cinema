@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
+import vm from "node:vm";
 const root = process.cwd();
 const pkg = JSON.parse(fs.readFileSync(path.join(root, "package.json"), "utf8"));
 
@@ -67,6 +68,54 @@ test("file and native WebView entry points redirect before Firebase modules init
     assert.ok(source.includes(tag), page + " includes the native-origin redirect");
     assert.ok(source.indexOf(tag) < source.indexOf('type="module"'), page + " redirects before Firebase modules run");
   }
+});
+test("native-origin redirect routes only unsupported wrappers to trusted hosting", () => {
+  const redirectSource = fs.readFileSync(path.join(root, "scripts", "platform-origin-redirect.js"), "utf8");
+  const runRedirect = (href, userAgent) => {
+    const parsed = new URL(href);
+    let destination = null;
+    const location = {
+      protocol: parsed.protocol,
+      hostname: parsed.hostname,
+      pathname: parsed.pathname,
+      search: parsed.search,
+      hash: parsed.hash,
+      replace(value) { destination = value; }
+    };
+    vm.runInNewContext(redirectSource, {
+      window: { location },
+      navigator: { userAgent },
+      URL
+    });
+    return destination;
+  };
+
+  assert.equal(
+    runRedirect("file:///android_asset/www/home.html?source=apk#recall", "Android WebView"),
+    "https://vivid-cinema.web.app/home.html?source=apk#recall"
+  );
+  assert.equal(
+    runRedirect(
+      "https://deploy-preview-342--vivid-cinema.netlify.app/for-you.html?source=apk",
+      "Mozilla/5.0 (Linux; Android 14; Pixel Build/UP1A; wv) AppleWebKit/537.36"
+    ),
+    "https://vivid-cinema.web.app/for-you.html?source=apk"
+  );
+  assert.equal(
+    runRedirect(
+      "https://vivid-cinema.web.app/home.html",
+      "Mozilla/5.0 (Linux; Android 14; Pixel Build/UP1A; wv) AppleWebKit/537.36"
+    ),
+    null
+  );
+  assert.equal(
+    runRedirect("http://localhost:1234/home.html", "Mozilla/5.0 Windows Electron/36.4.0"),
+    null
+  );
+  assert.equal(
+    runRedirect("https://deploy-preview-342--vivid-cinema.netlify.app/home.html", "Mozilla/5.0 Chrome/130.0"),
+    null
+  );
 });
 test("Windows icon preparation creates a valid ICO container from the checked-in Vivid PNG", () => {
   const script = fs.readFileSync(path.join(root, "desktop", "make-windows-icon.cjs"), "utf8");
