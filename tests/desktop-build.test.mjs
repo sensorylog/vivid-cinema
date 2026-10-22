@@ -16,7 +16,7 @@ test("desktop packaging is opt-in and preserves existing scripts", () => {
   assert.ok(pkg.scripts["test:rules"]);
 });
 test("Windows installer and portable executable targets use Vivid branding", () => {
-  assert.equal(pkg.version, "1.0.3");
+  assert.equal(pkg.version, "1.0.4");
   assert.ok(pkg.devDependencies.electron);
   assert.ok(pkg.devDependencies["electron-builder"]);
   assert.ok(pkg.dependencies["electron-updater"]);
@@ -164,6 +164,7 @@ test("Windows app checks for updates and offers download plus restart-to-install
   assert.match(preload, /Vivid Cinema update/);
   assert.match(preload, /Restart & install/);
   assert.match(preload, /vivid-update-status/);
+  assert.ok(fs.existsSync(path.join(root, "styles", "vivid-desktop-update.css")));
 });
 
 test("Windows workflow builds on demand or on release tags", () => {
@@ -175,6 +176,12 @@ test("Windows workflow builds on demand or on release tags", () => {
   assert.match(workflow, /GH_TOKEN:.*secrets\.GITHUB_TOKEN/);
   assert.match(workflow, /contents: write/);
   assert.match(workflow, /Decide whether this push publishes a release/);
+  assert.match(workflow, /Ensure matching release tag exists before publishing/);
+  assert.match(workflow, /git tag -a \$tag/);
+  assert.match(workflow, /git push origin "refs\/tags\/\$tag"/);
+  assert.match(workflow, /Verify updater metadata was generated/);
+  assert.match(workflow, /dist-desktop\/latest\.yml/);
+  assert.match(workflow, /Vivid-Cinema-Setup-\*\.exe\.blockmap/);
   assert.match(workflow, /pull_request/);
   assert.match(workflow, /windows-latest/);
   assert.match(workflow, /desktop:dist/);
