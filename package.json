@@ -65,7 +65,8 @@
       "createStartMenuShortcut": true,
       "installerIcon": "icons/vivid-icon.ico",
       "uninstallerIcon": "icons/vivid-icon.ico",
-      "artifactName": "Vivid-Cinema-Setup-${version}.${ext}"
+      "artifactName": "Vivid-Cinema-Setup-${version}.${ext}",
+      "installerHeaderIcon": "icons/vivid-icon.ico"
     },
     "portable": {
       "artifactName": "Vivid-Cinema-Portable-${version}.${ext}"
