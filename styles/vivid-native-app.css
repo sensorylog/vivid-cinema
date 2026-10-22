@@ -1,0 +1,73 @@
+/* Vivid Cinema — native-only polish for the Capacitor Android/iOS shell.
+   This stylesheet is added only to the generated app bundle and activates only
+   when the Capacitor native runtime is detected. */
+html.vivid-native-app {
+  min-height: 100%;
+  scroll-padding-top: calc(76px + env(safe-area-inset-top, 0px));
+  -webkit-text-size-adjust: 100%;
+  overscroll-behavior-y: none;
+}
+
+body.vivid-native-app {
+  min-height: 100dvh;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior-y: contain;
+  touch-action: pan-x pan-y;
+}
+
+.vivid-native-app :is(button, [role="button"], .vivid-button, .vivid-icon-button, a) {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+.vivid-native-app :is(button, [role="button"], .vivid-button, .vivid-icon-button) {
+  min-height: 44px;
+}
+
+.vivid-native-app :is(input, textarea, select) {
+  font-size: 16px;
+  scroll-margin-bottom: 24px;
+}
+
+.vivid-native-app :is(input, textarea, select, button, a, [tabindex]):focus-visible {
+  outline: 2px solid rgba(199, 255, 85, .9);
+  outline-offset: 3px;
+}
+
+.vivid-native-app :is(.vivid-topbar, .vivid-discovery-nav, .vivid-title-nav, .vivid-library-nav, .vivid-watch-nav) {
+  padding-left: max(14px, env(safe-area-inset-left, 0px));
+  padding-right: max(14px, env(safe-area-inset-right, 0px));
+}
+
+.vivid-native-app :is(.vivid-mobile-nav, .vivid-bottom-nav, .vivid-tab-bar) {
+  padding-bottom: max(8px, env(safe-area-inset-bottom, 0px));
+}
+
+.vivid-native-app :is(.vivid-player-overlay, .vivid-player-dialog, .vivid-modal, .vivid-dialog) {
+  padding-bottom: max(12px, env(safe-area-inset-bottom, 0px));
+}
+
+.vivid-native-app img,
+.vivid-native-app video,
+.vivid-native-app iframe {
+  -webkit-user-drag: none;
+}
+
+@media (hover: none) and (pointer: coarse) {
+  .vivid-native-app :is(a, button, [role="button"], .vivid-button, .vivid-icon-button):hover {
+    transform: none;
+    filter: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vivid-native-app *,
+  .vivid-native-app *::before,
+  .vivid-native-app *::after {
+    scroll-behavior: auto !important;
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "appId": "com.vividcinema.app",
+  "appName": "Vivid Cinema",
+  "webDir": "dist",
+  "android": {
+    "allowMixedContent": false
+  }
+}
