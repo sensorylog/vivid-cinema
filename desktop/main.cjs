@@ -1,4 +1,4 @@
-const { app, BrowserWindow, shell, session } = require("electron");
+const { app, BrowserWindow, Menu, dialog, shell, session } = require("electron");
 const http = require("node:http");
 const fs = require("node:fs");
 const path = require("node:path");
@@ -20,6 +20,15 @@ const mimeTypes = {
 if (process.platform === "win32") {
   app.setAppUserModelId("com.axisvision.vividcinema");
 }
+const hasSingleInstanceLock = app.requestSingleInstanceLock();
+if (!hasSingleInstanceLock) app.quit();
+else app.on("second-instance", () => {
+  const win = BrowserWindow.getAllWindows()[0];
+  if (!win) return;
+  if (win.isMinimized()) win.restore();
+  if (!win.isVisible()) win.show();
+  win.focus();
+});
 
 function createLocalServer(root) {
   const absoluteRoot = path.resolve(root);
@@ -91,6 +100,8 @@ async function startLocalServer() {
   localOrigin = "http://localhost:" + address.port;
 }
 
+function installApplicationMenu() { Menu.setApplicationMenu(Menu.buildFromTemplate([{ label: "Vivid Cinema", submenu: [{ label: "About Vivid Cinema", click: async () => dialog.showMessageBox({ title: "About Vivid Cinema", message: "Vivid Cinema", detail: "Version " + app.getVersion() + "\\nA cinematic discovery experience by Axis Vision.", buttons: ["OK"] }) }, { type: "separator" }, { role: "quit", label: "Exit Vivid Cinema" }] }, { label: "View", submenu: [{ role: "reload", label: "Reload", accelerator: "CmdOrCtrl+R" }, { role: "forceReload", label: "Force Reload", accelerator: "CmdOrCtrl+Shift+R" }, { type: "separator" }, { label: "Toggle Full Screen", accelerator: "F11", click: () => { const win = BrowserWindow.getFocusedWindow(); if (win) win.setFullScreen(!win.isFullScreen()); } }, { type: "separator" }, { label: "Zoom In", accelerator: "CmdOrCtrl+Plus", click: () => { const win = BrowserWindow.getFocusedWindow(); if (win) win.webContents.setZoomLevel(win.webContents.getZoomLevel() + 0.5); } }, { label: "Zoom Out", accelerator: "CmdOrCtrl+-", click: () => { const win = BrowserWindow.getFocusedWindow(); if (win) win.webContents.setZoomLevel(win.webContents.getZoomLevel() - 0.5); } }, { label: "Reset Zoom", accelerator: "CmdOrCtrl+0", click: () => { const win = BrowserWindow.getFocusedWindow(); if (win) win.webContents.setZoomLevel(0); } }] }, { label: "Help", submenu: [{ label: "Vivid Cinema Website", click: () => { void shell.openExternal(HOSTED_APP_URL); } }, { label: "Report an Issue", click: () => { void shell.openExternal("https://github.com/sensorylog/vivid-cinema/issues"); } }] }])); }
+
 function createWindow() {
   const win = new BrowserWindow({
     width: 1440, height: 900, minWidth: 960, minHeight: 640,
@@ -109,6 +120,8 @@ function createWindow() {
     } else if (input.key === "Escape" && win.isFullScreen()) {
       event.preventDefault();
       win.setFullScreen(false);
+    } else if (input.key === "F12" || (input.control && input.shift && input.key.toLowerCase() === "i")) {
+      event.preventDefault();
     }
   });
 
@@ -223,7 +236,9 @@ function createWindow() {
   });
 }
 
+if (hasSingleInstanceLock) {
 app.whenReady().then(async () => {
+  installApplicationMenu();
   session.defaultSession.setPermissionRequestHandler((_webContents, permission, callback) => {
     callback(["fullscreen", "media", "notifications"].includes(permission));
   });
@@ -238,3 +253,4 @@ app.whenReady().then(async () => {
 });
 app.on("window-all-closed", () => { if (process.platform !== "darwin") app.quit(); });
 app.on("before-quit", () => { if (localServer) localServer.close(); });
+}
