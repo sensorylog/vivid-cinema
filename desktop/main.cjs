@@ -62,6 +62,8 @@ function createLocalServer(root) {
 
 let localServer;
 let localOrigin;
+const HOSTED_APP_URL = "https://vivid-cinema.web.app/home.html";
+const HOSTED_APP_ORIGIN = new URL(HOSTED_APP_URL).origin;
 
 async function startLocalServer() {
   localServer = createLocalServer(appRoot);
@@ -99,6 +101,17 @@ function createWindow() {
     }
   });
 
+  let localFallbackStarted = false;
+  win.webContents.on("did-fail-load", (_event, errorCode, errorDescription, validatedURL, isMainFrame) => {
+    if (!isMainFrame || localFallbackStarted || errorCode === -3) return;
+    let failedOrigin;
+    try { failedOrigin = new URL(validatedURL).origin; } catch { return; }
+    if (failedOrigin !== HOSTED_APP_ORIGIN) return;
+    localFallbackStarted = true;
+    console.warn("Vivid Cinema hosted app failed to load; opening bundled offline fallback:", errorCode, errorDescription);
+    if (localOrigin) void win.loadURL(localOrigin + "/home.html");
+  });
+
   win.webContents.setWindowOpenHandler(({ url }) => {
     try {
       const target = new URL(url);
@@ -125,15 +138,20 @@ function createWindow() {
     return { action: "deny" };
   });
   win.webContents.on("will-navigate", (event, url) => {
-    if (url !== localOrigin && !url.startsWith(localOrigin + "/")) {
+    let target;
+    try { target = new URL(url); } catch {
       event.preventDefault();
-      try {
-        const target = new URL(url);
-        if (target.protocol === "https:" || target.protocol === "http:") void shell.openExternal(target.href);
-      } catch { /* Ignore malformed or unsupported URLs. */ }
+      return;
     }
+    const isTrustedAppOrigin = target.origin === HOSTED_APP_ORIGIN ||
+      Boolean(localOrigin && target.origin === new URL(localOrigin).origin);
+    if (isTrustedAppOrigin) return;
+    event.preventDefault();
+    if (target.protocol === "https:" || target.protocol === "http:") void shell.openExternal(target.href);
   });
-  void win.loadURL(localOrigin + "/home.html");
+  // Firebase AI Logic + reCAPTCHA App Check require the real HTTPS app origin.
+  // Keep the packaged files as a graceful offline fallback, not the primary origin.
+  void win.loadURL(HOSTED_APP_URL);
 }
 
 app.whenReady().then(async () => {
