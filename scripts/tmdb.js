@@ -21,14 +21,18 @@ export async function tmdb(path, params = {}, options = {}) {
   const url = buildUrl(path, params);
   const useCache = options.cache !== false;
   const timeoutMs = options.timeoutMs ?? 10000;
-  if (useCache && cache.has(url)) return cache.get(url);
+  if (useCache && cache.has(url)) {
+    const entry = cache.get(url);
+    if (entry && Date.now() - Number(entry.t || 0) < SESSION_CACHE_TTL_MS) return entry.data;
+    cache.delete(url);
+  }
   if (useCache) {
     try {
       const raw = sessionStorage.getItem(SESSION_CACHE_PREFIX + url);
       if (raw) {
         const entry = JSON.parse(raw);
         if (entry && Date.now() - Number(entry.t) < SESSION_CACHE_TTL_MS && entry.data) {
-          cache.set(url, entry.data);
+          cache.set(url, entry);
           trimMemoryCache();
           return entry.data;
         }
@@ -41,7 +45,7 @@ export async function tmdb(path, params = {}, options = {}) {
   const timeout = setTimeout(() => controller.abort(), timeoutMs);
   const request = (async () => {
     try {
-      const response = await fetch(url, { signal: controller.signal, cache: "default", headers: { Accept: "application/json" } });
+      const response = await fetch(url, { signal: controller.signal, cache: "no-store", headers: { Accept: "application/json" } });
       if (!response.ok) {
         const error = new Error("TMDB request failed: " + response.status);
         error.status = response.status;
@@ -49,7 +53,7 @@ export async function tmdb(path, params = {}, options = {}) {
       }
       const data = await response.json();
       if (useCache) {
-        cache.set(url, data);
+        cache.set(url, { t: Date.now(), data });
         trimMemoryCache();
         try {
           const serialized = JSON.stringify({ t: Date.now(), data });
