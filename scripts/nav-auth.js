@@ -11,6 +11,9 @@ async function initAuthUi() {
       import("https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js")
     ]);
 
+    // Wait until Firebase has restored persisted credentials before painting signed-out navigation.
+    if (typeof auth.authStateReady === "function") await auth.authStateReady();
+
     onAuthStateChanged(auth, (user) => {
       window.dispatchEvent(new CustomEvent("vivid:auth-ready", { detail: user }));
       if (user) {
