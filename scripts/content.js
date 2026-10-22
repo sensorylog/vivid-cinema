@@ -58,18 +58,26 @@ const HOME_LOADERS = Object.freeze({
   hulu: () => providerHome(PROVIDER_IDS.hulu),
   paramountPlus: () => providerHome(PROVIDER_IDS.paramountPlus),
   newReleases: () => {
+    // Use local calendar dates (not UTC ISO dates) so the release window cannot
+    // drift a day around midnight. Sort by actual release date first: popularity
+    // alone can bury a title that came out yesterday under older viral titles.
+    const dateKey = (date) => [date.getFullYear(), String(date.getMonth() + 1).padStart(2, "0"), String(date.getDate()).padStart(2, "0")].join("-");
     const now = new Date();
     const from = new Date(now); from.setDate(from.getDate() - 45);
     const to = new Date(now); to.setDate(to.getDate() + 14);
+    const fromKey = dateKey(from), toKey = dateKey(to);
     return Promise.allSettled([
-      tmdbApi.newMovies(1, from.toISOString().slice(0,10), to.toISOString().slice(0,10)),
-      tmdbApi.newTv(1, from.toISOString().slice(0,10), to.toISOString().slice(0,10))
+      tmdbApi.newMovies(1, fromKey, toKey),
+      tmdbApi.newTv(1, fromKey, toKey)
     ]).then(results => {
       const items = [];
       results.forEach((result,index) => {
         if(result.status==="fulfilled") items.push(...normalizeResults(result.value?.results||[], index===0?"movie":"tv"));
       });
-      items.sort((a,b)=>Number(b.raw?.popularity||0)-Number(a.raw?.popularity||0));
+      items.sort((a,b) =>
+        String(b.date || "").localeCompare(String(a.date || "")) ||
+        Number(b.raw?.popularity||0)-Number(a.raw?.popularity||0)
+      );
       return {page:1,total_pages:1,results:items.slice(0,20)};
     });
   },
