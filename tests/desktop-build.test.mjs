@@ -56,7 +56,7 @@ test("Windows workflow builds on demand or on release tags", () => {
   assert.match(workflow, /pull_request/);
   assert.match(workflow, /windows-latest/);
   assert.match(workflow, /desktop:dist/);
-  assert.match(workflow, /icons\/**/);
+  assert.match(workflow, /icons\/\*\*/);
   assert.match(workflow, /Vivid-Cinema-Setup/);
   assert.match(workflow, /Vivid-Cinema-Portable/);
 });
