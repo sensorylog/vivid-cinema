@@ -1,7 +1,7 @@
 import { readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 
-const gradlePath = path.resolve("android/app/build.gradle");
+const gradlePath = path.resolve(process.env.VIVID_ANDROID_GRADLE_FILE || "android/app/build.gradle");
 const storeFile = process.env.VIVID_ANDROID_KEYSTORE_FILE;
 const requiredEnv = [
   "ANDROID_KEYSTORE_PASSWORD",
