@@ -23,7 +23,7 @@ test("core app routes remain navigable with the service worker active", async ({
   });
   page.on("pageerror", error => pageErrors.push(error.message));
 
-  const first = await page.goto("/home.html", { waitUntil: "domcontentloaded" });
+  const first = await page.goto("/home.html", { waitUntil: "commit" });
   expect(first?.status()).toBe(200);
   await expect(page.locator("body")).toBeVisible();
 
@@ -43,7 +43,7 @@ test("core app routes remain navigable with the service worker active", async ({
   expect(controlled, "service worker should control the local app after activation").toBe(true);
 
   for (const route of routes) {
-    const response = await page.goto(route, { waitUntil: "domcontentloaded" });
+    const response = await page.goto(route, { waitUntil: "commit" });
     expect(response, "navigation response missing for " + route).not.toBeNull();
     expect(response.status(), "unexpected HTTP status for " + route).toBe(200);
     expect(new URL(page.url()).pathname).toBe(route);
