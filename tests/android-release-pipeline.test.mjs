@@ -43,16 +43,18 @@ test("Gradle signing injection works against a generated-project fixture", async
   const temp = await mkdtemp(path.join(tmpdir(), "vivid-gradle-signing-"));
   try {
     const gradlePath = path.join(temp, "build.gradle");
-    await writeFile(gradlePath, \`plugins { id "com.android.application" }
-android {
-    namespace "com.vividcinema.app"
-    buildTypes {
-        release {
-            minifyEnabled false
-        }
-    }
-}
-\`, "utf8");
+    const fixture = [
+      'plugins { id "com.android.application" }',
+      "android {",
+      '    namespace "com.vividcinema.app"',
+      "    buildTypes {",
+      "        release {",
+      "            minifyEnabled false",
+      "        }",
+      "    }",
+      "}"
+    ].join("\n");
+    await writeFile(gradlePath, fixture, "utf8");
     const scriptPath = fileURLToPath(new URL("../automation/configure-android-release-signing.mjs", import.meta.url));
     const result = spawnSync(process.execPath, [scriptPath], {
       encoding: "utf8",
