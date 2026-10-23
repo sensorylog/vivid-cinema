@@ -33,7 +33,8 @@ test("ordinary JavaScript and CSS use network-first while retaining offline cach
   assert.match(source, /const CACHE_NAME = "vivid-cinema-shell-v241"/);
   assert.match(source, /isCodeOrStyle.*networkFirst/);
   assert.match(source, /event\.respondWith\(isCodeOrStyle\?networkFirst\(request\):isHtml\?networkFirst\(request\):staleWhileRevalidate\(request,event\)\)/);
-  assert.match(source, /redirect:"follow"/);\n  assert.match(source, /response\.redirected&&response\.url/);
+  assert.match(source, /redirect:"follow"/);
+  assert.match(source, /response\.redirected&&response\.url/);
 });
 
 test("notification navigation is restricted to the app origin", () => {
