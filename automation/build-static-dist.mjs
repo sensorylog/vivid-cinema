@@ -5,12 +5,11 @@ import { fileURLToPath } from "node:url";
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const output = path.join(root, "dist");
 
-// Keep Netlify's publish directory limited to the actual static site.
+// Keep static site's publish directory limited to the actual static site.
 // Mirror Firebase Hosting's source-only exclusions and avoid publishing repo metadata.
 const excludedDirectories = new Set([
   ".git",
   ".github",
-  ".netlify",
   "node_modules",
   "automation",
   "dist",
@@ -27,7 +26,6 @@ const excludedFiles = new Set([
   "firestore.indexes.json",
   "README.md",
   "LICENSE",
-  "netlify.toml",
   ".gitignore",
   ".gitattributes",
   "package.json",
@@ -53,7 +51,7 @@ async function copySite(source, destination, relative = "") {
   }
 }
 
-// Build the static site used by Netlify and by the generated Capacitor APK. The website remains
+// Build the static site used by Cloudflare Pages, Firebase Hosting, and the generated Capacitor APK. The website remains
 // visually unchanged in a normal browser; only a genuine Capacitor runtime receives
 // the native class and stylesheet.
 async function addNativeEnhancements(directory) {

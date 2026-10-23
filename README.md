@@ -2,12 +2,13 @@
 
 ## Current hosting arrangement
 
-- Primary automatic static hosting: [vivid-cinemas.netlify.app](https://vivid-cinemas.netlify.app/).
-- Firebase remains the backend for Authentication, Firestore, and Firebase AI Logic.
-- Firebase Hosting is retained as a manual fallback; its GitHub Actions deployment is intentionally manual-only while its monthly quota is limited.
-- Netlify deployment does not automatically update an already-installed APK or a previously built Windows EXE that points at another URL.
+- **Primary static hosting:** [Cloudflare Pages](https://vivid-cinema.pages.dev/).
+- **Backup static hosting:** Firebase Hosting ([vivid-cinema.web.app](https://vivid-cinema.web.app/)); its GitHub Actions deployment remains manual-only to avoid unexpected deployments against the monthly Hosting allowance.
+- Firebase remains the backend for Authentication, Firestore, Firebase AI Logic, and App Check.
+- Netlify is no longer part of the intended hosting setup. Its old project/deployment is not deleted by this repository change.
+- The shared static build at `automation/build-static-dist.mjs` produces `dist/` for Cloudflare Pages, Firebase Hosting, and the generated Capacitor APK.
 
-See [Netlify-primary hosting and Firebase fallback](docs/netlify-primary-firebase-fallback.md) for the quota-reset procedure and the one-time App Check domain setup needed for Vivid Recall.
+See [Cloudflare Pages hosting](docs/cloudflare-pages-hosting.md) for build settings, domain authorization, validation, and rollback guidance.
 
 
 ## Phase D4 — PWA foundation and offline shell

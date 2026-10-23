@@ -9,7 +9,7 @@
     "check:syntax": "node automation/check-syntax.mjs",
     "desktop:start": "electron desktop/main.cjs",
     "desktop:dist": "node desktop/make-windows-icon.cjs && electron-builder --win nsis portable --publish never",
-    "build:web": "node automation/build-netlify-dist.mjs",
+    "build:web": "node automation/build-static-dist.mjs",
     "cap:sync": "npm run build:web && cap sync android",
     "cap:open:android": "cap open android",
     "desktop:publish": "node desktop/make-windows-icon.cjs && electron-builder --win nsis --publish never"
