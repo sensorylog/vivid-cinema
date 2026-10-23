@@ -13,7 +13,9 @@ const routes = [
 test("core app routes remain navigable with the service worker active", async ({ page }) => {
   const failedNavigations = [];
   page.on("requestfailed", request => {
-    if (request.isNavigationRequest()) {
+    // Firebase Auth and other third-party iframes can be cancelled when the test
+    // navigates away from a route. Only local app-document failures are relevant.
+    if (request.isNavigationRequest() && request.url().startsWith("http://127.0.0.1:4173/")) {
       failedNavigations.push({
         url: request.url(),
         error: request.failure()?.errorText || "navigation failed"
