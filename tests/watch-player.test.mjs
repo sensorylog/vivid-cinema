@@ -53,6 +53,12 @@ test("anime playback excludes the unverified Aniweeb source and automatically fa
 });
 
 
+test("EmbedWave sandbox or load failures trigger an automatic player-level fallback", () => {
+  assert.match(source, /source === "embedwave"\) \{/);
+  assert.match(source, /triggerFallback\("embedwave_timeout_or_embedded_error"\)/);
+  assert.match(source, /source === "embedwave" \? 12000 : 25000/);
+});
+
 test("movie and TV Player 1 exposes seven sources while anime providers remain separate", () => {
   assert.match(source, /: \["vidapi", "vidsrc", "embedwave", "vidfast", "ezvidapi", "embedapistream", "moviesapi"\];/);
   assert.match(source, /if \(source === "vidapi" \|\| source === "vidsrc" \|\| source === "vidfast" \|\| source === "embedapistream" \|\| source === "moviesapi"\) return hasFallbackId\(\);\r?\n\s*if \(source === "embedwave" \|\| source === "ezvidapi"\) return hasTmdbId\(\);\r?\n\s*return false;/);
