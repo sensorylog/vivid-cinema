@@ -72,7 +72,7 @@ function createLocalServer(root) {
 
 let localServer;
 let localOrigin;
-const HOSTED_APP_URL = "https://vivid-cinema.netlify.app/home.html";
+const HOSTED_APP_URL = "https://vivid-cinemas.netlify.app/home.html";
 const HOSTED_APP_ORIGIN = new URL(HOSTED_APP_URL).origin;
 const FIREBASE_FALLBACK_URL = "https://vivid-cinema.web.app/home.html";
 const FIREBASE_FALLBACK_ORIGIN = new URL(FIREBASE_FALLBACK_URL).origin;

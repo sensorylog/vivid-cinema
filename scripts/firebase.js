@@ -86,7 +86,7 @@ if (!RECAPTCHA_ENTERPRISE_SITE_KEY) {
       origin: window.location.origin,
       code: appCheckError.code || null,
       message: appCheckError.message,
-      hint: "For Netlify, allow vivid-cinema.netlify.app in both Firebase App Check and the reCAPTCHA Enterprise site's allowed domains."
+      hint: "For Netlify, allow vivid-cinemas.netlify.app in both Firebase App Check and the reCAPTCHA Enterprise site's allowed domains."
     });
   }
 }

@@ -9,7 +9,7 @@
     /(?:;\s*wv\)|\bCapacitor\b)/i.test(userAgent);
   const isNativeWebView = /(?:;\s*wv\)|\bCapacitor\b)/i.test(userAgent);
   const isUntrustedNativeOrigin = isNativeWebView &&
-    !["vivid-cinema.netlify.app", "vivid-cinema.web.app", "vivid-cinema.firebaseapp.com"].includes(hostname);
+    !["vivid-cinemas.netlify.app", "vivid-cinema.web.app", "vivid-cinema.firebaseapp.com"].includes(hostname);
 
   // Local-file and native WebView origins cannot complete the deployed site's
   // reCAPTCHA Enterprise App Check flow. Move those wrappers to the trusted
@@ -18,7 +18,7 @@
 
   const filename = window.location.pathname.split("/").pop() || "home.html";
   const page = /^[a-z0-9-]+\.html$/i.test(filename) ? filename : "home.html";
-  const target = new URL(page, "https://vivid-cinema.netlify.app/");
+  const target = new URL(page, "https://vivid-cinemas.netlify.app/");
   target.search = window.location.search;
   target.hash = window.location.hash;
   window.location.replace(target.href);
