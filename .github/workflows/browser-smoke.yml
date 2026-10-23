@@ -1,0 +1,52 @@
+name: Browser navigation smoke tests
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "*.html"
+      - "scripts/**"
+      - "styles/**"
+      - "service-worker.js"
+      - "manifest.json"
+      - "automation/serve-static-test.mjs"
+      - "playwright.config.mjs"
+      - "tests/browser/**"
+      - "package.json"
+      - "package-lock.json"
+      - ".github/workflows/browser-smoke.yml"
+  pull_request:
+    paths:
+      - "*.html"
+      - "scripts/**"
+      - "styles/**"
+      - "service-worker.js"
+      - "manifest.json"
+      - "automation/serve-static-test.mjs"
+      - "playwright.config.mjs"
+      - "tests/browser/**"
+      - "package.json"
+      - "package-lock.json"
+      - ".github/workflows/browser-smoke.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  navigation-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - name: Install locked app dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Install Playwright test runner without changing the lockfile
+        run: npm install --no-save --package-lock=false --no-audit --no-fund @playwright/test@1.55.0
+      - name: Install Chromium and WebKit
+        run: npx playwright install --with-deps chromium webkit
+      - name: Test navigation in Chromium and WebKit
+        run: npx playwright test
