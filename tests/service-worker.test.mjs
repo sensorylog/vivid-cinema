@@ -89,7 +89,7 @@ function createWorkerHarness(fetchImpl, initialCache = new Map()) {
     Set,
     Error
   };
-  runInNewContext(source + "\\nglobalThis.__worker = { networkFirst, staleWhileRevalidate, safeCachedResponse };", context);
+  runInNewContext(source + "\nglobalThis.__worker = { networkFirst, staleWhileRevalidate, safeCachedResponse };", context);
   return { worker: context.__worker, cacheEntries, cacheKey, handlers };
 }
 
