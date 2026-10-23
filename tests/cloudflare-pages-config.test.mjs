@@ -1,0 +1,58 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import { readFile, access } from "node:fs/promises";
+
+const headers = await readFile(new URL("../_headers", import.meta.url), "utf8");
+const buildScript = await readFile(new URL("../automation/build-netlify-dist.mjs", import.meta.url), "utf8");
+const netlify = await readFile(new URL("../netlify.toml", import.meta.url), "utf8");
+
+test("Cloudflare Pages headers preserve core security policy", () => {
+  for (const header of [
+    "Strict-Transport-Security:",
+    "X-Content-Type-Options: nosniff",
+    "X-Permitted-Cross-Domain-Policies: none",
+    "Referrer-Policy: strict-origin-when-cross-origin",
+    "Content-Security-Policy:",
+    "Permissions-Policy:"
+  ]) {
+    assert.ok(headers.includes(header), `Missing header directive: ${header}`);
+  }
+});
+
+test("Cloudflare Content Security Policy keeps existing Firebase and provider endpoints", () => {
+  const csp = headers.split("\n").find(line => line.trimStart().startsWith("Content-Security-Policy:"));
+  assert.ok(csp);
+  for (const host of [
+    "identitytoolkit.googleapis.com",
+    "firestore.googleapis.com",
+    "firebasevertexai.googleapis.com",
+    "recaptchaenterprise.googleapis.com",
+    "vivid-cinema.firebaseapp.com",
+    "api.themoviedb.org",
+    "checkout.paystack.com",
+    "www.youtube.com",
+    "vidlink.pro"
+  ]) {
+    assert.ok(csp.includes(host), `CSP is missing existing allowed host ${host}`);
+  }
+});
+
+test("Cloudflare Pages keeps the existing HTML and static asset cache policies", () => {
+  assert.match(headers, /\/\*\.html\s+Cache-Control: no-cache, max-age=0, must-revalidate/);
+  assert.match(headers, /\/\*\.js\s+Cache-Control: public, max-age=86400, stale-while-revalidate=604800/);
+  assert.match(headers, /\/\*\.css\s+Cache-Control: public, max-age=86400, stale-while-revalidate=604800/);
+  assert.match(headers, /\/\*\.png\s+Cache-Control: public, max-age=604800, stale-while-revalidate=2592000/);
+});
+
+test("static build includes the Cloudflare headers file in the published output", async () => {
+  assert.ok(buildScript.includes('const output = path.join(root, "dist")'));
+  assert.ok(!buildScript.includes('"_headers"'));
+  // The existing recursive copy copies root files unless explicitly excluded.
+  assert.ok(buildScript.includes("await cp(from, to)"));
+});
+
+test("Netlify configuration remains present as an independent fallback", async () => {
+  assert.ok(netlify.includes("publish = \"dist\""));
+  assert.ok(netlify.includes("Content-Security-Policy"));
+  await access(new URL("../netlify.toml", import.meta.url));
+});
