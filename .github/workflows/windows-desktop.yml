@@ -86,7 +86,7 @@ jobs:
         if: steps.release-decision.outputs.publish == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npm run desktop:publish
+        run: npm run desktop:dist
       - name: Verify updater metadata was generated
         if: steps.release-decision.outputs.publish == 'true'
         shell: pwsh
@@ -107,12 +107,13 @@ jobs:
           $version = node -p "require('./package.json').version"
           $tag = "v$version"
           $installer = Get-ChildItem "dist-desktop/Vivid-Cinema-Setup-*.exe" -ErrorAction SilentlyContinue | Select-Object -First 1
+          $portable = Get-ChildItem "dist-desktop/Vivid-Cinema-Portable-*.exe" -ErrorAction SilentlyContinue | Select-Object -First 1
           $blockMap = Get-ChildItem "dist-desktop/Vivid-Cinema-Setup-*.exe.blockmap" -ErrorAction SilentlyContinue | Select-Object -First 1
           $metadata = Get-Item "dist-desktop/latest.yml" -ErrorAction SilentlyContinue
-          if (!$installer -or !$blockMap -or !$metadata) {
-            throw "Installer, blockmap, and latest.yml must all exist before publishing."
+          if (!$installer -or !$portable -or !$blockMap -or !$metadata) {
+            throw "Installer, portable executable, blockmap, and latest.yml must all exist before publishing."
           }
-          gh release create $tag $installer.FullName $blockMap.FullName $metadata.FullName --verify-tag --title "Vivid Cinema $version" --notes "Vivid Cinema Windows installer release $version. Includes in-app update metadata."
+          gh release create $tag $installer.FullName $portable.FullName $blockMap.FullName $metadata.FullName --verify-tag --title "Vivid Cinema $version" --notes "Vivid Cinema Windows release $version. Includes installer, portable executable, and in-app update metadata."
           if ($LASTEXITCODE -ne 0) {
             throw "GitHub release upload failed for $tag."
           }
@@ -131,7 +132,7 @@ jobs:
           }
           $release = Invoke-RestMethod -Method Get -Uri "https://api.github.com/repos/sensorylog/vivid-cinema/releases/tags/$tag" -Headers $headers
           $assetNames = @($release.assets | ForEach-Object { $_.name })
-          $requiredAssets = @("Vivid-Cinema-Setup-$version.exe", "Vivid-Cinema-Setup-$version.exe.blockmap", "latest.yml")
+          $requiredAssets = @("Vivid-Cinema-Setup-$version.exe", "Vivid-Cinema-Portable-$version.exe", "Vivid-Cinema-Setup-$version.exe.blockmap", "latest.yml")
           foreach ($assetName in $requiredAssets) {
             if ($assetNames -notcontains $assetName) {
               throw "Published release $tag is missing required updater asset: $assetName"
