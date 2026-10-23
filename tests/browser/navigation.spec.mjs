@@ -27,13 +27,20 @@ test("core app routes remain navigable with the service worker active", async ({
   expect(first?.status()).toBe(200);
   await expect(page.locator("body")).toBeVisible();
 
-  // controllerchange can intentionally reload the first page when the new worker activates.
-  // Playwright's waitForFunction survives that navigation, unlike a long page.evaluate promise.
-  await page.waitForFunction(
-    () => Boolean(navigator.serviceWorker?.controller),
-    null,
-    { timeout: 120_000 }
-  );
+  expect(new URL(page.url()).origin).toBe("http://127.0.0.1:4173");
+
+  // controllerchange intentionally reloads the first page. Poll from the Playwright
+  // side so that the test survives the app's reload without holding one JS context open.
+  let controlled = false;
+  for (let attempt = 0; attempt < 20 && !controlled; attempt += 1) {
+    await page.waitForTimeout(1_000);
+    try {
+      controlled = await page.evaluate(() => Boolean(navigator.serviceWorker?.controller));
+    } catch {
+      // The expected controllerchange reload can destroy a single evaluation context.
+    }
+  }
+  expect(controlled, "service worker should control the local app after activation").toBe(true);
 
   for (const route of routes) {
     const response = await page.goto(route, { waitUntil: "domcontentloaded" });
