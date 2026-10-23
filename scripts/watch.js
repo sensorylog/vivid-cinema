@@ -410,8 +410,15 @@ function setPlayerSource(source, params, startAt = 0) {
     fallbackTimer = window.setTimeout(() => {
       fallbackTimer = null;
       if (primaryHealthy || activeSource !== source) return;
+      // EmbedWave can render a sandbox-restriction error inside its cross-origin
+      // document, which the parent page cannot inspect. Recover at the player level
+      // instead of leaving users stuck on that provider's error screen.
+      if (source === "embedwave") {
+        if (!triggerFallback("embedwave_timeout_or_embedded_error")) showFallbackPrompt(source);
+        return;
+      }
       showFallbackPrompt(source);
-    }, 25000);
+    }, source === "embedwave" ? 12000 : 25000);
   } else if (source === "vidking") {
     if (isAnimePlayback() || !hasFallbackId()) return;
     primaryHealthy = false;
