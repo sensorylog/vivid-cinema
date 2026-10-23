@@ -72,7 +72,7 @@ function createLocalServer(root) {
 
 let localServer;
 let localOrigin;
-const HOSTED_APP_URL = "https://vivid-cinemas.netlify.app/home.html";
+const HOSTED_APP_URL = "https://vivid-cinema.pages.dev/home.html";
 const HOSTED_APP_ORIGIN = new URL(HOSTED_APP_URL).origin;
 const FIREBASE_FALLBACK_URL = "https://vivid-cinema.web.app/home.html";
 const FIREBASE_FALLBACK_ORIGIN = new URL(FIREBASE_FALLBACK_URL).origin;
@@ -206,7 +206,7 @@ function createWindow() {
     if (firebaseFallbackStarted || localFallbackStarted || hostedAppLoaded) return;
     firebaseFallbackStarted = true;
     clearHostedLoadTimeout();
-    console.warn("Vivid Cinema Netlify site unavailable; trying Firebase Hosting fallback:", reason);
+    console.warn("Vivid Cinema Cloudflare Pages site unavailable; trying Firebase Hosting fallback:", reason);
     hostedLoadTimeout = setTimeout(
       () => fallbackToLocal("Firebase Hosting fallback timed out after " + Math.round(HOSTED_LOAD_TIMEOUT_MS / 1000) + " seconds"),
       HOSTED_LOAD_TIMEOUT_MS
@@ -227,10 +227,10 @@ function createWindow() {
     if (hostedLoadStarted) return;
     hostedLoadStarted = true;
     hostedLoadTimeout = setTimeout(
-      () => fallbackToFirebase("Netlify app load timed out after " + Math.round(HOSTED_LOAD_TIMEOUT_MS / 1000) + " seconds"),
+      () => fallbackToFirebase("Cloudflare Pages app load timed out after " + Math.round(HOSTED_LOAD_TIMEOUT_MS / 1000) + " seconds"),
       HOSTED_LOAD_TIMEOUT_MS
     );
-    void win.loadURL(HOSTED_APP_URL).catch(error => fallbackToFirebase(error?.message || "Netlify navigation failed"));
+    void win.loadURL(HOSTED_APP_URL).catch(error => fallbackToFirebase(error?.message || "Cloudflare Pages navigation failed"));
   });
   win.webContents.on("did-fail-load", (_event, errorCode, errorDescription, validatedURL, isMainFrame) => {
     if (!isMainFrame || localFallbackStarted || hostedAppLoaded || errorCode === -3) return;

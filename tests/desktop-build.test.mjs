@@ -39,10 +39,10 @@ test("Windows installer and portable executable targets use Vivid branding", () 
   assert.ok(fs.existsSync(path.join(root, "icons", "vivid-icon.svg")));
   assert.ok(fs.existsSync(path.join(root, "icons", "vivid-icon-180.png")));
 });
-test("desktop runtime uses Netlify first, Firebase Hosting second, and a bundled offline fallback last", () => {
+test("desktop runtime uses Cloudflare Pages first, Firebase Hosting second, and a bundled offline fallback last", () => {
   const main = fs.readFileSync(path.join(root, "desktop", "main.cjs"), "utf8");
   assert.match(main, /app\.getAppPath\(\)/);
-  assert.match(main, /HOSTED_APP_URL = "https:\/\/vivid-cinemas\.netlify\.app\/home\.html"/);
+  assert.match(main, /HOSTED_APP_URL = "https:\/\/vivid-cinema\.pages\.dev\/home\.html"/);
   assert.match(main, /FIREBASE_FALLBACK_URL = "https:\/\/vivid-cinema\.web\.app\/home\.html"/);
   assert.match(main, /fallbackToFirebase/);
   assert.match(main, /FIREBASE_FALLBACK_ORIGIN/);
@@ -52,7 +52,7 @@ test("desktop runtime uses Netlify first, Firebase Hosting second, and a bundled
   assert.match(main, /LOADING_HTML/);
   assert.match(main, /loadURL\(LOADING_URL\)/);
   assert.match(main, /hostedLoadStarted/);
-  assert.match(main, /Netlify app load timed out after/);
+  assert.match(main, /Cloudflare Pages app load timed out after/);
   assert.match(main, /Firebase Hosting fallback timed out after/);
   assert.match(main, /localOrigin \+ "\/home\.html"/);
   assert.match(main, /nodeIntegration:\s*false/);
@@ -84,7 +84,7 @@ test("file and native WebView entry points redirect before Firebase modules init
   assert.match(redirect, /appassets\.androidplatform\.net/);
   assert.match(redirect, /isUntrustedNativeOrigin/);
   assert.doesNotMatch(redirect, /\\bElectron\\b/);
-  assert.match(redirect, /https:\/\/vivid-cinemas\.netlify\.app\//);
+  assert.match(redirect, /https:\/\/vivid-cinema\.pages\.dev\//);
   assert.match(redirect, /window\.location\.replace\(target\.href\)/);
   const syntaxChecker = fs.readFileSync(path.join(root, "automation", "check-syntax.mjs"), "utf8");
   assert.match(syntaxChecker, /scripts\/platform-origin-redirect\.js/);
@@ -118,14 +118,14 @@ test("native-origin redirect routes only unsupported wrappers to trusted hosting
 
   assert.equal(
     runRedirect("file:///android_asset/www/home.html?source=apk#recall", "Android WebView"),
-    "https://vivid-cinemas.netlify.app/home.html?source=apk#recall"
+    "https://vivid-cinema.pages.dev/home.html?source=apk#recall"
   );
   assert.equal(
     runRedirect(
-      "https://deploy-preview-342--vivid-cinemas.netlify.app/for-you.html?source=apk",
+      "https://08293d6d.vivid-cinema.pages.dev/for-you.html?source=apk",
       "Mozilla/5.0 (Linux; Android 14; Pixel Build/UP1A; wv) AppleWebKit/537.36"
     ),
-    "https://vivid-cinemas.netlify.app/for-you.html?source=apk"
+    "https://vivid-cinema.pages.dev/for-you.html?source=apk"
   );
   assert.equal(
     runRedirect(
@@ -139,7 +139,7 @@ test("native-origin redirect routes only unsupported wrappers to trusted hosting
     null
   );
   assert.equal(
-    runRedirect("https://deploy-preview-342--vivid-cinemas.netlify.app/home.html", "Mozilla/5.0 Chrome/130.0"),
+    runRedirect("https://08293d6d.vivid-cinema.pages.dev/home.html", "Mozilla/5.0 Chrome/130.0"),
     null
   );
 });
@@ -162,9 +162,13 @@ test("Windows app checks for updates and offers download plus restart-to-install
   assert.match(main, /vivid-update-install/);
   assert.match(main, /PORTABLE_EXECUTABLE_FILE/);
   assert.match(preload, /Vivid Cinema update/);
-  assert.match(preload, /vivid-cinemas\.netlify\.app/);
+  assert.match(preload, /vivid-cinema\.pages\.dev/);
   assert.match(preload, /vivid-cinema\.web\.app/);
   assert.match(preload, /trustedHosts/);
+  assert.match(preload, /vivid-cinema\\.pages\\.dev/);
+  assert.doesNotMatch(preload, /netlify/i, "desktop update UI must not depend on the retired host");
+  assert.doesNotMatch(main, /netlify/i, "desktop runtime must not depend on the retired host");
+  assert.doesNotMatch(redirect, /netlify/i, "native redirect must use the current primary host");
   assert.match(preload, /Restart & install/);
   assert.match(preload, /vivid-update-status/);
   assert.ok(fs.existsSync(path.join(root, "styles", "vivid-desktop-update.css")));

@@ -1,6 +1,6 @@
 const { ipcRenderer } = require("electron");
 
-const trustedHosts = new Set(["vivid-cinemas.netlify.app", "vivid-cinema.netlify.app", "vivid-cinema.web.app", "localhost"]);
+const trustedHosts = new Set(["vivid-cinema.pages.dev", "vivid-cinema.web.app", "vivid-cinema.firebaseapp.com", "localhost"]);
 if (trustedHosts.has(location.hostname)) {
   let latestStatus = null;
   let banner = null;
