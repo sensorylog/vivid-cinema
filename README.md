@@ -3,10 +3,10 @@
 ## Current hosting arrangement
 
 - **Primary static hosting:** [Cloudflare Pages](https://vivid-cinema.pages.dev/).
-- **Backup static hosting:** Firebase Hosting ([vivid-cinema.web.app](https://vivid-cinema.web.app/)); its GitHub Actions deployment remains manual-only to avoid unexpected deployments against the monthly Hosting allowance.
+- Firebase Hosting is not used as an app or website fallback while the primary host is unavailable; keep it out of all launch and canonical URL paths.
 - Firebase remains the backend for Authentication, Firestore, Firebase AI Logic, and App Check.
 - Netlify is no longer part of the intended hosting setup. Its old project/deployment is not deleted by this repository change.
-- The shared static build at `automation/build-static-dist.mjs` produces `dist/` for Cloudflare Pages, Firebase Hosting, and the generated Capacitor APK.
+- The shared static build at `automation/build-static-dist.mjs` produces `dist/` for Cloudflare Pages and the generated Capacitor APK. Firebase remains only for backend services such as Authentication and Firestore.
 
 See [Cloudflare Pages hosting](docs/cloudflare-pages-hosting.md) for build settings, domain authorization, validation, and rollback guidance.
 
