@@ -27,21 +27,13 @@ test("core app routes remain navigable with the service worker active", async ({
   expect(first?.status()).toBe(200);
   await expect(page.locator("body")).toBeVisible();
 
-  // Wait for service-worker installation/activation where the browser supports it.
-  const workerState = await page.evaluate(async () => {
-    if (!("serviceWorker" in navigator)) return "unsupported";
-    const registration = await Promise.race([
-      navigator.serviceWorker.ready,
-      new Promise(resolve => setTimeout(() => resolve(null), 120_000))
-    ]);
-    return registration?.active?.state || "timeout";
-  });
-  expect(["activated", "unsupported"]).toContain(workerState);
-
-  if (workerState === "activated") {
-    await page.reload({ waitUntil: "domcontentloaded" });
-    await page.waitForFunction(() => Boolean(navigator.serviceWorker?.controller), null, { timeout: 30_000 });
-  }
+  // controllerchange can intentionally reload the first page when the new worker activates.
+  // Playwright's waitForFunction survives that navigation, unlike a long page.evaluate promise.
+  await page.waitForFunction(
+    () => Boolean(navigator.serviceWorker?.controller),
+    null,
+    { timeout: 120_000 }
+  );
 
   for (const route of routes) {
     const response = await page.goto(route, { waitUntil: "domcontentloaded" });
