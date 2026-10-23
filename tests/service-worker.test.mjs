@@ -136,7 +136,7 @@ test("legacy MediaForge entry points are absent from the offline shell", async (
   await assert.rejects(access(path.join(root, "styles", "vivid-mediaforge.css")));
 });
 test("app-shell manifest contains no duplicate cache URLs", () => {
-  const match = source.match(/const APP_SHELL = \\[([\\s\\S]*?)\\n\\];/);
+  const match = source.match(/const APP_SHELL = \[([\s\S]*?)\n\];/);
   assert.ok(match, "APP_SHELL array must be discoverable");
   const assets = [...match[1].matchAll(/"([^"]+)"/g)].map(entry => entry[1]);
   const duplicates = assets.filter((asset, index) => assets.indexOf(asset) !== index);
