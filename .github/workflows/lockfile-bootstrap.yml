@@ -1,4 +1,4 @@
-name: Temporary lockfile generation for release hardening # final stable head
+name: Temporary lockfile generation for release hardening # commit untracked lockfile
 
 on:
   push:
@@ -22,7 +22,7 @@ jobs:
       - name: Commit generated lockfile to this working branch
         run: |
           set -euo pipefail
-          if git diff --quiet -- package-lock.json; then
+          if [ -z "$(git status --short -- package-lock.json)" ]; then
             echo "Lockfile already matches package metadata."
             exit 0
           fi
