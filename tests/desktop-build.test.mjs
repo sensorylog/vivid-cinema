@@ -16,7 +16,7 @@ test("desktop packaging is opt-in and preserves existing scripts", () => {
   assert.ok(pkg.scripts["test:rules"]);
 });
 test("Windows installer and portable executable targets use Vivid branding", () => {
-  assert.equal(pkg.version, "1.0.5");
+  assert.equal(pkg.version, "1.0.6");
   assert.ok(pkg.devDependencies.electron);
   assert.ok(pkg.devDependencies["electron-builder"]);
   assert.ok(pkg.dependencies["electron-updater"]);
@@ -118,14 +118,14 @@ test("native-origin redirect routes only unsupported wrappers to trusted hosting
 
   assert.equal(
     runRedirect("file:///android_asset/www/home.html?source=apk#recall", "Android WebView"),
-    "https://vivid-cinema.netlify.app/home.html?source=apk#recall"
+    "https://vivid-cinemas.netlify.app/home.html?source=apk#recall"
   );
   assert.equal(
     runRedirect(
-      "https://deploy-preview-342--vivid-cinema.netlify.app/for-you.html?source=apk",
+      "https://deploy-preview-342--vivid-cinemas.netlify.app/for-you.html?source=apk",
       "Mozilla/5.0 (Linux; Android 14; Pixel Build/UP1A; wv) AppleWebKit/537.36"
     ),
-    "https://vivid-cinema.netlify.app/for-you.html?source=apk"
+    "https://vivid-cinemas.netlify.app/for-you.html?source=apk"
   );
   assert.equal(
     runRedirect(
@@ -139,7 +139,7 @@ test("native-origin redirect routes only unsupported wrappers to trusted hosting
     null
   );
   assert.equal(
-    runRedirect("https://deploy-preview-342--vivid-cinema.netlify.app/home.html", "Mozilla/5.0 Chrome/130.0"),
+    runRedirect("https://deploy-preview-342--vivid-cinemas.netlify.app/home.html", "Mozilla/5.0 Chrome/130.0"),
     null
   );
 });
