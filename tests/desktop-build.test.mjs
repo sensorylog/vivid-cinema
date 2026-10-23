@@ -42,7 +42,7 @@ test("Windows installer and portable executable targets use Vivid branding", () 
 test("desktop runtime uses Cloudflare Pages first, Firebase Hosting second, and a bundled offline fallback last", () => {
   const main = fs.readFileSync(path.join(root, "desktop", "main.cjs"), "utf8");
   assert.match(main, /app\.getAppPath\(\)/);
-  assert.match(main, /HOSTED_APP_URL = "https:\/\/vivid-cinema\.pages\.app\/home\.html"/);
+  assert.match(main, /HOSTED_APP_URL = "https:\/\/vivid-cinema\.pages\.dev\/home\.html"/);
   assert.match(main, /FIREBASE_FALLBACK_URL = "https:\/\/vivid-cinema\.web\.app\/home\.html"/);
   assert.match(main, /fallbackToFirebase/);
   assert.match(main, /FIREBASE_FALLBACK_ORIGIN/);
@@ -84,7 +84,7 @@ test("file and native WebView entry points redirect before Firebase modules init
   assert.match(redirect, /appassets\.androidplatform\.net/);
   assert.match(redirect, /isUntrustedNativeOrigin/);
   assert.doesNotMatch(redirect, /\\bElectron\\b/);
-  assert.match(redirect, /https:\/\/vivid-cinema\.pages\.app\//);
+  assert.match(redirect, /https:\/\/vivid-cinema\.pages\.dev\//);
   assert.match(redirect, /window\.location\.replace\(target\.href\)/);
   const syntaxChecker = fs.readFileSync(path.join(root, "automation", "check-syntax.mjs"), "utf8");
   assert.match(syntaxChecker, /scripts\/platform-origin-redirect\.js/);
@@ -162,7 +162,7 @@ test("Windows app checks for updates and offers download plus restart-to-install
   assert.match(main, /vivid-update-install/);
   assert.match(main, /PORTABLE_EXECUTABLE_FILE/);
   assert.match(preload, /Vivid Cinema update/);
-  assert.match(preload, /vivid-cinema\.pages\.app/);
+  assert.match(preload, /vivid-cinema\.pages\.dev/);
   assert.match(preload, /vivid-cinema\.web\.app/);
   assert.match(preload, /trustedHosts/);
   assert.match(preload, /Restart & install/);
