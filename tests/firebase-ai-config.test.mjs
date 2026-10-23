@@ -54,7 +54,7 @@ test("achievement Sparks reuse the existing Recall model and App Check protectio
 test("Netlify is the primary automatic host and Firebase Hosting is a manual fallback", () => {
   assert.match(hostingWorkflow, /workflow_dispatch:/);
   assert.doesNotMatch(hostingWorkflow, /^  push:/m);
-  assert.match(firebaseSource, /vivid-cinema\.netlify\.app/);
+  assert.match(firebaseSource, /vivid-cinemas\.netlify\.app/);
   assert.match(firebaseSource, /reCAPTCHA Enterprise/);
 });
 
@@ -62,6 +62,6 @@ test("Recall diagnostics support a deployed Netlify origin without weakening App
   assert.match(aiSource, /requires a deployed site because App Check is skipped on localhost/);
   assert.match(firebaseSource, /initializeAppCheck/);
   assert.match(firebaseSource, /ReCaptchaEnterpriseProvider/);
-  assert.match(firebaseSource, /allow vivid-cinema\.netlify\.app in both Firebase App Check/);
+  assert.match(firebaseSource, /allow vivid-cinemas\.netlify\.app in both Firebase App Check/);
   assert.match(workerSource, /vivid-cinema-shell-v239/);
 });
