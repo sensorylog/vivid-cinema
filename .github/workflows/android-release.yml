@@ -52,7 +52,7 @@ jobs:
       - name: Install dependencies
         env:
           ELECTRON_SKIP_BINARY_DOWNLOAD: "1"
-        run: npm install --no-audit --no-fund
+        run: npm ci --no-audit --no-fund
 
       - name: Run Android release contract tests
         run: node --test tests/android-release-pipeline.test.mjs tests/android-native-polish.test.mjs tests/android-icon.test.mjs tests/service-worker.test.mjs
