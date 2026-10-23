@@ -9,6 +9,7 @@ on:
   pull_request:
     paths:
       - "capacitor.config.json"
+      - "automation/build-static-dist.mjs"
       - "automation/build-netlify-dist.mjs"
       - "automation/apply-android-icon.mjs"
       - "styles/vivid-native-app.css"
@@ -17,6 +18,7 @@ on:
       - "home.html"
       - "for-you.html"
       - "package.json"
+      - "tests/android-native-polish.test.mjs"
       - ".github/workflows/android-debug-apk.yml"
   workflow_dispatch:
 
