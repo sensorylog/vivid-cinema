@@ -16,7 +16,7 @@ test("desktop packaging is opt-in and preserves existing scripts", () => {
   assert.ok(pkg.scripts["test:rules"]);
 });
 test("Windows installer and portable executable targets use Vivid branding", () => {
-  assert.equal(pkg.version, "1.0.15");
+  assert.equal(pkg.version, "1.0.16");
   assert.ok(pkg.devDependencies.electron);
   assert.ok(pkg.devDependencies["electron-builder"]);
   assert.ok(pkg.dependencies["electron-updater"]);
@@ -40,13 +40,12 @@ test("Windows installer and portable executable targets use Vivid branding", () 
   assert.ok(fs.existsSync(path.join(root, "icons", "vivid-icon.svg")));
   assert.ok(fs.existsSync(path.join(root, "icons", "vivid-icon-180.png")));
 });
-test("desktop runtime uses Cloudflare Pages first, Firebase Hosting second, and a bundled offline fallback last", () => {
+test("desktop runtime uses Cloudflare Pages first and bundled offline fallback without Firebase Hosting", () => {
   const main = fs.readFileSync(path.join(root, "desktop", "main.cjs"), "utf8");
   assert.match(main, /app\.getAppPath\(\)/);
   assert.match(main, /HOSTED_APP_URL = "https:\/\/vivid-cinema\.pages\.dev\/home\.html"/);
-  assert.match(main, /FIREBASE_FALLBACK_URL = "https:\/\/vivid-cinema\.web\.app\/home\.html"/);
-  assert.match(main, /fallbackToFirebase/);
-  assert.match(main, /FIREBASE_FALLBACK_ORIGIN/);
+  assert.doesNotMatch(main, /vivid-cinema\.web\.app|FIREBASE_FALLBACK|fallbackToFirebase/);
+  assert.match(main, /fallbackToLocal\("Cloudflare Pages app load timed out after/);
   assert.match(main, /loadURL\(HOSTED_APP_URL\)/);
   assert.match(main, /did-fail-load/);
   assert.match(main, /HOSTED_LOAD_TIMEOUT_MS = 12000/);
@@ -54,7 +53,6 @@ test("desktop runtime uses Cloudflare Pages first, Firebase Hosting second, and 
   assert.match(main, /loadURL\(LOADING_URL\)/);
   assert.match(main, /hostedLoadStarted/);
   assert.match(main, /Cloudflare Pages app load timed out after/);
-  assert.match(main, /Firebase Hosting fallback timed out after/);
   assert.match(main, /localOrigin \+ "\/home\.html"/);
   assert.match(main, /nodeIntegration:\s*false/);
   assert.match(main, /contextIsolation:\s*true/);
@@ -63,7 +61,7 @@ test("desktop runtime uses Cloudflare Pages first, Firebase Hosting second, and 
   assert.match(main, /isFirebaseAuthPopup/);
   assert.match(main, /startsWith\(absoluteRoot \+ path\.sep\)/);
   assert.match(main, /vivid-icon\.ico/);
-  assert.match(main, /win\.maximize\(\)/);
+  assert.match(main, /fullscreen:\s*true/);
   assert.match(main, /win\.setFullScreen\(!win\.isFullScreen\(\)\)/);
   assert.match(main, /input\.key === "F11"/);
   assert.match(main, /icon:\s*appIcon/);
@@ -133,7 +131,7 @@ test("native-origin redirect routes only unsupported wrappers to trusted hosting
       "https://vivid-cinema.web.app/home.html",
       "Mozilla/5.0 (Linux; Android 14; Pixel Build/UP1A; wv) AppleWebKit/537.36"
     ),
-    null
+    "https://vivid-cinema.pages.dev/home.html"
   );
   assert.equal(
     runRedirect("http://localhost:1234/home.html", "Mozilla/5.0 Windows Electron/36.4.0"),

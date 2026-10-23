@@ -9,11 +9,11 @@
     /(?:;\s*wv\)|\bCapacitor\b)/i.test(userAgent);
   const isNativeWebView = /(?:;\s*wv\)|\bCapacitor\b)/i.test(userAgent);
   const isUntrustedNativeOrigin = isNativeWebView &&
-    !["vivid-cinema.pages.dev", "vivid-cinema.web.app", "vivid-cinema.firebaseapp.com"].includes(hostname);
+    !["vivid-cinema.pages.dev"].includes(hostname);
 
   // Local-file and native WebView origins cannot complete the deployed site's
   // reCAPTCHA Enterprise App Check flow. Move those wrappers to the trusted
-  // Cloudflare Pages primary origin before app modules initialize Firebase or Gemini; Firebase Hosting remains the fallback.
+  // Cloudflare Pages primary origin before app modules initialize Firebase or Gemini.
   if (!isFileBundle && !isCapacitorBundle && !isAndroidAssetBundle && !isNativeLoopbackBundle && !isUntrustedNativeOrigin) return;
 
   const filename = window.location.pathname.split("/").pop() || "home.html";

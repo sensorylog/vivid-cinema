@@ -74,8 +74,6 @@ let localServer;
 let localOrigin;
 const HOSTED_APP_URL = "https://vivid-cinema.pages.dev/home.html";
 const HOSTED_APP_ORIGIN = new URL(HOSTED_APP_URL).origin;
-const FIREBASE_FALLBACK_URL = "https://vivid-cinema.web.app/home.html";
-const FIREBASE_FALLBACK_ORIGIN = new URL(FIREBASE_FALLBACK_URL).origin;
 const HOSTED_LOAD_TIMEOUT_MS = 12000;
 const supportsOneClickUpdates = app.isPackaged && process.platform === "win32" &&
   !process.env.PORTABLE_EXECUTABLE_FILE && !process.env.PORTABLE_EXECUTABLE_DIR;
@@ -111,7 +109,6 @@ function isTrustedUpdateSender(event) {
     if (event.senderFrame !== event.sender.mainFrame) return false;
     const target = new URL(event.senderFrame.url);
     return target.origin === HOSTED_APP_ORIGIN ||
-      target.origin === FIREBASE_FALLBACK_ORIGIN ||
       Boolean(localOrigin && target.origin === new URL(localOrigin).origin);
   } catch { return false; }
 }
@@ -164,7 +161,7 @@ function scheduleUpdateChecks() {
 function createWindow() {
   const win = new BrowserWindow({
     width: 1440, height: 900, minWidth: 960, minHeight: 640,
-    show: false, backgroundColor: "#050608", autoHideMenuBar: true, title: "Vivid Cinema",
+    show: false, fullscreen: true, backgroundColor: "#050608", autoHideMenuBar: true, title: "Vivid Cinema",
     icon: appIcon,
     webPreferences: { session: session.defaultSession, preload: path.join(__dirname, "preload.cjs"), nodeIntegration: false, contextIsolation: true, sandbox: true, webSecurity: true }
   });
@@ -185,7 +182,6 @@ function createWindow() {
   });
 
   let localFallbackStarted = false;
-  let firebaseFallbackStarted = false;
   let hostedAppLoaded = false;
   let hostedLoadStarted = false;
   let hostedLoadTimeout;
@@ -202,43 +198,29 @@ function createWindow() {
     console.warn("Vivid Cinema hosted origins unavailable; opening bundled offline fallback:", reason);
     if (localOrigin) void win.loadURL(localOrigin + "/home.html").catch(() => {});
   };
-  const fallbackToFirebase = reason => {
-    if (firebaseFallbackStarted || localFallbackStarted || hostedAppLoaded) return;
-    firebaseFallbackStarted = true;
-    clearHostedLoadTimeout();
-    console.warn("Vivid Cinema Cloudflare Pages site unavailable; trying Firebase Hosting fallback:", reason);
-    hostedLoadTimeout = setTimeout(
-      () => fallbackToLocal("Firebase Hosting fallback timed out after " + Math.round(HOSTED_LOAD_TIMEOUT_MS / 1000) + " seconds"),
-      HOSTED_LOAD_TIMEOUT_MS
-    );
-    void win.loadURL(FIREBASE_FALLBACK_URL).catch(error => fallbackToLocal(error?.message || "Firebase Hosting navigation failed"));
-  };
   win.webContents.on("did-finish-load", () => {
     let loadedOrigin;
     try { loadedOrigin = new URL(win.webContents.getURL()).origin; } catch { return; }
-    if (loadedOrigin !== HOSTED_APP_ORIGIN && loadedOrigin !== FIREBASE_FALLBACK_ORIGIN) return;
+    if (loadedOrigin !== HOSTED_APP_ORIGIN) return;
     hostedAppLoaded = true;
     clearHostedLoadTimeout();
   });
   win.once("ready-to-show", () => {
-    win.maximize();
     win.setFullScreen(true);
     win.show();
     if (hostedLoadStarted) return;
     hostedLoadStarted = true;
     hostedLoadTimeout = setTimeout(
-      () => fallbackToFirebase("Cloudflare Pages app load timed out after " + Math.round(HOSTED_LOAD_TIMEOUT_MS / 1000) + " seconds"),
+      () => fallbackToLocal("Cloudflare Pages app load timed out after " + Math.round(HOSTED_LOAD_TIMEOUT_MS / 1000) + " seconds"),
       HOSTED_LOAD_TIMEOUT_MS
     );
-    void win.loadURL(HOSTED_APP_URL).catch(error => fallbackToFirebase(error?.message || "Cloudflare Pages navigation failed"));
+    void win.loadURL(HOSTED_APP_URL).catch(error => fallbackToLocal(error?.message || "Cloudflare Pages navigation failed"));
   });
   win.webContents.on("did-fail-load", (_event, errorCode, errorDescription, validatedURL, isMainFrame) => {
     if (!isMainFrame || localFallbackStarted || hostedAppLoaded || errorCode === -3) return;
     let failedOrigin;
     try { failedOrigin = new URL(validatedURL).origin; } catch { return; }
-    if (failedOrigin === HOSTED_APP_ORIGIN && !firebaseFallbackStarted) {
-      fallbackToFirebase(errorCode + " " + errorDescription);
-    } else if (failedOrigin === FIREBASE_FALLBACK_ORIGIN && firebaseFallbackStarted) {
+    if (failedOrigin === HOSTED_APP_ORIGIN) {
       fallbackToLocal(errorCode + " " + errorDescription);
     }
   });
@@ -253,8 +235,7 @@ function createWindow() {
       const isFirebaseAuthPopup =
         target.protocol === "https:" &&
         (target.hostname === "accounts.google.com" ||
-          target.hostname.endsWith(".firebaseapp.com") ||
-          target.hostname.endsWith(".web.app"));
+          target.hostname.endsWith(".firebaseapp.com"));
       if (isFirebaseAuthPopup) {
         return {
           action: "allow",
@@ -279,7 +260,6 @@ function createWindow() {
       return;
     }
     const isTrustedAppOrigin = target.origin === HOSTED_APP_ORIGIN ||
-      target.origin === FIREBASE_FALLBACK_ORIGIN ||
       Boolean(localOrigin && target.origin === new URL(localOrigin).origin);
     if (isTrustedAppOrigin) return;
     event.preventDefault();
