@@ -138,6 +138,18 @@ jobs:
               throw "Published release $tag is missing required updater asset: $assetName"
             }
           }
+      - name: Upload verified Windows release files
+        if: steps.release-decision.outputs.publish == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: vivid-cinema-windows-${{ github.run_number }}
+          path: |
+            dist-desktop/Vivid-Cinema-Setup-*.exe
+            dist-desktop/Vivid-Cinema-Portable-*.exe
+            dist-desktop/Vivid-Cinema-Setup-*.exe.blockmap
+            dist-desktop/latest.yml
+          if-no-files-found: error
+          retention-days: 30
       - name: Build Windows installer and portable executable
         if: steps.release-decision.outputs.publish != 'true'
         run: npm run desktop:dist
