@@ -71,7 +71,8 @@ jobs:
         run: |
           set -euo pipefail
           printf '%s' "$ANDROID_KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/vivid-release-key.jks"
-          echo "VIVID_ANDROID_KEYSTORE_FILE=$RUNNER_TEMP/vivid-release-key.jks" >> "$GITHUB_ENV"
+          export VIVID_ANDROID_KEYSTORE_FILE="$RUNNER_TEMP/vivid-release-key.jks"
+          echo "VIVID_ANDROID_KEYSTORE_FILE=$VIVID_ANDROID_KEYSTORE_FILE" >> "$GITHUB_ENV"
           node automation/configure-android-release-signing.mjs
 
       - name: Apply shared Vivid Cinema launcher icon
