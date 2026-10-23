@@ -1,0 +1,120 @@
+name: Android signed release APK
+
+on:
+  workflow_dispatch:
+    inputs:
+      publish_to_github_release:
+        description: Upload the signed APK to the existing matching GitHub release
+        required: true
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+jobs:
+  signed-release-apk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - name: Require Android signing secrets
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+          for name in KEYSTORE_BASE64 KEYSTORE_PASSWORD KEY_ALIAS KEY_PASSWORD; do
+            if [ -z "${!name}" ]; then
+              echo "::error::Missing GitHub Actions secret for Android signing: $name. Configure the ANDROID_* secrets documented in ANDROID_BUILD.md."
+              exit 1
+            fi
+          done
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v4
+
+      - name: Install dependencies
+        env:
+          ELECTRON_SKIP_BINARY_DOWNLOAD: "1"
+        run: npm ci --no-audit --no-fund
+
+      - name: Run Android release contract tests
+        run: node --test tests/android-release-pipeline.test.mjs tests/android-native-polish.test.mjs tests/android-icon.test.mjs tests/service-worker.test.mjs
+
+      - name: Generate Android project and bundle local website
+        run: |
+          npx cap add android
+          npm run cap:sync
+
+      - name: Configure release signing
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+          printf '%s' "$ANDROID_KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/vivid-release-key.jks"
+          export VIVID_ANDROID_KEYSTORE_FILE="$RUNNER_TEMP/vivid-release-key.jks"
+          echo "VIVID_ANDROID_KEYSTORE_FILE=$VIVID_ANDROID_KEYSTORE_FILE" >> "$GITHUB_ENV"
+          node automation/configure-android-release-signing.mjs
+
+      - name: Apply shared Vivid Cinema launcher icon
+        run: node automation/apply-android-icon.mjs
+
+      - name: Build signed release APK
+        run: |
+          chmod +x android/gradlew
+          cd android
+          ./gradlew assembleRelease
+          mkdir -p ../release-output
+          cp app/build/outputs/apk/release/app-release.apk ../release-output/Vivid-Cinema-Android-$(node -p "require('../package.json').version").apk
+
+      - name: Verify APK signature and package
+        shell: bash
+        run: |
+          set -euo pipefail
+          apk="$(find release-output -maxdepth 1 -name '*.apk' -print -quit)"
+          test -n "$apk"
+          apksigner_path="$(find "$ANDROID_HOME/build-tools" -type f -name apksigner -print -quit)"
+          test -n "$apksigner_path"
+          "$apksigner_path" verify --verbose "$apk"
+          aapt_path="$(find "$ANDROID_HOME/build-tools" -type f -name aapt -print -quit)"
+          test -n "$aapt_path"
+          "$aapt_path" dump badging "$apk" | grep -F "package: name='com.vividcinema.app'"
+
+      - name: Upload signed APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: vivid-cinema-signed-android-${{ github.run_number }}
+          path: release-output/*.apk
+          if-no-files-found: error
+          retention-days: 90
+
+      - name: Publish APK to matching GitHub release
+        if: inputs.publish_to_github_release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          version="$(node -p "require('./package.json').version")"
+          tag="v$version"
+          gh release view "$tag" >/dev/null
+          gh release upload "$tag" release-output/*.apk --clobber
+          gh release view "$tag" --json assets --jq '.assets[].name' | grep -Fx "Vivid-Cinema-Android-$version.apk"
