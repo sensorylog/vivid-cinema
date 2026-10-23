@@ -165,6 +165,10 @@ test("Windows app checks for updates and offers download plus restart-to-install
   assert.match(preload, /vivid-cinema\.pages\.dev/);
   assert.match(preload, /vivid-cinema\.web\.app/);
   assert.match(preload, /trustedHosts/);
+  assert.match(preload, /vivid-cinema\\.pages\\.dev/);
+  assert.doesNotMatch(preload, /netlify/i, "desktop update UI must not depend on the retired host");
+  assert.doesNotMatch(main, /netlify/i, "desktop runtime must not depend on the retired host");
+  assert.doesNotMatch(redirect, /netlify/i, "native redirect must use the current primary host");
   assert.match(preload, /Restart & install/);
   assert.match(preload, /vivid-update-status/);
   assert.ok(fs.existsSync(path.join(root, "styles", "vivid-desktop-update.css")));
