@@ -26,10 +26,10 @@ In the Firebase console for project `vivid-cinema`:
 
 1. Open **App Check** and select the registered web app used by Vivid Cinema.
 2. Confirm the web app is protected by the intended reCAPTCHA Enterprise provider and the site key matches the public key configured in `scripts/firebase.js`.
-3. Add `vivid-cinema.netlify.app` to the allowed domains for the corresponding reCAPTCHA Enterprise site key in the Google Cloud reCAPTCHA Enterprise console.
+3. Add `vivid-cinemas.netlify.app` to the allowed domains for the corresponding reCAPTCHA Enterprise site key in the Google Cloud reCAPTCHA Enterprise console.
 4. Ensure the domain is allowed for the Firebase App Check web provider as applicable, then save the changes.
 5. Confirm Firebase AI Logic is enabled for this project and the Gemini Developer API provider/model is configured.
-6. Open `https://vivid-cinema.netlify.app/`, sign in if required by project policy, and test Vivid Recall. Check the browser console and Network panel if it fails.
+6. Open `https://vivid-cinemas.netlify.app/`, sign in if required by project policy, and test Vivid Recall. Check the browser console and Network panel if it fails.
 
 The source code can improve diagnostics, but it cannot add an allowed domain to the Firebase or Google Cloud console. If App Check rejects the Netlify origin, Gemini calls can fail even while the rest of the website works.
 
@@ -44,4 +44,4 @@ The source code can improve diagnostics, but it cannot add an allowed domain to 
 
 ## Desktop and Android packaging
 
-This repository's current `main` tree contains the web app and PWA, but no checked-in Electron wrapper or Android native project/build workflow. Therefore this hosting change does not automatically rewrite a previously built EXE or APK. For any wrapper that opens the hosted website, its configured URL must be updated to `https://vivid-cinema.netlify.app/` and a new package built. If a wrapper bundles the web files locally, verify that it also uses the current Firebase configuration and App Check-allowed origin for AI calls.
+This repository's current `main` tree contains the web app and PWA, but no checked-in Electron wrapper or Android native project/build workflow. Therefore this hosting change does not automatically rewrite a previously built EXE or APK. For any wrapper that opens the hosted website, its configured URL must be updated to `https://vivid-cinemas.netlify.app/` and a new package built. If a wrapper bundles the web files locally, verify that it also uses the current Firebase configuration and App Check-allowed origin for AI calls.
