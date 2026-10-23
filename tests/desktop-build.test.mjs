@@ -163,7 +163,7 @@ test("Windows app checks for updates and offers download plus restart-to-install
   assert.match(main, /PORTABLE_EXECUTABLE_FILE/);
   assert.match(preload, /Vivid Cinema update/);
   assert.match(preload, /vivid-cinema\.pages\.dev/);
-  assert.match(preload, /vivid-cinema\.web\.app/);
+  assert.doesNotMatch(preload, /vivid-cinema\.web\.app/, "desktop update UI must not trust Firebase Hosting");
   assert.match(preload, /trustedHosts/);
   assert.doesNotMatch(preload, /netlify/i, "desktop update UI must not depend on the retired host");
   assert.doesNotMatch(main, /netlify/i, "desktop runtime must not depend on the retired host");
