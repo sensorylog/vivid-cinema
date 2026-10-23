@@ -12,6 +12,7 @@ test("Make Vivid Yours is recorded once locally and synced to the signed-in acco
   const home = await read("script.js");
   assert.match(intelligence, /ONBOARDING_SEEN_KEY="vivid:onboarding:shown:v1"/);
   assert.match(intelligence, /export function markColdStartShown\(\)/);
+  assert.match(intelligence, /markColdStartShown\(\)\{const s=read\(\);try\{localStorage\.setItem\(ONBOARDING_SEEN_KEY,"1"\)\}catch\{\}if\(s\.onboarding\.shownAt\)return s/);
   assert.match(intelligence, /!s\.onboarding\.shownAt&&!s\.onboarding\.completed&&!s\.onboarding\.dismissed/);
   assert.match(intelligence, /remoteOnboarding\?\.shownAt\|\|remoteOnboarding\?\.completed\|\|remoteOnboarding\?\.dismissed/);
   assert.match(intelligence, /cloud\(\["taste","profile"\],\{onboarding:s\.onboarding\}\)/);
