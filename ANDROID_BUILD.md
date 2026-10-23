@@ -49,3 +49,8 @@ Generate and back up the keystore securely on a trusted machine. Base64-encode t
 Once the four secrets are configured, run **Actions → Android signed release APK → Run workflow**. The workflow creates and verifies a signed release APK and stores it as a 90-day artifact. The optional `publish_to_github_release` input uploads it to the existing matching `v<package version>` GitHub release; it does not publish to Google Play.
 
 The workflow intentionally fails early when signing secrets are missing. No Firebase Cloud Functions, Blaze plan, or cloud backend is required for APK signing.
+
+
+### Moving from the current debug APK to the first signed release
+
+Android treats a differently signed APK as a different publisher. The existing CI APK is debug-signed, so the first production-signed APK may not install as an in-place update over a previously installed debug APK. Back up anything important first; uninstalling the debug build can clear app-local data. After the first signed release is installed, keep using the same production keystore for every subsequent update.
