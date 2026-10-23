@@ -154,6 +154,7 @@ test("Windows app checks for updates and offers download plus restart-to-install
   const preloadPath = path.join(root, "desktop", "preload.cjs");
   assert.ok(fs.existsSync(preloadPath));
   const preload = fs.readFileSync(preloadPath, "utf8");
+  const redirect = fs.readFileSync(path.join(root, "scripts", "platform-origin-redirect.js"), "utf8");
   assert.match(main, /require\("electron-updater"\)/);
   assert.match(main, /autoUpdater\.autoDownload = false/);
   assert.match(main, /autoUpdater\.checkForUpdates\(\)/);
