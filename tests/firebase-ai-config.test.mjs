@@ -62,6 +62,6 @@ test("Recall diagnostics support the deployed Cloudflare Pages origin without we
   assert.match(aiSource, /requires a deployed site because App Check is skipped on localhost/);
   assert.match(firebaseSource, /initializeAppCheck/);
   assert.match(firebaseSource, /ReCaptchaEnterpriseProvider/);
-  assert.match(firebaseSource, /allow vivid-cinema\.pages\.dev in both Firebase App Check/);
+  assert.match(firebaseSource, /Allow vivid-cinema\.pages\.dev and vivid-cinema\.web\.app in Firebase App Check/);
   assert.match(workerSource, /vivid-cinema-shell-v240/);
 });
