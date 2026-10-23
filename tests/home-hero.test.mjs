@@ -7,6 +7,7 @@ const stripComments = (css) => css.replace(/\/\*[\s\S]*?\*\//g, "");
 
 test("TFLIX-style trending billboard is restored above the unchanged featured-card strip", () => {
   const home = read("../home.html");
+  assert.doesNotMatch(home, /vivid-qr-share|QR code to visit Vivid Cinema|Scan to visit Vivid Cinema/i, "home no longer exposes the QR scan-to-visit feature");
   assert.match(home, /<section id="hero" class="empty" aria-label="Trending today"/);
   assert.match(home, /<div class="vivid-feature-strip">/);
   assert.match(home, /<div class="vivid-feature-track" id="feature-track" aria-label="Featured titles carousel"><\/div>/);
