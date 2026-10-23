@@ -2,7 +2,7 @@
 
 ## Current hosting arrangement
 
-- Primary automatic static hosting: [vivid-cinema.netlify.app](https://vivid-cinema.netlify.app/).
+- Primary automatic static hosting: [vivid-cinemas.netlify.app](https://vivid-cinemas.netlify.app/).
 - Firebase remains the backend for Authentication, Firestore, and Firebase AI Logic.
 - Firebase Hosting is retained as a manual fallback; its GitHub Actions deployment is intentionally manual-only while its monthly quota is limited.
 - Netlify deployment does not automatically update an already-installed APK or a previously built Windows EXE that points at another URL.
