@@ -1,0 +1,54 @@
+/*
+  Strict-Transport-Security: max-age=31536000; includeSubDomains
+  X-Content-Type-Options: nosniff
+  X-Permitted-Cross-Domain-Policies: none
+  X-DNS-Prefetch-Control: off
+  Cross-Origin-Resource-Policy: same-site
+  Origin-Agent-Cluster: ?1
+  Referrer-Policy: strict-origin-when-cross-origin
+  Content-Security-Policy: default-src 'self'; base-uri 'none'; object-src 'none'; frame-ancestors 'self'; form-action 'self' https://formspree.io; script-src 'self' https://acscdn.com https://*.acscdn.com https://js.paystack.co https://www.gstatic.com https://www.google.com https://www.recaptcha.net https://apis.google.com https://cdn.jsdelivr.net https://www.googletagmanager.com; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' https://cdn.jsdelivr.net https://fonts.gstatic.com data:; connect-src 'self' https://acscdn.com https://*.acscdn.com https://api.themoviedb.org https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://www.gstatic.com https://firestore.googleapis.com https://firebaseml.googleapis.com https://us-central1-vivid-cinema.cloudfunctions.net https://vivid-cinema-api.vercel.app https://firebaseinstallations.googleapis.com https://firebase.googleapis.com https://firebaseappcheck.googleapis.com https://content-firebaseappcheck.googleapis.com https://firebasevertexai.googleapis.com https://recaptchaenterprise.googleapis.com https://www.googleapis.com https://apis.google.com https://accounts.google.com https://www.google.com https://www.recaptcha.net https://vivid-cinema.firebaseapp.com https://*.firebaseio.com https://www.google-analytics.com https://region1.google-analytics.com https://analytics.google.com https://api.paystack.co https://js.paystack.co https://checkout.paystack.com https://iptv-org.github.io https://raw.githubusercontent.com https://dearbulut.github.io https://graphql.anilist.co https://app.nativenotify.com; frame-src 'self' https://acscdn.com https://*.acscdn.com https://www.youtube.com https://www.youtube-nocookie.com https://vaplayer.ru https://api.yenime.net https://vidsrc.sh https://vidsrc.cc https://vidlink.pro https://player.vidplus.to https://vivid-cinema.firebaseapp.com https://accounts.google.com https://apis.google.com https://www.google.com https://checkout.paystack.com https://www.recaptcha.net https://vidapi.ru https://vidapi.me https://vidapi.to https://vidapi.bz https://vidapi.tw https://vidsrc2.ru https://vidsrc.ir https://vidking.net https://www.vidking.net https://vixsrc.to https://moviesapi.to https://vidsrc-embed.ru https://cinesrc.st https://vidfast.vc https://anixo.buzz https://anilink.cc https://ani.megaplay.su https://megaplay.buzz https://megavid.buzz https://megaflix.buzz https://embedwave.cc https://vidfast.to https://ezvidapi.com https://watch.embed-api.stream; media-src 'self' blob: https:; worker-src 'self' blob:; manifest-src 'self'; upgrade-insecure-requests
+
+/*.html
+  Cache-Control: no-cache, max-age=0, must-revalidate
+  X-Frame-Options: SAMEORIGIN
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(self "https://checkout.paystack.com"), fullscreen=(self "https://www.youtube.com" "https://www.youtube-nocookie.com" "https://vaplayer.ru" "https://vidsrc.sh" "https://vidlink.pro" "https://player.vidplus.to" "https://api.yenime.net" "https://vidapi.ru" "https://vidapi.me" "https://vidapi.to" "https://vidapi.bz" "https://vidapi.tw" "https://vidsrc2.ru" "https://vidsrc.ir" "https://vidking.net" "https://www.vidking.net" "https://vixsrc.to" "https://moviesapi.to" "https://vidsrc-embed.ru" "https://cinesrc.st" "https://vidfast.vc" "https://anixo.buzz" "https://anilink.cc" "https://ani.megaplay.su" "https://megaplay.buzz" "https://megavid.buzz" "https://megaflix.buzz" "https://embedwave.cc" "https://vidfast.to" "https://ezvidapi.com" "https://watch.embed-api.stream"), autoplay=(self "https://www.youtube.com" "https://www.youtube-nocookie.com" "https://youtube.com" "https://vaplayer.ru" "https://vidsrc.sh" "https://vidlink.pro" "https://player.vidplus.to" "https://api.yenime.net" "https://vidapi.ru" "https://vidapi.me" "https://vidapi.to" "https://vidapi.bz" "https://vidapi.tw" "https://vidsrc2.ru" "https://vidsrc.ir" "https://vidking.net" "https://www.vidking.net" "https://vixsrc.to" "https://moviesapi.to" "https://vidsrc-embed.ru" "https://cinesrc.st" "https://vidfast.vc" "https://anixo.buzz" "https://anilink.cc" "https://ani.megaplay.su" "https://megaplay.buzz" "https://megavid.buzz" "https://megaflix.buzz" "https://embedwave.cc" "https://vidfast.to" "https://ezvidapi.com" "https://watch.embed-api.stream")
+
+/*.js
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+
+/**/*.js
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+
+/*.css
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
+
+/**/*.css
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
+
+/*.png
+  Cache-Control: public, max-age=604800, stale-while-revalidate=2592000
+
+/**/*.png
+  Cache-Control: public, max-age=604800, stale-while-revalidate=2592000
+
+/*.jpg
+  Cache-Control: public, max-age=604800, stale-while-revalidate=2592000
+
+/**/*.jpg
+  Cache-Control: public, max-age=604800, stale-while-revalidate=2592000
+
+/*.jpeg
+  Cache-Control: public, max-age=604800, stale-while-revalidate=2592000
+
+/**/*.jpeg
+  Cache-Control: public, max-age=604800, stale-while-revalidate=2592000
+
+/*.webp
+  Cache-Control: public, max-age=604800, stale-while-revalidate=2592000
+
+/**/*.webp
+  Cache-Control: public, max-age=604800, stale-while-revalidate=2592000
