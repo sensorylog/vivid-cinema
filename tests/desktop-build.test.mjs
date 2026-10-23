@@ -131,7 +131,7 @@ test("native-origin redirect routes only unsupported wrappers to trusted hosting
       "https://vivid-cinema.web.app/home.html",
       "Mozilla/5.0 (Linux; Android 14; Pixel Build/UP1A; wv) AppleWebKit/537.36"
     ),
-    null
+    "https://vivid-cinema.pages.dev/home.html"
   );
   assert.equal(
     runRedirect("http://localhost:1234/home.html", "Mozilla/5.0 Windows Electron/36.4.0"),
