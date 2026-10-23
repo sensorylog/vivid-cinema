@@ -3,13 +3,14 @@ import assert from "node:assert/strict";
 import { readFile, access } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { runInNewContext } from "node:vm";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const source = await readFile(path.join(root, "service-worker.js"), "utf8");
 
 test("service worker has a versioned cache and required offline shell", () => {
   assert.match(source, /const CACHE_NAME = "vivid-cinema-shell-v\d+"/);
-  assert.match(source, /const REQUIRED_APP_SHELL = \["\.\/", "\.\/index\.html", "\.\/home\.html", "\.\/offline\.html", "\.\/manifest\.json"\]/);
+  assert.match(source, /const REQUIRED_APP_SHELL = \["\.\/index\.html", "\.\/home\.html", "\.\/offline\.html", "\.\/manifest\.json"\]/);
   assert.match(source, /failedRequired\.length/);
   assert.match(source, /optional assets were not precached/);
   assert.match(source, /\.\/scripts\/local-owner\.js/);
@@ -30,11 +31,94 @@ test("every precached asset exists in the repository", async () => {
 });
 
 test("ordinary JavaScript and CSS use network-first while retaining offline cache fallback", () => {
-  assert.match(source, /const CACHE_NAME = "vivid-cinema-shell-v241"/);
+  assert.match(source, /const CACHE_NAME = "vivid-cinema-shell-v242"/);
   assert.match(source, /isCodeOrStyle.*networkFirst/);
   assert.match(source, /event\.respondWith\(isCodeOrStyle\?networkFirst\(request\):isHtml\?networkFirst\(request\):staleWhileRevalidate\(request,event\)\)/);
   assert.match(source, /redirect:"follow"/);
   assert.match(source, /response\.redirected&&response\.url/);
+});
+
+test("service worker never returns redirect-marked or redirect-status responses", () => {
+  assert.match(source, /function isSafeResponse\(response\)/);
+  assert.match(source, /!response\.redirected/);
+  assert.match(source, /response\.type!=="opaqueredirect"/);
+  assert.match(source, /response\.status>=300&&response\.status<400/);
+  assert.match(source, /async function fetchWithoutRedirect\(/);
+  assert.match(source, /redirect:"error"/);
+  assert.match(source, /async function safeCachedResponse\(/);
+  assert.match(source, /await cache\.delete\(request\)/);
+  assert.doesNotMatch(source, /cache\.add\(/, "precache must validate responses before storing them");
+  assert.match(source, /asset!=="\.\/"/, "root alias is not precached because it can redirect");
+});
+
+function createWorkerHarness(fetchImpl, initialCache = new Map()) {
+  const cacheEntries = new Map(initialCache);
+  const cacheKey = (request) => typeof request === "string"
+    ? new URL(request, "https://vivid.test/service-worker.js").href
+    : request.url;
+  const cache = {
+    async match(request) { return cacheEntries.get(cacheKey(request)) || null; },
+    async put(request, response) { cacheEntries.set(cacheKey(request), response); },
+    async delete(request) { return cacheEntries.delete(cacheKey(request)); }
+  };
+  const cacheStorage = {
+    async open() { return cache; },
+    async match(request) { return cache.match(request); },
+    async keys() { return ["vivid-cinema-shell-v242"]; },
+    async delete() { return true; }
+  };
+  const handlers = {};
+  const context = {
+    self: {
+      location: { origin: "https://vivid.test", href: "https://vivid.test/service-worker.js" },
+      addEventListener(name, callback) { handlers[name] = callback; },
+      skipWaiting: async () => {},
+      clients: {}
+    },
+    caches: cacheStorage,
+    fetch: (request, init) => fetchImpl(request, init),
+    AbortController,
+    setTimeout,
+    clearTimeout,
+    URL,
+    Request,
+    Response,
+    console,
+    Promise,
+    Map,
+    Set,
+    Error
+  };
+  runInNewContext(source + "\nglobalThis.__worker = { networkFirst, staleWhileRevalidate, safeCachedResponse };", context);
+  return { worker: context.__worker, cacheEntries, cacheKey, handlers };
+}
+
+function mockResponse({ redirected = false, url = "https://vivid.test/home.html", status = 200 } = {}) {
+  return { redirected, url, status, type: "basic", ok: status >= 200 && status < 300, clone() { return { ...this }; } };
+}
+
+test("network navigation redirects are re-fetched at their final URL before being served", async () => {
+  const calls = [];
+  const harness = createWorkerHarness(async (request, init) => {
+    calls.push({ request: typeof request === "string" ? request : request.url, init });
+    if (calls.length === 1) return mockResponse({ redirected: true, url: "https://vivid.test/home.html" });
+    return mockResponse({ redirected: false, url: "https://vivid.test/home.html" });
+  });
+  const request = new Request("https://vivid.test/home.html");
+  const response = await harness.worker.networkFirst(request);
+  assert.equal(response.redirected, false);
+  assert.equal(calls.length, 2);
+  assert.equal(calls[1].request, "https://vivid.test/home.html");
+  assert.equal(calls[1].init.redirect, "error");
+});
+
+test("redirected responses already in cache are deleted and never returned", async () => {
+  const request = new Request("https://vivid.test/home.html");
+  const key = request.url;
+  const harness = createWorkerHarness(async () => { throw new Error("network unavailable"); }, new Map([[key, mockResponse({ redirected: true })]]));
+  const response = await harness.worker.networkFirst(request);
+  assert.equal(response.status, 504);
+  assert.equal(harness.cacheEntries.has(key), false);
 });
 
 test("notification navigation is restricted to the app origin", () => {

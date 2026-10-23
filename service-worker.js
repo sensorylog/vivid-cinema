@@ -1,5 +1,5 @@
 // Bump this version whenever the precached app shell changes.
-const CACHE_NAME = "vivid-cinema-shell-v241";
+const CACHE_NAME = "vivid-cinema-shell-v242";
 const APP_SHELL = [
   "./","./index.html","./home.html","./for-you.html","./person.html","./discover.html","./collection.html","./title.html","./watch.html",
   "./library.html","./auth.html","./login.html","./verify-email.html","./forgot-password.html","./account.html","./achievements.html","./terms.html","./privacy.html","./contact.html","./donate.html","./donation-success.html",
@@ -13,18 +13,49 @@ const APP_SHELL = [
   "./scripts/nav-auth.js","./scripts/library.js","./scripts/library-page.js","./scripts/discover.js","./scripts/collection.js","./scripts/person.js","./scripts/recommendations.js","./scripts/release-alerts.js","./scripts/cinema-reminders.js","./scripts/push-notifications.js","./native-notify/web/nativeNotifyIds.js","./native-notify/web/native-notify-web-push.js","./scripts/news.js","./scripts/news.js?v=20261018-sync-stage-1","./scripts/news.js?v=20261018-feedback-sync-3","./scripts/news.js?v=20261018-feedback-sync-4","./scripts/news.js?v=20261018-sync-stage-1","./scripts/newsroom.js","./scripts/newsroom.js?v=20261018-firestore-db-1","./scripts/newsroom.js?v=20261019-premium-polish-3","./scripts/news-community-highlights.js","./scripts/news-community.js","./scripts/news-story.js","./scripts/moderation.js","./scripts/editorial-desk.js","./scripts/title.js","./scripts/playback/player-engine.js","./scripts/playback/playback-servers.js","./scripts/playback/server-settings.js","./scripts/watch.js","./scripts/watch.js?v=watch-player-layout-1","./scripts/watch.js?v=watch-player-layout-2","./scripts/watch.js?v=watch-player-layout-3","./scripts/watch.js?v=watch-player-choice-2","./scripts/watch.js?v=watch-player-tv-seven-servers-3","./scripts/playback/tflix-secondary-player.js","./scripts/playback/tflix-secondary-player.js?player-choice-1","./scripts/playback/tflix-secondary-player.js?tv-episodes-3","./scripts/playback/playback-urls.js","./scripts/landing.js",
   "./scripts/account.js","./scripts/account-bootstrap.js","./scripts/account-bootstrap.js?v=20261016-account-bootstrap-1","./scripts/auth.js","./scripts/auth.js?v=20261016-auth-runtime-audit2","./scripts/verify-email.js","./scripts/anime.js","./scripts/live.js","./scripts/live.js?v=live7","./scripts/home-breathe.js","./data/live-channels.json","./script.js","./script.js?v=20261006-2"
 ];
-const REQUIRED_APP_SHELL = ["./", "./index.html", "./home.html", "./offline.html", "./manifest.json"];
+const REQUIRED_APP_SHELL = ["./index.html", "./home.html", "./offline.html", "./manifest.json"];
+function isSafeResponse(response){
+ return !!response&&!response.redirected&&response.type!=="opaqueredirect"&&!(response.status>=300&&response.status<400);
+}
+async function cacheAsset(cache,asset){
+ const response=await fetch(asset,{cache:"no-store",redirect:"follow"});
+ // Never precache a response whose request crossed a redirect. Safari can reject
+ // a redirected response when a service worker returns it for a navigation.
+ if(!response.ok||response.type!=="basic"||!isSafeResponse(response))throw new Error("Unsafe or unavailable precache response: "+asset);
+ await cache.put(asset,response.clone());
+}
+async function safeCachedResponse(request){
+ const cache=await caches.open(CACHE_NAME);
+ const response=await cache.match(request);
+ if(response&&!isSafeResponse(response)){
+  await cache.delete(request);
+  return null;
+ }
+ return response||null;
+}
+async function fetchWithoutRedirect(request,init={}){
+ let response=await fetch(request,{...init,redirect:"follow"});
+ if(response.redirected&&response.url){
+  // Re-request the final URL so the Response handed to Safari is not marked
+  // redirected. If that destination redirects again, fail closed to cache/offline.
+  response=await fetch(response.url,{...init,credentials:request.credentials||"same-origin",headers:request.headers,redirect:"error"});
+ }
+ if(!isSafeResponse(response))throw new Error("Service worker refused to serve a redirect response");
+ return response;
+}
 async function cacheShell(){
  const cache=await caches.open(CACHE_NAME);
- const requiredResults=await Promise.allSettled(REQUIRED_APP_SHELL.map(asset=>cache.add(asset)));
+ const requiredResults=await Promise.allSettled(REQUIRED_APP_SHELL.map(asset=>cacheAsset(cache,asset)));
  const failedRequired=requiredResults.map((result,index)=>result.status==="rejected"?REQUIRED_APP_SHELL[index]:null).filter(Boolean);
  if(failedRequired.length){
   await caches.delete(CACHE_NAME);
   throw new Error("Required Vivid shell assets failed to cache: "+failedRequired.join(", "));
  }
  const requiredSet=new Set(REQUIRED_APP_SHELL);
- const optional=[...new Set(APP_SHELL)].filter(asset=>!requiredSet.has(asset));
- const results=await Promise.allSettled(optional.map(asset=>cache.add(asset)));
+ // Do not precache "./": root requests may redirect to index.html depending on
+ // host configuration, and redirected responses must never enter the app cache.
+ const optional=[...new Set(APP_SHELL)].filter(asset=>asset!=="./"&&!requiredSet.has(asset));
+ const results=await Promise.allSettled(optional.map(asset=>cacheAsset(cache,asset)));
  const failures=results.map((result,index)=>result.status==="rejected"?optional[index]:null).filter(Boolean);
  if(failures.length) console.warn("Vivid shell: optional assets were not precached",failures);
 }
@@ -33,21 +64,35 @@ self.addEventListener("activate",event=>{event.waitUntil(caches.keys().then(keys
 self.addEventListener("message",event=>{if(event.data?.type==="SKIP_WAITING")self.skipWaiting();});
 async function networkFirst(request){
  const controller=new AbortController(); const timeout=setTimeout(()=>controller.abort(),6000);
- try{let response=await fetch(request,{signal:controller.signal,cache:"no-store",redirect:"follow"});if(response.redirected&&response.url){response=await fetch(response.url,{signal:controller.signal,cache:"no-store",redirect:"follow"});}if(response.ok&&response.type==="basic"&&!response.redirected){const cache=await caches.open(CACHE_NAME);await cache.put(request,response.clone());}return response;}
- catch{return (await caches.match(request))||new Response("",{status:504,statusText:"Offline"});}finally{clearTimeout(timeout);}
+ try{
+  const response=await fetchWithoutRedirect(request,{signal:controller.signal,cache:"no-store"});
+  if(response.ok&&response.type==="basic"){
+   const cache=await caches.open(CACHE_NAME);
+   await cache.put(request,response.clone());
+  }
+  return response;
+ }catch{
+  return (await safeCachedResponse(request))||new Response("",{status:504,statusText:"Offline"});
+ }finally{clearTimeout(timeout);}
 }
 async function staleWhileRevalidate(request,event,isNavigation=false){
  // Start the refresh before awaiting the cache, then keep the fetch event alive
  // so a cached response does not cause the browser to cancel the background update.
- const cachedPromise=caches.match(request);
- const refresh=fetch(request,{cache:"no-store",redirect:"follow"}).then(async response=>{if(response.redirected&&response.url)response=await fetch(response.url,{cache:"no-store",redirect:"follow"});if(response.ok&&response.type==="basic"&&!response.redirected){const cache=await caches.open(CACHE_NAME);await cache.put(request,response.clone());}return response;}).catch(()=>null);
+ const cachedPromise=safeCachedResponse(request);
+ const refresh=fetchWithoutRedirect(request,{cache:"no-store"}).then(async response=>{
+  if(response.ok&&response.type==="basic"){
+   const cache=await caches.open(CACHE_NAME);
+   await cache.put(request,response.clone());
+  }
+  return response;
+ }).catch(()=>null);
  event.waitUntil(refresh.then(()=>undefined));
  const cached=await cachedPromise;
  if(cached)return cached;
  const fresh=await refresh;
- if(fresh)return fresh;
+ if(fresh&&isSafeResponse(fresh))return fresh;
  // Only document navigations should receive HTML as an offline fallback.
- if(isNavigation)return (await caches.match("./offline.html"))||new Response("",{status:504,statusText:"Offline"});
+ if(isNavigation)return (await safeCachedResponse("./offline.html"))||new Response("",{status:504,statusText:"Offline"});
  // Returning offline.html for a missing script, stylesheet, or image can break
  // the page with an unexpected HTML response. Fail the asset request instead.
  return new Response("",{status:504,statusText:"Offline"});
