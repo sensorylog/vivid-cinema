@@ -162,8 +162,8 @@ test("Windows app checks for updates and offers download plus restart-to-install
   assert.match(main, /vivid-update-install/);
   assert.match(main, /PORTABLE_EXECUTABLE_FILE/);
   assert.match(preload, /Vivid Cinema update/);
-  assert.match(preload, /vivid-cinemas\\.netlify\\.app/);
-  assert.match(preload, /vivid-cinema\\.web\\.app/);
+  assert.match(preload, /vivid-cinemas\.netlify\.app/);
+  assert.match(preload, /vivid-cinema\.web\.app/);
   assert.match(preload, /trustedHosts/);
   assert.match(preload, /Restart & install/);
   assert.match(preload, /vivid-update-status/);
