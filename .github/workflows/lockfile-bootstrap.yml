@@ -1,4 +1,4 @@
-name: Temporary lockfile generation for release hardening
+name: Temporary lockfile generation for release hardening # final stable head
 
 on:
   push:
