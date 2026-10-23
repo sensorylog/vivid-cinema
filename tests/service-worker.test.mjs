@@ -30,10 +30,10 @@ test("every precached asset exists in the repository", async () => {
 });
 
 test("ordinary JavaScript and CSS use network-first while retaining offline cache fallback", () => {
-  assert.match(source, /const CACHE_NAME = "vivid-cinema-shell-v240"/);
+  assert.match(source, /const CACHE_NAME = "vivid-cinema-shell-v241"/);
   assert.match(source, /isCodeOrStyle.*networkFirst/);
   assert.match(source, /event\.respondWith\(isCodeOrStyle\?networkFirst\(request\):isHtml\?networkFirst\(request\):staleWhileRevalidate\(request,event\)\)/);
-  assert.match(source, /fetch\(request,\{signal:controller\.signal,cache:"no-store"\}\)/);
+  assert.match(source, /redirect:"follow"/);\n  assert.match(source, /response\.redirected&&response\.url/);
 });
 
 test("notification navigation is restricted to the app origin", () => {
