@@ -1,10 +1,11 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { readFile, access } from "node:fs/promises";
+import { readFile } from "node:fs/promises";
 
 const headers = await readFile(new URL("../_headers", import.meta.url), "utf8");
-const buildScript = await readFile(new URL("../automation/build-netlify-dist.mjs", import.meta.url), "utf8");
-const netlify = await readFile(new URL("../netlify.toml", import.meta.url), "utf8");
+const buildScript = await readFile(new URL("../automation/build-static-dist.mjs", import.meta.url), "utf8");
+const packageJson = JSON.parse(await readFile(new URL("../package.json", import.meta.url), "utf8"));
+const firebaseWorkflow = await readFile(new URL("../.github/workflows/firebase-hosting-deploy.yml", import.meta.url), "utf8");
 
 test("Cloudflare Pages headers preserve core security policy", () => {
   for (const header of [
@@ -44,15 +45,16 @@ test("Cloudflare Pages keeps the existing HTML and static asset cache policies",
   assert.match(headers, /\/\*\.png\s+Cache-Control: public, max-age=604800, stale-while-revalidate=2592000/);
 });
 
-test("static build includes the Cloudflare headers file in the published output", async () => {
+test("shared static build publishes dist and retains Capacitor enhancements", () => {
+  assert.equal(packageJson.scripts["build:web"], "node automation/build-static-dist.mjs");
   assert.ok(buildScript.includes('const output = path.join(root, "dist")'));
   assert.ok(!buildScript.includes('"_headers"'));
-  // The existing recursive copy copies root files unless explicitly excluded.
   assert.ok(buildScript.includes("await cp(from, to)"));
+  assert.ok(buildScript.includes("vivid-native-app-enhancements"));
 });
 
-test("Netlify configuration remains present as an independent fallback", async () => {
-  assert.ok(netlify.includes("publish = \"dist\""));
-  assert.ok(netlify.includes("Content-Security-Policy"));
-  await access(new URL("../netlify.toml", import.meta.url));
+test("Firebase Hosting remains a manual-only backup workflow", () => {
+  assert.match(firebaseWorkflow, /workflow_dispatch:/);
+  assert.doesNotMatch(firebaseWorkflow, /Netlify is the primary automatic host/);
+  assert.match(firebaseWorkflow, /Cloudflare Pages is the primary static host/);
 });
