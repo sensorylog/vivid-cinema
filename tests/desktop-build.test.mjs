@@ -172,7 +172,7 @@ test("Windows workflow builds on demand or on release tags", () => {
   assert.ok(fs.existsSync(file));
   const workflow = fs.readFileSync(file, "utf8");
   assert.match(workflow, /workflow_dispatch/);
-  assert.match(workflow, /desktop:publish/);
+  assert.match(workflow, /desktop:dist/);
   assert.match(workflow, /GH_TOKEN:.*secrets\.GITHUB_TOKEN/);
   assert.match(workflow, /contents: write/);
   assert.match(workflow, /Decide whether this push publishes a release/);
@@ -194,4 +194,5 @@ test("Windows workflow builds on demand or on release tags", () => {
   assert.match(workflow, /icons\/\*\*/);
   assert.match(workflow, /Vivid-Cinema-Setup/);
   assert.match(workflow, /Vivid-Cinema-Portable/);
+  assert.match(workflow, /Vivid-Cinema-Portable-\$version\.exe/);
 });
