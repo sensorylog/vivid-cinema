@@ -42,7 +42,7 @@ test("Windows installer and portable executable targets use Vivid branding", () 
 test("desktop runtime uses Netlify first, Firebase Hosting second, and a bundled offline fallback last", () => {
   const main = fs.readFileSync(path.join(root, "desktop", "main.cjs"), "utf8");
   assert.match(main, /app\.getAppPath\(\)/);
-  assert.match(main, /HOSTED_APP_URL = "https:\/\/vivid-cinema\.netlify\.app\/home\.html"/);
+  assert.match(main, /HOSTED_APP_URL = "https:\/\/vivid-cinemas\.netlify\.app\/home\.html"/);
   assert.match(main, /FIREBASE_FALLBACK_URL = "https:\/\/vivid-cinema\.web\.app\/home\.html"/);
   assert.match(main, /fallbackToFirebase/);
   assert.match(main, /FIREBASE_FALLBACK_ORIGIN/);
@@ -84,7 +84,7 @@ test("file and native WebView entry points redirect before Firebase modules init
   assert.match(redirect, /appassets\.androidplatform\.net/);
   assert.match(redirect, /isUntrustedNativeOrigin/);
   assert.doesNotMatch(redirect, /\\bElectron\\b/);
-  assert.match(redirect, /https:\/\/vivid-cinema\.netlify\.app\//);
+  assert.match(redirect, /https:\/\/vivid-cinemas\.netlify\.app\//);
   assert.match(redirect, /window\.location\.replace\(target\.href\)/);
   const syntaxChecker = fs.readFileSync(path.join(root, "automation", "check-syntax.mjs"), "utf8");
   assert.match(syntaxChecker, /scripts\/platform-origin-redirect\.js/);
