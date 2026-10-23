@@ -30,11 +30,24 @@ test("every precached asset exists in the repository", async () => {
 });
 
 test("ordinary JavaScript and CSS use network-first while retaining offline cache fallback", () => {
-  assert.match(source, /const CACHE_NAME = "vivid-cinema-shell-v241"/);
+  assert.match(source, /const CACHE_NAME = "vivid-cinema-shell-v242"/);
   assert.match(source, /isCodeOrStyle.*networkFirst/);
   assert.match(source, /event\.respondWith\(isCodeOrStyle\?networkFirst\(request\):isHtml\?networkFirst\(request\):staleWhileRevalidate\(request,event\)\)/);
   assert.match(source, /redirect:"follow"/);
   assert.match(source, /response\.redirected&&response\.url/);
+});
+
+test("service worker never returns redirect-marked or redirect-status responses", () => {
+  assert.match(source, /function isSafeResponse\\(response\\)/);
+  assert.match(source, /!response\\.redirected/);
+  assert.match(source, /response\\.type!=="opaqueredirect"/);
+  assert.match(source, /response\\.status>=300&&response\\.status<400/);
+  assert.match(source, /async function fetchWithoutRedirect\\(/);
+  assert.match(source, /redirect:"error"/);
+  assert.match(source, /async function safeCachedResponse\\(/);
+  assert.match(source, /await cache\\.delete\\(request\\)/);
+  assert.doesNotMatch(source, /cache\\.add\\(/, "precache must validate responses before storing them");
+  assert.match(source, /asset!=="\\.\\/"/, "root alias is not precached because it can redirect");
 });
 
 test("notification navigation is restricted to the app origin", () => {
