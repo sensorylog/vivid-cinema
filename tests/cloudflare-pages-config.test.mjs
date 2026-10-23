@@ -58,3 +58,11 @@ test("Firebase Hosting remains a manual-only backup workflow", () => {
   assert.doesNotMatch(firebaseWorkflow, /Netlify is the primary automatic host/);
   assert.match(firebaseWorkflow, /Cloudflare Pages is the primary static host/);
 });
+
+
+test("Cloudflare CSP does not allow obsolete Cloud Functions or legacy Vercel API origins", () => {
+  const csp = headers.split("\\n").find(line => line.trimStart().startsWith("Content-Security-Policy:"));
+  assert.ok(csp);
+  assert.doesNotMatch(csp, /cloudfunctions\\.net/);
+  assert.doesNotMatch(csp, /vivid-cinema-api\\.vercel\\.app/);
+});
