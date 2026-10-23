@@ -16,7 +16,7 @@ test("desktop packaging is opt-in and preserves existing scripts", () => {
   assert.ok(pkg.scripts["test:rules"]);
 });
 test("Windows installer and portable executable targets use Vivid branding", () => {
-  assert.equal(pkg.version, "1.0.8");
+  assert.equal(pkg.version, "1.0.10");
   assert.ok(pkg.devDependencies.electron);
   assert.ok(pkg.devDependencies["electron-builder"]);
   assert.ok(pkg.dependencies["electron-updater"]);
@@ -162,6 +162,9 @@ test("Windows app checks for updates and offers download plus restart-to-install
   assert.match(main, /vivid-update-install/);
   assert.match(main, /PORTABLE_EXECUTABLE_FILE/);
   assert.match(preload, /Vivid Cinema update/);
+  assert.match(preload, /vivid-cinemas\\.netlify\\.app/);
+  assert.match(preload, /vivid-cinema\\.web\\.app/);
+  assert.match(preload, /trustedHosts/);
   assert.match(preload, /Restart & install/);
   assert.match(preload, /vivid-update-status/);
   assert.ok(fs.existsSync(path.join(root, "styles", "vivid-desktop-update.css")));
