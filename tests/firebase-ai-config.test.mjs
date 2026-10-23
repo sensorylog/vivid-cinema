@@ -33,7 +33,7 @@ test("Recall keeps detailed quota and provider errors visible for diagnosis", ()
 });
 
 test("service worker cache version changes with the updated AI modules", () => {
-  assert.match(workerSource, /vivid-cinema-shell-v239/);
+  assert.match(workerSource, /vivid-cinema-shell-v240/);
 });
 
 test("achievement Sparks reuse the existing Recall model and App Check protections", () => {
@@ -51,17 +51,18 @@ test("achievement Sparks reuse the existing Recall model and App Check protectio
   assert.match(aiSource, /export async function sendRecallChatMessage/);
 });
 
-test("Netlify is the primary automatic host and Firebase Hosting is a manual fallback", () => {
+test("Cloudflare Pages is the primary automatic host and Firebase Hosting is a manual fallback", () => {
   assert.match(hostingWorkflow, /workflow_dispatch:/);
   assert.doesNotMatch(hostingWorkflow, /^  push:/m);
-  assert.match(firebaseSource, /vivid-cinemas\.netlify\.app/);
+  assert.match(firebaseSource, /Cloudflare Pages/);
   assert.match(firebaseSource, /reCAPTCHA Enterprise/);
 });
 
-test("Recall diagnostics support a deployed Netlify origin without weakening App Check", () => {
+test("Recall diagnostics support deployed hosting origins without weakening App Check", () => {
   assert.match(aiSource, /requires a deployed site because App Check is skipped on localhost/);
   assert.match(firebaseSource, /initializeAppCheck/);
   assert.match(firebaseSource, /ReCaptchaEnterpriseProvider/);
-  assert.match(firebaseSource, /allow vivid-cinemas\.netlify\.app in both Firebase App Check/);
-  assert.match(workerSource, /vivid-cinema-shell-v239/);
+  assert.match(firebaseSource, /vivid-cinema\.pages\.dev/);
+  assert.match(firebaseSource, /vivid-cinema\.web\.app/);
+  assert.match(workerSource, /vivid-cinema-shell-v240/);
 });
