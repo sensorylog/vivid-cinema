@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
 const [builder, nativeCss, capacitorConfig] = await Promise.all([
-  readFile(new URL("../automation/build-netlify-dist.mjs", import.meta.url), "utf8"),
+  readFile(new URL("../automation/build-static-dist.mjs", import.meta.url), "utf8"),
   readFile(new URL("../styles/vivid-native-app.css", import.meta.url), "utf8"),
   readFile(new URL("../capacitor.config.json", import.meta.url), "utf8")
 ]);
