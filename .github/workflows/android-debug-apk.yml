@@ -9,6 +9,10 @@ on:
   pull_request:
     paths:
       - "capacitor.config.json"
+      - "service-worker.js"
+      - "scripts/app-shell.js"
+      - "_headers"
+      - "firebase.json"
       - "automation/build-static-dist.mjs"
       - "automation/build-netlify-dist.mjs"
       - "automation/apply-android-icon.mjs"
