@@ -9,7 +9,7 @@ const source = await readFile(path.join(root, "service-worker.js"), "utf8");
 
 test("service worker has a versioned cache and required offline shell", () => {
   assert.match(source, /const CACHE_NAME = "vivid-cinema-shell-v\d+"/);
-  assert.match(source, /const REQUIRED_APP_SHELL = \["\.\/", "\.\/index\.html", "\.\/home\.html", "\.\/offline\.html", "\.\/manifest\.json"\]/);
+  assert.match(source, /const REQUIRED_APP_SHELL = \["\.\/index\.html", "\.\/home\.html", "\.\/offline\.html", "\.\/manifest\.json"\]/);
   assert.match(source, /failedRequired\.length/);
   assert.match(source, /optional assets were not precached/);
   assert.match(source, /\.\/scripts\/local-owner\.js/);
@@ -38,16 +38,16 @@ test("ordinary JavaScript and CSS use network-first while retaining offline cach
 });
 
 test("service worker never returns redirect-marked or redirect-status responses", () => {
-  assert.match(source, /function isSafeResponse\\(response\\)/);
-  assert.match(source, /!response\\.redirected/);
-  assert.match(source, /response\\.type!=="opaqueredirect"/);
-  assert.match(source, /response\\.status>=300&&response\\.status<400/);
-  assert.match(source, /async function fetchWithoutRedirect\\(/);
+  assert.match(source, /function isSafeResponse\(response\)/);
+  assert.match(source, /!response\.redirected/);
+  assert.match(source, /response\.type!=="opaqueredirect"/);
+  assert.match(source, /response\.status>=300&&response\.status<400/);
+  assert.match(source, /async function fetchWithoutRedirect\(/);
   assert.match(source, /redirect:"error"/);
-  assert.match(source, /async function safeCachedResponse\\(/);
-  assert.match(source, /await cache\\.delete\\(request\\)/);
-  assert.doesNotMatch(source, /cache\\.add\\(/, "precache must validate responses before storing them");
-  assert.match(source, /asset!=="\\.\\/"/, "root alias is not precached because it can redirect");
+  assert.match(source, /async function safeCachedResponse\(/);
+  assert.match(source, /await cache\.delete\(request\)/);
+  assert.doesNotMatch(source, /cache\.add\(/, "precache must validate responses before storing them");
+  assert.match(source, /asset!=="\.\/"/, "root alias is not precached because it can redirect");
 });
 
 test("notification navigation is restricted to the app origin", () => {
