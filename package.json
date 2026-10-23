@@ -49,6 +49,7 @@
       "node_modules/semver/**",
       "node_modules/tiny-async-pool/**",
       "node_modules/debug/**",
+      "node_modules/ms/**",
       "node_modules/sax/**",
       "node_modules/graceful-fs/**",
       "node_modules/jsonfile/**",
