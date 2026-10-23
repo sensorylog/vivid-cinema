@@ -71,7 +71,7 @@ if (!RECAPTCHA_ENTERPRISE_SITE_KEY) {
   // Localhost and loopback were intentionally removed from the reCAPTCHA
   // Enterprise allowed-domain list. Use the deployed Hosting domain to test AI.
   appCheckSkippedReason =
-    "App Check is intentionally skipped on local development hosts; test Gemini on the deployed Netlify or Firebase Hosting site.";
+    "App Check is intentionally skipped on local development hosts; test Gemini on the deployed Cloudflare Pages or Firebase Hosting site.";
 } else {
   try {
     appCheck = initializeAppCheck(app, {
@@ -86,7 +86,7 @@ if (!RECAPTCHA_ENTERPRISE_SITE_KEY) {
       origin: window.location.origin,
       code: appCheckError.code || null,
       message: appCheckError.message,
-      hint: "For Netlify, allow vivid-cinemas.netlify.app in both Firebase App Check and the reCAPTCHA Enterprise site's allowed domains."
+      hint: "Allow vivid-cinema.pages.dev and vivid-cinema.web.app in Firebase App Check and the reCAPTCHA Enterprise site's allowed domains."
     });
   }
 }
