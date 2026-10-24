@@ -82,7 +82,6 @@ async function addNativeEnhancements(directory) {
       html = html.replace("</head>", buildInfo + '<script type="module" src="/scripts/android-updater.js"></script></head>');
     }
     await writeFile(target, html, "utf8");
-    }
   }
 }
 
