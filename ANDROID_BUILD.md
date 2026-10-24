@@ -46,7 +46,7 @@ The debug workflow is for testing only. To build a production-signed APK, first 
 
 Generate and back up the keystore securely on a trusted machine. Base64-encode the existing keystore file for the secret; never commit the keystore or secrets, paste passwords or keystore bytes into chat, or print them in workflow logs. Keep encrypted offline backups. **Every future APK update must use the same signing key** or Android will reject it as an update to the installed app.
 
-Once the four secrets are configured, run **Actions → Android signed release APK → Run workflow**. The workflow creates and verifies a signed release APK and stores it as a 90-day artifact. The optional `publish_to_github_release` input uploads it to the existing matching `v<package version>` GitHub release; it does not publish to Google Play.
+Once the four secrets are configured, run **Actions → Android signed release APK → Run workflow** and leave `publish_to_github_release` enabled to publish the APK to the matching `v<package version>` GitHub release. Publishing a new GitHub release also triggers this workflow automatically. The workflow verifies the signature, stores a 90-day workflow artifact, and attaches the APK as the stable asset name `Vivid-Cinema-Android.apk`. The latest signed APK download URL is https://github.com/sensorylog/vivid-cinema/releases/latest/download/Vivid-Cinema-Android.apk. This does not publish to Google Play.
 
 The workflow intentionally fails early when signing secrets are missing. No Firebase Cloud Functions, Blaze plan, or cloud backend is required for APK signing.
 
