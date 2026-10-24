@@ -87,5 +87,14 @@ async function addNativeEnhancements(directory) {
 
 await rm(output, { recursive: true, force: true });
 await copySite(root, output);
+if (process.env.VIVID_ANDROID_BUILD) {
+  const build = Number(process.env.VIVID_ANDROID_BUILD);
+  const workerPath = path.join(output, "service-worker.js");
+  const worker = await readFile(workerPath, "utf8");
+  if (!Number.isSafeInteger(build) || build < 1) throw new Error("VIVID_ANDROID_BUILD must be a positive integer.");
+  const updatedWorker = worker.replace(/const CACHE_NAME = "([^"]+)";/, `const CACHE_NAME = "$1-android-${build}";`);
+  if (updatedWorker === worker) throw new Error("Could not bump the service worker cache for this Android build.");
+  await writeFile(workerPath, updatedWorker, "utf8");
+}
 await addNativeEnhancements(output);
 console.log("Prepared static site in dist/ with native-only Capacitor polish.");
