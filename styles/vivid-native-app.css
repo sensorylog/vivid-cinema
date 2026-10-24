@@ -71,3 +71,37 @@ body.vivid-native-app {
     transition-duration: .01ms !important;
   }
 }
+
+
+/* Native Android update notice */
+.vivid-android-update-notice {
+  position: fixed;
+  z-index: 2147483000;
+  inset: max(12px, env(safe-area-inset-top, 0px)) 12px auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 18px;
+  border: 1px solid rgba(199, 255, 85, .32);
+  border-radius: 22px;
+  color: #f7f8fc;
+  background: linear-gradient(145deg, rgba(20, 25, 33, .98), rgba(7, 10, 15, .98));
+  box-shadow: 0 22px 70px rgba(0, 0, 0, .48), 0 0 30px rgba(199, 255, 85, .08);
+  -webkit-backdrop-filter: blur(24px);
+  backdrop-filter: blur(24px);
+}
+.vivid-android-update-copy { display: grid; gap: 5px; min-width: 0; }
+.vivid-android-update-kicker { color: #d5ff76; font-size: 10px; font-weight: 800; letter-spacing: .15em; }
+.vivid-android-update-copy strong { font-size: 17px; line-height: 1.25; }
+.vivid-android-update-copy p, .vivid-android-update-copy small { margin: 0; color: #c1c8d5; font-size: 12px; line-height: 1.45; }
+.vivid-android-update-actions { display: flex; flex-direction: column; align-items: stretch; gap: 7px; flex: 0 0 auto; }
+.vivid-android-update-actions button { min-height: 42px; border: 0; border-radius: 12px; padding: 0 14px; font: inherit; font-size: 12px; font-weight: 800; cursor: pointer; }
+.vivid-android-update-install { background: #d5ff76; color: #10140b; }
+.vivid-android-update-install:disabled { opacity: .7; cursor: wait; }
+.vivid-android-update-dismiss { background: rgba(255,255,255,.07); color: #d6dbe5; }
+@media (max-width: 520px) {
+  .vivid-android-update-notice { align-items: stretch; flex-direction: column; gap: 13px; padding: 16px; }
+  .vivid-android-update-actions { display: grid; grid-template-columns: 1fr auto; }
+  .vivid-android-update-actions button { padding: 0 12px; }
+}
