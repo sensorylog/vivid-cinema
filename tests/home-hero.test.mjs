@@ -157,3 +157,15 @@ test("Home loads the current audit stylesheet once, without a duplicate cache-bu
     .map((match) => match[1]);
   assert.deepEqual(references, ["styles/vivid-audit-fixes.css?v=editorial-v2"]);
 });
+
+test("app Home exposes the official download page on desktop, mobile, and footer navigation", () => {
+  const home = read("../home.html");
+  assert.match(home, /<a href="downloads\.html"><i class="bi bi-download" aria-hidden="true"><\/i><span>Download App<\/span><\/a>/);
+  assert.match(home, /<a href="downloads\.html"><i class="bi bi-download" aria-hidden="true"><\/i><span>Download<\/span><\/a>/);
+  assert.match(home, /<a href="downloads\.html">Downloads<\/a>/);
+  const sw = read("../service-worker.js");
+  assert.match(sw, /vivid-cinema-shell-v248/);
+  assert.match(sw, /"\.\/downloads\.html"/);
+  assert.match(sw, /"\.\/styles\/downloads\.css"/);
+  assert.match(sw, /"\.\/scripts\/downloads\.js\?v=direct-download-v3"/);
+});
