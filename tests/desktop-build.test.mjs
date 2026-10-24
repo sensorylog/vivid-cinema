@@ -16,7 +16,7 @@ test("desktop packaging is opt-in and preserves existing scripts", () => {
   assert.ok(pkg.scripts["test:rules"]);
 });
 test("Windows installer and portable executable targets use Vivid branding", () => {
-  assert.equal(pkg.version, "1.0.21");
+  assert.equal(pkg.version, "1.0.22");
   assert.ok(pkg.devDependencies.electron);
   assert.ok(pkg.devDependencies["electron-builder"]);
   assert.ok(pkg.dependencies["electron-updater"]);
@@ -212,4 +212,19 @@ test("native dropdown options keep readable contrast in Windows Chromium", () =>
   assert.ok(css.includes("background-color:#fff;color:#111216"));
   assert.ok(css.includes("select{color-scheme:dark}"));
   assert.ok(css.includes('html[data-vivid-theme="light"] select{color-scheme:light}'));
+});
+
+
+test("Windows desktop recovers from failed later-page navigation instead of leaving a black screen", () => {
+  const main = fs.readFileSync(path.join(root, "desktop", "main.cjs"), "utf8");
+  assert.match(main, /RECOVERY_HTML/);
+  assert.match(main, /RECOVERY_URL/);
+  assert.match(main, /hostedNavigationRecoveryInProgress/);
+  assert.match(main, /recoverHostedNavigation/);
+  assert.match(main, /showHostedRecoveryPage/);
+  assert.match(main, /renderer process exited/);
+  assert.match(main, /render-process-gone/);
+  assert.match(main, /hosted page navigation failed; retrying the primary app origin/);
+  assert.match(main, /if \(!hostedAppLoaded\)/);
+  assert.match(main, /https:\/\/vivid-cinema\.pages\.dev\/home\.html/);
 });
