@@ -97,8 +97,8 @@ test("auth-related Firebase modules use one SDK version and fresh cache keys", a
     .map((line) => line.split("/firebasejs/")[1]?.split("/")[0]);
   assert.ok(versions.length >= 9, "expected to inspect all shared Firebase SDK imports");
   assert.ok(versions.every((version) => version === "12.19.0"), "Firebase SDK imports must be version-aligned");
-  assert.ok(auth.includes("./firebase.js?v=20261024-desktop-persistence-1"));
-  assert.ok(worker.includes("./scripts/firebase.js?v=20261024-desktop-persistence-1"));
+  assert.ok(auth.includes("./firebase.js?v=20261016-auth-runtime-audit2"));
+  assert.ok(worker.includes("./scripts/firebase.js?v=20261016-auth-runtime-audit2"));
   assert.ok(worker.includes("./scripts/auth.js?v=20261024-desktop-persistence-1"));
   assert.ok(loginPage.includes("scripts/auth.js?v=20261024-desktop-persistence-1"));
   assert.ok(signupPage.includes("scripts/auth.js?v=20261024-desktop-persistence-1"));
