@@ -31,6 +31,10 @@ on:
       - ".github/workflows/android-debug-apk.yml"
   workflow_dispatch:
 
+concurrency:
+  group: android-apk-build-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: write
 
