@@ -91,13 +91,13 @@ if (!RECAPTCHA_ENTERPRISE_SITE_KEY) {
   }
 }
 
-// Prefer durable localStorage persistence on desktop WebViews, then IndexedDB, with memory only as a last resort.
+// Prefer IndexedDB persistence on desktop WebViews, then localStorage, with memory only as a last resort.
 // Explicitly provide the browser popup resolver so Google sign-in keeps working in supported browsers.
 const auth = initializeAuth(app, {
-  persistence: [browserLocalPersistence, indexedDBLocalPersistence, inMemoryPersistence],
+  persistence: [indexedDBLocalPersistence, browserLocalPersistence, inMemoryPersistence],
   popupRedirectResolver: browserPopupRedirectResolver
 });
 const db = getFirestore(app);
 
-// The configured persistence order deliberately favors durable browser-local storage.
+// The configured persistence order deliberately favors durable IndexedDB storage.
 export { app, appCheck, appCheckError, appCheckSkippedReason, auth, db };
