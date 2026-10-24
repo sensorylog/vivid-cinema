@@ -17,7 +17,8 @@ test("Make Vivid Yours is recorded once locally and synced to the signed-in acco
   assert.match(intelligence, /remoteOnboarding\?\.shownAt\|\|remoteOnboarding\?\.completed\|\|remoteOnboarding\?\.dismissed/);
   assert.match(intelligence, /cloud\(\["taste","profile"\],\{onboarding:s\.onboarding\}\)/);
   assert.match(home, /markColdStartShown\(\);/);
-  assert.match(home, /await startIntelligenceSync\(\)/);\n  assert.doesNotMatch(home, /Promise\.race\(\[\s*startIntelligenceSync\(\)/);
+  assert.match(home, /await startIntelligenceSync\(\)/);
+  assert.doesNotMatch(home, /Promise\.race\(\[\s*startIntelligenceSync\(\)/);
 });
 
 test("Firebase auth explicitly prefers durable persistence and waits for restored sessions", async () => {
@@ -33,6 +34,8 @@ test("Firebase auth explicitly prefers durable persistence and waits for restore
 
 test("Electron binds the app window to the stable default persistent session", async () => {
   const main = await read("desktop/main.cjs");
-  assert.match(main, /webPreferences:\s*\{ session: session\.defaultSession/);\n  assert.match(main, /LOCAL_SERVER_PORT = 43821/);\n  assert.match(main, /localServer\.listen\(LOCAL_SERVER_PORT, "localhost", resolve\)/);
+  assert.match(main, /webPreferences:\s*\{ session: session\.defaultSession/);
+  assert.match(main, /LOCAL_SERVER_PORT = 43821/);
+  assert.match(main, /localServer\.listen\(LOCAL_SERVER_PORT, "localhost", resolve\)/);
   assert.doesNotMatch(main, /clearStorageData\(/);
 });
