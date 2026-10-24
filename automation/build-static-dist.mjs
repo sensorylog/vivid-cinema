@@ -72,7 +72,16 @@ async function addNativeEnhancements(directory) {
         '<link rel="stylesheet" href="/styles/vivid-native-app.css">'
       ].join("");
       html = html.replace("</head>", enhancement + "</head>");
-      await writeFile(target, html, "utf8");
+    }
+    if (process.env.VIVID_ANDROID_VERSION && process.env.VIVID_ANDROID_BUILD && !html.includes('id="vivid-android-build-info"')) {
+      const version = JSON.stringify(String(process.env.VIVID_ANDROID_VERSION));
+      const build = Number(process.env.VIVID_ANDROID_BUILD);
+      const builtAt = JSON.stringify(String(process.env.VIVID_ANDROID_BUILT_AT || new Date().toISOString()));
+      if (!Number.isSafeInteger(build) || build < 1) throw new Error("VIVID_ANDROID_BUILD must be a positive integer.");
+      const buildInfo = '<script id="vivid-android-build-info">window.VIVID_ANDROID_BUILD_INFO={version:' + version + ',build:' + build + ',builtAt:' + builtAt + '};</script>';
+      html = html.replace("</head>", buildInfo + '<script type="module" src="/scripts/android-updater.js"></script></head>');
+    }
+    await writeFile(target, html, "utf8");
     }
   }
 }
