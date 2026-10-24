@@ -54,3 +54,16 @@ The workflow intentionally fails early when signing secrets are missing. No Fire
 ### Moving from the current debug APK to the first signed release
 
 Android treats a differently signed APK as a different publisher. The existing CI APK is debug-signed, so the first production-signed APK may not install as an in-place update over a previously installed debug APK. Back up anything important first; uninstalling the debug build can clear app-local data. After the first signed release is installed, keep using the same production keystore for every subsequent update.
+
+
+## Automatic Android updates while production signing is deferred
+
+The current no-production-signing path uses a **debug APK**. The Android debug workflow builds it on pushes to `main` and on published GitHub releases, then attaches the newest versioned APK to the latest release. The downloads page detects that asset automatically.
+
+The bundled app checks the latest GitHub release for a newer Android build. When one is available, it displays an **Update Vivid Cinema** notice. Tapping **Download & Install** uses Android's download manager and opens the system package installer; Android may ask the user to allow Vivid Cinema to install apps from this source and to confirm installation.
+
+To make in-place debug updates possible without manual signing setup, the workflow reuses a dedicated **debug-only** keystore stored as a GitHub release asset. This is not a production signing key and must never be promoted as one. The key is public because it is distributed with the debug build; use this path only for testing and early distribution. Production release signing should use a separate private keystore when ready.
+
+**One-time transition note:** APKs produced by older workflow runs used each runner's temporary debug key. If one of those builds is already installed, Android may reject the first APK produced by the stable-key workflow as an update. Uninstall that old build once, then install the new APK. After that, future builds from this workflow reuse the same debug key and can update in place. Uninstalling may clear app-local data, so back up anything important first.
+
+This workflow does not require Firebase Cloud Functions, a Blaze plan, or manually configured Android signing secrets. It does not publish to Google Play.
