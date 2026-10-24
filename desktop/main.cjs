@@ -75,6 +75,8 @@ let localOrigin;
 const HOSTED_APP_URL = "https://vivid-cinema.pages.dev/home.html";
 const HOSTED_APP_ORIGIN = new URL(HOSTED_APP_URL).origin;
 const HOSTED_LOAD_TIMEOUT_MS = 12000;
+// Keep the offline fallback on one origin so Firebase Auth and onboarding storage survive relaunches.
+const LOCAL_SERVER_PORT = 43821;
 const supportsOneClickUpdates = app.isPackaged && process.platform === "win32" &&
   !process.env.PORTABLE_EXECUTABLE_FILE && !process.env.PORTABLE_EXECUTABLE_DIR;
 const LOADING_HTML = `<!doctype html>
@@ -94,7 +96,7 @@ async function startLocalServer() {
   localServer = createLocalServer(appRoot);
   await new Promise((resolve, reject) => {
     localServer.once("error", reject);
-    localServer.listen(0, "localhost", resolve);
+    localServer.listen(LOCAL_SERVER_PORT, "localhost", resolve);
   });
   const address = localServer.address();
   if (!address || typeof address === "string") throw new Error("Unable to start local app server");
