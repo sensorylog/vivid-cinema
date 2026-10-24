@@ -66,7 +66,7 @@ async function checkForAndroidUpdate() {
     const assets = Array.isArray(release.assets) ? release.assets : [];
     const apk = assets.find(asset => asset.name === "Vivid-Cinema-Android.apk");
     const metadata = assets.map(asset => {
-      const match = /^Vivid-Cinema-Android-build-(\\d+)\\.json$/i.exec(asset.name || "");
+      const match = /^Vivid-Cinema-Android-build-(\d+)\.json$/i.exec(asset.name || "");
       return match ? { ...asset, build: Number(match[1]) } : null;
     }).filter(Boolean).sort((a, b) => b.build - a.build)[0];
 
