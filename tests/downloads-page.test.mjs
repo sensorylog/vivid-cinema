@@ -20,8 +20,16 @@ test("downloads page resolves current assets from the latest GitHub release", ()
   assert.match(script, /Vivid-Cinema-Portable-/);
   assert.match(script, /Vivid-Cinema-Android/);
   assert.match(script, /browser_download_url/);
-  assert.match(script, /View Android release assets/);
   assert.match(script, /release\.html_url \|\| RELEASE_PAGE/);
+});
+
+test("download buttons have direct file fallbacks and wait for release lookup before navigating", () => {
+  assert.match(script, /releases\/latest\/download\/Vivid-Cinema-Android\.apk/);
+  assert.match(script, /releases\/latest\/download\/Vivid-Cinema-Setup-1\.0\.22\.exe/);
+  assert.match(script, /releases\/latest\/download\/Vivid-Cinema-Portable-1\.0\.22\.exe/);
+  assert.match(script, /await releaseReady/);
+  assert.match(script, /window\.location\.assign\(link\.href\)/);
+  assert.match(script, /Keep direct download URLs usable during GitHub API outages/);
 });
 
 test("downloads page has responsive and keyboard-focus styles", () => {
