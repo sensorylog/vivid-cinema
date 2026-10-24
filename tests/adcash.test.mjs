@@ -11,9 +11,12 @@ test("Adcash ads are disabled from the shared app shell and service worker", asy
   const serviceWorker = await readFile(path.join(root, "service-worker.js"), "utf8");
   const headers = await readFile(path.join(root, "_headers"), "utf8");
   const firebase = await readFile(path.join(root, "firebase.json"), "utf8");
+  const landing = await readFile(path.join(root, "index.html"), "utf8");
 
   assert.doesNotMatch(loader, /import ["']\.\/adcash\.js["']/);
+  assert.doesNotMatch(landing, /adcash|acscdn|runAutoTag/i);
   assert.doesNotMatch(serviceWorker, /scripts\/adcash\.js/);
+  assert.match(serviceWorker, /vivid-cinema-shell-v249/);
   assert.doesNotMatch(headers, /acscdn\.com/i);
   assert.doesNotMatch(firebase, /acscdn\.com/i);
 });
