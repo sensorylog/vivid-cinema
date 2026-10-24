@@ -12,6 +12,8 @@ test("provider shelves retry the US catalogue when the selected region has no ti
   assert.match(source, /async function providerDiscover\(providerId, type, page = 1, region = getProviderCountry\(\)\)/);
   assert.match(source, /let items = await loadRegion\(region\)/);
   assert.match(source, /if \(!items\.length && region !== "US"\)\s*\{\s*items = await loadRegion\("US"\)/);
+  assert.match(source, /paramountPlus: \\[2303, 2304, 2616, 531, 582, 633, 1853\\]/);
+  assert.match(source, /Array\\.isArray\\(providerId\\).*join\\("\\\\|"\\)/);
   assert.match(source, /if \(!fulfilled\.length\)\s*\{\s*throw results\.find\(result => result\.status === "rejected"\)/);
 });
 

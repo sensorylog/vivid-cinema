@@ -729,7 +729,7 @@ export function collectIntentCandidates(responses = []) {
   return candidates;
 }
 
-export async function getPlotMatchRecommendations(intent = {}, limit = 18) {
+export async function getPlotMatchRecommendations(intent = {}, limit = 18, options = {}) {
   const ownerAtStart = currentProgressOwner();
   const query = String(intent.query || "").trim();
   const requestedType = ["movie", "tv"].includes(intent.mediaType) ? intent.mediaType : "all";
@@ -741,13 +741,15 @@ export async function getPlotMatchRecommendations(intent = {}, limit = 18) {
     available: false,
     message: "Gemini is unavailable right now; local clue extraction is still active."
   };
-  try {
-    const { getRecallClues } = await import("./firebase-ai.js");
-    recallResult = await getRecallClues(query, localClues);
-  } catch (error) {
-    // A missing SDK, disabled AI Logic service, or App Check failure must not
-    // prevent the existing local Vivid Recall search from working.
-    console.warn("Vivid Recall AI setup is not ready; keeping local matching.", error);
+  if (!options.localOnly) {
+    try {
+      const { getRecallClues } = await import("./firebase-ai.js");
+      recallResult = await getRecallClues(query, localClues);
+    } catch (error) {
+      // A missing SDK, disabled AI Logic service, or App Check failure must not
+      // prevent the existing local Vivid Recall search from working.
+      console.warn("Vivid Recall AI setup is not ready; keeping local matching.", error);
+    }
   }
   if (currentProgressOwner() !== ownerAtStart) return [];
   const plotClues = Array.isArray(recallResult?.clues) && recallResult.clues.length
