@@ -108,7 +108,7 @@ async function startLocalServer() {
       localOrigin = "http://localhost:" + port;
       return;
     } catch (error) {
-      candidate.close();
+      candidate.removeAllListeners();
       if (error?.code !== "EADDRINUSE") throw error;
       lastError = error;
     }
