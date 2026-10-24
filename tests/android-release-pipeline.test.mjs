@@ -12,7 +12,8 @@ const [workflow, signer, docs] = await Promise.all([
   readFile(new URL("../ANDROID_BUILD.md", import.meta.url), "utf8")
 ]);
 
-test("signed Android release is manual and requires repository signing secrets", () => {
+test("signed Android release publishes on GitHub release and can be run manually", () => {
+  assert.match(workflow, /release:\s*\n\s*types: \[published\]/);
   assert.match(workflow, /workflow_dispatch:/);
   assert.match(workflow, /ANDROID_KEYSTORE_BASE64/);
   assert.match(workflow, /ANDROID_KEYSTORE_PASSWORD/);
@@ -21,6 +22,8 @@ test("signed Android release is manual and requires repository signing secrets",
   assert.match(workflow, /assembleRelease/);
   assert.match(workflow, /apksigner.*verify/);
   assert.match(workflow, /publish_to_github_release/);
+  assert.match(workflow, /github\.event_name == 'release' \|\| inputs\.publish_to_github_release/);
+  assert.match(workflow, /Vivid-Cinema-Android\.apk/);
 });
 
 test("release signer reads credentials only from environment and never writes secrets into source", () => {
