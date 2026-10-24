@@ -12,8 +12,8 @@ const [workflow, signer, docs] = await Promise.all([
   readFile(new URL("../ANDROID_BUILD.md", import.meta.url), "utf8")
 ]);
 
-test("signed Android release publishes on GitHub release and can be run manually", () => {
-  assert.match(workflow, /release:\s*\n\s*types: \[published\]/);
+test("production-signed Android release remains manual until signing is configured", () => {
+  assert.doesNotMatch(workflow, /release:\s*\n\s*types: \[published\]/);
   assert.match(workflow, /workflow_dispatch:/);
   assert.match(workflow, /ANDROID_KEYSTORE_BASE64/);
   assert.match(workflow, /ANDROID_KEYSTORE_PASSWORD/);
