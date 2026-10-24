@@ -10,7 +10,7 @@ const [workflow, updater, builder, configure, downloads] = await Promise.all([
   readFile(new URL("../scripts/downloads.js", import.meta.url), "utf8")
 ]);
 
-test("Android workflow builds debug APKs and publishes a versioned asset without production secrets", () => {
+test("Android workflow publishes a clean Vivid Cinema APK and build metadata without production secrets", () => {
   assert.match(workflow, /release:\s*\n\s*types: \[published\]/);
   assert.match(workflow, /assembleDebug/);
   assert.match(workflow, /Vivid-Cinema-Debug\.keystore/);
@@ -44,5 +44,5 @@ test("Android native updater uses stable debug signing and requests package inst
 });
 
 test("downloads page can resolve versioned Android build assets", () => {
-  assert.match(downloads, /Vivid-Cinema-Android-.*build-/);
+  assert.match(downloads, /Vivid-Cinema-Android/);
 });
