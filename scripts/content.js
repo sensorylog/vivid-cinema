@@ -39,7 +39,7 @@ async function providerHome(providerId) {
   }
   // Retry Paramount+ plan IDs individually when the combined provider query is empty.
   if (!items.length && Array.isArray(providerId)) {
-    const fallbackIds = providerId.filter(id => [2303, 2304, 2616, 531].includes(Number(id)));
+    const fallbackIds = providerId.map(Number);
     const results = await Promise.allSettled(fallbackIds.map(async id => {
       const [movies, tv] = await Promise.all([
         providerDiscover(id, "movie", 1, "US"),
