@@ -13,7 +13,7 @@ test("provider shelves retry the US catalogue when the selected region has no ti
   assert.match(source, /let items = \[\]/);
   assert.match(source, /try \{ items = await loadRegion\(region\); \}/);
   assert.match(source, /if \(!items\.length && region !== "US"\)/);
-  assert.match(source, /providerId\.filter\(id => \[2303, 2304, 2616, 531\]/);
+  assert.match(source, /const fallbackIds = providerId\.map\(Number\)/);
   assert.match(source, /providerDiscover\(id, "movie", 1, "US"\)/);
   assert.match(source, /paramountPlus: \[2303, 2304, 2616, 531, 582, 633, 1853\]/);
   assert.ok(source.includes('Array.isArray(providerId) ? providerId : [providerId]'));
