@@ -17,7 +17,7 @@ test("Android workflow publishes a cleanly named APK and build metadata without 
   assert.match(workflow, /release:\s*\n\s*types: \[published\]/);
   assert.match(workflow, /assembleDebug/);
   assert.match(workflow, /apk_name="Vivid-Cinema-Android\.apk"/);
-  assert.match(workflow, /Vivid-Cinema-Android-build\.json/);
+  assert.match(workflow, /Vivid-Cinema-Android-build-/);
   assert.match(workflow, /gh release upload/);
   assert.match(workflow, /Vivid-Cinema-Debug\.keystore/);
   assert.doesNotMatch(workflow, /ANDROID_KEYSTORE_BASE64|ANDROID_KEYSTORE_PASSWORD/);
@@ -31,7 +31,7 @@ test("Android bundle embeds build metadata and loads the updater", () => {
 });
 
 test("updater compares remote metadata and installs the cleanly named APK", () => {
-  assert.match(updater, /Vivid-Cinema-Android-build\.json/);
+  assert.match(updater, /Vivid-Cinema-Android-build-/);
   assert.match(updater, /Vivid-Cinema-Android\.apk/);
   assert.match(updater, /remoteBuild <= Number\(local\.build/);
   assert.match(updater, /downloadAndInstall\(\{ url, version \}\)/);
