@@ -153,7 +153,7 @@ test("mascot video retries muted inline autoplay when ready and visible", () => 
 
 test("Home loads the current audit stylesheet once, without a duplicate cache-busting request", () => {
   const home = read("../home.html");
-  const references = [...home.matchAll(/<link\\b[^>]*href=["']([^"']*vivid-audit-fixes\\.css(?:\\?[^"']*)?)["'][^>]*>/g)]
+  const references = [...home.matchAll(/<link\b[^>]*href=["']([^"']*vivid-audit-fixes\.css(?:\?[^"']*)?)["'][^>]*>/g)]
     .map((match) => match[1]);
   assert.deepEqual(references, ["styles/vivid-audit-fixes.css?v=editorial-v2"]);
 });
