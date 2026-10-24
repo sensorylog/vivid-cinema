@@ -35,6 +35,8 @@ test("Firebase auth explicitly prefers durable persistence and waits for restore
 test("Electron binds the app window to the stable default persistent session", async () => {
   const main = await read("desktop/main.cjs");
   assert.match(main, /webPreferences:\s*\{ session: session\.defaultSession/);
+  assert.match(main, /session\.defaultSession\.setPermissionRequestHandler\(/);
+  assert.doesNotMatch(main, /clearStorageData\(/);
   assert.match(main, /LOCAL_SERVER_PORT = 43821/);
   assert.match(main, /for \(let offset = 0; offset < 5; offset \+= 1\)/);
   assert.match(main, /candidate\.listen\(port, "localhost", resolve\)/);

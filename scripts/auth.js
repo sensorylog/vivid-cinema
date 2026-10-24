@@ -1,6 +1,8 @@
 import { auth, db } from "./firebase.js?v=20261016-auth-runtime-audit2";
 import {
   createUserWithEmailAndPassword,
+  browserLocalPersistence,
+  setPersistence,
   GoogleAuthProvider,
   sendPasswordResetEmail,
   signInWithEmailAndPassword,
@@ -72,7 +74,7 @@ function withTimeout(promise,ms,label){
   ]);
 }
 function friendlyError(error){
-  const messages={"auth/internal-error":"Google sign-in could not finish in this browser. Please try again.","auth/web-storage-unsupported":"This browser is blocking secure sign-in storage. Please allow site storage for Vivid Cinema and try again.","auth/cancelled-popup-request":"Another Google sign-in is already in progress. Please try again.","auth/popup-closed-by-user":"Google sign-in was cancelled.","auth/email-already-in-use":"An account already exists for this email.","auth/invalid-email":"Please enter a valid email address.","auth/weak-password":"Choose a stronger password.","auth/invalid-credential":"Email or password is incorrect.","auth/user-disabled":"This account has been disabled.","auth/too-many-requests":"Too many attempts. Please wait and try again.","auth/popup-blocked":"Your browser blocked the Google sign-in window. Allow pop-ups for Vivid Cinema, then try again.","auth/account-exists-with-different-credential":"An account already exists with a different sign-in method.","auth/network-request-failed":"Connection problem. Check your internet connection and try again.","auth/requires-recent-login":"For security, please sign in again and retry.","auth/timeout":"Firebase sign-in is taking too long. Check your connection and try again.","vivid/rate-limited":"Please wait a minute before requesting another verification email.","vivid/missing-user":"Please sign in and try again."};
+  const messages={"auth/internal-error":"Google sign-in could not finish in this browser. Please try again.","auth/web-storage-unsupported":"This browser is blocking secure sign-in storage. Please allow site storage for Vivid Cinema and try again.","auth/unsupported-persistence-type":"Vivid Cinema could not save your Windows login session. Check that app storage is enabled, then restart and try again.","auth/cancelled-popup-request":"Another Google sign-in is already in progress. Please try again.","auth/popup-closed-by-user":"Google sign-in was cancelled.","auth/email-already-in-use":"An account already exists for this email.","auth/invalid-email":"Please enter a valid email address.","auth/weak-password":"Choose a stronger password.","auth/invalid-credential":"Email or password is incorrect.","auth/user-disabled":"This account has been disabled.","auth/too-many-requests":"Too many attempts. Please wait and try again.","auth/popup-blocked":"Your browser blocked the Google sign-in window. Allow pop-ups for Vivid Cinema, then try again.","auth/account-exists-with-different-credential":"An account already exists with a different sign-in method.","auth/network-request-failed":"Connection problem. Check your internet connection and try again.","auth/requires-recent-login":"For security, please sign in again and retry.","auth/timeout":"Firebase sign-in is taking too long. Check your connection and try again.","vivid/rate-limited":"Please wait a minute before requesting another verification email.","vivid/missing-user":"Please sign in and try again."};
   if(error?.code==="auth/unauthorized-domain") return "This Vivid domain is not authorized in Firebase Authentication.";
   if(error?.code==="auth/operation-not-allowed") return "This sign-in method is disabled in Firebase Authentication.";
   if(error?.code==="auth/api-key-not-valid" || error?.code==="auth/invalid-api-key") return "Firebase rejected this app's API key. Check the Firebase web app configuration.";
@@ -118,7 +120,16 @@ async function beginGoogleRedirect(provider){
   markGoogleRedirectPending();
   await signInWithRedirect(auth,provider);
 }
+async function ensureDurableDesktopAuthPersistence(){
+  // Firebase can fall back to in-memory auth when browser storage is unavailable.
+  // On Windows Electron, explicitly require localStorage-backed persistence so a
+  // successful login is not silently lost when the desktop process exits or updates.
+  if(/Electron/i.test(navigator.userAgent)){
+    await setPersistence(auth,browserLocalPersistence);
+  }
+}
 async function googleSignIn(){
+  await ensureDurableDesktopAuthPersistence();
   const provider=new GoogleAuthProvider();
   provider.setCustomParameters({prompt:"select_account"});
 
@@ -219,6 +230,7 @@ loginForm?.addEventListener("submit",async(event)=>{
   const email=document.getElementById("login-email")?.value.trim()||"",password=document.getElementById("login-password")?.value||"",button=loginForm.querySelector("button[type=submit]");
   button.disabled=true;showMessage("Signing in…",true);
   try{
+    await ensureDurableDesktopAuthPersistence();
     const credential=await withTimeout(signInWithEmailAndPassword(auth,email,password),15000,"Email sign-in timed out.");
     if(!credential.user.emailVerified){await signOut(auth);showMessage("Please verify your email before signing in. Check your inbox.");button.disabled=false;return;}
     void startLibrarySync();
