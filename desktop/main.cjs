@@ -91,6 +91,11 @@ p{margin:18px 0 22px;color:#9ca6bb;font-size:14px;letter-spacing:.02em}
 @media(prefers-reduced-motion:reduce){.track span{animation:none}}
 </style></head><body><main role="status" aria-live="polite"><div class="brand">Vivid<span>Cinema</span></div><p>Preparing your cinema experience…</p><div class="track" aria-hidden="true"><span></span></div></main></body></html>`;
 const LOADING_URL = "data:text/html;charset=utf-8," + encodeURIComponent(LOADING_HTML);
+const RECOVERY_HTML = `<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Reconnect · Vivid Cinema</title>
+<style>*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:#050608;color:#f7f8fc;font-family:Segoe UI,system-ui,sans-serif}body{min-height:100vh;display:grid;place-items:center;text-align:center}main{max-width:520px;padding:32px}.brand{font-size:34px;font-weight:750;letter-spacing:-1px}.brand span{font-weight:400;color:#a8b2c7}p{color:#aab3c5;line-height:1.6}a{display:inline-block;margin:14px 6px 0;padding:12px 20px;border-radius:12px;background:#7565ff;color:white;text-decoration:none;font-weight:650}a.secondary{background:#252a3b}</style></head>
+<body><main role="status"><div class="brand">Vivid<span>Cinema</span></div><h1>Let's reconnect</h1><p>A page didn't load correctly. Your account data has not been cleared. Check your connection, then retry Vivid Cinema.</p><a href="https://vivid-cinema.pages.dev/home.html">Retry Vivid Cinema</a><!--LOCAL_RETRY_LINK--></main></body></html>`;
+const RECOVERY_URL = "data:text/html;charset=utf-8," + encodeURIComponent(RECOVERY_HTML);
 
 async function startLocalServer() {
   // Prefer the same origin every launch. Try a small stable range only if another
@@ -199,6 +204,9 @@ function createWindow() {
   let localFallbackStarted = false;
   let hostedAppLoaded = false;
   let hostedLoadStarted = false;
+  let navigationRecoveryInProgress = false;
+  let recoveryPageShown = false;
+  let localAppLoaded = false;
   let hostedLoadTimeout;
   const clearHostedLoadTimeout = () => {
     if (hostedLoadTimeout) {
@@ -216,10 +224,45 @@ function createWindow() {
   win.webContents.on("did-finish-load", () => {
     let loadedOrigin;
     try { loadedOrigin = new URL(win.webContents.getURL()).origin; } catch { return; }
-    if (loadedOrigin !== HOSTED_APP_ORIGIN) return;
-    hostedAppLoaded = true;
+    const isHostedApp = loadedOrigin === HOSTED_APP_ORIGIN;
+    const isLocalApp = Boolean(localOrigin && loadedOrigin === new URL(localOrigin).origin);
+    if (!isHostedApp && !isLocalApp) return;
+    if (isHostedApp) hostedAppLoaded = true;
+    if (isLocalApp) localAppLoaded = true;
+    navigationRecoveryInProgress = false;
+    recoveryPageShown = false;
     clearHostedLoadTimeout();
   });
+
+  const showAppRecoveryPage = reason => {
+    if (recoveryPageShown || win.isDestroyed()) return;
+    recoveryPageShown = true;
+    navigationRecoveryInProgress = false;
+    console.error("Vivid Cinema could not recover an app page navigation:", reason);
+    const localRetryLink = localOrigin
+      ? '<a class="secondary" href="' + localOrigin + '/home.html">Try offline copy</a>'
+      : "";
+    const recoveryHtml = RECOVERY_HTML.replace("<!--LOCAL_RETRY_LINK-->", localRetryLink);
+    const recoveryUrl = localRetryLink
+      ? "data:text/html;charset=utf-8," + encodeURIComponent(recoveryHtml)
+      : RECOVERY_URL;
+    void win.loadURL(recoveryUrl).catch(error => {
+      console.error("Vivid Cinema recovery screen failed:", error?.message || error);
+    });
+  };
+  const recoverAppNavigation = (retryUrl, reason) => {
+    if (navigationRecoveryInProgress) {
+      showAppRecoveryPage(reason);
+      return;
+    }
+    navigationRecoveryInProgress = true;
+    recoveryPageShown = false;
+    console.warn("Vivid Cinema app page navigation failed; retrying its existing origin:", reason);
+    void win.loadURL(retryUrl).catch(error => {
+      showAppRecoveryPage(error?.message || reason);
+    });
+  };
+
   win.once("ready-to-show", () => {
     win.setFullScreen(true);
     win.show();
@@ -232,12 +275,36 @@ function createWindow() {
     void win.loadURL(HOSTED_APP_URL).catch(error => fallbackToLocal(error?.message || "Cloudflare Pages navigation failed"));
   });
   win.webContents.on("did-fail-load", (_event, errorCode, errorDescription, validatedURL, isMainFrame) => {
-    if (!isMainFrame || localFallbackStarted || hostedAppLoaded || errorCode === -3) return;
+    if (!isMainFrame || errorCode === -3) return;
     let failedOrigin;
     try { failedOrigin = new URL(validatedURL).origin; } catch { return; }
-    if (failedOrigin === HOSTED_APP_ORIGIN) {
-      fallbackToLocal(errorCode + " " + errorDescription);
+    const isHostedApp = failedOrigin === HOSTED_APP_ORIGIN;
+    const isLocalApp = Boolean(localOrigin && failedOrigin === new URL(localOrigin).origin);
+    if (!isHostedApp && !isLocalApp) return;
+
+    const reason = errorCode + " " + errorDescription;
+    if (isHostedApp && !hostedAppLoaded) {
+      if (!localFallbackStarted) fallbackToLocal(reason);
+      return;
     }
+
+    // Recover failures after startup on either trusted app origin. The old
+    // handler ignored all post-startup failures, leaving a black window.
+    const retryUrl = isHostedApp ? HOSTED_APP_URL : localOrigin + "/home.html";
+    recoverAppNavigation(retryUrl, reason);
+  });
+  win.webContents.on("render-process-gone", (_event, details) => {
+    const reason = "renderer process exited (" + (details?.reason || "unknown reason") + ")";
+    if (hostedAppLoaded) {
+      recoverAppNavigation(HOSTED_APP_URL, reason);
+      return;
+    }
+    if (localOrigin && (localAppLoaded || localFallbackStarted)) {
+      recoverAppNavigation(localOrigin + "/home.html", reason);
+      return;
+    }
+    if (!localFallbackStarted) fallbackToLocal(reason);
+    else showAppRecoveryPage(reason);
   });
 
   win.on("closed", () => {
