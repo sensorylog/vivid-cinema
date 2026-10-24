@@ -1,13 +1,15 @@
 name: Android signed release APK
 
 on:
+  release:
+    types: [published]
   workflow_dispatch:
     inputs:
       publish_to_github_release:
         description: Upload the signed APK to the existing matching GitHub release
         required: true
         type: boolean
-        default: false
+        default: true
 
 permissions:
   contents: write
@@ -84,7 +86,7 @@ jobs:
           cd android
           ./gradlew assembleRelease
           mkdir -p ../release-output
-          cp app/build/outputs/apk/release/app-release.apk ../release-output/Vivid-Cinema-Android-$(node -p "require('../package.json').version").apk
+          cp app/build/outputs/apk/release/app-release.apk ../release-output/Vivid-Cinema-Android.apk
 
       - name: Verify APK signature and package
         shell: bash
@@ -108,13 +110,20 @@ jobs:
           retention-days: 90
 
       - name: Publish APK to matching GitHub release
-        if: inputs.publish_to_github_release
+        if: github.event_name == 'release' || inputs.publish_to_github_release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
           version="$(node -p "require('./package.json').version")"
           tag="v$version"
+          if [ "${GITHUB_EVENT_NAME}" = "release" ]; then
+            event_tag="$(node -e 'const fs=require("fs"); const e=JSON.parse(fs.readFileSync(process.env.GITHUB_EVENT_PATH,"utf8")); process.stdout.write(e.release.tag_name)')"
+            if [ "$event_tag" != "$tag" ]; then
+              echo "::error::Release tag $event_tag does not match package version tag $tag."
+              exit 1
+            fi
+          fi
           gh release view "$tag" >/dev/null
-          gh release upload "$tag" release-output/*.apk --clobber
-          gh release view "$tag" --json assets --jq '.assets[].name' | grep -Fx "Vivid-Cinema-Android-$version.apk"
+          gh release upload "$tag" release-output/Vivid-Cinema-Android.apk --clobber
+          gh release view "$tag" --json assets --jq '.assets[].name' | grep -Fx "Vivid-Cinema-Android.apk"
