@@ -6,16 +6,20 @@ on:
       - main
       - feat/windows-desktop-electron
       - android-capacitor-foundation
+  release:
+    types: [published]
   pull_request:
     paths:
       - "capacitor.config.json"
       - "service-worker.js"
       - "scripts/app-shell.js"
+      - "scripts/android-updater.js"
       - "_headers"
       - "firebase.json"
       - "automation/build-static-dist.mjs"
       - "automation/build-netlify-dist.mjs"
       - "automation/apply-android-icon.mjs"
+      - "automation/configure-android-debug-build.mjs"
       - "styles/vivid-native-app.css"
       - "scripts/platform-origin-redirect.js"
       - "index.html"
@@ -23,11 +27,12 @@ on:
       - "for-you.html"
       - "package.json"
       - "tests/android-native-polish.test.mjs"
+      - "tests/android-auto-update.test.mjs"
       - ".github/workflows/android-debug-apk.yml"
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build-debug-apk:
@@ -46,7 +51,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: 21
+          java-version: "21"
 
       - name: Set up Android SDK
         uses: android-actions/setup-android@v4
@@ -56,13 +61,42 @@ jobs:
           ELECTRON_SKIP_BINARY_DOWNLOAD: "1"
         run: npm ci --no-audit --no-fund
 
+      - name: Set Android app version metadata
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="$(node -p "JSON.parse(require('fs').readFileSync('package.json','utf8')).version")"
+          echo "VIVID_ANDROID_VERSION=$version" >> "$GITHUB_ENV"
+          echo "VIVID_ANDROID_BUILD=$GITHUB_RUN_NUMBER" >> "$GITHUB_ENV"
+          echo "VIVID_ANDROID_BUILT_AT=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_ENV"
+
       - name: Run tests
         run: |
-          node --test tests/auth-verification.test.mjs tests/service-worker.test.mjs tests/adcash.test.mjs tests/android-native-polish.test.mjs tests/android-icon.test.mjs
+          node --test tests/auth-verification.test.mjs tests/service-worker.test.mjs tests/adcash.test.mjs tests/android-native-polish.test.mjs tests/android-icon.test.mjs tests/android-auto-update.test.mjs
           npm run check:syntax
 
       - name: Generate Android project
         run: npx cap add android
+
+      - name: Configure stable debug signing and Android updater
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$HOME/.android" "$RUNNER_TEMP/vivid-android-key"
+          # Reuse the debug-only key saved on an earlier release so Android accepts
+          # in-place updates. If the current release is new, locate the key on any
+          # prior release before generating a first-run development key.
+          key_tag="$(gh api "repos/$GITHUB_REPOSITORY/releases?per_page=100" --jq '.[] | select(any(.assets[]?; .name == "Vivid-Cinema-Debug.keystore")) | .tag_name' | head -n 1 || true)"
+          if [ -n "$key_tag" ]; then
+            gh release download "$key_tag" --repo "$GITHUB_REPOSITORY" --pattern "Vivid-Cinema-Debug.keystore" --dir "$RUNNER_TEMP/vivid-android-key"
+          fi
+          if [ ! -f "$RUNNER_TEMP/vivid-android-key/Vivid-Cinema-Debug.keystore" ]; then
+            keytool -genkeypair -noprompt -keystore "$RUNNER_TEMP/vivid-android-key/Vivid-Cinema-Debug.keystore" -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Vivid Cinema Debug,O=Vivid Cinema,C=GH"
+          fi
+          cp "$RUNNER_TEMP/vivid-android-key/Vivid-Cinema-Debug.keystore" "$HOME/.android/debug.keystore"
+          node automation/configure-android-debug-build.mjs
 
       - name: Bundle local website and sync Capacitor
         run: npm run cap:sync
@@ -72,25 +106,56 @@ jobs:
 
       - name: Build debug APK
         run: |
+          set -euo pipefail
           chmod +x android/gradlew
           cd android
           ./gradlew assembleDebug
+          cd ..
+          mkdir -p release-output
+          apk_name="Vivid-Cinema-Android-$VIVID_ANDROID_VERSION-build-$VIVID_ANDROID_BUILD.apk"
+          cp android/app/build/outputs/apk/debug/app-debug.apk "release-output/$apk_name"
+          apksigner_path="$(find "$ANDROID_HOME/build-tools" -type f -name apksigner -print -quit)"
+          "$apksigner_path" verify --verbose "release-output/$apk_name"
+          aapt_path="$(find "$ANDROID_HOME/build-tools" -type f -name aapt -print -quit)"
+          "$aapt_path" dump badging "release-output/$apk_name" | grep -F "package: name='com.vividcinema.app'"
+          echo "VIVID_ANDROID_APK_NAME=$apk_name" >> "$GITHUB_ENV"
 
       - name: Verify Vivid icon is embedded in the APK
         shell: bash
         run: |
           set -euo pipefail
-          apk="android/app/build/outputs/apk/debug/app-debug.apk"
+          apk="release-output/$VIVID_ANDROID_APK_NAME"
           expected="$(sha256sum icons/vivid-icon-180.png | cut -d ' ' -f 1)"
           actual="$(unzip -p "$apk" res/drawable-nodpi-v4/vivid_icon_foreground.png | sha256sum | cut -d ' ' -f 1)"
           test "$actual" = "$expected" || { echo "APK adaptive icon does not match icons/vivid-icon-180.png"; exit 1; }
           unzip -l "$apk" | grep -q 'res/mipmap-anydpi-v26/ic_launcher.xml'
           echo "Verified: APK adaptive launcher foreground exactly matches the Vivid Cinema icon source."
 
-      - name: Upload debug APK
+      - name: Upload debug APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: vivid-cinema-debug-apk
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          path: release-output/*.apk
           if-no-files-found: error
           retention-days: 14
+
+      - name: Publish latest debug APK for in-app updates
+        if: github.event_name != 'pull_request'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "$GITHUB_EVENT_NAME" = "release" ]; then
+            tag="$(node -e 'const fs=require("fs");const e=JSON.parse(fs.readFileSync(process.env.GITHUB_EVENT_PATH,"utf8"));process.stdout.write(e.release.tag_name)')"
+          else
+            tag="$(gh release view --repo "$GITHUB_REPOSITORY" --json tagName --jq .tagName)"
+          fi
+          gh release view "$tag" --repo "$GITHUB_REPOSITORY" >/dev/null
+          # Keep only the newest versioned APK on the latest release.
+          while IFS= read -r old_asset; do
+            [ -z "$old_asset" ] || gh release delete-asset "$tag" "$old_asset" --repo "$GITHUB_REPOSITORY" --yes
+          done < <(gh release view "$tag" --repo "$GITHUB_REPOSITORY" --json assets --jq '.assets[].name | select(test("^Vivid-Cinema-Android-.*-build-[0-9]+\\.apk$"))')
+          gh release upload "$tag" "release-output/$VIVID_ANDROID_APK_NAME" "$HOME/.android/debug.keystore#Vivid-Cinema-Debug.keystore" --repo "$GITHUB_REPOSITORY" --clobber
+          gh release view "$tag" --repo "$GITHUB_REPOSITORY" --json assets --jq '.assets[].name' | grep -Fx "$VIVID_ANDROID_APK_NAME"
+          echo "Published $VIVID_ANDROID_APK_NAME to $tag."
