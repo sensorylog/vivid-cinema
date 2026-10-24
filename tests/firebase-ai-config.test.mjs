@@ -35,7 +35,7 @@ test("Recall keeps detailed quota and provider errors visible for diagnosis", ()
 });
 
 test("service worker cache version changes with the updated AI modules", () => {
-  assert.match(workerSource, /vivid-cinema-shell-v245/);
+  assert.match(workerSource, /vivid-cinema-shell-v246/);
 });
 
 test("achievement Sparks reuse the existing Recall model and App Check protections", () => {
@@ -65,5 +65,5 @@ test("Recall diagnostics support the deployed Cloudflare Pages origin without we
   assert.match(firebaseSource, /initializeAppCheck/);
   assert.match(firebaseSource, /ReCaptchaEnterpriseProvider/);
   assert.match(firebaseSource, /Allow vivid-cinema\.pages\.dev and vivid-cinema\.web\.app in Firebase App Check/);
-  assert.match(workerSource, /vivid-cinema-shell-v245/);
+  assert.match(workerSource, /vivid-cinema-shell-v246/);
 });
