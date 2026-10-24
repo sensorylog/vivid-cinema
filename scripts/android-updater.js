@@ -65,16 +65,15 @@ async function checkForAndroidUpdate() {
     const release = await response.json();
     const assets = Array.isArray(release.assets) ? release.assets : [];
     const apk = assets.find(asset => asset.name === "Vivid-Cinema-Android.apk");
-    const buildInfoAsset = assets.find(asset => asset.name === "Vivid-Cinema-Android-build.json");
+    const metadata = assets.map(asset => {
+      const match = /^Vivid-Cinema-Android-build-(\\d+)\\.json$/i.exec(asset.name || "");
+      return match ? { ...asset, build: Number(match[1]) } : null;
+    }).filter(Boolean).sort((a, b) => b.build - a.build)[0];
 
-    // Keep the public APK filename simple; the metadata asset identifies its CI build.
-    if (apk?.browser_download_url && buildInfoAsset?.browser_download_url) {
-      const metadataResponse = await fetch(buildInfoAsset.browser_download_url, { cache: "no-store" });
-      if (!metadataResponse.ok) return;
-      const metadata = await metadataResponse.json();
-      const remoteBuild = Number(metadata.build);
-      if (!Number.isSafeInteger(remoteBuild) || remoteBuild <= Number(local.build || 0)) return;
-      createUpdateNotice(String(metadata.version || release.tag_name || local.version), remoteBuild, apk.browser_download_url);
+    // The stable APK filename stays simple; its companion asset name carries the CI build.
+    if (apk?.browser_download_url && metadata && metadata.build > Number(local.build || 0)) {
+      const version = String(release.tag_name || local.version || "latest").replace(/^v/i, "");
+      createUpdateNotice(version, metadata.build, apk.browser_download_url);
       return;
     }
 
