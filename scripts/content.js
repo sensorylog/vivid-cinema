@@ -27,13 +27,36 @@ async function providerHome(providerId) {
     return items;
   };
 
-  let items = await loadRegion(region);
-  // Some services (including Paramount+) have little or no catalogue data in
-  // every supported country. Keep the shelf useful by falling back to the US
-  // catalogue only when the selected region has no results. The UI describes
-  // these as popular provider titles, not a promise of local availability.
+  let items = [];
+  try { items = await loadRegion(region); }
+  catch (error) {
+    if (region === "US") throw error;
+    console.warn("Provider catalogue unavailable in " + region + "; trying US.", error);
+  }
   if (!items.length && region !== "US") {
-    items = await loadRegion("US");
+    try { items = await loadRegion("US"); }
+    catch (error) { console.warn("Provider catalogue unavailable in US.", error); }
+  }
+  // Retry Paramount+ plan IDs individually when the combined provider query is empty.
+  if (!items.length && Array.isArray(providerId)) {
+    const fallbackIds = providerId.filter(id => [2303, 2304, 2616, 531].includes(Number(id)));
+    const results = await Promise.allSettled(fallbackIds.map(async id => {
+      const [movies, tv] = await Promise.all([
+        providerDiscover(id, "movie", 1, "US"),
+        providerDiscover(id, "tv", 1, "US")
+      ]);
+      return { movies: movies?.results || [], tv: tv?.results || [] };
+    }));
+    const unique = new Map();
+    for (const result of results) {
+      if (result.status !== "fulfilled") continue;
+      normalizeResults(result.value.movies, "movie").forEach(item => unique.set("movie:" + item.id, item));
+      normalizeResults(result.value.tv, "tv").forEach(item => unique.set("tv:" + item.id, item));
+    }
+    items = [...unique.values()].sort((a, b) =>
+      Number(b.raw?.popularity || 0) - Number(a.raw?.popularity || 0) ||
+      Number(b.vote_average || 0) - Number(a.vote_average || 0)
+    );
   }
   return { page: 1, total_pages: 1, results: items.slice(0, 20) };
 }
