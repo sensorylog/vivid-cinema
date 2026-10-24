@@ -11,8 +11,8 @@ test("TFLIX-style trending billboard is restored above the unchanged featured-ca
   assert.match(home, /<section id="hero" class="empty" aria-label="Trending today"/);
   assert.match(home, /<div class="vivid-feature-strip">/);
   assert.match(home, /class="vivid-download-promo"/, "the full app homepage has a visible downloads CTA");
-  assert.match(home, /class="vivid-download-promo-link" href="downloads\\.html"/);
-  assert.match(read("../styles/vivid-home.css"), /\\.vivid-download-promo[\\s\\S]*?@media\\(max-width:640px\\)/, "download CTA is styled responsively for mobile");
+  assert.ok(home.includes('class="vivid-download-promo-link" href="downloads.html"'));
+  assert.ok(read("../styles/vivid-home.css").includes("@media(max-width:640px){.vivid-download-promo"), "download CTA is styled responsively for mobile");
   assert.match(home, /<div class="vivid-feature-track" id="feature-track" aria-label="Featured titles carousel"><\/div>/);
   assert.ok(home.indexOf('<section id="hero"') < home.indexOf('<div class="vivid-feature-strip">'));
   const homeCss = read("../styles/vivid-home.css");
