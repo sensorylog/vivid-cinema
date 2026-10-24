@@ -15,7 +15,7 @@ function setDownload(id, url, filename) {
 function setReleaseFallback() {
   setDownload("windows-installer", RELEASE_PAGE, "Windows installer");
   setDownload("windows-portable", RELEASE_PAGE, "Windows portable");
-  setDownload("android-apk", `https://github.com/${OWNER}/${REPO}/releases/latest/download/Vivid-Cinema-Android.apk`, "Android APK");
+  setDownload("android-apk", RELEASE_PAGE, "Android release assets");
 }
 
 function humanSize(bytes) {
