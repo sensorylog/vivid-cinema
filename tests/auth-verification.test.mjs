@@ -29,11 +29,11 @@ test("Google redirect recovery only runs when a redirect was explicitly started"
 });
 
 test("Windows desktop login explicitly selects durable localStorage auth persistence", () => {
-  assert.match(auth, /browserLocalPersistence,\\s*setPersistence,/);
-  assert.match(auth, /async function ensureDurableDesktopAuthPersistence\\(\\)[\\s\\S]*?if\\(\\/Electron\\/i\\.test\\(navigator\\.userAgent\\)\\)\\{\\s*await setPersistence\\(auth,browserLocalPersistence\\);\\s*\\}/);
-  assert.match(auth, /async function googleSignIn\\(\\)\\{\\s*await ensureDurableDesktopAuthPersistence\\(\\);/);
-  assert.match(auth, /await ensureDurableDesktopAuthPersistence\\(\\);\\s*const credential=await withTimeout\\(signInWithEmailAndPassword/);
-  assert.match(auth, /auth\\/unsupported-persistence-type/);
+  assert.match(auth, /browserLocalPersistence,\s*setPersistence,/);
+  assert.match(auth, /async function ensureDurableDesktopAuthPersistence\(\)[\s\S]*?if\(\/Electron\/i\.test\(navigator\.userAgent\)\)\{\s*await setPersistence\(auth,browserLocalPersistence\);\s*\}/);
+  assert.match(auth, /async function googleSignIn\(\)\{\s*await ensureDurableDesktopAuthPersistence\(\);/);
+  assert.match(auth, /await ensureDurableDesktopAuthPersistence\(\);\s*const credential=await withTimeout\(signInWithEmailAndPassword/);
+  assert.match(auth, /auth\/unsupported-persistence-type/);
 });
 
 test("installed PWAs use redirect-based Google sign-in instead of popup flow", () => {
