@@ -707,10 +707,7 @@ document.addEventListener("DOMContentLoaded",()=>{
   void (async()=>{
     const needsColdStart=shouldShowColdStart();
     if(needsColdStart)document.body.classList.add("vivid-onboarding-active");
-    try{await Promise.race([
-      startIntelligenceSync(),
-      new Promise(resolve=>window.setTimeout(resolve,8000))
-    ])}catch{}
+    try{await startIntelligenceSync()}catch{}
     try{
       if(shouldShowColdStart())await maybeShowColdStart();
     }catch{}
