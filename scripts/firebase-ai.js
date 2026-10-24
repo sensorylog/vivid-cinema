@@ -8,7 +8,7 @@ import { app, appCheckError, appCheckSkippedReason } from "./firebase.js";
 
 const RECALL_MODEL = "gemini-3.5-flash-lite";
 const CLUE_TIMEOUT_MS = 12000;
-const CHAT_TIMEOUT_MS = 30000;
+const CHAT_TIMEOUT_MS = typeof navigator !== "undefined" && /Electron\//i.test(navigator.userAgent) ? 12000 : 30000;
 
 let modelPromise = null;
 

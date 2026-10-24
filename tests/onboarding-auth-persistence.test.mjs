@@ -17,7 +17,8 @@ test("Make Vivid Yours is recorded once locally and synced to the signed-in acco
   assert.match(intelligence, /remoteOnboarding\?\.shownAt\|\|remoteOnboarding\?\.completed\|\|remoteOnboarding\?\.dismissed/);
   assert.match(intelligence, /cloud\(\["taste","profile"\],\{onboarding:s\.onboarding\}\)/);
   assert.match(home, /markColdStartShown\(\);/);
-  assert.match(home, /setTimeout\(resolve,8000\)/);
+  assert.match(home, /await startIntelligenceSync\(\)/);
+  assert.doesNotMatch(home, /Promise\.race\(\[\s*startIntelligenceSync\(\)/);
 });
 
 test("Firebase auth explicitly prefers durable persistence and waits for restored sessions", async () => {
@@ -25,7 +26,7 @@ test("Firebase auth explicitly prefers durable persistence and waits for restore
   const navAuth = await read("scripts/nav-auth.js");
   const shell = await read("scripts/app-shell.js");
   assert.match(firebase, /initializeAuth\(app,\s*\{/);
-  assert.match(firebase, /persistence:\s*\[browserLocalPersistence, indexedDBLocalPersistence, inMemoryPersistence\]/);
+  assert.match(firebase, /persistence:\s*\[indexedDBLocalPersistence, browserLocalPersistence, inMemoryPersistence\]/);
   assert.match(firebase, /popupRedirectResolver:\s*browserPopupRedirectResolver/);
   assert.match(navAuth, /await auth\.authStateReady\(\)/);
   assert.match(shell, /await auth\.authStateReady\(\)/);
@@ -34,5 +35,8 @@ test("Firebase auth explicitly prefers durable persistence and waits for restore
 test("Electron binds the app window to the stable default persistent session", async () => {
   const main = await read("desktop/main.cjs");
   assert.match(main, /webPreferences:\s*\{ session: session\.defaultSession/);
+  assert.match(main, /LOCAL_SERVER_PORT = 43821/);
+  assert.match(main, /for \(let offset = 0; offset < 5; offset \+= 1\)/);
+  assert.match(main, /candidate\.listen\(port, "localhost", resolve\)/);
   assert.doesNotMatch(main, /clearStorageData\(/);
 });

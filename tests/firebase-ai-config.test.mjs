@@ -21,7 +21,9 @@ test("Gemini request timeouts attempt to abort the underlying browser request", 
   assert.match(aiSource, /model\.generateContent\(prompt, \{ signal: controller\.signal \}\)/);
   assert.match(aiSource, /controller\.abort\(\)/);
   assert.match(aiSource, /CLUE_TIMEOUT_MS = 12000/);
-  assert.match(aiSource, /CHAT_TIMEOUT_MS = 30000/);
+  assert.match(aiSource, /CHAT_TIMEOUT_MS =/);
+  assert.match(aiSource, /Electron/);
+  assert.ok(aiSource.includes("? 12000 : 30000"));
 });
 
 test("Recall keeps detailed quota and provider errors visible for diagnosis", () => {
@@ -33,7 +35,7 @@ test("Recall keeps detailed quota and provider errors visible for diagnosis", ()
 });
 
 test("service worker cache version changes with the updated AI modules", () => {
-  assert.match(workerSource, /vivid-cinema-shell-v243/);
+  assert.match(workerSource, /vivid-cinema-shell-v244/);
 });
 
 test("achievement Sparks reuse the existing Recall model and App Check protections", () => {
@@ -63,5 +65,5 @@ test("Recall diagnostics support the deployed Cloudflare Pages origin without we
   assert.match(firebaseSource, /initializeAppCheck/);
   assert.match(firebaseSource, /ReCaptchaEnterpriseProvider/);
   assert.match(firebaseSource, /Allow vivid-cinema\.pages\.dev and vivid-cinema\.web\.app in Firebase App Check/);
-  assert.match(workerSource, /vivid-cinema-shell-v243/);
+  assert.match(workerSource, /vivid-cinema-shell-v244/);
 });

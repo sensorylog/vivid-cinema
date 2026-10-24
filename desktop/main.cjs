@@ -75,6 +75,8 @@ let localOrigin;
 const HOSTED_APP_URL = "https://vivid-cinema.pages.dev/home.html";
 const HOSTED_APP_ORIGIN = new URL(HOSTED_APP_URL).origin;
 const HOSTED_LOAD_TIMEOUT_MS = 12000;
+// Keep the offline fallback on one origin so Firebase Auth and onboarding storage survive relaunches.
+const LOCAL_SERVER_PORT = 43821;
 const supportsOneClickUpdates = app.isPackaged && process.platform === "win32" &&
   !process.env.PORTABLE_EXECUTABLE_FILE && !process.env.PORTABLE_EXECUTABLE_DIR;
 const LOADING_HTML = `<!doctype html>
@@ -91,14 +93,27 @@ p{margin:18px 0 22px;color:#9ca6bb;font-size:14px;letter-spacing:.02em}
 const LOADING_URL = "data:text/html;charset=utf-8," + encodeURIComponent(LOADING_HTML);
 
 async function startLocalServer() {
-  localServer = createLocalServer(appRoot);
-  await new Promise((resolve, reject) => {
-    localServer.once("error", reject);
-    localServer.listen(0, "localhost", resolve);
-  });
-  const address = localServer.address();
-  if (!address || typeof address === "string") throw new Error("Unable to start local app server");
-  localOrigin = "http://localhost:" + address.port;
+  // Prefer the same origin every launch. Try a small stable range only if another
+  // local process already owns the preferred port; never choose a random port.
+  let lastError = null;
+  for (let offset = 0; offset < 5; offset += 1) {
+    const port = LOCAL_SERVER_PORT + offset;
+    const candidate = createLocalServer(appRoot);
+    try {
+      await new Promise((resolve, reject) => {
+        candidate.once("error", reject);
+        candidate.listen(port, "localhost", resolve);
+      });
+      localServer = candidate;
+      localOrigin = "http://localhost:" + port;
+      return;
+    } catch (error) {
+      candidate.removeAllListeners();
+      if (error?.code !== "EADDRINUSE") throw error;
+      lastError = error;
+    }
+  }
+  throw lastError || new Error("Unable to start local app server on a stable port");
 }
 
 function installApplicationMenu() { Menu.setApplicationMenu(Menu.buildFromTemplate([{ label: "Vivid Cinema", submenu: [{ label: "About Vivid Cinema", click: async () => dialog.showMessageBox({ title: "About Vivid Cinema", message: "Vivid Cinema", detail: "Version " + app.getVersion() + "\\nA cinematic discovery experience by Axis Vision.", buttons: ["OK"] }) }, { type: "separator" }, { role: "quit", label: "Exit Vivid Cinema" }] }, { label: "View", submenu: [{ role: "reload", label: "Reload", accelerator: "CmdOrCtrl+R" }, { role: "forceReload", label: "Force Reload", accelerator: "CmdOrCtrl+Shift+R" }, { type: "separator" }, { label: "Toggle Full Screen", accelerator: "F11", click: () => { const win = BrowserWindow.getFocusedWindow(); if (win) win.setFullScreen(!win.isFullScreen()); } }, { type: "separator" }, { label: "Zoom In", accelerator: "CmdOrCtrl+Plus", click: () => { const win = BrowserWindow.getFocusedWindow(); if (win) win.webContents.setZoomLevel(win.webContents.getZoomLevel() + 0.5); } }, { label: "Zoom Out", accelerator: "CmdOrCtrl+-", click: () => { const win = BrowserWindow.getFocusedWindow(); if (win) win.webContents.setZoomLevel(win.webContents.getZoomLevel() - 0.5); } }, { label: "Reset Zoom", accelerator: "CmdOrCtrl+0", click: () => { const win = BrowserWindow.getFocusedWindow(); if (win) win.webContents.setZoomLevel(0); } }] }, { label: "Help", submenu: [{ label: "Vivid Cinema Website", click: () => { void shell.openExternal(HOSTED_APP_URL); } }, { label: "Report an Issue", click: () => { void shell.openExternal("https://github.com/sensorylog/vivid-cinema/issues"); } }] }])); }

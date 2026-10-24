@@ -16,7 +16,7 @@ test("desktop packaging is opt-in and preserves existing scripts", () => {
   assert.ok(pkg.scripts["test:rules"]);
 });
 test("Windows installer and portable executable targets use Vivid branding", () => {
-  assert.equal(pkg.version, "1.0.18");
+  assert.equal(pkg.version, "1.0.19");
   assert.ok(pkg.devDependencies.electron);
   assert.ok(pkg.devDependencies["electron-builder"]);
   assert.ok(pkg.dependencies["electron-updater"]);
