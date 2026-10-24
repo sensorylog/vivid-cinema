@@ -26,7 +26,7 @@ test("Firebase auth explicitly prefers durable persistence and waits for restore
   const navAuth = await read("scripts/nav-auth.js");
   const shell = await read("scripts/app-shell.js");
   assert.match(firebase, /initializeAuth\(app,\s*\{/);
-  assert.match(firebase, /persistence:\s*\[browserLocalPersistence, indexedDBLocalPersistence, inMemoryPersistence\]/);
+  assert.match(firebase, /persistence:\s*\[indexedDBLocalPersistence, browserLocalPersistence, inMemoryPersistence\]/);
   assert.match(firebase, /popupRedirectResolver:\s*browserPopupRedirectResolver/);
   assert.match(navAuth, /await auth\.authStateReady\(\)/);
   assert.match(shell, /await auth\.authStateReady\(\)/);
