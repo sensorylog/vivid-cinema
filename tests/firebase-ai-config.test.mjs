@@ -21,7 +21,9 @@ test("Gemini request timeouts attempt to abort the underlying browser request", 
   assert.match(aiSource, /model\.generateContent\(prompt, \{ signal: controller\.signal \}\)/);
   assert.match(aiSource, /controller\.abort\(\)/);
   assert.match(aiSource, /CLUE_TIMEOUT_MS = 12000/);
-  assert.match(aiSource, /CHAT_TIMEOUT_MS =/);\n  assert.match(aiSource, /Electron/);\n  assert.match(aiSource, /\\? 12000 : 30000/);
+  assert.match(aiSource, /CHAT_TIMEOUT_MS =/);
+  assert.match(aiSource, /Electron/);
+  assert.ok(aiSource.includes("? 12000 : 30000"));
 });
 
 test("Recall keeps detailed quota and provider errors visible for diagnosis", () => {
