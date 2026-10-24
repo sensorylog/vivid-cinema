@@ -955,3 +955,15 @@ body[data-vivid-page="home"] .vivid-home-toast[hidden] { display: none; }
 @media (min-width: 900px) {
   body[data-vivid-page="home"] .vivid-home-toast { bottom: 28px; }
 }
+
+
+/* Download CTA belongs to the full app homepage, not only the marketing landing page. */
+.vivid-download-promo{display:flex;align-items:center;justify-content:space-between;gap:22px;width:min(1312px,calc(100% - 2 * var(--vivid-page-gutter,24px)));margin:12px auto 28px;padding:clamp(20px,3vw,30px);box-sizing:border-box;border:1px solid rgba(255,255,255,.13);border-radius:22px;background:radial-gradient(ellipse at 0% 0%,rgba(92,110,255,.13),transparent 55%),linear-gradient(120deg,rgba(255,255,255,.065),rgba(255,255,255,.025));}
+.vivid-download-promo-copy{min-width:0}
+.vivid-download-promo-kicker{display:block;margin-bottom:8px;font-size:10px;font-weight:800;letter-spacing:.16em;color:#aeb8ff}
+.vivid-download-promo-copy h2{margin:0;font-size:clamp(21px,2.6vw,30px);line-height:1.08;letter-spacing:-.045em;color:#f7f8fc}
+.vivid-download-promo-copy p{margin:8px 0 0;max-width:600px;font-size:13px;line-height:1.5;color:#a1a7b4}
+.vivid-download-promo-link{flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:46px;padding:0 17px;border:1px solid rgba(255,255,255,.88);border-radius:13px;background:#f5f7fa;color:#08090b;text-decoration:none;font-size:13px;font-weight:800;white-space:nowrap;transition:transform .18s ease,background .18s ease}
+.vivid-download-promo-link:hover{transform:translateY(-2px);background:#fff}
+.vivid-download-promo-link:focus-visible{outline:2px solid #aeb8ff;outline-offset:4px}
+@media(max-width:640px){.vivid-download-promo{width:calc(100% - 24px);margin:8px auto 22px;padding:19px 17px;align-items:flex-start;flex-direction:column;gap:15px;border-radius:18px}.vivid-download-promo-copy h2{font-size:23px}.vivid-download-promo-copy p{font-size:12px}.vivid-download-promo-link{width:100%;min-height:44px;box-sizing:border-box}}
