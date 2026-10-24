@@ -58,7 +58,7 @@ Android treats a differently signed APK as a different publisher. The existing C
 
 ## Automatic Android updates while production signing is deferred
 
-The current no-production-signing path uses an Android APK signed with a development-only key. The **Android APK Build** workflow builds it on pushes to `main` and on published GitHub releases, then publishes it as `Vivid-Cinema-Android.apk` alongside `Vivid-Cinema-Android-build.json`. The downloads page detects the stable APK asset automatically; the installed app uses the metadata file to check for a newer build.
+The current no-production-signing path uses an Android APK signed with a development-only key. The **Android APK Build** workflow builds it on pushes to `main` and on published GitHub releases, then publishes it as `Vivid-Cinema-Android.apk` alongside a numbered `Vivid-Cinema-Android-build-<build>.json` metadata asset. The downloads page detects the stable APK asset automatically; the installed app uses the metadata file to check for a newer build.
 
 The installed app name is simply **Vivid Cinema** and its launcher icon uses the shared `icons/vivid-icon-180.png` source. The bundled app checks the latest GitHub release metadata for a newer Android build. When one is available, it displays an **Update Vivid Cinema** notice. Tapping **Download & Install** uses Android's download manager and opens the system package installer; Android may ask the user to allow Vivid Cinema to install apps from this source and to confirm installation.
 
