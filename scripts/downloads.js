@@ -2,7 +2,6 @@ const OWNER = "sensorylog";
 const REPO = "vivid-cinema";
 const RELEASE_API = `https://api.github.com/repos/${OWNER}/${REPO}/releases/latest`;
 const RELEASE_PAGE = `https://github.com/${OWNER}/${REPO}/releases/latest`;
-const FALLBACK_VERSION = "1.0.22";
 const byId = (id) => document.getElementById(id);
 
 function setDownload(id, url, filename) {
@@ -14,8 +13,8 @@ function setDownload(id, url, filename) {
 }
 
 function setReleaseFallback() {
-  setDownload("windows-installer", `https://github.com/${OWNER}/${REPO}/releases/latest/download/Vivid-Cinema-Setup-${FALLBACK_VERSION}.exe`, "Windows installer");
-  setDownload("windows-portable", `https://github.com/${OWNER}/${REPO}/releases/latest/download/Vivid-Cinema-Portable-${FALLBACK_VERSION}.exe`, "Windows portable");
+  setDownload("windows-installer", RELEASE_PAGE, "Windows installer");
+  setDownload("windows-portable", RELEASE_PAGE, "Windows portable");
   setDownload("android-apk", `https://github.com/${OWNER}/${REPO}/releases/latest/download/Vivid-Cinema-Android.apk`, "Android APK");
 }
 
