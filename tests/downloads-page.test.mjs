@@ -20,7 +20,8 @@ test("downloads page resolves current assets from the latest GitHub release", ()
   assert.match(script, /Vivid-Cinema-Portable-/);
   assert.match(script, /Vivid-Cinema-Android/);
   assert.match(script, /browser_download_url/);
-  assert.match(script, /FALLBACK_VERSION = "1\.0\.22"/);
+  assert.match(script, /View Android release assets/);
+  assert.match(script, /release\\.html_url \\|\\| RELEASE_PAGE/);
 });
 
 test("downloads page has responsive and keyboard-focus styles", () => {
