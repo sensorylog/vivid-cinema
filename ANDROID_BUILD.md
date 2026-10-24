@@ -1,6 +1,6 @@
 # Vivid Cinema Android build
 
-The Android app bundles the site's static files locally with Capacitor. The existing Firebase Hosting website remains a separate deployment and is not changed by this build.
+The Android app bundles the site's static files locally with Capacitor. The live Cloudflare Pages website is deployed separately; building Android does not deploy or change the live website.
 
 ## First-time local setup
 
@@ -25,14 +25,13 @@ APK output: `android/app/build/outputs/apk/debug/app-debug.apk`.
 
 ## GitHub Actions
 
-Pushing to `android-capacitor-foundation` triggers the Android APK Build workflow. If tests and the Android build pass, download the `vivid-cinema-android-apk` artifact from that workflow run. The current development-signed APK is for early distribution, not a Play Store release.
+Pushing to `main` triggers the **Android APK Build** workflow. A successful run produces the `vivid-cinema-android-apk` artifact and publishes the stable `Vivid-Cinema-Android.apk` asset to the latest GitHub release. You can also run the workflow manually from GitHub Actions. The current development-signed APK is for testing and early distribution, not a Play Store release.
 
 ## Current boundaries
 
 - The app UI is bundled locally; Firebase, TMDB, and third-party playback providers still need network access.
 - Email verification uses Firebase Auth's client SDK and the configured Firebase email action handler; no Vercel API or email Cloud Function is required by this client flow.
-- Google sign-in, embedded playback/fullscreen, notification behavior, and Android back navigation still require device testing before release.
-- Do not merge this branch into `main` until the build and app behavior have been reviewed.
+- Google sign-in, embedded playback/fullscreen, notification behavior, in-app APK updates, and Android back navigation still require real-device testing before a production release.
 
 
 ## Signed Android release APK
