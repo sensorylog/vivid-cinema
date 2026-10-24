@@ -25,7 +25,7 @@ APK output: `android/app/build/outputs/apk/debug/app-debug.apk`.
 
 ## GitHub Actions
 
-Pushing to `android-capacitor-foundation` triggers the Android debug build workflow. If tests and the Android build pass, download the `vivid-cinema-debug-apk` artifact from that workflow run. It is a debug APK for testing, not a Play Store release.
+Pushing to `android-capacitor-foundation` triggers the Android APK Build workflow. If tests and the Android build pass, download the `vivid-cinema-android-apk` artifact from that workflow run. The current development-signed APK is for early distribution, not a Play Store release.
 
 ## Current boundaries
 
