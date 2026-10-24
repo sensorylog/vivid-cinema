@@ -206,7 +206,8 @@ test("Windows workflow builds on demand or on release tags", () => {
 
 test("native dropdown options keep readable contrast in Windows Chromium", () => {
   const css = fs.readFileSync(path.join(root, "styles", "vivid-audit-fixes.css"), "utf8");
-  assert.match(css, /select\\s+option[^}]*color:\s*#f4f2ed/i);
-  assert.match(css, /select\\s+option[^}]*background-color:\s*#111318/i);
-  assert.match(css, /html\\[data-vivid-theme="light"\\] select option[^}]*color:\s*#111216/i);
+  assert.match(css, /select option,[\\s\\S]*?background-color:#111318;color:#f4f2ed/);
+  assert.match(css, /html\\[data-vivid-theme="light"\\] select option,[\\s\\S]*?background-color:#fff;color:#111216/);
+  assert.match(css, /select\\{color-scheme:dark\\}/);
+  assert.match(css, /html\\[data-vivid-theme="light"\\] select\\{color-scheme:light\\}/);
 });
