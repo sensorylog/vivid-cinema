@@ -36,6 +36,7 @@ test("Electron binds the app window to the stable default persistent session", a
   const main = await read("desktop/main.cjs");
   assert.match(main, /webPreferences:\s*\{ session: session\.defaultSession/);
   assert.match(main, /LOCAL_SERVER_PORT = 43821/);
-  assert.match(main, /localServer\.listen\(LOCAL_SERVER_PORT, "localhost", resolve\)/);
+  assert.match(main, /for \(let offset = 0; offset < 5; offset \+= 1\)/);
+  assert.match(main, /candidate\.listen\(port, "localhost", resolve\)/);
   assert.doesNotMatch(main, /clearStorageData\(/);
 });
