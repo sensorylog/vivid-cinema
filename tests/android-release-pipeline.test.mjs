@@ -22,7 +22,7 @@ test("production-signed Android release remains manual until signing is configur
   assert.match(workflow, /assembleRelease/);
   assert.match(workflow, /apksigner.*verify/);
   assert.match(workflow, /publish_to_github_release/);
-  assert.match(workflow, /github\.event_name == 'release' \|\| inputs\.publish_to_github_release/);
+  assert.match(workflow, /if: inputs\.publish_to_github_release/);
   assert.match(workflow, /Vivid-Cinema-Android\.apk/);
 });
 
