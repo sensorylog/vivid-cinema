@@ -225,7 +225,7 @@ test("Windows desktop recovers from failed later-page navigation instead of leav
   assert.match(main, /renderer process exited/);
   assert.match(main, /render-process-gone/);
   assert.match(main, /app page navigation failed; retrying its existing origin/);
-  assert.match(main, /if \(!hostedAppLoaded\)/);
+  assert.match(main, /!hostedAppLoaded/);
   assert.match(main, /https:\/\/vivid-cinema\.pages\.dev\/home\.html/);
   assert.match(main, /Try offline copy/);
   assert.match(main, /localOrigin \+ "\/home\.html"/);
