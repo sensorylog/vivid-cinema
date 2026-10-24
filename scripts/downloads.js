@@ -43,7 +43,17 @@ async function loadLatestRelease() {
     const apk = assetLink(assets, (name) => /^Vivid-Cinema-Android\.apk$/i.test(name) || /^Vivid-Cinema-Android-\d+(?:\.\d+){1,3}\.apk$/i.test(name));
     if (installer) setDownload("windows-installer", installer.browser_download_url, installer.name);
     if (portable) setDownload("windows-portable", portable.browser_download_url, portable.name);
-    if (apk) setDownload("android-apk", apk.browser_download_url, apk.name);
+    if (apk) {
+      setDownload("android-apk", apk.browser_download_url, apk.name);
+    } else {
+      // Never send visitors to a guaranteed 404 when the release has no APK asset yet.
+      setDownload("android-apk", release.html_url || RELEASE_PAGE, "View Android release assets");
+      const androidButton = byId("android-apk");
+      const androidTitle = androidButton?.querySelector("strong");
+      const androidSubtitle = androidButton?.querySelector("small");
+      if (androidTitle) androidTitle.textContent = "Find Android APK";
+      if (androidSubtitle) androidSubtitle.textContent = "Open official release assets";
+    }
     const version = String(release.tag_name || release.name || "").replace(/^v/i, "");
     if (version) byId("release-version").textContent = `Version ${version}`;
     if (release.published_at) {
@@ -54,7 +64,7 @@ async function loadLatestRelease() {
     const missing = [];
     if (!installer) missing.push("Windows installer");
     if (!portable) missing.push("portable Windows build");
-    if (!apk) missing.push("Android APK");
+    if (!apk) missing.push("Android APK (open release assets to check availability)");
     if (missing.length) {
       byId("downloads-status").textContent = `Some files are not attached to the latest release yet: ${missing.join(", ")}. Open release notes to see available files.`;
     }
