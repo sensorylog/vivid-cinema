@@ -16,7 +16,7 @@ test("desktop packaging is opt-in and preserves existing scripts", () => {
   assert.ok(pkg.scripts["test:rules"]);
 });
 test("Windows installer and portable executable targets use Vivid branding", () => {
-  assert.equal(pkg.version, "1.0.19");
+  assert.equal(pkg.version, "1.0.20");
   assert.ok(pkg.devDependencies.electron);
   assert.ok(pkg.devDependencies["electron-builder"]);
   assert.ok(pkg.dependencies["electron-updater"]);
@@ -201,4 +201,12 @@ test("Windows workflow builds on demand or on release tags", () => {
   assert.match(workflow, /Vivid-Cinema-Setup/);
   assert.match(workflow, /Vivid-Cinema-Portable/);
   assert.match(workflow, /Vivid-Cinema-Portable-\$version\.exe/);
+});
+
+
+test("native dropdown options keep readable contrast in Windows Chromium", () => {
+  const css = fs.readFileSync(path.join(root, "styles", "vivid-audit-fixes.css"), "utf8");
+  assert.match(css, /select\\s+option[^}]*color:\s*#f4f2ed/i);
+  assert.match(css, /select\\s+option[^}]*background-color:\s*#111318/i);
+  assert.match(css, /html\\[data-vivid-theme="light"\\] select option[^}]*color:\s*#111216/i);
 });
