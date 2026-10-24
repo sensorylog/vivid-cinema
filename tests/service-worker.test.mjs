@@ -31,7 +31,7 @@ test("every precached asset exists in the repository", async () => {
 });
 
 test("ordinary JavaScript and CSS use network-first while retaining offline cache fallback", () => {
-  assert.match(source, /const CACHE_NAME = "vivid-cinema-shell-v249"/);
+  assert.match(source, /const CACHE_NAME = "vivid-cinema-shell-v250"/);
   assert.match(source, /isCodeOrStyle.*networkFirst/);
   assert.match(source, /event\.respondWith\(isCodeOrStyle\?networkFirst\(request\):isHtml\?networkFirst\(request\):staleWhileRevalidate\(request,event\)\)/);
   assert.match(source, /redirect:"follow"/);
@@ -64,7 +64,7 @@ function createWorkerHarness(fetchImpl, initialCache = new Map()) {
   const cacheStorage = {
     async open() { return cache; },
     async match(request) { return cache.match(request); },
-    async keys() { return ["vivid-cinema-shell-v249"]; },
+    async keys() { return ["vivid-cinema-shell-v250"]; },
     async delete() { return true; }
   };
   const handlers = {};
