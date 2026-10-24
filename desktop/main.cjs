@@ -4,9 +4,6 @@ const http = require("node:http");
 const fs = require("node:fs");
 const path = require("node:path");
 
-// Use the same named persistent partition across launches and in-place updates.
-// "persist:default" is Electron's default persistent profile, so existing auth data stays in place.
-const appSession = session.fromPartition("persist:default");
 const appRoot = app.getAppPath();
 const windowsIcon = path.join(appRoot, "icons", "vivid-icon.ico");
 const appIcon = fs.existsSync(windowsIcon)
@@ -181,7 +178,7 @@ function createWindow() {
     width: 1440, height: 900, minWidth: 960, minHeight: 640,
     show: false, fullscreen: true, backgroundColor: "#050608", autoHideMenuBar: true, title: "Vivid Cinema",
     icon: appIcon,
-    webPreferences: { session: appSession, preload: path.join(__dirname, "preload.cjs"), nodeIntegration: false, contextIsolation: true, sandbox: true, webSecurity: true }
+    webPreferences: { session: session.defaultSession, preload: path.join(__dirname, "preload.cjs"), nodeIntegration: false, contextIsolation: true, sandbox: true, webSecurity: true }
   });
 
   // Show a tiny local splash immediately; the main app then loads on its trusted HTTPS origin.
@@ -297,7 +294,7 @@ if (hasSingleInstanceLock) {
 app.whenReady().then(async () => {
   installApplicationMenu();
   configureAutoUpdates();
-  appSession.setPermissionRequestHandler((_webContents, permission, callback) => {
+  session.defaultSession.setPermissionRequestHandler((_webContents, permission, callback) => {
     callback(["fullscreen", "media", "notifications"].includes(permission));
   });
   try {
