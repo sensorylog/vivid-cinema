@@ -33,7 +33,7 @@ test("Android bundle embeds build metadata and loads the updater", () => {
 test("updater compares remote metadata and installs the cleanly named APK", () => {
   assert.match(updater, /Vivid-Cinema-Android-build-/);
   assert.match(updater, /Vivid-Cinema-Android\.apk/);
-  assert.match(updater, /remoteBuild <= Number\(local\.build/);
+  assert.match(updater, /metadata\.build > Number\(local\.build/);
   assert.match(updater, /downloadAndInstall\(\{ url, version \}\)/);
   assert.match(updater, /Update Vivid Cinema/);
   assert.match(updater, /Download &amp; Install/);
