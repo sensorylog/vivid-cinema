@@ -64,15 +64,28 @@ async function checkForAndroidUpdate() {
     if (!response.ok) return;
     const release = await response.json();
     const assets = Array.isArray(release.assets) ? release.assets : [];
-    const apk = assets
-      .map(asset => {
-        const match = /^Vivid-Cinema-Android-(\d+(?:\.\d+){1,3})-build-(\d+)\.apk$/i.exec(asset.name || "");
-        return match ? { ...asset, version: match[1], build: Number(match[2]) } : null;
-      })
-      .filter(Boolean)
-      .sort((a, b) => b.build - a.build)[0];
-    if (!apk || !apk.browser_download_url || apk.build <= Number(local.build || 0)) return;
-    createUpdateNotice(apk.version, apk.build, apk.browser_download_url);
+    const apk = assets.find(asset => asset.name === "Vivid-Cinema-Android.apk");
+    const buildInfoAsset = assets.find(asset => asset.name === "Vivid-Cinema-Android-build.json");
+
+    // Keep the public APK filename simple; the metadata asset identifies its CI build.
+    if (apk?.browser_download_url && buildInfoAsset?.browser_download_url) {
+      const metadataResponse = await fetch(buildInfoAsset.browser_download_url, { cache: "no-store" });
+      if (!metadataResponse.ok) return;
+      const metadata = await metadataResponse.json();
+      const remoteBuild = Number(metadata.build);
+      if (!Number.isSafeInteger(remoteBuild) || remoteBuild <= Number(local.build || 0)) return;
+      createUpdateNotice(String(metadata.version || release.tag_name || local.version), remoteBuild, apk.browser_download_url);
+      return;
+    }
+
+    // Backward compatibility for versioned APKs from earlier workflow runs.
+    const legacyApk = assets.map(asset => {
+      const match = /^Vivid-Cinema-Android-(\d+(?:\.\d+){1,3})-build-(\d+)\.apk$/i.exec(asset.name || "");
+      return match ? { ...asset, version: match[1], build: Number(match[2]) } : null;
+    }).filter(Boolean).sort((a, b) => b.build - a.build)[0];
+    if (legacyApk?.browser_download_url && legacyApk.build > Number(local.build || 0)) {
+      createUpdateNotice(legacyApk.version, legacyApk.build, legacyApk.browser_download_url);
+    }
   } catch (error) {
     console.debug("Vivid Android update check skipped:", error);
   }
