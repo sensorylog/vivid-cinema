@@ -40,7 +40,7 @@ async function loadLatestRelease() {
     const assets = Array.isArray(release.assets) ? release.assets : [];
     const installer = assetLink(assets, (name) => /^Vivid-Cinema-Setup-\d+(?:\.\d+){1,3}\.exe$/i.test(name));
     const portable = assetLink(assets, (name) => /^Vivid-Cinema-Portable-\d+(?:\.\d+){1,3}\.exe$/i.test(name));
-    const apk = assetLink(assets, (name) => /^Vivid-Cinema-Android-\d+(?:\.\d+){1,3}-build-\d+\.apk$/i.test(name)) || assetLink(assets, (name) => /^Vivid-Cinema-Android\.apk$/i.test(name) || /^Vivid-Cinema-Android-\d+(?:\.\d+){1,3}\.apk$/i.test(name));
+    const apk = assetLink(assets, (name) => /^Vivid-Cinema-Android\\.apk$/i.test(name)) || assetLink(assets, (name) => /^Vivid-Cinema-Android-\\d+(?:\\.\\d+){1,3}-build-\\d+\\.apk$/i.test(name)) || assetLink(assets, (name) => /^Vivid-Cinema-Android-\\d+(?:\\.\\d+){1,3}\\.apk$/i.test(name));
     if (installer) setDownload("windows-installer", installer.browser_download_url, installer.name);
     if (portable) setDownload("windows-portable", portable.browser_download_url, portable.name);
     if (apk) {
