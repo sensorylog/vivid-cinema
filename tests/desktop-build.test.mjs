@@ -219,12 +219,14 @@ test("Windows desktop recovers from failed later-page navigation instead of leav
   const main = fs.readFileSync(path.join(root, "desktop", "main.cjs"), "utf8");
   assert.match(main, /RECOVERY_HTML/);
   assert.match(main, /RECOVERY_URL/);
-  assert.match(main, /hostedNavigationRecoveryInProgress/);
-  assert.match(main, /recoverHostedNavigation/);
-  assert.match(main, /showHostedRecoveryPage/);
+  assert.match(main, /navigationRecoveryInProgress/);
+  assert.match(main, /recoverAppNavigation/);
+  assert.match(main, /showAppRecoveryPage/);
   assert.match(main, /renderer process exited/);
   assert.match(main, /render-process-gone/);
-  assert.match(main, /hosted page navigation failed; retrying the primary app origin/);
+  assert.match(main, /app page navigation failed; retrying its existing origin/);
   assert.match(main, /if \(!hostedAppLoaded\)/);
   assert.match(main, /https:\/\/vivid-cinema\.pages\.dev\/home\.html/);
+  assert.match(main, /Try offline copy/);
+  assert.match(main, /localOrigin \+ "\/home\.html"/);
 });
