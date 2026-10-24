@@ -1850,3 +1850,15 @@ body{
 @media(prefers-reduced-motion:reduce){
   :where(*, *::before, *::after){scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
 }
+
+
+/* Native select popups can inherit OS/Chromium colors that hide option labels on Windows.
+   Declare both foreground and popup surface explicitly instead of relying on hover repaint. */
+select{color-scheme:dark}
+select option,
+select optgroup{background-color:#111318;color:#f4f2ed}
+select option:checked{background-color:#c7ff55;color:#080a0e}
+html[data-vivid-theme="light"] select{color-scheme:light}
+html[data-vivid-theme="light"] select option,
+html[data-vivid-theme="light"] select optgroup{background-color:#fff;color:#111216}
+html[data-vivid-theme="light"] select option:checked{background-color:#111216;color:#fff}
