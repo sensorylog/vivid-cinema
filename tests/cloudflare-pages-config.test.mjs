@@ -29,6 +29,7 @@ test("Cloudflare Content Security Policy keeps existing Firebase and provider en
     "firebasevertexai.googleapis.com",
     "recaptchaenterprise.googleapis.com",
     "vivid-cinema.firebaseapp.com",
+    "api.github.com",
     "api.themoviedb.org",
     "checkout.paystack.com",
     "www.youtube.com",
