@@ -158,7 +158,7 @@ jobs:
           gh release view "$tag" --repo "$GITHUB_REPOSITORY" >/dev/null
           # Stable public APK name; metadata identifies the monotonically increasing CI build.
           node --input-type=module -e 'import {writeFileSync} from "node:fs"; writeFileSync("release-output/Vivid-Cinema-Android-build-" + process.env.VIVID_ANDROID_BUILD + ".json", JSON.stringify({version: process.env.VIVID_ANDROID_VERSION, build: Number(process.env.VIVID_ANDROID_BUILD)}, null, 2))'
-          gh release upload "$tag" "release-output/Vivid-Cinema-Android.apk" $RUNNER_TEMP/Vivid-Cinema-Android-build-$VIVID_ANDROID_BUILD.json "$RUNNER_TEMP/vivid-android-key/Vivid-Cinema-Debug.keystore" --repo "$GITHUB_REPOSITORY" --clobber
+          gh release upload "$tag" "release-output/Vivid-Cinema-Android.apk" "release-output/Vivid-Cinema-Android-build-$VIVID_ANDROID_BUILD.json" "$RUNNER_TEMP/vivid-android-key/Vivid-Cinema-Debug.keystore" --repo "$GITHUB_REPOSITORY" --clobber
           gh release view "$tag" --repo "$GITHUB_REPOSITORY" --json assets --jq '.assets[].name' | grep -Fx "Vivid-Cinema-Android.apk"
           gh release view "$tag" --repo "$GITHUB_REPOSITORY" --json assets --jq '.assets[].name' | grep -Fx "Vivid-Cinema-Android-build-$VIVID_ANDROID_BUILD.json"
           echo "Published Vivid-Cinema-Android.apk to $tag."
