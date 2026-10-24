@@ -87,3 +87,12 @@ test("For You preserves local matching alongside the isolated Gemini Recall chat
   assert.doesNotMatch(script, /AI clue expansion|Gemini interprets|Airforce/i);
   assert.match(html, /No Cloud Functions/);
 });
+
+
+test("Vivid Recall chat has a Gemini-independent local fallback for desktop WebViews", () => {
+  const chat = readFileSync(new URL("../scripts/vivid-recall-chat.js", import.meta.url), "utf8");
+  assert.match(chat, /getPlotMatchRecommendations\(intent, 5, \{ localOnly: true \}\)/);
+  assert.match(chat, /await fallbackToLocalSearch\(version\)/);
+  assert.match(chat, /Local Recall found/);
+  assert.match(recommendations, /if \(!options\.localOnly\)/);
+});

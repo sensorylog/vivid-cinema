@@ -3,7 +3,7 @@ import { normalizeResults, normalizeUpcomingResults } from "./media.js";
 import { getProviderCountry } from "./provider-region.js";
 
 async function providerDiscover(providerId, type, page = 1, region = getProviderCountry()) {
-  const params = { page, with_watch_monetization_types: "flatrate", with_watch_providers: String(providerId), sort_by: "popularity.desc", "vote_count.gte": "20", watch_region: region };
+  const params = { page, with_watch_monetization_types: "flatrate", with_watch_providers: (Array.isArray(providerId) ? providerId : [providerId]).map(String).join("|"), sort_by: "popularity.desc", "vote_count.gte": "20", watch_region: region };
   return type === "movie" ? tmdbApi.discoverMovies(params) : tmdbApi.discoverTv(params);
 }
 async function providerHome(providerId) {
@@ -37,7 +37,7 @@ async function providerHome(providerId) {
   }
   return { page: 1, total_pages: 1, results: items.slice(0, 20) };
 }
-const PROVIDER_IDS = Object.freeze({ netflix: 8, primeVideo: 9, hboMax: 1899, disneyPlus: 337, appleTvPlus: 350, hulu: 15, paramountPlus: 531 });
+const PROVIDER_IDS = Object.freeze({ netflix: 8, primeVideo: 9, hboMax: 1899, disneyPlus: 337, appleTvPlus: 350, hulu: 15, paramountPlus: [2303, 2304, 2616, 531, 582, 633, 1853] });
 const HOME_LOADERS = Object.freeze({
   // The Home shelf should reflect live daily momentum, not a weekly list that
   // can feel stale after a title spikes or drops out of conversation.

@@ -1,6 +1,8 @@
 import { tmdbApi } from "./tmdb.js";
 import { getImageUrl, getMediaUrl } from "./media.js";
 import { escapeHtml } from "./utils.js";
+import { parseIntent } from "./intent-parser.js";
+import { getPlotMatchRecommendations } from "./recommendations.js";
 
 const $ = id => document.getElementById(id);
 const history = [];
@@ -158,15 +160,32 @@ function renderVerifiedCards(items) {
   return `<div class="recall-chat-results"><div class="recall-chat-results-label">TMDB-verified matches</div>${cards}</div>`;
 }
 
-function fallbackToLocalSearch(version) {
-  if (version !== requestVersion) return;
+async function fallbackToLocalSearch(version) {
+  if (version !== requestVersion) return 0;
   const search = $("intent-query");
-  const form = $("intent-form");
-  const memory = history.filter(item => item.role === "user").map(item => item.content).join(" ");
-  if (search && form && memory) {
-    search.value = memory.slice(0, 500);
-    setStatus("Gemini unavailable · running local Recall search");
-    form.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }));
+  const memory = history.filter(item => item.role === "user").map(item => item.content).join(" ").slice(0, 500);
+  if (search && memory) search.value = memory;
+  setStatus("Gemini unavailable · matching your clues locally…");
+  try {
+    // Do not retry Gemini here: Electron/App Check failures should fall straight
+    // through to deterministic clue matching instead of leaving Recall stalled.
+    const intent = parseIntent(memory);
+    const matches = await getPlotMatchRecommendations(intent, 5, { localOnly: true });
+    if (version !== requestVersion) return 0;
+    if (matches.length) {
+      addMessage("assistant", "I can still search your memory locally. These titles best match the clues so far:", renderVerifiedCards(matches));
+      setStatus("Local Recall found " + matches.length + " possible match" + (matches.length === 1 ? "" : "es") + " · Add another clue to narrow it down.");
+    } else {
+      addMessage("assistant", "I couldn’t find a strong match from those clues yet. Try adding a character, a scene, the setting, or how the story ended.");
+      setStatus("Local Recall is active · More specific clues may help.");
+    }
+    return matches.length;
+  } catch (localError) {
+    if (version !== requestVersion) return 0;
+    console.warn("Vivid Recall local fallback failed:", localError);
+    addMessage("assistant", "Gemini is unavailable and the local catalogue search couldn’t complete. Your clues are still here — please try again in a moment.");
+    setStatus("Local Recall search failed · " + errorDiagnostic(localError));
+    return 0;
   }
 }
 
@@ -218,8 +237,11 @@ async function sendMessage(text) {
         ? "Gemini returned a quota or capacity error (429). Your clues are still here, and local catalogue search is active. The status below includes the server diagnostic so we can identify the exact limit."
         : "Gemini couldn’t connect this time. Your clues are still saved in this chat, and I’ve switched to local catalogue search. The status below shows the expanded error details.";
     addMessage("assistant", userFacingError);
-    fallbackToLocalSearch(version);
-    setStatus((needsSignIn ? "Gemini 401 · " : quotaFailure ? "Gemini 429 · " : "Gemini connection failed · ") + fullDiagnostic);
+    const localMatches = await fallbackToLocalSearch(version);
+    if (version === requestVersion) {
+      const localLabel = needsSignIn ? "Gemini 401" : quotaFailure ? "Gemini 429" : "Gemini connection failed";
+      setStatus(localLabel + " · " + (localMatches ? "Local Recall found " + localMatches + " possible matches" : "Local Recall is ready for more clues") + " · " + fullDiagnostic);
+    }
   } finally {
     if (version === requestVersion) {
       setBusy(false);
