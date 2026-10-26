@@ -4,19 +4,31 @@ import { addDoc, collection, serverTimestamp } from "https://www.gstatic.com/fir
 
 const platform = (() => {
   try {
+    const capacitor = window.Capacitor;
+    if (capacitor?.isNativePlatform?.() && capacitor.getPlatform?.() === "android") return "android";
+    if (/Electron\//i.test(window.navigator.userAgent || "")) return "windows";
     return window.matchMedia?.("(display-mode: standalone)")?.matches || window.navigator.standalone === true ? "pwa" : "web";
   } catch { return "web"; }
 })();
 let uid = null;
 let sessionId = null;
 let started = false;
+let resolveInitialAuth;
+let initialAuthResolved = false;
+const initialAuthReady = new Promise((resolve) => { resolveInitialAuth = resolve; });
+function finishInitialAuth(user) {
+  if (initialAuthResolved) return;
+  initialAuthResolved = true;
+  resolveInitialAuth(user || null);
+}
 function getSessionId() {
   if (sessionId) return sessionId;
   try {
-    sessionId = sessionStorage.getItem("vivid:pulse-session");
+    const storageKey = "vivid:pulse-session:" + (uid || "signed-out");
+    sessionId = sessionStorage.getItem(storageKey);
     if (!sessionId) {
       sessionId = globalThis.crypto?.randomUUID?.() || ("s_" + Date.now().toString(36) + Math.random().toString(36).slice(2, 10));
-      sessionStorage.setItem("vivid:pulse-session", sessionId);
+      sessionStorage.setItem(storageKey, sessionId);
     }
   } catch {
     sessionId = "s_" + Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
@@ -35,16 +47,28 @@ function safeDetails(details = {}) {
   return safe;
 }
 export async function trackPulseEvent(event, details = {}) {
-  if (!uid || !started) return;
+  if (!uid || !started) return { skipped: true, reason: "not_authenticated_or_session_not_ready" };
   try {
-    await addDoc(collection(db, "analyticsEvents"), {
+    const ref = await addDoc(collection(db, "analyticsEvents"), {
       event, platform, userId: uid, sessionId: getSessionId(),
       timestamp: serverTimestamp(), appVersion: "web-current",
       details: safeDetails(details)
     });
+    return { recorded: true, id: ref.id };
   } catch (error) {
     console.warn("[Vivid Pulse] Event write failed:", error?.code || error?.message || error);
+    return { skipped: true, reason: error?.code || "write_failed" };
   }
+}
+
+export async function recordPulseDownload(targetPlatform, source = "downloads_page") {
+  if (!["windows", "android"].includes(targetPlatform)) {
+    return { skipped: true, reason: "unsupported_download_platform" };
+  }
+  // Wait for Firebase Auth's first state resolution so an existing signed-in
+  // user is not mistaken for a signed-out visitor during initialization.
+  await initialAuthReady;
+  return trackPulseEvent("download_" + targetPlatform, { source });
 }
 let activeUid = null;
 onAuthStateChanged(auth, user => {
@@ -53,10 +77,18 @@ onAuthStateChanged(auth, user => {
     // Reset session state when the signed-in account changes.
     activeUid = nextUid;
     uid = nextUid;
+    sessionId = null;
     started = false;
   }
-  if (!uid) { started = false; return; }
-  if (started) return;
+  if (!uid) {
+    started = false;
+    finishInitialAuth(null);
+    return;
+  }
+  if (started) {
+    finishInitialAuth(user);
+    return;
+  }
   started = true;
   const sid = getSessionId();
   const startedKey = "vivid:pulse-started:" + uid;
@@ -67,6 +99,7 @@ onAuthStateChanged(auth, user => {
     try { sessionStorage.setItem(startedKey, sid); } catch {}
   }
   void trackPulseEvent("page_view", { page: location.pathname });
+  finishInitialAuth(user);
 });
 document.addEventListener("click", event => {
   const target = event.target.closest?.("[data-id][data-type]");

@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { initializeTestEnvironment, assertFails, assertSucceeds } from "@firebase/rules-unit-testing";
-import { doc, setDoc, getDoc, getDocs, collection, query, limit } from "firebase/firestore";
+import { doc, setDoc, getDoc, getDocs, collection, query, limit, serverTimestamp } from "firebase/firestore";
 
 const rules = await readFile(new URL("../firestore.rules", import.meta.url), "utf8");
 const env = await initializeTestEnvironment({
@@ -85,6 +85,55 @@ test("unauthenticated users cannot read private user documents", async () => {
   });
   const db = env.unauthenticatedContext().firestore();
   await assertFails(getDoc(doc(db, "users/alice/favorites/movie:550")));
+});
+
+
+test("authenticated users can create schema-valid Vivid Pulse events but cannot read the analytics collection", async () => {
+  const db = env.authenticatedContext("alice").firestore();
+  await assertSucceeds(setDoc(doc(db, "analyticsEvents/event-valid"), {
+    event: "page_view",
+    platform: "web",
+    userId: "alice",
+    sessionId: "session-alice-1",
+    timestamp: serverTimestamp(),
+    appVersion: "web-current",
+    details: { page: "/home.html" }
+  }));
+  await assertFails(getDocs(collection(db, "analyticsEvents")));
+});
+
+test("Vivid Pulse rejects forged user IDs and keeps analytics events immutable", async () => {
+  const db = env.authenticatedContext("alice").firestore();
+  await assertFails(setDoc(doc(db, "analyticsEvents/event-forged"), {
+    event: "page_view",
+    platform: "web",
+    userId: "bob",
+    sessionId: "session-forged",
+    timestamp: serverTimestamp(),
+    appVersion: "web-current",
+    details: {}
+  }));
+
+  await env.withSecurityRulesDisabled(async context => {
+    await setDoc(doc(context.firestore(), "analyticsEvents/event-immutable"), {
+      event: "page_view",
+      platform: "web",
+      userId: "alice",
+      sessionId: "session-alice-2",
+      timestamp: new Date(),
+      appVersion: "web-current",
+      details: {}
+    });
+  });
+  await assertFails(setDoc(doc(db, "analyticsEvents/event-immutable"), {
+    event: "page_view",
+    platform: "web",
+    userId: "alice",
+    sessionId: "session-alice-2",
+    timestamp: serverTimestamp(),
+    appVersion: "web-current",
+    details: {}
+  }));
 });
 
 test.after(async () => {
