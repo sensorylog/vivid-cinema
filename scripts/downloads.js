@@ -122,7 +122,7 @@ for (const id of ["windows-installer", "windows-portable", "android-apk"]) {
     link.setAttribute("aria-busy", "true");
     try {
       await releaseReady;
-      const isDirectReleaseAsset = /\\/releases\\/(?:latest\\/download|download\\/[^/]+\\/)/i.test(link.href);
+      const isDirectReleaseAsset = /\/releases\/(?:latest\/download|download\/[^/]+\/)/i.test(link.href);
       if (isDirectReleaseAsset) {
         const tracker = await waitAtMost(pulseTrackerReady, 350);
         if (tracker?.recordPulseDownload) {
