@@ -51,11 +51,14 @@ onAuthStateChanged(auth, user => {
   if (!uid) { started = false; return; }
   if (started) return;
   started = true;
-  void trackPulseEvent("app_session_start", { page: location.pathname });
+  const sid = getSessionId();
+  let sessionWasStarted = false;
+  try { sessionWasStarted = sessionStorage.getItem("vivid:pulse-started") === sid; } catch {}
+  if (!sessionWasStarted) {
+    void trackPulseEvent("app_session_start", { page: location.pathname });
+    try { sessionStorage.setItem("vivid:pulse-started", sid); } catch {}
+  }
   void trackPulseEvent("page_view", { page: location.pathname });
-});
-window.addEventListener("pageshow", () => {
-  if (uid && started) void trackPulseEvent("page_view", { page: location.pathname });
 });
 document.addEventListener("click", event => {
   const target = event.target.closest?.("[data-id][data-type]");
