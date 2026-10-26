@@ -1,3 +1,4 @@
+import "./vivid-pulse.js";
 import { getFeaturedMovies } from "./content.js";
 import { getImageUrl } from "./media.js";
 import { auth, db } from "./firebase.js";
