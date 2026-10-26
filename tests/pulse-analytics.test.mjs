@@ -5,6 +5,12 @@ import { readFile } from "node:fs/promises";
 const tracker = await readFile(new URL("../scripts/vivid-pulse.js", import.meta.url), "utf8");
 const downloads = await readFile(new URL("../scripts/downloads.js", import.meta.url), "utf8");
 const html = await readFile(new URL("../downloads.html", import.meta.url), "utf8");
+const landing = await readFile(new URL("../index.html", import.meta.url), "utf8");
+
+test("landing page loads the Firestore tracker alongside existing analytics", () => {
+  assert.match(landing, /scripts\/vivid-pulse\.js/);
+  assert.match(landing, /scripts\/analytics\.js/);
+});
 
 test("Pulse tracker writes schema-compatible server-timestamped events", () => {
   assert.match(tracker, /collection\(db, ["']analyticsEvents["']\)/);
