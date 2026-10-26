@@ -43,20 +43,28 @@ export async function trackPulseEvent(event, details = {}) {
       details: safeDetails(details)
     });
   } catch (error) {
-    console.debug("[Vivid Pulse] Event write skipped:", error?.code || error?.message || error);
+    console.warn("[Vivid Pulse] Event write failed:", error?.code || error?.message || error);
   }
 }
+let activeUid = null;
 onAuthStateChanged(auth, user => {
-  uid = user?.uid || null;
+  const nextUid = user?.uid || null;
+  if (nextUid !== activeUid) {
+    // Reset session state when the signed-in account changes.
+    activeUid = nextUid;
+    uid = nextUid;
+    started = false;
+  }
   if (!uid) { started = false; return; }
   if (started) return;
   started = true;
   const sid = getSessionId();
+  const startedKey = "vivid:pulse-started:" + uid;
   let sessionWasStarted = false;
-  try { sessionWasStarted = sessionStorage.getItem("vivid:pulse-started") === sid; } catch {}
+  try { sessionWasStarted = sessionStorage.getItem(startedKey) === sid; } catch {}
   if (!sessionWasStarted) {
     void trackPulseEvent("app_session_start", { page: location.pathname });
-    try { sessionStorage.setItem("vivid:pulse-started", sid); } catch {}
+    try { sessionStorage.setItem(startedKey, sid); } catch {}
   }
   void trackPulseEvent("page_view", { page: location.pathname });
 });
