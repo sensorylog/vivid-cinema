@@ -694,7 +694,7 @@ service cloud.firestore {
         && request.resource.data.keys().hasOnly(['event','platform','userId','sessionId','timestamp','appVersion','details'])
         && request.resource.data.keys().hasAll(['event','platform','userId','sessionId','timestamp','appVersion','details'])
         && request.resource.data.event is string
-        && request.resource.data.event.matches('^[a-z][a-z0-9_]{0,59}
+        && request.resource.data.event.matches('^[a-z][a-z0-9_]{0,59}$')
         && request.resource.data.platform in ['windows','android','web','pwa']
         && request.resource.data.userId == request.auth.uid
         && request.resource.data.sessionId is string
