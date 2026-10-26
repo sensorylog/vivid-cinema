@@ -100,21 +100,42 @@ async function loadLatestRelease() {
   }
 }
 
-// A fast tap must not accidentally open the release page while the API lookup
-// is still resolving. Wait for link resolution, then navigate to the actual file.
+// Analytics is deliberately optional: a Firebase/configuration failure must never
+// break the download page. A bounded wait lets authenticated clicks reach Firestore
+// before navigation without making downloads depend on analytics availability.
+const pulseTrackerReady = import("./vivid-pulse.js").catch((error) => {
+  console.debug("Vivid Pulse download tracking unavailable:", error?.code || error?.message || error);
+  return null;
+});
+const waitAtMost = (promise, ms) => Promise.race([
+  Promise.resolve(promise),
+  new Promise((resolve) => setTimeout(resolve, ms))
+]);
+
 const releaseReady = loadLatestRelease();
 for (const id of ["windows-installer", "windows-portable", "android-apk"]) {
   const link = byId(id);
   link?.addEventListener("click", async (event) => {
-    if (link.dataset.releaseReady === "true") return;
     event.preventDefault();
+    if (link.dataset.pulseNavigationStarted === "true") return;
+    link.dataset.pulseNavigationStarted = "true";
     link.setAttribute("aria-busy", "true");
     try {
       await releaseReady;
-      link.dataset.releaseReady = "true";
-      window.location.assign(link.href);
+      const isDirectReleaseAsset = /\\/releases\\/(?:latest\\/download|download\\/[^/]+\\/)/i.test(link.href);
+      if (isDirectReleaseAsset) {
+        const tracker = await waitAtMost(pulseTrackerReady, 350);
+        if (tracker?.recordPulseDownload) {
+          const targetPlatform = id === "android-apk" ? "android" : "windows";
+          await waitAtMost(tracker.recordPulseDownload(targetPlatform, "downloads_page"), 600);
+        }
+      }
+    } catch (error) {
+      // Tracking must remain best-effort and must not strand a valid download.
+      console.debug("Vivid Pulse download event skipped:", error?.code || error?.message || error);
     } finally {
       link.removeAttribute("aria-busy");
+      window.location.assign(link.href);
     }
   });
 }
