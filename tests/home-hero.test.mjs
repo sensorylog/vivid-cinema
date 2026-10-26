@@ -167,7 +167,7 @@ test("app Home exposes the official download page on desktop, mobile, and footer
   assert.match(home, /<a href="downloads\.html"><i class="bi bi-download" aria-hidden="true"><\/i><span>Download<\/span><\/a>/);
   assert.match(home, /<a href="downloads\.html">Downloads<\/a>/);
   const sw = read("../service-worker.js");
-  assert.match(sw, /vivid-cinema-shell-v248/);
+  assert.match(sw, /vivid-cinema-shell-v251/);
   assert.match(sw, /"\.\/downloads\.html"/);
   assert.match(sw, /"\.\/styles\/downloads\.css"/);
   assert.match(sw, /"\.\/scripts\/downloads\.js\?v=direct-download-v3"/);
