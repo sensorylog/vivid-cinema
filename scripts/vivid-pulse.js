@@ -35,16 +35,25 @@ function safeDetails(details = {}) {
   return safe;
 }
 export async function trackPulseEvent(event, details = {}) {
-  if (!uid || !started) return;
+  if (!uid || !started) return { skipped: true, reason: "not_authenticated_or_session_not_ready" };
   try {
-    await addDoc(collection(db, "analyticsEvents"), {
+    const ref = await addDoc(collection(db, "analyticsEvents"), {
       event, platform, userId: uid, sessionId: getSessionId(),
       timestamp: serverTimestamp(), appVersion: "web-current",
       details: safeDetails(details)
     });
+    return { recorded: true, id: ref.id };
   } catch (error) {
     console.warn("[Vivid Pulse] Event write failed:", error?.code || error?.message || error);
+    return { skipped: true, reason: error?.code || "write_failed" };
   }
+}
+
+export async function recordPulseDownload(targetPlatform, source = "downloads_page") {
+  if (!["windows", "android"].includes(targetPlatform)) {
+    return { skipped: true, reason: "unsupported_download_platform" };
+  }
+  return trackPulseEvent("download_" + targetPlatform, { source });
 }
 let activeUid = null;
 onAuthStateChanged(auth, user => {
