@@ -1,5 +1,4 @@
 import "./google-tag.js";
-import "./vivid-pulse.js";
 import "./pwa.js";
 import { VIVID_CONFIG } from "./config.js";
 
@@ -374,6 +373,7 @@ function initAppShell() {
   document.documentElement.dataset.vividReady = "false";
   void import("./google-tag.js").catch(() => {});
   void import("./analytics.js").catch(() => {});
+  void import("./vivid-pulse.js").catch(error => console.debug("Vivid Pulse unavailable:", error?.message || error));
   const storedTheme = (() => { try { return localStorage.getItem("vivid:theme"); } catch { return null; } })();
   document.documentElement.dataset.vividTheme = storedTheme === "light" ? "light" : "dark";
   setViewportState();
