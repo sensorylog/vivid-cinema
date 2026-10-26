@@ -20,6 +20,14 @@ test("Pulse tracker writes schema-compatible server-timestamped events", () => {
   assert.match(tracker, /return \{ recorded: true, id: ref\.id \}/);
 });
 
+test("native app sessions are classified as Android or Windows instead of Website", () => {
+  assert.match(tracker, /capacitor\\?\.isNativePlatform/);
+  assert.match(tracker, /capacitor\\?\.getPlatform/);
+  assert.match(tracker, /Electron\\\\\//);
+  assert.match(tracker, /return "windows"/);
+  assert.match(tracker, /return "android"/);
+});
+
 test("download tracking only supports Windows and Android and uses Pulse event names", () => {
   assert.match(tracker, /export async function recordPulseDownload/);
   assert.match(tracker, /\["windows", "android"\]/);
