@@ -21,11 +21,11 @@ test("Pulse tracker writes schema-compatible server-timestamped events", () => {
 });
 
 test("native app sessions are classified as Android or Windows instead of Website", () => {
-  assert.match(tracker, /capacitor\\?\.isNativePlatform/);
-  assert.match(tracker, /capacitor\\?\.getPlatform/);
-  assert.match(tracker, /Electron\\\\\//);
-  assert.match(tracker, /return "windows"/);
-  assert.match(tracker, /return "android"/);
+  assert.ok(tracker.includes("capacitor?.isNativePlatform?.()"));
+  assert.ok(tracker.includes("capacitor.getPlatform?.()"));
+  assert.ok(tracker.includes("/Electron\\//i"));
+  assert.ok(tracker.includes('return "windows"'));
+  assert.ok(tracker.includes('return "android"'));
 });
 
 test("download tracking only supports Windows and Android and uses Pulse event names", () => {
