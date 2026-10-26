@@ -13,10 +13,11 @@ let started = false;
 function getSessionId() {
   if (sessionId) return sessionId;
   try {
-    sessionId = sessionStorage.getItem("vivid:pulse-session");
+    const storageKey = "vivid:pulse-session:" + (uid || "signed-out");
+    sessionId = sessionStorage.getItem(storageKey);
     if (!sessionId) {
       sessionId = globalThis.crypto?.randomUUID?.() || ("s_" + Date.now().toString(36) + Math.random().toString(36).slice(2, 10));
-      sessionStorage.setItem("vivid:pulse-session", sessionId);
+      sessionStorage.setItem(storageKey, sessionId);
     }
   } catch {
     sessionId = "s_" + Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
@@ -62,6 +63,7 @@ onAuthStateChanged(auth, user => {
     // Reset session state when the signed-in account changes.
     activeUid = nextUid;
     uid = nextUid;
+    sessionId = null;
     started = false;
   }
   if (!uid) { started = false; return; }
