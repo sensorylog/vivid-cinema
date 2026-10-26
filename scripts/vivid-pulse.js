@@ -27,7 +27,7 @@ function safeDetails(details = {}) {
   const safe = {};
   for (const [key, value] of Object.entries(details).slice(0, 20)) {
     if (!/^[a-zA-Z][a-zA-Z0-9_]{0,39}$/.test(key)) continue;
-    if (/(password|token|secret|email|phone|message|content|location|address|cookie|authorization|search_term|query)/i.test(key)) continue;
+    if (/(password|token|secret|email|phone|message|location|address|cookie|authorization|search_term|^query$|query_text|^content$|content_(text|body))/i.test(key)) continue;
     if (typeof value === "string") safe[key] = value.slice(0, 120);
     else if (typeof value === "number" && Number.isFinite(value)) safe[key] = value;
     else if (typeof value === "boolean") safe[key] = value;
