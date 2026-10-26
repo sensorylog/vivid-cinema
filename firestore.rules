@@ -695,6 +695,23 @@ service cloud.firestore {
         && request.resource.data.keys().hasAll(['event','platform','userId','sessionId','timestamp','appVersion','details'])
         && request.resource.data.event is string
         && request.resource.data.event.matches('^[a-z][a-z0-9_]{0,59}
+        && request.resource.data.platform in ['windows','android','web','pwa']
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.sessionId is string
+        && request.resource.data.sessionId.size() >= 1
+        && request.resource.data.sessionId.size() <= 128
+        && request.resource.data.timestamp == request.time
+        && request.resource.data.appVersion is string
+        && request.resource.data.appVersion.size() >= 1
+        && request.resource.data.appVersion.size() <= 40
+        && request.resource.data.details is map
+        && request.resource.data.details.keys().size() <= 20;
+      allow update, delete: if false;
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
   }
 }
 )
