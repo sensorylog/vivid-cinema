@@ -1,4 +1,5 @@
 import "./google-tag.js";
+import "./vivid-pulse.js";
 import "./pwa.js";
 import { VIVID_CONFIG } from "./config.js";
 
