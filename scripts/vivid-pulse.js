@@ -4,6 +4,9 @@ import { addDoc, collection, serverTimestamp } from "https://www.gstatic.com/fir
 
 const platform = (() => {
   try {
+    const nativePlatform = window.Capacitor?.getPlatform?.();
+    if (nativePlatform === "android") return "android";
+    if (window.navigator.userAgent.includes("Electron")) return "windows";
     return window.matchMedia?.("(display-mode: standalone)")?.matches || window.navigator.standalone === true ? "pwa" : "web";
   } catch { return "web"; }
 })();
