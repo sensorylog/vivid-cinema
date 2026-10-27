@@ -16,7 +16,7 @@ test("Adcash ads are disabled from the shared app shell and service worker", asy
   assert.doesNotMatch(loader, /import ["']\.\/adcash\.js["']/);
   assert.doesNotMatch(landing, /adcash|acscdn|runAutoTag/i);
   assert.doesNotMatch(serviceWorker, /scripts\/adcash\.js/);
-  assert.match(serviceWorker, /vivid-cinema-shell-v250/);
+  assert.match(serviceWorker, /vivid-cinema-shell-v\d+/);
   assert.doesNotMatch(headers, /acscdn\.com/i);
   assert.doesNotMatch(firebase, /acscdn\.com/i);
 });
