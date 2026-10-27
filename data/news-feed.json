@@ -1,10 +1,49 @@
 {
-  "generatedAt": "2026-10-27T23:21:22.611Z",
+  "generatedAt": "2026-10-27T23:56:43.838Z",
   "source": "Google News RSS search feeds",
   "count": 120,
   "failedQueries": 0,
   "feedCount": 21,
   "articles": [
+    {
+      "id": "1ra97ah",
+      "headline": "THR Lands 96 National Arts & Entertainment Journalism Awards Noms",
+      "publisher": "The Hollywood Reporter",
+      "publisherUrl": "https://www.hollywoodreporter.com",
+      "sourceUrl": "https://www.hollywoodreporter.com/news/general-news/thr-national-arts-entertainment-journalism-awards-noms-1236741393/",
+      "publishedAt": "2026-10-27T23:40:12.000Z",
+      "region": "hollywood",
+      "category": "film",
+      "summary": "The Hollywood Reporter tops National Arts &amp; Entertainment Journalism Awards with 96 noms, more than any other outlet.",
+      "imageUrl": "./data/news-thumbnails/1ra97ah.webp",
+      "imageFallbackUrl": "https://www.hollywoodreporter.com/wp-content/uploads/2026/10/NAEJA_Noms_SPLASH.jpg?w=1250&h=704&crop=1"
+    },
+    {
+      "id": "pnxtt1",
+      "headline": "Rajinikanth’s Jailer 2 Becomes First Kollywood Film to Cross Rs. 700 Crore",
+      "publisher": "Udaipur Kiran",
+      "publisherUrl": "https://udaipurkiran.com",
+      "sourceUrl": "https://udaipurkiran.com/rajinikanths-jailer-2-becomes-first-kollywood-film-to-cross-rs-700-crore/",
+      "publishedAt": "2026-10-27T23:29:31.000Z",
+      "region": "global",
+      "category": "box-office",
+      "summary": "Rajinikanth's film Jailer 2 has crossed the Rs. 700 crore mark at the worldwide box office within twelve days of its release. The film, directed by Nelson Dilipkumar, has reached a total of Rs. 703 crore, comprising Rs. 454 crore from India and Rs. 249 crore (approximately USD 26.2 million) from overseas. This accomplishment sets",
+      "imageUrl": "./data/news-thumbnails/pnxtt1.webp",
+      "imageFallbackUrl": "https://udaipurkiran.com/wp-content/uploads/2026/10/rajinikanths-jailer-2-becomes-first-kollywood-film-to-cross-1225781.webp"
+    },
+    {
+      "id": "1bu5b20",
+      "headline": "Tokyo Film Festival Director Takeo Hisamatsu Wants More Money, More Parties and a Bigger Global Profile for Japanese Cinema",
+      "publisher": "Yahoo",
+      "publisherUrl": "https://www.yahoo.com",
+      "sourceUrl": "https://www.yahoo.com/entertainment/movies/articles/tokyo-film-festival-director-takeo-231933676.html",
+      "publishedAt": "2026-10-27T23:19:33.000Z",
+      "region": "hollywood",
+      "category": "film",
+      "summary": "Returning to lead the festival ahead of its 40th anniversary, the industry veteran sees an opportunity to capitalize on the surging international interest in all things Japan.",
+      "imageUrl": "./data/news-thumbnails/1bu5b20.webp",
+      "imageFallbackUrl": "https://s.yimg.com/lo/mysterio/api/a6b5ed93487588c8173f8451da1dfdf6ede40ec9c0d94cc79986dc3c476d8f41/lightyear_networkapi/resizefill_w1200%3Bquality_80%3Bformat_webp/https%3A%2F%2Fmedia.zenfs.com%2Fen%2Fthe_hollywood_reporter_217%2Fa2a0f3f1bc1f46760142e66a63013241.jpg"
+    },
     {
       "id": "1mt284",
       "headline": "Japan Must Follow Hollywood’s Distribution Playbook, Says Tokyo Market Chief Shiina Yasushi, Who Eyes Major Expansion by 2030",
@@ -17,6 +56,19 @@
       "summary": "Japan Must Follow Hollywood’s Distribution Playbook, Says Tokyo Market Chief Shiina Yasushi, Who Eyes Major Expansion by 2030",
       "imageUrl": "https://www.imdb.com/news/ni66083079/?ref_=nwc_art_perm",
       "imageFallbackUrl": "https://www.imdb.com/news/ni66083079/?ref_=nwc_art_perm"
+    },
+    {
+      "id": "f8n2sf",
+      "headline": "Acclaimed Movie Actor Dies 'Following a Brief Illness': Family Reveals Death of Francis Duru",
+      "publisher": "PopCulture.com",
+      "publisherUrl": "https://popculture.com",
+      "sourceUrl": "https://popculture.com/uncategorized/news/acclaimed-movie-actor-dies-following-a-brief-illness-family-reveals-death-of-francis-duru/",
+      "publishedAt": "2026-10-27T22:54:55.000Z",
+      "region": "africa",
+      "category": "film",
+      "summary": "Actor Francis Duru has died at age 57, according to a family statement. Duru was an acclaimed figure in international cinema and also an industry diplomat behind the scenes. Loved ones announced his death on Friday via Instagram. “We, the family of Francis Duru, regret to announce his passing following a brief illness,” the statement [&hellip;]",
+      "imageUrl": "./data/news-thumbnails/f8n2sf.jpg",
+      "imageFallbackUrl": "https://popculture.com/wp-content/uploads/sites/5/2023/05/6d934e55-b8d0-4bd0-9385-435cb3525c23.jpg?w=1200"
     },
     {
       "id": "1o1fl0c",
@@ -32,19 +84,6 @@
       "imageFallbackUrl": "https://wheretowatch.tv/wp-content/uploads/2026/10/IMG_5452.jpeg"
     },
     {
-      "id": "1dwj1ki",
-      "headline": "Bunny Levine’s Final Film ‘Omi’ Premieres at Austin Film Festival – Watch the Trailer – Film News in Brief",
-      "publisher": "IMDb",
-      "publisherUrl": "https://www.imdb.com",
-      "sourceUrl": "https://www.imdb.com/pt/news/ni66082994/?ref_=nwc_art_perm",
-      "publishedAt": "2026-10-27T22:23:20.000Z",
-      "region": "global",
-      "category": "festivals",
-      "summary": "Bunny Levine’s Final Film ‘Omi’ Premieres at Austin Film Festival – Watch the Trailer – Film News in Brief",
-      "imageUrl": "https://www.imdb.com/pt/news/ni66082994/?ref_=nwc_art_perm",
-      "imageFallbackUrl": "https://www.imdb.com/pt/news/ni66082994/?ref_=nwc_art_perm"
-    },
-    {
       "id": "1wgc0gi",
       "headline": "TV screen personality of the year finalists revealed",
       "publisher": "1News",
@@ -56,6 +95,19 @@
       "summary": "Ten finalists for the coveted category were unveiled today as part of the New Zealand Screen Awards, with public voting now open.",
       "imageUrl": "./data/news-thumbnails/1wgc0gi.avif",
       "imageFallbackUrl": "https://tvnz-1-news-prod.cdn.arcpublishing.com/resizer/v2/chris-chang-YKBVZKG6JRB7PD5ON2PVWO367Y.jpg?auth=5ec46ed98fd5b6e7239bc2547ac6e55aab1a0db41ab85f4537b00cddaa308627&quality=70&width=600&height=315&focal=3327%2C1105"
+    },
+    {
+      "id": "uimjqg",
+      "headline": "Bunny Levine’s Final Film ‘Omi’ Premieres at Austin Film Festival – Watch the Trailer – Film News in Brief",
+      "publisher": "IMDb",
+      "publisherUrl": "https://www.imdb.com",
+      "sourceUrl": "https://www.imdb.com/news/ni66082994/?ref_=nwc_art_perm",
+      "publishedAt": "2026-10-27T22:09:50.000Z",
+      "region": "global",
+      "category": "festivals",
+      "summary": "Bunny Levine’s Final Film ‘Omi’ Premieres at Austin Film Festival – Watch the Trailer – Film News in Brief",
+      "imageUrl": "https://www.imdb.com/news/ni66082994/?ref_=nwc_art_perm",
+      "imageFallbackUrl": "https://www.imdb.com/news/ni66082994/?ref_=nwc_art_perm"
     },
     {
       "id": "14k4kam",
@@ -84,17 +136,17 @@
       "imageFallbackUrl": "https://image.koreajoongangdaily.com/12935619.jpg?imageId=12935619&x=0&y=13.06&cropw=100&croph=71.67&panox=0&panoy=13.06&panow=100&panoh=71.67&width=1200&height=683"
     },
     {
-      "id": "1jy7g3",
-      "headline": "‘Fair Play’ Doc About Olympic Gymnast Jordan Chiles Set for 2027 Release on Hulu, Disney+ (Exclusive)",
-      "publisher": "The Hollywood Reporter",
-      "publisherUrl": "https://www.hollywoodreporter.com",
-      "sourceUrl": "https://www.hollywoodreporter.com/movies/movie-news/jordan-chiles-documentary-fair-play-olympics-andscape-1236740605/",
-      "publishedAt": "2026-10-27T21:59:46.000Z",
-      "region": "hollywood",
-      "category": "film",
-      "summary": "Olympic gymnast Jordan Chiles is the focus of documentary feature 'Fair Play,' heading to Hulu and Disney+ in 2027 ahead of the Los Angeles Olympics.",
-      "imageUrl": "./data/news-thumbnails/1jy7g3.webp",
-      "imageFallbackUrl": "https://www.hollywoodreporter.com/wp-content/uploads/2026/10/Jordan-Chiles-and-Trishtan-Williams-Split-Getty-H-2026.jpg?w=1296&h=730&crop=1"
+      "id": "p6uahh",
+      "headline": "XBox president Sarah Bond: The secrets of her success",
+      "publisher": "Mashable",
+      "publisherUrl": "https://mashable.com",
+      "sourceUrl": "https://mashable.com/article/sarah-bond-xbox",
+      "publishedAt": "2026-10-27T22:00:00.000Z",
+      "region": "global",
+      "category": "gaming",
+      "summary": "Xbox president Sarah Bond is a rare figure in the gaming industry — a powerful Black female executive.",
+      "imageUrl": "./data/news-thumbnails/p6uahh.jpg",
+      "imageFallbackUrl": "https://helios-i.mashable.com/imagery/articles/062GLCV707kyV4rWpBQzZug/hero-image.fill.size_1200x675.v1743098633.jpg"
     },
     {
       "id": "1djdyeg",
@@ -114,52 +166,39 @@
       "headline": "Cynthia Erivo, Ayoade Bamgboye Reimagine ‘Wicked’ as Nollywood Comedy",
       "publisher": "Olorisupergal",
       "publisherUrl": "https://olorisupergal.com",
-      "sourceUrl": "https://olorisupergal.com/cynthia-erivo-ayoade-bamgboye-reimagine-wicked-as-nollywood-comedy/",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMimAFBVV95cUxPQk40S1lCQ1QxYW01TTV3MkJsemxhZm9WY3hUbFA0T2p2cjRFbkx3aTRleTh6eFJISF9ySzdvTU15WGFTUVVZdjh0OXdsRU04UmwyMEhfZ1AwLVBuX1NGcC1Bdjh0emFBN3RES0UzNkw1RmNPYm9CbDRmZXFPMS1reWtrNUZ0QmRDaVo0RUJ1MnBWMUh4bFRlWA?oc=5",
       "publishedAt": "2026-10-27T21:08:32.000Z",
       "region": "africa",
       "category": "film",
-      "summary": "Pop culture, Nollywood, Celebrity News or Home of Entertainment in Africa",
-      "imageUrl": "./data/news-thumbnails/1kedrkt.webp",
-      "imageFallbackUrl": "https://olorisupergal.com/wp-content/uploads/2026/10/Cynthia-Erivo-2.jpg"
-    },
-    {
-      "id": "1vm1j4g",
-      "headline": "Connor Storrie in Talks to Join Ryan Gosling in Marvel’s ‘Ghost Rider’",
-      "publisher": "The Hollywood Reporter",
-      "publisherUrl": "https://www.hollywoodreporter.com",
-      "sourceUrl": "https://www.hollywoodreporter.com/movies/movie-news/connor-storrie-joining-ryan-gosling-ghost-rider-1236741021/",
-      "publishedAt": "2026-10-27T21:03:37.000Z",
-      "region": "hollywood",
-      "category": "film",
-      "summary": "Shawn Levy is directing the project, which reunites him with his 'Star Wars: Starfighter' star Gosling and scribe Jonathan Tropper.",
-      "imageUrl": "./data/news-thumbnails/1vm1j4g.webp",
-      "imageFallbackUrl": "https://www.hollywoodreporter.com/wp-content/uploads/2026/10/Connor-Storrie-and-Ryan-Gosling-Split-Getty-H-2026.jpg?w=1296&h=730&crop=1"
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
     },
     {
       "id": "1o41bq1",
       "headline": "Video game film adaptations used to be huge flops. Now studios can’t get enough",
       "publisher": "Japan Today",
       "publisherUrl": "https://japantoday.com",
-      "sourceUrl": "https://japantoday.com/category/entertainment/Video-game-film-adaptations-used-to-be-huge-flops.-Now-studios-can%E2%80%99t-get-enough",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMizgFBVV95cUxNaDZSTXV4Y1c3R2ltWTVuSm1pTi1UQ1NPMUxkeG9jb0hfc1dtTHpldF9xeFFOcGFJS1JBYkFQdXhlN3R0a3lIdVBPd3FYSUZOd1gtZTRmUlJodXpBcmpQeUViVlFJNkhsMXN3NFFsYWlIclRtdGpfSDBsZkJ0RERlSmtWRXFGa3I3QW9WWWs3Y0E2VDlRaHVDMHgtQWw1Rk41YUh1YnlvUTF1TEdBcHNtbHhPQkpTSTdxLTEwYnhHek90U1dENVFCTUtxX3lGQQ?oc=5",
       "publishedAt": "2026-10-27T21:00:00.000Z",
       "region": "hollywood",
       "category": "film",
-      "summary": "Video game film adaptations used to be huge flops. Now studios can’t get enough",
-      "imageUrl": "https://japantoday.com/category/entertainment/Video-game-film-adaptations-used-to-be-huge-flops.-Now-studios-can%E2%80%99t-get-enough",
-      "imageFallbackUrl": "https://japantoday.com/category/entertainment/Video-game-film-adaptations-used-to-be-huge-flops.-Now-studios-can%E2%80%99t-get-enough"
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
     },
     {
-      "id": "yzbkoa",
-      "headline": "Reuters Entertainment News Summary",
-      "publisher": "Devdiscourse",
-      "publisherUrl": "https://www.devdiscourse.com",
-      "sourceUrl": "https://www.devdiscourse.com/article/international/3998317-reuters-entertainment-news-summary",
-      "publishedAt": "2026-10-27T20:56:46.000Z",
+      "id": "1suwa6t",
+      "headline": "Clayface Director Makes It Clear Who's To Blame If Fans Don't Like The DC Movie",
+      "publisher": "AOL.com",
+      "publisherUrl": "https://www.aol.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMihAFBVV95cUxNTFBMbVFmbG5nM19QWXh5M2s3M1Q3UXhmUDVoUnVoX3QtN1FhM0k0bDg0UmphS2stdW9uSUM4RkhCMHVteWtLSUF3bGIyeFFrajJBSDlzakQxUEtLTFNCZEVxdG05WFBLWDBrQ25XcG4wVVlNcXYxc0hGWi1sa0h1Nzc4TS0?oc=5",
+      "publishedAt": "2026-10-27T21:00:00.000Z",
       "region": "hollywood",
-      "category": "television",
-      "summary": "Read more about Reuters Entertainment News Summary on Devdiscourse",
-      "imageUrl": "./data/news-thumbnails/yzbkoa.jpg",
-      "imageFallbackUrl": "https://www.devdiscourse.com/img?imageUrl=https://devdiscourse.blob.core.windows.net/imagegallery/25_06_2019_19_12_02_9568411.jpg&width=920&format=jpeg"
+      "category": "film",
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
     },
     {
       "id": "1fvqoat",
@@ -183,6 +222,19 @@
       "publishedAt": "2026-10-27T20:40:13.000Z",
       "region": "asia",
       "category": "television",
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
+    },
+    {
+      "id": "smgeqp",
+      "headline": "Chimezie Imo's life story and the raw indie performances that landed him his breakthrough role",
+      "publisher": "Legit News",
+      "publisherUrl": "https://www.legit.ng",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMiwgFBVV95cUxOeU1QRDF5dmJ4Tkd2ekhxVDhWR2F5ZDQwWk5VRkQ4dXZkNms5MnZReE0zLTVDY2k4d0NCQVd2aVl6dUx0YzlmTm1RZ0pUYjVSQldYMWxlcThMN09QUzY5bGFYZ18xQzNlOWlWaDdfaWFYVHBjcXVSYWYyMFZyQ3FjczN1czcyUi1uNUJaczZQdnZyWnNFUkt1S1FQbGR5aGsxR3RrOGV0VkZCZmZobHdjdGdiWGFvcmZZOVBhdk9IZFFOZw?oc=5",
+      "publishedAt": "2026-10-27T20:40:08.000Z",
+      "region": "africa",
+      "category": "film",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
       "imageUrl": "",
       "imageFallbackUrl": ""
@@ -214,6 +266,19 @@
       "imageFallbackUrl": ""
     },
     {
+      "id": "z5s3ok",
+      "headline": "Christopher Nolan’s The Odyssey Nears End of Theatrical Run With $1.79 Billion Global Total",
+      "publisher": "Zoom TV | Entertainment",
+      "publisherUrl": "https://www.zoomtventertainment.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMirAFBVV95cUxNUG05S3h0ZUE4SFFxYkRGbEFLTncyWmh1Y0Jhdmhra3otUHZwX0dhRTM2QlhrdHZfT0hLSWhBV05MMW9lODROY1BZenpHN2YzeG5Ta2VQRU5uX0lWQjBFTUJscWxWdEl1RndGX1pIY1BPcEJfbWsxUmd5ZGxiTFFCRm41Z0lldEJDVmczc0JiNFI1ekhmR2FEcUNuY1JBckRaWFZmVVcyaHVCd0x0?oc=5",
+      "publishedAt": "2026-10-27T20:10:31.000Z",
+      "region": "global",
+      "category": "box-office",
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
+    },
+    {
       "id": "1jdl9bd",
       "headline": "The 'Elden Ring' Movie Just Found A Streaming Home At Amazon — With A Catch",
       "publisher": "inkl",
@@ -227,6 +292,32 @@
       "imageFallbackUrl": ""
     },
     {
+      "id": "jo1f3q",
+      "headline": "We rated every ‘celebrity home’ on a $50 Hollywood tour — see the results",
+      "publisher": "New York Post",
+      "publisherUrl": "https://nypost.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMitgFBVV95cUxNdUxrbnU3MHBKd19GMG43N1RtaGZBSENDNEVEamhCU01wMlNweC1wRVU5QWFrVnJHa081enRHZzVET1QyaEFwZkZJNFpHNzZsZlZpNlpyNjZzZDloVmlmVXpwZVItcUNRMVp2SnctNWNVTkVrSlBhZ016RV9NQm9GZE5BVnZSZFpMTXkzeDhtb0NJQmVONEd2R3YxaGVaTFJHdHJITi0tOTA1cl9nOHdEV3p4NGRtQQ?oc=5",
+      "publishedAt": "2026-10-27T20:07:00.000Z",
+      "region": "hollywood",
+      "category": "celebrity",
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
+    },
+    {
+      "id": "17ea8jm",
+      "headline": "Anime Licensing Platform AniBiz Gets $6 Million Investment From Japan’s TBS Group, Toei Animation and TV Tokyo Holdings",
+      "publisher": "IMDb",
+      "publisherUrl": "https://www.imdb.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMiZkFVX3lxTE5tMnRfOHUzVUtsanFUNnExd2hpZGQyLXRjMEdhSGpLOGVtZmlzZGdyUko2RzVIX2syVGFjZVQ0Q09SeUNhVXBvLXhTX09WRjgtTEI5RngtNm5DZEpSMXdBOVBlUFhxUQ?oc=5",
+      "publishedAt": "2026-10-27T19:54:50.000Z",
+      "region": "asia",
+      "category": "anime",
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
+    },
+    {
       "id": "2fwzq6",
       "headline": "Samsung TV Plus Expands K-Content Lineup with Short-Form Microdrama Slate, Weekly Movie Nights, and Reality Competition, Deepening its Commitment to Korean-Led Entertainment",
       "publisher": "Samsung Global Newsroom",
@@ -235,19 +326,6 @@
       "publishedAt": "2026-10-27T19:51:16.000Z",
       "region": "asia",
       "category": "television",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
-      "id": "5pxm1",
-      "headline": "Original Star Trek actor Walter Koenig dies aged 90",
-      "publisher": "1News",
-      "publisherUrl": "https://www.1news.co.nz",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMikAFBVV95cUxNa0dfS2pnYjZtaFJBUmNrNHRxYUZfQ3pKWF85bEpra2txOW4xY1ZlZFVaWG92VGlCakZiNjgwLW5qZmRqWXVxVTI0Q2lTR21qSTZQeXRLLWljcHNnUHg5NlE0M21VRnNGM0Z2am5fTFBKXzF3S2psUFpYM3F6ejJGZ2lNU01HODAzR282VWxjXzk?oc=5",
-      "publishedAt": "2026-10-27T19:43:29.000Z",
-      "region": "global",
-      "category": "awards",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
       "imageUrl": "",
       "imageFallbackUrl": ""
@@ -305,19 +383,6 @@
       "imageFallbackUrl": ""
     },
     {
-      "id": "ial5cw",
-      "headline": "2026-2027 awards season calendar: Key dates for Oscars, Grammys, Golden Globes, every major show",
-      "publisher": "Yahoo",
-      "publisherUrl": "https://www.yahoo.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMilwFBVV95cUxPN3ZCTTdWTE1yRHNUdUNEWW9CazI1V09LSzAyclpXRV93WkJUQTNkWW9ldlEzY0toMWx0eGhWZ2J0NmphU2NHZ3l3X3hmMkpFdFpuOFo5VHhZbnp5c1FlQ2NPYkhXQjJMYXhRYVRjb3l1b3hhS2ticmtBRGVsTGRKeWRIS3l1RFBVWFpwN1dzTFdrNmJwWXhF?oc=5",
-      "publishedAt": "2026-10-27T19:09:49.000Z",
-      "region": "global",
-      "category": "awards",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
       "id": "1rk1x6o",
       "headline": "Reel to Reality Film Festival returns to celebrate bold African storytelling",
       "publisher": "Bona Magazine",
@@ -352,19 +417,6 @@
       "publishedAt": "2026-10-27T19:08:40.000Z",
       "region": "asia",
       "category": "television",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
-      "id": "1f6f296",
-      "headline": "‘The Gilded Age’ Season 4 Review: The Real Housewives of the New York Elite Queen Out as Series Hits New Heights [A-]",
-      "publisher": "Awards Watch",
-      "publisherUrl": "https://awardswatch.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMi0gFBVV95cUxOck1nQ2t5TUZIcE5iYTc1UVJiTUx1WmJMMFNnZ1Q4RUFCdVNoaDE4b1F3SUMxNVFhak5Ec1RQQVZpbk9NR01ISTNxUHNkbkFlbTFrNjBtNnEzeEFKQ1JSQWJGVW5LSDZaaEtJRDVCMDVQelh6ZGJ6TkFKZng5TEttaTI4UF9PUTUtQzJWNER4YmRIX0k5SnY0dDEybEoxeDc5ZC1yVmRLWFN4Vmp3RE9abk51anR3ZmE2MDFNbXFnNUM2NVdBQ2luc0hhbEpVLWJnRVE?oc=5",
-      "publishedAt": "2026-10-27T19:06:19.000Z",
-      "region": "global",
-      "category": "awards",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
       "imageUrl": "",
       "imageFallbackUrl": ""
@@ -417,6 +469,32 @@
       "publishedAt": "2026-10-27T18:30:43.000Z",
       "region": "hollywood",
       "category": "streaming",
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
+    },
+    {
+      "id": "1xw7r7r",
+      "headline": "WAND News honored with two Regional Emmy Awards",
+      "publisher": "WAND",
+      "publisherUrl": "https://www.wandtv.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMiigFBVV95cUxNVXJsTVlPTWlhUlN3RXdocC1BRlB6d05vT3BoekJ0cDBNZXI1OHRvc0FWaGZ1Q2g0X0k3XzFaZUJxVVpNSld0TFZ4ejUweXpaX2NzcjBVRzNxMDh6XzZJOTJnMUszZms0cVM2M2FFTmhUSS0ya0NxZm83ajh1ZzhpVTV0Rm5PUnB0N1HSAZ4BQVVfeXFMTWs0YWNGWHpoUm10TnFKakxEbDhIUXE3Wm9vMmZNV2NWXzdHUGlRYkxCbEI5b3p0cnlId3NMXy0wSkFub2IxYUl6aEZlVWcxOGczZGRrWDlpMFhWVVYtSGtSaFhRamhEMklETWs0X1RIUG1MWlVRYnN4b3B0a2Jzbmh0UllSbHBvY2xGMHdXdUI3dGxqcEZBM2s4TUcyNXc?oc=5",
+      "publishedAt": "2026-10-27T18:30:00.000Z",
+      "region": "hollywood",
+      "category": "television",
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
+    },
+    {
+      "id": "tph9x1",
+      "headline": "Actress Hayden Panettiere dies at 36, found in cardiac arrest - ABC News",
+      "publisher": "ABC News - Breaking News, Latest News and Videos",
+      "publisherUrl": "https://abcnews.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMidkFVX3lxTE9zSjV5eGxNbk1wWUlEX0trWENkcE90aUtQQ3c2YVVXT05lbHJFYjB3bjd6NVFXM2Y5YnloR2JhaFRUUjl1Ym13MEozamxLeWhuNnlkUzFPaS1DdEgySlZHNUEyc1ZrMWZSMUdpRDJOUzRpMEVrOWfSAXtBVV95cUxOa0lEdXdRSVBuaS1vazlmNXhzeTVuSGhnVXpxdDNGTFJEYTc4cEpGeEJEREw0by00M185SzEyeXZERlU5RnJIbnREZ1RsV0tmNnRpTmtPM3NLblBiS1ZtYndUbGNybDZGdjVrR0dRMlRhbXZ3cFhxT2c0Qms?oc=5",
+      "publishedAt": "2026-10-27T18:28:06.000Z",
+      "region": "hollywood",
+      "category": "television",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
       "imageUrl": "",
       "imageFallbackUrl": ""
@@ -487,6 +565,19 @@
       "imageFallbackUrl": ""
     },
     {
+      "id": "1u21xp5",
+      "headline": "THR Charts",
+      "publisher": "The Hollywood Reporter",
+      "publisherUrl": "https://www.hollywoodreporter.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMiVkFVX3lxTE1DOUhYZTVTYlBIU3lGbWQ0akJYbnNtMnJxY1VPeXBEd1FQSWtrSWlCdHNEeFNNUW54aktkY2FqaVlKMTRjanNtZlVHYk54MkNQdjJOOEhB?oc=5",
+      "publishedAt": "2026-10-27T18:07:19.000Z",
+      "region": "hollywood",
+      "category": "television",
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
+    },
+    {
       "id": "4yks1e",
       "headline": "‘Missing out on millions’: The red tape strangling Australia’s screen sector",
       "publisher": "The Australian",
@@ -500,14 +591,14 @@
       "imageFallbackUrl": ""
     },
     {
-      "id": "hqryb9",
-      "headline": "AniBiz Raises $6 Million From TBS Group, Toei Animation, TV Tokyo",
-      "publisher": "Variety",
-      "publisherUrl": "https://variety.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMivgFBVV95cUxNTXM4RUx6WDRLX2pQZ3ZuN2xfMkI0TWRZWl9XcFp5U284V3dQMG9Fc3NQVk5OZWFGV2VHTkduRGJvbVJzZmpBalhqNXItRGgzeFdrZ3Npd2gyNGgyTkFrZEtVUzJyYzFoQ2l3Y25UZHVuYzJPSkRqLTNMYm9OdnQ5ajg2Ny0xRVZUUkR0X2RZZ0Z2enVrR0RJOXdwcDdxakM5WFpEQVF4WVBPbF9tcHhPYTNyNXNiLWVmN0NfTEpn?oc=5",
-      "publishedAt": "2026-10-27T18:00:00.000Z",
-      "region": "asia",
-      "category": "anime",
+      "id": "rl5fm2",
+      "headline": "Nollywood veteran Steve Echendu dies at 52, family announces funeral programme",
+      "publisher": "Head Topics",
+      "publisherUrl": "https://ng.headtopics.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMikwFBVV95cUxNdGxJQjVvbHIzbnhlRHVxREhlRnlEaW5EelJCb055ZktqZnotZlA5MDlUOEc1dWZYTzRSYUxfcmtZWXpHOS1LbUlPZk5rYVdRWFVQVllJMVVrV2hCMjRmeHlZSTkxWTJrQnN0VmVSRkREWUJYek1mX21tM0Q4YkExMEg5R2NHNlh3UFhhZjVzbHB6czA?oc=5",
+      "publishedAt": "2026-10-27T18:02:00.000Z",
+      "region": "africa",
+      "category": "film",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
       "imageUrl": "",
       "imageFallbackUrl": ""
@@ -591,19 +682,6 @@
       "imageFallbackUrl": ""
     },
     {
-      "id": "17ea8jm",
-      "headline": "Anime Licensing Platform AniBiz Gets $6 Million Investment From Japan’s TBS Group, Toei Animation and TV Tokyo Holdings",
-      "publisher": "IMDb",
-      "publisherUrl": "https://www.imdb.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMiZkFVX3lxTE5tMnRfOHUzVUtsanFUNnExd2hpZGQyLXRjMEdhSGpLOGVtZmlzZGdyUko2RzVIX2syVGFjZVQ0Q09SeUNhVXBvLXhTX09WRjgtTEI5RngtNm5DZEpSMXdBOVBlUFhxUQ?oc=5",
-      "publishedAt": "2026-10-27T17:39:03.000Z",
-      "region": "asia",
-      "category": "anime",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
       "id": "1kzeqx7",
       "headline": "Studios Get Millions From California’s Tax Credit. But They Balk at the State’s Diversity Initiative",
       "publisher": "The Hollywood Reporter",
@@ -623,19 +701,6 @@
       "publisherUrl": "https://variety.com",
       "sourceUrl": "https://news.google.com/rss/articles/CBMifkFVX3lxTFB2WEdLbW1VM3BTZlc4eDdzZURpZGd1WDdzZTc0QU9pRlVDT0hLc010RFVFR1FyQXJrdllZU1FnUmkzbWpEekRXbmtLNFhyaHUxamp1WlNVTFh3d004VW1ZUmZGaGVpSHJ5S3VPWHF6N29RV3FKei1pdzlTY0E0Zw?oc=5",
       "publishedAt": "2026-10-27T17:35:00.000Z",
-      "region": "global",
-      "category": "awards",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
-      "id": "hj6nua",
-      "headline": "Michael Strahan Biography - ABC News",
-      "publisher": "ABC News - Breaking News, Latest News and Videos",
-      "publisherUrl": "https://abcnews.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMifEFVX3lxTE83Z2cxYkxBOTE0TGNjTmJfTU91Y3pMWjVlWlZRVVdQZDQ1M0RaeURPa3FFRVJnS2JVTjNBbW1TUnkzNEk1X3ZNTlpNX3hyWVlKZDJ3RGJJOWNTcHd3WUVPRWRtbkEycFhvaF9QSkh6R3pWV0VVT1VRaVNkeE_SAYIBQVVfeXFMTl9RU3VRbDBpVndxMkpoMEgxbDBqdHIwRWpuUzVmbEpEOWtvWFFMODBxeTdzVkRoUzJqNVM3NzdjMjI1TnhfTFVRWUxyQzUwMmJ0amJHMDlXZURtQ3BxdVYxQnpTSVVVV3NBTGIydzdOSXp0a1RzQXgwSkpuc2tZRjdMZw?oc=5",
-      "publishedAt": "2026-10-27T17:33:41.000Z",
       "region": "global",
       "category": "awards",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
@@ -682,19 +747,6 @@
       "imageFallbackUrl": ""
     },
     {
-      "id": "10jpzpy",
-      "headline": "Shilpa Rao concert row: Kutle Khan issues clarification amid backlash",
-      "publisher": "The Hawk",
-      "publisherUrl": "https://www.thehawk.in",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMipwFBVV95cUxNTkdOX2ROdTMzeVoyb1hPT1BtZjJMTzRNM0N0RmVXM1ktaHBXZnpEWERnaHdJUUU3OXBJcHdTXzRvNjZzY1U4Nm1aaEI0WW5Sd1VKbHJKWWtTOWVWZDIyaG9wTDB2RFA2aUFPRHp0eUVtazZkVGh4WVRuQUNMam4wbWRHMEV0bzVEanBHSS1UMUhtYm14MG8wMEt1VzJSVzdFa1UyYkxOZw?oc=5",
-      "publishedAt": "2026-10-27T17:21:38.000Z",
-      "region": "india",
-      "category": "music",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
       "id": "h2uyr7",
       "headline": "UK and EU officials to discuss freedom of movement",
       "publisher": "BBC",
@@ -734,14 +786,14 @@
       "imageFallbackUrl": ""
     },
     {
-      "id": "blzm54",
-      "headline": "Streaming services adapt their apps for iPhone Duo",
-      "publisher": "FlatpanelsHD",
-      "publisherUrl": "https://www.flatpanelshd.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMiekFVX3lxTE80UXpwbll6WU5EOFBsSjF0T2pMS01IQU1Oa0hzTnQzb2c5RDRwMEFNaXlGalRsVmpKcHhHVDRwVG5tQ0RjYVVGSGVRanlOemJobmtKVlVhTGFsRWc1cG0zNlFDUGxXbTM0dUIzd0tqTFNzNGM1eEdmOWRn?oc=5",
-      "publishedAt": "2026-10-27T17:11:55.000Z",
-      "region": "hollywood",
-      "category": "streaming",
+      "id": "1jqs7yg",
+      "headline": "Entertainment News",
+      "publisher": "Channels Television",
+      "publisherUrl": "https://www.channelstv.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMiaEFVX3lxTFBFMjMzMzNBWm5QemQ0VmNfM1I3WDFXYzlRdk96YTA3X2tYUXgtODdJS3k4a0gtbHNza0xLaGYzNmRzbTBTbjhwNndiOTlZa2dzVVh5ZDQ4VGFZdjJmalBaeGVaWkhaY2st?oc=5",
+      "publishedAt": "2026-10-27T17:07:49.000Z",
+      "region": "africa",
+      "category": "film",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
       "imageUrl": "",
       "imageFallbackUrl": ""
@@ -786,19 +838,6 @@
       "imageFallbackUrl": ""
     },
     {
-      "id": "11vfhp7",
-      "headline": "ABS-CBN programs recognized among the most child-friendly - ABS-CBN",
-      "publisher": "ABS-CBN",
-      "publisherUrl": "https://www.abs-cbn.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMixAFBVV95cUxOa0ZtMTdaa2puOWt4T1llYUJrNjhpQ0Y3SFBwcWxfTjctOFEwdjVzVHVyQWsxQzRyaVFOZ3JDa2dWTzZuNDdqM21ZX01mWHh1QnRJS3JLU2tqS0lrMXZyM2h5cmZla2ZkZFhUSVRwYUN1bkU1OF9la3FvWDFSQWZQOTY2SFU5TExjcnZnQWQ0TWtGU0FGdHItREFTSE1LWExBR0p6Q0RIWDdsNFFxRGxJUTZKUWdHczFyQUtjRlo4RmZqV3Nv?oc=5",
-      "publishedAt": "2026-10-27T16:59:42.000Z",
-      "region": "global",
-      "category": "awards",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
       "id": "1s1wi3a",
       "headline": "Unnamed celebrity accused of 'inappropriate sexual activities', court hears",
       "publisher": "BBC",
@@ -833,6 +872,19 @@
       "publishedAt": "2026-10-27T16:50:49.000Z",
       "region": "africa",
       "category": "film",
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
+    },
+    {
+      "id": "bboxdb",
+      "headline": "‘Easily Offended’: Paul Schrader on Festivals Rejecting His Pedophile Movie",
+      "publisher": "ComingSoon.net",
+      "publisherUrl": "https://www.comingsoon.net",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMikwFBVV95cUxNaGZLS0l5SWZ1WXZNZEViUFZrbHpTVzFwdVBmOC1wNWRhNTNKdzZVUFhwSDlqc2kwZzVNSFZWaHZUNkFjTnh2Q2J0LUdTQXZ0WUNtWGM1STY0OEF1Vm9ZNHJ0SDF1NUJ6MHFPUV9ad0dEd1dmU3BkdWladE9OTkptTUdHbzI1LVdMMVZNT3FBNng2NGfSAZMBQVVfeXFMTWhmS0tJeUlmdVl2TWRFYlBWa2x6U1cxcHVQZjgtcDVkYTUzSnc2VVBYcEg5anNpMGc1TUhWVmh2VDZBY054dkNidC1HU0F2dFlDbVhjNUk2NDhBdVZvWTRydEgxdTVCejBxT1FfWndHRHdXZlNwZHVpWnRPTk5KbU1HR28yNS1XTDFWTU9xQTZ4NjRn?oc=5",
+      "publishedAt": "2026-10-27T16:31:15.000Z",
+      "region": "global",
+      "category": "festivals",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
       "imageUrl": "",
       "imageFallbackUrl": ""
@@ -877,19 +929,6 @@
       "imageFallbackUrl": ""
     },
     {
-      "id": "13e9qnl",
-      "headline": "Jessica Chastain’s Horror Movie Officially Removed From 500 Theaters as It Nears $100 Million",
-      "publisher": "Collider",
-      "publisherUrl": "https://collider.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMiggFBVV95cUxQQzVDbnZSUXctRzRKVEhQNHpYX2d2MEFRMkJxZ0JvanZCV2JaOEZ4VGYxMDJ4S3FjUzJCbjgxeXpPYU5QaVZCdWNCS254TEVvWXBsN0ptNE5kYjFwUHppNXU2akthb3QyODhsRE5xY0RENmgydVJYaW1wZHBwR1piYkd3?oc=5",
-      "publishedAt": "2026-10-27T16:15:12.000Z",
-      "region": "global",
-      "category": "box-office",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
       "id": "1e3pt1t",
       "headline": "Kamal Haasan, Karthi, Nivin Pauly, Vijay Sethupathi Mourn Music Director Deva’s Demise",
       "publisher": "INDIA New England News",
@@ -898,19 +937,6 @@
       "publishedAt": "2026-10-27T15:47:10.000Z",
       "region": "india",
       "category": "music",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
-      "id": "uee1yl",
-      "headline": "Netflix Faces Ad-Sales Headwinds as Streaming Inventory Swells",
-      "publisher": "Mezha.net",
-      "publisherUrl": "https://mezha.net",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMiiAFBVV95cUxOaW9ja0U1bWxGZXZOWW5SdTIxbUxuOGNCMXRQd1FvWFVUODJtX0pTenR2eWZWS2ptMVM5QmJMVUczYmlRN2NSdFlIVW94Qm1sRHZyRksyczFBOC0xNUZkVG54ZWxHejNXUkNSUzU4ZFM1VWo4YXduM3FxcGlkQ1ZjMGZaTUltWmNL?oc=5",
-      "publishedAt": "2026-10-27T15:42:38.000Z",
-      "region": "hollywood",
-      "category": "streaming",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
       "imageUrl": "",
       "imageFallbackUrl": ""
@@ -929,24 +955,37 @@
       "imageFallbackUrl": ""
     },
     {
-      "id": "n9m6at",
-      "headline": "Susan Saint James dies at 80: Why the actor walked away from Hollywood at the height of her fame",
-      "publisher": "The Economic Times",
-      "publisherUrl": "https://m.economictimes.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMikAJBVV95cUxNTlVpaGpZRGFfTkxtSjlfdW1oTGNZNDNfa0Fjam04Zmt3Ym45MVdvdTZnNFY0VE40TTg1WTB3RGZxdlRRcC1IRjZGN2U4Vm9CTnBweXdkd2VybzBKWlVTc2hZRHRTNi1ESGozSGQ5NGt5S1d5Mk1uS1JKR3VQczdCQkluekU3Y2tPcllWWUQ4UXk0a2hVbVQzWjVXLU5rdndwVGhmNTRySWZnVGdTYmtFZ0hURXlqbGtFSlNPdkZFRkNsRTQ2QmZ6Y3dWMktYaEpKc09OYTFEbmhJNmxzallvS08xSjhnSlVvem4zOVRCZHA3MEJOcjI0SmdYZkgwRTFVWU9nZURrUmxCWlQtVzNTUNIBkAJBVV95cUxNTlVpaGpZRGFfTkxtSjlfdW1oTGNZNDNfa0Fjam04Zmt3Ym45MVdvdTZnNFY0VE40TTg1WTB3RGZxdlRRcC1IRjZGN2U4Vm9CTnBweXdkd2VybzBKWlVTc2hZRHRTNi1ESGozSGQ5NGt5S1d5Mk1uS1JKR3VQczdCQkluekU3Y2tPcllWWUQ4UXk0a2hVbVQzWjVXLU5rdndwVGhmNTRySWZnVGdTYmtFZ0hURXlqbGtFSlNPdkZFRkNsRTQ2QmZ6Y3dWMktYaEpKc09OYTFEbmhJNmxzallvS08xSjhnSlVvem4zOVRCZHA3MEJOcjI0SmdYZkgwRTFVWU9nZURrUmxCWlQtVzNTUA?oc=5",
-      "publishedAt": "2026-10-27T15:37:00.000Z",
-      "region": "global",
-      "category": "awards",
+      "id": "cm9flf",
+      "headline": "‘Fair Play’ Doc About Olympic Gymnast Jordan Chiles Set for 2027 Release on Hulu, Disney+ (Exclusive)",
+      "publisher": "IMDb",
+      "publisherUrl": "https://www.imdb.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMiZkFVX3lxTE9KNFBqRHh1dWRzZVpxSGtvZnkzSk5ORWFob1g4SmpvV21fN2lzM3ExcnBsc2FpSkVOMkpneTRkVHpiMThidERLd3N0V1QxQUVPRlduTlRzbDBheTlmZ3JyY3MyRGwyUQ?oc=5",
+      "publishedAt": "2026-10-27T15:38:43.000Z",
+      "region": "hollywood",
+      "category": "film",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
       "imageUrl": "",
       "imageFallbackUrl": ""
     },
     {
-      "id": "1xpw0tl",
+      "id": "18fbz4e",
+      "headline": "Nollywood: Cynthia Erivo Turns Wicked Into a Hilarious Drama",
+      "publisher": "Geeky Nigeria",
+      "publisherUrl": "https://geeky.com.ng",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMilwFBVV95cUxPQVNUZ2h6WDFFSlRfMmZia01ZV0Jpb2Z0blZxekwyRXpFTE1WTmNadGRGeGtuMW54N0FZdG9aakkyZmVidkEwTm03MkJwMk5yenhVa0VCWHU5aTNjN01YaktnUzVldlhKcVdTMkdrdC1JemxsVEZ2WVVNVUYzanNwT2tYWXhqZDBjYzFETjM3OTdacnZOU0VN?oc=5",
+      "publishedAt": "2026-10-27T15:34:05.000Z",
+      "region": "africa",
+      "category": "film",
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
+    },
+    {
+      "id": "1lzljru",
       "headline": "Netflix Has a New Problem: Subscribers Are Watching Less and Opening the App Less Often",
       "publisher": "| Cord Cutters News",
       "publisherUrl": "https://cordcuttersnews.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMivgFBVV95cUxQb09JejVCOTlBRnQ5Q1F0c2tOX3ZRdjRzSG1sNVVWaFZkTjAxNno0OE93VnE5Tmw2eWdKUEhnYzdqMmZHdTV4RXlPTkJLOHVacUJmcUNQOC1OTFdod25YXzcxUEtOQXM4bldSS0l1VVhpX0doSmZ3dEM2X01Eck9CYlQwNnhiRzRveUpjYlh0ZElSVUllS0JQSThlSnhkbDdRbXdndXJTMXJXT0xwNlhFYy1TWUs3cUVWdkJfRktn0gG-AUFVX3lxTFBvT0l6NUI5OUFGdDlDUXRza05fdlF2NHNIbWw1VVZoVmROMDE2ejQ4T3dWcTlObDZ5Z0pQSGdjN2oyZkd1NXhFeU9OQks4dVpxQmZxQ1A4LU5MV2h3blhfNzFQS05BczhuV1JLSXVVWGlfR2hKZnd0QzZfTURyT0JiVDA2eGJHNG95SmNiWHRkSVJVSWVLQlBJOGVKeGRsN1Ftd2d1clMxcldPTHA2WEVjLVNZSzdxRVZ2Ql9GS2c?oc=5",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMitgFBVV95cUxNY0VHZTJpRnZkYUZ2bG5EQ3pXUjVJaUQ5cE5wd3g3aGdTNDktdWNQay0zYWoxcU5YZklYaFU4MEFXcldNYndyVjlQVllCbnlIXzFxOGdrRGgwNVQ4QTNqeEtYUUtvNlRKdGtkZTZqMmktcTg1Wlo5M05tM2FHZFBibEpOTlFCZnk3a0pvaV9MRU1CbjBFU1RVODg5UXdEbkpINkw4Z1R2bGJKb3VpNUhOZ1ZfM1N0UdIBvgFBVV95cUxQb09JejVCOTlBRnQ5Q1F0c2tOX3ZRdjRzSG1sNVVWaFZkTjAxNno0OE93VnE5Tmw2eWdKUEhnYzdqMmZHdTV4RXlPTkJLOHVacUJmcUNQOC1OTFdod25YXzcxUEtOQXM4bldSS0l1VVhpX0doSmZ3dEM2X01Eck9CYlQwNnhiRzRveUpjYlh0ZElSVUllS0JQSThlSnhkbDdRbXdndXJTMXJXT0xwNlhFYy1TWUs3cUVWdkJfRktn?oc=5",
       "publishedAt": "2026-10-27T15:32:21.000Z",
       "region": "hollywood",
       "category": "streaming",
@@ -968,12 +1007,12 @@
       "imageFallbackUrl": ""
     },
     {
-      "id": "tph9x1",
-      "headline": "Actress Hayden Panettiere dies at 36, found in cardiac arrest - ABC News",
-      "publisher": "ABC News - Breaking News, Latest News and Videos",
-      "publisherUrl": "https://abcnews.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMidkFVX3lxTE9zSjV5eGxNbk1wWUlEX0trWENkcE90aUtQQ3c2YVVXT05lbHJFYjB3bjd6NVFXM2Y5YnloR2JhaFRUUjl1Ym13MEozamxLeWhuNnlkUzFPaS1DdEgySlZHNUEyc1ZrMWZSMUdpRDJOUzRpMEVrOWfSAXtBVV95cUxOa0lEdXdRSVBuaS1vazlmNXhzeTVuSGhnVXpxdDNGTFJEYTc4cEpGeEJEREw0by00M185SzEyeXZERlU5RnJIbnREZ1RsV0tmNnRpTmtPM3NLblBiS1ZtYndUbGNybDZGdjVrR0dRMlRhbXZ3cFhxT2c0Qms?oc=5",
-      "publishedAt": "2026-10-27T15:27:53.000Z",
+      "id": "1ccsd25",
+      "headline": "Susan Saint James, Emmy-winning star of Kate & Allie, dies at 80 after battling pancreatic cancer | Hindustan Times",
+      "publisher": "Hindustan Times",
+      "publisherUrl": "https://www.hindustantimes.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMi9wFBVV95cUxOdUZfTTBkUEN0OXc5Rnd4QmVXc1d6dGRaYWFrazMzc3Z1dlB1RDNfdGxqbzJWQ1J4R19RUTJYMjMwWVlCVGs5cTNsZG1jOU81SGc5eU1yRGJHTXNJeFNXM0xpeHRzc1pjQU1pek83S1VvYy1JSWdsWmU0ZkVzaVV0QWJzd01CbUdLcmRqMG9MLVE2d0hpNWk4RWdiTnpxVHJodThWRUNnb003dkkxOEJlMmd2ek5RVzVYZUsxU3pLNFhEemRFMTBPV1ROY2pjZ21Nd2RrQU5DNDJvMkdrdWw4RV94UlJ0dHRKV3dWX0lrYmVKcEZRMTEw0gH8AUFVX3lxTE9HN3FPRW9LVUZZYmFiY3g0d1NNSnc2MHVhY2pVbnk5VTJYbEVpWEl6al8tR3FYbXpXZTRRMHh6d2pyWkEwSE5xbjNtVHpiNTZnYW1wLTg5ampKVkE2ZjE3blVjbTZ2ZnBOLXF2WFIyTzRVaFpXaFVOOWxDN0pDUkd5MmxTTWNUc0ctTHBRTVZFbkp0Wmlid3Q0SHd5c2pENUhPMlViRHU2VDRRS1kzby1RRUh6Qnc5MDRHdVpUdVBfbmFKNUhYRnR0d1J6c3AwcjFOWm51cTBUcGtmVTVZbFl4c2Nvckx1ZUoxVVVsVS15NENwQWttYWFlNmhsaQ?oc=5",
+      "publishedAt": "2026-10-27T15:25:09.000Z",
       "region": "hollywood",
       "category": "television",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
@@ -1033,19 +1072,6 @@
       "imageFallbackUrl": ""
     },
     {
-      "id": "1vmtd55",
-      "headline": "Jailer 2 Box Office Collection Day 13: Rajinikanth's Film Slows Down, Is Rs 1,000 Crore Still Possible?",
-      "publisher": "ETV Bharat",
-      "publisherUrl": "https://www.etvbharat.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMi7AFBVV95cUxOVjhTM21FV2lFY3ozZmktd3RQbkJhQmtjVjZJQVNXMDZYeE1aNnM5dUlyc3VNelRTdFhqcmg5am9KOUFLdE44MWpRT0Noc3NnT3Vhb0RPU0x2a2gyMnlvM05iZWJsanVTT2ZualJuYTZrYWhneXllQS1pdG42QUVWSjVjZlhoREJ2b1lLOWFFQnI4dmFGS0x3S2swc2NCRGNCdlQ1eWRldElpZVl5Skd1RVF2WHVoSXZZcW1DQVNvUk8yRk9uZld5Qk1RQ1hwUEF6SmNWN2xRbnB4YUF0OVFadmV4ZmpOemZYa1huTNIB8gFBVV95cUxNT3NZaGdPY0xCRENwc1BOOHZkbUNvQUNaWmYtUTVDSmU4d0VpNnV0cDZ5a3NlRGZ4dndzMU5zYndnQTFCWUd4SWFUV0lTQWI5SkdiQ2NLX20tVmtPS3RpdXRXNjFqTWY5b1lpNGNmNVRTZEhCZHR5N2tmV1lxREFIQkt2a0h3WjR5bGc2YnFPUXRicjBVSHR2dUV6OGlnQS1rWkdya2syaHNjNzg1YlFXTXFEUmF3OHoyTkNORjV1QjVUZFRERkx3RTc1NDljZkVBc3pJMXBJYlhOSWhzOV93QUVEa0h4Wm9iQjRXQVFZSGZHdw?oc=5",
-      "publishedAt": "2026-10-27T15:11:27.000Z",
-      "region": "global",
-      "category": "box-office",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
       "id": "zdtm6g",
       "headline": "EBONY Power 100: Must-Add Playlist Hits",
       "publisher": "EBONY Magazine",
@@ -1093,6 +1119,19 @@
       "publishedAt": "2026-10-27T14:59:00.000Z",
       "region": "india",
       "category": "film",
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
+    },
+    {
+      "id": "1m1e972",
+      "headline": "How to watch Love Island Australia season 8 online – FREE STREAM new episodes of dating show",
+      "publisher": "TechRadar",
+      "publisherUrl": "https://www.techradar.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMi1gFBVV95cUxQUkNIU0Y3VE42V1FtYzhGRzdmcDBiUU5tU2xqTGNhX0I5dkloTTh2dUV1aVJ2MVBzM2ZId0hORDcwd3VMYWVJOTV2cnljX2NEVFZreU5xWHVXT1FDVHVNUXV3bmd2N2hzWkNGRC1CZTNGMlpEbVFDTXIxbTJJbHdLY0NFanhaT182V0V0OVlSY0ZhTlZqamFxd2s1dzBJZmgyX2dzcWZKcFNGYUJuMVpzLWpWOGcyekphcU15VjBSZWZOcWZlbmhhVW80dkhWenBPQTg2bmZB?oc=5",
+      "publishedAt": "2026-10-27T14:40:05.000Z",
+      "region": "europe",
+      "category": "television",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
       "imageUrl": "",
       "imageFallbackUrl": ""
@@ -1163,19 +1202,6 @@
       "imageFallbackUrl": ""
     },
     {
-      "id": "zbi1t8",
-      "headline": "Shirin Shila celebrates 12 years in film industry",
-      "publisher": "The Bangladesh Today",
-      "publisherUrl": "https://thebangladeshtoday.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMibkFVX3lxTE4zbmI5WVNldXJORG5Dc0hrV0VXLXkxYTVwektYZjYycGloU09WZUJpSC1HQnNYeUdYZ2tLb2VwTGhzWHpvSUZ5Rms2UFdzRWVFUG5qaW1ORjZkS0g4SzhqMkUwbHFtdUZJVzlyTVBn?oc=5",
-      "publishedAt": "2026-10-27T13:57:59.000Z",
-      "region": "global",
-      "category": "awards",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
       "id": "mdws56",
       "headline": "47 Best Halloween Movies to Put You in a Spooky Mood",
       "publisher": "Glamour",
@@ -1228,6 +1254,19 @@
       "imageFallbackUrl": ""
     },
     {
+      "id": "1ob9b44",
+      "headline": "‘Good Partner’ Season 2 Coming to Netflix Korea in November 2026",
+      "publisher": "IMDb",
+      "publisherUrl": "https://www.imdb.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMiYEFVX3lxTE5IR1A4VnlvNzQzSzZkR1ZQWFhmSllOZktSVDNaLWJPUXJ5NWdyNFU0UEMtTVZwRFZYTDJ5OExVbG1oVm5SRTNjTS1qc2YtZ3drT0lSOE9kdkhIRl81S2dqRA?oc=5",
+      "publishedAt": "2026-10-27T13:44:24.000Z",
+      "region": "asia",
+      "category": "television",
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
+    },
+    {
       "id": "14emn96",
       "headline": "'Silent Partner' Wins Best Feature Narrative at 2026 Urbanworld Film Festival, Following Sold-Out Premiere and Encore Screening",
       "publisher": "Blex Media",
@@ -1248,7 +1287,7 @@
       "sourceUrl": "https://news.google.com/rss/articles/CBMirAFBVV95cUxPMGRaTm5DYzRiVzZpZ28wUXNLemxvQ25LZUxMQmswdGlfNF9YMjA2UWNRTWdRM2NTdTQ3RUYyZ3h4M25mMDF4Vk4zRFNMSEd6dnZScDJiSmZlN2tYX0hTU1ZyeHY2WmVVLTRVN1FhVzQzLWFEQXd1T1AxdlA4N2JVcUxrbFRFNFVqSzRjRXo5elZ3NWgtLXNRSmdnVlI4TG94VFZjYTd6S3Z6cWtT0gGyAUFVX3lxTE5EeW5CLWVIR3hNOU9MUi1yMmd2Z0RUbXd6Z0thOEZKWGtUNWJyV2ZlUDI0ZHlWeGI3NE1jUDFiMGhmUC1oOWdVSTMxYUxsY2FnTjFyUlRDWmFXY0JOaGlWeGdtV01KLTl0dHFtb0stUUFMS3A5WktVS3FWanhoNGRDUWY1UC02UWZxOTNNcjlseHVYZWJJc0JXa3RmVVA5RDQzcFdfU1pEdnZIWUl3YVV6N2c?oc=5",
       "publishedAt": "2026-10-27T13:18:53.000Z",
       "region": "hollywood",
-      "category": "television",
+      "category": "celebrity",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
       "imageUrl": "",
       "imageFallbackUrl": ""
@@ -1267,14 +1306,14 @@
       "imageFallbackUrl": ""
     },
     {
-      "id": "dg7hc6",
-      "headline": "Why has the 'treasure of Korean cinema' resolutely chosen a 'normal' life for the past 25 years?",
-      "publisher": "Vietnam.vn",
-      "publisherUrl": "https://www.vietnam.vn",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMirAFBVV95cUxPUjItSTVZSlhFRmxKSC0yQ0pMTUwtVUFfa19sOFd4aUJqZjJNdVItRldFTm5PcXpoS0R2ZWhGeko2bFJjbXN2ZE9pTVRNUmJDRFdoWVA0aTBtRTh1RFIweGJGcmVjaTdFeXY5RlJYZ1hZSDZWTFV3NkY3OU1GMUZvWll4aWF1OGtOVk85NGhGQlJ5Zl94OTQxeUVMOTY3MEdyY1dJX3JVSk91ZU55?oc=5",
-      "publishedAt": "2026-10-27T13:17:27.000Z",
-      "region": "global",
-      "category": "awards",
+      "id": "1s2lqni",
+      "headline": "Channel 4 strikes Disney+ deal",
+      "publisher": "Advanced Television",
+      "publisherUrl": "https://www.advanced-television.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMigwFBVV95cUxOcVpsX0ZpZ081bW00eTJ5emNJd0kyRkx0b2Z5cHNrdTRON0lvVWVKbnJaUXZNa2d3NzItejFsZnNtMWc0Q3lvLXJ5cGJiNXVXQ0VJcVRuYURjZ1pMbFFlNElqaHRNYU13eVppM183SGFxOHNVaUJSTUVfbWROR1V6eWh5NA?oc=5",
+      "publishedAt": "2026-10-27T13:07:05.000Z",
+      "region": "europe",
+      "category": "television",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
       "imageUrl": "",
       "imageFallbackUrl": ""
@@ -1293,14 +1332,14 @@
       "imageFallbackUrl": ""
     },
     {
-      "id": "g4us4y",
-      "headline": "Agbara Nla: The Return Hits ₦408.3m, Ranks Second Among Nollywood’s Biggest Films of 2026",
-      "publisher": "Brand Icon Image",
-      "publisherUrl": "https://www.brandiconimage.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMihAFBVV95cUxNeGZFdG10cXBZQzJJN0lrd3FwNzdneVFPWjJfMkp1U21Id3h2cWVMNk9KZ1l6R3o5NUZuOVVmSm1Hc3dIS19iV2dETFNEV3R0OEZWcWVvMkNZVEV1WmVKNXhNbmpjT2JDdzFCLWtiV0F6TmtUdFU3TGZKbVZXSXdzd0dZM3E?oc=5",
-      "publishedAt": "2026-10-27T12:42:00.000Z",
-      "region": "africa",
-      "category": "film",
+      "id": "ckm0gd",
+      "headline": "Street Fighter Box Office Performance Surpasses Mortal Kombat: Annihilation",
+      "publisher": "Zoom TV | Entertainment",
+      "publisherUrl": "https://www.zoomtventertainment.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMixAFBVV95cUxQdDJaNWV5QV9na0kweU9oSEowSlFFcXNzc0MzOW9PcGkwajJ0T2tuZ2NaNkQybW0xLUV3QkRuMmdseEhXdFZaUzlBVnY5ZG5IaDk1UElrbVpuTndfVE5oTW9Td0NYR3BaWElhZi1yWTY5aHZBX3AzNUNQTzdsdHA0bXBwdmFDOXd0TnVFbmNOYTl3MTE5MDJYQ3N2OXgtaURCcHlNYzhpZTJvQ0lkd0tCckxKNVp6azk5Z1ZvVVRwMUpVTkZC?oc=5",
+      "publishedAt": "2026-10-27T12:44:24.000Z",
+      "region": "global",
+      "category": "box-office",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
       "imageUrl": "",
       "imageFallbackUrl": ""
@@ -1384,6 +1423,19 @@
       "imageFallbackUrl": ""
     },
     {
+      "id": "gc2oof",
+      "headline": "Every Major Box Office Record Broken By Rajinikanth's Jailer 2 | Kollywood News",
+      "publisher": "Sacnilk",
+      "publisherUrl": "https://www.sacnilk.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMilAFBVV95cUxNekpfdE5rNjNjQ3gwVWttUlBEOVFtT1pIX3hQTUlqcm1ILTNkZ2c2WWNwY0pJSWVSelFqYjcyMUlndUZqdndEaWlJSExsb1BWbjZLeWMwZHJodF9KS0tQbVBZUlZ2TXItUVE0aFctZTJBREV3bEI5c011UjZaYkhrQ2pERG9Hb05JdDhWdkV3WE1QU1hv?oc=5",
+      "publishedAt": "2026-10-27T10:50:48.000Z",
+      "region": "global",
+      "category": "box-office",
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
+    },
+    {
       "id": "m39sa",
       "headline": "Moatasem Al Nahar reveals why he missed ‘Naseeb’ film premiere - Al-Bawaba",
       "publisher": "Al-Bawaba",
@@ -1423,40 +1475,14 @@
       "imageFallbackUrl": ""
     },
     {
-      "id": "1lv4gwb",
-      "headline": "DCU Horror Film Clayface Poised To Outperform Tom Cruise’s Digger At Global Box Office",
-      "publisher": "Zoom TV | Entertainment",
-      "publisherUrl": "https://www.zoomtventertainment.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMitwFBVV95cUxNY0dpdEZwMkhHdTlvSFVUSTN5cUVTRXdOVVNQRjYzdGNBaDIyelczaW5FNkw0LTBCbW9ORmlSN3poTXRQQnRmaFVnTFhuMU9DZ2RTd2pXdzIzbXN3STF2aXladVIxeU5FazVHMTlpWUd4dUkyLVNzSzlqTXV6TUlfWjRwNV9Qb19BaVd3bVlSdngyVmxUNExLMVFyNWR0ZFkwaGtrWlhSSlFVSko3b1FFanYwUXpEQWM?oc=5",
-      "publishedAt": "2026-10-27T09:12:13.000Z",
-      "region": "global",
-      "category": "box-office",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
-      "id": "1su6mqj",
-      "headline": "DNA launches flexible streaming and audio subscription bundle",
-      "publisher": "Broadband TV News",
-      "publisherUrl": "https://www.broadbandtvnews.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMiqAFBVV95cUxNTjdSMFBwVmlOOFR0dUFlNlpZdzlzOGczbjNob1ZuN0V2R3VHdVpHX0lIcUtEb2xzWWNHR3RKVVBZbkJhZDZrZnR0ektteWJieV85cno2YWZQNGVPSFRGbk1lZGVybmdFVWtSU1dYdzlKUnNlMXF1WWtzZ3FldzBoeVhGcnhIU2d3ZHFmVlBjSXRoS0ZnRDZsOUZUWlNvREp3X2sySDZnY0c?oc=5",
-      "publishedAt": "2026-10-27T08:56:30.000Z",
-      "region": "europe",
-      "category": "television",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
-      "id": "6kmiq4",
-      "headline": "Channel 4 joins Disney+ in latest streamer-broadcaster partnership",
-      "publisher": "Broadband TV News",
-      "publisherUrl": "https://www.broadbandtvnews.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMiqgFBVV95cUxNc3kxcVc2X0dtSkFNei01SWtFRkF5S1FHcFg3Ym8tZnJFc0FMcUxxSWxXNWU5X0g4UmlsZ1JGb1g0c0Y0MURiQVdYeEJBeDNjVVZBbHFJRWhyU0hjYlpPYW9yZndyMmgwTjBkYS1aRDdxTjltWXNIeGRZX1U1TThYa25lenhQUHBzb1pzYmQxVVpiZV9VdUFXdGVRcHNlRXlzYlhfbEtyR2NSZw?oc=5",
-      "publishedAt": "2026-10-27T08:43:18.000Z",
-      "region": "europe",
-      "category": "television",
+      "id": "1ljmqou",
+      "headline": "Shaan Channels Michael Jackson in Dubai! Fans Call Bollywood Singer a ‘Pop Star’ After Tribute Performance",
+      "publisher": "Dainik Jagran MP CG",
+      "publisherUrl": "https://english.dainikjagranmpcg.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMiywFBVV95cUxPZkpYWE41NDZHek5NRWFKR1hxd3hpZUF2R2R5enVhVk5KWUJ2SzhoMzB1ZXM5ZEtWZHNpNlJRQTJJWC1FUG9mY1RZUTBPSkVENEp6QlRkNFRYeGNSMXh4ME5fXzRfemxnNnY2VUctTE9LRlVFaGtqaWI5ZEZyQXozRDhJTEFCQW9UQnVZT0txWV8xOVFHbVFOUlRTQVNTMDRGTEhfYnpFbzA4MkdtbXk4Q3ItbVdJcmhCRkRUNUc5Vi1aX0VscDZ0ckpKdw?oc=5",
+      "publishedAt": "2026-10-27T09:52:02.000Z",
+      "region": "india",
+      "category": "music",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
       "imageUrl": "",
       "imageFallbackUrl": ""
@@ -1469,6 +1495,19 @@
       "sourceUrl": "https://news.google.com/rss/articles/CBMiqwFBVV95cUxNUE5KS1BlanpDaU9IcEQwVjdMcFpIZUZKdkJ5aF94MVcxaTBPUFpOOERWQXdVNVBfcG1OcHlvbE1ub3RQRTRXZVBRd3dLTnFmZk55dW93OEVBX1pwMXU4MENQVExPNzl0amdBUVYwT0hxMXFqYnJBZWpHZkxIdkNvWTZZY0U3NUZIQ2FIdnBWRElNWkpzZHJVQ1BfUlMweXg1eXV1Q09GdjdjRXM?oc=5",
       "publishedAt": "2026-10-27T08:07:45.000Z",
       "region": "europe",
+      "category": "film",
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
+    },
+    {
+      "id": "jsxntk",
+      "headline": "All About 'Remember' - ABS-CBN",
+      "publisher": "ABS-CBN",
+      "publisherUrl": "https://www.abs-cbn.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMijwFBVV95cUxObDIwR0VyS2I4TWprbExBVmdaZFZzM3VxWGZoOXllc3hkRDF0cUdlSWYwWkdNOE01cU4xel9nb19nNlYtRDRBQV9vZXQzdWtRZFdEZDZVVmdLZFhWdzEzYmFuMUwtbDdqU2NHc0RKdzlma2kya1JuZV9TWVhPZk5lRjVxQ3lhaVpaeTVGUEUyMA?oc=5",
+      "publishedAt": "2026-10-27T07:34:37.000Z",
+      "region": "middle-east",
       "category": "film",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
       "imageUrl": "",
@@ -1522,45 +1561,6 @@
       "publishedAt": "2026-10-27T06:30:02.000Z",
       "region": "africa",
       "category": "celebrity",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
-      "id": "10s99vn",
-      "headline": "Udta Teer box office collection day 4: Ayushmann Khurrana film earns Rs 33.8 cr worldwide, sees 61.6% drop",
-      "publisher": "The Indian Express",
-      "publisherUrl": "https://indianexpress.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMi4wFBVV95cUxNTjB3WjNnbFhVSXdHcG1obUM4Sjd0NmNoWkpCa2xKNHhWTXVaV2VfS0JSZlNXcDA5ajNyaVNDcFlWT210eHhPbTNnNFZoeWRKMk1zVlUwYWxKUlJwb2E4YVB1dHVGU3lBZjlFZHVOUjhqc09UYURFaTF2dzVtYnh2M1h0WDh1d0w2OU14ZkdsZ094djEyYzBEODhsVlZYVFYxLXhmRW4xOWhfMEU5Qm5jc3ZXejlKdUktM0N0Y1J6cU1WZDJGZjBsVmJYUkR2a1JmamNTcm9jckFpSHZmMTNiWTU3RdIB6gFBVV95cUxNSTZrcjRxd1J2OVpyY0wtUEJKRWhXaUFfeGhhcVVJZi1JZ3kwcVhLcUJsOVZQSXVIT2hHZGQzQ3dXX0o1ZUlGbDQ2UGxvek5Wc09qaW9veV9FUUROb05NbDd0QkdILTNESVM5bGNHckRxVTMwUHdJNGI3MmpmdHVRbzJpc2ZBZ3pPaUw5cTNoQnN0LS1YdkRFNHhFaVc3bzRWWjhuOXNYQm5IaXVrdnBkV1l3elJONWk5R0ViR1BYYVNYa1UtdTlJWWVYVjVYNi1qVjBzdDd0Z1ZvakM3MTBGWl9ONXN2Mk5zaWc?oc=5",
-      "publishedAt": "2026-10-27T04:31:53.000Z",
-      "region": "global",
-      "category": "box-office",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
-      "id": "1rx22x",
-      "headline": "Hossam Elwan: A Friend, Filmmaker and Storyteller Who Lives On",
-      "publisher": "Sada Elbalad English",
-      "publisherUrl": "https://see.news",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMiX0FVX3lxTE5QeFRjZkxidWFWUVlVYmJKUW1FTWpuWlhpOF8yVEVGZWhqVVZOTjJQMEhDVGVITEs4SUdQWEkzOVM3eGxaOVMtalRYVEVoT3o1eXM0aHl3MWpybnV5dlNR?oc=5",
-      "publishedAt": "2026-10-26T21:42:41.000Z",
-      "region": "middle-east",
-      "category": "film",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
-      "id": "bx1wis",
-      "headline": "Abrasive Lapping Film Market in Latin America and the Caribbean: Size, Trends and Forecast to 2035",
-      "publisher": "IndexBox",
-      "publisherUrl": "https://www.indexbox.io",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMizwFBVV95cUxOa0EyS3dPZU1FZjlrUmVSM0JDQVBsby1fTFNQMU5Lc1B6TnE1cGNucXZKTFFiMzAxcHQ1d0REQzdFZXJpYXc3dGxDRmdJQlI1emdINFI4azB0cWtnbDlrcENaakFYUk9ZUUwtaEtvbmY1OFBfeFU0LVhsMU1Yb0xNenhmbDVmMFRfV3Y4VEhaV1ViTXZ0VDAwcHEzU3diUURqMXBXUnBPTnUzS0VxbHl3dlE3VU9tUlVNU2hqR29YUGpUdTFEZl9TckdSUXp6N1U?oc=5",
-      "publishedAt": "2026-10-25T07:00:00.000Z",
-      "region": "latin-america",
-      "category": "film",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
       "imageUrl": "",
       "imageFallbackUrl": ""
