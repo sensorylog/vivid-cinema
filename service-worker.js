@@ -1,5 +1,5 @@
 // Bump this version whenever the precached app shell changes.
-const CACHE_NAME = "vivid-cinema-shell-v251";
+const CACHE_NAME = "vivid-cinema-shell-v252";
 const APP_SHELL = [
   "./","./index.html","./home.html","./downloads.html","./for-you.html","./person.html","./discover.html","./collection.html","./title.html","./watch.html",
   "./library.html","./auth.html","./login.html","./verify-email.html","./forgot-password.html","./account.html","./achievements.html","./terms.html","./privacy.html","./contact.html","./donate.html","./donation-success.html",

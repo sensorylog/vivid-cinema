@@ -100,4 +100,4 @@ const auth = initializeAuth(app, {
 const db = getFirestore(app);
 
 // The configured persistence order deliberately favors durable IndexedDB storage.
-export { app, appCheck, appCheckError, appCheckSkippedReason, auth, db };
+export { app, appCheck, appCheckError, appCheckSkippedReason, auth, db, firebaseConfig, RECAPTCHA_ENTERPRISE_SITE_KEY };

@@ -104,6 +104,28 @@ test("analytics event writes are scoped to the signed-in user", async () => {
   }));
 });
 
+test("pseudonymous anonymous visitors can write their own first-open event", async () => {
+  const anonymousVisitor = env.authenticatedContext("anonymous-visitor-1").firestore();
+  await assertSucceeds(setDoc(doc(anonymousVisitor, "analyticsEvents/anonymous-first-open"), {
+    event: "app_first_open",
+    platform: "android",
+    userId: "anonymous-visitor-1",
+    sessionId: "anonymous-session-1",
+    timestamp: serverTimestamp(),
+    appVersion: "web-current",
+    details: { identity_type: "anonymous", signal: "native_app_launch" }
+  }));
+  await assertFails(setDoc(doc(anonymousVisitor, "analyticsEvents/anonymous-forged-user"), {
+    event: "app_first_open",
+    platform: "android",
+    userId: "another-visitor",
+    sessionId: "anonymous-session-1",
+    timestamp: serverTimestamp(),
+    appVersion: "web-current",
+    details: { identity_type: "anonymous" }
+  }));
+});
+
 test("analytics event collection is readable only by the configured admin", async () => {
   const admin = env.authenticatedContext("awiBvDUVZvdyKnvOpGtD0rh2nZf1").firestore();
   const regularUser = env.authenticatedContext("alice").firestore();
