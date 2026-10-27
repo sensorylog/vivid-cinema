@@ -1,6 +1,30 @@
-import { auth, db } from "./firebase.js";
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
-import { addDoc, collection, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+import { app, auth, db, firebaseConfig, RECAPTCHA_ENTERPRISE_SITE_KEY } from "./firebase.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
+import {
+  initializeAuth, indexedDBLocalPersistence, browserLocalPersistence, inMemoryPersistence,
+  onAuthStateChanged, signInAnonymously
+} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
+import { getFirestore, addDoc, collection, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+import { initializeAppCheck, ReCaptchaEnterpriseProvider } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app-check.js";
+
+// Use a separate Firebase app for anonymous analytics so analytics never changes
+// the site's real sign-in state or exposes personal account features to anonymous users.
+const anonymousApp = initializeApp(firebaseConfig, "vivid-pulse-anonymous");
+const LOCAL_HOSTS = new Set(["localhost", "127.0.0.1", "::1"]);
+if (RECAPTCHA_ENTERPRISE_SITE_KEY && !LOCAL_HOSTS.has(window.location.hostname)) {
+  try {
+    initializeAppCheck(anonymousApp, {
+      provider: new ReCaptchaEnterpriseProvider(RECAPTCHA_ENTERPRISE_SITE_KEY),
+      isTokenAutoRefreshEnabled: true
+    });
+  } catch (error) {
+    console.warn("[Vivid Pulse] Anonymous App Check initialization failed:", error?.message || error);
+  }
+}
+const anonymousAuth = initializeAuth(anonymousApp, {
+  persistence: [indexedDBLocalPersistence, browserLocalPersistence, inMemoryPersistence]
+});
+const anonymousDb = getFirestore(anonymousApp);
 
 const platform = (() => {
   try {
@@ -11,8 +35,14 @@ const platform = (() => {
   } catch { return "web"; }
 })();
 let uid = null;
+let activeDb = db;
+let identityType = "account";
+let activeIdentityKey = null;
 let sessionId = null;
 let started = false;
+let preferredIdentity = "anonymous";
+let anonymousUserPromise = null;
+
 function getSessionId() {
   if (sessionId) return sessionId;
   try {
@@ -38,28 +68,29 @@ function safeDetails(details = {}) {
   return safe;
 }
 export async function trackPulseEvent(event, details = {}) {
-  if (!/^[a-z][a-z0-9_]{1,63}$/.test(event)) return;
-  if (!uid || !started) return;
+  if (!/^[a-z][a-z0-9_]{1,59}$/.test(event) || !uid || !started) return false;
   try {
-    await addDoc(collection(db, "analyticsEvents"), {
+    await addDoc(collection(activeDb, "analyticsEvents"), {
       event, platform, userId: uid, sessionId: getSessionId(),
       timestamp: serverTimestamp(), appVersion: "web-current",
-      details: safeDetails(details)
+      details: safeDetails({ ...details, identity_type: identityType })
     });
+    return true;
   } catch (error) {
     console.warn("[Vivid Pulse] Event write failed:", error?.code || error?.message || error);
+    return false;
   }
 }
-let activeUid = null;
-onAuthStateChanged(auth, user => {
-  const nextUid = user?.uid || null;
-  if (nextUid !== activeUid) {
-    // Reset session state when the signed-in account changes.
-    activeUid = nextUid;
-    uid = nextUid;
+function beginTracking(user, targetDb, anonymous) {
+  if (!user || (anonymous && preferredIdentity !== "anonymous")) return;
+  const nextKey = (anonymous ? "anonymous:" : "account:") + user.uid;
+  if (nextKey !== activeIdentityKey) {
+    activeIdentityKey = nextKey;
+    uid = user.uid;
+    activeDb = targetDb;
+    identityType = anonymous || user.isAnonymous ? "anonymous" : "account";
     started = false;
   }
-  if (!uid) { started = false; return; }
   if (started) return;
   started = true;
   const sid = getSessionId();
@@ -71,6 +102,45 @@ onAuthStateChanged(auth, user => {
     try { sessionStorage.setItem(startedKey, sid); } catch {}
   }
   void trackPulseEvent("page_view", { page: location.pathname });
+
+  // A first-open event means the native app actually launched; a download click alone never does.
+  if (platform === "windows" || platform === "android") {
+    let alreadyOpened = false;
+    try { alreadyOpened = localStorage.getItem("vivid:pulse-first-open:" + platform) === "1"; } catch { return; }
+    if (!alreadyOpened) {
+      void trackPulseEvent("app_first_open", { platform, signal: "native_app_launch" }).then(written => {
+        if (written) {
+          try { localStorage.setItem("vivid:pulse-first-open:" + platform, "1"); } catch {}
+        }
+      });
+    }
+  }
+}
+async function getAnonymousUser() {
+  if (anonymousAuth.currentUser) return anonymousAuth.currentUser;
+  if (!anonymousUserPromise) {
+    anonymousUserPromise = new Promise(resolve => {
+      const unsubscribe = onAuthStateChanged(anonymousAuth, user => {
+        unsubscribe();
+        resolve(user);
+      }, () => resolve(null));
+    }).then(async user => user || (await signInAnonymously(anonymousAuth)).user)
+      .finally(() => { anonymousUserPromise = null; });
+  }
+  return anonymousUserPromise;
+}
+onAuthStateChanged(auth, user => {
+  if (user) {
+    preferredIdentity = "account";
+    beginTracking(user, db, false);
+    return;
+  }
+  preferredIdentity = "anonymous";
+  void getAnonymousUser().then(anonymousUser => {
+    if (preferredIdentity === "anonymous") beginTracking(anonymousUser, anonymousDb, true);
+  }).catch(error => {
+    console.warn("[Vivid Pulse] Anonymous analytics unavailable:", error?.code || error?.message || error);
+  });
 });
 document.addEventListener("click", event => {
   const downloadLink = event.target.closest?.("#windows-installer, #windows-portable, #android-apk");
