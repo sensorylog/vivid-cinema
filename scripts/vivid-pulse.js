@@ -35,6 +35,7 @@ function safeDetails(details = {}) {
   return safe;
 }
 export async function trackPulseEvent(event, details = {}) {
+  if (!/^[a-z][a-z0-9_]{1,63}$/.test(event)) return;
   if (!uid || !started) return;
   try {
     await addDoc(collection(db, "analyticsEvents"), {
@@ -69,6 +70,15 @@ onAuthStateChanged(auth, user => {
   void trackPulseEvent("page_view", { page: location.pathname });
 });
 document.addEventListener("click", event => {
+  const downloadLink = event.target.closest?.("#windows-installer, #windows-portable, #android-apk");
+  if (downloadLink) {
+    const targetPlatform = downloadLink.id === "android-apk" ? "android" : "windows";
+    void trackPulseEvent("download_" + targetPlatform, {
+      source: location.pathname,
+      download_variant: downloadLink.id === "windows-portable" ? "portable" : (downloadLink.id === "windows-installer" ? "installer" : "apk")
+    });
+    return;
+  }
   const target = event.target.closest?.("[data-id][data-type]");
   if (target) {
     void trackPulseEvent("content_click", { content_id: String(target.dataset.id), content_type: String(target.dataset.type), source: location.pathname });

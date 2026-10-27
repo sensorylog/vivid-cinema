@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { initializeTestEnvironment, assertFails, assertSucceeds } from "@firebase/rules-unit-testing";
-import { doc, setDoc, getDoc, getDocs, collection, query, limit } from "firebase/firestore";
+import { doc, setDoc, getDoc, getDocs, collection, query, limit, serverTimestamp } from "firebase/firestore";
 
 const rules = await readFile(new URL("../firestore.rules", import.meta.url), "utf8");
 const env = await initializeTestEnvironment({
@@ -85,6 +85,31 @@ test("unauthenticated users cannot read private user documents", async () => {
   });
   const db = env.unauthenticatedContext().firestore();
   await assertFails(getDoc(doc(db, "users/alice/favorites/movie:550")));
+});
+
+
+test("analytics event writes are scoped to the signed-in user", async () => {
+  const alice = env.authenticatedContext("alice").firestore();
+  const validEvent = {
+    event: "page_view", platform: "web", userId: "alice",
+    sessionId: "session-1", timestamp: serverTimestamp(),
+    appVersion: "test", details: { page: "/home.html" }
+  };
+  await assertSucceeds(setDoc(doc(alice, "analyticsEvents/alice-event"), validEvent));
+  await assertFails(setDoc(doc(alice, "analyticsEvents/forged-user"), {
+    ...validEvent, userId: "bob"
+  }));
+  await assertFails(setDoc(doc(alice, "analyticsEvents/invalid-platform"), {
+    ...validEvent, platform: "server"
+  }));
+});
+
+test("analytics event collection is readable only by the configured admin", async () => {
+  const admin = env.authenticatedContext("awiBvDUVZvdyKnvOpGtD0rh2nZf1").firestore();
+  const regularUser = env.authenticatedContext("alice").firestore();
+  await assertSucceeds(getDocs(query(collection(admin, "analyticsEvents"), limit(10))));
+  await assertFails(getDocs(query(collection(regularUser, "analyticsEvents"), limit(10))));
+  await assertFails(getDocs(query(collection(env.unauthenticatedContext().firestore(), "analyticsEvents"), limit(10))));
 });
 
 test.after(async () => {
