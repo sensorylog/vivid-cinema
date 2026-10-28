@@ -8,7 +8,7 @@ const stripComments = (css) => css.replace(/\/\*[\s\S]*?\*\//g, "");
 test("TFLIX-style trending billboard is restored above the unchanged featured-card strip", () => {
   const home = read("../home.html");
   assert.doesNotMatch(home, /vivid-qr-share|QR code to visit Vivid Cinema|Scan to visit Vivid Cinema/i, "home no longer exposes the QR scan-to-visit feature");
-  assert.match(home, /<section id="hero" class="empty" aria-label="Trending today"/);
+  assert.match(home, /<section id="hero" class="hero-fallback" aria-label="Trending today"/);
   assert.match(home, /<div class="vivid-feature-strip">/);
   assert.match(home, /class="vivid-download-promo"/, "the full app homepage has a visible downloads CTA");
   assert.ok(home.includes('class="vivid-download-promo-link" href="downloads.html"'));
@@ -72,7 +72,7 @@ test("TFLIX-style trending billboard is restored above the unchanged featured-ca
 
 test("TFLIX-style hero uses TMDB stills, plays listed trailers, and routes to Vivid title details", () => {
   const js = read("../scripts/tflix-hero.js");
-  assert.match(js, /tmdbApi\.trending\("all",\s*"day",\s*1\)/);
+  assert.match(js, /tmdbApi\.trending\("all",\s*"day",\s*1,\s*\{ timeoutMs: HERO_REQUEST_TIMEOUT_MS \}\)/);
   assert.match(js, /HERO_BACKDROP_SIZE\s*=\s*\(\)\s*=>\s*window\.matchMedia\("\(max-width: 767px\)"\)\.matches\s*\?\s*"w780"\s*:\s*"w1280"/);
   assert.match(js, /getImageUrl\(item\.backdrop_path,\s*HERO_BACKDROP_SIZE\(\)\)/, "hero slides use viewport-appropriate backdrop sizes");
   assert.match(js, /getImageUrl\(items\[0\]\.backdrop_path,\s*HERO_BACKDROP_SIZE\(\)\)/, "the preload must match the rendered hero image size");
@@ -80,7 +80,7 @@ test("TFLIX-style hero uses TMDB stills, plays listed trailers, and routes to Vi
   assert.match(js, /TRAILER_WINDOW_MS = 30000/);
   assert.match(js, /aria-hidden", "true"/);
   assert.match(js, /\.inert = true/);
-  assert.match(js, /tmdbApi\.trending\("movie", "day", 1\)/, "a cached fallback feed is available");
+  assert.match(js, /tmdbApi\.trending\("movie", "day", 1, \{ timeoutMs: HERO_REQUEST_TIMEOUT_MS \}\)/, "a bounded fallback feed is available");
   assert.doesNotMatch(js, /cache:\s*false/, "hero trending requests should use the shared TMDB cache");
   assert.match(js, /slide\.inert = index !== 0/);
   assert.match(js, /window\.vividCinemaSelectHero = selectHeroItem/);
@@ -108,7 +108,7 @@ test("service worker shell cache includes the new hero assets", () => {
   assert.match(sw, /\.\/styles\/vivid-tflix-hero\.css/);
   assert.match(sw, /\.\/styles\/vivid-tflix-hero\.css\?v=hero-trailer-full-bleed-1/);
   assert.match(home, /vivid-tflix-hero\.css\?v=hero-trailer-full-bleed-1/);
-  assert.match(sw, /\.\/scripts\/tflix-hero\.js\?v=hero-responsive-artwork-1/);
+  assert.match(sw, /\.\/scripts\/tflix-hero\.js\?v=hero-fast-fallback-1/);
   assert.match(home, /vivid-apple-tv-mobile\.css\?v=apple-tv-mobile-2/);
   assert.match(sw, /\.\/styles\/vivid-apple-tv-mobile\.css\?v=apple-tv-mobile-2/);
   const mobileCss = stripComments(read("../styles/vivid-apple-tv-mobile.css"));
@@ -142,17 +142,19 @@ test("Vivid typography uses real bold weights consistently across the shared des
 });
 
 
-test("mascot video retries muted inline autoplay when ready and visible", () => {
+test("mascot video loads near the viewport and retries muted inline playback", () => {
   const home = read("../home.html");
   const autoplay = read("../scripts/mascot-autoplay.js");
-  assert.match(home, /class="vivid-mascot-video" autoplay muted loop playsinline preload="auto"/);
+  assert.match(home, /class="vivid-mascot-video" muted loop playsinline preload="none"/);
   assert.match(home, /assets\/videos\/vivid-mascot\.MP4/);
-  assert.match(home, /scripts\/mascot-autoplay\.js\?v=1/);
+  assert.match(home, /scripts\/mascot-autoplay\.js\?v=2/);
   assert.match(autoplay, /video\.play\(\)/);
+  assert.doesNotMatch(autoplay, /setAttribute\("autoplay"/, "the video must not force eager loading before it is visible");
+  assert.match(autoplay, /else if \(!video\.paused\) video\.pause\(\)/, "the mascot pauses when it leaves the viewport");
   assert.match(autoplay, /IntersectionObserver/);
   assert.match(autoplay, /visibilitychange/);
   assert.match(read("../service-worker.js"), /vivid-cinema-shell-v\d+/);
-  assert.match(read("../service-worker.js"), /scripts\/mascot-autoplay\.js\?v=1/);
+  assert.match(read("../service-worker.js"), /scripts\/mascot-autoplay\.js\?v=2/);
 });
 
 
@@ -173,4 +175,20 @@ test("app Home exposes the official download page on desktop, mobile, and footer
   assert.match(sw, /"\.\/downloads\.html"/);
   assert.match(sw, /"\.\/styles\/downloads\.css"/);
   assert.match(sw, /"\.\/scripts\/downloads\.js\?v=direct-download-v3"/);
+});
+
+
+test("home hero has immediate fallback content and uses bounded, cached TMDB requests", () => {
+  const home = read("../home.html");
+  const js = read("../scripts/tflix-hero.js");
+  assert.match(home, /hero-fallback/);
+  assert.match(home, /Your next favourite is waiting\./);
+  assert.match(home, /href="discover\.html"/);
+  assert.match(js, /const HERO_CACHE_KEY = "vivid:home-hero:v1"/);
+  assert.match(js, /const HERO_CACHE_TTL_MS = 6 \* 60 \* 60 \* 1000/);
+  assert.match(js, /const HERO_REQUEST_TIMEOUT_MS = 5000/);
+  assert.match(js, /renderHero\(cachedItems\)/);
+  assert.match(js, /function loadMovieFallback\(\)/);
+  assert.match(js, /loadMovieFallback\(\)/);
+  assert.doesNotMatch(js, /await tmdbApi\.trending\("movie", "day", 1/);
 });
