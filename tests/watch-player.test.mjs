@@ -93,3 +93,12 @@ test("watch artwork renders before optional anime lookup and TV episode metadata
 test("anime catalog lookup is limited to anime titles and lookup failures do not abort watch rendering", () => {
   assert.match(source, /const animeIdsPromise = \(isAnimePlayback\(\) \|\| isLikelyAnime\(\)\)[\s\S]*?resolveAnimeIds\([\s\S]*?\.catch\(error => \{[\s\S]*?return \{ aniListId: "", malId: "" \};[\s\S]*?\}\)[\s\S]*?: Promise\.resolve\(\{ aniListId: "", malId: "" \}\)/);
 });
+
+test("watch page lazy-loads only the selected secondary player module", () => {
+  assert.doesNotMatch(source, /^import .*secondary-player\.js/m);
+  assert.match(source, /function mountSecondaryPlayer\(params, title, detailsSnapshot = details\)/);
+  assert.match(source, /if \(isAnimePlayback\(\)\) \{[\s\S]*?import\("\.\/playback\/anime-secondary-player\.js"\)/);
+  assert.match(source, /import\("\.\/playback\/tflix-secondary-player\.js"\)/);
+  assert.match(source, /mountSecondaryPlayer\(params, episodeTitle \|\| title\)/);
+  assert.match(source, /mountSecondaryPlayer\(currentParams, details\.episode\?\.name \|\| media\.title \|\| media\.name, details\)/);
+});
