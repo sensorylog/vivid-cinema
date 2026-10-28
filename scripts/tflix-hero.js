@@ -16,6 +16,7 @@ let heroIndex = 0;
 let heroTimer = null;
 let artworkTimer = null;
 let heroRunToken = 0;
+let heroSelectionMade = false;
 
 function matchPct(value) {
   const rating = Number(value || 0);
@@ -277,6 +278,7 @@ function notifyHeroChange() {
 
 function selectHeroItem(item) {
   if (!item || item.id == null || !item.backdrop_path) return false;
+  heroSelectionMade = true;
   const mediaType = item.media_type === "tv" ? "tv" : "movie";
   const existingIndex = heroSlides.findIndex((slide) =>
     String(slide.id) === String(item.id) && slide.media_type === mediaType
@@ -313,39 +315,80 @@ function getHeroItems(data, mediaType) {
     .map((item, index) => ({ ...item, trending_rank: index + 1 }));
 }
 
+const HERO_CACHE_KEY = "vivid:home-hero:v1";
+const HERO_CACHE_TTL_MS = 6 * 60 * 60 * 1000;
+const HERO_REQUEST_TIMEOUT_MS = 5000;
+
+function readCachedHeroItems() {
+  try {
+    const entry = JSON.parse(localStorage.getItem(HERO_CACHE_KEY) || "null");
+    const age = Date.now() - Number(entry?.savedAt || 0);
+    if (!entry || !Number.isFinite(age) || age < 0 || age > HERO_CACHE_TTL_MS || !Array.isArray(entry.items)) {
+      localStorage.removeItem(HERO_CACHE_KEY);
+      return [];
+    }
+    return getHeroItems({ results: entry.items }, "all");
+  } catch {
+    return [];
+  }
+}
+
+function saveCachedHeroItems(items) {
+  try {
+    localStorage.setItem(HERO_CACHE_KEY, JSON.stringify({ savedAt: Date.now(), items: items.slice(0, 5) }));
+  } catch {
+    // Storage can be disabled or full; the live hero must still work.
+  }
+}
+
+function preloadHeroArtwork(items) {
+  if (!items[0]?.backdrop_path) return;
+  const preload = new Image();
+  preload.decoding = "async";
+  preload.fetchPriority = "high";
+  preload.src = getImageUrl(items[0].backdrop_path, HERO_BACKDROP_SIZE());
+}
+
+function loadMovieFallback() {
+  // Do not make the static/cached hero wait for a second API request.
+  void tmdbApi.trending("movie", "day", 1, { timeoutMs: HERO_REQUEST_TIMEOUT_MS })
+    .then((data) => {
+      const items = getHeroItems(data, "movie");
+      if (!items.length) return;
+      saveCachedHeroItems(items);
+      if (heroSelectionMade) return;
+      preloadHeroArtwork(items);
+      renderHero(items);
+    })
+    .catch((error) => console.warn("Vivid movie-trending fallback unavailable:", error));
+}
+
 async function loadHero() {
   const hero = document.getElementById("hero");
   if (!hero) return;
 
-  try {
-    let data;
-    let mediaType = "all";
-    try {
-      data = await tmdbApi.trending("all", "day", 1);
-    } catch (error) {
-      console.warn("Vivid daily trending (all) unavailable; falling back to movies:", error);
-      mediaType = "movie";
-      data = await tmdbApi.trending("movie", "day", 1);
-    }
+  // Returning visitors get a validated, short-lived snapshot immediately.
+  // First-time visitors see the static HTML fallback while TMDB responds.
+  const cachedItems = readCachedHeroItems();
+  if (cachedItems.length && !heroSelectionMade) {
+    preloadHeroArtwork(cachedItems);
+    renderHero(cachedItems);
+  }
 
-    let items = getHeroItems(data, mediaType);
-    if (!items.length && mediaType === "all") {
-      // Keep the billboard useful if the mixed trending feed has no usable backdrops.
-      mediaType = "movie";
-      data = await tmdbApi.trending("movie", "day", 1);
-      items = getHeroItems(data, mediaType);
+  try {
+    const data = await tmdbApi.trending("all", "day", 1, { timeoutMs: HERO_REQUEST_TIMEOUT_MS });
+    const items = getHeroItems(data, "all");
+    if (!items.length) {
+      loadMovieFallback();
+      return;
     }
-    if (items[0]?.backdrop_path) {
-      const preload = new Image();
-      preload.decoding = "async";
-      preload.fetchPriority = "high";
-      preload.src = getImageUrl(items[0].backdrop_path, HERO_BACKDROP_SIZE());
-    }
+    saveCachedHeroItems(items);
+    if (heroSelectionMade) return;
+    preloadHeroArtwork(items);
     renderHero(items);
   } catch (error) {
-    console.warn("Vivid trending hero unavailable:", error);
-    clearPlaybackTimers();
-    hero.classList.add("empty");
+    console.warn("Vivid daily trending unavailable; keeping the current hero:", error);
+    loadMovieFallback();
   }
 }
 
