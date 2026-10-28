@@ -45,7 +45,15 @@ html.vivid-standalone #vivid-first-paint{display:grid}#vivid-first-paint.is-hidd
 <div class="vivid-release-footnote"><i class="bi bi-shield-check"></i><span>Only titles you follow are checked. You stay in control.</span></div>
 </aside>
 <main id="home">
-<section id="hero" class="empty" aria-label="Trending today" aria-roledescription="carousel"></section>
+<section id="hero" class="hero-fallback" aria-label="Trending today" aria-roledescription="carousel">
+<article class="hero-slide active" aria-label="Discover your next favourite" aria-hidden="false">
+<div class="hero-bg" aria-hidden="true"></div><div class="hero-trailer-shade" aria-hidden="true"></div>
+<div class="hero-content"><div class="hero-badge"><span class="bolt" aria-hidden="true">●</span> FEATURED ON VIVID</div>
+<h1 class="hero-title">Your next favourite is waiting.</h1>
+<div class="hero-meta"><span>Movies and series</span><span class="chip">DISCOVER</span></div>
+<p class="hero-overview">Explore trending films, new series, and stories worth staying in for.</p>
+<div class="hero-actions"><a class="btn btn-primary hero-play" href="discover.html" aria-label="Explore movies and series">Explore titles</a></div>
+</div></article></section>
 <div class="vivid-feature-strip"><div class="vivid-feature-viewport"><div class="vivid-feature-track" id="feature-track" aria-label="Featured titles carousel"></div></div></div>
 <section class="vivid-download-promo" aria-labelledby="vivid-download-promo-title">
   <div class="vivid-download-promo-copy"><span class="vivid-download-promo-kicker">TAKE VIVID WITH YOU</span><h2 id="vivid-download-promo-title">Your cinema. On your device.</h2><p>Get the Vivid Cinema app for your device and keep the experience close.</p></div>
@@ -88,7 +96,7 @@ html.vivid-standalone #vivid-first-paint{display:grid}#vivid-first-paint.is-hidd
 <section class="vivid-rails" id="upcoming"><div class="vivid-rail-head"><div><h2>Coming soon</h2><p>Upcoming movies on the radar.</p></div><div class="vivid-rail-controls"><button data-scroll="upcoming-rail" data-dir="-1" aria-label="Previous upcoming titles"><i class="bi bi-chevron-left"></i></button><button data-scroll="upcoming-rail" data-dir="1" aria-label="Next upcoming titles"><i class="bi bi-chevron-right"></i></button></div></div><div class="vivid-rail" id="upcoming-rail"></div><div class="vivid-rail-footer"><a class="vivid-rail-see-all" href="collection.html?collection=upcoming">See all</a></div></section>
 <section class="vivid-home-breathe vivid-mascot-moment" aria-label="Meet the Vivid Cinema mascot">
 <div class="vivid-home-breathe-scene vivid-mascot-scene">
-<video class="vivid-mascot-video" autoplay muted loop playsinline preload="auto" aria-label="Vivid Cinema mascot animation" poster="icons/vivid-icon.svg"><source src="assets/videos/vivid-mascot.MP4" type="video/mp4">Your browser does not support embedded video.</video>
+<video class="vivid-mascot-video" muted loop playsinline preload="none" aria-label="Vivid Cinema mascot animation" poster="icons/vivid-icon.svg"><source src="assets/videos/vivid-mascot.MP4" type="video/mp4">Your browser does not support embedded video.</video>
 <div class="vivid-mascot-spark mascot-spark-one" aria-hidden="true">✦</div><div class="vivid-mascot-spark mascot-spark-two" aria-hidden="true">✧</div>
 <div class="vivid-home-breathe-copy"><span class="vivid-home-breathe-kicker">MEET YOUR MOVIE BUDDY</span><strong>Vivid Cinema. Your kind of movie night.</strong><small>Big stories, good popcorn, and your next favourite watch — all in one place.</small><a href="collection.html?collection=trending" class="vivid-home-breathe-action">Find your next movie <i class="bi bi-arrow-right" aria-hidden="true"></i></a></div>
 </div>
