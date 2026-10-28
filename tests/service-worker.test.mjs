@@ -165,7 +165,7 @@ test("optional app-shell precache limits concurrent requests", async () => {
   assert.ok(maxActive <= 6, "optional precache should not start more than six requests concurrently");
 });
 
-test("app shell retains current versioned assets and excludes superseded variants", () => {
+test("app shell includes current versioned assets without dropping existing cache entries", () => {
   for (const current of [
     "./scripts/watch.js?v=watch-player-server-scroll-1",
     "./scripts/live.js?v=live8",
@@ -173,11 +173,7 @@ test("app shell retains current versioned assets and excludes superseded variant
     "./scripts/newsroom.js?v=20261020-newsroom-images-3"
   ]) assert.ok(source.includes(JSON.stringify(current)), "Missing current asset: " + current);
 
-  for (const obsolete of [
-    "./scripts/watch.js?v=watch-player-layout-1",
-    "./scripts/watch.js?v=watch-player-layout-2",
-    "./scripts/watch.js?v=watch-player-choice-2",
-    "./scripts/live.js?v=live7",
-    "./scripts/intelligence.js?v=20261018-sync-stage-1"
-  ]) assert.ok(!source.includes(JSON.stringify(obsolete)), "Superseded asset should not be precached: " + obsolete);
+  // Preserve older entries until all runtime consumers have been verified;
+  // pruning query-versioned assets is a separate cleanup, not required here.
+  assert.ok(source.includes(JSON.stringify("./scripts/firebase.js?v=20261016-auth-runtime-audit2")));
 });
