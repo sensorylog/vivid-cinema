@@ -108,7 +108,7 @@ test("service worker shell cache includes the new hero assets", () => {
   assert.match(sw, /\.\/styles\/vivid-tflix-hero\.css/);
   assert.match(sw, /\.\/styles\/vivid-tflix-hero\.css\?v=hero-trailer-full-bleed-1/);
   assert.match(home, /vivid-tflix-hero\.css\?v=hero-trailer-full-bleed-1/);
-  assert.match(sw, /\.\/scripts\/tflix-hero\.js\?v=hero-trailer-autoplay-2/);
+  assert.match(sw, /\.\/scripts\/tflix-hero\.js\?v=hero-responsive-artwork-1/);
   assert.match(home, /vivid-apple-tv-mobile\.css\?v=apple-tv-mobile-2/);
   assert.match(sw, /\.\/styles\/vivid-apple-tv-mobile\.css\?v=apple-tv-mobile-2/);
   const mobileCss = stripComments(read("../styles/vivid-apple-tv-mobile.css"));
