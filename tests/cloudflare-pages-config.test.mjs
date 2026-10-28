@@ -46,6 +46,13 @@ test("Cloudflare Pages keeps the existing HTML and static asset cache policies",
   assert.match(headers, /\/\*\.png\s+Cache-Control: public, max-age=604800, stale-while-revalidate=2592000/);
 });
 
+test("Google Search Console verification token is copied into the Cloudflare Pages artifact", async () => {
+  const verification = await readFile(new URL("../googlec7ad9951d02b4b4f.html", import.meta.url), "utf8");
+  assert.equal(verification.trim(), "google-site-verification: googlec7ad9951d02b4b4f.html");
+  assert.ok(buildScript.includes('const googleVerificationFile = "googlec7ad9951d02b4b4f.html"'));
+  assert.ok(buildScript.includes("path.join(output, googleVerificationFile)"));
+});
+
 test("shared static build publishes dist and retains Capacitor enhancements", () => {
   assert.equal(packageJson.scripts["build:web"], "node automation/build-static-dist.mjs");
   assert.ok(buildScript.includes('const output = path.join(root, "dist")'));
