@@ -10,8 +10,6 @@ import { recordBehavior, startIntelligenceSync } from "./intelligence.js";
 import { playDirectStream, resolveDirectStream, stopDirectStream } from "./playback/player-engine.js";
 import { buildCustomEmbedUrl, getCustomPlaybackServer } from "./playback/playback-servers.js";
 import { buildVidapiEmbedUrl, buildVidsrcEmbedUrl, buildVidlinkEmbedUrl, buildVidplusEmbedUrl, buildVidkingEmbedUrl, buildEmbedWaveUrl, buildVidFastUrl, buildEzVidApiUrl, buildEmbedApiStreamUrl, buildMoviesApiUrl } from "./playback/playback-urls.js";
-import { mountTflixSecondaryPlayer } from "./playback/tflix-secondary-player.js";
-import { mountAnimeSecondaryPlayer } from "./playback/anime-secondary-player.js";
 
 const $ = (id) => document.getElementById(id);
 const route = getRoute();
@@ -541,6 +539,43 @@ async function loadWatchRecommendations(params) {
   if (rail.isConnected) rail.innerHTML = recommendationCards();
 }
 
+function mountSecondaryPlayer(params, title, detailsSnapshot = details) {
+  const root = $("vivid-tflix-player");
+  if (!root) return;
+
+  if (isAnimePlayback()) {
+    const animeParams = { ...params, anime: true };
+    void import("./playback/anime-secondary-player.js")
+      .then(({ mountAnimeSecondaryPlayer }) => {
+        if (!root.isConnected) return;
+        mountAnimeSecondaryPlayer({
+          root,
+          params: animeParams,
+          media,
+          title,
+          aniListId,
+          malId
+        });
+      })
+      .catch(error => console.warn("Vivid anime secondary player could not initialize:", error));
+    return;
+  }
+
+  void import("./playback/tflix-secondary-player.js")
+    .then(({ mountTflixSecondaryPlayer }) => {
+      if (!root.isConnected) return;
+      mountTflixSecondaryPlayer({
+        root,
+        params,
+        media,
+        details: detailsSnapshot,
+        title,
+        isAnime: false
+      });
+    })
+    .catch(error => console.warn("Vivid secondary player could not initialize:", error));
+}
+
 function renderShell(params) {
   const isTv = params.type === "tv";
   const title = media.title || "Vivid Cinema";
@@ -572,11 +607,7 @@ function renderShell(params) {
     '<section id="vivid-tflix-player" class="vivid-tflix-player" aria-label="Additional streaming player"></section>' +
     '<section class="vivid-watch-recommendations"><div class="vivid-section-heading"><div><span>MORE TO DISCOVER</span><h2>You might also like</h2></div></div><div id="watch-recommendations" class="vivid-watch-rec-rail">' + recommendationCards() + '</div></section>';
 
-  if (isAnimePlayback()) {
-    mountAnimeSecondaryPlayer({ root: $("vivid-tflix-player"), params: { ...params, anime: true }, media, title: episodeTitle || title, aniListId, malId });
-  } else {
-    mountTflixSecondaryPlayer({ root: $("vivid-tflix-player"), params, media, details, title: episodeTitle || title, isAnime: false });
-  }
+  mountSecondaryPlayer(params, episodeTitle || title);
 
   const player = $("vidapi-player");
   const directPlayer = $("vivid-direct-player");
@@ -1089,11 +1120,7 @@ async function load() {
     }
     // Re-mount Player 2 after TMDB metadata arrives so its season and episode
     // selectors use the actual series seasons, not the early loading shell.
-    if (isAnimePlayback()) {
-      mountAnimeSecondaryPlayer({ root: $("vivid-tflix-player"), params: { ...currentParams, anime: true }, media, title: details.episode?.name || media.title || media.name, aniListId, malId });
-    } else {
-      mountTflixSecondaryPlayer({ root: $("vivid-tflix-player"), params: currentParams, media, details, title: details.episode?.name || media.title || media.name, isAnime: false });
-    }
+    mountSecondaryPlayer(currentParams, details.episode?.name || media.title || media.name, details);
     void loadWatchRecommendations(currentParams);
     // Metadata arrived after shell — re-arm
     // the primary timer if the player is still waiting.
