@@ -10,6 +10,7 @@ const firebaseWorkflow = await readFile(new URL("../.github/workflows/firebase-h
 test("Cloudflare Pages headers preserve core security policy", () => {
   for (const header of [
     "Strict-Transport-Security:",
+    "Cross-Origin-Opener-Policy: same-origin-allow-popups",
     "X-Content-Type-Options: nosniff",
     "X-Permitted-Cross-Domain-Policies: none",
     "Referrer-Policy: strict-origin-when-cross-origin",
