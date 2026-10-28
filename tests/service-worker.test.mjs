@@ -160,7 +160,7 @@ test("optional app-shell precache limits concurrent requests", async () => {
   const assets = Array.from({ length: 20 }, (_, index) => "./assets/test-" + index + ".js");
   const failures = await harness.worker.cacheAssetsWithConcurrency(cache, assets, 6);
 
-  assert.deepEqual(failures, []);
+  assert.equal(failures.length, 0);
   assert.equal(requests, assets.length);
   assert.ok(maxActive <= 6, "optional precache should not start more than six requests concurrently");
 });
