@@ -72,7 +72,7 @@ test("TFLIX-style trending billboard is restored above the unchanged featured-ca
 
 test("TFLIX-style hero uses TMDB stills, plays listed trailers, and routes to Vivid title details", () => {
   const js = read("../scripts/tflix-hero.js");
-  assert.match(js, /tmdbApi\.trending\("all",\s*"day",\s*1\)/);
+  assert.match(js, /tmdbApi\.trending\("all",\s*"day",\s*1,\s*\{ timeoutMs: HERO_REQUEST_TIMEOUT_MS \}\)/);
   assert.match(js, /HERO_BACKDROP_SIZE\s*=\s*\(\)\s*=>\s*window\.matchMedia\("\(max-width: 767px\)"\)\.matches\s*\?\s*"w780"\s*:\s*"w1280"/);
   assert.match(js, /getImageUrl\(item\.backdrop_path,\s*HERO_BACKDROP_SIZE\(\)\)/, "hero slides use viewport-appropriate backdrop sizes");
   assert.match(js, /getImageUrl\(items\[0\]\.backdrop_path,\s*HERO_BACKDROP_SIZE\(\)\)/, "the preload must match the rendered hero image size");
@@ -108,7 +108,7 @@ test("service worker shell cache includes the new hero assets", () => {
   assert.match(sw, /\.\/styles\/vivid-tflix-hero\.css/);
   assert.match(sw, /\.\/styles\/vivid-tflix-hero\.css\?v=hero-trailer-full-bleed-1/);
   assert.match(home, /vivid-tflix-hero\.css\?v=hero-trailer-full-bleed-1/);
-  assert.match(sw, /\.\/scripts\/tflix-hero\.js\?v=hero-responsive-artwork-1/);
+  assert.match(sw, /\.\/scripts\/tflix-hero\.js\?v=hero-fast-fallback-1/);
   assert.match(home, /vivid-apple-tv-mobile\.css\?v=apple-tv-mobile-2/);
   assert.match(sw, /\.\/styles\/vivid-apple-tv-mobile\.css\?v=apple-tv-mobile-2/);
   const mobileCss = stripComments(read("../styles/vivid-apple-tv-mobile.css"));
@@ -147,14 +147,14 @@ test("mascot video loads near the viewport and retries muted inline playback", (
   const autoplay = read("../scripts/mascot-autoplay.js");
   assert.match(home, /class="vivid-mascot-video" muted loop playsinline preload="none"/);
   assert.match(home, /assets\/videos\/vivid-mascot\.MP4/);
-  assert.match(home, /scripts\/mascot-autoplay\.js\?v=1/);
+  assert.match(home, /scripts\/mascot-autoplay\.js\?v=2/);
   assert.match(autoplay, /video\.play\(\)/);
   assert.doesNotMatch(autoplay, /setAttribute\("autoplay"/, "the video must not force eager loading before it is visible");
   assert.match(autoplay, /else if \(!video\.paused\) video\.pause\(\)/, "the mascot pauses when it leaves the viewport");
   assert.match(autoplay, /IntersectionObserver/);
   assert.match(autoplay, /visibilitychange/);
   assert.match(read("../service-worker.js"), /vivid-cinema-shell-v\d+/);
-  assert.match(read("../service-worker.js"), /scripts\/mascot-autoplay\.js\?v=1/);
+  assert.match(read("../service-worker.js"), /scripts\/mascot-autoplay\.js\?v=2/);
 });
 
 
