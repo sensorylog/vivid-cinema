@@ -73,7 +73,9 @@ test("TFLIX-style trending billboard is restored above the unchanged featured-ca
 test("TFLIX-style hero uses TMDB stills, plays listed trailers, and routes to Vivid title details", () => {
   const js = read("../scripts/tflix-hero.js");
   assert.match(js, /tmdbApi\.trending\("all",\s*"day",\s*1\)/);
-  assert.match(js, /getImageUrl\(item\.backdrop_path,\s*"w1280"\)/);
+  assert.match(js, /HERO_BACKDROP_SIZE\s*=\s*\(\)\s*=>\s*window\.matchMedia\("\(max-width: 767px\)"\)\.matches\s*\?\s*"w780"\s*:\s*"w1280"/);
+  assert.match(js, /getImageUrl\(item\.backdrop_path,\s*HERO_BACKDROP_SIZE\(\)\)/, "hero slides use viewport-appropriate backdrop sizes");
+  assert.match(js, /getImageUrl\(items\[0\]\.backdrop_path,\s*HERO_BACKDROP_SIZE\(\)\)/, "the preload must match the rendered hero image size");
   assert.match(js, /getMediaUrl\(item\)/);
   assert.match(js, /TRAILER_WINDOW_MS = 30000/);
   assert.match(js, /aria-hidden", "true"/);
