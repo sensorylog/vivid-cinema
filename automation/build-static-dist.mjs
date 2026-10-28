@@ -87,6 +87,9 @@ async function addNativeEnhancements(directory) {
 
 await rm(output, { recursive: true, force: true });
 await copySite(root, output);
+// Keep Google Search Console's root-level ownership token in the actual Pages artifact.
+const googleVerificationFile = "googlec7ad9951d02b4b4f.html";
+await cp(path.join(root, googleVerificationFile), path.join(output, googleVerificationFile));
 if (process.env.VIVID_ANDROID_BUILD) {
   const build = Number(process.env.VIVID_ANDROID_BUILD);
   const workerPath = path.join(output, "service-worker.js");
