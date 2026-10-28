@@ -170,7 +170,9 @@ test("app shell includes current versioned assets without dropping existing cach
     "./scripts/watch.js?v=watch-player-server-scroll-1",
     "./scripts/live.js?v=live8",
     "./scripts/title.js?v=beast-1",
-    "./scripts/newsroom.js?v=20261020-newsroom-images-3"
+    "./scripts/newsroom.js?v=20261020-newsroom-images-3",
+    "./scripts/tflix-hero.js?v=hero-fast-fallback-1",
+    "./scripts/mascot-autoplay.js?v=2"
   ]) assert.ok(source.includes(JSON.stringify(current)), "Missing current asset: " + current);
 
   // Preserve older entries until all runtime consumers have been verified;
