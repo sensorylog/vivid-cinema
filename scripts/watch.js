@@ -1043,13 +1043,41 @@ async function load() {
     media = normalizeMedia(details, currentParams.type);
     imdbId = resolveImdbId(details) || (/^tt\d+$/i.test(String(currentParams.id || "")) ? String(currentParams.id) : "");
     tmdbId = /^\d+$/.test(String(currentParams.id || "")) ? String(currentParams.id) : String(details?.id || "");
-    const animeIds = await resolveAnimeIds(media?.title || details?.name || details?.title || "");
+    // Render the TMDB title artwork and metadata immediately. Episode-specific
+    // details can refine it after the season request completes.
+    hydrateWatchDetails(currentParams);
+
+    // Anime catalog lookups are optional: skip them for ordinary movies/TV and
+    // never let a provider timeout prevent the watch page from rendering.
+    const animeIdsPromise = (isAnimePlayback() || isLikelyAnime())
+      ? resolveAnimeIds(media?.title || details?.name || details?.title || "").catch(error => {
+          console.warn("Vivid anime ID lookup unavailable:", error);
+          return { aniListId: "", malId: "" };
+        })
+      : Promise.resolve({ aniListId: "", malId: "" });
+
+    if (isAnimePlayback()) {
+      const status = $("player-status");
+      if (status) {
+        status.textContent = "Matching this title to an anime player…";
+        status.hidden = false;
+      }
+    }
+
+    if (currentParams.type === "tv") {
+      details.episode = await tmdbApi.tvSeason(currentParams.id, currentParams.season)
+        .then(season => (season.episodes || []).find(ep => Number(ep.episode_number) === Number(currentParams.episode)) || null)
+        .catch(() => null);
+    }
+    // Re-render episode-specific text/artwork if the season request supplied it.
+    hydrateWatchDetails(currentParams);
+
+    const animeIds = await animeIdsPromise;
     aniListId = animeIds.aniListId;
     malId = animeIds.malId;
     updateSourceLabel();
     if (isAnimePlayback()) {
-      // Resolve anime IDs now, but do not load a third-party iframe until the
-      // viewer explicitly opens the player.
+      // Do not load a third-party iframe until the viewer explicitly opens the player.
       const status = $("player-status");
       if (status) {
         status.textContent = aniListId || malId
@@ -1059,12 +1087,6 @@ async function load() {
       }
       updateSourceLabel();
     }
-    if (currentParams.type === "tv") {
-      details.episode = await tmdbApi.tvSeason(currentParams.id, currentParams.season)
-        .then(season => (season.episodes || []).find(ep => Number(ep.episode_number) === Number(currentParams.episode)) || null)
-        .catch(() => null);
-    }
-    hydrateWatchDetails(currentParams);
     // Re-mount Player 2 after TMDB metadata arrives so its season and episode
     // selectors use the actual series seasons, not the early loading shell.
     if (isAnimePlayback()) {

@@ -74,3 +74,22 @@ test("movie/TV server picker keeps all providers in a simple scrollable dropdown
   assert.match(styles, /overflow-y:\s*(?:auto|scroll)/);
   assert.match(styles, /touch-action:\s*pan-y/);
 });
+
+
+test("watch artwork renders before optional anime lookup and TV episode metadata", () => {
+  const detailsLoad = source.indexOf('details = currentParams.type === "tv" ? await tmdbApi.tvDetails');
+  const earlyHydrate = source.indexOf("hydrateWatchDetails(currentParams);", detailsLoad);
+  const animeLookup = source.indexOf("const animeIdsPromise = (isAnimePlayback() || isLikelyAnime())", detailsLoad);
+  const tvSeason = source.indexOf("details.episode = await tmdbApi.tvSeason", detailsLoad);
+  const finalHydrate = source.indexOf("hydrateWatchDetails(currentParams);", earlyHydrate + 1);
+
+  assert.ok(detailsLoad >= 0, "TMDB title details should load");
+  assert.ok(earlyHydrate > detailsLoad, "title artwork should render as soon as TMDB details arrive");
+  assert.ok(animeLookup > earlyHydrate, "optional anime lookup must not precede initial artwork rendering");
+  assert.ok(tvSeason > earlyHydrate, "TV season lookup must not precede initial artwork rendering");
+  assert.ok(finalHydrate > tvSeason, "episode-specific details should refresh the initial metadata");
+});
+
+test("anime catalog lookup is limited to anime titles and lookup failures do not abort watch rendering", () => {
+  assert.match(source, /const animeIdsPromise = \(isAnimePlayback\(\) \|\| isLikelyAnime\(\)\)[\s\S]*?resolveAnimeIds\([\s\S]*?\.catch\(error => \{[\s\S]*?return \{ aniListId: "", malId: "" \};[\s\S]*?\}\)[\s\S]*?: Promise\.resolve\(\{ aniListId: "", malId: "" \}\)/);
+});
