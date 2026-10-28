@@ -1,5 +1,4 @@
-/* Keep the Vivid mascot animation playing without requiring a tap.
-   Autoplay is muted and inline; browsers may still defer playback until visible. */
+/* Play the Vivid mascot animation when it is near the viewport, without requiring a tap. */
 (() => {
   const videos = document.querySelectorAll(".vivid-mascot-video");
   if (!videos.length) return;
@@ -11,7 +10,6 @@
     video.setAttribute("muted", "");
     video.setAttribute("playsinline", "");
     video.setAttribute("webkit-playsinline", "");
-    video.setAttribute("autoplay", "");
     if (video.readyState === 0) video.load();
 
     const playback = video.play();
@@ -26,6 +24,7 @@
           const video = entry.target;
           video.dataset.mascotVisible = String(entry.isIntersecting);
           if (entry.isIntersecting) start(video);
+          else if (!video.paused) video.pause();
         }
       }, { rootMargin: "160px 0px", threshold: 0.01 })
     : null;
