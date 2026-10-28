@@ -39,9 +39,13 @@ test("home entry point does not import unused named bindings", async () => {
 test("static icons and fonts have explicit reusable cache headers", async () => {
   const headers = await read("_headers");
   for (const extension of ["svg", "avif", "gif", "ico"]) {
-    assert.match(headers, new RegExp("\\\*/\\\\*?\\\\." + extension + "\\n\\s+Cache-Control: public, max-age=604800, stale-while-revalidate=2592000"));
+    for (const pattern of [`/*.${extension}`, `/**/*.${extension}`]) {
+      assert.ok(headers.includes(`${pattern}\n  Cache-Control: public, max-age=604800, stale-while-revalidate=2592000`));
+    }
   }
   for (const extension of ["woff2", "woff"]) {
-    assert.match(headers, new RegExp("\\\*/\\\\*?\\\\." + extension + "\\n\\s+Cache-Control: public, max-age=2592000, stale-while-revalidate=2592000"));
+    for (const pattern of [`/*.${extension}`, `/**/*.${extension}`]) {
+      assert.ok(headers.includes(`${pattern}\n  Cache-Control: public, max-age=2592000, stale-while-revalidate=2592000`));
+    }
   }
 });
