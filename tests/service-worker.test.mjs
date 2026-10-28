@@ -89,7 +89,7 @@ function createWorkerHarness(fetchImpl, initialCache = new Map()) {
     Set,
     Error
   };
-  runInNewContext(source + "\nglobalThis.__worker = { networkFirst, staleWhileRevalidate, safeCachedResponse };", context);
+  runInNewContext(source + "\nglobalThis.__worker = { networkFirst, staleWhileRevalidate, safeCachedResponse, cacheAssetsWithConcurrency };", context);
   return { worker: context.__worker, cacheEntries, cacheKey, handlers };
 }
 
@@ -141,4 +141,43 @@ test("app-shell manifest contains no duplicate cache URLs", () => {
   const assets = [...match[1].matchAll(/"([^"]+)"/g)].map(entry => entry[1]);
   const duplicates = assets.filter((asset, index) => assets.indexOf(asset) !== index);
   assert.deepEqual(duplicates, [], "Duplicate precache URLs waste cache space: " + duplicates.join(", "));
+});
+
+
+test("optional app-shell precache limits concurrent requests", async () => {
+  let active = 0;
+  let maxActive = 0;
+  let requests = 0;
+  const harness = createWorkerHarness(async request => {
+    requests += 1;
+    active += 1;
+    maxActive = Math.max(maxActive, active);
+    await new Promise(resolve => setTimeout(resolve, 2));
+    active -= 1;
+    return mockResponse({ url: new URL(typeof request === "string" ? request : request.url, "https://vivid.test/").href });
+  });
+  const cache = { async put() {} };
+  const assets = Array.from({ length: 20 }, (_, index) => "./assets/test-" + index + ".js");
+  const failures = await harness.worker.cacheAssetsWithConcurrency(cache, assets, 6);
+
+  assert.deepEqual(failures, []);
+  assert.equal(requests, assets.length);
+  assert.ok(maxActive <= 6, "optional precache should not start more than six requests concurrently");
+});
+
+test("app shell retains current versioned assets and excludes superseded variants", () => {
+  for (const current of [
+    "./scripts/watch.js?v=watch-player-server-scroll-1",
+    "./scripts/live.js?v=live8",
+    "./scripts/title.js?v=beast-1",
+    "./scripts/newsroom.js?v=20261020-newsroom-images-3"
+  ]) assert.ok(source.includes(JSON.stringify(current)), "Missing current asset: " + current);
+
+  for (const obsolete of [
+    "./scripts/watch.js?v=watch-player-layout-1",
+    "./scripts/watch.js?v=watch-player-layout-2",
+    "./scripts/watch.js?v=watch-player-choice-2",
+    "./scripts/live.js?v=live7",
+    "./scripts/intelligence.js?v=20261018-sync-stage-1"
+  ]) assert.ok(!source.includes(JSON.stringify(obsolete)), "Superseded asset should not be precached: " + obsolete);
 });
