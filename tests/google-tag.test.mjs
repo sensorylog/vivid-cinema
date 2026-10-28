@@ -22,7 +22,7 @@ test("every root HTML page loads Google tag directly or through app shell exactl
   const problems = [];
   for (const file of files) {
     // The standalone diagnostics utility intentionally avoids the sitewide app shell and analytics.
-    if (file === "auth-diagnostics.html") continue;
+    if (file === "auth-diagnostics.html" || /^google[a-f0-9]+\.html$/i.test(file)) continue;
     const html = await readFile(path.join(root, file), "utf8");
     const direct = /scripts\/google-tag\.js/i.test(html);
     const viaShell = /scripts\/app-shell\.js(?:\?[^"']*)?/i.test(html);
