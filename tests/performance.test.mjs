@@ -20,3 +20,18 @@ test("watch page disables expensive ambient blur animation and overlay", async (
   assert.match(css, /body\.vivid-watch-page\.vivid-atmosphere::before\{animation:none;filter:none/);
   assert.match(css, /body\.vivid-watch-page\.vivid-atmosphere::after\{display:none\}/);
 });
+
+test("shared app-shell modules are not redundantly imported a second time", async () => {
+  const appShell = await read("scripts/app-shell.js");
+  assert.match(appShell, /^import ["']\.\/google-tag\.js["'];/m);
+  assert.match(appShell, /^import ["']\.\/vivid-pulse\.js["'];/m);
+  assert.doesNotMatch(appShell, /import\(["']\.\/google-tag\.js["']\)/);
+  assert.doesNotMatch(appShell, /import\(["']\.\/vivid-pulse\.js["']\)/);
+});
+
+test("home entry point does not import unused named bindings", async () => {
+  const source = await read("script.js");
+  assert.doesNotMatch(source, /\bgetHomeSections\b/);
+  assert.doesNotMatch(source, /\brequestReleaseAlerts\b/);
+  assert.doesNotMatch(source, /\bclearRecentSearches\b/);
+});
