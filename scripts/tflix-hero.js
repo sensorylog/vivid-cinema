@@ -8,6 +8,7 @@ const ARTWORK_HOLD_MS = 2400;
 const TRAILER_WINDOW_MS = 30000;
 const NO_TRAILER_HOLD_MS = 8000;
 const TRAILER_LOAD_FAILSAFE_MS = 40000;
+const HERO_BACKDROP_SIZE = () => window.matchMedia("(max-width: 767px)").matches ? "w780" : "w1280";
 const trailerCache = new Map();
 
 let heroSlides = [];
@@ -180,7 +181,7 @@ function createSlide(item, index) {
 
   const backdrop = document.createElement("div");
   backdrop.className = "hero-bg";
-  backdrop.style.backgroundImage = "url(\"" + getImageUrl(item.backdrop_path, "w1280") + "\")";
+  backdrop.style.backgroundImage = "url(\"" + getImageUrl(item.backdrop_path, HERO_BACKDROP_SIZE()) + "\")";
   backdrop.setAttribute("aria-hidden", "true");
 
   const shade = document.createElement("div");
@@ -338,7 +339,7 @@ async function loadHero() {
       const preload = new Image();
       preload.decoding = "async";
       preload.fetchPriority = "high";
-      preload.src = getImageUrl(items[0].backdrop_path, "w1280");
+      preload.src = getImageUrl(items[0].backdrop_path, HERO_BACKDROP_SIZE());
     }
     renderHero(items);
   } catch (error) {
