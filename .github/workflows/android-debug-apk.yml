@@ -156,8 +156,23 @@ jobs:
           set -euo pipefail
           if [ "$GITHUB_EVENT_NAME" = "release" ]; then
             tag="$(node -e 'const fs=require("fs");const e=JSON.parse(fs.readFileSync(process.env.GITHUB_EVENT_PATH,"utf8"));process.stdout.write(e.release.tag_name)')"
-          else
+          elif [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ]; then
             tag="$(gh release view --repo "$GITHUB_REPOSITORY" --json tagName --jq .tagName)"
+          else
+            # A version bump starts Windows release creation and this APK build in
+            # parallel. Wait for the matching versioned release instead of racing
+            # and uploading the new APK to the previous release.
+            tag="v$VIVID_ANDROID_VERSION"
+            for attempt in $(seq 1 30); do
+              if gh release view "$tag" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+                break
+              fi
+              if [ "$attempt" -eq 30 ]; then
+                echo "Matching release $tag was not created before timeout."
+                exit 1
+              fi
+              sleep 20
+            done
           fi
           gh release view "$tag" --repo "$GITHUB_REPOSITORY" >/dev/null
           # Stable public APK name; metadata identifies the monotonically increasing CI build.
