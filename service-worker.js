@@ -21,7 +21,7 @@ const APP_SHELL = [
   "./styles/vivid-achievements.css?v=20261018-achievements-1","./scripts/achievements.js","./scripts/achievements-page.js?v=20261018-cinematic-1","./scripts/achievement-catalog.js","./scripts/app-shell.js",
   "./scripts/donate.js","./scripts/google-tag.js","./scripts/analytics.js","./scripts/vivid-pulse.js","./scripts/provider-region.js",
   "./scripts/search.js","./scripts/search-page.js","./scripts/intelligence.js","./scripts/intent-parser.js","./scripts/plot-search.js",
-  "./scripts/for-you.js","./scripts/vivid-recall-chat.js","./scripts/firebase-ai.js","./scripts/local-owner.js","./scripts/firebase.js",
+  "./scripts/for-you.js","./scripts/vivid-recall-chat.js","./scripts/firebase-ai.js","./scripts/local-owner.js","./scripts/firebase.js","./scripts/firebase.js?v=20261016-auth-runtime-audit2",
   "./scripts/pwa.js","./scripts/atmosphere.js","./scripts/i18n.js","./scripts/routes.js","./scripts/config.js",
   "./scripts/utils.js","./scripts/content.js","./scripts/media.js","./scripts/tmdb.js","./scripts/nav-auth.js",
   "./scripts/downloads.js?v=direct-download-v3","./scripts/library.js","./scripts/library-page.js","./scripts/discover.js","./scripts/collection.js",
