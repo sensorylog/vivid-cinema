@@ -1,17 +1,44 @@
 // Bump this version whenever the precached app shell changes.
-const CACHE_NAME = "vivid-cinema-shell-v252";
+const CACHE_NAME = "vivid-cinema-shell-v253";
 const APP_SHELL = [
-  "./","./index.html","./home.html","./downloads.html","./for-you.html","./person.html","./discover.html","./collection.html","./title.html","./watch.html",
-  "./library.html","./auth.html","./login.html","./verify-email.html","./forgot-password.html","./account.html","./achievements.html","./terms.html","./privacy.html","./contact.html","./donate.html","./donation-success.html",
-  "./offline.html","./live.html","./news.html","./community.html","./news-story.html","./moderator.html", "./scripts/news-source-registry.js","./search.html","./anime.html","./help.html","./about.html","./accessibility.html","./cookies.html","./404.html","./manifest.json","./robots.txt","./icons/vivid-icon.svg",
-  "./assets/images/IMG_6099.jpeg","./scripts/mascot-autoplay.js?v=1","./styles/vivid-foundation.css","./styles/vivid-system.css","./styles/downloads.css","./styles/vivid-liquid-glass.css","./styles/vivid-liquid-glass.css?v=lg4","./styles/vivid-media-layout.css?v=1","./styles/vivid-home.css","./styles/vivid-donate.css","./styles/vivid-shell.css","./styles/vivid-cinematic.css",
-  "./styles/vivid-title.css","./styles/vivid-person.css","./styles/vivid-watch.css","./styles/vivid-watch.css?v=player-flow-3-servers","./styles/vivid-watch.css?v=watch-player-layout-1","./styles/vivid-watch.css?v=watch-player-layout-2","./styles/vivid-watch.css?v=watch-player-layout-3","./styles/vivid-cleanup.css?v=4","./styles/vivid-watch-polish.css?v=2","./styles/vivid-library.css","./styles/vivid-library.css?v=library-mobile-fix1","./styles/vivid-discovery.css","./styles/vivid-for-you.css",
-  "./styles/vivid-collection.css","./styles/vivid-auth.css","./styles/vivid-account.css","./styles/vivid-account-cinematic.css?v=20261018-cinematic-1","./styles/vivid-achievements-page.css?v=20261018-cinematic-1","./styles/vivid-pwa.css",
-  "./styles/vivid-tflix-hero.css","./styles/vivid-tflix-hero.css?v=hero-motion-2","./styles/vivid-tflix-hero.css?v=hero-motion-3","./styles/vivid-tflix-hero.css?v=hero-trailer-full-bleed-1","./styles/vivid-viewport.css?v=page-gutters-1","./styles/vivid-apple-tv-mobile.css?v=apple-tv-mobile-2","./scripts/tflix-hero.js","./scripts/tflix-hero.js?v=hero-rank-fast-2","./scripts/tflix-hero.js?v=hero-trailer-autoplay-2","./styles/vivid-atmosphere.css","./styles/vivid-search-standalone.css","./styles/vivid-desktop.css","./styles/vivid-landing.css","./styles/vivid-landing-final.css","./styles/vivid-home-breathe.css","./styles/vivid-news.css","./styles/vivid-community.css","./styles/vivid-moderation.css","./styles/vivid-anime.css","./styles/vivid-viewport.css",
-  "./styles/vivid-legal.css","./styles/vivid-live.css","./styles/vivid-audit-fixes.css","./styles/vivid-achievements.css?v=20261018-achievements-1","./scripts/achievements.js","./scripts/achievements-page.js?v=20261018-cinematic-1","./scripts/achievement-catalog.js","./scripts/app-shell.js","./scripts/donate.js","./scripts/google-tag.js","./scripts/analytics.js","./scripts/vivid-pulse.js","./scripts/provider-region.js","./scripts/search.js","./scripts/search-page.js","./scripts/intelligence.js","./scripts/intelligence.js?v=20261018-sync-stage-1","./scripts/intelligence.js?v=20261018-feedback-payload-2","./scripts/intelligence.js?v=20261018-feedback-sync-3","./scripts/intelligence.js?v=20261018-feedback-sync-4","./scripts/intent-parser.js","./scripts/plot-search.js","./scripts/for-you.js","./scripts/vivid-recall-chat.js","./scripts/firebase-ai.js","./scripts/local-owner.js","./scripts/firebase.js","./scripts/firebase.js?v=20261016-auth-runtime-audit2","./scripts/pwa.js",
-  "./scripts/atmosphere.js","./scripts/i18n.js","./scripts/routes.js","./scripts/config.js","./scripts/utils.js","./scripts/content.js","./scripts/media.js","./scripts/tmdb.js",
-  "./scripts/nav-auth.js","./scripts/downloads.js?v=direct-download-v3","./scripts/library.js","./scripts/library-page.js","./scripts/discover.js","./scripts/collection.js","./scripts/person.js","./scripts/recommendations.js","./scripts/release-alerts.js","./scripts/cinema-reminders.js","./scripts/push-notifications.js","./native-notify/web/nativeNotifyIds.js","./native-notify/web/native-notify-web-push.js","./scripts/news.js","./scripts/news.js?v=20261018-sync-stage-1","./scripts/news.js?v=20261018-feedback-sync-3","./scripts/news.js?v=20261018-feedback-sync-4","./scripts/newsroom.js","./scripts/newsroom.js?v=20261018-firestore-db-1","./scripts/newsroom.js?v=20261019-premium-polish-3","./scripts/news-community-highlights.js","./scripts/news-community.js","./scripts/news-story.js","./scripts/moderation.js","./scripts/editorial-desk.js","./scripts/title.js","./scripts/playback/player-engine.js","./scripts/playback/playback-servers.js","./scripts/playback/server-settings.js","./scripts/watch.js","./scripts/watch.js?v=watch-player-layout-1","./scripts/watch.js?v=watch-player-layout-2","./scripts/watch.js?v=watch-player-layout-3","./scripts/watch.js?v=watch-player-choice-2","./scripts/watch.js?v=watch-player-tv-seven-servers-3","./scripts/playback/tflix-secondary-player.js","./scripts/playback/tflix-secondary-player.js?player-choice-1","./scripts/playback/tflix-secondary-player.js?tv-episodes-3","./scripts/playback/playback-urls.js","./scripts/landing.js",
-  "./scripts/account.js","./scripts/account-bootstrap.js","./scripts/account-bootstrap.js?v=20261016-account-bootstrap-1","./scripts/auth.js","./scripts/auth.js?v=20261024-desktop-persistence-1","./scripts/verify-email.js","./scripts/anime.js","./scripts/live.js","./scripts/live.js?v=live7","./scripts/home-breathe.js","./data/live-channels.json","./script.js","./script.js?v=20261006-2"
+  "./","./index.html","./home.html","./downloads.html","./for-you.html",
+  "./person.html","./discover.html","./collection.html","./title.html","./watch.html",
+  "./library.html","./auth.html","./login.html","./verify-email.html","./forgot-password.html",
+  "./account.html","./achievements.html","./terms.html","./privacy.html","./contact.html",
+  "./donate.html","./donation-success.html","./offline.html","./live.html","./news.html",
+  "./community.html","./news-story.html","./moderator.html","./scripts/news-source-registry.js","./search.html",
+  "./anime.html","./help.html","./about.html","./accessibility.html","./cookies.html",
+  "./404.html","./manifest.json","./robots.txt","./icons/vivid-icon.svg","./assets/images/IMG_6099.jpeg",
+  "./scripts/mascot-autoplay.js?v=1","./styles/vivid-foundation.css","./styles/vivid-system.css","./styles/downloads.css","./styles/vivid-liquid-glass.css",
+  "./styles/vivid-liquid-glass.css?v=lg4","./styles/vivid-media-layout.css?v=1","./styles/vivid-home.css","./styles/vivid-donate.css","./styles/vivid-shell.css",
+  "./styles/vivid-cinematic.css","./styles/vivid-title.css","./styles/vivid-person.css","./styles/vivid-watch.css","./styles/vivid-watch.css?v=watch-player-layout-3",
+  "./styles/vivid-library.css","./styles/vivid-library.css?v=library-mobile-fix1","./styles/vivid-discovery.css","./styles/vivid-for-you.css","./styles/vivid-collection.css",
+  "./styles/vivid-auth.css","./styles/vivid-account.css","./styles/vivid-account-cinematic.css?v=20261018-cinematic-1","./styles/vivid-achievements-page.css?v=20261018-cinematic-1","./styles/vivid-pwa.css",
+  "./styles/vivid-tflix-hero.css","./styles/vivid-tflix-hero.css?v=hero-trailer-full-bleed-1","./styles/vivid-viewport.css?v=page-gutters-1","./styles/vivid-apple-tv-mobile.css?v=apple-tv-mobile-2","./scripts/tflix-hero.js",
+  "./scripts/tflix-hero.js?v=hero-trailer-autoplay-2","./styles/vivid-atmosphere.css","./styles/vivid-search-standalone.css","./styles/vivid-desktop.css","./styles/vivid-landing.css",
+  "./styles/vivid-landing-final.css","./styles/vivid-home-breathe.css","./styles/vivid-news.css","./styles/vivid-community.css","./styles/vivid-moderation.css",
+  "./styles/vivid-anime.css","./styles/vivid-viewport.css","./styles/vivid-legal.css","./styles/vivid-live.css","./styles/vivid-audit-fixes.css",
+  "./styles/vivid-achievements.css?v=20261018-achievements-1","./scripts/achievements.js","./scripts/achievements-page.js?v=20261018-cinematic-1","./scripts/achievement-catalog.js","./scripts/app-shell.js",
+  "./scripts/donate.js","./scripts/google-tag.js","./scripts/analytics.js","./scripts/vivid-pulse.js","./scripts/provider-region.js",
+  "./scripts/search.js","./scripts/search-page.js","./scripts/intelligence.js","./scripts/intent-parser.js","./scripts/plot-search.js",
+  "./scripts/for-you.js","./scripts/vivid-recall-chat.js","./scripts/firebase-ai.js","./scripts/local-owner.js","./scripts/firebase.js",
+  "./scripts/firebase.js?v=20261016-auth-runtime-audit2","./scripts/pwa.js","./scripts/atmosphere.js","./scripts/i18n.js","./scripts/routes.js",
+  "./scripts/config.js","./scripts/utils.js","./scripts/content.js","./scripts/media.js","./scripts/tmdb.js",
+  "./scripts/nav-auth.js","./scripts/downloads.js?v=direct-download-v3","./scripts/library.js","./scripts/library-page.js","./scripts/discover.js",
+  "./scripts/collection.js","./scripts/person.js","./scripts/recommendations.js","./scripts/release-alerts.js","./scripts/cinema-reminders.js",
+  "./scripts/push-notifications.js","./native-notify/web/nativeNotifyIds.js","./native-notify/web/native-notify-web-push.js","./scripts/news.js","./scripts/news.js?v=20261018-feedback-sync-4",
+  "./scripts/newsroom.js","./scripts/news-community-highlights.js","./scripts/news-community.js","./scripts/news-story.js","./scripts/moderation.js",
+  "./scripts/editorial-desk.js","./scripts/title.js","./scripts/playback/player-engine.js","./scripts/playback/playback-servers.js","./scripts/playback/server-settings.js",
+  "./scripts/watch.js","./scripts/playback/tflix-secondary-player.js","./scripts/playback/playback-urls.js","./scripts/landing.js","./scripts/account.js",
+  "./scripts/account-bootstrap.js","./scripts/account-bootstrap.js?v=20261016-account-bootstrap-1","./scripts/auth.js","./scripts/auth.js?v=20261024-desktop-persistence-1","./scripts/verify-email.js",
+  "./scripts/anime.js","./scripts/live.js","./scripts/home-breathe.js","./data/live-channels.json","./script.js",
+  "./script.js?v=20261006-2","./scripts/watch.js?v=watch-player-server-scroll-1","./scripts/account.js?v=20261016-account-runtime-2","./styles/vivid-news.css?v=20261021-this-week-1","./scripts/newsroom.js?v=20261020-newsroom-images-3",
+  "./scripts/live.js?v=live8","./styles/vivid-cleanup.css?v=1","./styles/vivid-title-refresh.css?v=beast-1","./scripts/title.js?v=beast-1","./styles/vivid-donate.css?v=support3",
+  "./styles/vivid-watch.css?v=player-flow-3-servers","./styles/vivid-watch.css?v=watch-player-layout-1","./styles/vivid-watch.css?v=watch-player-layout-2","./styles/vivid-cleanup.css?v=4","./styles/vivid-watch-polish.css?v=2",
+  "./styles/vivid-tflix-hero.css?v=hero-motion-2","./styles/vivid-tflix-hero.css?v=hero-motion-3","./scripts/tflix-hero.js?v=hero-rank-fast-2","./scripts/intelligence.js?v=20261018-sync-stage-1","./scripts/intelligence.js?v=20261018-feedback-payload-2",
+  "./scripts/intelligence.js?v=20261018-feedback-sync-3","./scripts/intelligence.js?v=20261018-feedback-sync-4","./scripts/news.js?v=20261018-sync-stage-1","./scripts/news.js?v=20261018-feedback-sync-3","./scripts/newsroom.js?v=20261018-firestore-db-1",
+  "./scripts/newsroom.js?v=20261019-premium-polish-3","./scripts/watch.js?v=watch-player-layout-1","./scripts/watch.js?v=watch-player-layout-2","./scripts/watch.js?v=watch-player-layout-3","./scripts/watch.js?v=watch-player-choice-2",
+  "./scripts/watch.js?v=watch-player-tv-seven-servers-3","./scripts/playback/tflix-secondary-player.js?player-choice-1","./scripts/playback/tflix-secondary-player.js?tv-episodes-3","./scripts/live.js?v=live7"
 ];
 const REQUIRED_APP_SHELL = ["./index.html", "./home.html", "./offline.html", "./manifest.json"];
 function isSafeResponse(response){
@@ -23,6 +50,19 @@ async function cacheAsset(cache,asset){
  // a redirected response when a service worker returns it for a navigation.
  if(!response.ok||response.type!=="basic"||!isSafeResponse(response))throw new Error("Unsafe or unavailable precache response: "+asset);
  await cache.put(asset,response.clone());
+}
+async function cacheAssetsWithConcurrency(cache,assets,concurrency=6){
+ const failures=[];
+ let nextIndex=0;
+ const workerCount=Math.min(Math.max(1,Math.floor(Number(concurrency)||1)),assets.length);
+ await Promise.all(Array.from({length:workerCount},async()=>{
+  while(nextIndex<assets.length){
+   const index=nextIndex++;
+   try{await cacheAsset(cache,assets[index]);}
+   catch{failures.push(assets[index]);}
+  }
+ }));
+ return failures;
 }
 async function safeCachedResponse(request){
  const cache=await caches.open(CACHE_NAME);
@@ -55,9 +95,10 @@ async function cacheShell(){
  // Do not precache "./": root requests may redirect to index.html depending on
  // host configuration, and redirected responses must never enter the app cache.
  const optional=[...new Set(APP_SHELL)].filter(asset=>asset!=="./"&&!requiredSet.has(asset));
- const results=await Promise.allSettled(optional.map(asset=>cacheAsset(cache,asset)));
- const failures=results.map((result,index)=>result.status==="rejected"?optional[index]:null).filter(Boolean);
- if(failures.length) console.warn("Vivid shell: optional assets were not precached",failures);
+ // Keep install-time network pressure bounded. The previous unbounded
+ // Promise.allSettled launched every optional asset request at once.
+ const failures = await cacheAssetsWithConcurrency(cache, optional);
+ if(failures.length) console.warn("Vivid shell: optional assets were not precached", failures);
 }
 self.addEventListener("install",event=>{event.waitUntil(cacheShell().then(()=>self.skipWaiting()));});
 self.addEventListener("activate",event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key.startsWith("vivid-cinema-shell-")&&key!==CACHE_NAME).map(key=>caches.delete(key)))).then(()=>self.clients.claim()));});
