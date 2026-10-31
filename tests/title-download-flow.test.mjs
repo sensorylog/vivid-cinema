@@ -27,6 +27,8 @@ test("title download action opens the native Vivid Offline library", async () =>
   assert.match(engine, /vivid-downloads\.json/);
   assert.match(engine, /destroyStore: false/);
   assert.match(engine, /action === "resume"/);
+  assert.match(engine, /rescanFiles/);
+  assert.match(engine, /needsRescan/);
   assert.match(offline, /desktop-search-form/);
   assert.match(offline, /engine\.mediaUrl\(job\.id\)/);
   assert.match(offline, /data-action="pause"/);
