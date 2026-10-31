@@ -161,7 +161,8 @@ function configureOfflineMediaProtocol() {
     const url = new URL(request.url);
     if (url.hostname !== "download" || url.searchParams.get("token") !== mediaToken) return new Response("Forbidden", { status: 403 });
     const id = decodeURIComponent(url.pathname.slice(1));
-    const filePath = downloadEngine && downloadEngine.mediaFile(id);
+    const fileIndex = Number(url.searchParams.get("file") || 0);
+    const filePath = downloadEngine && downloadEngine.mediaFile(id, fileIndex);
     if (!filePath) return new Response("Media not found", { status: 404 });
     let stat;
     try { stat = await fs.promises.stat(filePath); } catch { return new Response("Media not found", { status: 404 }); }
@@ -197,10 +198,10 @@ function configureDownloadEngine() {
     if (!isTrustedDownloadSender(event)) throw new Error("Untrusted download request");
     return downloadEngine.list();
   });
-  ipcMain.handle("vivid-download-media-url", (event, id) => {
+  ipcMain.handle("vivid-download-media-url", (event, id, fileIndex = 0) => {
     if (!isTrustedDownloadSender(event)) throw new Error("Untrusted download request");
-    if (!downloadEngine.mediaFile(id)) throw new Error("This download is not ready to play.");
-    return "vivid-media://download/" + encodeURIComponent(String(id)) + "?token=" + mediaToken;
+    if (!downloadEngine.mediaFile(id, fileIndex)) throw new Error("This download is not ready to play.");
+    return "vivid-media://download/" + encodeURIComponent(String(id)) + "?file=" + encodeURIComponent(String(fileIndex)) + "&token=" + mediaToken;
   });
   ipcMain.handle("vivid-offline-url", event => {
     if (!isTrustedDownloadSender(event)) throw new Error("Untrusted offline navigation request");
