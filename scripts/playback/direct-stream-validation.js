@@ -8,7 +8,7 @@ export function normalizeAllowedHosts(hosts) {
     try {
       const parsed = new URL("https://" + host);
       if (parsed.hostname !== host || parsed.username || parsed.password || parsed.port || parsed.pathname !== "/" || parsed.search || parsed.hash) return [];
-      return [host.startsWith("*.") ? "*." + parsed.hostname : parsed.hostname];
+      return [host.startsWith("*.") ? "*." + parsed.hostname.slice(2) : parsed.hostname];
     } catch {
       return [];
     }
