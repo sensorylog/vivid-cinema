@@ -1,6 +1,7 @@
 import { DownloadManager } from "./downloads/download-manager.js";
 import { createIndexedDBPersistence } from "./downloads/indexeddb-persistence.js";
-import { createBrowserDownloadAdapter } from "./downloads/browser-direct-adapter.js";\nimport { createBrowserHlsDownloadAdapter } from "./downloads/browser-hls-adapter.js";
+import { createBrowserDownloadAdapter } from "./downloads/browser-direct-adapter.js";
+import { createBrowserHlsDownloadAdapter } from "./downloads/browser-hls-adapter.js";
 import { createOfflinePlaybackController, ensureOfflineHlsLibrary } from "./downloads/offline-playback.js";
 
 const byId = id => document.getElementById(id);
