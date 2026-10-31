@@ -1,7 +1,7 @@
 import { DownloadManager } from "./downloads/download-manager.js";
 import { createIndexedDBPersistence } from "./downloads/indexeddb-persistence.js";
 import { createBrowserDownloadAdapter } from "./downloads/browser-direct-adapter.js";\nimport { createBrowserHlsDownloadAdapter } from "./downloads/browser-hls-adapter.js";
-import { createOfflinePlaybackController } from "./downloads/offline-playback.js";
+import { createOfflinePlaybackController, ensureOfflineHlsLibrary } from "./downloads/offline-playback.js";
 
 const byId = id => document.getElementById(id);
 const jobsNode = byId("offline-jobs");
@@ -71,7 +71,14 @@ async function switchOwner(user) {
         if (typeof integration?.resolve !== "function") throw new Error("No authorized download provider is configured. The selected title cannot be downloaded yet.");
         activeSource = await integration.resolve(job, context);
         try {
-          if (activeSource?.type === "hls") return await hlsAdapter.download(job, context);
+          if (activeSource?.type === "hls") {
+            let Hls = null;
+            try { Hls = await ensureOfflineHlsLibrary(); } catch { /* Native HLS may still support offline playback. */ }
+            if (!Hls?.isSupported?.() && !video.canPlayType?.("application/vnd.apple.mpegurl") && !video.canPlayType?.("application/x-mpegURL")) {
+              throw new Error("This browser has no offline HLS playback engine available. The HLS download was not started.");
+            }
+            return await hlsAdapter.download(job, context);
+          }
           return await directAdapter.download(job, context);
         } finally {
           activeSource = null;
