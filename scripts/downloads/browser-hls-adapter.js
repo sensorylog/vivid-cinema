@@ -194,7 +194,7 @@ export function createBrowserHlsDownloadAdapter({
       throw error;
     }
     await writeFile(directory, resource.path, new Blob(chunks, { type: mime.split(";")[0] || "application/octet-stream" }));
-    progress.onProgress({ bytesDownloaded: progress.bytes, totalBytes: progress.totalBytes });
+    progress.onProgress({ bytesDownloaded: progress.bytes, totalBytes: progress.unknownLengthCount === 0 && progress.knownLengthCount === progress.expectedResources ? progress.totalBytes : null });
     return size;
   }
 
@@ -221,7 +221,7 @@ export function createBrowserHlsDownloadAdapter({
       for (const resource of parsed.resources) resource.baseUrl = parsed.mediaUrl || startUrl.href;
 
       const directory = await jobDirectory(id, true);
-      const progress = { bytes: 0, totalBytes: null, onProgress };
+      const progress = { bytes: 0, totalBytes: 0, knownLengthCount: 0, unknownLengthCount: 0, expectedResources: parsed.resources.length, onProgress };
       let cursor = 0;
       let transferError = null;
       const workers = Array.from({ length: Math.min(limit, parsed.resources.length) }, async () => {
