@@ -393,7 +393,7 @@ function openTitleDownload() {
   const isTv = media.media_type === "tv";
   const modal = document.createElement("div");
   modal.className = "vivid-download-modal";
-  modal.innerHTML = '<section class="vivid-download-dialog" role="dialog" aria-modal="true" aria-labelledby="vivid-download-title"><button class="vivid-download-close" type="button" aria-label="Close">×</button><p>OFFLINE DOWNLOAD</p><h2 id="vivid-download-title">Download ' + (isTv ? 'an episode' : 'this movie') + '</h2><div class="vivid-download-selection">' + (isTv ? '<label>Season <select id="download-season"></select></label><label>Episode <select id="download-episode"></select></label>' : '<p>' + escapeHtml(media.title) + '</p>') + '</div><div class="vivid-download-options" id="vivid-download-options" aria-live="polite"><p>Checking available download qualities…</p></div><p class="vivid-download-note">Choose a stream returned by your connected FlixQuest resolver. Vivid saves supported streams in this browser.</p></section>';
+  modal.innerHTML = '<section class="vivid-download-dialog" role="dialog" aria-modal="true" aria-labelledby="vivid-download-title"><button class="vivid-download-close" type="button" aria-label="Close">×</button><p>OFFLINE DOWNLOAD</p><h2 id="vivid-download-title">Download ' + (isTv ? 'an episode' : 'this movie') + '</h2><div class="vivid-download-selection">' + (isTv ? '<label>Season <select id="download-season"></select></label><label>Episode <select id="download-episode"></select></label>' : '<p>' + escapeHtml(media.title) + '</p>') + '</div><button class="vivid-download-search" id="vivid-download-search" type="button"><i class="bi bi-search"></i> Search for download links</button><div class="vivid-download-options" id="vivid-download-options" aria-live="polite"><p>Choose a season and episode if needed, then search for available download qualities.</p></div><p class="vivid-download-note">Vivid checks supported download sources and saves selected media to your offline library.</p></section>';
   document.body.appendChild(modal);
   const close = () => modal.remove();
   modal.querySelector(".vivid-download-close").addEventListener("click", close);
@@ -401,14 +401,18 @@ function openTitleDownload() {
   const seasons = (currentDetails.seasons || []).filter(item => Number(item.episode_count) > 0 && Number(item.season_number) >= 0);
   const seasonSelect = modal.querySelector("#download-season");
   const episodeSelect = modal.querySelector("#download-episode");
+  const searchButton = modal.querySelector("#vivid-download-search");
+  searchButton.addEventListener("click", () => void loadOptions());
   let request = 0;
   async function loadOptions() {
     const run = ++request;
     const season = Number(seasonSelect?.value || 1), episode = Number(episodeSelect?.value || 1);
     const mediaRequest = { id: String(media.id), media_type: media.media_type, title: media.title, year: media.year || "", poster_path: media.poster_path || "", season: isTv ? season : null, episode: isTv ? episode : null };
     const slot = modal.querySelector("#vivid-download-options"), integration = globalThis.VIVID_DOWNLOADS;
-    if (typeof integration?.getOptions !== "function") { slot.innerHTML = '<p class="vivid-download-empty">Connect your FlixQuest API instance in Offline Downloads settings, then return here to load real movie and episode streams.</p>'; return; }
-    slot.innerHTML = '<p>Finding available qualities…</p>';
+    if (typeof integration?.getOptions !== "function") { slot.innerHTML = '<p class="vivid-download-empty">Vivid\u2019s download source service is unavailable right now. Please try again later.</p>'; return; }
+    searchButton.disabled = true;
+    searchButton.innerHTML = '<i class="bi bi-arrow-repeat"></i> Searching…';
+    slot.innerHTML = '<p>Searching supported download sources for this title…</p>';
     try {
       const options = await integration.getOptions(mediaRequest);
       if (run !== request || !slot.isConnected) return;
@@ -430,11 +434,12 @@ function openTitleDownload() {
         const data = await tmdbApi.tvSeason(media.id, Number(seasonSelect.value || 1));
         if (!episodeSelect.isConnected) return;
         episodeSelect.innerHTML = (data.episodes || []).map(item => '<option value="' + Number(item.episode_number) + '">Episode ' + Number(item.episode_number) + ' · ' + escapeHtml(item.name || "") + '</option>').join("");
-        await loadOptions();
-      } catch { episodeSelect.innerHTML = '<option value="1">Episode 1</option>'; await loadOptions(); }
+        slotReset();
+      } catch { episodeSelect.innerHTML = '<option value="1">Episode 1</option>'; slotReset(); }
     }
-    seasonSelect.addEventListener("change", loadEpisodes); episodeSelect.addEventListener("change", loadOptions); void loadEpisodes();
-  } else void loadOptions();
+    function slotReset() { const slot = modal.querySelector("#vivid-download-options"); if (slot) slot.innerHTML = '<p>Tap Search for download links to find available qualities for this episode.</p>'; }
+    seasonSelect.addEventListener("change", loadEpisodes); episodeSelect.addEventListener("change", slotReset); void loadEpisodes();
+  }
 }
 
 function renderPersonPage(person) {
