@@ -24,6 +24,9 @@ test("download library uses owner-scoped persistence, automatic provider integra
   assert.match(script, /manager\.retry\(id\)/);
   assert.match(script, /manager\.enqueue\(/);
   assert.match(script, /return "Downloaded"/);
+  assert.match(script, /data-action="export"/);
+  assert.match(script, /Save file/);
+  assert.match(script, /link\.download=filename/);
   assert.doesNotMatch(script, /FlixQuest|flixquest|createBrowserHlsDownloadAdapter/);
   assert.doesNotMatch(script, /Internet Archive|archive\.org/);
 });
