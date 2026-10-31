@@ -45,3 +45,7 @@
 
 .offline-speed-control{display:flex;align-items:center;gap:7px;font-size:11px;color:#aebbd4}
 .offline-speed-control select{border:1px solid rgba(170,185,220,.22);border-radius:8px;background:#0b1020;color:#f4f6fc;padding:7px 8px;font:600 11px system-ui,sans-serif}
+
+.offline-episodes{display:grid;gap:6px;margin-top:12px}
+.offline-episodes button{display:block;width:100%;text-align:left;border:1px solid rgba(170,185,220,.14);border-radius:9px;background:rgba(255,255,255,.025);color:#cbd5e8;padding:9px 11px;font:500 11px/1.4 system-ui,sans-serif;overflow-wrap:anywhere;cursor:pointer}
+.offline-episodes button:hover{background:rgba(255,255,255,.08);border-color:rgba(141,138,255,.45)}
