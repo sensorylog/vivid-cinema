@@ -397,7 +397,14 @@ function openTitleDownload() {
     sessionStorage.setItem("vivid:pending-desktop-download", JSON.stringify({
       id: media.id,
       title: media.title,
-      media_type: media.media_type === "tv" ? "tv" : "movie"
+      media_type: media.media_type === "tv" ? "tv" : "movie",
+      seasons: media.media_type === "tv" && Array.isArray(currentDetails?.seasons)
+        ? currentDetails.seasons.map(season => ({
+            season_number: Number(season.season_number),
+            name: String(season.name || ""),
+            episode_count: Number(season.episode_count) || 0
+          })).filter(season => Number.isInteger(season.season_number) && season.season_number >= 0 && season.episode_count > 0)
+        : []
     }));
     window.location.assign("my-downloads.html");
   } catch (error) {
