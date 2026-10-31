@@ -20,7 +20,7 @@ test("browser library remains available separately from the native Electron mana
   assert.match(script, /createOfflinePlaybackController/);
   assert.match(script, /window\.vividDownloads\?\.available/);
   assert.match(desktop, /engine\.list\(\)/);
-  assert.match(desktop, /engine\.mediaUrl\(job\.id\)/);
+  assert.match(desktop, /engine\.mediaUrl\(job\.id,fileIndex\)/);
   assert.match(desktop, /Downloads are saved to your computer/);
   assert.doesNotMatch(script, /VIVID_DOWNLOADS|provider-integration|archive\.org|wikimedia\.org/i);
 });
