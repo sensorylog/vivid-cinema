@@ -217,7 +217,7 @@ export function createBrowserHlsDownloadAdapter({
       if (signal?.aborted) throw new DOMException("Download aborted.", "AbortError");
       const source = await resolve(job, { signal });
       if (source?.type !== "hls") throw new Error("The selected source is not an HLS stream.");
-      const sourceHosts = Array.isArray(source.sourceHosts) && source.allowedHosts.length ? source.allowedHosts : allowedHosts;
+      const sourceHosts = Array.isArray(source.allowedHosts) && source.allowedHosts.length ? source.allowedHosts : allowedHosts;
       const startUrl = resolveResource(source.url, source.url, sourceHosts);
       const headers = source.headers && typeof source.headers === "object" ? source.headers : {};
       const firstText = await fetchText(startUrl, headers, signal);
