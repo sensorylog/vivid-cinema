@@ -13,7 +13,7 @@ function validIdentifier(value) {
 }
 function validFilename(value) {
   return typeof value === "string" && value.length <= 220 && !value.includes("/") && !value.includes("\\")
-    && !value.startsWith(".") && /^[a-zA-Z0-9][a-zA-Z0-9._() -]*$/.test(value);
+    && !value.startsWith(".") && /^[\\p{L}\\p{N}][\\p{L}\\p{N}._() -]*$/u.test(value);
 }
 export async function onRequest({ request, params }) {
   if (request.method !== "GET" && request.method !== "HEAD") return new Response("Method not allowed", { status: 405, headers: { Allow: "GET, HEAD" } });
