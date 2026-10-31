@@ -94,6 +94,10 @@ test("desktop engine downloads a video-extension payload from a local seeded tor
     const trackerUrl = "http://127.0.0.1:" + trackerPort + "/announce";
     console.log("[vivid-integration] stage: tracker listening", trackerUrl);
     let seederAnnounced = false;
+    const trackerEvents = { start: 0, update: 0, complete: 0, stop: 0 };
+    for (const event of Object.keys(trackerEvents)) {
+      tracker.on(event, () => { trackerEvents[event] += 1; });
+    }
     tracker.on("start", () => { seederAnnounced = true; });
 
     console.log("[vivid-integration] stage: create seeder");
@@ -151,9 +155,6 @@ test("desktop engine downloads a video-extension payload from a local seeded tor
     const job = engine.jobs.get(started.id);
     assert.ok(job, "engine should register a download job");
     const torrent = job.torrent;
-    const trackerEvents = { start: 0, update: 0 };
-    tracker.on("start", () => { trackerEvents.start += 1; });
-    tracker.on("update", () => { trackerEvents.update += 1; });
     seedTorrent.on("wire", (wire, address) => {
       console.log("[vivid-integration] seeder peer connected", address || "unknown");
     });
@@ -172,6 +173,7 @@ test("desktop engine downloads a video-extension payload from a local seeded tor
       );
     } catch (error) {
       const liveTorrent = job.torrent;
+      const swarm = tracker.torrents?.[seedTorrent.infoHash];
       console.error("[vivid-integration] timeout state", JSON.stringify({
         job: engine.snapshot(job),
         torrent: liveTorrent ? {
@@ -189,6 +191,15 @@ test("desktop engine downloads a video-extension payload from a local seeded tor
           numPeers: seedTorrent.numPeers,
           uploaded: seedTorrent.uploaded,
           length: seedTorrent.length
+        },
+        tracker: {
+          infoHash: seedTorrent.infoHash,
+          swarm: swarm ? {
+            complete: swarm.complete,
+            incomplete: swarm.incomplete,
+            peerCount: Object.keys(swarm.peers || {}).length
+          } : null,
+          knownTorrents: Object.keys(tracker.torrents || {})
         },
         trackerEvents
       }));
