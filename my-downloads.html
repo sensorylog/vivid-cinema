@@ -22,25 +22,12 @@
   <header class="offline-heading">
     <p class="offline-eyebrow">YOUR DEVICE · YOUR LIBRARY</p>
     <h1>Offline <span>Downloads</span></h1>
-    <p class="offline-intro">Manage movie and series files saved for offline viewing on this device.</p>
+    <p class="offline-intro">Your movie and episode downloads, progress, and saved files.</p>
   </header>
   <section class="offline-notice" aria-labelledby="offline-status-title">
     <div class="offline-notice-icon" aria-hidden="true">↓</div>
     <div><h2 id="offline-status-title">Your movie & series downloads</h2>
-      <p>Choose Download from a title page, select an available quality, and your transfer will appear here. Connect FlixQuest below to load real movie and episode streams.</p>
-    </div>
-  </section>
-  <section class="offline-notice offline-provider-settings" aria-labelledby="flixquest-settings-title">
-    <div class="offline-notice-icon" aria-hidden="true">⚙</div>
-    <div class="offline-provider-settings-copy">
-      <h2 id="flixquest-settings-title">Connect FlixQuest</h2>
-      <p>Enter the HTTPS base URL for your FlixQuest Scraper API v2 instance. This is the resolver Vivid will ask for movie and episode streams.</p>
-      <form id="flixquest-config-form" class="offline-provider-form">
-        <label for="flixquest-api-url">FlixQuest API URL</label>
-        <input id="flixquest-api-url" name="apiUrl" type="url" inputmode="url" autocomplete="url" placeholder="https://your-flixquest-api.example" required>
-        <button type="submit">Save & test connection</button>
-      </form>
-      <p id="flixquest-config-status" class="offline-message" role="status" aria-live="polite">Not connected yet. Your API URL is saved only in this browser.</p>
+      <p>Choose Download on a title page. Vivid automatically searches available public-domain and Creative Commons copies—no API URL, provider account, or manual setup.</p>
     </div>
   </section>
   <section id="offline-player-section" class="offline-player-section" hidden aria-label="Offline video player">
