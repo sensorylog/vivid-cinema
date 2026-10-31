@@ -230,3 +230,14 @@ test("Windows desktop recovers from failed later-page navigation instead of leav
   assert.match(main, /Try offline copy/);
   assert.match(main, /localOrigin \+ "\/home\.html"/);
 });
+
+test("desktop download runtime dependencies are isolated and installed before launch or packaging", () => {
+  const runtime = JSON.parse(fs.readFileSync(path.join(root, "desktop", "package.json"), "utf8"));
+  const runtimeLock = JSON.parse(fs.readFileSync(path.join(root, "desktop", "package-lock.json"), "utf8"));
+  assert.equal(runtime.dependencies.webtorrent, "1.9.7");
+  assert.equal(runtime.dependencies["torrent-search-api"], "^2.1.4");
+  assert.equal(runtimeLock.packages[""].dependencies.webtorrent, "1.9.7");
+  assert.match(pkg.scripts["predesktop:start"], /npm --prefix desktop ci --omit=dev/);
+  assert.match(pkg.scripts["predesktop:dist"], /npm --prefix desktop ci --omit=dev/);
+  assert.ok(pkg.build.files.includes("desktop/node_modules/**"));
+});
