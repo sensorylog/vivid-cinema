@@ -40,19 +40,24 @@ test("Windows installer and portable executable targets use Vivid branding", () 
   assert.ok(fs.existsSync(path.join(root, "icons", "vivid-icon.svg")));
   assert.ok(fs.existsSync(path.join(root, "icons", "vivid-icon-180.png")));
 });
-test("desktop runtime uses Cloudflare Pages first and bundled offline fallback without Firebase Hosting", () => {
+test("desktop runtime starts from the bundled local app and keeps hosted recovery available", () => {
   const main = fs.readFileSync(path.join(root, "desktop", "main.cjs"), "utf8");
   assert.match(main, /app\.getAppPath\(\)/);
+  assert.match(main, /"ETag": etag/);
+  assert.match(main, /writeHead\(304, cacheHeaders\)/);
+  assert.match(main, /if-none-match/);
+  assert.match(main, /"Cache-Control": "no-cache"/);
   assert.match(main, /HOSTED_APP_URL = "https:\/\/vivid-cinema\.pages\.dev\/home\.html"/);
   assert.doesNotMatch(main, /vivid-cinema\.web\.app|FIREBASE_FALLBACK|fallbackToFirebase/);
-  assert.match(main, /fallbackToLocal\("Cloudflare Pages app load timed out after/);
+  assert.match(main, /loadURL\(localOrigin \+ "\/home\.html"\)/);
+  assert.match(main, /bundled application first/);
+  assert.match(main, /trying the hosted app/);
   assert.match(main, /loadURL\(HOSTED_APP_URL\)/);
+  assert.doesNotMatch(main, /HOSTED_LOAD_TIMEOUT_MS|Cloudflare Pages app load timed out/);
   assert.match(main, /did-fail-load/);
-  assert.match(main, /HOSTED_LOAD_TIMEOUT_MS = 12000/);
   assert.match(main, /LOADING_HTML/);
   assert.match(main, /loadURL\(LOADING_URL\)/);
   assert.match(main, /hostedLoadStarted/);
-  assert.match(main, /Cloudflare Pages app load timed out after/);
   assert.match(main, /localOrigin \+ "\/home\.html"/);
   assert.match(main, /nodeIntegration:\s*false/);
   assert.match(main, /contextIsolation:\s*true/);
@@ -155,6 +160,12 @@ test("Windows app checks for updates and offers download plus restart-to-install
   const preload = fs.readFileSync(preloadPath, "utf8");
   const redirect = fs.readFileSync(path.join(root, "scripts", "platform-origin-redirect.js"), "utf8");
   assert.match(main, /require\("electron-updater"\)/);
+  assert.doesNotMatch(main, /^const .*download-engine\.cjs/m);
+  assert.match(main, /async function getDownloadEngine\(\)/);
+  assert.match(main, /downloadEngine = new DesktopDownloadEngine/);
+  assert.doesNotMatch(main, /^  downloadEngine = new DesktopDownloadEngine/m);
+  assert.match(main, /require\("\.\/download-engine\.cjs"\)/);
+  assert.match(main, /await getDownloadEngine\(\)/);
   assert.match(main, /autoUpdater\.autoDownload = false/);
   assert.match(main, /autoUpdater\.checkForUpdates\(\)/);
   assert.match(main, /setInterval\(check, 6 \* 60 \* 60 \* 1000\)/);
@@ -165,6 +176,10 @@ test("Windows app checks for updates and offers download plus restart-to-install
   assert.match(preload, /vivid-cinema\.pages\.dev/);
   assert.doesNotMatch(preload, /vivid-cinema\.web\.app/, "desktop update UI must not trust Firebase Hosting");
   assert.match(preload, /trustedHosts/);
+  assert.match(preload, /hardwareConcurrency/);
+  assert.match(preload, /vivid-performance-legacy/);
+  assert.match(preload, /vivid-performance\.css/);
+  assert.ok(fs.existsSync(path.join(root, "styles", "vivid-performance.css")));
   assert.doesNotMatch(preload, /netlify/i, "desktop update UI must not depend on the retired host");
   assert.doesNotMatch(main, /netlify/i, "desktop runtime must not depend on the retired host");
   assert.doesNotMatch(redirect, /netlify/i, "native redirect must use the current primary host");
@@ -240,4 +255,17 @@ test("desktop download runtime dependencies are isolated and installed before la
   assert.match(pkg.scripts["predesktop:start"], /npm --prefix desktop ci --omit=dev/);
   assert.match(pkg.scripts["predesktop:dist"], /npm --prefix desktop ci --omit=dev/);
   assert.ok(pkg.build.files.includes("desktop/node_modules/**"));
+});
+
+test("legacy desktop profile removes continuous decorative work", () => {
+  const atmosphere = fs.readFileSync(path.join(root, "scripts", "atmosphere.js"), "utf8");
+  const homeBreathe = fs.readFileSync(path.join(root, "scripts", "home-breathe.js"), "utf8");
+  const hero = fs.readFileSync(path.join(root, "scripts", "tflix-hero.js"), "utf8");
+  assert.match(atmosphere, /legacyPerformance/);
+  assert.match(atmosphere, /requestAnimationFrame\(update\)/);
+  assert.match(atmosphere, /if\(!legacyPerformance\)/);
+  assert.match(atmosphere, /legacyPerformance \|\| reduceMotion/);
+  assert.match(homeBreathe, /!legacyPerformance/);
+  assert.match(hero, /if \(legacyPerformance\)/);
+  assert.match(hero, /setTimeout\(advanceHero, NO_TRAILER_HOLD_MS\)/);
 });

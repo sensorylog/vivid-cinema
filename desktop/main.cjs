@@ -6,7 +6,6 @@ const path = require("node:path");
 const crypto = require("node:crypto");
 const { Readable } = require("node:stream");
 protocol.registerSchemesAsPrivileged([{ scheme: "vivid-media", privileges: { standard: true, secure: true, supportFetchAPI: true, corsEnabled: true, stream: true } }]);
-const { DesktopDownloadEngine } = require("./download-engine.cjs");
 
 const appRoot = app.getAppPath();
 const windowsIcon = path.join(appRoot, "icons", "vivid-icon.ico");
@@ -62,11 +61,27 @@ function createLocalServer(root) {
         res.writeHead(404, { "Content-Type": "text/plain; charset=utf-8" }).end("Not found");
         return;
       }
-      res.writeHead(200, {
-        "Content-Type": mimeTypes[path.extname(target).toLowerCase()] || "application/octet-stream",
+      const etag = 'W/"' + stat.size.toString(16) + "-" + Math.trunc(stat.mtimeMs).toString(16) + '"';
+      const lastModified = stat.mtime.toUTCString();
+      const ifNoneMatch = req.headers["if-none-match"];
+      const ifModifiedSince = req.headers["if-modified-since"];
+      const notModified = (ifNoneMatch && ifNoneMatch.split(",").map(value => value.trim()).includes(etag)) ||
+        (!ifNoneMatch && ifModifiedSince && Number.isFinite(Date.parse(ifModifiedSince)) &&
+          Date.parse(ifModifiedSince) >= Math.floor(stat.mtimeMs / 1000) * 1000);
+      const cacheHeaders = {
+        "ETag": etag,
+        "Last-Modified": lastModified,
+        "Cache-Control": "no-cache",
         "X-Content-Type-Options": "nosniff",
-        "Referrer-Policy": "strict-origin-when-cross-origin",
-        "Cache-Control": "no-store"
+        "Referrer-Policy": "strict-origin-when-cross-origin"
+      };
+      if (notModified) {
+        res.writeHead(304, cacheHeaders).end();
+        return;
+      }
+      res.writeHead(200, {
+        ...cacheHeaders,
+        "Content-Type": mimeTypes[path.extname(target).toLowerCase()] || "application/octet-stream"
       });
       if (req.method === "HEAD") return res.end();
       const stream = fs.createReadStream(target);
@@ -79,10 +94,26 @@ function createLocalServer(root) {
 let localServer;
 let localOrigin;
 let downloadEngine;
+let downloadEnginePromise;
+async function getDownloadEngine() {
+  if (downloadEngine) return downloadEngine;
+  if (!downloadEnginePromise) {
+    downloadEnginePromise = Promise.resolve().then(() => {
+      // WebTorrent and provider discovery are substantial dependencies. Keep
+      // them out of normal startup and load them only when downloads are used.
+      const { DesktopDownloadEngine } = require("./download-engine.cjs");
+      downloadEngine = new DesktopDownloadEngine({ app, BrowserWindow, dialog, shell });
+      return downloadEngine;
+    }).catch(error => {
+      downloadEnginePromise = null;
+      throw error;
+    });
+  }
+  return downloadEnginePromise;
+}
 const mediaToken = crypto.randomBytes(32).toString("hex");
 const HOSTED_APP_URL = "https://vivid-cinema.pages.dev/home.html";
 const HOSTED_APP_ORIGIN = new URL(HOSTED_APP_URL).origin;
-const HOSTED_LOAD_TIMEOUT_MS = 12000;
 // Keep the offline fallback on one origin so Firebase Auth and onboarding storage survive relaunches.
 const LOCAL_SERVER_PORT = 43821;
 const supportsOneClickUpdates = app.isPackaged && process.platform === "win32" &&
@@ -185,34 +216,33 @@ function configureOfflineMediaProtocol() {
   });
 }
 function configureDownloadEngine() {
-  downloadEngine = new DesktopDownloadEngine({ app, BrowserWindow, dialog, shell });
-  ipcMain.handle("vivid-download-search", (event, query) => {
+  ipcMain.handle("vivid-download-search", async (event, query) => {
     if (!isTrustedDownloadSender(event)) throw new Error("Untrusted download request");
-    return downloadEngine.search(query);
+    return (await getDownloadEngine()).search(query);
   });
-  ipcMain.handle("vivid-download-start", (event, result, media) => {
+  ipcMain.handle("vivid-download-start", async (event, result, media) => {
     if (!isTrustedDownloadSender(event)) throw new Error("Untrusted download request");
-    return downloadEngine.start(result, media);
+    return (await getDownloadEngine()).start(result, media);
   });
-  ipcMain.handle("vivid-download-list", event => {
+  ipcMain.handle("vivid-download-list", async event => {
     if (!isTrustedDownloadSender(event)) throw new Error("Untrusted download request");
-    return downloadEngine.list();
+    return (await getDownloadEngine()).list();
   });
-  ipcMain.handle("vivid-playback-position-get", (event, id, fileIndex = 0) => {
+  ipcMain.handle("vivid-playback-position-get", async (event, id, fileIndex = 0) => {
     if (!isTrustedDownloadSender(event)) throw new Error("Untrusted playback request");
-    return downloadEngine.getPlaybackPosition(id, fileIndex);
+    return (await getDownloadEngine()).getPlaybackPosition(id, fileIndex);
   });
   ipcMain.handle("vivid-playback-position-set", async (event, id, fileIndex = 0, seconds = 0) => {
     if (!isTrustedDownloadSender(event)) throw new Error("Untrusted playback request");
-    return downloadEngine.setPlaybackPosition(id, fileIndex, seconds);
+    return (await getDownloadEngine()).setPlaybackPosition(id, fileIndex, seconds);
   });
   ipcMain.handle("vivid-playback-position-clear", async (event, id, fileIndex = 0) => {
     if (!isTrustedDownloadSender(event)) throw new Error("Untrusted playback request");
-    return downloadEngine.clearPlaybackPosition(id, fileIndex);
+    return (await getDownloadEngine()).clearPlaybackPosition(id, fileIndex);
   });
-  ipcMain.handle("vivid-download-media-url", (event, id, fileIndex = 0) => {
+  ipcMain.handle("vivid-download-media-url", async (event, id, fileIndex = 0) => {
     if (!isTrustedDownloadSender(event)) throw new Error("Untrusted download request");
-    if (!downloadEngine.mediaFile(id, fileIndex)) throw new Error("This download is not ready to play.");
+    if (!(await getDownloadEngine()).mediaFile(id, fileIndex)) throw new Error("This download is not ready to play.");
     return "vivid-media://download/" + encodeURIComponent(String(id)) + "?file=" + encodeURIComponent(String(fileIndex)) + "&token=" + mediaToken;
   });
   ipcMain.handle("vivid-offline-url", event => {
@@ -221,11 +251,11 @@ function configureDownloadEngine() {
   });
   ipcMain.handle("vivid-download-folder", async event => {
     if (!isTrustedDownloadSender(event)) throw new Error("Untrusted download request");
-    return downloadEngine.chooseFolder();
+    return (await getDownloadEngine()).chooseFolder();
   });
-  ipcMain.handle("vivid-download-control", (event, id, action) => {
+  ipcMain.handle("vivid-download-control", async (event, id, action) => {
     if (!isTrustedDownloadSender(event)) throw new Error("Untrusted download request");
-    return downloadEngine.control(id, action);
+    return (await getDownloadEngine()).control(id, action);
   });
 }
 
@@ -297,17 +327,9 @@ function createWindow() {
   let navigationRecoveryInProgress = false;
   let recoveryPageShown = false;
   let localAppLoaded = false;
-  let hostedLoadTimeout;
-  const clearHostedLoadTimeout = () => {
-    if (hostedLoadTimeout) {
-      clearTimeout(hostedLoadTimeout);
-      hostedLoadTimeout = null;
-    }
-  };
   const fallbackToLocal = reason => {
     if (localFallbackStarted || hostedAppLoaded) return;
     localFallbackStarted = true;
-    clearHostedLoadTimeout();
     console.warn("Vivid Cinema hosted origins unavailable; opening bundled offline fallback:", reason);
     if (localOrigin) void win.loadURL(localOrigin + "/home.html").catch(() => {});
   };
@@ -362,11 +384,15 @@ function createWindow() {
       void win.loadURL(localOrigin + "/my-downloads.html").catch(error => console.warn("Vivid offline library could not be opened:", error?.message || error));
       return;
     }
-    hostedLoadTimeout = setTimeout(
-      () => fallbackToLocal("Cloudflare Pages app load timed out after " + Math.round(HOSTED_LOAD_TIMEOUT_MS / 1000) + " seconds"),
-      HOSTED_LOAD_TIMEOUT_MS
-    );
-    void win.loadURL(HOSTED_APP_URL).catch(error => fallbackToLocal(error?.message || "Cloudflare Pages navigation failed"));
+    // Load the bundled application first. The shell is local and should never
+    // wait for a slow or unavailable internet connection to become interactive.
+    // Catalogue, account and provider data continue to use their normal services.
+    void win.loadURL(localOrigin + "/home.html").catch(error => {
+      console.warn("Vivid bundled app could not be opened; trying the hosted app:", error?.message || error);
+      void win.loadURL(HOSTED_APP_URL).catch(hostedError => {
+        showAppRecoveryPage(hostedError?.message || error?.message || "Both local and hosted app startup failed");
+      });
+    });
   });
   win.webContents.on("did-fail-load", (_event, errorCode, errorDescription, validatedURL, isMainFrame) => {
     if (!isMainFrame || errorCode === -3) return;
@@ -377,13 +403,16 @@ function createWindow() {
     if (!isHostedApp && !isLocalApp) return;
 
     const reason = errorCode + " " + errorDescription;
-    if (isHostedApp && !hostedAppLoaded) {
+    if (isLocalApp && !localAppLoaded) {
+      console.warn("Vivid bundled app failed during startup; trying hosted recovery:", reason);
+      void win.loadURL(HOSTED_APP_URL).catch(error => showAppRecoveryPage(error?.message || reason));
+      return;
+    }
+    if (isHostedApp && !hostedAppLoaded && !localAppLoaded) {
       if (!localFallbackStarted) fallbackToLocal(reason);
       return;
     }
 
-    // Recover failures after startup on either trusted app origin. The old
-    // handler ignored all post-startup failures, leaving a black window.
     const retryUrl = isHostedApp ? HOSTED_APP_URL : localOrigin + "/home.html";
     recoverAppNavigation(retryUrl, reason);
   });
@@ -397,12 +426,17 @@ function createWindow() {
       recoverAppNavigation(localOrigin + "/home.html", reason);
       return;
     }
+    if (!localAppLoaded && localOrigin) {
+      void win.loadURL(localOrigin + "/home.html").catch(error => {
+        void win.loadURL(HOSTED_APP_URL).catch(hostedError => showAppRecoveryPage(hostedError?.message || error?.message || reason));
+      });
+      return;
+    }
     if (!localFallbackStarted) fallbackToLocal(reason);
     else showAppRecoveryPage(reason);
   });
 
   win.on("closed", () => {
-    if (hostedLoadTimeout) clearTimeout(hostedLoadTimeout);
   });
 
   win.webContents.setWindowOpenHandler(({ url }) => {

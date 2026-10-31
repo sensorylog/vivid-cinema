@@ -9,6 +9,7 @@ const meta = document.querySelector(".vivid-home-tv-meta");
 let items = [];
 let index = 0;
 let timer = null;
+const legacyPerformance = document.documentElement.classList.contains("vivid-performance-legacy");
 let liveAnimations = [];
 
 async function loadDirectTrending() {
@@ -56,7 +57,7 @@ function showTrendingItem(item) {
 
 async function refreshTrending() {
   let next = collectTrending();
-  if (!next.length) next = await loadDirectTrending();
+  if (!next.length && !legacyPerformance) next = await loadDirectTrending();
   if (!next.length) return;
 
   items = next;
@@ -64,7 +65,7 @@ async function refreshTrending() {
   showTrendingItem(items[index]);
   index = (index + 1) % items.length;
 
-  if (!timer && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+  if (!legacyPerformance && !timer && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
     timer = window.setInterval(() => {
       if (document.hidden) return;
       const latest = collectTrending();
