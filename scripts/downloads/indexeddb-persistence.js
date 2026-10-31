@@ -41,7 +41,7 @@ export function createIndexedDBPersistence({
   let databasePromise;
   function database() {
     if (!databasePromise) {
-      databasePromise = new Promise((resolve, reject) => {
+      const opening = new Promise((resolve, reject) => {
         const request = indexedDB.open(name, DATABASE_VERSION);
         request.onupgradeneeded = () => {
           const db = request.result;
@@ -51,11 +51,18 @@ export function createIndexedDBPersistence({
         };
         request.onsuccess = () => {
           const db = request.result;
-          db.onversionchange = () => db.close();
+          db.onversionchange = () => {
+            db.close();
+            databasePromise = null;
+          };
           resolve(db);
         };
         request.onerror = () => reject(request.error || new Error("Unable to open download metadata storage."));
         request.onblocked = () => reject(new Error("Download metadata storage is blocked by another open tab."));
+      });
+      databasePromise = opening.catch(error => {
+        databasePromise = null;
+        throw error;
       });
     }
     return databasePromise;
