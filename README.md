@@ -11,6 +11,20 @@
 See [Cloudflare Pages hosting](docs/cloudflare-pages-hosting.md) for build settings, domain authorization, validation, and rollback guidance.
 
 
+## Movie and episode downloads
+
+The title-page **Download** action now discovers files automatically; users do not enter resolver URLs, API keys, or provider settings.
+
+- The first built-in source searches Internet Archive's Advanced Search API and item Metadata API.
+- Vivid only offers video files whose item metadata explicitly declares a Creative Commons licence or public-domain status. Supported files include MP4, M4V, WebM, MOV, and OGV.
+- A Cloudflare Pages Function at `/api/ia-download/:identifier/:filename` re-checks the item licence and file metadata, then streams the file from Internet Archive through Vivid's own origin. It forwards HTTP Range requests, so interrupted transfers can resume without exposing archive storage-node URLs to the browser.
+- The existing download queue stores progress metadata in IndexedDB and video bytes in OPFS. It supports queued downloads, progress, pause/cancel, retry, resume, remove, and local playback.
+- The native app uses the Vivid Cloudflare Pages endpoint for the archive proxy.
+
+**Availability limitation:** this is an automatic, working source for openly licensed/public-domain material, not a way to download every commercial streaming title. Netflix, Disney+, Prime Video and similar services do not provide a general public API that gives Vivid transferable movie files. The app does not bypass DRM or turn protected streams into downloads. A TV episode appears only when a matching openly licensed file exists in the archive.
+
+Internet Archive's licence and rights fields are supplied with each uploaded item. Vivid filters out items without a recognizable declaration, but the archive's uploader is responsible for the accuracy of that declaration. Users can open the linked archive item to review its terms.
+
 ## Phase D4 — PWA foundation and offline shell
 Vivid Cinema now has the first production-oriented PWA layer:
 - installable web-app manifest with standalone display
@@ -26,7 +40,7 @@ Vivid Cinema now has the first production-oriented PWA layer:
 
 The service worker intentionally stays conservative: it caches the application shell and same-origin static resources, but does not proxy third-party TMDB, YouTube, Firebase or CDN requests. Dynamic catalogue data therefore remains network-dependent while the application shell can reopen offline.
 
-The PWA layer does not add streaming or download functionality.
+The PWA layer itself does not add streaming or download functionality; movie downloads are implemented separately in the download system described above.
 
 Runtime/device PWA verification is still pending. In particular, install prompts, iOS home-screen behavior, service-worker lifecycle, offline navigation and Firebase/TMDB behavior should be tested on real devices before launch.
 
