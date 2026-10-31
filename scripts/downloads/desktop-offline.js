@@ -3,7 +3,8 @@ const byId = id => document.getElementById(id);
 const escapeHtml = value => String(value ?? "").replace(/[&<>"']/g, char => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[char]));
 const bytes = value => {
   const n = Number(value) || 0;
-  if (!n) return "—";
+  if (!Number.isFinite(n) || n < 0) return "—";
+  if (n === 0) return "0 B";
   const units = ["B","KB","MB","GB","TB"]; let size=n, index=0;
   while(size>=1024 && index<units.length-1){size/=1024;index++;}
   return size.toFixed(index?1:0)+" "+units[index];
