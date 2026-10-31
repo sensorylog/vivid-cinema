@@ -41,7 +41,6 @@ function searchUrl(title) {
   query.set("page", "1");
   query.set("output", "json");
   for (const field of ["identifier", "title", "year", "licenseurl"]) query.append("fl[]", field);
-  if (year && /^\d{4}$/.test(String(year))) query.set("sort[]", "year asc");
   return API + "/advancedsearch.php?" + query.toString();
 }
 export function createInternetArchiveProvider({ fetchImpl = globalThis.fetch } = {}) {
