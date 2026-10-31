@@ -76,18 +76,6 @@ async function switchOwner(user) {
     jobsNode.innerHTML='<div class="offline-empty"><strong>Storage unavailable</strong><p>This browser needs IndexedDB and Origin Private File System support for offline video files.</p></div>';
   }
 }
-async function consumePendingDownload(){
-  let pending;
-  try{pending=JSON.parse(sessionStorage.getItem("vivid:pending-download")||"null");}catch{}
-  if(!pending?.media||!pending?.option)return;
-  sessionStorage.removeItem("vivid:pending-download");
-  const integration=VIVID_DOWNLOADS;
-  try{
-    const media={...pending.media,source_id:String(pending.option.sourceId||integration.sourceId),source_file:String(pending.option.id)};
-    await manager.enqueue(media,{quality:String(pending.option.quality||pending.option.label||"Auto")});
-    messageNode.textContent="Download added to your queue.";
-  }catch(error){messageNode.textContent="Could not start this download: "+String(error?.message||error);}
-}
 jobsNode.addEventListener("click",async event=>{
   const button=event.target.closest("button[data-action]"); if(!button||!manager)return;
   const {action,id}=button.dataset; button.disabled=true;
