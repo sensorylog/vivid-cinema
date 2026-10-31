@@ -1,10 +1,10 @@
 const API = "https://archive.org";
 const VIDEO_EXT = /\.(?:mp4|m4v|webm|mov|ogv)$/i;
-const APPROVED_LICENSES = [
-  /creativecommons\.org\/publicdomain\/zero\/1\.0\/?(?:$|[?#])/i,
-  /creativecommons\.org\/publicdomain\/mark\/1\.0\/?(?:$|[?#])/i,
-  /creativecommons\.org\/licenses\/by\/4\.[0-9]+\/?(?:$|[?#])/i,
-  /creativecommons\.org\/licenses\/by-sa\/4\.[0-9]+\/?(?:$|[?#])/i
+const APPROVED_LICENSE_PATHS = [
+  /^\/publicdomain\/zero\/1\.0\/?$/i,
+  /^\/publicdomain\/mark\/1\.0\/?$/i,
+  /^\/licenses\/by\/4\.[0-9]+\/?$/i,
+  /^\/licenses\/by-sa\/4\.[0-9]+\/?$/i
 ];
 
 function safeText(value, limit = 500) {
@@ -17,14 +17,22 @@ function itemId(value) {
 }
 function approvedRights(metadata) {
   const license = String(metadata?.metadata?.licenseurl || "");
+  try {
+    const url = new URL(license);
+    if (url.protocol === "https:" && url.hostname.toLowerCase() === "creativecommons.org" &&
+        APPROVED_LICENSE_PATHS.some(pattern => pattern.test(url.pathname))) return true;
+  } catch {}
   const rights = safeText(metadata?.metadata?.rights || "", 2000).toLowerCase();
-  return APPROVED_LICENSES.some(pattern => pattern.test(license)) ||
-    /public domain|dedicated to the public domain|cc0 1\.0/.test(rights);
+  if (/not public domain|all rights reserved|copyright|rights unknown|unknown rights|restricted/.test(rights)) return false;
+  return /public domain|dedicated to the public domain|cc0 1\.0/.test(rights);
 }
 function videoFiles(metadata) {
   return (Array.isArray(metadata?.files) ? metadata.files : [])
     .filter(file => file && typeof file.name === "string" && VIDEO_EXT.test(file.name) &&
-      file.source !== "metadata" && file.private !== true && file.private !== "true" && !file.name.startsWith("/") && !file.name.split("/").some(part => !part || part === "." || part === ".." || part.includes("\\\\")) && Number(file.size) > 0)
+      file.source !== "metadata" && file.private !== true && file.private !== "true" &&
+      !file.name.startsWith("/") &&
+      !file.name.split("/").some(part => !part || part === "." || part === ".." || part.includes("\\") ) &&
+      Number(file.size) > 0)
     .map(file => ({
       name: file.name,
       size: Number(file.size),
@@ -71,7 +79,7 @@ export function createInternetArchiveSource({ fetchImpl = globalThis.fetch } = {
       const d2 = String(metadata.d2 || "");
       const dir = String(metadata.dir || "");
       const host = [d1, d2].find(value => /^[a-z0-9.-]+\.archive\.org$/i.test(value));
-      const safeDir = /^\/[0-9]+\/items\/[A-Za-z0-9_-]{5,80}$/.test(dir) ? dir : "";
+      const safeDir = new RegExp("^/[0-9]+/items/" + id + "$").test(dir) ? dir : "";
       return {
         identifier: id,
         title: safeText(metadata.metadata.title || id, 180),
