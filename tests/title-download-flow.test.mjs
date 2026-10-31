@@ -9,8 +9,10 @@ test("title download action opens the native Vivid Offline library", async () =>
   const engine = await readFile(new URL("../desktop/download-engine.cjs", import.meta.url), "utf8");
   const offline = await readFile(new URL("../scripts/downloads/desktop-offline.js", import.meta.url), "utf8");
   const page = await readFile(new URL("../my-downloads.html", import.meta.url), "utf8");
+  const shell = await readFile(new URL("../scripts/app-shell.js", import.meta.url), "utf8");
   assert.match(script, /id="title-download"/);
   assert.match(script, /vivid:pending-desktop-download/);
+  assert.match(script, /currentDetails\?\.seasons/);
   assert.match(script, /my-downloads\.html/);
   assert.doesNotMatch(script, /function openTitleDownload\(\)[\s\S]*?vivid-download-modal/);
   assert.match(preload, /exposeInMainWorld\("vividDownloads"/);
@@ -36,6 +38,14 @@ test("title download action opens the native Vivid Offline library", async () =>
   assert.match(engine, /needsRescan/);
   assert.match(engine, /playbackPositions/);
   assert.match(offline, /desktop-search-form/);
+  assert.match(offline, /loadSeriesSeason/);
+  assert.match(offline, /searchSelectedEpisodes/);
+  assert.match(offline, /S\"\+String\(season\)\.padStart\(2,"0"\)\+"E\"/);
+  assert.match(page, /desktop-series-picker/);
+  assert.match(page, /desktop-season-select/);
+  assert.match(page, /desktop-episodes/);
+  assert.match(shell, /page === "home" && !window\.vividDownloads\?\.available/);
+  assert.match(shell, /navLink\("search\.html", "bi-search", "Search"/);
   assert.match(offline, /engine\.mediaUrl\(job\.id,fileIndex\)/);
   assert.match(offline, /data-action="pause"/);
   assert.match(offline, /data-action="resume"/);
