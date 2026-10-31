@@ -117,10 +117,10 @@ export function createInternetArchiveProvider({ fetchImpl = globalThis.fetch } =
     }
     const ext = extensionOf(filename);
     if (!VIDEO_EXTENSIONS.has(ext)) throw new Error("That file is not a supported video format.");
-    const proxyPath = "/api/ia-download/" + encodeURIComponent(id) + "/" + encodeURIComponent(filename);
-    const nativeApp = Boolean(globalThis.Capacitor?.isNativePlatform?.());
-    const origin = nativeApp ? "https://vivid-cinema.pages.dev" : globalThis.location.origin;
-    const proxyUrl = new URL(proxyPath, origin);
+    const proxyUrl = new URL("https://us-central1-vivid-cinema.cloudfunctions.net/downloadMedia");
+    proxyUrl.searchParams.set("source", "internet-archive");
+    proxyUrl.searchParams.set("identifier", id);
+    proxyUrl.searchParams.set("filename", filename);
     return { url: proxyUrl.href, type: "file", mimeType: MIME_BY_EXTENSION[ext], allowedHosts: [proxyUrl.hostname], headers: {} };
   }
   return Object.freeze({ sourceId: "internet-archive", getOptions, resolve });
