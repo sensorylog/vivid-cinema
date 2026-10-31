@@ -116,7 +116,7 @@ class DesktopDownloadEngine {
       media: { id: safeText(media.id, 80), media_type: media.media_type === "tv" ? "tv" : "movie",
         title: safeText(media.title || result.title), season: Number.isInteger(Number(media.season)) ? Number(media.season) : null,
         episode: Number.isInteger(Number(media.episode)) ? Number(media.episode) : null },
-      magnet, status: "queued", torrent: null, filePath: null, downloadPath: this.downloadPath, error: null, createdAt: Date.now()
+      magnet, status: "queued", torrent: null, filePath: null, downloadPath: path.join(this.downloadPath, id), error: null, createdAt: Date.now()
     };
     this.jobs.set(id, job);
     await this.persist();
@@ -173,7 +173,8 @@ class DesktopDownloadEngine {
       job.files = [...torrent.files]
         .filter(item => VIDEO_EXTENSIONS.test(item.name))
         .map(item => ({ name: safeText(item.name, 300), path: path.resolve(jobPath, item.path), size: Number(item.length) || 0 }))
-        .filter(item => fs.existsSync(item.path) && fs.statSync(item.path).isFile());
+        .filter(item => fs.existsSync(item.path) && fs.statSync(item.path).isFile())
+        .sort((a, b) => b.size - a.size);
       job.filePath = job.files[0]?.path || null;
       job.status = job.files.length ? "completed" : "failed";
       if (!job.filePath) job.error = "The release finished, but no playable video file was found.";
