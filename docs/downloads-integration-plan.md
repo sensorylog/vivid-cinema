@@ -40,7 +40,7 @@ The Expo/React Native downloader, AsyncStorage, Notifee and native filesystem AP
 - Corrected cancellation ordering so the manager waits for the transfer adapter to settle before asking it to remove partial output.
 - The manager receives persistence and download adapters by dependency injection. It does not resolve media URLs, fetch media, write files, or claim offline playback. Persisted job metadata intentionally excludes source URLs and provider credentials.
 - Added `my-downloads.html`, `scripts/my-downloads.js` and `styles/my-downloads.css` as a distinct offline-library route; the installer page remains unchanged. The shared desktop/mobile navigation links to the new page and the service worker precaches its shell assets.
-- The library hydrates account/guest-scoped IndexedDB metadata, searches Internet Archive movie items, inspects item metadata and eligible video files, and exposes downloads only when a supported public-domain or Creative Commons license declaration is present. The browser OPFS adapter is connected to the queue and local offline player; pause, retry, cancel, remove and play are wired. This source is a test catalogue, not a general current-movie/TV provider.
+- The library hydrates account/guest-scoped IndexedDB metadata, searches Internet Archive movie items, inspects item metadata and eligible video files, and exposes downloads only when a supported public-domain or Creative Commons license declaration is present. The browser OPFS adapter is connected to the queue and local offline player; stop, restart, cancel, remove and play are wired. This source is a test catalogue, not a general current-movie/TV provider.
 - The Internet Archive source only supports movie catalogue items and direct video files (MP4, M4V, WebM, MOV and OGV). It does not provide a general TV-series episode catalogue. Items without an approved license declaration are blocked, but item-level rights metadata is uploader-supplied and still requires human review. The adapter does not support HLS/DASH. OPFS availability, CORS policy, storage quota and browser lifecycle vary; background-download guarantees are not made.
 
 ## Proposed Vivid design
@@ -69,12 +69,12 @@ The Expo/React Native downloader, AsyncStorage, Notifee and native filesystem AP
 3. Implement and test the job store/queue and browser-safe direct-file adapter.
 4. Add Capacitor Android and Electron adapters independently.
 5. Connect the browser adapter to the Internet Archive resolver and route completed OPFS files into offline playback (implemented on this feature branch).
-6. Connect only an authorized source and test movie, TV episode, pause/resume, app restart, low storage, expired URL and deletion on real devices.
+6. Connect only an authorized source and test movie, TV episode, stop/restart, app reload, low storage, expired URL and deletion on real devices.
 
 ## Acceptance criteria
 
 - A download job survives app restart on supported native platforms.
-- Progress and failures are visible and actionable.
+- Progress and failures are visible and actionable. Stop/restart is available; true byte-range resume remains unimplemented.
 - A completed item plays without a network connection.
 - Movies and TV episodes are correctly grouped and identified.
 - The same web UI works without importing React Native packages.
