@@ -1,6 +1,7 @@
 import { Readable } from "node:stream";
 
-// Keep proxy limits aligned with the browser OPFS adapter.\nconst MAX_FILE_BYTES = 8 * 1024 * 1024 * 1024;
+// Keep proxy limits aligned with the browser OPFS adapter.
+const MAX_FILE_BYTES = 8 * 1024 * 1024 * 1024;
 const IA_EXTENSIONS = new Map([
   ["mp4", "video/mp4"], ["m4v", "video/mp4"], ["webm", "video/webm"],
   ["mov", "video/quicktime"], ["ogv", "video/ogg"]
