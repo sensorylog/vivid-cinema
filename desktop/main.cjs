@@ -1,9 +1,11 @@
-const { app, BrowserWindow, Menu, dialog, shell, session, ipcMain, net } = require("electron");
+const { app, BrowserWindow, Menu, dialog, shell, session, ipcMain, net, protocol } = require("electron");
 const { autoUpdater } = require("electron-updater");
 const http = require("node:http");
 const fs = require("node:fs");
 const path = require("node:path");
 const crypto = require("node:crypto");
+const { Readable } = require("node:stream");
+protocol.registerSchemesAsPrivileged([{ scheme: "vivid-media", privileges: { standard: true, secure: true, supportFetchAPI: true, corsEnabled: true, stream: true } }]);
 const { DesktopDownloadEngine } = require("./download-engine.cjs");
 
 const appRoot = app.getAppPath();
@@ -47,32 +49,6 @@ function createLocalServer(root) {
       pathname = decodeURIComponent(parsedUrl.pathname);
     } catch {
       res.writeHead(400).end("Bad request");
-      return;
-    }
-    if (pathname === "/__vivid_media") {
-      if (parsedUrl.searchParams.get("token") !== mediaToken) { res.writeHead(403).end("Forbidden"); return; }
-      const mediaPath = downloadEngine && downloadEngine.mediaFile(parsedUrl.searchParams.get("id"));
-      if (!mediaPath) { res.writeHead(404).end("Media not found"); return; }
-      fs.stat(mediaPath, (error, stat) => {
-        if (error || !stat.isFile()) { res.writeHead(404).end("Media not found"); return; }
-        const ext = path.extname(mediaPath).toLowerCase();
-        const types = { ".mp4":"video/mp4", ".m4v":"video/mp4", ".mkv":"video/x-matroska", ".webm":"video/webm", ".mov":"video/quicktime", ".avi":"video/x-msvideo", ".ogv":"video/ogg" };
-        const headers = { "Content-Type": types[ext] || "application/octet-stream", "Accept-Ranges":"bytes", "Cache-Control":"no-store", "Access-Control-Allow-Origin":"*", "Content-Disposition":"inline" };
-        const range = req.headers.range;
-        if (range) {
-          const parts = String(range).replace("bytes=", "").split("-");
-          const start = parts[0] ? Number(parts[0]) : Math.max(0, stat.size - Number(parts[1] || 0));
-          const end = parts[0] && parts[1] ? Math.min(Number(parts[1]), stat.size - 1) : stat.size - 1;
-          if (!Number.isSafeInteger(start) || !Number.isSafeInteger(end) || start > end || start >= stat.size) { res.writeHead(416, { "Content-Range":"bytes */" + stat.size }).end(); return; }
-          headers["Content-Range"] = "bytes " + start + "-" + end + "/" + stat.size;
-          headers["Content-Length"] = String(end - start + 1); res.writeHead(206, headers);
-          if (req.method === "HEAD") return res.end();
-          fs.createReadStream(mediaPath, { start, end }).pipe(res); return;
-        }
-        headers["Content-Length"] = String(stat.size); res.writeHead(200, headers);
-        if (req.method === "HEAD") return res.end();
-        fs.createReadStream(mediaPath).pipe(res);
-      });
       return;
     }
     if (pathname === "/") pathname = "/home.html";
@@ -180,6 +156,33 @@ function isTrustedDownloadSender(event) {
   } catch { return false; }
 }
 
+function configureOfflineMediaProtocol() {
+  protocol.handle("vivid-media", async request => {
+    const url = new URL(request.url);
+    if (url.hostname !== "download" || url.searchParams.get("token") !== mediaToken) return new Response("Forbidden", { status: 403 });
+    const id = decodeURIComponent(url.pathname.slice(1));
+    const filePath = downloadEngine && downloadEngine.mediaFile(id);
+    if (!filePath) return new Response("Media not found", { status: 404 });
+    let stat;
+    try { stat = await fs.promises.stat(filePath); } catch { return new Response("Media not found", { status: 404 }); }
+    const ext = path.extname(filePath).toLowerCase();
+    const types = { ".mp4":"video/mp4", ".m4v":"video/mp4", ".mkv":"video/x-matroska", ".webm":"video/webm", ".mov":"video/quicktime", ".avi":"video/x-msvideo", ".ogv":"video/ogg" };
+    const headers = new Headers({ "Content-Type":types[ext] || "application/octet-stream", "Accept-Ranges":"bytes", "Content-Length":String(stat.size), "Access-Control-Allow-Origin":"*", "Cache-Control":"no-store" });
+    const range = request.headers.get("range");
+    if (range) {
+      const raw = String(range).replace("bytes=", "").split("-");
+      const start = raw[0] ? Number(raw[0]) : Math.max(0, stat.size - Number(raw[1] || 0));
+      const end = raw[0] && raw[1] ? Math.min(Number(raw[1]), stat.size - 1) : stat.size - 1;
+      if (!Number.isSafeInteger(start) || !Number.isSafeInteger(end) || start > end || start >= stat.size) return new Response(null, { status:416, headers:{ "Content-Range":"bytes */" + stat.size } });
+      headers.set("Content-Range", "bytes " + start + "-" + end + "/" + stat.size);
+      headers.set("Content-Length", String(end - start + 1));
+      if (request.method === "HEAD") return new Response(null, { status:206, headers });
+      return new Response(Readable.toWeb(fs.createReadStream(filePath, { start, end })), { status:206, headers });
+    }
+    if (request.method === "HEAD") return new Response(null, { status:200, headers });
+    return new Response(Readable.toWeb(fs.createReadStream(filePath)), { status:200, headers });
+  });
+}
 function configureDownloadEngine() {
   downloadEngine = new DesktopDownloadEngine({ app, BrowserWindow, dialog, shell });
   ipcMain.handle("vivid-download-search", (event, query) => {
@@ -197,7 +200,7 @@ function configureDownloadEngine() {
   ipcMain.handle("vivid-download-media-url", (event, id) => {
     if (!isTrustedDownloadSender(event)) throw new Error("Untrusted download request");
     if (!downloadEngine.mediaFile(id)) throw new Error("This download is not ready to play.");
-    return localOrigin + "/__vivid_media?id=" + encodeURIComponent(String(id)) + "&token=" + mediaToken;
+    return "vivid-media://download/" + encodeURIComponent(String(id)) + "?token=" + mediaToken;
   });
   ipcMain.handle("vivid-offline-url", event => {
     if (!isTrustedDownloadSender(event)) throw new Error("Untrusted offline navigation request");
@@ -444,7 +447,8 @@ app.whenReady().then(async () => {
   });
   try {
     await startLocalServer();
-  configureDownloadEngine();
+    configureDownloadEngine();
+    configureOfflineMediaProtocol();
     createWindow();
     scheduleUpdateChecks();
   } catch (error) {
