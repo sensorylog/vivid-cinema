@@ -39,13 +39,13 @@ function qualityHeight(value) {
 }
 
 function chooseOfflineTracks(tracks, quality) {
-  const variants = tracks.filter(track => track.type === "variant" && track.video?.height > 0);
+  const variants = tracks.filter(track => track.type === "variant" && track.height > 0);
   if (!variants.length) return tracks.filter(track => track.type === "variant");
   const target = qualityHeight(quality);
   const below = variants.filter(track => track.video.height <= target);
   const pool = below.length ? below : variants;
   const selected = pool.sort((a, b) => {
-    const heightDiff = (b.video?.height || 0) - (a.video?.height || 0);
+    const heightDiff = (b.height || 0) - (a.height || 0);
     return heightDiff || (b.bandwidth || 0) - (a.bandwidth || 0);
   })[0];
   return [selected, ...tracks.filter(track => track.type === "text")];
@@ -135,7 +135,7 @@ export function createShakaOfflineAdapter({
             const total = estimated || null;
             onProgress({ progress: Math.min(100, Math.max(0, Number(progress) * 100)), bytesDownloaded: total ? Math.floor(total * progress) : 0, totalBytes: total });
           },
-          usePersistentLicense: false
+          usePersistentLicense: true
         }
       });
       const operation = storage.store(source.url.href, {
