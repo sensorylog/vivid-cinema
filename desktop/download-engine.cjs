@@ -33,7 +33,7 @@ class DesktopDownloadEngine {
   async persist() {
     const rows = [...this.jobs.values()].map(job => ({
       id: job.id, title: job.title, resultTitle: job.resultTitle,
-      media: job.media, magnet: job.magnet, status: job.status,
+      media: job.media, magnet: job.magnet, status: job.status, downloadPath: job.downloadPath || this.downloadPath,
       filePath: job.filePath || null, error: job.error || null,
       progress: job.progress || 0, downloaded: job.downloaded || 0, total: job.total || 0,
       createdAt: job.createdAt, updatedAt: Date.now()
@@ -60,7 +60,7 @@ class DesktopDownloadEngine {
         const status = row.status === "completed" && row.filePath && fs.existsSync(row.filePath)
           ? "completed"
           : ["cancelled", "failed"].includes(row.status) ? row.status : "paused";
-        this.jobs.set(row.id, { ...row, status, torrent: null, error: row.error || null });
+        this.jobs.set(row.id, { ...row, downloadPath: path.isAbsolute(row.downloadPath || "") ? row.downloadPath : this.downloadPath, status, torrent: null, error: row.error || null });
       }
       await this.persist();
     } catch (error) {
@@ -108,7 +108,7 @@ class DesktopDownloadEngine {
       media: { id: safeText(media.id, 80), media_type: media.media_type === "tv" ? "tv" : "movie",
         title: safeText(media.title || result.title), season: Number.isInteger(Number(media.season)) ? Number(media.season) : null,
         episode: Number.isInteger(Number(media.episode)) ? Number(media.episode) : null },
-      magnet, status: "queued", torrent: null, filePath: null, error: null, createdAt: Date.now()
+      magnet, status: "queued", torrent: null, filePath: null, downloadPath: this.downloadPath, error: null, createdAt: Date.now()
     };
     this.jobs.set(id, job);
     await this.persist();
@@ -119,7 +119,9 @@ class DesktopDownloadEngine {
   attachTorrent(job) {
     job.status = "downloading";
     job.error = null;
-    const torrent = this.client.add(job.magnet, { path: this.downloadPath });
+    const jobPath = job.downloadPath || this.downloadPath;
+    fs.mkdirSync(jobPath, { recursive: true });
+    const torrent = this.client.add(job.magnet, { path: jobPath });
     job.torrent = torrent;
     const publish = () => {
       job.progress = roundProgress(torrent);
@@ -134,7 +136,7 @@ class DesktopDownloadEngine {
     torrent.on("upload", publish);
     torrent.on("done", () => {
       const file = [...torrent.files].filter(item => VIDEO_EXTENSIONS.test(item.name)).sort((a, b) => b.length - a.length)[0];
-      job.filePath = file ? path.resolve(this.downloadPath, file.path) : null;
+      job.filePath = file ? path.resolve(jobPath, file.path) : null;
       job.status = job.filePath ? "completed" : "failed";
       if (!job.filePath) job.error = "The release finished, but no playable video file was found.";
       job.torrent = null;
