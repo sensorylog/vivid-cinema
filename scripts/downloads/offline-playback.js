@@ -19,7 +19,7 @@ function loadHlsLibrary() {
     const onLoad = () => {
       cleanup();
       if (globalThis.Hls) resolve(globalThis.Hls);
-      else reject(new Error("The HLS playback library loaded without its API."));
+      else { hlsLibraryPromise = null; reject(new Error("The HLS playback library loaded without its API.")); }
     };
     const onError = () => {
       cleanup();
