@@ -161,12 +161,12 @@ test("Windows app checks for updates and offers download plus restart-to-install
   const preload = fs.readFileSync(preloadPath, "utf8");
   const redirect = fs.readFileSync(path.join(root, "scripts", "platform-origin-redirect.js"), "utf8");
   assert.match(main, /require\("electron-updater"\)/);
-  assert.doesNotMatch(main, /^const .*download-engine\.cjs/m);
-  assert.match(main, /async function getDownloadEngine\(\)/);
-  assert.match(main, /downloadEngine = new DesktopDownloadEngine/);
-  assert.doesNotMatch(main, /^  downloadEngine = new DesktopDownloadEngine/m);
-  assert.match(main, /require\("\.\/download-engine\.cjs"\)/);
-  assert.match(main, /await getDownloadEngine\(\)/);
+  assert.match(main, /^const \{ DesktopDownloadEngine \} = require\("\.\/download-engine\.cjs"\);/m);
+  assert.doesNotMatch(main, /getDownloadEngine|downloadEnginePromise/, "download engine must not be deferred until the first renderer request");
+  assert.match(main, /function configureDownloadEngine\(\) \{\s*\/\/ Match the known-working 1\.0\.28 lifecycle[\s\S]*?downloadEngine = new DesktopDownloadEngine\(\{ app, BrowserWindow, dialog, shell \}\);/);
+  assert.match(main, /return downloadEngine\.start\(result, media\)/);
+  assert.match(main, /return downloadEngine\.search\(query\)/);
+  assert.match(main, /configureDownloadEngine\(\);\s*configureOfflineMediaProtocol\(\);\s*createWindow\(\);/, "engine must be ready before the renderer window opens");
   assert.match(main, /autoUpdater\.autoDownload = false/);
   assert.match(main, /autoUpdater\.checkForUpdates\(\)/);
   assert.match(main, /setInterval\(check, 6 \* 60 \* 60 \* 1000\)/);
