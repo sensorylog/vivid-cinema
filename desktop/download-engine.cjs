@@ -156,6 +156,13 @@ class DesktopDownloadEngine {
     };
   }
 
+  mediaFile(id) {
+    const job = this.jobs.get(String(id));
+    if (!job || job.status !== "completed" || !job.filePath) return null;
+    const target = path.resolve(job.filePath);
+    return fs.existsSync(target) && fs.statSync(target).isFile() ? target : null;
+  }
+
   async list() {
     await this.ready;
     return [...this.jobs.values()].map(job => this.snapshot(job));
