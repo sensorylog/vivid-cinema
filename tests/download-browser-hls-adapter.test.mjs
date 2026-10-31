@@ -99,7 +99,7 @@ test("stores an explicitly authorized HLS VOD asset in OPFS and exposes a local 
   const calls = [];
   const adapter = createBrowserHlsDownloadAdapter({
     resolve: async () => ({ type: "hls", url: "https://media.example.test/master.m3u8", allowedHosts: ["media.example.test"] }),
-    allowedHosts: ["media.example.test"],
+    allowedHosts: ["resolver.example.test"],
     maxHeight: 720,
     storage: opfs.storage,
     fetchImpl: async url => {
@@ -132,7 +132,7 @@ test("does not fetch an HLS source whose resolved format is not HLS", async () =
   let fetched = false;
   const adapter = createBrowserHlsDownloadAdapter({
     resolve: async () => ({ type: "embed", url: "https://media.example.test/master.m3u8" }),
-    allowedHosts: ["media.example.test"],
+    allowedHosts: ["resolver.example.test"],
     storage: opfs.storage,
     fetchImpl: async () => { fetched = true; throw new Error("must not fetch"); }
   });
