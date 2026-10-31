@@ -97,6 +97,7 @@ byId("offline-jobs").addEventListener("click",async event=>{
   }catch(error){setMessage(error?.message||"Action failed.");}
   finally{button.disabled=false;}
 });
+byId("offline-player").addEventListener("error",()=>setMessage("This file uses a video format or codec the built-in player cannot decode. Try an MP4 or WebM release."));
 byId("offline-player-close").addEventListener("click",()=>{const video=byId("offline-player");video.pause();video.removeAttribute("src");video.load();video.dataset.jobId="";byId("offline-player-section").hidden=true;});
 engine.onProgress(payload=>{const index=jobs.findIndex(item=>item.id===payload.id);if(index>=0)jobs[index]={...jobs[index],...payload};else jobs.push(payload);render();});
 engine.onComplete(()=>{void refresh();setMessage("Download complete. Your movie is ready to watch offline.");});
