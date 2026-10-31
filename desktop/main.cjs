@@ -102,7 +102,8 @@ async function getDownloadEngine() {
       // WebTorrent and provider discovery are substantial dependencies. Keep
       // them out of normal startup and load them only when downloads are used.
       const { DesktopDownloadEngine } = require("./download-engine.cjs");
-          return downloadEngine;
+      downloadEngine = new DesktopDownloadEngine({ app, BrowserWindow, dialog, shell });
+      return downloadEngine;
     }).catch(error => {
       downloadEnginePromise = null;
       throw error;
