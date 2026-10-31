@@ -34,6 +34,7 @@ class DesktopDownloadEngine {
       id: job.id, title: job.title, resultTitle: job.resultTitle,
       media: job.media, magnet: job.magnet, status: job.status,
       filePath: job.filePath || null, error: job.error || null,
+      progress: job.progress || 0, downloaded: job.downloaded || 0, total: job.total || 0,
       createdAt: job.createdAt, updatedAt: Date.now()
     }));
     await fsp.mkdir(path.dirname(this.statePath), { recursive: true });
@@ -116,6 +117,9 @@ class DesktopDownloadEngine {
     const torrent = this.client.add(job.magnet, { path: this.downloadPath });
     job.torrent = torrent;
     const publish = () => {
+      job.progress = roundProgress(torrent);
+      job.downloaded = Number(torrent.downloaded) || job.downloaded || 0;
+      job.total = Number(torrent.length) || job.total || 0;
       const payload = this.snapshot(job);
       this.send("vivid-download-progress", payload);
       void this.persist().catch(error => console.warn("Download state save failed:", error.message));
@@ -149,9 +153,9 @@ class DesktopDownloadEngine {
     const fileSize = job.filePath && fs.existsSync(job.filePath) ? fs.statSync(job.filePath).size : 0;
     return {
       id: job.id, title: job.title, media: job.media, status: job.status,
-      progress: torrent ? roundProgress(torrent) : job.status === "completed" ? 100 : 0,
-      speed: torrent?.downloadSpeed || 0, downloaded: torrent?.downloaded || 0,
-      total: torrent?.length || fileSize || 0, peers: torrent?.numPeers || 0,
+      progress: torrent ? roundProgress(torrent) : job.status === "completed" ? 100 : Number(job.progress) || 0,
+      speed: torrent?.downloadSpeed || 0, downloaded: torrent?.downloaded || job.downloaded || 0,
+      total: torrent?.length || job.total || fileSize || 0, peers: torrent?.numPeers || 0,
       filePath: job.filePath || null, error: job.error || null, createdAt: job.createdAt
     };
   }
@@ -174,6 +178,9 @@ class DesktopDownloadEngine {
     if (!job) return false;
     if (action === "pause" && job.status === "downloading" && job.torrent) {
       const torrent = job.torrent;
+      job.progress = roundProgress(torrent);
+      job.downloaded = Number(torrent.downloaded) || 0;
+      job.total = Number(torrent.length) || 0;
       job.status = "paused";
       job.torrent = null;
       await new Promise(resolve => torrent.destroy({ destroyStore: false }, resolve));
