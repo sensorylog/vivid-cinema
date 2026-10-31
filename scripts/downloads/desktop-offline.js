@@ -70,7 +70,6 @@ async function searchTitle(media){
 }
 async function refresh(){try{jobs=await engine.list();render();}catch(error){setMessage(error?.message||"Could not load your downloads.");}}
 const player = byId("offline-player");
-const positionKey = () => "vivid:offline-position:"+player.dataset.jobId+":"+(player.dataset.fileIndex||"0");
 const clock = value => {
   const seconds = Math.max(0, Math.floor(Number(value) || 0));
   const hours = Math.floor(seconds / 3600);
@@ -98,21 +97,27 @@ player.addEventListener("timeupdate",()=>{
   syncPlayerControls();
   if(player.dataset.jobId&&player.currentTime-lastPositionSave>=5){
     lastPositionSave=player.currentTime;
-    localStorage.setItem(positionKey(),String(Math.floor(player.currentTime)));
+    void engine.setPlaybackPosition(player.dataset.jobId,Number(player.dataset.fileIndex)||0,player.currentTime).catch(()=>{});
   }
 });
 player.addEventListener("pause",()=>{
-  if(player.dataset.jobId&&player.currentTime>0)localStorage.setItem(positionKey(),String(Math.floor(player.currentTime)));
+  if(player.dataset.jobId&&player.currentTime>0)void engine.setPlaybackPosition(player.dataset.jobId,Number(player.dataset.fileIndex)||0,player.currentTime).catch(()=>{});
 });
 player.addEventListener("loadedmetadata",()=>{
-  const saved=Number(localStorage.getItem(positionKey())||0);
-  if(saved>5&&Number.isFinite(player.duration)&&saved<player.duration-30)player.currentTime=saved;
-  syncPlayerControls();
+  const jobId=player.dataset.jobId, fileIndex=Number(player.dataset.fileIndex)||0;
+  void engine.getPlaybackPosition(jobId,fileIndex).then(saved=>{
+    if(player.dataset.jobId!==jobId||Number(player.dataset.fileIndex)!==fileIndex)return;
+    if(saved>5&&Number.isFinite(player.duration)&&saved<player.duration-30)player.currentTime=saved;
+    syncPlayerControls();
+  }).catch(syncPlayerControls);
 });
 player.addEventListener("durationchange",syncPlayerControls);
 player.addEventListener("play",syncPlayerControls);
 player.addEventListener("pause",syncPlayerControls);
-player.addEventListener("ended",()=>{if(player.dataset.jobId)localStorage.removeItem(positionKey());syncPlayerControls();});
+player.addEventListener("ended",()=>{if(player.dataset.jobId)void engine.clearPlaybackPosition(player.dataset.jobId,Number(player.dataset.fileIndex)||0).catch(()=>{});syncPlayerControls();});
+window.addEventListener("pagehide",()=>{
+  if(player.dataset.jobId&&player.currentTime>0)void engine.setPlaybackPosition(player.dataset.jobId,Number(player.dataset.fileIndex)||0,player.currentTime).catch(()=>{});
+});
 window.addEventListener("keydown",event=>{
   if(byId("offline-player-section").hidden||event.target.matches("input,textarea,select,button"))return;
   if(event.code==="Space"){event.preventDefault();if(player.paused)void player.play().catch(()=>{});else player.pause();}
