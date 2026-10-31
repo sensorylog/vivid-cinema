@@ -101,7 +101,7 @@ jobsNode.addEventListener("click",async event=>{
       const media=job.media||{}, mime=String(job.asset.mimeType||"video/mp4");
       const extension=({"video/mp4":"mp4","video/webm":"webm","video/quicktime":"mov","video/ogg":"ogv"})[mime]||"mp4";
       const episode=media.season==null?"":" - S"+String(media.season).padStart(2,"0")+"E"+String(media.episode).padStart(2,"0");
-      const filename=(String(media.title||"Vivid Cinema")+episode).replace(/[<>:"/\\|?*\\u0000-\\u001f]/g,"-").trim()+"."+extension;
+      const filename=(String(media.title||"Vivid Cinema")+episode).replace(/[<>:"|?*]/g,"-").replace(/[\\/]/g,"-").replace(/\p{Cc}/gu,"-").trim()+"."+extension;
       const link=document.createElement("a");link.href=fileUrl;link.download=filename;link.rel="noopener";document.body.appendChild(link);link.click();link.remove();
       window.setTimeout(()=>URL.revokeObjectURL(fileUrl),120000);
       messageNode.textContent="Your video file is being saved by the browser.";
