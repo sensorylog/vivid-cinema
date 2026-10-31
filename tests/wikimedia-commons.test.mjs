@@ -36,10 +36,11 @@ test("resolves Commons items through the same-origin Vivid streaming proxy", asy
   const provider = createWikimediaCommonsProvider({ fetchImpl: async () => Response.json(result()) });
   const source = await provider.resolve({ media: { source_file: "File:Example Film.mp4" } });
   const url = new URL(source.url);
-  assert.equal(url.origin, "https://vivid.example");
-  assert.equal(url.pathname, "/api/commons-download");
+  assert.equal(url.origin, "https://us-central1-vivid-cinema.cloudfunctions.net");
+  assert.equal(url.pathname, "/downloadMedia");
+  assert.equal(url.searchParams.get("source"), "wikimedia-commons");
   assert.equal(url.searchParams.get("title"), "File:Example Film.mp4");
-  assert.deepEqual(source.allowedHosts, ["vivid.example"]);
+  assert.deepEqual(source.allowedHosts, ["us-central1-vivid-cinema.cloudfunctions.net"]);
 });
 test("rejects invalid Commons file titles", async () => {
   const provider = createWikimediaCommonsProvider({ fetchImpl: async () => Response.json({}) });
