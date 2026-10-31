@@ -405,9 +405,9 @@ function openTitleDownload() {
   async function loadOptions() {
     const run = ++request;
     const season = Number(seasonSelect?.value || 1), episode = Number(episodeSelect?.value || 1);
-    const mediaRequest = { id: String(media.id), media_type: media.media_type, title: media.title, year: media.year || "", poster_path: media.poster_path || "", season: isTv ? season : null, episode: isTv ? episode : null };
+    const mediaRequest = { id: String(media.id), media_type: media.media_type, title: media.title, episode_title: isTv ? (episodeSelect?.selectedOptions?.[0]?.textContent?.split(" · ").slice(1).join(" · ") || "") : "", year: media.year || "", poster_path: media.poster_path || "", season: isTv ? season : null, episode: isTv ? episode : null };
     const slot = modal.querySelector("#vivid-download-options"), integration = globalThis.VIVID_DOWNLOADS;
-    slot.innerHTML = '<p>Searching Internet Archive for downloadable licensed files…</p>';
+    slot.innerHTML = '<p>Searching public archives for downloadable licensed files…</p>';
     try {
       const options = await integration.getOptions(mediaRequest);
       if (run !== request || !slot.isConnected) return;
