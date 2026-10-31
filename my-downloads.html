@@ -45,6 +45,13 @@
   <section id="offline-player-section" class="offline-player-section" hidden aria-label="Offline video player">
     <div class="offline-player-heading"><h2 id="offline-player-title">Offline playback</h2><button id="offline-player-close" type="button">Close player</button></div>
     <video id="offline-player" controls playsinline preload="metadata"></video>
+    <div id="offline-custom-controls" class="offline-custom-controls" hidden>
+      <button id="offline-play-toggle" type="button" aria-label="Play or pause">Play</button>
+      <label class="offline-seek-control"><span class="sr-only">Seek video</span><input id="offline-seek" type="range" min="0" max="1000" value="0" step="1"></label>
+      <span id="offline-time" class="offline-time">0:00 / 0:00</span>
+      <label class="offline-volume-control">Volume <input id="offline-volume" type="range" min="0" max="1" value="1" step="0.05"></label>
+      <button id="offline-fullscreen" type="button">Fullscreen</button>
+    </div>
     <p>Playing a video saved locally on this device.</p>
   </section>
   <section class="offline-summary" aria-label="Download totals">
