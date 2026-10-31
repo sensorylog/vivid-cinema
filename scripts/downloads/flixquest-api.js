@@ -15,7 +15,7 @@ function safeStreamUrl(value) {
 function linkFormat(link) {
   if (link.isM3U8 === true) return "hls";
   if (link.isDASH === true) return "dash";
-  return DIRECT_EXTENSIONS.test(String(link.url || "")) ? "file" : "unknown";
+  return "file";
 }
 export function createFlixQuestApi({ baseUrl, fetchImpl = globalThis.fetch, timeoutMs = DEFAULT_TIMEOUT_MS } = {}) {
   const root = normalizeBaseUrl(baseUrl);
