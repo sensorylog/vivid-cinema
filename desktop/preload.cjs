@@ -1,4 +1,32 @@
-const { ipcRenderer } = require("electron");
+const { ipcRenderer, contextBridge } = require("electron");
+
+
+contextBridge.exposeInMainWorld("vividDownloads", Object.freeze({
+  available: true,
+  search: query => ipcRenderer.invoke("vivid-download-search", query),
+  start: (result, media) => ipcRenderer.invoke("vivid-download-start", result, media),
+  list: () => ipcRenderer.invoke("vivid-download-list"),
+  chooseFolder: () => ipcRenderer.invoke("vivid-download-folder"),
+  control: (id, action) => ipcRenderer.invoke("vivid-download-control", id, action),
+  onProgress: callback => {
+    if (typeof callback !== "function") return () => {};
+    const listener = (_event, payload) => callback(payload);
+    ipcRenderer.on("vivid-download-progress", listener);
+    return () => ipcRenderer.removeListener("vivid-download-progress", listener);
+  },
+  onComplete: callback => {
+    if (typeof callback !== "function") return () => {};
+    const listener = (_event, payload) => callback(payload);
+    ipcRenderer.on("vivid-download-complete", listener);
+    return () => ipcRenderer.removeListener("vivid-download-complete", listener);
+  },
+  onError: callback => {
+    if (typeof callback !== "function") return () => {};
+    const listener = (_event, payload) => callback(payload);
+    ipcRenderer.on("vivid-download-error", listener);
+    return () => ipcRenderer.removeListener("vivid-download-error", listener);
+  }
+}));
 
 const trustedHosts = new Set(["vivid-cinema.pages.dev", "localhost"]);
 if (trustedHosts.has(location.hostname)) {

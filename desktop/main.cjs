@@ -3,6 +3,7 @@ const { autoUpdater } = require("electron-updater");
 const http = require("node:http");
 const fs = require("node:fs");
 const path = require("node:path");
+const { DesktopDownloadEngine } = require("./download-engine.cjs");
 
 const appRoot = app.getAppPath();
 const windowsIcon = path.join(appRoot, "icons", "vivid-icon.ico");
@@ -72,6 +73,7 @@ function createLocalServer(root) {
 
 let localServer;
 let localOrigin;
+let downloadEngine;
 const HOSTED_APP_URL = "https://vivid-cinema.pages.dev/home.html";
 const HOSTED_APP_ORIGIN = new URL(HOSTED_APP_URL).origin;
 const HOSTED_LOAD_TIMEOUT_MS = 12000;
@@ -137,6 +139,39 @@ function sendUpdateStatus(status) {
   for (const win of BrowserWindow.getAllWindows()) {
     if (!win.isDestroyed()) win.webContents.send("vivid-update-status", status);
   }
+}
+
+
+function isTrustedDownloadSender(event) {
+  try {
+    if (event.senderFrame !== event.sender.mainFrame) return false;
+    const origin = new URL(event.senderFrame.url).origin;
+    return origin === HOSTED_APP_ORIGIN || Boolean(localOrigin && origin === new URL(localOrigin).origin);
+  } catch { return false; }
+}
+
+function configureDownloadEngine() {
+  downloadEngine = new DesktopDownloadEngine({ app, BrowserWindow, dialog, shell });
+  ipcMain.handle("vivid-download-search", (event, query) => {
+    if (!isTrustedDownloadSender(event)) throw new Error("Untrusted download request");
+    return downloadEngine.search(query);
+  });
+  ipcMain.handle("vivid-download-start", (event, result, media) => {
+    if (!isTrustedDownloadSender(event)) throw new Error("Untrusted download request");
+    return downloadEngine.start(result, media);
+  });
+  ipcMain.handle("vivid-download-list", event => {
+    if (!isTrustedDownloadSender(event)) throw new Error("Untrusted download request");
+    return downloadEngine.list();
+  });
+  ipcMain.handle("vivid-download-folder", async event => {
+    if (!isTrustedDownloadSender(event)) throw new Error("Untrusted download request");
+    return downloadEngine.chooseFolder();
+  });
+  ipcMain.handle("vivid-download-control", (event, id, action) => {
+    if (!isTrustedDownloadSender(event)) throw new Error("Untrusted download request");
+    return downloadEngine.control(id, action);
+  });
 }
 
 function configureAutoUpdates() {
@@ -366,6 +401,7 @@ app.whenReady().then(async () => {
   });
   try {
     await startLocalServer();
+  configureDownloadEngine();
     createWindow();
     scheduleUpdateChecks();
   } catch (error) {

@@ -875,3 +875,20 @@ body.vivid-title-page .vivid-title-backdrop-image{object-fit:cover;object-positi
 body.vivid-title-page .vivid-title-copy h1{font-family:Georgia,"Times New Roman",serif;letter-spacing:-.05em}
 body.vivid-title-page :where(.vivid-title-kicker,.vivid-section-heading>div>span){color:#c7ff55}
 body.vivid-title-page :where(.vivid-title-actions .vivid-button:focus-visible,.vivid-title-nav a:focus-visible){outline:2px solid #c7ff55;outline-offset:3px}
+
+
+/* Built-in desktop download source picker */
+.vivid-download-modal{position:fixed;inset:0;z-index:10000;display:grid;place-items:center;padding:18px;background:rgba(3,5,10,.82);backdrop-filter:blur(12px)}
+.vivid-download-dialog{position:relative;width:min(620px,100%);max-height:min(82vh,760px);overflow:auto;padding:28px;border:1px solid rgba(255,255,255,.12);border-radius:20px;background:#10131b;color:#f5f7fb;box-shadow:0 24px 90px rgba(0,0,0,.5)}
+.vivid-download-dialog>p:first-of-type{font-size:10px;letter-spacing:.16em;color:#c7ff55;font-weight:800}
+.vivid-download-dialog h2{margin:8px 0 12px;font-size:clamp(1.5rem,4vw,2rem)}
+.vivid-download-close{position:absolute;right:14px;top:12px;width:36px;height:36px;border:0;border-radius:50%;background:#252a35;color:white;font-size:24px;cursor:pointer}
+.vivid-download-result{margin:12px 0;padding:14px;border:1px solid rgba(255,255,255,.1);border-radius:12px;background:#171c27}
+.vivid-download-result strong{display:block;font-size:14px;line-height:1.4;overflow-wrap:anywhere}
+.vivid-download-result p{margin:6px 0 10px;color:#aeb8ca;font-size:12px}
+.vivid-download-result button,.vivid-download-dialog>button.vivid-button{min-height:36px;padding:8px 14px;border:0;border-radius:9px;background:#c7ff55;color:#11150b;font-weight:750;cursor:pointer}
+.vivid-download-result button:disabled{opacity:.6;cursor:wait}
+#vivid-download-jobs{margin-top:18px}
+@media(max-width:520px){.vivid-download-dialog{padding:22px 16px;border-radius:16px}}
+
+.vivid-download-dialog label{display:block;margin:14px 0 6px;color:#aeb8ca;font-size:12px}.vivid-download-dialog select{width:100%;min-height:40px;padding:8px 12px;border:1px solid rgba(255,255,255,.16);border-radius:9px;background:#171c27;color:#f5f7fb}
