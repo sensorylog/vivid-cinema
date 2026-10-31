@@ -56,6 +56,12 @@ test("Shaka adapter stores authorized HLS/DASH manifests and reports progress", 
   assert.equal(state.stored[0].metadata.vividJobId, "job-1");
   assert.equal(progress[0].bytesDownloaded, 500);
   assert.equal(progress[0].totalBytes, 1000);
+  const chosen = state.config.offline.trackSelectionCallback([
+    { id: 1, type: "variant", height: 1080, bandwidth: 900 },
+    { id: 2, type: "variant", height: 720, bandwidth: 500 },
+    { id: 3, type: "text", language: "en" }
+  ]);
+  assert.deepEqual(chosen.map(track => track.id), [2, 3]);
 });
 
 test("Shaka adapter rejects unapproved hosts and non-adaptive formats", async () => {
