@@ -10,7 +10,9 @@ test("proxies only verified licensed archive files and forwards byte ranges", as
   globalThis.fetch = async (url, init = {}) => {
     calls.push({ url: String(url), init });
     if (String(url).includes("/metadata/")) return Response.json(metadata);
-    return new Response(new Uint8Array([1, 2, 3]), { status: 206, headers: { "content-type": "video/mp4", "content-range": "bytes 0-2/40000000", "content-length": "3" } });
+    const response = new Response(new Uint8Array([1, 2, 3]), { status: 206, headers: { "content-type": "video/mp4", "content-range": "bytes 0-2/40000000", "content-length": "3" } });
+    Object.defineProperty(response, "url", { value: "https://ia800123.us.archive.org/12/items/test_item/film.mp4" });
+    return response;
   };
   try {
     const request = new Request("https://vivid.example/api/ia-download/test_item/film.mp4", { headers: { Range: "bytes=0-2" } });
