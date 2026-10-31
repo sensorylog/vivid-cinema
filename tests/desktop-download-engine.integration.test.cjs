@@ -198,12 +198,12 @@ test("desktop engine downloads a video-extension payload from a local seeded tor
             complete: swarm.complete,
             incomplete: swarm.incomplete,
             peerCount: Object.keys(swarm.peers || {}).length,
-            peers: Object.values(swarm.peers || {}).map(peer => ({
-              ip: peer.ip,
-              port: peer.port,
-              peerId: peer.peerId?.toString("hex") || null,
-              complete: peer.complete,
-              left: peer.left
+            peers: Object.values(swarm.peers || {}).filter(Boolean).map(peer => ({
+              ip: peer?.ip ?? null,
+              port: peer?.port ?? null,
+              peerId: peer?.peerId?.toString("hex") || null,
+              complete: peer?.complete ?? null,
+              left: peer?.left ?? null
             }))
           } : null,
           knownTorrents: Object.keys(tracker.torrents || {})
