@@ -57,6 +57,11 @@ jobs:
               if ($previousVersion -ne $version) { $publish = $true }
             }
           }
+          if ($env:GITHUB_REF -eq "refs/heads/main") {
+            $tag = "v$version"
+            $existingTag = git ls-remote --tags origin "refs/tags/$tag"
+            if (!$existingTag) { $publish = $true }
+          }
           "publish=$($publish.ToString().ToLower())" >> $env:GITHUB_OUTPUT
       - name: Install desktop runtime dependencies
         run: npm --prefix desktop ci --omit=dev --no-audit --no-fund
