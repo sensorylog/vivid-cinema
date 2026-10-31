@@ -7,6 +7,17 @@ const WebTorrent = require("webtorrent");
 const TorrentSearchApi = require("torrent-search-api");
 
 const VIDEO_EXTENSIONS = /\.(mp4|m4v|mkv|avi|mov|webm|ogv|mpg|mpeg|wmv|flv|ts|m2ts|3gp)$/i;
+ // Maintained public tracker endpoints provide extra discovery paths for
+ // magnets with missing or unreliable tracker metadata.
+const FALLBACK_TRACKERS = Object.freeze([
+  "udp://tracker.opentrackr.org:1337/announce",
+  "udp://open.stealth.si:80/announce",
+  "udp://open.demonii.com:1337/announce",
+  "udp://tracker.qu.ax:6969/announce",
+  "udp://explodie.org:6969/announce",
+  "http://tracker2.dler.org:80/announce",
+  "http://tracker.renfei.net:8080/announce"
+]);
 const safeText = (value, max = 180) => String(value || "").replace(/[\u0000-\u001f]/g, "").trim().slice(0, max);
 const roundProgress = torrent => Math.round((Number(torrent?.progress) || 0) * 1000) / 10;
 
@@ -84,6 +95,8 @@ class DesktopDownloadEngine {
       fs.mkdirSync(this.downloadPath, { recursive: true });
       for (const row of Array.isArray(state.jobs) ? state.jobs : []) {
         if (!row || typeof row.id !== "string" || typeof row.magnet !== "string" || !row.magnet.startsWith("magnet:?")) continue;
+        // Cancelled rows from older versions are stale history, not active downloads.
+        if (row.status === "cancelled") continue;
         const files = Array.isArray(row.files) ? row.files.filter(file => file && typeof file.path === "string" && path.isAbsolute(file.path) && fs.existsSync(file.path)) : [];
         if (!files.length && row.filePath && fs.existsSync(row.filePath)) files.push({ name: path.basename(row.filePath), path: row.filePath, size: 0 });
         const status = row.status === "completed" && files.length
@@ -153,7 +166,7 @@ class DesktopDownloadEngine {
     job.error = null;
     const jobPath = job.downloadPath || this.downloadPath;
     fs.mkdirSync(jobPath, { recursive: true });
-    const torrent = this.client.add(job.magnet, { path: jobPath, uploads: 0 });
+    const torrent = this.client.add(job.magnet, { path: jobPath, uploads: 0, announce: FALLBACK_TRACKERS });
     job.torrent = torrent;
     const publish = () => {
       job.progress = roundProgress(torrent);
@@ -368,8 +381,16 @@ class DesktopDownloadEngine {
         job.torrent = null;
         await new Promise(resolve => torrent.destroy({ destroyStore: true }, resolve));
       }
+      // Paused/failed jobs have no live torrent to destroy, so remove their
+      // per-job partial folder explicitly. Never target the shared download root.
+      const jobPath = path.resolve(job.downloadPath || "");
+      if (path.basename(jobPath) === job.id && jobPath !== path.resolve(this.downloadPath)) {
+        await fsp.rm(jobPath, { recursive: true, force: true })
+          .catch(error => console.warn("Could not remove cancelled download data:", error.message));
+      }
+      this.jobs.delete(job.id);
       await this.persist();
-      this.send("vivid-download-progress", this.snapshot(job));
+      this.send("vivid-download-progress", { id: job.id, status: "cancelled", removed: true });
       return true;
     }
     if (action === "show" && job.filePath) { this.shell.showItemInFolder(job.filePath); return true; }
@@ -396,4 +417,4 @@ class DesktopDownloadEngine {
     await new Promise(resolve => this.client.destroy(resolve));
   }
 }
-module.exports = { DesktopDownloadEngine };
+module.exports = { DesktopDownloadEngine, FALLBACK_TRACKERS };
