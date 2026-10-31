@@ -1,8 +1,11 @@
-const { app, BrowserWindow, Menu, dialog, shell, session, ipcMain } = require("electron");
+const { app, BrowserWindow, Menu, dialog, shell, session, ipcMain, net, protocol } = require("electron");
 const { autoUpdater } = require("electron-updater");
 const http = require("node:http");
 const fs = require("node:fs");
 const path = require("node:path");
+const crypto = require("node:crypto");
+const { Readable } = require("node:stream");
+protocol.registerSchemesAsPrivileged([{ scheme: "vivid-media", privileges: { standard: true, secure: true, supportFetchAPI: true, corsEnabled: true, stream: true } }]);
 const { DesktopDownloadEngine } = require("./download-engine.cjs");
 
 const appRoot = app.getAppPath();
@@ -39,9 +42,11 @@ function createLocalServer(root) {
       res.writeHead(405, { Allow: "GET, HEAD" }).end();
       return;
     }
+    let parsedUrl;
     let pathname;
     try {
-      pathname = decodeURIComponent(new URL(req.url || "/", "http://localhost").pathname);
+      parsedUrl = new URL(req.url || "/", "http://localhost");
+      pathname = decodeURIComponent(parsedUrl.pathname);
     } catch {
       res.writeHead(400).end("Bad request");
       return;
@@ -74,6 +79,7 @@ function createLocalServer(root) {
 let localServer;
 let localOrigin;
 let downloadEngine;
+const mediaToken = crypto.randomBytes(32).toString("hex");
 const HOSTED_APP_URL = "https://vivid-cinema.pages.dev/home.html";
 const HOSTED_APP_ORIGIN = new URL(HOSTED_APP_URL).origin;
 const HOSTED_LOAD_TIMEOUT_MS = 12000;
@@ -150,6 +156,34 @@ function isTrustedDownloadSender(event) {
   } catch { return false; }
 }
 
+function configureOfflineMediaProtocol() {
+  protocol.handle("vivid-media", async request => {
+    const url = new URL(request.url);
+    if (url.hostname !== "download" || url.searchParams.get("token") !== mediaToken) return new Response("Forbidden", { status: 403 });
+    const id = decodeURIComponent(url.pathname.slice(1));
+    const fileIndex = Number(url.searchParams.get("file") || 0);
+    const filePath = downloadEngine && downloadEngine.mediaFile(id, fileIndex);
+    if (!filePath) return new Response("Media not found", { status: 404 });
+    let stat;
+    try { stat = await fs.promises.stat(filePath); } catch { return new Response("Media not found", { status: 404 }); }
+    const ext = path.extname(filePath).toLowerCase();
+    const types = { ".mp4":"video/mp4", ".m4v":"video/mp4", ".mkv":"video/x-matroska", ".webm":"video/webm", ".mov":"video/quicktime", ".avi":"video/x-msvideo", ".ogv":"video/ogg", ".mpg":"video/mpeg", ".mpeg":"video/mpeg", ".wmv":"video/x-ms-wmv", ".flv":"video/x-flv", ".ts":"video/mp2t", ".m2ts":"video/mp2t", ".3gp":"video/3gpp" };
+    const headers = new Headers({ "Content-Type":types[ext] || "application/octet-stream", "Accept-Ranges":"bytes", "Content-Length":String(stat.size), "Access-Control-Allow-Origin":"*", "Cache-Control":"no-store" });
+    const range = request.headers.get("range");
+    if (range) {
+      const raw = String(range).replace("bytes=", "").split("-");
+      const start = raw[0] ? Number(raw[0]) : Math.max(0, stat.size - Number(raw[1] || 0));
+      const end = raw[0] && raw[1] ? Math.min(Number(raw[1]), stat.size - 1) : stat.size - 1;
+      if (!Number.isSafeInteger(start) || !Number.isSafeInteger(end) || start > end || start >= stat.size) return new Response(null, { status:416, headers:{ "Content-Range":"bytes */" + stat.size } });
+      headers.set("Content-Range", "bytes " + start + "-" + end + "/" + stat.size);
+      headers.set("Content-Length", String(end - start + 1));
+      if (request.method === "HEAD") return new Response(null, { status:206, headers });
+      return new Response(Readable.toWeb(fs.createReadStream(filePath, { start, end })), { status:206, headers });
+    }
+    if (request.method === "HEAD") return new Response(null, { status:200, headers });
+    return new Response(Readable.toWeb(fs.createReadStream(filePath)), { status:200, headers });
+  });
+}
 function configureDownloadEngine() {
   downloadEngine = new DesktopDownloadEngine({ app, BrowserWindow, dialog, shell });
   ipcMain.handle("vivid-download-search", (event, query) => {
@@ -163,6 +197,27 @@ function configureDownloadEngine() {
   ipcMain.handle("vivid-download-list", event => {
     if (!isTrustedDownloadSender(event)) throw new Error("Untrusted download request");
     return downloadEngine.list();
+  });
+  ipcMain.handle("vivid-playback-position-get", (event, id, fileIndex = 0) => {
+    if (!isTrustedDownloadSender(event)) throw new Error("Untrusted playback request");
+    return downloadEngine.getPlaybackPosition(id, fileIndex);
+  });
+  ipcMain.handle("vivid-playback-position-set", async (event, id, fileIndex = 0, seconds = 0) => {
+    if (!isTrustedDownloadSender(event)) throw new Error("Untrusted playback request");
+    return downloadEngine.setPlaybackPosition(id, fileIndex, seconds);
+  });
+  ipcMain.handle("vivid-playback-position-clear", async (event, id, fileIndex = 0) => {
+    if (!isTrustedDownloadSender(event)) throw new Error("Untrusted playback request");
+    return downloadEngine.clearPlaybackPosition(id, fileIndex);
+  });
+  ipcMain.handle("vivid-download-media-url", (event, id, fileIndex = 0) => {
+    if (!isTrustedDownloadSender(event)) throw new Error("Untrusted download request");
+    if (!downloadEngine.mediaFile(id, fileIndex)) throw new Error("This download is not ready to play.");
+    return "vivid-media://download/" + encodeURIComponent(String(id)) + "?file=" + encodeURIComponent(String(fileIndex)) + "&token=" + mediaToken;
+  });
+  ipcMain.handle("vivid-offline-url", event => {
+    if (!isTrustedDownloadSender(event)) throw new Error("Untrusted offline navigation request");
+    return localOrigin + "/my-downloads.html";
   });
   ipcMain.handle("vivid-download-folder", async event => {
     if (!isTrustedDownloadSender(event)) throw new Error("Untrusted download request");
@@ -303,6 +358,10 @@ function createWindow() {
     win.show();
     if (hostedLoadStarted) return;
     hostedLoadStarted = true;
+    if (!net.isOnline()) {
+      void win.loadURL(localOrigin + "/my-downloads.html").catch(error => console.warn("Vivid offline library could not be opened:", error?.message || error));
+      return;
+    }
     hostedLoadTimeout = setTimeout(
       () => fallbackToLocal("Cloudflare Pages app load timed out after " + Math.round(HOSTED_LOAD_TIMEOUT_MS / 1000) + " seconds"),
       HOSTED_LOAD_TIMEOUT_MS
@@ -401,7 +460,8 @@ app.whenReady().then(async () => {
   });
   try {
     await startLocalServer();
-  configureDownloadEngine();
+    configureDownloadEngine();
+    configureOfflineMediaProtocol();
     createWindow();
     scheduleUpdateChecks();
   } catch (error) {
@@ -411,5 +471,13 @@ app.whenReady().then(async () => {
   app.on("activate", () => { if (BrowserWindow.getAllWindows().length === 0) createWindow(); });
 });
 app.on("window-all-closed", () => { if (process.platform !== "darwin") app.quit(); });
-app.on("before-quit", () => { if (localServer) localServer.close(); });
+let shutdownStarted = false;
+app.on("before-quit", event => {
+  if (downloadEngine && !shutdownStarted) {
+    event.preventDefault(); shutdownStarted = true;
+    void downloadEngine.shutdown().finally(() => { if (localServer) localServer.close(); app.quit(); });
+    return;
+  }
+  if (localServer) localServer.close();
+});
 }

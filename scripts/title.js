@@ -389,69 +389,21 @@ function render(details, externalCertification = "", externalCertificationNote =
 
 function openTitleDownload() {
   if (!media) return;
-  const engine = window.vividDownloads;
-  const modal = document.createElement("div");
-  modal.className = "vivid-download-modal";
-  modal.innerHTML = '<section class="vivid-download-dialog" role="dialog" aria-modal="true" aria-labelledby="vivid-download-title"><button class="vivid-download-close" type="button" aria-label="Close">×</button><p>VIVID DOWNLOADS</p><h2 id="vivid-download-title">Find a download</h2><p class="vivid-download-empty" id="vivid-download-status">Searching built-in sources…</p><label for="vivid-download-quality">Quality</label><select id="vivid-download-quality"><option value="any">Any quality</option><option value="2160">4K / 2160p</option><option value="1080">1080p</option><option value="720">720p</option><option value="480">480p</option></select><div id="vivid-download-results"></div><div id="vivid-download-jobs"></div><button class="vivid-button vivid-button--secondary" id="vivid-download-folder" type="button">Choose download folder</button></section>';
-  document.body.appendChild(modal);
-  const close = () => { modal.remove(); offProgress?.(); offComplete?.(); offError?.(); };
-  modal.querySelector(".vivid-download-close").addEventListener("click", close);
-  modal.addEventListener("click", event => { if (event.target === modal) close(); });
-  const status = modal.querySelector("#vivid-download-status");
-  const results = modal.querySelector("#vivid-download-results");
-  const jobs = modal.querySelector("#vivid-download-jobs");
-  if (!engine?.available) {
-    status.textContent = "Built-in downloads are available in Vivid for Windows. Open this title in the desktop app to search and save files directly to your device.";
-    modal.querySelector("#vivid-download-folder").hidden = true;
+  if (!window.vividDownloads?.available) {
+    window.alert("Offline downloads are available in the Vivid Cinema Windows app. Open this title in the desktop app to download it.");
     return;
   }
-  const escape = value => String(value ?? "").replace(/[&<>"']/g, char => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[char]));
-  const renderJobs = async () => {
-    const items = await engine.list();
-    jobs.innerHTML = items.map(item => '<article class="vivid-download-result" data-job="' + escape(item.id) + '"><strong>' + escape(item.title) + '</strong><p>' + escape(item.status) + ' · ' + Number(item.progress || 0).toFixed(1) + '% · ' + Math.round((item.speed || 0) / 1024) + ' KB/s</p></article>').join("");
-  };
-  const renderResults = items => {
-    if (!items.length) { status.textContent = "No results found. Try another title or spelling."; return; }
-    status.textContent = "Choose a release and quality. Vivid saves it to your selected folder.";
-    const quality = modal.querySelector("#vivid-download-quality");
-    const draw = () => {
-      const selected = quality.value;
-      const filtered = items.filter(item => selected === "any" || new RegExp("(?:^|[^0-9])" + selected + "p?(?:[^0-9]|$)", "i").test(item.title));
-      results.innerHTML = filtered.map((item,index) => '<article class="vivid-download-result"><strong>' + escape(item.title) + '</strong><p>' + escape(item.provider) + ' · ' + escape(item.size || "Size unknown") + ' · ' + item.seeds + ' seeders</p><button type="button" data-result="' + index + '">Download</button></article>').join("") || '<p class="vivid-download-empty">No releases match that quality. Choose Any quality.</p>';
-      results.querySelectorAll("[data-result]").forEach(button => button.addEventListener("click", async () => {
-        button.disabled = true; button.textContent = "Starting…";
-        try {
-          await engine.start(filtered[Number(button.dataset.result)], { title: media.title, id: media.id, media_type: media.media_type });
-          button.textContent = "Added to downloads";
-          status.textContent = "Your download has started.";
-          await renderJobs();
-        } catch (error) {
-          button.disabled = false; button.textContent = "Try again";
-          status.textContent = error?.message || "Could not start this download.";
-        }
-      }));
-    };
-    quality.addEventListener("change", draw);
-    draw();
-  };
-  const offProgress = engine.onProgress(payload => {
-    const card = jobs.querySelector('[data-job="' + payload.id + '"]');
-    if (card) card.querySelector("p").textContent = payload.status + ' · ' + payload.progress + '% · ' + Math.round(payload.speed / 1024) + ' KB/s';
-    else void renderJobs();
-  });
-  const offComplete = engine.onComplete(payload => {
-    status.textContent = payload.title + " has finished downloading.";
-    void renderJobs();
-  });
-  const offError = engine.onError(payload => { status.textContent = payload.message; void renderJobs(); });
-  modal.querySelector("#vivid-download-folder").addEventListener("click", async () => {
-    try { const folder = await engine.chooseFolder(); status.textContent = "Download folder: " + folder; }
-    catch (error) { status.textContent = error?.message || "Could not choose folder."; }
-  });
-  void engine.search(media.title).then(renderResults).catch(error => {
-    status.textContent = error?.message || "The built-in sources could not be reached.";
-  });
-  void renderJobs();
+  try {
+    sessionStorage.setItem("vivid:pending-desktop-download", JSON.stringify({
+      id: media.id,
+      title: media.title,
+      media_type: media.media_type === "tv" ? "tv" : "movie"
+    }));
+    window.location.assign("my-downloads.html");
+  } catch (error) {
+    console.error("Could not open Vivid Offline:", error);
+    window.location.assign("my-downloads.html");
+  }
 }
 function renderPersonPage(person) {
   const cast = Array.isArray(person?.combined_credits?.cast) ? person.combined_credits.cast : [];

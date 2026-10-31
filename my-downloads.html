@@ -27,13 +27,33 @@
   <section class="offline-notice" aria-labelledby="offline-status-title">
     <div class="offline-notice-icon" aria-hidden="true">↓</div>
     <div><h2 id="offline-status-title">Your movie & series downloads</h2>
-      <p>Vivid will show saved files here when an authorized direct-download source is available. No archive search or manual API setup is used.</p>
+      <p id="offline-notice-copy">The Vivid Cinema Windows app keeps your downloaded movies and series in one offline library.</p>
     </div>
   </section>
+  <section id="desktop-download-search" class="offline-desktop-search" hidden aria-label="Find a movie to download">
+    <form id="desktop-search-form">
+      <label for="desktop-search-input">Find a movie or series</label>
+      <div class="offline-search-row">
+        <input id="desktop-search-input" type="search" placeholder="Search a title…" autocomplete="off">
+        <button type="submit">Search</button>
+      </div>
+      <label for="desktop-quality">Download quality</label>
+      <select id="desktop-quality"><option value="any">Any quality</option><option value="2160">4K / 2160p</option><option value="1080">1080p</option><option value="720">720p</option><option value="480">480p</option></select>
+    </form>
+    <div id="desktop-search-results" class="offline-search-results"></div>
+  </section>
   <section id="offline-player-section" class="offline-player-section" hidden aria-label="Offline video player">
-    <div class="offline-player-heading"><h2 id="offline-player-title">Offline playback</h2><button id="offline-player-close" type="button">Close player</button></div>
+    <div class="offline-player-heading"><h2 id="offline-player-title">Vivid Ultra Player</h2><button id="offline-player-close" type="button">Close player</button></div>
     <video id="offline-player" controls playsinline preload="metadata"></video>
-    <p>Playing a file saved in this browser’s private device storage.</p>
+    <div id="offline-custom-controls" class="offline-custom-controls" hidden>
+      <button id="offline-play-toggle" type="button" aria-label="Play or pause">Play</button>
+      <label class="offline-seek-control"><span class="sr-only">Seek video</span><input id="offline-seek" type="range" min="0" max="1000" value="0" step="1"></label>
+      <span id="offline-time" class="offline-time">0:00 / 0:00</span>
+      <label class="offline-volume-control">Volume <input id="offline-volume" type="range" min="0" max="1" value="1" step="0.05"></label>
+      <label class="offline-speed-control">Speed <select id="offline-speed"><option value="0.75">0.75×</option><option value="1" selected>1×</option><option value="1.25">1.25×</option><option value="1.5">1.5×</option><option value="2">2×</option></select></label>
+      <button id="offline-fullscreen" type="button">Fullscreen</button>
+    </div>
+    <p>Playing a video saved locally on this device.</p>
   </section>
   <section class="offline-summary" aria-label="Download totals">
     <div><strong id="offline-total">0</strong><span>All items</span></div>
@@ -48,7 +68,7 @@
     <p id="offline-message" class="offline-message" role="status" aria-live="polite">Loading your download library…</p>
     <div id="offline-jobs" class="offline-jobs"></div>
   </section>
-  <p class="offline-footnote">Download records are stored separately for each Vivid account on this device. Video files are saved in this browser’s private site storage (OPFS), not the public Downloads folder; the browser or operating system may clear that storage.</p>
+  <p id="offline-footnote" class="offline-footnote">Your downloads are stored locally on this device.</p>
   <a class="offline-back" href="home.html">← Back to Vivid Cinema</a>
 </main>
 <script type="module" src="scripts/my-downloads.js"></script>

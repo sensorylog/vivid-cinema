@@ -13,3 +13,39 @@
 
 .offline-player-section{margin:32px 0;padding:20px;border:1px solid rgba(150,165,195,.2);border-radius:18px;background:#090d16}.offline-player-section[hidden]{display:none}.offline-player-heading{display:flex;justify-content:space-between;align-items:center;gap:12px}.offline-player-heading h2{font-size:19px}.offline-player-section video{display:block;width:100%;max-height:65vh;background:#000;border-radius:12px}.offline-player-section>p{color:#9ca8bd;font-size:11px}
 @media(max-width:600px){.offline-player-heading{align-items:flex-start}}
+
+.offline-desktop-search{margin:26px 0 34px;padding:22px;border:1px solid rgba(150,165,195,.17);border-radius:18px;background:rgba(255,255,255,.025)}
+.offline-desktop-search[hidden]{display:none}
+.offline-desktop-search form{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:end}
+.offline-desktop-search label{display:block;color:#aab5ca;font-size:12px;font-weight:700;letter-spacing:.04em}
+.offline-desktop-search input,.offline-desktop-search select{width:100%;margin-top:7px;min-height:44px;border:1px solid rgba(170,185,220,.22);border-radius:11px;background:#0b1020;color:#f4f6fc;padding:0 13px;font:inherit}
+.offline-search-row{display:flex;gap:9px}
+.offline-search-row input{flex:1;min-width:0}
+.offline-search-row button,.offline-search-results button{border:0;border-radius:11px;background:linear-gradient(120deg,#6965ff,#387cf4);color:white;padding:0 18px;min-height:44px;font-weight:700;cursor:pointer}
+.offline-search-results{display:grid;gap:10px;margin-top:16px}
+.offline-result{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px;border:1px solid rgba(150,165,195,.14);border-radius:13px;background:rgba(255,255,255,.025)}
+.offline-result strong{font-size:13px;overflow-wrap:anywhere}.offline-result p,.offline-muted{margin:5px 0 0;color:#9ca8bd;font-size:11px}
+.offline-search-results button{min-height:36px;padding:0 14px;flex:none}
+.offline-search-results button:disabled{opacity:.55;cursor:wait}
+.offline-job-actions button:disabled{opacity:.55;cursor:wait}
+@media(max-width:600px){.offline-desktop-search form{grid-template-columns:1fr}.offline-result{align-items:flex-start;flex-direction:column}.offline-search-results button{width:100%}}
+
+.offline-custom-controls{display:flex;align-items:center;gap:13px;flex-wrap:wrap;padding:13px 4px 2px;color:#dfe5f5}
+.offline-custom-controls[hidden]{display:none}
+.offline-custom-controls button{border:1px solid rgba(170,185,220,.22);border-radius:10px;background:rgba(255,255,255,.06);color:#f4f6fc;padding:9px 13px;font:650 12px system-ui,sans-serif;cursor:pointer}
+.offline-custom-controls button:hover{background:rgba(255,255,255,.13)}
+.offline-seek-control{flex:1;min-width:140px}
+.offline-seek-control input,.offline-volume-control input{width:100%;accent-color:#8d8aff;vertical-align:middle}
+.offline-time{font:600 11px/1.2 ui-monospace,monospace;color:#aebbd4;white-space:nowrap}
+.offline-volume-control{display:flex;align-items:center;gap:8px;font-size:11px;color:#aebbd4}
+.offline-volume-control input{width:76px}
+.offline-player-section:fullscreen{padding:3vw;background:#030407;display:flex;flex-direction:column;justify-content:center}
+.offline-player-section:fullscreen video{max-height:78vh}
+@media(max-width:600px){.offline-custom-controls{gap:8px}.offline-seek-control{order:3;flex-basis:100%}.offline-volume-control{margin-left:auto}}
+
+.offline-speed-control{display:flex;align-items:center;gap:7px;font-size:11px;color:#aebbd4}
+.offline-speed-control select{border:1px solid rgba(170,185,220,.22);border-radius:8px;background:#0b1020;color:#f4f6fc;padding:7px 8px;font:600 11px system-ui,sans-serif}
+
+.offline-episodes{display:grid;gap:6px;margin-top:12px}
+.offline-episodes button{display:block;width:100%;text-align:left;border:1px solid rgba(170,185,220,.14);border-radius:9px;background:rgba(255,255,255,.025);color:#cbd5e8;padding:9px 11px;font:500 11px/1.4 system-ui,sans-serif;overflow-wrap:anywhere;cursor:pointer}
+.offline-episodes button:hover{background:rgba(255,255,255,.08);border-color:rgba(141,138,255,.45)}

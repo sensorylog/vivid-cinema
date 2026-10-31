@@ -24,6 +24,8 @@ test("Cloudflare Pages headers preserve core security policy", () => {
 test("Cloudflare Content Security Policy keeps existing Firebase and provider endpoints", () => {
   const csp = headers.split("\n").find(line => line.trimStart().startsWith("Content-Security-Policy:"));
   assert.ok(csp);
+  assert.ok(csp.includes("media-src"));
+  assert.ok(csp.includes("vivid-media:"), "CSP must allow Vivid local offline playback");
   for (const host of [
     "identitytoolkit.googleapis.com",
     "firestore.googleapis.com",
