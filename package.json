@@ -14,7 +14,8 @@
     "cap:open:android": "cap open android",
     "desktop:publish": "node desktop/make-windows-icon.cjs && electron-builder --win nsis --publish never",
     "predesktop:dist": "npm --prefix desktop ci --omit=dev --no-audit --no-fund",
-    "predesktop:publish": "npm --prefix desktop ci --omit=dev --no-audit --no-fund"
+    "predesktop:publish": "npm --prefix desktop ci --omit=dev --no-audit --no-fund",
+    "predesktop:start": "npm --prefix desktop ci --omit=dev --no-audit --no-fund"
   },
   "devDependencies": {
     "@firebase/rules-unit-testing": "^4.0.1",
