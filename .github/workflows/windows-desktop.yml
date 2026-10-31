@@ -61,6 +61,7 @@ jobs:
       - name: Install desktop runtime dependencies
         run: npm --prefix desktop ci --omit=dev --no-audit --no-fund
       - name: Verify the desktop download engine with a local seeded torrent
+        timeout-minutes: 3
         run: node --test tests/desktop-download-engine.integration.test.cjs
       - name: Ensure matching release tag exists before publishing
         if: steps.release-decision.outputs.publish == 'true' && github.ref == 'refs/heads/main'
