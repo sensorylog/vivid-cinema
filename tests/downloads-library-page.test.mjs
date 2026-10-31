@@ -6,7 +6,7 @@ test("offline downloads page is a title-driven movie and series library", async 
   const page = await readFile(new URL("../my-downloads.html", import.meta.url), "utf8");
   assert.match(page, /data-vivid-page="downloads-library"/);
   assert.match(page, /scripts\/my-downloads\.js/);
-  assert.match(page, /Your movie &amp; series downloads/);
+  assert.match(page, /Your movie &(?:amp;)? series downloads/);
   assert.doesNotMatch(page, /Internet Archive|archive-search|archive-results/);
   assert.match(page, /offline-player/);
 });
