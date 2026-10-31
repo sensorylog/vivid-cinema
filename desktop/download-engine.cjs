@@ -34,7 +34,7 @@ class DesktopDownloadEngine {
   async persist() {
     const rows = [...this.jobs.values()].map(job => ({
       id: job.id, title: job.title, resultTitle: job.resultTitle,
-      media: job.media, magnet: job.magnet, status: job.status, downloadPath: job.downloadPath || this.downloadPath,
+      media: job.media, magnet: job.magnet, status: job.status, phase: job.phase || null, downloadPath: job.downloadPath || this.downloadPath,
       filePath: job.filePath || null, files: Array.isArray(job.files) ? job.files : [],
       error: job.error || null, progress: job.progress || 0, downloaded: job.downloaded || 0, total: job.total || 0,
       needsRescan: Boolean(job.needsRescan), createdAt: job.createdAt, updatedAt: Date.now()
@@ -68,7 +68,7 @@ class DesktopDownloadEngine {
         const status = row.status === "completed" && files.length
           ? "completed"
           : ["cancelled", "failed"].includes(row.status) ? row.status : "paused";
-        this.jobs.set(row.id, { ...row, files, filePath: files[0]?.path || row.filePath || null, downloadPath: path.isAbsolute(row.downloadPath || "") ? row.downloadPath : this.downloadPath, needsRescan: !["completed", "cancelled"].includes(status), status, torrent: null, error: row.error || null });
+        this.jobs.set(row.id, { ...row, phase: row.phase || null, files, filePath: files[0]?.path || row.filePath || null, downloadPath: path.isAbsolute(row.downloadPath || "") ? row.downloadPath : this.downloadPath, needsRescan: !["completed", "cancelled"].includes(status), status, torrent: null, error: row.error || null });
       }
       await this.persist();
     } catch (error) {
@@ -126,6 +126,7 @@ class DesktopDownloadEngine {
 
   attachTorrent(job) {
     job.status = "downloading";
+    job.phase = "Connecting to peers";
     job.error = null;
     const jobPath = job.downloadPath || this.downloadPath;
     fs.mkdirSync(jobPath, { recursive: true });
@@ -135,6 +136,9 @@ class DesktopDownloadEngine {
       job.progress = roundProgress(torrent);
       job.downloaded = Number(torrent.downloaded) || job.downloaded || 0;
       job.total = Number(torrent.length) || job.total || 0;
+      job.phase = torrent.ready
+        ? (torrent.numPeers > 0 ? (job.downloaded > 0 ? "Receiving data" : "Connected · waiting for data") : "Waiting for peers")
+        : "Finding peers and metadata";
       const payload = this.snapshot(job);
       this.send("vivid-download-progress", payload);
       if (!job.persistTimer) {
@@ -167,9 +171,28 @@ class DesktopDownloadEngine {
     });
     const publishWhenReady = () => { if (!job.needsRescan) publish(); };
     torrent.on("metadata", publishWhenReady);
-    torrent.on("download", publishWhenReady);
+    torrent.on("wire", () => { if (job.torrent === torrent) { job.phase = "Connected · waiting for data"; publishWhenReady(); } });
+    torrent.on("download", () => { if (job.torrent === torrent) job.phase = "Receiving data"; publishWhenReady(); });
     torrent.on("upload", publishWhenReady);
+    // WebTorrent emits download events only when pieces arrive. A lightweight heartbeat
+    // keeps peer count, speed and the waiting-for-peers state visible even while stalled.
+    job.statusTimer = setInterval(() => {
+      if (job.torrent !== torrent || !["downloading", "verifying"].includes(job.status)) {
+        clearInterval(job.statusTimer);
+        job.statusTimer = null;
+        return;
+      }
+      if (job.status === "downloading") {
+        job.phase = torrent.ready
+          ? (torrent.numPeers > 0 ? (torrent.downloaded > 0 ? "Receiving data" : "Connected · waiting for data") : "Waiting for peers")
+          : "Finding peers and metadata";
+      }
+      this.send("vivid-download-progress", this.snapshot(job));
+    }, 2000);
+    job.statusTimer.unref?.();
     torrent.on("done", () => {
+      if (job.statusTimer) clearInterval(job.statusTimer);
+      job.statusTimer = null;
       job.files = [...torrent.files]
         .filter(item => VIDEO_EXTENSIONS.test(item.name))
         .map(item => ({ name: safeText(item.name, 300), path: path.resolve(jobPath, item.path), size: Number(item.length) || 0 }))
@@ -177,6 +200,7 @@ class DesktopDownloadEngine {
         .sort((a, b) => b.size - a.size);
       job.filePath = job.files[0]?.path || null;
       job.status = job.files.length ? "completed" : "failed";
+      job.phase = job.status === "completed" ? "Downloaded" : "Could not find a playable video";
       if (!job.filePath) job.error = "The release finished, but no playable video file was found.";
       job.torrent = null;
       publish();
@@ -184,6 +208,8 @@ class DesktopDownloadEngine {
         job.status === "completed" ? { ...this.snapshot(job), filePath: job.filePath } : { id: job.id, message: job.error });
     });
     torrent.on("error", error => {
+      if (job.statusTimer) clearInterval(job.statusTimer);
+      job.statusTimer = null;
       if (job.status === "cancelled" || job.status === "paused") return;
       job.status = "failed";
       job.needsRescan = true;
@@ -201,6 +227,7 @@ class DesktopDownloadEngine {
     return {
       id: job.id, title: job.title, media: job.media, status: job.status,
       progress: torrent ? roundProgress(torrent) : job.status === "completed" ? 100 : Number(job.progress) || 0,
+      phase: job.phase || null,
       speed: torrent?.downloadSpeed || 0, downloaded: torrent?.downloaded || job.downloaded || 0,
       total: torrent?.length || job.total || fileSize || 0, peers: torrent?.numPeers || 0,
       filePath: job.filePath || null,
@@ -258,10 +285,13 @@ class DesktopDownloadEngine {
       const torrent = job.torrent;
       if (job.persistTimer) clearTimeout(job.persistTimer);
       job.persistTimer = null;
+      if (job.statusTimer) clearInterval(job.statusTimer);
+      job.statusTimer = null;
       job.progress = roundProgress(torrent);
       job.downloaded = Number(torrent.downloaded) || 0;
       job.total = Number(torrent.length) || 0;
       job.status = "paused";
+      job.phase = "Paused";
       job.needsRescan = true;
       job.torrent = null;
       await new Promise(resolve => torrent.destroy({ destroyStore: false }, resolve));
@@ -276,6 +306,9 @@ class DesktopDownloadEngine {
     }
     if (action === "cancel" && ["queued", "downloading", "verifying", "paused", "failed"].includes(job.status)) {
       job.status = "cancelled";
+      job.phase = "Cancelled";
+      if (job.statusTimer) clearInterval(job.statusTimer);
+      job.statusTimer = null;
       if (job.persistTimer) clearTimeout(job.persistTimer);
       job.persistTimer = null;
       if (job.torrent) {
@@ -295,11 +328,14 @@ class DesktopDownloadEngine {
     for (const job of this.jobs.values()) {
       if (job.persistTimer) clearTimeout(job.persistTimer);
       job.persistTimer = null;
+      if (job.statusTimer) clearInterval(job.statusTimer);
+      job.statusTimer = null;
       if (["downloading", "verifying"].includes(job.status) && job.torrent) {
         job.progress = roundProgress(job.torrent);
         job.downloaded = Number(job.torrent.downloaded) || job.downloaded || 0;
         job.total = Number(job.torrent.length) || job.total || 0;
         job.status = "paused";
+        job.phase = "Paused";
         job.needsRescan = job.downloaded > 0;
       }
       job.torrent = null;
