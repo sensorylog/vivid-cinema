@@ -12,7 +12,9 @@
     "build:web": "node automation/build-static-dist.mjs",
     "cap:sync": "npm run build:web && cap sync android",
     "cap:open:android": "cap open android",
-    "desktop:publish": "node desktop/make-windows-icon.cjs && electron-builder --win nsis --publish never"
+    "desktop:publish": "node desktop/make-windows-icon.cjs && electron-builder --win nsis --publish never",
+    "predesktop:dist": "npm --prefix desktop ci --omit=dev --no-audit --no-fund",
+    "predesktop:publish": "npm --prefix desktop ci --omit=dev --no-audit --no-fund"
   },
   "devDependencies": {
     "@firebase/rules-unit-testing": "^4.0.1",
@@ -26,9 +28,7 @@
     "firebase-admin": "^14.5.0",
     "@capacitor/android": "^8.5.3",
     "@capacitor/core": "^8.5.3",
-    "electron-updater": "^6.6.2",
-    "webtorrent": "1.9.7",
-    "torrent-search-api": "^2.1.4"
+    "electron-updater": "^6.6.2"
   },
   "author": "Johnson Kyei Baffour",
   "main": "desktop/main.cjs",
@@ -39,6 +39,7 @@
       "output": "dist-desktop"
     },
     "files": [
+      "desktop/node_modules/**",
       "**/*",
       "!node_modules/**",
       "node_modules/electron-updater/**",
