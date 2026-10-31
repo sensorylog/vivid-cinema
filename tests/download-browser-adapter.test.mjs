@@ -7,12 +7,14 @@ function fakeOPFS() {
   const directory = {
     async getFileHandle(name) {
       return {
-        async createWritable() {
-          let chunks = [];
+        async createWritable(options = {}) {
+          let bytes = options.keepExistingData && files.has(name) ? new Uint8Array(await files.get(name).arrayBuffer()) : new Uint8Array();
+          let cursor = options.keepExistingData ? bytes.length : 0;
           return {
-            async write(chunk) { chunks.push(new Uint8Array(chunk)); },
-            async close() { files.set(name, new Blob(chunks, { type: "video/mp4" })); },
-            async abort() { chunks = []; files.delete(name); }
+            async write(chunk) { const value = new Uint8Array(chunk); const next = new Uint8Array(Math.max(bytes.length, cursor + value.length)); next.set(bytes); next.set(value, cursor); bytes = next; cursor += value.length; },
+            async seek(position) { cursor = position; },
+            async close() { files.set(name, new Blob([bytes], { type: "video/mp4" })); },
+            async abort() { bytes = new Uint8Array(); files.delete(name); }
           };
         },
         async getFile() {
@@ -109,6 +111,34 @@ test("enforces a streaming size limit and removes partial output", async () => {
   });
   await assert.rejects(adapter.download(job), /size limit/);
   assert.equal(opfs.files.size, 0);
+});
+
+
+test("resumes a paused direct download with an HTTP byte range", async () => {
+  const opfs = fakeOPFS();
+  const calls = [];
+  const adapter = createBrowserDownloadAdapter({
+    resolve: async () => ({ url: "https://media.example.test/movie.mp4", mimeType: "video/mp4" }),
+    allowedHosts: ["media.example.test"],
+    storage: opfs.storage,
+    fetchImpl: async (_url, options) => {
+      calls.push(options);
+      if (options.headers?.Range) {
+        return new Response(new Uint8Array([3, 4]), { status: 206, headers: {
+          "content-type": "video/mp4", "content-length": "2", "content-range": "bytes 2-3/4"
+        } });
+      }
+      return videoResponse([new Uint8Array([1, 2])]);
+    }
+  });
+  const controller = new AbortController();
+  const paused = adapter.download(job, { signal: controller.signal, onProgress: () => controller.abort("paused") });
+  await assert.rejects(paused, /aborted/i);
+  assert.equal(opfs.files.get("job_123.media").size, 2);
+  const asset = await adapter.download(job);
+  assert.equal(calls[1].headers.Range, "bytes=2-");
+  assert.equal(asset.size, 4);
+  assert.equal((await adapter.getAssetFile(asset)).size, 4);
 });
 
 test("cancellation cleans partial output", async () => {
