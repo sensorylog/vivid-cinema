@@ -13,5 +13,5 @@ test("movie and TV title pages expose a download quality chooser beside watch ac
   assert.match(script, /download-episode/);
   assert.match(script, /VIVID_DOWNLOADS/);
   assert.match(script, /vivid:pending-download/);
-  assert.match(script, /No authorized downloadable files are available/);
+  assert.match(script, /No supported HLS or direct video streams were returned/);
 });
