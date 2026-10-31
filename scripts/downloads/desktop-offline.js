@@ -102,7 +102,7 @@ player.addEventListener("timeupdate",()=>{
   }
 });
 player.addEventListener("pause",()=>{
-  if(player.dataset.jobId&&player.currentTime>0)localStorage.setItem("vivid:offline-position:"+player.dataset.jobId,String(Math.floor(player.currentTime)));
+  if(player.dataset.jobId&&player.currentTime>0)localStorage.setItem(positionKey(),String(Math.floor(player.currentTime)));
 });
 player.addEventListener("loadedmetadata",()=>{
   const saved=Number(localStorage.getItem(positionKey())||0);
