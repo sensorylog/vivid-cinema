@@ -46,11 +46,11 @@ export function createInternetArchiveSource({ fetchImpl = globalThis.fetch } = {
       if (term.length < 2) return [];
       const params = new URLSearchParams({
         q: term + " AND mediatype:movies",
-        "fl[]": "identifier,title,year,creator",
         rows: String(Math.max(1, Math.min(20, Number(rows) || 12))),
         page: "1",
         output: "json"
       });
+      for (const field of ["identifier", "title", "year", "creator"]) params.append("fl[]", field);
       const data = await json(API + "/advancedsearch.php?" + params.toString(), signal);
       return (data?.response?.docs || []).filter(doc => doc && typeof doc.identifier === "string")
         .map(doc => ({
