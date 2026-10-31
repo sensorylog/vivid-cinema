@@ -80,7 +80,7 @@ export class DownloadManager {
   }
   persist() {
     const state = this.snapshot();
-    this.persistChain = this.persistChain.then(() => this.persistence.save(state));
+    this.persistChain = this.persistChain.catch(() => {}).then(() => this.persistence.save(state));
     return this.persistChain;
   }
   async ready() { if (!this.hydrated) await this.hydrate(); }
@@ -161,9 +161,10 @@ export class DownloadManager {
       if (!job) break;
       const task = this.run(job);
       this.tasks.set(job.id, task);
-      void task.finally(() => {
+      const clearTask = () => {
         if (this.tasks.get(job.id) === task) this.tasks.delete(job.id);
-      });
+      };
+      void task.then(clearTask, clearTask);
     }
   }
 
@@ -174,9 +175,9 @@ export class DownloadManager {
     job.status = "downloading";
     job.error = null;
     job.updatedAt = this.now();
-    await this.persist();
-    this.emit();
     try {
+      await this.persist();
+      this.emit();
       const result = await this.adapter.download(copy(job), {
         signal: controller.signal,
         onProgress: ({ bytesDownloaded = 0, totalBytes = null } = {}) => {
@@ -210,9 +211,12 @@ export class DownloadManager {
       this.controllers.delete(job.id);
       this.running = Math.max(0, this.running - 1);
       job.updatedAt = this.now();
-      await this.persist();
-      this.emit();
-      this.pump();
+      try {
+        await this.persist();
+      } finally {
+        this.emit();
+        this.pump();
+      }
     }
   }
 }
