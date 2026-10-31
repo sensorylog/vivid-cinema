@@ -1,20 +1,29 @@
 const reduceMotion=window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const legacyPerformance=document.documentElement.classList.contains("vivid-performance-legacy");
 document.body.classList.add("vivid-atmosphere");
 
 /* Shared scroll glass — densify sticky chrome without touching page JS */
 (function setupScrollGlass(){
-  const navs = () => document.querySelectorAll(
+  const navs = document.querySelectorAll(
     ".vivid-topbar, .vivid-discovery-nav, .vivid-title-nav, .vivid-library-nav, .vivid-watch-nav"
   );
+  let raf = 0;
+  let previous = null;
   const update = () => {
+    raf = 0;
     const on = window.scrollY > 16;
-    navs().forEach((el) => el.classList.toggle("is-scrolled", on));
+    if (on === previous) return;
+    previous = on;
+    navs.forEach((el) => el.classList.toggle("is-scrolled", on));
+  };
+  const requestUpdate = () => {
+    if (!raf) raf = window.requestAnimationFrame(update);
   };
   update();
-  window.addEventListener("scroll", update, { passive: true });
+  window.addEventListener("scroll", requestUpdate, { passive: true });
 })();
 
-if(!reduceMotion && window.matchMedia("(hover: hover) and (pointer: fine)").matches){
+if(!legacyPerformance && !reduceMotion && window.matchMedia("(hover: hover) and (pointer: fine)").matches){
   let raf=0;
   window.addEventListener("pointermove",event=>{
     if(raf)return;
@@ -40,7 +49,7 @@ const revealSelector=[
 ].join(",");
 
 function setupReveals(root=document){
-  if(reduceMotion)return;
+  if(legacyPerformance || reduceMotion)return;
   const nodes=root.querySelectorAll?.(revealSelector)||[];
   if(!nodes.length)return;
   if(!("IntersectionObserver" in window)){
@@ -65,7 +74,7 @@ function setupReveals(root=document){
 setupReveals();
 
 function setupAmbientArtwork(){
-  if(reduceMotion || document.body.matches(".vivid-landing") || document.body.matches(".vivid-watch-page")) return;
+  if(legacyPerformance || reduceMotion || document.body.matches(".vivid-landing") || document.body.matches(".vivid-watch-page")) return;
   const sources=()=>[...document.querySelectorAll("img[src]")].map(img=>img.currentSrc||img.src).filter(src=>/^https?:/i.test(src));
   const ensure=()=>{
     const list=[...new Set(sources())].slice(0,18);
@@ -100,17 +109,19 @@ function setupAmbientArtwork(){
 }
 setupAmbientArtwork();
 
-const mutationObserver=new MutationObserver(records=>{
-  for(const record of records){
-    for(const node of record.addedNodes){
-      if(node.nodeType===1)setupReveals(node);
+if(!legacyPerformance){
+  const mutationObserver=new MutationObserver(records=>{
+    for(const record of records){
+      for(const node of record.addedNodes){
+        if(node.nodeType===1)setupReveals(node);
+      }
     }
-  }
-});
-mutationObserver.observe(document.body,{childList:true,subtree:true});
+  });
+  mutationObserver.observe(document.body,{childList:true,subtree:true});
+}
 
 function setupPageTransitions(){
-  if(reduceMotion)return;
+  if(legacyPerformance || reduceMotion)return;
   const layer=document.createElement("div");
   layer.className="vivid-page-transition";
   layer.setAttribute("aria-hidden","true");
@@ -143,7 +154,7 @@ setupPageTransitions();
   const content=document.querySelector(".vivid-hero-content");
   const track=document.querySelector(".vivid-feature-track");
   if(!hero||!media)return;
-  if(reduceMotion)return;
+  if(legacyPerformance || reduceMotion)return;
   let raf=0;
   const update=()=>{
     raf=0;
