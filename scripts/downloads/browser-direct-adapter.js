@@ -60,9 +60,13 @@ export function createBrowserDownloadAdapter({
       const sourceHosts = Array.isArray(source?.allowedHosts) && source.allowedHosts.length ? source.allowedHosts : allowedHosts;
       const url = validateAllowedHttpsUrl(source?.url, sourceHosts);
       if (!url) throw new Error("The download source URL is not HTTPS or is outside the resolver host allowlist.");
+      let offset = 0;
+      try { offset = (await (await fileHandle(id, false)).getFile()).size || 0; } catch (error) { if (error?.name !== "NotFoundError") throw error; }
+      const requestHeaders = { ...(source.headers || {}) };
+      if (offset > 0) requestHeaders.Range = "bytes=" + offset + "-";
       const response = await fetchImpl(url.href, {
         method: "GET",
-        headers: source.headers || {},
+        headers: requestHeaders,
         credentials: "omit",
         mode: "cors",
         redirect: "error",
@@ -70,6 +74,14 @@ export function createBrowserDownloadAdapter({
         signal
       });
       if (!response?.ok || response.redirected) throw new Error("The authorized source did not return a direct file response.");
+      if (offset > 0 && response.status === 206) {
+        const range = /^bytes\\s+(\\d+)-(\\d+)\\/(\\d+|\\*)$/i.exec(String(response.headers?.get?.("content-range") || ""));
+        if (!range || Number(range[1]) !== offset) throw new Error("The source returned an invalid byte-range response; restart the download.");
+      } else if (offset > 0 && response.status === 200) {
+        offset = 0;
+      } else if (response.status === 206) {
+        throw new Error("The source returned a partial response without a matching resume request.");
+      }
       const responseMime = String(response.headers?.get?.("content-type") || "").split(";")[0].trim().toLowerCase();
       const declaredMime = String(source.mimeType || "").split(";")[0].trim().toLowerCase();
       if (responseMime && !VIDEO_MIME.test(responseMime) && !["application/octet-stream", "binary/octet-stream"].includes(responseMime)) {
@@ -77,14 +89,18 @@ export function createBrowserDownloadAdapter({
       }
       const mimeType = VIDEO_MIME.test(responseMime) ? responseMime : declaredMime;
       if (!VIDEO_MIME.test(mimeType)) throw new Error("Only direct video-file responses are supported by this browser adapter.");
-      const declaredLength = Number(response.headers?.get?.("content-length"));
-      if (Number.isFinite(declaredLength) && declaredLength > byteLimit) throw new Error("The video file exceeds the configured download size limit.");
+      const contentRange = /^bytes\\s+\\d+-\\d+\\/(\\d+)$/i.exec(String(response.headers?.get?.("content-range") || ""));
+      const responseLength = Number(response.headers?.get?.("content-length"));
+      const declaredLength = Number.isFinite(responseLength) && responseLength > 0 ? responseLength : null;
+      const totalBytes = contentRange ? Number(contentRange[1]) : declaredLength ? offset + declaredLength : null;
+      if (Number.isFinite(totalBytes) && totalBytes > byteLimit) throw new Error("The video file exceeds the configured download size limit.");
       if (!response.body?.getReader) throw new Error("The browser did not provide a readable download stream.");
 
       const handle = await fileHandle(id, true);
-      const writer = await handle.createWritable({ keepExistingData: false });
+      const writer = await handle.createWritable({ keepExistingData: offset > 0 });
+      if (offset > 0) await writer.seek(offset);
       const reader = response.body.getReader();
-      let bytesDownloaded = 0;
+      let bytesDownloaded = offset;
       try {
         while (true) {
           if (signal?.aborted) throw new DOMException("Download aborted.", "AbortError");
@@ -93,14 +109,13 @@ export function createBrowserDownloadAdapter({
           bytesDownloaded += value.byteLength;
           if (bytesDownloaded > byteLimit) throw new Error("The video file exceeds the configured download size limit.");
           await writer.write(value);
-          onProgress({ bytesDownloaded, totalBytes: Number.isFinite(declaredLength) && declaredLength > 0 ? declaredLength : null });
+          onProgress({ bytesDownloaded, totalBytes });
         }
         if (signal?.aborted) throw new DOMException("Download aborted.", "AbortError");
         await writer.close();
       } catch (error) {
         try { await reader.cancel(error); } catch {}
         try { await writer.abort(error); } catch {}
-        await remove(id);
         throw error;
       }
       return {
