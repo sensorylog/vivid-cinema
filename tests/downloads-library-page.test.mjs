@@ -9,6 +9,8 @@ test("offline downloads page is a title-driven movie and series library", async 
   assert.match(page, /Your movie &(?:amp;)? series downloads/);
   assert.doesNotMatch(page, /Internet Archive|archive-search|archive-results/);
   assert.match(page, /offline-player/);
+  assert.match(page, /flixquest-api-url/);
+  assert.match(page, /Save & test connection/);
 });
 test("offline library uses owner-scoped persistence, configured authorized resolver, queue and local player", async () => {
   const script = await readFile(new URL("../scripts/my-downloads.js", import.meta.url), "utf8");
@@ -24,6 +26,6 @@ test("offline library uses owner-scoped persistence, configured authorized resol
   assert.match(script, /integration\.resolve/);
   assert.match(script, /manager\.retry\(id\)/);
   assert.match(script, /manager\.enqueue\(/);
-  assert.match(script, /No authorized download provider is configured/);
+  assert.match(script, /FlixQuest is not configured/);
   assert.doesNotMatch(script, /Internet Archive|archive\.org/);
 });
