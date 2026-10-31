@@ -98,7 +98,9 @@ export function createInternetArchiveSource({ fetchImpl = globalThis.fetch } = {
       if (!file) throw new Error("That video file is no longer available or is not eligible for download.");
       const url = new URL(file.url);
       if (url.protocol !== "https:" || !url.hostname.endsWith(".archive.org")) throw new Error("Internet Archive returned an unexpected file host.");
-      return { url: url.href, mimeType: "video/" + (VIDEO_EXT.exec(file.name)?.[0].slice(1).toLowerCase() === "ogv" ? "ogg" : VIDEO_EXT.exec(file.name)?.[0].slice(1).toLowerCase()), allowedHost: url.hostname };
+      const extension = VIDEO_EXT.exec(file.name)?.[0].slice(1).toLowerCase();
+      const mimeType = extension === "m4v" ? "video/mp4" : extension === "ogv" ? "video/ogg" : extension === "mov" ? "video/quicktime" : "video/" + extension;
+      return { url: url.href, mimeType, allowedHost: url.hostname };
     }
   });
 }
