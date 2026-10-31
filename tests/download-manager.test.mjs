@@ -33,6 +33,18 @@ test("enqueue creates a typed job and completes through the injected platform ad
   assert.equal(manager.snapshot()[0].asset.uri, "file:///offline/movie.mp4");
 });
 
+
+test("manager accepts progress percentages from adaptive download engines", async () => {
+  const { manager } = setup({ download: async (_job, { onProgress }) => {
+    onProgress({ progress: 63 });
+    return { uri: "offline:9", mimeType: "application/x-shaka-offline" };
+  } });
+  await manager.hydrate();
+  const job = await manager.enqueue(movie, { quality: "720p" });
+  await tick();
+  assert.equal(manager.snapshot().find(item => item.id === job.id).progress, 100);
+});
+
 test("duplicate movie-quality jobs are not queued twice", async () => {
   const { manager } = setup();
   await manager.hydrate();
