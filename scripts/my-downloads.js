@@ -63,7 +63,7 @@ async function switchOwner(user) {
     const allowedHosts=typeof integration?.getAllowedHosts==="function"&&integration.getAllowedHosts().length?integration.getAllowedHosts():["not-configured.invalid"];
     let activeSource = null;
     const resolveActiveSource = async () => {
-      if (!activeSource) throw new Error("No active authorized download source is available.");
+      if (!activeSource) throw new Error("No FlixQuest stream is currently selected.");
       return activeSource;
     };
     const directAdapter = createBrowserDownloadAdapter({ resolve: resolveActiveSource, allowedHosts });
@@ -118,7 +118,7 @@ async function consumePendingDownload(){
   sessionStorage.removeItem("vivid:pending-download");
   const integration=globalThis.VIVID_DOWNLOADS;
   if(typeof integration?.resolve!=="function"){
-    messageNode.textContent="Your quality selection was received, but no authorized download provider is configured yet. The download was not started.";
+    messageNode.textContent="Your quality selection was received, but FlixQuest is not configured. The download was not started.";
     return;
   }
   try{
