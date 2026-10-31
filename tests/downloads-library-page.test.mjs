@@ -8,6 +8,8 @@ test("downloads page is a title-driven movie and series library with no manual p
   assert.match(page, /scripts\/my-downloads\.js/);
   assert.match(page, /Your movie &(?:amp;)? series downloads/);
   assert.match(page, /no API URL, provider account, or manual setup/);
+  assert.match(page, /My <span>Downloads<\\/span>/);
+  assert.doesNotMatch(page, /Offline Downloads/);
   assert.doesNotMatch(page, /FlixQuest|flixquest-api-url|Save & test connection/);
   assert.match(page, /offline-player/);
 });
