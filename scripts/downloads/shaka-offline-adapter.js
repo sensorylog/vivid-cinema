@@ -1,6 +1,7 @@
 import { validateAllowedHttpsUrl } from "../playback/direct-stream-validation.js";
 
 const SHAKA_SCRIPT = "https://cdn.jsdelivr.net/npm/shaka-player@4.16.12/dist/shaka-player.compiled.js";
+const DEFAULT_MAX_BYTES = 8 * 1024 * 1024 * 1024;
 let shakaPromise = null;
 
 export function ensureShakaLibrary({ documentRef = globalThis.document, scriptUrl = SHAKA_SCRIPT } = {}) {
@@ -70,11 +71,14 @@ export function createShakaOfflineAdapter({
   video,
   allowedHosts = [],
   shakaLoader = ensureShakaLibrary,
+  ownerId = "guest",
+  maxBytes = DEFAULT_MAX_BYTES,
   now = () => Date.now()
 } = {}) {
   if (typeof resolve !== "function") throw new TypeError("An authorized media resolver is required.");
   if (!video) throw new TypeError("A video element is required.");
   if (!Array.isArray(allowedHosts) || !allowedHosts.length) throw new TypeError("At least one authorized media host is required.");
+  if (!Number.isSafeInteger(Number(maxBytes)) || Number(maxBytes) <= 0) throw new TypeError("maxBytes must be a positive safe integer.");
 
   let shaka = null;
   let player = null;
@@ -123,13 +127,13 @@ export function createShakaOfflineAdapter({
       await ready();
       const source = validateSource(await resolve(job, { signal }));
       installNetworkGuards(source);
-      const estimated = Math.max(0, Number(source.size) || 0);
+      let estimated = Math.max(0, Number(source.size) || 0);
       storage.configure({
         offline: {
           trackSelectionCallback: tracks => chooseOfflineTracks(tracks, job.quality),
           downloadSizeCallback: size => {
-            if (size > 0 && source.maxBytes && size > Number(source.maxBytes)) return false;
-            return true;
+            if (Number.isFinite(Number(size)) && Number(size) > 0) estimated = Number(size);
+            return estimated <= Number(maxBytes);
           },
           progressCallback: (_content, progress) => {
             const total = estimated || null;
@@ -145,6 +149,7 @@ export function createShakaOfflineAdapter({
         season: job.media?.season ?? null,
         episode: job.media?.episode ?? null,
         quality: String(job.quality || "Auto"),
+        ownerId: String(ownerId || "guest"),
         savedAt: now()
       }, source.type === "hls" ? "application/x-mpegURL" : "application/dash+xml");
       activeOperation = operation;
@@ -167,7 +172,7 @@ export function createShakaOfflineAdapter({
         try { activeOperation?.abort(); } catch {}
       }
       const items = await storage.list();
-      const match = items.find(item => String(item.appMetadata?.vividJobId || "") === String(job?.id || ""));
+      const match = items.find(item => String(item.appMetadata?.vividJobId || "") === String(job?.id || "") && String(item.appMetadata?.ownerId || "guest") === String(ownerId || "guest"));
       if (match) await storage.remove(match.offlineUri);
     },
     async removeAsset(job) {
