@@ -77,7 +77,7 @@ export function parseHlsPlaylist(text, baseUrl, { maxHeight = 1080, allowedHosts
     if (attrs.METHOD !== "NONE") throw new Error("Encrypted HLS playlists are not supported by this browser offline adapter.");
   }
   if (lines.some(line => line.startsWith("#EXT-X-DEFINE:") || (line.startsWith("#") && /\bURI=/.test(line) && !line.startsWith("#EXT-X-MAP:")))) {
-    throw new Error("HLS playlist variables and unsupported URI-bearing tags are not supported.");
+    throw new Error("HLS playlist variables, alternate audio/subtitle renditions, and unsupported URI-bearing tags are not supported.");
   }
   if (lines.some(line => line.startsWith("#EXT-X-I-FRAME-STREAM-INF:") || /^#EXT-X-MEDIA:.*TYPE=(?:"(?:AUDIO|SUBTITLES)"|(?:AUDIO|SUBTITLES)).*URI=/.test(line))) {
     throw new Error("HLS alternate audio and I-frame playlists are not supported by this browser offline adapter.");
