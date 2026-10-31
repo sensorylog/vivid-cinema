@@ -6,7 +6,7 @@ contextBridge.exposeInMainWorld("vividDownloads", Object.freeze({
   search: query => ipcRenderer.invoke("vivid-download-search", query),
   start: (result, media) => ipcRenderer.invoke("vivid-download-start", result, media),
   list: () => ipcRenderer.invoke("vivid-download-list"),
-  mediaUrl: id => ipcRenderer.invoke("vivid-download-media-url", id),
+  mediaUrl: (id, fileIndex = 0) => ipcRenderer.invoke("vivid-download-media-url", id, fileIndex),
   chooseFolder: () => ipcRenderer.invoke("vivid-download-folder"),
   control: (id, action) => ipcRenderer.invoke("vivid-download-control", id, action),
   onProgress: callback => {
