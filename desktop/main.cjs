@@ -1,8 +1,9 @@
-const { app, BrowserWindow, Menu, dialog, shell, session, ipcMain } = require("electron");
+const { app, BrowserWindow, Menu, dialog, shell, session, ipcMain, net } = require("electron");
 const { autoUpdater } = require("electron-updater");
 const http = require("node:http");
 const fs = require("node:fs");
 const path = require("node:path");
+const crypto = require("node:crypto");
 const { DesktopDownloadEngine } = require("./download-engine.cjs");
 
 const appRoot = app.getAppPath();
@@ -74,6 +75,7 @@ function createLocalServer(root) {
 let localServer;
 let localOrigin;
 let downloadEngine;
+const mediaToken = crypto.randomBytes(32).toString("hex");
 const HOSTED_APP_URL = "https://vivid-cinema.pages.dev/home.html";
 const HOSTED_APP_ORIGIN = new URL(HOSTED_APP_URL).origin;
 const HOSTED_LOAD_TIMEOUT_MS = 12000;
@@ -163,6 +165,15 @@ function configureDownloadEngine() {
   ipcMain.handle("vivid-download-list", event => {
     if (!isTrustedDownloadSender(event)) throw new Error("Untrusted download request");
     return downloadEngine.list();
+  });
+  ipcMain.handle("vivid-download-media-url", (event, id) => {
+    if (!isTrustedDownloadSender(event)) throw new Error("Untrusted download request");
+    if (!downloadEngine.mediaFile(id)) throw new Error("This download is not ready to play.");
+    return localOrigin + "/__vivid_media?id=" + encodeURIComponent(String(id)) + "&token=" + mediaToken;
+  });
+  ipcMain.handle("vivid-offline-url", event => {
+    if (!isTrustedDownloadSender(event)) throw new Error("Untrusted offline navigation request");
+    return localOrigin + "/my-downloads.html";
   });
   ipcMain.handle("vivid-download-folder", async event => {
     if (!isTrustedDownloadSender(event)) throw new Error("Untrusted download request");
@@ -303,6 +314,10 @@ function createWindow() {
     win.show();
     if (hostedLoadStarted) return;
     hostedLoadStarted = true;
+    if (!net.isOnline()) {
+      void win.loadURL(localOrigin + "/my-downloads.html").catch(error => console.warn("Vivid offline library could not be opened:", error?.message || error));
+      return;
+    }
     hostedLoadTimeout = setTimeout(
       () => fallbackToLocal("Cloudflare Pages app load timed out after " + Math.round(HOSTED_LOAD_TIMEOUT_MS / 1000) + " seconds"),
       HOSTED_LOAD_TIMEOUT_MS
@@ -411,5 +426,13 @@ app.whenReady().then(async () => {
   app.on("activate", () => { if (BrowserWindow.getAllWindows().length === 0) createWindow(); });
 });
 app.on("window-all-closed", () => { if (process.platform !== "darwin") app.quit(); });
-app.on("before-quit", () => { if (localServer) localServer.close(); });
+let shutdownStarted = false;
+app.on("before-quit", event => {
+  if (downloadEngine && !shutdownStarted) {
+    event.preventDefault(); shutdownStarted = true;
+    void downloadEngine.shutdown().finally(() => { if (localServer) localServer.close(); app.quit(); });
+    return;
+  }
+  if (localServer) localServer.close();
+});
 }
