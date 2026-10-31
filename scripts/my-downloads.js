@@ -69,7 +69,7 @@ async function switchOwner(user) {
     };
     const directAdapter = createBrowserDownloadAdapter({ resolve: resolveActiveSource, allowedHosts });
     const hlsAdapter = createBrowserHlsDownloadAdapter({ resolve: resolveActiveSource, allowedHosts });
-    const shakaAdapter = createShakaOfflineAdapter({ resolve: resolveActiveSource, video, allowedHosts });
+    const shakaAdapter = createShakaOfflineAdapter({ resolve: resolveActiveSource, video, allowedHosts, ownerId: owner });
     const adapter = {
       async download(job, context) {
         if (typeof integration?.resolve !== "function") throw new Error("No authorized download provider is configured. The selected title cannot be downloaded yet.");
