@@ -420,7 +420,7 @@ function openTitleDownload() {
       slot.innerHTML = safeOptions.map(option => '<button type="button" class="vivid-download-option" data-option="' + escapeHtml(option.id) + '"><strong>' + escapeHtml(option.label) + '</strong><span>' + escapeHtml([option.format, option.license].filter(Boolean).join(" · ")) + '</span></button>').join("");
       slot.querySelectorAll("[data-option]").forEach(button => button.addEventListener("click", () => {
         const option = safeOptions.find(item => item.id === button.dataset.option); if (!option) return;
-        sessionStorage.setItem("vivid:pending-download", JSON.stringify({ media: mediaRequest, option: { id: String(option.id), label: String(option.label), quality: String(option.quality || option.label), format: String(option.format || ""), size: Number(option.size) || null } }));
+        sessionStorage.setItem("vivid:pending-download", JSON.stringify({ media: mediaRequest, option: { id: String(option.id), sourceId: String(option.sourceId || integration.sourceId), label: String(option.label), quality: String(option.quality || option.label), format: String(option.format || ""), size: Number(option.size) || null } }));
         window.location.href = "my-downloads.html?start=1";
       }));
     } catch (error) {
