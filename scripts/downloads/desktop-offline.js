@@ -17,6 +17,7 @@ function setMessage(message){ byId("offline-message").textContent = message; }
 function statusText(job){
   if(job.status==="downloading") return "Downloading";
   if(job.status==="paused") return "Paused";
+  if(job.status==="verifying") return "Verifying saved data";
   if(job.status==="completed") return "Ready to watch";
   if(job.status==="cancelled") return "Cancelled";
   if(job.status==="failed") return "Needs attention";
@@ -24,7 +25,7 @@ function statusText(job){
 }
 function render(){
   const completed=jobs.filter(x=>x.status==="completed").length;
-  const active=jobs.filter(x=>["downloading","queued"].includes(x.status)).length;
+  const active=jobs.filter(x=>["downloading","queued","verifying"].includes(x.status)).length;
   byId("offline-total").textContent=String(jobs.length);
   byId("offline-completed").textContent=String(completed);
   byId("offline-active").textContent=String(active);
@@ -41,9 +42,9 @@ function render(){
     if(job.status==="paused"||job.status==="failed") actions.push('<button data-action="resume" data-id="'+escapeHtml(job.id)+'">Resume</button>');
     if(job.status==="completed") actions.push('<button data-action="play" data-id="'+escapeHtml(job.id)+'">Watch now</button>');
     if(job.status==="completed"&&job.filePath) actions.push('<button data-action="show" data-id="'+escapeHtml(job.id)+'">Show in folder</button>');
-    if(["downloading","paused","failed","queued"].includes(job.status)) actions.push('<button data-action="cancel" data-id="'+escapeHtml(job.id)+'">Cancel</button>');
+    if(["downloading","verifying","paused","failed","queued"].includes(job.status)) actions.push('<button data-action="cancel" data-id="'+escapeHtml(job.id)+'">Cancel</button>');
     return '<article class="offline-job"><div><div class="offline-job-title">'+escapeHtml(job.title)+'</div><div class="offline-job-meta">'+escapeHtml(detail)+'</div>'+
-      (["downloading","paused","completed"].includes(job.status)?'<div class="offline-progress"><span style="width:'+progress+'%"></span></div>':"")+
+      (["downloading","paused","verifying","completed"].includes(job.status)?'<div class="offline-progress"><span style="width:'+progress+'%"></span></div>':"")+
       (job.error?'<p class="offline-job-error">'+escapeHtml(job.error)+'</p>':"")+
       '</div><div class="offline-job-actions">'+actions.join("")+'</div></article>';
   }).join("");
