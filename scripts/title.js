@@ -424,7 +424,8 @@ function openTitleDownload() {
         sessionStorage.setItem("vivid:pending-download", JSON.stringify({ media: mediaRequest, option: { id: String(option.id), label: String(option.label), quality: String(option.quality || option.label), format: String(option.format || ""), size: Number(option.size) || null } }));
         window.location.href = "my-downloads.html?start=1";
       }));
-    } catch (error) { if (run === request && slot.isConnected) slot.innerHTML = '<p class="vivid-download-empty">Could not load download options: ' + escapeHtml(error?.message || error) + '</p>'; }
+    } catch (error) { if (run === request && slot.isConnected) slot.innerHTML = '<p class="vivid-download-empty">Could not find download links: ' + escapeHtml(error?.message || error) + '</p>'; }
+    finally { if (searchButton.isConnected) { searchButton.disabled = false; searchButton.innerHTML = '<i class="bi bi-search"></i> Search for download links'; } }
   }
   if (isTv) {
     const available = seasons.length ? seasons : [{ season_number: 1, episode_count: 1 }];
