@@ -62,7 +62,7 @@ function closeTracker(tracker) {
   }), 5000, "local tracker shutdown").catch(() => {});
 }
 
-test("desktop engine downloads a real video file from a local seeded torrent", { timeout: 90000 }, async () => {
+test("desktop engine downloads a video-extension payload from a local seeded torrent", { timeout: 90000 }, async () => {
   const root = await fs.mkdtemp(path.join(os.tmpdir(), "vivid-download-integration-"));
   const videoPath = path.join(root, "vivid-integration.mp4");
   const downloadsPath = path.join(root, "downloads");
@@ -90,6 +90,8 @@ test("desktop engine downloads a real video file from a local seeded torrent", {
       });
     }), 10000, "local HTTP tracker startup");
     const trackerUrl = "http://127.0.0.1:" + trackerPort + "/announce";
+    let seederAnnounced = false;
+    tracker.on("start", () => { seederAnnounced = true; });
 
     seeder = new WebTorrent({ dht: false, tracker: { announce: [trackerUrl] } });
     const seedTorrent = await withTimeout(new Promise((resolve, reject) => {
@@ -103,6 +105,7 @@ test("desktop engine downloads a real video file from a local seeded torrent", {
     }), 20000, "local torrent seeding");
     assert.match(seedTorrent.magnetURI, /^magnet:\?xt=urn:btih:/);
     assert.ok(seedTorrent.magnetURI.includes(encodeURIComponent(trackerUrl)));
+    await waitFor(() => seederAnnounced, 10000, "seeder registration with the local tracker");
 
     engine = new DesktopDownloadEngine({
       app: {
