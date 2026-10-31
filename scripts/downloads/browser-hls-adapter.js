@@ -250,11 +250,11 @@ export function createBrowserHlsDownloadAdapter({
     },
     async removePartial(job) { await remove(safeId(job?.id)); },
     async removeAsset(job) {
-      const match = /^opfs-hls:\\/\\/vivid-cinema-downloads\\/([a-zA-Z0-9_-]{1,128})$/.exec(String(job?.asset?.uri || ""));
+      const match = /^opfs-hls:\/\/vivid-cinema-downloads\/([a-zA-Z0-9_-]{1,128})$/.exec(String(job?.asset?.uri || ""));
       if (match) await remove(match[1]);
     },
     async getAssetUrl(asset) {
-      const match = /^opfs-hls:\\/\\/vivid-cinema-downloads\\/([a-zA-Z0-9_-]{1,128})$/.exec(String(asset?.uri || ""));
+      const match = /^opfs-hls:\/\/vivid-cinema-downloads\/([a-zA-Z0-9_-]{1,128})$/.exec(String(asset?.uri || ""));
       if (!match) throw new TypeError("Invalid Vivid offline HLS asset URI.");
       const id = match[1], directory = await jobDirectory(id, false);
       const playlistFile = await readFile(directory, "index.m3u8");
@@ -284,7 +284,7 @@ export function createBrowserHlsDownloadAdapter({
       return manifestUrl;
     },
     revokeAssetUrl(asset) {
-      const match = /^opfs-hls:\\/\\/vivid-cinema-downloads\\/([a-zA-Z0-9_-]{1,128})$/.exec(String(asset?.uri || ""));
+      const match = /^opfs-hls:\/\/vivid-cinema-downloads\/([a-zA-Z0-9_-]{1,128})$/.exec(String(asset?.uri || ""));
       if (!match) return;
       for (const url of activeObjectUrls.get(match[1]) || []) URL.revokeObjectURL(url);
       activeObjectUrls.delete(match[1]);
