@@ -42,3 +42,6 @@
 .offline-player-section:fullscreen{padding:3vw;background:#030407;display:flex;flex-direction:column;justify-content:center}
 .offline-player-section:fullscreen video{max-height:78vh}
 @media(max-width:600px){.offline-custom-controls{gap:8px}.offline-seek-control{order:3;flex-basis:100%}.offline-volume-control{margin-left:auto}}
+
+.offline-speed-control{display:flex;align-items:center;gap:7px;font-size:11px;color:#aebbd4}
+.offline-speed-control select{border:1px solid rgba(170,185,220,.22);border-radius:8px;background:#0b1020;color:#f4f6fc;padding:7px 8px;font:600 11px system-ui,sans-serif}
