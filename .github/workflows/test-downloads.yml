@@ -36,6 +36,7 @@ on:
       - "tests/download*.test.mjs"
       - "tests/internet-archive.test.mjs"
       - "tests/wikimedia-commons.test.mjs"
+      - "tests/provider-integration.test.mjs"
       - "tests/cloudflare-pages-config.test.mjs"
       - "package.json"
       - "_headers"
@@ -83,6 +84,7 @@ jobs:
             tests/download-source-identity.test.mjs \
             tests/internet-archive.test.mjs \
             tests/wikimedia-commons.test.mjs \
+            tests/provider-integration.test.mjs \
             tests/download-proxy.test.mjs \
             tests/download-browser-hls-adapter.test.mjs \
             tests/cloudflare-pages-config.test.mjs
