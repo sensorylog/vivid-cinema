@@ -34,7 +34,7 @@ export function ensureShakaLibrary({ documentRef = globalThis.document, scriptUr
 }
 
 function qualityHeight(value) {
-  const match = /(?:^|\\D)(2160|1440|1080|720|576|480|360|240)p?(?:\\D|$)/i.exec(String(value || ""));
+  const match = /(?:^|\D)(2160|1440|1080|720|576|480|360|240)p?(?:\D|$)/i.exec(String(value || ""));
   return match ? Number(match[1]) : 1080;
 }
 
@@ -133,7 +133,7 @@ export function createShakaOfflineAdapter({
           },
           progressCallback: (_content, progress) => {
             const total = estimated || null;
-            onProgress({ bytesDownloaded: total ? Math.floor(total * progress) : 0, totalBytes: total });
+            onProgress({ progress: Math.min(100, Math.max(0, Number(progress) * 100)), bytesDownloaded: total ? Math.floor(total * progress) : 0, totalBytes: total });
           },
           usePersistentLicense: false
         }
