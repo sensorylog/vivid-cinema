@@ -1,5 +1,5 @@
 // Bump this version whenever the precached app shell changes.
-const CACHE_NAME = "vivid-cinema-shell-v257";
+const CACHE_NAME = "vivid-cinema-shell-v258";\nconst HLS_LIBRARY_URL = "https://cdn.jsdelivr.net/npm/hls.js@1.7.3/dist/hls.min.js";
 const APP_SHELL = [
   "./","./index.html","./home.html","./downloads.html","./my-downloads.html","./for-you.html",
   "./person.html","./discover.html","./collection.html","./title.html","./watch.html",
@@ -48,7 +48,7 @@ async function cacheAsset(cache,asset){
  const response=await fetch(asset,{cache:"no-store",redirect:"follow"});
  // Never precache a response whose request crossed a redirect. Safari can reject
  // a redirected response when a service worker returns it for a navigation.
- if(!response.ok||response.type!=="basic"||!isSafeResponse(response))throw new Error("Unsafe or unavailable precache response: "+asset);
+ const allowedResponseType=response.type==="basic"||(asset===HLS_LIBRARY_URL&&response.type==="cors");\n if(!response.ok||!allowedResponseType||!isSafeResponse(response)||response.url!==asset)throw new Error("Unsafe or unavailable precache response: "+asset);
  await cache.put(asset,response.clone());
 }
 async function cacheAssetsWithConcurrency(cache,assets,concurrency=6){
