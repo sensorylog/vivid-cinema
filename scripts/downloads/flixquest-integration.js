@@ -31,8 +31,22 @@ export const VIVID_DOWNLOADS = Object.freeze({
     return { providers, count: providers.length };
   },
   async getOptions(media) {
-    const options = await api().getDownloadOptions(media);
-    return options.map(option => ({ ...option, format: option.format.toUpperCase() }));
+    const client = api();
+    const options = await client.getDownloadOptions(media);
+    return Promise.all(options.map(async option => {
+      let sizeLabel = "";
+      if (option.sizeToken) {
+        try {
+          const estimate = await client.getStreamSize(option.sizeToken);
+          const bytes = Number(estimate.estimatedBytes);
+          if (Number.isFinite(bytes) && bytes > 0) {
+            const units = ["B", "KB", "MB", "GB", "TB"], unit = Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), 4);
+            sizeLabel = "~" + (bytes / Math.pow(1024, unit)).toFixed(unit ? 1 : 0) + " " + units[unit];
+          }
+        } catch { /* A failed estimate must not hide a valid stream option. */ }
+      }
+      return { ...option, format: option.format.toUpperCase(), sizeLabel };
+    }));
   },
   async resolve(job) {
     const media = job?.media || {};
