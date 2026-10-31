@@ -13,3 +13,19 @@
 
 .offline-player-section{margin:32px 0;padding:20px;border:1px solid rgba(150,165,195,.2);border-radius:18px;background:#090d16}.offline-player-section[hidden]{display:none}.offline-player-heading{display:flex;justify-content:space-between;align-items:center;gap:12px}.offline-player-heading h2{font-size:19px}.offline-player-section video{display:block;width:100%;max-height:65vh;background:#000;border-radius:12px}.offline-player-section>p{color:#9ca8bd;font-size:11px}
 @media(max-width:600px){.offline-player-heading{align-items:flex-start}}
+
+.offline-desktop-search{margin:26px 0 34px;padding:22px;border:1px solid rgba(150,165,195,.17);border-radius:18px;background:rgba(255,255,255,.025)}
+.offline-desktop-search[hidden]{display:none}
+.offline-desktop-search form{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:end}
+.offline-desktop-search label{display:block;color:#aab5ca;font-size:12px;font-weight:700;letter-spacing:.04em}
+.offline-desktop-search input,.offline-desktop-search select{width:100%;margin-top:7px;min-height:44px;border:1px solid rgba(170,185,220,.22);border-radius:11px;background:#0b1020;color:#f4f6fc;padding:0 13px;font:inherit}
+.offline-search-row{display:flex;gap:9px}
+.offline-search-row input{flex:1;min-width:0}
+.offline-search-row button,.offline-search-results button{border:0;border-radius:11px;background:linear-gradient(120deg,#6965ff,#387cf4);color:white;padding:0 18px;min-height:44px;font-weight:700;cursor:pointer}
+.offline-search-results{display:grid;gap:10px;margin-top:16px}
+.offline-result{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px;border:1px solid rgba(150,165,195,.14);border-radius:13px;background:rgba(255,255,255,.025)}
+.offline-result strong{font-size:13px;overflow-wrap:anywhere}.offline-result p,.offline-muted{margin:5px 0 0;color:#9ca8bd;font-size:11px}
+.offline-search-results button{min-height:36px;padding:0 14px;flex:none}
+.offline-search-results button:disabled{opacity:.55;cursor:wait}
+.offline-job-actions button:disabled{opacity:.55;cursor:wait}
+@media(max-width:600px){.offline-desktop-search form{grid-template-columns:1fr}.offline-result{align-items:flex-start;flex-direction:column}.offline-search-results button{width:100%}}
