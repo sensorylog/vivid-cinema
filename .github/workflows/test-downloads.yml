@@ -17,6 +17,7 @@ on:
       - "tests/cloudflare-pages-config.test.mjs"
       - "package.json"
       - "_headers"
+      - ".github/workflows/test-downloads.yml"
       - "service-worker.js"
       - "tests/service-worker.test.mjs"
 
