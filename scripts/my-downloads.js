@@ -40,7 +40,7 @@ function statusLabel(job) {
   if (job.status === "completed") return "Saved offline";
   if (job.status === "downloading") return "Downloading · " + Math.round(job.progress || 0) + "%";
   if (job.status === "queued") return "Waiting in queue";
-  if (job.status === "paused") return "Paused";
+  if (job.status === "paused") return "Stopped · retry starts over";
   if (job.status === "cancelled") return "Cancelled";
   return "Download failed";
 }
@@ -62,8 +62,8 @@ function render(jobs) {
     const total = formatBytes(job.totalBytes);
     const details = [job.quality || "Auto",statusLabel(job),bytes ? (bytes + (total ? " / " + total : "")) : ""].filter(Boolean).join(" · ");
     const actions = [];
-    if (["queued","downloading"].includes(job.status)) actions.push('<button type="button" data-action="pause" data-id="' + escapeHtml(job.id) + '">Pause</button>');
-    if (["paused","failed"].includes(job.status)) actions.push('<button type="button" data-action="retry" data-id="' + escapeHtml(job.id) + '">Retry</button>');
+    if (["queued","downloading"].includes(job.status)) actions.push('<button type="button" data-action="pause" data-id="' + escapeHtml(job.id) + '">Stop</button>');
+    if (["paused","failed"].includes(job.status)) actions.push('<button type="button" data-action="retry" data-id="' + escapeHtml(job.id) + '">Restart</button>');
     if (job.status === "completed") actions.push('<button type="button" data-action="play" data-id="' + escapeHtml(job.id) + '">Play offline</button>');
     if (job.status !== "cancelled" && job.status !== "completed") actions.push('<button type="button" data-action="cancel" data-id="' + escapeHtml(job.id) + '">Cancel</button>');
     if (!["queued","downloading"].includes(job.status)) actions.push('<button type="button" data-action="remove" data-id="' + escapeHtml(job.id) + '">Remove</button>');
