@@ -7,7 +7,7 @@ import { hasLibraryItem, startLibrarySync, toggleLibraryItem, upsertLibraryItem 
 import { getProviderCountry, setProviderCountry } from "./provider-region.js";
 import { getLatestPlaybackProgress } from "./recommendations.js";
 import { recordBehavior } from "./intelligence.js";
-import "./downloads/flixquest-integration.js";
+import "./downloads/provider-integration.js";
 
 const $ = (id) => document.getElementById(id);
 const route = getRoute();
@@ -393,7 +393,7 @@ function openTitleDownload() {
   const isTv = media.media_type === "tv";
   const modal = document.createElement("div");
   modal.className = "vivid-download-modal";
-  modal.innerHTML = '<section class="vivid-download-dialog" role="dialog" aria-modal="true" aria-labelledby="vivid-download-title"><button class="vivid-download-close" type="button" aria-label="Close">×</button><p>OFFLINE DOWNLOAD</p><h2 id="vivid-download-title">Download ' + (isTv ? 'an episode' : 'this movie') + '</h2><div class="vivid-download-selection">' + (isTv ? '<label>Season <select id="download-season"></select></label><label>Episode <select id="download-episode"></select></label>' : '<p>' + escapeHtml(media.title) + '</p>') + '</div><div class="vivid-download-options" id="vivid-download-options" aria-live="polite"><p>Checking available download qualities…</p></div><p class="vivid-download-note">Choose a stream returned by your connected FlixQuest resolver. Vivid saves supported streams in this browser.</p></section>';
+  modal.innerHTML = '<section class="vivid-download-dialog" role="dialog" aria-modal="true" aria-labelledby="vivid-download-title"><button class="vivid-download-close" type="button" aria-label="Close">×</button><p>DOWNLOAD TO THIS DEVICE</p><h2 id="vivid-download-title">Download ' + (isTv ? 'an episode' : 'this movie') + '</h2><div class="vivid-download-selection">' + (isTv ? '<label>Season <select id="download-season"></select></label><label>Episode <select id="download-episode"></select></label>' : '<p>' + escapeHtml(media.title) + '</p>') + '</div><div class="vivid-download-options" id="vivid-download-options" aria-live="polite"><p>Searching available licensed copies…</p></div><p class="vivid-download-note">Vivid automatically checks public-domain and Creative Commons video files. No provider account or API setup is required.</p></section>';
   document.body.appendChild(modal);
   const close = () => modal.remove();
   modal.querySelector(".vivid-download-close").addEventListener("click", close);
@@ -407,20 +407,25 @@ function openTitleDownload() {
     const season = Number(seasonSelect?.value || 1), episode = Number(episodeSelect?.value || 1);
     const mediaRequest = { id: String(media.id), media_type: media.media_type, title: media.title, year: media.year || "", poster_path: media.poster_path || "", season: isTv ? season : null, episode: isTv ? episode : null };
     const slot = modal.querySelector("#vivid-download-options"), integration = globalThis.VIVID_DOWNLOADS;
-    if (typeof integration?.getOptions !== "function") { slot.innerHTML = '<p class="vivid-download-empty">Connect your FlixQuest API instance in Offline Downloads settings, then return here to load real movie and episode streams.</p>'; return; }
-    slot.innerHTML = '<p>Finding available qualities…</p>';
+    slot.innerHTML = '<p>Searching Internet Archive for downloadable licensed files…</p>';
     try {
       const options = await integration.getOptions(mediaRequest);
       if (run !== request || !slot.isConnected) return;
       const safeOptions = Array.isArray(options) ? options.filter(option => option && typeof option.id === "string" && typeof option.label === "string") : [];
-      if (!safeOptions.length) { slot.innerHTML = '<p class="vivid-download-empty">No supported HLS or direct video streams were returned for this ' + (isTv ? 'episode' : 'movie') + '.</p>'; return; }
-      slot.innerHTML = safeOptions.map(option => '<button type="button" class="vivid-download-option" data-option="' + escapeHtml(option.id) + '"><strong>' + escapeHtml(option.label) + '</strong><span>' + escapeHtml([option.format, option.sizeLabel || option.size || ""].filter(Boolean).join(" · ")) + '</span></button>').join("");
+      if (!safeOptions.length) {
+        const query = encodeURIComponent((media.title || "") + (isTv ? " season " + season + " episode " + episode : ""));
+        slot.innerHTML = '<p class="vivid-download-empty">No openly licensed downloadable copy was found for this title in the connected public archive.</p><a class="vivid-download-option" href="https://archive.org/search?query=' + query + '" target="_blank" rel="noopener noreferrer"><strong>Search the public archive</strong><span>Open Internet Archive results</span></a>';
+        return;
+      }
+      slot.innerHTML = safeOptions.map(option => '<button type="button" class="vivid-download-option" data-option="' + escapeHtml(option.id) + '"><strong>' + escapeHtml(option.label) + '</strong><span>' + escapeHtml([option.format, option.license].filter(Boolean).join(" · ")) + '</span></button>').join("");
       slot.querySelectorAll("[data-option]").forEach(button => button.addEventListener("click", () => {
         const option = safeOptions.find(item => item.id === button.dataset.option); if (!option) return;
         sessionStorage.setItem("vivid:pending-download", JSON.stringify({ media: mediaRequest, option: { id: String(option.id), label: String(option.label), quality: String(option.quality || option.label), format: String(option.format || ""), size: Number(option.size) || null } }));
         window.location.href = "my-downloads.html?start=1";
       }));
-    } catch (error) { if (run === request && slot.isConnected) slot.innerHTML = '<p class="vivid-download-empty">Could not load download options: ' + escapeHtml(error?.message || error) + '</p>'; }
+    } catch (error) {
+      if (run === request && slot.isConnected) slot.innerHTML = '<p class="vivid-download-empty">Could not search the public archive: ' + escapeHtml(error?.message || error) + '</p>';
+    }
   }
   if (isTv) {
     const available = seasons.length ? seasons : [{ season_number: 1, episode_count: 1 }];
