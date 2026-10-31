@@ -1,0 +1,66 @@
+/* Vivid Cinema desktop adaptive performance layer.
+   Applied only to older/low-memory Windows machines by the Electron preload.
+   Keep layout, navigation and features intact; simplify costly decoration only. */
+
+html.vivid-performance-legacy {
+  scroll-behavior: auto !important;
+}
+
+html.vivid-performance-legacy body.vivid-atmosphere::before,
+html.vivid-performance-legacy body.vivid-atmosphere::after {
+  animation: none !important;
+  filter: none !important;
+}
+
+html.vivid-performance-legacy body.vivid-atmosphere .vivid-ambient-art {
+  display: none !important;
+}
+
+html.vivid-performance-legacy body.vivid-atmosphere .vivid-card,
+html.vivid-performance-legacy body.vivid-atmosphere .vivid-feature-card,
+html.vivid-performance-legacy body.vivid-atmosphere .landing-poster,
+html.vivid-performance-legacy body.vivid-atmosphere .vivid-card-info,
+html.vivid-performance-legacy body.vivid-atmosphere .vivid-card-media::after,
+html.vivid-performance-legacy body.vivid-atmosphere .vivid-card::after {
+  animation: none !important;
+  transition: none !important;
+  filter: none !important;
+  box-shadow: none !important;
+}
+
+html.vivid-performance-legacy body.vivid-atmosphere .vivid-card::before,
+html.vivid-performance-legacy body.vivid-atmosphere .vivid-feature-card::before,
+html.vivid-performance-legacy body.vivid-atmosphere .landing-poster::before {
+  display: none !important;
+}
+
+html.vivid-performance-legacy body.vivid-atmosphere .vivid-reveal {
+  opacity: 1 !important;
+  transform: none !important;
+  transition: none !important;
+}
+
+html.vivid-performance-legacy body.vivid-atmosphere .vivid-topbar,
+html.vivid-performance-legacy body.vivid-atmosphere .vivid-discovery-nav,
+html.vivid-performance-legacy body.vivid-atmosphere .vivid-title-nav,
+html.vivid-performance-legacy body.vivid-atmosphere .vivid-library-nav,
+html.vivid-performance-legacy body.vivid-atmosphere .vivid-watch-nav {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  transition: none !important;
+}
+
+html.vivid-performance-legacy .vivid-page-transition {
+  display: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.vivid-performance-legacy *,
+  html.vivid-performance-legacy *::before,
+  html.vivid-performance-legacy *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
