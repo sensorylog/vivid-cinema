@@ -15,7 +15,7 @@ let searchResults = [];
 
 function setMessage(message){ byId("offline-message").textContent = message; }
 function statusText(job){
-  if(job.status==="downloading") return "Downloading";
+  if(job.status==="downloading") return job.phase || "Connecting to peers";
   if(job.status==="paused") return "Paused";
   if(job.status==="verifying") return "Verifying saved data";
   if(job.status==="completed") return "Ready to watch";
@@ -36,7 +36,9 @@ function render(){
   byId("offline-jobs").innerHTML=jobs.map(job=>{
     const progress=Math.max(0,Math.min(100,Number(job.progress)||0));
     const speed=job.speed?bytes(job.speed)+"/s":"";
-    const detail=[statusText(job),progress.toFixed(1)+"%",bytes(job.downloaded)+" of "+bytes(job.total),speed,job.peers?job.peers+" peers":""].filter(Boolean).join(" · ");
+    const transferSize=job.total?bytes(job.total):"size unknown";
+    const peerState=job.peers?job.peers+" peers connected":"No peers connected";
+    const detail=[statusText(job),progress.toFixed(1)+"%",bytes(job.downloaded)+" of "+transferSize,speed,["downloading","verifying"].includes(job.status)?peerState:""].filter(Boolean).join(" · ");
     const actions=[];
     if(job.status==="downloading") actions.push('<button data-action="pause" data-id="'+escapeHtml(job.id)+'">Pause</button>');
     if(job.status==="paused"||job.status==="failed") actions.push('<button data-action="resume" data-id="'+escapeHtml(job.id)+'">Resume</button>');
@@ -48,7 +50,7 @@ function render(){
       '<button type="button" data-action="play-file" data-id="'+escapeHtml(job.id)+'" data-index="'+file.index+'">'+escapeHtml(file.name)+'</button>'
     ).join("")+'</div>' : "";
     return '<article class="offline-job"><div><div class="offline-job-title">'+escapeHtml(job.title)+'</div><div class="offline-job-meta">'+escapeHtml(detail)+'</div>'+
-      (["downloading","paused","verifying","completed"].includes(job.status)?'<div class="offline-progress"><span style="width:'+progress+'%"></span></div>':"")+
+      (["downloading","paused","verifying","completed"].includes(job.status)?'<div class="offline-progress" role="progressbar" aria-label="Download progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="'+progress.toFixed(1)+'"><span style="width:'+progress+'%"></span></div>':"")+
       (job.error?'<p class="offline-job-error">'+escapeHtml(job.error)+'</p>':"")+episodeList+
       '</div><div class="offline-job-actions">'+actions.join("")+'</div></article>';
   }).join("");
