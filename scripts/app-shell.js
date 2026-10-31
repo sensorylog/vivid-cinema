@@ -73,7 +73,9 @@ function buildPrimaryLinks(page) {
   ];
   // Home has a working in-page search dialog; keep its trigger instead of
   // replacing it with a plain route link when the shell is rebuilt.
-  if (page === "home") {
+  // The Windows app uses a real Search page route. The website keeps its
+  // in-page dialog on Home, while mobile navigation always links to search.html.
+  if (page === "home" && !window.vividDownloads?.available) {
     links.push('<button class="vivid-nav-search-modal" type="button" data-search-trigger aria-label="Open search"><i class="bi bi-search" aria-hidden="true"></i><span>Search</span></button>');
   } else {
     links.push(navLink("search.html", "bi-search", "Search", page === "search"));

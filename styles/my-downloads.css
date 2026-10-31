@@ -49,3 +49,50 @@
 .offline-episodes{display:grid;gap:6px;margin-top:12px}
 .offline-episodes button{display:block;width:100%;text-align:left;border:1px solid rgba(170,185,220,.14);border-radius:9px;background:rgba(255,255,255,.025);color:#cbd5e8;padding:9px 11px;font:500 11px/1.4 system-ui,sans-serif;overflow-wrap:anywhere;cursor:pointer}
 .offline-episodes button:hover{background:rgba(255,255,255,.08);border-color:rgba(141,138,255,.45)}
+
+/* Keep the download hub responsive on low-power desktop hardware. */
+html.vivid-performance-legacy .offline-notice,
+html.vivid-performance-legacy .offline-summary div,
+html.vivid-performance-legacy .offline-desktop-search,
+html.vivid-performance-legacy .offline-job,
+html.vivid-performance-legacy .offline-result,
+html.vivid-performance-legacy .offline-player-section {
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+html.vivid-performance-legacy .offline-notice,
+html.vivid-performance-legacy .offline-summary div,
+html.vivid-performance-legacy .offline-desktop-search,
+html.vivid-performance-legacy .offline-result,
+html.vivid-performance-legacy .offline-player-section {
+  background: #0b0e16;
+}
+html.vivid-performance-legacy .offline-job-actions button,
+html.vivid-performance-legacy .offline-search-row button,
+html.vivid-performance-legacy .offline-search-results button {
+  background-image: none;
+  transition: none;
+}
+
+
+/* Series episode picker for native desktop downloads */
+.offline-series-picker{margin:18px 0;padding:18px;border:1px solid rgba(255,255,255,.12);border-radius:16px;background:rgba(255,255,255,.035)}
+.offline-series-heading{display:flex;align-items:end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:14px}
+.offline-series-heading strong{display:block;font-size:1rem}
+.offline-series-heading p{margin:5px 0 0;color:var(--vivid-muted,#aab2c4);font-size:.88rem}
+.offline-series-heading label{display:grid;gap:6px;min-width:180px;font-size:.78rem;color:var(--vivid-muted,#aab2c4)}
+.offline-series-heading select{width:100%;min-height:42px;padding:8px 12px;border:1px solid rgba(255,255,255,.16);border-radius:10px;background:#111521;color:inherit}
+.offline-episode-picker{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:8px;max-height:360px;overflow:auto}
+.offline-episode-option{display:flex;align-items:flex-start;gap:10px;padding:11px;border:1px solid rgba(255,255,255,.1);border-radius:11px;background:rgba(0,0,0,.16);cursor:pointer}
+.offline-episode-option input{width:18px;height:18px;flex:0 0 auto;margin:2px 0 0;accent-color:#8a78ff}
+.offline-episode-option span{min-width:0;display:grid;gap:4px}
+.offline-episode-option strong{font-size:.86rem;line-height:1.35}
+.offline-episode-option small{color:var(--vivid-muted,#aab2c4);font-size:.75rem;line-height:1.45}
+.offline-series-actions{display:flex;justify-content:flex-end;gap:9px;margin-top:14px;flex-wrap:wrap}
+.offline-series-actions button{min-height:40px;padding:9px 14px;border:1px solid rgba(255,255,255,.16);border-radius:10px;background:rgba(255,255,255,.07);color:inherit;font-weight:650}
+#desktop-episode-search{background:linear-gradient(110deg,#6956e8,#3d70cb);border-color:transparent}
+#desktop-episode-search:disabled{opacity:.55;cursor:wait}
+html.vivid-performance-legacy .offline-series-picker{backdrop-filter:none;box-shadow:none;background:#10131a}
+html.vivid-performance-legacy .offline-episode-picker{max-height:300px}
+@media(max-width:560px){.offline-series-heading{align-items:stretch}.offline-series-heading label{min-width:100%}.offline-series-actions{justify-content:stretch}.offline-series-actions button{flex:1}}
