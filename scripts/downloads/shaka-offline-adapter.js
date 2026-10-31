@@ -42,7 +42,7 @@ function chooseOfflineTracks(tracks, quality) {
   const variants = tracks.filter(track => track.type === "variant" && track.height > 0);
   if (!variants.length) return tracks.filter(track => track.type === "variant");
   const target = qualityHeight(quality);
-  const below = variants.filter(track => track.video.height <= target);
+  const below = variants.filter(track => track.height <= target);
   const pool = below.length ? below : variants;
   const selected = pool.sort((a, b) => {
     const heightDiff = (b.height || 0) - (a.height || 0);
