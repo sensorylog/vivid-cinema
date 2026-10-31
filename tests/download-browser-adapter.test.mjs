@@ -128,7 +128,7 @@ test("resumes a paused direct download with an HTTP byte range", async () => {
           "content-type": "video/mp4", "content-length": "2", "content-range": "bytes 2-3/4"
         } });
       }
-      return videoResponse([new Uint8Array([1, 2])]);
+      return new Response(new ReadableStream({ start(stream) { stream.enqueue(new Uint8Array([1, 2])); } }), { status: 200, headers: { "content-type": "video/mp4", "content-length": "4" } });
     }
   });
   const controller = new AbortController();
