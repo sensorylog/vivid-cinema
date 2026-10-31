@@ -80,7 +80,7 @@ jobs:
         if: steps.release-decision.outputs.publish == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npm run desktop:dist --ignore-scripts
+        run: npm --ignore-scripts run desktop:dist
       - name: Verify updater metadata was generated
         if: steps.release-decision.outputs.publish == 'true'
         shell: pwsh
