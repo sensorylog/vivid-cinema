@@ -42,6 +42,21 @@ test("items without an approved rights declaration never expose download files",
   assert.deepEqual(item.files, []);
 });
 
+test("rejects misleading license URLs and unsafe or private file names", async () => {
+  const source = createInternetArchiveSource({ fetchImpl: async () => response({
+    metadata: { title: "Bad Rights", licenseurl: "https://evil.example/creativecommons.org/licenses/by/4.0/" },
+    d1: "ia800123.us.archive.org", dir: "/12/items/bad_rights_film",
+    files: [
+      { name: "private.mp4", size: "100", private: true },
+      { name: "../escape.mp4", size: "100" },
+      { name: "ok.mp4", size: "100" }
+    ]
+  })});
+  const item = await source.getItem("bad_rights_film");
+  assert.equal(item.rightsApproved, false);
+  assert.deepEqual(item.files, []);
+});
+
 test("rejects malformed identifiers and redirected catalogue responses", async () => {
   const source = createInternetArchiveSource({ fetchImpl: async () => ({ ok: true, redirected: true, async json() { return {}; } }) });
   await assert.rejects(source.getItem("../bad"), /Invalid Internet Archive/);
