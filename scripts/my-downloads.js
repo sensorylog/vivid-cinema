@@ -156,6 +156,7 @@ jobsNode.addEventListener("click", async event => {
       playerSection.hidden = false;
       await playback.play(job.asset);
       playerSection.scrollIntoView({ behavior: "smooth", block: "start" });
+      try { await video.play(); } catch { messageNode.textContent = "Offline file is ready. Tap Play in the video controls to start."; }
     }
   } catch (error) {
     messageNode.textContent = "That action could not be completed: " + String(error?.message || error);
