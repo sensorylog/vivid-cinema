@@ -176,8 +176,18 @@ export function createBrowserHlsDownloadAdapter({
     if (mime.includes("text/html") || mime.includes("application/json")) throw new Error("An HLS segment returned an HTML or JSON response.");
     const declared = Number(response.headers?.get?.("content-length"));
     if (Number.isFinite(declared) && declared > maxBytes) throw new Error("The HLS asset exceeds the configured size limit.");
+    if (Number.isFinite(declared) && declared > 0) {
+      progress.totalBytes += declared;
+      progress.knownLengthCount += 1;
+    } else {
+      progress.unknownLengthCount += 1;
+    }
+    const parts = resource.path.split("/");
+    let target = directory;
+    for (const part of parts.slice(0, -1)) target = await target.getDirectoryHandle(part, { create: true });
+    const handle = await target.getFileHandle(parts.at(-1), { create: true });
+    const writer = await handle.createWritable({ keepExistingData: false });
     const reader = response.body.getReader();
-    const chunks = [];
     let size = 0;
     try {
       while (true) {
@@ -187,14 +197,17 @@ export function createBrowserHlsDownloadAdapter({
         size += value.byteLength;
         progress.bytes += value.byteLength;
         if (progress.bytes > maxBytes) throw new Error("The HLS asset exceeds the configured size limit.");
-        chunks.push(value);
+        await writer.write(value);
       }
+      await writer.close();
     } catch (error) {
       try { await reader.cancel(error); } catch {}
+      try { await writer.abort(error); } catch {}
       throw error;
     }
-    await writeFile(directory, resource.path, new Blob(chunks, { type: mime.split(";")[0] || "application/octet-stream" }));
-    progress.onProgress({ bytesDownloaded: progress.bytes, totalBytes: progress.unknownLengthCount === 0 && progress.knownLengthCount === progress.expectedResources ? progress.totalBytes : null });
+    try {
+      progress.onProgress({ bytesDownloaded: progress.bytes, totalBytes: progress.unknownLengthCount === 0 && progress.knownLengthCount === progress.expectedResources ? progress.totalBytes : null });
+    } catch { /* UI progress listeners must not interrupt media storage. */ }
     return size;
   }
 
