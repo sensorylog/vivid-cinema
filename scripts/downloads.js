@@ -8,8 +8,8 @@ const byId = (id) => document.getElementById(id);
 // These are real, direct assets on the current stable release. They let a tap
 // start a download even if the GitHub API is slow or temporarily unavailable.
 function setReleaseFallback() {
-  setDownload("windows-installer", `${RELEASE_DOWNLOAD}/Vivid-Cinema-Setup-1.0.27.exe`, "Vivid Cinema Windows installer");
-  setDownload("windows-portable", `${RELEASE_DOWNLOAD}/Vivid-Cinema-Portable-1.0.27.exe`, "Vivid Cinema portable for Windows");
+  setDownload("windows-installer", `${RELEASE_DOWNLOAD}/Vivid-Cinema-Setup-1.0.28.exe`, "Vivid Cinema Windows installer");
+  setDownload("windows-portable", `${RELEASE_DOWNLOAD}/Vivid-Cinema-Portable-1.0.28.exe`, "Vivid Cinema portable for Windows");
   setDownload("android-apk", `${RELEASE_DOWNLOAD}/Vivid-Cinema-Android.apk`, "Vivid Cinema Android APK");
 }
 
