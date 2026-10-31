@@ -115,7 +115,8 @@ class DesktopDownloadEngine {
       id, title: safeText(media.title || result.title), resultTitle: safeText(result.title, 300),
       media: { id: safeText(media.id, 80), media_type: media.media_type === "tv" ? "tv" : "movie",
         title: safeText(media.title || result.title), season: Number.isInteger(Number(media.season)) ? Number(media.season) : null,
-        episode: Number.isInteger(Number(media.episode)) ? Number(media.episode) : null },
+        episode: Number.isInteger(Number(media.episode)) ? Number(media.episode) : null,
+        episodeTitle: safeText(media.episodeTitle, 180) },
       magnet, status: "queued", torrent: null, filePath: null, downloadPath: path.join(this.downloadPath, id), error: null, createdAt: Date.now()
     };
     this.jobs.set(id, job);
