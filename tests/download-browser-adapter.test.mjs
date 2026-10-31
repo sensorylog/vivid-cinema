@@ -80,7 +80,7 @@ test("rejects redirects and non-video responses", async () => {
     allowedHosts: ["media.example.test"], storage: opfs.storage, fetchImpl
   });
   await assert.rejects(makeAdapter(async () => new Response("", { status: 302 })).download(job), /direct file response/);
-  await assert.rejects(makeAdapter(async () => new Response("not video", { headers: { "content-type": "text/html" } })).download(job), /Only direct video-file/);
+  await assert.rejects(makeAdapter(async () => new Response("not video", { headers: { "content-type": "text/html" } })).download(job), /not a video file/);
 });
 
 test("accepts generic binary transport only when the authorized resolver declares a video MIME type", async () => {
