@@ -15,6 +15,8 @@ test("title download action opens the native Vivid Offline library", async () =>
   assert.doesNotMatch(script, /function openTitleDownload\(\)[\s\S]*?vivid-download-modal/);
   assert.match(preload, /exposeInMainWorld\("vividDownloads"/);
   assert.match(preload, /mediaUrl:.*fileIndex/);
+  assert.match(preload, /getPlaybackPosition/);
+  assert.match(preload, /setPlaybackPosition/);
   assert.match(main, /configureDownloadEngine\(\)/);
   assert.match(main, /vivid-download-media-url/);
   assert.match(main, /vivid-media/);
@@ -40,7 +42,8 @@ test("title download action opens the native Vivid Offline library", async () =>
   assert.match(offline, /offline-fullscreen/);
   assert.match(offline, /offline-speed/);
   assert.match(offline, /play-file/);
-  assert.match(offline, /vivid:offline-position/);
+  assert.match(offline, /engine\\.getPlaybackPosition/);
+  assert.match(offline, /engine\\.setPlaybackPosition/);
   assert.match(page, /desktop-search-form/);
   assert.match(page, /offline-player/);
   assert.doesNotMatch(script, /Internet Archive|archive\.org|Wikimedia|wikimedia\.org/i);
