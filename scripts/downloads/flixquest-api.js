@@ -30,7 +30,7 @@ function explicitOfflineAsset(link) {
   let downloadUrl;
   try { downloadUrl = new URL(rawUrl); } catch { return null; }
   if (downloadUrl.protocol !== "https:" || downloadUrl.username || downloadUrl.password ||
-      downloadUrl.hash || downloadUrl.search) return null;
+      downloadUrl.hash) return null;
   return { url: downloadUrl.href, mimeType };
 }
 
