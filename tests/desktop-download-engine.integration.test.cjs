@@ -107,7 +107,7 @@ test("desktop engine downloads a video-extension payload from a local seeded tor
     });
 
     console.log("[vivid-integration] stage: create seeder");
-    seeder = new WebTorrent({ dht: false, tracker: { announce: [trackerUrl] } });
+    seeder = new WebTorrent({ dht: false, utp: false, tracker: { announce: [trackerUrl] } });
     const seedTorrent = await withTimeout(new Promise((resolve, reject) => {
       seeder.once("error", reject);
       const torrent = seeder.seed(
@@ -123,7 +123,7 @@ test("desktop engine downloads a video-extension payload from a local seeded tor
     console.log("[vivid-integration] stage: seeder announced");
 
     console.log("[vivid-integration] stage: construct download engine");
-    engine = new DesktopDownloadEngine({
+    const originalUtpSupport = WebTorrent.UTP_SUPPORT;\n    WebTorrent.UTP_SUPPORT = false;\n    engine = new DesktopDownloadEngine({
       app: {
         getPath(name) {
           return name === "downloads" ? downloadsPath : userDataPath;
