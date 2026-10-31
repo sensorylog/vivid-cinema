@@ -1,6 +1,27 @@
 name: Vivid download system tests
 
 on:
+  push:
+    branches:
+      - feat/automatic-movie-download-sources
+    paths:
+      - "scripts/downloads/**"
+      - "scripts/title.js"
+      - "scripts/my-downloads.js"
+      - "my-downloads.html"
+      - "styles/my-downloads.css"
+      - "functions/download-proxy.js"
+      - "functions/index.js"
+      - "functions/package.json"
+      - "tests/download*.test.mjs"
+      - "tests/internet-archive.test.mjs"
+      - "tests/wikimedia-commons.test.mjs"
+      - "tests/cloudflare-pages-config.test.mjs"
+      - "package.json"
+      - "_headers"
+      - "service-worker.js"
+      - "tests/service-worker.test.mjs"
+      - ".github/workflows/test-downloads.yml"
   pull_request:
     paths:
       - "scripts/downloads/**"
