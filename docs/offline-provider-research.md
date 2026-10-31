@@ -21,7 +21,6 @@ Keep two provider classes separate:
 | Vimeo API | Authenticated account video file/download fields with public, private, video_files scopes; CDN redirect URLs expire | Yes, for videos accessible to the authorized Vimeo account and plan | Good for a creator/library integration; not a universal catalog source |
 | Dailymotion API | Partner-only downloadable stream URLs; Edge plan add-on and private API key permission required | Yes, for partner-owned/managed content under the account plan | Possible owner-content adapter; not a general catalog resolver |
 | PeerTube | Federated video search/API, public web video files, private files with auth/token, generated MP4 mux endpoint | Yes, when the instance/video permits access and provides file IDs/tokens | Potential separate open-video/creator-content catalog; no reliable TMDB movie/episode mapping |
-| Internet Archive | Public item metadata and downloadable file assets exist for items whose metadata/license permit download | Item/file-specific; not every item is downloadable or rights-cleared | Candidate only for a separately curated public-domain/rights-verified collection; not a general movie provider |
 | YouTube Data API | Metadata and embedded playback, subject to YouTube API policies | API policy prohibits downloading/caching audiovisual content or offline playback without prior written approval | Do not use as a download provider |
 
 ### Primary documentation
@@ -43,7 +42,6 @@ Keep two provider classes separate:
 1. **Finish FlixQuest verification**: obtain an authorized base URL/API access from its service owner, verify /api/v2/providers and /api/v2/providers/status, and obtain a documented offline download contract or separate download endpoint. Do not turn links[].url playback links into download URLs by guessing.
 2. **Add an owner-content adapter only if Vivid actually has owned/licensed assets**: Cloudflare Stream is the cleanest fit because its API has a documented download-generation lifecycle and signed-download flag. Keep account API tokens in server-side Firebase Functions/Secret Manager; the browser should receive only short-lived user-authorized download URLs.
 3. **Mux/Vimeo/Dailymotion**: add only if Vivid has a corresponding creator/partner account and owned/licensed assets to expose. They are not drop-in public scrapers.
-4. **PeerTube / Internet Archive**: treat as distinct curated catalogs, not invisible fallbacks for TMDB. Only surface assets with explicit download permission/licence and retain source/license attribution.
 5. **Do not implement YouTube downloads** via Data API; policy expressly prohibits it absent prior written approval.
 
 ## Flickv4 research beyond the initial repository snapshot
