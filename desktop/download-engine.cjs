@@ -179,7 +179,7 @@ class DesktopDownloadEngine {
     torrent.on("error", error => {
       if (job.status === "cancelled" || job.status === "paused") return;
       job.status = "failed";
-      job.needsRescan = Number(job.downloaded) > 0;
+      job.needsRescan = true;
       job.error = safeText(error?.message || "Download failed", 300);
       job.torrent = null;
       publish();
