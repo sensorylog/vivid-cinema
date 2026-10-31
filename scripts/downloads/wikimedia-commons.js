@@ -41,7 +41,7 @@ export function createWikimediaCommonsProvider({ fetchImpl = globalThis.fetch } 
     const title = clean(media?.title);
     if (!title) throw new TypeError("A movie or series title is required.");
     const episode = media?.media_type === "tv" ? " S" + String(media.season || 1).padStart(2, "0") + "E" + String(media.episode || 1).padStart(2, "0") : "";
-    const query = title + episode;
+    const query = title + episode + (media?.episode_title ? " " + clean(media.episode_title) : "");
     const key = query.toLowerCase();
     const cached = cache.get(key);
     if (cached && cached.expires > Date.now()) return cached.options;
@@ -63,7 +63,7 @@ export function createWikimediaCommonsProvider({ fetchImpl = globalThis.fetch } 
       const short = clean(info?.extmetadata?.LicenseShortName?.value || "Open licence");
       options.push({
         id: fileTitle, sourceId: "wikimedia-commons",
-        label: fileTitle.replace(/^File:/i, "") + " · " + mime.extension.toUpperCase() + " · " + formatBytes(size),
+        label: "Wikimedia Commons · " + fileTitle.replace(/^File:/i, "") + " · " + mime.extension.toUpperCase() + " · " + formatBytes(size),
         quality: mime.extension.toUpperCase(), format: mime.extension.toUpperCase(), size,
         license: short + " · " + license,
         detailsUrl: "https://commons.wikimedia.org/wiki/" + encodeURIComponent(fileTitle.replace(/ /g, "_"))
