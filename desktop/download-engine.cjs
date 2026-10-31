@@ -62,7 +62,7 @@ class DesktopDownloadEngine {
         const status = row.status === "completed" && files.length
           ? "completed"
           : ["cancelled", "failed"].includes(row.status) ? row.status : "paused";
-        this.jobs.set(row.id, { ...row, files, filePath: files[0]?.path || row.filePath || null, downloadPath: path.isAbsolute(row.downloadPath || "") ? row.downloadPath : this.downloadPath, needsRescan: !["completed", "cancelled"].includes(status) && Number(row.downloaded) > 0, status, torrent: null, error: row.error || null });
+        this.jobs.set(row.id, { ...row, files, filePath: files[0]?.path || row.filePath || null, downloadPath: path.isAbsolute(row.downloadPath || "") ? row.downloadPath : this.downloadPath, needsRescan: !["completed", "cancelled"].includes(status), status, torrent: null, error: row.error || null });
       }
       await this.persist();
     } catch (error) {
@@ -230,7 +230,7 @@ class DesktopDownloadEngine {
       job.downloaded = Number(torrent.downloaded) || 0;
       job.total = Number(torrent.length) || 0;
       job.status = "paused";
-      job.needsRescan = job.downloaded > 0;
+      job.needsRescan = true;
       job.torrent = null;
       await new Promise(resolve => torrent.destroy({ destroyStore: false }, resolve));
       await this.persist();
