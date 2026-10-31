@@ -75,7 +75,7 @@ export function createBrowserDownloadAdapter({
       });
       if (!response?.ok || response.redirected) throw new Error("The authorized source did not return a direct file response.");
       if (offset > 0 && response.status === 206) {
-        const range = /^bytes\s+(\d+)-(\d+)\/(\d+|\\*)$/i.exec(String(response.headers?.get?.("content-range") || ""));
+        const range = /^bytes\s+(\d+)-(\d+)\/(\d+|\*)$/i.exec(String(response.headers?.get?.("content-range") || ""));
         if (!range || Number(range[1]) !== offset) throw new Error("The source returned an invalid byte-range response; restart the download.");
       } else if (offset > 0 && response.status === 200) {
         offset = 0;
