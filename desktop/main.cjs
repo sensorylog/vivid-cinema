@@ -167,7 +167,7 @@ function configureOfflineMediaProtocol() {
     let stat;
     try { stat = await fs.promises.stat(filePath); } catch { return new Response("Media not found", { status: 404 }); }
     const ext = path.extname(filePath).toLowerCase();
-    const types = { ".mp4":"video/mp4", ".m4v":"video/mp4", ".mkv":"video/x-matroska", ".webm":"video/webm", ".mov":"video/quicktime", ".avi":"video/x-msvideo", ".ogv":"video/ogg" };
+    const types = { ".mp4":"video/mp4", ".m4v":"video/mp4", ".mkv":"video/x-matroska", ".webm":"video/webm", ".mov":"video/quicktime", ".avi":"video/x-msvideo", ".ogv":"video/ogg", ".mpg":"video/mpeg", ".mpeg":"video/mpeg", ".wmv":"video/x-ms-wmv", ".flv":"video/x-flv", ".ts":"video/mp2t", ".m2ts":"video/mp2t", ".3gp":"video/3gpp" };
     const headers = new Headers({ "Content-Type":types[ext] || "application/octet-stream", "Accept-Ranges":"bytes", "Content-Length":String(stat.size), "Access-Control-Allow-Origin":"*", "Cache-Control":"no-store" });
     const range = request.headers.get("range");
     if (range) {
