@@ -2,18 +2,34 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
-test("title download action is connected to the Electron download bridge", async () => {
+test("title download action opens the native Vivid Offline library", async () => {
   const script = await readFile(new URL("../scripts/title.js", import.meta.url), "utf8");
   const main = await readFile(new URL("../desktop/main.cjs", import.meta.url), "utf8");
   const preload = await readFile(new URL("../desktop/preload.cjs", import.meta.url), "utf8");
   const engine = await readFile(new URL("../desktop/download-engine.cjs", import.meta.url), "utf8");
+  const offline = await readFile(new URL("../scripts/downloads/desktop-offline.js", import.meta.url), "utf8");
+  const page = await readFile(new URL("../my-downloads.html", import.meta.url), "utf8");
   assert.match(script, /id="title-download"/);
-  assert.match(script, /engine\.search\(media\.title\)/);
-  assert.match(script, /engine\.start\(/);
+  assert.match(script, /vivid:pending-desktop-download/);
+  assert.match(script, /my-downloads\.html/);
+  assert.doesNotMatch(script, /function openTitleDownload\(\)[\s\S]*?vivid-download-modal/);
   assert.match(preload, /exposeInMainWorld\("vividDownloads"/);
+  assert.match(preload, /mediaUrl: id/);
   assert.match(main, /configureDownloadEngine\(\)/);
+  assert.match(main, /vivid-download-media-url/);
+  assert.match(main, /__vivid_media/);
+  assert.match(main, /Accept-Ranges/);
+  assert.match(main, /net\.isOnline\(\)/);
   assert.match(engine, /TorrentSearchApi\.enablePublicProviders/);
   assert.match(engine, /new WebTorrent/);
-  assert.doesNotMatch(script, /Downloads unavailable/);
+  assert.match(engine, /vivid-downloads\.json/);
+  assert.match(engine, /destroyStore: false/);
+  assert.match(engine, /action === "resume"/);
+  assert.match(offline, /desktop-search-form/);
+  assert.match(offline, /engine\.mediaUrl\(job\.id\)/);
+  assert.match(offline, /action==="pause"/);
+  assert.match(offline, /action==="resume"/);
+  assert.match(page, /desktop-search-form/);
+  assert.match(page, /offline-player/);
   assert.doesNotMatch(script, /Internet Archive|archive\.org|Wikimedia|wikimedia\.org/i);
 });
