@@ -1,5 +1,5 @@
 // Bump this version whenever the precached app shell changes.
-const CACHE_NAME = "vivid-cinema-shell-v260";
+const CACHE_NAME = "vivid-cinema-shell-v261";
 const HLS_LIBRARY_URL = "https://cdn.jsdelivr.net/npm/hls.js@1.7.3/dist/hls.min.js";
 const APP_SHELL = [
   HLS_LIBRARY_URL,
@@ -17,6 +17,7 @@ const APP_SHELL = [
   "./styles/vivid-library.css","./styles/vivid-library.css?v=library-mobile-fix1","./styles/vivid-discovery.css","./styles/vivid-for-you.css","./styles/vivid-collection.css",
   "./styles/vivid-auth.css","./styles/vivid-account.css","./styles/vivid-account-cinematic.css?v=20261018-cinematic-1","./styles/vivid-achievements-page.css?v=20261018-cinematic-1","./styles/vivid-pwa.css",
   "./styles/vivid-tflix-hero.css","./styles/vivid-tflix-hero.css?v=hero-trailer-full-bleed-1","./styles/vivid-viewport.css?v=page-gutters-1","./styles/vivid-apple-tv-mobile.css?v=apple-tv-mobile-2","./scripts/tflix-hero.js",
+  "./scripts/downloads/shaka-offline-adapter.js",
   "./scripts/tflix-hero.js?v=hero-responsive-artwork-1","./styles/vivid-atmosphere.css","./styles/vivid-search-standalone.css","./styles/vivid-desktop.css","./styles/vivid-landing.css",
   "./styles/vivid-landing-final.css","./styles/vivid-home-breathe.css","./styles/vivid-news.css","./styles/vivid-community.css","./styles/vivid-moderation.css",
   "./styles/vivid-anime.css","./styles/vivid-viewport.css","./styles/vivid-legal.css","./styles/vivid-live.css","./styles/vivid-audit-fixes.css",
