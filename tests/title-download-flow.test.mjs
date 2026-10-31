@@ -23,7 +23,7 @@ test("title download action opens the native Vivid Offline library", async () =>
   assert.match(main, /Accept-Ranges/);
   assert.match(main, /net\.isOnline\(\)/);
   assert.match(engine, /TorrentSearchApi\.enablePublicProviders/);
-  assert.match(engine, /new WebTorrent/);
+  assert.match(engine, /new WebTorrent\(\{ uploadLimit: 0, seedOutgoingConnections: false \}\)/);
   assert.match(engine, /vivid-downloads\.json/);
   assert.match(engine, /destroyStore: false/);
   assert.match(engine, /action === "resume"/);
