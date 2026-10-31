@@ -15,6 +15,8 @@ test("offline library uses owner-scoped persistence, configured authorized resol
   assert.match(script, /createIndexedDBPersistence\(\{ownerId:owner\}\)/);
   assert.match(script, /createBrowserDownloadAdapter/);
   assert.match(script, /createBrowserHlsDownloadAdapter/);
+  assert.match(script, /browser-direct-adapter\.js";\nimport \{ createBrowserHlsDownloadAdapter/);
+  assert.doesNotMatch(script, /browser-direct-adapter\.js";\\nimport/);
   assert.match(script, /activeSource\?\.type === "hls"/);
   assert.match(script, /ensureOfflineHlsLibrary/);
   assert.match(script, /createOfflinePlaybackController/);
