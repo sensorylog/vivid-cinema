@@ -13,7 +13,7 @@ const roundProgress = torrent => Math.round((Number(torrent?.progress) || 0) * 1
 class DesktopDownloadEngine {
   constructor({ app, BrowserWindow, dialog, shell }) {
     Object.assign(this, { app, BrowserWindow, dialog, shell });
-    this.client = new WebTorrent();
+    this.client = new WebTorrent({ uploadLimit: 0, seedOutgoingConnections: false });
     this.jobs = new Map();
     this.searchResults = new Map();
     this.persistQueue = Promise.resolve();
