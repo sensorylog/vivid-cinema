@@ -29,6 +29,11 @@ test("title download action opens the native Vivid Offline library", async () =>
   assert.match(offline, /engine\.mediaUrl\(job\.id\)/);
   assert.match(offline, /data-action="pause"/);
   assert.match(offline, /data-action="resume"/);
+  assert.match(offline, /offline-play-toggle/);
+  assert.match(offline, /offline-seek/);
+  assert.match(offline, /offline-fullscreen/);
+  assert.match(offline, /offline-speed/);
+  assert.match(offline, /vivid:offline-position/);
   assert.match(page, /desktop-search-form/);
   assert.match(page, /offline-player/);
   assert.doesNotMatch(script, /Internet Archive|archive\.org|Wikimedia|wikimedia\.org/i);
