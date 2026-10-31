@@ -65,7 +65,7 @@ export function createFlixQuestApi({ baseUrl, fetchImpl = globalThis.fetch, time
       const links = await getStreams({ mediaType: media.media_type, tmdbId: media.id, providerId: provider.id, season: media.season, episode: media.episode, full: true });
       return links.map((link, index) => {
         const url = safeStreamUrl(link.url), format = linkFormat(link);
-        if (!url || !["hls", "file"].includes(format)) return null;
+        if (!url || !["hls", "dash", "file"].includes(format)) return null;
         const quality = typeof link.quality === "string" && link.quality.trim() ? link.quality : "Auto";
         const server = typeof link.server === "string" && link.server.trim() ? link.server : provider.name;
         return { id: provider.id + "::" + index, providerId: provider.id, linkIndex: index, label: quality + " · " + server,
@@ -73,7 +73,7 @@ export function createFlixQuestApi({ baseUrl, fetchImpl = globalThis.fetch, time
       }).filter(Boolean);
     }));
     const options = results.flatMap(result => result.status === "fulfilled" ? result.value : []);
-    if (!options.length) throw new Error("FlixQuest returned no downloadable HLS or direct video streams. DASH and embed-page links are not supported by the website downloader yet.");
+    if (!options.length) throw new Error("No supported downloadable HLS, DASH or direct video streams were returned.");
     return options;
   }
   async function resolveDownload(media, selectedId) {
@@ -83,12 +83,12 @@ export function createFlixQuestApi({ baseUrl, fetchImpl = globalThis.fetch, time
     if (!Number.isInteger(index) || index < 0) throw new Error("The selected FlixQuest stream is invalid.");
     const links = await getStreams({ mediaType: media.media_type, tmdbId: media.id, providerId, season: media.season, episode: media.episode, full: true });
     const link = links[index], url = safeStreamUrl(link?.url), format = link && linkFormat(link);
-    if (!link || !url || !["hls", "file"].includes(format)) throw new Error("FlixQuest could not re-resolve the selected stream. Refresh the quality list and try again.");
+    if (!link || !url || !["hls", "dash", "file"].includes(format)) throw new Error("The selected media source could not be re-resolved. Search again and retry.");
     const headers = {};
     for (const [name, value] of Object.entries(safeObject(link.headers))) {
       if (/^accept$/i.test(name) && typeof value === "string" && value.length < 2048) headers[name] = value;
     }
-    return { url: url.href, type: format, mimeType: format === "hls" ? "application/vnd.apple.mpegurl" : "video/mp4",
+    return { url: url.href, type: format, mimeType: format === "hls" ? "application/vnd.apple.mpegurl" : format === "dash" ? "application/dash+xml" : "video/mp4",
       headers, allowedHosts: [...new Set([root.hostname, url.hostname])], providerId, server: link.server || providerId, quality: link.quality || "Auto" };
   }
   async function getStreamSize(token) {
