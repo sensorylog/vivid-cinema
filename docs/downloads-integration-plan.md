@@ -1,6 +1,6 @@
 # Vivid Cinema download integration plan
 
-**Status:** Queue manager and account-scoped browser metadata persistence committed; native media-transfer adapters and UI are not implemented yet.
+**Status:** Queue manager, account-scoped metadata persistence and an authorized OPFS browser direct-file adapter committed; native media-transfer adapters, resolver wiring and UI are not implemented yet.
 **Date:** 31 October 2026
 **Reference source:** [Flickv4](https://github.com/sheeshcake/Flickv4), GPL-3.0, by Wendale Franz Dy.
 
@@ -36,9 +36,10 @@ The Expo/React Native downloader, AsyncStorage, Notifee and native filesystem AP
 - Added `tests/download-manager.test.mjs` for identity validation, duplicate prevention, TV episode identity, interrupted-job recovery, adapter failure/retry, cancellation and asset removal.
 - Added the queue and IndexedDB persistence test files to the `npm test` script.
 - Added `scripts/downloads/indexeddb-persistence.js`, an IndexedDB metadata store explicitly scoped to a guest or authenticated owner ID. Separate owners cannot read each other's job lists. It stores job metadata only, not media blobs or provider URLs.
+- Added `scripts/downloads/browser-direct-adapter.js`, which accepts only resolver-supplied HTTPS URLs on an explicit host allowlist, rejects redirects and non-video responses, streams direct video files into OPFS, reports byte progress, enforces a configurable size limit and cleans partial output on failure. It exposes local-file access/removal methods for later player integration.
 - Corrected cancellation ordering so the manager waits for the transfer adapter to settle before asking it to remove partial output.
 - The manager receives persistence and download adapters by dependency injection. It does not resolve media URLs, fetch media, write files, or claim offline playback. Persisted job metadata intentionally excludes source URLs and provider credentials.
-- This commit is the queue contract only; it is not yet a user-visible download feature. Runtime tests have not been executed in this environment.
+- The browser adapter is not wired into the watch page or UI; no live source resolver is configured. It supports direct video files only, not HLS/DASH. OPFS availability and quota vary by browser, and this adapter does not yet guarantee background downloads or local playback routing.
 
 ## Proposed Vivid design
 
