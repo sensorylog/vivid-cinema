@@ -69,7 +69,7 @@ export function parseHlsPlaylist(text, baseUrl, { maxHeight = 1080, allowedHosts
     const attrs = parseAttributes(line.slice(line.indexOf(":") + 1));
     if (attrs.METHOD !== "NONE") throw new Error("Encrypted HLS playlists are not supported by this browser offline adapter.");
   }
-  if (lines.some(line => line.startsWith("#EXT-X-I-FRAME-STREAM-INF:") || /#EXT-X-MEDIA:.*TYPE="AUDIO".*URI=/.test(line))) {\n    throw new Error("HLS alternate audio and I-frame playlists are not supported by this browser offline adapter.");\n  }\n  if (lines.some(line => line.startsWith("#EXT-X-BYTERANGE:"))) {
+  if (lines.some(line => line.startsWith("#EXT-X-I-FRAME-STREAM-INF:") || /^#EXT-X-MEDIA:.*TYPE=(?:"(?:AUDIO|SUBTITLES)"|(?:AUDIO|SUBTITLES)).*URI=/.test(line))) {\n    throw new Error("HLS alternate audio and I-frame playlists are not supported by this browser offline adapter.");\n  }\n  if (lines.some(line => line.startsWith("#EXT-X-BYTERANGE:"))) {
     throw new Error("HLS byte-range playlists are not supported by this browser offline adapter.");
   }
 
@@ -171,7 +171,7 @@ export function createBrowserHlsDownloadAdapter({
         const { done, value } = await reader.read();
         if (done) break;
         size += value.byteLength;
-        progress.add(value.byteLength);
+        progress.bytes += value.byteLength;
         if (progress.bytes > maxBytes) throw new Error("The HLS asset exceeds the configured size limit.");
         chunks.push(value);
       }
@@ -219,7 +219,9 @@ export function createBrowserHlsDownloadAdapter({
         }
       });
       try {
-        await Promise.all(workers);
+        const settled = await Promise.allSettled(workers);
+        const failed = settled.find(item => item.status === "rejected");
+        if (failed) throw failed.reason;
         if (signal?.aborted) throw new DOMException("Download aborted.", "AbortError");
         await writeFile(directory, "index.m3u8", new Blob([parsed.playlist], { type: HLS_MIME }));
         await writeFile(directory, "metadata.json", new Blob([JSON.stringify({
