@@ -157,9 +157,10 @@ class DesktopDownloadEngine {
         void this.persist().catch(saveError => console.warn("Download state save failed:", saveError.message));
       });
     });
-    torrent.on("metadata", publish);
-    torrent.on("download", publish);
-    torrent.on("upload", publish);
+    const publishWhenReady = () => { if (!job.needsRescan) publish(); };
+    torrent.on("metadata", publishWhenReady);
+    torrent.on("download", publishWhenReady);
+    torrent.on("upload", publishWhenReady);
     torrent.on("done", () => {
       const file = [...torrent.files].filter(item => VIDEO_EXTENSIONS.test(item.name)).sort((a, b) => b.length - a.length)[0];
       job.filePath = file ? path.resolve(jobPath, file.path) : null;
