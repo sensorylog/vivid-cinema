@@ -6,7 +6,7 @@ const crypto = require("node:crypto");
 const WebTorrent = require("webtorrent");
 const TorrentSearchApi = require("torrent-search-api");
 
-const VIDEO_EXTENSIONS = /\.(mp4|m4v|mkv|avi|mov|webm|ogv)$/i;
+const VIDEO_EXTENSIONS = /\.(mp4|m4v|mkv|avi|mov|webm|ogv|mpg|mpeg|wmv|flv|ts|m2ts|3gp)$/i;
 const safeText = (value, max = 180) => String(value || "").replace(/[\u0000-\u001f]/g, "").trim().slice(0, max);
 const roundProgress = torrent => Math.round((Number(torrent?.progress) || 0) * 1000) / 10;
 
