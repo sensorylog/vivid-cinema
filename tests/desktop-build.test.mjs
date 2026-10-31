@@ -40,15 +40,17 @@ test("Windows installer and portable executable targets use Vivid branding", () 
   assert.ok(fs.existsSync(path.join(root, "icons", "vivid-icon.svg")));
   assert.ok(fs.existsSync(path.join(root, "icons", "vivid-icon-180.png")));
 });
-test("desktop runtime uses Cloudflare Pages first and bundled offline fallback without Firebase Hosting", () => {
+test("desktop runtime starts from the bundled local app and keeps hosted recovery available", () => {
   const main = fs.readFileSync(path.join(root, "desktop", "main.cjs"), "utf8");
   assert.match(main, /app\.getAppPath\(\)/);
   assert.match(main, /HOSTED_APP_URL = "https:\/\/vivid-cinema\.pages\.dev\/home\.html"/);
   assert.doesNotMatch(main, /vivid-cinema\.web\.app|FIREBASE_FALLBACK|fallbackToFirebase/);
-  assert.match(main, /fallbackToLocal\("Cloudflare Pages app load timed out after/);
+  assert.match(main, /loadURL\(localOrigin \+ "\/home\.html"\)/);
+  assert.match(main, /bundled app first/);
+  assert.match(main, /trying the hosted app/);
   assert.match(main, /loadURL\(HOSTED_APP_URL\)/);
+  assert.doesNotMatch(main, /HOSTED_LOAD_TIMEOUT_MS|Cloudflare Pages app load timed out/);
   assert.match(main, /did-fail-load/);
-  assert.match(main, /HOSTED_LOAD_TIMEOUT_MS = 12000/);
   assert.match(main, /LOADING_HTML/);
   assert.match(main, /loadURL\(LOADING_URL\)/);
   assert.match(main, /hostedLoadStarted/);
@@ -165,6 +167,10 @@ test("Windows app checks for updates and offers download plus restart-to-install
   assert.match(preload, /vivid-cinema\.pages\.dev/);
   assert.doesNotMatch(preload, /vivid-cinema\.web\.app/, "desktop update UI must not trust Firebase Hosting");
   assert.match(preload, /trustedHosts/);
+  assert.match(preload, /hardwareConcurrency/);
+  assert.match(preload, /vivid-performance-legacy/);
+  assert.match(preload, /vivid-performance\.css/);
+  assert.ok(fs.existsSync(path.join(root, "styles", "vivid-performance.css")));
   assert.doesNotMatch(preload, /netlify/i, "desktop update UI must not depend on the retired host");
   assert.doesNotMatch(main, /netlify/i, "desktop runtime must not depend on the retired host");
   assert.doesNotMatch(redirect, /netlify/i, "native redirect must use the current primary host");
