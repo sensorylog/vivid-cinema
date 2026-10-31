@@ -81,7 +81,7 @@ async function consumePendingDownload(){
   sessionStorage.removeItem("vivid:pending-download");
   const integration=VIVID_DOWNLOADS;
   try{
-    const media={...pending.media,source_id:String(integration.sourceId),source_file:String(pending.option.id)};
+    const media={...pending.media,source_id:String(pending.option.sourceId||integration.sourceId),source_file:String(pending.option.id)};
     await manager.enqueue(media,{quality:String(pending.option.quality||pending.option.label||"Auto")});
     messageNode.textContent="Download added to your queue.";
   }catch(error){messageNode.textContent="Could not start this download: "+String(error?.message||error);}
