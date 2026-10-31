@@ -168,8 +168,8 @@ export function createBrowserHlsDownloadAdapter({
     if (text.length > PLAYLIST_LIMIT) throw new Error("The HLS playlist exceeds the size limit.");
     return text;
   }
-  async function downloadResource(resource, directory, headers, signal, progress) {
-    const url = resolveResource(resource.uri, resource.baseUrl, allowedHosts);
+  async function downloadResource(resource, directory, headers, signal, progress, resourceHosts = allowedHosts) {
+    const url = resolveResource(resource.uri, resource.baseUrl, resourceHosts);
     const response = await fetchImpl(url.href, { method: "GET", headers, credentials: "omit", mode: "cors", redirect: "error", cache: "no-store", signal });
     if (!response.ok || response.redirected || !response.body?.getReader) throw new Error("An HLS media resource could not be downloaded.");
     const mime = String(response.headers?.get?.("content-type") || "").toLowerCase();
@@ -240,7 +240,7 @@ export function createBrowserHlsDownloadAdapter({
         while (cursor < parsed.resources.length && !transferError) {
           if (signal?.aborted) throw new DOMException("Download aborted.", "AbortError");
           const resource = parsed.resources[cursor++];
-          try { await downloadResource(resource, directory, headers, signal, progress); }
+          try { await downloadResource(resource, directory, headers, signal, progress, sourceHosts); }
           catch (error) { transferError ||= error; throw error; }
         }
       });
