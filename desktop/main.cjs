@@ -229,7 +229,7 @@ function configureDownloadEngine() {
   });
   ipcMain.handle("vivid-download-media-url", (event, id, fileIndex = 0) => {
     if (!isTrustedDownloadSender(event)) throw new Error("Untrusted download request");
-    if (!downloadEngine.mediaFile(id, fileIndex) throw new Error("This download is not ready to play.");
+    if (!downloadEngine.mediaFile(id, fileIndex)) throw new Error("This download is not ready to play.");
     return "vivid-media://download/" + encodeURIComponent(String(id)) + "?file=" + encodeURIComponent(String(fileIndex)) + "&token=" + mediaToken;
   });
   ipcMain.handle("vivid-offline-url", event => {
