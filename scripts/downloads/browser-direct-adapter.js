@@ -115,7 +115,9 @@ export function createBrowserDownloadAdapter({
         await writer.close();
       } catch (error) {
         try { await reader.cancel(error); } catch {}
-        try { await writer.close(); } catch { try { await writer.abort(error); } catch {} }
+        const preserveForResume = signal?.aborted && signal.reason === "paused" || (!signal?.aborted && !/size limit/i.test(String(error?.message || "")) && error?.name !== "AbortError");
+        if (preserveForResume) { try { await writer.close(); } catch { try { await writer.abort(error); } catch {} } }
+        else { try { await writer.abort(error); } catch {} await remove(id); }
         throw error;
       }
       return {
