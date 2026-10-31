@@ -24,7 +24,7 @@ function labelFor(job) {
   return (media.title||"Untitled")+episode;
 }
 function statusLabel(job) {
-  if(job.status==="completed")return "Saved offline";
+  if(job.status==="completed")return "Downloaded";
   if(job.status==="downloading")return "Downloading · "+Math.round(job.progress||0)+"%";
   if(job.status==="queued")return "Waiting in queue";
   if(job.status==="paused")return "Stopped · restart from the beginning";
@@ -42,7 +42,7 @@ function render(jobs) {
     const actions=[];
     if(["queued","downloading"].includes(job.status))actions.push('<button type="button" data-action="pause" data-id="'+escapeHtml(job.id)+'">Stop</button>');
     if(["paused","failed"].includes(job.status))actions.push('<button type="button" data-action="retry" data-id="'+escapeHtml(job.id)+'">Restart</button>');
-    if(job.status==="completed"&&job.asset?.uri)actions.push('<button type="button" data-action="play" data-id="'+escapeHtml(job.id)+'">Play offline</button>');
+    if(job.status==="completed"&&job.asset?.uri)actions.push('<button type="button" data-action="play" data-id="'+escapeHtml(job.id)+'">Play</button>');
     if(job.status!=="cancelled"&&job.status!=="completed")actions.push('<button type="button" data-action="cancel" data-id="'+escapeHtml(job.id)+'">Cancel</button>');
     if(!["queued","downloading"].includes(job.status))actions.push('<button type="button" data-action="remove" data-id="'+escapeHtml(job.id)+'">Remove</button>');
     return '<article class="offline-job"><div><div class="offline-job-title">'+escapeHtml(labelFor(job))+'</div><div class="offline-job-meta">'+escapeHtml(details)+'</div>'+
