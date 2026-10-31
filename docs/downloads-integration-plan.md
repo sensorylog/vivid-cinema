@@ -79,3 +79,11 @@ The Expo/React Native downloader, AsyncStorage, Notifee and native filesystem AP
 - Movies and TV episodes are correctly grouped and identified.
 - The same web UI works without importing React Native packages.
 - Tests cover queue transitions, persistence, URL validation, partial-file cleanup and offline playback routing.
+
+## Browser HLS offline storage milestone (in progress)
+
+- Added `scripts/downloads/browser-hls-adapter.js` as a separate OPFS-backed HLS VOD adapter. It selects a bounded master-playlist variant, downloads initialization maps and media segments, writes a local rewritten media playlist, and exposes a blob-URL playlist for a future offline HLS player.
+- The adapter requires an injected resolver to return both `type: "hls"` and `offlineAllowed: true`; all playlist, variant, map and segment URLs must pass the exact HTTPS host allowlist. It omits cookies, rejects redirects, enforces playlist/segment/total-size limits, supports bounded segment concurrency, and removes partial output after failure.
+- Initial support is deliberately VOD-only: the media playlist must contain `EXT-X-ENDLIST`. Encrypted playlists, byte ranges, variable substitution, alternate audio/subtitle renditions, I-frame playlists and nested master playlists are rejected rather than silently producing incomplete offline files.
+- The HLS adapter has dedicated parser, OPFS, authorization, host-validation and failure-cleanup tests in `tests/download-browser-hls-adapter.test.mjs`.
+- This adapter is not yet connected to the title-page resolver contract, queue selection or offline player. Blob-playlist playback must be proven on target browsers before the UI offers HLS downloads. It does not support live streams, DRM, key extraction, or access-control bypass.
