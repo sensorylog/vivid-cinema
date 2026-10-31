@@ -54,6 +54,7 @@ test("desktop runtime starts from the bundled local app and keeps hosted recover
   assert.match(main, /trying the hosted app/);
   assert.match(main, /loadURL\(HOSTED_APP_URL\)/);
   assert.doesNotMatch(main, /HOSTED_LOAD_TIMEOUT_MS|Cloudflare Pages app load timed out/);
+  assert.doesNotMatch(main, /clearHostedLoadTimeout/, "startup must not call an undefined hosted-load timeout helper");
   assert.match(main, /did-fail-load/);
   assert.match(main, /LOADING_HTML/);
   assert.match(main, /loadURL\(LOADING_URL\)/);
