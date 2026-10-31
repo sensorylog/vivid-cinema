@@ -343,7 +343,6 @@ function createWindow() {
     if (isLocalApp) localAppLoaded = true;
     navigationRecoveryInProgress = false;
     recoveryPageShown = false;
-    clearHostedLoadTimeout();
   });
 
   const showAppRecoveryPage = reason => {
