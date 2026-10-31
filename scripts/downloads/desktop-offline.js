@@ -70,6 +70,7 @@ async function searchTitle(media){
 }
 async function refresh(){try{jobs=await engine.list();render();}catch(error){setMessage(error?.message||"Could not load your downloads.");}}
 const player = byId("offline-player");
+const positionKey = () => "vivid:offline-position:"+player.dataset.jobId+":"+(player.dataset.fileIndex||"0");
 const clock = value => {
   const seconds = Math.max(0, Math.floor(Number(value) || 0));
   const hours = Math.floor(seconds / 3600);
@@ -97,21 +98,21 @@ player.addEventListener("timeupdate",()=>{
   syncPlayerControls();
   if(player.dataset.jobId&&player.currentTime-lastPositionSave>=5){
     lastPositionSave=player.currentTime;
-    localStorage.setItem("vivid:offline-position:"+player.dataset.jobId,String(Math.floor(player.currentTime)));
+    localStorage.setItem(positionKey(),String(Math.floor(player.currentTime)));
   }
 });
 player.addEventListener("pause",()=>{
   if(player.dataset.jobId&&player.currentTime>0)localStorage.setItem("vivid:offline-position:"+player.dataset.jobId,String(Math.floor(player.currentTime)));
 });
 player.addEventListener("loadedmetadata",()=>{
-  const saved=Number(localStorage.getItem("vivid:offline-position:"+player.dataset.jobId)||0);
+  const saved=Number(localStorage.getItem(positionKey())||0);
   if(saved>5&&Number.isFinite(player.duration)&&saved<player.duration-30)player.currentTime=saved;
   syncPlayerControls();
 });
 player.addEventListener("durationchange",syncPlayerControls);
 player.addEventListener("play",syncPlayerControls);
 player.addEventListener("pause",syncPlayerControls);
-player.addEventListener("ended",()=>{if(player.dataset.jobId)localStorage.removeItem("vivid:offline-position:"+player.dataset.jobId);syncPlayerControls();});
+player.addEventListener("ended",()=>{if(player.dataset.jobId)localStorage.removeItem(positionKey());syncPlayerControls();});
 window.addEventListener("keydown",event=>{
   if(byId("offline-player-section").hidden||event.target.matches("input,textarea,select,button"))return;
   if(event.code==="Space"){event.preventDefault();if(player.paused)void player.play().catch(()=>{});else player.pause();}
