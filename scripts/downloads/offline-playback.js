@@ -33,7 +33,9 @@ function loadHlsLibrary() {
   return hlsLibraryPromise;
 }
 
-export function ensureOfflineHlsLibrary() { return loadHlsLibrary(); }\n\nexport function createOfflinePlaybackController({ adapter, video } = {}) {
+export function ensureOfflineHlsLibrary() { return loadHlsLibrary(); }
+
+export function createOfflinePlaybackController({ adapter, video } = {}) {
   if (typeof adapter?.getAssetUrl !== "function") {
     throw new TypeError("An offline asset adapter is required.");
   }
