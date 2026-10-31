@@ -94,7 +94,7 @@ test("rejects live, encrypted, byte-range and alternate-audio playlists", () => 
   assert.throws(() => parseHlsPlaylist("#EXTM3U\n#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID=\"audio\",URI=\"audio.m3u8\"\n#EXTINF:6,\na.ts\n#EXT-X-ENDLIST", "https://media.example.test/a.m3u8"), /alternate audio/);
 });
 
-test("stores an explicitly authorized HLS VOD asset in OPFS and exposes a local playlist URL", async () => {
+test("stores a resolver-provided HLS VOD asset in OPFS and exposes a local playlist URL", async () => {
   const opfs = fakeOPFS();
   const calls = [];
   const adapter = createBrowserHlsDownloadAdapter({
