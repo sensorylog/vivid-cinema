@@ -17,6 +17,7 @@ test("title download action opens the native Vivid Offline library", async () =>
   assert.match(preload, /mediaUrl:.*fileIndex/);
   assert.match(preload, /getPlaybackPosition/);
   assert.match(preload, /setPlaybackPosition/);
+  assert.match(preload, /addEventListener\("offline"/);
   assert.match(main, /configureDownloadEngine\(\)/);
   assert.match(main, /vivid-download-media-url/);
   assert.match(main, /vivid-playback-position-get/);
