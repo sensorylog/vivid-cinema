@@ -18,7 +18,6 @@ function withTimeout(value, timeoutMs, description) {
     Promise.resolve(value),
     new Promise((_, reject) => {
       timer = setTimeout(() => reject(new Error("Timed out waiting for " + description)), timeoutMs);
-      timer.unref?.();
     })
   ]).finally(() => clearTimeout(timer));
 }
@@ -57,6 +56,7 @@ function closeClient(client) {
 
 function closeTracker(tracker) {
   if (!tracker) return Promise.resolve();
+  try { tracker.http?.closeAllConnections?.(); } catch {}
   return withTimeout(new Promise(resolve => {
     try { tracker.close(() => resolve()); } catch { resolve(); }
   }), 5000, "local tracker shutdown").catch(() => {});
@@ -123,7 +123,7 @@ test("desktop engine downloads a video-extension payload from a local seeded tor
     // not public DHT routing or external network access.
     if (engine.client.dht) {
       const dht = engine.client.dht;
-      await withTimeout(new Promise(resolve => dht.destroy(resolve)), 10000, "test DHT shutdown");
+      try { dht.destroy(); } catch {}
       engine.client.dht = null;
     }
     engine.searchResults.set("local-fixture", {
