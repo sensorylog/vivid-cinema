@@ -78,6 +78,7 @@ function renderSearch(items){
 async function loadSeriesSeason(seasonNumber){
   const requestId=++seasonRequestId;
   const list=byId("desktop-episodes");
+  byId("desktop-episode-select-all").textContent="Select all";
   list.innerHTML='<p class="offline-muted">Loading season episodes…</p>';
   currentSeasonEpisodes=[];
   byId("desktop-search-results").innerHTML="";
