@@ -94,12 +94,12 @@ test("rejects live, encrypted, byte-range and alternate-audio playlists", () => 
   assert.throws(() => parseHlsPlaylist("#EXTM3U\n#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID=\"audio\",URI=\"audio.m3u8\"\n#EXTINF:6,\na.ts\n#EXT-X-ENDLIST", "https://media.example.test/a.m3u8"), /alternate audio/);
 });
 
-test("stores an explicitly authorized HLS VOD asset in OPFS and exposes a local playlist URL", async () => {
+test("stores a resolver-provided HLS VOD asset in OPFS and exposes a local playlist URL", async () => {
   const opfs = fakeOPFS();
   const calls = [];
   const adapter = createBrowserHlsDownloadAdapter({
-    resolve: async () => ({ type: "hls", offlineAllowed: true, url: "https://media.example.test/master.m3u8" }),
-    allowedHosts: ["media.example.test"],
+    resolve: async () => ({ type: "hls", url: "https://media.example.test/master.m3u8", allowedHosts: ["media.example.test"] }),
+    allowedHosts: ["resolver.example.test"],
     maxHeight: 720,
     storage: opfs.storage,
     fetchImpl: async url => {
@@ -127,23 +127,23 @@ test("stores an explicitly authorized HLS VOD asset in OPFS and exposes a local 
   assert.equal([...opfs.files.keys()].some(key => key.includes("hls_job_01")), false);
 });
 
-test("does not fetch HLS unless the resolver explicitly authorizes offline storage", async () => {
+test("does not fetch an HLS source whose resolved format is not HLS", async () => {
   const opfs = fakeOPFS();
   let fetched = false;
   const adapter = createBrowserHlsDownloadAdapter({
-    resolve: async () => ({ type: "hls", url: "https://media.example.test/master.m3u8" }),
-    allowedHosts: ["media.example.test"],
+    resolve: async () => ({ type: "embed", url: "https://media.example.test/master.m3u8" }),
+    allowedHosts: ["resolver.example.test"],
     storage: opfs.storage,
     fetchImpl: async () => { fetched = true; throw new Error("must not fetch"); }
   });
-  await assert.rejects(adapter.download(job), /explicitly authorize/);
+  await assert.rejects(adapter.download(job), /not an HLS stream/);
   assert.equal(fetched, false);
 });
 
 test("rejects an unallowlisted segment host and removes partial files", async () => {
   const opfs = fakeOPFS();
   const adapter = createBrowserHlsDownloadAdapter({
-    resolve: async () => ({ type: "hls", offlineAllowed: true, url: "https://media.example.test/master.m3u8" }),
+    resolve: async () => ({ type: "hls", url: "https://media.example.test/master.m3u8", allowedHosts: ["media.example.test"] }),
     allowedHosts: ["media.example.test"],
     storage: opfs.storage,
     fetchImpl: async url => {

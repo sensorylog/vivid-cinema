@@ -168,8 +168,8 @@ export function createBrowserHlsDownloadAdapter({
     if (text.length > PLAYLIST_LIMIT) throw new Error("The HLS playlist exceeds the size limit.");
     return text;
   }
-  async function downloadResource(resource, directory, headers, signal, progress) {
-    const url = resolveResource(resource.uri, resource.baseUrl, allowedHosts);
+  async function downloadResource(resource, directory, headers, signal, progress, resourceHosts = allowedHosts) {
+    const url = resolveResource(resource.uri, resource.baseUrl, resourceHosts);
     const response = await fetchImpl(url.href, { method: "GET", headers, credentials: "omit", mode: "cors", redirect: "error", cache: "no-store", signal });
     if (!response.ok || response.redirected || !response.body?.getReader) throw new Error("An HLS media resource could not be downloaded.");
     const mime = String(response.headers?.get?.("content-type") || "").toLowerCase();
@@ -216,17 +216,16 @@ export function createBrowserHlsDownloadAdapter({
       const id = safeId(job?.id);
       if (signal?.aborted) throw new DOMException("Download aborted.", "AbortError");
       const source = await resolve(job, { signal });
-      if (source?.offlineAllowed !== true || source?.type !== "hls") {
-        throw new Error("The provider did not explicitly authorize this HLS asset for offline storage.");
-      }
-      const startUrl = resolveResource(source.url, source.url, allowedHosts);
+      if (source?.type !== "hls") throw new Error("The selected source is not an HLS stream.");
+      const sourceHosts = Array.isArray(source.allowedHosts) && source.allowedHosts.length ? source.allowedHosts : allowedHosts;
+      const startUrl = resolveResource(source.url, source.url, sourceHosts);
       const headers = source.headers && typeof source.headers === "object" ? source.headers : {};
       const firstText = await fetchText(startUrl, headers, signal);
-      let parsed = parseHlsPlaylist(firstText, startUrl.href, { maxHeight, allowedHosts });
+      let parsed = parseHlsPlaylist(firstText, startUrl.href, { maxHeight, allowedHosts: sourceHosts });
       if (parsed.kind === "master") {
-        const variantUrl = resolveResource(parsed.variantUrl, startUrl.href, allowedHosts);
+        const variantUrl = resolveResource(parsed.variantUrl, startUrl.href, sourceHosts);
         const variantText = await fetchText(variantUrl, headers, signal);
-        parsed = parseHlsPlaylist(variantText, variantUrl.href, { maxHeight, allowedHosts });
+        parsed = parseHlsPlaylist(variantText, variantUrl.href, { maxHeight, allowedHosts: sourceHosts });
         if (parsed.kind !== "media") throw new Error("Nested HLS master playlists are not supported.");
       }
       if (parsed.resources.length > maxSegments) throw new Error("The HLS playlist contains too many segments.");
@@ -241,7 +240,7 @@ export function createBrowserHlsDownloadAdapter({
         while (cursor < parsed.resources.length && !transferError) {
           if (signal?.aborted) throw new DOMException("Download aborted.", "AbortError");
           const resource = parsed.resources[cursor++];
-          try { await downloadResource(resource, directory, headers, signal, progress); }
+          try { await downloadResource(resource, directory, headers, signal, progress, sourceHosts); }
           catch (error) { transferError ||= error; throw error; }
         }
       });

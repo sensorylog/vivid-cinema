@@ -1,7 +1,9 @@
 import { DownloadManager } from "./downloads/download-manager.js";
 import { createIndexedDBPersistence } from "./downloads/indexeddb-persistence.js";
-import { createBrowserDownloadAdapter } from "./downloads/browser-direct-adapter.js";\nimport { createBrowserHlsDownloadAdapter } from "./downloads/browser-hls-adapter.js";
+import { createBrowserDownloadAdapter } from "./downloads/browser-direct-adapter.js";
+import { createBrowserHlsDownloadAdapter } from "./downloads/browser-hls-adapter.js";
 import { createOfflinePlaybackController, ensureOfflineHlsLibrary } from "./downloads/offline-playback.js";
+import { VIVID_DOWNLOADS, getFlixQuestBaseUrl, saveFlixQuestBaseUrl } from "./downloads/flixquest-integration.js";
 
 const byId = id => document.getElementById(id);
 const jobsNode = byId("offline-jobs");
@@ -58,10 +60,10 @@ async function switchOwner(user) {
   try{
     const persistence=createIndexedDBPersistence({ownerId:owner});
     const integration=globalThis.VIVID_DOWNLOADS;
-    const allowedHosts=Array.isArray(integration?.allowedHosts)&&integration.allowedHosts.length?integration.allowedHosts:["downloads.vivid.invalid"];
+    const allowedHosts=typeof integration?.getAllowedHosts==="function"&&integration.getAllowedHosts().length?integration.getAllowedHosts():["not-configured.invalid"];
     let activeSource = null;
     const resolveActiveSource = async () => {
-      if (!activeSource) throw new Error("No active authorized download source is available.");
+      if (!activeSource) throw new Error("No FlixQuest stream is currently selected.");
       return activeSource;
     };
     const directAdapter = createBrowserDownloadAdapter({ resolve: resolveActiveSource, allowedHosts });
@@ -116,11 +118,11 @@ async function consumePendingDownload(){
   sessionStorage.removeItem("vivid:pending-download");
   const integration=globalThis.VIVID_DOWNLOADS;
   if(typeof integration?.resolve!=="function"){
-    messageNode.textContent="Your quality selection was received, but no authorized download provider is configured yet. The download was not started.";
+    messageNode.textContent="Your quality selection was received, but FlixQuest is not configured. The download was not started.";
     return;
   }
   try{
-    const media={...pending.media,source_id:String(integration.sourceId||"configured-provider"),source_file:String(pending.option.id)};
+    const media={...pending.media,source_id:String(integration.sourceId||"flixquest"),source_file:String(pending.option.id)};
     await manager.enqueue(media,{quality:String(pending.option.quality||pending.option.label||"Auto")});
     messageNode.textContent="Download added to your queue.";
   }catch(error){messageNode.textContent="Could not start this download: "+String(error?.message||error);}
@@ -142,6 +144,25 @@ jobsNode.addEventListener("click",async event=>{
   finally{button.disabled=false;}
 });
 byId("offline-player-close").addEventListener("click",async()=>{await playback?.stop();playerSection.hidden=true;});
+const configForm=byId("flixquest-config-form");
+const configInput=byId("flixquest-api-url");
+const configStatus=byId("flixquest-config-status");
+if(configInput)configInput.value=getFlixQuestBaseUrl();
+if(configForm)configForm.addEventListener("submit",async event=>{
+  event.preventDefault();
+  const button=configForm.querySelector('button[type="submit"]');
+  button.disabled=true;
+  configStatus.textContent="Saving the API URL and checking enabled providers…";
+  try{
+    saveFlixQuestBaseUrl(configInput.value);
+    const result=await VIVID_DOWNLOADS.testConnection();
+    if(!result.count)throw new Error("The API responded, but it has no enabled providers.");
+    configStatus.textContent="Connected. "+result.count+" enabled provider"+(result.count===1?"":"s")+" found. Reloading the download tools…";
+    window.setTimeout(()=>window.location.reload(),700);
+  }catch(error){
+    configStatus.textContent="Connection failed: "+String(error?.message||error);
+  }finally{button.disabled=false;}
+});
 async function start(){
   try{
     const [{auth},{onAuthStateChanged}]=await Promise.all([import("./firebase.js"),import("https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js")]);
