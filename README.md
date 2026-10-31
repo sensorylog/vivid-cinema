@@ -15,7 +15,7 @@ See [Cloudflare Pages hosting](docs/cloudflare-pages-hosting.md) for build setti
 
 The website's movie-download action is currently disabled because no authorized direct-download provider is connected. The title page explains this and points users to the legitimate streaming, rental and purchase options listed under **Where to Watch**.
 
-Vivid does not ask users to enter resolver URLs or API keys. The old public-archive discovery and proxy integration have been removed. The IndexedDB/OPFS download-library foundation remains for a future provider that explicitly authorizes offline storage. No commercial streaming playback URL is treated as permission to download a movie or episode.
+Vivid does not ask users to enter resolver URLs or API keys. The IndexedDB/OPFS download-library foundation remains for a future provider that explicitly authorizes offline storage. No commercial streaming playback URL is treated as permission to download a movie or episode.
 
 ## Phase D4 — PWA foundation and offline shell
 Vivid Cinema now has the first production-oriented PWA layer:
