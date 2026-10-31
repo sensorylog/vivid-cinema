@@ -76,7 +76,7 @@ export function createBrowserDownloadAdapter({
         signal
       });
       if (response?.status === 416 && existingSize > 0) {
-        const complete = /^bytes \\*\\/(\\d+)$/i.exec(String(response.headers?.get?.("content-range") || ""));
+        const complete = /^bytes \*\/(\d+)$/i.exec(String(response.headers?.get?.("content-range") || ""));
         if (complete && Number(complete[1]) === existingSize) return { uri: "opfs://vivid-cinema-downloads/" + id, mimeType: source.mimeType || "video/mp4", size: existingSize };
       }
       if (!response?.ok || response.redirected) throw new Error("The authorized source did not return a direct file response.");
