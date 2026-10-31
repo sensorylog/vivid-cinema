@@ -210,7 +210,12 @@ class DesktopDownloadEngine {
 
   async shutdown() {
     for (const job of this.jobs.values()) {
-      if (job.status === "downloading") job.status = "paused";
+      if (job.status === "downloading" && job.torrent) {
+        job.progress = roundProgress(job.torrent);
+        job.downloaded = Number(job.torrent.downloaded) || job.downloaded || 0;
+        job.total = Number(job.torrent.length) || job.total || 0;
+        job.status = "paused";
+      }
       job.torrent = null;
     }
     await this.persist().catch(error => console.warn("Could not persist downloads on exit:", error.message));
