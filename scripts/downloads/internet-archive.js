@@ -33,22 +33,7 @@ function formatBytes(value) {
   const index = Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), units.length - 1);
   return (bytes / Math.pow(1024, index)).toFixed(index ? 1 : 0) + " " + units[index];
 }
-async function fetchJson(url, signal) {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(new Error("Internet Archive request timed out.")), REQUEST_TIMEOUT_MS);
-  const abort = () => controller.abort(signal?.reason);
-  if (signal?.aborted) abort();
-  else signal?.addEventListener("abort", abort, { once: true });
-  try {
-    const response = await fetch(url, { method: "GET", credentials: "omit", mode: "cors", redirect: "error", cache: "no-store", signal: controller.signal, headers: { Accept: "application/json" } });
-    if (!response.ok) throw new Error("Internet Archive returned HTTP " + response.status + ".");
-    return await response.json();
-  } finally {
-    clearTimeout(timer);
-    signal?.removeEventListener("abort", abort);
-  }
-}
-function searchUrl(title, year) {
+function searchUrl(title) {
   const query = new URLSearchParams();
   const safe = title.replace(/["\\]/g, " ").trim();
   query.set("q", 'mediatype:movies AND title:"' + safe + '"');
@@ -58,37 +43,6 @@ function searchUrl(title, year) {
   for (const field of ["identifier", "title", "year", "licenseurl"]) query.append("fl[]", field);
   if (year && /^\d{4}$/.test(String(year))) query.set("sort[]", "year asc");
   return API + "/advancedsearch.php?" + query.toString();
-}
-async function readItem(identifier, signal) {
-  const id = safeIdentifier(identifier);
-  if (!id) return null;
-  const item = await fetchJson(API + "/metadata/" + encodeURIComponent(id), signal);
-  const metadata = item?.metadata || {};
-  if (!isExplicitlyLicensed(metadata) || !Array.isArray(item.files)) return null;
-  const files = item.files.filter(file => {
-    if (!file || file.source === "metadata" || file.private === "true" || file.private === true) return false;
-    const name = String(file.name || "");
-    const ext = extensionOf(name);
-    const size = Number(file.size);
-    return VIDEO_EXTENSIONS.has(ext) && !name.includes("/") && !name.startsWith(".")
-      && Number.isFinite(size) && size >= 1024 * 1024 && size <= MAX_FILE_BYTES;
-  }).sort((a, b) => {
-    const rank = file => ({ mp4: 0, m4v: 1, webm: 2, mov: 3, ogv: 4 })[extensionOf(file.name)] ?? 9;
-    return rank(a) - rank(b) || Number(b.size) - Number(a.size);
-  });
-  if (!files.length) return null;
-  return {
-    identifier: id,
-    title: cleanTitle(metadata.title || id),
-    year: String(metadata.year || metadata.date || "").slice(0, 4),
-    license: String(metadata.licenseurl || metadata.rights || "Declared public-domain / Creative Commons item").replace(/<[^>]*>/g, " ").slice(0, 240),
-    files: files.slice(0, 5).map(file => ({
-      name: String(file.name),
-      size: Number(file.size),
-      extension: extensionOf(file.name),
-      mimeType: MIME_BY_EXTENSION[extensionOf(file.name)]
-    }))
-  };
 }
 export function createInternetArchiveProvider({ fetchImpl = globalThis.fetch } = {}) {
   if (typeof fetchImpl !== "function") throw new TypeError("A fetch implementation is required.");
@@ -114,7 +68,7 @@ export function createInternetArchiveProvider({ fetchImpl = globalThis.fetch } =
     const cacheKey = queryTitle.toLowerCase();
     const cached = cache.get(cacheKey);
     if (cached && cached.expires > Date.now()) return cached.options;
-    const search = await requestJson(searchUrl(queryTitle, media?.year), signal);
+    const search = await requestJson(searchUrl(queryTitle), signal);
     const docs = Array.isArray(search?.response?.docs) ? search.response.docs : [];
     const unique = [...new Set(docs.map(doc => safeIdentifier(doc.identifier)).filter(Boolean))].slice(0, RESULT_LIMIT);
     const settled = await Promise.allSettled(unique.map(id => requestJson(API + "/metadata/" + encodeURIComponent(id), signal).then(item => {
@@ -165,7 +119,10 @@ export function createInternetArchiveProvider({ fetchImpl = globalThis.fetch } =
     const ext = extensionOf(filename);
     if (!VIDEO_EXTENSIONS.has(ext)) throw new Error("That file is not a supported video format.");
     const proxyPath = "/api/ia-download/" + encodeURIComponent(id) + "/" + encodeURIComponent(filename);
-    return { url: new URL(proxyPath, globalThis.location.origin).href, type: "file", mimeType: MIME_BY_EXTENSION[ext], allowedHosts: [globalThis.location.hostname], headers: {} };
+    const nativeApp = Boolean(globalThis.Capacitor?.isNativePlatform?.());
+    const origin = nativeApp ? "https://vivid-cinema.pages.dev" : globalThis.location.origin;
+    const proxyUrl = new URL(proxyPath, origin);
+    return { url: proxyUrl.href, type: "file", mimeType: MIME_BY_EXTENSION[ext], allowedHosts: [proxyUrl.hostname], headers: {} };
   }
   return Object.freeze({ sourceId: "internet-archive", getOptions, resolve });
 }
