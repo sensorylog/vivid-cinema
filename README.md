@@ -15,7 +15,7 @@ See [Cloudflare Pages hosting](docs/cloudflare-pages-hosting.md) for build setti
 
 The title-page **Download** action now discovers files automatically; users do not enter resolver URLs, API keys, or provider settings.
 
-- The first built-in source searches Internet Archive's Advanced Search API and item Metadata API.
+- Built-in discovery searches Internet Archive's Advanced Search and Metadata APIs plus Wikimedia Commons' MediaWiki search and image metadata APIs.
 - Vivid only offers video files whose item metadata explicitly declares a Creative Commons licence or public-domain status. Supported files include MP4, M4V, WebM, MOV, and OGV.
 - A Cloudflare Pages Function at `/api/ia-download/:identifier/:filename` re-checks the item licence and file metadata, then streams the file from Internet Archive through Vivid's own origin. It forwards HTTP Range requests, so interrupted transfers can resume without exposing archive storage-node URLs to the browser.
 - The existing download queue stores progress metadata in IndexedDB and video bytes in OPFS. It supports queued downloads, progress, pause/cancel, retry, resume, remove, and local playback.
