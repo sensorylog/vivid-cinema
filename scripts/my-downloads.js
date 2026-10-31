@@ -3,6 +3,9 @@ import { createIndexedDBPersistence } from "./downloads/indexeddb-persistence.js
 import { createBrowserDownloadAdapter } from "./downloads/browser-direct-adapter.js";
 import { createOfflinePlaybackController } from "./downloads/offline-playback.js";
 
+if (window.vividDownloads?.available) {
+  void import("./downloads/desktop-offline.js");
+} else {
 const byId = id => document.getElementById(id);
 const jobsNode = byId("offline-jobs");
 const messageNode = byId("offline-message");
@@ -113,3 +116,5 @@ async function start(){
   }catch(error){console.warn("Vivid download library is using guest storage:",error);await switchOwner(null);}
 }
 void start();
+
+}
