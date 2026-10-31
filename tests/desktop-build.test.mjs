@@ -160,7 +160,7 @@ test("Windows app checks for updates and offers download plus restart-to-install
   const preload = fs.readFileSync(preloadPath, "utf8");
   const redirect = fs.readFileSync(path.join(root, "scripts", "platform-origin-redirect.js"), "utf8");
   assert.match(main, /require\("electron-updater"\)/);
-  assert.doesNotMatch(main, /^const \\{ DesktopDownloadEngine \\} = require\\("\.\\/download-engine\\.cjs"\\);/m);
+  assert.doesNotMatch(main, /^const .*download-engine\.cjs/m);
   assert.match(main, /async function getDownloadEngine\(\)/);
   assert.match(main, /require\("\.\/download-engine\.cjs"\)/);
   assert.match(main, /await getDownloadEngine\(\)/);
