@@ -41,6 +41,7 @@ export class DownloadManager {
     this.idFactory = idFactory || (() => globalThis.crypto?.randomUUID?.() || `job-${this.now()}-${Math.random().toString(36).slice(2)}`);
     this.jobs = new Map();
     this.controllers = new Map();
+    this.tasks = new Map();
     this.listeners = new Set();
     this.running = 0;
     this.hydrated = false;
@@ -121,6 +122,8 @@ export class DownloadManager {
     job.status = "cancelled";
     job.updatedAt = this.now();
     this.controllers.get(job.id)?.abort("cancelled");
+    const task = this.tasks.get(job.id);
+    if (task) await task;
     try { await this.adapter.removePartial?.(copy(job)); } catch { /* keep cancellation visible */ }
     await this.persist();
     this.emit();
@@ -156,7 +159,11 @@ export class DownloadManager {
     while (this.running < this.concurrency) {
       const job = [...this.jobs.values()].find(item => item.status === "queued");
       if (!job) break;
-      void this.run(job);
+      const task = this.run(job);
+      this.tasks.set(job.id, task);
+      void task.finally(() => {
+        if (this.tasks.get(job.id) === task) this.tasks.delete(job.id);
+      });
     }
   }
 
