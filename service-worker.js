@@ -1,6 +1,8 @@
 // Bump this version whenever the precached app shell changes.
-const CACHE_NAME = "vivid-cinema-shell-v258";\nconst HLS_LIBRARY_URL = "https://cdn.jsdelivr.net/npm/hls.js@1.7.3/dist/hls.min.js";
+const CACHE_NAME = "vivid-cinema-shell-v258";
+const HLS_LIBRARY_URL = "https://cdn.jsdelivr.net/npm/hls.js@1.7.3/dist/hls.min.js";
 const APP_SHELL = [
+  HLS_LIBRARY_URL,
   "./","./index.html","./home.html","./downloads.html","./my-downloads.html","./for-you.html",
   "./person.html","./discover.html","./collection.html","./title.html","./watch.html",
   "./library.html","./auth.html","./login.html","./verify-email.html","./forgot-password.html",
@@ -159,6 +161,21 @@ self.addEventListener("fetch",event=>{
  const request=event.request;
  if(request.method!=="GET")return;
  const url=new URL(request.url);
+ if(url.href===HLS_LIBRARY_URL){
+  event.respondWith((async()=>{
+   const cached=await safeCachedResponse(HLS_LIBRARY_URL);
+   if(cached)return cached;
+   try{
+    const response=await fetch(request,{cache:"no-store",redirect:"error"});
+    if(response.ok&&response.type==="cors"&&isSafeResponse(response)){
+     const cache=await caches.open(CACHE_NAME);
+     await cache.put(HLS_LIBRARY_URL,response.clone());
+    }
+    return response;
+   }catch{return new Response("",{status:504,statusText:"Offline"});}
+  })());
+  return;
+ }
  if(url.origin!==self.location.origin)return;
  // Authentication must not depend on stale cached documents or SDK bundles.
  // Always try the network first for auth pages, auth modules and Firebase config.
