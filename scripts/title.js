@@ -7,6 +7,7 @@ import { hasLibraryItem, startLibrarySync, toggleLibraryItem, upsertLibraryItem 
 import { getProviderCountry, setProviderCountry } from "./provider-region.js";
 import { getLatestPlaybackProgress } from "./recommendations.js";
 import { recordBehavior } from "./intelligence.js";
+import "./downloads/flixquest-integration.js";
 
 const $ = (id) => document.getElementById(id);
 const route = getRoute();
@@ -392,7 +393,7 @@ function openTitleDownload() {
   const isTv = media.media_type === "tv";
   const modal = document.createElement("div");
   modal.className = "vivid-download-modal";
-  modal.innerHTML = '<section class="vivid-download-dialog" role="dialog" aria-modal="true" aria-labelledby="vivid-download-title"><button class="vivid-download-close" type="button" aria-label="Close">×</button><p>OFFLINE DOWNLOAD</p><h2 id="vivid-download-title">Download ' + (isTv ? 'an episode' : 'this movie') + '</h2><div class="vivid-download-selection">' + (isTv ? '<label>Season <select id="download-season"></select></label><label>Episode <select id="download-episode"></select></label>' : '<p>' + escapeHtml(media.title) + '</p>') + '</div><div class="vivid-download-options" id="vivid-download-options" aria-live="polite"><p>Checking available download qualities…</p></div><p class="vivid-download-note">Only download options supplied by an authorized source are shown.</p></section>';
+  modal.innerHTML = '<section class="vivid-download-dialog" role="dialog" aria-modal="true" aria-labelledby="vivid-download-title"><button class="vivid-download-close" type="button" aria-label="Close">×</button><p>OFFLINE DOWNLOAD</p><h2 id="vivid-download-title">Download ' + (isTv ? 'an episode' : 'this movie') + '</h2><div class="vivid-download-selection">' + (isTv ? '<label>Season <select id="download-season"></select></label><label>Episode <select id="download-episode"></select></label>' : '<p>' + escapeHtml(media.title) + '</p>') + '</div><div class="vivid-download-options" id="vivid-download-options" aria-live="polite"><p>Checking available download qualities…</p></div><p class="vivid-download-note">Choose a stream returned by your connected FlixQuest resolver. Vivid saves supported streams in this browser.</p></section>';
   document.body.appendChild(modal);
   const close = () => modal.remove();
   modal.querySelector(".vivid-download-close").addEventListener("click", close);
@@ -406,7 +407,7 @@ function openTitleDownload() {
     const season = Number(seasonSelect?.value || 1), episode = Number(episodeSelect?.value || 1);
     const mediaRequest = { id: String(media.id), media_type: media.media_type, title: media.title, year: media.year || "", poster_path: media.poster_path || "", season: isTv ? season : null, episode: isTv ? episode : null };
     const slot = modal.querySelector("#vivid-download-options"), integration = globalThis.VIVID_DOWNLOADS;
-    if (typeof integration?.getOptions !== "function") { slot.innerHTML = '<p class="vivid-download-empty">Download options are not connected yet. Streaming players do not automatically provide downloadable files. Vivid needs an authorized download provider before it can show real qualities or start a file transfer.</p>'; return; }
+    if (typeof integration?.getOptions !== "function") { slot.innerHTML = '<p class="vivid-download-empty">Connect your FlixQuest API instance in Offline Downloads settings, then return here to load real movie and episode streams.</p>'; return; }
     slot.innerHTML = '<p>Finding available qualities…</p>';
     try {
       const options = await integration.getOptions(mediaRequest);
