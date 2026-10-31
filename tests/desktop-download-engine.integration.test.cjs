@@ -123,7 +123,9 @@ test("desktop engine downloads a video-extension payload from a local seeded tor
     console.log("[vivid-integration] stage: seeder announced");
 
     console.log("[vivid-integration] stage: construct download engine");
-    const originalUtpSupport = WebTorrent.UTP_SUPPORT;\n    WebTorrent.UTP_SUPPORT = false;\n    engine = new DesktopDownloadEngine({
+    const originalUtpSupport = WebTorrent.UTP_SUPPORT;
+    WebTorrent.UTP_SUPPORT = false;
+    engine = new DesktopDownloadEngine({
       app: {
         getPath(name) {
           return name === "downloads" ? downloadsPath : userDataPath;
@@ -133,6 +135,7 @@ test("desktop engine downloads a video-extension payload from a local seeded tor
       dialog: {},
       shell: {}
     });
+    WebTorrent.UTP_SUPPORT = originalUtpSupport;
 
     await withTimeout(engine.ready, 10000, "download engine initialization");
     console.log("[vivid-integration] stage: engine ready");
