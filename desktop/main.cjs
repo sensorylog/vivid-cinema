@@ -198,6 +198,18 @@ function configureDownloadEngine() {
     if (!isTrustedDownloadSender(event)) throw new Error("Untrusted download request");
     return downloadEngine.list();
   });
+  ipcMain.handle("vivid-playback-position-get", (event, id, fileIndex = 0) => {
+    if (!isTrustedDownloadSender(event)) throw new Error("Untrusted playback request");
+    return downloadEngine.getPlaybackPosition(id, fileIndex);
+  });
+  ipcMain.handle("vivid-playback-position-set", async (event, id, fileIndex = 0, seconds = 0) => {
+    if (!isTrustedDownloadSender(event)) throw new Error("Untrusted playback request");
+    return downloadEngine.setPlaybackPosition(id, fileIndex, seconds);
+  });
+  ipcMain.handle("vivid-playback-position-clear", async (event, id, fileIndex = 0) => {
+    if (!isTrustedDownloadSender(event)) throw new Error("Untrusted playback request");
+    return downloadEngine.clearPlaybackPosition(id, fileIndex);
+  });
   ipcMain.handle("vivid-download-media-url", (event, id, fileIndex = 0) => {
     if (!isTrustedDownloadSender(event)) throw new Error("Untrusted download request");
     if (!downloadEngine.mediaFile(id, fileIndex)) throw new Error("This download is not ready to play.");
