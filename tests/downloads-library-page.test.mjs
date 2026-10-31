@@ -42,3 +42,15 @@ test("desktop search result button leaves Starting state after the start request
   const desktop = await readFile(new URL("../scripts/downloads/desktop-offline.js", import.meta.url), "utf8");
   assert.match(desktop, /finally\s*\{[\s\S]*button\.disabled=false;button\.textContent="Download"/);
 });
+
+test("desktop torrent diagnostics expose tracker, DHT, peer and warning events", async () => {
+  const engine = await readFile(new URL("../desktop/download-engine.cjs", import.meta.url), "utf8");
+  const desktop = await readFile(new URL("../scripts/downloads/desktop-offline.js", import.meta.url), "utf8");
+  assert.match(engine, /torrent\.on\("trackerAnnounce"/);
+  assert.match(engine, /torrent\.on\("dhtAnnounce"/);
+  assert.match(engine, /torrent\.on\("noPeers"/);
+  assert.match(engine, /torrent\.on\("warning"/);
+  assert.match(engine, /this\.client\.on\("error"/);
+  assert.match(engine, /dhtListening: Boolean\(this\.client\.dht && this\.client\.dht\.listening\)/);
+  assert.match(desktop, /discoveryDetail/);
+});
