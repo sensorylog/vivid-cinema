@@ -56,3 +56,14 @@ body.vivid-downloads{margin:0;min-width:320px;background:#050608;color:#f5f6fb;f
 @media(max-width:700px){.downloads-shell{width:calc(100% - 32px);padding-top:16px}.downloads-intro{margin:54px auto 28px}.downloads-grid{grid-template-columns:1fr;gap:14px}.download-card{padding:23px;border-radius:20px}.download-card-copy{min-height:0;margin-bottom:20px}.downloads-trust{grid-template-columns:1fr;gap:8px}.downloads-trust>div{padding:13px}.downloads-footer{justify-content:center;text-align:center}.downloads-footer small{width:100%}}
 @media(max-width:380px){.downloads-shell{width:calc(100% - 24px)}.downloads-intro h1{font-size:40px}.downloads-intro>p{font-size:13px}.downloads-brand{font-size:16px}.downloads-brand img{width:34px;height:34px}.downloads-back{padding:9px 10px;font-size:11px}}
 @media(prefers-reduced-motion:reduce){.download-primary,.download-secondary{transition:none}}
+
+
+/* Honest status for the in-app movie and series download feature. */
+.downloads-feature-status{display:flex;align-items:center;gap:16px;margin-top:18px;padding:20px 22px;border:1px solid #8ba6ff30;border-radius:18px;background:linear-gradient(110deg,#7896ff12,#54d9bd08);box-shadow:0 16px 48px #0002}
+.downloads-feature-status-icon{display:grid;place-items:center;flex:0 0 44px;width:44px;height:44px;border:1px solid #8ba6ff30;border-radius:14px;color:#b9c9ff;background:#7896ff14;font-size:25px;font-weight:800}
+.downloads-feature-status>div:nth-child(2){min-width:0;flex:1}
+.downloads-feature-status-label{color:#aebeff;font-size:9px;font-weight:850;letter-spacing:.16em}
+.downloads-feature-status h2{margin:5px 0 4px;font-size:16px;letter-spacing:-.025em}
+.downloads-feature-status p{margin:0;color:#a4adbf;font-size:11px;line-height:1.65}
+.downloads-coming-soon{flex:0 0 auto;padding:7px 10px;border:1px solid #8ba6ff35;border-radius:999px;color:#c6d1ff;background:#7896ff12;font-size:9px;font-weight:850;letter-spacing:.1em}
+@media(max-width:560px){.downloads-feature-status{align-items:flex-start;flex-wrap:wrap;padding:17px}.downloads-feature-status>div:nth-child(2){flex-basis:calc(100% - 60px)}.downloads-coming-soon{margin-left:60px}}

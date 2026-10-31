@@ -26,8 +26,8 @@ test("downloads page resolves current assets from the latest GitHub release", ()
 test("download buttons have direct file fallbacks and wait for release lookup before navigating", () => {
   assert.match(script, /RELEASE_DOWNLOAD = .*releases\/latest\/download/);
   assert.match(script, /Vivid-Cinema-Android\.apk/);
-  assert.match(script, /Vivid-Cinema-Setup-1\.0\.22\.exe/);
-  assert.match(script, /Vivid-Cinema-Portable-1\.0\.22\.exe/);
+  assert.match(script, /Vivid-Cinema-Setup-1\.0\.27\.exe/);
+  assert.match(script, /Vivid-Cinema-Portable-1\.0\.27\.exe/);
   assert.match(script, /await releaseReady/);
   assert.match(script, /window\.location\.assign\(link\.href\)/);
   assert.match(script, /Keep direct download URLs usable during GitHub API outages/);
@@ -37,4 +37,12 @@ test("downloads page has responsive and keyboard-focus styles", () => {
   assert.match(styles, /@media\(max-width:700px\)/);
   assert.match(styles, /:focus-visible/);
   assert.match(styles, /prefers-reduced-motion/);
+});
+
+
+test("downloads page clearly marks movie and series downloads as coming soon", () => {
+  assert.match(html, /Movie &amp; TV downloads are coming soon/);
+  assert.match(html, /Direct movie and series downloads are not ready yet/);
+  assert.match(html, /COMING SOON/);
+  assert.match(styles, /downloads-feature-status/);
 });
