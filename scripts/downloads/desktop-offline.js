@@ -81,17 +81,32 @@ function syncPlayerControls(){
 byId("offline-play-toggle").addEventListener("click",()=>{if(player.paused)void player.play().catch(()=>{});else player.pause();});
 byId("offline-seek").addEventListener("input",event=>{if(Number.isFinite(player.duration))player.currentTime=player.duration*(Number(event.target.value)/1000);});
 byId("offline-volume").addEventListener("input",event=>{player.volume=Number(event.target.value);player.muted=player.volume===0;});
+byId("offline-speed").addEventListener("change",event=>{player.playbackRate=Number(event.target.value)||1;});
 byId("offline-fullscreen").addEventListener("click",async()=>{
   const section=byId("offline-player-section");
   try{if(document.fullscreenElement)await document.exitFullscreen();else await section.requestFullscreen();}
   catch{setMessage("Fullscreen is not available on this device.");}
 });
-player.addEventListener("timeupdate",syncPlayerControls);
-player.addEventListener("loadedmetadata",syncPlayerControls);
+let lastPositionSave=0;
+player.addEventListener("timeupdate",()=>{
+  syncPlayerControls();
+  if(player.dataset.jobId&&player.currentTime-lastPositionSave>=5){
+    lastPositionSave=player.currentTime;
+    localStorage.setItem("vivid:offline-position:"+player.dataset.jobId,String(Math.floor(player.currentTime)));
+  }
+});
+player.addEventListener("pause",()=>{
+  if(player.dataset.jobId&&player.currentTime>0)localStorage.setItem("vivid:offline-position:"+player.dataset.jobId,String(Math.floor(player.currentTime)));
+});
+player.addEventListener("loadedmetadata",()=>{
+  const saved=Number(localStorage.getItem("vivid:offline-position:"+player.dataset.jobId)||0);
+  if(saved>5&&Number.isFinite(player.duration)&&saved<player.duration-30)player.currentTime=saved;
+  syncPlayerControls();
+});
 player.addEventListener("durationchange",syncPlayerControls);
 player.addEventListener("play",syncPlayerControls);
 player.addEventListener("pause",syncPlayerControls);
-player.addEventListener("ended",syncPlayerControls);
+player.addEventListener("ended",()=>{if(player.dataset.jobId)localStorage.removeItem("vivid:offline-position:"+player.dataset.jobId);syncPlayerControls();});
 window.addEventListener("keydown",event=>{
   if(byId("offline-player-section").hidden||event.target.matches("input,textarea,select,button"))return;
   if(event.code==="Space"){event.preventDefault();if(player.paused)void player.play().catch(()=>{});else player.pause();}
