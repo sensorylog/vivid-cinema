@@ -12,8 +12,8 @@ function validIdentifier(value) {
   return /^[a-zA-Z0-9][a-zA-Z0-9_-]{2,79}$/.test(String(value || ""));
 }
 function validFilename(value) {
-  return typeof value === "string" && value.length <= 220 && !value.includes("/") && !value.includes("\\")
-    && !value.startsWith(".") && /^[\\p{L}\\p{N}][\\p{L}\\p{N}._() -]*$/u.test(value);
+  return typeof value === "string" && value.length <= 220
+    && !/[\/\\\u0000-\u001f]/.test(value) && !value.startsWith(".") && value !== "..";
 }
 export async function onRequest({ request, params }) {
   if (request.method !== "GET" && request.method !== "HEAD") return new Response("Method not allowed", { status: 405, headers: { Allow: "GET, HEAD" } });
