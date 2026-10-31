@@ -62,19 +62,19 @@ test("desktop engine downloads a real video file from a local seeded torrent", {
   let seeder;
   let engine;
   try {
-    tracker = new TrackerServer({ udp: false, http: false, ws: true, stats: false });
+    tracker = new TrackerServer({ udp: false, http: true, ws: false, stats: false });
     const trackerPort = await new Promise((resolve, reject) => {
       tracker.once("error", reject);
       tracker.listen(0, "127.0.0.1", () => {
-        const address = tracker.ws && tracker.ws.address();
+        const address = tracker.http && tracker.http.address();
         if (!address || typeof address.port !== "number") {
-          reject(new Error("Local WebSocket tracker did not bind to a port"));
+          reject(new Error("Local HTTP tracker did not bind to a port"));
           return;
         }
         resolve(address.port);
       });
     });
-    const trackerUrl = "ws://127.0.0.1:" + trackerPort;
+    const trackerUrl = "http://127.0.0.1:" + trackerPort + "/announce";
 
     seeder = new WebTorrent({ dht: false, tracker: { announce: [trackerUrl] } });
     const seedTorrent = await new Promise((resolve, reject) => {
