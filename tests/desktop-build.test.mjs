@@ -46,7 +46,7 @@ test("desktop runtime starts from the bundled local app and keeps hosted recover
   assert.match(main, /HOSTED_APP_URL = "https:\/\/vivid-cinema\.pages\.dev\/home\.html"/);
   assert.doesNotMatch(main, /vivid-cinema\.web\.app|FIREBASE_FALLBACK|fallbackToFirebase/);
   assert.match(main, /loadURL\(localOrigin \+ "\/home\.html"\)/);
-  assert.match(main, /bundled app first/);
+  assert.match(main, /bundled application first/);
   assert.match(main, /trying the hosted app/);
   assert.match(main, /loadURL\(HOSTED_APP_URL\)/);
   assert.doesNotMatch(main, /HOSTED_LOAD_TIMEOUT_MS|Cloudflare Pages app load timed out/);
