@@ -37,3 +37,8 @@ test("desktop downloads expose live transfer phases and accessible progress upda
   assert.match(desktop, /No peers connected/);
   assert.match(desktop, /role="progressbar"/);
 });
+
+test("desktop search result button leaves Starting state after the start request settles", async () => {
+  const desktop = await readFile(new URL("../scripts/downloads/desktop-offline.js", import.meta.url), "utf8");
+  assert.match(desktop, /finally\s*\{[\s\S]*button\.disabled=false;button\.textContent="Download"/);
+});
