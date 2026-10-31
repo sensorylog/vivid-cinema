@@ -14,6 +14,24 @@ class DesktopDownloadEngine {
   constructor({ app, BrowserWindow, dialog, shell }) {
     Object.assign(this, { app, BrowserWindow, dialog, shell });
     this.client = new WebTorrent({ uploadLimit: 0, seedOutgoingConnections: false });
+    this.clientError = null;
+    // WebTorrent can emit a client-level error when DHT/network discovery fails.
+    // Always handle it so a UDP/DHT failure cannot become an unhandled EventEmitter error.
+    this.client.on("error", error => {
+      this.clientError = safeText(error?.message || "Torrent engine failed", 240);
+      for (const job of this.jobs.values()) {
+        if (!job.torrent || !["downloading", "verifying"].includes(job.status)) continue;
+        if (job.statusTimer) clearInterval(job.statusTimer);
+        job.statusTimer = null;
+        job.status = "failed";
+        job.phase = "Torrent engine error";
+        job.needsRescan = true;
+        job.error = "Torrent engine stopped: " + this.clientError;
+        job.torrent = null;
+        this.send("vivid-download-error", { id: job.id, message: job.error });
+      }
+      void this.persist().catch(saveError => console.warn("Download state save failed:", saveError.message));
+    });
     this.jobs = new Map();
     this.searchResults = new Map();
     this.playbackPositions = new Map();
@@ -108,6 +126,7 @@ class DesktopDownloadEngine {
     await this.ready;
     const source = result && this.searchResults.get(String(result.id));
     if (!source) throw new Error("Search result expired. Search again and choose a result.");
+    if (this.client.destroyed) throw new Error(this.clientError || "The torrent engine stopped. Restart Vivid Cinema before trying again.");
     const magnet = result.magnet || await TorrentSearchApi.getMagnet(source);
     if (typeof magnet !== "string" || !magnet.startsWith("magnet:?")) throw new Error("No valid magnet link was returned.");
     const id = crypto.randomUUID();
@@ -171,7 +190,26 @@ class DesktopDownloadEngine {
       });
     });
     const publishWhenReady = () => { if (!job.needsRescan) publish(); };
+    const discovery = job.discovery = {
+      trackerCount: Array.isArray(torrent.announce) ? torrent.announce.length : 0,
+      trackerAnnounces: 0,
+      dhtAnnounces: 0,
+      noPeerAnnounces: 0,
+      lastNoPeerSource: null,
+      lastWarning: null
+    };
     torrent.on("metadata", publishWhenReady);
+    torrent.on("trackerAnnounce", () => { discovery.trackerAnnounces += 1; publishWhenReady(); });
+    torrent.on("dhtAnnounce", () => { discovery.dhtAnnounces += 1; publishWhenReady(); });
+    torrent.on("noPeers", source => {
+      discovery.noPeerAnnounces += 1;
+      discovery.lastNoPeerSource = safeText(source || "unknown", 24);
+      publishWhenReady();
+    });
+    torrent.on("warning", warning => {
+      discovery.lastWarning = safeText(warning?.message || warning || "Unknown discovery warning", 180);
+      publishWhenReady();
+    });
     torrent.on("wire", () => { if (job.torrent === torrent) { job.phase = "Connected · waiting for data"; publishWhenReady(); } });
     torrent.on("download", () => { if (job.torrent === torrent) job.phase = "Receiving data"; publishWhenReady(); });
     torrent.on("upload", publishWhenReady);
@@ -229,6 +267,16 @@ class DesktopDownloadEngine {
       id: job.id, title: job.title, media: job.media, status: job.status,
       progress: torrent ? roundProgress(torrent) : job.status === "completed" ? 100 : Number(job.progress) || 0,
       phase: job.phase || null,
+      discovery: job.discovery ? {
+        trackerCount: job.discovery.trackerCount,
+        trackerAnnounces: job.discovery.trackerAnnounces,
+        dhtAnnounces: job.discovery.dhtAnnounces,
+        noPeerAnnounces: job.discovery.noPeerAnnounces,
+        lastNoPeerSource: job.discovery.lastNoPeerSource,
+        lastWarning: job.discovery.lastWarning,
+        dhtEnabled: Boolean(this.client.dht),
+        dhtListening: Boolean(this.client.dht && this.client.dht.listening)
+      } : null,
       speed: torrent?.downloadSpeed || 0, downloaded: torrent?.downloaded || job.downloaded || 0,
       total: torrent?.length || job.total || fileSize || 0, peers: torrent?.numPeers || 0,
       filePath: job.filePath || null,
