@@ -102,6 +102,7 @@ engine.onProgress(payload=>{const index=jobs.findIndex(item=>item.id===payload.i
 engine.onComplete(()=>{void refresh();setMessage("Download complete. Your movie is ready to watch offline.");});
 engine.onError(payload=>{void refresh();setMessage(payload.message||"A download failed.");});
 byId("offline-owner").textContent="This device";
+byId("desktop-download-search").hidden=false;
 byId("offline-notice-copy").textContent="Downloads are saved to your computer in the Vivid Cinema folder. They remain available without an internet connection.";
 byId("offline-footnote").textContent="Your videos are stored on this device in the Vivid Cinema folder inside Downloads. Removing a download from Vivid does not silently delete your video files.";
 const pending=sessionStorage.getItem("vivid:pending-desktop-download");
