@@ -49,3 +49,28 @@
 .offline-episodes{display:grid;gap:6px;margin-top:12px}
 .offline-episodes button{display:block;width:100%;text-align:left;border:1px solid rgba(170,185,220,.14);border-radius:9px;background:rgba(255,255,255,.025);color:#cbd5e8;padding:9px 11px;font:500 11px/1.4 system-ui,sans-serif;overflow-wrap:anywhere;cursor:pointer}
 .offline-episodes button:hover{background:rgba(255,255,255,.08);border-color:rgba(141,138,255,.45)}
+
+/* Keep the download hub responsive on low-power desktop hardware. */
+html.vivid-performance-legacy .offline-notice,
+html.vivid-performance-legacy .offline-summary div,
+html.vivid-performance-legacy .offline-desktop-search,
+html.vivid-performance-legacy .offline-job,
+html.vivid-performance-legacy .offline-result,
+html.vivid-performance-legacy .offline-player-section {
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+html.vivid-performance-legacy .offline-notice,
+html.vivid-performance-legacy .offline-summary div,
+html.vivid-performance-legacy .offline-desktop-search,
+html.vivid-performance-legacy .offline-result,
+html.vivid-performance-legacy .offline-player-section {
+  background: #0b0e16;
+}
+html.vivid-performance-legacy .offline-job-actions button,
+html.vivid-performance-legacy .offline-search-row button,
+html.vivid-performance-legacy .offline-search-results button {
+  background-image: none;
+  transition: none;
+}
