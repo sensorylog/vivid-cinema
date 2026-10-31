@@ -57,6 +57,28 @@ test("rejects misleading license URLs and unsafe or private file names", async (
   assert.deepEqual(item.files, []);
 });
 
+test("resolves only the selected approved file to an archive subdomain", async () => {
+  const source = createInternetArchiveSource({ fetchImpl: async () => response({
+    metadata: { title: "Film", licenseurl: "https://creativecommons.org/licenses/by/4.0/" },
+    d1: "ia800123.us.archive.org", dir: "/12/items/film_1935",
+    files: [{ name: "film.m4v", size: "2000" }]
+  })});
+  const result = await source.resolve({ media: { source_id: "film_1935", source_file: "film.m4v" } });
+  assert.equal(result.url, "https://ia800123.us.archive.org/12/items/film_1935/film.m4v");
+  assert.equal(result.mimeType, "video/mp4");
+});
+
+test("mismatched item paths never expose files", async () => {
+  const source = createInternetArchiveSource({ fetchImpl: async () => response({
+    metadata: { title: "Film", licenseurl: "https://creativecommons.org/publicdomain/zero/1.0/" },
+    d1: "ia800123.us.archive.org", dir: "/12/items/another_item",
+    files: [{ name: "film.mp4", size: "100" }]
+  })});
+  const item = await source.getItem("film_1935");
+  assert.equal(item.rightsApproved, true);
+  assert.deepEqual(item.files, []);
+});
+
 test("rejects malformed identifiers and redirected catalogue responses", async () => {
   const source = createInternetArchiveSource({ fetchImpl: async () => ({ ok: true, redirected: true, async json() { return {}; } }) });
   await assert.rejects(source.getItem("../bad"), /Invalid Internet Archive/);
