@@ -49,9 +49,12 @@ test("supports Creative Commons licences and safe direct-download proxy URLs", a
   const [option] = await provider.getOptions({ ...movie, title: "CC Movie" });
   const source = await provider.resolve({ media: { source_file: option.id } });
   const url = new URL(source.url);
-  assert.equal(url.origin, "https://vivid.example");
-  assert.equal(url.pathname, "/api/ia-download/cc_movie/cc-movie.webm");
-  assert.deepEqual(source.allowedHosts, ["vivid.example"]);
+  assert.equal(url.origin, "https://us-central1-vivid-cinema.cloudfunctions.net");
+  assert.equal(url.pathname, "/downloadMedia");
+  assert.equal(url.searchParams.get("source"), "internet-archive");
+  assert.equal(url.searchParams.get("identifier"), "cc_movie");
+  assert.equal(url.searchParams.get("filename"), "cc-movie.webm");
+  assert.deepEqual(source.allowedHosts, ["us-central1-vivid-cinema.cloudfunctions.net"]);
   assert.equal(source.mimeType, "video/webm");
 });
 
