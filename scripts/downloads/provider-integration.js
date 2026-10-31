@@ -9,7 +9,9 @@ export const VIVID_DOWNLOADS = Object.freeze({
   sourceId: "automatic",
   async getOptions(media, context) {
     const results = await Promise.allSettled([...providers.values()].map(provider => provider.getOptions(media, context)));
-    return results.flatMap(result => result.status === "fulfilled" ? result.value : [])
+    const successful = results.filter(result => result.status === "fulfilled");
+    if (!successful.length) throw new Error("Could not reach either public video archive. Check your connection and try again.");
+    return successful.flatMap(result => result.value)
       .sort((a, b) => (b.size || 0) - (a.size || 0));
   },
   async resolve(job, context) {
