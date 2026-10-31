@@ -182,13 +182,14 @@ export class DownloadManager {
       this.emit();
       const result = await this.adapter.download(copy(job), {
         signal: controller.signal,
-        onProgress: ({ bytesDownloaded = 0, totalBytes = null } = {}) => {
+        onProgress: ({ bytesDownloaded = 0, totalBytes = null, progress: reportedProgress = null } = {}) => {
           if (controller.signal.aborted || job.status !== "downloading") return;
           const bytes = Math.max(0, Number(bytesDownloaded) || 0);
           const total = Number.isFinite(Number(totalBytes)) && Number(totalBytes) > 0 ? Number(totalBytes) : null;
           job.bytesDownloaded = bytes;
           job.totalBytes = total;
-          job.progress = total ? Math.min(99, Math.max(job.progress, Math.floor(bytes / total * 100))) : job.progress;
+          const reported = Number(reportedProgress);
+          job.progress = Number.isFinite(reported) ? Math.min(99, Math.max(job.progress, Math.floor(reported))) : total ? Math.min(99, Math.max(job.progress, Math.floor(bytes / total * 100))) : job.progress;
           job.updatedAt = this.now();
           this.emit();
           void this.persist();
