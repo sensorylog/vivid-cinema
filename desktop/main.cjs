@@ -66,7 +66,7 @@ function createLocalServer(root) {
         "Content-Type": mimeTypes[path.extname(target).toLowerCase()] || "application/octet-stream",
         "X-Content-Type-Options": "nosniff",
         "Referrer-Policy": "strict-origin-when-cross-origin",
-        "Cache-Control": "no-store"
+        "Cache-Control": "no-cache"
       });
       if (req.method === "HEAD") return res.end();
       const stream = fs.createReadStream(target);
@@ -82,7 +82,6 @@ let downloadEngine;
 const mediaToken = crypto.randomBytes(32).toString("hex");
 const HOSTED_APP_URL = "https://vivid-cinema.pages.dev/home.html";
 const HOSTED_APP_ORIGIN = new URL(HOSTED_APP_URL).origin;
-const HOSTED_LOAD_TIMEOUT_MS = 12000;
 // Keep the offline fallback on one origin so Firebase Auth and onboarding storage survive relaunches.
 const LOCAL_SERVER_PORT = 43821;
 const supportsOneClickUpdates = app.isPackaged && process.platform === "win32" &&
@@ -362,11 +361,15 @@ function createWindow() {
       void win.loadURL(localOrigin + "/my-downloads.html").catch(error => console.warn("Vivid offline library could not be opened:", error?.message || error));
       return;
     }
-    hostedLoadTimeout = setTimeout(
-      () => fallbackToLocal("Cloudflare Pages app load timed out after " + Math.round(HOSTED_LOAD_TIMEOUT_MS / 1000) + " seconds"),
-      HOSTED_LOAD_TIMEOUT_MS
-    );
-    void win.loadURL(HOSTED_APP_URL).catch(error => fallbackToLocal(error?.message || "Cloudflare Pages navigation failed"));
+    // Load the bundled application first. The shell is local and should never
+    // wait for a slow or unavailable internet connection to become interactive.
+    // Catalogue, account and provider data continue to use their normal services.
+    void win.loadURL(localOrigin + "/home.html").catch(error => {
+      console.warn("Vivid bundled app could not be opened; trying the hosted app:", error?.message || error);
+      void win.loadURL(HOSTED_APP_URL).catch(hostedError => {
+        showAppRecoveryPage(hostedError?.message || error?.message || "Both local and hosted app startup failed");
+      });
+    });
   });
   win.webContents.on("did-fail-load", (_event, errorCode, errorDescription, validatedURL, isMainFrame) => {
     if (!isMainFrame || errorCode === -3) return;
@@ -377,13 +380,16 @@ function createWindow() {
     if (!isHostedApp && !isLocalApp) return;
 
     const reason = errorCode + " " + errorDescription;
-    if (isHostedApp && !hostedAppLoaded) {
+    if (isLocalApp && !localAppLoaded) {
+      console.warn("Vivid bundled app failed during startup; trying hosted recovery:", reason);
+      void win.loadURL(HOSTED_APP_URL).catch(error => showAppRecoveryPage(error?.message || reason));
+      return;
+    }
+    if (isHostedApp && !hostedAppLoaded && !localAppLoaded) {
       if (!localFallbackStarted) fallbackToLocal(reason);
       return;
     }
 
-    // Recover failures after startup on either trusted app origin. The old
-    // handler ignored all post-startup failures, leaving a black window.
     const retryUrl = isHostedApp ? HOSTED_APP_URL : localOrigin + "/home.html";
     recoverAppNavigation(retryUrl, reason);
   });
@@ -395,6 +401,12 @@ function createWindow() {
     }
     if (localOrigin && (localAppLoaded || localFallbackStarted)) {
       recoverAppNavigation(localOrigin + "/home.html", reason);
+      return;
+    }
+    if (!localAppLoaded && localOrigin) {
+      void win.loadURL(localOrigin + "/home.html").catch(error => {
+        void win.loadURL(HOSTED_APP_URL).catch(hostedError => showAppRecoveryPage(hostedError?.message || error?.message || reason));
+      });
       return;
     }
     if (!localFallbackStarted) fallbackToLocal(reason);
