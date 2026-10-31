@@ -10,3 +10,6 @@
 .offline-progress{height:4px;background:rgba(255,255,255,.1);border-radius:9px;overflow:hidden;margin-top:10px}.offline-progress span{display:block;height:100%;background:linear-gradient(90deg,#52c7ff,#8b7cff);width:0}
 .offline-footnote{margin:30px 0 18px;color:#8491a8;font-size:11px;line-height:1.65}.offline-back{color:#c5d0e8;text-decoration:none;font-size:13px}
 @media(max-width:600px){.offline-library{width:min(100% - 28px,980px);margin-top:32px}.offline-notice{padding:17px}.offline-job{grid-template-columns:1fr}.offline-job-actions{justify-content:flex-start}.offline-summary div{padding:14px}.offline-summary strong{font-size:23px}}
+
+.offline-player-section{margin:32px 0;padding:20px;border:1px solid rgba(150,165,195,.2);border-radius:18px;background:#090d16}.offline-player-section[hidden]{display:none}.offline-player-heading{display:flex;justify-content:space-between;align-items:center;gap:12px}.offline-player-heading h2{font-size:19px}.offline-player-section video{display:block;width:100%;max-height:65vh;background:#000;border-radius:12px}.offline-player-section>p{color:#9ca8bd;font-size:11px}
+@media(max-width:600px){.offline-player-heading{align-items:flex-start}}
