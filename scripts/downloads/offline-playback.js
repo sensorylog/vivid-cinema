@@ -62,9 +62,6 @@ export function createOfflinePlaybackController({ adapter, video } = {}) {
       try { activeHls.destroy(); } catch {}
       activeHls = null;
     }
-    try { video.pause(); } catch {}
-    video.removeAttribute?.("src");
-    try { video.load(); } catch {}
     const previousUrl = activeUrl;
     const previousAsset = activeAsset;
     activeUrl = null;
@@ -72,6 +69,9 @@ export function createOfflinePlaybackController({ adapter, video } = {}) {
     if (previousAsset?.uri?.startsWith("offline:")) {
       try { await adapter.stopAsset?.(); } catch {}
     }
+    try { video.pause(); } catch {}
+    video.removeAttribute?.("src");
+    try { video.load(); } catch {}
     revokeAsset(previousAsset, previousUrl);
   }
 
