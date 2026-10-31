@@ -128,3 +128,31 @@ test("cancellation waits for transfer shutdown before deleting partial output", 
   assert.equal(cleanupSawPartial, true);
   assert.equal(manager.snapshot()[0].status, "cancelled");
 });
+
+test("a transient metadata-save failure releases the worker and the queue continues", async () => {
+  let saves = 0;
+  let failedOnce = false;
+  let data = [];
+  const persistence = {
+    async load() { return structuredClone(data); },
+    async save(value) {
+      saves += 1;
+      if (saves === 3 && !failedOnce) {
+        failedOnce = true;
+        throw new Error("temporary storage failure");
+      }
+      data = structuredClone(value);
+    }
+  };
+  const adapter = { download: async () => ({ uri: "file:///offline/ok.mp4", mimeType: "video/mp4", size: 10 }) };
+  let id = 0;
+  const manager = new DownloadManager({ persistence, adapter, idFactory: () => "persist-" + (++id) });
+  await manager.hydrate();
+  const first = await manager.enqueue(movie);
+  await tick();
+  assert.equal(manager.snapshot().find(job => job.id === first.id).status, "failed");
+  assert.equal(manager.running, 0);
+  const second = await manager.enqueue({ id: 551, media_type: "movie", title: "The Matrix" });
+  await tick();
+  assert.equal(manager.snapshot().find(job => job.id === second.id).status, "completed");
+});
