@@ -363,7 +363,7 @@ function render(details, externalCertification = "", externalCertificationNote =
       '<div class="vivid-title-copy"><span class="vivid-title-kicker">'+(media.media_type==="tv"?"TV SERIES":"MOVIE")+'</span><h1>'+escapeHtml(title)+'</h1>'+
       '<div class="vivid-title-meta"><span>'+escapeHtml(year)+'</span>'+(runtime?'<i></i><span>'+escapeHtml(runtime)+'</span>':"")+'<i></i><span>★ '+rating+'</span></div>'+
       '<div class="vivid-title-genres">'+genres+'</div><p>'+escapeHtml(media.overview||"No synopsis is available for this title yet.")+'</p>'+
-      '<div class="vivid-title-actions">'+(isUpcoming?'<span class="vivid-title-release-status" role="status"><i class="bi bi-calendar-event"></i> Coming soon · Not released yet</span>':'<a class="vivid-button vivid-button--primary" href="'+escapeHtml(titleWatchUrl)+'"><i class="bi bi-play-fill"></i> '+(hasResume?"Resume":"Watch now")+'</a>')+(firstTrailer?'<button class="vivid-button vivid-button--secondary" id="hero-trailer" type="button"><i class="bi bi-play-circle"></i> Watch trailer</button>':(isUpcoming?'<span class="vivid-muted">Trailer not available yet</span>':""))+'<a class="vivid-button vivid-button--ghost" href="home.html"><i class="bi bi-arrow-left"></i> Browse more</a></div></div></div></section>'+
+      '<div class="vivid-title-actions">'+(isUpcoming?'<span class="vivid-title-release-status" role="status"><i class="bi bi-calendar-event"></i> Coming soon · Not released yet</span>':'<a class="vivid-button vivid-button--primary" href="'+escapeHtml(titleWatchUrl)+'"><i class="bi bi-play-fill"></i> '+(hasResume?"Resume":"Watch now")+'</a>')+(firstTrailer?'<button class="vivid-button vivid-button--secondary" id="hero-trailer" type="button"><i class="bi bi-play-circle"></i> Watch trailer</button>':(isUpcoming?'<span class="vivid-muted">Trailer not available yet</span>':""))+(isUpcoming?"":'<button class="vivid-button vivid-button--secondary" id="title-download" type="button"><i class="bi bi-download"></i> Download</button>')+'<a class="vivid-button vivid-button--ghost" href="home.html"><i class="bi bi-arrow-left"></i> Browse more</a></div></div></div></section>'+
     renderLibraryActions()+
     renderInformation(details, country, externalCertification, externalCertificationNote)+
     renderTrailerSection(details)+
@@ -384,6 +384,56 @@ function render(details, externalCertification = "", externalCertificationNote =
     if (item) recordBehavior("recommendation_clicked", item, { surface: "title" });
   });
   if(firstTrailer)$("hero-trailer").addEventListener("click",()=>openTrailer(firstTrailer.key,firstTrailer.name||"Trailer"));
+  if (!isUpcoming) $("#title-download")?.addEventListener("click", () => openTitleDownload());
+}
+
+function openTitleDownload() {
+  if (!media || !currentDetails) return;
+  const isTv = media.media_type === "tv";
+  const modal = document.createElement("div");
+  modal.className = "vivid-download-modal";
+  modal.innerHTML = '<section class="vivid-download-dialog" role="dialog" aria-modal="true" aria-labelledby="vivid-download-title"><button class="vivid-download-close" type="button" aria-label="Close">×</button><p>OFFLINE DOWNLOAD</p><h2 id="vivid-download-title">Download ' + (isTv ? 'an episode' : 'this movie') + '</h2><div class="vivid-download-selection">' + (isTv ? '<label>Season <select id="download-season"></select></label><label>Episode <select id="download-episode"></select></label>' : '<p>' + escapeHtml(media.title) + '</p>') + '</div><div class="vivid-download-options" id="vivid-download-options" aria-live="polite"><p>Checking available download qualities…</p></div><p class="vivid-download-note">Only download options supplied by an authorized source are shown.</p></section>';
+  document.body.appendChild(modal);
+  const close = () => modal.remove();
+  modal.querySelector(".vivid-download-close").addEventListener("click", close);
+  modal.addEventListener("click", event => { if (event.target === modal) close(); });
+  const seasons = (currentDetails.seasons || []).filter(item => Number(item.episode_count) > 0 && Number(item.season_number) >= 0);
+  const seasonSelect = modal.querySelector("#download-season");
+  const episodeSelect = modal.querySelector("#download-episode");
+  let request = 0;
+  async function loadOptions() {
+    const run = ++request;
+    const season = Number(seasonSelect?.value || 1), episode = Number(episodeSelect?.value || 1);
+    const mediaRequest = { id: String(media.id), media_type: media.media_type, title: media.title, year: media.year || "", poster_path: media.poster_path || "", season: isTv ? season : null, episode: isTv ? episode : null };
+    const slot = modal.querySelector("#vivid-download-options"), integration = globalThis.VIVID_DOWNLOADS;
+    if (typeof integration?.getOptions !== "function") { slot.innerHTML = '<p class="vivid-download-empty">Download options are not connected yet. Streaming players do not automatically provide downloadable files. Vivid needs an authorized download provider before it can show real qualities or start a file transfer.</p>'; return; }
+    slot.innerHTML = '<p>Finding available qualities…</p>';
+    try {
+      const options = await integration.getOptions(mediaRequest);
+      if (run !== request || !slot.isConnected) return;
+      const safeOptions = Array.isArray(options) ? options.filter(option => option && typeof option.id === "string" && typeof option.label === "string") : [];
+      if (!safeOptions.length) { slot.innerHTML = '<p class="vivid-download-empty">No authorized downloadable files are available for this ' + (isTv ? 'episode' : 'movie') + '.</p>'; return; }
+      slot.innerHTML = safeOptions.map(option => '<button type="button" class="vivid-download-option" data-option="' + escapeHtml(option.id) + '"><strong>' + escapeHtml(option.label) + '</strong><span>' + escapeHtml([option.format, option.sizeLabel || option.size || ""].filter(Boolean).join(" · ")) + '</span></button>').join("");
+      slot.querySelectorAll("[data-option]").forEach(button => button.addEventListener("click", () => {
+        const option = safeOptions.find(item => item.id === button.dataset.option); if (!option) return;
+        sessionStorage.setItem("vivid:pending-download", JSON.stringify({ media: mediaRequest, option: { id: String(option.id), label: String(option.label), quality: String(option.quality || option.label), format: String(option.format || ""), size: Number(option.size) || null } }));
+        window.location.href = "my-downloads.html?start=1";
+      }));
+    } catch (error) { if (run === request && slot.isConnected) slot.innerHTML = '<p class="vivid-download-empty">Could not load download options: ' + escapeHtml(error?.message || error) + '</p>'; }
+  }
+  if (isTv) {
+    const available = seasons.length ? seasons : [{ season_number: 1, episode_count: 1 }];
+    seasonSelect.innerHTML = available.map(item => '<option value="' + Number(item.season_number) + '">Season ' + Number(item.season_number) + '</option>').join("");
+    async function loadEpisodes() {
+      try {
+        const data = await tmdbApi.tvSeason(media.id, Number(seasonSelect.value || 1));
+        if (!episodeSelect.isConnected) return;
+        episodeSelect.innerHTML = (data.episodes || []).map(item => '<option value="' + Number(item.episode_number) + '">Episode ' + Number(item.episode_number) + ' · ' + escapeHtml(item.name || "") + '</option>').join("");
+        await loadOptions();
+      } catch { episodeSelect.innerHTML = '<option value="1">Episode 1</option>'; await loadOptions(); }
+    }
+    seasonSelect.addEventListener("change", loadEpisodes); episodeSelect.addEventListener("change", loadOptions); void loadEpisodes();
+  } else void loadOptions();
 }
 
 function renderPersonPage(person) {
