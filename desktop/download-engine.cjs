@@ -16,6 +16,7 @@ class DesktopDownloadEngine {
     this.client = new WebTorrent({ uploadLimit: 0, seedOutgoingConnections: false });
     this.jobs = new Map();
     this.searchResults = new Map();
+    this.playbackPositions = new Map();
     this.persistQueue = Promise.resolve();
     this.downloadPath = path.join(app.getPath("downloads"), "Vivid Cinema");
     this.statePath = path.join(app.getPath("userData"), "vivid-downloads.json");
@@ -38,7 +39,7 @@ class DesktopDownloadEngine {
       error: job.error || null, progress: job.progress || 0, downloaded: job.downloaded || 0, total: job.total || 0,
       needsRescan: Boolean(job.needsRescan), createdAt: job.createdAt, updatedAt: Date.now()
     }));
-    const state = JSON.stringify({ version: 1, downloadPath: this.downloadPath, jobs: rows }, null, 2);
+    const state = JSON.stringify({ version: 1, downloadPath: this.downloadPath, jobs: rows, playbackPositions: Object.fromEntries(this.playbackPositions) }, null, 2);
     this.persistQueue = this.persistQueue.catch(() => {}).then(async () => {
       await fsp.mkdir(path.dirname(this.statePath), { recursive: true });
       const temporary = this.statePath + ".tmp";
@@ -51,6 +52,11 @@ class DesktopDownloadEngine {
   async restore() {
     try {
       const state = JSON.parse(await fsp.readFile(this.statePath, "utf8"));
+      if (state.playbackPositions && typeof state.playbackPositions === "object") {
+        for (const [key, value] of Object.entries(state.playbackPositions)) {
+          if (typeof key === "string" && Number.isFinite(Number(value)) && Number(value) >= 0) this.playbackPositions.set(key, Number(value));
+        }
+      }
       if (typeof state.downloadPath === "string" && path.isAbsolute(state.downloadPath)) {
         this.downloadPath = state.downloadPath;
       }
@@ -200,6 +206,31 @@ class DesktopDownloadEngine {
       files: (job.files || []).map((file, index) => ({ index, name: file.name, size: file.size })),
       error: job.error || null, createdAt: job.createdAt
     };
+  }
+
+  playbackPositionKey(id, fileIndex = 0) {
+    const index = Number(fileIndex);
+    if (!Number.isInteger(index) || index < 0) throw new Error("Invalid video index.");
+    return String(id) + ":" + index;
+  }
+
+  getPlaybackPosition(id, fileIndex = 0) {
+    return this.playbackPositions.get(this.playbackPositionKey(id, fileIndex)) || 0;
+  }
+
+  async setPlaybackPosition(id, fileIndex = 0, seconds = 0) {
+    const job = this.jobs.get(String(id));
+    const value = Number(seconds);
+    if (!job || job.status !== "completed" || !Number.isFinite(value) || value < 0) return false;
+    this.playbackPositions.set(this.playbackPositionKey(id, fileIndex), Math.floor(value));
+    await this.persist();
+    return true;
+  }
+
+  async clearPlaybackPosition(id, fileIndex = 0) {
+    this.playbackPositions.delete(this.playbackPositionKey(id, fileIndex));
+    await this.persist();
+    return true;
   }
 
   mediaFile(id, fileIndex = 0) {
