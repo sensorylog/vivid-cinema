@@ -113,5 +113,5 @@ test("cancellation cleans partial output", async () => {
 test("requires an explicit resolver, host allowlist and OPFS support", () => {
   assert.throws(() => createBrowserDownloadAdapter({}), /resolver/);
   assert.throws(() => createBrowserDownloadAdapter({ resolve() {}, storage: fakeOPFS().storage }), /authorized download host/);
-  assert.throws(() => createBrowserDownloadAdapter({ resolve() {}, allowedHosts: ["media.example.test"], storage: {} }), /OPFS/);
+  assert.throws(() => createBrowserDownloadAdapter({ resolve() {}, allowedHosts: ["media.example.test"], storage: {} }), /Origin Private File System/);
 });
