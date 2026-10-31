@@ -6,6 +6,7 @@ contextBridge.exposeInMainWorld("vividDownloads", Object.freeze({
   search: query => ipcRenderer.invoke("vivid-download-search", query),
   start: (result, media) => ipcRenderer.invoke("vivid-download-start", result, media),
   list: () => ipcRenderer.invoke("vivid-download-list"),
+  mediaUrl: id => ipcRenderer.invoke("vivid-download-media-url", id),
   chooseFolder: () => ipcRenderer.invoke("vivid-download-folder"),
   control: (id, action) => ipcRenderer.invoke("vivid-download-control", id, action),
   onProgress: callback => {
@@ -30,6 +31,14 @@ contextBridge.exposeInMainWorld("vividDownloads", Object.freeze({
 
 const trustedHosts = new Set(["vivid-cinema.pages.dev", "localhost"]);
 if (trustedHosts.has(location.hostname)) {
+  window.addEventListener("offline", async () => {
+    try {
+      const offlineUrl = await ipcRenderer.invoke("vivid-offline-url");
+      if (offlineUrl && location.href !== offlineUrl) location.replace(offlineUrl);
+    } catch (error) {
+      console.warn("Vivid could not open the offline library:", error?.message || error);
+    }
+  });
   let latestStatus = null;
   let banner = null;
   let message = null;
