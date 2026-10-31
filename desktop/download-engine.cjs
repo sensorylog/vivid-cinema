@@ -60,7 +60,7 @@ class DesktopDownloadEngine {
         const status = row.status === "completed" && row.filePath && fs.existsSync(row.filePath)
           ? "completed"
           : ["cancelled", "failed"].includes(row.status) ? row.status : "paused";
-        this.jobs.set(row.id, { ...row, downloadPath: path.isAbsolute(row.downloadPath || "") ? row.downloadPath : this.downloadPath, needsRescan: status === "paused" && Number(row.downloaded) > 0, status, torrent: null, error: row.error || null });
+        this.jobs.set(row.id, { ...row, downloadPath: path.isAbsolute(row.downloadPath || "") ? row.downloadPath : this.downloadPath, needsRescan: !["completed", "cancelled"].includes(status) && Number(row.downloaded) > 0, status, torrent: null, error: row.error || null });
       }
       await this.persist();
     } catch (error) {
@@ -173,6 +173,7 @@ class DesktopDownloadEngine {
     torrent.on("error", error => {
       if (job.status === "cancelled" || job.status === "paused") return;
       job.status = "failed";
+      job.needsRescan = Number(job.downloaded) > 0;
       job.error = safeText(error?.message || "Download failed", 300);
       job.torrent = null;
       publish();
