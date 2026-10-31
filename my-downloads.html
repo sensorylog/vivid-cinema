@@ -27,9 +27,27 @@
   <section class="offline-notice" aria-labelledby="offline-status-title">
     <div class="offline-notice-icon" aria-hidden="true">↓</div>
     <div>
-      <h2 id="offline-status-title">Download sources aren’t connected yet</h2>
-      <p>Vivid can manage saved download jobs, but downloading new movies or episodes stays unavailable until an authorized direct-file source is configured. Your streaming providers are not treated as download sources.</p>
+      <h2 id="offline-status-title">Internet Archive test downloads are connected</h2>
+      <p>Search the Internet Archive catalogue for films with supported public-domain or Creative Commons license declarations. Vivid checks item metadata before enabling direct video-file downloads. Your streaming providers are not treated as download sources, and item rights still need your review. Creative Commons files may carry attribution or share-alike conditions.</p>
     </div>
+  </section>
+  <section class="archive-browser" aria-labelledby="archive-browser-title">
+    <div class="archive-browser-heading">
+      <p class="offline-eyebrow">AUTHORIZED TEST CATALOGUE</p>
+      <h2 id="archive-browser-title">Find downloadable films</h2>
+      <p>Search Internet Archive’s movie collection. Vivid only enables downloads when an item declares a supported public-domain or Creative Commons license.</p>
+    </div>
+    <form id="archive-search-form" class="archive-search">
+      <label for="archive-search-query">Movie title or keyword</label>
+      <div><input id="archive-search-query" type="search" minlength="2" maxlength="100" placeholder="Search public-domain films…" required><button type="submit">Search films</button></div>
+    </form>
+    <p id="archive-search-message" class="offline-message" role="status" aria-live="polite">Search the Internet Archive catalogue to find test downloads.</p>
+    <div id="archive-results" class="archive-results"></div>
+  </section>
+  <section id="offline-player-section" class="offline-player-section" hidden aria-label="Offline video player">
+    <div class="offline-player-heading"><h2 id="offline-player-title">Offline playback</h2><button id="offline-player-close" type="button">Close player</button></div>
+    <video id="offline-player" controls playsinline preload="metadata"></video>
+    <p>Playing a file saved in this browser’s private device storage.</p>
   </section>
   <section class="offline-summary" aria-label="Download totals">
     <div><strong id="offline-total">0</strong><span>All items</span></div>
@@ -44,7 +62,7 @@
     <p id="offline-message" class="offline-message" role="status" aria-live="polite">Loading your download library…</p>
     <div id="offline-jobs" class="offline-jobs"></div>
   </section>
-  <p class="offline-footnote">Download records are stored separately for each Vivid account on this device. When browser downloads are enabled, video files will use browser-managed device storage, which can be cleared by the operating system or browser.</p>
+  <p class="offline-footnote">Download records are stored separately for each Vivid account on this device. Video files are saved in this browser’s private site storage (OPFS), not the public Downloads folder; the browser or operating system may clear that storage.</p>
   <a class="offline-back" href="home.html">← Back to Vivid Cinema</a>
 </main>
 <script type="module" src="scripts/my-downloads.js"></script>

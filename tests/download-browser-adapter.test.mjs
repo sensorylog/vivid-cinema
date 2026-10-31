@@ -80,7 +80,24 @@ test("rejects redirects and non-video responses", async () => {
     allowedHosts: ["media.example.test"], storage: opfs.storage, fetchImpl
   });
   await assert.rejects(makeAdapter(async () => new Response("", { status: 302 })).download(job), /direct file response/);
-  await assert.rejects(makeAdapter(async () => new Response("not video", { headers: { "content-type": "text/html" } })).download(job), /Only direct video-file/);
+  await assert.rejects(makeAdapter(async () => new Response("not video", { headers: { "content-type": "text/html" } })).download(job), /not a video file/);
+});
+
+test("accepts generic binary transport only when the authorized resolver declares a video MIME type", async () => {
+  const opfs = fakeOPFS();
+  const adapter = createBrowserDownloadAdapter({
+    resolve: async () => ({ url: "https://media.example.test/movie.mp4", mimeType: "video/mp4" }),
+    allowedHosts: ["media.example.test"], storage: opfs.storage,
+    fetchImpl: async () => videoResponse(undefined, { "content-type": "application/octet-stream" })
+  });
+  const asset = await adapter.download(job);
+  assert.equal(asset.mimeType, "video/mp4");
+  const htmlAdapter = createBrowserDownloadAdapter({
+    resolve: async () => ({ url: "https://media.example.test/movie.mp4", mimeType: "video/mp4" }),
+    allowedHosts: ["media.example.test"], storage: opfs.storage,
+    fetchImpl: async () => videoResponse(undefined, { "content-type": "text/html" })
+  });
+  await assert.rejects(htmlAdapter.download({ ...job, id: "job_html" }), /not a video file/);
 });
 
 test("enforces a streaming size limit and removes partial output", async () => {

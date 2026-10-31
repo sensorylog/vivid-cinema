@@ -56,7 +56,7 @@ export function createBrowserDownloadAdapter({
     async download(job, { signal, onProgress = () => {} } = {}) {
       const id = validateJobId(job?.id);
       if (signal?.aborted) throw new DOMException("Download aborted.", "AbortError");
-      const source = await resolve(job);
+      const source = await resolve(job, { signal });
       const url = validateAllowedHttpsUrl(source?.url, allowedHosts);
       if (!url) throw new Error("The download source URL is not HTTPS or its host is not authorized.");
       const response = await fetchImpl(url.href, {
@@ -69,7 +69,12 @@ export function createBrowserDownloadAdapter({
         signal
       });
       if (!response?.ok || response.redirected) throw new Error("The authorized source did not return a direct file response.");
-      const mimeType = String(response.headers?.get?.("content-type") || source.mimeType || "").split(";")[0].trim().toLowerCase();
+      const responseMime = String(response.headers?.get?.("content-type") || "").split(";")[0].trim().toLowerCase();
+      const declaredMime = String(source.mimeType || "").split(";")[0].trim().toLowerCase();
+      if (responseMime && !VIDEO_MIME.test(responseMime) && !["application/octet-stream", "binary/octet-stream"].includes(responseMime)) {
+        throw new Error("The source response is not a video file.");
+      }
+      const mimeType = VIDEO_MIME.test(responseMime) ? responseMime : declaredMime;
       if (!VIDEO_MIME.test(mimeType)) throw new Error("Only direct video-file responses are supported by this browser adapter.");
       const declaredLength = Number(response.headers?.get?.("content-length"));
       if (Number.isFinite(declaredLength) && declaredLength > byteLimit) throw new Error("The video file exceeds the configured download size limit.");

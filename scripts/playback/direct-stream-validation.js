@@ -8,7 +8,7 @@ export function normalizeAllowedHosts(hosts) {
     try {
       const parsed = new URL("https://" + host);
       if (parsed.hostname !== host || parsed.username || parsed.password || parsed.port || parsed.pathname !== "/" || parsed.search || parsed.hash) return [];
-      return [parsed.hostname];
+      return [host.startsWith("*.") ? "*." + parsed.hostname.slice(2) : parsed.hostname];
     } catch {
       return [];
     }
@@ -26,7 +26,8 @@ export function validateAllowedHttpsUrl(value, hosts) {
   if (url.protocol !== "https:" || url.username || url.password) return null;
   if (url.port && url.port !== "443") return null;
   const allowed = normalizeAllowedHosts(hosts);
-  if (!allowed.includes(url.hostname.toLowerCase())) return null;
+  const hostname = url.hostname.toLowerCase();
+  if (!allowed.some(host => host.startsWith("*.") ? hostname.endsWith("." + host.slice(2)) && hostname !== host.slice(2) : host === hostname)) return null;
   return url;
 }
 

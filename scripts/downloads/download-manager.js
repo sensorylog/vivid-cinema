@@ -20,7 +20,9 @@ function normalizeMedia(input = {}) {
   return {
     id, media_type: mediaType, title, season, episode,
     year: String(input.year ?? "").slice(0, 8),
-    poster_path: String(input.poster_path ?? "").slice(0, 500)
+    poster_path: String(input.poster_path ?? "").slice(0, 500),
+    source_id: String(input.source_id ?? "").slice(0, 80),
+    source_file: String(input.source_file ?? "").slice(0, 300)
   };
 }
 const copy = value => JSON.parse(JSON.stringify(value));
@@ -89,7 +91,7 @@ export class DownloadManager {
     await this.ready();
     const media = normalizeMedia(input);
     const quality = String(options.quality ?? "Auto").slice(0, 24);
-    const key = [media.media_type, media.id, media.season ?? "", media.episode ?? "", quality].join(":");
+    const key = [media.media_type, media.id, media.source_id, media.source_file, media.season ?? "", media.episode ?? "", quality].join(":");
     const existing = [...this.jobs.values()].find(job => job.key === key && job.status !== "cancelled");
     if (existing) return copy(existing);
     const timestamp = this.now();
