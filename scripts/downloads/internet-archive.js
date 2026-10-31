@@ -7,7 +7,6 @@ const MIME_BY_EXTENSION = Object.freeze({
   mp4: "video/mp4", m4v: "video/mp4", webm: "video/webm",
   mov: "video/quicktime", ogv: "video/ogg"
 });
-const cache = new Map();
 
 function cleanTitle(value) {
   return String(value || "").replace(/[\u0000-\u001f]/g, " ").replace(/\s+/g, " ").trim().slice(0, 180);
@@ -44,6 +43,7 @@ function searchUrl(title) {
   return API + "/advancedsearch.php?" + query.toString();
 }
 export function createInternetArchiveProvider({ fetchImpl = globalThis.fetch } = {}) {
+  const cache = new Map();
   if (typeof fetchImpl !== "function") throw new TypeError("A fetch implementation is required.");
   // Keep the provider injectable for tests without replacing global fetch.
   const requestJson = async (url, signal) => {
