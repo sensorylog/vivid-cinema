@@ -41,7 +41,7 @@ function chooseVariant(variants, maxHeight = 1080) {
 }
 
 export function parseHlsPlaylist(text, baseUrl, { maxHeight = 1080, allowedHosts = [] } = {}) {
-  if (typeof text !== "string" || !text.startsWith("#EXTM3U")) throw new Error("The source did not return a valid HLS playlist.");
+  if (typeof text !== "string" || !text.replace(/^\uFEFF/, "").trimStart().startsWith("#EXTM3U")) throw new Error("The source did not return a valid HLS playlist.");
   const lines = text.replace(/^\uFEFF/, "").split(/\r?\n/);
   const variants = [];
   for (let i = 0; i < lines.length; i += 1) {
@@ -57,6 +57,13 @@ export function parseHlsPlaylist(text, baseUrl, { maxHeight = 1080, allowedHosts
     });
   }
   if (variants.length) {
+    if (lines.some(line => line.startsWith("#EXT-X-DEFINE:") || line.startsWith("#EXT-X-I-FRAME-STREAM-INF:") || /^#EXT-X-MEDIA:.*TYPE=(?:"(?:AUDIO|SUBTITLES)"|(?:AUDIO|SUBTITLES)).*URI=/.test(line))) {
+      throw new Error("HLS master playlists with variables, I-frame, alternate audio or subtitle renditions are not supported.");
+    }
+    const sessionKeys = lines.filter(line => line.startsWith("#EXT-X-SESSION-KEY:"));
+    if (sessionKeys.some(line => parseAttributes(line.slice(line.indexOf(":") + 1)).METHOD !== "NONE")) {
+      throw new Error("Encrypted HLS playlists are not supported by this browser offline adapter.");
+    }
     const selected = chooseVariant(variants, maxHeight);
     return { kind: "master", variantUrl: resolveResource(selected.uri, baseUrl, allowedHosts).href, variants };
   }
