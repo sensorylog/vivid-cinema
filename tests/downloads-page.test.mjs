@@ -38,3 +38,11 @@ test("downloads page has responsive and keyboard-focus styles", () => {
   assert.match(styles, /:focus-visible/);
   assert.match(styles, /prefers-reduced-motion/);
 });
+
+
+test("downloads page clearly marks movie and series downloads as coming soon", () => {
+  assert.match(html, /Movie &amp; TV downloads are coming soon/);
+  assert.match(html, /Direct movie and series downloads are not ready yet/);
+  assert.match(html, /COMING SOON/);
+  assert.match(styles, /downloads-feature-status/);
+});
