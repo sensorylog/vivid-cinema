@@ -43,6 +43,10 @@ test("Windows installer and portable executable targets use Vivid branding", () 
 test("desktop runtime starts from the bundled local app and keeps hosted recovery available", () => {
   const main = fs.readFileSync(path.join(root, "desktop", "main.cjs"), "utf8");
   assert.match(main, /app\.getAppPath\(\)/);
+  assert.match(main, /"ETag": etag/);
+  assert.match(main, /writeHead\(304, cacheHeaders\)/);
+  assert.match(main, /if-none-match/);
+  assert.match(main, /"Cache-Control": "no-cache"/);
   assert.match(main, /HOSTED_APP_URL = "https:\/\/vivid-cinema\.pages\.dev\/home\.html"/);
   assert.doesNotMatch(main, /vivid-cinema\.web\.app|FIREBASE_FALLBACK|fallbackToFirebase/);
   assert.match(main, /loadURL\(localOrigin \+ "\/home\.html"\)/);
