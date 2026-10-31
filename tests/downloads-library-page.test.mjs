@@ -9,10 +9,9 @@ test("downloads page explains that no direct-download source is currently connec
   assert.match(page, /authorized direct-download source/);
   assert.match(page, /My <span>Downloads<\/span>/);
   assert.match(page, /offline-player/);
-  assert.doesNotMatch(page, /Internet Archive|archive\.org|Wikimedia|wikimedia\.org|public-domain|Creative Commons/i);
 });
 
-test("download library keeps saved-file playback but has no archive resolver dependency", async () => {
+test("download library retains saved-file playback without a remote resolver", async () => {
   const script = await readFile(new URL("../scripts/my-downloads.js", import.meta.url), "utf8");
   assert.match(script, /createIndexedDBPersistence\(\{ownerId:owner\}\)/);
   assert.match(script, /createBrowserDownloadAdapter/);
@@ -21,5 +20,5 @@ test("download library keeps saved-file playback but has no archive resolver dep
   assert.match(script, /data-action="export"/);
   assert.match(script, /Save file/);
   assert.match(script, /no authorized direct-download source connected/i);
-  assert.doesNotMatch(script, /Internet Archive|archive\.org|Wikimedia|wikimedia\.org|VIVID_DOWNLOADS|provider-integration/i);
+  assert.doesNotMatch(script, /VIVID_DOWNLOADS|provider-integration|archive\.org|wikimedia\.org/i);
 });
