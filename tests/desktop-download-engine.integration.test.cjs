@@ -10,7 +10,7 @@ const { createRequire } = require("node:module");
 const requireDesktop = createRequire(path.resolve(__dirname, "../desktop/package.json"));
 const WebTorrent = requireDesktop("webtorrent");
 const { Server: TrackerServer } = requireDesktop("bittorrent-tracker");
-const { DesktopDownloadEngine } = require("../desktop/download-engine.cjs");
+const { DesktopDownloadEngine, FALLBACK_TRACKERS } = require("../desktop/download-engine.cjs");
 
 function withTimeout(value, timeoutMs, description) {
   let timer;
@@ -166,6 +166,9 @@ test("desktop engine downloads a video-extension payload from a local seeded tor
     const job = engine.jobs.get(started.id);
     assert.ok(job, "engine should register a download job");
     const torrent = job.torrent;
+    assert.ok(FALLBACK_TRACKERS.length >= 5, "fallback tracker list should provide multiple discovery routes");
+    assert.ok(FALLBACK_TRACKERS.every(url => /^(udp|https?):\/\//.test(url)), "fallback trackers must use supported UDP/HTTP protocols");
+    assert.ok(torrent.announce.some(url => FALLBACK_TRACKERS.includes(url)), "fallback trackers should be added to each torrent");
     assert.equal(torrent?._rechokeNumSlots, 0,
       "the downloader should disable peer payload uploads without throttling protocol traffic");
     seedTorrent.on("wire", (wire, address) => {
@@ -265,6 +268,43 @@ test("desktop engine downloads a video-extension payload from a local seeded tor
     if (engine) await withTimeout(engine.shutdown(), 10000, "download engine shutdown").catch(() => {});
     await closeClient(seeder);
     await closeTracker(tracker);
+    await fs.rm(root, { recursive: true, force: true });
+  }
+});
+
+test("cancelling a paused download removes its row and partial files", { timeout: 30000 }, async () => {
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "vivid-cancel-integration-"));
+  const downloadsPath = path.join(root, "downloads");
+  const userDataPath = path.join(root, "user-data");
+  const id = "cancel-fixture";
+  const jobPath = path.join(downloadsPath, id);
+  let engine;
+  try {
+    await fs.mkdir(jobPath, { recursive: true });
+    await fs.writeFile(path.join(jobPath, "partial.data"), Buffer.from("partial torrent data"));
+    engine = new DesktopDownloadEngine({
+      app: { getPath(name) { return name === "downloads" ? downloadsPath : userDataPath; } },
+      BrowserWindow: { getAllWindows: () => [] },
+      dialog: {},
+      shell: {}
+    });
+    await withTimeout(engine.ready, 10000, "cancel fixture engine initialization");
+    engine.jobs.set(id, {
+      id, title: "Cancelled fixture", resultTitle: "Cancelled fixture",
+      media: { id: "1", media_type: "movie", title: "Cancelled fixture", season: null, episode: null, episodeTitle: "" },
+      magnet: "magnet:?xt=urn:btih:0123456789012345678901234567890123456789",
+      status: "paused", phase: "Paused", torrent: null, downloadPath: jobPath,
+      filePath: null, files: [], progress: 12, downloaded: 100, total: 800,
+      error: null, createdAt: Date.now(), needsRescan: true
+    });
+    await engine.persist();
+    assert.equal(await engine.control(id, "cancel"), true);
+    assert.equal((await engine.list()).some(job => job.id === id), false);
+    await assert.rejects(fs.access(jobPath));
+    const state = JSON.parse(await fs.readFile(engine.statePath, "utf8"));
+    assert.equal(state.jobs.some(job => job.id === id), false);
+  } finally {
+    if (engine) await engine.shutdown();
     await fs.rm(root, { recursive: true, force: true });
   }
 });
