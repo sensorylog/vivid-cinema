@@ -1,5 +1,4 @@
 const DEFAULT_TIMEOUT_MS = 20000;
-const DIRECT_EXTENSIONS = /\.(?:mp4|m4v|webm|mov|ogv)(?:$|\?)/i;
 function normalizeBaseUrl(value) {
   let url;
   try { url = new URL(String(value || "")); } catch { throw new TypeError("Enter your FlixQuest API instance URL first."); }
