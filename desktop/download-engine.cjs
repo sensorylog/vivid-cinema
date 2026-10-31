@@ -10,6 +10,7 @@ class DesktopDownloadEngine {
     Object.assign(this, { app, BrowserWindow, dialog, shell });
     this.client = new WebTorrent();
     this.jobs = new Map();
+    this.searchResults = new Map();
     this.downloadPath = path.join(app.getPath("downloads"), "Vivid Cinema");
     fs.mkdirSync(this.downloadPath, { recursive: true });
     TorrentSearchApi.enablePublicProviders();
@@ -23,16 +24,19 @@ class DesktopDownloadEngine {
     const term = String(query || "").trim().slice(0, 160);
     if (term.length < 2) throw new Error("Enter at least two characters.");
     const rows = await TorrentSearchApi.search(term, "All", 60);
-    return (Array.isArray(rows) ? rows : []).filter(x => x && x.title && Number(x.seeds || 0) > 0).map((source, index) => ({
-      id: String(source.id || source.desc || index).slice(0, 500),
+    return (Array.isArray(rows) ? rows : []).filter(x => x && x.title && Number(x.seeds || 0) > 0).map(source => {
+      const id = crypto.randomUUID();
+      this.searchResults.set(id, source);
+      return {
+      id,
       title: String(source.title).slice(0, 300),
       provider: String(source.provider || "Torrent provider").slice(0, 80),
       seeds: Math.max(0, Number(source.seeds) || 0),
       peers: Math.max(0, Number(source.peers) || 0),
       size: String(source.size || "").slice(0, 40),
-      magnet: typeof source.magnet === "string" ? source.magnet : null,
-      source
-    }));
+      magnet: typeof source.magnet === "string" ? source.magnet : null
+    };
+    });
   }
   async chooseFolder() {
     const result = await this.dialog.showOpenDialog({ properties: ["openDirectory", "createDirectory"] });
@@ -40,8 +44,9 @@ class DesktopDownloadEngine {
     return this.downloadPath;
   }
   async start(result, media = {}) {
-    if (!result || !result.source) throw new Error("Choose a result first.");
-    const magnet = result.magnet || await TorrentSearchApi.getMagnet(result.source);
+    const source = result && this.searchResults.get(String(result.id));
+    if (!source) throw new Error("Search result expired. Search again and choose a result.");
+    const magnet = result.magnet || await TorrentSearchApi.getMagnet(source);
     if (typeof magnet !== "string" || !magnet.startsWith("magnet:?")) throw new Error("No valid magnet link was returned.");
     const id = crypto.randomUUID();
     const torrent = this.client.add(magnet, { path: this.downloadPath });
