@@ -19,7 +19,7 @@ test("keeps results from a healthy source when the other archive is unavailable"
     return new Response("unavailable", { status: 503 });
   };
   try {
-    const { VIVID_DOWNLOADS } = await import("../scripts/downloads/provider-integration.js");
+    const { VIVID_DOWNLOADS } = await import("../scripts/downloads/provider-integration.js?healthy-source");
     assert.deepEqual(await VIVID_DOWNLOADS.getOptions({ title: "No Archive Result", media_type: "movie" }), []);
   } finally { globalThis.fetch = originalFetch; }
 });
