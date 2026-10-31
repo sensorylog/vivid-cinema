@@ -11,7 +11,7 @@ test("home trending animation avoids forced synchronous layout and repeated fall
   const source = await read("scripts/home-breathe.js");
   assert.doesNotMatch(source, /offsetWidth|offsetHeight|getBoundingClientRect\(/, "animation must not force synchronous layout");
   assert.match(source, /if \(document\.hidden\) return/, "background tabs should not keep cycling the artwork");
-  assert.match(source, /if \(!timer && !window\.matchMedia\("\(prefers-reduced-motion: reduce\)"\)\.matches\)/, "respect reduced-motion preference");
+  assert.match(source, /if \(!legacyPerformance && !timer && !window\.matchMedia\("\(prefers-reduced-motion: reduce\)"\)\.matches\)/, "respect reduced-motion and legacy performance preferences");
   assert.doesNotMatch(source, /if \(!latest\.length\) latest = await loadDirectTrending\(\)/, "the interval must not repeatedly fetch TMDB when the rail is empty");
 });
 
