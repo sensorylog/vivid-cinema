@@ -56,12 +56,12 @@ test("accepts only explicit offline direct-file metadata and rejects unsafe URLs
     { id: "manifest", downloadUrl: "https://cdn.example/a.m3u8", offlineDownload: true, mimeType: "application/vnd.apple.mpegurl" },
     { id: "wrong", downloadUrl: "https://cdn.example/a.mp4", offlineDownload: false, mimeType: "video/mp4" },
     { id: "http", downloadUrl: "http://cdn.example/a.mp4", offlineDownload: true, mimeType: "video/mp4" },
-    { id: "query", downloadUrl: "https://cdn.example/a.mp4?token=secret", offlineDownload: true, mimeType: "video/mp4" }
+    { id: "signed", downloadUrl: "https://cdn.example/a.mp4?token=secret", offlineDownload: true, mimeType: "video/mp4" }
   ] }) });
   const args = { mediaType: "movie", tmdbId: 1, providerId: "alpha" };
-  assert.deepEqual(await api.getDownloadOptions(args), [{ id: "file", quality: "1080p", mimeType: "video/mp4" }]);
+  assert.deepEqual(await api.getDownloadOptions(args), [\n    { id: "file", quality: "1080p", mimeType: "video/mp4" },\n    { id: "signed", quality: "Available quality", mimeType: "video/mp4" }\n  ]);
   assert.deepEqual(await api.resolveDownload(args, "file"), { url: "https://cdn.example/a.mp4", mimeType: "video/mp4" });
-  await assert.rejects(api.resolveDownload(args, "http"), /did not explicitly authorize/);
+  await assert.rejects(api.resolveDownload(args, "http"), /did not explicitly authorize/);\n  assert.equal((await api.resolveDownload(args, "signed")).url, "https://cdn.example/a.mp4?token=secret");
 });
 
 test("propagates API errors and rejects redirected responses", async () => {
