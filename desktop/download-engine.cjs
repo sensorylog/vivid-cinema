@@ -34,8 +34,8 @@ class DesktopDownloadEngine {
     const rows = [...this.jobs.values()].map(job => ({
       id: job.id, title: job.title, resultTitle: job.resultTitle,
       media: job.media, magnet: job.magnet, status: job.status, downloadPath: job.downloadPath || this.downloadPath,
-      filePath: job.filePath || null, error: job.error || null,
-      progress: job.progress || 0, downloaded: job.downloaded || 0, total: job.total || 0,
+      filePath: job.filePath || null, files: Array.isArray(job.files) ? job.files : [],
+      error: job.error || null, progress: job.progress || 0, downloaded: job.downloaded || 0, total: job.total || 0,
       needsRescan: Boolean(job.needsRescan), createdAt: job.createdAt, updatedAt: Date.now()
     }));
     const state = JSON.stringify({ version: 1, downloadPath: this.downloadPath, jobs: rows }, null, 2);
@@ -57,10 +57,12 @@ class DesktopDownloadEngine {
       fs.mkdirSync(this.downloadPath, { recursive: true });
       for (const row of Array.isArray(state.jobs) ? state.jobs : []) {
         if (!row || typeof row.id !== "string" || typeof row.magnet !== "string" || !row.magnet.startsWith("magnet:?")) continue;
-        const status = row.status === "completed" && row.filePath && fs.existsSync(row.filePath)
+        const files = Array.isArray(row.files) ? row.files.filter(file => file && typeof file.path === "string" && path.isAbsolute(file.path) && fs.existsSync(file.path)) : [];
+        if (!files.length && row.filePath && fs.existsSync(row.filePath)) files.push({ name: path.basename(row.filePath), path: row.filePath, size: 0 });
+        const status = row.status === "completed" && files.length
           ? "completed"
           : ["cancelled", "failed"].includes(row.status) ? row.status : "paused";
-        this.jobs.set(row.id, { ...row, downloadPath: path.isAbsolute(row.downloadPath || "") ? row.downloadPath : this.downloadPath, needsRescan: !["completed", "cancelled"].includes(status) && Number(row.downloaded) > 0, status, torrent: null, error: row.error || null });
+        this.jobs.set(row.id, { ...row, files, filePath: files[0]?.path || row.filePath || null, downloadPath: path.isAbsolute(row.downloadPath || "") ? row.downloadPath : this.downloadPath, needsRescan: !["completed", "cancelled"].includes(status) && Number(row.downloaded) > 0, status, torrent: null, error: row.error || null });
       }
       await this.persist();
     } catch (error) {
@@ -162,9 +164,12 @@ class DesktopDownloadEngine {
     torrent.on("download", publishWhenReady);
     torrent.on("upload", publishWhenReady);
     torrent.on("done", () => {
-      const file = [...torrent.files].filter(item => VIDEO_EXTENSIONS.test(item.name)).sort((a, b) => b.length - a.length)[0];
-      job.filePath = file ? path.resolve(jobPath, file.path) : null;
-      job.status = job.filePath ? "completed" : "failed";
+      job.files = [...torrent.files]
+        .filter(item => VIDEO_EXTENSIONS.test(item.name))
+        .map(item => ({ name: safeText(item.name, 300), path: path.resolve(jobPath, item.path), size: Number(item.length) || 0 }))
+        .filter(item => fs.existsSync(item.path) && fs.statSync(item.path).isFile());
+      job.filePath = job.files[0]?.path || null;
+      job.status = job.files.length ? "completed" : "failed";
       if (!job.filePath) job.error = "The release finished, but no playable video file was found.";
       job.torrent = null;
       publish();
@@ -191,14 +196,20 @@ class DesktopDownloadEngine {
       progress: torrent ? roundProgress(torrent) : job.status === "completed" ? 100 : Number(job.progress) || 0,
       speed: torrent?.downloadSpeed || 0, downloaded: torrent?.downloaded || job.downloaded || 0,
       total: torrent?.length || job.total || fileSize || 0, peers: torrent?.numPeers || 0,
-      filePath: job.filePath || null, error: job.error || null, createdAt: job.createdAt
+      filePath: job.filePath || null,
+      files: (job.files || []).map((file, index) => ({ index, name: file.name, size: file.size })),
+      error: job.error || null, createdAt: job.createdAt
     };
   }
 
-  mediaFile(id) {
+  mediaFile(id, fileIndex = 0) {
     const job = this.jobs.get(String(id));
-    if (!job || job.status !== "completed" || !job.filePath) return null;
-    const target = path.resolve(job.filePath);
+    if (!job || job.status !== "completed") return null;
+    const index = Number(fileIndex);
+    if (!Number.isInteger(index) || index < 0) return null;
+    const file = (job.files || [])[index] || (index === 0 && job.filePath ? { path: job.filePath } : null);
+    if (!file?.path) return null;
+    const target = path.resolve(file.path);
     return fs.existsSync(target) && fs.statSync(target).isFile() ? target : null;
   }
 
