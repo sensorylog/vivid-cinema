@@ -62,11 +62,27 @@ function createLocalServer(root) {
         res.writeHead(404, { "Content-Type": "text/plain; charset=utf-8" }).end("Not found");
         return;
       }
-      res.writeHead(200, {
-        "Content-Type": mimeTypes[path.extname(target).toLowerCase()] || "application/octet-stream",
+      const etag = 'W/"' + stat.size.toString(16) + "-" + Math.trunc(stat.mtimeMs).toString(16) + '"';
+      const lastModified = stat.mtime.toUTCString();
+      const ifNoneMatch = req.headers["if-none-match"];
+      const ifModifiedSince = req.headers["if-modified-since"];
+      const notModified = (ifNoneMatch && ifNoneMatch.split(",").map(value => value.trim()).includes(etag)) ||
+        (!ifNoneMatch && ifModifiedSince && Number.isFinite(Date.parse(ifModifiedSince)) &&
+          Date.parse(ifModifiedSince) >= Math.floor(stat.mtimeMs / 1000) * 1000);
+      const cacheHeaders = {
+        "ETag": etag,
+        "Last-Modified": lastModified,
+        "Cache-Control": "no-cache",
         "X-Content-Type-Options": "nosniff",
-        "Referrer-Policy": "strict-origin-when-cross-origin",
-        "Cache-Control": "no-cache"
+        "Referrer-Policy": "strict-origin-when-cross-origin"
+      };
+      if (notModified) {
+        res.writeHead(304, cacheHeaders).end();
+        return;
+      }
+      res.writeHead(200, {
+        ...cacheHeaders,
+        "Content-Type": mimeTypes[path.extname(target).toLowerCase()] || "application/octet-stream"
       });
       if (req.method === "HEAD") return res.end();
       const stream = fs.createReadStream(target);
@@ -296,17 +312,9 @@ function createWindow() {
   let navigationRecoveryInProgress = false;
   let recoveryPageShown = false;
   let localAppLoaded = false;
-  let hostedLoadTimeout;
-  const clearHostedLoadTimeout = () => {
-    if (hostedLoadTimeout) {
-      clearTimeout(hostedLoadTimeout);
-      hostedLoadTimeout = null;
-    }
-  };
   const fallbackToLocal = reason => {
     if (localFallbackStarted || hostedAppLoaded) return;
     localFallbackStarted = true;
-    clearHostedLoadTimeout();
     console.warn("Vivid Cinema hosted origins unavailable; opening bundled offline fallback:", reason);
     if (localOrigin) void win.loadURL(localOrigin + "/home.html").catch(() => {});
   };
@@ -414,7 +422,6 @@ function createWindow() {
   });
 
   win.on("closed", () => {
-    if (hostedLoadTimeout) clearTimeout(hostedLoadTimeout);
   });
 
   win.webContents.setWindowOpenHandler(({ url }) => {
