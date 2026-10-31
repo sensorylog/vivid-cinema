@@ -417,7 +417,7 @@ function openTitleDownload() {
       const options = await integration.getOptions(mediaRequest);
       if (run !== request || !slot.isConnected) return;
       const safeOptions = Array.isArray(options) ? options.filter(option => option && typeof option.id === "string" && typeof option.label === "string") : [];
-      if (!safeOptions.length) { slot.innerHTML = '<p class="vivid-download-empty">No supported HLS or direct video streams were returned for this ' + (isTv ? 'episode' : 'movie') + '.</p>'; return; }
+      if (!safeOptions.length) { slot.innerHTML = '<p class="vivid-download-empty">No supported HLS, DASH or direct video downloads were returned for this ' + (isTv ? 'episode' : 'movie') + '.</p>'; return; }
       slot.innerHTML = safeOptions.map(option => '<button type="button" class="vivid-download-option" data-option="' + escapeHtml(option.id) + '"><strong>' + escapeHtml(option.label) + '</strong><span>' + escapeHtml([option.format, option.sizeLabel || option.size || ""].filter(Boolean).join(" · ")) + '</span></button>').join("");
       slot.querySelectorAll("[data-option]").forEach(button => button.addEventListener("click", () => {
         const option = safeOptions.find(item => item.id === button.dataset.option); if (!option) return;
