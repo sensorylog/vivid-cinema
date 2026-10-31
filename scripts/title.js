@@ -384,7 +384,7 @@ function render(details, externalCertification = "", externalCertificationNote =
     if (item) recordBehavior("recommendation_clicked", item, { surface: "title" });
   });
   if(firstTrailer)$("hero-trailer").addEventListener("click",()=>openTrailer(firstTrailer.key,firstTrailer.name||"Trailer"));
-  if (!isUpcoming) $("#title-download")?.addEventListener("click", () => openTitleDownload());
+  if (!isUpcoming) $("title-download")?.addEventListener("click", () => openTitleDownload());
 }
 
 function openTitleDownload() {
