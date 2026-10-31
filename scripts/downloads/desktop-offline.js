@@ -1,3 +1,4 @@
+if (window.vividDownloads?.available) {
 const byId = id => document.getElementById(id);
 const escapeHtml = value => String(value ?? "").replace(/[&<>"']/g, char => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[char]));
 const bytes = value => {
@@ -107,3 +108,5 @@ const pending=sessionStorage.getItem("vivid:pending-desktop-download");
 if(pending){sessionStorage.removeItem("vivid:pending-desktop-download");try{void searchTitle(JSON.parse(pending));}catch{setMessage("Open a movie page and tap Download to find a release.");}}
 else setMessage("Your offline library is ready.");
 void refresh();
+
+}
