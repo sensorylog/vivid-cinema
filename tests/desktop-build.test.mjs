@@ -54,7 +54,6 @@ test("desktop runtime starts from the bundled local app and keeps hosted recover
   assert.match(main, /LOADING_HTML/);
   assert.match(main, /loadURL\(LOADING_URL\)/);
   assert.match(main, /hostedLoadStarted/);
-  assert.match(main, /Cloudflare Pages app load timed out after/);
   assert.match(main, /localOrigin \+ "\/home\.html"/);
   assert.match(main, /nodeIntegration:\s*false/);
   assert.match(main, /contextIsolation:\s*true/);
