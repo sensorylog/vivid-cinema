@@ -40,6 +40,18 @@
       <label for="desktop-quality">Download quality</label>
       <select id="desktop-quality"><option value="any">Any quality</option><option value="2160">4K / 2160p</option><option value="1080">1080p</option><option value="720">720p</option><option value="480">480p</option></select>
     </form>
+    <section id="desktop-series-picker" class="offline-series-picker" hidden aria-label="Choose series episodes">
+      <div class="offline-series-heading">
+        <div><strong id="desktop-series-title">Choose episodes</strong><p>Select a season, then choose the episodes you want to save.</p></div>
+        <label for="desktop-season-select">Season</label>
+        <select id="desktop-season-select" aria-label="Choose season"></select>
+      </div>
+      <div id="desktop-episodes" class="offline-episode-picker" aria-live="polite"></div>
+      <div class="offline-series-actions">
+        <button id="desktop-episode-select-all" type="button">Select all</button>
+        <button id="desktop-episode-search" type="button">Find selected episodes</button>
+      </div>
+    </section>
     <div id="desktop-search-results" class="offline-search-results"></div>
   </section>
   <section id="offline-player-section" class="offline-player-section" hidden aria-label="Offline video player">
