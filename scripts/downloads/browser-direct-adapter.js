@@ -56,7 +56,7 @@ export function createBrowserDownloadAdapter({
     async download(job, { signal, onProgress = () => {} } = {}) {
       const id = validateJobId(job?.id);
       if (signal?.aborted) throw new DOMException("Download aborted.", "AbortError");
-      const source = await resolve(job);
+      const source = await resolve(job, { signal });
       const url = validateAllowedHttpsUrl(source?.url, allowedHosts);
       if (!url) throw new Error("The download source URL is not HTTPS or its host is not authorized.");
       const response = await fetchImpl(url.href, {
