@@ -10,6 +10,7 @@ const NO_TRAILER_HOLD_MS = 8000;
 const TRAILER_LOAD_FAILSAFE_MS = 40000;
 const HERO_BACKDROP_SIZE = () => window.matchMedia("(max-width: 767px)").matches ? "w780" : "w1280";
 const trailerCache = new Map();
+const legacyPerformance = document.documentElement.classList.contains("vivid-performance-legacy");
 
 let heroSlides = [];
 let heroIndex = 0;
@@ -86,6 +87,13 @@ function activateCurrentHero() {
   const token = ++heroRunToken;
   const item = heroSlides[heroIndex];
   if (!item || document.hidden) return;
+
+  // Legacy PCs keep the cinematic artwork carousel but skip background
+  // trailer lookups and remote iframe decoding while the user is browsing.
+  if (legacyPerformance) {
+    heroTimer = window.setTimeout(advanceHero, NO_TRAILER_HOLD_MS);
+    return;
+  }
 
   // Trailer autoplay is an explicit feature of this billboard. Reduced-motion
   // CSS still disables decorative movement, but must not silently disable video.
