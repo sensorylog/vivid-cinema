@@ -12,6 +12,17 @@ const WebTorrent = requireDesktop("webtorrent");
 const { Server: TrackerServer } = requireDesktop("bittorrent-tracker");
 const { DesktopDownloadEngine } = require("../desktop/download-engine.cjs");
 
+function withTimeout(value, timeoutMs, description) {
+  let timer;
+  return Promise.race([
+    Promise.resolve(value),
+    new Promise((_, reject) => {
+      timer = setTimeout(() => reject(new Error("Timed out waiting for " + description)), timeoutMs);
+      timer.unref?.();
+    })
+  ]).finally(() => clearTimeout(timer));
+}
+
 function waitFor(predicate, timeoutMs, description) {
   const startedAt = Date.now();
   return new Promise((resolve, reject) => {
@@ -39,12 +50,16 @@ function waitFor(predicate, timeoutMs, description) {
 
 function closeClient(client) {
   if (!client) return Promise.resolve();
-  return new Promise(resolve => client.destroy(() => resolve()));
+  return withTimeout(new Promise(resolve => {
+    try { client.destroy(() => resolve()); } catch { resolve(); }
+  }), 5000, "torrent client shutdown").catch(() => {});
 }
 
 function closeTracker(tracker) {
   if (!tracker) return Promise.resolve();
-  return new Promise(resolve => tracker.close(() => resolve()));
+  return withTimeout(new Promise(resolve => {
+    try { tracker.close(() => resolve()); } catch { resolve(); }
+  }), 5000, "local tracker shutdown").catch(() => {});
 }
 
 test("desktop engine downloads a real video file from a local seeded torrent", { timeout: 90000 }, async () => {
@@ -63,7 +78,7 @@ test("desktop engine downloads a real video file from a local seeded torrent", {
   let engine;
   try {
     tracker = new TrackerServer({ udp: false, http: true, ws: false, stats: false });
-    const trackerPort = await new Promise((resolve, reject) => {
+    const trackerPort = await withTimeout(new Promise((resolve, reject) => {
       tracker.once("error", reject);
       tracker.listen(0, "127.0.0.1", () => {
         const address = tracker.http && tracker.http.address();
@@ -73,11 +88,11 @@ test("desktop engine downloads a real video file from a local seeded torrent", {
         }
         resolve(address.port);
       });
-    });
+    }), 10000, "local HTTP tracker startup");
     const trackerUrl = "http://127.0.0.1:" + trackerPort + "/announce";
 
     seeder = new WebTorrent({ dht: false, tracker: { announce: [trackerUrl] } });
-    const seedTorrent = await new Promise((resolve, reject) => {
+    const seedTorrent = await withTimeout(new Promise((resolve, reject) => {
       seeder.once("error", reject);
       const torrent = seeder.seed(
         videoPath,
@@ -85,7 +100,7 @@ test("desktop engine downloads a real video file from a local seeded torrent", {
         resolve
       );
       torrent.once("error", reject);
-    });
+    }), 20000, "local torrent seeding");
     assert.match(seedTorrent.magnetURI, /^magnet:\?xt=urn:btih:/);
     assert.ok(seedTorrent.magnetURI.includes(encodeURIComponent(trackerUrl)));
 
@@ -100,12 +115,12 @@ test("desktop engine downloads a real video file from a local seeded torrent", {
       shell: {}
     });
 
-    await engine.ready;
+    await withTimeout(engine.ready, 10000, "download engine initialization");
     // Keep this fixture isolated: the test validates tracker discovery and TCP transfer,
     // not public DHT routing or external network access.
     if (engine.client.dht) {
       const dht = engine.client.dht;
-      await new Promise(resolve => dht.destroy(resolve));
+      await withTimeout(new Promise(resolve => dht.destroy(resolve)), 10000, "test DHT shutdown");
       engine.client.dht = null;
     }
     engine.searchResults.set("local-fixture", {
@@ -114,20 +129,20 @@ test("desktop engine downloads a real video file from a local seeded torrent", {
       magnet: seedTorrent.magnetURI
     });
 
-    const started = await engine.start({
+    const started = await withTimeout(engine.start({
       id: "local-fixture",
       title: "Vivid integration fixture",
       magnet: seedTorrent.magnetURI
     }, {
       title: "Vivid integration fixture",
       media_type: "movie"
-    });
+    }), 10000, "download job start");
     const job = engine.jobs.get(started.id);
     assert.ok(job, "engine should register a download job");
 
     await waitFor(
       () => ["completed", "failed"].includes(job.status),
-      60000,
+      30000,
       "the seeded video transfer to complete"
     );
 
@@ -138,7 +153,7 @@ test("desktop engine downloads a real video file from a local seeded torrent", {
     assert.deepEqual(downloaded, payload, "downloaded file should match the seeded video bytes");
     assert.ok(job.discovery.trackerAnnounces > 0, "download should announce through the local tracker");
   } finally {
-    if (engine) await engine.shutdown().catch(() => {});
+    if (engine) await withTimeout(engine.shutdown(), 10000, "download engine shutdown").catch(() => {});
     await closeClient(seeder);
     await closeTracker(tracker);
     await fs.rm(root, { recursive: true, force: true });
