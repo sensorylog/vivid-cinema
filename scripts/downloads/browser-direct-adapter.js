@@ -60,9 +60,15 @@ export function createBrowserDownloadAdapter({
       const sourceHosts = Array.isArray(source?.allowedHosts) && source.allowedHosts.length ? source.allowedHosts : allowedHosts;
       const url = validateAllowedHttpsUrl(source?.url, sourceHosts);
       if (!url) throw new Error("The download source URL is not HTTPS or is outside the resolver host allowlist.");
+      const handle = await fileHandle(id, true);
+      let existingSize = 0;
+      try { existingSize = (await handle.getFile()).size || 0; } catch {}
+      if (existingSize > byteLimit) { await remove(id); existingSize = 0; }
+      const requestHeaders = new Headers(source.headers || {});
+      if (existingSize > 0) requestHeaders.set("Range", "bytes=" + existingSize + "-");
       const response = await fetchImpl(url.href, {
         method: "GET",
-        headers: source.headers || {},
+        headers: requestHeaders,
         credentials: "omit",
         mode: "cors",
         redirect: "error",
@@ -77,36 +83,57 @@ export function createBrowserDownloadAdapter({
       }
       const mimeType = VIDEO_MIME.test(responseMime) ? responseMime : declaredMime;
       if (!VIDEO_MIME.test(mimeType)) throw new Error("Only direct video-file responses are supported by this browser adapter.");
+      let appendOffset = existingSize;
+      const contentRange = String(response.headers?.get?.("content-range") || "");
+      if (response.status === 206) {
+        const match = /^bytes (\d+)-(\d+)\/(\d+|\*)$/i.exec(contentRange);
+        if (!match || Number(match[1]) !== existingSize) throw new Error("The source returned an invalid byte range; restart this download.");
+      } else if (response.status === 200) {
+        appendOffset = 0;
+      } else {
+        throw new Error("The source did not accept the requested download range.");
+      }
+      const rangeTotal = response.status === 206 && /\/(\d+)$/.exec(contentRange);
       const declaredLength = Number(response.headers?.get?.("content-length"));
-      if (Number.isFinite(declaredLength) && declaredLength > byteLimit) throw new Error("The video file exceeds the configured download size limit.");
+      const totalBytes = rangeTotal ? Number(rangeTotal[1])
+        : Number.isFinite(declaredLength) && declaredLength > 0 ? appendOffset + declaredLength : null;
+      if (totalBytes && totalBytes > byteLimit) throw new Error("The video file exceeds the configured download size limit.");
       if (!response.body?.getReader) throw new Error("The browser did not provide a readable download stream.");
 
-      const handle = await fileHandle(id, true);
-      const writer = await handle.createWritable({ keepExistingData: false });
+      const writer = await handle.createWritable({ keepExistingData: appendOffset > 0 });
+      if (appendOffset > 0) await writer.seek(appendOffset);
       const reader = response.body.getReader();
-      let bytesDownloaded = 0;
+      let bytesThisAttempt = 0;
       try {
         while (true) {
           if (signal?.aborted) throw new DOMException("Download aborted.", "AbortError");
           const { done, value } = await reader.read();
           if (done) break;
-          bytesDownloaded += value.byteLength;
-          if (bytesDownloaded > byteLimit) throw new Error("The video file exceeds the configured download size limit.");
+          bytesThisAttempt += value.byteLength;
+          if (appendOffset + bytesThisAttempt > byteLimit) throw new Error("The video file exceeds the configured download size limit.");
           await writer.write(value);
-          onProgress({ bytesDownloaded, totalBytes: Number.isFinite(declaredLength) && declaredLength > 0 ? declaredLength : null });
+          onProgress({ bytesDownloaded: appendOffset + bytesThisAttempt, totalBytes });
         }
         if (signal?.aborted) throw new DOMException("Download aborted.", "AbortError");
         await writer.close();
       } catch (error) {
         try { await reader.cancel(error); } catch {}
-        try { await writer.abort(error); } catch {}
-        await remove(id);
+        if (/size limit/i.test(String(error?.message || ""))) {
+          try { await writer.abort(error); } catch {}
+          await remove(id);
+        } else {
+          // Commit the partial bytes so a retry can continue with an HTTP Range request.
+          try { await writer.close(); } catch {
+            try { await writer.abort(error); } catch {}
+            if (!appendOffset) await remove(id);
+          }
+        }
         throw error;
       }
       return {
         uri: "opfs://vivid-cinema-downloads/" + id,
         mimeType,
-        size: bytesDownloaded
+        size: appendOffset + bytesThisAttempt
       };
     },
     async removePartial(job) {
