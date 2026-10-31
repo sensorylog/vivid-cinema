@@ -98,7 +98,13 @@ test("desktop engine downloads a video-extension payload from a local seeded tor
     for (const event of Object.keys(trackerEvents)) {
       tracker.on(event, () => { trackerEvents[event] += 1; });
     }
-    tracker.on("start", () => { seederAnnounced = true; });
+    tracker.on("start", addr => {
+      seederAnnounced = true;
+      console.log("[vivid-integration] tracker start from", addr);
+    });
+    tracker.on("warning", warning => {
+      console.log("[vivid-integration] tracker warning", warning?.message || String(warning));
+    });
 
     console.log("[vivid-integration] stage: create seeder");
     seeder = new WebTorrent({ dht: false, tracker: { announce: [trackerUrl] } });
@@ -158,6 +164,9 @@ test("desktop engine downloads a video-extension payload from a local seeded tor
     seedTorrent.on("wire", (wire, address) => {
       console.log("[vivid-integration] seeder peer connected", address || "unknown");
     });
+    torrent?.on("peer", address => {
+      console.log("[vivid-integration] leecher peer discovered", address || "unknown");
+    });
     torrent?.on("wire", (wire, address) => {
       console.log("[vivid-integration] leecher peer connected", address || "unknown");
     });
@@ -198,13 +207,18 @@ test("desktop engine downloads a video-extension payload from a local seeded tor
             complete: swarm.complete,
             incomplete: swarm.incomplete,
             peerCount: Object.keys(swarm.peers || {}).length,
-            peers: Object.values(swarm.peers || {}).filter(Boolean).map(peer => ({
-              ip: peer?.ip ?? null,
-              port: peer?.port ?? null,
-              peerId: peer?.peerId?.toString("hex") || null,
-              complete: peer?.complete ?? null,
-              left: peer?.left ?? null
-            }))
+            peerCacheKeys: swarm.peers?.keys || [],
+            peers: (swarm.peers?.keys || []).map(key => {
+              const peer = swarm.peers.peek(key);
+              return {
+                key,
+                type: peer?.type ?? null,
+                ip: peer?.ip ?? null,
+                port: peer?.port ?? null,
+                peerId: peer?.peerId ?? null,
+                complete: peer?.complete ?? null
+              };
+            })
           } : null,
           knownTorrents: Object.keys(tracker.torrents || {})
         },
