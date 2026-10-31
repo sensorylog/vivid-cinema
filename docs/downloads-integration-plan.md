@@ -1,6 +1,6 @@
 # Vivid Cinema download integration plan
 
-**Status:** Core queue manager committed; platform storage/download adapters and UI are not implemented yet.
+**Status:** Queue manager and account-scoped browser metadata persistence committed; native media-transfer adapters and UI are not implemented yet.
 **Date:** 31 October 2026
 **Reference source:** [Flickv4](https://github.com/sheeshcake/Flickv4), GPL-3.0, by Wendale Franz Dy.
 
@@ -30,7 +30,17 @@ Review and adapt concepts from these source files; do not copy React Native-only
 
 The Expo/React Native downloader, AsyncStorage, Notifee and native filesystem APIs are not drop-in dependencies for Vivid.
 
-## Implemented foundation (31 October 2026)\n\n- Added `scripts/downloads/download-manager.js`, a platform-neutral queue/state manager.\n- Added `tests/download-manager.test.mjs` for identity validation, duplicate prevention, TV episode identity, interrupted-job recovery, adapter failure/retry, cancellation and asset removal.\n- Added the new test file to the `npm test` script.\n- The manager receives persistence and download adapters by dependency injection. It does not resolve media URLs, fetch media, write files, or claim offline playback. Persisted job metadata intentionally excludes source URLs and provider credentials.\n- This commit is the queue contract only; it is not yet a user-visible download feature. Runtime tests have not been executed in this environment.\n\n## Proposed Vivid design
+## Implemented foundation (31 October 2026)
+
+- Added `scripts/downloads/download-manager.js`, a platform-neutral queue/state manager.
+- Added `tests/download-manager.test.mjs` for identity validation, duplicate prevention, TV episode identity, interrupted-job recovery, adapter failure/retry, cancellation and asset removal.
+- Added the queue and IndexedDB persistence test files to the `npm test` script.
+- Added `scripts/downloads/indexeddb-persistence.js`, an IndexedDB metadata store explicitly scoped to a guest or authenticated owner ID. Separate owners cannot read each other's job lists. It stores job metadata only, not media blobs or provider URLs.
+- Corrected cancellation ordering so the manager waits for the transfer adapter to settle before asking it to remove partial output.
+- The manager receives persistence and download adapters by dependency injection. It does not resolve media URLs, fetch media, write files, or claim offline playback. Persisted job metadata intentionally excludes source URLs and provider credentials.
+- This commit is the queue contract only; it is not yet a user-visible download feature. Runtime tests have not been executed in this environment.
+
+## Proposed Vivid design
 
 1. **Shared web contract** — a platform-neutral download manager owns jobs, validation, queue state, progress events, cancellation, retry and metadata. Persist metadata separately from media bytes.
 2. **Authorized source resolver** — accept only a provider integration explicitly authorized to provide downloadable media. Return a typed file or HLS resource with required headers, expiry and available quality options. Do not infer download URLs from an iframe or scrape a third-party player.
@@ -53,7 +63,7 @@ The Expo/React Native downloader, AsyncStorage, Notifee and native filesystem AP
 
 1. Complete this architecture and dependency audit.
 2. Define the resolver and platform-adapter interfaces with tests and no live media provider.
-3. Implement the job store/queue and browser-safe direct-file adapter.
+3. Implement and test the job store/queue and browser-safe direct-file adapter.
 4. Add Capacitor Android and Electron adapters independently.
 5. Add the offline library UI and local playback.
 6. Connect only an authorized source and test movie, TV episode, pause/resume, app restart, low storage, expired URL and deletion on real devices.

@@ -41,6 +41,7 @@ export class DownloadManager {
     this.idFactory = idFactory || (() => globalThis.crypto?.randomUUID?.() || `job-${this.now()}-${Math.random().toString(36).slice(2)}`);
     this.jobs = new Map();
     this.controllers = new Map();
+    this.tasks = new Map();
     this.listeners = new Set();
     this.running = 0;
     this.hydrated = false;
@@ -79,7 +80,7 @@ export class DownloadManager {
   }
   persist() {
     const state = this.snapshot();
-    this.persistChain = this.persistChain.then(() => this.persistence.save(state));
+    this.persistChain = this.persistChain.catch(() => {}).then(() => this.persistence.save(state));
     return this.persistChain;
   }
   async ready() { if (!this.hydrated) await this.hydrate(); }
@@ -121,6 +122,8 @@ export class DownloadManager {
     job.status = "cancelled";
     job.updatedAt = this.now();
     this.controllers.get(job.id)?.abort("cancelled");
+    const task = this.tasks.get(job.id);
+    if (task) await task;
     try { await this.adapter.removePartial?.(copy(job)); } catch { /* keep cancellation visible */ }
     await this.persist();
     this.emit();
@@ -156,7 +159,12 @@ export class DownloadManager {
     while (this.running < this.concurrency) {
       const job = [...this.jobs.values()].find(item => item.status === "queued");
       if (!job) break;
-      void this.run(job);
+      const task = this.run(job);
+      this.tasks.set(job.id, task);
+      const clearTask = () => {
+        if (this.tasks.get(job.id) === task) this.tasks.delete(job.id);
+      };
+      void task.then(clearTask, clearTask);
     }
   }
 
@@ -167,9 +175,9 @@ export class DownloadManager {
     job.status = "downloading";
     job.error = null;
     job.updatedAt = this.now();
-    await this.persist();
-    this.emit();
     try {
+      await this.persist();
+      this.emit();
       const result = await this.adapter.download(copy(job), {
         signal: controller.signal,
         onProgress: ({ bytesDownloaded = 0, totalBytes = null } = {}) => {
@@ -203,9 +211,12 @@ export class DownloadManager {
       this.controllers.delete(job.id);
       this.running = Math.max(0, this.running - 1);
       job.updatedAt = this.now();
-      await this.persist();
-      this.emit();
-      this.pump();
+      try {
+        await this.persist();
+      } finally {
+        this.emit();
+        this.pump();
+      }
     }
   }
 }
