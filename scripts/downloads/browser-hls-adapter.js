@@ -40,7 +40,7 @@ function chooseVariant(variants, maxHeight = 1080) {
   return pool.sort((a, b) => (b.bandwidth || 0) - (a.bandwidth || 0))[0];
 }
 
-export function parseHlsPlaylist(text, baseUrl, { maxHeight = 1080 } = {}) {
+export function parseHlsPlaylist(text, baseUrl, { maxHeight = 1080, allowedHosts = [] } = {}) {
   if (typeof text !== "string" || !text.startsWith("#EXTM3U")) throw new Error("The source did not return a valid HLS playlist.");
   const lines = text.replace(/^\\uFEFF/, "").split(/\\r?\\n/);
   const variants = [];
@@ -58,7 +58,7 @@ export function parseHlsPlaylist(text, baseUrl, { maxHeight = 1080 } = {}) {
   }
   if (variants.length) {
     const selected = chooseVariant(variants, maxHeight);
-    return { kind: "master", variantUrl: resolveResource(selected.uri, baseUrl, arguments[2]?.allowedHosts || []) , variants };
+    return { kind: "master", variantUrl: resolveResource(selected.uri, baseUrl, allowedHosts).href, variants };
   }
 
   if (!lines.some(line => line.trim() === "#EXT-X-ENDLIST")) {
@@ -69,7 +69,7 @@ export function parseHlsPlaylist(text, baseUrl, { maxHeight = 1080 } = {}) {
     const attrs = parseAttributes(line.slice(line.indexOf(":") + 1));
     if (attrs.METHOD !== "NONE") throw new Error("Encrypted HLS playlists are not supported by this browser offline adapter.");
   }
-  if (lines.some(line => line.startsWith("#EXT-X-BYTERANGE:"))) {
+  if (lines.some(line => line.startsWith("#EXT-X-I-FRAME-STREAM-INF:") || /#EXT-X-MEDIA:.*TYPE="AUDIO".*URI=/.test(line))) {\n    throw new Error("HLS alternate audio and I-frame playlists are not supported by this browser offline adapter.");\n  }\n  if (lines.some(line => line.startsWith("#EXT-X-BYTERANGE:"))) {
     throw new Error("HLS byte-range playlists are not supported by this browser offline adapter.");
   }
 
@@ -94,7 +94,7 @@ export function parseHlsPlaylist(text, baseUrl, { maxHeight = 1080 } = {}) {
     output.push(path);
   }
   if (!segmentIndex) throw new Error("The HLS media playlist contains no media segments.");
-  return { kind: "media", resources, playlist: output.join("\\n") + "\\n", segmentCount: segmentIndex };
+  return { kind: "media", resources, playlist: output.join("\\n") + "\\n", segmentCount: segmentIndex, mediaUrl: baseUrl };
 }
 
 export function createBrowserHlsDownloadAdapter({
@@ -195,11 +195,11 @@ export function createBrowserHlsDownloadAdapter({
       const startUrl = resolveResource(source.url, source.url, allowedHosts);
       const headers = source.headers && typeof source.headers === "object" ? source.headers : {};
       const firstText = await fetchText(startUrl, headers, signal);
-      let parsed = parseHlsPlaylist(firstText, startUrl.href, { maxHeight });
+      let parsed = parseHlsPlaylist(firstText, startUrl.href, { maxHeight, allowedHosts });
       if (parsed.kind === "master") {
         const variantUrl = resolveResource(parsed.variantUrl, startUrl.href, allowedHosts);
         const variantText = await fetchText(variantUrl, headers, signal);
-        parsed = parseHlsPlaylist(variantText, variantUrl.href, { maxHeight });
+        parsed = parseHlsPlaylist(variantText, variantUrl.href, { maxHeight, allowedHosts });
         if (parsed.kind !== "media") throw new Error("Nested HLS master playlists are not supported.");
       }
       if (parsed.resources.length > maxSegments) throw new Error("The HLS playlist contains too many segments.");
