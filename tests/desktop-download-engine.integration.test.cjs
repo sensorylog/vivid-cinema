@@ -197,9 +197,36 @@ test("desktop engine downloads a video-extension payload from a local seeded tor
           swarm: swarm ? {
             complete: swarm.complete,
             incomplete: swarm.incomplete,
-            peerCount: Object.keys(swarm.peers || {}).length
+            peerCount: Object.keys(swarm.peers || {}).length,
+            peers: Object.values(swarm.peers || {}).map(peer => ({
+              ip: peer.ip,
+              port: peer.port,
+              peerId: peer.peerId?.toString("hex") || null,
+              complete: peer.complete,
+              left: peer.left
+            }))
           } : null,
           knownTorrents: Object.keys(tracker.torrents || {})
+        },
+        seederNetwork: {
+          numPeers: seedTorrent.numPeers,
+          wires: seedTorrent.wires?.map(wire => ({
+            type: wire.type,
+            remoteAddress: wire.remoteAddress,
+            remotePort: wire.remotePort,
+            peerId: wire.peerId?.toString("hex") || null
+          })) || [],
+          clientDestroyed: seeder.destroyed
+        },
+        downloaderNetwork: {
+          clientDestroyed: engine.client.destroyed,
+          clientListening: engine.client.listening,
+          torrentWires: liveTorrent?.wires?.map(wire => ({
+            type: wire.type,
+            remoteAddress: wire.remoteAddress,
+            remotePort: wire.remotePort,
+            peerId: wire.peerId?.toString("hex") || null
+          })) || []
         },
         trackerEvents
       }));
