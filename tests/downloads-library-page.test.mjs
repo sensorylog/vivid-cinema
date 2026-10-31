@@ -24,3 +24,16 @@ test("browser library remains available separately from the native Electron mana
   assert.match(desktop, /Downloads are saved to your computer/);
   assert.doesNotMatch(script, /VIVID_DOWNLOADS|provider-integration|archive\.org|wikimedia\.org/i);
 });
+
+
+test("desktop downloads expose live transfer phases and accessible progress updates", async () => {
+  const desktop = await readFile(new URL("../scripts/downloads/desktop-offline.js", import.meta.url), "utf8");
+  const engine = await readFile(new URL("../desktop/download-engine.cjs", import.meta.url), "utf8");
+  assert.match(engine, /statusTimer = setInterval/);
+  assert.match(engine, /Waiting for peers/);
+  assert.match(engine, /Finding peers and metadata/);
+  assert.match(engine, /phase: job\.phase/);
+  assert.match(desktop, /job\.phase \|\| "Connecting to peers"/);
+  assert.match(desktop, /No peers connected/);
+  assert.match(desktop, /role="progressbar"/);
+});
