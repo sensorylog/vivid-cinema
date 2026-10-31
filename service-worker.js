@@ -1,6 +1,8 @@
 // Bump this version whenever the precached app shell changes.
-const CACHE_NAME = "vivid-cinema-shell-v257";
+const CACHE_NAME = "vivid-cinema-shell-v258";
+const HLS_LIBRARY_URL = "https://cdn.jsdelivr.net/npm/hls.js@1.7.3/dist/hls.min.js";
 const APP_SHELL = [
+  HLS_LIBRARY_URL,
   "./","./index.html","./home.html","./downloads.html","./my-downloads.html","./for-you.html",
   "./person.html","./discover.html","./collection.html","./title.html","./watch.html",
   "./library.html","./auth.html","./login.html","./verify-email.html","./forgot-password.html",
@@ -24,7 +26,7 @@ const APP_SHELL = [
   "./scripts/for-you.js","./scripts/vivid-recall-chat.js","./scripts/firebase-ai.js","./scripts/local-owner.js","./scripts/firebase.js",
   "./scripts/firebase.js?v=20261016-auth-runtime-audit2","./scripts/pwa.js","./scripts/atmosphere.js","./scripts/i18n.js","./scripts/routes.js",
   "./scripts/config.js","./scripts/utils.js","./scripts/content.js","./scripts/media.js","./scripts/tmdb.js",
-  "./scripts/nav-auth.js","./scripts/downloads.js?v=direct-download-v3","./scripts/my-downloads.js","./scripts/downloads/download-manager.js","./scripts/downloads/indexeddb-persistence.js","./scripts/downloads/browser-direct-adapter.js","./scripts/downloads/offline-playback.js","./scripts/library.js","./scripts/library-page.js","./scripts/discover.js",
+  "./scripts/nav-auth.js","./scripts/downloads.js?v=direct-download-v3","./scripts/my-downloads.js","./scripts/downloads/download-manager.js","./scripts/downloads/indexeddb-persistence.js","./scripts/downloads/browser-direct-adapter.js","./scripts/downloads/browser-hls-adapter.js","./scripts/downloads/offline-playback.js","./scripts/library.js","./scripts/library-page.js","./scripts/discover.js",
   "./scripts/collection.js","./scripts/person.js","./scripts/recommendations.js","./scripts/release-alerts.js","./scripts/cinema-reminders.js",
   "./scripts/push-notifications.js","./native-notify/web/nativeNotifyIds.js","./native-notify/web/native-notify-web-push.js","./scripts/news.js","./scripts/news.js?v=20261018-feedback-sync-4",
   "./scripts/newsroom.js","./scripts/news-community-highlights.js","./scripts/news-community.js","./scripts/news-story.js","./scripts/moderation.js",
@@ -48,7 +50,9 @@ async function cacheAsset(cache,asset){
  const response=await fetch(asset,{cache:"no-store",redirect:"follow"});
  // Never precache a response whose request crossed a redirect. Safari can reject
  // a redirected response when a service worker returns it for a navigation.
- if(!response.ok||response.type!=="basic"||!isSafeResponse(response))throw new Error("Unsafe or unavailable precache response: "+asset);
+ const allowedResponseType=response.type==="basic"||(asset===HLS_LIBRARY_URL&&response.type==="cors");
+ const expectedUrl=new URL(asset,self.location.href).href;
+ if(!response.ok||!allowedResponseType||!isSafeResponse(response)||response.url!==expectedUrl)throw new Error("Unsafe or unavailable precache response: "+asset);
  await cache.put(asset,response.clone());
 }
 async function cacheAssetsWithConcurrency(cache,assets,concurrency=6){
@@ -157,6 +161,21 @@ self.addEventListener("fetch",event=>{
  const request=event.request;
  if(request.method!=="GET")return;
  const url=new URL(request.url);
+ if(url.href===HLS_LIBRARY_URL){
+  event.respondWith((async()=>{
+   const cached=await safeCachedResponse(HLS_LIBRARY_URL);
+   if(cached)return cached;
+   try{
+    const response=await fetch(request,{cache:"no-store",redirect:"error"});
+    if(response.ok&&response.type==="cors"&&isSafeResponse(response)){
+     const cache=await caches.open(CACHE_NAME);
+     await cache.put(HLS_LIBRARY_URL,response.clone());
+    }
+    return response;
+   }catch{return new Response("",{status:504,statusText:"Offline"});}
+  })());
+  return;
+ }
  if(url.origin!==self.location.origin)return;
  // Authentication must not depend on stale cached documents or SDK bundles.
  // Always try the network first for auth pages, auth modules and Firebase config.

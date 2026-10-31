@@ -1,7 +1,7 @@
 import { DownloadManager } from "./downloads/download-manager.js";
 import { createIndexedDBPersistence } from "./downloads/indexeddb-persistence.js";
-import { createBrowserDownloadAdapter } from "./downloads/browser-direct-adapter.js";
-import { createOfflinePlaybackController } from "./downloads/offline-playback.js";
+import { createBrowserDownloadAdapter } from "./downloads/browser-direct-adapter.js";\nimport { createBrowserHlsDownloadAdapter } from "./downloads/browser-hls-adapter.js";
+import { createOfflinePlaybackController, ensureOfflineHlsLibrary } from "./downloads/offline-playback.js";
 
 const byId = id => document.getElementById(id);
 const jobsNode = byId("offline-jobs");
@@ -59,13 +59,46 @@ async function switchOwner(user) {
     const persistence=createIndexedDBPersistence({ownerId:owner});
     const integration=globalThis.VIVID_DOWNLOADS;
     const allowedHosts=Array.isArray(integration?.allowedHosts)&&integration.allowedHosts.length?integration.allowedHosts:["downloads.vivid.invalid"];
-    const adapter=createBrowserDownloadAdapter({
-      resolve:async(job,context)=>{
-        if(typeof integration?.resolve!=="function")throw new Error("No authorized download provider is configured. The selected title cannot be downloaded yet.");
-        return integration.resolve(job,context);
+    let activeSource = null;
+    const resolveActiveSource = async () => {
+      if (!activeSource) throw new Error("No active authorized download source is available.");
+      return activeSource;
+    };
+    const directAdapter = createBrowserDownloadAdapter({ resolve: resolveActiveSource, allowedHosts });
+    const hlsAdapter = createBrowserHlsDownloadAdapter({ resolve: resolveActiveSource, allowedHosts });
+    const adapter = {
+      async download(job, context) {
+        if (typeof integration?.resolve !== "function") throw new Error("No authorized download provider is configured. The selected title cannot be downloaded yet.");
+        activeSource = await integration.resolve(job, context);
+        try {
+          if (activeSource?.type === "hls") {
+            let Hls = null;
+            try { Hls = await ensureOfflineHlsLibrary(); } catch { /* Native HLS may still support offline playback. */ }
+            if (!Hls?.isSupported?.() && !video.canPlayType?.("application/vnd.apple.mpegurl") && !video.canPlayType?.("application/x-mpegURL")) {
+              throw new Error("This browser has no offline HLS playback engine available. The HLS download was not started.");
+            }
+            return await hlsAdapter.download(job, context);
+          }
+          return await directAdapter.download(job, context);
+        } finally {
+          activeSource = null;
+        }
       },
-      allowedHosts
-    });
+      async removePartial(job) {
+        await Promise.allSettled([directAdapter.removePartial(job), hlsAdapter.removePartial(job)]);
+      },
+      async removeAsset(job) {
+        if (String(job?.asset?.uri || "").startsWith("opfs-hls://")) return hlsAdapter.removeAsset(job);
+        return directAdapter.removeAsset(job);
+      },
+      async getAssetUrl(asset) {
+        if (String(asset?.uri || "").startsWith("opfs-hls://")) return hlsAdapter.getAssetUrl(asset);
+        return directAdapter.getAssetUrl(asset);
+      },
+      revokeAssetUrl(asset) {
+        if (String(asset?.uri || "").startsWith("opfs-hls://")) hlsAdapter.revokeAssetUrl(asset);
+      }
+    };
     const nextManager=new DownloadManager({persistence,adapter,concurrency:1}); await nextManager.hydrate();
     if(run!==generation){await persistence.close();return;}
     manager=nextManager; playback=createOfflinePlaybackController({adapter,video}); unsubscribe=manager.subscribe(render);

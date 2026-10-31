@@ -14,6 +14,9 @@ test("offline library uses owner-scoped persistence, configured authorized resol
   const script = await readFile(new URL("../scripts/my-downloads.js", import.meta.url), "utf8");
   assert.match(script, /createIndexedDBPersistence\(\{ownerId:owner\}\)/);
   assert.match(script, /createBrowserDownloadAdapter/);
+  assert.match(script, /createBrowserHlsDownloadAdapter/);
+  assert.match(script, /activeSource\?\.type === "hls"/);
+  assert.match(script, /ensureOfflineHlsLibrary/);
   assert.match(script, /createOfflinePlaybackController/);
   assert.match(script, /integration\.resolve/);
   assert.match(script, /manager\.retry\(id\)/);

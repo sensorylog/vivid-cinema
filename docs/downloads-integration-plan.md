@@ -79,3 +79,11 @@ The Expo/React Native downloader, AsyncStorage, Notifee and native filesystem AP
 - Movies and TV episodes are correctly grouped and identified.
 - The same web UI works without importing React Native packages.
 - Tests cover queue transitions, persistence, URL validation, partial-file cleanup and offline playback routing.
+
+## Browser HLS offline storage milestone (in progress)
+
+- Added `scripts/downloads/browser-hls-adapter.js` as a separate OPFS-backed HLS VOD adapter. It selects a bounded master-playlist variant, downloads initialization maps and media segments, writes a local rewritten media playlist, and exposes a blob-URL playlist for a future offline HLS player.
+- The adapter requires an injected resolver to return both `type: "hls"` and `offlineAllowed: true`; all playlist, variant, map and segment URLs must pass the exact HTTPS host allowlist. It omits cookies, rejects redirects, enforces playlist/segment/total-size limits, supports bounded segment concurrency, and removes partial output after failure.
+- Initial support is deliberately VOD-only: the media playlist must contain `EXT-X-ENDLIST`. Encrypted playlists, byte ranges, variable substitution, alternate audio/subtitle renditions, I-frame playlists and nested master playlists are rejected rather than silently producing incomplete offline files.
+- The HLS adapter has dedicated parser, OPFS, authorization, host-validation and failure-cleanup tests in `tests/download-browser-hls-adapter.test.mjs`.
+- The adapter is routed through the website download queue when the configured resolver returns an explicitly authorized HLS source. Offline playback uses Hls.js for MSE-capable browsers, with native HLS as a fallback; the service worker precaches the exact Hls.js build and serves it from cache while offline. The title-page still only offers options supplied by a configured provider, and no current provider has a verified HLS offline-entitlement contract. Real-device OPFS quota, reload, and offline playback validation remain required before treating this as production-ready. It does not support live streams, DRM, key extraction, or access-control bypass.
