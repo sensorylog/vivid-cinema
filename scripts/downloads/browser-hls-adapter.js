@@ -42,14 +42,14 @@ function chooseVariant(variants, maxHeight = 1080) {
 
 export function parseHlsPlaylist(text, baseUrl, { maxHeight = 1080, allowedHosts = [] } = {}) {
   if (typeof text !== "string" || !text.startsWith("#EXTM3U")) throw new Error("The source did not return a valid HLS playlist.");
-  const lines = text.replace(/^\\uFEFF/, "").split(/\\r?\\n/);
+  const lines = text.replace(/^\uFEFF/, "").split(/\r?\n/);
   const variants = [];
   for (let i = 0; i < lines.length; i += 1) {
     if (!lines[i].startsWith("#EXT-X-STREAM-INF:")) continue;
     const attrs = parseAttributes(lines[i].slice(lines[i].indexOf(":") + 1));
     const uri = lines.slice(i + 1).find(line => line.trim() && !line.trim().startsWith("#"));
     if (!uri) continue;
-    const resolution = /^(\\d+)x(\\d+)$/i.exec(attrs.RESOLUTION || "");
+    const resolution = /^(\d+)x(\d+)$/i.exec(attrs.RESOLUTION || "");
     variants.push({
       uri: uri.trim(),
       bandwidth: Number(attrs.BANDWIDTH) || 0,
@@ -94,7 +94,7 @@ export function parseHlsPlaylist(text, baseUrl, { maxHeight = 1080, allowedHosts
     output.push(path);
   }
   if (!segmentIndex) throw new Error("The HLS media playlist contains no media segments.");
-  return { kind: "media", resources, playlist: output.join("\\n") + "\\n", segmentCount: segmentIndex, mediaUrl: baseUrl };
+  return { kind: "media", resources, playlist: output.join("\n") + "\n", segmentCount: segmentIndex, mediaUrl: baseUrl };
 }
 
 export function createBrowserHlsDownloadAdapter({
@@ -245,7 +245,7 @@ export function createBrowserHlsDownloadAdapter({
       let playlist = await playlistFile.text();
       const urls = [];
       const paths = new Set();
-      for (const line of playlist.split(/\\r?\\n/)) {
+      for (const line of playlist.split(/\r?\n/)) {
         if (line && !line.startsWith("#")) paths.add(line.trim());
         const map = /#EXT-X-MAP:.*?URI="([^"]+)"/.exec(line);
         if (map) paths.add(map[1]);
@@ -257,10 +257,10 @@ export function createBrowserHlsDownloadAdapter({
         urls.push(url);
         replacements.set(path, url);
       }
-      playlist = playlist.split(/\\r?\\n/).map(line => {
+      playlist = playlist.split(/\r?\n/).map(line => {
         if (line && !line.startsWith("#")) return replacements.get(line.trim()) || line;
         return line.replace(/(#EXT-X-MAP:.*?URI=")([^"]+)(")/, (_all, before, path, after) => before + (replacements.get(path) || path) + after);
-      }).join("\\n");
+      }).join("\n");
       const manifestUrl = URL.createObjectURL(new Blob([playlist], { type: HLS_MIME }));
       urls.push(manifestUrl);
       activeObjectUrls.set(id, urls);
