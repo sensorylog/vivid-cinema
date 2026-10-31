@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#06070a">
+<meta name="description" content="Manage your Vivid Cinema offline downloads.">
+<title>Offline Downloads · Vivid Cinema</title>
+<link rel="icon" href="icons/vivid-icon.svg" type="image/svg+xml">
+<link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="styles/vivid-foundation.css">
+<link rel="stylesheet" href="styles/vivid-system.css">
+<link rel="stylesheet" href="styles/vivid-shell.css">
+<link rel="stylesheet" href="styles/vivid-liquid-glass.css?v=lg4">
+<link rel="stylesheet" href="styles/vivid-viewport.css?v=page-gutters-1">
+<link rel="stylesheet" href="styles/vivid-pwa.css">
+<link rel="stylesheet" href="styles/my-downloads.css">
+</head>
+<body data-vivid-page="downloads-library">
+<main class="offline-library">
+  <header class="offline-heading">
+    <p class="offline-eyebrow">YOUR DEVICE · YOUR LIBRARY</p>
+    <h1>Offline <span>Downloads</span></h1>
+    <p class="offline-intro">Manage video files saved for offline viewing on this device.</p>
+  </header>
+  <section class="offline-notice" aria-labelledby="offline-status-title">
+    <div class="offline-notice-icon" aria-hidden="true">↓</div>
+    <div>
+      <h2 id="offline-status-title">Download sources aren’t connected yet</h2>
+      <p>Vivid can manage saved download jobs, but downloading new movies or episodes stays unavailable until an authorized direct-file source is configured. Your streaming providers are not treated as download sources.</p>
+    </div>
+  </section>
+  <section class="offline-summary" aria-label="Download totals">
+    <div><strong id="offline-total">0</strong><span>All items</span></div>
+    <div><strong id="offline-completed">0</strong><span>Saved</span></div>
+    <div><strong id="offline-active">0</strong><span>In progress</span></div>
+  </section>
+  <section class="offline-list-section" aria-labelledby="offline-list-title">
+    <div class="offline-list-heading">
+      <h2 id="offline-list-title">Your downloads</h2>
+      <span id="offline-owner">Guest library</span>
+    </div>
+    <p id="offline-message" class="offline-message" role="status" aria-live="polite">Loading your download library…</p>
+    <div id="offline-jobs" class="offline-jobs"></div>
+  </section>
+  <p class="offline-footnote">Download records are stored separately for each Vivid account on this device. Video files remain in browser-managed device storage; browser storage can be cleared by the operating system or browser.</p>
+  <a class="offline-back" href="home.html">← Back to Vivid Cinema</a>
+</main>
+<script type="module" src="scripts/my-downloads.js"></script>
+<script type="module" src="scripts/app-shell.js"></script>
+</body>
+</html>
