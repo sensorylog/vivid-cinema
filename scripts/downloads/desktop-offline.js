@@ -85,7 +85,7 @@ async function loadSeriesSeason(seasonNumber){
       const number=Number(episode.episode_number)||0;
       const label="Episode "+number+" · "+String(episode.name||"Untitled episode");
       const date=episode.air_date?" · "+episode.air_date:"";
-      return '<label class="offline-episode-option"><input type="checkbox" data-episode="'+number+'" checked><span><strong>'+escapeHtml(label)+'</strong><small>'+escapeHtml(String(episode.overview||"").slice(0,180)||"No episode description available.")+escapeHtml(date)+'</small></span></label>';
+      return '<label class="offline-episode-option"><input type="checkbox" data-episode="'+number+'"><span><strong>'+escapeHtml(label)+'</strong><small>'+escapeHtml(String(episode.overview||"").slice(0,180)||"No episode description available.")+escapeHtml(date)+'</small></span></label>';
     }).join(""):'<p class="offline-muted">No episodes are listed for this season.</p>';
   }catch(error){
     if(requestId!==seasonRequestId)return;
