@@ -31,12 +31,13 @@ function safeArchiveFilename(value) {
 function safeCommonsTitle(value) {
   return typeof value === "string" && /^File:.{1,220}$/i.test(value) && !/[\u0000-\u001f]/.test(value);
 }
-async function fetchJson(url) {
-  const response = await fetch(url, { headers: jsonHeaders, signal: AbortSignal.timeout(20000) });
+async function fetchJson(url, signal) {
+  const timeout = AbortSignal.timeout(20000);
+  const response = await fetch(url, { headers: jsonHeaders, signal: signal ? AbortSignal.any([signal, timeout]) : timeout });
   if (!response.ok) throw new Error("Source metadata returned HTTP " + response.status + ".");
   return response.json();
 }
-async function resolveArchive(req) {
+async function resolveArchive(req, signal) {
   const identifier = String(req.query.identifier || "");
   const filename = String(req.query.filename || "");
   if (!safeArchiveIdentifier(identifier) || !safeArchiveFilename(filename)) {
@@ -45,7 +46,7 @@ async function resolveArchive(req) {
   const extension = filename.split(".").pop().toLowerCase();
   const mimeType = IA_EXTENSIONS.get(extension);
   if (!mimeType) { const error = new Error("Unsupported video format."); error.status = 415; throw error; }
-  const item = await fetchJson("https://archive.org/metadata/" + encodeURIComponent(identifier));
+  const item = await fetchJson("https://archive.org/metadata/" + encodeURIComponent(identifier), signal);
   if (!licensedArchive(item?.metadata || {})) { const error = new Error("This item has no recognized public-domain or Creative Commons declaration."); error.status = 403; throw error; }
   const file = Array.isArray(item.files) ? item.files.find(entry => entry?.name === filename && entry.private !== "true" && entry.private !== true) : null;
   const size = Number(file?.size);
@@ -57,7 +58,7 @@ async function resolveArchive(req) {
     mimeType, filename
   };
 }
-async function resolveCommons(req) {
+async function resolveCommons(req, signal) {
   const title = String(req.query.title || "");
   if (!safeCommonsTitle(title)) { const error = new Error("Invalid Wikimedia Commons file title."); error.status = 400; throw error; }
   const api = new URL("https://commons.wikimedia.org/w/api.php");
@@ -66,7 +67,7 @@ async function resolveCommons(req) {
     iiprop: "url|size|mime|extmetadata", iiextmetadatafilter: "LicenseUrl|LicenseShortName",
     titles: title, origin: "*"
   })) api.searchParams.set(key, value);
-  const metadata = await fetchJson(api);
+  const metadata = await fetchJson(api, signal);
   const pages = Array.isArray(metadata?.query?.pages) ? metadata.query.pages : Object.values(metadata?.query?.pages || {});
   const page = pages[0], info = page?.imageinfo?.[0];
   const mimeType = String(info?.mime || "").toLowerCase();
@@ -85,6 +86,8 @@ async function resolveCommons(req) {
 }
 export function createDownloadProxyHandler() {
   return async (req, res) => {
+    const clientController = new AbortController();
+    res.on("close", () => { if (!res.writableEnded) clientController.abort(new Error("Download client disconnected.")); });
     res.set("Access-Control-Allow-Origin", "*");
     res.set("Access-Control-Allow-Methods", "GET, HEAD, OPTIONS");
     res.set("Access-Control-Allow-Headers", "Range, If-Range, Content-Type");
@@ -94,8 +97,8 @@ export function createDownloadProxyHandler() {
     if (req.method !== "GET" && req.method !== "HEAD") return res.set("Allow", "GET, HEAD, OPTIONS").status(405).send("Method not allowed");
     try {
       const source = String(req.query.source || "");
-      const media = source === "internet-archive" ? await resolveArchive(req)
-        : source === "wikimedia-commons" ? await resolveCommons(req) : null;
+      const media = source === "internet-archive" ? await resolveArchive(req, clientController.signal)
+        : source === "wikimedia-commons" ? await resolveCommons(req, clientController.signal) : null;
       if (!media) return res.status(400).send("Unknown download source.");
       const headers = new Headers();
       for (const name of ["range", "if-range"]) {
@@ -103,7 +106,7 @@ export function createDownloadProxyHandler() {
         if (value) headers.set(name, value);
       }
       const upstream = await fetch(media.url, {
-        method: req.method, headers, redirect: "follow", signal: AbortSignal.timeout(540000)
+        method: req.method, headers, redirect: "follow", signal: AbortSignal.any([clientController.signal, AbortSignal.timeout(540000)])
       });
       let finalUrl;
       try { finalUrl = new URL(upstream.url); } catch {}
