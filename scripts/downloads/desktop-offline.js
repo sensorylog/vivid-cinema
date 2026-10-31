@@ -1,3 +1,5 @@
+import { tmdbApi } from "../tmdb.js";
+
 if (window.vividDownloads?.available) {
 const byId = id => document.getElementById(id);
 const escapeHtml = value => String(value ?? "").replace(/[&<>"']/g, char => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[char]));
@@ -13,6 +15,8 @@ const engine = window.vividDownloads;
 let currentMedia = null;
 let jobs = [];
 let searchResults = [];
+let currentSeasonEpisodes = [];
+let seasonRequestId = 0;
 
 function setMessage(message){ byId("offline-message").textContent = message; }
 function statusText(job){
@@ -60,13 +64,82 @@ function renderSearch(items){
   searchResults=items;
   const quality=byId("desktop-quality").value;
   const filtered=items.filter(item=>quality==="any"||new RegExp("(?:^|[^0-9])"+quality+"p?(?:[^0-9]|$)","i").test(item.title));
-  byId("desktop-search-results").innerHTML=filtered.length?filtered.map(item=>
-    '<article class="offline-result"><div><strong>'+escapeHtml(item.title)+'</strong><p>'+escapeHtml(item.provider)+' · '+escapeHtml(item.size||"Size unknown")+' · '+item.seeds+' seeders</p></div><button type="button" data-result="'+escapeHtml(item.id)+'">Download</button></article>'
-  ).join(""):'<p class="offline-muted">No matching releases. Try another quality or search term.</p>';
+  byId("desktop-search-results").innerHTML=filtered.length?filtered.map(item=>{
+    const episodeLabel=Number.isInteger(item.episode)
+      ? "S"+String(item.season).padStart(2,"0")+"E"+String(item.episode).padStart(2,"0")+(item.episodeTitle?" · "+item.episodeTitle:"")
+      : "";
+    return '<article class="offline-result"><div><strong>'+escapeHtml(item.title)+'</strong><p>'+(episodeLabel?'<b>'+escapeHtml(episodeLabel)+'</b> · ':"")+escapeHtml(item.provider)+' · '+escapeHtml(item.size||"Size unknown")+' · '+item.seeds+' seeders</p></div><button type="button" data-result="'+escapeHtml(item.id)+'">Download</button></article>';
+  }).join(""):'<p class="offline-muted">No matching releases. Try another quality or search term.</p>';
+}
+async function loadSeriesSeason(seasonNumber){
+  const requestId=++seasonRequestId;
+  const list=byId("desktop-episodes");
+  list.innerHTML='<p class="offline-muted">Loading season episodes…</p>';
+  currentSeasonEpisodes=[];
+  byId("desktop-search-results").innerHTML="";
+  try{
+    const data=await tmdbApi.tvSeason(currentMedia.id,seasonNumber);
+    if(requestId!==seasonRequestId)return;
+    currentSeasonEpisodes=Array.isArray(data?.episodes)?data.episodes:[];
+    list.innerHTML=currentSeasonEpisodes.length?currentSeasonEpisodes.map(episode=>{
+      const number=Number(episode.episode_number)||0;
+      const label="Episode "+number+" · "+String(episode.name||"Untitled episode");
+      const date=episode.air_date?" · "+episode.air_date:"";
+      return '<label class="offline-episode-option"><input type="checkbox" data-episode="'+number+'" checked><span><strong>'+escapeHtml(label)+'</strong><small>'+escapeHtml(String(episode.overview||"").slice(0,180)||"No episode description available.")+escapeHtml(date)+'</small></span></label>';
+    }).join(""):'<p class="offline-muted">No episodes are listed for this season.</p>';
+  }catch(error){
+    if(requestId!==seasonRequestId)return;
+    list.innerHTML='<p class="offline-muted">Could not load this season: '+escapeHtml(error?.message||"Please try again.")+'</p>';
+  }
+}
+async function searchSelectedEpisodes(){
+  const selected=[...byId("desktop-episodes").querySelectorAll('input[data-episode]:checked')]
+    .map(input=>currentSeasonEpisodes.find(episode=>Number(episode.episode_number)===Number(input.dataset.episode)))
+    .filter(Boolean);
+  if(!selected.length){setMessage("Select at least one episode first.");return;}
+  const season=Number(byId("desktop-season-select").value);
+  const found=[];
+  byId("desktop-episode-search").disabled=true;
+  byId("desktop-search-results").innerHTML="";
+  try{
+    for(let index=0;index<selected.length;index++){
+      const episode=selected[index], number=Number(episode.episode_number);
+      const query=(currentMedia.title||"")+" S"+String(season).padStart(2,"0")+"E"+String(number).padStart(2,"0");
+      setMessage("Finding releases for episode "+number+" ("+(index+1)+" of "+selected.length+")…");
+      try{
+        const rows=await engine.search(query);
+        found.push(...rows.map(row=>({...row,season,episode:number,episodeTitle:String(episode.name||"")})));
+      }catch(error){console.warn("Episode release search failed:",query,error);}
+    }
+    renderSearch(found);
+    setMessage(found.length?"Choose a release beside the episode you want to save.":"No releases found for the selected episodes. Try another season or episode.");
+  }finally{byId("desktop-episode-search").disabled=false;}
 }
 async function searchTitle(media){
   currentMedia=media;
   byId("desktop-search-input").value=media.title||"";
+  const seriesPicker=byId("desktop-series-picker");
+  if(media.media_type==="tv"){
+    seriesPicker.hidden=false;
+    byId("desktop-series-title").textContent=media.title||"Choose episodes";
+    byId("desktop-search-results").innerHTML="";
+    let seasons=Array.isArray(media.seasons)?media.seasons:[];
+    if(!seasons.length){
+      try{const details=await tmdbApi.tvDetailsBasic(media.id);seasons=Array.isArray(details?.seasons)?details.seasons:[];}
+      catch(error){setMessage("Could not load series seasons: "+(error?.message||"Please try again."));return;}
+    }
+    seasons=seasons.filter(season=>Number.isInteger(Number(season.season_number))&&Number(season.season_number)>=0&&Number(season.episode_count)>0)
+      .sort((a,b)=>Number(a.season_number)-Number(b.season_number));
+    const seasonSelect=byId("desktop-season-select");
+    seasonSelect.innerHTML=seasons.map(season=>'<option value="'+Number(season.season_number)+'">'+escapeHtml(season.name||("Season "+season.season_number))+' ('+Number(season.episode_count)+' episodes)</option>').join("");
+    if(!seasons.length){byId("desktop-episodes").innerHTML='<p class="offline-muted">No seasons with episodes are available for this series.</p>';setMessage("No season information is available for this series.");return;}
+    const first=seasons.find(season=>Number(season.season_number)>0)||seasons[0];
+    seasonSelect.value=String(first.season_number);
+    setMessage("Choose a season and tick the episodes you want to download.");
+    await loadSeriesSeason(first.season_number);
+    return;
+  }
+  seriesPicker.hidden=true;
   setMessage("Searching available releases for "+(media.title||"your title")+"…");
   try{const rows=await engine.search(media.title||"");renderSearch(rows);setMessage(rows.length?"Choose a release to save it to this device.":"No releases found. Try a different title.");}
   catch(error){setMessage(error?.message||"Search is unavailable. Check your connection and try again.");}
@@ -151,11 +224,26 @@ byId("desktop-search-form").addEventListener("submit",async event=>{
   catch(error){setMessage(error?.message||"Search failed.");}
 });
 byId("desktop-quality").addEventListener("change",()=>renderSearch(searchResults));
+byId("desktop-season-select").addEventListener("change",event=>{void loadSeriesSeason(Number(event.target.value));});
+byId("desktop-episode-select-all").addEventListener("click",()=>{
+  const inputs=[...byId("desktop-episodes").querySelectorAll('input[data-episode]')];
+  const selectAll=inputs.some(input=>!input.checked);
+  inputs.forEach(input=>{input.checked=selectAll;});
+  byId("desktop-episode-select-all").textContent=selectAll?"Clear selection":"Select all";
+});
+byId("desktop-episode-search").addEventListener("click",()=>{void searchSelectedEpisodes();});
 byId("desktop-search-results").addEventListener("click",async event=>{
   const button=event.target.closest("button[data-result]");if(!button)return;
   const result=searchResults.find(item=>item.id===button.dataset.result);if(!result)return;
   button.disabled=true;button.textContent="Starting…";
-  try{await engine.start(result,currentMedia||{title:result.title,media_type:"movie"});setMessage("Download added. You can keep browsing while it saves.");await refresh();}
+  try{
+    const mediaForResult=currentMedia?.media_type==="tv"&&Number.isInteger(result.episode)
+      ? {...currentMedia,season:result.season,episode:result.episode}
+      : currentMedia||{title:result.title,media_type:"movie"};
+    await engine.start(result,mediaForResult);
+    setMessage(Number.isInteger(result.episode)?"Episode download added. You can keep browsing while it saves.":"Download added. You can keep browsing while it saves.");
+    await refresh();
+  }
   catch(error){button.disabled=false;button.textContent="Download";setMessage(error?.message||"Could not start download.");}
 });
 byId("offline-jobs").addEventListener("click",async event=>{
