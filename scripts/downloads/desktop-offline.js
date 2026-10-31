@@ -43,9 +43,13 @@ function render(){
     if(job.status==="completed") actions.push('<button data-action="play" data-id="'+escapeHtml(job.id)+'">Watch now</button>');
     if(job.status==="completed"&&job.filePath) actions.push('<button data-action="show" data-id="'+escapeHtml(job.id)+'">Show in folder</button>');
     if(["downloading","verifying","paused","failed","queued"].includes(job.status)) actions.push('<button data-action="cancel" data-id="'+escapeHtml(job.id)+'">Cancel</button>');
+    const files = Array.isArray(job.files) ? job.files : [];
+    const episodeList = files.length > 1 ? '<div class="offline-episodes">'+files.map(file =>
+      '<button type="button" data-action="play-file" data-id="'+escapeHtml(job.id)+'" data-index="'+file.index+'">'+escapeHtml(file.name)+'</button>'
+    ).join("")+'</div>' : "";
     return '<article class="offline-job"><div><div class="offline-job-title">'+escapeHtml(job.title)+'</div><div class="offline-job-meta">'+escapeHtml(detail)+'</div>'+
       (["downloading","paused","verifying","completed"].includes(job.status)?'<div class="offline-progress"><span style="width:'+progress+'%"></span></div>':"")+
-      (job.error?'<p class="offline-job-error">'+escapeHtml(job.error)+'</p>':"")+
+      (job.error?'<p class="offline-job-error">'+escapeHtml(job.error)+'</p>':"")+episodeList+
       '</div><div class="offline-job-actions">'+actions.join("")+'</div></article>';
   }).join("");
 }
@@ -116,12 +120,14 @@ window.addEventListener("keydown",event=>{
   if(event.key.toLowerCase()==="f")void byId("offline-fullscreen").click();
   if(event.key.toLowerCase()==="m")player.muted=!player.muted;
 });
-async function play(job){
-  const url=await engine.mediaUrl(job.id);
+async function play(job,fileIndex=0){
+  const url=await engine.mediaUrl(job.id,fileIndex);
   if(!url) throw new Error("The saved video file is not available.");
-  byId("offline-player-title").textContent=job.title;
+  const file=Array.isArray(job.files)?job.files[fileIndex]:null;
+  const playerTitle=file&&job.files.length>1?job.title+" — "+file.name:job.title;
+  byId("offline-player-title").textContent=playerTitle;
   const section=byId("offline-player-section");
-  if(player.dataset.jobId!==job.id){player.pause();player.src=url;player.dataset.jobId=job.id;player.load();}
+  if(player.dataset.jobId!==job.id||player.dataset.fileIndex!==String(fileIndex)){player.pause();player.src=url;player.dataset.jobId=job.id;player.dataset.fileIndex=String(fileIndex);player.load();lastPositionSave=0;}
   player.controls=false;
   byId("offline-custom-controls").hidden=false;
   section.hidden=false;section.scrollIntoView({behavior:"smooth",block:"start"});
@@ -147,7 +153,7 @@ byId("offline-jobs").addEventListener("click",async event=>{
   const button=event.target.closest("button[data-action]");if(!button)return;
   const {action,id}=button.dataset;button.disabled=true;
   try{
-    if(action==="play"){const job=jobs.find(item=>item.id===id);if(job)await play(job);}
+    if(action==="play"||action==="play-file"){const job=jobs.find(item=>item.id===id);if(job)await play(job,action==="play-file"?Number(button.dataset.index)||0:0);}
     else {const ok=await engine.control(id,action);if(!ok)throw new Error("That action is not available.");await refresh();}
   }catch(error){setMessage(error?.message||"Action failed.");}
   finally{button.disabled=false;}
