@@ -1,7 +1,7 @@
 const API = "https://archive.org";
 const REQUEST_TIMEOUT_MS = 15000;
 const RESULT_LIMIT = 12;
-const MAX_FILE_BYTES = 12 * 1024 * 1024 * 1024;
+const MAX_FILE_BYTES = 8 * 1024 * 1024 * 1024;
 const VIDEO_EXTENSIONS = new Set(["mp4", "m4v", "webm", "mov", "ogv"]);
 const MIME_BY_EXTENSION = Object.freeze({
   mp4: "video/mp4", m4v: "video/mp4", webm: "video/webm",
