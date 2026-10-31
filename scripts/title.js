@@ -7,7 +7,6 @@ import { hasLibraryItem, startLibrarySync, toggleLibraryItem, upsertLibraryItem 
 import { getProviderCountry, setProviderCountry } from "./provider-region.js";
 import { getLatestPlaybackProgress } from "./recommendations.js";
 import { recordBehavior } from "./intelligence.js";
-import "./downloads/provider-integration.js";
 
 const $ = (id) => document.getElementById(id);
 const route = getRoute();
@@ -389,57 +388,14 @@ function render(details, externalCertification = "", externalCertificationNote =
 }
 
 function openTitleDownload() {
-  if (!media || !currentDetails) return;
-  const isTv = media.media_type === "tv";
+  if (!media) return;
   const modal = document.createElement("div");
   modal.className = "vivid-download-modal";
-  modal.innerHTML = '<section class="vivid-download-dialog" role="dialog" aria-modal="true" aria-labelledby="vivid-download-title"><button class="vivid-download-close" type="button" aria-label="Close">×</button><p>DOWNLOAD TO THIS DEVICE</p><h2 id="vivid-download-title">Download ' + (isTv ? 'an episode' : 'this movie') + '</h2><div class="vivid-download-selection">' + (isTv ? '<label>Season <select id="download-season"></select></label><label>Episode <select id="download-episode"></select></label>' : '<p>' + escapeHtml(media.title) + '</p>') + '</div><div class="vivid-download-options" id="vivid-download-options" aria-live="polite"><p>Searching available licensed copies…</p></div><p class="vivid-download-note">Vivid automatically checks Internet Archive and Wikimedia Commons for public-domain and Creative Commons video files. No provider account or API setup is required.</p></section>';
+  modal.innerHTML = '<section class="vivid-download-dialog" role="dialog" aria-modal="true" aria-labelledby="vivid-download-title"><button class="vivid-download-close" type="button" aria-label="Close">×</button><p>DOWNLOAD TO THIS DEVICE</p><h2 id="vivid-download-title">Downloads unavailable</h2><p class="vivid-download-empty">Vivid does not currently have an authorized direct-download source for this title. Check the streaming, rental and purchase options in Where to Watch.</p></section>';
   document.body.appendChild(modal);
   const close = () => modal.remove();
   modal.querySelector(".vivid-download-close").addEventListener("click", close);
   modal.addEventListener("click", event => { if (event.target === modal) close(); });
-  const seasons = (currentDetails.seasons || []).filter(item => Number(item.episode_count) > 0 && Number(item.season_number) >= 0);
-  const seasonSelect = modal.querySelector("#download-season");
-  const episodeSelect = modal.querySelector("#download-episode");
-  let request = 0;
-  async function loadOptions() {
-    const run = ++request;
-    const season = Number(seasonSelect?.value || 1), episode = Number(episodeSelect?.value || 1);
-    const mediaRequest = { id: String(media.id), media_type: media.media_type, title: media.title, episode_title: isTv ? (episodeSelect?.selectedOptions?.[0]?.textContent?.split(" · ").slice(1).join(" · ") || "") : "", year: media.year || "", poster_path: media.poster_path || "", season: isTv ? season : null, episode: isTv ? episode : null };
-    const slot = modal.querySelector("#vivid-download-options"), integration = globalThis.VIVID_DOWNLOADS;
-    slot.innerHTML = '<p>Searching public archives for downloadable licensed files…</p>';
-    try {
-      const options = await integration.getOptions(mediaRequest);
-      if (run !== request || !slot.isConnected) return;
-      const safeOptions = Array.isArray(options) ? options.filter(option => option && typeof option.id === "string" && typeof option.label === "string") : [];
-      if (!safeOptions.length) {
-        const query = encodeURIComponent((media.title || "") + (isTv ? " season " + season + " episode " + episode : ""));
-        slot.innerHTML = '<p class="vivid-download-empty">No openly licensed downloadable copy was found for this title in the public archives.</p><a class="vivid-download-option" href="https://archive.org/search?query=' + query + '" target="_blank" rel="noopener noreferrer"><strong>Search the public archive</strong><span>Open Internet Archive results</span></a>';
-        return;
-      }
-      slot.innerHTML = safeOptions.map(option => '<button type="button" class="vivid-download-option" data-option="' + escapeHtml(option.id) + '"><strong>' + escapeHtml(option.label) + '</strong><span>' + escapeHtml([option.format, option.license].filter(Boolean).join(" · ")) + '</span></button>').join("");
-      slot.querySelectorAll("[data-option]").forEach(button => button.addEventListener("click", () => {
-        const option = safeOptions.find(item => item.id === button.dataset.option); if (!option) return;
-        sessionStorage.setItem("vivid:pending-download", JSON.stringify({ media: mediaRequest, option: { id: String(option.id), sourceId: String(option.sourceId || integration.sourceId), label: String(option.label), quality: String(option.quality || option.label), format: String(option.format || ""), size: Number(option.size) || null } }));
-        window.location.href = "my-downloads.html?start=1";
-      }));
-    } catch (error) {
-      if (run === request && slot.isConnected) slot.innerHTML = '<p class="vivid-download-empty">Could not search the public archive: ' + escapeHtml(error?.message || error) + '</p>';
-    }
-  }
-  if (isTv) {
-    const available = seasons.length ? seasons : [{ season_number: 1, episode_count: 1 }];
-    seasonSelect.innerHTML = available.map(item => '<option value="' + Number(item.season_number) + '">Season ' + Number(item.season_number) + '</option>').join("");
-    async function loadEpisodes() {
-      try {
-        const data = await tmdbApi.tvSeason(media.id, Number(seasonSelect.value || 1));
-        if (!episodeSelect.isConnected) return;
-        episodeSelect.innerHTML = (data.episodes || []).map(item => '<option value="' + Number(item.episode_number) + '">Episode ' + Number(item.episode_number) + ' · ' + escapeHtml(item.name || "") + '</option>').join("");
-        await loadOptions();
-      } catch { episodeSelect.innerHTML = '<option value="1">Episode 1</option>'; await loadOptions(); }
-    }
-    seasonSelect.addEventListener("change", loadEpisodes); episodeSelect.addEventListener("change", loadOptions); void loadEpisodes();
-  } else void loadOptions();
 }
 
 function renderPersonPage(person) {
