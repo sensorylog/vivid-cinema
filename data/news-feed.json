@@ -1,10 +1,36 @@
 {
-  "generatedAt": "2026-10-31T13:38:16.929Z",
+  "generatedAt": "2026-10-31T14:25:01.233Z",
   "source": "Google News RSS search feeds",
   "count": 120,
   "failedQueries": 0,
   "feedCount": 21,
   "articles": [
+    {
+      "id": "1bdhsdt",
+      "headline": "Celebrities Who Officiated Their Hollywood Pal's Weddings",
+      "publisher": "Nicki Swift",
+      "publisherUrl": "https://www.nickiswift.com",
+      "sourceUrl": "https://www.nickiswift.com/2299863/celebrities-who-officiated-hollywood-friends-weddings/",
+      "publishedAt": "2026-10-31T14:15:00.000Z",
+      "region": "hollywood",
+      "category": "celebrity",
+      "summary": "From Jay Shetty to Adele to even Tom Hanks, these celebrities played a special role in their friend",
+      "imageUrl": "./data/news-thumbnails/1bdhsdt.jpg",
+      "imageFallbackUrl": "https://www.nickiswift.com/img/gallery/celebrities-who-officiated-their-hollywood-pals-weddings/l-intro-1793205844.jpg"
+    },
+    {
+      "id": "nxd61z",
+      "headline": "11 Upcoming K-Dramas On OTT In November 2026: The Remarried Empress, Good Partner 2, What A Boss Wants, Nine T",
+      "publisher": "Times Now",
+      "publisherUrl": "https://www.timesnownews.com",
+      "sourceUrl": "https://www.timesnownews.com/entertainment-news/korean/11-upcoming-kdramas-on-ott-in-november-2026-the-remarried-empress-good-partner-2-what-a-boss-wants-nine-to-six-article-156441324",
+      "publishedAt": "2026-10-31T13:54:02.000Z",
+      "region": "asia",
+      "category": "television",
+      "summary": "November 2026 brings 11 K-drama titles spanning fantasy romance, supernatural comedy, historical action, workplace relationships and crime thrillers. Check out the full list., Korean, Times Now",
+      "imageUrl": "./data/news-thumbnails/nxd61z.webp",
+      "imageFallbackUrl": "https://images.timesnownews.com/thumb/msid-156442365,thumbsize-685333,width-1280,height-720,resizemode-75/156442365.jpg"
+    },
     {
       "id": "1n9tysl",
       "headline": "Why Malia and Sasha Obama Dropped Their Famous Last Names in Hollywood and Left D.C. Politics Behind",
@@ -45,6 +71,19 @@
       "imageFallbackUrl": "https://kashmirlife.net/wp-content/uploads/2026/10/Faheem-Abdullah.webp"
     },
     {
+      "id": "1pk0lyj",
+      "headline": "Michael J. Fox's First Major TV Role Was On A Forgotten Historical Drama",
+      "publisher": "Yahoo",
+      "publisherUrl": "https://www.yahoo.com",
+      "sourceUrl": "https://www.yahoo.com/entertainment/tv/articles/michael-j-foxs-first-major-131200732.html",
+      "publishedAt": "2026-10-31T13:12:00.000Z",
+      "region": "hollywood",
+      "category": "television",
+      "summary": "Years before Back to the Future made him a star, Michael J. Fox landed his first major TV role on a short-lived drama from two legendary creators.",
+      "imageUrl": "./data/news-thumbnails/1pk0lyj.jpg",
+      "imageFallbackUrl": "https://s.yimg.com/lo/mysterio/api/7c3f2ca45bdeff56c36c044aab8cfe4079ca5db49de7026f1a5d24ff7a2008f5/lightyear_networkapi/resizefill_w1200%3Bquality_80%3Bformat_jpg/https%3A%2F%2Fmedia.zenfs.com%2Fen%2Ftvline.com%2Ff08ac575c8afe738dff14a3896746906.jpg"
+    },
+    {
       "id": "hn4muc",
       "headline": "Pony Verma on 12-year age-gap with Prakash Raj, relationship with daughters from 1st marriage",
       "publisher": "The Indian Express",
@@ -69,6 +108,19 @@
       "summary": "Doctor X Mafia In White Episode 8 India Release Time Today: As Doctor X Mafia In White Episode 8 is releasing in a few hours, let’s take a look at the release time of the much-talked-about Korean drama. Check out the date and time in India as per IST.",
       "imageUrl": "./data/news-thumbnails/emc0pd.jpg",
       "imageFallbackUrl": "https://images.filmibeat.com/img/2026/10/doctorxmafiainwhitedailymotionep1d1-30191793450794.jpg"
+    },
+    {
+      "id": "1t87s8y",
+      "headline": "Kannada Film Premada Oorali Nears Rs. 125 Crore Milestone in Theatrical Run",
+      "publisher": "Zoom TV",
+      "publisherUrl": "https://www.zoomtventertainment.com",
+      "sourceUrl": "https://www.zoomtventertainment.com/bollywood/premada-oorali-kannada-film-box-office-collections-update-article-156442017",
+      "publishedAt": "2026-10-31T12:42:52.000Z",
+      "region": "global",
+      "category": "box-office",
+      "summary": "The Kannada film Premada Oorali continues to show steady performance in its sixth week, with trade estimates placing its total Indian box office gross at approximately Rs. 117.05 crore as it approaches its final run., Bollywood News, Zoom TV",
+      "imageUrl": "./data/news-thumbnails/1t87s8y.webp",
+      "imageFallbackUrl": "https://images.zoomnews.com/thumb/msid-156442344,thumbsize-210538,width-1280,height-720,resizemode-75/156442344.jpg"
     },
     {
       "id": "yzsp84",
@@ -110,43 +162,69 @@
       "imageFallbackUrl": ""
     },
     {
+      "id": "wbhav9",
+      "headline": "National Film and TV Awards nominations come out with a bang",
+      "publisher": "Bona Magazine",
+      "publisherUrl": "https://www.bona.co.za",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMinwFBVV95cUxQT0daSEdHaDBOVFM4bTRPQmw5QlFxTUhTaklZbkd6eUR2RTNwcUVTVzdpRGRjaFNLUEp0dXFDWEVpTE1QdmNUZ1htaF9MTFQ0ZDBFcEJ1U1M1NXVxLTNYZDZWbDMyRmJvaS1RSEp4OHVmVW5HbGZBekZtSTJ0QzdBSkdobnUtaXNTLUxTaHN3alVHQXpOM0tHcktTLXUzRk0?oc=5",
+      "publishedAt": "2026-10-31T12:29:07.000Z",
+      "region": "global",
+      "category": "awards",
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
+    },
+    {
+      "id": "bdr3bw",
+      "headline": "CANEX WKND: Turning Africa’s cultural power into economic wealth",
+      "publisher": "pmexpressng.com",
+      "publisherUrl": "https://pmexpressng.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMilgFBVV95cUxNSUh2Vm1wVndGbGFxaU1mZ0Vsb1RoQmwxTnc5OUxsMXBqTzFyM3ltZnF1Y1VJeUV6Und3am8takwzV0gtZUxCVnpLN1ktQUN0dkdYU0RQMmlvc0lSMThjLXJRa2h5UWxWM0Y1MzJCV01ydVBRMUc3UXFmYVhfME9VWnNqWXZGZXRMcE1vVzAtWV80aGdWbmc?oc=5",
+      "publishedAt": "2026-10-31T12:05:02.000Z",
+      "region": "africa",
+      "category": "film",
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
+    },
+    {
       "id": "1wjgijs",
       "headline": "Cornish filmmaker performs live soundtrack to new movie",
       "publisher": "BBC",
       "publisherUrl": "https://www.bbc.com",
-      "sourceUrl": "https://www.bbc.com/news/articles/c64g1j4vkrdlo",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMiW0FVX3lxTE1lMTktTnFpVTRpclZ1OGxaaGJoWFhBamFCUV9MSU01ekhwZ2pwTzJQTWx3bFlmcU1aWFhfMWJ0c21VS0xDUGs1VEJuYVlpY2lJem1sMG04ckFGazQ?oc=5",
       "publishedAt": "2026-10-31T12:00:31.000Z",
       "region": "global",
       "category": "music",
-      "summary": "Mark Jenkin says playing the score live \"heightens the emotion\" felt by the audience.",
-      "imageUrl": "./data/news-thumbnails/1wjgijs.jpg",
-      "imageFallbackUrl": "https://ichef.bbci.co.uk/news/1024/branded_news/27fd/live/c3ad4380-d21e-11f1-b8e4-17c9744a7f8e.jpg"
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
     },
     {
       "id": "59tp5e",
       "headline": "Sanjay Gupta passes away at 57: Gajendra Chauhan, Vindu Dara Singh remember filmmaker's cinema legacy",
       "publisher": "The Times of India",
       "publisherUrl": "https://timesofindia.indiatimes.com",
-      "sourceUrl": "https://timesofindia.indiatimes.com/entertainment/hindi/bollywood/news/sanjay-gupta-passes-away-at-57-gajendra-chauhan-vindu-dara-singh-remember-filmmakers-cinema-legacy/articleshow/135400138.cms",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMioAJBVV95cUxPcWpkWDEzSzhfN1dCX1pvU0VEQ18yZlBrZjRURmVKak1BZTMtNTB1MGtjeGYtMU45a3FRZU56YVFablVjaTVPZkhCZnkyQ2tDMmFoTG9NLVVNbXE0S2xWYndnbG90SHdDWjExamhRbm5lYlBMWFJldDVOZ3U0R1A0SDNKeEJ2RzBEYmNNMEtqSnVIcDNNeXhsUGtiRU82U2JUVDVQQks4MW1Sa0hzdnhxdktudmNpQmwzV2tCM2VrT0FSZ3U5cnZrRlZxRHBJMTgtZmNxRkNnNVNwWWh6ZkoxWkJFOTJDUDZCLUdsVmVhYXpPcGc2VTNiejlMT1J0Ul95RGxNelZtYjNJdlBwUDlRNUlmUEx4SEpIUlJ5SzNLX1LSAaYCQVVfeXFMTUQtMWZsakZZQmxaQlRiWUNVYV9nNmxlQ0tvUXNZRW1USVdSV0tydHppUlZvb0tOb0FqcXhjTmt0RHdMcjl5alRPU2pVRVNPbHdkUEdIOWl0OU51cUFkS2ZiRUFyMkhGYlVqVS1pSWpnQTZmeDFZZ3c2NmNQaURsWERtXzJlakRRME9QOE9Ud1gzMHNMdnJSX0JEUmpvSk5jSXNvTEJLMktwNWM1a0JMZGZqbXNEOElfRFJ3REZtemF3T2hsaDZ4RVVxdS1jUVlVdVJ4UTBfR0VjZE5SSGF6cXd1XzhkaUNFanRFeHFQUkFtTnV3ampMVDQ1NFJpMnRyYmJER1FYUUJzbXJ3T2xwNW11Ti1WV3pCZ2JPdENXOW5fdlJldXRn?oc=5",
       "publishedAt": "2026-10-31T11:54:00.000Z",
       "region": "india",
       "category": "film",
-      "summary": "The Indian film fraternity is mourning the demise of filmmaker and producer Sanjay Gupta, who passed away at the age of 57 on Saturday morning.",
-      "imageUrl": "./data/news-thumbnails/59tp5e.avif",
-      "imageFallbackUrl": "https://static.toiimg.com/thumb/msid-135400138,width-1280,height-720,resizemode-6,overlay-toi_sw,pt-32,y_pad-600/photo.jpg"
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
     },
     {
       "id": "9wvdg6",
       "headline": "75 MIFA 2026 Honors Influential Filipino-Americans for Global Impact",
       "publisher": "Good News Pilipinas",
       "publisherUrl": "https://goodnewspilipinas.com",
-      "sourceUrl": "https://goodnewspilipinas.com/75-mifa-2026-influential-filipino-americans/",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMif0FVX3lxTE4wUFloZnYxZ0MzRV9Kd0p5Sl9NSlhmaU14RWo1T3RBTlVGWldad01tVEc0cXc5QUpYdXFNd3Z2VjJGMHpiaDRLdEpHZVdNNE94SlBUXzVRVXBQYVNMdUZZRFRMS09CY1J0VTZHS2lzejRoRkxFUkc1enFzUDdLOU0?oc=5",
       "publishedAt": "2026-10-31T11:51:21.000Z",
       "region": "global",
       "category": "music",
-      "summary": "Meet the 75 MIFA 2026 honorees recognized across entertainment, music, media, business, healthcare, and community leadership.",
-      "imageUrl": "./data/news-thumbnails/9wvdg6.webp",
-      "imageFallbackUrl": "https://goodnewspilipinas.com/wp-content/uploads/2026/10/MIFA-featured.webp"
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
     },
     {
       "id": "1yzfl69",
@@ -201,14 +279,14 @@
       "imageFallbackUrl": ""
     },
     {
-      "id": "1olbcwy",
-      "headline": "Brad Pitt & Jon Bernthal's 135-Minute Military Action Thriller Officially Sets Netflix Streaming Date",
-      "publisher": "MovieWeb",
-      "publisherUrl": "https://movieweb.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMihwFBVV95cUxNUEhRdGFsejFqejVHSEJ6blhoYmtUMmozT2RIclQ0cUx3MUF4Smo3dGpuc3ozYUNMcHNPX2p6TVAtNkpfdk9ZcEQ1VVROZjMyVmEyU05XbUlTVXR5Sjdzd0d1bXlRUVhlYnQwSG0wSk9jWWJaY0FNUVZVU2VwdzJsT3Y1MXAxMm8?oc=5",
-      "publishedAt": "2026-10-31T11:00:17.000Z",
-      "region": "hollywood",
-      "category": "streaming",
+      "id": "2gc3m",
+      "headline": "One Bar of Soap, 60 Seconds, ₦2m: Givanas Industry Unveils Miss Ivory Season 4",
+      "publisher": "Head Topics",
+      "publisherUrl": "https://ng.headtopics.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMimgFBVV95cUxNb0NpbHJVUVk3SVM0cENQUnN4TlBSQzJObURPV1h3aHRDR2JlRzEzU0JqUDBnVWZpVTZnUmI5d05lWXBwSzM2SUhRQ3pSNDl0SU1lel9nWGZKemFYMF9henpiaUJHNENlSEEzS3puNEtMNHBNUDRJd0xER085LVEwanZ2WkpuRy1HUVAtSEl5NGVGbXRPdnpPNzJn?oc=5",
+      "publishedAt": "2026-10-31T10:53:00.000Z",
+      "region": "africa",
+      "category": "film",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
       "imageUrl": "",
       "imageFallbackUrl": ""
@@ -279,14 +357,27 @@
       "imageFallbackUrl": ""
     },
     {
+      "id": "1dkdoo0",
+      "headline": "Sanjay Gupta passes away: Fardeen Khan, Ronit Roy, Rakesh Roshan and others pay last respects at filmmake",
+      "publisher": "The Times of India",
+      "publisherUrl": "https://timesofindia.indiatimes.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMivwJBVV95cUxQZDdHbkVlREwwczVpdEJRT0lsUXpkT1V0dDBUQ1ZtQ2J5UXh3RW81SVZDbmF1Nlc3WTRKbHpFM05GVXlWRHFDTks1MlVvd3NlUlJFYkJ3WXgtckEtanFPblVYYXprRmZLMFhndjM1TW43dXlCbFJuNWEzcVNhaDFkZmlVWi1VUEliSmxJSHNuUDlzU3ZhZkx5a19lWFZCN3FZYmJCTXZ6T214a1JRR1VDT3VSQkw0TXQ3XzkyZXZaVjU3eVFRS0NFUS0yMzZPdmV1amZ1OFlDb1VNcDhLVG1XY2cxcFdzenVMYTluZEc3dkxCMVR2VVBKX3dsdXVocmFDcEplb1AwNVhDRmR1Q2xBT0g0SnZSRUdMZVpZTzN2dHNWUXpDeXZ3MnVVRU5SdzQ0Q2s5YUhMY01GeWI5MHpZ0gHEAkFVX3lxTE54dHdnbDM2Vl93VDYyZ3RKbEpRbEZrNHVGSGhtZVNGajNMVWh2UTRzTmdPT1B3TkQ4eGk4YUtGWUtsUnJqaG1kT3BZQU1faVJsbzJmTnd3ak90c3ZvUTRJUXJLdUdXQnctbHI4a1FCRFdtSWgxZnl0Nk1BNTNMY1ktVXkxcU44M180clBIOXB0dmVLbUpwME5sNWt1TGVtanNEYWR4ZUZUV2RJQ21oZkJjZU9KeFV1TDBUSlNrSU1jZUN6UTBGUmttZ3htdklhMWRXalRmWUNuNmR6Vk9IWWV5blNnZTliM0VTcURhckx0V3MwRFRqa3pHUlhYOXNKTm54eFFlcmZvNFhSQXl4QURkcDdEUnVIVnlaMVN1ZjMxcVNnNmp0clA0b3JHNDJSd19nd0RCV1NocHdGVXZLYWpXSW1Oag?oc=5",
+      "publishedAt": "2026-10-31T10:33:00.000Z",
+      "region": "india",
+      "category": "film",
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
+    },
+    {
       "id": "1dzcw7u",
       "headline": "Piyush Goyal says foreign Deputy PM’s daughter wants to work in Bollywood: ‘He’s been behind me’",
       "publisher": "The Indian Express",
       "publisherUrl": "https://indianexpress.com",
       "sourceUrl": "https://news.google.com/rss/articles/CBMi8AFBVV95cUxQVzFNSUVDd0E2dDB6R1BheWZkaUJlNEE5dGI1MklLLUhicVpzZGVVd3ZONzBHNTdNc0Q1dnRPTEdycXJCMWZUWWpoeU1xanFuZ05kTjhIdUoxTjhDNlRSa2ttLXFzZW9CT2VUVE1sYUpKa3hFV0gwdHdvM2lKWGs5NjRGU25TclBOZU9pVlNuWnhjd2h4eXdLOFFuN29DWkkwT3AyRlFDSWZ1SmdrcU1obnRhRVJWUjY3TEFhYmlxODdsSmV2cmZRSlYzenZpVjJ4MEFnRm9uUFFiX0dac2xMNHZTNlByaGFfc0h3MC1zNTTSAfcBQVVfeXFMTVFiMnhBZi1YX01mclRFMnBUN1V5dy10NlBIMU1YalVzTXItMEc4WmpaWHEwWjRPWjF0aTFiTnFDME9CZjdTa2VxQmRQTl9FcFNfT21YOFFyZkZmMU9jLV9fVDhwaG1pandXQlp3cEpiUXd6LTVLRWM5RjJ2YVhSODAwM0FFLW1RQzA5Tk5jdzVkSDV2aGRxU1lVVV93MG14Y2w2bUdDM3ZQZ3RpMnBOTG5Ld1V2aXUwQm9odU45OFRVaEV4OGVoNEY4bHpWVEpMMTZIUi1lZDlIT0tROGxJeWE4ZWFKdlFINzloWjNWQjBXa1pMWWdZdw?oc=5",
       "publishedAt": "2026-10-31T10:30:43.000Z",
-      "region": "india",
-      "category": "film",
+      "region": "global",
+      "category": "box-office",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
       "imageUrl": "",
       "imageFallbackUrl": ""
@@ -331,19 +422,6 @@
       "imageFallbackUrl": ""
     },
     {
-      "id": "182fo9n",
-      "headline": "Late Korean TV icon Choi Bul-am requested documentary chronicle his life amid illness",
-      "publisher": "The Korea Times",
-      "publisherUrl": "https://www.koreatimes.co.kr",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMi2AFBVV95cUxPbG1Vbl9CRE9ScUczZzJyeWNMb1BGOXBaSkJIaHltRGQ5ZXg1NWF6NTNCMDNnZmdSRVRlaWdXczNkdnRKM3M5S2pFTVVVOTRZRkZvaElILVZKSjc0UGR5eXJWTGdtbDcxU2ZBX1k0Qm1PNVNZcm1XbFp4QmhINVQxWmloM1dsSTRsRThIWE1acm1zWE11bE4xb1NLMEpDNlBERmNQZGlXSjdFQWN4S3BZWFRmdDhPckZKMDRHU2pHc21ONXBwRWlZbDNESVoyYUxMYWtEMXByaU_SAdgBQVVfeXFMT2xtVW5fQkRPUnFHM2cycnljTG9QRjlwWkpCSGh5bURkOWV4NTVhejUzQjAzZ2ZnUkVUZWlnV3MzZHZ0SjNzOUtqRU1VVTk0WUZGb2hJSC1WSko3NFBkeXlyVkxnbWw3MVNmQV9ZNEJtTzVTWXJtV2xaeEJoSDVUMVppaDNXbEk0bEU4SFhNWnJtc1hNdWxOMW9TSzBKQzZQREZjUGRpV0o3RUFjeEtwWVhUZnQ4T3JGSjA0R1NqR3NtTjVwcEVpWWwzRElaMmFMTGFrRDFwcmlP?oc=5",
-      "publishedAt": "2026-10-31T09:44:04.000Z",
-      "region": "asia",
-      "category": "television",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
       "id": "1rhjita",
       "headline": "Mika Singh remembers late Sanjay Gupta as his ‘Godfather’; says ‘You gave me my first Bollywood break’",
       "publisher": "The Times of India",
@@ -363,19 +441,6 @@
       "publisherUrl": "https://www.thehawk.in",
       "sourceUrl": "https://news.google.com/rss/articles/CBMi6AFBVV95cUxOLWdjRExLYVlIRlRjcDAzN1dia0lFdjZjQUNaaEpzbi1TVFFzdnVmRUd5N2VsYWVIOHpzVm10UkxJczNzRFFmU3JnYWdIeFhtWjA3V1B4MF9KdkFCZVROOHY2NG43MmhRZlhwMjBheUttNWY2cGtyWFNZM0laUDBEZms5dzNsQzUtZkFmZjkzbWVQd3NVM1FhdVRlWmp1NUtXUWRGdlJHaFVyYUhhQ2czMFJCQTdNUVBpNEg1SnQycGNUMy1rX2lJbUhWMW53R0k4MHhVbldPeWwwQk1xSWNhM1JxSEdEZ3NW?oc=5",
       "publishedAt": "2026-10-31T09:38:55.000Z",
-      "region": "india",
-      "category": "music",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
-      "id": "syon69",
-      "headline": "Milap Zaveri to dedicate his next to his 'Godfather' Sanjay Gupta",
-      "publisher": "The Hawk",
-      "publisherUrl": "https://www.thehawk.in",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMioAFBVV95cUxQRzBVVmswc3RfOGpHRlZaMm1rNDladGl4UFQ1UF8xeG1yQm5TdjB0dm1wQWQ4dmZIdDhkMGw1WW5iRUxXSFpHczBoc3VWbTlRQV9ud3JBWFNQYUg5SUl4cWRpV3FreUw1NC1pT3JKSl83VVNnRDJ5TGZ2U09kdVVlQ1lQOWJlMWNZdml0UjBwWTFaUHZMNGtIMWxlQ3huekVt?oc=5",
-      "publishedAt": "2026-10-31T09:33:55.000Z",
       "region": "india",
       "category": "music",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
@@ -487,6 +552,19 @@
       "imageFallbackUrl": ""
     },
     {
+      "id": "18rlsjw",
+      "headline": "'Rise: The Siya Kolisi story' raises the bar for South African film",
+      "publisher": "IOL",
+      "publisherUrl": "https://iol.co.za",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMitgFBVV95cUxNVFJ1N1RRRENJeUZTbHF6dlZWZHNuazdTeDdfdnNkTDJmUExLR1RXc2JncGNoSXVTSDVPYW9ndm94d0Q4T2l5Ny1mbnNqaC03d3pSdktUcGRaaG9COG41bG1qT1Y5VFBPOUNWSWxVY0xNR2lNRUhsOXRmYXIxeFV2WERzWHRUYnJZSzZQZE5teWdxU0YtYzBDYUgydmQzMk1OU3hubEg3eEN5LXMzUlJkZXRWbkhndw?oc=5",
+      "publishedAt": "2026-10-31T08:34:10.000Z",
+      "region": "africa",
+      "category": "film",
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
+    },
+    {
       "id": "yshyn9",
       "headline": "The best Japanese romance anime to watch on Netflix right now",
       "publisher": "Lifestyle Asia Hong Kong",
@@ -552,19 +630,6 @@
       "imageFallbackUrl": ""
     },
     {
-      "id": "ji5m5q",
-      "headline": "Two unheard Ozzy Osbourne songs to be released",
-      "publisher": "inkl",
-      "publisherUrl": "https://www.inkl.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMifEFVX3lxTE9mdndkdUgzcnlnWm1nTXpKRThVYTVLWjl3aHAySXh4U1Zzd1lqNVcxRGFLUGRjQ0VrbnVFQjNNNzBDOTlZMFBYNzlqNnNKWGU5dWFMSW9CYnQzM3ZvUGdVSks1MUh2WUxReV9EM1BIWGJlMGQxdTdfWUYwRlc?oc=5",
-      "publishedAt": "2026-10-31T08:00:00.000Z",
-      "region": "global",
-      "category": "music",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
       "id": "1h75ezv",
       "headline": "‘Hamilton House’ Comes to Call at Smodcastle Film Festival",
       "publisher": "Two River Times",
@@ -585,32 +650,6 @@
       "sourceUrl": "https://news.google.com/rss/articles/CBMi6wJBVV95cUxPcDlHRGlxUTlGU3p0dUFmSWdtZFRMZUNmU3c2UUxxUDEtR004WUozYlVaNjhRQmF6UzRvN2tIZzZCb0FpYUk2QzMyVGl3UDZDMmJoZWFqX3J2UkdrS002TjB4bm8tNDFkRVlpSmE5b214VnIxeWZNSUNoSzlfU2w3cjFTVm5RR2RFSXJvZE02UC1fU2IwRnRMcHdDeEdiQl9GVkQ1dC1Vc3FwTmM2ZG0xTU9wUVZkTVdIZk5XcW9qWWtEdWFQeEFrNjRJQXZpdW5KaGFxSno1Q0g5YnJYOW1xQW9vVEtfaU5sd0NIS1NFOF9xaDFJR19wX2FiOW5UVHdXeU1pZ3dtLWhrdWRhMVBKQkR2RVJ6bXBRT1ZXeDNkNkJmNk5YUTJzWXZmOGltS3ZkanVGQkw0bFFOX3BpRnJpZUZPMlZ4SFcwa0FlbnhJbDhqYU9IV1lxRFZ2eHlmNERHMEUwbkg5d2hPd2vSAfACQVVfeXFMUFZBcWNsRzVBM3lXRGxFT0dJWXZvT1lPejRCUzhQVlI2Skc2REF2Y1BYWlFLdFA2d3hsd216Z3VXX0hmYzItVzRVLU1pa1N0SmtjTGR4UkVlbjZGeXA0Z1dJSUQxbmdFLTlRNkYycjBtMUxVb3E2Z0dwam5vVk1ZZ0UzSlljNU1XVUsyeV9jaGc1TjRVNHV0NllfNXhyeGtBQ2ZNMVFhWWpEQndPcFBITXlXek10T05LMUlRSWllYmxsLVhTYTU4ZnJ6S2s4NEtoclJNZllZQnlzNktlcTc3akxSRmJZTlo2dkRvSHVVa09JbWJTQ2JPYk0wVkJwMEFnTWROSlY3TXR3MGxYUHRGc0NBR3EtN1c5bGhYSEkwb2M1MEZTQm5rUTByMXhjcl9VQmI4aFkxb0FCRzl6T21SWkphNmpWMFNqZFgtMGNSN1A2SlpGSzdKY2xIS3JlendkdkNqdzN3dWl2enhmX1RFMTI?oc=5",
       "publishedAt": "2026-10-31T07:58:00.000Z",
       "region": "india",
-      "category": "film",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
-      "id": "ndf25b",
-      "headline": "Film AlUla wants audiences to delve deeper than the screen",
-      "publisher": "アラブニュース",
-      "publisherUrl": "https://www.arabnews.jp",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMipAFBVV95cUxOeGVvdzRTT05vVWVFM1h1UTBmNUxYc1d5OXlrdDJFOUVXTWRWaWRZSkR6NHgwUXY5cUhKeVFucjZPX3ZRZFZuSGp0a243Y09sLW5VR1dfNmgyNUVDbTJTSEY5Q3FiMVczcUYxZVVsVGxKZm9xSGZQQ1V1VEVVWldHYWNVZ1VTVGZlVkRYMXZBSGRGZkNvSnYwOENHQ083cHg0SEw1Xw?oc=5",
-      "publishedAt": "2026-10-31T07:52:01.000Z",
-      "region": "middle-east",
-      "category": "film",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
-      "id": "18rlsjw",
-      "headline": "'Rise: The Siya Kolisi story' raises the bar for South African film",
-      "publisher": "IOL",
-      "publisherUrl": "https://iol.co.za",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMitgFBVV95cUxNVFJ1N1RRRENJeUZTbHF6dlZWZHNuazdTeDdfdnNkTDJmUExLR1RXc2JncGNoSXVTSDVPYW9ndm94d0Q4T2l5Ny1mbnNqaC03d3pSdktUcGRaaG9COG41bG1qT1Y5VFBPOUNWSWxVY0xNR2lNRUhsOXRmYXIxeFV2WERzWHRUYnJZSzZQZE5teWdxU0YtYzBDYUgydmQzMk1OU3hubEg3eEN5LXMzUlJkZXRWbkhndw?oc=5",
-      "publishedAt": "2026-10-31T07:45:44.000Z",
-      "region": "africa",
       "category": "film",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
       "imageUrl": "",
@@ -682,19 +721,6 @@
       "imageFallbackUrl": ""
     },
     {
-      "id": "1y52efp",
-      "headline": "Premada Oorali Box Office Collection Day 37",
-      "publisher": "Sacnilk",
-      "publisherUrl": "https://www.sacnilk.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMiigFBVV95cUxNSkJwdnQ1UmJ4NnV3RHdXX1JZTUdaVUlVbkdFeUpzWWp0dVU3OVNndnpMajg0TW0wWmp1a3ZQZFhFSFFkVEw0dDNNMlBpX3VobzhvNV9qSVMzb0xyNml4M3M1clJaak9QUWNzVkxxeS1ldUVKdUFoQlZyTDd5Q2NJTTJCLU9lWXdRNUE?oc=5",
-      "publishedAt": "2026-10-31T07:16:33.000Z",
-      "region": "global",
-      "category": "box-office",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
       "id": "1hsdxzf",
       "headline": "Sanjay Gupta’s Post About Favourite Hollywood Stars Michael Douglas, Sylvester Stallone Resurfaces After His Death",
       "publisher": "ABP Live English",
@@ -708,12 +734,38 @@
       "imageFallbackUrl": ""
     },
     {
+      "id": "12yjwl5",
+      "headline": "Ram Gopal Varma faces Rs 29.67 cr recovery notice, film industry warned against working with him",
+      "publisher": "The Indian Express",
+      "publisherUrl": "https://indianexpress.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMigAJBVV95cUxOVmtFRnN6aUxLRVJLV2tKeFB3LWxJZXNPa3F6MVA2eGJ5cVpIZllDV1RyT2RfeDVkeEpsNUFaS2VRc2lTSXc1Tm5qSzlKMWZ3ZzdDOGhTVzlESTF5bjhiTTllM0J0TGlGT1VXX0FzRlpTbG5VaW5MOGl0czFCOHVQV3ppX3B0S0hoRGp6dkFVdzhvajdMallqaG90eGFZbGNQbzdMbFNnSFpQNHlnVXk5WF8tbEkzNnQ3YkNFcmxuTnhxbVhNUjEyeWVob3VwX0hKbkFhMk5oajFxY0dRNHM5c3ZlYTlUTG1vdlk5N3JCTUpLQm16RkV6VElFLUtqTkZa0gGAAkFVX3lxTE5Wa0VGc3ppTEtFUktXa0p4UHctbEllc09rcXoxUDZ4YnlxWkhmWUNXVHJPZF94NWR4Smw1QVpLZVFzaVNJdzVObmpLOUoxZndnN0M4aFNXOURJMXluOGJNOWUzQnRMaUZPVVdfQXNGWlNsblVpbkw4aXRzMUI4dVBXemlfcHRLSGhEanp2QVV3OG9qN0xqWWpob3R4YVlsY1BvN0xsU2dIWlA0eWdVeTlYXy1sSTM2dDdiQ0VybG5OeHFtWE1SMTJ5ZWhvdXBfSEpuQWEyTmhqMXFjR1E0czlzdmVhOVRMbW92WTk3ckJNSktCbXpGRXpUSUUtS2pORlo?oc=5",
+      "publishedAt": "2026-10-31T07:08:14.000Z",
+      "region": "hollywood",
+      "category": "film",
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
+    },
+    {
       "id": "zxcjgp",
       "headline": "Ndlovu Choir brings African Christmas show to Johannesburg in December",
       "publisher": "Joburg ETC",
       "publisherUrl": "https://www.joburgetc.com",
       "sourceUrl": "https://news.google.com/rss/articles/CBMisAFBVV95cUxNeXp2RlhVMUEwazh4cUxMOTlrY0czNDcxN2c2RVd3djJkN1kxTWZ6WkgxS01Jb0I5c1lJeFFYbGVPQnY5V0stTUl3TnM3SExjTVdOYTNrZTM2YUZVN2JRZmc1WnlQSWQwdkdJa0gxSlN2dVlZblBYVThfN3lTZTZtR1F1aE1uWW9uM2hyaFV0MTdaRHBUdnBVcUxBMVNSTnFCczRmVlVSUTVJb1Y4eVpzbA?oc=5",
       "publishedAt": "2026-10-31T07:00:45.000Z",
+      "region": "africa",
+      "category": "film",
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
+    },
+    {
+      "id": "ki863t",
+      "headline": "Musawa, Gani Adams, other film icons honoured at Germany-Nigeria Film Week 2026",
+      "publisher": "Vanguard News",
+      "publisherUrl": "https://www.vanguardngr.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMitAFBVV95cUxOc0VKb0FzemJQUUREekFvbi1QYnBZTjBYaUJpYlpsMFBfd0ZQS2hWaEZfMGcwQ0VwTnN5cnNFV1RCWG5UVlNDUkN4SkZJVEViZlExRWV3bFRhNTRuRHJBSkhtY2FyYWhhMmoxSmhVcGNGZGFPaHhLdy1DbThiVll1elRVM01BT2dMd1FSeFlwX3FLQUhDN2k2bm92VU41NzNWQlRKQ2Y3SzQ1SUNOY0ZfbmR4OEPSAboBQVVfeXFMT2dWUDc5UHd1T1hVVW4xTWczdER0MXhBNEp6QVppeHBZSU5mdG14MnE1WWtkdVlrNEt2VVhRMUxIU0ZvWTdmQlhhTk85V0d5Qnc2cVdUSXVyeTllUU9qXy1wQ3FISGZjN0Q3NEpITzE3NDJSVHI4VXQ4cjFwOXV5a2RXX2F2ZEEwandFdUhzSWFLbmJ4cmRfckZMbVlKTmt6YUR5SVNEMHJGemF4b0hvREhYN3dwaGNsazhB?oc=5",
+      "publishedAt": "2026-10-31T06:57:26.000Z",
       "region": "africa",
       "category": "film",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
@@ -799,6 +851,19 @@
       "imageFallbackUrl": ""
     },
     {
+      "id": "ix5pgk",
+      "headline": "Genoveva Umeh champions young adult stories with new film,’Tele x Zikora’",
+      "publisher": "Vanguard News",
+      "publisherUrl": "https://www.vanguardngr.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMiqwFBVV95cUxPYlF4V0FVNnlHRUM3TFV1a0pUR2w5X2I2amZOR2tudlA3SFppQ3RMMW9vbzZiRUpuNlhJTVhXZFpMQmpRLWRNOUw0YkxTV1BPNk9lV01ZS19IODBnQnRUR1lDRmd2MW56ZHNYYWMyRWdIckdGSXptM1VoY0VQZEd3MUJDa1U1RGdQNmx4ZS02S2hNeTRHX0xsY1hhbENwWXFpeWlhTEtxa2VNNHPSAbABQVVfeXFMTk16ZVZKa2tBcWFRQTlWQS05WC1uOEJUTkxCc2l3TE5KSWVoUTdBOTh5MGhEbXFyeDZ5MmQxSlFjeUM5UWdzcFpJR1ZkRUhWZnNJdDlfZ2xpVktiRDQ3TzdfRGVDQzZhY0N0V1JVZ1BwOE1NOE5nY3dxZ21pb2U1NXI2N25PY0VtVWs3b290Sm1pTnZZM2J4VGc2MGVUNGxiLV9JbndEMFk0QVljZDZUd2o?oc=5",
+      "publishedAt": "2026-10-31T06:25:15.000Z",
+      "region": "africa",
+      "category": "film",
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
+    },
+    {
       "id": "16vow1t",
       "headline": "Big music shake-up in Shah Rukh Khan’s ‘KING’! Anirudh Ravichander reportedly exits",
       "publisher": "Mathrubhumi English",
@@ -820,6 +885,19 @@
       "publishedAt": "2026-10-31T06:15:00.000Z",
       "region": "global",
       "category": "box-office",
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
+    },
+    {
+      "id": "59s5ee",
+      "headline": "Film AlUla wants audiences to delve deeper than the screen",
+      "publisher": "Arab News",
+      "publisherUrl": "https://www.arabnews.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMipgFBVV95cUxNT3BxRTVmTTZFNEU5cEFOVjdITERkVnZKOWJEQURTaGk3bWJtRjZFdVJJNVJXRGtaUmZVQV9XTnZKZU9YSzdwN3pWcVU2WFF5WE5SRkF2c0txT210UzlxMTJQQ2w0VDlZOVdGSTZMNWphWm5JTEVoUjlJOGU1dlNQbWt2RTVEMFpucDB6TjhMZGdVdlpUa3pHS2lLSlhGV01UREp3dktR?oc=5",
+      "publishedAt": "2026-10-31T06:15:00.000Z",
+      "region": "middle-east",
+      "category": "film",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
       "imageUrl": "",
       "imageFallbackUrl": ""
@@ -955,19 +1033,6 @@
       "imageFallbackUrl": ""
     },
     {
-      "id": "mlctxd",
-      "headline": "Ramayana international reviews hail dazzling visuals, but say exhausting narrative makes Ranbir Kapoor, Yash film an 'overproduced B movie' | Bollywood",
-      "publisher": "Hindustan Times",
-      "publisherUrl": "https://www.hindustantimes.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMiygJBVV95cUxONnZKbjVPdnNjRTFSMDNrek1qb3pwUzRBT3hiV2N3TlBxalpYRGtBTlVFNk8xc2laVld1Tm9PQzVUZGg4a2MtcGQwUWhpWWtnNjQ0ZjE2cXQtQl9OeV9zb0pCLUFNbFQ5bHNMWkV5d2U1YjBPbGVGOFdLU0FMMTdKWGEzb1hhWXNGcUFyN0N6bWk0UTBGdEM2TWlYLXJ3VG9CZlFjWTg0dmVkN0g5TXd2UkllN2hSd0Zxd043TnQ1OGJsQWxTMWxKZmxWSDFqbDdCYzdOdDVfQ2pzUm5IX0ZDekNXQWxFZGZVUnNKLWZJQVpxWFVPdWNvc0VUQnpSb01pR1hpZXY5Smg1RnRzMl9GUnZhc0hiN2s0VVFkVUVwamI0MFFBLVJxRnM2cjBKaUhOLUppbV9ubk5zR0NnTEJIWDFPaTVieUxQRVHSAc8CQVVfeXFMT29FaTRCaWV5OE1VM3RPOE04WG1xbUlFRUJRLWlFakhldy1zSEpDMXZfYTh2N3lyYS1wM0RzQW1JaVhHOEJadmJ1eEVJcVdCVUZjcTAtMHZqVms1c0FjOERTTXg4R3VpZVBtZ2duX0hrVkRvaGE2bV9lWjdGejdZekV2SmR6cUI4NUZKQVBsTmNfc2dTeVV2SHRDOTlsdXhHbW41R0YyVVM1b0tBRWdNYXdYS1R1eXpncjZsUzl6a2YyMWVQaVVSYkV1aHJyVEpzTGJEWWlEcDdER0dkUjhQSFZWMjVLcVl0OS1ib1Q0b3BreG9JdFNZblNMRUJXZVVqbWVUUHMxOEVuV1g0QWVUb3FxY0pvVi10Sk1WSXAwOFoybmRDeEE3SnZVZm51ODFlcGFlT0E2N0dLSzJHSXpnUFVDVk9EM2ZNd1hrRlNQXzg?oc=5",
-      "publishedAt": "2026-10-31T05:19:38.000Z",
-      "region": "india",
-      "category": "film",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
       "id": "t12wic",
       "headline": "Bollywood Stars Gather for Producer Anand Pandit’s Star-Studded Diwali Celebration in Mumbai",
       "publisher": "Zoom TV",
@@ -1047,7 +1112,7 @@
     },
     {
       "id": "1765uhm",
-      "headline": "Daytime Emmys 2026: General Hospital Wins Best Drama Series For Fifth Straight Year — See Winners List",
+      "headline": "Daytime Emmys 2026: General Hospital Wins Best Drama Series For Sixth Straight Year — See Winners List",
       "publisher": "TVLine",
       "publisherUrl": "https://www.tvline.com",
       "sourceUrl": "https://news.google.com/rss/articles/CBMihwFBVV95cUxORjdpdy12NmVSZFR5MjdBSlZfUkdqdkE5eDlka3g1UlUzd1hxZDVuLUVPeTgtZEN4Tks3TkhZLVFtYkJaaDhFdS1PU2c0MzZKa1JQS2RHWW1kZUpzQTJ6V09nM08zMDFUOGtfdVFiS3NQX2ZjSTVOblNNeTdxVlhOeElWY2h1QWM?oc=5",
@@ -1067,6 +1132,19 @@
       "publishedAt": "2026-10-31T04:07:44.000Z",
       "region": "asia",
       "category": "television",
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
+    },
+    {
+      "id": "1v87gth",
+      "headline": "Mercy Aigbe-Adeoti: Despite Language Barrier, Our Movies Getting International Accolades",
+      "publisher": "New Telegraph",
+      "publisherUrl": "https://newtelegraphng.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMitAFBVV95cUxPTFlBRndYbFItd3pxbkdOMjMwOFc1eFdHR0RBZ2F3ZW5TZUo1UnZoeXc2RllMdmVaSWhUaXVVWnV4TGlZclNmUS1qT3RvUzYtc1RUU3pUNjJ6MmVqMWFBNVlBelJGdDM2TGl6OGExSnJDT2dvOVFrMzBsMmk2QUpFQTlUcXRqSHdNNmZaN1FzeFAzQUxMaldqSnoyRDhvb1MxVTY0dXlVVGxDM3lyaEp5dEJKRkw?oc=5",
+      "publishedAt": "2026-10-31T03:44:16.000Z",
+      "region": "africa",
+      "category": "film",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
       "imageUrl": "",
       "imageFallbackUrl": ""
@@ -1163,19 +1241,6 @@
       "imageFallbackUrl": ""
     },
     {
-      "id": "j97gog",
-      "headline": "How to watch Pakistan vs Sri Lanka: live stream ODI tri-series final for free from anywhere - What Hi-Fi?",
-      "publisher": "What Hi-Fi?",
-      "publisherUrl": "https://www.whathifi.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMirgFBVV95cUxPYmNodnE3cjExRTN5ZDFCR3lpeFY5eTB5ZjNkTy1OUHlTOWRsUU53aXRSZWxTQVpPajFmcVg0a2J1d1pIak1NaTFrak45Z25CNGdWWXo1MGM5Rzc4UmlWMTNfMDJQUjZXQU5SSjVfa19LYWVDZUtOOUN4MTAwbmc0NVktUzJOSndtVDFzVHhRT0laY3JhTFdaMFRoRmIzcHZ0MEpNWG1vcmFfcTM1ZVE?oc=5",
-      "publishedAt": "2026-10-31T02:31:55.000Z",
-      "region": "europe",
-      "category": "television",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
       "id": "19pd4jx",
       "headline": "Universal Studios Hollywood Workers Say They Are Still Facing Food and Housing Insecurity",
       "publisher": "IMDb",
@@ -1197,6 +1262,19 @@
       "publishedAt": "2026-10-31T02:04:06.000Z",
       "region": "hollywood",
       "category": "streaming",
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
+    },
+    {
+      "id": "54hssg",
+      "headline": "List Of Hollywood & Media Layoffs From Paramount To Warner Bros Discovery To CNN & More",
+      "publisher": "Culture.org",
+      "publisherUrl": "https://culture.org",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMixgFBVV95cUxQUlVISmxVMUFWLVk1SDBaQVRGREF4VlNfTlg0X29veHhvQlR1QlV0N0dsRVFYWndJMGV5d21iYWVudnk3bUlCQ3ZLa1dLcW9JSVo5eTdvSUQtUVhLQ3hNNWhlZnNRRV9JVUlVWG5QSWFKd0hJakJkNV9EbXJiMl9YVVdZVzBaWFNXSTlpMTZ6ZE10TkcwRVRSM3R4Tml2UjBJMHkweG1HTDNVVnVwWDVJOVdJMUlRY0otZWpMSktXUHdkamllQkE?oc=5",
+      "publishedAt": "2026-10-31T01:51:58.000Z",
+      "region": "hollywood",
+      "category": "film",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
       "imageUrl": "",
       "imageFallbackUrl": ""
@@ -1254,32 +1332,6 @@
       "imageFallbackUrl": ""
     },
     {
-      "id": "y7n3gg",
-      "headline": "'Prahaar: The Ujjwal Nikam Story' box office collection day 15: Rajkummar Rao's film sees slight Friday r",
-      "publisher": "The Times of India",
-      "publisherUrl": "https://timesofindia.indiatimes.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMi3AJBVV95cUxPRWdzTTZBbllmTUFvVlg0N2ZROGdRVVRSNUx5OGhVdXlxT24tV2NLZ3pERG95UmY0WDdCcjVfa09TeHRhdWxpVXQwaGJ2VEtjSmRLNGhhYThJUlVsdExHS2FJTlAxVl9DZ2l1MFZZa3dMZDFnNWZGMXQzVlA5dEtFalJ5SmlKR1AweERYZkpFVzU1U0Q3MmFOaUtFUzZjc2psVWExOFdKbVdkQWVVc0lwc1MwU0h2OE9IV2R2aUdvR2hDQUdPWGZ6bk1qTklBRXpNZGVlazBxOTRDbFYtUC1KZVJaZk1ZRXZaYi01VE81SC1LdEVfa1FxT0JuNGRncm4tYmhDQlhtWEFuejlBd2Zsang3bmhkbFA4WmhHb040OFF0ZW1qRUNUWmJuclQ0SUoyMm1wSFB1U0FRU0dLLWxvVzFnVjQ3Qmp0ZXJxWmJ3U0lrNVVHTlJ5YTNvYjnSAeICQVVfeXFMT2hTTEpHMnh5emZHUUlnRU9mZ0xKQmZ0VFpPdFM1dXdtQWpObU94aVRhV1V2a0RqXzlvRC1YcUNKamtjRVRyOTNuVXJaT3VXTzc1aVZ2b3F6empwWnRzVW02dlJjRDZTUFJpX2FVZG9pOE5RR3FtNTExWVJVSFBSR1pvMy13OE1aM0tQQjI4NEJJVnU0T1Z1QTctUXFEOFdXM1FUQk1aTzF1eW9ORWZWOFdLaElybVlJajBJN0VvMHVfQ3RHZ0x6V0tOMkdpdmFYRnVlb2w0X21nUl9kaU90MHFFcGVzN2pETnhPQm84dnFVcEJzSnoyd25iTVd5bHB1NUcwSGUwOEo1SjVtcFdlV252OE1paVdoamoxVmhJakdLcFBLQ2lyWjQ0T2JYOVRIVV9oZ2ZsU1otZmhDLVJ0eUZyZ0FSOU9ubWpNZy1NZnlTS3dHRkNoSW05SXloWVBUcGNR?oc=5",
-      "publishedAt": "2026-10-31T01:23:00.000Z",
-      "region": "global",
-      "category": "box-office",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
-      "id": "18dxk3o",
-      "headline": "'Ramayana' vs 'Godzilla Minus Zero' Twitter reviews: Ranbir Kapoor starrer and Japanese monster film open",
-      "publisher": "The Times of India",
-      "publisherUrl": "https://timesofindia.indiatimes.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMihANBVV95cUxOYjlBS0t3MEZLY05JR0FTS0QtN3owbHVWOWV1VnVzRTlGQVdvOUxBUno2VUF4VWdEaFh6MWQ5cU9jaHZjdU1Oc000bF9vdzJnMFUxeE1Na0VxUC00NXBQbk82UVgyRkhReDFBWWFDODNSY3Nybm94QUQzbWpibDJIMDhvbUVuMjVvZGRWRGMtVzdvRHVuREdSdGFIbDdJLUg3dXp2RzYxV2pJOE5qMERJUFgxOHUzb3gxQ1BqOEg0bDc3SF9RSnpoNFpnb3JIMzcwLUpFdjVycm4ycmZVQlBIZ2FKeEMzN1B5ZzYydlk5N3NCQm9XUnF2Z1RiRTc0YUZ0T1d0VEVPeG1idHdwTERBX2NIdm9yWUF6MXpjTGN4LUNybG5XYnhQSWJZekR1b01hTkZjcDhRS01odVM5NHlKVmQzUFRTdEpwYXlaZUdzWll6RWtwQUUxalVHZXI3dldUUWdJMXcybzdiSVZNQVFrbldVclB6WmVZSDJPVzRYeGdGaVhq0gGKA0FVX3lxTE90azhjRUhSeUhoS0VwX0Jka0VLR1BndHZrUlZRdHRaYzZxS2ZxWFBTeUphUXdzRExWSmlXdExfX3BJeFFWR2FKQlRLODR3TVpDU2dEUTN5T1VhaGJjcU15Rl95aDN2MHc5X29kU0VGRVZHbGttRnNHbDhlYkNDaDFDdktrWEJ2LUNmbW5tdUVpdzJaNEptN1Byd1RZOXJIVG1jT18zbXh6WUtjR0prVl9jdmVORGNtOEZNVDdjd25OTFlHQlJQLTRoZmNUXzJIUXhLOWdIaEktVThQZVF6a0pxVzFqN3pqUVZjWVNfLXJRdkxUM3U0cW5ORFBTUEhtS3NGNkMzV1JhaExkaVljMWpESUlBTkJ5T0FvY0VZdTdHZE1iV0t1anhpYWg4YkxYMWZPa1YyYWhUQkpVWlcybVZfVFpISks5aGYtRHZDWHltNzR0eGt6OGVGbEd4UE9nX0Zuekh4cjlNRWlWQVpnZzJvcFBrVXVvVHJGWjQwQVA5dFJIRW1Rbk5zYkE?oc=5",
-      "publishedAt": "2026-10-31T01:22:00.000Z",
-      "region": "india",
-      "category": "film",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
       "id": "1e7o0y1",
       "headline": "llama ai for youtube App Download for Android",
       "publisher": "Học viện Nông nghiệp Việt Nam",
@@ -1288,19 +1340,6 @@
       "publishedAt": "2026-10-31T01:21:58.000Z",
       "region": "global",
       "category": "gaming",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
-      "id": "1bn1mct",
-      "headline": "Police deployed during stand-off over control of top Poland court",
-      "publisher": "BBC",
-      "publisherUrl": "https://www.bbc.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMiW0FVX3lxTE53ZU94RERoa2FxUnNTakNrdzVmYS1tUjJNMmRReEhvalJRY3VtZW1lck5VV1N5SEx3bU01bWVQQkRfMXphbHdFc1RLVHRsb3lNLTVweEhzNUU5QlU?oc=5",
-      "publishedAt": "2026-10-31T01:11:43.000Z",
-      "region": "europe",
-      "category": "television",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
       "imageUrl": "",
       "imageFallbackUrl": ""
@@ -1345,19 +1384,6 @@
       "imageFallbackUrl": ""
     },
     {
-      "id": "6cidz9",
-      "headline": "Fionnula Flanagan receives Late Late Show Legend Award",
-      "publisher": "RTE.ie",
-      "publisherUrl": "https://www.rte.ie",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMiqgFBVV95cUxPUnVTWWdaUXBjTnJaQWtUT3BpQ3h6VzFCdWtNVGNTYWJaZ3dfdEFJQVYwdWNyNWVnaG5GTEtiN3BfUDJ5RHJTdjZrMlZRWGxMb0JZX0pneElsMUpWRS14bERMNmFzSFhtX2llMG9mT0s5X1Q3SlpMV25tLUpFdy1BRFRBRG5iNWZhUHgxdE95amYtSE1ScFhIR2o2ZmNpMmk5bWY0N3lQWUNRQQ?oc=5",
-      "publishedAt": "2026-10-31T00:33:38.000Z",
-      "region": "global",
-      "category": "awards",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
       "id": "1l3qi0e",
       "headline": "'6TM' Wins Top Industry Award at Ji.hlava Festival",
       "publisher": "Variety",
@@ -1366,6 +1392,19 @@
       "publishedAt": "2026-10-31T00:12:00.000Z",
       "region": "europe",
       "category": "film",
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
+    },
+    {
+      "id": "zg0bn9",
+      "headline": "Viral songs may fade, but good songwriters will thrive — Puffy Tee",
+      "publisher": "Head Topics",
+      "publisherUrl": "https://ng.headtopics.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMimAFBVV95cUxQaDZaX2ZiRmo5MHd5MV9qYVJyeEQ4YXRMQWhKZDRrZUpEZzh3am9UNTBVQWI4QzZRc0xfS0MwYW90SkN1TmV6UVdyNjFVSF9tSTJZaERnejg0dEdqb2EzeEFhZGNLRVVjZU03SldoNnhjNkhTY0dEMnJVbjRVWjVhQ1g5M0VMdXhHQ1k0cEdEc0N0b3l4cms1Sg?oc=5",
+      "publishedAt": "2026-10-31T00:03:00.000Z",
+      "region": "global",
+      "category": "music",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
       "imageUrl": "",
       "imageFallbackUrl": ""
@@ -1397,19 +1436,6 @@
       "imageFallbackUrl": ""
     },
     {
-      "id": "1jqs7yg",
-      "headline": "Entertainment News",
-      "publisher": "Channels Television",
-      "publisherUrl": "https://www.channelstv.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMiaEFVX3lxTFBFMjMzMzNBWm5QemQ0VmNfM1I3WDFXYzlRdk96YTA3X2tYUXgtODdJS3k4a0gtbHNza0xLaGYzNmRzbTBTbjhwNndiOTlZa2dzVVh5ZDQ4VGFZdjJmalBaeGVaWkhaY2st?oc=5",
-      "publishedAt": "2026-10-30T22:02:15.000Z",
-      "region": "africa",
-      "category": "film",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
       "id": "1p3961r",
       "headline": "U-KNOCK 2026 opens in LA Nov. 3, and Hollywood finance wants to know who owns Korean IP - K-EnterTech Hub",
       "publisher": "K-EnterTech Hub",
@@ -1436,39 +1462,26 @@
       "imageFallbackUrl": ""
     },
     {
-      "id": "1un46wq",
-      "headline": "Dune 3 popcorn buckets are even more unhinged than the original",
-      "publisher": "CBC",
-      "publisherUrl": "https://www.cbc.ca",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMifkFVX3lxTFA5YlRFeHVVX2JhX2lyT0NNVGpaSlFGTnFLRDBIdF9lZGI3VDE4a29sQmx1ZjhEX1U2bEJsbG1FT0JPUTdGTXdjUFBabVNGY0VKbDVWVlV3cThfeUxzRTVuYmNJVTRHYWpvNEFUY20zaWpkQ2JTZzV0aEdXYk9tUQ?oc=5",
-      "publishedAt": "2026-10-30T18:39:14.000Z",
+      "id": "19ijajr",
+      "headline": "Middle East Pay-TV Services Market to Reach USD 4,986.7 Million",
+      "publisher": "openPR.com",
+      "publisherUrl": "https://www.openpr.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMioAFBVV95cUxPYVZLaG9WSzNGVG92UThWZWJpYnUtbloyV0xTeG1fNzJyYkI4MjZfTWxNXzM2OURteTJMd08yUmFZcVF4NmVLNnF0OEktRzVic080T2hRSnNLd1lralJNTFlnS09OY0cxNXlnNU8zRm5UYWZZakhiNnRHdTktZV9wSjkyZ2FYeUlXNFo1WmpQbG14OXpIdmlvRmlmNDBWcGJW?oc=5",
+      "publishedAt": "2026-10-30T17:47:19.000Z",
+      "region": "middle-east",
+      "category": "film",
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
+    },
+    {
+      "id": "ews0l9",
+      "headline": "Krampus & Kin Returns to Universal Horror Unleashed in Las Vegas",
+      "publisher": "FlickDirect",
+      "publisherUrl": "https://flickdirect.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMiswFBVV95cUxNemp1anh4R1RPVEJvT1FVR09yXzgzSzREYzBHSXNzYWo3QzdiUzNiU3NMb0ktTFZCRV9hMjBZbUhhWXFEbFVFX2NwdENKRDJLUVBMeXRjZFBFX1lWWTN6ZC1tTVhualU0blpQSWFZREJLWUZtdnhnZzg5MFZDNWlacWlENG1uTURjZjlRU3hQam5Vemlud09Pc1pPaDN4WmtCcDBPdEppUVVJelJPelBoekhFQQ?oc=5",
+      "publishedAt": "2026-10-30T17:22:54.000Z",
       "region": "europe",
-      "category": "film",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
-      "id": "1ybmghx",
-      "headline": "Nollywood–Africa in Diaspora Film & Food Festival launched",
-      "publisher": "Graphic Online",
-      "publisherUrl": "https://www.graphic.com.gh",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMitgFBVV95cUxPN3VfdURWRTh5TU5ObnZuMUYxcE5TVmcxdGgxWUxPSTUyb1hqOWRMRnFkUnp5cEpxdE9yLWpGMXdfUHBodV9GN09temtvZ2pUM1JHUWF0YlZxREg0dVNqdmxYUV83NzJJVTQtMjE1Z1p1cGFJUVllbFZTVUFaVmhxWV9QYzZBSDlNY2lRYWdJZjl1Y3hFMEJQYUFUM1VFVFhsLTNkdHlqUHItUlJSNGdUdmJvNEQ0Zw?oc=5",
-      "publishedAt": "2026-10-30T18:30:58.000Z",
-      "region": "africa",
-      "category": "film",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
-      "id": "1rf9xya",
-      "headline": "AFRIFF 2026: ‘Frames of the Future’ to celebrate storytellers reimagining African stories",
-      "publisher": "The Nation Newspaper",
-      "publisherUrl": "https://thenationonlineng.net",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMivgFBVV95cUxOTklQcGZIbDBKX0wzdUplUnFLakxFTGQzejh6MlhtN1RKLVFYcDJwdEF5UVVsWHdmYS1XWFotdE82a1JzTFJSeFluamlnb0dKVmNKOV9aeWlLUW1jOU5ldEsyeTF1YWU1cUpKZW96N0NtcGxPUld6cHZmRGJ3LTRMa1VBcmZNNmsxeUgxbU5WZ1drTU9Xb3dHbFU3SnZWOEZ4TnpxckpmS1JvY3NReGxqREsyNHRLMkJuZm56VEhn0gG-AUFVX3lxTE5OSVBwZkhsMEpfTDN1SmVScUtqTEVMZDN6OHoyWG03VEotUVhwMnB0QXlRVWxYd2ZhLVdYWi10TzZrUnNMUlJ4WW5qaWdvR0pWY0o5X1p5aUtRbWM5TmV0SzJ5MXVhZTVxSkplb3o3Q21wbE9SV3pwdmZEYnctNExrVUFyZk02azF5SDFtTlZnV2tNT1dvd0dsVTdKdlY4RnhOenFySmZLUm9jc1F4bGpESzI0dEsyQm5mbnpUSGc?oc=5",
-      "publishedAt": "2026-10-30T18:06:26.000Z",
-      "region": "africa",
       "category": "film",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
       "imageUrl": "",
@@ -1533,19 +1546,6 @@
       "publisherUrl": "https://www.sixthtone.com",
       "sourceUrl": "https://news.google.com/rss/articles/CBMiT0FVX3lxTE4tZ2tjVHBVNG9nb0pCZU1YTTUxOVBpTXlzeUVZbmVCM1dMV001V3BHWkI4ci1WZ09mdjUweEN5YS1nOEFMZ2w1MkFsRTduT3c?oc=5",
       "publishedAt": "2026-10-29T21:00:21.000Z",
-      "region": "middle-east",
-      "category": "film",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
-      "id": "ptyko1",
-      "headline": "Animated Movie Based on Bestseller ‘The Unicorn That Said No’ Travels to Multiple Territories Ahead of AFM (EXCLUSIVE)",
-      "publisher": "Yahoo",
-      "publisherUrl": "https://malaysia.news.yahoo.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMijwFBVV95cUxNY1FwR3VrZ3dSaVJMVG9CRGl4elNSSVFlTXU5d0FYRmFfTlgwS1lzTlhrRlkyQjI0UFkyWTRCdG5lb3dYUUgzUWdzcXF6RFFRQ0I2ZnJ2WURhMGlZQWRpVWRWR2dSOUNEa0hUQ0dzdi1xYUVmZFRLZGlGQUhzdHJPQWVzSDJWamZ1cGhuLTB6Zw?oc=5",
-      "publishedAt": "2026-10-29T10:00:00.000Z",
       "region": "middle-east",
       "category": "film",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
