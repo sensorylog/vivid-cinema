@@ -139,7 +139,7 @@ export function createInternetArchiveProvider({ fetchImpl = globalThis.fetch } =
         const ext = extensionOf(file.name);
         const size = Number(file.size);
         options.push({
-          id: item.id + "::" + file.name,
+          id: item.id + "::" + file.name, sourceId: "internet-archive",
           label: item.title + (item.year ? " (" + item.year + ")" : "") + " · " + ext.toUpperCase() + " · " + formatBytes(size),
           quality: ext.toUpperCase(), format: ext.toUpperCase(), size,
           sourceTitle: item.title, license: item.license,
