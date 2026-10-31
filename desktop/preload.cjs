@@ -32,6 +32,31 @@ contextBridge.exposeInMainWorld("vividDownloads", Object.freeze({
   }
 }));
 
+// Older dual-core/low-memory PCs get a lighter visual layer without changing
+// application features. Modern machines retain the full cinematic styling.
+(() => {
+  const cores = Number(navigator.hardwareConcurrency || 0);
+  const memory = Number(navigator.deviceMemory || 0);
+  const legacy = (cores > 0 && cores <= 2) || (memory > 0 && memory <= 4);
+  if (!legacy) return;
+
+  const apply = () => {
+    if (!document.documentElement) return;
+    document.documentElement.classList.add("vivid-performance-legacy");
+    if (!document.head || document.querySelector("[data-vivid-performance-styles]")) return;
+    const link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href = new URL("/styles/vivid-performance.css", location.origin).href;
+    link.dataset.vividPerformanceStyles = "true";
+    document.head.appendChild(link);
+  };
+
+  apply();
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", apply, { once: true });
+  }
+})();
+
 const trustedHosts = new Set(["vivid-cinema.pages.dev", "localhost"]);
 if (trustedHosts.has(location.hostname)) {
   window.addEventListener("offline", async () => {
