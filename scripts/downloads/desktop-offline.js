@@ -249,7 +249,12 @@ byId("desktop-search-results").addEventListener("click",async event=>{
     setMessage(Number.isInteger(result.episode)?"Episode download added. You can keep browsing while it saves.":"Download added. You can keep browsing while it saves.");
     await refresh();
   }
-  catch(error){button.disabled=false;button.textContent="Download";setMessage(error?.message||"Could not start download.");}
+  catch(error){setMessage(error?.message||"Could not start download.");}
+  finally{
+    // "Starting…" only represents the IPC request. Once the job is accepted,
+    // restore the result button; transfer progress belongs in the download row.
+    if(button.isConnected){button.disabled=false;button.textContent="Download";}
+  }
 });
 byId("offline-jobs").addEventListener("click",async event=>{
   const button=event.target.closest("button[data-action]");if(!button)return;
