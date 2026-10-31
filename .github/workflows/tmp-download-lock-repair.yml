@@ -1,0 +1,28 @@
+name: Temporary desktop download lockfile repair
+on:
+  push:
+    branches:
+      - main
+permissions:
+  contents: write
+jobs:
+  refresh-feature-lock:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: integrate-desktop-download-engine
+          persist-credentials: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install --package-lock-only --ignore-scripts --no-audit --no-fund
+      - name: Push regenerated lockfile to feature branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package-lock.json
+          if ! git diff --cached --quiet; then
+            git commit -m "Regenerate npm lockfile for desktop download engine"
+            git push origin HEAD:integrate-desktop-download-engine
+          fi
