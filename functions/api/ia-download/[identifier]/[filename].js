@@ -28,7 +28,7 @@ export async function onRequest({ request, params }) {
   const item = await metadataResponse.json();
   if (!explicitlyLicensed(item?.metadata || {})) return new Response("This item has no recognized public-domain or Creative Commons declaration", { status: 403 });
   const file = Array.isArray(item.files) ? item.files.find(entry => entry?.name === filename && entry.private !== "true" && entry.private !== true) : null;
-  if (!file || !Number.isFinite(Number(file.size)) || Number(file.size) < 1024 * 1024 || Number(file.size) > 12 * 1024 * 1024 * 1024) {
+  if (!file || !Number.isFinite(Number(file.size)) || Number(file.size) < 1024 * 1024 || Number(file.size) > 8 * 1024 * 1024 * 1024) {
     return new Response("The selected video file is not available for download", { status: 404 });
   }
   const upstreamUrl = "https://archive.org/download/" + encodeURIComponent(identifier) + "/" + encodeURIComponent(filename);
