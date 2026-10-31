@@ -7,12 +7,19 @@ function fakeOPFS() {
   const directory = {
     async getFileHandle(name) {
       return {
-        async createWritable() {
-          let chunks = [];
+        async createWritable({ keepExistingData = false } = {}) {
+          const original = files.get(name);
+          let bytes = keepExistingData && original ? new Uint8Array(await original.arrayBuffer()) : new Uint8Array();
+          let position = 0;
           return {
-            async write(chunk) { chunks.push(new Uint8Array(chunk)); },
-            async close() { files.set(name, new Blob(chunks, { type: "video/mp4" })); },
-            async abort() { chunks = []; files.delete(name); }
+            async seek(offset) { position = offset; },
+            async write(chunk) {
+              const value = new Uint8Array(chunk);
+              const next = new Uint8Array(Math.max(bytes.length, position + value.length));
+              next.set(bytes); next.set(value, position); bytes = next; position += value.length;
+            },
+            async close() { files.set(name, new Blob([bytes], { type: "video/mp4" })); },
+            async abort() { if (!keepExistingData) files.delete(name); }
           };
         },
         async getFile() {
@@ -30,7 +37,6 @@ function fakeOPFS() {
     storage: { async getDirectory() { return { async getDirectoryHandle() { return directory; } }; } }
   };
 }
-
 function videoResponse(chunks = [new Uint8Array([1, 2]), new Uint8Array([3, 4])], headers = {}) {
   return new Response(new ReadableStream({
     start(controller) { for (const chunk of chunks) controller.enqueue(chunk); controller.close(); }
@@ -58,6 +64,33 @@ test("downloads an authorized direct video file into OPFS and reports progress",
   assert.equal((await adapter.getAssetFile(asset)).size, 4);
   await adapter.removeAsset({ ...job, asset });
   assert.equal(opfs.files.size, 0);
+});
+
+test("resumes interrupted direct downloads with an HTTP Range request", async () => {
+  const opfs = fakeOPFS();
+  const controller = new AbortController();
+  const calls = [];
+  const adapter = createBrowserDownloadAdapter({
+    resolve: async () => ({ url: "https://media.example.test/movie.mp4", mimeType: "video/mp4" }),
+    allowedHosts: ["media.example.test"], storage: opfs.storage,
+    fetchImpl: async (url, options) => {
+      calls.push({ url, options });
+      if (calls.length === 1) return videoResponse([new Uint8Array([1, 2]), new Uint8Array([3, 4])]);
+      return new Response(new ReadableStream({
+        start(stream) { stream.enqueue(new Uint8Array([3, 4])); stream.close(); }
+      }), { status: 206, headers: { "content-type": "video/mp4", "content-length": "2", "content-range": "bytes 2-3/4" } });
+    }
+  });
+  await assert.rejects(adapter.download(job, {
+    signal: controller.signal,
+    onProgress: progress => { if (progress.bytesDownloaded === 2) controller.abort("pause"); }
+  }), /aborted/i);
+  const progress = [];
+  const asset = await adapter.download(job, { onProgress: value => progress.push(value) });
+  assert.equal(calls[1].options.headers.get("Range"), "bytes=2-");
+  assert.deepEqual([...new Uint8Array(await (await adapter.getAssetFile(asset)).arrayBuffer())], [1, 2, 3, 4]);
+  assert.equal(asset.size, 4);
+  assert.equal(progress.at(-1).bytesDownloaded, 4);
 });
 
 test("rejects non-allowlisted and non-HTTPS sources before fetching", async () => {

@@ -1,16 +1,15 @@
 import { DownloadManager } from "./downloads/download-manager.js";
 import { createIndexedDBPersistence } from "./downloads/indexeddb-persistence.js";
 import { createBrowserDownloadAdapter } from "./downloads/browser-direct-adapter.js";
-import { createBrowserHlsDownloadAdapter } from "./downloads/browser-hls-adapter.js";
-import { createOfflinePlaybackController, ensureOfflineHlsLibrary } from "./downloads/offline-playback.js";
-import { VIVID_DOWNLOADS, getFlixQuestBaseUrl, saveFlixQuestBaseUrl } from "./downloads/flixquest-integration.js";
+import { createOfflinePlaybackController } from "./downloads/offline-playback.js";
+import { VIVID_DOWNLOADS } from "./downloads/provider-integration.js";
 
 const byId = id => document.getElementById(id);
 const jobsNode = byId("offline-jobs");
 const messageNode = byId("offline-message");
 const playerSection = byId("offline-player-section");
 const video = byId("offline-player");
-let manager = null, playback = null, unsubscribe = null, activeOwner = null, generation = 0;
+let manager = null, playback = null, activeAdapter = null, unsubscribe = null, activeOwner = null, generation = 0;
 
 function escapeHtml(value) {
   return String(value ?? "").replace(/[&<>"']/g, char => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[char]);
@@ -25,10 +24,10 @@ function labelFor(job) {
   return (media.title||"Untitled")+episode;
 }
 function statusLabel(job) {
-  if(job.status==="completed")return "Saved offline";
+  if(job.status==="completed")return "Downloaded";
   if(job.status==="downloading")return "Downloading · "+Math.round(job.progress||0)+"%";
   if(job.status==="queued")return "Waiting in queue";
-  if(job.status==="paused")return "Stopped · restart begins again";
+  if(job.status==="paused")return "Stopped · restart from the beginning";
   if(job.status==="cancelled")return "Cancelled";
   return "Download failed";
 }
@@ -43,7 +42,7 @@ function render(jobs) {
     const actions=[];
     if(["queued","downloading"].includes(job.status))actions.push('<button type="button" data-action="pause" data-id="'+escapeHtml(job.id)+'">Stop</button>');
     if(["paused","failed"].includes(job.status))actions.push('<button type="button" data-action="retry" data-id="'+escapeHtml(job.id)+'">Restart</button>');
-    if(job.status==="completed"&&job.asset?.uri)actions.push('<button type="button" data-action="play" data-id="'+escapeHtml(job.id)+'">Play offline</button>');
+    if(job.status==="completed"&&job.asset?.uri){actions.push('<button type="button" data-action="play" data-id="'+escapeHtml(job.id)+'">Play</button>');actions.push('<button type="button" data-action="export" data-id="'+escapeHtml(job.id)+'">Save file</button>');}
     if(job.status!=="cancelled"&&job.status!=="completed")actions.push('<button type="button" data-action="cancel" data-id="'+escapeHtml(job.id)+'">Cancel</button>');
     if(!["queued","downloading"].includes(job.status))actions.push('<button type="button" data-action="remove" data-id="'+escapeHtml(job.id)+'">Remove</button>');
     return '<article class="offline-job"><div><div class="offline-job-title">'+escapeHtml(labelFor(job))+'</div><div class="offline-job-meta">'+escapeHtml(details)+'</div>'+
@@ -59,51 +58,15 @@ async function switchOwner(user) {
   jobsNode.innerHTML=""; messageNode.textContent="Loading your download library…";
   try{
     const persistence=createIndexedDBPersistence({ownerId:owner});
-    const integration=globalThis.VIVID_DOWNLOADS;
-    const allowedHosts=typeof integration?.getAllowedHosts==="function"&&integration.getAllowedHosts().length?integration.getAllowedHosts():["not-configured.invalid"];
-    let activeSource = null;
-    const resolveActiveSource = async () => {
-      if (!activeSource) throw new Error("No FlixQuest stream is currently selected.");
-      return activeSource;
-    };
-    const directAdapter = createBrowserDownloadAdapter({ resolve: resolveActiveSource, allowedHosts });
-    const hlsAdapter = createBrowserHlsDownloadAdapter({ resolve: resolveActiveSource, allowedHosts });
-    const adapter = {
-      async download(job, context) {
-        if (typeof integration?.resolve !== "function") throw new Error("No authorized download provider is configured. The selected title cannot be downloaded yet.");
-        activeSource = await integration.resolve(job, context);
-        try {
-          if (activeSource?.type === "hls") {
-            let Hls = null;
-            try { Hls = await ensureOfflineHlsLibrary(); } catch { /* Native HLS may still support offline playback. */ }
-            if (!Hls?.isSupported?.() && !video.canPlayType?.("application/vnd.apple.mpegurl") && !video.canPlayType?.("application/x-mpegURL")) {
-              throw new Error("This browser has no offline HLS playback engine available. The HLS download was not started.");
-            }
-            return await hlsAdapter.download(job, context);
-          }
-          return await directAdapter.download(job, context);
-        } finally {
-          activeSource = null;
-        }
-      },
-      async removePartial(job) {
-        await Promise.allSettled([directAdapter.removePartial(job), hlsAdapter.removePartial(job)]);
-      },
-      async removeAsset(job) {
-        if (String(job?.asset?.uri || "").startsWith("opfs-hls://")) return hlsAdapter.removeAsset(job);
-        return directAdapter.removeAsset(job);
-      },
-      async getAssetUrl(asset) {
-        if (String(asset?.uri || "").startsWith("opfs-hls://")) return hlsAdapter.getAssetUrl(asset);
-        return directAdapter.getAssetUrl(asset);
-      },
-      revokeAssetUrl(asset) {
-        if (String(asset?.uri || "").startsWith("opfs-hls://")) hlsAdapter.revokeAssetUrl(asset);
-      }
-    };
+    const integration=VIVID_DOWNLOADS;
+    const directAdapter = createBrowserDownloadAdapter({
+      resolve: (job, context) => integration.resolve(job, context),
+      allowedHosts: [location.hostname]
+    });
+    const adapter = directAdapter;
     const nextManager=new DownloadManager({persistence,adapter,concurrency:1}); await nextManager.hydrate();
     if(run!==generation){await persistence.close();return;}
-    manager=nextManager; playback=createOfflinePlaybackController({adapter,video}); unsubscribe=manager.subscribe(render);
+    manager=nextManager; activeAdapter=adapter; playback=createOfflinePlaybackController({adapter,video}); unsubscribe=manager.subscribe(render);
     await consumePendingDownload();
   }catch(error){
     if(run!==generation)return;
@@ -116,13 +79,9 @@ async function consumePendingDownload(){
   try{pending=JSON.parse(sessionStorage.getItem("vivid:pending-download")||"null");}catch{}
   if(!pending?.media||!pending?.option)return;
   sessionStorage.removeItem("vivid:pending-download");
-  const integration=globalThis.VIVID_DOWNLOADS;
-  if(typeof integration?.resolve!=="function"){
-    messageNode.textContent="Your quality selection was received, but FlixQuest is not configured. The download was not started.";
-    return;
-  }
+  const integration=VIVID_DOWNLOADS;
   try{
-    const media={...pending.media,source_id:String(integration.sourceId||"flixquest"),source_file:String(pending.option.id)};
+    const media={...pending.media,source_id:String(pending.option.sourceId||integration.sourceId),source_file:String(pending.option.id)};
     await manager.enqueue(media,{quality:String(pending.option.quality||pending.option.label||"Auto")});
     messageNode.textContent="Download added to your queue.";
   }catch(error){messageNode.textContent="Could not start this download: "+String(error?.message||error);}
@@ -135,6 +94,18 @@ jobsNode.addEventListener("click",async event=>{
     if(action==="retry")await manager.retry(id);
     if(action==="cancel")await manager.cancel(id);
     if(action==="remove")await manager.remove(id);
+    if(action==="export"){
+      const job=manager.snapshot().find(item=>item.id===id); if(!job?.asset?.uri)throw new Error("This completed download has no local file reference.");
+      if(typeof activeAdapter?.getAssetUrl!=="function")throw new Error("The saved file cannot be exported by this browser.");
+      const fileUrl=await activeAdapter.getAssetUrl(job.asset);
+      const media=job.media||{}, mime=String(job.asset.mimeType||"video/mp4");
+      const extension=({"video/mp4":"mp4","video/webm":"webm","video/quicktime":"mov","video/ogg":"ogv"})[mime]||"mp4";
+      const episode=media.season==null?"":" - S"+String(media.season).padStart(2,"0")+"E"+String(media.episode).padStart(2,"0");
+      const filename=(String(media.title||"Vivid Cinema")+episode).replace(/[<>:"|?*]/g,"-").replace(/[\\/]/g,"-").replace(/\p{Cc}/gu,"-").trim()+"."+extension;
+      const link=document.createElement("a");link.href=fileUrl;link.download=filename;link.rel="noopener";document.body.appendChild(link);link.click();link.remove();
+      window.setTimeout(()=>URL.revokeObjectURL(fileUrl),120000);
+      messageNode.textContent="Your video file is being saved by the browser.";
+    }
     if(action==="play"){
       const job=manager.snapshot().find(item=>item.id===id); if(!job?.asset?.uri)throw new Error("This completed download has no local file reference.");
       byId("offline-player-title").textContent=labelFor(job);playerSection.hidden=false;await playback.play(job.asset);playerSection.scrollIntoView({behavior:"smooth",block:"start"});
@@ -144,25 +115,6 @@ jobsNode.addEventListener("click",async event=>{
   finally{button.disabled=false;}
 });
 byId("offline-player-close").addEventListener("click",async()=>{await playback?.stop();playerSection.hidden=true;});
-const configForm=byId("flixquest-config-form");
-const configInput=byId("flixquest-api-url");
-const configStatus=byId("flixquest-config-status");
-if(configInput)configInput.value=getFlixQuestBaseUrl();
-if(configForm)configForm.addEventListener("submit",async event=>{
-  event.preventDefault();
-  const button=configForm.querySelector('button[type="submit"]');
-  button.disabled=true;
-  configStatus.textContent="Saving the API URL and checking enabled providers…";
-  try{
-    saveFlixQuestBaseUrl(configInput.value);
-    const result=await VIVID_DOWNLOADS.testConnection();
-    if(!result.count)throw new Error("The API responded, but it has no enabled providers.");
-    configStatus.textContent="Connected. "+result.count+" enabled provider"+(result.count===1?"":"s")+" found. Reloading the download tools…";
-    window.setTimeout(()=>window.location.reload(),700);
-  }catch(error){
-    configStatus.textContent="Connection failed: "+String(error?.message||error);
-  }finally{button.disabled=false;}
-});
 async function start(){
   try{
     const [{auth},{onAuthStateChanged}]=await Promise.all([import("./firebase.js"),import("https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js")]);
