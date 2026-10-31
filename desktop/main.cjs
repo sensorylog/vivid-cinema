@@ -215,7 +215,6 @@ function configureOfflineMediaProtocol() {
   });
 }
 function configureDownloadEngine() {
-  downloadEngine = new DesktopDownloadEngine({ app, BrowserWindow, dialog, shell });
   ipcMain.handle("vivid-download-search", async (event, query) => {
     if (!isTrustedDownloadSender(event)) throw new Error("Untrusted download request");
     return (await getDownloadEngine()).search(query);
