@@ -36,7 +36,7 @@ class DesktopDownloadEngine {
       media: job.media, magnet: job.magnet, status: job.status, downloadPath: job.downloadPath || this.downloadPath,
       filePath: job.filePath || null, error: job.error || null,
       progress: job.progress || 0, downloaded: job.downloaded || 0, total: job.total || 0,
-      createdAt: job.createdAt, updatedAt: Date.now()
+      needsRescan: Boolean(job.needsRescan), createdAt: job.createdAt, updatedAt: Date.now()
     }));
     const state = JSON.stringify({ version: 1, downloadPath: this.downloadPath, jobs: rows }, null, 2);
     this.persistQueue = this.persistQueue.catch(() => {}).then(async () => {
@@ -60,7 +60,7 @@ class DesktopDownloadEngine {
         const status = row.status === "completed" && row.filePath && fs.existsSync(row.filePath)
           ? "completed"
           : ["cancelled", "failed"].includes(row.status) ? row.status : "paused";
-        this.jobs.set(row.id, { ...row, downloadPath: path.isAbsolute(row.downloadPath || "") ? row.downloadPath : this.downloadPath, status, torrent: null, error: row.error || null });
+        this.jobs.set(row.id, { ...row, downloadPath: path.isAbsolute(row.downloadPath || "") ? row.downloadPath : this.downloadPath, needsRescan: status === "paused" && Number(row.downloaded) > 0, status, torrent: null, error: row.error || null });
       }
       await this.persist();
     } catch (error) {
@@ -137,6 +137,26 @@ class DesktopDownloadEngine {
         job.persistTimer.unref?.();
       }
     };
+    torrent.on("ready", () => {
+      if (!job.needsRescan) return;
+      job.status = "verifying";
+      this.send("vivid-download-progress", this.snapshot(job));
+      torrent.rescanFiles(error => {
+        if (job.torrent !== torrent) return;
+        if (error) {
+          job.status = "failed";
+          job.error = "Could not verify the saved partial download: " + safeText(error.message, 220);
+          job.torrent = null;
+          void torrent.destroy({ destroyStore: false }, () => {});
+          this.send("vivid-download-error", { id: job.id, message: job.error });
+        } else {
+          job.needsRescan = false;
+          job.status = "downloading";
+          publish();
+        }
+        void this.persist().catch(saveError => console.warn("Download state save failed:", saveError.message));
+      });
+    });
     torrent.on("metadata", publish);
     torrent.on("download", publish);
     torrent.on("upload", publish);
@@ -197,6 +217,7 @@ class DesktopDownloadEngine {
       job.downloaded = Number(torrent.downloaded) || 0;
       job.total = Number(torrent.length) || 0;
       job.status = "paused";
+      job.needsRescan = job.downloaded > 0;
       job.torrent = null;
       await new Promise(resolve => torrent.destroy({ destroyStore: false }, resolve));
       await this.persist();
@@ -208,7 +229,7 @@ class DesktopDownloadEngine {
       await this.persist();
       return true;
     }
-    if (action === "cancel" && ["queued", "downloading", "paused", "failed"].includes(job.status)) {
+    if (action === "cancel" && ["queued", "downloading", "verifying", "paused", "failed"].includes(job.status)) {
       job.status = "cancelled";
       if (job.persistTimer) clearTimeout(job.persistTimer);
       job.persistTimer = null;
@@ -229,11 +250,12 @@ class DesktopDownloadEngine {
     for (const job of this.jobs.values()) {
       if (job.persistTimer) clearTimeout(job.persistTimer);
       job.persistTimer = null;
-      if (job.status === "downloading" && job.torrent) {
+      if (["downloading", "verifying"].includes(job.status) && job.torrent) {
         job.progress = roundProgress(job.torrent);
         job.downloaded = Number(job.torrent.downloaded) || job.downloaded || 0;
         job.total = Number(job.torrent.length) || job.total || 0;
         job.status = "paused";
+        job.needsRescan = job.downloaded > 0;
       }
       job.torrent = null;
     }
