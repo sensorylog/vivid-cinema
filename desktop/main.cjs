@@ -40,11 +40,39 @@ function createLocalServer(root) {
       res.writeHead(405, { Allow: "GET, HEAD" }).end();
       return;
     }
+    let parsedUrl;
     let pathname;
     try {
-      pathname = decodeURIComponent(new URL(req.url || "/", "http://localhost").pathname);
+      parsedUrl = new URL(req.url || "/", "http://localhost");
+      pathname = decodeURIComponent(parsedUrl.pathname);
     } catch {
       res.writeHead(400).end("Bad request");
+      return;
+    }
+    if (pathname === "/__vivid_media") {
+      if (parsedUrl.searchParams.get("token") !== mediaToken) { res.writeHead(403).end("Forbidden"); return; }
+      const mediaPath = downloadEngine && downloadEngine.mediaFile(parsedUrl.searchParams.get("id"));
+      if (!mediaPath) { res.writeHead(404).end("Media not found"); return; }
+      fs.stat(mediaPath, (error, stat) => {
+        if (error || !stat.isFile()) { res.writeHead(404).end("Media not found"); return; }
+        const ext = path.extname(mediaPath).toLowerCase();
+        const types = { ".mp4":"video/mp4", ".m4v":"video/mp4", ".mkv":"video/x-matroska", ".webm":"video/webm", ".mov":"video/quicktime", ".avi":"video/x-msvideo", ".ogv":"video/ogg" };
+        const headers = { "Content-Type": types[ext] || "application/octet-stream", "Accept-Ranges":"bytes", "Cache-Control":"no-store", "Access-Control-Allow-Origin":"*", "Content-Disposition":"inline" };
+        const range = req.headers.range;
+        if (range) {
+          const parts = String(range).replace("bytes=", "").split("-");
+          const start = parts[0] ? Number(parts[0]) : Math.max(0, stat.size - Number(parts[1] || 0));
+          const end = parts[0] && parts[1] ? Math.min(Number(parts[1]), stat.size - 1) : stat.size - 1;
+          if (!Number.isSafeInteger(start) || !Number.isSafeInteger(end) || start > end || start >= stat.size) { res.writeHead(416, { "Content-Range":"bytes */" + stat.size }).end(); return; }
+          headers["Content-Range"] = "bytes " + start + "-" + end + "/" + stat.size;
+          headers["Content-Length"] = String(end - start + 1); res.writeHead(206, headers);
+          if (req.method === "HEAD") return res.end();
+          fs.createReadStream(mediaPath, { start, end }).pipe(res); return;
+        }
+        headers["Content-Length"] = String(stat.size); res.writeHead(200, headers);
+        if (req.method === "HEAD") return res.end();
+        fs.createReadStream(mediaPath).pipe(res);
+      });
       return;
     }
     if (pathname === "/") pathname = "/home.html";
