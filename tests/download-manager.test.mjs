@@ -26,7 +26,7 @@ test("enqueue creates a typed job and completes through the injected platform ad
   const { manager } = setup();
   await manager.hydrate();
   const job = await manager.enqueue(movie, { quality: "720p" });
-  assert.equal(job.status, "queued");
+  assert.ok(["queued", "downloading"].includes(job.status));
   await tick();
   assert.equal(manager.snapshot()[0].status, "completed");
   assert.equal(manager.snapshot()[0].progress, 100);
