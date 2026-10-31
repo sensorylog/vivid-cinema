@@ -31,7 +31,7 @@ test("filters out files with missing or non-open licence metadata", async () => 
   const provider = createWikimediaCommonsProvider({ fetchImpl: async () => Response.json(result({ license: "https://example.com/all-rights-reserved" })) });
   assert.deepEqual(await provider.getOptions({ title: "Example Film" }), []);
 });
-test("resolves Commons items through the same-origin Vivid streaming proxy", async () => {
+test("resolves Commons items through the managed Vivid streaming endpoint", async () => {
   globalThis.location = { origin: "https://vivid.example" };
   const provider = createWikimediaCommonsProvider({ fetchImpl: async () => Response.json(result()) });
   const source = await provider.resolve({ media: { source_file: "File:Example Film.mp4" } });
