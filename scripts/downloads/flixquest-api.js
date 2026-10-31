@@ -87,7 +87,7 @@ export function createFlixQuestApi({ baseUrl, fetchImpl = globalThis.fetch, time
     if (!link || !url || !["hls", "file"].includes(format)) throw new Error("FlixQuest could not re-resolve the selected stream. Refresh the quality list and try again.");
     const headers = {};
     for (const [name, value] of Object.entries(safeObject(link.headers))) {
-      if (/^(accept|origin|referer|user-agent)$/i.test(name) && typeof value === "string" && value.length < 2048) headers[name] = value;
+      if (/^accept$/i.test(name) && typeof value === "string" && value.length < 2048) headers[name] = value;
     }
     return { url: url.href, type: format, mimeType: format === "hls" ? "application/vnd.apple.mpegurl" : "video/mp4",
       headers, allowedHosts: [...new Set([root.hostname, url.hostname])], providerId, server: link.server || providerId, quality: link.quality || "Auto" };
