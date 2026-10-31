@@ -34,7 +34,7 @@ if (trustedHosts.has(location.hostname)) {
   window.addEventListener("offline", async () => {
     try {
       const offlineUrl = await ipcRenderer.invoke("vivid-offline-url");
-      if (offlineUrl && location.href !== offlineUrl) location.replace(offlineUrl);
+      if (offlineUrl && !location.pathname.endsWith("/my-downloads.html")) location.replace(offlineUrl);
     } catch (error) {
       console.warn("Vivid could not open the offline library:", error?.message || error);
     }
