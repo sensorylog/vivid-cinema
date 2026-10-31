@@ -2,7 +2,6 @@ import { DownloadManager } from "./downloads/download-manager.js";
 import { createIndexedDBPersistence } from "./downloads/indexeddb-persistence.js";
 import { createBrowserDownloadAdapter } from "./downloads/browser-direct-adapter.js";
 import { createOfflinePlaybackController } from "./downloads/offline-playback.js";
-import { VIVID_DOWNLOADS } from "./downloads/provider-integration.js";
 
 const byId = id => document.getElementById(id);
 const jobsNode = byId("offline-jobs");
@@ -34,7 +33,7 @@ function statusLabel(job) {
 function render(jobs) {
   const completed=jobs.filter(job=>job.status==="completed").length, active=jobs.filter(job=>["queued","downloading"].includes(job.status)).length;
   byId("offline-total").textContent=String(jobs.length); byId("offline-completed").textContent=String(completed); byId("offline-active").textContent=String(active);
-  if(!jobs.length){jobsNode.innerHTML='<div class="offline-empty"><strong>No downloads yet</strong><p>Open a movie or series title and tap Download to check its available qualities.</p></div>';messageNode.textContent="Your download queue is empty.";return;}
+  if(!jobs.length){jobsNode.innerHTML='<div class="offline-empty"><strong>No downloads yet</strong><p>Vivid does not currently have an authorized direct-download source connected.</p></div>';messageNode.textContent="Your download queue is empty.";return;}
   messageNode.textContent=jobs.length+(jobs.length===1?" item in your device library.":" items in your device library.");
   jobsNode.innerHTML=jobs.map(job=>{
     const progress=Math.max(0,Math.min(100,Number(job.progress)||0)), bytes=formatBytes(job.bytesDownloaded), total=formatBytes(job.totalBytes);
@@ -58,33 +57,24 @@ async function switchOwner(user) {
   jobsNode.innerHTML=""; messageNode.textContent="Loading your download library…";
   try{
     const persistence=createIndexedDBPersistence({ownerId:owner});
-    const integration=VIVID_DOWNLOADS;
     const directAdapter = createBrowserDownloadAdapter({
-      resolve: (job, context) => integration.resolve(job, context),
+      resolve: async () => { throw new Error("Vivid has no authorized direct-download source connected."); },
       allowedHosts: [location.hostname]
     });
     const adapter = directAdapter;
     const nextManager=new DownloadManager({persistence,adapter,concurrency:1}); await nextManager.hydrate();
     if(run!==generation){await persistence.close();return;}
     manager=nextManager; activeAdapter=adapter; playback=createOfflinePlaybackController({adapter,video}); unsubscribe=manager.subscribe(render);
-    await consumePendingDownload();
+    const stalePending = sessionStorage.getItem("vivid:pending-download");
+    if (stalePending) {
+      sessionStorage.removeItem("vivid:pending-download");
+      messageNode.textContent = "That queued download is no longer available because no authorized direct-download source is connected.";
+    }
   }catch(error){
     if(run!==generation)return;
     messageNode.textContent="Browser downloads are unavailable: "+String(error?.message||error);
     jobsNode.innerHTML='<div class="offline-empty"><strong>Storage unavailable</strong><p>This browser needs IndexedDB and Origin Private File System support for offline video files.</p></div>';
   }
-}
-async function consumePendingDownload(){
-  let pending;
-  try{pending=JSON.parse(sessionStorage.getItem("vivid:pending-download")||"null");}catch{}
-  if(!pending?.media||!pending?.option)return;
-  sessionStorage.removeItem("vivid:pending-download");
-  const integration=VIVID_DOWNLOADS;
-  try{
-    const media={...pending.media,source_id:String(pending.option.sourceId||integration.sourceId),source_file:String(pending.option.id)};
-    await manager.enqueue(media,{quality:String(pending.option.quality||pending.option.label||"Auto")});
-    messageNode.textContent="Download added to your queue.";
-  }catch(error){messageNode.textContent="Could not start this download: "+String(error?.message||error);}
 }
 jobsNode.addEventListener("click",async event=>{
   const button=event.target.closest("button[data-action]"); if(!button||!manager)return;

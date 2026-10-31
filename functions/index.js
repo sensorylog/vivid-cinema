@@ -2,10 +2,9 @@ import { createHash } from "node:crypto";
 import { initializeApp } from "firebase-admin/app";
 import { getFirestore, Timestamp } from "firebase-admin/firestore";
 import { onSchedule } from "firebase-functions/v2/scheduler";
-import { onCall, onRequest, HttpsError } from "firebase-functions/v2/https";
+import { onCall, HttpsError } from "firebase-functions/v2/https";
 import { logger } from "firebase-functions";
 import Parser from "rss-parser";
-import { createDownloadProxyHandler } from "./download-proxy.js";
 
 initializeApp();
 const db = getFirestore();
@@ -243,9 +242,3 @@ export const getCommunityPollResults = onCall({ region: "us-central1", maxInstan
   }
   return { counts, total: counts.reduce((sum, count) => sum + count, 0) };
 });
-
-
-// Stream only metadata-verified public-domain / Creative Commons video files.
-export const downloadMedia = onRequest({
-  region: "us-central1", cors: true, maxInstances: 10, timeoutSeconds: 540, memory: "1GiB"
-}, createDownloadProxyHandler());
