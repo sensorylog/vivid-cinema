@@ -162,6 +162,7 @@ test("Windows app checks for updates and offers download plus restart-to-install
   assert.match(main, /require\("electron-updater"\)/);
   assert.doesNotMatch(main, /^const .*download-engine\.cjs/m);
   assert.match(main, /async function getDownloadEngine\(\)/);
+  assert.doesNotMatch(main, /downloadEngine = new DesktopDownloadEngine/);
   assert.match(main, /require\("\.\/download-engine\.cjs"\)/);
   assert.match(main, /await getDownloadEngine\(\)/);
   assert.match(main, /autoUpdater\.autoDownload = false/);
