@@ -17,9 +17,9 @@ The title-page **Download** action now discovers files automatically; users do n
 
 - Built-in discovery searches Internet Archive's Advanced Search and Metadata APIs plus Wikimedia Commons' MediaWiki search and image metadata APIs.
 - Vivid only offers video files whose item metadata explicitly declares a Creative Commons licence or public-domain status. Supported files include MP4, M4V, WebM, MOV, and OGV.
-- A Cloudflare Pages Function at `/api/ia-download/:identifier/:filename` re-checks the item licence and file metadata, then streams the file from Internet Archive through Vivid's own origin. It forwards HTTP Range requests, so interrupted transfers can resume without exposing archive storage-node URLs to the browser.
+- Vivid's existing Firebase Functions backend exposes a managed HTTPS `downloadMedia` endpoint. It re-checks each source's licence and file metadata, then streams the file from Internet Archive or Wikimedia Commons to the browser. It forwards HTTP Range requests, so interrupted transfers can resume without exposing archive storage-node URLs to the browser.
 - The existing download queue stores progress metadata in IndexedDB and video bytes in OPFS. It supports queued downloads, progress, pause/cancel, retry, resume, remove, and local playback.
-- The native app uses the Vivid Cloudflare Pages endpoint for the archive proxy.
+- The native app uses the same Vivid-managed HTTPS download endpoint.
 
 **Availability limitation:** this is an automatic, working source for openly licensed/public-domain material, not a way to download every commercial streaming title. Netflix, Disney+, Prime Video and similar services do not provide a general public API that gives Vivid transferable movie files. The app does not bypass DRM or turn protected streams into downloads. A TV episode appears only when a matching openly licensed file exists in the archive.
 
