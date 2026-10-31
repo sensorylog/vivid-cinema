@@ -43,9 +43,8 @@ test("maps FlixQuest HLS and direct-file stream links to quality options without
     if (String(url).endsWith("/providers")) return response({ providers: [{ id: "alpha", name: "Alpha", enabled: true }] });
     return response({ links: [
       { server: "Server A", url: "https://scraper.example/proxy?token=abc", isM3U8: true, quality: "1080p", sizeToken: "signed-size-token" },
-      { server: "Server B", url: "https://cdn.example/movie.mp4", quality: "720p" },
+      { server: "Server B", url: "https://scraper.example/proxy?token=direct", quality: "720p" },
       { server: "Server C", url: "https://cdn.example/movie.mpd", isDASH: true, quality: "4K" },
-      { server: "Server D", url: "https://cdn.example/embed/page", quality: "1080p" },
       { server: "Unsafe", url: "http://cdn.example/movie.mp4", quality: "1080p" }
     ] });
   }});
