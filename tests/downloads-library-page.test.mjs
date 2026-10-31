@@ -61,7 +61,7 @@ test("desktop download list removes cancelled jobs and search keeps peer-only re
   const engine = await readFile(new URL("../desktop/download-engine.cjs", import.meta.url), "utf8");
   assert.match(desktop, /status!=="cancelled"/);
   assert.match(desktop, /payload\.status==="cancelled"\|\|payload\.removed/);
-  assert.match(desktop, /Number\(item\.peers\|\|0\)\+' peers'/);
+  assert.match(desktop, /Number\(item\.peers\|\|0\)\+' peers<\/p>'/);
   assert.match(engine, /Number\(x\.seeds \|\| 0\) > 0 \|\| Number\(x\.peers \|\| 0\) > 0/);
   assert.match(engine, /announce: FALLBACK_TRACKERS/);
   assert.match(engine, /this\.jobs\.delete\(job\.id\)/);
