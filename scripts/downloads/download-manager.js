@@ -136,8 +136,6 @@ export class DownloadManager {
     const job = this.jobs.get(String(id));
     if (!job || !["failed", "paused"].includes(job.status)) return false;
     job.status = "queued";
-    job.progress = 0;
-    job.bytesDownloaded = 0;
     job.error = null;
     job.updatedAt = this.now();
     await this.persist();
