@@ -392,7 +392,7 @@ function openTitleDownload() {
   const engine = window.vividDownloads;
   const modal = document.createElement("div");
   modal.className = "vivid-download-modal";
-  modal.innerHTML = '<section class="vivid-download-dialog" role="dialog" aria-modal="true" aria-labelledby="vivid-download-title"><button class="vivid-download-close" type="button" aria-label="Close">×</button><p>VIVID DOWNLOADS</p><h2 id="vivid-download-title">Find a download</h2><p class="vivid-download-empty" id="vivid-download-status">Searching built-in sources…</p><div id="vivid-download-results"></div><div id="vivid-download-jobs"></div><button class="vivid-button vivid-button--secondary" id="vivid-download-folder" type="button">Choose download folder</button></section>';
+  modal.innerHTML = '<section class="vivid-download-dialog" role="dialog" aria-modal="true" aria-labelledby="vivid-download-title"><button class="vivid-download-close" type="button" aria-label="Close">×</button><p>VIVID DOWNLOADS</p><h2 id="vivid-download-title">Find a download</h2><p class="vivid-download-empty" id="vivid-download-status">Searching built-in sources…</p><label for="vivid-download-quality">Quality</label><select id="vivid-download-quality"><option value="any">Any quality</option><option value="2160">4K / 2160p</option><option value="1080">1080p</option><option value="720">720p</option><option value="480">480p</option></select><div id="vivid-download-results"></div><div id="vivid-download-jobs"></div><button class="vivid-button vivid-button--secondary" id="vivid-download-folder" type="button">Choose download folder</button></section>';
   document.body.appendChild(modal);
   const close = () => { modal.remove(); offProgress?.(); offComplete?.(); offError?.(); };
   modal.querySelector(".vivid-download-close").addEventListener("click", close);
@@ -412,20 +412,27 @@ function openTitleDownload() {
   };
   const renderResults = items => {
     if (!items.length) { status.textContent = "No results found. Try another title or spelling."; return; }
-    status.textContent = "Choose a release. Vivid will download it to your selected folder.";
-    results.innerHTML = items.map((item,index) => '<article class="vivid-download-result"><strong>' + escape(item.title) + '</strong><p>' + escape(item.provider) + ' · ' + escape(item.size || "Size unknown") + ' · ' + item.seeds + ' seeders</p><button type="button" data-result="' + index + '">Download</button></article>').join("");
-    results.querySelectorAll("[data-result]").forEach(button => button.addEventListener("click", async () => {
-      button.disabled = true; button.textContent = "Starting…";
-      try {
-        await engine.start(items[Number(button.dataset.result)], { title: media.title, id: media.id, media_type: media.media_type });
-        button.textContent = "Added to downloads";
-        status.textContent = "Your download has started.";
-        await renderJobs();
-      } catch (error) {
-        button.disabled = false; button.textContent = "Try again";
-        status.textContent = error?.message || "Could not start this download.";
-      }
-    }));
+    status.textContent = "Choose a release and quality. Vivid saves it to your selected folder.";
+    const quality = modal.querySelector("#vivid-download-quality");
+    const draw = () => {
+      const selected = quality.value;
+      const filtered = items.filter(item => selected === "any" || new RegExp("(?:^|[^0-9])" + selected + "p?(?:[^0-9]|$)", "i").test(item.title));
+      results.innerHTML = filtered.map((item,index) => '<article class="vivid-download-result"><strong>' + escape(item.title) + '</strong><p>' + escape(item.provider) + ' · ' + escape(item.size || "Size unknown") + ' · ' + item.seeds + ' seeders</p><button type="button" data-result="' + index + '">Download</button></article>').join("") || '<p class="vivid-download-empty">No releases match that quality. Choose Any quality.</p>';
+      results.querySelectorAll("[data-result]").forEach(button => button.addEventListener("click", async () => {
+        button.disabled = true; button.textContent = "Starting…";
+        try {
+          await engine.start(filtered[Number(button.dataset.result)], { title: media.title, id: media.id, media_type: media.media_type });
+          button.textContent = "Added to downloads";
+          status.textContent = "Your download has started.";
+          await renderJobs();
+        } catch (error) {
+          button.disabled = false; button.textContent = "Try again";
+          status.textContent = error?.message || "Could not start this download.";
+        }
+      }));
+    };
+    quality.addEventListener("change", draw);
+    draw();
   };
   const offProgress = engine.onProgress(payload => {
     const card = jobs.querySelector('[data-job="' + payload.id + '"]');
