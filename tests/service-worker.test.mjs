@@ -179,3 +179,11 @@ test("app shell includes current versioned assets without dropping existing cach
   // pruning query-versioned assets is a separate cleanup, not required here.
   assert.ok(source.includes(JSON.stringify("./scripts/firebase.js?v=20261016-auth-runtime-audit2")));
 });
+test("service worker precaches Hls.js and serves the exact CORS library offline", () => {
+  assert.match(source, /const HLS_LIBRARY_URL = "https:\\/\\/cdn\\.jsdelivr\\.net\\/npm\\/hls\\.js@1\\.7\\.3\\/dist\\/hls\\.min\\.js"/);
+  assert.match(source, /const APP_SHELL = \[\\s*HLS_LIBRARY_URL/);
+  assert.match(source, /asset===HLS_LIBRARY_URL&&response\.type==="cors"/);
+  assert.match(source, /if\(url\.href===HLS_LIBRARY_URL\)/);
+  assert.match(source, /cache\.put\(HLS_LIBRARY_URL,response\.clone\(\)\)/);
+  assert.ok(source.includes('"./scripts/downloads/browser-hls-adapter.js"'));
+});
