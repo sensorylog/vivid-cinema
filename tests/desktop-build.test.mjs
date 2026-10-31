@@ -256,3 +256,16 @@ test("desktop download runtime dependencies are isolated and installed before la
   assert.match(pkg.scripts["predesktop:dist"], /npm --prefix desktop ci --omit=dev/);
   assert.ok(pkg.build.files.includes("desktop/node_modules/**"));
 });
+
+test("legacy desktop profile removes continuous decorative work", () => {
+  const atmosphere = fs.readFileSync(path.join(root, "scripts", "atmosphere.js"), "utf8");
+  const homeBreathe = fs.readFileSync(path.join(root, "scripts", "home-breathe.js"), "utf8");
+  const hero = fs.readFileSync(path.join(root, "scripts", "tflix-hero.js"), "utf8");
+  assert.match(atmosphere, /legacyPerformance/);
+  assert.match(atmosphere, /requestAnimationFrame\(update\)/);
+  assert.match(atmosphere, /if\(!legacyPerformance\)/);
+  assert.match(atmosphere, /legacyPerformance \|\| reduceMotion/);
+  assert.match(homeBreathe, /!legacyPerformance/);
+  assert.match(hero, /if \(legacyPerformance\)/);
+  assert.match(hero, /setTimeout\(advanceHero, NO_TRAILER_HOLD_MS\)/);
+});
