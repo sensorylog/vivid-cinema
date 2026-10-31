@@ -1,4 +1,4 @@
-const LOCAL_ASSET_URI = /^(?:opfs:\/\/vivid-cinema-downloads|opfs-hls:\/\/vivid-cinema-downloads)\/[a-zA-Z0-9_-]{1,128}$/;
+const LOCAL_ASSET_URI = /^(?:(?:opfs|opfs-hls):\/\/vivid-cinema-downloads\/[a-zA-Z0-9_-]{1,128}|offline:[a-zA-Z0-9_./-]+)$/;
 const HLS_MIME = "application/vnd.apple.mpegurl";
 const HLS_LIBRARY_URL = "https://cdn.jsdelivr.net/npm/hls.js@1.7.3/dist/hls.min.js";
 let hlsLibraryPromise = null;
@@ -69,6 +69,9 @@ export function createOfflinePlaybackController({ adapter, video } = {}) {
     const previousAsset = activeAsset;
     activeUrl = null;
     activeAsset = null;
+    if (previousAsset?.uri?.startsWith("offline:")) {
+      try { await adapter.stopAsset?.(); } catch {}
+    }
     revokeAsset(previousAsset, previousUrl);
   }
 
@@ -77,6 +80,16 @@ export function createOfflinePlaybackController({ adapter, video } = {}) {
       throw new TypeError("The selected item is not a supported local offline asset.");
     }
     const request = ++generation;
+    if (asset.uri.startsWith("offline:") && typeof adapter.playAsset === "function") {
+      await adapter.playAsset(asset, { startAt });
+      if (request !== generation) return false;
+      activeAsset = asset;
+      activeUrl = null;
+      video.controls = true;
+      video.playsInline = true;
+      video.preload = "metadata";
+      return true;
+    }
     const nextUrl = await adapter.getAssetUrl(asset);
     if (request !== generation) {
       revokeAsset(asset, nextUrl);
