@@ -63,7 +63,7 @@ export function createInternetArchiveProvider({ fetchImpl = globalThis.fetch } =
     if (!title) throw new TypeError("A movie or series title is required.");
     const episodeLabel = media?.media_type === "tv" && Number.isInteger(Number(media.season)) && Number.isInteger(Number(media.episode))
       ? " S" + String(media.season).padStart(2, "0") + "E" + String(media.episode).padStart(2, "0") : "";
-    const queryTitle = title + episodeLabel;
+    const queryTitle = title + episodeLabel + (media?.episode_title ? " " + cleanTitle(media.episode_title) : "");
     const cacheKey = queryTitle.toLowerCase();
     const cached = cache.get(cacheKey);
     if (cached && cached.expires > Date.now()) return cached.options;
@@ -93,7 +93,7 @@ export function createInternetArchiveProvider({ fetchImpl = globalThis.fetch } =
         const size = Number(file.size);
         options.push({
           id: item.id + "::" + file.name, sourceId: "internet-archive",
-          label: item.title + (item.year ? " (" + item.year + ")" : "") + " · " + ext.toUpperCase() + " · " + formatBytes(size),
+          label: "Internet Archive · " + item.title + (item.year ? " (" + item.year + ")" : "") + " · " + ext.toUpperCase() + " · " + formatBytes(size),
           quality: ext.toUpperCase(), format: ext.toUpperCase(), size,
           sourceTitle: item.title, license: item.license,
           detailsUrl: "https://archive.org/details/" + encodeURIComponent(item.id)
