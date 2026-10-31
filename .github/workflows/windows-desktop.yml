@@ -58,6 +58,10 @@ jobs:
             }
           }
           "publish=$($publish.ToString().ToLower())" >> $env:GITHUB_OUTPUT
+      - name: Install desktop runtime dependencies
+        run: npm --prefix desktop ci --omit=dev --no-audit --no-fund
+      - name: Verify the desktop download engine with a local seeded torrent
+        run: node --test tests/desktop-download-engine.integration.test.cjs
       - name: Ensure matching release tag exists before publishing
         if: steps.release-decision.outputs.publish == 'true' && github.ref == 'refs/heads/main'
         shell: pwsh
@@ -76,7 +80,7 @@ jobs:
         if: steps.release-decision.outputs.publish == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npm run desktop:dist
+        run: npm --ignore-scripts run desktop:dist
       - name: Verify updater metadata was generated
         if: steps.release-decision.outputs.publish == 'true'
         shell: pwsh

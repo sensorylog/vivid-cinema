@@ -49,6 +49,7 @@ function render(){
         +" ("+discovery.dhtAnnounces+" announces) · trackers "+discovery.trackerCount
         +" ("+discovery.trackerAnnounces+" announces) · no-peer "+discovery.noPeerAnnounces
         +(discovery.lastNoPeerSource?" ["+discovery.lastNoPeerSource+"]":"")
+        +(discovery.lastWarning?" · warning: "+discovery.lastWarning:"")
       : "";
     const detail=[statusText(job),progress.toFixed(1)+"%",bytes(job.downloaded)+" of "+transferSize,speed,["downloading","verifying"].includes(job.status)?peerState:"",discoveryDetail].filter(Boolean).join(" · ");
     const actions=[];
