@@ -105,3 +105,26 @@ test("active jobs cannot be removed; completed jobs can be removed with their as
   assert.equal(await manager.remove(job.id), true);
   assert.equal(removed, true);
 });
+
+test("cancellation waits for transfer shutdown before deleting partial output", async () => {
+  let finishTransfer;
+  let partialWasWritten = false;
+  let cleanupSawPartial = false;
+  const { manager, adapter } = setup({
+    download: (_job, { signal }) => new Promise(resolve => {
+      finishTransfer = () => { partialWasWritten = true; resolve({ uri: "file:///partial" }); };
+      signal.addEventListener("abort", () => {
+        // Simulate a native writer that still has buffered bytes to flush.
+        queueMicrotask(finishTransfer);
+      }, { once: true });
+    })
+  });
+  adapter.removePartial = async () => { cleanupSawPartial = partialWasWritten; };
+  await manager.hydrate();
+  const job = await manager.enqueue(movie);
+  await tick();
+  await manager.cancel(job.id);
+  assert.equal(partialWasWritten, true);
+  assert.equal(cleanupSawPartial, true);
+  assert.equal(manager.snapshot()[0].status, "cancelled");
+});
