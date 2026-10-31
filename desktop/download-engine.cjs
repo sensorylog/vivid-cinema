@@ -13,7 +13,10 @@ const roundProgress = torrent => Math.round((Number(torrent?.progress) || 0) * 1
 class DesktopDownloadEngine {
   constructor({ app, BrowserWindow, dialog, shell }) {
     Object.assign(this, { app, BrowserWindow, dialog, shell });
-    this.client = new WebTorrent({ uploadLimit: 0, seedOutgoingConnections: false });
+    // Do not set uploadLimit: 0: WebTorrent applies it to all outgoing peer traffic,
+    // including handshakes and piece requests needed to download. Disable payload
+    // uploads per torrent instead, while leaving protocol traffic unrestricted.
+    this.client = new WebTorrent();
     this.clientError = null;
     // WebTorrent can emit a client-level error when DHT/network discovery fails.
     // Always handle it so a UDP/DHT failure cannot become an unhandled EventEmitter error.
@@ -150,7 +153,7 @@ class DesktopDownloadEngine {
     job.error = null;
     const jobPath = job.downloadPath || this.downloadPath;
     fs.mkdirSync(jobPath, { recursive: true });
-    const torrent = this.client.add(job.magnet, { path: jobPath });
+    const torrent = this.client.add(job.magnet, { path: jobPath, uploads: 0 });
     job.torrent = torrent;
     const publish = () => {
       job.progress = roundProgress(torrent);

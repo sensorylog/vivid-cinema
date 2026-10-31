@@ -139,6 +139,8 @@ test("desktop engine downloads a video-extension payload from a local seeded tor
 
     await withTimeout(engine.ready, 10000, "download engine initialization");
     console.log("[vivid-integration] stage: engine ready");
+    assert.equal(engine.client.throttleGroups.up.getEnabled(), false,
+      "outgoing peer protocol traffic must not be blocked by a zero-byte upload throttle");
     // Keep this fixture isolated: the test validates tracker discovery and TCP transfer,
     // not public DHT routing or external network access.
     if (engine.client.dht) {
@@ -164,6 +166,8 @@ test("desktop engine downloads a video-extension payload from a local seeded tor
     const job = engine.jobs.get(started.id);
     assert.ok(job, "engine should register a download job");
     const torrent = job.torrent;
+    assert.equal(torrent?._rechokeNumSlots, 0,
+      "the downloader should disable peer payload uploads without throttling protocol traffic");
     seedTorrent.on("wire", (wire, address) => {
       console.log("[vivid-integration] seeder peer connected", address || "unknown");
     });
