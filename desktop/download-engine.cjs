@@ -16,6 +16,7 @@ class DesktopDownloadEngine {
     this.client = new WebTorrent();
     this.jobs = new Map();
     this.searchResults = new Map();
+    this.persistQueue = Promise.resolve();
     this.downloadPath = path.join(app.getPath("downloads"), "Vivid Cinema");
     this.statePath = path.join(app.getPath("userData"), "vivid-downloads.json");
     fs.mkdirSync(this.downloadPath, { recursive: true });
@@ -37,10 +38,14 @@ class DesktopDownloadEngine {
       progress: job.progress || 0, downloaded: job.downloaded || 0, total: job.total || 0,
       createdAt: job.createdAt, updatedAt: Date.now()
     }));
-    await fsp.mkdir(path.dirname(this.statePath), { recursive: true });
-    const temporary = this.statePath + ".tmp";
-    await fsp.writeFile(temporary, JSON.stringify({ version: 1, downloadPath: this.downloadPath, jobs: rows }, null, 2), "utf8");
-    await fsp.rename(temporary, this.statePath);
+    const state = JSON.stringify({ version: 1, downloadPath: this.downloadPath, jobs: rows }, null, 2);
+    this.persistQueue = this.persistQueue.catch(() => {}).then(async () => {
+      await fsp.mkdir(path.dirname(this.statePath), { recursive: true });
+      const temporary = this.statePath + ".tmp";
+      await fsp.writeFile(temporary, state, "utf8");
+      await fsp.rename(temporary, this.statePath);
+    });
+    return this.persistQueue;
   }
 
   async restore() {
