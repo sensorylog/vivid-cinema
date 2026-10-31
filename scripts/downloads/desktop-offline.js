@@ -64,14 +64,53 @@ async function searchTitle(media){
   catch(error){setMessage(error?.message||"Search is unavailable. Check your connection and try again.");}
 }
 async function refresh(){try{jobs=await engine.list();render();}catch(error){setMessage(error?.message||"Could not load your downloads.");}}
+const player = byId("offline-player");
+const clock = value => {
+  const seconds = Math.max(0, Math.floor(Number(value) || 0));
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const rest = seconds % 60;
+  return hours ? hours + ":" + String(minutes).padStart(2,"0") + ":" + String(rest).padStart(2,"0") : minutes + ":" + String(rest).padStart(2,"0");
+};
+function syncPlayerControls(){
+  const duration=Number.isFinite(player.duration)?player.duration:0;
+  byId("offline-seek").value=duration?String(Math.round(player.currentTime/duration*1000)):"0";
+  byId("offline-time").textContent=clock(player.currentTime)+" / "+clock(duration);
+  byId("offline-play-toggle").textContent=player.paused?"Play":"Pause";
+}
+byId("offline-play-toggle").addEventListener("click",()=>{if(player.paused)void player.play().catch(()=>{});else player.pause();});
+byId("offline-seek").addEventListener("input",event=>{if(Number.isFinite(player.duration))player.currentTime=player.duration*(Number(event.target.value)/1000);});
+byId("offline-volume").addEventListener("input",event=>{player.volume=Number(event.target.value);player.muted=player.volume===0;});
+byId("offline-fullscreen").addEventListener("click",async()=>{
+  const section=byId("offline-player-section");
+  try{if(document.fullscreenElement)await document.exitFullscreen();else await section.requestFullscreen();}
+  catch{setMessage("Fullscreen is not available on this device.");}
+});
+player.addEventListener("timeupdate",syncPlayerControls);
+player.addEventListener("loadedmetadata",syncPlayerControls);
+player.addEventListener("durationchange",syncPlayerControls);
+player.addEventListener("play",syncPlayerControls);
+player.addEventListener("pause",syncPlayerControls);
+player.addEventListener("ended",syncPlayerControls);
+window.addEventListener("keydown",event=>{
+  if(byId("offline-player-section").hidden||event.target.matches("input,textarea,select,button"))return;
+  if(event.code==="Space"){event.preventDefault();if(player.paused)void player.play().catch(()=>{});else player.pause();}
+  if(event.key==="ArrowRight"&&Number.isFinite(player.duration))player.currentTime=Math.min(player.duration,player.currentTime+10);
+  if(event.key==="ArrowLeft")player.currentTime=Math.max(0,player.currentTime-10);
+  if(event.key.toLowerCase()==="f")void byId("offline-fullscreen").click();
+  if(event.key.toLowerCase()==="m")player.muted=!player.muted;
+});
 async function play(job){
   const url=await engine.mediaUrl(job.id);
   if(!url) throw new Error("The saved video file is not available.");
   byId("offline-player-title").textContent=job.title;
-  const section=byId("offline-player-section"), video=byId("offline-player");
-  if(video.dataset.jobId!==job.id){video.pause();video.src=url;video.dataset.jobId=job.id;video.load();}
+  const section=byId("offline-player-section");
+  if(player.dataset.jobId!==job.id){player.pause();player.src=url;player.dataset.jobId=job.id;player.load();}
+  player.controls=false;
+  byId("offline-custom-controls").hidden=false;
   section.hidden=false;section.scrollIntoView({behavior:"smooth",block:"start"});
-  try{await video.play();}catch{setMessage("Your movie is ready. Press Play in the player to begin.");}
+  try{await player.play();}catch{setMessage("Your movie is ready. Press Play in the Vivid player to begin.");}
+  syncPlayerControls();
 }
 byId("desktop-search-form").addEventListener("submit",async event=>{
   event.preventDefault();const query=byId("desktop-search-input").value.trim();
@@ -97,8 +136,8 @@ byId("offline-jobs").addEventListener("click",async event=>{
   }catch(error){setMessage(error?.message||"Action failed.");}
   finally{button.disabled=false;}
 });
-byId("offline-player").addEventListener("error",()=>setMessage("This file uses a video format or codec the built-in player cannot decode. Try an MP4 or WebM release."));
-byId("offline-player-close").addEventListener("click",()=>{const video=byId("offline-player");video.pause();video.removeAttribute("src");video.load();video.dataset.jobId="";byId("offline-player-section").hidden=true;});
+player.addEventListener("error",()=>setMessage("This file uses a video format or codec the built-in player cannot decode. Try an MP4 or WebM release."));
+byId("offline-player-close").addEventListener("click",()=>{player.pause();player.removeAttribute("src");player.load();player.dataset.jobId="";player.controls=true;byId("offline-custom-controls").hidden=true;byId("offline-player-section").hidden=true;});
 engine.onProgress(payload=>{const index=jobs.findIndex(item=>item.id===payload.id);if(index>=0)jobs[index]={...jobs[index],...payload};else jobs.push(payload);render();});
 engine.onComplete(()=>{void refresh();setMessage("Download complete. Your movie is ready to watch offline.");});
 engine.onError(payload=>{void refresh();setMessage(payload.message||"A download failed.");});
