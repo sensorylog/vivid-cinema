@@ -21,6 +21,6 @@ test("browser library remains available separately from the native Electron mana
   assert.match(script, /window\.vividDownloads\?\.available/);
   assert.match(desktop, /engine\.list\(\)/);
   assert.match(desktop, /engine\.mediaUrl\(job\.id\)/);
-  assert.match(desktop, /Your downloads are saved on this device/);
+  assert.match(desktop, /Vivid Cinema Windows app keeps/);
   assert.doesNotMatch(script, /VIVID_DOWNLOADS|provider-integration|archive\.org|wikimedia\.org/i);
 });
