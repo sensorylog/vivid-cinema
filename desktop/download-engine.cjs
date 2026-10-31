@@ -115,7 +115,7 @@ class DesktopDownloadEngine {
     const term = safeText(query, 160);
     if (term.length < 2) throw new Error("Enter at least two characters.");
     const rows = await TorrentSearchApi.search(term, "All", 60);
-    return (Array.isArray(rows) ? rows : []).filter(x => x && x.title && Number(x.seeds || 0) > 0).map(source => {
+    return (Array.isArray(rows) ? rows : []).filter(x => x && x.title && (Number(x.seeds || 0) > 0 || Number(x.peers || 0) > 0)).map(source => {
       const id = crypto.randomUUID();
       this.searchResults.set(id, source);
       return {
