@@ -1,22 +1,61 @@
 {
-  "generatedAt": "2026-10-31T14:25:01.233Z",
+  "generatedAt": "2026-10-31T15:02:08.437Z",
   "source": "Google News RSS search feeds",
   "count": 120,
   "failedQueries": 0,
   "feedCount": 21,
   "articles": [
     {
-      "id": "1bdhsdt",
-      "headline": "Celebrities Who Officiated Their Hollywood Pal's Weddings",
-      "publisher": "Nicki Swift",
-      "publisherUrl": "https://www.nickiswift.com",
-      "sourceUrl": "https://www.nickiswift.com/2299863/celebrities-who-officiated-hollywood-friends-weddings/",
-      "publishedAt": "2026-10-31T14:15:00.000Z",
+      "id": "1ghk56i",
+      "headline": "Celebrity Traitors boss wants Royal Family member and Hollywood superstar in next series",
+      "publisher": "The Mirror",
+      "publisherUrl": "https://www.mirror.co.uk",
+      "sourceUrl": "https://www.mirror.co.uk/3am/celebrity-news/celebrity-traitors-boss-wants-royal-37829839",
+      "publishedAt": "2026-10-31T14:46:00.000Z",
       "region": "hollywood",
       "category": "celebrity",
-      "summary": "From Jay Shetty to Adele to even Tom Hanks, these celebrities played a special role in their friend",
-      "imageUrl": "./data/news-thumbnails/1bdhsdt.jpg",
-      "imageFallbackUrl": "https://www.nickiswift.com/img/gallery/celebrities-who-officiated-their-hollywood-pals-weddings/l-intro-1793205844.jpg"
+      "summary": "Series two of Celebrity Traitors has proved terrestrial TV can still pack a punch when it comes to ratings - and it seems show boss Stephen Lambert is keen to push the envelope even further",
+      "imageUrl": "./data/news-thumbnails/1ghk56i.avif",
+      "imageFallbackUrl": "https://i2-prod.mirror.co.uk/article37737440.ece/ALTERNATES/s1200d/3_Claudia-Winkleman-in-Celebrity-Traitors.jpg"
+    },
+    {
+      "id": "6zbuky",
+      "headline": "Everything Coming to HBO Max Australia in November 2026: Full Release Schedule",
+      "publisher": "Screen Realm",
+      "publisherUrl": "https://screenrealm.com",
+      "sourceUrl": "https://screenrealm.com/hbo-max-australia-november-2026-release-schedule/",
+      "publishedAt": "2026-10-31T14:38:30.000Z",
+      "region": "hollywood",
+      "category": "streaming",
+      "summary": "HBO Max Australia’s November 2026 release schedule is here. See every movie and TV show arriving, with premiere dates, synopses and trailers.",
+      "imageUrl": "./data/news-thumbnails/6zbuky.jpg",
+      "imageFallbackUrl": "https://screenrealm.com/wp-content/uploads/2026/11/hbo-max-australia-november-2026-release-schedule.jpg"
+    },
+    {
+      "id": "xzamoq",
+      "headline": "Janhvi Kapoor recreates mother Sridevi’s iconic ‘Nagina’ look for Halloween with Orry as Rishi Kapoor: ‘Had to recreate one of the most iconic movie moments everrrrr’",
+      "publisher": "The Times of India",
+      "publisherUrl": "https://timesofindia.indiatimes.com",
+      "sourceUrl": "https://timesofindia.indiatimes.com/entertainment/hindi/bollywood/news/janhvi-kapoor-recreates-mother-sridevis-iconic-nagina-look-for-halloween-with-orry-as-rishi-kapoor-had-to-recreate-one-of-the-most-iconic-movie-moments-everrrrr/articleshow/135403577.cms",
+      "publishedAt": "2026-10-31T14:21:00.000Z",
+      "region": "india",
+      "category": "film",
+      "summary": "Janhvi Kapoor marked Halloween this year with a heartfelt tribute to her late mother Sridevi.",
+      "imageUrl": "./data/news-thumbnails/xzamoq.avif",
+      "imageFallbackUrl": "https://static.toiimg.com/thumb/msid-135403648,width-1280,height-720,resizemode-6,overlay-toi_sw,pt-32,y_pad-600/photo.jpg"
+    },
+    {
+      "id": "1ryq0c5",
+      "headline": "A Love Other Than Yours Ep 13 Ending TWIST: Mi Do-Tae Seung BREAKUP; Did Namgoong Make It Official With Soo-A?",
+      "publisher": "Filmibeat",
+      "publisherUrl": "https://www.filmibeat.com",
+      "sourceUrl": "https://www.filmibeat.com/korean/a-love-other-than-yours-episode-13-ending-explained-seo-kang-jun-ahn-eun-jin-kdrama-ep-13-last-scene-536595.html",
+      "publishedAt": "2026-10-31T14:17:25.000Z",
+      "region": "asia",
+      "category": "television",
+      "summary": "Starring Seo Kang Jun and Ahn Eun Jin in the lead roles, A Love Other Than Yours Episode 13 delivers a major relationship twist. Heres what happens to Mi Do and Tae Seung and whether Namgoong finally makes things official with Soo-A.",
+      "imageUrl": "./data/news-thumbnails/1ryq0c5.jpg",
+      "imageFallbackUrl": "https://images.filmibeat.com/img/2026/10/feature75-53651793456228.jpg"
     },
     {
       "id": "nxd61z",
@@ -30,6 +69,19 @@
       "summary": "November 2026 brings 11 K-drama titles spanning fantasy romance, supernatural comedy, historical action, workplace relationships and crime thrillers. Check out the full list., Korean, Times Now",
       "imageUrl": "./data/news-thumbnails/nxd61z.webp",
       "imageFallbackUrl": "https://images.timesnownews.com/thumb/msid-156442365,thumbsize-685333,width-1280,height-720,resizemode-75/156442365.jpg"
+    },
+    {
+      "id": "8n0xyn",
+      "headline": "Harry Potter on HBO Max: release date, cast and plot of the new series",
+      "publisher": "Sortir à Paris",
+      "publisherUrl": "https://www.sortiraparis.com",
+      "sourceUrl": "https://www.sortiraparis.com/en/what-to-do-in-paris/cinema-series/articles/241961-harry-potter-the-sorting-hat-and-hogwarts-ghosts-join-the-cast",
+      "publishedAt": "2026-10-31T13:46:45.000Z",
+      "region": "hollywood",
+      "category": "streaming",
+      "summary": "David Threlfall will voice the Sorting Hat, while Leo Bill will play Nearly Headless Nick: HBO has revealed more of the cast for Harry Potter, set to premiere on HBO Max on December 25, 2026.",
+      "imageUrl": "./data/news-thumbnails/8n0xyn.jpg",
+      "imageFallbackUrl": "https://cdn.sortiraparis.com/images/80/69688/1182840-serie-harry-potter-hbo-dominic-mclaughlin.jpg"
     },
     {
       "id": "1n9tysl",
@@ -58,6 +110,19 @@
       "imageFallbackUrl": "https://images.filmibeat.com/img/2026/10/finaltableep1timewhoplayswhatd-57561793452528.jpg"
     },
     {
+      "id": "1y52efp",
+      "headline": "Premada Oorali Box Office Collection Day 37",
+      "publisher": "Sacnilk",
+      "publisherUrl": "https://www.sacnilk.com",
+      "sourceUrl": "https://www.sacnilk.com/quicknews/Premada_Oorali_2026_Box_Office_Collection_Day_37",
+      "publishedAt": "2026-10-31T13:17:01.000Z",
+      "region": "global",
+      "category": "box-office",
+      "summary": "Premada Oorali Box Office Collection Day 37: ₹0.85 Cr net on Day 36; India net total ₹107.57 Cr after 36 days. Day 37 live updates, shows and occupancy.",
+      "imageUrl": "./data/news-thumbnails/1y52efp.jpg",
+      "imageFallbackUrl": "https://cdn.sacnilk.com/image/news/1000027935.jpg"
+    },
+    {
       "id": "18r7dxh",
       "headline": "Kashmiri Singer Faheem Abdullah Bags IIFA Award for ‘Saiyaara’ Title Track",
       "publisher": "Kashmir Life",
@@ -84,6 +149,19 @@
       "imageFallbackUrl": "https://s.yimg.com/lo/mysterio/api/7c3f2ca45bdeff56c36c044aab8cfe4079ca5db49de7026f1a5d24ff7a2008f5/lightyear_networkapi/resizefill_w1200%3Bquality_80%3Bformat_jpg/https%3A%2F%2Fmedia.zenfs.com%2Fen%2Ftvline.com%2Ff08ac575c8afe738dff14a3896746906.jpg"
     },
     {
+      "id": "1vytxe1",
+      "headline": "Gripping PS4, PS5 Adventure Game Is 80% Off on PlayStation Store",
+      "publisher": "PlayStation LifeStyle",
+      "publisherUrl": "https://www.playstationlifestyle.net",
+      "sourceUrl": "https://www.playstationlifestyle.net/2026/10/31/a-plague-tale-innocence-ps4-ps5-deal",
+      "publishedAt": "2026-10-31T13:00:00.000Z",
+      "region": "global",
+      "category": "gaming",
+      "summary": "An acclaimed adventure is now 80% off on the PlayStation Store for a limited time, with the offer available on PS4 and PS5.",
+      "imageUrl": "./data/news-thumbnails/1vytxe1.jpg",
+      "imageFallbackUrl": "https://www.playstationlifestyle.net/wp-content/uploads/sites/9/2026/10/Gripping-PS4-PS5-Adventure-Game-Is-80-Off-on-PlayStation-Store.jpg?resize=1200,630"
+    },
+    {
       "id": "hn4muc",
       "headline": "Pony Verma on 12-year age-gap with Prakash Raj, relationship with daughters from 1st marriage",
       "publisher": "The Indian Express",
@@ -101,52 +179,52 @@
       "headline": "Doctor X Mafia In White Episode 8 Release Time Today: When, Where Will New Ep Premiere Online? What To Expect?",
       "publisher": "Filmibeat",
       "publisherUrl": "https://www.filmibeat.com",
-      "sourceUrl": "https://www.filmibeat.com/korean/doctor-x-mafia-in-white-episode-8-release-time-today-when-will-new-ep-premiere-online-india-expect-536579.html",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMi2wFBVV95cUxQRGktVE9rWFRlZ0pMMmNTaUNraFdYNUlrRVNXd0VUbHY5bVk2cDctVThxM0VuVFJlRjJuZmltMTBFZmJZWjVwMEM4Z3dndGl3Mml5TGRKRmRLbnFiYXd6SHh1TGprYklTNDFETDdmNkEwcW1kajFqQk42N2dsTWg0R0ZfbHBXMVZnV3hBTlVTbmJ0NkMtWGZHWXA5djhXTHRfMmtYX0I0Y2dYV1g5STVvaWQ2RldiRGpoejM5OWg4eUVFWFNON1Y5QW1Zd3F5M2xIRkt4SENzdU9ORmc?oc=5",
       "publishedAt": "2026-10-31T12:50:45.000Z",
       "region": "asia",
       "category": "television",
-      "summary": "Doctor X Mafia In White Episode 8 India Release Time Today: As Doctor X Mafia In White Episode 8 is releasing in a few hours, let’s take a look at the release time of the much-talked-about Korean drama. Check out the date and time in India as per IST.",
-      "imageUrl": "./data/news-thumbnails/emc0pd.jpg",
-      "imageFallbackUrl": "https://images.filmibeat.com/img/2026/10/doctorxmafiainwhitedailymotionep1d1-30191793450794.jpg"
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
     },
     {
       "id": "1t87s8y",
       "headline": "Kannada Film Premada Oorali Nears Rs. 125 Crore Milestone in Theatrical Run",
       "publisher": "Zoom TV",
       "publisherUrl": "https://www.zoomtventertainment.com",
-      "sourceUrl": "https://www.zoomtventertainment.com/bollywood/premada-oorali-kannada-film-box-office-collections-update-article-156442017",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMivgFBVV95cUxPODNaSTRDUlBJV3JFWWxXd1l6LXBWclB6UzlEWWlzUGJ0Y2tFeUhMcHdJN2lKYW02bHNlSVZRcDRmamxjVXI3NGFNVEVjVFprNTFaRXpadW5lRXYxSlpFRzJQNXQ0bUx1M19zZlBLOHAzRE5tbE1odGdWV2h6NUF3VVlGN1dnSmFxWlpwZTBBLWxVZkxLWmRieWU4SUFJQ2NrbHhIUVFmUUFRQkdwMXJRYXVibmlqMFZCb0dDX2h3?oc=5",
       "publishedAt": "2026-10-31T12:42:52.000Z",
       "region": "global",
       "category": "box-office",
-      "summary": "The Kannada film Premada Oorali continues to show steady performance in its sixth week, with trade estimates placing its total Indian box office gross at approximately Rs. 117.05 crore as it approaches its final run., Bollywood News, Zoom TV",
-      "imageUrl": "./data/news-thumbnails/1t87s8y.webp",
-      "imageFallbackUrl": "https://images.zoomnews.com/thumb/msid-156442344,thumbsize-210538,width-1280,height-720,resizemode-75/156442344.jpg"
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
     },
     {
       "id": "yzsp84",
       "headline": "100 Days Of Deception Episode 7 Release Time Today: When & Where Will Ep 7 Premiere? What Happened In Ep 6?",
       "publisher": "Filmibeat",
       "publisherUrl": "https://www.filmibeat.com",
-      "sourceUrl": "https://www.filmibeat.com/korean/100-days-of-deception-episode-7-release-time-today-when-where-will-ep-7-premiere-online-ep-6-recap-536577.html",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMi2wFBVV95cUxNeUZEYzJwVEhKa2pGM2Jmb1RvUlNyYlU3TTFCX0J0THlXd2MwcFJYVkZxYzNITTZBbUpCT0hIdzlHdTQwT09IbEk3ZG9FdWVUa1loaE8wSlNWT09oYkZvUTc0Q2V6NHNIeDNOUE9fMjMzRFhZZElWOVVqb0JERmFoMHA2alJwQnh4ZXRkUnhGUXpkT0FHY0JuZHlPTTUwQ0J5ellVSTlBZkVmd19PRFNnV3hycnIzRkhxd2JKRTFxb3NmZjJ6T3VENFVzcTNIUUpmU3FOT3FUVzl5aHc?oc=5",
       "publishedAt": "2026-10-31T12:39:38.000Z",
       "region": "asia",
       "category": "television",
-      "summary": "100 Days Of Deception (Kdrama) Episode 7 Release Time Today (October 31) - What Happened In Episode 6? | 100 Days Of Deception (Korean: 100일의 거짓말) Episode 7 India Release Time | 100 Days Of Deception Episode 7 Netflix Release Time | 100 Days Of Deception Episode 7 Release Time Tonight | 100 Days Of Deception Episode 7 Release Time In India | 100 Days Of Deception Episode 7 OTT Release Date And Pla",
-      "imageUrl": "./data/news-thumbnails/yzsp84.jpg",
-      "imageFallbackUrl": "https://images.filmibeat.com/img/2026/10/100daysofdeceptionep1timed1-97481793450232.jpg"
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
     },
     {
       "id": "170ob6u",
       "headline": "Jujutsu Kaisen fans get a major surprise as final manga exhibition approaches in Japan",
       "publisher": "The Times of India",
       "publisherUrl": "https://timesofindia.indiatimes.com",
-      "sourceUrl": "https://timesofindia.indiatimes.com/entertainment/anime/jujutsu-kaisen-fans-get-a-major-surprise-as-final-manga-exhibition-approaches-in-japan/articleshow/135400960.cms",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMi_AFBVV95cUxPUUR5dFY2SWpDZ0x6WmcycjQ5eGxEMGY3OU1HMFAxMGxxWVFEZTlnRDBNREltcnZ2OUpQR0hsRGpPT05uUTVzWmlKb1NDTnlGQjIyTEdLa09oSW5FQ280NkhMQlo1anpVQU5ONzVhVlFGY19QSkZ0RHlLQll5eEw5ZmxReXRSRHZlMVJuSjhmTkxValU4NmZtajVmdjNWY3RwdExLMFo5eUp1YmVCVUJudm5Xa0YwVnpMM2JUbktYNHN2NDI2RjhTajJVN0djX3BZYTY3SGVfVV9LaGNNRHFjdlBCVHNGSWxUbHhKTV9pV0ZoM2RadlJySlZIdUbSAYICQVVfeXFMT2lORG9SZlBBT0JaODVWV2pGQzJOLTFWTUlGYkM4ZllxYThDRGdOdkpzVEQ1RmJvZzJzMFh2YnVRUGNGM0owaEpDWWtlMFk2a3NwXzBaTU1FZUowNkdxOGg4aHFzYlpNdjFwajBwUjh0dmhFUHRKRWRVVmdZZDhuMzJ0MUItdi1Ib2lvTHJYUFBqTFJNS2dvRGlhRW96WjBrLW5iTmp6T2FqU3NwaEE0SkNDeFMwSFlvZmdpNXg5SnNNTllRLTdXYzI0NF9qUG11QXRYWlBtNDlta0NnSWczOTF2NGZBdXlnZnZmM3UzNHlLOHNIRHZweUwzbkVFWGl6V2Vn?oc=5",
       "publishedAt": "2026-10-31T12:31:00.000Z",
       "region": "asia",
       "category": "anime",
-      "summary": "The Jujutsu Kaisen manga may have reached its final chapter, but fans are not ready to leave its world behind.",
-      "imageUrl": "./data/news-thumbnails/170ob6u.avif",
-      "imageFallbackUrl": "https://static.toiimg.com/thumb/msid-135401123,width-1280,height-720,resizemode-6,overlay-toi_sw,pt-32,y_pad-600/photo.jpg"
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
     },
     {
       "id": "1k5vknn",
@@ -279,6 +357,19 @@
       "imageFallbackUrl": ""
     },
     {
+      "id": "1olbcwy",
+      "headline": "Brad Pitt & Jon Bernthal's 135-Minute Military Action Thriller Officially Sets Netflix Streaming Date",
+      "publisher": "MovieWeb",
+      "publisherUrl": "https://movieweb.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMihwFBVV95cUxNUEhRdGFsejFqejVHSEJ6blhoYmtUMmozT2RIclQ0cUx3MUF4Smo3dGpuc3ozYUNMcHNPX2p6TVAtNkpfdk9ZcEQ1VVROZjMyVmEyU05XbUlTVXR5Sjdzd0d1bXlRUVhlYnQwSG0wSk9jWWJaY0FNUVZVU2VwdzJsT3Y1MXAxMm8?oc=5",
+      "publishedAt": "2026-10-31T11:00:17.000Z",
+      "region": "hollywood",
+      "category": "streaming",
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
+    },
+    {
       "id": "2gc3m",
       "headline": "One Bar of Soap, 60 Seconds, ₦2m: Givanas Industry Unveils Miss Ivory Season 4",
       "publisher": "Head Topics",
@@ -376,8 +467,8 @@
       "publisherUrl": "https://indianexpress.com",
       "sourceUrl": "https://news.google.com/rss/articles/CBMi8AFBVV95cUxQVzFNSUVDd0E2dDB6R1BheWZkaUJlNEE5dGI1MklLLUhicVpzZGVVd3ZONzBHNTdNc0Q1dnRPTEdycXJCMWZUWWpoeU1xanFuZ05kTjhIdUoxTjhDNlRSa2ttLXFzZW9CT2VUVE1sYUpKa3hFV0gwdHdvM2lKWGs5NjRGU25TclBOZU9pVlNuWnhjd2h4eXdLOFFuN29DWkkwT3AyRlFDSWZ1SmdrcU1obnRhRVJWUjY3TEFhYmlxODdsSmV2cmZRSlYzenZpVjJ4MEFnRm9uUFFiX0dac2xMNHZTNlByaGFfc0h3MC1zNTTSAfcBQVVfeXFMTVFiMnhBZi1YX01mclRFMnBUN1V5dy10NlBIMU1YalVzTXItMEc4WmpaWHEwWjRPWjF0aTFiTnFDME9CZjdTa2VxQmRQTl9FcFNfT21YOFFyZkZmMU9jLV9fVDhwaG1pandXQlp3cEpiUXd6LTVLRWM5RjJ2YVhSODAwM0FFLW1RQzA5Tk5jdzVkSDV2aGRxU1lVVV93MG14Y2w2bUdDM3ZQZ3RpMnBOTG5Ld1V2aXUwQm9odU45OFRVaEV4OGVoNEY4bHpWVEpMMTZIUi1lZDlIT0tROGxJeWE4ZWFKdlFINzloWjNWQjBXa1pMWWdZdw?oc=5",
       "publishedAt": "2026-10-31T10:30:43.000Z",
-      "region": "global",
-      "category": "box-office",
+      "region": "india",
+      "category": "film",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
       "imageUrl": "",
       "imageFallbackUrl": ""
@@ -422,27 +513,14 @@
       "imageFallbackUrl": ""
     },
     {
-      "id": "1rhjita",
-      "headline": "Mika Singh remembers late Sanjay Gupta as his ‘Godfather’; says ‘You gave me my first Bollywood break’",
-      "publisher": "The Times of India",
-      "publisherUrl": "https://timesofindia.indiatimes.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMinwJBVV95cUxQXzZzN3hrSVRTMk5oNWoxaW41cUE2T1NKNWVDMzVpbzYzMVZ3N0ZreHVtdi1Wd2NpX25NSmNwLVBFOElQMElyTUphNUE5RDg0TXl6NERxT3pTbGhneFFLb2FneXhfUUpMSmVvVURoRjFYRHV3bmQxeE5DMkN3OXFvejVESjlETE5XSTJxZTVIWWFfMUxFRkVoUGF4RXRDYm9iR2IxYTh1eUhyWWIyaXFUb0dFcHp3TkhjMkswTVdXNzV1QnpSaldxQVo4Y1JxLVo3YzBLZzlxZHY2STBWeVNfSWxPTjVLWldMQ0ZPWFA0TkF1TTM5ZmVrWTZ1ZkVsRlp1bVlMYjBlRDk3X1JuS2JxdDFhMmZyN1ozaEFmc0NwTdIBpAJBVV95cUxPSXBGOHRnRVVSbGFVR2thUWs2eWtLNHlBaFI2dVFrbjN5dDZ6VllWdlFxVDJqRVItQ2x6MmZSQ0JBdTFKblJqZFV5TGtFbG9vUGpLLVhhWmUzcFZBOUxNYjR2QXVjWjlNclRPcUs0YWRWQzFDY2k3YnBjbVh5cmUwcTR0dS13U1F3S3dZWXJyaTNkU2FUZEN3ZjVZaXRrT1U2WnZ6OEZqU2NHRzNqaV80a0lpdDgxeXk4Mm9Bc2VoX210czNocXV5UTF3Xzktd0p1REw1TEMwQ2ZoZmc0M0haTFk4NVVRX3o0M3piRm9GaS1aRXRUTVZDMllHMkYyb2FHT29lZXZLdGNSa3RBTFhkZWx6OVZwX240Q2c2eWlQQWlYcHh3?oc=5",
-      "publishedAt": "2026-10-31T09:40:00.000Z",
-      "region": "india",
-      "category": "music",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
-      "id": "1grmooi",
-      "headline": "Ronit Roy, Rohit Roy become inconsolable as they arrive at late filmmaker Sanjay Gupta’s residence to offer condolences",
-      "publisher": "The Hawk",
-      "publisherUrl": "https://www.thehawk.in",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMi6AFBVV95cUxOLWdjRExLYVlIRlRjcDAzN1dia0lFdjZjQUNaaEpzbi1TVFFzdnVmRUd5N2VsYWVIOHpzVm10UkxJczNzRFFmU3JnYWdIeFhtWjA3V1B4MF9KdkFCZVROOHY2NG43MmhRZlhwMjBheUttNWY2cGtyWFNZM0laUDBEZms5dzNsQzUtZkFmZjkzbWVQd3NVM1FhdVRlWmp1NUtXUWRGdlJHaFVyYUhhQ2czMFJCQTdNUVBpNEg1SnQycGNUMy1rX2lJbUhWMW53R0k4MHhVbldPeWwwQk1xSWNhM1JxSEdEZ3NW?oc=5",
-      "publishedAt": "2026-10-31T09:38:55.000Z",
-      "region": "india",
-      "category": "music",
+      "id": "182fo9n",
+      "headline": "Late Korean TV icon Choi Bul-am requested documentary chronicle his life amid illness",
+      "publisher": "The Korea Times",
+      "publisherUrl": "https://www.koreatimes.co.kr",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMi2AFBVV95cUxPbG1Vbl9CRE9ScUczZzJyeWNMb1BGOXBaSkJIaHltRGQ5ZXg1NWF6NTNCMDNnZmdSRVRlaWdXczNkdnRKM3M5S2pFTVVVOTRZRkZvaElILVZKSjc0UGR5eXJWTGdtbDcxU2ZBX1k0Qm1PNVNZcm1XbFp4QmhINVQxWmloM1dsSTRsRThIWE1acm1zWE11bE4xb1NLMEpDNlBERmNQZGlXSjdFQWN4S3BZWFRmdDhPckZKMDRHU2pHc21ONXBwRWlZbDNESVoyYUxMYWtEMXByaU_SAdgBQVVfeXFMT2xtVW5fQkRPUnFHM2cycnljTG9QRjlwWkpCSGh5bURkOWV4NTVhejUzQjAzZ2ZnUkVUZWlnV3MzZHZ0SjNzOUtqRU1VVTk0WUZGb2hJSC1WSko3NFBkeXlyVkxnbWw3MVNmQV9ZNEJtTzVTWXJtV2xaeEJoSDVUMVppaDNXbEk0bEU4SFhNWnJtc1hNdWxOMW9TSzBKQzZQREZjUGRpV0o3RUFjeEtwWVhUZnQ4T3JGSjA0R1NqR3NtTjVwcEVpWWwzRElaMmFMTGFrRDFwcmlP?oc=5",
+      "publishedAt": "2026-10-31T09:44:04.000Z",
+      "region": "asia",
+      "category": "television",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
       "imageUrl": "",
       "imageFallbackUrl": ""
@@ -526,19 +604,6 @@
       "imageFallbackUrl": ""
     },
     {
-      "id": "gvlp2f",
-      "headline": "From law to films, meet Aditi Sandhya Sharma, the emerging talent making her mark in Indian cinema",
-      "publisher": "Adgully",
-      "publisherUrl": "https://www.adgully.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMiywFBVV95cUxOTmlKQkd1VkRuYVdnemtyVDZ3VExjenhtUkh3Z0JVMlBmakZkUFRqQnp0SWp3eUs5eWlhcEdCcTlDamlBZFpiWXo0VFF0MXJfeGYzYjdWbTRob3VkMDlObHhBS28tcDBCdnl4Yk1rSEtzR0ZHWFlEejhxM3BIdEpiaE9aTGxYY0RjQU5aTzNDRXlRTlB2aXNlUm1hR1ZLSldXbURyVDZ1dVNjSWc2akJXdWt2dWhqbVBoZFE0UzRfNjh5UlNIbHdSVmE0MA?oc=5",
-      "publishedAt": "2026-10-31T08:41:06.000Z",
-      "region": "india",
-      "category": "film",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
       "id": "122jv84",
       "headline": "'Jailer 2' box office collection day 16: Rajinikanth's film beats first part by Rs 243 cr; earns Rs 776 c",
       "publisher": "The Times of India",
@@ -559,6 +624,19 @@
       "sourceUrl": "https://news.google.com/rss/articles/CBMitgFBVV95cUxNVFJ1N1RRRENJeUZTbHF6dlZWZHNuazdTeDdfdnNkTDJmUExLR1RXc2JncGNoSXVTSDVPYW9ndm94d0Q4T2l5Ny1mbnNqaC03d3pSdktUcGRaaG9COG41bG1qT1Y5VFBPOUNWSWxVY0xNR2lNRUhsOXRmYXIxeFV2WERzWHRUYnJZSzZQZE5teWdxU0YtYzBDYUgydmQzMk1OU3hubEg3eEN5LXMzUlJkZXRWbkhndw?oc=5",
       "publishedAt": "2026-10-31T08:34:10.000Z",
       "region": "africa",
+      "category": "film",
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
+    },
+    {
+      "id": "gvlp2f",
+      "headline": "From law to films, meet Aditi Sandhya Sharma, the emerging talent making her mark in Indian cinema",
+      "publisher": "Adgully",
+      "publisherUrl": "https://www.adgully.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMiywFBVV95cUxOTmlKQkd1VkRuYVdnemtyVDZ3VExjenhtUkh3Z0JVMlBmakZkUFRqQnp0SWp3eUs5eWlhcEdCcTlDamlBZFpiWXo0VFF0MXJfeGYzYjdWbTRob3VkMDlObHhBS28tcDBCdnl4Yk1rSEtzR0ZHWFlEejhxM3BIdEpiaE9aTGxYY0RjQU5aTzNDRXlRTlB2aXNlUm1hR1ZLSldXbURyVDZ1dVNjSWc2akJXdWt2dWhqbVBoZFE0UzRfNjh5UlNIbHdSVmE0MA?oc=5",
+      "publishedAt": "2026-10-31T08:33:03.000Z",
+      "region": "india",
       "category": "film",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
       "imageUrl": "",
@@ -591,6 +669,19 @@
       "imageFallbackUrl": ""
     },
     {
+      "id": "1ttmom2",
+      "headline": "Mika Singh mourns Sanjay Gupta’s demise, recalls filmmaker giving him his first Bollywood break",
+      "publisher": "The Hawk",
+      "publisherUrl": "https://www.thehawk.in",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMiyAFBVV95cUxPdWc4SHBjdUozY0lvWlp4YnVkd2JYajRMd1JZdnZVa24tLWhVVE85WWNDYmloUEdzTWpteElRR255U1hCalhBN2Y3azBocXJ1cGF5RVJMUHNpdkY4QjBlcmRxNlRYT0ptV1BOcDVwT09kYlBSclVmVjVtWUs0dEpDSWdlaG9tejFIWjNCZ1pqanA0aVo2WGdEd0s2aXg3UTRaRkpvN3FSYWNTd2Z1OUxWMVptaW1NalpQUWdPX25UVXQ0OTRmU0VncQ?oc=5",
+      "publishedAt": "2026-10-31T08:18:55.000Z",
+      "region": "india",
+      "category": "music",
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
+    },
+    {
       "id": "levep",
       "headline": "Ramayana advance booking crosses ₹40 crore five days before release; deadlock with Indian exhibitors ends for Ranbir Kapoor, Yash film | Bollywood",
       "publisher": "Hindustan Times",
@@ -604,27 +695,27 @@
       "imageFallbackUrl": ""
     },
     {
-      "id": "19qsu4o",
-      "headline": "This Christmas Comedy Cost $18 Million But Stayed At No. 1 For 12 Straight Weekends",
-      "publisher": "Koimoi",
-      "publisherUrl": "https://www.koimoi.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMivAFBVV95cUxNRlR0dDdJSWh6R0Z4enpWLTRQa1NRVTN4cDR1bG5fZmtPWU9RbmpNcEd1bEstYXN1ejRSUjFDY0w0WEwtVUEtaEtJbEs5ZlkxeXlsY0ZhckV1TmtOQTlRTEc4RHlwX2s5MG9Fbzl5cHl6OFJwOGw1cWVYeXFiZEhyOVFTNkJIdl95T3dOdHotcVowMGhjdzdfcDUyT1htRXBnYjhleW5PUWh3Sjd6Q3VuVUwtUW1Ca3h3ZXVTSw?oc=5",
-      "publishedAt": "2026-10-31T08:08:40.000Z",
-      "region": "hollywood",
-      "category": "film",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
       "id": "wsm6lx",
       "headline": "First look at Andrew Scott in ‘Elsinore’ released ahead of TIFF premiere",
       "publisher": "IFTN",
       "publisherUrl": "https://www.iftn.ie",
       "sourceUrl": "https://news.google.com/rss/articles/CBMijAFBVV95cUxOMjU1NnFjQ3VTT3IyWkdMd3VRd2NKdU9VSGYyYWg2S3lvRHM3WnZpbFJxWGpianMybjhuRm40QzhiNlpVQmtmVmdFWmlQSjJsMkJ2RC1sOVFOUzR0M041WmZjcmVRSU1GNFpMNHhRQVNabV9PektrWXFLOHVuZnFwU1g4S0xNOUVpcC0xUA?oc=5",
       "publishedAt": "2026-10-31T08:03:29.000Z",
-      "region": "europe",
-      "category": "film",
+      "region": "global",
+      "category": "festivals",
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
+    },
+    {
+      "id": "ji5m5q",
+      "headline": "Two unheard Ozzy Osbourne songs to be released",
+      "publisher": "inkl",
+      "publisherUrl": "https://www.inkl.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMifEFVX3lxTE9mdndkdUgzcnlnWm1nTXpKRThVYTVLWjl3aHAySXh4U1Zzd1lqNVcxRGFLUGRjQ0VrbnVFQjNNNzBDOTlZMFBYNzlqNnNKWGU5dWFMSW9CYnQzM3ZvUGdVSks1MUh2WUxReV9EM1BIWGJlMGQxdTdfWUYwRlc?oc=5",
+      "publishedAt": "2026-10-31T08:00:00.000Z",
+      "region": "global",
+      "category": "music",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
       "imageUrl": "",
       "imageFallbackUrl": ""
@@ -650,6 +741,19 @@
       "sourceUrl": "https://news.google.com/rss/articles/CBMi6wJBVV95cUxPcDlHRGlxUTlGU3p0dUFmSWdtZFRMZUNmU3c2UUxxUDEtR004WUozYlVaNjhRQmF6UzRvN2tIZzZCb0FpYUk2QzMyVGl3UDZDMmJoZWFqX3J2UkdrS002TjB4bm8tNDFkRVlpSmE5b214VnIxeWZNSUNoSzlfU2w3cjFTVm5RR2RFSXJvZE02UC1fU2IwRnRMcHdDeEdiQl9GVkQ1dC1Vc3FwTmM2ZG0xTU9wUVZkTVdIZk5XcW9qWWtEdWFQeEFrNjRJQXZpdW5KaGFxSno1Q0g5YnJYOW1xQW9vVEtfaU5sd0NIS1NFOF9xaDFJR19wX2FiOW5UVHdXeU1pZ3dtLWhrdWRhMVBKQkR2RVJ6bXBRT1ZXeDNkNkJmNk5YUTJzWXZmOGltS3ZkanVGQkw0bFFOX3BpRnJpZUZPMlZ4SFcwa0FlbnhJbDhqYU9IV1lxRFZ2eHlmNERHMEUwbkg5d2hPd2vSAfACQVVfeXFMUFZBcWNsRzVBM3lXRGxFT0dJWXZvT1lPejRCUzhQVlI2Skc2REF2Y1BYWlFLdFA2d3hsd216Z3VXX0hmYzItVzRVLU1pa1N0SmtjTGR4UkVlbjZGeXA0Z1dJSUQxbmdFLTlRNkYycjBtMUxVb3E2Z0dwam5vVk1ZZ0UzSlljNU1XVUsyeV9jaGc1TjRVNHV0NllfNXhyeGtBQ2ZNMVFhWWpEQndPcFBITXlXek10T05LMUlRSWllYmxsLVhTYTU4ZnJ6S2s4NEtoclJNZllZQnlzNktlcTc3akxSRmJZTlo2dkRvSHVVa09JbWJTQ2JPYk0wVkJwMEFnTWROSlY3TXR3MGxYUHRGc0NBR3EtN1c5bGhYSEkwb2M1MEZTQm5rUTByMXhjcl9VQmI4aFkxb0FCRzl6T21SWkphNmpWMFNqZFgtMGNSN1A2SlpGSzdKY2xIS3JlendkdkNqdzN3dWl2enhmX1RFMTI?oc=5",
       "publishedAt": "2026-10-31T07:58:00.000Z",
       "region": "india",
+      "category": "film",
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
+    },
+    {
+      "id": "1vrhgpq",
+      "headline": "Alternativa Film Festival opens first African edition with over N164m in prizes",
+      "publisher": "The Nation Newspaper",
+      "publisherUrl": "https://thenationonlineng.net",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMitAFBVV95cUxPZmdrSXRyeWJ6dFEweWtFS0g1cWUxdFRXb0JMNEMyZURHQkNJTXRBMXczYm1JQ1FtMndRaEF6RXNndlE3bGM0OFRVdHBDdGlBTWxOS0FQRkN1cG9kUDUzNHpuWjY4ZlVjNHhYcG1PZWxJUmlTTVN0Vm42cFhHU1pXcHBVUHFnWHd6MTVaXzRyaTZVa2s2NmtXZ2UzZGpkVnhfcUd4RGlwQ2h0ZkVXbGxvWTJkcEHSAbQBQVVfeXFMT2Zna0l0cnlienRRMHlrRUtINXFlMXRUV29CTDRDMmVER0JDSU10QTF3M2JtSUNRbTJ3UWhBekVzZ3ZRN2xjNDhUVXRwQ3RpQU1sTktBUEZDdXBvZFA1MzR6blo2OGZVYzR4WHBtT2VsSVJpU01TdFZuNnBYR1NaV3BwVVBxZ1h3ejE1Wl80cmk2VWtrNjZrV2dlM2RqZFZ4X3FHeERpcENodGZFV2xsb1kyZHBB?oc=5",
+      "publishedAt": "2026-10-31T07:50:56.000Z",
+      "region": "africa",
       "category": "film",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
       "imageUrl": "",
@@ -734,19 +838,6 @@
       "imageFallbackUrl": ""
     },
     {
-      "id": "12yjwl5",
-      "headline": "Ram Gopal Varma faces Rs 29.67 cr recovery notice, film industry warned against working with him",
-      "publisher": "The Indian Express",
-      "publisherUrl": "https://indianexpress.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMigAJBVV95cUxOVmtFRnN6aUxLRVJLV2tKeFB3LWxJZXNPa3F6MVA2eGJ5cVpIZllDV1RyT2RfeDVkeEpsNUFaS2VRc2lTSXc1Tm5qSzlKMWZ3ZzdDOGhTVzlESTF5bjhiTTllM0J0TGlGT1VXX0FzRlpTbG5VaW5MOGl0czFCOHVQV3ppX3B0S0hoRGp6dkFVdzhvajdMallqaG90eGFZbGNQbzdMbFNnSFpQNHlnVXk5WF8tbEkzNnQ3YkNFcmxuTnhxbVhNUjEyeWVob3VwX0hKbkFhMk5oajFxY0dRNHM5c3ZlYTlUTG1vdlk5N3JCTUpLQm16RkV6VElFLUtqTkZa0gGAAkFVX3lxTE5Wa0VGc3ppTEtFUktXa0p4UHctbEllc09rcXoxUDZ4YnlxWkhmWUNXVHJPZF94NWR4Smw1QVpLZVFzaVNJdzVObmpLOUoxZndnN0M4aFNXOURJMXluOGJNOWUzQnRMaUZPVVdfQXNGWlNsblVpbkw4aXRzMUI4dVBXemlfcHRLSGhEanp2QVV3OG9qN0xqWWpob3R4YVlsY1BvN0xsU2dIWlA0eWdVeTlYXy1sSTM2dDdiQ0VybG5OeHFtWE1SMTJ5ZWhvdXBfSEpuQWEyTmhqMXFjR1E0czlzdmVhOVRMbW92WTk3ckJNSktCbXpGRXpUSUUtS2pORlo?oc=5",
-      "publishedAt": "2026-10-31T07:08:14.000Z",
-      "region": "hollywood",
-      "category": "film",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
       "id": "zxcjgp",
       "headline": "Ndlovu Choir brings African Christmas show to Johannesburg in December",
       "publisher": "Joburg ETC",
@@ -755,6 +846,19 @@
       "publishedAt": "2026-10-31T07:00:45.000Z",
       "region": "africa",
       "category": "film",
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
+    },
+    {
+      "id": "6aa1zb",
+      "headline": "K-drama's beloved duo Yoo Yeon-seok, Seo Hyeon-jin reunites after 10 years",
+      "publisher": "The Korea Herald",
+      "publisherUrl": "https://www.koreaherald.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMiV0FVX3lxTE56bHd4QWVnMm1ncVhtMlIxOERuSmFubmFqcFEzVG9JeTJueEJlQS1SYTVITTBLMGhqaWJaWFlfNW5pemZtOFl4T0plakpRdkUxQkVNUU5uNA?oc=5",
+      "publishedAt": "2026-10-31T07:00:05.000Z",
+      "region": "asia",
+      "category": "television",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
       "imageUrl": "",
       "imageFallbackUrl": ""
@@ -916,6 +1020,19 @@
       "imageFallbackUrl": ""
     },
     {
+      "id": "bxxbs7",
+      "headline": "Get a chance to rewatch these Filipino films again in Cubao",
+      "publisher": "astig.ph",
+      "publisherUrl": "https://astig.ph",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMiiAFBVV95cUxQYlpQX2ZqYVdZZlBON29LRUFEQmlJa1Z2Vl9uUEdQTlRuMDJWUFBqWTJ2cGlCSkQ2SmNVVjJMbkRkYkRkaV9Va2o4Z3ZJanhQVUJ2Tl9JSlRHLVRWR0EyMldyVXpEb0Z0bGU0ekh6WnpPX0ZKWTViaDdBTnowMXI3YmptZFdpbGZs?oc=5",
+      "publishedAt": "2026-10-31T06:03:53.000Z",
+      "region": "global",
+      "category": "festivals",
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
+    },
+    {
       "id": "1feowob",
       "headline": "Kaante director Sanjay Gupta dies at 57 after suffering head injury at home, investigation begins",
       "publisher": "The Indian Express",
@@ -1007,19 +1124,6 @@
       "imageFallbackUrl": ""
     },
     {
-      "id": "1t0zi73",
-      "headline": "Daytime Emmy Awards 2026: General Hospital wins Best Drama, The Kelly Clarkson Show bags 5 awards | Complete winners list",
-      "publisher": "WION",
-      "publisherUrl": "https://www.wionews.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMikAJBVV95cUxQS0pPMnVRS2ctVmN1Z1F6MXVFVmVHTnlfZ2gwYUxyRUUycXlmWVUtLVIza21abTFxeVg5cHV3RGNadzE3ZG5XVHRLbjNIUmNrSlJGM1A5OFo4aWFuZ1VMUUNRSnl1QU9OdXVkSzYzS1daRlhubzNWeEJwQVBldEdydFg3Z0wtSjJfUUdtSVVqUkJab2lGbzhVRHlwRHNFSS1BU1MzYzRZdWctbFNjSXRUamZMaW5RSU5vbVFsa2lOR3FpYnJqLTFGS2oyVEpYWEpMUWhBOHozMThMNklKbjZPa2VIS2RpR3d3Nmh4Y1ZXeXJDS3c1el9YUmNweDZock1IMXdyRHF1RHN0dExGNWdmWdIBkAJBVV95cUxQS0pPMnVRS2ctVmN1Z1F6MXVFVmVHTnlfZ2gwYUxyRUUycXlmWVUtLVIza21abTFxeVg5cHV3RGNadzE3ZG5XVHRLbjNIUmNrSlJGM1A5OFo4aWFuZ1VMUUNRSnl1QU9OdXVkSzYzS1daRlhubzNWeEJwQVBldEdydFg3Z0wtSjJfUUdtSVVqUkJab2lGbzhVRHlwRHNFSS1BU1MzYzRZdWctbFNjSXRUamZMaW5RSU5vbVFsa2lOR3FpYnJqLTFGS2oyVEpYWEpMUWhBOHozMThMNklKbjZPa2VIS2RpR3d3Nmh4Y1ZXeXJDS3c1el9YUmNweDZock1IMXdyRHF1RHN0dExGNWdmWQ?oc=5",
-      "publishedAt": "2026-10-31T05:36:00.000Z",
-      "region": "hollywood",
-      "category": "television",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
       "id": "2lvgpm",
       "headline": "Shah Rukh Khan’s 'King' breaks overseas rights record at Rs 175 crore; eyes to top 'Pathaan', 'Jawan' col",
       "publisher": "The Times of India",
@@ -1054,6 +1158,19 @@
       "publishedAt": "2026-10-31T04:39:42.000Z",
       "region": "hollywood",
       "category": "film",
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
+    },
+    {
+      "id": "1ca8uoy",
+      "headline": "Adnan Sami shares glimpses of Taj Mahal visit with wife and family, calls it 'magnificent monument of love'",
+      "publisher": "The Hawk",
+      "publisherUrl": "https://www.thehawk.in",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMi1wFBVV95cUxOTlctSW1BVU5QUGIzV2MwVjk3WmxYNGJpN0xpbzJSc19BSU5ZWDVHcEU1ZG5CMGFTSlZHbGp0YWc0V25KeE9uUzFRTG1TQXVrWGtpUGdsRVpJd012NEE3b1ZWTVJDQlVfNlVIeWxtZGpKdTFBZGxfU1A3eFBRekoxZHUzY3E1bjZFa2doLU1VNVFrTmdDcVZ1MkhzNWxrZGJQUVBHNlRoNTVsSUpNZVNNS2dUZnpLX0xiSlNTOFg5cExwaEYwUXZoR0diWXE0YkFTUzd6T3Bzdw?oc=5",
+      "publishedAt": "2026-10-31T04:33:43.000Z",
+      "region": "india",
+      "category": "music",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
       "imageUrl": "",
       "imageFallbackUrl": ""
@@ -1111,14 +1228,14 @@
       "imageFallbackUrl": ""
     },
     {
-      "id": "1765uhm",
-      "headline": "Daytime Emmys 2026: General Hospital Wins Best Drama Series For Sixth Straight Year — See Winners List",
-      "publisher": "TVLine",
-      "publisherUrl": "https://www.tvline.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMihwFBVV95cUxORjdpdy12NmVSZFR5MjdBSlZfUkdqdkE5eDlka3g1UlUzd1hxZDVuLUVPeTgtZEN4Tks3TkhZLVFtYkJaaDhFdS1PU2c0MzZKa1JQS2RHWW1kZUpzQTJ6V09nM08zMDFUOGtfdVFiS3NQX2ZjSTVOblNNeTdxVlhOeElWY2h1QWM?oc=5",
-      "publishedAt": "2026-10-31T04:18:00.000Z",
-      "region": "hollywood",
-      "category": "television",
+      "id": "kqxt8f",
+      "headline": "Ranabaali Box Office Collection Day 16",
+      "publisher": "Sacnilk",
+      "publisherUrl": "https://www.sacnilk.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMigwFBVV95cUxNTEd5X2pPMmtpVlRsMlJoZ1RTZy1ya3JTX28yY19pYTJYRkV1Q0FzN0owc3Z2ekhXQU41dVZqN29lZkRvNURobllVX3BqVVFyS0dnYkNhVV9faGVFa0EyM1htdTVLU21KUlFFYXhRUUY4U2JBVTg1TFRSd2pyZ0h5WVpYYw?oc=5",
+      "publishedAt": "2026-10-31T04:21:28.000Z",
+      "region": "global",
+      "category": "box-office",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
       "imageUrl": "",
       "imageFallbackUrl": ""
@@ -1150,19 +1267,6 @@
       "imageFallbackUrl": ""
     },
     {
-      "id": "h3i9e6",
-      "headline": "Diljit Dosanjh hits back over ‘Satluj’ jibes during CJP protest, tells them not to teach Punjabis how to fight; Abhijeet Dipke responds",
-      "publisher": "The Hawk",
-      "publisherUrl": "https://www.thehawk.in",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMi-wFBVV95cUxNd1E1UmFMb3loV25mLTNSUzNwMXZ1STM4RTI5Qnh5OHJ0TTNwRUNWRlk5emNOSUw3VXVhQlYySHNLU3E0TkdhV1JqSnhvUXJEamRIaktZN0RNLVJ4Q3ROZXp6MHlOVmwxZGxnTS1sbVlQRWl4VUlPaUdwcWJtZWxhT0tiUVpwekRuNzFabElCd2Mzek9jdFlkNGd1MzB4bHpERGR1QXpLanU4c1RaR1VlY0xxa1BoeVpEWFgyRlcwV3Q2dGg1VDdZT2JKM0lCamZZZk9LVWI1Ry05anFYaHdIbEZNblEtWnlhUEptZkp6QXY5MzBQMnAxU3FWMA?oc=5",
-      "publishedAt": "2026-10-31T03:38:42.000Z",
-      "region": "india",
-      "category": "music",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
       "id": "mm81uq",
       "headline": "Angel Studios CCO Lays Out “Values-Based” Initiative Banning Sex, Nudity, F-Words & “Misuse Of God’s Name”: “Hollywood Lives In A Bubble”",
       "publisher": "Yahoo",
@@ -1189,27 +1293,14 @@
       "imageFallbackUrl": ""
     },
     {
-      "id": "fhx69x",
+      "id": "1a95i7k",
       "headline": "Daytime Emmy Awards 2026 winners, 'Kelly Clarkson,' 'General Hospital' – See the list",
-      "publisher": "The Olympian",
-      "publisherUrl": "https://www.theolympian.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMicEFVX3lxTE5mMHBrLVVKNFRLZGpWZFl2SkxxRlh4WmhzNkpROFNOaVJ4a2I1eFVTUG96YzEwa0hGMi1CMHpVQUxuRS1CdjhUZjN4VmJVamdSNktCMllxZzVENXJLV21XVm5RYkFMYkNOSFh4MlFWQjY?oc=5",
-      "publishedAt": "2026-10-31T03:07:00.000Z",
+      "publisher": "Yahoo",
+      "publisherUrl": "https://www.yahoo.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMimwFBVV95cUxPWDRTRHdPYWdvMlB0VVN5YWRlclVDX29vTVRueUk2MlNjbTRHalhjWC1QbVpleWVsTWotRWdWSEJvRDNROHNFZDdVRjFQM0xXcl9QVGFwMEMzdk9KR3JEcEY0Tzhia09tQlRGcm9GYjJBZlE5cWp0N2JpcDh0eWdPaEFRTFlZTHlNWXhGbjgwN0Rvb0pzOW02Qmd0TQ?oc=5",
+      "publishedAt": "2026-10-31T03:06:00.000Z",
       "region": "hollywood",
       "category": "television",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
-      "id": "1lyanc8",
-      "headline": "Jailer 2 Box Office Collection Day 16: Rajinikanth Starrer Inches Closer To Rs 800 Crore Worldwide Despite Dip",
-      "publisher": "NDTV Profit",
-      "publisherUrl": "https://www.ndtvprofit.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMiiwJBVV95cUxOZ3IweDBxYUdXTXo3cEpLdVRSM1hpbGE4aHdKSGZGaXF1MkVXUzl6LWRJNkgtOFcyc1hGZjM0TG9KekYwNTVRcUw0eVNWUnl4N2w1aldVRG80YTJnd0FBLVNNX1haem1UbU5NM0g1U29OT2ZEQV9MaTNKNFUzT0VqZHNLWkw4YURNQ1RvbGNVMERsdVQyN1BFUW5oQzhiX3VQLVNDVlgwZ0JRUmp1TkdUNzVjZFk3dUZ0VUNnTjBKYnNQVXREMjI3QXY0MDdyZFQ5aHdJbi0tU254V1p0THVvckk2TTNhWm5OU1MtNlVsdmdSZTdKVUdyLXpJV2U2al81V243N1FfS0ozdGfSAZMCQVVfeXFMTTRDcTB5NG5hWXZpRFBnNnhIZkt4MnI3bnNnWjJsZWxCWlFiWjRwU0ZESXpFbE5aYUsxT1dzSVdDME9hLTJZUkw2WDBaR1NCTHVPUGoxeE05SXRpNDlLVXpLdE1Ral9tZFV3aWxkWnZ3WEkycUVTcE1hb3I1OFFfNFpkTHJhTmtTcERZT0xINFpnTVdtdDQ3ZWRITDVpMlE5WGh2dENhamxHbFpsVmo2eWVfaXg5ZW9hdjVQTjFFb1pGMGR0Nm1jeDRrT2xJcV90VHpxMXRsUVlrS2lBT0d4TV96dExieGkzMXlMcEJHeG8td1pad0ZXOEd6YkxPcVBseG90UnF0ZEZPY3JUZmJVN2dFTEU?oc=5",
-      "publishedAt": "2026-10-31T03:02:53.000Z",
-      "region": "global",
-      "category": "box-office",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
       "imageUrl": "",
       "imageFallbackUrl": ""
@@ -1228,58 +1319,6 @@
       "imageFallbackUrl": ""
     },
     {
-      "id": "m01se2",
-      "headline": "'Aadarsha Kutumbam – House No. 47' box office collection day 1: Venkatesh and Srinidhi Shetty's film reco",
-      "publisher": "The Times of India",
-      "publisherUrl": "https://timesofindia.indiatimes.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMi4AJBVV95cUxQTkJ4bkRlbk1ReENIRmdTTXJuTk03aTZteUFXeVZjdGxjalp6akZLNHNpNS0xQnJRTDExR0d0OW12cnZmckhjQ0lUaV90SnJ1dTktNV8ybkNmRVJ4R3RITUhTSU04MkNRQkxYQXBySkJyaVNkOGJYeDVDNHBOUFhsRGlqQk4yMTVySEpoa0dDbTFjM1NDTW4yU1dLM3pJZURadEt6YTNNZ2ViYm1pOUV5V3RYcUtuNnVoR1JDMGMwUmpuZWdrRTlFaTNZM1hFVzVsN3BIUi1zTWFYY1NWckxRQ2w0bzQxOGkyOEcxY0c4c3pVZ0hwT0lBTjI4bUJtNm43OW4wUWd1bHVYbklTTnVpSVVmMHNUazExQ3E0THRycGt3RnBGWWF5UW1GVktjNjhpRWNfWUJXalJRYnAwZDNTVnNybGR0Y2wwU0EtOVRkSU9MN1RHNTdXVnBDbHpvR2FG0gHmAkFVX3lxTE0zeFZDREotbmRUNEV2UGl1XzhzVXBSbk12djJndGpmZ0w2OFQ2bWltdHFPTW9YbTNxZWZ0OVlEazM5Ymo4eW5nRWRVWUdIMmtxSzNGbzhFZGxKWEd0Rk9VSTZ2MjVpNFFXNnZHaVFlbC1fNzdzQlhxS2xMTE1Hb3RXbjdlWlZBTG9aSTNWMHNJbGNSbHNnam5wel9iSWEydm1MQjFxc1N2SXlmWnQ1OC11bHlPdTNKRWlyOGZHdHJPSnFfVHA0ZUZxZWNKNDlSNDRfWndDNFM4SW1qZHNJTXNfVHhCWDZoc0haSnJhczY5TkFwbmp2WDZ0NEloZUFJZ3dPb0ZtOU9xWWZDb1FuaUJkWFRiTTltQkhqV0RxUHhzV3hiVy1Ma2ZieFdLdnpIWm05XzRNeUZBLWE4aDBabnBjU1dVR1dLcE83Qm42YVZjaGJkTW04UWc5eFBUOHlDRDdmLVFXUlE?oc=5",
-      "publishedAt": "2026-10-31T02:40:00.000Z",
-      "region": "global",
-      "category": "box-office",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
-      "id": "19pd4jx",
-      "headline": "Universal Studios Hollywood Workers Say They Are Still Facing Food and Housing Insecurity",
-      "publisher": "IMDb",
-      "publisherUrl": "https://www.imdb.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMiZkFVX3lxTE55TnhXeWNfSWhWYmFyYlVzaW9qa2lGMUV6Wl9nMlNVMEx2dnBxU2tHNHYtNHpnallSWk53cmd2amVXZDVjRW5BUDlkZF9kcUxvMVNsRWNxbzhyQUFKdUhHS29LTEttQQ?oc=5",
-      "publishedAt": "2026-10-31T02:24:12.000Z",
-      "region": "hollywood",
-      "category": "film",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
-      "id": "18axptz",
-      "headline": "What's new to streaming this week? (Week of Oct. 30, 2026)",
-      "publisher": "Mashable",
-      "publisherUrl": "https://mashable.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMicEFVX3lxTFB0amJoRmU1Wm1oZUtvaGtwcXB6aFRmRDJpY1JCcHRUM05HY3R3cGlwX3BpczJXa2J0UGFSVGNCendhMWhsR1VPNHZyaTlYR0plT2pCTUtBaVBqZGZqdGJNdnhUTjdjSVAxcnUwUDY3WEI?oc=5",
-      "publishedAt": "2026-10-31T02:04:06.000Z",
-      "region": "hollywood",
-      "category": "streaming",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
-      "id": "54hssg",
-      "headline": "List Of Hollywood & Media Layoffs From Paramount To Warner Bros Discovery To CNN & More",
-      "publisher": "Culture.org",
-      "publisherUrl": "https://culture.org",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMixgFBVV95cUxQUlVISmxVMUFWLVk1SDBaQVRGREF4VlNfTlg0X29veHhvQlR1QlV0N0dsRVFYWndJMGV5d21iYWVudnk3bUlCQ3ZLa1dLcW9JSVo5eTdvSUQtUVhLQ3hNNWhlZnNRRV9JVUlVWG5QSWFKd0hJakJkNV9EbXJiMl9YVVdZVzBaWFNXSTlpMTZ6ZE10TkcwRVRSM3R4Tml2UjBJMHkweG1HTDNVVnVwWDVJOVdJMUlRY0otZWpMSktXUHdkamllQkE?oc=5",
-      "publishedAt": "2026-10-31T01:51:58.000Z",
-      "region": "hollywood",
-      "category": "film",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
       "id": "1fpidp8",
       "headline": "2026 Media Educators Conference Offers Instructors an Insiders’ View of the TV Industry",
       "publisher": "Television Academy",
@@ -1288,32 +1327,6 @@
       "publishedAt": "2026-10-31T01:48:37.000Z",
       "region": "global",
       "category": "awards",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
-      "id": "dmggal",
-      "headline": "Daytime Emmy Awards 2026 BEST dressed: The celebrities making a statement on the red carpet",
-      "publisher": "Daily Mail",
-      "publisherUrl": "https://www.dailymail.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMitgFBVV95cUxPT3pTY09hMkVGWU5qYnRyYUxBcTM5WExnYncxTXlvTm5jY1AzWTQ4MEZEOUM1a0ZjTmVVR1lqMzk0c1MycXJTVkhING45Z3Q3MDRySzBnczVtdTJQV1dESVRSWGNjTkdQd3NPX08wTFphTmQzUmdXSnVvV0QxTkhzSGRCUHg0V2QzQ0hTS1NkRWhCSzZZR2UzUThlcUFzQ2dtNnkySi1OWVVLVi10OGhNeXRVdXMxZ9IBuwFBVV95cUxPcldfYjBnRTZ3b1lnSDR4bjdTTFVERUNBeDVYbml4STFQY2l3SWFqbmdRVkZCYl9JMkg2QXJZWnc5R1AwR3U2X09sSFZCMWNjUV94NXJObXctMXN5Q3RNLVEyNUFSNUVYb2k3ekxlVFF5MjRmd3ZtNy1WbUJtS2l2WlJPeDUxV1Myemp0WTExckNsT0N2eGtycWNGNFhNcTRqdEtkY1d4VUxrVjltaHBQdk93SFRNblltNm1B?oc=5",
-      "publishedAt": "2026-10-31T01:40:00.000Z",
-      "region": "hollywood",
-      "category": "celebrity",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
-      "id": "ssmlag",
-      "headline": "National Film & TV Awards announces 2026 Nominees",
-      "publisher": "SA Music News Magazine",
-      "publisherUrl": "https://www.samusicnews.co.za",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMilwFBVV95cUxPQmtiVkR2Xzc5ZUxMbjVaTXpSY05zR01Dc2k4U2RkN2w0RDFBMFlhMmhQRDRuUW1ZaV9EbGl5OU9mZnZoOGhyWnh3cDhGMTc5TlIzcG9kSXN6REdYaWtxYlNjdzE0a2NkZWxpZU54YzVXWU85ZWJCNVE1VjlOSGEwZVI0V1Q1Tmo1RS1NcldSc190b0t2NzdV?oc=5",
-      "publishedAt": "2026-10-31T01:39:04.000Z",
-      "region": "hollywood",
-      "category": "television",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
       "imageUrl": "",
       "imageFallbackUrl": ""
@@ -1340,6 +1353,19 @@
       "publishedAt": "2026-10-31T01:21:58.000Z",
       "region": "global",
       "category": "gaming",
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
+    },
+    {
+      "id": "1pdkyws",
+      "headline": "‘Kelly Clarkson Show,’ ‘General Hospital,’ ‘Beyond the Gates’ Lead Daytime Emmys 2026 Winners",
+      "publisher": "Variety",
+      "publisherUrl": "https://variety.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMiggFBVV95cUxQUWZKY010T1gtVVNDcDNJaWpjOVlacnNFMWZvOWZUazVKbTRQTl9YSlVqWlJJNGVSNlVBdkhKSVhYbExEb1JGVFA0b1RVZm5kdWVUNV9YWGhhSlNhay0zN0lCN0h0Wjh2a2tJZlBxRHBLYmhHZHQyY2tNa2x3N2VPQXN3?oc=5",
+      "publishedAt": "2026-10-31T01:01:00.000Z",
+      "region": "hollywood",
+      "category": "television",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
       "imageUrl": "",
       "imageFallbackUrl": ""
@@ -1397,32 +1423,6 @@
       "imageFallbackUrl": ""
     },
     {
-      "id": "zg0bn9",
-      "headline": "Viral songs may fade, but good songwriters will thrive — Puffy Tee",
-      "publisher": "Head Topics",
-      "publisherUrl": "https://ng.headtopics.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMimAFBVV95cUxQaDZaX2ZiRmo5MHd5MV9qYVJyeEQ4YXRMQWhKZDRrZUpEZzh3am9UNTBVQWI4QzZRc0xfS0MwYW90SkN1TmV6UVdyNjFVSF9tSTJZaERnejg0dEdqb2EzeEFhZGNLRVVjZU03SldoNnhjNkhTY0dEMnJVbjRVWjVhQ1g5M0VMdXhHQ1k0cEdEc0N0b3l4cms1Sg?oc=5",
-      "publishedAt": "2026-10-31T00:03:00.000Z",
-      "region": "global",
-      "category": "music",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
-      "id": "w50qlv",
-      "headline": "Musical Drama Which Way to Premiere at Africa International Film Festival",
-      "publisher": "Head Topics",
-      "publisherUrl": "https://ng.headtopics.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMioAFBVV95cUxOV3o1MEhIdnhMLXlIVjlnN1YzQnRtQXVhQ3RYLWwwN0FEMWZjaU1jV0JFYng2ZlVZN2JUOEhyMGE4ZmZRdEJKeTY4aXFoT2U3Ym01T1lKOHhzekY5Q1dKand3eUVIUkpBOEtPNWNzWTNRVVBPZ1BieG9peHNrN2dxWmFYSERiYzVZZmZCMnVvblhGQWwwMXJrczl5eWE0TGg0?oc=5",
-      "publishedAt": "2026-10-31T00:03:00.000Z",
-      "region": "global",
-      "category": "festivals",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
       "id": "1gdkazv",
       "headline": "SCAD Studio's Message to the Film Industry: ‘We Are Open For Business’",
       "publisher": "Comic Book Resources",
@@ -1436,27 +1436,14 @@
       "imageFallbackUrl": ""
     },
     {
-      "id": "1p3961r",
-      "headline": "U-KNOCK 2026 opens in LA Nov. 3, and Hollywood finance wants to know who owns Korean IP - K-EnterTech Hub",
-      "publisher": "K-EnterTech Hub",
-      "publisherUrl": "https://www.kentertechhub.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMiXEFVX3lxTE5xajFwbGhFT3B6czROYlp4LTIwUTJ2LTA2YVJLaXlWZDdOa1ltMDRjZnI1dUFlV2hVc3hrakZKZjFNU0JFTDVqYnp6TzBMakh1c0tpb3N5NUt3anVU?oc=5",
-      "publishedAt": "2026-10-30T21:40:54.000Z",
+      "id": "1ryfeyk",
+      "headline": "Former Netflix exec Dogan has been consulting for Paramount+ for the last nine months, buying shows including Making Love and Team Moms. Read more below.",
+      "publisher": "Facebook",
+      "publisherUrl": "https://www.facebook.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMi1AFBVV95cUxQZjNDVXdIMUQzd2FuTzJ3RDUtVjVkNDN6S01wa00zMC0tSld1OWg1WkhpNDJTSGJScTJPTWRNeFFtcU1nZnpWZm4xT2k3dG9UZldVWnphQ29lZmg1N1BkZm8zZ2VRSnV0TlN6SXp1eTFQLWExbGlSSW5Uc09ISlgzX0lJY3FyQllNYWZ3Qk1hVWQwMXo5MFVUcXgtQjNNZGE1V21hZmNXZ2NuNzFQazBraHUtU3M3RU4waW1MODNzRUo5UWtDbVlESjBaeWcxSWlkOWp3Yw?oc=5",
+      "publishedAt": "2026-10-30T21:00:20.000Z",
       "region": "global",
       "category": "business",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
-      "id": "872gcj",
-      "headline": "Catherine Zeta-Jones on Why Her New TV Show Made Huge Changes to Beloved Source Material",
-      "publisher": "ComingSoon.net",
-      "publisherUrl": "https://www.comingsoon.net",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMiowFBVV95cUxNajljWlVPX1R3WTJfVm1HN3NWNE93VzJfbmRScjY3dHpTOTdDR3RKSmUxXzRrVktsSzdYUkdBQVBKM040NUZxZF9Nc2lKYlFEZ0hoN0t2akhtT3d6LWk3LXJHdzNyWG5uT0wtZU00MnlRX2lDOFYzbWJ0bms5c2I3YnlEV0lBVjNxOVNwWUdXRHg3RHJSaEltSTFHTGZaSkh5U2s00gGjAUFVX3lxTE1qOWNaVU9fVHdZMl9WbUc3c1Y0T3dXMl9uZFJyNjd0elM5N0NHdEpKZTFfNGtWS2xLN1hSR0FBUEozTjQ1RnFkX01zaUpiUURnSGg3S3ZqSG1Pd3otaTctckd3M3JYbm5PTC1lTTQyeVFfaUM4VjNtYnRuazlzYjdieURXSUFWM3E5U3BZR1dEeDdEclJoSW1JMUdMZlpKSHlTazQ?oc=5",
-      "publishedAt": "2026-10-30T21:27:14.000Z",
-      "region": "global",
-      "category": "gaming",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
       "imageUrl": "",
       "imageFallbackUrl": ""
@@ -1527,6 +1514,19 @@
       "imageFallbackUrl": ""
     },
     {
+      "id": "1djyt8e",
+      "headline": "Elke Sommer, European Film Sex Symbol and 1960s Hollywood Star, Dies",
+      "publisher": "ColombiaOne.com",
+      "publisherUrl": "https://colombiaone.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMiYkFVX3lxTE5aTE1rX2tjbUFWQ3UxaUdRMVlPVVJ0MTJOWWZPNk45Y09CaVUtUVd3eHQ3bG9Kd2J0ZGV1WWNCWHFoaVpnQURTSFdKYkMyc0ttNXBqSXhmWU5FM2RhYU1GM3Nn?oc=5",
+      "publishedAt": "2026-10-30T12:58:32.000Z",
+      "region": "europe",
+      "category": "film",
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
+    },
+    {
       "id": "ds53t2",
       "headline": "Veteran Nollywood actress bags major achievement at prestigious US university",
       "publisher": "Yen News",
@@ -1540,12 +1540,12 @@
       "imageFallbackUrl": ""
     },
     {
-      "id": "1nj5jyk",
-      "headline": "A Chef Caught in a Middle East War Is China’s Latest Hit",
-      "publisher": "Sixth Tone",
-      "publisherUrl": "https://www.sixthtone.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMiT0FVX3lxTE4tZ2tjVHBVNG9nb0pCZU1YTTUxOVBpTXlzeUVZbmVCM1dMV001V3BHWkI4ci1WZ09mdjUweEN5YS1nOEFMZ2w1MkFsRTduT3c?oc=5",
-      "publishedAt": "2026-10-29T21:00:21.000Z",
+      "id": "hbovxs",
+      "headline": "The Fix movie review: Liam Neeson, Zachary Levi’s geopolitical thriller loses the plot",
+      "publisher": "The Indian Express",
+      "publisherUrl": "https://indianexpress.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMi6gFBVV95cUxPMnRxSTdmeXRrZEhZUXFjdW51SzZxS1o5QnAtSmJlRDN1c3VQZC1xUGFTRmpEdG9sSldkUDRDaVRNekxteHBLSHhMM3RPSzNBcVhaOHl3cDZ2QWczejA4Wnd4TlBLSHNPT2JneWtuTVFKbTd3NkJIQXhKVWprcWVtZDUwdkExT3J3cnFzTXFMc25wZ0pWMHBOSXlnWFdZRFA4M3JaUmZSYVNWUUFYWWY0MVNWVGd5THpRY2x6TXRFaEkxNFdqMWtJMHhWUDVpREhDZ2FHM2U5X0ZYUkFGLTMwMlo0UHVlV2FWTWfSAfABQVVfeXFMTVk2OUV2N1pnX0YxcGVWOGdEdnNYakRWSWhNOWZQbHpvOTNRaGRvS2JSRngwX0x2ODNqNHdQam8xLXUweDlNdm9UNUJFWDAzaEplbnFhZl9nQmVqcjJfaTFWaFBMeDdQMXB1dHFReGt3S3R2SUpoVzlkUVFqLTVfbmdNa2ZDN1Vyb2xyLUlPdmoyY1J4bmZTSkdZRS10Xy1HaUw2enhKUkVGckREcWI0aHNiOGU1YmpyQTRXUTM4MjJBY01fQTZGQ01PSVdwZXdfdWFTWXIzVnZwR2dTNDNFRTkyTmVYT2s2VUY4OUdmTXgt?oc=5",
+      "publishedAt": "2026-10-30T10:39:28.000Z",
       "region": "middle-east",
       "category": "film",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
