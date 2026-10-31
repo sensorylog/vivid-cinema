@@ -17,6 +17,8 @@ on:
       - "tests/cloudflare-pages-config.test.mjs"
       - "package.json"
       - "_headers"
+      - "service-worker.js"
+      - "tests/service-worker.test.mjs"
 
 permissions:
   contents: read
