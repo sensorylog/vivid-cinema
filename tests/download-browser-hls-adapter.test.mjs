@@ -100,6 +100,7 @@ test("stores an explicitly authorized HLS VOD asset in OPFS and exposes a local 
   const adapter = createBrowserHlsDownloadAdapter({
     resolve: async () => ({ type: "hls", offlineAllowed: true, url: "https://media.example.test/master.m3u8" }),
     allowedHosts: ["media.example.test"],
+    maxHeight: 720,
     storage: opfs.storage,
     fetchImpl: async url => {
       calls.push(url);
