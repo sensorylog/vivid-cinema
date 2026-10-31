@@ -70,6 +70,7 @@ async function switchOwner(user) {
   unsubscribe?.();
   unsubscribe = null;
   try { await manager?.adapter?.dispose?.(); } catch {}
+  try { await manager?.persistence?.close?.(); } catch {}
   activeOwner = owner;
   byId("offline-owner").textContent = user?.uid ? "Signed-in account" : "Guest library";
   jobsNode.innerHTML = "";
