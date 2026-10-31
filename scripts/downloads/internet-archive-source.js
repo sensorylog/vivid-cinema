@@ -24,7 +24,7 @@ function approvedRights(metadata) {
 function videoFiles(metadata) {
   return (Array.isArray(metadata?.files) ? metadata.files : [])
     .filter(file => file && typeof file.name === "string" && VIDEO_EXT.test(file.name) &&
-      file.source !== "metadata" && file.private !== "true" && Number(file.size) > 0)
+      file.source !== "metadata" && file.private !== true && file.private !== "true" && !file.name.startsWith("/") && !file.name.split("/").some(part => !part || part === "." || part === ".." || part.includes("\\\\")) && Number(file.size) > 0)
     .map(file => ({
       name: file.name,
       size: Number(file.size),
