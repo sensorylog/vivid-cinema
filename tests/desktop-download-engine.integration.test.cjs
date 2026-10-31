@@ -101,6 +101,13 @@ test("desktop engine downloads a real video file from a local seeded torrent", {
     });
 
     await engine.ready;
+    // Keep this fixture isolated: the test validates tracker discovery and TCP transfer,
+    // not public DHT routing or external network access.
+    if (engine.client.dht) {
+      const dht = engine.client.dht;
+      await new Promise(resolve => dht.destroy(resolve));
+      engine.client.dht = null;
+    }
     engine.searchResults.set("local-fixture", {
       title: "Vivid integration fixture",
       provider: "local-test",
