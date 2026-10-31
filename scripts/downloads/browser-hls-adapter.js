@@ -69,7 +69,7 @@ export function parseHlsPlaylist(text, baseUrl, { maxHeight = 1080, allowedHosts
     const attrs = parseAttributes(line.slice(line.indexOf(":") + 1));
     if (attrs.METHOD !== "NONE") throw new Error("Encrypted HLS playlists are not supported by this browser offline adapter.");
   }
-  if (lines.some(line => line.startsWith("#EXT-X-I-FRAME-STREAM-INF:") || /^#EXT-X-MEDIA:.*TYPE=(?:"(?:AUDIO|SUBTITLES)"|(?:AUDIO|SUBTITLES)).*URI=/.test(line))) {\n    throw new Error("HLS alternate audio and I-frame playlists are not supported by this browser offline adapter.");\n  }\n  if (lines.some(line => line.startsWith("#EXT-X-BYTERANGE:"))) {
+  if (lines.some(line => line.startsWith("#EXT-X-DEFINE:"))) {\n    throw new Error("HLS playlist variable substitution is not supported.");\n  }\n  if (lines.some(line => line.startsWith("#EXT-X-I-FRAME-STREAM-INF:") || /^#EXT-X-MEDIA:.*TYPE=(?:"(?:AUDIO|SUBTITLES)"|(?:AUDIO|SUBTITLES)).*URI=/.test(line))) {\n    throw new Error("HLS alternate audio and I-frame playlists are not supported by this browser offline adapter.");\n  }\n  if (lines.some(line => line.startsWith("#EXT-X-BYTERANGE:"))) {
     throw new Error("HLS byte-range playlists are not supported by this browser offline adapter.");
   }
 
@@ -82,7 +82,7 @@ export function parseHlsPlaylist(text, baseUrl, { maxHeight = 1080, allowedHosts
     if (!line) { output.push(""); continue; }
     if (line.startsWith("#EXT-X-MAP:")) {
       const attrs = parseAttributes(line.slice(line.indexOf(":") + 1));
-      if (!attrs.URI) throw new Error("The HLS initialization map is missing its URI.");
+      if (!attrs.URI) throw new Error("The HLS initialization map is missing its URI.");\n      if (attrs.BYTERANGE) throw new Error("HLS byte-range initialization maps are not supported.");
       const path = "segments/init-" + String(mapIndex++).padStart(5, "0") + ".bin";
       resources.push({ uri: attrs.URI, path, kind: "map" });
       output.push(line.replace(/URI="[^"]*"/, 'URI="' + path + '"'));
@@ -203,10 +203,8 @@ export function createBrowserHlsDownloadAdapter({
         if (parsed.kind !== "media") throw new Error("Nested HLS master playlists are not supported.");
       }
       if (parsed.resources.length > maxSegments) throw new Error("The HLS playlist contains too many segments.");
-      for (const resource of parsed.resources) resource.baseUrl = parsed.kind === "media" ? (parsed.baseUrl || startUrl.href) : startUrl.href;
-      // Resolve all resources against the selected media playlist, not the master.
-      const mediaBase = parsed.mediaUrl || startUrl.href;
-      for (const resource of parsed.resources) resource.baseUrl = mediaBase;
+      // Resolve every segment against the selected media playlist, not the master.
+      for (const resource of parsed.resources) resource.baseUrl = parsed.mediaUrl || startUrl.href;
 
       const directory = await jobDirectory(id, true);
       const progress = { bytes: 0, totalBytes: null, onProgress };
