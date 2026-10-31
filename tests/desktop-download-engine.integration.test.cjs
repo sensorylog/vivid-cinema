@@ -150,12 +150,50 @@ test("desktop engine downloads a video-extension payload from a local seeded tor
     }), 10000, "download job start");
     const job = engine.jobs.get(started.id);
     assert.ok(job, "engine should register a download job");
+    const torrent = job.torrent;
+    const trackerEvents = { start: 0, update: 0 };
+    tracker.on("start", () => { trackerEvents.start += 1; });
+    tracker.on("update", () => { trackerEvents.update += 1; });
+    seedTorrent.on("wire", (wire, address) => {
+      console.log("[vivid-integration] seeder peer connected", address || "unknown");
+    });
+    torrent?.on("wire", (wire, address) => {
+      console.log("[vivid-integration] leecher peer connected", address || "unknown");
+    });
+    torrent?.on("warning", warning => {
+      console.log("[vivid-integration] leecher warning", warning?.message || String(warning));
+    });
 
-    await waitFor(
-      () => ["completed", "failed"].includes(job.status),
-      30000,
-      "the seeded video transfer to complete"
-    );
+    try {
+      await waitFor(
+        () => ["completed", "failed"].includes(job.status),
+        30000,
+        "the seeded video transfer to complete"
+      );
+    } catch (error) {
+      const liveTorrent = job.torrent;
+      console.error("[vivid-integration] timeout state", JSON.stringify({
+        job: engine.snapshot(job),
+        torrent: liveTorrent ? {
+          ready: liveTorrent.ready,
+          numPeers: liveTorrent.numPeers,
+          downloaded: liveTorrent.downloaded,
+          received: liveTorrent.received,
+          length: liveTorrent.length,
+          progress: liveTorrent.progress,
+          announce: liveTorrent.announce,
+          wireCount: liveTorrent.wires?.length ?? null
+        } : null,
+        seeder: {
+          ready: seedTorrent.ready,
+          numPeers: seedTorrent.numPeers,
+          uploaded: seedTorrent.uploaded,
+          length: seedTorrent.length
+        },
+        trackerEvents
+      }));
+      throw error;
+    }
 
     console.log("[vivid-integration] stage: transfer terminal", job.status, JSON.stringify(engine.snapshot(job)));
     assert.equal(job.status, "completed", "engine should complete the local torrent: " + JSON.stringify(engine.snapshot(job)));
