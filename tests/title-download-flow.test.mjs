@@ -28,6 +28,7 @@ test("title download action opens the native Vivid Offline library", async () =>
   assert.match(engine, /destroyStore: false/);
   assert.match(engine, /action === "resume"/);
   assert.match(engine, /rescanFiles/);
+  assert.match(engine, /job\\.files = \\[\\.\\.\\.torrent\\.files\\]/);
   assert.match(engine, /needsRescan/);
   assert.match(offline, /desktop-search-form/);
   assert.match(offline, /engine\.mediaUrl\(job\.id\)/);
@@ -37,6 +38,7 @@ test("title download action opens the native Vivid Offline library", async () =>
   assert.match(offline, /offline-seek/);
   assert.match(offline, /offline-fullscreen/);
   assert.match(offline, /offline-speed/);
+  assert.match(offline, /play-file/);
   assert.match(offline, /vivid:offline-position/);
   assert.match(page, /desktop-search-form/);
   assert.match(page, /offline-player/);
