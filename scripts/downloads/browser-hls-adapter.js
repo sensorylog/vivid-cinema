@@ -71,9 +71,11 @@ export function parseHlsPlaylist(text, baseUrl, { maxHeight = 1080, allowedHosts
   }
   if (lines.some(line => line.startsWith("#EXT-X-DEFINE:"))) {
     throw new Error("HLS playlist variable substitution is not supported.");
-  }\n  if (lines.some(line => line.startsWith("#EXT-X-I-FRAME-STREAM-INF:") || /^#EXT-X-MEDIA:.*TYPE=(?:"(?:AUDIO|SUBTITLES)"|(?:AUDIO|SUBTITLES)).*URI=/.test(line))) {
+  }
+  if (lines.some(line => line.startsWith("#EXT-X-I-FRAME-STREAM-INF:") || /^#EXT-X-MEDIA:.*TYPE=(?:"(?:AUDIO|SUBTITLES)"|(?:AUDIO|SUBTITLES)).*URI=/.test(line))) {
     throw new Error("HLS alternate audio and I-frame playlists are not supported by this browser offline adapter.");
-  }\n  if (lines.some(line => line.startsWith("#EXT-X-BYTERANGE:"))) {
+  }
+  if (lines.some(line => line.startsWith("#EXT-X-BYTERANGE:"))) {
     throw new Error("HLS byte-range playlists are not supported by this browser offline adapter.");
   }
 
