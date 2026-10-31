@@ -34,7 +34,7 @@ function fakeOPFS() {
   };
   return {
     files,
-    storage: { async getDirectory() { return { async getDirectoryHandle() { return directory; } }; }
+    storage: { async getDirectory() { return { async getDirectoryHandle() { return directory; } }; } }
   };
 }
 function videoResponse(chunks = [new Uint8Array([1, 2]), new Uint8Array([3, 4])], headers = {}) {
