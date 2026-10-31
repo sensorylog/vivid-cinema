@@ -8,8 +8,8 @@ function normalizeBaseUrl(value) {
   if (url.protocol !== "https:" || url.username || url.password || url.search || url.hash) {
     throw new TypeError("FlixQuest API must use a clean HTTPS base URL.");
   }
-  url.pathname = url.pathname.replace(/\/+$/, "");
-  if (!url.pathname.endsWith("/api/v2")) url.pathname += "/api/v2";
+  const path = url.pathname.replace(/\/+$/, "");
+  url.pathname = path.endsWith("/api/v2") ? path : path + "/api/v2";
   return url;
 }
 
@@ -19,15 +19,19 @@ function safeObject(value) {
 
 function explicitOfflineAsset(link) {
   const item = safeObject(link);
-  const url = typeof item.downloadUrl === "string" ? item.downloadUrl :
+  // Never infer download permission from the ordinary playback "url" field.
+  const rawUrl = typeof item.downloadUrl === "string" ? item.downloadUrl :
     typeof item.download_url === "string" ? item.download_url : "";
   const mimeType = typeof item.mimeType === "string" ? item.mimeType :
     typeof item.mime_type === "string" ? item.mime_type : "";
-  // A playable stream is not evidence of offline-download permission. Only
-  // an explicit API download field and affirmative offline flag qualify.
   if (item.offlineDownload !== true && item.offline_download !== true) return null;
-  if (!url || !DIRECT_VIDEO_MIME.test(mimeType)) return null;
-  return { url, mimeType };
+  if (!rawUrl || !DIRECT_VIDEO_MIME.test(mimeType)) return null;
+
+  let downloadUrl;
+  try { downloadUrl = new URL(rawUrl); } catch { return null; }
+  if (downloadUrl.protocol !== "https:" || downloadUrl.username || downloadUrl.password ||
+      downloadUrl.hash || downloadUrl.search) return null;
+  return { url: downloadUrl.href, mimeType };
 }
 
 export function createFlixQuestApi({
@@ -42,7 +46,7 @@ export function createFlixQuestApi({
   }
 
   async function request(path, query = {}, { signal } = {}) {
-    const url = new URL(root.href.replace(/\/$/, "") + path);
+    const url = new URL(path.replace(/^\/+/, ""), root.href.endsWith("/") ? root : new URL(root.href + "/"));
     for (const [key, value] of Object.entries(query)) {
       if (value !== undefined && value !== null) url.searchParams.set(key, String(value));
     }
@@ -60,6 +64,9 @@ export function createFlixQuestApi({
         cache: "no-store",
         signal: controller.signal
       });
+      if (response.redirected || (response.url && new URL(response.url).origin !== root.origin)) {
+        throw new Error("FlixQuest API redirected outside its configured origin.");
+      }
       let body = {};
       try { body = safeObject(await response.json()); } catch {}
       if (!response.ok || body.success === false) {
@@ -74,14 +81,14 @@ export function createFlixQuestApi({
   }
 
   async function getProviders(options = {}) {
-    const body = await request("/providers", {}, options);
+    const body = await request("providers", {}, options);
     if (!Array.isArray(body.providers)) throw new Error("FlixQuest returned an invalid provider list.");
     return body.providers.filter(p => safeObject(p).enabled === true && typeof p.id === "string")
       .map(p => ({ id: p.id, name: typeof p.name === "string" ? p.name : p.id }));
   }
 
   async function getProviderStatus(options = {}) {
-    return request("/providers/status", {}, options);
+    return request("providers/status", {}, options);
   }
 
   async function getStreams({ mediaType, tmdbId, providerId, season, episode, full = false, signal } = {}) {
@@ -89,13 +96,13 @@ export function createFlixQuestApi({
     if (!/^\d{1,12}$/.test(String(tmdbId ?? ""))) throw new TypeError("A valid TMDB ID is required.");
     if (!/^[a-zA-Z0-9_-]{1,80}$/.test(String(providerId ?? ""))) throw new TypeError("A valid provider ID is required.");
     const query = { tmdbId, provider: providerId, full: full ? "true" : undefined };
-    let path = "/stream-movie";
+    let path = "stream-movie";
     if (mediaType === "tv") {
       if (!Number.isInteger(Number(season)) || Number(season) < 0 ||
           !Number.isInteger(Number(episode)) || Number(episode) < 0) {
         throw new TypeError("A valid TV season and episode are required.");
       }
-      path = "/stream-tv";
+      path = "stream-tv";
       query.season = season;
       query.episode = episode;
     }
