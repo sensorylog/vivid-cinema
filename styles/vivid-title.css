@@ -875,3 +875,26 @@ body.vivid-title-page .vivid-title-backdrop-image{object-fit:cover;object-positi
 body.vivid-title-page .vivid-title-copy h1{font-family:Georgia,"Times New Roman",serif;letter-spacing:-.05em}
 body.vivid-title-page :where(.vivid-title-kicker,.vivid-section-heading>div>span){color:#c7ff55}
 body.vivid-title-page :where(.vivid-title-actions .vivid-button:focus-visible,.vivid-title-nav a:focus-visible){outline:2px solid #c7ff55;outline-offset:3px}
+
+
+/* Vivid offline download picker */
+.vivid-download-modal{position:fixed;inset:0;z-index:6200;display:grid;place-items:center;padding:18px;background:rgba(2,4,8,.78);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
+.vivid-download-dialog{position:relative;width:min(560px,100%);max-height:min(86dvh,760px);overflow:auto;padding:28px;border:1px solid rgba(255,255,255,.12);border-radius:24px;background:linear-gradient(155deg,#171b24,#090b10 72%);box-shadow:0 28px 100px rgba(0,0,0,.62);color:#f6f7fa}
+.vivid-download-dialog>p:first-of-type{margin:0 0 8px;color:#a9b4c5;font-size:.66rem;font-weight:800;letter-spacing:.18em}
+.vivid-download-dialog h2{margin:0 38px 20px 0;font-size:clamp(1.45rem,5vw,2rem);letter-spacing:-.04em}
+.vivid-download-close{position:absolute;top:16px;right:16px;width:38px;height:38px;border:1px solid rgba(255,255,255,.12);border-radius:12px;background:rgba(255,255,255,.06);color:#fff;font-size:1.4rem;cursor:pointer}
+.vivid-download-selection{display:flex;gap:12px;margin:0 0 16px}
+.vivid-download-selection label{display:grid;gap:6px;flex:1;color:#9ca6b5;font-size:.72rem}
+.vivid-download-selection select{width:100%;min-height:44px;padding:0 12px;border:1px solid rgba(255,255,255,.13);border-radius:12px;background:#111722;color:#fff;font:inherit}
+.vivid-download-selection>p{margin:0;color:#dce1e9;font-weight:650}
+.vivid-download-search{display:flex;align-items:center;justify-content:center;gap:9px;width:100%;min-height:48px;border:1px solid rgba(154,190,255,.3);border-radius:14px;background:linear-gradient(135deg,#315caa,#24447f);color:#fff;font:inherit;font-weight:750;cursor:pointer;transition:filter .18s ease,transform .18s ease}
+.vivid-download-search:hover{filter:brightness(1.12);transform:translateY(-1px)}
+.vivid-download-search:disabled{opacity:.65;cursor:wait;transform:none}
+.vivid-download-options{display:grid;gap:9px;margin-top:14px;max-height:38dvh;overflow:auto}
+.vivid-download-options>p{margin:0;padding:16px;border:1px solid rgba(255,255,255,.07);border-radius:13px;background:rgba(255,255,255,.035);color:#aeb7c4;font-size:.84rem;line-height:1.55}
+.vivid-download-option{display:flex;align-items:center;justify-content:space-between;gap:14px;width:100%;padding:14px 15px;border:1px solid rgba(255,255,255,.1);border-radius:14px;background:rgba(255,255,255,.045);color:#fff;text-align:left;cursor:pointer}
+.vivid-download-option:hover{border-color:rgba(143,183,255,.48);background:rgba(72,112,184,.16)}
+.vivid-download-option strong{font-size:.9rem}
+.vivid-download-option span{color:#9ca8b8;font-size:.72rem;text-align:right}
+.vivid-download-note{margin:14px 0 0;color:#737f90;font-size:.7rem;line-height:1.5}
+@media(max-width:520px){.vivid-download-modal{align-items:end;padding:0}.vivid-download-dialog{width:100%;max-height:90dvh;padding:24px 18px calc(22px + env(safe-area-inset-bottom));border-radius:24px 24px 0 0}.vivid-download-selection{gap:8px}.vivid-download-option{padding:13px}}
