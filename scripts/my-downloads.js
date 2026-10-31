@@ -42,7 +42,7 @@ function render(jobs) {
     const actions=[];
     if(["queued","downloading"].includes(job.status))actions.push('<button type="button" data-action="pause" data-id="'+escapeHtml(job.id)+'">Stop</button>');
     if(["paused","failed"].includes(job.status))actions.push('<button type="button" data-action="retry" data-id="'+escapeHtml(job.id)+'">Restart</button>');
-    if(job.status==="completed"&&job.asset?.uri)actions.push('<button type="button" data-action="play" data-id="'+escapeHtml(job.id)+'">Play</button>');
+    if(job.status==="completed"&&job.asset?.uri){actions.push('<button type="button" data-action="play" data-id="'+escapeHtml(job.id)+'">Play</button>');actions.push('<button type="button" data-action="export" data-id="'+escapeHtml(job.id)+'">Save file</button>');}
     if(job.status!=="cancelled"&&job.status!=="completed")actions.push('<button type="button" data-action="cancel" data-id="'+escapeHtml(job.id)+'">Cancel</button>');
     if(!["queued","downloading"].includes(job.status))actions.push('<button type="button" data-action="remove" data-id="'+escapeHtml(job.id)+'">Remove</button>');
     return '<article class="offline-job"><div><div class="offline-job-title">'+escapeHtml(labelFor(job))+'</div><div class="offline-job-meta">'+escapeHtml(details)+'</div>'+
