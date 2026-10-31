@@ -93,3 +93,58 @@ test("controller requires an adapter and a video element", () => {
   assert.throws(() => createOfflinePlaybackController({ video: makeVideo() }), /adapter/);
   assert.throws(() => createOfflinePlaybackController({ adapter: { getAssetUrl() {} } }), /video element/);
 });
+test("offline HLS uses Hls.js for local blob playlists and releases its resources on stop", async () => {
+  const originalHls = globalThis.Hls;
+  const revoked = [];
+  const previousRevoke = URL.revokeObjectURL;
+  const instances = [];
+  class FakeHls {
+    static isSupported() { return true; }
+    constructor(config) { this.config = config; this.loaded = null; this.destroyed = false; instances.push(this); }
+    attachMedia(video) { this.video = video; }
+    loadSource(url) { this.loaded = url; }
+    destroy() { this.destroyed = true; }
+  }
+  globalThis.Hls = FakeHls;
+  URL.revokeObjectURL = value => revoked.push(value);
+  const video = makeVideo();
+  const asset = { uri: "opfs-hls://vivid-cinema-downloads/hls_job", mimeType: "application/vnd.apple.mpegurl", kind: "hls" };
+  const adapter = {
+    async getAssetUrl() { return "blob:https://vivid.test/offline-manifest"; },
+    revokeAssetUrl(value) { revoked.push(value.uri); }
+  };
+  try {
+    const controller = createOfflinePlaybackController({ adapter, video });
+    assert.equal(await controller.play(asset), true);
+    assert.equal(instances[0].loaded, "blob:https://vivid.test/offline-manifest");
+    assert.throws(() => instances[0].config.fetchSetup({ url: "https://media.example.test/segment.ts" }, {}), /non-local media resource/);
+    await controller.stop();
+    assert.equal(instances[0].destroyed, true);
+    assert.ok(revoked.includes(asset.uri));
+    assert.equal(video.src, "");
+  } finally {
+    if (originalHls === undefined) delete globalThis.Hls;
+    else globalThis.Hls = originalHls;
+    URL.revokeObjectURL = previousRevoke;
+  }
+});
+
+test("offline HLS falls back to native playback when Hls.js is unsupported", async () => {
+  const originalHls = globalThis.Hls;
+  class UnsupportedHls { static isSupported() { return false; } }
+  globalThis.Hls = UnsupportedHls;
+  const video = makeVideo();
+  video.canPlayType = type => type === "application/vnd.apple.mpegurl" ? "maybe" : "";
+  const controller = createOfflinePlaybackController({
+    video,
+    adapter: { async getAssetUrl() { return "blob:https://vivid.test/offline-native"; } }
+  });
+  try {
+    assert.equal(await controller.play({ uri: "opfs-hls://vivid-cinema-downloads/native", mimeType: "application/vnd.apple.mpegurl" }), true);
+    assert.equal(video.src, "blob:https://vivid.test/offline-native");
+  } finally {
+    await controller.stop();
+    if (originalHls === undefined) delete globalThis.Hls;
+    else globalThis.Hls = originalHls;
+  }
+});
