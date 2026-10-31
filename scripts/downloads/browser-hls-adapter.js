@@ -216,11 +216,13 @@ export function createBrowserHlsDownloadAdapter({
       const directory = await jobDirectory(id, true);
       const progress = { bytes: 0, totalBytes: null, onProgress };
       let cursor = 0;
+      let transferError = null;
       const workers = Array.from({ length: Math.min(limit, parsed.resources.length) }, async () => {
-        while (cursor < parsed.resources.length) {
+        while (cursor < parsed.resources.length && !transferError) {
           if (signal?.aborted) throw new DOMException("Download aborted.", "AbortError");
           const resource = parsed.resources[cursor++];
-          await downloadResource(resource, directory, headers, signal, progress);
+          try { await downloadResource(resource, directory, headers, signal, progress); }
+          catch (error) { transferError ||= error; throw error; }
         }
       });
       try {
@@ -250,6 +252,7 @@ export function createBrowserHlsDownloadAdapter({
       const id = match[1], directory = await jobDirectory(id, false);
       const playlistFile = await readFile(directory, "index.m3u8");
       let playlist = await playlistFile.text();
+      for (const previous of activeObjectUrls.get(id) || []) URL.revokeObjectURL(previous);
       const urls = [];
       const paths = new Set();
       for (const line of playlist.split(/\r?\n/)) {
