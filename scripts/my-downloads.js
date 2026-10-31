@@ -9,7 +9,7 @@ const jobsNode = byId("offline-jobs");
 const messageNode = byId("offline-message");
 const playerSection = byId("offline-player-section");
 const video = byId("offline-player");
-let manager = null, playback = null, unsubscribe = null, activeOwner = null, generation = 0;
+let manager = null, playback = null, activeAdapter = null, unsubscribe = null, activeOwner = null, generation = 0;
 
 function escapeHtml(value) {
   return String(value ?? "").replace(/[&<>"']/g, char => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[char]);
@@ -66,7 +66,7 @@ async function switchOwner(user) {
     const adapter = directAdapter;
     const nextManager=new DownloadManager({persistence,adapter,concurrency:1}); await nextManager.hydrate();
     if(run!==generation){await persistence.close();return;}
-    manager=nextManager; playback=createOfflinePlaybackController({adapter,video}); unsubscribe=manager.subscribe(render);
+    manager=nextManager; activeAdapter=adapter; playback=createOfflinePlaybackController({adapter,video}); unsubscribe=manager.subscribe(render);
     await consumePendingDownload();
   }catch(error){
     if(run!==generation)return;
@@ -94,6 +94,18 @@ jobsNode.addEventListener("click",async event=>{
     if(action==="retry")await manager.retry(id);
     if(action==="cancel")await manager.cancel(id);
     if(action==="remove")await manager.remove(id);
+    if(action==="export"){
+      const job=manager.snapshot().find(item=>item.id===id); if(!job?.asset?.uri)throw new Error("This completed download has no local file reference.");
+      if(typeof activeAdapter?.getAssetUrl!=="function")throw new Error("The saved file cannot be exported by this browser.");
+      const fileUrl=await activeAdapter.getAssetUrl(job.asset);
+      const media=job.media||{}, mime=String(job.asset.mimeType||"video/mp4");
+      const extension=({"video/mp4":"mp4","video/webm":"webm","video/quicktime":"mov","video/ogg":"ogv"})[mime]||"mp4";
+      const episode=media.season==null?"":" - S"+String(media.season).padStart(2,"0")+"E"+String(media.episode).padStart(2,"0");
+      const filename=(String(media.title||"Vivid Cinema")+episode).replace(/[<>:"/\\|?*\\u0000-\\u001f]/g,"-").trim()+"."+extension;
+      const link=document.createElement("a");link.href=fileUrl;link.download=filename;link.rel="noopener";document.body.appendChild(link);link.click();link.remove();
+      window.setTimeout(()=>URL.revokeObjectURL(fileUrl),120000);
+      messageNode.textContent="Your video file is being saved by the browser.";
+    }
     if(action==="play"){
       const job=manager.snapshot().find(item=>item.id===id); if(!job?.asset?.uri)throw new Error("This completed download has no local file reference.");
       byId("offline-player-title").textContent=labelFor(job);playerSection.hidden=false;await playback.play(job.asset);playerSection.scrollIntoView({behavior:"smooth",block:"start"});
