@@ -41,6 +41,20 @@ test("duplicate movie-quality jobs are not queued twice", async () => {
   assert.equal(a.id, b.id);
 });
 
+test("authorized source identifiers and filenames are retained without storing source URLs", async () => {
+  const { manager } = setup();
+  await manager.hydrate();
+  const job = await manager.enqueue({
+    id: 12345, media_type: "movie", title: "Archive Film",
+    source_id: "archive_film_1930", source_file: "archive_film.mp4"
+  });
+  await tick();
+  const saved = manager.snapshot().find(item => item.id === job.id);
+  assert.equal(saved.media.source_id, "archive_film_1930");
+  assert.equal(saved.media.source_file, "archive_film.mp4");
+  assert.equal(JSON.stringify(saved).includes("https://"), false);
+});
+
 test("TV episodes retain distinct season and episode identity", async () => {
   const { manager } = setup();
   await manager.hydrate();
