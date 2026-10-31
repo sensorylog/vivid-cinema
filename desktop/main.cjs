@@ -4,6 +4,7 @@ const http = require("node:http");
 const fs = require("node:fs");
 const path = require("node:path");
 const crypto = require("node:crypto");
+const { DesktopDownloadEngine } = require("./download-engine.cjs");
 const { Readable } = require("node:stream");
 protocol.registerSchemesAsPrivileged([{ scheme: "vivid-media", privileges: { standard: true, secure: true, supportFetchAPI: true, corsEnabled: true, stream: true } }]);
 
@@ -94,23 +95,6 @@ function createLocalServer(root) {
 let localServer;
 let localOrigin;
 let downloadEngine;
-let downloadEnginePromise;
-async function getDownloadEngine() {
-  if (downloadEngine) return downloadEngine;
-  if (!downloadEnginePromise) {
-    downloadEnginePromise = Promise.resolve().then(() => {
-      // WebTorrent and provider discovery are substantial dependencies. Keep
-      // them out of normal startup and load them only when downloads are used.
-      const { DesktopDownloadEngine } = require("./download-engine.cjs");
-      downloadEngine = new DesktopDownloadEngine({ app, BrowserWindow, dialog, shell });
-      return downloadEngine;
-    }).catch(error => {
-      downloadEnginePromise = null;
-      throw error;
-    });
-  }
-  return downloadEnginePromise;
-}
 const mediaToken = crypto.randomBytes(32).toString("hex");
 const HOSTED_APP_URL = "https://vivid-cinema.pages.dev/home.html";
 const HOSTED_APP_ORIGIN = new URL(HOSTED_APP_URL).origin;
@@ -216,33 +200,36 @@ function configureOfflineMediaProtocol() {
   });
 }
 function configureDownloadEngine() {
-  ipcMain.handle("vivid-download-search", async (event, query) => {
+  // Match the known-working 1.0.28 lifecycle: create the WebTorrent client
+  // during desktop startup, before the renderer can issue a download request.
+  downloadEngine = new DesktopDownloadEngine({ app, BrowserWindow, dialog, shell });
+  ipcMain.handle("vivid-download-search", (event, query) => {
     if (!isTrustedDownloadSender(event)) throw new Error("Untrusted download request");
-    return (await getDownloadEngine()).search(query);
+    return downloadEngine.search(query);
   });
-  ipcMain.handle("vivid-download-start", async (event, result, media) => {
+  ipcMain.handle("vivid-download-start", (event, result, media) => {
     if (!isTrustedDownloadSender(event)) throw new Error("Untrusted download request");
-    return (await getDownloadEngine()).start(result, media);
+    return downloadEngine.start(result, media);
   });
-  ipcMain.handle("vivid-download-list", async event => {
+  ipcMain.handle("vivid-download-list", event => {
     if (!isTrustedDownloadSender(event)) throw new Error("Untrusted download request");
-    return (await getDownloadEngine()).list();
+    return downloadEngine.list();
   });
-  ipcMain.handle("vivid-playback-position-get", async (event, id, fileIndex = 0) => {
+  ipcMain.handle("vivid-playback-position-get", (event, id, fileIndex = 0) => {
     if (!isTrustedDownloadSender(event)) throw new Error("Untrusted playback request");
-    return (await getDownloadEngine()).getPlaybackPosition(id, fileIndex);
+    return downloadEngine.getPlaybackPosition(id, fileIndex);
   });
-  ipcMain.handle("vivid-playback-position-set", async (event, id, fileIndex = 0, seconds = 0) => {
+  ipcMain.handle("vivid-playback-position-set", (event, id, fileIndex = 0, seconds = 0) => {
     if (!isTrustedDownloadSender(event)) throw new Error("Untrusted playback request");
-    return (await getDownloadEngine()).setPlaybackPosition(id, fileIndex, seconds);
+    return downloadEngine.setPlaybackPosition(id, fileIndex, seconds);
   });
-  ipcMain.handle("vivid-playback-position-clear", async (event, id, fileIndex = 0) => {
+  ipcMain.handle("vivid-playback-position-clear", (event, id, fileIndex = 0) => {
     if (!isTrustedDownloadSender(event)) throw new Error("Untrusted playback request");
-    return (await getDownloadEngine()).clearPlaybackPosition(id, fileIndex);
+    return downloadEngine.clearPlaybackPosition(id, fileIndex);
   });
-  ipcMain.handle("vivid-download-media-url", async (event, id, fileIndex = 0) => {
+  ipcMain.handle("vivid-download-media-url", (event, id, fileIndex = 0) => {
     if (!isTrustedDownloadSender(event)) throw new Error("Untrusted download request");
-    if (!(await getDownloadEngine()).mediaFile(id, fileIndex)) throw new Error("This download is not ready to play.");
+    if (!downloadEngine.mediaFile(id, fileIndex) throw new Error("This download is not ready to play.");
     return "vivid-media://download/" + encodeURIComponent(String(id)) + "?file=" + encodeURIComponent(String(fileIndex)) + "&token=" + mediaToken;
   });
   ipcMain.handle("vivid-offline-url", event => {
@@ -251,11 +238,11 @@ function configureDownloadEngine() {
   });
   ipcMain.handle("vivid-download-folder", async event => {
     if (!isTrustedDownloadSender(event)) throw new Error("Untrusted download request");
-    return (await getDownloadEngine()).chooseFolder();
+    return downloadEngine.chooseFolder();
   });
-  ipcMain.handle("vivid-download-control", async (event, id, action) => {
+  ipcMain.handle("vivid-download-control", (event, id, action) => {
     if (!isTrustedDownloadSender(event)) throw new Error("Untrusted download request");
-    return (await getDownloadEngine()).control(id, action);
+    return downloadEngine.control(id, action);
   });
 }
 
