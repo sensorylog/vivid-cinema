@@ -129,7 +129,13 @@ class DesktopDownloadEngine {
       job.total = Number(torrent.length) || job.total || 0;
       const payload = this.snapshot(job);
       this.send("vivid-download-progress", payload);
-      void this.persist().catch(error => console.warn("Download state save failed:", error.message));
+      if (!job.persistTimer) {
+        job.persistTimer = setTimeout(() => {
+          job.persistTimer = null;
+          void this.persist().catch(error => console.warn("Download state save failed:", error.message));
+        }, 2000);
+        job.persistTimer.unref?.();
+      }
     };
     torrent.on("metadata", publish);
     torrent.on("download", publish);
@@ -185,6 +191,8 @@ class DesktopDownloadEngine {
     if (!job) return false;
     if (action === "pause" && job.status === "downloading" && job.torrent) {
       const torrent = job.torrent;
+      if (job.persistTimer) clearTimeout(job.persistTimer);
+      job.persistTimer = null;
       job.progress = roundProgress(torrent);
       job.downloaded = Number(torrent.downloaded) || 0;
       job.total = Number(torrent.length) || 0;
@@ -202,6 +210,8 @@ class DesktopDownloadEngine {
     }
     if (action === "cancel" && ["queued", "downloading", "paused", "failed"].includes(job.status)) {
       job.status = "cancelled";
+      if (job.persistTimer) clearTimeout(job.persistTimer);
+      job.persistTimer = null;
       if (job.torrent) {
         const torrent = job.torrent;
         job.torrent = null;
@@ -217,6 +227,8 @@ class DesktopDownloadEngine {
 
   async shutdown() {
     for (const job of this.jobs.values()) {
+      if (job.persistTimer) clearTimeout(job.persistTimer);
+      job.persistTimer = null;
       if (job.status === "downloading" && job.torrent) {
         job.progress = roundProgress(job.torrent);
         job.downloaded = Number(job.torrent.downloaded) || job.downloaded || 0;
@@ -226,7 +238,7 @@ class DesktopDownloadEngine {
       job.torrent = null;
     }
     await this.persist().catch(error => console.warn("Could not persist downloads on exit:", error.message));
-    await new Promise(resolve => this.client.destroy({ destroyStore: false }, resolve));
+    await new Promise(resolve => this.client.destroy(resolve));
   }
 }
 module.exports = { DesktopDownloadEngine };
