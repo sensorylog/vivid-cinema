@@ -54,7 +54,11 @@ function render(){
     const episodeList = files.length > 1 ? '<div class="offline-episodes">'+files.map(file =>
       '<button type="button" data-action="play-file" data-id="'+escapeHtml(job.id)+'" data-index="'+file.index+'">'+escapeHtml(file.name)+'</button>'
     ).join("")+'</div>' : "";
-    return '<article class="offline-job"><div><div class="offline-job-title">'+escapeHtml(job.title)+'</div><div class="offline-job-meta">'+escapeHtml(detail)+'</div>'+
+    const media=job.media||{};
+    const episodeTag=media.season!=null&&media.episode!=null
+      ? " · S"+String(media.season).padStart(2,"0")+"E"+String(media.episode).padStart(2,"0")+(media.episodeTitle?" — "+media.episodeTitle:"")
+      : "";
+    return '<article class="offline-job"><div><div class="offline-job-title">'+escapeHtml(job.title+episodeTag)+'</div><div class="offline-job-meta">'+escapeHtml(detail)+'</div>'+
       (["downloading","paused","verifying","completed"].includes(job.status)?'<div class="offline-progress" role="progressbar" aria-label="Download progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="'+progress.toFixed(1)+'"><span style="width:'+progress+'%"></span></div>':"")+
       (job.error?'<p class="offline-job-error">'+escapeHtml(job.error)+'</p>':"")+episodeList+
       '</div><div class="offline-job-actions">'+actions.join("")+'</div></article>';
@@ -238,7 +242,7 @@ byId("desktop-search-results").addEventListener("click",async event=>{
   button.disabled=true;button.textContent="Starting…";
   try{
     const mediaForResult=currentMedia?.media_type==="tv"&&Number.isInteger(result.episode)
-      ? {...currentMedia,season:result.season,episode:result.episode}
+      ? {...currentMedia,season:result.season,episode:result.episode,episodeTitle:result.episodeTitle}
       : currentMedia||{title:result.title,media_type:"movie"};
     await engine.start(result,mediaForResult);
     setMessage(Number.isInteger(result.episode)?"Episode download added. You can keep browsing while it saves.":"Download added. You can keep browsing while it saves.");
