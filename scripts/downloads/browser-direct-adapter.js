@@ -16,8 +16,8 @@ function validateJobId(value) {
 
 /**
  * Browser direct-file adapter backed by the Origin Private File System (OPFS).
- * The injected resolver must return a direct-download URL from a source that
- * explicitly authorizes offline storage. HLS/DASH manifests are not accepted.
+ * The injected resolver returns a direct media URL. HLS/DASH manifests are handled
+ * by the HLS adapter; this adapter stores progressive video bytes in OPFS.
  */
 export function createBrowserDownloadAdapter({
   resolve,
@@ -59,7 +59,7 @@ export function createBrowserDownloadAdapter({
       const source = await resolve(job, { signal });
       const sourceHosts = Array.isArray(source?.allowedHosts) && source.allowedHosts.length ? source.allowedHosts : allowedHosts;
       const url = validateAllowedHttpsUrl(source?.url, sourceHosts);
-      if (!url) throw new Error("The download source URL is not HTTPS or its host is not authorized.");
+      if (!url) throw new Error("The download source URL is not HTTPS or is outside the resolver host allowlist.");
       const response = await fetchImpl(url.href, {
         method: "GET",
         headers: source.headers || {},
