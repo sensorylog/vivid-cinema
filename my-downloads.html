@@ -30,6 +30,19 @@
       <p>Choose Download from a title page, select an available quality, and your transfer will appear here. Download options only appear when an authorized provider is connected.</p>
     </div>
   </section>
+  <section class="offline-notice offline-provider-settings" aria-labelledby="flixquest-settings-title">
+    <div class="offline-notice-icon" aria-hidden="true">⚙</div>
+    <div class="offline-provider-settings-copy">
+      <h2 id="flixquest-settings-title">Connect FlixQuest</h2>
+      <p>Enter the HTTPS base URL for your FlixQuest Scraper API v2 instance. This is the resolver Vivid will ask for movie and episode streams.</p>
+      <form id="flixquest-config-form" class="offline-provider-form">
+        <label for="flixquest-api-url">FlixQuest API URL</label>
+        <input id="flixquest-api-url" name="apiUrl" type="url" inputmode="url" autocomplete="url" placeholder="https://your-flixquest-api.example" required>
+        <button type="submit">Save & test connection</button>
+      </form>
+      <p id="flixquest-config-status" class="offline-message" role="status" aria-live="polite">Not connected yet. Your API URL is saved only in this browser.</p>
+    </div>
+  </section>
   <section id="offline-player-section" class="offline-player-section" hidden aria-label="Offline video player">
     <div class="offline-player-heading"><h2 id="offline-player-title">Offline playback</h2><button id="offline-player-close" type="button">Close player</button></div>
     <video id="offline-player" controls playsinline preload="metadata"></video>
