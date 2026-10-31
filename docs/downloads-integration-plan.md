@@ -1,6 +1,6 @@
 # Vivid Cinema download integration plan
 
-**Status:** Queue manager, account-scoped metadata persistence and an authorized OPFS browser direct-file adapter committed; native media-transfer adapters, resolver wiring and UI are not implemented yet.
+**Status:** Queue manager, account-scoped metadata persistence, OPFS browser direct-file adapter and first offline-download library UI are implemented. No authorized media resolver, native media-transfer adapters or offline player routing are configured yet.
 **Date:** 31 October 2026
 **Reference source:** [Flickv4](https://github.com/sheeshcake/Flickv4), GPL-3.0, by Wendale Franz Dy.
 
@@ -39,7 +39,9 @@ The Expo/React Native downloader, AsyncStorage, Notifee and native filesystem AP
 - Added `scripts/downloads/browser-direct-adapter.js`, which accepts only resolver-supplied HTTPS URLs on an explicit host allowlist, rejects redirects and non-video responses, streams direct video files into OPFS, reports byte progress, enforces a configurable size limit and cleans partial output on failure. It exposes local-file access/removal methods for later player integration.
 - Corrected cancellation ordering so the manager waits for the transfer adapter to settle before asking it to remove partial output.
 - The manager receives persistence and download adapters by dependency injection. It does not resolve media URLs, fetch media, write files, or claim offline playback. Persisted job metadata intentionally excludes source URLs and provider credentials.
-- The browser adapter is not wired into the watch page or UI; no live source resolver is configured. It supports direct video files only, not HLS/DASH. OPFS availability and quota vary by browser, and this adapter does not yet guarantee background downloads or local playback routing.
+- Added `my-downloads.html`, `scripts/my-downloads.js` and `styles/my-downloads.css` as a distinct offline-library route; the installer page remains unchanged. The shared desktop/mobile navigation links to the new page and the service worker precaches its shell assets.
+- The library hydrates account/guest-scoped IndexedDB metadata, shows counts and job states, and supports pause, cancel and remove actions. It deliberately disables retry and new download creation until an authorized resolver exists; the page uses a fail-closed adapter rather than inventing a source.
+- The browser adapter is not yet connected to the library manager. It supports direct video files only, not HLS/DASH. OPFS availability and quota vary by browser, and there is no local playback routing or background-download guarantee.
 
 ## Proposed Vivid design
 
@@ -66,7 +68,7 @@ The Expo/React Native downloader, AsyncStorage, Notifee and native filesystem AP
 2. Define the resolver and platform-adapter interfaces with tests and no live media provider.
 3. Implement and test the job store/queue and browser-safe direct-file adapter.
 4. Add Capacitor Android and Electron adapters independently.
-5. Add the offline library UI and local playback.
+5. Add offline playback and connect the browser adapter through a configured authorized resolver.
 6. Connect only an authorized source and test movie, TV episode, pause/resume, app restart, low storage, expired URL and deletion on real devices.
 
 ## Acceptance criteria
