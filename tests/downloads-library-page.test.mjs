@@ -8,13 +8,13 @@ test("downloads page is a title-driven movie and series library with no manual p
   assert.match(page, /scripts\/my-downloads\.js/);
   assert.match(page, /Your movie &(?:amp;)? series downloads/);
   assert.match(page, /no API URL, provider account, or manual setup/);
-  assert.match(page, /My <span>Downloads<\\/span>/);
+  assert.match(page, /My <span>Downloads<\/span>/);
   assert.doesNotMatch(page, /Offline Downloads/);
   assert.doesNotMatch(page, /FlixQuest|flixquest-api-url|Save & test connection/);
   assert.match(page, /offline-player/);
 });
 
-test("offline library uses owner-scoped persistence, automatic provider integration, queue and local player", async () => {
+test("download library uses owner-scoped persistence, automatic provider integration, queue and local player", async () => {
   const script = await readFile(new URL("../scripts/my-downloads.js", import.meta.url), "utf8");
   assert.match(script, /createIndexedDBPersistence\(\{ownerId:owner\}\)/);
   assert.match(script, /createBrowserDownloadAdapter/);
@@ -23,6 +23,7 @@ test("offline library uses owner-scoped persistence, automatic provider integrat
   assert.match(script, /integration\.resolve/);
   assert.match(script, /manager\.retry\(id\)/);
   assert.match(script, /manager\.enqueue\(/);
+  assert.match(script, /return "Downloaded"/);
   assert.doesNotMatch(script, /FlixQuest|flixquest|createBrowserHlsDownloadAdapter/);
   assert.doesNotMatch(script, /Internet Archive|archive\.org/);
 });
