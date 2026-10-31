@@ -76,9 +76,8 @@ export function createWikimediaCommonsProvider({ fetchImpl = globalThis.fetch } 
   async function resolve(job) {
     const title = String(job?.media?.source_file || "");
     if (!/^File:.{1,220}$/i.test(title) || /[\u0000-\u001f]/.test(title)) throw new Error("The selected Wikimedia Commons file is invalid.");
-    const nativeApp = Boolean(globalThis.Capacitor?.isNativePlatform?.());
-    const origin = nativeApp ? "https://vivid-cinema.pages.dev" : globalThis.location.origin;
-    const url = new URL("/api/commons-download", origin);
+    const url = new URL("https://us-central1-vivid-cinema.cloudfunctions.net/downloadMedia");
+    url.searchParams.set("source", "wikimedia-commons");
     url.searchParams.set("title", title);
     return { url: url.href, type: "file", mimeType: "video/mp4", allowedHosts: [url.hostname], headers: {} };
   }
