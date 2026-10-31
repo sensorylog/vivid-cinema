@@ -1,5 +1,5 @@
 // Bump this version whenever the precached app shell changes.
-const CACHE_NAME = "vivid-cinema-shell-v261";
+const CACHE_NAME = "vivid-cinema-shell-v262";
 const HLS_LIBRARY_URL = "https://cdn.jsdelivr.net/npm/hls.js@1.7.3/dist/hls.min.js";
 const APP_SHELL = [
   HLS_LIBRARY_URL,
@@ -26,7 +26,7 @@ const APP_SHELL = [
   "./scripts/for-you.js","./scripts/vivid-recall-chat.js","./scripts/firebase-ai.js","./scripts/local-owner.js","./scripts/firebase.js",
   "./scripts/firebase.js?v=20261016-auth-runtime-audit2","./scripts/pwa.js","./scripts/atmosphere.js","./scripts/i18n.js","./scripts/routes.js",
   "./scripts/config.js","./scripts/utils.js","./scripts/content.js","./scripts/media.js","./scripts/tmdb.js",
-  "./scripts/nav-auth.js","./scripts/downloads.js?v=direct-download-v3","./scripts/my-downloads.js","./scripts/downloads/provider-integration.js","./scripts/downloads/internet-archive.js","./scripts/downloads/wikimedia-commons.js","./scripts/downloads/download-manager.js","./scripts/downloads/indexeddb-persistence.js","./scripts/downloads/browser-direct-adapter.js","./scripts/downloads/browser-hls-adapter.js","./scripts/downloads/offline-playback.js","./scripts/library.js","./scripts/library-page.js","./scripts/discover.js",
+  "./scripts/nav-auth.js","./scripts/downloads.js?v=direct-download-v3","./scripts/my-downloads.js","./scripts/downloads/download-manager.js","./scripts/downloads/indexeddb-persistence.js","./scripts/downloads/browser-direct-adapter.js","./scripts/downloads/browser-hls-adapter.js","./scripts/downloads/offline-playback.js","./scripts/library.js","./scripts/library-page.js","./scripts/discover.js",
   "./scripts/collection.js","./scripts/person.js","./scripts/recommendations.js","./scripts/release-alerts.js","./scripts/cinema-reminders.js",
   "./scripts/push-notifications.js","./native-notify/web/nativeNotifyIds.js","./native-notify/web/native-notify-web-push.js","./scripts/news.js","./scripts/news.js?v=20261018-feedback-sync-4",
   "./scripts/newsroom.js","./scripts/news-community-highlights.js","./scripts/news-community.js","./scripts/news-story.js","./scripts/moderation.js",
@@ -35,7 +35,7 @@ const APP_SHELL = [
   "./scripts/account-bootstrap.js","./scripts/account-bootstrap.js?v=20261016-account-bootstrap-1","./scripts/auth.js","./scripts/auth.js?v=20261024-desktop-persistence-1","./scripts/verify-email.js",
   "./scripts/anime.js","./scripts/live.js","./scripts/home-breathe.js","./data/live-channels.json","./script.js",
   "./script.js?v=20261006-2","./scripts/watch.js?v=watch-player-server-scroll-1","./scripts/account.js?v=20261016-account-runtime-2","./styles/vivid-news.css?v=20261021-this-week-1","./scripts/newsroom.js?v=20261020-newsroom-images-3",
-  "./scripts/live.js?v=live8","./styles/vivid-cleanup.css?v=1","./styles/vivid-title-refresh.css?v=beast-1","./scripts/title.js?v=download-flow-1","./styles/vivid-donate.css?v=support3", "./scripts/tflix-hero.js?v=hero-fast-fallback-1", "./scripts/mascot-autoplay.js?v=2",
+  "./scripts/live.js?v=live8","./styles/vivid-cleanup.css?v=1","./styles/vivid-title-refresh.css?v=beast-1","./scripts/title.js?v=no-archive-download-2","./styles/vivid-donate.css?v=support3", "./scripts/tflix-hero.js?v=hero-fast-fallback-1", "./scripts/mascot-autoplay.js?v=2",
   "./styles/vivid-watch.css?v=player-flow-3-servers","./styles/vivid-watch.css?v=watch-player-layout-1","./styles/vivid-watch.css?v=watch-player-layout-2","./styles/vivid-cleanup.css?v=4","./styles/vivid-watch-polish.css?v=2",
   "./styles/vivid-tflix-hero.css?v=hero-motion-2","./styles/vivid-tflix-hero.css?v=hero-motion-3","./scripts/tflix-hero.js?v=hero-rank-fast-2","./scripts/intelligence.js?v=20261018-sync-stage-1","./scripts/intelligence.js?v=20261018-feedback-payload-2",
   "./scripts/intelligence.js?v=20261018-feedback-sync-3","./scripts/intelligence.js?v=20261018-feedback-sync-4","./scripts/news.js?v=20261018-sync-stage-1","./scripts/news.js?v=20261018-feedback-sync-3","./scripts/newsroom.js?v=20261018-firestore-db-1",
