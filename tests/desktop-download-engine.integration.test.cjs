@@ -63,6 +63,7 @@ function closeTracker(tracker) {
 }
 
 test("desktop engine downloads a video-extension payload from a local seeded torrent", { timeout: 90000 }, async () => {
+  console.log("[vivid-integration] stage: create fixture");
   const root = await fs.mkdtemp(path.join(os.tmpdir(), "vivid-download-integration-"));
   const videoPath = path.join(root, "vivid-integration.mp4");
   const downloadsPath = path.join(root, "downloads");
@@ -77,6 +78,7 @@ test("desktop engine downloads a video-extension payload from a local seeded tor
   let seeder;
   let engine;
   try {
+    console.log("[vivid-integration] stage: create tracker");
     tracker = new TrackerServer({ udp: false, http: true, ws: false, stats: false });
     const trackerPort = await withTimeout(new Promise((resolve, reject) => {
       tracker.once("error", reject);
@@ -90,9 +92,11 @@ test("desktop engine downloads a video-extension payload from a local seeded tor
       });
     }), 10000, "local HTTP tracker startup");
     const trackerUrl = "http://127.0.0.1:" + trackerPort + "/announce";
+    console.log("[vivid-integration] stage: tracker listening", trackerUrl);
     let seederAnnounced = false;
     tracker.on("start", () => { seederAnnounced = true; });
 
+    console.log("[vivid-integration] stage: create seeder");
     seeder = new WebTorrent({ dht: false, tracker: { announce: [trackerUrl] } });
     const seedTorrent = await withTimeout(new Promise((resolve, reject) => {
       seeder.once("error", reject);
@@ -106,7 +110,9 @@ test("desktop engine downloads a video-extension payload from a local seeded tor
     assert.match(seedTorrent.magnetURI, /^magnet:\?xt=urn:btih:/);
     assert.ok(seedTorrent.magnetURI.includes(encodeURIComponent(trackerUrl)));
     await waitFor(() => seederAnnounced, 10000, "seeder registration with the local tracker");
+    console.log("[vivid-integration] stage: seeder announced");
 
+    console.log("[vivid-integration] stage: construct download engine");
     engine = new DesktopDownloadEngine({
       app: {
         getPath(name) {
@@ -119,6 +125,7 @@ test("desktop engine downloads a video-extension payload from a local seeded tor
     });
 
     await withTimeout(engine.ready, 10000, "download engine initialization");
+    console.log("[vivid-integration] stage: engine ready");
     // Keep this fixture isolated: the test validates tracker discovery and TCP transfer,
     // not public DHT routing or external network access.
     if (engine.client.dht) {
@@ -132,6 +139,7 @@ test("desktop engine downloads a video-extension payload from a local seeded tor
       magnet: seedTorrent.magnetURI
     });
 
+    console.log("[vivid-integration] stage: start download");
     const started = await withTimeout(engine.start({
       id: "local-fixture",
       title: "Vivid integration fixture",
@@ -149,6 +157,7 @@ test("desktop engine downloads a video-extension payload from a local seeded tor
       "the seeded video transfer to complete"
     );
 
+    console.log("[vivid-integration] stage: transfer terminal", job.status, JSON.stringify(engine.snapshot(job)));
     assert.equal(job.status, "completed", "engine should complete the local torrent: " + JSON.stringify(engine.snapshot(job)));
     assert.ok(job.filePath, "completed job should expose a playable file path");
     const downloaded = await fs.readFile(job.filePath);
