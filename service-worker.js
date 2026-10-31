@@ -48,7 +48,9 @@ async function cacheAsset(cache,asset){
  const response=await fetch(asset,{cache:"no-store",redirect:"follow"});
  // Never precache a response whose request crossed a redirect. Safari can reject
  // a redirected response when a service worker returns it for a navigation.
- const allowedResponseType=response.type==="basic"||(asset===HLS_LIBRARY_URL&&response.type==="cors");\n if(!response.ok||!allowedResponseType||!isSafeResponse(response)||response.url!==asset)throw new Error("Unsafe or unavailable precache response: "+asset);
+ const allowedResponseType=response.type==="basic"||(asset===HLS_LIBRARY_URL&&response.type==="cors");
+ const expectedUrl=new URL(asset,self.location.href).href;
+ if(!response.ok||!allowedResponseType||!isSafeResponse(response)||response.url!==expectedUrl)throw new Error("Unsafe or unavailable precache response: "+asset);
  await cache.put(asset,response.clone());
 }
 async function cacheAssetsWithConcurrency(cache,assets,concurrency=6){
