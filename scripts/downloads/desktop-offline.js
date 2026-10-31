@@ -43,7 +43,14 @@ function render(){
     const speed=job.speed?bytes(job.speed)+"/s":"";
     const transferSize=job.total?bytes(job.total):"size unknown";
     const peerState=job.peers?job.peers+" peers connected":"No peers connected";
-    const detail=[statusText(job),progress.toFixed(1)+"%",bytes(job.downloaded)+" of "+transferSize,speed,["downloading","verifying"].includes(job.status)?peerState:""].filter(Boolean).join(" · ");
+    const discovery=job.discovery;
+    const discoveryDetail=discovery
+      ? "DHT "+(discovery.dhtEnabled?(discovery.dhtListening?"ready":"starting"):"off")
+        +" ("+discovery.dhtAnnounces+" announces) · trackers "+discovery.trackerCount
+        +" ("+discovery.trackerAnnounces+" announces) · no-peer "+discovery.noPeerAnnounces
+        +(discovery.lastNoPeerSource?" ["+discovery.lastNoPeerSource+"]":"")
+      : "";
+    const detail=[statusText(job),progress.toFixed(1)+"%",bytes(job.downloaded)+" of "+transferSize,speed,["downloading","verifying"].includes(job.status)?peerState:"",discoveryDetail].filter(Boolean).join(" · ");
     const actions=[];
     if(job.status==="downloading") actions.push('<button data-action="pause" data-id="'+escapeHtml(job.id)+'">Pause</button>');
     if(job.status==="paused"||job.status==="failed") actions.push('<button data-action="resume" data-id="'+escapeHtml(job.id)+'">Resume</button>');
