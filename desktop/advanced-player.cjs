@@ -80,18 +80,28 @@ class AdvancedPlayer {
     this.child = child;
     this.currentMediaPath = realMediaPath;
 
-    child.once("error", error => {
-      if (this.child !== child) return;
-      this.child = null;
-      this.currentMediaPath = null;
-      console.error("Vivid Advanced Player failed to start:", error?.message || error);
+    return new Promise((resolve, reject) => {
+      let settled = false;
+      child.once("spawn", () => {
+        settled = true;
+        resolve({ started: true, engine: "mpv" });
+      });
+      child.once("error", error => {
+        if (this.child === child) {
+          this.child = null;
+          this.currentMediaPath = null;
+        }
+        console.error("Vivid Advanced Player failed to start:", error?.message || error);
+        if (!settled) reject(new Error("Vivid Advanced Player could not start: " + (error?.message || "process launch failed")));
+      });
+      child.once("exit", (code, signal) => {
+        if (this.child === child) {
+          this.child = null;
+          this.currentMediaPath = null;
+        }
+        if (!settled) reject(new Error("Vivid Advanced Player exited before opening the video (code " + code + ", signal " + signal + ")."));
+      });
     });
-    child.once("exit", () => {
-      if (this.child !== child) return;
-      this.child = null;
-      this.currentMediaPath = null;
-    });
-    return { started: true, engine: "mpv" };
   }
 
   stop() {
