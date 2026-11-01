@@ -371,7 +371,20 @@ class DesktopDownloadEngine {
     const file = (job.files || [])[index] || (index === 0 && job.filePath ? { path: job.filePath } : null);
     if (!file?.path) return null;
     const target = path.resolve(file.path);
-    return fs.existsSync(target) && fs.statSync(target).isFile() ? target : null;
+    if (!fs.existsSync(target)) return null;
+    try {
+      // Torrent metadata is persisted locally. Resolve symlinks as well as
+      // lexical paths so a damaged/tampered job record cannot expose a file
+      // outside that job's own download directory to the media protocol.
+      const jobRoot = path.resolve(job.downloadPath || path.join(this.downloadPath, String(id)));
+      const realRoot = fs.realpathSync(jobRoot);
+      const realTarget = fs.realpathSync(target);
+      const relative = path.relative(realRoot, realTarget);
+      if (!relative || relative === ".." || relative.startsWith(".." + path.sep) || path.isAbsolute(relative)) return null;
+      return fs.statSync(realTarget).isFile() ? realTarget : null;
+    } catch {
+      return null;
+    }
   }
 
   async list() {
