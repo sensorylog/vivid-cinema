@@ -131,7 +131,14 @@ class AdvancedPlayer {
     const connect = () => {
       if (this.child !== child || attempts >= 12) return;
       attempts += 1;
-      const socket = this.netImpl.createConnection(pipePath);
+      let socket;
+      try {
+        socket = this.netImpl.createConnection(pipePath);
+      } catch (error) {
+        if (attempts < 12 && this.child === child) this.ipcRetryTimer = setTimeout(connect, 250);
+        else console.warn("Vivid Advanced Player IPC could not connect:", error?.message || error);
+        return;
+      }
       this.ipcSocket = socket;
       let buffer = "";
       let connected = false;
