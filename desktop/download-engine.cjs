@@ -156,7 +156,7 @@ class DesktopDownloadEngine {
     await this.ready;
     const source = result && this.searchResults.get(String(result.id));
     if (!source) throw new Error("Search result expired. Search again and choose a result.");
-    if (this.client.destroyed) throw new Error(this.clientError || "The torrent engine stopped. Restart Vivid Cinema before trying again.");
+    if (!this.client || this.client.destroyed) this.createClient();
     const magnet = result.magnet || await TorrentSearchApi.getMagnet(source);
     if (typeof magnet !== "string" || !magnet.startsWith("magnet:?")) throw new Error("No valid magnet link was returned.");
     const id = crypto.randomUUID();
