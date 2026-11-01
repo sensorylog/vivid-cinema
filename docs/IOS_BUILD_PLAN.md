@@ -12,7 +12,7 @@
 - Use GitHub Actions macOS runners for unsigned simulator compilation. This repository is public; verify the current Actions quota and runner availability before relying on it.
 - Do not add paid hosting, CI, analytics, authentication, media, or build dependencies.
 - Keep existing Firebase and hosting usage within their current free allowances. Stop and ask before any change that could create a bill.
-- The iOS platform package is installed transiently in CI at the exact Capacitor version already used by this repository. It is not yet a committed dependency or a locally reproducible native setup; promote it into the lockfile only after the first CI build proves the integration.
+- The iOS platform package is installed transiently in CI at the exact Capacitor version already used by this repository. It is not yet a committed dependency or a locally reproducible native setup; promote it into the lockfile only after reviewing the generated Xcode project and lockfile changes.
 
 ## Implementation sequence
 
@@ -31,16 +31,18 @@
 
 ## First simulator milestone (confirmed)
 
-- The unsigned iOS Simulator app compiled successfully in GitHub Actions on 2026-11-01.
-- The same job passed all 421 project tests and syntax checks, generated/synced the Capacitor iOS project, and uploaded the Simulator `.app` artifact.
+- The unsigned iOS Simulator app compiled successfully in GitHub Actions on 2026-11-01 on the current PR head commit `4a22ea7b7c1edf1117d85e58bf182021d41cd701`.
+- The job passed the full project test suite and syntax checks, generated/synced the Capacitor iOS project, compiled the Simulator app, and uploaded the `vivid-cinema-ios-simulator` artifact.
+- Artifact ID: `13105770811`; it is a Simulator-only `.app` artifact with a seven-day retention window, not a signed IPA or physical-device installer.
 - The generated iOS project currently exists only inside the CI job/artifact; the repository still does not track an `ios/` Xcode project.
 
 ## Native readiness gates before any physical-device beta
 
-1. Replace the browser-only Google OAuth path with a supported native iOS sign-in flow and verified URL callback handling. The current auth module relies on Firebase popup/redirect APIs and has not been validated inside WKWebView.
-2. Select and configure an iOS-compatible Firebase App Check provider (DeviceCheck or App Attest) and verify the project's enforcement settings. The current Firebase bootstrap uses reCAPTCHA Enterprise, which is a browser provider and is not a substitute for native attestation.
-3. Validate Firebase auth persistence and Firestore/library sync after app termination and relaunch on a real iPhone.
-4. Validate embedded playback, fullscreen/orientation, audio-session behaviour, external provider hand-off, subtitles and progress tracking on device. Cross-origin iframe players may not expose native controls or playback state.
-5. Add and commit the reproducible native project/dependency setup only after reviewing the generated Xcode project and lockfile changes.
+1. Obtain the real Firebase iOS app registration, `GoogleService-Info.plist`, Google iOS OAuth client ID, and reversed-client-ID URL scheme. The repository audit found none of these; do not invent or commit placeholders.
+2. Replace the browser-only Google OAuth path with a supported native iOS sign-in flow and verified URL callback handling. The current auth module relies on Firebase popup/redirect APIs and has not been validated inside WKWebView.
+3. Verify the Firebase project's App Check enforcement settings, then select and configure an iOS-compatible provider (DeviceCheck or App Attest). The current Firebase bootstrap uses reCAPTCHA Enterprise, which is a browser provider and is not a substitute for native attestation.
+4. Validate Firebase auth persistence and Firestore/library sync after app termination and relaunch on a real iPhone.
+5. Validate embedded playback, fullscreen/orientation, audio-session behaviour, external provider hand-off, subtitles and progress tracking on device. Cross-origin iframe players may not expose native controls or playback state.
+6. Add and commit the reproducible native project/dependency setup only after reviewing the generated Xcode project and lockfile changes.
 
 These are explicit release gates, not assumed-working features. The Simulator build passing does not close them.
