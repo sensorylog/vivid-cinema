@@ -221,6 +221,7 @@ async function hydratePosterArtwork(){
     return true;
   });
   let changed=false;
+  let changed=false;
   const worker=async()=>{
     while(queue.length){
       const job=queue.shift(),media=job.media||{};
@@ -642,6 +643,16 @@ byId("offline-player-close").addEventListener("click",async()=>{
   byId("offline-next-episode").hidden=true;resumePosition=0;byId("offline-player-section").classList.remove("controls-hidden");
   syncFullscreenButton();
 });
+function updateJobProgress(job){
+  const id=String(job.id);
+  const card=[...byId("offline-jobs").querySelectorAll("[data-job-id]")].find(node=>node.dataset.jobId===id);
+  if(!card)return;
+  const progress=Math.max(0,Math.min(100,Number(job.progress)||0));
+  const status=card.querySelector(".offline-card-status,.offline-episode-status");
+  if(status)status.textContent=statusText(job)+(job.status==="downloading"?" · "+Math.round(progress)+"%":"");
+  const bar=card.querySelector('[role="progressbar"]');
+  if(bar){bar.setAttribute("aria-valuenow",progress.toFixed(1));const fill=bar.querySelector("span");if(fill)fill.style.width=progress+"%";}
+}
 function updateJobProgress(job){
   const id=String(job.id);
   const card=[...byId("offline-jobs").querySelectorAll("[data-job-id]")].find(node=>node.dataset.jobId===id);
