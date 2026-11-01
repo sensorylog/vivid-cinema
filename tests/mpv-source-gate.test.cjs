@@ -65,3 +65,13 @@ test("source gate rejects incomplete component licence provenance", t => {
   fs.writeFileSync(paths.manifestPath, JSON.stringify(manifest));
   assert.throws(() => verifyMpvSources({ projectRoot: paths.root, skip: false }), /Every source-manifest component/);
 });
+
+
+test("source gate rejects licence paths that escape the bundled notice directory", t => {
+  const paths = fixture(t);
+  writeValidBundle(paths);
+  const manifest = JSON.parse(fs.readFileSync(paths.manifestPath, "utf8"));
+  manifest.components[0].licenseFile = "../../package.json";
+  fs.writeFileSync(paths.manifestPath, JSON.stringify(manifest));
+  assert.throws(() => verifyMpvSources({ projectRoot: paths.root, skip: false }), /bundled licence file/);
+});
