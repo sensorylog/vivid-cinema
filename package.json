@@ -67,11 +67,12 @@
       "!docs/**",
       "!dist-desktop/**",
       "!coverage/**",
-      "!README.md",
       "!LICENSE",
       "!android/**",
       "!ios/**",
-      "!api/**"
+      "!api/**",
+      "!README.md",
+      "!licenses/mpv/CORRESPONDING-SOURCE.zip"
     ],
     "asar": true,
     "win": {
@@ -126,7 +127,7 @@
         "from": "licenses/mpv",
         "to": "licenses/mpv",
         "filter": [
-          "**/*"
+          "NOTICE.md"
         ]
       }
     ]
