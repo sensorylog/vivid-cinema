@@ -40,7 +40,7 @@ test -s "$REPO_ROOT/desktop/vendor/mpv/mpv.exe"
 mkdir -p "$REPO_ROOT/licenses/mpv"
 rm -f "$REPO_ROOT/licenses/mpv/CORRESPONDING-SOURCE.zip"
 zip -q -r "$REPO_ROOT/licenses/mpv/CORRESPONDING-SOURCE.zip" . \
-  -x "*/.git/*" ".git/*" "mingw_build/*" "mingw_prefix/*" "artifact/*" \
+  -x "*/.git/*" ".git/*" "*/.git" ".git" "mingw_build/*" "mingw_prefix/*" "artifact/*" \
      "*/builddir/*" "*/.cache/*" "*.o" "*.a" "*.dll" "*.exe" "*.com"
 node "$REPO_ROOT/desktop/create-mpv-source-manifest.cjs" \
   --source-root "$MPV_ROOT" \
