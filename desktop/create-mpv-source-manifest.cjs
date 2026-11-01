@@ -83,6 +83,49 @@ function main() {
     const licenseFile = copyLicense(repo.directory, licenseRoot, relative || path.basename(repo.directory));
     components.push({ name: relative || path.basename(repo.directory), license: "See bundled upstream licence text", source: repo.source, commit: repo.commit, licenseFile });
   }
+  const tarballSources = [
+    ["libiconv-1.18", "https://ftpmirror.gnu.org/gnu/libiconv/libiconv-1.18.tar.gz", "1.18"],
+    ["zlib-1.3.1", "https://zlib.net/fossils/zlib-1.3.1.tar.gz", "1.3.1"],
+    ["freetype-2.14.1", "https://download.savannah.gnu.org/releases/freetype/freetype-2.14.1.tar.xz", "2.14.1"],
+    ["fribidi-1.0.16", "https://github.com/fribidi/fribidi/releases/download/v1.0.16/fribidi-1.0.16.tar.xz", "1.0.16"],
+    ["harfbuzz-12.2.0", "https://github.com/harfbuzz/harfbuzz/releases/download/12.2.0/harfbuzz-12.2.0.tar.xz", "12.2.0"]
+  ];
+  for (const [directoryName, source, version] of tarballSources) {
+    const directory = path.join(sourceRoot, directoryName);
+    if (!fs.existsSync(directory)) throw new Error("Pinned source tarball was not unpacked: " + directoryName);
+    const licenseFile = copyLicense(directory, licenseRoot, directoryName);
+    components.push({
+      name: directoryName,
+      license: "See bundled upstream licence text",
+      source,
+      version,
+      licenseFile
+    });
+  }
+
+  const subprojectsRoot = path.join(sourceRoot, "subprojects");
+  if (fs.existsSync(subprojectsRoot)) {
+    for (const entry of fs.readdirSync(subprojectsRoot, { withFileTypes: true })) {
+      if (!entry.isDirectory()) continue;
+      const directory = path.join(subprojectsRoot, entry.name);
+      if (repositories.some(repo => path.resolve(repo.directory) === path.resolve(directory))) continue;
+      const license = findLicenseFile(directory);
+      if (!license) continue;
+      const wrapPath = path.join(subprojectsRoot, entry.name + ".wrap");
+      const wrap = fs.existsSync(wrapPath) ? fs.readFileSync(wrapPath, "utf8") : "";
+      const sourceMatch = wrap.match(/^\\s*(?:source_url|url)\\s*=\\s*(.+)$/m);
+      const source = sourceMatch ? sourceMatch[1].trim() : "Meson subproject source snapshot: " + entry.name;
+      const licenseFile = copyLicense(directory, licenseRoot, "subproject-" + entry.name);
+      components.push({
+        name: "subprojects/" + entry.name,
+        license: "See bundled upstream licence text",
+        source,
+        version: entry.name,
+        licenseFile
+      });
+    }
+  }
+
   const mpvLicenseFile = copyLicense(sourceRoot, licenseRoot, "mpv");
   const ffmpegLicenseFile = copyLicense(ffmpegRepo.directory, licenseRoot, "ffmpeg");
   const archiveSha256 = crypto.createHash("sha256").update(fs.readFileSync(archivePath)).digest("hex");
