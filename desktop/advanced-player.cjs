@@ -81,7 +81,7 @@ class AdvancedPlayer {
 
     const savedPosition = this.downloadEngine.getPlaybackPosition?.(jobId, index) || 0;
     const startAt = Number.isFinite(Number(savedPosition)) ? Math.max(0, Number(savedPosition)) : 0;
-    const ipcPath = "\\\\\\\\.\\\\pipe\\\\vivid-mpv-" + this.randomUUID();
+    const ipcPath = "\\.\pipe\vivid-mpv-" + this.randomUUID();
     this.stop();
     const child = this.spawnImpl(executable, createMpvArgs(realMediaPath, startAt, ipcPath), {
       cwd: path.dirname(executable),
@@ -93,6 +93,8 @@ class AdvancedPlayer {
     this.child = child;
     this.currentMediaPath = realMediaPath;
     this.currentJob = { id: jobId, fileIndex: index };
+    this.latestPosition = startAt;
+    this.lastPositionWrite = 0;
 
     return new Promise((resolve, reject) => {
       let settled = false;
