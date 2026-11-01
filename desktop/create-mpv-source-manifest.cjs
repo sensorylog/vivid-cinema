@@ -17,7 +17,7 @@ function gitOutput(directory, args) {
   return execFileSync("git", ["-C", directory, ...args], { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] }).trim();
 }
 function findLicenseFile(root) {
-  const preferred = /^(license|licence|copying|ftl)(\.|$)/i;
+  const preferred = /^(license|licence|copying|copyright|ftl)(\.|$)/i;
   const candidates = [];
   function walk(directory, depth) {
     if (depth > 4) return;
@@ -29,7 +29,17 @@ function findLicenseFile(root) {
     }
   }
   walk(root, 0);
-  candidates.sort((a, b) => path.relative(root, a).split(path.sep).length - path.relative(root, b).split(path.sep).length || a.localeCompare(b));
+  candidates.sort((a, b) => {
+    const priority = file => {
+      const name = path.basename(file).toLowerCase();
+      if (name.startsWith("license") || name.startsWith("licence")) return 0;
+      if (name.startsWith("copying")) return 1;
+      if (name.startsWith("ftl")) return 2;
+      return 3;
+    };
+    return path.relative(root, a).split(path.sep).length - path.relative(root, b).split(path.sep).length ||
+      priority(a) - priority(b) || a.localeCompare(b);
+  });
   return candidates[0] || null;
 }
 function collectGitRepositories(root) {
