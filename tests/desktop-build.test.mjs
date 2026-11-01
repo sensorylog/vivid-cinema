@@ -287,3 +287,22 @@ test("Vivid Ultra Player keeps Chromium playback and adds guarded native media c
   assert.match(player, /if\(!select\|\|!tracks/);
   assert.match(styles, /offline-player-section\[data-subtitle-size="large"\]/);
 });
+
+
+test("Ultra Player adds explicit resume choices, safe series-next matching and cinema auto-hide", () => {
+  const player = fs.readFileSync(path.join(root, "scripts", "downloads", "desktop-offline.js"), "utf8");
+  const page = fs.readFileSync(path.join(root, "my-downloads.html"), "utf8");
+  const styles = fs.readFileSync(path.join(root, "styles", "my-downloads.css"), "utf8");
+  assert.match(page, /offline-resume-continue/);
+  assert.match(page, /offline-resume-restart/);
+  assert.match(page, /offline-next-episode/);
+  assert.match(player, /getPlaybackPosition\(jobId,fileIndex\)/);
+  assert.match(player, /Continue from /);
+  assert.match(player, /clearPlaybackPosition/);
+  assert.match(player, /function findNextEpisode\(job\)/);
+  assert.match(player, /Number\(next\.episode\)===episode\+1/);
+  assert.match(player, /setTimeout\(\(\)=>\{/);
+  assert.match(player, /controls-hidden/);
+  assert.match(styles, /offline-player-section:fullscreen/);
+  assert.match(styles, /controls-hidden \.offline-custom-controls/);
+});
