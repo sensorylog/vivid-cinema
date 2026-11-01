@@ -72,7 +72,8 @@
       "!ios/**",
       "!api/**",
       "!README.md",
-      "!licenses/mpv/CORRESPONDING-SOURCE.zip"
+      "!licenses/mpv/CORRESPONDING-SOURCE.zip",
+      "!licenses/mpv/SOURCE-MANIFEST.json"
     ],
     "asar": true,
     "win": {
