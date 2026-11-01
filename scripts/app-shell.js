@@ -207,12 +207,7 @@ function syncMobileNavigation() {
     navLink("home.html", "bi-house-fill", "Home", page === "home"),
     navLink("discover.html", "bi-grid-fill", "Browse", isBrowsePage(page)),
     navLink("for-you.html", "bi-stars", "For You", page === "for-you"),
-    navLink("live.html", "bi-broadcast-pin", "Live", page === "live"),
-    navLink("library.html", "bi-bookmark-fill", "Library", page === "library"),
-    ...(window.vividDownloads?.available === true
-      ? [navLink("my-downloads.html", "bi-download", "Offline", page === "downloads-library")]
-      : []),
-    navLink("news.html", "bi-newspaper", "News", page === "news"),
+    navLink("library.html", "bi-bookmark-fill", "Library", page === "library" || page === "downloads-library"),
     navLink("search.html", "bi-search", "Search", page === "search")
   ].join("");
   nav.classList.add("vivid-v2-mobile-nav");
@@ -447,12 +442,20 @@ function initCinematicFocusNavigation() {
 }
 
 function ensureMediaLayoutStyles() {
-  if (document.querySelector('link[data-vivid-media-layout]')) return;
-  const link = document.createElement("link");
-  link.rel = "stylesheet";
-  link.href = "./styles/vivid-media-layout.css?v=1";
-  link.dataset.vividMediaLayout = "true";
-  document.head.appendChild(link);
+  if (!document.querySelector('link[data-vivid-media-layout]')) {
+    const link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href = "./styles/vivid-media-layout.css?v=1";
+    link.dataset.vividMediaLayout = "true";
+    document.head.appendChild(link);
+  }
+  if (!document.querySelector('link[data-vivid-premium-experience]')) {
+    const link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href = "./styles/vivid-premium-experience.css?v=1";
+    link.dataset.vividPremiumExperience = "true";
+    document.head.appendChild(link);
+  }
 }
 
 function initAppShell() {
@@ -460,6 +463,7 @@ function initAppShell() {
   initialized = true;
 
   ensureMediaLayoutStyles();
+  document.body.classList.add("vivid-app-experience");
   document.documentElement.dataset.vividReady = "false";
   const storedTheme = (() => { try { return localStorage.getItem("vivid:theme"); } catch { return null; } })();
   document.documentElement.dataset.vividTheme = storedTheme === "light" ? "light" : "dark";
