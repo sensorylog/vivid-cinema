@@ -1,0 +1,39 @@
+.vivid-install-page{min-height:100vh;background:radial-gradient(ellipse at 50% -10%,rgba(77,105,255,.2),transparent 48%),#08090b;color:#f7f8fc}
+.install-shell{width:min(100% - 36px,900px);margin:0 auto;padding:22px 0 34px}
+.install-header,.install-brand,.install-back,.install-facts,.install-footer{display:flex;align-items:center}
+.install-header{justify-content:space-between;gap:16px;padding:4px 0 26px;border-bottom:1px solid rgba(255,255,255,.09)}
+.install-brand{gap:10px;color:#f7f8fc;text-decoration:none;font-size:19px;font-weight:800;letter-spacing:-.6px}
+.install-brand>span>span{font-weight:400;color:#aeb8ca}
+.install-brand img{border-radius:13px}
+.install-back{gap:8px;color:#d7dff1;text-decoration:none;font-size:13px;font-weight:700}
+.install-hero{text-align:center;padding:58px 12px 48px}
+.install-eyebrow,.install-platform{display:inline-flex;align-items:center;gap:8px;color:#caff78;font-size:10px;font-weight:850;letter-spacing:.17em}
+.install-app-icon{width:106px;height:106px;margin:22px auto 24px;padding:9px;border:1px solid rgba(255,255,255,.16);border-radius:28px;background:linear-gradient(145deg,rgba(255,255,255,.13),rgba(255,255,255,.025));box-shadow:0 18px 60px rgba(0,0,0,.38)}
+.install-app-icon img{display:block;width:100%;height:100%;border-radius:21px}
+.install-hero h1{margin:0;font-size:clamp(38px,7vw,64px);line-height:1.02;letter-spacing:-.055em;font-weight:850}
+.install-hero h1 em{font-style:normal;background:linear-gradient(95deg,#d9ff8c,#9fd8ff 55%,#c0a8ff);background-clip:text;-webkit-background-clip:text;color:transparent}
+.install-lede{max-width:590px;margin:20px auto 0;color:#aeb8ca;font-size:16px;line-height:1.65}
+.install-facts{justify-content:center;flex-wrap:wrap;gap:10px 20px;margin-top:24px;color:#d5dceb;font-size:12px}
+.install-facts b{color:#caff78;margin-right:5px}
+.install-instructions{padding:32px clamp(18px,5vw,42px);border:1px solid rgba(255,255,255,.12);border-radius:28px;background:linear-gradient(145deg,rgba(22,27,38,.9),rgba(10,13,19,.94));box-shadow:0 28px 80px rgba(0,0,0,.28)}
+.install-section-heading h2{margin:9px 0 8px;font-size:clamp(27px,4vw,38px);letter-spacing:-.04em}
+.install-section-heading p{max-width:590px;margin:0;color:#aeb8ca;line-height:1.6}
+.install-steps{display:grid;gap:0;margin:28px 0 24px;padding:0;list-style:none}
+.install-steps li{display:grid;grid-template-columns:42px minmax(0,1fr) 42px;align-items:center;gap:16px;padding:19px 0;border-top:1px solid rgba(255,255,255,.09)}
+.install-step-number{color:#caff78;font-size:11px;font-weight:850;letter-spacing:.08em}
+.install-steps h3{margin:0 0 5px;font-size:16px}
+.install-steps p{margin:0;color:#aeb8ca;font-size:13px;line-height:1.55}
+.install-step-symbol,.install-share-symbol{display:grid;place-items:center;width:40px;height:40px;border:1px solid rgba(255,255,255,.15);border-radius:13px;background:rgba(255,255,255,.06);color:#eaf0fc;font-size:23px}
+.install-share-symbol{border-radius:11px;background:#f4f5f7;color:#151820;font-size:23px;font-weight:700}
+.install-share-symbol span{transform:translateY(-1px)}
+.install-check{color:#caff78}
+.install-open-button{display:flex;align-items:center;justify-content:center;gap:12px;min-height:54px;border-radius:16px;background:#d3ff7a;color:#10150a;text-decoration:none;font-weight:850;box-shadow:0 10px 30px rgba(194,255,106,.12)}
+.install-note{margin:14px 0 0;text-align:center;color:#8e9aaf;font-size:12px;line-height:1.55}
+.install-faq{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin:20px 0}
+.install-faq article{padding:19px;border:1px solid rgba(255,255,255,.1);border-radius:18px;background:rgba(255,255,255,.035)}
+.install-faq h3{margin:0 0 8px;font-size:14px}
+.install-faq p{margin:0;color:#9da9bd;font-size:12px;line-height:1.65}
+.install-footer{justify-content:space-between;gap:12px;flex-wrap:wrap;padding:22px 2px 0;border-top:1px solid rgba(255,255,255,.09);color:#8490a5;font-size:11px}
+.install-footer a{color:#cbd5e7;text-decoration:none}
+@media(max-width:640px){.install-shell{width:min(100% - 26px,900px);padding-top:14px}.install-hero{padding:44px 5px 32px}.install-hero h1{font-size:clamp(36px,10vw,52px)}.install-lede{font-size:14px}.install-facts{gap:8px 13px;font-size:11px}.install-instructions{padding:25px 18px;border-radius:22px}.install-steps li{grid-template-columns:31px minmax(0,1fr) 36px;gap:10px;padding:17px 0}.install-step-symbol,.install-share-symbol{width:35px;height:35px;border-radius:11px}.install-steps h3{font-size:14px}.install-steps p{font-size:12px}.install-faq{grid-template-columns:1fr;gap:10px}.install-footer{justify-content:center;text-align:center}.install-footer span{flex-basis:100%;order:3}}
+@media(prefers-reduced-motion:reduce){.install-open-button{box-shadow:none}}
