@@ -50,3 +50,11 @@ test("core app routes remain navigable with the service worker active", async ({
 
   expect(failedNavigations).toEqual([]);
 });
+
+
+test("website navigation does not advertise the unsupported Offline downloads tab", async ({ page }) => {
+  await page.goto("/home.html", { waitUntil: "domcontentloaded" });
+  await expect(page.locator(".vivid-navlinks a[href='my-downloads.html']")).toHaveCount(0);
+  await expect(page.locator(".vivid-mobile-nav a[href='my-downloads.html']")).toHaveCount(0);
+  await expect(page.locator(".vivid-navlinks a[href='library.html']")).toHaveCount(1);
+});
