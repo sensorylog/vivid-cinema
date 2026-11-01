@@ -43,3 +43,21 @@ Existing user-facing features worth preserving:
 ## First reliability tranche
 
 This PR hardens local byte-range delivery and verifies GET/HEAD, suffix/open-ended ranges, invalid/multiple ranges and common MIME mappings. It also keeps the player architecture unchanged while the advanced-engine packaging and licensing decision is made.
+
+
+## Advanced Player implementation tranche
+
+The Windows desktop branch now has an opt-in mpv fallback path:
+
+- A pinned upstream mpv full Windows build is downloaded during desktop preparation and verified against its SHA-256 digest before extraction. The binary is not checked into the Git repository.
+- Electron main process owns process creation and shutdown. The renderer receives only `openAdvancedPlayer(jobId, fileIndex)` and `stopAdvancedPlayer()`; it cannot pass arbitrary paths, commands, or shell arguments.
+- The executable is launched with an argument array and `shell: false`, with mpv user configuration disabled, the upstream on-screen controller enabled, and `--hwdec=auto-safe` so mpv can use a safe hardware decoder when available.
+- A per-launch random Windows named pipe is used only by the main process. The renderer cannot access it. mpv's time-position property is observed to preserve the existing Vivid resume position while the advanced engine is playing.
+- The existing HTML player remains the default. Users explicitly open the separate native mpv window from the offline player when they need the advanced engine.
+
+### Boundaries and release blockers
+
+- The current pinned runtime is Windows x64. Windows ARM64, macOS, Android and browser playback are not enabled by this tranche.
+- The advanced window uses mpv's own OSD/keyboard controls; Vivid's HTML player controls do not overlay the native mpv window.
+- The pinned binary's provenance and mpv/FFmpeg source revisions are recorded in `licenses/mpv/NOTICE.md`. The complete corresponding-source bundle for every GPL-covered component and required notices still needs to be assembled and verified before a public release containing this runtime. The notice explicitly records this as a release compliance gate.
+- CI can prove that the pinned archive downloads, checksum validation runs, the launcher contract is tested, and Windows packaging succeeds. It cannot prove that every codec works or that playback is smooth on all hardware. Real-device playback testing against the documented codec matrix remains required.
