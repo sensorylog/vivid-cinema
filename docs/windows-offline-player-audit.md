@@ -49,7 +49,7 @@ This PR hardens local byte-range delivery and verifies GET/HEAD, suffix/open-end
 
 The Windows desktop branch now has an opt-in mpv fallback path:
 
-- A pinned upstream mpv full Windows build is downloaded during desktop preparation and verified against its SHA-256 digest before extraction. The binary is not checked into the Git repository.
+- The signed upstream mpv 0.41.0 stable Windows x64 release archive is downloaded during desktop preparation and verified against its SHA-256 digest before extraction. This avoids shipping an untested development build. The official release binary omits some optional features that are not required for file playback. The binary is not checked into the Git repository.
 - Electron main process owns process creation and shutdown. The renderer receives only `openAdvancedPlayer(jobId, fileIndex)` and `stopAdvancedPlayer()`; it cannot pass arbitrary paths, commands, or shell arguments.
 - The executable is launched with an argument array and `shell: false`, with mpv user configuration disabled, the upstream on-screen controller enabled, and `--hwdec=auto-safe` so mpv can use a safe hardware decoder when available.
 - A per-launch random Windows named pipe is used only by the main process. The renderer cannot access it. mpv's time-position property is observed to preserve the existing Vivid resume position while the advanced engine is playing.
@@ -65,4 +65,4 @@ The Windows desktop branch now has an opt-in mpv fallback path:
 
 ### Cache and distribution safety
 
-The offline-player stylesheet and script now have new versioned URLs, and the service-worker shell cache is bumped to v265 so older cached renderer code cannot hide the new control. Pull-request and non-release CI artifacts deliberately omit the mpv executable; local Windows packaging and a public release prepare the pinned runtime. A public release is fail-closed until both `licenses/mpv/CORRESPONDING-SOURCE.zip` and `licenses/mpv/SOURCE-MANIFEST.json` are present and verified, and the workflow publishes both beside the installer.
+The offline-player stylesheet and script now have new versioned URLs, and the service-worker shell cache is bumped to v265 so older cached renderer code cannot hide the new control. Windows CI downloads and checksum-verifies the stable mpv archive, then removes the executable before producing pull-request and non-release preview artifacts. Local Windows packaging and a public release retain the pinned runtime. A public release is fail-closed until both `licenses/mpv/CORRESPONDING-SOURCE.zip` and `licenses/mpv/SOURCE-MANIFEST.json` are present and verified, and the workflow publishes both beside the installer.
