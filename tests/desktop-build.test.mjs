@@ -385,3 +385,28 @@ test("Windows Offline Library Stage 3 keeps download controls while grouping tit
   assert.match(styles, /offline-media-card/);
   assert.match(styles, /prefers-reduced-motion/);
 });
+
+
+test("Windows desktop navigation keeps Home Search visible and restores previous-page Back", () => {
+  const shell = fs.readFileSync(path.join(root, "scripts", "app-shell.js"), "utf8");
+  const home = fs.readFileSync(path.join(root, "home.html"), "utf8");
+  const searchPage = fs.readFileSync(path.join(root, "search.html"), "utf8");
+  const liquidGlass = fs.readFileSync(path.join(root, "styles", "vivid-liquid-glass.css"), "utf8");
+
+  // Home's shared header is rebuilt at startup. The Windows branch must use
+  // the dedicated Search page route, not the website-only in-page dialog.
+  assert.match(shell, /navLink\("search\.html", "bi-search", "Search", page === "search"\)/);
+  assert.match(shell, /window\.vividDownloads\?\.available === true/);
+  assert.match(shell, /vivid-windows-desktop/);
+  assert.match(home, /data-search-trigger/);
+  assert.match(searchPage, /id="search-page-input"/);
+  assert.match(searchPage, /scripts\/search-page\.js/);
+  assert.match(liquidGlass, /body\.vivid-windows-desktop \.vivid-topbar \.vivid-navlinks > a\[href="search\.html"\]/);
+
+  // Every Windows content page gets a Back control; Home gets one only when
+  // it was reached from another internal page. Direct entry remains sensible.
+  assert.match(shell, /hasInternalPreviousPage = previous\?\.origin === location\.origin/);
+  assert.match(shell, /if \(page === "home" && !hasInternalPreviousPage\) return/);
+  assert.match(shell, /back\.href = "home\.html"/);
+  assert.match(shell, /window\.history\.back\(\)/);
+});
