@@ -432,6 +432,8 @@ test("Advanced Player uses a pinned mpv runtime, private IPC and guarded main-pr
   assert.ok(pkg.build.extraResources.some(item => item.from === "desktop/vendor/mpv" && item.to === "mpv"));
   assert.ok(pkg.build.extraResources.some(item => item.from === "licenses/mpv" && item.to === "licenses/mpv"));
   assert.ok(prepare.includes("ARCHIVE_SHA256"));
+  assert.ok(prepare.includes("0.41.0"));
+  assert.ok(prepare.includes("41f6a645068483470267271e1d09966ca3b9f413"));
   assert.ok(prepare.includes("a49811c0752c108b8260636f9c6f6fcb97406641c98b30f1e7b500dfb20177de"));
   assert.ok(prepare.includes("checksum mismatch"));
   assert.ok(prepare.includes("Expand-Archive"));
@@ -450,6 +452,7 @@ test("Advanced Player uses a pinned mpv runtime, private IPC and guarded main-pr
   assert.ok(renderer.includes("engine.openAdvancedPlayer(id,fileIndex)"));
   assert.ok(workflow.includes("node desktop/prepare-mpv.cjs"));
   assert.ok(workflow.includes("approved checksum"));
+  assert.ok(workflow.includes("Remove mpv executable from non-release preview artifacts"));
   assert.ok(workflow.includes("CORRESPONDING-SOURCE.zip"));
   assert.ok(workflow.includes("SOURCE-MANIFEST.json"));
   assert.ok(workflow.includes("VIVID_SKIP_MPV_PREPARE: \"1\""));
