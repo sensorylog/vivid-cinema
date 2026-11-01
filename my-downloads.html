@@ -86,7 +86,7 @@
     <div><strong id="offline-completed">0</strong><span>Saved</span></div>
     <div><strong id="offline-active">0</strong><span>In progress</span></div>
   </section>
-  <section id="offline-library-tools" class="offline-library-tools" aria-label="Filter your offline library">
+  <section id="offline-library-tools" class="offline-library-tools" aria-label="Filter your offline library" hidden>
     <label class="offline-library-search" for="offline-library-search">
       <span aria-hidden="true">⌕</span>
       <input id="offline-library-search" type="search" placeholder="Search your library…" autocomplete="off">
@@ -101,7 +101,7 @@
   </section>
   <section class="offline-list-section" aria-labelledby="offline-list-title">
     <div class="offline-list-heading">
-      <h2 id="offline-list-title">Your library</h2><span id="offline-library-count" class="offline-library-count">0 downloads</span>
+      <h2 id="offline-list-title">Your library</h2><span id="offline-library-count" class="offline-library-count" hidden>0 downloads</span>
       <span id="offline-owner">Guest library</span>
     </div>
     <p id="offline-message" class="offline-message" role="status" aria-live="polite">Loading your download library…</p>
