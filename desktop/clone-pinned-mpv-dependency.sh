@@ -13,10 +13,10 @@ case "$URL" in
   *Little-CMS.git) KEY="lcms2" ;;
   *FFmpeg.git) KEY="ffmpeg" ;;
   *shaderc.git) KEY="shaderc" ;;
-  *SPIRV-Cross.git) KEY="spirv-cross" ;;
-  *nv-codec-headers.git) KEY="nv-codec-headers" ;;
-  *Vulkan-Headers.git) KEY="vulkan-headers" ;;
-  *Vulkan-Loader.git) KEY="vulkan-loader" ;;
+  *SPIRV-Cross|*SPIRV-Cross.git) KEY="spirv-cross" ;;
+  *nv-codec-headers|*nv-codec-headers.git) KEY="nv-codec-headers" ;;
+  *Vulkan-Headers|*Vulkan-Headers.git) KEY="vulkan-headers" ;;
+  *Vulkan-Loader|*Vulkan-Loader.git) KEY="vulkan-loader" ;;
   *libplacebo.git) KEY="libplacebo" ;;
   *libass.git) KEY="libass" ;;
   *LuaJIT.git) KEY="luajit" ;;
