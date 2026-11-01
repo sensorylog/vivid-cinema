@@ -109,3 +109,27 @@ html.vivid-performance-legacy .offline-episode-picker{max-height:300px}
 .offline-player-section[data-subtitle-size="large"] video::cue{font-size:140%}
 @media(max-width:760px){.offline-custom-controls{flex-wrap:wrap}.offline-subtitle-file-control{max-width:100%}.offline-subtitle-file-control input{max-width:125px}}
 html.vivid-performance-legacy .offline-custom-controls button{transition:none}
+
+
+/* Cinema mode and player focus controls. */
+.offline-player-section{position:relative;overflow:hidden;transition:background .2s ease}
+.offline-player-section video{object-fit:contain}
+.offline-player-section.controls-hidden .offline-player-heading,
+.offline-player-section.controls-hidden .offline-custom-controls,
+.offline-player-section.controls-hidden .offline-resume-prompt,
+.offline-player-section.controls-hidden>p{opacity:0;pointer-events:none;transition:opacity .22s ease}
+.offline-player-heading,.offline-custom-controls,.offline-resume-prompt{transition:opacity .22s ease}
+.offline-player-section:fullscreen{width:100vw;height:100vh;max-width:none;margin:0;padding:24px;box-sizing:border-box;border:0;border-radius:0;gap:12px}
+.offline-player-section:fullscreen video{width:100%;height:calc(100vh - 170px);max-height:none;flex:1;min-height:0;object-fit:contain}
+.offline-player-section:fullscreen .offline-custom-controls{width:100%;box-sizing:border-box;padding:14px 8px 4px}
+.offline-player-section:fullscreen .offline-player-heading{flex:0 0 auto}
+.offline-resume-prompt{display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;margin:10px auto;padding:12px 16px;border:1px solid rgba(170,185,220,.2);border-radius:14px;background:rgba(15,20,34,.96);color:#f4f6fc}
+.offline-resume-prompt[hidden]{display:none}
+.offline-resume-prompt button{border:1px solid rgba(170,185,220,.25);border-radius:9px;padding:8px 13px;background:rgba(255,255,255,.08);color:#fff;font-weight:650;cursor:pointer}
+#offline-resume-continue{background:#6255d9;border-color:transparent}
+#offline-next-episode{background:#6255d9;border-color:transparent}
+@media(max-width:700px){.offline-player-section:fullscreen{padding:10px}.offline-player-section:fullscreen video{height:calc(100vh - 220px)}.offline-resume-prompt{margin:8px 0}.offline-custom-controls{gap:8px}}
+html.vivid-performance-legacy .offline-player-section,
+html.vivid-performance-legacy .offline-player-heading,
+html.vivid-performance-legacy .offline-custom-controls,
+html.vivid-performance-legacy .offline-resume-prompt{transition:none}
