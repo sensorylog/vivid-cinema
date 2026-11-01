@@ -5,6 +5,7 @@ import { readFile } from "node:fs/promises";
 test("title download action opens the native Vivid Offline library", async () => {
   const script = await readFile(new URL("../scripts/title.js", import.meta.url), "utf8");
   const main = await readFile(new URL("../desktop/main.cjs", import.meta.url), "utf8");
+  const mediaProtocol = await readFile(new URL("../desktop/media-protocol.cjs", import.meta.url), "utf8");
   const preload = await readFile(new URL("../desktop/preload.cjs", import.meta.url), "utf8");
   const engine = await readFile(new URL("../desktop/download-engine.cjs", import.meta.url), "utf8");
   const offline = await readFile(new URL("../scripts/downloads/desktop-offline.js", import.meta.url), "utf8");
@@ -28,8 +29,9 @@ test("title download action opens the native Vivid Offline library", async () =>
   assert.match(main, /vivid-playback-position-get/);
   assert.match(main, /vivid-media/);
   assert.match(main, /protocol\.handle\("vivid-media"/);
-  assert.match(main, /Readable\.toWeb/);
-  assert.match(main, /Accept-Ranges/);
+  assert.match(main, /createMediaResponse/);
+  assert.match(mediaProtocol, /Readable\.toWeb/);
+  assert.match(mediaProtocol, /Accept-Ranges/);
   assert.match(main, /net\.isOnline\(\)/);
   assert.match(engine, /TorrentSearchApi\.enablePublicProviders/);
   assert.match(engine, /new WebTorrent\(\)/);
