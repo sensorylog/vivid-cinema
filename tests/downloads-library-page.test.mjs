@@ -127,7 +127,7 @@ test("fullscreen uses only Vivid overlay controls and pointer movement can hide 
   assert.match(desktop, /function hasKeyboardFocusedPlayerControl\(\)/);
   assert.match(desktop, /controlsHideTimer=setTimeout\(\(\)=>\{\s*hidePlayerControlsNow\(\);/);
   assert.match(desktop, /controlsHideTimer=setTimeout\(hidePlayerControlsNow,280\)/);
-  assert.doesNotMatch(desktop, /section\.matches\(":focus-within"\)/);
+  assert.doesNotMatch(desktop, /!section\\.matches\\(":focus-within"\\)/);
   assert.match(css, /\.offline-player-section:fullscreen\.controls-hidden \.offline-custom-controls\s*\{[\s\S]*?visibility:\s*hidden/);
 });
 
