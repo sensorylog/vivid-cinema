@@ -6,6 +6,7 @@ const path = require("node:path");
 const crypto = require("node:crypto");
 const { DesktopDownloadEngine } = require("./download-engine.cjs");
 const { createMediaResponse } = require("./media-protocol.cjs");
+const { AdvancedPlayer } = require("./advanced-player.cjs");
 protocol.registerSchemesAsPrivileged([{ scheme: "vivid-media", privileges: { standard: true, secure: true, supportFetchAPI: true, corsEnabled: true, stream: true } }]);
 
 const appRoot = app.getAppPath();
@@ -95,6 +96,7 @@ function createLocalServer(root) {
 let localServer;
 let localOrigin;
 let downloadEngine;
+let advancedPlayer;
 const mediaToken = crypto.randomBytes(32).toString("hex");
 const HOSTED_APP_URL = "https://vivid-cinema.pages.dev/home.html";
 const HOSTED_APP_ORIGIN = new URL(HOSTED_APP_URL).origin;
@@ -194,6 +196,7 @@ function configureDownloadEngine() {
   // Match the known-working 1.0.28 lifecycle: create the WebTorrent client
   // during desktop startup, before the renderer can issue a download request.
   downloadEngine = new DesktopDownloadEngine({ app, BrowserWindow, dialog, shell });
+  advancedPlayer = new AdvancedPlayer({ app, downloadEngine });
   ipcMain.handle("vivid-download-search", (event, query) => {
     if (!isTrustedDownloadSender(event)) throw new Error("Untrusted download request");
     return downloadEngine.search(query);
@@ -205,6 +208,14 @@ function configureDownloadEngine() {
   ipcMain.handle("vivid-download-list", event => {
     if (!isTrustedDownloadSender(event)) throw new Error("Untrusted download request");
     return downloadEngine.list();
+  });
+  ipcMain.handle("vivid-advanced-player-open", async (event, id, fileIndex = 0) => {
+    if (!isTrustedDownloadSender(event)) throw new Error("Untrusted advanced-player request");
+    return advancedPlayer.open(id, fileIndex);
+  });
+  ipcMain.handle("vivid-advanced-player-stop", event => {
+    if (!isTrustedDownloadSender(event)) throw new Error("Untrusted advanced-player request");
+    return advancedPlayer.stop();
   });
   ipcMain.handle("vivid-playback-position-get", (event, id, fileIndex = 0) => {
     if (!isTrustedDownloadSender(event)) throw new Error("Untrusted playback request");
@@ -486,6 +497,7 @@ let shutdownStarted = false;
 app.on("before-quit", event => {
   if (downloadEngine && !shutdownStarted) {
     event.preventDefault(); shutdownStarted = true;
+    if (advancedPlayer) advancedPlayer.stop();
     void downloadEngine.shutdown().finally(() => { if (localServer) localServer.close(); app.quit(); });
     return;
   }
