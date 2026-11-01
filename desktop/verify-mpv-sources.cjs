@@ -29,15 +29,25 @@ function verifyMpvSources({ projectRoot = path.resolve(__dirname, ".."), skip = 
   if (!Array.isArray(manifest.components) || manifest.components.length === 0) {
     throw new Error("The source manifest must enumerate all additional bundled components and their licences.");
   }
-  const incomplete = manifest.components.some(component =>
-    !component || typeof component.name !== "string" || !component.name.trim() ||
-    typeof component.license !== "string" || !component.license.trim() ||
-    typeof component.source !== "string" || !component.source.trim() ||
-    !(typeof component.commit === "string" && component.commit.trim()) &&
-      !(typeof component.version === "string" && component.version.trim())
-  );
+  const licenseRootReal = fs.realpathSync(licenseRoot);
+  const incomplete = manifest.components.some(component => {
+    if (!component || typeof component.name !== "string" || !component.name.trim() ||
+        typeof component.license !== "string" || !component.license.trim() ||
+        typeof component.source !== "string" || !component.source.trim() ||
+        !(typeof component.commit === "string" && component.commit.trim()) &&
+          !(typeof component.version === "string" && component.version.trim()) ||
+        typeof component.licenseFile !== "string" || !component.licenseFile.trim()) return true;
+    const licensePath = path.resolve(licenseRoot, component.licenseFile);
+    const relative = path.relative(licenseRootReal, licensePath);
+    if (!relative || relative.startsWith("..") || path.isAbsolute(relative) || !fs.existsSync(licensePath)) return true;
+    try {
+      const realLicensePath = fs.realpathSync(licensePath);
+      const realRelative = path.relative(licenseRootReal, realLicensePath);
+      return realRelative.startsWith("..") || !fs.statSync(realLicensePath).isFile();
+    } catch { return true; }
+  });
   if (incomplete) {
-    throw new Error("Every source-manifest component must include its name, licence, source location and exact commit or version.");
+    throw new Error("Every source-manifest component must include its name, licence, source location, exact commit or version, and a bundled licence file inside licenses/mpv.");
   }
   if (!manifest.verification || typeof manifest.verification.method !== "string" ||
       !manifest.verification.method.trim() || typeof manifest.verification.verifiedBy !== "string" ||
