@@ -90,7 +90,7 @@ test("advanced player launches only a validated completed download through a dir
   assert.ok(calls[0][1].includes("--start=12.000"));
   await new Promise(resolve => setImmediate(resolve));
   assert.match(player.ipcSocket.lastWrite, /observe_property/);
-  player.ipcSocket.emit("data", JSON.stringify({ event: "property-change", id: 1, name: "time-pos", data: 24 }) + "\\n");
+  player.ipcSocket.emit("data", JSON.stringify({ event: "property-change", id: 1, name: "time-pos", data: 24 }) + "\n");
   await new Promise(resolve => setImmediate(resolve));
   assert.ok(savedPositions.some(row => row[0] === "job-1" && row[1] === 0 && row[2] === 24), "mpv time-pos events update Vivid resume state");
 
