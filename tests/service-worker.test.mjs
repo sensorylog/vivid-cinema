@@ -12,7 +12,9 @@ test("service worker has a versioned cache and required offline shell", () => {
   assert.match(source, /const CACHE_NAME = "vivid-cinema-shell-v\d+"/);
   assert.match(source, /const REQUIRED_APP_SHELL = \["\.\/index\.html", "\.\/home\.html", "\.\/offline\.html", "\.\/manifest\.json"\]/);
   assert.match(source, /failedRequired\.length/);
+  assert.match(source, /async function cacheOptionalShell\\(\\)/);
   assert.match(source, /optional assets were not precached/);
+  assert.match(source, /type==="PRECACHE_OPTIONAL"/);
   assert.match(source, /\.\/scripts\/local-owner\.js/);
 });
 
@@ -30,12 +32,14 @@ test("every precached asset exists in the repository", async () => {
   assert.deepEqual(missing, [], "Missing precache assets: " + missing.join(", "));
 });
 
-test("ordinary JavaScript and CSS use network-first while retaining offline cache fallback", () => {
-  assert.match(source, /const CACHE_NAME = "vivid-cinema-shell-v\d+"/);
-  assert.match(source, /isCodeOrStyle.*networkFirst/);
-  assert.match(source, /event\.respondWith\(isCodeOrStyle\?networkFirst\(request\):isHtml\?networkFirst\(request\):staleWhileRevalidate\(request,event\)\)/);
+test("ordinary JavaScript and CSS serve cache immediately and refresh in the background", () => {
+  assert.match(source, /const CACHE_NAME = "vivid-cinema-shell-v\\d+"/);
+  assert.match(source, /isCodeOrStyle.*staleWhileRevalidate/);
+  assert.match(source, /event\\.respondWith\\(isCodeOrStyle\\?staleWhileRevalidate\\(request,event\\):isHtml\\?networkFirst\\(request\\):staleWhileRevalidate\\(request,event\\)\\)/);
+  assert.match(source, /auth-diagnostics\\|account\\|account-bootstrap/);
+  assert.doesNotMatch(source, /auth-diagnostics\\|app-shell\\|account/);
   assert.match(source, /redirect:"follow"/);
-  assert.match(source, /response\.redirected&&response\.url/);
+  assert.match(source, /response\\.redirected&&response\\.url/);
 });
 
 test("service worker never returns redirect-marked or redirect-status responses", () => {
@@ -89,7 +93,7 @@ function createWorkerHarness(fetchImpl, initialCache = new Map()) {
     Set,
     Error
   };
-  runInNewContext(source + "\nglobalThis.__worker = { networkFirst, staleWhileRevalidate, safeCachedResponse, cacheAssetsWithConcurrency };", context);
+  runInNewContext(source + "\nglobalThis.__worker = { networkFirst, staleWhileRevalidate, safeCachedResponse, cacheAssetsWithConcurrency, cacheShell, cacheOptionalShell };", context);
   return { worker: context.__worker, cacheEntries, cacheKey, handlers };
 }
 
@@ -211,4 +215,26 @@ test("Hls.js CORS response is cached and served again when offline", async () =>
   offline = true;
   const cached = await dispatch();
   assert.equal(cached.url, libraryUrl);
+});
+
+
+test("service worker install waits only for the essential offline shell", () => {
+  const install = source.match(/self\\.addEventListener\\("install",event=>\\{([\\s\\S]*?)\\}\\);/);
+  assert.ok(install);
+  assert.match(install[1], /cacheShell\\(\\)\\.then\\(\\(\\)=>self\\.skipWaiting\\(\\)\\)/);
+  assert.doesNotMatch(install[1], /cacheOptionalShell|cacheAssetsWithConcurrency/);
+  assert.match(source, /type:"PRECACHE_OPTIONAL"/);
+});
+
+test("cached app scripts are returned immediately while a background refresh is attempted", async () => {
+  const scriptUrl = "https://vivid.test/scripts/app-shell.js";
+  const cached = mockResponse({ url: scriptUrl });
+  let networkRequested = false;
+  const harness = createWorkerHarness(async () => {
+    networkRequested = true;
+    throw new Error("offline");
+  }, new Map([[scriptUrl, cached]]));
+  const response = await harness.worker.staleWhileRevalidate(new Request(scriptUrl), { waitUntil() {} });
+  assert.equal(response, cached);
+  assert.equal(networkRequested, true);
 });
