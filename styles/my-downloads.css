@@ -140,3 +140,15 @@ html.vivid-performance-legacy .offline-resume-prompt{transition:none}
 
 .offline-subtitle-track-control{display:flex;align-items:center;gap:6px;font-size:11px;color:#aebbd4}
 .offline-subtitle-track-control select{max-width:145px;border:1px solid rgba(170,185,220,.22);border-radius:8px;background:#0b1020;color:#f4f6fc;padding:7px 8px;font:600 11px system-ui,sans-serif}
+
+
+/* Floating cinema controls stay inside the player and never cover the close action. */
+.offline-player-section{min-height:280px}
+.offline-player-section video{max-height:70vh}
+.offline-player-heading{position:absolute;z-index:4;top:30px;left:32px;right:32px;padding:10px 12px;border-radius:12px;background:linear-gradient(90deg,rgba(4,7,13,.82),rgba(4,7,13,.2));}
+.offline-custom-controls{position:absolute;z-index:4;left:28px;right:28px;bottom:34px;padding:13px 14px;border:1px solid rgba(190,205,235,.16);border-radius:15px;background:linear-gradient(100deg,rgba(7,11,20,.94),rgba(15,20,34,.86));box-shadow:0 12px 36px rgba(0,0,0,.28);backdrop-filter:blur(12px)}
+.offline-player-section:fullscreen .offline-player-heading{position:relative;inset:auto;padding:0;background:none}
+.offline-player-section:fullscreen .offline-custom-controls{position:relative;inset:auto;padding:14px 8px 4px;border:0;border-radius:0;background:none;box-shadow:none;backdrop-filter:none}
+.offline-player-section:fullscreen .offline-resume-prompt{flex:0 0 auto}
+@media(max-width:760px){.offline-player-heading{top:16px;left:16px;right:16px}.offline-custom-controls{left:12px;right:12px;bottom:22px;padding:10px}.offline-player-section{min-height:240px}}
+html.vivid-performance-legacy .offline-custom-controls{backdrop-filter:none;box-shadow:none;background:#101522}
