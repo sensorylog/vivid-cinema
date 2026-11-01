@@ -372,3 +372,13 @@ html.vivid-performance-legacy .offline-library-tools,html.vivid-performance-lega
     transition: none;
   }
 }
+
+/* In fullscreen, Chromium's native video controls are disabled by the player
+   controller; these Vivid controls are the only visible transport UI. */
+.offline-player-section:fullscreen video { pointer-events: none; }
+.offline-player-section:fullscreen .offline-custom-controls { pointer-events: auto; }
+.offline-player-section:fullscreen.controls-hidden .offline-player-heading,
+.offline-player-section:fullscreen.controls-hidden .offline-custom-controls {
+  visibility: hidden;
+}
+

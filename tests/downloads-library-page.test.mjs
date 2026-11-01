@@ -102,7 +102,7 @@ test("offline player fullscreen fills the viewport and floats controls over the 
   assert.match(desktop, /function currentFullscreenElement\(\)/);
   assert.match(desktop, /webkitRequestFullscreen/);
   assert.match(desktop, /\},2200\)/);
-  assert.match(desktop, /\},280\)/);
+  assert.ok(desktop.includes("setTimeout(hidePlayerControlsNow,280)"));
   assert.match(css, /\.offline-player-section:fullscreen\s*\{[\s\S]*?height:\s*100dvh/);
   assert.match(css, /\.offline-player-section:fullscreen video\s*\{[\s\S]*?position:\s*absolute[\s\S]*?height:\s*100%/);
   assert.match(css, /\.offline-player-section:fullscreen \.offline-custom-controls\s*\{[\s\S]*?position:\s*absolute/);
@@ -117,4 +117,27 @@ test("MKV playback selects a default audio track and diagnoses silent unsupporte
   assert.match(desktop, /webkitAudioDecodedByteCount/);
   assert.match(desktop, /DTS or TrueHD audio/);
   assert.match(desktop, /if\(player\.muted&&player\.volume>0\)player\.muted=false/);
+});
+
+
+test("fullscreen uses only Vivid overlay controls and pointer movement can hide them", async () => {
+  const desktop = await readFile(new URL("../scripts/downloads/desktop-offline.js", import.meta.url), "utf8");
+  const css = await readFile(new URL("../styles/my-downloads.css", import.meta.url), "utf8");
+  assert.match(desktop, /player\.controls=!active/);
+  assert.match(desktop, /function hasKeyboardFocusedPlayerControl\(\)/);
+  assert.match(desktop, /controlsHideTimer=setTimeout\(\(\)=>\{\s*hidePlayerControlsNow\(\);/);
+  assert.ok(desktop.includes("setTimeout(hidePlayerControlsNow,280)"));
+  assert.doesNotMatch(desktop, /!section.matches/);
+  assert.match(css, /\.offline-player-section:fullscreen\.controls-hidden \.offline-custom-controls\s*\{[\s\S]*?visibility:\s*hidden/);
+});
+
+test("Windows player runtime and stylesheet have cache-busting URLs", async () => {
+  const page = await readFile(new URL("../my-downloads.html", import.meta.url), "utf8");
+  const script = await readFile(new URL("../scripts/my-downloads.js", import.meta.url), "utf8");
+  const worker = await readFile(new URL("../service-worker.js", import.meta.url), "utf8");
+  assert.match(page, /my-downloads\.css\?v=player-fullscreen-v3/);
+  assert.match(script, /desktop-offline\.js\?player-fullscreen-v3/);
+  assert.match(worker, /vivid-cinema-shell-v263/);
+  assert.match(worker, /desktop-offline\.js\?player-fullscreen-v3/);
+  assert.match(worker, /my-downloads\.css\?v=player-fullscreen-v3/);
 });

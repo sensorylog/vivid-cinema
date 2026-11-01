@@ -424,6 +424,9 @@ function syncFullscreenButton(){
   const button=byId("offline-fullscreen");
   button.textContent=active?"Exit fullscreen":"Fullscreen";
   button.setAttribute("aria-pressed",String(active));
+  // Native Chromium controls do not participate in our fade animation.
+  // In fullscreen, use only Vivid's floating controls; restore native controls on exit.
+  player.controls=!active;
 }
 async function togglePlayerFullscreen(){
   const section=byId("offline-player-section");
@@ -457,23 +460,29 @@ let resumePosition=0;
 let controlsHideTimer=0;
 let subtitleCueBaseTimes=[];
 let activeSubtitleTrack=null;
+function hasKeyboardFocusedPlayerControl(){
+  const section=byId("offline-player-section");
+  return Boolean(section.querySelector(":focus-visible"));
+}
+function hidePlayerControlsNow(){
+  const section=byId("offline-player-section");
+  if(!player.paused&&!hasKeyboardFocusedPlayerControl())section.classList.add("controls-hidden");
+}
 function showPlayerControls(){
   const section=byId("offline-player-section");
   section.classList.remove("controls-hidden");
   if(controlsHideTimer)clearTimeout(controlsHideTimer);
   if(!player.paused){
     controlsHideTimer=setTimeout(()=>{
-      if(!player.paused&&!section.matches(":focus-within"))section.classList.add("controls-hidden");
+      hidePlayerControlsNow();
     },2200);
   }
 }
 function hidePlayerControls(){
   const section=byId("offline-player-section");
   if(controlsHideTimer)clearTimeout(controlsHideTimer);
-  if(!player.paused&&!section.matches(":focus-within")){
-    controlsHideTimer=setTimeout(()=>{
-      if(!player.paused&&!section.matches(":focus-within"))section.classList.add("controls-hidden");
-    },280);
+  if(!player.paused&&!hasKeyboardFocusedPlayerControl()){
+    controlsHideTimer=setTimeout(hidePlayerControlsNow,280);
   }
 }
 function findNextEpisode(job){
