@@ -20,11 +20,11 @@ test("Home paints shelves independently and defers secondary shelves until near 
   const source=await read("script.js");
   const batch=source.slice(source.indexOf("async function loadSectionBatch(keys){"),source.indexOf("async function loadMoreSection"));
   const home=source.slice(source.indexOf("async function loadHome(){"),source.indexOf("let searchDialog"));
-  assert.match(batch,/Promise\\.all\\(keys\\.map\\(async key/);
+  assert.ok(batch.includes("Promise.all(keys.map(async key=>"));
   assert.match(home,/new IntersectionObserver/);
   assert.match(home,/rootMargin:"700px 0px"/);
   assert.match(batch,/vivid:home-trending-ready/);
-  assert.doesNotMatch(source,/initFeatureStrip\\(\\);void loadHome\\(\\)/);
+  assert.ok(!source.includes("initFeatureStrip();void loadHome()"));
 });
 
 test("Home ambient artwork shares trending data and TMDB uses browser HTTP caching", async () => {
@@ -38,9 +38,9 @@ test("Home ambient artwork shares trending data and TMDB uses browser HTTP cachi
 test("offline progress updates patch only the matching download row", async () => {
   const source=await read("scripts/downloads/desktop-offline.js");
   assert.match(source,/data-job-id=/);
-  assert.match(source,/function updateJobProgress\\(job\\)/);
-  assert.match(source,/else updateJobProgress\\(jobs\\[index\\]\\)/);
-  assert.match(source,/if\\(changed\\)render\\(\\)/);
+  assert.ok(source.includes("function updateJobProgress(job)"));
+  assert.ok(source.includes("else updateJobProgress(jobs[index])"));
+  assert.ok(source.includes("if(changed)render()"));
 });
 
 test("watch page disables expensive ambient blur animation and overlay", async () => {
