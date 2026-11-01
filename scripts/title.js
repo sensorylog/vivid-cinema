@@ -390,7 +390,10 @@ function render(details, externalCertification = "", externalCertificationNote =
 function openTitleDownload() {
   if (!media) return;
   if (!window.vividDownloads?.available) {
-    window.alert("Offline downloads are available in the Vivid Cinema Windows app. Open this title in the desktop app to download it.");
+    const isAndroidApp = window.Capacitor?.isNativePlatform?.() && window.Capacitor?.getPlatform?.() === "android";
+    window.alert(isAndroidApp
+      ? "Movie and TV offline downloads are coming to the Vivid Cinema Android app. This feature is not available on Android yet. For offline watching today, use Vivid Cinema for Windows."
+      : "Download movies and TV episodes in the Vivid Cinema Windows app, then watch them offline in My Downloads. Android offline downloads are in development, and website downloads are still being developed.");
     return;
   }
   try {

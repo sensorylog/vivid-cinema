@@ -238,3 +238,137 @@ html.vivid-performance-legacy .offline-library-tools,html.vivid-performance-lega
 }
 
 .offline-job-error{margin:7px 0 0;color:#ffb6b6;font-size:12px;line-height:1.45;overflow-wrap:anywhere}
+
+
+/* Vivid Cinema 1.0.37 — immersive offline cinema mode.
+   Keep the video viewport-sized and float controls over the picture. */
+.offline-player-section:fullscreen {
+  position: fixed !important;
+  inset: 0 !important;
+  display: flex !important;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: stretch;
+  gap: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  height: 100dvh !important;
+  min-width: 0;
+  min-height: 0;
+  max-width: none !important;
+  max-height: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: #000 !important;
+  box-sizing: border-box;
+}
+.offline-player-section:fullscreen video {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+  min-width: 0;
+  min-height: 0;
+  max-width: none;
+  max-height: none !important;
+  flex: none !important;
+  margin: 0;
+  border-radius: 0;
+  background: #000;
+  object-fit: contain;
+}
+.offline-player-section:fullscreen .offline-player-heading {
+  position: absolute !important;
+  z-index: 8;
+  top: max(14px, env(safe-area-inset-top));
+  left: max(16px, env(safe-area-inset-left));
+  right: max(16px, env(safe-area-inset-right));
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 13px;
+  background: linear-gradient(90deg,rgba(4,7,13,.88),rgba(4,7,13,.42));
+  backdrop-filter: blur(10px);
+}
+.offline-player-section:fullscreen .offline-custom-controls {
+  position: absolute !important;
+  z-index: 9;
+  inset: auto max(14px, env(safe-area-inset-right)) max(14px, env(safe-area-inset-bottom)) max(14px, env(safe-area-inset-left)) !important;
+  display: flex;
+  width: auto !important;
+  max-height: min(42dvh, 300px);
+  overflow-y: auto;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 9px 12px;
+  padding: 12px 14px;
+  border: 1px solid rgba(210,220,245,.18);
+  border-radius: 16px;
+  background: linear-gradient(180deg,rgba(7,10,18,.78),rgba(7,10,18,.96));
+  box-shadow: 0 12px 38px rgba(0,0,0,.42);
+  backdrop-filter: blur(14px);
+  box-sizing: border-box;
+}
+.offline-player-section:fullscreen .offline-seek-control {
+  flex: 1 1 180px;
+  min-width: 150px;
+}
+.offline-player-section:fullscreen .offline-player-heading h2 {
+  margin: 0;
+  font-size: clamp(14px,2vw,20px);
+}
+.offline-player-section:fullscreen .offline-player-heading button,
+.offline-player-section:fullscreen .offline-custom-controls button {
+  min-height: 38px;
+}
+.offline-player-section:fullscreen.controls-hidden .offline-player-heading {
+  opacity: 0;
+  transform: translateY(-10px);
+  pointer-events: none;
+}
+.offline-player-section:fullscreen.controls-hidden .offline-custom-controls {
+  opacity: 0;
+  transform: translateY(14px);
+  pointer-events: none;
+}
+.offline-player-section:fullscreen .offline-player-heading,
+.offline-player-section:fullscreen .offline-custom-controls {
+  transition: opacity .2s ease, transform .2s ease;
+}
+.offline-player-section:fullscreen .offline-resume-prompt {
+  position: absolute;
+  z-index: 10;
+  left: 50%;
+  bottom: 18%;
+  transform: translateX(-50%);
+  max-width: min(92vw,560px);
+}
+.offline-player-section:fullscreen .offline-seek-feedback {
+  z-index: 10;
+}
+@media(max-width:700px) {
+  .offline-player-section:fullscreen .offline-player-heading {
+    top: max(8px, env(safe-area-inset-top));
+    left: max(8px, env(safe-area-inset-left));
+    right: max(8px, env(safe-area-inset-right));
+  }
+  .offline-player-section:fullscreen .offline-custom-controls {
+    inset: auto max(8px, env(safe-area-inset-right)) max(8px, env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-left)) !important;
+    max-height: 46dvh;
+    gap: 7px;
+    padding: 9px;
+  }
+}
+@media(prefers-reduced-motion:reduce) {
+  .offline-player-section:fullscreen .offline-player-heading,
+  .offline-player-section:fullscreen .offline-custom-controls {
+    transition: none;
+  }
+}

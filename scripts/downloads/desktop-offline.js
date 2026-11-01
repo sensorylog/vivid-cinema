@@ -372,6 +372,11 @@ function refreshAudioTracks(){
   if(!select||!tracks||typeof tracks.length!=="number"){if(select)select.parentElement.hidden=true;return;}
   select.innerHTML="";
   if(!tracks.length){select.parentElement.hidden=true;return;}
+  // Some Matroska files expose audio tracks without marking a default track.
+  // Explicitly enable the first track so a playable video is not silently muted.
+  let hasEnabledTrack=false;
+  for(let index=0;index<tracks.length;index++)hasEnabledTrack ||= Boolean(tracks[index].enabled);
+  if(!hasEnabledTrack)tracks[0].enabled=true;
   for(let index=0;index<tracks.length;index++){
     const track=tracks[index],option=document.createElement("option");
     option.value=String(index);
@@ -411,8 +416,11 @@ byId("offline-audio-track").addEventListener("change",event=>{
 byId("offline-seek").addEventListener("input",event=>{if(Number.isFinite(player.duration))player.currentTime=player.duration*(Number(event.target.value)/1000);});
 byId("offline-volume").addEventListener("input",event=>{player.volume=Number(event.target.value);player.muted=player.volume===0;});
 byId("offline-speed").addEventListener("change",event=>{player.playbackRate=Number(event.target.value)||1;});
+function currentFullscreenElement(){
+  return document.fullscreenElement||document.webkitFullscreenElement||null;
+}
 function syncFullscreenButton(){
-  const active=document.fullscreenElement===byId("offline-player-section");
+  const active=currentFullscreenElement()===byId("offline-player-section");
   const button=byId("offline-fullscreen");
   button.textContent=active?"Exit fullscreen":"Fullscreen";
   button.setAttribute("aria-pressed",String(active));
@@ -420,14 +428,24 @@ function syncFullscreenButton(){
 async function togglePlayerFullscreen(){
   const section=byId("offline-player-section");
   try{
-    if(document.fullscreenElement===section){
-      await document.exitFullscreen();
+    const active=currentFullscreenElement();
+    if(active===section){
+      const exit=document.exitFullscreen||document.webkitExitFullscreen;
+      if(typeof exit==="function")await exit.call(document);
       return;
     }
-    if(document.fullscreenElement)await document.exitFullscreen();
-    const request=section.requestFullscreen||section.webkitRequestFullscreen;
+    if(active){
+      const exit=document.exitFullscreen||document.webkitExitFullscreen;
+      if(typeof exit==="function")await exit.call(document);
+    }
+    const standardRequest=section.requestFullscreen;
+    const request=standardRequest||section.webkitRequestFullscreen;
     if(typeof request!=="function")throw new Error("Fullscreen API is unavailable.");
-    await request.call(section,{navigationUI:"hide"});
+    const result=standardRequest
+      ? request.call(section,{navigationUI:"hide"})
+      : request.call(section);
+    await Promise.resolve(result);
+    showPlayerControls();
   }catch(error){
     syncFullscreenButton();
     setMessage("Fullscreen could not be opened on this device. "+(error?.message||""));
@@ -446,12 +464,17 @@ function showPlayerControls(){
   if(!player.paused){
     controlsHideTimer=setTimeout(()=>{
       if(!player.paused&&!section.matches(":focus-within"))section.classList.add("controls-hidden");
-    },3200);
+    },2200);
   }
 }
 function hidePlayerControls(){
   const section=byId("offline-player-section");
-  if(!player.paused&&!section.matches(":focus-within"))section.classList.add("controls-hidden");
+  if(controlsHideTimer)clearTimeout(controlsHideTimer);
+  if(!player.paused&&!section.matches(":focus-within")){
+    controlsHideTimer=setTimeout(()=>{
+      if(!player.paused&&!section.matches(":focus-within"))section.classList.add("controls-hidden");
+    },280);
+  }
 }
 function findNextEpisode(job){
   const media=job?.media||{};
@@ -536,6 +559,29 @@ player.addEventListener("loadedmetadata",()=>{
 });
 player.addEventListener("durationchange",syncPlayerControls);
 player.addEventListener("loadedmetadata",refreshAudioTracks);
+let audioDiagnosticTimer=null;
+function diagnoseSilentMatroska(){
+  if(audioDiagnosticTimer)clearTimeout(audioDiagnosticTimer);
+  const file=Array.isArray(jobs.find(item=>item.id===player.dataset.jobId)?.files)
+    ? jobs.find(item=>item.id===player.dataset.jobId).files[Number(player.dataset.fileIndex)||0]
+    : null;
+  if(!/\.mkv$/i.test(String(file?.name||"")))return;
+  const decoded=Number(player.webkitAudioDecodedByteCount);
+  if(!Number.isFinite(decoded))return;
+  const startTime=player.currentTime;
+  const startBytes=decoded;
+  audioDiagnosticTimer=setTimeout(()=>{
+    audioDiagnosticTimer=null;
+    if(player.paused||player.ended||player.currentTime<startTime+2)return;
+    const currentBytes=Number(player.webkitAudioDecodedByteCount);
+    if(Number.isFinite(currentBytes)&&currentBytes<=startBytes){
+      setMessage("This MKV is playing video, but its audio track is not being decoded. It may use DTS or TrueHD audio, which the built-in player cannot play. Use an MKV with AAC/MP3 audio or an MP4 version.");
+    }
+  },4500);
+}
+player.addEventListener("playing",diagnoseSilentMatroska);
+player.addEventListener("pause",()=>{if(audioDiagnosticTimer)clearTimeout(audioDiagnosticTimer);audioDiagnosticTimer=null;});
+
 player.addEventListener("loadedmetadata",refreshSubtitleTracks);
 player.addEventListener("loadeddata",refreshAudioTracks);
 player.textTracks?.addEventListener?.("addtrack",refreshSubtitleTracks);
@@ -578,7 +624,7 @@ async function play(job,fileIndex=0){
   byId("offline-resume-prompt").hidden=true;
   resumePosition=0;
   const section=byId("offline-player-section");
-  if(player.dataset.jobId!==job.id||player.dataset.fileIndex!==String(fileIndex)){player.pause();clearExternalSubtitle();player.src=url;player.dataset.jobId=job.id;player.dataset.fileIndex=String(fileIndex);player.load();lastPositionSave=0;byId("offline-player-section").dataset.subtitleSize="medium";byId("offline-subtitle-size").value="medium";}
+  if(player.dataset.jobId!==job.id||player.dataset.fileIndex!==String(fileIndex)){player.pause();clearExternalSubtitle();player.src=url;player.dataset.jobId=job.id;player.dataset.fileIndex=String(fileIndex);if(player.muted&&player.volume>0)player.muted=false;player.load();lastPositionSave=0;byId("offline-player-section").dataset.subtitleSize="medium";byId("offline-subtitle-size").value="medium";}
   player.controls=false;
   byId("offline-custom-controls").hidden=false;
   section.classList.remove("controls-hidden");
@@ -633,9 +679,11 @@ byId("offline-jobs").addEventListener("click",async event=>{
 player.addEventListener("error",()=>setMessage("This file uses a video format or codec the built-in player cannot decode. Try an MP4 or WebM release."));
 byId("offline-player-close").addEventListener("click",async()=>{
   if(controlsHideTimer)clearTimeout(controlsHideTimer);
-  if(document.fullscreenElement===playerSection){
-    try{await document.exitFullscreen();}catch{}
+  if(currentFullscreenElement()===playerSection){
+    const exit=document.exitFullscreen||document.webkitExitFullscreen;
+    try{if(typeof exit==="function")await exit.call(document);}catch{}
   }
+  if(audioDiagnosticTimer)clearTimeout(audioDiagnosticTimer);audioDiagnosticTimer=null;
   player.pause();clearExternalSubtitle();player.removeAttribute("src");player.load();player.dataset.jobId="";
   player.controls=true;byId("offline-custom-controls").hidden=true;byId("offline-player-section").hidden=true;
   byId("offline-audio-track").parentElement.hidden=true;byId("offline-resume-prompt").hidden=true;
