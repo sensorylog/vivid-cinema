@@ -23,7 +23,7 @@ test("watch page disables expensive ambient blur animation and overlay", async (
 
 test("noncritical analytics, telemetry and PWA modules do not block app-shell evaluation", async () => {
   const appShell = await read("scripts/app-shell.js");
-  for (const module of ["google-tag", "vivid-pulse", "pwa"]) {
+  for (const module of ["google-tag", "vivid-pulse", "pwa", "analytics", "achievements"]) {
     assert.ok(!appShell.includes('import "./' + module + '.js";'), module + " must not be a blocking static import");
     assert.ok(appShell.includes('import("./' + module + '.js")'), module + " should load after first paint");
   }
@@ -36,6 +36,7 @@ test("app shell routes Back through its saved previous internal Vivid route", as
   assert.ok(appShell.includes("function trackInternalNavigation(event)"));
   assert.ok(appShell.includes("location.assign(new URL(previous, location.origin).href)"));
   assert.ok(appShell.indexOf("recordCurrentRoute();") < appShell.indexOf("ensureBackControl();"));
+  assert.ok(appShell.includes("scheduleIdle(() => { syncAccountNavigation(); }, 1200)"));
 });
 
 test("first-time service-worker installation does not force an extra page reload", async () => {
