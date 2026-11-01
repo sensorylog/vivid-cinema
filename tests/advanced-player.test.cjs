@@ -116,7 +116,7 @@ test("advanced player rejects unknown jobs, missing runtime and non-Windows laun
     platform: "win32",
     resourcesPath: root
   });
-  await assert.rejects(missingRuntime.open("job-1"), /runtime is missing/);
+  await assert.rejects(missingRuntime.open("job-1"), /not bundled/);
 
   const nonWindows = new AdvancedPlayer({
     app: { isPackaged: true, getAppPath: () => root },
