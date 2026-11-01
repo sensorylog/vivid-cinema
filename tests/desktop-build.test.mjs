@@ -365,6 +365,9 @@ test("Windows Offline Library Stage 3 keeps download controls while grouping tit
   assert.match(library, /async function hydratePosterArtwork\(\)/);
   assert.match(library, /tmdbApi\.tvDetailsBasic\(media\.id\)/);
   assert.match(library, /tmdbApi\.movieDetailsBasic\(media\.id\)/);
+  assert.match(library, /candidateMedia\.poster_path=poster/);
+  assert.match(library, /return "Downloading"/);
+  assert.doesNotMatch(library, /job\.phase \|\| "Connecting to peers"/);
   assert.match(library, /poster\.split\("\/"\)\.includes\("\.\."\)/);
   assert.doesNotMatch(library, /discoveryDetail|lastNoPeerSource|trackerAnnounces/);
   assert.match(styles, /offline-series-card/);
