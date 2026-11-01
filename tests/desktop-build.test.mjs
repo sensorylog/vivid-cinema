@@ -270,3 +270,20 @@ test("legacy desktop profile removes continuous decorative work", () => {
   assert.match(hero, /if \(legacyPerformance\)/);
   assert.match(hero, /setTimeout\(advanceHero, NO_TRAILER_HOLD_MS\)/);
 });
+
+
+test("Vivid Ultra Player keeps Chromium playback and adds guarded native media controls", () => {
+  const player = fs.readFileSync(path.join(root, "scripts", "downloads", "desktop-offline.js"), "utf8");
+  const page = fs.readFileSync(path.join(root, "my-downloads.html"), "utf8");
+  const styles = fs.readFileSync(path.join(root, "styles", "my-downloads.css"), "utf8");
+  assert.match(page, /<video id="offline-player" controls playsinline preload="metadata"><\/video>/);
+  assert.match(page, /offline-skip-back/);
+  assert.match(page, /offline-skip-forward/);
+  assert.match(page, /offline-subtitle-file/);
+  assert.match(player, /parseSrtToVtt/);
+  assert.match(player, /WEBVTT/);
+  assert.match(player, /URL\.revokeObjectURL/);
+  assert.match(player, /refreshAudioTracks/);
+  assert.match(player, /if\(!select\|\|!tracks/);
+  assert.match(styles, /offline-player-section\[data-subtitle-size="large"\]/);
+});
