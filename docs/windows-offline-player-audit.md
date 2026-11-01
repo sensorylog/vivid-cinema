@@ -61,3 +61,8 @@ The Windows desktop branch now has an opt-in mpv fallback path:
 - The advanced window uses mpv's own OSD/keyboard controls; Vivid's HTML player controls do not overlay the native mpv window.
 - The pinned binary's provenance and mpv/FFmpeg source revisions are recorded in `licenses/mpv/NOTICE.md`. The complete corresponding-source bundle for every GPL-covered component and required notices still needs to be assembled and verified before a public release containing this runtime. The notice explicitly records this as a release compliance gate.
 - CI can prove that the pinned archive downloads, checksum validation runs, the launcher contract is tested, and Windows packaging succeeds. It cannot prove that every codec works or that playback is smooth on all hardware. Real-device playback testing against the documented codec matrix remains required.
+
+
+### Cache and distribution safety
+
+The offline-player stylesheet and script now have new versioned URLs, and the service-worker shell cache is bumped to v265 so older cached renderer code cannot hide the new control. Pull-request and non-release CI artifacts deliberately omit the mpv executable; local Windows packaging and a public release prepare the pinned runtime. A public release is fail-closed until both `licenses/mpv/CORRESPONDING-SOURCE.zip` and `licenses/mpv/SOURCE-MANIFEST.json` are present and verified, and the workflow publishes both beside the installer.
