@@ -438,9 +438,12 @@ test("Advanced Player uses a pinned mpv runtime, private IPC and guarded main-pr
   assert.ok(pkg.build.extraResources.some(item => item.from === "desktop/vendor/mpv" && item.to === "mpv"));
   const mpvNotices = pkg.build.extraResources.find(item => item.from === "licenses/mpv" && item.to === "licenses/mpv");
   assert.ok(mpvNotices);
-  assert.ok(mpvNotices.filter.includes("Copyright"));
-  assert.ok(mpvNotices.filter.includes("LICENSE.GPL"));
-  assert.ok(mpvNotices.filter.includes("LICENSE.LGPL"));
+  assert.ok(mpvNotices.filter.includes("**/*"));
+  assert.ok(mpvNotices.filter.includes("!CORRESPONDING-SOURCE.zip"));
+  assert.ok(mpvNotices.filter.includes("!SOURCE-MANIFEST.json"));
+  assert.ok(fs.existsSync(path.join(root, "licenses", "mpv", "Copyright")));
+  assert.ok(fs.existsSync(path.join(root, "licenses", "mpv", "LICENSE.GPL")));
+  assert.ok(fs.existsSync(path.join(root, "licenses", "mpv", "LICENSE.LGPL")));
   assert.ok(prepare.includes("ARCHIVE_SHA256"));
   assert.ok(prepare.includes("0.41.0"));
   assert.ok(prepare.includes("41f6a645068483470267271e1d09966ca3b9f413"));
