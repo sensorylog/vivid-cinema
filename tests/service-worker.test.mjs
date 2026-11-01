@@ -222,7 +222,7 @@ test("service worker install waits only for the essential offline shell", () => 
   const install = source.slice(start, end);
   assert.ok(install.includes("event.waitUntil(cacheShell().then(()=>self.skipWaiting()))"));
   assert.ok(!install.includes("cacheOptionalShell"));
-  assert.ok(source.includes('type:"PRECACHE_OPTIONAL"'));
+  assert.ok(source.includes('type==="PRECACHE_OPTIONAL"'));
 });
 test("cached app scripts are returned immediately while a background refresh is attempted", async () => {
   const scriptUrl = "https://vivid.test/scripts/app-shell.js";
