@@ -92,3 +92,17 @@ test("torrent progress events are coalesced instead of rebuilding the library on
   assert.match(desktop, /\},300\)/);
   assert.match(desktop, /engine\.onProgress\(payload=>\{[\s\S]*?scheduleProgressRender\(\);[\s\S]*?\}\);/);
 });
+
+
+test("offline player fullscreen fills the viewport and floats controls over the video", async () => {
+  const desktop = await readFile(new URL("../scripts/downloads/desktop-offline.js", import.meta.url), "utf8");
+  const css = await readFile(new URL("../styles/my-downloads.css", import.meta.url), "utf8");
+  assert.match(desktop, /function currentFullscreenElement\(\)/);
+  assert.match(desktop, /webkitRequestFullscreen/);
+  assert.match(desktop, /\},2200\)/);
+  assert.match(desktop, /\},280\)/);
+  assert.match(css, /\.offline-player-section:fullscreen\s*\{[\s\S]*?height:\s*100dvh/);
+  assert.match(css, /\.offline-player-section:fullscreen video\s*\{[\s\S]*?position:\s*absolute[\s\S]*?height:\s*100%/);
+  assert.match(css, /\.offline-player-section:fullscreen \.offline-custom-controls\s*\{[\s\S]*?position:\s*absolute/);
+  assert.match(css, /\.offline-player-section:fullscreen\.controls-hidden \.offline-custom-controls/);
+});
