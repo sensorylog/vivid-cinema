@@ -137,7 +137,9 @@ function buildPrimaryLinks(page) {
     navLink("for-you.html", "bi-stars", "For You", page === "for-you"),
     navLink("live.html", "bi-broadcast-pin", "Live", page === "live"),
     navLink("library.html", "bi-bookmark-fill", "Library", page === "library"),
-    navLink("my-downloads.html", "bi-download", "Offline", page === "downloads-library"),
+    ...(window.vividDownloads?.available === true
+      ? [navLink("my-downloads.html", "bi-download", "Offline", page === "downloads-library")]
+      : []),
     navLink("news.html", "bi-newspaper", "News", page === "news")
   ];
   // Home has a working in-page search dialog; keep its trigger instead of
@@ -207,7 +209,9 @@ function syncMobileNavigation() {
     navLink("for-you.html", "bi-stars", "For You", page === "for-you"),
     navLink("live.html", "bi-broadcast-pin", "Live", page === "live"),
     navLink("library.html", "bi-bookmark-fill", "Library", page === "library"),
-    navLink("my-downloads.html", "bi-download", "Offline", page === "downloads-library"),
+    ...(window.vividDownloads?.available === true
+      ? [navLink("my-downloads.html", "bi-download", "Offline", page === "downloads-library")]
+      : []),
     navLink("news.html", "bi-newspaper", "News", page === "news"),
     navLink("search.html", "bi-search", "Search", page === "search")
   ].join("");
