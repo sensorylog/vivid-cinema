@@ -205,7 +205,40 @@ async function searchTitle(media){
   try{const rows=await engine.search(media.title||"");renderSearch(rows);setMessage(rows.length?"Choose a release to save it to this device.":"No releases found. Try a different title.");}
   catch(error){setMessage(error?.message||"Search is unavailable. Check your connection and try again.");}
 }
-async function refresh(){try{jobs=(await engine.list()).filter(job=>job.status!=="cancelled");render();}catch(error){setMessage(error?.message||"Could not load your downloads.");}}
+const posterLookups=new Set();
+async function hydratePosterArtwork(){
+  const queue=jobs.filter(job=>{
+    const media=job.media||{};
+    if(media.poster_path||!media.id)return false;
+    const key=media.media_type+":"+media.id;
+    if(posterLookups.has(key))return false;
+    posterLookups.add(key);
+    return true;
+  });
+  const worker=async()=>{
+    while(queue.length){
+      const job=queue.shift(),media=job.media||{};
+      try{
+        const details=media.media_type==="tv"
+          ? await tmdbApi.tvDetailsBasic(media.id)
+          : await tmdbApi.movieDetailsBasic(media.id);
+        const poster=String(details?.poster_path||"");
+        if(/^\/[A-Za-z0-9_./-]+\.(?:jpg|jpeg|png|webp)$/i.test(poster)&&!poster.split("/").includes("..")){
+          media.poster_path=poster;
+          render();
+        }
+      }catch{}
+    }
+  };
+  await Promise.all([worker(),worker(),worker()]);
+}
+async function refresh(){
+  try{
+    jobs=(await engine.list()).filter(job=>job.status!=="cancelled");
+    render();
+    void hydratePosterArtwork();
+  }catch(error){setMessage(error?.message||"Could not load your downloads.");}
+}
 const player = byId("offline-player");
 const clock = value => {
   const seconds = Math.max(0, Math.floor(Number(value) || 0));
