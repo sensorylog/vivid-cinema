@@ -21,7 +21,7 @@ The exact FFmpeg revision and all other bundled component revisions must be reco
 
 mpv is licensed under GPL-2.0-or-later by default. The binary also contains or depends on FFmpeg and other third-party components. The licence and redistribution obligations of the exact binaries depend on the build configuration and every included component; this notice is not a substitute for those component notices.
 
-The Vivid application remains separately distributed. Bundling this executable does not grant Vivid rights to relicense mpv or its dependencies. Review the upstream `Copyright` file and the relevant FFmpeg and dependency licences before redistributing a release.
+The upstream mpv `Copyright`, `LICENSE.GPL` and `LICENSE.LGPL` texts are included beside this notice in the installed application's `resources/licenses/mpv` directory. The Vivid application remains separately distributed. Bundling this executable does not grant Vivid rights to relicense mpv or its dependencies. The complete corresponding-source archive must also carry all required FFmpeg and other dependency notices.
 
 ## Corresponding source and release gate
 
