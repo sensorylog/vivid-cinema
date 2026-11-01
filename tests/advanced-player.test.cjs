@@ -89,7 +89,7 @@ test("advanced player launches only a validated completed download through a dir
   assert.equal(calls[0][2].shell, false);
   assert.equal(calls[0][2].windowsHide, true);
   assert.equal(calls[0][2].detached, false);
-  assert.equal(calls[0][1].at(-1), fs.realpathSync(mediaPath));
+  assert.equal(calls[0][1].at(-1), await fs.promises.realpath(mediaPath));
   assert.ok(calls[0][1].includes("--start=12.000"));
   await new Promise(resolve => setImmediate(resolve));
   assert.match(player.ipcSocket.lastWrite, /observe_property/);
