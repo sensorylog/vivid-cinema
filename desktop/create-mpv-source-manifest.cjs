@@ -17,7 +17,7 @@ function gitOutput(directory, args) {
   return execFileSync("git", ["-C", directory, ...args], { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] }).trim();
 }
 function findLicenseFile(root) {
-  const preferred = /^(license|licence|copying|copyright|ftl)(\.|$)/i;
+  const preferred = /^(license|licence|copying|ftl)(\.|$)/i;
   const candidates = [];
   function walk(directory, depth) {
     if (depth > 4) return;
@@ -114,7 +114,8 @@ function main() {
       const wrapPath = path.join(subprojectsRoot, entry.name + ".wrap");
       const wrap = fs.existsSync(wrapPath) ? fs.readFileSync(wrapPath, "utf8") : "";
       const sourceMatch = wrap.match(/^\\s*(?:source_url|url)\\s*=\\s*(.+)$/m);
-      const source = sourceMatch ? sourceMatch[1].trim() : "Meson subproject source snapshot: " + entry.name;
+      if (!sourceMatch) throw new Error("Meson subproject has no recorded source URL in its wrap file: " + entry.name);
+      const source = sourceMatch[1].trim();
       const licenseFile = copyLicense(directory, licenseRoot, "subproject-" + entry.name);
       components.push({
         name: "subprojects/" + entry.name,
