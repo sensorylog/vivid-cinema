@@ -133,3 +133,7 @@ html.vivid-performance-legacy .offline-player-section,
 html.vivid-performance-legacy .offline-player-heading,
 html.vivid-performance-legacy .offline-custom-controls,
 html.vivid-performance-legacy .offline-resume-prompt{transition:none}
+
+.offline-subtitle-sync-control{display:flex;align-items:center;gap:6px;font-size:11px;color:#aebbd4}
+.offline-subtitle-sync-control input{width:92px;accent-color:#8d8aff}
+.offline-subtitle-sync-control output{min-width:34px;font-variant-numeric:tabular-nums}
