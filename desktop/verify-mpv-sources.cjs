@@ -5,6 +5,18 @@ const path = require("node:path");
 const crypto = require("node:crypto");
 const { MPV_SOURCE_COMMIT } = require("./prepare-mpv.cjs");
 
+function hasBundledLicenseFile(licenseRoot, licenseRootReal, relativePath) {
+  if (typeof relativePath !== "string" || !relativePath.trim()) return false;
+  const candidate = path.resolve(licenseRoot, relativePath);
+  const relative = path.relative(licenseRootReal, candidate);
+  if (!relative || relative.startsWith("..") || path.isAbsolute(relative) || !fs.existsSync(candidate)) return false;
+  try {
+    const realCandidate = fs.realpathSync(candidate);
+    const realRelative = path.relative(licenseRootReal, realCandidate);
+    return !realRelative.startsWith("..") && fs.statSync(realCandidate).isFile();
+  } catch { return false; }
+}
+
 function verifyMpvSources({ projectRoot = path.resolve(__dirname, ".."), skip = process.env.VIVID_SKIP_MPV_PREPARE === "1" } = {}) {
   if (skip) return { skipped: true };
   const licenseRoot = path.join(projectRoot, "licenses", "mpv");
@@ -26,10 +38,14 @@ function verifyMpvSources({ projectRoot = path.resolve(__dirname, ".."), skip = 
   if (manifest.mpv?.commit !== MPV_SOURCE_COMMIT || !/^[0-9a-f]{40}$/.test(manifest.ffmpeg?.commit || "")) {
     throw new Error("The source manifest does not identify the pinned mpv release and exact FFmpeg source commit.");
   }
+  const licenseRootReal = fs.realpathSync(licenseRoot);
+  if (!hasBundledLicenseFile(licenseRoot, licenseRootReal, manifest.mpv.licenseFile) ||
+      !hasBundledLicenseFile(licenseRoot, licenseRootReal, manifest.ffmpeg.licenseFile)) {
+    throw new Error("The source manifest must reference bundled mpv and FFmpeg licence files inside licenses/mpv.");
+  }
   if (!Array.isArray(manifest.components) || manifest.components.length === 0) {
     throw new Error("The source manifest must enumerate all additional bundled components and their licences.");
   }
-  const licenseRootReal = fs.realpathSync(licenseRoot);
   const incomplete = manifest.components.some(component => {
     if (!component || typeof component.name !== "string" || !component.name.trim() ||
         typeof component.license !== "string" || !component.license.trim() ||
@@ -37,14 +53,7 @@ function verifyMpvSources({ projectRoot = path.resolve(__dirname, ".."), skip = 
         !(typeof component.commit === "string" && component.commit.trim()) &&
           !(typeof component.version === "string" && component.version.trim()) ||
         typeof component.licenseFile !== "string" || !component.licenseFile.trim()) return true;
-    const licensePath = path.resolve(licenseRoot, component.licenseFile);
-    const relative = path.relative(licenseRootReal, licensePath);
-    if (!relative || relative.startsWith("..") || path.isAbsolute(relative) || !fs.existsSync(licensePath)) return true;
-    try {
-      const realLicensePath = fs.realpathSync(licensePath);
-      const realRelative = path.relative(licenseRootReal, realLicensePath);
-      return realRelative.startsWith("..") || !fs.statSync(realLicensePath).isFile();
-    } catch { return true; }
+    return !hasBundledLicenseFile(licenseRoot, licenseRootReal, component.licenseFile);
   });
   if (incomplete) {
     throw new Error("Every source-manifest component must include its name, licence, source location, exact commit or version, and a bundled licence file inside licenses/mpv.");
