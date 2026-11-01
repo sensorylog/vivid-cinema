@@ -568,35 +568,32 @@ player.addEventListener("loadedmetadata",()=>{
 });
 player.addEventListener("durationchange",syncPlayerControls);
 player.addEventListener("loadedmetadata",refreshAudioTracks);
-let audioDiagnosticTimer=null;
-function diagnoseSilentMatroska(){
-  if(audioDiagnosticTimer)clearTimeout(audioDiagnosticTimer);
-  const file=Array.isArray(jobs.find(item=>item.id===player.dataset.jobId)?.files)
-    ? jobs.find(item=>item.id===player.dataset.jobId).files[Number(player.dataset.fileIndex)||0]
-    : null;
-  if(!/\.mkv$/i.test(String(file?.name||"")))return;
-  const decoded=Number(player.webkitAudioDecodedByteCount);
-  if(!Number.isFinite(decoded))return;
-  const startTime=player.currentTime;
-  const startBytes=decoded;
-  audioDiagnosticTimer=setTimeout(()=>{
-    audioDiagnosticTimer=null;
-    if(player.paused||player.ended||player.currentTime<startTime+2)return;
-    const currentBytes=Number(player.webkitAudioDecodedByteCount);
-    if(Number.isFinite(currentBytes)&&currentBytes<=startBytes){
-      setMessage("This MKV is playing video, but its audio track is not being decoded. It may use DTS or TrueHD audio, which the built-in player cannot play. Use an MKV with AAC/MP3 audio or an MP4 version.");
-    }
-  },4500);
+function describePlaybackError(){
+  byId("offline-audio-track").parentElement.hidden=true;
+  const code=Number(player.error?.code||0);
+  if(code===1){setMessage("Playback was interrupted. Press Play to continue.");return;}
+  if(code===2){setMessage("Vivid could not read this saved media file. Check that the download is complete and still exists.");return;}
+  if(code===3){setMessage("The file opened, but this device could not decode one of its audio or video codecs. Try another release or a compatible MP4/WebM version.");return;}
+  if(code===4){setMessage("This container or one of its codecs is not supported by Vivid's built-in player. Try another release or a compatible MP4/WebM version.");return;}
+  setMessage("Vivid could not start this video. Check the file and try again.");
 }
-player.addEventListener("playing",diagnoseSilentMatroska);
-player.addEventListener("pause",()=>{if(audioDiagnosticTimer)clearTimeout(audioDiagnosticTimer);audioDiagnosticTimer=null;});
+player.addEventListener("error",describePlaybackError);
+player.addEventListener("waiting",()=>{
+  if(!player.paused)setMessage("Buffering your saved video…");
+});
+player.addEventListener("stalled",()=>{
+  if(!player.paused)setMessage("The local media stream has paused while reading data. Checking playback…");
+});
+player.addEventListener("playing",()=>{
+  const status=byId("offline-message").textContent;
+  if(/buffering|local media stream has paused/i.test(status))setMessage("Your movie is playing offline.");
+});
 
 player.addEventListener("loadedmetadata",refreshSubtitleTracks);
 player.addEventListener("loadeddata",refreshAudioTracks);
 player.textTracks?.addEventListener?.("addtrack",refreshSubtitleTracks);
 player.textTracks?.addEventListener?.("removetrack",refreshSubtitleTracks);
 player.textTracks?.addEventListener?.("change",refreshSubtitleTracks);
-player.addEventListener("error",()=>{byId("offline-audio-track").parentElement.hidden=true;});
 if(player.audioTracks){
   player.audioTracks.addEventListener?.("addtrack",refreshAudioTracks);
   player.audioTracks.addEventListener?.("removetrack",refreshAudioTracks);
@@ -641,6 +638,37 @@ async function play(job,fileIndex=0){
   try{await player.play();}catch{setMessage("Your movie is ready. Press Play in the Vivid player to begin.");}
   syncPlayerControls();
 }
+byId("offline-advanced-player").addEventListener("click",async()=>{
+  const id=String(player.dataset.jobId||"");
+  const fileIndex=Number(player.dataset.fileIndex)||0;
+  if(!id){setMessage("Open a saved download in the Vivid player first.");return;}
+  const button=byId("offline-advanced-player");
+  button.disabled=true;
+  const currentTime=Number(player.currentTime)||0;
+  try{
+    if(currentTime>0)await engine.setPlaybackPosition(id,fileIndex,currentTime);
+    await engine.openAdvancedPlayer(id,fileIndex);
+    if(currentFullscreenElement()===playerSection){
+      const exit=document.exitFullscreen||document.webkitExitFullscreen;
+      if(typeof exit==="function")await exit.call(document);
+    }
+    player.pause();
+    clearExternalSubtitle();
+    player.removeAttribute("src");
+    player.load();
+    player.dataset.jobId="";
+    player.dataset.fileIndex="0";
+    player.controls=true;
+    byId("offline-custom-controls").hidden=true;
+    byId("offline-player-section").hidden=true;
+    byId("offline-resume-prompt").hidden=true;
+    byId("offline-next-episode").hidden=true;
+    syncFullscreenButton();
+    setMessage("Vivid Advanced Player opened in a separate window. Use Watch now later to resume from your saved position.");
+  }catch(error){
+    setMessage(error?.message||"Vivid Advanced Player could not be opened.");
+  }finally{button.disabled=false;}
+});
 byId("desktop-search-form").addEventListener("submit",async event=>{
   event.preventDefault();const query=byId("desktop-search-input").value.trim();
   if(query.length<2){setMessage("Enter at least two characters.");return;}
@@ -685,14 +713,12 @@ byId("offline-jobs").addEventListener("click",async event=>{
   }catch(error){setMessage(error?.message||"Action failed.");}
   finally{button.disabled=false;}
 });
-player.addEventListener("error",()=>setMessage("This file uses a video format or codec the built-in player cannot decode. Try an MP4 or WebM release."));
 byId("offline-player-close").addEventListener("click",async()=>{
   if(controlsHideTimer)clearTimeout(controlsHideTimer);
   if(currentFullscreenElement()===playerSection){
     const exit=document.exitFullscreen||document.webkitExitFullscreen;
     try{if(typeof exit==="function")await exit.call(document);}catch{}
   }
-  if(audioDiagnosticTimer)clearTimeout(audioDiagnosticTimer);audioDiagnosticTimer=null;
   player.pause();clearExternalSubtitle();player.removeAttribute("src");player.load();player.dataset.jobId="";
   player.controls=true;byId("offline-custom-controls").hidden=true;byId("offline-player-section").hidden=true;
   byId("offline-audio-track").parentElement.hidden=true;byId("offline-resume-prompt").hidden=true;

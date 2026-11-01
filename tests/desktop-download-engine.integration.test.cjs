@@ -518,6 +518,17 @@ test("desktop engine downloads a video-extension payload from a local seeded tor
       "restored completed media should remain addressable by the player");
     assert.deepEqual(await fs.readFile(engine.mediaFile(started.id, 0)), payload,
       "the restored library should still point to the original downloaded bytes");
+
+    // A persisted job record must not redirect the player to a file outside
+    // that download's own directory, even if the path exists on disk.
+    const restoredJob = engine.jobs.get(started.id);
+    const trustedFiles = restoredJob.files;
+    const outsidePath = path.join(root, "outside-job-media.mp4");
+    await fs.writeFile(outsidePath, Buffer.from("not part of this download"));
+    restoredJob.files = [{ ...trustedFiles[0], path: outsidePath }];
+    assert.equal(engine.mediaFile(started.id, 0), null,
+      "the player must refuse media paths outside the job's download directory");
+    restoredJob.files = trustedFiles;
   } finally {
     if (engine) await withTimeout(engine.shutdown(), 10000, "download engine shutdown").catch(() => {});
     await closeClient(seeder);

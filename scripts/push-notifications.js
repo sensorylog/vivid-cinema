@@ -1,17 +1,31 @@
-import { NN_APP_ID, NN_WEB_KEY } from "../native-notify/web/nativeNotifyIds.js";
-import { disableNativeNotifyWebPush, enableNativeNotifyWebPush, ensureNativeNotifyWebPush } from "../native-notify/web/native-notify-web-push.js";
-
 const SUBS_COLLECTION="pushSubscriptions";
 const REMINDERS_COLLECTION="cinemaReminders";
-// Vivid already owns the site's only service worker scope, so Native Notify
-// registers through the existing root worker (service-worker.js) instead of a
-// second worker. Its push and notificationclick listeners live there.
 const PUSH_SERVICE_WORKER="/service-worker.js";
+const VAPID_PUBLIC_KEY="BMNW0k1P89YhNVPP4NJYa4mDOw2arwbEJUPJ3mDcV6UpcSn-WP_T2PqJc6ANEkvtzUe9LacEMJ4com85M4w-eN8";
+const ENSURE_STAMP_KEY="vivid_push_checked_at";
+const ENSURE_INTERVAL_MS=30*60*1000;
+const OPTOUT_KEY="vivid:push-optout:v1";
+const LEGACY_OPTOUT_KEY="nn_web_push_optout";
 let firebasePromise=null;
+
 function keyId(endpoint){
   let hash=0;
   for(let i=0;i<endpoint.length;i++)hash=((hash<<5)-hash+endpoint.charCodeAt(i))|0;
   return Math.abs(hash).toString(36);
+}
+function base64UrlToBytes(value){
+  const normalized=String(value||"").replace(/-/g,"+").replace(/_/g,"/");
+  const padded=normalized+"=".repeat((4-normalized.length%4)%4);
+  const raw=window.atob(padded);
+  const bytes=new Uint8Array(raw.length);
+  for(let i=0;i<raw.length;i++)bytes[i]=raw.charCodeAt(i);
+  return bytes;
+}
+function sameApplicationServerKey(subscription,key){
+  const existing=subscription?.options?.applicationServerKey;
+  if(!existing)return false;
+  const a=new Uint8Array(existing);
+  return a.length===key.length&&a.every((byte,index)=>byte===key[index]);
 }
 async function getFirebase(){
   if(!firebasePromise){
@@ -25,88 +39,95 @@ async function getFirebase(){
   return firebasePromise;
 }
 export async function getPushSupport(){
-  return "serviceWorker" in navigator && "PushManager" in window && "Notification" in window;
+  return "serviceWorker" in navigator&&"PushManager" in window&&"Notification" in window;
 }
-// Native Notify options for this site. The VAPID public key is fetched by the
-// client at subscribe time (GET /api/universal/web-push/keys/...), so a rotated
-// key is picked up automatically and no key is hardcoded here.
-function nativeNotifyOptions(){
-  return {appId:NN_APP_ID,webKey:NN_WEB_KEY,serviceWorkerPath:PUSH_SERVICE_WORKER};
-}
-// scripts/pwa.js registers this worker with { scope: "./", updateViaCache: "none" }.
-// The Native Notify client re-registers the same script (a browser allows one
-// worker per scope), and a plain register() call resets updateViaCache to its
-// default — which would weaken the PWA's update check. Put the site's own
-// options back immediately after the client has run.
-async function restoreWorkerRegistration(){
-  try{
-    await navigator.serviceWorker.register(PUSH_SERVICE_WORKER,{scope:"./",updateViaCache:"none"});
-  }catch(error){
-    console.warn("Vivid service worker registration refresh skipped:",error);
-  }
-}
-// The silent re-register costs two API calls (VAPID key + device register), so it
-// runs at most once per browser per window instead of on every page load.
-const ENSURE_STAMP_KEY="nn_web_push_checked_at";
-const ENSURE_INTERVAL_MS=30*60*1000;
-// Without storage the device id below would be regenerated on every load and pile
-// up duplicate devices on the server, so the silent path stays off there.
 function storageWritable(){
-  try{
-    const probe="__vivid_push_probe__";
-    window.localStorage.setItem(probe,"1");
-    window.localStorage.removeItem(probe);
-    return true;
-  }catch{return false}
+  try{const probe="__vivid_push_probe__";window.localStorage.setItem(probe,"1");window.localStorage.removeItem(probe);return true;}
+  catch{return false;}
 }
-function ensureAttemptedRecently(){
-  try{
-    const at=Number(window.localStorage.getItem(ENSURE_STAMP_KEY)||0);
-    return Number.isFinite(at)&&at>0&&Date.now()-at<ENSURE_INTERVAL_MS;
-  }catch{return false}
+function optedOut(){
+  try{return window.localStorage.getItem(OPTOUT_KEY)==="1"||window.localStorage.getItem(LEGACY_OPTOUT_KEY)==="1";}
+  catch{return false;}
 }
 function markEnsureAttempt(){
-  try{window.localStorage.setItem(ENSURE_STAMP_KEY,String(Date.now()))}catch{}
+  try{window.localStorage.setItem(ENSURE_STAMP_KEY,String(Date.now()));}catch{}
+}
+function ensureAttemptedRecently(){
+  try{const at=Number(window.localStorage.getItem(ENSURE_STAMP_KEY)||0);return Number.isFinite(at)&&at>0&&Date.now()-at<ENSURE_INTERVAL_MS;}
+  catch{return false;}
+}
+async function getRegistration(){
+  await navigator.serviceWorker.register(PUSH_SERVICE_WORKER,{scope:"./",updateViaCache:"none"});
+  return navigator.serviceWorker.ready;
+}
+async function getCurrentUser(){
+  const {auth}=await getFirebase();
+  return auth.currentUser||null;
+}
+async function saveSubscription(user,subscription){
+  const json=subscription.toJSON();
+  if(!json?.endpoint||!json?.keys?.p256dh||!json?.keys?.auth)throw Error("The browser returned an incomplete push subscription.");
+  const {db,doc,setDoc}=await getFirebase();
+  await setDoc(doc(db,"users",user.uid,SUBS_COLLECTION,keyId(json.endpoint)),{
+    endpoint:json.endpoint,
+    expirationTime:json.expirationTime||null,
+    keys:{p256dh:json.keys.p256dh,auth:json.keys.auth},
+    userAgent:String(navigator.userAgent||"").slice(0,500),
+    updatedAt:Date.now()
+  },{merge:true});
+}
+async function subscribeCurrentBrowser({allowCreate=true}={}){
+  if(!(await getPushSupport()))throw Error("Background notifications are not supported in this browser.");
+  const user=await getCurrentUser();
+  if(!user)throw Error("Sign in to Vivid Cinema before enabling notifications.");
+  const registration=await getRegistration();
+  const key=base64UrlToBytes(VAPID_PUBLIC_KEY);
+  if(key.length!==65||key[0]!==4)throw Error("Vivid's push public key is invalid. Please contact support.");
+  let subscription=await registration.pushManager.getSubscription();
+  if(subscription&&!sameApplicationServerKey(subscription,key)){
+    await subscription.unsubscribe();
+    subscription=null;
+  }
+  if(!subscription){
+    if(!allowCreate)return null;
+    subscription=await registration.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:key});
+  }
+  await saveSubscription(user,subscription);
+  return subscription;
 }
 export async function enableCinemaPush(){
   if(!(await getPushSupport()))throw Error("Background notifications are not supported in this browser.");
-  // Ask for permission while the click's user gesture is still fresh. The
-  // Native Notify helper re-reads the granted state, so it does not prompt again.
-  if(window.Notification?.permission==="default"){
+  if(window.Notification.permission==="default"){
     const permission=await Notification.requestPermission();
     if(permission!=="granted")throw Error(permission==="denied"?"Notifications are blocked for this site in your browser settings.":"Notification permission was not granted.");
+  }else if(window.Notification.permission!=="granted"){
+    throw Error("Notifications are blocked for this site in your browser settings.");
   }
-  const result=await enableNativeNotifyWebPush(nativeNotifyOptions());
-  await restoreWorkerRegistration();
+  try{window.localStorage.removeItem(OPTOUT_KEY);window.localStorage.removeItem(LEGACY_OPTOUT_KEY);}catch{}
+  const subscription=await subscribeCurrentBrowser();
   markEnsureAttempt();
-  if(!result.ok)throw Error(result.message||"Background notifications could not be enabled.");
-  return {deviceId:result.deviceId};
+  return {deviceId:keyId(subscription.endpoint)};
 }
-// Silent re-register on page load: a browser that already allowed notifications
-// but lost its subscription is restored without a prompt or a click. It never
-// asks for permission, never runs twice in a row, and stays out of the way when
-// the browser has no storage.
 export async function ensureCinemaPush(){
   try{
-    if(!storageWritable()||ensureAttemptedRecently())return {ok:false,status:"skipped",deviceId:null};
-    const result=await ensureNativeNotifyWebPush(nativeNotifyOptions());
-    if(result.status==="skipped")return result;
+    if(!(await getPushSupport())||window.Notification.permission!=="granted"||optedOut()||!storageWritable()||ensureAttemptedRecently()){
+      return {ok:false,status:"skipped",deviceId:null};
+    }
+    const user=await getCurrentUser();
+    if(!user)return {ok:false,status:"skipped",deviceId:null};
+    const subscription=await subscribeCurrentBrowser();
     markEnsureAttempt();
-    await restoreWorkerRegistration();
-    return result;
+    return {ok:true,status:"enabled",deviceId:keyId(subscription.endpoint)};
   }catch(error){
     markEnsureAttempt();
     console.warn("Vivid background notification refresh skipped:",error);
-    return {ok:false,status:"failed",message:String(error?.message||error)};
+    return {ok:false,status:"failed",message:String(error?.message||error),deviceId:null};
   }
-}
-export async function disableBackgroundPush(){
-  return disableNativeNotifyWebPush(nativeNotifyOptions());
 }
 export async function disableCinemaPush(){
   let subscription=null;
   try{
-    if("serviceWorker" in navigator){
+    if("serviceWorker"in navigator){
       const registration=await navigator.serviceWorker.ready;
       subscription=await registration.pushManager?.getSubscription()||null;
     }
@@ -114,13 +135,10 @@ export async function disableCinemaPush(){
     console.warn("Vivid push subscription lookup failed:",error);
     return false;
   }
-
-  // A browser can have several devices registered to the same account.
-  // Remove only this browser's endpoint; never erase the user's other devices.
+  try{window.localStorage.setItem(OPTOUT_KEY,"1");window.localStorage.setItem(LEGACY_OPTOUT_KEY,"1");}catch{}
   let remoteRemovalSucceeded=true;
   try{
-    const {auth}=await getFirebase();
-    const user=auth.currentUser;
+    const user=await getCurrentUser();
     if(user&&subscription?.endpoint){
       const {db,doc,deleteDoc}=await getFirebase();
       await deleteDoc(doc(db,"users",user.uid,SUBS_COLLECTION,keyId(subscription.endpoint)));
@@ -129,14 +147,16 @@ export async function disableCinemaPush(){
     remoteRemovalSucceeded=false;
     console.warn("Vivid push subscription cleanup failed:",error);
   }
-
-  try{
-    if(subscription)await subscription.unsubscribe();
-  }catch(error){
+  try{if(subscription)await subscription.unsubscribe();}
+  catch(error){
     console.warn("Vivid browser push unsubscribe failed:",error);
     return false;
   }
   return remoteRemovalSucceeded;
+}
+export async function disableBackgroundPush(){
+  const ok=await disableCinemaPush();
+  return {ok,status:ok?"disabled":"failed",deviceId:null};
 }
 
 export async function getServerReleaseAlerts(){

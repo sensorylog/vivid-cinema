@@ -12,6 +12,7 @@ on:
       - "init.json"
       - "desktop/**"
       - "icons/**"
+      - "licenses/**"
       - "tests/**"
       - ".github/workflows/windows-desktop.yml"
   push:
@@ -65,6 +66,63 @@ jobs:
           "publish=$($publish.ToString().ToLower())" >> $env:GITHUB_OUTPUT
       - name: Install desktop runtime dependencies
         run: npm --prefix desktop ci --omit=dev --no-audit --no-fund
+      - name: Enforce mpv corresponding-source bundle before public release
+        if: steps.release-decision.outputs.publish == 'true'
+        shell: pwsh
+        run: |
+          if (!(Test-Path "licenses/mpv/CORRESPONDING-SOURCE.zip")) {
+            throw "Refusing to publish mpv: the complete corresponding-source archive is missing."
+          }
+          if (!(Test-Path "licenses/mpv/SOURCE-MANIFEST.json")) {
+            throw "Refusing to publish mpv: the source manifest is missing."
+          }
+          $manifest = Get-Content "licenses/mpv/SOURCE-MANIFEST.json" -Raw | ConvertFrom-Json
+          if ($manifest.formatVersion -ne 1 -or $manifest.verified -ne $true) {
+            throw "Refusing to publish mpv: the corresponding-source manifest is not verified."
+          }
+          if ($manifest.mpv.commit -ne "41f6a645068483470267271e1d09966ca3b9f413" -or $manifest.ffmpeg.commit -notmatch "^[0-9a-f]{40}$") {
+            throw "Refusing to publish mpv: the source manifest does not identify the exact stable mpv and FFmpeg source revisions."
+          }
+          $sourceHash = (Get-FileHash "licenses/mpv/CORRESPONDING-SOURCE.zip" -Algorithm SHA256).Hash.ToLower()
+          if ($manifest.archiveSha256 -ne $sourceHash) {
+            throw "Refusing to publish mpv: the corresponding-source archive hash does not match its manifest."
+          }
+          if (@($manifest.components).Count -lt 1) {
+            throw "Refusing to publish mpv: the source manifest must enumerate the bundled GPL-covered components."
+          }
+      - name: Verify mpv corresponding-source manifest in Node
+        if: steps.release-decision.outputs.publish == 'true'
+        run: node desktop/verify-mpv-sources.cjs
+      - name: Prepare checksum-pinned mpv Advanced Player runtime
+        run: node desktop/prepare-mpv.cjs
+      - name: Verify mpv runtime and redistribution notice
+        shell: pwsh
+        run: |
+          if (!(Test-Path "desktop/vendor/mpv/mpv.exe")) {
+            throw "The checksum-verified mpv runtime was not prepared."
+          }
+          $runtime = Get-Content "desktop/vendor/mpv/vivid-mpv-runtime.json" | ConvertFrom-Json
+          if ($runtime.sha256 -ne "a49811c0752c108b8260636f9c6f6fcb97406641c98b30f1e7b500dfb20177de") {
+            throw "The bundled mpv runtime does not match the approved checksum."
+          }
+          & "desktop/vendor/mpv/mpv.exe" --version | Out-Null
+          if ($LASTEXITCODE -ne 0) {
+            throw "The extracted mpv executable failed its startup/version smoke test."
+          }
+          if (!(Test-Path "licenses/mpv/NOTICE.md")) {
+            throw "The mpv third-party redistribution notice is missing."
+          }
+      - name: Remove mpv executable from non-release preview artifacts
+        if: steps.release-decision.outputs.publish != 'true'
+        shell: pwsh
+        run: |
+          Get-ChildItem "desktop/vendor/mpv" -Force | Where-Object { $_.Name -ne ".gitkeep" -and $_.Name -ne "README.txt" } | Remove-Item -Recurse -Force
+          if (!(Test-Path "desktop/vendor/mpv/.gitkeep")) {
+            New-Item -Path "desktop/vendor/mpv/.gitkeep" -ItemType File -Force | Out-Null
+          }
+          if (!(Test-Path "desktop/vendor/mpv/README.txt")) {
+            Set-Content -Path "desktop/vendor/mpv/README.txt" -Value "Runtime staged by desktop/prepare-mpv.cjs."
+          }
       - name: Verify the desktop download engine with a local seeded torrent
         timeout-minutes: 3
         run: node --test tests/desktop-download-engine.integration.test.cjs
@@ -110,10 +168,11 @@ jobs:
           $portable = Get-ChildItem "dist-desktop/Vivid-Cinema-Portable-*.exe" -ErrorAction SilentlyContinue | Select-Object -First 1
           $blockMap = Get-ChildItem "dist-desktop/Vivid-Cinema-Setup-*.exe.blockmap" -ErrorAction SilentlyContinue | Select-Object -First 1
           $metadata = Get-Item "dist-desktop/latest.yml" -ErrorAction SilentlyContinue
-          if (!$installer -or !$portable -or !$blockMap -or !$metadata) {
-            throw "Installer, portable executable, blockmap, and latest.yml must all exist before publishing."
+          $sourceBundle = Get-Item "licenses/mpv/CORRESPONDING-SOURCE.zip" -ErrorAction SilentlyContinue
+          if (!$installer -or !$portable -or !$blockMap -or !$metadata -or !$sourceBundle) {
+            throw "Installer, portable executable, blockmap, updater metadata, and mpv source bundle must all exist before publishing."
           }
-          gh release create $tag $installer.FullName $portable.FullName $blockMap.FullName $metadata.FullName --verify-tag --title "Vivid Cinema $version" --notes "Vivid Cinema Windows release $version. Includes installer, portable executable, and in-app update metadata."
+          gh release create $tag $installer.FullName $portable.FullName $blockMap.FullName $metadata.FullName $sourceBundle.FullName "licenses/mpv/SOURCE-MANIFEST.json" --verify-tag --title "Vivid Cinema $version" --notes "Vivid Cinema Windows release $version. Includes installer, portable executable, in-app update metadata, and mpv corresponding source."
           if ($LASTEXITCODE -ne 0) {
             throw "GitHub release upload failed for $tag."
           }
@@ -132,7 +191,7 @@ jobs:
           }
           $release = Invoke-RestMethod -Method Get -Uri "https://api.github.com/repos/sensorylog/vivid-cinema/releases/tags/$tag" -Headers $headers
           $assetNames = @($release.assets | ForEach-Object { $_.name })
-          $requiredAssets = @("Vivid-Cinema-Setup-$version.exe", "Vivid-Cinema-Portable-$version.exe", "Vivid-Cinema-Setup-$version.exe.blockmap", "latest.yml")
+          $requiredAssets = @("Vivid-Cinema-Setup-$version.exe", "Vivid-Cinema-Portable-$version.exe", "Vivid-Cinema-Setup-$version.exe.blockmap", "latest.yml", "CORRESPONDING-SOURCE.zip", "SOURCE-MANIFEST.json")
           foreach ($assetName in $requiredAssets) {
             if ($assetNames -notcontains $assetName) {
               throw "Published release $tag is missing required updater asset: $assetName"
@@ -148,10 +207,14 @@ jobs:
             dist-desktop/Vivid-Cinema-Portable-*.exe
             dist-desktop/Vivid-Cinema-Setup-*.exe.blockmap
             dist-desktop/latest.yml
+            licenses/mpv/CORRESPONDING-SOURCE.zip
+            licenses/mpv/SOURCE-MANIFEST.json
           if-no-files-found: error
           retention-days: 30
       - name: Build Windows installer and portable executable
         if: steps.release-decision.outputs.publish != 'true'
+        env:
+          VIVID_SKIP_MPV_PREPARE: "1"
         run: npm run desktop:dist
       - name: Upload Windows build artifacts
         if: steps.release-decision.outputs.publish != 'true'

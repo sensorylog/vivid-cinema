@@ -9,7 +9,11 @@ if(!vapidPrivateKey)throw new Error("Missing VAPID_PRIVATE_KEY");
 
 initializeApp({credential:cert(serviceAccount)});
 const db=getFirestore();
-webpush.setVapidDetails("mailto:notifications@vividcinema.app","BGZNNqdOPr-XJjdPnJMKPHvErIXftdRM0P8VxpjElqRs5AwpyY94lownEeUE2W-8GnFyvNd3-u7tmRu2b-5dEIg",vapidPrivateKey);
+const vapidPublicKey="BMNW0k1P89YhNVPP4NJYa4mDOw2arwbEJUPJ3mDcV6UpcSn-WP_T2PqJc6ANEkvtzUe9LacEMJ4com85M4w-eN8";
+const decodedVapidPublicKey=Buffer.from(vapidPublicKey.replace(/-/g,"+").replace(/_/g,"/"),"base64");
+if(decodedVapidPublicKey.length!==65||decodedVapidPublicKey[0]!==4)throw new Error("Invalid VAPID_PUBLIC_KEY");
+webpush.setVapidDetails("mailto:notifications@vividcinema.app",vapidPublicKey,vapidPrivateKey);
+
 
 const now=Date.now();
 const snapshot=await db.collectionGroup("cinemaReminders")

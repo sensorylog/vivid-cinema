@@ -1,0 +1,130 @@
+"use strict";
+
+const test = require("node:test");
+const assert = require("node:assert/strict");
+const fs = require("node:fs");
+const os = require("node:os");
+const path = require("node:path");
+const { EventEmitter } = require("node:events");
+const { AdvancedPlayer, createMpvArgs, resolveMpvExecutable } = require("../desktop/advanced-player.cjs");
+
+function fakeChild() {
+  const child = new EventEmitter();
+  child.exitCode = null;
+  child.killed = false;
+  child.kill = () => { child.killed = true; return true; };
+  return child;
+}
+
+test("mpv executable resolution separates packaged and development paths", () => {
+  assert.equal(
+    resolveMpvExecutable({ isPackaged: true, resourcesPath: "C:/App/resources", appPath: "C:/src" }),
+    path.join("C:/App/resources", "mpv", "mpv.exe")
+  );
+  assert.equal(
+    resolveMpvExecutable({ isPackaged: false, resourcesPath: "C:/App/resources", appPath: "C:/src" }),
+    path.join("C:/src", "desktop", "vendor", "mpv", "mpv.exe")
+  );
+});
+
+test("mpv launch arguments use safe decoding defaults and never invoke a shell", () => {
+  const media = "C:\\Users\\A User\\Downloads\\film; & $().mkv";
+  const args = createMpvArgs(media);
+  assert.ok(args.includes("--hwdec=auto-safe"));
+  assert.ok(args.includes("--no-config"));
+  assert.ok(args.includes("--osc=yes"));
+  assert.ok(args.includes("--"));
+  assert.equal(args.at(-1), media);
+  const resumed = createMpvArgs(media, 42.5, String.raw`\\.\pipe\vivid-mpv-test`);
+  assert.ok(resumed.includes("--start=42.500"));
+  assert.ok(resumed.includes(String.raw`--input-ipc-server=\\.\pipe\vivid-mpv-test`));
+  assert.ok(!args.some(value => value.includes("cmd.exe") || value.includes("powershell")));
+});
+
+test("advanced player launches only a validated completed download through a direct process spawn", async t => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "vivid-advanced-player-"));
+  t.after(() => fs.rmSync(root, { recursive: true, force: true }));
+  const mediaPath = path.join(root, "movie.mkv");
+  const executableDirectory = path.join(root, "mpv");
+  fs.mkdirSync(executableDirectory, { recursive: true });
+  const executable = path.join(executableDirectory, "mpv.exe");
+  fs.writeFileSync(mediaPath, "media");
+  fs.writeFileSync(executable, "runtime");
+
+  const calls = [];
+  const children = [];
+  const savedPositions = [];
+  const player = new AdvancedPlayer({
+    app: { isPackaged: true, getAppPath: () => root },
+    downloadEngine: {
+      mediaFile: (id, index) => id === "job-1" && index === 0 ? mediaPath : null,
+      getPlaybackPosition: () => 12,
+      setPlaybackPosition: async (...args) => { savedPositions.push(args); return true; }
+    },
+    platform: "win32",
+    resourcesPath: root,
+    netImpl: {
+      createConnection: () => {
+        const socket = new EventEmitter();
+        socket.destroyed = false;
+        socket.setEncoding = () => {};
+        socket.write = value => { socket.lastWrite = value; return true; };
+        socket.destroy = () => { socket.destroyed = true; };
+        queueMicrotask(() => socket.emit("connect"));
+        return socket;
+      }
+    },
+    spawnImpl: (...args) => {
+      calls.push(args);
+      const child = fakeChild();
+      children.push(child);
+      queueMicrotask(() => child.emit("spawn"));
+      return child;
+    }
+  });
+
+  assert.deepEqual(await player.open("job-1", 0), { started: true, engine: "mpv", resumedFrom: 12 });
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0][0], executable);
+  assert.equal(calls[0][2].shell, false);
+  assert.equal(calls[0][2].windowsHide, true);
+  assert.equal(calls[0][2].detached, false);
+  assert.equal(calls[0][1].at(-1), await fs.promises.realpath(mediaPath));
+  assert.ok(calls[0][1].includes("--start=12.000"));
+  await new Promise(resolve => setImmediate(resolve));
+  assert.match(player.ipcSocket.lastWrite, /observe_property/);
+  player.ipcSocket.emit("data", JSON.stringify({ event: "property-change", id: 1, name: "time-pos", data: 24 }) + "\n");
+  await new Promise(resolve => setImmediate(resolve));
+  assert.ok(savedPositions.some(row => row[0] === "job-1" && row[1] === 0 && row[2] === 24), "mpv time-pos events update Vivid resume state");
+
+  await player.open("job-1", 0);
+  assert.equal(children[0].killed, true, "opening another title stops the previous mpv process");
+  assert.equal(calls.length, 2);
+  player.stop();
+  assert.equal(children[1].killed, true);
+});
+
+test("advanced player rejects unknown jobs, missing runtime and non-Windows launch", async t => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "vivid-advanced-player-"));
+  t.after(() => fs.rmSync(root, { recursive: true, force: true }));
+  const mediaPath = path.join(root, "movie.mkv");
+  fs.writeFileSync(mediaPath, "media");
+
+  const missingRuntime = new AdvancedPlayer({
+    app: { isPackaged: true, getAppPath: () => root },
+    downloadEngine: { mediaFile: id => id === "job-1" ? mediaPath : null },
+    platform: "win32",
+    resourcesPath: root
+  });
+  await assert.rejects(missingRuntime.open("job-1"), /not bundled/);
+
+  const nonWindows = new AdvancedPlayer({
+    app: { isPackaged: true, getAppPath: () => root },
+    downloadEngine: { mediaFile: () => mediaPath },
+    platform: "linux",
+    resourcesPath: root
+  });
+  await assert.rejects(nonWindows.open("job-1"), /Windows desktop app only/);
+  await assert.rejects(missingRuntime.open("unknown-job"), /not ready to play/);
+  await assert.rejects(missingRuntime.open("job-1", -1), /invalid/);
+});
