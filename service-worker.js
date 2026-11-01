@@ -95,18 +95,22 @@ async function cacheShell(){
   await caches.delete(CACHE_NAME);
   throw new Error("Required Vivid shell assets failed to cache: "+failedRequired.join(", "));
  }
+}
+async function cacheOptionalShell(){
+ const cache=await caches.open(CACHE_NAME);
  const requiredSet=new Set(REQUIRED_APP_SHELL);
- // Do not precache "./": root requests may redirect to index.html depending on
- // host configuration, and redirected responses must never enter the app cache.
+ // Warm optional routes and feature modules after the app is interactive.
+ // They must not hold up first install or service-worker activation.
  const optional=[...new Set(APP_SHELL)].filter(asset=>asset!=="./"&&!requiredSet.has(asset));
- // Keep install-time network pressure bounded. The previous unbounded
- // Promise.allSettled launched every optional asset request at once.
- const failures = await cacheAssetsWithConcurrency(cache, optional);
- if(failures.length) console.warn("Vivid shell: optional assets were not precached", failures);
+ const failures=await cacheAssetsWithConcurrency(cache,optional);
+ if(failures.length)console.warn("Vivid shell: optional assets were not precached",failures);
 }
 self.addEventListener("install",event=>{event.waitUntil(cacheShell().then(()=>self.skipWaiting()));});
 self.addEventListener("activate",event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key.startsWith("vivid-cinema-shell-")&&key!==CACHE_NAME).map(key=>caches.delete(key)))).then(()=>self.clients.claim()));});
-self.addEventListener("message",event=>{if(event.data?.type==="SKIP_WAITING")self.skipWaiting();});
+self.addEventListener("message",event=>{
+ if(event.data?.type==="SKIP_WAITING"){self.skipWaiting();return;}
+ if(event.data?.type==="PRECACHE_OPTIONAL")event.waitUntil(cacheOptionalShell());
+});
 async function networkFirst(request){
  const controller=new AbortController(); const timeout=setTimeout(()=>controller.abort(),6000);
  try{
@@ -180,14 +184,14 @@ self.addEventListener("fetch",event=>{
  // Authentication must not depend on stale cached documents or SDK bundles.
  // Always try the network first for auth pages, auth modules and Firebase config.
  const isAuthDocument=/\/(?:login|auth|forgot-password|verify-email|auth-diagnostics|account)\.html$/.test(url.pathname);
- const isAuthRuntime=/\/scripts\/(?:auth|firebase|nav-auth|auth-diagnostics|app-shell|account|account-bootstrap)\.js$/.test(url.pathname)||/\/init\.json$/.test(url.pathname);
+ const isAuthRuntime=/\/scripts\/(?:auth|firebase|nav-auth|auth-diagnostics|account|account-bootstrap)\.js$/.test(url.pathname)||/\/init\.json$/.test(url.pathname);
  const isFreshNewsRuntime=/\/scripts\/(?:newsroom|intelligence)\.js$/.test(url.pathname)||/\/styles\/vivid-news\.css$/.test(url.pathname)||/\/data\/(?:news-feed\.json|news-thumbnails\/)/.test(url.pathname);
  if(isAuthDocument||isAuthRuntime){event.respondWith(networkFirst(request));return;}
  if(isFreshNewsRuntime){event.respondWith(networkFirst(request));return;}
  if(request.mode==="navigate"){event.respondWith(staleWhileRevalidate(request,event,true));return;}
  const isCodeOrStyle=/\.(?:js|css)$/.test(url.pathname);
  const isHtml=/\.html$/.test(url.pathname);
- event.respondWith(isCodeOrStyle?networkFirst(request):isHtml?networkFirst(request):staleWhileRevalidate(request,event));
+ event.respondWith(isCodeOrStyle?staleWhileRevalidate(request,event):isHtml?networkFirst(request):staleWhileRevalidate(request,event));
 });
 function safeNotificationUrl(value){
  try{const url=new URL(value||"./home.html",self.location.origin);return url.origin===self.location.origin?url.href:new URL("./home.html",self.location.origin).href;}
