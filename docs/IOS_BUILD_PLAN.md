@@ -28,3 +28,19 @@
 - The current repository has a Capacitor Android configuration but no tracked `ios/` project and no `@capacitor/ios` dependency in its package manifest.
 - An unsigned Simulator build is for engineering validation only. It cannot be installed on a physical iPhone as a normal consumer app.
 - Physical-device native installation and public native distribution may require Apple signing/program access. No paid route is assumed or authorised by this plan.
+
+## First simulator milestone (confirmed)
+
+- The unsigned iOS Simulator app compiled successfully in GitHub Actions on 2026-11-01.
+- The same job passed all 421 project tests and syntax checks, generated/synced the Capacitor iOS project, and uploaded the Simulator `.app` artifact.
+- The generated iOS project currently exists only inside the CI job/artifact; the repository still does not track an `ios/` Xcode project.
+
+## Native readiness gates before any physical-device beta
+
+1. Replace the browser-only Google OAuth path with a supported native iOS sign-in flow and verified URL callback handling. The current auth module relies on Firebase popup/redirect APIs and has not been validated inside WKWebView.
+2. Select and configure an iOS-compatible Firebase App Check provider (DeviceCheck or App Attest) and verify the project's enforcement settings. The current Firebase bootstrap uses reCAPTCHA Enterprise, which is a browser provider and is not a substitute for native attestation.
+3. Validate Firebase auth persistence and Firestore/library sync after app termination and relaunch on a real iPhone.
+4. Validate embedded playback, fullscreen/orientation, audio-session behaviour, external provider hand-off, subtitles and progress tracking on device. Cross-origin iframe players may not expose native controls or playback state.
+5. Add and commit the reproducible native project/dependency setup only after reviewing the generated Xcode project and lockfile changes.
+
+These are explicit release gates, not assumed-working features. The Simulator build passing does not close them.
