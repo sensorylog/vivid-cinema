@@ -5,6 +5,7 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs/promises");
 const os = require("node:os");
 const path = require("node:path");
+const { EventEmitter } = require("node:events");
 const { createRequire } = require("node:module");
 
 const requireDesktop = createRequire(path.resolve(__dirname, "../desktop/package.json"));
@@ -163,6 +164,71 @@ test("resume failures keep the previous progress and partial folder intact", { t
     assert.equal(await fs.readFile(path.join(jobPath, "partial.bin"), "utf8"), "keep this partial data");
     engine.client = realClient;
   } finally {
+    if (engine) await engine.shutdown();
+    await fs.rm(root, { recursive: true, force: true });
+  }
+});
+
+test("reattaching a partial torrent does not overwrite saved progress before the rescan", { timeout: 30000 }, async () => {
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "vivid-rescan-progress-"));
+  let engine;
+  let realClient;
+  let torrent;
+  try {
+    engine = new DesktopDownloadEngine({
+      app: { getPath(name) { return name === "downloads" ? path.join(root, "downloads") : path.join(root, "user-data"); } },
+      BrowserWindow: { getAllWindows: () => [] },
+      dialog: {},
+      shell: {}
+    });
+    await withTimeout(engine.ready, 10000, "rescan progress fixture initialization");
+    realClient = engine.client;
+    torrent = new EventEmitter();
+    Object.assign(torrent, {
+      progress: 0,
+      downloaded: 0,
+      length: 1000,
+      downloadSpeed: 0,
+      numPeers: 0,
+      ready: false,
+      announce: [],
+      rescanFiles(callback) {
+        this.progress = 0.76;
+        this.downloaded = 760;
+        callback(null);
+      }
+    });
+    engine.client = { destroyed: false, dht: null, add() { return torrent; } };
+    const job = {
+      id: "rescan-progress-fixture",
+      title: "Rescan progress fixture",
+      magnet: "magnet:?xt=urn:btih:0123456789012345678901234567890123456789",
+      status: "paused",
+      progress: 75.5,
+      downloaded: 755,
+      total: 1000,
+      needsRescan: true,
+      downloadPath: path.join(root, "downloads", "rescan-progress-fixture"),
+      torrent: null,
+      files: []
+    };
+    engine.attachTorrent(job);
+    assert.equal(job.progress, 75.5,
+      "the initial empty in-memory bitfield must not replace persisted progress");
+    torrent.ready = true;
+    torrent.emit("ready");
+    assert.equal(job.status, "downloading");
+    assert.equal(job.needsRescan, false);
+    assert.equal(job.progress, 76,
+      "progress should update from the verified bitfield after the rescan completes");
+  } finally {
+    if (engine?.jobs) {
+      for (const job of engine.jobs.values()) {
+        if (job.statusTimer) clearInterval(job.statusTimer);
+        if (job.persistTimer) clearTimeout(job.persistTimer);
+      }
+    }
+    if (engine && realClient) engine.client = realClient;
     if (engine) await engine.shutdown();
     await fs.rm(root, { recursive: true, force: true });
   }
