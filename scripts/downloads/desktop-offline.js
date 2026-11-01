@@ -173,9 +173,16 @@ function syncPlayerControls(){
   byId("offline-play-toggle").textContent=player.paused?"Play":"Pause";
   byId("offline-play-toggle").setAttribute("aria-label",player.paused?"Play":"Pause");
 }
+let seekFeedbackTimer=0;
 function seekBy(seconds){
   if(!Number.isFinite(player.duration))return;
   player.currentTime=Math.max(0,Math.min(player.duration,player.currentTime+seconds));
+  const feedback=byId("offline-seek-feedback");
+  feedback.textContent=seconds<0?"−10 seconds":"+10 seconds";
+  feedback.className="offline-seek-feedback "+(seconds<0?"is-back":"is-forward");
+  feedback.hidden=false;
+  if(seekFeedbackTimer)clearTimeout(seekFeedbackTimer);
+  seekFeedbackTimer=setTimeout(()=>{feedback.hidden=true;},850);
 }
 function clearExternalSubtitle(){
   const track=byId("offline-external-subtitle");
@@ -435,8 +442,8 @@ window.addEventListener("pagehide",()=>{
 window.addEventListener("keydown",event=>{
   if(byId("offline-player-section").hidden||event.target.matches("input,textarea,select,button"))return;
   if(event.code==="Space"){event.preventDefault();if(player.paused)void player.play().catch(()=>{});else player.pause();}
-  if(event.key==="ArrowRight")seekBy(10);
-  if(event.key==="ArrowLeft")seekBy(-10);
+  if(event.key==="ArrowRight"){event.preventDefault();seekBy(10);}
+  if(event.key==="ArrowLeft"){event.preventDefault();seekBy(-10);}
   if(event.key.toLowerCase()==="f")void byId("offline-fullscreen").click();
   if(event.key.toLowerCase()==="m")player.muted=!player.muted;
 });
