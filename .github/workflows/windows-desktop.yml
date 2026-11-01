@@ -76,6 +76,20 @@ jobs:
           if (!(Test-Path "licenses/mpv/SOURCE-MANIFEST.json")) {
             throw "Refusing to publish mpv: the source manifest is missing."
           }
+          $manifest = Get-Content "licenses/mpv/SOURCE-MANIFEST.json" -Raw | ConvertFrom-Json
+          if ($manifest.formatVersion -ne 1 -or $manifest.verified -ne $true) {
+            throw "Refusing to publish mpv: the corresponding-source manifest is not verified."
+          }
+          if ($manifest.mpv.commit -ne "9e2ed65eb0c02f99a352dfa1ad3c85ecceefe005" -or $manifest.ffmpeg.commit -ne "a3c5339578cb1d54322e06b6bd1c8852fc6abc29") {
+            throw "Refusing to publish mpv: the source manifest does not match the exact bundled mpv/FFmpeg revisions."
+          }
+          $sourceHash = (Get-FileHash "licenses/mpv/CORRESPONDING-SOURCE.zip" -Algorithm SHA256).Hash.ToLower()
+          if ($manifest.archiveSha256 -ne $sourceHash) {
+            throw "Refusing to publish mpv: the corresponding-source archive hash does not match its manifest."
+          }
+          if (@($manifest.components).Count -lt 1) {
+            throw "Refusing to publish mpv: the source manifest must enumerate the bundled GPL-covered components."
+          }
       - name: Prepare checksum-pinned mpv Advanced Player runtime
         if: steps.release-decision.outputs.publish == 'true'
         run: node desktop/prepare-mpv.cjs
