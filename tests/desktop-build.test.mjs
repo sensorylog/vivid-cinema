@@ -452,6 +452,7 @@ test("Advanced Player uses a pinned mpv runtime, private IPC and guarded main-pr
   assert.ok(sourceGate.includes("CORRESPONDING-SOURCE.zip"));
   assert.ok(sourceGate.includes("archiveSha256"));
   assert.ok(sourceGate.includes("verifiedBy"));
+  assert.ok(sourceGate.includes("licenseFile"));
   assert.ok(prepare.includes("Expand-Archive"));
   assert.ok(advanced.includes("--hwdec=auto-safe"));
   assert.ok(advanced.includes("shell: false"));
