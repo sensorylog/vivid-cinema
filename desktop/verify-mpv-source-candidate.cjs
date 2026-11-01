@@ -29,7 +29,7 @@ function main() {
     const licensePath = path.resolve(licenseRoot, component.licenseFile || "");
     const relative = path.relative(licenseRoot, licensePath);
     if (!relative || relative.startsWith("..") || path.isAbsolute(relative) || !fs.existsSync(licensePath) || !fs.statSync(licensePath).isFile()) throw new Error("Candidate source component is missing its bundled licence text: " + component.name);
-    if (!component.source || !component.commit || !component.license) throw new Error("Candidate source component has incomplete provenance: " + component.name);
+    if (!component.source || (!component.commit && !component.version) || !component.license) throw new Error("Candidate source component has incomplete provenance: " + component.name);
   }
   console.log("Candidate verified structurally (not legally certified):", manifest.components.length, "components; SHA-256", digest);
 }
