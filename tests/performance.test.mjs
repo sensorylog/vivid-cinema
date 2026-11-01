@@ -38,6 +38,13 @@ test("app shell routes Back through its saved previous internal Vivid route", as
   assert.ok(appShell.indexOf("recordCurrentRoute();") < appShell.indexOf("ensureBackControl();"));
 });
 
+test("first-time service-worker installation does not force an extra page reload", async () => {
+  const pwa = await read("scripts/pwa.js");
+  assert.ok(pwa.includes("const hadController = Boolean(navigator.serviceWorker.controller)"));
+  assert.ok(pwa.includes("if (hadController) {"));
+  assert.ok(pwa.includes('navigator.serviceWorker.addEventListener("controllerchange"'));
+});
+
 test("home entry point does not import unused named bindings", async () => {
   const source = await read("script.js");
   assert.doesNotMatch(source, /\bgetHomeSections\b/);
