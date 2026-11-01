@@ -638,6 +638,22 @@ async function play(job,fileIndex=0){
   try{await player.play();}catch{setMessage("Your movie is ready. Press Play in the Vivid player to begin.");}
   syncPlayerControls();
 }
+byId("offline-advanced-player").addEventListener("click",async()=>{
+  const id=String(player.dataset.jobId||"");
+  const fileIndex=Number(player.dataset.fileIndex)||0;
+  if(!id){setMessage("Open a saved download in the Vivid player first.");return;}
+  const button=byId("offline-advanced-player");
+  button.disabled=true;
+  const currentTime=Number(player.currentTime)||0;
+  try{
+    if(currentTime>0)await engine.setPlaybackPosition(id,fileIndex,currentTime);
+    await engine.openAdvancedPlayer(id,fileIndex);
+    player.pause();
+    setMessage("Vivid Advanced Player opened. Use its on-screen controls or keyboard shortcuts to watch.");
+  }catch(error){
+    setMessage(error?.message||"Vivid Advanced Player could not be opened.");
+  }finally{button.disabled=false;}
+});
 byId("desktop-search-form").addEventListener("submit",async event=>{
   event.preventDefault();const query=byId("desktop-search-input").value.trim();
   if(query.length<2){setMessage("Enter at least two characters.");return;}
