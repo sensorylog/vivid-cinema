@@ -59,6 +59,17 @@ The desktop engine currently owns torrent search/download lifecycle and persiste
 
 **Do not refactor these paths as part of a player or visual redesign.** First prove any required change with a reproducible test and preserve existing data formats and IPC contracts wherever possible.
 
+## User data locations and protection boundary
+
+The desktop engine currently resolves two important locations through Electron:
+
+- Media files: `app.getPath("downloads")/Vivid Cinema` (the Windows user's Downloads folder, in a Vivid Cinema subfolder).
+- Download state and playback positions: `app.getPath("userData")/vivid-downloads.json` (the Electron application user-data directory).
+
+The JSON state currently contains a version field, the selected download path, job records and playback positions. Persistence writes to a temporary `.tmp` file and renames it into place.
+
+Before any future migration or packaging change, both the media directory and the state JSON must be accounted for in a recovery plan. A Git branch protects source code only; it does not back up files on the user's PC. Never assume the Windows user-data path from a guessed product name—resolve and verify the actual path on the target installation before any data operation.
+
 ## Existing player behaviour
 
 The Windows player currently uses Chromium HTML5 video through the Electron renderer and local `vivid-media` URLs.
