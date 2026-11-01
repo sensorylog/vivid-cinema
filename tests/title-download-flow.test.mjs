@@ -39,7 +39,9 @@ test("title download action opens the native Vivid Offline library", async () =>
   assert.match(engine, /job\.files/);
   assert.match(engine, /episodeTitle: safeText\(media\.episodeTitle, 180\)/);
   assert.match(offline, /episodeTitle:result\.episodeTitle/);
-  assert.match(offline, /job\.title\+episodeTag/);
+  assert.match(offline, /media\.episodeTitle\|\|job\.title/);
+  assert.match(offline, /media\.title\|\|first\.title/);
+  assert.match(offline, /function episodeMarkup\(job\)/);
   assert.match(engine, /needsRescan/);
   assert.match(engine, /playbackPositions/);
   assert.match(offline, /desktop-search-form/);
