@@ -1,0 +1,18 @@
+{
+  "formatVersion": 1,
+  "target": "x86_64-w64-mingw32",
+  "dependencies": {
+    "dav1d": {"source":"https://github.com/videolan/dav1d.git","commit":"4e3ab21fbbf84a4bd283ea27f96287fcd7c228c1"},
+    "lcms2": {"source":"https://github.com/mm2/Little-CMS.git","commit":"7717fce0d85447ef3b2df0cca2e99207c15eeecd"},
+    "ffmpeg": {"source":"https://github.com/FFmpeg/FFmpeg.git","commit":"f7a9cd23e8520ea3c2bc48e166c14b50ca81c8dc","branch":"release/8.0"},
+    "shaderc": {"source":"https://github.com/google/shaderc.git","commit":"4f0683ab2419ecbb9e18c9edfd4ffd70c2ba8cc6"},
+    "spirv-cross": {"source":"https://github.com/KhronosGroup/SPIRV-Cross.git","commit":"57e4efcc84112abcd426dc5ec248b5339bee04f2"},
+    "nv-codec-headers": {"source":"https://github.com/FFmpeg/nv-codec-headers.git","commit":"f2053071ea93137255b6dcf42e9b4c9e0965a44e"},
+    "vulkan-headers": {"source":"https://github.com/KhronosGroup/Vulkan-Headers.git","commit":"9fbc2a782ee3f8a4db64e7d991e23da75e893f44"},
+    "vulkan-loader": {"source":"https://github.com/KhronosGroup/Vulkan-Loader.git","commit":"aa6dee8385afe4b2cc0152d086af2184743e16fd"},
+    "libplacebo": {"source":"https://github.com/haasn/libplacebo.git","commit":"c4de47cd94af6ce15573debe84306e01bca33996"},
+    "libass": {"source":"https://github.com/libass/libass.git","commit":"00fe2ec7ae677b7568fbbcbcbcb67d34bb4292a3"},
+    "luajit": {"source":"https://github.com/LuaJIT/LuaJIT.git","commit":"ea9eb7edb5eac4a9d175d74523db34fac0fa5180"}
+  },
+  "note": "Git dependencies used by the pinned mpv 0.41.0 build script are immutable. shaderc's git-sync-deps uses the exact revisions recorded in its pinned DEPS file. Versioned release tarballs are captured in the source snapshot."
+}
