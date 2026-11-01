@@ -1,6 +1,3 @@
-import { tmdbApi } from "./tmdb.js";
-import { getImageUrl } from "./media.js";
-
 const rail = document.getElementById("trending-rail");
 const art = document.querySelector(".vivid-home-tv-art");
 const title = document.querySelector(".vivid-home-tv-title");
@@ -11,20 +8,6 @@ let index = 0;
 let timer = null;
 const legacyPerformance = document.documentElement.classList.contains("vivid-performance-legacy");
 let liveAnimations = [];
-
-async function loadDirectTrending() {
-  try {
-    const data = await tmdbApi.trending("all", "week");
-    return (data?.results || []).filter(item => item?.poster_path || item?.backdrop_path).slice(0, 12).map(item => ({
-      src: getImageUrl(item.backdrop_path || item.poster_path, "w780"),
-      title: item.title || item.name || "Trending now",
-      meta: `${(item.release_date || item.first_air_date || "").slice(0, 4) || "Now"} · ${item.media_type === "tv" ? "Series" : "Movie"}`
-    }));
-  } catch (error) {
-    console.warn("Vivid Moment artwork fallback failed:", error);
-    return [];
-  }
-}
 
 function collectTrending() {
   if (!rail) return [];
@@ -55,9 +38,8 @@ function showTrendingItem(item) {
   meta.textContent = item.meta;
 }
 
-async function refreshTrending() {
-  let next = collectTrending();
-  if (!next.length && !legacyPerformance) next = await loadDirectTrending();
+function refreshTrending() {
+  const next = collectTrending();
   if (!next.length) return;
 
   items = next;
@@ -78,7 +60,6 @@ async function refreshTrending() {
 }
 
 
-// The Trending rail can still be loading when the cinema moment appears.
-// Pull the same TMDB trending feed directly so the TV artwork never depends
-// on another rail's lazy-image timing.
-window.setTimeout(() => { void refreshTrending(); }, 700);
+// Reuse the Home catalogue response rather than requesting a second trending feed.
+// The rail is rendered before this event is dispatched.
+window.addEventListener("vivid:home-trending-ready", () => refreshTrending());
