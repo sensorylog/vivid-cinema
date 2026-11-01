@@ -317,3 +317,13 @@ test("Ultra Player subtitle sync applies offsets from original cue timings", () 
   assert.match(player, /cue\.endTime=Math\.max\(cue\.startTime\+0\.001,base\.end\+offset\)/);
   assert.match(player, /activeSubtitleTrack!==track\.track/);
 });
+
+
+test("Ultra Player exposes embedded and external subtitle track selection", () => {
+  const player = fs.readFileSync(path.join(root, "scripts", "downloads", "desktop-offline.js"), "utf8");
+  const page = fs.readFileSync(path.join(root, "my-downloads.html"), "utf8");
+  assert.match(page, /offline-subtitle-track/);
+  assert.match(player, /function refreshSubtitleTracks\(\)/);
+  assert.match(player, /player\.textTracks/);
+  assert.match(player, /tracks\[index\]\.mode=index===selected\?"showing":"disabled"/);
+});
