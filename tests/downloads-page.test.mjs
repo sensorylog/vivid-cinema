@@ -40,9 +40,17 @@ test("downloads page has responsive and keyboard-focus styles", () => {
 });
 
 
-test("downloads page clearly marks movie and series downloads as coming soon", () => {
-  assert.match(html, /Movie &amp; TV downloads are coming soon/);
-  assert.match(html, /Direct movie and series downloads are not ready yet/);
-  assert.match(html, /COMING SOON/);
-  assert.match(styles, /downloads-feature-status/);
+test("downloads page advertises offline movie and TV downloads on Windows", () => {
+  assert.match(html, /AVAILABLE NOW · WINDOWS APP/);
+  assert.match(html, /Download movies &amp; TV shows\. Watch offline\./);
+  assert.match(html, /download movies and TV episodes to your device, then watch them offline right inside the app/i);
+  assert.match(html, /My Downloads/);
+  assert.match(styles, /downloads-feature-status-available/);
+});
+
+test("Android offline downloads and website downloads are clearly marked in development", () => {
+  assert.match(html, /Android &amp; website offline downloads are next/);
+  assert.match(html, /movie and TV offline downloads are being developed for it/);
+  assert.match(html, /website download experience is also still in development/);
+  assert.match(html, /downloads-feature-status-pending/);
 });
