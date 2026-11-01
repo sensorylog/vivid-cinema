@@ -54,3 +54,10 @@ test("Android offline downloads and website downloads are clearly marked in deve
   assert.match(html, /website download experience is also still in development/);
   assert.match(html, /downloads-feature-status-pending/);
 });
+
+
+test("download page never hardcodes an obsolete Windows installer fallback", async () => {
+  assert.doesNotMatch(html, /Vivid-Cinema-(?:Setup|Portable)-1\.0\.\d+\.exe/);
+  assert.doesNotMatch(script, /Vivid-Cinema-(?:Setup|Portable)-1\.0\.\d+\.exe/);
+  assert.match(html, /scripts\/downloads\.js\?v=direct-download-v4/);
+});
