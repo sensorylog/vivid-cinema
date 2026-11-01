@@ -411,8 +411,11 @@ byId("offline-audio-track").addEventListener("change",event=>{
 byId("offline-seek").addEventListener("input",event=>{if(Number.isFinite(player.duration))player.currentTime=player.duration*(Number(event.target.value)/1000);});
 byId("offline-volume").addEventListener("input",event=>{player.volume=Number(event.target.value);player.muted=player.volume===0;});
 byId("offline-speed").addEventListener("change",event=>{player.playbackRate=Number(event.target.value)||1;});
+function currentFullscreenElement(){
+  return document.fullscreenElement||document.webkitFullscreenElement||null;
+}
 function syncFullscreenButton(){
-  const active=document.fullscreenElement===byId("offline-player-section");
+  const active=currentFullscreenElement()===byId("offline-player-section");
   const button=byId("offline-fullscreen");
   button.textContent=active?"Exit fullscreen":"Fullscreen";
   button.setAttribute("aria-pressed",String(active));
@@ -420,14 +423,24 @@ function syncFullscreenButton(){
 async function togglePlayerFullscreen(){
   const section=byId("offline-player-section");
   try{
-    if(document.fullscreenElement===section){
-      await document.exitFullscreen();
+    const active=currentFullscreenElement();
+    if(active===section){
+      const exit=document.exitFullscreen||document.webkitExitFullscreen;
+      if(typeof exit==="function")await exit.call(document);
       return;
     }
-    if(document.fullscreenElement)await document.exitFullscreen();
-    const request=section.requestFullscreen||section.webkitRequestFullscreen;
+    if(active){
+      const exit=document.exitFullscreen||document.webkitExitFullscreen;
+      if(typeof exit==="function")await exit.call(document);
+    }
+    const standardRequest=section.requestFullscreen;
+    const request=standardRequest||section.webkitRequestFullscreen;
     if(typeof request!=="function")throw new Error("Fullscreen API is unavailable.");
-    await request.call(section,{navigationUI:"hide"});
+    const result=standardRequest
+      ? request.call(section,{navigationUI:"hide"})
+      : request.call(section);
+    await Promise.resolve(result);
+    showPlayerControls();
   }catch(error){
     syncFullscreenButton();
     setMessage("Fullscreen could not be opened on this device. "+(error?.message||""));
@@ -446,12 +459,17 @@ function showPlayerControls(){
   if(!player.paused){
     controlsHideTimer=setTimeout(()=>{
       if(!player.paused&&!section.matches(":focus-within"))section.classList.add("controls-hidden");
-    },3200);
+    },2200);
   }
 }
 function hidePlayerControls(){
   const section=byId("offline-player-section");
-  if(!player.paused&&!section.matches(":focus-within"))section.classList.add("controls-hidden");
+  if(controlsHideTimer)clearTimeout(controlsHideTimer);
+  if(!player.paused&&!section.matches(":focus-within")){
+    controlsHideTimer=setTimeout(()=>{
+      if(!player.paused&&!section.matches(":focus-within"))section.classList.add("controls-hidden");
+    },280);
+  }
 }
 function findNextEpisode(job){
   const media=job?.media||{};
@@ -633,8 +651,9 @@ byId("offline-jobs").addEventListener("click",async event=>{
 player.addEventListener("error",()=>setMessage("This file uses a video format or codec the built-in player cannot decode. Try an MP4 or WebM release."));
 byId("offline-player-close").addEventListener("click",async()=>{
   if(controlsHideTimer)clearTimeout(controlsHideTimer);
-  if(document.fullscreenElement===playerSection){
-    try{await document.exitFullscreen();}catch{}
+  if(currentFullscreenElement()===playerSection){
+    const exit=document.exitFullscreen||document.webkitExitFullscreen;
+    try{if(typeof exit==="function")await exit.call(document);}catch{}
   }
   player.pause();clearExternalSubtitle();player.removeAttribute("src");player.load();player.dataset.jobId="";
   player.controls=true;byId("offline-custom-controls").hidden=true;byId("offline-player-section").hidden=true;
