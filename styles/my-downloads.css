@@ -137,3 +137,6 @@ html.vivid-performance-legacy .offline-resume-prompt{transition:none}
 .offline-subtitle-sync-control{display:flex;align-items:center;gap:6px;font-size:11px;color:#aebbd4}
 .offline-subtitle-sync-control input{width:92px;accent-color:#8d8aff}
 .offline-subtitle-sync-control output{min-width:34px;font-variant-numeric:tabular-nums}
+
+.offline-subtitle-track-control{display:flex;align-items:center;gap:6px;font-size:11px;color:#aebbd4}
+.offline-subtitle-track-control select{max-width:145px;border:1px solid rgba(170,185,220,.22);border-radius:8px;background:#0b1020;color:#f4f6fc;padding:7px 8px;font:600 11px system-ui,sans-serif}
