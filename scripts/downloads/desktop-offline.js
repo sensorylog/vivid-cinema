@@ -206,9 +206,10 @@ function loadExternalSubtitle(file){
       track.label=file.name;
       track.srclang="und";
       track.src=URL.createObjectURL(blob);
+      player.dataset.subtitleUrl=track.src;
       track.default=true;
       player.appendChild(track);
-      player.textTracks.addEventListener("addtrack",()=>{for(const item of player.textTracks)if(item===track.track)item.mode="showing";},{once:true});
+      try{track.track.mode="showing";}catch{}
       setMessage("Subtitle loaded: "+file.name);
     }catch(error){setMessage(error?.message||"Could not load this subtitle.");}
   };
