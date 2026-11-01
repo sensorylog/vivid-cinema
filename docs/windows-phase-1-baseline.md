@@ -146,13 +146,14 @@ The `desktop/package.json` still contains legacy Dolphin Movie Downloader identi
 - [x] Identify what the existing tests prove and what they do not prove.
 - [x] Record high-risk legacy packaging/dependency areas to avoid touching casually.
 - [x] Make no runtime-code, dependency, lockfile, download-data or release changes.
-- [ ] Run a fresh full Windows workflow on the protected branch before any runtime implementation, if/when an approved workflow-dispatch or PR validation path is used.
-- [ ] Perform manual Windows machine checks with representative downloaded media before selecting or replacing a playback engine.
+- [x] Record successful Windows, test and quality workflows for the exact source baseline. No runtime code changed in Phase 1, so a duplicate build of the documentation-only checkpoint was not required.
+- [ ] Stage 2 preflight: on the target Windows installation, resolve the actual Electron user-data path and confirm the Downloads/Vivid Cinema media path; make and verify a backup of both before any migration or player-engine change.
+- [ ] Stage 2 preflight: run representative downloaded media on the existing installed player and collect baseline playback/performance observations before comparing playback engines.
 
 ## Phase 1 disposition
 
-**Foundation inventory and source-control checkpoint: complete.**
+**Phase 1 foundation inventory and source-control checkpoint: complete.**
 
 **Runtime modifications: none.**
 
-The remaining validation items above are intentionally retained as gates before risky implementation. The existing baseline CI is recorded, but no claim is made that physical Windows playback, codec compatibility, hardware decoding or clean-machine installation has been tested by this source audit.
+The successful CI runs are tied to the exact source baseline. The remaining items are explicit Stage 2 preflight gates before any player-engine or data migration work. No claim is made that physical Windows playback, codec compatibility, hardware decoding or clean-machine installation has been tested by this source audit.
