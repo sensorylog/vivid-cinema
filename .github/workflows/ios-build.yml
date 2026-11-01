@@ -47,7 +47,7 @@ jobs:
         run: npm run check:syntax
 
       - name: Install the matching Capacitor iOS platform for this build
-        run: npm install --no-save --package-lock=false --no-audit --no-fund @capacitor/ios@8.5.3
+        run: npm install --no-save --package-lock=false --no-audit --no-fund @capacitor/core@8.5.3 @capacitor/cli@8.5.3 @capacitor/android@8.5.3 @capacitor/ios@8.5.3
 
       - name: Build the bundled Vivid Cinema web app
         run: npm run build:web
@@ -60,7 +60,7 @@ jobs:
       - name: Build unsigned iOS Simulator app
         run: |
           xcodebuild \
-            -workspace ios/App/App.xcworkspace \
+            -project ios/App/App.xcodeproj \
             -scheme App \
             -configuration Debug \
             -sdk iphonesimulator \
