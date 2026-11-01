@@ -627,6 +627,8 @@ byId("offline-jobs").addEventListener("error",event=>{
 },true);
 byId("offline-owner").textContent="This device";
 byId("desktop-download-search").hidden=false;
+byId("offline-library-tools").hidden=false;
+byId("offline-library-count").hidden=false;
 byId("offline-notice-copy").textContent="Downloads are saved to your computer in the Vivid Cinema folder. They remain available without an internet connection.";
 byId("offline-footnote").textContent="Your videos are stored on this device in the Vivid Cinema folder inside Downloads. Removing a download from Vivid does not silently delete your video files.";
 const pending=sessionStorage.getItem("vivid:pending-desktop-download");
