@@ -24,7 +24,12 @@ test("Home paints catalogue shelves independently and reuses trending data for t
   const featureEnd = source.indexOf("function wireRails", featureStart);
   const batch = source.slice(batchStart, batchEnd);
   const feature = source.slice(featureStart, featureEnd);
+  const loadHomeStart = source.indexOf("async function loadHome(){");
+  const loadHomeEnd = source.indexOf("let searchDialog", loadHomeStart);
+  const homeLoad = source.slice(loadHomeStart, loadHomeEnd);
   assert.match(batch, /Promise\.all\(keys\.map\(async key/);
+  assert.match(homeLoad, /new IntersectionObserver/);
+  assert.match(homeLoad, /rootMargin:"700px 0px"/);
   assert.match(batch, /if\(key==="trending"\)initFeatureStrip\(data\.items\)/);
   assert.doesNotMatch(feature, /tmdbApi\.trending/);
   assert.doesNotMatch(source, /\[\["top10","topRatedMovies","popularTv"\]/);
