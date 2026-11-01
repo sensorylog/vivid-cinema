@@ -258,6 +258,16 @@ async function loadSectionBatch(keys){
       console.warn("Vivid home section failed:",key,error);
       const el=$(railId);
       if(el)el.innerHTML='<div class="vivid-empty">Unable to load this section. Try again.</div>';
+      // Preserve the previous featured-art fallback, but only request it if the
+      // shared Home trending request actually fails.
+      if(key==="trending"){
+        try{
+          const fallback=await tmdbApi.trending("all","week");
+          const fallbackItems=normalizeResults(fallback.results||[]).filter(item=>item.backdrop_path||item.poster_path).slice(0,12);
+          initFeatureStrip(fallbackItems);
+          window.dispatchEvent(new CustomEvent("vivid:home-trending-ready",{detail:fallbackItems}));
+        }catch(fallbackError){console.warn("Vivid featured artwork fallback unavailable:",fallbackError);}
+      }
     }
   }));
 }
