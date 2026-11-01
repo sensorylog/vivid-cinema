@@ -41,6 +41,28 @@ function extractZip(archivePath, destination) {
   }
 }
 
+function expandNestedArchives(directory, depth = 0, expanded = []) {
+  if (depth > 3 || expanded.length >= 8) return expanded;
+  for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
+    const fullPath = path.join(directory, entry.name);
+    let stat;
+    try { stat = fs.statSync(fullPath); } catch { continue; }
+    if (stat.isDirectory()) {
+      expandNestedArchives(fullPath, depth, expanded);
+      continue;
+    }
+    if (!stat.isFile() || path.extname(entry.name).toLowerCase() !== ".zip") continue;
+    const nestedDestination = fullPath + ".extracted";
+    if (fs.existsSync(nestedDestination)) continue;
+    fs.mkdirSync(nestedDestination, { recursive: true });
+    extractZip(fullPath, nestedDestination);
+    expanded.push(nestedDestination);
+    expandNestedArchives(nestedDestination, depth + 1, expanded);
+    if (expanded.length >= 8) break;
+  }
+  return expanded;
+}
+
 function findExecutable(directory) {
   for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
     const fullPath = path.join(directory, entry.name);
@@ -63,7 +85,7 @@ function listExtractedFiles(directory, root = directory, limit = 60, output = []
     const fullPath = path.join(directory, entry.name);
     output.push(path.relative(root, fullPath) || entry.name);
     try {
-      if (entry.isDirectory()) listExtractedFiles(fullPath, root, limit, output);
+      if (fs.statSync(fullPath).isDirectory()) listExtractedFiles(fullPath, root, limit, output);
     } catch { /* Diagnostic listing only. */ }
   }
   return output;
@@ -93,6 +115,9 @@ async function prepareMpv({ platform = process.platform, projectRoot = path.reso
     fs.mkdirSync(extractPath, { recursive: true });
     await downloadPinnedArchive(archivePath);
     extractZip(archivePath, extractPath);
+    // The stable release ZIP is a wrapper containing the actual runtime ZIP.
+    // Expand nested archives before searching for the executable and its DLLs.
+    expandNestedArchives(extractPath);
     const executable = findExecutable(extractPath);
     if (!executable) throw new Error("The verified mpv archive did not contain mpv.exe. Extracted entries: " + listExtractedFiles(extractPath).join(", "));
     const runtimeDirectory = path.dirname(executable);
