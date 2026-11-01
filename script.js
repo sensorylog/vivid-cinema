@@ -442,16 +442,37 @@ async function loadHome(){
  const primary=["top10","trending","nowPlaying","popularMovies"];
  try{await loadSectionBatch(primary)}catch(error){console.warn("Vivid primary home load failed:",error)}
 
- const loadSecondary=async()=>{
-   // Keep secondary shelves from creating a seven-request burst. Each small
-   // batch can paint before the next one starts, keeping scrolling responsive.
-   for(const batch of [["topRatedMovies","popularTv"],["topRatedTv"],["upcoming","newReleases"],["netflix","primeVideo"],["hboMax","disneyPlus"],["appleTvPlus","hulu"],["paramountPlus"]]){
-     try{await loadSectionBatch(batch)}catch(error){console.warn("Vivid secondary home load failed:",batch,error)}
-     await new Promise(resolve=>window.setTimeout(resolve,80));
+ const loadSecondary=()=>{
+   const secondary=["topRatedMovies","popularTv","topRatedTv","upcoming","newReleases","netflix","primeVideo","hboMax","disneyPlus","appleTvPlus","hulu","paramountPlus"];
+   // Load below-the-fold shelves shortly before they enter view, instead of
+   // fetching every catalogue and rendering every card during Home startup.
+   if("IntersectionObserver" in window){
+     const observer=new IntersectionObserver(entries=>{
+       for(const entry of entries){
+         if(!entry.isIntersecting)continue;
+         observer.unobserve(entry.target);
+         const key=entry.target.dataset.vividHomeSection;
+         if(key)void loadSectionBatch([key]);
+       }
+     },{rootMargin:"700px 0px"});
+     for(const key of secondary){
+       const section=$(SECTION_RAIL_IDS[key])?.closest(".vivid-rails");
+       if(!section)continue;
+       section.dataset.vividHomeSection=key;
+       observer.observe(section);
+     }
+     return;
    }
+   // Older-browser fallback keeps automatic loading, but limits request bursts.
+   void (async()=>{
+     for(const batch of [["topRatedMovies","popularTv"],["topRatedTv"],["upcoming","newReleases"],["netflix","primeVideo"],["hboMax","disneyPlus"],["appleTvPlus","hulu"],["paramountPlus"]]){
+       await loadSectionBatch(batch);
+       await new Promise(resolve=>window.setTimeout(resolve,80));
+     }
+   })();
  };
- if("requestIdleCallback" in window)requestIdleCallback(()=>void loadSecondary(),{timeout:1800});
- else window.setTimeout(()=>void loadSecondary(),900);
+ if("requestIdleCallback" in window)requestIdleCallback(loadSecondary,{timeout:1800});
+ else window.setTimeout(loadSecondary,900);
 
  const loadRecommendations=()=>void renderRecommendations().then(composeHomepage);
  if("requestIdleCallback" in window)requestIdleCallback(loadRecommendations,{timeout:2600});
