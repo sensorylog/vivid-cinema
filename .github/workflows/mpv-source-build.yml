@@ -1,5 +1,10 @@
 name: Vivid Cinema mpv Source-Build Candidate
 on:
+  pull_request:
+    paths:
+      - "desktop/**"
+      - "licenses/mpv/**"
+      - ".github/workflows/mpv-source-build.yml"
   workflow_dispatch:
 permissions:
   contents: read
