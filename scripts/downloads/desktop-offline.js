@@ -648,8 +648,23 @@ byId("offline-advanced-player").addEventListener("click",async()=>{
   try{
     if(currentTime>0)await engine.setPlaybackPosition(id,fileIndex,currentTime);
     await engine.openAdvancedPlayer(id,fileIndex);
+    if(currentFullscreenElement()===playerSection){
+      const exit=document.exitFullscreen||document.webkitExitFullscreen;
+      if(typeof exit==="function")await exit.call(document);
+    }
     player.pause();
-    setMessage("Vivid Advanced Player opened. Use its on-screen controls or keyboard shortcuts to watch.");
+    clearExternalSubtitle();
+    player.removeAttribute("src");
+    player.load();
+    player.dataset.jobId="";
+    player.dataset.fileIndex="0";
+    player.controls=true;
+    byId("offline-custom-controls").hidden=true;
+    byId("offline-player-section").hidden=true;
+    byId("offline-resume-prompt").hidden=true;
+    byId("offline-next-episode").hidden=true;
+    syncFullscreenButton();
+    setMessage("Vivid Advanced Player opened in a separate window. Use Watch now later to resume from your saved position.");
   }catch(error){
     setMessage(error?.message||"Vivid Advanced Player could not be opened.");
   }finally{button.disabled=false;}
