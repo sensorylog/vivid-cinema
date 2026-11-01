@@ -213,10 +213,6 @@ function configureDownloadEngine() {
     if (!isTrustedDownloadSender(event)) throw new Error("Untrusted advanced-player request");
     return advancedPlayer.open(id, fileIndex);
   });
-  ipcMain.handle("vivid-advanced-player-stop", event => {
-    if (!isTrustedDownloadSender(event)) throw new Error("Untrusted advanced-player request");
-    return advancedPlayer.stop();
-  });
   ipcMain.handle("vivid-playback-position-get", (event, id, fileIndex = 0) => {
     if (!isTrustedDownloadSender(event)) throw new Error("Untrusted playback request");
     return downloadEngine.getPlaybackPosition(id, fileIndex);
