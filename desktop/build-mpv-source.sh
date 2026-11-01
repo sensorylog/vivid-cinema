@@ -2,15 +2,29 @@
 set -euo pipefail
 readonly MPV_COMMIT="41f6a645068483470267271e1d09966ca3b9f413"
 readonly MPV_URL="https://github.com/mpv-player/mpv.git"
-readonly WORK_ROOT="\${RUNNER_TEMP:-/tmp}/vivid-mpv-source-build"
+readonly WORK_ROOT="${RUNNER_TEMP:-/tmp}/vivid-mpv-source-build"
 readonly MPV_ROOT="$WORK_ROOT/mpv"
-readonly REPO_ROOT="\${GITHUB_WORKSPACE:-$(pwd)}"
+readonly REPO_ROOT="${GITHUB_WORKSPACE:-$(pwd)}"
 rm -rf "$WORK_ROOT"
 mkdir -p "$WORK_ROOT"
 git clone --no-checkout "$MPV_URL" "$MPV_ROOT"
 git -C "$MPV_ROOT" checkout --detach "$MPV_COMMIT"
 test "$(git -C "$MPV_ROOT" rev-parse HEAD)" = "$MPV_COMMIT"
 cd "$MPV_ROOT"
+cp "$REPO_ROOT/desktop/mpv-dependencies.lock.json" ci/vivid-mpv-dependencies.lock.json
+cp "$REPO_ROOT/desktop/clone-pinned-mpv-dependency.sh" ci/vivid-clone-pinned-mpv-dependency.sh
+export VIVID_MPV_DEPENDENCY_LOCK="$MPV_ROOT/ci/vivid-mpv-dependencies.lock.json"
+python3 - "$MPV_ROOT/ci/build-mingw64.sh" "$MPV_ROOT/ci/vivid-clone-pinned-mpv-dependency.sh" <<'PY'
+import pathlib, sys
+build_script = pathlib.Path(sys.argv[1])
+helper = pathlib.Path(sys.argv[2])
+text = build_script.read_text()
+old = 'gitclone="git clone --depth=1 --recursive --shallow-submodules"'
+new = 'gitclone="bash ' + str(helper) + '"'
+if text.count(old) != 1:
+    raise SystemExit("Could not safely patch the upstream dependency clone hook.")
+build_script.write_text(text.replace(old, new))
+PY
 export TARGET="x86_64-w64-mingw32"
 export RUST_TARGET="x86_64-pc-windows-gnu"
 export WINEDEBUG="-all"
