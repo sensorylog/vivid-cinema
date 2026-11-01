@@ -57,6 +57,7 @@ test("advanced player launches only a validated completed download through a dir
       calls.push(args);
       const child = fakeChild();
       children.push(child);
+      queueMicrotask(() => child.emit("spawn"));
       return child;
     }
   });
