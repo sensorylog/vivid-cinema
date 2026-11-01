@@ -12,6 +12,7 @@ on:
       - "init.json"
       - "desktop/**"
       - "icons/**"
+      - "licenses/**"
       - "tests/**"
       - ".github/workflows/windows-desktop.yml"
   push:
@@ -65,6 +66,21 @@ jobs:
           "publish=$($publish.ToString().ToLower())" >> $env:GITHUB_OUTPUT
       - name: Install desktop runtime dependencies
         run: npm --prefix desktop ci --omit=dev --no-audit --no-fund
+      - name: Prepare checksum-pinned mpv Advanced Player runtime
+        run: node desktop/prepare-mpv.cjs
+      - name: Verify mpv runtime and redistribution notice
+        shell: pwsh
+        run: |
+          if (!(Test-Path "desktop/vendor/mpv/mpv.exe")) {
+            throw "The checksum-verified mpv runtime was not prepared."
+          }
+          $runtime = Get-Content "desktop/vendor/mpv/vivid-mpv-runtime.json" | ConvertFrom-Json
+          if ($runtime.sha256 -ne "24a5ac969219767c617f5d109761d4e24db8ba05dee30db485ea756415dc63b4") {
+            throw "The bundled mpv runtime does not match the approved checksum."
+          }
+          if (!(Test-Path "licenses/mpv/NOTICE.md")) {
+            throw "The mpv third-party redistribution notice is missing."
+          }
       - name: Verify the desktop download engine with a local seeded torrent
         timeout-minutes: 3
         run: node --test tests/desktop-download-engine.integration.test.cjs
