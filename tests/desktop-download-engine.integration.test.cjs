@@ -68,7 +68,7 @@ test("desktop engine downloads a video-extension payload from a local seeded tor
   const videoPath = path.join(root, "vivid-integration.mp4");
   const downloadsPath = path.join(root, "downloads");
   const userDataPath = path.join(root, "user-data");
-  const payload = Buffer.alloc(768 * 1024);
+  const payload = Buffer.alloc(8 * 1024 * 1024);
   for (let index = 0; index < payload.length; index += 1) {
     payload[index] = (index * 31 + Math.floor(index / 251)) % 251;
   }
@@ -184,17 +184,32 @@ test("desktop engine downloads a video-extension payload from a local seeded tor
       console.log("[vivid-integration] leecher warning", warning?.message || String(warning));
     });
 
-    // Exercise the real pause/resume control path against the local seeded
-    // torrent before allowing the transfer to complete.
+    // Pause only after verified bytes have reached disk. The previous test
+    // paused immediately after enqueue and never proved partial data survives.
+    await waitFor(
+      () => job.torrent?.ready && Number(job.torrent.downloaded) >= 64 * 1024 && job.torrent.progress < 0.95,
+      20000,
+      "a genuine partial transfer before pause"
+    );
+    const progressBeforePause = Number(job.torrent.progress) * 100;
+    const bytesBeforePause = Number(job.torrent.downloaded);
+    assert.ok(bytesBeforePause >= 64 * 1024, "pause fixture must contain verified partial bytes");
     assert.equal(await engine.control(started.id, "pause"), true,
       "an active desktop download should pause");
     assert.equal(job.status, "paused", "pause should persist a paused job state");
+    assert.ok(job.progress >= progressBeforePause - 0.1, "pause must preserve the verified percentage");
     const pausedState = JSON.parse(await fs.readFile(engine.statePath, "utf8"));
     assert.equal(pausedState.jobs.find(row => row.id === started.id)?.status, "paused",
       "the paused state should survive in the on-disk job record");
     assert.equal(await engine.control(started.id, "resume"), true,
       "a paused desktop download should resume");
     assert.equal(job.status, "downloading", "resume should reattach the torrent");
+    await waitFor(() => job.status === "downloading" && job.needsRescan === false,
+      20000, "partial torrent verification to finish after resume");
+    assert.ok(job.progress >= progressBeforePause - 0.1,
+      "resume must restore verified pieces rather than restart at zero");
+    assert.ok(Number(job.torrent?.downloaded) >= bytesBeforePause,
+      "resume must reuse previously downloaded bytes from the existing store");
 
     try {
       await waitFor(
