@@ -209,3 +209,30 @@ body.vivid-desktop-offline-library .offline-progress span{display:block;height:1
 html.vivid-performance-legacy .offline-library-tools,html.vivid-performance-legacy .offline-media-card,html.vivid-performance-legacy .offline-series-card{backdrop-filter:none;box-shadow:none}
 
 .offline-library-tools[hidden],.offline-library-count[hidden]{display:none!important}
+
+
+/* Fullscreen must become a real viewport-sized layout, not just a fullscreen block. */
+.offline-player-section:fullscreen {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: center;
+  min-width: 0;
+  min-height: 0;
+}
+.offline-player-section:fullscreen video {
+  flex: 1 1 auto;
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+  height: auto;
+  max-height: none;
+}
+.offline-player-section:fullscreen .offline-seek-feedback {
+  position: absolute;
+}
+@media (max-width: 700px) {
+  .offline-player-section:fullscreen {
+    padding: max(8px, env(safe-area-inset-top)) max(8px, env(safe-area-inset-right)) max(8px, env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-left));
+  }
+}
