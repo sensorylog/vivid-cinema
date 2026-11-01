@@ -36,6 +36,10 @@ function posterMarkup(media){
   const safePoster=/^\/[A-Za-z0-9_./-]+\.(?:jpg|jpeg|png|webp)$/i.test(poster)&&!poster.split("/").includes("..");
   return '<div class="offline-poster" aria-hidden="true"><span>VIVID</span>'+(safePoster?'<img loading="lazy" decoding="async" src="https://image.tmdb.org/t/p/w342'+escapeHtml(poster)+'" alt="">':"")+'</div>';
 }
+function errorMarkup(job){
+  if(job.status!=="failed"||!job.error)return "";
+  return '<p class="offline-job-error" role="status">'+escapeHtml(job.error)+'</p>';
+}
 function progressMarkup(job){
   if(!["downloading","paused","verifying","completed","queued"].includes(job.status))return "";
   const progress=Math.max(0,Math.min(100,Number(job.progress)||0));
@@ -62,7 +66,7 @@ function episodeMarkup(job){
   const episode=Math.max(0,Math.floor(Number(media.episode)||0));
   const episodeLabel="S"+String(season).padStart(2,"0")+"E"+String(episode).padStart(2,"0");
   const title=media.episodeTitle||job.title||"Episode";
-  return '<article class="offline-episode-row"><div class="offline-episode-copy"><span class="offline-episode-number">'+episodeLabel+'</span><strong>'+escapeHtml(title)+'</strong><small>'+escapeHtml(statusText(job))+(job.status==="downloading"?" · "+Math.round(progress)+"%":"")+'</small>'+progressMarkup(job)+fileMarkup(job)+'</div>'+actionMarkup(job)+'</article>';
+  return '<article class="offline-episode-row"><div class="offline-episode-copy"><span class="offline-episode-number">'+episodeLabel+'</span><strong>'+escapeHtml(title)+'</strong><small>'+escapeHtml(statusText(job))+(job.status==="downloading"?" · "+Math.round(progress)+"%":"")+'</small>'+progressMarkup(job)+errorMarkup(job)+fileMarkup(job)+'</div>'+actionMarkup(job)+'</article>';
 }
 function matchesLibrary(job){
   const media=job.media||{};
@@ -115,7 +119,7 @@ function render(){
     const media=job.media||{},progress=Math.max(0,Math.min(100,Number(job.progress)||0));
     const title=media.title||job.title||"Untitled movie";
     const detail=statusText(job)+(job.status==="downloading"?" · "+Math.round(progress)+"%":"");
-    const markup='<article class="offline-media-card">'+posterMarkup(media)+'<div class="offline-media-copy"><span class="offline-card-kicker">MOVIE</span><h3>'+escapeHtml(title)+'</h3><p class="offline-card-status">'+escapeHtml(detail)+'</p>'+progressMarkup(job)+fileMarkup(job)+actionMarkup(job)+'</div></article>';
+    const markup='<article class="offline-media-card">'+posterMarkup(media)+'<div class="offline-media-copy"><span class="offline-card-kicker">MOVIE</span><h3>'+escapeHtml(title)+'</h3><p class="offline-card-status">'+escapeHtml(detail)+'</p>'+progressMarkup(job)+errorMarkup(job)+fileMarkup(job)+actionMarkup(job)+'</div></article>';
     entries.push({time:Number(job.updatedAt||job.createdAt)||0,markup});
   }
   entries.sort((a,b)=>b.time-a.time);
