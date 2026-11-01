@@ -1,6 +1,7 @@
 import { tmdbApi } from "../tmdb.js";
 
 if (window.vividDownloads?.available) {
+document.body.classList.add("vivid-desktop-offline-library");
 const byId = id => document.getElementById(id);
 const escapeHtml = value => String(value ?? "").replace(/[&<>"']/g, char => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[char]));
 const bytes = value => {
@@ -626,6 +627,7 @@ byId("offline-jobs").addEventListener("error",event=>{
   if(event.target instanceof HTMLImageElement&&event.target.closest(".offline-poster"))event.target.remove();
 },true);
 byId("offline-owner").textContent="This device";
+byId("offline-list-title").textContent="Your library";
 byId("desktop-download-search").hidden=false;
 byId("offline-library-tools").hidden=false;
 byId("offline-library-count").hidden=false;
