@@ -28,7 +28,6 @@ class DesktopDownloadEngine {
     // including handshakes and piece requests needed to download. Disable payload
     // uploads per torrent instead, while leaving protocol traffic unrestricted.
     this.clientError = null;
-    this.createClient();
     this.jobs = new Map();
     this.searchResults = new Map();
     this.playbackPositions = new Map();
@@ -37,6 +36,7 @@ class DesktopDownloadEngine {
     this.statePath = path.join(app.getPath("userData"), "vivid-downloads.json");
     fs.mkdirSync(this.downloadPath, { recursive: true });
     TorrentSearchApi.enablePublicProviders();
+    this.createClient();
     this.ready = this.restore();
   }
 
