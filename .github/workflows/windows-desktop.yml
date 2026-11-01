@@ -109,9 +109,12 @@ jobs:
         if: steps.release-decision.outputs.publish != 'true'
         shell: pwsh
         run: |
-          Get-ChildItem "desktop/vendor/mpv" -Force | Where-Object { $_.Name -ne ".gitkeep" } | Remove-Item -Recurse -Force
+          Get-ChildItem "desktop/vendor/mpv" -Force | Where-Object { $_.Name -ne ".gitkeep" -and $_.Name -ne "README.txt" } | Remove-Item -Recurse -Force
           if (!(Test-Path "desktop/vendor/mpv/.gitkeep")) {
             New-Item -Path "desktop/vendor/mpv/.gitkeep" -ItemType File -Force | Out-Null
+          }
+          if (!(Test-Path "desktop/vendor/mpv/README.txt")) {
+            Set-Content -Path "desktop/vendor/mpv/README.txt" -Value "Runtime staged by desktop/prepare-mpv.cjs."
           }
       - name: Verify the desktop download engine with a local seeded torrent
         timeout-minutes: 3
