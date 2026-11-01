@@ -26,8 +26,8 @@ test("downloads page resolves current assets from the latest GitHub release", ()
 test("download buttons have safe latest-release fallbacks and wait for release lookup before navigating", () => {
   assert.match(script, /RELEASE_DOWNLOAD = .*releases\/latest\/download/);
   assert.match(script, /Vivid-Cinema-Android\.apk/);
-  assert.match(script, /Vivid-Cinema-Setup-1\.0\.28\.exe/);
-  assert.match(script, /Vivid-Cinema-Portable-1\.0\.28\.exe/);
+  assert.match(script, /View the latest official Vivid Cinema Windows installer/);
+  assert.match(script, /View the latest official Vivid Cinema portable build/);
   assert.match(script, /await releaseReady/);
   assert.match(script, /window\.location\.assign\(link\.href\)/);
   assert.match(script, /Keep direct download URLs usable during GitHub API outages/);
