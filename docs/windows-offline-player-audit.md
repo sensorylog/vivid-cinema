@@ -59,7 +59,7 @@ The Windows desktop branch now has an opt-in mpv fallback path:
 
 - The current pinned runtime is Windows x64. Windows ARM64, macOS, Android and browser playback are not enabled by this tranche.
 - The advanced window uses mpv's own OSD/keyboard controls; Vivid's HTML player controls do not overlay the native mpv window.
-- The pinned binary's provenance and mpv/FFmpeg source revisions are recorded in `licenses/mpv/NOTICE.md`. The complete corresponding-source bundle for every GPL-covered component and required notices still needs to be assembled and verified before a public release containing this runtime. The notice explicitly records this as a release compliance gate.
+- The pinned mpv binary's provenance is recorded in `licenses/mpv/NOTICE.md`. The exact FFmpeg and other component revisions must be captured in `SOURCE-MANIFEST.json` after inspecting the build inputs. The complete corresponding-source bundle for every GPL-covered component and required notices still needs to be assembled and verified before a public release containing this runtime. The notice explicitly records this as a release compliance gate.
 - CI can prove that the pinned archive downloads, its checksum matches, extraction succeeds, mpv.exe starts, the launcher contract is tested, and the Windows preview package builds. The preview package deliberately excludes the mpv binary; a public package containing it remains blocked by the corresponding-source gate. CI cannot prove that every codec works or that playback is smooth on all hardware. Real-device playback testing against the documented codec matrix remains required.
 
 
