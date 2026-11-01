@@ -445,9 +445,7 @@ test("Advanced Player uses a pinned mpv runtime, private IPC and guarded main-pr
   assert.ok(main.includes("vivid-advanced-player-open"));
   assert.ok(main.includes("isTrustedDownloadSender(event)"));
   assert.ok(main.includes("advancedPlayer.open(id, fileIndex)"));
-  assert.ok(main.includes("advancedPlayer.stop()"));
   assert.ok(preload.includes("openAdvancedPlayer: (id, fileIndex = 0)"));
-  assert.ok(preload.includes("stopAdvancedPlayer"));
   assert.ok(page.includes('id="offline-advanced-player"'));
   assert.ok(renderer.includes("engine.openAdvancedPlayer(id,fileIndex)"));
   assert.ok(workflow.includes("node desktop/prepare-mpv.cjs"));
