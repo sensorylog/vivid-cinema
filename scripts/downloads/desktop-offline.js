@@ -171,8 +171,80 @@ function syncPlayerControls(){
   byId("offline-seek").value=duration?String(Math.round(player.currentTime/duration*1000)):"0";
   byId("offline-time").textContent=clock(player.currentTime)+" / "+clock(duration);
   byId("offline-play-toggle").textContent=player.paused?"Play":"Pause";
+  byId("offline-play-toggle").setAttribute("aria-label",player.paused?"Play":"Pause");
 }
+function seekBy(seconds){
+  if(!Number.isFinite(player.duration))return;
+  player.currentTime=Math.max(0,Math.min(player.duration,player.currentTime+seconds));
+}
+function clearExternalSubtitle(){
+  const track=byId("offline-external-subtitle");
+  if(track)track.remove();
+  if(player.dataset.subtitleUrl){URL.revokeObjectURL(player.dataset.subtitleUrl);delete player.dataset.subtitleUrl;}
+}
+function parseSrtToVtt(source){
+  const normalized=source.replace(/^\uFEFF/,"").replace(/\r\n?/g,"\n");
+  const body=normalized.replace(/(\d{2}:\d{2}:\d{2}),(\d{3})/g,"$1.$2");
+  return "WEBVTT\n\n"+body.replace(/^\s*\d+\s*\n/gm,"");
+}
+function loadExternalSubtitle(file){
+  if(!file)return;
+  const extension=(file.name.split(".").pop()||"").toLowerCase();
+  if(!["srt","vtt"].includes(extension)){setMessage("Choose an SRT or WebVTT subtitle file.");return;}
+  const reader=new FileReader();
+  reader.onerror=()=>setMessage("Could not read that subtitle file.");
+  reader.onload=()=>{
+    try{
+      const source=String(reader.result||"");
+      const vtt=extension==="srt"?parseSrtToVtt(source):source.replace(/^\uFEFF/,"");
+      if(!/^WEBVTT(?:\s|$)/.test(vtt.trimStart()))throw new Error("Invalid WebVTT subtitle file.");
+      const blob=new Blob([vtt],{type:"text/vtt"});
+      clearExternalSubtitle();
+      const track=document.createElement("track");
+      track.id="offline-external-subtitle";
+      track.kind="subtitles";
+      track.label=file.name;
+      track.srclang="und";
+      track.src=URL.createObjectURL(blob);
+      track.default=true;
+      player.appendChild(track);
+      player.textTracks.addEventListener("addtrack",()=>{for(const item of player.textTracks)if(item===track.track)item.mode="showing";},{once:true});
+      setMessage("Subtitle loaded: "+file.name);
+    }catch(error){setMessage(error?.message||"Could not load this subtitle.");}
+  };
+  reader.readAsText(file);
+}
+function refreshAudioTracks(){
+  const select=byId("offline-audio-track");
+  const tracks=player.audioTracks;
+  if(!select||!tracks||typeof tracks.length!=="number"){if(select)select.parentElement.hidden=true;return;}
+  select.innerHTML="";
+  if(!tracks.length){select.parentElement.hidden=true;return;}
+  for(let index=0;index<tracks.length;index++){
+    const track=tracks[index],option=document.createElement("option");
+    option.value=String(index);
+    option.textContent=track.label||track.language||("Audio "+(index+1));
+    option.selected=Boolean(track.enabled);
+    select.appendChild(option);
+  }
+  select.parentElement.hidden=false;
+}
+
 byId("offline-play-toggle").addEventListener("click",()=>{if(player.paused)void player.play().catch(()=>{});else player.pause();});
+byId("offline-skip-back").addEventListener("click",()=>seekBy(-10));
+byId("offline-skip-forward").addEventListener("click",()=>seekBy(10));
+byId("offline-subtitle-file").addEventListener("change",event=>{
+  const file=event.target.files?.[0];loadExternalSubtitle(file);event.target.value="";
+});
+byId("offline-subtitle-size").addEventListener("change",event=>{
+  byId("offline-player-section").dataset.subtitleSize=event.target.value;
+});
+byId("offline-audio-track").addEventListener("change",event=>{
+  const tracks=player.audioTracks,index=Number(event.target.value);
+  if(!tracks||!Number.isInteger(index)||!tracks[index])return;
+  for(let i=0;i<tracks.length;i++)tracks[i].enabled=i===index;
+});
+
 byId("offline-seek").addEventListener("input",event=>{if(Number.isFinite(player.duration))player.currentTime=player.duration*(Number(event.target.value)/1000);});
 byId("offline-volume").addEventListener("input",event=>{player.volume=Number(event.target.value);player.muted=player.volume===0;});
 byId("offline-speed").addEventListener("change",event=>{player.playbackRate=Number(event.target.value)||1;});
@@ -201,6 +273,14 @@ player.addEventListener("loadedmetadata",()=>{
   }).catch(syncPlayerControls);
 });
 player.addEventListener("durationchange",syncPlayerControls);
+player.addEventListener("loadedmetadata",refreshAudioTracks);
+player.addEventListener("loadeddata",refreshAudioTracks);
+player.addEventListener("error",()=>{byId("offline-audio-track").parentElement.hidden=true;});
+if(player.audioTracks){
+  player.audioTracks.addEventListener?.("addtrack",refreshAudioTracks);
+  player.audioTracks.addEventListener?.("removetrack",refreshAudioTracks);
+  player.audioTracks.addEventListener?.("change",refreshAudioTracks);
+}
 player.addEventListener("play",syncPlayerControls);
 player.addEventListener("pause",syncPlayerControls);
 player.addEventListener("ended",()=>{if(player.dataset.jobId)void engine.clearPlaybackPosition(player.dataset.jobId,Number(player.dataset.fileIndex)||0).catch(()=>{});syncPlayerControls();});
@@ -210,8 +290,8 @@ window.addEventListener("pagehide",()=>{
 window.addEventListener("keydown",event=>{
   if(byId("offline-player-section").hidden||event.target.matches("input,textarea,select,button"))return;
   if(event.code==="Space"){event.preventDefault();if(player.paused)void player.play().catch(()=>{});else player.pause();}
-  if(event.key==="ArrowRight"&&Number.isFinite(player.duration))player.currentTime=Math.min(player.duration,player.currentTime+10);
-  if(event.key==="ArrowLeft")player.currentTime=Math.max(0,player.currentTime-10);
+  if(event.key==="ArrowRight")seekBy(10);
+  if(event.key==="ArrowLeft")seekBy(-10);
   if(event.key.toLowerCase()==="f")void byId("offline-fullscreen").click();
   if(event.key.toLowerCase()==="m")player.muted=!player.muted;
 });
@@ -222,7 +302,7 @@ async function play(job,fileIndex=0){
   const playerTitle=file&&job.files.length>1?job.title+" — "+file.name:job.title;
   byId("offline-player-title").textContent=playerTitle;
   const section=byId("offline-player-section");
-  if(player.dataset.jobId!==job.id||player.dataset.fileIndex!==String(fileIndex)){player.pause();player.src=url;player.dataset.jobId=job.id;player.dataset.fileIndex=String(fileIndex);player.load();lastPositionSave=0;}
+  if(player.dataset.jobId!==job.id||player.dataset.fileIndex!==String(fileIndex)){player.pause();clearExternalSubtitle();player.src=url;player.dataset.jobId=job.id;player.dataset.fileIndex=String(fileIndex);player.load();lastPositionSave=0;byId("offline-player-section").dataset.subtitleSize="medium";byId("offline-subtitle-size").value="medium";}
   player.controls=false;
   byId("offline-custom-controls").hidden=false;
   section.hidden=false;section.scrollIntoView({behavior:"smooth",block:"start"});
@@ -274,7 +354,7 @@ byId("offline-jobs").addEventListener("click",async event=>{
   finally{button.disabled=false;}
 });
 player.addEventListener("error",()=>setMessage("This file uses a video format or codec the built-in player cannot decode. Try an MP4 or WebM release."));
-byId("offline-player-close").addEventListener("click",()=>{player.pause();player.removeAttribute("src");player.load();player.dataset.jobId="";player.controls=true;byId("offline-custom-controls").hidden=true;byId("offline-player-section").hidden=true;});
+byId("offline-player-close").addEventListener("click",()=>{player.pause();clearExternalSubtitle();player.removeAttribute("src");player.load();player.dataset.jobId="";player.controls=true;byId("offline-custom-controls").hidden=true;byId("offline-player-section").hidden=true;byId("offline-audio-track").parentElement.hidden=true;});
 engine.onProgress(payload=>{
   if(payload.status==="cancelled"||payload.removed){jobs=jobs.filter(item=>item.id!==payload.id);render();return;}
   const index=jobs.findIndex(item=>item.id===payload.id);
