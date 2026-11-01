@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
-URL="\${1:?source URL required}"
-DEST="\${2:-}"
-LOCK_FILE="\${VIVID_MPV_DEPENDENCY_LOCK:-$(cd "$(dirname "$0")" && pwd)/mpv-dependencies.lock.json}"
+URL="${1:?source URL required}"
+DEST="${2:-}"
+LOCK_FILE="${VIVID_MPV_DEPENDENCY_LOCK:-$(cd "$(dirname "$0")" && pwd)/mpv-dependencies.lock.json}"
 if [[ ! -f "$LOCK_FILE" ]]; then
   echo "Missing pinned mpv dependency lock: $LOCK_FILE" >&2
   exit 2
@@ -32,15 +32,15 @@ readarray -t ENTRY < <(node -e '
   console.log(item.source);
   console.log(item.commit);
 ' "$LOCK_FILE" "$KEY")
-SOURCE="\${ENTRY[0]}"
-COMMIT="\${ENTRY[1]}"
+SOURCE="${ENTRY[0]}"
+COMMIT="${ENTRY[1]}"
 if [[ ! "$COMMIT" =~ ^[0-9a-f]{40}$ ]]; then
   echo "Invalid pinned commit for $KEY" >&2
   exit 4
 fi
 if [[ -z "$DEST" ]]; then
-  DEST="\${URL##*/}"
-  DEST="\${DEST%.git}"
+  DEST="${URL##*/}"
+  DEST="${DEST%.git}"
 fi
 rm -rf "$DEST"
 mkdir -p "$DEST"
