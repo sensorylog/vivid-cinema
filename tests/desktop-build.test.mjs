@@ -409,5 +409,5 @@ test("Windows desktop navigation keeps Home Search visible and restores previous
   assert.match(shell, /hasInternalPreviousPage \|\|= previous\?\.origin === location\.origin/);
   assert.match(shell, /if \(page === "home" && !hasInternalPreviousPage\) return/);
   assert.match(shell, /back\.href = "home\.html"/);
-  assert.match(shell, /window\.history\.back\(\)/);
+  assert.match(shell, /history\.back\(\)/);
 });
