@@ -176,8 +176,8 @@ class DesktopDownloadEngine {
 
   attachTorrent(job) {
     if (!this.client || this.client.destroyed) this.createClient();
-    job.status = "downloading";
-    job.phase = "Connecting to peers";
+    job.status = job.needsRescan ? "verifying" : "downloading";
+    job.phase = job.needsRescan ? "Verifying saved download" : "Connecting to peers";
     job.error = null;
     const jobPath = job.downloadPath || this.downloadPath;
     fs.mkdirSync(jobPath, { recursive: true });
@@ -202,9 +202,11 @@ class DesktopDownloadEngine {
       if (!job.needsRescan) job.progress = roundProgress(torrent);
       job.downloaded = Number(torrent.downloaded) || job.downloaded || 0;
       job.total = Number(torrent.length) || job.total || 0;
-      job.phase = torrent.ready
-        ? (torrent.numPeers > 0 ? (job.downloaded > 0 ? "Receiving data" : "Connected · waiting for data") : "Waiting for peers")
-        : "Finding peers and metadata";
+      job.phase = job.needsRescan
+        ? "Verifying saved download"
+        : torrent.ready
+          ? (torrent.numPeers > 0 ? (job.downloaded > 0 ? "Receiving data" : "Connected · waiting for data") : "Waiting for peers")
+          : "Finding peers and metadata";
       const payload = this.snapshot(job);
       this.send("vivid-download-progress", payload);
       if (!job.persistTimer) {
@@ -217,28 +219,13 @@ class DesktopDownloadEngine {
     };
     torrent.on("ready", () => {
       if (!job.needsRescan) return;
-      job.status = "verifying";
-      this.send("vivid-download-progress", this.snapshot(job));
-      torrent.rescanFiles(error => {
-        if (job.torrent !== torrent) return;
-        if (error) {
-          job.progress = Math.max(Number(job.progress) || 0, roundProgress(torrent));
-          job.downloaded = Math.max(Number(job.downloaded) || 0, Number(torrent.downloaded) || 0);
-          job.total = Math.max(Number(job.total) || 0, Number(torrent.length) || 0);
-          job.status = "failed";
-          job.needsRescan = job.downloaded > 0;
-          job.error = "Could not verify the saved partial download: " + safeText(error.message, 220);
-          job.torrent = null;
-          void torrent.destroy({ destroyStore: false }, () => {});
-          this.send("vivid-download-error", { id: job.id, message: job.error });
-          void this.persist().catch(saveError => console.warn("Download state save failed:", saveError.message));
-        } else {
-          job.needsRescan = false;
-          job.status = "downloading";
-          publish();
-        }
-        void this.persist().catch(saveError => console.warn("Download state save failed:", saveError.message));
-      });
+      // WebTorrent 1.9.7 verifies the existing filesystem store before it emits
+      // "ready". Calling rescanFiles here performs a second full piece-hash pass
+      // and can stall Windows resume. The ready event is the verification gate.
+      job.needsRescan = false;
+      job.status = "downloading";
+      publish();
+      void this.persist().catch(saveError => console.warn("Download state save failed:", saveError.message));
     });
     const publishWhenReady = () => { if (!job.needsRescan) publish(); };
     const discovery = job.discovery = {
