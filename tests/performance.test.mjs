@@ -15,6 +15,25 @@ test("home trending animation avoids forced synchronous layout and repeated fall
   assert.doesNotMatch(source, /if \(!latest\.length\) latest = await loadDirectTrending\(\)/, "the interval must not repeatedly fetch TMDB when the rail is empty");
 });
 
+
+test("Home paints catalogue shelves independently and reuses trending data for the feature strip", async () => {
+  const source = await read("script.js");
+  const batch = source.match(/async function loadSectionBatch\(keys\)\{([\\s\\S]*?)\\n\}/)?.[1] || "";
+  const feature = source.match(/function initFeatureStrip\(items=\[\]\)\{([\\s\\S]*?)\\n\}/)?.[1] || "";
+  assert.match(batch, /Promise\\.all\\(keys\\.map\\(async key/);
+  assert.match(batch, /if\\(key==="trending"\\)initFeatureStrip\\(data\\.items\\)/);
+  assert.doesNotMatch(feature, /tmdbApi\\.trending/);
+  assert.doesNotMatch(source, /\\[\\["top10","topRatedMovies","popularTv"\\]/);
+});
+
+test("offline download progress patches the changed row instead of rebuilding the full library", async () => {
+  const desktop = await read("scripts/downloads/desktop-offline.js");
+  assert.match(desktop, /data-job-id=/);
+  assert.match(desktop, /function updateJobProgress\\(job\\)/);
+  assert.match(desktop, /if\\(previous\\.status!==payload\\.status\\)render\\(\\);\\s*else updateJobProgress\\(jobs\\[index\\]\\)/);
+  assert.match(desktop, /if\\(changed\\)render\\(\\)/);
+});
+
 test("watch page disables expensive ambient blur animation and overlay", async () => {
   const css = await read("styles/vivid-atmosphere.css");
   assert.match(css, /body\.vivid-watch-page\.vivid-atmosphere::before\{animation:none;filter:none/);
