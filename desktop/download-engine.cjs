@@ -196,7 +196,10 @@ class DesktopDownloadEngine {
     }
     job.torrent = torrent;
     const publish = () => {
-      job.progress = roundProgress(torrent);
+      // A newly attached torrent has an empty in-memory bitfield until the
+      // saved store has been rescanned. Do not replace persisted progress with
+      // that temporary zero; the successful rescan calls publish again.
+      if (!job.needsRescan) job.progress = roundProgress(torrent);
       job.downloaded = Number(torrent.downloaded) || job.downloaded || 0;
       job.total = Number(torrent.length) || job.total || 0;
       job.phase = torrent.ready
