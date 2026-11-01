@@ -1,0 +1,39 @@
+name: Vivid Cinema mpv Source-Build Candidate
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  build-mpv-candidate:
+    name: Build pinned mpv source candidate
+    runs-on: ubuntu-24.04
+    timeout-minutes: 240
+    steps:
+      - name: Checkout Vivid Cinema
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install Windows cross-build dependencies
+        run: |
+          sudo dpkg --add-architecture i386
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends -y \
+            ccache g++-mingw-w64 gcc-multilib python3-pip nasm ninja-build \
+            pkgconf wine wine64 wget zip unzip git cmake make
+          python -m pip install --user "meson==1.9.2"
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      - name: Build mpv from pinned upstream source and snapshot build inputs
+        run: bash desktop/build-mpv-source.sh
+      - name: Upload candidate runtime and corresponding-source snapshot
+        uses: actions/upload-artifact@v4
+        with:
+          name: vivid-mpv-source-build-candidate
+          path: |
+            desktop/vendor/mpv/**
+            licenses/mpv/CORRESPONDING-SOURCE.zip
+            licenses/mpv/SOURCE-MANIFEST.json
+            licenses/mpv/source-notices/**
+          if-no-files-found: error
+          retention-days: 30
