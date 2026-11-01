@@ -203,11 +203,10 @@ function renderFeatureStrip(){
 
 window.addEventListener("vivid:hero-change",event=>syncFeatureStripSelection(event.detail));
 
-async function initFeatureStrip(){
+function initFeatureStrip(items=[]){
  try{
-   let data;
-   try{data=await tmdbApi.trending("all","week")}catch(error){console.warn("Featured strip fallback",error);data=await tmdbApi.trending("movie","week")}
-   featured=normalizeResults(data.results||[]).filter(item=>item.backdrop_path||item.poster_path).slice(0,8);
+   // Reuse the first Home trending response instead of making a second catalogue request.
+   featured=(Array.isArray(items)?items:[]).filter(item=>item?.backdrop_path||item?.poster_path).slice(0,8);
    if(featured[0]?.backdrop_path){const preload=new Image();preload.decoding="async";preload.fetchPriority="high";preload.src=getImageUrl(featured[0].backdrop_path,"w1280");}
    renderFeatureStrip();
  }catch(error){
@@ -241,24 +240,26 @@ function updateRailControls(rail){
 }
 
 async function loadSectionBatch(keys){
- const results=await Promise.allSettled(keys.map(key=>getHomeSectionPage(key,1)));
- results.forEach((result,index)=>{
-   const key=keys[index];
-   const railId=SECTION_RAIL_IDS[key];
-   if(!railId)return;
-   if(result.status!=="fulfilled"){
-     console.warn("Vivid home section failed:",key,result.reason);
-     const el=$(railId);
-     if(el)el.innerHTML='<div class="vivid-empty">Unable to load this section. Try again.</div>';
-     return;
-   }
-   const data=result.value;
-   renderRail(railId,data.items,{signal:sectionSignal(key),rankStart:key==="top10"?1:0});
-   sectionState[key]={page:data.page,totalPages:data.totalPages};
-   const button=document.querySelector('[data-load-section="'+key+'"]');
-   if(button)button.hidden=data.page>=data.totalPages;
-   updateRailControls($(railId));
- });
+  // Paint each shelf as soon as its own request finishes. Waiting for the
+  // slowest endpoint before rendering all shelves made the Home viewport
+  // feel blocked by one slow catalogue response.
+  await Promise.all(keys.map(async key=>{
+    const railId=SECTION_RAIL_IDS[key];
+    if(!railId)return;
+    try{
+      const data=await getHomeSectionPage(key,1);
+      renderRail(railId,data.items,{signal:sectionSignal(key),rankStart:key==="top10"?1:0});
+      sectionState[key]={page:data.page,totalPages:data.totalPages};
+      const button=document.querySelector('[data-load-section="'+key+'"]');
+      if(button)button.hidden=data.page>=data.totalPages;
+      updateRailControls($(railId));
+      if(key==="trending")initFeatureStrip(data.items);
+    }catch(error){
+      console.warn("Vivid home section failed:",key,error);
+      const el=$(railId);
+      if(el)el.innerHTML='<div class="vivid-empty">Unable to load this section. Try again.</div>';
+    }
+  }));
 }
 
 async function loadMoreSection(key,button){
@@ -701,7 +702,7 @@ document.addEventListener("DOMContentLoaded",()=>{
   window.addEventListener("vivid:library-changed",()=>queuePersonalizedHomeRefresh());
   window.addEventListener("vivid:progress-changed",()=>renderContinueWatching());
   window.addEventListener("vivid:recommendations-invalidated",()=>queuePersonalizedHomeRefresh());
-  initFeatureStrip();void loadHome();void refreshReleaseAlerts();void refreshServerReleaseCenter();
+  void loadHome();void refreshReleaseAlerts();void refreshServerReleaseCenter();
 
   // Personalization runs in the background after the core Home UI has started.
   void (async()=>{
