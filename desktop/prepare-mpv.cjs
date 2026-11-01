@@ -95,7 +95,7 @@ async function prepareMpv({ platform = process.platform, projectRoot = path.reso
     await downloadPinnedArchive(archivePath);
     extractZip(archivePath, extractPath);
     const executable = findExecutable(extractPath);
-    if (!executable) throw new Error("The verified mpv archive did not contain mpv.exe. Extracted entries: " + listExtractedFiles(extractRoot).join(", "));
+    if (!executable) throw new Error("The verified mpv archive did not contain mpv.exe. Extracted entries: " + listExtractedFiles(extractPath).join(", "));
     const runtimeDirectory = path.dirname(executable);
     const stagedPath = vendorPath + ".staged";
     fs.rmSync(stagedPath, { recursive: true, force: true });
