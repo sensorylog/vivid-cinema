@@ -85,7 +85,7 @@ class AdvancedPlayer {
     this.stop();
     const child = this.spawnImpl(executable, createMpvArgs(realMediaPath, startAt, ipcPath), {
       cwd: path.dirname(executable),
-      windowsHide: false,
+      windowsHide: true,
       shell: false,
       detached: false,
       stdio: "ignore"
