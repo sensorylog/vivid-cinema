@@ -62,7 +62,7 @@ function episodeMarkup(job){
   const episode=Math.max(0,Math.floor(Number(media.episode)||0));
   const episodeLabel="S"+String(season).padStart(2,"0")+"E"+String(episode).padStart(2,"0");
   const title=media.episodeTitle||job.title||"Episode";
-  return '<article class="offline-episode-row"><div class="offline-episode-copy"><span class="offline-episode-number">'+episodeLabel+'</span><strong>'+escapeHtml(title)+'</strong><small>'+escapeHtml(statusText(job))+(job.status==="downloading"?" · "+Math.round(progress)+"%":"")+'</small>'+progressMarkup(job)+fileMarkup(job)+'</div>'+actionMarkup(job)+'</article>';
+  return '<article class="offline-episode-row" data-job-id="'+escapeHtml(job.id)+'"><div class="offline-episode-copy"><span class="offline-episode-number">'+episodeLabel+'</span><strong>'+escapeHtml(title)+'</strong><small class="offline-episode-status">'+escapeHtml(statusText(job))+(job.status==="downloading"?" · "+Math.round(progress)+"%":"")+'</small>'+progressMarkup(job)+fileMarkup(job)+'</div>'+actionMarkup(job)+'</article>';
 }
 function matchesLibrary(job){
   const media=job.media||{};
@@ -115,7 +115,7 @@ function render(){
     const media=job.media||{},progress=Math.max(0,Math.min(100,Number(job.progress)||0));
     const title=media.title||job.title||"Untitled movie";
     const detail=statusText(job)+(job.status==="downloading"?" · "+Math.round(progress)+"%":"");
-    const markup='<article class="offline-media-card">'+posterMarkup(media)+'<div class="offline-media-copy"><span class="offline-card-kicker">MOVIE</span><h3>'+escapeHtml(title)+'</h3><p class="offline-card-status">'+escapeHtml(detail)+'</p>'+progressMarkup(job)+fileMarkup(job)+actionMarkup(job)+'</div></article>';
+    const markup='<article class="offline-media-card" data-job-id="'+escapeHtml(job.id)+'">'+posterMarkup(media)+'<div class="offline-media-copy"><span class="offline-card-kicker">MOVIE</span><h3>'+escapeHtml(title)+'</h3><p class="offline-card-status">'+escapeHtml(detail)+'</p>'+progressMarkup(job)+fileMarkup(job)+actionMarkup(job)+'</div></article>';
     entries.push({time:Number(job.updatedAt||job.createdAt)||0,markup});
   }
   entries.sort((a,b)=>b.time-a.time);
@@ -216,6 +216,7 @@ async function hydratePosterArtwork(){
     posterLookups.add(key);
     return true;
   });
+  let changed=false;
   const worker=async()=>{
     while(queue.length){
       const job=queue.shift(),media=job.media||{};
@@ -229,14 +230,17 @@ async function hydratePosterArtwork(){
             const candidateMedia=candidate.media||{};
             if(candidateMedia.media_type===media.media_type&&String(candidateMedia.id||"")===String(media.id||"")){
               candidateMedia.poster_path=poster;
+              changed=true;
             }
           }
-          render();
         }
       }catch{}
     }
   };
-  await Promise.all([worker(),worker(),worker()]);
+  await Promise.all([worker(),worker()]);
+  // Batch poster results into one DOM update instead of rebuilding the library
+  // once for every individual metadata response.
+  if(changed)render();
 }
 async function refresh(){
   try{
@@ -604,11 +608,30 @@ byId("offline-player-close").addEventListener("click",()=>{
   byId("offline-audio-track").parentElement.hidden=true;byId("offline-resume-prompt").hidden=true;
   byId("offline-next-episode").hidden=true;resumePosition=0;byId("offline-player-section").classList.remove("controls-hidden");
 });
+function updateJobProgress(job){
+  const id=String(job.id);
+  const card=[...byId("offline-jobs").querySelectorAll("[data-job-id]")].find(node=>node.dataset.jobId===id);
+  if(!card)return;
+  const progress=Math.max(0,Math.min(100,Number(job.progress)||0));
+  const status=card.querySelector(".offline-card-status,.offline-episode-status");
+  if(status)status.textContent=statusText(job)+(job.status==="downloading"?" · "+Math.round(progress)+"%":"");
+  const bar=card.querySelector('[role="progressbar"]');
+  if(bar){
+    bar.setAttribute("aria-valuenow",progress.toFixed(1));
+    const fill=bar.querySelector("span");
+    if(fill)fill.style.width=progress+"%";
+  }
+}
 engine.onProgress(payload=>{
   if(payload.status==="cancelled"||payload.removed){jobs=jobs.filter(item=>item.id!==payload.id);render();return;}
   const index=jobs.findIndex(item=>item.id===payload.id);
-  if(index>=0)jobs[index]={...jobs[index],...payload};else jobs.push(payload);
-  render();
+  if(index<0){jobs.push(payload);render();return;}
+  const previous=jobs[index];
+  jobs[index]={...previous,...payload};
+  // Only rebuild cards when their structure changes. Ordinary byte/progress
+  // updates patch the existing row and leave posters, grouping and layout alone.
+  if(previous.status!==payload.status)render();
+  else updateJobProgress(jobs[index]);
 });
 engine.onComplete(()=>{void refresh();setMessage("Download complete. Your movie is ready to watch offline.");});
 engine.onError(()=>{void refresh();setMessage("A download needs attention. Try Resume, or cancel it and choose another release.");});
