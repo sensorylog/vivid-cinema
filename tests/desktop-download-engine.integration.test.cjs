@@ -170,7 +170,7 @@ test("resume failures keep the previous progress and partial folder intact", { t
   }
 });
 
-test("reattaching a partial torrent does not overwrite saved progress before the rescan", { timeout: 30000 }, async () => {
+test("reattaching a partial torrent keeps saved progress until WebTorrent confirms the store is ready", { timeout: 30000 }, async () => {
   const root = await fs.mkdtemp(path.join(os.tmpdir(), "vivid-rescan-progress-"));
   let engine;
   let realClient;
@@ -193,10 +193,8 @@ test("reattaching a partial torrent does not overwrite saved progress before the
       numPeers: 0,
       ready: false,
       announce: [],
-      rescanFiles(callback) {
-        this.progress = 0.76;
-        this.downloaded = 760;
-        callback(null);
+      rescanFiles() {
+        throw new Error("the app must not run a second full piece rescan after WebTorrent ready");
       }
     });
     engine.client = { destroyed: false, dht: null, add() { return torrent; } };
@@ -214,10 +212,15 @@ test("reattaching a partial torrent does not overwrite saved progress before the
       files: []
     };
     engine.attachTorrent(job);
+    assert.equal(job.status, "verifying",
+      "a resumed job should remain in Finishing up while WebTorrent validates its saved store");
     assert.equal(job.progress, 75.5,
       "the initial empty in-memory bitfield must not replace persisted progress");
     assert.equal(engine.snapshot(job).progress, 75.5,
       "the UI snapshot must keep showing saved progress while the torrent is still loading metadata");
+    // WebTorrent emits ready only after its built-in existing-store verification.
+    torrent.progress = 0.76;
+    torrent.downloaded = 760;
     torrent.ready = true;
     torrent.emit("ready");
     assert.equal(job.status, "downloading");
