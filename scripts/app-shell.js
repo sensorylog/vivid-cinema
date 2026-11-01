@@ -456,9 +456,7 @@ function initAppShell() {
   initialized = true;
 
   ensureMediaLayoutStyles();
-  void import("./achievements.js").catch(error => console.warn("Vivid achievements could not initialize:", error));
   document.documentElement.dataset.vividReady = "false";
-  void import("./analytics.js").catch(() => {});
   const storedTheme = (() => { try { return localStorage.getItem("vivid:theme"); } catch { return null; } })();
   document.documentElement.dataset.vividTheme = storedTheme === "light" ? "light" : "dark";
   setViewportState();
@@ -470,7 +468,6 @@ function initAppShell() {
   syncVividBranding();
   showPostAuthNotice();
   syncNavigation();
-  syncAccountNavigation();
   initThemeToggle();
   recordCurrentRoute();
   ensureBackControl();
@@ -490,9 +487,12 @@ function initAppShell() {
       if ("requestIdleCallback" in window) window.requestIdleCallback(callback, { timeout });
       else window.setTimeout(callback, Math.min(timeout, 900));
     };
+    scheduleIdle(() => { syncAccountNavigation(); }, 1200);
     scheduleIdle(() => { void import("./google-tag.js").catch(() => {}); }, 1800);
-    scheduleIdle(() => { void import("./pwa.js").catch(error => console.warn("Vivid offline support could not initialize:", error)); }, 2200);
-    scheduleIdle(() => { void import("./vivid-pulse.js").catch(error => console.warn("Vivid background telemetry unavailable:", error)); }, 3200);
+    scheduleIdle(() => { void import("./achievements.js").catch(error => console.warn("Vivid achievements could not initialize:", error)); }, 2200);
+    scheduleIdle(() => { void import("./pwa.js").catch(error => console.warn("Vivid offline support could not initialize:", error)); }, 2400);
+    scheduleIdle(() => { void import("./analytics.js").catch(() => {}); }, 3000);
+    scheduleIdle(() => { void import("./vivid-pulse.js").catch(error => console.warn("Vivid background telemetry unavailable:", error)); }, 3800);
   });
 }
 
