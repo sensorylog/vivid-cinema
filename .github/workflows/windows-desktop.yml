@@ -142,7 +142,7 @@ jobs:
           if (!$installer -or !$portable -or !$blockMap -or !$metadata -or !$sourceBundle) {
             throw "Installer, portable executable, blockmap, updater metadata, and mpv source bundle must all exist before publishing."
           }
-          gh release create $tag $installer.FullName $portable.FullName $blockMap.FullName $metadata.FullName $sourceBundle.FullName --verify-tag --title "Vivid Cinema $version" --notes "Vivid Cinema Windows release $version. Includes installer, portable executable, in-app update metadata, and mpv corresponding source."
+          gh release create $tag $installer.FullName $portable.FullName $blockMap.FullName $metadata.FullName $sourceBundle.FullName "licenses/mpv/SOURCE-MANIFEST.json" --verify-tag --title "Vivid Cinema $version" --notes "Vivid Cinema Windows release $version. Includes installer, portable executable, in-app update metadata, and mpv corresponding source."
           if ($LASTEXITCODE -ne 0) {
             throw "GitHub release upload failed for $tag."
           }
@@ -161,7 +161,7 @@ jobs:
           }
           $release = Invoke-RestMethod -Method Get -Uri "https://api.github.com/repos/sensorylog/vivid-cinema/releases/tags/$tag" -Headers $headers
           $assetNames = @($release.assets | ForEach-Object { $_.name })
-          $requiredAssets = @("Vivid-Cinema-Setup-$version.exe", "Vivid-Cinema-Portable-$version.exe", "Vivid-Cinema-Setup-$version.exe.blockmap", "latest.yml", "CORRESPONDING-SOURCE.zip")
+          $requiredAssets = @("Vivid-Cinema-Setup-$version.exe", "Vivid-Cinema-Portable-$version.exe", "Vivid-Cinema-Setup-$version.exe.blockmap", "latest.yml", "CORRESPONDING-SOURCE.zip", "SOURCE-MANIFEST.json")
           foreach ($assetName in $requiredAssets) {
             if ($assetNames -notcontains $assetName) {
               throw "Published release $tag is missing required updater asset: $assetName"
@@ -178,6 +178,7 @@ jobs:
             dist-desktop/Vivid-Cinema-Setup-*.exe.blockmap
             dist-desktop/latest.yml
             licenses/mpv/CORRESPONDING-SOURCE.zip
+            licenses/mpv/SOURCE-MANIFEST.json
           if-no-files-found: error
           retention-days: 30
       - name: Build Windows installer and portable executable
