@@ -1,5 +1,5 @@
 // Bump this version whenever the precached app shell changes.
-const CACHE_NAME = "vivid-cinema-shell-v263";
+const CACHE_NAME = "vivid-cinema-shell-v264";
 const HLS_LIBRARY_URL = "https://cdn.jsdelivr.net/npm/hls.js@1.7.3/dist/hls.min.js";
 const APP_SHELL = [
   HLS_LIBRARY_URL,
@@ -28,7 +28,7 @@ const APP_SHELL = [
   "./scripts/config.js","./scripts/utils.js","./scripts/content.js","./scripts/media.js","./scripts/tmdb.js",
   "./scripts/nav-auth.js","./scripts/downloads.js?v=direct-download-v4","./scripts/my-downloads.js","./scripts/downloads/desktop-offline.js?player-fullscreen-v3","./scripts/downloads/download-manager.js","./scripts/downloads/indexeddb-persistence.js","./scripts/downloads/browser-direct-adapter.js","./scripts/downloads/browser-hls-adapter.js","./scripts/downloads/offline-playback.js","./scripts/library.js","./scripts/library-page.js","./scripts/discover.js",
   "./scripts/collection.js","./scripts/person.js","./scripts/recommendations.js","./scripts/release-alerts.js","./scripts/cinema-reminders.js",
-  "./scripts/push-notifications.js","./native-notify/web/nativeNotifyIds.js","./native-notify/web/native-notify-web-push.js","./scripts/news.js","./scripts/news.js?v=20261018-feedback-sync-4",
+  "./scripts/push-notifications.js","./scripts/news.js","./scripts/news.js?v=20261018-feedback-sync-4",
   "./scripts/newsroom.js","./scripts/news-community-highlights.js","./scripts/news-community.js","./scripts/news-story.js","./scripts/moderation.js",
   "./scripts/editorial-desk.js","./scripts/title.js","./scripts/playback/player-engine.js","./scripts/playback/playback-servers.js","./scripts/playback/server-settings.js",
   "./scripts/watch.js","./scripts/playback/tflix-secondary-player.js","./scripts/playback/playback-urls.js","./scripts/landing.js","./scripts/account.js",
@@ -146,11 +146,7 @@ async function staleWhileRevalidate(request,event,isNavigation=false){
  // the page with an unexpected HTML response. Fail the asset request instead.
  return new Response("",{status:504,statusText:"Offline"});
 }
-// Pushes arrive from Native Notify (web push) and from the legacy reminder
-// senders. Native Notify sends {title,body,image,tag,data:{url}}; the older
-// senders send {title,body,tag,url}. Both shapes are normalised here so the
-// existing cinema reminders keep working and Native Notify deep links open
-// the right page. The click handler below is unchanged.
+// Vivid push senders use flat payloads; nested URL data remains supported for old subscriptions.
 self.addEventListener("push",event=>{event.waitUntil((async()=>{
  let data={};
  try{data=event.data?.json?.()||{};}catch{try{data=JSON.parse(event.data?.text?.()||"{}");}catch{}}
