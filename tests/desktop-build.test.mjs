@@ -285,6 +285,10 @@ test("Vivid Ultra Player keeps Chromium playback and adds guarded native media c
   assert.match(player, /URL\.revokeObjectURL/);
   assert.match(player, /refreshAudioTracks/);
   assert.match(player, /if\(!select\|\|!tracks/);
+  assert.match(player, /function describePlaybackError\(\)/);
+  assert.match(player, /player\.addEventListener\("waiting"/);
+  assert.match(player, /player\.addEventListener\("stalled"/);
+  assert.doesNotMatch(player, /webkitAudioDecodedByteCount/);
   assert.match(styles, /offline-player-section\[data-subtitle-size="large"\]/);
 });
 
