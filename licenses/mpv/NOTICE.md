@@ -25,7 +25,7 @@ The Vivid application remains separately distributed. Bundling this executable d
 
 The exact mpv and FFmpeg source revisions and the upstream build workflow are identified above. The upstream workflow also obtains and builds additional dependencies. Before publishing a Vivid installer containing this runtime, the release process must include or host the complete corresponding source for the exact binary build, including the build scripts and source for every GPL-covered component, together with all required licence notices and any written offer required by the applicable licence.
 
-**Release compliance gate:** do not publish a public Vivid installer containing this runtime until the complete corresponding-source bundle for the exact build has been assembled, verified, and made available to recipients. The source links above are provenance references; they are not, by themselves, a claim that the complete corresponding-source bundle is already included in this repository.
+**Release compliance gate:** do not publish a public Vivid installer containing this runtime until both `CORRESPONDING-SOURCE.zip` and `SOURCE-MANIFEST.json` have been assembled, verified, and made available to recipients as release assets. The Windows release workflow intentionally fails closed if either file is missing. The archive must contain the complete corresponding source for the exact binary build, including the build scripts and source for every GPL-covered component. The source links above are provenance references; they are not, by themselves, a claim that the complete corresponding-source bundle is already included in this repository.
 
 Upstream references:
 - https://github.com/mpv-player/mpv#license
