@@ -62,6 +62,75 @@ function closeTracker(tracker) {
   }), 5000, "local tracker shutdown").catch(() => {});
 }
 
+test("verification keeps the last confirmed progress visible instead of showing a restart", { timeout: 30000 }, async () => {
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "vivid-progress-fixture-"));
+  let engine;
+  try {
+    engine = new DesktopDownloadEngine({
+      app: { getPath(name) { return name === "downloads" ? path.join(root, "downloads") : path.join(root, "user-data"); } },
+      BrowserWindow: { getAllWindows: () => [] },
+      dialog: {},
+      shell: {}
+    });
+    await withTimeout(engine.ready, 10000, "progress fixture engine initialization");
+    const job = {
+      id: "verifying-fixture",
+      title: "Verification fixture",
+      status: "verifying",
+      progress: 82.4,
+      downloaded: 824,
+      total: 1000,
+      torrent: { progress: 0, downloaded: 0, length: 1000, downloadSpeed: 0, numPeers: 0 },
+      files: [],
+      discovery: null
+    };
+    assert.equal(engine.snapshot(job).progress, 82.4,
+      "re-scanning the existing store must not visually reset a job to zero");
+  } finally {
+    if (engine) await engine.shutdown();
+    await fs.rm(root, { recursive: true, force: true });
+  }
+});
+
+test("a fatal WebTorrent client error preserves job progress and replaces the dead client", { timeout: 30000 }, async () => {
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "vivid-client-recovery-"));
+  let engine;
+  let oldClient;
+  try {
+    engine = new DesktopDownloadEngine({
+      app: { getPath(name) { return name === "downloads" ? path.join(root, "downloads") : path.join(root, "user-data"); } },
+      BrowserWindow: { getAllWindows: () => [] },
+      dialog: {},
+      shell: {}
+    });
+    await withTimeout(engine.ready, 10000, "client recovery fixture initialization");
+    oldClient = engine.client;
+    const job = {
+      id: "client-recovery-fixture",
+      title: "Client recovery fixture",
+      status: "downloading",
+      progress: 64,
+      downloaded: 640,
+      total: 1000,
+      torrent: { progress: 0.71, downloaded: 710, length: 1000 },
+      statusTimer: null,
+      persistTimer: null
+    };
+    engine.jobs.set(job.id, job);
+    oldClient.emit("error", new Error("simulated fatal torrent client error"));
+    assert.notEqual(engine.client, oldClient, "Resume must have a fresh usable torrent client");
+    assert.equal(job.status, "failed");
+    assert.equal(job.progress, 71);
+    assert.equal(job.downloaded, 710);
+    assert.equal(job.needsRescan, true);
+    assert.equal(job.torrent, null);
+  } finally {
+    if (oldClient && oldClient !== engine?.client) await closeClient(oldClient);
+    if (engine) await engine.shutdown();
+    await fs.rm(root, { recursive: true, force: true });
+  }
+});
+
 test("desktop engine downloads a video-extension payload from a local seeded torrent", { timeout: 90000 }, async () => {
   console.log("[vivid-integration] stage: create fixture");
   const root = await fs.mkdtemp(path.join(os.tmpdir(), "vivid-download-integration-"));
