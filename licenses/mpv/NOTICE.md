@@ -13,7 +13,8 @@ Vivid Cinema redistributes mpv as a **separate executable process** for Windows 
 - Downloaded asset: `mpv-v0.41.0-dev-g9e2ed65eb-41103006513-x86_64-w64-mingw32-full.zip`
 - SHA-256: `24a5ac969219767c617f5d109761d4e24db8ba05dee30db485ea756415dc63b4`
 - FFmpeg runtime reported by the upstream build: `git-2026-10-30-a3c5339`
-- FFmpeg source: https://github.com/FFmpeg/FFmpeg/commit/a3c5339
+- FFmpeg source commit: `a3c5339578cb1d54322e06b6bd1c8852fc6abc29`
+- FFmpeg source: https://github.com/FFmpeg/FFmpeg/commit/a3c5339578cb1d54322e06b6bd1c8852fc6abc29
 
 ## Licensing
 
