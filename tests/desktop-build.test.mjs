@@ -422,6 +422,7 @@ test("Advanced Player uses a pinned mpv runtime, private IPC and guarded main-pr
   const preload = fs.readFileSync(path.join(root, "desktop", "preload.cjs"), "utf8");
   const advanced = fs.readFileSync(path.join(root, "desktop", "advanced-player.cjs"), "utf8");
   const prepare = fs.readFileSync(path.join(root, "desktop", "prepare-mpv.cjs"), "utf8");
+  const sourceGate = fs.readFileSync(path.join(root, "desktop", "verify-mpv-sources.cjs"), "utf8");
   const page = fs.readFileSync(path.join(root, "my-downloads.html"), "utf8");
   const renderer = fs.readFileSync(path.join(root, "scripts", "downloads", "desktop-offline.js"), "utf8");
   const workflow = fs.readFileSync(path.join(root, ".github", "workflows", "windows-desktop.yml"), "utf8");
@@ -429,6 +430,9 @@ test("Advanced Player uses a pinned mpv runtime, private IPC and guarded main-pr
 
   assert.ok(fs.existsSync(path.join(root, "tests", "advanced-player.test.cjs")));
   assert.ok(pkg.scripts.test.includes("tests/advanced-player.test.cjs"));
+  assert.ok(pkg.scripts.test.includes("tests/mpv-source-gate.test.cjs"));
+  assert.ok(pkg.scripts["predesktop:dist"].includes("desktop/verify-mpv-sources.cjs"));
+  assert.ok(pkg.scripts["predesktop:publish"].includes("desktop/verify-mpv-sources.cjs"));
   assert.ok(pkg.build.extraResources.some(item => item.from === "desktop/vendor/mpv" && item.to === "mpv"));
   const mpvNotices = pkg.build.extraResources.find(item => item.from === "licenses/mpv" && item.to === "licenses/mpv");
   assert.ok(mpvNotices);
@@ -440,6 +444,9 @@ test("Advanced Player uses a pinned mpv runtime, private IPC and guarded main-pr
   assert.ok(prepare.includes("41f6a645068483470267271e1d09966ca3b9f413"));
   assert.ok(prepare.includes("a49811c0752c108b8260636f9c6f6fcb97406641c98b30f1e7b500dfb20177de"));
   assert.ok(prepare.includes("checksum mismatch"));
+  assert.ok(sourceGate.includes("CORRESPONDING-SOURCE.zip"));
+  assert.ok(sourceGate.includes("archiveSha256"));
+  assert.ok(sourceGate.includes("verifiedBy"));
   assert.ok(prepare.includes("Expand-Archive"));
   assert.ok(advanced.includes("--hwdec=auto-safe"));
   assert.ok(advanced.includes("shell: false"));
@@ -464,4 +471,5 @@ test("Advanced Player uses a pinned mpv runtime, private IPC and guarded main-pr
   const syntaxChecker = fs.readFileSync(path.join(root, "automation", "check-syntax.mjs"), "utf8");
   assert.ok(syntaxChecker.includes("desktop/advanced-player.cjs"));
   assert.ok(syntaxChecker.includes("desktop/prepare-mpv.cjs"));
+  assert.ok(syntaxChecker.includes("desktop/verify-mpv-sources.cjs"));
 });
