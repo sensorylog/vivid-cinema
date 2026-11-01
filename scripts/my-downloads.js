@@ -4,7 +4,7 @@ import { createBrowserDownloadAdapter } from "./downloads/browser-direct-adapter
 import { createOfflinePlaybackController } from "./downloads/offline-playback.js";
 
 if (window.vividDownloads?.available) {
-  void import("./downloads/desktop-offline.js?player-fullscreen-v3");
+  void import("./downloads/desktop-offline.js?advanced-mpv-fallback-v1");
 } else {
 const byId = id => document.getElementById(id);
 const jobsNode = byId("offline-jobs");
