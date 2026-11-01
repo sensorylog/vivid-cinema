@@ -330,3 +330,16 @@ test("Ultra Player exposes embedded and external subtitle track selection", () =
   assert.match(player, /player\.textTracks/);
   assert.match(player, /tracks\[index\]\.mode=index===selected\?"showing":"disabled"/);
 });
+
+
+test("Ultra Player shows animated feedback for 10-second seeks and prevents page scrolling", () => {
+  const player = fs.readFileSync(path.join(root, "scripts", "downloads", "desktop-offline.js"), "utf8");
+  const page = fs.readFileSync(path.join(root, "my-downloads.html"), "utf8");
+  const styles = fs.readFileSync(path.join(root, "styles", "my-downloads.css"), "utf8");
+  assert.match(page, /offline-seek-feedback/);
+  assert.match(player, /feedback\.textContent=seconds<0\?"−10 seconds":"\+10 seconds"/);
+  assert.match(player, /event\.preventDefault\(\);seekBy\(10\)/);
+  assert.match(player, /event\.preventDefault\(\);seekBy\(-10\)/);
+  assert.match(styles, /@keyframes offline-seek-back/);
+  assert.match(styles, /@keyframes offline-seek-forward/);
+});
