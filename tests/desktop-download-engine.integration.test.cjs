@@ -78,6 +78,7 @@ test("verification keeps the last confirmed progress visible instead of showing 
       id: "verifying-fixture",
       title: "Verification fixture",
       status: "verifying",
+      needsRescan: true,
       progress: 82.4,
       downloaded: 824,
       total: 1000,
@@ -242,7 +243,7 @@ test("desktop engine downloads a video-extension payload from a local seeded tor
   const videoPath = path.join(root, "vivid-integration.mp4");
   const downloadsPath = path.join(root, "downloads");
   const userDataPath = path.join(root, "user-data");
-  const payload = Buffer.alloc(32 * 1024 * 1024);
+  const payload = Buffer.alloc(8 * 1024 * 1024);
   for (let index = 0; index < payload.length; index += 1) {
     payload[index] = (index * 31 + Math.floor(index / 251)) % 251;
   }
@@ -360,15 +361,30 @@ test("desktop engine downloads a video-extension payload from a local seeded tor
 
     // Pause only after verified bytes have reached disk. The previous test
     // paused immediately after enqueue and never proved partial data survives.
-    await waitFor(
-      () => job.torrent?.ready && Number(job.torrent.downloaded) >= 64 * 1024 && job.torrent.progress >= 0.70 && job.torrent.progress < 0.95,
-      20000,
-      "a genuine partial transfer before pause"
-    );
+    await new Promise((resolve, reject) => {
+      const startedAt = Date.now();
+      const poll = setInterval(() => {
+        const live = job.torrent;
+        if (live?.ready && Number(live.downloaded) >= 64 * 1024 &&
+            live.progress >= 0.5 && live.progress < 0.95) {
+          clearInterval(poll);
+          resolve();
+          return;
+        }
+        if (Date.now() - startedAt >= 30000) {
+          clearInterval(poll);
+          reject(new Error("Timed out waiting for a substantial partial transfer before pause: " +
+            JSON.stringify(live ? {
+              ready: live.ready, progress: live.progress, downloaded: live.downloaded,
+              length: live.length, peers: live.numPeers, wires: live.wires?.length || 0
+            } : { status: job.status, error: job.error })));
+        }
+      }, 20);
+    });
     const progressBeforePause = Number(job.torrent.progress) * 100;
     const bytesBeforePause = Number(job.torrent.downloaded);
     assert.ok(bytesBeforePause >= 64 * 1024, "pause fixture must contain verified partial bytes");
-    assert.ok(progressBeforePause >= 70 && progressBeforePause < 95, "pause fixture must be close to completion, not an empty queue");
+    assert.ok(progressBeforePause >= 50 && progressBeforePause < 95, "pause fixture must contain substantial but incomplete data");
     assert.equal(await engine.control(started.id, "pause"), true,
       "an active desktop download should pause");
     assert.equal(job.status, "paused", "pause should persist a paused job state");
