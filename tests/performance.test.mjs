@@ -30,6 +30,17 @@ test("Home paints catalogue shelves independently and reuses trending data for t
   assert.doesNotMatch(source, /\[\["top10","topRatedMovies","popularTv"\]/);
 });
 
+test("catalogue fetches can use the browser HTTP cache and Home artwork shares one trending response", async () => {
+  const tmdb = await read("scripts/tmdb.js");
+  const home = await read("script.js");
+  const breathe = await read("scripts/home-breathe.js");
+  assert.match(tmdb, /cache: "default"/);
+  assert.doesNotMatch(tmdb, /cache: "no-store"/);
+  assert.match(home, /vivid:home-trending-ready/);
+  assert.match(breathe, /vivid:home-trending-ready/);
+  assert.doesNotMatch(breathe, /tmdbApi|loadDirectTrending/);
+});
+
 test("offline download progress patches the changed row instead of rebuilding the full library", async () => {
   const desktop = await read("scripts/downloads/desktop-offline.js");
   assert.match(desktop, /data-job-id=/);
