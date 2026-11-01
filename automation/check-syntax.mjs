@@ -11,6 +11,7 @@ const files = [
   "desktop/main.cjs",
   "desktop/advanced-player.cjs",
   "desktop/prepare-mpv.cjs",
+  "desktop/verify-mpv-sources.cjs",
   "desktop/preload.cjs",
   "desktop/download-engine.cjs",
   "scripts/my-downloads.js",
