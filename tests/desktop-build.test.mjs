@@ -433,6 +433,8 @@ test("Advanced Player uses a pinned mpv runtime, private IPC and guarded main-pr
   assert.ok(pkg.scripts.test.includes("tests/mpv-source-gate.test.cjs"));
   assert.ok(pkg.scripts["predesktop:dist"].includes("desktop/verify-mpv-sources.cjs"));
   assert.ok(pkg.scripts["predesktop:publish"].includes("desktop/verify-mpv-sources.cjs"));
+  assert.ok(pkg.scripts["predesktop:dist"].indexOf("verify-mpv-sources.cjs") < pkg.scripts["predesktop:dist"].indexOf("prepare-mpv.cjs"));
+  assert.ok(pkg.scripts["predesktop:publish"].indexOf("verify-mpv-sources.cjs") < pkg.scripts["predesktop:publish"].indexOf("prepare-mpv.cjs"));
   assert.ok(pkg.build.extraResources.some(item => item.from === "desktop/vendor/mpv" && item.to === "mpv"));
   const mpvNotices = pkg.build.extraResources.find(item => item.from === "licenses/mpv" && item.to === "licenses/mpv");
   assert.ok(mpvNotices);
