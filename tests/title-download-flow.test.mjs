@@ -14,6 +14,9 @@ test("title download action opens the native Vivid Offline library", async () =>
   assert.match(script, /vivid:pending-desktop-download/);
   assert.match(script, /currentDetails\?\.seasons/);
   assert.match(script, /my-downloads\.html/);
+  assert.match(script, /Movie and TV offline downloads are coming to the Vivid Cinema Android app/);
+  assert.match(script, /website downloads are still being developed/);
+  assert.match(script, /window\.Capacitor\?\.isNativePlatform/);
   assert.doesNotMatch(script, /function openTitleDownload\(\)[\s\S]*?vivid-download-modal/);
   assert.match(preload, /exposeInMainWorld\("vividDownloads"/);
   assert.match(preload, /mediaUrl:.*fileIndex/);
