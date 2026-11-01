@@ -69,6 +69,7 @@
       <label class="offline-seek-control"><span class="sr-only">Seek video</span><input id="offline-seek" type="range" min="0" max="1000" value="0" step="1"></label>
       <span id="offline-time" class="offline-time">0:00 / 0:00</span>
       <label class="offline-volume-control">Volume <input id="offline-volume" type="range" min="0" max="1" value="1" step="0.05"></label>
+      <label class="offline-subtitle-track-control" hidden>Track <select id="offline-subtitle-track" aria-label="Subtitle track"><option value="-1">Off</option></select></label>
       <label class="offline-subtitle-control">Subtitles <select id="offline-subtitle-size" aria-label="Subtitle size"><option value="small">Small</option><option value="medium" selected>Medium</option><option value="large">Large</option></select></label>
       <label class="offline-subtitle-sync-control">Subtitle sync <input id="offline-subtitle-offset" type="range" min="-5" max="5" value="0" step="0.5" aria-label="Subtitle timing offset"><output id="offline-subtitle-offset-value" for="offline-subtitle-offset">0.0s</output></label>
       <label class="offline-subtitle-file-control">Load SRT/VTT <input id="offline-subtitle-file" type="file" accept=".srt,.vtt,text/vtt,application/x-subrip"></label>
