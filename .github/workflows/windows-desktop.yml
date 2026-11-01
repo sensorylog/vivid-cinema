@@ -102,6 +102,10 @@ jobs:
           if ($runtime.sha256 -ne "a49811c0752c108b8260636f9c6f6fcb97406641c98b30f1e7b500dfb20177de") {
             throw "The bundled mpv runtime does not match the approved checksum."
           }
+          & "desktop/vendor/mpv/mpv.exe" --version | Out-Null
+          if ($LASTEXITCODE -ne 0) {
+            throw "The extracted mpv executable failed its startup/version smoke test."
+          }
           if (!(Test-Path "licenses/mpv/NOTICE.md")) {
             throw "The mpv third-party redistribution notice is missing."
           }
