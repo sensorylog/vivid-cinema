@@ -57,10 +57,17 @@ async function prepareMpv({ platform = process.platform, projectRoot = path.reso
     console.log("Skipping bundled mpv preparation: the Vivid desktop player runtime is Windows-only.");
     return { skipped: true };
   }
+  const vendorPath = path.join(projectRoot, "desktop", "vendor", "mpv");
+  const existingManifest = path.join(vendorPath, "vivid-mpv-runtime.json");
+  if (fs.existsSync(path.join(vendorPath, "mpv.exe")) && fs.existsSync(existingManifest)) {
+    try {
+      const manifest = JSON.parse(fs.readFileSync(existingManifest, "utf8"));
+      if (manifest.sha256 === ARCHIVE_SHA256) return { skipped: false, cached: true, executable: path.join(vendorPath, "mpv.exe"), version: MPV_VERSION };
+    } catch { /* Replace incomplete or invalid cached runtime. */ }
+  }
   const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "vivid-mpv-"));
   const archivePath = path.join(tempRoot, ARCHIVE_NAME);
   const extractPath = path.join(tempRoot, "extracted");
-  const vendorPath = path.join(projectRoot, "desktop", "vendor", "mpv");
   try {
     fs.mkdirSync(extractPath, { recursive: true });
     await downloadPinnedArchive(archivePath);
