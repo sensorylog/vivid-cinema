@@ -67,7 +67,7 @@ async function addNativeEnhancements(directory) {
     if (!html.includes('id="vivid-native-app-enhancements"')) {
       const enhancement = [
         '<script id="vivid-native-app-enhancements">',
-        '(()=>{try{if(window.Capacitor?.isNativePlatform?.()){document.documentElement.classList.add("vivid-native-app");}}catch{}})();',
+        '(()=>{try{if(!window.Capacitor?.isNativePlatform?.())return;const apply=()=>{document.documentElement.classList.add("vivid-native-app");document.body?.classList.add("vivid-native-app");};apply();if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",apply,{once:true});}catch{}})();',
         "</script>",
         '<link rel="stylesheet" href="/styles/vivid-native-app.css">'
       ].join("");
