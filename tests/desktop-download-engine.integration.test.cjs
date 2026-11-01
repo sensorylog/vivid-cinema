@@ -131,6 +131,43 @@ test("a fatal WebTorrent client error preserves job progress and replaces the de
   }
 });
 
+test("resume failures keep the previous progress and partial folder intact", { timeout: 30000 }, async () => {
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "vivid-resume-error-"));
+  let engine;
+  try {
+    engine = new DesktopDownloadEngine({
+      app: { getPath(name) { return name === "downloads" ? path.join(root, "downloads") : path.join(root, "user-data"); } },
+      BrowserWindow: { getAllWindows: () => [] },
+      dialog: {},
+      shell: {}
+    });
+    await withTimeout(engine.ready, 10000, "resume error fixture initialization");
+    const id = "resume-error-fixture";
+    const jobPath = path.join(root, "downloads", id);
+    await fs.mkdir(jobPath, { recursive: true });
+    await fs.writeFile(path.join(jobPath, "partial.bin"), Buffer.from("keep this partial data"));
+    const realClient = engine.client;
+    engine.client = { destroyed: false, add() { throw new Error("simulated reattach failure"); } };
+    engine.jobs.set(id, {
+      id, title: "Resume error fixture", magnet: "magnet:?xt=urn:btih:0123456789012345678901234567890123456789",
+      status: "paused", phase: "Paused", progress: 76.5, downloaded: 765, total: 1000,
+      downloadPath: jobPath, torrent: null, needsRescan: true, files: [], filePath: null
+    });
+    assert.equal(await engine.control(id, "resume"), true,
+      "the control action should complete and report the job state rather than losing it");
+    const job = engine.jobs.get(id);
+    assert.equal(job.status, "failed");
+    assert.equal(job.progress, 76.5);
+    assert.equal(job.downloaded, 765);
+    assert.match(job.error, /simulated reattach failure/);
+    assert.equal(await fs.readFile(path.join(jobPath, "partial.bin"), "utf8"), "keep this partial data");
+    engine.client = realClient;
+  } finally {
+    if (engine) await engine.shutdown();
+    await fs.rm(root, { recursive: true, force: true });
+  }
+});
+
 test("desktop engine downloads a video-extension payload from a local seeded torrent", { timeout: 90000 }, async () => {
   console.log("[vivid-integration] stage: create fixture");
   const root = await fs.mkdtemp(path.join(os.tmpdir(), "vivid-download-integration-"));
