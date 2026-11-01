@@ -81,7 +81,9 @@ test("desktop player fullscreen uses a viewport flex layout and reflects fullscr
   const desktop = await readFile(new URL("../scripts/downloads/desktop-offline.js", import.meta.url), "utf8");
   const css = await readFile(new URL("../styles/my-downloads.css", import.meta.url), "utf8");
   assert.match(desktop, /function syncFullscreenButton\(\)/);
-  assert.match(desktop, /section\.requestFullscreen\|\|section\.webkitRequestFullscreen/);
+  assert.match(desktop, /section\.requestFullscreen/);
+  assert.match(desktop, /section\.webkitRequestFullscreen/);
+  assert.match(desktop, /document\.webkitExitFullscreen/);
   assert.match(desktop, /document\.addEventListener\("fullscreenchange"/);
   assert.match(css, /\.offline-player-section:fullscreen\s*\{[^}]*display:\s*flex/s);
 });
