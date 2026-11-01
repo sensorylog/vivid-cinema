@@ -13,8 +13,8 @@
     "cap:sync": "npm run build:web && cap sync android",
     "cap:open:android": "cap open android",
     "desktop:publish": "node desktop/make-windows-icon.cjs && electron-builder --win nsis --publish never",
-    "predesktop:dist": "npm --prefix desktop ci --omit=dev --no-audit --no-fund && node desktop/prepare-mpv.cjs && node desktop/verify-mpv-sources.cjs",
-    "predesktop:publish": "npm --prefix desktop ci --omit=dev --no-audit --no-fund && node desktop/prepare-mpv.cjs && node desktop/verify-mpv-sources.cjs",
+    "predesktop:dist": "npm --prefix desktop ci --omit=dev && node desktop/verify-mpv-sources.cjs && node desktop/prepare-mpv.cjs",
+    "predesktop:publish": "npm --prefix desktop ci --omit=dev && node desktop/verify-mpv-sources.cjs && node desktop/prepare-mpv.cjs",
     "predesktop:start": "npm --prefix desktop ci --omit=dev --no-audit --no-fund && node desktop/prepare-mpv.cjs"
   },
   "devDependencies": {
