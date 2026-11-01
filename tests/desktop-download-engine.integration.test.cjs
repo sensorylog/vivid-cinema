@@ -397,7 +397,7 @@ test("desktop engine downloads a video-extension payload from a local seeded tor
       "the paused state should survive in the on-disk job record");
     assert.equal(await engine.control(started.id, "resume"), true,
       "a paused desktop download should resume");
-    assert.equal(job.status, "downloading", "resume should reattach the torrent");
+    assert.equal(job.status, "verifying", "resume should reattach the torrent and verify its saved store before downloading");
     await waitFor(() => job.status === "downloading" && job.needsRescan === false,
       20000, "partial torrent verification to finish after resume");
     assert.ok(job.progress >= progressBeforePause - 0.1,
