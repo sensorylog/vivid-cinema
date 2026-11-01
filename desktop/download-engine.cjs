@@ -322,7 +322,7 @@ class DesktopDownloadEngine {
       id: job.id, title: job.title, media: job.media, status: job.status,
       // WebTorrent's bitfield is rebuilt during rescanFiles after Resume.
       // Keep the last verified percentage visible until that scan completes.
-      progress: job.status === "verifying"
+      progress: job.needsRescan
         ? Math.max(Number(job.progress) || 0, torrent ? roundProgress(torrent) : 0)
         : torrent ? roundProgress(torrent) : job.status === "completed" ? 100 : Number(job.progress) || 0,
       phase: job.phase || null,
