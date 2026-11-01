@@ -44,13 +44,30 @@ function extractZip(archivePath, destination) {
 function findExecutable(directory) {
   for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
     const fullPath = path.join(directory, entry.name);
-    if (entry.isFile() && entry.name.toLowerCase() === "mpv.exe") return fullPath;
-    if (entry.isDirectory()) {
-      const found = findExecutable(fullPath);
-      if (found) return found;
+    if (entry.name.toLowerCase() === "mpv.exe") {
+      try { if (fs.statSync(fullPath).isFile()) return fullPath; } catch { /* Ignore broken archive entries. */ }
     }
+    try {
+      if (entry.isDirectory() || (entry.isSymbolicLink() && fs.statSync(fullPath).isDirectory())) {
+        const found = findExecutable(fullPath);
+        if (found) return found;
+      }
+    } catch { /* Ignore invalid archive entries. */ }
   }
   return null;
+}
+
+function listExtractedFiles(directory, limit = 60, output = []) {
+  if (output.length >= limit) return output;
+  for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
+    if (output.length >= limit) break;
+    const fullPath = path.join(directory, entry.name);
+    output.push(path.relative(directory, fullPath) || entry.name);
+    try {
+      if (entry.isDirectory()) listExtractedFiles(fullPath, limit, output);
+    } catch { /* Diagnostic listing only. */ }
+  }
+  return output;
 }
 
 async function prepareMpv({ platform = process.platform, projectRoot = path.resolve(__dirname, "..") } = {}) {
@@ -78,7 +95,7 @@ async function prepareMpv({ platform = process.platform, projectRoot = path.reso
     await downloadPinnedArchive(archivePath);
     extractZip(archivePath, extractPath);
     const executable = findExecutable(extractPath);
-    if (!executable) throw new Error("The verified mpv archive did not contain mpv.exe.");
+    if (!executable) throw new Error("The verified mpv archive did not contain mpv.exe. Extracted entries: " + listExtractedFiles(extractRoot).join(", "));
     const runtimeDirectory = path.dirname(executable);
     const stagedPath = vendorPath + ".staged";
     fs.rmSync(stagedPath, { recursive: true, force: true });
