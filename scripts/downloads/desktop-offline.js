@@ -195,7 +195,7 @@ function applySubtitleOffset(){
   subtitleCueBaseTimes.forEach((base,index)=>{
     const cue=cues[index];if(!cue)return;
     cue.startTime=Math.max(0,base.start+offset);
-    cue.endTime=Math.max(cue.startTime,base.end+offset);
+    cue.endTime=Math.max(cue.startTime+0.001,base.end+offset);
   });
 }
 function parseSrtToVtt(source){
@@ -308,7 +308,8 @@ function findNextEpisode(job){
     const nextSeason=Number(next.season),nextEpisode=Number(next.episode);
     const isFollowingEpisode=(nextSeason===season&&nextEpisode===episode+1)
       ||(nextSeason===season+1&&nextEpisode===1);
-    return String(next.title||"").trim().toLowerCase()===seriesTitle&&isFollowingEpisode;
+    return next.media_type==="tv"&&String(next.id||"")===String(media.id||"")
+      &&String(next.title||"").trim().toLowerCase()===seriesTitle&&isFollowingEpisode;
   })||null;
 }
 function syncNextEpisode(job){
@@ -354,6 +355,9 @@ player.addEventListener("timeupdate",()=>{
   }
 });
 player.addEventListener("pause",()=>{
+  // Opening the resume prompt pauses the initial autoplay attempt; do not overwrite
+  // the saved position with zero before the user chooses Continue or Start over.
+  if(!byId("offline-resume-prompt").hidden)return;
   if(player.dataset.jobId&&player.currentTime>0)void engine.setPlaybackPosition(player.dataset.jobId,Number(player.dataset.fileIndex)||0,player.currentTime).catch(()=>{});
 });
 player.addEventListener("loadedmetadata",()=>{
