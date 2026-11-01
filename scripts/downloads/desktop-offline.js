@@ -181,6 +181,22 @@ function clearExternalSubtitle(){
   const track=byId("offline-external-subtitle");
   if(track)track.remove();
   if(player.dataset.subtitleUrl){URL.revokeObjectURL(player.dataset.subtitleUrl);delete player.dataset.subtitleUrl;}
+  subtitleCueBaseTimes=[];
+  activeSubtitleTrack=null;
+  byId("offline-subtitle-offset").value="0";
+  byId("offline-subtitle-offset-value").textContent="0.0s";
+}
+function applySubtitleOffset(){
+  const offset=Number(byId("offline-subtitle-offset").value)||0;
+  byId("offline-subtitle-offset-value").textContent=(offset>0?"+":"")+offset.toFixed(1)+"s";
+  if(!activeSubtitleTrack||!subtitleCueBaseTimes.length)return;
+  const cues=activeSubtitleTrack.cues;
+  if(!cues)return;
+  subtitleCueBaseTimes.forEach((base,index)=>{
+    const cue=cues[index];if(!cue)return;
+    cue.startTime=Math.max(0,base.start+offset);
+    cue.endTime=Math.max(cue.startTime,base.end+offset);
+  });
 }
 function parseSrtToVtt(source){
   const normalized=source.replace(/^\uFEFF/,"").replace(/\r\n?/g,"\n");
@@ -208,7 +224,14 @@ function loadExternalSubtitle(file){
       track.src=URL.createObjectURL(blob);
       player.dataset.subtitleUrl=track.src;
       track.default=true;
+      track.addEventListener("load",()=>{
+        if(activeSubtitleTrack!==track.track)return;
+        track.track.mode="showing";
+        subtitleCueBaseTimes=Array.from(track.track.cues||[]).map(cue=>({start:cue.startTime,end:cue.endTime}));
+        applySubtitleOffset();
+      },{once:true});
       player.appendChild(track);
+      activeSubtitleTrack=track.track;
       try{track.track.mode="showing";}catch{}
       setMessage("Subtitle loaded: "+file.name);
     }catch(error){setMessage(error?.message||"Could not load this subtitle.");}
@@ -240,6 +263,7 @@ byId("offline-subtitle-file").addEventListener("change",event=>{
 byId("offline-subtitle-size").addEventListener("change",event=>{
   byId("offline-player-section").dataset.subtitleSize=event.target.value;
 });
+byId("offline-subtitle-offset").addEventListener("input",applySubtitleOffset);
 byId("offline-audio-track").addEventListener("change",event=>{
   const tracks=player.audioTracks,index=Number(event.target.value);
   if(!tracks||!Number.isInteger(index)||!tracks[index])return;
@@ -257,7 +281,8 @@ byId("offline-fullscreen").addEventListener("click",async()=>{
 let lastPositionSave=0;
 let resumePosition=0;
 let controlsHideTimer=0;
-let activePlayerJob=null;
+let subtitleCueBaseTimes=[];
+let activeSubtitleTrack=null;
 function showPlayerControls(){
   const section=byId("offline-player-section");
   section.classList.remove("controls-hidden");
@@ -280,8 +305,10 @@ function findNextEpisode(job){
   return jobs.find(candidate=>{
     if(candidate.status!=="completed"||candidate.id===job.id)return false;
     const next=candidate.media||{};
-    return String(next.title||"").trim().toLowerCase()===seriesTitle
-      &&Number(next.season)===season&&Number(next.episode)===episode+1;
+    const nextSeason=Number(next.season),nextEpisode=Number(next.episode);
+    const isFollowingEpisode=(nextSeason===season&&nextEpisode===episode+1)
+      ||(nextSeason===season+1&&nextEpisode===1);
+    return String(next.title||"").trim().toLowerCase()===seriesTitle&&isFollowingEpisode;
   })||null;
 }
 function syncNextEpisode(job){
@@ -382,9 +409,7 @@ async function play(job,fileIndex=0){
   const file=Array.isArray(job.files)?job.files[fileIndex]:null;
   const playerTitle=file&&job.files.length>1?job.title+" — "+file.name:job.title;
   byId("offline-player-title").textContent=playerTitle;
-  activePlayerJob=job;
   syncNextEpisode(job);
-  byId("offline-next-episode").hidden=true;
   byId("offline-resume-prompt").hidden=true;
   resumePosition=0;
   const section=byId("offline-player-section");
@@ -446,7 +471,7 @@ byId("offline-player-close").addEventListener("click",()=>{
   player.pause();clearExternalSubtitle();player.removeAttribute("src");player.load();player.dataset.jobId="";
   player.controls=true;byId("offline-custom-controls").hidden=true;byId("offline-player-section").hidden=true;
   byId("offline-audio-track").parentElement.hidden=true;byId("offline-resume-prompt").hidden=true;
-  byId("offline-next-episode").hidden=true;byId("offline-player-section").classList.remove("controls-hidden");
+  byId("offline-next-episode").hidden=true;resumePosition=0;byId("offline-player-section").classList.remove("controls-hidden");
 });
 engine.onProgress(payload=>{
   if(payload.status==="cancelled"||payload.removed){jobs=jobs.filter(item=>item.id!==payload.id);render();return;}
