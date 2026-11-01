@@ -472,6 +472,7 @@ function initAppShell() {
   syncNavigation();
   syncAccountNavigation();
   initThemeToggle();
+  recordCurrentRoute();
   ensureBackControl();
   ensureSkipLink();
   initCinematicFocusNavigation();
@@ -480,7 +481,6 @@ function initAppShell() {
   window.addEventListener("online", setConnectionState);
   window.addEventListener("offline", setConnectionState);
 
-  recordCurrentRoute();
   document.addEventListener("click", trackInternalNavigation, true);
   document.addEventListener("click", navigateToPreviousVividPage);
 
