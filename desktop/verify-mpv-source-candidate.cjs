@@ -18,6 +18,13 @@ function main() {
   const digest = crypto.createHash("sha256").update(fs.readFileSync(archivePath)).digest("hex");
   if (digest !== manifest.archiveSha256) throw new Error("Candidate source archive SHA-256 does not match its manifest.");
   if (!Array.isArray(manifest.components) || manifest.components.length < 1) throw new Error("Candidate manifest contains no dependency source inventory.");
+  for (const file of [manifest.mpv?.licenseFile, manifest.ffmpeg?.licenseFile]) {
+    const licensePath = path.resolve(licenseRoot, file || "");
+    const relative = path.relative(licenseRoot, licensePath);
+    if (!relative || relative.startsWith("..") || path.isAbsolute(relative) || !fs.existsSync(licensePath) || !fs.statSync(licensePath).isFile()) {
+      throw new Error("Candidate mpv/FFmpeg licence text is missing from the notice bundle.");
+    }
+  }
   for (const component of manifest.components) {
     const licensePath = path.resolve(licenseRoot, component.licenseFile || "");
     const relative = path.relative(licenseRoot, licensePath);
