@@ -185,6 +185,24 @@ function clearExternalSubtitle(){
   activeSubtitleTrack=null;
   byId("offline-subtitle-offset").value="0";
   byId("offline-subtitle-offset-value").textContent="0.0s";
+  refreshSubtitleTracks();
+}
+function refreshSubtitleTracks(){
+  const select=byId("offline-subtitle-track");
+  if(!select)return;
+  const tracks=player.textTracks;
+  select.innerHTML="";
+  const off=document.createElement("option");off.value="-1";off.textContent="Off";select.appendChild(off);
+  let selected="-1";
+  for(let index=0;index<tracks.length;index++){
+    const track=tracks[index],option=document.createElement("option");
+    option.value=String(index);
+    option.textContent=track.label||track.language||("Subtitle "+(index+1));
+    if(track.mode==="showing")selected=option.value;
+    select.appendChild(option);
+  }
+  select.value=selected;
+  select.parentElement.hidden=tracks.length===0;
 }
 function applySubtitleOffset(){
   const offset=Number(byId("offline-subtitle-offset").value)||0;
@@ -233,6 +251,7 @@ function loadExternalSubtitle(file){
       player.appendChild(track);
       activeSubtitleTrack=track.track;
       try{track.track.mode="showing";}catch{}
+      refreshSubtitleTracks();
       setMessage("Subtitle loaded: "+file.name);
     }catch(error){setMessage(error?.message||"Could not load this subtitle.");}
   };
@@ -264,6 +283,16 @@ byId("offline-subtitle-size").addEventListener("change",event=>{
   byId("offline-player-section").dataset.subtitleSize=event.target.value;
 });
 byId("offline-subtitle-offset").addEventListener("input",applySubtitleOffset);
+byId("offline-subtitle-track").addEventListener("change",event=>{
+  const selected=Number(event.target.value),tracks=player.textTracks;
+  for(let index=0;index<tracks.length;index++)tracks[index].mode=index===selected?"showing":"disabled";
+  if(selected<0){subtitleCueBaseTimes=[];activeSubtitleTrack=null;}
+  else{
+    activeSubtitleTrack=tracks[selected];
+    subtitleCueBaseTimes=Array.from(activeSubtitleTrack.cues||[]).map(cue=>({start:cue.startTime,end:cue.endTime}));
+    applySubtitleOffset();
+  }
+});
 byId("offline-audio-track").addEventListener("change",event=>{
   const tracks=player.audioTracks,index=Number(event.target.value);
   if(!tracks||!Number.isInteger(index)||!tracks[index])return;
@@ -379,7 +408,11 @@ player.addEventListener("loadedmetadata",()=>{
 });
 player.addEventListener("durationchange",syncPlayerControls);
 player.addEventListener("loadedmetadata",refreshAudioTracks);
+player.addEventListener("loadedmetadata",refreshSubtitleTracks);
 player.addEventListener("loadeddata",refreshAudioTracks);
+player.textTracks?.addEventListener?.("addtrack",refreshSubtitleTracks);
+player.textTracks?.addEventListener?.("removetrack",refreshSubtitleTracks);
+player.textTracks?.addEventListener?.("change",refreshSubtitleTracks);
 player.addEventListener("error",()=>{byId("offline-audio-track").parentElement.hidden=true;});
 if(player.audioTracks){
   player.audioTracks.addEventListener?.("addtrack",refreshAudioTracks);
