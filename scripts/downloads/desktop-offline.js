@@ -80,7 +80,7 @@ function renderSearch(items){
     const episodeLabel=Number.isInteger(item.episode)
       ? "S"+String(item.season).padStart(2,"0")+"E"+String(item.episode).padStart(2,"0")+(item.episodeTitle?" · "+item.episodeTitle:"")
       : "";
-    return '<article class="offline-result"><div><strong>'+escapeHtml(item.title)+'</strong><p>'+(episodeLabel?'<b>'+escapeHtml(episodeLabel)+'</b> · ':"")+escapeHtml(item.provider)+' · '+escapeHtml(item.size||"Size unknown")+' · '+item.seeds+' seeders</p></div><button type="button" data-result="'+escapeHtml(item.id)+'">Download</button></article>';
+    return '<article class="offline-result"><div><strong>'+escapeHtml(item.title)+'</strong><p>'+(episodeLabel?'<b>'+escapeHtml(episodeLabel)+'</b> · ':"")+escapeHtml(item.provider)+' · '+escapeHtml(item.size||"Size unknown")+' · '+Number(item.seeds||0)+' seeders · '+Number(item.peers||0)+' peers</p></div><button type="button" data-result="'+escapeHtml(item.id)+'">Download</button></article>';
   }).join(""):'<p class="offline-muted">No matching releases. Try another quality or search term.</p>';
 }
 async function loadSeriesSeason(seasonNumber){
@@ -157,7 +157,7 @@ async function searchTitle(media){
   try{const rows=await engine.search(media.title||"");renderSearch(rows);setMessage(rows.length?"Choose a release to save it to this device.":"No releases found. Try a different title.");}
   catch(error){setMessage(error?.message||"Search is unavailable. Check your connection and try again.");}
 }
-async function refresh(){try{jobs=await engine.list();render();}catch(error){setMessage(error?.message||"Could not load your downloads.");}}
+async function refresh(){try{jobs=(await engine.list()).filter(job=>job.status!=="cancelled");render();}catch(error){setMessage(error?.message||"Could not load your downloads.");}}
 const player = byId("offline-player");
 const clock = value => {
   const seconds = Math.max(0, Math.floor(Number(value) || 0));
@@ -275,7 +275,12 @@ byId("offline-jobs").addEventListener("click",async event=>{
 });
 player.addEventListener("error",()=>setMessage("This file uses a video format or codec the built-in player cannot decode. Try an MP4 or WebM release."));
 byId("offline-player-close").addEventListener("click",()=>{player.pause();player.removeAttribute("src");player.load();player.dataset.jobId="";player.controls=true;byId("offline-custom-controls").hidden=true;byId("offline-player-section").hidden=true;});
-engine.onProgress(payload=>{const index=jobs.findIndex(item=>item.id===payload.id);if(index>=0)jobs[index]={...jobs[index],...payload};else jobs.push(payload);render();});
+engine.onProgress(payload=>{
+  if(payload.status==="cancelled"||payload.removed){jobs=jobs.filter(item=>item.id!==payload.id);render();return;}
+  const index=jobs.findIndex(item=>item.id===payload.id);
+  if(index>=0)jobs[index]={...jobs[index],...payload};else jobs.push(payload);
+  render();
+});
 engine.onComplete(()=>{void refresh();setMessage("Download complete. Your movie is ready to watch offline.");});
 engine.onError(payload=>{void refresh();setMessage(payload.message||"A download failed.");});
 byId("offline-owner").textContent="This device";

@@ -55,3 +55,14 @@ test("desktop torrent diagnostics expose tracker, DHT, peer and warning events",
   assert.match(desktop, /discoveryDetail/);
   assert.match(desktop, /discovery\.lastWarning/);
 });
+
+test("desktop download list removes cancelled jobs and search keeps peer-only releases", async () => {
+  const desktop = await readFile(new URL("../scripts/downloads/desktop-offline.js", import.meta.url), "utf8");
+  const engine = await readFile(new URL("../desktop/download-engine.cjs", import.meta.url), "utf8");
+  assert.match(desktop, /status!=="cancelled"/);
+  assert.match(desktop, /payload\.status==="cancelled"\|\|payload\.removed/);
+  assert.ok(desktop.includes("Number(item.peers||0)+' peers</p>"));
+  assert.match(engine, /Number\(x\.seeds \|\| 0\) > 0 \|\| Number\(x\.peers \|\| 0\) > 0/);
+  assert.match(engine, /announce: FALLBACK_TRACKERS/);
+  assert.match(engine, /this\.jobs\.delete\(job\.id\)/);
+});
