@@ -270,3 +270,143 @@ test("legacy desktop profile removes continuous decorative work", () => {
   assert.match(hero, /if \(legacyPerformance\)/);
   assert.match(hero, /setTimeout\(advanceHero, NO_TRAILER_HOLD_MS\)/);
 });
+
+
+test("Vivid Ultra Player keeps Chromium playback and adds guarded native media controls", () => {
+  const player = fs.readFileSync(path.join(root, "scripts", "downloads", "desktop-offline.js"), "utf8");
+  const page = fs.readFileSync(path.join(root, "my-downloads.html"), "utf8");
+  const styles = fs.readFileSync(path.join(root, "styles", "my-downloads.css"), "utf8");
+  assert.match(page, /<video id="offline-player" controls playsinline preload="metadata"><\/video>/);
+  assert.match(page, /offline-skip-back/);
+  assert.match(page, /offline-skip-forward/);
+  assert.match(page, /offline-subtitle-file/);
+  assert.match(player, /parseSrtToVtt/);
+  assert.match(player, /WEBVTT/);
+  assert.match(player, /URL\.revokeObjectURL/);
+  assert.match(player, /refreshAudioTracks/);
+  assert.match(player, /if\(!select\|\|!tracks/);
+  assert.match(styles, /offline-player-section\[data-subtitle-size="large"\]/);
+});
+
+
+test("Ultra Player adds explicit resume choices, safe series-next matching and cinema auto-hide", () => {
+  const player = fs.readFileSync(path.join(root, "scripts", "downloads", "desktop-offline.js"), "utf8");
+  const page = fs.readFileSync(path.join(root, "my-downloads.html"), "utf8");
+  const styles = fs.readFileSync(path.join(root, "styles", "my-downloads.css"), "utf8");
+  assert.match(page, /offline-resume-continue/);
+  assert.match(page, /offline-resume-restart/);
+  assert.match(page, /offline-next-episode/);
+  assert.match(player, /getPlaybackPosition\(jobId,fileIndex\)/);
+  const resumePromptPosition = player.indexOf('byId("offline-resume-prompt").hidden=false;', player.indexOf("player.addEventListener(\"loadedmetadata\""));
+  const pauseForResumePrompt = player.indexOf("player.pause();", player.indexOf("player.addEventListener(\"loadedmetadata\""));
+  assert.ok(resumePromptPosition >= 0 && pauseForResumePrompt > resumePromptPosition, "show resume prompt before pausing so the old saved position is not overwritten");
+  assert.match(player, /Continue from /);
+  assert.match(player, /clearPlaybackPosition/);
+  assert.match(player, /function findNextEpisode\(job\)/);
+  assert.match(player, /nextEpisode===episode\+1/);
+  assert.match(player, /setTimeout\(\(\)=>\{/);
+  assert.match(player, /controls-hidden/);
+  assert.match(styles, /offline-player-section:fullscreen/);
+  assert.match(styles, /controls-hidden \.offline-custom-controls/);
+});
+
+
+test("Ultra Player subtitle sync applies offsets from original cue timings", () => {
+  const player = fs.readFileSync(path.join(root, "scripts", "downloads", "desktop-offline.js"), "utf8");
+  const page = fs.readFileSync(path.join(root, "my-downloads.html"), "utf8");
+  assert.match(page, /offline-subtitle-offset/);
+  assert.match(player, /function applySubtitleOffset\(\)/);
+  assert.match(player, /cue\.startTime=Math\.max\(0,base\.start\+offset\)/);
+  assert.match(player, /cue\.endTime=Math\.max\(cue\.startTime\+0\.001,base\.end\+offset\)/);
+  assert.match(player, /activeSubtitleTrack!==track\.track/);
+});
+
+
+test("Ultra Player exposes embedded and external subtitle track selection", () => {
+  const player = fs.readFileSync(path.join(root, "scripts", "downloads", "desktop-offline.js"), "utf8");
+  const page = fs.readFileSync(path.join(root, "my-downloads.html"), "utf8");
+  assert.match(page, /offline-subtitle-track/);
+  assert.match(player, /function refreshSubtitleTracks\(\)/);
+  assert.match(player, /player\.textTracks/);
+  assert.match(player, /tracks\[index\]\.mode=index===selected\?"showing":"disabled"/);
+});
+
+
+test("Ultra Player shows animated feedback for 10-second seeks and prevents page scrolling", () => {
+  const player = fs.readFileSync(path.join(root, "scripts", "downloads", "desktop-offline.js"), "utf8");
+  const page = fs.readFileSync(path.join(root, "my-downloads.html"), "utf8");
+  const styles = fs.readFileSync(path.join(root, "styles", "my-downloads.css"), "utf8");
+  assert.match(page, /offline-seek-feedback/);
+  assert.match(player, /feedback\.textContent=seconds<0\?"−10 seconds":"\+10 seconds"/);
+  assert.match(player, /event\.preventDefault\(\);seekBy\(10\)/);
+  assert.match(player, /event\.preventDefault\(\);seekBy\(-10\)/);
+  assert.match(styles, /@keyframes offline-seek-back/);
+  assert.match(styles, /@keyframes offline-seek-forward/);
+});
+
+
+test("Windows Offline Library Stage 3 keeps download controls while grouping titles and simplifying statuses", () => {
+  const page = fs.readFileSync(path.join(root, "my-downloads.html"), "utf8");
+  const library = fs.readFileSync(path.join(root, "scripts", "downloads", "desktop-offline.js"), "utf8");
+  const styles = fs.readFileSync(path.join(root, "styles", "my-downloads.css"), "utf8");
+  assert.match(page, /id="offline-library-tools"/);
+  assert.match(page, /id="offline-library-tools"[^>]*hidden/);
+  assert.match(page, /offline-library-count" hidden/);
+  assert.match(library, /byId\("offline-library-tools"\)\.hidden=false/);
+  assert.match(library, /byId\("offline-library-count"\)\.hidden=false/);
+  assert.match(library, /vivid-desktop-offline-library/);
+  assert.match(library, /offline-list-title"\)\.textContent="Your library"/);
+  assert.match(styles, /body\.vivid-desktop-offline-library \.offline-progress/);
+  assert.match(styles, /body\.vivid-desktop-offline-library \.offline-job-actions button/);
+  assert.match(styles, /\.offline-progress\{height:4px/);
+  assert.match(styles, /body\.vivid-desktop-offline-library \.offline-progress\{width:100%/);
+  for (const filter of ["all", "downloading", "saved", "series", "attention"]) {
+    assert.match(page, new RegExp('data-library-filter="' + filter + '"'));
+  }
+  assert.match(library, /function matchesLibrary\(job\)/);
+  assert.match(library, /function episodeMarkup\(job\)/);
+  assert.match(library, /function actionMarkup\(job\)/);
+  assert.match(library, /data-action="pause"/);
+  assert.match(library, /data-action="resume"/);
+  assert.match(library, /data-action="cancel"/);
+  assert.match(library, /data-action="play"/);
+  assert.match(library, /data-action="play-file"/);
+  assert.match(library, /image\.tmdb\.org\/t\/p\/w342/);
+  assert.match(library, /async function hydratePosterArtwork\(\)/);
+  assert.match(library, /tmdbApi\.tvDetailsBasic\(media\.id\)/);
+  assert.match(library, /tmdbApi\.movieDetailsBasic\(media\.id\)/);
+  assert.match(library, /candidateMedia\.poster_path=poster/);
+  assert.match(library, /return "Downloading"/);
+  assert.doesNotMatch(library, /job\.phase \|\| "Connecting to peers"/);
+  assert.match(library, /poster\.split\("\/"\)\.includes\("\.\."\)/);
+  assert.doesNotMatch(library, /discoveryDetail|lastNoPeerSource|trackerAnnounces/);
+  assert.match(styles, /offline-library-tools\[hidden\].*display:none!important/);
+  assert.match(styles, /offline-series-card/);
+  assert.match(styles, /offline-media-card/);
+  assert.match(styles, /prefers-reduced-motion/);
+});
+
+
+test("Windows desktop navigation keeps Home Search visible and restores previous-page Back", () => {
+  const shell = fs.readFileSync(path.join(root, "scripts", "app-shell.js"), "utf8");
+  const home = fs.readFileSync(path.join(root, "home.html"), "utf8");
+  const searchPage = fs.readFileSync(path.join(root, "search.html"), "utf8");
+  const liquidGlass = fs.readFileSync(path.join(root, "styles", "vivid-liquid-glass.css"), "utf8");
+
+  // Home's shared header is rebuilt at startup. The Windows branch must use
+  // the dedicated Search page route, not the website-only in-page dialog.
+  assert.match(shell, /navLink\("search\.html", "bi-search", "Search", page === "search"\)/);
+  assert.match(shell, /window\.vividDownloads\?\.available === true/);
+  assert.match(shell, /vivid-windows-desktop/);
+  assert.match(home, /data-search-trigger/);
+  assert.match(searchPage, /id="search-page-input"/);
+  assert.match(searchPage, /scripts\/search-page\.js/);
+  assert.match(liquidGlass, /body\.vivid-windows-desktop \.vivid-topbar \.vivid-navlinks > a\[href="search\.html"\]/);
+
+  // Every Windows content page gets a Back control; Home gets one only when
+  // it was reached from another internal page. Direct entry remains sensible.
+  assert.match(shell, /hasInternalPreviousPage = previous\?\.origin === location\.origin/);
+  assert.match(shell, /if \(page === "home" && !hasInternalPreviousPage\) return/);
+  assert.match(shell, /back\.href = "home\.html"/);
+  assert.match(shell, /window\.history\.back\(\)/);
+});

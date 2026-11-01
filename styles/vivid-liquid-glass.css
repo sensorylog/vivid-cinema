@@ -1251,3 +1251,15 @@ body.vivid-atmosphere .vivid-unified-header .vivid-navlinks > a[href="search.htm
     transition-duration: 0s !important;
   }
 }
+
+
+/* Windows desktop only: desktop navigation has no bottom tab bar, so keep the
+   Home Search route visible after the shared shell rebuilds the header. */
+@media (min-width: 641px) {
+  body.vivid-windows-desktop .vivid-topbar .vivid-navlinks > a[href="search.html"] {
+    display: inline-flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+  }
+}

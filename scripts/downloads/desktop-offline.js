@@ -1,6 +1,7 @@
 import { tmdbApi } from "../tmdb.js";
 
 if (window.vividDownloads?.available) {
+document.body.classList.add("vivid-desktop-offline-library");
 const byId = id => document.getElementById(id);
 const escapeHtml = value => String(value ?? "").replace(/[&<>"']/g, char => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[char]));
 const bytes = value => {
@@ -20,13 +21,58 @@ let seasonRequestId = 0;
 
 function setMessage(message){ byId("offline-message").textContent = message; }
 function statusText(job){
-  if(job.status==="downloading") return job.phase || "Connecting to peers";
+  if(job.status==="downloading") return "Downloading";
+  if(job.status==="queued") return "In queue";
   if(job.status==="paused") return "Paused";
-  if(job.status==="verifying") return "Verifying saved data";
-  if(job.status==="completed") return "Ready to watch";
-  if(job.status==="cancelled") return "Cancelled";
+  if(job.status==="verifying") return "Finishing up";
+  if(job.status==="completed") return "Saved";
   if(job.status==="failed") return "Needs attention";
   return "Preparing";
+}
+let libraryFilter="all";
+let libraryQuery="";
+function posterMarkup(media){
+  const poster=String(media?.poster_path||"");
+  const safePoster=/^\/[A-Za-z0-9_./-]+\.(?:jpg|jpeg|png|webp)$/i.test(poster)&&!poster.split("/").includes("..");
+  return '<div class="offline-poster" aria-hidden="true"><span>VIVID</span>'+(safePoster?'<img loading="lazy" decoding="async" src="https://image.tmdb.org/t/p/w342'+escapeHtml(poster)+'" alt="">':"")+'</div>';
+}
+function progressMarkup(job){
+  if(!["downloading","paused","verifying","completed","queued"].includes(job.status))return "";
+  const progress=Math.max(0,Math.min(100,Number(job.progress)||0));
+  return '<div class="offline-progress" role="progressbar" aria-label="Download progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="'+progress.toFixed(1)+'"><span style="width:'+progress+'%"></span></div>';
+}
+function actionMarkup(job){
+  const actions=[];
+  if(job.status==="downloading")actions.push('<button type="button" data-action="pause" data-id="'+escapeHtml(job.id)+'">Pause</button>');
+  if(job.status==="paused"||job.status==="failed")actions.push('<button type="button" data-action="resume" data-id="'+escapeHtml(job.id)+'">Resume</button>');
+  if(job.status==="completed")actions.push('<button type="button" class="is-primary" data-action="play" data-id="'+escapeHtml(job.id)+'">Watch now</button>');
+  if(job.status==="completed"&&job.filePath)actions.push('<button type="button" data-action="show" data-id="'+escapeHtml(job.id)+'">Show in folder</button>');
+  if(["downloading","verifying","paused","failed","queued"].includes(job.status))actions.push('<button type="button" data-action="cancel" data-id="'+escapeHtml(job.id)+'">Cancel</button>');
+  return actions.length?'<div class="offline-job-actions">'+actions.join("")+'</div>':"";
+}
+function fileMarkup(job){
+  const files=Array.isArray(job.files)?job.files:[];
+  if(files.length<=1)return "";
+  return '<details class="offline-file-list"><summary>'+files.length+' playable files</summary>'+files.map(file=>'<button type="button" data-action="play-file" data-id="'+escapeHtml(job.id)+'" data-index="'+Number(file.index)+'">'+escapeHtml(file.name)+'</button>').join("")+'</details>';
+}
+function episodeMarkup(job){
+  const media=job.media||{};
+  const progress=Math.max(0,Math.min(100,Number(job.progress)||0));
+  const season=Math.max(0,Math.floor(Number(media.season)||0));
+  const episode=Math.max(0,Math.floor(Number(media.episode)||0));
+  const episodeLabel="S"+String(season).padStart(2,"0")+"E"+String(episode).padStart(2,"0");
+  const title=media.episodeTitle||job.title||"Episode";
+  return '<article class="offline-episode-row"><div class="offline-episode-copy"><span class="offline-episode-number">'+episodeLabel+'</span><strong>'+escapeHtml(title)+'</strong><small>'+escapeHtml(statusText(job))+(job.status==="downloading"?" · "+Math.round(progress)+"%":"")+'</small>'+progressMarkup(job)+fileMarkup(job)+'</div>'+actionMarkup(job)+'</article>';
+}
+function matchesLibrary(job){
+  const media=job.media||{};
+  const isSeries=media.media_type==="tv";
+  if(libraryFilter==="downloading"&&!["downloading","queued","verifying"].includes(job.status))return false;
+  if(libraryFilter==="saved"&&job.status!=="completed")return false;
+  if(libraryFilter==="series"&&!isSeries)return false;
+  if(libraryFilter==="attention"&&!["failed","paused"].includes(job.status))return false;
+  if(libraryQuery&&!String([job.title,media.title,media.episodeTitle].join(" ")).toLowerCase().includes(libraryQuery))return false;
+  return true;
 }
 function render(){
   const completed=jobs.filter(x=>x.status==="completed").length;
@@ -34,43 +80,46 @@ function render(){
   byId("offline-total").textContent=String(jobs.length);
   byId("offline-completed").textContent=String(completed);
   byId("offline-active").textContent=String(active);
+  const visible=jobs.filter(matchesLibrary);
+  const seriesCount=new Set(jobs.filter(job=>job.media?.media_type==="tv").map(job=>String(job.media.id||job.media.title||job.title))).size;
+  const countNode=byId("offline-library-count");
+  if(countNode)countNode.textContent=jobs.length+" downloads · "+seriesCount+" series";
   if(!jobs.length){
-    byId("offline-jobs").innerHTML='<div class="offline-empty"><strong>Your cinema starts here</strong><p>Movies you download will be saved on this device and ready to watch offline.</p></div>';
+    byId("offline-jobs").innerHTML='<div class="offline-empty"><strong>Your cinema starts here</strong><p>Movies and episodes you save will appear here, ready for offline watching.</p></div>';
     return;
   }
-  byId("offline-jobs").innerHTML=jobs.map(job=>{
-    const progress=Math.max(0,Math.min(100,Number(job.progress)||0));
-    const speed=job.speed?bytes(job.speed)+"/s":"";
-    const transferSize=job.total?bytes(job.total):"size unknown";
-    const peerState=job.peers?job.peers+" peers connected":"No peers connected";
-    const discovery=job.discovery;
-    const discoveryDetail=discovery
-      ? "DHT "+(discovery.dhtEnabled?(discovery.dhtListening?"ready":"starting"):"off")
-        +" ("+discovery.dhtAnnounces+" announces) · trackers "+discovery.trackerCount
-        +" ("+discovery.trackerAnnounces+" announces) · no-peer "+discovery.noPeerAnnounces
-        +(discovery.lastNoPeerSource?" ["+discovery.lastNoPeerSource+"]":"")
-        +(discovery.lastWarning?" · warning: "+discovery.lastWarning:"")
-      : "";
-    const detail=[statusText(job),progress.toFixed(1)+"%",bytes(job.downloaded)+" of "+transferSize,speed,["downloading","verifying"].includes(job.status)?peerState:"",discoveryDetail].filter(Boolean).join(" · ");
-    const actions=[];
-    if(job.status==="downloading") actions.push('<button data-action="pause" data-id="'+escapeHtml(job.id)+'">Pause</button>');
-    if(job.status==="paused"||job.status==="failed") actions.push('<button data-action="resume" data-id="'+escapeHtml(job.id)+'">Resume</button>');
-    if(job.status==="completed") actions.push('<button data-action="play" data-id="'+escapeHtml(job.id)+'">Watch now</button>');
-    if(job.status==="completed"&&job.filePath) actions.push('<button data-action="show" data-id="'+escapeHtml(job.id)+'">Show in folder</button>');
-    if(["downloading","verifying","paused","failed","queued"].includes(job.status)) actions.push('<button data-action="cancel" data-id="'+escapeHtml(job.id)+'">Cancel</button>');
-    const files = Array.isArray(job.files) ? job.files : [];
-    const episodeList = files.length > 1 ? '<div class="offline-episodes">'+files.map(file =>
-      '<button type="button" data-action="play-file" data-id="'+escapeHtml(job.id)+'" data-index="'+file.index+'">'+escapeHtml(file.name)+'</button>'
-    ).join("")+'</div>' : "";
+  if(!visible.length){
+    byId("offline-jobs").innerHTML='<div class="offline-empty"><strong>No matching titles</strong><p>Try another search or choose a different filter.</p></div>';
+    return;
+  }
+  const series=new Map(), movies=[];
+  for(const job of visible){
     const media=job.media||{};
-    const episodeTag=media.season!=null&&media.episode!=null
-      ? " · S"+String(media.season).padStart(2,"0")+"E"+String(media.episode).padStart(2,"0")+(media.episodeTitle?" — "+media.episodeTitle:"")
-      : "";
-    return '<article class="offline-job"><div><div class="offline-job-title">'+escapeHtml(job.title+episodeTag)+'</div><div class="offline-job-meta">'+escapeHtml(detail)+'</div>'+
-      (["downloading","paused","verifying","completed"].includes(job.status)?'<div class="offline-progress" role="progressbar" aria-label="Download progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="'+progress.toFixed(1)+'"><span style="width:'+progress+'%"></span></div>':"")+
-      (job.error?'<p class="offline-job-error">'+escapeHtml(job.error)+'</p>':"")+episodeList+
-      '</div><div class="offline-job-actions">'+actions.join("")+'</div></article>';
-  }).join("");
+    if(media.media_type==="tv"){
+      const key=String(media.id||media.title||job.title).toLowerCase();
+      if(!series.has(key))series.set(key,[]);
+      series.get(key).push(job);
+    }else movies.push(job);
+  }
+  const entries=[];
+  for(const group of series.values()){
+    group.sort((a,b)=>(Number(a.media?.season)||0)-(Number(b.media?.season)||0)||(Number(a.media?.episode)||0)-(Number(b.media?.episode)||0));
+    const first=group[0],media=first.media||{},title=media.title||first.title||"Untitled series";
+    const activeCount=group.filter(job=>["downloading","queued","verifying"].includes(job.status)).length;
+    const savedCount=group.filter(job=>job.status==="completed").length;
+    const newest=Math.max(...group.map(job=>Number(job.updatedAt||job.createdAt)||0));
+    const markup='<article class="offline-series-card"><header class="offline-series-card-heading">'+posterMarkup(media)+'<div><span class="offline-card-kicker">TV SERIES</span><h3>'+escapeHtml(title)+'</h3><p>'+group.length+' episodes · '+savedCount+' saved'+(activeCount?' · '+activeCount+' in progress':'')+'</p></div></header><div class="offline-series-episodes">'+group.map(episodeMarkup).join("")+'</div></article>';
+    entries.push({time:newest,markup});
+  }
+  for(const job of movies){
+    const media=job.media||{},progress=Math.max(0,Math.min(100,Number(job.progress)||0));
+    const title=media.title||job.title||"Untitled movie";
+    const detail=statusText(job)+(job.status==="downloading"?" · "+Math.round(progress)+"%":"");
+    const markup='<article class="offline-media-card">'+posterMarkup(media)+'<div class="offline-media-copy"><span class="offline-card-kicker">MOVIE</span><h3>'+escapeHtml(title)+'</h3><p class="offline-card-status">'+escapeHtml(detail)+'</p>'+progressMarkup(job)+fileMarkup(job)+actionMarkup(job)+'</div></article>';
+    entries.push({time:Number(job.updatedAt||job.createdAt)||0,markup});
+  }
+  entries.sort((a,b)=>b.time-a.time);
+  byId("offline-jobs").innerHTML='<div class="offline-library-grid">'+entries.map(entry=>entry.markup).join("")+'</div>';
 }
 function renderSearch(items){
   searchResults=items;
@@ -80,7 +129,7 @@ function renderSearch(items){
     const episodeLabel=Number.isInteger(item.episode)
       ? "S"+String(item.season).padStart(2,"0")+"E"+String(item.episode).padStart(2,"0")+(item.episodeTitle?" · "+item.episodeTitle:"")
       : "";
-    return '<article class="offline-result"><div><strong>'+escapeHtml(item.title)+'</strong><p>'+(episodeLabel?'<b>'+escapeHtml(episodeLabel)+'</b> · ':"")+escapeHtml(item.provider)+' · '+escapeHtml(item.size||"Size unknown")+' · '+Number(item.seeds||0)+' seeders · '+Number(item.peers||0)+' peers</p></div><button type="button" data-result="'+escapeHtml(item.id)+'">Download</button></article>';
+    return '<article class="offline-result"><div><strong>'+escapeHtml(item.title)+'</strong><p>'+(episodeLabel?'<b>'+escapeHtml(episodeLabel)+'</b> · ':"")+escapeHtml(item.provider)+' · '+escapeHtml(item.size||"Size unknown")+'</p></div><button type="button" data-result="'+escapeHtml(item.id)+'">Download</button></article>';
   }).join(""):'<p class="offline-muted">No matching releases. Try another quality or search term.</p>';
 }
 async function loadSeriesSeason(seasonNumber){
@@ -157,7 +206,45 @@ async function searchTitle(media){
   try{const rows=await engine.search(media.title||"");renderSearch(rows);setMessage(rows.length?"Choose a release to save it to this device.":"No releases found. Try a different title.");}
   catch(error){setMessage(error?.message||"Search is unavailable. Check your connection and try again.");}
 }
-async function refresh(){try{jobs=(await engine.list()).filter(job=>job.status!=="cancelled");render();}catch(error){setMessage(error?.message||"Could not load your downloads.");}}
+const posterLookups=new Set();
+async function hydratePosterArtwork(){
+  const queue=jobs.filter(job=>{
+    const media=job.media||{};
+    if(media.poster_path||!media.id)return false;
+    const key=media.media_type+":"+media.id;
+    if(posterLookups.has(key))return false;
+    posterLookups.add(key);
+    return true;
+  });
+  const worker=async()=>{
+    while(queue.length){
+      const job=queue.shift(),media=job.media||{};
+      try{
+        const details=media.media_type==="tv"
+          ? await tmdbApi.tvDetailsBasic(media.id)
+          : await tmdbApi.movieDetailsBasic(media.id);
+        const poster=String(details?.poster_path||"");
+        if(/^\/[A-Za-z0-9_./-]+\.(?:jpg|jpeg|png|webp)$/i.test(poster)&&!poster.split("/").includes("..")){
+          for(const candidate of jobs){
+            const candidateMedia=candidate.media||{};
+            if(candidateMedia.media_type===media.media_type&&String(candidateMedia.id||"")===String(media.id||"")){
+              candidateMedia.poster_path=poster;
+            }
+          }
+          render();
+        }
+      }catch{}
+    }
+  };
+  await Promise.all([worker(),worker(),worker()]);
+}
+async function refresh(){
+  try{
+    jobs=(await engine.list()).filter(job=>job.status!=="cancelled");
+    render();
+    void hydratePosterArtwork();
+  }catch(error){setMessage(error?.message||"Could not load your downloads.");}
+}
 const player = byId("offline-player");
 const clock = value => {
   const seconds = Math.max(0, Math.floor(Number(value) || 0));
@@ -171,8 +258,141 @@ function syncPlayerControls(){
   byId("offline-seek").value=duration?String(Math.round(player.currentTime/duration*1000)):"0";
   byId("offline-time").textContent=clock(player.currentTime)+" / "+clock(duration);
   byId("offline-play-toggle").textContent=player.paused?"Play":"Pause";
+  byId("offline-play-toggle").setAttribute("aria-label",player.paused?"Play":"Pause");
 }
+let seekFeedbackTimer=0;
+function seekBy(seconds){
+  if(!Number.isFinite(player.duration))return;
+  player.currentTime=Math.max(0,Math.min(player.duration,player.currentTime+seconds));
+  const feedback=byId("offline-seek-feedback");
+  feedback.textContent=seconds<0?"−10 seconds":"+10 seconds";
+  feedback.className="offline-seek-feedback "+(seconds<0?"is-back":"is-forward");
+  feedback.hidden=false;
+  if(seekFeedbackTimer)clearTimeout(seekFeedbackTimer);
+  seekFeedbackTimer=setTimeout(()=>{feedback.hidden=true;},850);
+}
+function clearExternalSubtitle(){
+  const track=byId("offline-external-subtitle");
+  if(track)track.remove();
+  if(player.dataset.subtitleUrl){URL.revokeObjectURL(player.dataset.subtitleUrl);delete player.dataset.subtitleUrl;}
+  subtitleCueBaseTimes=[];
+  activeSubtitleTrack=null;
+  byId("offline-subtitle-offset").value="0";
+  byId("offline-subtitle-offset-value").textContent="0.0s";
+  refreshSubtitleTracks();
+}
+function refreshSubtitleTracks(){
+  const select=byId("offline-subtitle-track");
+  if(!select)return;
+  const tracks=player.textTracks;
+  select.innerHTML="";
+  const off=document.createElement("option");off.value="-1";off.textContent="Off";select.appendChild(off);
+  let selected="-1";
+  for(let index=0;index<tracks.length;index++){
+    const track=tracks[index],option=document.createElement("option");
+    option.value=String(index);
+    option.textContent=track.label||track.language||("Subtitle "+(index+1));
+    if(track.mode==="showing")selected=option.value;
+    select.appendChild(option);
+  }
+  select.value=selected;
+  select.parentElement.hidden=tracks.length===0;
+}
+function applySubtitleOffset(){
+  const offset=Number(byId("offline-subtitle-offset").value)||0;
+  byId("offline-subtitle-offset-value").textContent=(offset>0?"+":"")+offset.toFixed(1)+"s";
+  if(!activeSubtitleTrack||!subtitleCueBaseTimes.length)return;
+  const cues=activeSubtitleTrack.cues;
+  if(!cues)return;
+  subtitleCueBaseTimes.forEach((base,index)=>{
+    const cue=cues[index];if(!cue)return;
+    cue.startTime=Math.max(0,base.start+offset);
+    cue.endTime=Math.max(cue.startTime+0.001,base.end+offset);
+  });
+}
+function parseSrtToVtt(source){
+  const normalized=source.replace(/^\uFEFF/,"").replace(/\r\n?/g,"\n");
+  const body=normalized.replace(/(\d{2}:\d{2}:\d{2}),(\d{3})/g,"$1.$2");
+  return "WEBVTT\n\n"+body.replace(/^\s*\d+\s*\n/gm,"");
+}
+function loadExternalSubtitle(file){
+  if(!file)return;
+  const extension=(file.name.split(".").pop()||"").toLowerCase();
+  if(!["srt","vtt"].includes(extension)){setMessage("Choose an SRT or WebVTT subtitle file.");return;}
+  const reader=new FileReader();
+  reader.onerror=()=>setMessage("Could not read that subtitle file.");
+  reader.onload=()=>{
+    try{
+      const source=String(reader.result||"");
+      const vtt=extension==="srt"?parseSrtToVtt(source):source.replace(/^\uFEFF/,"");
+      if(!/^WEBVTT(?:\s|$)/.test(vtt.trimStart()))throw new Error("Invalid WebVTT subtitle file.");
+      const blob=new Blob([vtt],{type:"text/vtt"});
+      clearExternalSubtitle();
+      const track=document.createElement("track");
+      track.id="offline-external-subtitle";
+      track.kind="subtitles";
+      track.label=file.name;
+      track.srclang="und";
+      track.src=URL.createObjectURL(blob);
+      player.dataset.subtitleUrl=track.src;
+      track.default=true;
+      track.addEventListener("load",()=>{
+        if(activeSubtitleTrack!==track.track)return;
+        track.track.mode="showing";
+        subtitleCueBaseTimes=Array.from(track.track.cues||[]).map(cue=>({start:cue.startTime,end:cue.endTime}));
+        applySubtitleOffset();
+      },{once:true});
+      player.appendChild(track);
+      activeSubtitleTrack=track.track;
+      try{track.track.mode="showing";}catch{}
+      refreshSubtitleTracks();
+      setMessage("Subtitle loaded: "+file.name);
+    }catch(error){setMessage(error?.message||"Could not load this subtitle.");}
+  };
+  reader.readAsText(file);
+}
+function refreshAudioTracks(){
+  const select=byId("offline-audio-track");
+  const tracks=player.audioTracks;
+  if(!select||!tracks||typeof tracks.length!=="number"){if(select)select.parentElement.hidden=true;return;}
+  select.innerHTML="";
+  if(!tracks.length){select.parentElement.hidden=true;return;}
+  for(let index=0;index<tracks.length;index++){
+    const track=tracks[index],option=document.createElement("option");
+    option.value=String(index);
+    option.textContent=track.label||track.language||("Audio "+(index+1));
+    option.selected=Boolean(track.enabled);
+    select.appendChild(option);
+  }
+  select.parentElement.hidden=false;
+}
+
 byId("offline-play-toggle").addEventListener("click",()=>{if(player.paused)void player.play().catch(()=>{});else player.pause();});
+byId("offline-skip-back").addEventListener("click",()=>seekBy(-10));
+byId("offline-skip-forward").addEventListener("click",()=>seekBy(10));
+byId("offline-subtitle-file").addEventListener("change",event=>{
+  const file=event.target.files?.[0];loadExternalSubtitle(file);event.target.value="";
+});
+byId("offline-subtitle-size").addEventListener("change",event=>{
+  byId("offline-player-section").dataset.subtitleSize=event.target.value;
+});
+byId("offline-subtitle-offset").addEventListener("input",applySubtitleOffset);
+byId("offline-subtitle-track").addEventListener("change",event=>{
+  const selected=Number(event.target.value),tracks=player.textTracks;
+  for(let index=0;index<tracks.length;index++)tracks[index].mode=index===selected?"showing":"disabled";
+  if(selected<0){subtitleCueBaseTimes=[];activeSubtitleTrack=null;}
+  else{
+    activeSubtitleTrack=tracks[selected];
+    subtitleCueBaseTimes=Array.from(activeSubtitleTrack.cues||[]).map(cue=>({start:cue.startTime,end:cue.endTime}));
+    applySubtitleOffset();
+  }
+});
+byId("offline-audio-track").addEventListener("change",event=>{
+  const tracks=player.audioTracks,index=Number(event.target.value);
+  if(!tracks||!Number.isInteger(index)||!tracks[index])return;
+  for(let i=0;i<tracks.length;i++)tracks[i].enabled=i===index;
+});
+
 byId("offline-seek").addEventListener("input",event=>{if(Number.isFinite(player.duration))player.currentTime=player.duration*(Number(event.target.value)/1000);});
 byId("offline-volume").addEventListener("input",event=>{player.volume=Number(event.target.value);player.muted=player.volume===0;});
 byId("offline-speed").addEventListener("change",event=>{player.playbackRate=Number(event.target.value)||1;});
@@ -182,6 +402,74 @@ byId("offline-fullscreen").addEventListener("click",async()=>{
   catch{setMessage("Fullscreen is not available on this device.");}
 });
 let lastPositionSave=0;
+let resumePosition=0;
+let controlsHideTimer=0;
+let subtitleCueBaseTimes=[];
+let activeSubtitleTrack=null;
+function showPlayerControls(){
+  const section=byId("offline-player-section");
+  section.classList.remove("controls-hidden");
+  if(controlsHideTimer)clearTimeout(controlsHideTimer);
+  if(!player.paused){
+    controlsHideTimer=setTimeout(()=>{
+      if(!player.paused&&!section.matches(":focus-within"))section.classList.add("controls-hidden");
+    },3200);
+  }
+}
+function hidePlayerControls(){
+  const section=byId("offline-player-section");
+  if(!player.paused&&!section.matches(":focus-within"))section.classList.add("controls-hidden");
+}
+function findNextEpisode(job){
+  const media=job?.media||{};
+  const episode=Number(media.episode),season=Number(media.season);
+  const seriesTitle=String(media.title||"").trim().toLowerCase();
+  if(!seriesTitle||!Number.isInteger(episode)||episode<1||!Number.isInteger(season))return null;
+  return jobs.find(candidate=>{
+    if(candidate.status!=="completed"||candidate.id===job.id)return false;
+    const next=candidate.media||{};
+    const nextSeason=Number(next.season),nextEpisode=Number(next.episode);
+    const isFollowingEpisode=(nextSeason===season&&nextEpisode===episode+1)
+      ||(nextSeason===season+1&&nextEpisode===1);
+    return next.media_type==="tv"&&String(next.id||"")===String(media.id||"")
+      &&String(next.title||"").trim().toLowerCase()===seriesTitle&&isFollowingEpisode;
+  })||null;
+}
+function syncNextEpisode(job){
+  const next=findNextEpisode(job);
+  const button=byId("offline-next-episode");
+  button.hidden=!next;
+  button.dataset.jobId=next?.id||"";
+  button.textContent=next?"Next episode · S"+String(next.media.season).padStart(2,"0")+"E"+String(next.media.episode).padStart(2,"0"):"Next episode";
+}
+byId("offline-resume-continue").addEventListener("click",async()=>{
+  const prompt=byId("offline-resume-prompt");
+  if(resumePosition>0&&Number.isFinite(player.duration)&&resumePosition<player.duration-1)player.currentTime=resumePosition;
+  prompt.hidden=true;resumePosition=0;
+  try{await player.play();}catch{setMessage("Press Play to continue watching.");}
+  showPlayerControls();
+});
+byId("offline-resume-restart").addEventListener("click",async()=>{
+  const prompt=byId("offline-resume-prompt");
+  prompt.hidden=true;resumePosition=0;player.currentTime=0;
+  if(player.dataset.jobId)void engine.clearPlaybackPosition(player.dataset.jobId,Number(player.dataset.fileIndex)||0).catch(()=>{});
+  try{await player.play();}catch{setMessage("Press Play to start from the beginning.");}
+  showPlayerControls();
+});
+byId("offline-next-episode").addEventListener("click",async()=>{
+  const next=jobs.find(job=>job.id===byId("offline-next-episode").dataset.jobId);
+  if(!next)return;
+  try{await play(next,0);}catch(error){setMessage(error?.message||"Could not open the next episode.");}
+});
+const playerSection=byId("offline-player-section");
+playerSection.addEventListener("pointermove",showPlayerControls);
+playerSection.addEventListener("pointerdown",showPlayerControls);
+playerSection.addEventListener("pointerleave",hidePlayerControls);
+playerSection.addEventListener("focusin",showPlayerControls);
+playerSection.addEventListener("focusout",()=>{if(!playerSection.matches(":focus-within"))showPlayerControls();});
+document.addEventListener("fullscreenchange",showPlayerControls);
+player.addEventListener("play",showPlayerControls);
+player.addEventListener("pause",showPlayerControls);
 player.addEventListener("timeupdate",()=>{
   syncPlayerControls();
   if(player.dataset.jobId&&player.currentTime-lastPositionSave>=5){
@@ -190,28 +478,59 @@ player.addEventListener("timeupdate",()=>{
   }
 });
 player.addEventListener("pause",()=>{
+  // Opening the resume prompt pauses the initial autoplay attempt; do not overwrite
+  // the saved position with zero before the user chooses Continue or Start over.
+  if(!byId("offline-resume-prompt").hidden)return;
   if(player.dataset.jobId&&player.currentTime>0)void engine.setPlaybackPosition(player.dataset.jobId,Number(player.dataset.fileIndex)||0,player.currentTime).catch(()=>{});
 });
 player.addEventListener("loadedmetadata",()=>{
   const jobId=player.dataset.jobId, fileIndex=Number(player.dataset.fileIndex)||0;
   void engine.getPlaybackPosition(jobId,fileIndex).then(saved=>{
     if(player.dataset.jobId!==jobId||Number(player.dataset.fileIndex)!==fileIndex)return;
-    if(saved>5&&Number.isFinite(player.duration)&&saved<player.duration-30)player.currentTime=saved;
+    if(saved>5&&Number.isFinite(player.duration)&&saved<player.duration-30){
+      resumePosition=saved;
+      byId("offline-resume-copy").textContent="Continue from "+clock(saved)+"?";
+      byId("offline-resume-prompt").hidden=false;
+      player.pause();
+      showPlayerControls();
+    }else{
+      resumePosition=0;
+      byId("offline-resume-prompt").hidden=true;
+    }
     syncPlayerControls();
-  }).catch(syncPlayerControls);
+  }).catch(()=>{resumePosition=0;byId("offline-resume-prompt").hidden=true;syncPlayerControls();});
 });
 player.addEventListener("durationchange",syncPlayerControls);
+player.addEventListener("loadedmetadata",refreshAudioTracks);
+player.addEventListener("loadedmetadata",refreshSubtitleTracks);
+player.addEventListener("loadeddata",refreshAudioTracks);
+player.textTracks?.addEventListener?.("addtrack",refreshSubtitleTracks);
+player.textTracks?.addEventListener?.("removetrack",refreshSubtitleTracks);
+player.textTracks?.addEventListener?.("change",refreshSubtitleTracks);
+player.addEventListener("error",()=>{byId("offline-audio-track").parentElement.hidden=true;});
+if(player.audioTracks){
+  player.audioTracks.addEventListener?.("addtrack",refreshAudioTracks);
+  player.audioTracks.addEventListener?.("removetrack",refreshAudioTracks);
+  player.audioTracks.addEventListener?.("change",refreshAudioTracks);
+}
 player.addEventListener("play",syncPlayerControls);
 player.addEventListener("pause",syncPlayerControls);
-player.addEventListener("ended",()=>{if(player.dataset.jobId)void engine.clearPlaybackPosition(player.dataset.jobId,Number(player.dataset.fileIndex)||0).catch(()=>{});syncPlayerControls();});
+player.addEventListener("ended",()=>{
+  if(player.dataset.jobId)void engine.clearPlaybackPosition(player.dataset.jobId,Number(player.dataset.fileIndex)||0).catch(()=>{});
+  byId("offline-resume-prompt").hidden=true;
+  const job=jobs.find(item=>item.id===player.dataset.jobId);
+  syncNextEpisode(job);
+  showPlayerControls();
+  syncPlayerControls();
+});
 window.addEventListener("pagehide",()=>{
   if(player.dataset.jobId&&player.currentTime>0)void engine.setPlaybackPosition(player.dataset.jobId,Number(player.dataset.fileIndex)||0,player.currentTime).catch(()=>{});
 });
 window.addEventListener("keydown",event=>{
   if(byId("offline-player-section").hidden||event.target.matches("input,textarea,select,button"))return;
   if(event.code==="Space"){event.preventDefault();if(player.paused)void player.play().catch(()=>{});else player.pause();}
-  if(event.key==="ArrowRight"&&Number.isFinite(player.duration))player.currentTime=Math.min(player.duration,player.currentTime+10);
-  if(event.key==="ArrowLeft")player.currentTime=Math.max(0,player.currentTime-10);
+  if(event.key==="ArrowRight"){event.preventDefault();seekBy(10);}
+  if(event.key==="ArrowLeft"){event.preventDefault();seekBy(-10);}
   if(event.key.toLowerCase()==="f")void byId("offline-fullscreen").click();
   if(event.key.toLowerCase()==="m")player.muted=!player.muted;
 });
@@ -221,10 +540,14 @@ async function play(job,fileIndex=0){
   const file=Array.isArray(job.files)?job.files[fileIndex]:null;
   const playerTitle=file&&job.files.length>1?job.title+" — "+file.name:job.title;
   byId("offline-player-title").textContent=playerTitle;
+  syncNextEpisode(job);
+  byId("offline-resume-prompt").hidden=true;
+  resumePosition=0;
   const section=byId("offline-player-section");
-  if(player.dataset.jobId!==job.id||player.dataset.fileIndex!==String(fileIndex)){player.pause();player.src=url;player.dataset.jobId=job.id;player.dataset.fileIndex=String(fileIndex);player.load();lastPositionSave=0;}
+  if(player.dataset.jobId!==job.id||player.dataset.fileIndex!==String(fileIndex)){player.pause();clearExternalSubtitle();player.src=url;player.dataset.jobId=job.id;player.dataset.fileIndex=String(fileIndex);player.load();lastPositionSave=0;byId("offline-player-section").dataset.subtitleSize="medium";byId("offline-subtitle-size").value="medium";}
   player.controls=false;
   byId("offline-custom-controls").hidden=false;
+  section.classList.remove("controls-hidden");
   section.hidden=false;section.scrollIntoView({behavior:"smooth",block:"start"});
   try{await player.play();}catch{setMessage("Your movie is ready. Press Play in the Vivid player to begin.");}
   syncPlayerControls();
@@ -274,7 +597,13 @@ byId("offline-jobs").addEventListener("click",async event=>{
   finally{button.disabled=false;}
 });
 player.addEventListener("error",()=>setMessage("This file uses a video format or codec the built-in player cannot decode. Try an MP4 or WebM release."));
-byId("offline-player-close").addEventListener("click",()=>{player.pause();player.removeAttribute("src");player.load();player.dataset.jobId="";player.controls=true;byId("offline-custom-controls").hidden=true;byId("offline-player-section").hidden=true;});
+byId("offline-player-close").addEventListener("click",()=>{
+  if(controlsHideTimer)clearTimeout(controlsHideTimer);
+  player.pause();clearExternalSubtitle();player.removeAttribute("src");player.load();player.dataset.jobId="";
+  player.controls=true;byId("offline-custom-controls").hidden=true;byId("offline-player-section").hidden=true;
+  byId("offline-audio-track").parentElement.hidden=true;byId("offline-resume-prompt").hidden=true;
+  byId("offline-next-episode").hidden=true;resumePosition=0;byId("offline-player-section").classList.remove("controls-hidden");
+});
 engine.onProgress(payload=>{
   if(payload.status==="cancelled"||payload.removed){jobs=jobs.filter(item=>item.id!==payload.id);render();return;}
   const index=jobs.findIndex(item=>item.id===payload.id);
@@ -282,9 +611,26 @@ engine.onProgress(payload=>{
   render();
 });
 engine.onComplete(()=>{void refresh();setMessage("Download complete. Your movie is ready to watch offline.");});
-engine.onError(payload=>{void refresh();setMessage(payload.message||"A download failed.");});
+engine.onError(()=>{void refresh();setMessage("A download needs attention. Try Resume, or cancel it and choose another release.");});
+byId("offline-library-search").addEventListener("input",event=>{
+  libraryQuery=event.target.value.trim().toLowerCase();
+  render();
+});
+byId("offline-library-tools").addEventListener("click",event=>{
+  const button=event.target.closest("button[data-library-filter]");
+  if(!button)return;
+  libraryFilter=button.dataset.libraryFilter;
+  byId("offline-library-tools").querySelectorAll("button[data-library-filter]").forEach(item=>item.setAttribute("aria-pressed",String(item===button)));
+  render();
+});
+byId("offline-jobs").addEventListener("error",event=>{
+  if(event.target instanceof HTMLImageElement&&event.target.closest(".offline-poster"))event.target.remove();
+},true);
 byId("offline-owner").textContent="This device";
+byId("offline-list-title").textContent="Your library";
 byId("desktop-download-search").hidden=false;
+byId("offline-library-tools").hidden=false;
+byId("offline-library-count").hidden=false;
 byId("offline-notice-copy").textContent="Downloads are saved to your computer in the Vivid Cinema folder. They remain available without an internet connection.";
 byId("offline-footnote").textContent="Your videos are stored on this device in the Vivid Cinema folder inside Downloads. Removing a download from Vivid does not silently delete your video files.";
 const pending=sessionStorage.getItem("vivid:pending-desktop-download");
