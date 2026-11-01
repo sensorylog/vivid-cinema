@@ -57,7 +57,9 @@ function fileMarkup(job){
 function episodeMarkup(job){
   const media=job.media||{};
   const progress=Math.max(0,Math.min(100,Number(job.progress)||0));
-  const episodeLabel="S"+String(media.season??0).padStart(2,"0")+"E"+String(media.episode??0).padStart(2,"0");
+  const season=Math.max(0,Math.floor(Number(media.season)||0));
+  const episode=Math.max(0,Math.floor(Number(media.episode)||0));
+  const episodeLabel="S"+String(season).padStart(2,"0")+"E"+String(episode).padStart(2,"0");
   const title=media.episodeTitle||job.title||"Episode";
   return '<article class="offline-episode-row"><div class="offline-episode-copy"><span class="offline-episode-number">'+episodeLabel+'</span><strong>'+escapeHtml(title)+'</strong><small>'+escapeHtml(statusText(job))+(job.status==="downloading"?" · "+Math.round(progress)+"%":"")+'</small>'+progressMarkup(job)+fileMarkup(job)+'</div>'+actionMarkup(job)+'</article>';
 }
