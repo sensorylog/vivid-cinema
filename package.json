@@ -128,7 +128,10 @@
         "from": "licenses/mpv",
         "to": "licenses/mpv",
         "filter": [
-          "NOTICE.md"
+          "NOTICE.md",
+          "Copyright",
+          "LICENSE.GPL",
+          "LICENSE.LGPL"
         ]
       }
     ]
