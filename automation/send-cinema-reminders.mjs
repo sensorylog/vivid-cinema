@@ -15,9 +15,6 @@ if(decodedVapidPublicKey.length!==65||decodedVapidPublicKey[0]!==4)throw new Err
 webpush.setVapidDetails("mailto:notifications@vividcinema.app",vapidPublicKey,vapidPrivateKey);
 
 
-const vapidPublicKey="BMNW0k1P89YhNVPP4NJYa4mDOw2arwbEJUPJ3mDcV6UpcSn-WP_T2PqJc6ANEkvtzUe9LacEMJ4com85M4w-eN8";
-const decodedVapidPublicKey=Buffer.from(vapidPublicKey.replace(/-/g,"+").replace(/_/g,"/"),"base64");
-if(decodedVapidPublicKey.length!==65||decodedVapidPublicKey[0]!==4)throw new Error("Invalid VAPID_PUBLIC_KEY");
 const now=Date.now();
 const snapshot=await db.collectionGroup("cinemaReminders")
   .where("sent","==",false)
