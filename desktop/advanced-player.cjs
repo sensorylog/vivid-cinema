@@ -144,7 +144,7 @@ class AdvancedPlayer {
         buffer += String(chunk);
         if (buffer.length > 65536) buffer = buffer.slice(-32768);
         let newline;
-        while ((newline = buffer.indexOf("\\n")) >= 0) {
+        while ((newline = buffer.indexOf("\n")) >= 0) {
           const line = buffer.slice(0, newline).trim();
           buffer = buffer.slice(newline + 1);
           if (!line) continue;
@@ -176,7 +176,7 @@ class AdvancedPlayer {
 
   sendIpc(command) {
     if (!this.ipcSocket || this.ipcSocket.destroyed) return false;
-    try { this.ipcSocket.write(JSON.stringify({ command }) + "\\n"); return true; }
+    try { this.ipcSocket.write(JSON.stringify({ command }) + "\n"); return true; }
     catch { return false; }
   }
 
