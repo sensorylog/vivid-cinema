@@ -217,8 +217,10 @@ class DesktopDownloadEngine {
         job.persistTimer.unref?.();
       }
     };
-    torrent.on("ready", () => {
-      if (!job.needsRescan) return;
+    let readyHandled = false;
+    const handleTorrentReady = () => {
+      if (readyHandled || job.torrent !== torrent || !job.needsRescan) return;
+      readyHandled = true;
       // WebTorrent 1.9.7 verifies the existing filesystem store before it emits
       // "ready". Calling rescanFiles here performs a second full piece-hash pass
       // and can stall Windows resume. The ready event is the verification gate.
@@ -226,7 +228,8 @@ class DesktopDownloadEngine {
       job.status = "downloading";
       publish();
       void this.persist().catch(saveError => console.warn("Download state save failed:", saveError.message));
-    });
+    };
+    torrent.on("ready", handleTorrentReady);
     const publishWhenReady = () => { if (!job.needsRescan) publish(); };
     const discovery = job.discovery = {
       trackerCount: Array.isArray(torrent.announce) ? torrent.announce.length : 0,
@@ -299,6 +302,10 @@ class DesktopDownloadEngine {
       this.send("vivid-download-error", { id: job.id, message: job.error });
       void this.persist().catch(saveError => console.warn("Download state save failed:", saveError.message));
     });
+    // A restored torrent may finish verification before the ready listener
+    // is attached. Check its current state after all listeners are registered
+    // so fast local stores cannot leave Resume stuck in verification.
+    if (torrent.ready) handleTorrentReady();
     publish();
   }
 
