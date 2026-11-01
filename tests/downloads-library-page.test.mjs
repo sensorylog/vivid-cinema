@@ -56,6 +56,15 @@ test("desktop torrent diagnostics expose tracker, DHT, peer and warning events",
   assert.match(engine, /lastWarning/);
 });
 
+test("failed movie and episode downloads show their actual recovery reason", async () => {
+  const desktop = await readFile(new URL("../scripts/downloads/desktop-offline.js", import.meta.url), "utf8");
+  const styles = await readFile(new URL("../styles/my-downloads.css", import.meta.url), "utf8");
+  assert.match(desktop, /function errorMarkup\(job\)/);
+  assert.match(desktop, /job\.status!==\"failed\"\|\|!job\.error/);
+  assert.match(desktop, /progressMarkup\(job\)\+errorMarkup\(job\)\+fileMarkup\(job\)/);
+  assert.match(styles, /\.offline-job-error/);
+});
+
 test("desktop download list removes cancelled jobs and search keeps peer-only releases", async () => {
   const desktop = await readFile(new URL("../scripts/downloads/desktop-offline.js", import.meta.url), "utf8");
   const engine = await readFile(new URL("../desktop/download-engine.cjs", import.meta.url), "utf8");
