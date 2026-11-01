@@ -224,7 +224,12 @@ async function hydratePosterArtwork(){
           : await tmdbApi.movieDetailsBasic(media.id);
         const poster=String(details?.poster_path||"");
         if(/^\/[A-Za-z0-9_./-]+\.(?:jpg|jpeg|png|webp)$/i.test(poster)&&!poster.split("/").includes("..")){
-          media.poster_path=poster;
+          for(const candidate of jobs){
+            const candidateMedia=candidate.media||{};
+            if(candidateMedia.media_type===media.media_type&&String(candidateMedia.id||"")===String(media.id||"")){
+              candidateMedia.poster_path=poster;
+            }
+          }
           render();
         }
       }catch{}
