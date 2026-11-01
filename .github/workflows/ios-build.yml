@@ -1,0 +1,78 @@
+name: Vivid Cinema iOS Simulator Build
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/ios-build.yml"
+      - "automation/**"
+      - "capacitor.config.json"
+      - "package.json"
+      - "package-lock.json"
+      - "scripts/**"
+      - "styles/**"
+      - "*.html"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: vivid-ios-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ios-simulator:
+    name: Test and build iOS Simulator app
+    runs-on: macos-15
+    timeout-minutes: 45
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install locked project dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: Run project tests
+        run: npm test
+
+      - name: Check JavaScript syntax
+        run: npm run check:syntax
+
+      - name: Install the matching Capacitor iOS platform for this build
+        run: npm install --no-save --package-lock=false --no-audit --no-fund @capacitor/ios@8.5.3
+
+      - name: Build the bundled Vivid Cinema web app
+        run: npm run build:web
+
+      - name: Generate and sync the iOS project
+        run: |
+          npx cap add ios
+          npx cap sync ios
+
+      - name: Build unsigned iOS Simulator app
+        run: |
+          xcodebuild \
+            -workspace ios/App/App.xcworkspace \
+            -scheme App \
+            -configuration Debug \
+            -sdk iphonesimulator \
+            -destination 'generic/platform=iOS Simulator' \
+            -derivedDataPath ios/DerivedData \
+            CODE_SIGNING_ALLOWED=NO \
+            build
+
+      - name: Upload unsigned simulator build
+        uses: actions/upload-artifact@v4
+        with:
+          name: vivid-cinema-ios-simulator
+          path: ios/DerivedData/Build/Products/Debug-iphonesimulator/App.app
+          if-no-files-found: error
+          retention-days: 7
