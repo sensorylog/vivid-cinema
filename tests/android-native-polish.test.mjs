@@ -13,6 +13,7 @@ test("native-only styling is injected into the generated bundle, not source HTML
   assert.match(builder, /window\.Capacitor\?\.isNativePlatform\?\.\(\)/);
   assert.match(builder, /styles\/vivid-native-app\.css/);
   assert.match(builder, /id="vivid-native-app-enhancements"/);
+  assert.match(builder, /document\.body\?\.classList\.add\("vivid-native-app"\)/);
 });
 
 test("native styling covers safe areas, touch targets, and accessible focus", () => {
