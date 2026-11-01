@@ -242,7 +242,7 @@ test("desktop engine downloads a video-extension payload from a local seeded tor
   const videoPath = path.join(root, "vivid-integration.mp4");
   const downloadsPath = path.join(root, "downloads");
   const userDataPath = path.join(root, "user-data");
-  const payload = Buffer.alloc(8 * 1024 * 1024);
+  const payload = Buffer.alloc(32 * 1024 * 1024);
   for (let index = 0; index < payload.length; index += 1) {
     payload[index] = (index * 31 + Math.floor(index / 251)) % 251;
   }
@@ -361,13 +361,14 @@ test("desktop engine downloads a video-extension payload from a local seeded tor
     // Pause only after verified bytes have reached disk. The previous test
     // paused immediately after enqueue and never proved partial data survives.
     await waitFor(
-      () => job.torrent?.ready && Number(job.torrent.downloaded) >= 64 * 1024 && job.torrent.progress < 0.95,
+      () => job.torrent?.ready && Number(job.torrent.downloaded) >= 64 * 1024 && job.torrent.progress >= 0.70 && job.torrent.progress < 0.95,
       20000,
       "a genuine partial transfer before pause"
     );
     const progressBeforePause = Number(job.torrent.progress) * 100;
     const bytesBeforePause = Number(job.torrent.downloaded);
     assert.ok(bytesBeforePause >= 64 * 1024, "pause fixture must contain verified partial bytes");
+    assert.ok(progressBeforePause >= 70 && progressBeforePause < 95, "pause fixture must be close to completion, not an empty queue");
     assert.equal(await engine.control(started.id, "pause"), true,
       "an active desktop download should pause");
     assert.equal(job.status, "paused", "pause should persist a paused job state");
