@@ -1,34 +1,36 @@
 # Third-party notice: mpv Advanced Player
 
-Vivid Cinema redistributes mpv as a **separate executable process** for Windows offline playback. Vivid does not link mpv into the Electron application. The mpv window and its keyboard/OSD controls are provided by the upstream mpv program.
+Vivid Cinema redistributes mpv as a **separate executable process** for Windows offline playback. Vivid does not link mpv into the Electron application. The native mpv window, on-screen controller, track selection and keyboard controls are provided by the upstream mpv program.
 
 ## Exact bundled build
 
 - Project: mpv
-- Build version: `0.41.0-dev-g9e2ed65eb`
-- mpv source commit: `9e2ed65eb0c02f99a352dfa1ad3c85ecceefe005`
-- Upstream source: https://github.com/mpv-player/mpv/tree/9e2ed65eb0c02f99a352dfa1ad3c85ecceefe005
-- Upstream build workflow run: https://github.com/mpv-player/mpv/actions/runs/41103006513
-- Build workflow source: https://github.com/mpv-player/mpv/blob/4013a3c9b6f6b3b4d2d8f971e91c2e1eab3f8184/.github/workflows/build.yml
-- Downloaded asset: `mpv-v0.41.0-dev-g9e2ed65eb-41103006513-x86_64-w64-mingw32-full.zip`
-- SHA-256: `24a5ac969219767c617f5d109761d4e24db8ba05dee30db485ea756415dc63b4`
-- FFmpeg runtime reported by the upstream build: `git-2026-10-30-a3c5339`
-- FFmpeg source commit: `a3c5339578cb1d54322e06b6bd1c8852fc6abc29`
-- FFmpeg source: https://github.com/FFmpeg/FFmpeg/commit/a3c5339578cb1d54322e06b6bd1c8852fc6abc29
+- Stable version: `0.41.0`
+- mpv source commit: `41f6a645068483470267271e1d09966ca3b9f413`
+- Source tag: `v0.41.0` (signed upstream release tag)
+- Upstream source: https://github.com/mpv-player/mpv/tree/41f6a645068483470267271e1d09966ca3b9f413
+- Upstream release: https://github.com/mpv-player/mpv/releases/tag/v0.41.0
+- Downloaded asset: `mpv-v0.41.0-x86_64-w64-mingw32.zip`
+- SHA-256: `a49811c0752c108b8260636f9c6f6fcb97406641c98b30f1e7b500dfb20177de`
+
+The selected archive is the upstream stable Windows x86_64 release asset, not an untested development build. Upstream notes that its release CI binaries omit some optional features (for example, encoding support). Encoding is not needed for Vivid's playback use case. This build must not be described as supporting every optional mpv feature or every possible media codec.
+
+The exact FFmpeg revision and all other bundled component revisions must be recorded in `SOURCE-MANIFEST.json` after inspecting the exact release binary and corresponding upstream build inputs. Do not guess those revisions.
 
 ## Licensing
 
-mpv is licensed under GPL-2.0-or-later by default. The selected upstream Windows build is the full GPL-enabled build and includes FFmpeg and additional third-party libraries. The licences and redistribution obligations of the exact binaries are determined by the build configuration and all included components; this notice is not a substitute for those component notices.
+mpv is licensed under GPL-2.0-or-later by default. The binary also contains or depends on FFmpeg and other third-party components. The licence and redistribution obligations of the exact binaries depend on the build configuration and every included component; this notice is not a substitute for those component notices.
 
 The Vivid application remains separately distributed. Bundling this executable does not grant Vivid rights to relicense mpv or its dependencies. Review the upstream `Copyright` file and the relevant FFmpeg and dependency licences before redistributing a release.
 
 ## Corresponding source and release gate
 
-The exact mpv and FFmpeg source revisions and the upstream build workflow are identified above. The upstream workflow also obtains and builds additional dependencies. Before publishing a Vivid installer containing this runtime, the release process must include or host the complete corresponding source for the exact binary build, including the build scripts and source for every GPL-covered component, together with all required licence notices and any written offer required by the applicable licence.
+Before redistribution, the exact source archive must contain the corresponding source for the bundled mpv, FFmpeg and every GPL-covered component, along with the relevant build scripts and required licence notices. `SOURCE-MANIFEST.json` must identify the exact mpv commit, the exact 40-character FFmpeg commit, every relevant component and licence, and the SHA-256 of the source archive.
 
-**Release compliance gate:** do not publish a public Vivid installer containing this runtime until both `CORRESPONDING-SOURCE.zip` and `SOURCE-MANIFEST.json` have been assembled, verified, and made available to recipients as release assets. The Windows release workflow intentionally fails closed if either file is missing. The archive must contain the complete corresponding source for the exact binary build, including the build scripts and source for every GPL-covered component. The source links above are provenance references; they are not, by themselves, a claim that the complete corresponding-source bundle is already included in this repository.
+**Release compliance gate:** do not publish a public Vivid installer containing this runtime until both `CORRESPONDING-SOURCE.zip` and `SOURCE-MANIFEST.json` have been assembled, independently checked against the binary, and made available to recipients as release assets. The Windows release workflow intentionally fails closed if either file is missing or the manifest does not match the pinned mpv revision and source archive hash. The source links above are provenance references; they are not, by themselves, a claim that the complete corresponding-source bundle is already included in this repository.
 
 Upstream references:
+- https://mpv.io/installation/
 - https://github.com/mpv-player/mpv#license
-- https://github.com/mpv-player/mpv/blob/master/Copyright
+- https://github.com/mpv-player/mpv/blob/41f6a645068483470267271e1d09966ca3b9f413/Copyright
 - https://www.ffmpeg.org/legal.html
