@@ -205,6 +205,19 @@ async function registerServiceWorker() {
     window.addEventListener("pageshow", checkForAppUpdate);
     document.addEventListener("visibilitychange", checkForAppUpdate);
 
+    // Warm optional routes/assets only after the current page has painted.
+    // The essential offline shell is cached during install; the rest of the
+    // app shell must not delay first launch.
+    const warmOptionalAssets = () => {
+      window.setTimeout(() => {
+        void navigator.serviceWorker.ready.then(ready => {
+          ready.active?.postMessage({ type: "PRECACHE_OPTIONAL" });
+        }).catch(() => {});
+      }, 2200);
+    };
+    if (document.readyState === "complete") warmOptionalAssets();
+    else window.addEventListener("load", warmOptionalAssets, { once: true });
+
     return registration;
   } catch (error) {
     console.error("Vivid service worker registration failed:", error);
