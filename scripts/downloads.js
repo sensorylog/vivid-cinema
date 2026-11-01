@@ -5,8 +5,7 @@ const RELEASE_PAGE = `https://github.com/${OWNER}/${REPO}/releases/latest`;
 const RELEASE_DOWNLOAD = `https://github.com/${OWNER}/${REPO}/releases/latest/download`;
 const byId = (id) => document.getElementById(id);
 
-// These are real, direct assets on the current stable release. They let a tap
-// start a download even if the GitHub API is slow or temporarily unavailable.
+// Safe fallbacks remain useful if the GitHub API is slow or temporarily unavailable.
 function setReleaseFallback() {
   // Never point users at a stale, version-pinned Windows installer if the API is unavailable.
   // The release page always exposes the latest official installer and portable build.
