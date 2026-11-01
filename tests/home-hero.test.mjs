@@ -95,8 +95,8 @@ test("TFLIX-style hero uses TMDB stills, plays listed trailers, and routes to Vi
 
   const homeScript = read("../script.js");
   assert.match(homeScript, /function renderFeatureStrip\(\)/);
-  assert.match(homeScript, /async function initFeatureStrip\(\)/);
-  assert.match(homeScript, /initFeatureStrip\(\);void loadHome\(\)/);
+  assert.match(homeScript, /function initFeatureStrip\(items=\[\]\)/);
+  assert.match(homeScript, /vivid:home-trending-ready/);
   assert.match(homeScript, /window\.vividCinemaSelectHero/);
   assert.match(homeScript, /addEventListener\("vivid:hero-change"/);
 });
