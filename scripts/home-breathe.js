@@ -1,3 +1,5 @@
+import { getImageUrl } from "./media.js";
+
 const rail = document.getElementById("trending-rail");
 const art = document.querySelector(".vivid-home-tv-art");
 const title = document.querySelector(".vivid-home-tv-title");
@@ -38,8 +40,14 @@ function showTrendingItem(item) {
   meta.textContent = item.meta;
 }
 
-function refreshTrending() {
-  const next = collectTrending();
+function refreshTrending(sourceItems) {
+  const next = Array.isArray(sourceItems)
+    ? sourceItems.filter(item=>item?.backdrop_path||item?.poster_path).map(item=>({
+        src:getImageUrl(item.backdrop_path||item.poster_path,"w780"),
+        title:item.title||item.name||"Trending now",
+        meta:(item.year||"Now")+" · "+(item.media_type==="tv"?"Series":"Movie")
+      }))
+    : collectTrending();
   if (!next.length) return;
 
   items = next;
@@ -62,4 +70,4 @@ function refreshTrending() {
 
 // Reuse the Home catalogue response rather than requesting a second trending feed.
 // The rail is rendered before this event is dispatched.
-window.addEventListener("vivid:home-trending-ready", () => refreshTrending());
+window.addEventListener("vivid:home-trending-ready", event => refreshTrending(event.detail));
