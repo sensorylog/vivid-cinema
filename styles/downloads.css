@@ -67,3 +67,8 @@ body.vivid-downloads{margin:0;min-width:320px;background:#050608;color:#f5f6fb;f
 .downloads-feature-status p{margin:0;color:#a4adbf;font-size:11px;line-height:1.65}
 .downloads-coming-soon{flex:0 0 auto;padding:7px 10px;border:1px solid #8ba6ff35;border-radius:999px;color:#c6d1ff;background:#7896ff12;font-size:9px;font-weight:850;letter-spacing:.1em}
 @media(max-width:560px){.downloads-feature-status{align-items:flex-start;flex-wrap:wrap;padding:17px}.downloads-feature-status>div:nth-child(2){flex-basis:calc(100% - 60px)}.downloads-coming-soon{margin-left:60px}}
+
+.downloads-feature-status-available{border-color:#42d6a233;background:linear-gradient(110deg,#42d6a218,#54d9bd09)}
+.downloads-feature-status-available .downloads-feature-status-label,.downloads-available{color:#79e6bd}
+.downloads-feature-status-available .downloads-feature-status-icon{border-color:#42d6a255;color:#79e6bd;background:#42d6a218}
+.downloads-feature-status-pending{margin-top:12px}
