@@ -57,14 +57,14 @@ function findExecutable(directory) {
   return null;
 }
 
-function listExtractedFiles(directory, limit = 60, output = []) {
+function listExtractedFiles(directory, root = directory, limit = 60, output = []) {
   if (output.length >= limit) return output;
   for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
     if (output.length >= limit) break;
     const fullPath = path.join(directory, entry.name);
-    output.push(path.relative(directory, fullPath) || entry.name);
+    output.push(path.relative(root, fullPath) || entry.name);
     try {
-      if (entry.isDirectory()) listExtractedFiles(fullPath, limit, output);
+      if (entry.isDirectory()) listExtractedFiles(fullPath, root, limit, output);
     } catch { /* Diagnostic listing only. */ }
   }
   return output;
