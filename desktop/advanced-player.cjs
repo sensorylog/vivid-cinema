@@ -144,10 +144,12 @@ class AdvancedPlayer {
       let connected = false;
       socket.setEncoding?.("utf8");
       socket.once("connect", () => {
+        if (this.child !== child) { socket.destroy?.(); return; }
         connected = true;
         this.sendIpc(["observe_property", 1, "time-pos"]);
       });
       socket.on("data", chunk => {
+        if (this.child !== child) return;
         buffer += String(chunk);
         if (buffer.length > 65536) buffer = buffer.slice(-32768);
         let newline;
@@ -168,6 +170,7 @@ class AdvancedPlayer {
         }
       });
       socket.once("error", error => {
+        if (this.child !== child) { socket.destroy?.(); return; }
         if (this.ipcSocket === socket) this.ipcSocket = null;
         socket.destroy?.();
         if (!connected && this.child === child && attempts < 12) {
