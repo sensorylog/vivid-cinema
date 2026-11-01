@@ -236,3 +236,5 @@ html.vivid-performance-legacy .offline-library-tools,html.vivid-performance-lega
     padding: max(8px, env(safe-area-inset-top)) max(8px, env(safe-area-inset-right)) max(8px, env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-left));
   }
 }
+
+.offline-job-error{margin:7px 0 0;color:#ffb6b6;font-size:12px;line-height:1.45;overflow-wrap:anywhere}
