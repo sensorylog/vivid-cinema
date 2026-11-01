@@ -161,3 +161,49 @@ html.vivid-performance-legacy .offline-custom-controls{backdrop-filter:none;box-
 @keyframes offline-seek-back{0%{opacity:0;transform:translate(-70%,-50%) scale(.86)}20%{opacity:1}100%{opacity:0;transform:translate(-90%,-50%) scale(1.04)}}
 @keyframes offline-seek-forward{0%{opacity:0;transform:translate(-30%,-50%) scale(.86)}20%{opacity:1}100%{opacity:0;transform:translate(-10%,-50%) scale(1.04)}}
 html.vivid-performance-legacy .offline-seek-feedback{animation:none;opacity:.95}
+
+/* Stage 3 — premium offline library cards and simple user-facing controls. */
+.offline-library-tools{display:grid;gap:14px;margin:24px 0 20px;padding:16px;border:1px solid rgba(160,178,215,.15);border-radius:18px;background:linear-gradient(135deg,rgba(22,29,46,.88),rgba(10,13,21,.92))}
+.offline-library-search{display:flex;align-items:center;gap:10px;min-height:46px;padding:0 14px;border:1px solid rgba(175,190,225,.18);border-radius:12px;background:rgba(0,0,0,.22);color:#aebbd4}
+.offline-library-search>span{font-size:24px;line-height:1}
+.offline-library-search input{width:100%;min-width:0;border:0;outline:0;background:transparent;color:#f5f6fb;font:500 14px system-ui,sans-serif}
+.offline-library-search input::placeholder{color:#8995aa}
+.offline-library-filters{display:flex;gap:8px;flex-wrap:wrap}
+.offline-library-filters button{min-height:34px;padding:7px 13px;border:1px solid rgba(170,185,220,.18);border-radius:999px;background:rgba(255,255,255,.035);color:#aebbd4;font:650 11px system-ui,sans-serif;cursor:pointer;transition:background .16s ease,border-color .16s ease,color .16s ease}
+.offline-library-filters button[aria-pressed="true"]{background:rgba(120,132,255,.18);border-color:rgba(150,160,255,.58);color:#f4f5ff}
+.offline-library-filters button:focus-visible,.offline-library-search:focus-within{outline:2px solid #a5aaff;outline-offset:3px}
+.offline-library-count{font-size:11px;color:#929eb4;font-weight:600}
+.offline-library-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,330px),1fr));gap:16px}
+.offline-media-card,.offline-series-card{min-width:0;border:1px solid rgba(155,174,215,.16);border-radius:17px;background:linear-gradient(145deg,rgba(25,32,49,.94),rgba(12,16,26,.98));overflow:hidden}
+.offline-media-card{display:grid;grid-template-columns:104px minmax(0,1fr);gap:15px;padding:14px;align-items:start}
+.offline-poster{position:relative;display:grid;place-items:center;overflow:hidden;aspect-ratio:2/3;border-radius:10px;background:linear-gradient(145deg,#303b5c,#111827 72%);color:#c7d0f1;font-size:12px;font-weight:900;letter-spacing:.18em}
+.offline-poster img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.offline-media-copy{min-width:0;display:flex;flex-direction:column;align-items:flex-start;gap:8px}
+.offline-card-kicker{font-size:9px;letter-spacing:.18em;font-weight:850;color:#9da9ca}
+.offline-media-copy h3,.offline-series-card-heading h3{margin:0;color:#f4f5fb;font-size:16px;line-height:1.3;overflow-wrap:anywhere}
+.offline-card-status,.offline-series-card-heading p{margin:0;color:#a5b0c5;font-size:11px;line-height:1.5}
+.offline-media-copy .offline-job-actions{justify-content:flex-start;margin-top:4px}
+.offline-job-actions button{min-height:34px;padding:7px 10px;border:1px solid rgba(170,185,220,.2);border-radius:9px;background:rgba(255,255,255,.045);color:#dce3f2;font:650 10px system-ui,sans-serif;cursor:pointer}
+.offline-job-actions button.is-primary{background:linear-gradient(110deg,#7164e8,#4775ce);border-color:transparent;color:#fff}
+.offline-job-actions button:disabled{opacity:.5;cursor:wait}
+.offline-progress{width:100%;height:5px;margin:3px 0 0;overflow:hidden;border-radius:99px;background:rgba(255,255,255,.1)}
+.offline-progress span{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#6b70e8,#7ec4f1);transition:width .22s ease}
+.offline-series-card-heading{display:grid;grid-template-columns:78px minmax(0,1fr);gap:14px;align-items:center;padding:16px 16px 13px}
+.offline-series-card-heading .offline-poster{width:78px}
+.offline-series-card-heading>div{display:grid;gap:6px}
+.offline-series-episodes{display:grid;padding:0 16px 12px}
+.offline-episode-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;padding:12px 0;border-top:1px solid rgba(160,178,215,.11)}
+.offline-episode-copy{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 9px;align-items:center;min-width:0}
+.offline-episode-copy>strong{min-width:0;color:#e9edf7;font-size:12px;overflow-wrap:anywhere}
+.offline-episode-copy>small{grid-column:2;color:#9ca9c0;font-size:10px}
+.offline-episode-number{grid-row:1/3;padding:5px 7px;border-radius:7px;background:rgba(126,139,255,.12);color:#c3cbff;font-size:9px;font-weight:800;white-space:nowrap}
+.offline-episode-copy .offline-progress,.offline-episode-copy .offline-file-list{grid-column:2}
+.offline-episode-row .offline-job-actions{justify-content:flex-end}
+.offline-file-list{width:100%;color:#aebbd4;font-size:10px}
+.offline-file-list summary{cursor:pointer;padding:5px 0}
+.offline-file-list button{display:block;width:100%;padding:7px 9px;text-align:left;border:1px solid rgba(170,185,220,.13);border-radius:7px;background:rgba(255,255,255,.03);color:#cbd5e8;font-size:10px;overflow-wrap:anywhere}
+.offline-file-list[open]{display:grid;gap:5px}
+.offline-library-count{margin-left:8px}
+@media(max-width:620px){.offline-media-card{grid-template-columns:82px minmax(0,1fr);gap:11px;padding:11px}.offline-series-card-heading{grid-template-columns:64px minmax(0,1fr);padding:13px}.offline-series-card-heading .offline-poster{width:64px}.offline-series-episodes{padding:0 12px 9px}.offline-episode-row{grid-template-columns:minmax(0,1fr);gap:8px}.offline-episode-row .offline-job-actions{justify-content:flex-start}.offline-library-filters{gap:6px}.offline-library-filters button{padding:6px 10px}}
+@media(prefers-reduced-motion:reduce){.offline-library-filters button,.offline-progress span{transition:none}}
+html.vivid-performance-legacy .offline-library-tools,html.vivid-performance-legacy .offline-media-card,html.vivid-performance-legacy .offline-series-card{backdrop-filter:none;box-shadow:none}
