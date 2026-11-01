@@ -108,3 +108,13 @@ test("offline player fullscreen fills the viewport and floats controls over the 
   assert.match(css, /\.offline-player-section:fullscreen \.offline-custom-controls\s*\{[\s\S]*?position:\s*absolute/);
   assert.match(css, /\.offline-player-section:fullscreen\.controls-hidden \.offline-custom-controls/);
 });
+
+
+test("MKV playback selects a default audio track and diagnoses silent unsupported codecs", async () => {
+  const desktop = await readFile(new URL("../scripts/downloads/desktop-offline.js", import.meta.url), "utf8");
+  assert.match(desktop, /if\(!hasEnabledTrack\)tracks\[0\]\.enabled=true/);
+  assert.match(desktop, /function diagnoseSilentMatroska\(\)/);
+  assert.match(desktop, /webkitAudioDecodedByteCount/);
+  assert.match(desktop, /DTS or TrueHD audio/);
+  assert.match(desktop, /if\(player\.muted&&player\.volume>0\)player\.muted=false/);
+});
