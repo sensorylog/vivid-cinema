@@ -207,3 +207,5 @@ html.vivid-performance-legacy .offline-seek-feedback{animation:none;opacity:.95}
 @media(max-width:620px){.offline-media-card{grid-template-columns:82px minmax(0,1fr);gap:11px;padding:11px}.offline-series-card-heading{grid-template-columns:64px minmax(0,1fr);padding:13px}.offline-series-card-heading .offline-poster{width:64px}.offline-series-episodes{padding:0 12px 9px}.offline-episode-row{grid-template-columns:minmax(0,1fr);gap:8px}.offline-episode-row .offline-job-actions{justify-content:flex-start}.offline-library-filters{gap:6px}.offline-library-filters button{padding:6px 10px}}
 @media(prefers-reduced-motion:reduce){.offline-library-filters button,.offline-progress span{transition:none}}
 html.vivid-performance-legacy .offline-library-tools,html.vivid-performance-legacy .offline-media-card,html.vivid-performance-legacy .offline-series-card{backdrop-filter:none;box-shadow:none}
+
+.offline-library-tools[hidden],.offline-library-count[hidden]{display:none!important}
