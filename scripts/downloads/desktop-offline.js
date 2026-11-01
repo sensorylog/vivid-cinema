@@ -20,13 +20,56 @@ let seasonRequestId = 0;
 
 function setMessage(message){ byId("offline-message").textContent = message; }
 function statusText(job){
-  if(job.status==="downloading") return job.phase || "Connecting to peers";
+  if(job.status==="downloading") return "Downloading";
+  if(job.status==="queued") return "In queue";
   if(job.status==="paused") return "Paused";
-  if(job.status==="verifying") return "Verifying saved data";
-  if(job.status==="completed") return "Ready to watch";
-  if(job.status==="cancelled") return "Cancelled";
+  if(job.status==="verifying") return "Finishing up";
+  if(job.status==="completed") return "Saved";
   if(job.status==="failed") return "Needs attention";
   return "Preparing";
+}
+let libraryFilter="all";
+let libraryQuery="";
+function posterMarkup(media){
+  const poster=String(media?.poster_path||"");
+  const safePoster=/^\/[A-Za-z0-9_./-]+\.(?:jpg|jpeg|png|webp)$/i.test(poster)&&!poster.split("/").includes("..");
+  return '<div class="offline-poster" aria-hidden="true"><span>VIVID</span>'+(safePoster?'<img loading="lazy" decoding="async" src="https://image.tmdb.org/t/p/w342'+escapeHtml(poster)+'" alt="">':"")+'</div>';
+}
+function progressMarkup(job){
+  if(!["downloading","paused","verifying","completed","queued"].includes(job.status))return "";
+  const progress=Math.max(0,Math.min(100,Number(job.progress)||0));
+  return '<div class="offline-progress" role="progressbar" aria-label="Download progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="'+progress.toFixed(1)+'"><span style="width:'+progress+'%"></span></div>';
+}
+function actionMarkup(job){
+  const actions=[];
+  if(job.status==="downloading")actions.push('<button type="button" data-action="pause" data-id="'+escapeHtml(job.id)+'">Pause</button>');
+  if(job.status==="paused"||job.status==="failed")actions.push('<button type="button" data-action="resume" data-id="'+escapeHtml(job.id)+'">Resume</button>');
+  if(job.status==="completed")actions.push('<button type="button" class="is-primary" data-action="play" data-id="'+escapeHtml(job.id)+'">Watch now</button>');
+  if(job.status==="completed"&&job.filePath)actions.push('<button type="button" data-action="show" data-id="'+escapeHtml(job.id)+'">Show in folder</button>');
+  if(["downloading","verifying","paused","failed","queued"].includes(job.status))actions.push('<button type="button" data-action="cancel" data-id="'+escapeHtml(job.id)+'">Cancel</button>');
+  return actions.length?'<div class="offline-job-actions">'+actions.join("")+'</div>':"";
+}
+function fileMarkup(job){
+  const files=Array.isArray(job.files)?job.files:[];
+  if(files.length<=1)return "";
+  return '<details class="offline-file-list"><summary>'+files.length+' playable files</summary>'+files.map(file=>'<button type="button" data-action="play-file" data-id="'+escapeHtml(job.id)+'" data-index="'+Number(file.index)+'">'+escapeHtml(file.name)+'</button>').join("")+'</details>';
+}
+function episodeMarkup(job){
+  const media=job.media||{};
+  const progress=Math.max(0,Math.min(100,Number(job.progress)||0));
+  const episodeLabel="S"+String(media.season??0).padStart(2,"0")+"E"+String(media.episode??0).padStart(2,"0");
+  const title=media.episodeTitle||job.title||"Episode";
+  return '<article class="offline-episode-row"><div class="offline-episode-copy"><span class="offline-episode-number">'+episodeLabel+'</span><strong>'+escapeHtml(title)+'</strong><small>'+escapeHtml(statusText(job))+(job.status==="downloading"?" · "+Math.round(progress)+"%":"")+'</small>'+progressMarkup(job)+fileMarkup(job)+'</div>'+actionMarkup(job)+'</article>';
+}
+function matchesLibrary(job){
+  const media=job.media||{};
+  const isSeries=media.media_type==="tv";
+  if(libraryFilter==="downloading"&&!["downloading","queued","verifying"].includes(job.status))return false;
+  if(libraryFilter==="saved"&&job.status!=="completed")return false;
+  if(libraryFilter==="series"&&!isSeries)return false;
+  if(libraryFilter==="attention"&&!["failed","paused"].includes(job.status))return false;
+  if(libraryQuery&&!String([job.title,media.title,media.episodeTitle].join(" ")).toLowerCase().includes(libraryQuery))return false;
+  return true;
 }
 function render(){
   const completed=jobs.filter(x=>x.status==="completed").length;
@@ -34,43 +77,46 @@ function render(){
   byId("offline-total").textContent=String(jobs.length);
   byId("offline-completed").textContent=String(completed);
   byId("offline-active").textContent=String(active);
+  const visible=jobs.filter(matchesLibrary);
+  const seriesCount=new Set(jobs.filter(job=>job.media?.media_type==="tv").map(job=>String(job.media.id||job.media.title||job.title))).size;
+  const countNode=byId("offline-library-count");
+  if(countNode)countNode.textContent=jobs.length+" downloads · "+seriesCount+" series";
   if(!jobs.length){
-    byId("offline-jobs").innerHTML='<div class="offline-empty"><strong>Your cinema starts here</strong><p>Movies you download will be saved on this device and ready to watch offline.</p></div>';
+    byId("offline-jobs").innerHTML='<div class="offline-empty"><strong>Your cinema starts here</strong><p>Movies and episodes you save will appear here, ready for offline watching.</p></div>';
     return;
   }
-  byId("offline-jobs").innerHTML=jobs.map(job=>{
-    const progress=Math.max(0,Math.min(100,Number(job.progress)||0));
-    const speed=job.speed?bytes(job.speed)+"/s":"";
-    const transferSize=job.total?bytes(job.total):"size unknown";
-    const peerState=job.peers?job.peers+" peers connected":"No peers connected";
-    const discovery=job.discovery;
-    const discoveryDetail=discovery
-      ? "DHT "+(discovery.dhtEnabled?(discovery.dhtListening?"ready":"starting"):"off")
-        +" ("+discovery.dhtAnnounces+" announces) · trackers "+discovery.trackerCount
-        +" ("+discovery.trackerAnnounces+" announces) · no-peer "+discovery.noPeerAnnounces
-        +(discovery.lastNoPeerSource?" ["+discovery.lastNoPeerSource+"]":"")
-        +(discovery.lastWarning?" · warning: "+discovery.lastWarning:"")
-      : "";
-    const detail=[statusText(job),progress.toFixed(1)+"%",bytes(job.downloaded)+" of "+transferSize,speed,["downloading","verifying"].includes(job.status)?peerState:"",discoveryDetail].filter(Boolean).join(" · ");
-    const actions=[];
-    if(job.status==="downloading") actions.push('<button data-action="pause" data-id="'+escapeHtml(job.id)+'">Pause</button>');
-    if(job.status==="paused"||job.status==="failed") actions.push('<button data-action="resume" data-id="'+escapeHtml(job.id)+'">Resume</button>');
-    if(job.status==="completed") actions.push('<button data-action="play" data-id="'+escapeHtml(job.id)+'">Watch now</button>');
-    if(job.status==="completed"&&job.filePath) actions.push('<button data-action="show" data-id="'+escapeHtml(job.id)+'">Show in folder</button>');
-    if(["downloading","verifying","paused","failed","queued"].includes(job.status)) actions.push('<button data-action="cancel" data-id="'+escapeHtml(job.id)+'">Cancel</button>');
-    const files = Array.isArray(job.files) ? job.files : [];
-    const episodeList = files.length > 1 ? '<div class="offline-episodes">'+files.map(file =>
-      '<button type="button" data-action="play-file" data-id="'+escapeHtml(job.id)+'" data-index="'+file.index+'">'+escapeHtml(file.name)+'</button>'
-    ).join("")+'</div>' : "";
+  if(!visible.length){
+    byId("offline-jobs").innerHTML='<div class="offline-empty"><strong>No matching titles</strong><p>Try another search or choose a different filter.</p></div>';
+    return;
+  }
+  const series=new Map(), movies=[];
+  for(const job of visible){
     const media=job.media||{};
-    const episodeTag=media.season!=null&&media.episode!=null
-      ? " · S"+String(media.season).padStart(2,"0")+"E"+String(media.episode).padStart(2,"0")+(media.episodeTitle?" — "+media.episodeTitle:"")
-      : "";
-    return '<article class="offline-job"><div><div class="offline-job-title">'+escapeHtml(job.title+episodeTag)+'</div><div class="offline-job-meta">'+escapeHtml(detail)+'</div>'+
-      (["downloading","paused","verifying","completed"].includes(job.status)?'<div class="offline-progress" role="progressbar" aria-label="Download progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="'+progress.toFixed(1)+'"><span style="width:'+progress+'%"></span></div>':"")+
-      (job.error?'<p class="offline-job-error">'+escapeHtml(job.error)+'</p>':"")+episodeList+
-      '</div><div class="offline-job-actions">'+actions.join("")+'</div></article>';
-  }).join("");
+    if(media.media_type==="tv"){
+      const key=String(media.id||media.title||job.title).toLowerCase();
+      if(!series.has(key))series.set(key,[]);
+      series.get(key).push(job);
+    }else movies.push(job);
+  }
+  const entries=[];
+  for(const group of series.values()){
+    group.sort((a,b)=>(Number(a.media?.season)||0)-(Number(b.media?.season)||0)||(Number(a.media?.episode)||0)-(Number(b.media?.episode)||0));
+    const first=group[0],media=first.media||{},title=media.title||first.title||"Untitled series";
+    const activeCount=group.filter(job=>["downloading","queued","verifying"].includes(job.status)).length;
+    const savedCount=group.filter(job=>job.status==="completed").length;
+    const newest=Math.max(...group.map(job=>Number(job.updatedAt||job.createdAt)||0));
+    const markup='<article class="offline-series-card"><header class="offline-series-card-heading">'+posterMarkup(media)+'<div><span class="offline-card-kicker">TV SERIES</span><h3>'+escapeHtml(title)+'</h3><p>'+group.length+' episodes · '+savedCount+' saved'+(activeCount?' · '+activeCount+' in progress':'')+'</p></div></header><div class="offline-series-episodes">'+group.map(episodeMarkup).join("")+'</div></article>';
+    entries.push({time:newest,markup});
+  }
+  for(const job of movies){
+    const media=job.media||{},progress=Math.max(0,Math.min(100,Number(job.progress)||0));
+    const title=media.title||job.title||"Untitled movie";
+    const detail=statusText(job)+(job.status==="downloading"?" · "+Math.round(progress)+"%":"");
+    const markup='<article class="offline-media-card">'+posterMarkup(media)+'<div class="offline-media-copy"><span class="offline-card-kicker">MOVIE</span><h3>'+escapeHtml(title)+'</h3><p class="offline-card-status">'+escapeHtml(detail)+'</p>'+progressMarkup(job)+fileMarkup(job)+actionMarkup(job)+'</div></article>';
+    entries.push({time:Number(job.updatedAt||job.createdAt)||0,markup});
+  }
+  entries.sort((a,b)=>b.time-a.time);
+  byId("offline-jobs").innerHTML='<div class="offline-library-grid">'+entries.map(entry=>entry.markup).join("")+'</div>';
 }
 function renderSearch(items){
   searchResults=items;
@@ -525,6 +571,20 @@ engine.onProgress(payload=>{
 });
 engine.onComplete(()=>{void refresh();setMessage("Download complete. Your movie is ready to watch offline.");});
 engine.onError(payload=>{void refresh();setMessage(payload.message||"A download failed.");});
+byId("offline-library-search").addEventListener("input",event=>{
+  libraryQuery=event.target.value.trim().toLowerCase();
+  render();
+});
+byId("offline-library-tools").addEventListener("click",event=>{
+  const button=event.target.closest("button[data-library-filter]");
+  if(!button)return;
+  libraryFilter=button.dataset.libraryFilter;
+  byId("offline-library-tools").querySelectorAll("button[data-library-filter]").forEach(item=>item.setAttribute("aria-pressed",String(item===button)));
+  render();
+});
+byId("offline-jobs").addEventListener("error",event=>{
+  if(event.target instanceof HTMLImageElement&&event.target.closest(".offline-poster"))event.target.remove();
+},true);
 byId("offline-owner").textContent="This device";
 byId("desktop-download-search").hidden=false;
 byId("offline-notice-copy").textContent="Downloads are saved to your computer in the Vivid Cinema folder. They remain available without an internet connection.";
