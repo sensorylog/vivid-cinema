@@ -14,6 +14,7 @@ function fixture(t) {
   t.after(() => fs.rmSync(root, { recursive: true, force: true }));
   const licenseRoot = path.join(root, "licenses", "mpv");
   fs.mkdirSync(licenseRoot, { recursive: true });
+  fs.writeFileSync(path.join(licenseRoot, "LICENSE.GPL"), "test licence text");
   return { root, licenseRoot, archivePath: path.join(licenseRoot, "CORRESPONDING-SOURCE.zip"), manifestPath: path.join(licenseRoot, "SOURCE-MANIFEST.json") };
 }
 
@@ -25,7 +26,7 @@ function writeValidBundle(paths) {
     verified: true,
     mpv: { commit: MPV_SOURCE_COMMIT },
     ffmpeg: { commit: "a".repeat(40) },
-    components: [{ name: "example-lib", license: "LGPL-2.1-or-later", source: "https://example.invalid/source", version: "1.2.3" }],
+    components: [{ name: "example-lib", license: "LGPL-2.1-or-later", source: "https://example.invalid/source", version: "1.2.3", licenseFile: "LICENSE.GPL" }],
     verification: { method: "reviewed source manifest and archive contents", verifiedBy: "test-fixture" },
     archiveSha256: crypto.createHash("sha256").update(bytes).digest("hex")
   }));
