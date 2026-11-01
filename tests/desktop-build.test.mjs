@@ -354,6 +354,10 @@ test("Windows Offline Library Stage 3 keeps download controls while grouping tit
   assert.match(page, /offline-library-count" hidden/);
   assert.match(library, /byId\("offline-library-tools"\)\.hidden=false/);
   assert.match(library, /byId\("offline-library-count"\)\.hidden=false/);
+  assert.match(library, /vivid-desktop-offline-library/);
+  assert.match(library, /offline-list-title"\)\.textContent="Your library"/);
+  assert.match(styles, /body\.vivid-desktop-offline-library \.offline-progress/);
+  assert.match(styles, /body\.vivid-desktop-offline-library \.offline-job-actions button/);
   for (const filter of ["all", "downloading", "saved", "series", "attention"]) {
     assert.match(page, new RegExp('data-library-filter="' + filter + '"'));
   }
