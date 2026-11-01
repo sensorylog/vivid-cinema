@@ -33,8 +33,8 @@ test("desktop downloads expose live transfer phases and accessible progress upda
   assert.match(engine, /Waiting for peers/);
   assert.match(engine, /Finding peers and metadata/);
   assert.match(engine, /phase: job\.phase/);
-  assert.match(desktop, /job\.phase \|\| "Connecting to peers"/);
-  assert.match(desktop, /No peers connected/);
+  assert.match(desktop, /job\.status==="downloading"\) return "Downloading"/);
+  assert.doesNotMatch(desktop, /No peers connected|peerState|discoveryDetail/);
   assert.match(desktop, /role="progressbar"/);
 });
 
@@ -52,8 +52,8 @@ test("desktop torrent diagnostics expose tracker, DHT, peer and warning events",
   assert.match(engine, /torrent\.on\("warning"/);
   assert.match(engine, /this\.client\.on\("error"/);
   assert.match(engine, /dhtListening: Boolean\(this\.client\.dht && this\.client\.dht\.listening\)/);
-  assert.match(desktop, /discoveryDetail/);
-  assert.match(desktop, /discovery\.lastWarning/);
+  assert.doesNotMatch(desktop, /discoveryDetail|discovery\.lastWarning|lastNoPeerSource/);
+  assert.match(engine, /lastWarning/);
 });
 
 test("desktop download list removes cancelled jobs and search keeps peer-only releases", async () => {
