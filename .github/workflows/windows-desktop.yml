@@ -91,10 +91,8 @@ jobs:
             throw "Refusing to publish mpv: the source manifest must enumerate the bundled GPL-covered components."
           }
       - name: Prepare checksum-pinned mpv Advanced Player runtime
-        if: steps.release-decision.outputs.publish == 'true'
         run: node desktop/prepare-mpv.cjs
       - name: Verify mpv runtime and redistribution notice
-        if: steps.release-decision.outputs.publish == 'true'
         shell: pwsh
         run: |
           if (!(Test-Path "desktop/vendor/mpv/mpv.exe")) {
@@ -106,6 +104,14 @@ jobs:
           }
           if (!(Test-Path "licenses/mpv/NOTICE.md")) {
             throw "The mpv third-party redistribution notice is missing."
+          }
+      - name: Remove mpv executable from non-release preview artifacts
+        if: steps.release-decision.outputs.publish != 'true'
+        shell: pwsh
+        run: |
+          Get-ChildItem "desktop/vendor/mpv" -Force | Where-Object { $_.Name -ne ".gitkeep" } | Remove-Item -Recurse -Force
+          if (!(Test-Path "desktop/vendor/mpv/.gitkeep")) {
+            New-Item -Path "desktop/vendor/mpv/.gitkeep" -ItemType File -Force | Out-Null
           }
       - name: Verify the desktop download engine with a local seeded torrent
         timeout-minutes: 3
