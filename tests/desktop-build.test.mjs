@@ -467,6 +467,7 @@ test("Advanced Player uses a pinned mpv runtime, private IPC and guarded main-pr
   assert.ok(workflow.includes("Remove mpv executable from non-release preview artifacts"));
   assert.ok(workflow.includes("CORRESPONDING-SOURCE.zip"));
   assert.ok(workflow.includes("SOURCE-MANIFEST.json"));
+  assert.ok(workflow.includes("node desktop/verify-mpv-sources.cjs"));
   assert.ok(workflow.includes("VIVID_SKIP_MPV_PREPARE: \"1\""));
   assert.ok(notice.includes("Release compliance gate"));
   assert.ok(notice.includes("complete corresponding-source bundle"));
