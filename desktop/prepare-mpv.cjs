@@ -53,6 +53,10 @@ function findExecutable(directory) {
 }
 
 async function prepareMpv({ platform = process.platform, projectRoot = path.resolve(__dirname, "..") } = {}) {
+  if (process.env.VIVID_SKIP_MPV_PREPARE === "1") {
+    console.log("Skipping mpv packaging for this non-release build.");
+    return { skipped: true };
+  }
   if (platform !== "win32") {
     console.log("Skipping bundled mpv preparation: the Vivid desktop player runtime is Windows-only.");
     return { skipped: true };
