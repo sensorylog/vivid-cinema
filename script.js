@@ -203,11 +203,9 @@ function renderFeatureStrip(){
 
 window.addEventListener("vivid:hero-change",event=>syncFeatureStripSelection(event.detail));
 
-async function initFeatureStrip(){
+function initFeatureStrip(items=[]){
  try{
-   let data;
-   try{data=await tmdbApi.trending("all","week")}catch(error){console.warn("Featured strip fallback",error);data=await tmdbApi.trending("movie","week")}
-   featured=normalizeResults(data.results||[]).filter(item=>item.backdrop_path||item.poster_path).slice(0,8);
+   featured=(Array.isArray(items)?items:[]).filter(item=>item?.backdrop_path||item?.poster_path).slice(0,8);
    if(featured[0]?.backdrop_path){const preload=new Image();preload.decoding="async";preload.fetchPriority="high";preload.src=getImageUrl(featured[0].backdrop_path,"w1280");}
    renderFeatureStrip();
  }catch(error){
@@ -241,26 +239,27 @@ function updateRailControls(rail){
 }
 
 async function loadSectionBatch(keys){
- const results=await Promise.allSettled(keys.map(key=>getHomeSectionPage(key,1)));
- results.forEach((result,index)=>{
-   const key=keys[index];
-   const railId=SECTION_RAIL_IDS[key];
-   if(!railId)return;
-   if(result.status!=="fulfilled"){
-     console.warn("Vivid home section failed:",key,result.reason);
-     const el=$(railId);
-     if(el)el.innerHTML='<div class="vivid-empty">Unable to load this section. Try again.</div>';
-     return;
-   }
-   const data=result.value;
-   renderRail(railId,data.items,{signal:sectionSignal(key),rankStart:key==="top10"?1:0});
-   sectionState[key]={page:data.page,totalPages:data.totalPages};
-   const button=document.querySelector('[data-load-section="'+key+'"]');
-   if(button)button.hidden=data.page>=data.totalPages;
-   updateRailControls($(railId));
- });
+  await Promise.all(keys.map(async key=>{
+    const railId=SECTION_RAIL_IDS[key];if(!railId)return;
+    try{
+      const data=await getHomeSectionPage(key,1);
+      renderRail(railId,data.items,{signal:sectionSignal(key),rankStart:key==="top10"?1:0});
+      sectionState[key]={page:data.page,totalPages:data.totalPages};
+      const button=document.querySelector('[data-load-section="'+key+'"]');
+      if(button)button.hidden=data.page>=data.totalPages;
+      updateRailControls($(railId));
+      if(key==="trending"){initFeatureStrip(data.items);window.dispatchEvent(new CustomEvent("vivid:home-trending-ready",{detail:data.items}));}
+    }catch(error){
+      console.warn("Vivid home section failed:",key,error);
+      const el=$(railId);if(el)el.innerHTML='<div class="vivid-empty">Unable to load this section. Try again.</div>';
+      if(key==="trending")try{
+        const fallback=await tmdbApi.trending("all","week");
+        const fallbackItems=normalizeResults(fallback.results||[]).filter(item=>item.backdrop_path||item.poster_path).slice(0,12);
+        initFeatureStrip(fallbackItems);window.dispatchEvent(new CustomEvent("vivid:home-trending-ready",{detail:fallbackItems}));
+      }catch(fallbackError){console.warn("Vivid featured artwork fallback unavailable:",fallbackError);}
+    }
+  }));
 }
-
 async function loadMoreSection(key,button){
  if(!button||button.disabled||loadingSections.has(key))return;
  const railId=SECTION_RAIL_IDS[key];
@@ -431,16 +430,19 @@ async function loadHome(){
  const primary=["top10","trending","nowPlaying","popularMovies"];
  try{await loadSectionBatch(primary)}catch(error){console.warn("Vivid primary home load failed:",error)}
 
- const loadSecondary=async()=>{
-   // Keep secondary shelves from creating a seven-request burst. Each small
-   // batch can paint before the next one starts, keeping scrolling responsive.
-   for(const batch of [["top10","topRatedMovies","popularTv"],["topRatedTv"],["upcoming","newReleases"],["netflix","primeVideo"],["hboMax","disneyPlus"],["appleTvPlus","hulu"],["paramountPlus"]]){
-     try{await loadSectionBatch(batch)}catch(error){console.warn("Vivid secondary home load failed:",batch,error)}
-     await new Promise(resolve=>window.setTimeout(resolve,80));
+ const loadSecondary=()=>{
+   const secondary=["topRatedMovies","popularTv","topRatedTv","upcoming","newReleases","netflix","primeVideo","hboMax","disneyPlus","appleTvPlus","hulu","paramountPlus"];
+   if("IntersectionObserver" in window){
+     const observer=new IntersectionObserver(entries=>{
+       for(const entry of entries){if(!entry.isIntersecting)continue;observer.unobserve(entry.target);const key=entry.target.dataset.vividHomeSection;if(key)void loadSectionBatch([key]);}
+     },{rootMargin:"700px 0px"});
+     for(const key of secondary){const section=$(SECTION_RAIL_IDS[key])?.closest(".vivid-rails");if(!section)continue;section.dataset.vividHomeSection=key;observer.observe(section);}
+     return;
    }
+   void (async()=>{for(const batch of [["topRatedMovies","popularTv"],["topRatedTv"],["upcoming","newReleases"],["netflix","primeVideo"],["hboMax","disneyPlus"],["appleTvPlus","hulu"],["paramountPlus"]]){await loadSectionBatch(batch);await new Promise(resolve=>window.setTimeout(resolve,80));}})();
  };
- if("requestIdleCallback" in window)requestIdleCallback(()=>void loadSecondary(),{timeout:1800});
- else window.setTimeout(()=>void loadSecondary(),900);
+ if("requestIdleCallback" in window)requestIdleCallback(loadSecondary,{timeout:1800});
+ else window.setTimeout(loadSecondary,900);
 
  const loadRecommendations=()=>void renderRecommendations().then(composeHomepage);
  if("requestIdleCallback" in window)requestIdleCallback(loadRecommendations,{timeout:2600});
@@ -701,7 +703,7 @@ document.addEventListener("DOMContentLoaded",()=>{
   window.addEventListener("vivid:library-changed",()=>queuePersonalizedHomeRefresh());
   window.addEventListener("vivid:progress-changed",()=>renderContinueWatching());
   window.addEventListener("vivid:recommendations-invalidated",()=>queuePersonalizedHomeRefresh());
-  initFeatureStrip();void loadHome();void refreshReleaseAlerts();void refreshServerReleaseCenter();
+  void loadHome();void refreshReleaseAlerts();void refreshServerReleaseCenter();
 
   // Personalization runs in the background after the core Home UI has started.
   void (async()=>{

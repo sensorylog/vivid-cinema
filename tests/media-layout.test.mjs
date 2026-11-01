@@ -29,8 +29,8 @@ test("retired home hero is absent while shared media layout remains for other su
 test("featured cards load independently of the removed trailer player", () => {
   const js = read("../script.js");
   assert.match(js, /function renderFeatureStrip\(\)/);
-  assert.match(js, /async function initFeatureStrip\(\)/);
-  assert.match(js, /initFeatureStrip\(\);void loadHome\(\)/);
+  assert.match(js, /function initFeatureStrip\(items=\[\]\)/);
+  assert.match(js, /vivid:home-trending-ready/);
   assert.doesNotMatch(js, /autoplay:\s*"1"|heroMuted|sendHeroPlayerCommand|loadHeroVideo/);
 });
 

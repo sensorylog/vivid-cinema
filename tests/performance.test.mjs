@@ -10,9 +10,37 @@ const read = (file) => readFile(path.join(root, file), "utf8");
 test("home trending animation avoids forced synchronous layout and repeated fallback requests", async () => {
   const source = await read("scripts/home-breathe.js");
   assert.doesNotMatch(source, /offsetWidth|offsetHeight|getBoundingClientRect\(/, "animation must not force synchronous layout");
-  assert.match(source, /if \(document\.hidden\) return/, "background tabs should not keep cycling the artwork");
+  assert.ok(source.includes("if(document.hidden)return"), "background tabs should not keep cycling the artwork");
   assert.match(source, /if \(!legacyPerformance && !timer && !window\.matchMedia\("\(prefers-reduced-motion: reduce\)"\)\.matches\)/, "respect reduced-motion and legacy performance preferences");
   assert.doesNotMatch(source, /if \(!latest\.length\) latest = await loadDirectTrending\(\)/, "the interval must not repeatedly fetch TMDB when the rail is empty");
+});
+
+
+test("Home paints shelves independently and defers secondary shelves until near the viewport", async () => {
+  const source=await read("script.js");
+  const batch=source.slice(source.indexOf("async function loadSectionBatch(keys){"),source.indexOf("async function loadMoreSection"));
+  const home=source.slice(source.indexOf("async function loadHome(){"),source.indexOf("let searchDialog"));
+  assert.ok(batch.includes("Promise.all(keys.map(async key=>"));
+  assert.match(home,/new IntersectionObserver/);
+  assert.match(home,/rootMargin:"700px 0px"/);
+  assert.match(batch,/vivid:home-trending-ready/);
+  assert.ok(!source.includes("initFeatureStrip();void loadHome()"));
+});
+
+test("Home ambient artwork shares trending data and TMDB uses browser HTTP caching", async () => {
+  const home=await read("script.js"),breathe=await read("scripts/home-breathe.js"),tmdb=await read("scripts/tmdb.js");
+  assert.match(home,/vivid:home-trending-ready/);
+  assert.match(breathe,/vivid:home-trending-ready/);
+  assert.doesNotMatch(breathe,/tmdbApi|loadDirectTrending/);
+  assert.match(tmdb,/cache: "default"/);
+});
+
+test("offline progress updates patch only the matching download row", async () => {
+  const source=await read("scripts/downloads/desktop-offline.js");
+  assert.match(source,/data-job-id=/);
+  assert.ok(source.includes("function updateJobProgress(job)"));
+  assert.ok(source.includes("else updateJobProgress(jobs[index])"));
+  assert.ok(source.includes("if(changed)render()"));
 });
 
 test("watch page disables expensive ambient blur animation and overlay", async () => {
