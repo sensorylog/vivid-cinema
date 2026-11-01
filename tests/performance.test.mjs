@@ -21,12 +21,29 @@ test("watch page disables expensive ambient blur animation and overlay", async (
   assert.match(css, /body\.vivid-watch-page\.vivid-atmosphere::after\{display:none\}/);
 });
 
-test("shared app-shell modules are not redundantly imported a second time", async () => {
+test("noncritical analytics, telemetry and PWA modules do not block app-shell evaluation", async () => {
   const appShell = await read("scripts/app-shell.js");
-  assert.match(appShell, /^import ["']\.\/google-tag\.js["'];/m);
-  assert.match(appShell, /^import ["']\.\/vivid-pulse\.js["'];/m);
-  assert.doesNotMatch(appShell, /import\(["']\.\/google-tag\.js["']\)/);
-  assert.doesNotMatch(appShell, /import\(["']\.\/vivid-pulse\.js["']\)/);
+  for (const module of ["google-tag", "vivid-pulse", "pwa", "analytics", "achievements"]) {
+    assert.ok(!appShell.includes('import "./' + module + '.js";'), module + " must not be a blocking static import");
+    assert.ok(appShell.includes('import("./' + module + '.js")'), module + " should load after first paint");
+  }
+});
+
+test("app shell routes Back through its saved previous internal Vivid route", async () => {
+  const appShell = await read("scripts/app-shell.js");
+  assert.ok(appShell.includes('const NAV_STACK_KEY = "vivid:navigation-stack:v1"'));
+  assert.ok(appShell.includes("function recordCurrentRoute()"));
+  assert.ok(appShell.includes("function trackInternalNavigation(event)"));
+  assert.ok(appShell.includes("location.assign(new URL(previous, location.origin).href)"));
+  assert.ok(appShell.indexOf("recordCurrentRoute();") < appShell.indexOf("ensureBackControl();"));
+  assert.ok(appShell.includes("scheduleIdle(() => { syncAccountNavigation(); }, 1200)"));
+});
+
+test("first-time service-worker installation does not force an extra page reload", async () => {
+  const pwa = await read("scripts/pwa.js");
+  assert.ok(pwa.includes("const hadController = Boolean(navigator.serviceWorker.controller)"));
+  assert.ok(pwa.includes("if (hadController) {"));
+  assert.ok(pwa.includes('navigator.serviceWorker.addEventListener("controllerchange"'));
 });
 
 test("home entry point does not import unused named bindings", async () => {

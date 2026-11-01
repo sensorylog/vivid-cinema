@@ -182,15 +182,18 @@ async function registerServiceWorker() {
   if (!("serviceWorker" in navigator)) return null;
 
   try {
+    const hadController = Boolean(navigator.serviceWorker.controller);
     const registration = await navigator.serviceWorker.register(SW_PATH, { scope: "./", updateViaCache: "none" });
     activeRegistration = registration;
     createUpdateControl(registration);
 
     // Listen before the update check so an activated worker always reloads
     // the document and switches the app shell as one coherent version.
-    navigator.serviceWorker.addEventListener("controllerchange", () => {
-      window.location.reload();
-    }, { once: true });
+    if (hadController) {
+      navigator.serviceWorker.addEventListener("controllerchange", () => {
+        window.location.reload();
+      }, { once: true });
+    }
 
     // iOS Home Screen apps can retain an older worker/cache longer than Safari.
     // updateViaCache:"none" makes the worker update check bypass the HTTP cache.
@@ -204,6 +207,19 @@ async function registerServiceWorker() {
     checkForAppUpdate();
     window.addEventListener("pageshow", checkForAppUpdate);
     document.addEventListener("visibilitychange", checkForAppUpdate);
+
+    // Warm optional routes/assets only after the current page has painted.
+    // The essential offline shell is cached during install; the rest of the
+    // app shell must not delay first launch.
+    const warmOptionalAssets = () => {
+      window.setTimeout(() => {
+        void navigator.serviceWorker.ready.then(ready => {
+          ready.active?.postMessage({ type: "PRECACHE_OPTIONAL" });
+        }).catch(() => {});
+      }, 2200);
+    };
+    if (document.readyState === "complete") warmOptionalAssets();
+    else window.addEventListener("load", warmOptionalAssets, { once: true });
 
     return registration;
   } catch (error) {

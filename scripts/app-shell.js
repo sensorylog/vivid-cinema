@@ -1,10 +1,79 @@
-import "./google-tag.js";
-import "./vivid-pulse.js";
-import "./pwa.js";
 import { VIVID_CONFIG } from "./config.js";
 
 const MOBILE_BREAKPOINT = 768;
 let initialized = false;
+
+const NAV_STACK_KEY = "vivid:navigation-stack:v1";
+
+function currentRoute() {
+  return location.pathname + location.search + location.hash;
+}
+
+function readNavigationStack() {
+  try {
+    const saved = JSON.parse(sessionStorage.getItem(NAV_STACK_KEY) || "[]");
+    return Array.isArray(saved) ? saved.filter(route => {
+      if (typeof route !== "string") return false;
+      try { return new URL(route, location.origin).origin === location.origin; }
+      catch { return false; }
+    }).slice(-40) : [];
+  } catch { return []; }
+}
+
+function writeNavigationStack(stack) {
+  try { sessionStorage.setItem(NAV_STACK_KEY, JSON.stringify(stack.slice(-40))); }
+  catch {}
+}
+
+function recordCurrentRoute() {
+  const route = currentRoute();
+  const stack = readNavigationStack();
+  if (stack.at(-1) === route) return;
+  const previousIndex = stack.lastIndexOf(route);
+  if (previousIndex >= 0) stack.splice(previousIndex + 1);
+  else stack.push(route);
+  writeNavigationStack(stack);
+}
+
+function trackInternalNavigation(event) {
+  if (event.defaultPrevented || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+  const link = event.target.closest?.("a[href]");
+  if (!link || (link.target && link.target !== "_self") || link.hasAttribute("download") ||
+      link.hasAttribute("data-vivid-back") || link.hasAttribute("data-no-page-transition")) return;
+  let destination;
+  try { destination = new URL(link.href, location.href); } catch { return; }
+  if (destination.origin !== location.origin || !["http:", "https:"].includes(destination.protocol)) return;
+  const route = destination.pathname + destination.search + destination.hash;
+  if (route === currentRoute()) return;
+  const stack = readNavigationStack();
+  if (stack.at(-1) !== route) {
+    stack.push(route);
+    writeNavigationStack(stack);
+  }
+}
+
+function navigateToPreviousVividPage(event) {
+  const back = event.target.closest?.("[data-vivid-back]");
+  if (!back || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+  const current = currentRoute();
+  const stack = readNavigationStack();
+  while (stack.length && stack.at(-1) === current) stack.pop();
+  const previous = stack.at(-1);
+  if (previous) {
+    event.preventDefault();
+    writeNavigationStack(stack);
+    location.assign(new URL(previous, location.origin).href);
+    return;
+  }
+  try {
+    const referrer = document.referrer ? new URL(document.referrer, location.href) : null;
+    if (history.length > 1 && referrer?.origin === location.origin) {
+      event.preventDefault();
+      history.back();
+    }
+  } catch {}
+}
+
 
 function setViewportState() {
   document.documentElement.dataset.viewport =
@@ -291,12 +360,12 @@ function ensureBackControl() {
   const isWindowsDesktop = window.vividDownloads?.available === true;
   if (isWindowsDesktop) {
     if (page === "landing") return;
-    let hasInternalPreviousPage = false;
+    const stack = readNavigationStack();
+    let hasInternalPreviousPage = stack.length > 1 && stack.at(-1) === currentRoute();
     try {
       const previous = document.referrer ? new URL(document.referrer, location.href) : null;
-      hasInternalPreviousPage = previous?.origin === location.origin &&
-        (previous.pathname + previous.search + previous.hash) !==
-        (location.pathname + location.search + location.hash);
+      hasInternalPreviousPage ||= previous?.origin === location.origin &&
+        (previous.pathname + previous.search + previous.hash) !== currentRoute();
     } catch {}
     if (page === "home" && !hasInternalPreviousPage) return;
   } else if (["home", "landing", "live"].includes(page)) {
@@ -387,9 +456,7 @@ function initAppShell() {
   initialized = true;
 
   ensureMediaLayoutStyles();
-  void import("./achievements.js").catch(error => console.warn("Vivid achievements could not initialize:", error));
   document.documentElement.dataset.vividReady = "false";
-  void import("./analytics.js").catch(() => {});
   const storedTheme = (() => { try { return localStorage.getItem("vivid:theme"); } catch { return null; } })();
   document.documentElement.dataset.vividTheme = storedTheme === "light" ? "light" : "dark";
   setViewportState();
@@ -401,8 +468,8 @@ function initAppShell() {
   syncVividBranding();
   showPostAuthNotice();
   syncNavigation();
-  syncAccountNavigation();
   initThemeToggle();
+  recordCurrentRoute();
   ensureBackControl();
   ensureSkipLink();
   initCinematicFocusNavigation();
@@ -411,20 +478,21 @@ function initAppShell() {
   window.addEventListener("online", setConnectionState);
   window.addEventListener("offline", setConnectionState);
 
-  document.addEventListener("click", event => {
-    const back = event.target.closest("[data-vivid-back]");
-    if (!back) return;
-    if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
-    if (window.history.length > 1) {
-      try {
-        const ref = document.referrer ? new URL(document.referrer, location.href) : null;
-        if (ref?.origin === location.origin) { event.preventDefault(); window.history.back(); }
-      } catch {}
-    }
-  });
+  document.addEventListener("click", trackInternalNavigation, true);
+  document.addEventListener("click", navigateToPreviousVividPage);
 
   requestAnimationFrame(() => {
     document.documentElement.dataset.vividReady = "true";
+    const scheduleIdle = (callback, timeout = 1800) => {
+      if ("requestIdleCallback" in window) window.requestIdleCallback(callback, { timeout });
+      else window.setTimeout(callback, Math.min(timeout, 900));
+    };
+    scheduleIdle(() => { syncAccountNavigation(); }, 1200);
+    scheduleIdle(() => { void import("./google-tag.js").catch(() => {}); }, 1800);
+    scheduleIdle(() => { void import("./achievements.js").catch(error => console.warn("Vivid achievements could not initialize:", error)); }, 2200);
+    scheduleIdle(() => { void import("./pwa.js").catch(error => console.warn("Vivid offline support could not initialize:", error)); }, 2400);
+    scheduleIdle(() => { void import("./analytics.js").catch(() => {}); }, 3000);
+    scheduleIdle(() => { void import("./vivid-pulse.js").catch(error => console.warn("Vivid background telemetry unavailable:", error)); }, 3800);
   });
 }
 

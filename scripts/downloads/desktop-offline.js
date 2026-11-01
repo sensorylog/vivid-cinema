@@ -36,6 +36,10 @@ function posterMarkup(media){
   const safePoster=/^\/[A-Za-z0-9_./-]+\.(?:jpg|jpeg|png|webp)$/i.test(poster)&&!poster.split("/").includes("..");
   return '<div class="offline-poster" aria-hidden="true"><span>VIVID</span>'+(safePoster?'<img loading="lazy" decoding="async" src="https://image.tmdb.org/t/p/w342'+escapeHtml(poster)+'" alt="">':"")+'</div>';
 }
+function errorMarkup(job){
+  if(job.status!=="failed"||!job.error)return "";
+  return '<p class="offline-job-error" role="status">'+escapeHtml(job.error)+'</p>';
+}
 function progressMarkup(job){
   if(!["downloading","paused","verifying","completed","queued"].includes(job.status))return "";
   const progress=Math.max(0,Math.min(100,Number(job.progress)||0));
@@ -62,7 +66,7 @@ function episodeMarkup(job){
   const episode=Math.max(0,Math.floor(Number(media.episode)||0));
   const episodeLabel="S"+String(season).padStart(2,"0")+"E"+String(episode).padStart(2,"0");
   const title=media.episodeTitle||job.title||"Episode";
-  return '<article class="offline-episode-row"><div class="offline-episode-copy"><span class="offline-episode-number">'+episodeLabel+'</span><strong>'+escapeHtml(title)+'</strong><small>'+escapeHtml(statusText(job))+(job.status==="downloading"?" · "+Math.round(progress)+"%":"")+'</small>'+progressMarkup(job)+fileMarkup(job)+'</div>'+actionMarkup(job)+'</article>';
+  return '<article class="offline-episode-row"><div class="offline-episode-copy"><span class="offline-episode-number">'+episodeLabel+'</span><strong>'+escapeHtml(title)+'</strong><small>'+escapeHtml(statusText(job))+(job.status==="downloading"?" · "+Math.round(progress)+"%":"")+'</small>'+progressMarkup(job)+errorMarkup(job)+fileMarkup(job)+'</div>'+actionMarkup(job)+'</article>';
 }
 function matchesLibrary(job){
   const media=job.media||{};
@@ -115,7 +119,7 @@ function render(){
     const media=job.media||{},progress=Math.max(0,Math.min(100,Number(job.progress)||0));
     const title=media.title||job.title||"Untitled movie";
     const detail=statusText(job)+(job.status==="downloading"?" · "+Math.round(progress)+"%":"");
-    const markup='<article class="offline-media-card">'+posterMarkup(media)+'<div class="offline-media-copy"><span class="offline-card-kicker">MOVIE</span><h3>'+escapeHtml(title)+'</h3><p class="offline-card-status">'+escapeHtml(detail)+'</p>'+progressMarkup(job)+fileMarkup(job)+actionMarkup(job)+'</div></article>';
+    const markup='<article class="offline-media-card">'+posterMarkup(media)+'<div class="offline-media-copy"><span class="offline-card-kicker">MOVIE</span><h3>'+escapeHtml(title)+'</h3><p class="offline-card-status">'+escapeHtml(detail)+'</p>'+progressMarkup(job)+errorMarkup(job)+fileMarkup(job)+actionMarkup(job)+'</div></article>';
     entries.push({time:Number(job.updatedAt||job.createdAt)||0,markup});
   }
   entries.sort((a,b)=>b.time-a.time);
@@ -238,7 +242,16 @@ async function hydratePosterArtwork(){
   };
   await Promise.all([worker(),worker(),worker()]);
 }
+let progressRenderTimer=0;
+function scheduleProgressRender(){
+  if(progressRenderTimer)return;
+  progressRenderTimer=setTimeout(()=>{
+    progressRenderTimer=0;
+    render();
+  },300);
+}
 async function refresh(){
+  if(progressRenderTimer){clearTimeout(progressRenderTimer);progressRenderTimer=0;}
   try{
     jobs=(await engine.list()).filter(job=>job.status!=="cancelled");
     render();
@@ -396,11 +409,29 @@ byId("offline-audio-track").addEventListener("change",event=>{
 byId("offline-seek").addEventListener("input",event=>{if(Number.isFinite(player.duration))player.currentTime=player.duration*(Number(event.target.value)/1000);});
 byId("offline-volume").addEventListener("input",event=>{player.volume=Number(event.target.value);player.muted=player.volume===0;});
 byId("offline-speed").addEventListener("change",event=>{player.playbackRate=Number(event.target.value)||1;});
-byId("offline-fullscreen").addEventListener("click",async()=>{
+function syncFullscreenButton(){
+  const active=document.fullscreenElement===byId("offline-player-section");
+  const button=byId("offline-fullscreen");
+  button.textContent=active?"Exit fullscreen":"Fullscreen";
+  button.setAttribute("aria-pressed",String(active));
+}
+async function togglePlayerFullscreen(){
   const section=byId("offline-player-section");
-  try{if(document.fullscreenElement)await document.exitFullscreen();else await section.requestFullscreen();}
-  catch{setMessage("Fullscreen is not available on this device.");}
-});
+  try{
+    if(document.fullscreenElement===section){
+      await document.exitFullscreen();
+      return;
+    }
+    if(document.fullscreenElement)await document.exitFullscreen();
+    const request=section.requestFullscreen||section.webkitRequestFullscreen;
+    if(typeof request!=="function")throw new Error("Fullscreen API is unavailable.");
+    await request.call(section,{navigationUI:"hide"});
+  }catch(error){
+    syncFullscreenButton();
+    setMessage("Fullscreen could not be opened on this device. "+(error?.message||""));
+  }
+}
+byId("offline-fullscreen").addEventListener("click",togglePlayerFullscreen);
 let lastPositionSave=0;
 let resumePosition=0;
 let controlsHideTimer=0;
@@ -467,7 +498,8 @@ playerSection.addEventListener("pointerdown",showPlayerControls);
 playerSection.addEventListener("pointerleave",hidePlayerControls);
 playerSection.addEventListener("focusin",showPlayerControls);
 playerSection.addEventListener("focusout",()=>{if(!playerSection.matches(":focus-within"))showPlayerControls();});
-document.addEventListener("fullscreenchange",showPlayerControls);
+document.addEventListener("fullscreenchange",()=>{syncFullscreenButton();showPlayerControls();});
+document.addEventListener("webkitfullscreenchange",()=>{syncFullscreenButton();showPlayerControls();});
 player.addEventListener("play",showPlayerControls);
 player.addEventListener("pause",showPlayerControls);
 player.addEventListener("timeupdate",()=>{
@@ -597,18 +629,24 @@ byId("offline-jobs").addEventListener("click",async event=>{
   finally{button.disabled=false;}
 });
 player.addEventListener("error",()=>setMessage("This file uses a video format or codec the built-in player cannot decode. Try an MP4 or WebM release."));
-byId("offline-player-close").addEventListener("click",()=>{
+byId("offline-player-close").addEventListener("click",async()=>{
   if(controlsHideTimer)clearTimeout(controlsHideTimer);
+  if(document.fullscreenElement===playerSection){
+    try{await document.exitFullscreen();}catch{}
+  }
   player.pause();clearExternalSubtitle();player.removeAttribute("src");player.load();player.dataset.jobId="";
   player.controls=true;byId("offline-custom-controls").hidden=true;byId("offline-player-section").hidden=true;
   byId("offline-audio-track").parentElement.hidden=true;byId("offline-resume-prompt").hidden=true;
   byId("offline-next-episode").hidden=true;resumePosition=0;byId("offline-player-section").classList.remove("controls-hidden");
+  syncFullscreenButton();
 });
 engine.onProgress(payload=>{
-  if(payload.status==="cancelled"||payload.removed){jobs=jobs.filter(item=>item.id!==payload.id);render();return;}
+  if(payload.status==="cancelled"||payload.removed){jobs=jobs.filter(item=>item.id!==payload.id);scheduleProgressRender();return;}
   const index=jobs.findIndex(item=>item.id===payload.id);
   if(index>=0)jobs[index]={...jobs[index],...payload};else jobs.push(payload);
-  render();
+  // Torrent piece events can arrive rapidly. Coalesce them so the library DOM
+  // is not rebuilt for every chunk while keeping progress visibly responsive.
+  scheduleProgressRender();
 });
 engine.onComplete(()=>{void refresh();setMessage("Download complete. Your movie is ready to watch offline.");});
 engine.onError(()=>{void refresh();setMessage("A download needs attention. Try Resume, or cancel it and choose another release.");});

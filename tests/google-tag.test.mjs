@@ -9,7 +9,7 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 test("shared app shell loads the sitewide GA4 Google tag", async () => {
   const shell = await readFile(path.join(root, "scripts", "app-shell.js"), "utf8");
   const tag = await readFile(path.join(root, "scripts", "google-tag.js"), "utf8");
-  assert.match(shell, /import ["']\.\/google-tag\.js["']/);
+  assert.ok(shell.includes('import("./google-tag.js")'));
   assert.match(tag, /G-TKXLVSEFL4/);
   assert.match(tag, /googletagmanager\.com\/gtag\/js/);
   assert.match(tag, /__vividGtagLoaded/);

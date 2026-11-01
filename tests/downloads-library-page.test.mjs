@@ -50,10 +50,19 @@ test("desktop torrent diagnostics expose tracker, DHT, peer and warning events",
   assert.match(engine, /torrent\.on\("dhtAnnounce"/);
   assert.match(engine, /torrent\.on\("noPeers"/);
   assert.match(engine, /torrent\.on\("warning"/);
-  assert.match(engine, /this\.client\.on\("error"/);
+  assert.match(engine, /client\.on\("error"/);
   assert.match(engine, /dhtListening: Boolean\(this\.client\.dht && this\.client\.dht\.listening\)/);
   assert.doesNotMatch(desktop, /discoveryDetail|discovery\.lastWarning|lastNoPeerSource/);
   assert.match(engine, /lastWarning/);
+});
+
+test("failed movie and episode downloads show their actual recovery reason", async () => {
+  const desktop = await readFile(new URL("../scripts/downloads/desktop-offline.js", import.meta.url), "utf8");
+  const styles = await readFile(new URL("../styles/my-downloads.css", import.meta.url), "utf8");
+  assert.match(desktop, /function errorMarkup\(job\)/);
+  assert.match(desktop, /job\.status!==\"failed\"\|\|!job\.error/);
+  assert.match(desktop, /progressMarkup\(job\)\+errorMarkup\(job\)\+fileMarkup\(job\)/);
+  assert.match(styles, /\.offline-job-error/);
 });
 
 test("desktop download list removes cancelled jobs and search keeps peer-only releases", async () => {
@@ -65,4 +74,21 @@ test("desktop download list removes cancelled jobs and search keeps peer-only re
   assert.match(engine, /Number\(x\.seeds \|\| 0\) > 0 \|\| Number\(x\.peers \|\| 0\) > 0/);
   assert.match(engine, /announce: FALLBACK_TRACKERS/);
   assert.match(engine, /this\.jobs\.delete\(job\.id\)/);
+});
+
+
+test("desktop player fullscreen uses a viewport flex layout and reflects fullscreen state", async () => {
+  const desktop = await readFile(new URL("../scripts/downloads/desktop-offline.js", import.meta.url), "utf8");
+  const css = await readFile(new URL("../styles/my-downloads.css", import.meta.url), "utf8");
+  assert.match(desktop, /function syncFullscreenButton\(\)/);
+  assert.match(desktop, /section\.requestFullscreen\|\|section\.webkitRequestFullscreen/);
+  assert.match(desktop, /document\.addEventListener\("fullscreenchange"/);
+  assert.match(css, /\.offline-player-section:fullscreen\s*\{[^}]*display:\s*flex/s);
+});
+
+test("torrent progress events are coalesced instead of rebuilding the library on every event", async () => {
+  const desktop = await readFile(new URL("../scripts/downloads/desktop-offline.js", import.meta.url), "utf8");
+  assert.match(desktop, /function scheduleProgressRender\(\)/);
+  assert.match(desktop, /\},300\)/);
+  assert.match(desktop, /engine\.onProgress\(payload=>\{[\s\S]*?scheduleProgressRender\(\);[\s\S]*?\}\);/);
 });

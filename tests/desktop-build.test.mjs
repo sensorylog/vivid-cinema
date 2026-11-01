@@ -405,8 +405,9 @@ test("Windows desktop navigation keeps Home Search visible and restores previous
 
   // Every Windows content page gets a Back control; Home gets one only when
   // it was reached from another internal page. Direct entry remains sensible.
-  assert.match(shell, /hasInternalPreviousPage = previous\?\.origin === location\.origin/);
+  assert.match(shell, /hasInternalPreviousPage = stack\.length > 1 && stack\.at\(-1\) === currentRoute\(\)/);
+  assert.match(shell, /hasInternalPreviousPage \|\|= previous\?\.origin === location\.origin/);
   assert.match(shell, /if \(page === "home" && !hasInternalPreviousPage\) return/);
   assert.match(shell, /back\.href = "home\.html"/);
-  assert.match(shell, /window\.history\.back\(\)/);
+  assert.match(shell, /history\.back\(\)/);
 });

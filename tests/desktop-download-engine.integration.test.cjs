@@ -5,6 +5,7 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs/promises");
 const os = require("node:os");
 const path = require("node:path");
+const { EventEmitter } = require("node:events");
 const { createRequire } = require("node:module");
 
 const requireDesktop = createRequire(path.resolve(__dirname, "../desktop/package.json"));
@@ -62,13 +63,190 @@ function closeTracker(tracker) {
   }), 5000, "local tracker shutdown").catch(() => {});
 }
 
+test("verification keeps the last confirmed progress visible instead of showing a restart", { timeout: 30000 }, async () => {
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "vivid-progress-fixture-"));
+  let engine;
+  try {
+    engine = new DesktopDownloadEngine({
+      app: { getPath(name) { return name === "downloads" ? path.join(root, "downloads") : path.join(root, "user-data"); } },
+      BrowserWindow: { getAllWindows: () => [] },
+      dialog: {},
+      shell: {}
+    });
+    await withTimeout(engine.ready, 10000, "progress fixture engine initialization");
+    const job = {
+      id: "verifying-fixture",
+      title: "Verification fixture",
+      status: "verifying",
+      needsRescan: true,
+      progress: 82.4,
+      downloaded: 824,
+      total: 1000,
+      torrent: { progress: 0, downloaded: 0, length: 1000, downloadSpeed: 0, numPeers: 0 },
+      files: [],
+      discovery: null
+    };
+    assert.equal(engine.snapshot(job).progress, 82.4,
+      "re-scanning the existing store must not visually reset a job to zero");
+  } finally {
+    if (engine) await engine.shutdown();
+    await fs.rm(root, { recursive: true, force: true });
+  }
+});
+
+test("a fatal WebTorrent client error preserves job progress and replaces the dead client", { timeout: 30000 }, async () => {
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "vivid-client-recovery-"));
+  let engine;
+  let oldClient;
+  try {
+    engine = new DesktopDownloadEngine({
+      app: { getPath(name) { return name === "downloads" ? path.join(root, "downloads") : path.join(root, "user-data"); } },
+      BrowserWindow: { getAllWindows: () => [] },
+      dialog: {},
+      shell: {}
+    });
+    await withTimeout(engine.ready, 10000, "client recovery fixture initialization");
+    oldClient = engine.client;
+    const job = {
+      id: "client-recovery-fixture",
+      title: "Client recovery fixture",
+      status: "downloading",
+      progress: 64,
+      downloaded: 640,
+      total: 1000,
+      torrent: { progress: 0.71, downloaded: 710, length: 1000 },
+      statusTimer: null,
+      persistTimer: null
+    };
+    engine.jobs.set(job.id, job);
+    oldClient.emit("error", new Error("simulated fatal torrent client error"));
+    assert.notEqual(engine.client, oldClient, "Resume must have a fresh usable torrent client");
+    assert.equal(job.status, "failed");
+    assert.equal(job.progress, 71);
+    assert.equal(job.downloaded, 710);
+    assert.equal(job.needsRescan, true);
+    assert.equal(job.torrent, null);
+  } finally {
+    if (oldClient && oldClient !== engine?.client) await closeClient(oldClient);
+    if (engine) await engine.shutdown();
+    await fs.rm(root, { recursive: true, force: true });
+  }
+});
+
+test("resume failures keep the previous progress and partial folder intact", { timeout: 30000 }, async () => {
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "vivid-resume-error-"));
+  let engine;
+  try {
+    engine = new DesktopDownloadEngine({
+      app: { getPath(name) { return name === "downloads" ? path.join(root, "downloads") : path.join(root, "user-data"); } },
+      BrowserWindow: { getAllWindows: () => [] },
+      dialog: {},
+      shell: {}
+    });
+    await withTimeout(engine.ready, 10000, "resume error fixture initialization");
+    const id = "resume-error-fixture";
+    const jobPath = path.join(root, "downloads", id);
+    await fs.mkdir(jobPath, { recursive: true });
+    await fs.writeFile(path.join(jobPath, "partial.bin"), Buffer.from("keep this partial data"));
+    const realClient = engine.client;
+    engine.client = { destroyed: false, add() { throw new Error("simulated reattach failure"); } };
+    engine.jobs.set(id, {
+      id, title: "Resume error fixture", magnet: "magnet:?xt=urn:btih:0123456789012345678901234567890123456789",
+      status: "paused", phase: "Paused", progress: 76.5, downloaded: 765, total: 1000,
+      downloadPath: jobPath, torrent: null, needsRescan: true, files: [], filePath: null
+    });
+    assert.equal(await engine.control(id, "resume"), true,
+      "the control action should complete and report the job state rather than losing it");
+    const job = engine.jobs.get(id);
+    assert.equal(job.status, "failed");
+    assert.equal(job.progress, 76.5);
+    assert.equal(job.downloaded, 765);
+    assert.match(job.error, /simulated reattach failure/);
+    assert.equal(await fs.readFile(path.join(jobPath, "partial.bin"), "utf8"), "keep this partial data");
+    engine.client = realClient;
+  } finally {
+    if (engine) await engine.shutdown();
+    await fs.rm(root, { recursive: true, force: true });
+  }
+});
+
+test("reattaching a partial torrent keeps saved progress until WebTorrent confirms the store is ready", { timeout: 30000 }, async () => {
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "vivid-rescan-progress-"));
+  let engine;
+  let realClient;
+  let torrent;
+  try {
+    engine = new DesktopDownloadEngine({
+      app: { getPath(name) { return name === "downloads" ? path.join(root, "downloads") : path.join(root, "user-data"); } },
+      BrowserWindow: { getAllWindows: () => [] },
+      dialog: {},
+      shell: {}
+    });
+    await withTimeout(engine.ready, 10000, "rescan progress fixture initialization");
+    realClient = engine.client;
+    torrent = new EventEmitter();
+    Object.assign(torrent, {
+      progress: 0,
+      downloaded: 0,
+      length: 1000,
+      downloadSpeed: 0,
+      numPeers: 0,
+      ready: false,
+      announce: [],
+      rescanFiles() {
+        throw new Error("the app must not run a second full piece rescan after WebTorrent ready");
+      }
+    });
+    engine.client = { destroyed: false, dht: null, add() { return torrent; } };
+    const job = {
+      id: "rescan-progress-fixture",
+      title: "Rescan progress fixture",
+      magnet: "magnet:?xt=urn:btih:0123456789012345678901234567890123456789",
+      status: "paused",
+      progress: 75.5,
+      downloaded: 755,
+      total: 1000,
+      needsRescan: true,
+      downloadPath: path.join(root, "downloads", "rescan-progress-fixture"),
+      torrent: null,
+      files: []
+    };
+    engine.attachTorrent(job);
+    assert.equal(job.status, "verifying",
+      "a resumed job should remain in Finishing up while WebTorrent validates its saved store");
+    assert.equal(job.progress, 75.5,
+      "the initial empty in-memory bitfield must not replace persisted progress");
+    assert.equal(engine.snapshot(job).progress, 75.5,
+      "the UI snapshot must keep showing saved progress while the torrent is still loading metadata");
+    // WebTorrent emits ready only after its built-in existing-store verification.
+    torrent.progress = 0.76;
+    torrent.downloaded = 760;
+    torrent.ready = true;
+    torrent.emit("ready");
+    assert.equal(job.status, "downloading");
+    assert.equal(job.needsRescan, false);
+    assert.equal(job.progress, 76,
+      "progress should update from the verified bitfield after the rescan completes");
+  } finally {
+    if (engine?.jobs) {
+      for (const job of engine.jobs.values()) {
+        if (job.statusTimer) clearInterval(job.statusTimer);
+        if (job.persistTimer) clearTimeout(job.persistTimer);
+      }
+    }
+    if (engine && realClient) engine.client = realClient;
+    if (engine) await engine.shutdown();
+    await fs.rm(root, { recursive: true, force: true });
+  }
+});
+
 test("desktop engine downloads a video-extension payload from a local seeded torrent", { timeout: 90000 }, async () => {
   console.log("[vivid-integration] stage: create fixture");
   const root = await fs.mkdtemp(path.join(os.tmpdir(), "vivid-download-integration-"));
   const videoPath = path.join(root, "vivid-integration.mp4");
   const downloadsPath = path.join(root, "downloads");
   const userDataPath = path.join(root, "user-data");
-  const payload = Buffer.alloc(768 * 1024);
+  const payload = Buffer.alloc(8 * 1024 * 1024);
   for (let index = 0; index < payload.length; index += 1) {
     payload[index] = (index * 31 + Math.floor(index / 251)) % 251;
   }
@@ -184,17 +362,48 @@ test("desktop engine downloads a video-extension payload from a local seeded tor
       console.log("[vivid-integration] leecher warning", warning?.message || String(warning));
     });
 
-    // Exercise the real pause/resume control path against the local seeded
-    // torrent before allowing the transfer to complete.
+    // Pause only after verified bytes have reached disk. The previous test
+    // paused immediately after enqueue and never proved partial data survives.
+    await new Promise((resolve, reject) => {
+      const startedAt = Date.now();
+      const poll = setInterval(() => {
+        const live = job.torrent;
+        if (live?.ready && Number(live.downloaded) >= 64 * 1024 &&
+            live.progress >= 0.5 && live.progress < 0.95) {
+          clearInterval(poll);
+          resolve();
+          return;
+        }
+        if (Date.now() - startedAt >= 30000) {
+          clearInterval(poll);
+          reject(new Error("Timed out waiting for a substantial partial transfer before pause: " +
+            JSON.stringify(live ? {
+              ready: live.ready, progress: live.progress, downloaded: live.downloaded,
+              length: live.length, peers: live.numPeers, wires: live.wires?.length || 0
+            } : { status: job.status, error: job.error })));
+        }
+      }, 20);
+    });
+    const progressBeforePause = Number(job.torrent.progress) * 100;
+    const bytesBeforePause = Number(job.torrent.downloaded);
+    assert.ok(bytesBeforePause >= 64 * 1024, "pause fixture must contain verified partial bytes");
+    assert.ok(progressBeforePause >= 50 && progressBeforePause < 95, "pause fixture must contain substantial but incomplete data");
     assert.equal(await engine.control(started.id, "pause"), true,
       "an active desktop download should pause");
     assert.equal(job.status, "paused", "pause should persist a paused job state");
+    assert.ok(job.progress >= progressBeforePause - 0.1, "pause must preserve the verified percentage");
     const pausedState = JSON.parse(await fs.readFile(engine.statePath, "utf8"));
     assert.equal(pausedState.jobs.find(row => row.id === started.id)?.status, "paused",
       "the paused state should survive in the on-disk job record");
     assert.equal(await engine.control(started.id, "resume"), true,
       "a paused desktop download should resume");
-    assert.equal(job.status, "downloading", "resume should reattach the torrent");
+    assert.equal(job.status, "verifying", "resume should reattach the torrent and verify its saved store before downloading");
+    await waitFor(() => job.status === "downloading" && job.needsRescan === false,
+      20000, "partial torrent verification to finish after resume");
+    assert.ok(job.progress >= progressBeforePause - 0.1,
+      "resume must restore verified pieces rather than restart at zero");
+    assert.ok(Number(job.torrent?.downloaded) >= bytesBeforePause,
+      "resume must reuse previously downloaded bytes from the existing store");
 
     try {
       await waitFor(
