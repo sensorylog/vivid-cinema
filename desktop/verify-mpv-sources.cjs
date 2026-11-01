@@ -8,12 +8,19 @@ const { MPV_SOURCE_COMMIT } = require("./prepare-mpv.cjs");
 function hasBundledLicenseFile(licenseRoot, licenseRootReal, relativePath) {
   if (typeof relativePath !== "string" || !relativePath.trim()) return false;
   const candidate = path.resolve(licenseRoot, relativePath);
-  const relative = path.relative(licenseRootReal, candidate);
-  if (!relative || relative.startsWith("..") || path.isAbsolute(relative) || !fs.existsSync(candidate)) return false;
+  const lexicalRelative = path.relative(licenseRoot, candidate);
+  if (!lexicalRelative || lexicalRelative === ".." ||
+      lexicalRelative.startsWith(".." + path.sep) || path.isAbsolute(lexicalRelative) ||
+      !fs.existsSync(candidate)) return false;
   try {
+    // Compare canonical paths on both sides. macOS may expose /var through
+    // /private/var, so comparing a canonical root to a lexical candidate
+    // incorrectly rejects valid files created under os.tmpdir().
     const realCandidate = fs.realpathSync(candidate);
     const realRelative = path.relative(licenseRootReal, realCandidate);
-    return !realRelative.startsWith("..") && fs.statSync(realCandidate).isFile();
+    return Boolean(realRelative) && realRelative !== ".." &&
+      !realRelative.startsWith(".." + path.sep) && !path.isAbsolute(realRelative) &&
+      fs.statSync(realCandidate).isFile();
   } catch { return false; }
 }
 
