@@ -415,3 +415,44 @@ test("Windows desktop navigation keeps Home Search visible and restores previous
   assert.match(shell, /back\.href = "home\.html"/);
   assert.match(shell, /history\.back\(\)/);
 });
+
+
+test("Advanced Player uses a pinned mpv runtime, private IPC and guarded main-process launch", () => {
+  const main = fs.readFileSync(path.join(root, "desktop", "main.cjs"), "utf8");
+  const preload = fs.readFileSync(path.join(root, "desktop", "preload.cjs"), "utf8");
+  const advanced = fs.readFileSync(path.join(root, "desktop", "advanced-player.cjs"), "utf8");
+  const prepare = fs.readFileSync(path.join(root, "desktop", "prepare-mpv.cjs"), "utf8");
+  const page = fs.readFileSync(path.join(root, "my-downloads.html"), "utf8");
+  const renderer = fs.readFileSync(path.join(root, "scripts", "downloads", "desktop-offline.js"), "utf8");
+  const workflow = fs.readFileSync(path.join(root, ".github", "workflows", "windows-desktop.yml"), "utf8");
+  const notice = fs.readFileSync(path.join(root, "licenses", "mpv", "NOTICE.md"), "utf8");
+
+  assert.ok(fs.existsSync(path.join(root, "tests", "advanced-player.test.cjs")));
+  assert.match(pkg.scripts.test, /tests\\/advanced-player\\.test\\.cjs/);
+  assert.ok(pkg.build.extraResources.some(item => item.from === "desktop/vendor/mpv" && item.to === "mpv"));
+  assert.ok(pkg.build.extraResources.some(item => item.from === "licenses/mpv" && item.to === "licenses/mpv"));
+  assert.match(prepare, /ARCHIVE_SHA256/);
+  assert.match(prepare, /24a5ac969219767c617f5d109761d4e24db8ba05dee30db485ea756415dc63b4/);
+  assert.match(prepare, /checksum mismatch/);
+  assert.match(prepare, /Expand-Archive/);
+  assert.match(advanced, /--hwdec=auto-safe/);
+  assert.match(advanced, /shell: false/);
+  assert.match(advanced, /--no-config/);
+  assert.match(advanced, /observe_property/);
+  assert.match(advanced, /setPlaybackPosition/);
+  assert.match(main, /vivid-advanced-player-open/);
+  assert.match(main, /isTrustedDownloadSender\\(event\\)/);
+  assert.match(main, /advancedPlayer\\.open\\(id, fileIndex\\)/);
+  assert.match(main, /advancedPlayer\\.stop\\(\\)/);
+  assert.match(preload, /openAdvancedPlayer: \\(id, fileIndex = 0\\)/);
+  assert.match(preload, /stopAdvancedPlayer/);
+  assert.match(page, /id="offline-advanced-player"/);
+  assert.match(renderer, /engine\\.openAdvancedPlayer\\(id,fileIndex\\)/);
+  assert.match(workflow, /node desktop\\/prepare-mpv\\.cjs/);
+  assert.match(workflow, /approved checksum/);
+  assert.match(notice, /Release compliance gate/);
+  assert.match(notice, /complete corresponding-source bundle/);
+  const syntaxChecker = fs.readFileSync(path.join(root, "automation", "check-syntax.mjs"), "utf8");
+  assert.match(syntaxChecker, /desktop\\/advanced-player\\.cjs/);
+  assert.match(syntaxChecker, /desktop\\/prepare-mpv\\.cjs/);
+});
