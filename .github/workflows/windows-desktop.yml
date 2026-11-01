@@ -90,6 +90,9 @@ jobs:
           if (@($manifest.components).Count -lt 1) {
             throw "Refusing to publish mpv: the source manifest must enumerate the bundled GPL-covered components."
           }
+      - name: Verify mpv corresponding-source manifest in Node
+        if: steps.release-decision.outputs.publish == 'true'
+        run: node desktop/verify-mpv-sources.cjs
       - name: Prepare checksum-pinned mpv Advanced Player runtime
         run: node desktop/prepare-mpv.cjs
       - name: Verify mpv runtime and redistribution notice
