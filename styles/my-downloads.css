@@ -96,3 +96,16 @@ html.vivid-performance-legacy .offline-search-results button {
 html.vivid-performance-legacy .offline-series-picker{backdrop-filter:none;box-shadow:none;background:#10131a}
 html.vivid-performance-legacy .offline-episode-picker{max-height:300px}
 @media(max-width:560px){.offline-series-heading{align-items:stretch}.offline-series-heading label{min-width:100%}.offline-series-actions{justify-content:stretch}.offline-series-actions button{flex:1}}
+
+
+/* Vivid Ultra Player: safe, native-engine playback controls. */
+.offline-custom-controls button{min-height:38px;white-space:nowrap}
+.offline-subtitle-control,.offline-audio-track-control,.offline-subtitle-file-control{display:flex;align-items:center;gap:7px;font-size:11px;color:#aebbd4}
+.offline-subtitle-control select,.offline-audio-track-control select{max-width:130px;border:1px solid rgba(170,185,220,.22);border-radius:8px;background:#0b1020;color:#f4f6fc;padding:7px 8px;font:600 11px system-ui,sans-serif}
+.offline-subtitle-file-control input{max-width:175px;color:#cbd5e8;font:600 10px system-ui,sans-serif}
+.offline-player-section video::cue{color:#fff;background:rgba(0,0,0,.78)}
+.offline-player-section[data-subtitle-size="small"] video::cue{font-size:85%}
+.offline-player-section[data-subtitle-size="medium"] video::cue{font-size:110%}
+.offline-player-section[data-subtitle-size="large"] video::cue{font-size:140%}
+@media(max-width:760px){.offline-custom-controls{flex-wrap:wrap}.offline-subtitle-file-control{max-width:100%}.offline-subtitle-file-control input{max-width:125px}}
+html.vivid-performance-legacy .offline-custom-controls button{transition:none}
