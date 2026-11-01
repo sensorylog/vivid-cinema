@@ -300,7 +300,7 @@ test("Ultra Player adds explicit resume choices, safe series-next matching and c
   assert.match(player, /Continue from /);
   assert.match(player, /clearPlaybackPosition/);
   assert.match(player, /function findNextEpisode\(job\)/);
-  assert.match(player, /Number\(next\.episode\)===episode\+1/);
+  assert.match(player, /nextEpisode===episode\+1/);
   assert.match(player, /setTimeout\(\(\)=>\{/);
   assert.match(player, /controls-hidden/);
   assert.match(styles, /offline-player-section:fullscreen/);
@@ -314,6 +314,6 @@ test("Ultra Player subtitle sync applies offsets from original cue timings", () 
   assert.match(page, /offline-subtitle-offset/);
   assert.match(player, /function applySubtitleOffset\(\)/);
   assert.match(player, /cue\.startTime=Math\.max\(0,base\.start\+offset\)/);
-  assert.match(player, /cue\.endTime=Math\.max\(cue\.startTime,base\.end\+offset\)/);
+  assert.match(player, /cue\.endTime=Math\.max\(cue\.startTime\+0\.001,base\.end\+offset\)/);
   assert.match(player, /activeSubtitleTrack!==track\.track/);
 });
