@@ -23,7 +23,7 @@ test("downloads page resolves current assets from the latest GitHub release", ()
   assert.match(script, /release\.html_url \|\| RELEASE_PAGE/);
 });
 
-test("download buttons have direct file fallbacks and wait for release lookup before navigating", () => {
+test("download buttons have safe latest-release fallbacks and wait for release lookup before navigating", () => {
   assert.match(script, /RELEASE_DOWNLOAD = .*releases\/latest\/download/);
   assert.match(script, /Vivid-Cinema-Android\.apk/);
   assert.match(script, /Vivid-Cinema-Setup-1\.0\.28\.exe/);
