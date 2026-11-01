@@ -350,6 +350,10 @@ test("Windows Offline Library Stage 3 keeps download controls while grouping tit
   const library = fs.readFileSync(path.join(root, "scripts", "downloads", "desktop-offline.js"), "utf8");
   const styles = fs.readFileSync(path.join(root, "styles", "my-downloads.css"), "utf8");
   assert.match(page, /id="offline-library-tools"/);
+  assert.match(page, /id="offline-library-tools"[^>]*hidden/);
+  assert.match(page, /offline-library-count" hidden/);
+  assert.match(library, /byId\("offline-library-tools"\)\.hidden=false/);
+  assert.match(library, /byId\("offline-library-count"\)\.hidden=false/);
   for (const filter of ["all", "downloading", "saved", "series", "attention"]) {
     assert.match(page, new RegExp('data-library-filter="' + filter + '"'));
   }
