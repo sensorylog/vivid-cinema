@@ -366,9 +366,9 @@ player.addEventListener("loadedmetadata",()=>{
     if(player.dataset.jobId!==jobId||Number(player.dataset.fileIndex)!==fileIndex)return;
     if(saved>5&&Number.isFinite(player.duration)&&saved<player.duration-30){
       resumePosition=saved;
-      player.pause();
       byId("offline-resume-copy").textContent="Continue from "+clock(saved)+"?";
       byId("offline-resume-prompt").hidden=false;
+      player.pause();
       showPlayerControls();
     }else{
       resumePosition=0;
