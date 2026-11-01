@@ -343,3 +343,28 @@ test("Ultra Player shows animated feedback for 10-second seeks and prevents page
   assert.match(styles, /@keyframes offline-seek-back/);
   assert.match(styles, /@keyframes offline-seek-forward/);
 });
+
+
+test("Windows Offline Library Stage 3 keeps download controls while grouping titles and simplifying statuses", () => {
+  const page = fs.readFileSync(path.join(root, "my-downloads.html"), "utf8");
+  const library = fs.readFileSync(path.join(root, "scripts", "downloads", "desktop-offline.js"), "utf8");
+  const styles = fs.readFileSync(path.join(root, "styles", "my-downloads.css"), "utf8");
+  assert.match(page, /id="offline-library-tools"/);
+  for (const filter of ["all", "downloading", "saved", "series", "attention"]) {
+    assert.match(page, new RegExp('data-library-filter="' + filter + '"'));
+  }
+  assert.match(library, /function matchesLibrary\(job\)/);
+  assert.match(library, /function episodeMarkup\(job\)/);
+  assert.match(library, /function actionMarkup\(job\)/);
+  assert.match(library, /data-action="pause"/);
+  assert.match(library, /data-action="resume"/);
+  assert.match(library, /data-action="cancel"/);
+  assert.match(library, /data-action="play"/);
+  assert.match(library, /data-action="play-file"/);
+  assert.match(library, /image\.tmdb\.org\/t\/p\/w342/);
+  assert.match(library, /poster\.split\("\/"\)\.includes\("\.\."\)/);
+  assert.doesNotMatch(library, /discoveryDetail|lastNoPeerSource|trackerAnnounces/);
+  assert.match(styles, /offline-series-card/);
+  assert.match(styles, /offline-media-card/);
+  assert.match(styles, /prefers-reduced-motion/);
+});
