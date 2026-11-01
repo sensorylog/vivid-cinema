@@ -87,6 +87,7 @@ test("advanced player launches only a validated completed download through a dir
   assert.equal(calls.length, 1);
   assert.equal(calls[0][0], executable);
   assert.equal(calls[0][2].shell, false);
+  assert.equal(calls[0][2].windowsHide, true);
   assert.equal(calls[0][2].detached, false);
   assert.equal(calls[0][1].at(-1), fs.realpathSync(mediaPath));
   assert.ok(calls[0][1].includes("--start=12.000"));
