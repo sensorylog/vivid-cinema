@@ -215,6 +215,8 @@ test("reattaching a partial torrent does not overwrite saved progress before the
     engine.attachTorrent(job);
     assert.equal(job.progress, 75.5,
       "the initial empty in-memory bitfield must not replace persisted progress");
+    assert.equal(engine.snapshot(job).progress, 75.5,
+      "the UI snapshot must keep showing saved progress while the torrent is still loading metadata");
     torrent.ready = true;
     torrent.emit("ready");
     assert.equal(job.status, "downloading");
