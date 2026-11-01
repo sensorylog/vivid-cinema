@@ -184,6 +184,18 @@ test("desktop engine downloads a video-extension payload from a local seeded tor
       console.log("[vivid-integration] leecher warning", warning?.message || String(warning));
     });
 
+    // Exercise the real pause/resume control path against the local seeded
+    // torrent before allowing the transfer to complete.
+    assert.equal(await engine.control(started.id, "pause"), true,
+      "an active desktop download should pause");
+    assert.equal(job.status, "paused", "pause should persist a paused job state");
+    const pausedState = JSON.parse(await fs.readFile(engine.statePath, "utf8"));
+    assert.equal(pausedState.jobs.find(row => row.id === started.id)?.status, "paused",
+      "the paused state should survive in the on-disk job record");
+    assert.equal(await engine.control(started.id, "resume"), true,
+      "a paused desktop download should resume");
+    assert.equal(job.status, "downloading", "resume should reattach the torrent");
+
     try {
       await waitFor(
         () => ["completed", "failed"].includes(job.status),
