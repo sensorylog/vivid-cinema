@@ -288,7 +288,20 @@ function ensureBackControl() {
   const main = document.querySelector("main");
   if (!main || document.querySelector("[data-vivid-back]")) return;
   const page = document.body?.dataset?.vividPage || "";
-  if (["home", "landing", "live"].includes(page)) return;
+  const isWindowsDesktop = window.vividDownloads?.available === true;
+  if (isWindowsDesktop) {
+    if (page === "landing") return;
+    let hasInternalPreviousPage = false;
+    try {
+      const previous = document.referrer ? new URL(document.referrer, location.href) : null;
+      hasInternalPreviousPage = previous?.origin === location.origin &&
+        (previous.pathname + previous.search + previous.hash) !==
+        (location.pathname + location.search + location.hash);
+    } catch {}
+    if (page === "home" && !hasInternalPreviousPage) return;
+  } else if (["home", "landing", "live"].includes(page)) {
+    return;
+  }
   const back = document.createElement("a");
   back.className = "vivid-page-back";
   back.href = "home.html";
@@ -382,6 +395,9 @@ function initAppShell() {
   setViewportState();
   setConnectionState();
   setPageIdentity();
+  if (window.vividDownloads?.available === true) {
+    document.body.classList.add("vivid-windows-desktop");
+  }
   syncVividBranding();
   showPostAuthNotice();
   syncNavigation();
