@@ -57,6 +57,11 @@
   <section id="offline-player-section" class="offline-player-section" hidden aria-label="Offline video player">
     <div class="offline-player-heading"><h2 id="offline-player-title">Vivid Ultra Player</h2><button id="offline-player-close" type="button">Close player</button></div>
     <video id="offline-player" controls playsinline preload="metadata"></video>
+    <div id="offline-resume-prompt" class="offline-resume-prompt" hidden role="group" aria-label="Resume playback">
+      <span id="offline-resume-copy">Continue watching?</span>
+      <button id="offline-resume-continue" type="button">Continue</button>
+      <button id="offline-resume-restart" type="button">Start over</button>
+    </div>
     <div id="offline-custom-controls" class="offline-custom-controls" hidden>
       <button id="offline-skip-back" type="button" aria-label="Back 10 seconds">↶ 10s</button>
       <button id="offline-play-toggle" type="button" aria-label="Play or pause">Play</button>
@@ -69,6 +74,7 @@
       <label class="offline-audio-track-control" hidden>Audio <select id="offline-audio-track" aria-label="Audio track"></select></label>
       <label class="offline-speed-control">Speed <select id="offline-speed"><option value="0.75">0.75×</option><option value="1" selected>1×</option><option value="1.25">1.25×</option><option value="1.5">1.5×</option><option value="2">2×</option></select></label>
       <button id="offline-fullscreen" type="button">Fullscreen</button>
+      <button id="offline-next-episode" type="button" hidden>Next episode</button>
     </div>
     <p>Playing a video saved locally on this device.</p>
   </section>
