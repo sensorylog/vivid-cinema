@@ -521,13 +521,14 @@ test("desktop engine downloads a video-extension payload from a local seeded tor
 
     // A persisted job record must not redirect the player to a file outside
     // that download's own directory, even if the path exists on disk.
-    const trustedFiles = job.files;
+    const restoredJob = engine.jobs.get(started.id);
+    const trustedFiles = restoredJob.files;
     const outsidePath = path.join(root, "outside-job-media.mp4");
     await fs.writeFile(outsidePath, Buffer.from("not part of this download"));
-    job.files = [{ ...trustedFiles[0], path: outsidePath }];
+    restoredJob.files = [{ ...trustedFiles[0], path: outsidePath }];
     assert.equal(engine.mediaFile(started.id, 0), null,
       "the player must refuse media paths outside the job's download directory");
-    job.files = trustedFiles;
+    restoredJob.files = trustedFiles;
   } finally {
     if (engine) await withTimeout(engine.shutdown(), 10000, "download engine shutdown").catch(() => {});
     await closeClient(seeder);
