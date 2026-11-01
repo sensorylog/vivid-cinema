@@ -253,7 +253,7 @@ async function loadSectionBatch(keys){
       const button=document.querySelector('[data-load-section="'+key+'"]');
       if(button)button.hidden=data.page>=data.totalPages;
       updateRailControls($(railId));
-      if(key==="trending")initFeatureStrip(data.items);
+      if(key==="trending"){initFeatureStrip(data.items);window.dispatchEvent(new CustomEvent("vivid:home-trending-ready",{detail:data.items}));}
     }catch(error){
       console.warn("Vivid home section failed:",key,error);
       const el=$(railId);
