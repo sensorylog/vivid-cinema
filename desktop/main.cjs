@@ -5,7 +5,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 const crypto = require("node:crypto");
 const { DesktopDownloadEngine } = require("./download-engine.cjs");
-const { Readable } = require("node:stream");
+const { createMediaResponse } = require("./media-protocol.cjs");
 protocol.registerSchemesAsPrivileged([{ scheme: "vivid-media", privileges: { standard: true, secure: true, supportFetchAPI: true, corsEnabled: true, stream: true } }]);
 
 const appRoot = app.getAppPath();
@@ -174,29 +174,20 @@ function isTrustedDownloadSender(event) {
 function configureOfflineMediaProtocol() {
   protocol.handle("vivid-media", async request => {
     const url = new URL(request.url);
-    if (url.hostname !== "download" || url.searchParams.get("token") !== mediaToken) return new Response("Forbidden", { status: 403 });
-    const id = decodeURIComponent(url.pathname.slice(1));
+    if (url.hostname !== "download" || url.searchParams.get("token") !== mediaToken) {
+      return new Response("Forbidden", { status: 403 });
+    }
+    let id;
+    try { id = decodeURIComponent(url.pathname.slice(1)); }
+    catch { return new Response("Invalid media id", { status: 400 }); }
     const fileIndex = Number(url.searchParams.get("file") || 0);
     const filePath = downloadEngine && downloadEngine.mediaFile(id, fileIndex);
     if (!filePath) return new Response("Media not found", { status: 404 });
     let stat;
-    try { stat = await fs.promises.stat(filePath); } catch { return new Response("Media not found", { status: 404 }); }
-    const ext = path.extname(filePath).toLowerCase();
-    const types = { ".mp4":"video/mp4", ".m4v":"video/mp4", ".mkv":"video/x-matroska", ".webm":"video/webm", ".mov":"video/quicktime", ".avi":"video/x-msvideo", ".ogv":"video/ogg", ".mpg":"video/mpeg", ".mpeg":"video/mpeg", ".wmv":"video/x-ms-wmv", ".flv":"video/x-flv", ".ts":"video/mp2t", ".m2ts":"video/mp2t", ".3gp":"video/3gpp" };
-    const headers = new Headers({ "Content-Type":types[ext] || "application/octet-stream", "Accept-Ranges":"bytes", "Content-Length":String(stat.size), "Access-Control-Allow-Origin":"*", "Cache-Control":"no-store" });
-    const range = request.headers.get("range");
-    if (range) {
-      const raw = String(range).replace("bytes=", "").split("-");
-      const start = raw[0] ? Number(raw[0]) : Math.max(0, stat.size - Number(raw[1] || 0));
-      const end = raw[0] && raw[1] ? Math.min(Number(raw[1]), stat.size - 1) : stat.size - 1;
-      if (!Number.isSafeInteger(start) || !Number.isSafeInteger(end) || start > end || start >= stat.size) return new Response(null, { status:416, headers:{ "Content-Range":"bytes */" + stat.size } });
-      headers.set("Content-Range", "bytes " + start + "-" + end + "/" + stat.size);
-      headers.set("Content-Length", String(end - start + 1));
-      if (request.method === "HEAD") return new Response(null, { status:206, headers });
-      return new Response(Readable.toWeb(fs.createReadStream(filePath, { start, end })), { status:206, headers });
-    }
-    if (request.method === "HEAD") return new Response(null, { status:200, headers });
-    return new Response(Readable.toWeb(fs.createReadStream(filePath)), { status:200, headers });
+    try { stat = await fs.promises.stat(filePath); }
+    catch { return new Response("Media not found", { status: 404 }); }
+    if (!stat.isFile()) return new Response("Media not found", { status: 404 });
+    return createMediaResponse(request, filePath, stat);
   });
 }
 function configureDownloadEngine() {
