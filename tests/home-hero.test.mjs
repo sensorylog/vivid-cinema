@@ -174,7 +174,7 @@ test("app Home exposes the official download page on desktop, mobile, and footer
   assert.match(sw, /vivid-cinema-shell-v\d+/);
   assert.match(sw, /"\.\/downloads\.html"/);
   assert.match(sw, /"\.\/styles\/downloads\.css"/);
-  assert.match(sw, /"\.\/scripts\/downloads\.js\?v=direct-download-v3"/);
+  assert.match(sw, /"\.\/scripts\/downloads\.js\?v=direct-download-v4"/);
 });
 
 
