@@ -76,7 +76,7 @@ class AdvancedPlayer {
     try {
       await fs.promises.access(executable, fs.constants.F_OK);
     } catch {
-      throw new Error("The Vivid Advanced Player runtime is missing. Reinstall or update Vivid Cinema to repair it.");
+      throw new Error("The Vivid Advanced Player is not bundled with this build. Use a Windows release that includes the Advanced Player runtime.");
     }
 
     const savedPosition = this.downloadEngine.getPlaybackPosition?.(jobId, index) || 0;
