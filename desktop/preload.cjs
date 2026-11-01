@@ -6,6 +6,8 @@ contextBridge.exposeInMainWorld("vividDownloads", Object.freeze({
   search: query => ipcRenderer.invoke("vivid-download-search", query),
   start: (result, media) => ipcRenderer.invoke("vivid-download-start", result, media),
   list: () => ipcRenderer.invoke("vivid-download-list"),
+  openAdvancedPlayer: (id, fileIndex = 0) => ipcRenderer.invoke("vivid-advanced-player-open", id, fileIndex),
+  stopAdvancedPlayer: () => ipcRenderer.invoke("vivid-advanced-player-stop"),
   mediaUrl: (id, fileIndex = 0) => ipcRenderer.invoke("vivid-download-media-url", id, fileIndex),
   getPlaybackPosition: (id, fileIndex = 0) => ipcRenderer.invoke("vivid-playback-position-get", id, fileIndex),
   setPlaybackPosition: (id, fileIndex = 0, seconds = 0) => ipcRenderer.invoke("vivid-playback-position-set", id, fileIndex, seconds),
