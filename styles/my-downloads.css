@@ -382,3 +382,8 @@ html.vivid-performance-legacy .offline-library-tools,html.vivid-performance-lega
   visibility: hidden;
 }
 
+
+
+.offline-player-heading-actions{display:flex;align-items:center;justify-content:flex-end;gap:.55rem;flex-wrap:wrap}
+.offline-player-heading-actions button{min-height:38px}
+@media(max-width:560px){.offline-player-heading{align-items:flex-start;gap:.7rem}.offline-player-heading-actions{width:100%;justify-content:flex-start}}
