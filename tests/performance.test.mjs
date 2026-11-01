@@ -18,20 +18,24 @@ test("home trending animation avoids forced synchronous layout and repeated fall
 
 test("Home paints catalogue shelves independently and reuses trending data for the feature strip", async () => {
   const source = await read("script.js");
-  const batch = source.match(/async function loadSectionBatch\(keys\)\{([\\s\\S]*?)\\n\}/)?.[1] || "";
-  const feature = source.match(/function initFeatureStrip\(items=\[\]\)\{([\\s\\S]*?)\\n\}/)?.[1] || "";
-  assert.match(batch, /Promise\\.all\\(keys\\.map\\(async key/);
-  assert.match(batch, /if\\(key==="trending"\\)initFeatureStrip\\(data\\.items\\)/);
-  assert.doesNotMatch(feature, /tmdbApi\\.trending/);
-  assert.doesNotMatch(source, /\\[\\["top10","topRatedMovies","popularTv"\\]/);
+  const batchStart = source.indexOf("async function loadSectionBatch(keys){");
+  const batchEnd = source.indexOf("async function loadMoreSection", batchStart);
+  const featureStart = source.indexOf("function initFeatureStrip(items=[]){");
+  const featureEnd = source.indexOf("function wireRails", featureStart);
+  const batch = source.slice(batchStart, batchEnd);
+  const feature = source.slice(featureStart, featureEnd);
+  assert.match(batch, /Promise\.all\(keys\.map\(async key/);
+  assert.match(batch, /if\(key==="trending"\)initFeatureStrip\(data\.items\)/);
+  assert.doesNotMatch(feature, /tmdbApi\.trending/);
+  assert.doesNotMatch(source, /\[\["top10","topRatedMovies","popularTv"\]/);
 });
 
 test("offline download progress patches the changed row instead of rebuilding the full library", async () => {
   const desktop = await read("scripts/downloads/desktop-offline.js");
   assert.match(desktop, /data-job-id=/);
-  assert.match(desktop, /function updateJobProgress\\(job\\)/);
-  assert.match(desktop, /if\\(previous\\.status!==payload\\.status\\)render\\(\\);\\s*else updateJobProgress\\(jobs\\[index\\]\\)/);
-  assert.match(desktop, /if\\(changed\\)render\\(\\)/);
+  assert.match(desktop, /function updateJobProgress\(job\)/);
+  assert.match(desktop, /if\(previous\.status!==payload\.status\)render\(\);\s*else updateJobProgress\(jobs\[index\]\)/);
+  assert.match(desktop, /if\(changed\)render\(\)/);
 });
 
 test("watch page disables expensive ambient blur animation and overlay", async () => {
