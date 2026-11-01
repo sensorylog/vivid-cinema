@@ -6,10 +6,11 @@ const os = require("node:os");
 const crypto = require("node:crypto");
 const { spawnSync } = require("node:child_process");
 
-const MPV_VERSION = "0.41.0-dev-g9e2ed65eb";
-const ARCHIVE_NAME = "mpv-v0.41.0-dev-g9e2ed65eb-41103006513-x86_64-w64-mingw32-full.zip";
-const ARCHIVE_URL = "https://github.com/mpv-player/mpv/releases/download/git-release/" + ARCHIVE_NAME;
-const ARCHIVE_SHA256 = "24a5ac969219767c617f5d109761d4e24db8ba05dee30db485ea756415dc63b4";
+const MPV_VERSION = "0.41.0";
+const MPV_SOURCE_COMMIT = "41f6a645068483470267271e1d09966ca3b9f413";
+const ARCHIVE_NAME = "mpv-v0.41.0-x86_64-w64-mingw32.zip";
+const ARCHIVE_URL = "https://github.com/mpv-player/mpv/releases/download/v0.41.0/" + ARCHIVE_NAME;
+const ARCHIVE_SHA256 = "a49811c0752c108b8260636f9c6f6fcb97406641c98b30f1e7b500dfb20177de";
 const MAX_ARCHIVE_BYTES = 150 * 1024 * 1024;
 
 async function downloadPinnedArchive(destination) {
@@ -90,8 +91,9 @@ async function prepareMpv({ platform = process.platform, projectRoot = path.reso
       archive: ARCHIVE_NAME,
       archiveUrl: ARCHIVE_URL,
       sha256: ARCHIVE_SHA256,
-      source: "https://github.com/mpv-player/mpv/tree/9e2ed65eb0c02f99a352dfa1ad3c85ecceefe005",
-      buildWorkflow: "https://github.com/mpv-player/mpv/blob/4013a3c9b6f6b3b4d2d8f971e91c2e1eab3f8184/.github/workflows/build.yml"
+      sourceCommit: MPV_SOURCE_COMMIT,
+      source: "https://github.com/mpv-player/mpv/tree/" + MPV_SOURCE_COMMIT,
+      release: "https://github.com/mpv-player/mpv/releases/tag/v0.41.0"
     }, null, 2) + "\n");
     return { skipped: false, executable: path.join(vendorPath, "mpv.exe"), version: MPV_VERSION };
   } finally {
@@ -108,4 +110,4 @@ if (require.main === module) {
   });
 }
 
-module.exports = { prepareMpv, downloadPinnedArchive, ARCHIVE_URL, ARCHIVE_SHA256, MPV_VERSION };
+module.exports = { prepareMpv, downloadPinnedArchive, ARCHIVE_URL, ARCHIVE_SHA256, MPV_VERSION, MPV_SOURCE_COMMIT };
