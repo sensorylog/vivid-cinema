@@ -264,6 +264,39 @@ test("desktop engine downloads a video-extension payload from a local seeded tor
     assert.equal(downloaded.length, payload.length, "downloaded file should have the expected byte length");
     assert.deepEqual(downloaded, payload, "downloaded file should match the seeded video bytes");
     assert.ok(job.discovery.trackerAnnounces > 0, "download should announce through the local tracker");
+
+    // Exercise the real offline-library persistence boundary: save a playback
+    // position, close the engine as if Vivid were exiting, then restore it.
+    assert.equal(await engine.setPlaybackPosition(started.id, 0, 123.9), true,
+      "completed media should accept a per-file playback position");
+    assert.equal(engine.getPlaybackPosition(started.id, 0), 123,
+      "playback positions should be stored as whole seconds");
+    assert.equal(await engine.setPlaybackPosition(started.id, 0, -1), false,
+      "negative playback positions must be rejected");
+
+    console.log("[vivid-integration] stage: restart engine and restore library");
+    await withTimeout(engine.shutdown(), 10000, "pre-restart download engine shutdown");
+    engine = new DesktopDownloadEngine({
+      app: {
+        getPath(name) {
+          return name === "downloads" ? downloadsPath : userDataPath;
+        }
+      },
+      BrowserWindow: { getAllWindows: () => [] },
+      dialog: {},
+      shell: {}
+    });
+    await withTimeout(engine.ready, 10000, "download library restoration");
+    const restoredJobs = await engine.list();
+    assert.equal(restoredJobs.length, 1, "the completed download should appear once after restart");
+    assert.equal(restoredJobs[0].id, started.id, "the original download identity should survive restart");
+    assert.equal(restoredJobs[0].status, "completed", "completed media should remain saved after restart");
+    assert.equal(engine.getPlaybackPosition(started.id, 0), 123,
+      "the per-file playback position should survive restart");
+    assert.equal(engine.mediaFile(started.id, 0), job.filePath,
+      "restored completed media should remain addressable by the player");
+    assert.deepEqual(await fs.readFile(engine.mediaFile(started.id, 0)), payload,
+      "the restored library should still point to the original downloaded bytes");
   } finally {
     if (engine) await withTimeout(engine.shutdown(), 10000, "download engine shutdown").catch(() => {});
     await closeClient(seeder);
