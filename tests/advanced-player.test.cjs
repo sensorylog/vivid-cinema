@@ -51,12 +51,13 @@ test("advanced player launches only a validated completed download through a dir
 
   const calls = [];
   const children = [];
+  const savedPositions = [];
   const player = new AdvancedPlayer({
     app: { isPackaged: true, getAppPath: () => root },
     downloadEngine: {
       mediaFile: (id, index) => id === "job-1" && index === 0 ? mediaPath : null,
       getPlaybackPosition: () => 12,
-      setPlaybackPosition: async () => true
+      setPlaybackPosition: async (...args) => { savedPositions.push(args); return true; }
     },
     platform: "win32",
     resourcesPath: root,
@@ -89,6 +90,9 @@ test("advanced player launches only a validated completed download through a dir
   assert.ok(calls[0][1].includes("--start=12.000"));
   await new Promise(resolve => setImmediate(resolve));
   assert.match(player.ipcSocket.lastWrite, /observe_property/);
+  player.ipcSocket.emit("data", JSON.stringify({ event: "property-change", id: 1, name: "time-pos", data: 24 }) + "\\n");
+  await new Promise(resolve => setImmediate(resolve));
+  assert.ok(savedPositions.some(row => row[0] === "job-1" && row[1] === 0 && row[2] === 24), "mpv time-pos events update Vivid resume state");
 
   await player.open("job-1", 0);
   assert.equal(children[0].killed, true, "opening another title stops the previous mpv process");
