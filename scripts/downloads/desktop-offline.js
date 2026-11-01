@@ -255,6 +255,70 @@ byId("offline-fullscreen").addEventListener("click",async()=>{
   catch{setMessage("Fullscreen is not available on this device.");}
 });
 let lastPositionSave=0;
+let resumePosition=0;
+let controlsHideTimer=0;
+let activePlayerJob=null;
+function showPlayerControls(){
+  const section=byId("offline-player-section");
+  section.classList.remove("controls-hidden");
+  if(controlsHideTimer)clearTimeout(controlsHideTimer);
+  if(!player.paused){
+    controlsHideTimer=setTimeout(()=>{
+      if(!player.paused&&!section.matches(":focus-within"))section.classList.add("controls-hidden");
+    },3200);
+  }
+}
+function hidePlayerControls(){
+  const section=byId("offline-player-section");
+  if(!player.paused&&!section.matches(":focus-within"))section.classList.add("controls-hidden");
+}
+function findNextEpisode(job){
+  const media=job?.media||{};
+  const episode=Number(media.episode),season=Number(media.season);
+  const seriesTitle=String(media.title||"").trim().toLowerCase();
+  if(!seriesTitle||!Number.isInteger(episode)||episode<1||!Number.isInteger(season))return null;
+  return jobs.find(candidate=>{
+    if(candidate.status!=="completed"||candidate.id===job.id)return false;
+    const next=candidate.media||{};
+    return String(next.title||"").trim().toLowerCase()===seriesTitle
+      &&Number(next.season)===season&&Number(next.episode)===episode+1;
+  })||null;
+}
+function syncNextEpisode(job){
+  const next=findNextEpisode(job);
+  const button=byId("offline-next-episode");
+  button.hidden=!next;
+  button.dataset.jobId=next?.id||"";
+  button.textContent=next?"Next episode · S"+String(next.media.season).padStart(2,"0")+"E"+String(next.media.episode).padStart(2,"0"):"Next episode";
+}
+byId("offline-resume-continue").addEventListener("click",async()=>{
+  const prompt=byId("offline-resume-prompt");
+  if(resumePosition>0&&Number.isFinite(player.duration)&&resumePosition<player.duration-1)player.currentTime=resumePosition;
+  prompt.hidden=true;resumePosition=0;
+  try{await player.play();}catch{setMessage("Press Play to continue watching.");}
+  showPlayerControls();
+});
+byId("offline-resume-restart").addEventListener("click",async()=>{
+  const prompt=byId("offline-resume-prompt");
+  prompt.hidden=true;resumePosition=0;player.currentTime=0;
+  if(player.dataset.jobId)void engine.clearPlaybackPosition(player.dataset.jobId,Number(player.dataset.fileIndex)||0).catch(()=>{});
+  try{await player.play();}catch{setMessage("Press Play to start from the beginning.");}
+  showPlayerControls();
+});
+byId("offline-next-episode").addEventListener("click",async()=>{
+  const next=jobs.find(job=>job.id===byId("offline-next-episode").dataset.jobId);
+  if(!next)return;
+  try{await play(next,0);}catch(error){setMessage(error?.message||"Could not open the next episode.");}
+});
+const playerSection=byId("offline-player-section");
+playerSection.addEventListener("pointermove",showPlayerControls);
+playerSection.addEventListener("pointerdown",showPlayerControls);
+playerSection.addEventListener("pointerleave",hidePlayerControls);
+playerSection.addEventListener("focusin",showPlayerControls);
+playerSection.addEventListener("focusout",()=>{if(!playerSection.matches(":focus-within"))showPlayerControls();});
+document.addEventListener("fullscreenchange",showPlayerControls);
+player.addEventListener("play",showPlayerControls);
+player.addEventListener("pause",showPlayerControls);
 player.addEventListener("timeupdate",()=>{
   syncPlayerControls();
   if(player.dataset.jobId&&player.currentTime-lastPositionSave>=5){
@@ -269,9 +333,18 @@ player.addEventListener("loadedmetadata",()=>{
   const jobId=player.dataset.jobId, fileIndex=Number(player.dataset.fileIndex)||0;
   void engine.getPlaybackPosition(jobId,fileIndex).then(saved=>{
     if(player.dataset.jobId!==jobId||Number(player.dataset.fileIndex)!==fileIndex)return;
-    if(saved>5&&Number.isFinite(player.duration)&&saved<player.duration-30)player.currentTime=saved;
+    if(saved>5&&Number.isFinite(player.duration)&&saved<player.duration-30){
+      resumePosition=saved;
+      player.pause();
+      byId("offline-resume-copy").textContent="Continue from "+clock(saved)+"?";
+      byId("offline-resume-prompt").hidden=false;
+      showPlayerControls();
+    }else{
+      resumePosition=0;
+      byId("offline-resume-prompt").hidden=true;
+    }
     syncPlayerControls();
-  }).catch(syncPlayerControls);
+  }).catch(()=>{resumePosition=0;byId("offline-resume-prompt").hidden=true;syncPlayerControls();});
 });
 player.addEventListener("durationchange",syncPlayerControls);
 player.addEventListener("loadedmetadata",refreshAudioTracks);
@@ -284,7 +357,14 @@ if(player.audioTracks){
 }
 player.addEventListener("play",syncPlayerControls);
 player.addEventListener("pause",syncPlayerControls);
-player.addEventListener("ended",()=>{if(player.dataset.jobId)void engine.clearPlaybackPosition(player.dataset.jobId,Number(player.dataset.fileIndex)||0).catch(()=>{});syncPlayerControls();});
+player.addEventListener("ended",()=>{
+  if(player.dataset.jobId)void engine.clearPlaybackPosition(player.dataset.jobId,Number(player.dataset.fileIndex)||0).catch(()=>{});
+  byId("offline-resume-prompt").hidden=true;
+  const job=jobs.find(item=>item.id===player.dataset.jobId);
+  syncNextEpisode(job);
+  showPlayerControls();
+  syncPlayerControls();
+});
 window.addEventListener("pagehide",()=>{
   if(player.dataset.jobId&&player.currentTime>0)void engine.setPlaybackPosition(player.dataset.jobId,Number(player.dataset.fileIndex)||0,player.currentTime).catch(()=>{});
 });
@@ -302,10 +382,16 @@ async function play(job,fileIndex=0){
   const file=Array.isArray(job.files)?job.files[fileIndex]:null;
   const playerTitle=file&&job.files.length>1?job.title+" — "+file.name:job.title;
   byId("offline-player-title").textContent=playerTitle;
+  activePlayerJob=job;
+  syncNextEpisode(job);
+  byId("offline-next-episode").hidden=true;
+  byId("offline-resume-prompt").hidden=true;
+  resumePosition=0;
   const section=byId("offline-player-section");
   if(player.dataset.jobId!==job.id||player.dataset.fileIndex!==String(fileIndex)){player.pause();clearExternalSubtitle();player.src=url;player.dataset.jobId=job.id;player.dataset.fileIndex=String(fileIndex);player.load();lastPositionSave=0;byId("offline-player-section").dataset.subtitleSize="medium";byId("offline-subtitle-size").value="medium";}
   player.controls=false;
   byId("offline-custom-controls").hidden=false;
+  section.classList.remove("controls-hidden");
   section.hidden=false;section.scrollIntoView({behavior:"smooth",block:"start"});
   try{await player.play();}catch{setMessage("Your movie is ready. Press Play in the Vivid player to begin.");}
   syncPlayerControls();
@@ -355,7 +441,13 @@ byId("offline-jobs").addEventListener("click",async event=>{
   finally{button.disabled=false;}
 });
 player.addEventListener("error",()=>setMessage("This file uses a video format or codec the built-in player cannot decode. Try an MP4 or WebM release."));
-byId("offline-player-close").addEventListener("click",()=>{player.pause();clearExternalSubtitle();player.removeAttribute("src");player.load();player.dataset.jobId="";player.controls=true;byId("offline-custom-controls").hidden=true;byId("offline-player-section").hidden=true;byId("offline-audio-track").parentElement.hidden=true;});
+byId("offline-player-close").addEventListener("click",()=>{
+  if(controlsHideTimer)clearTimeout(controlsHideTimer);
+  player.pause();clearExternalSubtitle();player.removeAttribute("src");player.load();player.dataset.jobId="";
+  player.controls=true;byId("offline-custom-controls").hidden=true;byId("offline-player-section").hidden=true;
+  byId("offline-audio-track").parentElement.hidden=true;byId("offline-resume-prompt").hidden=true;
+  byId("offline-next-episode").hidden=true;byId("offline-player-section").classList.remove("controls-hidden");
+});
 engine.onProgress(payload=>{
   if(payload.status==="cancelled"||payload.removed){jobs=jobs.filter(item=>item.id!==payload.id);render();return;}
   const index=jobs.findIndex(item=>item.id===payload.id);
