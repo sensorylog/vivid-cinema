@@ -181,7 +181,19 @@ class DesktopDownloadEngine {
     job.error = null;
     const jobPath = job.downloadPath || this.downloadPath;
     fs.mkdirSync(jobPath, { recursive: true });
-    const torrent = this.client.add(job.magnet, { path: jobPath, uploads: 0, announce: FALLBACK_TRACKERS });
+    let torrent;
+    try {
+      torrent = this.client.add(job.magnet, { path: jobPath, uploads: 0, announce: FALLBACK_TRACKERS });
+    } catch (error) {
+      job.status = "failed";
+      job.phase = "Could not restart saved download";
+      job.needsRescan = Number(job.downloaded) > 0;
+      job.error = safeText(error?.message || "Could not resume this download", 300);
+      job.torrent = null;
+      this.send("vivid-download-error", { id: job.id, message: job.error });
+      void this.persist().catch(saveError => console.warn("Download state save failed:", saveError.message));
+      return false;
+    }
     job.torrent = torrent;
     const publish = () => {
       job.progress = roundProgress(torrent);
