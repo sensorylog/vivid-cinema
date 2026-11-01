@@ -7,7 +7,7 @@
 .offline-list-heading{display:flex;align-items:center;justify-content:space-between;gap:12px}.offline-list-heading h2{font-size:22px;margin:0}.offline-list-heading>span{font-size:12px;color:#9ca8bd}.offline-message{color:#9ca8bd;font-size:13px}
 .offline-empty{padding:36px 20px;text-align:center;border:1px dashed rgba(150,165,195,.22);border-radius:18px;color:#aab4c7}.offline-empty strong{display:block;color:#e8ebf4;font-size:15px;margin-bottom:7px}.offline-empty p{font-size:13px;line-height:1.6;margin:0}
 .offline-job{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px;align-items:center;padding:17px 0;border-bottom:1px solid rgba(150,165,195,.14)}.offline-job-title{font-weight:700;overflow-wrap:anywhere}.offline-job-meta{font-size:12px;color:#9ca8bd;margin-top:5px}.offline-job-error{font-size:12px;color:#ffb5a9;margin-top:6px}.offline-job-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}.offline-job-actions button{border:1px solid rgba(170,185,220,.24);background:rgba(255,255,255,.05);color:#e8ebf4;padding:8px 11px;border-radius:10px;font:600 12px/1.2 system-ui,sans-serif;cursor:pointer}.offline-job-actions button:hover{background:rgba(255,255,255,.11)}.offline-job-actions button:focus-visible,.offline-back:focus-visible{outline:2px solid #9bb2ff;outline-offset:3px}
-body.vivid-desktop-offline-library .offline-progress{height:4px;background:rgba(255,255,255,.1);border-radius:9px;overflow:hidden;margin-top:10px}.offline-progress span{display:block;height:100%;background:linear-gradient(90deg,#52c7ff,#8b7cff);width:0}
+.offline-progress{height:4px;background:rgba(255,255,255,.1);border-radius:9px;overflow:hidden;margin-top:10px}.offline-progress span{display:block;height:100%;background:linear-gradient(90deg,#52c7ff,#8b7cff);width:0}
 .offline-footnote{margin:30px 0 18px;color:#8491a8;font-size:11px;line-height:1.65}.offline-back{color:#c5d0e8;text-decoration:none;font-size:13px}
 @media(max-width:600px){.offline-library{width:min(100% - 28px,980px);margin-top:32px}.offline-notice{padding:17px}.offline-job{grid-template-columns:1fr}.offline-job-actions{justify-content:flex-start}.offline-summary div{padding:14px}.offline-summary strong{font-size:23px}}
 
@@ -27,7 +27,7 @@ body.vivid-desktop-offline-library .offline-progress{height:4px;background:rgba(
 .offline-result strong{font-size:13px;overflow-wrap:anywhere}.offline-result p,.offline-muted{margin:5px 0 0;color:#9ca8bd;font-size:11px}
 .offline-search-results button{min-height:36px;padding:0 14px;flex:none}
 .offline-search-results button:disabled{opacity:.55;cursor:wait}
-body.vivid-desktop-offline-library .offline-job-actions button:disabled{opacity:.55;cursor:wait}
+.offline-job-actions button:disabled{opacity:.55;cursor:wait}
 @media(max-width:600px){.offline-desktop-search form{grid-template-columns:1fr}.offline-result{align-items:flex-start;flex-direction:column}.offline-search-results button{width:100%}}
 
 .offline-custom-controls{display:flex;align-items:center;gap:13px;flex-wrap:wrap;padding:13px 4px 2px;color:#dfe5f5}
@@ -185,8 +185,8 @@ html.vivid-performance-legacy .offline-seek-feedback{animation:none;opacity:.95}
 .offline-media-copy .offline-job-actions{justify-content:flex-start;margin-top:4px}
 body.vivid-desktop-offline-library .offline-job-actions button{min-height:34px;padding:7px 10px;border:1px solid rgba(170,185,220,.2);border-radius:9px;background:rgba(255,255,255,.045);color:#dce3f2;font:650 10px system-ui,sans-serif;cursor:pointer}
 body.vivid-desktop-offline-library .offline-job-actions button.is-primary{background:linear-gradient(110deg,#7164e8,#4775ce);border-color:transparent;color:#fff}
-.offline-job-actions button:disabled{opacity:.5;cursor:wait}
-.offline-progress{width:100%;height:5px;margin:3px 0 0;overflow:hidden;border-radius:99px;background:rgba(255,255,255,.1)}
+body.vivid-desktop-offline-library .offline-job-actions button:disabled{opacity:.5;cursor:wait}
+body.vivid-desktop-offline-library .offline-progress{width:100%;height:5px;margin:3px 0 0;overflow:hidden;border-radius:99px;background:rgba(255,255,255,.1)}
 body.vivid-desktop-offline-library .offline-progress span{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#6b70e8,#7ec4f1);transition:width .22s ease}
 .offline-series-card-heading{display:grid;grid-template-columns:78px minmax(0,1fr);gap:14px;align-items:center;padding:16px 16px 13px}
 .offline-series-card-heading .offline-poster{width:78px}
