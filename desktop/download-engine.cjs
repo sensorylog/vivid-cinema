@@ -27,25 +27,8 @@ class DesktopDownloadEngine {
     // Do not set uploadLimit: 0: WebTorrent applies it to all outgoing peer traffic,
     // including handshakes and piece requests needed to download. Disable payload
     // uploads per torrent instead, while leaving protocol traffic unrestricted.
-    this.client = new WebTorrent();
     this.clientError = null;
-    // WebTorrent can emit a client-level error when DHT/network discovery fails.
-    // Always handle it so a UDP/DHT failure cannot become an unhandled EventEmitter error.
-    this.client.on("error", error => {
-      this.clientError = safeText(error?.message || "Torrent engine failed", 240);
-      for (const job of this.jobs.values()) {
-        if (!job.torrent || !["downloading", "verifying"].includes(job.status)) continue;
-        if (job.statusTimer) clearInterval(job.statusTimer);
-        job.statusTimer = null;
-        job.status = "failed";
-        job.phase = "Torrent engine error";
-        job.needsRescan = true;
-        job.error = "Torrent engine stopped: " + this.clientError;
-        job.torrent = null;
-        this.send("vivid-download-error", { id: job.id, message: job.error });
-      }
-      void this.persist().catch(saveError => console.warn("Download state save failed:", saveError.message));
-    });
+    this.createClient();
     this.jobs = new Map();
     this.searchResults = new Map();
     this.playbackPositions = new Map();
@@ -55,6 +38,37 @@ class DesktopDownloadEngine {
     fs.mkdirSync(this.downloadPath, { recursive: true });
     TorrentSearchApi.enablePublicProviders();
     this.ready = this.restore();
+  }
+
+  createClient() {
+    const client = new WebTorrent();
+    this.client = client;
+    client.on("error", error => {
+      // A fatal WebTorrent client error destroys that client and every torrent
+      // attached to it. Preserve each job's verified progress and replace the
+      // client so Resume can reattach to the existing on-disk torrent store.
+      if (this.client !== client) return;
+      this.clientError = safeText(error?.message || "Torrent engine failed", 240);
+      for (const job of this.jobs.values()) {
+        const torrent = job.torrent;
+        if (!torrent || !["downloading", "verifying"].includes(job.status)) continue;
+        if (job.statusTimer) clearInterval(job.statusTimer);
+        job.statusTimer = null;
+        if (job.persistTimer) clearTimeout(job.persistTimer);
+        job.persistTimer = null;
+        job.progress = Math.max(Number(job.progress) || 0, roundProgress(torrent));
+        job.downloaded = Math.max(Number(job.downloaded) || 0, Number(torrent.downloaded) || 0);
+        job.total = Math.max(Number(job.total) || 0, Number(torrent.length) || 0);
+        job.status = "failed";
+        job.phase = "Torrent engine error";
+        job.needsRescan = job.downloaded > 0;
+        job.error = "Torrent engine stopped: " + this.clientError;
+        job.torrent = null;
+        this.send("vivid-download-error", { id: job.id, message: job.error });
+      }
+      this.createClient();
+      void this.persist().catch(saveError => console.warn("Download state save failed:", saveError.message));
+    });
   }
 
   send(channel, data) {
@@ -161,6 +175,7 @@ class DesktopDownloadEngine {
   }
 
   attachTorrent(job) {
+    if (!this.client || this.client.destroyed) this.createClient();
     job.status = "downloading";
     job.phase = "Connecting to peers";
     job.error = null;
@@ -192,11 +207,16 @@ class DesktopDownloadEngine {
       torrent.rescanFiles(error => {
         if (job.torrent !== torrent) return;
         if (error) {
+          job.progress = Math.max(Number(job.progress) || 0, roundProgress(torrent));
+          job.downloaded = Math.max(Number(job.downloaded) || 0, Number(torrent.downloaded) || 0);
+          job.total = Math.max(Number(job.total) || 0, Number(torrent.length) || 0);
           job.status = "failed";
+          job.needsRescan = job.downloaded > 0;
           job.error = "Could not verify the saved partial download: " + safeText(error.message, 220);
           job.torrent = null;
           void torrent.destroy({ destroyStore: false }, () => {});
           this.send("vivid-download-error", { id: job.id, message: job.error });
+          void this.persist().catch(saveError => console.warn("Download state save failed:", saveError.message));
         } else {
           job.needsRescan = false;
           job.status = "downloading";
@@ -266,12 +286,16 @@ class DesktopDownloadEngine {
       if (job.statusTimer) clearInterval(job.statusTimer);
       job.statusTimer = null;
       if (job.status === "cancelled" || job.status === "paused") return;
+      job.progress = Math.max(Number(job.progress) || 0, roundProgress(torrent));
+      job.downloaded = Math.max(Number(job.downloaded) || 0, Number(torrent.downloaded) || 0);
+      job.total = Math.max(Number(job.total) || 0, Number(torrent.length) || 0);
       job.status = "failed";
-      job.needsRescan = true;
+      job.needsRescan = job.downloaded > 0;
       job.error = safeText(error?.message || "Download failed", 300);
       job.torrent = null;
       publish();
       this.send("vivid-download-error", { id: job.id, message: job.error });
+      void this.persist().catch(saveError => console.warn("Download state save failed:", saveError.message));
     });
     publish();
   }
@@ -281,7 +305,11 @@ class DesktopDownloadEngine {
     const fileSize = job.filePath && fs.existsSync(job.filePath) ? fs.statSync(job.filePath).size : 0;
     return {
       id: job.id, title: job.title, media: job.media, status: job.status,
-      progress: torrent ? roundProgress(torrent) : job.status === "completed" ? 100 : Number(job.progress) || 0,
+      // WebTorrent's bitfield is rebuilt during rescanFiles after Resume.
+      // Keep the last verified percentage visible until that scan completes.
+      progress: job.status === "verifying"
+        ? Math.max(Number(job.progress) || 0, torrent ? roundProgress(torrent) : 0)
+        : torrent ? roundProgress(torrent) : job.status === "completed" ? 100 : Number(job.progress) || 0,
       phase: job.phase || null,
       discovery: job.discovery ? {
         trackerCount: job.discovery.trackerCount,
