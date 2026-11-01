@@ -128,7 +128,7 @@ function renderSearch(items){
     const episodeLabel=Number.isInteger(item.episode)
       ? "S"+String(item.season).padStart(2,"0")+"E"+String(item.episode).padStart(2,"0")+(item.episodeTitle?" · "+item.episodeTitle:"")
       : "";
-    return '<article class="offline-result"><div><strong>'+escapeHtml(item.title)+'</strong><p>'+(episodeLabel?'<b>'+escapeHtml(episodeLabel)+'</b> · ':"")+escapeHtml(item.provider)+' · '+escapeHtml(item.size||"Size unknown")+' · '+Number(item.seeds||0)+' seeders · '+Number(item.peers||0)+' peers</p></div><button type="button" data-result="'+escapeHtml(item.id)+'">Download</button></article>';
+    return '<article class="offline-result"><div><strong>'+escapeHtml(item.title)+'</strong><p>'+(episodeLabel?'<b>'+escapeHtml(episodeLabel)+'</b> · ':"")+escapeHtml(item.provider)+' · '+escapeHtml(item.size||"Size unknown")+'</p></div><button type="button" data-result="'+escapeHtml(item.id)+'">Download</button></article>';
   }).join(""):'<p class="offline-muted">No matching releases. Try another quality or search term.</p>';
 }
 async function loadSeriesSeason(seasonNumber){
@@ -610,7 +610,7 @@ engine.onProgress(payload=>{
   render();
 });
 engine.onComplete(()=>{void refresh();setMessage("Download complete. Your movie is ready to watch offline.");});
-engine.onError(payload=>{void refresh();setMessage(payload.message||"A download failed.");});
+engine.onError(()=>{void refresh();setMessage("A download needs attention. Try Resume, or cancel it and choose another release.");});
 byId("offline-library-search").addEventListener("input",event=>{
   libraryQuery=event.target.value.trim().toLowerCase();
   render();
