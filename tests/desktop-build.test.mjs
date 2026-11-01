@@ -450,6 +450,9 @@ test("Advanced Player uses a pinned mpv runtime, private IPC and guarded main-pr
   assert.ok(renderer.includes("engine.openAdvancedPlayer(id,fileIndex)"));
   assert.ok(workflow.includes("node desktop/prepare-mpv.cjs"));
   assert.ok(workflow.includes("approved checksum"));
+  assert.ok(workflow.includes("CORRESPONDING-SOURCE.zip"));
+  assert.ok(workflow.includes("SOURCE-MANIFEST.json"));
+  assert.ok(workflow.includes("VIVID_SKIP_MPV_PREPARE: \"1\""));
   assert.ok(notice.includes("Release compliance gate"));
   assert.ok(notice.includes("complete corresponding-source bundle"));
   const syntaxChecker = fs.readFileSync(path.join(root, "automation", "check-syntax.mjs"), "utf8");
