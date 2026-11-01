@@ -35,6 +35,9 @@ test("mpv launch arguments use safe decoding defaults and never invoke a shell",
   assert.ok(args.includes("--osc=yes"));
   assert.ok(args.includes("--"));
   assert.equal(args.at(-1), media);
+  const resumed = createMpvArgs(media, 42.5, String.raw`\\.\pipe\vivid-mpv-test`);
+  assert.ok(resumed.includes("--start=42.500"));
+  assert.ok(resumed.includes(String.raw`--input-ipc-server=\\.\pipe\vivid-mpv-test`));
   assert.ok(!args.some(value => value.includes("cmd.exe") || value.includes("powershell")));
 });
 
@@ -50,9 +53,24 @@ test("advanced player launches only a validated completed download through a dir
   const children = [];
   const player = new AdvancedPlayer({
     app: { isPackaged: true, getAppPath: () => root },
-    downloadEngine: { mediaFile: (id, index) => id === "job-1" && index === 0 ? mediaPath : null },
+    downloadEngine: {
+      mediaFile: (id, index) => id === "job-1" && index === 0 ? mediaPath : null,
+      getPlaybackPosition: () => 12,
+      setPlaybackPosition: async () => true
+    },
     platform: "win32",
     resourcesPath: root,
+    netImpl: {
+      createConnection: () => {
+        const socket = new EventEmitter();
+        socket.destroyed = false;
+        socket.setEncoding = () => {};
+        socket.write = value => { socket.lastWrite = value; return true; };
+        socket.destroy = () => { socket.destroyed = true; };
+        queueMicrotask(() => socket.emit("connect"));
+        return socket;
+      }
+    },
     spawnImpl: (...args) => {
       calls.push(args);
       const child = fakeChild();
@@ -68,6 +86,9 @@ test("advanced player launches only a validated completed download through a dir
   assert.equal(calls[0][2].shell, false);
   assert.equal(calls[0][2].detached, false);
   assert.equal(calls[0][1].at(-1), fs.realpathSync(mediaPath));
+  assert.ok(calls[0][1].includes("--start=12.000"));
+  await new Promise(resolve => setImmediate(resolve));
+  assert.match(player.ipcSocket.lastWrite, /observe_property/);
 
   await player.open("job-1", 0);
   assert.equal(children[0].killed, true, "opening another title stops the previous mpv process");
