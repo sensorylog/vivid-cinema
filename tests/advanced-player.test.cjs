@@ -45,7 +45,9 @@ test("advanced player launches only a validated completed download through a dir
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "vivid-advanced-player-"));
   t.after(() => fs.rmSync(root, { recursive: true, force: true }));
   const mediaPath = path.join(root, "movie.mkv");
-  const executable = path.join(root, "mpv.exe");
+  const executableDirectory = path.join(root, "mpv");
+  fs.mkdirSync(executableDirectory, { recursive: true });
+  const executable = path.join(executableDirectory, "mpv.exe");
   fs.writeFileSync(mediaPath, "media");
   fs.writeFileSync(executable, "runtime");
 
@@ -81,7 +83,7 @@ test("advanced player launches only a validated completed download through a dir
     }
   });
 
-  assert.deepEqual(await player.open("job-1", 0), { started: true, engine: "mpv" });
+  assert.deepEqual(await player.open("job-1", 0), { started: true, engine: "mpv", resumedFrom: 12 });
   assert.equal(calls.length, 1);
   assert.equal(calls[0][0], executable);
   assert.equal(calls[0][2].shell, false);
@@ -109,7 +111,7 @@ test("advanced player rejects unknown jobs, missing runtime and non-Windows laun
 
   const missingRuntime = new AdvancedPlayer({
     app: { isPackaged: true, getAppPath: () => root },
-    downloadEngine: { mediaFile: () => mediaPath },
+    downloadEngine: { mediaFile: id => id === "job-1" ? mediaPath : null },
     platform: "win32",
     resourcesPath: root
   });
