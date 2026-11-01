@@ -44,11 +44,10 @@ function extractZip(archivePath, destination) {
 function findExecutable(directory) {
   for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
     const fullPath = path.join(directory, entry.name);
-    if (entry.name.toLowerCase() === "mpv.exe") {
-      try { if (fs.statSync(fullPath).isFile()) return fullPath; } catch { /* Ignore broken archive entries. */ }
-    }
     try {
-      if (entry.isDirectory() || (entry.isSymbolicLink() && fs.statSync(fullPath).isDirectory())) {
+      const stat = fs.statSync(fullPath);
+      if (entry.name.toLowerCase() === "mpv.exe" && stat.isFile()) return fullPath;
+      if (stat.isDirectory()) {
         const found = findExecutable(fullPath);
         if (found) return found;
       }
