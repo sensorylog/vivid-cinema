@@ -452,3 +452,6 @@ html.vivid-performance-legacy .offline-library-tools,html.vivid-performance-lega
 .offline-subtitle-outline-control input{accent-color:#8d8aff}
 .offline-player-section:fullscreen .offline-subtitle-overlay{z-index:7;top:12%;bottom:15%}
 @media(max-width:760px){.offline-subtitle-font-control,.offline-subtitle-color-control,.offline-subtitle-position-control,.offline-audio-language-control,.offline-subtitle-language-control{max-width:100%}.offline-subtitle-overlay{left:2%;right:2%}}
+
+.offline-open-local-file{min-height:42px;margin-top:14px;padding:9px 16px;border:1px solid rgba(170,185,220,.24);border-radius:11px;background:linear-gradient(120deg,#6965ff,#387cf4);color:#fff;font:700 13px system-ui,sans-serif;cursor:pointer}
+.offline-open-local-file:hover{filter:brightness(1.08)}.offline-open-local-file:disabled{opacity:.55;cursor:wait}
