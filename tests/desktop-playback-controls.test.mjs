@@ -33,3 +33,13 @@ test("Windows offline player provides Picture in Picture and windowed cinema mod
   assert.match(player, /exitPictureInPicture/);
   assert.match(player, /windowed-cinema/);
 });
+
+test("Windows offline player offers bounded audio boost with compression and audio delay", () => {
+  assert.match(page, /id="offline-audio-boost"[^>]*min="100" max="250"/);
+  assert.match(page, /id="offline-audio-delay"[^>]*min="0" max="500"/);
+  assert.match(player, /createMediaElementSource\(player\)/);
+  assert.match(player, /createDynamicsCompressor\(\)/);
+  assert.match(player, /audioGain\.connect\(audioCompressor\)/);
+  assert.match(player, /audioCompressor\.connect\(audioDelay\)/);
+  assert.match(player, /audioDelay\.delayTime\.setTargetAtTime/);
+});
