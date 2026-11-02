@@ -349,7 +349,7 @@ async function updatePlaybackDiagnostics(){
 }
 function syncPlayerControls(){
   const duration=Number.isFinite(player.duration)?player.duration:0;
-  byId("offline-seek").value=duration?String(Math.round(player.currentTime/duration*100000)):"0";
+  if(seekPreviewTarget===null)byId("offline-seek").value=duration?String(Math.round(player.currentTime/duration*100000)):"0";
   byId("offline-time").textContent=clock(player.currentTime)+" / "+clock(duration);
   byId("offline-play-toggle").textContent=player.paused?"Play":"Pause";
   byId("offline-play-toggle").setAttribute("aria-label",player.paused?"Play":"Pause");
@@ -753,6 +753,7 @@ function commitSeekPreview(){
 }
 seekInput.addEventListener("change",commitSeekPreview);
 seekInput.addEventListener("pointerup",commitSeekPreview);
+seekInput.addEventListener("pointercancel",commitSeekPreview);
 seekInput.addEventListener("keyup",event=>{if(["ArrowLeft","ArrowRight","Home","End","PageUp","PageDown"].includes(event.key))commitSeekPreview();});
 seekInput.addEventListener("blur",commitSeekPreview);
 byId("offline-volume").addEventListener("input",event=>{player.volume=Number(event.target.value);player.muted=player.volume===0;});
