@@ -68,7 +68,19 @@ test("advanced player launches only a validated completed download through a dir
         const socket = new EventEmitter();
         socket.destroyed = false;
         socket.setEncoding = () => {};
-        socket.write = value => { socket.lastWrite = value; return true; };
+        socket.write = value => {
+          socket.lastWrite = value;
+          const request = JSON.parse(value);
+          if (Number.isInteger(request.request_id)) {
+            const data = request.command[0] === "get_property" ? [
+              { id: 1, type: "video", selected: true },
+              { id: 2, type: "audio", title: "English", lang: "eng", codec: "aac", selected: true },
+              { id: 3, type: "sub", title: "English SDH", lang: "eng", codec: "ass", selected: false, external: false }
+            ] : null;
+            queueMicrotask(() => socket.emit("data", JSON.stringify({ request_id: request.request_id, error: "success", data }) + "\n"));
+          }
+          return true;
+        };
         socket.destroy = () => { socket.destroyed = true; };
         queueMicrotask(() => socket.emit("connect"));
         return socket;
@@ -96,6 +108,16 @@ test("advanced player launches only a validated completed download through a dir
   player.ipcSocket.emit("data", JSON.stringify({ event: "property-change", id: 1, name: "time-pos", data: 24 }) + "\n");
   await new Promise(resolve => setImmediate(resolve));
   assert.ok(savedPositions.some(row => row[0] === "job-1" && row[1] === 0 && row[2] === 24), "mpv time-pos events update Vivid resume state");
+
+  const tracks = await player.getTracks();
+  assert.equal(tracks.audio[0].title, "English");
+  assert.equal(tracks.subtitles[0].codec, "ass");
+  assert.equal(tracks.subtitles[0].id, 3);
+  await player.selectTrack("subtitle", 3);
+  assert.match(player.ipcSocket.lastWrite, /"set_property","sid",3/);
+  await player.selectTrack("audio", "off");
+  assert.match(player.ipcSocket.lastWrite, /"set_property","aid","no"/);
+  await assert.rejects(player.selectTrack("video", 1), /audio or subtitle/);
 
   await player.open("job-1", 0);
   assert.equal(children[0].killed, true, "opening another title stops the previous mpv process");
