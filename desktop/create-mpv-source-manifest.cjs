@@ -123,7 +123,7 @@ function main() {
       if (!license) continue;
       const wrapPath = path.join(subprojectsRoot, entry.name + ".wrap");
       const wrap = fs.existsSync(wrapPath) ? fs.readFileSync(wrapPath, "utf8") : "";
-      const sourceMatch = wrap.match(/^\\s*(?:source_url|url)\\s*=\\s*(.+)$/m);
+      const sourceMatch = wrap.match(/^\s*(?:source_url|url)\s*=\s*(.+)$/m);
       if (!sourceMatch) throw new Error("Meson subproject has no recorded source URL in its wrap file: " + entry.name);
       const source = sourceMatch[1].trim();
       const licenseFile = copyLicense(directory, licenseRoot, "subproject-" + entry.name);
