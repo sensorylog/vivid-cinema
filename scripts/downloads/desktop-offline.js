@@ -924,7 +924,37 @@ window.addEventListener("keydown",event=>{
   if(key==="arrowup"){event.preventDefault();player.volume=Math.min(1,player.volume+0.05);if(player.volume>0)player.muted=false;byId("offline-volume").value=String(player.volume);return;}
   if(key==="arrowdown"){event.preventDefault();player.volume=Math.max(0,player.volume-0.05);byId("offline-volume").value=String(player.volume);}
 });
+async function releaseLocalMedia(){
+  const token=player.dataset.localMediaToken;
+  if(!token)return;
+  player.dataset.localMediaToken="";
+  try{await engine.releaseLocalFile(token);}catch{}
+}
+async function playLocalFile(){
+  const file=await engine.openLocalFile();
+  if(!file)return;
+  await releaseLocalMedia();
+  player.pause();clearExternalSubtitle();chapterTrack=null;chapterCues=[];
+  activePreferenceKey="local:"+file.name+":"+file.size;applyPlaybackPreferences();
+  player.src=file.url;player.dataset.jobId="";player.dataset.fileIndex="0";
+  player.dataset.mediaFilename=file.name;player.dataset.localMediaToken=file.token;
+  player.load();lastPositionSave=0;resumePosition=0;
+  byId("offline-player-title").textContent=file.name;
+  byId("offline-resume-prompt").hidden=true;byId("offline-next-episode").hidden=true;
+  byId("offline-player-section").dataset.subtitleSize="medium";byId("offline-subtitle-size").value="medium";
+  player.controls=false;byId("offline-custom-controls").hidden=false;
+  playerSection.classList.remove("controls-hidden");playerSection.hidden=false;
+  playerSection.scrollIntoView({behavior:"smooth",block:"start"});
+  try{await player.play();}catch{setMessage("Your video is ready. Press Play in the Vivid player to begin.");}
+  setMessage("Opened "+file.name+".");syncPlayerControls();
+}
+byId("offline-open-local-file").addEventListener("click",async event=>{
+  const button=event.currentTarget;button.disabled=true;
+  try{await playLocalFile();}catch(error){setMessage(error?.message||"Could not open that video file.");}
+  finally{button.disabled=false;}
+});
 async function play(job,fileIndex=0){
+  await releaseLocalMedia();
   const url=await engine.mediaUrl(job.id,fileIndex);
   if(!url) throw new Error("The saved video file is not available.");
   const file=Array.isArray(job.files)?job.files[fileIndex]:null;
@@ -934,7 +964,7 @@ async function play(job,fileIndex=0){
   byId("offline-resume-prompt").hidden=true;
   resumePosition=0;
   const section=byId("offline-player-section");
-  if(player.dataset.jobId!==job.id||player.dataset.fileIndex!==String(fileIndex)){player.pause();clearExternalSubtitle();activePreferenceKey=playbackProfileKey(job,fileIndex);applyPlaybackPreferences();player.src=url;player.dataset.jobId=job.id;player.dataset.fileIndex=String(fileIndex);player.dataset.mediaFilename=file?.name||job.title||"Saved media";if(player.muted&&player.volume>0)player.muted=false;player.load();lastPositionSave=0;byId("offline-player-section").dataset.subtitleSize="medium";byId("offline-subtitle-size").value="medium";}
+  if(player.dataset.jobId!==job.id||player.dataset.fileIndex!==String(fileIndex)){player.pause();clearExternalSubtitle();activePreferenceKey=playbackProfileKey(job,fileIndex);applyPlaybackPreferences();player.src=url;player.dataset.jobId=job.id;player.dataset.fileIndex=String(fileIndex);player.dataset.localMediaToken="";player.dataset.mediaFilename=file?.name||job.title||"Saved media";if(player.muted&&player.volume>0)player.muted=false;player.load();lastPositionSave=0;byId("offline-player-section").dataset.subtitleSize="medium";byId("offline-subtitle-size").value="medium";}
   player.controls=false;
   byId("offline-custom-controls").hidden=false;
   section.classList.remove("controls-hidden");
@@ -992,6 +1022,7 @@ byId("offline-player-close").addEventListener("click",async()=>{
     const exit=document.exitFullscreen||document.webkitExitFullscreen;
     try{if(typeof exit==="function")await exit.call(document);}catch{}
   }
+  void releaseLocalMedia();
   player.pause();clearExternalSubtitle();chapterTrack=null;chapterCues=[];byId("offline-chapter-controls").hidden=true;byId("offline-skip-intro").hidden=true;byId("offline-skip-credits").hidden=true;byId("offline-audio-boost").value="100";byId("offline-audio-boost-value").textContent="100%";byId("offline-audio-delay").value="0";byId("offline-audio-delay-value").textContent="0 ms";if(audioGain&&audioContext)audioGain.gain.setTargetAtTime(1,audioContext.currentTime,0.015);if(audioDelay&&audioContext)audioDelay.delayTime.setTargetAtTime(0,audioContext.currentTime,0.015);player.removeAttribute("src");player.load();player.dataset.jobId="";player.dataset.mediaFilename="";diagnosticsRequest++;
   player.controls=true;byId("offline-custom-controls").hidden=true;byId("offline-player-section").classList.remove("windowed-cinema");byId("offline-player-section").hidden=true;
   byId("offline-cinema-mode").setAttribute("aria-pressed","false");byId("offline-cinema-mode").textContent="Windowed cinema";
@@ -1036,6 +1067,7 @@ byId("offline-library-tools").addEventListener("click",event=>{
 byId("offline-jobs").addEventListener("error",event=>{
   if(event.target instanceof HTMLImageElement&&event.target.closest(".offline-poster"))event.target.remove();
 },true);
+byId("offline-open-local-file").hidden=false;
 byId("offline-owner").textContent="This device";
 byId("offline-list-title").textContent="Your library";
 byId("desktop-download-search").hidden=false;
