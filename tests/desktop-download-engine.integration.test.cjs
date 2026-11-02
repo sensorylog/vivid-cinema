@@ -11,7 +11,29 @@ const { createRequire } = require("node:module");
 const requireDesktop = createRequire(path.resolve(__dirname, "../desktop/package.json"));
 const WebTorrent = requireDesktop("webtorrent");
 const { Server: TrackerServer } = requireDesktop("bittorrent-tracker");
-const { DesktopDownloadEngine, FALLBACK_TRACKERS } = require("../desktop/download-engine.cjs");
+const { DesktopDownloadEngine, FALLBACK_TRACKERS, selectVideoPayload } = require("../desktop/download-engine.cjs");
+
+test("torrent selection keeps every video and skips bundled non-video extras", () => {
+  const calls = [];
+  const files = [
+    { name: "Movie.mkv", select() { calls.push("select:Movie.mkv"); }, deselect() { calls.push("deselect:Movie.mkv"); } },
+    { name: "poster.jpg", select() { calls.push("select:poster.jpg"); }, deselect() { calls.push("deselect:poster.jpg"); } },
+    { name: "readme.nfo", select() { calls.push("select:readme.nfo"); }, deselect() { calls.push("deselect:readme.nfo"); } },
+    { name: "Episode 2.mp4", select() { calls.push("select:Episode 2.mp4"); }, deselect() { calls.push("deselect:Episode 2.mp4"); } }
+  ];
+  assert.deepEqual(selectVideoPayload({ files }), { videoFiles: 2, deselectedFiles: 2 });
+  assert.deepEqual(calls, [
+    "deselect:poster.jpg", "deselect:readme.nfo",
+    "select:Movie.mkv", "select:Episode 2.mp4"
+  ]);
+});
+
+test("torrent selection leaves unknown-only payloads untouched", () => {
+  let touched = false;
+  const files = [{ name: "archive.bin", select() { touched = true; }, deselect() { touched = true; } }];
+  assert.deepEqual(selectVideoPayload({ files }), { videoFiles: 0, deselectedFiles: 0 });
+  assert.equal(touched, false);
+});
 
 function withTimeout(value, timeoutMs, description) {
   let timer;

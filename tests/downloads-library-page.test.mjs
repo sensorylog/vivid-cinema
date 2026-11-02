@@ -112,12 +112,14 @@ test("offline player fullscreen fills the viewport and floats controls over the 
 
 test("MKV playback selects a default audio track and reports decoder failures", async () => {
   const desktop = await readFile(new URL("../scripts/downloads/desktop-offline.js", import.meta.url), "utf8");
-  assert.match(desktop, /if\(!hasEnabledTrack\)tracks\[0\]\.enabled=true/);
+  assert.match(desktop, /function audioTrackLabel\(track,index\)/);
+  assert.match(desktop, /if\(selectedIndex<0\)\{selectedIndex=0;tracks\[0\]\.enabled=true;\}/);
   assert.match(desktop, /function describePlaybackError\(\)/);
   assert.match(desktop, /code===3/);
   assert.match(desktop, /code===4/);
   assert.doesNotMatch(desktop, /webkitAudioDecodedByteCount/);
-  assert.match(desktop, /if\(player\.muted&&player\.volume>0\)player\.muted=false/);
+  assert.match(desktop, /select\.value=String\(selectedIndex\)/);
+  assert.match(desktop, /player\.addEventListener\("canplay",refreshAudioTracks\)/);
 });
 
 
@@ -136,9 +138,9 @@ test("Windows player runtime and stylesheet have cache-busting URLs", async () =
   const page = await readFile(new URL("../my-downloads.html", import.meta.url), "utf8");
   const script = await readFile(new URL("../scripts/my-downloads.js", import.meta.url), "utf8");
   const worker = await readFile(new URL("../service-worker.js", import.meta.url), "utf8");
-  assert.match(page, /my-downloads\.css\?v=advanced-mpv-fallback-v1/);
-  assert.match(script, /desktop-offline\.js\?advanced-mpv-fallback-v1/);
+  assert.match(page, /my-downloads\.css\?v=builtin-player-v1/);
+  assert.match(script, /desktop-offline\.js\?builtin-player-v1/);
   assert.match(worker, /vivid-cinema-shell-v267/);
-  assert.match(worker, /desktop-offline\.js\?advanced-mpv-fallback-v1/);
-  assert.match(worker, /my-downloads\.css\?v=advanced-mpv-fallback-v1/);
+  assert.match(worker, /desktop-offline\.js\?builtin-player-v1/);
+  assert.match(worker, /my-downloads\.css\?v=builtin-player-v1/);
 });
