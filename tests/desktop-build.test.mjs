@@ -277,7 +277,7 @@ test("Vivid Ultra Player keeps Chromium playback and adds guarded native media c
   const page = fs.readFileSync(path.join(root, "my-downloads.html"), "utf8");
   const styles = fs.readFileSync(path.join(root, "styles", "my-downloads.css"), "utf8");
   const subtitleEngine = fs.readFileSync(path.join(root, "scripts", "downloads", "subtitle-engine.js"), "utf8");
-  assert.match(page, /<video id="offline-player" controls playsinline preload="metadata"><\\/video>/);
+  assert.match(page, /<video id="offline-player" controls playsinline preload="metadata"><\/video>/);
   assert.match(page, /offline-skip-back/);
   assert.match(page, /offline-skip-forward/);
   assert.match(page, /offline-subtitle-file/);
@@ -285,16 +285,16 @@ test("Vivid Ultra Player keeps Chromium playback and adds guarded native media c
   assert.match(player, /renderSubtitleAtTime/);
   assert.match(subtitleEngine, /WEBVTT/);
   assert.match(player, /refreshAudioTracks/);
-  assert.match(player, /function audioTrackLabel\\(track,index\\)/);
-  assert.match(player, /if\\(selectedIndex<0\\)selectedIndex=0/);
-  assert.match(player, /tracks\\[index\\]\\.enabled=index===selectedIndex/);
-  assert.match(player, /player\\.addEventListener\\("canplay",refreshAudioTracks\\)/);
-  assert.match(player, /if\\(!select\\|\\|!tracks/);
-  assert.match(player, /function describePlaybackError\\(\\)/);
-  assert.match(player, /player\\.addEventListener\\("waiting"/);
-  assert.match(player, /player\\.addEventListener\\("stalled"/);
+  assert.match(player, /function audioTrackLabel\(track,index\)/);
+  assert.match(player, /if\(selectedIndex<0\)selectedIndex=0/);
+  assert.match(player, /tracks\[index\]\.enabled=index===selectedIndex/);
+  assert.match(player, /player\.addEventListener\("canplay",refreshAudioTracks\)/);
+  assert.match(player, /if\(!select\|\|!tracks/);
+  assert.match(player, /function describePlaybackError\(\)/);
+  assert.match(player, /player\.addEventListener\("waiting"/);
+  assert.match(player, /player\.addEventListener\("stalled"/);
   assert.doesNotMatch(player, /webkitAudioDecodedByteCount/);
-  assert.match(styles, /offline-player-section\\[data-subtitle-size="large"\\]/);
+  assert.match(styles, /offline-player-section\[data-subtitle-size="large"\]/);
 });
 
 
@@ -324,10 +324,10 @@ test("Ultra Player subtitle sync applies offsets from original cue timings", () 
   const player = fs.readFileSync(path.join(root, "scripts", "downloads", "desktop-offline.js"), "utf8");
   const page = fs.readFileSync(path.join(root, "my-downloads.html"), "utf8");
   assert.match(page, /offline-subtitle-offset/);
-  assert.match(player, /function applySubtitleOffset\\(\\)/);
-  assert.match(player, /cue\\.startTime=Math\\.max\\(0,base\\.start\\+offset\\)/);
-  assert.match(player, /cue\\.endTime=Math\\.max\\(cue\\.startTime\\+0\\.001,base\\.end\\+offset\\)/);
-  assert.match(player, /renderExternalSubtitle\\(\\)/);
+  assert.match(player, /function applySubtitleOffset\(\)/);
+  assert.match(player, /cue\.startTime=Math\.max\(0,base\.start\+offset\)/);
+  assert.match(player, /cue\.endTime=Math\.max\(cue\.startTime\+0\.001,base\.end\+offset\)/);
+  assert.match(player, /renderExternalSubtitle\(\)/);
 });
 
 
@@ -335,9 +335,9 @@ test("Ultra Player exposes embedded and external subtitle track selection", () =
   const player = fs.readFileSync(path.join(root, "scripts", "downloads", "desktop-offline.js"), "utf8");
   const page = fs.readFileSync(path.join(root, "my-downloads.html"), "utf8");
   assert.match(page, /offline-subtitle-track/);
-  assert.match(player, /function refreshSubtitleTracks\\(\\)/);
-  assert.match(player, /player\\.textTracks/);
-  assert.match(player, /tracks\\[index\\]\\.mode=selected>=0&&index===selected\\?"showing":"disabled"/);
+  assert.match(player, /function refreshSubtitleTracks\(\)/);
+  assert.match(player, /player\.textTracks/);
+  assert.match(player, /tracks\[index\]\.mode=selected>=0&&index===selected\?"showing":"disabled"/);
 });
 
 
