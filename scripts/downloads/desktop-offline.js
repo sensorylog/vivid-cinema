@@ -539,7 +539,7 @@ byId("offline-audio-track").addEventListener("change",event=>{
   setMessage("Selected "+audioTrackLabel(tracks[index],index)+".");
 });
 
-byId("offline-seek").addEventListener("input",event=>{if(Number.isFinite(player.duration))player.currentTime=player.duration*(Number(event.target.value)/1000);});
+byId("offline-seek").addEventListener("input",event=>{if(Number.isFinite(player.duration))player.currentTime=player.duration*(Number(event.target.value)/100000);});
 byId("offline-volume").addEventListener("input",event=>{player.volume=Number(event.target.value);player.muted=player.volume===0;});
 byId("offline-speed").addEventListener("change",event=>{player.playbackRate=Number(event.target.value)||1;});
 function currentFullscreenElement(){
