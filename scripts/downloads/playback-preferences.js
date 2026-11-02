@@ -27,7 +27,11 @@ export function savePlaybackPreferences(profileKey, patch) {
   const key = String(profileKey || "default");
   store.global = { ...(store.global || {}) };
   store.profiles = { ...(store.profiles || {}) };
-  store.profiles[key] = { ...(store.profiles[key] || {}), ...patch };
+  const normalizedPatch = { ...patch };
+  for (const field of ["audioLanguage", "subtitleLanguage"]) {
+    if (Object.prototype.hasOwnProperty.call(normalizedPatch, field)) normalizedPatch[field] = normalizeLanguageTag(normalizedPatch[field]);
+  }
+  store.profiles[key] = { ...(store.profiles[key] || {}), ...normalizedPatch };
   for (const field of ["audioLanguage", "subtitleLanguage"]) {
     if (Object.prototype.hasOwnProperty.call(patch, field)) store.global[field] = normalizeLanguageTag(patch[field]);
   }
