@@ -27,7 +27,7 @@ Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour,
 Style: Default,Arial,32,&H00FFFFFF,&H000000FF,&H00000000,&H80000000,0,0,0,0,100,100,0,0,1,2,1,2,10,10,20,1
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
-Dialogue: 0,0:00:01.00,0:00:03.50,Default,,0,0,0,,{i1}Hello, world!{i0}\NSecond line`;
+Dialogue: 0,0:00:01.00,0:00:03.50,Default,,0,0,0,,{\\i1}Hello, world!{\\i0}\\NSecond line`;
   const cues = parseSubtitleFile(ass, "ass");
   assert.equal(cues.length, 1);
   assert.equal(cues[0].start, 1);
