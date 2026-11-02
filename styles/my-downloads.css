@@ -415,3 +415,9 @@ html.vivid-performance-legacy .offline-library-tools,html.vivid-performance-lega
 .offline-player-section.windowed-cinema #offline-player{max-height:72vh}
 .offline-player-section.windowed-cinema .offline-player-heading{position:sticky;top:0;z-index:2}
 @media(max-width:720px){.offline-player-section.windowed-cinema{inset:0!important;border-radius:0}}
+
+
+/* Phase 2 — audio enhancement controls. */
+.offline-custom-controls .offline-audio-boost-control,.offline-custom-controls .offline-audio-delay-control{display:grid;grid-template-columns:auto minmax(90px,1fr) auto;align-items:center;gap:7px;min-width:min(100%,220px);color:#cbd3e5;font-size:11px}
+.offline-custom-controls .offline-audio-boost-control input,.offline-custom-controls .offline-audio-delay-control input{width:100%;min-width:0;accent-color:#9b8cff}
+.offline-custom-controls .offline-audio-boost-control output,.offline-custom-controls .offline-audio-delay-control output{min-width:42px;color:#f0edff;font-variant-numeric:tabular-nums;text-align:right}
