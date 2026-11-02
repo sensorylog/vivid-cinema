@@ -945,8 +945,8 @@ async function playLocalFile(){
   player.controls=false;byId("offline-custom-controls").hidden=false;
   playerSection.classList.remove("controls-hidden");playerSection.hidden=false;
   playerSection.scrollIntoView({behavior:"smooth",block:"start"});
-  try{await player.play();}catch{setMessage("Your video is ready. Press Play in the Vivid player to begin.");}
-  setMessage("Opened "+file.name+".");syncPlayerControls();
+  try{await player.play();setMessage("Opened "+file.name+".");}catch{setMessage("Your video is ready. Press Play in the Vivid player to begin.");}
+  syncPlayerControls();
 }
 byId("offline-open-local-file").addEventListener("click",async event=>{
   const button=event.currentTarget;button.disabled=true;
