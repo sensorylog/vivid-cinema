@@ -24,6 +24,7 @@ let media = null;
 let details = null;
 let currentParams = null;
 let lastHistorySyncAt = 0;
+let persistDirectProgress = null;
 let activeSource = "vidapi";
 const sourceAttempted = new Set();
 let primaryHealthy = false;
@@ -249,6 +250,10 @@ function setPlayerSource(source, params, startAt = 0) {
   if (tryNextButton) tryNextButton.hidden = true;
   const customServer = typeof source === "string" && source.startsWith("custom:") ? getCustomPlaybackServer(source.slice(7)) : null;
   if ((!["vidapi", "vidsrc", "vidlink", "vidplus", "vidking", "direct", "embedwave", "vidfast", "ezvidapi", "embedapistream", "moviesapi"].includes(source) && !customServer) || !sourceAvailable(source)) return;
+  if (activeSource === "direct" && source !== "direct") {
+    persistDirectProgress?.();
+    void flushPlaybackProgress(progressKey());
+  }
   activeSource = source;
   player.closest(".vivid-player-frame")?.classList.toggle("is-embedwave", source === "embedwave");
   sourceAttempted.add(source);
@@ -705,6 +710,9 @@ function renderShell(params) {
     if (!overlay.classList.contains("vivid-player-inline")) document.body.classList.remove("vivid-player-open");
     if (openPlayer) openPlayer.setAttribute("aria-expanded", "false");
     directLoadGeneration += 1;
+    // Closing the cinema window can happen between throttled timeupdate saves.
+    persistDirectProgress?.();
+    void flushPlaybackProgress(progressKey());
     stopDirectStream(directPlayer);
     if (directPlayer) directPlayer.hidden = true;
     if (player) { player.src = ""; player.hidden = false; }
@@ -754,13 +762,13 @@ function renderShell(params) {
   });
   if (directPlayer) {
     let lastDirectProgressSaveAt = 0;
-    const saveDirectProgress = (completed = false) => {
+    const saveDirectProgress = (completed = false, force = false) => {
       if (activeSource !== "direct" || !media || !currentParams) return;
       const progress = Math.max(0, Number(directPlayer.currentTime) || 0);
       const duration = Math.max(0, Number(directPlayer.duration) || 0);
       if (progress <= 0 && !completed) return;
       const now = Date.now();
-      if (!completed && now - lastDirectProgressSaveAt < 8000) return;
+      if (!completed && !force && now - lastDirectProgressSaveAt < 8000) return;
       lastDirectProgressSaveAt = now;
       const season = currentParams.type === "tv" ? currentParams.season : undefined;
       const episode = currentParams.type === "tv" ? currentParams.episode : undefined;
@@ -783,6 +791,7 @@ function renderShell(params) {
         });
       }
     };
+    persistDirectProgress = () => saveDirectProgress(false, true);
     directPlayer.addEventListener("playing", () => {
       if (activeSource !== "direct") return;
       primaryHealthy = true;
@@ -1133,7 +1142,16 @@ async function load() {
 }
 
 document.addEventListener("visibilitychange", () => {
-  if (document.visibilityState === "hidden" && currentParams?.id) void flushPlaybackProgress(progressKey());
+  if (document.visibilityState === "hidden" && currentParams?.id) {
+    persistDirectProgress?.();
+    void flushPlaybackProgress(progressKey());
+  }
+});
+
+window.addEventListener("pagehide", () => {
+  if (!currentParams?.id) return;
+  persistDirectProgress?.();
+  void flushPlaybackProgress(progressKey());
 });
 
 document.addEventListener("DOMContentLoaded", () => {
