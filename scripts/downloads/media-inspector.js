@@ -102,7 +102,7 @@ function ebmlElements(bytes, start, end) {
     const id = readVint(bytes, offset, true);
     if (!id) break;
     const size = readVint(bytes, offset + id.length);
-    if (!size || !Number.isSafeInteger(size.value)) break;
+    if (!size || (!size.unknown && !Number.isSafeInteger(size.value))) break;
     const data = offset + id.length + size.length;
     const elementEnd = size.unknown ? end : data + size.value;
     if (elementEnd > end || elementEnd > bytes.length) break;
