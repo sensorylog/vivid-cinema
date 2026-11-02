@@ -54,3 +54,20 @@ test("stores playback preference profiles per movie, show episode, and media fil
   assert.equal(playbackProfileKey({ id: "job", media: { id: 55, media_type: "movie" } }, 0), "movie:55:file:0");
   assert.equal(playbackProfileKey({ id: "job", media: { id: 77, media_type: "tv", season: 2, episode: 4 } }, 1), "tv:77:s2e4:file:1");
 });
+
+test("offline player exposes language and subtitle appearance controls", async () => {
+  const fs = await import("node:fs");
+  const path = await import("node:path");
+  const { fileURLToPath } = await import("node:url");
+  const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+  const html = fs.readFileSync(path.join(root, "my-downloads.html"), "utf8");
+  const player = fs.readFileSync(path.join(root, "scripts/downloads/desktop-offline.js"), "utf8");
+  for (const id of ["offline-audio-language", "offline-subtitle-language", "offline-subtitle-font", "offline-subtitle-color", "offline-subtitle-position", "offline-subtitle-background", "offline-subtitle-outline", "offline-subtitle-overlay"]) {
+    assert.ok(html.includes('id="' + id + '"'), "missing " + id);
+  }
+  assert.match(player, /playbackProfileKey\(job,fileIndex\)/);
+  assert.match(player, /getPlaybackPreferences\(activePreferenceKey\)/);
+  assert.match(player, /savePlaybackPreferences\(activePreferenceKey,patch\)/);
+  assert.match(player, /parseSubtitleFile\(/);
+  assert.match(player, /renderSubtitleAtTime\(/);
+});
