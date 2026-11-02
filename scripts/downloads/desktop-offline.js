@@ -695,6 +695,7 @@ let seekPreviewTarget=null;
 let seekPreviewSource="";
 let seekPreviewRequest=0;
 function resetSeekPreviewSource(){
+  diagnosticsRequest++;
   seekPreviewRequest++;
   seekPreviewTarget=null;
   seekPreviewSource="";
@@ -715,6 +716,7 @@ function ensureSeekPreviewSource(){
 }
 function drawSeekPreview(){
   if(seekPreview.hidden||seekPreviewVideo.readyState<2)return;
+  if(seekPreviewTarget!==null&&Math.abs(seekPreviewVideo.currentTime-seekPreviewTarget)>0.05)return;
   const context=seekPreview.getContext("2d");
   if(!context)return;
   try{context.drawImage(seekPreviewVideo,0,0,seekPreview.width,seekPreview.height);}catch{}
