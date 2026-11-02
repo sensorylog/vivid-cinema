@@ -568,13 +568,103 @@ player.addEventListener("loadedmetadata",()=>{
 });
 player.addEventListener("durationchange",syncPlayerControls);
 player.addEventListener("loadedmetadata",refreshAudioTracks);
+let advancedTrackTimer=null;
+let advancedTrackBusy=false;
+function trackLabel(track,index){
+  const parts=[track.title||track.language||("Track "+(index+1))];
+  if(track.language&&track.title&&track.title.toLowerCase()!==track.language.toLowerCase())parts.push(track.language);
+  if(track.codec)parts.push(track.codec.toUpperCase());
+  if(track.external)parts.push("External");
+  if(track.default)parts.push("Default");
+  if(track.forced)parts.push("Forced");
+  return parts.join(" · ");
+}
+async function refreshAdvancedTracks(){
+  const panel=byId("advanced-track-panel");
+  if(panel.hidden||advancedTrackBusy)return;
+  advancedTrackBusy=true;
+  const status=byId("advanced-track-status");
+  try{
+    const tracks=await engine.getAdvancedPlayerTracks();
+    const audio=Array.isArray(tracks?.audio)?tracks.audio:[];
+    const subtitles=Array.isArray(tracks?.subtitles)?tracks.subtitles:[];
+    const audioSelect=byId("advanced-audio-select");
+    const subtitleSelect=byId("advanced-subtitle-select");
+    const oldAudio=audioSelect.value,oldSubtitle=subtitleSelect.value;
+    audioSelect.innerHTML=audio.length?audio.map((track,index)=>'<option value="'+Number(track.id)+'">'+escapeHtml(trackLabel(track,index))+'</option>').join(""):'<option value="">No audio tracks found</option>';
+    subtitleSelect.innerHTML='<option value="off">Subtitles off</option>'+subtitles.map((track,index)=>'<option value="'+Number(track.id)+'">'+escapeHtml(trackLabel(track,index))+'</option>').join("");
+    if(audio.some(track=>String(track.id)===oldAudio))audioSelect.value=oldAudio;
+    else {const selected=audio.find(track=>track.selected);if(selected)audioSelect.value=String(selected.id);}
+    if(subtitles.some(track=>String(track.id)===oldSubtitle))subtitleSelect.value=oldSubtitle;
+    else {const selected=subtitles.find(track=>track.selected);if(selected)subtitleSelect.value=String(selected.id);}
+    status.textContent=audio.length+" audio track"+(audio.length===1?"":"s")+" · "+subtitles.length+" subtitle track"+(subtitles.length===1?"":"s")+" found. Matching external files are included when mpv detects them.";
+  }catch(error){
+    status.textContent=error?.message||"Advanced Player is not connected. Start a movie, then refresh tracks.";
+    if(/closed before the command completed|Advanced Player closed/i.test(status.textContent)){clearInterval(advancedTrackTimer);advancedTrackTimer=null;}
+  }finally{advancedTrackBusy=false;}
+}
+function showAdvancedTrackPanel(){
+  byId("advanced-track-panel").hidden=false;
+  byId("advanced-track-status").textContent="Looking for embedded and matching external tracks…";
+  void refreshAdvancedTracks();
+  if(advancedTrackTimer)clearInterval(advancedTrackTimer);
+  advancedTrackTimer=setInterval(()=>void refreshAdvancedTracks(),3000);
+}
+byId("advanced-track-refresh").addEventListener("click",()=>void refreshAdvancedTracks());
+byId("advanced-audio-select").addEventListener("change",async event=>{
+  try{await engine.selectAdvancedPlayerTrack("audio",event.target.value);byId("advanced-track-status").textContent="Audio track changed.";}
+  catch(error){byId("advanced-track-status").textContent=error?.message||"Could not change audio track.";}
+});
+byId("advanced-subtitle-select").addEventListener("change",async event=>{
+  try{await engine.selectAdvancedPlayerTrack("subtitle",event.target.value);byId("advanced-track-status").textContent=event.target.value==="off"?"Subtitles turned off.":"Subtitle track changed.";}
+  catch(error){byId("advanced-track-status").textContent=error?.message||"Could not change subtitle track.";}
+});
+async function launchAdvancedPlayer({automatic=false}={}){
+  const id=String(player.dataset.jobId||"");
+  const fileIndex=Number(player.dataset.fileIndex)||0;
+  if(!id)throw new Error("Open a saved download in the Vivid player first.");
+  const button=byId("offline-advanced-player");
+  if(button.disabled)return;
+  button.disabled=true;
+  try{
+    const currentTime=Number(player.currentTime)||0;
+    if(currentTime>0)await engine.setPlaybackPosition(id,fileIndex,currentTime);
+    await engine.openAdvancedPlayer(id,fileIndex);
+    showAdvancedTrackPanel();
+    if(currentFullscreenElement()===playerSection){
+      const exit=document.exitFullscreen||document.webkitExitFullscreen;
+      if(typeof exit==="function")await exit.call(document);
+    }
+    player.pause();
+    clearExternalSubtitle();
+    player.removeAttribute("src");
+    player.load();
+    player.dataset.jobId="";
+    player.dataset.fileIndex="0";
+    player.controls=true;
+    byId("offline-custom-controls").hidden=true;
+    byId("offline-player-section").hidden=true;
+    byId("offline-resume-prompt").hidden=true;
+    byId("offline-next-episode").hidden=true;
+    syncFullscreenButton();
+    setMessage(automatic
+      ?"This movie needs the Advanced Player. It has been opened in a separate window."
+      :"Vivid Advanced Player opened in a separate window. Use Watch now later to resume from your saved position.");
+    return true;
+  }finally{button.disabled=false;}
+}
 function describePlaybackError(){
   byId("offline-audio-track").parentElement.hidden=true;
   const code=Number(player.error?.code||0);
   if(code===1){setMessage("Playback was interrupted. Press Play to continue.");return;}
   if(code===2){setMessage("Vivid could not read this saved media file. Check that the download is complete and still exists.");return;}
-  if(code===3){setMessage("The file opened, but this device could not decode one of its audio or video codecs. Try another release or a compatible MP4/WebM version.");return;}
-  if(code===4){setMessage("This container or one of its codecs is not supported by Vivid's built-in player. Try another release or a compatible MP4/WebM version.");return;}
+  if(code===3||code===4){
+    setMessage("This movie's format needs the Advanced Player. Opening it now…");
+    void launchAdvancedPlayer({automatic:true}).catch(error=>{
+      setMessage("Vivid couldn't open the Advanced Player: "+(error?.message||"Please try Open Advanced Player."));
+    });
+    return;
+  }
   setMessage("Vivid could not start this video. Check the file and try again.");
 }
 player.addEventListener("error",describePlaybackError);
@@ -639,35 +729,8 @@ async function play(job,fileIndex=0){
   syncPlayerControls();
 }
 byId("offline-advanced-player").addEventListener("click",async()=>{
-  const id=String(player.dataset.jobId||"");
-  const fileIndex=Number(player.dataset.fileIndex)||0;
-  if(!id){setMessage("Open a saved download in the Vivid player first.");return;}
-  const button=byId("offline-advanced-player");
-  button.disabled=true;
-  const currentTime=Number(player.currentTime)||0;
-  try{
-    if(currentTime>0)await engine.setPlaybackPosition(id,fileIndex,currentTime);
-    await engine.openAdvancedPlayer(id,fileIndex);
-    if(currentFullscreenElement()===playerSection){
-      const exit=document.exitFullscreen||document.webkitExitFullscreen;
-      if(typeof exit==="function")await exit.call(document);
-    }
-    player.pause();
-    clearExternalSubtitle();
-    player.removeAttribute("src");
-    player.load();
-    player.dataset.jobId="";
-    player.dataset.fileIndex="0";
-    player.controls=true;
-    byId("offline-custom-controls").hidden=true;
-    byId("offline-player-section").hidden=true;
-    byId("offline-resume-prompt").hidden=true;
-    byId("offline-next-episode").hidden=true;
-    syncFullscreenButton();
-    setMessage("Vivid Advanced Player opened in a separate window. Use Watch now later to resume from your saved position.");
-  }catch(error){
-    setMessage(error?.message||"Vivid Advanced Player could not be opened.");
-  }finally{button.disabled=false;}
+  try{await launchAdvancedPlayer();}
+  catch(error){setMessage(error?.message||"Vivid Advanced Player could not be opened.");}
 });
 byId("desktop-search-form").addEventListener("submit",async event=>{
   event.preventDefault();const query=byId("desktop-search-input").value.trim();

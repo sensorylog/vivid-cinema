@@ -81,6 +81,14 @@
     </div>
     <p>Playing a video saved locally on this device.</p>
   </section>
+  <section id="advanced-track-panel" class="advanced-track-panel" hidden aria-label="Advanced Player track selection">
+    <div class="advanced-track-heading"><div><span class="offline-card-kicker">NOW PLAYING IN MPV</span><h2>Audio & subtitles</h2><p>Choose the language and subtitle track for your movie.</p></div><button id="advanced-track-refresh" type="button">Refresh tracks</button></div>
+    <div class="advanced-track-controls">
+      <label>Audio track<select id="advanced-audio-select" aria-label="Advanced Player audio track"><option value="">Loading tracks…</option></select></label>
+      <label>Subtitle track<select id="advanced-subtitle-select" aria-label="Advanced Player subtitle track"><option value="off">Subtitles off</option></select></label>
+    </div>
+    <p id="advanced-track-status" class="advanced-track-status" role="status" aria-live="polite">Connect to the Advanced Player to load tracks.</p>
+  </section>
   <section class="offline-summary" aria-label="Download totals">
     <div><strong id="offline-total">0</strong><span>All items</span></div>
     <div><strong id="offline-completed">0</strong><span>Saved</span></div>
