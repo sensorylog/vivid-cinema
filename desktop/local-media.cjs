@@ -6,7 +6,7 @@ const crypto = require("node:crypto");
 const LOCAL_VIDEO_EXTENSIONS = Object.freeze([
   "mp4", "m4v", "mkv", "avi", "mov", "webm", "ogv", "ogg",
   "mpg", "mpeg", "m1v", "m2v", "vob", "wmv", "asf", "flv",
-  "ts", "m2ts", "mts", "3gp", "3gpp", "3g2", "qt", "mp4v", "f4v"
+  "ts", "m2ts", "mts", "3gp", "3gpp", "3g2", "qt", "mp4v", "f4v", "divx"
 ]);
 
 function isSupportedLocalVideoFile(filePath) {
