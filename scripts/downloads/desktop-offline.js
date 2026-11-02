@@ -330,17 +330,55 @@ function parseSrtToVtt(source){
   const body=normalized.replace(/(\d{2}:\d{2}:\d{2}),(\d{3})/g,"$1.$2");
   return "WEBVTT\n\n"+body.replace(/^\s*\d+\s*\n/gm,"");
 }
+function assTimestampToVtt(value){
+  const match=/^(\d+):(\d{2}):(\d{2})[.](\d{1,2})$/.exec(String(value||"").trim());
+  if(!match)return null;
+  const hours=Number(match[1]),minutes=Number(match[2]),seconds=Number(match[3]),centiseconds=Number(match[4].padEnd(2,"0"));
+  if(minutes>59||seconds>59)return null;
+  return String(hours).padStart(2,"0")+":"+match[2]+":"+match[3]+"."+String(centiseconds*10).padStart(3,"0");
+}
+function parseAssToVtt(source){
+  const lines=source.replace(/^\uFEFF/,"").replace(/\r\n?/g,"\n").split("\n");
+  let inEvents=false,format=[],cues=[];
+  for(const line of lines){
+    const trimmed=line.trim();
+    if(/^\[Events\]$/i.test(trimmed)){inEvents=true;continue;}
+    if(/^\[[^\]]+\]$/.test(trimmed)){inEvents=false;continue;}
+    if(!inEvents)continue;
+    const formatMatch=/^Format:\s*(.+)$/i.exec(trimmed);
+    if(formatMatch){format=formatMatch[1].split(",").map(field=>field.trim().toLowerCase());continue;}
+    if(!/^Dialogue:\s*/i.test(trimmed)||!format.length)continue;
+    const values=trimmed.replace(/^Dialogue:\s*/i,"").split(",");
+    if(values.length<format.length)continue;
+    const textIndex=format.indexOf("text"),startIndex=format.indexOf("start"),endIndex=format.indexOf("end");
+    if(textIndex<0||startIndex<0||endIndex<0)continue;
+    const fields=values.slice(0,format.length-1);
+    fields.push(values.slice(format.length-1).join(","));
+    const start=assTimestampToVtt(fields[startIndex]),end=assTimestampToVtt(fields[endIndex]);
+    if(!start||!end)continue;
+    const text=String(fields[textIndex]||"")
+      .replace(/\{[^}]*\}/g,"")
+      .replace(/\\[Nn]/g,"\n")
+      .replace(/\\h/g," ")
+      .replace(/\r/g,"")
+      .trim();
+    if(!text)continue;
+    cues.push(start+" --> "+end+"\n"+text);
+  }
+  if(!cues.length)throw new Error("No readable subtitle cues were found in this ASS/SSA file.");
+  return "WEBVTT\n\n"+cues.join("\n\n")+"\n";
+}
 function loadExternalSubtitle(file){
   if(!file)return;
   const extension=(file.name.split(".").pop()||"").toLowerCase();
-  if(!["srt","vtt"].includes(extension)){setMessage("Choose an SRT or WebVTT subtitle file.");return;}
+  if(!["srt","vtt","ass","ssa"].includes(extension)){setMessage("Choose an SRT, VTT, ASS or SSA subtitle file.");return;}
   const reader=new FileReader();
   reader.onerror=()=>setMessage("Could not read that subtitle file.");
   reader.onload=()=>{
     try{
       const source=String(reader.result||"");
-      const vtt=extension==="srt"?parseSrtToVtt(source):source.replace(/^\uFEFF/,"");
-      if(!/^WEBVTT(?:\s|$)/.test(vtt.trimStart()))throw new Error("Invalid WebVTT subtitle file.");
+      const vtt=extension==="srt"?parseSrtToVtt(source):(["ass","ssa"].includes(extension)?parseAssToVtt(source):source.replace(/^\uFEFF/,""));
+      if(!/^WEBVTT(?:\s|$)/.test(vtt.trimStart()))throw new Error("Invalid subtitle file. Check that it is a valid SRT, VTT, ASS or SSA file.");
       const blob=new Blob([vtt],{type:"text/vtt"});
       clearExternalSubtitle();
       const track=document.createElement("track");
