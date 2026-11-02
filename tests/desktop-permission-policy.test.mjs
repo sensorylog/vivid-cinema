@@ -87,3 +87,13 @@ test("denies permission checks without a requesting origin", () => {
     allowedOrigins: [hostedOrigin]
   }), false);
 });
+
+test("Electron wires both permission request and permission check handlers through the origin policy", async () => {
+  const { readFile } = await import("node:fs/promises");
+  const main = await readFile(new URL("../desktop/main.cjs", import.meta.url), "utf8");
+  assert.match(main, /setPermissionRequestHandler\(\(webContents, permission, callback, details = \{\}\)/);
+  assert.match(main, /details\.requestingUrl/);
+  assert.match(main, /setPermissionCheckHandler\(\(webContents, permission, requestingOrigin\)/);
+  assert.match(main, /currentUrl: webContents\.getURL\(\)/);
+  assert.match(main, /allowedOrigins: allowedPermissionOrigins\(\)/);
+});
