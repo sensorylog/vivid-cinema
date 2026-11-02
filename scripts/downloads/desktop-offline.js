@@ -621,7 +621,6 @@ function refreshAudioTracks(){
   }
   select.value=String(selectedIndex);
   select.parentElement.hidden=false;
-  saveCurrentPlaybackPreferences({audioTrackLanguage:tracks[selectedIndex]?.language||""});
 }
 
 byId("offline-play-toggle").addEventListener("click",()=>{if(player.paused)void player.play().catch(()=>{});else player.pause();});
