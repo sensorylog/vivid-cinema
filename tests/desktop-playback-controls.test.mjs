@@ -54,3 +54,10 @@ test("Chapter navigation and skip actions are only driven by chapter metadata", 
   assert.match(player, /seekToChapter\(direction\)/);
   assert.match(player, /cue\.endTime/);
 });
+
+test("Seek control displays a preview frame from the locally playing video", () => {
+  assert.match(page, /id="offline-seek-preview"[^>]*width="160" height="90"/);
+  assert.match(player, /drawImage\(player,0,0,seekPreview\.width,seekPreview\.height\)/);
+  assert.match(player, /player\.addEventListener\("seeked",drawSeekPreview\)/);
+  assert.match(player, /function hideSeekPreview\(\)/);
+});
