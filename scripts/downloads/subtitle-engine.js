@@ -3,7 +3,7 @@ const TIME = /^(\d{1,2}):(\d{2}):(\d{2})[.,](\d{1,3})$/;
 function toSeconds(value) {
   const match = TIME.exec(String(value || "").trim());
   if (!match) return null;
-  const hours = Number(match[1]), minutes = Number(match[2]), seconds = Number(match[3]);
+  const hours = Number(match[1] || 0), minutes = Number(match[2]), seconds = Number(match[3]);
   if (minutes > 59 || seconds > 59) return null;
   return hours * 3600 + minutes * 60 + seconds + Number(("0." + match[4]));
 }
@@ -175,18 +175,18 @@ export function renderSubtitleAtTime(container, cues, time, preferences = {}) {
   container.dataset.cueKey = key;
   container.replaceChildren();
   if (!active) return;
-  const position = preferences.position || "bottom";
+  const position = preferences.position || "auto";
   const alignment = Number(active.alignment || active.style?.alignment || 2);
   const vertical = alignment >= 7 ? "top" : alignment >= 4 ? "middle" : "bottom";
   const horizontal = [1, 4, 7].includes(alignment) ? "left" : [3, 6, 9].includes(alignment) ? "right" : "center";
   const box = document.createElement("div");
   box.className = "offline-rendered-subtitle";
+  const effectivePosition = position === "auto" ? vertical : position;
+  box.dataset.position = effectivePosition;
   box.style.textAlign = horizontal;
-  box.style[position === "top" || vertical === "top" ? "top" : position === "middle" || vertical === "middle" ? "top" : "bottom"] = "12%";
-  if (position === "middle" || vertical === "middle") box.style.transform = "translateY(50%)";
-  box.style.fontFamily = safeFont(preferences.font || active.style?.fontFamily || "Arial");
-  box.style.fontSize = preferences.size === "small" ? "2.2vh" : preferences.size === "large" ? "4.2vh" : "3vh";
-  box.style.color = preferences.color || active.style?.color || "#fff";
+  box.style.fontFamily = safeFont(preferences.font && preferences.font !== "auto" ? preferences.font : active.style?.fontFamily || "Arial");
+  box.style.fontSize = preferences.size === "small" ? "2.2vh" : preferences.size === "large" ? "4.2vh" : preferences.size === "medium" ? "3vh" : Math.max(16, Number(active.style?.fontSize) || 24) + "px";
+  box.style.color = preferences.color && preferences.color !== "auto" ? preferences.color : active.style?.color || "#fff";
   const outlineColor = active.style?.outlineColor || "rgba(0,0,0,.95)";
   const outline = preferences.outline === false ? 0 : Math.max(1, Number(active.style?.outline) || 2);
   box.style.webkitTextStroke = outline + "px " + outlineColor;
