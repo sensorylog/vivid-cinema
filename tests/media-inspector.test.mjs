@@ -78,3 +78,30 @@ test("a ranged response covering the complete small file is not labelled partial
   assert.equal(result.fileSize, 3);
   assert.equal(result.partial, false);
 });
+
+test("parses Matroska tracks, codec identifiers, language and duration with an unknown-size Segment", () => {
+  const vintSize = value => new Uint8Array([0x80 | value]);
+  const idBytes = id => new Uint8Array((id.toString(16).match(/../g) || []).map(part => parseInt(part, 16)));
+  const element = (id, payload) => join(idBytes(id), vintSize(payload.length), payload);
+  const unknownSegmentSize = new Uint8Array([0x01, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff]);
+  const scale = element(0x2ad7b1, new Uint8Array([0x0f, 0x42, 0x40]));
+  const durationBytes = new Uint8Array(8);
+  new DataView(durationBytes.buffer).setFloat64(0, 60000, false);
+  const info = element(0x1549a966, join(scale, element(0x4489, durationBytes)));
+  const trackEntry = element(0xae, join(
+    element(0x83, new Uint8Array([1])),
+    element(0x86, new TextEncoder().encode("V_MPEG4/ISO/AVC")),
+    element(0x22b59c, new TextEncoder().encode("eng"))
+  ));
+  const tracks = element(0x1654ae6b, trackEntry);
+  const segment = join(idBytes(0x18538067), unknownSegmentSize, info, tracks);
+  const file = join(element(0x1a45dfa3, new Uint8Array(0)), segment);
+  const result = inspectMediaBytes(file, "sample.mkv");
+  assert.equal(result.format, "Matroska / WebM");
+  assert.equal(result.complete, true);
+  assert.equal(result.tracks.length, 1);
+  assert.equal(result.tracks[0].kind, "video");
+  assert.equal(result.tracks[0].codec, "V_MPEG4/ISO/AVC");
+  assert.equal(result.tracks[0].language, "eng");
+  assert.equal(result.duration, 60);
+});
