@@ -160,3 +160,31 @@ test("inspection refuses an unbounded response when streaming is unavailable", a
     /verifiably bounded/
   );
 });
+
+test("reads nominal MP4 frame rate from the video sample timing table", () => {
+  const ftyp = box("ftyp", new TextEncoder().encode("isom\\0\\0\\0\\0isom"));
+  const stsd = box("stsd", join(new Uint8Array(4), uint(1), uint(16), new TextEncoder().encode("avc1"), new Uint8Array(8)));
+  const stts = box("stts", join(new Uint8Array(4), uint(1), uint(240), uint(1000)));
+  const stbl = box("stbl", join(stsd, stts));
+  const minf = box("minf", stbl);
+  const hdlr = box("hdlr", join(new Uint8Array(8), new TextEncoder().encode("vide"), new Uint8Array(4)));
+  const mdhd = box("mdhd", join(new Uint8Array(4), uint(0), uint(0), uint(24000), uint(240000)));
+  const mdia = box("mdia", join(hdlr, mdhd, minf));
+  const result = inspectMediaBytes(join(ftyp, box("moov", box("trak", mdia))), "24fps.mp4");
+  assert.equal(result.tracks[0].frameRate, 24);
+});
+
+test("reads nominal Matroska frame rate from DefaultDuration", () => {
+  const vintSize = value => new Uint8Array([0x80 | value]);
+  const idBytes = id => new Uint8Array((id.toString(16).match(/../g) || []).map(part => parseInt(part, 16)));
+  const element = (id, payload) => join(idBytes(id), vintSize(payload.length), payload);
+  const track = element(0xae, join(
+    element(0x83, new Uint8Array([1])),
+    element(0x86, new TextEncoder().encode("V_MPEG4/ISO/AVC")),
+    element(0x23e383, new Uint8Array([0x02, 0x62, 0x5a, 0x00]))
+  ));
+  const segment = join(idBytes(0x18538067), new Uint8Array([0x01, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff]), element(0x1654ae6b, track));
+  const file = join(element(0x1a45dfa3, new Uint8Array(0)), segment);
+  const result = inspectMediaBytes(file, "25fps.mkv");
+  assert.equal(result.tracks[0].frameRate, 25);
+});
