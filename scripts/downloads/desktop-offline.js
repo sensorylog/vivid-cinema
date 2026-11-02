@@ -1,4 +1,5 @@
 import { tmdbApi } from "../tmdb.js";
+import { describeLoadedMedia, probePlaybackCapabilities } from "./media-capabilities.js";
 
 if (window.vividDownloads?.available) {
 document.body.classList.add("vivid-desktop-offline-library");
@@ -261,6 +262,8 @@ async function refresh(){
   }catch(error){setMessage(error?.message||"Could not load your downloads.");}
 }
 const player = byId("offline-player");
+let capabilityReportPromise = null;
+let diagnosticsRequest = 0;
 const clock = value => {
   const seconds = Math.max(0, Math.floor(Number(value) || 0));
   const hours = Math.floor(seconds / 3600);
@@ -268,6 +271,43 @@ const clock = value => {
   const rest = seconds % 60;
   return hours ? hours + ":" + String(minutes).padStart(2,"0") + ":" + String(rest).padStart(2,"0") : minutes + ":" + String(rest).padStart(2,"0");
 };
+async function updatePlaybackDiagnostics(){
+  const request=++diagnosticsRequest;
+  const filename=player.dataset.mediaFilename||"";
+  const media=describeLoadedMedia(player,filename);
+  const summary=byId("offline-media-summary");
+  summary.textContent=media.filename+" · "+media.container.label+" · "+media.resolution+" · "+(media.duration===null?"Duration unavailable":clock(media.duration))+" · "+media.codec;
+  if(!capabilityReportPromise)capabilityReportPromise=probePlaybackCapabilities({video:player});
+  const report=await capabilityReportPromise;
+  if(request!==diagnosticsRequest||!player.dataset.jobId)return;
+  const grid=byId("offline-capability-grid");
+  grid.replaceChildren();
+  const addGroup=(title,items)=>{
+    const group=document.createElement("section");
+    group.className="offline-capability-group";
+    const heading=document.createElement("h4");heading.textContent=title;group.appendChild(heading);
+    const list=document.createElement("ul");
+    for(const item of items){
+      const row=document.createElement("li");
+      const name=document.createElement("span");name.textContent=item.label;
+      const state=document.createElement("strong");
+      state.textContent=item.supported?"Reported supported":"Not reported";
+      state.className=item.supported?"is-supported":"is-unknown";
+      row.append(name,state);
+      if(item.mediaCapabilities){
+        const detail=document.createElement("small");
+        detail.textContent=(item.mediaCapabilities.smooth===null?"":item.mediaCapabilities.smooth?"Smooth estimate":"May not be smooth")
+          +(item.mediaCapabilities.powerEfficient===null?"":(item.mediaCapabilities.smooth===null?"":" · ")+(item.mediaCapabilities.powerEfficient?"Power efficient":"Not power efficient"));
+        row.appendChild(detail);
+      }
+      list.appendChild(row);
+    }
+    group.appendChild(list);grid.appendChild(group);
+  };
+  addGroup("Video codecs",report.videoProfiles);
+  addGroup("Audio codecs",report.audioProfiles);
+  byId("offline-capability-note").textContent=report.note+" These estimates describe this Windows device and Chromium build; they do not confirm the codecs inside the selected file.";
+}
 function syncPlayerControls(){
   const duration=Number.isFinite(player.duration)?player.duration:0;
   byId("offline-seek").value=duration?String(Math.round(player.currentTime/duration*1000)):"0";
@@ -620,6 +660,7 @@ player.addEventListener("loadedmetadata",()=>{
   }).catch(()=>{resumePosition=0;byId("offline-resume-prompt").hidden=true;syncPlayerControls();});
 });
 player.addEventListener("durationchange",syncPlayerControls);
+player.addEventListener("loadedmetadata",()=>{void updatePlaybackDiagnostics();});
 player.addEventListener("loadedmetadata",refreshAudioTracks);
 function describePlaybackError(){
   byId("offline-audio-track").parentElement.hidden=true;
@@ -683,7 +724,7 @@ async function play(job,fileIndex=0){
   byId("offline-resume-prompt").hidden=true;
   resumePosition=0;
   const section=byId("offline-player-section");
-  if(player.dataset.jobId!==job.id||player.dataset.fileIndex!==String(fileIndex)){player.pause();clearExternalSubtitle();player.src=url;player.dataset.jobId=job.id;player.dataset.fileIndex=String(fileIndex);if(player.muted&&player.volume>0)player.muted=false;player.load();lastPositionSave=0;byId("offline-player-section").dataset.subtitleSize="medium";byId("offline-subtitle-size").value="medium";}
+  if(player.dataset.jobId!==job.id||player.dataset.fileIndex!==String(fileIndex)){player.pause();clearExternalSubtitle();player.src=url;player.dataset.jobId=job.id;player.dataset.fileIndex=String(fileIndex);player.dataset.mediaFilename=file?.name||job.title||"Saved media";if(player.muted&&player.volume>0)player.muted=false;player.load();lastPositionSave=0;byId("offline-player-section").dataset.subtitleSize="medium";byId("offline-subtitle-size").value="medium";}
   player.controls=false;
   byId("offline-custom-controls").hidden=false;
   section.classList.remove("controls-hidden");
@@ -741,7 +782,7 @@ byId("offline-player-close").addEventListener("click",async()=>{
     const exit=document.exitFullscreen||document.webkitExitFullscreen;
     try{if(typeof exit==="function")await exit.call(document);}catch{}
   }
-  player.pause();clearExternalSubtitle();player.removeAttribute("src");player.load();player.dataset.jobId="";
+  player.pause();clearExternalSubtitle();player.removeAttribute("src");player.load();player.dataset.jobId="";player.dataset.mediaFilename="";diagnosticsRequest++;
   player.controls=true;byId("offline-custom-controls").hidden=true;byId("offline-player-section").hidden=true;
   byId("offline-audio-track").parentElement.hidden=true;byId("offline-resume-prompt").hidden=true;
   byId("offline-next-episode").hidden=true;resumePosition=0;byId("offline-player-section").classList.remove("controls-hidden");
