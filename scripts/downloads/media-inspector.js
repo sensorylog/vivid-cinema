@@ -57,7 +57,7 @@ function parseMp4(bytes) {
     let codec = "Unknown";
     if (stsd && stsd.data + 16 <= stsd.end) {
       const entrySize = u32(new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength), stsd.data + 8);
-      if (entrySize >= 8 && stsd.data + 8 + entrySize <= stsd.end) codec = fourCC(bytes, stsd.data + 16);
+      if (entrySize >= 8 && stsd.data + 8 + entrySize <= stsd.end) codec = fourCC(bytes, stsd.data + 12);
     }
     const mdhd = mdiaChildren.find(item => item.type === "mdhd");
     let language = "";
@@ -91,7 +91,7 @@ function readVint(bytes, offset, keepMarker = false) {
   if (length > 8 || offset + length > bytes.length) return null;
   let value = keepMarker ? first : first & (mask - 1);
   for (let i = 1; i < length; i++) value = value * 256 + bytes[offset + i];
-  const unknown = !keepMarker && Array.from(bytes.subarray(offset, offset + length)).every(byte => byte === 0xff);
+  const unknown = !keepMarker && first === (mask * 2 - 1) && Array.from(bytes.subarray(offset + 1, offset + length)).every(byte => byte === 0xff);
   return { value, length, unknown };
 }
 
@@ -162,25 +162,74 @@ export function inspectMediaBytes(input, filename = "") {
   return { format: "Unrecognised or unsupported container", tracks: [], complete: false, inspectedBytes: bytes.length, filename, note: "No supported container signature was found in the inspected bytes." };
 }
 
+async function readBoundedBytes(response, limit) {
+  const reader = response.body?.getReader?.();
+  if (!reader) {
+    const header = response.headers.get("content-length");
+    const declared = header === null ? null : Number(header);
+    if (!Number.isSafeInteger(declared) || declared < 0 || declared > limit) {
+      throw new Error("Media source did not provide a verifiably bounded inspection response.");
+    }
+    const buffer = await response.arrayBuffer();
+    if (buffer.byteLength > limit) throw new Error("Media inspection response exceeded its byte limit.");
+    return { bytes: new Uint8Array(buffer), limited: false };
+  }
+  const chunks = [];
+  let total = 0, done = false, limited = false;
+  try {
+    while (total < limit) {
+      const item = await reader.read();
+      if (item.done) { done = true; break; }
+      const chunk = item.value instanceof Uint8Array ? item.value : new Uint8Array(item.value);
+      const take = Math.min(chunk.byteLength, limit - total);
+      if (take) chunks.push(chunk.subarray(0, take));
+      total += take;
+      if (take < chunk.byteLength) { limited = true; break; }
+    }
+    if (!done && total >= limit) limited = true;
+    if (limited) await reader.cancel().catch(() => {});
+  } finally { reader.releaseLock?.(); }
+  const bytes = new Uint8Array(total);
+  let offset = 0;
+  for (const chunk of chunks) { bytes.set(chunk, offset); offset += chunk.byteLength; }
+  return { bytes, limited };
+}
+
 export async function inspectMediaUrl(url, filename = "", { fetchImpl = globalThis.fetch, maxBytes = 32 * 1024 * 1024 } = {}) {
   if (typeof fetchImpl !== "function" || !url) throw new Error("Media inspection is unavailable for this source.");
+  if (!Number.isSafeInteger(maxBytes) || maxBytes <= 0) throw new Error("Media inspection byte limit is invalid.");
   const response = await fetchImpl(url, { headers: { Range: "bytes=0-" + (maxBytes - 1) } });
   if (!(response.ok || response.status === 206)) throw new Error("Could not read the media file for inspection (HTTP " + response.status + ").");
-  const bytes = new Uint8Array(await response.arrayBuffer());
+  const bounded = await readBoundedBytes(response, maxBytes);
+  const bytes = bounded.bytes;
   if (!bytes.length) throw new Error("The media file returned no readable data.");
+  const contentRange = /^bytes\s+(\d+)-(\d+)\/(\d+)$/i.exec(response.headers.get("content-range") || "");
+  const fileSize = contentRange
+    ? Number(contentRange[3])
+    : response.status === 200 && Number.isSafeInteger(Number(response.headers.get("content-length")))
+      ? Number(response.headers.get("content-length"))
+      : null;
   const result = inspectMediaBytes(bytes, filename);
-  const rangeTotal = /\\/(\\d+)$/.exec(response.headers.get("content-range") || "");
-  const fileSize = rangeTotal ? Number(rangeTotal[1]) : Number(response.headers.get("content-length")) || null;
   if (!result.complete && fileSize && fileSize > bytes.length) {
-    const tailStart = Math.max(bytes.length, fileSize - Math.min(maxBytes, 8 * 1024 * 1024));
-    try {
-      const tailResponse = await fetchImpl(url, { headers: { Range: "bytes=" + tailStart + "-" + (fileSize - 1) } });
-      if (tailResponse.ok || tailResponse.status === 206) {
-        const tail = new Uint8Array(await tailResponse.arrayBuffer());
-        const tailResult = inspectMediaBytes(tail, filename);
-        if (tailResult.complete && tailResult.tracks.length) return { ...tailResult, fileSize, partial: true, note: tailResult.note + " Metadata was located in the file's trailing region." };
-      }
-    } catch {}
+    const tailLength = Math.min(maxBytes, 8 * 1024 * 1024, fileSize);
+    const tailStart = Math.max(bytes.length, fileSize - tailLength);
+    if (tailStart < fileSize) {
+      try {
+        const tailResponse = await fetchImpl(url, { headers: { Range: "bytes=" + tailStart + "-" + (fileSize - 1) } });
+        if (tailResponse.status === 206) {
+          const tail = (await readBoundedBytes(tailResponse, fileSize - tailStart)).bytes;
+          const tailResult = inspectMediaBytes(tail, filename);
+          if (tailResult.complete && tailResult.tracks.length) {
+            return { ...tailResult, fileSize, partial: true, note: tailResult.note + " Metadata was located in the file's trailing region." };
+          }
+        }
+      } catch {}
+    }
   }
-  return { ...result, fileSize, partial: response.status === 206 || bytes.length >= maxBytes };
+  const partial = contentRange
+    ? Number(contentRange[2]) + 1 < Number(contentRange[3])
+    : response.status === 206
+      ? true
+      : bounded.limited || (fileSize !== null && bytes.length < fileSize);
+  return { ...result, fileSize, partial };
 }
