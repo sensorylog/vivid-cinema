@@ -6,7 +6,7 @@ This document describes the implementation present in the repository at the audi
 
 ## Current implementation
 
-The Windows desktop application uses Electron and Chromium's native `HTMLVideoElement` for local playback. The Electron main process owns the download engine and exposes completed local media through the token-gated `vivid-media://` protocol. The renderer owns the Vivid player interface.
+The Windows desktop application uses Electron and Chromium's native `HTMLVideoElement` for local playback. The Electron main process owns the download engine and exposes completed downloads and user-selected local video files through the token-gated `vivid-media://` protocol. The renderer owns the Vivid player interface.
 
 Implemented player and library capabilities include:
 
@@ -21,6 +21,7 @@ Implemented player and library capabilities include:
 - Embedded audio/text track selection when Chromium exposes the relevant track APIs for the file and build.
 - MP4/ISO-BMFF and Matroska/WebM metadata inspection, codec capability checks and local playback diagnostics.
 - Movies-only library filtering, library sorting, saved-storage totals and per-file/multi-file size display.
+- Native Windows file-picker support for opening ordinary local video files directly in the same player, without importing or copying them into the Vivid download library.
 
 The automated tests cover media inspection, local protocol range handling, playback controls and state, subtitle parsing, preference persistence and library behaviour. Passing automated tests do not establish successful decoding of every real-world media file on physical Windows hardware.
 
@@ -35,7 +36,7 @@ The desktop session grants only the existing fullscreen, media and notifications
 3. **Audio and embedded subtitle track access is conditional.** Track selection depends on APIs and tracks exposed by Chromium for the particular file and runtime. External subtitle parsing does not imply support for every embedded subtitle format, especially bitmap formats such as PGS and VobSub.
 4. **Frame stepping is approximate unless a frame rate is supplied.** The current UI falls back to 30 fps when `player.dataset.frameRate` is absent. It is not yet a general frame-accurate stepping implementation.
 5. **Seek preview is not a thumbnail system.** It captures a frame from the active video element while seeking rather than generating and displaying independent timeline thumbnails.
-6. **Local streaming is a critical playback path.** Seeking depends on correct byte-range responses from the custom Electron media protocol. The protocol implementation and its range tests are part of the current player foundation.
+6. **Local streaming is a critical playback path.** Both completed downloads and explicitly selected local files are streamed through the custom Electron media protocol. Selected files receive scoped opaque grants rather than renderer-visible filesystem paths. Seeking depends on correct byte-range responses from this protocol.
 7. **No universal compatibility or zero-dropped-frame guarantee is possible.** Results depend on codecs/profiles, resolution, frame rate, bitrate, storage, GPU/driver and system power/thermal limits. Unsupported, corrupted or unusually demanding media may still fail.
 
 ## mpv research status — proposal only
