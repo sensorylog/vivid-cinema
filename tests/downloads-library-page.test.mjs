@@ -146,3 +146,23 @@ test("Windows player runtime and stylesheet have cache-busting URLs", async () =
   assert.match(worker, /desktop-offline\.js\?builtin-player-v1/);
   assert.match(worker, /my-downloads\.css\?v=builtin-player-v1/);
 });
+
+test("offline library filters movies, sorts saved media, and reports on-device storage", async () => {
+  const page = await readFile(new URL("../my-downloads.html", import.meta.url), "utf8");
+  const desktop = await readFile(new URL("../scripts/downloads/desktop-offline.js", import.meta.url), "utf8");
+  const styles = await readFile(new URL("../styles/my-downloads.css", import.meta.url), "utf8");
+  assert.match(page, /id="offline-storage"/);
+  assert.match(page, /data-library-filter="movies"/);
+  assert.match(page, /id="offline-library-sort"/);
+  assert.match(page, /option value="recent"/);
+  assert.match(page, /option value="title"/);
+  assert.match(page, /option value="largest"/);
+  assert.match(desktop, /libraryFilter==="movies"/);
+  assert.match(desktop, /librarySort==="title"/);
+  assert.match(desktop, /librarySort==="largest"/);
+  assert.match(desktop, /byId\("offline-storage"\)\.textContent=bytes\(savedBytes\)/);
+  assert.match(desktop, /files\.reduce\(\(fileSum,file\)=>fileSum\+Math\.max\(0,Number\(file\.size\)\|\|0\),0\)/);
+  assert.match(desktop, /files\.length\+\' playable files · \'\+bytes\(total\)/);
+  assert.match(styles, /offline-library-sort/);
+  assert.match(styles, /offline-file-meta/);
+});

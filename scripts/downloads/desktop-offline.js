@@ -39,6 +39,7 @@ function statusText(job){
 }
 let libraryFilter="all";
 let libraryQuery="";
+let librarySort="recent";
 function posterMarkup(media){
   const poster=String(media?.poster_path||"");
   const safePoster=/^\/[A-Za-z0-9_./-]+\.(?:jpg|jpeg|png|webp)$/i.test(poster)&&!poster.split("/").includes("..");
@@ -64,8 +65,10 @@ function actionMarkup(job){
 }
 function fileMarkup(job){
   const files=Array.isArray(job.files)?job.files:[];
-  if(files.length<=1)return "";
-  return '<details class="offline-file-list"><summary>'+files.length+' playable files</summary>'+files.map(file=>'<button type="button" data-action="play-file" data-id="'+escapeHtml(job.id)+'" data-index="'+Number(file.index)+'">'+escapeHtml(file.name)+'</button>').join("")+'</details>';
+  if(!files.length)return "";
+  const total=files.reduce((sum,file)=>sum+Math.max(0,Number(file.size)||0),0);
+  if(files.length===1)return '<p class="offline-file-meta">'+escapeHtml(files[0].name)+' · '+bytes(files[0].size)+'</p>';
+  return '<details class="offline-file-list"><summary>'+files.length+' playable files · '+bytes(total)+'</summary>'+files.map(file=>'<button type="button" data-action="play-file" data-id="'+escapeHtml(job.id)+'" data-index="'+Number(file.index)+'">'+escapeHtml(file.name)+' · '+bytes(file.size)+'</button>').join("")+'</details>';
 }
 function episodeMarkup(job){
   const media=job.media||{};
@@ -81,17 +84,21 @@ function matchesLibrary(job){
   const isSeries=media.media_type==="tv";
   if(libraryFilter==="downloading"&&!["downloading","queued","verifying"].includes(job.status))return false;
   if(libraryFilter==="saved"&&job.status!=="completed")return false;
+  if(libraryFilter==="movies"&&isSeries)return false;
   if(libraryFilter==="series"&&!isSeries)return false;
   if(libraryFilter==="attention"&&!["failed","paused"].includes(job.status))return false;
   if(libraryQuery&&!String([job.title,media.title,media.episodeTitle].join(" ")).toLowerCase().includes(libraryQuery))return false;
   return true;
 }
 function render(){
-  const completed=jobs.filter(x=>x.status==="completed").length;
+  const completedJobs=jobs.filter(x=>x.status==="completed");
+  const completed=completedJobs.length;
   const active=jobs.filter(x=>["downloading","queued","verifying"].includes(x.status)).length;
+  const savedBytes=completedJobs.reduce((sum,job)=>sum+(Array.isArray(job.files)&&job.files.length?job.files.reduce((fileSum,file)=>fileSum+Math.max(0,Number(file.size)||0),0):Math.max(0,Number(job.total)||0)),0);
   byId("offline-total").textContent=String(jobs.length);
   byId("offline-completed").textContent=String(completed);
   byId("offline-active").textContent=String(active);
+  byId("offline-storage").textContent=bytes(savedBytes);
   const visible=jobs.filter(matchesLibrary);
   const seriesCount=new Set(jobs.filter(job=>job.media?.media_type==="tv").map(job=>String(job.media.id||job.media.title||job.title))).size;
   const countNode=byId("offline-library-count");
@@ -121,16 +128,18 @@ function render(){
     const savedCount=group.filter(job=>job.status==="completed").length;
     const newest=Math.max(...group.map(job=>Number(job.updatedAt||job.createdAt)||0));
     const markup='<article class="offline-series-card"><header class="offline-series-card-heading">'+posterMarkup(media)+'<div><span class="offline-card-kicker">TV SERIES</span><h3>'+escapeHtml(title)+'</h3><p>'+group.length+' episodes · '+savedCount+' saved'+(activeCount?' · '+activeCount+' in progress':'')+'</p></div></header><div class="offline-series-episodes">'+group.map(episodeMarkup).join("")+'</div></article>';
-    entries.push({time:newest,markup});
+    const size=group.reduce((sum,job)=>sum+(Array.isArray(job.files)?job.files.reduce((fileSum,file)=>fileSum+Math.max(0,Number(file.size)||0),0):Math.max(0,Number(job.total)||0)),0);
+    entries.push({time:newest,title,size,markup});
   }
   for(const job of movies){
     const media=job.media||{},progress=Math.max(0,Math.min(100,Number(job.progress)||0));
     const title=media.title||job.title||"Untitled movie";
     const detail=statusText(job)+(job.status==="downloading"?" · "+Math.round(progress)+"%":"");
     const markup='<article class="offline-media-card" data-job-id="'+escapeHtml(job.id)+'">'+posterMarkup(media)+'<div class="offline-media-copy"><span class="offline-card-kicker">MOVIE</span><h3>'+escapeHtml(title)+'</h3><p class="offline-card-status">'+escapeHtml(detail)+'</p>'+progressMarkup(job)+errorMarkup(job)+fileMarkup(job)+actionMarkup(job)+'</div></article>';
-    entries.push({time:Number(job.updatedAt||job.createdAt)||0,markup});
+    const size=Array.isArray(job.files)?job.files.reduce((sum,file)=>sum+Math.max(0,Number(file.size)||0),0):Math.max(0,Number(job.total)||0);
+    entries.push({time:Number(job.updatedAt||job.createdAt)||0,title,size,markup});
   }
-  entries.sort((a,b)=>b.time-a.time);
+  entries.sort((a,b)=>librarySort==="title"?a.title.localeCompare(b.title,undefined,{sensitivity:"base"}):librarySort==="largest"?b.size-a.size||b.time-a.time:b.time-a.time);
   byId("offline-jobs").innerHTML='<div class="offline-library-grid">'+entries.map(entry=>entry.markup).join("")+'</div>';
 }
 function renderSearch(items){
@@ -1011,6 +1020,10 @@ engine.onComplete(()=>{void refresh();setMessage("Download complete. Your movie 
 engine.onError(()=>{void refresh();setMessage("A download needs attention. Try Resume, or cancel it and choose another release.");});
 byId("offline-library-search").addEventListener("input",event=>{
   libraryQuery=event.target.value.trim().toLowerCase();
+  render();
+});
+byId("offline-library-sort").addEventListener("change",event=>{
+  librarySort=event.target.value;
   render();
 });
 byId("offline-library-tools").addEventListener("click",event=>{
