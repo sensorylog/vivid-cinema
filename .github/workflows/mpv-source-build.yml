@@ -6,6 +6,9 @@ on:
       - "licenses/mpv/**"
       - ".github/workflows/mpv-source-build.yml"
   workflow_dispatch:
+concurrency:
+  group: vivid-mpv-source-candidate-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 permissions:
   contents: read
 jobs:
