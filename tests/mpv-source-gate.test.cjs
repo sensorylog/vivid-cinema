@@ -8,6 +8,7 @@ const path = require("node:path");
 const crypto = require("node:crypto");
 const { MPV_SOURCE_COMMIT } = require("../desktop/prepare-mpv.cjs");
 const { verifyMpvSources } = require("../desktop/verify-mpv-sources.cjs");
+const MANIFEST_SCRIPT = fs.readFileSync(path.join(__dirname, "../desktop/create-mpv-source-manifest.cjs"), "utf8");
 const BUILD_SCRIPT = fs.readFileSync(path.join(__dirname, "../desktop/build-mpv-source.sh"), "utf8");
 
 function fixture(t) {
@@ -81,4 +82,9 @@ test("source gate rejects licence paths that escape the bundled notice directory
 test("mpv candidate smoke test uses a terminating version query instead of opening an idle player", () => {
   assert.match(BUILD_SCRIPT, /wine \.\/artifact\/mpv\.com --version --no-config/);
   assert.doesNotMatch(BUILD_SCRIPT, /wine \.\/artifact\/mpv\.com -v --no-config/);
+});
+
+test("candidate manifest parser recognizes ordinary Meson wrap source_url fields", () => {
+  assert.match(MANIFEST_SCRIPT, /wrap\.match\(\/\^\\s/);
+  assert.doesNotMatch(MANIFEST_SCRIPT, /wrap\.match\(\/\^\\\\s/);
 });
