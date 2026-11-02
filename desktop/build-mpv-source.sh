@@ -34,7 +34,7 @@ meson wrap install mujs
 meson subprojects download
 ./ci/build-mingw64.sh meson pack
 meson test -C mingw_build --print-errorlogs
-wine ./artifact/mpv.com -v --no-config
+wine ./artifact/mpv.com --version --no-config
 test -s artifact/mpv.exe
 mkdir -p "$REPO_ROOT/desktop/vendor/mpv"
 find "$REPO_ROOT/desktop/vendor/mpv" -mindepth 1 -maxdepth 1 -exec rm -rf {} +
