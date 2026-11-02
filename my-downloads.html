@@ -67,9 +67,9 @@
     </div>
     <div id="offline-custom-controls" class="offline-custom-controls" hidden>
       <button id="offline-skip-back" type="button" aria-label="Back 10 seconds">↶ 10s</button>
-      <button id="offline-frame-back" type="button" aria-label="Previous frame">− Frame</button>
+      <button id="offline-frame-back" type="button" aria-label="Previous frame" disabled>− Frame</button>
       <button id="offline-play-toggle" type="button" aria-label="Play or pause">Play</button>
-      <button id="offline-frame-forward" type="button" aria-label="Next frame">Frame +</button>
+      <button id="offline-frame-forward" type="button" aria-label="Next frame" disabled>Frame +</button>
       <button id="offline-skip-forward" type="button" aria-label="Forward 10 seconds">10s ↷</button>
       <label class="offline-seek-control"><span class="sr-only">Seek video</span><canvas id="offline-seek-preview" width="160" height="90" aria-hidden="true" hidden></canvas><input id="offline-seek" type="range" min="0" max="100000" value="0" step="1"></label>
       <div id="offline-chapter-controls" class="offline-chapter-controls" hidden aria-label="Chapter navigation"><button id="offline-chapter-previous" type="button" aria-label="Previous chapter">Chapter −</button><span id="offline-chapter-label">Chapter</span><button id="offline-chapter-next" type="button" aria-label="Next chapter">Chapter +</button><button id="offline-skip-intro" type="button" hidden>Skip intro</button><button id="offline-skip-credits" type="button" hidden>Skip credits</button></div>
