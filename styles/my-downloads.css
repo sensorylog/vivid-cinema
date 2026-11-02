@@ -652,3 +652,15 @@ html.vivid-performance-legacy .offline-summary div{backdrop-filter:none!importan
  .offline-title-detail-content{padding:22px}
  .offline-title-dialog{border-radius:18px}
 }
+
+
+/* Continue-watching shelf — powered by the existing local playback-position store. */
+.offline-continue-section{margin:28px 0 34px}
+.offline-continue-section[hidden]{display:none}
+.offline-continue-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,270px),1fr));gap:12px;margin-top:14px}
+.offline-continue-card{display:grid;grid-template-columns:66px minmax(0,1fr);gap:12px;align-items:center;padding:11px;border:1px solid var(--offline-line);border-radius:15px;background:linear-gradient(145deg,#151d2b,#0c111c)}
+.offline-continue-card .offline-poster{min-height:96px}
+.offline-continue-card>div:last-child{display:grid;gap:5px;min-width:0}
+.offline-continue-card strong{overflow:hidden;color:#edf1fa;font-size:12px;text-overflow:ellipsis;white-space:nowrap}
+.offline-continue-card small{color:#9ba9c0;font-size:10px}
+.offline-continue-card button{justify-self:start;min-height:29px;margin-top:3px;padding:0 10px;border:1px solid rgba(157,144,255,.22);border-radius:8px;background:rgba(137,124,255,.14);color:#d9d4ff;font:750 9px system-ui,sans-serif}
