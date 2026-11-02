@@ -75,6 +75,25 @@ function navigateToPreviousVividPage(event) {
 }
 
 
+function setStandaloneExperience() {
+  const standalone = window.matchMedia?.("(display-mode: standalone)")?.matches ||
+    window.navigator.standalone === true;
+  if (!standalone) return;
+
+  document.documentElement.classList.add("vivid-standalone");
+  const ios = /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.MSStream;
+  if (!ios) return;
+
+  document.documentElement.classList.add("vivid-ios-standalone");
+  let statusBar = document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]');
+  if (!statusBar) {
+    statusBar = document.createElement("meta");
+    statusBar.name = "apple-mobile-web-app-status-bar-style";
+    document.head.appendChild(statusBar);
+  }
+  statusBar.content = "black-translucent";
+}
+
 function setViewportState() {
   document.documentElement.dataset.viewport =
     window.innerWidth < MOBILE_BREAKPOINT ? "mobile" : "desktop";
@@ -452,7 +471,7 @@ function ensureMediaLayoutStyles() {
   if (!document.querySelector('link[data-vivid-premium-experience]')) {
     const link = document.createElement("link");
     link.rel = "stylesheet";
-    link.href = "./styles/vivid-premium-experience.css?v=1";
+    link.href = "./styles/vivid-premium-experience.css?v=2";
     link.dataset.vividPremiumExperience = "true";
     document.head.appendChild(link);
   }
@@ -463,6 +482,7 @@ function initAppShell() {
   initialized = true;
 
   ensureMediaLayoutStyles();
+  setStandaloneExperience();
   document.body.classList.add("vivid-app-experience");
   document.documentElement.dataset.vividReady = "false";
   const storedTheme = (() => { try { return localStorage.getItem("vivid:theme"); } catch { return null; } })();
