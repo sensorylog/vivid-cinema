@@ -8,6 +8,8 @@ const path = require("node:path");
 const crypto = require("node:crypto");
 const { DesktopDownloadEngine } = require("./download-engine.cjs");
 const { createMediaResponse } = require("./media-protocol.cjs");
+const { isPermissionAllowed } = require("./permission-policy.cjs");
+const { createLocalMediaRegistry, isSupportedLocalVideoFile, LOCAL_VIDEO_EXTENSIONS } = require("./local-media.cjs");
 protocol.registerSchemesAsPrivileged([{ scheme: "vivid-media", privileges: { standard: true, secure: true, supportFetchAPI: true, corsEnabled: true, stream: true } }]);
 
 const appRoot = app.getAppPath();
@@ -98,6 +100,7 @@ let localServer;
 let localOrigin;
 let downloadEngine;
 const mediaToken = crypto.randomBytes(32).toString("hex");
+const localMediaRegistry = createLocalMediaRegistry({ maxEntries: 8 });
 const HOSTED_APP_URL = "https://vivid-cinema.pages.dev/home.html";
 const HOSTED_APP_ORIGIN = new URL(HOSTED_APP_URL).origin;
 // Keep the offline fallback on one origin so Firebase Auth and onboarding storage survive relaunches.
@@ -176,14 +179,28 @@ function isTrustedDownloadSender(event) {
 function configureOfflineMediaProtocol() {
   protocol.handle("vivid-media", async request => {
     const url = new URL(request.url);
-    if (url.hostname !== "download" || url.searchParams.get("token") !== mediaToken) {
+    if (url.searchParams.get("token") !== mediaToken) {
       return new Response("Forbidden", { status: 403 });
     }
-    let id;
-    try { id = decodeURIComponent(url.pathname.slice(1)); }
-    catch { return new Response("Invalid media id", { status: 400 }); }
-    const fileIndex = Number(url.searchParams.get("file") || 0);
-    const filePath = downloadEngine && downloadEngine.mediaFile(id, fileIndex);
+
+    let filePath = null;
+    if (url.hostname === "download") {
+      let id;
+      try { id = decodeURIComponent(url.pathname.slice(1)); }
+      catch { return new Response("Invalid media id", { status: 400 }); }
+      const fileIndex = Number(url.searchParams.get("file") || 0);
+      filePath = downloadEngine && downloadEngine.mediaFile(id, fileIndex);
+    } else if (url.hostname === "local") {
+      let grantToken;
+      try { grantToken = decodeURIComponent(url.pathname.slice(1)); }
+      catch { return new Response("Invalid local media token", { status: 400 }); }
+      const grant = localMediaRegistry.get(grantToken);
+      filePath = grant?.filePath || null;
+      if (!filePath || !isSupportedLocalVideoFile(filePath)) return new Response("Media not found", { status: 404 });
+    } else {
+      return new Response("Not found", { status: 404 });
+    }
+
     if (!filePath) return new Response("Media not found", { status: 404 });
     let stat;
     try { stat = await fs.promises.stat(filePath); }
@@ -224,6 +241,33 @@ function configureDownloadEngine() {
     if (!isTrustedDownloadSender(event)) throw new Error("Untrusted download request");
     if (!downloadEngine.mediaFile(id, fileIndex)) throw new Error("This download is not ready to play.");
     return "vivid-media://download/" + encodeURIComponent(String(id)) + "?file=" + encodeURIComponent(String(fileIndex)) + "&token=" + mediaToken;
+  });
+  ipcMain.handle("vivid-local-media-open", async event => {
+    if (!isTrustedDownloadSender(event)) throw new Error("Untrusted local media request");
+    const parent = BrowserWindow.fromWebContents(event.sender);
+    const result = await dialog.showOpenDialog(parent, {
+      title: "Open a video in Vivid Cinema",
+      properties: ["openFile"],
+      filters: [{ name: "Video files", extensions: [...LOCAL_VIDEO_EXTENSIONS] }]
+    });
+    if (result.canceled || !result.filePaths?.length) return null;
+
+    const selectedPath = await fs.promises.realpath(result.filePaths[0]);
+    if (!isSupportedLocalVideoFile(selectedPath)) throw new Error("Choose a supported video file.");
+    const stat = await fs.promises.stat(selectedPath);
+    if (!stat.isFile()) throw new Error("The selected item is not a video file.");
+
+    const token = localMediaRegistry.register(selectedPath, event.sender.id);
+    return {
+      token,
+      url: "vivid-media://local/" + encodeURIComponent(token) + "?token=" + mediaToken,
+      name: path.basename(selectedPath),
+      size: stat.size
+    };
+  });
+  ipcMain.handle("vivid-local-media-release", (event, token) => {
+    if (!isTrustedDownloadSender(event)) throw new Error("Untrusted local media release");
+    return localMediaRegistry.release(token, event.sender.id);
   });
   ipcMain.handle("vivid-offline-url", event => {
     if (!isTrustedDownloadSender(event)) throw new Error("Untrusted offline navigation request");
@@ -468,9 +512,22 @@ if (hasSingleInstanceLock) {
 app.whenReady().then(async () => {
   installApplicationMenu();
   configureAutoUpdates();
-  session.defaultSession.setPermissionRequestHandler((_webContents, permission, callback) => {
-    callback(["fullscreen", "media", "notifications"].includes(permission));
+  const allowedPermissionOrigins = () => [HOSTED_APP_ORIGIN, localOrigin].filter(Boolean);
+  const canGrantPermission = (webContents, permission, requestingUrl) => {
+    if (!webContents || webContents.isDestroyed()) return false;
+    return isPermissionAllowed({
+      permission,
+      requestingUrl,
+      currentUrl: webContents.getURL(),
+      allowedOrigins: allowedPermissionOrigins()
+    });
+  };
+  session.defaultSession.setPermissionRequestHandler((webContents, permission, callback, details = {}) => {
+    callback(canGrantPermission(webContents, permission, details.requestingUrl));
   });
+  session.defaultSession.setPermissionCheckHandler((webContents, permission, requestingOrigin) =>
+    canGrantPermission(webContents, permission, requestingOrigin)
+  );
   try {
     await startLocalServer();
     configureDownloadEngine();
@@ -486,6 +543,7 @@ app.whenReady().then(async () => {
 app.on("window-all-closed", () => { if (process.platform !== "darwin") app.quit(); });
 let shutdownStarted = false;
 app.on("before-quit", event => {
+  localMediaRegistry.clear();
   if (downloadEngine && !shutdownStarted) {
     event.preventDefault(); shutdownStarted = true;
     void downloadEngine.shutdown().finally(() => { if (localServer) localServer.close(); app.quit(); });

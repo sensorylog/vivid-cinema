@@ -60,6 +60,29 @@ function parseMp4(bytes) {
       if (entrySize >= 8 && stsd.data + 8 + entrySize <= stsd.end) codec = fourCC(bytes, stsd.data + 12);
     }
     const mdhd = mdiaChildren.find(item => item.type === "mdhd");
+    let frameRate = null;
+    if (kind === "video" && mdhd && stbl) {
+      const version = bytes[mdhd.data];
+      const timescaleOffset = mdhd.data + (version === 1 ? 20 : 12);
+      const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+      if (timescaleOffset + 4 <= mdhd.end) {
+        const timescale = u32(view, timescaleOffset);
+        const stts = children(stbl, "stts")[0];
+        if (timescale && stts && stts.data + 8 <= stts.end) {
+          const entryCount = u32(view, stts.data + 4);
+          let offset = stts.data + 8, samples = 0, ticks = 0;
+          for (let entry = 0; entry < entryCount && offset + 8 <= stts.end; entry++, offset += 8) {
+            const count = u32(view, offset), delta = u32(view, offset + 4);
+            samples += count;
+            ticks += count * delta;
+          }
+          if (samples > 0 && ticks > 0) {
+            const candidate = timescale * samples / ticks;
+            if (Number.isFinite(candidate) && candidate >= 1 && candidate <= 1000) frameRate = candidate;
+          }
+        }
+      }
+    }
     let language = "";
     if (mdhd && mdhd.data + 24 <= mdhd.end) {
       const version = bytes[mdhd.data];
@@ -69,7 +92,7 @@ function parseMp4(bytes) {
         if (packed) language = [((packed >> 10) & 31) + 0x60, ((packed >> 5) & 31) + 0x60, (packed & 31) + 0x60].map(code => String.fromCharCode(code)).join("");
       }
     }
-    tracks.push({ kind, codec, language: /^[a-z]{3}$/.test(language) ? language : "", source: "MP4 sample description" });
+    tracks.push({ kind, codec, language: /^[a-z]{3}$/.test(language) ? language : "", ...(frameRate ? { frameRate } : {}), source: "MP4 sample description" });
   }
   const tkhd = children(moov, "trak").map(trak => {
     const box = children(trak, "tkhd")[0];
@@ -143,10 +166,25 @@ function parseMatroska(bytes) {
     const get = id => fields.find(element => element.id === id);
     const type = get(0x83), codec = get(0x86), language = get(0x22b59c) || get(0x22b59d);
     const kindValue = type ? ebmlUint(bytes, type) : 0;
+    const defaultDuration = get(0x23e383);
+    const video = get(0xe0);
+    const videoFrameRate = video ? ebmlElements(bytes, video.data, video.end).find(element => element.id === 0x2383e3) : null;
+    let frameRate = null;
+    if (kindValue === 1) {
+      if (defaultDuration) {
+        const duration = ebmlUint(bytes, defaultDuration);
+        if (duration > 0) frameRate = 1000000000 / duration;
+      } else if (videoFrameRate && (videoFrameRate.size === 4 || videoFrameRate.size === 8)) {
+        const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+        frameRate = videoFrameRate.size === 4 ? view.getFloat32(videoFrameRate.data, false) : view.getFloat64(videoFrameRate.data, false);
+      }
+      if (!Number.isFinite(frameRate) || frameRate < 1 || frameRate > 1000) frameRate = null;
+    }
     tracks.push({
       kind: kindValue === 1 ? "video" : kindValue === 2 ? "audio" : kindValue === 17 ? "subtitle" : "unknown",
       codec: codec ? ebmlString(bytes, codec) : "Unknown",
       language: language ? ebmlString(bytes, language) : "",
+      ...(frameRate ? { frameRate } : {}),
       source: "Matroska TrackEntry"
     });
   }

@@ -9,6 +9,8 @@ const files = [
   "service-worker.js",
   "scripts/platform-origin-redirect.js",
   "desktop/main.cjs",
+  "desktop/local-media.cjs",
+  "desktop/media-protocol.cjs",
   "desktop/preload.cjs",
   "desktop/download-engine.cjs",
   "scripts/my-downloads.js",
