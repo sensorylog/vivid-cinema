@@ -102,3 +102,16 @@ test("watch page lazy-loads only the selected secondary player module", () => {
   assert.match(source, /mountSecondaryPlayer\(params, episodeTitle \|\| title\)/);
   assert.match(source, /mountSecondaryPlayer\(currentParams, details\.episode\?\.name \|\| media\.title \|\| media\.name, details\)/);
 });
+
+test("direct playback force-saves the latest position before player teardown", () => {
+  assert.match(source, /let persistDirectProgress = null/);
+  assert.match(source, /persistDirectProgress\?\.\(\);[\s\S]*?stopDirectStream\(directPlayer\)/);
+  assert.match(source, /const saveDirectProgress = \(completed = false, force = false\)/);
+  assert.match(source, /!completed && !force && now - lastDirectProgressSaveAt < 8000/);
+  assert.match(source, /persistDirectProgress = \(\) => saveDirectProgress\(false, true\)/);
+});
+
+test("direct playback flushes its final progress when the app is backgrounded or page-hidden", () => {
+  assert.match(source, /visibilitychange[\s\S]*?persistDirectProgress\?\.\(\)[\s\S]*?flushPlaybackProgress\(progressKey\(\)\)/);
+  assert.match(source, /window\.addEventListener\("pagehide"[\s\S]*?persistDirectProgress\?\.\(\)[\s\S]*?flushPlaybackProgress\(progressKey\(\)\)/);
+});
