@@ -21,6 +21,28 @@ const FALLBACK_TRACKERS = Object.freeze([
 const safeText = (value, max = 180) => String(value || "").replace(/[\u0000-\u001f]/g, "").trim().slice(0, max);
 const roundProgress = torrent => Math.round((Number(torrent?.progress) || 0) * 1000) / 10;
 
+// Movie torrents often bundle samples, artwork, NFOs and unrelated extras.
+// Keep every video file selected (so season packs still work), but deselect
+// non-video payloads once metadata arrives. This avoids wasting bandwidth and
+// disk space without changing the torrent's identity or damaging resume data.
+function selectVideoPayload(torrent) {
+  const files = Array.isArray(torrent?.files) ? torrent.files : [];
+  const videos = files.filter(file => VIDEO_EXTENSIONS.test(String(file?.name || "")));
+  if (!videos.length) return { videoFiles: 0, deselectedFiles: 0 };
+  let deselectedFiles = 0;
+  for (const file of files) {
+    if (videos.includes(file)) continue;
+    if (typeof file.deselect === "function") {
+      file.deselect();
+      deselectedFiles += 1;
+    }
+  }
+  for (const file of videos) {
+    if (typeof file.select === "function") file.select();
+  }
+  return { videoFiles: videos.length, deselectedFiles };
+}
+
 class DesktopDownloadEngine {
   constructor({ app, BrowserWindow, dialog, shell }) {
     Object.assign(this, { app, BrowserWindow, dialog, shell });
@@ -239,7 +261,12 @@ class DesktopDownloadEngine {
       lastNoPeerSource: null,
       lastWarning: null
     };
-    torrent.on("metadata", publishWhenReady);
+    torrent.on("metadata", () => {
+      const selection = selectVideoPayload(torrent);
+      discovery.videoFiles = selection.videoFiles;
+      discovery.deselectedFiles = selection.deselectedFiles;
+      publishWhenReady();
+    });
     torrent.on("trackerAnnounce", () => { discovery.trackerAnnounces += 1; publishWhenReady(); });
     torrent.on("dhtAnnounce", () => { discovery.dhtAnnounces += 1; publishWhenReady(); });
     torrent.on("noPeers", source => {
@@ -327,6 +354,8 @@ class DesktopDownloadEngine {
         noPeerAnnounces: job.discovery.noPeerAnnounces,
         lastNoPeerSource: job.discovery.lastNoPeerSource,
         lastWarning: job.discovery.lastWarning,
+        videoFiles: job.discovery.videoFiles || 0,
+        deselectedFiles: job.discovery.deselectedFiles || 0,
         dhtEnabled: Boolean(this.client.dht),
         dhtListening: Boolean(this.client.dht && this.client.dht.listening)
       } : null,
@@ -467,4 +496,4 @@ class DesktopDownloadEngine {
     await new Promise(resolve => this.client.destroy(resolve));
   }
 }
-module.exports = { DesktopDownloadEngine, FALLBACK_TRACKERS };
+module.exports = { DesktopDownloadEngine, FALLBACK_TRACKERS, selectVideoPayload };
