@@ -266,6 +266,7 @@ const player = byId("offline-player");
 let audioContext = null;
 let audioSource = null;
 let audioGain = null;
+let audioCompressor = null;
 let audioDelay = null;
 let audioGraphUnavailable = false;
 let capabilityReportPromise = null;
@@ -337,7 +338,7 @@ function ensureAudioProcessing(){
   if(audioGraphUnavailable)return false;
   if(audioGain&&audioDelay)return true;
   const AudioContextClass=window.AudioContext||window.webkitAudioContext;
-  if(!AudioContextClass||typeof player.captureStream==="function"&&player.disableRemotePlayback){
+  if(!AudioContextClass){
     audioGraphUnavailable=true;
     setMessage("Audio boost and delay are unavailable in this Windows media session.");
     return false;
@@ -346,11 +347,18 @@ function ensureAudioProcessing(){
     audioContext=audioContext||new AudioContextClass();
     audioSource=audioSource||audioContext.createMediaElementSource(player);
     audioGain=audioContext.createGain();
+    audioCompressor=audioContext.createDynamicsCompressor();
+    audioCompressor.threshold.value=-1;
+    audioCompressor.knee.value=0;
+    audioCompressor.ratio.value=20;
+    audioCompressor.attack.value=0.003;
+    audioCompressor.release.value=0.15;
     audioDelay=audioContext.createDelay(0.6);
     audioGain.gain.value=Number(byId("offline-audio-boost").value)/100;
     audioDelay.delayTime.value=Number(byId("offline-audio-delay").value)/1000;
     audioSource.connect(audioGain);
-    audioGain.connect(audioDelay);
+    audioGain.connect(audioCompressor);
+    audioCompressor.connect(audioDelay);
     audioDelay.connect(audioContext.destination);
     void audioContext.resume().catch(error=>setMessage("Audio processing could not start: "+(error?.message||"Please try again.")));
     return true;
