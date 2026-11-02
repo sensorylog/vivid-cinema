@@ -619,7 +619,8 @@ function stepFrame(direction){
   }
   player.pause();
   const currentFrame=Math.round(player.currentTime*frameRate);
-  const nextFrame=Math.max(0,Math.min(Math.ceil(player.duration*frameRate),currentFrame+(direction<0?-1:1)));
+  const lastFrame=Math.max(0,Math.ceil(player.duration*frameRate)-1);
+  const nextFrame=Math.max(0,Math.min(lastFrame,currentFrame+(direction<0?-1:1)));
   player.currentTime=Math.min(player.duration,nextFrame/frameRate);
 }
 byId("offline-frame-back").addEventListener("click",()=>stepFrame(-1));
