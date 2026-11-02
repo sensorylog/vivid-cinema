@@ -97,7 +97,7 @@ async function showTitleDetails(job){
   const isSeries=media.media_type==="tv";
   const title=String(media.title||job.title||"Untitled");
   const poster=String(media.poster_path||"");
-  const safePoster=/^\\/[A-Za-z0-9_./-]+\\.(?:jpg|jpeg|png|webp)$/i.test(poster)&&!poster.split("/").includes("..");
+  const safePoster=/^\/[A-Za-z0-9_./-]+\.(?:jpg|jpeg|png|webp)$/i.test(poster)&&!poster.split("/").includes("..");
   const image=safePoster?"https://image.tmdb.org/t/p/w500"+poster:"";
   const heading=byId("offline-title-detail-title");
   const copy=byId("offline-title-detail-copy");
@@ -120,7 +120,7 @@ async function showTitleDetails(job){
     byId("offline-title-detail-overview").textContent=String(detail?.overview||media.overview||"No description is available for this title.");
     byId("offline-title-detail-meta").textContent=[year,Number.isFinite(rating)&&rating>0?"★ "+rating.toFixed(1):"",genres].filter(Boolean).join(" · ")|| (isSeries?"Series library":"Saved movie");
     const detailPoster=String(detail?.poster_path||"");
-    if(/^\\/[A-Za-z0-9_./-]+\\.(?:jpg|jpeg|png|webp)$/i.test(detailPoster)&&!detailPoster.split("/").includes(".."))art.style.backgroundImage='url("https://image.tmdb.org/t/p/w500'+detailPoster+'")';
+    if(/^\/[A-Za-z0-9_./-]+\.(?:jpg|jpeg|png|webp)$/i.test(detailPoster)&&!detailPoster.split("/").includes(".."))art.style.backgroundImage='url("https://image.tmdb.org/t/p/w500'+detailPoster+'")';
   }catch{
     byId("offline-title-detail-overview").textContent=String(media.overview||"Title information is unavailable offline. Your saved media remains in your library.");
   }
