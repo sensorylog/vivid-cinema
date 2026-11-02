@@ -373,7 +373,7 @@ function seekBy(seconds){
   if(!Number.isFinite(player.duration))return;
   player.currentTime=Math.max(0,Math.min(player.duration,player.currentTime+seconds));
   const feedback=byId("offline-seek-feedback");
-  feedback.textContent=(seconds<0?"−":"+")+Math.abs(seconds)+" seconds";
+  if(Math.abs(seconds)===10)feedback.textContent=seconds<0?"−10 seconds":"+10 seconds";else feedback.textContent=(seconds<0?"−":"+")+Math.abs(seconds)+" seconds";
   feedback.className="offline-seek-feedback "+(seconds<0?"is-back":"is-forward");
   feedback.hidden=false;
   if(seekFeedbackTimer)clearTimeout(seekFeedbackTimer);
