@@ -427,6 +427,11 @@ function seekToChapter(direction){
     if(next)player.currentTime=next.startTime;
     return;
   }
+  const activeIndex=chapterCues.findIndex(cue=>now>=cue.startTime&&now<cue.endTime);
+  if(activeIndex>=0&&now-chapterCues[activeIndex].startTime>3){
+    player.currentTime=chapterCues[activeIndex].startTime;
+    return;
+  }
   const prior=chapterCues.filter(cue=>cue.startTime<now-0.5);
   if(prior.length)player.currentTime=prior[prior.length-1].startTime;
 }
