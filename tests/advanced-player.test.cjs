@@ -33,6 +33,8 @@ test("mpv launch arguments use safe decoding defaults and never invoke a shell",
   assert.ok(args.includes("--hwdec=auto-safe"));
   assert.ok(args.includes("--no-config"));
   assert.ok(args.includes("--osc=yes"));
+  assert.ok(args.includes("--sub-auto=fuzzy"), "discover matching external subtitle files automatically");
+  assert.ok(args.includes("--audio-file-auto=fuzzy"), "discover matching external audio tracks automatically");
   assert.ok(args.includes("--"));
   assert.equal(args.at(-1), media);
   const resumed = createMpvArgs(media, 42.5, String.raw`\\.\pipe\vivid-mpv-test`);
