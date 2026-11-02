@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { choosePreferredTrack, normalizeLanguageTag, parseSubtitleFile } from "../scripts/downloads/subtitle-engine.js";
-import { playbackProfileKey } from "../scripts/downloads/playback-preferences.js";
+import { getPlaybackPreferences, playbackProfileKey, savePlaybackPreferences } from "../scripts/downloads/playback-preferences.js";
 
 test("parses numbered SRT cues and normalizes comma timestamps", () => {
   const cues = parseSubtitleFile("1\n00:00:01,250 --> 00:00:03,500\nHello\nworld\n\n2\n00:00:04,000 --> 00:00:05,000\nGoodbye", "srt");
@@ -70,4 +70,25 @@ test("offline player exposes language and subtitle appearance controls", async (
   assert.match(player, /savePlaybackPreferences\(activePreferenceKey,patch\)/);
   assert.match(player, /parseSubtitleFile\(/);
   assert.match(player, /renderSubtitleAtTime\(/);
+});
+
+test("stores language defaults globally and appearance choices per media profile", () => {
+  const original = globalThis.localStorage;
+  const values = new Map();
+  globalThis.localStorage = {
+    getItem(key) { return values.get(key) ?? null; },
+    setItem(key, value) { values.set(key, value); }
+  };
+  try {
+    savePlaybackPreferences("movie:55:file:0", { audioLanguage: "EN_us", subtitleLanguage: "ja", subtitleSize: "large", color: "#fff36a" });
+    savePlaybackPreferences("tv:77:s2e4:file:1", { subtitleSize: "small" });
+    assert.equal(getPlaybackPreferences("movie:55:file:0").audioLanguage, "en-us");
+    assert.equal(getPlaybackPreferences("tv:77:s2e4:file:1").audioLanguage, "en-us");
+    assert.equal(getPlaybackPreferences("tv:77:s2e4:file:1").subtitleLanguage, "ja");
+    assert.equal(getPlaybackPreferences("tv:77:s2e4:file:1").subtitleSize, "small");
+    assert.equal(getPlaybackPreferences("movie:55:file:0").color, "#fff36a");
+  } finally {
+    if (original === undefined) delete globalThis.localStorage;
+    else globalThis.localStorage = original;
+  }
 });
