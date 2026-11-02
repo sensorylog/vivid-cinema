@@ -142,3 +142,13 @@ test("Windows player runtime and stylesheet have cache-busting URLs", async () =
   assert.match(worker, /desktop-offline\.js\?advanced-mpv-fallback-v1/);
   assert.match(worker, /my-downloads\.css\?v=advanced-mpv-fallback-v1/);
 });
+
+
+test("unsupported built-in video or audio codecs automatically fall back to the Advanced Player", async () => {
+  const desktop = await readFile(new URL("../scripts/downloads/desktop-offline.js", import.meta.url), "utf8");
+  assert.match(desktop, /if\(code===3\|\|code===4\)/);
+  assert.match(desktop, /launchAdvancedPlayer\(\{automatic:true\}\)/);
+  assert.match(desktop, /await engine\.setPlaybackPosition\(id,fileIndex,currentTime\)/);
+  assert.match(desktop, /await engine\.openAdvancedPlayer\(id,fileIndex\)/);
+  assert.match(desktop, /This movie's format needs the Advanced Player/);
+});
