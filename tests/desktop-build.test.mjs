@@ -428,6 +428,9 @@ test("Windows desktop release uses the built-in player without an mpv build or s
   assert.doesNotMatch(page, /offline-advanced-player|advanced-track-panel/);
   assert.doesNotMatch(renderer, /launchAdvancedPlayer|openAdvancedPlayer|mpv/);
   assert.doesNotMatch(workflow, /mpv|CORRESPONDING-SOURCE|SOURCE-MANIFEST|VIVID_SKIP_MPV/);
+  assert.match(renderer, /parseAssToVtt/);
+  assert.match(renderer, /assTimestampToVtt/);
+  assert.match(renderer, /"ass","ssa"/);
   assert.equal(pkg.build.extraResources.length, 0);
   assert.ok(!pkg.scripts["predesktop:dist"]);
   assert.ok(!pkg.scripts["predesktop:publish"]);
