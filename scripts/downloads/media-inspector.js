@@ -91,7 +91,8 @@ function readVint(bytes, offset, keepMarker = false) {
   if (length > 8 || offset + length > bytes.length) return null;
   let value = keepMarker ? first : first & (mask - 1);
   for (let i = 1; i < length; i++) value = value * 256 + bytes[offset + i];
-  return { value, length };
+  const unknown = !keepMarker && Array.from(bytes.subarray(offset, offset + length)).every(byte => byte === 0xff);
+  return { value, length, unknown };
 }
 
 function ebmlElements(bytes, start, end) {
@@ -103,7 +104,7 @@ function ebmlElements(bytes, start, end) {
     const size = readVint(bytes, offset + id.length);
     if (!size || !Number.isSafeInteger(size.value)) break;
     const data = offset + id.length + size.length;
-    const elementEnd = data + size.value;
+    const elementEnd = size.unknown ? end : data + size.value;
     if (elementEnd > end || elementEnd > bytes.length) break;
     result.push({ id: id.value, data, end: elementEnd, size: size.value });
     offset = elementEnd;
@@ -168,5 +169,18 @@ export async function inspectMediaUrl(url, filename = "", { fetchImpl = globalTh
   const bytes = new Uint8Array(await response.arrayBuffer());
   if (!bytes.length) throw new Error("The media file returned no readable data.");
   const result = inspectMediaBytes(bytes, filename);
-  return { ...result, fileSize: Number(response.headers.get("content-length")) || null, partial: response.status === 206 || bytes.length >= maxBytes };
+  const rangeTotal = /\\/(\\d+)$/.exec(response.headers.get("content-range") || "");
+  const fileSize = rangeTotal ? Number(rangeTotal[1]) : Number(response.headers.get("content-length")) || null;
+  if (!result.complete && fileSize && fileSize > bytes.length) {
+    const tailStart = Math.max(bytes.length, fileSize - Math.min(maxBytes, 8 * 1024 * 1024));
+    try {
+      const tailResponse = await fetchImpl(url, { headers: { Range: "bytes=" + tailStart + "-" + (fileSize - 1) } });
+      if (tailResponse.ok || tailResponse.status === 206) {
+        const tail = new Uint8Array(await tailResponse.arrayBuffer());
+        const tailResult = inspectMediaBytes(tail, filename);
+        if (tailResult.complete && tailResult.tracks.length) return { ...tailResult, fileSize, partial: true, note: tailResult.note + " Metadata was located in the file's trailing region." };
+      }
+    } catch {}
+  }
+  return { ...result, fileSize, partial: response.status === 206 || bytes.length >= maxBytes };
 }
