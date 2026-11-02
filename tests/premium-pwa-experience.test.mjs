@@ -45,3 +45,17 @@ test("installed iOS PWA gets a standalone app shell and safe-area-aware content"
   assert.match(css, /env\(safe-area-inset-bottom/);
   assert.match(css, /overscroll-behavior-y:\s*contain/);
 });
+
+
+test("installed iOS PWA supports an edge-swipe back gesture without hijacking players", () => {
+  const shell = read("../scripts/app-shell.js");
+  const css = read("../styles/vivid-premium-experience.css");
+  assert.match(shell, /function initStandaloneBackGesture\(\)/);
+  assert.match(shell, /touchstart/);
+  assert.match(shell, /touchend/);
+  assert.match(shell, /touch.clientX > 22/);
+  assert.match(shell, /dx < 112/);
+  assert.match(shell, /video, iframe/);
+  assert.match(shell, /history.back\(\)/);
+  assert.match(css, /touch-action:\s*manipulation/);
+});
