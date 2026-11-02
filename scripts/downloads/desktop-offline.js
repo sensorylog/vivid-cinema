@@ -600,7 +600,7 @@ async function refreshAdvancedTracks(){
     status.textContent=audio.length+" audio track"+(audio.length===1?"":"s")+" · "+subtitles.length+" subtitle track"+(subtitles.length===1?"":"s")+" found. Matching external files are included when mpv detects them.";
   }catch(error){
     status.textContent=error?.message||"Advanced Player is not connected. Start a movie, then refresh tracks.";
-    if(/closed|not connected/i.test(status.textContent)){clearInterval(advancedTrackTimer);advancedTrackTimer=null;}
+    if(/closed before the command completed|Advanced Player closed/i.test(status.textContent)){clearInterval(advancedTrackTimer);advancedTrackTimer=null;}
   }finally{advancedTrackBusy=false;}
 }
 function showAdvancedTrackPanel(){
