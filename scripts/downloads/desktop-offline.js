@@ -404,6 +404,16 @@ function loadExternalSubtitle(file){
   };
   reader.readAsText(file);
 }
+function audioTrackLabel(track,index){
+  const parts=[];
+  const label=String(track.label||"").trim();
+  const language=String(track.language||"").trim();
+  const kind=String(track.kind||"").trim();
+  if(label)parts.push(label);
+  if(language&&language.toLowerCase()!=="und"&&language.toLowerCase()!==label.toLowerCase())parts.push(language.toUpperCase());
+  if(kind&&kind!=="main"&&kind!=="alternative")parts.push(kind);
+  return parts.length?parts.join(" · "):"Audio "+(index+1);
+}
 function refreshAudioTracks(){
   const select=byId("offline-audio-track");
   const tracks=player.audioTracks;
@@ -412,16 +422,19 @@ function refreshAudioTracks(){
   if(!tracks.length){select.parentElement.hidden=true;return;}
   // Some Matroska files expose audio tracks without marking a default track.
   // Explicitly enable the first track so a playable video is not silently muted.
-  let hasEnabledTrack=false;
-  for(let index=0;index<tracks.length;index++)hasEnabledTrack ||= Boolean(tracks[index].enabled);
-  if(!hasEnabledTrack)tracks[0].enabled=true;
+  let selectedIndex=-1;
+  for(let index=0;index<tracks.length;index++){
+    if(tracks[index].enabled){selectedIndex=index;break;}
+  }
+  if(selectedIndex<0){selectedIndex=0;tracks[0].enabled=true;}
   for(let index=0;index<tracks.length;index++){
     const track=tracks[index],option=document.createElement("option");
     option.value=String(index);
-    option.textContent=track.label||track.language||("Audio "+(index+1));
-    option.selected=Boolean(track.enabled);
+    option.textContent=audioTrackLabel(track,index);
+    option.selected=index===selectedIndex;
     select.appendChild(option);
   }
+  select.value=String(selectedIndex);
   select.parentElement.hidden=false;
 }
 
@@ -449,6 +462,8 @@ byId("offline-audio-track").addEventListener("change",event=>{
   const tracks=player.audioTracks,index=Number(event.target.value);
   if(!tracks||!Number.isInteger(index)||!tracks[index])return;
   for(let i=0;i<tracks.length;i++)tracks[i].enabled=i===index;
+  refreshAudioTracks();
+  setMessage("Selected "+audioTrackLabel(tracks[index],index)+".");
 });
 
 byId("offline-seek").addEventListener("input",event=>{if(Number.isFinite(player.duration))player.currentTime=player.duration*(Number(event.target.value)/1000);});
@@ -628,6 +643,7 @@ player.addEventListener("playing",()=>{
 
 player.addEventListener("loadedmetadata",refreshSubtitleTracks);
 player.addEventListener("loadeddata",refreshAudioTracks);
+player.addEventListener("canplay",refreshAudioTracks);
 player.textTracks?.addEventListener?.("addtrack",refreshSubtitleTracks);
 player.textTracks?.addEventListener?.("removetrack",refreshSubtitleTracks);
 player.textTracks?.addEventListener?.("change",refreshSubtitleTracks);
