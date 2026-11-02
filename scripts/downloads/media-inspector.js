@@ -200,7 +200,7 @@ export async function inspectMediaUrl(url, filename = "", { fetchImpl = globalTh
   const bounded = await readBoundedBytes(response, maxBytes);
   const bytes = bounded.bytes;
   if (!bytes.length) throw new Error("The media file returned no readable data.");
-  const contentRange = /^bytes\\s+(\\d+)-(\\d+)\\/(\\d+)$/i.exec(response.headers.get("content-range") || "");
+  const contentRange = /^bytes\s+(\d+)-(\d+)\/(\d+)$/i.exec(response.headers.get("content-range") || "");
   const fileSize = contentRange
     ? Number(contentRange[3])
     : response.status === 200 && Number.isSafeInteger(Number(response.headers.get("content-length")))
