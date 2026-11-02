@@ -213,6 +213,14 @@ function configureDownloadEngine() {
     if (!isTrustedDownloadSender(event)) throw new Error("Untrusted advanced-player request");
     return advancedPlayer.open(id, fileIndex);
   });
+  ipcMain.handle("vivid-advanced-player-tracks", event => {
+    if (!isTrustedDownloadSender(event)) throw new Error("Untrusted advanced-player request");
+    return advancedPlayer.getTracks();
+  });
+  ipcMain.handle("vivid-advanced-player-select-track", (event, type, trackId) => {
+    if (!isTrustedDownloadSender(event)) throw new Error("Untrusted advanced-player request");
+    return advancedPlayer.selectTrack(type, trackId);
+  });
   ipcMain.handle("vivid-playback-position-get", (event, id, fileIndex = 0) => {
     if (!isTrustedDownloadSender(event)) throw new Error("Untrusted playback request");
     return downloadEngine.getPlaybackPosition(id, fileIndex);
