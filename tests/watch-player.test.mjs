@@ -115,3 +115,20 @@ test("direct playback flushes its final progress when the app is backgrounded or
   assert.match(source, /visibilitychange[\s\S]*?persistDirectProgress\?\.\(\)[\s\S]*?flushPlaybackProgress\(progressKey\(\)\)/);
   assert.match(source, /window\.addEventListener\("pagehide"[\s\S]*?persistDirectProgress\?\.\(\)[\s\S]*?flushPlaybackProgress\(progressKey\(\)\)/);
 });
+
+
+test("TV episode navigation links stay within season and cross to adjacent seasons", () => {
+  assert.match(source, /function episodeNavigationMarkup\(params\)/);
+  assert.match(source, /const currentSeason = seasons\.find/);
+  assert.match(source, /currentEpisode > 1[\s\S]*?episode: currentEpisode - 1/);
+  assert.match(source, /currentEpisode < Number\(currentSeason\.episode_count\)[\s\S]*?episode: currentEpisode \+ 1/);
+  assert.match(source, /buildWatchUrl\(media\.id, "tv", target\.season, target\.episode\)/);
+  assert.match(source, /isAnimePlayback\(\) \? "&anime=1" : ""/);
+  assert.match(source, /watch-episode-navigation/);
+});
+
+test("TV episode navigation disables boundaries and excludes specials", () => {
+  assert.match(source, /Number\(season\?\.season_number\) > 0/);
+  assert.match(source, /"Beginning of series"/);
+  assert.match(source, /"Season complete"/);
+});
