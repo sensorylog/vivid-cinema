@@ -8,6 +8,7 @@ const path = require("node:path");
 const crypto = require("node:crypto");
 const { MPV_SOURCE_COMMIT } = require("../desktop/prepare-mpv.cjs");
 const { verifyMpvSources } = require("../desktop/verify-mpv-sources.cjs");
+const BUILD_SCRIPT = fs.readFileSync(path.join(__dirname, "../desktop/build-mpv-source.sh"), "utf8");
 
 function fixture(t) {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "vivid-mpv-source-gate-"));
@@ -75,4 +76,9 @@ test("source gate rejects licence paths that escape the bundled notice directory
   manifest.components[0].licenseFile = "../../package.json";
   fs.writeFileSync(paths.manifestPath, JSON.stringify(manifest));
   assert.throws(() => verifyMpvSources({ projectRoot: paths.root, skip: false }), /bundled licence file/);
+});
+
+test("mpv candidate smoke test uses a terminating version query instead of opening an idle player", () => {
+  assert.match(BUILD_SCRIPT, /wine \.\/artifact\/mpv\.com --version --no-config/);
+  assert.doesNotMatch(BUILD_SCRIPT, /wine \.\/artifact\/mpv\.com -v --no-config/);
 });
