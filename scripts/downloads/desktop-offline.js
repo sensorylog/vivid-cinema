@@ -749,7 +749,6 @@ function commitSeekPreview(){
   seekPreviewTarget=null;
   seekPreview.hidden=true;
 }
-function cancelSeekPreview(){seekPreviewTarget=null;seekPreview.hidden=true;}
 seekInput.addEventListener("change",commitSeekPreview);
 seekInput.addEventListener("pointerup",commitSeekPreview);
 seekInput.addEventListener("keyup",event=>{if(["ArrowLeft","ArrowRight","Home","End","PageUp","PageDown"].includes(event.key))commitSeekPreview();});
@@ -996,7 +995,7 @@ async function playLocalFile(){
   await releaseLocalMedia();
   player.pause();resetSeekPreviewSource();clearExternalSubtitle();chapterTrack=null;chapterCues=[];
   activePreferenceKey="local:"+file.name+":"+file.size;applyPlaybackPreferences();
-  resetSeekPreviewSource();player.src=file.url;player.dataset.frameRate="";byId("offline-frame-back").disabled=true;byId("offline-frame-forward").disabled=true;player.dataset.jobId="";player.dataset.fileIndex="0";
+  player.src=file.url;player.dataset.frameRate="";byId("offline-frame-back").disabled=true;byId("offline-frame-forward").disabled=true;player.dataset.jobId="";player.dataset.fileIndex="0";
   player.dataset.mediaFilename=file.name;player.dataset.localMediaToken=file.token;
   player.load();lastPositionSave=0;resumePosition=0;
   byId("offline-player-title").textContent=file.name;
