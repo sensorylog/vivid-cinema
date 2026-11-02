@@ -389,6 +389,59 @@ function clearExternalSubtitle(){
   byId("offline-subtitle-offset-value").textContent="0.0s";
   refreshSubtitleTracks();
 }
+let chapterTrack=null;
+let chapterCues=[];
+const introPattern=/\\b(intro|opening|recap|previously on)\\b/i;
+const creditsPattern=/\\b(credits|end credits|closing credits|outro)\\b/i;
+function readChapterCues(){
+  const tracks=Array.from(player.textTracks||[]);
+  chapterTrack=tracks.find(track=>track.kind==="chapters"&&track.cues&&track.cues.length)||null;
+  if(chapterTrack&&chapterTrack.mode==="disabled")chapterTrack.mode="hidden";
+  chapterCues=chapterTrack?Array.from(chapterTrack.cues||[]).filter(cue=>Number.isFinite(cue.startTime)&&Number.isFinite(cue.endTime)&&cue.endTime>cue.startTime).sort((a,b)=>a.startTime-b.startTime):[];
+  byId("offline-chapter-controls").hidden=chapterCues.length===0;
+  updateChapterControls();
+}
+function updateChapterControls(){
+  const controls=byId("offline-chapter-controls");
+  if(!chapterCues.length){controls.hidden=true;return;}
+  controls.hidden=false;
+  const now=Number(player.currentTime)||0;
+  const activeIndex=chapterCues.findIndex(cue=>now>=cue.startTime&&now<cue.endTime);
+  const active=activeIndex>=0?chapterCues[activeIndex]:null;
+  const chapterText=String(active?.text||"").replace(/<[^>]*>/g," ").replace(/\\s+/g," ").trim();
+  byId("offline-chapter-label").textContent=chapterText?chapterText.slice(0,56):active?"Chapter "+(activeIndex+1):"Chapters";
+  byId("offline-chapter-previous").disabled=chapterCues.every(cue=>cue.startTime>=now-0.5);
+  byId("offline-chapter-next").disabled=!chapterCues.some(cue=>cue.startTime>now+0.5);
+  const introIndex=chapterCues.findIndex(cue=>introPattern.test(String(cue.text||"")));
+  const intro= chapterCues[introIndex];
+  const skipIntro=byId("offline-skip-intro");
+  skipIntro.hidden=!(intro&&now>=intro.startTime-0.5&&now<intro.endTime);
+  const credits=chapterCues.find(cue=>creditsPattern.test(String(cue.text||""))&&now>=cue.startTime&&now<cue.endTime);
+  byId("offline-skip-credits").hidden=!credits;
+}
+function seekToChapter(direction){
+  if(!chapterCues.length)return;
+  const now=Number(player.currentTime)||0;
+  if(direction>0){
+    const next=chapterCues.find(cue=>cue.startTime>now+0.5);
+    if(next)player.currentTime=next.startTime;
+    return;
+  }
+  const prior=chapterCues.filter(cue=>cue.startTime<now-0.5);
+  if(prior.length)player.currentTime=prior[prior.length-1].startTime;
+}
+byId("offline-chapter-previous").addEventListener("click",()=>seekToChapter(-1));
+byId("offline-chapter-next").addEventListener("click",()=>seekToChapter(1));
+byId("offline-skip-intro").addEventListener("click",()=>{
+  const intro=chapterCues.find(cue=>introPattern.test(String(cue.text||"")));
+  if(!intro)return;
+  const next=chapterCues.find(cue=>cue.startTime>=intro.endTime-0.5);
+  player.currentTime=next?next.startTime:intro.endTime;
+});
+byId("offline-skip-credits").addEventListener("click",()=>{
+  const credits=chapterCues.find(cue=>creditsPattern.test(String(cue.text||""))&&player.currentTime>=cue.startTime&&player.currentTime<cue.endTime);
+  if(credits)player.currentTime=Math.min(Number.isFinite(player.duration)?player.duration:credits.endTime,Math.max(credits.endTime,credits.startTime));
+});
 function refreshSubtitleTracks(){
   const select=byId("offline-subtitle-track");
   if(!select)return;
@@ -768,6 +821,10 @@ player.addEventListener("playing",()=>{
 });
 
 player.addEventListener("loadedmetadata",refreshSubtitleTracks);
+player.addEventListener("loadedmetadata",readChapterCues);
+player.addEventListener("timeupdate",()=>{if(!chapterTrack)readChapterCues();else updateChapterControls();});
+player.textTracks?.addEventListener?.("addtrack",readChapterCues);
+player.textTracks?.addEventListener?.("change",readChapterCues);
 player.addEventListener("loadeddata",refreshAudioTracks);
 player.addEventListener("canplay",refreshAudioTracks);
 player.textTracks?.addEventListener?.("addtrack",refreshSubtitleTracks);
@@ -874,7 +931,7 @@ byId("offline-player-close").addEventListener("click",async()=>{
     const exit=document.exitFullscreen||document.webkitExitFullscreen;
     try{if(typeof exit==="function")await exit.call(document);}catch{}
   }
-  player.pause();clearExternalSubtitle();byId("offline-audio-boost").value="100";byId("offline-audio-boost-value").textContent="100%";byId("offline-audio-delay").value="0";byId("offline-audio-delay-value").textContent="0 ms";if(audioGain&&audioContext)audioGain.gain.setTargetAtTime(1,audioContext.currentTime,0.015);if(audioDelay&&audioContext)audioDelay.delayTime.setTargetAtTime(0,audioContext.currentTime,0.015);player.removeAttribute("src");player.load();player.dataset.jobId="";player.dataset.mediaFilename="";diagnosticsRequest++;
+  player.pause();clearExternalSubtitle();chapterTrack=null;chapterCues=[];byId("offline-chapter-controls").hidden=true;byId("offline-skip-intro").hidden=true;byId("offline-skip-credits").hidden=true;byId("offline-audio-boost").value="100";byId("offline-audio-boost-value").textContent="100%";byId("offline-audio-delay").value="0";byId("offline-audio-delay-value").textContent="0 ms";if(audioGain&&audioContext)audioGain.gain.setTargetAtTime(1,audioContext.currentTime,0.015);if(audioDelay&&audioContext)audioDelay.delayTime.setTargetAtTime(0,audioContext.currentTime,0.015);player.removeAttribute("src");player.load();player.dataset.jobId="";player.dataset.mediaFilename="";diagnosticsRequest++;
   player.controls=true;byId("offline-custom-controls").hidden=true;byId("offline-player-section").classList.remove("windowed-cinema");byId("offline-player-section").hidden=true;
   byId("offline-cinema-mode").setAttribute("aria-pressed","false");byId("offline-cinema-mode").textContent="Windowed cinema";
   byId("offline-audio-track").parentElement.hidden=true;byId("offline-resume-prompt").hidden=true;
