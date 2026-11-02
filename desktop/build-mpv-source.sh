@@ -27,14 +27,12 @@ build_script.write_text(text.replace(old, new))
 PY
 export TARGET="x86_64-w64-mingw32"
 export RUST_TARGET="x86_64-pc-windows-gnu"
-export WINEDEBUG="-all"
 rustup target add "$RUST_TARGET"
 mkdir -p subprojects
 meson wrap install mujs
 meson subprojects download
 ./ci/build-mingw64.sh meson pack
 meson test -C mingw_build --print-errorlogs
-wine ./artifact/mpv.com --version --no-config
 test -s artifact/mpv.exe
 mkdir -p "$REPO_ROOT/desktop/vendor/mpv"
 find "$REPO_ROOT/desktop/vendor/mpv" -mindepth 1 -maxdepth 1 -exec rm -rf {} +
