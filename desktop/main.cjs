@@ -8,6 +8,7 @@ const path = require("node:path");
 const crypto = require("node:crypto");
 const { DesktopDownloadEngine } = require("./download-engine.cjs");
 const { createMediaResponse } = require("./media-protocol.cjs");
+const { isPermissionAllowed } = require("./permission-policy.cjs");
 protocol.registerSchemesAsPrivileged([{ scheme: "vivid-media", privileges: { standard: true, secure: true, supportFetchAPI: true, corsEnabled: true, stream: true } }]);
 
 const appRoot = app.getAppPath();
@@ -468,9 +469,22 @@ if (hasSingleInstanceLock) {
 app.whenReady().then(async () => {
   installApplicationMenu();
   configureAutoUpdates();
-  session.defaultSession.setPermissionRequestHandler((_webContents, permission, callback) => {
-    callback(["fullscreen", "media", "notifications"].includes(permission));
+  const allowedPermissionOrigins = () => [HOSTED_APP_ORIGIN, localOrigin].filter(Boolean);
+  const canGrantPermission = (webContents, permission, requestingUrl) => {
+    if (!webContents || webContents.isDestroyed()) return false;
+    return isPermissionAllowed({
+      permission,
+      requestingUrl,
+      currentUrl: webContents.getURL(),
+      allowedOrigins: allowedPermissionOrigins()
+    });
+  };
+  session.defaultSession.setPermissionRequestHandler((webContents, permission, callback, details = {}) => {
+    callback(canGrantPermission(webContents, permission, details.requestingUrl));
   });
+  session.defaultSession.setPermissionCheckHandler((webContents, permission, requestingOrigin) =>
+    canGrantPermission(webContents, permission, requestingOrigin)
+  );
   try {
     await startLocalServer();
     configureDownloadEngine();
