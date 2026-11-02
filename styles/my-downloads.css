@@ -407,3 +407,11 @@ html.vivid-performance-legacy .offline-library-tools,html.vivid-performance-lega
 .offline-capability-group li>strong.is-unknown{color:#e2c58b}
 .offline-capability-group li>small{grid-column:1/-1;color:#8f9bb1;font-size:10px}
 @media(max-width:640px){.offline-capability-grid{grid-template-columns:1fr}}
+
+
+/* Phase 2 — precision transport and windowed cinema presentation. */
+.offline-custom-controls #offline-frame-back,.offline-custom-controls #offline-frame-forward{white-space:nowrap}
+.offline-player-section.windowed-cinema{position:fixed!important;inset:4vh 4vw!important;z-index:10000;display:flex;flex-direction:column;justify-content:center;padding:clamp(12px,2vw,28px);overflow:auto;background:rgba(5,7,12,.98);border:1px solid rgba(175,190,225,.24);border-radius:20px;box-shadow:0 28px 100px rgba(0,0,0,.8)}
+.offline-player-section.windowed-cinema #offline-player{max-height:72vh}
+.offline-player-section.windowed-cinema .offline-player-heading{position:sticky;top:0;z-index:2}
+@media(max-width:720px){.offline-player-section.windowed-cinema{inset:0!important;border-radius:0}}
