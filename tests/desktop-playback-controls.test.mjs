@@ -13,7 +13,10 @@ test("Windows offline player exposes high-resolution seeking and frame stepping"
   assert.match(player, /currentTime\/duration\*100000/);
   assert.match(player, /function stepFrame\(direction\)/);
   assert.match(player, /player\.pause\(\)/);
-  assert.match(player, /Number\(player\.dataset\.frameRate\)\|\|30/);
+  assert.match(player, /const frameRate=Number\(player\.dataset\.frameRate\)/);
+  assert.match(player, /Math\.round\(player\.currentTime\*frameRate\)/);
+  assert.match(player, /offline-frame-forward"\)\.disabled=!frameControlsAvailable/);
+  assert.match(page, /id="offline-frame-back"[^>]*disabled/);
   assert.match(page, /id="offline-frame-back"/);
   assert.match(page, /id="offline-frame-forward"/);
 });
@@ -57,9 +60,11 @@ test("Chapter navigation and skip actions are only driven by chapter metadata", 
 
 test("Seek control displays a preview frame from the locally playing video", () => {
   assert.match(page, /id="offline-seek-preview"[^>]*width="160" height="90"/);
-  assert.match(player, /drawImage\(player,0,0,seekPreview\.width,seekPreview\.height\)/);
-  assert.match(player, /player\.addEventListener\("seeked",drawSeekPreview\)/);
-  assert.match(player, /function hideSeekPreview\(\)/);
+  assert.match(player, /const seekPreviewVideo=document\.createElement\("video"\)/);
+  assert.match(player, /drawImage\(seekPreviewVideo,0,0,seekPreview\.width,seekPreview\.height\)/);
+  assert.match(player, /function commitSeekPreview\(\)/);
+  assert.match(player, /player\.currentTime=seekPreviewTarget/);
+  assert.doesNotMatch(player, /seekInput\.addEventListener\("input",event=>\{\s*if\(Number\.isFinite\(player\.duration\)\)player\.currentTime/);
 });
 
 test("Keyboard volume-up shortcut restores sound after mute", () => {
