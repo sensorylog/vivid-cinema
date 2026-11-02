@@ -142,7 +142,7 @@ test("Windows player runtime and stylesheet have cache-busting URLs", async () =
   const worker = await readFile(new URL("../service-worker.js", import.meta.url), "utf8");
   assert.match(page, /my-downloads\.css\?v=builtin-player-v1/);
   assert.match(script, /desktop-offline\.js\?builtin-player-v1/);
-  assert.match(worker, /vivid-cinema-shell-v267/);
+  assert.match(worker, /vivid-cinema-shell-v269/);
   assert.match(worker, /desktop-offline\.js\?builtin-player-v1/);
   assert.match(worker, /my-downloads\.css\?v=builtin-player-v1/);
 });
@@ -165,4 +165,27 @@ test("offline library filters movies, sorts saved media, and reports on-device s
   assert.match(desktop, /files\.length\+\' playable files · \'\+bytes\(total\)/);
   assert.match(styles, /offline-library-sort/);
   assert.match(styles, /offline-file-meta/);
+});
+
+
+test("offline redesign provides title details, season grouping and continue watching", async () => {
+  const page = await readFile(new URL("../my-downloads.html", import.meta.url), "utf8");
+  const desktop = await readFile(new URL("../scripts/downloads/desktop-offline.js", import.meta.url), "utf8");
+  const styles = await readFile(new URL("../styles/my-downloads.css", import.meta.url), "utf8");
+  assert.match(page, /offline-title-dialog/);
+  assert.match(page, /offline-continue-section/);
+  assert.match(desktop, /async function showTitleDetails\(job\)/);
+  assert.match(desktop, /offline-season-group/);
+  assert.match(desktop, /async function renderContinueWatching\(\)/);
+  assert.match(desktop, /engine\.getPlaybackPosition\(job\.id,0\)/);
+  assert.match(styles, /\.offline-title-dialog/);
+  assert.match(styles, /\.offline-continue-card/);
+});
+
+test("offline redesign cache is versioned and precaches the active stylesheet", async () => {
+  const page = await readFile(new URL("../my-downloads.html", import.meta.url), "utf8");
+  const worker = await readFile(new URL("../service-worker.js", import.meta.url), "utf8");
+  assert.match(page, /my-downloads\.css\?v=offline-cinema-redesign-1/);
+  assert.match(worker, /vivid-cinema-shell-v269/);
+  assert.match(worker, /my-downloads\.css\?v=offline-cinema-redesign-1/);
 });
