@@ -81,7 +81,7 @@ test("source gate rejects licence paths that escape the bundled notice directory
 });
 
 test("mpv candidate build leaves Wine smoke testing to the workflow after packaging", () => {
-  assert.doesNotMatch(BUILD_SCRIPT, /\\bwine\\b/i);
+  assert.doesNotMatch(BUILD_SCRIPT, /\bwine\b/i);
   const buildStep = BUILD_WORKFLOW.indexOf("Build mpv and prepare source-compliance candidate");
   const uploadStep = BUILD_WORKFLOW.indexOf("Upload candidate runtime and corresponding-source snapshot");
   const smokeStep = BUILD_WORKFLOW.indexOf("Smoke-test the packaged Windows player");
@@ -90,7 +90,7 @@ test("mpv candidate build leaves Wine smoke testing to the workflow after packag
 
 test("mpv candidate Wine smoke test is bounded and cannot prevent artifact publication", () => {
   assert.match(BUILD_WORKFLOW, /timeout --signal=TERM --kill-after=10s 60s wine/);
-  assert.match(BUILD_WORKFLOW, /timeout-minutes: 2\\s+continue-on-error: true/);
+  assert.match(BUILD_WORKFLOW, /timeout-minutes: 2\s+continue-on-error: true/);
   assert.ok(BUILD_WORKFLOW.indexOf("Upload candidate runtime") < BUILD_WORKFLOW.indexOf("Smoke-test the packaged Windows player"));
 });
 
