@@ -710,6 +710,9 @@ function renderShell(params) {
     if (!overlay.classList.contains("vivid-player-inline")) document.body.classList.remove("vivid-player-open");
     if (openPlayer) openPlayer.setAttribute("aria-expanded", "false");
     directLoadGeneration += 1;
+    // Closing the cinema window can happen between throttled timeupdate saves.
+    persistDirectProgress?.();
+    void flushPlaybackProgress(progressKey());
     stopDirectStream(directPlayer);
     if (directPlayer) directPlayer.hidden = true;
     if (player) { player.src = ""; player.hidden = false; }
