@@ -111,7 +111,6 @@ jobs:
           $portable = Get-ChildItem "dist-desktop/Vivid-Cinema-Portable-*.exe" -ErrorAction SilentlyContinue | Select-Object -First 1
           $blockMap = Get-ChildItem "dist-desktop/Vivid-Cinema-Setup-*.exe.blockmap" -ErrorAction SilentlyContinue | Select-Object -First 1
           $metadata = Get-Item "dist-desktop/latest.yml" -ErrorAction SilentlyContinue
-          $sourceBundle = Get-Item "licenses/mpv/CORRESPONDING-SOURCE.zip" -ErrorAction SilentlyContinue
           if (!$installer -or !$portable -or !$blockMap -or !$metadata) {
             throw "Installer, portable executable, blockmap, and updater metadata must all exist before publishing."
           }
