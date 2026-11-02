@@ -169,7 +169,7 @@ export async function inspectMediaUrl(url, filename = "", { fetchImpl = globalTh
   const bytes = new Uint8Array(await response.arrayBuffer());
   if (!bytes.length) throw new Error("The media file returned no readable data.");
   const result = inspectMediaBytes(bytes, filename);
-  const rangeTotal = /\\/(\\d+)$/.exec(response.headers.get("content-range") || "");
+  const rangeTotal = /\/(\d+)$/.exec(response.headers.get("content-range") || "");
   const fileSize = rangeTotal ? Number(rangeTotal[1]) : Number(response.headers.get("content-length")) || null;
   if (!result.complete && fileSize && fileSize > bytes.length) {
     const tailStart = Math.max(bytes.length, fileSize - Math.min(maxBytes, 8 * 1024 * 1024));
