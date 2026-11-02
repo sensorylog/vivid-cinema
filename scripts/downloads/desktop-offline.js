@@ -454,35 +454,6 @@ byId("offline-skip-credits").addEventListener("click",()=>{
   const credits=chapterCues.find(cue=>creditsPattern.test(String(cue.text||""))&&player.currentTime>=cue.startTime&&player.currentTime<cue.endTime);
   if(credits)player.currentTime=Math.min(Number.isFinite(player.duration)?player.duration:credits.endTime,Math.max(credits.endTime,credits.startTime));
 });
-function refreshSubtitleTracks(){
-  const select=byId("offline-subtitle-track");
-  if(!select)return;
-  const tracks=player.textTracks;
-  select.innerHTML="";
-  const off=document.createElement("option");off.value="-1";off.textContent="Off";select.appendChild(off);
-  let selected="-1";
-  for(let index=0;index<tracks.length;index++){
-    const track=tracks[index],option=document.createElement("option");
-    option.value=String(index);
-    option.textContent=track.label||track.language||("Subtitle "+(index+1));
-    if(track.mode==="showing")selected=option.value;
-    select.appendChild(option);
-  }
-  select.value=selected;
-  select.parentElement.hidden=tracks.length===0;
-}
-function applySubtitleOffset(){
-  const offset=Number(byId("offline-subtitle-offset").value)||0;
-  byId("offline-subtitle-offset-value").textContent=(offset>0?"+":"")+offset.toFixed(1)+"s";
-  if(!activeSubtitleTrack||!subtitleCueBaseTimes.length)return;
-  const cues=activeSubtitleTrack.cues;
-  if(!cues)return;
-  subtitleCueBaseTimes.forEach((base,index)=>{
-    const cue=cues[index];if(!cue)return;
-    cue.startTime=Math.max(0,base.start+offset);
-    cue.endTime=Math.max(cue.startTime+0.001,base.end+offset);
-  });
-}
 function loadExternalSubtitle(file){
   if(!file)return;
   const extension=(file.name.split(".").pop()||"").toLowerCase();
