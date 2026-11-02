@@ -9,8 +9,8 @@ const MEDIA_TYPES = Object.freeze({
   ".mkv": "video/x-matroska", ".mka": "audio/x-matroska", ".mks": "video/x-matroska",
   ".webm": "video/webm", ".mov": "video/quicktime", ".qt": "video/quicktime",
   ".avi": "video/x-msvideo", ".ogv": "video/ogg", ".ogg": "video/ogg",
-  ".mpg": "video/mpeg", ".mpeg": "video/mpeg", ".m1v": "video/mpeg", ".m2v": "video/mpeg",
-  ".vob": "video/mpeg", ".wmv": "video/x-ms-wmv", ".asf": "video/x-ms-asf",
+  ".mpg": "video/mpeg", ".mpeg": "video/mpeg", ".m1v": "video/mpeg", ".m2v": "video/mpeg", ".vob": "video/mpeg",
+  ".wmv": "video/x-ms-wmv", ".asf": "video/x-ms-asf",
   ".flv": "video/x-flv", ".divx": "video/divx", ".ts": "video/mp2t",
   ".m2ts": "video/mp2t", ".mts": "video/mp2t", ".3gp": "video/3gpp",
   ".3gpp": "video/3gpp", ".3g2": "video/3gpp"
