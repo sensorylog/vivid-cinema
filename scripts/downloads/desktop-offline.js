@@ -263,6 +263,11 @@ async function refresh(){
   }catch(error){setMessage(error?.message||"Could not load your downloads.");}
 }
 const player = byId("offline-player");
+let audioContext = null;
+let audioSource = null;
+let audioGain = null;
+let audioDelay = null;
+let audioGraphUnavailable = false;
 let capabilityReportPromise = null;
 let diagnosticsRequest = 0;
 const clock = value => {
@@ -327,6 +332,33 @@ function syncPlayerControls(){
   byId("offline-time").textContent=clock(player.currentTime)+" / "+clock(duration);
   byId("offline-play-toggle").textContent=player.paused?"Play":"Pause";
   byId("offline-play-toggle").setAttribute("aria-label",player.paused?"Play":"Pause");
+}
+function ensureAudioProcessing(){
+  if(audioGraphUnavailable)return false;
+  if(audioGain&&audioDelay)return true;
+  const AudioContextClass=window.AudioContext||window.webkitAudioContext;
+  if(!AudioContextClass||typeof player.captureStream==="function"&&player.disableRemotePlayback){
+    audioGraphUnavailable=true;
+    setMessage("Audio boost and delay are unavailable in this Windows media session.");
+    return false;
+  }
+  try{
+    audioContext=audioContext||new AudioContextClass();
+    audioSource=audioSource||audioContext.createMediaElementSource(player);
+    audioGain=audioContext.createGain();
+    audioDelay=audioContext.createDelay(0.6);
+    audioGain.gain.value=Number(byId("offline-audio-boost").value)/100;
+    audioDelay.delayTime.value=Number(byId("offline-audio-delay").value)/1000;
+    audioSource.connect(audioGain);
+    audioGain.connect(audioDelay);
+    audioDelay.connect(audioContext.destination);
+    void audioContext.resume().catch(error=>setMessage("Audio processing could not start: "+(error?.message||"Please try again.")));
+    return true;
+  }catch(error){
+    audioGraphUnavailable=true;
+    setMessage("Audio processing could not be enabled: "+(error?.message||"This file may not support enhanced audio."));
+    return false;
+  }
 }
 let seekFeedbackTimer=0;
 function seekBy(seconds){
@@ -543,6 +575,16 @@ byId("offline-audio-track").addEventListener("change",event=>{
 
 byId("offline-seek").addEventListener("input",event=>{if(Number.isFinite(player.duration))player.currentTime=player.duration*(Number(event.target.value)/100000);});
 byId("offline-volume").addEventListener("input",event=>{player.volume=Number(event.target.value);player.muted=player.volume===0;});
+byId("offline-audio-boost").addEventListener("input",event=>{
+  const value=Math.max(100,Math.min(250,Number(event.target.value)||100));
+  byId("offline-audio-boost-value").textContent=value+"%";
+  if(ensureAudioProcessing()&&audioGain)audioGain.gain.setTargetAtTime(value/100,audioContext.currentTime,0.015);
+});
+byId("offline-audio-delay").addEventListener("input",event=>{
+  const value=Math.max(0,Math.min(500,Number(event.target.value)||0));
+  byId("offline-audio-delay-value").textContent=value+" ms";
+  if(ensureAudioProcessing()&&audioDelay)audioDelay.delayTime.setTargetAtTime(value/1000,audioContext.currentTime,0.015);
+});
 byId("offline-speed").addEventListener("change",event=>{player.playbackRate=Number(event.target.value)||1;});
 function currentFullscreenElement(){
   return document.fullscreenElement||document.webkitFullscreenElement||null;
@@ -824,7 +866,7 @@ byId("offline-player-close").addEventListener("click",async()=>{
     const exit=document.exitFullscreen||document.webkitExitFullscreen;
     try{if(typeof exit==="function")await exit.call(document);}catch{}
   }
-  player.pause();clearExternalSubtitle();player.removeAttribute("src");player.load();player.dataset.jobId="";player.dataset.mediaFilename="";diagnosticsRequest++;
+  player.pause();clearExternalSubtitle();byId("offline-audio-boost").value="100";byId("offline-audio-boost-value").textContent="100%";byId("offline-audio-delay").value="0";byId("offline-audio-delay-value").textContent="0 ms";if(audioGain&&audioContext)audioGain.gain.setTargetAtTime(1,audioContext.currentTime,0.015);if(audioDelay&&audioContext)audioDelay.delayTime.setTargetAtTime(0,audioContext.currentTime,0.015);player.removeAttribute("src");player.load();player.dataset.jobId="";player.dataset.mediaFilename="";diagnosticsRequest++;
   player.controls=true;byId("offline-custom-controls").hidden=true;byId("offline-player-section").classList.remove("windowed-cinema");byId("offline-player-section").hidden=true;
   byId("offline-cinema-mode").setAttribute("aria-pressed","false");byId("offline-cinema-mode").textContent="Windowed cinema";
   byId("offline-audio-track").parentElement.hidden=true;byId("offline-resume-prompt").hidden=true;
