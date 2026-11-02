@@ -107,6 +107,7 @@
     <div><strong id="offline-total">0</strong><span>All items</span></div>
     <div><strong id="offline-completed">0</strong><span>Saved</span></div>
     <div><strong id="offline-active">0</strong><span>In progress</span></div>
+    <div><strong id="offline-storage">0 B</strong><span>Saved on device</span></div>
   </section>
   <section id="offline-library-tools" class="offline-library-tools" aria-label="Filter your offline library" hidden>
     <label class="offline-library-search" for="offline-library-search">
@@ -117,9 +118,17 @@
       <button type="button" data-library-filter="all" aria-pressed="true">All</button>
       <button type="button" data-library-filter="downloading" aria-pressed="false">Downloading</button>
       <button type="button" data-library-filter="saved" aria-pressed="false">Saved</button>
+      <button type="button" data-library-filter="movies" aria-pressed="false">Movies</button>
       <button type="button" data-library-filter="series" aria-pressed="false">Series</button>
       <button type="button" data-library-filter="attention" aria-pressed="false">Needs attention</button>
     </div>
+    <label class="offline-library-sort" for="offline-library-sort">Sort by
+      <select id="offline-library-sort">
+        <option value="recent">Recently updated</option>
+        <option value="title">Title A–Z</option>
+        <option value="largest">Largest files</option>
+      </select>
+    </label>
   </section>
   <section class="offline-list-section" aria-labelledby="offline-list-title">
     <div class="offline-list-heading">
