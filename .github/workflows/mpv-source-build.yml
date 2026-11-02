@@ -33,7 +33,7 @@ jobs:
           python -m venv "$RUNNER_TEMP/meson-venv"
           "$RUNNER_TEMP/meson-venv/bin/pip" install "meson==1.9.2"
           echo "$RUNNER_TEMP/meson-venv/bin" >> "$GITHUB_PATH"
-      - name: Build mpv from pinned upstream source and snapshot build inputs
+      - name: Build mpv and prepare source-compliance candidate
         run: bash desktop/build-mpv-source.sh
       - name: Upload candidate runtime and corresponding-source snapshot
         uses: actions/upload-artifact@v4
@@ -46,3 +46,17 @@ jobs:
             licenses/mpv/source-notices/**
           if-no-files-found: error
           retention-days: 30
+      - name: Smoke-test the packaged Windows player (bounded, non-blocking)
+        id: mpv-smoke-test
+        timeout-minutes: 2
+        continue-on-error: true
+        run: |
+          set +e
+          timeout --signal=TERM --kill-after=10s 60s wine ./desktop/vendor/mpv/mpv.com --version --no-config
+          result=$?
+          if [ "$result" -eq 124 ] || [ "$result" -eq 137 ]; then
+            echo "::warning::Wine smoke test exceeded 60 seconds; candidate artifact was already uploaded."
+          elif [ "$result" -ne 0 ]; then
+            echo "::warning::Wine smoke test exited with status $result; candidate artifact was already uploaded."
+          fi
+          exit 0
