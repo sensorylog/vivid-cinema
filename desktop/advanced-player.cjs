@@ -212,7 +212,7 @@ class AdvancedPlayer {
       }, timeoutMs);
       this.pendingIpcRequests.set(requestId, { resolve, reject, timer });
       try {
-        this.ipcSocket.write(JSON.stringify({ command, request_id: requestId }) + "\\n");
+        this.ipcSocket.write(JSON.stringify({ command, request_id: requestId }) + "\n");
       } catch (error) {
         clearTimeout(timer);
         this.pendingIpcRequests.delete(requestId);
