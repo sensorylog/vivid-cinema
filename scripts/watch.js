@@ -1,7 +1,7 @@
 import { tmdbApi } from "./tmdb.js";
 import { resolveAnimeIds } from "./playback/anime-id-resolver.js";
 import { getImageUrl, getMediaUrl, normalizeMedia, normalizeResults } from "./media.js";
-import { buildTitleUrl, getRoute } from "./routes.js";
+import { buildTitleUrl, buildWatchUrl, getRoute } from "./routes.js";
 import { escapeHtml } from "./utils.js";
 import { getLocalLibrary, saveLocalLibrary, upsertLibraryItem, startLibrarySync } from "./library.js";
 import { getPlaybackProgress, savePlaybackProgress, flushPlaybackProgress, completePlaybackProgress, startPlaybackSync } from "./recommendations.js";
@@ -581,6 +581,40 @@ function mountSecondaryPlayer(params, title, detailsSnapshot = details) {
     .catch(error => console.warn("Vivid secondary player could not initialize:", error));
 }
 
+
+function episodeNavigationMarkup(params) {
+  if (params?.type !== "tv" || !media?.id) return "";
+  const seasons = (Array.isArray(details?.seasons) ? details.seasons : [])
+    .filter(season => Number(season?.season_number) > 0 && Number(season?.episode_count) > 0)
+    .sort((a, b) => Number(a.season_number) - Number(b.season_number));
+  const currentSeason = seasons.find(season => Number(season.season_number) === Number(params.season));
+  if (!currentSeason) return "";
+
+  const currentEpisode = Math.max(1, Number(params.episode) || 1);
+  const previousSeason = seasons.filter(season => Number(season.season_number) < Number(params.season)).at(-1);
+  const nextSeason = seasons.find(season => Number(season.season_number) > Number(params.season));
+  const previous = currentEpisode > 1
+    ? { season: Number(params.season), episode: currentEpisode - 1 }
+    : previousSeason
+      ? { season: Number(previousSeason.season_number), episode: Number(previousSeason.episode_count) }
+      : null;
+  const next = currentEpisode < Number(currentSeason.episode_count)
+    ? { season: Number(params.season), episode: currentEpisode + 1 }
+    : nextSeason
+      ? { season: Number(nextSeason.season_number), episode: 1 }
+      : null;
+  const link = (target, direction, icon) => {
+    if (!target) return '<span class="vivid-episode-nav-item is-disabled" aria-disabled="true"><i class="bi ' + icon + '" aria-hidden="true"></i><span><small>' + direction + '</small><strong>' + (direction === "Previous episode" ? "Beginning of series" : "Season complete") + '</strong></span></span>';
+    const href = buildWatchUrl(media.id, "tv", target.season, target.episode) + (isAnimePlayback() ? "&anime=1" : "");
+    const label = "S" + String(target.season).padStart(2, "0") + " · E" + String(target.episode).padStart(2, "0");
+    return '<a class="vivid-episode-nav-item" href="' + escapeHtml(href) + '"><i class="bi ' + icon + '" aria-hidden="true"></i><span><small>' + direction + '</small><strong>' + label + '</strong></span></a>';
+  };
+  return '<div class="vivid-episode-nav-heading"><span>YOUR SERIES</span><strong>Episode navigation</strong></div><div class="vivid-episode-nav-links">' +
+    link(previous, "Previous episode", "bi-skip-start-fill") +
+    link(next, "Next episode", "bi-skip-end-fill") +
+    '</div>';
+}
+
 function renderShell(params) {
   const isTv = params.type === "tv";
   const title = media.title || "Vivid Cinema";
@@ -610,6 +644,7 @@ function renderShell(params) {
       '<button type="button" class="vivid-player-source" data-player-source="direct" hidden aria-pressed="false" hidden><span class="vivid-server-dot"></span><span><strong>Direct stream</strong><small>Authorized HLS/DASH · adaptive quality</small></span><span class="vivid-server-state" data-server-state="direct">Unavailable</span></button>' +
       '<p>Choose another source if playback does not start. Direct streams appear only when an authorized integration is available.</p></aside></div></section></div>' +
     '<section id="vivid-tflix-player" class="vivid-tflix-player" aria-label="Additional streaming player"></section>' +
+    '<section id="watch-episode-navigation" class="vivid-episode-navigation" aria-label="TV episode navigation">' + episodeNavigationMarkup(params) + '</section>' +
     '<section class="vivid-watch-recommendations"><div class="vivid-section-heading"><div><span>MORE TO DISCOVER</span><h2>You might also like</h2></div></div><div id="watch-recommendations" class="vivid-watch-rec-rail">' + recommendationCards() + '</div></section>';
 
   mountSecondaryPlayer(params, episodeTitle || title);
@@ -862,6 +897,8 @@ function hydrateWatchDetails(params) {
   if (backdrop) backdrop.style.setProperty("--watch-backdrop", "url('" + getImageUrl(media.backdrop_path || media.poster_path, media.backdrop_path ? "w1280" : "w780") + "')");
   const player = $("vidapi-player");
   if (player) player.title = title + " player";
+  const episodeNavigation = $("watch-episode-navigation");
+  if (episodeNavigation) episodeNavigation.innerHTML = episodeNavigationMarkup(params);
   const recommendations = $("watch-recommendations");
   if (recommendations) recommendations.innerHTML = recommendationCards();
   document.title = (episodeTitle ? episodeTitle + " · " : "") + title + " · Vivid Cinema";
