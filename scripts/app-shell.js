@@ -94,6 +94,58 @@ function setStandaloneExperience() {
   statusBar.content = "black-translucent";
 }
 
+function initStandaloneBackGesture() {
+  const standalone = window.matchMedia?.("(display-mode: standalone)")?.matches ||
+    window.navigator.standalone === true;
+  const ios = /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.MSStream;
+  if (!standalone || !ios || window.matchMedia?.("(pointer: coarse)")?.matches === false) return;
+
+  let start = null;
+  const ignored = target => target?.closest?.(
+    "input, textarea, select, button, a, video, iframe, [contenteditable='true'], " +
+    "[data-no-swipe-back], .vivid-rail, .vivid-player-frame, .vivid-player-dialog"
+  );
+
+  document.addEventListener("touchstart", event => {
+    if (event.touches.length !== 1 || ignored(event.target)) {
+      start = null;
+      return;
+    }
+    const touch = event.touches[0];
+    if (touch.clientX > 22 || touch.clientY < 54) {
+      start = null;
+      return;
+    }
+    const stack = readNavigationStack();
+    if (stack.length < 2) {
+      start = null;
+      return;
+    }
+    start = { x: touch.clientX, y: touch.clientY, time: Date.now() };
+  }, { passive: true });
+
+  document.addEventListener("touchend", event => {
+    if (!start || event.changedTouches.length !== 1) {
+      start = null;
+      return;
+    }
+    const touch = event.changedTouches[0];
+    const dx = touch.clientX - start.x;
+    const dy = touch.clientY - start.y;
+    const elapsed = Date.now() - start.time;
+    start = null;
+    if (dx < 112 || Math.abs(dy) > 76 || elapsed > 700) return;
+    const stack = readNavigationStack();
+    const current = currentRoute();
+    while (stack.length && stack.at(-1) === current) stack.pop();
+    if (!stack.length) return;
+    writeNavigationStack(stack);
+    history.back();
+  }, { passive: true });
+
+  document.addEventListener("touchcancel", () => { start = null; }, { passive: true });
+}
+
 function setViewportState() {
   document.documentElement.dataset.viewport =
     window.innerWidth < MOBILE_BREAKPOINT ? "mobile" : "desktop";
@@ -501,6 +553,7 @@ function initAppShell() {
   ensureBackControl();
   ensureSkipLink();
   initCinematicFocusNavigation();
+  initStandaloneBackGesture();
 
   window.addEventListener("resize", setViewportState, { passive: true });
   window.addEventListener("online", setConnectionState);
