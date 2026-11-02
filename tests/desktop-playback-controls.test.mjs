@@ -13,7 +13,7 @@ test("Windows offline player exposes high-resolution seeking and frame stepping"
   assert.match(player, /currentTime\/duration\*100000/);
   assert.match(player, /function stepFrame\(direction\)/);
   assert.match(player, /player\.pause\(\)/);
-  assert.match(player, /1\/frameRate/);
+  assert.match(player, /Number\(player\.dataset\.frameRate\)\|\|30/);
   assert.match(page, /id="offline-frame-back"/);
   assert.match(page, /id="offline-frame-forward"/);
 });
