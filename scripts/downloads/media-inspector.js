@@ -165,8 +165,11 @@ export function inspectMediaBytes(input, filename = "") {
 async function readBoundedBytes(response, limit) {
   const reader = response.body?.getReader?.();
   if (!reader) {
-    const declared = Number(response.headers.get("content-length"));
-    if (Number.isFinite(declared) && declared > limit) throw new Error("Media source did not honour the bounded range request.");
+    const header = response.headers.get("content-length");
+    const declared = header === null ? null : Number(header);
+    if (!Number.isSafeInteger(declared) || declared < 0 || declared > limit) {
+      throw new Error("Media source did not provide a verifiably bounded inspection response.");
+    }
     const buffer = await response.arrayBuffer();
     if (buffer.byteLength > limit) throw new Error("Media inspection response exceeded its byte limit.");
     return { bytes: new Uint8Array(buffer), limited: false };
