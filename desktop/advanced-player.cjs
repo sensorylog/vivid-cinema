@@ -18,6 +18,8 @@ function createMpvArgs(mediaPath, startSeconds = 0, ipcPath = "") {
     "--no-terminal",
     "--force-window=yes",
     "--osc=yes",
+    "--sub-auto=fuzzy",
+    "--audio-file-auto=fuzzy",
     "--input-default-bindings=yes",
     "--input-vo-keyboard=yes",
     "--hwdec=auto-safe",
