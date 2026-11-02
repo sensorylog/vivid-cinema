@@ -567,7 +567,7 @@ function refreshSubtitleTracks(){
     select.appendChild(option);
     if(track.mode==="showing")selected=option.value;
   }
-  if(activeExternalSubtitleCues.length)selected="-2";
+  if(activeExternalSubtitleCues.length){selected="-2";for(const item of selectable)item.track.mode="disabled";}
   else if(subtitleOff){selected="-1";for(const item of selectable)item.track.mode="disabled";}
   else if(preferredIndex>=0){
     const preferredTrack=selectable[preferredIndex];
