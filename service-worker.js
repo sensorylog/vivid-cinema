@@ -1,5 +1,5 @@
 // Bump this version whenever the precached app shell changes.
-const CACHE_NAME = "vivid-cinema-shell-v266";
+const CACHE_NAME = "vivid-cinema-shell-v267";
 const HLS_LIBRARY_URL = "https://cdn.jsdelivr.net/npm/hls.js@1.7.3/dist/hls.min.js";
 const APP_SHELL = [
   HLS_LIBRARY_URL,
@@ -12,7 +12,7 @@ const APP_SHELL = [
   "./anime.html","./help.html","./about.html","./accessibility.html","./cookies.html",
   "./404.html","./manifest.json","./robots.txt","./icons/vivid-icon.svg","./assets/images/IMG_6099.jpeg",
   "./scripts/mascot-autoplay.js?v=1","./styles/vivid-foundation.css","./styles/vivid-system.css","./styles/downloads.css","./styles/vivid-liquid-glass.css",
-  "./styles/vivid-liquid-glass.css?v=lg4","./styles/my-downloads.css","./styles/my-downloads.css?v=advanced-mpv-fallback-v1","./styles/vivid-media-layout.css?v=1","./styles/vivid-premium-experience.css?v=1","./styles/vivid-home.css","./styles/vivid-donate.css","./styles/vivid-shell.css",
+  "./styles/vivid-liquid-glass.css?v=lg4","./styles/my-downloads.css","./styles/my-downloads.css?v=advanced-mpv-fallback-v1","./styles/vivid-media-layout.css?v=1","./styles/vivid-premium-experience.css?v=2","./styles/vivid-home.css","./styles/vivid-donate.css","./styles/vivid-shell.css",
   "./styles/vivid-cinematic.css","./styles/vivid-title.css","./styles/vivid-person.css","./styles/vivid-watch.css","./styles/vivid-watch.css?v=watch-player-layout-3",
   "./styles/vivid-library.css","./styles/vivid-library.css?v=library-mobile-fix1","./styles/vivid-discovery.css","./styles/vivid-for-you.css","./styles/vivid-collection.css",
   "./styles/vivid-auth.css","./styles/vivid-account.css","./styles/vivid-account-cinematic.css?v=20261018-cinematic-1","./styles/vivid-achievements-page.css?v=20261018-cinematic-1","./styles/vivid-pwa.css",
