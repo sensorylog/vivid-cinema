@@ -43,3 +43,14 @@ test("Windows offline player offers bounded audio boost with compression and aud
   assert.match(player, /audioCompressor\.connect\(audioDelay\)/);
   assert.match(player, /audioDelay\.delayTime\.setTargetAtTime/);
 });
+
+test("Chapter navigation and skip actions are only driven by chapter metadata", () => {
+  for (const id of ["offline-chapter-controls", "offline-chapter-previous", "offline-chapter-next", "offline-skip-intro", "offline-skip-credits"]) {
+    assert.ok(page.includes('id="' + id + '"'), "missing chapter control " + id);
+  }
+  assert.match(player, /track\.kind==="chapters"/);
+  assert.match(player, /introPattern/);
+  assert.match(player, /creditsPattern/);
+  assert.match(player, /seekToChapter\(direction\)/);
+  assert.match(player, /cue\.endTime/);
+});
