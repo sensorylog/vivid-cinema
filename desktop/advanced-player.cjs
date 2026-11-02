@@ -46,6 +46,8 @@ class AdvancedPlayer {
     this.ipcRetryTimer = null;
     this.lastPositionWrite = 0;
     this.currentJob = null;
+    this.nextIpcRequestId = 10;
+    this.pendingIpcRequests = new Map();
   }
 
   executablePath() {
@@ -159,6 +161,14 @@ class AdvancedPlayer {
           if (!line) continue;
           try {
             const message = JSON.parse(line);
+            if (Number.isInteger(message.request_id) && this.pendingIpcRequests.has(message.request_id)) {
+              const pending = this.pendingIpcRequests.get(message.request_id);
+              this.pendingIpcRequests.delete(message.request_id);
+              clearTimeout(pending.timer);
+              if (message.error && message.error !== "success") pending.reject(new Error("mpv command failed: " + message.error));
+              else pending.resolve(message.data);
+              continue;
+            }
             if (message.event === "property-change" && message.name === "time-pos" && Number.isFinite(message.data)) {
               this.latestPosition = Math.max(0, message.data);
               if (Date.now() - this.lastPositionWrite >= 5000) {
@@ -190,6 +200,57 @@ class AdvancedPlayer {
     catch { return false; }
   }
 
+  requestIpc(command, timeoutMs = 1800) {
+    if (!this.ipcSocket || this.ipcSocket.destroyed) {
+      return Promise.reject(new Error("Advanced Player controls are not connected yet."));
+    }
+    const requestId = this.nextIpcRequestId++;
+    return new Promise((resolve, reject) => {
+      const timer = setTimeout(() => {
+        this.pendingIpcRequests.delete(requestId);
+        reject(new Error("Advanced Player did not respond in time."));
+      }, timeoutMs);
+      this.pendingIpcRequests.set(requestId, { resolve, reject, timer });
+      try {
+        this.ipcSocket.write(JSON.stringify({ command, request_id: requestId }) + "\\n");
+      } catch (error) {
+        clearTimeout(timer);
+        this.pendingIpcRequests.delete(requestId);
+        reject(error);
+      }
+    });
+  }
+
+  async getTracks() {
+    const tracks = await this.requestIpc(["get_property", "track-list"]);
+    if (!Array.isArray(tracks)) return { audio: [], subtitles: [] };
+    const normalize = track => ({
+      id: Number(track.id),
+      title: String(track.title || track.lang || "").slice(0, 160),
+      language: String(track.lang || "").slice(0, 32),
+      codec: String(track.codec || "").slice(0, 48),
+      selected: Boolean(track.selected),
+      external: Boolean(track.external),
+      default: Boolean(track.default),
+      forced: Boolean(track.forced)
+    });
+    return {
+      audio: tracks.filter(track => track.type === "audio").map(normalize),
+      subtitles: tracks.filter(track => track.type === "sub").map(normalize)
+    };
+  }
+
+  async selectTrack(type, trackId) {
+    const property = type === "audio" ? "aid" : type === "subtitle" ? "sid" : null;
+    if (!property) throw new Error("Choose an audio or subtitle track.");
+    const value = trackId === null || trackId === "off" ? "no" : Number(trackId);
+    if (value !== "no" && (!Number.isSafeInteger(value) || value < 1 || value > 10000)) {
+      throw new Error("The selected track is invalid.");
+    }
+    await this.requestIpc(["set_property", property, value]);
+    return true;
+  }
+
   persistLatestPosition() {
     const current = this.currentJob;
     const seconds = Number(this.latestPosition);
@@ -205,6 +266,11 @@ class AdvancedPlayer {
     const socket = this.ipcSocket;
     this.ipcSocket = null;
     if (socket && !socket.destroyed) socket.destroy();
+    for (const pending of this.pendingIpcRequests.values()) {
+      clearTimeout(pending.timer);
+      pending.reject(new Error("Advanced Player closed before the command completed."));
+    }
+    this.pendingIpcRequests.clear();
   }
 
   stop() {
