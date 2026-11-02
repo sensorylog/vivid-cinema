@@ -153,7 +153,6 @@ jobs:
           retention-days: 30
       - name: Build Windows installer and portable executable
         if: steps.release-decision.outputs.publish != 'true'
-        env:
         run: npm run desktop:dist
       - name: Upload Windows build artifacts
         if: steps.release-decision.outputs.publish != 'true'
