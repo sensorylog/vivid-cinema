@@ -421,3 +421,8 @@ html.vivid-performance-legacy .offline-library-tools,html.vivid-performance-lega
 .offline-custom-controls .offline-audio-boost-control,.offline-custom-controls .offline-audio-delay-control{display:grid;grid-template-columns:auto minmax(90px,1fr) auto;align-items:center;gap:7px;min-width:min(100%,220px);color:#cbd3e5;font-size:11px}
 .offline-custom-controls .offline-audio-boost-control input,.offline-custom-controls .offline-audio-delay-control input{width:100%;min-width:0;accent-color:#9b8cff}
 .offline-custom-controls .offline-audio-boost-control output,.offline-custom-controls .offline-audio-delay-control output{min-width:42px;color:#f0edff;font-variant-numeric:tabular-nums;text-align:right}
+
+.offline-chapter-controls{display:flex;align-items:center;gap:7px;flex-wrap:wrap;min-width:0}
+.offline-chapter-controls[hidden]{display:none}
+.offline-chapter-controls span{max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#dce4f6;font-size:11px}
+.offline-chapter-controls button:disabled{opacity:.4;cursor:not-allowed}
