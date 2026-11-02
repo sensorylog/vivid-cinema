@@ -529,10 +529,10 @@ function applyPlaybackPreferences(){
   const values={
     "offline-audio-language":prefs.audioLanguage||"",
     "offline-subtitle-language":prefs.subtitleLanguage||"",
-    "offline-subtitle-size":prefs.subtitleSize||"medium",
-    "offline-subtitle-font":prefs.font||"Arial",
-    "offline-subtitle-color":prefs.color||"#ffffff",
-    "offline-subtitle-position":prefs.position||"bottom",
+    "offline-subtitle-size":prefs.subtitleSize||"auto",
+    "offline-subtitle-font":prefs.font||"auto",
+    "offline-subtitle-color":prefs.color||"auto",
+    "offline-subtitle-position":prefs.position||"auto",
     "offline-subtitle-background":String(Math.round((Number(prefs.background??0.25))*100)),
     "offline-subtitle-offset":String(Number(prefs.subtitleOffset)||0)
   };
@@ -553,7 +553,9 @@ function refreshSubtitleTracks(){
   }
   let selected="-1";
   const preferred=String(currentPlaybackPreferences.subtitleLanguage||"");
-  const preferredIndex=choosePreferredTrack(Array.from(tracks||[]).filter(track=>track.kind!=="chapters"),preferred);
+  const subtitleOff=currentPlaybackPreferences.subtitleOff===true||preferred==="off";
+  const eligibleTracks=Array.from(tracks||[]).filter(track=>track.kind!=="chapters");
+  const preferredIndex=choosePreferredTrack(eligibleTracks,preferred);
   const selectable=[];
   for(let index=0;index<tracks.length;index++){
     const track=tracks[index];
@@ -566,9 +568,10 @@ function refreshSubtitleTracks(){
     if(track.mode==="showing")selected=option.value;
   }
   if(activeExternalSubtitleCues.length)selected="-2";
-  else if(selected==="-1"&&preferredIndex>=0){
+  else if(subtitleOff){selected="-1";for(const item of selectable)item.track.mode="disabled";}
+  else if(preferredIndex>=0){
     const preferredTrack=selectable[preferredIndex];
-    if(preferredTrack){selected=String(preferredTrack.index);preferredTrack.track.mode="showing";}
+    if(preferredTrack){selected=String(preferredTrack.index);for(const item of selectable)item.track.mode=item===preferredTrack?"showing":"disabled";}
   }
   select.value=selected;
   select.parentElement.hidden=selectable.length===0&&!activeExternalSubtitleCues.length;
@@ -605,9 +608,8 @@ function refreshAudioTracks(){
   if(!tracks.length){select.parentElement.hidden=true;return;}
   // Some Matroska files expose audio tracks without marking a default track.
   // Explicitly enable the first track so a playable video is not silently muted.
-  let selectedIndex=-1;
-  for(let index=0;index<tracks.length;index++)if(tracks[index].enabled){selectedIndex=index;break;}
-  if(selectedIndex<0)selectedIndex=choosePreferredTrack(tracks,currentPlaybackPreferences.audioLanguage);
+  let selectedIndex=choosePreferredTrack(tracks,currentPlaybackPreferences.audioTrackLanguage||currentPlaybackPreferences.audioLanguage);
+  if(selectedIndex<0)for(let index=0;index<tracks.length;index++)if(tracks[index].enabled){selectedIndex=index;break;}
   if(selectedIndex<0)selectedIndex=0;
   for(let index=0;index<tracks.length;index++)tracks[index].enabled=index===selectedIndex;
   for(let index=0;index<tracks.length;index++){
@@ -658,7 +660,7 @@ byId("offline-subtitle-track").addEventListener("change",event=>{
   const selected=Number(event.target.value),tracks=player.textTracks;
   for(let index=0;index<tracks.length;index++)tracks[index].mode=selected>=0&&index===selected?"showing":"disabled";
   if(selected!==-2){activeExternalSubtitleCues=[];externalSubtitleLabel="";clearSubtitleOverlay(byId("offline-subtitle-overlay"));}
-  if(selected<0){subtitleCueBaseTimes=[];activeSubtitleTrack=null;}
+  if(selected===-1){subtitleCueBaseTimes=[];activeSubtitleTrack=null;}
   else if(selected>=0){
     activeSubtitleTrack=tracks[selected];
     subtitleCueBaseTimes=Array.from(activeSubtitleTrack.cues||[]).map(cue=>({start:cue.startTime,end:cue.endTime}));
@@ -668,13 +670,13 @@ byId("offline-subtitle-track").addEventListener("change",event=>{
   saveCurrentPlaybackPreferences({subtitleOff:selected===-1});
 });
 byId("offline-audio-language").addEventListener("change",event=>{
-  saveCurrentPlaybackPreferences({audioLanguage:event.target.value});
+  saveCurrentPlaybackPreferences({audioLanguage:event.target.value,audioTrackLanguage:""});
   refreshAudioTracks();
 });
 byId("offline-subtitle-language").addEventListener("change",event=>{
   saveCurrentPlaybackPreferences({subtitleLanguage:event.target.value,subtitleOff:event.target.value==="off"});
+  refreshSubtitleTracks();
   if(event.target.value==="off"){byId("offline-subtitle-track").value="-1";byId("offline-subtitle-track").dispatchEvent(new Event("change"));}
-  else refreshSubtitleTracks();
 });
 for(const id of ["offline-subtitle-size","offline-subtitle-font","offline-subtitle-color","offline-subtitle-position","offline-subtitle-outline","offline-subtitle-background"]){
   byId(id).addEventListener("input",()=>{
