@@ -323,7 +323,7 @@ async function updatePlaybackDiagnostics(){
 }
 function syncPlayerControls(){
   const duration=Number.isFinite(player.duration)?player.duration:0;
-  byId("offline-seek").value=duration?String(Math.round(player.currentTime/duration*1000)):"0";
+  byId("offline-seek").value=duration?String(Math.round(player.currentTime/duration*100000)):"0";
   byId("offline-time").textContent=clock(player.currentTime)+" / "+clock(duration);
   byId("offline-play-toggle").textContent=player.paused?"Play":"Pause";
   byId("offline-play-toggle").setAttribute("aria-label",player.paused?"Play":"Pause");
@@ -494,6 +494,26 @@ function refreshAudioTracks(){
 byId("offline-play-toggle").addEventListener("click",()=>{if(player.paused)void player.play().catch(()=>{});else player.pause();});
 byId("offline-skip-back").addEventListener("click",()=>seekBy(-10));
 byId("offline-skip-forward").addEventListener("click",()=>seekBy(10));
+function stepFrame(direction){
+  if(!Number.isFinite(player.duration))return;
+  player.pause();
+  const frameRate=Number(player.dataset.frameRate)||30;
+  player.currentTime=Math.max(0,Math.min(player.duration,player.currentTime+(direction<0?-1:1)/frameRate));
+}
+byId("offline-frame-back").addEventListener("click",()=>stepFrame(-1));
+byId("offline-frame-forward").addEventListener("click",()=>stepFrame(1));
+byId("offline-pip").addEventListener("click",async()=>{
+  try{
+    if(document.pictureInPictureElement===player){await document.exitPictureInPicture();return;}
+    if(!document.pictureInPictureEnabled||typeof player.requestPictureInPicture!=="function")throw new Error("Picture in Picture is not supported by this Windows media session.");
+    await player.requestPictureInPicture();
+  }catch(error){setMessage(error?.message||"Picture in Picture could not be opened.");}
+});
+byId("offline-cinema-mode").addEventListener("click",()=>{
+  const active=playerSection.classList.toggle("windowed-cinema");
+  byId("offline-cinema-mode").setAttribute("aria-pressed",String(active));
+  byId("offline-cinema-mode").textContent=active?"Exit windowed cinema":"Windowed cinema";
+});
 byId("offline-subtitle-file").addEventListener("change",event=>{
   const file=event.target.files?.[0];loadExternalSubtitle(file);event.target.value="";
 });
@@ -720,12 +740,19 @@ window.addEventListener("pagehide",()=>{
   if(player.dataset.jobId&&player.currentTime>0)void engine.setPlaybackPosition(player.dataset.jobId,Number(player.dataset.fileIndex)||0,player.currentTime).catch(()=>{});
 });
 window.addEventListener("keydown",event=>{
-  if(byId("offline-player-section").hidden||event.target.matches("input,textarea,select,button"))return;
-  if(event.code==="Space"){event.preventDefault();if(player.paused)void player.play().catch(()=>{});else player.pause();}
-  if(event.key==="ArrowRight"){event.preventDefault();seekBy(10);}
-  if(event.key==="ArrowLeft"){event.preventDefault();seekBy(-10);}
-  if(event.key.toLowerCase()==="f")void byId("offline-fullscreen").click();
-  if(event.key.toLowerCase()==="m")player.muted=!player.muted;
+  if(playerSection.hidden||event.target.matches("input,textarea,select,button,[contenteditable='true']"))return;
+  const key=event.key.toLowerCase();
+  if(event.code==="Space"||key==="k"){event.preventDefault();if(player.paused)void player.play().catch(()=>{});else player.pause();return;}
+  if(key==="arrowright"||key==="l"){event.preventDefault();seekBy(event.shiftKey?30:5);return;}
+  if(key==="arrowleft"||key==="j"){event.preventDefault();seekBy(event.shiftKey?-30:-5);return;}
+  if(key==="."||key===">"){event.preventDefault();stepFrame(1);return;}
+  if(key===","||key==="<"){event.preventDefault();stepFrame(-1);return;}
+  if(key==="f"){event.preventDefault();void byId("offline-fullscreen").click();return;}
+  if(key==="p"){event.preventDefault();void byId("offline-pip").click();return;}
+  if(key==="c"){event.preventDefault();byId("offline-cinema-mode").click();return;}
+  if(key==="m"){event.preventDefault();player.muted=!player.muted;return;}
+  if(key==="arrowup"){event.preventDefault();player.volume=Math.min(1,player.volume+0.05);byId("offline-volume").value=String(player.volume);return;}
+  if(key==="arrowdown"){event.preventDefault();player.volume=Math.max(0,player.volume-0.05);byId("offline-volume").value=String(player.volume);}
 });
 async function play(job,fileIndex=0){
   const url=await engine.mediaUrl(job.id,fileIndex);
