@@ -1,0 +1,35 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const player = fs.readFileSync(path.join(root, "scripts", "downloads", "desktop-offline.js"), "utf8");
+const page = fs.readFileSync(path.join(root, "my-downloads.html"), "utf8");
+
+test("Windows offline player exposes high-resolution seeking and frame stepping", () => {
+  assert.match(page, /id="offline-seek"[^>]*max="100000"/);
+  assert.match(player, /currentTime\/duration\*100000/);
+  assert.match(player, /function stepFrame\(direction\)/);
+  assert.match(player, /player\.pause\(\)/);
+  assert.match(player, /1\/frameRate/);
+  assert.match(page, /id="offline-frame-back"/);
+  assert.match(page, /id="offline-frame-forward"/);
+});
+
+test("Windows offline player supports expanded transport keyboard shortcuts", () => {
+  for (const shortcut of ['key==="k"', 'key==="l"', 'key==="j"', 'key==="."', 'key===","', 'key==="f"', 'key==="p"', 'key==="c"', 'key==="m"']) {
+    assert.ok(player.includes(shortcut), "missing shortcut " + shortcut);
+  }
+  assert.match(player, /event\.shiftKey\?30:5/);
+  assert.match(player, /event\.shiftKey\?-30:-5/);
+});
+
+test("Windows offline player provides Picture in Picture and windowed cinema modes", () => {
+  assert.match(page, /id="offline-pip"/);
+  assert.match(page, /id="offline-cinema-mode"/);
+  assert.match(player, /requestPictureInPicture/);
+  assert.match(player, /exitPictureInPicture/);
+  assert.match(player, /windowed-cinema/);
+});
