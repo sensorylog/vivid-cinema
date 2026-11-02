@@ -1132,6 +1132,7 @@ byId("desktop-search-results").addEventListener("click",async event=>{
     if(button.isConnected){button.disabled=false;button.textContent="Download";}
   }
 });
+byId("offline-continue-list").addEventListener("click",async event=>{const button=event.target.closest("button[data-action=\"continue\"]");if(!button)return;const job=jobs.find(item=>item.id===button.dataset.id);if(!job)return;button.disabled=true;try{await play(job,0);}catch(error){setMessage(error?.message||"Could not resume this title.");}finally{button.disabled=false;}});
 byId("offline-jobs").addEventListener("click",async event=>{
   const button=event.target.closest("button[data-action]");if(!button)return;
   const {action,id}=button.dataset;button.disabled=true;
