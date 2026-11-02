@@ -205,10 +205,10 @@ export function renderSubtitleAtTime(container, cues, time, preferences = {}) {
     if (style.bold) span.style.fontWeight = "700";
     if (style.italic) span.style.fontStyle = "italic";
     if (style.underline) span.style.textDecoration = "underline";
-    if (style.fontFamily) span.style.fontFamily = safeFont(style.fontFamily);
-    if (style.fontSize) span.style.fontSize = (Number(style.fontSize) / 24) + "em";
-    if (style.color) span.style.color = style.color;
-    if (style.outlineColor && style.outline) span.style.webkitTextStroke = style.outline + "px " + style.outlineColor;
+    if (style.fontFamily && (!preferences.font || preferences.font === "auto")) span.style.fontFamily = safeFont(style.fontFamily);
+    if (style.fontSize && (!preferences.size || preferences.size === "auto")) span.style.fontSize = (Number(style.fontSize) / (Number(active.style?.fontSize) || 24)) + "em";
+    if (style.color && (!preferences.color || preferences.color === "auto")) span.style.color = style.color;
+    if (preferences.outline !== false && style.outlineColor && style.outline) span.style.webkitTextStroke = style.outline + "px " + style.outlineColor;
     box.appendChild(span);
   }
   container.appendChild(box);
