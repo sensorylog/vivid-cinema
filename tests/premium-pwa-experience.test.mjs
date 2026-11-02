@@ -20,10 +20,10 @@ test("premium PWA experience styles are loaded globally and respect reduced moti
   const shell = read("../scripts/app-shell.js");
   const worker = read("../service-worker.js");
   const css = read("../styles/vivid-premium-experience.css");
-  assert.match(shell, /vivid-premium-experience\.css\?v=1/);
+  assert.match(shell, /vivid-premium-experience\\.css\\?v=2/);
   assert.match(shell, /vivid-app-experience/);
-  assert.match(worker, /vivid-cinema-shell-v266/);
-  assert.match(worker, /vivid-premium-experience\.css\?v=1/);
+  assert.match(worker, /vivid-cinema-shell-v267/);
+  assert.match(worker, /vivid-premium-experience\\.css\\?v=2/);
   assert.match(css, /@view-transition\s*\{\s*navigation:\s*auto;/);
   assert.match(css, /grid-template-columns:\s*repeat\(5/);
   assert.match(css, /aria-current="page"/);
@@ -36,7 +36,7 @@ test("installed iOS PWA gets a standalone app shell and safe-area-aware content"
   const worker = read("../service-worker.js");
   const css = read("../styles/vivid-premium-experience.css");
   assert.match(shell, /function setStandaloneExperience\(\)/);
-  assert.match(shell, /display-mode:\\s*standalone/);
+  assert.match(shell, /display-mode:\s*standalone/);
   assert.match(shell, /vivid-ios-standalone/);
   assert.match(shell, /apple-mobile-web-app-status-bar-style/);
   assert.match(shell, /vivid-premium-experience\.css\?v=2/);
