@@ -91,7 +91,7 @@ function readVint(bytes, offset, keepMarker = false) {
   if (length > 8 || offset + length > bytes.length) return null;
   let value = keepMarker ? first : first & (mask - 1);
   for (let i = 1; i < length; i++) value = value * 256 + bytes[offset + i];
-  const unknown = !keepMarker && Array.from(bytes.subarray(offset, offset + length)).every(byte => byte === 0xff);
+  const unknown = !keepMarker && first === (mask * 2 - 1) && Array.from(bytes.subarray(offset + 1, offset + length)).every(byte => byte === 0xff);
   return { value, length, unknown };
 }
 
