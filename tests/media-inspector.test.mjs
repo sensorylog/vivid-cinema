@@ -148,3 +148,15 @@ test("finds MP4 movie metadata in the trailing region after a bounded prefix sca
   assert.equal(result.partial, true);
   assert.match(result.note, /trailing region/);
 });
+
+
+test("inspection refuses an unbounded response when streaming is unavailable", async () => {
+  const fakeFetch = async () => new Response(null, { status: 200 });
+  await assert.rejects(
+    inspectMediaUrl("vivid-media://download/file", "unknown-size.mkv", {
+      fetchImpl: fakeFetch,
+      maxBytes: 1024
+    }),
+    /verifiably bounded/
+  );
+});
