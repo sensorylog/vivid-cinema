@@ -1,4 +1,4 @@
-const TIME = /^(\d{1,2}):(\d{2}):(\d{2})[.,](\d{1,3})$/;
+const TIME = /^(?:(\d+):)?(\d{2}):(\d{2})[.,](\d{1,3})$/;
 
 function toSeconds(value) {
   const match = TIME.exec(String(value || "").trim());
@@ -39,7 +39,7 @@ function parseVtt(source) {
   const cues = [];
   for (const block of normalized.replace(/^WEBVTT[^\n]*\n/, "").split(/\n\s*\n/)) {
     const lines = block.trim().split("\n");
-    const timingIndex = lines.findIndex(line => /\d{1,2}:\d{2}:\d{2}[.,]\d{1,3}\s*-->/.test(line));
+    const timingIndex = lines.findIndex(line => /(?:\d+:)?\d{2}:\d{2}[.,]\d{1,3}\s*-->/.test(line));
     if (timingIndex < 0) continue;
     const timing = lines[timingIndex].split("-->");
     const start = toSeconds(timing[0]);
