@@ -8,7 +8,7 @@ const uint=(value)=>{const b=new Uint8Array(4);new DataView(b.buffer).setUint32(
 
 test("inspects MP4 sample-entry codec identifiers and track types",()=>{
  const ftyp=box("ftyp",new TextEncoder().encode("isom\0\0\0\0isom"));
- const stsd=box("stsd",join(new Uint8Array(4),uint(1),uint(16),new TextEncoder().encode("avc1"),new Uint8Array(0)));
+ const stsd=box("stsd",join(new Uint8Array(4),uint(1),uint(16),new TextEncoder().encode("avc1"),new Uint8Array(8)));
  const stbl=box("stbl",stsd),minf=box("minf",stbl);
  const hdlr=box("hdlr",join(new Uint8Array(8),new TextEncoder().encode("vide"),new Uint8Array(4)));
  const mdia=box("mdia",join(hdlr,minf));
@@ -24,7 +24,7 @@ test("recognises Matroska EBML signatures and reports missing track metadata hon
  const vintSize=value=>new Uint8Array([0x80|value]);
  const element=(id,payload)=>join(new Uint8Array([...(id.toString(16).match(/../g)||[])].map(x=>parseInt(x,16))),vintSize(payload.length),payload);
  const ebml=element(0x1a45dfa3,new Uint8Array(0));
- const segment=element(0x18538067,new Uint8Array(0));
+ const segment=join(new Uint8Array([0x18,0x53,0x80,0x67,0x01,0xff,0xff,0xff,0xff,0xff,0xff,0xff]));
  const result=inspectMediaBytes(join(ebml,segment),"sample.mkv");
  assert.equal(result.format,"Matroska / WebM");
  assert.equal(result.complete,false);
