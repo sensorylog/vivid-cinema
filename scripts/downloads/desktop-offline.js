@@ -1,5 +1,6 @@
 import { tmdbApi } from "../tmdb.js";
 import { describeLoadedMedia, probePlaybackCapabilities } from "./media-capabilities.js";
+import { inspectMediaUrl } from "./media-inspector.js";
 
 if (window.vividDownloads?.available) {
 document.body.classList.add("vivid-desktop-offline-library");
@@ -277,6 +278,18 @@ async function updatePlaybackDiagnostics(){
   const media=describeLoadedMedia(player,filename);
   const summary=byId("offline-media-summary");
   summary.textContent=media.filename+" · "+media.container.label+" · "+media.resolution+" · "+(media.duration===null?"Duration unavailable":clock(media.duration))+" · "+media.codec;
+  const details=byId("offline-file-details");
+  details.textContent="Inspecting actual container and track metadata…";
+  try{
+    const inspected=await inspectMediaUrl(player.currentSrc,filename);
+    if(request!==diagnosticsRequest||!player.dataset.jobId)return;
+    const trackSummary=inspected.tracks.length?inspected.tracks.map(track=>track.kind+": "+track.codec+(track.language?" ("+track.language+")":"")).join(" · "):"No tracks identified in inspected metadata";
+    const duration=Number.isFinite(inspected.duration)?clock(inspected.duration):"Duration not present in inspected metadata";
+    const resolution=inspected.width&&inspected.height?Math.round(inspected.width)+" × "+Math.round(inspected.height):media.resolution;
+    details.textContent=inspected.format+" · "+trackSummary+" · "+duration+" · "+resolution+" · "+(inspected.partial?"Metadata scan limited to first 32 MiB":"Metadata scan complete")+". "+inspected.note;
+  }catch(error){
+    if(request===diagnosticsRequest)details.textContent="Media metadata scan unavailable: "+(error?.message||"Unknown inspection error");
+  }
   if(!capabilityReportPromise)capabilityReportPromise=probePlaybackCapabilities({video:player});
   const report=await capabilityReportPromise;
   if(request!==diagnosticsRequest||!player.dataset.jobId)return;
