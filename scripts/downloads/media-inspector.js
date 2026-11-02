@@ -57,7 +57,7 @@ function parseMp4(bytes) {
     let codec = "Unknown";
     if (stsd && stsd.data + 16 <= stsd.end) {
       const entrySize = u32(new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength), stsd.data + 8);
-      if (entrySize >= 8 && stsd.data + 8 + entrySize <= stsd.end) codec = fourCC(bytes, stsd.data + 16);
+      if (entrySize >= 8 && stsd.data + 8 + entrySize <= stsd.end) codec = fourCC(bytes, stsd.data + 12);
     }
     const mdhd = mdiaChildren.find(item => item.type === "mdhd");
     let language = "";
