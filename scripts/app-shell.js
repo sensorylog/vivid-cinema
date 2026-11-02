@@ -75,6 +75,77 @@ function navigateToPreviousVividPage(event) {
 }
 
 
+function setStandaloneExperience() {
+  const standalone = window.matchMedia?.("(display-mode: standalone)")?.matches ||
+    window.navigator.standalone === true;
+  if (!standalone) return;
+
+  document.documentElement.classList.add("vivid-standalone");
+  const ios = /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.MSStream;
+  if (!ios) return;
+
+  document.documentElement.classList.add("vivid-ios-standalone");
+  let statusBar = document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]');
+  if (!statusBar) {
+    statusBar = document.createElement("meta");
+    statusBar.name = "apple-mobile-web-app-status-bar-style";
+    document.head.appendChild(statusBar);
+  }
+  statusBar.content = "black-translucent";
+}
+
+function initStandaloneBackGesture() {
+  const standalone = window.matchMedia?.("(display-mode: standalone)")?.matches ||
+    window.navigator.standalone === true;
+  const ios = /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.MSStream;
+  if (!standalone || !ios || window.matchMedia?.("(pointer: coarse)")?.matches === false) return;
+
+  let start = null;
+  const ignored = target => target?.closest?.(
+    "input, textarea, select, button, a, video, iframe, [contenteditable='true'], " +
+    "[data-no-swipe-back], .vivid-rail, .vivid-player-frame, .vivid-player-dialog"
+  );
+
+  document.addEventListener("touchstart", event => {
+    if (event.touches.length !== 1 || ignored(event.target)) {
+      start = null;
+      return;
+    }
+    const touch = event.touches[0];
+    if (touch.clientX > 22 || touch.clientY < 54) {
+      start = null;
+      return;
+    }
+    const stack = readNavigationStack();
+    if (stack.length < 2) {
+      start = null;
+      return;
+    }
+    start = { x: touch.clientX, y: touch.clientY, time: Date.now() };
+  }, { passive: true });
+
+  document.addEventListener("touchend", event => {
+    if (!start || event.changedTouches.length !== 1) {
+      start = null;
+      return;
+    }
+    const touch = event.changedTouches[0];
+    const dx = touch.clientX - start.x;
+    const dy = touch.clientY - start.y;
+    const elapsed = Date.now() - start.time;
+    start = null;
+    if (dx < 112 || Math.abs(dy) > 76 || elapsed > 700) return;
+    const stack = readNavigationStack();
+    const current = currentRoute();
+    while (stack.length && stack.at(-1) === current) stack.pop();
+    if (!stack.length) return;
+    writeNavigationStack(stack);
+    history.back();
+  }, { passive: true });
+
+  document.addEventListener("touchcancel", () => { start = null; }, { passive: true });
+}
+
 function setViewportState() {
   document.documentElement.dataset.viewport =
     window.innerWidth < MOBILE_BREAKPOINT ? "mobile" : "desktop";
@@ -207,12 +278,7 @@ function syncMobileNavigation() {
     navLink("home.html", "bi-house-fill", "Home", page === "home"),
     navLink("discover.html", "bi-grid-fill", "Browse", isBrowsePage(page)),
     navLink("for-you.html", "bi-stars", "For You", page === "for-you"),
-    navLink("live.html", "bi-broadcast-pin", "Live", page === "live"),
-    navLink("library.html", "bi-bookmark-fill", "Library", page === "library"),
-    ...(window.vividDownloads?.available === true
-      ? [navLink("my-downloads.html", "bi-download", "Offline", page === "downloads-library")]
-      : []),
-    navLink("news.html", "bi-newspaper", "News", page === "news"),
+    navLink("library.html", "bi-bookmark-fill", "Library", page === "library" || page === "downloads-library"),
     navLink("search.html", "bi-search", "Search", page === "search")
   ].join("");
   nav.classList.add("vivid-v2-mobile-nav");
@@ -447,12 +513,20 @@ function initCinematicFocusNavigation() {
 }
 
 function ensureMediaLayoutStyles() {
-  if (document.querySelector('link[data-vivid-media-layout]')) return;
-  const link = document.createElement("link");
-  link.rel = "stylesheet";
-  link.href = "./styles/vivid-media-layout.css?v=1";
-  link.dataset.vividMediaLayout = "true";
-  document.head.appendChild(link);
+  if (!document.querySelector('link[data-vivid-media-layout]')) {
+    const link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href = "./styles/vivid-media-layout.css?v=1";
+    link.dataset.vividMediaLayout = "true";
+    document.head.appendChild(link);
+  }
+  if (!document.querySelector('link[data-vivid-premium-experience]')) {
+    const link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href = "./styles/vivid-premium-experience.css?v=2";
+    link.dataset.vividPremiumExperience = "true";
+    document.head.appendChild(link);
+  }
 }
 
 function initAppShell() {
@@ -460,6 +534,8 @@ function initAppShell() {
   initialized = true;
 
   ensureMediaLayoutStyles();
+  setStandaloneExperience();
+  document.body.classList.add("vivid-app-experience");
   document.documentElement.dataset.vividReady = "false";
   const storedTheme = (() => { try { return localStorage.getItem("vivid:theme"); } catch { return null; } })();
   document.documentElement.dataset.vividTheme = storedTheme === "light" ? "light" : "dark";
@@ -477,6 +553,7 @@ function initAppShell() {
   ensureBackControl();
   ensureSkipLink();
   initCinematicFocusNavigation();
+  initStandaloneBackGesture();
 
   window.addEventListener("resize", setViewportState, { passive: true });
   window.addEventListener("online", setConnectionState);
