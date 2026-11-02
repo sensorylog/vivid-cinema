@@ -55,9 +55,9 @@ Any future decision to bundle mpv must be treated as a separate engineering and 
 
 ## Remaining verification
 
-- Run representative local media files on a physical Windows machine and record the exact Windows version, Electron build, GPU/driver, file container and audio/video codecs.
-- Verify playback, seeking, audio output, track selection, external subtitles and error recovery using those files.
-- Do not infer broad codec compatibility from extension checks, metadata inspection or CI packaging success alone.
+A structured physical-device test plan is prepared in [Windows playback verification matrix](windows-playback-test-matrix.md). It covers representative containers and codecs, external and embedded subtitles, audio tracks, local-file opening, byte-range seeking, frame stepping, isolated seek preview, stability and error recovery. The matrix includes an environment record and per-file result template.
+
+**All matrix cases remain Pending.** No physical Windows playback tests have been performed as part of this audit-cleanup series. Before claiming compatibility, a tester must run the packaged Windows build on real hardware and record the exact Windows/Electron/Chromium versions, GPU/driver, media stream details and observed results. Do not infer broad codec compatibility from extension checks, metadata inspection or CI packaging success alone.
 
 ## Scope of this audit-cleanup series
 
