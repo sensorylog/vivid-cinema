@@ -105,3 +105,46 @@ test("parses Matroska tracks, codec identifiers, language and duration with an u
   assert.equal(result.tracks[0].language, "eng");
   assert.equal(result.duration, 60);
 });
+
+test("finds MP4 movie metadata in the trailing region after a bounded prefix scan", async () => {
+  const ftyp = box("ftyp", new TextEncoder().encode("isom\\0\\0\\0\\0isom"));
+  const stsd = box("stsd", join(new Uint8Array(4), uint(1), uint(16), new TextEncoder().encode("avc1"), new Uint8Array(8)));
+  const stbl = box("stbl", stsd);
+  const minf = box("minf", stbl);
+  const hdlr = box("hdlr", join(new Uint8Array(8), new TextEncoder().encode("vide"), new Uint8Array(4)));
+  const moov = box("moov", box("trak", box("mdia", join(hdlr, minf))));
+  const totalSize = 2000;
+  const tailStart = totalSize - 1024;
+  const tailBytes = new Uint8Array(1024);
+  tailBytes.set(moov);
+  const ranges = [];
+  const fakeFetch = async (_url, options) => {
+    const range = options.headers.Range;
+    ranges.push(range);
+    if (range === "bytes=0-1023") {
+      return new Response(ftyp, {
+        status: 206,
+        headers: {
+          "content-length": String(ftyp.length),
+          "content-range": "bytes 0-" + (ftyp.length - 1) + "/" + totalSize
+        }
+      });
+    }
+    return new Response(tailBytes, {
+      status: 206,
+      headers: {
+        "content-length": String(tailBytes.length),
+        "content-range": "bytes " + tailStart + "-" + (totalSize - 1) + "/" + totalSize
+      }
+    });
+  };
+  const result = await inspectMediaUrl("vivid-media://download/file", "tail-index.mp4", {
+    fetchImpl: fakeFetch,
+    maxBytes: 1024
+  });
+  assert.deepEqual(ranges, ["bytes=0-1023", "bytes=976-1999"]);
+  assert.equal(result.complete, true);
+  assert.equal(result.tracks[0].codec, "avc1");
+  assert.equal(result.partial, true);
+  assert.match(result.note, /trailing region/);
+});
