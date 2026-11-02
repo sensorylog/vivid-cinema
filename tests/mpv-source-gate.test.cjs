@@ -10,6 +10,7 @@ const { MPV_SOURCE_COMMIT } = require("../desktop/prepare-mpv.cjs");
 const { verifyMpvSources } = require("../desktop/verify-mpv-sources.cjs");
 const MANIFEST_SCRIPT = fs.readFileSync(path.join(__dirname, "../desktop/create-mpv-source-manifest.cjs"), "utf8");
 const BUILD_SCRIPT = fs.readFileSync(path.join(__dirname, "../desktop/build-mpv-source.sh"), "utf8");
+const SOURCE_WORKFLOW = fs.readFileSync(path.join(__dirname, "../.github/workflows/mpv-source-build.yml"), "utf8");
 
 function fixture(t) {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "vivid-mpv-source-gate-"));
@@ -69,7 +70,6 @@ test("source gate rejects incomplete component licence provenance", t => {
   assert.throws(() => verifyMpvSources({ projectRoot: paths.root, skip: false }), /Every source-manifest component/);
 });
 
-
 test("source gate rejects licence paths that escape the bundled notice directory", t => {
   const paths = fixture(t);
   writeValidBundle(paths);
@@ -79,9 +79,14 @@ test("source gate rejects licence paths that escape the bundled notice directory
   assert.throws(() => verifyMpvSources({ projectRoot: paths.root, skip: false }), /bundled licence file/);
 });
 
-test("mpv candidate smoke test uses a terminating version query instead of opening an idle player", () => {
-  assert.match(BUILD_SCRIPT, /wine \.\/artifact\/mpv\.com --version --no-config/);
-  assert.doesNotMatch(BUILD_SCRIPT, /wine \.\/artifact\/mpv\.com -v --no-config/);
+test("mpv candidate is smoke-tested only after its runtime and source snapshot are uploaded", () => {
+  const upload = SOURCE_WORKFLOW.indexOf("uses: actions/upload-artifact@v4");
+  const smoke = SOURCE_WORKFLOW.indexOf("wine ./desktop/vendor/mpv/mpv.com --version --no-config");
+  assert.ok(upload >= 0, "candidate artifact upload step must exist");
+  assert.ok(smoke > upload, "Wine smoke test must run after artifact upload");
+  assert.match(SOURCE_WORKFLOW, /timeout --signal=TERM --kill-after=10s 90s wine/);
+  assert.match(SOURCE_WORKFLOW, /timeout-minutes: 3/);
+  assert.doesNotMatch(BUILD_SCRIPT, /wine \.\/artifact\/mpv\.com/);
 });
 
 test("candidate manifest parser recognizes ordinary Meson wrap source_url fields", () => {
