@@ -177,6 +177,7 @@ test("offline redesign provides title details, season grouping and continue watc
   assert.match(desktop, /async function showTitleDetails\(job\)/);
   assert.match(desktop, /offline-season-group/);
   assert.match(desktop, /async function renderContinueWatching\(\)/);
+  assert.match(desktop, /offline-continue-list\"\)\.addEventListener\(\"click\"/);
   assert.match(desktop, /engine\.getPlaybackPosition\(job\.id,0\)/);
   assert.match(styles, /\.offline-title-dialog/);
   assert.match(styles, /\.offline-continue-card/);
