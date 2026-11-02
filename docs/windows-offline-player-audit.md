@@ -29,6 +29,12 @@ The automated tests cover media inspection, local protocol range handling, playb
 
 The desktop session grants only the existing fullscreen, media and notifications permission types, and only when the requesting origin is an exact trusted application origin (the configured Vivid hosted origin or the active local desktop origin) that also matches the active WebContents URL. Both Electron permission-request and permission-check handlers use the same fail-closed policy. Malformed, opaque, credential-bearing, lookalike and untrusted origins are denied. This origin restriction does not change the existing set of permission types.
 
+## Local file opening
+
+The Windows desktop renderer can request a native file picker through a narrow preload API. The main process accepts only supported video extensions, resolves the selected path, verifies that it is a regular file, and issues a random opaque media grant to the requesting renderer. The renderer receives a tokenized `vivid-media://local/` URL rather than a filesystem path. The media protocol serves only registered grants, supports byte-range seeking, and grants are released by the requesting renderer when the player closes or switches away; the registry is bounded and cleared at application shutdown. Selected files are played in place and are not copied into or added to the Vivid download library.
+
+This remains Chromium playback, not an additional decoding engine: codec/profile support is still determined by the bundled Electron/Chromium build and Windows environment. The native picker currently filters to supported video-container extensions; subtitle files continue to be loaded separately through the existing subtitle picker.
+
 ## Confirmed architecture and limitations
 
 1. **Native Chromium decoding is the only playback engine present.** The current player relies on the codecs and containers supported by the bundled Electron/Chromium build and the Windows environment. A file extension or container name does not establish that its contained video and audio codecs can be decoded.
