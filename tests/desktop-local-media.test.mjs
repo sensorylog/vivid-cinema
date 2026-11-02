@@ -47,3 +47,28 @@ test("registry bounds retained file grants and clears on shutdown", () => {
   registry.clear();
   assert.equal(registry.size, 0);
 });
+
+test("Electron opens only user-selected supported files and serves scoped local media grants", async () => {
+  const { readFile } = await import("node:fs/promises");
+  const [main, preload, renderer, page] = await Promise.all([
+    readFile(new URL("../desktop/main.cjs", import.meta.url), "utf8"),
+    readFile(new URL("../desktop/preload.cjs", import.meta.url), "utf8"),
+    readFile(new URL("../scripts/downloads/desktop-offline.js", import.meta.url), "utf8"),
+    readFile(new URL("../my-downloads.html", import.meta.url), "utf8")
+  ]);
+  assert.match(main, /showOpenDialog\(parent,\s*\{/);
+  assert.match(main, /properties:\s*\["openFile"\]/);
+  assert.match(main, /fs\.promises\.realpath/);
+  assert.match(main, /isSupportedLocalVideoFile\(selectedPath\)/);
+  assert.match(main, /localMediaRegistry\.register\(selectedPath, event\.sender\.id\)/);
+  assert.match(main, /vivid-media:\/\/local\//);
+  assert.match(main, /localMediaRegistry\.get\(grantToken\)/);
+  assert.match(main, /localMediaRegistry\.release\(token, event\.sender\.id\)/);
+  assert.match(preload, /openLocalFile:\s*\(\) => ipcRenderer\.invoke\("vivid-local-media-open"\)/);
+  assert.match(preload, /releaseLocalFile:\s*token => ipcRenderer\.invoke\("vivid-local-media-release", token\)/);
+  assert.match(renderer, /engine\.openLocalFile\(\)/);
+  assert.match(renderer, /engine\.releaseLocalFile\(token\)/);
+  assert.match(renderer, /offline-open-local-file/);
+  assert.match(page, /id="offline-open-local-file"/);
+  assert.doesNotMatch(preload, /readFile|readFileSync/);
+});
