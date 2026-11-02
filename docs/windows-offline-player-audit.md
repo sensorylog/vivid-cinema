@@ -59,6 +59,27 @@ A structured physical-device test plan is prepared in [Windows playback verifica
 
 **All matrix cases remain Pending.** No physical Windows playback tests have been performed as part of this audit-cleanup series. Before claiming compatibility, a tester must run the packaged Windows build on real hardware and record the exact Windows/Electron/Chromium versions, GPU/driver, media stream details and observed results. Do not infer broad codec compatibility from extension checks, metadata inspection or CI packaging success alone.
 
+## Final audit-cleanup record
+
+The six scoped findings have been addressed on the single branch `audit/windows-offline-player-cleanup`:
+
+1. **Outdated mpv documentation:** corrected the audit to distinguish the current Chromium player from the unimplemented mpv proposal.
+2. **Electron permissions:** centralized a fail-closed origin and permission policy for both permission requests and permission checks, with regression tests.
+3. **Local-file opening:** added a native file picker and sender-scoped opaque media grants through the existing byte-range media protocol.
+4. **Frame stepping and seek preview:** added nominal frame-rate inspection for MP4 and Matroska/WebM, disabled frame stepping when timing is unavailable, and moved scrub preview decoding to a separate video element.
+5. **Windows playback verification:** prepared the [Windows playback verification matrix](windows-playback-test-matrix.md). Every physical-device case remains Pending.
+6. **Remaining limitations:** recorded below and throughout this audit; no claim of universal format support or physical Windows verification is made.
+
+### Verification record and release gate
+
+- The permission-policy focused tests were previously run locally: **9 passed, 0 failed**.
+- The local-media grant unit tests were previously run locally: **5 passed**. Integration coverage was added to the repository test suite but was not separately executed in that local run.
+- Frame-rate parser and player regression tests were added or updated, but their execution has **not been confirmed** in this environment.
+- A full repository test run and CI result for the final branch have **not been confirmed**.
+- Physical Windows playback and packaged-build verification have **not been performed**. The matrix must be completed on actual Windows hardware before making compatibility claims or treating the player as release-verified.
+
+This audit describes the implemented code paths and their known constraints; it is not a certification, a completed hardware test report, or a guarantee that any particular codec/profile will play on every Windows machine.
+
 ## Scope of this audit-cleanup series
 
 This cleanup series is limited to the six findings explicitly listed in the accompanying audit plan. It is not a general redesign and must not introduce unrelated features, deployment changes or torrent-feature work.
