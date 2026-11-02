@@ -1,4 +1,6 @@
 const { app, BrowserWindow, Menu, dialog, shell, session, ipcMain, net, protocol } = require("electron");
+// Enable Chromium's AudioVideoTracks API for embedded audio track selection in the Windows player.
+app.commandLine.appendSwitch("enable-blink-features", "AudioVideoTracks");
 const { autoUpdater } = require("electron-updater");
 const http = require("node:http");
 const fs = require("node:fs");
