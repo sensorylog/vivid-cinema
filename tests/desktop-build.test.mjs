@@ -253,9 +253,9 @@ test("desktop download runtime dependencies are isolated and installed before la
   assert.equal(runtime.dependencies.webtorrent, "1.9.7");
   assert.equal(runtime.dependencies["torrent-search-api"], "^2.1.4");
   assert.equal(runtimeLock.packages[""].dependencies.webtorrent, "1.9.7");
-  assert.match(pkg.scripts["predesktop:start"], /npm --prefix desktop ci --omit=dev/);
-  assert.match(pkg.scripts["predesktop:dist"], /npm --prefix desktop ci --omit=dev/);
-  assert.ok(pkg.build.files.includes("desktop/node_modules/**"));
+  assert.equal(pkg.scripts["predesktop:start"], undefined);
+  assert.equal(pkg.scripts["predesktop:dist"], undefined);
+  assert.ok(!pkg.build.files.includes("desktop/node_modules/**"));
 });
 
 test("legacy desktop profile removes continuous decorative work", () => {
