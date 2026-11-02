@@ -184,6 +184,26 @@ function render(){
   entries.sort((a,b)=>librarySort==="title"?a.title.localeCompare(b.title,undefined,{sensitivity:"base"}):librarySort==="largest"?b.size-a.size||b.time-a.time:b.time-a.time);
   byId("offline-jobs").innerHTML='<div class="offline-library-grid">'+entries.map(entry=>entry.markup).join("")+'</div>';
 }
+async function renderContinueWatching(){
+  const section=byId("offline-continue-section");
+  const list=byId("offline-continue-list");
+  if(!section||!list)return;
+  const candidates=jobs.filter(job=>job.status==="completed").slice(0,40);
+  if(!candidates.length){section.hidden=true;list.replaceChildren();return;}
+  const results=await Promise.all(candidates.map(async job=>{
+    try{return {job,position:Number(await engine.getPlaybackPosition(job.id,0))||0};}
+    catch{return {job,position:0};}
+  }));
+  const resumable=results.filter(item=>item.position>5).sort((a,b)=>b.position-a.position).slice(0,8);
+  if(!resumable.length){section.hidden=true;list.replaceChildren();return;}
+  section.hidden=false;
+  list.innerHTML=resumable.map(({job,position})=>{
+    const media=job.media||{};
+    const title=media.episodeTitle||media.title||job.title||"Saved title";
+    const label=media.media_type==="tv"?"S"+String(media.season||0).padStart(2,"0")+"E"+String(media.episode||0).padStart(2,"0"):"MOVIE";
+    return '<article class="offline-continue-card">'+posterMarkup(media)+'<div><span class="offline-card-kicker">'+escapeHtml(label)+'</span><strong>'+escapeHtml(title)+'</strong><small>Continue from '+escapeHtml(clock(position))+'</small><button type="button" data-action="continue" data-id="'+escapeHtml(job.id)+'">Continue watching</button></div></article>';
+  }).join("");
+}
 function renderSearch(items){
   searchResults=items;
   const quality=byId("desktop-quality").value;
@@ -316,6 +336,7 @@ async function refresh(){
   try{
     jobs=(await engine.list()).filter(job=>job.status!=="cancelled");
     render();
+    void renderContinueWatching();
     void hydratePosterArtwork();
   }catch(error){setMessage(error?.message||"Could not load your downloads.");}
 }
@@ -1116,7 +1137,7 @@ byId("offline-jobs").addEventListener("click",async event=>{
   const {action,id}=button.dataset;button.disabled=true;
   try{
     if(action==="details"){const job=jobs.find(item=>item.id===id);if(job)await showTitleDetails(job);}
-    else if(action==="play"||action==="play-file"){const job=jobs.find(item=>item.id===id);if(job)await play(job,action==="play-file"?Number(button.dataset.index)||0:0);}
+    else if(action==="continue"||action==="play"||action==="play-file"){const job=jobs.find(item=>item.id===id);if(job)await play(job,action==="play-file"?Number(button.dataset.index)||0:0);}
     else {const ok=await engine.control(id,action);if(!ok)throw new Error("That action is not available.");await refresh();}
   }catch(error){setMessage(error?.message||"Action failed.");}
   finally{button.disabled=false;}
