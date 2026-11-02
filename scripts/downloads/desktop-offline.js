@@ -373,7 +373,7 @@ function seekBy(seconds){
   if(!Number.isFinite(player.duration))return;
   player.currentTime=Math.max(0,Math.min(player.duration,player.currentTime+seconds));
   const feedback=byId("offline-seek-feedback");
-  feedback.textContent=seconds<0?"−10 seconds":"+10 seconds";
+  feedback.textContent=(seconds<0?"−":"+")+Math.abs(seconds)+" seconds";
   feedback.className="offline-seek-feedback "+(seconds<0?"is-back":"is-forward");
   feedback.hidden=false;
   if(seekFeedbackTimer)clearTimeout(seekFeedbackTimer);
@@ -391,8 +391,8 @@ function clearExternalSubtitle(){
 }
 let chapterTrack=null;
 let chapterCues=[];
-const introPattern=/\\b(intro|opening|recap|previously on)\\b/i;
-const creditsPattern=/\\b(credits|end credits|closing credits|outro)\\b/i;
+const introPattern=/\b(intro|opening|recap|previously on)\b/i;
+const creditsPattern=/\b(credits|end credits|closing credits|outro)\b/i;
 function readChapterCues(){
   const tracks=Array.from(player.textTracks||[]);
   chapterTrack=tracks.find(track=>track.kind==="chapters")||null;
@@ -408,7 +408,7 @@ function updateChapterControls(){
   const now=Number(player.currentTime)||0;
   const activeIndex=chapterCues.findIndex(cue=>now>=cue.startTime&&now<cue.endTime);
   const active=activeIndex>=0?chapterCues[activeIndex]:null;
-  const chapterText=String(active?.text||"").replace(/<[^>]*>/g," ").replace(/\\s+/g," ").trim();
+  const chapterText=String(active?.text||"").replace(/<[^>]*>/g," ").replace(/\s+/g," ").trim();
   byId("offline-chapter-label").textContent=chapterText?chapterText.slice(0,56):active?"Chapter "+(activeIndex+1):"Chapters";
   byId("offline-chapter-previous").disabled=chapterCues.every(cue=>cue.startTime>=now-0.5);
   byId("offline-chapter-next").disabled=!chapterCues.some(cue=>cue.startTime>now+0.5);
