@@ -634,7 +634,25 @@ byId("offline-audio-track").addEventListener("change",event=>{
   setMessage("Selected "+audioTrackLabel(tracks[index],index)+".");
 });
 
-byId("offline-seek").addEventListener("input",event=>{if(Number.isFinite(player.duration))player.currentTime=player.duration*(Number(event.target.value)/100000);});
+const seekInput=byId("offline-seek");
+const seekPreview=byId("offline-seek-preview");
+function drawSeekPreview(){
+  if(seekPreview.hidden||player.readyState<2)return;
+  const context=seekPreview.getContext("2d");
+  if(!context)return;
+  try{context.drawImage(player,0,0,seekPreview.width,seekPreview.height);}catch{}
+}
+seekInput.addEventListener("input",event=>{
+  if(Number.isFinite(player.duration))player.currentTime=player.duration*(Number(event.target.value)/100000);
+  seekPreview.hidden=false;
+  drawSeekPreview();
+});
+player.addEventListener("seeked",drawSeekPreview);
+function hideSeekPreview(){seekPreview.hidden=true;}
+seekInput.addEventListener("change",hideSeekPreview);
+seekInput.addEventListener("pointerup",hideSeekPreview);
+seekInput.addEventListener("blur",hideSeekPreview);
+seekInput.parentElement.addEventListener("pointerleave",hideSeekPreview);
 byId("offline-volume").addEventListener("input",event=>{player.volume=Number(event.target.value);player.muted=player.volume===0;});
 byId("offline-audio-boost").addEventListener("input",event=>{
   const value=Math.max(100,Math.min(250,Number(event.target.value)||100));
