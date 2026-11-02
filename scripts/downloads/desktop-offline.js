@@ -395,7 +395,7 @@ const introPattern=/\\b(intro|opening|recap|previously on)\\b/i;
 const creditsPattern=/\\b(credits|end credits|closing credits|outro)\\b/i;
 function readChapterCues(){
   const tracks=Array.from(player.textTracks||[]);
-  chapterTrack=tracks.find(track=>track.kind==="chapters"&&track.cues&&track.cues.length)||null;
+  chapterTrack=tracks.find(track=>track.kind==="chapters")||null;
   if(chapterTrack&&chapterTrack.mode==="disabled")chapterTrack.mode="hidden";
   chapterCues=chapterTrack?Array.from(chapterTrack.cues||[]).filter(cue=>Number.isFinite(cue.startTime)&&Number.isFinite(cue.endTime)&&cue.endTime>cue.startTime).sort((a,b)=>a.startTime-b.startTime):[];
   byId("offline-chapter-controls").hidden=chapterCues.length===0;
@@ -822,7 +822,7 @@ player.addEventListener("playing",()=>{
 
 player.addEventListener("loadedmetadata",refreshSubtitleTracks);
 player.addEventListener("loadedmetadata",readChapterCues);
-player.addEventListener("timeupdate",()=>{if(!chapterTrack)readChapterCues();else updateChapterControls();});
+player.addEventListener("timeupdate",()=>{if(!chapterTrack||!chapterCues.length)readChapterCues();else updateChapterControls();});
 player.textTracks?.addEventListener?.("addtrack",readChapterCues);
 player.textTracks?.addEventListener?.("change",readChapterCues);
 player.addEventListener("loadeddata",refreshAudioTracks);
