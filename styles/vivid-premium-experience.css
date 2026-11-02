@@ -147,3 +147,15 @@ html.vivid-ios-standalone body {
     scroll-behavior: auto;
   }
 }
+
+
+/* Touch response should feel immediate even where iOS does not expose
+   the native haptics API to installed web apps. */
+@media (hover: none) and (pointer: coarse) {
+  body.vivid-app-experience :where(button, a, [role="button"]) {
+    touch-action: manipulation;
+  }
+  body.vivid-app-experience :where(button, a, [role="button"]):active {
+    filter: brightness(1.12);
+  }
+}
