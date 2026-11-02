@@ -740,6 +740,7 @@ seekPreviewVideo.addEventListener("loadedmetadata",()=>{
   if(seekPreviewTarget!==null)updateSeekPreview(seekPreviewTarget);
 });
 seekPreviewVideo.addEventListener("seeked",drawSeekPreview);
+seekPreviewVideo.addEventListener("loadeddata",drawSeekPreview);
 seekInput.addEventListener("input",event=>{
   if(!Number.isFinite(player.duration))return;
   seekPreview.hidden=false;
