@@ -39,3 +39,42 @@ test("range inspection requests only a bounded prefix",async()=>{
  assert.equal(result.inspectedBytes,3);
  assert.equal(result.partial,true);
 });
+
+test("a server that ignores Range cannot make inspection read beyond its byte budget", async () => {
+  let cancelled = false;
+  const payload = new Uint8Array(1536).fill(7);
+  const body = new ReadableStream({
+    start(controller) {
+      controller.enqueue(payload.subarray(0, 512));
+      controller.enqueue(payload.subarray(512, 1024));
+      controller.enqueue(payload.subarray(1024));
+      controller.close();
+    },
+    cancel() { cancelled = true; }
+  });
+  const fakeFetch = async () => new Response(body, {
+    status: 200,
+    headers: { "content-length": String(payload.length) }
+  });
+  const result = await inspectMediaUrl("vivid-media://download/file", "large.mkv", {
+    fetchImpl: fakeFetch,
+    maxBytes: 1024
+  });
+  assert.equal(result.inspectedBytes, 1024);
+  assert.equal(result.fileSize, 1536);
+  assert.equal(result.partial, true);
+});
+
+test("a ranged response covering the complete small file is not labelled partial", async () => {
+  const fakeFetch = async () => new Response(new Uint8Array([1, 2, 3]), {
+    status: 206,
+    headers: { "content-length": "3", "content-range": "bytes 0-2/3" }
+  });
+  const result = await inspectMediaUrl("vivid-media://download/file", "tiny.mkv", {
+    fetchImpl: fakeFetch,
+    maxBytes: 1024
+  });
+  assert.equal(result.inspectedBytes, 3);
+  assert.equal(result.fileSize, 3);
+  assert.equal(result.partial, false);
+});
