@@ -136,9 +136,9 @@ test("Windows player runtime and stylesheet have cache-busting URLs", async () =
   const page = await readFile(new URL("../my-downloads.html", import.meta.url), "utf8");
   const script = await readFile(new URL("../scripts/my-downloads.js", import.meta.url), "utf8");
   const worker = await readFile(new URL("../service-worker.js", import.meta.url), "utf8");
-  assert.match(page, /my-downloads\.css\?v=advanced-mpv-fallback-v1/);
-  assert.match(script, /desktop-offline\.js\?advanced-mpv-fallback-v1/);
+  assert.match(page, /my-downloads\.css\?v=builtin-player-v1/);
+  assert.match(script, /desktop-offline\.js\?builtin-player-v1/);
   assert.match(worker, /vivid-cinema-shell-v267/);
-  assert.match(worker, /desktop-offline\.js\?advanced-mpv-fallback-v1/);
-  assert.match(worker, /my-downloads\.css\?v=advanced-mpv-fallback-v1/);
+  assert.match(worker, /desktop-offline\.js\?builtin-player-v1/);
+  assert.match(worker, /my-downloads\.css\?v=builtin-player-v1/);
 });
