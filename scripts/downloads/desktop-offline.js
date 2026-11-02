@@ -509,6 +509,8 @@ byId("offline-pip").addEventListener("click",async()=>{
     await player.requestPictureInPicture();
   }catch(error){setMessage(error?.message||"Picture in Picture could not be opened.");}
 });
+player.addEventListener("enterpictureinpicture",()=>{byId("offline-pip").textContent="Exit picture in picture";});
+player.addEventListener("leavepictureinpicture",()=>{byId("offline-pip").textContent="Picture in picture";});
 byId("offline-cinema-mode").addEventListener("click",()=>{
   const active=playerSection.classList.toggle("windowed-cinema");
   byId("offline-cinema-mode").setAttribute("aria-pressed",String(active));
@@ -823,7 +825,8 @@ byId("offline-player-close").addEventListener("click",async()=>{
     try{if(typeof exit==="function")await exit.call(document);}catch{}
   }
   player.pause();clearExternalSubtitle();player.removeAttribute("src");player.load();player.dataset.jobId="";player.dataset.mediaFilename="";diagnosticsRequest++;
-  player.controls=true;byId("offline-custom-controls").hidden=true;byId("offline-player-section").hidden=true;
+  player.controls=true;byId("offline-custom-controls").hidden=true;byId("offline-player-section").classList.remove("windowed-cinema");byId("offline-player-section").hidden=true;
+  byId("offline-cinema-mode").setAttribute("aria-pressed","false");byId("offline-cinema-mode").textContent="Windowed cinema";
   byId("offline-audio-track").parentElement.hidden=true;byId("offline-resume-prompt").hidden=true;
   byId("offline-next-episode").hidden=true;resumePosition=0;byId("offline-player-section").classList.remove("controls-hidden");
   syncFullscreenButton();
