@@ -430,3 +430,20 @@ html.vivid-performance-legacy .offline-library-tools,html.vivid-performance-lega
 .offline-seek-control{position:relative}
 #offline-seek-preview{position:absolute;left:50%;bottom:calc(100% + 10px);z-index:20;width:160px;height:90px;transform:translateX(-50%);border:1px solid rgba(220,228,246,.35);border-radius:8px;background:#050608;box-shadow:0 8px 28px rgba(0,0,0,.55);object-fit:contain;pointer-events:none}
 #offline-seek-preview[hidden]{display:none}
+
+
+/* Phase 3 — custom JavaScript subtitle renderer and language preferences. */
+.offline-subtitle-overlay{position:absolute;z-index:7;left:4%;right:4%;top:12%;bottom:12%;display:flex;align-items:flex-end;justify-content:center;pointer-events:none}
+.offline-subtitle-overlay:empty{display:none}
+.offline-rendered-subtitle{position:absolute;left:50%;bottom:0;transform:translateX(-50%);width:max-content;max-width:92%;line-height:1.28;text-align:center;white-space:pre-line;overflow-wrap:anywhere;font-weight:650;box-decoration-break:clone;-webkit-box-decoration-break:clone}
+.offline-rendered-subtitle[data-position="top"]{top:0;bottom:auto}
+.offline-rendered-subtitle[data-position="middle"]{top:50%;bottom:auto;transform:translate(-50%,-50%)}
+.offline-subtitle-font-control,.offline-subtitle-color-control,.offline-subtitle-position-control,.offline-audio-language-control,.offline-subtitle-language-control{display:flex;align-items:center;gap:6px;color:#aebbd4;font-size:11px}
+.offline-subtitle-font-control select,.offline-subtitle-color-control select,.offline-subtitle-position-control select,.offline-audio-language-control select,.offline-subtitle-language-control select{max-width:125px;min-height:34px;border:1px solid rgba(170,185,220,.22);border-radius:8px;background:#0b1020;color:#f4f6fc;padding:6px 8px;font:600 11px system-ui,sans-serif}
+.offline-subtitle-background-control{display:flex;align-items:center;gap:6px;color:#aebbd4;font-size:11px}
+.offline-subtitle-background-control input{width:76px;accent-color:#8d8aff}
+.offline-subtitle-background-control output{min-width:32px;font-variant-numeric:tabular-nums}
+.offline-subtitle-outline-control{display:flex;align-items:center;gap:6px;color:#aebbd4;font-size:11px}
+.offline-subtitle-outline-control input{accent-color:#8d8aff}
+.offline-player-section:fullscreen .offline-subtitle-overlay{z-index:7;top:12%;bottom:15%}
+@media(max-width:760px){.offline-subtitle-font-control,.offline-subtitle-color-control,.offline-subtitle-position-control,.offline-audio-language-control,.offline-subtitle-language-control{max-width:100%}.offline-subtitle-overlay{left:2%;right:2%}}
