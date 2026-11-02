@@ -12,8 +12,8 @@ Implemented player and library capabilities include:
 
 - Custom playback controls, high-resolution seeking, 10-second skip, keyboard shortcuts, playback speed, fullscreen and windowed cinema mode.
 - Picture-in-picture when supported by the active Chromium/Windows media session.
-- Frame-step controls. The current implementation uses `player.dataset.frameRate` when supplied and otherwise falls back to 30 fps; no general per-file frame-rate extraction is currently wired into that control.
-- A live seek preview captured from the current video frame. This is not a separately generated thumbnail timeline; dragging the seek control changes the media current time.
+- Frame-step controls use the nominal frame rate when it can be read from MP4 sample timing metadata or Matroska/WebM track timing metadata. The controls remain disabled when the inspected file does not expose a usable rate; there is no arbitrary 30 fps fallback.
+- An independent seek-preview video element seeks to the scrub target and paints that frame to the preview canvas. The main playback position is not changed until the seek is committed. This is a live decode preview, not a separately generated thumbnail timeline.
 - Audio boost and audio delay through the Web Audio API, subject to browser support and successful audio-graph creation.
 - Chapter navigation and intro/credits skipping only when chapter metadata is exposed by the media.
 - Saved playback positions and per-file playback preference profiles.
@@ -40,8 +40,8 @@ This remains Chromium playback, not an additional decoding engine: codec/profile
 1. **Native Chromium decoding is the only playback engine present.** The current player relies on the codecs and containers supported by the bundled Electron/Chromium build and the Windows environment. A file extension or container name does not establish that its contained video and audio codecs can be decoded.
 2. **There is no general-purpose advanced playback engine in this baseline.** The repository's current `main` tree contains no mpv runtime, mpv launcher, mpv IPC integration, mpv preparation script, corresponding-source bundle or mpv source manifest. The root package scripts do not prepare or package mpv.
 3. **Audio and embedded subtitle track access is conditional.** Track selection depends on APIs and tracks exposed by Chromium for the particular file and runtime. External subtitle parsing does not imply support for every embedded subtitle format, especially bitmap formats such as PGS and VobSub.
-4. **Frame stepping is approximate unless a frame rate is supplied.** The current UI falls back to 30 fps when `player.dataset.frameRate` is absent. It is not yet a general frame-accurate stepping implementation.
-5. **Seek preview is not a thumbnail system.** It captures a frame from the active video element while seeking rather than generating and displaying independent timeline thumbnails.
+4. **Frame stepping uses inspected nominal timing, not guaranteed frame indexing.** MP4 sample timing tables and Matroska/WebM DefaultDuration or Video FrameRate metadata can supply a nominal rate. If no usable rate is present, frame-step controls stay disabled rather than guessing 30 fps. Chromium's media seek and decode pipeline may still land on a nearby presentation frame, and variable-frame-rate media cannot be treated as exact constant-rate frame numbering.
+5. **Seek preview is independent but not a thumbnail system.** A muted secondary video element seeks to the scrub target and supplies the preview image; the main video is only seeked when the user commits the range change. Preview decoding is subject to the same codec support and local byte-range streaming constraints as playback; no thumbnails are generated or cached.
 6. **Local streaming is a critical playback path.** Both completed downloads and explicitly selected local files are streamed through the custom Electron media protocol. Selected files receive scoped opaque grants rather than renderer-visible filesystem paths. Seeking depends on correct byte-range responses from this protocol.
 7. **No universal compatibility or zero-dropped-frame guarantee is possible.** Results depend on codecs/profiles, resolution, frame rate, bitrate, storage, GPU/driver and system power/thermal limits. Unsupported, corrupted or unusually demanding media may still fail.
 
