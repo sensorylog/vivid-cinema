@@ -1,68 +1,53 @@
-# Vivid Cinema Windows offline player: audit and upgrade plan
+# Vivid Cinema Windows offline player: current-state audit
 
-Audit baseline: PR #423 head `48d15d884337e8fde3cfe1d72d7e80978d46dc40` (1 November 2026).
+Audit baseline: `main` at `1c9d1e134796b99bffc418a787c3fe6dd77e6531` (Phase 4 merged, 2 November 2026).
 
-## Existing implementation
+This document describes the implementation present in the repository at the audit baseline. It distinguishes implemented behaviour from proposed work. Earlier planning notes are not evidence that a feature or runtime is present.
 
-The Windows desktop application uses Electron 36.4.x and the browser's native `HTMLVideoElement` for offline playback. The download engine stores completed torrent files under the Vivid Cinema download directory and exposes them to the renderer through a token-gated `vivid-media://` protocol. The renderer owns the Vivid player UI.
+## Current implementation
 
-Existing user-facing features worth preserving:
-- custom Vivid playback controls, fullscreen, 10-second seek, volume and speed controls;
-- saved playback positions, resume/restart prompt and next-episode action;
-- native text-track selection, external SRT/VTT loading, subtitle size and subtitle offset;
-- per-download multi-file selection and local playback.
+The Windows desktop application uses Electron and Chromium's native `HTMLVideoElement` for local playback. The Electron main process owns the download engine and exposes completed local media through the token-gated `vivid-media://` protocol. The renderer owns the Vivid player interface.
 
-## Findings and limitations
+Implemented player and library capabilities include:
 
-1. **Container extension is not codec support.** The main-process protocol maps extensions to MIME types. A Matroska/AVI/MP4 extension says nothing definitive about the audio/video codecs, profiles, bit depth or level inside the file. Chromium's decoder support depends on the actual build and platform.
-2. **Chromium's built-in decoder is not a universal media engine.** Chromium documents a limited set of containers and codecs; proprietary codecs vary by build. Unsupported audio can produce video-without-sound, and unsupported video can fail entirely.
-3. **Audio-track UI is conditional.** The renderer depends on `HTMLMediaElement.audioTracks`; if Chromium does not expose it for a given source/build, the track picker is hidden.
-4. **Subtitle support is narrow.** External SRT is converted to WebVTT and external WebVTT is supported. Advanced embedded subtitle formats such as ASS/SSA, PGS and VobSub are not implemented by this HTML player.
-5. **Error diagnostics are generic.** The current error handler reports a broad unsupported-codec message. The MKV silent-audio heuristic uses `webkitAudioDecodedByteCount`, which is not a portable codec-inspection interface.
-6. **Local streaming is a critical playback path.** Seeking depends on correct HTTP-style byte-range responses from the custom Electron protocol. The original range parser was inline and did not reject malformed/multiple ranges consistently.
-7. **No universal zero-lag guarantee is possible.** Performance depends on codec/profile, resolution, frame rate, bitrate, storage speed, GPU/driver and thermal/power limits. The player should select hardware decoding when proven safe and fall back to software decoding or a clear compatibility message when necessary.
+- Custom playback controls, high-resolution seeking, 10-second skip, keyboard shortcuts, playback speed, fullscreen and windowed cinema mode.
+- Picture-in-picture when supported by the active Chromium/Windows media session.
+- Frame-step controls. The current implementation uses `player.dataset.frameRate` when supplied and otherwise falls back to 30 fps; no general per-file frame-rate extraction is currently wired into that control.
+- A live seek preview captured from the current video frame. This is not a separately generated thumbnail timeline; dragging the seek control changes the media current time.
+- Audio boost and audio delay through the Web Audio API, subject to browser support and successful audio-graph creation.
+- Chapter navigation and intro/credits skipping only when chapter metadata is exposed by the media.
+- Saved playback positions and per-file playback preference profiles.
+- External SRT, VTT, ASS and SSA parsing/rendering, subtitle appearance controls, timing offset and language preferences.
+- Embedded audio/text track selection when Chromium exposes the relevant track APIs for the file and build.
+- MP4/ISO-BMFF and Matroska/WebM metadata inspection, codec capability checks and local playback diagnostics.
+- Movies-only library filtering, library sorting, saved-storage totals and per-file/multi-file size display.
 
-## Research conclusions
+The automated tests cover media inspection, local protocol range handling, playback controls and state, subtitle parsing, preference persistence and library behaviour. Passing automated tests do not establish successful decoding of every real-world media file on physical Windows hardware.
 
-- Chromium's published media support lists MP4, Ogg, WebM, WAV, Matroska and HLS containers, with AV1/VP8/VP9 and platform/build-dependent proprietary codecs. See https://www.chromium.org/audio-video/.
-- MediaCapabilities `decodingInfo()` can report whether a specified codec/profile/resolution/bitrate configuration is supported, smooth and power-efficient. It is a preflight hint, not a decoder and not a substitute for actual file inspection. See https://developer.mozilla.org/en-US/docs/Web/API/MediaCapabilities/decodingInfo.
-- Windows Media Foundation has its own platform codec/container matrix and optional codec dependencies; relying on Windows alone will not guarantee all media formats. See https://learn.microsoft.com/windows/win32/medfound/supported-media-formats-in-media-foundation and https://learn.microsoft.com/windows/apps/develop/media-authoring-processing/supported-codecs.
-- mpv is a strong candidate for a second, advanced playback engine: it supports a broad set of formats, hardware-decoding APIs, buffering controls, track selection and a JSON IPC interface (including named pipes on Windows). See https://mpv.io/manual/stable/ and https://github.com/mpv-player/mpv.
-- mpv is GPLv2-or-later by default; an LGPL mode exists with feature restrictions. FFmpeg's build flags and included libraries affect redistribution obligations. Any bundled engine must be pinned, reproducibly built or provenance-verified, accompanied by required notices/source, and reviewed for codec patent obligations. See https://github.com/mpv-player/mpv#license, https://github.com/mpv-player/mpv/blob/master/Copyright and https://www.ffmpeg.org/legal.html.
+## Confirmed architecture and limitations
 
-## Recommended architecture
+1. **Native Chromium decoding is the only playback engine present.** The current player relies on the codecs and containers supported by the bundled Electron/Chromium build and the Windows environment. A file extension or container name does not establish that its contained video and audio codecs can be decoded.
+2. **There is no general-purpose advanced playback engine in this baseline.** The repository's current `main` tree contains no mpv runtime, mpv launcher, mpv IPC integration, mpv preparation script, corresponding-source bundle or mpv source manifest. The root package scripts do not prepare or package mpv.
+3. **Audio and embedded subtitle track access is conditional.** Track selection depends on APIs and tracks exposed by Chromium for the particular file and runtime. External subtitle parsing does not imply support for every embedded subtitle format, especially bitmap formats such as PGS and VobSub.
+4. **Frame stepping is approximate unless a frame rate is supplied.** The current UI falls back to 30 fps when `player.dataset.frameRate` is absent. It is not yet a general frame-accurate stepping implementation.
+5. **Seek preview is not a thumbnail system.** It captures a frame from the active video element while seeking rather than generating and displaying independent timeline thumbnails.
+6. **Local streaming is a critical playback path.** Seeking depends on correct byte-range responses from the custom Electron media protocol. The protocol implementation and its range tests are part of the current player foundation.
+7. **No universal compatibility or zero-dropped-frame guarantee is possible.** Results depend on codecs/profiles, resolution, frame rate, bitrate, storage, GPU/driver and system power/thermal limits. Unsupported, corrupted or unusually demanding media may still fail.
 
-1. Preserve the current native Chromium/Vivid player for formats that it demonstrably decodes well.
-2. Add a dedicated advanced-engine fallback for files the browser cannot decode, including unsupported audio-only cases. mpv is the leading candidate; do not claim universal support until a pinned Windows build is verified and end-to-end tested.
-3. Keep the engine process in Electron's main process. Never expose a generic shell/command execution bridge to the renderer. Use a narrowly scoped IPC API, unique per-session IPC endpoint, argument arrays (never shell interpolation), process lifecycle handling and explicit allowlisted commands. mpv's IPC is intentionally unauthenticated and must remain local/private.
-4. Inspect actual file streams before playback where possible: container, video/audio codec, profile, bit depth, resolution, frame rate, bitrate, languages, chapters and subtitle formats. Use this to choose the engine and explain compatibility.
-5. Add playback observability: startup time, buffering/waiting, decode errors, dropped frames where available, selected tracks and recovery outcome. Keep diagnostics local and privacy-preserving.
-6. Test with a codec/container matrix on real Windows hardware, including 1080p/4K H.264, HEVC, AV1, VP9, MPEG-2, VC-1, VP8; AAC, AC-3/E-AC-3, DTS, TrueHD, FLAC, Opus; MKV, MP4, MOV, AVI, WebM, TS/M2TS, MPEG, WMV, FLV, 3GP; SRT, WebVTT, ASS/SSA, PGS and VobSub. The test suite must record the exact tested engine/build/GPU/driver.
-7. Do not promise every file or zero dropped frames: encrypted/DRM content, corrupted files, unsupported hardware codecs and extreme bitrates can still fail. Give users a clear reason and recovery option.
+## mpv research status — proposal only
 
-## First reliability tranche
+mpv remains a possible candidate for a future advanced playback engine because it offers broad format support, hardware-decoding options, track selection and a local IPC interface.
 
-This PR hardens local byte-range delivery and verifies GET/HEAD, suffix/open-ended ranges, invalid/multiple ranges and common MIME mappings. It also keeps the player architecture unchanged while the advanced-engine packaging and licensing decision is made.
+**It is not implemented or packaged by the current `main` branch.** References in earlier revisions of this document to a pinned mpv 0.41.0 runtime, verified upstream archive, Windows named-pipe integration, mpv licensing files, corresponding-source ZIP, source manifest, or release-time compliance gates described a proposed or historical implementation state that is not present in this audit baseline. Those statements must not be used as evidence that the current application contains mpv or that its distribution is blocked by an mpv-specific gate.
 
+Any future decision to bundle mpv must be treated as a separate engineering and legal-compliance task. It must establish the exact binary provenance, build inputs, applicable license mode, required notices and corresponding source for the actual components being distributed, and must be validated in the Windows packaging/release workflow before being described as implemented.
 
-## Advanced Player implementation tranche
+## Remaining verification
 
-The Windows desktop branch now has an opt-in mpv fallback path:
+- Run representative local media files on a physical Windows machine and record the exact Windows version, Electron build, GPU/driver, file container and audio/video codecs.
+- Verify playback, seeking, audio output, track selection, external subtitles and error recovery using those files.
+- Do not infer broad codec compatibility from extension checks, metadata inspection or CI packaging success alone.
 
-- The signed upstream mpv 0.41.0 stable Windows x64 release archive is downloaded during desktop preparation and verified against its SHA-256 digest before extraction. This avoids shipping an untested development build. The official release binary omits some optional features that are not required for file playback. The binary is not checked into the Git repository.
-- Electron main process owns process creation and shutdown. The renderer receives only `openAdvancedPlayer(jobId, fileIndex)` and `stopAdvancedPlayer()`; it cannot pass arbitrary paths, commands, or shell arguments.
-- The executable is launched with an argument array and `shell: false`, with mpv user configuration disabled, the upstream on-screen controller enabled, and `--hwdec=auto-safe` so mpv can use a safe hardware decoder when available.
-- A per-launch random Windows named pipe is used only by the main process. The renderer cannot access it. mpv's time-position property is observed to preserve the existing Vivid resume position while the advanced engine is playing.
-- The existing HTML player remains the default. Users explicitly open the separate native mpv window from the offline player when they need the advanced engine.
+## Scope of this audit-cleanup series
 
-### Boundaries and release blockers
-
-- The current pinned runtime is Windows x64. Windows ARM64, macOS, Android and browser playback are not enabled by this tranche.
-- The advanced window uses mpv's own OSD/keyboard controls; Vivid's HTML player controls do not overlay the native mpv window.
-- The pinned mpv binary's provenance is recorded in `licenses/mpv/NOTICE.md`. The exact FFmpeg and other component revisions must be captured in `SOURCE-MANIFEST.json` after inspecting the build inputs. The complete corresponding-source bundle for every GPL-covered component and required notices still needs to be assembled and verified before a public release containing this runtime. The notice explicitly records this as a release compliance gate.
-- CI can prove that the pinned archive downloads, its checksum matches, extraction succeeds, mpv.exe starts, the launcher contract is tested, and the Windows preview package builds. The preview package deliberately excludes the mpv binary; a public package containing it remains blocked by the corresponding-source gate. CI cannot prove that every codec works or that playback is smooth on all hardware. Real-device playback testing against the documented codec matrix remains required.
-
-
-### Cache and distribution safety
-
-The offline-player stylesheet and script now have new versioned URLs, and the service-worker shell cache is bumped to v265 so older cached renderer code cannot hide the new control. Windows CI downloads and checksum-verifies the stable mpv archive, then removes the executable before producing pull-request and non-release preview artifacts. Local `desktop:start` development runs can use the pinned runtime. Redistributable installer commands (`desktop:dist` and `desktop:publish`) and public releases fail closed until both `licenses/mpv/CORRESPONDING-SOURCE.zip` and `licenses/mpv/SOURCE-MANIFEST.json` are present and verified; the release workflow publishes both beside the installer.
+This cleanup series is limited to the six findings explicitly listed in the accompanying audit plan. It is not a general redesign and must not introduce unrelated features, deployment changes or torrent-feature work.
