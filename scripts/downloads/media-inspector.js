@@ -167,7 +167,8 @@ function parseMatroska(bytes) {
     const type = get(0x83), codec = get(0x86), language = get(0x22b59c) || get(0x22b59d);
     const kindValue = type ? ebmlUint(bytes, type) : 0;
     const defaultDuration = get(0x23e383);
-    const videoFrameRate = get(0x2383e3);
+    const video = get(0xe0);
+    const videoFrameRate = video ? ebmlElements(bytes, video.data, video.end).find(element => element.id === 0x2383e3) : null;
     let frameRate = null;
     if (kindValue === 1) {
       if (defaultDuration) {
