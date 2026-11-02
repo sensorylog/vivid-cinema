@@ -13,7 +13,7 @@ test("premium PWA shell keeps five clear mobile destinations", () => {
   assert.match(mobileNav, /navLink\("library\.html".*?"Library"/s);
   assert.match(mobileNav, /navLink\("search\.html".*?"Search"/s);
   assert.doesNotMatch(mobileNav, /navLink\("live\.html"|navLink\("news\.html"|navLink\("my-downloads\.html"/);
-  assert.match(mobileNav, /\.join\("\"\"\)/);
+  assert.ok(mobileNav.includes(`.join("")`));
 });
 
 test("premium PWA experience styles are loaded globally and respect reduced motion", () => {
