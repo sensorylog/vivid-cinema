@@ -24,6 +24,10 @@ Implemented player and library capabilities include:
 
 The automated tests cover media inspection, local protocol range handling, playback controls and state, subtitle parsing, preference persistence and library behaviour. Passing automated tests do not establish successful decoding of every real-world media file on physical Windows hardware.
 
+## Permission handling
+
+The desktop session grants only the existing fullscreen, media and notifications permission types, and only when the requesting origin is an exact trusted application origin (the configured Vivid hosted origin or the active local desktop origin) that also matches the active WebContents URL. Both Electron permission-request and permission-check handlers use the same fail-closed policy. Malformed, opaque, credential-bearing, lookalike and untrusted origins are denied. This origin restriction does not change the existing set of permission types.
+
 ## Confirmed architecture and limitations
 
 1. **Native Chromium decoding is the only playback engine present.** The current player relies on the codecs and containers supported by the bundled Electron/Chromium build and the Windows environment. A file extension or container name does not establish that its contained video and audio codecs can be decoded.
