@@ -10,6 +10,7 @@ const { MPV_SOURCE_COMMIT } = require("../desktop/prepare-mpv.cjs");
 const { verifyMpvSources } = require("../desktop/verify-mpv-sources.cjs");
 const MANIFEST_SCRIPT = fs.readFileSync(path.join(__dirname, "../desktop/create-mpv-source-manifest.cjs"), "utf8");
 const BUILD_SCRIPT = fs.readFileSync(path.join(__dirname, "../desktop/build-mpv-source.sh"), "utf8");
+const BUILD_WORKFLOW = fs.readFileSync(path.join(__dirname, "../.github/workflows/mpv-source-build.yml"), "utf8");
 
 function fixture(t) {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "vivid-mpv-source-gate-"));
@@ -79,9 +80,18 @@ test("source gate rejects licence paths that escape the bundled notice directory
   assert.throws(() => verifyMpvSources({ projectRoot: paths.root, skip: false }), /bundled licence file/);
 });
 
-test("mpv candidate smoke test uses a terminating version query instead of opening an idle player", () => {
-  assert.match(BUILD_SCRIPT, /wine \.\/artifact\/mpv\.com --version --no-config/);
-  assert.doesNotMatch(BUILD_SCRIPT, /wine \.\/artifact\/mpv\.com -v --no-config/);
+test("mpv candidate build leaves Wine smoke testing to the workflow after packaging", () => {
+  assert.doesNotMatch(BUILD_SCRIPT, /\\bwine\\b/i);
+  const buildStep = BUILD_WORKFLOW.indexOf("Build mpv and prepare source-compliance candidate");
+  const uploadStep = BUILD_WORKFLOW.indexOf("Upload candidate runtime and corresponding-source snapshot");
+  const smokeStep = BUILD_WORKFLOW.indexOf("Smoke-test the packaged Windows player");
+  assert.ok(buildStep >= 0 && uploadStep > buildStep && smokeStep > uploadStep);
+});
+
+test("mpv candidate Wine smoke test is bounded and cannot prevent artifact publication", () => {
+  assert.match(BUILD_WORKFLOW, /timeout --signal=TERM --kill-after=10s 60s wine/);
+  assert.match(BUILD_WORKFLOW, /timeout-minutes: 2\\s+continue-on-error: true/);
+  assert.ok(BUILD_WORKFLOW.indexOf("Upload candidate runtime") < BUILD_WORKFLOW.indexOf("Smoke-test the packaged Windows player"));
 });
 
 test("candidate manifest parser recognizes ordinary Meson wrap source_url fields", () => {
