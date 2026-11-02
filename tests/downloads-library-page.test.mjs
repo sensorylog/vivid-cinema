@@ -113,7 +113,9 @@ test("offline player fullscreen fills the viewport and floats controls over the 
 test("MKV playback selects a default audio track and reports decoder failures", async () => {
   const desktop = await readFile(new URL("../scripts/downloads/desktop-offline.js", import.meta.url), "utf8");
   assert.match(desktop, /function audioTrackLabel\(track,index\)/);
-  assert.match(desktop, /if\(selectedIndex<0\)\{selectedIndex=0;tracks\[0\]\.enabled=true;\}/);
+  assert.match(desktop, /choosePreferredTrack\(tracks,currentPlaybackPreferences\.audioTrackLanguage\|\|currentPlaybackPreferences\.audioLanguage\)/);
+  assert.match(desktop, /if\(selectedIndex<0\)selectedIndex=0;/);
+  assert.match(desktop, /tracks\[index\]\.enabled=index===selectedIndex/);
   assert.match(desktop, /function describePlaybackError\(\)/);
   assert.match(desktop, /code===3/);
   assert.match(desktop, /code===4/);

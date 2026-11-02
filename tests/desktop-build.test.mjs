@@ -276,16 +276,18 @@ test("Vivid Ultra Player keeps Chromium playback and adds guarded native media c
   const player = fs.readFileSync(path.join(root, "scripts", "downloads", "desktop-offline.js"), "utf8");
   const page = fs.readFileSync(path.join(root, "my-downloads.html"), "utf8");
   const styles = fs.readFileSync(path.join(root, "styles", "my-downloads.css"), "utf8");
+  const subtitleEngine = fs.readFileSync(path.join(root, "scripts", "downloads", "subtitle-engine.js"), "utf8");
   assert.match(page, /<video id="offline-player" controls playsinline preload="metadata"><\/video>/);
   assert.match(page, /offline-skip-back/);
   assert.match(page, /offline-skip-forward/);
   assert.match(page, /offline-subtitle-file/);
-  assert.match(player, /parseSrtToVtt/);
-  assert.match(player, /WEBVTT/);
-  assert.match(player, /URL\.revokeObjectURL/);
+  assert.match(player, /parseSubtitleFile/);
+  assert.match(player, /renderSubtitleAtTime/);
+  assert.match(subtitleEngine, /WEBVTT/);
   assert.match(player, /refreshAudioTracks/);
   assert.match(player, /function audioTrackLabel\(track,index\)/);
-  assert.match(player, /tracks\[0\]\.enabled=true/);
+  assert.match(player, /if\(selectedIndex<0\)selectedIndex=0/);
+  assert.match(player, /tracks\[index\]\.enabled=index===selectedIndex/);
   assert.match(player, /player\.addEventListener\("canplay",refreshAudioTracks\)/);
   assert.match(player, /if\(!select\|\|!tracks/);
   assert.match(player, /function describePlaybackError\(\)/);
@@ -325,7 +327,7 @@ test("Ultra Player subtitle sync applies offsets from original cue timings", () 
   assert.match(player, /function applySubtitleOffset\(\)/);
   assert.match(player, /cue\.startTime=Math\.max\(0,base\.start\+offset\)/);
   assert.match(player, /cue\.endTime=Math\.max\(cue\.startTime\+0\.001,base\.end\+offset\)/);
-  assert.match(player, /activeSubtitleTrack!==track\.track/);
+  assert.match(player, /renderExternalSubtitle\(\)/);
 });
 
 
@@ -335,7 +337,7 @@ test("Ultra Player exposes embedded and external subtitle track selection", () =
   assert.match(page, /offline-subtitle-track/);
   assert.match(player, /function refreshSubtitleTracks\(\)/);
   assert.match(player, /player\.textTracks/);
-  assert.match(player, /tracks\[index\]\.mode=index===selected\?"showing":"disabled"/);
+  assert.match(player, /tracks\[index\]\.mode=selected>=0&&index===selected\?"showing":"disabled"/);
 });
 
 
@@ -425,15 +427,17 @@ test("Windows desktop release uses the built-in player without an mpv build or s
   const preload = fs.readFileSync(path.join(root, "desktop", "preload.cjs"), "utf8");
   const page = fs.readFileSync(path.join(root, "my-downloads.html"), "utf8");
   const renderer = fs.readFileSync(path.join(root, "scripts", "downloads", "desktop-offline.js"), "utf8");
+  const subtitleEngine = fs.readFileSync(path.join(root, "scripts", "downloads", "subtitle-engine.js"), "utf8");
   const workflow = fs.readFileSync(path.join(root, ".github", "workflows", "windows-desktop.yml"), "utf8");
   assert.doesNotMatch(main, /AdvancedPlayer|vivid-advanced-player/);
   assert.doesNotMatch(preload, /openAdvancedPlayer|getAdvancedPlayerTracks|selectAdvancedPlayerTrack/);
   assert.doesNotMatch(page, /offline-advanced-player|advanced-track-panel/);
   assert.doesNotMatch(renderer, /launchAdvancedPlayer|openAdvancedPlayer|mpv/);
   assert.doesNotMatch(workflow, /mpv|CORRESPONDING-SOURCE|SOURCE-MANIFEST|VIVID_SKIP_MPV/);
-  assert.match(renderer, /parseAssToVtt/);
-  assert.match(renderer, /assTimestampToVtt/);
-  assert.match(renderer, /"ass","ssa"/);
+  assert.match(renderer, /parseSubtitleFile/);
+  assert.match(renderer, /renderSubtitleAtTime/);
+  assert.match(subtitleEngine, /ext === "ass" \|\| ext === "ssa"/);
+  assert.match(main, /appendSwitch\("enable-blink-features", "AudioVideoTracks"\)/);
   assert.equal(pkg.build.extraResources.length, 0);
   assert.ok(!pkg.scripts["predesktop:dist"]);
   assert.ok(!pkg.scripts["predesktop:publish"]);

@@ -1,6 +1,8 @@
 import { tmdbApi } from "../tmdb.js";
 import { describeLoadedMedia, probePlaybackCapabilities } from "./media-capabilities.js";
 import { inspectMediaUrl } from "./media-inspector.js";
+import { choosePreferredTrack, clearSubtitleOverlay, parseSubtitleFile, renderSubtitleAtTime } from "./subtitle-engine.js";
+import { getPlaybackPreferences, playbackProfileKey, savePlaybackPreferences } from "./playback-preferences.js";
 
 if (window.vividDownloads?.available) {
 document.body.classList.add("vivid-desktop-offline-library");
@@ -20,6 +22,10 @@ let jobs = [];
 let searchResults = [];
 let currentSeasonEpisodes = [];
 let seasonRequestId = 0;
+let activePreferenceKey = "default";
+let currentPlaybackPreferences = {};
+let activeExternalSubtitleCues = [];
+let externalSubtitleLabel = "";
 
 function setMessage(message){ byId("offline-message").textContent = message; }
 function statusText(job){
@@ -383,10 +389,11 @@ function clearExternalSubtitle(){
   const track=byId("offline-external-subtitle");
   if(track)track.remove();
   if(player.dataset.subtitleUrl){URL.revokeObjectURL(player.dataset.subtitleUrl);delete player.dataset.subtitleUrl;}
+  activeExternalSubtitleCues=[];
+  externalSubtitleLabel="";
+  clearSubtitleOverlay(byId("offline-subtitle-overlay"));
   subtitleCueBaseTimes=[];
   activeSubtitleTrack=null;
-  byId("offline-subtitle-offset").value="0";
-  byId("offline-subtitle-offset-value").textContent="0.0s";
   refreshSubtitleTracks();
 }
 let chapterTrack=null;
@@ -447,113 +454,112 @@ byId("offline-skip-credits").addEventListener("click",()=>{
   const credits=chapterCues.find(cue=>creditsPattern.test(String(cue.text||""))&&player.currentTime>=cue.startTime&&player.currentTime<cue.endTime);
   if(credits)player.currentTime=Math.min(Number.isFinite(player.duration)?player.duration:credits.endTime,Math.max(credits.endTime,credits.startTime));
 });
+function loadExternalSubtitle(file){
+  if(!file)return;
+  const extension=(file.name.split(".").pop()||"").toLowerCase();
+  try{
+    const reader=new FileReader();
+    reader.onerror=()=>setMessage("Could not read that subtitle file.");
+    reader.onload=()=>{
+      try{
+        const cues=parseSubtitleFile(String(reader.result||""),extension);
+        clearExternalSubtitle();
+        activeExternalSubtitleCues=cues;
+        externalSubtitleLabel=file.name;
+        refreshSubtitleTracks();
+        byId("offline-subtitle-track").value="-2";
+        renderExternalSubtitle();
+        setMessage("Loaded "+cues.length+" subtitle cues from "+file.name+".");
+        saveCurrentPlaybackPreferences({subtitleExternalLabel:file.name});
+      }catch(error){setMessage(error?.message||"Could not load this subtitle.");}
+    };
+    reader.readAsText(file);
+  }catch(error){setMessage(error?.message||"Could not read that subtitle file.");}
+}
+function subtitleRenderPreferences(){
+  return {
+    size:byId("offline-subtitle-size").value,
+    font:byId("offline-subtitle-font").value,
+    color:byId("offline-subtitle-color").value,
+    outline:byId("offline-subtitle-outline").checked,
+    position:byId("offline-subtitle-position").value,
+    background:Number(byId("offline-subtitle-background").value)/100
+  };
+}
+function renderExternalSubtitle(){
+  const offset=Number(byId("offline-subtitle-offset").value)||0;
+  renderSubtitleAtTime(byId("offline-subtitle-overlay"),activeExternalSubtitleCues,player.currentTime-offset,subtitleRenderPreferences());
+}
+function saveCurrentPlaybackPreferences(patch){
+  currentPlaybackPreferences={...currentPlaybackPreferences,...patch};
+  savePlaybackPreferences(activePreferenceKey,patch);
+}
+function applyPlaybackPreferences(){
+  const prefs=getPlaybackPreferences(activePreferenceKey);
+  currentPlaybackPreferences=prefs;
+  const values={
+    "offline-audio-language":prefs.audioLanguage||"",
+    "offline-subtitle-language":prefs.subtitleLanguage||"",
+    "offline-subtitle-size":prefs.subtitleSize||"auto",
+    "offline-subtitle-font":prefs.font||"auto",
+    "offline-subtitle-color":prefs.color||"auto",
+    "offline-subtitle-position":prefs.position||"auto",
+    "offline-subtitle-background":String(Math.round((Number(prefs.background??0.25))*100)),
+    "offline-subtitle-offset":String(Number(prefs.subtitleOffset)||0)
+  };
+  for(const [id,value] of Object.entries(values))byId(id).value=value;
+  byId("offline-subtitle-outline").checked=prefs.outline!==false;
+  byId("offline-player-section").dataset.subtitleSize=values["offline-subtitle-size"];
+  byId("offline-subtitle-background-value").textContent=values["offline-subtitle-background"]+"%";
+  byId("offline-subtitle-offset-value").textContent=(Number(values["offline-subtitle-offset"])>0?"+":"")+Number(values["offline-subtitle-offset"]).toFixed(1)+"s";
+}
 function refreshSubtitleTracks(){
   const select=byId("offline-subtitle-track");
   if(!select)return;
   const tracks=player.textTracks;
   select.innerHTML="";
   const off=document.createElement("option");off.value="-1";off.textContent="Off";select.appendChild(off);
+  if(activeExternalSubtitleCues.length){
+    const external=document.createElement("option");external.value="-2";external.textContent=externalSubtitleLabel||"External subtitles";select.appendChild(external);
+  }
   let selected="-1";
+  const preferred=String(currentPlaybackPreferences.subtitleLanguage||"");
+  const subtitleOff=currentPlaybackPreferences.subtitleOff===true||preferred==="off";
+  const eligibleTracks=Array.from(tracks||[]).filter(track=>track.kind!=="chapters");
+  const preferredIndex=choosePreferredTrack(eligibleTracks,preferred);
+  const selectable=[];
   for(let index=0;index<tracks.length;index++){
-    const track=tracks[index],option=document.createElement("option");
+    const track=tracks[index];
+    if(track.kind==="chapters")continue;
+    selectable.push({track,index});
+    const option=document.createElement("option");
     option.value=String(index);
     option.textContent=track.label||track.language||("Subtitle "+(index+1));
-    if(track.mode==="showing")selected=option.value;
     select.appendChild(option);
+    if(track.mode==="showing")selected=option.value;
+  }
+  if(activeExternalSubtitleCues.length){selected="-2";for(const item of selectable)item.track.mode="disabled";}
+  else if(subtitleOff){selected="-1";for(const item of selectable)item.track.mode="disabled";}
+  else if(preferredIndex>=0){
+    const preferredTrack=selectable[preferredIndex];
+    if(preferredTrack){selected=String(preferredTrack.index);for(const item of selectable)item.track.mode=item===preferredTrack?"showing":"disabled";}
   }
   select.value=selected;
-  select.parentElement.hidden=tracks.length===0;
+  select.parentElement.hidden=selectable.length===0&&!activeExternalSubtitleCues.length;
 }
 function applySubtitleOffset(){
   const offset=Number(byId("offline-subtitle-offset").value)||0;
   byId("offline-subtitle-offset-value").textContent=(offset>0?"+":"")+offset.toFixed(1)+"s";
-  if(!activeSubtitleTrack||!subtitleCueBaseTimes.length)return;
-  const cues=activeSubtitleTrack.cues;
-  if(!cues)return;
-  subtitleCueBaseTimes.forEach((base,index)=>{
-    const cue=cues[index];if(!cue)return;
-    cue.startTime=Math.max(0,base.start+offset);
-    cue.endTime=Math.max(cue.startTime+0.001,base.end+offset);
-  });
-}
-function parseSrtToVtt(source){
-  const normalized=source.replace(/^\uFEFF/,"").replace(/\r\n?/g,"\n");
-  const body=normalized.replace(/(\d{2}:\d{2}:\d{2}),(\d{3})/g,"$1.$2");
-  return "WEBVTT\n\n"+body.replace(/^\s*\d+\s*\n/gm,"");
-}
-function assTimestampToVtt(value){
-  const match=/^(\d+):(\d{2}):(\d{2})[.](\d{1,2})$/.exec(String(value||"").trim());
-  if(!match)return null;
-  const hours=Number(match[1]),minutes=Number(match[2]),seconds=Number(match[3]),centiseconds=Number(match[4].padEnd(2,"0"));
-  if(minutes>59||seconds>59)return null;
-  return String(hours).padStart(2,"0")+":"+match[2]+":"+match[3]+"."+String(centiseconds*10).padStart(3,"0");
-}
-function parseAssToVtt(source){
-  const lines=source.replace(/^\uFEFF/,"").replace(/\r\n?/g,"\n").split("\n");
-  let inEvents=false,format=[],cues=[];
-  for(const line of lines){
-    const trimmed=line.trim();
-    if(/^\[Events\]$/i.test(trimmed)){inEvents=true;continue;}
-    if(/^\[[^\]]+\]$/.test(trimmed)){inEvents=false;continue;}
-    if(!inEvents)continue;
-    const formatMatch=/^Format:\s*(.+)$/i.exec(trimmed);
-    if(formatMatch){format=formatMatch[1].split(",").map(field=>field.trim().toLowerCase());continue;}
-    if(!/^Dialogue:\s*/i.test(trimmed)||!format.length)continue;
-    const values=trimmed.replace(/^Dialogue:\s*/i,"").split(",");
-    if(values.length<format.length)continue;
-    const textIndex=format.indexOf("text"),startIndex=format.indexOf("start"),endIndex=format.indexOf("end");
-    if(textIndex<0||startIndex<0||endIndex<0)continue;
-    const fields=values.slice(0,format.length-1);
-    fields.push(values.slice(format.length-1).join(","));
-    const start=assTimestampToVtt(fields[startIndex]),end=assTimestampToVtt(fields[endIndex]);
-    if(!start||!end)continue;
-    const text=String(fields[textIndex]||"")
-      .replace(/\{[^}]*\}/g,"")
-      .replace(/\\[Nn]/g,"\n")
-      .replace(/\\h/g," ")
-      .replace(/\r/g,"")
-      .trim();
-    if(!text)continue;
-    cues.push(start+" --> "+end+"\n"+text);
+  if(activeSubtitleTrack&&subtitleCueBaseTimes.length){
+    const cues=activeSubtitleTrack.cues;
+    if(cues)subtitleCueBaseTimes.forEach((base,index)=>{
+      const cue=cues[index];if(!cue)return;
+      cue.startTime=Math.max(0,base.start+offset);
+      cue.endTime=Math.max(cue.startTime+0.001,base.end+offset);
+    });
   }
-  if(!cues.length)throw new Error("No readable subtitle cues were found in this ASS/SSA file.");
-  return "WEBVTT\n\n"+cues.join("\n\n")+"\n";
-}
-function loadExternalSubtitle(file){
-  if(!file)return;
-  const extension=(file.name.split(".").pop()||"").toLowerCase();
-  if(!["srt","vtt","ass","ssa"].includes(extension)){setMessage("Choose an SRT, VTT, ASS or SSA subtitle file.");return;}
-  const reader=new FileReader();
-  reader.onerror=()=>setMessage("Could not read that subtitle file.");
-  reader.onload=()=>{
-    try{
-      const source=String(reader.result||"");
-      const vtt=extension==="srt"?parseSrtToVtt(source):(["ass","ssa"].includes(extension)?parseAssToVtt(source):source.replace(/^\uFEFF/,""));
-      if(!/^WEBVTT(?:\s|$)/.test(vtt.trimStart()))throw new Error("Invalid subtitle file. Check that it is a valid SRT, VTT, ASS or SSA file.");
-      const blob=new Blob([vtt],{type:"text/vtt"});
-      clearExternalSubtitle();
-      const track=document.createElement("track");
-      track.id="offline-external-subtitle";
-      track.kind="subtitles";
-      track.label=file.name;
-      track.srclang="und";
-      track.src=URL.createObjectURL(blob);
-      player.dataset.subtitleUrl=track.src;
-      track.default=true;
-      track.addEventListener("load",()=>{
-        if(activeSubtitleTrack!==track.track)return;
-        track.track.mode="showing";
-        subtitleCueBaseTimes=Array.from(track.track.cues||[]).map(cue=>({start:cue.startTime,end:cue.endTime}));
-        applySubtitleOffset();
-      },{once:true});
-      player.appendChild(track);
-      activeSubtitleTrack=track.track;
-      try{track.track.mode="showing";}catch{}
-      refreshSubtitleTracks();
-      setMessage("Subtitle loaded: "+file.name);
-    }catch(error){setMessage(error?.message||"Could not load this subtitle.");}
-  };
-  reader.readAsText(file);
+  renderExternalSubtitle();
+  saveCurrentPlaybackPreferences({subtitleOffset:offset});
 }
 function audioTrackLabel(track,index){
   const parts=[];
@@ -573,11 +579,10 @@ function refreshAudioTracks(){
   if(!tracks.length){select.parentElement.hidden=true;return;}
   // Some Matroska files expose audio tracks without marking a default track.
   // Explicitly enable the first track so a playable video is not silently muted.
-  let selectedIndex=-1;
-  for(let index=0;index<tracks.length;index++){
-    if(tracks[index].enabled){selectedIndex=index;break;}
-  }
-  if(selectedIndex<0){selectedIndex=0;tracks[0].enabled=true;}
+  let selectedIndex=choosePreferredTrack(tracks,currentPlaybackPreferences.audioTrackLanguage||currentPlaybackPreferences.audioLanguage);
+  if(selectedIndex<0)for(let index=0;index<tracks.length;index++)if(tracks[index].enabled){selectedIndex=index;break;}
+  if(selectedIndex<0)selectedIndex=0;
+  for(let index=0;index<tracks.length;index++)tracks[index].enabled=index===selectedIndex;
   for(let index=0;index<tracks.length;index++){
     const track=tracks[index],option=document.createElement("option");
     option.value=String(index);
@@ -623,18 +628,40 @@ byId("offline-subtitle-size").addEventListener("change",event=>{
 byId("offline-subtitle-offset").addEventListener("input",applySubtitleOffset);
 byId("offline-subtitle-track").addEventListener("change",event=>{
   const selected=Number(event.target.value),tracks=player.textTracks;
-  for(let index=0;index<tracks.length;index++)tracks[index].mode=index===selected?"showing":"disabled";
-  if(selected<0){subtitleCueBaseTimes=[];activeSubtitleTrack=null;}
-  else{
+  for(let index=0;index<tracks.length;index++)tracks[index].mode=selected>=0&&index===selected?"showing":"disabled";
+  if(selected!==-2){activeExternalSubtitleCues=[];externalSubtitleLabel="";clearSubtitleOverlay(byId("offline-subtitle-overlay"));}
+  if(selected===-1){subtitleCueBaseTimes=[];activeSubtitleTrack=null;}
+  else if(selected>=0){
     activeSubtitleTrack=tracks[selected];
     subtitleCueBaseTimes=Array.from(activeSubtitleTrack.cues||[]).map(cue=>({start:cue.startTime,end:cue.endTime}));
     applySubtitleOffset();
-  }
+    saveCurrentPlaybackPreferences({subtitleTrackLanguage:activeSubtitleTrack.language||"",subtitleLanguage:activeSubtitleTrack.language||""});
+  }else if(selected===-2){activeSubtitleTrack=null;subtitleCueBaseTimes=[];renderExternalSubtitle();}
+  saveCurrentPlaybackPreferences({subtitleOff:selected===-1});
 });
+byId("offline-audio-language").addEventListener("change",event=>{
+  saveCurrentPlaybackPreferences({audioLanguage:event.target.value,audioTrackLanguage:""});
+  refreshAudioTracks();
+});
+byId("offline-subtitle-language").addEventListener("change",event=>{
+  saveCurrentPlaybackPreferences({subtitleLanguage:event.target.value,subtitleOff:event.target.value==="off"});
+  refreshSubtitleTracks();
+  if(event.target.value==="off"){byId("offline-subtitle-track").value="-1";byId("offline-subtitle-track").dispatchEvent(new Event("change"));}
+});
+for(const id of ["offline-subtitle-size","offline-subtitle-font","offline-subtitle-color","offline-subtitle-position","offline-subtitle-outline","offline-subtitle-background"]){
+  byId(id).addEventListener("input",()=>{
+    const prefs=subtitleRenderPreferences();
+    byId("offline-player-section").dataset.subtitleSize=prefs.size;
+    byId("offline-subtitle-background-value").textContent=Math.round(prefs.background*100)+"%";
+    saveCurrentPlaybackPreferences({subtitleSize:prefs.size,font:prefs.font,color:prefs.color,position:prefs.position,outline:prefs.outline,background:prefs.background});
+    renderExternalSubtitle();
+  });
+}
 byId("offline-audio-track").addEventListener("change",event=>{
   const tracks=player.audioTracks,index=Number(event.target.value);
   if(!tracks||!Number.isInteger(index)||!tracks[index])return;
   for(let i=0;i<tracks.length;i++)tracks[i].enabled=i===index;
+  saveCurrentPlaybackPreferences({audioTrackLanguage:tracks[index].language||"",audioLanguage:tracks[index].language||""});
   refreshAudioTracks();
   setMessage("Selected "+audioTrackLabel(tracks[index],index)+".");
 });
@@ -844,6 +871,8 @@ player.addEventListener("playing",()=>{
 });
 
 player.addEventListener("loadedmetadata",refreshSubtitleTracks);
+player.addEventListener("timeupdate",renderExternalSubtitle);
+player.addEventListener("seeked",renderExternalSubtitle);
 player.addEventListener("loadedmetadata",readChapterCues);
 player.addEventListener("timeupdate",()=>{if(!chapterTrack||!chapterCues.length)readChapterCues();else updateChapterControls();});
 player.textTracks?.addEventListener?.("addtrack",readChapterCues);
@@ -896,7 +925,7 @@ async function play(job,fileIndex=0){
   byId("offline-resume-prompt").hidden=true;
   resumePosition=0;
   const section=byId("offline-player-section");
-  if(player.dataset.jobId!==job.id||player.dataset.fileIndex!==String(fileIndex)){player.pause();clearExternalSubtitle();player.src=url;player.dataset.jobId=job.id;player.dataset.fileIndex=String(fileIndex);player.dataset.mediaFilename=file?.name||job.title||"Saved media";if(player.muted&&player.volume>0)player.muted=false;player.load();lastPositionSave=0;byId("offline-player-section").dataset.subtitleSize="medium";byId("offline-subtitle-size").value="medium";}
+  if(player.dataset.jobId!==job.id||player.dataset.fileIndex!==String(fileIndex)){player.pause();clearExternalSubtitle();activePreferenceKey=playbackProfileKey(job,fileIndex);applyPlaybackPreferences();player.src=url;player.dataset.jobId=job.id;player.dataset.fileIndex=String(fileIndex);player.dataset.mediaFilename=file?.name||job.title||"Saved media";if(player.muted&&player.volume>0)player.muted=false;player.load();lastPositionSave=0;byId("offline-player-section").dataset.subtitleSize="medium";byId("offline-subtitle-size").value="medium";}
   player.controls=false;
   byId("offline-custom-controls").hidden=false;
   section.classList.remove("controls-hidden");
