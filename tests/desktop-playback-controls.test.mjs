@@ -61,3 +61,7 @@ test("Seek control displays a preview frame from the locally playing video", () 
   assert.match(player, /player\.addEventListener\("seeked",drawSeekPreview\)/);
   assert.match(player, /function hideSeekPreview\(\)/);
 });
+
+test("Keyboard volume-up shortcut restores sound after mute", () => {
+  assert.match(player, /player\.volume>0\)player\.muted=false/);
+});
