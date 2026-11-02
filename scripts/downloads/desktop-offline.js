@@ -883,7 +883,7 @@ window.addEventListener("keydown",event=>{
   if(key==="p"){event.preventDefault();void byId("offline-pip").click();return;}
   if(key==="c"){event.preventDefault();byId("offline-cinema-mode").click();return;}
   if(key==="m"){event.preventDefault();player.muted=!player.muted;return;}
-  if(key==="arrowup"){event.preventDefault();player.volume=Math.min(1,player.volume+0.05);byId("offline-volume").value=String(player.volume);return;}
+  if(key==="arrowup"){event.preventDefault();player.volume=Math.min(1,player.volume+0.05);if(player.volume>0)player.muted=false;byId("offline-volume").value=String(player.volume);return;}
   if(key==="arrowdown"){event.preventDefault();player.volume=Math.max(0,player.volume-0.05);byId("offline-volume").value=String(player.volume);}
 });
 async function play(job,fileIndex=0){
