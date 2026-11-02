@@ -250,6 +250,10 @@ function setPlayerSource(source, params, startAt = 0) {
   if (tryNextButton) tryNextButton.hidden = true;
   const customServer = typeof source === "string" && source.startsWith("custom:") ? getCustomPlaybackServer(source.slice(7)) : null;
   if ((!["vidapi", "vidsrc", "vidlink", "vidplus", "vidking", "direct", "embedwave", "vidfast", "ezvidapi", "embedapistream", "moviesapi"].includes(source) && !customServer) || !sourceAvailable(source)) return;
+  if (activeSource === "direct" && source !== "direct") {
+    persistDirectProgress?.();
+    void flushPlaybackProgress(progressKey());
+  }
   activeSource = source;
   player.closest(".vivid-player-frame")?.classList.toggle("is-embedwave", source === "embedwave");
   sourceAttempted.add(source);
@@ -258,10 +262,6 @@ function setPlayerSource(source, params, startAt = 0) {
 
   if (source !== "direct") {
     directLoadGeneration += 1;
-    // Capture the latest direct-video position before teardown. The regular
-    // timeupdate saver is throttled, so closing between ticks must force a save.
-    persistDirectProgress?.();
-    void flushPlaybackProgress(progressKey());
     stopDirectStream(directPlayer);
     if (directPlayer) directPlayer.hidden = true;
     player.hidden = false;
