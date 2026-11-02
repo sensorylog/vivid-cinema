@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 concurrency:
   group: vivid-mpv-source-candidate-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 permissions:
   contents: read
 jobs:
@@ -33,7 +33,7 @@ jobs:
           python -m venv "$RUNNER_TEMP/meson-venv"
           "$RUNNER_TEMP/meson-venv/bin/pip" install "meson==1.9.2"
           echo "$RUNNER_TEMP/meson-venv/bin" >> "$GITHUB_PATH"
-      - name: Build mpv from pinned upstream source and snapshot build inputs
+      - name: Build mpv and prepare source candidate
         run: bash desktop/build-mpv-source.sh
       - name: Upload candidate runtime and corresponding-source snapshot
         uses: actions/upload-artifact@v4
@@ -46,3 +46,6 @@ jobs:
             licenses/mpv/source-notices/**
           if-no-files-found: error
           retention-days: 30
+      - name: Smoke-test candidate runtime under Wine
+        timeout-minutes: 3
+        run: timeout --signal=TERM --kill-after=10s 90s wine ./desktop/vendor/mpv/mpv.com --version --no-config
