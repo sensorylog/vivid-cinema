@@ -239,6 +239,8 @@ test("Windows workflow builds on demand or on release tags", () => {
   assert.match(workflow, /Build auto-updatable Windows release files/);
   assert.match(workflow, /Verify desktop runtime lockfile is synchronized/);
   assert.match(workflow, /working-directory: desktop/);
+  assert.ok(workflow.includes("run: npm ci --omit=dev --no-audit --no-fund"));
+  assert.doesNotMatch(workflow, /Commit resolved desktop runtime lockfile|Upload resolved desktop runtime lockfile/);
   assert.match(workflow, /gh release create/);
   assert.match(workflow, /--draft/);
   assert.match(workflow, /Publish verified Windows release/);
@@ -296,6 +298,14 @@ test("desktop download runtime dependencies are isolated and installed before la
   assert.equal(runtimeLock.packages[""].devDependencies, undefined);
   assert.equal(runtimeLock.packages[""].dependencies["vivid-cinema"], undefined);
   assert.equal(runtimeLock.packages["node_modules/vivid-cinema"], undefined);
+  assert.equal(runtimeLock.packages["node_modules/electron"], undefined);
+  assert.equal(runtimeLock.packages["node_modules/electron-builder"], undefined);
+  assert.equal(runtimeLock.packages["node_modules/electron-updater"].version, "6.8.12");
+  assert.equal(runtimeLock.packages["node_modules/ffmpeg-static"].version, "5.2.0");
+  assert.equal(runtimeLock.packages["node_modules/ffprobe-static"].version, "3.1.0");
+  assert.equal(runtimeLock.packages["node_modules/hls.js"].version, "1.7.3");
+  assert.equal(runtimeLock.packages["node_modules/torrent-search-api"].version, "2.1.4");
+  assert.equal(runtimeLock.packages["node_modules/webtorrent"].version, "1.9.7");
   assert.equal(pkg.scripts["predesktop:start"], undefined);
   assert.equal(pkg.scripts["predesktop:dist"], undefined);
   assert.ok(pkg.build.files.includes("desktop/node_modules/**"));
