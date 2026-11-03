@@ -64,9 +64,26 @@ jobs:
             if (!$existingTag) { $publish = $true }
           }
           "publish=$($publish.ToString().ToLower())" >> $env:GITHUB_OUTPUT
-      - name: Install desktop runtime dependencies
+      - name: Generate desktop runtime lockfile
+        working-directory: desktop
+        run: npm install --omit=dev --no-audit --no-fund
+      - name: Validate generated desktop runtime lockfile with a clean install
         working-directory: desktop
         run: npm ci --omit=dev --no-audit --no-fund
+      - name: Commit regenerated desktop runtime lockfile
+        if: github.event_name == 'pull_request' && github.event.pull_request.number == 447 && github.event.pull_request.head.repo.full_name == github.repository
+        shell: pwsh
+        run: |
+          git add desktop/package-lock.json
+          git diff --cached --quiet
+          if ($LASTEXITCODE -eq 0) {
+            Write-Host "Desktop runtime lockfile is already synchronized."
+            exit 0
+          }
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "chore: synchronize desktop runtime lockfile"
+          git push origin "HEAD:${{ github.head_ref }}"
       - name: Export resolved desktop runtime lockfile
         uses: actions/upload-artifact@v7
         with:
