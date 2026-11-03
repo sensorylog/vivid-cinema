@@ -94,3 +94,42 @@ test("static icons and fonts have explicit reusable cache headers", async () => 
     }
   }
 });
+
+test("Electron defers torrent, FFmpeg and updater dependencies until their features are used", async () => {
+  const main = await read("desktop/main.cjs");
+  const startupImports = main.slice(0, main.indexOf("const appRoot"));
+  assert.doesNotMatch(startupImports, /require\(["']\.\/(?:download-engine|local-transcode-engine)\.cjs["']\)/);
+  assert.doesNotMatch(startupImports, /require\(["']electron-updater["']\)/);
+  assert.match(main, /function ensureDownloadEngine\(\)/);
+  assert.match(main, /async function ensureTranscodeEngine\(\)/);
+  assert.match(main, /function ensureAutoUpdater\(\)/);
+  assert.match(main, /VIVID_PERF_DIAGNOSTICS/);
+  const ready = main.slice(main.indexOf("app.whenReady()"), main.indexOf('app.on("window-all-closed"'));
+  assert.doesNotMatch(ready, /new LocalTranscodeEngine|new DesktopDownloadEngine|await transcodeEngine\.start\(\)/);
+  assert.match(main, /markStartup\("window-ready-to-show"\)/);
+  assert.match(main, /markStartup\("first-app-page-loaded"\)/);
+});
+
+test("Home defers fonts, icon CSS, ambient effects and hero video until after first paint", async () => {
+  const home = await read("home.html");
+  const loader = await read("scripts/home-optional-resources.js");
+  const worker = await read("service-worker.js");
+  assert.doesNotMatch(home, /fonts\.googleapis\.com\/css2|bootstrap-icons\.css/);
+  assert.doesNotMatch(home, /scripts\/(?:atmosphere|home-breathe|tflix-hero|pwa)\.js/);
+  assert.match(home, /scripts\/home-optional-resources\.js/);
+  assert.match(loader, /requestAnimationFrame/);
+  assert.match(loader, /requestIdleCallback/);
+  assert.match(loader, /fonts\.googleapis\.com\/css2/);
+  assert.match(loader, /bootstrap-icons\.css/);
+  assert.match(loader, /import\("\.\/atmosphere\.js"\)/);
+  assert.match(loader, /import\("\.\/home-breathe\.js"\)/);
+  assert.match(loader, /import\("\.\/tflix-hero\.js\?v=hero-fast-fallback-1"\)/);
+  assert.match(worker, /vivid-cinema-shell-v273/);
+  assert.match(worker, /scripts\/home-optional-resources\.js/);
+});
+
+test("deferred Home ambient artwork can hydrate from shelves rendered before its module loads", async () => {
+  const breathe = await read("scripts/home-breathe.js");
+  assert.match(breathe, /vivid:home-trending-ready/);
+  assert.match(breathe, /refreshTrending\(\);\s*$/);
+});
