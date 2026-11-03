@@ -228,6 +228,8 @@ test("Windows workflow builds on demand or on release tags", () => {
   assert.ok(workflow.indexOf("Create or reuse draft release for electron-builder") < workflow.indexOf("Build auto-updatable Windows release files"));
   assert.ok(workflow.indexOf("Build auto-updatable Windows release files") < workflow.indexOf("Verify updater metadata was generated"));
   assert.match(workflow, /Verify draft release contains all required assets/);
+  assert.match(workflow, /if \(!\$release\.draft\)/);
+  assert.match(workflow, /did not become public after verification/);
   assert.match(workflow, /git tag -a \$tag/);
   assert.match(workflow, /git push origin "refs\/tags\/\$tag"/);
   assert.match(workflow, /Verify updater metadata was generated/);
