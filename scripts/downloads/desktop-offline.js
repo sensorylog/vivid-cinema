@@ -515,8 +515,14 @@ async function updatePlaybackDiagnostics(){
   addGroup("Audio codecs",report.audioProfiles);
   byId("offline-capability-note").textContent=report.note+" These estimates describe this Windows device and Chromium build; they do not confirm the codecs inside the selected file.";
 }
+function playbackDuration(){
+  const nativeDuration=Number(player.duration);
+  if(Number.isFinite(nativeDuration)&&nativeDuration>0)return nativeDuration;
+  const availableDuration=Number(player.dataset.transcodeDuration);
+  return Number.isFinite(availableDuration)&&availableDuration>0?availableDuration:0;
+}
 function syncPlayerControls(){
-  const duration=Number.isFinite(player.duration)?player.duration:0;
+  const duration=playbackDuration();
   if(seekPreviewTarget===null)byId("offline-seek").value=duration?String(Math.round(player.currentTime/duration*100000)):"0";
   byId("offline-time").textContent=clock(player.currentTime)+" / "+clock(duration);
   byId("offline-play-toggle").textContent=player.paused?"Play":"Pause";
@@ -558,8 +564,9 @@ function ensureAudioProcessing(){
 }
 let seekFeedbackTimer=0;
 function seekBy(seconds){
-  if(!Number.isFinite(player.duration))return;
-  player.currentTime=Math.max(0,Math.min(player.duration,player.currentTime+seconds));
+  const duration=playbackDuration();
+  if(!duration)return;
+  player.currentTime=Math.max(0,Math.min(duration,player.currentTime+seconds));
   const feedback=byId("offline-seek-feedback");
   if(Math.abs(seconds)===10)feedback.textContent=seconds<0?"−10 seconds":"+10 seconds";else feedback.textContent=(seconds<0?"−":"+")+Math.abs(seconds)+" seconds";
   feedback.className="offline-seek-feedback "+(seconds<0?"is-back":"is-forward");
@@ -634,7 +641,7 @@ byId("offline-skip-intro").addEventListener("click",()=>{
 });
 byId("offline-skip-credits").addEventListener("click",()=>{
   const credits=chapterCues.find(cue=>creditsPattern.test(String(cue.text||""))&&player.currentTime>=cue.startTime&&player.currentTime<cue.endTime);
-  if(credits)player.currentTime=Math.min(Number.isFinite(player.duration)?player.duration:credits.endTime,Math.max(credits.endTime,credits.startTime));
+  if(credits)player.currentTime=Math.min(playbackDuration()||credits.endTime,Math.max(credits.endTime,credits.startTime));
 });
 function loadExternalSubtitle(file){
   if(!file)return;
@@ -781,15 +788,16 @@ byId("offline-skip-back").addEventListener("click",()=>seekBy(-10));
 byId("offline-skip-forward").addEventListener("click",()=>seekBy(10));
 function stepFrame(direction){
   const frameRate=Number(player.dataset.frameRate);
-  if(!Number.isFinite(player.duration)||!Number.isFinite(frameRate)||frameRate<=0){
+  const duration=playbackDuration();
+  if(!duration||!Number.isFinite(frameRate)||frameRate<=0){
     setMessage("Frame stepping is unavailable because this file's nominal frame rate could not be read.");
     return;
   }
   player.pause();
   const currentFrame=Math.round(player.currentTime*frameRate);
-  const lastFrame=Math.max(0,Math.ceil(player.duration*frameRate)-1);
+  const lastFrame=Math.max(0,Math.ceil(duration*frameRate)-1);
   const nextFrame=Math.max(0,Math.min(lastFrame,currentFrame+(direction<0?-1:1)));
-  player.currentTime=Math.min(player.duration,nextFrame/frameRate);
+  player.currentTime=Math.min(duration,nextFrame/frameRate);
 }
 byId("offline-frame-back").addEventListener("click",()=>stepFrame(-1));
 byId("offline-frame-forward").addEventListener("click",()=>stepFrame(1));
@@ -894,7 +902,8 @@ function drawSeekPreview(){
 function updateSeekPreview(target){
   if(player.dataset.transcodeSessionId){seekPreview.hidden=true;return;}
   if(!Number.isFinite(target)||!ensureSeekPreviewSource())return;
-  seekPreviewTarget=Math.max(0,Math.min(Number.isFinite(player.duration)?player.duration:target,target));
+  const duration=playbackDuration();
+  seekPreviewTarget=Math.max(0,Math.min(duration||target,target));
   const request=++seekPreviewRequest;
   const seekWhenReady=()=>{
     if(request!==seekPreviewRequest||seekPreviewTarget===null)return;
@@ -912,12 +921,13 @@ seekPreviewVideo.addEventListener("loadedmetadata",()=>{
 seekPreviewVideo.addEventListener("seeked",drawSeekPreview);
 seekPreviewVideo.addEventListener("loadeddata",drawSeekPreview);
 seekInput.addEventListener("input",event=>{
-  if(!Number.isFinite(player.duration))return;
+  const duration=playbackDuration();
+  if(!duration)return;
   seekPreview.hidden=false;
-  updateSeekPreview(player.duration*(Number(event.target.value)/100000));
+  updateSeekPreview(duration*(Number(event.target.value)/100000));
 });
 function commitSeekPreview(){
-  if(seekPreviewTarget!==null&&Number.isFinite(player.duration))player.currentTime=seekPreviewTarget;
+  if(seekPreviewTarget!==null&&playbackDuration()>0)player.currentTime=seekPreviewTarget;
   seekPreviewTarget=null;
   seekPreview.hidden=true;
 }
@@ -1031,7 +1041,8 @@ function syncNextEpisode(job){
 }
 byId("offline-resume-continue").addEventListener("click",async()=>{
   const prompt=byId("offline-resume-prompt");
-  if(resumePosition>0&&Number.isFinite(player.duration)&&resumePosition<player.duration-1)player.currentTime=resumePosition;
+  const duration=playbackDuration();
+  if(resumePosition>0&&duration>0&&resumePosition<duration-1)player.currentTime=resumePosition;
   prompt.hidden=true;resumePosition=0;
   try{await player.play();}catch{setMessage("Press Play to continue watching.");}
   showPlayerControls();
@@ -1072,7 +1083,14 @@ player.addEventListener("pause",()=>{
   if(player.dataset.jobId&&player.currentTime>0)void engine.setPlaybackPosition(player.dataset.jobId,Number(player.dataset.fileIndex)||0,player.currentTime).catch(()=>{});
 });
 function showResumePrompt(saved){
-  if(!(saved>5)||!Number.isFinite(player.duration)||saved>=player.duration-30){
+  const duration=playbackDuration();
+  if(saved>5&&player.dataset.transcodeSessionId&&player.dataset.transcodeComplete!=="true"&&(!duration||saved>=duration-30)){
+    player.dataset.pendingResumePosition=String(saved);
+    resumePosition=saved;
+    byId("offline-resume-prompt").hidden=true;
+    return false;
+  }
+  if(!(saved>5)||!duration||saved>=duration-30){
     resumePosition=0;
     byId("offline-resume-prompt").hidden=true;
     return false;
@@ -1090,7 +1108,8 @@ player.addEventListener("loadedmetadata",()=>{
   delete player.dataset.pendingResumePosition;
   void engine.getPlaybackPosition(jobId,fileIndex).then(saved=>{
     if(player.dataset.jobId!==jobId||Number(player.dataset.fileIndex)!==fileIndex||(player.dataset.transcodeSessionId||"")!==sessionId)return;
-    if(saved>5&&!Number.isFinite(player.duration)&&sessionId){
+    const duration=playbackDuration();
+    if(saved>5&&sessionId&&(!duration||(saved>=duration-30&&player.dataset.transcodeComplete!=="true"))){
       player.dataset.pendingResumePosition=String(saved);
       resumePosition=saved;
       return;
@@ -1105,7 +1124,8 @@ player.addEventListener("loadedmetadata",()=>{
 player.addEventListener("durationchange",()=>{
   syncPlayerControls();
   const pending=Number(player.dataset.pendingResumePosition);
-  if(pending>5&&Number.isFinite(player.duration)){
+  const duration=playbackDuration();
+  if(pending>5&&duration>0&&(pending<duration-30||player.dataset.transcodeComplete==="true")){
     delete player.dataset.pendingResumePosition;
     showResumePrompt(pending);
   }
