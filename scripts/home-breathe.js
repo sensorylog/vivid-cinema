@@ -51,3 +51,5 @@ function refreshTrending(sourceItems) {
 
 // Reuse Home's trending catalogue response for ambient artwork.
 window.addEventListener("vivid:home-trending-ready",event=>refreshTrending(event.detail));
+// If this enhancement module was deferred until after the catalogue event, use the rendered rail.
+refreshTrending();
