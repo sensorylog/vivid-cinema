@@ -1071,24 +1071,45 @@ player.addEventListener("pause",()=>{
   if(!byId("offline-resume-prompt").hidden)return;
   if(player.dataset.jobId&&player.currentTime>0)void engine.setPlaybackPosition(player.dataset.jobId,Number(player.dataset.fileIndex)||0,player.currentTime).catch(()=>{});
 });
+function showResumePrompt(saved){
+  if(!(saved>5)||!Number.isFinite(player.duration)||saved>=player.duration-30){
+    resumePosition=0;
+    byId("offline-resume-prompt").hidden=true;
+    return false;
+  }
+  resumePosition=saved;
+  byId("offline-resume-copy").textContent="Continue from "+clock(saved)+"?";
+  byId("offline-resume-prompt").hidden=false;
+  player.pause();
+  showPlayerControls();
+  return true;
+}
 player.addEventListener("loadedmetadata",()=>{
   const jobId=player.dataset.jobId, fileIndex=Number(player.dataset.fileIndex)||0;
+  const sessionId=player.dataset.transcodeSessionId||"";
+  delete player.dataset.pendingResumePosition;
   void engine.getPlaybackPosition(jobId,fileIndex).then(saved=>{
-    if(player.dataset.jobId!==jobId||Number(player.dataset.fileIndex)!==fileIndex)return;
-    if(saved>5&&Number.isFinite(player.duration)&&saved<player.duration-30){
+    if(player.dataset.jobId!==jobId||Number(player.dataset.fileIndex)!==fileIndex||(player.dataset.transcodeSessionId||"")!==sessionId)return;
+    if(saved>5&&!Number.isFinite(player.duration)&&sessionId){
+      player.dataset.pendingResumePosition=String(saved);
       resumePosition=saved;
-      byId("offline-resume-copy").textContent="Continue from "+clock(saved)+"?";
-      byId("offline-resume-prompt").hidden=false;
-      player.pause();
-      showPlayerControls();
-    }else{
-      resumePosition=0;
-      byId("offline-resume-prompt").hidden=true;
+      return;
     }
+    showResumePrompt(saved);
     syncPlayerControls();
-  }).catch(()=>{resumePosition=0;byId("offline-resume-prompt").hidden=true;syncPlayerControls();});
+  }).catch(()=>{
+    if(player.dataset.jobId!==jobId||(player.dataset.transcodeSessionId||"")!==sessionId)return;
+    resumePosition=0;byId("offline-resume-prompt").hidden=true;syncPlayerControls();
+  });
 });
-player.addEventListener("durationchange",syncPlayerControls);
+player.addEventListener("durationchange",()=>{
+  syncPlayerControls();
+  const pending=Number(player.dataset.pendingResumePosition);
+  if(pending>5&&Number.isFinite(player.duration)){
+    delete player.dataset.pendingResumePosition;
+    showResumePrompt(pending);
+  }
+});
 player.addEventListener("loadedmetadata",()=>{void updatePlaybackDiagnostics();});
 player.addEventListener("loadedmetadata",refreshAudioTracks);
 function describePlaybackError(){
@@ -1162,6 +1183,7 @@ async function releaseLocalMedia(){
   const token=player.dataset.localMediaToken;
   player.dataset.transcodeSessionId="";
   player.dataset.transcodeCodecs="";
+  delete player.dataset.pendingResumePosition;
   player.dataset.localMediaToken="";
   if(sessionId){
     transcodePlayer.reset();
