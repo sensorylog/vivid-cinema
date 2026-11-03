@@ -4,6 +4,7 @@ import { describeLoadedMedia, probePlaybackCapabilities } from "./media-capabili
 import { inspectMediaUrl } from "./media-inspector.js";
 import { choosePreferredTrack, clearSubtitleOverlay, parseSubtitleFile, renderSubtitleAtTime } from "./subtitle-engine.js";
 import { getPlaybackPreferences, playbackProfileKey, savePlaybackPreferences } from "./playback-preferences.js";
+import { createTranscodePlayer } from "./transcode-player.js";
 
 if (window.vividDownloads?.available) {
 document.body.classList.add("vivid-desktop-offline-library");
@@ -438,6 +439,7 @@ async function refresh(){
   }catch(error){setMessage(error?.message||"Could not load your downloads.");}
 }
 const player = byId("offline-player");
+const transcodePlayer = createTranscodePlayer(player);
 let audioContext = null;
 let audioSource = null;
 let audioGain = null;
@@ -461,6 +463,11 @@ async function updatePlaybackDiagnostics(){
   summary.textContent=media.filename+" · "+media.container.label+" · "+media.resolution+" · "+(media.duration===null?"Duration unavailable":clock(media.duration))+" · "+media.codec;
   const details=byId("offline-file-details");
   details.textContent="Inspecting actual container and track metadata…";
+  if(player.dataset.transcodeSessionId){
+    let codecs={};
+    try{codecs=JSON.parse(player.dataset.transcodeCodecs||"{}");}catch{}
+    details.textContent="FFmpeg compatibility stream · H.264 video · "+(codecs.outputAudio||"No audio stream")+" · Original video: "+(codecs.inputVideo||"unknown")+" · Original audio: "+(codecs.inputAudio||"none");
+  }else{
   try{
     const inspected=await inspectMediaUrl(player.currentSrc,filename);
     if(request!==diagnosticsRequest)return;
@@ -475,6 +482,7 @@ async function updatePlaybackDiagnostics(){
     details.textContent=inspected.format+" · "+trackSummary+" · "+duration+" · "+resolution+" · "+(inspected.partial?"Metadata scan limited to first 32 MiB":"Metadata scan complete")+". "+inspected.note;
   }catch(error){
     if(request===diagnosticsRequest){player.dataset.frameRate="";byId("offline-frame-back").disabled=true;byId("offline-frame-forward").disabled=true;details.textContent="Media metadata scan unavailable: "+(error?.message||"Unknown inspection error");}
+  }
   }
   if(!capabilityReportPromise)capabilityReportPromise=probePlaybackCapabilities({video:player});
   const report=await capabilityReportPromise;
@@ -866,6 +874,7 @@ function resetSeekPreviewSource(){
   seekPreview.hidden=true;
 }
 function ensureSeekPreviewSource(){
+  if(player.dataset.transcodeSessionId)return false;
   const source=player.currentSrc||player.src;
   if(!source||source===seekPreviewSource)return Boolean(source);
   seekPreviewRequest++;
@@ -1130,6 +1139,7 @@ player.addEventListener("ended",()=>{
 });
 window.addEventListener("pagehide",()=>{
   if(player.dataset.jobId&&player.currentTime>0)void engine.setPlaybackPosition(player.dataset.jobId,Number(player.dataset.fileIndex)||0,player.currentTime).catch(()=>{});
+  void releaseLocalMedia();
 });
 window.addEventListener("keydown",event=>{
   if(playerSection.hidden||event.target.matches("input,textarea,select,button,[contenteditable='true']"))return;
@@ -1147,27 +1157,39 @@ window.addEventListener("keydown",event=>{
   if(key==="arrowdown"){event.preventDefault();player.volume=Math.max(0,player.volume-0.05);byId("offline-volume").value=String(player.volume);}
 });
 async function releaseLocalMedia(){
+  const sessionId=player.dataset.transcodeSessionId;
   const token=player.dataset.localMediaToken;
-  if(!token)return;
+  player.dataset.transcodeSessionId="";
+  player.dataset.transcodeCodecs="";
   player.dataset.localMediaToken="";
-  try{await engine.releaseLocalFile(token);}catch{}
+  if(sessionId){
+    transcodePlayer.reset();
+    try{await engine.stopTranscode(sessionId);}catch{}
+  }
+  if(token){
+    player.pause();
+    player.removeAttribute("src");
+    player.load();
+    try{await engine.releaseLocalFile(token);}catch{}
+  }
 }
 async function playLocalFile(){
-  const file=await engine.openLocalFile();
+  const file=await engine.openLocalTranscode();
   if(!file)return;
   await releaseLocalMedia();
-  player.pause();resetSeekPreviewSource();clearExternalSubtitle();chapterTrack=null;chapterCues=[];
-  activePreferenceKey="local:"+file.name+":"+file.size;applyPlaybackPreferences();
-  player.src=file.url;player.dataset.frameRate="";byId("offline-frame-back").disabled=true;byId("offline-frame-forward").disabled=true;player.dataset.jobId="";player.dataset.fileIndex="0";
-  player.dataset.mediaFilename=file.name;player.dataset.localMediaToken=file.token;
-  player.load();lastPositionSave=0;resumePosition=0;
-  byId("offline-player-title").textContent=file.name;
+  resetSeekPreviewSource();clearExternalSubtitle();chapterTrack=null;chapterCues=[];
+  activePreferenceKey="local:"+file.fileName+":"+file.fileSize;applyPlaybackPreferences();
+  transcodePlayer.load(file);
+  player.dataset.frameRate="";byId("offline-frame-back").disabled=true;byId("offline-frame-forward").disabled=true;player.dataset.jobId="";player.dataset.fileIndex="0";
+  player.dataset.mediaFilename=file.fileName;player.dataset.localMediaToken="";player.dataset.transcodeSessionId=file.sessionId;player.dataset.transcodeCodecs=JSON.stringify(file.codecs||{});
+  lastPositionSave=0;resumePosition=0;
+  byId("offline-player-title").textContent=file.fileName;
   byId("offline-resume-prompt").hidden=true;byId("offline-next-episode").hidden=true;
   byId("offline-player-section").dataset.subtitleSize="medium";byId("offline-subtitle-size").value="medium";
   player.controls=false;byId("offline-custom-controls").hidden=false;
   playerSection.classList.remove("controls-hidden");playerSection.hidden=false;
   playerSection.scrollIntoView({behavior:"smooth",block:"start"});
-  try{await player.play();setMessage("Opened "+file.name+".");}catch{setMessage("Your video is ready. Press Play in the Vivid player to begin.");}
+  try{await player.play();setMessage("Opened "+file.fileName+" with Vivid compatibility playback.");}catch{setMessage("Your video is ready. Press Play in the Vivid player to begin.");}
   syncPlayerControls();
 }
 byId("offline-open-local-file").addEventListener("click",async event=>{
@@ -1176,9 +1198,10 @@ byId("offline-open-local-file").addEventListener("click",async event=>{
   finally{button.disabled=false;}
 });
 async function play(job,fileIndex=0){
+  const file=Array.isArray(job.files)?job.files[fileIndex]:null;
+  const media=await engine.openDownloadTranscode(job.id,fileIndex);
+  if(!media) throw new Error("The saved video file is not available.");
   await releaseLocalMedia();
-  const url=await engine.mediaUrl(job.id,fileIndex);
-  if(!url) throw new Error("The saved video file is not available.");
   const file=Array.isArray(job.files)?job.files[fileIndex]:null;
   const playerTitle=file&&job.files.length>1?job.title+" — "+file.name:job.title;
   byId("offline-player-title").textContent=playerTitle;
@@ -1186,7 +1209,7 @@ async function play(job,fileIndex=0){
   byId("offline-resume-prompt").hidden=true;
   resumePosition=0;
   const section=byId("offline-player-section");
-  if(player.dataset.jobId!==job.id||player.dataset.fileIndex!==String(fileIndex)){player.pause();clearExternalSubtitle();activePreferenceKey=playbackProfileKey(job,fileIndex);applyPlaybackPreferences();resetSeekPreviewSource();player.src=url;player.dataset.frameRate="";byId("offline-frame-back").disabled=true;byId("offline-frame-forward").disabled=true;player.dataset.jobId=job.id;player.dataset.fileIndex=String(fileIndex);player.dataset.localMediaToken="";player.dataset.mediaFilename=file?.name||job.title||"Saved media";if(player.muted&&player.volume>0)player.muted=false;player.load();lastPositionSave=0;byId("offline-player-section").dataset.subtitleSize="medium";byId("offline-subtitle-size").value="medium";}
+  player.pause();clearExternalSubtitle();activePreferenceKey=playbackProfileKey(job,fileIndex);applyPlaybackPreferences();resetSeekPreviewSource();transcodePlayer.load(media);player.dataset.frameRate="";byId("offline-frame-back").disabled=true;byId("offline-frame-forward").disabled=true;player.dataset.jobId=job.id;player.dataset.fileIndex=String(fileIndex);player.dataset.localMediaToken="";player.dataset.transcodeSessionId=media.sessionId;player.dataset.transcodeCodecs=JSON.stringify(media.codecs||{});player.dataset.mediaFilename=media.fileName||file?.name||job.title||"Saved media";if(player.muted&&player.volume>0)player.muted=false;lastPositionSave=0;byId("offline-player-section").dataset.subtitleSize="medium";byId("offline-subtitle-size").value="medium";
   player.controls=false;
   byId("offline-custom-controls").hidden=false;
   section.classList.remove("controls-hidden");
