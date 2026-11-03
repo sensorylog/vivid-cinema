@@ -65,7 +65,8 @@ jobs:
           }
           "publish=$($publish.ToString().ToLower())" >> $env:GITHUB_OUTPUT
       - name: Install desktop runtime dependencies
-        run: npm --prefix desktop install --omit=dev --no-audit --no-fund
+        working-directory: desktop
+        run: npm install --omit=dev --no-audit --no-fund
       - name: Verify desktop runtime lockfile is synchronized
         run: node -e "const p=require('./desktop/package.json');const l=require('./desktop/package-lock.json');if(l.name!==p.name||l.version!==p.version||JSON.stringify(l.packages[''].dependencies)!==JSON.stringify(p.dependencies))process.exit(1)"
       - name: Upload resolved desktop runtime lockfile for review
