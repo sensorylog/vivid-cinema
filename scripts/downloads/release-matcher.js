@@ -7,14 +7,13 @@ const WORDS = value => String(value ?? "")
   .split(/\s+/)
   .filter(Boolean);
 
-function containsSequence(haystack, needle) {
-  if (!needle.length || needle.length > haystack.length) return false;
+function sequenceIndex(haystack, needle) {
+  if (!needle.length || needle.length > haystack.length) return -1;
   for (let index = 0; index <= haystack.length - needle.length; index += 1) {
-    if (needle.every((word, offset) => haystack[index + offset] === word)) return true;
+    if (needle.every((word, offset) => haystack[index + offset] === word)) return index;
   }
-  return false;
+  return -1;
 }
-
 /**
  * Conservative release gate. It intentionally rejects ambiguous results:
  * movies need the exact title phrase and selected release year; episodes need
@@ -24,7 +23,10 @@ export function matchesSelectedRelease(media, result) {
   if (!media || !result || typeof result.title !== "string") return false;
   const titleWords = WORDS(media.title);
   const releaseWords = WORDS(result.title);
-  if (!containsSequence(releaseWords, titleWords)) return false;
+  const titleStart = sequenceIndex(releaseWords, titleWords);
+  if (titleStart < 0) return false;
+  const allowedReleasePrefixes = new Set(["yts", "mx", "rarbg", "1337x", "eztv", "ettv", "torrent", "download", "www", "galaxy", "evo", "ntb", "ctrlhd"]);
+  if (releaseWords.slice(0, titleStart).some(word => !allowedReleasePrefixes.has(word))) return false;
   if (/\b(?:fan[\s._-]*edit|fanmade|parody|trailer|teaser|sample|clip|workprint)\b/i.test(result.title)) return false;
 
   if (media.media_type === "tv") {
