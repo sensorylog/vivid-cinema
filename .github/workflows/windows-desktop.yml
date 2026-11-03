@@ -64,33 +64,9 @@ jobs:
             if (!$existingTag) { $publish = $true }
           }
           "publish=$($publish.ToString().ToLower())" >> $env:GITHUB_OUTPUT
-      - name: Generate desktop runtime lockfile
-        working-directory: desktop
-        run: npm install --omit=dev --no-audit --no-fund
-      - name: Validate generated desktop runtime lockfile with a clean install
+      - name: Install desktop runtime dependencies
         working-directory: desktop
         run: npm ci --omit=dev --no-audit --no-fund
-      - name: Commit regenerated desktop runtime lockfile
-        if: github.event_name == 'pull_request' && github.event.pull_request.number == 447 && github.event.pull_request.head.repo.full_name == github.repository
-        shell: pwsh
-        run: |
-          git add desktop/package-lock.json
-          git diff --cached --quiet
-          if ($LASTEXITCODE -eq 0) {
-            Write-Host "Desktop runtime lockfile is already synchronized."
-            exit 0
-          }
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git commit -m "chore: synchronize desktop runtime lockfile"
-          git push origin "HEAD:${{ github.head_ref }}"
-      - name: Export resolved desktop runtime lockfile
-        uses: actions/upload-artifact@v7
-        with:
-          name: vivid-cinema-desktop-lockfile-${{ github.run_number }}
-          path: desktop/package-lock.json
-          if-no-files-found: error
-          retention-days: 1
       - name: Verify desktop runtime lockfile is synchronized
         run: node -e "const p=require('./desktop/package.json');const l=require('./desktop/package-lock.json');if(l.name!==p.name||l.version!==p.version||JSON.stringify(l.packages[''].dependencies)!==JSON.stringify(p.dependencies))process.exit(1)"
       - name: Test local FFmpeg transcode engine
