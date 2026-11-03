@@ -11,6 +11,8 @@ export function createTranscodePlayer(video) {
       try { track.remove(); } catch {}
       track = null;
     }
+    delete video.dataset.transcodeDuration;
+    delete video.dataset.transcodeComplete;
     video.pause();
     video.removeAttribute("src");
     video.load();
@@ -33,6 +35,14 @@ export function createTranscodePlayer(video) {
         lowLatencyMode: false,
         backBufferLength: 90,
         maxBufferLength: 30
+      });
+      hls.on(window.Hls.Events.LEVEL_UPDATED, (_event, data) => {
+        const duration = Number(data?.details?.totalduration);
+        if (Number.isFinite(duration) && duration > 0) {
+          video.dataset.transcodeDuration = String(duration);
+          video.dataset.transcodeComplete = data.details.live ? "false" : "true";
+          video.dispatchEvent(new Event("durationchange"));
+        }
       });
       hls.on(window.Hls.Events.ERROR, (_event, data) => {
         if (!data?.fatal) return;
