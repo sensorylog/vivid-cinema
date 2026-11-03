@@ -498,5 +498,5 @@ test("Windows runtime is current, hardened, and the offline shell cache is inval
   const offlineRenderer = fs.readFileSync(path.join(root, "scripts", "downloads", "desktop-offline.js"), "utf8");
   assert.ok(offlineRenderer.includes("./transcode-player.js?windows-offline-hls-v2"));
   const myDownloads = fs.readFileSync(path.join(root, "scripts", "my-downloads.js"), "utf8");
-  assert.ok(myDownloads.includes("./downloads/desktop-offline.js?windows-offline-hls-v2"));
+  assert.ok(myDownloads.includes('import("./downloads/desktop-offline.js?windows-offline-hls-v2")'));
 });
