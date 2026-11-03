@@ -244,7 +244,7 @@ test("Windows workflow builds on demand or on release tags", () => {
   assert.match(workflow, /Publish verified Windows release/);
   assert.ok(workflow.includes("gh release edit $tag --draft=false"));
   assert.match(workflow, /--verify-tag/);
-  assert.match(workflow, /Verify published updater assets/);
+  assert.match(workflow, /Verify draft release contains all required assets/);
   assert.match(workflow, /releases\/tags\/\$tag/);
   assert.match(workflow, /Vivid-Cinema-Setup-\$version\.exe\.blockmap/);
   assert.match(workflow, /latest\.yml/);
