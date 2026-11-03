@@ -286,7 +286,7 @@ class LocalTranscodeEngine {
       try { playlist = await fs.promises.readFile(path.join(record.directory, "index.m3u8"), "utf8"); } catch {}
       const availableDuration = [...playlist.matchAll(/#EXTINF:([0-9.]+)/g)]
         .reduce((total, item) => total + (Number(item[1]) || 0), 0);
-      const playlistFinalized = /#EXT-X-ENDLIST\\s*$/.test(playlist.trim());
+      const playlistFinalized = /#EXT-X-ENDLIST\s*$/.test(playlist.trim());
       const complete = record.complete && playlistFinalized;
       const payload = JSON.stringify({
         sourceDuration: record.sourceDuration,
