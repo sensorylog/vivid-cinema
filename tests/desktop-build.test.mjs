@@ -10,7 +10,7 @@ test("desktop packaging is opt-in and preserves existing scripts", () => {
   assert.equal(pkg.scripts["desktop:start"], "electron desktop/main.cjs");
   assert.match(pkg.scripts["desktop:dist"], /make-windows-icon\.cjs/);
   assert.match(pkg.scripts["desktop:dist"], /electron-builder --win nsis portable/);
-  assert.match(pkg.scripts["desktop:dist"], /--publish never/);
+  assert.match(pkg.scripts["desktop:dist"], /--publish onTagOrDraft/);
   assert.match(pkg.scripts.test, /tests\/desktop-build\.test\.mjs/);
   assert.equal(pkg.scripts["check:syntax"], "node automation/check-syntax.mjs");
   assert.ok(pkg.scripts["test:rules"]);
@@ -20,17 +20,17 @@ test("Windows installer and portable executable targets use Vivid branding", () 
   assert.match(pkg.version, /^\d+\.\d+\.\d+$/, "package version must be valid semantic version");
   assert.ok(pkg.devDependencies.electron);
   assert.ok(pkg.devDependencies["electron-builder"]);
-  assert.ok(pkg.dependencies["electron-updater"]);
   assert.match(pkg.scripts["desktop:publish"], /electron-builder --win nsis --publish never/);
   assert.deepEqual(pkg.build.publish[0], { provider: "github", owner: "sensorylog", repo: "vivid-cinema", releaseType: "release" });
   assert.ok(pkg.build.files.includes("!node_modules/**"));
-  assert.ok(pkg.build.files.includes("node_modules/electron-updater/**"));
-  assert.ok(pkg.build.files.includes("node_modules/builder-util-runtime/**"));
-  assert.ok(pkg.build.files.includes("node_modules/ms/**"));
   const desktopRuntime = JSON.parse(fs.readFileSync(path.join(root, "desktop", "package.json"), "utf8"));
   assert.ok(desktopRuntime.dependencies["ffmpeg-static"]);
   assert.ok(desktopRuntime.dependencies["ffprobe-static"]);
   assert.ok(desktopRuntime.dependencies["hls.js"]);
+  assert.equal(desktopRuntime.name, "vivid-cinema-desktop-runtime");
+  assert.equal(desktopRuntime.private, true);
+  assert.equal(desktopRuntime.version, pkg.version);
+  assert.equal(desktopRuntime.dependencies["electron-updater"], "6.8.12");
   assert.deepEqual(pkg.build.asarUnpack, ["desktop/node_modules/ffmpeg-static/**", "desktop/node_modules/ffprobe-static/**"]);
   assert.deepEqual(pkg.build.win.target.map((target) => target.target), ["nsis", "portable"]);
   assert.equal(pkg.build.asar, true);
@@ -167,19 +167,25 @@ test("Windows app checks for updates and offers download plus restart-to-install
   const preload = fs.readFileSync(preloadPath, "utf8");
   const redirect = fs.readFileSync(path.join(root, "scripts", "platform-origin-redirect.js"), "utf8");
   assert.match(main, /require\("electron-updater"\)/);
-  assert.match(main, /^const \{ DesktopDownloadEngine \} = require\("\.\/download-engine\.cjs"\);/m);
-  assert.match(main, /require\("\.\/local-transcode-engine\.cjs"\)/);
+  assert.match(main, /function ensureAutoUpdater\(\)/);
+  assert.match(main, /const \{ autoUpdater: updater \} = require\("electron-updater"\)/);
+  assert.match(main, /function ensureDownloadEngine\(\)/);
+  assert.match(main, /const \{ DesktopDownloadEngine \} = require\("\.\/download-engine\.cjs"\)/);
+  assert.match(main, /async function ensureTranscodeEngine\(\)/);
+  assert.match(main, /const \{ LocalTranscodeEngine \} = require\("\.\/local-transcode-engine\.cjs"\)/);
   assert.match(main, /new LocalTranscodeEngine/);
   assert.match(main, /vivid-transcode-open-local/);
   assert.match(main, /vivid-transcode-open-download/);
   assert.match(main, /vivid-transcode-stop/);
-  assert.doesNotMatch(main, /getDownloadEngine|downloadEnginePromise/, "download engine must not be deferred until the first renderer request");
-  assert.match(main, /function configureDownloadEngine\(\) \{\s*\/\/ Match the known-working 1\.0\.28 lifecycle[\s\S]*?downloadEngine = new DesktopDownloadEngine\(\{ app, BrowserWindow, dialog, shell \}\);/);
-  assert.match(main, /return downloadEngine\.start\(result, media\)/);
-  assert.match(main, /return downloadEngine\.search\(query\)/);
-  assert.match(main, /configureDownloadEngine\(\);\s*configureOfflineMediaProtocol\(\);\s*createWindow\(\);/, "engine must be ready before the renderer window opens");
+  const startupImports = main.slice(0, main.indexOf("const appRoot"));
+  assert.doesNotMatch(startupImports, /require\(["'](?:electron-updater|\.\/(?:download-engine|local-transcode-engine)\.cjs)["']\)/);
+  assert.match(main, /return ensureDownloadEngine\(\)\.start\(result, media\)/);
+  assert.match(main, /return ensureDownloadEngine\(\)\.search\(query\)/);
+  assert.match(main, /configureDownloadEngine\(\);\s*configureOfflineMediaProtocol\(\);\s*createWindow\(\);/, "IPC handlers must be registered before the renderer window opens");
+  const ready = main.slice(main.indexOf("app.whenReady()"), main.indexOf('app.on("window-all-closed"'));
+  assert.doesNotMatch(ready, /new LocalTranscodeEngine|new DesktopDownloadEngine|await transcodeEngine\.start\(\)/);
   assert.match(main, /autoUpdater\.autoDownload = false/);
-  assert.match(main, /autoUpdater\.checkForUpdates\(\)/);
+  assert.match(main, /ensureAutoUpdater\(\)\.checkForUpdates\(\)/);
   assert.match(main, /setInterval\(check, 6 \* 60 \* 60 \* 1000\)/);
   assert.match(main, /vivid-update-download/);
   assert.match(main, /vivid-update-install/);
@@ -206,7 +212,9 @@ test("Windows app checks for updates and offers download plus restart-to-install
   assert.match(offlineRenderer, /openLocalTranscode/);
   assert.match(offlineRenderer, /openDownloadTranscode/);
   const downloadsPage = fs.readFileSync(path.join(root, "my-downloads.html"), "utf8");
-  assert.ok(downloadsPage.includes("/desktop/node_modules/hls.js/dist/hls.min.js"));
+  const libraryBootstrap = fs.readFileSync(path.join(root, "scripts", "my-downloads.js"), "utf8");
+  assert.ok(libraryBootstrap.includes("/desktop/node_modules/hls.js/dist/hls.min.js"));
+  assert.ok(libraryBootstrap.includes("https://cdn.jsdelivr.net/npm/hls.js@1.7.3/dist/hls.min.js"));
 });
 
 test("Windows workflow builds on demand or on release tags", () => {
@@ -214,19 +222,38 @@ test("Windows workflow builds on demand or on release tags", () => {
   assert.ok(fs.existsSync(file));
   const workflow = fs.readFileSync(file, "utf8");
   assert.match(workflow, /workflow_dispatch/);
+  assert.ok(workflow.includes("actions/checkout@v7"));
+  assert.ok(workflow.includes("actions/setup-node@v7"));
+  assert.ok(workflow.includes("actions/upload-artifact@v7"));
+  assert.equal(workflow.includes("actions/checkout@v4"), false);
+  assert.equal(workflow.includes("actions/setup-node@v4"), false);
+  assert.equal(workflow.includes("actions/upload-artifact@v4"), false);
   assert.match(workflow, /desktop:dist/);
   assert.match(workflow, /GH_TOKEN:.*secrets\.GITHUB_TOKEN/);
   assert.match(workflow, /contents: write/);
   assert.match(workflow, /Decide whether this push publishes a release/);
+  assert.match(workflow, /Require Windows code-signing credentials for production release/);
+  assert.match(workflow, /Verify Windows Authenticode signatures/);
   assert.match(workflow, /Ensure matching release tag exists before publishing/);
+  assert.match(workflow, /Create or reuse draft release for electron-builder/);
+  assert.ok(workflow.indexOf("Ensure matching release tag exists before publishing") < workflow.indexOf("Create or reuse draft release for electron-builder"));
+  assert.ok(workflow.indexOf("Create or reuse draft release for electron-builder") < workflow.indexOf("Build auto-updatable Windows release files"));
+  assert.ok(workflow.indexOf("Build auto-updatable Windows release files") < workflow.indexOf("Verify updater metadata was generated"));
+  assert.match(workflow, /Verify draft release contains all required assets/);
   assert.match(workflow, /git tag -a \$tag/);
   assert.match(workflow, /git push origin "refs\/tags\/\$tag"/);
   assert.match(workflow, /Verify updater metadata was generated/);
   assert.match(workflow, /Build auto-updatable Windows release files/);
-  assert.match(workflow, /Publish installer and updater metadata together/);
+  assert.match(workflow, /Verify desktop runtime lockfile is synchronized/);
+  assert.match(workflow, /working-directory: desktop/);
+  assert.match(workflow, /npm install --omit=dev --no-audit --no-fund/);
+  assert.match(workflow, /Validate generated desktop runtime lockfile with a clean install/);
+  assert.match(workflow, /Commit regenerated desktop runtime lockfile/);
   assert.match(workflow, /gh release create/);
+  assert.match(workflow, /--draft/);
+  assert.match(workflow, /Publish verified Windows release/);
+  assert.ok(workflow.includes("gh release edit $tag --draft=false"));
   assert.match(workflow, /--verify-tag/);
-  assert.match(workflow, /Verify published updater assets/);
   assert.match(workflow, /releases\/tags\/\$tag/);
   assert.match(workflow, /Vivid-Cinema-Setup-\$version\.exe\.blockmap/);
   assert.match(workflow, /latest\.yml/);
@@ -271,8 +298,11 @@ test("desktop download runtime dependencies are isolated and installed before la
   const runtime = JSON.parse(fs.readFileSync(path.join(root, "desktop", "package.json"), "utf8"));
   const runtimeLock = JSON.parse(fs.readFileSync(path.join(root, "desktop", "package-lock.json"), "utf8"));
   assert.equal(runtime.dependencies.webtorrent, "1.9.7");
-  assert.equal(runtime.dependencies["torrent-search-api"], "^2.1.4");
-  assert.equal(runtimeLock.packages[""].dependencies.webtorrent, "1.9.7");
+  assert.equal(runtime.dependencies["torrent-search-api"], "2.1.4");
+  assert.equal(runtimeLock.name, runtime.name);
+  assert.equal(runtimeLock.version, runtime.version);
+  assert.deepEqual(runtimeLock.packages[""].dependencies, runtime.dependencies);
+  assert.equal(runtimeLock.packages[""].devDependencies, undefined);
   assert.equal(pkg.scripts["predesktop:start"], undefined);
   assert.equal(pkg.scripts["predesktop:dist"], undefined);
   assert.ok(pkg.build.files.includes("desktop/node_modules/**"));
@@ -462,4 +492,29 @@ test("Windows desktop release uses the built-in player without an mpv build or s
   assert.equal(pkg.build.extraResources.length, 0);
   assert.ok(!pkg.scripts["predesktop:dist"]);
   assert.ok(!pkg.scripts["predesktop:publish"]);
+});
+
+test("Windows runtime is current, hardened, and the offline shell cache is invalidated", () => {
+  assert.equal(pkg.devDependencies.electron, "45.2.1");
+  assert.equal(pkg.version, "1.0.42");
+  assert.deepEqual(pkg.build.electronFuses, {
+    runAsNode: false,
+    enableNodeOptionsEnvironmentVariable: false,
+    enableNodeCliInspectArguments: false,
+    enableEmbeddedAsarIntegrityValidation: true,
+    onlyLoadAppFromAsar: true,
+    loadBrowserProcessSpecificV8Snapshot: false,
+    grantFileProtocolExtraPrivileges: false
+  });
+  assert.equal(pkg.dependencies["electron-updater"], undefined);
+  const preload = fs.readFileSync(path.join(root, "desktop", "preload.cjs"), "utf8");
+  assert.doesNotMatch(preload, /\bBuffer\b|\bsetImmediate\b|\bclearImmediate\b|require\(["'](?:events|timers|url)["']\)/);
+  const serviceWorker = fs.readFileSync(path.join(root, "service-worker.js"), "utf8");
+  assert.ok(serviceWorker.includes('CACHE_NAME = "vivid-cinema-shell-v273"'));
+  assert.ok(serviceWorker.includes("./scripts/downloads/desktop-offline.js?windows-offline-hls-v2"));
+  assert.ok(serviceWorker.includes("./scripts/downloads/transcode-player.js?windows-offline-hls-v2"));
+  const offlineRenderer = fs.readFileSync(path.join(root, "scripts", "downloads", "desktop-offline.js"), "utf8");
+  assert.ok(offlineRenderer.includes("./transcode-player.js?windows-offline-hls-v2"));
+  const myDownloads = fs.readFileSync(path.join(root, "scripts", "my-downloads.js"), "utf8");
+  assert.ok(myDownloads.includes('import("./downloads/desktop-offline.js?windows-offline-hls-v2")'));
 });
