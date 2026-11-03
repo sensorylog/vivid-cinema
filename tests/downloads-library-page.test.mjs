@@ -42,12 +42,12 @@ test("desktop release search is identity-gated and batches up to five unique mov
   const desktop = await readFile(new URL("../scripts/downloads/desktop-offline.js", import.meta.url), "utf8");
   const page = await readFile(new URL("../my-downloads.html", import.meta.url), "utf8");
   assert.match(desktop, /matchesSelectedRelease\\(media,item\\)/);
-  assert.match(desktop, /batchQueue\\.length>=5/);
-  assert.match(desktop, /batchIdentity\\(item\\.media\\)===key/);
-  assert.match(desktop, /Promise\\.allSettled\\(pending\\.map\\(item=>engine\\.start/);
-  assert.match(desktop, /sessionStorage\\.setItem\\(BATCH_KEY/);
-  assert.match(desktop, /function transferText\\(job\\)/);
-  assert.match(desktop, /job\\.peers/);
+  assert.ok(desktop.includes("batchQueue.length>=5"));
+  assert.ok(desktop.includes("batchIdentity(item.media)===key"));
+  assert.ok(desktop.includes("Promise.allSettled(pending.map(item=>engine.start"));
+  assert.ok(desktop.includes("sessionStorage.setItem(BATCH_KEY"));
+  assert.ok(desktop.includes("function transferText(job)"));
+  assert.ok(desktop.includes("Number(job.peers)"));
   assert.match(page, /id="desktop-add-selected"/);
   assert.match(page, /id="desktop-batch-queue"/);
 });
@@ -75,7 +75,7 @@ test("failed movie and episode downloads show their actual recovery reason", asy
   const styles = await readFile(new URL("../styles/my-downloads.css", import.meta.url), "utf8");
   assert.match(desktop, /function errorMarkup\(job\)/);
   assert.match(desktop, /job\.status!==\"failed\"\|\|!job\.error/);
-  assert.match(desktop, /progressMarkup\(job\)\+errorMarkup\(job\)\+fileMarkup\(job\)/);
+  assert.ok(desktop.includes("progressMarkup(job)+transferMarkup(job)+errorMarkup(job)+fileMarkup(job)"));
   assert.match(styles, /\.offline-job-error/);
 });
 
