@@ -24,7 +24,7 @@ test("Windows installer and portable executable targets use Vivid branding", () 
   assert.equal(pkg.build.publish[0].releaseType, "draft");
   assert.equal(pkg.build.publish[0].owner, "sensorylog");
   assert.equal(pkg.build.publish[0].repo, "vivid-cinema");
-  assert.deepEqual(pkg.build.publish[0], { provider: "github", owner: "sensorylog", repo: "vivid-cinema", releaseType: "release" });
+  assert.deepEqual(pkg.build.publish[0], { provider: "github", owner: "sensorylog", repo: "vivid-cinema", releaseType: "draft" });
   assert.ok(pkg.build.files.includes("!node_modules/**"));
   const desktopRuntime = JSON.parse(fs.readFileSync(path.join(root, "desktop", "package.json"), "utf8"));
   assert.ok(desktopRuntime.dependencies["ffmpeg-static"]);
