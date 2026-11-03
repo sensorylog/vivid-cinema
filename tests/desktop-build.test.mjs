@@ -14,6 +14,7 @@ test("desktop packaging is opt-in and preserves existing scripts", () => {
   assert.match(pkg.scripts.test, /tests\/desktop-build\.test\.mjs/);
   assert.equal(pkg.scripts["check:syntax"], "node automation/check-syntax.mjs");
   assert.ok(pkg.scripts["test:rules"]);
+  assert.ok(pkg.scripts.test.includes("tests/desktop-local-transcode.test.cjs"));
 });
 test("Windows installer and portable executable targets use Vivid branding", () => {
   assert.match(pkg.version, /^\d+\.\d+\.\d+$/, "package version must be valid semantic version");
@@ -26,6 +27,11 @@ test("Windows installer and portable executable targets use Vivid branding", () 
   assert.ok(pkg.build.files.includes("node_modules/electron-updater/**"));
   assert.ok(pkg.build.files.includes("node_modules/builder-util-runtime/**"));
   assert.ok(pkg.build.files.includes("node_modules/ms/**"));
+  const desktopRuntime = JSON.parse(fs.readFileSync(path.join(root, "desktop", "package.json"), "utf8"));
+  assert.ok(desktopRuntime.dependencies["ffmpeg-static"]);
+  assert.ok(desktopRuntime.dependencies["ffprobe-static"]);
+  assert.ok(desktopRuntime.dependencies["hls.js"]);
+  assert.deepEqual(pkg.build.asarUnpack, ["desktop/node_modules/ffmpeg-static/**", "desktop/node_modules/ffprobe-static/**"]);
   assert.deepEqual(pkg.build.win.target.map((target) => target.target), ["nsis", "portable"]);
   assert.equal(pkg.build.asar, true);
   assert.equal(pkg.build.win.icon, "icons/vivid-icon.ico");
@@ -162,6 +168,11 @@ test("Windows app checks for updates and offers download plus restart-to-install
   const redirect = fs.readFileSync(path.join(root, "scripts", "platform-origin-redirect.js"), "utf8");
   assert.match(main, /require\("electron-updater"\)/);
   assert.match(main, /^const \{ DesktopDownloadEngine \} = require\("\.\/download-engine\.cjs"\);/m);
+  assert.match(main, /require\("\.\/local-transcode-engine\.cjs"\)/);
+  assert.match(main, /new LocalTranscodeEngine/);
+  assert.match(main, /vivid-transcode-open-local/);
+  assert.match(main, /vivid-transcode-open-download/);
+  assert.match(main, /vivid-transcode-stop/);
   assert.doesNotMatch(main, /getDownloadEngine|downloadEnginePromise/, "download engine must not be deferred until the first renderer request");
   assert.match(main, /function configureDownloadEngine\(\) \{\s*\/\/ Match the known-working 1\.0\.28 lifecycle[\s\S]*?downloadEngine = new DesktopDownloadEngine\(\{ app, BrowserWindow, dialog, shell \}\);/);
   assert.match(main, /return downloadEngine\.start\(result, media\)/);
@@ -186,7 +197,16 @@ test("Windows app checks for updates and offers download plus restart-to-install
   assert.doesNotMatch(redirect, /netlify/i, "native redirect must use the current primary host");
   assert.match(preload, /Restart & install/);
   assert.match(preload, /vivid-update-status/);
+  assert.match(preload, /openLocalTranscode/);
+  assert.match(preload, /openDownloadTranscode/);
+  assert.match(preload, /stopTranscode/);
   assert.ok(fs.existsSync(path.join(root, "styles", "vivid-desktop-update.css")));
+  const offlineRenderer = fs.readFileSync(path.join(root, "scripts", "downloads", "desktop-offline.js"), "utf8");
+  assert.match(offlineRenderer, /createTranscodePlayer/);
+  assert.match(offlineRenderer, /openLocalTranscode/);
+  assert.match(offlineRenderer, /openDownloadTranscode/);
+  const downloadsPage = fs.readFileSync(path.join(root, "my-downloads.html"), "utf8");
+  assert.ok(downloadsPage.includes("/desktop/node_modules/hls.js/dist/hls.min.js"));
 });
 
 test("Windows workflow builds on demand or on release tags", () => {
@@ -277,7 +297,7 @@ test("Vivid Ultra Player keeps Chromium playback and adds guarded native media c
   const page = fs.readFileSync(path.join(root, "my-downloads.html"), "utf8");
   const styles = fs.readFileSync(path.join(root, "styles", "my-downloads.css"), "utf8");
   const subtitleEngine = fs.readFileSync(path.join(root, "scripts", "downloads", "subtitle-engine.js"), "utf8");
-  assert.match(page, /<video id="offline-player" controls playsinline preload="metadata"><\/video>/);
+  assert.match(page, /<video id="offline-player" controls playsinline preload="metadata" crossorigin="anonymous"><\/video>/);
   assert.match(page, /offline-skip-back/);
   assert.match(page, /offline-skip-forward/);
   assert.match(page, /offline-subtitle-file/);
@@ -306,8 +326,9 @@ test("Ultra Player adds explicit resume choices, safe series-next matching and c
   assert.match(page, /offline-resume-restart/);
   assert.match(page, /offline-next-episode/);
   assert.match(player, /getPlaybackPosition\(jobId,fileIndex\)/);
-  const resumePromptPosition = player.indexOf('byId("offline-resume-prompt").hidden=false;', player.indexOf("player.addEventListener(\"loadedmetadata\""));
-  const pauseForResumePrompt = player.indexOf("player.pause();", player.indexOf("player.addEventListener(\"loadedmetadata\""));
+  const resumePromptPosition = player.indexOf('byId("offline-resume-prompt").hidden=false;', player.indexOf("function showResumePrompt"));
+  const pauseForResumePrompt = player.indexOf("player.pause();", player.indexOf("function showResumePrompt"));
+  assert.match(player, /pendingResumePosition/);
   assert.ok(resumePromptPosition >= 0 && pauseForResumePrompt > resumePromptPosition, "show resume prompt before pausing so the old saved position is not overwritten");
   assert.match(player, /Continue from /);
   assert.match(player, /clearPlaybackPosition/);

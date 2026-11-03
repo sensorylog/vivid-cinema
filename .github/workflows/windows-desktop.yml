@@ -65,7 +65,9 @@ jobs:
           }
           "publish=$($publish.ToString().ToLower())" >> $env:GITHUB_OUTPUT
       - name: Install desktop runtime dependencies
-        run: npm --prefix desktop ci --omit=dev --no-audit --no-fund
+        run: npm --prefix desktop install --omit=dev --no-audit --no-fund
+      - name: Test local FFmpeg transcode engine
+        run: node --test tests/desktop-local-transcode.test.cjs
       - name: Verify the desktop download engine with a local seeded torrent
         timeout-minutes: 3
         run: node --test tests/desktop-download-engine.integration.test.cjs

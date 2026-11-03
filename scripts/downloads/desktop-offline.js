@@ -4,6 +4,7 @@ import { describeLoadedMedia, probePlaybackCapabilities } from "./media-capabili
 import { inspectMediaUrl } from "./media-inspector.js";
 import { choosePreferredTrack, clearSubtitleOverlay, parseSubtitleFile, renderSubtitleAtTime } from "./subtitle-engine.js";
 import { getPlaybackPreferences, playbackProfileKey, savePlaybackPreferences } from "./playback-preferences.js";
+import { createTranscodePlayer } from "./transcode-player.js";
 
 if (window.vividDownloads?.available) {
 document.body.classList.add("vivid-desktop-offline-library");
@@ -438,6 +439,7 @@ async function refresh(){
   }catch(error){setMessage(error?.message||"Could not load your downloads.");}
 }
 const player = byId("offline-player");
+const transcodePlayer = createTranscodePlayer(player);
 let audioContext = null;
 let audioSource = null;
 let audioGain = null;
@@ -461,6 +463,11 @@ async function updatePlaybackDiagnostics(){
   summary.textContent=media.filename+" · "+media.container.label+" · "+media.resolution+" · "+(media.duration===null?"Duration unavailable":clock(media.duration))+" · "+media.codec;
   const details=byId("offline-file-details");
   details.textContent="Inspecting actual container and track metadata…";
+  if(player.dataset.transcodeSessionId){
+    let codecs={};
+    try{codecs=JSON.parse(player.dataset.transcodeCodecs||"{}");}catch{}
+    details.textContent="FFmpeg compatibility stream · H.264 video · "+(codecs.outputAudio||"No audio stream")+" · Original video: "+(codecs.inputVideo||"unknown")+" · Original audio: "+(codecs.inputAudio||"none");
+  }else{
   try{
     const inspected=await inspectMediaUrl(player.currentSrc,filename);
     if(request!==diagnosticsRequest)return;
@@ -475,6 +482,7 @@ async function updatePlaybackDiagnostics(){
     details.textContent=inspected.format+" · "+trackSummary+" · "+duration+" · "+resolution+" · "+(inspected.partial?"Metadata scan limited to first 32 MiB":"Metadata scan complete")+". "+inspected.note;
   }catch(error){
     if(request===diagnosticsRequest){player.dataset.frameRate="";byId("offline-frame-back").disabled=true;byId("offline-frame-forward").disabled=true;details.textContent="Media metadata scan unavailable: "+(error?.message||"Unknown inspection error");}
+  }
   }
   if(!capabilityReportPromise)capabilityReportPromise=probePlaybackCapabilities({video:player});
   const report=await capabilityReportPromise;
@@ -507,8 +515,14 @@ async function updatePlaybackDiagnostics(){
   addGroup("Audio codecs",report.audioProfiles);
   byId("offline-capability-note").textContent=report.note+" These estimates describe this Windows device and Chromium build; they do not confirm the codecs inside the selected file.";
 }
+function playbackDuration(){
+  const nativeDuration=Number(player.duration);
+  if(Number.isFinite(nativeDuration)&&nativeDuration>0)return nativeDuration;
+  const availableDuration=Number(player.dataset.transcodeDuration);
+  return Number.isFinite(availableDuration)&&availableDuration>0?availableDuration:0;
+}
 function syncPlayerControls(){
-  const duration=Number.isFinite(player.duration)?player.duration:0;
+  const duration=playbackDuration();
   if(seekPreviewTarget===null)byId("offline-seek").value=duration?String(Math.round(player.currentTime/duration*100000)):"0";
   byId("offline-time").textContent=clock(player.currentTime)+" / "+clock(duration);
   byId("offline-play-toggle").textContent=player.paused?"Play":"Pause";
@@ -550,8 +564,9 @@ function ensureAudioProcessing(){
 }
 let seekFeedbackTimer=0;
 function seekBy(seconds){
-  if(!Number.isFinite(player.duration))return;
-  player.currentTime=Math.max(0,Math.min(player.duration,player.currentTime+seconds));
+  const duration=playbackDuration();
+  if(!duration)return;
+  player.currentTime=Math.max(0,Math.min(duration,player.currentTime+seconds));
   const feedback=byId("offline-seek-feedback");
   if(Math.abs(seconds)===10)feedback.textContent=seconds<0?"−10 seconds":"+10 seconds";else feedback.textContent=(seconds<0?"−":"+")+Math.abs(seconds)+" seconds";
   feedback.className="offline-seek-feedback "+(seconds<0?"is-back":"is-forward");
@@ -626,7 +641,7 @@ byId("offline-skip-intro").addEventListener("click",()=>{
 });
 byId("offline-skip-credits").addEventListener("click",()=>{
   const credits=chapterCues.find(cue=>creditsPattern.test(String(cue.text||""))&&player.currentTime>=cue.startTime&&player.currentTime<cue.endTime);
-  if(credits)player.currentTime=Math.min(Number.isFinite(player.duration)?player.duration:credits.endTime,Math.max(credits.endTime,credits.startTime));
+  if(credits)player.currentTime=Math.min(playbackDuration()||credits.endTime,Math.max(credits.endTime,credits.startTime));
 });
 function loadExternalSubtitle(file){
   if(!file)return;
@@ -700,7 +715,7 @@ function refreshSubtitleTracks(){
   const preferred=String(currentPlaybackPreferences.subtitleLanguage||"");
   const subtitleOff=currentPlaybackPreferences.subtitleOff===true||preferred==="off";
   const eligibleTracks=Array.from(tracks||[]).filter(track=>track.kind!=="chapters");
-  const preferredIndex=choosePreferredTrack(eligibleTracks,preferred);
+  const preferredIndex=choosePreferredTrack(eligibleTracks,preferred||"en");
   const selectable=[];
   for(let index=0;index<tracks.length;index++){
     const track=tracks[index];
@@ -773,15 +788,16 @@ byId("offline-skip-back").addEventListener("click",()=>seekBy(-10));
 byId("offline-skip-forward").addEventListener("click",()=>seekBy(10));
 function stepFrame(direction){
   const frameRate=Number(player.dataset.frameRate);
-  if(!Number.isFinite(player.duration)||!Number.isFinite(frameRate)||frameRate<=0){
+  const duration=playbackDuration();
+  if(!duration||!Number.isFinite(frameRate)||frameRate<=0){
     setMessage("Frame stepping is unavailable because this file's nominal frame rate could not be read.");
     return;
   }
   player.pause();
   const currentFrame=Math.round(player.currentTime*frameRate);
-  const lastFrame=Math.max(0,Math.ceil(player.duration*frameRate)-1);
+  const lastFrame=Math.max(0,Math.ceil(duration*frameRate)-1);
   const nextFrame=Math.max(0,Math.min(lastFrame,currentFrame+(direction<0?-1:1)));
-  player.currentTime=Math.min(player.duration,nextFrame/frameRate);
+  player.currentTime=Math.min(duration,nextFrame/frameRate);
 }
 byId("offline-frame-back").addEventListener("click",()=>stepFrame(-1));
 byId("offline-frame-forward").addEventListener("click",()=>stepFrame(1));
@@ -866,6 +882,7 @@ function resetSeekPreviewSource(){
   seekPreview.hidden=true;
 }
 function ensureSeekPreviewSource(){
+  if(player.dataset.transcodeSessionId)return false;
   const source=player.currentSrc||player.src;
   if(!source||source===seekPreviewSource)return Boolean(source);
   seekPreviewRequest++;
@@ -883,8 +900,10 @@ function drawSeekPreview(){
   try{context.drawImage(seekPreviewVideo,0,0,seekPreview.width,seekPreview.height);}catch{}
 }
 function updateSeekPreview(target){
+  if(player.dataset.transcodeSessionId){seekPreview.hidden=true;return;}
   if(!Number.isFinite(target)||!ensureSeekPreviewSource())return;
-  seekPreviewTarget=Math.max(0,Math.min(Number.isFinite(player.duration)?player.duration:target,target));
+  const duration=playbackDuration();
+  seekPreviewTarget=Math.max(0,Math.min(duration||target,target));
   const request=++seekPreviewRequest;
   const seekWhenReady=()=>{
     if(request!==seekPreviewRequest||seekPreviewTarget===null)return;
@@ -902,12 +921,13 @@ seekPreviewVideo.addEventListener("loadedmetadata",()=>{
 seekPreviewVideo.addEventListener("seeked",drawSeekPreview);
 seekPreviewVideo.addEventListener("loadeddata",drawSeekPreview);
 seekInput.addEventListener("input",event=>{
-  if(!Number.isFinite(player.duration))return;
+  const duration=playbackDuration();
+  if(!duration)return;
   seekPreview.hidden=false;
-  updateSeekPreview(player.duration*(Number(event.target.value)/100000));
+  updateSeekPreview(duration*(Number(event.target.value)/100000));
 });
 function commitSeekPreview(){
-  if(seekPreviewTarget!==null&&Number.isFinite(player.duration))player.currentTime=seekPreviewTarget;
+  if(seekPreviewTarget!==null&&playbackDuration()>0)player.currentTime=seekPreviewTarget;
   seekPreviewTarget=null;
   seekPreview.hidden=true;
 }
@@ -1021,7 +1041,8 @@ function syncNextEpisode(job){
 }
 byId("offline-resume-continue").addEventListener("click",async()=>{
   const prompt=byId("offline-resume-prompt");
-  if(resumePosition>0&&Number.isFinite(player.duration)&&resumePosition<player.duration-1)player.currentTime=resumePosition;
+  const duration=playbackDuration();
+  if(resumePosition>0&&duration>0&&resumePosition<duration-1)player.currentTime=resumePosition;
   prompt.hidden=true;resumePosition=0;
   try{await player.play();}catch{setMessage("Press Play to continue watching.");}
   showPlayerControls();
@@ -1061,24 +1082,54 @@ player.addEventListener("pause",()=>{
   if(!byId("offline-resume-prompt").hidden)return;
   if(player.dataset.jobId&&player.currentTime>0)void engine.setPlaybackPosition(player.dataset.jobId,Number(player.dataset.fileIndex)||0,player.currentTime).catch(()=>{});
 });
+function showResumePrompt(saved){
+  const duration=playbackDuration();
+  if(saved>5&&player.dataset.transcodeSessionId&&player.dataset.transcodeComplete!=="true"&&(!duration||saved>=duration-30)){
+    player.dataset.pendingResumePosition=String(saved);
+    resumePosition=saved;
+    byId("offline-resume-prompt").hidden=true;
+    return false;
+  }
+  if(!(saved>5)||!duration||saved>=duration-30){
+    resumePosition=0;
+    byId("offline-resume-prompt").hidden=true;
+    return false;
+  }
+  resumePosition=saved;
+  byId("offline-resume-copy").textContent="Continue from "+clock(saved)+"?";
+  byId("offline-resume-prompt").hidden=false;
+  player.pause();
+  showPlayerControls();
+  return true;
+}
 player.addEventListener("loadedmetadata",()=>{
   const jobId=player.dataset.jobId, fileIndex=Number(player.dataset.fileIndex)||0;
+  const sessionId=player.dataset.transcodeSessionId||"";
+  delete player.dataset.pendingResumePosition;
   void engine.getPlaybackPosition(jobId,fileIndex).then(saved=>{
-    if(player.dataset.jobId!==jobId||Number(player.dataset.fileIndex)!==fileIndex)return;
-    if(saved>5&&Number.isFinite(player.duration)&&saved<player.duration-30){
+    if(player.dataset.jobId!==jobId||Number(player.dataset.fileIndex)!==fileIndex||(player.dataset.transcodeSessionId||"")!==sessionId)return;
+    const duration=playbackDuration();
+    if(saved>5&&sessionId&&(!duration||(saved>=duration-30&&player.dataset.transcodeComplete!=="true"))){
+      player.dataset.pendingResumePosition=String(saved);
       resumePosition=saved;
-      byId("offline-resume-copy").textContent="Continue from "+clock(saved)+"?";
-      byId("offline-resume-prompt").hidden=false;
-      player.pause();
-      showPlayerControls();
-    }else{
-      resumePosition=0;
-      byId("offline-resume-prompt").hidden=true;
+      return;
     }
+    showResumePrompt(saved);
     syncPlayerControls();
-  }).catch(()=>{resumePosition=0;byId("offline-resume-prompt").hidden=true;syncPlayerControls();});
+  }).catch(()=>{
+    if(player.dataset.jobId!==jobId||(player.dataset.transcodeSessionId||"")!==sessionId)return;
+    resumePosition=0;byId("offline-resume-prompt").hidden=true;syncPlayerControls();
+  });
 });
-player.addEventListener("durationchange",syncPlayerControls);
+player.addEventListener("durationchange",()=>{
+  syncPlayerControls();
+  const pending=Number(player.dataset.pendingResumePosition);
+  const duration=playbackDuration();
+  if(pending>5&&duration>0&&(pending<duration-30||player.dataset.transcodeComplete==="true")){
+    delete player.dataset.pendingResumePosition;
+    showResumePrompt(pending);
+  }
+});
 player.addEventListener("loadedmetadata",()=>{void updatePlaybackDiagnostics();});
 player.addEventListener("loadedmetadata",refreshAudioTracks);
 function describePlaybackError(){
@@ -1130,6 +1181,7 @@ player.addEventListener("ended",()=>{
 });
 window.addEventListener("pagehide",()=>{
   if(player.dataset.jobId&&player.currentTime>0)void engine.setPlaybackPosition(player.dataset.jobId,Number(player.dataset.fileIndex)||0,player.currentTime).catch(()=>{});
+  void releaseLocalMedia();
 });
 window.addEventListener("keydown",event=>{
   if(playerSection.hidden||event.target.matches("input,textarea,select,button,[contenteditable='true']"))return;
@@ -1147,27 +1199,42 @@ window.addEventListener("keydown",event=>{
   if(key==="arrowdown"){event.preventDefault();player.volume=Math.max(0,player.volume-0.05);byId("offline-volume").value=String(player.volume);}
 });
 async function releaseLocalMedia(){
+  const sessionId=player.dataset.transcodeSessionId;
   const token=player.dataset.localMediaToken;
-  if(!token)return;
+  player.dataset.transcodeSessionId="";
+  player.dataset.transcodeCodecs="";
+  delete player.dataset.pendingResumePosition;
   player.dataset.localMediaToken="";
-  try{await engine.releaseLocalFile(token);}catch{}
+  player.dataset.jobId="";
+  player.dataset.fileIndex="0";
+  if(sessionId){
+    transcodePlayer.reset();
+    try{await engine.stopTranscode(sessionId);}catch{}
+  }
+  if(token){
+    player.pause();
+    player.removeAttribute("src");
+    player.load();
+    try{await engine.releaseLocalFile(token);}catch{}
+  }
 }
 async function playLocalFile(){
-  const file=await engine.openLocalFile();
+  const file=await engine.openLocalTranscode();
   if(!file)return;
   await releaseLocalMedia();
-  player.pause();resetSeekPreviewSource();clearExternalSubtitle();chapterTrack=null;chapterCues=[];
-  activePreferenceKey="local:"+file.name+":"+file.size;applyPlaybackPreferences();
-  player.src=file.url;player.dataset.frameRate="";byId("offline-frame-back").disabled=true;byId("offline-frame-forward").disabled=true;player.dataset.jobId="";player.dataset.fileIndex="0";
-  player.dataset.mediaFilename=file.name;player.dataset.localMediaToken=file.token;
-  player.load();lastPositionSave=0;resumePosition=0;
-  byId("offline-player-title").textContent=file.name;
+  resetSeekPreviewSource();clearExternalSubtitle();chapterTrack=null;chapterCues=[];
+  activePreferenceKey="local:"+file.fileName+":"+file.fileSize;applyPlaybackPreferences();
+  player.dataset.frameRate="";byId("offline-frame-back").disabled=true;byId("offline-frame-forward").disabled=true;player.dataset.jobId="";player.dataset.fileIndex="0";
+  player.dataset.mediaFilename=file.fileName;player.dataset.localMediaToken="";player.dataset.transcodeSessionId=file.sessionId;player.dataset.transcodeCodecs=JSON.stringify(file.codecs||{});
+  try{transcodePlayer.load(file);}catch(error){await releaseLocalMedia();throw error;}
+  lastPositionSave=0;resumePosition=0;
+  byId("offline-player-title").textContent=file.fileName;
   byId("offline-resume-prompt").hidden=true;byId("offline-next-episode").hidden=true;
   byId("offline-player-section").dataset.subtitleSize="medium";byId("offline-subtitle-size").value="medium";
   player.controls=false;byId("offline-custom-controls").hidden=false;
   playerSection.classList.remove("controls-hidden");playerSection.hidden=false;
   playerSection.scrollIntoView({behavior:"smooth",block:"start"});
-  try{await player.play();setMessage("Opened "+file.name+".");}catch{setMessage("Your video is ready. Press Play in the Vivid player to begin.");}
+  try{await player.play();setMessage("Opened "+file.fileName+" with Vivid compatibility playback.");}catch{setMessage("Your video is ready. Press Play in the Vivid player to begin.");}
   syncPlayerControls();
 }
 byId("offline-open-local-file").addEventListener("click",async event=>{
@@ -1176,17 +1243,17 @@ byId("offline-open-local-file").addEventListener("click",async event=>{
   finally{button.disabled=false;}
 });
 async function play(job,fileIndex=0){
-  await releaseLocalMedia();
-  const url=await engine.mediaUrl(job.id,fileIndex);
-  if(!url) throw new Error("The saved video file is not available.");
   const file=Array.isArray(job.files)?job.files[fileIndex]:null;
+  const media=await engine.openDownloadTranscode(job.id,fileIndex);
+  if(!media) throw new Error("The saved video file is not available.");
+  await releaseLocalMedia();
   const playerTitle=file&&job.files.length>1?job.title+" — "+file.name:job.title;
   byId("offline-player-title").textContent=playerTitle;
   syncNextEpisode(job);
   byId("offline-resume-prompt").hidden=true;
   resumePosition=0;
   const section=byId("offline-player-section");
-  if(player.dataset.jobId!==job.id||player.dataset.fileIndex!==String(fileIndex)){player.pause();clearExternalSubtitle();activePreferenceKey=playbackProfileKey(job,fileIndex);applyPlaybackPreferences();resetSeekPreviewSource();player.src=url;player.dataset.frameRate="";byId("offline-frame-back").disabled=true;byId("offline-frame-forward").disabled=true;player.dataset.jobId=job.id;player.dataset.fileIndex=String(fileIndex);player.dataset.localMediaToken="";player.dataset.mediaFilename=file?.name||job.title||"Saved media";if(player.muted&&player.volume>0)player.muted=false;player.load();lastPositionSave=0;byId("offline-player-section").dataset.subtitleSize="medium";byId("offline-subtitle-size").value="medium";}
+  player.pause();clearExternalSubtitle();activePreferenceKey=playbackProfileKey(job,fileIndex);applyPlaybackPreferences();resetSeekPreviewSource();player.dataset.frameRate="";byId("offline-frame-back").disabled=true;byId("offline-frame-forward").disabled=true;player.dataset.jobId=job.id;player.dataset.fileIndex=String(fileIndex);player.dataset.localMediaToken="";player.dataset.transcodeSessionId=media.sessionId;player.dataset.transcodeCodecs=JSON.stringify(media.codecs||{});player.dataset.mediaFilename=media.fileName||file?.name||job.title||"Saved media";try{transcodePlayer.load(media);}catch(error){await releaseLocalMedia();throw error;}if(player.muted&&player.volume>0)player.muted=false;lastPositionSave=0;byId("offline-player-section").dataset.subtitleSize="medium";byId("offline-subtitle-size").value="medium";
   player.controls=false;
   byId("offline-custom-controls").hidden=false;
   section.classList.remove("controls-hidden");
