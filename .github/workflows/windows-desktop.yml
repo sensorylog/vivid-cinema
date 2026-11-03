@@ -68,6 +68,14 @@ jobs:
         run: npm --prefix desktop install --omit=dev --no-audit --no-fund
       - name: Verify desktop runtime lockfile is synchronized
         run: node -e "const p=require('./desktop/package.json');const l=require('./desktop/package-lock.json');if(l.name!==p.name||l.version!==p.version||JSON.stringify(l.packages[''].dependencies)!==JSON.stringify(p.dependencies))process.exit(1)"
+      - name: Upload resolved desktop runtime lockfile for review
+        if: github.event_name == 'pull_request'
+        uses: actions/upload-artifact@v4
+        with:
+          name: vivid-cinema-desktop-runtime-lock-${{ github.run_number }}
+          path: desktop/package-lock.json
+          if-no-files-found: error
+          retention-days: 7
       - name: Test local FFmpeg transcode engine
         run: node --test tests/desktop-local-transcode.test.cjs
       - name: Verify the desktop download engine with a local seeded torrent
