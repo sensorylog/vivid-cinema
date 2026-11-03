@@ -620,9 +620,14 @@ app.on("window-all-closed", () => { if (process.platform !== "darwin") app.quit(
 let shutdownStarted = false;
 app.on("before-quit", event => {
   localMediaRegistry.clear();
-  if ((downloadEngine || transcodeEngine) && !shutdownStarted) {
+  if ((downloadEngine || transcodeEngine || transcodeEngineStartPromise) && !shutdownStarted) {
     event.preventDefault(); shutdownStarted = true;
-    void Promise.allSettled([downloadEngine?.shutdown(), transcodeEngine?.shutdown()]).finally(() => {
+    void (async () => {
+      if (transcodeEngineStartPromise && !transcodeEngine) {
+        await transcodeEngineStartPromise.catch(() => null);
+      }
+      await Promise.allSettled([downloadEngine?.shutdown(), transcodeEngine?.shutdown()]);
+    })().finally(() => {
       if (localServer) localServer.close();
       app.quit();
     });
