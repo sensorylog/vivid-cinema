@@ -400,6 +400,7 @@ function openTitleDownload() {
     sessionStorage.setItem("vivid:pending-desktop-download", JSON.stringify({
       id: media.id,
       title: media.title,
+      year: String(currentDetails?.release_date || currentDetails?.first_air_date || "").slice(0, 4) || String(media.year || ""),
       media_type: media.media_type === "tv" ? "tv" : "movie",
       seasons: media.media_type === "tv" && Array.isArray(currentDetails?.seasons)
         ? currentDetails.seasons.map(season => ({
