@@ -238,6 +238,7 @@ test("Windows workflow builds on demand or on release tags", () => {
   assert.match(workflow, /Verify updater metadata was generated/);
   assert.match(workflow, /Build auto-updatable Windows release files/);
   assert.match(workflow, /Verify desktop runtime lockfile is synchronized/);
+  assert.match(workflow, /working-directory: desktop/);
   assert.match(workflow, /gh release create/);
   assert.match(workflow, /--draft/);
   assert.match(workflow, /Publish verified Windows release/);
@@ -293,6 +294,8 @@ test("desktop download runtime dependencies are isolated and installed before la
   assert.equal(runtimeLock.version, runtime.version);
   assert.deepEqual(runtimeLock.packages[""].dependencies, runtime.dependencies);
   assert.equal(runtimeLock.packages[""].devDependencies, undefined);
+  assert.equal(runtimeLock.packages[""].dependencies["vivid-cinema"], undefined);
+  assert.equal(runtimeLock.packages["node_modules/vivid-cinema"], undefined);
   assert.equal(pkg.scripts["predesktop:start"], undefined);
   assert.equal(pkg.scripts["predesktop:dist"], undefined);
   assert.ok(pkg.build.files.includes("desktop/node_modules/**"));
