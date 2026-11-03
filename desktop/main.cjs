@@ -2,6 +2,9 @@ const { app, BrowserWindow, Menu, dialog, shell, session, ipcMain, net, protocol
 // Enable Chromium's AudioVideoTracks API for embedded audio track selection in the Windows player.
 app.commandLine.appendSwitch("enable-blink-features", "AudioVideoTracks");
 const { performance } = require("node:perf_hooks");
+const startupStartedAt = performance.now();
+const startupDiagnosticsEnabled = process.env.VIVID_PERF_DIAGNOSTICS === "1" ||
+  app.commandLine.hasSwitch("vivid-perf");
 const http = require("node:http");
 const fs = require("node:fs");
 const path = require("node:path");
@@ -102,10 +105,6 @@ let transcodeEngine;
 let transcodeEngineStartPromise = null;
 let autoUpdater = null;
 let autoUpdaterListenersInstalled = false;
-const startupStartedAt = performance.now();
-const startupDiagnosticsEnabled = process.env.VIVID_PERF_DIAGNOSTICS === "1" ||
-  app.commandLine.hasSwitch("vivid-perf");
-
 function markStartup(stage) {
   if (!startupDiagnosticsEnabled) return;
   console.info("[Vivid startup] " + stage + ": " + Math.round(performance.now() - startupStartedAt) + "ms");
