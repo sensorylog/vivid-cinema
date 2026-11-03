@@ -3,8 +3,24 @@ import { createIndexedDBPersistence } from "./downloads/indexeddb-persistence.js
 import { createBrowserDownloadAdapter } from "./downloads/browser-direct-adapter.js";
 import { createOfflinePlaybackController } from "./downloads/offline-playback.js";
 
+async function loadHlsRuntime() {
+  if (window.Hls) return;
+  await new Promise(resolve => {
+    const script = document.createElement("script");
+    script.async = true;
+    script.src = window.vividDownloads?.available
+      ? "/desktop/node_modules/hls.js/dist/hls.min.js"
+      : "https://cdn.jsdelivr.net/npm/hls.js@1.7.3/dist/hls.min.js";
+    script.onload = resolve;
+    script.onerror = resolve;
+    document.head.appendChild(script);
+  });
+}
+
+await loadHlsRuntime();
+
 if (window.vividDownloads?.available) {
-  void import("./downloads/desktop-offline.js?strict-release-batch-v1");
+  void import("./downloads/desktop-offline.js?windows-offline-hls-v2");
 } else {
 const byId = id => document.getElementById(id);
 const jobsNode = byId("offline-jobs");
