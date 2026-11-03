@@ -22,8 +22,6 @@ test("TFLIX-style trending billboard is restored above the unchanged featured-ca
   assert.match(home, /vivid-tflix-hero\.css/);
   assert.ok(home.includes("scripts/home-optional-resources.js"));
   assert.ok(read("../scripts/home-optional-resources.js").includes('import("./tflix-hero.js?v=hero-fast-fallback-1")'));
-  assert.ok(home.includes("scripts/home-optional-resources.js"));
-  assert.ok(read("../scripts/home-optional-resources.js").includes('import("./tflix-hero.js?v=hero-fast-fallback-1")'));
   assert.match(home, /fonts\.googleapis\.com/);
 
   const heroCss = read("../styles/vivid-tflix-hero.css");
