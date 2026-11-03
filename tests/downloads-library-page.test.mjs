@@ -38,6 +38,20 @@ test("desktop downloads expose live transfer phases and accessible progress upda
   assert.match(desktop, /role="progressbar"/);
 });
 
+test("desktop release search is identity-gated and batches up to five unique movies or episodes", async () => {
+  const desktop = await readFile(new URL("../scripts/downloads/desktop-offline.js", import.meta.url), "utf8");
+  const page = await readFile(new URL("../my-downloads.html", import.meta.url), "utf8");
+  assert.match(desktop, /matchesSelectedRelease\\(media,item\\)/);
+  assert.match(desktop, /batchQueue\\.length>=5/);
+  assert.match(desktop, /batchIdentity\\(item\\.media\\)===key/);
+  assert.match(desktop, /Promise\\.allSettled\\(pending\\.map\\(item=>engine\\.start/);
+  assert.match(desktop, /sessionStorage\\.setItem\\(BATCH_KEY/);
+  assert.match(desktop, /function transferText\\(job\\)/);
+  assert.match(desktop, /job\\.peers/);
+  assert.match(page, /id="desktop-add-selected"/);
+  assert.match(page, /id="desktop-batch-queue"/);
+});
+
 test("desktop search result button leaves Starting state after the start request settles", async () => {
   const desktop = await readFile(new URL("../scripts/downloads/desktop-offline.js", import.meta.url), "utf8");
   assert.match(desktop, /finally\s*\{[\s\S]*button\.disabled=false;button\.textContent="Download"/);
@@ -142,7 +156,7 @@ test("Windows player runtime and stylesheet have cache-busting URLs", async () =
   const worker = await readFile(new URL("../service-worker.js", import.meta.url), "utf8");
   assert.match(page, /my-downloads\.css\?v=offline-cinema-redesign-1/);
   assert.match(script, /desktop-offline\.js\?builtin-player-v1/);
-  assert.match(worker, /vivid-cinema-shell-v269/);
+  assert.match(worker, /vivid-cinema-shell-v270/);
   assert.match(worker, /desktop-offline\.js\?builtin-player-v1/);
   assert.match(worker, /my-downloads\.css\?v=offline-cinema-redesign-1/);
 });
@@ -187,6 +201,6 @@ test("offline redesign cache is versioned and precaches the active stylesheet", 
   const page = await readFile(new URL("../my-downloads.html", import.meta.url), "utf8");
   const worker = await readFile(new URL("../service-worker.js", import.meta.url), "utf8");
   assert.match(page, /my-downloads\.css\?v=offline-cinema-redesign-1/);
-  assert.match(worker, /vivid-cinema-shell-v269/);
+  assert.match(worker, /vivid-cinema-shell-v270/);
   assert.match(worker, /my-downloads\.css\?v=offline-cinema-redesign-1/);
 });
