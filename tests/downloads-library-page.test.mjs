@@ -41,7 +41,7 @@ test("desktop downloads expose live transfer phases and accessible progress upda
 test("desktop release search is identity-gated and batches up to five unique movies or episodes", async () => {
   const desktop = await readFile(new URL("../scripts/downloads/desktop-offline.js", import.meta.url), "utf8");
   const page = await readFile(new URL("../my-downloads.html", import.meta.url), "utf8");
-  assert.match(desktop, /matchesSelectedRelease\\(media,item\\)/);
+  assert.ok(desktop.includes("matchesSelectedRelease(media,item)"));
   assert.ok(desktop.includes("batchQueue.length>=5"));
   assert.ok(desktop.includes("batchIdentity(item.media)===key"));
   assert.ok(desktop.includes("Promise.allSettled(pending.map(item=>engine.start"));
@@ -154,11 +154,11 @@ test("Windows player runtime and stylesheet have cache-busting URLs", async () =
   const page = await readFile(new URL("../my-downloads.html", import.meta.url), "utf8");
   const script = await readFile(new URL("../scripts/my-downloads.js", import.meta.url), "utf8");
   const worker = await readFile(new URL("../service-worker.js", import.meta.url), "utf8");
-  assert.match(page, /my-downloads\.css\?v=offline-cinema-redesign-1/);
+  assert.match(page, /my-downloads\.css\?v=offline-cinema-batch-1/);
   assert.match(script, /desktop-offline\.js\?builtin-player-v1/);
   assert.match(worker, /vivid-cinema-shell-v270/);
   assert.match(worker, /desktop-offline\.js\?builtin-player-v1/);
-  assert.match(worker, /my-downloads\.css\?v=offline-cinema-redesign-1/);
+  assert.match(worker, /my-downloads\.css\?v=offline-cinema-batch-1/);
 });
 
 test("offline library filters movies, sorts saved media, and reports on-device storage", async () => {
@@ -200,7 +200,7 @@ test("offline redesign provides title details, season grouping and continue watc
 test("offline redesign cache is versioned and precaches the active stylesheet", async () => {
   const page = await readFile(new URL("../my-downloads.html", import.meta.url), "utf8");
   const worker = await readFile(new URL("../service-worker.js", import.meta.url), "utf8");
-  assert.match(page, /my-downloads\.css\?v=offline-cinema-redesign-1/);
+  assert.match(page, /my-downloads\.css\?v=offline-cinema-batch-1/);
   assert.match(worker, /vivid-cinema-shell-v270/);
-  assert.match(worker, /my-downloads\.css\?v=offline-cinema-redesign-1/);
+  assert.match(worker, /my-downloads\.css\?v=offline-cinema-batch-1/);
 });
