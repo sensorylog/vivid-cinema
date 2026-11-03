@@ -171,7 +171,7 @@ test("app shell includes current versioned assets without dropping existing cach
   for (const current of [
     "./scripts/watch.js?v=watch-player-server-scroll-1",
     "./scripts/live.js?v=live8",
-    "./scripts/title.js?v=no-archive-download-2",
+    "./scripts/title.js?v=download-year-identity-1",
     "./scripts/newsroom.js?v=20261020-newsroom-images-3",
     "./scripts/tflix-hero.js?v=hero-fast-fallback-1",
     "./scripts/mascot-autoplay.js?v=2"
