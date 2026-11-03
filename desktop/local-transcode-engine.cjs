@@ -110,7 +110,7 @@ class LocalTranscodeEngine {
   async inspect(filePath) {
     const result = await runProcess(this.ffprobePath, [
       "-v", "error",
-      "-show_entries", "stream=index,codec_type,codec_name,profile,width,height,channels,channel_layout:stream_tags=language,title:stream_disposition=default,forced",
+      "-show_entries", "stream=index,codec_type,codec_name,profile,width,height,pix_fmt,bits_per_raw_sample,channels,channel_layout:stream_tags=language,title:stream_disposition=default,forced",
       "-of", "json",
       filePath
     ]);
@@ -132,6 +132,10 @@ class LocalTranscodeEngine {
     const video = streams.find(stream => stream.codec_type === "video");
     const audio = streams.filter(stream => stream.codec_type === "audio").sort((a, b) => Number(Boolean(b.disposition?.default)) - Number(Boolean(a.disposition?.default)))[0] || null;
     const subtitle = preferredEnglishSubtitle(streams);
+    const videoPixelFormat = String(video.pix_fmt || "").toLowerCase();
+    const videoBitDepth = Number(video.bits_per_raw_sample || (videoPixelFormat.includes("10") ? 10 : 8));
+    const canCopyVideo = video.codec_name === "h264" && videoPixelFormat === "yuv420p" && videoBitDepth <= 8;
+    const canCopyAudio = !audio || (audio.codec_name === "aac" && Number(audio.channels || 2) <= 2);
     const sessionId = crypto.randomBytes(24).toString("hex");
     const directory = path.join(this.root, sessionId);
     await fs.promises.mkdir(directory, { recursive: true });
@@ -144,9 +148,12 @@ class LocalTranscodeEngine {
       "-map", "0:v:0",
       "-map", audio ? "0:" + audio.index : "0:a:0?",
       "-sn", "-dn",
-      "-c:v", "libx264", "-preset", "ultrafast", "-crf", "23",
-      "-pix_fmt", "yuv420p", "-profile:v", "high",
-      "-c:a", "aac", "-b:a", "192k", "-ac", "2", "-ar", "48000",
+      ...(canCopyVideo ? ["-c:v", "copy"] : [
+        "-c:v", "libx264", "-preset", "ultrafast", "-crf", "23",
+        "-pix_fmt", "yuv420p", "-profile:v", "high",
+        "-vf", "scale=w='min(1920,iw)':h='min(1080,ih)':force_original_aspect_ratio=decrease:force_divisible_by=2"
+      ]),
+      ...(canCopyAudio ? ["-c:a", "copy"] : ["-c:a", "aac", "-b:a", "160k", "-ac", "2", "-ar", "48000"]),
       "-max_muxing_queue_size", "1024",
       "-f", "hls", "-hls_time", "4", "-hls_list_size", "0",
       "-hls_flags", "independent_segments+temp_file",
@@ -219,7 +226,10 @@ class LocalTranscodeEngine {
           inputVideo: video.codec_name || "unknown",
           inputAudio: audio?.codec_name || null,
           outputVideo: "h264",
-          outputAudio: audio ? "aac-stereo" : null
+          outputAudio: audio ? (canCopyAudio ? audio.codec_name : "aac-stereo") : null,
+          videoMode: canCopyVideo ? "copy" : "transcode",
+          audioMode: canCopyAudio ? "copy" : "transcode",
+          downscaled: !canCopyVideo && (Number(video.width || 0) > 1920 || Number(video.height || 0) > 1080)
         },
         subtitle: subtitle ? { language: "en", label: "English", sourceCodec: subtitle.codec_name || "unknown" } : null
       };
