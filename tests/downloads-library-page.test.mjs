@@ -221,5 +221,6 @@ test("My Downloads uses a clear discover, playback and offline-library hierarchy
   assert.match(styles, /\.offline-search-form/);
   assert.match(styles, /\.offline-player-settings-grid/);
   assert.match(styles, /\.offline-summary-grid/);
+  assert.match(styles, /\.offline-job\{/);
   assert.match(styles, /@media\(max-width:720px\)/);
 });
