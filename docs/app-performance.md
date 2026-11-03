@@ -18,6 +18,8 @@ This is a targeted performance pass. It keeps the current Electron + static web 
 - The deferred ambient-art module checks the already-rendered trending rail as well as listening for the normal trending event, so it does not miss data when it starts later.
 - The service-worker shell cache is incremented whenever the new loader is added.
 
+These choices follow Electron's official [performance guidance](https://www.electronjs.org/docs/latest/tutorial/performance): measure first, defer expensive module loading, keep the main process responsive, and schedule low-priority renderer work during idle time.
+
 ## Measurement, not guesswork
 
 Use the same device, network, account state, and cache state before and after a change. Compare cold start and warm start separately.
