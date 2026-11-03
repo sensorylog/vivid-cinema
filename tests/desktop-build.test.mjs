@@ -497,7 +497,7 @@ test("Windows desktop release uses the built-in player without an mpv build or s
 
 test("Windows runtime is current, hardened, and the offline shell cache is invalidated", () => {
   assert.equal(pkg.devDependencies.electron, "45.2.1");
-  assert.equal(pkg.version, "1.0.42");
+  assert.equal(pkg.version, "1.0.43");
   assert.deepEqual(pkg.build.electronFuses, {
     runAsNode: false,
     enableNodeOptionsEnvironmentVariable: false,
