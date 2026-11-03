@@ -677,3 +677,5 @@ html.vivid-performance-legacy .offline-summary div{backdrop-filter:none!importan
 .offline-batch-queue ul{margin:0;padding-left:18px;color:#bdc7dc;font-size:12px;line-height:1.8}
 .offline-batch-queue-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
 .offline-batch-queue button:disabled{opacity:.55;cursor:wait}
+
+.offline-summary small{display:block;margin-top:7px;color:#aebbd4;font-size:10px;font-weight:600}
