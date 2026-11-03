@@ -708,7 +708,7 @@ function refreshSubtitleTracks(){
   const preferred=String(currentPlaybackPreferences.subtitleLanguage||"");
   const subtitleOff=currentPlaybackPreferences.subtitleOff===true||preferred==="off";
   const eligibleTracks=Array.from(tracks||[]).filter(track=>track.kind!=="chapters");
-  const preferredIndex=choosePreferredTrack(eligibleTracks,preferred);
+  const preferredIndex=choosePreferredTrack(eligibleTracks,preferred||"en");
   const selectable=[];
   for(let index=0;index<tracks.length;index++){
     const track=tracks[index];
