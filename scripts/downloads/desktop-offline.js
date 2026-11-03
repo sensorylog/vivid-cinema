@@ -295,8 +295,8 @@ async function renderContinueWatching(){
   }).join("");
 }
 function renderSearch(items){
-  searchResults=items;
-  const identityMatches=currentMedia?items.filter(item=>{
+  searchResults=[...items].sort((a,b)=>(Number(b.seeds)||0)-(Number(a.seeds)||0)||(Number(b.peers)||0)-(Number(a.peers)||0));
+  const identityMatches=currentMedia?searchResults.filter(item=>{
     const media=mediaForResult(item);
     return media&&matchesSelectedRelease(media,item);
   }):items;
@@ -307,7 +307,7 @@ function renderSearch(items){
     const episodeLabel=Number.isInteger(item.episode)
       ? "S"+String(item.season).padStart(2,"0")+"E"+String(item.episode).padStart(2,"0")+(item.episodeTitle?" · "+item.episodeTitle:"")
       : "";
-    const checkbox=currentMedia?'<label class="offline-result-select"><input type="checkbox" data-batch-result="'+escapeHtml(item.id)+'"><span><strong>'+escapeHtml(item.title)+'</strong><p>'+(episodeLabel?'<b>'+escapeHtml(episodeLabel)+'</b> · ':"")+escapeHtml(item.provider)+' · '+escapeHtml(item.size||"Size unknown")+' · '+Math.max(0,Number(item.seeds)||0)+' seeds</p></span></label>':'<div><strong>'+escapeHtml(item.title)+'</strong><p>'+escapeHtml(item.provider)+' · '+escapeHtml(item.size||"Size unknown")+'</p></div>';
+    const checkbox=currentMedia?'<label class="offline-result-select"><input type="checkbox" data-batch-result="'+escapeHtml(item.id)+'"><span><strong>'+escapeHtml(item.title)+'</strong><p>'+(episodeLabel?'<b>'+escapeHtml(episodeLabel)+'</b> · ':"")+escapeHtml(item.provider)+' · '+escapeHtml(item.size||"Size unknown")+' · '+Math.max(0,Number(item.seeds)||0)+' seeds · '+Math.max(0,Number(item.peers)||0)+' peers</p></span></label>':'<div><strong>'+escapeHtml(item.title)+'</strong><p>'+escapeHtml(item.provider)+' · '+escapeHtml(item.size||"Size unknown")+'</p></div>';
     return '<article class="offline-result">'+checkbox+'<button type="button" data-result="'+escapeHtml(item.id)+'">Download</button></article>';
   }).join(""):'<p class="offline-muted">'+(currentMedia&&items.length?"No releases matched this exact title and release identity.":"No matching releases. Try another quality or search term.")+'</p>';
   return filtered.length;
