@@ -276,7 +276,7 @@ class LocalTranscodeEngine {
     let url;
     try { url = new URL(request.url || "/", this.origin); }
     catch { response.writeHead(400).end("Bad request"); return; }
-    const match = /^\/session\/([a-f0-9]{48})\/(index\.m3u8|english\.vtt|segment_\d{5}\.ts)$/.exec(url.pathname);
+    const match = /^\/session\/([a-f0-9]{48})\/(index\.m3u8|english\.vtt|status\.json|segment_\d{5}\.ts)$/.exec(url.pathname);
     if (!match) { response.writeHead(404).end("Not found"); return; }
     const record = this.sessions.get(match[1]);
     if (!record || record.stopped) { response.writeHead(404).end("Session expired"); return; }
