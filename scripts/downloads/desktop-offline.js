@@ -516,10 +516,20 @@ async function updatePlaybackDiagnostics(){
   byId("offline-capability-note").textContent=report.note+" These estimates describe this Windows device and Chromium build; they do not confirm the codecs inside the selected file.";
 }
 function playbackDuration(){
+  if(player.dataset.transcodeSessionId){
+    const sourceDuration=Number(player.dataset.transcodeSourceDuration||player.dataset.transcodeDuration);
+    if(Number.isFinite(sourceDuration)&&sourceDuration>0)return sourceDuration;
+  }
   const nativeDuration=Number(player.duration);
   if(Number.isFinite(nativeDuration)&&nativeDuration>0)return nativeDuration;
-  const availableDuration=Number(player.dataset.transcodeDuration);
+  const availableDuration=Number(player.dataset.transcodeAvailableDuration||player.dataset.transcodeDuration);
   return Number.isFinite(availableDuration)&&availableDuration>0?availableDuration:0;
+}
+function playbackSeekLimit(){
+  const duration=playbackDuration();
+  if(!player.dataset.transcodeSessionId||player.dataset.transcodeComplete==="true")return duration;
+  const available=Number(player.dataset.transcodeAvailableDuration);
+  return Number.isFinite(available)&&available>0?Math.min(duration,available):0;
 }
 function syncPlayerControls(){
   const duration=playbackDuration();
@@ -564,7 +574,7 @@ function ensureAudioProcessing(){
 }
 let seekFeedbackTimer=0;
 function seekBy(seconds){
-  const duration=playbackDuration();
+  const duration=playbackSeekLimit();
   if(!duration)return;
   player.currentTime=Math.max(0,Math.min(duration,player.currentTime+seconds));
   const feedback=byId("offline-seek-feedback");
@@ -924,10 +934,11 @@ seekInput.addEventListener("input",event=>{
   const duration=playbackDuration();
   if(!duration)return;
   seekPreview.hidden=false;
-  updateSeekPreview(duration*(Number(event.target.value)/100000));
+  updateSeekPreview(Math.min(playbackSeekLimit()||0,duration*(Number(event.target.value)/100000)));
 });
 function commitSeekPreview(){
-  if(seekPreviewTarget!==null&&playbackDuration()>0)player.currentTime=seekPreviewTarget;
+  const limit=playbackSeekLimit();
+  if(seekPreviewTarget!==null&&limit>0)player.currentTime=Math.min(limit,seekPreviewTarget);
   seekPreviewTarget=null;
   seekPreview.hidden=true;
 }
@@ -1084,7 +1095,8 @@ player.addEventListener("pause",()=>{
 });
 function showResumePrompt(saved){
   const duration=playbackDuration();
-  if(saved>5&&player.dataset.transcodeSessionId&&player.dataset.transcodeComplete!=="true"&&(!duration||saved>=duration-30)){
+  const available=Number(player.dataset.transcodeAvailableDuration)||0;
+  if(saved>5&&player.dataset.transcodeSessionId&&player.dataset.transcodeComplete!=="true"&&saved>available+2){
     player.dataset.pendingResumePosition=String(saved);
     resumePosition=saved;
     byId("offline-resume-prompt").hidden=true;
@@ -1109,7 +1121,8 @@ player.addEventListener("loadedmetadata",()=>{
   void engine.getPlaybackPosition(jobId,fileIndex).then(saved=>{
     if(player.dataset.jobId!==jobId||Number(player.dataset.fileIndex)!==fileIndex||(player.dataset.transcodeSessionId||"")!==sessionId)return;
     const duration=playbackDuration();
-    if(saved>5&&sessionId&&(!duration||(saved>=duration-30&&player.dataset.transcodeComplete!=="true"))){
+    const available=Number(player.dataset.transcodeAvailableDuration)||0;
+    if(saved>5&&sessionId&&player.dataset.transcodeComplete!=="true"&&saved>available+2){
       player.dataset.pendingResumePosition=String(saved);
       resumePosition=saved;
       return;
@@ -1125,7 +1138,8 @@ player.addEventListener("durationchange",()=>{
   syncPlayerControls();
   const pending=Number(player.dataset.pendingResumePosition);
   const duration=playbackDuration();
-  if(pending>5&&duration>0&&(pending<duration-30||player.dataset.transcodeComplete==="true")){
+  const available=Number(player.dataset.transcodeAvailableDuration)||0;
+  if(pending>5&&duration>0&&(player.dataset.transcodeComplete==="true"||pending<=available+2)){
     delete player.dataset.pendingResumePosition;
     showResumePrompt(pending);
   }
@@ -1151,6 +1165,11 @@ player.addEventListener("playing",()=>{
   const status=byId("offline-message").textContent;
   if(/buffering|local media stream has paused/i.test(status))setMessage("Your movie is playing offline.");
 });
+player.addEventListener("transcodestatuschange",()=>{
+  if(player.dataset.transcodeFailed==="true"){
+    setMessage("The movie could not be fully prepared for playback. "+(player.dataset.transcodeError||"Try opening the file again."));
+  }
+});
 
 player.addEventListener("loadedmetadata",refreshSubtitleTracks);
 player.addEventListener("timeupdate",renderExternalSubtitle);
@@ -1172,7 +1191,10 @@ if(player.audioTracks){
 player.addEventListener("play",syncPlayerControls);
 player.addEventListener("pause",syncPlayerControls);
 player.addEventListener("ended",()=>{
-  if(player.dataset.jobId)void engine.clearPlaybackPosition(player.dataset.jobId,Number(player.dataset.fileIndex)||0).catch(()=>{});
+  const transcodeEndedEarly=Boolean(player.dataset.transcodeSessionId)
+    &&player.dataset.transcodeComplete!=="true"
+    &&Number(player.currentTime)<Number(player.dataset.transcodeSourceDuration||playbackDuration())-5;
+  if(player.dataset.jobId&&!transcodeEndedEarly)void engine.clearPlaybackPosition(player.dataset.jobId,Number(player.dataset.fileIndex)||0).catch(()=>{});
   byId("offline-resume-prompt").hidden=true;
   const job=jobs.find(item=>item.id===player.dataset.jobId);
   syncNextEpisode(job);
