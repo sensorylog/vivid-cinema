@@ -940,7 +940,7 @@ seekInput.addEventListener("input",event=>{
 });
 function commitSeekPreview(){
   const limit=playbackSeekLimit();
-  if(seekPreviewTarget!==null&&limit>0)player.currentTime=Math.min(limit,seekPreviewTarget);
+  if(seekPreviewTarget!==null&&limit>0)player.currentTime=seekPreviewTarget;
   seekPreviewTarget=null;
   seekPreview.hidden=true;
 }
