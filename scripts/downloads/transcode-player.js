@@ -33,6 +33,7 @@ export function createTranscodePlayer(video) {
       hls = new window.Hls({
         enableWorker: true,
         lowLatencyMode: false,
+        startPosition: 0,
         backBufferLength: 90,
         maxBufferLength: 30
       });
