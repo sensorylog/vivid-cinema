@@ -101,6 +101,10 @@ test("Electron defers torrent, FFmpeg and updater dependencies until their featu
   assert.doesNotMatch(startupImports, /require\(["']\.\/(?:download-engine|local-transcode-engine)\.cjs["']\)/);
   assert.doesNotMatch(startupImports, /require\(["']electron-updater["']\)/);
   assert.match(main, /function ensureDownloadEngine\(\)/);
+  const downloadHelper = main.slice(main.indexOf("function ensureDownloadEngine"), main.indexOf("async function ensureTranscodeEngine"));
+  const downloadIpc = main.slice(main.indexOf("function configureDownloadEngine"), main.indexOf("function configureAutoUpdates"));
+  assert.match(downloadHelper, /downloadEngine = new DesktopDownloadEngine/);
+  assert.doesNotMatch(downloadIpc, /new DesktopDownloadEngine/);
   assert.match(main, /async function ensureTranscodeEngine\(\)/);
   assert.match(main, /function ensureAutoUpdater\(\)/);
   assert.match(main, /VIVID_PERF_DIAGNOSTICS/);
