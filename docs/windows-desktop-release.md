@@ -15,7 +15,7 @@ Electron 44 and later no longer publish 32-bit Windows builds, so this project i
 
 - The root package owns the Electron runtime and electron-builder.
 - `desktop/package.json` is the isolated runtime dependency manifest for the desktop process.
-- Desktop runtime modules are installed under `desktop/node_modules` and included in `app.asar`.
+- Desktop runtime modules are installed under `desktop/node_modules` with `npm ci --omit=dev` from the `desktop` directory and included in `app.asar`.
 - FFmpeg and FFprobe binaries are unpacked from ASAR so Windows can execute them.
 - The app itself is loaded from `app.asar`; ASAR integrity validation and Electron fuses are enabled in the packaged binary.
 
