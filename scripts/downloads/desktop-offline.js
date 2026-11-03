@@ -62,6 +62,11 @@ function transferMarkup(job){
   const detail=transferText(job);
   return detail?'<small class="offline-transfer-meta" data-transfer-meta="'+escapeHtml(job.id)+'">'+escapeHtml(detail)+'</small>':"";
 }
+function updateAggregateSpeed(){
+  const total=jobs.filter(job=>job.status==="downloading").reduce((sum,job)=>sum+Math.max(0,Number(job.speed)||0),0);
+  const node=byId("offline-total-speed");
+  if(node)node.textContent=bytes(total)+"/s combined";
+}
 function batchIdentity(media){
   return [media.media_type,media.id,media.season??"",media.episode??""].join(":");
 }
@@ -224,6 +229,7 @@ function render(){
   byId("offline-total").textContent=String(jobs.length);
   byId("offline-completed").textContent=String(completed);
   byId("offline-active").textContent=String(active);
+  updateAggregateSpeed();
   byId("offline-storage").textContent=bytes(savedBytes);
   const visible=jobs.filter(matchesLibrary);
   const seriesCount=new Set(jobs.filter(job=>job.media?.media_type==="tv").map(job=>String(job.media.id||job.media.title||job.title))).size;
@@ -1260,6 +1266,7 @@ function updateJobProgress(job){
   const card=[...byId("offline-jobs").querySelectorAll("[data-job-id]")].find(node=>node.dataset.jobId===id);
   if(!card)return;
   const progress=Math.max(0,Math.min(100,Number(job.progress)||0));
+  updateAggregateSpeed();
   const status=card.querySelector(".offline-card-status,.offline-episode-status");
   if(status)status.textContent=statusText(job)+(job.status==="downloading"?" · "+Math.round(progress)+"%":"");
   const transfer=card.querySelector("[data-transfer-meta]");
