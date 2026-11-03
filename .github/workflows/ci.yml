@@ -243,7 +243,7 @@ jobs:
           node-version: "22"
 
       - name: Install desktop runtime dependencies
-        run: npm ci --prefix desktop --omit=dev --no-audit --no-fund
+        run: npm install --prefix desktop --omit=dev --no-audit --no-fund
 
       - name: Run real local torrent transfer integration test
         run: node --test tests/desktop-download-engine.integration.test.cjs
