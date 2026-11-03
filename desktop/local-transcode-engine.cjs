@@ -65,8 +65,9 @@ function waitForFile(filePath, { timeoutMs = 30000, processRef = null } = {}) {
 }
 
 function preferredEnglishSubtitle(streams) {
+  const textCodecs = new Set(["subrip", "ass", "ssa", "mov_text", "webvtt", "text"]);
   const candidates = (Array.isArray(streams) ? streams : []).filter(stream => {
-    if (stream.codec_type !== "subtitle") return false;
+    if (stream.codec_type !== "subtitle" || !textCodecs.has(String(stream.codec_name || "").toLowerCase())) return false;
     const language = String(stream.tags?.language || "").toLowerCase();
     return language === "en" || language === "eng" || language.startsWith("en-");
   });
@@ -156,7 +157,7 @@ class LocalTranscodeEngine {
     const child = spawn(this.ffmpegPath, args, { windowsHide: true, stdio: ["ignore", "ignore", "pipe"] });
     const record = {
       id: sessionId, ownerId, directory, child, stderrText: "",
-      exitCode: null, stopped: false, subtitlePromise: null
+      exitCode: null, subtitleExitCode: null, stopped: false, subtitlePromise: null
     };
     this.sessions.set(sessionId, record);
     child.stderr.on("data", chunk => { record.stderrText = (record.stderrText + chunk.toString("utf8")).slice(-12000); });
@@ -176,8 +177,8 @@ class LocalTranscodeEngine {
       const subtitleTimer = setTimeout(() => {
         if (subtitleChild.exitCode === null && !subtitleChild.killed) subtitleChild.kill();
       }, Math.max(this.startupTimeoutMs * 4, 180000));
-      subtitleChild.once("close", () => clearTimeout(subtitleTimer));
-      subtitleChild.once("error", () => clearTimeout(subtitleTimer));
+      subtitleChild.once("close", code => { record.subtitleExitCode = code; clearTimeout(subtitleTimer); });
+      subtitleChild.once("error", () => { record.subtitleExitCode = -1; clearTimeout(subtitleTimer); });
     }
 
     try {
@@ -226,7 +227,10 @@ class LocalTranscodeEngine {
     const filename = match[2];
     const filePath = path.join(record.directory, filename);
     if (filename === "english.vtt") {
-      try { await waitForFile(filePath, { timeoutMs: 30000 }); }
+      if (record.subtitleExitCode !== null && record.subtitleExitCode !== undefined && record.subtitleExitCode !== 0) {
+        response.writeHead(404).end("Subtitle not available"); return;
+      }
+      try { await waitForFile(filePath, { timeoutMs: 180000 }); }
       catch { response.writeHead(404).end("Subtitle not available"); return; }
     }
     let stat;
