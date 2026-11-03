@@ -104,7 +104,7 @@
         "provider": "github",
         "owner": "sensorylog",
         "repo": "vivid-cinema",
-        "releaseType": "release"
+        "releaseType": "draft"
       }
     ],
     "extraResources": []
