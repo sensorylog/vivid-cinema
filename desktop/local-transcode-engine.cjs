@@ -164,14 +164,20 @@ class LocalTranscodeEngine {
     child.once("close", code => { record.exitCode = code; });
 
     if (subtitle) {
-      record.subtitlePromise = runProcess(this.ffmpegPath, [
+      const subtitleChild = spawn(this.ffmpegPath, [
         "-y", "-hide_banner", "-loglevel", "error",
         "-i", absolutePath,
         "-map", "0:" + subtitle.index,
         "-c:s", "webvtt",
         "-f", "webvtt",
         path.join(directory, "english.vtt")
-      ], { timeoutMs: Math.max(this.startupTimeoutMs * 4, 180000) }).catch(() => null);
+      ], { windowsHide: true, stdio: ["ignore", "ignore", "ignore"] });
+      record.subtitleChild = subtitleChild;
+      const subtitleTimer = setTimeout(() => {
+        if (subtitleChild.exitCode === null && !subtitleChild.killed) subtitleChild.kill();
+      }, Math.max(this.startupTimeoutMs * 4, 180000));
+      subtitleChild.once("close", () => clearTimeout(subtitleTimer));
+      subtitleChild.once("error", () => clearTimeout(subtitleTimer));
     }
 
     try {
@@ -217,7 +223,7 @@ class LocalTranscodeEngine {
     const filename = match[2];
     const filePath = path.join(record.directory, filename);
     if (filename === "english.vtt") {
-      try { await waitForFile(filePath, { timeoutMs: 30000, processRef: record }); }
+      try { await waitForFile(filePath, { timeoutMs: 30000 }); }
       catch { response.writeHead(404).end("Subtitle not available"); return; }
     }
     let stat;
@@ -242,7 +248,18 @@ class LocalTranscodeEngine {
     if (!record || record.ownerId !== ownerId) return false;
     this.sessions.delete(record.id);
     record.stopped = true;
-    if (record.child && record.child.exitCode === null && !record.child.killed) { try { record.child.kill(); } catch {} }
+    const children = [record.child, record.subtitleChild].filter(Boolean);
+    for (const child of children) {
+      if (child.exitCode === null && !child.killed) { try { child.kill(); } catch {} }
+    }
+    await Promise.all(children.map(child => {
+      if (child.exitCode !== null) return Promise.resolve();
+      return new Promise(resolve => {
+        const timer = setTimeout(resolve, 3000);
+        child.once("close", () => { clearTimeout(timer); resolve(); });
+        child.once("error", () => { clearTimeout(timer); resolve(); });
+      });
+    }));
     await fs.promises.rm(record.directory, { recursive: true, force: true }).catch(() => {});
     return true;
   }
