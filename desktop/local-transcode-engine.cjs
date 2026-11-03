@@ -136,7 +136,7 @@ class LocalTranscodeEngine {
     const reportedBitDepth = Number.parseInt(video.bits_per_raw_sample, 10);
     const videoBitDepth = Number.isFinite(reportedBitDepth) ? reportedBitDepth : (videoPixelFormat.includes("10") ? 10 : 8);
     const canCopyVideo = video.codec_name === "h264" && videoPixelFormat === "yuv420p" && videoBitDepth <= 8;
-    const canCopyAudio = !audio || (audio.codec_name === "aac" && Number(audio.channels || 2) <= 2);
+    const canCopyAudio = !audio || (audio.codec_name === "aac" && (!audio.profile || audio.profile === "LC") && Number(audio.channels || 2) <= 2);
     const sessionId = crypto.randomBytes(24).toString("hex");
     const directory = path.join(this.root, sessionId);
     await fs.promises.mkdir(directory, { recursive: true });
