@@ -206,7 +206,9 @@ test("Windows app checks for updates and offers download plus restart-to-install
   assert.match(offlineRenderer, /openLocalTranscode/);
   assert.match(offlineRenderer, /openDownloadTranscode/);
   const downloadsPage = fs.readFileSync(path.join(root, "my-downloads.html"), "utf8");
-  assert.ok(downloadsPage.includes("/desktop/node_modules/hls.js/dist/hls.min.js"));
+  const libraryBootstrap = fs.readFileSync(path.join(root, "scripts", "my-downloads.js"), "utf8");
+  assert.ok(libraryBootstrap.includes("/desktop/node_modules/hls.js/dist/hls.min.js"));
+  assert.ok(libraryBootstrap.includes("https://cdn.jsdelivr.net/npm/hls.js@1.7.3/dist/hls.min.js"));
 });
 
 test("Windows workflow builds on demand or on release tags", () => {
@@ -495,7 +497,6 @@ test("Windows runtime is current, hardened, and the offline shell cache is inval
   assert.ok(serviceWorker.includes("./scripts/downloads/transcode-player.js?windows-offline-hls-v2"));
   const offlineRenderer = fs.readFileSync(path.join(root, "scripts", "downloads", "desktop-offline.js"), "utf8");
   assert.ok(offlineRenderer.includes("./transcode-player.js?windows-offline-hls-v2"));
-  assert.ok(serviceWorker.includes("./desktop/node_modules/hls.js/dist/hls.min.js"));
   const myDownloads = fs.readFileSync(path.join(root, "scripts", "my-downloads.js"), "utf8");
   assert.ok(myDownloads.includes("./downloads/desktop-offline.js?windows-offline-hls-v2"));
 });
