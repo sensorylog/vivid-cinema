@@ -10,6 +10,10 @@
 
 See [Cloudflare Pages hosting](docs/cloudflare-pages-hosting.md) for build settings, domain authorization, validation, and rollback guidance.
 
+## Windows desktop
+
+The Electron Windows app ships as an NSIS installer and a portable executable. See [Windows desktop packaging and release requirements](docs/windows-desktop-release.md) for the supported runtime, signing setup, updater behavior, CI checks, and manual smoke-test checklist.
+
 
 ## Movie and episode downloads
 
