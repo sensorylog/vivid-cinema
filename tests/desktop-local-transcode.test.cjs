@@ -5,7 +5,14 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs/promises");
 const os = require("node:os");
 const path = require("node:path");
-const { LocalTranscodeEngine, preferredEnglishSubtitle, executablePath, waitForFile, runProcess } = require("../desktop/local-transcode-engine.cjs");
+const { LocalTranscodeEngine, preferredEnglishSubtitle, executablePath, waitForFile, runProcess, parseMediaDuration } = require("../desktop/local-transcode-engine.cjs");
+
+test("media duration parsing preserves long movie runtimes", () => {
+  for (const duration of [30 * 60, 90 * 60, 3 * 60 * 60]) {
+    assert.equal(parseMediaDuration({ format: { duration: String(duration) }, streams: [{ duration: String(duration - 0.25) }] }), duration);
+  }
+  assert.equal(parseMediaDuration({ streams: [{ duration: "0" }] }), 0);
+});
 
 test("English subtitle selection prefers default English over forced or non-English tracks", () => {
   const selected = preferredEnglishSubtitle([
@@ -110,6 +117,24 @@ test("real FFmpeg transcodes a sample MKV and serves HLS plus an embedded Englis
     assert.equal(session.codecs.outputVideo, "h264");
     assert.equal(session.codecs.outputAudio, "aac-stereo");
     assert.ok(session.subtitleUrl);
+    assert.ok(Math.abs(session.sourceDuration - 2) < 0.25, "session exposes the full source duration");
+    assert.equal(session.duration, session.sourceDuration);
+    assert.ok(session.statusUrl);
+
+    const statusResponse = await fetch(session.statusUrl, { headers: { Origin: "https://vivid-cinema.pages.dev" } });
+    assert.equal(statusResponse.status, 200);
+    let transcodeStatus = await statusResponse.json();
+    assert.ok(Math.abs(transcodeStatus.sourceDuration - 2) < 0.25);
+    assert.ok(transcodeStatus.availableDuration >= 0);
+    assert.equal(typeof transcodeStatus.complete, "boolean");
+    for (let attempt = 0; attempt < 50 && !transcodeStatus.complete && !transcodeStatus.failed; attempt++) {
+      await new Promise(resolve => setTimeout(resolve, 100));
+      const updated = await fetch(session.statusUrl, { headers: { Origin: "https://vivid-cinema.pages.dev" } });
+      assert.equal(updated.status, 200);
+      transcodeStatus = await updated.json();
+    }
+    assert.equal(transcodeStatus.failed, false, transcodeStatus.error || "FFmpeg should complete the sample transcode");
+    assert.equal(transcodeStatus.complete, true, "status reports completion only after FFmpeg finalizes the HLS playlist");
 
     const headers = { Origin: "https://vivid-cinema.pages.dev" };
     const playlistResponse = await fetch(session.url, { headers });

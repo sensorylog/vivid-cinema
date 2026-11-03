@@ -64,6 +64,14 @@ function waitForFile(filePath, { timeoutMs = 30000, processRef = null } = {}) {
   });
 }
 
+function parseMediaDuration(data) {
+  const candidates = [
+    Number(data?.format?.duration),
+    ...(Array.isArray(data?.streams) ? data.streams.map(stream => Number(stream?.duration)) : [])
+  ].filter(value => Number.isFinite(value) && value > 0);
+  return candidates.length ? Math.max(...candidates) : 0;
+}
+
 function preferredEnglishSubtitle(streams) {
   const textCodecs = new Set(["subrip", "ass", "ssa", "mov_text", "webvtt", "text"]);
   const candidates = (Array.isArray(streams) ? streams : []).filter(stream => {
@@ -110,7 +118,7 @@ class LocalTranscodeEngine {
   async inspect(filePath) {
     const result = await runProcess(this.ffprobePath, [
       "-v", "error",
-      "-show_entries", "stream=index,codec_type,codec_name,profile,width,height,pix_fmt,bits_per_raw_sample,channels,channel_layout:stream_tags=language,title:stream_disposition=default,forced",
+      "-show_entries", "format=duration:stream=index,codec_type,codec_name,profile,width,height,pix_fmt,bits_per_raw_sample,channels,channel_layout,duration:stream_tags=language,title:stream_disposition=default,forced",
       "-of", "json",
       filePath
     ]);
@@ -119,7 +127,7 @@ class LocalTranscodeEngine {
     catch { throw new Error("FFprobe returned invalid media metadata."); }
     const streams = Array.isArray(data.streams) ? data.streams : [];
     if (!streams.some(stream => stream.codec_type === "video")) throw new Error("This file does not contain a video stream.");
-    return streams;
+    return { streams, duration: parseMediaDuration(data) };
   }
 
   async createSession(filePath, ownerId) {
@@ -128,7 +136,9 @@ class LocalTranscodeEngine {
     const absolutePath = await fs.promises.realpath(filePath);
     const inputStat = await fs.promises.stat(absolutePath);
     if (!inputStat.isFile()) throw new Error("The selected media file is not a regular file.");
-    const streams = await this.inspect(absolutePath);
+    const inspected = await this.inspect(absolutePath);
+    const streams = inspected.streams;
+    const sourceDuration = inspected.duration;
     const video = streams.find(stream => stream.codec_type === "video");
     const audio = streams.filter(stream => stream.codec_type === "audio").sort((a, b) => Number(Boolean(b.disposition?.default)) - Number(Boolean(a.disposition?.default)))[0] || null;
     const subtitle = preferredEnglishSubtitle(streams);
@@ -165,12 +175,21 @@ class LocalTranscodeEngine {
     const child = spawn(this.ffmpegPath, args, { windowsHide: true, stdio: ["ignore", "ignore", "pipe"] });
     const record = {
       id: sessionId, ownerId, directory, child, stderrText: "",
-      exitCode: null, subtitleExitCode: null, stopped: false, subtitlePromise: null
+      sourceDuration, exitCode: null, subtitleExitCode: null, stopped: false, subtitlePromise: null,
+      complete: false, failed: false
     };
     this.sessions.set(sessionId, record);
     child.stderr.on("data", chunk => { record.stderrText = (record.stderrText + chunk.toString("utf8")).slice(-12000); });
-    child.once("error", error => { record.stderrText += "\n" + error.message; record.exitCode = -1; });
-    child.once("close", code => { record.exitCode = code; });
+    child.once("error", error => {
+      record.stderrText += "\n" + error.message;
+      record.exitCode = -1;
+      record.failed = true;
+    });
+    child.once("close", code => {
+      record.exitCode = code;
+      record.complete = code === 0;
+      record.failed = code !== 0;
+    });
 
     if (subtitle) {
       const subtitleTempPath = path.join(directory, "english.vtt.tmp");
@@ -223,6 +242,9 @@ class LocalTranscodeEngine {
         subtitleUrl: subtitle ? this.origin + "/session/" + sessionId + "/english.vtt" : null,
         fileName: path.basename(absolutePath),
         fileSize: inputStat.size,
+        duration: sourceDuration,
+        sourceDuration,
+        statusUrl: this.origin + "/session/" + sessionId + "/status.json",
         codecs: {
           inputVideo: video.codec_name || "unknown",
           inputAudio: audio?.codec_name || null,
@@ -254,11 +276,29 @@ class LocalTranscodeEngine {
     let url;
     try { url = new URL(request.url || "/", this.origin); }
     catch { response.writeHead(400).end("Bad request"); return; }
-    const match = /^\/session\/([a-f0-9]{48})\/(index\.m3u8|english\.vtt|segment_\d{5}\.ts)$/.exec(url.pathname);
+    const match = /^\/session\/([a-f0-9]{48})\/(index\.m3u8|english\.vtt|status\.json|segment_\d{5}\.ts)$/.exec(url.pathname);
     if (!match) { response.writeHead(404).end("Not found"); return; }
     const record = this.sessions.get(match[1]);
     if (!record || record.stopped) { response.writeHead(404).end("Session expired"); return; }
     const filename = match[2];
+    if (filename === "status.json") {
+      let playlist = "";
+      try { playlist = await fs.promises.readFile(path.join(record.directory, "index.m3u8"), "utf8"); } catch {}
+      const availableDuration = [...playlist.matchAll(/#EXTINF:([0-9.]+)/g)]
+        .reduce((total, item) => total + (Number(item[1]) || 0), 0);
+      const playlistFinalized = /#EXT-X-ENDLIST\s*$/.test(playlist.trim());
+      const complete = record.complete && playlistFinalized;
+      const payload = JSON.stringify({
+        sourceDuration: record.sourceDuration,
+        availableDuration,
+        complete,
+        failed: record.failed,
+        error: record.failed ? (record.stderrText.trim().slice(-1600) || "FFmpeg stopped before the movie was fully transcoded.") : null
+      });
+      response.writeHead(200, { "Content-Type": "application/json; charset=utf-8", "Content-Length": Buffer.byteLength(payload), "Cache-Control": "no-store" });
+      response.end(request.method === "HEAD" ? undefined : payload);
+      return;
+    }
     const filePath = path.join(record.directory, filename);
     if (filename === "english.vtt") {
       if (record.subtitleExitCode !== null && record.subtitleExitCode !== undefined && record.subtitleExitCode !== 0) {
@@ -324,4 +364,4 @@ class LocalTranscodeEngine {
   }
 }
 
-module.exports = { LocalTranscodeEngine, preferredEnglishSubtitle, runProcess, waitForFile, executablePath };
+module.exports = { LocalTranscodeEngine, preferredEnglishSubtitle, runProcess, waitForFile, executablePath, parseMediaDuration };
