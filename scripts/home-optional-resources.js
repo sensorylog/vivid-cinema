@@ -2,19 +2,19 @@ const FONT_STYLESHEET = "https://fonts.googleapis.com/css2?family=Bebas+Neue&fam
 const ICON_STYLESHEET = "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.9.1/font/bootstrap-icons.css";
 
 function loadStylesheet(href, marker) {
-  if (document.querySelector("[data-" + marker + "]")) return;
+  if (document.querySelector("[" + marker + "]")) return;
   const link = document.createElement("link");
   link.rel = "stylesheet";
   link.href = href;
-  link.dataset[marker] = "true";
+  link.setAttribute(marker, "");
   document.head.appendChild(link);
 }
 
 function loadEnhancements() {
   // Fonts and icon glyphs are visual polish, not prerequisites for first paint.
   // Keep system-font and text-label fallbacks usable while these arrive.
-  loadStylesheet(FONT_STYLESHEET, "vividHomeFonts");
-  loadStylesheet(ICON_STYLESHEET, "vividHomeIcons");
+  loadStylesheet(FONT_STYLESHEET, "data-vivid-home-fonts");
+  loadStylesheet(ICON_STYLESHEET, "data-vivid-home-icons");
 
   // Ambient effects and the video billboard must not compete with the first
   // catalogue render. They remain enabled and initialise after the first frame.
