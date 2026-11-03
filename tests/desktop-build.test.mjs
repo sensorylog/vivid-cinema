@@ -222,6 +222,10 @@ test("Windows workflow builds on demand or on release tags", () => {
   assert.ok(fs.existsSync(file));
   const workflow = fs.readFileSync(file, "utf8");
   assert.match(workflow, /workflow_dispatch/);
+  assert.match(workflow, /actions\\/checkout@v7/);
+  assert.match(workflow, /actions\\/setup-node@v7/);
+  assert.match(workflow, /actions\\/upload-artifact@v7/);
+  assert.doesNotMatch(workflow, /actions\\/(?:checkout|setup-node|upload-artifact)@v4/);
   assert.match(workflow, /desktop:dist/);
   assert.match(workflow, /GH_TOKEN:.*secrets\.GITHUB_TOKEN/);
   assert.match(workflow, /contents: write/);
