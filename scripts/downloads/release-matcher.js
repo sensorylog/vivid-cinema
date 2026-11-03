@@ -14,10 +14,11 @@ function sequenceIndex(haystack, needle) {
   }
   return -1;
 }
+
 /**
- * Conservative release gate. It intentionally rejects ambiguous results:
- * movies need the exact title phrase and selected release year; episodes need
- * the exact series phrase and exact SxxExx (or NxNN) coordinates.
+ * Conservative release gate. Movies require the exact title and release year;
+ * episodes require the exact series and episode coordinates. Unknown title
+ * prefixes and obvious non-feature listings are rejected rather than guessed.
  */
 export function matchesSelectedRelease(media, result) {
   if (!media || !result || typeof result.title !== "string") return false;
@@ -25,11 +26,12 @@ export function matchesSelectedRelease(media, result) {
   const releaseWords = WORDS(result.title);
   const titleStart = sequenceIndex(releaseWords, titleWords);
   if (titleStart < 0) return false;
-  const allowedReleasePrefixes = new Set(["yts", "mx", "rarbg", "1337x", "eztv", "ettv", "torrent", "download", "www", "galaxy", "evo", "ntb", "ctrlhd"]);
-  if (releaseWords.slice(0, titleStart).some(word => !allowedReleasePrefixes.has(word))) return false;
-  if (/\b(?:fan[\s._-]*edit|fanmade|parody|trailer|teaser|sample|clip|workprint)\b/i.test(result.title)) return false;
 
+  const allowedReleasePrefixes = new Set(["yts", "mx", "rarbg", "1337x", "eztv", "ettv", "torrent", "download", "www", "galaxy", "evo", "ntb", "ctrlhd"]);
+  const end = titleStart + titleWords.length;
   if (media.media_type === "tv") {
+    if (releaseWords.slice(0, titleStart).some(word => !allowedReleasePrefixes.has(word))) return false;
+    if (/\b(?:fan[\s._-]*edit|fanmade|parody|trailer|teaser|sample|clip|workprint)\b/i.test(result.title)) return false;
     const season = Number(media.season);
     const episode = Number(media.episode);
     if (!Number.isInteger(season) || season < 0 || !Number.isInteger(episode) || episode < 0) return false;
@@ -44,6 +46,15 @@ export function matchesSelectedRelease(media, result) {
   if (media.media_type !== "movie") return false;
   const year = String(media.year ?? "").match(/^(19|20)\d{2}$/)?.[0];
   if (!year) return false;
-  const years = [...new Set(result.title.match(/\b(?:19|20)\d{2}\b/g) || [])];
-  return years.includes(year) && years.every(candidate => candidate === year);
+  const releaseYears = releaseWords
+    .map((word, index) => ({ word, index }))
+    .filter(item => item.index < titleStart || item.index >= end)
+    .filter(item => /^(19|20)\d{2}$/.test(item.word))
+    .map(item => item.word);
+  if (!releaseYears.includes(year) || releaseYears.some(candidate => candidate !== year)) return false;
+  const yearAfterTitle = releaseWords.findIndex((word, index) => index >= end && word === year);
+  if (yearAfterTitle >= 0 && yearAfterTitle !== end) return false;
+  if (releaseWords.slice(0, titleStart).some(word => word !== year && !allowedReleasePrefixes.has(word))) return false;
+  if (/\b(?:fan[\s._-]*edit|fanmade|parody|trailer|teaser|sample|clip|workprint)\b/i.test(result.title)) return false;
+  return true;
 }
