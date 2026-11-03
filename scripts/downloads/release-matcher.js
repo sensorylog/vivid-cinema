@@ -1,10 +1,10 @@
 const WORDS = value => String(value ?? "")
   .normalize("NFKD")
-  .replace(/[\\u0300-\\u036f]/g, "")
+  .replace(/[\u0300-\u036f]/g, "")
   .toLowerCase()
   .replace(/[^a-z0-9]+/g, " ")
   .trim()
-  .split(/\\s+/)
+  .split(/\s+/)
   .filter(Boolean);
 
 function containsSequence(haystack, needle) {
@@ -39,8 +39,8 @@ export function matchesSelectedRelease(media, result) {
   }
 
   if (media.media_type !== "movie") return false;
-  const year = String(media.year ?? "").match(/^(19|20)\\d{2}$/)?.[0];
+  const year = String(media.year ?? "").match(/^(19|20)\d{2}$/)?.[0];
   if (!year) return false;
-  const years = [...new Set(result.title.match(/\\b(?:19|20)\\d{2}\\b/g) || [])];
+  const years = [...new Set(result.title.match(/\b(?:19|20)\d{2}\b/g) || [])];
   return years.includes(year) && years.every(candidate => candidate === year);
 }
