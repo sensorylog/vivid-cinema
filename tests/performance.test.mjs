@@ -118,7 +118,10 @@ test("Home defers fonts, icon CSS, ambient effects and hero video until after fi
   const home = await read("home.html");
   const loader = await read("scripts/home-optional-resources.js");
   const worker = await read("service-worker.js");
-  assert.doesNotMatch(home, /fonts\.googleapis\.com\/css2|bootstrap-icons\.css/);
+  assert.ok(home.includes('rel="preload" as="style" href="https://fonts.googleapis.com/css2'));
+  assert.ok(home.includes('rel="preload" as="style" href="https://cdn.jsdelivr.net/npm/bootstrap-icons'));
+  assert.equal(home.includes('rel="stylesheet" href="https://fonts.googleapis.com/css2'), false);
+  assert.equal(home.includes('rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons'), false);
   assert.doesNotMatch(home, /scripts\/(?:atmosphere|home-breathe|tflix-hero|pwa)\.js/);
   assert.match(home, /scripts\/home-optional-resources\.js/);
   assert.match(loader, /requestAnimationFrame/);
