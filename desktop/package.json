@@ -1,6 +1,6 @@
 {
   "name": "vivid-cinema-desktop-runtime",
-  "version": "1.0.43",
+  "version": "1.0.44",
   "private": true,
   "description": "Runtime dependencies for the Vivid Cinema Windows desktop application.",
   "dependencies": {
