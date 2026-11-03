@@ -160,11 +160,11 @@ test("Windows player runtime and stylesheet have cache-busting URLs", async () =
   const page = await readFile(new URL("../my-downloads.html", import.meta.url), "utf8");
   const script = await readFile(new URL("../scripts/my-downloads.js", import.meta.url), "utf8");
   const worker = await readFile(new URL("../service-worker.js", import.meta.url), "utf8");
-  assert.match(page, /my-downloads\.css\?v=offline-cinema-batch-1/);
+  assert.match(page, /my-downloads\.css\?v=offline-cinema-redesign-1/);
   assert.match(script, /desktop-offline\.js\?windows-offline-hls-v2/);
-  assert.match(worker, /vivid-cinema-shell-v273/);
+  assert.match(worker, /vivid-cinema-shell-v274/);
   assert.match(worker, /desktop-offline\.js\?windows-offline-hls-v2/);
-  assert.match(worker, /my-downloads\.css\?v=offline-cinema-batch-1/);
+  assert.match(worker, /my-downloads\.css\?v=offline-cinema-redesign-1/);
 });
 
 test("offline library filters movies, sorts saved media, and reports on-device storage", async () => {
@@ -206,7 +206,21 @@ test("offline redesign provides title details, season grouping and continue watc
 test("offline redesign cache is versioned and precaches the active stylesheet", async () => {
   const page = await readFile(new URL("../my-downloads.html", import.meta.url), "utf8");
   const worker = await readFile(new URL("../service-worker.js", import.meta.url), "utf8");
-  assert.match(page, /my-downloads\.css\?v=offline-cinema-batch-1/);
-  assert.match(worker, /vivid-cinema-shell-v273/);
-  assert.match(worker, /my-downloads\.css\?v=offline-cinema-batch-1/);
+  assert.match(page, /my-downloads\.css\?v=offline-cinema-redesign-1/);
+  assert.match(worker, /vivid-cinema-shell-v274/);
+  assert.match(worker, /my-downloads\.css\?v=offline-cinema-redesign-1/);
+});
+
+test("My Downloads uses a clear discover, playback and offline-library hierarchy", async () => {
+  const page = await readFile(new URL("../my-downloads.html", import.meta.url), "utf8");
+  const styles = await readFile(new URL("../styles/my-downloads.css", import.meta.url), "utf8");
+  assert.match(page, /id="desktop-search-heading">Find something to save/);
+  assert.match(page, /class="offline-summary-grid"/);
+  assert.match(page, /class="offline-player-settings"/);
+  assert.match(page, /class="offline-library-tools-heading"/);
+  assert.match(styles, /\.offline-search-form/);
+  assert.match(styles, /\.offline-player-settings-grid/);
+  assert.match(styles, /\.offline-summary-grid/);
+  assert.match(styles, /\.offline-job\{/);
+  assert.match(styles, /@media\(max-width:720px\)/);
 });
