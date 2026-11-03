@@ -269,8 +269,7 @@ function configureOfflineMediaProtocol() {
   });
 }
 function configureDownloadEngine() {
-  // Match the known-working 1.0.28 lifecycle: create the WebTorrent client
-  // during desktop startup, before the renderer can issue a download request.
+  // Register IPC endpoints at startup; construct the download runtime on first use.
   ipcMain.handle("vivid-download-search", (event, query) => {
     if (!isTrustedDownloadSender(event)) throw new Error("Untrusted download request");
     return ensureDownloadEngine().search(query);
