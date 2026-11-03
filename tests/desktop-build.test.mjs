@@ -14,6 +14,7 @@ test("desktop packaging is opt-in and preserves existing scripts", () => {
   assert.match(pkg.scripts.test, /tests\/desktop-build\.test\.mjs/);
   assert.equal(pkg.scripts["check:syntax"], "node automation/check-syntax.mjs");
   assert.ok(pkg.scripts["test:rules"]);
+  assert.ok(pkg.scripts.test.includes("tests/desktop-local-transcode.test.cjs"));
 });
 test("Windows installer and portable executable targets use Vivid branding", () => {
   assert.match(pkg.version, /^\d+\.\d+\.\d+$/, "package version must be valid semantic version");
@@ -205,7 +206,7 @@ test("Windows app checks for updates and offers download plus restart-to-install
   assert.match(offlineRenderer, /openLocalTranscode/);
   assert.match(offlineRenderer, /openDownloadTranscode/);
   const downloadsPage = fs.readFileSync(path.join(root, "my-downloads.html"), "utf8");
-  assert.match(downloadsPage, /desktop\\/node_modules\\/hls\\.js\\/dist\\/hls\\.min\\.js/);
+  assert.ok(downloadsPage.includes("/desktop/node_modules/hls.js/dist/hls.min.js"));
 });
 
 test("Windows workflow builds on demand or on release tags", () => {
