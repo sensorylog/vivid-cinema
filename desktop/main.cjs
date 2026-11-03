@@ -7,6 +7,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 const crypto = require("node:crypto");
 const { DesktopDownloadEngine } = require("./download-engine.cjs");
+const { LocalTranscodeEngine } = require("./local-transcode-engine.cjs");
 const { createMediaResponse } = require("./media-protocol.cjs");
 const { isPermissionAllowed } = require("./permission-policy.cjs");
 const { createLocalMediaRegistry, isSupportedLocalVideoFile, LOCAL_VIDEO_EXTENSIONS } = require("./local-media.cjs");
@@ -99,6 +100,7 @@ function createLocalServer(root) {
 let localServer;
 let localOrigin;
 let downloadEngine;
+let transcodeEngine;
 const mediaToken = crypto.randomBytes(32).toString("hex");
 const localMediaRegistry = createLocalMediaRegistry({ maxEntries: 8 });
 const HOSTED_APP_URL = "https://vivid-cinema.pages.dev/home.html";
@@ -269,6 +271,29 @@ function configureDownloadEngine() {
     if (!isTrustedDownloadSender(event)) throw new Error("Untrusted local media release");
     return localMediaRegistry.release(token, event.sender.id);
   });
+  ipcMain.handle("vivid-transcode-open-local", async event => {
+    if (!isTrustedDownloadSender(event)) throw new Error("Untrusted local transcode request");
+    const parent = BrowserWindow.fromWebContents(event.sender);
+    const result = await dialog.showOpenDialog(parent, {
+      title: "Open a video in Vivid Cinema",
+      properties: ["openFile"],
+      filters: [{ name: "Video files", extensions: [...LOCAL_VIDEO_EXTENSIONS] }]
+    });
+    if (result.canceled || !result.filePaths?.length) return null;
+    const selectedPath = await fs.promises.realpath(result.filePaths[0]);
+    if (!isSupportedLocalVideoFile(selectedPath)) throw new Error("Choose a supported video file.");
+    return transcodeEngine.createSession(selectedPath, event.sender.id);
+  });
+  ipcMain.handle("vivid-transcode-open-download", async (event, id, fileIndex = 0) => {
+    if (!isTrustedDownloadSender(event)) throw new Error("Untrusted download transcode request");
+    const mediaPath = downloadEngine && downloadEngine.mediaFile(id, fileIndex);
+    if (!mediaPath) throw new Error("This downloaded video is not ready to play.");
+    return transcodeEngine.createSession(mediaPath, event.sender.id);
+  });
+  ipcMain.handle("vivid-transcode-stop", (event, sessionId) => {
+    if (!isTrustedDownloadSender(event)) throw new Error("Untrusted transcode stop request");
+    return transcodeEngine.stopSession(sessionId, event.sender.id);
+  });
   ipcMain.handle("vivid-offline-url", event => {
     if (!isTrustedDownloadSender(event)) throw new Error("Untrusted offline navigation request");
     return localOrigin + "/my-downloads.html";
@@ -329,6 +354,8 @@ function createWindow() {
     icon: appIcon,
     webPreferences: { session: session.defaultSession, preload: path.join(__dirname, "preload.cjs"), nodeIntegration: false, contextIsolation: true, sandbox: true, webSecurity: true }
   });
+
+  win.webContents.once("destroyed", () => { void transcodeEngine?.stopOwner(win.webContents.id); });
 
   // Show a tiny local splash immediately; the main app then loads on its trusted HTTPS origin.
   // F11 or Escape returns to the normal desktop window.
@@ -530,6 +557,8 @@ app.whenReady().then(async () => {
   );
   try {
     await startLocalServer();
+    transcodeEngine = new LocalTranscodeEngine({ app, allowedOrigins: [HOSTED_APP_ORIGIN, localOrigin] });
+    await transcodeEngine.start();
     configureDownloadEngine();
     configureOfflineMediaProtocol();
     createWindow();
@@ -544,9 +573,12 @@ app.on("window-all-closed", () => { if (process.platform !== "darwin") app.quit(
 let shutdownStarted = false;
 app.on("before-quit", event => {
   localMediaRegistry.clear();
-  if (downloadEngine && !shutdownStarted) {
+  if ((downloadEngine || transcodeEngine) && !shutdownStarted) {
     event.preventDefault(); shutdownStarted = true;
-    void downloadEngine.shutdown().finally(() => { if (localServer) localServer.close(); app.quit(); });
+    void Promise.allSettled([downloadEngine?.shutdown(), transcodeEngine?.shutdown()]).finally(() => {
+      if (localServer) localServer.close();
+      app.quit();
+    });
     return;
   }
   if (localServer) localServer.close();
