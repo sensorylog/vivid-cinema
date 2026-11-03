@@ -48,6 +48,8 @@ test("desktop release search is identity-gated and batches up to five unique mov
   assert.ok(desktop.includes("sessionStorage.setItem(BATCH_KEY"));
   assert.ok(desktop.includes("function transferText(job)"));
   assert.ok(desktop.includes("Number(job.peers)"));
+  assert.ok(desktop.includes("Number(b.seeds)||0)-(Number(a.seeds)||0)"));
+  assert.ok(desktop.includes(" seeds · '+Math.max(0,Number(item.peers)||0)+' peers"));
   assert.match(page, /id="desktop-add-selected"/);
   assert.match(page, /id="desktop-batch-queue"/);
   assert.ok(desktop.includes("if(!currentMedia){setMessage("));
