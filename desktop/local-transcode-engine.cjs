@@ -129,7 +129,7 @@ class LocalTranscodeEngine {
     if (!inputStat.isFile()) throw new Error("The selected media file is not a regular file.");
     const streams = await this.inspect(absolutePath);
     const video = streams.find(stream => stream.codec_type === "video");
-    const audio = streams.find(stream => stream.codec_type === "audio");
+    const audio = streams.filter(stream => stream.codec_type === "audio").sort((a, b) => Number(Boolean(b.disposition?.default)) - Number(Boolean(a.disposition?.default)))[0] || null;
     const subtitle = preferredEnglishSubtitle(streams);
     const sessionId = crypto.randomBytes(24).toString("hex");
     const directory = path.join(this.root, sessionId);
@@ -141,7 +141,7 @@ class LocalTranscodeEngine {
       "-y", "-hide_banner", "-loglevel", "warning",
       "-i", absolutePath,
       "-map", "0:v:0",
-      "-map", "0:a:0?",
+      "-map", audio ? "0:" + audio.index : "0:a:0?",
       "-sn", "-dn",
       "-c:v", "libx264", "-preset", "ultrafast", "-crf", "23",
       "-pix_fmt", "yuv420p", "-profile:v", "high",
@@ -181,7 +181,10 @@ class LocalTranscodeEngine {
     }
 
     try {
-      await waitForFile(path.join(directory, "segment_00000.ts"), { timeoutMs: this.startupTimeoutMs, processRef: record });
+      await Promise.all([
+        waitForFile(path.join(directory, "index.m3u8"), { timeoutMs: this.startupTimeoutMs, processRef: record }),
+        waitForFile(path.join(directory, "segment_00000.ts"), { timeoutMs: this.startupTimeoutMs, processRef: record })
+      ]);
       return {
         sessionId,
         url: this.origin + "/session/" + sessionId + "/index.m3u8",
