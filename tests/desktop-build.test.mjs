@@ -246,9 +246,8 @@ test("Windows workflow builds on demand or on release tags", () => {
   assert.match(workflow, /Build auto-updatable Windows release files/);
   assert.match(workflow, /Verify desktop runtime lockfile is synchronized/);
   assert.match(workflow, /working-directory: desktop/);
-  assert.match(workflow, /npm install --omit=dev --no-audit --no-fund/);
-  assert.match(workflow, /Validate generated desktop runtime lockfile with a clean install/);
-  assert.match(workflow, /Commit regenerated desktop runtime lockfile/);
+  assert.match(workflow, /npm ci --omit=dev --no-audit --no-fund/);
+  assert.doesNotMatch(workflow, /Commit regenerated desktop runtime lockfile/);
   assert.match(workflow, /gh release create/);
   assert.match(workflow, /--draft/);
   assert.match(workflow, /Publish verified Windows release/);
