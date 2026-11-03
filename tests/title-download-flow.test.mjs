@@ -62,7 +62,12 @@ test("title download action opens the native Vivid Offline library", async () =>
   assert.match(page, /desktop-episodes/);
   assert.match(shell, /page === "home" && !window\.vividDownloads\?\.available/);
   assert.match(shell, /navLink\("search\.html", "bi-search", "Search"/);
-  assert.match(offline, /engine\.mediaUrl\(job\.id,fileIndex\)/);
+  assert.match(offline, /engine\.openDownloadTranscode\(job\.id,fileIndex\)/);
+  assert.match(offline, /engine\.openLocalTranscode\(\)/);
+  assert.match(preload, /openDownloadTranscode/);
+  assert.match(preload, /openLocalTranscode/);
+  assert.match(main, /vivid-transcode-open-download/);
+  assert.match(main, /vivid-transcode-open-local/);
   assert.match(offline, /data-action="pause"/);
   assert.match(offline, /data-action="resume"/);
   assert.match(offline, /offline-play-toggle/);
