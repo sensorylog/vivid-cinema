@@ -181,12 +181,20 @@ class LocalTranscodeEngine {
           if (subtitleChild.exitCode === null && !subtitleChild.killed) subtitleChild.kill();
         }, Math.max(this.startupTimeoutMs * 4, 180000));
         subtitleChild.once("close", async code => {
-          record.subtitleExitCode = code;
           clearTimeout(subtitleTimer);
           if (code === 0) {
-            try { await fs.promises.rename(subtitleTempPath, subtitleFinalPath); resolve(true); }
-            catch { resolve(false); }
-          } else resolve(false);
+            try {
+              await fs.promises.rename(subtitleTempPath, subtitleFinalPath);
+              record.subtitleExitCode = 0;
+              resolve(true);
+            } catch {
+              record.subtitleExitCode = -1;
+              resolve(false);
+            }
+          } else {
+            record.subtitleExitCode = code;
+            resolve(false);
+          }
         });
         subtitleChild.once("error", () => {
           record.subtitleExitCode = -1;
@@ -245,7 +253,7 @@ class LocalTranscodeEngine {
       if (record.subtitleExitCode !== null && record.subtitleExitCode !== undefined && record.subtitleExitCode !== 0) {
         response.writeHead(404).end("Subtitle not available"); return;
       }
-      try { await waitForFile(filePath, { timeoutMs: 180000 }); }
+      try { await waitForFile(filePath, { timeoutMs: 180000, processRef: { get exitCode() { return record.subtitleExitCode; } } }); }
       catch { response.writeHead(404).end("Subtitle not available"); return; }
     }
     let stat;
