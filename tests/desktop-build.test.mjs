@@ -232,14 +232,13 @@ test("Windows workflow builds on demand or on release tags", () => {
   assert.match(workflow, /GH_TOKEN:.*secrets\.GITHUB_TOKEN/);
   assert.match(workflow, /contents: write/);
   assert.match(workflow, /Decide whether this push publishes a release/);
-  assert.match(workflow, /Require Windows code-signing credentials for production release/);
-  assert.match(workflow, /Verify Windows Authenticode signatures/);
   assert.match(workflow, /Ensure matching release tag exists before publishing/);
   assert.match(workflow, /Create or reuse draft release for electron-builder/);
   assert.ok(workflow.indexOf("Ensure matching release tag exists before publishing") < workflow.indexOf("Create or reuse draft release for electron-builder"));
   assert.ok(workflow.indexOf("Create or reuse draft release for electron-builder") < workflow.indexOf("Build auto-updatable Windows release files"));
   assert.ok(workflow.indexOf("Build auto-updatable Windows release files") < workflow.indexOf("Verify updater metadata was generated"));
   assert.match(workflow, /Verify draft release contains all required assets/);
+  assert.doesNotMatch(workflow, /WIN_CSC_LINK|WIN_CSC_KEY_PASSWORD|Require Windows code-signing credentials|Verify Windows Authenticode signatures/);
   assert.match(workflow, /if \(!\$release\.draft\)/);
   assert.match(workflow, /did not become public after verification/);
   assert.match(workflow, /git tag -a \$tag/);
