@@ -175,13 +175,21 @@ class LocalTranscodeEngine {
     const child = spawn(this.ffmpegPath, args, { windowsHide: true, stdio: ["ignore", "ignore", "pipe"] });
     const record = {
       id: sessionId, ownerId, directory, child, stderrText: "",
-      exitCode: null, subtitleExitCode: null, stopped: false, subtitlePromise: null,
+      sourceDuration, exitCode: null, subtitleExitCode: null, stopped: false, subtitlePromise: null,
       complete: false, failed: false
     };
     this.sessions.set(sessionId, record);
     child.stderr.on("data", chunk => { record.stderrText = (record.stderrText + chunk.toString("utf8")).slice(-12000); });
-    child.once("error", error => { record.stderrText += "\n" + error.message; record.exitCode = -1; });
-    child.once("close", code => { record.exitCode = code; });
+    child.once("error", error => {
+      record.stderrText += "\n" + error.message;
+      record.exitCode = -1;
+      record.failed = true;
+    });
+    child.once("close", code => {
+      record.exitCode = code;
+      record.complete = code === 0;
+      record.failed = code !== 0;
+    });
 
     if (subtitle) {
       const subtitleTempPath = path.join(directory, "english.vtt.tmp");
