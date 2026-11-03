@@ -14,7 +14,7 @@
 <link rel="stylesheet" href="styles/vivid-liquid-glass.css?v=lg4">
 <link rel="stylesheet" href="styles/vivid-viewport.css?v=page-gutters-1">
 <link rel="stylesheet" href="styles/vivid-pwa.css">
-<link rel="stylesheet" href="styles/my-downloads.css?v=builtin-player-v1">
+<link rel="stylesheet" href="styles/my-downloads.css?v=offline-cinema-redesign-1">
 </head>
 <body data-vivid-page="downloads-library">
 <header class="vivid-topbar"><nav class="vivid-nav" aria-label="Primary"></nav></header>
@@ -55,6 +55,20 @@
     </section>
     <div id="desktop-search-results" class="offline-search-results"></div>
   </section>
+  <dialog id="offline-title-dialog" class="offline-title-dialog" aria-labelledby="offline-title-detail-title">
+    <button id="offline-title-detail-close" class="offline-title-detail-close" type="button" aria-label="Close title details">×</button>
+    <div class="offline-title-detail-layout">
+      <div id="offline-title-detail-art" class="offline-title-detail-art" role="img" aria-label="Title artwork"></div>
+      <div class="offline-title-detail-content">
+        <p class="offline-eyebrow">VIVID CINEMA · OFFLINE LIBRARY</p>
+        <h2 id="offline-title-detail-title">Title details</h2>
+        <p id="offline-title-detail-meta" class="offline-title-detail-meta"></p>
+        <p id="offline-title-detail-copy" class="offline-title-detail-copy"></p>
+        <p id="offline-title-detail-overview" class="offline-title-detail-overview"></p>
+        <button id="offline-title-detail-watch" class="offline-title-detail-watch" type="button" hidden>Watch now</button>
+      </div>
+    </div>
+  </dialog>
   <section id="offline-player-section" class="offline-player-section" hidden aria-label="Offline video player">
     <div class="offline-player-heading"><h2 id="offline-player-title">Vivid Ultra Player</h2><div class="offline-player-heading-actions"><button id="offline-player-close" type="button">Close player</button></div></div>
     <video id="offline-player" controls playsinline preload="metadata"></video>
@@ -109,6 +123,10 @@
     <div><strong id="offline-completed">0</strong><span>Saved</span></div>
     <div><strong id="offline-active">0</strong><span>In progress</span></div>
     <div><strong id="offline-storage">0 B</strong><span>Saved on device</span></div>
+  </section>
+  <section id="offline-continue-section" class="offline-continue-section" hidden aria-labelledby="offline-continue-title">
+    <div class="offline-list-heading"><h2 id="offline-continue-title">Continue watching</h2><span>Pick up where you left off</span></div>
+    <div id="offline-continue-list" class="offline-continue-list"></div>
   </section>
   <section id="offline-library-tools" class="offline-library-tools" aria-label="Filter your offline library" hidden>
     <label class="offline-library-search" for="offline-library-search">

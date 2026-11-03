@@ -59,6 +59,7 @@ function actionMarkup(job){
   if(job.status==="downloading")actions.push('<button type="button" data-action="pause" data-id="'+escapeHtml(job.id)+'">Pause</button>');
   if(job.status==="paused"||job.status==="failed")actions.push('<button type="button" data-action="resume" data-id="'+escapeHtml(job.id)+'">Resume</button>');
   if(job.status==="completed")actions.push('<button type="button" class="is-primary" data-action="play" data-id="'+escapeHtml(job.id)+'">Watch now</button>');
+  actions.push('<button type="button" data-action="details" data-id="'+escapeHtml(job.id)+'">Details</button>');
   if(job.status==="completed"&&job.filePath)actions.push('<button type="button" data-action="show" data-id="'+escapeHtml(job.id)+'">Show in folder</button>');
   if(["downloading","verifying","paused","failed","queued"].includes(job.status))actions.push('<button type="button" data-action="cancel" data-id="'+escapeHtml(job.id)+'">Cancel</button>');
   return actions.length?'<div class="offline-job-actions">'+actions.join("")+'</div>':"";
@@ -90,6 +91,47 @@ function matchesLibrary(job){
   if(libraryQuery&&!String([job.title,media.title,media.episodeTitle].join(" ")).toLowerCase().includes(libraryQuery))return false;
   return true;
 }
+async function showTitleDetails(job){
+  const dialog=byId("offline-title-dialog");
+  const media=job.media||{};
+  const isSeries=media.media_type==="tv";
+  const title=String(media.title||job.title||"Untitled");
+  const poster=String(media.poster_path||"");
+  const safePoster=/^\/[A-Za-z0-9_./-]+\.(?:jpg|jpeg|png|webp)$/i.test(poster)&&!poster.split("/").includes("..");
+  const image=safePoster?"https://image.tmdb.org/t/p/w500"+poster:"";
+  const heading=byId("offline-title-detail-title");
+  const copy=byId("offline-title-detail-copy");
+  const art=byId("offline-title-detail-art");
+  heading.textContent=title;
+  art.style.backgroundImage=image?'url("'+image.replace(/["\\\\]/g,"")+'")':"";
+  copy.textContent=isSeries?"TV series · Saved episodes":"Movie · Local library";
+  byId("offline-title-detail-overview").textContent=String(media.overview||"Loading title information…");
+  byId("offline-title-detail-meta").textContent=isSeries?"Series library":"Saved movie";
+  byId("offline-title-detail-watch").hidden=job.status!=="completed";
+  byId("offline-title-detail-watch").dataset.jobId=job.id;
+  if(typeof dialog.showModal==="function")dialog.showModal();else dialog.setAttribute("open","");
+  if(!media.id)return;
+  try{
+    const detail=isSeries?await tmdbApi.tvDetailsBasic(media.id):await tmdbApi.movieDetailsBasic(media.id);
+    const date=String(detail?.release_date||detail?.first_air_date||"");
+    const year=date.slice(0,4);
+    const rating=Number(detail?.vote_average);
+    const genres=Array.isArray(detail?.genres)?detail.genres.map(item=>item.name).filter(Boolean).slice(0,4).join(" · "):"";
+    byId("offline-title-detail-overview").textContent=String(detail?.overview||media.overview||"No description is available for this title.");
+    byId("offline-title-detail-meta").textContent=[year,Number.isFinite(rating)&&rating>0?"★ "+rating.toFixed(1):"",genres].filter(Boolean).join(" · ")|| (isSeries?"Series library":"Saved movie");
+    const detailPoster=String(detail?.poster_path||"");
+    if(/^\/[A-Za-z0-9_./-]+\.(?:jpg|jpeg|png|webp)$/i.test(detailPoster)&&!detailPoster.split("/").includes(".."))art.style.backgroundImage='url("https://image.tmdb.org/t/p/w500'+detailPoster+'")';
+  }catch{
+    byId("offline-title-detail-overview").textContent=String(media.overview||"Title information is unavailable offline. Your saved media remains in your library.");
+  }
+}
+byId("offline-title-detail-close").addEventListener("click",()=>byId("offline-title-dialog").close());
+byId("offline-title-detail-watch").addEventListener("click",async event=>{
+  const job=jobs.find(item=>item.id===event.currentTarget.dataset.jobId);
+  if(!job)return;
+  byId("offline-title-dialog").close();
+  try{await play(job,0);}catch(error){setMessage(error?.message||"Could not open this saved title.");}
+});
 function render(){
   const completedJobs=jobs.filter(x=>x.status==="completed");
   const completed=completedJobs.length;
@@ -127,7 +169,7 @@ function render(){
     const activeCount=group.filter(job=>["downloading","queued","verifying"].includes(job.status)).length;
     const savedCount=group.filter(job=>job.status==="completed").length;
     const newest=Math.max(...group.map(job=>Number(job.updatedAt||job.createdAt)||0));
-    const markup='<article class="offline-series-card"><header class="offline-series-card-heading">'+posterMarkup(media)+'<div><span class="offline-card-kicker">TV SERIES</span><h3>'+escapeHtml(title)+'</h3><p>'+group.length+' episodes · '+savedCount+' saved'+(activeCount?' · '+activeCount+' in progress':'')+'</p></div></header><div class="offline-series-episodes">'+group.map(episodeMarkup).join("")+'</div></article>';
+    const seasons=new Map();for(const episodeJob of group){const seasonNumber=Math.max(0,Math.floor(Number(episodeJob.media?.season)||0));if(!seasons.has(seasonNumber))seasons.set(seasonNumber,[]);seasons.get(seasonNumber).push(episodeJob);}const seasonMarkup=[...seasons.entries()].sort((a,b)=>a[0]-b[0]).map(([seasonNumber,episodes])=>'<details class="offline-season-group" open><summary>Season '+seasonNumber+' <span>'+episodes.length+' episodes</span></summary><div>'+episodes.map(episodeMarkup).join("")+'</div></details>').join("");const markup='<article class="offline-series-card"><header class="offline-series-card-heading">'+posterMarkup(media)+'<div><span class="offline-card-kicker">TV SERIES</span><h3>'+escapeHtml(title)+'</h3><p>'+group.length+' episodes · '+savedCount+' saved'+(activeCount?' · '+activeCount+' in progress':'')+'</p><button type="button" class="offline-details-button" data-action="details" data-id="'+escapeHtml(first.id)+'">Series details</button></div></header><div class="offline-series-episodes">'+seasonMarkup+'</div></article>';
     const size=group.reduce((sum,job)=>sum+(Array.isArray(job.files)?job.files.reduce((fileSum,file)=>fileSum+Math.max(0,Number(file.size)||0),0):Math.max(0,Number(job.total)||0)),0);
     entries.push({time:newest,title,size,markup});
   }
@@ -141,6 +183,26 @@ function render(){
   }
   entries.sort((a,b)=>librarySort==="title"?a.title.localeCompare(b.title,undefined,{sensitivity:"base"}):librarySort==="largest"?b.size-a.size||b.time-a.time:b.time-a.time);
   byId("offline-jobs").innerHTML='<div class="offline-library-grid">'+entries.map(entry=>entry.markup).join("")+'</div>';
+}
+async function renderContinueWatching(){
+  const section=byId("offline-continue-section");
+  const list=byId("offline-continue-list");
+  if(!section||!list)return;
+  const candidates=jobs.filter(job=>job.status==="completed").slice(0,40);
+  if(!candidates.length){section.hidden=true;list.replaceChildren();return;}
+  const results=await Promise.all(candidates.map(async job=>{
+    try{return {job,position:Number(await engine.getPlaybackPosition(job.id,0))||0};}
+    catch{return {job,position:0};}
+  }));
+  const resumable=results.filter(item=>item.position>5).sort((a,b)=>b.position-a.position).slice(0,8);
+  if(!resumable.length){section.hidden=true;list.replaceChildren();return;}
+  section.hidden=false;
+  list.innerHTML=resumable.map(({job,position})=>{
+    const media=job.media||{};
+    const title=media.episodeTitle||media.title||job.title||"Saved title";
+    const label=media.media_type==="tv"?"S"+String(media.season||0).padStart(2,"0")+"E"+String(media.episode||0).padStart(2,"0"):"MOVIE";
+    return '<article class="offline-continue-card">'+posterMarkup(media)+'<div><span class="offline-card-kicker">'+escapeHtml(label)+'</span><strong>'+escapeHtml(title)+'</strong><small>Continue from '+escapeHtml(clock(position))+'</small><button type="button" data-action="continue" data-id="'+escapeHtml(job.id)+'">Continue watching</button></div></article>';
+  }).join("");
 }
 function renderSearch(items){
   searchResults=items;
@@ -274,6 +336,7 @@ async function refresh(){
   try{
     jobs=(await engine.list()).filter(job=>job.status!=="cancelled");
     render();
+    void renderContinueWatching();
     void hydratePosterArtwork();
   }catch(error){setMessage(error?.message||"Could not load your downloads.");}
 }
@@ -1069,11 +1132,13 @@ byId("desktop-search-results").addEventListener("click",async event=>{
     if(button.isConnected){button.disabled=false;button.textContent="Download";}
   }
 });
+byId("offline-continue-list").addEventListener("click",async event=>{const button=event.target.closest("button[data-action=\"continue\"]");if(!button)return;const job=jobs.find(item=>item.id===button.dataset.id);if(!job)return;button.disabled=true;try{await play(job,0);}catch(error){setMessage(error?.message||"Could not resume this title.");}finally{button.disabled=false;}});
 byId("offline-jobs").addEventListener("click",async event=>{
   const button=event.target.closest("button[data-action]");if(!button)return;
   const {action,id}=button.dataset;button.disabled=true;
   try{
-    if(action==="play"||action==="play-file"){const job=jobs.find(item=>item.id===id);if(job)await play(job,action==="play-file"?Number(button.dataset.index)||0:0);}
+    if(action==="details"){const job=jobs.find(item=>item.id===id);if(job)await showTitleDetails(job);}
+    else if(action==="continue"||action==="play"||action==="play-file"){const job=jobs.find(item=>item.id===id);if(job)await play(job,action==="play-file"?Number(button.dataset.index)||0:0);}
     else {const ok=await engine.control(id,action);if(!ok)throw new Error("That action is not available.");await refresh();}
   }catch(error){setMessage(error?.message||"Action failed.");}
   finally{button.disabled=false;}
