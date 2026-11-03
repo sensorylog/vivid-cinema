@@ -1,4 +1,5 @@
 import { tmdbApi } from "../tmdb.js";
+import { matchesSelectedRelease } from "./release-matcher.js";
 import { describeLoadedMedia, probePlaybackCapabilities } from "./media-capabilities.js";
 import { inspectMediaUrl } from "./media-inspector.js";
 import { choosePreferredTrack, clearSubtitleOverlay, parseSubtitleFile, renderSubtitleAtTime } from "./subtitle-engine.js";
@@ -20,6 +21,9 @@ const engine = window.vividDownloads;
 let currentMedia = null;
 let jobs = [];
 let searchResults = [];
+const BATCH_KEY = "vivid:desktop-download-batch";
+let batchQueue = [];
+try { const saved = JSON.parse(sessionStorage.getItem(BATCH_KEY) || "[]"); batchQueue = Array.isArray(saved) ? saved.slice(0, 5) : []; } catch { batchQueue = []; }
 let currentSeasonEpisodes = [];
 let seasonRequestId = 0;
 let activePreferenceKey = "default";
@@ -37,6 +41,91 @@ function statusText(job){
   if(job.status==="failed") return "Needs attention";
   return "Preparing";
 }
+function transferText(job){
+  const parts=[];
+  const speed=Math.max(0,Number(job.speed)||0);
+  const downloaded=Math.max(0,Number(job.downloaded)||0);
+  const total=Math.max(0,Number(job.total)||0);
+  const peers=Math.max(0,Number(job.peers)||0);
+  if(speed>0)parts.push(bytes(speed)+"/s");
+  else if(job.phase)parts.push(String(job.phase));
+  if(peers>0)parts.push(peers+" peers");
+  if(total>0)parts.push(bytes(downloaded)+" / "+bytes(total));
+  if(speed>0&&total>downloaded){
+    const seconds=Math.ceil((total-downloaded)/speed);
+    const eta=seconds>=3600?Math.floor(seconds/3600)+"h "+Math.floor(seconds%3600/60)+"m":seconds>=60?Math.floor(seconds/60)+"m "+seconds%60+"s":seconds+"s";
+    parts.push("about "+eta+" left");
+  }
+  return parts.join(" · ");
+}
+function transferMarkup(job){
+  const detail=transferText(job);
+  return detail?'<small class="offline-transfer-meta" data-transfer-meta="'+escapeHtml(job.id)+'">'+escapeHtml(detail)+'</small>':"";
+}
+function updateAggregateSpeed(){
+  const total=jobs.filter(job=>job.status==="downloading").reduce((sum,job)=>sum+Math.max(0,Number(job.speed)||0),0);
+  const node=byId("offline-total-speed");
+  if(node)node.textContent=bytes(total)+"/s combined";
+}
+function batchIdentity(media){
+  return [media.media_type,media.id,media.season??"",media.episode??""].join(":");
+}
+function saveBatchQueue(){
+  try{sessionStorage.setItem(BATCH_KEY,JSON.stringify(batchQueue.slice(0,5)));}catch{}
+  renderBatchQueue();
+}
+function renderBatchQueue(){
+  const node=byId("desktop-batch-queue");
+  if(!node)return;
+  if(!batchQueue.length){node.hidden=true;node.innerHTML="";return;}
+  node.hidden=false;
+  node.innerHTML='<h3>Download batch · '+batchQueue.length+'/5</h3><p>Add up to five different movies or episodes. Your batch stays here while you choose other titles.</p><ul>'+batchQueue.map((item,index)=>{
+    const media=item.media||{},episode=Number.isInteger(media.episode)?" · S"+String(media.season).padStart(2,"0")+"E"+String(media.episode).padStart(2,"0"):"";
+    return '<li>'+escapeHtml(media.title||item.result?.title||"Selected title")+escapeHtml(episode)+' <small> — '+escapeHtml(item.result?.title||"Release")+'</small> <button type="button" data-batch-remove="'+index+'" aria-label="Remove from batch">Remove</button></li>';
+  }).join("")+'</ul><div class="offline-batch-queue-actions"><button type="button" data-batch-start>Start batch ('+batchQueue.length+')</button><button type="button" data-batch-clear>Clear batch</button></div>';
+}
+function mediaForResult(item){
+  if(!currentMedia)return null;
+  return currentMedia.media_type==="tv"&&Number.isInteger(item.episode)
+    ? {...currentMedia,season:item.season,episode:item.episode,episodeTitle:item.episodeTitle}
+    : currentMedia;
+}
+function addSelectedToBatch(){
+  const checked=[...byId("desktop-search-results").querySelectorAll('input[data-batch-result]:checked')];
+  if(!checked.length){setMessage("Select at least one matching release first.");return;}
+  let added=0,duplicates=0;
+  for(const input of checked){
+    const result=searchResults.find(item=>item.id===input.dataset.batchResult);
+    const media=result&&mediaForResult(result);
+    if(!result||!media||!matchesSelectedRelease(media,result))continue;
+    const key=batchIdentity(media);
+    if(batchQueue.some(item=>batchIdentity(item.media)===key)){duplicates++;continue;}
+    if(batchQueue.length>=5)break;
+    batchQueue.push({result:{id:result.id,title:result.title,provider:result.provider,size:result.size,seeds:result.seeds,peers:result.peers},media});
+  added++;
+  }
+  saveBatchQueue();
+  setMessage(added?added+" item(s) added to your batch. "+(duplicates?duplicates+" duplicate title/episode selection(s) skipped.":""):"Batch is full or those titles are already selected.");
+}
+async function startBatch(){
+  if(!batchQueue.length)return;
+  const button=byId("desktop-batch-queue").querySelector("[data-batch-start]");
+  if(button){button.disabled=true;button.textContent="Starting batch…";}
+  const pending=[...batchQueue];
+  const results=await Promise.allSettled(pending.map(item=>engine.start(item.result,item.media)));
+  let started=0;
+  results.forEach((result,index)=>{
+    if(result.status==="fulfilled"){
+      const key=batchIdentity(pending[index].media);
+      batchQueue=batchQueue.filter(item=>batchIdentity(item.media)!==key);
+      started++;
+    }
+  });
+  saveBatchQueue();
+  await refresh();
+  setMessage(started+" of "+pending.length+" batch download(s) started."+(batchQueue.length?" "+batchQueue.length+" item(s) remain in the batch; retry when ready.":""));
+}
+
 let libraryFilter="all";
 let libraryQuery="";
 let librarySort="recent";
@@ -78,7 +167,7 @@ function episodeMarkup(job){
   const episode=Math.max(0,Math.floor(Number(media.episode)||0));
   const episodeLabel="S"+String(season).padStart(2,"0")+"E"+String(episode).padStart(2,"0");
   const title=media.episodeTitle||job.title||"Episode";
-  return '<article class="offline-episode-row" data-job-id="'+escapeHtml(job.id)+'"><div class="offline-episode-copy"><span class="offline-episode-number">'+episodeLabel+'</span><strong>'+escapeHtml(title)+'</strong><small class="offline-episode-status">'+escapeHtml(statusText(job))+(job.status==="downloading"?" · "+Math.round(progress)+"%":"")+'</small>'+progressMarkup(job)+errorMarkup(job)+fileMarkup(job)+'</div>'+actionMarkup(job)+'</article>';
+  return '<article class="offline-episode-row" data-job-id="'+escapeHtml(job.id)+'"><div class="offline-episode-copy"><span class="offline-episode-number">'+episodeLabel+'</span><strong>'+escapeHtml(title)+'</strong><small class="offline-episode-status">'+escapeHtml(statusText(job))+(job.status==="downloading"?" · "+Math.round(progress)+"%":"")+'</small>'+progressMarkup(job)+transferMarkup(job)+errorMarkup(job)+fileMarkup(job)+'</div>'+actionMarkup(job)+'</article>';
 }
 function matchesLibrary(job){
   const media=job.media||{};
@@ -140,6 +229,7 @@ function render(){
   byId("offline-total").textContent=String(jobs.length);
   byId("offline-completed").textContent=String(completed);
   byId("offline-active").textContent=String(active);
+  updateAggregateSpeed();
   byId("offline-storage").textContent=bytes(savedBytes);
   const visible=jobs.filter(matchesLibrary);
   const seriesCount=new Set(jobs.filter(job=>job.media?.media_type==="tv").map(job=>String(job.media.id||job.media.title||job.title))).size;
@@ -177,7 +267,7 @@ function render(){
     const media=job.media||{},progress=Math.max(0,Math.min(100,Number(job.progress)||0));
     const title=media.title||job.title||"Untitled movie";
     const detail=statusText(job)+(job.status==="downloading"?" · "+Math.round(progress)+"%":"");
-    const markup='<article class="offline-media-card" data-job-id="'+escapeHtml(job.id)+'">'+posterMarkup(media)+'<div class="offline-media-copy"><span class="offline-card-kicker">MOVIE</span><h3>'+escapeHtml(title)+'</h3><p class="offline-card-status">'+escapeHtml(detail)+'</p>'+progressMarkup(job)+errorMarkup(job)+fileMarkup(job)+actionMarkup(job)+'</div></article>';
+    const markup='<article class="offline-media-card" data-job-id="'+escapeHtml(job.id)+'">'+posterMarkup(media)+'<div class="offline-media-copy"><span class="offline-card-kicker">MOVIE</span><h3>'+escapeHtml(title)+'</h3><p class="offline-card-status">'+escapeHtml(detail)+'</p>'+progressMarkup(job)+transferMarkup(job)+errorMarkup(job)+fileMarkup(job)+actionMarkup(job)+'</div></article>';
     const size=Array.isArray(job.files)?job.files.reduce((sum,file)=>sum+Math.max(0,Number(file.size)||0),0):Math.max(0,Number(job.total)||0);
     entries.push({time:Number(job.updatedAt||job.createdAt)||0,title,size,markup});
   }
@@ -205,15 +295,22 @@ async function renderContinueWatching(){
   }).join("");
 }
 function renderSearch(items){
-  searchResults=items;
+  searchResults=[...items].sort((a,b)=>(Number(b.seeds)||0)-(Number(a.seeds)||0)||(Number(b.peers)||0)-(Number(a.peers)||0));
+  const identityMatches=currentMedia?searchResults.filter(item=>{
+    const media=mediaForResult(item);
+    return media&&matchesSelectedRelease(media,item);
+  }):items;
   const quality=byId("desktop-quality").value;
-  const filtered=items.filter(item=>quality==="any"||new RegExp("(?:^|[^0-9])"+quality+"p?(?:[^0-9]|$)","i").test(item.title));
+  const filtered=identityMatches.filter(item=>quality==="any"||new RegExp("(?:^|[^0-9])"+quality+"p?(?:[^0-9]|$)","i").test(item.title));
+  byId("desktop-add-selected").hidden=!filtered.length||!currentMedia;
   byId("desktop-search-results").innerHTML=filtered.length?filtered.map(item=>{
     const episodeLabel=Number.isInteger(item.episode)
       ? "S"+String(item.season).padStart(2,"0")+"E"+String(item.episode).padStart(2,"0")+(item.episodeTitle?" · "+item.episodeTitle:"")
       : "";
-    return '<article class="offline-result"><div><strong>'+escapeHtml(item.title)+'</strong><p>'+(episodeLabel?'<b>'+escapeHtml(episodeLabel)+'</b> · ':"")+escapeHtml(item.provider)+' · '+escapeHtml(item.size||"Size unknown")+'</p></div><button type="button" data-result="'+escapeHtml(item.id)+'">Download</button></article>';
-  }).join(""):'<p class="offline-muted">No matching releases. Try another quality or search term.</p>';
+    const checkbox=currentMedia?'<label class="offline-result-select"><input type="checkbox" data-batch-result="'+escapeHtml(item.id)+'"><span><strong>'+escapeHtml(item.title)+'</strong><p>'+(episodeLabel?'<b>'+escapeHtml(episodeLabel)+'</b> · ':"")+escapeHtml(item.provider)+' · '+escapeHtml(item.size||"Size unknown")+' · '+Math.max(0,Number(item.seeds)||0)+' seeds · '+Math.max(0,Number(item.peers)||0)+' peers</p></span></label>':'<div><strong>'+escapeHtml(item.title)+'</strong><p>'+escapeHtml(item.provider)+' · '+escapeHtml(item.size||"Size unknown")+'</p></div>';
+    return '<article class="offline-result">'+checkbox+'<button type="button" data-result="'+escapeHtml(item.id)+'">Download</button></article>';
+  }).join(""):'<p class="offline-muted">'+(currentMedia&&items.length?"No releases matched this exact title and release identity.":"No matching releases. Try another quality or search term.")+'</p>';
+  return filtered.length;
 }
 async function loadSeriesSeason(seasonNumber){
   const requestId=++seasonRequestId;
@@ -256,8 +353,8 @@ async function searchSelectedEpisodes(){
         found.push(...rows.map(row=>({...row,season,episode:number,episodeTitle:String(episode.name||"")})));
       }catch(error){console.warn("Episode release search failed:",query,error);}
     }
-    renderSearch(found);
-    setMessage(found.length?"Choose a release beside the episode you want to save.":"No releases found for the selected episodes. Try another season or episode.");
+    const matched=renderSearch(found);
+    setMessage(matched?"Select one matching release per episode, then add up to five to your batch.":"No releases matched the selected episodes. Try another season or episode.");
   }finally{byId("desktop-episode-search").disabled=false;}
 }
 async function searchTitle(media){
@@ -286,7 +383,7 @@ async function searchTitle(media){
   }
   seriesPicker.hidden=true;
   setMessage("Searching available releases for "+(media.title||"your title")+"…");
-  try{const rows=await engine.search(media.title||"");renderSearch(rows);setMessage(rows.length?"Choose a release to save it to this device.":"No releases found. Try a different title.");}
+  try{const query=[media.title,media.year].filter(Boolean).join(" ");const rows=await engine.search(query);const matched=renderSearch(rows);setMessage(matched?"Choose the exact release, or add it to your batch.":"No releases matched "+(media.title||"this title")+" ("+(media.year||"release year unknown")+").");}
   catch(error){setMessage(error?.message||"Search is unavailable. Check your connection and try again.");}
 }
 const posterLookups=new Set();
@@ -1100,11 +1197,19 @@ async function play(job,fileIndex=0){
 byId("desktop-search-form").addEventListener("submit",async event=>{
   event.preventDefault();const query=byId("desktop-search-input").value.trim();
   if(query.length<2){setMessage("Enter at least two characters.");return;}
+  if(!currentMedia){setMessage("Choose a movie or series from the Vivid catalogue and tap Download so its exact identity can be checked.");return;}
   setMessage("Searching…");byId("desktop-search-results").innerHTML="";
   try{renderSearch(await engine.search(query));setMessage("Choose a release to download.");}
   catch(error){setMessage(error?.message||"Search failed.");}
 });
 byId("desktop-quality").addEventListener("change",()=>renderSearch(searchResults));
+byId("desktop-add-selected").addEventListener("click",addSelectedToBatch);
+byId("desktop-batch-queue").addEventListener("click",async event=>{
+  const remove=event.target.closest("button[data-batch-remove]");
+  if(remove){batchQueue.splice(Number(remove.dataset.batchRemove),1);saveBatchQueue();return;}
+  if(event.target.closest("[data-batch-clear]")){batchQueue=[];saveBatchQueue();return;}
+  if(event.target.closest("[data-batch-start]"))await startBatch();
+});
 byId("desktop-season-select").addEventListener("change",event=>{void loadSeriesSeason(Number(event.target.value));});
 byId("desktop-episode-select-all").addEventListener("click",()=>{
   const inputs=[...byId("desktop-episodes").querySelectorAll('input[data-episode]')];
@@ -1159,11 +1264,16 @@ byId("offline-player-close").addEventListener("click",async()=>{
 });
 function updateJobProgress(job){
   const id=String(job.id);
+  updateAggregateSpeed();
   const card=[...byId("offline-jobs").querySelectorAll("[data-job-id]")].find(node=>node.dataset.jobId===id);
   if(!card)return;
   const progress=Math.max(0,Math.min(100,Number(job.progress)||0));
   const status=card.querySelector(".offline-card-status,.offline-episode-status");
   if(status)status.textContent=statusText(job)+(job.status==="downloading"?" · "+Math.round(progress)+"%":"");
+  const transfer=card.querySelector("[data-transfer-meta]");
+  const detail=transferText(job);
+  if(transfer)transfer.textContent=detail;
+  else if(detail){const node=document.createElement("small");node.className="offline-transfer-meta";node.dataset.transferMeta=job.id;node.textContent=detail;status?.after(node);}
   const bar=card.querySelector('[role="progressbar"]');
   if(bar){bar.setAttribute("aria-valuenow",progress.toFixed(1));const fill=bar.querySelector("span");if(fill)fill.style.width=progress+"%";}
 }
@@ -1200,6 +1310,7 @@ byId("offline-list-title").textContent="Your library";
 byId("desktop-download-search").hidden=false;
 byId("offline-library-tools").hidden=false;
 byId("offline-library-count").hidden=false;
+renderBatchQueue();
 byId("offline-notice-copy").textContent="Downloads are saved to your computer in the Vivid Cinema folder. They remain available without an internet connection.";
 byId("offline-footnote").textContent="Your videos are stored on this device in the Vivid Cinema folder inside Downloads. Removing a download from Vivid does not silently delete your video files.";
 const pending=sessionStorage.getItem("vivid:pending-desktop-download");

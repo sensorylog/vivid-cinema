@@ -14,7 +14,7 @@
 <link rel="stylesheet" href="styles/vivid-liquid-glass.css?v=lg4">
 <link rel="stylesheet" href="styles/vivid-viewport.css?v=page-gutters-1">
 <link rel="stylesheet" href="styles/vivid-pwa.css">
-<link rel="stylesheet" href="styles/my-downloads.css?v=offline-cinema-redesign-1">
+<link rel="stylesheet" href="styles/my-downloads.css?v=offline-cinema-batch-1">
 </head>
 <body data-vivid-page="downloads-library">
 <header class="vivid-topbar"><nav class="vivid-nav" aria-label="Primary"></nav></header>
@@ -54,6 +54,8 @@
       </div>
     </section>
     <div id="desktop-search-results" class="offline-search-results"></div>
+    <div class="offline-batch-actions"><button id="desktop-add-selected" type="button" hidden>Add selected to batch</button></div>
+    <section id="desktop-batch-queue" class="offline-batch-queue" hidden aria-label="Download batch"></section>
   </section>
   <dialog id="offline-title-dialog" class="offline-title-dialog" aria-labelledby="offline-title-detail-title">
     <button id="offline-title-detail-close" class="offline-title-detail-close" type="button" aria-label="Close title details">×</button>
@@ -121,7 +123,7 @@
   <section class="offline-summary" aria-label="Download totals">
     <div><strong id="offline-total">0</strong><span>All items</span></div>
     <div><strong id="offline-completed">0</strong><span>Saved</span></div>
-    <div><strong id="offline-active">0</strong><span>In progress</span></div>
+    <div><strong id="offline-active">0</strong><span>In progress</span><small id="offline-total-speed">0 B/s combined</small></div>
     <div><strong id="offline-storage">0 B</strong><span>Saved on device</span></div>
   </section>
   <section id="offline-continue-section" class="offline-continue-section" hidden aria-labelledby="offline-continue-title">

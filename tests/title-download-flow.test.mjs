@@ -50,6 +50,10 @@ test("title download action opens the native Vivid Offline library", async () =>
   assert.match(engine, /needsRescan/);
   assert.match(engine, /playbackPositions/);
   assert.match(offline, /desktop-search-form/);
+  assert.match(script, /year: String\(currentDetails\?\.release_date \|\| currentDetails\?\.first_air_date/);
+  assert.match(offline, /matchesSelectedRelease/);
+  assert.match(offline, /desktop-add-selected/);
+  assert.match(offline, /Promise\.allSettled\(pending\.map\(item=>engine\.start/);
   assert.match(offline, /loadSeriesSeason/);
   assert.match(offline, /searchSelectedEpisodes/);
   assert.match(offline, /S\"\+String\(season\)\.padStart\(2,"0"\)\+"E\"/);

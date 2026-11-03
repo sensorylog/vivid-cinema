@@ -38,6 +38,24 @@ test("desktop downloads expose live transfer phases and accessible progress upda
   assert.match(desktop, /role="progressbar"/);
 });
 
+test("desktop release search is identity-gated and batches up to five unique movies or episodes", async () => {
+  const desktop = await readFile(new URL("../scripts/downloads/desktop-offline.js", import.meta.url), "utf8");
+  const page = await readFile(new URL("../my-downloads.html", import.meta.url), "utf8");
+  assert.ok(desktop.includes("matchesSelectedRelease(media,item)"));
+  assert.ok(desktop.includes("batchQueue.length>=5"));
+  assert.ok(desktop.includes("batchIdentity(item.media)===key"));
+  assert.ok(desktop.includes("Promise.allSettled(pending.map(item=>engine.start"));
+  assert.ok(desktop.includes("sessionStorage.setItem(BATCH_KEY"));
+  assert.ok(desktop.includes("function transferText(job)"));
+  assert.ok(desktop.includes("Number(job.peers)"));
+  assert.ok(desktop.includes("Number(b.seeds)||0)-(Number(a.seeds)||0)"));
+  assert.ok(desktop.includes(" seeds · '+Math.max(0,Number(item.peers)||0)+' peers"));
+  assert.match(page, /id="desktop-add-selected"/);
+  assert.match(page, /id="desktop-batch-queue"/);
+  assert.ok(desktop.includes("if(!currentMedia){setMessage("));
+  assert.ok(desktop.includes("Your batch stays here while you choose other titles."));
+});
+
 test("desktop search result button leaves Starting state after the start request settles", async () => {
   const desktop = await readFile(new URL("../scripts/downloads/desktop-offline.js", import.meta.url), "utf8");
   assert.match(desktop, /finally\s*\{[\s\S]*button\.disabled=false;button\.textContent="Download"/);
@@ -61,7 +79,7 @@ test("failed movie and episode downloads show their actual recovery reason", asy
   const styles = await readFile(new URL("../styles/my-downloads.css", import.meta.url), "utf8");
   assert.match(desktop, /function errorMarkup\(job\)/);
   assert.match(desktop, /job\.status!==\"failed\"\|\|!job\.error/);
-  assert.match(desktop, /progressMarkup\(job\)\+errorMarkup\(job\)\+fileMarkup\(job\)/);
+  assert.ok(desktop.includes("progressMarkup(job)+transferMarkup(job)+errorMarkup(job)+fileMarkup(job)"));
   assert.match(styles, /\.offline-job-error/);
 });
 
@@ -140,11 +158,11 @@ test("Windows player runtime and stylesheet have cache-busting URLs", async () =
   const page = await readFile(new URL("../my-downloads.html", import.meta.url), "utf8");
   const script = await readFile(new URL("../scripts/my-downloads.js", import.meta.url), "utf8");
   const worker = await readFile(new URL("../service-worker.js", import.meta.url), "utf8");
-  assert.match(page, /my-downloads\.css\?v=offline-cinema-redesign-1/);
-  assert.match(script, /desktop-offline\.js\?builtin-player-v1/);
-  assert.match(worker, /vivid-cinema-shell-v269/);
-  assert.match(worker, /desktop-offline\.js\?builtin-player-v1/);
-  assert.match(worker, /my-downloads\.css\?v=offline-cinema-redesign-1/);
+  assert.match(page, /my-downloads\.css\?v=offline-cinema-batch-1/);
+  assert.match(script, /desktop-offline\.js\?strict-release-batch-v1/);
+  assert.match(worker, /vivid-cinema-shell-v270/);
+  assert.match(worker, /desktop-offline\.js\?strict-release-batch-v1/);
+  assert.match(worker, /my-downloads\.css\?v=offline-cinema-batch-1/);
 });
 
 test("offline library filters movies, sorts saved media, and reports on-device storage", async () => {
@@ -186,7 +204,7 @@ test("offline redesign provides title details, season grouping and continue watc
 test("offline redesign cache is versioned and precaches the active stylesheet", async () => {
   const page = await readFile(new URL("../my-downloads.html", import.meta.url), "utf8");
   const worker = await readFile(new URL("../service-worker.js", import.meta.url), "utf8");
-  assert.match(page, /my-downloads\.css\?v=offline-cinema-redesign-1/);
-  assert.match(worker, /vivid-cinema-shell-v269/);
-  assert.match(worker, /my-downloads\.css\?v=offline-cinema-redesign-1/);
+  assert.match(page, /my-downloads\.css\?v=offline-cinema-batch-1/);
+  assert.match(worker, /vivid-cinema-shell-v270/);
+  assert.match(worker, /my-downloads\.css\?v=offline-cinema-batch-1/);
 });
