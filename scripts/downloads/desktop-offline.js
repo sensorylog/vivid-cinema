@@ -910,10 +910,12 @@ function drawSeekPreview(){
   try{context.drawImage(seekPreviewVideo,0,0,seekPreview.width,seekPreview.height);}catch{}
 }
 function updateSeekPreview(target){
-  if(player.dataset.transcodeSessionId){seekPreview.hidden=true;return;}
-  if(!Number.isFinite(target)||!ensureSeekPreviewSource())return;
+  if(!Number.isFinite(target))return;
   const duration=playbackDuration();
-  seekPreviewTarget=Math.max(0,Math.min(duration||target,target));
+  const limit=playbackSeekLimit();
+  seekPreviewTarget=Math.max(0,Math.min(limit||0,duration||target,target));
+  if(player.dataset.transcodeSessionId){seekPreview.hidden=true;return;}
+  if(!ensureSeekPreviewSource())return;
   const request=++seekPreviewRequest;
   const seekWhenReady=()=>{
     if(request!==seekPreviewRequest||seekPreviewTarget===null)return;
@@ -1191,9 +1193,10 @@ if(player.audioTracks){
 player.addEventListener("play",syncPlayerControls);
 player.addEventListener("pause",syncPlayerControls);
 player.addEventListener("ended",()=>{
+  const transcodeDuration=Number(player.dataset.transcodeSourceDuration||playbackDuration());
   const transcodeEndedEarly=Boolean(player.dataset.transcodeSessionId)
     &&player.dataset.transcodeComplete!=="true"
-    &&Number(player.currentTime)<Number(player.dataset.transcodeSourceDuration||playbackDuration())-5;
+    &&(!Number.isFinite(transcodeDuration)||transcodeDuration<=0||Number(player.currentTime)<transcodeDuration-5);
   if(player.dataset.jobId&&!transcodeEndedEarly)void engine.clearPlaybackPosition(player.dataset.jobId,Number(player.dataset.fileIndex)||0).catch(()=>{});
   byId("offline-resume-prompt").hidden=true;
   const job=jobs.find(item=>item.id===player.dataset.jobId);
