@@ -374,7 +374,8 @@ body[data-vivid-page="downloads-library"]{
 .offline-card-status,.offline-series-card-heading p{margin:0;color:#9ba9c0;font-size:10px;line-height:1.5}
 .offline-transfer-meta{display:block;margin-top:4px;color:#aebbd4;font-size:9px;line-height:1.45}
 .offline-progress{width:100%;height:5px;margin:5px 0 0;overflow:hidden;border-radius:99px;background:rgba(255,255,255,.09)}
-body.vivid-desktop-offline-library .offline-progress{background:rgba(255,255,255,.09)}
+.offline-progress{height:4px}
+body.vivid-desktop-offline-library .offline-progress{width:100%;height:4px;background:rgba(255,255,255,.09)}
 .offline-progress span{display:block;width:0;height:100%;border-radius:inherit;background:linear-gradient(90deg,#7d7afc,#72d7ed);transition:width .2s ease}
 .offline-job-error{margin:6px 0 0;color:var(--offline-danger);font-size:10px;line-height:1.5;overflow-wrap:anywhere}
 .offline-job-actions{display:flex;justify-content:flex-start;gap:6px;flex-wrap:wrap;margin-top:9px}
@@ -384,6 +385,7 @@ body.vivid-desktop-offline-library .offline-progress{background:rgba(255,255,255
   font:700 9px system-ui,sans-serif;cursor:pointer;
 }
 .offline-job-actions button.is-primary{border-color:transparent;background:linear-gradient(110deg,#7168eb,#438acb);color:#fff}
+body.vivid-desktop-offline-library .offline-job-actions button{border-radius:8px;background:rgba(255,255,255,.05);color:#dce4f4}
 .offline-job-actions button:hover{background-color:rgba(255,255,255,.12)}
 .offline-file-meta,.offline-file-list{width:100%;margin:7px 0 0;color:#9eabc0;font-size:9px;overflow-wrap:anywhere}
 .offline-file-list summary{cursor:pointer;padding:4px 0}
