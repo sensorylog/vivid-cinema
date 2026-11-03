@@ -24,11 +24,7 @@ export function createTranscodePlayer(video) {
       track.label = session.subtitle?.label || "English";
       track.srclang = "en";
       track.src = session.subtitleUrl;
-      track.default = true;
       video.appendChild(track);
-      track.addEventListener("load", () => {
-        try { track.track.mode = "showing"; } catch {}
-      }, { once: true });
     }
 
     if (window.Hls && window.Hls.isSupported()) {
@@ -37,6 +33,12 @@ export function createTranscodePlayer(video) {
         lowLatencyMode: false,
         backBufferLength: 90,
         maxBufferLength: 30
+      });
+      hls.on(window.Hls.Events.ERROR, (_event, data) => {
+        if (!data?.fatal) return;
+        if (data.type === window.Hls.ErrorTypes.NETWORK_ERROR) hls.startLoad();
+        else if (data.type === window.Hls.ErrorTypes.MEDIA_ERROR) hls.recoverMediaError();
+        else video.dispatchEvent(new Event("error"));
       });
       hls.loadSource(session.url);
       hls.attachMedia(video);
