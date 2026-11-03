@@ -20,8 +20,8 @@ test("Windows installer and portable executable targets use Vivid branding", () 
   assert.match(pkg.version, /^\d+\.\d+\.\d+$/, "package version must be valid semantic version");
   assert.ok(pkg.devDependencies.electron);
   assert.ok(pkg.devDependencies["electron-builder"]);
-  assert.match(pkg.scripts["desktop:publish"], /electron-builder --win nsis --publish never/);
-  assert.deepEqual(pkg.build.publish[0], { provider: "github", owner: "sensorylog", repo: "vivid-cinema", releaseType: "release" });
+  assert.match(pkg.scripts["desktop:publish"], /electron-builder --win nsis --publish onTagOrDraft/);
+  assert.deepEqual(pkg.build.publish[0], { provider: "github", owner: "sensorylog", repo: "vivid-cinema", releaseType: "draft" });
   assert.ok(pkg.build.files.includes("!node_modules/**"));
   const desktopRuntime = JSON.parse(fs.readFileSync(path.join(root, "desktop", "package.json"), "utf8"));
   assert.ok(desktopRuntime.dependencies["ffmpeg-static"]);
@@ -240,6 +240,8 @@ test("Windows workflow builds on demand or on release tags", () => {
   assert.ok(workflow.indexOf("Create or reuse draft release for electron-builder") < workflow.indexOf("Build auto-updatable Windows release files"));
   assert.ok(workflow.indexOf("Build auto-updatable Windows release files") < workflow.indexOf("Verify updater metadata was generated"));
   assert.match(workflow, /Verify draft release contains all required assets/);
+  assert.match(workflow, /if \(!\$release\.draft\)/);
+  assert.match(workflow, /did not become public after verification/);
   assert.match(workflow, /git tag -a \$tag/);
   assert.match(workflow, /git push origin "refs\/tags\/\$tag"/);
   assert.match(workflow, /Verify updater metadata was generated/);
@@ -495,7 +497,7 @@ test("Windows desktop release uses the built-in player without an mpv build or s
 
 test("Windows runtime is current, hardened, and the offline shell cache is invalidated", () => {
   assert.equal(pkg.devDependencies.electron, "45.2.1");
-  assert.equal(pkg.version, "1.0.42");
+  assert.equal(pkg.version, "1.0.43");
   assert.deepEqual(pkg.build.electronFuses, {
     runAsNode: false,
     enableNodeOptionsEnvironmentVariable: false,

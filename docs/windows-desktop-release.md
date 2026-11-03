@@ -15,7 +15,7 @@ Electron 44 and later no longer publish 32-bit Windows builds, so this project i
 
 - The root package owns the Electron runtime and electron-builder.
 - `desktop/package.json` is the isolated runtime dependency manifest for the desktop process.
-- Desktop runtime modules are installed under `desktop/node_modules` and included in `app.asar`.
+- Desktop runtime modules are installed under `desktop/node_modules` with `npm ci --omit=dev` from the `desktop` directory and included in `app.asar`.
 - FFmpeg and FFprobe binaries are unpacked from ASAR so Windows can execute them.
 - The app itself is loaded from `app.asar`; ASAR integrity validation and Electron fuses are enabled in the packaged binary.
 
@@ -36,8 +36,9 @@ The production workflow fails closed when the certificate is missing or either g
 2. If the offline app shell or player modules change, increment `CACHE_NAME` in `service-worker.js` and update the versioned player import/precache URLs.
 3. Open a PR. Windows CI installs the root and isolated desktop dependencies, checks their lockfiles, runs the regression suite, syntax checks, FFmpeg/HLS/subtitle integration, seeded-torrent integration, and builds installer plus portable artifacts.
 4. Merge only after the Windows build and regression checks pass.
-5. A version-changing push to `main` triggers the production workflow. It builds and signs both executables, checks `latest.yml` and the installer blockmap, creates or updates a **draft** GitHub release, verifies the required assets, then publishes the release.
-6. Never overwrite an already-public release. Use a new semantic version for changed binaries.
+5. A version-changing push to `main` triggers the production workflow. After checking the signing certificate, it creates or reuses the version tag and a **draft** GitHub release before packaging. The `desktop:dist` and `desktop:publish` scripts use `--publish onTagOrDraft` with `releaseType: draft`, so electron-builder uploads `latest.yml`, the installer blockmap, and signed binaries into the draft.
+6. CI verifies the update manifest, both Authenticode signatures, matching publisher identity, and the complete draft asset set. Only then does it make the release public and verify that GitHub reports it as published.
+7. Never overwrite an already-public release. Use a new semantic version for changed binaries.
 
 Required release assets:
 
