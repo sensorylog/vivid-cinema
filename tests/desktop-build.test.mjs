@@ -26,6 +26,11 @@ test("Windows installer and portable executable targets use Vivid branding", () 
   assert.ok(pkg.build.files.includes("node_modules/electron-updater/**"));
   assert.ok(pkg.build.files.includes("node_modules/builder-util-runtime/**"));
   assert.ok(pkg.build.files.includes("node_modules/ms/**"));
+  const desktopRuntime = JSON.parse(fs.readFileSync(path.join(root, "desktop", "package.json"), "utf8"));
+  assert.ok(desktopRuntime.dependencies["ffmpeg-static"]);
+  assert.ok(desktopRuntime.dependencies["ffprobe-static"]);
+  assert.ok(desktopRuntime.dependencies["hls.js"]);
+  assert.deepEqual(pkg.build.asarUnpack, ["desktop/node_modules/ffmpeg-static/**", "desktop/node_modules/ffprobe-static/**"]);
   assert.deepEqual(pkg.build.win.target.map((target) => target.target), ["nsis", "portable"]);
   assert.equal(pkg.build.asar, true);
   assert.equal(pkg.build.win.icon, "icons/vivid-icon.ico");
@@ -162,6 +167,11 @@ test("Windows app checks for updates and offers download plus restart-to-install
   const redirect = fs.readFileSync(path.join(root, "scripts", "platform-origin-redirect.js"), "utf8");
   assert.match(main, /require\("electron-updater"\)/);
   assert.match(main, /^const \{ DesktopDownloadEngine \} = require\("\.\/download-engine\.cjs"\);/m);
+  assert.match(main, /require\("\.\/local-transcode-engine\.cjs"\)/);
+  assert.match(main, /new LocalTranscodeEngine/);
+  assert.match(main, /vivid-transcode-open-local/);
+  assert.match(main, /vivid-transcode-open-download/);
+  assert.match(main, /vivid-transcode-stop/);
   assert.doesNotMatch(main, /getDownloadEngine|downloadEnginePromise/, "download engine must not be deferred until the first renderer request");
   assert.match(main, /function configureDownloadEngine\(\) \{\s*\/\/ Match the known-working 1\.0\.28 lifecycle[\s\S]*?downloadEngine = new DesktopDownloadEngine\(\{ app, BrowserWindow, dialog, shell \}\);/);
   assert.match(main, /return downloadEngine\.start\(result, media\)/);
@@ -186,7 +196,16 @@ test("Windows app checks for updates and offers download plus restart-to-install
   assert.doesNotMatch(redirect, /netlify/i, "native redirect must use the current primary host");
   assert.match(preload, /Restart & install/);
   assert.match(preload, /vivid-update-status/);
+  assert.match(preload, /openLocalTranscode/);
+  assert.match(preload, /openDownloadTranscode/);
+  assert.match(preload, /stopTranscode/);
   assert.ok(fs.existsSync(path.join(root, "styles", "vivid-desktop-update.css")));
+  const offlineRenderer = fs.readFileSync(path.join(root, "scripts", "downloads", "desktop-offline.js"), "utf8");
+  assert.match(offlineRenderer, /createTranscodePlayer/);
+  assert.match(offlineRenderer, /openLocalTranscode/);
+  assert.match(offlineRenderer, /openDownloadTranscode/);
+  const downloadsPage = fs.readFileSync(path.join(root, "my-downloads.html"), "utf8");
+  assert.match(downloadsPage, /desktop\\/node_modules\\/hls\\.js\\/dist\\/hls\\.min\\.js/);
 });
 
 test("Windows workflow builds on demand or on release tags", () => {
