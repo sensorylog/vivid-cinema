@@ -82,6 +82,45 @@ jobs:
           if ([string]::IsNullOrWhiteSpace($env:WIN_CSC_LINK)) {
             throw "Production Windows releases require a trusted Authenticode certificate. Configure the WIN_CSC_LINK GitHub Actions secret before publishing."
           }
+      - name: Ensure matching release tag exists before publishing
+        if: steps.release-decision.outputs.publish == 'true' && github.ref == 'refs/heads/main'
+        shell: pwsh
+        run: |
+          $version = node -p "require('./package.json').version"
+          $tag = "v$version"
+          $existing = git ls-remote --tags origin "refs/tags/$tag"
+          if ($existing) {
+            git fetch origin "refs/tags/$tag:refs/tags/$tag"
+            if ($LASTEXITCODE -ne 0) { throw "Could not fetch existing release tag $tag." }
+            $tagCommit = git rev-list -n 1 $tag
+            if ($tagCommit -ne $env:GITHUB_SHA) {
+              throw "Release tag $tag points to a different commit. Bump package.json before publishing changed bits."
+            }
+          } else {
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git tag -a $tag $env:GITHUB_SHA -m "Vivid Cinema $version"
+            git push origin "refs/tags/$tag"
+          }
+      - name: Create or reuse draft release for electron-builder
+        if: steps.release-decision.outputs.publish == 'true' && github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: pwsh
+        run: |
+          $version = node -p "require('./package.json').version"
+          $tag = "v$version"
+          $draftState = gh release view $tag --json isDraft -q .isDraft 2>$null
+          if ($LASTEXITCODE -eq 0) {
+            if ($draftState -ne "true") {
+              throw "Release $tag is already public. Refusing to overwrite a published release."
+            }
+          } else {
+            gh release create $tag --verify-tag --draft --title "Vivid Cinema $version" --notes "Vivid Cinema Windows release $version. Draft remains private until installer, portable executable, signatures, and updater metadata are verified."
+            if ($LASTEXITCODE -ne 0) {
+              throw "Could not create draft release $tag for electron-builder."
+            }
+          }
       - name: Build auto-updatable Windows release files
         if: steps.release-decision.outputs.publish == 'true'
         env:
@@ -120,54 +159,7 @@ jobs:
           if ($signerSubjects[0] -ne $signerSubjects[1]) {
             throw "Installer and portable executable were signed by different publishers."
           }
-      - name: Ensure matching release tag exists before publishing
-        if: steps.release-decision.outputs.publish == 'true' && github.ref == 'refs/heads/main'
-        shell: pwsh
-        run: |
-          $version = node -p "require('./package.json').version"
-          $tag = "v$version"
-          $existing = git ls-remote --tags origin "refs/tags/$tag"
-          if ($existing) {
-            git fetch origin "refs/tags/$tag:refs/tags/$tag"
-            if ($LASTEXITCODE -ne 0) { throw "Could not fetch existing release tag $tag." }
-            $tagCommit = git rev-list -n 1 $tag
-            if ($tagCommit -ne $env:GITHUB_SHA) {
-              throw "Release tag $tag points to a different commit. Bump package.json before publishing changed bits."
-            }
-          } else {
-            git config user.name "github-actions[bot]"
-            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git tag -a $tag $env:GITHUB_SHA -m "Vivid Cinema $version"
-            git push origin "refs/tags/$tag"
-          }
-      - name: Publish installer and updater metadata together
-        if: steps.release-decision.outputs.publish == 'true'
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        shell: pwsh
-        run: |
-          $version = node -p "require('./package.json').version"
-          $tag = "v$version"
-          $installer = Get-ChildItem "dist-desktop/Vivid-Cinema-Setup-*.exe" -ErrorAction SilentlyContinue | Select-Object -First 1
-          $portable = Get-ChildItem "dist-desktop/Vivid-Cinema-Portable-*.exe" -ErrorAction SilentlyContinue | Select-Object -First 1
-          $blockMap = Get-ChildItem "dist-desktop/Vivid-Cinema-Setup-*.exe.blockmap" -ErrorAction SilentlyContinue | Select-Object -First 1
-          $metadata = Get-Item "dist-desktop/latest.yml" -ErrorAction SilentlyContinue
-          if (!$installer -or !$portable -or !$blockMap -or !$metadata) {
-            throw "Installer, portable executable, blockmap, and updater metadata must all exist before publishing."
-          }
-          $draftState = gh release view $tag --json isDraft -q .isDraft 2>$null
-          if ($LASTEXITCODE -eq 0) {
-            if ($draftState -ne "true") {
-              throw "Release $tag is already public. Refusing to replace its published artifacts."
-            }
-            gh release upload $tag $installer.FullName $portable.FullName $blockMap.FullName $metadata.FullName --clobber
-          } else {
-            gh release create $tag $installer.FullName $portable.FullName $blockMap.FullName $metadata.FullName --verify-tag --draft --title "Vivid Cinema $version" --notes "Vivid Cinema Windows release $version. Includes signed installer, portable executable, and in-app update metadata."
-          }
-          if ($LASTEXITCODE -ne 0) {
-            throw "GitHub draft release upload failed for $tag."
-          }
-      - name: Verify published updater assets
+      - name: Verify draft release contains all required assets
         if: steps.release-decision.outputs.publish == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
