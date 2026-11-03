@@ -123,10 +123,18 @@ test("real FFmpeg transcodes a sample MKV and serves HLS plus an embedded Englis
 
     const statusResponse = await fetch(session.statusUrl, { headers: { Origin: "https://vivid-cinema.pages.dev" } });
     assert.equal(statusResponse.status, 200);
-    const transcodeStatus = await statusResponse.json();
+    let transcodeStatus = await statusResponse.json();
     assert.ok(Math.abs(transcodeStatus.sourceDuration - 2) < 0.25);
     assert.ok(transcodeStatus.availableDuration >= 0);
     assert.equal(typeof transcodeStatus.complete, "boolean");
+    for (let attempt = 0; attempt < 50 && !transcodeStatus.complete && !transcodeStatus.failed; attempt++) {
+      await new Promise(resolve => setTimeout(resolve, 100));
+      const updated = await fetch(session.statusUrl, { headers: { Origin: "https://vivid-cinema.pages.dev" } });
+      assert.equal(updated.status, 200);
+      transcodeStatus = await updated.json();
+    }
+    assert.equal(transcodeStatus.failed, false, transcodeStatus.error || "FFmpeg should complete the sample transcode");
+    assert.equal(transcodeStatus.complete, true, "status reports completion only after FFmpeg finalizes the HLS playlist");
 
     const headers = { Origin: "https://vivid-cinema.pages.dev" };
     const playlistResponse = await fetch(session.url, { headers });
