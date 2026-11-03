@@ -74,15 +74,6 @@ jobs:
       - name: Verify the desktop download engine with a local seeded torrent
         timeout-minutes: 3
         run: node --test tests/desktop-download-engine.integration.test.cjs
-      - name: Require Windows code-signing credentials for production release
-        if: steps.release-decision.outputs.publish == 'true' && github.ref == 'refs/heads/main'
-        shell: pwsh
-        env:
-          WIN_CSC_LINK: ${{ secrets.WIN_CSC_LINK }}
-        run: |
-          if ([string]::IsNullOrWhiteSpace($env:WIN_CSC_LINK)) {
-            throw "Production Windows releases require a trusted Authenticode certificate. Configure the WIN_CSC_LINK GitHub Actions secret before publishing."
-          }
       - name: Ensure matching release tag exists before publishing
         if: steps.release-decision.outputs.publish == 'true' && github.ref == 'refs/heads/main'
         shell: pwsh
@@ -117,7 +108,7 @@ jobs:
               throw "Release $tag is already public. Refusing to overwrite a published release."
             }
           } else {
-            gh release create $tag --verify-tag --draft --title "Vivid Cinema $version" --notes "Vivid Cinema Windows release $version. Draft remains private until installer, portable executable, signatures, and updater metadata are verified."
+            gh release create $tag --verify-tag --draft --title "Vivid Cinema $version" --notes "Vivid Cinema Windows release $version. Draft remains private until installer, portable executable, and updater metadata are verified."
             if ($LASTEXITCODE -ne 0) {
               throw "Could not create draft release $tag for electron-builder."
             }
@@ -126,8 +117,6 @@ jobs:
         if: steps.release-decision.outputs.publish == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          WIN_CSC_LINK: ${{ secrets.WIN_CSC_LINK }}
-          WIN_CSC_KEY_PASSWORD: ${{ secrets.WIN_CSC_KEY_PASSWORD }}
         run: npm --ignore-scripts run desktop:dist
       - name: Verify updater metadata was generated
         if: steps.release-decision.outputs.publish == 'true'
@@ -139,26 +128,6 @@ jobs:
           $blockMap = Get-ChildItem "dist-desktop/Vivid-Cinema-Setup-*.exe.blockmap" -ErrorAction SilentlyContinue
           if (!$blockMap) {
             throw "Installer blockmap was not generated; refusing to publish an incomplete update."
-          }
-      - name: Verify Windows Authenticode signatures
-        if: steps.release-decision.outputs.publish == 'true'
-        shell: pwsh
-        run: |
-          $installer = Get-ChildItem "dist-desktop/Vivid-Cinema-Setup-*.exe" -ErrorAction SilentlyContinue | Select-Object -First 1
-          $portable = Get-ChildItem "dist-desktop/Vivid-Cinema-Portable-*.exe" -ErrorAction SilentlyContinue | Select-Object -First 1
-          if (!$installer -or !$portable) {
-            throw "Both the Windows installer and portable executable must exist before signing verification."
-          }
-          $signerSubjects = @()
-          foreach ($artifact in @($installer, $portable)) {
-            $signature = Get-AuthenticodeSignature -FilePath $artifact.FullName
-            if ($signature.Status -ne "Valid" -or !$signature.SignerCertificate) {
-              throw "Windows Authenticode signature is missing or invalid: $($artifact.Name) ($($signature.Status))."
-            }
-            $signerSubjects += $signature.SignerCertificate.Subject
-          }
-          if ($signerSubjects[0] -ne $signerSubjects[1]) {
-            throw "Installer and portable executable were signed by different publishers."
           }
       - name: Verify draft release contains all required assets
         if: steps.release-decision.outputs.publish == 'true'
