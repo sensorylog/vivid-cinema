@@ -114,7 +114,8 @@ function markStartup(stage) {
 function ensureDownloadEngine() {
   if (!downloadEngine) {
     const { DesktopDownloadEngine } = require("./download-engine.cjs");
-    }
+    downloadEngine = new DesktopDownloadEngine({ app, BrowserWindow, dialog, shell });
+  }
   return downloadEngine;
 }
 
@@ -270,7 +271,6 @@ function configureOfflineMediaProtocol() {
 function configureDownloadEngine() {
   // Match the known-working 1.0.28 lifecycle: create the WebTorrent client
   // during desktop startup, before the renderer can issue a download request.
-  downloadEngine = new DesktopDownloadEngine({ app, BrowserWindow, dialog, shell });
   ipcMain.handle("vivid-download-search", (event, query) => {
     if (!isTrustedDownloadSender(event)) throw new Error("Untrusted download request");
     return ensureDownloadEngine().search(query);
