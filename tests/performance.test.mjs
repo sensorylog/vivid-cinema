@@ -131,7 +131,7 @@ test("Home defers fonts, icon CSS, ambient effects and hero video until after fi
   assert.match(loader, /import\("\.\/atmosphere\.js"\)/);
   assert.match(loader, /import\("\.\/home-breathe\.js"\)/);
   assert.match(loader, /import\("\.\/tflix-hero\.js\?v=hero-fast-fallback-1"\)/);
-  assert.match(worker, /vivid-cinema-shell-v273/);
+  assert.match(worker, /vivid-cinema-shell-v274/);
   assert.match(worker, /scripts\/home-optional-resources\.js/);
 });
 
