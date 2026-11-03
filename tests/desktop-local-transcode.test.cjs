@@ -67,3 +67,69 @@ test("local transcode server binds to loopback and rejects untrusted web origins
     await fs.rm(directory, { recursive: true, force: true });
   }
 });
+
+test("real FFmpeg transcodes a sample MKV and serves HLS plus an embedded English subtitle", async t => {
+  let ffmpegPath;
+  let ffprobePath;
+  try {
+    ffmpegPath = require("ffmpeg-static");
+    ffprobePath = require("ffprobe-static").path;
+    if (!ffmpegPath || !ffprobePath) throw new Error("FFmpeg binaries unavailable");
+  } catch {
+    t.skip("Desktop runtime dependencies are installed in the Windows packaging job.");
+    return;
+  }
+
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), "vivid-transcode-e2e-"));
+  const input = path.join(directory, "sample.mkv");
+  const subtitle = path.join(directory, "english.srt");
+  await fs.writeFile(subtitle, "1\\n00:00:00,200 --> 00:00:01,700\\nHello from Vivid\\n");
+  const engine = new LocalTranscodeEngine({
+    app: { getPath: () => directory, isPackaged: false },
+    ffmpegPath,
+    ffprobePath,
+    allowedOrigins: ["https://vivid-cinema.pages.dev"],
+    startupTimeoutMs: 30000
+  });
+  try {
+    await runProcess(ffmpegPath, [
+      "-y", "-hide_banner", "-loglevel", "error",
+      "-f", "lavfi", "-i", "testsrc=size=160x90:rate=12",
+      "-f", "lavfi", "-i", "sine=frequency=1000:sample_rate=48000",
+      "-i", subtitle,
+      "-t", "2",
+      "-map", "0:v:0", "-map", "1:a:0", "-map", "2:s:0",
+      "-c:v", "mpeg4", "-q:v", "5", "-c:a", "mp3", "-c:s", "srt",
+      "-metadata:s:a:0", "language=eng",
+      "-metadata:s:s:0", "language=eng",
+      input
+    ], { timeoutMs: 30000 });
+
+    const origin = await engine.start();
+    const session = await engine.createSession(input, 77);
+    assert.equal(session.codecs.outputVideo, "h264");
+    assert.equal(session.codecs.outputAudio, "aac-stereo");
+    assert.ok(session.subtitleUrl);
+
+    const headers = { Origin: "https://vivid-cinema.pages.dev" };
+    const playlistResponse = await fetch(session.url, { headers });
+    assert.equal(playlistResponse.status, 200);
+    const playlist = await playlistResponse.text();
+    assert.match(playlist, /#EXTM3U/);
+    const segmentName = playlist.split(/\\r?\\n/).find(line => /^segment_\\d+\\.ts$/.test(line.trim()));
+    assert.ok(segmentName, "HLS playlist includes a media segment");
+    const segmentResponse = await fetch(new URL(segmentName.trim(), session.url), { headers });
+    assert.equal(segmentResponse.status, 200);
+    assert.ok(Number(segmentResponse.headers.get("content-length")) > 0);
+
+    const subtitleResponse = await fetch(session.subtitleUrl, { headers });
+    assert.equal(subtitleResponse.status, 200);
+    assert.match(await subtitleResponse.text(), /WEBVTT/);
+    assert.equal(await engine.stopSession(session.sessionId, 77), true);
+    assert.equal(await engine.stopSession(session.sessionId, 78), false);
+    assert.ok(origin.startsWith("http://127.0.0.1:"));
+  } finally {
+    await engine.shutdown();
+    await fs.rm(directory, { recursive: true, force: true });
+  }
+});
