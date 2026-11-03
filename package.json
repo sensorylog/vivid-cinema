@@ -1,7 +1,7 @@
 {
   "name": "vivid-cinema",
   "private": true,
-  "version": "1.0.41",
+  "version": "1.0.42",
   "type": "module",
   "scripts": {
     "test": "node --test tests/premium-pwa-experience.test.mjs tests/newest-sort.test.mjs tests/catalogue-release-filter.test.mjs tests/live-catalogue.test.mjs tests/playback-urls.test.mjs tests/anime-secondary-player.test.mjs tests/anime-secondary-player-structure.test.mjs tests/anime-id-resolver.test.mjs tests/service-worker.test.mjs tests/watch-player.test.mjs tests/tflix-secondary-player.test.mjs tests/playback-structure.test.mjs tests/home-hero.test.mjs tests/home-search.test.mjs tests/google-tag.test.mjs tests/adcash.test.mjs tests/performance.test.mjs tests/auth-verification.test.mjs tests/push-notifications.test.mjs tests/account-profile.test.mjs tests/attribution.test.mjs tests/local-owner.test.mjs tests/memory-sync.test.mjs tests/recommendations-memory.test.mjs tests/intent-parser.test.mjs tests/recommendation-ranking.test.mjs tests/for-you-structure.test.mjs tests/plot-search.test.mjs tests/catalog-search.test.mjs tests/intelligence-integration.test.mjs tests/intelligence-events.test.mjs tests/future-module-contracts.test.mjs tests/firebase-ai-config.test.mjs tests/achievements.test.mjs tests/achievements-page.test.mjs tests/release-alerts.test.mjs tests/notification-senders.test.mjs tests/newsroom-ingest.test.mjs tests/static-news-images.test.mjs tests/desktop-build.test.mjs tests/desktop-permission-policy.test.mjs tests/desktop-local-media.test.mjs tests/desktop-media-protocol.test.mjs tests/home-provider-news-refresh.test.mjs tests/onboarding-auth-persistence.test.mjs tests/android-native-polish.test.mjs tests/android-icon.test.mjs tests/android-auto-update.test.mjs tests/cloudflare-pages-config.test.mjs tests/android-release-pipeline.test.mjs tests/downloads-page.test.mjs tests/download-manager.test.mjs tests/download-indexeddb.test.mjs tests/download-browser-adapter.test.mjs tests/downloads-library-page.test.mjs tests/offline-playback.test.mjs tests/title-download-flow.test.mjs tests/download-source-identity.test.mjs tests/download-release-matcher.test.mjs tests/reproducible-install.test.mjs tests/download-browser-hls-adapter.test.mjs tests/media-capabilities.test.mjs tests/media-inspector.test.mjs tests/desktop-playback-controls.test.mjs tests/subtitle-engine.test.mjs tests/desktop-local-transcode.test.cjs",
@@ -18,7 +18,7 @@
     "@firebase/rules-unit-testing": "^4.0.1",
     "firebase": "^11.10.0",
     "firebase-tools": "^15.34.0",
-    "electron": "^36.4.0",
+    "electron": "45.2.1",
     "electron-builder": "^26.0.12",
     "@capacitor/cli": "^8.5.3"
   },
@@ -26,7 +26,6 @@
     "firebase-admin": "^14.5.0",
     "@capacitor/android": "^8.5.3",
     "@capacitor/core": "^8.5.3",
-    "electron-updater": "^6.6.2"
   },
   "author": "Johnson Kyei Baffour",
   "main": "desktop/main.cjs",
@@ -40,22 +39,6 @@
       "desktop/node_modules/**",
       "**/*",
       "!node_modules/**",
-      "node_modules/electron-updater/**",
-      "node_modules/builder-util-runtime/**",
-      "node_modules/fs-extra/**",
-      "node_modules/js-yaml/**",
-      "node_modules/lazy-val/**",
-      "node_modules/lodash.escaperegexp/**",
-      "node_modules/lodash.isequal/**",
-      "node_modules/semver/**",
-      "node_modules/tiny-async-pool/**",
-      "node_modules/debug/**",
-      "node_modules/ms/**",
-      "node_modules/sax/**",
-      "node_modules/graceful-fs/**",
-      "node_modules/jsonfile/**",
-      "node_modules/universalify/**",
-      "node_modules/argparse/**",
       "!.git/**",
       "!.github/**",
       "!tests/**",
@@ -71,6 +54,15 @@
       "!README.md"
     ],
     "asar": true,
+    "electronFuses": {
+      "runAsNode": false,
+      "enableNodeOptionsEnvironmentVariable": false,
+      "enableNodeCliInspectArguments": false,
+      "enableEmbeddedAsarIntegrityValidation": true,
+      "onlyLoadAppFromAsar": true,
+      "loadBrowserProcessSpecificV8Snapshot": false,
+      "grantFileProtocolExtraPrivileges": false
+    },
     "asarUnpack": [
       "desktop/node_modules/ffmpeg-static/**",
       "desktop/node_modules/ffprobe-static/**"
