@@ -230,7 +230,7 @@ test("Windows workflow builds on demand or on release tags", () => {
   assert.match(workflow, /--draft/);
   assert.match(workflow, /gh release upload .*--clobber/);
   assert.match(workflow, /Publish verified Windows release/);
-  assert.match(workflow, /gh release edit \\$tag --draft=false/);
+  assert.ok(workflow.includes("gh release edit $tag --draft=false"));
   assert.match(workflow, /--verify-tag/);
   assert.match(workflow, /Verify published updater assets/);
   assert.match(workflow, /releases\/tags\/\$tag/);
@@ -487,12 +487,12 @@ test("Windows runtime is current, hardened, and the offline shell cache is inval
   });
   assert.equal(pkg.dependencies["electron-updater"], undefined);
   const preload = fs.readFileSync(path.join(root, "desktop", "preload.cjs"), "utf8");
-  assert.doesNotMatch(preload, /\\bBuffer\\b|\\bsetImmediate\\b|\\bclearImmediate\\b|require\\(["'](?:events|timers|url)["']\\)/);
+  assert.doesNotMatch(preload, /\bBuffer\b|\bsetImmediate\b|\bclearImmediate\b|require\(["'](?:events|timers|url)["']\)/);
   const serviceWorker = fs.readFileSync(path.join(root, "service-worker.js"), "utf8");
-  assert.match(serviceWorker, /CACHE_NAME = "vivid-cinema-shell-v272"/);
-  assert.match(serviceWorker, /desktop-offline\\.js\\?windows-offline-hls-v2/);
-  assert.match(serviceWorker, /transcode-player\\.js\\?windows-offline-hls-v2/);
-  assert.match(serviceWorker, /desktop\\/node_modules\\/hls\\.js\\/dist\\/hls\\.min\\.js/);
+  assert.ok(serviceWorker.includes('CACHE_NAME = "vivid-cinema-shell-v272"'));
+  assert.ok(serviceWorker.includes("./scripts/downloads/desktop-offline.js?windows-offline-hls-v2"));
+  assert.ok(serviceWorker.includes("./scripts/downloads/transcode-player.js?windows-offline-hls-v2"));
+  assert.ok(serviceWorker.includes("./desktop/node_modules/hls.js/dist/hls.min.js"));
   const myDownloads = fs.readFileSync(path.join(root, "scripts", "my-downloads.js"), "utf8");
-  assert.match(myDownloads, /desktop-offline\\.js\\?windows-offline-hls-v2/);
+  assert.ok(myDownloads.includes("./downloads/desktop-offline.js?windows-offline-hls-v2"));
 });
