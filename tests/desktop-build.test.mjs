@@ -326,8 +326,9 @@ test("Ultra Player adds explicit resume choices, safe series-next matching and c
   assert.match(page, /offline-resume-restart/);
   assert.match(page, /offline-next-episode/);
   assert.match(player, /getPlaybackPosition\(jobId,fileIndex\)/);
-  const resumePromptPosition = player.indexOf('byId("offline-resume-prompt").hidden=false;', player.indexOf("player.addEventListener(\"loadedmetadata\""));
-  const pauseForResumePrompt = player.indexOf("player.pause();", player.indexOf("player.addEventListener(\"loadedmetadata\""));
+  const resumePromptPosition = player.indexOf('byId("offline-resume-prompt").hidden=false;', player.indexOf("function showResumePrompt"));
+  const pauseForResumePrompt = player.indexOf("player.pause();", player.indexOf("function showResumePrompt"));
+  assert.match(player, /pendingResumePosition/);
   assert.ok(resumePromptPosition >= 0 && pauseForResumePrompt > resumePromptPosition, "show resume prompt before pausing so the old saved position is not overwritten");
   assert.match(player, /Continue from /);
   assert.match(player, /clearPlaybackPosition/);
