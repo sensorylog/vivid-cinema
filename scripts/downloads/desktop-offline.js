@@ -1205,6 +1205,8 @@ async function releaseLocalMedia(){
   player.dataset.transcodeCodecs="";
   delete player.dataset.pendingResumePosition;
   player.dataset.localMediaToken="";
+  player.dataset.jobId="";
+  player.dataset.fileIndex="0";
   if(sessionId){
     transcodePlayer.reset();
     try{await engine.stopTranscode(sessionId);}catch{}
