@@ -67,7 +67,7 @@ test("Electron opens only user-selected supported files and serves scoped local 
   assert.match(preload, /openLocalFile:\s*\(\) => ipcRenderer\.invoke\("vivid-local-media-open"\)/);
   assert.match(preload, /releaseLocalFile:\s*token => ipcRenderer\.invoke\("vivid-local-media-release", token\)/);
   assert.match(main, /vivid-transcode-open-local/);
-  assert.match(main, /transcodeEngine\.createSession\(selectedPath, event\.sender\.id\)/);
+  assert.match(main, /ensureTranscodeEngine\(\)\)\.createSession\(selectedPath, event\.sender\.id\)/);
   assert.match(preload, /openLocalTranscode: \(\) => ipcRenderer\.invoke\("vivid-transcode-open-local"\)/);
   assert.match(renderer, /engine\.openLocalTranscode\(\)/);
   assert.match(renderer, /transcodePlayer\.load\(file\)/);
