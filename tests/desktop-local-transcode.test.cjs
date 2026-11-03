@@ -125,6 +125,23 @@ test("real FFmpeg transcodes a sample MKV and serves HLS plus an embedded Englis
     const subtitleResponse = await fetch(session.subtitleUrl, { headers });
     assert.equal(subtitleResponse.status, 200);
     assert.match(await subtitleResponse.text(), /WEBVTT/);
+
+    const compatibleInput = path.join(directory, "compatible-h264-aac.mkv");
+    await runProcess(ffmpegPath, [
+      "-y", "-hide_banner", "-loglevel", "error", "-i", input,
+      "-map", "0:v:0", "-map", "0:a:0",
+      "-c:v", "libx264", "-preset", "ultrafast", "-pix_fmt", "yuv420p",
+      "-c:a", "aac", "-ac", "2", compatibleInput
+    ], { timeoutMs: 30000 });
+    const compatibleSession = await engine.createSession(compatibleInput, 77);
+    assert.equal(compatibleSession.codecs.videoMode, "copy");
+    assert.equal(compatibleSession.codecs.audioMode, "copy");
+    assert.equal(compatibleSession.codecs.downscaled, false);
+    const compatiblePlaylist = await fetch(compatibleSession.url, { headers });
+    assert.equal(compatiblePlaylist.status, 200);
+    assert.match(await compatiblePlaylist.text(), /#EXTM3U/);
+    assert.equal(await engine.stopSession(compatibleSession.sessionId, 77), true);
+
     assert.equal(await engine.stopSession(session.sessionId, 77), true);
     assert.equal(await engine.stopSession(session.sessionId, 78), false);
     assert.ok(origin.startsWith("http://127.0.0.1:"));
