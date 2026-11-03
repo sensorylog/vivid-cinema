@@ -9,12 +9,12 @@ const { LocalTranscodeEngine, preferredEnglishSubtitle, executablePath, waitForF
 
 test("English subtitle selection prefers default English over forced or non-English tracks", () => {
   const selected = preferredEnglishSubtitle([
-    { index: 2, codec_type: "subtitle", tags: { language: "jpn" }, disposition: { default: 1 } },
-    { index: 4, codec_type: "subtitle", tags: { language: "eng" }, disposition: { forced: 1 } },
-    { index: 5, codec_type: "subtitle", tags: { language: "en" }, disposition: { default: 1 } }
+    { index: 2, codec_type: "subtitle", codec_name: "subrip", tags: { language: "jpn" }, disposition: { default: 1 } },
+    { index: 4, codec_type: "subtitle", codec_name: "ass", tags: { language: "eng" }, disposition: { forced: 1 } },
+    { index: 5, codec_type: "subtitle", codec_name: "mov_text", tags: { language: "en" }, disposition: { default: 1 } }
   ]);
   assert.equal(selected.index, 5);
-  assert.equal(preferredEnglishSubtitle([{ codec_type: "subtitle", tags: { language: "fra" } }]), null);
+  assert.equal(preferredEnglishSubtitle([{ codec_type: "subtitle", codec_name: "subrip", tags: { language: "fra" } }]), null);
 });
 
 test("packaged FFmpeg binaries are resolved from Electron's asar-unpacked directory", () => {
