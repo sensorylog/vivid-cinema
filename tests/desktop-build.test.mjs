@@ -297,7 +297,7 @@ test("Vivid Ultra Player keeps Chromium playback and adds guarded native media c
   const page = fs.readFileSync(path.join(root, "my-downloads.html"), "utf8");
   const styles = fs.readFileSync(path.join(root, "styles", "my-downloads.css"), "utf8");
   const subtitleEngine = fs.readFileSync(path.join(root, "scripts", "downloads", "subtitle-engine.js"), "utf8");
-  assert.match(page, /<video id="offline-player" controls playsinline preload="metadata"><\/video>/);
+  assert.match(page, /<video id="offline-player" controls playsinline preload="metadata" crossorigin="anonymous"><\/video>/);
   assert.match(page, /offline-skip-back/);
   assert.match(page, /offline-skip-forward/);
   assert.match(page, /offline-subtitle-file/);
