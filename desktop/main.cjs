@@ -1,13 +1,11 @@
 const { app, BrowserWindow, Menu, dialog, shell, session, ipcMain, net, protocol } = require("electron");
 // Enable Chromium's AudioVideoTracks API for embedded audio track selection in the Windows player.
 app.commandLine.appendSwitch("enable-blink-features", "AudioVideoTracks");
-const { autoUpdater } = require("electron-updater");
+const { performance } = require("node:perf_hooks");
 const http = require("node:http");
 const fs = require("node:fs");
 const path = require("node:path");
 const crypto = require("node:crypto");
-const { DesktopDownloadEngine } = require("./download-engine.cjs");
-const { LocalTranscodeEngine } = require("./local-transcode-engine.cjs");
 const { createMediaResponse } = require("./media-protocol.cjs");
 const { isPermissionAllowed } = require("./permission-policy.cjs");
 const { createLocalMediaRegistry, isSupportedLocalVideoFile, LOCAL_VIDEO_EXTENSIONS } = require("./local-media.cjs");
@@ -101,6 +99,64 @@ let localServer;
 let localOrigin;
 let downloadEngine;
 let transcodeEngine;
+let transcodeEngineStartPromise = null;
+let autoUpdater = null;
+let autoUpdaterListenersInstalled = false;
+const startupStartedAt = performance.now();
+const startupDiagnosticsEnabled = process.env.VIVID_PERF_DIAGNOSTICS === "1" ||
+  app.commandLine.hasSwitch("vivid-perf");
+
+function markStartup(stage) {
+  if (!startupDiagnosticsEnabled) return;
+  console.info("[Vivid startup] " + stage + ": " + Math.round(performance.now() - startupStartedAt) + "ms");
+}
+
+function ensureDownloadEngine() {
+  if (!downloadEngine) {
+    const { DesktopDownloadEngine } = require("./download-engine.cjs");
+    }
+  return downloadEngine;
+}
+
+async function ensureTranscodeEngine() {
+  if (transcodeEngine) return transcodeEngine;
+  if (!transcodeEngineStartPromise) {
+    transcodeEngineStartPromise = (async () => {
+      const { LocalTranscodeEngine } = require("./local-transcode-engine.cjs");
+      const engine = new LocalTranscodeEngine({ app, allowedOrigins: [HOSTED_APP_ORIGIN, localOrigin] });
+      await engine.start();
+      transcodeEngine = engine;
+      return engine;
+    })().catch(error => {
+      transcodeEngineStartPromise = null;
+      throw error;
+    });
+  }
+  return transcodeEngineStartPromise;
+}
+
+function ensureAutoUpdater() {
+  if (!autoUpdater) {
+    const { autoUpdater: updater } = require("electron-updater");
+    autoUpdater = updater;
+  }
+  if (!autoUpdaterListenersInstalled) {
+    autoUpdaterListenersInstalled = true;
+    autoUpdater.autoDownload = false;
+    autoUpdater.autoInstallOnAppQuit = true;
+    autoUpdater.allowDowngrade = false;
+    autoUpdater.on("update-available", info => sendUpdateStatus({ state: "available", version: info.version }));
+    autoUpdater.on("download-progress", progress => {
+      sendUpdateStatus({ state: "downloading", percent: Math.max(0, Math.min(100, Math.round(progress.percent || 0))) });
+    });
+    autoUpdater.on("update-downloaded", info => sendUpdateStatus({ state: "downloaded", version: info.version }));
+    autoUpdater.on("error", error => {
+      console.warn("Vivid Cinema update check/install issue:", error?.message || error);
+      sendUpdateStatus({ state: "error" });
+    });
+  }
+  return autoUpdater;
+}
 const mediaToken = crypto.randomBytes(32).toString("hex");
 const localMediaRegistry = createLocalMediaRegistry({ maxEntries: 8 });
 const HOSTED_APP_URL = "https://vivid-cinema.pages.dev/home.html";
@@ -217,31 +273,31 @@ function configureDownloadEngine() {
   downloadEngine = new DesktopDownloadEngine({ app, BrowserWindow, dialog, shell });
   ipcMain.handle("vivid-download-search", (event, query) => {
     if (!isTrustedDownloadSender(event)) throw new Error("Untrusted download request");
-    return downloadEngine.search(query);
+    return ensureDownloadEngine().search(query);
   });
   ipcMain.handle("vivid-download-start", (event, result, media) => {
     if (!isTrustedDownloadSender(event)) throw new Error("Untrusted download request");
-    return downloadEngine.start(result, media);
+    return ensureDownloadEngine().start(result, media);
   });
   ipcMain.handle("vivid-download-list", event => {
     if (!isTrustedDownloadSender(event)) throw new Error("Untrusted download request");
-    return downloadEngine.list();
+    return ensureDownloadEngine().list();
   });
   ipcMain.handle("vivid-playback-position-get", (event, id, fileIndex = 0) => {
     if (!isTrustedDownloadSender(event)) throw new Error("Untrusted playback request");
-    return downloadEngine.getPlaybackPosition(id, fileIndex);
+    return ensureDownloadEngine().getPlaybackPosition(id, fileIndex);
   });
   ipcMain.handle("vivid-playback-position-set", (event, id, fileIndex = 0, seconds = 0) => {
     if (!isTrustedDownloadSender(event)) throw new Error("Untrusted playback request");
-    return downloadEngine.setPlaybackPosition(id, fileIndex, seconds);
+    return ensureDownloadEngine().setPlaybackPosition(id, fileIndex, seconds);
   });
   ipcMain.handle("vivid-playback-position-clear", (event, id, fileIndex = 0) => {
     if (!isTrustedDownloadSender(event)) throw new Error("Untrusted playback request");
-    return downloadEngine.clearPlaybackPosition(id, fileIndex);
+    return ensureDownloadEngine().clearPlaybackPosition(id, fileIndex);
   });
   ipcMain.handle("vivid-download-media-url", (event, id, fileIndex = 0) => {
     if (!isTrustedDownloadSender(event)) throw new Error("Untrusted download request");
-    if (!downloadEngine.mediaFile(id, fileIndex)) throw new Error("This download is not ready to play.");
+    if (!ensureDownloadEngine().mediaFile(id, fileIndex)) throw new Error("This download is not ready to play.");
     return "vivid-media://download/" + encodeURIComponent(String(id)) + "?file=" + encodeURIComponent(String(fileIndex)) + "&token=" + mediaToken;
   });
   ipcMain.handle("vivid-local-media-open", async event => {
@@ -282,17 +338,17 @@ function configureDownloadEngine() {
     if (result.canceled || !result.filePaths?.length) return null;
     const selectedPath = await fs.promises.realpath(result.filePaths[0]);
     if (!isSupportedLocalVideoFile(selectedPath)) throw new Error("Choose a supported video file.");
-    return transcodeEngine.createSession(selectedPath, event.sender.id);
+    return (await ensureTranscodeEngine()).createSession(selectedPath, event.sender.id);
   });
   ipcMain.handle("vivid-transcode-open-download", async (event, id, fileIndex = 0) => {
     if (!isTrustedDownloadSender(event)) throw new Error("Untrusted download transcode request");
-    const mediaPath = downloadEngine && downloadEngine.mediaFile(id, fileIndex);
+    const mediaPath = ensureDownloadEngine().mediaFile(id, fileIndex);
     if (!mediaPath) throw new Error("This downloaded video is not ready to play.");
-    return transcodeEngine.createSession(mediaPath, event.sender.id);
+    return (await ensureTranscodeEngine()).createSession(mediaPath, event.sender.id);
   });
   ipcMain.handle("vivid-transcode-stop", (event, sessionId) => {
     if (!isTrustedDownloadSender(event)) throw new Error("Untrusted transcode stop request");
-    return transcodeEngine.stopSession(sessionId, event.sender.id);
+    return transcodeEngine ? transcodeEngine.stopSession(sessionId, event.sender.id) : false;
   });
   ipcMain.handle("vivid-offline-url", event => {
     if (!isTrustedDownloadSender(event)) throw new Error("Untrusted offline navigation request");
@@ -300,47 +356,31 @@ function configureDownloadEngine() {
   });
   ipcMain.handle("vivid-download-folder", async event => {
     if (!isTrustedDownloadSender(event)) throw new Error("Untrusted download request");
-    return downloadEngine.chooseFolder();
+    return ensureDownloadEngine().chooseFolder();
   });
   ipcMain.handle("vivid-download-control", (event, id, action) => {
     if (!isTrustedDownloadSender(event)) throw new Error("Untrusted download request");
-    return downloadEngine.control(id, action);
+    return ensureDownloadEngine().control(id, action);
   });
 }
 
 function configureAutoUpdates() {
   if (!supportsOneClickUpdates) return;
-  autoUpdater.autoDownload = false;
-  autoUpdater.autoInstallOnAppQuit = true;
-  autoUpdater.allowDowngrade = false;
-  autoUpdater.on("update-available", info => {
-    sendUpdateStatus({ state: "available", version: info.version });
-  });
-  autoUpdater.on("download-progress", progress => {
-    sendUpdateStatus({ state: "downloading", percent: Math.max(0, Math.min(100, Math.round(progress.percent || 0))) });
-  });
-  autoUpdater.on("update-downloaded", info => {
-    sendUpdateStatus({ state: "downloaded", version: info.version });
-  });
-  autoUpdater.on("error", error => {
-    console.warn("Vivid Cinema update check/install issue:", error?.message || error);
-    sendUpdateStatus({ state: "error" });
-  });
   ipcMain.handle("vivid-update-download", async event => {
     if (!isTrustedUpdateSender(event)) throw new Error("Untrusted update request");
-    await autoUpdater.downloadUpdate();
+    await ensureAutoUpdater().downloadUpdate();
     return true;
   });
   ipcMain.handle("vivid-update-install", event => {
     if (!isTrustedUpdateSender(event)) throw new Error("Untrusted update request");
-    autoUpdater.quitAndInstall();
+    ensureAutoUpdater().quitAndInstall();
     return true;
   });
 }
 
 function scheduleUpdateChecks() {
   if (!supportsOneClickUpdates) return;
-  const check = () => autoUpdater.checkForUpdates().catch(error => {
+  const check = () => ensureAutoUpdater().checkForUpdates().catch(error => {
     console.warn("Vivid Cinema update check failed:", error?.message || error);
   });
   setTimeout(check, 15000);
@@ -355,6 +395,7 @@ function createWindow() {
     webPreferences: { session: session.defaultSession, preload: path.join(__dirname, "preload.cjs"), nodeIntegration: false, contextIsolation: true, sandbox: true, webSecurity: true }
   });
 
+  markStartup("window-created");
   win.webContents.once("destroyed", () => { void transcodeEngine?.stopOwner(win.webContents.id); });
 
   // Show a tiny local splash immediately; the main app then loads on its trusted HTTPS origin.
@@ -384,12 +425,17 @@ function createWindow() {
     console.warn("Vivid Cinema hosted origins unavailable; opening bundled offline fallback:", reason);
     if (localOrigin) void win.loadURL(localOrigin + "/home.html").catch(() => {});
   };
+  let firstAppPageLoaded = false;
   win.webContents.on("did-finish-load", () => {
     let loadedOrigin;
     try { loadedOrigin = new URL(win.webContents.getURL()).origin; } catch { return; }
     const isHostedApp = loadedOrigin === HOSTED_APP_ORIGIN;
     const isLocalApp = Boolean(localOrigin && loadedOrigin === new URL(localOrigin).origin);
     if (!isHostedApp && !isLocalApp) return;
+    if (!firstAppPageLoaded) {
+      firstAppPageLoaded = true;
+      markStartup("first-app-page-loaded");
+    }
     if (isHostedApp) hostedAppLoaded = true;
     if (isLocalApp) localAppLoaded = true;
     navigationRecoveryInProgress = false;
@@ -426,6 +472,7 @@ function createWindow() {
   };
 
   win.once("ready-to-show", () => {
+    markStartup("window-ready-to-show");
     win.setFullScreen(true);
     win.show();
     if (hostedLoadStarted) return;
@@ -537,6 +584,7 @@ function createWindow() {
 
 if (hasSingleInstanceLock) {
 app.whenReady().then(async () => {
+  markStartup("electron-app-ready");
   installApplicationMenu();
   configureAutoUpdates();
   const allowedPermissionOrigins = () => [HOSTED_APP_ORIGIN, localOrigin].filter(Boolean);
@@ -557,8 +605,7 @@ app.whenReady().then(async () => {
   );
   try {
     await startLocalServer();
-    transcodeEngine = new LocalTranscodeEngine({ app, allowedOrigins: [HOSTED_APP_ORIGIN, localOrigin] });
-    await transcodeEngine.start();
+    markStartup("local-server-ready");
     configureDownloadEngine();
     configureOfflineMediaProtocol();
     createWindow();
