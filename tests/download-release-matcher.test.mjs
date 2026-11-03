@@ -5,6 +5,7 @@ import { matchesSelectedRelease } from "../scripts/downloads/release-matcher.js"
 test("movie matching requires the selected title phrase and exact release year", () => {
   const odyssey = { id: 999, media_type: "movie", title: "The Odyssey", year: "2026" };
   assert.equal(matchesSelectedRelease(odyssey, { title: "The.Odyssey.2026.1080p.WEB-DL" }), true);
+  assert.equal(matchesSelectedRelease(odyssey, { title: "YTS.MX.The.Odyssey.2026.1080p.WEB-DL" }), true);
   assert.equal(matchesSelectedRelease(odyssey, { title: "The Odyssey 1997 1080p" }), false);
   assert.equal(matchesSelectedRelease(odyssey, { title: "An Odyssey of Space 2026 1080p" }), false);
   assert.equal(matchesSelectedRelease(odyssey, { title: "The Odyssey 1080p" }), false);
