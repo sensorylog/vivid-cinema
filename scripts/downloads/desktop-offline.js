@@ -892,6 +892,7 @@ function drawSeekPreview(){
   try{context.drawImage(seekPreviewVideo,0,0,seekPreview.width,seekPreview.height);}catch{}
 }
 function updateSeekPreview(target){
+  if(player.dataset.transcodeSessionId){seekPreview.hidden=true;return;}
   if(!Number.isFinite(target)||!ensureSeekPreviewSource())return;
   seekPreviewTarget=Math.max(0,Math.min(Number.isFinite(player.duration)?player.duration:target,target));
   const request=++seekPreviewRequest;
@@ -1202,7 +1203,6 @@ async function play(job,fileIndex=0){
   const media=await engine.openDownloadTranscode(job.id,fileIndex);
   if(!media) throw new Error("The saved video file is not available.");
   await releaseLocalMedia();
-  const file=Array.isArray(job.files)?job.files[fileIndex]:null;
   const playerTitle=file&&job.files.length>1?job.title+" — "+file.name:job.title;
   byId("offline-player-title").textContent=playerTitle;
   syncNextEpisode(job);
