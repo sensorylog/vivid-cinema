@@ -25,7 +25,7 @@ export function matchesSelectedRelease(media, result) {
   const titleWords = WORDS(media.title);
   const releaseWords = WORDS(result.title);
   if (!containsSequence(releaseWords, titleWords)) return false;
-  if (/\\b(?:fan[\\s._-]*edit|fanmade|parody|trailer|teaser|sample|clip|workprint)\\b/i.test(result.title)) return false;
+  if (/\b(?:fan[\s._-]*edit|fanmade|parody|trailer|teaser|sample|clip|workprint)\b/i.test(result.title)) return false;
 
   if (media.media_type === "tv") {
     const season = Number(media.season);
