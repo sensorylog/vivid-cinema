@@ -1264,10 +1264,10 @@ byId("offline-player-close").addEventListener("click",async()=>{
 });
 function updateJobProgress(job){
   const id=String(job.id);
+  updateAggregateSpeed();
   const card=[...byId("offline-jobs").querySelectorAll("[data-job-id]")].find(node=>node.dataset.jobId===id);
   if(!card)return;
   const progress=Math.max(0,Math.min(100,Number(job.progress)||0));
-  updateAggregateSpeed();
   const status=card.querySelector(".offline-card-status,.offline-episode-status");
   if(status)status.textContent=statusText(job)+(job.status==="downloading"?" · "+Math.round(progress)+"%":"");
   const transfer=card.querySelector("[data-transfer-meta]");
