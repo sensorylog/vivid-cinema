@@ -1180,9 +1180,9 @@ async function playLocalFile(){
   await releaseLocalMedia();
   resetSeekPreviewSource();clearExternalSubtitle();chapterTrack=null;chapterCues=[];
   activePreferenceKey="local:"+file.fileName+":"+file.fileSize;applyPlaybackPreferences();
-  transcodePlayer.load(file);
   player.dataset.frameRate="";byId("offline-frame-back").disabled=true;byId("offline-frame-forward").disabled=true;player.dataset.jobId="";player.dataset.fileIndex="0";
   player.dataset.mediaFilename=file.fileName;player.dataset.localMediaToken="";player.dataset.transcodeSessionId=file.sessionId;player.dataset.transcodeCodecs=JSON.stringify(file.codecs||{});
+  try{transcodePlayer.load(file);}catch(error){await releaseLocalMedia();throw error;}
   lastPositionSave=0;resumePosition=0;
   byId("offline-player-title").textContent=file.fileName;
   byId("offline-resume-prompt").hidden=true;byId("offline-next-episode").hidden=true;
@@ -1209,7 +1209,7 @@ async function play(job,fileIndex=0){
   byId("offline-resume-prompt").hidden=true;
   resumePosition=0;
   const section=byId("offline-player-section");
-  player.pause();clearExternalSubtitle();activePreferenceKey=playbackProfileKey(job,fileIndex);applyPlaybackPreferences();resetSeekPreviewSource();transcodePlayer.load(media);player.dataset.frameRate="";byId("offline-frame-back").disabled=true;byId("offline-frame-forward").disabled=true;player.dataset.jobId=job.id;player.dataset.fileIndex=String(fileIndex);player.dataset.localMediaToken="";player.dataset.transcodeSessionId=media.sessionId;player.dataset.transcodeCodecs=JSON.stringify(media.codecs||{});player.dataset.mediaFilename=media.fileName||file?.name||job.title||"Saved media";if(player.muted&&player.volume>0)player.muted=false;lastPositionSave=0;byId("offline-player-section").dataset.subtitleSize="medium";byId("offline-subtitle-size").value="medium";
+  player.pause();clearExternalSubtitle();activePreferenceKey=playbackProfileKey(job,fileIndex);applyPlaybackPreferences();resetSeekPreviewSource();player.dataset.frameRate="";byId("offline-frame-back").disabled=true;byId("offline-frame-forward").disabled=true;player.dataset.jobId=job.id;player.dataset.fileIndex=String(fileIndex);player.dataset.localMediaToken="";player.dataset.transcodeSessionId=media.sessionId;player.dataset.transcodeCodecs=JSON.stringify(media.codecs||{});player.dataset.mediaFilename=media.fileName||file?.name||job.title||"Saved media";try{transcodePlayer.load(media);}catch(error){await releaseLocalMedia();throw error;}if(player.muted&&player.volume>0)player.muted=false;lastPositionSave=0;byId("offline-player-section").dataset.subtitleSize="medium";byId("offline-subtitle-size").value="medium";
   player.controls=false;
   byId("offline-custom-controls").hidden=false;
   section.classList.remove("controls-hidden");
