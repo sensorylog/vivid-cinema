@@ -79,9 +79,9 @@ function renderBatchQueue(){
   if(!node)return;
   if(!batchQueue.length){node.hidden=true;node.innerHTML="";return;}
   node.hidden=false;
-  node.innerHTML='<h3>Download batch · '+batchQueue.length+'/5</h3><ul>'+batchQueue.map((item,index)=>{
+  node.innerHTML='<h3>Download batch · '+batchQueue.length+'/5</h3><p>Add up to five different movies or episodes. Your batch stays here while you choose other titles.</p><ul>'+batchQueue.map((item,index)=>{
     const media=item.media||{},episode=Number.isInteger(media.episode)?" · S"+String(media.season).padStart(2,"0")+"E"+String(media.episode).padStart(2,"0"):"";
-    return '<li>'+escapeHtml(media.title||item.result?.title||"Selected title")+escapeHtml(episode)+' <button type="button" data-batch-remove="'+index+'" aria-label="Remove from batch">Remove</button></li>';
+    return '<li>'+escapeHtml(media.title||item.result?.title||"Selected title")+escapeHtml(episode)+' <small> — '+escapeHtml(item.result?.title||"Release")+'</small> <button type="button" data-batch-remove="'+index+'" aria-label="Remove from batch">Remove</button></li>';
   }).join("")+'</ul><div class="offline-batch-queue-actions"><button type="button" data-batch-start>Start batch ('+batchQueue.length+')</button><button type="button" data-batch-clear>Clear batch</button></div>';
 }
 function mediaForResult(item){
@@ -1197,6 +1197,7 @@ async function play(job,fileIndex=0){
 byId("desktop-search-form").addEventListener("submit",async event=>{
   event.preventDefault();const query=byId("desktop-search-input").value.trim();
   if(query.length<2){setMessage("Enter at least two characters.");return;}
+  if(!currentMedia){setMessage("Choose a movie or series from the Vivid catalogue and tap Download so its exact identity can be checked.");return;}
   setMessage("Searching…");byId("desktop-search-results").innerHTML="";
   try{renderSearch(await engine.search(query));setMessage("Choose a release to download.");}
   catch(error){setMessage(error?.message||"Search failed.");}
