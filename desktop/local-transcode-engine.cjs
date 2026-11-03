@@ -282,6 +282,7 @@ class LocalTranscodeEngine {
         child.once("error", () => { clearTimeout(timer); resolve(); });
       });
     }));
+    if (record.subtitlePromise) await record.subtitlePromise.catch(() => false);
     await fs.promises.rm(record.directory, { recursive: true, force: true }).catch(() => {});
     return true;
   }
