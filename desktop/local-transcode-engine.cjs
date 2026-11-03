@@ -165,20 +165,35 @@ class LocalTranscodeEngine {
     child.once("close", code => { record.exitCode = code; });
 
     if (subtitle) {
+      const subtitleTempPath = path.join(directory, "english.vtt.tmp");
+      const subtitleFinalPath = path.join(directory, "english.vtt");
       const subtitleChild = spawn(this.ffmpegPath, [
         "-y", "-hide_banner", "-loglevel", "error",
         "-i", absolutePath,
         "-map", "0:" + subtitle.index,
         "-c:s", "webvtt",
         "-f", "webvtt",
-        path.join(directory, "english.vtt")
+        subtitleTempPath
       ], { windowsHide: true, stdio: ["ignore", "ignore", "ignore"] });
       record.subtitleChild = subtitleChild;
-      const subtitleTimer = setTimeout(() => {
-        if (subtitleChild.exitCode === null && !subtitleChild.killed) subtitleChild.kill();
-      }, Math.max(this.startupTimeoutMs * 4, 180000));
-      subtitleChild.once("close", code => { record.subtitleExitCode = code; clearTimeout(subtitleTimer); });
-      subtitleChild.once("error", () => { record.subtitleExitCode = -1; clearTimeout(subtitleTimer); });
+      record.subtitlePromise = new Promise(resolve => {
+        const subtitleTimer = setTimeout(() => {
+          if (subtitleChild.exitCode === null && !subtitleChild.killed) subtitleChild.kill();
+        }, Math.max(this.startupTimeoutMs * 4, 180000));
+        subtitleChild.once("close", async code => {
+          record.subtitleExitCode = code;
+          clearTimeout(subtitleTimer);
+          if (code === 0) {
+            try { await fs.promises.rename(subtitleTempPath, subtitleFinalPath); resolve(true); }
+            catch { resolve(false); }
+          } else resolve(false);
+        });
+        subtitleChild.once("error", () => {
+          record.subtitleExitCode = -1;
+          clearTimeout(subtitleTimer);
+          resolve(false);
+        });
+      });
     }
 
     try {
