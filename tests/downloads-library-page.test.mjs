@@ -50,6 +50,8 @@ test("desktop release search is identity-gated and batches up to five unique mov
   assert.ok(desktop.includes("Number(job.peers)"));
   assert.match(page, /id="desktop-add-selected"/);
   assert.match(page, /id="desktop-batch-queue"/);
+  assert.ok(desktop.includes("if(!currentMedia){setMessage("));
+  assert.ok(desktop.includes("Your batch stays here while you choose other titles."));
 });
 
 test("desktop search result button leaves Starting state after the start request settles", async () => {
