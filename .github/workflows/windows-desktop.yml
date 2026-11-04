@@ -48,6 +48,7 @@ jobs:
         shell: pwsh
         env:
           BEFORE_SHA: ${{ github.event.before }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           $version = node -p "require('./package.json').version"
           $publish = $false
@@ -61,7 +62,12 @@ jobs:
           if ($env:GITHUB_REF -eq "refs/heads/main") {
             $tag = "v$version"
             $existingTag = git ls-remote --tags origin "refs/tags/$tag"
-            if (!$existingTag) { $publish = $true }
+            if (!$existingTag) {
+              $publish = $true
+            } else {
+              $draftState = gh release view $tag --json isDraft -q .isDraft 2>$null
+              if ($LASTEXITCODE -eq 0 -and $draftState -eq "true") { $publish = $true }
+            }
           }
           "publish=$($publish.ToString().ToLower())" >> $env:GITHUB_OUTPUT
       - name: Install desktop runtime dependencies
@@ -86,7 +92,14 @@ jobs:
             if ($LASTEXITCODE -ne 0) { throw "Could not fetch existing release tag $tag." }
             $tagCommit = git rev-list -n 1 $tag
             if ($tagCommit -ne $env:GITHUB_SHA) {
-              throw "Release tag $tag points to a different commit. Bump package.json before publishing changed bits."
+              git merge-base --is-ancestor $tagCommit $env:GITHUB_SHA
+              if ($LASTEXITCODE -ne 0) { throw "Release tag $tag is not an ancestor of the recovery commit." }
+              $changedFiles = @(git diff --name-only "$tagCommit..$env:GITHUB_SHA")
+              $allowedFiles = @(".github/workflows/windows-desktop.yml", "tests/desktop-build.test.mjs", "data/news-feed.json")
+              $unexpectedFiles = @($changedFiles | Where-Object { $allowedFiles -notcontains $_ })
+              if ($unexpectedFiles.Count -gt 0) {
+                throw "Release tag $tag points to a different app build. Only release workflow recovery changes may follow the tag."
+              }
             }
           } else {
             git config user.name "github-actions[bot]"
@@ -114,12 +127,33 @@ jobs:
             }
           }
       - name: Build auto-updatable Windows release files
+        id: build-release
         if: steps.release-decision.outputs.publish == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npm --ignore-scripts run desktop:dist
+        shell: pwsh
+        run: |
+          $version = node -p "require('./package.json').version"
+          $tag = "v$version"
+          $requiredAssets = @("Vivid-Cinema-Setup-$version.exe", "Vivid-Cinema-Portable-$version.exe", "Vivid-Cinema-Setup-$version.exe.blockmap", "latest.yml")
+          $buildNeeded = $true
+          $releaseJson = gh release view $tag --json isDraft,assets 2>$null
+          if ($LASTEXITCODE -eq 0) {
+            $release = $releaseJson | ConvertFrom-Json
+            $assetNames = @($release.assets | ForEach-Object { $_.name })
+            $missingAssets = @($requiredAssets | Where-Object { $assetNames -notcontains $_ })
+            if ($release.isDraft -and $missingAssets.Count -eq 0) { $buildNeeded = $false }
+          }
+          if ($buildNeeded) {
+            npm --ignore-scripts run desktop:dist
+            if ($LASTEXITCODE -ne 0) { throw "electron-builder failed for release $tag." }
+            "built=true" >> $env:GITHUB_OUTPUT
+          } else {
+            Write-Host "All required Windows release assets already exist in the draft; reusing the verified build."
+            "built=false" >> $env:GITHUB_OUTPUT
+          }
       - name: Verify updater metadata was generated
-        if: steps.release-decision.outputs.publish == 'true'
+        if: steps.release-decision.outputs.publish == 'true' && steps.build-release.outputs.built == 'true'
         shell: pwsh
         run: |
           if (!(Test-Path "dist-desktop/latest.yml")) {
@@ -137,13 +171,10 @@ jobs:
         run: |
           $version = node -p "require('./package.json').version"
           $tag = "v$version"
-          $headers = @{
-            Authorization = "Bearer $env:GH_TOKEN"
-            Accept = "application/vnd.github+json"
-            "X-GitHub-Api-Version" = "2022-11-28"
-          }
-          $release = Invoke-RestMethod -Method Get -Uri "https://api.github.com/repos/sensorylog/vivid-cinema/releases/tags/$tag" -Headers $headers
-          if (!$release.draft) {
+          $releaseJson = gh release view $tag --json isDraft,assets
+          if ($LASTEXITCODE -ne 0) { throw "Could not read draft release $tag through GitHub CLI." }
+          $release = $releaseJson | ConvertFrom-Json
+          if (!$release.isDraft) {
             throw "Release $tag must remain a draft until every asset has been verified."
           }
           $assetNames = @($release.assets | ForEach-Object { $_.name })
@@ -154,7 +185,7 @@ jobs:
             }
           }
       - name: Upload verified Windows release files
-        if: steps.release-decision.outputs.publish == 'true'
+        if: steps.release-decision.outputs.publish == 'true' && steps.build-release.outputs.built == 'true'
         uses: actions/upload-artifact@v7
         with:
           name: vivid-cinema-windows-${{ github.run_number }}

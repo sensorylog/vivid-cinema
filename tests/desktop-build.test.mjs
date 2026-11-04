@@ -233,13 +233,17 @@ test("Windows workflow builds on demand or on release tags", () => {
   assert.match(workflow, /contents: write/);
   assert.match(workflow, /Decide whether this push publishes a release/);
   assert.match(workflow, /Ensure matching release tag exists before publishing/);
+  assert.match(workflow, /git merge-base --is-ancestor/);
+  assert.match(workflow, /gh release view \$tag --json isDraft -q \.isDraft/);
+  assert.match(workflow, /All required Windows release assets already exist in the draft/);
+  assert.match(workflow, /steps\.build-release\.outputs\.built == 'true'/);
   assert.match(workflow, /Create or reuse draft release for electron-builder/);
   assert.ok(workflow.indexOf("Ensure matching release tag exists before publishing") < workflow.indexOf("Create or reuse draft release for electron-builder"));
   assert.ok(workflow.indexOf("Create or reuse draft release for electron-builder") < workflow.indexOf("Build auto-updatable Windows release files"));
   assert.ok(workflow.indexOf("Build auto-updatable Windows release files") < workflow.indexOf("Verify updater metadata was generated"));
   assert.match(workflow, /Verify draft release contains all required assets/);
   assert.doesNotMatch(workflow, /WIN_CSC_LINK|WIN_CSC_KEY_PASSWORD|Require Windows code-signing credentials|Verify Windows Authenticode signatures/);
-  assert.match(workflow, /if \(!\$release\.draft\)/);
+  assert.match(workflow, /if \(!\$release\.isDraft\)/);
   assert.match(workflow, /did not become public after verification/);
   assert.match(workflow, /git tag -a \$tag/);
   assert.match(workflow, /git push origin "refs\/tags\/\$tag"/);
@@ -254,7 +258,7 @@ test("Windows workflow builds on demand or on release tags", () => {
   assert.match(workflow, /Publish verified Windows release/);
   assert.ok(workflow.includes("gh release edit $tag --draft=false"));
   assert.match(workflow, /--verify-tag/);
-  assert.match(workflow, /releases\/tags\/\$tag/);
+  assert.match(workflow, /gh release view \$tag --json isDraft,assets/);
   assert.match(workflow, /Vivid-Cinema-Setup-\$version\.exe\.blockmap/);
   assert.match(workflow, /latest\.yml/);
   assert.match(workflow, /pull_request/);
