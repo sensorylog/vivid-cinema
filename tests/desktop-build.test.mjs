@@ -234,6 +234,8 @@ test("Windows workflow builds on demand or on release tags", () => {
   assert.match(workflow, /Decide whether this push publishes a release/);
   assert.match(workflow, /Ensure matching release tag exists before publishing/);
   assert.match(workflow, /git merge-base --is-ancestor/);
+  assert.match(workflow, /gh release view \$tag --json isDraft -q \.isDraft/);
+  assert.match(workflow, /All required Windows release assets already exist in the draft/);
   assert.match(workflow, /steps\.build-release\.outputs\.built == 'true'/);
   assert.match(workflow, /Create or reuse draft release for electron-builder/);
   assert.ok(workflow.indexOf("Ensure matching release tag exists before publishing") < workflow.indexOf("Create or reuse draft release for electron-builder"));
