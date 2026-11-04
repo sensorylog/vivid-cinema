@@ -20,7 +20,7 @@ async function loadHlsRuntime() {
 await loadHlsRuntime();
 
 if (window.vividDownloads?.available) {
-  void import("./downloads/desktop-offline.js?windows-offline-hls-v2");
+  void import("./downloads/desktop-offline.js?windows-offline-hls-v3");
 } else {
 const byId = id => document.getElementById(id);
 const jobsNode = byId("offline-jobs");

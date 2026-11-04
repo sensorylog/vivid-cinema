@@ -496,7 +496,7 @@ test("Windows desktop release uses the built-in player without an mpv build or s
 
 test("Windows runtime is current, hardened, and the offline shell cache is invalidated", () => {
   assert.equal(pkg.devDependencies.electron, "45.2.1");
-  assert.equal(pkg.version, "1.0.43");
+  assert.equal(pkg.version, "1.0.44");
   assert.deepEqual(pkg.build.electronFuses, {
     runAsNode: false,
     enableNodeOptionsEnvironmentVariable: false,
@@ -510,11 +510,11 @@ test("Windows runtime is current, hardened, and the offline shell cache is inval
   const preload = fs.readFileSync(path.join(root, "desktop", "preload.cjs"), "utf8");
   assert.doesNotMatch(preload, /\bBuffer\b|\bsetImmediate\b|\bclearImmediate\b|require\(["'](?:events|timers|url)["']\)/);
   const serviceWorker = fs.readFileSync(path.join(root, "service-worker.js"), "utf8");
-  assert.ok(serviceWorker.includes('CACHE_NAME = "vivid-cinema-shell-v274"'));
-  assert.ok(serviceWorker.includes("./scripts/downloads/desktop-offline.js?windows-offline-hls-v2"));
-  assert.ok(serviceWorker.includes("./scripts/downloads/transcode-player.js?windows-offline-hls-v3"));
+  assert.ok(serviceWorker.includes('CACHE_NAME = "vivid-cinema-shell-v275"'));
+  assert.ok(serviceWorker.includes("./scripts/downloads/desktop-offline.js?windows-offline-hls-v3"));
+  assert.ok(serviceWorker.includes("./scripts/downloads/transcode-player.js?windows-offline-hls-v4"));
   const offlineRenderer = fs.readFileSync(path.join(root, "scripts", "downloads", "desktop-offline.js"), "utf8");
-  assert.ok(offlineRenderer.includes("./transcode-player.js?windows-offline-hls-v3"));
+  assert.ok(offlineRenderer.includes("./transcode-player.js?windows-offline-hls-v4"));
   const myDownloads = fs.readFileSync(path.join(root, "scripts", "my-downloads.js"), "utf8");
-  assert.ok(myDownloads.includes('import("./downloads/desktop-offline.js?windows-offline-hls-v2")'));
+  assert.ok(myDownloads.includes('import("./downloads/desktop-offline.js?windows-offline-hls-v3")'));
 });
