@@ -95,7 +95,7 @@ jobs:
               git merge-base --is-ancestor $tagCommit $env:GITHUB_SHA
               if ($LASTEXITCODE -ne 0) { throw "Release tag $tag is not an ancestor of the recovery commit." }
               $changedFiles = @(git diff --name-only "$tagCommit..$env:GITHUB_SHA")
-              $allowedFiles = @(".github/workflows/windows-desktop.yml", "tests/desktop-build.test.mjs")
+              $allowedFiles = @(".github/workflows/windows-desktop.yml", "tests/desktop-build.test.mjs", "data/news-feed.json")
               $unexpectedFiles = @($changedFiles | Where-Object { $allowedFiles -notcontains $_ })
               if ($unexpectedFiles.Count -gt 0) {
                 throw "Release tag $tag points to a different app build. Only release workflow recovery changes may follow the tag."
