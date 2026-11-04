@@ -160,11 +160,11 @@ test("Windows player runtime and stylesheet have cache-busting URLs", async () =
   const page = await readFile(new URL("../my-downloads.html", import.meta.url), "utf8");
   const script = await readFile(new URL("../scripts/my-downloads.js", import.meta.url), "utf8");
   const worker = await readFile(new URL("../service-worker.js", import.meta.url), "utf8");
-  assert.match(page, /my-downloads\.css\?v=offline-cinema-redesign-1/);
+  assert.match(page, /my-downloads\.css\?v=offline-cinema-redesign-2/);
   assert.match(script, /desktop-offline\.js\?windows-offline-hls-v2/);
-  assert.match(worker, /vivid-cinema-shell-v274/);
+  assert.match(worker, /vivid-cinema-shell-v275/);
   assert.match(worker, /desktop-offline\.js\?windows-offline-hls-v2/);
-  assert.match(worker, /my-downloads\.css\?v=offline-cinema-redesign-1/);
+  assert.match(worker, /my-downloads\.css\?v=offline-cinema-redesign-2/);
 });
 
 test("offline library filters movies, sorts saved media, and reports on-device storage", async () => {
@@ -206,9 +206,9 @@ test("offline redesign provides title details, season grouping and continue watc
 test("offline redesign cache is versioned and precaches the active stylesheet", async () => {
   const page = await readFile(new URL("../my-downloads.html", import.meta.url), "utf8");
   const worker = await readFile(new URL("../service-worker.js", import.meta.url), "utf8");
-  assert.match(page, /my-downloads\.css\?v=offline-cinema-redesign-1/);
-  assert.match(worker, /vivid-cinema-shell-v274/);
-  assert.match(worker, /my-downloads\.css\?v=offline-cinema-redesign-1/);
+  assert.match(page, /my-downloads\.css\?v=offline-cinema-redesign-2/);
+  assert.match(worker, /vivid-cinema-shell-v275/);
+  assert.match(worker, /my-downloads\.css\?v=offline-cinema-redesign-2/);
 });
 
 test("My Downloads uses a clear discover, playback and offline-library hierarchy", async () => {
