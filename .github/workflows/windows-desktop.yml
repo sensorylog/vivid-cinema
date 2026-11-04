@@ -88,7 +88,7 @@ jobs:
           $tag = "v$version"
           $existing = git ls-remote --tags origin "refs/tags/$tag"
           if ($existing) {
-            git fetch origin "refs/tags/$tag:refs/tags/$tag"
+            git fetch origin "refs/tags/${tag}:refs/tags/${tag}"
             if ($LASTEXITCODE -ne 0) { throw "Could not fetch existing release tag $tag." }
             $tagCommit = git rev-list -n 1 $tag
             if ($tagCommit -ne $env:GITHUB_SHA) {
