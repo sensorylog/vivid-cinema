@@ -246,6 +246,7 @@ test("Windows workflow builds on demand or on release tags", () => {
   assert.match(workflow, /if \(!\$release\.isDraft\)/);
   assert.match(workflow, /did not become public after verification/);
   assert.match(workflow, /git tag -a \$tag/);
+  assert.ok(workflow.includes('git fetch origin "refs/tags/${tag}:refs/tags/${tag}"'));
   assert.match(workflow, /git push origin "refs\/tags\/\$tag"/);
   assert.match(workflow, /Verify updater metadata was generated/);
   assert.match(workflow, /Build auto-updatable Windows release files/);
