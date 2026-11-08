@@ -10,9 +10,10 @@ test("premium PWA shell keeps all seven mobile destinations", () => {
   assert.match(mobileNav, /navLink\("home\.html".*?"Home"/s);
   assert.match(mobileNav, /navLink\("discover\.html".*?"Browse"/s);
   assert.match(mobileNav, /navLink\("for-you\.html".*?"For You"/s);
+  assert.match(mobileNav, /navLink\("live\.html".*?"Live"/s);
   assert.match(mobileNav, /navLink\("library\.html".*?"Library"/s);
+  assert.match(mobileNav, /navLink\("news\.html".*?"News"/s);
   assert.match(mobileNav, /navLink\("search\.html".*?"Search"/s);
-  assert.doesNotMatch(mobileNav, /navLink\("live\.html"|navLink\("news\.html"|navLink\("my-downloads\.html"/);
   assert.ok(mobileNav.includes(`.join("")`));
 });
 
