@@ -14,7 +14,7 @@
 <link rel="stylesheet" href="styles/vivid-foundation.css">
 <link rel="stylesheet" href="styles/vivid-system.css">
 <link rel="stylesheet" href="styles/vivid-liquid-glass.css?v=lg4">
-<link rel="stylesheet" href="styles/vivid-donate.css?v=support3">
+<link rel="stylesheet" href="styles/vivid-donate.css?v=support3"><link rel="stylesheet" href="styles/vivid-support-v2.css?v=1">
 <script src="https://js.paystack.co/v2/inline.js"></script>
 </head>
 <body class="vivid-donate-page">
@@ -29,9 +29,9 @@
 
   <section class="donate-intro" aria-labelledby="donate-title">
     <div class="donate-intro-copy">
-      <span class="donate-eyebrow"><span class="donate-eyebrow-dot" aria-hidden="true"></span> MADE FOR THE LOVE OF WHAT'S NEXT</span>
-      <h1 id="donate-title">Good stories bring us together. <span>Help us find more.</span></h1>
-      <p class="donate-lede">Vivid Cinema is built to make discovering your next film, series or anime feel special. If it has helped you find something worth watching, you can help us keep improving it.</p>
+      <span class="donate-eyebrow"><span class="donate-eyebrow-dot" aria-hidden="true"></span> INDEPENDENTLY BUILT. COMMUNITY SUPPORTED.</span>
+      <h1 id="donate-title">A better Vivid is <span>something we build together.</span></h1>
+      <p class="donate-lede">Vivid is growing into a richer cinema experience — from finding your next favourite to watching across devices. If it has made your time here better, an optional contribution helps us keep building with care.</p>
       <p class="donate-reassurance"><span aria-hidden="true">✦</span> Completely optional. Vivid remains yours to enjoy either way.</p>
       <div class="donate-intro-actions">
         <a class="donate-primary-link" href="#donate-checkout">Choose how to support <span aria-hidden="true">↘</span></a>
@@ -44,31 +44,31 @@
       <div class="donate-orbit-core"><img src="icons/vivid-icon.svg" alt=""></div>
       <span class="donate-orbit-star donate-orbit-star-one">✦</span>
       <span class="donate-orbit-star donate-orbit-star-two">✧</span>
-      <span class="donate-orbit-caption">A little support.<br>A better Vivid.</span>
+      <span class="donate-orbit-caption">Your support.<br>Our next chapter.</span>
     </div>
   </section>
 
   <section class="donate-purpose" id="donate-purpose" aria-label="What support helps with">
     <div class="donate-purpose-heading">
       <span class="donate-section-kicker">WHY IT MATTERS</span>
-      <h2>Help keep the experience getting better.</h2>
-      <p>Contributions help with the real work behind Vivid.</p>
+      <h2>Help us make every part of Vivid better.</h2>
+      <p>Support goes toward the ongoing work of keeping Vivid useful, reliable and growing.</p>
     </div>
     <div class="donate-purpose-grid">
       <article class="donate-purpose-item">
         <span class="donate-purpose-icon" aria-hidden="true">⌁</span>
         <h3>Keep it running</h3>
-        <p>Help offset hosting and the services that keep the website available.</p>
+        <p>Help with the infrastructure and services that keep Vivid available and dependable.</p>
       </article>
       <article class="donate-purpose-item">
         <span class="donate-purpose-icon" aria-hidden="true">✳</span>
         <h3>Make it better</h3>
-        <p>Support careful improvements to discovery, usability and reliability.</p>
+        <p>Help refine search, recommendations, playback and the details that make Vivid easier to use.</p>
       </article>
       <article class="donate-purpose-item">
         <span class="donate-purpose-icon" aria-hidden="true">◈</span>
         <h3>Build what’s next</h3>
-        <p>Help create room for thoughtful new features, without rushing the experience.</p>
+        <p>Support thoughtful development across web, mobile and desktop — built steadily, not rushed.</p>
       </article>
     </div>
   </section>
@@ -140,11 +140,30 @@
     </div>
   </section>
 
+  <section class="donate-recognition" id="donate-recognition" aria-labelledby="donate-recognition-title">
+    <div class="donate-recognition-heading"><span class="donate-section-kicker">THE PEOPLE BEHIND THE PROGRESS</span><h2 id="donate-recognition-title">Want your name on the credits?</h2><p>Supporter recognition is completely optional. If you choose to be listed, send us a display name after contributing. We verify contributions before publishing recognition — no payment details or private information are ever displayed.</p></div>
+    <form class="donate-recognition-form" action="https://formspree.io/f/mwpokaav" method="POST">
+      <input type="hidden" name="_subject" value="Vivid Cinema supporter recognition request">
+      <input type="hidden" name="reason" value="Supporter recognition request">
+      <label for="supporter-display-name">Display name</label><input id="supporter-display-name" name="display_name" type="text" maxlength="48" autocomplete="nickname" placeholder="How should we credit you?" required>
+      <label for="supporter-email">Email used at checkout</label><input id="supporter-email" name="email" type="email" maxlength="254" autocomplete="email" placeholder="you@example.com" required>
+      <label for="supporter-reference">Payment reference or Gumroad order ID <span>(optional)</span></label><input id="supporter-reference" name="payment_reference" type="text" maxlength="120" placeholder="Helps us verify your contribution">
+      <label class="donate-recognition-consent"><input type="checkbox" name="public_recognition_consent" value="yes" required><span>I give Vivid Cinema permission to publish this display name as a supporter, after my contribution has been verified.</span></label>
+      <button type="submit">Request supporter recognition <span aria-hidden="true">↗</span></button>
+      <p>Recognition is never automatic. We only use the display name you provide and your explicit permission. Never include card details, passwords or one-time codes.</p>
+    </form>
+  </section>
   <section class="donate-quiet-note" aria-label="A note about supporting Vivid">
     <span class="donate-quiet-mark" aria-hidden="true">♥</span>
     <div><h2>Enjoying Vivid is enough.</h2><p>Support is a choice, not a requirement. There are no locked features, guilt trips or promises of special treatment here. If you choose to contribute, thank you for helping us build with care.</p></div>
   </section>
 
+  <section class="donate-faq" aria-labelledby="donate-faq-title"><div><span class="donate-section-kicker">A FEW GOOD QUESTIONS</span><h2 id="donate-faq-title">Before you go.</h2></div><div class="donate-faq-list">
+    <details><summary>Do I need to contribute to use Vivid?</summary><p>No. Vivid remains free to enjoy. Contributions are voluntary and do not unlock features or change how you are treated.</p></details>
+    <details><summary>Where does my contribution go?</summary><p>Contributions support the ongoing costs and development of Vivid, including reliability, discovery, playback and improvements across devices. We do not promise that a specific payment will fund a particular feature.</p></details>
+    <details><summary>Can I contribute from outside Ghana?</summary><p>Yes. Ghana-based supporters can use Paystack in GHS. International supporters can use the Gumroad checkout and review the currency and final amount shown there.</p></details>
+    <details><summary>How does supporter recognition work?</summary><p>Recognition is optional. Submit the form above after contributing. We verify the contribution and only publish the display name you explicitly approved.</p></details>
+  </div></section>
   <footer class="donate-footer">
     <a class="donate-footer-brand" href="home.html">Vivid Cinema</a>
     <span>Made with care for people who love a good watch.</span>
