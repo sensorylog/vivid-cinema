@@ -4,7 +4,7 @@ import { readFileSync } from "node:fs";
 
 const read = path => readFileSync(new URL(path, import.meta.url), "utf8");
 
-test("premium PWA shell keeps five clear mobile destinations", () => {
+test("premium PWA shell keeps all seven mobile destinations", () => {
   const shell = read("../scripts/app-shell.js");
   const mobileNav = shell.slice(shell.indexOf("function syncMobileNavigation()"), shell.indexOf("function syncNavigation()"));
   assert.match(mobileNav, /navLink\("home\.html".*?"Home"/s);
@@ -22,7 +22,7 @@ test("premium PWA experience styles are loaded globally and respect reduced moti
   const css = read("../styles/vivid-premium-experience.css");
   assert.match(shell, /vivid-premium-experience\.css\?v=2/);
   assert.match(shell, /vivid-app-experience/);
-  assert.match(worker, /vivid-cinema-shell-v275/);
+  assert.match(worker, /vivid-cinema-shell-v278/);
   assert.match(worker, /vivid-premium-experience\.css\?v=2/);
   assert.match(css, /@view-transition\s*\{\s*navigation:\s*auto;/);
   assert.match(css, /grid-template-columns:\s*repeat\(5/);
@@ -40,7 +40,7 @@ test("installed iOS PWA gets a standalone app shell and safe-area-aware content"
   assert.match(shell, /vivid-ios-standalone/);
   assert.match(shell, /apple-mobile-web-app-status-bar-style/);
   assert.match(shell, /vivid-premium-experience\.css\?v=2/);
-  assert.match(worker, /vivid-cinema-shell-v275/);
+  assert.match(worker, /vivid-cinema-shell-v278/);
   assert.match(worker, /vivid-premium-experience\.css\?v=2/);
   assert.match(css, /env\(safe-area-inset-bottom/);
   assert.match(css, /overscroll-behavior-y:\s*contain/);
