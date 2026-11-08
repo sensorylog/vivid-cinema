@@ -162,7 +162,7 @@ test("Windows player runtime and stylesheet have cache-busting URLs", async () =
   const worker = await readFile(new URL("../service-worker.js", import.meta.url), "utf8");
   assert.match(page, /my-downloads\.css\?v=offline-cinema-redesign-2/);
   assert.match(script, /desktop-offline\.js\?windows-offline-hls-v3/);
-  assert.match(worker, /vivid-cinema-shell-v276/);
+  assert.match(worker, /vivid-cinema-shell-v278/);
   assert.match(worker, /desktop-offline\.js\?windows-offline-hls-v3/);
   assert.match(worker, /my-downloads\.css\?v=offline-cinema-redesign-2/);
 });
@@ -207,7 +207,7 @@ test("offline redesign cache is versioned and precaches the active stylesheet", 
   const page = await readFile(new URL("../my-downloads.html", import.meta.url), "utf8");
   const worker = await readFile(new URL("../service-worker.js", import.meta.url), "utf8");
   assert.match(page, /my-downloads\.css\?v=offline-cinema-redesign-2/);
-  assert.match(worker, /vivid-cinema-shell-v276/);
+  assert.match(worker, /vivid-cinema-shell-v278/);
   assert.match(worker, /my-downloads\.css\?v=offline-cinema-redesign-2/);
 });
 
