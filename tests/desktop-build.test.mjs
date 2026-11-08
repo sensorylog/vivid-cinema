@@ -515,7 +515,7 @@ test("Windows runtime is current, hardened, and the offline shell cache is inval
   const preload = fs.readFileSync(path.join(root, "desktop", "preload.cjs"), "utf8");
   assert.doesNotMatch(preload, /\bBuffer\b|\bsetImmediate\b|\bclearImmediate\b|require\(["'](?:events|timers|url)["']\)/);
   const serviceWorker = fs.readFileSync(path.join(root, "service-worker.js"), "utf8");
-  assert.ok(serviceWorker.includes('CACHE_NAME = "vivid-cinema-shell-v275"'));
+  assert.ok(serviceWorker.includes('CACHE_NAME = "vivid-cinema-shell-v276"'));
   assert.ok(serviceWorker.includes("./scripts/downloads/desktop-offline.js?windows-offline-hls-v3"));
   assert.ok(serviceWorker.includes("./scripts/downloads/transcode-player.js?windows-offline-hls-v4"));
   const offlineRenderer = fs.readFileSync(path.join(root, "scripts", "downloads", "desktop-offline.js"), "utf8");
