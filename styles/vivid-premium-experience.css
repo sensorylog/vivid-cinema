@@ -30,16 +30,16 @@ body.vivid-app-experience :where(a,button,[role="button"]):focus-visible {
   body.vivid-app-experience .vivid-mobile-nav.vivid-v2-mobile-nav {
     position: fixed !important;
     display: grid !important;
-    grid-template-columns: repeat(5,minmax(0,1fr)) !important;
+    grid-template-columns: repeat(7,minmax(0,1fr)) !important;
     align-items: stretch !important;
-    gap: 5px !important;
+    gap: 2px !important;
     left: 12px !important;
     right: 12px !important;
     bottom: calc(10px + env(safe-area-inset-bottom,0px)) !important;
     width: auto !important;
     height: 68px !important;
     box-sizing: border-box !important;
-    padding: 6px !important;
+    padding: 5px 4px !important;
     border: 1px solid rgba(255,255,255,.15) !important;
     border-radius: 22px !important;
     background: rgba(10,12,16,.88) !important;
@@ -63,7 +63,7 @@ body.vivid-app-experience :where(a,button,[role="button"]):focus-visible {
     flex-direction: column !important;
     align-items: center !important;
     justify-content: center !important;
-    gap: 4px !important;
+    gap: 3px !important;
     min-width: 0 !important;
     min-height: 54px !important;
     padding: 5px 2px !important;
@@ -71,7 +71,7 @@ body.vivid-app-experience :where(a,button,[role="button"]):focus-visible {
     border-radius: 15px !important;
     background: transparent !important;
     color: #9299a4 !important;
-    font-size: .61rem !important;
+    font-size: clamp(.48rem,2.2vw,.58rem) !important;
     font-weight: 650 !important;
     line-height: 1 !important;
     text-decoration: none !important;
