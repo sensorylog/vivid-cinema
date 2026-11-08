@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-08T23:04:33.347Z",
+  "generatedAt": "2026-11-08T23:23:49.589Z",
   "source": "Google News RSS search feeds",
   "count": 120,
   "failedQueries": 0,
@@ -32,17 +32,30 @@
       "imageFallbackUrl": ""
     },
     {
+      "id": "mupotj",
+      "headline": "Golf Leaderboards: PGA Tour, LPGA Tour, LIV Golf, DP World Tour, Ladies European Tour, major championships and more",
+      "publisher": "Sky Sports",
+      "publisherUrl": "https://www.skysports.com",
+      "sourceUrl": "https://www.skysports.com/golf/leaderboard",
+      "publishedAt": "2026-11-08T21:13:23.000Z",
+      "region": "europe",
+      "category": "television",
+      "summary": "Watch the best live coverage of your favourite sports: Football, Golf, Rugby, Cricket, Tennis, F1, Boxing, plus the latest sports news, transfers & scores.",
+      "imageUrl": "./data/news-thumbnails/mupotj.jpg",
+      "imageFallbackUrl": "https://e0.365dm.com/26/11/1600x900/skysports-ben-james-golf-rocket-classic_7400858.jpg?20261108133247"
+    },
+    {
       "id": "11xy24z",
       "headline": "'Godzilla Minus Zero' was no. 1 at the global box office with $63M to 'Ramayana: Rise of a Legend's $55M. Read more below.",
       "publisher": "Facebook",
       "publisherUrl": "https://www.facebook.com",
-      "sourceUrl": "https://www.facebook.com/deadline/posts/godzilla-minus-zero-was-no-1-at-the-global-box-office-with-63m-to-ramayana-rise-/1486166363383699/",
+      "sourceUrl": "https://www.facebook.com/login/?next=https%3A%2F%2Fwww.facebook.com%2Fdeadline%2Fposts%2Fgodzilla-minus-zero-was-no-1-at-the-global-box-office-with-63m-to-ramayana-rise-%2F1486166363383699%2F",
       "publishedAt": "2026-11-08T21:00:14.000Z",
       "region": "global",
       "category": "box-office",
       "summary": "'Godzilla Minus Zero' was no. 1 at the global box office with $63M to 'Ramayana: Rise of a Legend's $55M. Read more below.",
-      "imageUrl": "./data/news-thumbnails/11xy24z.jpg",
-      "imageFallbackUrl": "https://scontent-ord5-2.xx.fbcdn.net/v/t39.99422-6/897218837_1037695142687144_1849946981241909126_n.png?stp=dst-jpg_tt6&cstp=mx1000x667&ctp=p600x600&_nc_cat=103&ccb=1-7&_nc_sid=cae128&_nc_ohc=ONCnsOmWa8IQ7kNvwE5OXQE&_nc_oc=Adr3LlNjSUu2FlqgB_EKmjLRjGF1KrsdeIecG-_63Opsx4iquo9Mela12CXbCmKQo88&_nc_zt=14&_nc_ht=scontent-ord5-2.xx&_nc_gid=WNE4KONOOvOfwKxIlUlwJQ&_nc_ss=7c289&oh=00_AQTp1tb_Ku4xWLGmL4UF4TU4NNqoyz9H54zkNGWkHgqYxA&oe=6AF6BD42"
+      "imageUrl": "https://www.facebook.com/login/?next=https%3A%2F%2Fwww.facebook.com%2Fdeadline%2Fposts%2Fgodzilla-minus-zero-was-no-1-at-the-global-box-office-with-63m-to-ramayana-rise-%2F1486166363383699%2F",
+      "imageFallbackUrl": "https://www.facebook.com/login/?next=https%3A%2F%2Fwww.facebook.com%2Fdeadline%2Fposts%2Fgodzilla-minus-zero-was-no-1-at-the-global-box-office-with-63m-to-ramayana-rise-%2F1486166363383699%2F"
     },
     {
       "id": "1ial6y6",
@@ -82,19 +95,6 @@
       "summary": "‘Ramayana: Part I’, starring Ranbir Kapoor, Sai Pallavi and Yash among others, has maintained its strong momentum at the Indian box office on its first",
       "imageUrl": "./data/news-thumbnails/114fhbt.avif",
       "imageFallbackUrl": "https://static.toiimg.com/thumb/msid-135655529,width-1280,height-720,resizemode-6,overlay-toi_sw,pt-32,y_pad-600/photo.jpg"
-    },
-    {
-      "id": "mupotj",
-      "headline": "Golf Leaderboards: PGA Tour, LPGA Tour, LIV Golf, DP World Tour, Ladies European Tour, major championships and more",
-      "publisher": "Sky Sports",
-      "publisherUrl": "https://www.skysports.com",
-      "sourceUrl": "https://www.skysports.com/golf/leaderboard",
-      "publishedAt": "2026-11-08T20:01:11.000Z",
-      "region": "europe",
-      "category": "television",
-      "summary": "Watch the best live coverage of your favourite sports: Football, Golf, Rugby, Cricket, Tennis, F1, Boxing, plus the latest sports news, transfers & scores.",
-      "imageUrl": "./data/news-thumbnails/mupotj.jpg",
-      "imageFallbackUrl": "https://e0.365dm.com/26/11/1600x900/skysports-ben-james-golf-rocket-classic_7400858.jpg?20261108133247"
     },
     {
       "id": "10z3e0q",
@@ -292,8 +292,21 @@
       "imageFallbackUrl": ""
     },
     {
+      "id": "1jwy1l8",
+      "headline": "‘Love Is Blind’ OG Lauren Speed Claims She Didn’t Get ‘Real’ Engagement Ring: ‘The Diamond Fell Out’",
+      "publisher": "Us Weekly",
+      "publisherUrl": "https://www.usmagazine.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMiqAFBVV95cUxORGM3cXUyRURMdm80Sk9XdFdmSE9vNW1FQVZFR2lVRjZXbUtvU2l2RWNmWjJqeUUtaUFiWGtzd1E2TWQ1RG1wdEM5T2hoUFF0bEZJZmxwWU9HMkVwU3d6MFE2VWlRcllSam1IRGFfVDdzMW9BbWp2RllpX0swSUtnVnV5akRtQjVJdHBUQVBlTEhvRnliblhBMEN2THpEYWlmb3VjcDh6Q1g?oc=5",
+      "publishedAt": "2026-11-08T17:25:15.000Z",
+      "region": "hollywood",
+      "category": "television",
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
+    },
+    {
       "id": "1n4km64",
-      "headline": "After the Success of 'Percy Jackson, ' Disney Heads Back to the Greek Mythology Well With a New Live-Action Film in the Works",
+      "headline": "Disney Dives Back into Greek Mythology with New Live-Action Film",
       "publisher": "Inside the Magic",
       "publisherUrl": "https://insidethemagic.net",
       "sourceUrl": "https://news.google.com/rss/articles/CBMi2gFBVV95cUxNRkRqVFhaT2JMNEtsdXZZbUNUcDVZV25uTERzOTZRTExGOUlneWhJX1R1dFd1dlhMZGdReEtNYS0xMUtFaGF2Y0wxUGxGdU8xeW1lcGx0TnFWZ2tKYVRUa0dBYU0wNmVrUFFrTjBVb19MYWVIcE9TWFNhQkIwTGt6cUs1Y2dzcUVZOVlxR3dGOEZoLXZncFdudjh6dFFHeVYtaGw2NXBBdE9jSG5yNjBTemF1empSNERySlQxQTJRZFZlSFRHUndPVUpYc3pVX0tjUElMNENOamp6UQ?oc=5",
@@ -643,6 +656,19 @@
       "imageFallbackUrl": ""
     },
     {
+      "id": "oa4y8e",
+      "headline": "An immersive video game experience is opening at Mockingbird Station. What’s inside?",
+      "publisher": "Yahoo",
+      "publisherUrl": "https://www.yahoo.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMioAFBVV95cUxQelBBMGduX3g3aTJFZmpRMTktR180V1JFQ1EyRDRRcEh5cTE5X284RXNsdFI2OHd1aEtLX1JWb013OWxZTHhsclZ2bFI0eUdEeTJndUNWV3RzTmdCV0lGS0E1OWZVSHo5cGlDWGRQS2VtMkhMMmtmdVkwak5xTkM3aHRaemkySEtDZU5BQkk2XzNteWMybEhUN3UyRlJ3N1ZN?oc=5",
+      "publishedAt": "2026-11-08T12:00:00.000Z",
+      "region": "global",
+      "category": "gaming",
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
+    },
+    {
       "id": "1wn9fb5",
       "headline": "Horoscopes November 8, 2026: Parker Posey, be patient and concentrate on self-esteem",
       "publisher": "The Mercury News",
@@ -768,19 +794,6 @@
       "publishedAt": "2026-11-08T09:00:00.000Z",
       "region": "global",
       "category": "gaming",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
-      "id": "rly653",
-      "headline": "What’s Trending on Streaming - November 1 - November 7: Stick Sinks the Hole-in-One, The Gilded Age on Top, A Muted Return for All’s Fair",
-      "publisher": "The TV Ratings Guide",
-      "publisherUrl": "https://www.thetvratingsguide.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMijgFBVV95cUxOYm5KZ2ZISGZPbnMwRVh1VGQ3WW91c3Z4bE8xaUpUNFM5REpEaGlOOWxoRTlabnUxUUNzRldJaW91cVR3N0FLWk1pdGNQaVBCWEQ1TmMxMDZpbzBfcXFJS29rYlBnTGY1VEtKSFVfckhCTy0xNG16MVpJRmZ3ZlBNYS1HekZ5TnJhbXR5ODJR?oc=5",
-      "publishedAt": "2026-11-08T08:49:00.000Z",
-      "region": "hollywood",
-      "category": "streaming",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
       "imageUrl": "",
       "imageFallbackUrl": ""
@@ -923,6 +936,19 @@
       "sourceUrl": "https://news.google.com/rss/articles/CBMirgJBVV95cUxNRDVYNGc1V2lPOEhNdzF2dWFNTXRQMDZ4TDNNd0RZX1FnUVYtdmZqcFVkdXVFU3R5MzBkSGp3NWt5TWJwd2djQ0ZmYmhqOGFoQWFSajlfOG1lclJyV0NSMmZseVhmM29RcXpGVkJVcmxFb1dCVWNhTWszTldaV0ExZm5NWm1pLXFBRENRZGowcm01c0t3SVhlR2VtUWxqMUN4NkNQZVY5SmxCVTZ0TV9CQ0cyV0p3M2hRU081VG4tV3hhLVlaWDIzMi13MnUxWFpEdnMtQ0FWTFRDSURuR0RKbWdhazFTZWw5MHFoVFh3UmdWNDh5QzV1WUxiZEx2ZW40N1BVcGZSc3pzTnpGeXpKNjQycFBLeUlUNEVPV0xjVDhXZ0pJeDR6VlJubzIxQdIBswJBVV95cUxNYkVvc1JpeEdoRVZGbnJrZlFyY0FLQVN5TnRfLWFRMHB4TGllNFBGaWNSNEd0N1BKSVdZa0NjZnZ2UU9ybGFFTXFvREc3b3ZFUW5jX2ZhWTJRY2toTzdyTFdZb0ZoMzhnUl9rSHNpNDkxdm5PMkh5VnptaHNSM2N6Q3RNWmxBM2I3cU5mU3VKVFFod052U2llWW41YUdya1NIYlF2UnZpeVpoQzdxZmtDRnZ5bUVvTklsbXkxZk9kRVJ1V3dXNy1LWUl2VlhzTWlZSk9rOEF6Q0tJZDRCTnhXOENfU3hfdWVLQkRBbDl6VUZvMHpRR3l4dTBCNHlId0lZby1LaXpwSEU2eHc3ZW5QdGxzWDJRTVJkbi1kQ1J5TWYtd3pua05salpjNzVLcmR1RVg4?oc=5",
       "publishedAt": "2026-11-08T05:56:00.000Z",
       "region": "hollywood",
+      "category": "film",
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
+    },
+    {
+      "id": "1f65mrj",
+      "headline": "Keerthy Suresh compares Bollywood and South cinema; says South films are ‘more spontaneous’",
+      "publisher": "The Times of India",
+      "publisherUrl": "https://timesofindia.indiatimes.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMikAJBVV95cUxOby1SMm9wM2huSE5PdXJQYjVJcUJaUmVrM251SXljTGQ2c0Q2ZUktamhxRTNZa2JUTTBNVHp1MWsyWUZKZTFZU08tdlFvTENwcHlvbmhqSkZrNF9kWHFVS2wyYWI0Q2xDQkMzYV9oN2NaaWw4WDBWRUh1cGNRVzdCYzJqcllSNFU4Rk9MOUI0RVlfOHIwUUdSc0R2aWxQV3MzZUNEREYwbWl4WkNyNVZDdFdQVi1DcGV0aXRnN0duOHhjcExBakRQVVhocVFUTmJMdHJoYVpDeWRXSjhqXzJSU3FYVXA2WWtIb2E4a1BuX1VISGFkVjU2ZEs3eGx2V1JmTHVXWm42eWkxbWtHQlY5QdIBlgJBVV95cUxQUGk3RDdkY1psXzgxelhCTWY4djhmNmlTN2xIV0JCWlpZNE8yRmFMZm81Q2RNSExTekZNRENnWndIaUpldjBUQ3MtamNmWVl3cDhzQVE0ZTRYZC0zYzY3Ml9kU21kY0ZvZVk2cDBEU1ZRalIwNVczTUhVRl91cEFtMlNncEE4blg3dktoSVdKVm1TMC1JYmJEVHNZMXJsV0R2WkxsMDM0NUFQRmtWV3JHeUtuVkdPblZ4WGJrUVk4ZFRQQklJdmc5LUxMZTk3bFlTMTBILU1XYUh0R3BMcXJPbzQyNy1hdTFrelNSM3Y5Y19BOHlMQi1wSl9iTWpYMW5HTklERHd5UlgyNmxoemFPUzFCTGN4QQ?oc=5",
+      "publishedAt": "2026-11-08T05:55:00.000Z",
+      "region": "india",
       "category": "film",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
       "imageUrl": "",
@@ -1345,19 +1371,6 @@
       "imageFallbackUrl": ""
     },
     {
-      "id": "u2zrpc",
-      "headline": "I’m a TV expert. Here are 5 things you should watch on Netflix this weekend",
-      "publisher": "NJ.com",
-      "publisherUrl": "https://www.nj.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMiuwFBVV95cUxOMDZYSG5UenYwNDZycE12R3FjMXgybVFhS29lZDIzVmZ3NVUzdGRkQzUyUlBuQWFxWVAwcEdTN0pUUW9hZHZfZjV4SmhIVGpZWFVGbUE1VHdZRHBDOGFfekF1cUtrT2o0cmlESC00b0MwU1VVOU93d3gweEkyRkR2SDE3UUtGVFVZc1A2Vmo4aWphVFpaWnl3aU5hQzZidWtIQXVtMzNySDN5QXJ6R3d0dHBSTUs1Q3J4dl9N?oc=5",
-      "publishedAt": "2026-11-07T16:37:00.000Z",
-      "region": "hollywood",
-      "category": "television",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
       "id": "kuirhn",
       "headline": "Sebastián Lelio, Chilean Filmmaker Behind the Oscar Winning 'A Fantastic Woman' and 'Gloria,' Dies at 52",
       "publisher": "That Eric Alper",
@@ -1392,19 +1405,6 @@
       "publishedAt": "2026-11-07T14:21:55.000Z",
       "region": "middle-east",
       "category": "film",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
-      "id": "m3o3y7",
-      "headline": "Sony Axing Game Discs Will Have Outsized Impact on Low-Income Gamers, Experts Say",
-      "publisher": "Decrypt",
-      "publisherUrl": "https://decrypt.co",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMiqgFBVV95cUxPUExobVdMbkU4YkhjaERlamdRNWlSTmE0NHktd1R4NWdYWGE3a2dDak5RNzhqc2xiUm1xWjR3amlZMDlGYjBPS1lfRWhfZ09oMURNNGlUZnFrSzQ3Vm1kMVNFc0xxOGRlRkxta0Y3ZXo1UXhqeDNGTjZHUGtKRG5TYnJacV8xOHZ4RndNVVVMSlJjWWgxbjB6OXNXbGE5MHdIektaLXNFV2FEQQ?oc=5",
-      "publishedAt": "2026-11-07T14:01:02.000Z",
-      "region": "global",
-      "category": "gaming",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
       "imageUrl": "",
       "imageFallbackUrl": ""
