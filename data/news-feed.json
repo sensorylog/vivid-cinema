@@ -1,10 +1,75 @@
 {
-  "generatedAt": "2026-11-07T20:39:29.990Z",
+  "generatedAt": "2026-11-08T00:11:35.332Z",
   "source": "Google News RSS search feeds",
   "count": 120,
   "failedQueries": 0,
   "feedCount": 21,
   "articles": [
+    {
+      "id": "1sbmhrk",
+      "headline": "Barry Diller rejects Hollywood's scale argument and names YouTube the next winner - K-EnterTech Hub",
+      "publisher": "K-EnterTech Hub",
+      "publisherUrl": "https://www.kentertechhub.com",
+      "sourceUrl": "https://www.kentertechhub.com/barry-diller-netflix-youtube-en/",
+      "publishedAt": "2026-11-07T23:46:06.000Z",
+      "region": "global",
+      "category": "business",
+      "summary": "Barry Diller says Netflix has won paid streaming, rejects Hollywood's merge-to-compete logic and names YouTube the next winner. People kept growing after losing 60% of its Google traffic and now makes products instead of licensing brands. Korean broadcasters face the same questions.",
+      "imageUrl": "./data/news-thumbnails/1sbmhrk.jpg",
+      "imageFallbackUrl": "https://cdn.media.bluedot.so/bluedot.kentertechhub/2026/11/qfhqw3_202611072336.jpg"
+    },
+    {
+      "id": "aier5r",
+      "headline": "‘Clayface’ Hits a Box Office Milestone That DC Studios Badly Needed",
+      "publisher": "Comic Basics",
+      "publisherUrl": "https://www.comicbasics.com",
+      "sourceUrl": "https://www.comicbasics.com/clayface-hits-a-box-office-milestone-that-dc-studios-badly-needed/",
+      "publishedAt": "2026-11-07T22:34:29.000Z",
+      "region": "global",
+      "category": "box-office",
+      "summary": "DC Studios has had a bruising year at the box office, and the pressure on every new release has been hard to miss. 'Supergirl' grossed just $126.4 million",
+      "imageUrl": "./data/news-thumbnails/aier5r.webp",
+      "imageFallbackUrl": "https://www.comicbasics.com/wp-content/uploads/2026/10/Clayface1.webp"
+    },
+    {
+      "id": "ll8ru6",
+      "headline": "Netflix's Near-Perfect 2-Part \"Lioness Meets John Wick\" Action Thriller Is a Global Streaming Sensation",
+      "publisher": "MovieWeb",
+      "publisherUrl": "https://movieweb.com",
+      "sourceUrl": "https://movieweb.com/black-doves-stream-netflix-november-2026/",
+      "publishedAt": "2026-11-07T22:00:16.000Z",
+      "region": "hollywood",
+      "category": "streaming",
+      "summary": "Netflix's hit action thriller is back for a second season, and it's already a hit.",
+      "imageUrl": "./data/news-thumbnails/ll8ru6.avif",
+      "imageFallbackUrl": "https://static0.moviewebimages.com/wordpress/wp-content/uploads/2026/11/netflix-black-doves-streaming-success-action-thriller-john-wick.jpg?w=1600&h=900&fit=crop"
+    },
+    {
+      "id": "wkrqri",
+      "headline": "Patrick Swayze's Final Role Was In A Cop Drama Series With Vikings Star Travis Fimmel",
+      "publisher": "Yahoo",
+      "publisherUrl": "https://www.yahoo.com",
+      "sourceUrl": "https://www.yahoo.com/entertainment/tv/articles/patrick-swayzes-final-role-cop-214200681.html",
+      "publishedAt": "2026-11-07T21:42:00.000Z",
+      "region": "hollywood",
+      "category": "television",
+      "summary": "Patrick Swayze's final role wasn't in a blockbuster movie. It was a cop drama he made while battling cancer, and some critics said he'd never been better.",
+      "imageUrl": "./data/news-thumbnails/wkrqri.jpg",
+      "imageFallbackUrl": "https://s.yimg.com/lo/mysterio/api/b1c7b1bb4fc584d4b7efeeebffb1b3274731af98e7e81c63cf3c82b730c093e1/lightyear_networkapi/resizefill_w1200%3Bquality_80%3Bformat_jpg/https%3A%2F%2Fmedia.zenfs.com%2Fen%2Ftvline.com%2F4bdc71e3744998c0fd19d7e595a9980e.jpg"
+    },
+    {
+      "id": "1j9o0mb",
+      "headline": "The dream of a young Cuban artist: to conquer Hollywood and establish his own film company",
+      "publisher": "CiberCuba",
+      "publisherUrl": "https://en.cibercuba.com",
+      "sourceUrl": "https://en.cibercuba.com/noticias/2026-11-07-u208487-e208487-s27065-nid345189-sueno-joven-artista-cubano-conquistar-hollywood",
+      "publishedAt": "2026-11-07T21:30:33.000Z",
+      "region": "hollywood",
+      "category": "film",
+      "summary": "Royce Morales, a 17-year-old Cuban, confessed that his greatest dream is to be a Hollywood actor and he cannot envision a scenario in which he does not achieve it.",
+      "imageUrl": "./data/news-thumbnails/1j9o0mb.jpg",
+      "imageFallbackUrl": "https://cdn0.celebritax.com/sites/default/files/styles/watermark_100/public/1794086701-sueno-joven-artista-cubano.jpg"
+    },
     {
       "id": "ltkt6h",
       "headline": "Zagreb Film Festival opens Monday with more than 100 films across the city",
@@ -17,6 +82,45 @@
       "summary": "Zagreb Film Festival 2026 opens on 9 November with more than 100 films, international award winners and a special screening of Croatian classic Rondo.",
       "imageUrl": "./data/news-thumbnails/ltkt6h.jpg",
       "imageFallbackUrl": "https://www.croatiaweek.com/wp-content/uploads/2026/11/Samir-Ceric-Kovacevic_-715x429.jpg"
+    },
+    {
+      "id": "1odbowv",
+      "headline": "Sonu Nigam announces son’s journey into world of music far flung from family tradition",
+      "publisher": "The Hawk",
+      "publisherUrl": "https://www.thehawk.in",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMivgFBVV95cUxQdVNJX0VLd1N4LWl3d3RFZFVta09BTWxac2pNY0Rtd0UtMjNadXB1TWJkNm5XajRFeXl3MzktbXFpZGY2cEl5cEtLcTZGMnRfZXMzZEN2TnJVS096LW1DaVhCc240S3lhemFOMV9PUUpZVjQ3MjFZdUtLSWNGMzI5Wllkbm9BQnhqVV94Q1M0aDJWVDJtZ0NSMUlJWUJSMWIyeU9sdVduTExPMXdOWGdnTklhbEthbm1MaGVqQnpB?oc=5",
+      "publishedAt": "2026-11-07T20:08:28.000Z",
+      "region": "india",
+      "category": "music",
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
+    },
+    {
+      "id": "bafdlp",
+      "headline": "Ramayana Box Office Collection Day 4",
+      "publisher": "Sacnilk",
+      "publisherUrl": "https://www.sacnilk.com",
+      "sourceUrl": "https://www.sacnilk.com/quicknews/ramayana_part_1_2026_Box_Office_Collection_Day_4",
+      "publishedAt": "2026-11-07T20:01:17.000Z",
+      "region": "global",
+      "category": "box-office",
+      "summary": "Ramayana Box Office Collection Day 4: ₹69.80 Cr net on Day 3; India net total ₹182.70 Cr after 3 days. Day 4 live updates, shows and occupancy.",
+      "imageUrl": "./data/news-thumbnails/bafdlp.jpg",
+      "imageFallbackUrl": "https://cdn.sacnilk.com/image/news/1000028339.jpg"
+    },
+    {
+      "id": "6j87ct",
+      "headline": "What to Watch: Best Shows, Movies and Streaming Guides",
+      "publisher": "USA Today",
+      "publisherUrl": "https://www.usatoday.com",
+      "sourceUrl": "https://www.usatoday.com/entertainment/what-to-watch/",
+      "publishedAt": "2026-11-07T19:30:46.000Z",
+      "region": "hollywood",
+      "category": "streaming",
+      "summary": "Find what to watch across streaming platforms with guides to the best shows, movies and trending content.",
+      "imageUrl": "./data/news-thumbnails/6j87ct.png",
+      "imageFallbackUrl": "https://www.usatoday.com/tangstatic/sites/usat/og-image-q1a2z3fb72acfa.png"
     },
     {
       "id": "py2jue",
@@ -45,19 +149,6 @@
       "imageFallbackUrl": "https://cdn.tuko.co.ke/images/1200x675/d2ca46e1c50a81dc.jpeg?v=1"
     },
     {
-      "id": "1r8b0q7",
-      "headline": "6 Hollywood Hoaxes That Brought The Drama To Real Life",
-      "publisher": "Bored Panda",
-      "publisherUrl": "https://www.boredpanda.com",
-      "sourceUrl": "https://2.boredpanda.com/hollywood-hoaxes-brought-drama-real-life/",
-      "publishedAt": "2026-11-07T18:46:56.000Z",
-      "region": "hollywood",
-      "category": "celebrity",
-      "summary": "Here are six Hollywood hoaxes that brought real drama to real life.",
-      "imageUrl": "./data/news-thumbnails/1r8b0q7.jpg",
-      "imageFallbackUrl": "https://static.boredpanda.com/blog/wp-content/uploads/2026/11/hollywood-hoaxes-brought-drama-real-life-fb.jpg"
-    },
-    {
       "id": "dbtyn3",
       "headline": "‘Godzilla Minus Zero’ Barrels Toward Historic $32M Box Office Launch With ‘Cat in the Hat’ at No. 2",
       "publisher": "The Hollywood Reporter",
@@ -71,56 +162,56 @@
       "imageFallbackUrl": "https://www.hollywoodreporter.com/wp-content/uploads/2026/11/%E3%80%8E%E3%82%B4%E3%82%B8%E3%83%A9-0.0%E3%80%8F%E3%83%91%E3%83%96%E3%82%AB%E3%83%83%E3%83%88%E2%91%A9-H-2026.jpg?w=1296&h=730&crop=1"
     },
     {
-      "id": "zadf8d",
-      "headline": "Ratings Show Fox News’ Saturday in America With Kayleigh McEnany Tops Weekend Cable News",
-      "publisher": "Yahoo",
-      "publisherUrl": "https://www.yahoo.com",
-      "sourceUrl": "https://www.yahoo.com/entertainment/tv/articles/ratings-show-fox-news-saturday-171217085.html",
-      "publishedAt": "2026-11-07T17:12:17.000Z",
-      "region": "hollywood",
-      "category": "television",
-      "summary": "Kayleigh McEnany's Saturday morning show was the only weekend program to appear in the top 10 cable news programs overall, the network said.",
-      "imageUrl": "./data/news-thumbnails/zadf8d.jpg",
-      "imageFallbackUrl": "https://s.yimg.com/lo/mysterio/api/ae05e8a09f50fb4a1ee2fa7d87bce616caf65f4538d8aa46ec27378e46364c1b/lightyear_networkapi/resizefill_w1200%3Bquality_80%3Bformat_jpg/https%3A%2F%2Fmedia.zenfs.com%2Fen%2Fmediaite_845%2Fb2b8237efdd75f28c185e4e210fcf6be.jpg"
+      "id": "c65dt0",
+      "headline": "\"This is heartbreaking\": Akosua Serwaa’s lawyer William Kusi dies at 56",
+      "publisher": "Yen News",
+      "publisherUrl": "https://yen.com.gh",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMimwFBVV95cUxNTEJrV2hmQW9CU1o3QzVhYWtOTWpVN2k2THpVVHJiZmZudUluQk5rNGdBUW9Oak1vVS0yeFpWQmFnM0pIejA5R3V5cmFTMEZaa0V3Z2JlVkhOb0xUV3BhT3NpWjhKOVRxSmZGSzlQUHZfWVJoNTJsWnRLMDcxeG1uMjRzRF90Smo0SjloeGs2enlxTlhHam43TWxKdw?oc=5",
+      "publishedAt": "2026-11-07T17:27:10.000Z",
+      "region": "africa",
+      "category": "celebrity",
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
+    },
+    {
+      "id": "1k6iom5",
+      "headline": "\"This is heartbreaking\": 5 things you didn't know about Akosua Serwaa's lawyer",
+      "publisher": "Yen News",
+      "publisherUrl": "https://yen.com.gh",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMirgFBVV95cUxNektrQ3FVb29BRUNDU0N0ZzBROC1Ubl8yeDYwVFI4cnpoaXlHRWM1MEtYV21BWjByRTFZcS1IYThLSWxQYXFJcTBZRW16NFFRRmM1cUdnREdLcmdUb0doYV9mS2dUaDVHM090XzFlUGprdHpfdl9DS0J1OGRPdnNyY3h5aVFHdUZZTHEyekx0QS04eWJ2NXhwOFQza3NUY28tWXlpbjVXUk01Q1NUUXc?oc=5",
+      "publishedAt": "2026-11-07T17:27:10.000Z",
+      "region": "africa",
+      "category": "celebrity",
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
     },
     {
       "id": "i72ax4",
       "headline": "Which popular anime series are returning in 2027?",
       "publisher": "bdnews24.com",
       "publisherUrl": "https://bdnews24.com",
-      "sourceUrl": "https://bdnews24.com/entertainment/2qzqsknbpz",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE5ZS0hnRGFUSGNUbl9sazREbk85ZEFkUFBFUlNWNHdXLXg4YlZac2lzUHR1Zy1faXJTMTg0TXFBTmNEOEQxbmp4UVRGWGNuRllGZncwQ05UNG4?oc=5",
       "publishedAt": "2026-11-07T16:56:00.000Z",
       "region": "asia",
       "category": "anime",
-      "summary": "Which popular anime series are returning in 2027?",
-      "imageUrl": "./data/news-thumbnails/i72ax4.avif",
-      "imageFallbackUrl": "https://media.assettype.com/bdnews24-english/2026-11-07/9ikmuggn/anime-for-nov-071126.jpg?w=1200&ar=40%3A21&auto=format%2Ccompress&ogImage=true&mode=crop&enlarge=true&overlay=https%3A%2F%2Fmedia.assettype.com%2Fbdnews24-english%2F2026-08-19%2Fv2z58b9u%2Fbdnews24_default_social_strip.jpg&overlay_position=bottom&overlay_width=100"
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
     },
     {
       "id": "zhxh5z",
       "headline": "Nollywood Mourns Veteran Actor Diewait Ikpechukwu, Dead at 71",
       "publisher": "pan african visions",
       "publisherUrl": "https://panafricanvisions.com",
-      "sourceUrl": "https://panafricanvisions.com/2026/11/nollywood-mourns-veteran-actor-diewait-ikpechukwu-dead-at-71/",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMioAFBVV95cUxPd19qWkVpc19HaDZuZU5kTW9Zbk9OdzhWcDdxSWRRMHIxNVNmUlFzajhGX0otVmFBeWpoMkZUVU5FUFQwSjJrbTlfM0F0WHVhUUhaM2JaWHoxakpzODRKR1hXSFFEQjk1VjhuM1FKQ0xjeUwxOVFXdU5fT2tITmhxWmFVdWtTVjBMZW1JWXd4RVZEaUgza2YwQ3lUbmxSVDZw?oc=5",
       "publishedAt": "2026-11-07T16:30:27.000Z",
       "region": "africa",
       "category": "film",
-      "summary": "Nollywood Mourns Veteran Actor Diewait Ikpechukwu, Dead at 71",
-      "imageUrl": "./data/news-thumbnails/zhxh5z.png",
-      "imageFallbackUrl": "https://panafricanvisions.com/wp-content/uploads/2026/11/juty.png"
-    },
-    {
-      "id": "6j87ct",
-      "headline": "What to Watch: Best Shows, Movies and Streaming Guides",
-      "publisher": "USA Today",
-      "publisherUrl": "https://www.usatoday.com",
-      "sourceUrl": "https://www.usatoday.com/entertainment/what-to-watch/",
-      "publishedAt": "2026-11-07T16:30:21.000Z",
-      "region": "hollywood",
-      "category": "streaming",
-      "summary": "Find what to watch across streaming platforms with guides to the best shows, movies and trending content.",
-      "imageUrl": "./data/news-thumbnails/6j87ct.png",
-      "imageFallbackUrl": "https://www.usatoday.com/tangstatic/sites/usat/og-image-q1a2z3fb72acfa.png"
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
     },
     {
       "id": "u2zrpc",
@@ -136,30 +227,43 @@
       "imageFallbackUrl": ""
     },
     {
+      "id": "kuirhn",
+      "headline": "Sebastián Lelio, Chilean Filmmaker Behind the Oscar Winning 'A Fantastic Woman' and 'Gloria,' Dies at 52",
+      "publisher": "That Eric Alper",
+      "publisherUrl": "https://www.thatericalper.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMi1wFBVV95cUxPOGpzNHZOQXZ0clZ4c19Jbks0YXNxUzk0RllUTzAwVWgzbURmNURzdnBmVWZ1d3dZdnBvaEIwSWlPYmx3a2twcHk4U0Vza2VSNTEySlpWbjYxX3FCS0JRcHBmbFVIUGxNN3BSVzBPR2EzMFRoaDA5dV9GNF8tZHBsbkdqWWVZRUhjV3hMZFNOMUtyNEZnTnI3T3diV0MxNEp1Uk5KQ3lEQ0JWSlFyN1hYMTFnUHN6OERCRUlhT1U0VWpXdDJ2clFuWmtJS0lyRld3ZGprNUJLZw?oc=5",
+      "publishedAt": "2026-11-07T16:04:51.000Z",
+      "region": "global",
+      "category": "festivals",
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
+    },
+    {
       "id": "otnwds",
       "headline": "“Bewitched” Star Erin Murphy Reveals She Starred Alongside a Future U.S. President in Her First TV Commercial as a Baby",
       "publisher": "Yahoo",
       "publisherUrl": "https://www.yahoo.com",
-      "sourceUrl": "https://www.yahoo.com/entertainment/celebrity/interviews/articles/bewitched-star-erin-murphy-reveals-155900247.html",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMitgFBVV95cUxQcjdvVk1RNThHMlZHckhkeTBiLV94SXBSNEtqbVp0MmhaU2F3XzRyZTN5VVNUb0JrV3I2M0RCSE5CS3JSNFViZ3M1WFJZLXJEOENiWUxKRklQMlJhTEpKYlFuNjZMVlV0eEFjU05HdFBERVEyMWVNaUVsU00xelRjRXNabkRrb18wY01Wazk1SnllalRPYjhVdDUtUXJmUG1EZzhRTVQwTVZwWlhwMU9ldWdkaUE2dw?oc=5",
       "publishedAt": "2026-11-07T15:59:00.000Z",
       "region": "hollywood",
       "category": "television",
-      "summary": "Murphy is known for playing Tabitha Stephens on ‘Bewitched’ for six seasons",
-      "imageUrl": "./data/news-thumbnails/otnwds.jpg",
-      "imageFallbackUrl": "https://s.yimg.com/lo/mysterio/api/091799ef2af463cb7d3c2e0a047d407c19930a88e912ce5ae2f9e4f002c9cd47/lightyear_networkapi/resizefill_w1200%3Bquality_80%3Bformat_jpg/https%3A%2F%2Fmedia.zenfs.com%2Fen%2Fpeople_218%2F27c45c0f02cf74e61a099211eab9a360.jpg"
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
     },
     {
       "id": "1dheezu",
       "headline": "Ramayana Day 3 Outgrosses Opening Day as Worldwide Collection Tops 375 Crore (Early Estimates)",
       "publisher": "Sacnilk",
       "publisherUrl": "https://www.sacnilk.com",
-      "sourceUrl": "https://www.sacnilk.com/news/ramayana-day-3-outgrosses-opening-day-as-worldwide-collection-nears-375-crore-early-estimates",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMivwFBVV95cUxPNW9sZlViZmk4Tld0NlBXWUpSSEw5dDlKUVY3UG56QTFGVkN2R2ZCZFFOMl95Um13cDZnUU5lX0RUbkNCTDQxdURXaWF0LWhiVWdHZVk3aTRQV0JLS1phT251VmRkQ0lGYkxEVWFvU3dHRHA2bzdITDB2SFJrN0dFWm9fQnlWdko2RHdIQVFxeGlOMzhzRHk4MGNMczBBTGJweGNYNkZkS0xjaTNsTFVmZGJvbkFZamgxZ0toTzlhQQ?oc=5",
       "publishedAt": "2026-11-07T15:53:30.000Z",
       "region": "global",
       "category": "box-office",
-      "summary": "Mumbai, November 7, 2026 - Namit Malhotra's Ramayana: Part One is heading towards its biggest single-day worldwide collection on Saturday, November 7, after",
-      "imageUrl": "./data/news-thumbnails/1dheezu.jpg",
-      "imageFallbackUrl": "https://cdn.sacnilk.com/image/news300/1000028426.jpg"
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
     },
     {
       "id": "1663n7o",
@@ -292,19 +396,6 @@
       "imageFallbackUrl": ""
     },
     {
-      "id": "g0ozx1",
-      "headline": "Pyre director Vinod Kapri says 75% shows of film has been cut down within first week, reveals theatre owners were told only one film will be shown | Bollywood",
-      "publisher": "Hindustan Times",
-      "publisherUrl": "https://www.hindustantimes.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMiwgJBVV95cUxObmtIXzJ2UGhvYXFRN3M5NHh3NVBjWjYzMnczc2YwMXhWeXVIR0xJOWhTT29tNHN4Z2NwMkwzQ1B4Rm45aE5BTWNpRDV4Ql9DQUtCWjR1R1JtWVdZdEdPdUdTVVFkMk9vcWE4ZVpaeXIxaDRGZld6UjY3UlNDSDNhTFhmUXVJRld3Y2pWNE9pbnFzVFFqekdiM2Yxck9TWHhnUnhaQTM5c3d2dFBKSm5fNjBoN3hNT0lqRlRhZG1LeW50cVVJR01PQWFZV01DYmxDMy1TeFlQbUpxbHZHczBoZHZZZmdIa0xLQk5jdmlRUnBMMi1TTXhDSTZta25QRmJBV2tScW1aV1JyanZxT2VwN1Q0QjBKcFgxbUFJSkt2SkFsaWhKYU5tTTl1OGRvc1pyOExSTGxYZjJkaWlPWmtCUk930gHHAkFVX3lxTFBmMll0ZHc1Q2hUcGxHOWVYR1ZQVzM0SGdkNUNoYmNTRGVJUk9CSXRxd0R4bnoyZ3A4UnlaNVhuNHpMNWJVUnlIVXprQm9UYUdqdkdVeHRfRW15cHFvUUVLbF8yWmVpR2pseDBlOUVXYU9qOWFXTzg0V3RJUng4Nk9XV2FNdXAtTTNNdDc2UE91UEtxSHpESGRhVlNPYzhiOEQydV9KWFpiejU0QS1oWUNZcDVMcE5LYzBnbEc1Z2M5WGJZc05wajBTSWtvajNOTGlLMGpZenZITUh5aDBLb2FpNlpHeGVFaWw4QmtyanR6M3pidTNSSWZoMW94enpCUlJIZHpTSmRsY2dJY2ZCUGtfT0VkdUdJaHFEdUxPaWR0S0laX29jaVZ1eC05akl2UEpBTXRpYUZ1ZUFzbTJySVN3SWI0VzVoMA?oc=5",
-      "publishedAt": "2026-11-07T13:51:08.000Z",
-      "region": "india",
-      "category": "film",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
       "id": "1sfq2zw",
       "headline": "Final Table K-drama Episode 5 Release Time Today: Who Plays What In The Korean Drama? Full Cast, Ep 5 Deets",
       "publisher": "Filmibeat",
@@ -409,19 +500,6 @@
       "imageFallbackUrl": ""
     },
     {
-      "id": "8pfwvl",
-      "headline": "Kamal Haasan Turns 72: Daughters Shruti, Aksharaa Wish 'Rarest Of Rare Appa' On Birthday, As Sandiyar Goes On",
-      "publisher": "Times Now",
-      "publisherUrl": "https://www.timesnownews.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMi5gFBVV95cUxPSnBQWHkxbGtMRFRGbGpLWktUZ195b3JTSlpTYTFpU0o0ZmRLZU5YS0hXZEFMekJaTjk0eGxmOWxGbU1MMG53VURJNW1CR18xR1lFQ0VmTGxpaTlxM1J5LUVGQnh1cTBuTEV6blptYi1MdDdVQmdGcnRlS0FGVE5tRVN2TmJHay1TRE5fWWVBYy1JM2JvaTd5dUU2Q3loMzc4MlZHUjVYbU81c1FoVld2MnBrbi1VVGRtSHJ1dGxtTzl1SDdVTm9CUXdNUGN6R21YT3p5TGxaczZCRkdkM0Z3U09zYmxQd9IB6wFBVV95cUxNTnBpMWJBalJTdzhWVkZkM0hKY0JBdkhpdnF4Z0JBbnBHLXF0Xy12S09fQUxMb0IwUGxzbEViZjlOX3RrR3J5dEpCamZHX1l3T01fUkpZNVhKdHo0UVRRS0xUajZpZUdfNEdvdWt4cERVSU1oYVNtbnhXcHUwSmhMcXVNS2VJSlJ5MFk0RzVyajdNOUY5QjJWRkdHXzFtVENjQmV3M0lEUmZ6YXFTZnU3bHBTZ242UXczRWFSV1REVGRkeG5JS3JJZDg1R1hxWThrcDdnOFZsVnA4YXU5OGdKZEpSU2NaMU13TDlV?oc=5",
-      "publishedAt": "2026-11-07T11:29:07.000Z",
-      "region": "europe",
-      "category": "film",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
       "id": "1vo4q7q",
       "headline": "PÖFF Film Festival Showcases Ukrainian Resilience Amidst Ongoing War",
       "publisher": "The Chenab Times",
@@ -469,6 +547,19 @@
       "publishedAt": "2026-11-07T10:48:03.000Z",
       "region": "africa",
       "category": "film",
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
+    },
+    {
+      "id": "8ksrb2",
+      "headline": "Hollywood, Music and MasterChef! Meet the Stars Born on November 8",
+      "publisher": "Yahoo",
+      "publisherUrl": "https://www.yahoo.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMimwFBVV95cUxOYTlCQVF0WlVLaWljcVF1SlIwMWw2UVRiQzNSNFpURU5yc0Vmb2NzaWZrY0owMDZpTHVlNm8xMXlHR3M5d1F1UC0xODVtcmlTU0JfeE5RcnlzZENiZjdqX0piODlvNkliXzVaQmpuMFcxNUdWZjBJcml2R3dxc3BlamtRcUNidjgzMlBSazdRVTJzSUxJOEVwUEJBdw?oc=5",
+      "publishedAt": "2026-11-07T10:46:46.000Z",
+      "region": "hollywood",
+      "category": "celebrity",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
       "imageUrl": "",
       "imageFallbackUrl": ""
@@ -669,6 +760,19 @@
       "imageFallbackUrl": ""
     },
     {
+      "id": "1i8ql0d",
+      "headline": "'Ramayana: Part 1' Day 2 Box Office: Despite impressive opening, Ranbir Kapoor movie sees decline in second-day collections",
+      "publisher": "The Week",
+      "publisherUrl": "https://www.theweek.in",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMiowFBVV95cUxNWGhXdXNpcHVpRG9QRzVXQy1tdlk1ZjUxQTdvR2JZazRqNFhaSUltbDRvQUNzRzFRdVcyS3RkbWJiVDJXSkFfRjZlenhXdjdZRDdIaWlENjY4VEE3aWZ5V2VDOVVVRHBYZXhucFF1WlB2RjNkQm1na2NKcm5UVXg4YVd2NXpJSzE0TUxNRWcyVFNqZlc1dGpybGRiZm1vY19zcWVZ0gGoAUFVX3lxTE0tVFNiTjJYWDRHazdDNG82M0hpc3lNODl2blZpY1VfUGRvVlFWLUhOQ0RQMUlwTml4NE5jUW83dEZmSy05QVlVUVV5aTctZ0RRQXFpSTVOcnh6MThaYnFNM1NXdGFmQzhucjNQX0xOS2oxOXNCYzVWcVB0dmtJWW45bFhFT2lCbHRHVEFOQnVWdzdCRWpKMXJlMUVvcHZPQTFNZkdQczktdQ?oc=5",
+      "publishedAt": "2026-11-07T09:20:45.000Z",
+      "region": "global",
+      "category": "box-office",
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
+    },
+    {
       "id": "9nv8lx",
       "headline": "Nollywood star Diewait Ikpechukwu passes away following illness",
       "publisher": "Legit News",
@@ -708,14 +812,27 @@
       "imageFallbackUrl": ""
     },
     {
-      "id": "fym0hl",
-      "headline": "Ramayana Set for November 12 Hong Kong Release as Nitesh Tiwari's Dangal China Record Returns to Focus",
-      "publisher": "Sacnilk",
-      "publisherUrl": "https://www.sacnilk.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMiygFBVV95cUxPc1JNYS1zbGJZbXEyMHNiSmMyb0xwNXNaWEFMYUFGSUJXU1hSVm9naGp1UzQ3cFlWTUMzOUl3WG9ZTDJsMXctLThveGY5WHBRYTdlX1VGTHJ3TDlRdlZpXzNOYkh6UU5YSGpwdGUwbEticko4cDBYRXRMQmx3X3VZa0FHYUItbHlPa1RQcVItSFR3ekR5cHpacWtrLS1wWnU0NW1FUVE2VjhtTkdteC1Ib25BMmFVaGhTSUx5YVY2azdpR1UyVUl6X3VB?oc=5",
-      "publishedAt": "2026-11-07T08:16:23.000Z",
+      "id": "1kk5b2v",
+      "headline": "Davika Hoorne Returning for ‘Inherit’ Sequel, Director Banjong Pisanthanakun Confirms (EXCLUSIVE)",
+      "publisher": "Variety",
+      "publisherUrl": "https://variety.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMigAFBVV95cUxQQWI5RXIzR2Q1ZkdTMjFUX3c5cC1wVVdNUnFCYi14eEVjWlFpS2lNNDFkNFVTdmlwb0ZLUWQ5S3RMY2FwSUdWY3ZaTVVDdUV6TjA1bC1raTdvOV9kZjY1UDZxYzJPUnB6UTh0MFRYeUIwRFVGNXBBNWxwUWh6dEp1RA?oc=5",
+      "publishedAt": "2026-11-07T08:59:00.000Z",
       "region": "global",
-      "category": "box-office",
+      "category": "festivals",
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
+    },
+    {
+      "id": "as7neq",
+      "headline": "How far should films go in depicting violence? Experts weigh in on its impact on kids | Bollywood",
+      "publisher": "Hindustan Times",
+      "publisherUrl": "https://www.hindustantimes.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMi8gFBVV95cUxPYUI0a1R4dWdPaGhqRTBObFZlaDE2ekhuZXFSUzhFSFRmZ3ZIZk9rRmNzMlgyN2luQlpIVGZmOFVFSFJ3QnFyWVh4ck4yVVFyMWlVY1NiM3BNMzRCMTN5V2t4OExxZmlzLU1wUDRJd2J1MDU1T1FCNzYwSlJLN25vdWdkM1QyS2NiaDk4dEw0aElwSUowSGp2RXNxRFQ0MXpWSzRVSnRjLXNLMU80Y3Q0X2F4Z1pUeVM3MUNlMVY1LU4xZTNiUEpxM0cwT1dVcExKb2lxOWpPTzZzLXNDaXFCVW1GLUtLRVZLSVpuYko2LUJpUdIB9wFBVV95cUxNUjNPLWxyTXB2TU55V0R4OHp5Z2Iwb1JfamJBdm85Tm5JWVljUGd1a0NzZmxKd0ZLQVdabU9sbkJGcDczRWN2R2lGNDhWYzNrRGJYTm50LVlHQ3RHWXNhNTF4R2hHWFdQX1Q4VU1VeHQ5R0gwS2V3WWd3amw4dkl3REgzZGFENWlNenNWWmhjYjNmQW83Mzg3T3Y2Mkc4Q29qN2pnZm9kZUZTTWM1WVk5ZmFjOVhlbmpwS1RKSjVsdzBqUTdHX3AwNkZzTnhUV2o1VlVEckVENHQzWi12eHJ0T211eGw3clhIamNlVHg2ZE9aRlVtTHU0?oc=5",
+      "publishedAt": "2026-11-07T08:56:40.000Z",
+      "region": "india",
+      "category": "film",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
       "imageUrl": "",
       "imageFallbackUrl": ""
@@ -742,19 +859,6 @@
       "publishedAt": "2026-11-07T07:59:57.000Z",
       "region": "global",
       "category": "awards",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
-      "id": "1rnd6t5",
-      "headline": "Toei CEO Fumio Yoshimura Talks Global Expansion, GenAI Adoption & Entry Into Games",
-      "publisher": "Yahoo",
-      "publisherUrl": "https://www.yahoo.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMingFBVV95cUxOLUc0dFNaVzEyT1N0UjlkelMyUWhZbWh5UGlmMjNabi1ZZ2lReEw3TFRrSTdjanVURXVpZWQtdWRUOHNCcHBGUFc5bndLajl3Sjh4WkQ4U010Zm96d09mV3JJYVdJbFRqbVl2WDAyWkVyRVJzYkxOdmxnOHFaWmQ2d2lmb1FyQm01aG1yQ09jRXpiZWRHT1AwTklGRmk3UQ?oc=5",
-      "publishedAt": "2026-11-07T07:55:00.000Z",
-      "region": "global",
-      "category": "gaming",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
       "imageUrl": "",
       "imageFallbackUrl": ""
@@ -942,6 +1046,19 @@
       "imageFallbackUrl": ""
     },
     {
+      "id": "wrqutu",
+      "headline": "5 best new movies to stream this weekend on Netflix, Prime Video and more — including Robert Pattinson’s most intense role in years (Nov. 6-7)",
+      "publisher": "Tom's Guide",
+      "publisherUrl": "https://www.tomsguide.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMikwJBVV95cUxPZG9EbE9FdnViZmVqSzA3eHVESmJNZHRuZTFhWTgtS2ZfSGF4R2E5U0Y1WjY1aHdGSHNXbzNUYURSbWZUbHZxbXR2aGdXcWVpQkJYcFZHSk1VejRVNUNSMTVKMVkyZm9lU08tVVl2bDhnT2h2OHJzM3VkMnY0Z2xQOXNheEd0ZHFlYnRnRFVaWnNYVnp6cU5lUEJKaVRjem10SE11RHNFZ3dRaE1hNVJSWHM2WWhYUUdIV0hyNV9LZW5YZk1VLVVCSmR4N3FlRFU3bTdXdTY4WmJhaFNHbnh6NVhzUnN4YXZSSUNXZE45aVN0TU9UTndncXJjcldpMnVEa0FxdE5mcS1PUVpFMlR4YmxHTQ?oc=5",
+      "publishedAt": "2026-11-07T05:19:15.000Z",
+      "region": "hollywood",
+      "category": "streaming",
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
+    },
+    {
       "id": "6m1d2",
       "headline": "‘7th Heaven’ Star Jeremy London Fires Back at ‘Homeless’ Reports, Calls Celebrity News ‘Stupid’",
       "publisher": "TheWrap",
@@ -1020,32 +1137,6 @@
       "imageFallbackUrl": ""
     },
     {
-      "id": "1wcb4f9",
-      "headline": "Macklemore says US venues rejected his Free Palestine tour, Entertainment News",
-      "publisher": "AsiaOne.com",
-      "publisherUrl": "https://www.asiaone.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMinAFBVV95cUxQemtYZXE1MmFDdUVVMUZfMWJILVliT0gzVHN3ZmRpQWhxbGNxbS1zeTM2MEpFR1UwaUdjY0lFbFAxUjZOUXRmZFN6dHFaZ2hwQWlRRDhfM1dYMFlIbmsxRld1MnlhM1FoTlR2bl9wTldjN3FOWEt5WXd1RTMzdEpRZGhNVHBCd0lXTm5TR3hhajdHTlYteUVQeXJVekQ?oc=5",
-      "publishedAt": "2026-11-07T04:46:55.000Z",
-      "region": "asia",
-      "category": "television",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
-      "id": "com8jh",
-      "headline": "Ramayana: Rise Of A Legend Box Office Collection Day 2: Ranbir Kapoor, Yash Film Storms Past Rs 200 Crore Worldwide",
-      "publisher": "The Sunday Guardian",
-      "publisherUrl": "https://sundayguardianlive.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMi_wFBVV95cUxOVC0ySm5Dd0ZkclBtUzRha1hfOE0tRFZsV203cHB4X0htSFpRRXpkQWhXQUNnRHlJR2REQk1uUDlVeE1IOTFLU2l1NndSUHQ0YmhBN0xUUy1KTHdaN3BxY3BPMmk4bWV0REZ0YkVxSUNSaURLdzhWN0N1ZlRkWFJxRkc4VWNERk5ZLUFFM2JyNjFrUkFGQ1hFMXRfVnAxQ2FGSmNkblU2cWU3Z3hKd3U1SkxNQWRycVJUYzZFN0kxT2F4VDF5WjBFM0N0OTFRd2pSaEZxVnpGczV3cTNyNVJEckpQUFVrWnpLNkNVLWNWMWl5Yk41S0lRX1BIUUNFOWPSAYQCQVVfeXFMT1NGcnpZSE82d2tMRnFkeW51UW51X1JESXp3bVNvNUpkMUZGeEw4cTAtY0J1d2ZSLUJ3ZmJwN0E2VmRubzFDQnRGaXZ5cEFpQjJUMWltUkpqeHExb1lhN1NBXzREbHd1RVVMV0Rxcm1ZdFBBUGVPbEoxeUVzZUxQVDJDTUwxVjQ3ckdRWGx5SGNSc2hxZUNZTmdCWUY5NVVzZ1RyWWFLRnp5bWI0WlN0UDVsYVJSWndsaGFENlZsZkhqY21kWUI5MUd5NzF4NXRVaWdXSDNNalJvc0EwaWlOX2EwWEx4eldkcE1BZE1wcGxrQmZyQWdHQS1Hem1zaXE2cnpaU2o?oc=5",
-      "publishedAt": "2026-11-07T04:31:28.000Z",
-      "region": "global",
-      "category": "box-office",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
       "id": "z7o0em",
       "headline": "Ramayana Box Office Collection Day 2: Ranbir Kapoor Film Crosses Rs 200 Crore Mark Worldwide, Rs 100 Crore In India",
       "publisher": "NDTV",
@@ -1067,19 +1158,6 @@
       "publishedAt": "2026-11-07T03:58:34.000Z",
       "region": "india",
       "category": "film",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
-      "id": "133gvbc",
-      "headline": "Gamescom 2026: What's next for the gaming industry?",
-      "publisher": "DW.com",
-      "publisherUrl": "https://www.dw.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMieEFVX3lxTFA4eUg5Z1BoY2tGSGhycnUxeG5ILWZGN1BXNUdvdEFkSnZvLWFMWDRPVWtwcW9mRDdvcVpOaVctWnFEeFdVOXJIUWxDb0xkSmU1eVlOTVdVU2hlMWtlWU40TDE0RzY2SVJ1TXZNZ25QRUo0TkFRakhDMNIBeEFVX3lxTE1aYzFTVzBJYjJrQk16NzhmQ201cC00dmNva1VyVVBfVU1POWdhZG1fSnFFTzBXdHl4NFBMWE9qSnFaNUtqXzRYQWZvRDJpaFFZZDBSeUExbjZFT1ZJQW5LMm96VEctcHBTTVdYdXNqT3pBajk5WDkteQ?oc=5",
-      "publishedAt": "2026-11-07T03:57:20.000Z",
-      "region": "global",
-      "category": "gaming",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
       "imageUrl": "",
       "imageFallbackUrl": ""
@@ -1111,19 +1189,6 @@
       "imageFallbackUrl": ""
     },
     {
-      "id": "15af8y8",
-      "headline": "How to play 'GTA 6' a day before everyone else in the U.S.",
-      "publisher": "Mashable",
-      "publisherUrl": "https://mashable.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMidEFVX3lxTE9XZmFiZG1mdkpSc0xWNmxSdXZGUDZ0SG5HQm9iM0ZBbzRhWlFxUFU4OHhwRjlSZF9hLVh6QWt2MkZNVjNhNjhOT2dkR0N6U0laS3ZHWlAyNHMtM3FERWJSWkZVR0NNdlJ2N3BVel9ZajRjV1BY?oc=5",
-      "publishedAt": "2026-11-07T03:31:20.000Z",
-      "region": "global",
-      "category": "gaming",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
       "id": "101mp71",
       "headline": "Deadline’s Sound & Screen Film Underway To Start The Awards-Season Drumbeat",
       "publisher": "IMDb",
@@ -1145,6 +1210,19 @@
       "publishedAt": "2026-11-07T03:07:33.000Z",
       "region": "global",
       "category": "festivals",
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
+    },
+    {
+      "id": "twr9fg",
+      "headline": "'Fire Country,' 'Sheriff Country' Bosses Break Down the Crossover Episode",
+      "publisher": "Variety",
+      "publisherUrl": "https://variety.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMilgFBVV95cUxOY1czaUZvT2dTLUpLSWxyRTZVdHkwNElPaW9RYXl4SG9tVlh5SXNZUTQ1LUM3LWYweS1wUHVNeENwYlpwRVNiQmoxLVd2d2JTWFhKNHI3aHFSRTlkTkNTSHZCQmdaaGt4M2dUc3pXMDFxZjlUbVljU055Rzl4V0lmSWtpekFZN2szVzJFa2Q1MWVRUEtoZXc?oc=5",
+      "publishedAt": "2026-11-07T03:00:00.000Z",
+      "region": "hollywood",
+      "category": "television",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
       "imageUrl": "",
       "imageFallbackUrl": ""
@@ -1215,6 +1293,19 @@
       "imageFallbackUrl": ""
     },
     {
+      "id": "mgn9lz",
+      "headline": "‘The Remarried Empress’ Sets Disney+ and Hulu Record With Biggest Local Original Launch Ever",
+      "publisher": "The Hollywood Reporter",
+      "publisherUrl": "https://www.hollywoodreporter.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMivAFBVV95cUxPQjlINHlrZHVjOEpVODFudmpFMFQ4OHF1MGEtRTl3T1ZYU3gtcUhKbHY4M09GM3JiX1VKQmJLY2lWMjFsNFV0M19RZUdET0ROR3R0d3B6ZFVoODctSWY0SEhnajJHb1piZ1JVQmVpTmk2MmFyRlJVVUhaaU1mb1hyaDJqaGdQVjlBanRMU0ZjSEYwZXBUeTRYa2g1X3RhV09na05ZRjB4QVEtX2ZraUduazlBUnFJbGVJVVRYLQ?oc=5",
+      "publishedAt": "2026-11-07T01:24:42.000Z",
+      "region": "asia",
+      "category": "television",
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
+    },
+    {
       "id": "1pkzbim",
       "headline": "A TV Channel Lost 15% of Its Subscribers While a Venue Grew Profit 90%: Sphere's Q3 Signal to Broadcasters - K-EnterTech Hub",
       "publisher": "K-EnterTech Hub",
@@ -1223,71 +1314,6 @@
       "publishedAt": "2026-11-07T01:14:42.000Z",
       "region": "asia",
       "category": "television",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
-      "id": "2ikp9q",
-      "headline": "Ramayana Day 3 Box Office Collection: Rs 1,000 Crore Dreams Meet 1st Weekend Test After Friday Slide",
-      "publisher": "NDTV Profit",
-      "publisherUrl": "https://www.ndtvprofit.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMi3AFBVV95cUxOYUxSOVBWQV9xOUtyMUdOeWZSNVJZMFNScGF1V3AtTUVCNGxSb0hiaDZfMzNjRF9mLWlrZnhZZFd5Z3ZkV2JyZWFRak5lRGNiNkZZS3l2UTM1SWx5UlZqYU45N3JULXdiS0xyYjdXWl92THd5cWtaamdzRWJ3WXNpY1lRcnpJTXBtYmpRV280b0RRTEFQMkp4dEowN05xdFo3aFczeHhldFlXMmw0SklzYi10VjRyUzQ5Nk1xTWR0Sl81RGxKajVhWlg1RDlYal8tZWJWUjJpSjlwU2NT0gHkAUFVX3lxTE13Z2pVRTZDckFHV1ZWYUwxc3VhY01TT0Z6ck9wa0hpRFdKNlY1ZWllZkxGTl9TcVZGZG4zZGpVWlctRkwwYXBJUzZ3dWI1amFyRndUZnpDQjVrUjlTdGU0dkhRcEFubmtjMnJFM0V1ek1zTDVqSnNVSnFtQVNyZ21EMC1wWjZFUEtjTXlabTNPaEF1aFZTRV9KN0QyMVZvWnpPX0tyZzMzWTBsYlQxTTlCTy1NMGl0eTNpbktQQzRBYmswTTYyWnc3Ry1vZDFSVTJqVVlrRmhDTjdKSlhEb29CV1JQRw?oc=5",
-      "publishedAt": "2026-11-07T01:06:17.000Z",
-      "region": "global",
-      "category": "box-office",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
-      "id": "1yf1rya",
-      "headline": "'Action': Film industry rep preps Simcoe County for its closeup",
-      "publisher": "Barrie News",
-      "publisherUrl": "https://www.barrietoday.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMitwFBVV95cUxQLVl0NUxXY0MweTZ4WWItZThoMDE3TW1ZMFowR0RqZmJjUlJ0U2VEUXROZlJKYW1KWWdaVmdrWFJ4QnlaMS1Ta0RWWW4wTjQxVXBMRmhkRDZPT3FrNnJXNW1PU2txUzNwZmJPbDRITTFaWlB2UVNPZ3ZxUjZHNEY0RXEwSEVGRDliWkZ4SjZQXzRCS3BHRnlnRTk1U3ZxSThfYjJLenFURHMxNXc3cjlnUUZ4WDd0eDA?oc=5",
-      "publishedAt": "2026-11-07T01:03:20.000Z",
-      "region": "global",
-      "category": "awards",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
-      "id": "12k05nf",
-      "headline": "Meghan Markle's estranged father arrested and charged with possessing child sexual abuse materials",
-      "publisher": "WRAL",
-      "publisherUrl": "https://www.wral.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMizgFBVV95cUxNdW9RZ19Vd0ZiUkVXMFB1RWJDcXJkd0xVd1NZdW8xTDdBVEkxUW5aNFAyYmxtWTZoa0dLTGZ1a2lTVl9DTS00bGZDMno1cEVLcURMZl9qSXBBYldxLUxwUlYweU1EZ195OEF6MFdIXzQtdTAyU2hMb2JiLVdyNm1qWnQ3cmlKeXBQMWdjUjhoRkdTTGR2Qi1FZm1Oc25nNnJxX1VsQW9PZVI0REMybnpqaGx2T3VodUduTndZZ0RKeHRBZHNQdkF4MjNzV1dOdw?oc=5",
-      "publishedAt": "2026-11-07T01:01:44.000Z",
-      "region": "hollywood",
-      "category": "television",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
-      "id": "ymu4r",
-      "headline": "Cork Film Fest brings 'different dimension' to movie-going experience",
-      "publisher": "Irish Examiner",
-      "publisherUrl": "https://www.irishexaminer.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMifkFVX3lxTE5jbURCTV82Nk9ZRkdXM0lDVmcxMzF4Q2V6bEY2X1JrQ3MzMUFTR1FHNG5ZZEVoNzhZVUxGU01hdldkajBiSVpIY0dFdVhZY3BLSGRRc1BKRzh2MFhxSnpCOUlzQzFxdTNMd2gzTnh4eVhIUTdWa21RVkNJZVVMUQ?oc=5",
-      "publishedAt": "2026-11-07T01:00:00.000Z",
-      "region": "global",
-      "category": "festivals",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
-      "id": "xarj9v",
-      "headline": "‘Jimmy’ Review: Cornball James Stewart Biopic Gets the Manner, but Not the Man",
-      "publisher": "IMDb",
-      "publisherUrl": "https://www.imdb.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMiZ0FVX3lxTFBCTkdnczVneGJOd2d3UWlmSDk2M1pHb1NmbVhkVGY4UXJUSGxNZzhPNVhqdUFta1ZralF3QXA5cU5aOC1zRWtOQy1ESW1hUFY3YzJfX25IQ3dyWlUwN21WYmdmWkRUY1k?oc=5",
-      "publishedAt": "2026-11-07T00:49:50.000Z",
-      "region": "hollywood",
-      "category": "film",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
       "imageUrl": "",
       "imageFallbackUrl": ""
@@ -1306,14 +1332,27 @@
       "imageFallbackUrl": ""
     },
     {
-      "id": "1qiki1a",
-      "headline": "5 must-watch movies & TV shows streaming right now",
-      "publisher": "Boston.com",
-      "publisherUrl": "https://www.boston.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMiuAFBVV95cUxPdHl5dFhPTF80M3liMEY2ajRCcVpJRm9RMXBNUzZ4RXg1enVodzAyUkpKTXZ3N1RyMGlfX1B1bURPVGdmOUZDNzEtenpkTTdINWFCX1NSQ2ptMlZERGFuQUVNV1QtWjVEOTRla0w3Zk9pR3dyYjVLSlIwd3dSaGlreG85YlN6NXdDcldqRDB1amJHUW9UNWJ5eWRIRlBZSGdoaGJpd2JzcThSbG16VWs3UHVPT1ZRNGxB?oc=5",
-      "publishedAt": "2026-11-07T00:16:47.000Z",
-      "region": "hollywood",
-      "category": "streaming",
+      "id": "6e7xvx",
+      "headline": "How the Gaming Industry Has Changed Over the Years",
+      "publisher": "LAmag",
+      "publisherUrl": "https://lamag.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMikwFBVV95cUxQVXB1NnhyRVlGT3pBbzRYd0Q2V1JNbFJfTUxFX2htSmk2Z01sT1pxNGY5SHZuODhHcnF5ZkxWOE43eVlsVTVmUGlROVRxWnBLS050UGlzQ0g3MkcwX1JsMjFpRXBpQzdEUFYzYnNRV0tNTHRPU3RZRVd2WF92RjY1UFhuUU1UTHVtdElHQUthZlNJX0U?oc=5",
+      "publishedAt": "2026-11-06T23:52:53.000Z",
+      "region": "global",
+      "category": "gaming",
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
+    },
+    {
+      "id": "1jc81cm",
+      "headline": "Fox Agrees to Keep Roku Open to Rivals in Justice Department Greenlight",
+      "publisher": "The Hollywood Reporter",
+      "publisherUrl": "https://www.hollywoodreporter.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMisgFBVV95cUxONDdUU09VYWNKS1VSN0YwSXNfZlVjcDFLZ0JwR2d3dE5DclBKajNxOHFrSEk0emlRMTNUN2x0dk5GLThOcmpLODUyUU9uaUVwc3lJYW9XOWpSTDZCNDFLYzJDTE9aZWRxRnpQVlNzbnU4T1NCV21udXBMeEJKTHN3ZllNLTJrVVloX3dUZXI1TDJXN2prM01nN0tDRF8xT2dXaTl1d3lpcTEtWkcyREN4d2hn?oc=5",
+      "publishedAt": "2026-11-06T23:11:25.000Z",
+      "region": "global",
+      "category": "business",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
       "imageUrl": "",
       "imageFallbackUrl": ""
@@ -1332,19 +1371,6 @@
       "imageFallbackUrl": ""
     },
     {
-      "id": "17ej1xb",
-      "headline": "Best TV shows and movies streaming in Australia this month",
-      "publisher": "The Guardian",
-      "publisherUrl": "https://www.theguardian.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMixAFBVV95cUxObE52QVVaNzAzS0VnVE9mdjNDSnY0Qk1ycU92Y3VsN2lNMWNGR21hdDBsRlVrak52dmZfa19Ob0NqYk9KY1VDc3J0c0k3czBQNjRZRHphclBmNzlILTkwUl9kRGtfZGFkWkxVV3RmYzJQN1ZEZUJJaC1velZ6UVRJRm1jbzNyOGhXOTFDUG9vUUtRMFVXcTlGc3ZESXVyTDZ5RFhpYmR3eHU0OFNxdUNNX1VKSnFheklsTDB3U2dYMEVSODQ2?oc=5",
-      "publishedAt": "2026-11-06T22:50:00.000Z",
-      "region": "hollywood",
-      "category": "streaming",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
       "id": "1uam14e",
       "headline": "Efya's Mother Steals Show at Her Traditional Marriage: All to Know About the Veteran Presenter",
       "publisher": "Yen News",
@@ -1353,6 +1379,32 @@
       "publishedAt": "2026-11-06T22:42:52.000Z",
       "region": "africa",
       "category": "celebrity",
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
+    },
+    {
+      "id": "1ny85xz",
+      "headline": "Video gaming industry faces headwinds, feels the bite of the RMG ban",
+      "publisher": "The Times of India",
+      "publisherUrl": "https://timesofindia.indiatimes.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMi2gFBVV95cUxOYlZWQUR2QUptNHg1NW5JekJwTU5uZ21rbUI4QXFKZDBXeFFSYzNoM2xKc2tvaG54WDV4WGlnaGpBVzM5RHItaEpnbFVoaHBOU1BwdnBRLUVmQm5TV3ZfN2FoR0FRQ2NjaFRBNms0eGtPVzA0cU5SZTRLTUNfQ3Atek9Ed1RRYWJCT0F3VGVBRkdDeURMX20yTkJBem1CVzVhcDFwYU44a3Vud3I1SFBRb2JYVEZ6Wl9GWlo2U0ZqMlpjeEFSVm52SG5vQUtjOGxRNm9BdGhIWWR1Z9IB3wFBVV95cUxQei1UWmduRHBvODF6RHA2REdFZ201TXlCYlU5SW0tSlF0NnBBaHVZY21ZUm1wYlpiVDAyUnRsa0syd3UxSDA2eWRsV3NhV1JSUWVmaUR4NHhTeFF5b3lvSjdQaS1sVWRZbVR0aXVKUDVHaWQ2WGF0d1FEQ01YTjdxWVlvSjFyb3dWd3Q2aFp6dEdMZGxUblk0elM3em5TUTAtWDg1VHF0Mm9xbEprN0UycVRKVjJDM0FxLVVUYmVuYlFFa002cWZrMGhJZUFDM3JzRnl3SVF4SmVrMDF4VU00?oc=5",
+      "publishedAt": "2026-11-06T22:30:00.000Z",
+      "region": "global",
+      "category": "gaming",
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
+    },
+    {
+      "id": "18k2pji",
+      "headline": "Why so much hype around the new Grand Theft Auto?",
+      "publisher": "University of Cincinnati",
+      "publisherUrl": "https://www.uc.edu",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMiZkFVX3lxTE56WUJseUE0RXNfZlJCZmg5NjBWam1COTlPaUZnRHNEQ1NVTVY0RjZrQlRuUHc4VmxwS3doSTFYTldmSGxTTDA4WTE4OXVjTzlSc3hoRGlOWGhRbTR5SnZzbVFTcjBlUQ?oc=5",
+      "publishedAt": "2026-11-06T22:17:05.000Z",
+      "region": "global",
+      "category": "gaming",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
       "imageUrl": "",
       "imageFallbackUrl": ""
@@ -1397,19 +1449,6 @@
       "imageFallbackUrl": ""
     },
     {
-      "id": "1bi16z6",
-      "headline": "Kathy Hilton Says ‘Little Fights’ Broke Out at Bozoma Saint John and Keely Watson’s Wedding in Ghana (Exclusive)",
-      "publisher": "Yahoo",
-      "publisherUrl": "https://www.yahoo.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMiowFBVV95cUxQeFRab2txVzRiY290dUtXdEVmS1hYVnhManl3LWlEV3RJWnNPYncxOHBDUEYwa3lOZUlTTkRNVDBzeTM1T29HeWlxc1BsTThNYnBrYWhkVmVOZGN1YU5Hc2wyY3FhRTNSNk15SEwzSmhFQVhBRnhtRnV1VjNwSHlrSUphMnFCTm9lMnNnc1RqeWNDNWRpZldIOVNTUlBNamNDakxJ?oc=5",
-      "publishedAt": "2026-11-06T21:23:38.000Z",
-      "region": "africa",
-      "category": "celebrity",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
       "id": "1pokj8t",
       "headline": "Danny McBride’s ‘G.I. Joe’ Movie Gets October 2028 Release Date",
       "publisher": "Yahoo News UK",
@@ -1436,19 +1475,6 @@
       "imageFallbackUrl": ""
     },
     {
-      "id": "p7hpt6",
-      "headline": "Whoa, I Missed It! Disney Starts Licensing the Household Silver, When IP Backfires, and More Big Content Moves",
-      "publisher": "The Entertainment Strategy Guy | Substack",
-      "publisherUrl": "https://entertainment.substack.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMigwFBVV95cUxOSFVsVDF3b05wd3hBQ0V1Vk51dmFnR01CZFoxUUVZX09LTmRXZUNvelhoN1I5czJrNlA1bVBMLVdFR0gxb3c3ZzNKQlVnSlltVnZKT0tPcHp4anhKeTBqUVdLTGNZU2NXY254bEhqb0ZkVGZOUTFyMnU2eEctY3NoRmpBTQ?oc=5",
-      "publishedAt": "2026-11-06T19:02:04.000Z",
-      "region": "global",
-      "category": "business",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
       "id": "19toyw3",
       "headline": "News:",
       "publisher": "IGN India",
@@ -1457,19 +1483,6 @@
       "publishedAt": "2026-11-06T18:17:38.000Z",
       "region": "asia",
       "category": "anime",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
-      "id": "1kwt6zr",
-      "headline": "Kente, gele and glamour: How Becca and other stars dressed for Efya’s wedding",
-      "publisher": "Yen News",
-      "publisherUrl": "https://yen.com.gh",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMiywFBVV95cUxQLWJtQzZhY1RIOTFhYU1PaXNwUC12cXUzTE9sQWxOZDk5TDBNaE5KRHNxSWI4ckE0U1I3TGdWM2VCd0hZWE5HeHVqNFViVmRmeE9PZlJrSmxCU0NlRFJoclVUOWxLQVpiSzd0ZVZoM1VCbHU3WWR2VGQxVWxoR3JhWWZ2NlpBNUx0bmxlNFZOZEJMMmw0Y1AyWTlfRkJGd3Y5d3ZoMDRqM1VDWW1aWTRpRVdSbWp0bTlQRkYzeG0yZGNWNzl1RUtxeGFhMA?oc=5",
-      "publishedAt": "2026-11-06T18:14:15.000Z",
-      "region": "africa",
-      "category": "celebrity",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
       "imageUrl": "",
       "imageFallbackUrl": ""
@@ -1501,14 +1514,14 @@
       "imageFallbackUrl": ""
     },
     {
-      "id": "c0u0q6",
-      "headline": "Farah Khan reveals industry insiders doubted Shreya Ghoshal before Main Hoon Na: ‘Why take a new girl?’",
-      "publisher": "The Indian Express",
-      "publisherUrl": "https://indianexpress.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMi5wFBVV95cUxPdzBnWGZBS2JYQUpRU2QtZlIyMzdUbEtUbk9fWHFTMGFYVkFvNEYxVko3Q2JRal9FUkhTRUc0UTVtRzNGMkQ4dVVqZTlVNFZXRk1IaVc4ME1jbzJkVHBIWkk4NTFuMkZ0amRLOGxBdHQ1dHZ5Y2dPdzhlMEtKcWhtTFpHaUJlZDNKcDlwRVdkbTRWSWRDSk9rajVPZ1lpXzgxdmY1T09aQWVPUnV1T1ZzQ3NJX0s2bVhNa0dfdndZTjFEbVc5SWc3RVJsWTR6WWY0aVpUeGl0ZTBFUU1HVHo3U1FKdzkxQ3PSAecBQVVfeXFMT3cwZ1hmQUtiWEFKUVNkLWZSMjM3VGxLVG5PX1hxUzBhWFZBbzRGMVZKN0NiUWpfRVJIU0VHNFE1bUczRjJEOHVVamU5VTRWV0ZNSGlXODBNY28yZFRwSFpJODUxbjJGdGpkSzhsQXR0NXR2eWNnT3c4ZTBLSnFobUxaR2lCZWQzSnA5cEVXZG00VklkQ0pPa2o1T2dZaV84MXZmNU9PWkFlT1J1dU9Wc0NzSV9LNm1YTWtHX3Z3WU4xRG1XOUlnN0VSbFk0ellmNGlaVHhpdGUwRVFNR1R6N1NRSnc5MUNz?oc=5",
-      "publishedAt": "2026-11-06T13:09:49.000Z",
-      "region": "india",
-      "category": "music",
+      "id": "3pdjbw",
+      "headline": "Nadia Paschetto • Director, Arras Film Festival",
+      "publisher": "Cineuropa",
+      "publisherUrl": "https://cineuropa.org",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMiVEFVX3lxTE5UcmFXb2NsMnoxeGp2TGhOT3VocXU3M2pVMW1UWnRfU2UtZW9VM2QtMnhKcmQ2TzdwNFI3UV9wc3hFbFAya09UNGxsU2t5ajV4NUZhMw?oc=5",
+      "publishedAt": "2026-11-06T15:42:46.000Z",
+      "region": "europe",
+      "category": "film",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
       "imageUrl": "",
       "imageFallbackUrl": ""
@@ -1548,19 +1561,6 @@
       "publishedAt": "2026-11-05T17:54:44.000Z",
       "region": "latin-america",
       "category": "film",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
-      "id": "15xu54h",
-      "headline": "Hollywood Declares War on Insider Bets: Studios Ban Employees From Gambling on Movie News",
-      "publisher": "IMDb",
-      "publisherUrl": "https://www.imdb.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMiZ0FVX3lxTFBTelJRT01rUzZfZ0xjX01wZF91OFNIWkw0dWxMZUhNVXI4QTR5anNxaUExVGhSdmFUMVRTZWpOcmJ0Smk3blFKZFEtV0xZU0tVeGs4MnE1YXVGUkpIRE15MWMtSGtlM0E?oc=5",
-      "publishedAt": "2026-11-05T15:23:46.000Z",
-      "region": "global",
-      "category": "business",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
       "imageUrl": "",
       "imageFallbackUrl": ""
