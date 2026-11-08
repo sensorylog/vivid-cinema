@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-08T23:38:11.741Z",
+  "generatedAt": "2026-11-08T23:45:58.235Z",
   "source": "Google News RSS search feeds",
   "count": 120,
   "failedQueries": 0,
@@ -14,9 +14,9 @@
       "publishedAt": "2026-11-08T23:35:59.000Z",
       "region": "global",
       "category": "box-office",
-      "summary": "Asian Blockbusters 'Godzilla Minus Zero' and 'Ramayana: Rise of a Legend' Achieve Phenomenal Global Box Office Success - The news from on The Chenab Times",
+      "summary": "Asian blockbusters 'Godzilla Minus Zero' and 'Ramayana: Rise of a Legend' roared at the international box office with massive opening weekends on premium screens.",
       "imageUrl": "./data/news-thumbnails/hohq65.webp",
-      "imageFallbackUrl": "https://thechenabtimes.com/wp-content/uploads/2020/02/PicsArt_02-06-01.57.29.png"
+      "imageFallbackUrl": "https://thechenabtimes.com/wp-content/uploads/2026/10/%E7%AC%AC36%E5%9B%9E-%E6%9D%B1%E4%BA%AC%E5%9B%BD%E9%9A%9B%E6%98%A0%E7%94%BB%E7%A5%AD-%E3%82%AA%E3%83%BC%E3%83%97%E3%83%8B%E3%83%B3%E3%82%B0%E3%82%A4%E3%83%99%E3%83%B3%E3%83%88-%E3%83%AC%E3%83%83%E3%83%89%E3%82%AB%E3%83%BC%E3%83%9A%E3%83%83%E3%83%88.jpg"
     },
     {
       "id": "zbalm2",
@@ -30,6 +30,19 @@
       "summary": "Not long ago, a Japanese kaiju sequel and an Indian mythological epic landing in theaters on the same day would have looked like a scheduling headache.",
       "imageUrl": "./data/news-thumbnails/zbalm2.webp",
       "imageFallbackUrl": "https://www.comicbasics.com/wp-content/uploads/2026/11/ramayana-2026-Godzilla-minus-zero.webp"
+    },
+    {
+      "id": "1rqrldf",
+      "headline": "Breaking Bad actor’s desperate bid to save marriage amid secret divorce",
+      "publisher": "Nine.com.au",
+      "publisherUrl": "https://www.nine.com.au",
+      "sourceUrl": "https://www.nine.com.au/entertainment/celebrity/dean-norris-breaking-bad-actor-divorce-trying-to-save-marriage-20261109-p61cj0.html",
+      "publishedAt": "2026-11-08T23:25:23.000Z",
+      "region": "hollywood",
+      "category": "celebrity",
+      "summary": "Breaking Bad star Dean Norris appears to be working to repair his marriage to wife Bridget Norris days after reports of their divorce made headlines. Read more.",
+      "imageUrl": "./data/news-thumbnails/1rqrldf.webp",
+      "imageFallbackUrl": "https://static.ffx.io/images/$zoom_0.7357%2C$multiply_2%2C$ratio_1.777778%2C$width_1059%2C$x_0%2C$y_219/t_crop_custom/c_scale%2Cw_1200%2Cq_88%2Cf_auto/9087297e894c7f95d6e9fa4ef818082df187c4aa56baa594800cb837d03b3800"
     },
     {
       "id": "15lwok4",
@@ -81,7 +94,7 @@
       "category": "box-office",
       "summary": "'Godzilla Minus Zero' was no. 1 at the global box office with $63M to 'Ramayana: Rise of a Legend's $55M. Read more below.",
       "imageUrl": "./data/news-thumbnails/11xy24z.jpg",
-      "imageFallbackUrl": "https://scontent-sea5-1.xx.fbcdn.net/v/t39.99422-6/897218837_1037695142687144_1849946981241909126_n.png?stp=dst-jpg_tt6&cstp=mx1000x667&ctp=p600x600&_nc_cat=103&ccb=1-7&_nc_sid=cae128&_nc_ohc=ONCnsOmWa8IQ7kNvwEQg8Fu&_nc_oc=Adocw1Adwur1RNI5BhkvAcBtGkTLkrqmlCNtWUPUXz7VI4x_vURRHAByzxMimp52knY&_nc_zt=14&_nc_ht=scontent-sea5-1.xx&_nc_gid=MHbsFlDBdUf_T8tRfqaoSw&_nc_ss=7c289&oh=00_AQSHqyoUDqDuHK4rojrjjd8IAzZP4HvEAM206FB2KmYOew&oe=6AF6F582"
+      "imageFallbackUrl": "https://scontent-sjc3-1.xx.fbcdn.net/v/t39.99422-6/897218837_1037695142687144_1849946981241909126_n.png?stp=dst-jpg_tt6&cstp=mx1000x667&ctp=p600x600&_nc_cat=103&ccb=1-7&_nc_sid=cae128&_nc_ohc=ONCnsOmWa8IQ7kNvwHRmENb&_nc_oc=AdqFXdZ2bQfzqfhYJ_i1aS_GfNxhs5yVIaaTIJs21vz9yryYWY97vDwXfMmNHvwRcPw&_nc_zt=14&_nc_ht=scontent-sjc3-1.xx&_nc_gid=1azqXNLlAXkhEant6DvjkA&_nc_ss=7c289&oh=00_AQRr7FkmC4FLZsFyA_nYcadh26Q32BROkxCtHvBxR24l5w&oe=6AF6F582"
     },
     {
       "id": "1ial6y6",
@@ -153,13 +166,13 @@
       "headline": "'Godzilla Minus Zero' stomps to a record-setting $31.6 debut, clobbering 'The Cat in the Hat' - ABC News",
       "publisher": "ABC News - Breaking News, Latest News and Videos",
       "publisherUrl": "https://abcnews.com",
-      "sourceUrl": "https://abcnews.com/Entertainment/wireStory/godzilla-minus-zero-stomps-record-setting-316-debut-137957908",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMiqAFBVV95cUxNZlVsNEpOeC12Tmc4bTNoZmZFd0VBOWNsUFpicDRUQlZGdUgyY3pxSEVpM1pvMUg4U3pxdTFrVkl3d0VmZUtwdHhmQ0ZpSVY4MUFUaDJaYTJrMVlCT2NpNUxLeThoc3l5R2RnaUVQbkxHMXRTZFR0ZkNiNEhDQnZmV0V2TXNnb1R2Y1FmeGYzcExTNmhVcTdxajR5MTQ5YXdsWTh1WDdKTUfSAa4BQVVfeXFMTkRFd084TzJwLW15ZDFNajZzbG9FWEV2WGNyaFQ5MG1sdUtEeFNSREFVSkNRUGFzQnRZVEpqWEZNcGtUampfLVliR2pkajhqTHVnSmx6UTZZeTh6WllrTXk1Mms1Z21DRlRsN0hyam54M2g5SXhZN0ppUU5CTUV6bURsaVYyeHVGMTA1WVFIU29SRjNtVkQtdXFWMGhmYXVqTnZXV0gzS1ZZN1lCakpn?oc=5",
       "publishedAt": "2026-11-08T19:27:32.000Z",
       "region": "global",
       "category": "box-office",
-      "summary": "“Godzilla Minus Zero” stomped into movie theaters with a chart-topping $31.6 million over the weekend, scoring a record debut for a foreign-language film at the North American box office",
-      "imageUrl": "./data/news-thumbnails/yyezkp.avif",
-      "imageFallbackUrl": "https://i.abcnewsfe.com/a/0f4eb376-2324-47c5-b896-408cb3f2a44f/wirestory_bd8e1659697045d34e2ad0ccfab7682c_16x9.jpg?w=1600"
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
     },
     {
       "id": "1vdk1f0",
@@ -170,6 +183,19 @@
       "publishedAt": "2026-11-08T19:20:51.000Z",
       "region": "global",
       "category": "box-office",
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
+    },
+    {
+      "id": "1sqltq3",
+      "headline": "Box Office: ‘Heated Rivalry’ Fans Drive Show’s Theatrical Release to $1.4 Million",
+      "publisher": "Variety",
+      "publisherUrl": "https://variety.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMiqAFBVV95cUxOSGtnT20tV3FrLU1iZWVIN2xYdlBBYVJZMWNadmZpai0tLVR4bG9FU1lma09vWjNzTnE4eUs3M1EwNk5VU21vcmtYOGdXWllVZGZram91VW9zbFNEWnRUek10cm9lc1llZ2dGQm1rc0FQQ0xvMDRCdmk4UFJtOFdHc3g1ZDdaWldHZ2VKSUxiWjZCTkpSSWQ3d1VVb2Z0ZjNaV1dMVU5wSVQ?oc=5",
+      "publishedAt": "2026-11-08T19:19:00.000Z",
+      "region": "hollywood",
+      "category": "television",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
       "imageUrl": "",
       "imageFallbackUrl": ""
@@ -209,19 +235,6 @@
       "publishedAt": "2026-11-08T18:26:22.000Z",
       "region": "global",
       "category": "box-office",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
-      "id": "1adgan3",
-      "headline": "Smosh Games puts its spin on 'The Traitors' in two supersized 'Werewolf' episodes",
-      "publisher": "Mashable",
-      "publisherUrl": "https://mashable.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMipgFBVV95cUxONHNrem5CZHpkeDFPcUgyUVB1cEJHU0V2dkJnaHlBMFdkSmRadXJ5SVdUakZrTVJ6WlVONnFjN1MxTHFqOUJCWU53dTZIcmFINy1CcWxycjNqRkZEX0pWWmQ5TzBXWmNfQ010VEx6dE1LOUI5OXk1MS1ZdHEzOV9SZnRkMGJSY3RDZlpmbEZxSk9TV2dTaENHbWktVmdmWFBlcm41clB3?oc=5",
-      "publishedAt": "2026-11-08T18:24:49.000Z",
-      "region": "global",
-      "category": "gaming",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
       "imageUrl": "",
       "imageFallbackUrl": ""
@@ -325,19 +338,6 @@
       "sourceUrl": "https://news.google.com/rss/articles/CBMi2gFBVV95cUxNRkRqVFhaT2JMNEtsdXZZbUNUcDVZV25uTERzOTZRTExGOUlneWhJX1R1dFd1dlhMZGdReEtNYS0xMUtFaGF2Y0wxUGxGdU8xeW1lcGx0TnFWZ2tKYVRUa0dBYU0wNmVrUFFrTjBVb19MYWVIcE9TWFNhQkIwTGt6cUs1Y2dzcUVZOVlxR3dGOEZoLXZncFdudjh6dFFHeVYtaGw2NXBBdE9jSG5yNjBTemF1empSNERySlQxQTJRZFZlSFRHUndPVUpYc3pVX0tjUElMNENOamp6UQ?oc=5",
       "publishedAt": "2026-11-08T17:20:08.000Z",
       "region": "hollywood",
-      "category": "film",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
-      "id": "khml3x",
-      "headline": "THR Visionary: 5 Janusz Kaminski Shots",
-      "publisher": "The Hollywood Reporter",
-      "publisherUrl": "https://www.hollywoodreporter.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMisgFBVV95cUxNZDFia181Q2FubWtyUU5fNGpRNzRZa1pKLTdyaUdvSFFpa2lvUEZLRTBrTVRJTC1nMm5TZVNaYVNSdTFqQ1pyWm8ySXdOa3gyczNjOW9CeHZfanpXazBJV2NJZTRZeEU4NTBPb0JIVTRwdzROWFp0aXN5MFNwTF9USmpuZEVnaHpCSnBURUZoSXk5aHNqcXJpNFkzb2Y5SjBzTmNfWFVEbVV5Qm0xYzkySnVn?oc=5",
-      "publishedAt": "2026-11-08T17:05:40.000Z",
-      "region": "europe",
       "category": "film",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
       "imageUrl": "",
@@ -565,19 +565,6 @@
       "imageFallbackUrl": ""
     },
     {
-      "id": "73mjip",
-      "headline": "Exclusive | Tony Shalhoub’s daughter reveals why ‘Monk’ star deliberately avoided Hollywood spotlight",
-      "publisher": "Page Six",
-      "publisherUrl": "https://pagesix.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMivAFBVV95cUxOeF9Lc3hQaEl0RXdqcHZzc0xPYnRwMks1STFlZkR3ODhRN29mV294TVZReWJmbUs1N0tQYV9WODA3QTlFZHdVVndvbVUwZmlsN08xSlJTa0k3RkwwUkhFZzA4b1NBd21tYzlNX2RjcGhrcm5HYlJHa1U5SHdxak5ZSzhEVERxN3N4b3hZZm9Ybjk1YnFjRmFlLUNHLTBrMVlkajY5RVVFUnpYeFc3aG9sM0hJbFVMc3p5YVk5ZA?oc=5",
-      "publishedAt": "2026-11-08T13:00:00.000Z",
-      "region": "hollywood",
-      "category": "celebrity",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
       "id": "1df3etw",
       "headline": "Judi Dench says ‘big Hollywood producer’ told her she’d never make a film because of her face",
       "publisher": "Entertainment Weekly",
@@ -586,6 +573,19 @@
       "publishedAt": "2026-11-08T13:00:00.000Z",
       "region": "hollywood",
       "category": "film",
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
+    },
+    {
+      "id": "73mjip",
+      "headline": "Exclusive | Tony Shalhoub’s daughter reveals why ‘Monk’ star deliberately avoided Hollywood spotlight",
+      "publisher": "Page Six",
+      "publisherUrl": "https://pagesix.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMivAFBVV95cUxOeF9Lc3hQaEl0RXdqcHZzc0xPYnRwMks1STFlZkR3ODhRN29mV294TVZReWJmbUs1N0tQYV9WODA3QTlFZHdVVndvbVUwZmlsN08xSlJTa0k3RkwwUkhFZzA4b1NBd21tYzlNX2RjcGhrcm5HYlJHa1U5SHdxak5ZSzhEVERxN3N4b3hZZm9Ybjk1YnFjRmFlLUNHLTBrMVlkajY5RVVFUnpYeFc3aG9sM0hJbFVMc3p5YVk5ZA?oc=5",
+      "publishedAt": "2026-11-08T13:00:00.000Z",
+      "region": "hollywood",
+      "category": "celebrity",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
       "imageUrl": "",
       "imageFallbackUrl": ""
@@ -638,19 +638,6 @@
       "publishedAt": "2026-11-08T12:01:23.000Z",
       "region": "global",
       "category": "box-office",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
-      "id": "oa4y8e",
-      "headline": "An immersive video game experience is opening at Mockingbird Station. What’s inside?",
-      "publisher": "Yahoo",
-      "publisherUrl": "https://www.yahoo.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMioAFBVV95cUxQelBBMGduX3g3aTJFZmpRMTktR180V1JFQ1EyRDRRcEh5cTE5X284RXNsdFI2OHd1aEtLX1JWb013OWxZTHhsclZ2bFI0eUdEeTJndUNWV3RzTmdCV0lGS0E1OWZVSHo5cGlDWGRQS2VtMkhMMmtmdVkwak5xTkM3aHRaemkySEtDZU5BQkk2XzNteWMybEhUN3UyRlJ3N1ZN?oc=5",
-      "publishedAt": "2026-11-08T12:00:00.000Z",
-      "region": "global",
-      "category": "gaming",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
       "imageUrl": "",
       "imageFallbackUrl": ""
@@ -1025,7 +1012,7 @@
       "publisher": "USA Today",
       "publisherUrl": "https://www.usatoday.com",
       "sourceUrl": "https://news.google.com/rss/articles/CBMiY0FVX3lxTE5NS1h5cnZDV3Z5TUMtMzNJLU5QUjRqVHp5cTl1ZW9Zb0tSbUdoU2RPS0Z5SG9OTTZNd2ZVb0RCandUczRremdaWjBYYmhkZkh0aEg5Mzl3WWlDRHFrTGZ5OEc2Zw?oc=5",
-      "publishedAt": "2026-11-08T04:20:12.000Z",
+      "publishedAt": "2026-11-08T04:19:13.000Z",
       "region": "hollywood",
       "category": "streaming",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
@@ -1241,19 +1228,6 @@
       "imageFallbackUrl": ""
     },
     {
-      "id": "1v2ml0g",
-      "headline": "What To Watch This Weekend (Nov. 6-8): New Movies And Shows On Netflix, Hulu And More",
-      "publisher": "Forbes",
-      "publisherUrl": "https://www.forbes.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMi6AFBVV95cUxQSU16bEtJdWt5R0V4M1pCUU5UdHVOV1dYa3RyUXRXLVRLRHZFQ1lrYVRMRWJjYXhqUi1adi1KLWNqaXNsNDBpRXB5SWVXVXR4eGU4RUFoczRmTWR3RzVxQlN3VzA5X1ZfS21aRXhsQ1Y3dzFlVGdJTFJpdXY3aEw0RzNJNDRSZWlZZ3phTkE4MFM5cXh3N09aOGpBd0Jud0VCZ3ZVeHZMMm9rNzBtejlkV3BPREx6ZUIxV2tTSE5nbU1qMVlBc0VBTktZQW9iZ3J2YXgteXpJaUJGX2YzSkxXV0NtblRVMWxK?oc=5",
-      "publishedAt": "2026-11-07T23:48:00.000Z",
-      "region": "hollywood",
-      "category": "streaming",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
       "id": "1sbmhrk",
       "headline": "Barry Diller rejects Hollywood's scale argument and names YouTube the next winner - K-EnterTech Hub",
       "publisher": "K-EnterTech Hub",
@@ -1332,6 +1306,19 @@
       "imageFallbackUrl": ""
     },
     {
+      "id": "1a4uk8e",
+      "headline": "2027 Toy of the Year® Finalists Unveiled",
+      "publisher": "The Toy Association",
+      "publisherUrl": "https://www.toyassociation.org",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMiowFBVV95cUxOWGtpMWExMW92blFlU3RyTF9KOE5GTU9DTWlYWXJkcEx5OU1MeXdCanpBdDI4UWhqNGx3Nm9SOFdqR1ZldDhEVzNTNmRWcm5vOHFIVDZaOTJ1X1RSeGVmdFZmZGxxR0JZcEc2OHRaNTlTS0MzdWgwVUZxRS1NSTNSUDR4UnJLeGg1UGlJc0hyVXFEYVI0aVlUY1NqWVc2YUFFZS1B?oc=5",
+      "publishedAt": "2026-11-07T18:42:26.000Z",
+      "region": "global",
+      "category": "gaming",
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
+    },
+    {
       "id": "1k6iom5",
       "headline": "\"This is heartbreaking\": 5 things you didn't know about Akosua Serwaa's lawyer",
       "publisher": "Yen News",
@@ -1353,19 +1340,6 @@
       "publishedAt": "2026-11-07T16:56:00.000Z",
       "region": "asia",
       "category": "anime",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
-      "id": "u2zrpc",
-      "headline": "I’m a TV expert. Here are 5 things you should watch on Netflix this weekend",
-      "publisher": "NJ.com",
-      "publisherUrl": "https://www.nj.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMiuwFBVV95cUxOMDZYSG5UenYwNDZycE12R3FjMXgybVFhS29lZDIzVmZ3NVUzdGRkQzUyUlBuQWFxWVAwcEdTN0pUUW9hZHZfZjV4SmhIVGpZWFVGbUE1VHdZRHBDOGFfekF1cUtrT2o0cmlESC00b0MwU1VVOU93d3gweEkyRkR2SDE3UUtGVFVZc1A2Vmo4aWphVFpaWnl3aU5hQzZidWtIQXVtMzNySDN5QXJ6R3d0dHBSTUs1Q3J4dl9N?oc=5",
-      "publishedAt": "2026-11-07T16:37:00.000Z",
-      "region": "hollywood",
-      "category": "television",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
       "imageUrl": "",
       "imageFallbackUrl": ""
@@ -1405,6 +1379,19 @@
       "publishedAt": "2026-11-07T14:21:55.000Z",
       "region": "middle-east",
       "category": "film",
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
+    },
+    {
+      "id": "m3o3y7",
+      "headline": "Sony Axing Game Discs Will Have Outsized Impact on Low-Income Gamers, Experts Say",
+      "publisher": "Decrypt",
+      "publisherUrl": "https://decrypt.co",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMiqgFBVV95cUxPUExobVdMbkU4YkhjaERlamdRNWlSTmE0NHktd1R4NWdYWGE3a2dDak5RNzhqc2xiUm1xWjR3amlZMDlGYjBPS1lfRWhfZ09oMURNNGlUZnFrSzQ3Vm1kMVNFc0xxOGRlRkxta0Y3ZXo1UXhqeDNGTjZHUGtKRG5TYnJacV8xOHZ4RndNVVVMSlJjWWgxbjB6OXNXbGE5MHdIektaLXNFV2FEQQ?oc=5",
+      "publishedAt": "2026-11-07T14:01:02.000Z",
+      "region": "global",
+      "category": "gaming",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
       "imageUrl": "",
       "imageFallbackUrl": ""
@@ -1548,6 +1535,19 @@
       "publishedAt": "2026-11-06T19:02:04.000Z",
       "region": "global",
       "category": "business",
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
+    },
+    {
+      "id": "1rc9ogt",
+      "headline": "Dustin Hoffman details his ‘terrible experience’ making “The Graduate”: ‘Felt that I was about to be fired’",
+      "publisher": "Yahoo News UK",
+      "publisherUrl": "https://uk.news.yahoo.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMiiwFBVV95cUxNYmRHX0lNQlg0eEM4ZU1iVGJnOGp3SlNFSk85d0NxNUJUWGR3RGdvT2M5UFFIeGhuRjRsdTkzMno1Tmtid3p2UjExQnFrUmlTZ2pQUlZqQjM2VmRFWGY3VWxIYVk0aElWeVJKaVBEdDh2bkl1dW5BV19WQnk4UW85SGtGbEFQQWhmcTcw?oc=5",
+      "publishedAt": "2026-11-06T18:27:51.000Z",
+      "region": "europe",
+      "category": "film",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
       "imageUrl": "",
       "imageFallbackUrl": ""
