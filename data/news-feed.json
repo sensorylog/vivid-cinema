@@ -1,19 +1,45 @@
 {
-  "generatedAt": "2026-11-08T23:23:49.589Z",
+  "generatedAt": "2026-11-08T23:38:11.741Z",
   "source": "Google News RSS search feeds",
   "count": 120,
   "failedQueries": 0,
   "feedCount": 21,
   "articles": [
     {
-      "id": "1c096ng",
-      "headline": "Godzilla Minus Zero storms to top of North American box office",
-      "publisher": "BGNES",
-      "publisherUrl": "http://www.bgnes.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMingFBVV95cUxPM1VONVkyNVVwcTlGcGRaQ2VLOUIxRjBDRHNpV1hRZ2FsbmFETmNpWkVvZE5JN1E1NXhqeTV0Z2psWXdDQWhJbDRKS3c3R0J0dHFjQkctaU1IZzM5VDNSMUwzbWNyaTdwZ2NQOVYwcjhwRjNvdUYzanMzbXdjQ1dMMURPTGRmT2xrTEp1dTJrZm1pUHByeGFkcE5EeXF4QQ?oc=5",
-      "publishedAt": "2026-11-08T22:06:14.000Z",
+      "id": "hohq65",
+      "headline": "Godzilla Minus Zero & Ramayana Top Global Box Office",
+      "publisher": "The Chenab Times",
+      "publisherUrl": "https://thechenabtimes.com",
+      "sourceUrl": "https://thechenabtimes.com/2026/11/09/asian-blockbusters-godzilla-minus-zero-and-ramayana-rise-of-a-legend-achieve-phenomenal-global-box-office-success/",
+      "publishedAt": "2026-11-08T23:35:59.000Z",
       "region": "global",
       "category": "box-office",
+      "summary": "Asian Blockbusters 'Godzilla Minus Zero' and 'Ramayana: Rise of a Legend' Achieve Phenomenal Global Box Office Success - The news from on The Chenab Times",
+      "imageUrl": "./data/news-thumbnails/hohq65.webp",
+      "imageFallbackUrl": "https://thechenabtimes.com/wp-content/uploads/2020/02/PicsArt_02-06-01.57.29.png"
+    },
+    {
+      "id": "zbalm2",
+      "headline": "'Godzilla Minus Zero' and 'Ramayana: Rise of a Legend' Turn a Global Box Office Showdown Into a Landmark Weekend",
+      "publisher": "Comic Basics",
+      "publisherUrl": "https://www.comicbasics.com",
+      "sourceUrl": "https://www.comicbasics.com/godzilla-minus-zero-and-ramayana-rise-of-a-legend-turn-a-global-box-office-showdown-into-a-landmark-weekend/",
+      "publishedAt": "2026-11-08T23:29:02.000Z",
+      "region": "global",
+      "category": "box-office",
+      "summary": "Not long ago, a Japanese kaiju sequel and an Indian mythological epic landing in theaters on the same day would have looked like a scheduling headache.",
+      "imageUrl": "./data/news-thumbnails/zbalm2.webp",
+      "imageFallbackUrl": "https://www.comicbasics.com/wp-content/uploads/2026/11/ramayana-2026-Godzilla-minus-zero.webp"
+    },
+    {
+      "id": "15lwok4",
+      "headline": "AKTOR holds Hybrid Games for stars' wellness - ABS-CBN",
+      "publisher": "ABS-CBN",
+      "publisherUrl": "https://www.abs-cbn.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMitwFBVV95cUxQNTdJV0wzTDE2bHFkMWZNMXJnZVoyVGtWZ1lTX2RQNHBGVXh3X1ExNW9fY0U4X19mZWp0NGE0UlNJblN4dlp5dzh6dkdNTmFmbmd6Tzc1ajJXWG53dVdESjY5aXlweVFwVmJPNXRaN1h0dndfb3JQMEdmd1puNE85XzRvNEQ1SzlUV0N5MDJUdnMxTmV4N0tMdE9wYnN5VmlyZWZENXlFMmVGY2lMRTlnOW85Zi1NZ3c?oc=5",
+      "publishedAt": "2026-11-08T22:04:53.000Z",
+      "region": "global",
+      "category": "gaming",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
       "imageUrl": "",
       "imageFallbackUrl": ""
@@ -49,13 +75,13 @@
       "headline": "'Godzilla Minus Zero' was no. 1 at the global box office with $63M to 'Ramayana: Rise of a Legend's $55M. Read more below.",
       "publisher": "Facebook",
       "publisherUrl": "https://www.facebook.com",
-      "sourceUrl": "https://www.facebook.com/login/?next=https%3A%2F%2Fwww.facebook.com%2Fdeadline%2Fposts%2Fgodzilla-minus-zero-was-no-1-at-the-global-box-office-with-63m-to-ramayana-rise-%2F1486166363383699%2F",
+      "sourceUrl": "https://www.facebook.com/deadline/posts/godzilla-minus-zero-was-no-1-at-the-global-box-office-with-63m-to-ramayana-rise-/1486166363383699/",
       "publishedAt": "2026-11-08T21:00:14.000Z",
       "region": "global",
       "category": "box-office",
       "summary": "'Godzilla Minus Zero' was no. 1 at the global box office with $63M to 'Ramayana: Rise of a Legend's $55M. Read more below.",
-      "imageUrl": "https://www.facebook.com/login/?next=https%3A%2F%2Fwww.facebook.com%2Fdeadline%2Fposts%2Fgodzilla-minus-zero-was-no-1-at-the-global-box-office-with-63m-to-ramayana-rise-%2F1486166363383699%2F",
-      "imageFallbackUrl": "https://www.facebook.com/login/?next=https%3A%2F%2Fwww.facebook.com%2Fdeadline%2Fposts%2Fgodzilla-minus-zero-was-no-1-at-the-global-box-office-with-63m-to-ramayana-rise-%2F1486166363383699%2F"
+      "imageUrl": "./data/news-thumbnails/11xy24z.jpg",
+      "imageFallbackUrl": "https://scontent-sea5-1.xx.fbcdn.net/v/t39.99422-6/897218837_1037695142687144_1849946981241909126_n.png?stp=dst-jpg_tt6&cstp=mx1000x667&ctp=p600x600&_nc_cat=103&ccb=1-7&_nc_sid=cae128&_nc_ohc=ONCnsOmWa8IQ7kNvwEQg8Fu&_nc_oc=Adocw1Adwur1RNI5BhkvAcBtGkTLkrqmlCNtWUPUXz7VI4x_vURRHAByzxMimp52knY&_nc_zt=14&_nc_ht=scontent-sea5-1.xx&_nc_gid=MHbsFlDBdUf_T8tRfqaoSw&_nc_ss=7c289&oh=00_AQSHqyoUDqDuHK4rojrjjd8IAzZP4HvEAM206FB2KmYOew&oe=6AF6F582"
     },
     {
       "id": "1ial6y6",
@@ -101,13 +127,13 @@
       "headline": "Godzilla Minus Zero, Ramayana Lead Global Box Office With Combined $118.7m Opening",
       "publisher": "Brand Icon Image",
       "publisherUrl": "https://www.brandiconimage.com",
-      "sourceUrl": "https://www.brandiconimage.com/2026/11/godzilla-minus-zero-ramayana-lead.html",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMigwFBVV95cUxQUGxrVjNVT2pnRFhkOFQwd1dObTRHa3VSVkItQkNxMjMyNWJ6UkdVc3FpUnpkOFFNMGFScGYtdngzNHZuaVZiYURrNnhRRVNDbFpKallqY0tORFptR2NyTDJ4cUNBTWZpSDdBbzNIQ0JOWEVYTUpMcFprN0NUMk12eU9lOA?oc=5",
       "publishedAt": "2026-11-08T20:00:00.000Z",
       "region": "global",
       "category": "box-office",
-      "summary": "Godzilla Minus Zero, Ramayana Lead Global Box Office With Combined $118.7m Opening",
-      "imageUrl": "./data/news-thumbnails/10z3e0q.jpg",
-      "imageFallbackUrl": "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjSYD4p3sNO6RQ5kYjV3CAEN3a373EfMmgavAmkM2Jm5GEh9J9YZnRCI2P1ZkXm37ws0rl9uePZmKzeH_pYRC2KP6tRO0VMWvo20_ai-tgYgHpU9knc8sR9kv_9maXlRjErwv5a49yLMQdRQ14bmntaOO5Hs9qASrs-Z2TFR1EZtQX0rO_nQwU3uf3Ja5k/w1600/1001091362.jpg"
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
     },
     {
       "id": "1bpmgqf",
@@ -121,6 +147,19 @@
       "summary": "Specialty distributors and alternative fare from live concerts to Indian films to faith-based fare and TV series ruled the top 10 at the box office and beyond this weekend, showcasing the strength of ...",
       "imageUrl": "./data/news-thumbnails/1bpmgqf.jpg",
       "imageFallbackUrl": "https://s.yimg.com/lo/mysterio/api/bd28e3343edd07c9416431ca284b3735d02e5f1df5c6a948790dc422021cfc1b/lightyear_networkapi/resizefill_w1200%3Bquality_80%3Bformat_jpg/https%3A%2F%2Fmedia.zenfs.com%2Fen%2Fdeadline.com%2F48925193bdab647005707b818aa87699.jpg"
+    },
+    {
+      "id": "yyezkp",
+      "headline": "'Godzilla Minus Zero' stomps to a record-setting $31.6 debut, clobbering 'The Cat in the Hat' - ABC News",
+      "publisher": "ABC News - Breaking News, Latest News and Videos",
+      "publisherUrl": "https://abcnews.com",
+      "sourceUrl": "https://abcnews.com/Entertainment/wireStory/godzilla-minus-zero-stomps-record-setting-316-debut-137957908",
+      "publishedAt": "2026-11-08T19:27:32.000Z",
+      "region": "global",
+      "category": "box-office",
+      "summary": "“Godzilla Minus Zero” stomped into movie theaters with a chart-topping $31.6 million over the weekend, scoring a record debut for a foreign-language film at the North American box office",
+      "imageUrl": "./data/news-thumbnails/yyezkp.avif",
+      "imageFallbackUrl": "https://i.abcnewsfe.com/a/0f4eb376-2324-47c5-b896-408cb3f2a44f/wirestory_bd8e1659697045d34e2ad0ccfab7682c_16x9.jpg?w=1600"
     },
     {
       "id": "1vdk1f0",
@@ -140,26 +179,13 @@
       "headline": "Box Office: 'Godzilla Minus Zero' Roars Toward Record Opening",
       "publisher": "Deadline",
       "publisherUrl": "https://deadline.com",
-      "sourceUrl": "https://deadline.com/2026/11/box-office-godzilla-minus-zero-cat-in-the-hat-1237215161/",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMijwFBVV95cUxQaFVSRWh3OGg5Z2huTzdLYVQ0M3p4UVEyYXpKRkYtWldBLWUxSWNxNkZCbE9NWlFmSlItUGQ3eG5vZ2xvT0ZwejlMQWFscVhBb1BwdWhSNXVWM3R1cGdyRWpKcThoUU9RdklZdno1cW5LN241ZXV0aXZYVjJqSk9lbVdpeG8ydEdGeGxxSW9ORQ?oc=5",
       "publishedAt": "2026-11-08T19:10:00.000Z",
       "region": "global",
       "category": "box-office",
-      "summary": "'Godzilla Minus Zero's $32M opening is a record for a live-action foreign language film at the domestic box office.",
-      "imageUrl": "./data/news-thumbnails/1comc9v.webp",
-      "imageFallbackUrl": "https://deadline.com/wp-content/uploads/2026/11/%E3%80%8E%E3%82%B4%E3%82%B8%E3%83%A9-0.0%E3%80%8F%E3%83%91%E3%83%96%E3%82%AB%E3%83%83%E3%83%88%E3%89%92-e1793929665158.jpg?w=1024"
-    },
-    {
-      "id": "1e9szc8",
-      "headline": "'Godzilla Minus Zero' stomps to a record-setting $31.6 debut, clobbering 'The Cat in the Hat'",
-      "publisher": "Audacy",
-      "publisherUrl": "https://www.audacy.com",
-      "sourceUrl": "https://www.audacy.com/kcbsradio/entertainment/godzilla-cat-hat-box-office-bd8e1659697045d34e2ad0ccfab7682c",
-      "publishedAt": "2026-11-08T18:32:00.000Z",
-      "region": "global",
-      "category": "box-office",
-      "summary": "“Godzilla Minus Zero” stomped into movie theaters with a chart-topping $31.6 million over the weekend, scoring a record debut for a foreign-language film at the North American box office | KCBS All News 106.9FM and 740AM",
-      "imageUrl": "./data/news-thumbnails/1e9szc8.webp",
-      "imageFallbackUrl": "https://www.audacy.com/media-library/film-review-godzilla-minus-zero.jpg?id=68633830&width=1200&height=600&coordinates=0%2C62%2C0%2C63"
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
     },
     {
       "id": "182b2zj",
@@ -292,19 +318,6 @@
       "imageFallbackUrl": ""
     },
     {
-      "id": "1jwy1l8",
-      "headline": "‘Love Is Blind’ OG Lauren Speed Claims She Didn’t Get ‘Real’ Engagement Ring: ‘The Diamond Fell Out’",
-      "publisher": "Us Weekly",
-      "publisherUrl": "https://www.usmagazine.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMiqAFBVV95cUxORGM3cXUyRURMdm80Sk9XdFdmSE9vNW1FQVZFR2lVRjZXbUtvU2l2RWNmWjJqeUUtaUFiWGtzd1E2TWQ1RG1wdEM5T2hoUFF0bEZJZmxwWU9HMkVwU3d6MFE2VWlRcllSam1IRGFfVDdzMW9BbWp2RllpX0swSUtnVnV5akRtQjVJdHBUQVBlTEhvRnliblhBMEN2THpEYWlmb3VjcDh6Q1g?oc=5",
-      "publishedAt": "2026-11-08T17:25:15.000Z",
-      "region": "hollywood",
-      "category": "television",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
       "id": "1n4km64",
       "headline": "Disney Dives Back into Greek Mythology with New Live-Action Film",
       "publisher": "Inside the Magic",
@@ -376,19 +389,6 @@
       "publisherUrl": "https://deadline.com",
       "sourceUrl": "https://news.google.com/rss/articles/CBMipwFBVV95cUxNQjM2VFRLeGh3blFFR1Q0c01BLWlkTFdYcnlDdnh4SWFuc1NYb05xMUFSUmFUbHN5Zm96dXdQRkl1WXlqN3pRXzZFMklyMlA3YlJYTWNCYXp6SzgxbHNSelBiZXA4RUllUzlUVl9nYnlYVzdQNkVGWFFjSzFtalkwRHo3dDVYZ3EzcjhZWkx5RXJJVVMzSEk5UzBfbWg5LTBNaFBDXzRxQQ?oc=5",
       "publishedAt": "2026-11-08T16:37:00.000Z",
-      "region": "global",
-      "category": "box-office",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
-      "id": "akcang",
-      "headline": "Ramayana movie box office collection day 4: What ₹4000 cr Ranbir Kapoor starrer earned? Not even ₹400 cr worldwide!",
-      "publisher": "Livemint",
-      "publisherUrl": "https://www.livemint.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMihgJBVV95cUxOLVZ2ODdGMl90VkpYeXdiWVBIY0NNblFJT2dWbUZZa3p0S19ZcFVmVUliV1JHZlNKT283ajJXOGFETEZmWHY5UUY0OVZzbngzbEg2QUxZeEh6U1B1YVRuT1JnM1JMQ2pVVGk4d2tzWjBVWm5iLTNSY0hEWkdmbldRQzZpalV4NjNteElFY1VwT1B5NkwtOTdaU2xfQkN5ZEg5aUJLbGhqQU5vVTlXZHlPN19qMUhfN3NjMlRRcmF5cXhjUjdET2sxcm8tN19NWFN5dFVYT2V0bklvbGRWQVJqSVJuejM4UzdvV2tRZXpqcV9NTGJJVTNyR1ZYUDQ4RnpZekNMYWVn0gGLAkFVX3lxTE1mSmRZVk5qMmhxZ256VUQwUHE2SGFKNnV2RzdtT2kxZWhnS0Roa2RXLTI4RzdKbVpseTN4NmhWZXNKYnpOcE44Z05vbXloS3hHUVRldDFoRGpoTzRUMi0xVXQtTUlhUVlHRzBtT0gzZ0VMNFk5eEJ3VDM0MG1qbkVwNG9GSG9iaGtKTi1BXzRERjlNSDhhTklIQjFGMkZMNldXMk9RRGFjNTF3dk54NC1OME9ZeTlOcjRiSk5qSzRpUWxzYlJONDlYZnczQUhpQ0RCdVA3RVl3d0VSaDJ6LTZYcVFnTm5GNlM3UmtTZV9zWjVtSmNZLVU0RkRDQ1JnWjB6bDZ5NVhlVXJYbw?oc=5",
-      "publishedAt": "2026-11-08T16:31:30.000Z",
       "region": "global",
       "category": "box-office",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
@@ -612,19 +612,6 @@
       "publishedAt": "2026-11-08T12:44:17.000Z",
       "region": "india",
       "category": "music",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
-      "id": "1ygbuae",
-      "headline": "Hollywood’s Famous Heir Is Writing His Own Story",
-      "publisher": "Yahoo",
-      "publisherUrl": "https://www.yahoo.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMilgFBVV95cUxOX0NUaXRnWmFkNmdFdFY5d2NGelFfSGpmcUw5Ny1HdnFyRy1RR0ZNQVAyS1p1c3UyWkRyc29YVklzc0NPWkFlaExpS1J2TFhhSlFUOUwyQnhqLTRmWVhKVWRtYy04aXMtWHpYT2lGVDJBeU1iSFRpOUhWM3M3MlNTSWZnUkxqV3NOWDgtYVc2b2lodUZPR3c?oc=5",
-      "publishedAt": "2026-11-08T12:29:56.000Z",
-      "region": "hollywood",
-      "category": "celebrity",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
       "imageUrl": "",
       "imageFallbackUrl": ""
@@ -1254,6 +1241,19 @@
       "imageFallbackUrl": ""
     },
     {
+      "id": "1v2ml0g",
+      "headline": "What To Watch This Weekend (Nov. 6-8): New Movies And Shows On Netflix, Hulu And More",
+      "publisher": "Forbes",
+      "publisherUrl": "https://www.forbes.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMi6AFBVV95cUxQSU16bEtJdWt5R0V4M1pCUU5UdHVOV1dYa3RyUXRXLVRLRHZFQ1lrYVRMRWJjYXhqUi1adi1KLWNqaXNsNDBpRXB5SWVXVXR4eGU4RUFoczRmTWR3RzVxQlN3VzA5X1ZfS21aRXhsQ1Y3dzFlVGdJTFJpdXY3aEw0RzNJNDRSZWlZZ3phTkE4MFM5cXh3N09aOGpBd0Jud0VCZ3ZVeHZMMm9rNzBtejlkV3BPREx6ZUIxV2tTSE5nbU1qMVlBc0VBTktZQW9iZ3J2YXgteXpJaUJGX2YzSkxXV0NtblRVMWxK?oc=5",
+      "publishedAt": "2026-11-07T23:48:00.000Z",
+      "region": "hollywood",
+      "category": "streaming",
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
+    },
+    {
       "id": "1sbmhrk",
       "headline": "Barry Diller rejects Hollywood's scale argument and names YouTube the next winner - K-EnterTech Hub",
       "publisher": "K-EnterTech Hub",
@@ -1332,19 +1332,6 @@
       "imageFallbackUrl": ""
     },
     {
-      "id": "1a4uk8e",
-      "headline": "2027 Toy of the Year® Finalists Unveiled",
-      "publisher": "The Toy Association",
-      "publisherUrl": "https://www.toyassociation.org",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMiowFBVV95cUxOWGtpMWExMW92blFlU3RyTF9KOE5GTU9DTWlYWXJkcEx5OU1MeXdCanpBdDI4UWhqNGx3Nm9SOFdqR1ZldDhEVzNTNmRWcm5vOHFIVDZaOTJ1X1RSeGVmdFZmZGxxR0JZcEc2OHRaNTlTS0MzdWgwVUZxRS1NSTNSUDR4UnJLeGg1UGlJc0hyVXFEYVI0aVlUY1NqWVc2YUFFZS1B?oc=5",
-      "publishedAt": "2026-11-07T18:42:26.000Z",
-      "region": "global",
-      "category": "gaming",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
       "id": "1k6iom5",
       "headline": "\"This is heartbreaking\": 5 things you didn't know about Akosua Serwaa's lawyer",
       "publisher": "Yen News",
@@ -1366,6 +1353,19 @@
       "publishedAt": "2026-11-07T16:56:00.000Z",
       "region": "asia",
       "category": "anime",
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
+    },
+    {
+      "id": "u2zrpc",
+      "headline": "I’m a TV expert. Here are 5 things you should watch on Netflix this weekend",
+      "publisher": "NJ.com",
+      "publisherUrl": "https://www.nj.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMiuwFBVV95cUxOMDZYSG5UenYwNDZycE12R3FjMXgybVFhS29lZDIzVmZ3NVUzdGRkQzUyUlBuQWFxWVAwcEdTN0pUUW9hZHZfZjV4SmhIVGpZWFVGbUE1VHdZRHBDOGFfekF1cUtrT2o0cmlESC00b0MwU1VVOU93d3gweEkyRkR2SDE3UUtGVFVZc1A2Vmo4aWphVFpaWnl3aU5hQzZidWtIQXVtMzNySDN5QXJ6R3d0dHBSTUs1Q3J4dl9N?oc=5",
+      "publishedAt": "2026-11-07T16:37:00.000Z",
+      "region": "hollywood",
+      "category": "television",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
       "imageUrl": "",
       "imageFallbackUrl": ""
