@@ -278,7 +278,9 @@ function syncMobileNavigation() {
     navLink("home.html", "bi-house-fill", "Home", page === "home"),
     navLink("discover.html", "bi-grid-fill", "Browse", isBrowsePage(page)),
     navLink("for-you.html", "bi-stars", "For You", page === "for-you"),
+    navLink("live.html", "bi-broadcast-pin", "Live", page === "live"),
     navLink("library.html", "bi-bookmark-fill", "Library", page === "library" || page === "downloads-library"),
+    navLink("news.html", "bi-newspaper", "News", page === "news"),
     navLink("search.html", "bi-search", "Search", page === "search")
   ].join("");
   nav.classList.add("vivid-v2-mobile-nav");
