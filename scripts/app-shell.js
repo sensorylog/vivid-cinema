@@ -236,6 +236,8 @@ function syncDesktopNavigation() {
 
   // Preserve existing Home controls that have behavior wired by script.js.
   const notification = nav.querySelector("#release-alert-button");
+  const searchControl = nav.querySelector(".vivid-search-trigger, .vivid-nav-search");
+  const languageControl = nav.querySelector(".vivid-language, [data-vivid-language], .vivid-language-selector");
   nav.innerHTML = "";
 
   const brand = document.createElement("a");
@@ -247,8 +249,21 @@ function syncDesktopNavigation() {
   const links = document.createElement("div");
   links.className = "vivid-navlinks";
   links.innerHTML = buildPrimaryLinks(page);
-  if (notification && page === "home") links.appendChild(notification);
   nav.appendChild(links);
+
+  const tools = document.createElement("div");
+  tools.className = "vivid-nav-tools";
+  if (searchControl) tools.appendChild(searchControl);
+  else {
+    const search = document.createElement("a");
+    search.className = "vivid-search-trigger vivid-shell-search-link";
+    search.href = "search.html";
+    search.setAttribute("aria-label", "Search Vivid Cinema");
+    search.innerHTML = '<i class="bi bi-search" aria-hidden="true"></i><span>Search</span>';
+    tools.appendChild(search);
+  }
+  if (notification) tools.appendChild(notification);
+  nav.appendChild(tools);
 
   const account = document.createElement("a");
   account.className = "vivid-nav-account";
@@ -260,6 +275,7 @@ function syncDesktopNavigation() {
 
   const language = document.createElement("div");
   language.className = "vivid-nav-language-slot";
+  if (languageControl) language.appendChild(languageControl);
   nav.appendChild(language);
 
   nav.classList.remove("vivid-v2-nav");
@@ -531,6 +547,31 @@ function ensureMediaLayoutStyles() {
   }
 }
 
+function initHeaderScrollBehavior() {
+  const headers = [...document.querySelectorAll(".vivid-topbar, .vivid-unified-header, .vivid-discovery-nav, .vivid-library-nav, .vivid-title-nav, .vivid-watch-nav")];
+  if (!headers.length) return;
+  let lastY = Math.max(0, window.scrollY || 0);
+  let ticking = false;
+  const update = () => {
+    const y = Math.max(0, window.scrollY || 0);
+    const delta = y - lastY;
+    headers.forEach(header => {
+      header.classList.toggle("is-scrolled", y > 18);
+      if (y < 72) header.classList.remove("vivid-header-hidden");
+      else if (delta > 7) header.classList.add("vivid-header-hidden");
+      else if (delta < -7) header.classList.remove("vivid-header-hidden");
+    });
+    if (Math.abs(delta) > 2) lastY = y;
+    ticking = false;
+  };
+  window.addEventListener("scroll", () => {
+    if (ticking) return;
+    ticking = true;
+    window.requestAnimationFrame(update);
+  }, { passive: true });
+  update();
+}
+
 function initAppShell() {
   if (initialized) return;
   initialized = true;
@@ -550,6 +591,7 @@ function initAppShell() {
   syncVividBranding();
   showPostAuthNotice();
   syncNavigation();
+  initHeaderScrollBehavior();
   initThemeToggle();
   recordCurrentRoute();
   ensureBackControl();
