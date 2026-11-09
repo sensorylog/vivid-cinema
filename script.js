@@ -699,6 +699,7 @@ document.addEventListener("DOMContentLoaded",()=>{
   // Paint Home immediately. Intelligence/auth sync is optional enrichment and must
   // never be allowed to block the catalogue from loading.
   wireRails();wireSearch();wireAlphabet();wireReleaseAlerts();
+  if(location.hash==="#release-alert-popover") $("release-alert-button")?.click();
   window.addEventListener("vivid:account-switched",()=>queuePersonalizedHomeRefresh({clear:true}));
   window.addEventListener("vivid:library-changed",()=>queuePersonalizedHomeRefresh());
   window.addEventListener("vivid:progress-changed",()=>renderContinueWatching());
