@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-08T23:45:58.235Z",
+  "generatedAt": "2026-11-09T00:06:54.148Z",
   "source": "Google News RSS search feeds",
   "count": 120,
   "failedQueries": 0,
@@ -14,9 +14,9 @@
       "publishedAt": "2026-11-08T23:35:59.000Z",
       "region": "global",
       "category": "box-office",
-      "summary": "Asian blockbusters 'Godzilla Minus Zero' and 'Ramayana: Rise of a Legend' roared at the international box office with massive opening weekends on premium screens.",
+      "summary": "Asian Blockbusters 'Godzilla Minus Zero' and 'Ramayana: Rise of a Legend' Achieve Phenomenal Global Box Office Success - The news from on The Chenab Times",
       "imageUrl": "./data/news-thumbnails/hohq65.webp",
-      "imageFallbackUrl": "https://thechenabtimes.com/wp-content/uploads/2026/10/%E7%AC%AC36%E5%9B%9E-%E6%9D%B1%E4%BA%AC%E5%9B%BD%E9%9A%9B%E6%98%A0%E7%94%BB%E7%A5%AD-%E3%82%AA%E3%83%BC%E3%83%97%E3%83%8B%E3%83%B3%E3%82%B0%E3%82%A4%E3%83%99%E3%83%B3%E3%83%88-%E3%83%AC%E3%83%83%E3%83%89%E3%82%AB%E3%83%BC%E3%83%9A%E3%83%83%E3%83%88.jpg"
+      "imageFallbackUrl": "https://thechenabtimes.com/wp-content/uploads/2020/02/PicsArt_02-06-01.57.29.png"
     },
     {
       "id": "zbalm2",
@@ -71,6 +71,19 @@
       "imageFallbackUrl": ""
     },
     {
+      "id": "wf5no3",
+      "headline": "Maya Jama steps down as host of reality TV show Love Island",
+      "publisher": "BBC",
+      "publisherUrl": "https://www.bbc.com",
+      "sourceUrl": "https://www.bbc.com/news/articles/cwzrd5jj47ndo",
+      "publishedAt": "2026-11-08T21:19:48.000Z",
+      "region": "europe",
+      "category": "television",
+      "summary": "The presenter tells fans it is \"time to throw myself into something new\" after recent Celebrity Traitors success.",
+      "imageUrl": "./data/news-thumbnails/wf5no3.jpg",
+      "imageFallbackUrl": "https://ichef.bbci.co.uk/news/1024/branded_news/2f2c/live/327b8220-dbb3-11f1-b35d-8ff000e4934a.jpg"
+    },
+    {
       "id": "mupotj",
       "headline": "Golf Leaderboards: PGA Tour, LPGA Tour, LIV Golf, DP World Tour, Ladies European Tour, major championships and more",
       "publisher": "Sky Sports",
@@ -94,7 +107,7 @@
       "category": "box-office",
       "summary": "'Godzilla Minus Zero' was no. 1 at the global box office with $63M to 'Ramayana: Rise of a Legend's $55M. Read more below.",
       "imageUrl": "./data/news-thumbnails/11xy24z.jpg",
-      "imageFallbackUrl": "https://scontent-sjc3-1.xx.fbcdn.net/v/t39.99422-6/897218837_1037695142687144_1849946981241909126_n.png?stp=dst-jpg_tt6&cstp=mx1000x667&ctp=p600x600&_nc_cat=103&ccb=1-7&_nc_sid=cae128&_nc_ohc=ONCnsOmWa8IQ7kNvwHRmENb&_nc_oc=AdqFXdZ2bQfzqfhYJ_i1aS_GfNxhs5yVIaaTIJs21vz9yryYWY97vDwXfMmNHvwRcPw&_nc_zt=14&_nc_ht=scontent-sjc3-1.xx&_nc_gid=1azqXNLlAXkhEant6DvjkA&_nc_ss=7c289&oh=00_AQRr7FkmC4FLZsFyA_nYcadh26Q32BROkxCtHvBxR24l5w&oe=6AF6F582"
+      "imageFallbackUrl": "https://scontent-dfw6-1.xx.fbcdn.net/v/t39.99422-6/897218837_1037695142687144_1849946981241909126_n.png?stp=dst-jpg_tt6&cstp=mx1000x667&ctp=p600x600&_nc_cat=103&ccb=1-7&_nc_sid=cae128&_nc_ohc=ONCnsOmWa8IQ7kNvwGqnKg0&_nc_oc=AdpdjoKzVU1SYsGa2XPdo-G4GOUPbUu_1qGHPT2f6CGNRm1CbqqxfgSqs0mr7oosNfM&_nc_zt=14&_nc_ht=scontent-dfw6-1.xx&_nc_gid=aZYjQo4SilDsc0uKOGAOgA&_nc_ss=7c289&oh=00_AQT8WqBztzOpCUKaKkFmfHjjimmtARxEYWUWgrqEsdt8Ig&oe=6AF6F582"
     },
     {
       "id": "1ial6y6",
@@ -136,6 +149,19 @@
       "imageFallbackUrl": "https://static.toiimg.com/thumb/msid-135655529,width-1280,height-720,resizemode-6,overlay-toi_sw,pt-32,y_pad-600/photo.jpg"
     },
     {
+      "id": "1dmz4of",
+      "headline": "Indie & Alternative Cinema Surges From ‘Stray Kids’ To ‘Heated Rivalry’ – Specialty Box Office",
+      "publisher": "IMDb",
+      "publisherUrl": "https://www.imdb.com",
+      "sourceUrl": "https://www.imdb.com/news/ni66101592/?ref_=ttnw_art_perm",
+      "publishedAt": "2026-11-08T20:01:54.000Z",
+      "region": "hollywood",
+      "category": "film",
+      "summary": "Indie & Alternative Cinema Surges From ‘Stray Kids’ To ‘Heated Rivalry’ – Specialty Box Office",
+      "imageUrl": "https://www.imdb.com/news/ni66101592/?ref_=ttnw_art_perm",
+      "imageFallbackUrl": "https://www.imdb.com/news/ni66101592/?ref_=ttnw_art_perm"
+    },
+    {
       "id": "10z3e0q",
       "headline": "Godzilla Minus Zero, Ramayana Lead Global Box Office With Combined $118.7m Opening",
       "publisher": "Brand Icon Image",
@@ -149,17 +175,17 @@
       "imageFallbackUrl": ""
     },
     {
-      "id": "1bpmgqf",
-      "headline": "Indie & Alternative Cinema Surges From ‘Stray Kids’ To ‘Heated Rivalry’ – Specialty Box Office",
-      "publisher": "Yahoo News UK",
-      "publisherUrl": "https://uk.news.yahoo.com",
-      "sourceUrl": "https://uk.news.yahoo.com/indie-alternative-cinema-surges-stray-195106248.html",
-      "publishedAt": "2026-11-08T19:51:06.000Z",
-      "region": "global",
-      "category": "box-office",
-      "summary": "Specialty distributors and alternative fare from live concerts to Indian films to faith-based fare and TV series ruled the top 10 at the box office and beyond this weekend, showcasing the strength of ...",
-      "imageUrl": "./data/news-thumbnails/1bpmgqf.jpg",
-      "imageFallbackUrl": "https://s.yimg.com/lo/mysterio/api/bd28e3343edd07c9416431ca284b3735d02e5f1df5c6a948790dc422021cfc1b/lightyear_networkapi/resizefill_w1200%3Bquality_80%3Bformat_jpg/https%3A%2F%2Fmedia.zenfs.com%2Fen%2Fdeadline.com%2F48925193bdab647005707b818aa87699.jpg"
+      "id": "u1jp",
+      "headline": "RJ Mitte’s ‘Breaking Bad’ co-stars Bryan Cranston, Aaron Paul and more attend late actor’s celebration of life in Hollywood",
+      "publisher": "Yahoo",
+      "publisherUrl": "https://www.yahoo.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMisgFBVV95cUxNR3BFTk5SX0t0LWdHbmZYeE5ia1Q2MDhEdXBfN0gySUtNaXVoMExpczVfMmhKV3RvUEdqZkZaVEYySjJEdTI4Qnp1NUs0RjJLVUN2V29LWGsxV1Nzd1BfbGdJU3VPbWwxT3FHUVE4UkdwR2V5aDVmMHhCUU5BdDc3MEFaVXE5VjRMNjBoTFZIWklDUXR5Qk9BQzUzSW90dlNiMjc0Y1V1b1U2SjlNMVROWlpn?oc=5",
+      "publishedAt": "2026-11-08T19:30:04.000Z",
+      "region": "hollywood",
+      "category": "celebrity",
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
     },
     {
       "id": "yyezkp",
@@ -331,13 +357,13 @@
       "imageFallbackUrl": ""
     },
     {
-      "id": "1n4km64",
-      "headline": "Disney Dives Back into Greek Mythology with New Live-Action Film",
-      "publisher": "Inside the Magic",
-      "publisherUrl": "https://insidethemagic.net",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMi2gFBVV95cUxNRkRqVFhaT2JMNEtsdXZZbUNUcDVZV25uTERzOTZRTExGOUlneWhJX1R1dFd1dlhMZGdReEtNYS0xMUtFaGF2Y0wxUGxGdU8xeW1lcGx0TnFWZ2tKYVRUa0dBYU0wNmVrUFFrTjBVb19MYWVIcE9TWFNhQkIwTGt6cUs1Y2dzcUVZOVlxR3dGOEZoLXZncFdudjh6dFFHeVYtaGw2NXBBdE9jSG5yNjBTemF1empSNERySlQxQTJRZFZlSFRHUndPVUpYc3pVX0tjUElMNENOamp6UQ?oc=5",
-      "publishedAt": "2026-11-08T17:20:08.000Z",
-      "region": "hollywood",
+      "id": "khml3x",
+      "headline": "THR Visionary: 5 Janusz Kaminski Shots",
+      "publisher": "The Hollywood Reporter",
+      "publisherUrl": "https://www.hollywoodreporter.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMisgFBVV95cUxNZDFia181Q2FubWtyUU5fNGpRNzRZa1pKLTdyaUdvSFFpa2lvUEZLRTBrTVRJTC1nMm5TZVNaYVNSdTFqQ1pyWm8ySXdOa3gyczNjOW9CeHZfanpXazBJV2NJZTRZeEU4NTBPb0JIVTRwdzROWFp0aXN5MFNwTF9USmpuZEVnaHpCSnBURUZoSXk5aHNqcXJpNFkzb2Y5SjBzTmNfWFVEbVV5Qm0xYzkySnVn?oc=5",
+      "publishedAt": "2026-11-08T17:05:40.000Z",
+      "region": "europe",
       "category": "film",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
       "imageUrl": "",
@@ -643,6 +669,19 @@
       "imageFallbackUrl": ""
     },
     {
+      "id": "oa4y8e",
+      "headline": "An immersive video game experience is opening at Mockingbird Station. What’s inside?",
+      "publisher": "Yahoo",
+      "publisherUrl": "https://www.yahoo.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMioAFBVV95cUxQelBBMGduX3g3aTJFZmpRMTktR180V1JFQ1EyRDRRcEh5cTE5X284RXNsdFI2OHd1aEtLX1JWb013OWxZTHhsclZ2bFI0eUdEeTJndUNWV3RzTmdCV0lGS0E1OWZVSHo5cGlDWGRQS2VtMkhMMmtmdVkwak5xTkM3aHRaemkySEtDZU5BQkk2XzNteWMybEhUN3UyRlJ3N1ZN?oc=5",
+      "publishedAt": "2026-11-08T12:00:00.000Z",
+      "region": "global",
+      "category": "gaming",
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
+    },
+    {
       "id": "1wn9fb5",
       "headline": "Horoscopes November 8, 2026: Parker Posey, be patient and concentrate on self-esteem",
       "publisher": "The Mercury News",
@@ -916,19 +955,6 @@
       "imageFallbackUrl": ""
     },
     {
-      "id": "1f65mrj",
-      "headline": "Keerthy Suresh compares Bollywood and South cinema; says South films are ‘more spontaneous’",
-      "publisher": "The Times of India",
-      "publisherUrl": "https://timesofindia.indiatimes.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMikAJBVV95cUxOby1SMm9wM2huSE5PdXJQYjVJcUJaUmVrM251SXljTGQ2c0Q2ZUktamhxRTNZa2JUTTBNVHp1MWsyWUZKZTFZU08tdlFvTENwcHlvbmhqSkZrNF9kWHFVS2wyYWI0Q2xDQkMzYV9oN2NaaWw4WDBWRUh1cGNRVzdCYzJqcllSNFU4Rk9MOUI0RVlfOHIwUUdSc0R2aWxQV3MzZUNEREYwbWl4WkNyNVZDdFdQVi1DcGV0aXRnN0duOHhjcExBakRQVVhocVFUTmJMdHJoYVpDeWRXSjhqXzJSU3FYVXA2WWtIb2E4a1BuX1VISGFkVjU2ZEs3eGx2V1JmTHVXWm42eWkxbWtHQlY5QdIBlgJBVV95cUxQUGk3RDdkY1psXzgxelhCTWY4djhmNmlTN2xIV0JCWlpZNE8yRmFMZm81Q2RNSExTekZNRENnWndIaUpldjBUQ3MtamNmWVl3cDhzQVE0ZTRYZC0zYzY3Ml9kU21kY0ZvZVk2cDBEU1ZRalIwNVczTUhVRl91cEFtMlNncEE4blg3dktoSVdKVm1TMC1JYmJEVHNZMXJsV0R2WkxsMDM0NUFQRmtWV3JHeUtuVkdPblZ4WGJrUVk4ZFRQQklJdmc5LUxMZTk3bFlTMTBILU1XYUh0R3BMcXJPbzQyNy1hdTFrelNSM3Y5Y19BOHlMQi1wSl9iTWpYMW5HTklERHd5UlgyNmxoemFPUzFCTGN4QQ?oc=5",
-      "publishedAt": "2026-11-08T05:55:00.000Z",
-      "region": "india",
-      "category": "film",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
       "id": "u1y0p0",
       "headline": "Ramayana Worldwide Box Office: Ranbir Kapoor-Yash starrer grosses a MASSIVE Rs. 366.58 cr. in 3 days; Saturday collections jump 40% globally",
       "publisher": "Bollywood Hungama",
@@ -1012,7 +1038,7 @@
       "publisher": "USA Today",
       "publisherUrl": "https://www.usatoday.com",
       "sourceUrl": "https://news.google.com/rss/articles/CBMiY0FVX3lxTE5NS1h5cnZDV3Z5TUMtMzNJLU5QUjRqVHp5cTl1ZW9Zb0tSbUdoU2RPS0Z5SG9OTTZNd2ZVb0RCandUczRremdaWjBYYmhkZkh0aEg5Mzl3WWlDRHFrTGZ5OEc2Zw?oc=5",
-      "publishedAt": "2026-11-08T04:19:13.000Z",
+      "publishedAt": "2026-11-08T04:20:12.000Z",
       "region": "hollywood",
       "category": "streaming",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
@@ -1215,14 +1241,14 @@
       "imageFallbackUrl": ""
     },
     {
-      "id": "zs8e08",
-      "headline": "Taiwan’s Chunghwa Telecom Unveils Investment Slate Headed By ‘Gunshot’ & ‘Call Of Lobster’",
-      "publisher": "Deadline",
-      "publisherUrl": "https://deadline.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMikwFBVV95cUxQQlZMYlZBaWdFeFg2Z2RzNEJkblJsSWV6SWZnaTc1WFVJcWZnaXpzWTYtZ3VNRWY5ZDZheUh3MnhuMW9MZ1NQd1BHMmhkeWxtb1lnbVU2bHpVWXBsRG1KNk5QamtHNWlXTFVqYUVEcXd6Yy1iMzM3b01qb1N6Vm1idHpJUnY0NEtRVnRLVE5JWU8tMlE?oc=5",
-      "publishedAt": "2026-11-08T00:00:00.000Z",
-      "region": "global",
-      "category": "awards",
+      "id": "1v2ml0g",
+      "headline": "What To Watch This Weekend (Nov. 6-8): New Movies And Shows On Netflix, Hulu And More",
+      "publisher": "Forbes",
+      "publisherUrl": "https://www.forbes.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMi6AFBVV95cUxQSU16bEtJdWt5R0V4M1pCUU5UdHVOV1dYa3RyUXRXLVRLRHZFQ1lrYVRMRWJjYXhqUi1adi1KLWNqaXNsNDBpRXB5SWVXVXR4eGU4RUFoczRmTWR3RzVxQlN3VzA5X1ZfS21aRXhsQ1Y3dzFlVGdJTFJpdXY3aEw0RzNJNDRSZWlZZ3phTkE4MFM5cXh3N09aOGpBd0Jud0VCZ3ZVeHZMMm9rNzBtejlkV3BPREx6ZUIxV2tTSE5nbU1qMVlBc0VBTktZQW9iZ3J2YXgteXpJaUJGX2YzSkxXV0NtblRVMWxK?oc=5",
+      "publishedAt": "2026-11-07T23:48:00.000Z",
+      "region": "hollywood",
+      "category": "streaming",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
       "imageUrl": "",
       "imageFallbackUrl": ""
@@ -1262,19 +1288,6 @@
       "publishedAt": "2026-11-07T20:33:36.000Z",
       "region": "global",
       "category": "festivals",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
-      "id": "1e0r5p0",
-      "headline": "GMA Entertainment | Online Home of Kapuso Shows and Stars",
-      "publisher": "GMA Network",
-      "publisherUrl": "https://www.gmanetwork.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMiU0FVX3lxTE00UmlKWTRUS2xFSm9jTUVSMF81bmk0UkN1U01sa3hLclNiUk9IaFZVZDdBako5UzVtb081QVBiaFBUcDJJU3ZBSGJsbjRWRHhHSVVv?oc=5",
-      "publishedAt": "2026-11-07T20:31:35.000Z",
-      "region": "hollywood",
-      "category": "television",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
       "imageUrl": "",
       "imageFallbackUrl": ""
@@ -1345,6 +1358,19 @@
       "imageFallbackUrl": ""
     },
     {
+      "id": "u2zrpc",
+      "headline": "I’m a TV expert. Here are 5 things you should watch on Netflix this weekend",
+      "publisher": "NJ.com",
+      "publisherUrl": "https://www.nj.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMiuwFBVV95cUxOMDZYSG5UenYwNDZycE12R3FjMXgybVFhS29lZDIzVmZ3NVUzdGRkQzUyUlBuQWFxWVAwcEdTN0pUUW9hZHZfZjV4SmhIVGpZWFVGbUE1VHdZRHBDOGFfekF1cUtrT2o0cmlESC00b0MwU1VVOU93d3gweEkyRkR2SDE3UUtGVFVZc1A2Vmo4aWphVFpaWnl3aU5hQzZidWtIQXVtMzNySDN5QXJ6R3d0dHBSTUs1Q3J4dl9N?oc=5",
+      "publishedAt": "2026-11-07T16:37:00.000Z",
+      "region": "hollywood",
+      "category": "television",
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
+    },
+    {
       "id": "kuirhn",
       "headline": "Sebastián Lelio, Chilean Filmmaker Behind the Oscar Winning 'A Fantastic Woman' and 'Gloria,' Dies at 52",
       "publisher": "That Eric Alper",
@@ -1379,19 +1405,6 @@
       "publishedAt": "2026-11-07T14:21:55.000Z",
       "region": "middle-east",
       "category": "film",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
-      "id": "m3o3y7",
-      "headline": "Sony Axing Game Discs Will Have Outsized Impact on Low-Income Gamers, Experts Say",
-      "publisher": "Decrypt",
-      "publisherUrl": "https://decrypt.co",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMiqgFBVV95cUxPUExobVdMbkU4YkhjaERlamdRNWlSTmE0NHktd1R4NWdYWGE3a2dDak5RNzhqc2xiUm1xWjR3amlZMDlGYjBPS1lfRWhfZ09oMURNNGlUZnFrSzQ3Vm1kMVNFc0xxOGRlRkxta0Y3ZXo1UXhqeDNGTjZHUGtKRG5TYnJacV8xOHZ4RndNVVVMSlJjWWgxbjB6OXNXbGE5MHdIektaLXNFV2FEQQ?oc=5",
-      "publishedAt": "2026-11-07T14:01:02.000Z",
-      "region": "global",
-      "category": "gaming",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
       "imageUrl": "",
       "imageFallbackUrl": ""
@@ -1535,19 +1548,6 @@
       "publishedAt": "2026-11-06T19:02:04.000Z",
       "region": "global",
       "category": "business",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
-      "id": "1rc9ogt",
-      "headline": "Dustin Hoffman details his ‘terrible experience’ making “The Graduate”: ‘Felt that I was about to be fired’",
-      "publisher": "Yahoo News UK",
-      "publisherUrl": "https://uk.news.yahoo.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMiiwFBVV95cUxNYmRHX0lNQlg0eEM4ZU1iVGJnOGp3SlNFSk85d0NxNUJUWGR3RGdvT2M5UFFIeGhuRjRsdTkzMno1Tmtid3p2UjExQnFrUmlTZ2pQUlZqQjM2VmRFWGY3VWxIYVk0aElWeVJKaVBEdDh2bkl1dW5BV19WQnk4UW85SGtGbEFQQWhmcTcw?oc=5",
-      "publishedAt": "2026-11-06T18:27:51.000Z",
-      "region": "europe",
-      "category": "film",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
       "imageUrl": "",
       "imageFallbackUrl": ""
