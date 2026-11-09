@@ -263,6 +263,14 @@ function syncDesktopNavigation() {
     tools.appendChild(search);
   }
   if (notification) tools.appendChild(notification);
+  else {
+    const alerts = document.createElement("a");
+    alerts.className = "vivid-notification-button vivid-shell-notification-link";
+    alerts.href = "home.html#release-alert-popover";
+    alerts.setAttribute("aria-label", "Open Vivid notifications");
+    alerts.innerHTML = '<i class="bi bi-bell" aria-hidden="true"></i>';
+    tools.appendChild(alerts);
+  }
   nav.appendChild(tools);
 
   const account = document.createElement("a");
