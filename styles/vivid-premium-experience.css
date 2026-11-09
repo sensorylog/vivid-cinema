@@ -159,3 +159,74 @@ html.vivid-ios-standalone body {
     filter: brightness(1.12);
   }
 }
+
+/* Site-wide floating header: no enclosing slab; only controls receive glass. */
+body.vivid-app-experience :is(.vivid-topbar,.vivid-unified-header,.vivid-discovery-nav,.vivid-title-nav,.vivid-library-nav,.vivid-watch-nav) {
+  position: sticky !important; top: 0 !important; z-index: 1000 !important;
+  background: transparent !important; border: 0 !important; border-radius: 0 !important;
+  box-shadow: none !important; -webkit-backdrop-filter: none !important; backdrop-filter: none !important;
+  transition: transform 220ms ease, opacity 180ms ease !important; will-change: transform;
+}
+body.vivid-app-experience :is(.vivid-topbar,.vivid-unified-header,.vivid-discovery-nav,.vivid-title-nav,.vivid-library-nav,.vivid-watch-nav)::before,
+body.vivid-app-experience :is(.vivid-topbar,.vivid-unified-header,.vivid-discovery-nav,.vivid-title-nav,.vivid-library-nav,.vivid-watch-nav)::after {
+  content: none !important; display: none !important;
+}
+body.vivid-app-experience :is(.vivid-topbar,.vivid-unified-header,.vivid-discovery-nav,.vivid-title-nav,.vivid-library-nav,.vivid-watch-nav).vivid-header-hidden {
+  transform: translateY(calc(-100% - 12px)) !important; opacity: .96; pointer-events: none;
+}
+body.vivid-app-experience :is(.vivid-topbar,.vivid-unified-header) .vivid-nav {
+  min-height: 58px; gap: clamp(10px,1.5vw,20px);
+}
+body.vivid-app-experience :is(.vivid-topbar,.vivid-unified-header) .vivid-brand {
+  display: inline-flex; align-items: center; gap: 8px; margin: 0 !important; flex: 0 0 auto;
+}
+body.vivid-app-experience .vivid-brand-icon { width: 34px; height: 34px; flex: 0 0 34px; border-radius: 10px; }
+body.vivid-app-experience .vivid-nav-tools { display: inline-flex; align-items: center; gap: 8px; margin-left: auto; flex: 0 0 auto; }
+body.vivid-app-experience :is(.vivid-search-trigger,.vivid-shell-search-link,.vivid-notification-button,.vivid-nav-action,.vivid-nav-account,.vivid-language,.vivid-language-selector) {
+  box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center;
+  min-width: 42px; min-height: 42px; width: 42px; height: 42px; padding: 0 !important;
+  border: 1px solid rgba(255,255,255,.13) !important; border-radius: 14px !important;
+  background: rgba(255,255,255,.055) !important; color: rgba(245,247,251,.88) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.07) !important; text-decoration: none;
+  backdrop-filter: blur(16px) saturate(140%); -webkit-backdrop-filter: blur(16px) saturate(140%);
+  transition: background 180ms ease, border-color 180ms ease, transform 180ms ease;
+}
+body.vivid-app-experience :is(.vivid-search-trigger,.vivid-shell-search-link,.vivid-notification-button,.vivid-nav-action,.vivid-nav-account,.vivid-language,.vivid-language-selector):hover {
+  background: rgba(255,255,255,.11) !important; border-color: rgba(255,255,255,.23) !important; transform: translateY(-1px);
+}
+body.vivid-app-experience .vivid-search-trigger span,
+body.vivid-app-experience .vivid-search-trigger kbd,
+body.vivid-app-experience .vivid-shell-search-link span,
+body.vivid-app-experience .vivid-nav-account span,
+body.vivid-app-experience .vivid-nav-action span { display: none !important; }
+body.vivid-app-experience .vivid-nav-account,
+body.vivid-app-experience .vivid-nav-action { font-size: 0 !important; }
+body.vivid-app-experience .vivid-nav-language-slot { display: inline-flex; align-items: center; flex: 0 0 auto; }
+body.vivid-app-experience .vivid-nav-language-slot:empty { display: none; }
+body.vivid-app-experience .vivid-nav-language-slot :is(button,a,[role="button"]) {
+  min-height: 42px; padding: 0 10px; border: 0; border-radius: 12px; background: transparent; color: inherit;
+}
+body.vivid-app-experience :is(.vivid-search-trigger,.vivid-shell-search-link,.vivid-notification-button,.vivid-nav-account,.vivid-nav-action) i { font-size: 1.05rem; }
+body.vivid-app-experience :is(.vivid-topbar,.vivid-unified-header).is-scrolled .vivid-nav-tools > * {
+  background: rgba(12,14,18,.42) !important; border-color: rgba(255,255,255,.19) !important;
+  box-shadow: 0 5px 18px rgba(0,0,0,.14), inset 0 1px 0 rgba(255,255,255,.08) !important;
+}
+html[data-vivid-theme="light"] body.vivid-app-experience :is(.vivid-search-trigger,.vivid-shell-search-link,.vivid-notification-button,.vivid-nav-action,.vivid-nav-account) {
+  color: #20242c !important; border-color: rgba(20,28,40,.14) !important; background: rgba(255,255,255,.62) !important;
+}
+@media (max-width:640px) {
+  body.vivid-app-experience :is(.vivid-topbar,.vivid-unified-header) {
+    padding: calc(8px + env(safe-area-inset-top,0px)) 14px 4px !important; margin-top: 0 !important;
+  }
+  body.vivid-app-experience :is(.vivid-topbar,.vivid-unified-header) .vivid-nav { min-height: 48px; gap: 8px; }
+  body.vivid-app-experience .vivid-brand-icon { width: 31px; height: 31px; flex-basis: 31px; }
+  body.vivid-app-experience .vivid-brand-wordmark { font-size: clamp(.94rem,4.4vw,1.12rem); letter-spacing: -.055em; }
+  body.vivid-app-experience .vivid-nav-tools { gap: 6px; }
+  body.vivid-app-experience :is(.vivid-search-trigger,.vivid-shell-search-link,.vivid-notification-button,.vivid-nav-action,.vivid-nav-account) {
+    width: 40px; height: 40px; min-width: 40px; min-height: 40px; border-radius: 13px !important;
+  }
+  body.vivid-app-experience .vivid-nav-language-slot :is(button,a,[role="button"]) { min-height: 40px; padding-inline: 5px; font-size: .82rem; }
+}
+@media (prefers-reduced-motion:reduce) {
+  body.vivid-app-experience :is(.vivid-topbar,.vivid-unified-header,.vivid-discovery-nav,.vivid-title-nav,.vivid-library-nav,.vivid-watch-nav) { transition: none !important; }
+}
