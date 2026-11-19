@@ -278,3 +278,29 @@ test("room lobby presence, queue and chat are member-readable and never client-w
     await assertFails(setDoc(doc(host, "rooms/lobby-room/" + path + "-forged"), { forged: true }));
   }
 });
+
+
+test("Cinema Club watchlists, screening history and After-Credits are member-readable and server-writable only", async () => {
+  await env.withSecurityRulesDisabled(async context => {
+    const db = context.firestore();
+    await setDoc(doc(db, "cinemaClubs/archive-club"), { name: "Archive Club", ownerUid: "archive-member", status: "active" });
+    await setDoc(doc(db, "cinemaClubs/archive-club/members/archive-member"), { userId: "archive-member", role: "owner" });
+    await setDoc(doc(db, "cinemaClubs/archive-club/watchlist/movie_42"), { contentId: "movie:42", title: "Example Film" });
+    await setDoc(doc(db, "cinemaClubs/archive-club/screenings/screening-1"), { contentId: "movie:42", title: "Example Film" });
+    await setDoc(doc(db, "cinemaClubs/archive-club/screenings/screening-1/afterCredits/archive-member"), { uid: "archive-member", rating: 5 });
+    await setDoc(doc(db, "cinemaClubs/archive-club/screenings/screening-1/discussion/message-1"), { uid: "archive-member", message: "A great film." });
+  });
+  const member = env.authenticatedContext("archive-member").firestore();
+  const outsider = env.authenticatedContext("archive-outsider").firestore();
+  const paths = [
+    "cinemaClubs/archive-club/watchlist/movie_42",
+    "cinemaClubs/archive-club/screenings/screening-1",
+    "cinemaClubs/archive-club/screenings/screening-1/afterCredits/archive-member",
+    "cinemaClubs/archive-club/screenings/screening-1/discussion/message-1"
+  ];
+  for (const path of paths) {
+    await assertSucceeds(getDoc(doc(member, path)));
+    await assertFails(getDoc(doc(outsider, path)));
+    await assertFails(setDoc(doc(member, path + "-forged"), { forged: true }));
+  }
+});
