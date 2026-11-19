@@ -367,9 +367,8 @@ export const createWatchInvitation = onCall({ region: "us-central1", maxInstance
   const invitationRef = db.collection("watchInvitations").doc(tokenHash);
 
   await db.runTransaction(async transaction => {
-    const [targetSnapshot, memberSnapshot] = await Promise.all([
-      transaction.get(targetRef), transaction.get(memberRef)
-    ]);
+    const targetSnapshot = await transaction.get(targetRef);
+    const memberSnapshot = await transaction.get(memberRef);
     if (!targetSnapshot.exists || !memberSnapshot.exists || targetSnapshot.data()[ownerField] !== auth.uid) {
       throw new HttpsError("permission-denied", "Only the room host or club owner can create invitations.");
     }

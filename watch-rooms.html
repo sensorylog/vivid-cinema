@@ -121,7 +121,7 @@
             </article>
           </div>
         </section>
-        <p class="vivid-wr-stage-note" id="wr-stage-note" role="status">Interface preview · Room and club actions will connect to Vivid's secure backend in the next stage. Nothing here is saved yet.</p>
+        <p class="vivid-wr-stage-note" id="wr-stage-note" role="status">Your rooms and clubs are private to your Vivid account. Watch Rooms close after 24 hours; Cinema Clubs are persistent.</p>
       </div>
     </main>
   </div>
@@ -145,7 +145,7 @@
       <button class="vivid-wr-dialog-close" type="button" data-close-dialog aria-label="Close"><i class="bi bi-x-lg"></i></button>
       <span class="vivid-wr-dialog-kicker">YOU'RE ON THE LIST?</span><h2 id="wr-join-room-title">Join a Watch Room</h2>
       <p>Enter the private invite code shared by your host.</p>
-      <label for="wr-invite-code">Vivid invitation code</label><input id="wr-invite-code" name="inviteCode" maxlength="12" minlength="6" autocomplete="one-time-code" autocapitalize="characters" placeholder="e.g. VIVID7" required>
+      <label for="wr-invite-code">Vivid invitation code</label><input id="wr-invite-code" name="inviteCode" maxlength="12" minlength="6" autocomplete="one-time-code" autocapitalize="characters" placeholder="10-character invite code" pattern="[23456789ABCDEFGHJKLMNPQRSTUVWXYZ]{10}" minlength="10" maxlength="10" required>
       <p class="vivid-wr-form-note"><i class="bi bi-shield-lock" aria-hidden="true"></i> Only valid, active invitations can open a private room.</p>
       <button class="vivid-wr-button vivid-wr-button--primary vivid-wr-dialog-submit" type="submit">Continue <i class="bi bi-arrow-right"></i></button>
       <p class="vivid-wr-form-feedback" id="wr-join-feedback" role="status" aria-live="polite"></p>
