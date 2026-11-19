@@ -134,6 +134,6 @@ Each stage is delivered as focused commits on feature/watch-rooms and reviewed b
 - Room queue suggestions are created through trusted callable operations, bounded to 50 items, and support per-member vote toggling.
 - Room chat is member-only, bounded to 500 characters per message, and rate-limited server-side.
 - Reactions are allow-listed and toggled by authenticated room members.
-- Host-only settings control the room name and whether guests may add queue items or chat. The host can remove another member; the host cannot remove themselves.
+- Host-only settings control the room name and whether guests may add queue items or chat. The host can remove another member, change guest permissions, and close the room for everyone; the host cannot remove themselves.
 - Lobby collections are readable only by current room members. All client writes to presence, queue and chat are denied by Firestore rules; mutations use trusted callables.
 - Client lobby listeners are torn down when the user leaves the lobby. Playback synchronization remains Stage 5 and is not implied by the lobby.
