@@ -57,7 +57,10 @@ test("Watch Rooms is added to the shared top tools without changing the seven mo
   const appShell = readFileSync(new URL("../scripts/app-shell.js", import.meta.url), "utf8");
   assert.ok(appShell.includes('watchRooms.className = "vivid-watch-rooms-nav"'));
   assert.ok(appShell.includes('watchRooms.href = "watch-rooms.html"'));
-  const mobileBuilder = appShell.match(/nav\.innerHTML = \[([\s\S]*?)\]\.join\("\");/);
+  const mobileStart = appShell.indexOf("function syncMobileNavigation()");
+  const mobileEnd = appShell.indexOf("function syncNavigation()", mobileStart);
+  const mobileBuilder = appShell.slice(mobileStart, mobileEnd);
+  assert.ok(mobileStart >= 0 && mobileEnd > mobileStart, "shared mobile navigation builder should exist");
   assert.ok(mobileBuilder, "shared mobile navigation builder should exist");
   assert.equal((mobileBuilder[1].match(/navLink\(/g) || []).length, 7);
   assert.doesNotMatch(mobileBuilder[1], /watch-rooms/);
@@ -72,4 +75,6 @@ test("Watch Rooms private content waits for a non-anonymous Firebase user", () =
   assert.ok(moduleSource.includes("user.isAnonymous"));
   assert.ok(moduleSource.includes("auth.html?returnTo="));
   assert.ok(moduleSource.includes("onAuthStateChanged(auth"));
+  const authSource = readFileSync(new URL("../scripts/auth.js", import.meta.url), "utf8");
+  assert.ok(authSource.includes("preservePostAuthDestination"));
 });
