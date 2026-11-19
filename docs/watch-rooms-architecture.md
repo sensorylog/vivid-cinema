@@ -1,6 +1,6 @@
 # Vivid Watch Rooms — Engineering Architecture
 
-Status: Stages 1–4 implemented and validated; Stage 5 code complete (latest GitHub Actions validation is still queued); Stage 6 implementation complete, validation pending.
+Status: Stages 1–6 implemented; Stage 7 hardening and release validation in progress. GitHub Actions validation remains pending.
 Repository: sensorylog/vivid-cinema
 Base branch: main
 Feature branch: feature/watch-rooms
@@ -162,3 +162,14 @@ Each stage is delivered as focused commits on feature/watch-rooms and reviewed b
 - Firestore rules allow only current members of active clubs to read these collections. Client writes are denied; non-members and signed-out users cannot read club watchlists, history, ratings or discussions.
 - The club page subscribes to the selected club's shared watchlist and screening history, and loads a screening's ratings/discussion when the member opens its After-Credits view.
 - The UI accepts Vivid's typed `movie:ID` / `tv:ID` catalogue identifiers. It does not pretend free-text titles alone are a canonical catalogue match.
+
+
+## Stage 7 hardening and release validation
+
+- All Cinema Club mutations require a non-anonymous Firebase identity, verify active membership before work, and re-read club status and membership inside the committing transaction.
+- Watch Room and Cinema Club Firestore reads require a non-anonymous Firebase sign-in and a current membership record. Cinema Club archive reads additionally require the club status to remain active.
+- All room, lobby, playback, watchlist, screening, review and discussion writes remain server-only through callable operations. Firestore client write rules remain denied.
+- The club UI disables write forms until a club is selected, restores listeners after back-forward cache navigation, shows live watchlist/screening counts, and links the screening action to the actual club screening form.
+- Stage 7 test coverage includes Stage 6 callable export contracts, active-club transaction rechecks, member-only archive access, archived-club read denial, and client-write denial.
+- Release gate: the latest commit must pass the repository's Tests, Firestore Rules, static validation, browser navigation, Windows and Android workflows. Cloudflare Pages is tracked separately as a deployment check. A queued or in-progress workflow is not considered a pass.
+- Known product boundary: synchronized playback is currently supported only through the verified VidSrc parent-frame control contract; it is not frame-perfect and browser autoplay/network buffering remain external constraints.
