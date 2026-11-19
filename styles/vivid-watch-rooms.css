@@ -70,3 +70,31 @@ html[data-vivid-theme="light"] .vivid-wr-action-card,html[data-vivid-theme="ligh
 html[data-vivid-theme="light"] .vivid-wr-dialog{background:#fff;color:#171720}html[data-vivid-theme="light"] .vivid-wr-dialog-card input,html[data-vivid-theme="light"] .vivid-wr-dialog-card textarea,html[data-vivid-theme="light"] .vivid-wr-dialog-card select{background:#f7f5fa;color:#171720;border-color:rgba(20,28,40,.18)}
 @media(max-width:760px){.vivid-watch-rooms-main{padding-top:18px}.vivid-wr-hero{grid-template-columns:1fr;min-height:0;gap:0;padding:28px 23px;border-radius:24px}.vivid-wr-hero h1{font-size:clamp(2.55rem,11.8vw,4rem)}.vivid-wr-hero-art{min-height:220px}.vivid-wr-screen{width:min(78%,290px)}.vivid-wr-action-strip{grid-template-columns:1fr;margin-bottom:42px}.vivid-wr-section-heading{align-items:start}.vivid-wr-preview-list{grid-template-columns:1fr}.vivid-wr-club-layout{grid-template-columns:1fr}.vivid-wr-tabs{gap:18px}.vivid-wr-tab{font-size:.8rem}.vivid-wr-empty{min-height:310px;padding:28px 18px}}
 @media(prefers-reduced-motion:reduce){.vivid-watch-rooms-page *{scroll-behavior:auto!important;animation:none!important;transition:none!important}}
+
+
+/* Stage 4 — private room lobby */
+.vivid-wr-lobby { margin: 2rem 0 3rem; }
+.vivid-wr-lobby-heading { display:flex; align-items:center; justify-content:space-between; gap:1rem; margin-bottom:1.25rem; }
+.vivid-wr-lobby-heading h2 { margin:.35rem 0; }
+.vivid-wr-lobby-heading p { margin:0; opacity:.72; }
+.vivid-wr-lobby-grid { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:1rem; }
+.vivid-wr-lobby-panel { min-width:0; padding:1.1rem; border:1px solid rgba(255,255,255,.1); border-radius:1.1rem; background:rgba(255,255,255,.035); }
+.vivid-wr-lobby-panel h3 { display:flex; align-items:center; gap:.55rem; margin:0 0 1rem; font-size:1rem; }
+.vivid-wr-lobby-panel h3 span { margin-left:auto; opacity:.7; }
+.vivid-wr-lobby-list { display:grid; gap:.65rem; padding-left:1.25rem; }
+.vivid-wr-lobby-list li { display:flex; align-items:center; justify-content:space-between; gap:.8rem; }
+.vivid-wr-inline-form { display:flex; flex-wrap:wrap; gap:.6rem; margin:.8rem 0; }
+.vivid-wr-inline-form input:not([type=checkbox]) { flex:1 1 12rem; min-width:0; }
+.vivid-wr-lobby-chat { grid-column:1 / -1; }
+.vivid-wr-chat-log { display:grid; gap:.7rem; max-height:22rem; overflow:auto; padding:.25rem; }
+.vivid-wr-chat-message { padding:.7rem .85rem; border-radius:.8rem; background:rgba(255,255,255,.045); }
+.vivid-wr-chat-message p { margin:0 0 .5rem; overflow-wrap:anywhere; }
+.vivid-wr-chat-reactions { display:flex; flex-wrap:wrap; gap:.4rem; }
+.vivid-wr-chat-reactions button { border:1px solid rgba(255,255,255,.12); border-radius:99px; padding:.25rem .55rem; background:transparent; color:inherit; cursor:pointer; }
+.vivid-wr-host-controls { margin-top:1rem; }
+.vivid-wr-host-controls label { display:flex; align-items:center; gap:.35rem; }
+@media(max-width:700px) {
+  .vivid-wr-lobby-heading { align-items:flex-start; flex-direction:column; }
+  .vivid-wr-lobby-grid { grid-template-columns:1fr; }
+  .vivid-wr-lobby-chat { grid-column:auto; }
+}
