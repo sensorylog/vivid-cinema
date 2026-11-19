@@ -215,3 +215,11 @@ body {
     max-width: calc(100vw - 2 * max(14px, var(--vivid-safe-left)) - 2 * max(14px, var(--vivid-safe-right)));
   }
 }
+/* Keep the compact top-bar tools usable on phones without adding navigation rows. */
+.vivid-topbar .vivid-nav-account{display:inline-grid;place-items:center;flex:0 0 40px;width:40px;height:40px;min-height:40px;padding:0;border:1px solid rgba(255,255,255,.09);border-radius:999px;background:rgba(255,255,255,.035);color:#b8bec8;text-decoration:none}
+.vivid-topbar .vivid-nav-account>span{display:none}
+.vivid-topbar .vivid-nav-account:hover{color:#fff;background:rgba(255,255,255,.09);border-color:rgba(255,255,255,.18)}
+.vivid-topbar .vivid-nav-account:focus-visible{outline:2px solid rgba(255,255,255,.72);outline-offset:3px}
+@media(max-width:640px){.vivid-topbar .vivid-nav-tools .vivid-search-trigger span,.vivid-topbar .vivid-nav-tools .vivid-search-trigger kbd{display:none}.vivid-topbar .vivid-nav-tools .vivid-search-trigger{display:inline-grid;place-items:center;width:38px;height:38px;min-height:38px;padding:0}.vivid-topbar .vivid-nav-account{width:38px;height:38px;flex-basis:38px}}
+html[data-vivid-theme="light"] .vivid-topbar .vivid-nav-account{color:#59616d;border-color:rgba(20,28,40,.12);background:rgba(20,28,40,.035)}
+html[data-vivid-theme="light"] .vivid-topbar .vivid-nav-account:hover{color:#10131a;background:rgba(20,28,40,.08);border-color:rgba(20,28,40,.2)}
