@@ -113,6 +113,14 @@ function renderRoomPreviews() {
     privacy.className = "vivid-wr-preview-private";
     privacy.textContent = isOpen ? "Invite-only" : "Expired";
     card.append(meta, title, film, privacy);
+    if (isOpen) {
+      const lobbyButton = document.createElement("button");
+      lobbyButton.type = "button";
+      lobbyButton.className = "vivid-wr-button vivid-wr-button--quiet";
+      lobbyButton.textContent = "Open lobby";
+      lobbyButton.addEventListener("click", () => document.dispatchEvent(new CustomEvent("vivid:watch-room-open", { detail: room })));
+      card.append(lobbyButton);
+    }
     if (room.role === "host" && isOpen) {
       card.append(makeInviteButton("room", room.roomId, "Create invite code"));
     }
