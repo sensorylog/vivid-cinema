@@ -135,7 +135,7 @@ jobs:
         run: |
           $version = node -p "require('./package.json').version"
           $tag = "v$version"
-          $requiredAssets = @("Vivid-Cinema-Setup-$version.exe", "Vivid-Cinema-Portable-$version.exe", "Vivid-Cinema-Setup-$version.exe.blockmap", "latest.yml")
+          $requiredAssets = @("Vivid-Cinema-Setup-$version.exe", "Vivid-Cinema-Portable-$version.exe", "Vivid-Cinema-Setup-$version.exe.blockmap", "latest.yml", "Vivid-Cinema-Android.apk")
           $buildNeeded = $true
           $releaseJson = gh release view $tag --json isDraft,assets 2>$null
           if ($LASTEXITCODE -eq 0) {
@@ -162,6 +162,30 @@ jobs:
           $blockMap = Get-ChildItem "dist-desktop/Vivid-Cinema-Setup-*.exe.blockmap" -ErrorAction SilentlyContinue
           if (!$blockMap) {
             throw "Installer blockmap was not generated; refusing to publish an incomplete update."
+          }
+      - name: Wait for Android APK in draft release
+        if: steps.release-decision.outputs.publish == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: pwsh
+        run: |
+          $version = node -p "require('./package.json').version"
+          $tag = "v$version"
+          $apkReady = $false
+          for ($attempt = 1; $attempt -le 30; $attempt++) {
+            $releaseJson = gh release view $tag --json assets 2>$null
+            if ($LASTEXITCODE -eq 0) {
+              $release = $releaseJson | ConvertFrom-Json
+              $assetNames = @($release.assets | ForEach-Object { $_.name })
+              if ($assetNames -contains "Vivid-Cinema-Android.apk") {
+                $apkReady = $true
+                break
+              }
+            }
+            Start-Sleep -Seconds 20
+          }
+          if (!$apkReady) {
+            throw "The Android APK did not arrive in draft release $tag; leaving the release unpublished."
           }
       - name: Verify draft release contains all required assets
         if: steps.release-decision.outputs.publish == 'true'
