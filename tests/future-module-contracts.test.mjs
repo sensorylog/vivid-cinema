@@ -103,20 +103,23 @@ test("Watch Rooms dashboard exposes room creation, invitation entry and club man
     "renderClubDetail(selected)",
     "user.isAnonymous",
     "auth.authStateReady()",
-    "Invitation lookup and membership checks will be connected in Stage 3",
-    "Your club is not saved or shared"
+    "createWatchRoom",
+    "createCinemaClub",
+    "redeemWatchInvitation",
+    "loadDashboard(user)"
   ]) assert.ok(moduleSource.includes(required), "missing Watch Rooms interaction contract: " + required);
   assert.ok(styles.includes(".vivid-wr-dialog::backdrop"));
   assert.ok(styles.includes("@media(max-width:760px)"));
 });
 
-test("Watch Rooms preview actions never claim backend persistence or membership", () => {
+test("Watch Rooms dashboard uses trusted backend calls rather than local-only previews", () => {
   const moduleSource = readFileSync(new URL("../scripts/watch-rooms.js", import.meta.url), "utf8");
-  assert.ok(moduleSource.includes("LOCAL PREVIEW · NOT SAVED"));
-  assert.ok(moduleSource.includes("No room has been joined."));
-  assert.ok(moduleSource.includes("Your club is not saved or shared."));
-  assert.ok(!moduleSource.includes("addDoc("));
-  assert.ok(!moduleSource.includes("setDoc("));
+  assert.ok(moduleSource.includes("httpsCallable(functions, name)"));
+  assert.ok(moduleSource.includes("getDocs(query(collection(db, \"users\", user.uid, \"watchRooms\"")));
+  assert.ok(moduleSource.includes("getDocs(query(collection(db, \"users\", user.uid, \"cinemaClubs\"")));
+  assert.ok(moduleSource.includes("createWatchInvitation"));
+  assert.ok(moduleSource.includes("redeemWatchInvitation"));
+  assert.ok(!moduleSource.includes("LOCAL PREVIEW · NOT SAVED"));
 });
 
 

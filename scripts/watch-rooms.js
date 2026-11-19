@@ -1,5 +1,7 @@
-import { auth } from "./firebase.js";
+import { app, auth, db } from "./firebase.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
+import { collection, getDocs, orderBy, query } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-functions.js";
 
 const byId = id => document.getElementById(id);
 const loading = byId("watch-rooms-loading");
@@ -10,7 +12,9 @@ const retryButton = byId("watch-rooms-retry");
 const roomDialog = byId("wr-create-room-dialog");
 const joinDialog = byId("wr-join-room-dialog");
 const clubDialog = byId("wr-create-club-dialog");
-const previewState = { rooms: [], clubs: [], selectedClubId: null };
+const functions = getFunctions(app, "us-central1");
+const call = name => httpsCallable(functions, name);
+const dashboardState = { rooms: [], clubs: [], selectedClubId: null };
 
 function showSessionError(error) {
   if (loading) loading.hidden = true;
@@ -24,12 +28,21 @@ function requireVividAccount() {
   window.location.replace("auth.html?returnTo=" + encodeURIComponent("watch-rooms.html"));
 }
 
+function errorText(error, fallback) {
+  const code = error?.code || "";
+  if (code.includes("unauthenticated")) return "Please sign in to your Vivid account again.";
+  if (code.includes("permission-denied")) return "You don't have permission to do that in this space.";
+  if (code.includes("not-found")) return "That invitation could not be found. Check the code and try again.";
+  if (code.includes("failed-precondition")) return error.message || "That invitation is expired, revoked or full.";
+  if (code.includes("resource-exhausted")) return "This room or club has reached its member limit.";
+  return error?.message || fallback;
+}
+
 function openDialog(dialog) {
   if (!dialog) return;
   if (typeof dialog.showModal === "function") dialog.showModal();
   else dialog.setAttribute("open", "");
-  const firstField = dialog.querySelector("input,textarea,select");
-  firstField?.focus();
+  dialog.querySelector("input,textarea,select")?.focus();
 }
 
 function closeDialog(dialog) {
@@ -45,27 +58,57 @@ function setFeedback(id, message, isError = false) {
   target.dataset.state = isError ? "error" : "info";
 }
 
+function makeInviteButton(targetType, targetId, label) {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "vivid-wr-button vivid-wr-button--quiet";
+  button.textContent = label;
+  button.addEventListener("click", async () => {
+    button.disabled = true;
+    try {
+      const result = await call("createWatchInvitation")({ targetType, targetId });
+      const code = result.data.inviteCode;
+      const feedbackId = targetType === "room" ? "wr-room-feedback" : "wr-club-feedback";
+      setFeedback(feedbackId, "Your invite code (shown once): " + code + " · Expires in 48 hours. Share it privately.");
+      try {
+        await navigator.clipboard?.writeText(code);
+        setFeedback(feedbackId, "Invite code copied: " + code + " · Expires in 48 hours. Share it privately.");
+      } catch {
+        // The code remains visible for manual copying when clipboard access is unavailable.
+      }
+    } catch (error) {
+      setFeedback(targetType === "room" ? "wr-room-feedback" : "wr-club-feedback", errorText(error, "Couldn't create an invite code."), true);
+    } finally {
+      button.disabled = false;
+    }
+  });
+  return button;
+}
+
 function renderRoomPreviews() {
   const list = byId("wr-room-previews");
   const empty = byId("wr-rooms-empty");
   if (!list || !empty) return;
-  empty.hidden = previewState.rooms.length > 0;
-  byId("wr-room-count").textContent = String(previewState.rooms.length);
+  empty.hidden = dashboardState.rooms.length > 0;
+  byId("wr-room-count").textContent = String(dashboardState.rooms.length);
   list.replaceChildren();
-  for (const room of previewState.rooms) {
+  for (const room of dashboardState.rooms) {
     const card = document.createElement("article");
     card.className = "vivid-wr-preview-card";
     const meta = document.createElement("span");
     meta.className = "vivid-wr-preview-kicker";
-    meta.textContent = "LOCAL PREVIEW · NOT SAVED";
+    meta.textContent = room.role === "host" ? "YOUR ROOM · HOST" : "INVITED ROOM";
     const title = document.createElement("h3");
-    title.textContent = room.name;
+    title.textContent = room.name || "Private screening";
     const film = document.createElement("p");
-    film.textContent = room.film ? "Screening: " + room.film : "Your screening details will appear here.";
+    film.textContent = room.filmTitle ? "Screening: " + room.filmTitle : "Choose a film with your guests.";
     const privacy = document.createElement("span");
     privacy.className = "vivid-wr-preview-private";
-    privacy.textContent = "Invite-only";
+    privacy.textContent = room.status === "open" ? "Invite-only" : "Closed";
     card.append(meta, title, film, privacy);
+    if (room.role === "host" && room.status === "open") {
+      card.append(makeInviteButton("room", room.roomId, "Create invite code"));
+    }
     list.append(card);
   }
 }
@@ -75,15 +118,15 @@ function renderClubPreviews() {
   const empty = byId("wr-clubs-empty");
   const layout = byId("wr-club-layout");
   if (!list || !empty || !layout) return;
-  empty.hidden = previewState.clubs.length > 0;
-  layout.hidden = previewState.clubs.length === 0;
-  byId("wr-club-count").textContent = String(previewState.clubs.length);
+  empty.hidden = dashboardState.clubs.length > 0;
+  layout.hidden = dashboardState.clubs.length === 0;
+  byId("wr-club-count").textContent = String(dashboardState.clubs.length);
   list.replaceChildren();
-  for (const club of previewState.clubs) {
+  for (const club of dashboardState.clubs) {
     const button = document.createElement("button");
     button.type = "button";
-    button.className = "vivid-wr-club-preview" + (club.id === previewState.selectedClubId ? " is-selected" : "");
-    button.setAttribute("aria-pressed", String(club.id === previewState.selectedClubId));
+    button.className = "vivid-wr-club-preview" + (club.clubId === dashboardState.selectedClubId ? " is-selected" : "");
+    button.setAttribute("aria-pressed", String(club.clubId === dashboardState.selectedClubId));
     const icon = document.createElement("span");
     icon.className = "vivid-wr-club-preview-icon";
     icon.innerHTML = '<i class="bi bi-people" aria-hidden="true"></i>';
@@ -92,22 +135,22 @@ function renderClubPreviews() {
     const name = document.createElement("strong");
     name.textContent = club.name;
     const detail = document.createElement("small");
-    detail.textContent = "Founder · 1 member";
+    detail.textContent = (club.role === "owner" ? "Founder" : "Member") + " · " + (club.memberCount || 1) + " members";
     copy.append(name, detail);
     const arrow = document.createElement("i");
     arrow.className = "bi bi-chevron-right";
     arrow.setAttribute("aria-hidden", "true");
     button.append(icon, copy, arrow);
     button.addEventListener("click", () => {
-      previewState.selectedClubId = club.id;
+      dashboardState.selectedClubId = club.clubId;
       renderClubPreviews();
       renderClubDetail(club);
     });
     list.append(button);
   }
-  const selected = previewState.clubs.find(club => club.id === previewState.selectedClubId) || previewState.clubs[0];
+  const selected = dashboardState.clubs.find(club => club.clubId === dashboardState.selectedClubId) || dashboardState.clubs[0];
   if (selected) {
-    previewState.selectedClubId = selected.id;
+    dashboardState.selectedClubId = selected.clubId;
     renderClubDetail(selected);
   }
 }
@@ -115,7 +158,23 @@ function renderClubPreviews() {
 function renderClubDetail(club) {
   byId("wr-detail-name").textContent = club.name;
   byId("wr-detail-description").textContent = club.description || "A private Vivid Cinema Club. Your shared watchlist and screening history will live here.";
-  byId("wr-detail-members").textContent = "1";
+  byId("wr-detail-members").textContent = String(club.memberCount || 1);
+  const actions = byId("wr-detail-actions");
+  actions?.replaceChildren(makeInviteButton("club", club.clubId, "Invite members"));
+}
+
+async function loadDashboard(user) {
+  const [roomSnapshot, clubSnapshot] = await Promise.all([
+    getDocs(query(collection(db, "users", user.uid, "watchRooms"), orderBy("createdAt", "desc"))),
+    getDocs(query(collection(db, "users", user.uid, "cinemaClubs"), orderBy("createdAt", "desc")))
+  ]);
+  dashboardState.rooms = roomSnapshot.docs.map(document => document.data());
+  dashboardState.clubs = clubSnapshot.docs.map(document => document.data());
+  if (!dashboardState.clubs.some(club => club.clubId === dashboardState.selectedClubId)) {
+    dashboardState.selectedClubId = dashboardState.clubs[0]?.clubId || null;
+  }
+  renderRoomPreviews();
+  renderClubPreviews();
 }
 
 function showTab(name) {
@@ -164,54 +223,80 @@ document.querySelectorAll("[data-wr-tab]").forEach(tab => {
   });
 });
 
-byId("wr-create-room-form")?.addEventListener("submit", event => {
+byId("wr-create-room-form")?.addEventListener("submit", async event => {
   event.preventDefault();
   const form = event.currentTarget;
   if (!form.reportValidity()) return;
-  const data = new FormData(form);
-  previewState.rooms.unshift({
-    id: "preview-" + Date.now(),
-    name: String(data.get("roomName") || "").trim(),
-    film: String(data.get("filmTitle") || "").trim()
-  });
-  renderRoomPreviews();
-  setFeedback("wr-room-feedback", "Preview added on this device only. Room creation and invitations will be connected in Stage 3.");
-  byId("wr-stage-note").textContent = "Preview mode · Your room is not saved or shared. Secure room creation and invitations are coming in Stage 3.";
-  form.reset();
-  window.setTimeout(() => closeDialog(roomDialog), 900);
+  const submit = form.querySelector('[type="submit"]');
+  submit.disabled = true;
+  try {
+    const data = new FormData(form);
+    const created = await call("createWatchRoom")({
+      name: String(data.get("roomName") || "").trim(),
+      filmTitle: String(data.get("filmTitle") || "").trim()
+    });
+    const roomId = created.data.roomId;
+    const invitation = await call("createWatchInvitation")({ targetType: "room", targetId: roomId });
+    await loadDashboard(auth.currentUser);
+    showTab("rooms");
+    setFeedback("wr-room-feedback", "Room created. Your invite code is " + invitation.data.inviteCode + " · Expires in 48 hours. Share it privately.");
+    form.reset();
+  } catch (error) {
+    setFeedback("wr-room-feedback", errorText(error, "Couldn't create your room. Please try again."), true);
+    try { await loadDashboard(auth.currentUser); } catch {}
+  } finally {
+    submit.disabled = false;
+  }
 });
 
-byId("wr-join-room-form")?.addEventListener("submit", event => {
+byId("wr-join-room-form")?.addEventListener("submit", async event => {
   event.preventDefault();
   const input = byId("wr-invite-code");
   const code = input.value.trim().replace(/\s+/g, "").toUpperCase();
-  if (!/^[A-Z0-9-]{6,12}$/.test(code)) {
-    setFeedback("wr-join-feedback", "Enter a valid 6–12 character invite code.", true);
+  if (!/^[23456789ABCDEFGHJKLMNPQRSTUVWXYZ]{10}$/.test(code)) {
+    setFeedback("wr-join-feedback", "Enter the 10-character Vivid invitation code.", true);
     input.focus();
     return;
   }
-  input.value = code;
-  setFeedback("wr-join-feedback", "Code format looks good. Invitation lookup and membership checks will be connected in Stage 3. No room has been joined.");
+  const submit = event.currentTarget.querySelector('[type="submit"]');
+  submit.disabled = true;
+  try {
+    const result = await call("redeemWatchInvitation")({ inviteCode: code });
+    await loadDashboard(auth.currentUser);
+    showTab(result.data.targetType === "club" ? "clubs" : "rooms");
+    setFeedback("wr-join-feedback", result.data.alreadyMember ? "You're already a member of that space." : "You've joined successfully.");
+    input.value = "";
+  } catch (error) {
+    setFeedback("wr-join-feedback", errorText(error, "Couldn't redeem that invitation."), true);
+  } finally {
+    submit.disabled = false;
+  }
 });
 
-byId("wr-create-club-form")?.addEventListener("submit", event => {
+byId("wr-create-club-form")?.addEventListener("submit", async event => {
   event.preventDefault();
   const form = event.currentTarget;
   if (!form.reportValidity()) return;
-  const data = new FormData(form);
-  const club = {
-    id: "preview-" + Date.now(),
-    name: String(data.get("clubName") || "").trim(),
-    description: String(data.get("description") || "").trim()
-  };
-  previewState.clubs.unshift(club);
-  previewState.selectedClubId = club.id;
-  renderClubPreviews();
-  showTab("clubs");
-  setFeedback("wr-club-feedback", "Club preview created on this device only. Secure club creation and membership will be connected in Stage 3.");
-  byId("wr-stage-note").textContent = "Preview mode · Your club is not saved or shared. Secure club creation and invitations are coming in Stage 3.";
-  form.reset();
-  window.setTimeout(() => closeDialog(clubDialog), 900);
+  const submit = form.querySelector('[type="submit"]');
+  submit.disabled = true;
+  try {
+    const data = new FormData(form);
+    const created = await call("createCinemaClub")({
+      name: String(data.get("clubName") || "").trim(),
+      description: String(data.get("description") || "").trim()
+    });
+    const invitation = await call("createWatchInvitation")({ targetType: "club", targetId: created.data.clubId });
+    dashboardState.selectedClubId = created.data.clubId;
+    await loadDashboard(auth.currentUser);
+    showTab("clubs");
+    setFeedback("wr-club-feedback", "Cinema Club created. Your invite code is " + invitation.data.inviteCode + " · Expires in 48 hours. Share it privately.");
+    form.reset();
+  } catch (error) {
+    setFeedback("wr-club-feedback", errorText(error, "Couldn't create your Cinema Club. Please try again."), true);
+    try { await loadDashboard(auth.currentUser); } catch {}
+  } finally {
+    submit.disabled = false;
+  }
 });
 
 showTab("rooms");
@@ -221,7 +306,7 @@ retryButton?.addEventListener("click", () => window.location.reload());
 async function initializeWatchRoomsAccess() {
   if (!auth) throw new Error("Firebase Authentication is unavailable.");
   if (typeof auth.authStateReady === "function") await auth.authStateReady();
-  onAuthStateChanged(auth, user => {
+  onAuthStateChanged(auth, async user => {
     if (!user || user.isAnonymous) {
       requireVividAccount();
       return;
@@ -230,6 +315,12 @@ async function initializeWatchRoomsAccess() {
     if (errorPanel) errorPanel.hidden = true;
     if (privateContent) privateContent.hidden = false;
     document.body.dataset.vividWatchRoomsAccess = "authenticated";
+    try {
+      await loadDashboard(user);
+    } catch (error) {
+      console.error("Vivid Watch Rooms dashboard could not load:", error);
+      byId("wr-stage-note").textContent = "We couldn't load your rooms and clubs. Check your connection and use Try again.";
+    }
   }, showSessionError);
 }
 

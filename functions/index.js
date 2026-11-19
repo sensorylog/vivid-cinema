@@ -317,7 +317,7 @@ export const createWatchRoom = onCall({ region: "us-central1", maxInstances: 20 
     transaction.create(memberRef, member);
     transaction.create(userRoomRef, {
       roomId: roomRef.id, name, filmTitle, role: "host",
-      status: "open", joinedAt: now, createdAt: now
+      status: "open", memberCount: 1, joinedAt: now, createdAt: now
     });
   });
   return { roomId: roomRef.id, expiresAt: expiresAt.toMillis() };
@@ -342,7 +342,7 @@ export const createCinemaClub = onCall({ region: "us-central1", maxInstances: 20
     transaction.create(memberRef, member);
     transaction.create(userClubRef, {
       clubId: clubRef.id, name, description, role: "owner",
-      status: "active", joinedAt: now, createdAt: now
+      status: "active", memberCount: 1, joinedAt: now, createdAt: now
     });
   });
   return { clubId: clubRef.id };
@@ -373,7 +373,7 @@ export const createWatchInvitation = onCall({ region: "us-central1", maxInstance
       throw new HttpsError("permission-denied", "Only the room host or club owner can create invitations.");
     }
     const target = targetSnapshot.data();
-    if ((targetType === "room" && target.status !== "open") || (targetType === "club" && target.status !== "active")) {
+    if ((targetType === "room" && (target.status !== "open" || !target.expiresAt || target.expiresAt.toMillis() <= now.toMillis())) || (targetType === "club" && target.status !== "active")) {
       throw new HttpsError("failed-precondition", "This space is not accepting invitations.");
     }
     transaction.create(invitationRef, {
@@ -416,7 +416,7 @@ export const redeemWatchInvitation = onCall({ region: "us-central1", maxInstance
     if (!targetSnapshot.exists) throw new HttpsError("not-found", "This space is no longer available.");
     if (memberSnapshot.exists) return { targetType: invitation.targetType, targetId: invitation.targetId, alreadyMember: true };
     const target = targetSnapshot.data();
-    if ((isRoom && target.status !== "open") || (!isRoom && target.status !== "active")) {
+    if ((isRoom && (target.status !== "open" || !target.expiresAt || target.expiresAt.toMillis() <= now.toMillis())) || (!isRoom && target.status !== "active")) {
       throw new HttpsError("failed-precondition", "This space is no longer accepting members.");
     }
     const limit = isRoom ? MAX_ROOM_MEMBERS : MAX_CLUB_MEMBERS;
