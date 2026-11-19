@@ -1,6 +1,6 @@
 # Vivid Watch Rooms — Engineering Architecture
 
-Status: Stages 1–4 implemented and validated; Stage 5 synchronized playback in progress.
+Status: Stages 1–4 implemented and validated; Stage 5 code complete with CI validation pending; Stage 6 implementation in progress.
 Repository: sensorylog/vivid-cinema
 Base branch: main
 Feature branch: feature/watch-rooms
