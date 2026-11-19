@@ -78,3 +78,42 @@ test("Watch Rooms private content waits for a non-anonymous Firebase user", () =
   const authSource = readFileSync(new URL("../scripts/auth.js", import.meta.url), "utf8");
   assert.ok(authSource.includes("preservePostAuthDestination"));
 });
+
+
+test("Watch Rooms dashboard exposes room creation, invitation entry and club management UI", () => {
+  const page = readFileSync(new URL("../watch-rooms.html", import.meta.url), "utf8");
+  const moduleSource = readFileSync(new URL("../scripts/watch-rooms.js", import.meta.url), "utf8");
+  const styles = readFileSync(new URL("../styles/vivid-watch-rooms.css", import.meta.url), "utf8");
+  for (const required of [
+    'data-open-dialog="create-room"',
+    'data-open-dialog="join-room"',
+    'data-open-dialog="create-club"',
+    'id="wr-create-room-dialog"',
+    'id="wr-join-room-dialog"',
+    'id="wr-create-club-dialog"',
+    'id="wr-panel-rooms"',
+    'id="wr-panel-clubs"',
+    'id="wr-club-detail"'
+  ]) assert.ok(page.includes(required), "missing Watch Rooms UI contract: " + required);
+  for (const required of [
+    'addEventListener("submit"',
+    "renderRoomPreviews()",
+    "renderClubPreviews()",
+    "renderClubDetail(selected)",
+    "user.isAnonymous",
+    "auth.authStateReady()",
+    "Invitation lookup and membership checks will be connected in Stage 3",
+    "Your club is not saved or shared"
+  ]) assert.ok(moduleSource.includes(required), "missing Watch Rooms interaction contract: " + required);
+  assert.ok(styles.includes(".vivid-wr-dialog::backdrop"));
+  assert.ok(styles.includes("@media(max-width:760px)"));
+});
+
+test("Watch Rooms preview actions never claim backend persistence or membership", () => {
+  const moduleSource = readFileSync(new URL("../scripts/watch-rooms.js", import.meta.url), "utf8");
+  assert.ok(moduleSource.includes("LOCAL PREVIEW · NOT SAVED"));
+  assert.ok(moduleSource.includes("No room has been joined."));
+  assert.ok(moduleSource.includes("Your club is not saved or shared."));
+  assert.ok(!moduleSource.includes("addDoc("));
+  assert.ok(!moduleSource.includes("setDoc("));
+});
