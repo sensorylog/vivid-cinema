@@ -67,6 +67,22 @@ function postAuthDestination(){
     return target.pathname.replace(/^\//,"")+target.search+target.hash;
   }catch{return "home.html";}
 }
+function preservePostAuthDestination(){
+  const requested=new URLSearchParams(window.location.search).get("returnTo");
+  if(!requested)return;
+  const destination=postAuthDestination();
+  if(destination==="home.html")return;
+  document.querySelectorAll(".auth-switch a").forEach(link=>{
+    try{
+      const target=new URL(link.href,window.location.href);
+      if(target.origin!==window.location.origin)return;
+      target.searchParams.set("returnTo",destination);
+      link.href=target.pathname.replace(/^\\//,"")+target.search+target.hash;
+    }catch{}
+  });
+}
+preservePostAuthDestination();
+
 function withTimeout(promise,ms,label){
   return Promise.race([
     promise,
