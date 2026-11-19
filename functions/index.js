@@ -472,6 +472,14 @@ export const revokeWatchInvitation = onCall({ region: "us-central1", maxInstance
 
 // Watch Rooms Stage 4: trusted lobby, queue, chat and host-control operations.
 export {
+  addCinemaClubWatchlistItem,
+  removeCinemaClubWatchlistItem,
+  recordCinemaClubScreening,
+  addCinemaClubAfterCreditsReview,
+  addCinemaClubDiscussionMessage
+} from "./watch-rooms-clubs.js";
+
+export {
   heartbeatWatchRoom,
   addWatchRoomQueueItem,
   voteWatchRoomQueueItem,
