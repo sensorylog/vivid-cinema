@@ -34,7 +34,7 @@ async function requireRoomMember(roomId, uid) {
   const roomRef = db().collection("rooms").doc(roomId);
   const memberRef = roomRef.collection("members").doc(uid);
   const [room, member] = await Promise.all([roomRef.get(), memberRef.get()]);
-  if (!room.exists || room.data().status !== "open" || !member.exists) {
+  const expiresAt = room.exists ? room.data().expiresAt?.toMillis?.() : 0;\n  if (!room.exists || room.data().status !== "open" || (expiresAt && expiresAt <= Date.now()) || !member.exists) {
     throw new HttpsError("permission-denied", "You are not a member of an open room.");
   }
   return { roomRef, room: room.data(), memberRef, member: member.data() };
