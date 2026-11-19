@@ -228,3 +228,15 @@ test("Cinema Club writes re-check active club status inside their transactions",
   assert.ok(rules.includes("function isVividUser()"));
   assert.ok(rules.includes("request.auth.token.firebase.sign_in_provider != 'anonymous'"));
 });
+
+
+test("Cinema Club capacity limits use transactional counters to prevent concurrent overfill", () => {
+  const backend = readFileSync(new URL("../functions/watch-rooms-clubs.js", import.meta.url), "utf8");
+  const add = backend.slice(backend.indexOf("export const addCinemaClubWatchlistItem"), backend.indexOf("export const removeCinemaClubWatchlistItem"));
+  const remove = backend.slice(backend.indexOf("export const removeCinemaClubWatchlistItem"), backend.indexOf("export const recordCinemaClubScreening"));
+  const discussion = backend.slice(backend.indexOf("export const addCinemaClubDiscussionMessage"));
+  assert.ok(add.includes("watchlistCount") && add.includes("tx.update(clubRef"), "watchlist cap must be serialized on the club document");
+  assert.ok(remove.includes("watchlistCount") && remove.includes("tx.update(clubRef"), "removing a pick must decrement the shared counter");
+  assert.ok(discussion.includes("discussionCount") && discussion.includes("tx.update(screeningRef"), "discussion cap must be serialized on the screening document");
+  assert.doesNotMatch(discussion, /tx\.get\(screeningRef\.collection\(["']discussion["']\)\)/, "a collection-size query alone is vulnerable to concurrent inserts");
+});
