@@ -121,7 +121,7 @@ joinButton.addEventListener("click", () => {
   if (latestRemoteState) applyRemoteState(true);
   else setNote("You’re connected. Waiting for the host’s first playback update.");
 });
-leaveButton.addEventListener("click", () => { stopConnection(); setNote("Disconnected from the Watch Room. Your Vivid player is still available."); });
+leaveButton.addEventListener("click", () => { stopConnection(); const next = new URL(window.location.href); next.searchParams.delete("roomId"); window.history.replaceState({}, "", next); setNote("Disconnected from the Watch Room. Your Vivid player is still available."); });
 
 window.addEventListener("vivid:provider-playback", event => {
   const detail = event.detail || {};
@@ -161,8 +161,8 @@ window.addEventListener("vivid:player-source-changed", event => {
 onAuthStateChanged(auth, user => {
   if (!user || user.isAnonymous) { stopConnection(); setNote("Sign in to connect a private Watch Room."); form.querySelector("button").disabled = true; return; }
   form.querySelector("button").disabled = false;
-  const existingRoomId = params.get("roomId");
+  const existingRoomId = new URLSearchParams(window.location.search).get("roomId");
   if (existingRoomId && !roomId) connectToRoom(existingRoomId).catch(error => setNote(error?.message || "Could not reconnect to this Watch Room."));
 });
 
-window.addEventListener("pagehide", stopConnection, { once: true });
+window.addEventListener("pagehide", stopConnection);\nwindow.addEventListener("pageshow", event => {\n  if (!event.persisted || !auth.currentUser || auth.currentUser.isAnonymous) return;\n  const restoredRoomId = new URLSearchParams(window.location.search).get("roomId");\n  if (restoredRoomId && !roomId) connectToRoom(restoredRoomId).catch(error => setNote(error?.message || "Could not reconnect to this Watch Room."));\n});
