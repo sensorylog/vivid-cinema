@@ -311,7 +311,7 @@ export const createWatchRoom = onCall({ region: "us-central1", maxInstances: 20 
   await db.runTransaction(async transaction => {
     transaction.create(roomRef, {
       schemaVersion: 1, name, filmTitle, hostUid: auth.uid,
-      visibility: "invite", status: "open", memberCount: 1,
+      visibility: "invite", status: "open", memberCount: 1, queueCount: 0,
       createdAt: now, updatedAt: now, expiresAt
     });
     transaction.create(memberRef, member);
