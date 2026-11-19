@@ -115,7 +115,7 @@ form.addEventListener("submit", async event => {
 });
 
 joinButton.addEventListener("click", () => {
-  if (!getSupportedFrame()) { setNote("Select VidSrc and start the player before joining synchronized playback."); return; }
+  if (!getSupportedFrame() || localPosition == null) { setNote("Select VidSrc and start playback first. Once Vivid detects the player clock, tap Join synced playback."); return; }
   joinedPlayback = true;
   if (latestRemoteState) applyRemoteState(true);
   else setNote("You’re connected. Waiting for the host’s first playback update.");
