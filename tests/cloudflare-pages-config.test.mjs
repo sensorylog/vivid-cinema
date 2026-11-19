@@ -77,5 +77,5 @@ test("Cloudflare CSP allows the active verification API and managed download fun
   assert.ok(csp.includes("https://us-central1-vivid-cinema.cloudfunctions.net"));
   assert.ok(csp.includes("https://archive.org"));
   assert.ok(csp.includes("https://commons.wikimedia.org"));
-  assert.doesNotMatch(csp, /vivid-cinema-api\.vercel\.app/);
+  assert.ok(csp.includes("https://vivid-cinema-api.vercel.app"));
 });
