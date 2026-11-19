@@ -77,7 +77,7 @@ function preservePostAuthDestination(){
       const target=new URL(link.href,window.location.href);
       if(target.origin!==window.location.origin)return;
       target.searchParams.set("returnTo",destination);
-      link.href=target.pathname.replace(/^\\//,"")+target.search+target.hash;
+      link.href=(target.pathname.startsWith("/")?target.pathname.slice(1):target.pathname)+target.search+target.hash;
     }catch{}
   });
 }
