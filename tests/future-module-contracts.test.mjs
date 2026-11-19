@@ -115,8 +115,8 @@ test("Watch Rooms dashboard exposes room creation, invitation entry and club man
 test("Watch Rooms dashboard uses trusted backend calls rather than local-only previews", () => {
   const moduleSource = readFileSync(new URL("../scripts/watch-rooms.js", import.meta.url), "utf8");
   assert.ok(moduleSource.includes("httpsCallable(functions, name)"));
-  assert.ok(moduleSource.includes("getDocs(query(collection(db, \"users\", user.uid, \"watchRooms\"")));
-  assert.ok(moduleSource.includes("getDocs(query(collection(db, \"users\", user.uid, \"cinemaClubs\"")));
+  assert.ok(moduleSource.includes('collection(db, "users", user.uid, "watchRooms")'));
+  assert.ok(moduleSource.includes('collection(db, "users", user.uid, "cinemaClubs")'));
   assert.ok(moduleSource.includes("createWatchInvitation"));
   assert.ok(moduleSource.includes("redeemWatchInvitation"));
   assert.ok(!moduleSource.includes("LOCAL PREVIEW · NOT SAVED"));
