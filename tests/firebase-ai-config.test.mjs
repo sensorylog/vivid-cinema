@@ -17,6 +17,15 @@ test("Vivid Recall uses the stable, lower-cost Gemini Flash-Lite model", () => {
   assert.doesNotMatch(aiSource, /gemini-3\.8-flash/);
 });
 
+test("Gemini requests share one App Check client and serialize/retry only initial token throttles", () => {
+  assert.match(aiSource, /let recallAi = null/);
+  assert.match(aiSource, /useLimitedUseAppCheckTokens: true/);
+  assert.match(aiSource, /function serializeAiRequest\(task\)/);
+  assert.match(aiSource, /appCheck\\/initial-throttle/);
+  assert.match(aiSource, /attempt < 2/);
+  assert.match(aiSource, /do not retry quota, permission, or model errors/);
+});
+
 test("Gemini request timeouts attempt to abort the underlying browser request", () => {
   assert.match(aiSource, /model\.generateContent\(prompt, \{ signal: controller\.signal \}\)/);
   assert.match(aiSource, /controller\.abort\(\)/);
@@ -32,6 +41,8 @@ test("Recall keeps detailed quota and provider errors visible for diagnosis", ()
   assert.match(chatSource, /quotaFailure/);
   assert.match(chatSource, /full diagnostic/);
   assert.match(chatSource, /Gemini 429/);
+  assert.match(chatSource, /Try again shortly/);
+  assert.doesNotMatch(chatSource, /setStatus\(localLabel \+ .*fullDiagnostic/);
 });
 
 test("service worker cache version changes with the updated AI modules", () => {
