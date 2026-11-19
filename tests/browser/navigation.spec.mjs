@@ -57,4 +57,6 @@ test("website navigation does not advertise the unsupported Offline downloads ta
   await expect(page.locator(".vivid-navlinks a[href='my-downloads.html']")).toHaveCount(0);
   await expect(page.locator(".vivid-mobile-nav a[href='my-downloads.html']")).toHaveCount(0);
   await expect(page.locator(".vivid-navlinks a[href='library.html']")).toHaveCount(1);
+  await expect(page.locator(".vivid-watch-rooms-nav")).toHaveAttribute("href", "watch-rooms.html");
+  await expect(page.locator(".vivid-mobile-nav a")).toHaveCount(7);
 });
