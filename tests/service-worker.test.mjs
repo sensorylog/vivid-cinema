@@ -13,6 +13,9 @@ test("service worker has a versioned cache and required offline shell", () => {
   assert.match(source, /const REQUIRED_APP_SHELL = \["\.\/index\.html", "\.\/home\.html", "\.\/offline\.html", "\.\/manifest\.json"\]/);
   assert.match(source, /failedRequired\.length/);
   assert.ok(source.includes("async function cacheOptionalShell()"));
+  assert.ok(source.includes('"./watch-rooms.html"'));
+  assert.ok(source.includes('"./scripts/watch-rooms.js"'));
+  assert.ok(source.includes('"./styles/vivid-watch-rooms.css"'));
   assert.match(source, /optional assets were not precached/);
   assert.ok(source.includes('type==="PRECACHE_OPTIONAL"'));
   assert.match(source, /\.\/scripts\/local-owner\.js/);
