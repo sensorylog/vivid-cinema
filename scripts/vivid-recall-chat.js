@@ -57,34 +57,56 @@ function errorDiagnostic(error) {
     error?.details ||
     null;
   let responseText = "";
+  let parsedResponse = null;
   if (rawResponse) {
     if (typeof rawResponse === "string") {
       try {
-        const parsed = JSON.parse(rawResponse);
-        const serverError = parsed?.error || parsed;
-        responseText = [
-          serverError?.status,
-          serverError?.code,
-          serverError?.message
-        ].filter(Boolean).join(" · ") || rawResponse;
+        parsedResponse = JSON.parse(rawResponse);
       } catch {
         responseText = rawResponse;
       }
-    } else {
-      const serverError = rawResponse?.error || rawResponse;
-      responseText = [
-        serverError?.status,
-        serverError?.code,
-        serverError?.message
-      ].filter(Boolean).join(" · ") || JSON.stringify(rawResponse);
+    } else if (typeof rawResponse === "object") {
+      parsedResponse = rawResponse;
     }
   }
+
+  const serverError = parsedResponse?.error || parsedResponse || null;
+  if (serverError) {
+    responseText = [
+      serverError?.status,
+      serverError?.code,
+      serverError?.message
+    ].filter(Boolean).join(" · ");
+  }
+
+  // Google returns the actionable quota identifier inside QuotaFailure
+  // details. Keep these fields visible so a 429 is not misdiagnosed as
+  // generic traffic when a model/project free-tier allocation is zero.
+  const detailEntries = [
+    ...(Array.isArray(serverError?.details) ? serverError.details : []),
+    ...(Array.isArray(error?.details) ? error.details : [])
+  ];
+  const quotaViolations = detailEntries
+    .filter(item => /QuotaFailure/i.test(String(item?.["@type"] || item?.type || "")))
+    .flatMap(item => Array.isArray(item?.violations) ? item.violations : []);
+  const quotaText = quotaViolations.flatMap(item => [
+    item?.quotaMetric ? "metric=" + item.quotaMetric : "",
+    item?.quotaId ? "quota=" + item.quotaId : "",
+    item?.quotaValue != null ? "limit=" + item.quotaValue : "",
+    item?.quotaDimensions?.model ? "model=" + item.quotaDimensions.model : "",
+    item?.quotaDimensions?.location ? "location=" + item.quotaDimensions.location : ""
+  ]).filter(Boolean).join(" | ");
+
+  const retryInfo = detailEntries.find(item => /RetryInfo/i.test(String(item?.["@type"] || item?.type || "")));
+  const retryDelay = retryInfo?.retryDelay ? "retry=" + retryInfo.retryDelay : "";
   return cleanText([
     error?.code,
     error?.status ? "HTTP " + error.status : "",
     error?.message,
-    responseText && responseText !== error?.message ? "Server: " + responseText : ""
-  ].filter(Boolean).join(" · ") || "Unknown error", 420);
+    responseText && responseText !== error?.message ? "Server: " + responseText : "",
+    quotaText,
+    retryDelay
+  ].filter(Boolean).join(" · ") || "Unknown error", 650);
 }
 
 function normalizeTitle(value) {
@@ -240,7 +262,7 @@ async function sendMessage(text) {
     const localMatches = await fallbackToLocalSearch(version);
     if (version === requestVersion) {
       const localLabel = needsSignIn ? "Gemini 401" : quotaFailure ? "Gemini 429" : "Gemini connection failed";
-      setStatus(localLabel + " · " + (localMatches ? "Local Recall found " + localMatches + " possible matches" : "Local Recall is ready for more clues") + " · Try again shortly.");
+      setStatus(localLabel + " · " + (localMatches ? "Local Recall found " + localMatches + " possible matches" : "Local Recall is ready for more clues") + " · " + fullDiagnostic + " · Try again shortly.");
     }
   } finally {
     if (version === requestVersion) {
