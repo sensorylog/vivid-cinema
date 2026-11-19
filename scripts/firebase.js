@@ -59,6 +59,65 @@ async function loadFirebaseConfig() {
 const firebaseConfig = await loadFirebaseConfig();
 const app = initializeApp(firebaseConfig);
 
+// Capture the actual Firebase App Check token-exchange rejection. The AI SDK
+// only receives a dummy App Check token after this request fails, which hides
+// the useful HTTP response body behind a generic AI/error wrapper.
+let lastAppCheckExchangeFailure = null;
+const APP_CHECK_EXCHANGE_URL =
+  /(?:content-)?firebaseappcheck\\.googleapis\\.com\\/v1(?:beta)?\\/projects\\/[^/]+\\/apps\\/[^/?]+:exchangeRecaptchaEnterpriseToken/i;
+
+function installAppCheckExchangeDiagnostics() {
+  if (typeof window === "undefined" || typeof window.fetch !== "function" ||
+      window.fetch.__vividAppCheckDiagnostics) return;
+
+  const nativeFetch = window.fetch.bind(window);
+  const diagnosticFetch = async (input, init) => {
+    const requestUrl = typeof input === "string" ? input : input?.url || "";
+    const isAppCheckExchange = APP_CHECK_EXCHANGE_URL.test(requestUrl);
+    const response = await nativeFetch(input, init);
+    if (!isAppCheckExchange) return response;
+
+    if (response.ok) {
+      lastAppCheckExchangeFailure = null;
+      return response;
+    }
+
+    let responseBody = null;
+    try {
+      responseBody = await response.clone().json();
+    } catch {
+      try {
+        responseBody = { message: (await response.clone().text()).slice(0, 500) };
+      } catch {
+        responseBody = { message: "The App Check error response body could not be read." };
+      }
+    }
+
+    const apiError = responseBody?.error || responseBody || {};
+    lastAppCheckExchangeFailure = {
+      status: response.status,
+      endpoint: "exchangeRecaptchaEnterpriseToken",
+      code: apiError.code || response.status,
+      message: String(apiError.message || response.statusText || "App Check token exchange failed").slice(0, 500),
+      apiStatus: apiError.status || null,
+      details: Array.isArray(apiError.details) ? apiError.details : [],
+      retryAfter: response.headers.get("Retry-After"),
+      capturedAt: new Date().toISOString()
+    };
+    console.error("Vivid App Check token exchange rejected:", lastAppCheckExchangeFailure);
+    return response;
+  };
+
+  diagnosticFetch.__vividAppCheckDiagnostics = true;
+  window.fetch = diagnosticFetch;
+}
+
+installAppCheckExchangeDiagnostics();
+
+export function getLastAppCheckExchangeFailure() {
+  return lastAppCheckExchangeFailure;
+}
+
 // App Check must initialize before services that use it. The site key is public;
 // Gemini authorization remains behind the Firebase AI Logic proxy.
 let appCheck = null;
