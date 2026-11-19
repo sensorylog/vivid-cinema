@@ -405,6 +405,7 @@ export const redeemWatchInvitation = onCall({ region: "us-central1", maxInstance
       throw new HttpsError("failed-precondition", "This invitation is expired, revoked or full.");
     }
     const isRoom = invitation.targetType === "room";
+    if (request.data?.expectedTargetType && request.data.expectedTargetType !== invitation.targetType) throw new HttpsError("failed-precondition", "This invitation is for a different Vivid space.");
     const targetCollection = isRoom ? "rooms" : invitation.targetType === "club" ? "cinemaClubs" : null;
     if (!targetCollection) throw new HttpsError("failed-precondition", "This invitation has an invalid destination.");
     const targetRef = db.collection(targetCollection).doc(invitation.targetId);
