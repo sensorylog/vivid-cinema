@@ -18,7 +18,7 @@ let localPosition = null;
 let localStatus = "";
 let hostStatus = "playing";
 let lastPublishAt = 0;
-let publishQueue = Promise.resolve(); lastHostPayload = null;
+let publishQueue = Promise.resolve();
 let lastHostPayload = null;
 
 const panel = document.createElement("section");
