@@ -234,13 +234,13 @@ async function sendMessage(text) {
     const userFacingError = needsSignIn
       ? "Gemini returned 401 (unauthenticated). Firebase AI Logic may be set to allow signed-in users only. Sign in to Vivid Cinema, or change that AI Logic setting if guest chat should be allowed."
       : quotaFailure
-        ? "Gemini returned a quota or capacity error (429). Your clues are still here, and local catalogue search is active. The status below includes the server diagnostic so we can identify the exact limit."
-        : "Gemini couldn’t connect this time. Your clues are still saved in this chat, and I’ve switched to local catalogue search. The status below shows the expanded error details.";
+        ? "Gemini is temporarily busy or rate-limited. Your clues are still here, and local catalogue search is active."
+        : "Gemini couldn’t connect this time. Your clues are still saved in this chat, and I’ve switched to local catalogue search.";
     addMessage("assistant", userFacingError);
     const localMatches = await fallbackToLocalSearch(version);
     if (version === requestVersion) {
       const localLabel = needsSignIn ? "Gemini 401" : quotaFailure ? "Gemini 429" : "Gemini connection failed";
-      setStatus(localLabel + " · " + (localMatches ? "Local Recall found " + localMatches + " possible matches" : "Local Recall is ready for more clues") + " · " + fullDiagnostic);
+      setStatus(localLabel + " · " + (localMatches ? "Local Recall found " + localMatches + " possible matches" : "Local Recall is ready for more clues") + " · Try again shortly.");
     }
   } finally {
     if (version === requestVersion) {
