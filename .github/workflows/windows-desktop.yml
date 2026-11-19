@@ -135,7 +135,7 @@ jobs:
         run: |
           $version = node -p "require('./package.json').version"
           $tag = "v$version"
-          $requiredAssets = @("Vivid-Cinema-Setup-$version.exe", "Vivid-Cinema-Portable-$version.exe", "Vivid-Cinema-Setup-$version.exe.blockmap", "latest.yml", "Vivid-Cinema-Android.apk")
+          $requiredAssets = @("Vivid-Cinema-Setup-$version.exe", "Vivid-Cinema-Portable-$version.exe", "Vivid-Cinema-Setup-$version.exe.blockmap", "latest.yml")
           $buildNeeded = $true
           $releaseJson = gh release view $tag --json isDraft,assets 2>$null
           if ($LASTEXITCODE -eq 0) {
@@ -202,7 +202,7 @@ jobs:
             throw "Release $tag must remain a draft until every asset has been verified."
           }
           $assetNames = @($release.assets | ForEach-Object { $_.name })
-          $requiredAssets = @("Vivid-Cinema-Setup-$version.exe", "Vivid-Cinema-Portable-$version.exe", "Vivid-Cinema-Setup-$version.exe.blockmap", "latest.yml")
+          $requiredAssets = @("Vivid-Cinema-Setup-$version.exe", "Vivid-Cinema-Portable-$version.exe", "Vivid-Cinema-Setup-$version.exe.blockmap", "latest.yml", "Vivid-Cinema-Android.apk")
           foreach ($assetName in $requiredAssets) {
             if ($assetNames -notcontains $assetName) {
               throw "Published release $tag is missing required updater asset: $assetName"
