@@ -5,6 +5,7 @@ import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/
 const byId = id => document.getElementById(id);
 const call = name => httpsCallable(getFunctions(app, "us-central1"), name);
 let activeClub = null;
+let lastClub = null;
 let activeScreeningId = null;
 let stops = [];
 
@@ -91,6 +92,7 @@ document.addEventListener("vivid:cinema-club-selected", event => {
   if (!club?.clubId || club.clubId === activeClub?.clubId) return;
   stopListeners();
   activeClub = club;
+  lastClub = club;
   byId("wr-after-credits").hidden = true;
   const base = ["cinemaClubs", club.clubId];
   stops.push(onSnapshot(query(collection(db, ...base, "watchlist"), orderBy("createdAt", "desc"), limit(100)), renderWatchlist, error => feedback(error.message, true)));
@@ -158,4 +160,10 @@ byId("wr-club-discussion-form")?.addEventListener("submit", async event => {
   } catch (error) { feedback(error.message || "Couldn't post your message.", true); }
   finally { button.disabled = false; }
 });
-window.addEventListener("pagehide", stopListeners);
+window.addEventListener("pagehide", () => {
+  stopListeners();
+  activeClub = null;
+});
+window.addEventListener("pageshow", () => {
+  if (lastClub) document.dispatchEvent(new CustomEvent("vivid:cinema-club-selected", { detail: lastClub }));
+});
