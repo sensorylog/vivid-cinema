@@ -56,11 +56,12 @@ export const addCinemaClubWatchlistItem = onCall({ region: "us-central1", maxIns
   const listRef = clubRef.collection("watchlist");
   const itemRef = listRef.doc(contentId.replace(":", "_"));
   await db().runTransaction(async tx => {
-    const [club, member, item, list] = await Promise.all([tx.get(clubRef), tx.get(clubRef.collection("members").doc(uid)), tx.get(itemRef), tx.get(listRef)]);
+    const [club, member, item] = await Promise.all([tx.get(clubRef), tx.get(clubRef.collection("members").doc(uid)), tx.get(itemRef)]);
     if (!club.exists || club.data().status !== "active" || !member.exists) throw new HttpsError("permission-denied", "You are no longer a member of this club.");
     if (item.exists) return;
-    if (list.size >= MAX_WATCHLIST_ITEMS) throw new HttpsError("resource-exhausted", "This club's shared watchlist is full.");
+    if (Number(club.data().watchlistCount || 0) >= MAX_WATCHLIST_ITEMS) throw new HttpsError("resource-exhausted", "This club's shared watchlist is full.");
     tx.create(itemRef, { contentId, mediaType, title, year, posterPath, addedBy: uid, createdAt: Timestamp.now() });
+    tx.update(clubRef, { watchlistCount: Number(club.data().watchlistCount || 0) + 1, updatedAt: Timestamp.now() });
   });
   return { added: true, itemId: itemRef.id };
 });
@@ -74,7 +75,10 @@ export const removeCinemaClubWatchlistItem = onCall({ region: "us-central1", max
   await db().runTransaction(async tx => {
     const [club, member, item] = await Promise.all([tx.get(clubRef), tx.get(clubRef.collection("members").doc(uid)), tx.get(itemRef)]);
     if (!club.exists || club.data().status !== "active" || !member.exists) throw new HttpsError("permission-denied", "You are no longer a member of an active club.");
-    if (item.exists) tx.delete(itemRef);
+    if (item.exists) {
+      tx.delete(itemRef);
+      tx.update(clubRef, { watchlistCount: Math.max(0, Number(club.data().watchlistCount || 0) - 1), updatedAt: Timestamp.now() });
+    }
   });
   return { removed: true };
 });
@@ -96,7 +100,7 @@ export const recordCinemaClubScreening = onCall({ region: "us-central1", maxInst
     if (!club.exists || club.data().status !== "active" || !member.exists) throw new HttpsError("permission-denied", "You are no longer a member of this club.");
     tx.create(screeningRef, {
       contentId, mediaType, title, notes, screenedAt: Timestamp.fromMillis(screenedAtInput),
-      recordedBy: uid, reviewCount: 0, ratingTotal: 0, averageRating: 0, createdAt: Timestamp.now()
+      recordedBy: uid, reviewCount: 0, ratingTotal: 0, averageRating: 0, discussionCount: 0, createdAt: Timestamp.now()
     });
   });
   return { screeningId: screeningRef.id };
@@ -136,11 +140,12 @@ export const addCinemaClubDiscussionMessage = onCall({ region: "us-central1", ma
   const screeningRef = clubRef.collection("screenings").doc(screeningId);
   const messageRef = screeningRef.collection("discussion").doc();
   await db().runTransaction(async tx => {
-    const [club, member, screening, messages] = await Promise.all([tx.get(clubRef), tx.get(clubRef.collection("members").doc(uid)), tx.get(screeningRef), tx.get(screeningRef.collection("discussion"))]);
+    const [club, member, screening] = await Promise.all([tx.get(clubRef), tx.get(clubRef.collection("members").doc(uid)), tx.get(screeningRef)]);
     if (!club.exists || club.data().status !== "active" || !member.exists) throw new HttpsError("permission-denied", "You are no longer a member of an active club.");
     if (!screening.exists) throw new HttpsError("not-found", "Screening not found.");
-    if (messages.size >= MAX_DISCUSSION_MESSAGES) throw new HttpsError("resource-exhausted", "This screening discussion has reached its limit.");
+    if (Number(screening.data().discussionCount || 0) >= MAX_DISCUSSION_MESSAGES) throw new HttpsError("resource-exhausted", "This screening discussion has reached its limit.");
     tx.create(messageRef, { uid, message, createdAt: Timestamp.now() });
+    tx.update(screeningRef, { discussionCount: Number(screening.data().discussionCount || 0) + 1 });
   });
   return { messageId: messageRef.id };
 });
