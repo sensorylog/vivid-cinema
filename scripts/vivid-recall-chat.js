@@ -240,7 +240,27 @@ async function sendMessage(text) {
     if (version !== requestVersion) return;
     const errorCode = String(error?.code || "");
     const errorMessage = String(error?.message || error || "Unknown error");
-    const fullDiagnostic = errorDiagnostic(error);
+    const sdkDiagnostic = errorDiagnostic(error);
+    let appCheckExchangeFailure = null;
+    try {
+      const firebaseModule = await import("./firebase.js");
+      appCheckExchangeFailure = firebaseModule.getLastAppCheckExchangeFailure?.() || null;
+    } catch {
+      // Keep the original AI SDK diagnostic if the optional App Check detail is unavailable.
+    }
+    const exchangeDiagnostic = appCheckExchangeFailure
+      ? [
+          "App Check exchange HTTP " + appCheckExchangeFailure.status,
+          "code=" + appCheckExchangeFailure.code,
+          appCheckExchangeFailure.message,
+          appCheckExchangeFailure.apiStatus || "",
+          appCheckExchangeFailure.details?.length
+            ? "details=" + JSON.stringify(appCheckExchangeFailure.details).slice(0, 420)
+            : "",
+          appCheckExchangeFailure.retryAfter ? "retry-after=" + appCheckExchangeFailure.retryAfter : ""
+        ].filter(Boolean).join(" · ")
+      : "";
+    const fullDiagnostic = [sdkDiagnostic, exchangeDiagnostic].filter(Boolean).join(" · ").slice(0, 1100);
     const diagnosticText = errorCode + " " + errorMessage + " " + fullDiagnostic;
     const needsSignIn = /unauthenticated/i.test(diagnosticText) || /\b401\b/.test(diagnosticText);
     const appCheckThrottle = /appCheck\/(?:initial-)?throttled?/i.test(diagnosticText) || /AppCheck: Requests throttled due to previous 429/i.test(diagnosticText);
@@ -250,6 +270,7 @@ async function sendMessage(text) {
       message: errorMessage,
       customData: error?.customData || null,
       details: error?.details || null,
+      appCheckExchangeFailure,
       diagnostic: fullDiagnostic,
       error
     });
