@@ -131,6 +131,41 @@
               <div class="vivid-wr-detail-stats"><span><strong id="wr-detail-members">1</strong><small>Members</small></span><span><strong>0</strong><small>Screenings</small></span><span><strong>0</strong><small>Watchlist picks</small></span></div><div id="wr-detail-actions" class="vivid-wr-detail-actions"></div>
               <div class="vivid-wr-detail-next"><i class="bi bi-stars" aria-hidden="true"></i><span><strong>Next movie night</strong><small>Plan your first screening with the club.</small></span></div>
               <button class="vivid-wr-button vivid-wr-button--quiet" type="button" data-open-dialog="create-room">Plan a screening <i class="bi bi-arrow-right" aria-hidden="true"></i></button>
+              <section class="vivid-wr-club-library" aria-label="Club watchlist and screening archive">
+                <div class="vivid-wr-club-feature">
+                  <div><span class="vivid-wr-section-kicker">THE CLUB'S SHARED SHELF</span><h4>Watchlist</h4><p>Films your members want to watch together.</p></div>
+                  <form id="wr-club-watchlist-form" class="vivid-wr-inline-form">
+                    <input name="title" maxlength="180" placeholder="Film or series title" required>
+                    <input name="contentId" maxlength="20" placeholder="movie:123 or tv:456" pattern="(movie|tv):[0-9]{1,12}" required>
+                    <button class="vivid-wr-button vivid-wr-button--primary" type="submit">Add pick</button>
+                  </form>
+                  <ul id="wr-club-watchlist" class="vivid-wr-lobby-list"></ul>
+                </div>
+                <div class="vivid-wr-club-feature">
+                  <div><span class="vivid-wr-section-kicker">THE FILMS YOU SHARED</span><h4>Screening history</h4><p>Keep a record of club movie nights and the conversation after.</p></div>
+                  <form id="wr-club-screening-form" class="vivid-wr-inline-form">
+                    <input name="title" maxlength="180" placeholder="What did the club watch?" required>
+                    <input name="contentId" maxlength="20" placeholder="movie:123 or tv:456" pattern="(movie|tv):[0-9]{1,12}" required>
+                    <input name="notes" maxlength="1000" placeholder="Optional screening notes">
+                    <button class="vivid-wr-button vivid-wr-button--quiet" type="submit">Record screening</button>
+                  </form>
+                  <div id="wr-club-screenings" class="vivid-wr-screening-list" aria-live="polite"></div>
+                </div>
+                <section class="vivid-wr-club-feature" id="wr-after-credits" hidden>
+                  <span class="vivid-wr-section-kicker">AFTER THE CREDITS</span><h4 id="wr-after-credits-title">The conversation continues.</h4>
+                  <form id="wr-after-credits-form" class="vivid-wr-inline-form">
+                    <label>Rating <select name="rating" required><option value="5">5 · Loved it</option><option value="4">4 · Great</option><option value="3">3 · Good</option><option value="2">2 · Not for me</option><option value="1">1 · Disappointing</option></select></label>
+                    <textarea name="review" maxlength="1200" rows="2" placeholder="Your take on the film (optional)"></textarea>
+                    <button class="vivid-wr-button vivid-wr-button--primary" type="submit">Share rating</button>
+                  </form>
+                  <div id="wr-after-credits-reviews" class="vivid-wr-screening-list"></div>
+                  <form id="wr-club-discussion-form" class="vivid-wr-inline-form">
+                    <input name="message" maxlength="1000" placeholder="Add to the discussion…" required>
+                    <button class="vivid-wr-button vivid-wr-button--quiet" type="submit">Post</button>
+                  </form>
+                  <div id="wr-club-discussion" class="vivid-wr-screening-list" aria-live="polite"></div>
+                </section>
+              </section>
             </article>
           </div>
         </section>
