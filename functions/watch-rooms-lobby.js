@@ -178,3 +178,13 @@ export const removeWatchRoomMember = onCall({ region: "us-central1", maxInstance
   await db().collection("users").doc(memberUid).collection("watchRooms").doc(roomId).delete().catch(() => {});
   return { removed: true };
 });
+
+
+export const closeWatchRoom = onCall({ region: "us-central1", maxInstances: 20 }, async request => {
+  const uid = requireUser(request);
+  const roomId = validId(request.data?.roomId, "room ID");
+  const { roomRef } = await requireHost(roomId, uid);
+  await roomRef.update({ status: "closed", closedAt: Timestamp.now(), updatedAt: Timestamp.now() });
+  await db().collection("users").doc(uid).collection("watchRooms").doc(roomId).set({ status: "closed" }, { merge: true });
+  return { closed: true };
+});
