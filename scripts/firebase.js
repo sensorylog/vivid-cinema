@@ -64,7 +64,7 @@ const app = initializeApp(firebaseConfig);
 // the useful HTTP response body behind a generic AI/error wrapper.
 let lastAppCheckExchangeFailure = null;
 const APP_CHECK_EXCHANGE_URL =
-  /(?:content-)?firebaseappcheck\\.googleapis\\.com\\/v1(?:beta)?\\/projects\\/[^/]+\\/apps\\/[^/?]+:exchangeRecaptchaEnterpriseToken/i;
+  /(?:content-)?firebaseappcheck\.googleapis\.com\/v1(?:beta)?\/projects\/[^/]+\/apps\/[^/?]+:exchangeRecaptchaEnterpriseToken/i;
 
 function installAppCheckExchangeDiagnostics() {
   if (typeof window === "undefined" || typeof window.fetch !== "function" ||
