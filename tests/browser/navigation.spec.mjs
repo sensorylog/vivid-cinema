@@ -53,10 +53,17 @@ test("core app routes remain navigable with the service worker active", async ({
 
 
 test("website navigation does not advertise the unsupported Offline downloads tab", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/home.html", { waitUntil: "domcontentloaded" });
   await expect(page.locator(".vivid-navlinks a[href='my-downloads.html']")).toHaveCount(0);
   await expect(page.locator(".vivid-mobile-nav a[href='my-downloads.html']")).toHaveCount(0);
   await expect(page.locator(".vivid-navlinks a[href='library.html']")).toHaveCount(1);
-  await expect(page.locator(".vivid-watch-rooms-nav")).toHaveAttribute("href", "watch-rooms.html");
+  const watchRoomsIcon = page.locator(".vivid-watch-rooms-nav");
+  await expect(watchRoomsIcon).toHaveAttribute("href", "watch-rooms.html");
+  await expect(watchRoomsIcon).toBeVisible();
+  const iconBounds = await watchRoomsIcon.boundingBox();
+  expect(iconBounds).not.toBeNull();
+  expect(iconBounds.x).toBeGreaterThanOrEqual(0);
+  expect(iconBounds.x + iconBounds.width).toBeLessThanOrEqual(390);
   await expect(page.locator(".vivid-mobile-nav a")).toHaveCount(7);
 });
