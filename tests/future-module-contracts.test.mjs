@@ -159,3 +159,26 @@ test("Watch Rooms Stage 4 exposes trusted lobby, queue, chat, reactions and host
   assert.ok(lobby.includes("PRESENCE_TTL_MS"));
   assert.ok(lobby.includes("MAX_INSTANCES") || lobby.includes("maxInstances"));
 });
+
+
+test("Watch Rooms Stage 5 exposes a trusted VidSrc-only playback clock and client bridge", () => {
+  const functions = readFileSync(new URL("../functions/index.js", import.meta.url), "utf8");
+  const backend = readFileSync(new URL("../functions/watch-rooms-lobby.js", import.meta.url), "utf8");
+  const rules = readFileSync(new URL("../firestore.rules", import.meta.url), "utf8");
+  const client = readFileSync(new URL("../scripts/watch-room-playback.js", import.meta.url), "utf8");
+  const watch = readFileSync(new URL("../scripts/watch.js", import.meta.url), "utf8");
+  const page = readFileSync(new URL("../watch.html", import.meta.url), "utf8");
+  assert.ok(functions.includes("publishWatchRoomPlayback"));
+  assert.ok(backend.includes("export const publishWatchRoomPlayback = onCall"));
+  assert.ok(backend.includes('request.data?.provider !== "vidsrc"'));
+  assert.ok(backend.includes("requireHost(roomId, uid)"));
+  assert.ok(backend.includes("tx.get(roomRef.collection(\"members\").doc(uid))"));
+  assert.ok(rules.includes("match /playback/{stateId}"));
+  assert.ok(client.includes('const SUPPORTED_ORIGIN = "https://vidsrc.sh"'));
+  assert.ok(client.includes('postMessage({ player: true, action }, SUPPORTED_ORIGIN)'));
+  assert.ok(client.includes('onSnapshot(doc(db, "rooms", roomId, "playback", "current")'));
+  assert.ok(client.includes("Math.abs(expected - localPosition) > 2.5"));
+  assert.ok(watch.includes('event.origin === "https://vidsrc.sh"'));
+  assert.ok(watch.includes('new CustomEvent("vivid:provider-playback"'));
+  assert.ok(page.includes('src="scripts/watch-room-playback.js"'));
+});
