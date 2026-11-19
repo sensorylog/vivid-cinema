@@ -217,7 +217,14 @@ export const publishWatchRoomPlayback = onCall({ region: "us-central1", maxInsta
   const stateRef = roomRef.collection("playback").doc("current");
   const now = Timestamp.now();
   return db().runTransaction(async tx => {
-    const current = await tx.get(stateRef);
+    const [roomSnapshot, memberSnapshot, current] = await Promise.all([
+      tx.get(roomRef), tx.get(roomRef.collection("members").doc(uid)), tx.get(stateRef)
+    ]);
+    const roomData = roomSnapshot.exists ? roomSnapshot.data() : null;
+    const memberData = memberSnapshot.exists ? memberSnapshot.data() : null;
+    if (!roomData || roomData.status !== "open" || (roomData.expiresAt?.toMillis?.() && roomData.expiresAt.toMillis() <= now.toMillis()) || roomData.hostUid !== uid || memberData?.role !== "host") {
+      throw new HttpsError("permission-denied", "Only the active host of an open room can publish playback.");
+    }
     const previous = current.exists ? current.data() : null;
     if (previous && (previous.contentId !== contentId || previous.mediaType !== mediaType || (mediaType === "tv" && (previous.season !== season || previous.episode !== episode)))) throw new HttpsError("failed-precondition", "This room is already synchronized to a different title or episode.");
     if (previous?.lastEventAt?.toMillis && now.toMillis() - previous.lastEventAt.toMillis() < 1800 && status === "playing") return { accepted: false, reason: "rate-limited" };
