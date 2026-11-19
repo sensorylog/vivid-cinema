@@ -1075,7 +1075,7 @@ function handlePlayerEvent(event) {
         provider: "vidsrc", origin: event.origin, event: providerStatus,
         status: providerStatus === "completed" ? "ended" : providerStatus === "paused" ? "paused" : providerStatus === "playing" ? "playing" : "seeked",
         position: Number(data.player_progress) || 0, duration: Number(data.player_duration) || 0,
-        contentId: String(tmdbId || info.tmdb || currentParams?.id || info.imdb || ""),
+        contentId: String(currentParams?.id || info.tmdb || info.imdb || ""),
         mediaType: String(info.mediaType || currentParams?.type || "movie"),
         season: info.season ?? currentParams?.season, episode: info.episode ?? currentParams?.episode
       } }));
