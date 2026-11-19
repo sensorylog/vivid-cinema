@@ -41,6 +41,19 @@ async function requireRoomMember(roomId, uid) {
   return { roomRef, room: room.data(), memberRef, member: member.data() };
 }
 
+
+async function requireRoomMemberInTransaction(tx, roomId, uid) {
+  const roomRef = db().collection("rooms").doc(roomId);
+  const memberRef = roomRef.collection("members").doc(uid);
+  const [roomSnapshot, memberSnapshot] = await Promise.all([tx.get(roomRef), tx.get(memberRef)]);
+  const room = roomSnapshot.exists ? roomSnapshot.data() : null;
+  const expiresAt = room?.expiresAt?.toMillis?.() || 0;
+  if (!room || room.status !== "open" || (expiresAt && expiresAt <= Date.now()) || !memberSnapshot.exists) {
+    throw new HttpsError("permission-denied", "You are not a member of an open room.");
+  }
+  return { roomRef, room, memberRef, member: memberSnapshot.data() };
+}
+
 async function requireHost(roomId, uid) {
   const context = await requireRoomMember(roomId, uid);
   if (context.room.hostUid !== uid || context.member.role !== "host") {
@@ -54,13 +67,14 @@ async function requireHost(roomId, uid) {
 export const heartbeatWatchRoom = onCall({ region: "us-central1", maxInstances: 30 }, async request => {
   const uid = requireUser(request);
   const roomId = validId(request.data?.roomId, "room ID");
-  const { roomRef } = await requireRoomMember(roomId, uid);
+  const roomRef = db().collection("rooms").doc(roomId);
   const now = Date.now();
-  await roomRef.collection("presence").doc(uid).set({
-    uid,
-    lastSeenAt: Timestamp.fromMillis(now),
-    expiresAt: Timestamp.fromMillis(now + PRESENCE_TTL_MS)
-  }, { merge: true });
+  await db().runTransaction(async tx => {
+    await requireRoomMemberInTransaction(tx, roomId, uid);
+    tx.set(roomRef.collection("presence").doc(uid), {
+      uid, lastSeenAt: Timestamp.fromMillis(now), expiresAt: Timestamp.fromMillis(now + PRESENCE_TTL_MS)
+    }, { merge: true });
+  });
   return { expiresAt: now + PRESENCE_TTL_MS };
 });
 
@@ -71,17 +85,18 @@ export const addWatchRoomQueueItem = onCall({ region: "us-central1", maxInstance
   const contentId = request.data?.contentId == null ? null : cleanText(String(request.data.contentId), "Catalogue ID", 80);
   const mediaType = request.data?.mediaType ?? "movie";
   if (!["movie", "tv"].includes(mediaType)) throw new HttpsError("invalid-argument", "Media type must be movie or tv.");
-  const { roomRef, room, member } = await requireRoomMember(roomId, uid);
-  if (room.allowGuestQueue === false && member.role !== "host") throw new HttpsError("permission-denied", "The host has paused guest queue suggestions.");
-  const queueRef = roomRef.collection("queue");
-  const itemRef = queueRef.doc();
+  const roomRef = db().collection("rooms").doc(roomId);
+  const itemRef = roomRef.collection("queue").doc();
   await db().runTransaction(async tx => {
-    const existing = await tx.get(queueRef);
-    if (existing.size >= QUEUE_LIMIT) throw new HttpsError("resource-exhausted", "The room queue is full.");
+    const { room, member } = await requireRoomMemberInTransaction(tx, roomId, uid);
+    if (room.allowGuestQueue === false && member.role !== "host") throw new HttpsError("permission-denied", "The host has paused guest queue suggestions.");
+    const queueCount = Number(room.queueCount || 0);
+    if (queueCount >= QUEUE_LIMIT) throw new HttpsError("resource-exhausted", "The room queue is full.");
     tx.create(itemRef, {
       title, contentId, mediaType, addedBy: uid, votes: [uid],
       voteCount: 1, status: "queued", createdAt: Timestamp.now()
     });
+    tx.update(roomRef, { queueCount: queueCount + 1, updatedAt: Timestamp.now() });
   });
   return { itemId: itemRef.id };
 });
@@ -90,9 +105,10 @@ export const voteWatchRoomQueueItem = onCall({ region: "us-central1", maxInstanc
   const uid = requireUser(request);
   const roomId = validId(request.data?.roomId, "room ID");
   const itemId = validId(request.data?.itemId, "queue item ID");
-  const { roomRef } = await requireRoomMember(roomId, uid);
+  const roomRef = db().collection("rooms").doc(roomId);
   const itemRef = roomRef.collection("queue").doc(itemId);
   await db().runTransaction(async tx => {
+    await requireRoomMemberInTransaction(tx, roomId, uid);
     const item = await tx.get(itemRef);
     if (!item.exists || item.data().status !== "queued") throw new HttpsError("not-found", "That queue item is no longer available.");
     const votes = Array.isArray(item.data().votes) ? item.data().votes : [];
@@ -106,12 +122,14 @@ export const sendWatchRoomMessage = onCall({ region: "us-central1", maxInstances
   const uid = requireUser(request);
   const roomId = validId(request.data?.roomId, "room ID");
   const text = cleanText(request.data?.text, "Message", MESSAGE_LIMIT);
-  const { roomRef, room, memberRef, member } = await requireRoomMember(roomId, uid);
-  if (room.allowGuestChat === false && member.role !== "host") throw new HttpsError("permission-denied", "The host has paused guest chat.");
+  const roomRef = db().collection("rooms").doc(roomId);
+  const memberRef = roomRef.collection("members").doc(uid);
   const messageRef = roomRef.collection("chat").doc();
   await db().runTransaction(async tx => {
-    const member = await tx.get(memberRef);
-    const last = member.data()?.lastChatAt?.toMillis?.() || 0;
+    const { room, member } = await requireRoomMemberInTransaction(tx, roomId, uid);
+    if (room.allowGuestChat === false && member.role !== "host") throw new HttpsError("permission-denied", "The host has paused guest chat.");
+    const memberSnapshot = await tx.get(memberRef);
+    const last = memberSnapshot.data()?.lastChatAt?.toMillis?.() || 0;
     if (Date.now() - last < 700) throw new HttpsError("resource-exhausted", "Please slow down before sending another message.");
     tx.update(memberRef, { lastChatAt: Timestamp.now() });
     tx.create(messageRef, { uid, text, createdAt: Timestamp.now(), reactions: {} });
@@ -125,9 +143,10 @@ export const reactToWatchRoomMessage = onCall({ region: "us-central1", maxInstan
   const messageId = validId(request.data?.messageId, "message ID");
   const reaction = request.data?.reaction;
   if (!["❤️", "😂", "👏", "😮", "🔥"].includes(reaction)) throw new HttpsError("invalid-argument", "That reaction is not supported.");
-  const { roomRef } = await requireRoomMember(roomId, uid);
+  const roomRef = db().collection("rooms").doc(roomId);
   const messageRef = roomRef.collection("chat").doc(messageId);
   await db().runTransaction(async tx => {
+    await requireRoomMemberInTransaction(tx, roomId, uid);
     const message = await tx.get(messageRef);
     if (!message.exists) throw new HttpsError("not-found", "That message could not be found.");
     const reactions = message.data().reactions || {};
