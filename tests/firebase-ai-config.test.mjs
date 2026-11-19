@@ -21,7 +21,7 @@ test("Gemini requests share one App Check client and serialize/retry only initia
   assert.match(aiSource, /let recallAi = null/);
   assert.match(aiSource, /useLimitedUseAppCheckTokens: true/);
   assert.match(aiSource, /function serializeAiRequest\(task\)/);
-  assert.match(aiSource, /appCheck\\/initial-throttle/);
+  assert.ok(aiSource.includes("appCheck\\/initial-throttle"));
   assert.match(aiSource, /attempt < 2/);
   assert.match(aiSource, /do not retry quota, permission, or model errors/);
 });

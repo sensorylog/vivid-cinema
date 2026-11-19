@@ -29,8 +29,8 @@ function initialThrottleDelay(error) {
     error?.customData?.serverResponse,
     error?.customData?.response
   ].filter(Boolean).join(" ");
-  if (!/appCheck\\/initial-throttle/i.test(detail)) return 0;
-  const wait = detail.match(/(\\d{1,2})m:(\\d{2})s/i);
+  if (!/appCheck\/initial-throttle/i.test(detail)) return 0;
+  const wait = detail.match(/(\d{1,2})m:(\d{2})s/i);
   if (!wait) return 1200;
   const requested = (Number(wait[1]) * 60 + Number(wait[2])) * 1000;
   return Math.max(1000, Math.min(5000, requested + 150));
