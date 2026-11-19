@@ -1,10 +1,49 @@
 {
-  "generatedAt": "2026-11-19T10:36:49.181Z",
+  "generatedAt": "2026-11-19T10:51:41.695Z",
   "source": "Google News RSS search feeds",
   "count": 120,
   "failedQueries": 0,
   "feedCount": 21,
   "articles": [
+    {
+      "id": "1a9i940",
+      "headline": "K-pop China ban 2026: Hybe, SM, JYP eye return after thaw",
+      "publisher": "Jing Daily",
+      "publisherUrl": "https://jingdaily.com",
+      "sourceUrl": "https://jingdaily.com/posts/k-pop-china-ban-2026-hybe-sm-jyp-eye-return-after-thaw",
+      "publishedAt": "2026-11-19T10:36:00.000Z",
+      "region": "asia",
+      "category": "television",
+      "summary": "Hybe, SM and CJ ENM rallied after presidents Lee and Xi pledged wider cultural exchanges, but the deal stops short of lifting Beijing’s informal ‘hallyu’ ban.",
+      "imageUrl": "https://cdn.sanity.io/images/f8lauh0h/production/e04a88f3db5b3176c7cc220c3053c581d2cbe864-5000x3491.jpg",
+      "imageFallbackUrl": "https://cdn.sanity.io/images/f8lauh0h/production/e04a88f3db5b3176c7cc220c3053c581d2cbe864-5000x3491.jpg"
+    },
+    {
+      "id": "1l8e2mt",
+      "headline": "Ramayana: Ranbir Kapoor Film Beats Chinese Movie Ne Zha 2's Lifetime Total At North American Box Office",
+      "publisher": "NDTV Profit",
+      "publisherUrl": "https://www.ndtvprofit.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMi5gFBVV95cUxQbnJYTW1oWFZOcjZtdEZ5TEQ3NXpXMGg0Ny1LM3FzYW93bjYzVS10SWtPOTdUMVZ1U0pOWmpTSUc2LWZLM3Y3V1NuUG9pVlZDS09DQ0o5Y25oelZMMU8yTkMyVFp4ZlRFenBaTW0zR2lCcU9xcXd0OUxjV0xCb3NGb01zYVM5RHpadVBiUnZGREQ3a2d3V2p0NlVwYXJsd2lwbUp4dlMzaTBFNjIwRUdPek82ZlMyRXFHaXl6amlWWFVISVcwanVsUU52NmxLNUE1VkV3WWo4WHc0WjRsSWN2LWtIU3duUQ?oc=5",
+      "publishedAt": "2026-11-19T10:33:35.000Z",
+      "region": "global",
+      "category": "box-office",
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
+    },
+    {
+      "id": "s9cfri",
+      "headline": "76 Pct of Japanese Back Greater Govt Role in Cybersecurity: Poll",
+      "publisher": "Nippon.com",
+      "publisherUrl": "https://www.nippon.com",
+      "sourceUrl": "https://www.nippon.com/en/articles/-/57740",
+      "publishedAt": "2026-11-19T10:33:23.000Z",
+      "region": "asia",
+      "category": "anime",
+      "summary": "A multilingual, nonprofit site with content on Japanese culture, destinations, entertainment, and more.",
+      "imageUrl": "./data/news-thumbnails/s9cfri.jpg",
+      "imageFallbackUrl": "https://nippon.ismcdn.jp/mwimgs/f/a/1200wm/img_fa6da460981e9b8ee91c0f0b254e51f741165.jpg"
+    },
     {
       "id": "qld0y6",
       "headline": "WE ARE SO BACK The trailer for the second season of “Sakamoto Days” just dropped and is set to have an opening song by Japanese hip-hop duo Creepy Nuts. (Screenshots from TMS Anime/YouTube)",
@@ -16,7 +55,20 @@
       "category": "anime",
       "summary": "WE ARE SO BACK The trailer for the second season of “Sakamoto Days” just dropped and is set to have an opening song by Japanese hip-hop duo Creepy Nuts. (Screenshots from TMS Anime/YouTube)",
       "imageUrl": "./data/news-thumbnails/qld0y6.jpg",
-      "imageFallbackUrl": "https://scontent-iad6-1.xx.fbcdn.net/v/t39.99422-6/913241401_2096929200958198_7603183729102488595_n.png?stp=dst-jpg_tt6&cstp=mx1508x834&ctp=p600x600&_nc_cat=103&_nc_map=urlgen_bucketless&ccb=1-7&_nc_sid=cae128&_nc_ohc=R9G33e2dgr0Q7kNvwHHjArC&_nc_oc=AdrMmRhCMzGjpDRbMFItvQCypULgl2j_U4_CZKuw8nz1mUX7uMOQ07gmYO9STf2i-Bw&_nc_zt=14&_nc_ht=scontent-iad6-1.xx&_nc_gid=YVbKRjxohIlF60RoD10Ekw&_nc_ss=7c289&oh=00_AQT_RuNBQq3WI_ljLPR_pxTH1OzcCHawFHgsOAr4OIK_Rg&oe=6B048E5E"
+      "imageFallbackUrl": "https://scontent-sjc3-1.xx.fbcdn.net/v/t39.99422-6/913241401_2096929200958198_7603183729102488595_n.png?stp=dst-jpg_tt6&cstp=mx1508x834&ctp=p600x600&_nc_cat=103&_nc_map=urlgen_bucketless&ccb=1-7&_nc_sid=cae128&_nc_ohc=R9G33e2dgr0Q7kNvwHA4XGL&_nc_oc=Adqisqg53by31qfhXGHbjo03HEYN7QZcGgyMgtsICKbAZY1PWZkWMktSJc-oJls3-6w&_nc_zt=14&_nc_ht=scontent-sjc3-1.xx&_nc_gid=ADAk-KqFbRR3ns3x1vzIZQ&_nc_ss=7c289&oh=00_AQTMmBkclg_fAQIME6SyxQ-cmAWUJveC21bmBCRYiD3Dmw&oe=6B048E5E"
+    },
+    {
+      "id": "1lk38oc",
+      "headline": "Comcast And Skydance Shuttering European Streamer SkyShowtime; CEO Monty Sarhan Exiting",
+      "publisher": "Yahoo News UK",
+      "publisherUrl": "https://uk.news.yahoo.com",
+      "sourceUrl": "https://uk.news.yahoo.com/comcast-skydance-shuttering-european-streamer-102019623.html",
+      "publishedAt": "2026-11-19T10:20:19.000Z",
+      "region": "europe",
+      "category": "television",
+      "summary": "SkyShowtime’s lifespan is officially coming to an end. The European streaming service will close its doors at the end of 2027, with CEO Monty Sarhan leaving as part of the move. SkyShowtime’s CFO, Mar...",
+      "imageUrl": "./data/news-thumbnails/1lk38oc.jpg",
+      "imageFallbackUrl": "https://s.yimg.com/lo/mysterio/api/8088b2274ec840050147dfaea91b7df5ae5fe681f483298d50a02bb29ab6588c/lightyear_networkapi/resizefill_w1200%3Bquality_80%3Bformat_jpg/https%3A%2F%2Fmedia.zenfs.com%2Fen%2Fdeadline.com%2F8d0298e0f6a4c4a092b77b8e1087bf30.jpg"
     },
     {
       "id": "1c90ucd",
@@ -42,7 +94,7 @@
       "category": "music",
       "summary": "“Filipiñana” actress Jorrybell Agoto has passed away, the Film Development Council of the Philippines (FDCP) announced Thursday. She was 31 years old. Check the comments section for the full story.",
       "imageUrl": "./data/news-thumbnails/16sbzqm.jpg",
-      "imageFallbackUrl": "https://scontent-iad3-1.xx.fbcdn.net/v/t39.99422-6/914149648_2027126011307209_8302230273949524769_n.png?stp=dst-jpg_tt6&cstp=mx1080x1350&ctp=p600x600&_nc_cat=1&ccb=1-7&_nc_sid=cae128&_nc_ohc=zGX-n94iinAQ7kNvwFYprBD&_nc_oc=Adp43Bffu4Cgp_GEkq6Qa_X_DhE1_Al8VN3jajOgNlglDUZbFEyQj-xDsXGQQJRZieE&_nc_zt=14&_nc_ht=scontent-iad3-1.xx&_nc_gid=sjylUmdPTAAT4Z9DMxEmUg&_nc_ss=7c289&oh=00_AQQewPHJCqZuufFJVUlRJdFQLA0KCTsoE1InHLJCqHd7UQ&oe=6B04A509"
+      "imageFallbackUrl": "https://scontent-sjc6-1.xx.fbcdn.net/v/t39.99422-6/914149648_2027126011307209_8302230273949524769_n.png?stp=dst-jpg_tt6&cstp=mx1080x1350&ctp=p600x600&_nc_cat=1&ccb=1-7&_nc_sid=cae128&_nc_ohc=zGX-n94iinAQ7kNvwHGCeso&_nc_oc=AdqQDSTSsKFQ3KphE6rITSi0SXI38tVkhUzQi092_Re2XAfEcLcruZVRdwaqPsRoQaI&_nc_zt=14&_nc_ht=scontent-sjc6-1.xx&_nc_gid=ygAcm7cCELnTbryukjs6xg&_nc_ss=7c289&oh=00_AQTQqx3lzghAcU4xfQc6EZoKsNH0BnFKaCWy76JqD0YdRA&oe=6B04A509"
     },
     {
       "id": "11h37p8",
@@ -114,13 +166,26 @@
       "headline": "Nigeria won eight AMAAs at home, but Best Film went to Kenya. What the night means for Nollywood",
       "publisher": "theradar.ng",
       "publisherUrl": "https://theradar.ng",
-      "sourceUrl": "https://theradar.ng/entertainment/nigeria-won-eight-amaas-at-home-but-best-film-went-to-kenya-what-the-night-means-for-nollywood",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMixwFBVV95cUxQQzBQTjlfS0hjU1FWUlZZakdvV1FyOEpLc0I4S1dBNzJaSUxHWUptZTZNbzFLUnNPbGZCa0NSRi1uZ2xZcjJBcmpTX1I0anktSkRDNWlMOGdKRHQ1dThzelF1RVJwMmI3Wmk1OW10aXBVQktyMkxGdFNMeXpLVDFTNWdXa1FlRjRsVlZlaVA2N1FDbmgyTmU5c2l2djhkRVFhcXo3Y3dpeGc2cEZLU3dxYWFkd3dLYVVNMHFuNC1UMDM1aW9pamxB?oc=5",
       "publishedAt": "2026-11-19T09:00:12.000Z",
       "region": "africa",
       "category": "film",
-      "summary": "Nigeria took eight prizes at the 22nd AMAA in Lagos, with wins for Wale Ojo and Linda Ejiofor, but Kenya's One Woman, One Bra won Best Film. What it means.",
-      "imageUrl": "./data/news-thumbnails/1hc0i95.webp",
-      "imageFallbackUrl": "https://theradar.ng/api/images/28-hero-1795003131810-172863157.jpg"
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
+    },
+    {
+      "id": "oj7l5s",
+      "headline": "Malti Marie sings Gaytri Mantra, turns producer on mom Priyanka Chopra's film set | Bollywood",
+      "publisher": "Hindustan Times",
+      "publisherUrl": "https://www.hindustantimes.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMi6wFBVV95cUxOWDdTZ3ZTQ1haUUhJcUNtZV9XTnBpTlFKeWlEMTVDUHBrVXZUNHd1UGNRWV9ocThtTHoxcG9WYmRYLVM4SHVIQ0tiUTQwOWQ2VFM1R2FYNTlBZUlqNDhJOHd0YUhIS2RZMXVvSTBYODRMV0o5WEtkN19lQzN4NUpPWVRyY3FCM0tTWmlaekFLNThCWUduWjVhaElERzY2cTZhaHNDTjdYZXdXOUdrdk5KTXhlTnBoUTBvWFI5Yzd5cW1NYXlWYjl4SUJUUk8tQXp5R1ZjOGZCSW1tdlA5enRTNXhCeVBTQnRBNUFZ0gHwAUFVX3lxTE5sOVRybk9qZzN0ang5WWFnSlA5S3lfSkpaLTR2VlJub3FZNjV6MnVzWmJIMmU5NExQbmpTYWZwZGpWbWJXM04xWFFWcmJYVmttSkJ1blAwZWZhU1JqS3M1eXVVeHVFZjJyZHdIbHdIZVdNLXNheWRENkpZTHJGNS1CdXg4Rzg5c2UyanpmcFplN3VSMUFLRW9HanZHZ2Ixdl9ZckNBWWdOU2hpZmZHVEprZEYtUmxmRU9SSUhRc1g2bXZYZng1UWxhcmFVQ0RUS1B0U0N2NVRSTG1id3hZX0pKWXA0WUs2TlhLamFsaDA3aA?oc=5",
+      "publishedAt": "2026-11-19T08:58:49.000Z",
+      "region": "india",
+      "category": "film",
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
     },
     {
       "id": "kga75h",
@@ -140,26 +205,26 @@
       "headline": "Cairo artistic director Mohamed Tarek talks expanding the festival and reveals future plans",
       "publisher": "Screen Daily",
       "publisherUrl": "https://www.screendaily.com",
-      "sourceUrl": "https://www.screendaily.com/features/cairo-artistic-director-mohamed-tarek-talks-expanding-the-festival-and-reveals-future-plans/5222553.article",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMi3AFBVV95cUxOb19SblZobEUyNHNDaTBCanJ4OGRDVnZpRE45OWNSeDhFZXNFVmtpUnlUUUlrbHJVek5Ib1hyckhxV2RKcXo2NE1XTTZER3lyOUFHX3Z0a0NiX3JxcVpXZzFBM2JEWmthcmdQOGdTekw0OHdjNGpza1kxNThHMDZGMFVyeHdvRlhyYXlyWFFUbDZoM1RfVVh0VG5ITlJOVk1TOWtqUnRrYlJhWVozNmtVN0thM20zQkUzUTFKWmIwNk9DSEFfU0UxTm83ZGJST1ktTC1odGRkcWtrT0l4?oc=5",
       "publishedAt": "2026-11-19T08:44:07.000Z",
       "region": "middle-east",
       "category": "film",
-      "summary": "The festival is celebrating its 50th anniversary by engaging younger audiences and working to strengthen its position in the region.",
-      "imageUrl": "./data/news-thumbnails/1yvhgmx.jpg",
-      "imageFallbackUrl": "https://d1nslcd7m2225b.cloudfront.net/Pictures/1024x536/5/5/6/1492556_mohamedtarek_14071.jpg"
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
     },
     {
       "id": "ygh196",
       "headline": "Netflix Unveils Penélope Cruz & Juan Diego Botto’s Domestic Violence Drama ‘Patricia’ As Production Gets Underway",
       "publisher": "IMDb",
       "publisherUrl": "https://www.imdb.com",
-      "sourceUrl": "https://www.imdb.com/news/ni66118470/?ref_=nmnw_art_perm",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMiZ0FVX3lxTE5LcXhzLVk0Sm9JeUJMQ3FYMUFlQmxTTEczMzQ4aGtKM0pYRDlMemRpeHBDZW5CZFNpbFNfakNPZ0FTMU9EOEY5Rl9tN0NoMEljMmJXQ2lXbzZkajJNTlo3R1N0WDFuOUE?oc=5",
       "publishedAt": "2026-11-19T08:41:58.000Z",
       "region": "hollywood",
       "category": "film",
-      "summary": "Netflix Unveils Penélope Cruz & Juan Diego Botto’s Domestic Violence Drama ‘Patricia’ As Production Gets Underway",
-      "imageUrl": "https://www.imdb.com/news/ni66118470/?ref_=nmnw_art_perm",
-      "imageFallbackUrl": "https://www.imdb.com/news/ni66118470/?ref_=nmnw_art_perm"
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
     },
     {
       "id": "drrxga",
@@ -306,7 +371,7 @@
     },
     {
       "id": "oz77wx",
-      "headline": "The full 'GTA 6' soundtrack reportedly leaked: See every artist and track",
+      "headline": "The full 'GTA 6' soundtrack reportedly leaked: See all artists and tracks",
       "publisher": "Mashable",
       "publisherUrl": "https://mashable.com",
       "sourceUrl": "https://news.google.com/rss/articles/CBMiX0FVX3lxTE1LazFtLVpoQTd1d2hnOUJsdGRGLVZJMExPVzlZREFaUXVFNVBCaUJRTkt1a1A4NHlqel9nUGtFcnNqWGJyeXg0ZTRTWmRfeGRFekFHaURqdUlRYXkybTRv?oc=5",
@@ -760,19 +825,6 @@
       "imageFallbackUrl": ""
     },
     {
-      "id": "zw7fhj",
-      "headline": "Sooraj Barjatya calls 'Dhurandhar' wonderful film, says audiences need variety",
-      "publisher": "The Times of India",
-      "publisherUrl": "https://timesofindia.indiatimes.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMiggJBVV95cUxObGRhTzU4WE1CUzBGSFJMNEdJTWJBclBMUVloUnAtSHF5TkNXSjVxTmxqZXRPckp2VFhKV3pCaWhITVc2cDI0Zk1LV1pkQVZiS1l4TlpLSDdnMVlSRDlpN0szeWlPb2plSFZVNjFiU1VWT2xsNjJJT1dXUWhnWFNySlBqejhUcllUSGFKMWFqem1UVXdvVVRoMGVmWUs4R1dLTlJpSlJGMmxNSUdoQTRhOTlxUlZ0cW9teHRiT2ZGWE9kUmw1R2RBRmFHMTI2Q2VNcXVWLU1UcTlGOUFVaHE2eWd2X1paSXVmeEJTUXJVYmFhVHlvckhCMS1QdXhoclFpeUHSAYcCQVVfeXFMT0RNNEdnc0MwbVBBOHBqeFRpWmJtVjVqcS1pZGhrdlZhNFdnWmNPZC13TGFRNmg4ZXhaV3dvcWllcEl1S3BQLThrTlVZbVJyVklxUVB4WEdGdGxXQUJpazFpdktrc05DcHpwd1prN2RreHJieS1jRklRTEpCb3ZYcExHZGxWTnJpZGJjVkMzTUsyTlJ6bXRqZFEwQXhqOUxlVkl6X1lfVUc4Qy02VndvYlRCZzd0SFBzVDA0aTYwOFRhLUw0VXNpMG4zZ20zUFJSYjA4WkZuTDRlTEtiQXF6S2xGak1UNEZQQU5hUXMyTU9hY2tIRFhYOFh1UkJYdmYxa2JCUDJkdnc?oc=5",
-      "publishedAt": "2026-11-19T05:08:00.000Z",
-      "region": "india",
-      "category": "film",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
       "id": "p7xxur",
       "headline": "'Creative freedom in Bollywood's music has diminished'",
       "publisher": "Daily Observer",
@@ -833,6 +885,19 @@
       "publishedAt": "2026-11-19T04:45:35.000Z",
       "region": "global",
       "category": "box-office",
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
+    },
+    {
+      "id": "1kcvry1",
+      "headline": "“What A Boss Wants” And “Happy Anding” Both See Ratings Dip For 3rd Episodes",
+      "publisher": "TechnoSports Media Group",
+      "publisherUrl": "https://technosports.co.in",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMiYkFVX3lxTE9HdjFCdFlXYmRQSUJSMk9UNXlnVUQtM0JIWGdMb05GXzI0M01BZ0FHVjVMV3J2MzVla29STnZPM2JyeFpRMnJsa2dkLVNhS3F2ZWVJOEdHbm4zMDBvQzJuMEVn?oc=5",
+      "publishedAt": "2026-11-19T04:44:46.000Z",
+      "region": "asia",
+      "category": "television",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
       "imageUrl": "",
       "imageFallbackUrl": ""
@@ -937,6 +1002,19 @@
       "publishedAt": "2026-11-19T04:12:47.000Z",
       "region": "global",
       "category": "business",
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
+    },
+    {
+      "id": "4pmfkg",
+      "headline": "S. Korea-China trade deal raises cautious hopes for lifting Beijing's content ban",
+      "publisher": "Japan Wire by Kyodo News",
+      "publisherUrl": "https://english.kyodonews.net",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMiWkFVX3lxTE10VTF5QnhydGMxbFhQVW0xQjZ0ZXM0YnJSUUljNi1wd3paZHRLUVhjUEtiTEIydTFiRlZhWjJkZnRBZUVCUXB1T1daMkE2clRTQzJhLVFtWnoxZw?oc=5",
+      "publishedAt": "2026-11-19T04:10:00.000Z",
+      "region": "asia",
+      "category": "television",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
       "imageUrl": "",
       "imageFallbackUrl": ""
@@ -1059,19 +1137,6 @@
       "imageFallbackUrl": ""
     },
     {
-      "id": "1lon0oe",
-      "headline": "Michael Bublé Songs Headline Disney Ride and UK Tribute Show",
-      "publisher": "cwibc.co.id",
-      "publisherUrl": "https://cwibc.co.id",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMiYEFVX3lxTE8tZU1jNzdZeXJ3TEdlTGVqZ3FkWGNqX2lMbzVBU1V3VVNqQlpQSTJkT0hGRzdMX0RGYWFXQ01oVm1KZW81RlpXWWI5aHZZTHRRMVR6eHdDRFhEa1ZiNERucQ?oc=5",
-      "publishedAt": "2026-11-19T03:06:57.000Z",
-      "region": "global",
-      "category": "music",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
       "id": "1u21xp5",
       "headline": "THR Charts",
       "publisher": "The Hollywood Reporter",
@@ -1079,19 +1144,6 @@
       "sourceUrl": "https://news.google.com/rss/articles/CBMiVkFVX3lxTE1DOUhYZTVTYlBIU3lGbWQ0akJYbnNtMnJxY1VPeXBEd1FQSWtrSWlCdHNEeFNNUW54aktkY2FqaVlKMTRjanNtZlVHYk54MkNQdjJOOEhB?oc=5",
       "publishedAt": "2026-11-19T02:35:11.000Z",
       "region": "hollywood",
-      "category": "television",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
-      "id": "1hqypo4",
-      "headline": "(News Focus) Korea-China trade deal raises cautious hopes for lifting Beijing's content ban",
-      "publisher": "Yonhap News Agency",
-      "publisherUrl": "https://en.yna.co.kr",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMiWkFVX3lxTE1pSDVLemhPc3JSRldhUVNIRE1jeG5LTHVEZURCQjFaZnk1V0Rhdm1ybWdRVEhLTUNtQktabFVqUldOdzJIWmNrcW10ZGc5LVNOYzVSdXAwcFJNdw?oc=5",
-      "publishedAt": "2026-11-19T02:27:49.000Z",
-      "region": "asia",
       "category": "television",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
       "imageUrl": "",
@@ -1202,19 +1254,6 @@
       "imageFallbackUrl": ""
     },
     {
-      "id": "vaztc7",
-      "headline": "Chris Pratt to Star in Sci-Fi Movie ‘The Traveler’ as He Inks Paramount First-Look",
-      "publisher": "The Hollywood Reporter",
-      "publisherUrl": "https://www.hollywoodreporter.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMisgFBVV95cUxOa2ZZOWUtRzRCWGdyejR1WUZHUWZXclVDZ3VhTjVhTEl2MUx4N0lCM2xfZEdTZDl0YUNSS1FGckdWaXkyeFBzZHRxc1I2UWl0RmRhQXRwVEZfQ0VBNnNMSkhucm9UazZ3cUcwdThzRWtlaEs3YmhJTzU1QWg0OERzWkJNVWZSS0JxUWF6RVBESHVVS0dhcVJfLWVGSmlCbmpxTFZLLW5ZY0tnMmhMYWk0b2pB?oc=5",
-      "publishedAt": "2026-11-19T01:40:01.000Z",
-      "region": "hollywood",
-      "category": "film",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
       "id": "15oa57y",
       "headline": "GTA VI: Long wait about to be over for Arizona gamers",
       "publisher": "FOX 10 Phoenix",
@@ -1228,19 +1267,6 @@
       "imageFallbackUrl": ""
     },
     {
-      "id": "1mud7qw",
-      "headline": "'Ramayana' box office collection day 14: The Ranbir Kapoor, Yash, Sai Pallavi film inches towards Rs 850",
-      "publisher": "The Times of India",
-      "publisherUrl": "https://timesofindia.indiatimes.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMijgNBVV95cUxPTmVCNXF5S0VmdXNoOHB4dEVmZGJqMnhkLVZldkFLRDdsLUJKRElTU3Y0akN0TlQyc1dZbkhKX1JHeTE2T2ctbnp4d1FQY0VUWUdGNFJ2QVFTa1NNWWs1YkppaUVRdFRYcHBDMmN5dDdSVk9tajUyRTVxWGdEdTNPTzJHV0VsM3RJaVVMY1drRkx4aFBrMHJHajlWTGRzWWdlYmdKRnBTUmQxWkc5WEhNYkVfcTM2UmR0eS01RUdDbjJENFk3OU9uSUh0WTVFQnZoalJZM1FQdkE0VFhTM18zMUdxVmFYT0dUaUc0aTU4NGJUNVNPeENlTjR3WVR1VndWX2w0a2xXa3VtQm9rZXM3WEdWOWo2QW1qQTU2ZGV6X0p3TDkyUDMtZlhQSm4tdmZ2ZkVaRWZsSV9BQnRwT2RpdFlmeXhFUFRrWVBhOTZ1RUc3ZEJUMVpyYk1sSlhxb1Eyc0dwbW1YZkVvMWdIYXFHcVVndVMwclZwYW1iY3BtdExSdW9kZktiNkRZYlAwQdIBkwNBVV95cUxNZWtSZFVablVtX3JFaGhRdlUtekNvQjl5ZnBGaWhDa3dRT3k1YnpmMjlWcWFfMkw3NmpsTU8ta2JwN1o4TG9NYmhDbmwzSThCbElQUy1OS2F2Y0dSUzRmVGhpNG43by1wam5SVzVTNmpJSXZnV1VKZ1ZLVlJVUU94RzN6WjBvTnQwdkJaclU0RGtoZzRMb3QxdklUamlnR3ZITjl1dGRVblExbmVSVEc0ZVRTaERucUFpMjJJNkF2dXRIWVlrUnNSVkg2a3BNdVkySHJhUEtDaTh1bTlRUXB6WDg2dWI4aHd6RVM4dXk0RFFjWXltaXhacXVBcTdOVkd2LWF2ZjltTFBWQ0dXRExhUWdUZGZTZ2ZTdmd3VFdEVHhlVVY2Z3pjZ21WaFJITmdXTHF3bW5UTHZBeG8yWTVkUzJjN3VHM1IyY2hnYUNPOHVncjI4THZmeEhuTUw4U1VZVlJ1S2VaUFVwY3ZMakZ0Mkk1UzBueWh5TDBVY2FHaGFua2NMSDYtRnQxVkV0Qkh5R1h3?oc=5",
-      "publishedAt": "2026-11-19T01:18:00.000Z",
-      "region": "india",
-      "category": "film",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
       "id": "101kad",
       "headline": "Los Angeles film industry crisis sees dire update in new report",
       "publisher": "New York Post",
@@ -1249,19 +1275,6 @@
       "publishedAt": "2026-11-19T00:39:00.000Z",
       "region": "global",
       "category": "business",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
-      "id": "1xowji3",
-      "headline": "8 celebrity couples who have been open about their unconventional relationships",
-      "publisher": "Entertainment Weekly",
-      "publisherUrl": "https://ew.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMiekFVX3lxTE5JYmZUMEYzd3Nyd0hobVlCclBUNWJSY05vdjR1QjlWMzVMY2hJU0lOOE1MaWQxelRwT2c3WFVSQlktT1htVXYzeklVZmViYXdYUUdkdi1sOE1aQmd3R0xuZ1VxZE5iZmZaV05RRUlXUUNmRUxjTkpIcU13?oc=5",
-      "publishedAt": "2026-11-19T00:34:00.000Z",
-      "region": "hollywood",
-      "category": "celebrity",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
       "imageUrl": "",
       "imageFallbackUrl": ""
@@ -1353,19 +1366,6 @@
       "publishedAt": "2026-11-18T20:50:19.000Z",
       "region": "africa",
       "category": "celebrity",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
-      "id": "oa92rr",
-      "headline": "How to watch the “DWTS” season 35 finale live and vote",
-      "publisher": "Yahoo News UK",
-      "publisherUrl": "https://uk.news.yahoo.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMid0FVX3lxTE5RYjFKcGpSbGZ0dnpsSDlUcWZXXzd1ZzgwemdLdkNNU2g5RTNJLXoxRWlVZWlmaElaaHktWWVMT1F4S2ZaLTY1VnZMSUp3RjBDcFV3VlU2ZzZXcU5KbWVIa3ZnR1N1bUhvUlZwdUlZM3oyeU44YzFF?oc=5",
-      "publishedAt": "2026-11-18T20:49:44.000Z",
-      "region": "europe",
-      "category": "television",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
       "imageUrl": "",
       "imageFallbackUrl": ""
