@@ -11,8 +11,12 @@ service cloud.firestore {
       return signedIn() && request.auth.uid == userId;
     }
 
+    function isVividUser() {
+      return signedIn() && request.auth.token.firebase.sign_in_provider != 'anonymous';
+    }
+
     function isRoomMember(roomId) {
-      return signedIn()
+      return isVividUser()
         && exists(/databases/$(database)/documents/rooms/$(roomId)/members/$(request.auth.uid))
         && get(/databases/$(database)/documents/rooms/$(roomId)).data.status == 'open'
         && (!get(/databases/$(database)/documents/rooms/$(roomId)).data.keys().hasAny(['expiresAt'])
@@ -20,7 +24,7 @@ service cloud.firestore {
     }
 
     function isClubMember(clubId) {
-      return signedIn()
+      return isVividUser()
         && exists(/databases/$(database)/documents/cinemaClubs/$(clubId)/members/$(request.auth.uid))
         && get(/databases/$(database)/documents/cinemaClubs/$(clubId)).data.status == 'active';
     }
