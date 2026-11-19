@@ -245,6 +245,7 @@ async function sendMessage(text) {
     const needsSignIn = /unauthenticated/i.test(diagnosticText) || /\b401\b/.test(diagnosticText);
     const appCheckThrottle = /appCheck\/(?:initial-)?throttled?/i.test(diagnosticText) || /AppCheck: Requests throttled due to previous 429/i.test(diagnosticText);
     const quotaFailure = !appCheckThrottle && (/\b429\b|resource[_ ]exhausted|quota|rate.?limit/i.test(diagnosticText));
+    console.warn("Vivid Recall Gemini chat failed (full diagnostic):", {
       status: error?.status || error?.customData?.httpStatus || null,
       message: errorMessage,
       customData: error?.customData || null,
