@@ -268,10 +268,11 @@ test("room lobby presence, queue and chat are member-readable and never client-w
     await setDoc(doc(db, "rooms/lobby-room/presence/host"), { uid: "host", expiresAt: new Date(Date.now() + 60000) });
     await setDoc(doc(db, "rooms/lobby-room/queue/pick-1"), { title: "A film", votes: ["host"], voteCount: 1, status: "queued" });
     await setDoc(doc(db, "rooms/lobby-room/chat/message-1"), { uid: "host", text: "Ready?", reactions: {} });
+    await setDoc(doc(db, "rooms/lobby-room/playback/current"), { provider: "vidsrc", status: "playing", position: 120, duration: 3600, hostUid: "host" });
   });
   const host = env.authenticatedContext("host").firestore();
   const outsider = env.authenticatedContext("outsider").firestore();
-  for (const path of ["presence/host", "queue/pick-1", "chat/message-1"]) {
+  for (const path of ["presence/host", "queue/pick-1", "chat/message-1", "playback/current"]) {
     await assertSucceeds(getDoc(doc(host, "rooms/lobby-room/" + path)));
     await assertFails(getDoc(doc(outsider, "rooms/lobby-room/" + path)));
     await assertFails(setDoc(doc(host, "rooms/lobby-room/" + path + "-forged"), { forged: true }));
