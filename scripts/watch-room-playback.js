@@ -132,7 +132,7 @@ window.addEventListener("vivid:provider-playback", event => {
   if (detail.status === "paused") hostStatus = "paused";
   if (detail.status === "ended") hostStatus = "ended";
   const now = Date.now();
-  if (detail.event === "timeupdate" && now - lastPublishAt < 3500) return;
+  if (detail.status === "playing" && now - lastPublishAt < 3500) return;
   lastPublishAt = now;
   const payload = { roomId, provider: "vidsrc", status: hostStatus, contentId: String(detail.contentId || ""), mediaType: detail.mediaType, season: detail.season, episode: detail.episode, position: localPosition, duration: Math.max(0, Number(detail.duration) || 0) };
   publishQueue = publishQueue.then(() => call("publishWatchRoomPlayback")(payload)).catch(error => setNote(error?.message || "Could not publish the host playback state."));
