@@ -463,3 +463,15 @@ export const revokeWatchInvitation = onCall({ region: "us-central1", maxInstance
   });
   return { revoked: true };
 });
+
+
+// Watch Rooms Stage 4: trusted lobby, queue, chat and host-control operations.
+export {
+  heartbeatWatchRoom,
+  addWatchRoomQueueItem,
+  voteWatchRoomQueueItem,
+  sendWatchRoomMessage,
+  reactToWatchRoomMessage,
+  updateWatchRoomSettings,
+  removeWatchRoomMember
+} from "./watch-rooms-lobby.js";
