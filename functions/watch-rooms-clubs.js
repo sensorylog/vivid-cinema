@@ -72,8 +72,8 @@ export const removeCinemaClubWatchlistItem = onCall({ region: "us-central1", max
   const { clubRef } = await requireClubMember(clubId, uid);
   const itemRef = clubRef.collection("watchlist").doc(itemId);
   await db().runTransaction(async tx => {
-    const [member, item] = await Promise.all([tx.get(clubRef.collection("members").doc(uid)), tx.get(itemRef)]);
-    if (!member.exists) throw new HttpsError("permission-denied", "You are no longer a member of this club.");
+    const [club, member, item] = await Promise.all([tx.get(clubRef), tx.get(clubRef.collection("members").doc(uid)), tx.get(itemRef)]);
+    if (!club.exists || club.data().status !== "active" || !member.exists) throw new HttpsError("permission-denied", "You are no longer a member of an active club.");
     if (item.exists) tx.delete(itemRef);
   });
   return { removed: true };
@@ -114,8 +114,8 @@ export const addCinemaClubAfterCreditsReview = onCall({ region: "us-central1", m
   const screeningRef = clubRef.collection("screenings").doc(screeningId);
   const reviewRef = screeningRef.collection("afterCredits").doc(uid);
   await db().runTransaction(async tx => {
-    const [member, screening, existing] = await Promise.all([tx.get(clubRef.collection("members").doc(uid)), tx.get(screeningRef), tx.get(reviewRef)]);
-    if (!member.exists) throw new HttpsError("permission-denied", "You are no longer a member of this club.");
+    const [club, member, screening, existing] = await Promise.all([tx.get(clubRef), tx.get(clubRef.collection("members").doc(uid)), tx.get(screeningRef), tx.get(reviewRef)]);
+    if (!club.exists || club.data().status !== "active" || !member.exists) throw new HttpsError("permission-denied", "You are no longer a member of an active club.");
     if (!screening.exists) throw new HttpsError("not-found", "Screening not found.");
     const oldRating = existing.exists ? Number(existing.data().rating || 0) : 0;
     const count = Number(screening.data().reviewCount || 0);
@@ -136,8 +136,8 @@ export const addCinemaClubDiscussionMessage = onCall({ region: "us-central1", ma
   const screeningRef = clubRef.collection("screenings").doc(screeningId);
   const messageRef = screeningRef.collection("discussion").doc();
   await db().runTransaction(async tx => {
-    const [member, screening, messages] = await Promise.all([tx.get(clubRef.collection("members").doc(uid)), tx.get(screeningRef), tx.get(screeningRef.collection("discussion"))]);
-    if (!member.exists) throw new HttpsError("permission-denied", "You are no longer a member of this club.");
+    const [club, member, screening, messages] = await Promise.all([tx.get(clubRef), tx.get(clubRef.collection("members").doc(uid)), tx.get(screeningRef), tx.get(screeningRef.collection("discussion"))]);
+    if (!club.exists || club.data().status !== "active" || !member.exists) throw new HttpsError("permission-denied", "You are no longer a member of an active club.");
     if (!screening.exists) throw new HttpsError("not-found", "Screening not found.");
     if (messages.size >= MAX_DISCUSSION_MESSAGES) throw new HttpsError("resource-exhausted", "This screening discussion has reached its limit.");
     tx.create(messageRef, { uid, message, createdAt: Timestamp.now() });
