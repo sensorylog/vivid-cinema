@@ -15,7 +15,7 @@ Open Project Settings → Environment Variables and add these to Production (and
 - `FIREBASE_SERVICE_ACCOUNT_JSON`: the complete JSON key for a service account from Firebase Console → Project settings → Service accounts. Paste the full JSON as one environment-variable value. Never commit it to Git or put it in browser code.
 - `RESEND_API_KEY`: the private API key from Resend.
 - `VIVID_EMAIL_FROM`: a sender on a domain verified in Resend, e.g. `Vivid Cinema <verify@your-verified-domain.example>` (replace with your actual domain).
-- `VIVID_ALLOWED_ORIGINS` (optional): comma-separated browser origins. The default is `https://vivid-cinema.web.app,https://vivid-cinema.firebaseapp.com`. Add any custom Vivid domain exactly, including the scheme.
+- `VIVID_ALLOWED_ORIGINS` (optional): comma-separated browser origins. The default includes `https://vivid-cinema.pages.dev`, `https://vivid-cinema.web.app`, and `https://vivid-cinema.firebaseapp.com`. Add any custom Vivid domain exactly, including the scheme.
 
 Redeploy the Vercel project after adding environment variables.
 

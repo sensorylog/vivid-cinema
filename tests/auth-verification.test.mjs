@@ -55,8 +55,8 @@ test("external API verifies Firebase identity before sending a custom email", ()
   assert.match(api, /emailVerificationRateLimits/);
   assert.match(api, /Access-Control-Allow-Origin/);
   assert.match(api, /DEFAULT_ALLOWED_ORIGINS/);
-  assert.match(api, /VERIFY_CONTINUE_URL = "https:\/\/vivid-cinema\.netlify\.app\/verify-email\.html"/);
-  assert.match(api, /"https:\/\/vivid-cinema\.netlify\.app"/);
+  assert.match(api, /VERIFY_CONTINUE_URL = "https:\/\/vivid-cinema\.pages\.dev\/verify-email\.html"/);
+  assert.match(api, /"https:\/\/vivid-cinema\.pages\.dev"/);
   assert.match(api, /new Set\(\[\.\.\.DEFAULT_ALLOWED_ORIGINS, \.\.\.configured\]\)/);
   assert.match(packageJson, /"firebase-admin": "\^14\.5\.0"/);
   assert.match(firebaseConfig, /https:\/\/vivid-cinema-api\.vercel\.app/);

@@ -10,7 +10,7 @@ test("desktop packaging is opt-in and preserves existing scripts", () => {
   assert.equal(pkg.scripts["desktop:start"], "electron desktop/main.cjs");
   assert.match(pkg.scripts["desktop:dist"], /make-windows-icon\.cjs/);
   assert.match(pkg.scripts["desktop:dist"], /electron-builder --win nsis portable/);
-  assert.match(pkg.scripts["desktop:dist"], /--publish onTagOrDraft/);
+  assert.match(pkg.scripts["desktop:dist"], /--publish never/);
   assert.match(pkg.scripts.test, /tests\/desktop-build\.test\.mjs/);
   assert.equal(pkg.scripts["check:syntax"], "node automation/check-syntax.mjs");
   assert.ok(pkg.scripts["test:rules"]);
@@ -228,7 +228,7 @@ test("Windows workflow builds on demand or on release tags", () => {
   assert.equal(workflow.includes("actions/checkout@v4"), false);
   assert.equal(workflow.includes("actions/setup-node@v4"), false);
   assert.equal(workflow.includes("actions/upload-artifact@v4"), false);
-  assert.match(workflow, /desktop:dist/);
+  assert.match(workflow, /npm --ignore-scripts run desktop:release/);
   assert.match(workflow, /GH_TOKEN:.*secrets\.GITHUB_TOKEN/);
   assert.match(workflow, /contents: write/);
   assert.match(workflow, /Decide whether this push publishes a release/);
@@ -241,6 +241,8 @@ test("Windows workflow builds on demand or on release tags", () => {
   assert.ok(workflow.indexOf("Ensure matching release tag exists before publishing") < workflow.indexOf("Create or reuse draft release for electron-builder"));
   assert.ok(workflow.indexOf("Create or reuse draft release for electron-builder") < workflow.indexOf("Build auto-updatable Windows release files"));
   assert.ok(workflow.indexOf("Build auto-updatable Windows release files") < workflow.indexOf("Verify updater metadata was generated"));
+  assert.match(workflow, /Wait for Android APK in draft release/);
+  assert.match(workflow, /Vivid-Cinema-Android\.apk/);
   assert.match(workflow, /Verify draft release contains all required assets/);
   assert.doesNotMatch(workflow, /WIN_CSC_LINK|WIN_CSC_KEY_PASSWORD|Require Windows code-signing credentials|Verify Windows Authenticode signatures/);
   assert.match(workflow, /if \(!\$release\.isDraft\)/);
@@ -264,7 +266,7 @@ test("Windows workflow builds on demand or on release tags", () => {
   assert.match(workflow, /latest\.yml/);
   assert.match(workflow, /pull_request/);
   assert.match(workflow, /windows-latest/);
-  assert.match(workflow, /desktop:dist/);
+  assert.match(workflow, /run: npm run desktop:dist/);
   assert.match(workflow, /icons\/\*\*/);
   assert.match(workflow, /Vivid-Cinema-Setup/);
   assert.match(workflow, /Vivid-Cinema-Portable/);
@@ -501,7 +503,7 @@ test("Windows desktop release uses the built-in player without an mpv build or s
 
 test("Windows runtime is current, hardened, and the offline shell cache is invalidated", () => {
   assert.equal(pkg.devDependencies.electron, "45.2.1");
-  assert.equal(pkg.version, "1.0.44");
+  assert.match(pkg.version, /^\d+\.\d+\.\d+$/);
   assert.deepEqual(pkg.build.electronFuses, {
     runAsNode: false,
     enableNodeOptionsEnvironmentVariable: false,

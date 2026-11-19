@@ -71,11 +71,11 @@ test("Firebase Hosting remains a manual-only backup workflow", () => {
 });
 
 
-test("Cloudflare CSP allows the managed download function but blocks obsolete Vercel APIs", () => {
+test("Cloudflare CSP allows the active verification API and managed download function", () => {
   const csp = headers.split("\n").find(line => line.trimStart().startsWith("Content-Security-Policy:"));
   assert.ok(csp);
   assert.ok(csp.includes("https://us-central1-vivid-cinema.cloudfunctions.net"));
   assert.ok(csp.includes("https://archive.org"));
   assert.ok(csp.includes("https://commons.wikimedia.org"));
-  assert.doesNotMatch(csp, /vivid-cinema-api\.vercel\.app/);
+  assert.ok(csp.includes("https://vivid-cinema-api.vercel.app"));
 });

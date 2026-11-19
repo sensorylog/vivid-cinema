@@ -2,10 +2,10 @@ import { cert, getApp, getApps, initializeApp } from "firebase-admin/app";
 import { getAuth } from "firebase-admin/auth";
 import { getFirestore, Timestamp } from "firebase-admin/firestore";
 
-const VERIFY_CONTINUE_URL = "https://vivid-cinema.netlify.app/verify-email.html";
+const VERIFY_CONTINUE_URL = "https://vivid-cinema.pages.dev/verify-email.html";
 const MIN_RESEND_INTERVAL_MS = 60_000;
 const DEFAULT_ALLOWED_ORIGINS = [
-  "https://vivid-cinema.netlify.app",
+  "https://vivid-cinema.pages.dev",
   "https://vivid-cinema.web.app",
   "https://vivid-cinema.firebaseapp.com"
 ];
