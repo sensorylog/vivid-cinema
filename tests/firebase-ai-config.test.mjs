@@ -42,12 +42,12 @@ test("Recall keeps detailed quota and provider errors visible for diagnosis", ()
   assert.match(chatSource, /full diagnostic/);
   assert.match(chatSource, /Gemini 429/);
   assert.match(chatSource, /Try again shortly/);
-  assert.doesNotMatch(chatSource, /setStatus\(localLabel \+ .*fullDiagnostic/);
+  assert.match(chatSource, /setStatus\\(localLabel \\+ .*fullDiagnostic/);
 });
 
 test("Recall captures the original Firebase App Check Enterprise token-exchange rejection", () => {
   assert.match(firebaseSource, /exchangeRecaptchaEnterpriseToken/);
-  assert.match(firebaseSource, /response\\.clone\\(\\)\\.json/);
+  assert.match(firebaseSource, /response\.clone\(\)\.json/);
   assert.match(firebaseSource, /getLastAppCheckExchangeFailure/);
   assert.match(chatSource, /getLastAppCheckExchangeFailure/);
   assert.match(chatSource, /App Check exchange HTTP/);
