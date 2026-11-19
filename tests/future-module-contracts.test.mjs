@@ -213,3 +213,18 @@ test("Cinema Club Stage 6 provides persistent watchlists, screening history and 
   assert.ok(client.includes("addCinemaClubDiscussionMessage"));
   assert.ok(page.includes('src="scripts/watch-room-clubs.js"'));
 });
+
+
+test("Cinema Club writes re-check active club status inside their transactions", () => {
+  const backend = readFileSync(new URL("../functions/watch-rooms-clubs.js", import.meta.url), "utf8");
+  for (const operation of ["removeCinemaClubWatchlistItem","addCinemaClubAfterCreditsReview","addCinemaClubDiscussionMessage"]) {
+    const start = backend.indexOf("export const " + operation);
+    const end = backend.indexOf("\n});", start);
+    const body = backend.slice(start, end);
+    assert.ok(body.includes("tx.get(clubRef)"), operation + " must re-read the club in its transaction");
+    assert.ok(body.includes('club.data().status !== "active"'), operation + " must reject archived clubs");
+  }
+  const rules = readFileSync(new URL("../firestore.rules", import.meta.url), "utf8");
+  assert.ok(rules.includes("function isVividUser()"));
+  assert.ok(rules.includes("request.auth.token.firebase.sign_in_provider != 'anonymous'"));
+});
