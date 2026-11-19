@@ -145,7 +145,7 @@ jobs:
             if ($release.isDraft -and $missingAssets.Count -eq 0) { $buildNeeded = $false }
           }
           if ($buildNeeded) {
-            npm --ignore-scripts run desktop:dist
+            npm --ignore-scripts run desktop:release
             if ($LASTEXITCODE -ne 0) { throw "electron-builder failed for release $tag." }
             "built=true" >> $env:GITHUB_OUTPUT
           } else {
