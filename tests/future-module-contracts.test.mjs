@@ -190,3 +190,26 @@ test("Watch Room playback invitation form only redeems room invitations", () => 
   assert.ok(functions.includes("request.data?.expectedTargetType"));
   assert.ok(client.includes('expectedTargetType: "room"'));
 });
+
+
+test("Cinema Club Stage 6 provides persistent watchlists, screening history and After-Credits", () => {
+  const index = readFileSync(new URL("../functions/index.js", import.meta.url), "utf8");
+  const backend = readFileSync(new URL("../functions/watch-rooms-clubs.js", import.meta.url), "utf8");
+  const rules = readFileSync(new URL("../firestore.rules", import.meta.url), "utf8");
+  const client = readFileSync(new URL("../scripts/watch-room-clubs.js", import.meta.url), "utf8");
+  const page = readFileSync(new URL("../watch-rooms.html", import.meta.url), "utf8");
+  for (const callable of ["addCinemaClubWatchlistItem","removeCinemaClubWatchlistItem","recordCinemaClubScreening","addCinemaClubAfterCreditsReview","addCinemaClubDiscussionMessage"]) {
+    assert.ok(index.includes(callable), "missing Stage 6 callable export: " + callable);
+    assert.ok(backend.includes("export const " + callable + " = onCall"), "missing trusted Stage 6 operation: " + callable);
+  }
+  assert.ok(backend.includes("requireClubMember(clubId, uid)"));
+  assert.ok(backend.includes("tx.get(clubRef.collection(\"members\").doc(uid))"));
+  assert.ok(rules.includes("match /watchlist/{itemId}"));
+  assert.ok(rules.includes("match /screenings/{screeningId}"));
+  assert.ok(rules.includes("match /afterCredits/{userId}"));
+  assert.ok(rules.includes("match /discussion/{messageId}"));
+  assert.ok(client.includes("vivid:cinema-club-selected"));
+  assert.ok(client.includes("addCinemaClubAfterCreditsReview"));
+  assert.ok(client.includes("addCinemaClubDiscussionMessage"));
+  assert.ok(page.includes('src="scripts/watch-room-clubs.js"'));
+});
