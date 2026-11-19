@@ -240,3 +240,18 @@ test("Cinema Club capacity limits use transactional counters to prevent concurre
   assert.ok(discussion.includes("discussionCount") && discussion.includes("tx.update(screeningRef"), "discussion cap must be serialized on the screening document");
   assert.doesNotMatch(discussion, /tx\.get\(screeningRef\.collection\(["']discussion["']\)\)/, "a collection-size query alone is vulnerable to concurrent inserts");
 });
+
+
+test("Watch Room lobby mutations revalidate membership transactionally and serialize queue capacity", () => {
+  const lobby = readFileSync(new URL("../functions/watch-rooms-lobby.js", import.meta.url), "utf8");
+  const lifecycle = readFileSync(new URL("../functions/index.js", import.meta.url), "utf8");
+  assert.ok(lobby.includes("async function requireRoomMemberInTransaction(tx, roomId, uid)"));
+  for (const operation of ["heartbeatWatchRoom","addWatchRoomQueueItem","voteWatchRoomQueueItem","sendWatchRoomMessage","reactToWatchRoomMessage"]) {
+    const start = lobby.indexOf("export const " + operation);
+    const end = lobby.indexOf("\\n});", start);
+    assert.ok(lobby.slice(start, end).includes("requireRoomMemberInTransaction(tx, roomId, uid)"), operation + " must re-check membership and room lifecycle inside its transaction");
+  }
+  assert.ok(lobby.includes("queueCount >= QUEUE_LIMIT"));
+  assert.ok(lobby.includes("tx.update(roomRef, { queueCount: queueCount + 1"));
+  assert.ok(lifecycle.includes("memberCount: 1, queueCount: 0"));
+});
