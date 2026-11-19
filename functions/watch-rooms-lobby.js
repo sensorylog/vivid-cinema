@@ -70,7 +70,8 @@ export const addWatchRoomQueueItem = onCall({ region: "us-central1", maxInstance
   const contentId = request.data?.contentId == null ? null : cleanText(String(request.data.contentId), "Catalogue ID", 80);
   const mediaType = request.data?.mediaType ?? "movie";
   if (!["movie", "tv"].includes(mediaType)) throw new HttpsError("invalid-argument", "Media type must be movie or tv.");
-  const { roomRef } = await requireRoomMember(roomId, uid);
+  const { roomRef, room, member } = await requireRoomMember(roomId, uid);
+  if (room.allowGuestQueue === false && member.role !== "host") throw new HttpsError("permission-denied", "The host has paused guest queue suggestions.");
   const queueRef = roomRef.collection("queue");
   const itemRef = queueRef.doc();
   await db().runTransaction(async tx => {
@@ -104,7 +105,8 @@ export const sendWatchRoomMessage = onCall({ region: "us-central1", maxInstances
   const uid = requireUser(request);
   const roomId = validId(request.data?.roomId, "room ID");
   const text = cleanText(request.data?.text, "Message", MESSAGE_LIMIT);
-  const { roomRef, memberRef } = await requireRoomMember(roomId, uid);
+  const { roomRef, room, memberRef, member } = await requireRoomMember(roomId, uid);
+  if (room.allowGuestChat === false && member.role !== "host") throw new HttpsError("permission-denied", "The host has paused guest chat.");
   const messageRef = roomRef.collection("chat").doc();
   await db().runTransaction(async tx => {
     const member = await tx.get(memberRef);
