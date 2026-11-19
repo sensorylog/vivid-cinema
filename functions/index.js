@@ -473,5 +473,6 @@ export {
   sendWatchRoomMessage,
   reactToWatchRoomMessage,
   updateWatchRoomSettings,
-  removeWatchRoomMember
+  removeWatchRoomMember,
+  closeWatchRoom
 } from "./watch-rooms-lobby.js";
