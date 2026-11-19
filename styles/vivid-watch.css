@@ -284,3 +284,20 @@ body.vivid-watch-page :where(.vivid-watch-kicker,.vivid-watch-section-head span)
 .vivid-episode-nav-item.is-disabled{opacity:.45}
 .vivid-episode-nav-item:focus-visible{outline:2px solid #f4f4f7;outline-offset:3px}
 @media(max-width:520px){.vivid-episode-navigation{margin-top:14px;padding-inline:12px}.vivid-episode-nav-links{gap:8px}.vivid-episode-nav-item{min-height:60px;gap:8px;padding:10px}.vivid-episode-nav-item>i{width:30px;height:30px}.vivid-episode-nav-item strong{font-size:.74rem}.vivid-episode-nav-item small{font-size:.61rem}}
+
+
+/* Private Watch Room sync panel on the title playback page. */
+.vivid-room-sync{width:min(1180px,calc(100% - 32px));margin:22px auto 30px;padding:18px 20px;border:1px solid rgba(255,255,255,.1);border-radius:16px;background:rgba(255,255,255,.035);color:#f5f6f8}
+.vivid-room-sync__head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
+.vivid-room-sync__eyebrow{color:#aeb4c0;font-size:.62rem;font-weight:800;letter-spacing:.15em}
+.vivid-room-sync h2{margin:5px 0;font-size:1.12rem}
+.vivid-room-sync p{margin:0;color:#aeb4c0;font-size:.82rem;line-height:1.5}
+.vivid-room-sync__provider{padding:6px 9px;border:1px solid rgba(255,255,255,.12);border-radius:999px;color:#d7dbe2;font-size:.67rem;font-weight:700;white-space:nowrap}
+.vivid-room-sync__form{display:grid;gap:8px;margin-top:16px}
+.vivid-room-sync__form label{font-size:.75rem;font-weight:700}
+.vivid-room-sync__form>div{display:flex;gap:8px}
+.vivid-room-sync__form input{min-width:0;flex:1;padding:11px 13px;border:1px solid rgba(255,255,255,.14);border-radius:9px;background:rgba(0,0,0,.25);color:inherit;font:inherit}
+.vivid-room-sync button{min-height:42px;padding:0 14px;border:1px solid rgba(255,255,255,.16);border-radius:9px;background:rgba(255,255,255,.1);color:inherit;font:inherit;font-size:.78rem;font-weight:750;cursor:pointer}
+.vivid-room-sync button:disabled{opacity:.5;cursor:wait}
+.vivid-room-sync__actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+@media(max-width:560px){.vivid-room-sync{width:calc(100% - 24px);padding:15px}.vivid-room-sync__head{flex-direction:column}.vivid-room-sync__form>div{flex-direction:column}.vivid-room-sync__form button{width:100%}}
