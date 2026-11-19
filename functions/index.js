@@ -317,7 +317,7 @@ export const createWatchRoom = onCall({ region: "us-central1", maxInstances: 20 
     transaction.create(memberRef, member);
     transaction.create(userRoomRef, {
       roomId: roomRef.id, name, filmTitle, role: "host",
-      status: "open", memberCount: 1, joinedAt: now, createdAt: now
+      status: "open", memberCount: 1, expiresAt, joinedAt: now, createdAt: now
     });
   });
   return { roomId: roomRef.id, expiresAt: expiresAt.toMillis() };
@@ -430,7 +430,7 @@ export const redeemWatchInvitation = onCall({ region: "us-central1", maxInstance
     transaction.create(pointerRef, {
       [isRoom ? "roomId" : "clubId"]: invitation.targetId,
       name: target.name, ...(isRoom ? { filmTitle: target.filmTitle || "" } : { description: target.description || "" }),
-      role, status: target.status, memberCount: target.memberCount + 1, joinedAt: now, createdAt: now
+      role, status: target.status, memberCount: target.memberCount + 1, ...(isRoom ? { expiresAt: target.expiresAt } : {}), joinedAt: now, createdAt: now
     });
     transaction.update(targetRef, { memberCount: target.memberCount + 1, updatedAt: now });
     transaction.update(invitationRef, { useCount: invitation.useCount + 1, lastUsedAt: now });

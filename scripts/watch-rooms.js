@@ -107,11 +107,13 @@ function renderRoomPreviews() {
     title.textContent = room.name || "Private screening";
     const film = document.createElement("p");
     film.textContent = room.filmTitle ? "Screening: " + room.filmTitle : "Choose a film with your guests.";
+    const expiresAt = room.expiresAt?.toMillis?.() ?? Number(room.expiresAt || 0);
+    const isOpen = room.status === "open" && (!expiresAt || expiresAt > Date.now());
     const privacy = document.createElement("span");
     privacy.className = "vivid-wr-preview-private";
-    privacy.textContent = room.status === "open" ? "Invite-only" : "Closed";
+    privacy.textContent = isOpen ? "Invite-only" : "Expired";
     card.append(meta, title, film, privacy);
-    if (room.role === "host" && room.status === "open") {
+    if (room.role === "host" && isOpen) {
       card.append(makeInviteButton("room", room.roomId, "Create invite code"));
     }
     list.append(card);
