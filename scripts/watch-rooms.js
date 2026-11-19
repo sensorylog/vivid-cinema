@@ -171,6 +171,7 @@ function renderClubPreviews() {
 }
 
 function renderClubDetail(club) {
+  document.dispatchEvent(new CustomEvent("vivid:cinema-club-selected", { detail: club }));
   byId("wr-detail-name").textContent = club.name;
   byId("wr-detail-description").textContent = club.description || "A private Vivid Cinema Club. Your shared watchlist and screening history will live here.";
   byId("wr-detail-members").textContent = String(club.memberCount || 1);
