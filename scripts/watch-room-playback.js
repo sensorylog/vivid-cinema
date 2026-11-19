@@ -5,7 +5,6 @@ import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/
 
 const REGION = "us-central1";
 const SUPPORTED_ORIGIN = "https://vidsrc.sh";
-const params = new URLSearchParams(window.location.search);
 const functions = getFunctions(app, REGION);
 const call = name => httpsCallable(functions, name);
 let roomId = "";
@@ -165,4 +164,9 @@ onAuthStateChanged(auth, user => {
   if (existingRoomId && !roomId) connectToRoom(existingRoomId).catch(error => setNote(error?.message || "Could not reconnect to this Watch Room."));
 });
 
-window.addEventListener("pagehide", stopConnection);\nwindow.addEventListener("pageshow", event => {\n  if (!event.persisted || !auth.currentUser || auth.currentUser.isAnonymous) return;\n  const restoredRoomId = new URLSearchParams(window.location.search).get("roomId");\n  if (restoredRoomId && !roomId) connectToRoom(restoredRoomId).catch(error => setNote(error?.message || "Could not reconnect to this Watch Room."));\n});
+window.addEventListener("pagehide", stopConnection);
+window.addEventListener("pageshow", event => {
+  if (!event.persisted || !auth.currentUser || auth.currentUser.isAnonymous) return;
+  const restoredRoomId = new URLSearchParams(window.location.search).get("roomId");
+  if (restoredRoomId && !roomId) connectToRoom(restoredRoomId).catch(error => setNote(error?.message || "Could not reconnect to this Watch Room."));
+});
