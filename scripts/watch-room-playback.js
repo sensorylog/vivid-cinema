@@ -135,7 +135,7 @@ window.addEventListener("vivid:provider-playback", event => {
   if (detail.status === "playing" && now - lastPublishAt < 3500) return;
   lastPublishAt = now;
   const payload = { roomId, provider: "vidsrc", status: hostStatus, contentId: String(detail.contentId || ""), mediaType: detail.mediaType, season: detail.season, episode: detail.episode, position: localPosition, duration: Math.max(0, Number(detail.duration) || 0) };
-  publishQueue = publishQueue.then(() => call("publishWatchRoomPlayback")(payload)).catch(error => setNote(error?.message || "Could not publish the host playback state."));
+  publishQueue = publishQueue.then(() => roomId === payload.roomId && role === "host" ? call("publishWatchRoomPlayback")(payload) : null).catch(error => setNote(error?.message || "Could not publish the host playback state."));
 });
 
 onAuthStateChanged(auth, user => {
