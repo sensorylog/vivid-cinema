@@ -262,6 +262,15 @@ function syncDesktopNavigation() {
     search.innerHTML = '<i class="bi bi-search" aria-hidden="true"></i><span>Search</span>';
     tools.appendChild(search);
   }
+  const watchRooms = document.createElement("a");
+  watchRooms.className = "vivid-watch-rooms-nav";
+  watchRooms.href = "watch-rooms.html";
+  watchRooms.setAttribute("aria-label", "Watch Rooms");
+  watchRooms.title = "Watch Rooms";
+  watchRooms.innerHTML = '<i class="bi bi-people-fill" aria-hidden="true"></i>';
+  if (page === "watch-rooms") watchRooms.setAttribute("aria-current", "page");
+  tools.appendChild(watchRooms);
+
   if (notification) tools.appendChild(notification);
   else {
     const alerts = document.createElement("a");
