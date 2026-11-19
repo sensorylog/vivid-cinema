@@ -255,6 +255,7 @@ function setPlayerSource(source, params, startAt = 0) {
     void flushPlaybackProgress(progressKey());
   }
   activeSource = source;
+  window.dispatchEvent(new CustomEvent("vivid:player-source-changed", { detail: { source } }));
   player.closest(".vivid-player-frame")?.classList.toggle("is-embedwave", source === "embedwave");
   sourceAttempted.add(source);
   const status = $("player-status");
