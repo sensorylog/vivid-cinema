@@ -18,7 +18,8 @@ let localPosition = null;
 let localStatus = "";
 let hostStatus = "playing";
 let lastPublishAt = 0;
-let publishQueue = Promise.resolve();
+let publishQueue = Promise.resolve(); lastHostPayload = null;
+let lastHostPayload = null;
 
 const panel = document.createElement("section");
 panel.className = "vivid-room-sync";
@@ -135,6 +136,7 @@ window.addEventListener("vivid:provider-playback", event => {
   if (detail.status === "playing" && now - lastPublishAt < 3500) return;
   lastPublishAt = now;
   const payload = { roomId, provider: "vidsrc", status: hostStatus, contentId: String(detail.contentId || ""), mediaType: detail.mediaType, season: detail.season, episode: detail.episode, position: localPosition, duration: Math.max(0, Number(detail.duration) || 0) };
+  lastHostPayload = payload;
   publishQueue = publishQueue.then(() => roomId === payload.roomId && role === "host" ? call("publishWatchRoomPlayback")(payload) : null).catch(error => setNote(error?.message || "Could not publish the host playback state."));
 });
 
@@ -145,10 +147,11 @@ window.addEventListener("vivid:player-source-changed", event => {
     else if (roomId) setNote("VidSrc is active. Join synced playback when the player clock appears.");
     return;
   }
-  if (role === "host" && roomId && latestRemoteState?.provider === "vidsrc") {
+  if (role === "host" && roomId && (lastHostPayload || latestRemoteState?.provider === "vidsrc")) {
     hostStatus = "paused";
-    const state = latestRemoteState;
-    const payload = { roomId, provider: "vidsrc", status: "paused", contentId: state.contentId, mediaType: state.mediaType, season: state.season, episode: state.episode, position: localPosition ?? Number(state.position) ?? 0, duration: Number(state.duration) || 0 };
+    const state = lastHostPayload || latestRemoteState;
+    const payload = { roomId, provider: "vidsrc", status: "paused", contentId: state.contentId, mediaType: state.mediaType, season: state.season, episode: state.episode, position: Math.max(0, Number(localPosition ?? state.position) || 0), duration: Number(state.duration) || 0 };
+    lastHostPayload = payload;
     publishQueue = publishQueue.then(() => roomId === payload.roomId && role === "host" ? call("publishWatchRoomPlayback")(payload) : null).catch(error => setNote(error?.message || "Could not pause room sync after changing providers."));
     setNote("Room playback paused because this provider does not expose verified sync controls. Switch back to VidSrc to resume synchronization.");
   } else if (role !== "host" && roomId) {
