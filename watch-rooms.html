@@ -100,6 +100,19 @@
           <div class="vivid-wr-preview-list" id="wr-room-previews" aria-live="polite"></div>
         </section>
 
+        <section class="vivid-wr-lobby" id="wr-room-lobby" hidden aria-labelledby="wr-lobby-title">
+          <div class="vivid-wr-lobby-heading">
+            <div><span class="vivid-wr-section-kicker">THE SCREENING ROOM</span><h2 id="wr-lobby-title">Room lobby</h2><p id="wr-lobby-subtitle">Your crew is getting together.</p></div>
+            <button class="vivid-wr-button vivid-wr-button--quiet" id="wr-lobby-close" type="button">Back to rooms</button>
+          </div>
+          <div class="vivid-wr-lobby-grid">
+            <section class="vivid-wr-lobby-panel"><h3><i class="bi bi-people" aria-hidden="true"></i> In the room <span id="wr-lobby-presence-count">0</span></h3><ul id="wr-lobby-presence" class="vivid-wr-lobby-list"></ul></section>
+            <section class="vivid-wr-lobby-panel"><h3><i class="bi bi-list-ol" aria-hidden="true"></i> Up next</h3><form id="wr-queue-form" class="vivid-wr-inline-form"><input name="title" maxlength="180" placeholder="Suggest a film…" required><button class="vivid-wr-button vivid-wr-button--primary" type="submit">Add</button></form><ol id="wr-lobby-queue" class="vivid-wr-lobby-list"></ol></section>
+            <section class="vivid-wr-lobby-panel vivid-wr-lobby-chat"><h3><i class="bi bi-chat-dots" aria-hidden="true"></i> Room chat</h3><div id="wr-lobby-chat" class="vivid-wr-chat-log" aria-live="polite"></div><form id="wr-chat-form" class="vivid-wr-inline-form"><input name="text" maxlength="500" placeholder="Say something to the room…" required><button class="vivid-wr-button vivid-wr-button--primary" type="submit">Send</button></form></section>
+          </div>
+          <section class="vivid-wr-lobby-panel vivid-wr-host-controls" id="wr-host-controls" hidden><h3><i class="bi bi-shield-check" aria-hidden="true"></i> Host controls</h3><form id="wr-room-settings-form" class="vivid-wr-inline-form"><input name="name" maxlength="80" placeholder="Room name"><label><input type="checkbox" name="allowGuestQueue" checked> Guest queue</label><label><input type="checkbox" name="allowGuestChat" checked> Guest chat</label><button class="vivid-wr-button vivid-wr-button--quiet" type="submit">Save settings</button></form></section>
+        </section>
+
         <section class="vivid-wr-tab-panel" id="wr-panel-clubs" role="tabpanel" aria-labelledby="wr-tab-clubs" data-wr-panel="clubs" hidden>
           <div class="vivid-wr-empty" id="wr-clubs-empty">
             <span class="vivid-wr-empty-art vivid-wr-empty-art--club"><i class="bi bi-people" aria-hidden="true"></i><span>✦</span></span>
