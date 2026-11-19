@@ -132,3 +132,11 @@ test("TV episode navigation disables boundaries and excludes specials", () => {
   assert.match(source, /"Beginning of series"/);
   assert.match(source, /"Season complete"/);
 });
+
+
+test("only the verified VidSrc origin emits Watch Room playback bridge events", () => {
+  assert.match(source, /activeSource === "vidsrc" && event\.origin === "https:\/\/vidsrc\.sh"/);
+  assert.match(source, /new CustomEvent\("vivid:provider-playback"/);
+  assert.match(source, /contentId: String\(currentParams\?\.id/);
+  assert.match(source, /VIDSRC_ORIGINS\.has\(event\.origin\)/);
+});
