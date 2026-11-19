@@ -194,3 +194,35 @@ export const closeWatchRoom = onCall({ region: "us-central1", maxInstances: 20 }
   ));
   return { closed: true };
 });
+
+
+// The first synchronized adapter is limited to VidSrc's documented PLAYER_EVENT and parent-command protocol on vidsrc.sh.
+export const publishWatchRoomPlayback = onCall({ region: "us-central1", maxInstances: 20 }, async request => {
+  const uid = requireUser(request);
+  const roomId = validId(request.data?.roomId, "room ID");
+  if (request.data?.provider !== "vidsrc") throw new HttpsError("failed-precondition", "This provider is not enabled for synchronized playback.");
+  const status = request.data?.status;
+  if (!["playing", "paused", "ended"].includes(status)) throw new HttpsError("invalid-argument", "Playback status is not supported.");
+  const contentId = cleanText(String(request.data?.contentId || ""), "Catalogue ID", 80);
+  if (!/^(?:\d{1,12}|tt\d{5,12})$/.test(contentId)) throw new HttpsError("invalid-argument", "A valid TMDB or IMDb title ID is required.");
+  const mediaType = request.data?.mediaType;
+  if (!["movie", "tv"].includes(mediaType)) throw new HttpsError("invalid-argument", "Media type must be movie or tv.");
+  const position = Number(request.data?.position);
+  const duration = Number(request.data?.duration);
+  if (!Number.isFinite(position) || position < 0 || position > 86400 || !Number.isFinite(duration) || duration < 0 || duration > 86400 || (duration > 0 && position > duration + 10)) throw new HttpsError("invalid-argument", "Playback position or duration is outside the supported range.");
+  const season = mediaType === "tv" ? Number(request.data?.season) : null;
+  const episode = mediaType === "tv" ? Number(request.data?.episode) : null;
+  if (mediaType === "tv" && (!Number.isInteger(season) || season < 1 || season > 500 || !Number.isInteger(episode) || episode < 1 || episode > 5000)) throw new HttpsError("invalid-argument", "A valid season and episode are required.");
+  const { roomRef } = await requireHost(roomId, uid);
+  const stateRef = roomRef.collection("playback").doc("current");
+  const now = Timestamp.now();
+  return db().runTransaction(async tx => {
+    const current = await tx.get(stateRef);
+    const previous = current.exists ? current.data() : null;
+    if (previous && (previous.contentId !== contentId || previous.mediaType !== mediaType || (mediaType === "tv" && (previous.season !== season || previous.episode !== episode)))) throw new HttpsError("failed-precondition", "This room is already synchronized to a different title or episode.");
+    if (previous?.lastEventAt?.toMillis && now.toMillis() - previous.lastEventAt.toMillis() < 1800 && status === "playing") return { accepted: false, reason: "rate-limited" };
+    const revision = Number(previous?.revision || 0) + 1;
+    tx.set(stateRef, { provider: "vidsrc", contentId, mediaType, season, episode, status, position, duration, hostUid: uid, revision, updatedAt: now, lastEventAt: now });
+    return { accepted: true, revision };
+  });
+});
