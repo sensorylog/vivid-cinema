@@ -70,11 +70,15 @@ function makeInviteButton(targetType, targetId, label) {
       const code = result.data.inviteCode;
       const feedbackId = targetType === "room" ? "wr-room-feedback" : "wr-club-feedback";
       setFeedback(feedbackId, "Your invite code (shown once): " + code + " · Expires in 48 hours. Share it privately.");
-      try {
-        await navigator.clipboard?.writeText(code);
-        setFeedback(feedbackId, "Invite code copied: " + code + " · Expires in 48 hours. Share it privately.");
-      } catch {
-        // The code remains visible for manual copying when clipboard access is unavailable.
+      const status = byId("wr-stage-note");
+      if (status) status.textContent = "New invite code: " + code + " · Expires in 48 hours. Share it privately.";
+      if (navigator.clipboard?.writeText) {
+        try {
+          await navigator.clipboard.writeText(code);
+          if (status) status.textContent = "Invite code copied: " + code + " · Expires in 48 hours.";
+        } catch {
+          // The code remains visible for manual copying when clipboard access is unavailable.
+        }
       }
     } catch (error) {
       setFeedback(targetType === "room" ? "wr-room-feedback" : "wr-club-feedback", errorText(error, "Couldn't create an invite code."), true);

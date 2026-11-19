@@ -220,7 +220,9 @@ test("Watch Rooms and Cinema Clubs are readable only by their recorded members a
   await assertSucceeds(getDoc(doc(clubOwner, "cinemaClubs/private-club")));
   await assertFails(getDoc(doc(outsider, "cinemaClubs/private-club")));
   await assertSucceeds(getDoc(doc(host, "users/room-host/watchRooms/private-room")));
+  await assertSucceeds(getDocs(collection(host, "users/room-host/watchRooms")));
   await assertFails(getDoc(doc(outsider, "users/room-host/watchRooms/private-room")));
+  await assertFails(getDocs(collection(outsider, "users/room-host/watchRooms")));
 
   await assertFails(setDoc(doc(host, "rooms/fake-room"), {
     name: "Forged room", hostUid: "room-host", status: "open", memberCount: 1
