@@ -719,6 +719,22 @@ service cloud.firestore {
         allow get, list: if isRoomMember(roomId);
         allow create, update, delete: if false;
       }
+
+      // Lobby data is readable only by current room members. All mutations
+      // pass through trusted callable functions so clients cannot forge roles,
+      // votes, presence leases or chat metadata.
+      match /presence/{memberUid} {
+        allow get, list: if isRoomMember(roomId);
+        allow create, update, delete: if false;
+      }
+      match /queue/{itemId} {
+        allow get, list: if isRoomMember(roomId);
+        allow create, update, delete: if false;
+      }
+      match /chat/{messageId} {
+        allow get, list: if isRoomMember(roomId);
+        allow create, update, delete: if false;
+      }
     }
 
     match /cinemaClubs/{clubId} {
