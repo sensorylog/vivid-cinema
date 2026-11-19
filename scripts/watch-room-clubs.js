@@ -10,6 +10,16 @@ let activeScreeningId = null;
 let stops = [];
 
 function stopListeners() { stops.forEach(stop => stop()); stops = []; activeScreeningId = null; }
+function setClubFormsEnabled(enabled) {
+  ["wr-club-watchlist-form","wr-club-screening-form"].forEach(id => {
+    const form = byId(id);
+    if (form) form.querySelectorAll("input,button").forEach(control => { control.disabled = !enabled; });
+  });
+  ["wr-after-credits-form","wr-club-discussion-form"].forEach(id => {
+    const form = byId(id);
+    if (form) form.querySelectorAll("input,textarea,select,button").forEach(control => { control.disabled = !enabled; });
+  });
+}
 function feedback(message, error = false) {
   const note = byId("wr-stage-note");
   if (note) { note.textContent = message; note.dataset.state = error ? "error" : "info"; }
@@ -36,12 +46,14 @@ function watchlistItem(item) {
 }
 function renderWatchlist(snapshot) {
   const list = byId("wr-club-watchlist");
+  byId("wr-detail-watchlist-count").textContent = String(snapshot.size);
   list.replaceChildren();
   if (snapshot.empty) list.append(node("li", "Your shared shelf is empty. Add the first film.", "vivid-wr-screening-item"));
   snapshot.forEach(doc => list.append(watchlistItem({ id: doc.id, ...doc.data() })));
 }
 function renderScreenings(snapshot) {
   const list = byId("wr-club-screenings");
+  byId("wr-detail-screening-count").textContent = String(snapshot.size);
   list.replaceChildren();
   if (snapshot.empty) list.append(node("p", "No screenings recorded yet. Add the club's first movie night.", "vivid-wr-screening-item"));
   snapshot.forEach(doc => {
@@ -93,6 +105,7 @@ document.addEventListener("vivid:cinema-club-selected", event => {
   stopListeners();
   activeClub = club;
   lastClub = club;
+  setClubFormsEnabled(true);
   byId("wr-after-credits").hidden = true;
   const base = ["cinemaClubs", club.clubId];
   stops.push(onSnapshot(query(collection(db, ...base, "watchlist"), orderBy("createdAt", "desc"), limit(100)), renderWatchlist, error => feedback(error.message, true)));
@@ -160,9 +173,20 @@ byId("wr-club-discussion-form")?.addEventListener("submit", async event => {
   } catch (error) { feedback(error.message || "Couldn't post your message.", true); }
   finally { button.disabled = false; }
 });
+setClubFormsEnabled(false);
+byId("wr-detail-screening-count").textContent = "0";
+byId("wr-detail-watchlist-count").textContent = "0";
+byId("wr-detail-actions")?.addEventListener("click", () => {});
+byId("wr-stage-note")?.setAttribute("aria-live", "polite");
+document.querySelector("[data-focus-club-screening]")?.addEventListener("click", () => {
+  const title = byId("wr-club-screening-form")?.elements.title;
+  title?.focus();
+  title?.scrollIntoView({ behavior: "smooth", block: "center" });
+});
 window.addEventListener("pagehide", () => {
   stopListeners();
   activeClub = null;
+  setClubFormsEnabled(false);
 });
 window.addEventListener("pageshow", () => {
   if (lastClub) document.dispatchEvent(new CustomEvent("vivid:cinema-club-selected", { detail: lastClub }));
