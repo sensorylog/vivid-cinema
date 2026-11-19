@@ -15,6 +15,7 @@ test("Vivid Recall uses the stable, lower-cost Gemini Flash-Lite model", () => {
   assert.match(aiSource, /const RECALL_MODEL = "gemini-3\.5-flash-lite"/);
   assert.match(aiSource, /ThinkingLevel\.MINIMAL/);
   assert.doesNotMatch(aiSource, /gemini-3\.8-flash/);
+});
 
 test("Gemini requests share one App Check client and serialize/retry only initial token throttles", () => {
   assert.match(aiSource, /let recallAi = null/);
