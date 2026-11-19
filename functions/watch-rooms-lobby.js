@@ -155,8 +155,11 @@ export const updateWatchRoomSettings = onCall({ region: "us-central1", maxInstan
   }
   if (!Object.keys(update).length) throw new HttpsError("invalid-argument", "No room settings were supplied.");
   const { roomRef } = await requireHost(roomId, uid);
+  const members = await roomRef.collection("members").get();
   await roomRef.update({ ...update, updatedAt: Timestamp.now() });
-  await db().collection("users").doc(uid).collection("watchRooms").doc(roomId).set(update, { merge: true });
+  await Promise.all(members.docs.map(member =>
+    db().collection("users").doc(member.id).collection("watchRooms").doc(roomId).set(update, { merge: true })
+  ));
   return { updated: true };
 });
 
