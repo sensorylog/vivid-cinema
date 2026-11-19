@@ -141,3 +141,21 @@ test("Watch Rooms backend exposes trusted lifecycle operations and hashed invita
     "match /watchInvitations/{tokenHash}", "allow create, update, delete: if false"
   ]) assert.ok(rules.includes(contract), "missing Firestore authorization contract: " + contract);
 });
+
+
+test("Watch Rooms Stage 4 exposes trusted lobby, queue, chat, reactions and host controls", () => {
+  const index = readFileSync(new URL("../functions/index.js", import.meta.url), "utf8");
+  const lobby = readFileSync(new URL("../functions/watch-rooms-lobby.js", import.meta.url), "utf8");
+  const page = readFileSync(new URL("../watch-rooms.html", import.meta.url), "utf8");
+  const client = readFileSync(new URL("../scripts/watch-room-lobby.js", import.meta.url), "utf8");
+  const rules = readFileSync(new URL("../firestore.rules", import.meta.url), "utf8");
+  for (const name of ["heartbeatWatchRoom","addWatchRoomQueueItem","voteWatchRoomQueueItem","sendWatchRoomMessage","reactToWatchRoomMessage","updateWatchRoomSettings","removeWatchRoomMember"]) {
+    assert.ok(index.includes(name), "missing exported callable " + name);
+    assert.ok(lobby.includes("export const " + name + " = onCall"), "missing trusted callable implementation " + name);
+  }
+  for (const id of ["wr-room-lobby","wr-lobby-presence","wr-lobby-queue","wr-lobby-chat","wr-host-controls","wr-queue-form","wr-chat-form"]) assert.ok(page.includes('id="' + id + '"'));
+  for (const callable of ["heartbeatWatchRoom","addWatchRoomQueueItem","voteWatchRoomQueueItem","sendWatchRoomMessage","reactToWatchRoomMessage","updateWatchRoomSettings"]) assert.ok(client.includes('call("' + callable + '")'));
+  for (const path of ["presence","queue","chat"]) assert.ok(rules.includes("match /" + path + "/{"), "missing member-readable " + path + " rules");
+  assert.ok(lobby.includes("PRESENCE_TTL_MS"));
+  assert.ok(lobby.includes("MAX_INSTANCES") || lobby.includes("maxInstances"));
+});
