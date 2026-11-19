@@ -80,7 +80,7 @@ function applyRemoteState(force = false) {
 
 async function connectToRoom(id) {
   const user = auth.currentUser;
-  if (!user) throw new Error("Sign in to your Vivid account before joining a Watch Room.");
+  if (!user || user.isAnonymous) throw new Error("Sign in to your Vivid account before joining a Watch Room.");
   stopConnection();
   const membership = await getDoc(doc(db, "rooms", id, "members", user.uid));
   if (!membership.exists()) throw new Error("You are not a member of this Watch Room. Use a valid invitation code.");
@@ -139,7 +139,7 @@ window.addEventListener("vivid:provider-playback", event => {
 });
 
 onAuthStateChanged(auth, user => {
-  if (!user) { setNote("Sign in to connect a private Watch Room."); form.querySelector("button").disabled = true; return; }
+  if (!user || user.isAnonymous) { stopConnection(); setNote("Sign in to connect a private Watch Room."); form.querySelector("button").disabled = true; return; }
   form.querySelector("button").disabled = false;
   const existingRoomId = params.get("roomId");
   if (existingRoomId && !roomId) connectToRoom(existingRoomId).catch(error => setNote(error?.message || "Could not reconnect to this Watch Room."));
