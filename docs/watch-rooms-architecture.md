@@ -148,4 +148,5 @@ Each stage is delivered as focused commits on feature/watch-rooms and reviewed b
 - Guests join through a room invitation code on the watch page. The expected invitation target is validated before redemption so a Cinema Club code cannot be consumed accidentally.
 - The guest estimates the host position using the server timestamp, applies play/pause commands, and seeks when drift exceeds 2.5 seconds. A guest must start the VidSrc player through a user gesture before browser playback policy permits remote play commands.
 - Room state is locked to one title and (for TV) one episode. Changing to a different title requires a new screening room.
+- Host authority does not transfer automatically. Only the current host may publish playback; guests cannot claim control. If the host disconnects, the last snapshot remains available but no new authoritative commands are issued. The host can close the room; a new screening should be created if a different host is needed.
 - This is provider-assisted synchronization, not a promise of frame-perfect playback. Third-party network latency, buffering and browser autoplay restrictions remain outside Vivid's control.
