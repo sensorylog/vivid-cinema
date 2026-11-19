@@ -243,9 +243,8 @@ async function sendMessage(text) {
     const fullDiagnostic = errorDiagnostic(error);
     const diagnosticText = errorCode + " " + errorMessage + " " + fullDiagnostic;
     const needsSignIn = /unauthenticated/i.test(diagnosticText) || /\b401\b/.test(diagnosticText);
-    const quotaFailure = /\b429\b|resource[_ ]exhausted|quota|rate.?limit/i.test(diagnosticText);
-    console.warn("Vivid Recall Gemini chat failed (full diagnostic):", {
-      code: errorCode || null,
+    const appCheckThrottle = /appCheck\/(?:initial-)?throttled?/i.test(diagnosticText) || /AppCheck: Requests throttled due to previous 429/i.test(diagnosticText);
+    const quotaFailure = !appCheckThrottle && (/\b429\b|resource[_ ]exhausted|quota|rate.?limit/i.test(diagnosticText));
       status: error?.status || error?.customData?.httpStatus || null,
       message: errorMessage,
       customData: error?.customData || null,
@@ -255,13 +254,15 @@ async function sendMessage(text) {
     });
     const userFacingError = needsSignIn
       ? "Gemini returned 401 (unauthenticated). Firebase AI Logic may be set to allow signed-in users only. Sign in to Vivid Cinema, or change that AI Logic setting if guest chat should be allowed."
-      : quotaFailure
-        ? "Gemini is temporarily busy or rate-limited. Your clues are still here, and local catalogue search is active."
-        : "Gemini couldn’t connect this time. Your clues are still saved in this chat, and I’ve switched to local catalogue search.";
+      : appCheckThrottle
+        ? "Firebase App Check is cooling down after an earlier rejected request. Wait for its retry window, then try once. Your clues are safe and local catalogue search is active."
+        : quotaFailure
+          ? "Gemini is temporarily busy or rate-limited. Your clues are still here, and local catalogue search is active."
+          : "Gemini couldn’t connect this time. Your clues are still saved in this chat, and I’ve switched to local catalogue search.";
     addMessage("assistant", userFacingError);
     const localMatches = await fallbackToLocalSearch(version);
     if (version === requestVersion) {
-      const localLabel = needsSignIn ? "Gemini 401" : quotaFailure ? "Gemini 429" : "Gemini connection failed";
+      const localLabel = needsSignIn ? "Gemini 401" : appCheckThrottle ? "Firebase App Check cooldown" : quotaFailure ? "Gemini 429" : "Gemini connection failed";
       setStatus(localLabel + " · " + (localMatches ? "Local Recall found " + localMatches + " possible matches" : "Local Recall is ready for more clues") + " · " + fullDiagnostic + " · Try again shortly.");
     }
   } finally {
