@@ -1,6 +1,6 @@
 # Vivid Watch Rooms — Engineering Architecture
 
-Status: Stage 2 UI committed; Stage 3 trusted backend and authorization implementation in progress.
+Status: Stages 1–3 implemented; Stage 4 lobby and social implementation in progress.
 Repository: sensorylog/vivid-cinema
 Base branch: main
 Feature branch: feature/watch-rooms
@@ -128,3 +128,12 @@ Each stage is delivered as focused commits on feature/watch-rooms and reviewed b
 - No broad CSS cleanup or unrelated refactoring.
 - No claim of universal synchronization across unsupported embedded providers.
 - Do not modify the existing Android foundation pull request as part of this work.
+## Stage 4 lobby and social implementation
+
+- Presence is represented by short-lived member leases refreshed every 30 seconds and expiring after 90 seconds; it is not a substitute for membership.
+- Room queue suggestions are created through trusted callable operations, bounded to 50 items, and support per-member vote toggling.
+- Room chat is member-only, bounded to 500 characters per message, and rate-limited server-side.
+- Reactions are allow-listed and toggled by authenticated room members.
+- Host-only settings control the room name and whether guests may add queue items or chat. The host can remove another member; the host cannot remove themselves.
+- Lobby collections are readable only by current room members. All client writes to presence, queue and chat are denied by Firestore rules; mutations use trusted callables.
+- Client lobby listeners are torn down when the user leaves the lobby. Playback synchronization remains Stage 5 and is not implied by the lobby.
