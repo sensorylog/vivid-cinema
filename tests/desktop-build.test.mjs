@@ -241,6 +241,8 @@ test("Windows workflow builds on demand or on release tags", () => {
   assert.ok(workflow.indexOf("Ensure matching release tag exists before publishing") < workflow.indexOf("Create or reuse draft release for electron-builder"));
   assert.ok(workflow.indexOf("Create or reuse draft release for electron-builder") < workflow.indexOf("Build auto-updatable Windows release files"));
   assert.ok(workflow.indexOf("Build auto-updatable Windows release files") < workflow.indexOf("Verify updater metadata was generated"));
+  assert.match(workflow, /Wait for Android APK in draft release/);
+  assert.match(workflow, /Vivid-Cinema-Android\\.apk/);
   assert.match(workflow, /Verify draft release contains all required assets/);
   assert.doesNotMatch(workflow, /WIN_CSC_LINK|WIN_CSC_KEY_PASSWORD|Require Windows code-signing credentials|Verify Windows Authenticode signatures/);
   assert.match(workflow, /if \(!\$release\.isDraft\)/);
