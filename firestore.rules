@@ -21,7 +21,8 @@ service cloud.firestore {
 
     function isClubMember(clubId) {
       return signedIn()
-        && exists(/databases/$(database)/documents/cinemaClubs/$(clubId)/members/$(request.auth.uid));
+        && exists(/databases/$(database)/documents/cinemaClubs/$(clubId)/members/$(request.auth.uid))
+        && get(/databases/$(database)/documents/cinemaClubs/$(clubId)).data.status == 'active';
     }
 
     function validContentId(contentId) {
