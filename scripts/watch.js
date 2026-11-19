@@ -1068,6 +1068,20 @@ function handlePlayerEvent(event) {
     if (info.season != null && Number(info.season) !== Number(currentParams.season)) return;
     if (info.episode != null && Number(info.episode) !== Number(currentParams.episode)) return;
   }
+  if (activeSource === "vidsrc" && event.origin === "https://vidsrc.sh") {
+    const providerStatus = String(data.player_status || "").toLowerCase();
+    if (["playing", "paused", "seeked", "completed"].includes(providerStatus)) {
+      window.dispatchEvent(new CustomEvent("vivid:provider-playback", { detail: {
+        provider: "vidsrc", origin: event.origin, event: providerStatus,
+        status: providerStatus === "completed" ? "ended" : providerStatus === "paused" ? "paused" : providerStatus === "playing" ? "playing" : "seeked",
+        position: Number(data.player_progress) || 0, duration: Number(data.player_duration) || 0,
+        contentId: String(info.tmdb || info.imdb || tmdbId || currentParams?.id || ""),
+        mediaType: String(info.mediaType || currentParams?.type || "movie"),
+        season: info.season ?? currentParams?.season, episode: info.episode ?? currentParams?.episode
+      } }));
+    }
+  }
+
   // A validated playback/progress event means the active embed is alive.
   primaryHealthy = true;
   rememberSuccessfulSource(activeSource);
