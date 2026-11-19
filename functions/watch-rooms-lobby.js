@@ -163,7 +163,8 @@ export const updateWatchRoomSettings = onCall({ region: "us-central1", maxInstan
 export const removeWatchRoomMember = onCall({ region: "us-central1", maxInstances: 20 }, async request => {
   const uid = requireUser(request);
   const roomId = validId(request.data?.roomId, "room ID");
-  const memberUid = validId(request.data?.memberUid, "member ID");
+  const memberUid = request.data?.memberUid;
+  if (typeof memberUid !== "string" || !memberUid.length || memberUid.length > 128 || memberUid.includes("/")) throw new HttpsError("invalid-argument", "A valid member ID is required.");
   if (memberUid === uid) throw new HttpsError("failed-precondition", "The host cannot remove themselves. Close the room instead.");
   const { roomRef } = await requireHost(roomId, uid);
   const targetRef = roomRef.collection("members").doc(memberUid);
