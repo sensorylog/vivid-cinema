@@ -138,6 +138,23 @@ window.addEventListener("vivid:provider-playback", event => {
   publishQueue = publishQueue.then(() => roomId === payload.roomId && role === "host" ? call("publishWatchRoomPlayback")(payload) : null).catch(error => setNote(error?.message || "Could not publish the host playback state."));
 });
 
+window.addEventListener("vivid:player-source-changed", event => {
+  const source = event.detail?.source;
+  if (source === "vidsrc") {
+    if (role === "host") setNote("VidSrc is active. Your playback controls the room clock.");
+    else if (roomId) setNote("VidSrc is active. Join synced playback when the player clock appears.");
+    return;
+  }
+  if (role === "host" && roomId && latestRemoteState?.provider === "vidsrc") {
+    hostStatus = "paused";
+    const state = latestRemoteState;
+    const payload = { roomId, provider: "vidsrc", status: "paused", contentId: state.contentId, mediaType: state.mediaType, season: state.season, episode: state.episode, position: localPosition ?? Number(state.position) ?? 0, duration: Number(state.duration) || 0 };
+    publishQueue = publishQueue.then(() => roomId === payload.roomId && role === "host" ? call("publishWatchRoomPlayback")(payload) : null).catch(error => setNote(error?.message || "Could not pause room sync after changing providers."));
+    setNote("Room playback paused because this provider does not expose verified sync controls. Switch back to VidSrc to resume synchronization.");
+  } else if (role !== "host" && roomId) {
+    setNote("This provider is not enabled for room sync. Switch to VidSrc to follow the host.");
+  }
+});
 onAuthStateChanged(auth, user => {
   if (!user || user.isAnonymous) { stopConnection(); setNote("Sign in to connect a private Watch Room."); form.querySelector("button").disabled = true; return; }
   form.querySelector("button").disabled = false;
