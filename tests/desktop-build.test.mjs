@@ -228,7 +228,7 @@ test("Windows workflow builds on demand or on release tags", () => {
   assert.equal(workflow.includes("actions/checkout@v4"), false);
   assert.equal(workflow.includes("actions/setup-node@v4"), false);
   assert.equal(workflow.includes("actions/upload-artifact@v4"), false);
-  assert.match(workflow, /desktop:dist/);
+  assert.match(workflow, /desktop:release/);
   assert.match(workflow, /GH_TOKEN:.*secrets\.GITHUB_TOKEN/);
   assert.match(workflow, /contents: write/);
   assert.match(workflow, /Decide whether this push publishes a release/);
@@ -266,7 +266,7 @@ test("Windows workflow builds on demand or on release tags", () => {
   assert.match(workflow, /latest\.yml/);
   assert.match(workflow, /pull_request/);
   assert.match(workflow, /windows-latest/);
-  assert.match(workflow, /desktop:dist/);
+  assert.match(workflow, /desktop:release/);
   assert.match(workflow, /icons\/\*\*/);
   assert.match(workflow, /Vivid-Cinema-Setup/);
   assert.match(workflow, /Vivid-Cinema-Portable/);
