@@ -50,7 +50,7 @@ function stopConnection() {
   unsubscribePlayback = null;
   if (heartbeatTimer) window.clearInterval(heartbeatTimer);
   heartbeatTimer = null;
-  roomId = ""; role = ""; latestRemoteState = null; joinedPlayback = false; localPosition = null; localStatus = ""; hostStatus = "playing"; lastPublishAt = 0; publishQueue = Promise.resolve();
+  roomId = ""; role = ""; latestRemoteState = null; joinedPlayback = false; localPosition = null; localStatus = ""; hostStatus = "playing"; lastPublishAt = 0; publishQueue = Promise.resolve(); lastHostPayload = null;
   joinButton.hidden = true; leaveButton.hidden = true; form.hidden = false;
 }
 
