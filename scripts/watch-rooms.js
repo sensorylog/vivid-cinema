@@ -69,13 +69,14 @@ function makeInviteButton(targetType, targetId, label) {
       const result = await call("createWatchInvitation")({ targetType, targetId });
       const code = result.data.inviteCode;
       const feedbackId = targetType === "room" ? "wr-room-feedback" : "wr-club-feedback";
-      setFeedback(feedbackId, "Your invite code (shown once): " + code + " · Expires in 48 hours. Share it privately.");
+      const expiryLabel = targetType === "room" ? "Expires when the room closes (within 24 hours)." : "Expires in 48 hours.";
+      setFeedback(feedbackId, "Your invite code (shown once): " + code + " · " + expiryLabel + " Share it privately.");
       const status = byId("wr-stage-note");
-      if (status) status.textContent = "New invite code: " + code + " · Expires in 48 hours. Share it privately.";
+      if (status) status.textContent = "New invite code: " + code + " · " + expiryLabel + " Share it privately.";
       if (navigator.clipboard?.writeText) {
         try {
           await navigator.clipboard.writeText(code);
-          if (status) status.textContent = "Invite code copied: " + code + " · Expires in 48 hours.";
+          if (status) status.textContent = "Invite code copied: " + code + " · " + expiryLabel
         } catch {
           // The code remains visible for manual copying when clipboard access is unavailable.
         }
@@ -243,7 +244,7 @@ byId("wr-create-room-form")?.addEventListener("submit", async event => {
     const invitation = await call("createWatchInvitation")({ targetType: "room", targetId: roomId });
     await loadDashboard(auth.currentUser);
     showTab("rooms");
-    setFeedback("wr-room-feedback", "Room created. Your invite code is " + invitation.data.inviteCode + " · Expires in 48 hours. Share it privately.");
+    setFeedback("wr-room-feedback", "Room created. Your invite code is " + invitation.data.inviteCode + " · Expires when the room closes (within 24 hours). Share it privately.");
     form.reset();
   } catch (error) {
     setFeedback("wr-room-feedback", errorText(error, "Couldn't create your room. Please try again."), true);

@@ -360,7 +360,8 @@ export const createWatchInvitation = onCall({ region: "us-central1", maxInstance
   const targetRef = db.collection(collectionName).doc(targetId);
   const memberRef = targetRef.collection("members").doc(auth.uid);
   const now = Timestamp.now();
-  const expiresAt = Timestamp.fromMillis(now.toMillis() + INVITE_TTL_MS);
+  const defaultExpiresAt = Timestamp.fromMillis(now.toMillis() + INVITE_TTL_MS);
+  let expiresAt = defaultExpiresAt;
   const code = inviteCode();
   const tokenHash = inviteHash(code);
   const invitationRef = db.collection("watchInvitations").doc(tokenHash);
@@ -373,6 +374,7 @@ export const createWatchInvitation = onCall({ region: "us-central1", maxInstance
       throw new HttpsError("permission-denied", "Only the room host or club owner can create invitations.");
     }
     const target = targetSnapshot.data();
+    if (targetType === "room" && target.expiresAt && target.expiresAt.toMillis() < expiresAt.toMillis()) expiresAt = target.expiresAt;
     if ((targetType === "room" && (target.status !== "open" || !target.expiresAt || target.expiresAt.toMillis() <= now.toMillis())) || (targetType === "club" && target.status !== "active")) {
       throw new HttpsError("failed-precondition", "This space is not accepting invitations.");
     }
@@ -429,7 +431,7 @@ export const redeemWatchInvitation = onCall({ region: "us-central1", maxInstance
     transaction.create(pointerRef, {
       [isRoom ? "roomId" : "clubId"]: invitation.targetId,
       name: target.name, ...(isRoom ? { filmTitle: target.filmTitle || "" } : { description: target.description || "" }),
-      role, status: target.status, joinedAt: now, createdAt: now
+      role, status: target.status, memberCount: target.memberCount + 1, joinedAt: now, createdAt: now
     });
     transaction.update(targetRef, { memberCount: target.memberCount + 1, updatedAt: now });
     transaction.update(invitationRef, { useCount: invitation.useCount + 1, lastUsedAt: now });
