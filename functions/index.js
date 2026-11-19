@@ -401,9 +401,6 @@ export const redeemWatchInvitation = onCall({ region: "us-central1", maxInstance
     const invitationSnapshot = await transaction.get(invitationRef);
     if (!invitationSnapshot.exists) throw new HttpsError("not-found", "This invitation is invalid or has expired.");
     const invitation = invitationSnapshot.data();
-    if (invitation.revokedAt || invitation.expiresAt.toMillis() <= now.toMillis() || invitation.useCount >= invitation.maxUses) {
-      throw new HttpsError("failed-precondition", "This invitation is expired, revoked or full.");
-    }
     const isRoom = invitation.targetType === "room";
     if (request.data?.expectedTargetType && request.data.expectedTargetType !== invitation.targetType) throw new HttpsError("failed-precondition", "This invitation is for a different Vivid space.");
     const targetCollection = isRoom ? "rooms" : invitation.targetType === "club" ? "cinemaClubs" : null;
@@ -416,9 +413,16 @@ export const redeemWatchInvitation = onCall({ region: "us-central1", maxInstance
       transaction.get(targetRef), transaction.get(memberRef)
     ]);
     if (!targetSnapshot.exists) throw new HttpsError("not-found", "This space is no longer available.");
-    if (memberSnapshot.exists) return { targetType: invitation.targetType, targetId: invitation.targetId, alreadyMember: true };
     const target = targetSnapshot.data();
-    if ((isRoom && (target.status !== "open" || !target.expiresAt || target.expiresAt.toMillis() <= now.toMillis())) || (!isRoom && target.status !== "active")) {
+    const targetIsActive = (isRoom && target.status === "open" && target.expiresAt && target.expiresAt.toMillis() > now.toMillis()) || (!isRoom && target.status === "active");
+    if (memberSnapshot.exists) {
+      if (!targetIsActive) throw new HttpsError("failed-precondition", "This space is no longer active.");
+      return { targetType: invitation.targetType, targetId: invitation.targetId, alreadyMember: true };
+    }
+    if (invitation.revokedAt || invitation.expiresAt.toMillis() <= now.toMillis() || invitation.useCount >= invitation.maxUses) {
+      throw new HttpsError("failed-precondition", "This invitation is expired, revoked or full.");
+    }
+    if (!targetIsActive) {
       throw new HttpsError("failed-precondition", "This space is no longer accepting members.");
     }
     const limit = isRoom ? MAX_ROOM_MEMBERS : MAX_CLUB_MEMBERS;
