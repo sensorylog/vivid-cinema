@@ -182,3 +182,11 @@ test("Watch Rooms Stage 5 exposes a trusted VidSrc-only playback clock and clien
   assert.ok(watch.includes('new CustomEvent("vivid:provider-playback"'));
   assert.ok(page.includes('src="scripts/watch-room-playback.js"'));
 });
+
+
+test("Watch Room playback invitation form only redeems room invitations", () => {
+  const functions = readFileSync(new URL("../functions/index.js", import.meta.url), "utf8");
+  const client = readFileSync(new URL("../scripts/watch-room-playback.js", import.meta.url), "utf8");
+  assert.ok(functions.includes("request.data?.expectedTargetType"));
+  assert.ok(client.includes('expectedTargetType: "room"'));
+});
