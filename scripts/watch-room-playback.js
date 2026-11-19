@@ -106,7 +106,7 @@ form.addEventListener("submit", async event => {
   if (!/^[23456789ABCDEFGHJKLMNPQRSTUVWXYZ]{10}$/.test(code)) { setNote("Enter the 10-character Watch Room invitation code."); return; }
   const button = form.querySelector("button"); button.disabled = true;
   try {
-    const result = await call("redeemWatchInvitation")({ inviteCode: code });
+    const result = await call("redeemWatchInvitation")({ inviteCode: code, expectedTargetType: "room" });
     if (result.data.targetType !== "room") throw new Error("That code is for a Cinema Club, not a Watch Room.");
     await connectToRoom(result.data.targetId);
     const next = new URL(window.location.href); next.searchParams.set("roomId", result.data.targetId); window.history.replaceState({}, "", next);
