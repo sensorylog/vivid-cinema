@@ -1,6 +1,6 @@
 # Vivid Watch Rooms — Engineering Architecture
 
-Status: Stages 1–4 implemented and validated; Stage 5 code complete with CI validation pending; Stage 6 implementation in progress.
+Status: Stages 1–4 implemented and validated; Stage 5 code complete (latest GitHub Actions validation is still queued); Stage 6 implementation complete, validation pending.
 Repository: sensorylog/vivid-cinema
 Base branch: main
 Feature branch: feature/watch-rooms
@@ -150,3 +150,15 @@ Each stage is delivered as focused commits on feature/watch-rooms and reviewed b
 - Room state is locked to one title and (for TV) one episode. Changing to a different title requires a new screening room.
 - Host authority does not transfer automatically. Only the current host may publish playback; guests cannot claim control. If the host disconnects, the last snapshot remains available but no new authoritative commands are issued. The host can close the room; a new screening should be created if a different host is needed.
 - This is provider-assisted synchronization, not a promise of frame-perfect playback. Third-party network latency, buffering and browser autoplay restrictions remain outside Vivid's control.
+
+
+## Stage 6 persistent Cinema Club experience
+
+- `cinemaClubs/{clubId}/watchlist/{itemId}` stores a shared, typed movie/TV watchlist (maximum 100 entries). Items are keyed by typed catalogue identity so a movie and series with the same numeric catalogue ID cannot collide.
+- `cinemaClubs/{clubId}/screenings/{screeningId}` stores durable screening history, including typed title identity, screening date, optional notes, and rating aggregates. A member can record a screening from the club page.
+- `screenings/{screeningId}/afterCredits/{uid}` stores each member's editable 1–5 rating and optional review. Aggregate rating totals are updated transactionally to avoid lost updates.
+- `screenings/{screeningId}/discussion/{messageId}` stores member-only After-Credits discussion messages, bounded to 1,000 characters and 200 messages per screening.
+- Trusted callable operations perform every write. They require a signed-in, non-anonymous Vivid identity, verify active club membership, and re-check membership inside the transaction that commits durable changes.
+- Firestore rules allow only current members of active clubs to read these collections. Client writes are denied; non-members and signed-out users cannot read club watchlists, history, ratings or discussions.
+- The club page subscribes to the selected club's shared watchlist and screening history, and loads a screening's ratings/discussion when the member opens its After-Credits view.
+- The UI accepts Vivid's typed `movie:ID` / `tv:ID` catalogue identifiers. It does not pretend free-text titles alone are a canonical catalogue match.
