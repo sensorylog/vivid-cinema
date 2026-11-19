@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#06070a">
+  <meta name="description" content="Your private Vivid cinema. Watch Rooms and Cinema Clubs bring friends together around the films they love.">
+  <title>Watch Rooms · Vivid Cinema</title>
+  <link rel="icon" href="icons/vivid-icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/vivid-icon.svg">
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.9.1/font/bootstrap-icons.css">
+  <link rel="stylesheet" href="styles/vivid-foundation.css">
+  <link rel="stylesheet" href="styles/vivid-system.css">
+  <link rel="stylesheet" href="styles/vivid-shell.css">
+  <link rel="stylesheet" href="styles/vivid-atmosphere.css">
+  <link rel="stylesheet" href="styles/vivid-pwa.css">
+  <link rel="stylesheet" href="styles/vivid-liquid-glass.css?v=lg4">
+  <link rel="stylesheet" href="styles/vivid-watch-rooms.css">
+</head>
+<body data-vivid-page="watch-rooms" class="vivid-watch-rooms-page vivid-atmosphere">
+  <div class="vivid-watch-rooms-app">
+    <header class="vivid-topbar vivid-unified-header" id="topbar">
+      <nav class="vivid-nav vivid-unified-nav" aria-label="Primary">
+        <a class="vivid-brand vivid-site-brand" href="home.html">
+          <img class="vivid-brand-icon" src="icons/vivid-icon.svg" alt="" aria-hidden="true">
+          <span class="vivid-brand-wordmark">Vivid<span>Cinema</span></span>
+        </a>
+        <div class="vivid-navlinks" aria-hidden="true"></div>
+      </nav>
+    </header>
+
+    <main class="vivid-watch-rooms-main">
+      <a class="vivid-page-back" data-vivid-back href="home.html">
+        <i class="bi bi-chevron-left" aria-hidden="true"></i>
+        <span>Back to Vivid</span>
+      </a>
+
+      <section id="watch-rooms-loading" class="vivid-watch-rooms-state" role="status" aria-live="polite">
+        <span class="vivid-watch-rooms-state-icon" aria-hidden="true"><i class="bi bi-shield-lock"></i></span>
+        <p>Checking your Vivid account…</p>
+      </section>
+
+      <section id="watch-rooms-error" class="vivid-watch-rooms-state" role="alert" hidden>
+        <span class="vivid-watch-rooms-state-icon" aria-hidden="true"><i class="bi bi-exclamation-circle"></i></span>
+        <h1>We couldn't verify your session.</h1>
+        <p id="watch-rooms-error-message">Please check your connection and try again.</p>
+        <button class="vivid-button vivid-button--secondary" id="watch-rooms-retry" type="button">Try again</button>
+        <a class="vivid-link" href="home.html">Return to Vivid</a>
+      </section>
+
+      <div id="watch-rooms-private" hidden>
+        <section class="vivid-watch-rooms-hero" aria-labelledby="watch-rooms-title">
+          <div class="vivid-watch-rooms-hero-copy">
+            <span class="vivid-watch-rooms-eyebrow"><i class="bi bi-lock-fill" aria-hidden="true"></i> YOUR PRIVATE CINEMA</span>
+            <h1 id="watch-rooms-title">Movies are better <em>together.</em></h1>
+            <p>Bring your people into one shared cinema. Make a room for tonight, or build a club that keeps the next movie night close.</p>
+            <span class="vivid-watch-rooms-member-note"><i class="bi bi-shield-check" aria-hidden="true"></i> A private space for signed-in Vivid members</span>
+          </div>
+          <div class="vivid-watch-rooms-orbit" aria-hidden="true">
+            <span class="vivid-watch-rooms-orbit-ring vivid-watch-rooms-orbit-ring--outer"></span>
+            <span class="vivid-watch-rooms-orbit-ring vivid-watch-rooms-orbit-ring--inner"></span>
+            <span class="vivid-watch-rooms-orbit-core"><i class="bi bi-people-fill"></i></span>
+            <span class="vivid-watch-rooms-orbit-star vivid-watch-rooms-orbit-star--one">✦</span>
+            <span class="vivid-watch-rooms-orbit-star vivid-watch-rooms-orbit-star--two">✧</span>
+          </div>
+        </section>
+
+        <section class="vivid-watch-rooms-foundation" aria-label="Watch Rooms foundation">
+          <article class="vivid-watch-rooms-feature">
+            <span class="vivid-watch-rooms-feature-icon"><i class="bi bi-play-circle" aria-hidden="true"></i></span>
+            <div>
+              <span class="vivid-watch-rooms-feature-kicker">ONE-NIGHT CINEMA</span>
+              <h2>Watch Rooms</h2>
+              <p>Private screenings where invited friends can gather around the same film.</p>
+            </div>
+          </article>
+          <article class="vivid-watch-rooms-feature">
+            <span class="vivid-watch-rooms-feature-icon"><i class="bi bi-people" aria-hidden="true"></i></span>
+            <div>
+              <span class="vivid-watch-rooms-feature-kicker">YOUR LASTING CIRCLE</span>
+              <h2>Cinema Clubs</h2>
+              <p>Persistent groups with shared watchlists and a history of movies watched together.</p>
+            </div>
+          </article>
+        </section>
+        <p class="vivid-watch-rooms-foundation-note">The private cinema foundation is in place. Room creation, club tools and shared screenings will arrive in the next build stages.</p>
+      </div>
+    </main>
+  </div>
+
+  <script type="module" src="scripts/app-shell.js"></script>
+  <script type="module" src="scripts/watch-rooms.js"></script>
+  <script type="module" src="scripts/i18n.js"></script>
+</body>
+</html>
