@@ -13,7 +13,10 @@ service cloud.firestore {
 
     function isRoomMember(roomId) {
       return signedIn()
-        && exists(/databases/$(database)/documents/rooms/$(roomId)/members/$(request.auth.uid));
+        && exists(/databases/$(database)/documents/rooms/$(roomId)/members/$(request.auth.uid))
+        && get(/databases/$(database)/documents/rooms/$(roomId)).data.status == 'open'
+        && (!get(/databases/$(database)/documents/rooms/$(roomId)).data.keys().hasAny(['expiresAt'])
+          || get(/databases/$(database)/documents/rooms/$(roomId)).data.expiresAt > request.time);
     }
 
     function isClubMember(clubId) {
