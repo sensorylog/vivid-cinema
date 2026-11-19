@@ -56,8 +56,8 @@ export const addCinemaClubWatchlistItem = onCall({ region: "us-central1", maxIns
   const listRef = clubRef.collection("watchlist");
   const itemRef = listRef.doc(contentId.replace(":", "_"));
   await db().runTransaction(async tx => {
-    const [club, item, list] = await Promise.all([tx.get(clubRef), tx.get(itemRef), tx.get(listRef)]);
-    if (!club.exists || club.data().status !== "active") throw new HttpsError("failed-precondition", "This club is no longer active.");
+    const [club, member, item, list] = await Promise.all([tx.get(clubRef), tx.get(clubRef.collection("members").doc(uid)), tx.get(itemRef), tx.get(listRef)]);
+    if (!club.exists || club.data().status !== "active" || !member.exists) throw new HttpsError("permission-denied", "You are no longer a member of this club.");
     if (item.exists) return;
     if (list.size >= MAX_WATCHLIST_ITEMS) throw new HttpsError("resource-exhausted", "This club's shared watchlist is full.");
     tx.create(itemRef, { contentId, mediaType, title, year, posterPath, addedBy: uid, createdAt: Timestamp.now() });
@@ -70,7 +70,12 @@ export const removeCinemaClubWatchlistItem = onCall({ region: "us-central1", max
   const clubId = validId(request.data?.clubId, "club ID");
   const itemId = validId(request.data?.itemId, "watchlist item ID");
   const { clubRef } = await requireClubMember(clubId, uid);
-  await clubRef.collection("watchlist").doc(itemId).delete();
+  const itemRef = clubRef.collection("watchlist").doc(itemId);
+  await db().runTransaction(async tx => {
+    const [member, item] = await Promise.all([tx.get(clubRef.collection("members").doc(uid)), tx.get(itemRef)]);
+    if (!member.exists) throw new HttpsError("permission-denied", "You are no longer a member of this club.");
+    if (item.exists) tx.delete(itemRef);
+  });
   return { removed: true };
 });
 
@@ -86,9 +91,13 @@ export const recordCinemaClubScreening = onCall({ region: "us-central1", maxInst
   }
   const { clubRef } = await requireClubMember(clubId, uid);
   const screeningRef = clubRef.collection("screenings").doc();
-  await screeningRef.create({
-    contentId, mediaType, title, notes, screenedAt: Timestamp.fromMillis(screenedAtInput),
-    recordedBy: uid, reviewCount: 0, averageRating: 0, createdAt: Timestamp.now()
+  await db().runTransaction(async tx => {
+    const [club, member] = await Promise.all([tx.get(clubRef), tx.get(clubRef.collection("members").doc(uid))]);
+    if (!club.exists || club.data().status !== "active" || !member.exists) throw new HttpsError("permission-denied", "You are no longer a member of this club.");
+    tx.create(screeningRef, {
+      contentId, mediaType, title, notes, screenedAt: Timestamp.fromMillis(screenedAtInput),
+      recordedBy: uid, reviewCount: 0, ratingTotal: 0, averageRating: 0, createdAt: Timestamp.now()
+    });
   });
   return { screeningId: screeningRef.id };
 });
@@ -105,7 +114,8 @@ export const addCinemaClubAfterCreditsReview = onCall({ region: "us-central1", m
   const screeningRef = clubRef.collection("screenings").doc(screeningId);
   const reviewRef = screeningRef.collection("afterCredits").doc(uid);
   await db().runTransaction(async tx => {
-    const [screening, existing] = await Promise.all([tx.get(screeningRef), tx.get(reviewRef)]);
+    const [member, screening, existing] = await Promise.all([tx.get(clubRef.collection("members").doc(uid)), tx.get(screeningRef), tx.get(reviewRef)]);
+    if (!member.exists) throw new HttpsError("permission-denied", "You are no longer a member of this club.");
     if (!screening.exists) throw new HttpsError("not-found", "Screening not found.");
     const oldRating = existing.exists ? Number(existing.data().rating || 0) : 0;
     const count = Number(screening.data().reviewCount || 0);
@@ -126,7 +136,8 @@ export const addCinemaClubDiscussionMessage = onCall({ region: "us-central1", ma
   const screeningRef = clubRef.collection("screenings").doc(screeningId);
   const messageRef = screeningRef.collection("discussion").doc();
   await db().runTransaction(async tx => {
-    const [screening, messages] = await Promise.all([tx.get(screeningRef), tx.get(screeningRef.collection("discussion"))]);
+    const [member, screening, messages] = await Promise.all([tx.get(clubRef.collection("members").doc(uid)), tx.get(screeningRef), tx.get(screeningRef.collection("discussion"))]);
+    if (!member.exists) throw new HttpsError("permission-denied", "You are no longer a member of this club.");
     if (!screening.exists) throw new HttpsError("not-found", "Screening not found.");
     if (messages.size >= MAX_DISCUSSION_MESSAGES) throw new HttpsError("resource-exhausted", "This screening discussion has reached its limit.");
     tx.create(messageRef, { uid, message, createdAt: Timestamp.now() });
