@@ -50,6 +50,7 @@ function renderRoomPreviews() {
   const empty = byId("wr-rooms-empty");
   if (!list || !empty) return;
   empty.hidden = previewState.rooms.length > 0;
+  byId("wr-room-count").textContent = String(previewState.rooms.length);
   list.replaceChildren();
   for (const room of previewState.rooms) {
     const card = document.createElement("article");
@@ -212,6 +213,8 @@ byId("wr-create-club-form")?.addEventListener("submit", event => {
   form.reset();
   window.setTimeout(() => closeDialog(clubDialog), 900);
 });
+
+showTab("rooms");
 
 retryButton?.addEventListener("click", () => window.location.reload());
 

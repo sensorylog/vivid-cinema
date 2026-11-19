@@ -93,6 +93,7 @@ test("Watch Rooms dashboard exposes room creation, invitation entry and club man
     'id="wr-create-club-dialog"',
     'id="wr-panel-rooms"',
     'id="wr-panel-clubs"',
+    'id="wr-room-count"',
     'id="wr-club-detail"'
   ]) assert.ok(page.includes(required), "missing Watch Rooms UI contract: " + required);
   for (const required of [
