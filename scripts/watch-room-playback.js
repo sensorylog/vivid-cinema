@@ -23,7 +23,7 @@ let publishQueue = Promise.resolve();
 const panel = document.createElement("section");
 panel.className = "vivid-room-sync";
 panel.id = "vivid-room-sync";
-panel.innerHTML = '<div class="vivid-room-sync__head"><div><span class="vivid-room-sync__eyebrow">VIVID WATCH ROOMS</span><h2>Watch together</h2><p id="vivid-room-sync-note">Connect this title to a private screening.</p></div><span class="vivid-room-sync__provider">VidSrc sync</span></div><form id="vivid-room-sync-form" class="vivid-room-sync__form"><label for="vivid-room-sync-code">Room invitation code</label><div><input id="vivid-room-sync-code" name="inviteCode" maxlength="10" minlength="10" autocomplete="off" autocapitalize="characters" placeholder="10-character code" required><button type="submit">Connect room</button></div></form><div class="vivid-room-sync__actions"><button type="button" id="vivid-room-sync-join" hidden>Join synced playback</button><button type="button" id="vivid-room-sync-leave" hidden>Disconnect</button></div></section>';
+panel.innerHTML = '<div class="vivid-room-sync__head"><div><span class="vivid-room-sync__eyebrow">VIVID WATCH ROOMS</span><h2>Watch together</h2><p id="vivid-room-sync-note" role="status" aria-live="polite">Connect this title to a private screening.</p></div><span class="vivid-room-sync__provider">VidSrc sync</span></div><form id="vivid-room-sync-form" class="vivid-room-sync__form"><label for="vivid-room-sync-code">Room invitation code</label><div><input id="vivid-room-sync-code" name="inviteCode" maxlength="10" minlength="10" autocomplete="off" autocapitalize="characters" placeholder="10-character code" required><button type="submit">Connect room</button></div></form><div class="vivid-room-sync__actions"><button type="button" id="vivid-room-sync-join" hidden>Join synced playback</button><button type="button" id="vivid-room-sync-leave" hidden>Disconnect</button></div></section>';
 document.querySelector("#watch-content")?.insertAdjacentElement("afterend", panel);
 const note = document.getElementById("vivid-room-sync-note");
 const form = document.getElementById("vivid-room-sync-form");
@@ -49,7 +49,7 @@ function stopConnection() {
   unsubscribePlayback = null;
   if (heartbeatTimer) window.clearInterval(heartbeatTimer);
   heartbeatTimer = null;
-  roomId = ""; role = ""; latestRemoteState = null; joinedPlayback = false;
+  roomId = ""; role = ""; latestRemoteState = null; joinedPlayback = false; localPosition = null; localStatus = ""; hostStatus = "playing"; lastPublishAt = 0; publishQueue = Promise.resolve();
   joinButton.hidden = true; leaveButton.hidden = true; form.hidden = false;
 }
 
