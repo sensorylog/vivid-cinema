@@ -738,6 +738,12 @@ service cloud.firestore {
         allow get, list: if isRoomMember(roomId);
         allow create, update, delete: if false;
       }
+
+      // Authoritative playback snapshots are callable-written; members can subscribe, clients cannot write.
+      match /playback/{stateId} {
+        allow get, list: if isRoomMember(roomId);
+        allow create, update, delete: if false;
+      }
     }
 
     match /cinemaClubs/{clubId} {
