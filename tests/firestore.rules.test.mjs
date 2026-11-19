@@ -183,3 +183,69 @@ test("news discovery candidates are readable only by trusted moderators", async 
     status: "pending_review", headline: "A forged candidate"
   }));
 });
+
+
+test("Watch Rooms and Cinema Clubs are readable only by their recorded members and never client-writable", async () => {
+  await env.withSecurityRulesDisabled(async context => {
+    const db = context.firestore();
+    await setDoc(doc(db, "rooms", "private-room"), {
+      name: "Private screening", hostUid: "room-host", status: "open", memberCount: 1
+    });
+    await setDoc(doc(db, "rooms/private-room/members/room-host"), {
+      userId: "room-host", role: "host", displayName: "Host"
+    });
+    await setDoc(doc(db, "cinemaClubs", "private-club"), {
+      name: "Film Society", ownerUid: "club-owner", status: "active", memberCount: 1
+    });
+    await setDoc(doc(db, "cinemaClubs/private-club/members/club-owner"), {
+      userId: "club-owner", role: "owner", displayName: "Owner"
+    });
+    await setDoc(doc(db, "users/room-host/watchRooms/private-room"), {
+      roomId: "private-room", name: "Private screening", role: "host"
+    });
+    await setDoc(doc(db, "users/club-owner/cinemaClubs/private-club"), {
+      clubId: "private-club", name: "Film Society", role: "owner"
+    });
+  });
+
+  const host = env.authenticatedContext("room-host").firestore();
+  const guest = env.authenticatedContext("room-guest").firestore();
+  const clubOwner = env.authenticatedContext("club-owner").firestore();
+  const outsider = env.authenticatedContext("outsider").firestore();
+
+  await assertSucceeds(getDoc(doc(host, "rooms/private-room")));
+  await assertSucceeds(getDoc(doc(host, "rooms/private-room/members/room-host")));
+  await assertFails(getDoc(doc(guest, "rooms/private-room")));
+  await assertFails(getDoc(doc(outsider, "rooms/private-room/members/room-host")));
+  await assertSucceeds(getDoc(doc(clubOwner, "cinemaClubs/private-club")));
+  await assertFails(getDoc(doc(outsider, "cinemaClubs/private-club")));
+  await assertSucceeds(getDoc(doc(host, "users/room-host/watchRooms/private-room")));
+  await assertFails(getDoc(doc(outsider, "users/room-host/watchRooms/private-room")));
+
+  await assertFails(setDoc(doc(host, "rooms/fake-room"), {
+    name: "Forged room", hostUid: "room-host", status: "open", memberCount: 1
+  }));
+  await assertFails(setDoc(doc(host, "rooms/private-room/members/forged-member"), {
+    userId: "forged-member", role: "host", displayName: "Fake host"
+  }));
+  await assertFails(setDoc(doc(clubOwner, "cinemaClubs/fake-club"), {
+    name: "Forged club", ownerUid: "club-owner", status: "active", memberCount: 1
+  }));
+  await assertFails(setDoc(doc(guest, "watchInvitations/fake-token"), {
+    targetType: "room", targetId: "private-room", useCount: 0
+  }));
+});
+
+test("private dashboard indexes cannot be forged by another account", async () => {
+  const alice = env.authenticatedContext("alice").firestore();
+  const bob = env.authenticatedContext("bob").firestore();
+  await assertFails(setDoc(doc(alice, "users/bob/watchRooms/forged-room"), {
+    roomId: "forged-room", name: "Not Alice's room"
+  }));
+  await assertFails(setDoc(doc(alice, "users/alice/cinemaClubs/forged-club"), {
+    clubId: "forged-club", name: "Forged membership"
+  }));
+  await assertFails(setDoc(doc(bob, "users/alice/watchRooms/forged-room"), {
+    roomId: "forged-room"
+  }));
+});

@@ -1,6 +1,6 @@
 # Vivid Watch Rooms — Engineering Architecture
 
-Status: approved product direction; implementation pending.
+Status: Stage 2 UI committed; Stage 3 trusted backend and authorization implementation in progress.
 Repository: sensorylog/vivid-cinema
 Base branch: main
 Feature branch: feature/watch-rooms
@@ -42,6 +42,16 @@ These are domain concepts, not a final Firestore schema. Exact paths and fields 
 - Invitation records with securely generated, revocable and expiring tokens; store token hashes where practical rather than reusable plaintext secrets.
 - Playback state is ephemeral/realtime where possible; persist only intentional checkpoints and screening metadata.
 
+### Stage 3 Firestore schema
+
+- `rooms/{roomId}`: server-created room metadata, host UID, lifecycle status, member count and expiry.
+- `rooms/{roomId}/members/{uid}`: server-created membership and role records.
+- `cinemaClubs/{clubId}`: persistent club metadata, owner UID, status and member count.
+- `cinemaClubs/{clubId}/members/{uid}`: server-created membership and role records.
+- `users/{uid}/watchRooms/{roomId}` and `users/{uid}/cinemaClubs/{clubId}`: private, server-maintained dashboard indexes.
+- `watchInvitations/{sha256(code)}`: server-only invitation metadata; plaintext invite codes are returned once and never stored.
+- Room invitations expire after 48 hours, are revocable, and have a bounded use count. Room membership is capped at 12; club membership at 100.
+
 ### Cinema Club
 
 - id, ownerUid, name, description, image metadata, createdAt.
@@ -53,6 +63,10 @@ These are domain concepts, not a final Firestore schema. Exact paths and fields 
 
 - A room session may reference a club, but club membership does not require every screening to be club-linked.
 - Preserve history after a room closes; do not use room presence records as durable screening history.
+
+## Stage 3 trusted operations
+
+Callable operations: `createWatchRoom`, `createCinemaClub`, `createWatchInvitation`, `redeemWatchInvitation` and `revokeWatchInvitation`. These operations reject signed-out and anonymous identities, validate bounded inputs, and perform related document changes in Firestore transactions. Clients cannot create or modify room, club, membership, dashboard-index or invitation documents directly.
 
 ## Security model
 

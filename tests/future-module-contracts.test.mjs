@@ -118,3 +118,23 @@ test("Watch Rooms preview actions never claim backend persistence or membership"
   assert.ok(!moduleSource.includes("addDoc("));
   assert.ok(!moduleSource.includes("setDoc("));
 });
+
+
+test("Watch Rooms backend exposes trusted lifecycle operations and hashed invitations", () => {
+  const functions = readFileSync(new URL("../functions/index.js", import.meta.url), "utf8");
+  const rules = readFileSync(new URL("../firestore.rules", import.meta.url), "utf8");
+  for (const callable of [
+    "createWatchRoom", "createCinemaClub", "createWatchInvitation",
+    "redeemWatchInvitation", "revokeWatchInvitation"
+  ]) assert.ok(functions.includes("export const " + callable + " = onCall"), "missing trusted callable: " + callable);
+  for (const contract of [
+    "randomBytes(10)", "createHash(\"sha256\")", "expiresAt",
+    "useCount", "revokedAt", "MAX_ROOM_MEMBERS", "MAX_CLUB_MEMBERS",
+    "sign_in_provider === \"anonymous\""
+  ]) assert.ok(functions.includes(contract), "missing backend security contract: " + contract);
+  for (const contract of [
+    "function isRoomMember(roomId)", "function isClubMember(clubId)",
+    "match /rooms/{roomId}", "match /cinemaClubs/{clubId}",
+    "match /watchInvitations/{tokenHash}", "allow create, update, delete: if false"
+  ]) assert.ok(rules.includes(contract), "missing Firestore authorization contract: " + contract);
+});

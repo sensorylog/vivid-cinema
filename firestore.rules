@@ -11,6 +11,16 @@ service cloud.firestore {
       return signedIn() && request.auth.uid == userId;
     }
 
+    function isRoomMember(roomId) {
+      return signedIn()
+        && exists(/databases/$(database)/documents/rooms/$(roomId)/members/$(request.auth.uid));
+    }
+
+    function isClubMember(clubId) {
+      return signedIn()
+        && exists(/databases/$(database)/documents/cinemaClubs/$(clubId)/members/$(request.auth.uid));
+    }
+
     function validContentId(contentId) {
       return contentId.matches('^(movie|tv):[0-9]+$');
     }
@@ -207,6 +217,18 @@ service cloud.firestore {
       allow create: if isOwner(userId) && validProfile();
       allow update: if isOwner(userId) && validProfile();
       allow delete: if isOwner(userId);
+
+      // These index records are written only by trusted callable operations.
+      // They let a member load their own private dashboard without public queries.
+      match /watchRooms/{roomId} {
+        allow get, list: if isOwner(userId);
+        allow create, update, delete: if false;
+      }
+
+      match /cinemaClubs/{clubId} {
+        allow get, list: if isOwner(userId);
+        allow create, update, delete: if false;
+      }
 
       match /achievements/{achievementId} {
         // Personal milestone records only; the app evaluates progress locally.
@@ -684,6 +706,35 @@ service cloud.firestore {
       allow create: if isModerator() && validEditorialArticle();
       allow update: if isModerator() && ((validEditorialArticle() && request.resource.data.sourceId == resource.data.sourceId) || (resource.data.status == 'published' && request.resource.data.status == 'hidden' && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','moderatedAt','moderatedBy']) && request.resource.data.moderatedAt == request.time && request.resource.data.moderatedBy == request.auth.uid));
       allow delete: if isModerator();
+    }
+
+    // Watch Rooms and Cinema Clubs are created and mutated only by trusted
+    // callable functions. Members can read only spaces they have joined.
+    match /rooms/{roomId} {
+      allow get: if isRoomMember(roomId);
+      allow list: if false;
+      allow create, update, delete: if false;
+
+      match /members/{memberUid} {
+        allow get, list: if isRoomMember(roomId);
+        allow create, update, delete: if false;
+      }
+    }
+
+    match /cinemaClubs/{clubId} {
+      allow get: if isClubMember(clubId);
+      allow list: if false;
+      allow create, update, delete: if false;
+
+      match /members/{memberUid} {
+        allow get, list: if isClubMember(clubId);
+        allow create, update, delete: if false;
+      }
+    }
+
+    // Invitation codes are stored as SHA-256 hashes and never exposed to clients.
+    match /watchInvitations/{tokenHash} {
+      allow read, write: if false;
     }
 
     // Product analytics: users may create only their own bounded event records.
