@@ -251,3 +251,22 @@ test("private dashboard indexes cannot be forged by another account", async () =
     roomId: "forged-room"
   }));
 });
+
+
+test("room lobby presence, queue and chat are member-readable and never client-writable", async () => {
+  await env.withSecurityRulesDisabled(async context => {
+    const db = context.firestore();
+    await setDoc(doc(db, "rooms/lobby-room"), { name: "Lobby", hostUid: "host", status: "open", memberCount: 1 });
+    await setDoc(doc(db, "rooms/lobby-room/members/host"), { userId: "host", role: "host" });
+    await setDoc(doc(db, "rooms/lobby-room/presence/host"), { uid: "host", expiresAt: new Date(Date.now() + 60000) });
+    await setDoc(doc(db, "rooms/lobby-room/queue/pick-1"), { title: "A film", votes: ["host"], voteCount: 1, status: "queued" });
+    await setDoc(doc(db, "rooms/lobby-room/chat/message-1"), { uid: "host", text: "Ready?", reactions: {} });
+  });
+  const host = env.authenticatedContext("host").firestore();
+  const outsider = env.authenticatedContext("outsider").firestore();
+  for (const path of ["presence/host", "queue/pick-1", "chat/message-1"]) {
+    await assertSucceeds(getDoc(doc(host, "rooms/lobby-room/" + path)));
+    await assertFails(getDoc(doc(outsider, "rooms/lobby-room/" + path)));
+    await assertFails(setDoc(doc(host, "rooms/lobby-room/" + path + "-forged"), { forged: true }));
+  }
+});
