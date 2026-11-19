@@ -262,7 +262,7 @@ async function sendMessage(text) {
     const localMatches = await fallbackToLocalSearch(version);
     if (version === requestVersion) {
       const localLabel = needsSignIn ? "Gemini 401" : quotaFailure ? "Gemini 429" : "Gemini connection failed";
-      setStatus(localLabel + " · " + (localMatches ? "Local Recall found " + localMatches + " possible matches" : "Local Recall is ready for more clues") + " · " + fullDiagnostic + " · Try again shortly.");
+      setStatus(localLabel + " · " + (localMatches ? "Local Recall found " + localMatches + " possible matches" : "Local Recall is ready for more clues") + " · Try again shortly.");
     }
   } finally {
     if (version === requestVersion) {
