@@ -176,7 +176,6 @@ byId("wr-club-discussion-form")?.addEventListener("submit", async event => {
 setClubFormsEnabled(false);
 byId("wr-detail-screening-count").textContent = "0";
 byId("wr-detail-watchlist-count").textContent = "0";
-byId("wr-detail-actions")?.addEventListener("click", () => {});
 byId("wr-stage-note")?.setAttribute("aria-live", "polite");
 document.querySelector("[data-focus-club-screening]")?.addEventListener("click", () => {
   const title = byId("wr-club-screening-form")?.elements.title;
