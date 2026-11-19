@@ -757,6 +757,26 @@ service cloud.firestore {
       }
     }
 
+    // Cinema Club durable experience: members can read shared watchlists,
+    // screening history, member ratings and discussion; trusted callables own writes.
+    match /cinemaClubs/{clubId}/watchlist/{itemId} {
+      allow get, list: if isClubMember(clubId);
+      allow create, update, delete: if false;
+    }
+    match /cinemaClubs/{clubId}/screenings/{screeningId} {
+      allow get, list: if isClubMember(clubId);
+      allow create, update, delete: if false;
+
+      match /afterCredits/{userId} {
+        allow get, list: if isClubMember(clubId);
+        allow create, update, delete: if false;
+      }
+      match /discussion/{messageId} {
+        allow get, list: if isClubMember(clubId);
+        allow create, update, delete: if false;
+      }
+    }
+
     // Invitation codes are stored as SHA-256 hashes and never exposed to clients.
     match /watchInvitations/{tokenHash} {
       allow read, write: if false;
