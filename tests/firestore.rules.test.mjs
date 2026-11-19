@@ -194,6 +194,12 @@ test("Watch Rooms and Cinema Clubs are readable only by their recorded members a
     await setDoc(doc(db, "rooms/private-room/members/room-host"), {
       userId: "room-host", role: "host", displayName: "Host"
     });
+    await setDoc(doc(db, "rooms/closed-room"), {
+      name: "Closed screening", hostUid: "room-host", status: "closed", memberCount: 1
+    });
+    await setDoc(doc(db, "rooms/closed-room/members/room-host"), {
+      userId: "room-host", role: "host"
+    });
     await setDoc(doc(db, "cinemaClubs", "private-club"), {
       name: "Film Society", ownerUid: "club-owner", status: "active", memberCount: 1
     });
@@ -214,6 +220,7 @@ test("Watch Rooms and Cinema Clubs are readable only by their recorded members a
   const outsider = env.authenticatedContext("outsider").firestore();
 
   await assertSucceeds(getDoc(doc(host, "rooms/private-room")));
+  await assertFails(getDoc(doc(host, "rooms/closed-room")));
   await assertSucceeds(getDoc(doc(host, "rooms/private-room/members/room-host")));
   await assertFails(getDoc(doc(guest, "rooms/private-room")));
   await assertFails(getDoc(doc(outsider, "rooms/private-room/members/room-host")));
