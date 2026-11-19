@@ -1,6 +1,6 @@
 # Vivid Watch Rooms — Engineering Architecture
 
-Status: Stages 1–3 implemented; Stage 4 lobby and social implementation in progress.
+Status: Stages 1–4 implemented and validated; Stage 5 synchronized playback in progress.
 Repository: sensorylog/vivid-cinema
 Base branch: main
 Feature branch: feature/watch-rooms
@@ -137,3 +137,15 @@ Each stage is delivered as focused commits on feature/watch-rooms and reviewed b
 - Host-only settings control the room name and whether guests may add queue items or chat. The host can remove another member, change guest permissions, and close the room for everyone; the host cannot remove themselves.
 - Lobby collections are readable only by current room members. All client writes to presence, queue and chat are denied by Firestore rules; mutations use trusted callables.
 - Client lobby listeners are torn down when the user leaves the lobby. Playback synchronization remains Stage 5 and is not implied by the lobby.
+
+## Stage 5 synchronized playback — initial adapter
+
+- The first verified synchronization adapter is VidSrc at the configured exact origin `https://vidsrc.sh`.
+- VidSrc documents both `PLAYER_EVENT` playback updates and parent-frame play, pause and absolute/relative seek commands. Vivid accepts events only from the active iframe window and exact VidSrc origin, and sends commands back with that exact target origin.
+- VidAPI currently documents playback events but not a parent command API; VidLink documents events but not playback control commands. Those providers remain normal playback sources and are not advertised as synchronized.
+- The host is authoritative. A trusted callable rechecks open-room membership and host role in the same transaction that updates `rooms/{roomId}/playback/current`.
+- Members receive realtime read-only playback snapshots. Clients cannot write playback state directly.
+- Guests join through a room invitation code on the watch page. The expected invitation target is validated before redemption so a Cinema Club code cannot be consumed accidentally.
+- The guest estimates the host position using the server timestamp, applies play/pause commands, and seeks when drift exceeds 2.5 seconds. A guest must start the VidSrc player through a user gesture before browser playback policy permits remote play commands.
+- Room state is locked to one title and (for TV) one episode. Changing to a different title requires a new screening room.
+- This is provider-assisted synchronization, not a promise of frame-perfect playback. Third-party network latency, buffering and browser autoplay restrictions remain outside Vivid's control.
