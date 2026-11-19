@@ -34,6 +34,14 @@ test("release signer reads credentials only from environment and never writes se
   assert.doesNotMatch(signer, /storePassword\s+["'][^"']+["']/);
 });
 
+test("debug APK release never republishes the Android signing keystore", async () => {
+  const debugWorkflow = await readFile(new URL("../.github/workflows/android-debug-apk.yml", import.meta.url), "utf8");
+  const publishStep = debugWorkflow.split("Publish latest Android APK for in-app updates")[1] || "";
+  assert.match(publishStep, /gh release upload/);
+  assert.doesNotMatch(publishStep, /Vivid-Cinema-Debug\\.keystore/);
+  assert.match(debugWorkflow, /gh release download/);
+});
+
 test("Android release docs explain keystore continuity and secret setup", () => {
   assert.match(docs, /ANDROID_KEYSTORE_BASE64/);
   assert.match(docs, /never commit/i);
