@@ -11,12 +11,41 @@ const CLUE_TIMEOUT_MS = 12000;
 const CHAT_TIMEOUT_MS = typeof navigator !== "undefined" && /Electron\//i.test(navigator.userAgent) ? 12000 : 30000;
 
 let modelPromise = null;
+let recallAi = null;
+let aiRequestTail = Promise.resolve();
+
+// Keep all Recall/Spark requests on this page from competing for the initial
+// App Check token exchange. A failed request never poisons the queue.
+function serializeAiRequest(task) {
+  const current = aiRequestTail.then(task, task);
+  aiRequestTail = current.then(() => undefined, () => undefined);
+  return current;
+}
+
+function initialThrottleDelay(error) {
+  const detail = [
+    error?.code,
+    error?.message,
+    error?.customData?.serverResponse,
+    error?.customData?.response
+  ].filter(Boolean).join(" ");
+  if (!/appCheck\\/initial-throttle/i.test(detail)) return 0;
+  const wait = detail.match(/(\\d{1,2})m:(\\d{2})s/i);
+  if (!wait) return 1200;
+  const requested = (Number(wait[1]) * 60 + Number(wait[2])) * 1000;
+  return Math.max(1000, Math.min(5000, requested + 150));
+}
 
 function createRecallModel(maxOutputTokens) {
-  const ai = getAI(app, {
-    backend: new GoogleAIBackend(),
-    useLimitedUseAppCheckTokens: true
-  });
+  // Reuse one Firebase AI client for clue extraction, chat, and Sparks.
+  // Limited-use App Check tokens remain enabled for replay protection.
+  if (!recallAi) {
+    recallAi = getAI(app, {
+      backend: new GoogleAIBackend(),
+      useLimitedUseAppCheckTokens: true
+    });
+  }
+  const ai = recallAi;
   return getGenerativeModel(ai, {
     model: RECALL_MODEL,
     generationConfig: {
@@ -57,26 +86,41 @@ function parseClues(raw) {
 }
 
 async function generateWithTimeout(model, prompt, timeoutMs, operation) {
-  const controller = new AbortController();
-  let timeoutId;
-  try {
-    return await Promise.race([
-      model.generateContent(prompt, { signal: controller.signal }),
-      new Promise((_, reject) => {
-        timeoutId = setTimeout(() => {
-          const error = new Error(
-            operation + " timed out after " + Math.round(timeoutMs / 1000) +
-            " seconds; cancellation of the client request was attempted."
-          );
-          error.name = "TimeoutError";
-          reject(error);
-          controller.abort();
-        }, timeoutMs);
-      })
-    ]);
-  } finally {
-    clearTimeout(timeoutId);
-  }
+  return serializeAiRequest(async () => {
+    // Firebase App Check can briefly throttle the first limited-use token
+    // exchange (appCheck/initial-throttle). Honor its retry window once;
+    // do not retry quota, permission, or model errors.
+    for (let attempt = 0; attempt < 2; attempt++) {
+      const controller = new AbortController();
+      let timeoutId;
+      try {
+        return await Promise.race([
+          model.generateContent(prompt, { signal: controller.signal }),
+          new Promise((_, reject) => {
+            timeoutId = setTimeout(() => {
+              const error = new Error(
+                operation + " timed out after " + Math.round(timeoutMs / 1000) +
+                " seconds; cancellation of the client request was attempted."
+              );
+              error.name = "TimeoutError";
+              reject(error);
+              controller.abort();
+            }, timeoutMs);
+          })
+        ]);
+      } catch (error) {
+        const retryDelay = attempt === 0 ? initialThrottleDelay(error) : 0;
+        if (!retryDelay) throw error;
+        console.info("Vivid Recall: App Check initial token request was throttled; retrying once.", {
+          retryDelay
+        });
+        await new Promise(resolve => setTimeout(resolve, retryDelay));
+      } finally {
+        clearTimeout(timeoutId);
+      }
+    }
+    throw new Error(operation + " could not complete after the App Check retry.");
+  });
 }
 
 export async function getRecallClues(query, fallbackClues = []) {
