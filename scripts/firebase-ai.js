@@ -29,11 +29,14 @@ function initialThrottleDelay(error) {
     error?.customData?.serverResponse,
     error?.customData?.response
   ].filter(Boolean).join(" ");
-  if (!/appCheck\/initial-throttle/i.test(detail)) return 0;
+  // Firebase App Check can temporarily suppress token requests after either
+  // the initial token-exchange throttle or a previous HTTP 429. Respect the
+  // SDK's retry window once; don't treat this wrapper error as Gemini quota.
+  if (!/appCheck\/(?:initial-)?throttled?/i.test(detail)) return 0;
   const wait = detail.match(/(\d{1,2})m:(\d{2})s/i);
   if (!wait) return 1200;
   const requested = (Number(wait[1]) * 60 + Number(wait[2])) * 1000;
-  return Math.max(1000, Math.min(5000, requested + 150));
+  return Math.max(1000, Math.min(30000, requested + 250));
 }
 
 function createRecallModel(maxOutputTokens) {
@@ -87,9 +90,9 @@ function parseClues(raw) {
 
 async function generateWithTimeout(model, prompt, timeoutMs, operation) {
   return serializeAiRequest(async () => {
-    // Firebase App Check can briefly throttle the first limited-use token
-    // exchange (appCheck/initial-throttle). Honor its retry window once;
-    // do not retry quota, permission, or model errors.
+    // Firebase App Check can throttle token exchange during initialization or
+    // after a previous 429 (appCheck/throttled). Honor its retry window once;
+    // do not retry ordinary Gemini quota, permission, or model errors.
     for (let attempt = 0; attempt < 2; attempt++) {
       const controller = new AbortController();
       let timeoutId;
