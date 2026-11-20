@@ -208,6 +208,10 @@ function renderClubDetail(club) {
 
 async function loadDashboard(user) {
   const generation = ++dashboardLoadGeneration;
+  // Best-effort bounded retention keeps expired room pointers out of the
+  // dashboard without making the page depend on cleanup availability.
+  try { await call("cleanupExpiredWatchRooms")({}); }
+  catch (error) { console.warn("Vivid Watch Rooms retention pass was skipped:", error); }
   const [roomSnapshot, clubSnapshot] = await Promise.all([
     getDocs(query(collection(db, "users", user.uid, "watchRooms"), orderBy("createdAt", "desc"))),
     getDocs(query(collection(db, "users", user.uid, "cinemaClubs"), orderBy("createdAt", "desc")))
