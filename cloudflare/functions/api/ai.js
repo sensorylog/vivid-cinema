@@ -141,38 +141,62 @@ export async function onRequest({ request, env }) {
   }
 
   try {
-    // Use the chat-message interface shown in Cloudflare's current model
-    // examples. It applies the model's chat template explicitly instead of
-    // relying on the plain-prompt path.
-    const result = await env.AI.run(MODEL, {
-      messages: [
-        { role: "system", content: "Follow the user's instructions carefully. Return the requested answer directly." },
-        { role: "user", content: prompt }
-      ],
+    const systemPrompt = "Follow the user's instructions carefully. Return the requested answer directly.";
+    const messages = [
+      { role: "system", content: systemPrompt },
+      { role: "user", content: prompt }
+    ];
+    const extractText = result => {
+      if (typeof result === "string") return result.trim();
+      const candidates = [
+        result?.response,
+        result?.output_text,
+        result?.result?.response,
+        result?.choices?.[0]?.message?.content,
+        result?.result?.choices?.[0]?.message?.content
+      ];
+      return candidates.find(value => typeof value === "string" && value.trim())?.trim() || "";
+    };
+    const describeResult = result => ({
+      responseKeys: result && typeof result === "object" ? Object.keys(result).slice(0, 16) : [],
+      usage: result?.usage && typeof result.usage === "object" ? {
+        promptTokens: Number(result.usage.prompt_tokens || 0),
+        completionTokens: Number(result.usage.completion_tokens || 0),
+        totalTokens: Number(result.usage.total_tokens || 0)
+      } : null,
+      finishReason: result?.finish_reason || result?.choices?.[0]?.finish_reason || null
+    });
+
+    // First use Granite's documented chat interface. If it returns an empty
+    // response, retry once with the model's documented prompt input instead
+    // of failing the whole Vivid Recall request.
+    const chatResult = await env.AI.run(MODEL, {
+      messages,
       max_tokens: maxTokens,
       temperature: 0.2
     });
-    const generatedText = typeof result?.response === "string"
-      ? result.response
-      : typeof result === "string" ? result : "";
-    const text = generatedText.trim();
+    let text = extractText(chatResult);
+    let attempts = [{ input: "messages", ...describeResult(chatResult) }];
+
     if (!text) {
-      const responseKeys = result && typeof result === "object" ? Object.keys(result).slice(0, 12) : [];
-      const usage = result?.usage && typeof result.usage === "object"
-        ? {
-            promptTokens: Number(result.usage.prompt_tokens || 0),
-            completionTokens: Number(result.usage.completion_tokens || 0),
-            totalTokens: Number(result.usage.total_tokens || 0)
-          }
-        : null;
-      console.error("Cloudflare Workers AI returned an empty response after chat-template inference.", {
-        model: MODEL, uid: claims.uid, responseKeys, usage
+      const promptResult = await env.AI.run(MODEL, {
+        prompt: systemPrompt + "\\n\\n" + prompt,
+        max_tokens: maxTokens,
+        temperature: 0.2
+      });
+      text = extractText(promptResult);
+      attempts.push({ input: "prompt", ...describeResult(promptResult) });
+    }
+
+    if (!text) {
+      console.error("Cloudflare Workers AI returned no text for either supported Granite input mode.", {
+        model: MODEL, uid: claims.uid, attempts
       });
       return json(502, {
         ok: false,
         code: "empty-response",
-        message: "Cloudflare Workers AI returned no generated text. Please try again.",
-        diagnostic: { model: MODEL, responseKeys, usage }
+        message: "Cloudflare Workers AI returned no generated text using either chat or prompt input.",
+        diagnostic: { model: MODEL, attempts }
       });
     }
     return json(200, { ok: true, text, model: MODEL });
