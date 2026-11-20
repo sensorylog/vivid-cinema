@@ -419,3 +419,11 @@ test("Watch Room synchronization compensates for guest device clock skew", () =>
   assert.ok(client.includes("clockOffsetMs = serverTime - ((startedAt + finishedAt) / 2)"));
   assert.ok(client.includes("Date.now() + clockOffsetMs - updatedAt"));
 });
+
+
+test("Watch Room playback throttles heartbeats without dropping pause/resume transitions", () => {
+  const client = readFileSync(new URL("../scripts/watch-room-playback.js", import.meta.url), "utf8");
+  assert.ok(client.includes('detail.status === "playing" && lastPublishedStatus === "playing"'));
+  assert.ok(client.includes("lastPublishedStatus = hostStatus"));
+  assert.ok(client.includes('lastPublishedStatus = "paused"'));
+});
