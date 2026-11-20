@@ -1,11 +1,11 @@
 import { verifyFirebaseIdToken } from "../lib/firebase-token-verification.js";
 
-const MODEL = "@cf/zai-org/glm-4.7-flash";
-const MAX_BODY_BYTES = 16_000;
-const MAX_PROMPT_CHARS = 10_000;
-const MAX_OUTPUT_TOKENS = 900;
+const MODEL = "@cf/ibm-granite/granite-4.0-h-micro";
+const MAX_BODY_BYTES = 12_000;
+const MAX_PROMPT_CHARS = 8_000;
+const MAX_OUTPUT_TOKENS = 384;
 const WINDOW_MS = 60_000;
-const MAX_REQUESTS_PER_WINDOW = 12;
+const MAX_REQUESTS_PER_WINDOW = 6;
 const requestWindows = new Map();
 
 function json(status, payload) {
@@ -115,7 +115,7 @@ export async function onRequest({ request, env }) {
   const prompt = typeof body?.prompt === "string" ? body.prompt.trim() : "";
   const maxTokens = Number.isInteger(body?.maxOutputTokens)
     ? Math.max(64, Math.min(MAX_OUTPUT_TOKENS, body.maxOutputTokens))
-    : 700;
+     : 320;
   if (!prompt || prompt.length > MAX_PROMPT_CHARS) {
     return json(400, { ok: false, code: "invalid-argument", message: "The Vivid AI prompt must contain 1–10,000 characters." });
   }
@@ -124,8 +124,7 @@ export async function onRequest({ request, env }) {
     const result = await env.AI.run(MODEL, {
       prompt,
       max_tokens: maxTokens,
-      temperature: 0.25,
-      user: claims.uid
+      temperature: 0.2
     });
     const text = typeof result?.response === "string"
       ? result.response
