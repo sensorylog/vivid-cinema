@@ -179,7 +179,7 @@ test("Watch Rooms Stage 5 exposes trusted VidSrc and CineSRC playback bridges", 
   assert.ok(cloudflareBackend.includes('["vidsrc", "cinesrc"].includes(provider)'));
   assert.ok(backend.includes("tx.set(stateRef, { provider, contentId"));
   assert.ok(cloudflareBackend.includes("tx.set(stateRef, { provider, contentId"));
-  assert.ok(backend.includes("roomData.allowGuestPlaybackControl !== true"));
+  assert.ok(backend.includes('memberData.role === "guest" && roomData.allowGuestPlaybackControl === true'));
   assert.ok(backend.includes("tx.get(roomRef.collection(\"members\").doc(uid))"));
   assert.ok(rules.includes("match /playback/{stateId}"));
   assert.ok(client.includes("getProviderAdapter(activePlayerId, activeProviderId)"));
