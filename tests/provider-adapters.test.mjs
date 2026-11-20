@@ -14,7 +14,7 @@ test("provider registry keeps Player 1 and Player 2 identities distinct", () => 
   assert.equal(getProviderAdapter("player2", "vidsrc"), null);
 });
 
-test("only the existing Player 1 VidSrc bridge advertises room-control capabilities", () => {
+test("only documented VidSrc and CineSRC bridges advertise room-control capabilities", () => {
   const adapters = listProviderAdapters();
   const capable = adapters.filter(adapter => Object.values(adapter.capabilities).some(Boolean));
   assert.deepEqual(capable.map(adapter => adapter.playerId + ":" + adapter.providerId), ["player1:vidsrc", "player2:cinesrc"]);
