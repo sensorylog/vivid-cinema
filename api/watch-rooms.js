@@ -331,6 +331,55 @@ async function requireHost(roomId, uid) {
 // Presence is a short lease, not durable membership. Clients refresh it while
 // the lobby is open; stale leases naturally expire and are ignored by readers.
 
+async function cleanupExpiredWatchRooms(request) {
+  requireVividUser(request);
+  const now = Timestamp.now();
+  const lockRef = db.collection("system").doc("watchRoomCleanup");
+  const acquired = await db.runTransaction(async tx => {
+    const lock = await tx.get(lockRef);
+    const lastRunAt = lock.exists ? lock.data().lastRunAt?.toMillis?.() : 0;
+    if (Number.isFinite(lastRunAt) && now.toMillis() - lastRunAt < 10 * 60 * 1000) return false;
+    tx.set(lockRef, { lastRunAt: now, updatedAt: now }, { merge: true });
+    return true;
+  });
+  if (!acquired) return { skipped: true, deletedRooms: 0, deletedInvitations: 0 };
+
+  const expiredInvitations = await db.collection("watchInvitations")
+    .where("expiresAt", "<=", now)
+    .limit(100)
+    .get();
+  if (!expiredInvitations.empty) {
+    const batch = db.batch();
+    expiredInvitations.docs.forEach(document => batch.delete(document.ref));
+    await batch.commit();
+  }
+
+  const expiredRooms = await db.collection("rooms")
+    .where("expiresAt", "<=", now)
+    .limit(2)
+    .get();
+  let deletedRooms = 0;
+  for (const roomDocument of expiredRooms.docs) {
+    const roomRef = roomDocument.ref;
+    const members = await roomRef.collection("members").get();
+    if (!members.empty) {
+      const pointers = db.batch();
+      members.docs.forEach(member => {
+        pointers.delete(db.collection("users").doc(member.id).collection("watchRooms").doc(roomDocument.id));
+      });
+      await pointers.commit();
+    }
+    await db.recursiveDelete(roomRef);
+    deletedRooms += 1;
+  }
+  await lockRef.set({
+    lastCompletedAt: Timestamp.now(),
+    lastDeletedRooms: deletedRooms,
+    lastDeletedInvitations: expiredInvitations.size
+  }, { merge: true });
+  return { skipped: false, deletedRooms, deletedInvitations: expiredInvitations.size };
+}
+
 async function heartbeatWatchRoom(request) {
   const uid = requireUser(request);
   const roomId = validId(request.data?.roomId, "room ID");
@@ -804,7 +853,7 @@ const ALLOWED_ORIGINS = new Set([
   "https://vivid-cinema.firebaseapp.com",
   ...(process.env.VIVID_ALLOWED_ORIGINS || "").split(",").map(value => value.trim()).filter(Boolean)
 ]);
-const ROUTES = new Set(["createWatchRoom","createCinemaClub","createWatchInvitation","redeemWatchInvitation","revokeWatchInvitation","heartbeatWatchRoom","addWatchRoomQueueItem","removeWatchRoomQueueItem","voteWatchRoomQueueItem","sendWatchRoomMessage","reactToWatchRoomMessage","updateWatchRoomSettings","removeWatchRoomMember","leaveWatchRoom","closeWatchRoom","publishWatchRoomPlayback","addCinemaClubWatchlistItem","removeCinemaClubWatchlistItem","recordCinemaClubScreening","addCinemaClubAfterCreditsReview","addCinemaClubDiscussionMessage","leaveCinemaClub","archiveCinemaClub"]);
+const ROUTES = new Set(["createWatchRoom","createCinemaClub","createWatchInvitation","redeemWatchInvitation","revokeWatchInvitation","cleanupExpiredWatchRooms","heartbeatWatchRoom","addWatchRoomQueueItem","removeWatchRoomQueueItem","voteWatchRoomQueueItem","sendWatchRoomMessage","reactToWatchRoomMessage","updateWatchRoomSettings","removeWatchRoomMember","leaveWatchRoom","closeWatchRoom","publishWatchRoomPlayback","addCinemaClubWatchlistItem","removeCinemaClubWatchlistItem","recordCinemaClubScreening","addCinemaClubAfterCreditsReview","addCinemaClubDiscussionMessage","leaveCinemaClub","archiveCinemaClub"]);
 
 function respond(res, status, payload) {
   res.status(status).setHeader("Cache-Control", "no-store");
