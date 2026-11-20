@@ -17,6 +17,7 @@ let localPosition = null;
 let localStatus = "";
 let hostStatus = "playing";
 let lastPublishAt = 0;
+let lastPublishedStatus = "";
 let publishQueue = Promise.resolve();
 let lastHostPayload = null;
 let clockOffsetMs = 0;
@@ -50,7 +51,7 @@ function stopConnection() {
   unsubscribePlayback = null;
   if (heartbeatTimer) window.clearInterval(heartbeatTimer);
   heartbeatTimer = null;
-  roomId = ""; role = ""; latestRemoteState = null; joinedPlayback = false; localPosition = null; localStatus = ""; hostStatus = "playing"; lastPublishAt = 0; publishQueue = Promise.resolve(); lastHostPayload = null; clockOffsetMs = 0;
+  roomId = ""; role = ""; latestRemoteState = null; joinedPlayback = false; localPosition = null; localStatus = ""; hostStatus = "playing"; lastPublishAt = 0; lastPublishedStatus = ""; publishQueue = Promise.resolve(); lastHostPayload = null; clockOffsetMs = 0;
   joinButton.hidden = true; leaveButton.hidden = true; form.hidden = false;
 }
 
@@ -143,8 +144,11 @@ window.addEventListener("vivid:provider-playback", event => {
   if (detail.status === "paused") hostStatus = "paused";
   if (detail.status === "ended") hostStatus = "ended";
   const now = Date.now();
-  if (detail.status === "playing" && now - lastPublishAt < 3500) return;
+  // Throttle periodic playing heartbeats, but never drop a real pause/resume
+  // transition just because it follows a recent progress update.
+  if (detail.status === "playing" && lastPublishedStatus === "playing" && now - lastPublishAt < 3500) return;
   lastPublishAt = now;
+  lastPublishedStatus = hostStatus;
   const payload = { roomId, provider: "vidsrc", status: hostStatus, contentId: String(detail.contentId || ""), mediaType: detail.mediaType, season: detail.season, episode: detail.episode, position: localPosition, duration: Math.max(0, Number(detail.duration) || 0) };
   lastHostPayload = payload;
   publishQueue = publishQueue.then(() => roomId === payload.roomId && role === "host" ? call("publishWatchRoomPlayback")(payload) : null).catch(error => setNote(error?.message || "Could not publish the host playback state."));
@@ -162,6 +166,8 @@ window.addEventListener("vivid:player-source-changed", event => {
     const state = lastHostPayload || latestRemoteState;
     const payload = { roomId, provider: "vidsrc", status: "paused", contentId: state.contentId, mediaType: state.mediaType, season: state.season, episode: state.episode, position: Math.max(0, Number(localPosition ?? state.position) || 0), duration: Number(state.duration) || 0 };
     lastHostPayload = payload;
+    lastPublishAt = Date.now();
+    lastPublishedStatus = "paused";
     publishQueue = publishQueue.then(() => roomId === payload.roomId && role === "host" ? call("publishWatchRoomPlayback")(payload) : null).catch(error => setNote(error?.message || "Could not pause room sync after changing providers."));
     setNote("Room playback paused because this provider does not expose verified sync controls. Switch back to VidSrc to resume synchronization.");
   } else if (role !== "host" && roomId) {
