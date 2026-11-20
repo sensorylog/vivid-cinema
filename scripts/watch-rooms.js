@@ -208,8 +208,6 @@ function renderClubDetail(club) {
 
 async function loadDashboard(user) {
   const generation = ++dashboardLoadGeneration;
-  // Retention is maintenance, not a prerequisite for opening the dashboard.
-  // Keep cleanup out of this path to avoid an extra App Check assessment/request.
   // Read dashboard indexes through the same authenticated server API that
   // writes them. This avoids a split client/server permission path and ensures
   // Firestore timestamps are normalized before the browser renders the list.
@@ -224,6 +222,13 @@ async function loadDashboard(user) {
   }
   renderRoomPreviews();
   renderClubPreviews();
+  // Run bounded retention only after the dashboard is usable. The dashboard
+  // request has already obtained a standard cached App Check token, so this
+  // maintenance call does not require a separate attestation while that token
+  // remains valid. Never make the user wait for cleanup.
+  void call("cleanupExpiredWatchRooms")({}).catch(error => {
+    console.warn("Vivid Watch Rooms background retention pass was skipped:", error);
+  });
 }
 
 function showTab(name) {
