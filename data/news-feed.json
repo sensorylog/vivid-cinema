@@ -1,10 +1,23 @@
 {
-  "generatedAt": "2026-11-20T00:48:15.250Z",
+  "generatedAt": "2026-11-20T00:53:18.422Z",
   "source": "Google News RSS search feeds",
   "count": 120,
   "failedQueries": 0,
   "feedCount": 21,
   "articles": [
+    {
+      "id": "1o9gun",
+      "headline": "Sameera Reddy says South cinema gave her far more respect, money and stardom than Bollywood | Interview | Bollywood",
+      "publisher": "Hindustan Times",
+      "publisherUrl": "https://www.hindustantimes.com",
+      "sourceUrl": "https://www.hindustantimes.com/entertainment/bollywood/sameera-reddy-says-south-cinema-gave-her-far-more-respect-money-and-stardom-than-bollywood-interview-101795087996258.html",
+      "publishedAt": "2026-11-20T00:44:52.000Z",
+      "region": "india",
+      "category": "film",
+      "summary": "Sameera Reddy shared her take on the debate around working hours for new mothers in films and reflected on her experience in South Indian cinema. | Bollywood",
+      "imageUrl": "https://www.hindustantimes.com/static-content/1y/2026/ht/trending_graph-arrow-increase@2x.png",
+      "imageFallbackUrl": "https://www.hindustantimes.com/static-content/1y/2026/ht/trending_graph-arrow-increase@2x.png"
+    },
     {
       "id": "1husq7z",
       "headline": "Lucasfilm Unveils New Starfighter Logo as Gosling Expands Film Slate",
@@ -24,7 +37,7 @@
       "publisher": "1News",
       "publisherUrl": "https://www.1news.co.nz",
       "sourceUrl": "https://www.1news.co.nz/2026/11/20/1news-chris-chang-to-the-fore-at-nz-screen-awards/",
-      "publishedAt": "2026-11-20T00:12:31.000Z",
+      "publishedAt": "2026-11-20T00:17:31.000Z",
       "region": "global",
       "category": "awards",
       "summary": "The winners of the annual Screen Awards were revealed in a ceremony in Auckland on Thursday night.",
@@ -71,6 +84,19 @@
       "imageFallbackUrl": ""
     },
     {
+      "id": "oz77wx",
+      "headline": "The full 'GTA 6' soundtrack reportedly leaked: See every artist and track",
+      "publisher": "Mashable",
+      "publisherUrl": "https://mashable.com",
+      "sourceUrl": "https://mashable.com/life/gta-6-every-artist-track",
+      "publishedAt": "2026-11-19T23:27:28.000Z",
+      "region": "global",
+      "category": "music",
+      "summary": "From Justice's original score to radio stations hosted by Bad Bunny and Lana Del Rey, here's everything we know about the music of \"GTA 6.\"",
+      "imageUrl": "./data/news-thumbnails/oz77wx.jpg",
+      "imageFallbackUrl": "https://helios-i.mashable.com/imagery/articles/07ps12LdtTrH8UMXYyRS1od/hero-image.fill.size_1200x675.v1794995880.jpg"
+    },
+    {
       "id": "2clkth",
       "headline": "Is The Voice Celebrity set to replace The X Factor on ITV? New singing show could fill huge Saturday night gap",
       "publisher": "wheretowatch.tv",
@@ -82,6 +108,19 @@
       "summary": "Could The Voice Celebrity replace The X Factor on ITV? Find out about the new US celebrity singing competition and why a UK version could arrive in 2028.",
       "imageUrl": "./data/news-thumbnails/2clkth.webp",
       "imageFallbackUrl": "https://wheretowatch.tv/wp-content/uploads/2026/11/the-voice-celebrity-itv.webp"
+    },
+    {
+      "id": "f2pn1z",
+      "headline": "YEN Entertainment Awards at 5: A journey through the years",
+      "publisher": "Yen News",
+      "publisherUrl": "https://yen.com.gh",
+      "sourceUrl": "https://yen.com.gh/entertainment/tv-shows/315989-yen-entertainment-awards-marks-5-years-celebrating-ghanas-entertainment-industry/",
+      "publishedAt": "2026-11-19T23:16:30.000Z",
+      "region": "africa",
+      "category": "celebrity",
+      "summary": "YEN Entertainment Awards marks five years in 2026, tracing growth from 10 to 15 categories, jury-backed nominations and Ghanaian stars who shaped each edition.",
+      "imageUrl": "./data/news-thumbnails/f2pn1z.jpg",
+      "imageFallbackUrl": "https://cdn.yen.com.gh/images/1200x675/b6cbea9eba288a57.jpeg?v=1"
     },
     {
       "id": "11v3y1z",
@@ -101,13 +140,13 @@
       "headline": "Strike: The Running Grave: Start date, channel, episodes and cast revealed",
       "publisher": "wheretowatch.tv",
       "publisherUrl": "https://wheretowatch.tv",
-      "sourceUrl": "https://wheretowatch.tv/tv-news-2/strike-the-running-grave-start-date-channel-episodes-and-cast-revealed/19/11/",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMisAFBVV95cUxOWEtIcHJIUnVrN2RoWlZHQTk5cXVOVU5jcUpfQUpJejYtSkd2c1J2ZHVnbXJfRWlhX2E5UHcwTG5qQThuRnQyX2FtM1hTOFYyWF9xdEEzeC1pQy1ON1NqUUF1cGpCM3dhcFRfaklNZVNrTEFYN2szd0tqY2M3dFZmMzlOd1lVbjYxN2M1WG5VeEhiVEx2WGdGbUJLUUFSZGZZUVliY3pDZkNlMXBuUGxkWA?oc=5",
       "publishedAt": "2026-11-19T23:06:33.000Z",
       "region": "hollywood",
       "category": "television",
-      "summary": "BBC crime drama fans won't have long to wait for the return of one of television's most popular detective duos, as Strike: The Running Grave arrives on BBC One and BBC iPlayer on Sunday 6 December 2026 at 9pm.",
-      "imageUrl": "./data/news-thumbnails/v8orra.jpg",
-      "imageFallbackUrl": "https://wheretowatch.tv/wp-content/uploads/2026/11/strike-the-running-grave-bbc.jpg"
+      "summary": "Strike: The Running Grave: Start date, channel, episodes and cast revealed",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
     },
     {
       "id": "13pddim",
@@ -127,39 +166,52 @@
       "headline": "I’m A Celebrity 2026: When is the first eviction and who is favourite to leave?",
       "publisher": "wheretowatch.tv",
       "publisherUrl": "https://wheretowatch.tv",
-      "sourceUrl": "https://wheretowatch.tv/im-a-celeb/im-a-celebrity-2026-when-is-the-first-eviction-and-who-is-favourite-to-leave/19/11/",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMiugFBVV95cUxOT3pIUWxKQ2VfMndIU2VhOFNRb2VFRWhfQ3ZkQXhDYlZQcF9JRERUbm8zVGxDbDUzTzZSMzVweDZYNDBXOWZJOWtGOVhlUEszelVHdXN6c3M2dDN4cVhNSTJ5UnBOcFJxUzFMd3JsbnZrU3FVQTIwNE9oOTdKNkN2NzZZa0dUMmVIRktpMm1qQmNmRGNGeG1WZWw1TXhMajFBSGtaMlgtZl9DYW1LaFA3Uy12azJ1YnpPVUE?oc=5",
       "publishedAt": "2026-11-19T22:58:28.000Z",
       "region": "hollywood",
       "category": "television",
-      "summary": "I'm A Celebrity... Get Me Out Of Here! fans are already speculating about who could be the first celebrity to leave the jungle, with two campmates emerging as possible early casualties. Here's everything you need to know.",
-      "imageUrl": "./data/news-thumbnails/1s9bu2l.jpg",
-      "imageFallbackUrl": "https://wheretowatch.tv/wp-content/uploads/2026/11/Embargoed_2200_10th_Nov_Im_A_Celebrity_2026_Campmate_group-1-scaled.jpg"
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
+    },
+    {
+      "id": "1wgy4xa",
+      "headline": "Lord of the Rings Director Speaks Out on Failed $340 Million Project: 'None of the Money Made It to Us'",
+      "publisher": "IMDb",
+      "publisherUrl": "https://www.imdb.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMiZ0FVX3lxTE9ER0ZSWURLTWRZSEZQcVRPdmxnV3hXZ21DUzI4cVdjYkZjVDM1OWNEWmVIWURPZlpZeGFHMUdaRHJfQ1ZYYWtvZy1VQjVzdU5DdDU0YjZJYTdZdnZvS09DMGFFUktTVnc?oc=5",
+      "publishedAt": "2026-11-19T22:53:25.000Z",
+      "region": "asia",
+      "category": "anime",
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
     },
     {
       "id": "1wvuvel",
       "headline": "GTA 6 Sales Top $1.84 Billion, Surpassing The Odyssey’s Global Box Office Total",
       "publisher": "SSBCrack",
       "publisherUrl": "https://news.ssbcrack.com",
-      "sourceUrl": "https://news.ssbcrack.com/gta-6-sales-top-1-84-billion-surpassing-the-odysseys-global-box-office-total/",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMipgFBVV95cUxPWVdrMWhVYk9lbkI0NXhOWFRtZE1HVFdjNXZqWTNONE0zMVNlaGFKWDhDaEtsYU1PVWwwZlFRZXlFUDZ3VWVJLVdFY2k2SG1wQ2Zma0F4T2hhbVpGUkJzaW1LWFliZjJzSmdtdEhRTnFIQ2VSVktpaWViNm00ZVlTb2xJcm03YmVRWFVza1dfR2dSNTZ0ZWIzMEppS3MwR3gwZDB2U3FR?oc=5",
       "publishedAt": "2026-11-19T22:27:13.000Z",
       "region": "global",
       "category": "box-office",
-      "summary": "Grand Theft Auto VI has generated an estimated $1.84 billion in sales, according to market intelligence firm Sensor Tower—already exceeding the reported $1.80",
-      "imageUrl": "https://media2.ssbcrack.com/2026/11/GTA-6-Sales-Top-184-Billion-Surpassing-The-Odysseys-Global.jpg",
-      "imageFallbackUrl": "https://media2.ssbcrack.com/2026/11/GTA-6-Sales-Top-184-Billion-Surpassing-The-Odysseys-Global.jpg"
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
     },
     {
       "id": "1okgtzf",
       "headline": "what happened on I’m A Celebrity… Get Me Out of Here! tonight?",
       "publisher": "wheretowatch.tv",
       "publisherUrl": "https://wheretowatch.tv",
-      "sourceUrl": "https://wheretowatch.tv/im-a-celeb/what-happened-on-im-a-celebrity-get-me-out-of-here-tonight/19/11/",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMiogFBVV95cUxPdklZY2ZDUG9YQXpEeXJmSVBfV056bUlfenNHbU4tMTlIRXprbkJQODhHSmdHWWhQeUQxQ29DWjRQSUFpT1NqWTVyRThzVUk1cG5POUlna2tLUzVkTTJTSHl1ZktpVzk2Y2IzQllWZVgyQ2luZjQ2NHhXVlA3WEZ5a2ticktmSGpXUTk0a1pnOWFuTlpCVUJqNTR1ZzJIQmRLN3c?oc=5",
       "publishedAt": "2026-11-19T22:15:00.000Z",
       "region": "hollywood",
       "category": "television",
-      "summary": "Camp life took an unexpected turn as the celebrities discovered they had attracted some unwelcome visitors overnight, while two new arrivals made a surprise entrance and joined the campmates for a challenging Bushtucker Trial.",
-      "imageUrl": "./data/news-thumbnails/1okgtzf.webp",
-      "imageFallbackUrl": "https://i0.wp.com/wheretowatch.tv/wp-content/uploads/2026/11/im-a-celeb-lineup-2026-confirmed.jpg?fit=1920%2C1080&ssl=1"
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
     },
     {
       "id": "1a9bd20",
@@ -218,13 +270,13 @@
       "headline": "New ‘The Prisoner’ Series in the Works as Amazon Picks Up Rights (Exclusive)",
       "publisher": "The Hollywood Reporter",
       "publisherUrl": "https://www.hollywoodreporter.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMiogFBVV95cUxOdEkxZVh2WUgyQ2RXQ01wWFlzcGlUQ3hlZjlVOTBmLW5hbWVXT29IaE1jWFk2QnFNNFpETmRZY1lwUVlFRlpIMVJjTUZaUkhnLXgzYkl1R2hpUXNVcUowOWI0NVQ4ZkJoR090YURBUTJOcGFDTkpVMjJYNlBTc1BDcjEzU0NHNi0wMWdtLUhuc0RJcjc4cXhvdnRrMWM2N0trX0E?oc=5",
+      "sourceUrl": "https://www.hollywoodreporter.com/tv/tv-news/new-the-prisoner-series-in-the-works-amazon-1236759554/",
       "publishedAt": "2026-11-19T21:50:46.000Z",
       "region": "hollywood",
       "category": "film",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
+      "summary": "The Prisoner has captivated Hollywood, with Christopher Nolan considering a movie. Now, it's going back to TV with Amazon picking up the rights.",
+      "imageUrl": "./data/news-thumbnails/q9uf4j.webp",
+      "imageFallbackUrl": "https://www.hollywoodreporter.com/wp-content/uploads/2026/11/TSDPRIS_EC023-H-2026.jpg?w=1296&h=730&crop=1"
     },
     {
       "id": "16cpuxw",
@@ -508,6 +560,19 @@
       "publishedAt": "2026-11-19T20:13:35.000Z",
       "region": "europe",
       "category": "television",
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
+    },
+    {
+      "id": "plc9au",
+      "headline": "Ramayana Box Office Collection Day 16",
+      "publisher": "Sacnilk",
+      "publisherUrl": "https://www.sacnilk.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMiiwFBVV95cUxPODZVck80REt5emJrNWhYZlJyUWt6bVZNVkx2V1FfMi1CVTd6SGk1RWVDbC0tYmZYSW96cTVoajFhOTJyX0l1alphVjc1UktRem1iai1VWWY4TFRhdWxMN0w0Uk5YSE1paEx3X3pOMFE2NjM4UWlEUlU1dXgwUmdaMkh2Y214UXo5bC1R?oc=5",
+      "publishedAt": "2026-11-19T20:04:42.000Z",
+      "region": "global",
+      "category": "box-office",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
       "imageUrl": "",
       "imageFallbackUrl": ""
@@ -813,26 +878,13 @@
     },
     {
       "id": "1n5dxof",
-      "headline": "Scrapping EU food checks would risk health and cost jobs- council",
+      "headline": "EU food check cut risks health and jobs - council",
       "publisher": "BBC",
       "publisherUrl": "https://www.bbc.com",
       "sourceUrl": "https://news.google.com/rss/articles/CBMiW0FVX3lxTE12ZnBubTRVQjlxVjlUQWpKT2RER1RzNkdEY08yN2c0Q3V5clpFX3JWbnJtLUJ2U0xLQzhQaFU5QUZfYVJBbzczb1lBMGRMMl80Z1podmd3dDdtZjQ?oc=5",
       "publishedAt": "2026-11-19T16:44:02.000Z",
       "region": "europe",
       "category": "television",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
-      "id": "mrgxa3",
-      "headline": "The 65 Movies That Have Made More Than $1 Billion At The Global Box Office",
-      "publisher": "Yahoo News Canada",
-      "publisherUrl": "https://ca.news.yahoo.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMidkFVX3lxTE5jVUF1alBWNHBMSGpBcGdMMm5VejJESG1mTUNvSm0tXzl1UjZyVngxM0UxekdmQkF3Ry1VaFJDak1XSEJFV1I5STFQcW05RlhWRGx4SzNwNlhzQVpNdnBvVzhlNnNxUGpxMHJpbGl4azlraVVnb0E?oc=5",
-      "publishedAt": "2026-11-19T16:40:29.000Z",
-      "region": "global",
-      "category": "box-office",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
       "imageUrl": "",
       "imageFallbackUrl": ""
@@ -1202,32 +1254,6 @@
       "imageFallbackUrl": ""
     },
     {
-      "id": "1nqitem",
-      "headline": "The three best films to watch this weekend",
-      "publisher": "The Times",
-      "publisherUrl": "https://www.thetimes.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMiowFBVV95cUxOVlJJN1hCZW1qUkdkRlVsNC1lQTBuWXNaZ2hqVEZKLW1QMGRycWdubUIxUTNTSXBmbTJYemJVMEJ1YzRlR3l1T291SFBMS2xKbXk4QnB3c3BLc2RzWmp3QlAyeWhLODJqUXROS2Vrckw3anFFLXNCVGdTSmdXa3JXTXJYTFhoZU1sSDFFdVR6NmM4RlZ6cWFKZlNwdGlOUU5mNTI4?oc=5",
-      "publishedAt": "2026-11-19T13:00:00.000Z",
-      "region": "global",
-      "category": "box-office",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
-      "id": "2w0j99",
-      "headline": "Qatar’s Film Committee & UAE-Based Yango Play Explore Partnership Kicking Off With Falconry Doc Series ‘Elzam’",
-      "publisher": "Deadline",
-      "publisherUrl": "https://deadline.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMioAFBVV95cUxObXl2b2ZlakY1QU1pVEFlM1RNRDhaVFRYSW5jYi1TdUl0azB3b0RHalJvWTlkVzdvaTluTXl5eTVUTGdVOVAtZWJ5bHQ2LVJ1WFo5eVZ4RGJZTDNvcGhldExrall4LU5iYmR0MmFZSHRnSWc4blUxazI3M054VkhGMFh0a251V2FtaDBCWThOU3AyczBPcF9wc2dzRHgzQTRt?oc=5",
-      "publishedAt": "2026-11-19T12:59:00.000Z",
-      "region": "middle-east",
-      "category": "film",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
       "id": "1eoa15d",
       "headline": "DopeNation’s Kakalika makes GTA VI soundtrack as IShowSpeed jams to it",
       "publisher": "Yen News",
@@ -1327,19 +1353,6 @@
       "publishedAt": "2026-11-19T11:34:09.000Z",
       "region": "asia",
       "category": "television",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
-      "id": "wbtr4n",
-      "headline": "Who Is Neeja? All to Know About Ghanaian Dancer Afronita's Alleged Partner",
-      "publisher": "Yen News",
-      "publisherUrl": "https://yen.com.gh",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMipwFBVV95cUxQS25XcjNUS3g5TUI4WllwWklFcFFmWl9VOHZxbnpVOFBlNzhYUnNFS19qemdaenB1WjNVZm44YnNoU2FlXzVfNzN4S0dXS2Z4d1kxN1QzVkNJMnFyUVZpMkhFbHJ1bUt1UTNGLTdaMDJIUEJVTFowVVJ4Z2NSbTdrQU9uUERMUlBVaDN2SjVGSDFnREdHaGJ3QUgwSHg3cWFRMnF2T0x1cw?oc=5",
-      "publishedAt": "2026-11-19T11:18:14.000Z",
-      "region": "africa",
-      "category": "celebrity",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
       "imageUrl": "",
       "imageFallbackUrl": ""
@@ -1449,19 +1462,6 @@
       "imageFallbackUrl": ""
     },
     {
-      "id": "55lm57",
-      "headline": "Japan Govt under Fire for Using Conspiracy Theory YouTuber in PR",
-      "publisher": "Nippon.com",
-      "publisherUrl": "https://www.nippon.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMiVEFVX3lxTE5ZSzhrVlVORGtqcVBsVDR3NkdXQ0U3WW1hVmtoMkx6dVRqOHdzOGhtV1ozbllnNE5FaGdHQ2t4cWhkR29qaU1oQV83U052bjNtSlFXZw?oc=5",
-      "publishedAt": "2026-11-19T07:36:15.000Z",
-      "region": "asia",
-      "category": "anime",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
       "id": "qspy22",
       "headline": "South Korea Selects 30 New Accessible Tourism Sites for 2027",
       "publisher": "diarypoint.com",
@@ -1481,19 +1481,6 @@
       "publisherUrl": "https://indianexpress.com",
       "sourceUrl": "https://news.google.com/rss/articles/CBMi3gFBVV95cUxNRFZhTWlMQ3dBREo0NlE5aGJ2UDg2QUhYbVVORE5feGlQLWJCUTVQRWFNZ3YwQkJsOThRbk96aHhqV0FCdi1TVFFta01IZ2FidVR6SXRBaVU4VnJINVl0TTZKMG5ieHg4RWNsSEMxSWUtamUxYVNmR2NNOGh1LUU0NzdxUl9jSkl3bFd6MlJaUzZ4NWdRV3pLR00yUGVScm1YSHlzRG5BTGZSZFA5UGpwMG9ZTGliaW1mOWVqQkdVOW1YT0FHSHVvN0pPaFl0SWtJZ2dKSzlPTzJMX0VER1HSAd4BQVVfeXFMTURWYU1pTEN3QURKNDZROWhidlA4NkFIWG1VTkROX3hpUC1iQlE1UEVhTWd2MEJCbDk4UW5Pemh4aldBQnYtU1RRbWtNSGdhYnVUekl0QWlVOFZySDVZdE02SjBuYnh4OEVjbEhDMUllLWplMWFTZkdjTThodS1FNDc3cVJfY0pJd2xXejJSWlM2eDVnUVd6S0dNMlBlUnJtWEh5c0RuQUxmUmRQOVBqcDBvWUxpYmltZjllakJHVTltWE9BR0h1bzdKT2hZdElrSWdnSks5T08yTF9FREdR?oc=5",
       "publishedAt": "2026-11-19T06:31:50.000Z",
-      "region": "india",
-      "category": "film",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
-      "id": "1yhwl60",
-      "headline": "Aryan Khan features on inaugural TIME100 Next India cover",
-      "publisher": "Awaz The Voice",
-      "publisherUrl": "https://www.awazthevoice.in",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMisgFBVV95cUxNLWdYV0pDZklPZHVmTWFMZU1taWlCMlRybUY1ZzlkRjBwcE5XbzZVN3hqM0N5NFpNX0lUdE9wRlNEX1k2SkZQSE1wbm9URHNqM3JXcUVvc2RFSFZNNFpMNVRFX05UQ1lCSFp6UmxvSnRtSUxvTmVVTzVQY1dLbW9nYTF6Wk1uMVpVaXpBVkpQZGhRVUFnYVk4dnktclBXLUZXSldnV0hVTUhIdUd2UjdVMXRn?oc=5",
-      "publishedAt": "2026-11-19T05:54:18.000Z",
       "region": "india",
       "category": "film",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
@@ -1548,6 +1535,19 @@
       "publishedAt": "2026-11-19T00:05:21.000Z",
       "region": "global",
       "category": "business",
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
+    },
+    {
+      "id": "o02gh6",
+      "headline": "Carnival of cinema: DFF opens with stories galore | Gulf Times",
+      "publisher": "Gulf Times",
+      "publisherUrl": "https://www.gulf-times.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMinAFBVV95cUxOU3JWNXNNa0FLVjBlcmxfTWFYWkZkdUlWbWFSYnRvNmZ2WkIwNHJvNUU5bU1jOUVjb0ZWVlFueEt6ZEJpekltTldObjgxNVpsUjlfZUdGa2FMZnQzdTR4NzFhNHRicEI3X0FrOVJ6dkRONHhBREtqTVViZ2xuZWRXUklmcENYcXhLMFJqcjFEWnJjOFV6VXJlVUFJQmTSAaIBQVVfeXFMTm5DcFgyNXQzcmNZMlk5TFR2QkY1Y0NFUmF5NWpSYzlVRVlYUEtaQ21YRnVLZU5UR3F3dkRfM0wwTXBZQ0lhLTl0aU9ocmtpSDZrOEFvOWZwSnprNkZ6dEdFSURCekJUSHZneTlEQ2VEYWV6UUdiOExycHF3TlJLR19Sc05RNmN6Ti1vVXVIZ3MyWG1LVkJzWTVPRWJpU1NLNUt3?oc=5",
+      "publishedAt": "2026-11-18T21:00:00.000Z",
+      "region": "middle-east",
+      "category": "film",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
       "imageUrl": "",
       "imageFallbackUrl": ""
