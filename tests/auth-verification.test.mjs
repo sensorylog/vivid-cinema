@@ -102,7 +102,7 @@ test("auth-related Firebase modules use one SDK version and fresh cache keys", a
   assert.ok(worker.includes("./scripts/auth.js?v=20261024-desktop-persistence-1"));
   assert.ok(loginPage.includes("scripts/auth.js?v=20261024-desktop-persistence-1"));
   assert.ok(signupPage.includes("scripts/auth.js?v=20261024-desktop-persistence-1"));
-  assert.match(worker, /isAuthDocument\|\|isAuthRuntime\)\{event\.respondWith\(networkFirst\(request\)\);return;/);
+  assert.match(worker, /isAuthDocument\|\|isAuthRuntime\|\|isWatchRoomRuntime\)\{event\.respondWith\(networkFirst\(request\)\);return;/);
   assert.match(worker, /isAuthRuntime=.*auth\|firebase\|nav-auth/);
   assert.match(navAuth, /firebasejs\/12\.19\.0\/firebase-auth\.js/);
 });
