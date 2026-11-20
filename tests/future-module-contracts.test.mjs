@@ -255,3 +255,10 @@ test("Watch Room lobby mutations revalidate membership transactionally and seria
   assert.ok(lobby.includes("tx.update(roomRef, { queueCount: queueCount + 1"));
   assert.ok(lifecycle.includes("memberCount: 1, queueCount: 0"));
 });
+
+
+test("Cinema Club discussion displays the latest bounded page in chronological order", () => {
+  const client = readFileSync(new URL("../scripts/watch-room-clubs.js", import.meta.url), "utf8");
+  assert.ok(client.includes('orderBy("createdAt", "desc"), limit(100)'), "load the newest discussion messages rather than the oldest page");
+  assert.ok(client.includes("[...snapshot.docs].reverse()"), "render the newest page in chronological order");
+});
