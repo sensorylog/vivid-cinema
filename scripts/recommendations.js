@@ -440,7 +440,17 @@ function scoreCandidate(item, taste, progress, feedback, recentGenres = new Set(
   const year = Number(String(source.release_date || source.first_air_date || item.date || "").slice(0, 4));
   const decade = year >= 1900 ? String(Math.floor(year / 10) * 10) : "";
   const decadeScore = decade ? Math.max(0, Math.min(3, Number(taste.decades?.[decade] || 0))) : 0;
-  const quality = Math.min(1, Math.max(0, Number(item.vote_average || 0) / 10));
+  // Bayesian rating confidence prevents a title with a tiny vote sample from
+  // outranking consistently well-rated films and series on one lucky score.
+  const voteAverage = Math.max(0, Math.min(10, Number(item.vote_average || 0)));
+  const voteCount = Math.max(0, Number(item.vote_count || source.vote_count || 0));
+  const ratingConfidence = voteCount / (voteCount + 80);
+  const adjustedRating = 6.6 * (1 - ratingConfidence) + voteAverage * ratingConfidence;
+  const quality = Math.min(1, Math.max(0, adjustedRating / 10));
+  const confidenceBonus = ratingConfidence * 0.3;
+  const lowRatingPenalty = voteCount >= 40 && voteAverage < 5.2
+    ? Math.min(1.5, (5.2 - voteAverage) * 0.75)
+    : 0;
   const popularity = Math.min(1, Math.log10(1 + Math.max(0, Number(item.popularity || 0))) / 4);
   const feedbackBoost = feedback[keyFor(item)]?.kind === "like" ? 6 : 0;
 
@@ -488,7 +498,7 @@ function scoreCandidate(item, taste, progress, feedback, recentGenres = new Set(
       : 0;
 
   return genreScore * 5.4 + mediaScore * 1.9 + languageScore * .55 + countryScore * .35 +
-    decadeScore * .3 + actorScore * 1.1 + directorScore * 1.25 + quality * 1.4 +
+    decadeScore * .3 + actorScore * 1.1 + directorScore * 1.25 + quality * 1.4 + confidenceBonus - lowRatingPenalty +
     popularity * .8 + feedbackBoost + recentGenreBoost + freshness * .55 -
     seenPenalty + clickRecovery - progressPenalty - dislikePenalty;
 }
