@@ -168,7 +168,7 @@ Each stage is delivered as focused commits on feature/watch-rooms and reviewed b
 
 - All Cinema Club mutations require a non-anonymous Firebase identity, verify active membership before work, and re-read club status and membership inside the committing transaction.
 - Watch Room and Cinema Club Firestore reads require a non-anonymous Firebase sign-in and a current membership record. Cinema Club archive reads additionally require the club status to remain active.
-- All room, lobby, playback, watchlist, screening, review and discussion writes remain server-only through callable operations. Firestore client write rules remain denied.
+- All room, lobby, playback, watchlist, screening, review and discussion writes remain server-only through the authenticated Vercel API. Firestore client write rules remain denied.
 - The club UI disables write forms until a club is selected, restores listeners after back-forward cache navigation, shows live watchlist/screening counts, and links the screening action to the actual club screening form.
 - Stage 7 test coverage includes Stage 6 API route contracts, active-club transaction rechecks, member-only archive access, archived-club read denial, and client-write denial.
 - Release gate: the latest commit must pass the repository's Tests, Firestore Rules, static validation, browser navigation, Windows and Android workflows. Cloudflare Pages is tracked separately as a deployment check. A queued or in-progress workflow is not considered a pass.
