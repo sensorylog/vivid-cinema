@@ -283,6 +283,8 @@ test("Watch Room and invitation expiry are enforced by trusted API operations", 
   assert.ok(api.includes("async function cleanupExpiredWatchRooms(request)"));
   assert.ok(api.includes(".limit(1)"), "recursive room deletion is bounded to one room per cleanup pass");
   assert.ok(api.includes("10 * 60 * 1000"), "cleanup is globally throttled");
+  const dashboard = readFileSync(new URL("../scripts/watch-rooms.js", import.meta.url), "utf8");
+  assert.ok(dashboard.includes('call("cleanupExpiredWatchRooms")({})'));
   assert.doesNotMatch(api, /firebase-functions|onSchedule\(/);
 });
 
