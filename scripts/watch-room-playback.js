@@ -4,6 +4,7 @@ import { doc, getDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/12.1
 import { callWatchRoomApi } from "./watch-room-api.js";
 import { getProviderAdapter, sendProviderCommand as sendAdapterCommand } from "./playback/provider-adapters.js";
 
+let activePlayerId = "player1";
 let activeProviderId = "vidapi";
 const call = callWatchRoomApi;
 let roomId = "";
@@ -33,12 +34,12 @@ const leaveButton = document.getElementById("vivid-room-sync-leave");
 const setNote = message => { if (note) note.textContent = message; };
 
 function getActiveAdapter() {
-  return getProviderAdapter("player1", activeProviderId);
+  return getProviderAdapter(activePlayerId, activeProviderId);
 }
 
 function getSupportedFrame() {
   const adapter = getActiveAdapter();
-  const frame = document.getElementById("vidapi-player");
+  const frame = document.getElementById(activePlayerId === "player2" ? "vivid-tflix-frame" : "vidapi-player");
   if (!adapter || !frame?.contentWindow || !frame.src) return null;
   try { return new URL(frame.src).origin === adapter.origin ? frame : null; } catch { return null; }
 }
@@ -140,7 +141,8 @@ leaveButton.addEventListener("click", () => { stopConnection(); const next = new
 
 window.addEventListener("vivid:provider-playback", event => {
   const detail = event.detail || {};
-  if (detail.provider !== "vidsrc" || detail.origin !== SUPPORTED_ORIGIN) return;
+  const vidsrcAdapter = getProviderAdapter("player1", "vidsrc");
+  if (detail.provider !== "vidsrc" || detail.origin !== vidsrcAdapter?.origin) return;
   localPosition = Math.max(0, Number(detail.position) || 0);
   localStatus = detail.status === "playing" ? "playing" : detail.status === "paused" || detail.status === "ended" ? detail.status : localStatus;
   if (role !== "host" || !roomId) { if (role !== "host" && joinedPlayback) applyRemoteState(); return; }
@@ -156,6 +158,20 @@ window.addEventListener("vivid:provider-playback", event => {
   const payload = { roomId, provider: "vidsrc", status: hostStatus, contentId: String(detail.contentId || ""), mediaType: detail.mediaType, season: detail.season, episode: detail.episode, position: localPosition, duration: Math.max(0, Number(detail.duration) || 0) };
   lastHostPayload = payload;
   publishQueue = publishQueue.then(() => roomId === payload.roomId && role === "host" ? call("publishWatchRoomPlayback")(payload) : null).catch(error => setNote(error?.message || "Could not publish the host playback state."));
+});
+
+window.addEventListener("vivid:player-adapter-selected", event => {
+  const playerId = event.detail?.playerId;
+  const providerId = event.detail?.providerId;
+  if (!["player1", "player2"].includes(playerId) || typeof providerId !== "string") return;
+  activePlayerId = playerId;
+  activeProviderId = providerId;
+  const adapter = getActiveAdapter();
+  if (role === "host" && roomId && (!adapter || !adapter.capabilities.canPlay || !adapter.capabilities.canSeek)) {
+    setNote("Room playback is paused for this player/server because it has no verified remote-control bridge. Switch to Player 1 · VidSrc to resume synchronized screening.");
+  } else if (role !== "host" && roomId && (!adapter || !adapter.capabilities.canPlay || !adapter.capabilities.canSeek)) {
+    setNote("This player/server has no verified Watch Room control bridge. Switch to Player 1 · VidSrc to follow synchronized playback.");
+  }
 });
 
 window.addEventListener("vivid:player-source-changed", event => {
