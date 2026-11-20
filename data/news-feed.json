@@ -1,10 +1,62 @@
 {
-  "generatedAt": "2026-11-20T00:53:18.422Z",
+  "generatedAt": "2026-11-20T01:23:15.229Z",
   "source": "Google News RSS search feeds",
   "count": 120,
   "failedQueries": 0,
   "feedCount": 21,
   "articles": [
+    {
+      "id": "eg9e8p",
+      "headline": "North America's Box Office Surpasses $10B Again, Domestic Market Regresses to 2015 Levels: The Ice and Fire Saga of the Global Film Market",
+      "publisher": "36Kr",
+      "publisherUrl": "https://eu.36kr.com",
+      "sourceUrl": "https://eu.36kr.com/en/p/4076774236820360",
+      "publishedAt": "2026-11-20T01:22:22.000Z",
+      "region": "global",
+      "category": "box-office",
+      "summary": "North America has emerged as a top-priority, high-growth market that increasingly draws Gen Z entrepreneurs, young professionals, and startup innovators to launch ventures, pursue career opportunities, and tap into its dynamic business ecosystem. This in-depth exploration unpacks the core drivers behind the surging Gen Z influx into North America’s market: from its robust digital infrastructure, youth-focused startup support systems, and diverse cross-industry innovation hubs to flexible regulatory frameworks for young founders, abundant access to venture capital for Gen Z-led projects, and a thriving creator economy that aligns perfectly with this generation’s digital-native lifestyles. We ",
+      "imageUrl": "./data/news-thumbnails/eg9e8p.jpg",
+      "imageFallbackUrl": "https://img.36krcdn.com/hsossms/20261120/v2_7f0417beef914a45bda6f2a3f6390621@5091053@ai_oswg797246oswg1053oswg495_img_png~tplv-1marlgjv7f-ai-v3:600:400:600:400:q70.jpg"
+    },
+    {
+      "id": "ytrb39",
+      "headline": "Ramayana box office collection day 15: Ranbir Kapoor, Yash's film becomes fastest Indian movie to cross Rs",
+      "publisher": "The Economic Times",
+      "publisherUrl": "https://m.economictimes.com",
+      "sourceUrl": "https://economictimes.indiatimes.com/magazines/panache/ramayana-box-office-collection-day-15-ranbir-kapoor-yashs-film-becomes-fastest-indian-movie-to-cross-rs-1500-crore-worldwide/articleshow/136009390.cms?from=mdr",
+      "publishedAt": "2026-11-20T01:15:09.000Z",
+      "region": "global",
+      "category": "box-office",
+      "summary": "Ramayana, directed by Nitesh Tiwari, achieved massive success by crossing Rs 1600 crore worldwide within 15 days. The film",
+      "imageUrl": "./data/news-thumbnails/ytrb39.avif",
+      "imageFallbackUrl": "https://img.etimg.com/thumb/msid-136009436,width-1200,height-900,imgsize-120730,overlay-etpanache/articleshow.jpg"
+    },
+    {
+      "id": "1brli26",
+      "headline": "Ashton Kutcher to become a billionaire? Investment in AI company scores huge pay off",
+      "publisher": "The Times of India",
+      "publisherUrl": "https://timesofindia.indiatimes.com",
+      "sourceUrl": "https://timesofindia.indiatimes.com/entertainment/english/hollywood/news/ashton-kutcher-to-become-a-billionaire-investment-in-ai-company-scores-huge-pay-off/articleshow/136009328.cms",
+      "publishedAt": "2026-11-20T01:04:00.000Z",
+      "region": "hollywood",
+      "category": "film",
+      "summary": "Actor and entrepreneur Ashton Kutcher could soon enter the billionaire's club.",
+      "imageUrl": "./data/news-thumbnails/1brli26.avif",
+      "imageFallbackUrl": "https://static.toiimg.com/thumb/msid-136009384,width-1280,height-720,resizemode-6,overlay-toi_sw,pt-32,y_pad-600/photo.jpg"
+    },
+    {
+      "id": "1s8peqc",
+      "headline": "Europe ready for talks with Russia on ending war in Ukraine, leaders say",
+      "publisher": "BBC",
+      "publisherUrl": "https://www.bbc.com",
+      "sourceUrl": "https://www.bbc.com/news/articles/ckzd9nln5e6go",
+      "publishedAt": "2026-11-20T00:50:24.000Z",
+      "region": "europe",
+      "category": "television",
+      "summary": "European allies of Ukraine say they have a \"united\" negotiating position at a summit in Berlin.",
+      "imageUrl": "./data/news-thumbnails/1s8peqc.jpg",
+      "imageFallbackUrl": "https://ichef.bbci.co.uk/news/1024/branded_news/1fd8/live/5c168a90-e44a-11f1-a094-5fdc692f3e33.jpg"
+    },
     {
       "id": "1o9gun",
       "headline": "Sameera Reddy says South cinema gave her far more respect, money and stardom than Bollywood | Interview | Bollywood",
@@ -19,17 +71,30 @@
       "imageFallbackUrl": "https://www.hindustantimes.com/static-content/1y/2026/ht/trending_graph-arrow-increase@2x.png"
     },
     {
-      "id": "1husq7z",
-      "headline": "Lucasfilm Unveils New Starfighter Logo as Gosling Expands Film Slate",
-      "publisher": "Demokratis.co.id",
-      "publisherUrl": "https://demokratis.co.id",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMie0FVX3lxTE1ZZ1IzSGlYYzhJWUMyNGMtenM2ZmdmT2dYSmJWSld5LW9BY3lhZy10eldJWU5nc1E0NlNyRHhnX09EblpfMC10MmRTNHZtWTN6STkyX1hrM1I5d2tCeFZrUlp5allYWlBVc1padnR2WTR6eUtISnQ0dnZwRQ?oc=5",
-      "publishedAt": "2026-11-20T00:27:16.000Z",
+      "id": "5ark6i",
+      "headline": "What To Watch This Weekend: New Shows And Movies To Stream On Netflix, Hulu, Prime Video, Apple TV And More",
+      "publisher": "Forbes",
+      "publisherUrl": "https://www.forbes.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMi6AFBVV95cUxPVzM4MnM1dnlqYVhHTjM0S0hpQ3NtYjVLQ0N5b1RwdUVZdWhLNkt3WlVpYWR5SmF2aXB4YkNtZTZpZlRsUEswOEFMSkdhalNOV1RkQUFuOHR2NWk2SkRCSlBSN21zclVYN0tGeEVmS3E0ZG5PYUxJVFhLZ2VEcl94LVdWTVNuM0dsXzA5SXVTdnlyRnhhTUhOV3Iwa2o0d0lPaktoYVVMNWkzeGw5aGw0RnVIOHdwemk4aXQ0WDBiY2pfZVV5emJTb080NzE5anZ4QlJSTlNQYUw3TVhkVFZWdVRMa2lUQnds?oc=5",
+      "publishedAt": "2026-11-20T00:27:23.000Z",
       "region": "hollywood",
-      "category": "film",
+      "category": "streaming",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
       "imageUrl": "",
       "imageFallbackUrl": ""
+    },
+    {
+      "id": "v2nlka",
+      "headline": "Fess Parker Got Famous Playing Davy Crockett And Daniel Boone. Then He Quit Hollywood And Built A $100 Million Wine Country Empire",
+      "publisher": "Celebrity Net Worth",
+      "publisherUrl": "https://www.celebritynetworth.com",
+      "sourceUrl": "https://www.celebritynetworth.com/articles/entertainment-articles/fess-parker-got-famous-playing-davy-crockett-and-daniel-boone-then-he-quit-hollywood-and-built-a-100-million-wine-country-empire/",
+      "publishedAt": "2026-11-20T00:23:55.000Z",
+      "region": "hollywood",
+      "category": "celebrity",
+      "summary": "He became a television sensation playing Davy Crockett and Daniel Boone, but Fess Parker made his real fortune after walking away from Hollywood. From a 714-acre winery to a massive Santa Barbara beachfront hotel and a ranch transaction valued at $40 million, here's how a former TV cowboy built a $100 million California empire.",
+      "imageUrl": "./data/news-thumbnails/v2nlka.webp",
+      "imageFallbackUrl": "https://vz.cnwimg.com/wp-content/uploads/2026/11/fess-parker-scaled.jpg?x76785"
     },
     {
       "id": "772f9q",
@@ -43,6 +108,19 @@
       "summary": "The winners of the annual Screen Awards were revealed in a ceremony in Auckland on Thursday night.",
       "imageUrl": "./data/news-thumbnails/772f9q.avif",
       "imageFallbackUrl": "https://tvnz-1-news-prod.cdn.arcpublishing.com/resizer/v2/chris-chang-LMHUW23CVJHBJHXLEEFANULXWU.jpg?auth=e4fbd2db3351b119261954f4edd20ddf59917eaf06399d80ec8ba5da35becf71&quality=70&width=600&height=315&focal=2629%2C698"
+    },
+    {
+      "id": "1maxnyn",
+      "headline": "'Ramayana: Rise of a Legend' box office collection day 15: Ranbir Kapoor, Yash film earns Rs 19.35 cr; se",
+      "publisher": "The Times of India",
+      "publisherUrl": "https://timesofindia.indiatimes.com",
+      "sourceUrl": "https://timesofindia.indiatimes.com/entertainment/hindi/bollywood/box-office/ramayana-rise-of-a-legend-box-office-collection-day-15-ranbir-kapoor-yash-film-earns-rs-19-35-cr-second-week-collection-drops-47/articleshow/136008840.cms",
+      "publishedAt": "2026-11-20T00:11:00.000Z",
+      "region": "global",
+      "category": "box-office",
+      "summary": "'Ramayana: Rise of a Legend', starring Ranbir Kapoor and Yash, continues its impressive theatrical run after completing 15 days.",
+      "imageUrl": "./data/news-thumbnails/1maxnyn.avif",
+      "imageFallbackUrl": "https://static.toiimg.com/thumb/msid-136008907,width-1280,height-720,resizemode-6,overlay-toi_sw,pt-32,y_pad-600/photo.jpg"
     },
     {
       "id": "qynxsw",
@@ -71,6 +149,19 @@
       "imageFallbackUrl": ""
     },
     {
+      "id": "1iirwnz",
+      "headline": "The Best Movies Streaming Right Now, Service by Service (November 2026)",
+      "publisher": "Silver Screen Riot",
+      "publisherUrl": "https://silverscreenriot.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMibkFVX3lxTE50R3dfbG03dG5YcGprek1IbU81UjRGZkp3TVRTNHVWZEtGMUhYZ2dJeWhRSVUydS1UOWNVTzJ2eHE5N0xUQ0MxRzJjemZYbTVWeVA0QUhMR2Y1eTE3OWJkT0w0VmNfd3dUaUotOUdB?oc=5",
+      "publishedAt": "2026-11-19T23:33:44.000Z",
+      "region": "hollywood",
+      "category": "streaming",
+      "summary": "The Best Movies Streaming Right Now, Service by Service (November 2026)",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
+    },
+    {
       "id": "zhi8ip",
       "headline": "Kang Ji-hwan makes TikTok appearance after seven-year hiatus",
       "publisher": "미디어파인",
@@ -84,56 +175,69 @@
       "imageFallbackUrl": ""
     },
     {
+      "id": "sxzsy8",
+      "headline": "Wales warned it risks falling behind in multi-billion-pound video game industry",
+      "publisher": "Tivyside Advertiser",
+      "publisherUrl": "https://www.tivysideadvertiser.co.uk",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMiqgFBVV95cUxOZ1hmai10WnROcTNkMXByc2h2OGVEVndFd29wOEtlR0EwUHp0dWxXWDdHSTE1ZXBwTEQydzJVYzg2MG4yc054WWhVTDh5SXFZV1R3Xy13U1UyT2VTOWd4TTY0TXZYVjctVjhjZlNlVmdOejZxXzJ4NldrU2NwS3hyUTgtM0RRenFKMEU2Z0NZaDRMeFNZamRZMmx3by16anBRMTlRb2R2eW8ydw?oc=5",
+      "publishedAt": "2026-11-19T23:30:00.000Z",
+      "region": "global",
+      "category": "gaming",
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
+    },
+    {
       "id": "oz77wx",
       "headline": "The full 'GTA 6' soundtrack reportedly leaked: See every artist and track",
       "publisher": "Mashable",
       "publisherUrl": "https://mashable.com",
-      "sourceUrl": "https://mashable.com/life/gta-6-every-artist-track",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMiX0FVX3lxTE1LazFtLVpoQTd1d2hnOUJsdGRGLVZJMExPVzlZREFaUXVFNVBCaUJRTkt1a1A4NHlqel9nUGtFcnNqWGJyeXg0ZTRTWmRfeGRFekFHaURqdUlRYXkybTRv?oc=5",
       "publishedAt": "2026-11-19T23:27:28.000Z",
       "region": "global",
       "category": "music",
-      "summary": "From Justice's original score to radio stations hosted by Bad Bunny and Lana Del Rey, here's everything we know about the music of \"GTA 6.\"",
-      "imageUrl": "./data/news-thumbnails/oz77wx.jpg",
-      "imageFallbackUrl": "https://helios-i.mashable.com/imagery/articles/07ps12LdtTrH8UMXYyRS1od/hero-image.fill.size_1200x675.v1794995880.jpg"
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
     },
     {
       "id": "2clkth",
       "headline": "Is The Voice Celebrity set to replace The X Factor on ITV? New singing show could fill huge Saturday night gap",
       "publisher": "wheretowatch.tv",
       "publisherUrl": "https://wheretowatch.tv",
-      "sourceUrl": "https://wheretowatch.tv/entertainment-news/tv-news/the-voice-celebrity-itv-replace-x-factor-2028/19/11/",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMipgFBVV95cUxQVUhSMUg2UFhXd2ZCdGNZUDN3bUJuRVBqRUwyOFF0ejRDT0M0bklRVGVaNzN3RjdaTTdpRGpUSkZQUWM2QUdwT202NmlnVnV0Y25XLWd0WTJua3RUS3YtWmNEQVBBUXN4anhFOG5adWZNYURHdG5BSWJrU2hCMWQ2OHJibVFQcmFleGRwbUhrZUZkZDV2QW42aEpRZ29WY1hnQWdqQ1N3?oc=5",
       "publishedAt": "2026-11-19T23:21:03.000Z",
       "region": "hollywood",
       "category": "television",
-      "summary": "Could The Voice Celebrity replace The X Factor on ITV? Find out about the new US celebrity singing competition and why a UK version could arrive in 2028.",
-      "imageUrl": "./data/news-thumbnails/2clkth.webp",
-      "imageFallbackUrl": "https://wheretowatch.tv/wp-content/uploads/2026/11/the-voice-celebrity-itv.webp"
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
     },
     {
       "id": "f2pn1z",
       "headline": "YEN Entertainment Awards at 5: A journey through the years",
       "publisher": "Yen News",
       "publisherUrl": "https://yen.com.gh",
-      "sourceUrl": "https://yen.com.gh/entertainment/tv-shows/315989-yen-entertainment-awards-marks-5-years-celebrating-ghanas-entertainment-industry/",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMiygFBVV95cUxNRWlYVlYyNWhFNlNoVHI0d3daZ20zZ3dxdG1weXlIcGhkVVpiNC1mTVFqNU9lejgwWkJYY3h2RGpJM1h5Ml9CS3VyY3g4OHRyUW9xM05Fa1Y1OHNJeUFiZHhNTnJXaWx2ZG5tckJZbXgtVTdmOTc4MDRYdDZEaDJJeHVFeXROMWVJZk81ZXV6SWlaV0NIaVBoa2Q1S2RhdS12dHhlNFVnUEJweXdCcW9OX1NXVlEwRE5GOC1YN1p5NmN6Tm85anBPNEln?oc=5",
       "publishedAt": "2026-11-19T23:16:30.000Z",
       "region": "africa",
       "category": "celebrity",
-      "summary": "YEN Entertainment Awards marks five years in 2026, tracing growth from 10 to 15 categories, jury-backed nominations and Ghanaian stars who shaped each edition.",
-      "imageUrl": "./data/news-thumbnails/f2pn1z.jpg",
-      "imageFallbackUrl": "https://cdn.yen.com.gh/images/1200x675/b6cbea9eba288a57.jpeg?v=1"
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
     },
     {
       "id": "11v3y1z",
       "headline": "“I’m in Preparation for the End of Our World”: Golshifteh Farahani on Art, War and Her Tallinn Premiere",
       "publisher": "The Hollywood Reporter",
       "publisherUrl": "https://www.hollywoodreporter.com",
-      "sourceUrl": "https://www.hollywoodreporter.com/movies/movie-features/iran-star-golshifteh-farahani-when-she-hears-the-bells-film-1236759198/",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMixgFBVV95cUxPQktna3I1ODRiWl9FS2NVLVAya09Ka0ROMElxdG1MX1NTd1pVeXNhOVNfa3ZzNXZMeHlLWExTYXJpR0dMZXdGa05PRlpJcVpfVk1XSnBLQ2UtYzY2RkI3WWxlblpsRWJFX3Z4VjBZeGZBQkYxaWRxV2sxWXZBZzlkZDM0NlR6VjFaY2RZSUNBVWVvS3plclBTdm9BX0RMUTJmSmNsT19jSGw1Z3N4XzRDT09sUnJlcWZZbzBkaEhIYXlhSGZlOGc?oc=5",
       "publishedAt": "2026-11-19T23:15:06.000Z",
       "region": "global",
       "category": "festivals",
-      "summary": "Golshifteh Farahani on her Kabul-set thriller When She Hears the Bells, which premiered at Tallinn, and why she said yes without reading the script.",
-      "imageUrl": "./data/news-thumbnails/11v3y1z.webp",
-      "imageFallbackUrl": "https://www.hollywoodreporter.com/wp-content/uploads/2026/11/IMG_1510-edited-1.webp?w=1440&h=810&crop=1"
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
     },
     {
       "id": "v8orra",
@@ -144,7 +248,7 @@
       "publishedAt": "2026-11-19T23:06:33.000Z",
       "region": "hollywood",
       "category": "television",
-      "summary": "Strike: The Running Grave: Start date, channel, episodes and cast revealed",
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
       "imageUrl": "",
       "imageFallbackUrl": ""
     },
@@ -153,13 +257,13 @@
       "headline": "Greenberg Traurig's Entertainment & Media Practice Congratulates Clients on 2026 CMA Award Wins",
       "publisher": "PR Newswire",
       "publisherUrl": "https://www.prnewswire.com",
-      "sourceUrl": "https://www.prnewswire.com/news-releases/greenberg-traurigs-entertainment--media-practice-congratulates-clients-on-2026-cma-award-wins-302946141.html",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMi4wFBVV95cUxOMGk3TlBHbXpNbGttazdKOUZQaFMwT2xJZ081VjBkRTN3dGFrQmF0VktiY0xxTUpZWGdhR3pLNGxqQnE0OElaZE1zX1ltNFNNR0tzdkV2SXRGUDB4OFFWVENJUEpyRjc0NFA4bmhYYlFYNXNEZGtSUGtHS3h0dTQ4aUx0UHNBbXB3R0wtVDY4U3Ewc1AtRy1IbHJwZzdoOUYybEc5eERPV1BrVkpwaWtmNmZjb1FvbV9SSGtmcGpJRTVGaVI4YmJXcGJCSGNkeFk1Q24wQzZ3YVd6WDJnZU82dG9mbw?oc=5",
       "publishedAt": "2026-11-19T23:00:00.000Z",
       "region": "global",
       "category": "awards",
-      "summary": "/PRNewswire/ -- Global law firm Greenberg Traurig, LLP",
-      "imageUrl": "https://rt.prnewswire.com/rt.gif?NewsItemId=NY03097&Transmission_Id=202611191800PR_NEWS_USPR_____NY03097&DateId=20261119",
-      "imageFallbackUrl": "https://rt.prnewswire.com/rt.gif?NewsItemId=NY03097&Transmission_Id=202611191800PR_NEWS_USPR_____NY03097&DateId=20261119"
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
     },
     {
       "id": "1s9bu2l",
@@ -179,13 +283,13 @@
       "headline": "Lord of the Rings Director Speaks Out on Failed $340 Million Project: 'None of the Money Made It to Us'",
       "publisher": "IMDb",
       "publisherUrl": "https://www.imdb.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMiZ0FVX3lxTE9ER0ZSWURLTWRZSEZQcVRPdmxnV3hXZ21DUzI4cVdjYkZjVDM1OWNEWmVIWURPZlpZeGFHMUdaRHJfQ1ZYYWtvZy1VQjVzdU5DdDU0YjZJYTdZdnZvS09DMGFFUktTVnc?oc=5",
+      "sourceUrl": "https://www.imdb.com/news/ni66119613/?ref_=ttnw_art_perm",
       "publishedAt": "2026-11-19T22:53:25.000Z",
       "region": "asia",
       "category": "anime",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
+      "summary": "Lord of the Rings Director Speaks Out on Failed $340 Million Project: 'None of the Money Made It to Us'",
+      "imageUrl": "https://www.imdb.com/news/ni66119613/?ref_=ttnw_art_perm",
+      "imageFallbackUrl": "https://www.imdb.com/news/ni66119613/?ref_=ttnw_art_perm"
     },
     {
       "id": "1wvuvel",
@@ -270,13 +374,13 @@
       "headline": "New ‘The Prisoner’ Series in the Works as Amazon Picks Up Rights (Exclusive)",
       "publisher": "The Hollywood Reporter",
       "publisherUrl": "https://www.hollywoodreporter.com",
-      "sourceUrl": "https://www.hollywoodreporter.com/tv/tv-news/new-the-prisoner-series-in-the-works-amazon-1236759554/",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMiogFBVV95cUxOdEkxZVh2WUgyQ2RXQ01wWFlzcGlUQ3hlZjlVOTBmLW5hbWVXT29IaE1jWFk2QnFNNFpETmRZY1lwUVlFRlpIMVJjTUZaUkhnLXgzYkl1R2hpUXNVcUowOWI0NVQ4ZkJoR090YURBUTJOcGFDTkpVMjJYNlBTc1BDcjEzU0NHNi0wMWdtLUhuc0RJcjc4cXhvdnRrMWM2N0trX0E?oc=5",
       "publishedAt": "2026-11-19T21:50:46.000Z",
       "region": "hollywood",
       "category": "film",
-      "summary": "The Prisoner has captivated Hollywood, with Christopher Nolan considering a movie. Now, it's going back to TV with Amazon picking up the rights.",
-      "imageUrl": "./data/news-thumbnails/q9uf4j.webp",
-      "imageFallbackUrl": "https://www.hollywoodreporter.com/wp-content/uploads/2026/11/TSDPRIS_EC023-H-2026.jpg?w=1296&h=730&crop=1"
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
     },
     {
       "id": "16cpuxw",
@@ -326,19 +430,6 @@
       "publishedAt": "2026-11-19T21:27:19.000Z",
       "region": "global",
       "category": "gaming",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
-      "id": "1s8peqc",
-      "headline": "Europe ready for talks with Russia on ending war in Ukraine, leaders say",
-      "publisher": "BBC",
-      "publisherUrl": "https://www.bbc.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMiW0FVX3lxTFA4akxXcHFqbTV0dzV2MnZpTVFTc21SSGhVM3dCbnVpNlNpYUhWdHhWdWZlanlQQzdYOXdaLXVHdC1ZWHdzWkFDa2piREFkZ3cwS0IwV2d4X2JnbW8?oc=5",
-      "publishedAt": "2026-11-19T21:21:43.000Z",
-      "region": "europe",
-      "category": "television",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
       "imageUrl": "",
       "imageFallbackUrl": ""
@@ -669,15 +760,15 @@
       "imageFallbackUrl": ""
     },
     {
-      "id": "19y56u1",
-      "headline": "Where to Watch Canada's Drag Race Season 7 Online in the U.S. via VPN",
-      "publisher": "The Hollywood Reporter",
-      "publisherUrl": "https://www.hollywoodreporter.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMiswFBVV95cUxPWTFXbFY5RU95OGwwMko3UnYtRy1fbDlkY0FubEF2ODlPRWdZaWYweWJGaUlTRFNRWjY0Y0lZOF9kYWhFelpzZWtqM2hPRHFpN2xrbE9hZkY0S0FOYTRpXzNoZXQ3Ql9tYW8xZkxxUzB1cWdzZ1Z2cXlQZzRhX3NxUVNlaFVEY0diNV96QVg4QnZyRlFtVXYtUGVBOElyMGRYU21la01XTXlRQVZnSkZ3c2tROA?oc=5",
-      "publishedAt": "2026-11-19T19:00:43.000Z",
+      "id": "kmopb8",
+      "headline": "‘Gilded Age’ Scores Early Season 5 Renewal at HBO",
+      "publisher": "Variety",
+      "publisherUrl": "https://variety.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMiggFBVV95cUxON21oSUY2RFRaMHltQUU2dERueTZULWNQcG9TZi1BaFUtcVZRWXNtU1pVdE9LNmYzVklMN0dqM1g4NHVzdjFMTGdSNXIwakFtMUV4dWU4YVl4amF3M0QzdEg4N0ZKSXhxU3ZESElBbGRQS19BQkZFVi16Y0VOTkhvTzB3?oc=5",
+      "publishedAt": "2026-11-19T19:00:00.000Z",
       "region": "hollywood",
       "category": "television",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "summary": "‘Gilded Age’ Scores Early Season 5 Renewal at HBO",
       "imageUrl": "",
       "imageFallbackUrl": ""
     },
@@ -812,19 +903,6 @@
       "imageFallbackUrl": ""
     },
     {
-      "id": "fnw500",
-      "headline": "Former Xbox and EA exec hopes GTA 6 gives \"a much-needed shot in the arm\" to devs and publishers: \"The video game industry could really use a moment like this\"",
-      "publisher": "GamesRadar+",
-      "publisherUrl": "https://www.gamesradar.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMirgJBVV95cUxQQnlTbVJjUks1SXdBeFBXbm9hTWJDTEdaU0JlVUV1X3BGNVBlRUxwY3FDSEpZV0cyYy1JVzhHVUYtejN4S0Nfd2ZfeTZVVk1FbGotS284NnVvdzQyZ25zdTlpU044ckpZTG9kX1BLWHhDNlZLWndveXZhSm1tekFKalRZekVXZVBnQXBWeWdhWW1GaGM5TWxqS2hJSWUxN3VCaHUwcnltdjlscGFYQWYxWjh6alFnT3VfdVRUTU01UXlUdTRSQ2thdC1iN29fMXhzY1FWMmVhYkF6azZjTmVlMXVleTQ4UFIybTdZa1R4WnlUWmppYXNIaUdBNndrOFVFVC1HTU5SdXlyNmpzLXFUMndWcUNta2RKbzJnUEdhN0pCUmtNaWVVRVpFemJkdw?oc=5",
-      "publishedAt": "2026-11-19T17:25:22.000Z",
-      "region": "global",
-      "category": "gaming",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
       "id": "fgmb5l",
       "headline": "‘No Disc Included’: Digital-only Grand Theft Auto 6 raises concerns for gamers in rural East Tennessee",
       "publisher": "WBIR",
@@ -878,13 +956,26 @@
     },
     {
       "id": "1n5dxof",
-      "headline": "EU food check cut risks health and jobs - council",
+      "headline": "Scrapping EU food checks would risk health and cost jobs- council",
       "publisher": "BBC",
       "publisherUrl": "https://www.bbc.com",
       "sourceUrl": "https://news.google.com/rss/articles/CBMiW0FVX3lxTE12ZnBubTRVQjlxVjlUQWpKT2RER1RzNkdEY08yN2c0Q3V5clpFX3JWbnJtLUJ2U0xLQzhQaFU5QUZfYVJBbzczb1lBMGRMMl80Z1podmd3dDdtZjQ?oc=5",
       "publishedAt": "2026-11-19T16:44:02.000Z",
       "region": "europe",
       "category": "television",
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
+    },
+    {
+      "id": "mrgxa3",
+      "headline": "The 65 Movies That Have Made More Than $1 Billion At The Global Box Office",
+      "publisher": "Yahoo News Canada",
+      "publisherUrl": "https://ca.news.yahoo.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMidkFVX3lxTE5jVUF1alBWNHBMSGpBcGdMMm5VejJESG1mTUNvSm0tXzl1UjZyVngxM0UxekdmQkF3Ry1VaFJDak1XSEJFV1I5STFQcW05RlhWRGx4SzNwNlhzQVpNdnBvVzhlNnNxUGpxMHJpbGl4azlraVVnb0E?oc=5",
+      "publishedAt": "2026-11-19T16:40:29.000Z",
+      "region": "global",
+      "category": "box-office",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
       "imageUrl": "",
       "imageFallbackUrl": ""
@@ -911,7 +1002,7 @@
       "publishedAt": "2026-11-19T16:32:54.000Z",
       "region": "global",
       "category": "festivals",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "summary": "Doha Film Festival Opens With Calls for Independent Cinema",
       "imageUrl": "",
       "imageFallbackUrl": ""
     },
@@ -981,6 +1072,19 @@
       "imageFallbackUrl": ""
     },
     {
+      "id": "i4y05k",
+      "headline": "Dulquer Salmaan joins TIME100 Next India 2026 list; Anil Kapoor gives special tribute to actor-producer",
+      "publisher": "Bollywood Hungama",
+      "publisherUrl": "https://www.bollywoodhungama.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMi6gFBVV95cUxQWVdvb3pUVElpQVV5WDZFS1NBVWtERy1vVzBoeUpWckpWNC12LVdGMTRPWjdwUXhZZlhUVF9zWVZvQ3RFV0FBMlJmcUNDTmk4Ym45X3MtUlJhcEVOanFVRFozS0M5OEVfOEdNLTZzazFUTkVJU3hrdUMtOXVhLUszWFBISzk3SERCU29nNmpnYnVtNGNXT2hFOXVFMS1NRjdVa09LRm9ETG16NVFfcnllLVlHcWIwWWluQzN3Zjc0UXJhUmNSU2JHZmU3SGpzM1BndEE5T05ncW9RNXhuWmtqNE1RVWh0WllCMWfSAeoBQVVfeXFMUFlXb296VFRJaUFVeVg2RUtTQVVrREctb1cwaHlKVnJKVjQtdi1XRjE0T1o3cFF4WWZYVFRfc1lWb0N0RVdBQTJSZnFDQ05pOGJuOV9zLVJSYXBFTmpxVURaM0tDOThFXzhHTS02c2sxVE5FSVN4a3VDLTl1YS1LM1hQSEs5N0hEQlNvZzZqZ2J1bTRjV09oRTl1RTEtTUY3VWtPS0ZvRExtejVRX3J5ZS1ZR3FiMFlpbkMzd2Y3NFFyYVJjUlNiR2ZlN0hqczNQZ3RBOU9OZ3FvUTV4blprajRNUVVodFpZQjFn?oc=5",
+      "publishedAt": "2026-11-19T15:58:27.000Z",
+      "region": "india",
+      "category": "music",
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
+    },
+    {
       "id": "lsx3f3",
       "headline": "Marrakech’s Rémi Bonhomme on Oscars ambitions and championing Arab and African cinema",
       "publisher": "Screen Daily",
@@ -989,19 +1093,6 @@
       "publishedAt": "2026-11-19T15:47:37.000Z",
       "region": "middle-east",
       "category": "film",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
-      "id": "qvzjwp",
-      "headline": "Scene box office collection day 13: Suriya's film crosses Rs 250 crore worldwide, beats Good Bad Ugly",
-      "publisher": "India.com",
-      "publisherUrl": "https://www.india.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMi5wFBVV95cUxPclItWExOb0hGdmppYTh0MU1ueEdPaW9selBtaWpmcTVEOURtYmxGZXBVMGEzbktRVWVZVUx1by13d3dFWXE2LUlKdHpPTGhNbEV1TUwyWDZod0IxRkFYenR2TEVOU2VCNkp4QkdhdWZkak1NNVZWWU9Na25nYXN1V040ejVPMDk4bFV5NS1QV3I2NC1ydzlwblNaTTdjWDY3ZjkyYWVqRDN6OUdJSXBKUTR1S2liN0FGeUs5Sk0zRlI1UUd0RTBLdEphNThIYm1nSTFUeHNvSjh4SmdoUFdhbUcyVVgybk3SAewBQVVfeXFMTmlnQno0Nk42UDgxcXFoUm9jV09SRjVHME5YREo4TzBlNkNQRWpLMXRFMk55YXJVMlF1NnF4Y1lNeUhSb0ZmR0FYZHpSM25UWFpRRFpVcnF0ZkVCOTZEOWZPU2NycnFmMzFnanZoMUpVaG5idEhGTk15by10ekkxeExSdTFhZjJINURzSV9mNlp6UmdrbV9XNXJZT0tXYlVPZjQxTjd0cEpCTG45V0drZ2xKZU56VDFQdUNCZE5TTGhYOVdPVkl4RkZBZk03WU43cW9WN1JyTU9TYzBGTi1BQm1WY1kzeklZeHNmR0k?oc=5",
-      "publishedAt": "2026-11-19T15:30:39.000Z",
-      "region": "global",
-      "category": "box-office",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
       "imageUrl": "",
       "imageFallbackUrl": ""
@@ -1080,19 +1171,6 @@
       "publishedAt": "2026-11-19T14:26:46.000Z",
       "region": "hollywood",
       "category": "streaming",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
-      "id": "o0y4ql",
-      "headline": "“Hollywood Rewrites History” and Calls for Authentic Female Characters: Tallinn Debates Cinema Amid Global Crisis",
-      "publisher": "The Hollywood Reporter",
-      "publisherUrl": "https://www.hollywoodreporter.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMivAFBVV95cUxPbnl4R2FYdDVjZk9fZmNnbFpNS0JPRUpFU0lXajZONEhNXzdNWHcwLWdTMzdINTQxZE1oMS1VNzc5SGNFZmFZMVV3eUtycUlVQzY3a1k5WC1zQ2dNdzNDeDE1a1hWd21oQkxGNzBiS01FOXVlVmxIUU9SOXlBNUlaN1BLNUlIUmwyWkM2cmJ4dXBLbkRrdWdaa3ZSRU1nblJlcnExSXR0YTVUQm5QcW54bmpRY0EtTVpFTmtESQ?oc=5",
-      "publishedAt": "2026-11-19T14:22:07.000Z",
-      "region": "hollywood",
-      "category": "film",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
       "imageUrl": "",
       "imageFallbackUrl": ""
@@ -1189,19 +1267,6 @@
       "imageFallbackUrl": ""
     },
     {
-      "id": "h7te0x",
-      "headline": "Trapped in Banksy’s Walled Off Hotel in Bethlehem, Solve Puzzles: IFFR",
-      "publisher": "The Hollywood Reporter",
-      "publisherUrl": "https://www.hollywoodreporter.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMivwFBVV95cUxNVHpBeDhSSWo3cmV6Q09uRG5fWHhzT2xZLWJnTFlGcEk0eG9JSmZjT3IzZ0dFbFBpUnJmRmhHM0JkbUliaDNoNHhPVURZUVlnYzJjQmlKMjg0M0Z6WlctMnBnWG04RW9FbldIWl9JRzlRYzBSMmd4cW5RakZ3U0FIQm5pT1Y1b3BoLVVlcG5lSnlxTHFzbkdyLUJDSHBPbmpreHVtVFZDSzNRUzdNa2ZZaGk4cm1oNEdkaE4xVFpjTQ?oc=5",
-      "publishedAt": "2026-11-19T14:03:57.000Z",
-      "region": "hollywood",
-      "category": "film",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
       "id": "mn0v8t",
       "headline": "Ghana music industry needs to accelerate its global reach - Lasmid",
       "publisher": "3News",
@@ -1210,19 +1275,6 @@
       "publishedAt": "2026-11-19T13:53:53.000Z",
       "region": "africa",
       "category": "celebrity",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
-      "id": "1y5ukdy",
-      "headline": "Photos: Dipankar Jain's Gaddi-Language Debut ECHOES OF THE HERD to Premiere at Kolkata International Film Festival",
-      "publisher": "BroadwayWorld",
-      "publisherUrl": "https://www.broadwayworld.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMi-AFBVV95cUxOUVZ4T0QxakFvdE94VHJyMlVXTV94TDEwbVVPUndUc2UzN2N1cEZMUXZXWGRoczg4aUFxaVNvOUs3TlVEYkpPV2lXN0hwaXVyX1pJNVlxb2hoZTFDaWpucmZtQWhneW1QQjdRYTRmcmxVSEJjLVFGcC1OaWp2WnRPVnZ0ZnBlU0xlOGgzVU1kQjZuVHJxb1RfWGluQ2RXSE5EYlhUcTBfLVNuSTQycHdpZGFSNkF6T1doTnEtOGV3UUN0MGpPeUlTU2hPR2lIbnFfRWpIOWtlT3I0S2ZuWHdBd0dDZXgzOXB5SlZjMXJrdXltTDhpZXZWMQ?oc=5",
-      "publishedAt": "2026-11-19T13:29:16.000Z",
-      "region": "global",
-      "category": "festivals",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
       "imageUrl": "",
       "imageFallbackUrl": ""
@@ -1241,14 +1293,14 @@
       "imageFallbackUrl": ""
     },
     {
-      "id": "tivcki",
-      "headline": "DJ Waley Babu To Paagal: 7 Badshah Songs That Became Party Anthems",
-      "publisher": "Times Now",
-      "publisherUrl": "https://www.timesnownews.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMi4AFBVV95cUxORlZ2Mk1PcDc1MjFKZGNfbVA5a2h3ZUF3eFliTnNhcHBMMEU0VnBialVDQTltZ2tqUXpqQXhTYnlGSnZBaFo4ZFFHTDdfbzhhdDBOM28tWG56QXJCVHExdmtyQjBQQURZMHlidXRvQVdUb1VBQXVQT3g3blpTY202aGNWZFVLaDhONVQxN1ZjcTZNaFVORFBYbWRidUIxN3lGNlJzVjVkZC1OTEVuRElOMnhQMnEzUnRrZHB6WmVlZmE1RG5EcndFaDFYSjlvMl84bVVkVTdTRVdUOEtyVVRETg?oc=5",
-      "publishedAt": "2026-11-19T13:19:40.000Z",
-      "region": "global",
-      "category": "music",
+      "id": "2w0j99",
+      "headline": "Qatar’s Film Committee & UAE-Based Yango Play Explore Partnership Kicking Off With Falconry Doc Series ‘Elzam’",
+      "publisher": "Deadline",
+      "publisherUrl": "https://deadline.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMioAFBVV95cUxObXl2b2ZlakY1QU1pVEFlM1RNRDhaVFRYSW5jYi1TdUl0azB3b0RHalJvWTlkVzdvaTluTXl5eTVUTGdVOVAtZWJ5bHQ2LVJ1WFo5eVZ4RGJZTDNvcGhldExrall4LU5iYmR0MmFZSHRnSWc4blUxazI3M054VkhGMFh0a251V2FtaDBCWThOU3AyczBPcF9wc2dzRHgzQTRt?oc=5",
+      "publishedAt": "2026-11-19T12:59:00.000Z",
+      "region": "middle-east",
+      "category": "film",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
       "imageUrl": "",
       "imageFallbackUrl": ""
@@ -1267,32 +1319,6 @@
       "imageFallbackUrl": ""
     },
     {
-      "id": "1myjf3",
-      "headline": "J-Pop singer Maena wants Japanese music to go global like K-Pop; wants to collaborate with Indian artists",
-      "publisher": "News9live",
-      "publisherUrl": "https://www.news9live.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMikAFBVV95cUxQOUlOSmxGd0tKd1lGUkltMnlCMkIwSGN1S2d5cWVRQlBlNTJOU2dyTzhRZG04MURxZkRYTDFsUTJvSXRRQWVucWwzaWt4bl84QUFjODcxVndOaHNBNFJxejNuTE9ZU0Z4bzRvTW5nZDBSSF8wcE1hamx0OFlTaHk3T0x2OTl5dFQwRUV1UnhlVDnSAZYBQVVfeXFMTWM4ZmU1T2NETTljR2xONHpCRTd6X3lvVHNMYlhVZ2lDdHh0SWtqemt0TlRXWVBvT3B0MlZ6VGNuNTBXX3Y3c1pPZVBkVzFid25qNmxQcTEtUHJSYU1WSHV2OEhnb3NqOEdJXzFOcGFJejF6ak1KRXhEMVltc0hrZjg1emFIN2xsQm90Ti1EWG5HUmE3ZG5B?oc=5",
-      "publishedAt": "2026-11-19T12:46:20.000Z",
-      "region": "global",
-      "category": "music",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
-      "id": "x669x6",
-      "headline": "What's new to streaming this week? (Nov. 20, 2026)",
-      "publisher": "Mashable",
-      "publisherUrl": "https://mashable.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMid0FVX3lxTE9aNmVHMUJxczFrSXpKY25UTUVpNTJtbGg1cWhSTS1BQVhPR0NUdEtJZDlRZUo0U3hBYjJhUkt1eGxMLWpsVWFTTmxqQkxrM3ZnZDIyWGNtb0xrbE1WWm04eHI1MEVtc000WDkzUFoySUg5aEh6Vi1z?oc=5",
-      "publishedAt": "2026-11-19T12:32:46.000Z",
-      "region": "hollywood",
-      "category": "streaming",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
       "id": "yxdwzf",
       "headline": "Bleach director Noriyuki Abe on India’s anime craze: ‘Storytelling has no boundaries’",
       "publisher": "News9live",
@@ -1301,7 +1327,7 @@
       "publishedAt": "2026-11-19T12:18:09.000Z",
       "region": "asia",
       "category": "anime",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "summary": "Bleach director Noriyuki Abe on India’s anime craze: ‘Storytelling has no boundaries’",
       "imageUrl": "",
       "imageFallbackUrl": ""
     },
@@ -1314,19 +1340,6 @@
       "publishedAt": "2026-11-19T12:13:00.000Z",
       "region": "africa",
       "category": "film",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
-      "id": "ft2yyj",
-      "headline": "Emraan Hashmis Gunmaaster G9 Pays Tribute To Bappi Lahiri, Revamps 1979 Song Mausam Hai Gaane Ka",
-      "publisher": "ABP Live English",
-      "publisherUrl": "https://news.abplive.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMi5AFBVV95cUxNUmtVMl9La0FmZGpNMjhIVXptQnJyYkxJc2gxTnRya3pBcUdYeGVkRFBsalhMa1lLMVhFSXFDSFBRS1RwcW1pLXd0eVBpTTdOVjhqb2lKRWRHTFl5UzRpajNhb2xUcW56Q1hOYUFlOVRPYzRhNl9CeVdpME9USHpkOHJsZVdwVlFnUk1qVXFoeXJHY2s1RzhOWGpKdGN2SmRCdU1JMEs5NEVmaXl3QkpFYW9jMXZ4aWR6YnFDOGhFOFEtVUxyX0pKdENLX1JaUVUxNmtubHgyOXhhaTlTMmZSZWJYSmjSAeoBQVVfeXFMTWNnOERRVHdETnI3ZVAtSG1YVFBURGUtUjNlYjFfV2ZTQjFVcVhTRjNxdC1uX3dBNm4wZ3hkV3hwZHotRUZvN3ljSm5UMmh6WmdOeUJjdnkzbWd6cGN1R0x5c0c1ajVWazZQelhBWGgzb2pYY0JWTFZzOXg1UHh6aWNEX2owMkhSVFo0eG83TlRQeWl3OVpjQ095amFwbTZvc240T1VyR3ljMDVXc0hOVDF2UVFJNTdvelVXNFZqSzd3M2RNUEduOGc0VGpoWjR6bWx1SVBzY1U4aDJURDhSWEpUSTRXa0lpbkd3?oc=5",
-      "publishedAt": "2026-11-19T11:57:38.000Z",
-      "region": "india",
-      "category": "music",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
       "imageUrl": "",
       "imageFallbackUrl": ""
@@ -1488,19 +1501,6 @@
       "imageFallbackUrl": ""
     },
     {
-      "id": "106vzn9",
-      "headline": "Rockstar Considers Red Dead Redemption Film and TV Deal",
-      "publisher": "Peradaban.id",
-      "publisherUrl": "https://peradaban.id",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMiaEFVX3lxTE9HNklLLXFWcnF5cTE3M0VvcHQtbUFMZWFKTjlFR0UwYTRyQ2VMc3E5eDNXS0FQVmJQUGE0aHlIWjNZTTNFMHNJa1ZWZkZRRFY2UDE5UHhWdzhNYWlTcm5HaFlIeW0ycXhJ?oc=5",
-      "publishedAt": "2026-11-19T04:12:47.000Z",
-      "region": "global",
-      "category": "business",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
       "id": "ml6s4h",
       "headline": "SkyShowtime to Shut Down, CEO Exiting",
       "publisher": "The Hollywood Reporter",
@@ -1540,14 +1540,14 @@
       "imageFallbackUrl": ""
     },
     {
-      "id": "o02gh6",
-      "headline": "Carnival of cinema: DFF opens with stories galore | Gulf Times",
-      "publisher": "Gulf Times",
-      "publisherUrl": "https://www.gulf-times.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMinAFBVV95cUxOU3JWNXNNa0FLVjBlcmxfTWFYWkZkdUlWbWFSYnRvNmZ2WkIwNHJvNUU5bU1jOUVjb0ZWVlFueEt6ZEJpekltTldObjgxNVpsUjlfZUdGa2FMZnQzdTR4NzFhNHRicEI3X0FrOVJ6dkRONHhBREtqTVViZ2xuZWRXUklmcENYcXhLMFJqcjFEWnJjOFV6VXJlVUFJQmTSAaIBQVVfeXFMTm5DcFgyNXQzcmNZMlk5TFR2QkY1Y0NFUmF5NWpSYzlVRVlYUEtaQ21YRnVLZU5UR3F3dkRfM0wwTXBZQ0lhLTl0aU9ocmtpSDZrOEFvOWZwSnprNkZ6dEdFSURCekJUSHZneTlEQ2VEYWV6UUdiOExycHF3TlJLR19Sc05RNmN6Ti1vVXVIZ3MyWG1LVkJzWTVPRWJpU1NLNUt3?oc=5",
-      "publishedAt": "2026-11-18T21:00:00.000Z",
-      "region": "middle-east",
-      "category": "film",
+      "id": "1fyxoji",
+      "headline": "The 40 Most Important People in Streaming 2026",
+      "publisher": "Media Play News",
+      "publisherUrl": "https://www.mediaplaynews.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMigwFBVV95cUxPbm5FTjlkckVTYUpjMmhMM0NlWTNSdWNGU1FGdHl6aHFUVU9yRVVRc1Y5N2p1LUNjWUduajh6aExvV3VKVXJXQjYtbl9DR3pyZUpFVmpCQmQtNWpzS1pwR05pZmZudzhabFVKZTktaEZYWFpSN1lwb3lWZ3FEZXpheVJ4TQ?oc=5",
+      "publishedAt": "2026-11-18T14:13:18.000Z",
+      "region": "global",
+      "category": "business",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
       "imageUrl": "",
       "imageFallbackUrl": ""
