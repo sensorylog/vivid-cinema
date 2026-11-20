@@ -382,3 +382,12 @@ test("Invite redemption and member departures keep private dashboard counts in s
   assert.ok(leave.includes('tx.get(clubRef.collection("members"))'));
   assert.ok(leave.includes("memberCount: nextMemberCount"));
 });
+
+
+test("Watch Room lobby tears down and restores realtime listeners across BFCache navigation", () => {
+  const client = readFileSync(new URL("../scripts/watch-room-lobby.js", import.meta.url), "utf8");
+  assert.ok(client.includes('window.addEventListener("pagehide"'));
+  assert.ok(client.includes("if (room) lastRoom = room;"));
+  assert.ok(client.includes('window.addEventListener("pageshow"'));
+  assert.ok(client.includes("if (!event.persisted || !lastRoom"));
+});
