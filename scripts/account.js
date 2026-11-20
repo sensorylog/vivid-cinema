@@ -1,4 +1,4 @@
-import { auth, db } from "./firebase.js?v=20261016-auth-runtime-audit1";
+import { auth, db } from "./firebase.js?v=20261120-cloudflare-app-check-1";
 import { deleteUser, EmailAuthProvider, GoogleAuthProvider, onAuthStateChanged, reauthenticateWithCredential, reauthenticateWithPopup, sendPasswordResetEmail, signOut, updateProfile } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
 import { collection, deleteDoc, doc, getDocsFromServer, getDoc, serverTimestamp, setDoc, writeBatch } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 import { getLocalLibrary, syncLibraryForUser } from "./library.js";
