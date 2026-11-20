@@ -180,7 +180,11 @@ test("Watch Rooms Stage 5 exposes a trusted VidSrc-only playback clock and clien
   assert.ok(rules.includes("match /playback/{stateId}"));
   assert.ok(client.includes('const SUPPORTED_ORIGIN = "https://vidsrc.sh"'));
   assert.ok(client.includes('postMessage({ player: true, action }, SUPPORTED_ORIGIN)'));
-  assert.ok(client.includes('onSnapshot(doc(db, "rooms", roomId, "playback", "current")'));
+  assert.ok(backend.includes("async function getWatchRoomPlaybackSnapshot("));
+  assert.ok(backend.includes("requireRoomMember(roomId, uid)"));
+  assert.ok(client.includes('call("getWatchRoomPlaybackSnapshot")'));
+  assert.ok(client.includes("schedulePlaybackRefresh()"));
+  assert.ok(!client.includes("onSnapshot") && !client.includes("getDoc("), "playback membership and state must use the authenticated API");
   assert.ok(client.includes("Math.abs(expected - localPosition) > 2.5"));
   assert.ok(watch.includes('event.origin === "https://vidsrc.sh"'));
   assert.ok(watch.includes('new CustomEvent("vivid:provider-playback"'));
