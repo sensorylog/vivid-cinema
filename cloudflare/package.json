@@ -3,8 +3,7 @@
   "private": true,
   "type": "module",
   "dependencies": {
-    "@ljoukov/firebase-admin-cloudflare": "0.0.2",
-    "firebase-admin": "14.5.0"
+    "@ljoukov/firebase-admin-cloudflare": "0.0.2"
   },
   "devDependencies": {
     "wrangler": "4.53.0"
