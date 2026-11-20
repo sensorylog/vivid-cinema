@@ -125,7 +125,7 @@ test("Joining a room opens its lobby immediately after the dashboard refresh", a
 test("Only the host can permanently delete a room and all room data", async () => {
   const route = await readFile(new URL("../cloudflare/functions/api/watch-rooms.js", import.meta.url), "utf8");
   const start = route.indexOf("async function deleteWatchRoom(");
-  const end = route.indexOf("// The first synchronized adapter", start);
+  const end = route.indexOf("async function publishWatchRoomPlayback(", start);
   const implementation = route.slice(start, end);
   assert.ok(start >= 0 && end > start);
   assert.match(implementation, /room\.hostUid !== uid/);
