@@ -75,7 +75,9 @@ test("For You records impressions only after a recommendation is actually viewab
   assert.doesNotMatch(script, /items\.slice\(0, 12\)\.forEach\(item => recordBehavior\("recommendation_impression"/);
 });
 
-test("For You preserves local matching alongside the authenticated Cloudflare AI Recall chat", () => {
+test("For You is local-first and keeps authenticated Cloudflare AI as a selective Recall fallback", () => {
+  assert.match(recommendations, /shouldUseAi = !options\\.localOnly && localSignalStrength < 6/);
+  assert.match(recommendations, /Local Vivid intelligence gets first refusal/);
   assert.match(recommendations, /localOnly:\s*!recallResult\?\.available/);
   assert.match(recommendations, /Vivid Recall is using local clue extraction and catalogue matching/);
   assert.match(recommendations, /getRecallClues/);
