@@ -409,3 +409,13 @@ test("Watch Room backend and Firestore rules fail closed for missing expiry time
   assert.ok(rules.includes("room.keys().hasAll(['expiresAt'])"));
   assert.ok(rules.includes("room.expiresAt is timestamp"));
 });
+
+
+test("Watch Room synchronization compensates for guest device clock skew", () => {
+  const backend = readFileSync(new URL("../functions/watch-rooms-lobby.js", import.meta.url), "utf8");
+  const client = readFileSync(new URL("../scripts/watch-room-playback.js", import.meta.url), "utf8");
+  const heartbeat = backend.slice(backend.indexOf("export const heartbeatWatchRoom"), backend.indexOf("export const addWatchRoomQueueItem"));
+  assert.ok(heartbeat.includes("serverTime: Date.now()"));
+  assert.ok(client.includes("clockOffsetMs = serverTime - ((startedAt + finishedAt) / 2)"));
+  assert.ok(client.includes("Date.now() + clockOffsetMs - updatedAt"));
+});
