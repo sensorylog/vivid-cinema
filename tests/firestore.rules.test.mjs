@@ -189,7 +189,8 @@ test("Watch Rooms and Cinema Clubs are readable only by their recorded members a
   await env.withSecurityRulesDisabled(async context => {
     const db = context.firestore();
     await setDoc(doc(db, "rooms", "private-room"), {
-      name: "Private screening", hostUid: "room-host", status: "open", memberCount: 1
+      name: "Private screening", hostUid: "room-host", status: "open", memberCount: 1,
+      expiresAt: new Date(Date.now() + 60_000)
     });
     await setDoc(doc(db, "rooms/private-room/members/room-host"), {
       userId: "room-host", role: "host", displayName: "Host"
@@ -267,7 +268,7 @@ test("private dashboard indexes cannot be forged by another account", async () =
 test("room lobby presence, queue and chat are member-readable and never client-writable", async () => {
   await env.withSecurityRulesDisabled(async context => {
     const db = context.firestore();
-    await setDoc(doc(db, "rooms/lobby-room"), { name: "Lobby", hostUid: "host", status: "open", memberCount: 1 });
+    await setDoc(doc(db, "rooms/lobby-room"), { name: "Lobby", hostUid: "host", status: "open", memberCount: 1, expiresAt: new Date(Date.now() + 60_000) });
     await setDoc(doc(db, "rooms/lobby-room/members/host"), { userId: "host", role: "host" });
     await setDoc(doc(db, "rooms/lobby-room/presence/host"), { uid: "host", expiresAt: new Date(Date.now() + 60000) });
     await setDoc(doc(db, "rooms/lobby-room/queue/pick-1"), { title: "A film", votes: ["host"], voteCount: 1, status: "queued" });
@@ -316,4 +317,18 @@ test("Cinema Club watchlists, screening history and After-Credits are member-rea
     await assertFails(getDoc(doc(outsider, path)));
     await assertFails(setDoc(doc(member, path + "-forged"), { forged: true }));
   }
+});
+
+
+test("Watch Room access is denied when the expiry timestamp is missing or malformed", async () => {
+  await env.withSecurityRulesDisabled(async context => {
+    const db = context.firestore();
+    await setDoc(doc(db, "rooms/no-expiry"), { status: "open", hostUid: "expiry-user" });
+    await setDoc(doc(db, "rooms/no-expiry/members/expiry-user"), { role: "host" });
+    await setDoc(doc(db, "rooms/bad-expiry"), { status: "open", hostUid: "expiry-user", expiresAt: "tomorrow" });
+    await setDoc(doc(db, "rooms/bad-expiry/members/expiry-user"), { role: "host" });
+  });
+  const member = env.authenticatedContext("expiry-user").firestore();
+  await assertFails(getDoc(doc(member, "rooms/no-expiry")));
+  await assertFails(getDoc(doc(member, "rooms/bad-expiry")));
 });
