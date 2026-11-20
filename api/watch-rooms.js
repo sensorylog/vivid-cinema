@@ -887,8 +887,6 @@ async function authenticate(req) {
   return { uid: token.uid, token };
 }
 
-export const config = { maxDuration: 30 };
-
 export default async function handler(req, res) {
   res.setHeader("Cache-Control", "no-store");
   if (!cors(req, res)) return respond(res, 403, { ok: false, code: "permission-denied", message: "This origin is not allowed." });
