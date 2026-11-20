@@ -16,11 +16,13 @@ service cloud.firestore {
     }
 
     function isRoomMember(roomId) {
+      let room = get(/databases/$(database)/documents/rooms/$(roomId)).data;
       return isVividUser()
         && exists(/databases/$(database)/documents/rooms/$(roomId)/members/$(request.auth.uid))
-        && get(/databases/$(database)/documents/rooms/$(roomId)).data.status == 'open'
-        && (!get(/databases/$(database)/documents/rooms/$(roomId)).data.keys().hasAny(['expiresAt'])
-          || get(/databases/$(database)/documents/rooms/$(roomId)).data.expiresAt > request.time);
+        && room.status == 'open'
+        && room.keys().hasAll(['expiresAt'])
+        && room.expiresAt is timestamp
+        && room.expiresAt > request.time;
     }
 
     function isClubMember(clubId) {
