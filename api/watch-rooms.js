@@ -504,7 +504,7 @@ async function startWatchRoomScreening(request) {
     }
     const item = itemSnapshot.data();
     const contentId = String(item.contentId || "");
-    if (!/^\\d{1,12}$/.test(contentId) || !["movie", "tv"].includes(item.mediaType)) {
+    if (!/^\d{1,12}$/.test(contentId) || !["movie", "tv"].includes(item.mediaType)) {
       throw new HttpsError("failed-precondition", "This pick is missing a valid catalogue title. Remove it and add it again from search.");
     }
     screening = {
