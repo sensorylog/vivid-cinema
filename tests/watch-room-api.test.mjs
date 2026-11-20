@@ -19,7 +19,7 @@ test("The legacy Node API retains the existing Firebase Auth and App Check verif
   assert.ok(api.includes('getAuth(firebaseApp).verifyIdToken(match[1], true)'));
   assert.ok(api.includes('verifyToken(appCheckToken, { consume: true })'));
   for (const operation of [
-    "createWatchRoom","createCinemaClub","createWatchInvitation","redeemWatchInvitation","revokeWatchInvitation","cleanupExpiredWatchRooms",
+    "createWatchRoom","getWatchRoomDashboard","createCinemaClub","createWatchInvitation","redeemWatchInvitation","revokeWatchInvitation","cleanupExpiredWatchRooms",
     "heartbeatWatchRoom","addWatchRoomQueueItem","removeWatchRoomQueueItem","voteWatchRoomQueueItem",
     "sendWatchRoomMessage","reactToWatchRoomMessage","updateWatchRoomSettings","removeWatchRoomMember",
     "leaveWatchRoom","closeWatchRoom","publishWatchRoomPlayback",
@@ -129,4 +129,17 @@ test("Watch Room creation commits its invite and dashboard record atomically", a
   assert.match(handler, /room\.inviteCode/);
   assert.doesNotMatch(handler, /call\("createWatchInvitation"\)/);
   assert.match(handler, /dashboard refresh failed/);
+});
+
+
+test("Watch Rooms dashboard is loaded through the authenticated server API", async () => {
+  const route = await readFile(new URL("../cloudflare/functions/api/watch-rooms.js", import.meta.url), "utf8");
+  const clientPage = await readFile(new URL("../scripts/watch-rooms.js", import.meta.url), "utf8");
+  const dashboard = route.slice(route.indexOf("async function getWatchRoomDashboard("), route.indexOf("async function createCinemaClub("));
+  assert.match(dashboard, /users").doc\(auth\.uid\)/);
+  assert.match(dashboard, /collection\("watchRooms"\)/);
+  assert.match(dashboard, /collection\("cinemaClubs"\)/);
+  assert.match(dashboard, /timestampMillis/);
+  assert.match(clientPage, /call\("getWatchRoomDashboard"\)/);
+  assert.doesNotMatch(clientPage, /getDocs\(|collection\(db, "users"/);
 });
