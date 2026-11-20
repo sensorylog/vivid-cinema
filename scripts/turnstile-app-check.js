@@ -2,6 +2,7 @@ const ENDPOINT = "/api/app-check";
 let scriptPromise = null;
 let configPromise = null;
 let tokenExchangePromise = null;
+let cachedAppCheckToken = null;
 
 function loadTurnstile() {
   if (window.turnstile?.render) return Promise.resolve(window.turnstile);
@@ -140,8 +141,14 @@ async function exchangeTurnstileProof() {
 // only the in-flight exchange so one single-use Turnstile token is never
 // redeemed twice by concurrent Firebase service requests.
 export function getTurnstileAppCheckToken() {
+  if (cachedAppCheckToken?.expireTimeMillis > Date.now() + 60_000) {
+    return Promise.resolve(cachedAppCheckToken);
+  }
   if (!tokenExchangePromise) {
-    tokenExchangePromise = exchangeTurnstileProof().finally(() => {
+    tokenExchangePromise = exchangeTurnstileProof().then(token => {
+      cachedAppCheckToken = token;
+      return token;
+    }).finally(() => {
       tokenExchangePromise = null;
     });
   }
