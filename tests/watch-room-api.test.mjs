@@ -137,7 +137,7 @@ test("Watch Rooms dashboard is loaded through the authenticated server API", asy
   const route = await readFile(new URL("../cloudflare/functions/api/watch-rooms.js", import.meta.url), "utf8");
   const clientPage = await readFile(new URL("../scripts/watch-rooms.js", import.meta.url), "utf8");
   const dashboard = route.slice(route.indexOf("async function getWatchRoomDashboard("), route.indexOf("async function createCinemaClub("));
-  assert.match(dashboard, /users").doc\(auth\.uid\)/);
+  assert.ok(dashboard.includes('db.collection("users").doc(auth.uid)'));
   assert.match(dashboard, /collection\("watchRooms"\)/);
   assert.match(dashboard, /collection\("cinemaClubs"\)/);
   assert.match(dashboard, /timestampMillis/);
