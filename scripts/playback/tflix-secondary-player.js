@@ -85,11 +85,12 @@ export function mountTflixSecondaryPlayer({ root, params, media, details, title,
     status.hidden = false;
     status.classList.toggle("is-loading", mode === "loading");
   }
-  function loadServer(serverId) {
+  function loadServer(serverId, startAt = 0) {
     const server = SERVERS.find(item => item.id === serverId);
+    if (!server) { setStatus("This server is not available."); return false; }
     if (blockedServers.has(serverId)) {
       setStatus(server.name + " has been reported to play the wrong title for this movie. Please choose another server.");
-      return;
+      return false;
     }
     started = true;
     const url = buildTflixSecondaryServerUrl(serverId, playbackParams);
@@ -116,6 +117,7 @@ export function mountTflixSecondaryPlayer({ root, params, media, details, title,
       if (loadTimer) window.clearTimeout(loadTimer);
       loading.hidden = true;
       setStatus(server.name + " loaded. If playback does not start, try another server.");
+      window.dispatchEvent(new CustomEvent("vivid:player-frame-loaded", { detail: { playerId: "player2", providerId: serverId, position: Math.max(0, Number(startAt) || 0) } }));
       window.setTimeout(() => { if (thisGeneration === generation) status.hidden = true; }, 5000);
     });
     frame.addEventListener("error", () => {
@@ -133,6 +135,7 @@ export function mountTflixSecondaryPlayer({ root, params, media, details, title,
       loading.hidden = true;
       setStatus("Still waiting for " + server.name + "? The provider may be slow or unavailable.");
     }, 12000);
+    return true;
   }
   for (const server of SERVERS) {
     const button = document.createElement("button");
@@ -259,7 +262,8 @@ export function mountTflixSecondaryPlayer({ root, params, media, details, title,
     const selection = event.detail || {};
     if (selection.playerId === "player2") {
       root.hidden = false;
-      loadServer(selection.providerId);
+      const loaded = loadServer(selection.providerId, selection.position);
+      if (!loaded) window.dispatchEvent(new CustomEvent("vivid:watch-room-selection-error", { detail: { playerId: "player2", providerId: selection.providerId } }));
       root.scrollIntoView({ block: "center", behavior: "smooth" });
     } else if (selection.playerId === "player1") {
       root.hidden = true;
