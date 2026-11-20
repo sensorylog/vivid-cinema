@@ -307,6 +307,11 @@ window.addEventListener("message", event => {
 });
 
 
+window.addEventListener("vivid:watch-room-selection-error", event => {
+  const detail = event.detail || {};
+  setNote("The selected " + String(detail.providerId || "server") + " is blocked or unavailable for this title on this device. Choose another server.");
+});
+
 window.addEventListener("vivid:player-adapter-ready", event => {
   const readyPlayerId = event.detail?.playerId;
   const [selectedPlayerId, providerId] = lastAppliedSelectionKey.split(":");
