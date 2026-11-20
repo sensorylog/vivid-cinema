@@ -119,8 +119,13 @@ async function createWatchRoom(request) {
   const roomRef = db.collection("rooms").doc(randomBytes(20).toString("hex"));
   const memberRef = roomRef.collection("members").doc(auth.uid);
   const userRoomRef = db.collection("users").doc(auth.uid).collection("watchRooms").doc(roomRef.id);
+  const code = inviteCode();
+  const invitationRef = db.collection("watchInvitations").doc(inviteHash(code));
   const member = { userId: auth.uid, displayName: displayNameFor(auth), role: "host", joinedAt: now };
 
+  // Create the room, host membership, private dashboard pointer and invite in
+  // one transaction. The browser must never create a room and then fail on a
+  // separate invitation request, leaving the user with a misleading denial.
   await db.runTransaction(async transaction => {
     transaction.create(roomRef, {
       schemaVersion: 1, name, filmTitle, hostUid: auth.uid,
@@ -132,8 +137,17 @@ async function createWatchRoom(request) {
       roomId: roomRef.id, name, filmTitle, role: "host",
       status: "open", memberCount: 1, expiresAt, joinedAt: now, createdAt: now
     });
+    transaction.create(invitationRef, {
+      schemaVersion: 1, targetType: "room", targetId: roomRef.id, createdBy: auth.uid,
+      createdAt: now, expiresAt, maxUses: MAX_ROOM_MEMBERS - 1,
+      useCount: 0, revokedAt: null
+    });
   });
-  return { roomId: roomRef.id, expiresAt: expiresAt.toMillis() };
+  return {
+    roomId: roomRef.id, name, filmTitle, role: "host", status: "open",
+    memberCount: 1, joinedAt: now.toMillis(), expiresAt: expiresAt.toMillis(),
+    inviteCode: code
+  };
 }
 
 async function createCinemaClub(request) {

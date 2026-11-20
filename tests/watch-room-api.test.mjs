@@ -114,3 +114,19 @@ test("Cloudflare classifies Firestore IAM permission failures as server errors, 
   assert.ok(route.includes('code=firestoreIamDenied ? "internal"'));
   assert.ok(route.includes('"Watch Rooms Firestore IAM permission denied during operation:"'));
 });
+
+
+test("Watch Room creation commits its invite and dashboard record atomically", async () => {
+  const route = await readFile(new URL("../cloudflare/functions/api/watch-rooms.js", import.meta.url), "utf8");
+  const createRoom = route.slice(route.indexOf("async function createWatchRoom("), route.indexOf("async function createCinemaClub("));
+  assert.match(createRoom, /const code = inviteCode\(\)/);
+  assert.match(createRoom, /transaction\.create\(invitationRef/);
+  assert.match(createRoom, /targetType: "room", targetId: roomRef\.id/);
+  assert.match(createRoom, /inviteCode: code/);
+  assert.match(createRoom, /transaction\.create\(userRoomRef/);
+  const page = await readFile(new URL("../scripts/watch-rooms.js", import.meta.url), "utf8");
+  const handler = page.slice(page.indexOf('byId("wr-create-room-form")'), page.indexOf('byId("wr-join-room-form")'));
+  assert.match(handler, /room\.inviteCode/);
+  assert.doesNotMatch(handler, /call\("createWatchInvitation"\)/);
+  assert.match(handler, /dashboard refresh failed/);
+});
