@@ -79,7 +79,7 @@ function applyRoomPlayerSelection(room) {
   selectionControls.hidden = role !== "host" && !allowGuestPlayerSelection;
   selectionLabel.textContent = role === "host"
     ? "Choose the player and server for everyone in this room."
-    : "The host selected " + (playerId === "player1" ? "Player 1" : "Player 2") + " · " + providerId + ".";
+    : "Shared room selection: " + (playerId === "player1" ? "Player 1" : "Player 2") + " · " + providerId + ".";
   const key = playerId + ":" + providerId;
   if (key !== lastAppliedSelectionKey) {
     if (activePlayerId !== playerId || activeProviderId !== providerId) sendProviderCommand("pause");
@@ -113,8 +113,8 @@ async function saveRoomPlayerSelection() {
     setNote(error?.message || "Could not update the room player selection.");
     try { await refreshRoomPlayerSelection(); } catch {}
   } finally {
-    playerSelect.disabled = role !== "host";
-    providerSelect.disabled = role !== "host";
+    playerSelect.disabled = role !== "host" && !allowGuestPlayerSelection;
+    providerSelect.disabled = role !== "host" && !allowGuestPlayerSelection;
   }
 }
 
