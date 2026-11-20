@@ -219,7 +219,7 @@ test("Cinema Club writes re-check active club status inside their transactions",
   const backend = readFileSync(new URL("../api/watch-rooms.js", import.meta.url), "utf8");
   for (const operation of ["removeCinemaClubWatchlistItem","addCinemaClubAfterCreditsReview","addCinemaClubDiscussionMessage"]) {
     const start = backend.indexOf("async function " + operation);
-    const end = backend.indexOf("\n});", start);
+    const end = backend.indexOf("\n}", start);
     const body = backend.slice(start, end);
     assert.ok(body.includes("tx.get(clubRef)"), operation + " must re-read the club in its transaction");
     assert.ok(body.includes('club.data().status !== "active"'), operation + " must reject archived clubs");
@@ -372,7 +372,7 @@ test("Invite redemption and member departures keep private dashboard counts in s
   assert.ok(redeem.includes("memberCount: nextMemberCount"));
   for (const operation of ["removeWatchRoomMember","leaveWatchRoom"]) {
     const start = lobby.indexOf("async function " + operation);
-    const end = lobby.indexOf("\n});", start);
+    const end = lobby.indexOf("\n}", start);
     assert.ok(lobby.slice(start, end).includes('tx.get(roomRef.collection("members"))'));
     assert.ok(lobby.slice(start, end).includes("memberCount: nextMemberCount"));
   }
