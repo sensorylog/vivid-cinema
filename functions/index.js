@@ -470,6 +470,58 @@ export const revokeWatchInvitation = onCall({ region: "us-central1", maxInstance
 });
 
 
+
+/**
+ * Retention cleanup for private Watch Rooms.
+ *
+ * Firestore TTL is intentionally not used as the sole cleanup mechanism:
+ * deleting a parent document does not recursively delete its subcollections.
+ * This bounded scheduled job removes expired invitation records, dashboard
+ * pointers, and each expired room tree.
+ */
+export const cleanupExpiredWatchRooms = onSchedule({
+  schedule: "every 60 minutes",
+  timeZone: "UTC",
+  region: "us-central1",
+  timeoutSeconds: 300,
+  memory: "512MiB",
+  maxInstances: 1
+}, async () => {
+  const now = Timestamp.now();
+  const expiredInvitations = await db.collection("watchInvitations")
+    .where("expiresAt", "<=", now)
+    .limit(250)
+    .get();
+  if (!expiredInvitations.empty) {
+    const invitationBatch = db.batch();
+    expiredInvitations.docs.forEach(document => invitationBatch.delete(document.ref));
+    await invitationBatch.commit();
+  }
+
+  const expiredRooms = await db.collection("rooms")
+    .where("expiresAt", "<=", now)
+    .limit(25)
+    .get();
+  let deletedRooms = 0;
+  for (const roomDocument of expiredRooms.docs) {
+    const roomRef = roomDocument.ref;
+    const members = await roomRef.collection("members").get();
+    if (!members.empty) {
+      const pointerBatch = db.batch();
+      members.docs.forEach(member => {
+        pointerBatch.delete(db.collection("users").doc(member.id).collection("watchRooms").doc(roomDocument.id));
+      });
+      await pointerBatch.commit();
+    }
+    await db.recursiveDelete(roomRef);
+    deletedRooms += 1;
+  }
+  logger.info("Watch Rooms retention cleanup completed", {
+    deletedRooms,
+    deletedInvitations: expiredInvitations.size
+  });
+});
+
 // Watch Rooms Stage 4: trusted lobby, queue, chat and host-control operations.
 export {
   addCinemaClubWatchlistItem,
