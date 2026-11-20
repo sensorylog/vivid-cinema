@@ -453,9 +453,19 @@ function setPlayerSource(source, params, startAt = 0) {
 
 window.addEventListener("vivid:watch-room-apply-selection", event => {
   const selection = event.detail || {};
-  if (selection.playerId !== "player1" || !currentParams) return;
+  if (!["player1", "player2"].includes(selection.playerId) || !currentParams) return;
   const secondaryRoot = $("vivid-tflix-player");
+  const primaryOverlay = $("player-overlay");
+  const primaryFrame = $("vidapi-player");
+  if (selection.playerId === "player2") {
+    if (primaryOverlay) primaryOverlay.hidden = true;
+    if (primaryFrame) primaryFrame.src = "about:blank";
+    return;
+  }
+  if (primaryFrame?.src && !primaryFrame.src.endsWith("about:blank")) primaryFrame.src = "about:blank";
   if (secondaryRoot) secondaryRoot.hidden = true;
+  const primaryOverlay = $("player-overlay");
+  if (primaryOverlay) primaryOverlay.hidden = false;
   const position = Math.max(0, Number(selection.position) || 0);
   setPlayerSource(selection.providerId, currentParams, position);
   $("player-overlay")?.scrollIntoView({ block: "center", behavior: "smooth" });
