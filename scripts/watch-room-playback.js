@@ -147,8 +147,10 @@ leaveButton.addEventListener("click", () => { stopConnection(); const next = new
 
 window.addEventListener("vivid:provider-playback", event => {
   const detail = event.detail || {};
-  const vidsrcAdapter = getProviderAdapter("player1", "vidsrc");
-  if (detail.provider !== "vidsrc" || detail.origin !== vidsrcAdapter?.origin) return;
+  const eventAdapter = detail.provider === "cinesrc"
+    ? getProviderAdapter("player2", "cinesrc")
+    : detail.provider === "vidsrc" ? getProviderAdapter("player1", "vidsrc") : null;
+  if (!eventAdapter || detail.origin !== eventAdapter.origin) return;
   localPosition = Math.max(0, Number(detail.position) || 0);
   localStatus = detail.status === "playing" ? "playing" : detail.status === "paused" || detail.status === "ended" ? detail.status : localStatus;
   if (role !== "host" || !roomId) { if (role !== "host" && joinedPlayback) applyRemoteState(); return; }
@@ -161,7 +163,7 @@ window.addEventListener("vivid:provider-playback", event => {
   if (detail.status === "playing" && lastPublishedStatus === "playing" && now - lastPublishAt < 3500) return;
   lastPublishAt = now;
   lastPublishedStatus = hostStatus;
-  const payload = { roomId, provider: "vidsrc", status: hostStatus, contentId: String(detail.contentId || ""), mediaType: detail.mediaType, season: detail.season, episode: detail.episode, position: localPosition, duration: Math.max(0, Number(detail.duration) || 0) };
+  const payload = { roomId, provider: detail.provider, status: hostStatus, contentId: String(detail.contentId || ""), mediaType: detail.mediaType, season: detail.season, episode: detail.episode, position: localPosition, duration: Math.max(0, Number(detail.duration) || 0) };
   lastHostPayload = payload;
   publishQueue = publishQueue.then(() => roomId === payload.roomId && role === "host" ? call("publishWatchRoomPlayback")(payload) : null).catch(error => setNote(error?.message || "Could not publish the host playback state."));
 });
