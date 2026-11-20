@@ -100,8 +100,10 @@ function applyRoomPlayerSelection(room) {
 
 async function refreshRoomPlayerSelection() {
   if (!roomId) return;
-  const response = await call("getWatchRoomLobbySnapshot")({ roomId });
-  if (!roomId) return;
+  const requestedRoomId = roomId;
+  const requestGeneration = playbackConnectionGeneration;
+  const response = await call("getWatchRoomLobbySnapshot")({ roomId: requestedRoomId });
+  if (roomId !== requestedRoomId || requestGeneration !== playbackConnectionGeneration) return;
   applyRoomPlayerSelection(response.data?.room || {});
 }
 
@@ -261,10 +263,13 @@ async function connectToRoom(id) {
     try {
       const result = await call("heartbeatWatchRoom")({ roomId: id });
       const finishedAt = Date.now();
+      if (roomId !== id || connectionGeneration !== playbackConnectionGeneration) return;
       const serverTime = Number(result.data?.serverTime);
       if (Number.isFinite(serverTime)) clockOffsetMs = serverTime - ((startedAt + finishedAt) / 2);
     } catch (error) {
-      setNote(error?.message || "Room presence could not refresh.");
+      if (roomId === id && connectionGeneration === playbackConnectionGeneration) {
+        setNote(error?.message || "Room presence could not refresh.");
+      }
     }
   };
   await ping();
