@@ -190,6 +190,6 @@ test("Account creation, sign-in and the synced library keep their Firebase SDK p
   assert.match(auth, /signInWithEmailAndPassword\(auth/);
   assert.match(auth, /signInWithPopup\(auth/);
   assert.match(library, /getDocsFromServer/);
-  assert.match(library, /setDoc\(doc\(db, "users", uid/);
+  assert.match(library, /setDoc\(doc\(db,\\s*"users",\\s*uid/);
   assert.match(library, /getFirestore/);
 });
