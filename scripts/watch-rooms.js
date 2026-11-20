@@ -30,13 +30,16 @@ function requireVividAccount() {
 }
 
 function errorText(error, fallback) {
-  const code = error?.code || "";
+  const code = String(error?.code || "").toLowerCase();
   if (code.includes("unauthenticated")) return "Please sign in to your Vivid account again.";
   if (code.includes("permission-denied")) return "You don't have permission to do that in this space.";
   if (code.includes("not-found")) return "That invitation could not be found. Check the code and try again.";
-  if (code.includes("failed-precondition")) return error.message || "That invitation is expired, revoked or full.";
+  if (code.includes("failed-precondition")) return "This space is no longer available for that action. Refresh and try again.";
   if (code.includes("resource-exhausted")) return "This room or club has reached its member limit.";
-  return error?.message || fallback;
+  if (code.includes("invalid-argument")) return "Some of the information entered isn't valid. Check the form and try again.";
+  // Callable INTERNAL/unknown messages often expose implementation details
+  // such as "internal [0]". Keep those details in developer diagnostics only.
+  return fallback;
 }
 
 function openDialog(dialog) {
@@ -287,7 +290,8 @@ byId("wr-create-room-form")?.addEventListener("submit", async event => {
     setFeedback("wr-room-feedback", "Room created. Your invite code is " + invitation.data.inviteCode + " · Expires when the room closes (within 24 hours). Share it privately.");
     form.reset();
   } catch (error) {
-    setFeedback("wr-room-feedback", errorText(error, "Couldn't create your room. Please try again."), true);
+    console.error("Vivid Watch Room creation failed:", error);
+    setFeedback("wr-room-feedback", errorText(error, "We couldn't create your room just now. Please try again in a moment."), true);
     try { await loadDashboard(auth.currentUser); } catch {}
   } finally {
     submit.disabled = false;
