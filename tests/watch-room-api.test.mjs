@@ -90,7 +90,7 @@ test("Cloudflare Watch Rooms route preserves every trusted operation and one-tim
   assert.ok(route.includes('"auth/id-token-revoked"'));
   assert.ok(route.includes('"Watch Rooms Firebase ID-token verification failed:"'));
   assert.ok(!route.includes('String(error?.code || "").startsWith("auth/")'));
-  assert.ok(route.includes("verifyToken(appCheckToken, { consume: true })"));
+  assert.ok(route.includes("verifyAndConsumeAppCheckToken(appCheckToken, serviceAccount)"));
   assert.ok(route.includes("recursiveDelete(reference)"));
   assert.ok(route.includes("reference instanceof Query"));
 });
