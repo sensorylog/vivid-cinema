@@ -183,6 +183,10 @@ function buildScreeningUrl(screening) {
   url.searchParams.set("id", contentId);
   url.searchParams.set("type", mediaType);
   url.searchParams.set("roomId", room.roomId);
+  if (mediaType === "tv") {
+    url.searchParams.set("season", String(Math.max(1, Number(screening.season) || 1)));
+    url.searchParams.set("episode", String(Math.max(1, Number(screening.episode) || 1)));
+  }
   return url.pathname + url.search;
 }
 
@@ -249,7 +253,7 @@ function renderQueue(items) {
     if (room.role === "host" && /^\d{1,12}$/.test(String(item.contentId || ""))) {
       const start = document.createElement("button");
       start.type = "button";
-      start.textContent = "Start Screening";
+      start.textContent = item.mediaType === "tv" ? "Start Screening · S1 E1" : "Start Screening";
       start.className = "vivid-wr-button vivid-wr-button--primary";
       start.addEventListener("click", async () => {
         start.disabled = true;
