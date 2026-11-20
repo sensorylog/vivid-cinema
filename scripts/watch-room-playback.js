@@ -73,6 +73,11 @@ function applyRemoteState(force = false) {
   const state = latestRemoteState;
   if (!state || role === "host" || !joinedPlayback) return;
   if (!sameTitle(state)) { setNote("This room is synced to a different title or episode. Open that exact Vivid title to join."); return; }
+  const adapter = getActiveAdapter();
+  if (!adapter?.capabilities.canPlay || !adapter.capabilities.canSeek) {
+    setNote("Choose Player 1 · VidSrc first. This player/server does not have verified Watch Room controls.");
+    return;
+  }
   if (!getSupportedFrame()) { setNote("Choose VidSrc in the player’s server list first. Other providers are not enabled for room sync."); return; }
   const updatedAt = state.updatedAt?.toMillis?.() || Date.now();
   const elapsed = state.status === "playing" ? Math.max(0, (Date.now() + clockOffsetMs - updatedAt) / 1000) : 0;
