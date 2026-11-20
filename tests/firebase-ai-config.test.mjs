@@ -76,11 +76,13 @@ test("Recall keeps useful provider and quota diagnostics", () => {
 
 test("App Check remains initialized for Firebase services outside AI", () => {
   assert.match(firebaseSource, /initializeAppCheck/);
-  assert.match(firebaseSource, /ReCaptchaEnterpriseProvider/);
+  assert.match(firebaseSource, /CustomProvider/);
+  assert.match(firebaseSource, /getTurnstileAppCheckToken/);
+  assert.match(firebaseSource, /isTokenAutoRefreshEnabled:\\s*false/);
 });
 
 test("service worker cache version changes with the Cloudflare AI client", () => {
-  assert.match(workerSource, /vivid-cinema-shell-v295/);
+  assert.match(workerSource, /vivid-cinema-shell-v296/);
   assert.match(workerSource, /scripts\/cloudflare-ai\.js/);
 });
 
