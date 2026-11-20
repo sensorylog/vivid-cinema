@@ -83,7 +83,8 @@ test("Cloudflare Watch Rooms route preserves every trusted operation and one-tim
   }
   assert.ok(route.includes("verifyFirebaseIdToken(match[1], projectId, serviceAccount)"));
   assert.ok(route.includes("verifyAndConsumeAppCheckToken(appCheckToken, serviceAccount)"));
-  assert.doesNotMatch(route, /firebase-admin\\/(auth|app-check)|getAuth\\(|getAppCheck\\(/);
+  assert.ok(!route.includes("firebase-admin/auth") && !route.includes("firebase-admin/app-check"));
+  assert.ok(!route.includes("getAuth(") && !route.includes("getAppCheck("));
   assert.ok(route.includes("invalidUserTokenCodes"));
   assert.ok(!route.includes('rawCode.startsWith("auth/")'), "server-side Firebase Admin errors must not be mislabeled as user sign-in failures");
   assert.ok(route.includes('rawCode.startsWith("appCheck/")'));
