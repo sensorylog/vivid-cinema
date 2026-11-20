@@ -12,6 +12,7 @@ function openLobby(data) {
   byId("wr-lobby-title").textContent = data.name || "Private screening";
   byId("wr-lobby-subtitle").textContent = data.filmTitle ? "Tonight: " + data.filmTitle : "Your crew is getting together.";
   byId("wr-host-controls").hidden = data.role !== "host";
+  byId("wr-leave-room").hidden = data.role === "host";
   const settings = byId("wr-room-settings-form"); settings.elements.name.value = data.name || ""; settings.elements.allowGuestQueue.checked = data.allowGuestQueue !== false; settings.elements.allowGuestChat.checked = data.allowGuestChat !== false;
   const presence = collection(db, "rooms", data.roomId, "presence");
   stops.push(onSnapshot(presence, snap => { const now = Date.now(); const live = snap.docs.map(d => d.data()).filter(x => x.expiresAt?.toMillis?.() > now); byId("wr-lobby-presence-count").textContent = String(live.length); const ul = byId("wr-lobby-presence"); ul.replaceChildren(); live.forEach(x => { const li = document.createElement("li"), label = document.createElement("span"); label.textContent = x.uid === auth.currentUser?.uid ? "You · here now" : "Vivid member · here now"; li.append(label); if (room.role === "host" && x.uid !== auth.currentUser?.uid) { const remove = document.createElement("button"); remove.type = "button"; remove.textContent = "Remove"; remove.className = "vivid-wr-button vivid-wr-button--quiet"; remove.addEventListener("click", () => call("removeWatchRoomMember")({ roomId: room.roomId, memberUid: x.uid }).catch(showError)); li.append(remove); } ul.append(li); }); if (!live.length) ul.textContent = "Waiting for your crew…"; }, showError));
@@ -20,6 +21,22 @@ function openLobby(data) {
   const ping = () => call("heartbeatWatchRoom")({ roomId:data.roomId }).catch(showError); ping(); heartbeat = setInterval(ping,30000);
 }
 document.addEventListener("vivid:watch-room-open", e => openLobby(e.detail));
+byId("wr-leave-room")?.addEventListener("click", async () => {
+  if (!room || room.role === "host" || !window.confirm("Leave this Watch Room? You will need a new invitation to rejoin.")) return;
+  const roomId = room.roomId;
+  const button = byId("wr-leave-room");
+  button.disabled = true;
+  try {
+    await call("leaveWatchRoom")({ roomId });
+    stop();
+    byId("wr-room-lobby").hidden = true;
+    window.location.reload();
+  } catch (error) {
+    showError(error);
+  } finally {
+    button.disabled = false;
+  }
+});
 byId("wr-lobby-close")?.addEventListener("click", () => { stop(); byId("wr-room-lobby").hidden = true; byId("wr-panel-rooms").hidden = false; });
 byId("wr-queue-form")?.addEventListener("submit", async e => { e.preventDefault(); if (!room) return; const input=e.currentTarget.elements.title; try { await call("addWatchRoomQueueItem")({roomId:room.roomId,title:input.value.trim(),mediaType:"movie"}); input.value=""; } catch(err) { showError(err); } });
 byId("wr-chat-form")?.addEventListener("submit", async e => { e.preventDefault(); if (!room) return; const input=e.currentTarget.elements.text; try { await call("sendWatchRoomMessage")({roomId:room.roomId,text:input.value.trim()}); input.value=""; } catch(err) { showError(err); } });
