@@ -534,6 +534,7 @@ export {
 export {
   heartbeatWatchRoom,
   addWatchRoomQueueItem,
+  removeWatchRoomQueueItem,
   voteWatchRoomQueueItem,
   sendWatchRoomMessage,
   reactToWatchRoomMessage,
