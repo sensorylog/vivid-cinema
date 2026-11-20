@@ -7,6 +7,8 @@ import { getProviderAdapter, sendProviderCommand as sendAdapterCommand } from ".
 let activePlayerId = "player1";
 let activeProviderId = "vidapi";
 let allowGuestPlayerSelection = false;
+let allowGuestPlaybackControl = false;
+let suppressPlaybackPublishUntil = 0;
 let pendingPlayer2Seek = 0;
 const call = callWatchRoomApi;
 let roomId = "";
@@ -73,6 +75,7 @@ function applyRoomPlayerSelection(room) {
   populateRoomProviderOptions(playerId, providerId);
   selectionPanel.hidden = false;
   allowGuestPlayerSelection = room.allowGuestPlayerSelection === true;
+  allowGuestPlaybackControl = room.allowGuestPlaybackControl === true;
   selectionControls.hidden = role !== "host" && !allowGuestPlayerSelection;
   selectionLabel.textContent = role === "host"
     ? "Choose the player and server for everyone in this room."
@@ -146,7 +149,7 @@ function stopConnection() {
   if (selectionTimer) window.clearInterval(selectionTimer);
   heartbeatTimer = null; selectionTimer = null; lastAppliedSelectionKey = "";
   selectionPanel.hidden = true;
-  roomId = ""; role = ""; latestRemoteState = null; joinedPlayback = false; localPosition = null; localStatus = ""; hostStatus = "playing"; lastPublishAt = 0; lastPublishedStatus = ""; publishQueue = Promise.resolve(); lastHostPayload = null; clockOffsetMs = 0;
+  roomId = ""; role = ""; allowGuestPlayerSelection = false; allowGuestPlaybackControl = false; suppressPlaybackPublishUntil = 0; latestRemoteState = null; joinedPlayback = false; localPosition = null; localStatus = ""; hostStatus = "playing"; lastPublishAt = 0; lastPublishedStatus = ""; publishQueue = Promise.resolve(); lastHostPayload = null; clockOffsetMs = 0;
   joinButton.hidden = true; leaveButton.hidden = true; form.hidden = false;
 }
 
@@ -161,7 +164,10 @@ function sameTitle(state) {
 
 function applyRemoteState(force = false) {
   const state = latestRemoteState;
-  if (!state || role === "host" || !joinedPlayback) return;
+  const controllerUid = state?.controllerUid || state?.hostUid;
+  const currentUid = auth.currentUser?.uid;
+  const delegatedHostFollow = role === "host" && allowGuestPlaybackControl && controllerUid && controllerUid !== currentUid;
+  if (!state || controllerUid === currentUid || (!delegatedHostFollow && (role === "host" || !joinedPlayback))) return;
   if (!sameTitle(state)) { setNote("This room is synced to a different title or episode. Open that exact Vivid title to join."); return; }
   if (state.provider !== activeProviderId) { setNote("The host is using " + String(state.provider || "another provider") + ". Select that same provider to join synchronized playback."); return; }
   const adapter = getActiveAdapter();
@@ -173,6 +179,7 @@ function applyRemoteState(force = false) {
   const updatedAt = state.updatedAt?.toMillis?.() || Date.now();
   const elapsed = state.status === "playing" ? Math.max(0, (Date.now() + clockOffsetMs - updatedAt) / 1000) : 0;
   const expected = Math.max(0, Math.min(Number(state.duration) || 86400, Number(state.position) + elapsed));
+  suppressPlaybackPublishUntil = Date.now() + 1800;
   if (force || localPosition == null || Math.abs(expected - localPosition) > 2.5) {
     sendProviderCommand("seek", expected);
   }
@@ -210,7 +217,7 @@ async function connectToRoom(id) {
   unsubscribePlayback = onSnapshot(doc(db, "rooms", roomId, "playback", "current"), snapshot => {
     if (!snapshot.exists()) { latestRemoteState = null; if (role !== "host") setNote("Connected. Waiting for the host to start playback."); return; }
     latestRemoteState = snapshot.data();
-    if (role !== "host") applyRemoteState();
+    if (role !== "host" || allowGuestPlaybackControl) applyRemoteState();
   }, error => setNote(error?.message || "Playback sync connection was interrupted."));
 }
 
@@ -245,7 +252,8 @@ window.addEventListener("vivid:provider-playback", event => {
   if (!eventAdapter || detail.origin !== eventAdapter.origin) return;
   localPosition = Math.max(0, Number(detail.position) || 0);
   localStatus = detail.status === "playing" ? "playing" : detail.status === "paused" || detail.status === "ended" ? detail.status : localStatus;
-  if (role !== "host" || !roomId) { if (role !== "host" && joinedPlayback) applyRemoteState(); return; }
+  if (!roomId || (role !== "host" && !allowGuestPlaybackControl)) { if (role !== "host" && joinedPlayback) applyRemoteState(); return; }
+  if (Date.now() < suppressPlaybackPublishUntil) return;
   if (detail.status === "playing") hostStatus = "playing";
   if (detail.status === "paused") hostStatus = "paused";
   if (detail.status === "ended") hostStatus = "ended";
