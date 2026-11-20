@@ -1,5 +1,5 @@
 import { createHash, randomBytes } from "node:crypto";
-import { verifyFirebaseIdToken, verifyAndConsumeAppCheckToken } from "../lib/firebase-token-verification.js";
+import { verifyFirebaseIdToken, verifyAppCheckToken } from "../lib/firebase-token-verification.js";
 import { initializeApp as initializeRestApp } from "@ljoukov/firebase-admin-cloudflare/app";
 import { getFirestore, Query, Timestamp } from "@ljoukov/firebase-admin-cloudflare/firestore";
 
@@ -969,17 +969,14 @@ async function authenticate(req) {
   }
   let appCheck;
   try {
-    appCheck = await verifyAndConsumeAppCheckToken(appCheckToken, serviceAccount);
+    appCheck = await verifyAppCheckToken(appCheckToken);
   } catch (error) {
     console.error("Watch Rooms App Check verification failed:", {
       code: error?.code || "unknown", message: error?.message || String(error)
     });
     throw new HttpsError("failed-precondition", "Vivid could not verify this browser. Refresh the page and try again.");
   }
-  if (appCheck.alreadyConsumed) {
-    throw new HttpsError("failed-precondition", "This app-verification token was already used. Refresh the page and try again.");
-  }
-  if (!token.uid || token.firebase?.sign_in_provider === "anonymous") {
+    if (!token.uid || token.firebase?.sign_in_provider === "anonymous") {
     throw new HttpsError("unauthenticated", "Sign in with a Vivid account to use Watch Rooms.");
   }
   return { uid: token.uid, token };
