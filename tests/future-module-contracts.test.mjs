@@ -403,7 +403,8 @@ test("Watch Room lobby tears down and restores realtime listeners across BFCache
 test("Watch Room host can manage offline members, not only active presence leases", () => {
   const client = readFileSync(new URL("../scripts/watch-room-lobby.js", import.meta.url), "utf8");
   assert.ok(client.includes('collection(db, "rooms", data.roomId, "members")'));
-  assert.ok(client.includes('"Vivid member · away"'));
+  assert.ok(client.includes('status.className = isLive ? "is-online" : "is-away"'));
+  assert.ok(client.includes('member.displayName || "Vivid member"'));
   assert.ok(client.includes('call("removeWatchRoomMember")'));
 });
 
@@ -493,4 +494,29 @@ test("Firebase App Check uses Cloudflare Turnstile through the supported custom-
   assert.ok(endpoint.includes("createFirebaseAppCheckToken("));
   assert.ok(!firebase.includes("ReCaptchaEnterpriseProvider"));
   assert.ok(!endpoint.includes("recaptchaenterprise.googleapis.com"));
+});
+
+
+test("Watch Room lobby shows real membership and requires a searchable catalogue pick", () => {
+  const lobby = readFileSync(new URL("../scripts/watch-room-lobby.js", import.meta.url), "utf8");
+  const page = readFileSync(new URL("../watch-rooms.html", import.meta.url), "utf8");
+  const styles = readFileSync(new URL("../styles/vivid-watch-rooms.css", import.meta.url), "utf8");
+  const api = readFileSync(new URL("../api/watch-rooms.js", import.meta.url), "utf8");
+  const cloudflare = readFileSync(new URL("../cloudflare/functions/api/watch-rooms.js", import.meta.url), "utf8");
+  assert.ok(lobby.includes('import { tmdbApi } from "./tmdb.js"'));
+  assert.ok(lobby.includes("tmdbApi.searchMulti(value, 1)"), "queue suggestions must search TMDB movies and TV");
+  assert.ok(lobby.includes("selectedPick"), "users must select a catalogue result before submitting");
+  assert.ok(lobby.includes("contentId: String(selectedPick.id)"), "queue writes must include the selected TMDB ID");
+  assert.ok(lobby.includes("memberList.length"), "the room count must represent members, not online heartbeats");
+  assert.ok(lobby.includes("member.displayName"), "the roster must show real member display names");
+  assert.ok(lobby.includes('call("heartbeatWatchRoom")'), "room presence heartbeat must remain active");
+  for (const id of ["wr-lobby-online-count", "wr-queue-search-results", "wr-queue-selection"]) {
+    assert.ok(page.includes('id="' + id + '"'), "missing lobby experience element " + id);
+  }
+  assert.ok(styles.includes(".vivid-wr-queue-item"));
+  for (const source of [api, cloudflare]) {
+    const queue = source.slice(source.indexOf("async function addWatchRoomQueueItem"), source.indexOf("async function removeWatchRoomQueueItem"));
+    assert.ok(queue.includes("posterPath") && queue.includes("releaseDate"), "queue must retain selected title artwork and release year");
+    assert.ok(queue.includes("!/^\\d{1,12}$/.test(contentId)"), "queue must validate catalogue IDs");
+  }
 });
