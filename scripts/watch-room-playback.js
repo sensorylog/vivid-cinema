@@ -282,6 +282,16 @@ window.addEventListener("message", event => {
   }}));
 });
 
+
+window.addEventListener("vivid:player-adapter-ready", event => {
+  const readyPlayerId = event.detail?.playerId;
+  const [selectedPlayerId, providerId] = lastAppliedSelectionKey.split(":");
+  if (!readyPlayerId || readyPlayerId !== selectedPlayerId || !providerId) return;
+  window.dispatchEvent(new CustomEvent("vivid:watch-room-apply-selection", {
+    detail: { playerId: selectedPlayerId, providerId, position: Number(latestRemoteState?.position) || 0 }
+  }));
+});
+
 window.addEventListener("vivid:player-adapter-selected", event => {
   const playerId = event.detail?.playerId;
   const providerId = event.detail?.providerId;
