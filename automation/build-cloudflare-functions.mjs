@@ -1,4 +1,5 @@
 import { spawnSync } from "node:child_process";
+import { access } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -32,4 +33,5 @@ run(wrangler, [
   "--outdir", output,
   "--project-directory", root
 ]);
+await access(path.join(output, "_worker.js"));
 console.log("Bundled Cloudflare Pages Functions into dist/_worker.js.");
