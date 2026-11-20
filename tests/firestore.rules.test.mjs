@@ -218,8 +218,12 @@ test("Watch Rooms and Cinema Clubs are readable only by their recorded members a
   const guest = env.authenticatedContext("room-guest").firestore();
   const clubOwner = env.authenticatedContext("club-owner").firestore();
   const outsider = env.authenticatedContext("outsider").firestore();
+  const anonymous = env.authenticatedContext("anonymous-room-user", {
+    firebase: { sign_in_provider: "anonymous" }
+  }).firestore();
 
   await assertSucceeds(getDoc(doc(host, "rooms/private-room")));
+  await assertFails(getDoc(doc(anonymous, "rooms/private-room")));
   await assertFails(getDoc(doc(host, "rooms/closed-room")));
   await assertSucceeds(getDoc(doc(host, "rooms/private-room/members/room-host")));
   await assertFails(getDoc(doc(guest, "rooms/private-room")));
@@ -296,6 +300,9 @@ test("Cinema Club watchlists, screening history and After-Credits are member-rea
   const member = env.authenticatedContext("archive-member").firestore();
   const outsider = env.authenticatedContext("archive-outsider").firestore();
   const archivedMember = env.authenticatedContext("archived-member").firestore();
+  const anonymous = env.authenticatedContext("anonymous-club-user", {
+    firebase: { sign_in_provider: "anonymous" }
+  }).firestore();
   const paths = [
     "cinemaClubs/archive-club/watchlist/movie_42",
     "cinemaClubs/archive-club/screenings/screening-1",
@@ -303,6 +310,7 @@ test("Cinema Club watchlists, screening history and After-Credits are member-rea
     "cinemaClubs/archive-club/screenings/screening-1/discussion/message-1"
   ];
   await assertFails(getDoc(doc(archivedMember, "cinemaClubs/archived-club/watchlist/movie_43")));
+  await assertFails(getDoc(doc(anonymous, "cinemaClubs/archive-club")));
   for (const path of paths) {
     await assertSucceeds(getDoc(doc(member, path)));
     await assertFails(getDoc(doc(outsider, path)));
