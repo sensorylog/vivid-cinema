@@ -639,3 +639,12 @@ test("Delegated playback control is opt-in and preserves the host as room owner"
   assert.ok(client.includes('Date.now() < suppressPlaybackPublishUntil'));
   assert.ok(client.includes('controllerUid === currentUid'));
 });
+
+
+test("Watch Room player switching unloads the inactive iframe to prevent hidden audio", () => {
+  const player1 = readFileSync(new URL("../scripts/watch.js", import.meta.url), "utf8");
+  const player2 = readFileSync(new URL("../scripts/playback/tflix-secondary-player.js", import.meta.url), "utf8");
+  assert.ok(player1.includes('if (primaryFrame) primaryFrame.src = "about:blank"'));
+  assert.ok(player1.includes('primaryOverlay.hidden = true'));
+  assert.ok(player2.includes('if (frame) frame.src = "about:blank"'));
+});
