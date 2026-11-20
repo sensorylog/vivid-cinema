@@ -643,6 +643,7 @@ test("Delegated playback control is opt-in and preserves the host as room owner"
     assert.ok(backend.includes('hostUid: roomData.hostUid, controllerUid: uid'));
   }
   assert.ok(client.includes('role === "host" && allowGuestPlaybackControl && controllerUid && controllerUid !== currentUid'));
+  assert.ok(client.includes('role === "host" || allowGuestPlaybackControl'));
   assert.ok(client.includes('Date.now() < suppressPlaybackPublishUntil'));
   assert.ok(client.includes('controllerUid === currentUid'));
 });
