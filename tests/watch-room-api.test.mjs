@@ -133,3 +133,29 @@ test("Only the host can permanently delete a room and all room data", async () =
   assert.match(implementation, /collection\("watchRooms"\)/);
   assert.match(implementation, /recursiveDelete\(roomRef\)/);
 });
+
+
+test("Watch Room playback state is read through an authenticated member-only server snapshot", async () => {
+  for (const path of ["../cloudflare/functions/api/watch-rooms.js", "../api/watch-rooms.js"]) {
+    const route = await readFile(new URL(path, import.meta.url), "utf8");
+    const start = route.indexOf("async function getWatchRoomPlaybackSnapshot(");
+    const end = route.indexOf("async function heartbeatWatchRoom(", start);
+    assert.ok(start >= 0 && end > start, path + " must implement the playback snapshot operation");
+    const implementation = route.slice(start, end);
+    assert.match(implementation, /requireUser\(request\)/);
+    assert.match(implementation, /requireRoomMember\(roomId, uid\)/);
+    assert.match(implementation, /collection\("playback"\)\.doc\("current"\)/);
+    assert.match(implementation, /role: member\.role/);
+    assert.match(implementation, /playback:/);
+    assert.match(implementation, /serverTime: Date\.now\(\)/);
+    assert.match(route, /getWatchRoomPlaybackSnapshot/);
+  }
+});
+
+test("Watch Room playback client no longer reads Firestore directly and polls the authorized snapshot", async () => {
+  const playback = await readFile(new URL("../scripts/watch-room-playback.js", import.meta.url), "utf8");
+  assert.match(playback, /call\("getWatchRoomPlaybackSnapshot"\)/);
+  assert.match(playback, /setInterval\(refreshPlayback, 2500\)/);
+  assert.match(playback, /playbackConnectionGeneration/);
+  assert.doesNotMatch(playback, /onSnapshot|getDoc\(|from "\.\/firebase\.js";\s*\nimport \{ doc/);
+});
