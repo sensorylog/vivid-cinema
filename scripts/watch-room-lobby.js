@@ -165,6 +165,16 @@ function renderChat(messages) {
   log.scrollTop = log.scrollHeight;
 }
 
+function applyRoomPermissions() {
+  if (!room) return;
+  const isHost = room.role === "host";
+  const queueAllowed = isHost || room.allowGuestQueue !== false;
+  const chatAllowed = isHost || room.allowGuestChat !== false;
+  const queueForm = byId("wr-queue-form");
+  const chatForm = byId("wr-chat-form");
+  if (queueForm) queueForm.querySelectorAll("input, button").forEach(control => { control.disabled = !queueAllowed; });
+  if (chatForm) chatForm.querySelectorAll("input, button").forEach(control => { control.disabled = !chatAllowed; });
+}
 function renderQueue(items) {
   const list = byId("wr-lobby-queue");
   if (!list) return;
@@ -200,6 +210,7 @@ function renderQueue(items) {
     vote.textContent = voted ? "Voted ✓" : "Vote";
     vote.className = "vivid-wr-button vivid-wr-button--quiet";
     vote.setAttribute("aria-pressed", String(Boolean(voted)));
+    vote.disabled = room.role !== "host" && room.allowGuestVoting === false;
     vote.addEventListener("click", () => call("voteWatchRoomQueueItem")({ roomId: room.roomId, itemId: item.id }).catch(showError));
     actions.append(vote);
     const openTitle = document.createElement("a");
@@ -211,7 +222,7 @@ function renderQueue(items) {
       openTitle.rel = "noopener";
       actions.append(openTitle);
     }
-    if (room.role === "host" || item.addedBy === auth.currentUser?.uid) {
+    if (room.role === "host" || item.addedBy === auth.currentUser?.uid || room.allowGuestQueueManagement === true) {
       const remove = document.createElement("button");
       remove.type = "button";
       remove.textContent = "Remove";
@@ -232,6 +243,7 @@ function openLobby(data) {
   setSearchMessage("");
   room = data;
   lastRoom = data;
+  applyRoomPermissions();
   memberList = [];
   byId("wr-panel-rooms").hidden = true;
   byId("wr-panel-clubs").hidden = true;
@@ -272,6 +284,7 @@ function openLobby(data) {
           currentSettings.elements.allowGuestPlaybackControl.checked = room.allowGuestPlaybackControl === true;
         }
       }
+      applyRoomPermissions();
       memberList = Array.isArray(snapshot.members) ? snapshot.members : [];
       renderPresence();
       renderQueue(Array.isArray(snapshot.queue) ? snapshot.queue : []);
