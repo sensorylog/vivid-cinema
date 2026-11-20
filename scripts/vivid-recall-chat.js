@@ -79,7 +79,7 @@ function errorDiagnostic(error) {
     ].filter(Boolean).join(" · ");
   }
 
-  // Cloudflare returns actionable usage and quota details inside QuotaFailure
+  // Cloudflare can return actionable usage and quota details
   // details. Keep these fields visible so a 429 is not misdiagnosed as
   // generic traffic when a model/project free-tier allocation is zero.
   const detailEntries = [
