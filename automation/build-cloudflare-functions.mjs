@@ -30,7 +30,8 @@ const wrangler = path.join(
 );
 run(wrangler, [
   "pages", "functions", "build", functionsRoot,
-  "--outdir", output,
+  "--outfile", path.join(output, "_worker.js"),
+  "--build-output-directory", output,
   "--project-directory", root,
   "--config", path.join(root, "wrangler.toml"),
   "--compatibility-date", "2026-11-20",
