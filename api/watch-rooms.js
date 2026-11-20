@@ -644,7 +644,7 @@ async function closeWatchRoom(request) {
 }
 
 
-// The first synchronized adapter is limited to VidSrc's documented PLAYER_EVENT and parent-command protocol on vidsrc.sh.
+// Only providers with documented and origin-checked parent-command/event protocols are accepted here.
 async function publishWatchRoomPlayback(request) {
   const uid = requireUser(request);
   const roomId = validId(request.data?.roomId, "room ID");
