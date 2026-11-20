@@ -239,3 +239,15 @@ test("cached app scripts are returned immediately while a background refresh is 
   assert.equal(response, cached);
   assert.equal(networkRequested, true);
 });
+
+
+test("Watch Rooms and playback modules are included in the offline app shell", () => {
+  for (const asset of [
+    '"./watch-rooms.html"',
+    '"./scripts/watch-rooms.js"',
+    '"./scripts/watch-room-lobby.js"',
+    '"./scripts/watch-room-clubs.js"',
+    '"./scripts/watch-room-playback.js"',
+    '"./scripts/watch.js?v=watch-room-sync-1"'
+  ]) assert.ok(source.includes(asset), "missing Watch Rooms app-shell asset: " + asset);
+});
