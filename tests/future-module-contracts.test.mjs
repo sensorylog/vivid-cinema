@@ -308,7 +308,7 @@ test("Watch Room guests can leave transactionally while hosts must close the roo
   const leave = lobby.slice(lobby.indexOf("async function leaveWatchRoom"), lobby.indexOf("async function closeWatchRoom"));
   assert.ok(leave.includes("room.hostUid === uid || member.role === \"host\""));
   assert.ok(leave.includes("tx.delete(memberRef)") && leave.includes("tx.delete(pointerRef)"));
-  assert.ok(leave.includes("memberCount: Math.max(1"));
+  assert.ok(leave.includes("memberCount: nextMemberCount"));
   assert.ok(index.includes("  leaveWatchRoom,"));
   assert.ok(client.includes('call("leaveWatchRoom")'));
   assert.ok(page.includes('id="wr-leave-room"'));
