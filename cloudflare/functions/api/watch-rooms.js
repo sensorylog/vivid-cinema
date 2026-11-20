@@ -1,13 +1,12 @@
 import { createHash, randomBytes } from "node:crypto";
-import { cert, getApps, initializeApp } from "firebase-admin/app";
-import { getAuth } from "firebase-admin/auth";
-import { getAppCheck } from "firebase-admin/app-check";
+import { verifyFirebaseIdToken, verifyAndConsumeAppCheckToken } from "../lib/firebase-token-verification.js";
 import { initializeApp as initializeRestApp } from "@ljoukov/firebase-admin-cloudflare/app";
 import { getFirestore, Query, Timestamp } from "@ljoukov/firebase-admin-cloudflare/firestore";
 
-let firebaseApp;
 let db;
 let allowedOrigins;
+let serviceAccount;
+let projectId;
 
 function initializeServices(env) {
   allowedOrigins = new Set([
@@ -18,14 +17,11 @@ function initializeServices(env) {
   if (db) return;
   const serviceAccountRaw = env.FIREBASE_SERVICE_ACCOUNT_JSON;
   if (!serviceAccountRaw) throw new Error("FIREBASE_SERVICE_ACCOUNT_JSON is not configured for Vivid on Cloudflare Pages.");
-  const serviceAccount = JSON.parse(serviceAccountRaw);
-  const projectId = env.FIREBASE_PROJECT_ID || serviceAccount.project_id;
+  serviceAccount = JSON.parse(serviceAccountRaw);
+  projectId = env.FIREBASE_PROJECT_ID || serviceAccount.project_id;
   if (!projectId || !serviceAccount.client_email || !serviceAccount.private_key) {
     throw new Error("FIREBASE_SERVICE_ACCOUNT_JSON is incomplete.");
   }
-  firebaseApp = getApps().find(app => app.name === "vivid-watch-rooms") || initializeApp({
-    credential: cert(serviceAccount), projectId
-  }, "vivid-watch-rooms");
   const restApp = initializeRestApp({ serviceAccountJson: serviceAccountRaw, projectId }, "vivid-watch-rooms-rest");
   const firestore = getFirestore(restApp);
   db = new Proxy(firestore, {
@@ -910,19 +906,18 @@ async function authenticate(req) {
     // Keep revocation checking enabled. It requires the service account to have
     // Firebase Authentication user-read permissions; do not disguise IAM or
     // credential failures as an expired end-user session.
-    token = await getAuth(firebaseApp).verifyIdToken(match[1], true);
+    token = await verifyFirebaseIdToken(match[1], projectId, serviceAccount);
   } catch (error) {
     const code = String(error?.code || "unknown");
     console.error("Watch Rooms Firebase ID-token verification failed:", {
       code,
       message: error?.message || String(error),
-      projectId: firebaseApp?.options?.projectId || null
+      projectId: projectId || null
     });
     const invalidUserTokenCodes = new Set([
       "auth/id-token-expired",
       "auth/id-token-revoked",
       "auth/invalid-id-token",
-      "auth/argument-error",
       "auth/user-disabled"
     ]);
     if (invalidUserTokenCodes.has(code)) {
@@ -934,7 +929,7 @@ async function authenticate(req) {
   }
   let appCheck;
   try {
-    appCheck = await getAppCheck(firebaseApp).verifyToken(appCheckToken, { consume: true });
+    appCheck = await verifyAndConsumeAppCheckToken(appCheckToken, serviceAccount);
   } catch (error) {
     console.error("Watch Rooms App Check verification failed:", {
       code: error?.code || "unknown", message: error?.message || String(error)
