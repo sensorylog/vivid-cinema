@@ -8,7 +8,7 @@ const clients = await Promise.all([
   "watch-rooms.js", "watch-room-lobby.js", "watch-room-clubs.js", "watch-room-playback.js"
 ].map(name => readFile(new URL("../scripts/" + name, import.meta.url), "utf8")));
 
-test("Watch Rooms callable operations are served by the existing Vercel API, not Firebase Functions", () => {
+test("The legacy Node API retains the existing Firebase Auth and App Check verification contract", () => {
   assert.ok(api.includes('from "firebase-admin/app"'));
   assert.ok(api.includes('from "firebase-admin/auth"'));
   assert.ok(api.includes('from "firebase-admin/app-check"'));
