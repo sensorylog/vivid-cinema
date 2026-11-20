@@ -208,10 +208,6 @@ function renderClubDetail(club) {
 
 async function loadDashboard(user) {
   const generation = ++dashboardLoadGeneration;
-  // Best-effort bounded retention keeps expired room pointers out of the
-  // dashboard without making the page depend on cleanup availability.
-  try { await call("cleanupExpiredWatchRooms")({}); }
-  catch (error) { console.warn("Vivid Watch Rooms retention pass was skipped:", error); }
   // Read dashboard indexes through the same authenticated server API that
   // writes them. This avoids a split client/server permission path and ensures
   // Firestore timestamps are normalized before the browser renders the list.
@@ -226,6 +222,13 @@ async function loadDashboard(user) {
   }
   renderRoomPreviews();
   renderClubPreviews();
+  // Run bounded retention only after the dashboard is usable. The dashboard
+  // request has already obtained a standard cached App Check token, so this
+  // maintenance call does not require a separate attestation while that token
+  // remains valid. Never make the user wait for cleanup.
+  void call("cleanupExpiredWatchRooms")({}).catch(error => {
+    console.warn("Vivid Watch Rooms background retention pass was skipped:", error);
+  });
 }
 
 function showTab(name) {

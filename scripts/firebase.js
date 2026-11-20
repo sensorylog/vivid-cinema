@@ -77,7 +77,10 @@ if (!RECAPTCHA_ENTERPRISE_SITE_KEY) {
   try {
     appCheck = initializeAppCheck(app, {
       provider: new ReCaptchaEnterpriseProvider(RECAPTCHA_ENTERPRISE_SITE_KEY),
-      isTokenAutoRefreshEnabled: true
+      // Avoid background reCAPTCHA assessments on every site visit. Firebase
+      // services and Watch Rooms obtain cached tokens on demand; getToken()
+      // refreshes them when needed.
+      isTokenAutoRefreshEnabled: false
     });
   } catch (error) {
     appCheckError = error instanceof Error ? error : new Error(String(error));

@@ -7,8 +7,13 @@ const clients = await Promise.all([
   "watch-rooms.js", "watch-room-lobby.js", "watch-room-clubs.js", "watch-room-playback.js"
 ].map(name => readFile(new URL("../scripts/" + name, import.meta.url), "utf8")));
 
-test("Watch Rooms browser client sends Firebase Auth and standard App Check tokens", () => {
+test("Watch Rooms browser client sends Firebase Auth and standard App Check tokens", async () => {
   assert.ok(client.includes('getToken(appCheck, false)'));
+  const firebase = await readFile(new URL("../scripts/firebase.js", import.meta.url), "utf8");
+  assert.match(firebase, /isTokenAutoRefreshEnabled:\s*false/);
+  const dashboard = await readFile(new URL("../scripts/watch-rooms.js", import.meta.url), "utf8");
+  assert.ok(dashboard.includes('void call("cleanupExpiredWatchRooms")({})'), "retention remains scheduled as a non-blocking background task");
+  assert.ok(dashboard.indexOf('call("getWatchRoomDashboard")') < dashboard.indexOf('call("cleanupExpiredWatchRooms")'), "dashboard must load before maintenance starts");
   assert.doesNotMatch(client, /getLimitedUseToken/);
   assert.ok(client.includes('user.getIdToken()'));
   assert.ok(client.includes('"X-Firebase-AppCheck"'));

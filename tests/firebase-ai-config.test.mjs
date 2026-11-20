@@ -38,7 +38,7 @@ test("Cloudflare AI route verifies Firebase identity and uses the AI binding", (
   assert.match(apiSource, /FIREBASE_SERVICE_ACCOUNT_JSON/);
   assert.match(apiSource, /sign_in_provider === "anonymous"/);
   assert.match(apiSource, /env\.AI\.run/);
-  assert.match(apiSource, /messages: \[/);
+  assert.match(apiSource, /const messages = \[/);
   assert.match(apiSource, /role: "system"/);
   assert.match(apiSource, /prompt: systemPrompt/);
   assert.match(apiSource, /attempts\.push\(\{ input: "prompt"/);
