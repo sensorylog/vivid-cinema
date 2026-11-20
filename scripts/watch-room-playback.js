@@ -287,6 +287,7 @@ window.addEventListener("message", event => {
       pendingPlayer2Seek = 0;
       sendProviderCommand("seek", position);
     }
+    if ((role !== "host" && joinedPlayback) || (role === "host" && allowGuestPlaybackControl)) applyRemoteState(true);
     return;
   }
   if (type === "cinesrc:timeupdate" && status !== "playing") return;
