@@ -40,7 +40,7 @@ test("Watch Rooms are no longer exported from the Firebase Functions codebase", 
 test("Cloudflare Watch Rooms route preserves every trusted operation and signed App Check checks", async () => {
   const route = await readFile(new URL("../cloudflare/functions/api/watch-rooms.js", import.meta.url), "utf8");
   for (const operation of [
-    "createWatchRoom","createCinemaClub","createWatchInvitation","redeemWatchInvitation","revokeWatchInvitation","cleanupExpiredWatchRooms",
+    "createWatchRoom","deleteWatchRoom","createCinemaClub","createWatchInvitation","redeemWatchInvitation","revokeWatchInvitation","cleanupExpiredWatchRooms",
     "heartbeatWatchRoom","addWatchRoomQueueItem","removeWatchRoomQueueItem","voteWatchRoomQueueItem",
     "sendWatchRoomMessage","reactToWatchRoomMessage","updateWatchRoomSettings","removeWatchRoomMember",
     "leaveWatchRoom","closeWatchRoom","publishWatchRoomPlayback",
@@ -112,4 +112,24 @@ test("Watch Rooms dashboard is loaded through the authenticated server API", asy
   assert.match(dashboard, /timestampMillis/);
   assert.match(clientPage, /call\("getWatchRoomDashboard"\)/);
   assert.doesNotMatch(clientPage, /getDocs\(|collection\(db, "users"/);
+});
+
+
+test("Joining a room opens its lobby immediately after the dashboard refresh", async () => {
+  const dashboard = await readFile(new URL("../scripts/watch-rooms.js", import.meta.url), "utf8");
+  assert.ok(dashboard.includes('closeDialog(joinDialog)'));
+  assert.ok(dashboard.includes('new CustomEvent("vivid:watch-room-open"'));
+  assert.ok(dashboard.includes('dashboardState.rooms.find(item => item.roomId === result.data.targetId)'));
+});
+
+test("Only the host can permanently delete a room and all room data", async () => {
+  const route = await readFile(new URL("../cloudflare/functions/api/watch-rooms.js", import.meta.url), "utf8");
+  const start = route.indexOf("async function deleteWatchRoom(");
+  const end = route.indexOf("// The first synchronized adapter", start);
+  const implementation = route.slice(start, end);
+  assert.ok(start >= 0 && end > start);
+  assert.match(implementation, /room\.hostUid !== uid/);
+  assert.match(implementation, /member\.role !== "host"/);
+  assert.match(implementation, /collection\("watchRooms"\)/);
+  assert.match(implementation, /recursiveDelete\(roomRef\)/);
 });
