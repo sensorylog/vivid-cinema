@@ -1,0 +1,31 @@
+name: Watch Rooms Cloudflare API
+
+on:
+  pull_request:
+    paths:
+      - "cloudflare/**"
+      - "automation/build-cloudflare-functions.mjs"
+      - "automation/build-static-dist.mjs"
+      - "scripts/watch-room-api.js"
+      - "package.json"
+      - "tests/watch-room-api.test.mjs"
+      - "tests/cloudflare-pages-config.test.mjs"
+      - ".github/workflows/watch-rooms-cloudflare.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  cloudflare-pages-api:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run check:syntax
+      - run: node --test tests/watch-room-api.test.mjs tests/cloudflare-pages-config.test.mjs
+      - run: npm run build:web
