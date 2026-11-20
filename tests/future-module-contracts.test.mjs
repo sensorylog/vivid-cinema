@@ -574,3 +574,22 @@ test("Watch Room Step 5 persists host-selected player and server through both tr
     assert.ok(snapshot.includes('selectedProviderId: room.selectedProviderId || "vidapi"'));
   }
 });
+
+
+test("Watch Room Step 5 propagates the host-selected player and server to both player modules", () => {
+  const roomClient = readFileSync(new URL("../scripts/watch-room-playback.js", import.meta.url), "utf8");
+  const player1 = readFileSync(new URL("../scripts/watch.js", import.meta.url), "utf8");
+  const player2 = readFileSync(new URL("../scripts/playback/tflix-secondary-player.js", import.meta.url), "utf8");
+  assert.ok(roomClient.includes('call("setWatchRoomPlayerSelection")'));
+  assert.ok(roomClient.includes('call("getWatchRoomLobbySnapshot")'));
+  assert.ok(roomClient.includes('window.addEventListener("vivid:player-adapter-ready"'));
+  assert.ok(roomClient.includes('new CustomEvent("vivid:watch-room-apply-selection"'));
+  assert.ok(roomClient.includes("selectionTimer = window.setInterval"));
+  assert.ok(roomClient.includes("clearInterval(selectionTimer)"));
+  assert.ok(player1.includes('window.addEventListener("vivid:watch-room-apply-selection"'));
+  assert.ok(player1.includes("setPlayerSource(selection.providerId, currentParams, position)"));
+  assert.ok(player1.includes('new CustomEvent("vivid:player-adapter-ready"'));
+  assert.ok(player2.includes('window.addEventListener("vivid:watch-room-apply-selection"'));
+  assert.ok(player2.includes("loadServer(selection.providerId)"));
+  assert.ok(player2.includes('new CustomEvent("vivid:player-adapter-ready"'));
+});
