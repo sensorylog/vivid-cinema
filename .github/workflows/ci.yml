@@ -29,6 +29,9 @@ jobs:
       - name: Run scoped syntax checks
         run: npm run check:syntax
 
+      - name: Build Cloudflare Pages Functions bundle
+        run: npm run build:web
+
       - name: Validate JavaScript syntax
         shell: bash
         run: |

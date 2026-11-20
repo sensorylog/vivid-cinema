@@ -1,7 +1,7 @@
 import { auth, appCheck } from "./firebase.js";
 import { getLimitedUseToken } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app-check.js";
 
-const API_URL = "https://vivid-cinema-api.vercel.app/api/watch-rooms";
+const API_URL = "/api/watch-rooms";
 
 export function callWatchRoomApi(action) {
   return async (data = {}) => {
