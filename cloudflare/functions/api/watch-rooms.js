@@ -587,11 +587,18 @@ async function startWatchRoomScreening(request) {
     if (!/^\d{1,12}$/.test(contentId) || !["movie", "tv"].includes(item.mediaType)) {
       throw new HttpsError("failed-precondition", "This pick is missing a valid catalogue title. Remove it and add it again from search.");
     }
+    const season = item.mediaType === "tv" ? Number(request.data?.season ?? 1) : null;
+    const episode = item.mediaType === "tv" ? Number(request.data?.episode ?? 1) : null;
+    if (item.mediaType === "tv" && (!Number.isInteger(season) || season < 1 || season > 999 || !Number.isInteger(episode) || episode < 1 || episode > 9999)) {
+      throw new HttpsError("invalid-argument", "Choose a valid TV season and episode.");
+    }
     screening = {
       sessionId,
       queueItemId: itemId,
       contentId,
       mediaType: item.mediaType,
+      season,
+      episode,
       title: cleanText(item.title, "Screening title", 180),
       posterPath: item.posterPath || "",
       releaseDate: item.releaseDate || "",
