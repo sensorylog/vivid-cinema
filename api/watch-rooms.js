@@ -417,7 +417,7 @@ async function getWatchRoomLobbySnapshot(request) {
     return { id: document.id, ...data, createdAt: millis(data.createdAt) };
   });
   return {
-    room: { roomId, name: room.name || "Private screening", status: room.status, memberCount: members.length, selectedPlayerId: room.selectedPlayerId || "player1", selectedProviderId: room.selectedProviderId || "vidapi", selectionUpdatedAt: millis(room.selectionUpdatedAt), allowGuestQueue: room.allowGuestQueue !== false, allowGuestChat: room.allowGuestChat !== false, allowGuestVoting: room.allowGuestVoting !== false, allowGuestPlayerSelection: room.allowGuestPlayerSelection === true, allowGuestQueueManagement: room.allowGuestQueueManagement === true, allowGuestPlaybackControl: room.allowGuestPlaybackControl === true },
+    room: { roomId, name: room.name || "Private screening", status: room.status, memberCount: members.length, selectedPlayerId: room.selectedPlayerId || "player1", selectedProviderId: room.selectedProviderId || "vidapi", selectionUpdatedAt: millis(room.selectionUpdatedAt), activeScreening: room.activeScreening || null, allowGuestQueue: room.allowGuestQueue !== false, allowGuestChat: room.allowGuestChat !== false, allowGuestVoting: room.allowGuestVoting !== false, allowGuestPlayerSelection: room.allowGuestPlayerSelection === true, allowGuestQueueManagement: room.allowGuestQueueManagement === true, allowGuestPlaybackControl: room.allowGuestPlaybackControl === true },
     members, onlineCount: members.filter(member => member.isOnline).length, queue, chat,
     serverTime: now
   };
@@ -479,6 +479,53 @@ async function addWatchRoomQueueItem(request) {
     tx.update(roomRef, { queueCount: queueCount + 1, updatedAt: Timestamp.now() });
   });
   return { itemId: itemRef.id };
+}
+
+async function startWatchRoomScreening(request) {
+  const uid = requireUser(request);
+  const roomId = validId(request.data?.roomId, "room ID");
+  const itemId = validId(request.data?.itemId, "queue item ID");
+  const roomRef = db.collection("rooms").doc(roomId);
+  const itemRef = roomRef.collection("queue").doc(itemId);
+  const now = Timestamp.now();
+  const sessionId = randomBytes(16).toString("hex");
+  let screening;
+  await db.runTransaction(async tx => {
+    const { room, member } = await requireRoomMemberInTransaction(tx, roomId, uid);
+    if (room.hostUid !== uid || member.role !== "host") {
+      throw new HttpsError("permission-denied", "Only the room host can start a screening.");
+    }
+    if (room.status !== "open" || !room.expiresAt || room.expiresAt.toMillis() <= now.toMillis()) {
+      throw new HttpsError("failed-precondition", "This Watch Room is no longer active.");
+    }
+    const itemSnapshot = await tx.get(itemRef);
+    if (!itemSnapshot.exists || itemSnapshot.data().status !== "queued") {
+      throw new HttpsError("not-found", "That queue pick is no longer available.");
+    }
+    const item = itemSnapshot.data();
+    const contentId = String(item.contentId || "");
+    if (!/^\\d{1,12}$/.test(contentId) || !["movie", "tv"].includes(item.mediaType)) {
+      throw new HttpsError("failed-precondition", "This pick is missing a valid catalogue title. Remove it and add it again from search.");
+    }
+    screening = {
+      sessionId,
+      queueItemId: itemId,
+      contentId,
+      mediaType: item.mediaType,
+      title: cleanText(item.title, "Screening title", 180),
+      posterPath: item.posterPath || "",
+      releaseDate: item.releaseDate || "",
+      startedBy: uid,
+      startedAt: now
+    };
+    tx.update(itemRef, { status: "screening", screeningAt: now });
+    tx.update(roomRef, {
+      activeScreening: screening,
+      queueCount: Math.max(0, Number(room.queueCount || 0) - 1),
+      updatedAt: now
+    });
+  });
+  return { screening: { ...screening, startedAt: now.toMillis() } };
 }
 
 async function removeWatchRoomQueueItem(request) {
@@ -928,6 +975,7 @@ const operations = {
   getWatchRoomLobbySnapshot,
   getWatchRoomPlaybackSnapshot,
   addWatchRoomQueueItem,
+  startWatchRoomScreening,
   removeWatchRoomQueueItem,
   voteWatchRoomQueueItem,
   sendWatchRoomMessage,
@@ -954,7 +1002,7 @@ const ALLOWED_ORIGINS = new Set([
   "https://vivid-cinema.firebaseapp.com",
   ...(process.env.VIVID_ALLOWED_ORIGINS || "").split(",").map(value => value.trim()).filter(Boolean)
 ]);
-const ROUTES = new Set(["createWatchRoom","createCinemaClub","createWatchInvitation","redeemWatchInvitation","revokeWatchInvitation","cleanupExpiredWatchRooms","heartbeatWatchRoom","getWatchRoomLobbySnapshot","getWatchRoomPlaybackSnapshot","addWatchRoomQueueItem","removeWatchRoomQueueItem","voteWatchRoomQueueItem","sendWatchRoomMessage","reactToWatchRoomMessage","updateWatchRoomSettings","setWatchRoomPlayerSelection","removeWatchRoomMember","leaveWatchRoom","closeWatchRoom","publishWatchRoomPlayback","addCinemaClubWatchlistItem","removeCinemaClubWatchlistItem","recordCinemaClubScreening","addCinemaClubAfterCreditsReview","addCinemaClubDiscussionMessage","leaveCinemaClub","archiveCinemaClub"]);
+const ROUTES = new Set(["createWatchRoom","createCinemaClub","createWatchInvitation","redeemWatchInvitation","revokeWatchInvitation","cleanupExpiredWatchRooms","heartbeatWatchRoom","getWatchRoomLobbySnapshot","getWatchRoomPlaybackSnapshot","addWatchRoomQueueItem","startWatchRoomScreening","removeWatchRoomQueueItem","voteWatchRoomQueueItem","sendWatchRoomMessage","reactToWatchRoomMessage","updateWatchRoomSettings","setWatchRoomPlayerSelection","removeWatchRoomMember","leaveWatchRoom","closeWatchRoom","publishWatchRoomPlayback","addCinemaClubWatchlistItem","removeCinemaClubWatchlistItem","recordCinemaClubScreening","addCinemaClubAfterCreditsReview","addCinemaClubDiscussionMessage","leaveCinemaClub","archiveCinemaClub"]);
 
 function respond(res, status, payload) {
   res.status(status).setHeader("Cache-Control", "no-store");
