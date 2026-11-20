@@ -33,7 +33,6 @@ run(wrangler, [
   "--outfile", path.join(output, "_worker.js"),
   "--build-output-directory", output,
   "--project-directory", root,
-  "--config", path.join(root, "wrangler.toml"),
   "--compatibility-date", "2026-11-20",
   "--compatibility-flags", "nodejs_compat"
 ]);

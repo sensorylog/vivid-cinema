@@ -109,7 +109,7 @@ test("Cloudflare Pages bundles the Watch Rooms API from its isolated Functions d
   assert.ok(build.includes('"--outfile", path.join(output, "_worker.js")'));
   assert.ok(build.includes('"--build-output-directory", output'));
   assert.ok(build.includes('"--compatibility-flags", "nodejs_compat"'));
-  assert.ok(build.includes('"--config", path.join(root, "wrangler.toml")'));
+  assert.ok(!build.includes('"--config"'), "Wrangler Pages Functions build does not support --config");
   assert.equal(cloudflarePackage.dependencies["@ljoukov/firebase-admin-cloudflare"], "0.0.2");
   assert.ok(route.includes("verifyIdToken(match[1], true)"));
   assert.ok(route.includes("verifyToken(appCheckToken, { consume: true })"));
