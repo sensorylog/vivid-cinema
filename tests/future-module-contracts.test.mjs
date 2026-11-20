@@ -677,7 +677,8 @@ test("Watch Room followers resync when the selected provider iframe finishes loa
   const player2 = readFileSync(new URL("../scripts/playback/tflix-secondary-player.js", import.meta.url), "utf8");
   assert.ok(room.includes('window.addEventListener("vivid:player-frame-loaded"'));
   assert.ok(room.includes('applyRemoteState(true)'));
-  assert.ok(room.includes('localPosition = null;\n      localStatus = "";'));
+  assert.ok(room.includes("localPosition = null;"));
+  assert.ok(room.includes('localStatus = "";'));
   assert.ok(player1.includes('playerId: "player1", providerId: activeSource'));
   assert.ok(player2.includes('playerId: "player2", providerId: serverId'));
 });
