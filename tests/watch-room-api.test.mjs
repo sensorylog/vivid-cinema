@@ -155,7 +155,7 @@ test("Watch Room playback state is read through an authenticated member-only ser
 test("Watch Room playback client no longer reads Firestore directly and polls the authorized snapshot", async () => {
   const playback = await readFile(new URL("../scripts/watch-room-playback.js", import.meta.url), "utf8");
   assert.match(playback, /call\("getWatchRoomPlaybackSnapshot"\)/);
-  assert.match(playback, /setInterval\(refreshPlayback, 2500\)/);
+  assert.match(playback, /schedulePlaybackRefresh\(\)/);\n  assert.match(playback, /playbackPollDelayMs = Math\.min\(15000/);
   assert.match(playback, /playbackConnectionGeneration/);
   assert.doesNotMatch(playback, /onSnapshot|getDoc\(|from "\.\/firebase\.js";\s*\nimport \{ doc/);
 });
