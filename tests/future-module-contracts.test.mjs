@@ -464,7 +464,8 @@ test("Watch Rooms client sends Auth and standard App Check tokens to the trusted
   assert.ok(!api.includes('getLimitedUseToken(appCheck)'));
   assert.ok(api.includes('"X-Firebase-AppCheck": appCheckResult.token'));
   assert.ok(route.includes("verifyFirebaseIdToken(match[1], projectId, serviceAccount)"));
-  assert.ok(route.includes("verifyAndConsumeAppCheckToken(appCheckToken, serviceAccount)"));
+  assert.ok(route.includes("verifyAppCheckToken(appCheckToken)"));
+  assert.ok(!route.includes("verifyAndConsumeAppCheckToken"));
   assert.ok(!route.includes("firebase-admin/auth") && !route.includes("firebase-admin/app-check"));
   assert.ok(route.includes('throw new HttpsError("failed-precondition"'));
   assert.ok(!idToken.includes("Promise.all"));
