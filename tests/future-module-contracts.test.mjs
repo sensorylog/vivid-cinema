@@ -391,3 +391,11 @@ test("Watch Room lobby tears down and restores realtime listeners across BFCache
   assert.ok(client.includes('window.addEventListener("pageshow"'));
   assert.ok(client.includes("if (!event.persisted || !lastRoom"));
 });
+
+
+test("Watch Room host can manage offline members, not only active presence leases", () => {
+  const client = readFileSync(new URL("../scripts/watch-room-lobby.js", import.meta.url), "utf8");
+  assert.ok(client.includes('collection(db, "rooms", data.roomId, "members")'));
+  assert.ok(client.includes('"Vivid member · away"'));
+  assert.ok(client.includes('call("removeWatchRoomMember")'));
+});
