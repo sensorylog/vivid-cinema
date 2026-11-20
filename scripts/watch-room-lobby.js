@@ -249,12 +249,26 @@ function openLobby(data) {
   settings.elements.name.value = data.name || "";
   settings.elements.allowGuestQueue.checked = data.allowGuestQueue !== false;
   settings.elements.allowGuestChat.checked = data.allowGuestChat !== false;
+  settings.elements.allowGuestVoting.checked = data.allowGuestVoting !== false;
+  settings.elements.allowGuestPlayerSelection.checked = data.allowGuestPlayerSelection === true;
+  settings.elements.allowGuestQueueManagement.checked = data.allowGuestQueueManagement === true;
   const refreshLobby = async () => {
     if (!room || room.roomId !== data.roomId) return;
     try {
       const response = await call("getWatchRoomLobbySnapshot")({ roomId: data.roomId });
       if (!room || room.roomId !== data.roomId) return;
       const snapshot = response.data || {};
+      if (snapshot.room) {
+        room = { ...room, ...snapshot.room };
+        const currentSettings = byId("wr-room-settings-form");
+        if (room.role === "host" && currentSettings) {
+          currentSettings.elements.allowGuestQueue.checked = room.allowGuestQueue !== false;
+          currentSettings.elements.allowGuestChat.checked = room.allowGuestChat !== false;
+          currentSettings.elements.allowGuestVoting.checked = room.allowGuestVoting !== false;
+          currentSettings.elements.allowGuestPlayerSelection.checked = room.allowGuestPlayerSelection === true;
+          currentSettings.elements.allowGuestQueueManagement.checked = room.allowGuestQueueManagement === true;
+        }
+      }
       memberList = Array.isArray(snapshot.members) ? snapshot.members : [];
       renderPresence();
       renderQueue(Array.isArray(snapshot.queue) ? snapshot.queue : []);
@@ -406,7 +420,10 @@ byId("wr-room-settings-form")?.addEventListener("submit", async event => {
       settings: {
         name: form.elements.name.value.trim(),
         allowGuestQueue: form.elements.allowGuestQueue.checked,
-        allowGuestChat: form.elements.allowGuestChat.checked
+        allowGuestChat: form.elements.allowGuestChat.checked,
+        allowGuestVoting: form.elements.allowGuestVoting.checked,
+        allowGuestPlayerSelection: form.elements.allowGuestPlayerSelection.checked,
+        allowGuestQueueManagement: form.elements.allowGuestQueueManagement.checked
       }
     });
     byId("wr-lobby-title").textContent = form.elements.name.value.trim();
