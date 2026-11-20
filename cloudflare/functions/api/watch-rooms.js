@@ -999,7 +999,20 @@ export async function onRequest({request,env}) {
     return response(200,{ok:true,data:result??null},origin);
   } catch(error) {
     const rawCode=error?.code||"internal";
-    const code=rawCode.startsWith("app-check/") || rawCode.startsWith("appCheck/") ? "failed-precondition" : rawCode;
+    // Firestore's Google API can also return permission-denied when the
+    // Cloudflare service account lacks database IAM access. That is a server
+    // configuration failure, not a denial of the signed-in user's room role.
+    const firestoreIamDenied = !(error instanceof HttpsError) && rawCode === "permission-denied";
+    if (firestoreIamDenied) {
+      console.error("Watch Rooms Firestore IAM permission denied during operation:", {
+        action: body?.action || "unknown",
+        code: rawCode,
+        message: error?.message || String(error),
+        projectId
+      });
+    }
+    const code=firestoreIamDenied ? "internal" :
+      rawCode.startsWith("app-check/") || rawCode.startsWith("appCheck/") ? "failed-precondition" : rawCode;
     const status=({
       unauthenticated:401,"permission-denied":403,"not-found":404,
       "auth/id-token-expired":401,"auth/id-token-revoked":401,"auth/invalid-id-token":401,"auth/argument-error":401,
