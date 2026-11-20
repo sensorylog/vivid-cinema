@@ -93,7 +93,7 @@ async function createWatchRoom(request) {
     });
   });
   return { roomId: roomRef.id, expiresAt: expiresAt.toMillis() };
-});
+}
 
 async function createCinemaClub(request) {
   const auth = requireVividUser(request);
@@ -118,7 +118,7 @@ async function createCinemaClub(request) {
     });
   });
   return { clubId: clubRef.id };
-});
+}
 
 async function createWatchInvitation(request) {
   const auth = requireVividUser(request);
@@ -156,7 +156,7 @@ async function createWatchInvitation(request) {
     });
   });
   return { inviteCode: code, expiresAt: expiresAt.toMillis() };
-});
+}
 
 async function redeemWatchInvitation(request) {
   const auth = requireVividUser(request);
@@ -228,7 +228,7 @@ async function redeemWatchInvitation(request) {
     transaction.update(invitationRef, { useCount: invitation.useCount + 1, lastUsedAt: now });
     return { targetType: invitation.targetType, targetId: invitation.targetId, alreadyMember: false };
   });
-});
+}
 
 async function revokeWatchInvitation(request) {
   const auth = requireVividUser(request);
@@ -280,7 +280,7 @@ async function heartbeatWatchRoom(request) {
     }, { merge: true });
   });
   return { expiresAt: now + PRESENCE_TTL_MS, serverTime: Date.now() };
-});
+}
 
 async function addWatchRoomQueueItem(request) {
   const uid = requireUser(request);
@@ -303,7 +303,7 @@ async function addWatchRoomQueueItem(request) {
     tx.update(roomRef, { queueCount: queueCount + 1, updatedAt: Timestamp.now() });
   });
   return { itemId: itemRef.id };
-});
+}
 
 
 async function removeWatchRoomQueueItem(request) {
@@ -321,7 +321,7 @@ async function removeWatchRoomQueueItem(request) {
     tx.update(roomRef, { queueCount: Math.max(0, Number(room.queueCount || 0) - 1), updatedAt: Timestamp.now() });
   });
   return { removed: true };
-});
+}
 
 async function voteWatchRoomQueueItem(request) {
   const uid = requireUser(request);
@@ -338,7 +338,7 @@ async function voteWatchRoomQueueItem(request) {
     tx.update(itemRef, { votes: next, voteCount: next.length, updatedAt: Timestamp.now() });
   });
   return { updated: true };
-});
+}
 
 async function sendWatchRoomMessage(request) {
   const uid = requireUser(request);
@@ -360,7 +360,7 @@ async function sendWatchRoomMessage(request) {
     tx.create(messageRef, { uid, text, createdAt: Timestamp.now(), reactions: {} });
   });
   return { messageId: messageRef.id };
-});
+}
 
 async function reactToWatchRoomMessage(request) {
   const uid = requireUser(request);
@@ -380,7 +380,7 @@ async function reactToWatchRoomMessage(request) {
     tx.update(messageRef, { ["reactions." + reaction]: nextUsers });
   });
   return { updated: true };
-});
+}
 
 async function updateWatchRoomSettings(request) {
   const uid = requireUser(request);
@@ -410,7 +410,7 @@ async function updateWatchRoomSettings(request) {
     });
   });
   return { updated: true };
-});
+}
 
 async function removeWatchRoomMember(request) {
   const uid = requireUser(request);
@@ -438,7 +438,7 @@ async function removeWatchRoomMember(request) {
     });
   });
   return { removed: true };
-});
+}
 
 
 
@@ -465,7 +465,7 @@ async function leaveWatchRoom(request) {
     });
   });
   return { left: true };
-});
+}
 
 async function closeWatchRoom(request) {
   const uid = requireUser(request);
@@ -542,7 +542,7 @@ async function addCinemaClubWatchlistItem(request) {
     tx.update(clubRef, { watchlistCount: Number(club.data().watchlistCount || 0) + 1, updatedAt: Timestamp.now() });
   });
   return { added: true, itemId: itemRef.id };
-});
+}
 
 async function removeCinemaClubWatchlistItem(request) {
   const uid = requireUser(request);
@@ -559,7 +559,7 @@ async function removeCinemaClubWatchlistItem(request) {
     }
   });
   return { removed: true };
-});
+}
 
 async function recordCinemaClubScreening(request) {
   const uid = requireUser(request);
@@ -582,7 +582,7 @@ async function recordCinemaClubScreening(request) {
     });
   });
   return { screeningId: screeningRef.id };
-});
+}
 
 async function addCinemaClubAfterCreditsReview(request) {
   const uid = requireUser(request);
@@ -607,7 +607,7 @@ async function addCinemaClubAfterCreditsReview(request) {
     tx.update(screeningRef, { reviewCount: nextCount, ratingTotal: total, averageRating: Number((total / nextCount).toFixed(2)) });
   });
   return { saved: true };
-});
+}
 
 async function addCinemaClubDiscussionMessage(request) {
   const uid = requireUser(request);
@@ -626,7 +626,7 @@ async function addCinemaClubDiscussionMessage(request) {
     tx.update(screeningRef, { discussionCount: Number(screening.data().discussionCount || 0) + 1 });
   });
   return { messageId: messageRef.id };
-});
+}
 
 async function leaveCinemaClub(request) {
   const uid = requireUser(request);
@@ -654,7 +654,7 @@ async function leaveCinemaClub(request) {
     });
   });
   return { left: true };
-});
+}
 
 async function archiveCinemaClub(request) {
   const uid = requireUser(request);
