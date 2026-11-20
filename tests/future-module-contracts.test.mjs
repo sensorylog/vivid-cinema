@@ -346,3 +346,13 @@ test("Cinema Club members can leave and owners can archive with server-owned mem
   assert.ok(index.includes("  leaveCinemaClub,") && index.includes("  archiveCinemaClub"));
   assert.ok(client.includes('call(archive ? "archiveCinemaClub" : "leaveCinemaClub")'));
 });
+
+
+test("Host removal deletes membership, presence and dashboard pointer atomically", () => {
+  const lobby = readFileSync(new URL("../functions/watch-rooms-lobby.js", import.meta.url), "utf8");
+  const remove = lobby.slice(lobby.indexOf("export const removeWatchRoomMember"), lobby.indexOf("export const leaveWatchRoom"));
+  assert.ok(remove.includes("tx.delete(targetRef)"));
+  assert.ok(remove.includes("tx.delete(roomRef.collection(\"presence\").doc(memberUid))"));
+  assert.ok(remove.includes("tx.delete(pointerRef)"));
+  assert.doesNotMatch(remove, /\.delete\(\)\.catch\(\(\) => \{\}\)/);
+});
