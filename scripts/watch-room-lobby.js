@@ -252,6 +252,7 @@ function openLobby(data) {
   settings.elements.allowGuestVoting.checked = data.allowGuestVoting !== false;
   settings.elements.allowGuestPlayerSelection.checked = data.allowGuestPlayerSelection === true;
   settings.elements.allowGuestQueueManagement.checked = data.allowGuestQueueManagement === true;
+  settings.elements.allowGuestPlaybackControl.checked = data.allowGuestPlaybackControl === true;
   const refreshLobby = async () => {
     if (!room || room.roomId !== data.roomId) return;
     try {
@@ -267,6 +268,7 @@ function openLobby(data) {
           currentSettings.elements.allowGuestVoting.checked = room.allowGuestVoting !== false;
           currentSettings.elements.allowGuestPlayerSelection.checked = room.allowGuestPlayerSelection === true;
           currentSettings.elements.allowGuestQueueManagement.checked = room.allowGuestQueueManagement === true;
+          currentSettings.elements.allowGuestPlaybackControl.checked = room.allowGuestPlaybackControl === true;
         }
       }
       memberList = Array.isArray(snapshot.members) ? snapshot.members : [];
@@ -423,7 +425,8 @@ byId("wr-room-settings-form")?.addEventListener("submit", async event => {
         allowGuestChat: form.elements.allowGuestChat.checked,
         allowGuestVoting: form.elements.allowGuestVoting.checked,
         allowGuestPlayerSelection: form.elements.allowGuestPlayerSelection.checked,
-        allowGuestQueueManagement: form.elements.allowGuestQueueManagement.checked
+        allowGuestQueueManagement: form.elements.allowGuestQueueManagement.checked,
+        allowGuestPlaybackControl: form.elements.allowGuestPlaybackControl.checked
       }
     });
     byId("wr-lobby-title").textContent = form.elements.name.value.trim();
