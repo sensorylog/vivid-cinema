@@ -1,14 +1,18 @@
 import { createHash, randomBytes } from "node:crypto";
-import { getApps, initializeApp } from "firebase-admin/app";
+import { cert, getApps, initializeApp } from "firebase-admin/app";
 import { getAuth } from "firebase-admin/auth";
 import { getAppCheck } from "firebase-admin/app-check";
 import { getFirestore, Timestamp, FieldValue } from "firebase-admin/firestore";
 
+const serviceAccountRaw = process.env.FIREBASE_SERVICE_ACCOUNT_JSON;
+if (!serviceAccountRaw) throw new Error("FIREBASE_SERVICE_ACCOUNT_JSON is not configured for the Vivid API.");
+const serviceAccount = JSON.parse(serviceAccountRaw);
+if (!serviceAccount.project_id || !serviceAccount.client_email || !serviceAccount.private_key) {
+  throw new Error("FIREBASE_SERVICE_ACCOUNT_JSON is incomplete.");
+}
 const firebaseApp = getApps()[0] || initializeApp({
-  projectId: process.env.FIREBASE_PROJECT_ID || "vivid-cinema",
-  credential: process.env.FIREBASE_SERVICE_ACCOUNT_JSON
-    ? (await import("firebase-admin/app")).cert(JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_JSON))
-    : undefined
+  credential: cert(serviceAccount),
+  projectId: process.env.FIREBASE_PROJECT_ID || serviceAccount.project_id
 });
 const db = getFirestore(firebaseApp);
 
@@ -732,13 +736,16 @@ async function authenticate(req) {
   if (!appCheckToken) throw new HttpsError("failed-precondition", "App Check verification is required.");
   const [token, appCheck] = await Promise.all([
     getAuth(firebaseApp).verifyIdToken(match[1], true),
-    getAppCheck(firebaseApp).verifyToken(appCheckToken)
+    getAppCheck(firebaseApp).verifyToken(appCheckToken, { consume: true })
   ]);
+  if (appCheck.alreadyConsumed) throw new HttpsError("unauthenticated", "Refresh your app verification and try again.");
   if (!token.uid || token.firebase?.sign_in_provider === "anonymous") {
     throw new HttpsError("unauthenticated", "Sign in with a Vivid account to use Watch Rooms.");
   }
   return { uid: token.uid, token };
 }
+
+export const config = { maxDuration: 30 };
 
 export default async function handler(req, res) {
   res.setHeader("Cache-Control", "no-store");
