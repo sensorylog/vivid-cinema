@@ -280,7 +280,7 @@ test("Watch Room and invitation expiry are enforced by trusted API operations", 
   assert.ok(api.includes("invitation.expiresAt.toMillis() <= now.toMillis()"));
   assert.ok(api.includes("target.expiresAt.toMillis() > now.toMillis()"));
   assert.ok(api.includes("expiresAt: closedAt"), "closed rooms should become immediately ineligible for further mutations");
-  assert.doesNotMatch(api, /firebase-functions|onSchedule\\(/);
+  assert.doesNotMatch(api, /firebase-functions|onSchedule\(/);
 });
 
 
