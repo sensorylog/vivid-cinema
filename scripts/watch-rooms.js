@@ -127,6 +127,26 @@ function renderRoomPreviews() {
     if (room.role === "host" && isOpen) {
       card.append(makeInviteButton("room", room.roomId, "Create invite code"));
     }
+    if (room.role === "host") {
+      const deleteButton = document.createElement("button");
+      deleteButton.type = "button";
+      deleteButton.className = "vivid-wr-button vivid-wr-button--danger";
+      deleteButton.textContent = "Delete room";
+      deleteButton.addEventListener("click", async () => {
+        if (!window.confirm("Permanently delete “" + (room.name || "this room") + "”? This removes its chat, queue, playback and room history for everyone. This cannot be undone.")) return;
+        deleteButton.disabled = true;
+        try {
+          await call("deleteWatchRoom")({ roomId: room.roomId });
+          dashboardState.rooms = dashboardState.rooms.filter(item => item.roomId !== room.roomId);
+          renderRoomPreviews();
+          setFeedback("wr-stage-note", "Room deleted.");
+        } catch (error) {
+          setFeedback("wr-stage-note", errorText(error, "Couldn't delete this room. Please try again."), true);
+          deleteButton.disabled = false;
+        }
+      });
+      card.append(deleteButton);
+    }
     list.append(card);
   }
 }
@@ -328,9 +348,19 @@ byId("wr-join-room-form")?.addEventListener("submit", async event => {
   try {
     const result = await call("redeemWatchInvitation")({ inviteCode: code });
     await loadDashboard(auth.currentUser);
-    showTab(result.data.targetType === "club" ? "clubs" : "rooms");
-    setFeedback("wr-join-feedback", result.data.alreadyMember ? "You're already a member of that space." : "You've joined successfully.");
+    closeDialog(joinDialog);
     input.value = "";
+    if (result.data.targetType === "room") {
+      const joinedRoom = dashboardState.rooms.find(item => item.roomId === result.data.targetId);
+      if (!joinedRoom) throw new Error("You joined the room, but it hasn't appeared in your room list yet. Refresh your rooms to open it.");
+      showTab("rooms");
+      document.dispatchEvent(new CustomEvent("vivid:watch-room-open", { detail: joinedRoom }));
+    } else {
+      showTab("clubs");
+      dashboardState.selectedClubId = result.data.targetId;
+      renderClubPreviews();
+      byId("wr-panel-clubs")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
   } catch (error) {
     setFeedback("wr-join-feedback", errorText(error, "Couldn't redeem that invitation."), true);
   } finally {

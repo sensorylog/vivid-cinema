@@ -676,6 +676,28 @@ async function closeWatchRoom(request) {
   return { closed: true };
 }
 
+async function deleteWatchRoom(request) {
+  const uid = requireUser(request);
+  const roomId = validId(request.data?.roomId, "room ID");
+  const roomRef = db.collection("rooms").doc(roomId);
+  await db.runTransaction(async tx => {
+    const { room, member } = await requireRoomMemberInTransaction(tx, roomId, uid);
+    if (room.hostUid !== uid || member.role !== "host") {
+      throw new HttpsError("permission-denied", "Only the room host can permanently delete this room.");
+    }
+    const members = await tx.get(roomRef.collection("members"));
+    const deletedAt = Timestamp.now();
+    tx.update(roomRef, { status: "deleted", deletedAt, closedAt: deletedAt, expiresAt: deletedAt, updatedAt: deletedAt });
+    members.docs.forEach(document => {
+      tx.delete(db.collection("users").doc(document.id).collection("watchRooms").doc(roomId));
+    });
+  });
+  // Delete the complete room tree (members, presence, chat, queue and playback)
+  // only after the authoritative transaction has removed every dashboard pointer.
+  await recursiveDelete(roomRef);
+  return { deleted: true };
+}
+
 
 // The first synchronized adapter is limited to VidSrc's documented PLAYER_EVENT and parent-command protocol on vidsrc.sh.
 async function publishWatchRoomPlayback(request) {
@@ -918,6 +940,7 @@ const operations = {
   removeWatchRoomMember,
   leaveWatchRoom,
   closeWatchRoom,
+  deleteWatchRoom,
   publishWatchRoomPlayback,
   addCinemaClubWatchlistItem,
   removeCinemaClubWatchlistItem,
@@ -932,7 +955,7 @@ const ROUTES = new Set([
   "createWatchRoom","getWatchRoomDashboard","createCinemaClub","createWatchInvitation","redeemWatchInvitation","revokeWatchInvitation",
   "cleanupExpiredWatchRooms","heartbeatWatchRoom","addWatchRoomQueueItem","removeWatchRoomQueueItem","voteWatchRoomQueueItem",
   "sendWatchRoomMessage","reactToWatchRoomMessage","updateWatchRoomSettings","removeWatchRoomMember","leaveWatchRoom",
-  "closeWatchRoom","publishWatchRoomPlayback","addCinemaClubWatchlistItem","removeCinemaClubWatchlistItem",
+  "closeWatchRoom","deleteWatchRoom","publishWatchRoomPlayback","addCinemaClubWatchlistItem","removeCinemaClubWatchlistItem",
   "recordCinemaClubScreening","addCinemaClubAfterCreditsReview","addCinemaClubDiscussionMessage","leaveCinemaClub","archiveCinemaClub"
 ]);
 

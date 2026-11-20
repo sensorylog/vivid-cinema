@@ -1,6 +1,7 @@
 import { auth, db } from "./firebase.js";
 import { collection, limit, onSnapshot, orderBy, query } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 import { callWatchRoomApi } from "./watch-room-api.js";
+import { tmdbApi } from "./tmdb.js";
 
 const byId = id => document.getElementById(id);
 const call = callWatchRoomApi;
@@ -8,6 +9,75 @@ let activeClub = null;
 let lastClub = null;
 let activeScreeningId = null;
 let stops = [];
+let screeningSearchTimer = null;
+let screeningSearchGeneration = 0;
+const screeningSearchInput = byId("wr-screening-title-search");
+const screeningSearchResults = byId("wr-screening-title-results");
+const screeningContentId = byId("wr-screening-content-id");
+
+function renderScreeningSearchResults(items) {
+  if (!screeningSearchResults) return;
+  screeningSearchResults.replaceChildren();
+  screeningSearchResults.hidden = items.length === 0;
+  items.forEach(item => {
+    const button = node("button", undefined, "vivid-wr-title-result");
+    button.type = "button";
+    const poster = document.createElement("img");
+    poster.alt = "";
+    poster.loading = "lazy";
+    poster.src = item.poster_path ? "https://image.tmdb.org/t/p/w92" + item.poster_path : "";
+    poster.hidden = !item.poster_path;
+    const copy = node("span", undefined, "vivid-wr-title-result-copy");
+    copy.append(node("strong", item.title));
+    copy.append(node("small", item.mediaType.toUpperCase() + (item.year ? " · " + item.year : "")));
+    button.append(poster, copy);
+    button.addEventListener("click", () => {
+      screeningSearchInput.value = item.title;
+      screeningContentId.value = item.mediaType + ":" + item.id;
+      renderScreeningSearchResults([]);
+      screeningSearchInput.setCustomValidity("");
+      screeningSearchInput.setAttribute("aria-expanded", "false");
+    });
+    screeningSearchResults.append(button);
+  });
+  screeningSearchInput?.setAttribute("aria-expanded", String(items.length > 0));
+}
+
+screeningSearchInput?.addEventListener("input", () => {
+  clearTimeout(screeningSearchTimer);
+  screeningContentId.value = "";
+  screeningSearchInput.setCustomValidity("");
+  const queryText = screeningSearchInput.value.trim();
+  const generation = ++screeningSearchGeneration;
+  if (queryText.length < 2) {
+    renderScreeningSearchResults([]);
+    return;
+  }
+  screeningSearchTimer = setTimeout(async () => {
+    try {
+      const [movies, shows] = await Promise.all([
+        tmdbApi.searchMovies(queryText),
+        tmdbApi.searchTv(queryText)
+      ]);
+      if (generation !== screeningSearchGeneration) return;
+      const results = [
+        ...(movies.results || []).map(item => ({ ...item, mediaType: "movie", title: item.title || item.original_title, year: (item.release_date || "").slice(0, 4) })),
+        ...(shows.results || []).map(item => ({ ...item, mediaType: "tv", title: item.name || item.original_name, year: (item.first_air_date || "").slice(0, 4) }))
+      ].filter(item => item.id && item.title).sort((a, b) => Number(b.popularity || 0) - Number(a.popularity || 0)).slice(0, 8);
+      renderScreeningSearchResults(results);
+    } catch {
+      if (generation === screeningSearchGeneration) {
+        renderScreeningSearchResults([]);
+        feedback("Couldn't search the catalogue right now. Check your connection and try again.", true);
+      }
+    }
+  }, 280);
+});
+document.addEventListener("click", event => {
+  if (!event.target.closest("#wr-club-screening-form")) renderScreeningSearchResults([]);
+});
+
+
 
 function stopListeners() { stops.forEach(stop => stop()); stops = []; activeScreeningId = null; }
 function setClubFormsEnabled(enabled) {
@@ -132,6 +202,12 @@ byId("wr-club-screening-form")?.addEventListener("submit", async event => {
   if (!activeClub) return;
   const form = event.currentTarget;
   const contentId = form.elements.contentId.value.trim();
+  if (!contentId) {
+    screeningSearchInput?.setCustomValidity("Choose a movie or TV series from the search results.");
+    screeningSearchInput?.reportValidity();
+    screeningSearchInput?.focus();
+    return;
+  }
   const button = form.querySelector('[type="submit"]');
   button.disabled = true;
   try {

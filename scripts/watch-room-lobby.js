@@ -68,6 +68,21 @@ byId("wr-lobby-close")?.addEventListener("click", () => { lastRoom = null; stop(
 byId("wr-queue-form")?.addEventListener("submit", async e => { e.preventDefault(); if (!room) return; const input=e.currentTarget.elements.title; try { await call("addWatchRoomQueueItem")({roomId:room.roomId,title:input.value.trim(),mediaType:"movie"}); input.value=""; } catch(err) { showError(err); } });
 byId("wr-chat-form")?.addEventListener("submit", async e => { e.preventDefault(); if (!room) return; const input=e.currentTarget.elements.text; try { await call("sendWatchRoomMessage")({roomId:room.roomId,text:input.value.trim()}); input.value=""; } catch(err) { showError(err); } });
 byId("wr-close-room")?.addEventListener("click", async () => { if (!room || room.role !== "host" || !window.confirm("End this Watch Room for everyone?")) return; try { await call("closeWatchRoom")({ roomId: room.roomId }); lastRoom = null; stop(); byId("wr-room-lobby").hidden = true; window.location.reload(); } catch (error) { showError(error); } });
+byId("wr-delete-room")?.addEventListener("click", async () => {
+  if (!room || room.role !== "host" || !window.confirm("Permanently delete this room and all its chat, queue, playback and history for everyone? This cannot be undone.")) return;
+  const button = byId("wr-delete-room");
+  button.disabled = true;
+  try {
+    await call("deleteWatchRoom")({ roomId: room.roomId });
+    lastRoom = null;
+    stop();
+    byId("wr-room-lobby").hidden = true;
+    window.location.reload();
+  } catch (error) {
+    showError(error);
+    button.disabled = false;
+  }
+});
 byId("wr-room-settings-form")?.addEventListener("submit", async e => { e.preventDefault(); if (!room || room.role!=="host") return; const f=e.currentTarget; try { await call("updateWatchRoomSettings")({roomId:room.roomId,settings:{name:f.elements.name.value.trim(),allowGuestQueue:f.elements.allowGuestQueue.checked,allowGuestChat:f.elements.allowGuestChat.checked}}); byId("wr-lobby-title").textContent=f.elements.name.value.trim(); } catch(err) { showError(err); } });
 window.addEventListener("pagehide", () => {
   if (room) lastRoom = room;
