@@ -130,3 +130,66 @@ export async function verifyAppCheckToken(token) {
   // them locally; do not call the limited-use token consumption endpoint.
   return claims;
 }
+
+
+// Mirrors Firebase Admin SDK AppCheckTokenGenerator + exchangeToken. The
+// service-account private key signs the short-lived custom token locally;
+// Google exchanges it for a real Firebase App Check token. This avoids
+// Firebase Cloud Functions and does not use reCAPTCHA Enterprise assessments.
+export async function createFirebaseAppCheckToken(appId, projectId, serviceAccount, ttlMillis = 60 * 60 * 1000) {
+  if (typeof appId !== "string" || !appId || typeof projectId !== "string" || !projectId) {
+    throw new Error("Firebase App Check app/project configuration is missing.");
+  }
+  if (!Number.isFinite(ttlMillis) || ttlMillis < 30 * 60 * 1000 || ttlMillis > 7 * 24 * 60 * 60 * 1000) {
+    throw new Error("Firebase App Check token lifetime is outside the supported range.");
+  }
+  if (!serviceAccount?.client_email || !serviceAccount?.private_key) {
+    throw new Error("Firebase service-account signing credentials are incomplete.");
+  }
+
+  const now = Math.floor(Date.now() / 1000);
+  const customTokenHeader = base64Url(JSON.stringify({ alg: "RS256", typ: "JWT" }));
+  const customTokenClaims = base64Url(JSON.stringify({
+    iss: serviceAccount.client_email,
+    sub: serviceAccount.client_email,
+    app_id: appId,
+    aud: "https://firebaseappcheck.googleapis.com/google.firebase.appcheck.v1.TokenExchangeService",
+    exp: now + 300,
+    iat: now,
+    ttl: (ttlMillis / 1000) + "s"
+  }));
+  const unsigned = customTokenHeader + "." + customTokenClaims;
+  const privateKey = await crypto.subtle.importKey(
+    "pkcs8",
+    pemBytes(serviceAccount.private_key),
+    { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" },
+    false,
+    ["sign"]
+  );
+  const signature = await crypto.subtle.sign("RSASSA-PKCS1-v1_5", privateKey, encoder.encode(unsigned));
+  const customToken = unsigned + "." + base64Url(signature);
+  const accessToken = await serviceAccountAccessToken(serviceAccount);
+  const url = "https://firebaseappcheck.googleapis.com/v1/projects/" +
+    encodeURIComponent(projectId) + "/apps/" + encodeURIComponent(appId) + ":exchangeCustomToken";
+  const response = await fetch(url, {
+    method: "POST",
+    headers: {
+      Authorization: "Bearer " + accessToken,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ customToken })
+  });
+  const result = await response.json().catch(() => ({}));
+  if (!response.ok || typeof result.token !== "string" || !result.token) {
+    const error = new Error("Firebase App Check token exchange failed (" + response.status + ").");
+    error.code = "app-check/token-exchange-failed";
+    throw error;
+  }
+  const returnedTtl = typeof result.ttl === "string" && result.ttl.endsWith("s")
+    ? Number(result.ttl.slice(0, -1)) * 1000
+    : ttlMillis;
+  if (!Number.isFinite(returnedTtl) || returnedTtl < 30 * 60 * 1000) {
+    throw new Error("Firebase returned an invalid App Check token lifetime.");
+  }
+  return { token: result.token, ttlMillis: returnedTtl };
+}
