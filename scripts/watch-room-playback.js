@@ -82,9 +82,13 @@ function applyRoomPlayerSelection(room) {
     : "Shared room selection: " + (playerId === "player1" ? "Player 1" : "Player 2") + " · " + providerId + ".";
   const key = playerId + ":" + providerId;
   if (key !== lastAppliedSelectionKey) {
-    if (activePlayerId !== playerId || activeProviderId !== providerId) sendProviderCommand("pause");
-    lastAppliedSelectionKey = key;
     const position = Math.max(0, Number(localPosition ?? latestRemoteState?.position ?? lastHostPayload?.position) || 0);
+    if (activePlayerId !== playerId || activeProviderId !== providerId) {
+      sendProviderCommand("pause");
+      localPosition = null;
+      localStatus = "";
+    }
+    lastAppliedSelectionKey = key;
     if (playerId === "player2" && providerId === "cinesrc") pendingPlayer2Seek = position;
     window.dispatchEvent(new CustomEvent("vivid:watch-room-apply-selection", {
       detail: { playerId, providerId, position }
