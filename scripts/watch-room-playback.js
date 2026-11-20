@@ -307,6 +307,12 @@ window.addEventListener("message", event => {
 });
 
 
+window.addEventListener("vivid:player-frame-loaded", event => {
+  const detail = event.detail || {};
+  if (detail.playerId !== activePlayerId || detail.providerId !== activeProviderId || !latestRemoteState) return;
+  if ((role !== "host" && joinedPlayback) || (role === "host" && allowGuestPlaybackControl)) applyRemoteState(true);
+});
+
 window.addEventListener("vivid:watch-room-selection-error", event => {
   const detail = event.detail || {};
   setNote("The selected " + String(detail.providerId || "server") + " is blocked or unavailable for this title on this device. Choose another server.");
