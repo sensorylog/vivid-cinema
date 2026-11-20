@@ -590,7 +590,7 @@ test("Watch Room Step 5 propagates the host-selected player and server to both p
   assert.ok(player1.includes("setPlayerSource(selection.providerId, currentParams, position)"));
   assert.ok(player1.includes('new CustomEvent("vivid:player-adapter-ready"'));
   assert.ok(player2.includes('window.addEventListener("vivid:watch-room-apply-selection"'));
-  assert.ok(player2.includes("loadServer(selection.providerId)"));
+  assert.ok(player2.includes("loadServer(selection.providerId, selection.position)"));
   assert.ok(player2.includes('new CustomEvent("vivid:player-adapter-ready"'));
 });
 
@@ -624,4 +624,18 @@ test("Watch Room Step 6 enforces granular guest permissions in both trusted APIs
   }
   assert.ok(lobby.includes("currentSettings.elements.allowGuestPlayerSelection"));
   assert.ok(lobby.includes("currentSettings.elements.allowGuestPlaybackControl"));
+});
+
+
+test("Delegated playback control is opt-in and preserves the host as room owner", () => {
+  const node = readFileSync(new URL("../api/watch-rooms.js", import.meta.url), "utf8");
+  const cloudflare = readFileSync(new URL("../cloudflare/functions/api/watch-rooms.js", import.meta.url), "utf8");
+  const client = readFileSync(new URL("../scripts/watch-room-playback.js", import.meta.url), "utf8");
+  for (const backend of [node, cloudflare]) {
+    assert.ok(backend.includes('memberData.role === "guest" && roomData.allowGuestPlaybackControl === true'));
+    assert.ok(backend.includes('hostUid: roomData.hostUid, controllerUid: uid'));
+  }
+  assert.ok(client.includes('role === "host" && allowGuestPlaybackControl && controllerUid && controllerUid !== currentUid'));
+  assert.ok(client.includes('Date.now() < suppressPlaybackPublishUntil'));
+  assert.ok(client.includes('controllerUid === currentUid'));
 });
