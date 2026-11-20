@@ -863,7 +863,14 @@ function respond(res, status, payload) {
 function cors(req, res) {
   const origin = req.headers.origin;
   if (!origin) return true;
-  if (!ALLOWED_ORIGINS.has(origin)) return false;
+  let allowed = ALLOWED_ORIGINS.has(origin);
+  if (!allowed) {
+    try {
+      const parsed = new URL(origin);
+      allowed = parsed.protocol === "https:" && parsed.hostname.endsWith(".vivid-cinema.pages.dev");
+    } catch {}
+  }
+  if (!allowed) return false;
   res.setHeader("Access-Control-Allow-Origin", origin);
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Authorization, Content-Type, X-Firebase-AppCheck");
