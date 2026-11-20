@@ -106,7 +106,8 @@ test("Cloudflare Pages bundles the Watch Rooms API from its isolated Functions d
   const cloudflarePackage = JSON.parse(await readFile(new URL("../cloudflare/package.json", import.meta.url), "utf8"));
   assert.ok(build.includes("pages"));
   assert.ok(build.includes("functions"));
-  assert.ok(build.includes("--outdir"));
+  assert.ok(build.includes('"--outfile", path.join(output, "_worker.js")'));
+  assert.ok(build.includes('"--build-output-directory", output'));
   assert.ok(build.includes('"--compatibility-flags", "nodejs_compat"'));
   assert.ok(build.includes('"--config", path.join(root, "wrangler.toml")'));
   assert.equal(cloudflarePackage.dependencies["@ljoukov/firebase-admin-cloudflare"], "0.0.2");
