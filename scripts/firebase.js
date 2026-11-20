@@ -59,8 +59,9 @@ async function loadFirebaseConfig() {
 const firebaseConfig = await loadFirebaseConfig();
 const app = initializeApp(firebaseConfig);
 
-// App Check must initialize before services that use it. The site key is public;
-// Gemini authorization remains behind the Firebase AI Logic proxy.
+// App Check initializes before Firebase services that use it. This public site
+// key protects those Firebase services; Vivid AI uses its own authenticated
+// Cloudflare Pages endpoint and does not request App Check tokens.
 let appCheck = null;
 let appCheckError = null;
 let appCheckSkippedReason = null;
