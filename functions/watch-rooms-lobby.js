@@ -5,6 +5,7 @@ const db = () => getFirestore();
 const ROOM_MEMBER_LIMIT = 12;
 const QUEUE_LIMIT = 50;
 const MESSAGE_LIMIT = 500;
+const ROOM_CHAT_LIMIT = 500;
 const PRESENCE_TTL_MS = 90_000;
 
 function requireUser(request) {
@@ -149,7 +150,10 @@ export const sendWatchRoomMessage = onCall({ region: "us-central1", maxInstances
     const memberSnapshot = await tx.get(memberRef);
     const last = memberSnapshot.data()?.lastChatAt?.toMillis?.() || 0;
     if (Date.now() - last < 700) throw new HttpsError("resource-exhausted", "Please slow down before sending another message.");
+    const chatCount = Number(room.chatCount || 0);
+    if (chatCount >= ROOM_CHAT_LIMIT) throw new HttpsError("resource-exhausted", "This room has reached its message limit.");
     tx.update(memberRef, { lastChatAt: Timestamp.now() });
+    tx.update(roomRef, { chatCount: chatCount + 1, updatedAt: Timestamp.now() });
     tx.create(messageRef, { uid, text, createdAt: Timestamp.now(), reactions: {} });
   });
   return { messageId: messageRef.id };
