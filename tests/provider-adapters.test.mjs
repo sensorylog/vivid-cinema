@@ -40,3 +40,21 @@ test("commands require a supported action and matching iframe origin", () => {
   assert.equal(sendProviderCommand({ adapter: getProviderAdapter("player2", "vidsrc-embed"), frame, action: "play" }), false);
   assert.equal(sendProviderCommand({ adapter, frame: { ...frame, src: "https://evil.example/embed" }, action: "play" }), false);
 });
+
+
+test("CineSRC uses its documented command protocol and verified origin", () => {
+  const calls = [];
+  const frame = {
+    src: "https://cinesrc.st/embed/movie/1084242",
+    contentWindow: { postMessage: (...args) => calls.push(args) }
+  };
+  const adapter = getProviderAdapter("player2", "cinesrc");
+  assert.equal(providerSupports("player2", "cinesrc", "canPlay"), true);
+  assert.equal(sendProviderCommand({ adapter, frame, action: "play" }), true);
+  assert.deepEqual(calls[0], [{ type: "cinesrc:command", command: "play", args: [] }, "https://cinesrc.st"]);
+  assert.equal(sendProviderCommand({ adapter, frame, action: "pause" }), true);
+  assert.deepEqual(calls[1], [{ type: "cinesrc:command", command: "pause", args: [] }, "https://cinesrc.st"]);
+  assert.equal(sendProviderCommand({ adapter, frame, action: "seek", position: 123.5 }), true);
+  assert.deepEqual(calls[2], [{ type: "cinesrc:command", command: "seek", args: [123.5] }, "https://cinesrc.st"]);
+  assert.equal(sendProviderCommand({ adapter, frame: { ...frame, src: "https://evil.example/embed" }, action: "play" }), false);
+});
