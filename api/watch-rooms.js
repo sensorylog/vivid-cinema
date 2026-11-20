@@ -380,6 +380,49 @@ async function cleanupExpiredWatchRooms(request) {
   return { skipped: false, deletedRooms, deletedInvitations: expiredInvitations.size };
 }
 
+async function getWatchRoomLobbySnapshot(request) {
+  const uid = requireUser(request);
+  const roomId = validId(request.data?.roomId, "room ID");
+  const { roomRef, room } = await requireRoomMember(roomId, uid);
+  const now = Date.now();
+  const [membersSnapshot, presenceSnapshot, queueSnapshot, chatSnapshot] = await Promise.all([
+    roomRef.collection("members").get(),
+    roomRef.collection("presence").get(),
+    roomRef.collection("queue").get(),
+    roomRef.collection("chat").orderBy("createdAt", "desc").limit(80).get()
+  ]);
+  const millis = value => value?.toMillis?.() ?? (typeof value === "number" ? value : null);
+  const presence = new Map(presenceSnapshot.docs.map(document => {
+    const data = document.data();
+    return [document.id, millis(data.expiresAt)];
+  }));
+  const members = membersSnapshot.docs.map(document => {
+    const data = document.data();
+    const expiresAt = presence.get(document.id) || 0;
+    return {
+      uid: document.id,
+      displayName: data.displayName || "Vivid member",
+      role: data.role || "guest",
+      joinedAt: millis(data.joinedAt),
+      isOnline: expiresAt > now
+    };
+  }).sort((a, b) => (a.role === "host" ? -1 : 0) - (b.role === "host" ? -1 : 0) || String(a.displayName).localeCompare(String(b.displayName)));
+  const queue = queueSnapshot.docs.map(document => {
+    const data = document.data();
+    return { id: document.id, ...data, createdAt: millis(data.createdAt), updatedAt: millis(data.updatedAt) };
+  }).filter(item => item.status === "queued")
+    .sort((a, b) => (Number(b.voteCount) || 0) - (Number(a.voteCount) || 0) || (a.createdAt || 0) - (b.createdAt || 0));
+  const chat = [...chatSnapshot.docs].reverse().map(document => {
+    const data = document.data();
+    return { id: document.id, ...data, createdAt: millis(data.createdAt) };
+  });
+  return {
+    room: { roomId, name: room.name || "Private screening", status: room.status, memberCount: members.length },
+    members, onlineCount: members.filter(member => member.isOnline).length, queue, chat,
+    serverTime: now
+  };
+}
+
 async function heartbeatWatchRoom(request) {
   const uid = requireUser(request);
   const roomId = validId(request.data?.roomId, "room ID");
@@ -832,6 +875,7 @@ const operations = {
   revokeWatchInvitation,
   cleanupExpiredWatchRooms,
   heartbeatWatchRoom,
+  getWatchRoomLobbySnapshot,
   addWatchRoomQueueItem,
   removeWatchRoomQueueItem,
   voteWatchRoomQueueItem,
@@ -858,7 +902,7 @@ const ALLOWED_ORIGINS = new Set([
   "https://vivid-cinema.firebaseapp.com",
   ...(process.env.VIVID_ALLOWED_ORIGINS || "").split(",").map(value => value.trim()).filter(Boolean)
 ]);
-const ROUTES = new Set(["createWatchRoom","createCinemaClub","createWatchInvitation","redeemWatchInvitation","revokeWatchInvitation","cleanupExpiredWatchRooms","heartbeatWatchRoom","addWatchRoomQueueItem","removeWatchRoomQueueItem","voteWatchRoomQueueItem","sendWatchRoomMessage","reactToWatchRoomMessage","updateWatchRoomSettings","removeWatchRoomMember","leaveWatchRoom","closeWatchRoom","publishWatchRoomPlayback","addCinemaClubWatchlistItem","removeCinemaClubWatchlistItem","recordCinemaClubScreening","addCinemaClubAfterCreditsReview","addCinemaClubDiscussionMessage","leaveCinemaClub","archiveCinemaClub"]);
+const ROUTES = new Set(["createWatchRoom","createCinemaClub","createWatchInvitation","redeemWatchInvitation","revokeWatchInvitation","cleanupExpiredWatchRooms","heartbeatWatchRoom","getWatchRoomLobbySnapshot","addWatchRoomQueueItem","removeWatchRoomQueueItem","voteWatchRoomQueueItem","sendWatchRoomMessage","reactToWatchRoomMessage","updateWatchRoomSettings","removeWatchRoomMember","leaveWatchRoom","closeWatchRoom","publishWatchRoomPlayback","addCinemaClubWatchlistItem","removeCinemaClubWatchlistItem","recordCinemaClubScreening","addCinemaClubAfterCreditsReview","addCinemaClubDiscussionMessage","leaveCinemaClub","archiveCinemaClub"]);
 
 function respond(res, status, payload) {
   res.status(status).setHeader("Cache-Control", "no-store");

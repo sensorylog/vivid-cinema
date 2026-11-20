@@ -1,12 +1,11 @@
-import { auth, db } from "./firebase.js";
-import { collection, limit, onSnapshot, orderBy, query } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+import { auth } from "./firebase.js";
 import { callWatchRoomApi } from "./watch-room-api.js";
 import { tmdbApi } from "./tmdb.js";
 
 const byId = id => document.getElementById(id);
 const call = callWatchRoomApi;
 let room = null, lastRoom = null, stops = [], heartbeat = null, presenceRefresh = null;
-let memberList = [], presenceList = [], selectedPick = null, searchTimer = null, searchGeneration = 0;
+let memberList = [], selectedPick = null, searchTimer = null, searchGeneration = 0;
 
 function stop() {
   stops.forEach(fn => fn());
@@ -30,12 +29,10 @@ function showError(error) {
 }
 function renderPresence() {
   if (!room) return;
-  const now = Date.now();
-  const liveIds = new Set(presenceList.filter(item => item.expiresAt?.toMillis?.() > now).map(item => item.uid).filter(Boolean));
   const count = byId("wr-lobby-presence-count");
   const online = byId("wr-lobby-online-count");
   if (count) count.textContent = String(memberList.length);
-  if (online) online.textContent = liveIds.size + " online";
+  if (online) online.textContent = memberList.filter(member => member.isOnline).length + " online";
   const list = byId("wr-lobby-presence");
   if (!list) return;
   list.replaceChildren();
@@ -48,7 +45,7 @@ function renderPresence() {
     const isSelf = member.uid === auth.currentUser?.uid;
     name.textContent = isSelf ? (member.displayName || "You") + " · You" : member.displayName || "Vivid member";
     const status = document.createElement("small");
-    const isLive = liveIds.has(member.uid);
+    const isLive = member.isOnline === true;
     status.textContent = (member.role === "host" ? "Host" : "Member") + " · " + (isLive ? "Online" : "Away");
     status.className = isLive ? "is-online" : "is-away";
     identity.append(name, status);
@@ -67,7 +64,7 @@ function renderPresence() {
     }
     list.append(li);
   });
-  if (!memberList.length) list.textContent = "Waiting for your crew…";
+  if (!memberList.length) list.textContent = "Your room connection is confirmed, but the member roster came back empty. Refresh the room and try again.";
 }
 function setSearchMessage(message, isError = false) {
   const results = byId("wr-queue-search-results");
@@ -142,12 +139,37 @@ async function searchQueueTitles(value, generation) {
     setSearchMessage("Film search is temporarily unavailable. Please try again.", true);
   }
 }
-function renderQueue(snapshot) {
+function renderChat(messages) {
+  const log = byId("wr-lobby-chat");
+  if (!log) return;
+  log.replaceChildren();
+  messages.forEach(message => {
+    const member = memberList.find(item => item.uid === message.uid);
+    const row = document.createElement("article");
+    row.className = "vivid-wr-chat-message";
+    const text = document.createElement("p");
+    text.textContent = (message.uid === auth.currentUser?.uid ? "You" : member?.displayName || "Member") + ": " + message.text;
+    const actions = document.createElement("div");
+    actions.className = "vivid-wr-chat-reactions";
+    ["❤️", "😂", "👏", "😮", "🔥"].forEach(reaction => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.textContent = reaction + " " + (message.reactions?.[reaction]?.length || 0);
+      button.addEventListener("click", () => call("reactToWatchRoomMessage")({ roomId: room.roomId, messageId: message.id, reaction }).catch(showError));
+      actions.append(button);
+    });
+    row.append(text, actions);
+    log.append(row);
+  });
+  if (!messages.length) log.textContent = "No messages yet. Say hello to your crew.";
+  log.scrollTop = log.scrollHeight;
+}
+
+function renderQueue(items) {
   const list = byId("wr-lobby-queue");
   if (!list) return;
   list.replaceChildren();
-  const items = snapshot.docs.map(d => ({ id: d.id, ...d.data() }))
-    .filter(item => item.status === "queued")
+  items = (Array.isArray(items) ? items : []).filter(item => item.status === "queued")
     .sort((a, b) => (Number(b.voteCount) || 0) - (Number(a.voteCount) || 0));
   if (!items.length) {
     list.textContent = "No film picks yet. Search for a title above to add the first one.";
@@ -211,7 +233,6 @@ function openLobby(data) {
   room = data;
   lastRoom = data;
   memberList = [];
-  presenceList = [];
   byId("wr-panel-rooms").hidden = true;
   byId("wr-panel-clubs").hidden = true;
   byId("wr-room-lobby").hidden = false;
@@ -219,8 +240,8 @@ function openLobby(data) {
   byId("wr-lobby-subtitle").textContent = data.filmTitle ? "Tonight: " + data.filmTitle : "Your crew is getting together.";
   byId("wr-host-controls").hidden = data.role !== "host";
   byId("wr-leave-room").hidden = data.role === "host";
-  byId("wr-lobby-presence-count").textContent = "0";
-  byId("wr-lobby-online-count").textContent = "0 online";
+  byId("wr-lobby-presence-count").textContent = "…";
+  byId("wr-lobby-online-count").textContent = "Checking…";
   byId("wr-lobby-presence").textContent = "Loading your room members…";
   byId("wr-lobby-queue").textContent = "Loading film picks…";
   byId("wr-lobby-chat").textContent = "Loading room chat…";
@@ -228,46 +249,43 @@ function openLobby(data) {
   settings.elements.name.value = data.name || "";
   settings.elements.allowGuestQueue.checked = data.allowGuestQueue !== false;
   settings.elements.allowGuestChat.checked = data.allowGuestChat !== false;
-  const presence = collection(db, "rooms", data.roomId, "presence");
-  const members = collection(db, "rooms", data.roomId, "members");
-  stops.push(onSnapshot(members, snap => {
-    memberList = snap.docs.map(document => ({ uid: document.id, ...document.data() }));
-    renderPresence();
-  }, showError));
-  stops.push(onSnapshot(presence, snap => {
-    presenceList = snap.docs.map(document => ({ uid: document.id, ...document.data() }));
-    renderPresence();
-  }, showError));
-  stops.push(onSnapshot(query(collection(db, "rooms", data.roomId, "queue"), orderBy("createdAt", "asc")), renderQueue, showError));
-  stops.push(onSnapshot(query(collection(db, "rooms", data.roomId, "chat"), orderBy("createdAt", "desc"), limit(80)), snap => {
-    const log = byId("wr-lobby-chat");
-    log.replaceChildren();
-    [...snap.docs].reverse().forEach(d => {
-      const message = d.data();
-      const member = memberList.find(item => item.uid === message.uid);
-      const row = document.createElement("article");
-      row.className = "vivid-wr-chat-message";
-      const text = document.createElement("p");
-      text.textContent = (message.uid === auth.currentUser?.uid ? "You" : member?.displayName || "Member") + ": " + message.text;
-      const actions = document.createElement("div");
-      actions.className = "vivid-wr-chat-reactions";
-      ["❤️", "😂", "👏", "😮", "🔥"].forEach(reaction => {
-        const button = document.createElement("button");
-        button.type = "button";
-        button.textContent = reaction + " " + (message.reactions?.[reaction]?.length || 0);
-        button.addEventListener("click", () => call("reactToWatchRoomMessage")({ roomId: data.roomId, messageId: d.id, reaction }).catch(showError));
-        actions.append(button);
-      });
-      row.append(text, actions);
-      log.append(row);
+  const refreshLobby = async () => {
+    if (!room || room.roomId !== data.roomId) return;
+    try {
+      const response = await call("getWatchRoomLobbySnapshot")({ roomId: data.roomId });
+      if (!room || room.roomId !== data.roomId) return;
+      const snapshot = response.data || {};
+      memberList = Array.isArray(snapshot.members) ? snapshot.members : [];
+      renderPresence();
+      renderQueue(Array.isArray(snapshot.queue) ? snapshot.queue : []);
+      renderChat(Array.isArray(snapshot.chat) ? snapshot.chat : []);
+      const note = byId("wr-stage-note");
+      if (note?.dataset.state === "lobby-load-error") {
+        note.textContent = "Room connected. Members and film picks are up to date.";
+        note.dataset.state = "success";
+      }
+    } catch (error) {
+      if (!room || room.roomId !== data.roomId) return;
+      const message = error?.message || "We couldn't load this room right now.";
+      byId("wr-lobby-presence-count").textContent = "—";
+      byId("wr-lobby-online-count").textContent = "Unavailable";
+      byId("wr-lobby-presence").textContent = "Couldn't load room members. " + message;
+      byId("wr-lobby-queue").textContent = "Couldn't load film picks. " + message;
+      byId("wr-lobby-chat").textContent = "Couldn't load room chat. " + message;
+      setFeedback("Room data couldn't be refreshed: " + message, true);
+      const note = byId("wr-stage-note");
+      if (note) note.dataset.state = "lobby-load-error";
+    }
+  };
+  const ping = () => call("heartbeatWatchRoom")({ roomId: data.roomId })
+    .then(() => refreshLobby())
+    .catch(error => {
+      showError(error);
+      byId("wr-lobby-presence").textContent = "Couldn't confirm your room connection. " + (error?.message || "Try reopening the room.");
     });
-    if (!snap.size) log.textContent = "No messages yet. Say hello to your crew.";
-    log.scrollTop = log.scrollHeight;
-  }, showError));
-  const ping = () => call("heartbeatWatchRoom")({ roomId: data.roomId }).catch(showError);
   ping();
   heartbeat = setInterval(ping, 30000);
-  presenceRefresh = setInterval(renderPresence, 10000);
+  presenceRefresh = setInterval(refreshLobby, 5000);
 }
 document.addEventListener("vivid:watch-room-open", event => openLobby(event.detail));
 const queueTitleInput = byId("wr-queue-form")?.elements.title;
