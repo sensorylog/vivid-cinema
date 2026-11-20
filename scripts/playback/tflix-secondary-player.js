@@ -267,6 +267,11 @@ export function mountTflixSecondaryPlayer({ root, params, media, details, title,
       root.scrollIntoView({ block: "center", behavior: "smooth" });
     } else if (selection.playerId === "player1") {
       root.hidden = true;
+      generation++;
+      if (loadTimer) window.clearTimeout(loadTimer);
+      loadTimer = 0;
+      const frame = screen.querySelector("#vivid-tflix-frame");
+      if (frame) frame.src = "about:blank";
     }
   };
   window.addEventListener("vivid:watch-room-apply-selection", roomSelectionHandler);
