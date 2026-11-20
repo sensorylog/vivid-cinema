@@ -317,3 +317,16 @@ test("Watch Rooms dashboard ignores stale account responses after authentication
   assert.ok(client.includes("let dashboardLoadGeneration = 0"));
   assert.ok(client.includes("generation !== dashboardLoadGeneration || auth.currentUser?.uid !== user.uid"));
 });
+
+
+test("Watch Room host administration revalidates authority and updates room pointers atomically", () => {
+  const lobby = readFileSync(new URL("../functions/watch-rooms-lobby.js", import.meta.url), "utf8");
+  const settings = lobby.slice(lobby.indexOf("export const updateWatchRoomSettings"), lobby.indexOf("export const removeWatchRoomMember"));
+  const close = lobby.slice(lobby.indexOf("export const closeWatchRoom"), lobby.indexOf("export const publishWatchRoomPlayback"));
+  assert.ok(settings.includes("requireRoomMemberInTransaction(tx, roomId, uid)"));
+  assert.ok(settings.includes('room.hostUid !== uid || member.role !== "host"'));
+  assert.ok(settings.includes('tx.get(roomRef.collection("members"))'));
+  assert.ok(close.includes("requireRoomMemberInTransaction(tx, roomId, uid)"));
+  assert.ok(close.includes("expiresAt: closedAt"));
+  assert.ok(close.includes('tx.set(db().collection("users")'));
+});
