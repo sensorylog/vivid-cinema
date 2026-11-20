@@ -1,5 +1,6 @@
 import { createHash, randomBytes } from "node:crypto";
-import { verifyFirebaseIdToken, verifyAppCheckToken } from "../lib/firebase-token-verification.js";
+import { verifyFirebaseIdToken } from "../lib/firebase-token-verification.js";
+import { createWatchRoomSession, verifyWatchRoomSession, verifyTurnstileToken } from "../lib/watch-room-attestation.js";
 import { initializeApp as initializeRestApp } from "@ljoukov/firebase-admin-cloudflare/app";
 import { getFirestore, Query, Timestamp } from "@ljoukov/firebase-admin-cloudflare/firestore";
 
@@ -936,16 +937,13 @@ const ROUTES = new Set([
   "recordCinemaClubScreening","addCinemaClubAfterCreditsReview","addCinemaClubDiscussionMessage","leaveCinemaClub","archiveCinemaClub"
 ]);
 
-async function authenticate(req) {
-  const match = String(req.headers.authorization || "").match(/^Bearer\s+(.+)$/i);
+async function authenticateFirebaseIdentity(req) {
+  const match = String(req.headers.authorization || "").match(/^Bearer\\s+(.+)$/i);
   if (!match) throw new HttpsError("unauthenticated", "Sign in to your Vivid account and try again.");
-  const appCheckToken = String(req.headers["x-firebase-appcheck"] || "");
-  if (!appCheckToken) throw new HttpsError("failed-precondition", "App Check verification is required.");
   let token;
   try {
-    // Keep revocation checking enabled. It requires the service account to have
-    // Firebase Authentication user-read permissions; do not disguise IAM or
-    // credential failures as an expired end-user session.
+    // Keep revocation checking enabled. This verifies the Firebase ID token,
+    // disabled-user state and revocation status before any room operation.
     token = await verifyFirebaseIdToken(match[1], projectId, serviceAccount);
   } catch (error) {
     const code = String(error?.code || "unknown");
@@ -967,19 +965,51 @@ async function authenticate(req) {
     // configuration errors (HTTP 500), not proof that the browser is signed out.
     throw error;
   }
-  let appCheck;
-  try {
-    appCheck = await verifyAppCheckToken(appCheckToken);
-  } catch (error) {
-    console.error("Watch Rooms App Check verification failed:", {
-      code: error?.code || "unknown", message: error?.message || String(error)
-    });
-    throw new HttpsError("failed-precondition", "Vivid could not verify this browser. Refresh the page and try again.");
-  }
-    if (!token.uid || token.firebase?.sign_in_provider === "anonymous") {
+  if (!token.uid || token.firebase?.sign_in_provider === "anonymous") {
     throw new HttpsError("unauthenticated", "Sign in with a Vivid account to use Watch Rooms.");
   }
+  return token;
+}
+
+async function authenticate(req, env, origin) {
+  const token = await authenticateFirebaseIdentity(req);
+  const roomSession = String(req.headers["x-vivid-room-session"] || "");
+  try {
+    await verifyWatchRoomSession(roomSession, token.uid, origin, env.WATCH_ROOMS_SESSION_SECRET);
+  } catch (error) {
+    const code = error?.code === "room-session-expired" ? "room-session-expired" : "room-session-invalid";
+    throw new HttpsError(code, code === "room-session-expired"
+      ? "Browser verification expired. Please retry."
+      : "Browser verification is invalid. Please refresh and try again.");
+  }
   return { uid: token.uid, token };
+}
+
+async function attestWatchRoomBrowser(request, env, origin, body) {
+  if (!origin) throw new HttpsError("permission-denied", "A trusted Vivid site origin is required.");
+  const identity = await authenticateFirebaseIdentity({ headers: {
+    authorization: request.headers.get("Authorization") || ""
+  } });
+  try {
+    await verifyTurnstileToken(
+      body.data?.turnstileToken,
+      env.TURNSTILE_SECRET_KEY,
+      new URL(origin).hostname,
+      request.headers.get("CF-Connecting-IP") || ""
+    );
+  } catch (error) {
+    console.warn("Vivid Watch Rooms Turnstile verification failed:", {
+      code: error?.code || "unknown",
+      message: error?.message || String(error)
+    });
+    throw new HttpsError("failed-precondition", "Cloudflare couldn't verify this browser. Please retry the check.");
+  }
+  const session = await createWatchRoomSession(
+    identity.uid,
+    origin,
+    env.WATCH_ROOMS_SESSION_SECRET
+  );
+  return { sessionToken: session.token, expiresAt: session.expiresAt };
 }
 
 function isAllowedOrigin(origin) {
@@ -995,7 +1025,7 @@ function response(status, payload, origin) {
   if (origin) {
     headers.set("Access-Control-Allow-Origin",origin);
     headers.set("Access-Control-Allow-Methods","POST, OPTIONS");
-    headers.set("Access-Control-Allow-Headers","Authorization, Content-Type, X-Firebase-AppCheck");
+    headers.set("Access-Control-Allow-Headers","Authorization, Content-Type, X-Vivid-Room-Session");
     headers.set("Access-Control-Max-Age","600");
     headers.set("Vary","Origin");
   }
@@ -1019,46 +1049,59 @@ export async function onRequest({request,env}) {
   }
   if(!isAllowedOrigin(origin)) return response(403,{ok:false,code:"permission-denied",message:"This origin is not allowed."},origin);
   if(request.method==="OPTIONS") return optionsResponse(origin);
+  if(request.method==="GET") {
+    if(!env.TURNSTILE_SITE_KEY || !env.TURNSTILE_SECRET_KEY ||
+       typeof env.WATCH_ROOMS_SESSION_SECRET !== "string" || env.WATCH_ROOMS_SESSION_SECRET.length < 32) {
+      return response(503,{ok:false,code:"verification-not-configured",message:"Watch Rooms browser verification is not configured yet."},origin);
+    }
+    return response(200,{ok:true,siteKey:env.TURNSTILE_SITE_KEY},origin);
+  }
   if(request.method!=="POST") return response(405,{ok:false,code:"method-not-allowed",message:"Use POST for this endpoint."},origin);
+  let body;
+  let actionForLog = "unknown";
   try {
     const raw=await request.text();
     if(raw.length>24000) throw new HttpsError("invalid-argument","This request is too large.");
-    let body;
     try { body=JSON.parse(raw); } catch { throw new HttpsError("invalid-argument","A valid Watch Rooms request is required."); }
     if(!body||typeof body!=="object"||Array.isArray(body)) throw new HttpsError("invalid-argument","A valid Watch Rooms request is required.");
     const action=body.action;
+    actionForLog = typeof action === "string" ? action : "unknown";
+    if(action === "attestBrowser") {
+      if(!env.TURNSTILE_SECRET_KEY || typeof env.WATCH_ROOMS_SESSION_SECRET !== "string" || env.WATCH_ROOMS_SESSION_SECRET.length < 32) {
+        throw new HttpsError("failed-precondition","Watch Rooms browser verification is not configured yet.");
+      }
+      if(!origin) throw new HttpsError("permission-denied","A trusted Vivid site origin is required.");
+      const data=await attestWatchRoomBrowser(request,env,origin,body);
+      return response(200,{ok:true,data},origin);
+    }
     if(typeof action!=="string"||!ROUTES.has(action)) throw new HttpsError("invalid-argument","Unknown Watch Rooms operation.");
     const auth=await authenticate({headers:{
       authorization:request.headers.get("Authorization")||"",
-      "x-firebase-appcheck":request.headers.get("X-Firebase-AppCheck")||""
-    }});
+      "x-vivid-room-session":request.headers.get("X-Vivid-Room-Session")||""
+    }},env,origin);
     const result=await operations[action]({auth,data:body.data||{}});
     return response(200,{ok:true,data:result??null},origin);
   } catch(error) {
     const rawCode=error?.code||"internal";
-    // Firestore's Google API can also return permission-denied when the
-    // Cloudflare service account lacks database IAM access. That is a server
-    // configuration failure, not a denial of the signed-in user's room role.
     const firestoreIamDenied = !(error instanceof HttpsError) && rawCode === "permission-denied";
     if (firestoreIamDenied) {
       console.error("Watch Rooms Firestore IAM permission denied during operation:", {
-        action: body?.action || "unknown",
+        action: actionForLog,
         code: rawCode,
         message: error?.message || String(error),
         projectId
       });
     }
-    const code=firestoreIamDenied ? "internal" :
-      rawCode.startsWith("app-check/") || rawCode.startsWith("appCheck/") ? "failed-precondition" : rawCode;
+    const code=firestoreIamDenied ? "internal" : rawCode;
     const status=({
       unauthenticated:401,"permission-denied":403,"not-found":404,
       "auth/id-token-expired":401,"auth/id-token-revoked":401,"auth/invalid-id-token":401,"auth/argument-error":401,
-      "app-check/invalid-argument":401,"app-check/invalid-credential":401,"app-check/app-check-token-expired":401,
+      "room-session-expired":401,"room-session-invalid":401,
       "invalid-argument":400,"failed-precondition":409,"resource-exhausted":429,"already-exists":409
     })[code]||500;
     if(!(error instanceof HttpsError)||status>=500) console.error("Vivid Watch Rooms Cloudflare API failed:",error);
     const safeMessage=error instanceof HttpsError&&status<500?error.message:
-      status===401?"Your sign-in or app verification needs refreshing. Please refresh and try again.":"We couldn't complete that action right now. Please try again.";
+      status===401?"Your sign-in or browser verification needs refreshing. Please refresh and try again.":"We couldn't complete that action right now. Please try again.";
     return response(status,{ok:false,code,message:safeMessage},origin);
   }
 }
