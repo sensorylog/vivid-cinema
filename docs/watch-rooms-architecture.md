@@ -209,6 +209,6 @@ Each stage is delivered as focused commits on feature/watch-rooms and reviewed b
 
 - The Watch Rooms API is deployed at `/api/watch-rooms` on the same Cloudflare Pages origin as the site.
 - The Pages build runs `automation/build-cloudflare-functions.mjs`, which bundles the isolated `cloudflare/functions` directory into `dist/_worker.js`; the Firebase Functions source under `functions/` is not moved or deployed as Pages routes.
-- Configure the Cloudflare Pages production and preview Functions compatibility flag `nodejs_compat` (use a current compatibility date). The route uses Node crypto and Firebase Admin Auth/App Check SDKs.
+- In Cloudflare Pages, open **Settings → Functions → Compatibility Flags** and enable `nodejs_compat` for both Production and Preview. Use a current compatibility date (2026-08-04 or newer enables Node.js compatibility by default). The route uses Node crypto and Firebase Admin Auth/App Check SDKs.
 - Add `FIREBASE_SERVICE_ACCOUNT_JSON` as a Cloudflare Pages secret containing the complete Firebase service-account JSON. Do not commit the JSON or put it in a public Pages variable.
 - After the secret and compatibility flag are configured, the client uses the same-origin API path; no Vercel endpoint or Firebase Cloud Function is involved.
