@@ -1,12 +1,11 @@
 import { getIdToken } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
 import { auth } from "./firebase.js";
 
-const RECALL_MODEL = "gemini-3.5-flash-lite";
+const WORKERS_AI_MODEL = "@cf/zai-org/glm-4.7-flash";
 const CLUE_TIMEOUT_MS = 12000;
 const CHAT_TIMEOUT_MS = typeof navigator !== "undefined" && /Electron\//i.test(navigator.userAgent) ? 12000 : 30000;
 
 let modelPromise = null;
-let recallAi = null;
 let aiRequestTail = Promise.resolve();
 
 // Keep all Recall/Spark requests on this page from competing for the initial
@@ -17,33 +16,19 @@ function serializeAiRequest(task) {
   return current;
 }
 
-function initialThrottleDelay(error) {
-  const detail = [
-    error?.code,
-    error?.message,
-    error?.customData?.serverResponse,
-    error?.customData?.response
-  ].filter(Boolean).join(" ");
-  if (!/appCheck\/initial-throttle/i.test(detail)) return 0;
-  const wait = detail.match(/(\d{1,2})m:(\d{2})s/i);
-  if (!wait) return 1200;
-  const requested = (Number(wait[1]) * 60 + Number(wait[2])) * 1000;
-  return Math.max(1000, Math.min(5000, requested + 150));
-}
-
 function createRecallModel(maxOutputTokens) {
-  // Gemini runs through Vivid's authenticated Cloudflare Pages API.
-  // The browser never receives or stores the Gemini API key.
+  // All model inference runs on Cloudflare Workers AI. The browser sends only
+  // the signed-in user's Firebase ID token; no provider API key is exposed.
   return {
     async generateContent(prompt, options = {}) {
       const user = auth.currentUser;
       if (!user || user.isAnonymous) {
-        const error = new Error("Sign in to your Vivid account before using Gemini.");
+        const error = new Error("Sign in to your Vivid account before using Vivid AI.");
         error.code = "auth/unauthenticated";
         throw error;
       }
       const idToken = await getIdToken(user);
-      const response = await fetch("/api/gemini", {
+      const response = await fetch("/api/ai", {
         method: "POST",
         headers: { "Authorization": "Bearer " + idToken, "Content-Type": "application/json" },
         cache: "no-store",
@@ -52,7 +37,7 @@ function createRecallModel(maxOutputTokens) {
       });
       const payload = await response.json().catch(() => ({}));
       if (!response.ok || !payload.ok) {
-        const error = new Error(payload.message || "Vivid Gemini request failed (" + response.status + ").");
+        const error = new Error(payload.message || "Vivid AI request failed (" + response.status + ").");
         error.code = response.status === 401 ? "auth/unauthenticated" :
           response.status === 429 ? "resource-exhausted" : "functions/" + (payload.code || "internal");
         error.status = response.status;
@@ -92,39 +77,26 @@ function parseClues(raw) {
 
 async function generateWithTimeout(model, prompt, timeoutMs, operation) {
   return serializeAiRequest(async () => {
-    // Firebase App Check can briefly throttle the first limited-use token
-    // exchange (appCheck/initial-throttle). Honor its retry window once;
-    // do not retry quota, permission, or model errors.
-    for (let attempt = 0; attempt < 2; attempt++) {
-      const controller = new AbortController();
-      let timeoutId;
-      try {
-        return await Promise.race([
-          model.generateContent(prompt, { signal: controller.signal }),
-          new Promise((_, reject) => {
-            timeoutId = setTimeout(() => {
-              const error = new Error(
-                operation + " timed out after " + Math.round(timeoutMs / 1000) +
-                " seconds; cancellation of the client request was attempted."
-              );
-              error.name = "TimeoutError";
-              reject(error);
-              controller.abort();
-            }, timeoutMs);
-          })
-        ]);
-      } catch (error) {
-        const retryDelay = attempt === 0 ? initialThrottleDelay(error) : 0;
-        if (!retryDelay) throw error;
-        console.info("Vivid Recall: App Check initial token request was throttled; retrying once.", {
-          retryDelay
-        });
-        await new Promise(resolve => setTimeout(resolve, retryDelay));
-      } finally {
-        clearTimeout(timeoutId);
-      }
+    const controller = new AbortController();
+    let timeoutId;
+    try {
+      return await Promise.race([
+        model.generateContent(prompt, { signal: controller.signal }),
+        new Promise((_, reject) => {
+          timeoutId = setTimeout(() => {
+            const error = new Error(
+              operation + " timed out after " + Math.round(timeoutMs / 1000) +
+              " seconds; cancellation of the request was attempted."
+            );
+            error.name = "TimeoutError";
+            reject(error);
+            controller.abort();
+          }, timeoutMs);
+        })
+      ]);
+    } finally {
+      clearTimeout(timeoutId);
     }
-    throw new Error(operation + " could not complete after the App Check retry.");
   });
 }
 
@@ -145,17 +117,17 @@ export async function getRecallClues(query, fallbackClues = []) {
       "Do not guess or invent the title. Avoid generic words. Return only a JSON array of strings. " +
       "Description: " + JSON.stringify(cleanQuery),
       CLUE_TIMEOUT_MS,
-      "Gemini clue extraction"
+      "Vivid AI clue extraction"
     );
     const responseText = result?.response?.text?.() || "";
     const aiClues = parseClues(responseText);
     if (!aiClues.length) {
-      return { clues: fallback, available: false, message: "Gemini returned no usable plot clues; local matching is still active." };
+      return { clues: fallback, available: false, message: "Cloudflare Workers AI returned no usable plot clues; local matching is still active." };
     }
     return {
       clues: [...new Set([...aiClues, ...fallback])].slice(0, 12),
       available: true,
-      message: "Gemini Flash-Lite clue extraction is active."
+      message: "Cloudflare Workers AI clue extraction is active."
     };
   } catch (error) {
     console.warn("Vivid Recall AI unavailable; using local clue extraction.", {
@@ -167,7 +139,7 @@ export async function getRecallClues(query, fallbackClues = []) {
     return {
       clues: fallback,
       available: false,
-      message: "Gemini is unavailable right now; local clue extraction is still active."
+      message: "Cloudflare Workers AI is unavailable right now; local clue extraction is still active."
     };
   }
 }
@@ -215,12 +187,12 @@ export async function sendRecallChatMessage(messages, mediaType = "all") {
     "Conversation so far:\n" + transcript
   ].join("\n");
 
-  const result = await generateWithTimeout(model, prompt, CHAT_TIMEOUT_MS, "Gemini chat");
+  const result = await generateWithTimeout(model, prompt, CHAT_TIMEOUT_MS, "Cloudflare Workers AI chat");
   let payload;
   try {
     payload = JSON.parse(result?.response?.text?.() || "{}");
   } catch {
-    throw new Error("Gemini returned an unreadable chat response. Please try again.");
+    throw new Error("Cloudflare Workers AI returned an unreadable chat response. Please try again.");
   }
   const reply = String(payload?.reply || "").trim().slice(0, 900);
   const candidates = (Array.isArray(payload?.candidates) ? payload.candidates : [])
@@ -232,8 +204,8 @@ export async function sendRecallChatMessage(messages, mediaType = "all") {
       reason: String(item.reason || "").trim().slice(0, 180)
     }))
     .filter(item => item.title);
-  if (!reply) throw new Error("Gemini returned an empty reply. Please try again.");
-  return { reply, candidates, model: "Gemini 3.5 Flash-Lite" };
+  if (!reply) throw new Error("Cloudflare Workers AI returned an empty reply. Please try again.");
+  return { reply, candidates, model: "Vivid AI 3.5 Flash-Lite" };
 }
 
 
@@ -241,7 +213,7 @@ const SPARK_TIMEOUT_MS = 10000;
 
 /**
  * Produce one concise, educational Vivid Spark for an achievement unlock.
- * Reuses Vivid Recall's existing Gemini model, App Check gates, and timeout
+ * Reuses Vivid Recall's existing Vivid AI model, Firebase sign-in verification, and timeout
  * helper; this does not change the Recall chat or clue-extraction paths.
  */
 export async function generateAchievementSpark(input = {}) {
@@ -300,11 +272,11 @@ export async function generateAchievementSpark(input = {}) {
   try {
     payload = JSON.parse(result?.response?.text?.() || "{}");
   } catch {
-    throw new Error("Gemini returned an unreadable Vivid Spark.");
+    throw new Error("Cloudflare Workers AI returned an unreadable Vivid Spark.");
   }
   const spark = safeText(payload?.spark, 650);
   const wordCount = spark.split(/\s+/).filter(Boolean).length;
-  if (payload?.confidence !== "high") throw new Error("Gemini could not confidently ground this Vivid Spark.");
-  if (wordCount < 28 || wordCount > 70) throw new Error("Gemini returned a Spark outside the concise reading length.");
-  return { spark, model: "Gemini 3.5 Flash-Lite" };
+  if (payload?.confidence !== "high") throw new Error("Cloudflare Workers AI could not confidently ground this Vivid Spark.");
+  if (wordCount < 28 || wordCount > 70) throw new Error("Cloudflare Workers AI returned a Spark outside the concise reading length.");
+  return { spark, model: "Vivid AI 3.5 Flash-Lite" };
 }
