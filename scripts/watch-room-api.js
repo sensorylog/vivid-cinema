@@ -5,7 +5,11 @@ const API_URL = "https://vivid-cinema-api.vercel.app/api/watch-rooms";
 
 export function callWatchRoomApi(action) {
   return async (data = {}) => {
-    const user = auth.currentUser;
+    // Firebase Auth may still be restoring IndexedDB/local persistence when a
+    // caller first reaches this helper. Wait for that initial state before
+    // deciding that the user is signed out.
+    if (typeof auth.authStateReady === "function") await auth.authStateReady();
+    let user = auth.currentUser;
     if (!user) {
       const error = new Error("Please sign in to your Vivid account and try again.");
       error.code = "functions/unauthenticated";
@@ -25,8 +29,10 @@ export function callWatchRoomApi(action) {
       ]);
     } catch (cause) {
       console.warn("Vivid Watch Rooms could not obtain request credentials:", cause);
-      const error = new Error("Vivid couldn't verify your sign-in and app security. Refresh the page and try again.");
-      error.code = "functions/unauthenticated";
+      const error = new Error("Vivid couldn't obtain your sign-in or app-verification token. Refresh the page and try again.");
+      error.code = String(cause?.code || "").startsWith("app-check/")
+        ? "functions/failed-precondition"
+        : "functions/unauthenticated";
       throw error;
     }
     let response;
