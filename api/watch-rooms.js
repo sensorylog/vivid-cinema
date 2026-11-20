@@ -648,7 +648,8 @@ async function closeWatchRoom(request) {
 async function publishWatchRoomPlayback(request) {
   const uid = requireUser(request);
   const roomId = validId(request.data?.roomId, "room ID");
-  if (request.data?.provider !== "vidsrc") throw new HttpsError("failed-precondition", "This provider is not enabled for synchronized playback.");
+  const provider = request.data?.provider;
+  if (!["vidsrc", "cinesrc"].includes(provider)) throw new HttpsError("failed-precondition", "This provider is not enabled for synchronized playback.");
   const status = request.data?.status;
   if (!["playing", "paused", "ended"].includes(status)) throw new HttpsError("invalid-argument", "Playback status is not supported.");
   const contentId = cleanText(String(request.data?.contentId || ""), "Catalogue ID", 80);
@@ -677,7 +678,7 @@ async function publishWatchRoomPlayback(request) {
     if (previous && (previous.contentId !== contentId || previous.mediaType !== mediaType || (mediaType === "tv" && (previous.season !== season || previous.episode !== episode)))) throw new HttpsError("failed-precondition", "This room is already synchronized to a different title or episode.");
     if (previous?.lastEventAt?.toMillis && now.toMillis() - previous.lastEventAt.toMillis() < 1800 && status === "playing") return { accepted: false, reason: "rate-limited" };
     const revision = Number(previous?.revision || 0) + 1;
-    tx.set(stateRef, { provider: "vidsrc", contentId, mediaType, season, episode, status, position, duration, hostUid: uid, revision, updatedAt: now, lastEventAt: now });
+    tx.set(stateRef, { provider, contentId, mediaType, season, episode, status, position, duration, hostUid: uid, revision, updatedAt: now, lastEventAt: now });
     return { accepted: true, revision };
   });
 }
