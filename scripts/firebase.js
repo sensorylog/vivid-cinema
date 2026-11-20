@@ -1,9 +1,9 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
 import { initializeAuth, browserLocalPersistence, indexedDBLocalPersistence, inMemoryPersistence, browserPopupRedirectResolver } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
 import { getFirestore } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
-import { initializeAppCheck, ReCaptchaEnterpriseProvider } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app-check.js";
+import { initializeAppCheck, CustomProvider } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app-check.js";
+import { getTurnstileAppCheckToken } from "./turnstile-app-check.js";
 
-const RECAPTCHA_ENTERPRISE_SITE_KEY = "6LfEHikuAAAAAE3GvgM4_elW5wj035as6zBafGWu";
 const LOCAL_HOSTS = new Set(["localhost", "127.0.0.1", "::1"]);
 
 function validFirebaseConfig(config) {
@@ -59,38 +59,33 @@ async function loadFirebaseConfig() {
 const firebaseConfig = await loadFirebaseConfig();
 const app = initializeApp(firebaseConfig);
 
-// App Check initializes before Firebase services that use it. This public site
-// key protects those Firebase services; Vivid AI uses its own authenticated
-// Cloudflare Pages endpoint and does not request App Check tokens.
+// App Check initializes before Firebase services that use it. The custom
+// provider verifies the browser with Cloudflare Turnstile, then exchanges that
+// proof for a real Firebase App Check token. Auth, Firestore and Watch Rooms
+// therefore keep App Check protection without reCAPTCHA Enterprise assessments.
 let appCheck = null;
 let appCheckError = null;
 let appCheckSkippedReason = null;
-if (!RECAPTCHA_ENTERPRISE_SITE_KEY) {
-  appCheckError = new Error("The reCAPTCHA Enterprise site key is not configured.");
-  console.error("Vivid App Check is not configured:", appCheckError.message);
-} else if (LOCAL_HOSTS.has(window.location.hostname)) {
-  // Localhost and loopback were intentionally removed from the reCAPTCHA
-  // Enterprise allowed-domain list. Use the deployed Hosting domain to test AI.
+if (LOCAL_HOSTS.has(window.location.hostname)) {
+  // Localhost and loopback are intentionally excluded from production attestation.
   appCheckSkippedReason =
-    "App Check is intentionally skipped on local development hosts; test Gemini on the deployed Cloudflare Pages or Firebase Hosting site.";
+    "App Check is intentionally skipped on local development hosts; test protected Firebase services on the deployed Vivid site.";
 } else {
   try {
     appCheck = initializeAppCheck(app, {
-      provider: new ReCaptchaEnterpriseProvider(RECAPTCHA_ENTERPRISE_SITE_KEY),
-      // Avoid background reCAPTCHA assessments on every site visit. Firebase
-      // services and Watch Rooms obtain cached tokens on demand; getToken()
-      // refreshes them when needed.
+      provider: new CustomProvider({ getToken: getTurnstileAppCheckToken }),
+      // Firebase caches the returned one-hour token and requests a fresh one
+      // when a Firebase service needs it after expiry.
       isTokenAutoRefreshEnabled: false
     });
   } catch (error) {
     appCheckError = error instanceof Error ? error : new Error(String(error));
-    // Keep the rest of Vivid usable, but expose the exact cause to AI diagnostics.
-    console.warn("Vivid App Check could not initialize:", {
+    console.warn("Vivid custom App Check could not initialize:", {
       hostname: window.location.hostname,
       origin: window.location.origin,
       code: appCheckError.code || null,
       message: appCheckError.message,
-      hint: "Allow vivid-cinema.pages.dev and vivid-cinema.web.app in Firebase App Check and the reCAPTCHA Enterprise site's allowed domains."
+      hint: "Check the Cloudflare Turnstile widget hostnames and Pages environment variables."
     });
   }
 }
@@ -104,4 +99,4 @@ const auth = initializeAuth(app, {
 const db = getFirestore(app);
 
 // The configured persistence order deliberately favors durable IndexedDB storage.
-export { app, appCheck, appCheckError, appCheckSkippedReason, auth, db, firebaseConfig, RECAPTCHA_ENTERPRISE_SITE_KEY };
+export { app, appCheck, appCheckError, appCheckSkippedReason, auth, db, firebaseConfig };
