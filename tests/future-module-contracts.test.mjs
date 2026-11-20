@@ -461,3 +461,11 @@ test("Watch Rooms classifies Firebase App Check token failures separately from s
   assert.ok(!api.includes('startsWith("app-check/")'));
   assert.ok(!idToken.includes("Promise.all"));
 });
+
+
+test("Watch Rooms surfaces the safe failed-precondition cause instead of hiding it", () => {
+  const client = readFileSync(new URL("../scripts/watch-rooms.js", import.meta.url), "utf8");
+  const errors = client.slice(client.indexOf("function errorText"), client.indexOf("function openDialog"));
+  assert.ok(errors.includes('if (code.includes("failed-precondition")) return error?.message'));
+  assert.ok(!errors.includes("This space is no longer available for that action."));
+});
