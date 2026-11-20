@@ -47,14 +47,14 @@ const setNote = message => { if (note) note.textContent = message; };
 
 const ROOM_PLAYER_OPTIONS = {
   player1: [
-    ["vidapi", "VidAPI"], ["vidsrc", "VidSrc"], ["vidlink", "VidLink"],
-    ["vidplus", "VidPlus"], ["vidking", "VidKing"], ["embedwave", "EmbedWave"],
-    ["vidfast", "VidFast"], ["ezvidapi", "EZVidAPI"], ["embedapistream", "EmbedAPIStream"],
-    ["moviesapi", "MoviesAPI"]
+    ["vidsrc", "VidSrc · synced"], ["vidapi", "VidAPI · solo"], ["vidlink", "VidLink · solo"],
+    ["vidplus", "VidPlus · solo"], ["vidking", "VidKing · solo"], ["embedwave", "EmbedWave · solo"],
+    ["vidfast", "VidFast · solo"], ["ezvidapi", "EZVidAPI · solo"], ["embedapistream", "EmbedAPIStream · solo"],
+    ["moviesapi", "MoviesAPI · solo"]
   ],
   player2: [
-    ["moviesapi", "MoviesAPI"], ["vidsrc-embed", "VidSrc Embed"], ["cinesrc", "CineSRC"],
-    ["vidfast", "VidFast"], ["vidlink", "VidLink"]
+    ["cinesrc", "CineSRC · synced"], ["moviesapi", "MoviesAPI · solo"], ["vidsrc-embed", "VidSrc Embed · solo"],
+    ["vidfast", "VidFast · solo"], ["vidlink", "VidLink · solo"]
   ]
 };
 
