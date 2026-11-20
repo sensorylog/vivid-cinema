@@ -38,7 +38,7 @@ jobs:
           set -euo pipefail
           while IFS= read -r -d '' file; do
             node --check "$file"
-          done < <(find . -type d \( -name .git -o -name node_modules \) -prune -o -type f \( -name '*.js' -o -name '*.mjs' \) -print0)
+          done < <(find . -type d \( -name .git -o -name node_modules -o -name dist \) -prune -o -type f \( -name '*.js' -o -name '*.mjs' \) -print0)
 
       - name: Test custom playback server registry
         run: node --test tests/playback-servers.test.mjs

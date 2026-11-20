@@ -24,7 +24,7 @@ The shared script `automation/build-static-dist.mjs` creates the static `dist/` 
 
 ## Pages Functions runtime
 
-Enable `nodejs_compat` under Settings → Functions → Compatibility Flags for Production and Preview. The Watch Rooms Function requires it for Firebase Admin Auth and App Check SDK compatibility. Keep `FIREBASE_SERVICE_ACCOUNT_JSON` as a secret, not a plain-text public variable.
+The root `wrangler.toml` enables `nodejs_compat` for the Pages Functions bundle and sets the Pages output directory to `dist`. Keep the Cloudflare Pages Production and Preview compatibility settings aligned with this config. The Watch Rooms Function requires Node.js compatibility for its Firebase Auth and App Check dependencies. Keep `FIREBASE_SERVICE_ACCOUNT_JSON` as a secret, not a plain-text public variable.
 
 ## Headers and caching
 

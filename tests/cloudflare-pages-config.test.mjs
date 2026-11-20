@@ -93,13 +93,23 @@ test("Watch Rooms trusted API is deployed by the existing Vercel API project, no
   assert.ok(api.includes("getAppCheck(firebaseApp).verifyToken(appCheckToken, { consume: true })"));
 });
 
+test("Cloudflare Pages Wrangler config enables Node.js compatibility for the Watch Rooms bundle", async () => {
+  const config = await readFile(new URL("../wrangler.toml", import.meta.url), "utf8");
+  assert.match(config, /compatibility_flags\s*=\s*\[\s*"nodejs_compat"\s*\]/);
+  assert.match(config, /compatibility_date\s*=\s*"2026-/);
+  assert.match(config, /pages_build_output_dir\s*=\s*"\.\/dist"/);
+});
+
 test("Cloudflare Pages bundles the Watch Rooms API from its isolated Functions directory", async () => {
   const build = await readFile(new URL("../automation/build-cloudflare-functions.mjs", import.meta.url), "utf8");
   const route = await readFile(new URL("../cloudflare/functions/api/watch-rooms.js", import.meta.url), "utf8");
   const cloudflarePackage = JSON.parse(await readFile(new URL("../cloudflare/package.json", import.meta.url), "utf8"));
   assert.ok(build.includes("pages"));
   assert.ok(build.includes("functions"));
-  assert.ok(build.includes("--outdir"));
+  assert.ok(build.includes('"--outfile", path.join(output, "_worker.js")'));
+  assert.ok(build.includes('"--build-output-directory", output'));
+  assert.ok(build.includes('"--compatibility-flags", "nodejs_compat"'));
+  assert.ok(build.includes('"--config", path.join(root, "wrangler.toml")'));
   assert.equal(cloudflarePackage.dependencies["@ljoukov/firebase-admin-cloudflare"], "0.0.2");
   assert.ok(route.includes("verifyIdToken(match[1], true)"));
   assert.ok(route.includes("verifyToken(appCheckToken, { consume: true })"));
