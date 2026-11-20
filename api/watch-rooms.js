@@ -756,10 +756,16 @@ export default async function handler(req, res) {
     return respond(res, 405, { ok: false, code: "method-not-allowed", message: "Use POST for this endpoint." });
   }
   try {
-    const action = req.body?.action;
+    if (Number(req.headers["content-length"] || 0) > 24_000) {
+      throw new HttpsError("invalid-argument", "This request is too large.");
+    }
+    if (!req.body || typeof req.body !== "object" || Array.isArray(req.body)) {
+      throw new HttpsError("invalid-argument", "A valid Watch Rooms request is required.");
+    }
+    const action = req.body.action;
     if (typeof action !== "string" || !ROUTES.has(action)) throw new HttpsError("invalid-argument", "Unknown Watch Rooms operation.");
     const auth = await authenticate(req);
-    const result = await operations[action]({ auth, data: req.body?.data || {} });
+    const result = await operations[action]({ auth, data: req.body.data || {} });
     return respond(res, 200, { ok: true, data: result ?? null });
   } catch (error) {
     const code = error?.code || "internal";
@@ -770,10 +776,12 @@ export default async function handler(req, res) {
       "invalid-argument": 400, "failed-precondition": 409,
       "resource-exhausted": 429, "already-exists": 409
     })[code] || 500;
-    if (status >= 500) console.error("Vivid Watch Rooms API failed:", error);
-    return respond(res, status, {
-      ok: false, code,
-      message: status >= 500 ? "We couldn't complete that action right now. Please try again." : error.message
-    });
+    if (!(error instanceof HttpsError) || status >= 500) console.error("Vivid Watch Rooms API failed:", error);
+    const safeMessage = error instanceof HttpsError && status < 500
+      ? error.message
+      : status === 401
+        ? "Your sign-in or app verification needs refreshing. Please refresh and try again."
+        : "We couldn't complete that action right now. Please try again.";
+    return respond(res, status, { ok: false, code, message: safeMessage });
   }
 }
