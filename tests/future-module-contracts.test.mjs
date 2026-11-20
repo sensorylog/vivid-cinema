@@ -440,8 +440,7 @@ test("Watch Room creation never displays raw Firebase internal errors", () => {
 });
 
 
-test("Manual Firebase deployment includes Watch Rooms callable functions", () => {
-  const workflow = readFileSync(new URL("../.github/workflows/firebase-hosting-deploy.yml", import.meta.url), "utf8");
-  assert.ok(workflow.includes("Deploy trusted Firebase callable functions"));
-  assert.ok(workflow.includes("firebase-tools deploy --only functions --project vivid-cinema --non-interactive"));
+test("Watch Rooms API client is included in the offline application shell", () => {
+  const worker = readFileSync(new URL("../service-worker.js", import.meta.url), "utf8");
+  assert.ok(worker.includes('"./scripts/watch-room-api.js"'));
 });
