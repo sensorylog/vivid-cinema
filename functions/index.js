@@ -528,7 +528,9 @@ export {
   removeCinemaClubWatchlistItem,
   recordCinemaClubScreening,
   addCinemaClubAfterCreditsReview,
-  addCinemaClubDiscussionMessage
+  addCinemaClubDiscussionMessage,
+  leaveCinemaClub,
+  archiveCinemaClub
 } from "./watch-rooms-clubs.js";
 
 export {
