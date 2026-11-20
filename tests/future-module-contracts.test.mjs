@@ -624,6 +624,8 @@ test("Watch Room Step 6 enforces granular guest permissions in both trusted APIs
   }
   assert.ok(lobby.includes("currentSettings.elements.allowGuestPlayerSelection"));
   assert.ok(lobby.includes("currentSettings.elements.allowGuestPlaybackControl"));
+  assert.ok(lobby.includes("settings.dataset.dirty = \"true\""));
+  assert.ok(lobby.includes("currentSettings.dataset.dirty !== \"true\""));
 });
 
 
