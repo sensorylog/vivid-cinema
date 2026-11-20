@@ -22,9 +22,9 @@ test("Recall uses lightweight Granite; achievement Sparks stay local", () => {
 });
 
 test("browser AI requests require a signed-in Firebase user and send an ID token", () => {
-  assert.match(aiSource, /auth\.currentUser/);
+  assert.match(aiSource, /getRestoredSignedInUser/);
   assert.match(aiSource, /user\.isAnonymous/);
-  assert.match(aiSource, /getIdToken\(user\)/);
+  assert.match(aiSource, /getIdToken\(user, forceRefresh\)/);
   assert.match(aiSource, /fetch\("\/api\/ai"/);
   assert.match(aiSource, /Authorization/);
   assert.doesNotMatch(aiSource, /GEMINI_API_KEY|generativelanguage\.googleapis\.com/);
@@ -32,6 +32,8 @@ test("browser AI requests require a signed-in Firebase user and send an ID token
 
 test("Cloudflare AI route verifies Firebase identity and uses the AI binding", () => {
   assert.match(apiSource, /verifyFirebaseIdToken/);
+  assert.match(apiSource, /provider: "cloudflare-workers-ai"/);
+  assert.match(apiSource, /aiBinding: Boolean\(env\.AI/);
   assert.match(apiSource, /FIREBASE_SERVICE_ACCOUNT_JSON/);
   assert.match(apiSource, /sign_in_provider === "anonymous"/);
   assert.match(apiSource, /env\.AI\.run/);
@@ -71,7 +73,7 @@ test("App Check remains initialized for Firebase services outside AI", () => {
 });
 
 test("service worker cache version changes with the Cloudflare AI client", () => {
-  assert.match(workerSource, /vivid-cinema-shell-v294/);
+  assert.match(workerSource, /vivid-cinema-shell-v295/);
   assert.match(workerSource, /scripts\/cloudflare-ai\.js/);
 });
 
