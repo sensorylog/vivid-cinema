@@ -38,11 +38,14 @@ function initialThrottleDelay(error) {
 
 function createRecallModel(maxOutputTokens) {
   // Reuse one Firebase AI client for clue extraction, chat, and Sparks.
-  // Limited-use App Check tokens remain enabled for replay protection.
+  // Keep baseline App Check attestation, but use cached session tokens.
+  // Limited-use tokens trigger a fresh reCAPTCHA Enterprise assessment for
+  // every Gemini request and can exhaust the project's monthly assessment
+  // allowance. Replay protection must remain disabled for Firebase AI Logic.
   if (!recallAi) {
     recallAi = getAI(app, {
       backend: new GoogleAIBackend(),
-      useLimitedUseAppCheckTokens: true
+      useLimitedUseAppCheckTokens: false
     });
   }
   const ai = recallAi;

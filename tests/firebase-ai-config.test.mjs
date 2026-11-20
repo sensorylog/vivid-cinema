@@ -19,7 +19,10 @@ test("Vivid Recall uses the stable, lower-cost Gemini Flash-Lite model", () => {
 
 test("Gemini requests share one App Check client and serialize/retry only initial token throttles", () => {
   assert.match(aiSource, /let recallAi = null/);
-  assert.match(aiSource, /useLimitedUseAppCheckTokens: true/);
+  assert.match(aiSource, /useLimitedUseAppCheckTokens: false/);
+  assert.match(aiSource, /cached session tokens/);
+  assert.match(firebaseSource, /initializeAppCheck/);
+  assert.match(firebaseSource, /ReCaptchaEnterpriseProvider/);
   assert.match(aiSource, /function serializeAiRequest\(task\)/);
   assert.ok(aiSource.includes("appCheck\\/initial-throttle"));
   assert.match(aiSource, /attempt < 2/);
