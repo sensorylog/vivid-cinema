@@ -662,6 +662,7 @@ function renderShell(params) {
     '<section class="vivid-watch-recommendations"><div class="vivid-section-heading"><div><span>MORE TO DISCOVER</span><h2>You might also like</h2></div></div><div id="watch-recommendations" class="vivid-watch-rec-rail">' + recommendationCards() + '</div></section>';
 
   mountSecondaryPlayer(params, episodeTitle || title);
+  window.dispatchEvent(new CustomEvent("vivid:player-adapter-ready", { detail: { playerId: "player1" } }));
 
   const player = $("vidapi-player");
   const directPlayer = $("vivid-direct-player");
