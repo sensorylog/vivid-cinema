@@ -18,7 +18,7 @@ test("Watch Rooms callable operations are served by the existing Vercel API, not
   assert.ok(api.includes('getAuth(firebaseApp).verifyIdToken(match[1], true)'));
   assert.ok(api.includes('verifyToken(appCheckToken, { consume: true })'));
   for (const operation of [
-    "createWatchRoom","createCinemaClub","createWatchInvitation","redeemWatchInvitation","revokeWatchInvitation",
+    "createWatchRoom","createCinemaClub","createWatchInvitation","redeemWatchInvitation","revokeWatchInvitation","cleanupExpiredWatchRooms",
     "heartbeatWatchRoom","addWatchRoomQueueItem","removeWatchRoomQueueItem","voteWatchRoomQueueItem",
     "sendWatchRoomMessage","reactToWatchRoomMessage","updateWatchRoomSettings","removeWatchRoomMember",
     "leaveWatchRoom","closeWatchRoom","publishWatchRoomPlayback",
