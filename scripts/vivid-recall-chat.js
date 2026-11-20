@@ -262,7 +262,8 @@ async function sendMessage(text) {
     const localMatches = await fallbackToLocalSearch(version);
     if (version === requestVersion) {
       const localLabel = needsSignIn ? "Vivid AI 401" : quotaFailure ? "Vivid AI 429" : "Vivid AI connection failed";
-      setStatus(localLabel + " · " + (localMatches ? "Local Recall found " + localMatches + " possible matches" : "Local Recall is ready for more clues") + " · Try again shortly.");
+      const diagnostic = cleanText(fullDiagnostic, 180);
+      setStatus(localLabel + " · " + diagnostic + " · " + (localMatches ? "Local Recall found " + localMatches + " possible matches" : "Local Recall is ready for more clues") + " · Try again shortly.");
     }
   } finally {
     if (version === requestVersion) {
