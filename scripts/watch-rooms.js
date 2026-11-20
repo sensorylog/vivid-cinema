@@ -15,6 +15,7 @@ const clubDialog = byId("wr-create-club-dialog");
 const functions = getFunctions(app, "us-central1");
 const call = name => httpsCallable(functions, name);
 const dashboardState = { rooms: [], clubs: [], selectedClubId: null };
+let dashboardLoadGeneration = 0;
 
 function showSessionError(error) {
   if (loading) loading.hidden = true;
@@ -180,10 +181,14 @@ function renderClubDetail(club) {
 }
 
 async function loadDashboard(user) {
+  const generation = ++dashboardLoadGeneration;
   const [roomSnapshot, clubSnapshot] = await Promise.all([
     getDocs(query(collection(db, "users", user.uid, "watchRooms"), orderBy("createdAt", "desc"))),
     getDocs(query(collection(db, "users", user.uid, "cinemaClubs"), orderBy("createdAt", "desc")))
   ]);
+  // Auth can change while the two dashboard queries are in flight. Never let
+  // an older account's slower response overwrite the current account's view.
+  if (generation !== dashboardLoadGeneration || auth.currentUser?.uid !== user.uid) return;
   dashboardState.rooms = roomSnapshot.docs.map(document => document.data());
   dashboardState.clubs = clubSnapshot.docs.map(document => document.data());
   if (!dashboardState.clubs.some(club => club.clubId === dashboardState.selectedClubId)) {
