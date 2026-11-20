@@ -402,7 +402,9 @@ test("Watch Room lobby tears down and restores realtime listeners across BFCache
 
 test("Watch Room host can manage offline members, not only active presence leases", () => {
   const client = readFileSync(new URL("../scripts/watch-room-lobby.js", import.meta.url), "utf8");
-  assert.ok(client.includes('collection(db, "rooms", data.roomId, "members")'));
+  const backend = readFileSync(new URL("../cloudflare/functions/api/watch-rooms.js", import.meta.url), "utf8");
+  assert.ok(backend.includes('roomRef.collection("members").get()'), "roster must include durable members even when their presence lease expired");
+  assert.ok(client.includes('call("getWatchRoomLobbySnapshot")'));
   assert.ok(client.includes('status.className = isLive ? "is-online" : "is-away"'));
   assert.ok(client.includes('member.displayName || "Vivid member"'));
   assert.ok(client.includes('call("removeWatchRoomMember")'));
