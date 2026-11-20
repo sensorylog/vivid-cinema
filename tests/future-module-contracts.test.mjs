@@ -459,8 +459,9 @@ test("Watch Rooms client sends Auth and App Check tokens to the trusted Cloudfla
   assert.ok(idToken.includes('"functions/unavailable"'));
   assert.ok(api.includes('getLimitedUseToken(appCheck)'));
   assert.ok(api.includes('"X-Firebase-AppCheck": appCheckResult.token'));
-  assert.ok(route.includes("verifyIdToken(match[1], true)"));
-  assert.ok(route.includes("verifyToken(appCheckToken, { consume: true })"));
+  assert.ok(route.includes("verifyFirebaseIdToken(match[1], projectId, serviceAccount)"));
+  assert.ok(route.includes("verifyAndConsumeAppCheckToken(appCheckToken, serviceAccount)"));
+  assert.ok(!route.includes("firebase-admin/auth") && !route.includes("firebase-admin/app-check"));
   assert.ok(route.includes('throw new HttpsError("failed-precondition"'));
   assert.ok(!idToken.includes("Promise.all"));
 });
