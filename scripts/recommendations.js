@@ -3,7 +3,7 @@ import { getLocalLibrary } from "./library.js";
 import { normalizeResults } from "./media.js";
 import { getTasteProfile, getNotForMeKeys, getFeedbackState, getTasteStrength, getRecommendationMemory, recordBehavior } from "./intelligence.js";
 import { switchLocalOwner } from "./local-owner.js";
-import { buildPlotKeywordQueries, extractPlotClues, scorePlotCandidate, scorePlotCandidates } from "./plot-search.js";
+import { buildPlotKeywordQueries, extractPlotClues, getPlotConceptPhrases, scorePlotCandidate, scorePlotCandidates } from "./plot-search.js";
 
 const PROGRESS_KEY = "vivid:progress:v1";
 const FOR_YOU_CACHE_KEY = "vivid:for-you:v1";
@@ -736,12 +736,19 @@ export async function getPlotMatchRecommendations(intent = {}, limit = 18, optio
   const mediaTypes = requestedType === "all" ? ["movie", "tv"] : [requestedType];
   const localQueries = buildPlotKeywordQueries(query, 10);
   const localClues = extractPlotClues(query, 12);
+  const recognizedConcepts = getPlotConceptPhrases(query);
+  // Local Vivid intelligence gets first refusal. Only ask the cloud model to
+  // expand genuinely weak memories; clear, clue-rich searches stay local.
+  const localSignalStrength = localClues.length + recognizedConcepts.length * 2;
+  const shouldUseAi = !options.localOnly && localSignalStrength < 6;
   let recallResult = {
     clues: localClues,
     available: false,
-    message: "Cloudflare Workers AI is unavailable right now; local clue extraction is still active."
+    message: shouldUseAi
+      ? "Local clues are sparse; Vivid AI may help expand this memory."
+      : "Local Vivid intelligence found enough clues; cloud AI was not needed."
   };
-  if (!options.localOnly) {
+  if (shouldUseAi) {
     try {
       const { getRecallClues } = await import("./cloudflare-ai.js");
       recallResult = await getRecallClues(query, localClues);
