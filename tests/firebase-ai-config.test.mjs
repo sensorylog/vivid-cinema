@@ -34,6 +34,8 @@ test("Cloudflare AI route verifies Firebase identity and uses the AI binding", (
   assert.match(apiSource, /env\.AI\.run/);
   assert.match(apiSource, /MAX_PROMPT_CHARS/);
   assert.match(apiSource, /MAX_REQUESTS_PER_WINDOW/);
+  assert.match(apiSource, /MAX_OUTPUT_TOKENS = 384/);
+  assert.match(apiSource, /MAX_REQUESTS_PER_WINDOW = 6/);
   assert.doesNotMatch(apiSource, /GEMINI_API_KEY|generativelanguage\.googleapis\.com|X-Firebase-AppCheck/);
 });
 
