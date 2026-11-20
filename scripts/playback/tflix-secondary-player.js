@@ -266,6 +266,7 @@ export function mountTflixSecondaryPlayer({ root, params, media, details, title,
     }
   };
   window.addEventListener("vivid:watch-room-apply-selection", roomSelectionHandler);
+  window.dispatchEvent(new CustomEvent("vivid:player-adapter-ready", { detail: { playerId: "player2" } }));
 
   return { loadServer, getSelectedServer: () => selectedServer, destroy: () => { window.removeEventListener("vivid:watch-room-apply-selection", roomSelectionHandler); generation++; if (loadTimer) window.clearTimeout(loadTimer); const frame = screen.querySelector("#vivid-tflix-frame"); if (frame) frame.src = "about:blank"; } };
 }
