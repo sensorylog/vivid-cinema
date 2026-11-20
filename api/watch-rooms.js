@@ -883,11 +883,30 @@ async function authenticate(req) {
   if (!match) throw new HttpsError("unauthenticated", "Sign in to your Vivid account and try again.");
   const appCheckToken = String(req.headers["x-firebase-appcheck"] || "");
   if (!appCheckToken) throw new HttpsError("failed-precondition", "App Check verification is required.");
-  const [token, appCheck] = await Promise.all([
-    getAuth(firebaseApp).verifyIdToken(match[1], true),
-    getAppCheck(firebaseApp).verifyToken(appCheckToken, { consume: true })
-  ]);
-  if (appCheck.alreadyConsumed) throw new HttpsError("unauthenticated", "Refresh your app verification and try again.");
+  let token;
+  try {
+    token = await getAuth(firebaseApp).verifyIdToken(match[1], true);
+  } catch (error) {
+    // Keep expired/revoked/invalid Firebase ID tokens distinct from App Check.
+    if (String(error?.code || "").startsWith("auth/")) {
+      throw new HttpsError("unauthenticated", "Your Vivid sign-in token has expired. Refresh your session and try again.");
+    }
+    throw error;
+  }
+
+  let appCheck;
+  try {
+    appCheck = await getAppCheck(firebaseApp).verifyToken(appCheckToken, { consume: true });
+  } catch (error) {
+    console.error("Watch Rooms App Check verification failed:", {
+      code: error?.code || "unknown",
+      message: error?.message || String(error)
+    });
+    throw new HttpsError("failed-precondition", "Vivid could not verify this browser. Refresh the page and try again.");
+  }
+  if (appCheck.alreadyConsumed) {
+    throw new HttpsError("failed-precondition", "This app-verification token was already used. Refresh the page and try again.");
+  }
   if (!token.uid || token.firebase?.sign_in_provider === "anonymous") {
     throw new HttpsError("unauthenticated", "Sign in with a Vivid account to use Watch Rooms.");
   }
@@ -916,9 +935,11 @@ export default async function handler(req, res) {
     return respond(res, 200, { ok: true, data: result ?? null });
   } catch (error) {
     const rawCode = error?.code || "internal";
-    const code = rawCode.startsWith("auth/") || rawCode.startsWith("app-check/")
+    const code = rawCode.startsWith("auth/")
       ? "unauthenticated"
-      : rawCode;
+      : rawCode.startsWith("app-check/")
+        ? "failed-precondition"
+        : rawCode;
     const status = ({
       unauthenticated: 401, "permission-denied": 403, "not-found": 404,
       "auth/id-token-expired": 401, "auth/id-token-revoked": 401, "auth/invalid-id-token": 401, "auth/argument-error": 401,
