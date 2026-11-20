@@ -520,3 +520,23 @@ test("Watch Room lobby shows real membership and requires a searchable catalogue
     assert.ok(queue.includes("!/^\\d{1,12}$/.test(contentId)"), "queue must validate catalogue IDs");
   }
 });
+
+test("Watch Room lobby reads authoritative members, presence, queue and chat through the authenticated API", () => {
+  const cloudflare = readFileSync(new URL("../cloudflare/functions/api/watch-rooms.js", import.meta.url), "utf8");
+  const nodeApi = readFileSync(new URL("../api/watch-rooms.js", import.meta.url), "utf8");
+  const client = readFileSync(new URL("../scripts/watch-room-lobby.js", import.meta.url), "utf8");
+  for (const backend of [cloudflare, nodeApi]) {
+    assert.ok(backend.includes("async function getWatchRoomLobbySnapshot(request)"));
+    assert.ok(backend.includes('roomRef.collection("members").get()'));
+    assert.ok(backend.includes('roomRef.collection("presence").get()'));
+    assert.ok(backend.includes('roomRef.collection("queue").get()'));
+    assert.ok(backend.includes('roomRef.collection("chat").orderBy("createdAt", "desc").limit(80).get()'));
+    assert.ok(backend.includes("getWatchRoomLobbySnapshot,"));
+  }
+  assert.ok(client.includes('call("getWatchRoomLobbySnapshot")'));
+  assert.ok(client.includes("memberList = Array.isArray(snapshot.members) ? snapshot.members : []"));
+  assert.ok(client.includes("memberList.filter(member => member.isOnline).length"));
+  assert.ok(client.includes("presenceRefresh = setInterval(refreshLobby, 5000)"));
+  assert.ok(client.includes("Couldn't load room members."));
+  assert.doesNotMatch(client, /onSnapshot|collection\(db,/);
+});
