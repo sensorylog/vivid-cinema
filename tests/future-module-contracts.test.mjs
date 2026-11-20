@@ -310,3 +310,10 @@ test("Watch Room guests can leave transactionally while hosts must close the roo
   assert.ok(client.includes('call("leaveWatchRoom")'));
   assert.ok(page.includes('id="wr-leave-room"'));
 });
+
+
+test("Watch Rooms dashboard ignores stale account responses after authentication changes", () => {
+  const client = readFileSync(new URL("../scripts/watch-rooms.js", import.meta.url), "utf8");
+  assert.ok(client.includes("let dashboardLoadGeneration = 0"));
+  assert.ok(client.includes("generation !== dashboardLoadGeneration || auth.currentUser?.uid !== user.uid"));
+});
