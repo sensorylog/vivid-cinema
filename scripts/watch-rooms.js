@@ -1,7 +1,7 @@
-import { app, auth, db } from "./firebase.js";
+import { appCheck, auth, db } from "./firebase.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
 import { collection, getDocs, orderBy, query } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
-import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-functions.js";
+import { callWatchRoomApi } from "./watch-room-api.js";
 
 const byId = id => document.getElementById(id);
 const loading = byId("watch-rooms-loading");
@@ -12,8 +12,7 @@ const retryButton = byId("watch-rooms-retry");
 const roomDialog = byId("wr-create-room-dialog");
 const joinDialog = byId("wr-join-room-dialog");
 const clubDialog = byId("wr-create-club-dialog");
-const functions = getFunctions(app, "us-central1");
-const call = name => httpsCallable(functions, name);
+const call = callWatchRoomApi;
 const dashboardState = { rooms: [], clubs: [], selectedClubId: null };
 let dashboardLoadGeneration = 0;
 
