@@ -2,8 +2,9 @@ import { auth, db } from "./firebase.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
 import { doc, getDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 import { callWatchRoomApi } from "./watch-room-api.js";
+import { getProviderAdapter, sendProviderCommand as sendAdapterCommand } from "./playback/provider-adapters.js";
 
-const SUPPORTED_ORIGIN = "https://vidsrc.sh";
+let activeProviderId = "vidapi";
 const call = callWatchRoomApi;
 let roomId = "";
 let role = "";
@@ -31,17 +32,22 @@ const joinButton = document.getElementById("vivid-room-sync-join");
 const leaveButton = document.getElementById("vivid-room-sync-leave");
 const setNote = message => { if (note) note.textContent = message; };
 
-function getSupportedFrame() {
-  const frame = document.getElementById("vidapi-player");
-  if (!frame?.contentWindow || !frame.src) return null;
-  try { return new URL(frame.src).origin === SUPPORTED_ORIGIN ? frame : null; } catch { return null; }
+function getActiveAdapter() {
+  return getProviderAdapter("player1", activeProviderId);
 }
 
-function sendProviderCommand(action) {
+function getSupportedFrame() {
+  const adapter = getActiveAdapter();
+  const frame = document.getElementById("vidapi-player");
+  if (!adapter || !frame?.contentWindow || !frame.src) return null;
+  try { return new URL(frame.src).origin === adapter.origin ? frame : null; } catch { return null; }
+}
+
+function sendProviderCommand(action, position) {
+  const adapter = getActiveAdapter();
   const frame = getSupportedFrame();
-  if (!frame) return false;
-  frame.contentWindow.postMessage({ player: true, action }, SUPPORTED_ORIGIN);
-  return true;
+  if (!adapter || !frame) return false;
+  return sendAdapterCommand({ adapter, frame, action, position });
 }
 
 function stopConnection() {
@@ -71,7 +77,7 @@ function applyRemoteState(force = false) {
   const elapsed = state.status === "playing" ? Math.max(0, (Date.now() + clockOffsetMs - updatedAt) / 1000) : 0;
   const expected = Math.max(0, Math.min(Number(state.duration) || 86400, Number(state.position) + elapsed));
   if (force || localPosition == null || Math.abs(expected - localPosition) > 2.5) {
-    sendProviderCommand("seek" + Math.floor(expected));
+    sendProviderCommand("seek", expected);
   }
   if (state.status === "playing" && localStatus !== "playing") sendProviderCommand("play");
   if ((state.status === "paused" || state.status === "ended") && localStatus === "playing") sendProviderCommand("pause");
