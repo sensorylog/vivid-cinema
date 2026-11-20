@@ -876,6 +876,7 @@ function renderShell(params) {
       if (!player.src || player.src === "about:blank") return;
       status?.classList.remove("is-compact");
       if (status && !status.classList.contains("is-warning")) status.hidden = true;
+      window.dispatchEvent(new CustomEvent("vivid:player-frame-loaded", { detail: { playerId: "player1", providerId: activeSource } }));
     });
     player.addEventListener("error", () => {
       triggerFallback("iframe_error");
