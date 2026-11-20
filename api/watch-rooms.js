@@ -423,6 +423,22 @@ async function getWatchRoomLobbySnapshot(request) {
   };
 }
 
+async function getWatchRoomPlaybackSnapshot(request) {
+  const uid = requireUser(request);
+  const roomId = validId(request.data?.roomId, "room ID");
+  const { roomRef, member } = await requireRoomMember(roomId, uid);
+  const playbackSnapshot = await roomRef.collection("playback").doc("current").get();
+  const playbackData = playbackSnapshot.exists ? playbackSnapshot.data() : null;
+  const updatedAt = playbackData?.updatedAt?.toMillis?.() ??
+    (typeof playbackData?.updatedAt === "number" ? playbackData.updatedAt : null);
+  return {
+    roomId,
+    role: member.role,
+    playback: playbackData ? { ...playbackData, updatedAt } : null,
+    serverTime: Date.now()
+  };
+}
+
 async function heartbeatWatchRoom(request) {
   const uid = requireUser(request);
   const roomId = validId(request.data?.roomId, "room ID");
@@ -876,6 +892,7 @@ const operations = {
   cleanupExpiredWatchRooms,
   heartbeatWatchRoom,
   getWatchRoomLobbySnapshot,
+  getWatchRoomPlaybackSnapshot,
   addWatchRoomQueueItem,
   removeWatchRoomQueueItem,
   voteWatchRoomQueueItem,
@@ -902,7 +919,7 @@ const ALLOWED_ORIGINS = new Set([
   "https://vivid-cinema.firebaseapp.com",
   ...(process.env.VIVID_ALLOWED_ORIGINS || "").split(",").map(value => value.trim()).filter(Boolean)
 ]);
-const ROUTES = new Set(["createWatchRoom","createCinemaClub","createWatchInvitation","redeemWatchInvitation","revokeWatchInvitation","cleanupExpiredWatchRooms","heartbeatWatchRoom","getWatchRoomLobbySnapshot","addWatchRoomQueueItem","removeWatchRoomQueueItem","voteWatchRoomQueueItem","sendWatchRoomMessage","reactToWatchRoomMessage","updateWatchRoomSettings","removeWatchRoomMember","leaveWatchRoom","closeWatchRoom","publishWatchRoomPlayback","addCinemaClubWatchlistItem","removeCinemaClubWatchlistItem","recordCinemaClubScreening","addCinemaClubAfterCreditsReview","addCinemaClubDiscussionMessage","leaveCinemaClub","archiveCinemaClub"]);
+const ROUTES = new Set(["createWatchRoom","createCinemaClub","createWatchInvitation","redeemWatchInvitation","revokeWatchInvitation","cleanupExpiredWatchRooms","heartbeatWatchRoom","getWatchRoomLobbySnapshot","getWatchRoomPlaybackSnapshot","addWatchRoomQueueItem","removeWatchRoomQueueItem","voteWatchRoomQueueItem","sendWatchRoomMessage","reactToWatchRoomMessage","updateWatchRoomSettings","removeWatchRoomMember","leaveWatchRoom","closeWatchRoom","publishWatchRoomPlayback","addCinemaClubWatchlistItem","removeCinemaClubWatchlistItem","recordCinemaClubScreening","addCinemaClubAfterCreditsReview","addCinemaClubDiscussionMessage","leaveCinemaClub","archiveCinemaClub"]);
 
 function respond(res, status, payload) {
   res.status(status).setHeader("Cache-Control", "no-store");
