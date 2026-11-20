@@ -297,7 +297,7 @@ function displayNameFor(auth) {
   return name || "Vivid member";
 }
 
-export const createWatchRoom = onCall({ region: "us-central1", maxInstances: 20 }, async (request) => {
+const createWatchRoom = onCall({ region: "us-central1", maxInstances: 20 }, async (request) => {
   const auth = requireVividUser(request);
   const name = boundedText(request.data?.name, "Room name", 48, true);
   const filmTitle = boundedText(request.data?.filmTitle, "Film title", 100);
@@ -323,7 +323,7 @@ export const createWatchRoom = onCall({ region: "us-central1", maxInstances: 20 
   return { roomId: roomRef.id, expiresAt: expiresAt.toMillis() };
 });
 
-export const createCinemaClub = onCall({ region: "us-central1", maxInstances: 20 }, async (request) => {
+const createCinemaClub = onCall({ region: "us-central1", maxInstances: 20 }, async (request) => {
   const auth = requireVividUser(request);
   const name = boundedText(request.data?.name, "Club name", 48, true);
   const description = boundedText(request.data?.description, "Club description", 180);
@@ -348,7 +348,7 @@ export const createCinemaClub = onCall({ region: "us-central1", maxInstances: 20
   return { clubId: clubRef.id };
 });
 
-export const createWatchInvitation = onCall({ region: "us-central1", maxInstances: 20 }, async (request) => {
+const createWatchInvitation = onCall({ region: "us-central1", maxInstances: 20 }, async (request) => {
   const auth = requireVividUser(request);
   const targetType = request.data?.targetType;
   if (!["room", "club"].includes(targetType)) {
@@ -386,7 +386,7 @@ export const createWatchInvitation = onCall({ region: "us-central1", maxInstance
   return { inviteCode: code, expiresAt: expiresAt.toMillis() };
 });
 
-export const redeemWatchInvitation = onCall({ region: "us-central1", maxInstances: 30 }, async (request) => {
+const redeemWatchInvitation = onCall({ region: "us-central1", maxInstances: 30 }, async (request) => {
   const auth = requireVividUser(request);
   const code = typeof request.data?.inviteCode === "string"
     ? request.data.inviteCode.trim().toUpperCase()
@@ -458,7 +458,7 @@ export const redeemWatchInvitation = onCall({ region: "us-central1", maxInstance
   });
 });
 
-export const revokeWatchInvitation = onCall({ region: "us-central1", maxInstances: 20 }, async (request) => {
+const revokeWatchInvitation = onCall({ region: "us-central1", maxInstances: 20 }, async (request) => {
   const auth = requireVividUser(request);
   const code = typeof request.data?.inviteCode === "string"
     ? request.data.inviteCode.trim().toUpperCase()
@@ -494,7 +494,7 @@ export const revokeWatchInvitation = onCall({ region: "us-central1", maxInstance
  * This bounded scheduled job removes expired invitation records, dashboard
  * pointers, and each expired room tree.
  */
-export const cleanupExpiredWatchRooms = onSchedule({
+const cleanupExpiredWatchRooms = onSchedule({
   schedule: "every 60 minutes",
   timeZone: "UTC",
   region: "us-central1",
@@ -537,27 +537,3 @@ export const cleanupExpiredWatchRooms = onSchedule({
   });
 });
 
-// Watch Rooms Stage 4: trusted lobby, queue, chat and host-control operations.
-export {
-  addCinemaClubWatchlistItem,
-  removeCinemaClubWatchlistItem,
-  recordCinemaClubScreening,
-  addCinemaClubAfterCreditsReview,
-  addCinemaClubDiscussionMessage,
-  leaveCinemaClub,
-  archiveCinemaClub
-} from "./watch-rooms-clubs.js";
-
-export {
-  heartbeatWatchRoom,
-  addWatchRoomQueueItem,
-  removeWatchRoomQueueItem,
-  voteWatchRoomQueueItem,
-  sendWatchRoomMessage,
-  reactToWatchRoomMessage,
-  updateWatchRoomSettings,
-  removeWatchRoomMember,
-  leaveWatchRoom,
-  closeWatchRoom,
-  publishWatchRoomPlayback
-} from "./watch-rooms-lobby.js";
