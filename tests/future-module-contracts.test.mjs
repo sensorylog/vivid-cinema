@@ -593,3 +593,34 @@ test("Watch Room Step 5 propagates the host-selected player and server to both p
   assert.ok(player2.includes("loadServer(selection.providerId)"));
   assert.ok(player2.includes('new CustomEvent("vivid:player-adapter-ready"'));
 });
+
+
+test("Watch Room Step 5 restores Player 2 position only after the verified CineSRC ready event", () => {
+  const room = readFileSync(new URL("../scripts/watch-room-playback.js", import.meta.url), "utf8");
+  const player2 = readFileSync(new URL("../scripts/playback/tflix-secondary-player.js", import.meta.url), "utf8");
+  assert.ok(room.includes('pendingPlayer2Seek = position'));
+  assert.ok(room.includes('type === "cinesrc:ready"'));
+  assert.ok(room.includes('sendProviderCommand("seek", position)'));
+  assert.ok(player2.includes('loadServer(selection.providerId, selection.position)'));
+  assert.ok(player2.includes('return true;'));
+  assert.ok(player2.includes('vivid:watch-room-selection-error'));
+});
+
+test("Watch Room Step 6 enforces granular guest permissions in both trusted APIs and the lobby", () => {
+  const node = readFileSync(new URL("../api/watch-rooms.js", import.meta.url), "utf8");
+  const cloudflare = readFileSync(new URL("../cloudflare/functions/api/watch-rooms.js", import.meta.url), "utf8");
+  const lobby = readFileSync(new URL("../scripts/watch-room-lobby.js", import.meta.url), "utf8");
+  const html = readFileSync(new URL("../watch-rooms.html", import.meta.url), "utf8");
+  for (const backend of [node, cloudflare]) {
+    assert.ok(backend.includes("allowGuestPlayerSelection !== true"));
+    assert.ok(backend.includes("allowGuestQueueManagement !== true"));
+    assert.ok(backend.includes("allowGuestVoting === false"));
+    assert.ok(backend.includes("allowGuestPlayerSelection",), "snapshot/settings expose player-selection permission");
+    assert.ok(backend.includes("allowGuestQueueManagement"));
+  }
+  for (const name of ["allowGuestQueue", "allowGuestChat", "allowGuestVoting", "allowGuestPlayerSelection", "allowGuestQueueManagement"]) {
+    assert.ok(html.includes('name="' + name + '"'));
+    assert.ok(lobby.includes("form.elements." + name));
+  }
+  assert.ok(lobby.includes("currentSettings.elements.allowGuestPlayerSelection"));
+});
