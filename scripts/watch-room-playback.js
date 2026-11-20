@@ -1,14 +1,14 @@
-import { auth, db } from "./firebase.js";
+import { auth } from "./firebase.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
-import { doc, getDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 import { callWatchRoomApi } from "./watch-room-api.js";
 
 const SUPPORTED_ORIGIN = "https://vidsrc.sh";
 const call = callWatchRoomApi;
 let roomId = "";
 let role = "";
-let unsubscribePlayback = null;
+let playbackTimer = null;
 let heartbeatTimer = null;
+let playbackRefreshInFlight = false;
 let latestRemoteState = null;
 let joinedPlayback = false;
 let localPosition = null;
@@ -23,7 +23,7 @@ let clockOffsetMs = 0;
 const panel = document.createElement("section");
 panel.className = "vivid-room-sync";
 panel.id = "vivid-room-sync";
-panel.innerHTML = '<div class="vivid-room-sync__head"><div><span class="vivid-room-sync__eyebrow">VIVID WATCH ROOMS</span><h2>Watch together</h2><p id="vivid-room-sync-note" role="status" aria-live="polite">Connect this title to a private screening.</p></div><span class="vivid-room-sync__provider">VidSrc sync</span></div><form id="vivid-room-sync-form" class="vivid-room-sync__form"><label for="vivid-room-sync-code">Room invitation code</label><div><input id="vivid-room-sync-code" name="inviteCode" maxlength="10" minlength="10" autocomplete="off" autocapitalize="characters" placeholder="10-character code" required><button type="submit">Connect room</button></div></form><div class="vivid-room-sync__actions"><button type="button" id="vivid-room-sync-join" hidden>Join synced playback</button><button type="button" id="vivid-room-sync-leave" hidden>Disconnect</button></div></section>';
+panel.innerHTML = '<div class="vivid-room-sync__head"><div><span class="vivid-room-sync__eyebrow">VIVID WATCH ROOMS</span><h2>Watch together</h2><p id="vivid-room-sync-note" role="status" aria-live="polite">Connect this title to a private screening.</p></div><span class="vivid-room-sync__provider">Room sync</span></div><form id="vivid-room-sync-form" class="vivid-room-sync__form"><label for="vivid-room-sync-code">Room invitation code</label><div><input id="vivid-room-sync-code" name="inviteCode" maxlength="10" minlength="10" autocomplete="off" autocapitalize="characters" placeholder="10-character code" required><button type="submit">Connect room</button></div></form><div class="vivid-room-sync__actions"><button type="button" id="vivid-room-sync-join" hidden>Join synced playback</button><button type="button" id="vivid-room-sync-leave" hidden>Disconnect</button></div></section>';
 document.querySelector("#watch-content")?.insertAdjacentElement("afterend", panel);
 const note = document.getElementById("vivid-room-sync-note");
 const form = document.getElementById("vivid-room-sync-form");
@@ -45,10 +45,11 @@ function sendProviderCommand(action) {
 }
 
 function stopConnection() {
-  if (unsubscribePlayback) unsubscribePlayback();
-  unsubscribePlayback = null;
+  if (playbackTimer) window.clearInterval(playbackTimer);
   if (heartbeatTimer) window.clearInterval(heartbeatTimer);
+  playbackTimer = null;
   heartbeatTimer = null;
+  playbackRefreshInFlight = false;
   roomId = ""; role = ""; latestRemoteState = null; joinedPlayback = false; localPosition = null; localStatus = ""; hostStatus = "playing"; lastPublishAt = 0; lastPublishedStatus = ""; publishQueue = Promise.resolve(); lastHostPayload = null; clockOffsetMs = 0;
   joinButton.hidden = true; leaveButton.hidden = true; form.hidden = false;
 }
@@ -66,8 +67,8 @@ function applyRemoteState(force = false) {
   const state = latestRemoteState;
   if (!state || role === "host" || !joinedPlayback) return;
   if (!sameTitle(state)) { setNote("This room is synced to a different title or episode. Open that exact Vivid title to join."); return; }
-  if (!getSupportedFrame()) { setNote("Choose VidSrc in the player’s server list first. Other providers are not enabled for room sync."); return; }
-  const updatedAt = state.updatedAt?.toMillis?.() || Date.now();
+  if (!getSupportedFrame()) { setNote("Choose the room-compatible player in the server list first. Other providers are not enabled for room sync."); return; }
+  const updatedAt = Number(state.updatedAt) || Date.now();
   const elapsed = state.status === "playing" ? Math.max(0, (Date.now() + clockOffsetMs - updatedAt) / 1000) : 0;
   const expected = Math.max(0, Math.min(Number(state.duration) || 86400, Number(state.position) + elapsed));
   if (force || localPosition == null || Math.abs(expected - localPosition) > 2.5) {
@@ -75,38 +76,61 @@ function applyRemoteState(force = false) {
   }
   if (state.status === "playing" && localStatus !== "playing") sendProviderCommand("play");
   if ((state.status === "paused" || state.status === "ended") && localStatus === "playing") sendProviderCommand("pause");
-  setNote("Connected to the host’s playback clock. Small timing differences are corrected automatically.");
+  setNote("Connected to the host’s playback clock. Timing differences are corrected automatically.");
+}
+
+async function refreshPlayback() {
+  if (!roomId || playbackRefreshInFlight) return;
+  const requestedRoomId = roomId;
+  const startedAt = Date.now();
+  playbackRefreshInFlight = true;
+  try {
+    const result = await call("getWatchRoomPlaybackSnapshot")({ roomId: requestedRoomId });
+    const finishedAt = Date.now();
+    if (roomId !== requestedRoomId) return;
+    const serverTime = Number(result.data?.serverTime);
+    if (Number.isFinite(serverTime)) clockOffsetMs = serverTime - ((startedAt + finishedAt) / 2);
+    latestRemoteState = result.data?.playback || null;
+    if (role !== "host") {
+      if (latestRemoteState) applyRemoteState();
+      else setNote("Room connected. Waiting for the host to start playback.");
+    }
+  } catch (error) {
+    if (roomId === requestedRoomId) setNote(error?.message || "Playback sync connection was interrupted. Retrying automatically.");
+  } finally {
+    playbackRefreshInFlight = false;
+  }
 }
 
 async function connectToRoom(id) {
   const user = auth.currentUser;
   if (!user || user.isAnonymous) throw new Error("Sign in to your Vivid account before joining a Watch Room.");
   stopConnection();
-  const membership = await getDoc(doc(db, "rooms", id, "members", user.uid));
-  if (!membership.exists()) throw new Error("You are not a member of this Watch Room. Use a valid invitation code.");
-  const memberData = membership.data();
-  if (memberData.role !== "host" && memberData.role !== "guest") throw new Error("Your Watch Room membership is not valid.");
-  roomId = id; role = memberData.role;
+  const result = await call("getWatchRoomPlaybackSnapshot")({ roomId: id });
+  const memberRole = result.data?.role;
+  if (memberRole !== "host" && memberRole !== "guest") throw new Error("Your Watch Room membership is not valid.");
+  roomId = id; role = memberRole;
+  latestRemoteState = result.data?.playback || null;
+  const initialServerTime = Number(result.data?.serverTime);
+  if (Number.isFinite(initialServerTime)) clockOffsetMs = initialServerTime - Date.now();
   form.hidden = true; leaveButton.hidden = false;
   joinButton.hidden = role === "host";
-  setNote(role === "host" ? "You’re the host. Select VidSrc in the player; your playback becomes the room’s reference clock." : "Room connected. Start the same title with VidSrc, then tap Join synced playback.");
+  setNote(role === "host" ? "You’re the host. Select a room-compatible player; your playback becomes the room’s reference clock." : "Room connected. Open the same title and player, then tap Join synced playback.");
   const ping = async () => {
     const startedAt = Date.now();
     try {
-      const result = await call("heartbeatWatchRoom")({ roomId });
+      const heartbeat = await call("heartbeatWatchRoom")({ roomId });
       const finishedAt = Date.now();
-      const serverTime = Number(result.data?.serverTime);
+      const serverTime = Number(heartbeat.data?.serverTime);
       if (Number.isFinite(serverTime)) clockOffsetMs = serverTime - ((startedAt + finishedAt) / 2);
     } catch (error) {
       setNote(error?.message || "Room presence could not refresh.");
     }
   };
-  await ping(); heartbeatTimer = window.setInterval(ping, 30000);
-  unsubscribePlayback = onSnapshot(doc(db, "rooms", roomId, "playback", "current"), snapshot => {
-    if (!snapshot.exists()) { latestRemoteState = null; if (role !== "host") setNote("Connected. Waiting for the host to start playback."); return; }
-    latestRemoteState = snapshot.data();
-    if (role !== "host") applyRemoteState();
-  }, error => setNote(error?.message || "Playback sync connection was interrupted."));
+  await ping();
+  await refreshPlayback();
+  heartbeatTimer = window.setInterval(ping, 30000);
+  playbackTimer = window.setInterval(refreshPlayback, 2500);
 }
 
 form.addEventListener("submit", async event => {
@@ -125,7 +149,7 @@ form.addEventListener("submit", async event => {
 });
 
 joinButton.addEventListener("click", () => {
-  if (!getSupportedFrame() || localPosition == null) { setNote("Select VidSrc and start playback first. Once Vivid detects the player clock, tap Join synced playback."); return; }
+  if (!getSupportedFrame() || localPosition == null) { setNote("Select the room-compatible player and start playback first. Once Vivid detects the player clock, tap Join synced playback."); return; }
   joinedPlayback = true;
   if (latestRemoteState) applyRemoteState(true);
   else setNote("You’re connected. Waiting for the host’s first playback update.");
@@ -142,8 +166,6 @@ window.addEventListener("vivid:provider-playback", event => {
   if (detail.status === "paused") hostStatus = "paused";
   if (detail.status === "ended") hostStatus = "ended";
   const now = Date.now();
-  // Throttle periodic playing heartbeats, but never drop a real pause/resume
-  // transition just because it follows a recent progress update.
   if (detail.status === "playing" && lastPublishedStatus === "playing" && now - lastPublishAt < 3500) return;
   lastPublishAt = now;
   lastPublishedStatus = hostStatus;
@@ -155,8 +177,8 @@ window.addEventListener("vivid:provider-playback", event => {
 window.addEventListener("vivid:player-source-changed", event => {
   const source = event.detail?.source;
   if (source === "vidsrc") {
-    if (role === "host") setNote("VidSrc is active. Your playback controls the room clock.");
-    else if (roomId) setNote("VidSrc is active. Join synced playback when the player clock appears.");
+    if (role === "host") setNote("Room-compatible player is active. Your playback controls the room clock.");
+    else if (roomId) setNote("Room-compatible player is active. Join synced playback when the player clock appears.");
     return;
   }
   if (role === "host" && roomId && (lastHostPayload || latestRemoteState?.provider === "vidsrc")) {
@@ -167,9 +189,9 @@ window.addEventListener("vivid:player-source-changed", event => {
     lastPublishAt = Date.now();
     lastPublishedStatus = "paused";
     publishQueue = publishQueue.then(() => roomId === payload.roomId && role === "host" ? call("publishWatchRoomPlayback")(payload) : null).catch(error => setNote(error?.message || "Could not pause room sync after changing providers."));
-    setNote("Room playback paused because this provider does not expose verified sync controls. Switch back to VidSrc to resume synchronization.");
+    setNote("Room playback paused because this provider does not expose verified sync controls. Switch back to the room-compatible player to resume synchronization.");
   } else if (role !== "host" && roomId) {
-    setNote("This provider is not enabled for room sync. Switch to VidSrc to follow the host.");
+    setNote("This provider is not enabled for room sync. Switch to the room-compatible player to follow the host.");
   }
 });
 onAuthStateChanged(auth, user => {
