@@ -52,4 +52,4 @@ Turnstile proofs are single-use and expire after five minutes. They are never re
 - [ ] Verify Watch Rooms create/dashboard/invite/join/chat/playback.
 - [ ] Confirm Turnstile and App Check errors fail closed; do not add a bypass or silently disable App Check.
 
-Localhost remains intentionally excluded from production App Check attestation, matching the existing development behavior. Production HTTPS origins must be present in the Turnstile widget's hostname list.
+Vivid Pulse analytics now records events only for authenticated accounts. It no longer creates anonymous Firebase sessions or writes page-view events to Firestore on public visits, avoiding an unnecessary App Check token request for every visitor. Localhost remains intentionally excluded from production App Check attestation, matching the existing development behavior. Production HTTPS origins must be present in the Turnstile widget's hostname list.
