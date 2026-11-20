@@ -6,6 +6,8 @@ import { getProviderAdapter, sendProviderCommand as sendAdapterCommand } from ".
 
 let activePlayerId = "player1";
 let activeProviderId = "vidapi";
+let allowGuestPlayerSelection = false;
+let pendingPlayer2Seek = 0;
 const call = callWatchRoomApi;
 let roomId = "";
 let role = "";
@@ -70,7 +72,8 @@ function applyRoomPlayerSelection(room) {
   playerSelect.value = playerId;
   populateRoomProviderOptions(playerId, providerId);
   selectionPanel.hidden = false;
-  selectionControls.hidden = role !== "host";
+  allowGuestPlayerSelection = room.allowGuestPlayerSelection === true;
+  selectionControls.hidden = role !== "host" && !allowGuestPlayerSelection;
   selectionLabel.textContent = role === "host"
     ? "Choose the player and server for everyone in this room."
     : "The host selected " + (playerId === "player1" ? "Player 1" : "Player 2") + " · " + providerId + ".";
@@ -79,6 +82,7 @@ function applyRoomPlayerSelection(room) {
     if (activePlayerId !== playerId || activeProviderId !== providerId) sendProviderCommand("pause");
     lastAppliedSelectionKey = key;
     const position = Math.max(0, Number(localPosition ?? latestRemoteState?.position ?? lastHostPayload?.position) || 0);
+    if (playerId === "player2" && providerId === "cinesrc") pendingPlayer2Seek = position;
     window.dispatchEvent(new CustomEvent("vivid:watch-room-apply-selection", {
       detail: { playerId, providerId, position }
     }));
@@ -93,7 +97,7 @@ async function refreshRoomPlayerSelection() {
 }
 
 async function saveRoomPlayerSelection() {
-  if (!roomId || role !== "host") return;
+  if (!roomId || (role !== "host" && !allowGuestPlayerSelection)) return;
   const playerId = playerSelect.value;
   const providerId = providerSelect.value;
   providerSelect.disabled = true;
@@ -264,11 +268,19 @@ window.addEventListener("message", event => {
   const data = event.data;
   if (!data || typeof data.type !== "string" || !data.type.startsWith("cinesrc:")) return;
   const type = data.type;
-  if (!["cinesrc:play", "cinesrc:pause", "cinesrc:timeupdate", "cinesrc:ended"].includes(type)) return;
+  if (!["cinesrc:ready", "cinesrc:play", "cinesrc:pause", "cinesrc:timeupdate", "cinesrc:ended"].includes(type)) return;
   let status = localStatus;
   if (type === "cinesrc:play") status = "playing";
   else if (type === "cinesrc:pause") status = "paused";
   else if (type === "cinesrc:ended") status = "ended";
+  if (type === "cinesrc:ready") {
+    if (pendingPlayer2Seek > 0) {
+      const position = pendingPlayer2Seek;
+      pendingPlayer2Seek = 0;
+      sendProviderCommand("seek", position);
+    }
+    return;
+  }
   if (type === "cinesrc:timeupdate" && status !== "playing") return;
   localPosition = Math.max(0, Number(data.currentTime) || 0);
   localStatus = status;
