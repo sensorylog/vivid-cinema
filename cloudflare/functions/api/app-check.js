@@ -71,7 +71,13 @@ function options(origin) {
 
 export async function onRequest({ request, env }) {
   const origin = request.headers.get("Origin") || "";
-  if (!isAllowedOrigin(origin, env)) {
+  // Browsers commonly omit Origin on same-origin GET requests. The GET route
+  // exposes only the public site key; the proof-exchange POST must carry an
+  // explicitly allowed Origin and is checked against Turnstile's signed host.
+  if (origin && !isAllowedOrigin(origin, env)) {
+    return json(403, { ok: false, code: "permission-denied", message: "This Vivid origin is not allowed." });
+  }
+  if (request.method === "POST" && !isAllowedOrigin(origin, env)) {
     return json(403, { ok: false, code: "permission-denied", message: "This Vivid origin is not allowed." });
   }
   if (request.method === "OPTIONS") return options(origin);
