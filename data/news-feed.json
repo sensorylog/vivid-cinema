@@ -1,10 +1,36 @@
 {
-  "generatedAt": "2026-11-20T18:48:10.695Z",
+  "generatedAt": "2026-11-20T19:28:42.174Z",
   "source": "Google News RSS search feeds",
   "count": 120,
   "failedQueries": 0,
   "feedCount": 21,
   "articles": [
+    {
+      "id": "181wmoh",
+      "headline": "Jersey's and Guernsey's governments welcome new UK-EU deal",
+      "publisher": "BBC",
+      "publisherUrl": "https://www.bbc.com",
+      "sourceUrl": "https://www.bbc.com/news/articles/c6eq4jd2z23no",
+      "publishedAt": "2026-11-20T19:17:36.000Z",
+      "region": "europe",
+      "category": "television",
+      "summary": "Jersey's and Guernsey's governments say the package will especially benefit trade and young people.",
+      "imageUrl": "./data/news-thumbnails/181wmoh.jpg",
+      "imageFallbackUrl": "https://ichef.bbci.co.uk/news/1024/branded_news/9a31/live/c2f39e70-e50c-11f1-b40b-5f46e8cf687c.jpg"
+    },
+    {
+      "id": "nndok2",
+      "headline": "Your weekend watch plan: Netflix true crime drama, Anthony Bourdain biopic on HBO Max and the final season kickoff of a buzzy Paramount+ thriller",
+      "publisher": "Tom's Guide",
+      "publisherUrl": "https://www.tomsguide.com",
+      "sourceUrl": "https://www.tomsguide.com/entertainment/streaming/your-weekend-watch-plan-netflix-true-crime-drama-anthony-bourdain-biopic-on-hbo-max-and-the-final-season-kickoff-of-a-buzzy-paramount-thriller",
+      "publishedAt": "2026-11-20T19:00:00.000Z",
+      "region": "hollywood",
+      "category": "streaming",
+      "summary": "From \"The Altruists\" to \"Tony,\" here are our top streaming picks for the weekend (November 20-22) for those who don",
+      "imageUrl": "./data/news-thumbnails/nndok2.jpg",
+      "imageFallbackUrl": "https://cdn.mos.cms.futurecdn.net/t9PCaVPe7v97WPxvPRjWYi-2000-80.jpg"
+    },
     {
       "id": "1dguyuc",
       "headline": "UK finds fix for fridge and freezer vulnerability after European hacks | Hindustan Times",
@@ -30,6 +56,19 @@
       "summary": "Netflix, Sony, Lionsgate, Leawood Films and Black Bear are reportedly in the running for the $80 million action thriller.",
       "imageUrl": "./data/news-thumbnails/492wul.jpg",
       "imageFallbackUrl": "https://images.highwise.com/media/entertainment-film-action-adventure.jpg"
+    },
+    {
+      "id": "a8py27",
+      "headline": "Why BTS and the Big Four Agencies Rejected the 'Glass Ceiling'—and Why a Mid-Sized Agency Knocked on It... The Numbers Prove 'Grammy Economics' [Park Ji-hyun's Art World]",
+      "publisher": "파이낸셜뉴스",
+      "publisherUrl": "https://en.fnnews.com",
+      "sourceUrl": "https://en.fnnews.com/news/202611210243467830",
+      "publishedAt": "2026-11-20T18:27:50.000Z",
+      "region": "global",
+      "category": "music",
+      "summary": "Jennie (left), nominated in two categories including &lsquo;Record of the Year&rsquo; at the 69th Grammy Awards, and Kevin Parker of Australian band Tame Impala. /Photo: Newsis [Financial News] A large number of K-pop artists have been named to the 69th Gramm",
+      "imageUrl": "./data/news-thumbnails/a8py27.jpg",
+      "imageFallbackUrl": "https://image.fnnews.com/resource/media/image/2026/11/17/202611170604195280_l.jpg"
     },
     {
       "id": "mzs4og",
@@ -71,6 +110,19 @@
       "imageFallbackUrl": "https://onlykashmir.in/wp-content/uploads/2026/11/WhatsApp-Image-2026-11-20-at-22.47.23.jpeg"
     },
     {
+      "id": "bc5bmc",
+      "headline": "21 celebrities who believe in aliens — including those who claim to have seen UFOs",
+      "publisher": "Entertainment Weekly",
+      "publisherUrl": "https://ew.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMiaEFVX3lxTE5Xc2x2U3Q2dmtNYWhhWWRXREhWaG52TFdRT1pIWnhrRVQ0aWZtazdDMDN1amJVVEM1V0FDMS1JQ0ZJeFNLbW0zQ2Jlb1hhaTNIazBoMVluQzgxUEt6Y01Pbk1TQjJrSkZ5?oc=5",
+      "publishedAt": "2026-11-20T17:22:30.000Z",
+      "region": "hollywood",
+      "category": "celebrity",
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
+    },
+    {
       "id": "1heatkm",
       "headline": "‘Hunger Games: Sunrise on the Reaping’ Hunts Down $21M in Box Office Previews",
       "publisher": "The Hollywood Reporter",
@@ -82,6 +134,19 @@
       "summary": "The Hunger Games: Sunrise on the Reaping makes its box office debut with $21 million in Thursday previews for a big opening weekend for the prequel.",
       "imageUrl": "./data/news-thumbnails/1heatkm.webp",
       "imageFallbackUrl": "https://www.hollywoodreporter.com/wp-content/uploads/2025/11/SOLSTICE_UNIT_250924_01842R_CropC-H-2025.jpg?w=1296&h=730&crop=1"
+    },
+    {
+      "id": "1onjrjg",
+      "headline": "Dhurandhar Dominates DPIFF Awards 2026 As Ranveer Singh, Aditya Dhar And Akshaye Khanna Take Top Honours",
+      "publisher": "Glamsham.com",
+      "publisherUrl": "https://glamsham.com",
+      "sourceUrl": "https://glamsham.com/bollywood/news/dpiff-awards-2026-celebrates-41-winners/",
+      "publishedAt": "2026-11-20T17:15:22.000Z",
+      "region": "india",
+      "category": "music",
+      "summary": "DPIFF Awards 2026 honours 41 winners, including Ranveer Singh, Aneet Padda, James Cameron, Taylor Swift and Kamal Haasan across cinema, OTT and music.",
+      "imageUrl": "./data/news-thumbnails/1onjrjg.jpg",
+      "imageFallbackUrl": "https://glamsham.com/wp-content/uploads/2026/11/From-Ranveer-Singh-to-Taylor-Swift-DPIFF-Awards-2026-celebrates-41-winners-across-cinema-OTT-and-music.jpg"
     },
     {
       "id": "1ar0lwh",
@@ -101,26 +166,26 @@
       "headline": "Lionsgate's 'The Hunger Games: Sunrise on the Reaping' Eyeing Blockbuster Opening Weekend After $21 Million Preview Screening Revenue",
       "publisher": "Media Play News",
       "publisherUrl": "https://www.mediaplaynews.com",
-      "sourceUrl": "https://www.mediaplaynews.com/lionsgates-the-hunger-games-sunrise-on-the-reaping-eyeing-blockbuster-weekend-opening-after-21-million-preview-screening-revenue/",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMi8AFBVV95cUxPUDRmQUlfY2VRUGhfYU1ETXBwSkZnRE9nMmg1V2F2RUpuQVV0bmpaN1BJd1ZPMUJVRjdjMTNRUjlkQV9pOTYzMmdwSnk0S0xKTDNUMngtVFlVaXJicXY4dU9rRXhfazBLdFphc1czZmpWOEFHZHdBUldRbmUxOXZQT1l1UXVWWDVqT0lZS1B5NTNkMndSX0Yxa05zYk5aTmV4N1BYN0t2Z1FIWm5RaktIQnBETlJsQl8zNktDQnF5bVFCSWswV1B3cUhSV1hubHlENkJXSnVFVFBfMUFPaUxsWmlGVkRJNWJvdnNSY2V6WVA?oc=5",
       "publishedAt": "2026-11-20T17:02:55.000Z",
       "region": "global",
       "category": "box-office",
-      "summary": "Lionsgate’s prequel The Hunger Games: Sunrise on the Reaping is heading toward a blockbuster opening weekend after generating $21.25 million across special early screenings and Nov. 19 previews. The first “Hunger Games” theatrical release in three years posted the second-largest preview gross in franchise history, trailing only 2013’s The Hunger Games: Catching Fire $25.2 million &hellip; Continue reading \"Lionsgate’s ‘The Hunger Games: Sunrise on the Reaping’ Eyeing Blockbuster Opening Weekend After $21 Million Preview Screening Revenue\"",
-      "imageUrl": "./data/news-thumbnails/df97n9.jpg",
-      "imageFallbackUrl": "https://cdn.mediaplaynews.com/wp-content/uploads/2026/11/THGSOTR.jpg"
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
     },
     {
       "id": "1teixm0",
       "headline": "What to watch tonight: 56 new shows and movies just added to Netflix, Prime Video, Disney+ and more — including the return of ‘Percy Jackson’ (Nov. 20)",
       "publisher": "Tom's Guide",
       "publisherUrl": "https://www.tomsguide.com",
-      "sourceUrl": "https://www.tomsguide.com/entertainment/streaming/what-to-watch-tonight-56-new-shows-and-movies-just-added-to-netflix-prime-video-disney-and-more-including-the-return-of-percy-jackson-nov-20",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMimgJBVV95cUxPRTN2RlVualBLOGhYbFpSRmRaX3FNb2JKQVhva0tJVEJaSmxNUDFvelRoN0ZPbGRfNG50OUo5ekQ0M1QyVFBiVTZWbUxfVnZOd3p4aERHR0o3dUVwWHJXOElMUFFlWmNPSU5YTzl0QjR6ZEw4TEJsQTdhcXg3WUdDTEQ2VVFiMm1wRmIxWTl2OHJOZ2VCQ2dPdUdISC11alpydzMxd1BycHFIZm9BZHFRNGVwR0FHZUhEVkpuU2U3YTBmeG9DbjM3ajNOVEdpcUtXQWtqYTRhU0RpWVgtR0tmU2R0dS1jbmhXWDc0Yk9MQ2JrQjhvcUJLblExSVdycXRiVk5qMWU2WklfSWZRMmE1YnM3TElZLXpVcnc?oc=5",
       "publishedAt": "2026-11-20T17:00:00.000Z",
       "region": "hollywood",
       "category": "streaming",
-      "summary": "What to watch tonight: 56 new shows and movies just added to Netflix, Prime Video, Disney+ and more — including the return of ‘Percy Jackson’ (Nov. 20)",
-      "imageUrl": "./data/news-thumbnails/1teixm0.jpg",
-      "imageFallbackUrl": "https://cdn.mos.cms.futurecdn.net/BVFWyTyHRUVdNe6KnJ9b8M-2000-80.jpg"
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
     },
     {
       "id": "1c59x41",
@@ -153,13 +218,13 @@
       "headline": "‘The Polygamist’ dominates the 2026 NFTAs, taking home the most awards",
       "publisher": "Bona Magazine",
       "publisherUrl": "https://www.bona.co.za",
-      "sourceUrl": "https://www.bona.co.za/entertainment/the-polygamist-dominates-the-2026-nftas-taking-home-the-most-awards/",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMiqAFBVV95cUxOQkNMYjl2QjdDU2xobUxrRUlNVnZ6N1JNeTdablo5M3pxQS1XWmFDQnpEcS0zdk5fV1BwdWFmbWhKbV95WHRCLTl3RldSeXFiNWZ5SHdzazdaWmJ2OTFtNUZhQmlqMkJtWnpnNm9IWTRzQ2M0ZWdOOXlRRHA5MHpFNVRMbGwweG5hdnk5U3NsbkhKQ2tIZlF1MnRlU01XQjdzYlVUQUlKUDA?oc=5",
       "publishedAt": "2026-11-20T16:43:46.000Z",
       "region": "global",
       "category": "awards",
-      "summary": "'The Polygamist' dominated the 2026 NFTAs with five wins, including Best Scripted TV Series, Best Actress for Gugu Gumede and Best Director.",
-      "imageUrl": "./data/news-thumbnails/edz8s2.jpg",
-      "imageFallbackUrl": "https://www.bona.co.za/wp-content/uploads/2026/11/SnapInsta.to_703861839_18197397676363022_7627509108650987907_n-1-1.jpg"
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
     },
     {
       "id": "1e34sws",
@@ -305,12 +370,51 @@
       "imageFallbackUrl": ""
     },
     {
+      "id": "mow4ur",
+      "headline": "Skydance Will Need International Films to Supply Theatrical Release Pledge, Raine’s Joe Ravitch Predicts: ‘Those Are Big Investments’",
+      "publisher": "IMDb",
+      "publisherUrl": "https://www.imdb.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMiZkFVX3lxTE93Z01EOTk2TmdoWVpzdjM1UGQ0bUdqTjhOdUVYZEk2ZUFvcHdfMlZCMjBVTEkzcUJBQTFJWkI5LXA3S1E1VVkyVzlXRWF1WkVKSUFXUExCTDBPVERPTzdlTFZ6aUFVdw?oc=5",
+      "publishedAt": "2026-11-20T15:56:15.000Z",
+      "region": "hollywood",
+      "category": "film",
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
+    },
+    {
+      "id": "qgxdli",
+      "headline": "Big blow for Odo Broni as Akosua Serwaa gets major court boost in DL widow case",
+      "publisher": "Yen News",
+      "publisherUrl": "https://yen.com.gh",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMiywFBVV95cUxOdG53NGhXelowNm1qbXB3SldKMUJ0RVpMQmF0Wk9Cem5zejZyNHZMdC1XeXhDYl9NcDBYc1hjMVRwRjBzaGF4M2JvVGJaUWhPZ0I1ZHJBc1NTb0xOZmlUejhiSGlnRzgwemNkR19UaWdQN09TSkl3amxHQUh5WjJkeDAyWjdxS2pYYl9jX3BmUWZDc3RsU2hwcGdJTTBzRVQ3UlNMUzdiWGpUQW5wUUgwU29zc09tXzFxS1RqcDBjWFNrNW5mSWVQZ05OWQ?oc=5",
+      "publishedAt": "2026-11-20T15:43:29.000Z",
+      "region": "africa",
+      "category": "celebrity",
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
+    },
+    {
+      "id": "u07cv7",
+      "headline": "Nollywood Actress dies",
+      "publisher": "Dockaysworld",
+      "publisherUrl": "https://www.dockaysworld.com.ng",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMiZkFVX3lxTE9STjF0U3E0UEVRMjllY0lsWWh6U1JKQWJuWGdxTjdFY3dTTHdLZHR0QVpyVlFhWkh1MnFxaEhlX1dUUVNJSVVXZmxrUk1sX0JvSXkyeVRRdFRJQzkxSHY3Zkh2aFpRZw?oc=5",
+      "publishedAt": "2026-11-20T15:30:44.000Z",
+      "region": "africa",
+      "category": "film",
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
+    },
+    {
       "id": "1wmka21",
       "headline": "Here are eight films and TV shows you can watch during Native American Heritage Month",
       "publisher": "The Reveille, LSU's student newspaper",
       "publisherUrl": "https://lsureveille.com",
       "sourceUrl": "https://news.google.com/rss/articles/CBMiqwFBVV95cUxPZFJzak1ZTHhRQkY4Q1I2UF9ybFR0cTh6eVRLVEszd2F1Yk9HeDhzcExGekU2R001OHd3aWEtS3NoU3BiTXFPaFF3a21WUDl2WFhZeUI0ZG04eDltVXYwTnBZTnBxam9Ec3ItMk5odGctTGxaRXF3b1JpUmFlTW9CS1JvVEFfT3NzbVd2ZU5kUWFZdnJzU3AwbDJDZ25DenZtcENmNlNqZ29nXzQ?oc=5",
-      "publishedAt": "2026-11-20T15:23:25.000Z",
+      "publishedAt": "2026-11-20T15:23:32.000Z",
       "region": "hollywood",
       "category": "television",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
@@ -326,6 +430,19 @@
       "publishedAt": "2026-11-20T15:08:12.000Z",
       "region": "hollywood",
       "category": "film",
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
+    },
+    {
+      "id": "pif24x",
+      "headline": "27 Shocking Actor Deaths That Happened Mid-Filming — And How The Movie Or TV Show Handled It",
+      "publisher": "BuzzFeed",
+      "publisherUrl": "https://www.buzzfeed.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMimAFBVV95cUxOaEV1SndBT0lJT284eVNQaXVKQS1FV2VJS0NjYlZBR0FrSlNrblhUai16NG1jVy1ZVDRLZzA3RG0yajdPb0xES0o2ekhURU1md3dKb2U0TTU4WHNtUFBJTmUtMGdyZ3JJRlRNTmdTSWJJWGwyUWtpSThuUENBMlYzMlVPVEhtOWpqY2hodGVyUTRodXlJaTBnSQ?oc=5",
+      "publishedAt": "2026-11-20T15:01:02.000Z",
+      "region": "hollywood",
+      "category": "celebrity",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
       "imageUrl": "",
       "imageFallbackUrl": ""
@@ -370,14 +487,14 @@
       "imageFallbackUrl": ""
     },
     {
-      "id": "1f37d8i",
-      "headline": "Udit Narayan says Bhuvan Bam has put together an entertaining world in ‘Dhindora 2’",
-      "publisher": "www.thehawk.in",
-      "publisherUrl": "https://www.thehawk.in",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMiwAFBVV95cUxQNU1WZTBfT2w1RUZiRnNDNnRnVzNJcHZRNFdCU3czZ2Q2OEdvaXdNcU1LTlhmeElRUVplcEFUdklROWQwWlEzaU11ZEtIMXJtSjZsX0hicUNFSnlhMFJtZE9ITUFkTVB0TE1FXzFFdXE4b29aQ291dVh2SHY4TGxGWkRJdEhjNWFLUk5Lb1lrYlh4UmFFdDhHSV9Ybk1YX3VpQUZOcDl4LVVPQ3RMdW9FSkxpLWdZMFhwZC1IaXhCUkw?oc=5",
-      "publishedAt": "2026-11-20T14:48:00.000Z",
-      "region": "india",
-      "category": "music",
+      "id": "1xay515",
+      "headline": "Broadcast Ad Exposure Time Jumps With Start Of New Season 11/20/2026",
+      "publisher": "MediaPost",
+      "publisherUrl": "https://www.mediapost.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMirgFBVV95cUxQRUVsSDQyblZRTTBOT3VncHNZNDhqdnF2THNEQnhvSTR1eEJOdGVVM1Q1RHlobUZkdjY2a3R6dUF1cTJ0VnRzWDlHSTBlRDluS3pjVGFqemdhWTFLaXpOd2VjNU9uVGkxdDdDeDlrSjJfRkxaUTdHT0dyMmJTUGdTUlR3SFVKdXRSNDA0c1k3WURzQlI0emQ3dzBsSXh3WmpEbTVNNmV2X3A4VWdhSGc?oc=5",
+      "publishedAt": "2026-11-20T14:50:30.000Z",
+      "region": "hollywood",
+      "category": "streaming",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
       "imageUrl": "",
       "imageFallbackUrl": ""
@@ -461,32 +578,6 @@
       "imageFallbackUrl": ""
     },
     {
-      "id": "u07cv7",
-      "headline": "Nollywood Actress dies",
-      "publisher": "Dockaysworld",
-      "publisherUrl": "https://www.dockaysworld.com.ng",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMiZkFVX3lxTE9STjF0U3E0UEVRMjllY0lsWWh6U1JKQWJuWGdxTjdFY3dTTHdLZHR0QVpyVlFhWkh1MnFxaEhlX1dUUVNJSVVXZmxrUk1sX0JvSXkyeVRRdFRJQzkxSHY3Zkh2aFpRZw?oc=5",
-      "publishedAt": "2026-11-20T14:04:10.000Z",
-      "region": "africa",
-      "category": "film",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
-      "id": "1xay515",
-      "headline": "Broadcast Ad Exposure Time Jumps With Start Of New Season 11/20/2026",
-      "publisher": "MediaPost",
-      "publisherUrl": "https://www.mediapost.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMirgFBVV95cUxQRUVsSDQyblZRTTBOT3VncHNZNDhqdnF2THNEQnhvSTR1eEJOdGVVM1Q1RHlobUZkdjY2a3R6dUF1cTJ0VnRzWDlHSTBlRDluS3pjVGFqemdhWTFLaXpOd2VjNU9uVGkxdDdDeDlrSjJfRkxaUTdHT0dyMmJTUGdTUlR3SFVKdXRSNDA0c1k3WURzQlI0emQ3dzBsSXh3WmpEbTVNNmV2X3A4VWdhSGc?oc=5",
-      "publishedAt": "2026-11-20T14:03:02.000Z",
-      "region": "hollywood",
-      "category": "streaming",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
       "id": "1uzhqwx",
       "headline": "Popular GH actress spotted selling on the streets, appeals to celebs for help",
       "publisher": "Yen News",
@@ -539,26 +630,13 @@
       "imageFallbackUrl": ""
     },
     {
-      "id": "1x3vyix",
+      "id": "lbkdrz",
       "headline": "Ewa Puszczyńska says opening film 'Fatherland' reflects today's divided world despite its post-war settin",
       "publisher": "The Times of India",
       "publisherUrl": "https://timesofindia.indiatimes.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMivwJBVV95cUxNNHkwT2dseTdGZWtVNFlkY3JrOU5sWDl0SXpQNEVwX05paHJ0NU1sVFhab2Vad3NtcFFzck9NX2dYTFltR3FndVJhWWsxQk01YWtoUFZ0cFd0elUxUGxwWnpxX0dnS1M5WWVhOVU4ekhqMUlfbkVLellaVm44YW9KOXhCZTBGMG9TUklhOUF3S0pJS3hHazJEXzFOR1ctUG56cFQ0TkwtRmxST2dwS0R0SXY3RElnY3VWVkprLTBkV1BNVzN5SkNDWW8zRjRfb1JHZjdVUmJvMnEwRFpJXzVTb2oxbVlsV1EzTXphV09FUlpFNVB1TVhjdFNFQnFVUDRQR1pDT3cydHROV291czVHeV96a3AzUmZ3MnJqTHA4bVRTb0ZvaVJLLTlpcGVqNG5CeGIxN0tDY2tHaG9PSFY00gG_AkFVX3lxTE00eTBPZ2x5N0Zla1U0WWRjcms5TmxYOXRJelA0RXBfTmlocnQ1TWxUWFpvZVp3c21wUXNyT01fZ1hMWW1HcWd1UmFZazFCTTVha2hQVnRwV3R6VTFQbHBaenFfR2dLUzlZZWE5VTh6SGoxSV9uRUt6WVpWbjhhb0o5eEJlMEYwb1NSSWE5QXdLSklLeEdrMkRfMU5HVy1QbnpwVDROTC1GbFJPZ3BLRHRJdjdESWdjdVZWSmstMGRXUE1XM3lKQ0NZbzNGNF9vUkdmN1VSYm8ycTBEWklfNVNvajFtWWxXUTNNemFXT0VSWkU1UHVNWGN0U0VCcVVQNFBHWkNPdzJ0dE5Xb3VzNUd5X3prcDNSZncycmpMcDhtVFNvRm9pUkstOWlwZWo0bkJ4YjE3S0Nja0dob09IVjQ?oc=5",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMiugJBVV95cUxQWDExTTFRMXdyWXBBNnNNRkwzOXhVcEQtX0JCU2tWQ1BhR2p1VTRaUEE3MjlwSnlMUVJGaUJKbFB5dDExZmh4a2p2M01MUFFUT0taMTdzeUlLYnBtYmpWd19EVG5wRHFvUEgySS12VkZIMThxZWpYek9wT2FUZE9BalZHcjQzdWJGRzltODFxYTBuamFJYnJxYWdGeTUycUdQZ0hwbmNFUEVzeE5lYkJjZ0dfSm5KNER0dzJDenlxS0hmaXNsd2JOMmpfMGdtOVlIVG5TWWY0b054c2swV0JtNUpCaldfcVk5dzJmVXI4eGJJQzVET1AtWExfUDRzeUM5bnVYUDVUNVU4Q0FVOU5YcHl1SjFiOW9hYUIwaktMWVRaMHV2NnduWGlXaWRuS1hqNVhWYnNNLUJoUdIBvwJBVV95cUxNNHkwT2dseTdGZWtVNFlkY3JrOU5sWDl0SXpQNEVwX05paHJ0NU1sVFhab2Vad3NtcFFzck9NX2dYTFltR3FndVJhWWsxQk01YWtoUFZ0cFd0elUxUGxwWnpxX0dnS1M5WWVhOVU4ekhqMUlfbkVLellaVm44YW9KOXhCZTBGMG9TUklhOUF3S0pJS3hHazJEXzFOR1ctUG56cFQ0TkwtRmxST2dwS0R0SXY3RElnY3VWVkprLTBkV1BNVzN5SkNDWW8zRjRfb1JHZjdVUmJvMnEwRFpJXzVTb2oxbVlsV1EzTXphV09FUlpFNVB1TVhjdFNFQnFVUDRQR1pDT3cydHROV291czVHeV96a3AzUmZ3MnJqTHA4bVRTb0ZvaVJLLTlpcGVqNG5CeGIxN0tDY2tHaG9PSFY0?oc=5",
       "publishedAt": "2026-11-20T13:30:00.000Z",
       "region": "europe",
-      "category": "film",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
-      "id": "1u31z8n",
-      "headline": "Skydance Will Need International Films to Supply Theatrical Release Pledge, Raine’s Joe Ravitch Predicts: ‘Those Are Big Investments’",
-      "publisher": "IMDb",
-      "publisherUrl": "https://www.imdb.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMiZkFVX3lxTE1obExhUXpMYTF6ZVhCM2lxTmRPYm8yTGpiRHltaUExRXQxdVJxUHROc3lyUlc1OExwV21lb1FZWGhwNzhONTlwd2g1ZkRSUi1BbklmdUpDczNvWjJzOVc2d3VDdmVyQQ?oc=5",
-      "publishedAt": "2026-11-20T13:29:10.000Z",
-      "region": "hollywood",
       "category": "film",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
       "imageUrl": "",
@@ -656,6 +734,19 @@
       "imageFallbackUrl": ""
     },
     {
+      "id": "wlde9j",
+      "headline": "Project Hail Mary Box Office: How Much Does Ryan Gosling's Film Need From Its December Re-Release To Cross $700M Worldwide?",
+      "publisher": "Koimoi",
+      "publisherUrl": "https://www.koimoi.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMi6gFBVV95cUxOUjFtcExNcXR3OHZOaGRMdDVha3VwcTljWkVLdlhpMzNUMlczeDAtQ2gzX0R4aVZ4bE5JRlgxODZEcFk3cnZFUWVFUEJaV01KcWFaTWFwRFhUd2dRd2xCWkl5cWdQYzEwektzM1RrSjhZU3Z5ZXI3aXBDZWNNWnU0WDF4OTBBRnNVZG81d1ItajBVQldhQnNHNmF2OENZTEJUc2ZvcFdET3d0OHhXX3JnZFJveF80d2FNNTVWalVwcG03bWNXTjJzNUNKVUpwRjVDT25ETF9FRzVCbHBmWXpmQjVIY0d4bnFQbGc?oc=5",
+      "publishedAt": "2026-11-20T12:39:42.000Z",
+      "region": "global",
+      "category": "box-office",
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
+    },
+    {
       "id": "1bc77fu",
       "headline": "'Hanuman Ansh' director says none of the big production houses congratulated the film despite its Rs 400",
       "publisher": "The Times of India",
@@ -703,19 +794,6 @@
       "publishedAt": "2026-11-20T12:25:00.000Z",
       "region": "hollywood",
       "category": "celebrity",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
-      "id": "szdizi",
-      "headline": "MENA Broadcast, Media Technology & Satellite News",
-      "publisher": "BroadcastPro ME",
-      "publisherUrl": "https://www.broadcastprome.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMiqAFBVV95cUxOR1lLczdMaG5PMHo0WjFlNTdIazdIQWg4emtrR2JjcjFEX19rSm9vZktaZHZmNzJQdmo2TUZJbDMwdm9MdktwRngwbzBrUGdPcFpfMWlMbkxWdXhjb2N5SnlldjY5aGRjTmNuMUQ2aG15UXlqTUdrRzZxWGsxUTNmTnZ1NnMwX3RKc0NKMzZLLUNjRjU0clhXR3BXOGV6WGljM01yOFVFNDc?oc=5",
-      "publishedAt": "2026-11-20T12:21:39.000Z",
-      "region": "global",
-      "category": "festivals",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
       "imageUrl": "",
       "imageFallbackUrl": ""
@@ -812,32 +890,6 @@
       "imageFallbackUrl": ""
     },
     {
-      "id": "k8ffw7",
-      "headline": "‘Hunger Games: Sunrise on the Reaping’ Eyes $100 Million-Plus Opening Despite Mixed Reviews",
-      "publisher": "The Eastern Herald",
-      "publisherUrl": "https://easternherald.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMimAFBVV95cUxPZjNkUHk2RHZiOVU3R2xjMmVKbU12dXpMTTdGTkUtV253WFVMNkdKSjBfVGNLLVhWTmU3U1VHYjNxcnJkU1ktNGNzTXlvQkdGLXgyTURhTEpobkZaU18zMHJOTHE1QkhQSG1QM0FDaVZ2UFBiZUhIcnRLVEJkdmR3LTNkVTQ1cFJYTm83WmowaU05MGdqdU8yWA?oc=5",
-      "publishedAt": "2026-11-20T11:41:01.000Z",
-      "region": "global",
-      "category": "box-office",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
-      "id": "16sbzqm",
-      "headline": "“Filipiñana” actress Jorrybell Agoto has passed away, the Film Development Council of the Philippines (FDCP) announced Thursday. She was 31 years old. Check the comments section for the full story.",
-      "publisher": "Facebook",
-      "publisherUrl": "https://www.facebook.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMi3gFBVV95cUxPaTFoSzEzSjNkWEdPVEZ0QjVpZzZIX0dCaHJwMHVxbFN2OUdaSEV0QkVCaFotdmQ3SURCal91RGtoZUVmR2plVEdoUWZILVBqenFYQWxlTFQ5bFM2M3VXTThkSWl4R3dQZzYzYnlOOTZXNHVBMlVKN1JXS1JOc0dvOEcwckJzTzR3ZS1fZGVwNm1LLUZobFZDLTdRd0VSYVZjRFphWnJXWXRUTzN0T1psaldJWEVrazI0SVRSdVRzYWxhajc5ZGhOZ3JCa01OakpZSnhqRHI3aW9qd3hCa3c?oc=5",
-      "publishedAt": "2026-11-20T11:40:22.000Z",
-      "region": "global",
-      "category": "awards",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
       "id": "nesxml",
       "headline": "Social Media Bans in Tallinn Focus: Should Film Studios and Marketers Panic?",
       "publisher": "The Hollywood Reporter",
@@ -929,11 +981,11 @@
       "imageFallbackUrl": ""
     },
     {
-      "id": "10urwga",
+      "id": "w51zvv",
       "headline": "Satinder Sartaaj’s ‘Guzarish’ attains success: Bhushan Kumar says, “I have always believed in the power of non-film music”",
       "publisher": "Bollywood Hungama",
       "publisherUrl": "https://www.bollywoodhungama.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMi9gFBVV95cUxQemxja0lGbmgyOVJPZnRMNzZiTWJnN2lMcFNZMmFKR2hxOWdTcFFFRmZpOWxxdGxLOTAzX1JSUUZmU3pEZFZkcU5BZDctMVZZRTllUzBnd05BUlVURFhXNEp5dDdMNEhwR2s3SF9Zbi1vMnlTTUU2NDVqS3VGRVVtV25lY0cteWNUV2pwaUllYW41X1dtWUJxd2N3TVhLbk9SaVg1U1o3aDFlZ0J4RWw0SlBfZXJuRUNGWHBRQkdQeUxrWE51NXVvYU5DQUNvRnl1R1E5cC1ZeWRoZTZNWVViZllHRWR1aFBEazB6SGprM2QtQVlzYmfSAfsBQVVfeXFMUDFyMVpGYnNMcWpXaDdqSkJ5ZFZQaTR5YWJfdERScGpEcFRCRVg0MmpFWkVLLUwyRk8zZE1tQVo0b2NQNllJc2ZPVTNGcDEzQ1pVSUVDcjFIUHcyTlJfR1g0Y2dMRHRqNmFpTnZJWER5anNHTUVCd0l5VU9IbU9CcEptcVZRLWhvdG5VQnZxSlF4R1lCZm00Z1o5RXRDYWZESm9zSnNET2ROdURmNGhEcERCWC1QcGIxMXFPQ3MxVC02eFlJVGQtSThNMWVqZTJUTFBZNGFXaWNUOE5LY0dRcUdfbFpQMThGQW9sanlJdk44a1k5YkRMNnBWNk0?oc=5",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMi-wFBVV95cUxQMXIxWkZic0xxaldoN2pKQnlkVlBpNHlhYl90RFJwakRwVEJFWDQyakVaRUstTDJGTzNkTW1BWjRvY1A2WUlzZk9VM0ZwMTNDWlVJRUNyMUhQdzJOUl9HWDRjZ0xEdGo2YWlOdklYRHlqc0dNRUJ3SXlVT0htT0JwSm1xVlEtaG90blVCdnFKUXhHWUJmbTRnWjlFdENhZkRKb3NKc0RPZE51RGY0aERwREJYLVBwYjExcU9DczFULTZ4WUlUZC1JOE0xZWplMlRMUFk0YVdpY1Q4TktjR1FxR19sWlAxOEZBb2xqeUl2TjhrWTliREw2cFY2TdIB-wFBVV95cUxQMXIxWkZic0xxaldoN2pKQnlkVlBpNHlhYl90RFJwakRwVEJFWDQyakVaRUstTDJGTzNkTW1BWjRvY1A2WUlzZk9VM0ZwMTNDWlVJRUNyMUhQdzJOUl9HWDRjZ0xEdGo2YWlOdklYRHlqc0dNRUJ3SXlVT0htT0JwSm1xVlEtaG90blVCdnFKUXhHWUJmbTRnWjlFdENhZkRKb3NKc0RPZE51RGY0aERwREJYLVBwYjExcU9DczFULTZ4WUlUZC1JOE0xZWplMlRMUFk0YVdpY1Q4TktjR1FxR19sWlAxOEZBb2xqeUl2TjhrWTliREw2cFY2TQ?oc=5",
       "publishedAt": "2026-11-20T11:14:24.000Z",
       "region": "india",
       "category": "music",
@@ -1137,6 +1189,19 @@
       "imageFallbackUrl": ""
     },
     {
+      "id": "1olr1e5",
+      "headline": "Before ‘Ramayana’: From ‘Padmaavat’ to ‘Jodhaa Akbar’, Bollywood films that faced backlash over history,",
+      "publisher": "The Times of India",
+      "publisherUrl": "https://timesofindia.indiatimes.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMilANBVV95cUxNSmdyLWJISW4xaEg1Qmp6RXhDbUViQUVtTW9KdXhFZDhGZmc5V2RibmItVjR5dVVHWGF1Z3ZtRm9PdnZVZGp3alVWbndxVHNPVnBndXp0eDM0RWh3Q3hMbmFLckE2ckp4dTllN2xMMXZpQnFNV2RVemVZcmtCaXJuMjJER3lvdTJwU3N0VHJvd2pwUVFUYng0dV8tWHFjTVI5cGptSU1tRy1rOVdHVzUtVTIwQlpTbEZTMlVWMzM2OEtvVWZsZC11dXFyNlpURW9ZR2ZTSU9qbk1ja0p3ZjVGZDFCa3VzZjRhV1h4WXk0ZlBlcWRodFQ4MVNWSHlKalc1YnRnUHNfUnlFeTFUZ0RlVUQ0NUY0TVFBWU51M0NicFU2WjI1d2FSdzNLWUJWNVV1NlZ2VmZSYmF4OHpnYnVMVVo3MDF2aTEzYW5PenMwNG9FZU1veUFoS2tVZTkzSmJwNkdHQVZaUHhxQm95elFDakpwT2U5Ym11SEg4NnFpNS1hdF9nSXV5OFBTRXMwWEhDelVlYtIBmgNBVV95cUxPZ3N6dThhLTZ2blllemZEU285V0JRQktlcjJFQ1pCTEE4amhFTzU1VFNXcmZ0ZUdXZk54cTRqZkpNbkFFSEZaWXNsOGc1SFFWeWJZTGVVZHdHb24tTVdLbG1TQy1oU1FhelZfR1NGZUZpU20ycVVwakNhc2xYc3JjOGktSGxabnBfRzMtV0NKUUdLRW0tWElpcmVpTW4ybjNsTFpuSjl0Z1ZaVUtsMWpSQ2QyMW8xdGpSd3NyeXMyZDBScmxmdU83LTZNLXp3bEh1QU9FQVBKcC1BV2FrYXk5cmhyVzh6LXQtUDJnbTl0UUN1WmxwTmNTcjQtM1NybUd1VjNKcG1veHFGX0ZOb3A3MVpTd2FSV19OaTY0YU54dkprY0VYUElhZDg1ZWl6TmticlVFMWI5UWM1NmR6ZWFZWWw4NWd0RVFKRmV2eWNUdUUxMU1nc0M4SHJ2SGhlUXNkb2RrYjg4UVdGSlRNRUoyS1pFMGVwNmJLOE10RnFXTGRla19TZDRZRWZjMmd2elY3Uzh0TWdXZWtBQQ?oc=5",
+      "publishedAt": "2026-11-20T10:08:00.000Z",
+      "region": "india",
+      "category": "film",
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
+    },
+    {
       "id": "7e5q25",
       "headline": "Cirque du Soleil wins award for ‘Auana’ soundtrack - Honolulu Star-Advertiser",
       "publisher": "Honolulu Star-Advertiser",
@@ -1241,45 +1306,6 @@
       "imageFallbackUrl": ""
     },
     {
-      "id": "eugx1z",
-      "headline": "Celebrity chef Gordon Ramsay honoured with star on Hollywood Walk of Fame",
-      "publisher": "ScottishNews.com",
-      "publisherUrl": "https://www.scottishnews.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMinAFBVV95cUxPSWdkaWVoQUZjQ3dBQkg0YU1MT3QySTRIRzh2QlU2Z3RYRHNkM3k1cjJCUmJpLUxlcWlaTE8ybHkxaDlzUlhhM0FxQ1A3NGtTMV8wRlhXRnFSYmRUQXgxODZhVjR1SDZ5T1dXbGdEenU5ZHpiYW5NamthalFVUzRCZWU1azBUaWlIQVhLQ19TNE9nalJMVWVRMnYtTVU?oc=5",
-      "publishedAt": "2026-11-20T09:31:11.000Z",
-      "region": "hollywood",
-      "category": "celebrity",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
-      "id": "1inxm01",
-      "headline": "A defining aspect of my journey has been the ability to move between contemporary and mainstream music: D",
-      "publisher": "The Times of India",
-      "publisherUrl": "https://timesofindia.indiatimes.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMisgJBVV95cUxNalIxUHc1SzBwaWlvMnpWRXlVckVaa3ZEZDRIcWZrWDl0VmFqZk02U2FNd2pvQlMyNzhWV2RDVFpVVnB2VWxlM2htTjVGSWVlNUFFTzVqMWJ0R1hPR1VkS2YxVmNqcXNrOUZKUkItMXZlV2tEWWsySmpXTzJUZDlhajhtZFQxZFZKM0ZWV3pBNklmbWdiSmEwTlVHbW1WTXR0RTFKQ1ZaU216dldxTHA5dUhkVWhZMUM5aFl4ekFldkR2WEpiNTBoOFBvUUdUQzZIU3JmYVYtTXp2bFNuc3M5blNRd1prVmw2NXlvYkhKc3lWa1ViNDlTQTB1bDdiUHVSV1MxM3FoS3pFbmRmdjlQbzV2TmJvbjFhVFhUMXlBOExCTlZXWWcycFQxN2pEc1BNZEHSAbcCQVVfeXFMUGNsVXludTdDck5peWJwenMzTmtSNmcweXlFQkNIMUUtMFVJM2FvcVpuS0pYWm9jTDR6ZG1PSFlBVWMtdHZINXI4N1BoR09sNXdNMDRmcEhHd0w0c0RVRTV3MTJvbXBWN1h5MDZORDU3TTlFRmNWZ19oRThjVXd4WnlKdUQxZmV3akozVjlNcU9tZE82WHBpT0xiMTloRjF4OEZPY29GUVJuTW92SWV0V1RiTEhrRllmMTBSVk5XNmFBQkJxVE16R2hQbTZiVGNGTFhGcnkwVHVGcEVLWC14Vkd6aThQYm5OQUhfaFByT3c0R1VsM2owSjZoaUFDMjAtX3B1NDFocXlMVnlaYjFlZS1hQlBKRS1uSlhVNVIwOUxFSEJfN05kLUx1M0tNWlVZVlByR1U2Szg?oc=5",
-      "publishedAt": "2026-11-20T09:31:00.000Z",
-      "region": "india",
-      "category": "music",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
-      "id": "cac3r7",
-      "headline": "Ogogo’s daughter, Kira, releases debut film",
-      "publisher": "Punch Newspapers",
-      "publisherUrl": "https://punchng.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMibkFVX3lxTE5wbDZhT1lRN255Z2w5OXU2WnhRUU41RkRpQTNURVBYY1dMaW9wWmRmNlZ1MGhGQWFtenI1azA1Y19kMGREVEpWN2dCTS1mT0Y0M3ZGa2J6Z3E4MEo4RU9PZHNmU2VNTWhBT0gwcExR?oc=5",
-      "publishedAt": "2026-11-20T09:30:49.000Z",
-      "region": "africa",
-      "category": "film",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
       "id": "s18krg",
       "headline": "Skydance Will Need International Movies to Fulfil Theatrical Promise",
       "publisher": "Variety",
@@ -1351,21 +1377,21 @@
       "publisherUrl": "https://www.arabnews.com",
       "sourceUrl": "https://news.google.com/rss/articles/CBMivAFBVV95cUxOMlNkVmxoQ0ZQdXlaWnM3WWRvUXVlSWczZmR2TTZnVWxuTlVJZVhpcG5kak5YRW9NZHQtNXdnVWRqWWplOUVrLUNYY3VORW5JZmFPS3dMakN4V0E2bnB5QmMwSDB4Vm1waEFBeGdrM0FyN1A5Uk5KNFZ6QjJmS25qMlh0Ymk2WVkxM3Z4b0ZaMWU3NHNOaGlJaVl2aDFidlNVNDd3NDZaU3hRUExUQU1vZFpNS21YZVhwQlVkcQ?oc=5",
       "publishedAt": "2026-11-20T08:37:10.000Z",
-      "region": "latin-america",
+      "region": "middle-east",
       "category": "film",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
       "imageUrl": "",
       "imageFallbackUrl": ""
     },
     {
-      "id": "zdab2n",
-      "headline": "Taylor Swift Named International Artist of the Year at DPIFF 2026",
-      "publisher": "Dadasaheb Phalke International Film Festival | DPIFF",
-      "publisherUrl": "https://dpiff.in",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMifEFVX3lxTE14b24zelJXbGx4US1UNTFxalVxVVk4SkU1TmNkTU5od2hFSk0yRk9oZjdTU3g3NEhfQlBXQ2I4MUc4cDg0aDBxdjl0Z0E2b1QxQTlsNDkzVHBna2R3SFI1YU5hRUFRdVhmN09uYUppUExrMTk2NHgyazlVeDk?oc=5",
-      "publishedAt": "2026-11-20T08:20:05.000Z",
+      "id": "sfjlfq",
+      "headline": "2027 Sundance Film Festival Event Celebrating Sundance Institute: The Boulder Debut to Honor Jesse Eisenberg, Gina Prince-Bythewood, Beth de Araújo, and Dawn Porter",
+      "publisher": "sundance.org",
+      "publisherUrl": "https://www.sundance.org",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMinAJBVV95cUxNMFkwZFQzaGpoaTBuOXhuR01aMTF6VUZtNWw0amZmSW52Z01SbmhkNDh1X1BBQ3pfR2NOeTJINDRHNWxaTmtlUG9xZXFMTnpBd2NTaWZuV1dDY0NUX2pBNXNsZEFwS0p5YWtkdmZVZTFCV2hQNFBnRFIzc1NXZHRMUERfcTB2Y0ktWXVOX2tSTTBuanF3S3dkazNOUDdRSnlVcjgxNXQ1M3ZQMU5HRktBWkRacXNmWkdreTFPbHVScWgzeDVzNnB2c1RUVFdZS0w2a0tZX3liQmpfNkM4Tjk4dVV6TEpQTEEwd0txekFGdzJ4bWNhQW1vb0F1ckJ0QW9sSzBzWVNEQ0RXNkJYRy1PV2VmRjMxdkF6Wm4tbw?oc=5",
+      "publishedAt": "2026-11-20T08:03:31.000Z",
       "region": "global",
-      "category": "music",
+      "category": "festivals",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
       "imageUrl": "",
       "imageFallbackUrl": ""
@@ -1392,32 +1418,6 @@
       "publishedAt": "2026-11-20T06:57:03.000Z",
       "region": "asia",
       "category": "anime",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
-      "id": "12jlk43",
-      "headline": "Before ‘Ramayana’: From ‘Padmaavat’ to ‘Jodhaa Akbar’, Bollywood films that faced backlash over history,",
-      "publisher": "The Times of India",
-      "publisherUrl": "https://timesofindia.indiatimes.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMimgNBVV95cUxPZ3N6dThhLTZ2blllemZEU285V0JRQktlcjJFQ1pCTEE4amhFTzU1VFNXcmZ0ZUdXZk54cTRqZkpNbkFFSEZaWXNsOGc1SFFWeWJZTGVVZHdHb24tTVdLbG1TQy1oU1FhelZfR1NGZUZpU20ycVVwakNhc2xYc3JjOGktSGxabnBfRzMtV0NKUUdLRW0tWElpcmVpTW4ybjNsTFpuSjl0Z1ZaVUtsMWpSQ2QyMW8xdGpSd3NyeXMyZDBScmxmdU83LTZNLXp3bEh1QU9FQVBKcC1BV2FrYXk5cmhyVzh6LXQtUDJnbTl0UUN1WmxwTmNTcjQtM1NybUd1VjNKcG1veHFGX0ZOb3A3MVpTd2FSV19OaTY0YU54dkprY0VYUElhZDg1ZWl6TmticlVFMWI5UWM1NmR6ZWFZWWw4NWd0RVFKRmV2eWNUdUUxMU1nc0M4SHJ2SGhlUXNkb2RrYjg4UVdGSlRNRUoyS1pFMGVwNmJLOE10RnFXTGRla19TZDRZRWZjMmd2elY3Uzh0TWdXZWtBQdIBmgNBVV95cUxPZ3N6dThhLTZ2blllemZEU285V0JRQktlcjJFQ1pCTEE4amhFTzU1VFNXcmZ0ZUdXZk54cTRqZkpNbkFFSEZaWXNsOGc1SFFWeWJZTGVVZHdHb24tTVdLbG1TQy1oU1FhelZfR1NGZUZpU20ycVVwakNhc2xYc3JjOGktSGxabnBfRzMtV0NKUUdLRW0tWElpcmVpTW4ybjNsTFpuSjl0Z1ZaVUtsMWpSQ2QyMW8xdGpSd3NyeXMyZDBScmxmdU83LTZNLXp3bEh1QU9FQVBKcC1BV2FrYXk5cmhyVzh6LXQtUDJnbTl0UUN1WmxwTmNTcjQtM1NybUd1VjNKcG1veHFGX0ZOb3A3MVpTd2FSV19OaTY0YU54dkprY0VYUElhZDg1ZWl6TmticlVFMWI5UWM1NmR6ZWFZWWw4NWd0RVFKRmV2eWNUdUUxMU1nc0M4SHJ2SGhlUXNkb2RrYjg4UVdGSlRNRUoyS1pFMGVwNmJLOE10RnFXTGRla19TZDRZRWZjMmd2elY3Uzh0TWdXZWtBQQ?oc=5",
-      "publishedAt": "2026-11-20T06:50:00.000Z",
-      "region": "india",
-      "category": "film",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
-      "id": "62goig",
-      "headline": "Tony Umez says he kept working through his years away from Nollywood screens",
-      "publisher": "3News",
-      "publisherUrl": "https://3news.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMilAFBVV95cUxOdURiM2t5YjBEYmIyTnBJeG53dllFLWxFazgyOHd4Y3JuSnIzV0E1eFVXODBNNXJTcVh4aks3VnZMR0pOMXhlYUkxclNJeEVubnBPeDZuLTF1RUFrN2VOWElTZ0kzRm8wcXVkb2J2dHJMSmdFR0E5S1NKTF9nLXpLRkRwMWxNVnNxRXVwdUlmSkx1YnlB?oc=5",
-      "publishedAt": "2026-11-20T06:40:26.000Z",
-      "region": "africa",
-      "category": "celebrity",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
       "imageUrl": "",
       "imageFallbackUrl": ""
@@ -1501,13 +1501,13 @@
       "imageFallbackUrl": ""
     },
     {
-      "id": "lsx3f3",
-      "headline": "Marrakech’s Rémi Bonhomme on Oscars ambitions and championing Arab and African cinema",
-      "publisher": "Screen Daily",
-      "publisherUrl": "https://www.screendaily.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMi0wFBVV95cUxONEJ4WUdQNUJvSUFiMkNVZ0ZhR3JUM2lBYTRfM0cwSE1qZXNINjV3OFd5VGx1TnNBYnF2dEdzRW9fVDJxZTNjYWRvemt1RGVhNXFtb2p0R3hQX3VkRTdRVWlSUDZnY3lLeENtMFRkYkxFMnpiRlRBOGtSMG9qZWpfSnFGdmN3R0FQZWVDVkR3bGdRMXEzWFRSZzRTWkI2TzZZX0dVLTVfVG9IT0ZxREVOb2xKZmVldzQycWYyVEtTalowR1I0a3B0QTFUbmU0bmxBU2Y4?oc=5",
-      "publishedAt": "2026-11-19T15:47:37.000Z",
-      "region": "middle-east",
+      "id": "1k1d7ro",
+      "headline": "Saudi Film Nights Continues International Tour in Brazil with Four Saudi Films - ASHARQ AL-AWSAT English",
+      "publisher": "ASHARQ AL-AWSAT English",
+      "publisherUrl": "https://english.aawsat.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMiswFBVV95cUxNcXZVRjNVLU9xZllmYmh4ek14MXhDQVNGbTl3c1JTVzNNYTdLdVdOejQxNVczamN2cXF3RDQyZnljaGIwR3RnOFlkOVFaLXVnbjVUZG8wNWNjLVJtR1RVd2hiMy1CaHBqTzU3VTlEM19mQ084S214SUtQUGlYTEpvbXhyVFN5V3ZjSUdmMV9wZ0ZIVTBFNk1aZnVYR0V3QUVoU1dCcVBPV0pJMF9tV0VCUXN6Zw?oc=5",
+      "publishedAt": "2026-11-19T14:18:07.000Z",
+      "region": "latin-america",
       "category": "film",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
       "imageUrl": "",
