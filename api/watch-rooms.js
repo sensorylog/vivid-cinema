@@ -254,7 +254,7 @@ async function revokeWatchInvitation(request) {
     if (!invitation.revokedAt) transaction.update(invitationRef, { revokedAt: now, revokedBy: auth.uid });
   });
   return { revoked: true };
-});
+}
 
 
 
@@ -482,7 +482,7 @@ async function closeWatchRoom(request) {
     });
   });
   return { closed: true };
-});
+}
 
 
 // The first synchronized adapter is limited to VidSrc's documented PLAYER_EVENT and parent-command protocol on vidsrc.sh.
