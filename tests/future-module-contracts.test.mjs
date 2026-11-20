@@ -362,3 +362,23 @@ test("Only Cinema Club owners see the invite-generation action", () => {
   const client = readFileSync(new URL("../scripts/watch-rooms.js", import.meta.url), "utf8");
   assert.ok(client.includes('if (club.role === "owner") actionsForClub.push(makeInviteButton("club", club.clubId, "Invite members"))'));
 });
+
+
+test("Invite redemption and member departures keep private dashboard counts in sync", () => {
+  const index = readFileSync(new URL("../functions/index.js", import.meta.url), "utf8");
+  const lobby = readFileSync(new URL("../functions/watch-rooms-lobby.js", import.meta.url), "utf8");
+  const clubs = readFileSync(new URL("../functions/watch-rooms-clubs.js", import.meta.url), "utf8");
+  const redeem = index.slice(index.indexOf("export const redeemWatchInvitation"), index.indexOf("export const revokeWatchInvitation"));
+  assert.ok(redeem.includes('transaction.get(targetRef.collection("members"))'));
+  assert.ok(redeem.includes("existingPointerRef"));
+  assert.ok(redeem.includes("memberCount: nextMemberCount"));
+  for (const operation of ["removeWatchRoomMember","leaveWatchRoom"]) {
+    const start = lobby.indexOf("export const " + operation);
+    const end = lobby.indexOf("\n});", start);
+    assert.ok(lobby.slice(start, end).includes('tx.get(roomRef.collection("members"))'));
+    assert.ok(lobby.slice(start, end).includes("memberCount: nextMemberCount"));
+  }
+  const leave = clubs.slice(clubs.indexOf("export const leaveCinemaClub"), clubs.indexOf("export const archiveCinemaClub"));
+  assert.ok(leave.includes('tx.get(clubRef.collection("members"))'));
+  assert.ok(leave.includes("memberCount: nextMemberCount"));
+});
