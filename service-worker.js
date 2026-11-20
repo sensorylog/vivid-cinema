@@ -1,5 +1,5 @@
 // Bump this version whenever the precached app shell changes.
-const CACHE_NAME = "vivid-cinema-shell-v294";
+const CACHE_NAME = "vivid-cinema-shell-v295";
 const HLS_LIBRARY_URL = "https://cdn.jsdelivr.net/npm/hls.js@1.7.3/dist/hls.min.js";
 const APP_SHELL = [
   HLS_LIBRARY_URL,
@@ -180,7 +180,7 @@ self.addEventListener("fetch",event=>{
  // Authentication must not depend on stale cached documents or SDK bundles.
  // Always try the network first for auth pages, auth modules and Firebase config.
  const isAuthDocument=/\/(?:login|auth|forgot-password|verify-email|auth-diagnostics|account)\.html$/.test(url.pathname);
- const isAuthRuntime=/\/scripts\/(?:auth|firebase|nav-auth|auth-diagnostics|account|account-bootstrap)\.js$/.test(url.pathname)||/\/init\.json$/.test(url.pathname);
+ const isAuthRuntime=/\/scripts\/(?:auth|firebase|nav-auth|auth-diagnostics|account|account-bootstrap|cloudflare-ai)\.js$/.test(url.pathname)||/\/init\.json$/.test(url.pathname);
  // Watch Rooms handles account credentials and trusted backend mutations. Never
  // run an old cached copy after an auth/security fix has been deployed.
  const isWatchRoomRuntime=/\/scripts\/(?:watch-rooms|watch-room-lobby|watch-room-clubs|watch-room-playback|watch-room-api)\.js$/.test(url.pathname);
