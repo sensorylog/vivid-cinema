@@ -194,3 +194,12 @@ Each stage is delivered as focused commits on feature/watch-rooms and reviewed b
 - Lobby listeners and presence heartbeats are torn down on pagehide and restored on back-forward cache navigation. Hosts can manage both online and offline members, not just currently active presence leases.
 
 - Playback drift calculations use a server-time offset measured from the trusted room heartbeat, reducing dependence on each viewer device's wall clock. Periodic playing updates are throttled without suppressing pause/resume state transitions.
+
+
+## API hosting migration
+
+- Browser clients call `https://vivid-cinema-api.vercel.app/api/watch-rooms` through `scripts/watch-room-api.js`.
+- Every operation sends the current Firebase ID token in `Authorization: Bearer` and a one-time App Check token in `X-Firebase-AppCheck`. The Vercel handler verifies both before dispatch.
+- The API reuses the Firebase Admin service-account secret already used by `api/send-verification.js`; it does not create or deploy Firebase Cloud Functions.
+- Cloudflare's static build intentionally excludes `api/`; Vercel deploys that directory as serverless API routes, while Cloudflare Pages continues to publish `dist/`.
+- Firestore client writes to Watch Room and Cinema Club records remain denied. Trusted API transactions remain the only mutation path.
