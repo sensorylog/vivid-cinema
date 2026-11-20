@@ -611,7 +611,8 @@ async function reactToWatchRoomMessage(request) {
   const roomRef = db.collection("rooms").doc(roomId);
   const messageRef = roomRef.collection("chat").doc(messageId);
   await db.runTransaction(async tx => {
-    await requireRoomMemberInTransaction(tx, roomId, uid);
+    const { room, member } = await requireRoomMemberInTransaction(tx, roomId, uid);
+    if (member.role !== "host" && room.allowGuestChat === false) throw new HttpsError("permission-denied", "The host has paused guest chat and reactions.");
     const message = await tx.get(messageRef);
     if (!message.exists) throw new HttpsError("not-found", "That message could not be found.");
     const reactions = message.data().reactions || {};
