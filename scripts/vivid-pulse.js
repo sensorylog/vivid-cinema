@@ -1,30 +1,10 @@
-import { app, auth, db, firebaseConfig, RECAPTCHA_ENTERPRISE_SITE_KEY } from "./firebase.js";
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
-import {
-  initializeAuth, indexedDBLocalPersistence, browserLocalPersistence, inMemoryPersistence,
-  onAuthStateChanged, signInAnonymously
-} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
-import { getFirestore, addDoc, collection, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
-import { initializeAppCheck, ReCaptchaEnterpriseProvider } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app-check.js";
+import { auth, db } from "./firebase.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
+import { addDoc, collection, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 
-// Use a separate Firebase app for anonymous analytics so analytics never changes
-// the site's real sign-in state or exposes personal account features to anonymous users.
-const anonymousApp = initializeApp(firebaseConfig, "vivid-pulse-anonymous");
-const LOCAL_HOSTS = new Set(["localhost", "127.0.0.1", "::1"]);
-if (RECAPTCHA_ENTERPRISE_SITE_KEY && !LOCAL_HOSTS.has(window.location.hostname)) {
-  try {
-    initializeAppCheck(anonymousApp, {
-      provider: new ReCaptchaEnterpriseProvider(RECAPTCHA_ENTERPRISE_SITE_KEY),
-      isTokenAutoRefreshEnabled: true
-    });
-  } catch (error) {
-    console.warn("[Vivid Pulse] Anonymous App Check initialization failed:", error?.message || error);
-  }
-}
-const anonymousAuth = initializeAuth(anonymousApp, {
-  persistence: [indexedDBLocalPersistence, browserLocalPersistence, inMemoryPersistence]
-});
-const anonymousDb = getFirestore(anonymousApp);
+// Product analytics is intentionally limited to authenticated Vivid members.
+// Public visitors do not create anonymous Firebase sessions or trigger
+// Firestore writes/App Check attestations merely by opening a page.
 
 const platform = (() => {
   try {
@@ -41,7 +21,6 @@ let activeIdentityKey = null;
 let sessionId = null;
 let started = false;
 let preferredIdentity = "anonymous";
-let anonymousUserPromise = null;
 
 function getSessionId() {
   if (sessionId) return sessionId;
@@ -116,31 +95,18 @@ function beginTracking(user, targetDb, anonymous) {
     }
   }
 }
-async function getAnonymousUser() {
-  if (anonymousAuth.currentUser) return anonymousAuth.currentUser;
-  if (!anonymousUserPromise) {
-    anonymousUserPromise = new Promise(resolve => {
-      const unsubscribe = onAuthStateChanged(anonymousAuth, user => {
-        unsubscribe();
-        resolve(user);
-      }, () => resolve(null));
-    }).then(async user => user || (await signInAnonymously(anonymousAuth)).user)
-      .finally(() => { anonymousUserPromise = null; });
-  }
-  return anonymousUserPromise;
-}
 onAuthStateChanged(auth, user => {
-  if (user) {
+  if (user && !user.isAnonymous) {
     preferredIdentity = "account";
     beginTracking(user, db, false);
     return;
   }
   preferredIdentity = "anonymous";
-  void getAnonymousUser().then(anonymousUser => {
-    if (preferredIdentity === "anonymous") beginTracking(anonymousUser, anonymousDb, true);
-  }).catch(error => {
-    console.warn("[Vivid Pulse] Anonymous analytics unavailable:", error?.code || error?.message || error);
-  });
+  uid = null;
+  activeDb = db;
+  identityType = "anonymous";
+  activeIdentityKey = null;
+  started = false;
 });
 document.addEventListener("click", event => {
   const downloadLink = event.target.closest?.("#windows-installer, #windows-portable, #android-apk");

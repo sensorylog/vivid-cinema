@@ -481,8 +481,16 @@ test("Watch Rooms surfaces the safe failed-precondition cause instead of hiding 
 });
 
 
-test("Firebase App Check uses the newly supplied reCAPTCHA Enterprise site key", () => {
+test("Firebase App Check uses Cloudflare Turnstile through the supported custom-provider flow", () => {
   const firebase = readFileSync(new URL("../scripts/firebase.js", import.meta.url), "utf8");
-  assert.ok(firebase.includes('const RECAPTCHA_ENTERPRISE_SITE_KEY = "6LfEHikuAAAAAE3GvgM4_elW5wj035as6zBafGWu";'));
-  assert.ok(!firebase.includes("6Lfs5PMtAAAAAAH8_fR_A6g4uAftFvAv0uNsehTB"));
+  const provider = readFileSync(new URL("../scripts/turnstile-app-check.js", import.meta.url), "utf8");
+  const endpoint = readFileSync(new URL("../cloudflare/functions/api/app-check.js", import.meta.url), "utf8");
+  assert.ok(firebase.includes("initializeAppCheck"));
+  assert.ok(firebase.includes("new CustomProvider({ getToken: getTurnstileAppCheckToken })"));
+  assert.ok(firebase.includes("./turnstile-app-check.js"));
+  assert.ok(provider.includes('action: "vivid_app_check"'));
+  assert.ok(endpoint.includes("verifyTurnstileToken("));
+  assert.ok(endpoint.includes("createFirebaseAppCheckToken("));
+  assert.ok(!firebase.includes("ReCaptchaEnterpriseProvider"));
+  assert.ok(!endpoint.includes("recaptchaenterprise.googleapis.com"));
 });

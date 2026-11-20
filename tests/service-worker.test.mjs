@@ -36,7 +36,7 @@ test("every precached asset exists in the repository", async () => {
 });
 
 test("Watch Rooms security and auth modules always use network-first and cache version is bumped", () => {
-  assert.match(source, /const CACHE_NAME = "vivid-cinema-shell-v295"/);
+  assert.match(source, /const CACHE_NAME = "vivid-cinema-shell-v296"/);
   assert.ok(source.includes("const isWatchRoomRuntime=") && source.includes("watch-room-api") && source.includes("watch-room-playback"));
   assert.ok(source.includes("if(isAuthDocument||isAuthRuntime||isWatchRoomRuntime){event.respondWith(networkFirst(request));return;}"));
 });
@@ -208,7 +208,7 @@ test("app shell includes current versioned assets without dropping existing cach
 
   // Preserve older entries until all runtime consumers have been verified;
   // pruning query-versioned assets is a separate cleanup, not required here.
-  assert.ok(source.includes(JSON.stringify("./scripts/firebase.js?v=20261016-auth-runtime-audit2")));
+  assert.ok(source.includes(JSON.stringify("./scripts/firebase.js?v=20261120-cloudflare-app-check-1")));
 });
 test("service worker precaches Hls.js and serves the exact CORS library offline", () => {
   assert.ok(source.includes('const HLS_LIBRARY_URL = "https://cdn.jsdelivr.net/npm/hls.js@1.7.3/dist/hls.min.js"'));
