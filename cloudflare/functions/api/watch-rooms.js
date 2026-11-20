@@ -641,7 +641,9 @@ async function setWatchRoomPlayerSelection(request) {
   const selectedAt = Timestamp.now();
   await db.runTransaction(async tx => {
     const { room, member } = await requireRoomMemberInTransaction(tx, roomId, uid);
-    if ((room.hostUid !== uid || member.role !== "host") && room.allowGuestPlayerSelection !== true) {
+    const isHost = room.hostUid === uid && member.role === "host";
+    const isPermittedGuest = member.role === "guest" && room.allowGuestPlayerSelection === true;
+    if (!isHost && !isPermittedGuest) {
       throw new HttpsError("permission-denied", "The host has not allowed guests to change the shared player and server.");
     }
     if (room.status !== "open" || !room.expiresAt || room.expiresAt.toMillis() <= selectedAt.toMillis()) {
