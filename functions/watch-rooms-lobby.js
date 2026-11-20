@@ -195,9 +195,13 @@ export const updateWatchRoomSettings = onCall({ region: "us-central1", maxInstan
     }
   }
   if (!Object.keys(update).length) throw new HttpsError("invalid-argument", "No room settings were supplied.");
-  const { roomRef } = await requireHost(roomId, uid);
+  const roomRef = db().collection("rooms").doc(roomId);
+  await db().runTransaction(async tx => {
+    const { room, member } = await requireRoomMemberInTransaction(tx, roomId, uid);
+    if (room.hostUid !== uid || member.role !== "host") throw new HttpsError("permission-denied", "Only the room host can change these settings.");
+    tx.update(roomRef, { ...update, updatedAt: Timestamp.now() });
+  });
   const members = await roomRef.collection("members").get();
-  await roomRef.update({ ...update, updatedAt: Timestamp.now() });
   await Promise.all(members.docs.map(member =>
     db().collection("users").doc(member.id).collection("watchRooms").doc(roomId).set(update, { merge: true })
   ));
@@ -210,14 +214,16 @@ export const removeWatchRoomMember = onCall({ region: "us-central1", maxInstance
   const memberUid = request.data?.memberUid;
   if (typeof memberUid !== "string" || !memberUid.length || memberUid.length > 128 || memberUid.includes("/")) throw new HttpsError("invalid-argument", "A valid member ID is required.");
   if (memberUid === uid) throw new HttpsError("failed-precondition", "The host cannot remove themselves. Close the room instead.");
-  const { roomRef } = await requireHost(roomId, uid);
+  const roomRef = db().collection("rooms").doc(roomId);
   const targetRef = roomRef.collection("members").doc(memberUid);
   await db().runTransaction(async tx => {
+    const { room, member } = await requireRoomMemberInTransaction(tx, roomId, uid);
+    if (room.hostUid !== uid || member.role !== "host") throw new HttpsError("permission-denied", "Only the room host can remove members.");
     const target = await tx.get(targetRef);
     if (!target.exists) throw new HttpsError("not-found", "That member is not in this room.");
     tx.delete(targetRef);
     tx.delete(roomRef.collection("presence").doc(memberUid));
-    tx.update(roomRef, { memberCount: FieldValue.increment(-1), updatedAt: Timestamp.now() });
+    tx.update(roomRef, { memberCount: Math.max(1, Number(room.memberCount || 1) - 1), updatedAt: Timestamp.now() });
   });
   await db().collection("users").doc(memberUid).collection("watchRooms").doc(roomId).delete().catch(() => {});
   return { removed: true };
@@ -247,10 +253,14 @@ export const leaveWatchRoom = onCall({ region: "us-central1", maxInstances: 20 }
 export const closeWatchRoom = onCall({ region: "us-central1", maxInstances: 20 }, async request => {
   const uid = requireUser(request);
   const roomId = validId(request.data?.roomId, "room ID");
-  const { roomRef } = await requireHost(roomId, uid);
-  const members = await roomRef.collection("members").get();
+  const roomRef = db().collection("rooms").doc(roomId);
   const closedAt = Timestamp.now();
-  await roomRef.update({ status: "closed", closedAt, expiresAt: closedAt, updatedAt: closedAt });
+  await db().runTransaction(async tx => {
+    const { room, member } = await requireRoomMemberInTransaction(tx, roomId, uid);
+    if (room.hostUid !== uid || member.role !== "host") throw new HttpsError("permission-denied", "Only the room host can close this room.");
+    tx.update(roomRef, { status: "closed", closedAt, expiresAt: closedAt, updatedAt: closedAt });
+  });
+  const members = await roomRef.collection("members").get();
   await Promise.all(members.docs.map(member =>
     db().collection("users").doc(member.id).collection("watchRooms").doc(roomId).set({ status: "closed" }, { merge: true })
   ));
