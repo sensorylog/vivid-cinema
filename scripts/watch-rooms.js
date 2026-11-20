@@ -32,6 +32,7 @@ function errorText(error, fallback) {
   if (code.includes("unauthenticated")) return "Please sign in to your Vivid account again.";
   if (code.includes("permission-denied")) return "You don't have permission to do that in this space.";
   if (code.includes("not-found")) return "That invitation could not be found. Check the code and try again.";
+  if (code.startsWith("appcheck/")) return error?.message || ("Browser verification failed (" + code + "). Reload Vivid and try again.");
   if (code.includes("failed-precondition")) return error?.message || "Vivid could not verify this browser session. Refresh and try again.";
   if (code.includes("resource-exhausted")) return "This room or club has reached its member limit.";
   if (code.includes("invalid-argument")) return "Some of the information entered isn't valid. Check the form and try again.";

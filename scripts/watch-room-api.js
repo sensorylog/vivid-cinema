@@ -1,4 +1,4 @@
-import { auth, appCheck } from "./firebase.js";
+import { auth, appCheck, appCheckError } from "./firebase.js";
 import { getToken } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app-check.js";
 
 const API_URL = "/api/watch-rooms";
@@ -16,8 +16,17 @@ export function callWatchRoomApi(action) {
       throw error;
     }
     if (!appCheck) {
-      const error = new Error("Vivid couldn't verify this app. Refresh the page and try again.");
-      error.code = "functions/failed-precondition";
+      const cause = appCheckError;
+      const diagnosticCode = String(cause?.code || "appCheck/not-initialized");
+      console.error("Vivid Watch Rooms App Check initialization failed:", {
+        hostname: window.location.hostname,
+        origin: window.location.origin,
+        code: diagnosticCode,
+        message: cause?.message || "Firebase App Check did not initialize."
+      });
+      const error = new Error("Browser verification is unavailable (" + diagnosticCode + "). Reload Vivid and try again. If it continues, the site's App Check provider or allowed-domain configuration needs attention.");
+      error.code = diagnosticCode;
+      error.cause = cause || undefined;
       throw error;
     }
 
@@ -50,10 +59,13 @@ export function callWatchRoomApi(action) {
         code: cause?.code || "unknown",
         message: cause?.message || String(cause)
       });
+      const diagnosticCode = String(cause?.code || "appCheck/unknown");
       const error = new Error(
-        "Vivid couldn't verify this browser session. Check that this site is allowed in Firebase App Check, then refresh and try again."
+        "Browser verification failed (" + diagnosticCode + "). " +
+        (cause?.message || "Check the site's Firebase App Check provider and allowed domains, then reload.")
       );
-      error.code = "functions/failed-precondition";
+      error.code = diagnosticCode;
+      error.cause = cause;
       throw error;
     }
     let response;
