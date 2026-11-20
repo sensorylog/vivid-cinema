@@ -180,7 +180,7 @@ export async function onRequest({ request, env }) {
 
     if (!text) {
       const promptResult = await env.AI.run(MODEL, {
-        prompt: systemPrompt + "\\n\\n" + prompt,
+        prompt: systemPrompt + "\n\n" + prompt,
         max_tokens: maxTokens,
         temperature: 0.2
       });
