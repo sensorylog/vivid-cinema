@@ -104,11 +104,6 @@ export async function verifyTurnstileToken(token, secret, expectedHostname, remo
     throw new Error("Cloudflare Turnstile is not configured.");
   }
 
-  const form = new FormData();
-  form.set("secret", secret);
-  form.set("response", token);
-  if (typeof remoteIp === "string" && remoteIp) form.set("remoteip", remoteIp);
-
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 8000);
   try {
