@@ -248,7 +248,7 @@ test("Watch Room lobby mutations revalidate membership transactionally and seria
   assert.ok(lobby.includes("async function requireRoomMemberInTransaction(tx, roomId, uid)"));
   for (const operation of ["heartbeatWatchRoom","addWatchRoomQueueItem","voteWatchRoomQueueItem","sendWatchRoomMessage","reactToWatchRoomMessage"]) {
     const start = lobby.indexOf("async function " + operation);
-    const end = lobby.indexOf("\\n}", start);
+    const end = lobby.indexOf("\n}", start);
     assert.ok(lobby.slice(start, end).includes("requireRoomMemberInTransaction(tx, roomId, uid)"), operation + " must re-check membership and room lifecycle inside its transaction");
   }
   assert.ok(lobby.includes("queueCount >= QUEUE_LIMIT"));
@@ -271,7 +271,7 @@ test("Watch Room queue items can be removed by their author or host and release 
   const remove = backend.slice(backend.indexOf("async function removeWatchRoomQueueItem"), backend.indexOf("async function voteWatchRoomQueueItem"));
   assert.ok(remove.includes("member.role !== \"host\" && item.data().addedBy !== uid"), "only host or author may remove a queue pick");
   assert.ok(remove.includes("queueCount: Math.max(0, Number(room.queueCount || 0) - 1)"), "removal must free a queue slot transactionally");
-  assert.ok(index.includes("  removeWatchRoomQueueItem,"), "callable must be exported");
+  assert.ok(index.includes("  removeWatchRoomQueueItem,"), "operation must be routed by the API");
   assert.ok(client.includes('call("removeWatchRoomQueueItem")'), "lobby must expose the remove action");
 });
 
