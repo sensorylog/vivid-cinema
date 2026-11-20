@@ -26,7 +26,7 @@ test("Watch Rooms callable operations are served by the existing Vercel API, not
     "addCinemaClubAfterCreditsReview","addCinemaClubDiscussionMessage","leaveCinemaClub","archiveCinemaClub"
   ]) {
     assert.ok(api.includes("async function " + operation + "("), "missing API operation " + operation);
-    assert.ok(api.includes(operation + ","), "operation is not routed: " + operation);
+    assert.ok(api.includes('"' + operation + '"' ), "operation is not routed: " + operation);
   }
 });
 
