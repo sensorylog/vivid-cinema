@@ -165,9 +165,10 @@ test("Watch Rooms Stage 4 exposes trusted lobby, queue, chat, reactions and host
 });
 
 
-test("Watch Rooms Stage 5 exposes a trusted VidSrc-only playback clock and client bridge", () => {
+test("Watch Rooms Stage 5 exposes trusted VidSrc and CineSRC playback bridges", () => {
   const functions = readFileSync(new URL("../api/watch-rooms.js", import.meta.url), "utf8");
   const backend = readFileSync(new URL("../api/watch-rooms.js", import.meta.url), "utf8");
+  const cloudflareBackend = readFileSync(new URL("../cloudflare/functions/api/watch-rooms.js", import.meta.url), "utf8");
   const rules = readFileSync(new URL("../firestore.rules", import.meta.url), "utf8");
   const client = readFileSync(new URL("../scripts/watch-room-playback.js", import.meta.url), "utf8");
   const watch = readFileSync(new URL("../scripts/watch.js", import.meta.url), "utf8");
@@ -175,6 +176,9 @@ test("Watch Rooms Stage 5 exposes a trusted VidSrc-only playback clock and clien
   assert.ok(functions.includes("publishWatchRoomPlayback"));
   assert.ok(backend.includes("async function publishWatchRoomPlayback("));
   assert.ok(backend.includes('["vidsrc", "cinesrc"].includes(provider)'));
+  assert.ok(cloudflareBackend.includes('["vidsrc", "cinesrc"].includes(provider)'));
+  assert.ok(backend.includes("tx.set(stateRef, { provider, contentId"));
+  assert.ok(cloudflareBackend.includes("tx.set(stateRef, { provider, contentId"));
   assert.ok(backend.includes("requireHost(roomId, uid)"));
   assert.ok(backend.includes("tx.get(roomRef.collection(\"members\").doc(uid))"));
   assert.ok(rules.includes("match /playback/{stateId}"));
