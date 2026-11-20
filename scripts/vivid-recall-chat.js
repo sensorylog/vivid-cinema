@@ -189,7 +189,7 @@ async function fallbackToLocalSearch(version) {
   if (search && memory) search.value = memory;
   setStatus("Vivid AI unavailable · matching your clues locally…");
   try {
-    // Do not retry Vivid AI here: Electron/App Check failures should fall straight
+    // Do not retry Vivid AI here: desktop authentication or network failures should fall straight
     // through to deterministic clue matching instead of leaving Recall stalled.
     const intent = parseIntent(memory);
     const matches = await getPlotMatchRecommendations(intent, 5, { localOnly: true });
@@ -222,7 +222,7 @@ async function sendMessage(text) {
   const version = ++requestVersion;
 
   try {
-    const { sendRecallChatMessage } = await import("./firebase-ai.js");
+    const { sendRecallChatMessage } = await import("./cloudflare-ai.js");
     const payload = await sendRecallChatMessage(
       history.slice(-8).map(item => ({ role: item.role, content: item.content })),
       $("recall-chat-type")?.value || "all"
@@ -288,7 +288,7 @@ function init() {
     history.length = 0;
     $("recall-chat-messages")?.replaceChildren();
     addMessage("assistant", "Hey, I’m Vivid Recall. Tell me anything you remember — a scene, a character, a strange object, the ending, or just the feeling of the story. We’ll work it out together.");
-    setStatus("Vivid AI AI chat · TMDB title checks");
+    setStatus("Vivid Recall AI chat · TMDB title checks");
     setBusy(false);
     input.value = "";
     input.focus();
