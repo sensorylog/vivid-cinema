@@ -11,6 +11,8 @@ let roomId = "";
 let role = "";
 let unsubscribePlayback = null;
 let heartbeatTimer = null;
+let selectionTimer = null;
+let lastAppliedSelectionKey = "";
 let latestRemoteState = null;
 let joinedPlayback = false;
 let localPosition = null;
@@ -25,13 +27,93 @@ let clockOffsetMs = 0;
 const panel = document.createElement("section");
 panel.className = "vivid-room-sync";
 panel.id = "vivid-room-sync";
-panel.innerHTML = '<div class="vivid-room-sync__head"><div><span class="vivid-room-sync__eyebrow">VIVID WATCH ROOMS</span><h2>Watch together</h2><p id="vivid-room-sync-note" role="status" aria-live="polite">Connect this title to a private screening.</p></div><span class="vivid-room-sync__provider">Provider sync</span></div><form id="vivid-room-sync-form" class="vivid-room-sync__form"><label for="vivid-room-sync-code">Room invitation code</label><div><input id="vivid-room-sync-code" name="inviteCode" maxlength="10" minlength="10" autocomplete="off" autocapitalize="characters" placeholder="10-character code" required><button type="submit">Connect room</button></div></form><div class="vivid-room-sync__actions"><button type="button" id="vivid-room-sync-join" hidden>Join synced playback</button><button type="button" id="vivid-room-sync-leave" hidden>Disconnect</button></div></section>';
+panel.innerHTML = '<div class="vivid-room-sync__head><div><span class="vivid-room-sync__eyebrow">VIVID WATCH ROOMS</span><h2>Watch together</h2><p id="vivid-room-sync-note" role="status" aria-live="polite">Connect this title to a private screening.</p></div><span class="vivid-room-sync__provider">Provider sync</span></div><form id="vivid-room-sync-form" class="vivid-room-sync__form"><label for="vivid-room-sync-code">Room invitation code</label><div><input id="vivid-room-sync-code" name="inviteCode" maxlength="10" minlength="10" autocomplete="off" autocapitalize="characters" placeholder="10-character code" required><button type="submit">Connect room</button></div></form><div id="vivid-room-sync-selection" class="vivid-room-sync__selection" hidden><p id="vivid-room-sync-selection-label">Room player selection</p><div id="vivid-room-sync-selection-controls"><label for="vivid-room-sync-player">Player</label><select id="vivid-room-sync-player"><option value="player1">Player 1</option><option value="player2">Player 2</option></select><label for="vivid-room-sync-provider">Server</label><select id="vivid-room-sync-provider"></select></div></div><div class="vivid-room-sync__actions"><button type="button" id="vivid-room-sync-join" hidden>Join synced playback</button><button type="button" id="vivid-room-sync-leave" hidden>Disconnect</button></div></section>';
 document.querySelector("#watch-content")?.insertAdjacentElement("afterend", panel);
 const note = document.getElementById("vivid-room-sync-note");
 const form = document.getElementById("vivid-room-sync-form");
 const joinButton = document.getElementById("vivid-room-sync-join");
 const leaveButton = document.getElementById("vivid-room-sync-leave");
+const selectionPanel = document.getElementById("vivid-room-sync-selection");
+const selectionLabel = document.getElementById("vivid-room-sync-selection-label");
+const selectionControls = document.getElementById("vivid-room-sync-selection-controls");
+const playerSelect = document.getElementById("vivid-room-sync-player");
+const providerSelect = document.getElementById("vivid-room-sync-provider");
 const setNote = message => { if (note) note.textContent = message; };
+
+
+const ROOM_PLAYER_OPTIONS = {
+  player1: [
+    ["vidapi", "VidAPI"], ["vidsrc", "VidSrc"], ["vidlink", "VidLink"],
+    ["vidplus", "VidPlus"], ["vidking", "VidKing"], ["embedwave", "EmbedWave"],
+    ["vidfast", "VidFast"], ["ezvidapi", "EZVidAPI"], ["embedapistream", "EmbedAPIStream"],
+    ["moviesapi", "MoviesAPI"]
+  ],
+  player2: [
+    ["moviesapi", "MoviesAPI"], ["vidsrc-embed", "VidSrc Embed"], ["cinesrc", "CineSRC"],
+    ["vidfast", "VidFast"], ["vidlink", "VidLink"]
+  ]
+};
+
+function populateRoomProviderOptions(playerId, selectedProviderId) {
+  const options = ROOM_PLAYER_OPTIONS[playerId] || ROOM_PLAYER_OPTIONS.player1;
+  providerSelect.replaceChildren(...options.map(([value, label]) => {
+    const option = document.createElement("option");
+    option.value = value; option.textContent = label;
+    return option;
+  }));
+  providerSelect.value = options.some(([value]) => value === selectedProviderId) ? selectedProviderId : options[0][0];
+}
+
+function applyRoomPlayerSelection(room) {
+  const playerId = room.selectedPlayerId === "player2" ? "player2" : "player1";
+  const providerId = String(room.selectedProviderId || (playerId === "player1" ? "vidapi" : "moviesapi"));
+  playerSelect.value = playerId;
+  populateRoomProviderOptions(playerId, providerId);
+  selectionPanel.hidden = false;
+  selectionControls.hidden = role !== "host";
+  selectionLabel.textContent = role === "host"
+    ? "Choose the player and server for everyone in this room."
+    : "The host selected " + (playerId === "player1" ? "Player 1" : "Player 2") + " · " + providerId + ".";
+  const key = playerId + ":" + providerId;
+  if (key !== lastAppliedSelectionKey) {
+    lastAppliedSelectionKey = key;
+    window.dispatchEvent(new CustomEvent("vivid:watch-room-apply-selection", {
+      detail: { playerId, providerId, position: Number(latestRemoteState?.position) || 0 }
+    }));
+  }
+}
+
+async function refreshRoomPlayerSelection() {
+  if (!roomId) return;
+  const response = await call("getWatchRoomLobbySnapshot")({ roomId });
+  if (!roomId) return;
+  applyRoomPlayerSelection(response.data?.room || {});
+}
+
+async function saveRoomPlayerSelection() {
+  if (!roomId || role !== "host") return;
+  const playerId = playerSelect.value;
+  const providerId = providerSelect.value;
+  providerSelect.disabled = true;
+  playerSelect.disabled = true;
+  try {
+    await call("setWatchRoomPlayerSelection")({ roomId, playerId, providerId });
+    await refreshRoomPlayerSelection();
+    setNote("Shared player selection saved. The room is switching to " + playerId + " · " + providerId + ".");
+  } catch (error) {
+    setNote(error?.message || "Could not update the room player selection.");
+    try { await refreshRoomPlayerSelection(); } catch {}
+  } finally {
+    playerSelect.disabled = role !== "host";
+    providerSelect.disabled = role !== "host";
+  }
+}
+
+playerSelect.addEventListener("change", () => {
+  populateRoomProviderOptions(playerSelect.value, ROOM_PLAYER_OPTIONS[playerSelect.value][0][0]);
+  void saveRoomPlayerSelection();
+});
+providerSelect.addEventListener("change", () => { void saveRoomPlayerSelection(); });
 
 function getActiveAdapter() {
   return getProviderAdapter(activePlayerId, activeProviderId);
@@ -115,6 +197,8 @@ async function connectToRoom(id) {
     }
   };
   await ping(); heartbeatTimer = window.setInterval(ping, 30000);
+  try { await refreshRoomPlayerSelection(); } catch (error) { setNote(error?.message || "Could not load the room player selection."); }
+  selectionTimer = window.setInterval(() => { refreshRoomPlayerSelection().catch(error => setNote(error?.message || "Room player selection could not refresh.")); }, 5000);
   unsubscribePlayback = onSnapshot(doc(db, "rooms", roomId, "playback", "current"), snapshot => {
     if (!snapshot.exists()) { latestRemoteState = null; if (role !== "host") setNote("Connected. Waiting for the host to start playback."); return; }
     latestRemoteState = snapshot.data();
