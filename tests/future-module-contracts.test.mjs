@@ -174,13 +174,17 @@ test("Watch Rooms Stage 5 exposes a trusted VidSrc-only playback clock and clien
   const page = readFileSync(new URL("../watch.html", import.meta.url), "utf8");
   assert.ok(functions.includes("publishWatchRoomPlayback"));
   assert.ok(backend.includes("async function publishWatchRoomPlayback("));
-  assert.ok(backend.includes('request.data?.provider !== "vidsrc"'));
+  assert.ok(backend.includes('["vidsrc", "cinesrc"].includes(provider)'));
   assert.ok(backend.includes("requireHost(roomId, uid)"));
   assert.ok(backend.includes("tx.get(roomRef.collection(\"members\").doc(uid))"));
   assert.ok(rules.includes("match /playback/{stateId}"));
   assert.ok(client.includes("getProviderAdapter(activePlayerId, activeProviderId)"));
   assert.ok(client.includes("sendAdapterCommand({ adapter, frame, action, position })"));
   assert.ok(client.includes('getProviderAdapter("player1", "vidsrc")'));
+  assert.ok(client.includes('getProviderAdapter("player2", "cinesrc")'));
+  assert.ok(client.includes('data.type === "cinesrc:command"') === false);
+  assert.ok(client.includes('type: "cinesrc:command"'));
+  assert.ok(client.includes('event.source !== frame.contentWindow'));
   assert.ok(client.includes('window.addEventListener("vivid:player-adapter-selected"'));
   assert.ok(client.includes('document.getElementById(activePlayerId === "player2" ? "vivid-tflix-frame" : "vidapi-player")'));
   assert.ok(client.includes('onSnapshot(doc(db, "rooms", roomId, "playback", "current")'));
