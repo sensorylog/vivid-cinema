@@ -178,7 +178,8 @@ function renderClubDetail(club) {
   byId("wr-detail-members").textContent = String(club.memberCount || 1);
   const actions = byId("wr-detail-actions");
   if (actions) {
-    const invite = makeInviteButton("club", club.clubId, "Invite members");
+    const actionsForClub = [];
+    if (club.role === "owner") actionsForClub.push(makeInviteButton("club", club.clubId, "Invite members"));
     const membershipAction = document.createElement("button");
     membershipAction.type = "button";
     membershipAction.className = "vivid-wr-button vivid-wr-button--quiet";
@@ -198,7 +199,8 @@ function renderClubDetail(club) {
         membershipAction.disabled = false;
       }
     });
-    actions.replaceChildren(invite, membershipAction);
+    actionsForClub.push(membershipAction);
+    actions.replaceChildren(...actionsForClub);
   }
 }
 
