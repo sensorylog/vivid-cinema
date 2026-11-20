@@ -6,6 +6,6 @@
     "@ljoukov/firebase-admin-cloudflare": "0.0.2"
   },
   "devDependencies": {
-    "wrangler": "4.53.0"
+    "wrangler": "3.114.17"
   }
 }
