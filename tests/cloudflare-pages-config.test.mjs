@@ -68,6 +68,7 @@ test("Firebase Hosting remains a manual-only backup workflow", () => {
   assert.match(firebaseWorkflow, /workflow_dispatch:/);
   assert.doesNotMatch(firebaseWorkflow, /Netlify is the primary automatic host/);
   assert.match(firebaseWorkflow, /Cloudflare Pages is the primary static host/);
+  assert.doesNotMatch(firebaseWorkflow, /firebase-tools deploy --only functions/);
 });
 
 
