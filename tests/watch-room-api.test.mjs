@@ -9,6 +9,10 @@ const clients = await Promise.all([
 
 test("Watch Rooms browser client sends Firebase Auth and standard App Check tokens", () => {
   assert.ok(client.includes('getToken(appCheck, false)'));
+  const firebase = await readFile(new URL("../scripts/firebase.js", import.meta.url), "utf8");
+  assert.match(firebase, /isTokenAutoRefreshEnabled:\s*false/);
+  const dashboard = await readFile(new URL("../scripts/watch-rooms.js", import.meta.url), "utf8");
+  assert.doesNotMatch(dashboard, /call\("cleanupExpiredWatchRooms"\)/, "dashboard load must not trigger maintenance/App Check assessments");
   assert.doesNotMatch(client, /getLimitedUseToken/);
   assert.ok(client.includes('user.getIdToken()'));
   assert.ok(client.includes('"X-Firebase-AppCheck"'));
