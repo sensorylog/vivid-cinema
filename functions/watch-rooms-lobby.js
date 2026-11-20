@@ -101,6 +101,24 @@ export const addWatchRoomQueueItem = onCall({ region: "us-central1", maxInstance
   return { itemId: itemRef.id };
 });
 
+
+export const removeWatchRoomQueueItem = onCall({ region: "us-central1", maxInstances: 20 }, async request => {
+  const uid = requireUser(request);
+  const roomId = validId(request.data?.roomId, "room ID");
+  const itemId = validId(request.data?.itemId, "queue item ID");
+  const roomRef = db().collection("rooms").doc(roomId);
+  const itemRef = roomRef.collection("queue").doc(itemId);
+  await db().runTransaction(async tx => {
+    const { room, member } = await requireRoomMemberInTransaction(tx, roomId, uid);
+    const item = await tx.get(itemRef);
+    if (!item.exists || item.data().status !== "queued") throw new HttpsError("not-found", "That queue item is no longer available.");
+    if (member.role !== "host" && item.data().addedBy !== uid) throw new HttpsError("permission-denied", "Only the host or the person who suggested this pick can remove it.");
+    tx.delete(itemRef);
+    tx.update(roomRef, { queueCount: Math.max(0, Number(room.queueCount || 0) - 1), updatedAt: Timestamp.now() });
+  });
+  return { removed: true };
+});
+
 export const voteWatchRoomQueueItem = onCall({ region: "us-central1", maxInstances: 20 }, async request => {
   const uid = requireUser(request);
   const roomId = validId(request.data?.roomId, "room ID");
