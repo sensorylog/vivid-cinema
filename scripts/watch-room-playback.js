@@ -1,12 +1,10 @@
-import { app, auth, db } from "./firebase.js";
+import { auth, db } from "./firebase.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
 import { doc, getDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
-import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-functions.js";
+import { callWatchRoomApi } from "./watch-room-api.js";
 
-const REGION = "us-central1";
 const SUPPORTED_ORIGIN = "https://vidsrc.sh";
-const functions = getFunctions(app, REGION);
-const call = name => httpsCallable(functions, name);
+const call = callWatchRoomApi;
 let roomId = "";
 let role = "";
 let unsubscribePlayback = null;

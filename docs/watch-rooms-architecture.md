@@ -24,7 +24,7 @@ Feature branch: feature/watch-rooms
 - Firebase is initialized in scripts/firebase.js and exports the shared app, auth and db instances. Firebase Auth persistence is already configured there.
 - scripts/nav-auth.js and scripts/app-shell.js observe Firebase auth state and dispatch vivid:auth-ready. The feature must use the existing auth instance and must not introduce a competing auth listener or auth implementation unnecessarily.
 - Firestore rules are in firestore.rules and end with a deny-by-default catch-all. New room/club paths require explicit, narrow rules and emulator tests.
-- The existing Cloud Functions package is under functions/, uses Node 22 and Firebase Functions v2. functions/index.js currently contains trusted callable/scheduled functions; firebase.json configures the functions codebase as news-ingestion. Any new trusted room operations must respect this deployment layout and avoid accidental changes to existing functions.
+- Cloudflare Pages publishes the static frontend from dist/. The repository already has a Vercel serverless API at api/send-verification.js (vivid-cinema-api.vercel.app) using Firebase Admin. Watch Rooms trusted mutations use that existing Vercel API host rather than introducing Firebase Cloud Functions.
 - Movie playback is implemented in scripts/watch.js. It uses multiple third-party iframe providers and a direct player path. Provider capabilities are not uniform; some embedded providers do not report events to the parent, and custom embeds explicitly leave controls/status to the provider.
 - scripts/watch.js already validates provider postMessage origins for selected providers. Any new adapter must retain strict source-window and origin validation.
 - Unit tests use Node's test runner. Firestore rules tests use @firebase/rules-unit-testing. Browser route/navigation tests use Playwright.
@@ -66,7 +66,7 @@ These are domain concepts, not a final Firestore schema. Exact paths and fields 
 
 ## Stage 3 trusted operations
 
-Callable operations: `createWatchRoom`, `createCinemaClub`, `createWatchInvitation`, `redeemWatchInvitation` and `revokeWatchInvitation`. These operations reject signed-out and anonymous identities, validate bounded inputs, and perform related document changes in Firestore transactions. Clients cannot create or modify room, club, membership, dashboard-index or invitation documents directly.
+Trusted API operations: `createWatchRoom`, `createCinemaClub`, `createWatchInvitation`, `redeemWatchInvitation` and `revokeWatchInvitation`. These operations reject signed-out and anonymous identities, validate bounded inputs, and perform related document changes in Firestore transactions. Clients cannot create or modify room, club, membership, dashboard-index or invitation documents directly.
 
 ## Security model
 
@@ -131,11 +131,11 @@ Each stage is delivered as focused commits on feature/watch-rooms and reviewed b
 ## Stage 4 lobby and social implementation
 
 - Presence is represented by short-lived member leases refreshed every 30 seconds and expiring after 90 seconds; it is not a substitute for membership.
-- Room queue suggestions are created through trusted callable operations, bounded to 50 items, and support per-member vote toggling.
+- Room queue suggestions are created through trusted API operations, bounded to 50 items, and support per-member vote toggling.
 - Room chat is member-only, bounded to 500 characters per message, and rate-limited server-side.
 - Reactions are allow-listed and toggled by authenticated room members.
 - Host-only settings control the room name and whether guests may add queue items or chat. The host can remove another member, change guest permissions, and close the room for everyone; the host cannot remove themselves.
-- Lobby collections are readable only by current room members. All client writes to presence, queue and chat are denied by Firestore rules; mutations use trusted callables.
+- Lobby collections are readable only by current room members. All client writes to presence, queue and chat are denied by Firestore rules; mutations use trusted API operations.
 - Client lobby listeners are torn down when the user leaves the lobby. Playback synchronization remains Stage 5 and is not implied by the lobby.
 
 ## Stage 5 synchronized playback — initial adapter
@@ -143,7 +143,7 @@ Each stage is delivered as focused commits on feature/watch-rooms and reviewed b
 - The first verified synchronization adapter is VidSrc at the configured exact origin `https://vidsrc.sh`.
 - VidSrc documents both `PLAYER_EVENT` playback updates and parent-frame play, pause and absolute/relative seek commands. Vivid accepts events only from the active iframe window and exact VidSrc origin, and sends commands back with that exact target origin.
 - VidAPI currently documents playback events but not a parent command API; VidLink documents events but not playback control commands. Those providers remain normal playback sources and are not advertised as synchronized.
-- The host is authoritative. A trusted callable rechecks open-room membership and host role in the same transaction that updates `rooms/{roomId}/playback/current`.
+- The host is authoritative. A trusted API operation rechecks open-room membership and host role in the same transaction that updates `rooms/{roomId}/playback/current`.
 - Members receive realtime read-only playback snapshots. Clients cannot write playback state directly.
 - Guests join through a room invitation code on the watch page. The expected invitation target is validated before redemption so a Cinema Club code cannot be consumed accidentally.
 - The guest estimates the host position using the server timestamp, applies play/pause commands, and seeks when drift exceeds 2.5 seconds. A guest must start the VidSrc player through a user gesture before browser playback policy permits remote play commands.
@@ -158,7 +158,7 @@ Each stage is delivered as focused commits on feature/watch-rooms and reviewed b
 - `cinemaClubs/{clubId}/screenings/{screeningId}` stores durable screening history, including typed title identity, screening date, optional notes, and rating aggregates. A member can record a screening from the club page.
 - `screenings/{screeningId}/afterCredits/{uid}` stores each member's editable 1–5 rating and optional review. Aggregate rating totals are updated transactionally to avoid lost updates.
 - `screenings/{screeningId}/discussion/{messageId}` stores member-only After-Credits discussion messages, bounded to 1,000 characters and 200 messages per screening.
-- Trusted callable operations perform every write. They require a signed-in, non-anonymous Vivid identity, verify active club membership, and re-check membership inside the transaction that commits durable changes.
+- Trusted trusted API operations perform every write. They require a signed-in, non-anonymous Vivid identity, verify active club membership, and re-check membership inside the transaction that commits durable changes.
 - Firestore rules allow only current members of active clubs to read these collections. Client writes are denied; non-members and signed-out users cannot read club watchlists, history, ratings or discussions.
 - The club page subscribes to the selected club's shared watchlist and screening history, and loads a screening's ratings/discussion when the member opens its After-Credits view.
 - The UI accepts Vivid's typed `movie:ID` / `tv:ID` catalogue identifiers. It does not pretend free-text titles alone are a canonical catalogue match.
@@ -168,29 +168,38 @@ Each stage is delivered as focused commits on feature/watch-rooms and reviewed b
 
 - All Cinema Club mutations require a non-anonymous Firebase identity, verify active membership before work, and re-read club status and membership inside the committing transaction.
 - Watch Room and Cinema Club Firestore reads require a non-anonymous Firebase sign-in and a current membership record. Cinema Club archive reads additionally require the club status to remain active.
-- All room, lobby, playback, watchlist, screening, review and discussion writes remain server-only through callable operations. Firestore client write rules remain denied.
+- All room, lobby, playback, watchlist, screening, review and discussion writes remain server-only through the authenticated Vercel API. Firestore client write rules remain denied.
 - The club UI disables write forms until a club is selected, restores listeners after back-forward cache navigation, shows live watchlist/screening counts, and links the screening action to the actual club screening form.
-- Stage 7 test coverage includes Stage 6 callable export contracts, active-club transaction rechecks, member-only archive access, archived-club read denial, and client-write denial.
+- Stage 7 test coverage includes Stage 6 API route contracts, active-club transaction rechecks, member-only archive access, archived-club read denial, and client-write denial.
 - Release gate: the latest commit must pass the repository's Tests, Firestore Rules, static validation, browser navigation, Windows and Android workflows. Cloudflare Pages is tracked separately as a deployment check. A queued or in-progress workflow is not considered a pass.
 - Known product boundary: synchronized playback is currently supported only through the verified VidSrc parent-frame control contract; it is not frame-perfect and browser autoplay/network buffering remain external constraints.
 
 - Watch Room queue items can be removed by their author or the host. Removal and queueCount decrement occur in the same transaction, so a removed suggestion releases capacity without allowing concurrent overfill.
 - Room chat is capped at 500 messages per room with a transactionally maintained counter, in addition to the per-member send cooldown and message-length bound.
 - Guests can leave an open room through a trusted transaction that removes membership, presence and the private dashboard pointer. Hosts must close the room rather than orphan it.
-- A bounded hourly retention job deletes expired invitation records and expired/closed room trees, including nested subcollections and per-user dashboard pointers. Manually closed rooms are made immediately eligible for cleanup. This is necessary because Firestore TTL deletion of a parent document does not recursively delete subcollections.
+- Expiry is enforced by trusted operations, so expired rooms and invitations cannot be used. The dashboard also triggers a best-effort, globally throttled Vercel API retention pass: up to 100 expired invitations and one expired room tree are deleted per pass, including nested subcollections and member dashboard pointers. This avoids a Firebase scheduled function; cleanup is opportunistic rather than an hourly guarantee.
 - Anonymous Firebase identities are explicitly denied in the Watch Rooms and Cinema Club rules tests.
-- App Check is initialized in the shared web Firebase client with reCAPTCHA Enterprise, but enforcement for each Firebase product is a Firebase Console / deployment setting and must be confirmed against the actual production project before enabling callable enforcement. Do not enable server enforcement until supported app platforms (including packaged Android/Electron clients) have an App Check provider/token path.
+- The shared web Firebase client initializes reCAPTCHA Enterprise App Check. The Vercel Watch Rooms API requires Firebase ID-token verification and consumes one-time App Check tokens before performing trusted operations. This is custom API verification; it does not require enabling Firebase Cloud Functions.
 
 - Guests can leave an active Watch Room through a trusted transaction; the host must close the room. Leaving removes the member, presence lease and private dashboard pointer while preserving the host and room.
 - Cinema Club members can leave; the owner can archive the club. Both operations are transactionally authorized, update membership counts/pointers, and archived clubs become unreadable under the active-club Firestore rule.
 - Watch Room chat is capped at 500 messages per room in addition to per-member rate limiting. Queue items can be removed by their author or the host, with the transactional queue counter decremented.
 - Dashboard reads are generation-guarded so a slower response for a previous Firebase user cannot overwrite the current account's room/club list after an auth switch.
-- Closed/expired Watch Rooms and expired invitation documents are processed by a bounded hourly scheduled retention function. Room trees are recursively deleted and member dashboard pointers are removed. Firestore TTL is not relied on for subcollection cleanup.
+- Closed/expired Watch Rooms and expired invitation documents are denied by the API. Physical recursive cleanup is a separate retention task and is not claimed as deployed.
 
 - Invitation redemption, member departure and host removal update the authoritative member count and existing private dashboard summaries in the same transaction. Room and club previews therefore do not retain stale membership counts.
 - The service worker precaches the Watch Rooms dashboard, lobby, Cinema Club and playback modules. Its shell cache version is bumped so existing installations fetch the new feature assets on update.
 
-- Room access now fails closed if the parent room lacks a valid Firestore timestamp expiry. The same expiry requirement is enforced in Firestore rules, callable membership checks and playback publication.
+- Room access now fails closed if the parent room lacks a valid Firestore timestamp expiry. The same expiry requirement is enforced in Firestore rules, trusted API membership checks and playback publication.
 - Lobby listeners and presence heartbeats are torn down on pagehide and restored on back-forward cache navigation. Hosts can manage both online and offline members, not just currently active presence leases.
 
 - Playback drift calculations use a server-time offset measured from the trusted room heartbeat, reducing dependence on each viewer device's wall clock. Periodic playing updates are throttled without suppressing pause/resume state transitions.
+
+
+## API hosting migration
+
+- Browser clients call `https://vivid-cinema-api.vercel.app/api/watch-rooms` through `scripts/watch-room-api.js`.
+- Every operation sends the current Firebase ID token in `Authorization: Bearer` and a one-time App Check token in `X-Firebase-AppCheck`. The Vercel handler verifies both before dispatch.
+- The API reuses the `FIREBASE_SERVICE_ACCOUNT_JSON` Vercel secret already used by `api/send-verification.js`; the service account needs Firebase Auth Admin, Datastore User, and Firebase App Check Token Verifier permissions. It does not create or deploy Firebase Cloud Functions.
+- Cloudflare's static build intentionally excludes `api/`; Vercel deploys that directory as serverless API routes, while Cloudflare Pages continues to publish `dist/`. `VIVID_ALLOWED_ORIGINS` must include the production Pages hostname and any custom domain.
+- Firestore client writes to Watch Room and Cinema Club records remain denied. Trusted API transactions remain the only mutation path.

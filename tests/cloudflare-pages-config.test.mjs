@@ -68,6 +68,7 @@ test("Firebase Hosting remains a manual-only backup workflow", () => {
   assert.match(firebaseWorkflow, /workflow_dispatch:/);
   assert.doesNotMatch(firebaseWorkflow, /Netlify is the primary automatic host/);
   assert.match(firebaseWorkflow, /Cloudflare Pages is the primary static host/);
+  assert.doesNotMatch(firebaseWorkflow, /firebase-tools deploy --only functions/);
 });
 
 
@@ -78,4 +79,14 @@ test("Cloudflare CSP allows the active verification API and managed download fun
   assert.ok(csp.includes("https://archive.org"));
   assert.ok(csp.includes("https://commons.wikimedia.org"));
   assert.ok(csp.includes("https://vivid-cinema-api.vercel.app"));
+});
+
+
+test("Watch Rooms trusted API is deployed by the existing Vercel API project, not the static Pages artifact", async () => {
+  const api = await readFile(new URL("../api/watch-rooms.js", import.meta.url), "utf8");
+  assert.ok(buildScript.includes('"api"'), "static Pages build must keep server API source out of the public dist artifact");
+  assert.ok(api.includes("export default async function handler"));
+  assert.ok(api.includes("https://vivid-cinema.pages.dev"));
+  assert.ok(api.includes("https://vivid-cinema-api.vercel.app") === false, "server route must not hard-code its own public hostname");
+  assert.ok(api.includes("getAppCheck(firebaseApp).verifyToken(appCheckToken, { consume: true })"));
 });

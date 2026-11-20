@@ -1,9 +1,9 @@
-import { app, auth, db } from "./firebase.js";
+import { auth, db } from "./firebase.js";
 import { collection, limit, onSnapshot, orderBy, query } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
-import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-functions.js";
+import { callWatchRoomApi } from "./watch-room-api.js";
 
 const byId = id => document.getElementById(id);
-const call = name => httpsCallable(getFunctions(app, "us-central1"), name);
+const call = callWatchRoomApi;
 let activeClub = null;
 let lastClub = null;
 let activeScreeningId = null;

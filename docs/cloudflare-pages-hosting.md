@@ -3,6 +3,7 @@
 ## Hosting roles
 
 - **Cloudflare Pages** is the primary static frontend host for Vivid Cinema.
+- The existing **Vercel API project** at `vivid-cinema-api.vercel.app` serves the repository's `api/` serverless routes (including email verification and Watch Rooms). The static Pages build excludes `api/`; Vercel deploys those routes from the repository root.
 - **Firebase Hosting** is retained as a manual backup. Its GitHub Actions deployment remains manual-only; run it only when intentionally switching or validating the backup and after checking Firebase Hosting quota.
 - Firebase Authentication, Firestore, Firebase AI Logic, and App Check remain on the existing Firebase project. Moving static hosting does not migrate or disable these services.
 - Netlify is retired from the intended hosting setup. This repository change does not delete the Netlify project or disable its deployment; those are separate dashboard actions.
