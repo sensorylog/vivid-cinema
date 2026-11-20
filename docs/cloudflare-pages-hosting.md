@@ -7,7 +7,7 @@
 - **Firebase Hosting** is retained as a manual backup. Its GitHub Actions deployment remains manual-only; run it only when intentionally switching or validating the backup and after checking Firebase Hosting quota.
 - Firebase Authentication, Firestore, Firebase AI Logic, and App Check remain on the existing Firebase project. Moving static hosting does not migrate or disable these services.
 - Netlify is retired from the intended hosting setup. This repository change does not delete the Netlify project or disable its deployment; those are separate dashboard actions.
-- Cloudflare Pages Functions and Workers are not required for this static hosting plan. Movie media is not stored in Pages; the app continues to use its configured external services.
+- Cloudflare Pages Functions are used only for the Watch Rooms API; movie media is not stored in Pages, and the app continues to use its configured external services.
 
 ## Cloudflare Pages build settings
 
@@ -17,9 +17,14 @@
 - Build command: `npm run build:web`
 - Build output directory: `dist`
 - Root directory: `/`
-- Environment variables: none are required by the current static build script
+- Build-time dependencies: the build installs the isolated Cloudflare function dependencies under `cloudflare/` before bundling the Pages Function.
+- Runtime secret: `FIREBASE_SERVICE_ACCOUNT_JSON` must be configured in Pages Settings → Variables and Secrets (Production and Preview).
 
-The shared script `automation/build-static-dist.mjs` creates `dist/`, excludes repository/backend source, and includes the root `_headers` file for Cloudflare Pages. Do not publish the repository root.
+The shared script `automation/build-static-dist.mjs` creates the static `dist/` assets and excludes repository/backend source. The `build:web` command then bundles `cloudflare/functions/` into `dist/_worker.js`; the root Firebase Functions directory is not used as the Pages Functions source. Do not publish the repository root.
+
+## Pages Functions runtime
+
+Enable `nodejs_compat` under Settings → Functions → Compatibility Flags for Production and Preview. The Watch Rooms Function requires it for Firebase Admin Auth and App Check SDK compatibility. Keep `FIREBASE_SERVICE_ACCOUNT_JSON` as a secret, not a plain-text public variable.
 
 ## Headers and caching
 
