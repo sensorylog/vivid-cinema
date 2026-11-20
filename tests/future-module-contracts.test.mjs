@@ -469,3 +469,16 @@ test("Watch Rooms surfaces the safe failed-precondition cause instead of hiding 
   assert.ok(errors.includes('if (code.includes("failed-precondition")) return error?.message'));
   assert.ok(!errors.includes("This space is no longer available for that action."));
 });
+
+
+test("Watch Rooms preserves the actual Firebase App Check SDK error code and message", () => {
+  const api = readFileSync(new URL("../scripts/watch-room-api.js", import.meta.url), "utf8");
+  const start = api.indexOf("let appCheckResult;");
+  const end = api.indexOf("let response;", start);
+  const block = api.slice(start, end);
+  assert.ok(block.includes('cause?.code || "appCheck/unknown"'));
+  assert.ok(block.includes('cause?.message || "No additional message from Firebase App Check."'));
+  assert.ok(block.includes("diagnosticCode"));
+  assert.ok(block.includes("diagnosticMessage"));
+  assert.ok(block.includes("error.cause = cause"));
+});
