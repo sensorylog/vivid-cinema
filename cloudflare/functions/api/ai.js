@@ -117,7 +117,7 @@ export async function onRequest({ request, env }) {
     ? Math.max(64, Math.min(MAX_OUTPUT_TOKENS, body.maxOutputTokens))
      : 320;
   if (!prompt || prompt.length > MAX_PROMPT_CHARS) {
-    return json(400, { ok: false, code: "invalid-argument", message: "The Vivid AI prompt must contain 1–10,000 characters." });
+    return json(400, { ok: false, code: "invalid-argument", message: "The Vivid AI prompt must contain 1–8,000 characters." });
   }
 
   try {
