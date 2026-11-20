@@ -746,7 +746,7 @@ export async function getPlotMatchRecommendations(intent = {}, limit = 18, optio
       const { getRecallClues } = await import("./cloudflare-ai.js");
       recallResult = await getRecallClues(query, localClues);
     } catch (error) {
-      // A missing SDK, disabled AI Logic service, or App Check failure must not
+      // A missing Cloudflare AI binding, provider failure, or sign-in issue must not
       // prevent the existing local Vivid Recall search from working.
       console.warn("Vivid Recall AI setup is not ready; keeping local matching.", error);
     }
