@@ -516,6 +516,6 @@ test("Watch Room lobby shows real membership and requires a searchable catalogue
   for (const source of [api, cloudflare]) {
     const queue = source.slice(source.indexOf("async function addWatchRoomQueueItem"), source.indexOf("async function removeWatchRoomQueueItem"));
     assert.ok(queue.includes("posterPath") && queue.includes("releaseDate"), "queue must retain selected title artwork and release year");
-    assert.ok(queue.includes("!/^\\\\d{1,12}$/.test(contentId)"), "queue must validate catalogue IDs");
+    assert.ok(queue.includes("!/^\\d{1,12}$/.test(contentId)"), "queue must validate catalogue IDs");
   }
 });
