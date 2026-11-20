@@ -48,6 +48,9 @@ async function getConfig() {
 
 async function runManagedChallenge(siteKey) {
   const turnstile = await loadTurnstile();
+  if (!document.body) {
+    await new Promise(resolve => document.addEventListener("DOMContentLoaded", resolve, { once: true }));
+  }
   return new Promise((resolve, reject) => {
     const overlay = document.createElement("div");
     overlay.setAttribute("role", "dialog");
@@ -77,9 +80,7 @@ async function runManagedChallenge(siteKey) {
     panel.append(heading, description, mount);
     overlay.append(panel);
 
-    const attach = () => document.body.append(overlay);
-    if (document.body) attach();
-    else document.addEventListener("DOMContentLoaded", attach, { once: true });
+    document.body.append(overlay);
 
     let widgetId = null;
     let settled = false;
@@ -88,7 +89,6 @@ async function runManagedChallenge(siteKey) {
       if (settled) return;
       settled = true;
       window.clearTimeout(timeout);
-      document.removeEventListener("DOMContentLoaded", attach);
       if (widgetId !== null) {
         try { turnstile.remove(widgetId); } catch {}
       }
