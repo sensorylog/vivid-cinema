@@ -33,8 +33,8 @@ function writeClueCache(key, clues) {
   } catch {}
 }
 
-// Keep all Recall/Spark requests on this page from competing for the initial
-// App Check token exchange. A failed request never poisons the queue.
+// Serialize explicit Recall requests so a user cannot accidentally burst
+// several model calls at once. A failed request never poisons the queue.
 function serializeAiRequest(task) {
   const current = aiRequestTail.then(task, task);
   aiRequestTail = current.then(() => undefined, () => undefined);
@@ -254,7 +254,8 @@ export async function sendRecallChatMessage(messages, mediaType = "all") {
 }
 
 
-const SPARK_TIMEOUT_MS = 10000;
+
+
 
 /**
  * Produce one concise, educational Vivid Spark for an achievement unlock.
