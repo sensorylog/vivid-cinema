@@ -1004,7 +1004,7 @@ export async function onRequest({request,env}) {
     return response(200,{ok:true,data:result??null},origin);
   } catch(error) {
     const rawCode=error?.code||"internal";
-    const code=rawCode.startsWith("auth/")?"unauthenticated":rawCode.startsWith("app-check/")?"failed-precondition":rawCode;
+    const code=rawCode.startsWith("app-check/") || rawCode.startsWith("appCheck/") ? "failed-precondition" : rawCode;
     const status=({
       unauthenticated:401,"permission-denied":403,"not-found":404,
       "auth/id-token-expired":401,"auth/id-token-revoked":401,"auth/invalid-id-token":401,"auth/argument-error":401,

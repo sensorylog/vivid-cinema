@@ -83,6 +83,8 @@ test("Cloudflare Watch Rooms route preserves every trusted operation and one-tim
   }
   assert.ok(route.includes("verifyIdToken(match[1], true)"));
   assert.ok(route.includes("invalidUserTokenCodes"));
+  assert.ok(!route.includes('rawCode.startsWith("auth/")'), "server-side Firebase Admin errors must not be mislabeled as user sign-in failures");
+  assert.ok(route.includes('rawCode.startsWith("appCheck/")'));
   assert.ok(route.includes('"auth/id-token-revoked"'));
   assert.ok(route.includes('"Watch Rooms Firebase ID-token verification failed:"'));
   assert.ok(!route.includes('String(error?.code || "").startsWith("auth/")'));
