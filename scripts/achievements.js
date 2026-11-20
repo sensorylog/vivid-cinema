@@ -106,20 +106,8 @@ async function showUnlock(a,others,library){
   if(others.length)modal.querySelector("#vivid-achievement-extra").textContent=others.length+" more milestone"+(others.length===1?"":"s")+" unlocked with this one.";
   const close=()=>closeModal();modal.querySelector(".vivid-achievement-close").addEventListener("click",close);modal.querySelector(".vivid-achievement-continue").addEventListener("click",close);
   modal.addEventListener("click",event=>{if(event.target===modal)close()});document.body.append(modal);document.addEventListener("keydown",onModalKey);modal.querySelector(".vivid-achievement-continue").focus({preventScroll:true});
-  try{
-    const {generateAchievementSpark}=await import("./cloudflare-ai.js");
-    const store=readStore();
-    const recentSparks=(Array.isArray(store.sparkHistory)?store.sparkHistory:[]).slice(-6).map(item=>String(item?.spark||"").slice(0,240)).filter(Boolean);
-    const result=await generateAchievementSpark({achievement:{title:a.title,description:a.description,category:a.category},library:contextFor(library),recentSparks});
-    const spark=modal.isConnected&&currentUid===ownerAtStart?modal.querySelector("#vivid-achievement-spark"):null;
-    if(spark&&result?.spark){
-      spark.textContent=result.spark;
-      modal.querySelector(".vivid-spark-panel")?.classList.add("is-personalized");
-      const latestStore=readStore();
-      latestStore.sparkHistory=[...(Array.isArray(latestStore.sparkHistory)?latestStore.sparkHistory:[]),{achievementId:a.id,spark:result.spark,at:Date.now()}].slice(-8);
-      try{localStorage.setItem(STORAGE_KEY,JSON.stringify(latestStore))}catch{}
-    }
-  }catch(error){console.info("Vivid Spark stayed in local fallback mode:",error?.code||error?.message||error)}
+  // Achievement Sparks are deliberately local and curated. They never spend
+  // the shared Workers AI allowance during ordinary app use.
 }
 function persistRemote(record){
   const uid=currentUid;if(!uid||!record?.id)return;
