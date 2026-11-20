@@ -9,6 +9,7 @@ let role = "";
 let playbackTimer = null;
 let heartbeatTimer = null;
 let playbackRefreshInFlight = false;
+let playbackConnectionGeneration = 0;
 let latestRemoteState = null;
 let joinedPlayback = false;
 let localPosition = null;
@@ -45,6 +46,7 @@ function sendProviderCommand(action) {
 }
 
 function stopConnection() {
+  playbackConnectionGeneration += 1;
   if (playbackTimer) window.clearInterval(playbackTimer);
   if (heartbeatTimer) window.clearInterval(heartbeatTimer);
   playbackTimer = null;
@@ -82,12 +84,13 @@ function applyRemoteState(force = false) {
 async function refreshPlayback() {
   if (!roomId || playbackRefreshInFlight) return;
   const requestedRoomId = roomId;
+  const requestGeneration = playbackConnectionGeneration;
   const startedAt = Date.now();
   playbackRefreshInFlight = true;
   try {
     const result = await call("getWatchRoomPlaybackSnapshot")({ roomId: requestedRoomId });
     const finishedAt = Date.now();
-    if (roomId !== requestedRoomId) return;
+    if (roomId !== requestedRoomId || requestGeneration !== playbackConnectionGeneration) return;
     const serverTime = Number(result.data?.serverTime);
     if (Number.isFinite(serverTime)) clockOffsetMs = serverTime - ((startedAt + finishedAt) / 2);
     latestRemoteState = result.data?.playback || null;
@@ -96,9 +99,9 @@ async function refreshPlayback() {
       else setNote("Room connected. Waiting for the host to start playback.");
     }
   } catch (error) {
-    if (roomId === requestedRoomId) setNote(error?.message || "Playback sync connection was interrupted. Retrying automatically.");
+    if (roomId === requestedRoomId && requestGeneration === playbackConnectionGeneration) setNote(error?.message || "Playback sync connection was interrupted. Retrying automatically.");
   } finally {
-    playbackRefreshInFlight = false;
+    if (requestGeneration === playbackConnectionGeneration) playbackRefreshInFlight = false;
   }
 }
 
