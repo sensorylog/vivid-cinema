@@ -78,7 +78,7 @@ test("App Check remains initialized for Firebase services outside AI", () => {
   assert.match(firebaseSource, /initializeAppCheck/);
   assert.match(firebaseSource, /CustomProvider/);
   assert.match(firebaseSource, /getTurnstileAppCheckToken/);
-  assert.match(firebaseSource, /isTokenAutoRefreshEnabled:\\s*false/);
+  assert.match(firebaseSource, /isTokenAutoRefreshEnabled:\s*false/);
 });
 
 test("service worker cache version changes with the Cloudflare AI client", () => {
