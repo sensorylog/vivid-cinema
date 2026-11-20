@@ -12,16 +12,18 @@ function initialize(env) {
   if (!env.FIREBASE_SERVICE_ACCOUNT_JSON) {
     throw new Error("FIREBASE_SERVICE_ACCOUNT_JSON is not configured.");
   }
-  serviceAccount = JSON.parse(env.FIREBASE_SERVICE_ACCOUNT_JSON);
-  projectId = env.FIREBASE_PROJECT_ID || serviceAccount.project_id;
+  const parsedServiceAccount = JSON.parse(env.FIREBASE_SERVICE_ACCOUNT_JSON);
+  const resolvedProjectId = env.FIREBASE_PROJECT_ID || parsedServiceAccount.project_id;
   if (
-    projectId !== FIREBASE_PROJECT_ID ||
-    serviceAccount.project_id !== FIREBASE_PROJECT_ID ||
-    !serviceAccount.client_email ||
-    !serviceAccount.private_key
+    resolvedProjectId !== FIREBASE_PROJECT_ID ||
+    parsedServiceAccount.project_id !== FIREBASE_PROJECT_ID ||
+    !parsedServiceAccount.client_email ||
+    !parsedServiceAccount.private_key
   ) {
     throw new Error("Firebase service-account configuration does not match Vivid Cinema.");
   }
+  serviceAccount = parsedServiceAccount;
+  projectId = resolvedProjectId;
 }
 
 function isAllowedOrigin(origin, env) {
