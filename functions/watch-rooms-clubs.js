@@ -149,3 +149,48 @@ export const addCinemaClubDiscussionMessage = onCall({ region: "us-central1", ma
   });
   return { messageId: messageRef.id };
 });
+
+export const leaveCinemaClub = onCall({ region: "us-central1", maxInstances: 20 }, async request => {
+  const uid = requireUser(request);
+  const clubId = validId(request.data?.clubId, "club ID");
+  const clubRef = db().collection("cinemaClubs").doc(clubId);
+  const memberRef = clubRef.collection("members").doc(uid);
+  const pointerRef = db().collection("users").doc(uid).collection("cinemaClubs").doc(clubId);
+  await db().runTransaction(async tx => {
+    const [club, member] = await Promise.all([tx.get(clubRef), tx.get(memberRef)]);
+    if (!club.exists || club.data().status !== "active" || !member.exists) {
+      throw new HttpsError("permission-denied", "You must be a member of an active Cinema Club.");
+    }
+    if (member.data().role === "owner" || club.data().ownerUid === uid) {
+      throw new HttpsError("failed-precondition", "The club owner must archive the club instead of leaving it.");
+    }
+    tx.delete(memberRef);
+    tx.delete(pointerRef);
+    tx.update(clubRef, { memberCount: Math.max(1, Number(club.data().memberCount || 1) - 1), updatedAt: Timestamp.now() });
+  });
+  return { left: true };
+});
+
+export const archiveCinemaClub = onCall({ region: "us-central1", maxInstances: 20 }, async request => {
+  const uid = requireUser(request);
+  const clubId = validId(request.data?.clubId, "club ID");
+  const clubRef = db().collection("cinemaClubs").doc(clubId);
+  await db().runTransaction(async tx => {
+    const [club, owner, members] = await Promise.all([
+      tx.get(clubRef),
+      tx.get(clubRef.collection("members").doc(uid)),
+      tx.get(clubRef.collection("members"))
+    ]);
+    if (!club.exists || club.data().status !== "active") throw new HttpsError("failed-precondition", "This club is already archived.");
+    if (club.data().ownerUid !== uid || !owner.exists || owner.data().role !== "owner") {
+      throw new HttpsError("permission-denied", "Only the club owner can archive this Cinema Club.");
+    }
+    const archivedAt = Timestamp.now();
+    tx.update(clubRef, { status: "archived", archivedAt, updatedAt: archivedAt });
+    members.docs.forEach(member => {
+      tx.delete(db().collection("users").doc(member.id).collection("cinemaClubs").doc(clubId));
+    });
+  });
+  return { archived: true };
+});
+
