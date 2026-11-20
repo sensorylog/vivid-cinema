@@ -60,3 +60,10 @@ test("Watch Rooms API never exposes raw Firebase Admin errors to the browser", (
   assert.ok(api.includes("Your sign-in or app verification needs refreshing."));
   assert.ok(api.includes("We couldn't complete that action right now. Please try again."));
 });
+
+
+test("Watch Rooms API never exposes raw Firebase Admin errors to the browser", () => {
+  assert.ok(api.includes("const safeMessage = error instanceof HttpsError && status < 500"));
+  assert.ok(api.includes("Your sign-in or app verification needs refreshing."));
+  assert.ok(api.includes("We couldn't complete that action right now. Please try again."));
+});
