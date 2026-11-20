@@ -7,21 +7,23 @@ const clients = await Promise.all([
   "watch-rooms.js", "watch-room-lobby.js", "watch-room-clubs.js", "watch-room-playback.js"
 ].map(name => readFile(new URL("../scripts/" + name, import.meta.url), "utf8")));
 
-test("Watch Rooms browser client sends Firebase Auth and standard App Check tokens", async () => {
-  assert.ok(client.includes('getToken(appCheck, false)'));
+test("Watch Rooms browser client uses Firebase Auth and a cached Cloudflare attestation session", async () => {
+  assert.ok(client.includes('user.getIdToken()'));
+  assert.ok(client.includes('"X-Vivid-Room-Session"'));
+  assert.ok(client.includes('action: "attestBrowser"'));
+  assert.ok(client.includes('action: "watch_rooms"'));
+  assert.ok(client.includes('SESSION_REFRESH_SKEW_MS'));
+  assert.doesNotMatch(client, /getToken\\(appCheck|X-Firebase-AppCheck|appCheckError/);
   const firebase = await readFile(new URL("../scripts/firebase.js", import.meta.url), "utf8");
-  assert.match(firebase, /isTokenAutoRefreshEnabled:\s*false/);
+  assert.match(firebase, /initializeAppCheck/);
+  assert.match(firebase, /isTokenAutoRefreshEnabled:\\s*false/);
   const dashboard = await readFile(new URL("../scripts/watch-rooms.js", import.meta.url), "utf8");
   assert.ok(dashboard.includes('void call("cleanupExpiredWatchRooms")({})'), "retention remains scheduled as a non-blocking background task");
   assert.ok(dashboard.indexOf('call("getWatchRoomDashboard")') < dashboard.indexOf('call("cleanupExpiredWatchRooms")'), "dashboard must load before maintenance starts");
-  assert.doesNotMatch(client, /getLimitedUseToken/);
-  assert.ok(client.includes('user.getIdToken()'));
-  assert.ok(client.includes('"X-Firebase-AppCheck"'));
   assert.ok(client.includes('const API_URL = "/api/watch-rooms"'));
   assert.ok(client.includes('credentials: "omit"'));
   assert.ok(client.includes('return { data: payload.data }'));
 });
-
 test("All Watch Rooms and Cinema Club clients use the shared same-origin API adapter", () => {
   for (const source of clients) {
     assert.ok(source.includes('import { callWatchRoomApi } from "./watch-room-api.js"'));
@@ -37,10 +39,10 @@ test("Watch Rooms are no longer exported from the Firebase Functions codebase", 
 });
 
 
-test("Cloudflare Watch Rooms route preserves every trusted operation and signed App Check checks", async () => {
+test("Cloudflare Watch Rooms route preserves operations and requires signed Turnstile sessions", async () => {
   const route = await readFile(new URL("../cloudflare/functions/api/watch-rooms.js", import.meta.url), "utf8");
   for (const operation of [
-    "createWatchRoom","createCinemaClub","createWatchInvitation","redeemWatchInvitation","revokeWatchInvitation","cleanupExpiredWatchRooms",
+    "createWatchRoom","getWatchRoomDashboard","createCinemaClub","createWatchInvitation","redeemWatchInvitation","revokeWatchInvitation","cleanupExpiredWatchRooms",
     "heartbeatWatchRoom","addWatchRoomQueueItem","removeWatchRoomQueueItem","voteWatchRoomQueueItem",
     "sendWatchRoomMessage","reactToWatchRoomMessage","updateWatchRoomSettings","removeWatchRoomMember",
     "leaveWatchRoom","closeWatchRoom","publishWatchRoomPlayback",
@@ -51,21 +53,23 @@ test("Cloudflare Watch Rooms route preserves every trusted operation and signed 
     assert.ok(route.includes('"' + operation + '"'), "Cloudflare route does not allow " + operation);
   }
   assert.ok(route.includes("verifyFirebaseIdToken(match[1], projectId, serviceAccount)"));
-  assert.ok(route.includes("verifyAppCheckToken(appCheckToken)"));
+  assert.ok(route.includes("verifyTurnstileToken("));
+  assert.ok(route.includes("createWatchRoomSession("));
+  assert.ok(route.includes("verifyWatchRoomSession("));
+  assert.ok(route.includes('action === "attestBrowser"'));
+  assert.ok(route.includes("TURNSTILE_SITE_KEY"));
+  assert.ok(route.includes("TURNSTILE_SECRET_KEY"));
+  assert.ok(route.includes("WATCH_ROOMS_SESSION_SECRET"));
+  assert.ok(route.includes('"X-Vivid-Room-Session"'));
+  assert.doesNotMatch(route, /verifyAppCheckToken|X-Firebase-AppCheck/);
   assert.ok(!route.includes("firebase-admin/auth") && !route.includes("firebase-admin/app-check"));
   assert.ok(!route.includes("getAuth(") && !route.includes("getAppCheck("));
   assert.ok(route.includes("invalidUserTokenCodes"));
-  assert.ok(!route.includes('rawCode.startsWith("auth/")'), "server-side Firebase Admin errors must not be mislabeled as user sign-in failures");
-  assert.ok(route.includes('rawCode.startsWith("appCheck/")'));
   assert.ok(route.includes('"auth/id-token-revoked"'));
   assert.ok(route.includes('"Watch Rooms Firebase ID-token verification failed:"'));
-  assert.ok(!route.includes('String(error?.code || "").startsWith("auth/")'));
-  assert.ok(route.includes("verifyAppCheckToken(appCheckToken)"));
-  assert.ok(!route.includes("verifyAndConsumeAppCheckToken"));
   assert.ok(route.includes("recursiveDelete(reference)"));
   assert.ok(route.includes("reference instanceof Query"));
 });
-
 
 test("Cloudflare Firebase token verification uses Web Crypto and Google REST APIs, not Node HTTPS", async () => {
   const verifier = await readFile(new URL("../cloudflare/functions/lib/firebase-token-verification.js", import.meta.url), "utf8");
@@ -112,4 +116,60 @@ test("Watch Rooms dashboard is loaded through the authenticated server API", asy
   assert.match(dashboard, /timestampMillis/);
   assert.match(clientPage, /call\("getWatchRoomDashboard"\)/);
   assert.doesNotMatch(clientPage, /getDocs\(|collection\(db, "users"/);
+});
+
+
+test("Turnstile-backed Watch Rooms sessions are signed, short-lived and bound to user and origin", async () => {
+  const { createWatchRoomSession, verifyWatchRoomSession } = await import("../cloudflare/functions/lib/watch-room-attestation.js");
+  const secret = "vivid-watch-rooms-test-secret-with-more-than-32-characters";
+  const now = 1_800_000_000_000;
+  const session = await createWatchRoomSession("user-123", "https://vivid-cinema.pages.dev", secret, now);
+  const claims = await verifyWatchRoomSession(session.token, "user-123", "https://vivid-cinema.pages.dev", secret, now + 1000);
+  assert.equal(claims.sub, "user-123");
+  assert.equal(claims.origin, "https://vivid-cinema.pages.dev");
+  assert.equal(session.expiresAt, (Math.floor(now / 1000) + 1800) * 1000);
+  await assert.rejects(
+    verifyWatchRoomSession(session.token, "another-user", "https://vivid-cinema.pages.dev", secret, now + 1000),
+    error => error.code === "room-session-invalid"
+  );
+  await assert.rejects(
+    verifyWatchRoomSession(session.token, "user-123", "https://evil.example", secret, now + 1000),
+    error => error.code === "room-session-invalid"
+  );
+  await assert.rejects(
+    verifyWatchRoomSession(session.token, "user-123", "https://vivid-cinema.pages.dev", secret, now + 31 * 60 * 1000),
+    error => error.code === "room-session-expired"
+  );
+  const tampered = session.token.slice(0, -1) + (session.token.endsWith("a") ? "b" : "a");
+  await assert.rejects(
+    verifyWatchRoomSession(tampered, "user-123", "https://vivid-cinema.pages.dev", secret, now + 1000),
+    error => error.code === "room-session-invalid"
+  );
+});
+
+test("Turnstile verification checks the server verdict, hostname and action", async () => {
+  const { verifyTurnstileToken } = await import("../cloudflare/functions/lib/watch-room-attestation.js");
+  const originalFetch = globalThis.fetch;
+  try {
+    globalThis.fetch = async (_url, options) => {
+      assert.equal(options.method, "POST");
+      return new Response(JSON.stringify({
+        success: true, hostname: "vivid-cinema.pages.dev", action: "watch_rooms"
+      }), { status: 200, headers: { "Content-Type": "application/json" } });
+    };
+    await verifyTurnstileToken("valid-turnstile-token", "test-secret", "vivid-cinema.pages.dev", "203.0.113.4");
+    await assert.rejects(
+      verifyTurnstileToken("valid-turnstile-token", "test-secret", "evil.example", ""),
+      error => error.code === "turnstile/claims-mismatch"
+    );
+    globalThis.fetch = async () => new Response(JSON.stringify({
+      success: true, hostname: "vivid-cinema.pages.dev", action: "login"
+    }), { status: 200 });
+    await assert.rejects(
+      verifyTurnstileToken("valid-turnstile-token", "test-secret", "vivid-cinema.pages.dev", ""),
+      error => error.code === "turnstile/claims-mismatch"
+    );
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
 });
