@@ -218,6 +218,8 @@ window.addEventListener("vivid:player-adapter-selected", event => {
     setNote("Room playback is paused for this player/server because it has no verified remote-control bridge. Switch to Player 1 · VidSrc or Player 2 · CineSRC to resume synchronized screening.");
   } else if (role !== "host" && roomId && (!adapter || !adapter.capabilities.canPlay || !adapter.capabilities.canSeek)) {
     setNote("This player/server has no verified Watch Room control bridge. Switch to the same supported provider as the host to follow synchronized playback.");
+  } else if (role === "host" && roomId && playerId === "player2" && providerId === "cinesrc") {
+    setNote("CineSRC is active. Its verified player controls and playback clock are connected to this room.");
   }
 });
 
