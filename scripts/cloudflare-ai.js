@@ -252,13 +252,3 @@ export async function sendRecallChatMessage(messages, mediaType = "all") {
   if (!reply) throw new Error("Cloudflare Workers AI returned an empty reply. Please try again.");
   return { reply, candidates, model: "Cloudflare Workers AI · Granite 4.0 H Micro" };
 }
-
-
-
-
-
-/**
- * Produce one concise, educational Vivid Spark for an achievement unlock.
- * Uses Cloudflare Workers AI with Firebase sign-in verification and bounded timeouts
- * helper; this does not change the Recall chat or clue-extraction paths.
- */
