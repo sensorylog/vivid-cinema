@@ -1,5 +1,5 @@
 import { auth, appCheck } from "./firebase.js";
-import { getLimitedUseToken } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app-check.js";
+import { getToken } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app-check.js";
 
 const API_URL = "/api/watch-rooms";
 
@@ -42,11 +42,11 @@ export function callWatchRoomApi(action) {
 
     let appCheckResult;
     try {
-      appCheckResult = await getLimitedUseToken(appCheck);
+      appCheckResult = await getToken(appCheck, false);
     } catch (cause) {
-      // Firebase App Check SDK errors use the "appCheck/" namespace (camelCase),
-      // not "app-check/". Never misreport an App Check failure as a sign-in issue.
-      console.error("Vivid Watch Rooms App Check token acquisition failed:", {
+      // Firebase App Check SDK errors use the "appCheck/" namespace (camelCase).
+      // Preserve the exact SDK cause in logs for diagnosis without exposing it to users.
+      console.error("Vivid Watch Rooms standard App Check token acquisition failed:", {
         code: cause?.code || "unknown",
         message: cause?.message || String(cause)
       });
