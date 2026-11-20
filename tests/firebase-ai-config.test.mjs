@@ -45,7 +45,7 @@ test("Workers AI binding is declared for the Pages Functions runtime", () => {
 test("Cloudflare AI proxy bounds requests and rate limits authenticated users", () => {
   assert.match(apiSource, /MAX_BODY_BYTES/);
   assert.match(apiSource, /takeRateLimit\(claims\.uid\)/);
-  assert.match(apiSource, /status === 429/);
+  assert.match(apiSource, /upstreamStatus === 429/);
   assert.match(apiSource, /Cache-Control.*no-store/);
 });
 
