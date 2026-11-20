@@ -1,31 +1,10 @@
-import { app, auth, db, firebaseConfig } from "./firebase.js";
-import { getTurnstileAppCheckToken } from "./turnstile-app-check.js";
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
-import {
-  initializeAuth, indexedDBLocalPersistence, browserLocalPersistence, inMemoryPersistence,
-  onAuthStateChanged, signInAnonymously
-} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
-import { getFirestore, addDoc, collection, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
-import { initializeAppCheck, CustomProvider } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app-check.js";
+import { auth, db } from "./firebase.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
+import { addDoc, collection, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 
-// Use a separate Firebase app for anonymous analytics so analytics never changes
-// the site's real sign-in state or exposes personal account features to anonymous users.
-const anonymousApp = initializeApp(firebaseConfig, "vivid-pulse-anonymous");
-const LOCAL_HOSTS = new Set(["localhost", "127.0.0.1", "::1"]);
-if (!LOCAL_HOSTS.has(window.location.hostname)) {
-  try {
-    initializeAppCheck(anonymousApp, {
-      provider: new CustomProvider({ getToken: getTurnstileAppCheckToken }),
-      isTokenAutoRefreshEnabled: false
-    });
-  } catch (error) {
-    console.warn("[Vivid Pulse] Anonymous App Check initialization failed:", error?.message || error);
-  }
-}
-const anonymousAuth = initializeAuth(anonymousApp, {
-  persistence: [indexedDBLocalPersistence, browserLocalPersistence, inMemoryPersistence]
-});
-const anonymousDb = getFirestore(anonymousApp);
+// Product analytics is intentionally limited to authenticated Vivid members.
+// Do not create anonymous Firebase sessions or write Firestore page-view events
+// on every public visit; that needlessly consumes App Check attestations.
 
 const platform = (() => {
   try {
@@ -42,7 +21,6 @@ let activeIdentityKey = null;
 let sessionId = null;
 let started = false;
 let preferredIdentity = "anonymous";
-let anonymousUserPromise = null;
 
 function getSessionId() {
   if (sessionId) return sessionId;
@@ -117,19 +95,6 @@ function beginTracking(user, targetDb, anonymous) {
     }
   }
 }
-async function getAnonymousUser() {
-  if (anonymousAuth.currentUser) return anonymousAuth.currentUser;
-  if (!anonymousUserPromise) {
-    anonymousUserPromise = new Promise(resolve => {
-      const unsubscribe = onAuthStateChanged(anonymousAuth, user => {
-        unsubscribe();
-        resolve(user);
-      }, () => resolve(null));
-    }).then(async user => user || (await signInAnonymously(anonymousAuth)).user)
-      .finally(() => { anonymousUserPromise = null; });
-  }
-  return anonymousUserPromise;
-}
 onAuthStateChanged(auth, user => {
   if (user) {
     preferredIdentity = "account";
@@ -144,41 +109,16 @@ onAuthStateChanged(auth, user => {
   });
 });
 document.addEventListener("click", event => {
-  const downloadLink = event.target.closest?.("#windows-installer, #windows-portable, #android-apk");
-  if (downloadLink) {
-    const targetPlatform = downloadLink.id === "android-apk" ? "android" : "windows";
-    void trackPulseEvent("download_" + targetPlatform, {
-      source: location.pathname,
-      download_variant: downloadLink.id === "windows-portable" ? "portable" : (downloadLink.id === "windows-installer" ? "installer" : "apk")
-    });
+  const onAuthStateChanged(auth, user => {
+  if (user) {
+    preferredIdentity = "account";
+    beginTracking(user, db, false);
     return;
   }
-  const target = event.target.closest?.("[data-id][data-type]");
-  if (target) {
-    void trackPulseEvent("content_click", { content_id: String(target.dataset.id), content_type: String(target.dataset.type), source: location.pathname });
-    return;
-  }
-  if (event.target.closest?.(".vivid-discovery-card,.vivid-search-result")) {
-    void trackPulseEvent("content_click", { source: location.pathname });
-    return;
-  }
-  if (event.target.closest?.("#hero-watch,[data-watch],#stream-button,.stream-button")) {
-    void trackPulseEvent("stream_click", { source: location.pathname });
-  }
-});
-document.addEventListener("submit", event => {
-  const form = event.target;
-  if (form.matches?.("[data-landing-email-form]")) void trackPulseEvent("signup_start", { method: "email" });
-  else if (form.matches?.("#signup-form")) void trackPulseEvent("signup_submit", { method: "email" });
-  else if (form.matches?.("#login-form")) void trackPulseEvent("login_submit", { method: "email" });
-});
-document.addEventListener("input", event => {
-  const input = event.target;
-  if (!input.matches?.("#search-input")) return;
-  const queryLength = input.value.trim().length;
-  if (queryLength < 3) return;
-  clearTimeout(input.__vividPulseTimer);
-  input.__vividPulseTimer = setTimeout(() => {
-    void trackPulseEvent("search_performed", { query_length: queryLength, page: location.pathname });
-  }, 800);
+  preferredIdentity = "anonymous";
+  uid = null;
+  activeDb = db;
+  identityType = "anonymous";
+  activeIdentityKey = null;
+  started = false;
 });
