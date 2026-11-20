@@ -168,6 +168,15 @@ window.addEventListener("vivid:player-adapter-selected", event => {
   activeProviderId = providerId;
   const adapter = getActiveAdapter();
   if (role === "host" && roomId && (!adapter || !adapter.capabilities.canPlay || !adapter.capabilities.canSeek)) {
+    const state = lastHostPayload || latestRemoteState;
+    if (state?.contentId && state?.mediaType) {
+      const payload = { roomId, provider: "vidsrc", status: "paused", contentId: state.contentId, mediaType: state.mediaType, season: state.season, episode: state.episode, position: Math.max(0, Number(localPosition ?? state.position) || 0), duration: Number(state.duration) || 0 };
+      hostStatus = "paused";
+      lastHostPayload = payload;
+      lastPublishAt = Date.now();
+      lastPublishedStatus = "paused";
+      publishQueue = publishQueue.then(() => roomId === payload.roomId && role === "host" ? call("publishWatchRoomPlayback")(payload) : null).catch(error => setNote(error?.message || "Could not pause room sync after changing players."));
+    }
     setNote("Room playback is paused for this player/server because it has no verified remote-control bridge. Switch to Player 1 · VidSrc to resume synchronized screening.");
   } else if (role !== "host" && roomId && (!adapter || !adapter.capabilities.canPlay || !adapter.capabilities.canSeek)) {
     setNote("This player/server has no verified Watch Room control bridge. Switch to Player 1 · VidSrc to follow synchronized playback.");
