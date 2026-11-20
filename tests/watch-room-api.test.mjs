@@ -53,3 +53,10 @@ test("Watch Rooms are no longer exported from the Firebase Functions codebase", 
   const functionsIndex = await readFile(new URL("../functions/index.js", import.meta.url), "utf8");
   assert.doesNotMatch(functionsIndex, /createWatchRoom|createCinemaClub|createWatchInvitation|redeemWatchInvitation|publishWatchRoomPlayback|archiveCinemaClub|watch-rooms-lobby|watch-rooms-clubs|cleanupExpiredWatchRooms/);
 });
+
+
+test("Watch Rooms API never exposes raw Firebase Admin errors to the browser", () => {
+  assert.ok(api.includes("const safeMessage = error instanceof HttpsError && status < 500"));
+  assert.ok(api.includes("Your sign-in or app verification needs refreshing."));
+  assert.ok(api.includes("We couldn't complete that action right now. Please try again."));
+});
