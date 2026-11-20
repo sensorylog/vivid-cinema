@@ -138,7 +138,7 @@ export async function onRequest({ request, env }) {
   } catch (error) {
     const detail = String(error?.message || error || "");
     const upstreamStatus = Number(error?.status || error?.statusCode || 0);
-    const limited = upstreamStatus === 429 || /quota|daily limit|rate.?limit|neurons exhausted/i.test(detail);
+    const limited = upstreamStatus === 429 || /\b429\b|too many requests|quota|daily limit|rate.?limit|neurons exhausted/i.test(detail);
     console.error("Vivid Workers AI inference error:", {
       status: upstreamStatus || null,
       message: detail.slice(0, 500),
