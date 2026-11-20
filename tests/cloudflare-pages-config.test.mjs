@@ -57,7 +57,7 @@ test("Google Search Console verification token is copied into the Cloudflare Pag
 });
 
 test("shared static build publishes dist and retains Capacitor enhancements", () => {
-  assert.equal(packageJson.scripts["build:web"], "node automation/build-static-dist.mjs");
+  assert.equal(packageJson.scripts["build:web"], "node automation/build-static-dist.mjs && node automation/build-cloudflare-functions.mjs");
   assert.ok(buildScript.includes('const output = path.join(root, "dist")'));
   assert.ok(!buildScript.includes('"_headers"'));
   assert.ok(buildScript.includes("await cp(from, to)"));
@@ -89,4 +89,19 @@ test("Watch Rooms trusted API is deployed by the existing Vercel API project, no
   assert.ok(api.includes("https://vivid-cinema.pages.dev"));
   assert.ok(api.includes("https://vivid-cinema-api.vercel.app") === false, "server route must not hard-code its own public hostname");
   assert.ok(api.includes("getAppCheck(firebaseApp).verifyToken(appCheckToken, { consume: true })"));
+});
+
+test("Cloudflare Pages bundles the Watch Rooms API from its isolated Functions directory", async () => {
+  const build = await readFile(new URL("../automation/build-cloudflare-functions.mjs", import.meta.url), "utf8");
+  const route = await readFile(new URL("../cloudflare/functions/api/watch-rooms.js", import.meta.url), "utf8");
+  const cloudflarePackage = JSON.parse(await readFile(new URL("../cloudflare/package.json", import.meta.url), "utf8"));
+  assert.ok(build.includes("pages"));
+  assert.ok(build.includes("functions"));
+  assert.ok(build.includes("--outdir"));
+  assert.equal(cloudflarePackage.dependencies["@ljoukov/firebase-admin-cloudflare"], "0.0.2");
+  assert.ok(route.includes("verifyIdToken(match[1], true)"));
+  assert.ok(route.includes("verifyToken(appCheckToken, { consume: true })"));
+  assert.ok(route.includes('export async function onRequest'));
+  assert.ok(route.includes('db.runTransaction'));
+  assert.ok(!route.includes("vivid-cinema-api.vercel.app"));
 });
