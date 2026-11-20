@@ -204,8 +204,8 @@ test("Cinema Club Stage 6 provides persistent watchlists, screening history and 
   }
   assert.ok(backend.includes("requireClubMember(clubId, uid)"));
   assert.ok(backend.includes("tx.get(clubRef.collection(\"members\").doc(uid))"));
-  assert.ok(rules.includes("match /watchlist/{itemId}"));
-  assert.ok(rules.includes("match /screenings/{screeningId}"));
+  assert.ok(rules.includes("match /cinemaClubs/{clubId}/watchlist/{itemId}"));
+  assert.ok(rules.includes("match /cinemaClubs/{clubId}/screenings/{screeningId}"));
   assert.ok(rules.includes("match /afterCredits/{userId}"));
   assert.ok(rules.includes("match /discussion/{messageId}"));
   assert.ok(client.includes("vivid:cinema-club-selected"));
