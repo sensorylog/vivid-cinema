@@ -15,8 +15,8 @@ const recommendationsSource = await readFile(path.join(root, "scripts/recommenda
 const achievementsSource = await readFile(path.join(root, "scripts/achievements.js"), "utf8");
 
 test("Recall uses lightweight Granite; achievement Sparks stay local", () => {
-  assert.match(aiSource, /Cloudflare Workers AI/);
   assert.ok(apiSource.includes('const MODEL = "@cf/ibm-granite/granite-4.0-h-micro"'));
+  assert.match(aiSource, /Cloudflare Workers AI/);
   assert.doesNotMatch(achievementsSource, /cloudflare-ai\.js|generateAchievementSpark/);
   assert.doesNotMatch(aiSource, /firebase-ai\.js|GoogleAIBackend|getAI\(/);
 });
@@ -36,10 +36,8 @@ test("Cloudflare AI route verifies Firebase identity and uses the AI binding", (
   assert.match(apiSource, /sign_in_provider === "anonymous"/);
   assert.match(apiSource, /env\.AI\.run/);
   assert.match(apiSource, /MAX_PROMPT_CHARS/);
-  assert.match(apiSource, /MAX_REQUESTS_PER_WINDOW/);
-  assert.match(apiSource, /MAX_OUTPUT_TOKENS = 384/);
   assert.match(apiSource, /MAX_REQUESTS_PER_WINDOW = 6/);
-  assert.ok(apiSource.includes('const MODEL = "@cf/ibm-granite/granite-4.0-h-micro"'));
+  assert.match(apiSource, /MAX_OUTPUT_TOKENS = 384/);
   assert.doesNotMatch(apiSource, /GEMINI_API_KEY|generativelanguage\.googleapis\.com|X-Firebase-AppCheck/);
 });
 
