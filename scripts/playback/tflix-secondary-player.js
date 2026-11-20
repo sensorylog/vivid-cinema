@@ -254,5 +254,18 @@ export function mountTflixSecondaryPlayer({ root, params, media, details, title,
   const startButton = root.querySelector("#vivid-tflix-start");
   if (startButton) startButton.addEventListener("click", () => loadServer(selectedServer));
   // Player 2 loads only after an explicit tap on Start playback or a server choice.
-  return { loadServer, getSelectedServer: () => selectedServer, destroy: () => { generation++; if (loadTimer) window.clearTimeout(loadTimer); const frame = screen.querySelector("#vivid-tflix-frame"); if (frame) frame.src = "about:blank"; } };
+
+  const roomSelectionHandler = event => {
+    const selection = event.detail || {};
+    if (selection.playerId === "player2") {
+      root.hidden = false;
+      loadServer(selection.providerId);
+      root.scrollIntoView({ block: "center", behavior: "smooth" });
+    } else if (selection.playerId === "player1") {
+      root.hidden = true;
+    }
+  };
+  window.addEventListener("vivid:watch-room-apply-selection", roomSelectionHandler);
+
+  return { loadServer, getSelectedServer: () => selectedServer, destroy: () => { window.removeEventListener("vivid:watch-room-apply-selection", roomSelectionHandler); generation++; if (loadTimer) window.clearTimeout(loadTimer); const frame = screen.querySelector("#vivid-tflix-frame"); if (frame) frame.src = "about:blank"; } };
 }
