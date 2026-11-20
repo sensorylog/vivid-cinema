@@ -76,7 +76,7 @@ test("For You records impressions only after a recommendation is actually viewab
 });
 
 test("For You is local-first and keeps authenticated Cloudflare AI as a selective Recall fallback", () => {
-  assert.match(recommendations, /shouldUseAi = !options\\.localOnly && localSignalStrength < 6/);
+  assert.match(recommendations, /shouldUseAi = !options\.localOnly && localSignalStrength < 6/);
   assert.match(recommendations, /Local Vivid intelligence gets first refusal/);
   assert.match(recommendations, /localOnly:\s*!recallResult\?\.available/);
   assert.match(recommendations, /Vivid Recall is using local clue extraction and catalogue matching/);
