@@ -650,3 +650,16 @@ test("Watch Room player switching unloads the inactive iframe to prevent hidden 
   assert.ok(player1.includes('primaryOverlay.hidden = true'));
   assert.ok(player2.includes('if (frame) frame.src = "about:blank"'));
 });
+
+
+test("Watch Room chat permission also blocks guest reactions", () => {
+  const node = readFileSync(new URL("../api/watch-rooms.js", import.meta.url), "utf8");
+  const cloudflare = readFileSync(new URL("../cloudflare/functions/api/watch-rooms.js", import.meta.url), "utf8");
+  for (const backend of [node, cloudflare]) {
+    const start = backend.indexOf("async function reactToWatchRoomMessage(");
+    const end = backend.indexOf("async function ", start + 10);
+    const implementation = backend.slice(start, end);
+    assert.ok(implementation.includes("room.allowGuestChat === false"));
+    assert.ok(implementation.includes("member.role !== \"host\""));
+  }
+});
