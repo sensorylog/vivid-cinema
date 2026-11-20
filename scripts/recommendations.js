@@ -739,7 +739,7 @@ export async function getPlotMatchRecommendations(intent = {}, limit = 18, optio
   let recallResult = {
     clues: localClues,
     available: false,
-    message: "Gemini is unavailable right now; local clue extraction is still active."
+    message: "Cloudflare Workers AI is unavailable right now; local clue extraction is still active."
   };
   if (!options.localOnly) {
     try {
