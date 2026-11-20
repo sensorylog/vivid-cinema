@@ -20,7 +20,7 @@
 - Build-time dependencies: the build installs the isolated Cloudflare function dependencies under `cloudflare/` before bundling the Pages Function.
 - Runtime secret: `FIREBASE_SERVICE_ACCOUNT_JSON` must be configured in Pages Settings → Variables and Secrets (Production and Preview).
 
-The shared script `automation/build-static-dist.mjs` creates the static `dist/` assets and excludes repository/backend source. The `build:web` command then bundles `cloudflare/functions/` into `dist/_worker.js`; the root Firebase Functions directory is not used as the Pages Functions source. Do not publish the repository root.
+The shared script `automation/build-static-dist.mjs` creates the static `dist/` assets and excludes repository/backend source. The `build:web` command then bundles `cloudflare/functions/` into the `dist/_worker.js/` directory (`index.js` entrypoint); the root Firebase Functions directory is not used as the Pages Functions source. Do not publish the repository root.
 
 ## Pages Functions runtime
 
