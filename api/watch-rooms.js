@@ -765,6 +765,8 @@ export default async function handler(req, res) {
     const code = error?.code || "internal";
     const status = ({
       unauthenticated: 401, "permission-denied": 403, "not-found": 404,
+      "auth/id-token-expired": 401, "auth/id-token-revoked": 401, "auth/invalid-id-token": 401,
+      "app-check/invalid-argument": 401, "app-check/invalid-credential": 401, "app-check/app-check-token-expired": 401,
       "invalid-argument": 400, "failed-precondition": 409,
       "resource-exhausted": 429, "already-exists": 409
     })[code] || 500;
