@@ -1,9 +1,37 @@
-import { getIdToken } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
+import { getIdToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
 import { auth } from "./firebase.js";
 
 const WORKERS_AI_MODEL = "@cf/ibm-granite/granite-4.0-h-micro";
 const CLUE_TIMEOUT_MS = 10000;
 const CHAT_TIMEOUT_MS = typeof navigator !== "undefined" && /Electron\//i.test(navigator.userAgent) ? 12000 : 30000;
+
+let authReadyPromise = null;
+
+async function getRestoredSignedInUser() {
+  if (auth.currentUser) return auth.currentUser;
+  if (!authReadyPromise) {
+    authReadyPromise = new Promise((resolve, reject) => {
+      let unsubscribe = () => {};
+      let settled = false;
+      const finish = user => {
+        if (settled) return;
+        settled = true;
+        clearTimeout(timeout);
+        unsubscribe();
+        resolve(user || auth.currentUser || null);
+      };
+      const timeout = setTimeout(() => finish(auth.currentUser), 8000);
+      unsubscribe = onAuthStateChanged(auth, finish, error => {
+        if (settled) return;
+        settled = true;
+        clearTimeout(timeout);
+        unsubscribe();
+        reject(error);
+      });
+    }).finally(() => { authReadyPromise = null; });
+  }
+  return authReadyPromise;
+}
 
 let modelPromise = null;
 let aiRequestTail = Promise.resolve();
@@ -46,7 +74,7 @@ function createRecallModel(maxOutputTokens) {
   // the signed-in user's Firebase ID token; no provider API key is exposed.
   return {
     async generateContent(prompt, options = {}) {
-      const user = auth.currentUser;
+      const user = await getRestoredSignedInUser();
       if (!user || user.isAnonymous) {
         const error = new Error("Sign in to your Vivid account before using Vivid AI.");
         error.code = "auth/unauthenticated";
