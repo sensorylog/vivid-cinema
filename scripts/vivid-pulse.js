@@ -96,7 +96,7 @@ function beginTracking(user, targetDb, anonymous) {
   }
 }
 onAuthStateChanged(auth, user => {
-  if (user) {
+  if (user && !user.isAnonymous) {
     preferredIdentity = "account";
     beginTracking(user, db, false);
     return;
