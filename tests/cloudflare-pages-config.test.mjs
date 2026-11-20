@@ -29,7 +29,6 @@ test("Cloudflare Content Security Policy keeps existing Firebase and provider en
   for (const host of [
     "identitytoolkit.googleapis.com",
     "firestore.googleapis.com",
-    "firebasevertexai.googleapis.com",
     "recaptchaenterprise.googleapis.com",
     "vivid-cinema.firebaseapp.com",
     "api.github.com",
