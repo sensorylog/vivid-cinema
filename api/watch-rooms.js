@@ -403,9 +403,9 @@ async function addWatchRoomQueueItem(request) {
   const posterPath = request.data?.posterPath == null ? "" : cleanText(request.data.posterPath, "Poster path", 200);
   const releaseDate = request.data?.releaseDate == null ? "" : cleanText(request.data.releaseDate, "Release date", 10);
   if (!["movie", "tv"].includes(mediaType)) throw new HttpsError("invalid-argument", "Media type must be movie or tv.");
-  if (contentId && !/^\\d{1,12}$/.test(contentId)) throw new HttpsError("invalid-argument", "Choose a valid catalogue title before adding it.");
-  if (posterPath && !/^\\/[A-Za-z0-9._/-]{1,199}$/.test(posterPath)) throw new HttpsError("invalid-argument", "The selected poster path is invalid.");
-  if (releaseDate && !/^\\d{4}-\\d{2}-\\d{2}$/.test(releaseDate)) throw new HttpsError("invalid-argument", "The selected release date is invalid.");
+  if (contentId && !/^\d{1,12}$/.test(contentId)) throw new HttpsError("invalid-argument", "Choose a valid catalogue title before adding it.");
+  if (posterPath && !/^\/[A-Za-z0-9._/-]{1,199}$/.test(posterPath)) throw new HttpsError("invalid-argument", "The selected poster path is invalid.");
+  if (releaseDate && !/^\d{4}-\d{2}-\d{2}$/.test(releaseDate)) throw new HttpsError("invalid-argument", "The selected release date is invalid.");
   const roomRef = db.collection("rooms").doc(roomId);
   const itemRef = roomRef.collection("queue").doc();
   await db.runTransaction(async tx => {
