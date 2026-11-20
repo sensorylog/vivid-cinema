@@ -1,12 +1,37 @@
 import { getIdToken } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
 import { auth } from "./firebase.js";
 
-const WORKERS_AI_MODEL = "@cf/zai-org/glm-4.7-flash";
-const CLUE_TIMEOUT_MS = 12000;
+const WORKERS_AI_MODEL = "@cf/ibm-granite/granite-4.0-h-micro";
+const CLUE_TIMEOUT_MS = 10000;
 const CHAT_TIMEOUT_MS = typeof navigator !== "undefined" && /Electron\//i.test(navigator.userAgent) ? 12000 : 30000;
 
 let modelPromise = null;
 let aiRequestTail = Promise.resolve();
+const CLUE_CACHE_KEY = "vivid:recall-clues:v1";
+const CLUE_CACHE_TTL = 12 * 60 * 60 * 1000;
+
+function readClueCache(key) {
+  try {
+    const cache = JSON.parse(localStorage.getItem(CLUE_CACHE_KEY) || "{}");
+    const entry = cache[key];
+    if (!entry || Date.now() - Number(entry.at || 0) > CLUE_CACHE_TTL || !Array.isArray(entry.clues)) return null;
+    return entry.clues.filter(value => typeof value === "string").slice(0, 10);
+  } catch {
+    return null;
+  }
+}
+
+function writeClueCache(key, clues) {
+  try {
+    const cache = JSON.parse(localStorage.getItem(CLUE_CACHE_KEY) || "{}");
+    cache[key] = { at: Date.now(), clues: clues.slice(0, 10) };
+    const entries = Object.entries(cache)
+      .filter(([, entry]) => Date.now() - Number(entry?.at || 0) <= CLUE_CACHE_TTL)
+      .sort((a, b) => Number(b[1]?.at || 0) - Number(a[1]?.at || 0))
+      .slice(0, 40);
+    localStorage.setItem(CLUE_CACHE_KEY, JSON.stringify(Object.fromEntries(entries)));
+  } catch {}
+}
 
 // Keep all Recall/Spark requests on this page from competing for the initial
 // App Check token exchange. A failed request never poisons the queue.
@@ -51,7 +76,7 @@ function createRecallModel(maxOutputTokens) {
 
 function getRecallModel() {
   if (!modelPromise) {
-    modelPromise = Promise.resolve().then(() => createRecallModel(300)).catch(error => {
+    modelPromise = Promise.resolve().then(() => createRecallModel(220)).catch(error => {
       modelPromise = null;
       throw error;
     });
@@ -121,6 +146,11 @@ export async function getRecallClues(query, fallbackClues = []) {
   if (cleanQuery.length < 8) {
     return { clues: fallback, available: false, message: "The description is too short for AI clue extraction." };
   }
+  const cacheKey = cleanQuery.toLowerCase().replace(/\\s+/g, " ").slice(0, 1200);
+  const cachedClues = readClueCache(cacheKey);
+  if (cachedClues?.length) {
+    return { clues: [...new Set([...cachedClues, ...fallback])].slice(0, 12), available: true, message: "Cached Vivid Recall clues are active." };
+  }
   try {
     const model = await getRecallModel();
     const result = await generateWithTimeout(
@@ -138,6 +168,7 @@ export async function getRecallClues(query, fallbackClues = []) {
     if (!aiClues.length) {
       return { clues: fallback, available: false, message: "Cloudflare Workers AI returned no usable plot clues; local matching is still active." };
     }
+    writeClueCache(cacheKey, aiClues);
     return {
       clues: [...new Set([...aiClues, ...fallback])].slice(0, 12),
       available: true,
@@ -162,7 +193,7 @@ let chatModelPromise = null;
 
 function getRecallChatModel() {
   if (!chatModelPromise) {
-    chatModelPromise = Promise.resolve().then(() => createRecallModel(700)).catch(error => {
+    chatModelPromise = Promise.resolve().then(() => createRecallModel(320)).catch(error => {
       chatModelPromise = null;
       throw error;
     });
@@ -219,7 +250,7 @@ export async function sendRecallChatMessage(messages, mediaType = "all") {
     }))
     .filter(item => item.title);
   if (!reply) throw new Error("Cloudflare Workers AI returned an empty reply. Please try again.");
-  return { reply, candidates, model: "Cloudflare Workers AI · GLM-4.7 Flash" };
+  return { reply, candidates, model: "Cloudflare Workers AI · Granite 4.0 H Micro" };
 }
 
 
