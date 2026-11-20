@@ -330,3 +330,19 @@ test("Watch Room host administration revalidates authority and updates room poin
   assert.ok(close.includes("expiresAt: closedAt"));
   assert.ok(close.includes('tx.set(db().collection("users")'));
 });
+
+
+test("Cinema Club members can leave and owners can archive with server-owned membership cleanup", () => {
+  const backend = readFileSync(new URL("../functions/watch-rooms-clubs.js", import.meta.url), "utf8");
+  const index = readFileSync(new URL("../functions/index.js", import.meta.url), "utf8");
+  const client = readFileSync(new URL("../scripts/watch-rooms.js", import.meta.url), "utf8");
+  const leave = backend.slice(backend.indexOf("export const leaveCinemaClub"), backend.indexOf("export const archiveCinemaClub"));
+  const archive = backend.slice(backend.indexOf("export const archiveCinemaClub"));
+  assert.ok(leave.includes('member.data().role === "owner" || club.data().ownerUid === uid'));
+  assert.ok(leave.includes("tx.delete(memberRef)") && leave.includes("tx.delete(pointerRef)"));
+  assert.ok(archive.includes('club.data().ownerUid !== uid || !owner.exists || owner.data().role !== "owner"'));
+  assert.ok(archive.includes('status: "archived"'));
+  assert.ok(archive.includes('tx.delete(db().collection("users")'));
+  assert.ok(index.includes("  leaveCinemaClub,") && index.includes("  archiveCinemaClub"));
+  assert.ok(client.includes('call(archive ? "archiveCinemaClub" : "leaveCinemaClub")'));
+});
