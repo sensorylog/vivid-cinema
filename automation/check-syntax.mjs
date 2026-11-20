@@ -17,6 +17,7 @@ const files = [
   "scripts/downloads/desktop-offline.js",
   "api/watch-rooms.js",
   "cloudflare/functions/api/watch-rooms.js",
+  "cloudflare/functions/api/ai.js",
   "automation/build-cloudflare-functions.mjs",
   "scripts/watch-room-api.js",
   "scripts/watch-rooms.js",
