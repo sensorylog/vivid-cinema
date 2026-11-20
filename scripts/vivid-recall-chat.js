@@ -71,6 +71,14 @@ function errorDiagnostic(error) {
   }
 
   const serverError = parsedResponse?.error || parsedResponse || null;
+  const inferenceAttempts = Array.isArray(parsedResponse?.diagnostic?.attempts)
+    ? parsedResponse.diagnostic.attempts.map(attempt => [
+        attempt?.input ? "input=" + attempt.input : "",
+        Array.isArray(attempt?.responseKeys) ? "keys=" + attempt.responseKeys.join(",") : "",
+        attempt?.finishReason ? "finish=" + attempt.finishReason : "",
+        attempt?.usage?.completionTokens != null ? "outputTokens=" + attempt.usage.completionTokens : ""
+      ].filter(Boolean).join(" "))
+    : [];
   if (serverError) {
     responseText = [
       serverError?.status,
@@ -104,6 +112,7 @@ function errorDiagnostic(error) {
     error?.status ? "HTTP " + error.status : "",
     error?.message,
     responseText && responseText !== error?.message ? "Server: " + responseText : "",
+    inferenceAttempts.length ? "Inference: " + inferenceAttempts.join(" | ") : "",
     quotaText,
     retryDelay
   ].filter(Boolean).join(" · ") || "Unknown error", 650);
