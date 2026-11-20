@@ -25,7 +25,7 @@ let clockOffsetMs = 0;
 const panel = document.createElement("section");
 panel.className = "vivid-room-sync";
 panel.id = "vivid-room-sync";
-panel.innerHTML = '<div class="vivid-room-sync__head"><div><span class="vivid-room-sync__eyebrow">VIVID WATCH ROOMS</span><h2>Watch together</h2><p id="vivid-room-sync-note" role="status" aria-live="polite">Connect this title to a private screening.</p></div><span class="vivid-room-sync__provider">VidSrc sync</span></div><form id="vivid-room-sync-form" class="vivid-room-sync__form"><label for="vivid-room-sync-code">Room invitation code</label><div><input id="vivid-room-sync-code" name="inviteCode" maxlength="10" minlength="10" autocomplete="off" autocapitalize="characters" placeholder="10-character code" required><button type="submit">Connect room</button></div></form><div class="vivid-room-sync__actions"><button type="button" id="vivid-room-sync-join" hidden>Join synced playback</button><button type="button" id="vivid-room-sync-leave" hidden>Disconnect</button></div></section>';
+panel.innerHTML = '<div class="vivid-room-sync__head"><div><span class="vivid-room-sync__eyebrow">VIVID WATCH ROOMS</span><h2>Watch together</h2><p id="vivid-room-sync-note" role="status" aria-live="polite">Connect this title to a private screening.</p></div><span class="vivid-room-sync__provider">Provider sync</span></div><form id="vivid-room-sync-form" class="vivid-room-sync__form"><label for="vivid-room-sync-code">Room invitation code</label><div><input id="vivid-room-sync-code" name="inviteCode" maxlength="10" minlength="10" autocomplete="off" autocapitalize="characters" placeholder="10-character code" required><button type="submit">Connect room</button></div></form><div class="vivid-room-sync__actions"><button type="button" id="vivid-room-sync-join" hidden>Join synced playback</button><button type="button" id="vivid-room-sync-leave" hidden>Disconnect</button></div></section>';
 document.querySelector("#watch-content")?.insertAdjacentElement("afterend", panel);
 const note = document.getElementById("vivid-room-sync-note");
 const form = document.getElementById("vivid-room-sync-form");
@@ -76,10 +76,10 @@ function applyRemoteState(force = false) {
   if (state.provider !== activeProviderId) { setNote("The host is using " + String(state.provider || "another provider") + ". Select that same provider to join synchronized playback."); return; }
   const adapter = getActiveAdapter();
   if (!adapter?.capabilities.canPlay || !adapter.capabilities.canSeek) {
-    setNote("Choose Player 1 · VidSrc first. This player/server does not have verified Watch Room controls.");
+    setNote("Choose the same verified provider as the host. This player/server does not have Watch Room controls.");
     return;
   }
-  if (!getSupportedFrame()) { setNote("Choose VidSrc in the player’s server list first. Other providers are not enabled for room sync."); return; }
+  if (!getSupportedFrame()) { setNote("Select the same supported provider as the host and make sure its player has loaded."); return; }
   const updatedAt = state.updatedAt?.toMillis?.() || Date.now();
   const elapsed = state.status === "playing" ? Math.max(0, (Date.now() + clockOffsetMs - updatedAt) / 1000) : 0;
   const expected = Math.max(0, Math.min(Number(state.duration) || 86400, Number(state.position) + elapsed));
@@ -138,7 +138,7 @@ form.addEventListener("submit", async event => {
 });
 
 joinButton.addEventListener("click", () => {
-  if (!getSupportedFrame() || localPosition == null) { setNote("Select VidSrc and start playback first. Once Vivid detects the player clock, tap Join synced playback."); return; }
+  if (!getSupportedFrame() || localPosition == null) { setNote("Select a supported provider and start playback first. Once Vivid detects its playback clock, tap Join synced playback."); return; }
   joinedPlayback = true;
   if (latestRemoteState) applyRemoteState(true);
   else setNote("You’re connected. Waiting for the host’s first playback update.");
@@ -215,9 +215,9 @@ window.addEventListener("vivid:player-adapter-selected", event => {
       lastPublishedStatus = "paused";
       publishQueue = publishQueue.then(() => roomId === payload.roomId && role === "host" ? call("publishWatchRoomPlayback")(payload) : null).catch(error => setNote(error?.message || "Could not pause room sync after changing players."));
     }
-    setNote("Room playback is paused for this player/server because it has no verified remote-control bridge. Switch to Player 1 · VidSrc to resume synchronized screening.");
+    setNote("Room playback is paused for this player/server because it has no verified remote-control bridge. Switch to Player 1 · VidSrc or Player 2 · CineSRC to resume synchronized screening.");
   } else if (role !== "host" && roomId && (!adapter || !adapter.capabilities.canPlay || !adapter.capabilities.canSeek)) {
-    setNote("This player/server has no verified Watch Room control bridge. Switch to Player 1 · VidSrc to follow synchronized playback.");
+    setNote("This player/server has no verified Watch Room control bridge. Switch to the same supported provider as the host to follow synchronized playback.");
   }
 });
 
