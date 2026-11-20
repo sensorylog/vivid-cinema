@@ -50,10 +50,14 @@ export function callWatchRoomApi(action) {
         code: cause?.code || "unknown",
         message: cause?.message || String(cause)
       });
+      const diagnosticCode = String(cause?.code || "appCheck/unknown");
+      const diagnosticMessage = String(cause?.message || "No additional message from Firebase App Check.");
       const error = new Error(
-        "Vivid couldn't verify this browser session. Check that this site is allowed in Firebase App Check, then refresh and try again."
+        "Vivid couldn't obtain a Firebase App Check token (" + diagnosticCode + "). " +
+        diagnosticMessage + " Check that the reCAPTCHA Enterprise site key matches the Firebase App Check registration and that this exact Pages hostname is allowed."
       );
       error.code = "functions/failed-precondition";
+      error.cause = cause;
       throw error;
     }
     let response;
