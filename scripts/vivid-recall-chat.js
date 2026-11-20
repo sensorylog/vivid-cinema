@@ -41,7 +41,7 @@ function setBusy(value) {
       : 'Send <i class="bi bi-arrow-up-right" aria-hidden="true"></i>';
   }
   if (input) input.disabled = value;
-  if (value) setStatus("Gemini is thinking through your clues…");
+  if (value) setStatus("Vivid AI is thinking through your clues…");
 }
 
 function setStatus(text) {
@@ -79,7 +79,7 @@ function errorDiagnostic(error) {
     ].filter(Boolean).join(" · ");
   }
 
-  // Google returns the actionable quota identifier inside QuotaFailure
+  // Cloudflare can return actionable usage and quota details
   // details. Keep these fields visible so a 429 is not misdiagnosed as
   // generic traffic when a model/project free-tier allocation is zero.
   const detailEntries = [
@@ -187,9 +187,9 @@ async function fallbackToLocalSearch(version) {
   const search = $("intent-query");
   const memory = history.filter(item => item.role === "user").map(item => item.content).join(" ").slice(0, 500);
   if (search && memory) search.value = memory;
-  setStatus("Gemini unavailable · matching your clues locally…");
+  setStatus("Vivid AI unavailable · matching your clues locally…");
   try {
-    // Do not retry Gemini here: Electron/App Check failures should fall straight
+    // Do not retry Vivid AI here: desktop authentication or network failures should fall straight
     // through to deterministic clue matching instead of leaving Recall stalled.
     const intent = parseIntent(memory);
     const matches = await getPlotMatchRecommendations(intent, 5, { localOnly: true });
@@ -205,7 +205,7 @@ async function fallbackToLocalSearch(version) {
   } catch (localError) {
     if (version !== requestVersion) return 0;
     console.warn("Vivid Recall local fallback failed:", localError);
-    addMessage("assistant", "Gemini is unavailable and the local catalogue search couldn’t complete. Your clues are still here — please try again in a moment.");
+    addMessage("assistant", "Vivid AI is unavailable and the local catalogue search couldn’t complete. Your clues are still here — please try again in a moment.");
     setStatus("Local Recall search failed · " + errorDiagnostic(localError));
     return 0;
   }
@@ -222,7 +222,7 @@ async function sendMessage(text) {
   const version = ++requestVersion;
 
   try {
-    const { sendRecallChatMessage } = await import("./firebase-ai.js");
+    const { sendRecallChatMessage } = await import("./cloudflare-ai.js");
     const payload = await sendRecallChatMessage(
       history.slice(-8).map(item => ({ role: item.role, content: item.content })),
       $("recall-chat-type")?.value || "all"
@@ -235,7 +235,7 @@ async function sendMessage(text) {
     addMessage("assistant", reply, renderVerifiedCards(verified));
     if (verified.length) setStatus("Checked " + verified.length + " title" + (verified.length === 1 ? "" : "s") + " against TMDB · Ask another question to narrow it down.");
     else if (Array.isArray(payload?.candidates) && payload.candidates.length) setStatus("No exact catalogue match yet · add another clue or correct a guess.");
-    else setStatus("Gemini chat is active · Ask another question to narrow it down.");
+    else setStatus("Vivid AI chat is active · Ask another question to narrow it down.");
   } catch (error) {
     if (version !== requestVersion) return;
     const errorCode = String(error?.code || "");
@@ -244,7 +244,7 @@ async function sendMessage(text) {
     const diagnosticText = errorCode + " " + errorMessage + " " + fullDiagnostic;
     const needsSignIn = /unauthenticated/i.test(diagnosticText) || /\b401\b/.test(diagnosticText);
     const quotaFailure = /\b429\b|resource[_ ]exhausted|quota|rate.?limit/i.test(diagnosticText);
-    console.warn("Vivid Recall Gemini chat failed (full diagnostic):", {
+    console.warn("Vivid Recall Vivid AI chat failed (full diagnostic):", {
       code: errorCode || null,
       status: error?.status || error?.customData?.httpStatus || null,
       message: errorMessage,
@@ -254,14 +254,14 @@ async function sendMessage(text) {
       error
     });
     const userFacingError = needsSignIn
-      ? "Gemini returned 401 (unauthenticated). Firebase AI Logic may be set to allow signed-in users only. Sign in to Vivid Cinema, or change that AI Logic setting if guest chat should be allowed."
+      ? "Vivid AI returned 401 (unauthenticated). Vivid AI requires a signed-in Vivid account. Sign in and try again."
       : quotaFailure
-        ? "Gemini is temporarily busy or rate-limited. Your clues are still here, and local catalogue search is active."
-        : "Gemini couldn’t connect this time. Your clues are still saved in this chat, and I’ve switched to local catalogue search.";
+        ? "Vivid AI is temporarily busy or rate-limited. Your clues are still here, and local catalogue search is active."
+        : "Vivid AI couldn’t connect this time. Your clues are still saved in this chat, and I’ve switched to local catalogue search.";
     addMessage("assistant", userFacingError);
     const localMatches = await fallbackToLocalSearch(version);
     if (version === requestVersion) {
-      const localLabel = needsSignIn ? "Gemini 401" : quotaFailure ? "Gemini 429" : "Gemini connection failed";
+      const localLabel = needsSignIn ? "Vivid AI 401" : quotaFailure ? "Vivid AI 429" : "Vivid AI connection failed";
       setStatus(localLabel + " · " + (localMatches ? "Local Recall found " + localMatches + " possible matches" : "Local Recall is ready for more clues") + " · Try again shortly.");
     }
   } finally {
@@ -288,7 +288,7 @@ function init() {
     history.length = 0;
     $("recall-chat-messages")?.replaceChildren();
     addMessage("assistant", "Hey, I’m Vivid Recall. Tell me anything you remember — a scene, a character, a strange object, the ending, or just the feeling of the story. We’ll work it out together.");
-    setStatus("Gemini AI chat · TMDB title checks");
+    setStatus("Vivid Recall AI chat · TMDB title checks");
     setBusy(false);
     input.value = "";
     input.focus();

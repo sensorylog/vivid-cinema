@@ -112,11 +112,14 @@ test("Watch Rooms dashboard exposes room creation, invitation entry and club man
   assert.ok(styles.includes("@media(max-width:760px)"));
 });
 
-test("Watch Rooms dashboard uses trusted backend calls rather than local-only previews", () => {
+test("Watch Rooms dashboard uses the authenticated server API rather than client Firestore reads", () => {
   const moduleSource = readFileSync(new URL("../scripts/watch-rooms.js", import.meta.url), "utf8");
   assert.ok(moduleSource.includes("callWatchRoomApi"));
-  assert.ok(moduleSource.includes('collection(db, "users", user.uid, "watchRooms")'));
-  assert.ok(moduleSource.includes('collection(db, "users", user.uid, "cinemaClubs")'));
+  assert.ok(moduleSource.includes('call("getWatchRoomDashboard")'));
+  assert.ok(moduleSource.includes('call("cleanupExpiredWatchRooms")'));
+  assert.ok(moduleSource.includes("dashboardState.rooms"));
+  assert.ok(moduleSource.includes("dashboardState.clubs"));
+  assert.ok(!moduleSource.includes('collection(db, "users"'));
   assert.ok(moduleSource.includes("createWatchInvitation"));
   assert.ok(moduleSource.includes("redeemWatchInvitation"));
   assert.ok(!moduleSource.includes("LOCAL PREVIEW · NOT SAVED"));
@@ -449,7 +452,7 @@ test("Watch Rooms API client is included in the offline application shell", () =
 });
 
 
-test("Watch Rooms client sends Auth and App Check tokens to the trusted Cloudflare verifier", () => {
+test("Watch Rooms client sends Auth and standard App Check tokens to the trusted Cloudflare verifier", () => {
   const api = readFileSync(new URL("../scripts/watch-room-api.js", import.meta.url), "utf8");
   const route = readFileSync(new URL("../cloudflare/functions/api/watch-rooms.js", import.meta.url), "utf8");
   const idToken = api.slice(api.indexOf("let idToken;"), api.indexOf("let response;"));
@@ -457,10 +460,12 @@ test("Watch Rooms client sends Auth and App Check tokens to the trusted Cloudfla
   assert.ok(idToken.includes('startsWith("auth/")'));
   assert.ok(idToken.includes('"functions/unauthenticated"'));
   assert.ok(idToken.includes('"functions/unavailable"'));
-  assert.ok(api.includes('getLimitedUseToken(appCheck)'));
+  assert.ok(api.includes('getToken(appCheck, false)'));
+  assert.ok(!api.includes('getLimitedUseToken(appCheck)'));
   assert.ok(api.includes('"X-Firebase-AppCheck": appCheckResult.token'));
   assert.ok(route.includes("verifyFirebaseIdToken(match[1], projectId, serviceAccount)"));
-  assert.ok(route.includes("verifyAndConsumeAppCheckToken(appCheckToken, serviceAccount)"));
+  assert.ok(route.includes("verifyAppCheckToken(appCheckToken)"));
+  assert.ok(!route.includes("verifyAndConsumeAppCheckToken"));
   assert.ok(!route.includes("firebase-admin/auth") && !route.includes("firebase-admin/app-check"));
   assert.ok(route.includes('throw new HttpsError("failed-precondition"'));
   assert.ok(!idToken.includes("Promise.all"));

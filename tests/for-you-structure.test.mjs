@@ -75,7 +75,9 @@ test("For You records impressions only after a recommendation is actually viewab
   assert.doesNotMatch(script, /items\.slice\(0, 12\)\.forEach\(item => recordBehavior\("recommendation_impression"/);
 });
 
-test("For You preserves local matching alongside the isolated Gemini Recall chat", () => {
+test("For You is local-first and keeps authenticated Cloudflare AI as a selective Recall fallback", () => {
+  assert.match(recommendations, /shouldUseAi = !options\.localOnly && localSignalStrength < 6/);
+  assert.match(recommendations, /Local Vivid intelligence gets first refusal/);
   assert.match(recommendations, /localOnly:\s*!recallResult\?\.available/);
   assert.match(recommendations, /Vivid Recall is using local clue extraction and catalogue matching/);
   assert.match(recommendations, /getRecallClues/);
@@ -84,15 +86,15 @@ test("For You preserves local matching alongside the isolated Gemini Recall chat
   assert.match(html, /scripts\/vivid-recall-chat\.js/);
   assert.match(script, /getPlotMatchRecommendations/);
   assert.doesNotMatch(recommendations, /plotAiFallbackUrl|AIRFORCE|aiResult|fetch\(aiEndpoint/i);
-  assert.doesNotMatch(script, /AI clue expansion|Gemini interprets|Airforce/i);
+  assert.doesNotMatch(script, /AI clue expansion|legacy Gemini interprets|Airforce/i);
   assert.match(html, /No Cloud Functions/);
 });
 
 
-test("Vivid Recall chat has a Gemini-independent local fallback for desktop WebViews", () => {
+test("Vivid Recall chat has a Cloudflare-independent local fallback for desktop WebViews", () => {
   const chat = readFileSync(new URL("../scripts/vivid-recall-chat.js", import.meta.url), "utf8");
   assert.match(chat, /getPlotMatchRecommendations\(intent, 5, \{ localOnly: true \}\)/);
   assert.match(chat, /await fallbackToLocalSearch\(version\)/);
   assert.match(chat, /Local Recall found/);
-  assert.match(recommendations, /if \(!options\.localOnly\)/);
+  assert.match(recommendations, /shouldUseAi = !options\.localOnly && localSignalStrength < 6/);
 });

@@ -93,10 +93,10 @@ function onModalKey(event){
   if(event.shiftKey&&document.activeElement===buttons[0]){event.preventDefault();buttons.at(-1).focus()}
   else if(!event.shiftKey&&document.activeElement===buttons.at(-1)){event.preventDefault();buttons[0].focus()}
 }
-async function showUnlock(a,others,library){
+function showUnlock(a,others,library){
   if(!document.body)return;
   if(modalOpen){pendingUnlocks.push({achievement:a,others,library});return}
-  modalOpen=true;lastFocus=document.activeElement;const ownerAtStart=currentUid;
+  modalOpen=true;lastFocus=document.activeElement;
   const modal=document.createElement("div");modal.id="vivid-achievement-modal";modal.className="vivid-achievement-overlay";
   modal.innerHTML='<section class="vivid-achievement-dialog" role="dialog" aria-modal="true" aria-labelledby="vivid-achievement-title" aria-describedby="vivid-achievement-description"><button class="vivid-achievement-close" type="button" aria-label="Close achievement moment">×</button><div class="vivid-achievement-mark" aria-hidden="true"></div><span class="vivid-achievement-eyebrow">VIVID MILESTONE UNLOCKED</span><h2 id="vivid-achievement-title"></h2><p id="vivid-achievement-description"></p><div class="vivid-spark-panel"><span class="vivid-spark-label"><span aria-hidden="true">✦</span> VIVID SPARK</span><p id="vivid-achievement-spark" aria-live="polite"></p></div><p class="vivid-achievement-extra" id="vivid-achievement-extra"></p><button class="vivid-achievement-continue" type="button">Keep exploring <span aria-hidden="true">↗</span></button></section>';
   modal.querySelector(".vivid-achievement-mark").textContent=a.icon;
@@ -106,20 +106,8 @@ async function showUnlock(a,others,library){
   if(others.length)modal.querySelector("#vivid-achievement-extra").textContent=others.length+" more milestone"+(others.length===1?"":"s")+" unlocked with this one.";
   const close=()=>closeModal();modal.querySelector(".vivid-achievement-close").addEventListener("click",close);modal.querySelector(".vivid-achievement-continue").addEventListener("click",close);
   modal.addEventListener("click",event=>{if(event.target===modal)close()});document.body.append(modal);document.addEventListener("keydown",onModalKey);modal.querySelector(".vivid-achievement-continue").focus({preventScroll:true});
-  try{
-    const {generateAchievementSpark}=await import("./firebase-ai.js");
-    const store=readStore();
-    const recentSparks=(Array.isArray(store.sparkHistory)?store.sparkHistory:[]).slice(-6).map(item=>String(item?.spark||"").slice(0,240)).filter(Boolean);
-    const result=await generateAchievementSpark({achievement:{title:a.title,description:a.description,category:a.category},library:contextFor(library),recentSparks});
-    const spark=modal.isConnected&&currentUid===ownerAtStart?modal.querySelector("#vivid-achievement-spark"):null;
-    if(spark&&result?.spark){
-      spark.textContent=result.spark;
-      modal.querySelector(".vivid-spark-panel")?.classList.add("is-personalized");
-      const latestStore=readStore();
-      latestStore.sparkHistory=[...(Array.isArray(latestStore.sparkHistory)?latestStore.sparkHistory:[]),{achievementId:a.id,spark:result.spark,at:Date.now()}].slice(-8);
-      try{localStorage.setItem(STORAGE_KEY,JSON.stringify(latestStore))}catch{}
-    }
-  }catch(error){console.info("Vivid Spark stayed in local fallback mode:",error?.code||error?.message||error)}
+  // Achievement Sparks are deliberately local and curated. They never spend
+  // the shared Workers AI allowance during ordinary app use.
 }
 function persistRemote(record){
   const uid=currentUid;if(!uid||!record?.id)return;
