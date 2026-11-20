@@ -15,7 +15,33 @@ function openLobby(data) {
   byId("wr-leave-room").hidden = data.role === "host";
   const settings = byId("wr-room-settings-form"); settings.elements.name.value = data.name || ""; settings.elements.allowGuestQueue.checked = data.allowGuestQueue !== false; settings.elements.allowGuestChat.checked = data.allowGuestChat !== false;
   const presence = collection(db, "rooms", data.roomId, "presence");
-  stops.push(onSnapshot(presence, snap => { const now = Date.now(); const live = snap.docs.map(d => d.data()).filter(x => x.expiresAt?.toMillis?.() > now); byId("wr-lobby-presence-count").textContent = String(live.length); const ul = byId("wr-lobby-presence"); ul.replaceChildren(); live.forEach(x => { const li = document.createElement("li"), label = document.createElement("span"); label.textContent = x.uid === auth.currentUser?.uid ? "You · here now" : "Vivid member · here now"; li.append(label); if (room.role === "host" && x.uid !== auth.currentUser?.uid) { const remove = document.createElement("button"); remove.type = "button"; remove.textContent = "Remove"; remove.className = "vivid-wr-button vivid-wr-button--quiet"; remove.addEventListener("click", () => call("removeWatchRoomMember")({ roomId: room.roomId, memberUid: x.uid }).catch(showError)); li.append(remove); } ul.append(li); }); if (!live.length) ul.textContent = "Waiting for your crew…"; }, showError));
+  const members = collection(db, "rooms", data.roomId, "members");
+  let memberList = [], presenceList = [];
+  const renderPresence = () => {
+    const now = Date.now();
+    const liveIds = new Set(presenceList.filter(item => item.expiresAt?.toMillis?.() > now).map(item => item.uid));
+    byId("wr-lobby-presence-count").textContent = String(liveIds.size);
+    const ul = byId("wr-lobby-presence");
+    ul.replaceChildren();
+    memberList.forEach(member => {
+      const li = document.createElement("li"), label = document.createElement("span");
+      const isSelf = member.uid === auth.currentUser?.uid;
+      const isLive = liveIds.has(member.uid);
+      label.textContent = isSelf ? "You · here now" : isLive ? "Vivid member · here now" : "Vivid member · away";
+      li.append(label);
+      if (room.role === "host" && !isSelf) {
+        const remove = document.createElement("button");
+        remove.type = "button"; remove.textContent = "Remove";
+        remove.className = "vivid-wr-button vivid-wr-button--quiet";
+        remove.addEventListener("click", () => call("removeWatchRoomMember")({ roomId: room.roomId, memberUid: member.uid }).catch(showError));
+        li.append(remove);
+      }
+      ul.append(li);
+    });
+    if (!memberList.length) ul.textContent = "Waiting for your crew…";
+  };
+  stops.push(onSnapshot(members, snap => { memberList = snap.docs.map(document => ({ uid: document.id, ...document.data() })); renderPresence(); }, showError));
+  stops.push(onSnapshot(presence, snap => { presenceList = snap.docs.map(document => document.data()); renderPresence(); }, showError));
   stops.push(onSnapshot(query(collection(db, "rooms", data.roomId, "queue"), orderBy("createdAt", "asc")), snap => { const ol = byId("wr-lobby-queue"); ol.replaceChildren(); const items = snap.docs.map(d => ({ id:d.id, ...d.data() })).filter(x => x.status === "queued").sort((a,b) => (b.voteCount || 0) - (a.voteCount || 0)); if (!items.length) ol.textContent = "No picks yet. Add the first film."; items.forEach(x => { const li = document.createElement("li"), label = document.createElement("span"), vote = document.createElement("button"); label.textContent = x.title + " · " + (x.voteCount || 0) + " votes"; vote.type = "button"; vote.textContent = "Vote"; vote.className = "vivid-wr-button vivid-wr-button--quiet"; vote.addEventListener("click", () => call("voteWatchRoomQueueItem")({ roomId:data.roomId, itemId:x.id }).catch(showError)); li.append(label,vote); if (room.role === "host" || x.addedBy === auth.currentUser?.uid) { const remove = document.createElement("button"); remove.type = "button"; remove.textContent = "Remove"; remove.className = "vivid-wr-button vivid-wr-button--quiet"; remove.addEventListener("click", () => call("removeWatchRoomQueueItem")({ roomId:data.roomId, itemId:x.id }).catch(showError)); li.append(remove); } ol.append(li); }); }, showError));
   stops.push(onSnapshot(query(collection(db, "rooms", data.roomId, "chat"), orderBy("createdAt", "desc"), limit(80)), snap => { const log = byId("wr-lobby-chat"); log.replaceChildren(); [...snap.docs].reverse().forEach(d => { const m=d.data(), row=document.createElement("article"), p=document.createElement("p"), actions=document.createElement("div"); p.textContent=(m.uid===auth.currentUser?.uid ? "You" : "Member") + ": " + m.text; ["❤️","😂","👏","😮","🔥"].forEach(e => { const b=document.createElement("button"); b.type="button"; b.textContent=e+" "+(m.reactions?.[e]?.length||0); b.addEventListener("click",()=>call("reactToWatchRoomMessage")({roomId:data.roomId,messageId:d.id,reaction:e}).catch(showError)); actions.append(b); }); row.append(p,actions); log.append(row); }); log.scrollTop=log.scrollHeight; }, showError));
   const ping = () => call("heartbeatWatchRoom")({ roomId:data.roomId }).catch(showError); ping(); heartbeat = setInterval(ping,30000);
