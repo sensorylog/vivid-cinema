@@ -35,12 +35,12 @@ test("Watch Rooms browser client sends Firebase Auth and one-time App Check toke
   assert.ok(client.includes('getLimitedUseToken(appCheck)'));
   assert.ok(client.includes('user.getIdToken()'));
   assert.ok(client.includes('"X-Firebase-AppCheck"'));
-  assert.ok(client.includes('https://vivid-cinema-api.vercel.app/api/watch-rooms'));
+  assert.ok(client.includes('const API_URL = "/api/watch-rooms"'));
   assert.ok(client.includes('credentials: "omit"'));
   assert.ok(client.includes('return { data: payload.data }'));
 });
 
-test("All Watch Rooms and Cinema Club clients use the shared Vercel API adapter", () => {
+test("All Watch Rooms and Cinema Club clients use the shared same-origin API adapter", () => {
   for (const source of clients) {
     assert.ok(source.includes('import { callWatchRoomApi } from "./watch-room-api.js"'));
     assert.ok(source.includes("const call = callWatchRoomApi"));
@@ -66,4 +66,23 @@ test("Watch Rooms API never exposes raw Firebase Admin errors to the browser", (
   assert.ok(api.includes("const safeMessage = error instanceof HttpsError && status < 500"));
   assert.ok(api.includes("Your sign-in or app verification needs refreshing."));
   assert.ok(api.includes("We couldn't complete that action right now. Please try again."));
+});
+
+test("Cloudflare Watch Rooms route preserves every trusted operation and one-time App Check checks", async () => {
+  const route = await readFile(new URL("../cloudflare/functions/api/watch-rooms.js", import.meta.url), "utf8");
+  for (const operation of [
+    "createWatchRoom","createCinemaClub","createWatchInvitation","redeemWatchInvitation","revokeWatchInvitation","cleanupExpiredWatchRooms",
+    "heartbeatWatchRoom","addWatchRoomQueueItem","removeWatchRoomQueueItem","voteWatchRoomQueueItem",
+    "sendWatchRoomMessage","reactToWatchRoomMessage","updateWatchRoomSettings","removeWatchRoomMember",
+    "leaveWatchRoom","closeWatchRoom","publishWatchRoomPlayback",
+    "addCinemaClubWatchlistItem","removeCinemaClubWatchlistItem","recordCinemaClubScreening",
+    "addCinemaClubAfterCreditsReview","addCinemaClubDiscussionMessage","leaveCinemaClub","archiveCinemaClub"
+  ]) {
+    assert.ok(route.includes("async function " + operation + "("), "missing Cloudflare operation " + operation);
+    assert.ok(route.includes('"' + operation + '"'), "Cloudflare route does not allow " + operation);
+  }
+  assert.ok(route.includes("verifyIdToken(match[1], true)"));
+  assert.ok(route.includes("verifyToken(appCheckToken, { consume: true })"));
+  assert.ok(route.includes("recursiveDelete(reference)"));
+  assert.ok(route.includes("reference instanceof Query"));
 });
