@@ -253,6 +253,7 @@ function openLobby(data) {
   settings.elements.allowGuestPlayerSelection.checked = data.allowGuestPlayerSelection === true;
   settings.elements.allowGuestQueueManagement.checked = data.allowGuestQueueManagement === true;
   settings.elements.allowGuestPlaybackControl.checked = data.allowGuestPlaybackControl === true;
+  settings.addEventListener("change", () => { settings.dataset.dirty = "true"; });
   const refreshLobby = async () => {
     if (!room || room.roomId !== data.roomId) return;
     try {
@@ -262,7 +263,7 @@ function openLobby(data) {
       if (snapshot.room) {
         room = { ...room, ...snapshot.room };
         const currentSettings = byId("wr-room-settings-form");
-        if (room.role === "host" && currentSettings) {
+        if (room.role === "host" && currentSettings && currentSettings.dataset.dirty !== "true") {
           currentSettings.elements.allowGuestQueue.checked = room.allowGuestQueue !== false;
           currentSettings.elements.allowGuestChat.checked = room.allowGuestChat !== false;
           currentSettings.elements.allowGuestVoting.checked = room.allowGuestVoting !== false;
@@ -429,6 +430,7 @@ byId("wr-room-settings-form")?.addEventListener("submit", async event => {
         allowGuestPlaybackControl: form.elements.allowGuestPlaybackControl.checked
       }
     });
+    form.dataset.dirty = "false";
     byId("wr-lobby-title").textContent = form.elements.name.value.trim();
     setFeedback("Room settings saved.");
   } catch (error) { showError(error); }
