@@ -17,7 +17,7 @@ const recommendationsSource = await readFile(path.join(root, "scripts/recommenda
 const achievementsSource = await readFile(path.join(root, "scripts/achievements.js"), "utf8");
 
 test("Recall and Vivid Sparks use a current Cloudflare Workers AI model", () => {
-  assert.match(aiSource, /@cf\/zai-org\/glm-4\.7-flash/);
+  assert.match(aiSource, /@cf\\/ibm-granite\\/granite-4\\.0-h-micro/);
   assert.match(aiSource, /Cloudflare Workers AI/);
   assert.doesNotMatch(aiSource, /firebase-ai\.js|GoogleAIBackend|getAI\(/);
 });
@@ -40,7 +40,7 @@ test("Cloudflare AI route verifies Firebase identity and uses the AI binding", (
   assert.match(apiSource, /MAX_REQUESTS_PER_WINDOW/);
   assert.match(apiSource, /MAX_OUTPUT_TOKENS = 384/);
   assert.match(apiSource, /MAX_REQUESTS_PER_WINDOW = 6/);
-  assert.match(apiSource, /const MODEL = "@cf\\/ibm-granite\\/granite-4\\.0-h-micro"/);
+  assert.ok(apiSource.includes('const MODEL = "@cf/ibm-granite/granite-4.0-h-micro"'));
   assert.match(apiSource, /const MODEL = "@cf\\/ibm-granite\\/granite-4\\.0-h-micro"/);
   assert.doesNotMatch(apiSource, /GEMINI_API_KEY|generativelanguage\.googleapis\.com|X-Firebase-AppCheck/);
 });
