@@ -19,6 +19,7 @@ let hostStatus = "playing";
 let lastPublishAt = 0;
 let publishQueue = Promise.resolve();
 let lastHostPayload = null;
+let clockOffsetMs = 0;
 
 const panel = document.createElement("section");
 panel.className = "vivid-room-sync";
@@ -49,7 +50,7 @@ function stopConnection() {
   unsubscribePlayback = null;
   if (heartbeatTimer) window.clearInterval(heartbeatTimer);
   heartbeatTimer = null;
-  roomId = ""; role = ""; latestRemoteState = null; joinedPlayback = false; localPosition = null; localStatus = ""; hostStatus = "playing"; lastPublishAt = 0; publishQueue = Promise.resolve(); lastHostPayload = null;
+  roomId = ""; role = ""; latestRemoteState = null; joinedPlayback = false; localPosition = null; localStatus = ""; hostStatus = "playing"; lastPublishAt = 0; publishQueue = Promise.resolve(); lastHostPayload = null; clockOffsetMs = 0;
   joinButton.hidden = true; leaveButton.hidden = true; form.hidden = false;
 }
 
@@ -68,7 +69,7 @@ function applyRemoteState(force = false) {
   if (!sameTitle(state)) { setNote("This room is synced to a different title or episode. Open that exact Vivid title to join."); return; }
   if (!getSupportedFrame()) { setNote("Choose VidSrc in the player’s server list first. Other providers are not enabled for room sync."); return; }
   const updatedAt = state.updatedAt?.toMillis?.() || Date.now();
-  const elapsed = state.status === "playing" ? Math.max(0, (Date.now() - updatedAt) / 1000) : 0;
+  const elapsed = state.status === "playing" ? Math.max(0, (Date.now() + clockOffsetMs - updatedAt) / 1000) : 0;
   const expected = Math.max(0, Math.min(Number(state.duration) || 86400, Number(state.position) + elapsed));
   if (force || localPosition == null || Math.abs(expected - localPosition) > 2.5) {
     sendProviderCommand("seek" + Math.floor(expected));
@@ -90,7 +91,17 @@ async function connectToRoom(id) {
   form.hidden = true; leaveButton.hidden = false;
   joinButton.hidden = role === "host";
   setNote(role === "host" ? "You’re the host. Select VidSrc in the player; your playback becomes the room’s reference clock." : "Room connected. Start the same title with VidSrc, then tap Join synced playback.");
-  const ping = () => call("heartbeatWatchRoom")({ roomId }).catch(error => setNote(error?.message || "Room presence could not refresh."));
+  const ping = async () => {
+    const startedAt = Date.now();
+    try {
+      const result = await call("heartbeatWatchRoom")({ roomId });
+      const finishedAt = Date.now();
+      const serverTime = Number(result.data?.serverTime);
+      if (Number.isFinite(serverTime)) clockOffsetMs = serverTime - ((startedAt + finishedAt) / 2);
+    } catch (error) {
+      setNote(error?.message || "Room presence could not refresh.");
+    }
+  };
   await ping(); heartbeatTimer = window.setInterval(ping, 30000);
   unsubscribePlayback = onSnapshot(doc(db, "rooms", roomId, "playback", "current"), snapshot => {
     if (!snapshot.exists()) { latestRemoteState = null; if (role !== "host") setNote("Connected. Waiting for the host to start playback."); return; }
