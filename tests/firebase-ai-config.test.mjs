@@ -40,8 +40,10 @@ test("Cloudflare AI route verifies Firebase identity and uses the AI binding", (
   assert.match(apiSource, /env\.AI\.run/);
   assert.match(apiSource, /messages: \[/);
   assert.match(apiSource, /role: "system"/);
-  assert.match(apiSource, /chat-template inference/);
+  assert.match(apiSource, /prompt: systemPrompt/);
+  assert.match(apiSource, /attempts\.push\(\{ input: "prompt"/);
   assert.match(apiSource, /responseKeys/);
+  assert.match(chatSource, /inferenceAttempts/);
   assert.match(apiSource, /MAX_PROMPT_CHARS/);
   assert.match(apiSource, /MAX_REQUESTS_PER_WINDOW = 6/);
   assert.match(apiSource, /MAX_OUTPUT_TOKENS = 384/);
