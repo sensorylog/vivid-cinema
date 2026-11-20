@@ -89,7 +89,7 @@ test("For You preserves local matching alongside the authenticated Cloudflare AI
 });
 
 
-test("Vivid Recall chat has a Gemini-independent local fallback for desktop WebViews", () => {
+test("Vivid Recall chat has a Cloudflare-independent local fallback for desktop WebViews", () => {
   const chat = readFileSync(new URL("../scripts/vivid-recall-chat.js", import.meta.url), "utf8");
   assert.match(chat, /getPlotMatchRecommendations\(intent, 5, \{ localOnly: true \}\)/);
   assert.match(chat, /await fallbackToLocalSearch\(version\)/);
