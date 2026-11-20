@@ -107,6 +107,8 @@ test("Cloudflare Pages bundles the Watch Rooms API from its isolated Functions d
   assert.ok(build.includes("pages"));
   assert.ok(build.includes("functions"));
   assert.ok(build.includes("--outdir"));
+  assert.ok(build.includes('"--compatibility-flags", "nodejs_compat"'));
+  assert.ok(build.includes('"--config", path.join(root, "wrangler.toml")'));
   assert.equal(cloudflarePackage.dependencies["@ljoukov/firebase-admin-cloudflare"], "0.0.2");
   assert.ok(route.includes("verifyIdToken(match[1], true)"));
   assert.ok(route.includes("verifyToken(appCheckToken, { consume: true })"));
