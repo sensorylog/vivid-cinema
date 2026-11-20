@@ -356,3 +356,9 @@ test("Host removal deletes membership, presence and dashboard pointer atomically
   assert.ok(remove.includes("tx.delete(pointerRef)"));
   assert.doesNotMatch(remove, /\.delete\(\)\.catch\(\(\) => \{\}\)/);
 });
+
+
+test("Only Cinema Club owners see the invite-generation action", () => {
+  const client = readFileSync(new URL("../scripts/watch-rooms.js", import.meta.url), "utf8");
+  assert.ok(client.includes('if (club.role === "owner") actionsForClub.push(makeInviteButton("club", club.clubId, "Invite members"))'));
+});
