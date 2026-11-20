@@ -562,8 +562,8 @@ test("Watch Room Step 5 persists host-selected player and server through both tr
     assert.ok(operation.includes("requireUser(request)"), "selection must require an authenticated account");
     assert.ok(operation.includes("requireRoomMemberInTransaction(tx, roomId, uid)"), "selection must re-check room membership transactionally");
     assert.ok(operation.includes('room.hostUid !== uid || member.role !== "host"'), "only the host may choose the shared player");
-    assert.ok(operation.includes('player1: new Set(["vidapi", "vidsrc", "vidlink", "vidplus", "vidking", "embedwave", "vidfast", "ezvidapi", "embedapistream", "moviesapi"])'));
-    assert.ok(operation.includes('player2: new Set(["moviesapi", "vidsrc-embed", "cinesrc", "vidfast", "vidlink"])'));
+    assert.ok(backend.includes('player1: new Set(["vidapi", "vidsrc", "vidlink", "vidplus", "vidking", "embedwave", "vidfast", "ezvidapi", "embedapistream", "moviesapi"])'));
+    assert.ok(backend.includes('player2: new Set(["moviesapi", "vidsrc-embed", "cinesrc", "vidfast", "vidlink"])'));
     assert.ok(operation.includes("selectedPlayerId: playerId, selectedProviderId: providerId"));
     assert.ok(backend.includes("  setWatchRoomPlayerSelection,"));
     assert.ok(backend.includes('"setWatchRoomPlayerSelection"'));
