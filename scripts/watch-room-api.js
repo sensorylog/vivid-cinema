@@ -1,5 +1,5 @@
 import { auth, appCheck } from "./firebase.js";
-import { getToken } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app-check.js";
+import { getLimitedUseToken } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app-check.js";
 
 const API_URL = "https://vivid-cinema-api.vercel.app/api/watch-rooms";
 
@@ -19,7 +19,7 @@ export function callWatchRoomApi(action) {
 
     const [idToken, appCheckResult] = await Promise.all([
       user.getIdToken(),
-      getToken(appCheck, false)
+      getLimitedUseToken(appCheck)
     ]);
     const response = await fetch(API_URL, {
       method: "POST",
