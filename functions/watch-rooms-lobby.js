@@ -225,7 +225,8 @@ export const closeWatchRoom = onCall({ region: "us-central1", maxInstances: 20 }
   const roomId = validId(request.data?.roomId, "room ID");
   const { roomRef } = await requireHost(roomId, uid);
   const members = await roomRef.collection("members").get();
-  await roomRef.update({ status: "closed", closedAt: Timestamp.now(), updatedAt: Timestamp.now() });
+  const closedAt = Timestamp.now();
+  await roomRef.update({ status: "closed", closedAt, expiresAt: closedAt, updatedAt: closedAt });
   await Promise.all(members.docs.map(member =>
     db().collection("users").doc(member.id).collection("watchRooms").doc(roomId).set({ status: "closed" }, { merge: true })
   ));
