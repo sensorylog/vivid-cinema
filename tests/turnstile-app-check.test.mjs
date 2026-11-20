@@ -175,3 +175,21 @@ test("Vivid App Check no longer initializes the reCAPTCHA Enterprise provider", 
   assert.doesNotMatch(firebase + pulse, /ReCaptchaEnterpriseProvider|RECAPTCHA_ENTERPRISE_SITE_KEY/);
   assert.match(headers, /https:\/\/challenges\.cloudflare\.com/);
 });
+
+
+test("Account creation, sign-in and the synced library keep their Firebase SDK paths", async () => {
+  const [firebase, auth, library] = await Promise.all([
+    readFile(new URL("../scripts/firebase.js", import.meta.url), "utf8"),
+    readFile(new URL("../scripts/auth.js", import.meta.url), "utf8"),
+    readFile(new URL("../scripts/library.js", import.meta.url), "utf8")
+  ]);
+  assert.match(firebase, /initializeAuth\(app/);
+  assert.match(firebase, /getFirestore\(app\)/);
+  assert.match(firebase, /initializeAppCheck\(app/);
+  assert.match(auth, /createUserWithEmailAndPassword\(auth/);
+  assert.match(auth, /signInWithEmailAndPassword\(auth/);
+  assert.match(auth, /signInWithPopup\(auth/);
+  assert.match(library, /getDocsFromServer/);
+  assert.match(library, /setDoc\(doc\(db, "users", uid/);
+  assert.match(library, /getFirestore/);
+});
