@@ -15,6 +15,7 @@ const excludedDirectories = new Set([
   "dist",
   "functions",
   "api",
+  "cloudflare",
   "android",
   "ios",
   "docs",
