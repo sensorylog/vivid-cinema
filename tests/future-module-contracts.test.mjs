@@ -552,3 +552,25 @@ test("Watch Room lobby reads authoritative members, presence, queue and chat thr
   assert.ok(client.includes("Couldn't load room members."));
   assert.doesNotMatch(client, /onSnapshot|collection\(db,/);
 });
+
+
+test("Watch Room Step 5 persists host-selected player and server through both trusted APIs", () => {
+  const nodeApi = readFileSync(new URL("../api/watch-rooms.js", import.meta.url), "utf8");
+  const cloudflareApi = readFileSync(new URL("../cloudflare/functions/api/watch-rooms.js", import.meta.url), "utf8");
+  for (const backend of [nodeApi, cloudflareApi]) {
+    const operation = backend.slice(backend.indexOf("async function setWatchRoomPlayerSelection"), backend.indexOf("async function updateWatchRoomSettings"));
+    assert.ok(operation.includes("requireUser(request)"), "selection must require an authenticated account");
+    assert.ok(operation.includes("requireRoomMemberInTransaction(tx, roomId, uid)"), "selection must re-check room membership transactionally");
+    assert.ok(operation.includes('room.hostUid !== uid || member.role !== "host"'), "only the host may choose the shared player");
+    assert.ok(operation.includes('player1: new Set(["vidapi", "vidsrc", "vidlink", "vidplus", "vidking", "embedwave", "vidfast", "ezvidapi", "embedapistream", "moviesapi"])'));
+    assert.ok(operation.includes('player2: new Set(["moviesapi", "vidsrc-embed", "cinesrc", "vidfast", "vidlink"])'));
+    assert.ok(operation.includes("selectedPlayerId: playerId, selectedProviderId: providerId"));
+    assert.ok(backend.includes("  setWatchRoomPlayerSelection,"));
+    assert.ok(backend.includes('"setWatchRoomPlayerSelection"'));
+    const snapshotStart = backend.indexOf("async function getWatchRoomLobbySnapshot");
+    const snapshotEnd = backend.indexOf("async function heartbeatWatchRoom", snapshotStart);
+    const snapshot = backend.slice(snapshotStart, snapshotEnd);
+    assert.ok(snapshot.includes('selectedPlayerId: room.selectedPlayerId || "player1"'));
+    assert.ok(snapshot.includes('selectedProviderId: room.selectedProviderId || "vidapi"'));
+  }
+});
