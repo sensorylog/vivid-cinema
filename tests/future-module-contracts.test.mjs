@@ -399,3 +399,13 @@ test("Watch Room host can manage offline members, not only active presence lease
   assert.ok(client.includes('"Vivid member · away"'));
   assert.ok(client.includes('call("removeWatchRoomMember")'));
 });
+
+
+test("Watch Room backend and Firestore rules fail closed for missing expiry timestamps", () => {
+  const lobby = readFileSync(new URL("../functions/watch-rooms-lobby.js", import.meta.url), "utf8");
+  const rules = readFileSync(new URL("../firestore.rules", import.meta.url), "utf8");
+  assert.ok(lobby.includes("!Number.isFinite(expiresAt) || expiresAt <= Date.now()"));
+  assert.ok(lobby.includes("!Number.isFinite(roomData.expiresAt?.toMillis?.())"));
+  assert.ok(rules.includes("room.keys().hasAll(['expiresAt'])"));
+  assert.ok(rules.includes("room.expiresAt is timestamp"));
+});
