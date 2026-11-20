@@ -74,6 +74,26 @@ async function authenticate(request, env) {
 }
 
 export async function onRequest({ request, env }) {
+  // A non-sensitive health check lets production diagnostics distinguish a
+  // missing Pages route/binding from an authentication or inference failure.
+  if (request.method === "GET") {
+    const serviceAccountConfigured = Boolean(env.FIREBASE_SERVICE_ACCOUNT_JSON);
+    let projectConfigured = Boolean(env.FIREBASE_PROJECT_ID);
+    if (!projectConfigured && serviceAccountConfigured) {
+      try { projectConfigured = Boolean(JSON.parse(env.FIREBASE_SERVICE_ACCOUNT_JSON).project_id); } catch {}
+    }
+    return json(200, {
+      ok: true,
+      service: "vivid-ai",
+      provider: "cloudflare-workers-ai",
+      model: MODEL,
+      checks: {
+        aiBinding: Boolean(env.AI && typeof env.AI.run === "function"),
+        firebaseServiceAccount: serviceAccountConfigured,
+        firebaseProject: projectConfigured
+      }
+    });
+  }
   if (request.method !== "POST") return json(405, { ok: false, message: "Use POST for Vivid AI requests." });
   const origin = request.headers.get("Origin");
   if (origin) {
