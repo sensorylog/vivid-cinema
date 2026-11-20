@@ -1,10 +1,5 @@
-import {
-  getAI,
-  getGenerativeModel,
-  GoogleAIBackend,
-  ThinkingLevel
-} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-ai.js";
-import { app, appCheckError, appCheckSkippedReason } from "./firebase.js";
+import { getIdToken } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
+import { auth } from "./firebase.js";
 
 const RECALL_MODEL = "gemini-3.5-flash-lite";
 const CLUE_TIMEOUT_MS = 12000;
@@ -37,29 +32,36 @@ function initialThrottleDelay(error) {
 }
 
 function createRecallModel(maxOutputTokens) {
-  // Reuse one Firebase AI client for clue extraction, chat, and Sparks.
-  // Keep baseline App Check attestation, but use cached session tokens.
-  // Limited-use tokens trigger a fresh reCAPTCHA Enterprise assessment for
-  // every Gemini request and can exhaust the project's monthly assessment
-  // allowance. Replay protection must remain disabled for Firebase AI Logic.
-  if (!recallAi) {
-    recallAi = getAI(app, {
-      backend: new GoogleAIBackend(),
-      useLimitedUseAppCheckTokens: false
-    });
-  }
-  const ai = recallAi;
-  return getGenerativeModel(ai, {
-    model: RECALL_MODEL,
-    generationConfig: {
-      responseMimeType: "application/json",
-      maxOutputTokens,
-      // Flash-Lite supports minimal thinking; keep tokens focused on the JSON answer.
-      thinkingConfig: {
-        thinkingLevel: ThinkingLevel.MINIMAL
+  // Gemini runs through Vivid's authenticated Cloudflare Pages API.
+  // The browser never receives or stores the Gemini API key.
+  return {
+    async generateContent(prompt, options = {}) {
+      const user = auth.currentUser;
+      if (!user || user.isAnonymous) {
+        const error = new Error("Sign in to your Vivid account before using Gemini.");
+        error.code = "auth/unauthenticated";
+        throw error;
       }
+      const idToken = await getIdToken(user);
+      const response = await fetch("/api/gemini", {
+        method: "POST",
+        headers: { "Authorization": "Bearer " + idToken, "Content-Type": "application/json" },
+        cache: "no-store",
+        signal: options.signal,
+        body: JSON.stringify({ prompt, maxOutputTokens })
+      });
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok || !payload.ok) {
+        const error = new Error(payload.message || "Vivid Gemini request failed (" + response.status + ").");
+        error.code = response.status === 401 ? "auth/unauthenticated" :
+          response.status === 429 ? "resource-exhausted" : "functions/" + (payload.code || "internal");
+        error.status = response.status;
+        error.customData = { serverResponse: payload };
+        throw error;
+      }
+      return { response: { text: () => payload.text || "" } };
     }
-  });
+  };
 }
 
 function getRecallModel() {
@@ -133,21 +135,6 @@ export async function getRecallClues(query, fallbackClues = []) {
   if (cleanQuery.length < 8) {
     return { clues: fallback, available: false, message: "The description is too short for AI clue extraction." };
   }
-  if (appCheckSkippedReason) {
-    return {
-      clues: fallback,
-      available: false,
-      message: "Gemini testing requires a deployed site because App Check is skipped on localhost."
-    };
-  }
-  if (appCheckError) {
-    return {
-      clues: fallback,
-      available: false,
-      message: "Firebase App Check did not initialize; local clue extraction is still active."
-    };
-  }
-
   try {
     const model = await getRecallModel();
     const result = await generateWithTimeout(
@@ -198,12 +185,6 @@ function getRecallChatModel() {
 }
 
 export async function sendRecallChatMessage(messages, mediaType = "all") {
-  if (appCheckSkippedReason) {
-    throw new Error("Gemini chat requires a deployed site because App Check is skipped on localhost.");
-  }
-  if (appCheckError) {
-    throw new Error("Firebase App Check did not initialize" + (appCheckError?.code ? " (" + appCheckError.code + ")" : "") + (appCheckError?.message ? ": " + String(appCheckError.message).slice(0, 220) : ".") + " Local catalogue search is still available.");
-  }
   const safeMessages = (Array.isArray(messages) ? messages : [])
     .filter(item => item && ["user", "assistant"].includes(item.role))
     .slice(-8)
@@ -264,13 +245,6 @@ const SPARK_TIMEOUT_MS = 10000;
  * helper; this does not change the Recall chat or clue-extraction paths.
  */
 export async function generateAchievementSpark(input = {}) {
-  if (appCheckSkippedReason) {
-    throw new Error("Achievement Sparks require a deployed site because App Check is skipped on localhost.");
-  }
-  if (appCheckError) {
-    throw new Error("Firebase App Check did not initialize.");
-  }
-
   const achievement = input.achievement && typeof input.achievement === "object"
     ? input.achievement : {};
   const library = input.library && typeof input.library === "object"
