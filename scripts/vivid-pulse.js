@@ -3,8 +3,8 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.19.0/f
 import { addDoc, collection, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 
 // Product analytics is intentionally limited to authenticated Vivid members.
-// Do not create anonymous Firebase sessions or write Firestore page-view events
-// on every public visit; that needlessly consumes App Check attestations.
+// Public visitors do not create anonymous Firebase sessions or trigger
+// Firestore writes/App Check attestations merely by opening a page.
 
 const platform = (() => {
   try {
@@ -102,23 +102,48 @@ onAuthStateChanged(auth, user => {
     return;
   }
   preferredIdentity = "anonymous";
-  void getAnonymousUser().then(anonymousUser => {
-    if (preferredIdentity === "anonymous") beginTracking(anonymousUser, anonymousDb, true);
-  }).catch(error => {
-    console.warn("[Vivid Pulse] Anonymous analytics unavailable:", error?.code || error?.message || error);
-  });
-});
-document.addEventListener("click", event => {
-  const onAuthStateChanged(auth, user => {
-  if (user) {
-    preferredIdentity = "account";
-    beginTracking(user, db, false);
-    return;
-  }
-  preferredIdentity = "anonymous";
   uid = null;
   activeDb = db;
   identityType = "anonymous";
   activeIdentityKey = null;
   started = false;
+});
+document.addEventListener("click", event => {
+  const downloadLink = event.target.closest?.("#windows-installer, #windows-portable, #android-apk");
+  if (downloadLink) {
+    const targetPlatform = downloadLink.id === "android-apk" ? "android" : "windows";
+    void trackPulseEvent("download_" + targetPlatform, {
+      source: location.pathname,
+      download_variant: downloadLink.id === "windows-portable" ? "portable" : (downloadLink.id === "windows-installer" ? "installer" : "apk")
+    });
+    return;
+  }
+  const target = event.target.closest?.("[data-id][data-type]");
+  if (target) {
+    void trackPulseEvent("content_click", { content_id: String(target.dataset.id), content_type: String(target.dataset.type), source: location.pathname });
+    return;
+  }
+  if (event.target.closest?.(".vivid-discovery-card,.vivid-search-result")) {
+    void trackPulseEvent("content_click", { source: location.pathname });
+    return;
+  }
+  if (event.target.closest?.("#hero-watch,[data-watch],#stream-button,.stream-button")) {
+    void trackPulseEvent("stream_click", { source: location.pathname });
+  }
+});
+document.addEventListener("submit", event => {
+  const form = event.target;
+  if (form.matches?.("[data-landing-email-form]")) void trackPulseEvent("signup_start", { method: "email" });
+  else if (form.matches?.("#signup-form")) void trackPulseEvent("signup_submit", { method: "email" });
+  else if (form.matches?.("#login-form")) void trackPulseEvent("login_submit", { method: "email" });
+});
+document.addEventListener("input", event => {
+  const input = event.target;
+  if (!input.matches?.("#search-input")) return;
+  const queryLength = input.value.trim().length;
+  if (queryLength < 3) return;
+  clearTimeout(input.__vividPulseTimer);
+  input.__vividPulseTimer = setTimeout(() => {
+    void trackPulseEvent("search_performed", { query_length: queryLength, page: location.pathname });
+  }, 800);
 });
