@@ -447,3 +447,17 @@ test("Watch Rooms API client is included in the offline application shell", () =
   const worker = readFileSync(new URL("../service-worker.js", import.meta.url), "utf8");
   assert.ok(worker.includes('"./scripts/watch-room-api.js"'));
 });
+
+
+test("Watch Rooms classifies Firebase App Check token failures separately from sign-in failures", () => {
+  const api = readFileSync(new URL("../scripts/watch-room-api.js", import.meta.url), "utf8");
+  const idToken = api.slice(api.indexOf("let idToken;"), api.indexOf("let response;"));
+  assert.ok(idToken.includes("user.getIdToken()"));
+  assert.ok(idToken.includes('startsWith("auth/")'));
+  assert.ok(idToken.includes('"functions/unauthenticated"'));
+  assert.ok(idToken.includes('"functions/unavailable"'));
+  assert.ok(api.includes("appCheck token acquisition failed"));
+  assert.ok(api.includes('"functions/failed-precondition"'));
+  assert.ok(!api.includes('startsWith("app-check/")'));
+  assert.ok(!idToken.includes("Promise.all"));
+});
