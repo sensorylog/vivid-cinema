@@ -192,3 +192,5 @@ Each stage is delivered as focused commits on feature/watch-rooms and reviewed b
 
 - Room access now fails closed if the parent room lacks a valid Firestore timestamp expiry. The same expiry requirement is enforced in Firestore rules, callable membership checks and playback publication.
 - Lobby listeners and presence heartbeats are torn down on pagehide and restored on back-forward cache navigation. Hosts can manage both online and offline members, not just currently active presence leases.
+
+- Playback drift calculations use a server-time offset measured from the trusted room heartbeat, reducing dependence on each viewer device's wall clock. Periodic playing updates are throttled without suppressing pause/resume state transitions.
