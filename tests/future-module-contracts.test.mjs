@@ -682,3 +682,49 @@ test("Watch Room followers resync when the selected provider iframe finishes loa
   assert.ok(player1.includes('playerId: "player1", providerId: activeSource'));
   assert.ok(player2.includes('playerId: "player2", providerId: serverId'));
 });
+
+
+test("Watch Room playback snapshots use authenticated API polling instead of browser Firestore listeners", () => {
+  const node = readFileSync(new URL("../api/watch-rooms.js", import.meta.url), "utf8");
+  const cloudflare = readFileSync(new URL("../cloudflare/functions/api/watch-rooms.js", import.meta.url), "utf8");
+  const client = readFileSync(new URL("../scripts/watch-room-playback.js", import.meta.url), "utf8");
+  for (const backend of [node, cloudflare]) {
+    const start = backend.indexOf("async function getWatchRoomPlaybackSnapshot(");
+    const end = backend.indexOf("async function heartbeatWatchRoom(", start);
+    const operation = backend.slice(start, end);
+    assert.ok(start >= 0 && end > start);
+    assert.ok(operation.includes("requireUser(request)"));
+    assert.ok(operation.includes("requireRoomMember(roomId, uid)"));
+    assert.ok(operation.includes('collection("playback").doc("current")'));
+    assert.ok(backend.includes("  getWatchRoomPlaybackSnapshot,"));
+    assert.ok(backend.includes('"getWatchRoomPlaybackSnapshot"'));
+  }
+  assert.ok(client.includes('call("getWatchRoomPlaybackSnapshot")'));
+  assert.ok(client.includes("schedulePlaybackRefresh"));
+  assert.ok(client.includes("playbackConnectionGeneration"));
+  assert.ok(!client.includes("onSnapshot("));
+  assert.ok(!client.includes('from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js"'));
+});
+
+test("Watch Room Start Screening is host-authorized and launches the same queued title for members", () => {
+  const node = readFileSync(new URL("../api/watch-rooms.js", import.meta.url), "utf8");
+  const cloudflare = readFileSync(new URL("../cloudflare/functions/api/watch-rooms.js", import.meta.url), "utf8");
+  const lobby = readFileSync(new URL("../scripts/watch-room-lobby.js", import.meta.url), "utf8");
+  for (const backend of [node, cloudflare]) {
+    const start = backend.indexOf("async function startWatchRoomScreening(");
+    const end = backend.indexOf("async function removeWatchRoomQueueItem(", start);
+    const operation = backend.slice(start, end);
+    assert.ok(start >= 0 && end > start);
+    assert.ok(operation.includes('room.hostUid !== uid || member.role !== "host"'));
+    assert.ok(operation.includes('itemSnapshot.data().status !== "queued"'));
+    assert.ok(operation.includes("activeScreening: screening"));
+    assert.ok(operation.includes('status: "screening"'));
+    assert.ok(backend.includes("  startWatchRoomScreening,"));
+    assert.ok(backend.includes('"startWatchRoomScreening"'));
+    assert.ok(backend.includes("activeScreening: room.activeScreening || null"));
+  }
+  assert.ok(lobby.includes('call("startWatchRoomScreening")'));
+  assert.ok(lobby.includes("function buildScreeningUrl(screening)"));
+  assert.ok(lobby.includes('url.searchParams.set("roomId", room.roomId)'));
+  assert.ok(lobby.includes('join.textContent = "Join screening"'));
+});
