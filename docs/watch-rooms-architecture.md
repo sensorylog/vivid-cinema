@@ -66,7 +66,7 @@ These are domain concepts, not a final Firestore schema. Exact paths and fields 
 
 ## Stage 3 trusted operations
 
-Callable operations: `createWatchRoom`, `createCinemaClub`, `createWatchInvitation`, `redeemWatchInvitation` and `revokeWatchInvitation`. These operations reject signed-out and anonymous identities, validate bounded inputs, and perform related document changes in Firestore transactions. Clients cannot create or modify room, club, membership, dashboard-index or invitation documents directly.
+Trusted API operations: `createWatchRoom`, `createCinemaClub`, `createWatchInvitation`, `redeemWatchInvitation` and `revokeWatchInvitation`. These operations reject signed-out and anonymous identities, validate bounded inputs, and perform related document changes in Firestore transactions. Clients cannot create or modify room, club, membership, dashboard-index or invitation documents directly.
 
 ## Security model
 
@@ -131,11 +131,11 @@ Each stage is delivered as focused commits on feature/watch-rooms and reviewed b
 ## Stage 4 lobby and social implementation
 
 - Presence is represented by short-lived member leases refreshed every 30 seconds and expiring after 90 seconds; it is not a substitute for membership.
-- Room queue suggestions are created through trusted callable operations, bounded to 50 items, and support per-member vote toggling.
+- Room queue suggestions are created through trusted API operations, bounded to 50 items, and support per-member vote toggling.
 - Room chat is member-only, bounded to 500 characters per message, and rate-limited server-side.
 - Reactions are allow-listed and toggled by authenticated room members.
 - Host-only settings control the room name and whether guests may add queue items or chat. The host can remove another member, change guest permissions, and close the room for everyone; the host cannot remove themselves.
-- Lobby collections are readable only by current room members. All client writes to presence, queue and chat are denied by Firestore rules; mutations use trusted callables.
+- Lobby collections are readable only by current room members. All client writes to presence, queue and chat are denied by Firestore rules; mutations use trusted API operations.
 - Client lobby listeners are torn down when the user leaves the lobby. Playback synchronization remains Stage 5 and is not implied by the lobby.
 
 ## Stage 5 synchronized playback — initial adapter
@@ -143,7 +143,7 @@ Each stage is delivered as focused commits on feature/watch-rooms and reviewed b
 - The first verified synchronization adapter is VidSrc at the configured exact origin `https://vidsrc.sh`.
 - VidSrc documents both `PLAYER_EVENT` playback updates and parent-frame play, pause and absolute/relative seek commands. Vivid accepts events only from the active iframe window and exact VidSrc origin, and sends commands back with that exact target origin.
 - VidAPI currently documents playback events but not a parent command API; VidLink documents events but not playback control commands. Those providers remain normal playback sources and are not advertised as synchronized.
-- The host is authoritative. A trusted callable rechecks open-room membership and host role in the same transaction that updates `rooms/{roomId}/playback/current`.
+- The host is authoritative. A trusted API operation rechecks open-room membership and host role in the same transaction that updates `rooms/{roomId}/playback/current`.
 - Members receive realtime read-only playback snapshots. Clients cannot write playback state directly.
 - Guests join through a room invitation code on the watch page. The expected invitation target is validated before redemption so a Cinema Club code cannot be consumed accidentally.
 - The guest estimates the host position using the server timestamp, applies play/pause commands, and seeks when drift exceeds 2.5 seconds. A guest must start the VidSrc player through a user gesture before browser playback policy permits remote play commands.
@@ -158,7 +158,7 @@ Each stage is delivered as focused commits on feature/watch-rooms and reviewed b
 - `cinemaClubs/{clubId}/screenings/{screeningId}` stores durable screening history, including typed title identity, screening date, optional notes, and rating aggregates. A member can record a screening from the club page.
 - `screenings/{screeningId}/afterCredits/{uid}` stores each member's editable 1–5 rating and optional review. Aggregate rating totals are updated transactionally to avoid lost updates.
 - `screenings/{screeningId}/discussion/{messageId}` stores member-only After-Credits discussion messages, bounded to 1,000 characters and 200 messages per screening.
-- Trusted callable operations perform every write. They require a signed-in, non-anonymous Vivid identity, verify active club membership, and re-check membership inside the transaction that commits durable changes.
+- Trusted trusted API operations perform every write. They require a signed-in, non-anonymous Vivid identity, verify active club membership, and re-check membership inside the transaction that commits durable changes.
 - Firestore rules allow only current members of active clubs to read these collections. Client writes are denied; non-members and signed-out users cannot read club watchlists, history, ratings or discussions.
 - The club page subscribes to the selected club's shared watchlist and screening history, and loads a screening's ratings/discussion when the member opens its After-Credits view.
 - The UI accepts Vivid's typed `movie:ID` / `tv:ID` catalogue identifiers. It does not pretend free-text titles alone are a canonical catalogue match.
@@ -170,7 +170,7 @@ Each stage is delivered as focused commits on feature/watch-rooms and reviewed b
 - Watch Room and Cinema Club Firestore reads require a non-anonymous Firebase sign-in and a current membership record. Cinema Club archive reads additionally require the club status to remain active.
 - All room, lobby, playback, watchlist, screening, review and discussion writes remain server-only through callable operations. Firestore client write rules remain denied.
 - The club UI disables write forms until a club is selected, restores listeners after back-forward cache navigation, shows live watchlist/screening counts, and links the screening action to the actual club screening form.
-- Stage 7 test coverage includes Stage 6 callable export contracts, active-club transaction rechecks, member-only archive access, archived-club read denial, and client-write denial.
+- Stage 7 test coverage includes Stage 6 API route contracts, active-club transaction rechecks, member-only archive access, archived-club read denial, and client-write denial.
 - Release gate: the latest commit must pass the repository's Tests, Firestore Rules, static validation, browser navigation, Windows and Android workflows. Cloudflare Pages is tracked separately as a deployment check. A queued or in-progress workflow is not considered a pass.
 - Known product boundary: synchronized playback is currently supported only through the verified VidSrc parent-frame control contract; it is not frame-perfect and browser autoplay/network buffering remain external constraints.
 
@@ -190,7 +190,7 @@ Each stage is delivered as focused commits on feature/watch-rooms and reviewed b
 - Invitation redemption, member departure and host removal update the authoritative member count and existing private dashboard summaries in the same transaction. Room and club previews therefore do not retain stale membership counts.
 - The service worker precaches the Watch Rooms dashboard, lobby, Cinema Club and playback modules. Its shell cache version is bumped so existing installations fetch the new feature assets on update.
 
-- Room access now fails closed if the parent room lacks a valid Firestore timestamp expiry. The same expiry requirement is enforced in Firestore rules, callable membership checks and playback publication.
+- Room access now fails closed if the parent room lacks a valid Firestore timestamp expiry. The same expiry requirement is enforced in Firestore rules, trusted API membership checks and playback publication.
 - Lobby listeners and presence heartbeats are torn down on pagehide and restored on back-forward cache navigation. Hosts can manage both online and offline members, not just currently active presence leases.
 
 - Playback drift calculations use a server-time offset measured from the trusted room heartbeat, reducing dependence on each viewer device's wall clock. Periodic playing updates are throttled without suppressing pause/resume state transitions.
