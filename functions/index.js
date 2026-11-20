@@ -429,15 +429,30 @@ export const redeemWatchInvitation = onCall({ region: "us-central1", maxInstance
     if (!Number.isInteger(target.memberCount) || target.memberCount >= limit) {
       throw new HttpsError("resource-exhausted", "This space has reached its member limit.");
     }
+    const existingMembers = await transaction.get(targetRef.collection("members"));
     const role = isRoom ? "guest" : "member";
     const displayName = displayNameFor(auth);
+    const nextMemberCount = target.memberCount + 1;
+    // Keep the private dashboard summaries in sync with the authoritative
+    // parent count. These collections are deliberately capped at 12/100.
+    existingMembers.docs.forEach(existingMember => {
+      const existingData = existingMember.data();
+      const existingPointerRef = db.collection("users").doc(existingMember.id).collection(pointerCollection).doc(invitation.targetId);
+      transaction.set(existingPointerRef, {
+        [isRoom ? "roomId" : "clubId"]: invitation.targetId,
+        name: target.name,
+        ...(isRoom ? { filmTitle: target.filmTitle || "", expiresAt: target.expiresAt } : { description: target.description || "" }),
+        role: existingData.role, status: target.status, memberCount: nextMemberCount,
+        joinedAt: existingData.joinedAt || now, createdAt: existingData.joinedAt || now
+      }, { merge: true });
+    });
     transaction.create(memberRef, { userId: auth.uid, displayName, role, joinedAt: now });
     transaction.create(pointerRef, {
       [isRoom ? "roomId" : "clubId"]: invitation.targetId,
       name: target.name, ...(isRoom ? { filmTitle: target.filmTitle || "" } : { description: target.description || "" }),
-      role, status: target.status, memberCount: target.memberCount + 1, ...(isRoom ? { expiresAt: target.expiresAt } : {}), joinedAt: now, createdAt: now
+      role, status: target.status, memberCount: nextMemberCount, ...(isRoom ? { expiresAt: target.expiresAt } : {}), joinedAt: now, createdAt: now
     });
-    transaction.update(targetRef, { memberCount: target.memberCount + 1, updatedAt: now });
+    transaction.update(targetRef, { memberCount: nextMemberCount, updatedAt: now });
     transaction.update(invitationRef, { useCount: invitation.useCount + 1, lastUsedAt: now });
     return { targetType: invitation.targetType, targetId: invitation.targetId, alreadyMember: false };
   });
