@@ -44,7 +44,7 @@ function createRecallModel(maxOutputTokens) {
         error.customData = { serverResponse: payload };
         throw error;
       }
-      return { response: { text: () => payload.text || "" } };
+      return { response: { text: () => payload.text || "" }, model: payload.model || WORKERS_AI_MODEL };
     }
   };
 }
