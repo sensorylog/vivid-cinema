@@ -450,6 +450,18 @@ function setPlayerSource(source, params, startAt = 0) {
   }
   updateSourceLabel();
 }
+
+window.addEventListener("vivid:watch-room-apply-selection", event => {
+  const selection = event.detail || {};
+  if (selection.playerId !== "player1" || !currentParams) return;
+  const secondaryRoot = $("vivid-tflix-player");
+  if (secondaryRoot) secondaryRoot.hidden = true;
+  const position = Math.max(0, Number(selection.position) || 0);
+  setPlayerSource(selection.providerId, currentParams, position);
+  $("player-overlay")?.scrollIntoView({ block: "center", behavior: "smooth" });
+});
+
+
 function historyItem(extra = {}) {
   return {
     id: media.id,
