@@ -40,7 +40,7 @@ async function getJwks(url, cache) {
 }
 async function verifyRs256(token, jwksUrl) {
   const parsed = parseJwt(token);
-  if (parsed.header.alg !== "RS256" || typeof parsed.header.kid !== "string") throw new Error("Unsupported token signing algorithm.");
+  if (parsed.header.alg !== "RS256" || parsed.header.typ !== "JWT" || typeof parsed.header.kid !== "string") throw new Error("Unsupported token signing algorithm or type.");
   const cache = jwksUrl.includes("appcheck") ? appCheckJwksCache : authJwksCache;
   const jwks = await getJwks(jwksUrl, cache);
   const jwk = jwks.keys?.find(key => key.kid === parsed.header.kid && key.kty === "RSA");
@@ -85,8 +85,15 @@ function requireClaims(claims, projectId, issuer) {
   }
 }
 export async function verifyFirebaseIdToken(idToken, projectId, serviceAccount) {
-  const claims = await verifyRs256(idToken, "https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com");
-  requireClaims(claims, projectId, "https://securetoken.google.com/" + projectId);
+  let claims;
+  try {
+    claims = await verifyRs256(idToken, "https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com");
+    requireClaims(claims, projectId, "https://securetoken.google.com/" + projectId);
+  } catch (error) {
+    error.code = /Unable to retrieve Firebase signing keys|Google service-account authorization failed/.test(error.message)
+      ? "auth/internal-error" : "auth/invalid-id-token";
+    throw error;
+  }
   if (claims.firebase?.sign_in_provider === "anonymous") throw new Error("Anonymous Firebase accounts are not allowed.");
   const accessToken = await serviceAccountAccessToken(serviceAccount);
   const response = await fetch("https://identitytoolkit.googleapis.com/v1/projects/" + encodeURIComponent(projectId) + "/accounts:lookup", {
@@ -95,14 +102,21 @@ export async function verifyFirebaseIdToken(idToken, projectId, serviceAccount) 
     body: JSON.stringify({ localId: [claims.sub] })
   });
   const result = await response.json();
-  if (!response.ok) throw new Error("Firebase user status/revocation lookup failed (" + response.status + ").");
+  if (!response.ok) { const error = new Error("Firebase user status/revocation lookup failed (" + response.status + ")."); error.code = "auth/internal-error"; throw error; }
   const user = result.users?.[0];
   if (!user || user.disabled) throw new Error("Firebase user is disabled or no longer exists.");
   if (Number(user.validSince || 0) > Number(claims.auth_time || 0)) throw new Error("Firebase ID token has been revoked.");
   return { ...claims, uid: claims.sub };
 }
 export async function verifyAndConsumeAppCheckToken(token, serviceAccount) {
-  const claims = await verifyRs256(token, "https://firebaseappcheck.googleapis.com/v1/jwks");
+  let claims;
+  try {
+    claims = await verifyRs256(token, "https://firebaseappcheck.googleapis.com/v1/jwks");
+  } catch (error) {
+    error.code = /Unable to retrieve Firebase signing keys|Google service-account authorization failed/.test(error.message)
+      ? "appCheck/internal-error" : "appCheck/invalid-token";
+    throw error;
+  }
   const audience = Array.isArray(claims.aud) ? claims.aud : [];
   const projectAudience = audience.find(value => typeof value === "string" && /^projects\/[0-9]+$/.test(value));
   const projectNumber = projectAudience?.split("/")[1];
@@ -119,6 +133,6 @@ export async function verifyAndConsumeAppCheckToken(token, serviceAccount) {
     body: JSON.stringify({ appCheckToken: token })
   });
   const result = await response.json();
-  if (!response.ok) throw new Error("Firebase App Check verification/consumption failed (" + response.status + ").");
+  if (!response.ok) { const error = new Error("Firebase App Check verification/consumption failed (" + response.status + ")."); error.code = "appCheck/internal-error"; throw error; }
   return { ...claims, alreadyConsumed: result.alreadyConsumed === true };
 }
