@@ -7,7 +7,7 @@ const clients = await Promise.all([
   "watch-rooms.js", "watch-room-lobby.js", "watch-room-clubs.js", "watch-room-playback.js"
 ].map(name => readFile(new URL("../scripts/" + name, import.meta.url), "utf8")));
 
-test("Watch Rooms browser client sends Firebase Auth and standard App Check tokens", () => {
+test("Watch Rooms browser client sends Firebase Auth and standard App Check tokens", async () => {
   assert.ok(client.includes('getToken(appCheck, false)'));
   const firebase = await readFile(new URL("../scripts/firebase.js", import.meta.url), "utf8");
   assert.match(firebase, /isTokenAutoRefreshEnabled:\s*false/);
