@@ -286,16 +286,26 @@ byId("wr-create-room-form")?.addEventListener("submit", async event => {
       name: String(data.get("roomName") || "").trim(),
       filmTitle: String(data.get("filmTitle") || "").trim()
     });
-    const roomId = created.data.roomId;
-    const invitation = await call("createWatchInvitation")({ targetType: "room", targetId: roomId });
-    await loadDashboard(auth.currentUser);
+    // The API now creates the room, host membership, dashboard pointer and
+    // invitation atomically. Do not make a second permission-sensitive call.
+    const room = created.data;
+    dashboardState.rooms = [room, ...dashboardState.rooms.filter(item => item.roomId !== room.roomId)];
+    renderRoomPreviews();
     showTab("rooms");
-    setFeedback("wr-room-feedback", "Room created. Your invite code is " + invitation.data.inviteCode + " · Expires when the room closes (within 24 hours). Share it privately.");
+    setFeedback("wr-room-feedback", "Room created. Your invite code is " + room.inviteCode + " · Expires within 24 hours. Share it privately.");
     form.reset();
+
+    // Dashboard refresh is secondary. A Firestore client read failure must not
+    // turn a successfully-created room into a false permission-denied failure.
+    try {
+      await loadDashboard(auth.currentUser);
+    } catch (refreshError) {
+      console.error("Vivid Watch Room was created, but its dashboard refresh failed:", refreshError);
+      setFeedback("wr-room-feedback", "Room created and invite code ready: " + room.inviteCode + ". Your room list couldn't refresh yet; reload the page to try again.");
+    }
   } catch (error) {
     console.error("Vivid Watch Room creation failed:", error);
     setFeedback("wr-room-feedback", errorText(error, "We couldn't create your room just now. Please try again in a moment."), true);
-    try { await loadDashboard(auth.currentUser); } catch {}
   } finally {
     submit.disabled = false;
   }
