@@ -85,11 +85,17 @@ export function mountTflixSecondaryPlayer({ root, params, media, details, title,
     status.hidden = false;
     status.classList.toggle("is-loading", mode === "loading");
   }
-  function loadServer(serverId) {
+  function loadServer(serverId, startAt = 0) {
     const server = SERVERS.find(item => item.id === serverId);
+    if (!server) { setStatus("This server is not available."); return false; }
     if (blockedServers.has(serverId)) {
+      generation++;
+      if (loadTimer) window.clearTimeout(loadTimer);
+      loadTimer = 0;
+      const currentFrame = screen.querySelector("#vivid-tflix-frame");
+      if (currentFrame) currentFrame.src = "about:blank";
       setStatus(server.name + " has been reported to play the wrong title for this movie. Please choose another server.");
-      return;
+      return false;
     }
     started = true;
     const url = buildTflixSecondaryServerUrl(serverId, playbackParams);
@@ -98,6 +104,7 @@ export function mountTflixSecondaryPlayer({ root, params, media, details, title,
     const thisGeneration = generation;
     if (loadTimer) window.clearTimeout(loadTimer);
     selectedServer = serverId;
+    window.dispatchEvent(new CustomEvent("vivid:player-adapter-selected", { detail: { playerId: "player2", providerId: serverId } }));
     rememberServer(serverId);
     updateButtons();
     placeholder.hidden = true;
@@ -115,6 +122,7 @@ export function mountTflixSecondaryPlayer({ root, params, media, details, title,
       if (loadTimer) window.clearTimeout(loadTimer);
       loading.hidden = true;
       setStatus(server.name + " loaded. If playback does not start, try another server.");
+      window.dispatchEvent(new CustomEvent("vivid:player-frame-loaded", { detail: { playerId: "player2", providerId: serverId, position: Math.max(0, Number(startAt) || 0) } }));
       window.setTimeout(() => { if (thisGeneration === generation) status.hidden = true; }, 5000);
     });
     frame.addEventListener("error", () => {
@@ -132,6 +140,7 @@ export function mountTflixSecondaryPlayer({ root, params, media, details, title,
       loading.hidden = true;
       setStatus("Still waiting for " + server.name + "? The provider may be slow or unavailable.");
     }, 12000);
+    return true;
   }
   for (const server of SERVERS) {
     const button = document.createElement("button");
@@ -253,5 +262,25 @@ export function mountTflixSecondaryPlayer({ root, params, media, details, title,
   const startButton = root.querySelector("#vivid-tflix-start");
   if (startButton) startButton.addEventListener("click", () => loadServer(selectedServer));
   // Player 2 loads only after an explicit tap on Start playback or a server choice.
-  return { loadServer, getSelectedServer: () => selectedServer, destroy: () => { generation++; if (loadTimer) window.clearTimeout(loadTimer); const frame = screen.querySelector("#vivid-tflix-frame"); if (frame) frame.src = "about:blank"; } };
+
+  const roomSelectionHandler = event => {
+    const selection = event.detail || {};
+    if (selection.playerId === "player2") {
+      root.hidden = false;
+      const loaded = loadServer(selection.providerId, selection.position);
+      if (!loaded) window.dispatchEvent(new CustomEvent("vivid:watch-room-selection-error", { detail: { playerId: "player2", providerId: selection.providerId } }));
+      root.scrollIntoView({ block: "center", behavior: "smooth" });
+    } else if (selection.playerId === "player1") {
+      root.hidden = true;
+      generation++;
+      if (loadTimer) window.clearTimeout(loadTimer);
+      loadTimer = 0;
+      const frame = screen.querySelector("#vivid-tflix-frame");
+      if (frame) frame.src = "about:blank";
+    }
+  };
+  window.addEventListener("vivid:watch-room-apply-selection", roomSelectionHandler);
+  window.dispatchEvent(new CustomEvent("vivid:player-adapter-ready", { detail: { playerId: "player2" } }));
+
+  return { loadServer, getSelectedServer: () => selectedServer, destroy: () => { window.removeEventListener("vivid:watch-room-apply-selection", roomSelectionHandler); generation++; if (loadTimer) window.clearTimeout(loadTimer); const frame = screen.querySelector("#vivid-tflix-frame"); if (frame) frame.src = "about:blank"; } };
 }

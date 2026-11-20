@@ -497,9 +497,25 @@ async function getWatchRoomLobbySnapshot(request) {
     return { id: document.id, ...data, createdAt: millis(data.createdAt) };
   });
   return {
-    room: { roomId, name: room.name || "Private screening", status: room.status, memberCount: members.length },
+    room: { roomId, name: room.name || "Private screening", status: room.status, memberCount: members.length, selectedPlayerId: room.selectedPlayerId || "player1", selectedProviderId: room.selectedProviderId || "vidapi", selectionUpdatedAt: millis(room.selectionUpdatedAt), activeScreening: room.activeScreening || null, allowGuestQueue: room.allowGuestQueue !== false, allowGuestChat: room.allowGuestChat !== false, allowGuestVoting: room.allowGuestVoting !== false, allowGuestPlayerSelection: room.allowGuestPlayerSelection === true, allowGuestQueueManagement: room.allowGuestQueueManagement === true, allowGuestPlaybackControl: room.allowGuestPlaybackControl === true },
     members, onlineCount: members.filter(member => member.isOnline).length, queue, chat,
     serverTime: now
+  };
+}
+
+async function getWatchRoomPlaybackSnapshot(request) {
+  const uid = requireUser(request);
+  const roomId = validId(request.data?.roomId, "room ID");
+  const { roomRef, member } = await requireRoomMember(roomId, uid);
+  const playbackSnapshot = await roomRef.collection("playback").doc("current").get();
+  const playbackData = playbackSnapshot.exists ? playbackSnapshot.data() : null;
+  const updatedAt = playbackData?.updatedAt?.toMillis?.() ??
+    (typeof playbackData?.updatedAt === "number" ? playbackData.updatedAt : null);
+  return {
+    roomId,
+    role: member.role,
+    playback: playbackData ? { ...playbackData, updatedAt } : null,
+    serverTime: Date.now()
   };
 }
 
@@ -545,6 +561,60 @@ async function addWatchRoomQueueItem(request) {
   return { itemId: itemRef.id };
 }
 
+async function startWatchRoomScreening(request) {
+  const uid = requireUser(request);
+  const roomId = validId(request.data?.roomId, "room ID");
+  const itemId = validId(request.data?.itemId, "queue item ID");
+  const roomRef = db.collection("rooms").doc(roomId);
+  const itemRef = roomRef.collection("queue").doc(itemId);
+  const now = Timestamp.now();
+  const sessionId = randomBytes(16).toString("hex");
+  let screening;
+  await db.runTransaction(async tx => {
+    const { room, member } = await requireRoomMemberInTransaction(tx, roomId, uid);
+    if (room.hostUid !== uid || member.role !== "host") {
+      throw new HttpsError("permission-denied", "Only the room host can start a screening.");
+    }
+    if (room.status !== "open" || !room.expiresAt || room.expiresAt.toMillis() <= now.toMillis()) {
+      throw new HttpsError("failed-precondition", "This Watch Room is no longer active.");
+    }
+    const itemSnapshot = await tx.get(itemRef);
+    if (!itemSnapshot.exists || itemSnapshot.data().status !== "queued") {
+      throw new HttpsError("not-found", "That queue pick is no longer available.");
+    }
+    const item = itemSnapshot.data();
+    const contentId = String(item.contentId || "");
+    if (!/^\d{1,12}$/.test(contentId) || !["movie", "tv"].includes(item.mediaType)) {
+      throw new HttpsError("failed-precondition", "This pick is missing a valid catalogue title. Remove it and add it again from search.");
+    }
+    const season = item.mediaType === "tv" ? Number(request.data?.season ?? 1) : null;
+    const episode = item.mediaType === "tv" ? Number(request.data?.episode ?? 1) : null;
+    if (item.mediaType === "tv" && (!Number.isInteger(season) || season < 1 || season > 999 || !Number.isInteger(episode) || episode < 1 || episode > 9999)) {
+      throw new HttpsError("invalid-argument", "Choose a valid TV season and episode.");
+    }
+    screening = {
+      sessionId,
+      queueItemId: itemId,
+      contentId,
+      mediaType: item.mediaType,
+      season,
+      episode,
+      title: cleanText(item.title, "Screening title", 180),
+      posterPath: item.posterPath || "",
+      releaseDate: item.releaseDate || "",
+      startedBy: uid,
+      startedAt: now
+    };
+    tx.update(itemRef, { status: "screening", screeningAt: now });
+    tx.update(roomRef, {
+      activeScreening: screening,
+      queueCount: Math.max(0, Number(room.queueCount || 0) - 1),
+      updatedAt: now
+    });
+  });
+  return { screening: { ...screening, startedAt: now.toMillis() } };
+}
+
 async function removeWatchRoomQueueItem(request) {
   const uid = requireUser(request);
   const roomId = validId(request.data?.roomId, "room ID");
@@ -555,7 +625,7 @@ async function removeWatchRoomQueueItem(request) {
     const { room, member } = await requireRoomMemberInTransaction(tx, roomId, uid);
     const item = await tx.get(itemRef);
     if (!item.exists || item.data().status !== "queued") throw new HttpsError("not-found", "That queue item is no longer available.");
-    if (member.role !== "host" && item.data().addedBy !== uid) throw new HttpsError("permission-denied", "Only the host or the person who suggested this pick can remove it.");
+    if (member.role !== "host" && item.data().addedBy !== uid && room.allowGuestQueueManagement !== true) throw new HttpsError("permission-denied", "The host has not allowed guests to manage other queue picks.");
     tx.delete(itemRef);
     tx.update(roomRef, { queueCount: Math.max(0, Number(room.queueCount || 0) - 1), updatedAt: Timestamp.now() });
   });
@@ -569,7 +639,8 @@ async function voteWatchRoomQueueItem(request) {
   const roomRef = db.collection("rooms").doc(roomId);
   const itemRef = roomRef.collection("queue").doc(itemId);
   await db.runTransaction(async tx => {
-    await requireRoomMemberInTransaction(tx, roomId, uid);
+    const { room, member } = await requireRoomMemberInTransaction(tx, roomId, uid);
+    if (member.role !== "host" && room.allowGuestVoting === false) throw new HttpsError("permission-denied", "The host has paused guest voting.");
     const item = await tx.get(itemRef);
     if (!item.exists || item.data().status !== "queued") throw new HttpsError("not-found", "That queue item is no longer available.");
     const votes = Array.isArray(item.data().votes) ? item.data().votes : [];
@@ -610,7 +681,8 @@ async function reactToWatchRoomMessage(request) {
   const roomRef = db.collection("rooms").doc(roomId);
   const messageRef = roomRef.collection("chat").doc(messageId);
   await db.runTransaction(async tx => {
-    await requireRoomMemberInTransaction(tx, roomId, uid);
+    const { room, member } = await requireRoomMemberInTransaction(tx, roomId, uid);
+    if (member.role !== "host" && room.allowGuestChat === false) throw new HttpsError("permission-denied", "The host has paused guest chat and reactions.");
     const message = await tx.get(messageRef);
     if (!message.exists) throw new HttpsError("not-found", "That message could not be found.");
     const reactions = message.data().reactions || {};
@@ -621,16 +693,47 @@ async function reactToWatchRoomMessage(request) {
   return { updated: true };
 }
 
+
+const ROOM_PLAYER_PROVIDERS = Object.freeze({
+  player1: new Set(["vidapi", "vidsrc", "vidlink", "vidplus", "vidking", "embedwave", "vidfast", "ezvidapi", "embedapistream", "moviesapi"]),
+  player2: new Set(["moviesapi", "vidsrc-embed", "cinesrc", "vidfast", "vidlink"])
+});
+
+async function setWatchRoomPlayerSelection(request) {
+  const uid = requireUser(request);
+  const roomId = validId(request.data?.roomId, "room ID");
+  const playerId = request.data?.playerId;
+  const providerId = request.data?.providerId;
+  if (!Object.hasOwn(ROOM_PLAYER_PROVIDERS, playerId) || typeof providerId !== "string" || !ROOM_PLAYER_PROVIDERS[playerId].has(providerId)) {
+    throw new HttpsError("invalid-argument", "Choose a valid player and server.");
+  }
+  const roomRef = db.collection("rooms").doc(roomId);
+  const selectedAt = Timestamp.now();
+  await db.runTransaction(async tx => {
+    const { room, member } = await requireRoomMemberInTransaction(tx, roomId, uid);
+    const isHost = room.hostUid === uid && member.role === "host";
+    const isPermittedGuest = member.role === "guest" && room.allowGuestPlayerSelection === true;
+    if (!isHost && !isPermittedGuest) {
+      throw new HttpsError("permission-denied", "The host has not allowed guests to change the shared player and server.");
+    }
+    if (room.status !== "open" || !room.expiresAt || room.expiresAt.toMillis() <= selectedAt.toMillis()) {
+      throw new HttpsError("failed-precondition", "This Watch Room is no longer active.");
+    }
+    tx.update(roomRef, { selectedPlayerId: playerId, selectedProviderId: providerId, selectionUpdatedAt: selectedAt, updatedAt: selectedAt });
+  });
+  return { selected: true, playerId, providerId, selectedAt: selectedAt.toMillis() };
+}
+
 async function updateWatchRoomSettings(request) {
   const uid = requireUser(request);
   const roomId = validId(request.data?.roomId, "room ID");
   const patch = request.data?.settings;
   if (!patch || typeof patch !== "object" || Array.isArray(patch)) throw new HttpsError("invalid-argument", "Room settings are required.");
-  const allowed = ["name", "allowGuestQueue", "allowGuestChat"];
+  const allowed = ["name", "allowGuestQueue", "allowGuestChat", "allowGuestVoting", "allowGuestPlayerSelection", "allowGuestQueueManagement", "allowGuestPlaybackControl"];
   if (Object.keys(patch).some(key => !allowed.includes(key))) throw new HttpsError("invalid-argument", "One or more room settings are not supported.");
   const update = {};
   if (Object.hasOwn(patch, "name")) update.name = cleanText(patch.name, "Room name", 80);
-  for (const key of ["allowGuestQueue", "allowGuestChat"]) {
+  for (const key of ["allowGuestQueue", "allowGuestChat", "allowGuestVoting", "allowGuestPlayerSelection", "allowGuestQueueManagement", "allowGuestPlaybackControl"]) {
     if (Object.hasOwn(patch, key)) {
       if (typeof patch[key] !== "boolean") throw new HttpsError("invalid-argument", key + " must be true or false.");
       update[key] = patch[key];
@@ -746,11 +849,12 @@ async function deleteWatchRoom(request) {
 }
 
 
-// The first synchronized adapter is limited to VidSrc's documented PLAYER_EVENT and parent-command protocol on vidsrc.sh.
+// Only providers with documented and origin-checked parent-command/event protocols are accepted here.
 async function publishWatchRoomPlayback(request) {
   const uid = requireUser(request);
   const roomId = validId(request.data?.roomId, "room ID");
-  if (request.data?.provider !== "vidsrc") throw new HttpsError("failed-precondition", "This provider is not enabled for synchronized playback.");
+  const provider = request.data?.provider;
+  if (!["vidsrc", "cinesrc"].includes(provider)) throw new HttpsError("failed-precondition", "This provider is not enabled for synchronized playback.");
   const status = request.data?.status;
   if (!["playing", "paused", "ended"].includes(status)) throw new HttpsError("invalid-argument", "Playback status is not supported.");
   const contentId = cleanText(String(request.data?.contentId || ""), "Catalogue ID", 80);
@@ -763,7 +867,7 @@ async function publishWatchRoomPlayback(request) {
   const season = mediaType === "tv" ? Number(request.data?.season) : null;
   const episode = mediaType === "tv" ? Number(request.data?.episode) : null;
   if (mediaType === "tv" && (!Number.isInteger(season) || season < 1 || season > 500 || !Number.isInteger(episode) || episode < 1 || episode > 5000)) throw new HttpsError("invalid-argument", "A valid season and episode are required.");
-  const { roomRef } = await requireHost(roomId, uid);
+  const roomRef = db.collection("rooms").doc(roomId);
   const stateRef = roomRef.collection("playback").doc("current");
   const now = Timestamp.now();
   return db.runTransaction(async tx => {
@@ -772,14 +876,14 @@ async function publishWatchRoomPlayback(request) {
     ]);
     const roomData = roomSnapshot.exists ? roomSnapshot.data() : null;
     const memberData = memberSnapshot.exists ? memberSnapshot.data() : null;
-    if (!roomData || roomData.status !== "open" || !Number.isFinite(roomData.expiresAt?.toMillis?.()) || roomData.expiresAt.toMillis() <= now.toMillis() || roomData.hostUid !== uid || memberData?.role !== "host") {
-      throw new HttpsError("permission-denied", "Only the active host of an open room can publish playback.");
+    if (!roomData || roomData.status !== "open" || !Number.isFinite(roomData.expiresAt?.toMillis?.()) || roomData.expiresAt.toMillis() <= now.toMillis() || !memberData || !((roomData.hostUid === uid && memberData.role === "host") || (memberData.role === "guest" && roomData.allowGuestPlaybackControl === true))) {
+      throw new HttpsError("permission-denied", "Only the host or a guest explicitly allowed to control playback can publish playback.");
     }
     const previous = current.exists ? current.data() : null;
     if (previous && (previous.contentId !== contentId || previous.mediaType !== mediaType || (mediaType === "tv" && (previous.season !== season || previous.episode !== episode)))) throw new HttpsError("failed-precondition", "This room is already synchronized to a different title or episode.");
     if (previous?.lastEventAt?.toMillis && now.toMillis() - previous.lastEventAt.toMillis() < 1800 && status === "playing") return { accepted: false, reason: "rate-limited" };
     const revision = Number(previous?.revision || 0) + 1;
-    tx.set(stateRef, { provider: "vidsrc", contentId, mediaType, season, episode, status, position, duration, hostUid: uid, revision, updatedAt: now, lastEventAt: now });
+    tx.set(stateRef, { provider, contentId, mediaType, season, episode, status, position, duration, hostUid: roomData.hostUid, controllerUid: uid, revision, updatedAt: now, lastEventAt: now });
     return { accepted: true, revision };
   });
 }
@@ -979,12 +1083,15 @@ const operations = {
   cleanupExpiredWatchRooms,
   heartbeatWatchRoom,
   getWatchRoomLobbySnapshot,
+  getWatchRoomPlaybackSnapshot,
   addWatchRoomQueueItem,
+  startWatchRoomScreening,
   removeWatchRoomQueueItem,
   voteWatchRoomQueueItem,
   sendWatchRoomMessage,
   reactToWatchRoomMessage,
   updateWatchRoomSettings,
+  setWatchRoomPlayerSelection,
   removeWatchRoomMember,
   leaveWatchRoom,
   closeWatchRoom,
@@ -1001,8 +1108,8 @@ const operations = {
 
 const ROUTES = new Set([
   "createWatchRoom","getWatchRoomDashboard","createCinemaClub","createWatchInvitation","redeemWatchInvitation","revokeWatchInvitation",
-  "cleanupExpiredWatchRooms","heartbeatWatchRoom","getWatchRoomLobbySnapshot","addWatchRoomQueueItem","removeWatchRoomQueueItem","voteWatchRoomQueueItem",
-  "sendWatchRoomMessage","reactToWatchRoomMessage","updateWatchRoomSettings","removeWatchRoomMember","leaveWatchRoom",
+  "cleanupExpiredWatchRooms","heartbeatWatchRoom","getWatchRoomLobbySnapshot","getWatchRoomPlaybackSnapshot","addWatchRoomQueueItem","startWatchRoomScreening","removeWatchRoomQueueItem","voteWatchRoomQueueItem",
+  "sendWatchRoomMessage","reactToWatchRoomMessage","updateWatchRoomSettings","setWatchRoomPlayerSelection","removeWatchRoomMember","leaveWatchRoom",
   "closeWatchRoom","deleteWatchRoom","publishWatchRoomPlayback","addCinemaClubWatchlistItem","removeCinemaClubWatchlistItem",
   "recordCinemaClubScreening","addCinemaClubAfterCreditsReview","addCinemaClubDiscussionMessage","leaveCinemaClub","archiveCinemaClub"
 ]);

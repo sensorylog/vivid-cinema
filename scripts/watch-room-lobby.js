@@ -165,14 +165,61 @@ function renderChat(messages) {
   log.scrollTop = log.scrollHeight;
 }
 
+function applyRoomPermissions() {
+  if (!room) return;
+  const isHost = room.role === "host";
+  const queueAllowed = isHost || room.allowGuestQueue !== false;
+  const chatAllowed = isHost || room.allowGuestChat !== false;
+  const queueForm = byId("wr-queue-form");
+  const chatForm = byId("wr-chat-form");
+  if (queueForm) queueForm.querySelectorAll("input, button").forEach(control => { control.disabled = !queueAllowed; });
+  if (chatForm) chatForm.querySelectorAll("input, button").forEach(control => { control.disabled = !chatAllowed; });
+}
+function buildScreeningUrl(screening) {
+  const contentId = String(screening?.contentId || "");
+  const mediaType = screening?.mediaType === "tv" ? "tv" : "movie";
+  if (!/^\d{1,12}$/.test(contentId)) return "";
+  const url = new URL("watch.html", window.location.href);
+  url.searchParams.set("id", contentId);
+  url.searchParams.set("type", mediaType);
+  url.searchParams.set("roomId", room.roomId);
+  if (mediaType === "tv") {
+    url.searchParams.set("season", String(Math.max(1, Number(screening.season) || 1)));
+    url.searchParams.set("episode", String(Math.max(1, Number(screening.episode) || 1)));
+  }
+  return url.pathname + url.search;
+}
+
 function renderQueue(items) {
   const list = byId("wr-lobby-queue");
   if (!list) return;
   list.replaceChildren();
+  if (room?.activeScreening) {
+    const active = document.createElement("li");
+    active.className = "vivid-wr-queue-item vivid-wr-active-screening";
+    const copy = document.createElement("div");
+    copy.className = "vivid-wr-queue-copy";
+    const title = document.createElement("strong");
+    title.textContent = "Now screening: " + String(room.activeScreening.title || "Selected title");
+    const meta = document.createElement("small");
+    meta.textContent = "The host started this room screening.";
+    copy.append(title, meta);
+    const join = document.createElement("a");
+    join.className = "vivid-wr-button vivid-wr-button--primary";
+    join.textContent = "Join screening";
+    join.href = buildScreeningUrl(room.activeScreening);
+    active.append(copy, join);
+    list.append(active);
+  }
   items = (Array.isArray(items) ? items : []).filter(item => item.status === "queued")
     .sort((a, b) => (Number(b.voteCount) || 0) - (Number(a.voteCount) || 0));
   if (!items.length) {
-    list.textContent = "No film picks yet. Search for a title above to add the first one.";
+    if (!room?.activeScreening) list.textContent = "No film picks yet. Search for a title above to add the first one.";
+    else {
+      const empty = document.createElement("li");
+      empty.textContent = "No other picks in the queue.";
+      list.append(empty);
+    }
     return;
   }
   items.forEach(item => {
@@ -200,8 +247,28 @@ function renderQueue(items) {
     vote.textContent = voted ? "Voted ✓" : "Vote";
     vote.className = "vivid-wr-button vivid-wr-button--quiet";
     vote.setAttribute("aria-pressed", String(Boolean(voted)));
+    vote.disabled = room.role !== "host" && room.allowGuestVoting === false;
     vote.addEventListener("click", () => call("voteWatchRoomQueueItem")({ roomId: room.roomId, itemId: item.id }).catch(showError));
     actions.append(vote);
+    if (room.role === "host" && /^\d{1,12}$/.test(String(item.contentId || ""))) {
+      const start = document.createElement("button");
+      start.type = "button";
+      start.textContent = item.mediaType === "tv" ? "Start Screening · S1 E1" : "Start Screening";
+      start.className = "vivid-wr-button vivid-wr-button--primary";
+      start.addEventListener("click", async () => {
+        start.disabled = true;
+        try {
+          const response = await call("startWatchRoomScreening")({ roomId: room.roomId, itemId: item.id });
+          const url = buildScreeningUrl(response.data?.screening);
+          if (!url) throw new Error("The server returned an invalid screening title.");
+          window.location.assign(url);
+        } catch (error) {
+          showError(error);
+          start.disabled = false;
+        }
+      });
+      actions.append(start);
+    }
     const openTitle = document.createElement("a");
     openTitle.className = "vivid-wr-button vivid-wr-button--quiet";
     openTitle.textContent = "View title";
@@ -211,7 +278,7 @@ function renderQueue(items) {
       openTitle.rel = "noopener";
       actions.append(openTitle);
     }
-    if (room.role === "host" || item.addedBy === auth.currentUser?.uid) {
+    if (room.role === "host" || item.addedBy === auth.currentUser?.uid || room.allowGuestQueueManagement === true) {
       const remove = document.createElement("button");
       remove.type = "button";
       remove.textContent = "Remove";
@@ -232,6 +299,7 @@ function openLobby(data) {
   setSearchMessage("");
   room = data;
   lastRoom = data;
+  applyRoomPermissions();
   memberList = [];
   byId("wr-panel-rooms").hidden = true;
   byId("wr-panel-clubs").hidden = true;
@@ -249,12 +317,30 @@ function openLobby(data) {
   settings.elements.name.value = data.name || "";
   settings.elements.allowGuestQueue.checked = data.allowGuestQueue !== false;
   settings.elements.allowGuestChat.checked = data.allowGuestChat !== false;
+  settings.elements.allowGuestVoting.checked = data.allowGuestVoting !== false;
+  settings.elements.allowGuestPlayerSelection.checked = data.allowGuestPlayerSelection === true;
+  settings.elements.allowGuestQueueManagement.checked = data.allowGuestQueueManagement === true;
+  settings.elements.allowGuestPlaybackControl.checked = data.allowGuestPlaybackControl === true;
+  settings.addEventListener("change", () => { settings.dataset.dirty = "true"; });
   const refreshLobby = async () => {
     if (!room || room.roomId !== data.roomId) return;
     try {
       const response = await call("getWatchRoomLobbySnapshot")({ roomId: data.roomId });
       if (!room || room.roomId !== data.roomId) return;
       const snapshot = response.data || {};
+      if (snapshot.room) {
+        room = { ...room, ...snapshot.room };
+        const currentSettings = byId("wr-room-settings-form");
+        if (room.role === "host" && currentSettings && currentSettings.dataset.dirty !== "true") {
+          currentSettings.elements.allowGuestQueue.checked = room.allowGuestQueue !== false;
+          currentSettings.elements.allowGuestChat.checked = room.allowGuestChat !== false;
+          currentSettings.elements.allowGuestVoting.checked = room.allowGuestVoting !== false;
+          currentSettings.elements.allowGuestPlayerSelection.checked = room.allowGuestPlayerSelection === true;
+          currentSettings.elements.allowGuestQueueManagement.checked = room.allowGuestQueueManagement === true;
+          currentSettings.elements.allowGuestPlaybackControl.checked = room.allowGuestPlaybackControl === true;
+        }
+      }
+      applyRoomPermissions();
       memberList = Array.isArray(snapshot.members) ? snapshot.members : [];
       renderPresence();
       renderQueue(Array.isArray(snapshot.queue) ? snapshot.queue : []);
@@ -406,9 +492,14 @@ byId("wr-room-settings-form")?.addEventListener("submit", async event => {
       settings: {
         name: form.elements.name.value.trim(),
         allowGuestQueue: form.elements.allowGuestQueue.checked,
-        allowGuestChat: form.elements.allowGuestChat.checked
+        allowGuestChat: form.elements.allowGuestChat.checked,
+        allowGuestVoting: form.elements.allowGuestVoting.checked,
+        allowGuestPlayerSelection: form.elements.allowGuestPlayerSelection.checked,
+        allowGuestQueueManagement: form.elements.allowGuestQueueManagement.checked,
+        allowGuestPlaybackControl: form.elements.allowGuestPlaybackControl.checked
       }
     });
+    form.dataset.dirty = "false";
     byId("wr-lobby-title").textContent = form.elements.name.value.trim();
     setFeedback("Room settings saved.");
   } catch (error) { showError(error); }

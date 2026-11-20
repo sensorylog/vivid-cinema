@@ -256,6 +256,7 @@ function setPlayerSource(source, params, startAt = 0) {
   }
   activeSource = source;
   window.dispatchEvent(new CustomEvent("vivid:player-source-changed", { detail: { source } }));
+  window.dispatchEvent(new CustomEvent("vivid:player-adapter-selected", { detail: { playerId: "player1", providerId: source } }));
   player.closest(".vivid-player-frame")?.classList.toggle("is-embedwave", source === "embedwave");
   sourceAttempted.add(source);
   const status = $("player-status");
@@ -449,6 +450,27 @@ function setPlayerSource(source, params, startAt = 0) {
   }
   updateSourceLabel();
 }
+
+window.addEventListener("vivid:watch-room-apply-selection", event => {
+  const selection = event.detail || {};
+  if (!["player1", "player2"].includes(selection.playerId) || !currentParams) return;
+  const secondaryRoot = $("vivid-tflix-player");
+  const primaryOverlay = $("player-overlay");
+  const primaryFrame = $("vidapi-player");
+  if (selection.playerId === "player2") {
+    if (primaryOverlay) primaryOverlay.hidden = true;
+    if (primaryFrame) primaryFrame.src = "about:blank";
+    return;
+  }
+  if (primaryFrame?.src && !primaryFrame.src.endsWith("about:blank")) primaryFrame.src = "about:blank";
+  if (secondaryRoot) secondaryRoot.hidden = true;
+  if (primaryOverlay) primaryOverlay.hidden = false;
+  const position = Math.max(0, Number(selection.position) || 0);
+  setPlayerSource(selection.providerId, currentParams, position);
+  $("player-overlay")?.scrollIntoView({ block: "center", behavior: "smooth" });
+});
+
+
 function historyItem(extra = {}) {
   return {
     id: media.id,
@@ -649,6 +671,7 @@ function renderShell(params) {
     '<section class="vivid-watch-recommendations"><div class="vivid-section-heading"><div><span>MORE TO DISCOVER</span><h2>You might also like</h2></div></div><div id="watch-recommendations" class="vivid-watch-rec-rail">' + recommendationCards() + '</div></section>';
 
   mountSecondaryPlayer(params, episodeTitle || title);
+  window.dispatchEvent(new CustomEvent("vivid:player-adapter-ready", { detail: { playerId: "player1" } }));
 
   const player = $("vidapi-player");
   const directPlayer = $("vivid-direct-player");
@@ -853,6 +876,7 @@ function renderShell(params) {
       if (!player.src || player.src === "about:blank") return;
       status?.classList.remove("is-compact");
       if (status && !status.classList.contains("is-warning")) status.hidden = true;
+      window.dispatchEvent(new CustomEvent("vivid:player-frame-loaded", { detail: { playerId: "player1", providerId: activeSource } }));
     });
     player.addEventListener("error", () => {
       triggerFallback("iframe_error");
