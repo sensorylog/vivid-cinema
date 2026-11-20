@@ -669,3 +669,14 @@ test("Watch Room chat permission also blocks guest reactions", () => {
     assert.ok(implementation.includes("member.role !== \"host\""));
   }
 });
+
+
+test("Watch Room followers resync when the selected provider iframe finishes loading", () => {
+  const room = readFileSync(new URL("../scripts/watch-room-playback.js", import.meta.url), "utf8");
+  const player1 = readFileSync(new URL("../scripts/watch.js", import.meta.url), "utf8");
+  const player2 = readFileSync(new URL("../scripts/playback/tflix-secondary-player.js", import.meta.url), "utf8");
+  assert.ok(room.includes('window.addEventListener("vivid:player-frame-loaded"'));
+  assert.ok(room.includes('applyRemoteState(true)'));
+  assert.ok(player1.includes('playerId: "player1", providerId: activeSource'));
+  assert.ok(player2.includes('playerId: "player2", providerId: serverId'));
+});
