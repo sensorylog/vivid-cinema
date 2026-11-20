@@ -58,8 +58,8 @@ const PLAYER_1 = [
 ];
 
 // Player 2 IDs match buildTflixSecondaryServerUrl() in
-// scripts/playback/tflix-secondary-player.js. These origins are identity
-// hints only; no Player 2 provider has verified room-control capabilities.
+// scripts/playback/tflix-secondary-player.js. CineSRC is enabled because its
+// documented command and event protocol is implemented below.
 const PLAYER_2 = [
   provider("player2", "moviesapi", "MoviesAPI", "https://moviesapi.to"),
   provider("player2", "vidsrc-embed", "VidSrc Embed", "https://vidsrc-embed.ru"),
