@@ -224,6 +224,26 @@ export const removeWatchRoomMember = onCall({ region: "us-central1", maxInstance
 });
 
 
+
+export const leaveWatchRoom = onCall({ region: "us-central1", maxInstances: 20 }, async request => {
+  const uid = requireUser(request);
+  const roomId = validId(request.data?.roomId, "room ID");
+  const roomRef = db().collection("rooms").doc(roomId);
+  const memberRef = roomRef.collection("members").doc(uid);
+  const pointerRef = db().collection("users").doc(uid).collection("watchRooms").doc(roomId);
+  await db().runTransaction(async tx => {
+    const { room, member } = await requireRoomMemberInTransaction(tx, roomId, uid);
+    if (room.hostUid === uid || member.role === "host") {
+      throw new HttpsError("failed-precondition", "The host must end the room instead of leaving it.");
+    }
+    tx.delete(memberRef);
+    tx.delete(roomRef.collection("presence").doc(uid));
+    tx.delete(pointerRef);
+    tx.update(roomRef, { memberCount: Math.max(1, Number(room.memberCount || 1) - 1), updatedAt: Timestamp.now() });
+  });
+  return { left: true };
+});
+
 export const closeWatchRoom = onCall({ region: "us-central1", maxInstances: 20 }, async request => {
   const uid = requireUser(request);
   const roomId = validId(request.data?.roomId, "room ID");
