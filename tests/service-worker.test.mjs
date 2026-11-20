@@ -35,6 +35,32 @@ test("every precached asset exists in the repository", async () => {
   assert.deepEqual(missing, [], "Missing precache assets: " + missing.join(", "));
 });
 
+test("Watch Rooms security and auth modules always use network-first and cache version is bumped", () => {
+  assert.match(source, /const CACHE_NAME = "vivid-cinema-shell-v291"/);
+  assert.ok(source.includes("const isWatchRoomRuntime=") && source.includes("watch-room-api") && source.includes("watch-room-playback"));
+  assert.ok(source.includes("if(isAuthDocument||isAuthRuntime||isWatchRoomRuntime){event.respondWith(networkFirst(request));return;}"));
+});
+test("Watch Rooms API adapter bypasses an installed stale service-worker cache", async () => {
+  const url = "https://vivid.test/scripts/watch-room-api.js";
+  const stale = mockResponse({ url, status: 200 });
+  const fresh = mockResponse({ url, status: 200 });
+  let requested = false;
+  const harness = createWorkerHarness(async request => {
+    requested = true;
+    assert.equal(typeof request === "string" ? request : request.url, url);
+    return fresh;
+  }, new Map([[url, stale]]));
+  const event = {
+    request: new Request(url),
+    respondWith(promise) { this.response = promise; }
+  };
+  harness.handlers.fetch(event);
+  const response = await event.response;
+  assert.equal(requested, true);
+  assert.equal(response, fresh);
+  assert.equal(harness.cacheEntries.get(url), fresh);
+});
+
 test("ordinary JavaScript and CSS serve cache immediately and refresh in the background", () => {
   assert.match(source, /const CACHE_NAME = "vivid-cinema-shell-v\d+"/);
   assert.ok(source.includes("event.respondWith(isCodeOrStyle?staleWhileRevalidate(request,event):isHtml?networkFirst(request):staleWhileRevalidate(request,event));"));
