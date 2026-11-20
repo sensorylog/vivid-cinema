@@ -31,8 +31,9 @@ test("The legacy Node API retains the existing Firebase Auth and App Check verif
   }
 });
 
-test("Watch Rooms browser client sends Firebase Auth and one-time App Check tokens", () => {
-  assert.ok(client.includes('getLimitedUseToken(appCheck)'));
+test("Watch Rooms browser client sends Firebase Auth and standard App Check tokens", () => {
+  assert.ok(client.includes('getToken(appCheck, false)'));
+  assert.doesNotMatch(client, /getLimitedUseToken/);
   assert.ok(client.includes('user.getIdToken()'));
   assert.ok(client.includes('"X-Firebase-AppCheck"'));
   assert.ok(client.includes('const API_URL = "/api/watch-rooms"'));
@@ -68,7 +69,7 @@ test("Watch Rooms API never exposes raw Firebase Admin errors to the browser", (
   assert.ok(api.includes("We couldn't complete that action right now. Please try again."));
 });
 
-test("Cloudflare Watch Rooms route preserves every trusted operation and one-time App Check checks", async () => {
+test("Cloudflare Watch Rooms route preserves every trusted operation and signed App Check checks", async () => {
   const route = await readFile(new URL("../cloudflare/functions/api/watch-rooms.js", import.meta.url), "utf8");
   for (const operation of [
     "createWatchRoom","createCinemaClub","createWatchInvitation","redeemWatchInvitation","revokeWatchInvitation","cleanupExpiredWatchRooms",
@@ -82,7 +83,7 @@ test("Cloudflare Watch Rooms route preserves every trusted operation and one-tim
     assert.ok(route.includes('"' + operation + '"'), "Cloudflare route does not allow " + operation);
   }
   assert.ok(route.includes("verifyFirebaseIdToken(match[1], projectId, serviceAccount)"));
-  assert.ok(route.includes("verifyAndConsumeAppCheckToken(appCheckToken, serviceAccount)"));
+  assert.ok(route.includes("verifyAppCheckToken(appCheckToken)"));
   assert.ok(!route.includes("firebase-admin/auth") && !route.includes("firebase-admin/app-check"));
   assert.ok(!route.includes("getAuth(") && !route.includes("getAppCheck("));
   assert.ok(route.includes("invalidUserTokenCodes"));
@@ -104,7 +105,7 @@ test("Cloudflare Firebase token verification uses Web Crypto and Google REST API
   assert.match(verifier, /identitytoolkit\.googleapis\.com/);
   assert.match(verifier, /firebaseappcheck\.googleapis\.com\/v1\/jwks/);
   assert.match(verifier, /verifyAppCheckToken/);
-  assert.match(verifier, /alreadyConsumed/);
+  assert.doesNotMatch(verifier, /alreadyConsumed|:verifyAppCheckToken/);
   assert.doesNotMatch(verifier, /https\.request|firebase-admin\/auth|firebase-admin\/app-check/);
 });
 

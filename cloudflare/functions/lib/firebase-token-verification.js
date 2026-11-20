@@ -108,7 +108,7 @@ export async function verifyFirebaseIdToken(idToken, projectId, serviceAccount) 
   if (Number(user.validSince || 0) > Number(claims.auth_time || 0)) throw new Error("Firebase ID token has been revoked.");
   return { ...claims, uid: claims.sub };
 }
-export async function verifyAndConsumeAppCheckToken(token, serviceAccount) {
+export async function verifyAppCheckToken(token) {
   let claims;
   try {
     claims = await verifyRs256(token, "https://firebaseappcheck.googleapis.com/v1/jwks");
@@ -126,13 +126,7 @@ export async function verifyAndConsumeAppCheckToken(token, serviceAccount) {
       typeof claims.sub !== "string" || !claims.sub) {
     throw new Error("Firebase App Check token claims are invalid or expired.");
   }
-  const accessToken = await serviceAccountAccessToken(serviceAccount);
-  const response = await fetch("https://firebaseappcheck.googleapis.com/v1beta/projects/" + projectNumber + ":verifyAppCheckToken", {
-    method: "POST",
-    headers: { Authorization: "Bearer " + accessToken, "Content-Type": "application/json" },
-    body: JSON.stringify({ appCheckToken: token })
-  });
-  const result = await response.json();
-  if (!response.ok) { const error = new Error("Firebase App Check verification/consumption failed (" + response.status + ")."); error.code = "appCheck/internal-error"; throw error; }
-  return { ...claims, alreadyConsumed: result.alreadyConsumed === true };
+  // Standard App Check tokens are signed, time-limited attestations. Verify
+  // them locally; do not call the limited-use token consumption endpoint.
+  return claims;
 }
