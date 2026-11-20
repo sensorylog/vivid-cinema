@@ -64,7 +64,7 @@ function renderPresence() {
     }
     list.append(li);
   });
-  if (!memberList.length) list.textContent = "Waiting for your crew…";
+  if (!memberList.length) list.textContent = "Your room connection is confirmed, but the member roster came back empty. Refresh the room and try again.";
 }
 function setSearchMessage(message, isError = false) {
   const results = byId("wr-queue-search-results");
@@ -240,8 +240,8 @@ function openLobby(data) {
   byId("wr-lobby-subtitle").textContent = data.filmTitle ? "Tonight: " + data.filmTitle : "Your crew is getting together.";
   byId("wr-host-controls").hidden = data.role !== "host";
   byId("wr-leave-room").hidden = data.role === "host";
-  byId("wr-lobby-presence-count").textContent = "0";
-  byId("wr-lobby-online-count").textContent = "0 online";
+  byId("wr-lobby-presence-count").textContent = "…";
+  byId("wr-lobby-online-count").textContent = "Checking…";
   byId("wr-lobby-presence").textContent = "Loading your room members…";
   byId("wr-lobby-queue").textContent = "Loading film picks…";
   byId("wr-lobby-chat").textContent = "Loading room chat…";
@@ -267,6 +267,8 @@ function openLobby(data) {
     } catch (error) {
       if (!room || room.roomId !== data.roomId) return;
       const message = error?.message || "We couldn't load this room right now.";
+      byId("wr-lobby-presence-count").textContent = "—";
+      byId("wr-lobby-online-count").textContent = "Unavailable";
       byId("wr-lobby-presence").textContent = "Couldn't load room members. " + message;
       byId("wr-lobby-queue").textContent = "Couldn't load film picks. " + message;
       byId("wr-lobby-chat").textContent = "Couldn't load room chat. " + message;
