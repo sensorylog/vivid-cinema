@@ -417,7 +417,7 @@ async function getWatchRoomLobbySnapshot(request) {
     return { id: document.id, ...data, createdAt: millis(data.createdAt) };
   });
   return {
-    room: { roomId, name: room.name || "Private screening", status: room.status, memberCount: members.length, selectedPlayerId: room.selectedPlayerId || "player1", selectedProviderId: room.selectedProviderId || "vidapi", selectionUpdatedAt: millis(room.selectionUpdatedAt) },
+    room: { roomId, name: room.name || "Private screening", status: room.status, memberCount: members.length, selectedPlayerId: room.selectedPlayerId || "player1", selectedProviderId: room.selectedProviderId || "vidapi", selectionUpdatedAt: millis(room.selectionUpdatedAt), allowGuestQueue: room.allowGuestQueue !== false, allowGuestChat: room.allowGuestChat !== false, allowGuestVoting: room.allowGuestVoting !== false, allowGuestPlayerSelection: room.allowGuestPlayerSelection === true, allowGuestQueueManagement: room.allowGuestQueueManagement === true },
     members, onlineCount: members.filter(member => member.isOnline).length, queue, chat,
     serverTime: now
   };
@@ -475,7 +475,7 @@ async function removeWatchRoomQueueItem(request) {
     const { room, member } = await requireRoomMemberInTransaction(tx, roomId, uid);
     const item = await tx.get(itemRef);
     if (!item.exists || item.data().status !== "queued") throw new HttpsError("not-found", "That queue item is no longer available.");
-    if (member.role !== "host" && item.data().addedBy !== uid) throw new HttpsError("permission-denied", "Only the host or the person who suggested this pick can remove it.");
+    if (member.role !== "host" && item.data().addedBy !== uid && room.allowGuestQueueManagement !== true) throw new HttpsError("permission-denied", "The host has not allowed guests to manage other queue picks.");
     tx.delete(itemRef);
     tx.update(roomRef, { queueCount: Math.max(0, Number(room.queueCount || 0) - 1), updatedAt: Timestamp.now() });
   });
@@ -489,7 +489,8 @@ async function voteWatchRoomQueueItem(request) {
   const roomRef = db.collection("rooms").doc(roomId);
   const itemRef = roomRef.collection("queue").doc(itemId);
   await db.runTransaction(async tx => {
-    await requireRoomMemberInTransaction(tx, roomId, uid);
+    const { room, member } = await requireRoomMemberInTransaction(tx, roomId, uid);
+    if (member.role !== "host" && room.allowGuestVoting === false) throw new HttpsError("permission-denied", "The host has paused guest voting.");
     const item = await tx.get(itemRef);
     if (!item.exists || item.data().status !== "queued") throw new HttpsError("not-found", "That queue item is no longer available.");
     const votes = Array.isArray(item.data().votes) ? item.data().votes : [];
@@ -559,8 +560,8 @@ async function setWatchRoomPlayerSelection(request) {
   const selectedAt = Timestamp.now();
   await db.runTransaction(async tx => {
     const { room, member } = await requireRoomMemberInTransaction(tx, roomId, uid);
-    if (room.hostUid !== uid || member.role !== "host") {
-      throw new HttpsError("permission-denied", "Only the room host can change the shared player and server.");
+    if ((room.hostUid !== uid || member.role !== "host") && room.allowGuestPlayerSelection !== true) {
+      throw new HttpsError("permission-denied", "The host has not allowed guests to change the shared player and server.");
     }
     if (room.status !== "open" || !room.expiresAt || room.expiresAt.toMillis() <= selectedAt.toMillis()) {
       throw new HttpsError("failed-precondition", "This Watch Room is no longer active.");
@@ -575,11 +576,11 @@ async function updateWatchRoomSettings(request) {
   const roomId = validId(request.data?.roomId, "room ID");
   const patch = request.data?.settings;
   if (!patch || typeof patch !== "object" || Array.isArray(patch)) throw new HttpsError("invalid-argument", "Room settings are required.");
-  const allowed = ["name", "allowGuestQueue", "allowGuestChat"];
+  const allowed = ["name", "allowGuestQueue", "allowGuestChat", "allowGuestVoting", "allowGuestPlayerSelection", "allowGuestQueueManagement"];
   if (Object.keys(patch).some(key => !allowed.includes(key))) throw new HttpsError("invalid-argument", "One or more room settings are not supported.");
   const update = {};
   if (Object.hasOwn(patch, "name")) update.name = cleanText(patch.name, "Room name", 80);
-  for (const key of ["allowGuestQueue", "allowGuestChat"]) {
+  for (const key of ["allowGuestQueue", "allowGuestChat", "allowGuestVoting", "allowGuestPlayerSelection", "allowGuestQueueManagement"]) {
     if (Object.hasOwn(patch, key)) {
       if (typeof patch[key] !== "boolean") throw new HttpsError("invalid-argument", key + " must be true or false.");
       update[key] = patch[key];
