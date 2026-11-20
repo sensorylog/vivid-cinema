@@ -76,9 +76,11 @@ function applyRoomPlayerSelection(room) {
     : "The host selected " + (playerId === "player1" ? "Player 1" : "Player 2") + " · " + providerId + ".";
   const key = playerId + ":" + providerId;
   if (key !== lastAppliedSelectionKey) {
+    if (activePlayerId !== playerId || activeProviderId !== providerId) sendProviderCommand("pause");
     lastAppliedSelectionKey = key;
+    const position = Math.max(0, Number(localPosition ?? latestRemoteState?.position ?? lastHostPayload?.position) || 0);
     window.dispatchEvent(new CustomEvent("vivid:watch-room-apply-selection", {
-      detail: { playerId, providerId, position: Number(latestRemoteState?.position) || 0 }
+      detail: { playerId, providerId, position }
     }));
   }
 }
