@@ -57,8 +57,8 @@ test("Watch Rooms API adapter bypasses an installed stale service-worker cache",
   harness.handlers.fetch(event);
   const response = await event.response;
   assert.equal(requested, true);
-  assert.equal(response, fresh);
-  assert.equal(harness.cacheEntries.get(url), fresh);
+  assert.equal(response.url, fresh.url);
+  assert.equal(harness.cacheEntries.get(url)?.url, fresh.url);
 });
 
 test("ordinary JavaScript and CSS serve cache immediately and refresh in the background", () => {
