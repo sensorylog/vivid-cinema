@@ -107,3 +107,10 @@ test("Cloudflare Firebase token verification uses Web Crypto and Google REST API
   assert.match(verifier, /alreadyConsumed/);
   assert.doesNotMatch(verifier, /https\.request|firebase-admin\/auth|firebase-admin\/app-check/);
 });
+
+test("Cloudflare classifies Firestore IAM permission failures as server errors, not user access denials", async () => {
+  const route = await readFile(new URL("../cloudflare/functions/api/watch-rooms.js", import.meta.url), "utf8");
+  assert.ok(route.includes('const firestoreIamDenied = !(error instanceof HttpsError) && rawCode === "permission-denied"'));
+  assert.ok(route.includes('code=firestoreIamDenied ? "internal"'));
+  assert.ok(route.includes('"Watch Rooms Firestore IAM permission denied during operation:"'));
+});
