@@ -140,3 +140,4 @@ test("only the verified VidSrc origin emits Watch Room playback bridge events", 
   assert.match(source, /contentId: String\(currentParams\?\.id/);
   assert.match(source, /VIDSRC_ORIGINS\.has\(event\.origin\)/);
 });
+\n\ntest("Player 1 publishes provider identity for the shared Watch Room adapter layer", async () => { const {readFile}=await import("node:fs/promises"); const source=await readFile(new URL("../scripts/watch.js",import.meta.url),"utf8"); assert.match(source,/new CustomEvent\("vivid:player-adapter-selected",\s*\{ detail: \{ playerId: "player1", providerId: source \} \}\)/); });\n
