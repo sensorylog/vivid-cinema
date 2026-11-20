@@ -754,9 +754,11 @@ export async function getPlotMatchRecommendations(intent = {}, limit = 18, optio
   let recallResult = {
     clues: localClues,
     available: false,
-    message: shouldUseAi
-      ? "Local clues are sparse; Vivid AI may help expand this memory."
-      : "Local Vivid intelligence found enough clues; cloud AI was not needed."
+    message: options.localOnly
+      ? "Vivid is matching your clues locally; no cloud request was made."
+      : shouldUseAi
+        ? "Local clues are sparse; Vivid AI may help expand this memory."
+        : "Local Vivid intelligence found enough clues; cloud AI was not needed."
   };
   if (shouldUseAi) {
     try {
