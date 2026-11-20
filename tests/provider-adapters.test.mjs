@@ -17,14 +17,16 @@ test("provider registry keeps Player 1 and Player 2 identities distinct", () => 
 test("only the existing Player 1 VidSrc bridge advertises room-control capabilities", () => {
   const adapters = listProviderAdapters();
   const capable = adapters.filter(adapter => Object.values(adapter.capabilities).some(Boolean));
-  assert.deepEqual(capable.map(adapter => adapter.playerId + ":" + adapter.providerId), ["player1:vidsrc"]);
+  assert.deepEqual(capable.map(adapter => adapter.playerId + ":" + adapter.providerId), ["player1:vidsrc", "player2:cinesrc"]);
   for (const adapter of adapters) {
-    if (adapter.playerId === "player2" || adapter.providerId !== "vidsrc") {
+    if (!((adapter.playerId === "player1" && adapter.providerId === "vidsrc") || (adapter.playerId === "player2" && adapter.providerId === "cinesrc"))) {
       assert.equal(Object.values(adapter.capabilities).some(Boolean), false);
     }
   }
   assert.equal(providerSupports("player1", "vidsrc", "canSeek"), true);
   assert.equal(providerSupports("player2", "vidsrc-embed", "canSeek"), false);
+  assert.equal(providerSupports("player2", "cinesrc", "canSeek"), true);
+  assert.equal(providerSupports("player2", "vidlink", "canReadPosition"), false);
 });
 
 test("commands require a supported action and matching iframe origin", () => {
