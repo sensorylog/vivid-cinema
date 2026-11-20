@@ -177,7 +177,29 @@ function renderClubDetail(club) {
   byId("wr-detail-description").textContent = club.description || "A private Vivid Cinema Club. Your shared watchlist and screening history will live here.";
   byId("wr-detail-members").textContent = String(club.memberCount || 1);
   const actions = byId("wr-detail-actions");
-  actions?.replaceChildren(makeInviteButton("club", club.clubId, "Invite members"));
+  if (actions) {
+    const invite = makeInviteButton("club", club.clubId, "Invite members");
+    const membershipAction = document.createElement("button");
+    membershipAction.type = "button";
+    membershipAction.className = "vivid-wr-button vivid-wr-button--quiet";
+    membershipAction.textContent = club.role === "owner" ? "Archive club" : "Leave club";
+    membershipAction.addEventListener("click", async () => {
+      const archive = club.role === "owner";
+      const message = archive
+        ? "Archive this Cinema Club? Members will lose access to its shared space."
+        : "Leave this Cinema Club? You will need a new invitation to rejoin.";
+      if (!window.confirm(message)) return;
+      membershipAction.disabled = true;
+      try {
+        await call(archive ? "archiveCinemaClub" : "leaveCinemaClub")({ clubId: club.clubId });
+        window.location.reload();
+      } catch (error) {
+        setFeedback("wr-club-feedback", errorText(error, archive ? "Couldn't archive this club." : "Couldn't leave this club."), true);
+        membershipAction.disabled = false;
+      }
+    });
+    actions.replaceChildren(invite, membershipAction);
+  }
 }
 
 async function loadDashboard(user) {
