@@ -11,6 +11,7 @@ function candidate(id, extra = {}) {
     media_type: "movie",
     title: "Comedy " + id,
     vote_average: 7.5,
+    vote_count: 300,
     popularity: 80,
     raw: { genre_ids: [35], original_language: "en", release_date: "2022-04-01" },
     ...extra
@@ -33,6 +34,15 @@ test("filtered ranking preserves a useful number of results in one requested gen
     limit: 12
   });
   assert.equal(ranked.length, 8);
+});
+
+test("local ranking discounts tiny rating samples and trusts established audience scores", () => {
+  const candidates = [
+    candidate(1, { vote_average: 9.9, vote_count: 2 }),
+    candidate(2, { vote_average: 8.0, vote_count: 1200 })
+  ];
+  const ranked = rankIntentCandidates(candidates, { limit: 2 });
+  assert.equal(ranked[0].id, "2");
 });
 
 test("explicit likes boost candidates and not-for-me exclusions are respected", () => {
