@@ -1,5 +1,5 @@
 import { createHash, randomBytes } from "node:crypto";
-import { cert, getApps, initializeApp } from "firebase-admin/app";
+import { cert, getApp, getApps, initializeApp } from "firebase-admin/app";
 import { getAuth } from "firebase-admin/auth";
 import { getAppCheck } from "firebase-admin/app-check";
 import { getFirestore, Timestamp } from "firebase-admin/firestore";
@@ -10,7 +10,7 @@ const serviceAccount = JSON.parse(serviceAccountRaw);
 if (!serviceAccount.project_id || !serviceAccount.client_email || !serviceAccount.private_key) {
   throw new Error("FIREBASE_SERVICE_ACCOUNT_JSON is incomplete.");
 }
-const firebaseApp = getApps()[0] || initializeApp({
+const firebaseApp = getApps().length ? getApp() : initializeApp({
   credential: cert(serviceAccount),
   projectId: process.env.FIREBASE_PROJECT_ID || serviceAccount.project_id
 });
