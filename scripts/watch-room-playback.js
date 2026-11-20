@@ -27,7 +27,7 @@ let clockOffsetMs = 0;
 const panel = document.createElement("section");
 panel.className = "vivid-room-sync";
 panel.id = "vivid-room-sync";
-panel.innerHTML = '<div class="vivid-room-sync__head><div><span class="vivid-room-sync__eyebrow">VIVID WATCH ROOMS</span><h2>Watch together</h2><p id="vivid-room-sync-note" role="status" aria-live="polite">Connect this title to a private screening.</p></div><span class="vivid-room-sync__provider">Provider sync</span></div><form id="vivid-room-sync-form" class="vivid-room-sync__form"><label for="vivid-room-sync-code">Room invitation code</label><div><input id="vivid-room-sync-code" name="inviteCode" maxlength="10" minlength="10" autocomplete="off" autocapitalize="characters" placeholder="10-character code" required><button type="submit">Connect room</button></div></form><div id="vivid-room-sync-selection" class="vivid-room-sync__selection" hidden><p id="vivid-room-sync-selection-label">Room player selection</p><div id="vivid-room-sync-selection-controls"><label for="vivid-room-sync-player">Player</label><select id="vivid-room-sync-player"><option value="player1">Player 1</option><option value="player2">Player 2</option></select><label for="vivid-room-sync-provider">Server</label><select id="vivid-room-sync-provider"></select></div></div><div class="vivid-room-sync__actions"><button type="button" id="vivid-room-sync-join" hidden>Join synced playback</button><button type="button" id="vivid-room-sync-leave" hidden>Disconnect</button></div></section>';
+panel.innerHTML = '<div class="vivid-room-sync__head"><div><span class="vivid-room-sync__eyebrow">VIVID WATCH ROOMS</span><h2>Watch together</h2><p id="vivid-room-sync-note" role="status" aria-live="polite">Connect this title to a private screening.</p></div><span class="vivid-room-sync__provider">Provider sync</span></div><form id="vivid-room-sync-form" class="vivid-room-sync__form"><label for="vivid-room-sync-code">Room invitation code</label><div><input id="vivid-room-sync-code" name="inviteCode" maxlength="10" minlength="10" autocomplete="off" autocapitalize="characters" placeholder="10-character code" required><button type="submit">Connect room</button></div></form><div id="vivid-room-sync-selection" class="vivid-room-sync__selection" hidden><p id="vivid-room-sync-selection-label">Room player selection</p><div id="vivid-room-sync-selection-controls"><label for="vivid-room-sync-player">Player</label><select id="vivid-room-sync-player"><option value="player1">Player 1</option><option value="player2">Player 2</option></select><label for="vivid-room-sync-provider">Server</label><select id="vivid-room-sync-provider"></select></div></div><div class="vivid-room-sync__actions"><button type="button" id="vivid-room-sync-join" hidden>Join synced playback</button><button type="button" id="vivid-room-sync-leave" hidden>Disconnect</button></div></section>';
 document.querySelector("#watch-content")?.insertAdjacentElement("afterend", panel);
 const note = document.getElementById("vivid-room-sync-note");
 const form = document.getElementById("vivid-room-sync-form");
@@ -137,7 +137,9 @@ function stopConnection() {
   if (unsubscribePlayback) unsubscribePlayback();
   unsubscribePlayback = null;
   if (heartbeatTimer) window.clearInterval(heartbeatTimer);
-  heartbeatTimer = null;
+  if (selectionTimer) window.clearInterval(selectionTimer);
+  heartbeatTimer = null; selectionTimer = null; lastAppliedSelectionKey = "";
+  selectionPanel.hidden = true;
   roomId = ""; role = ""; latestRemoteState = null; joinedPlayback = false; localPosition = null; localStatus = ""; hostStatus = "playing"; lastPublishAt = 0; lastPublishedStatus = ""; publishQueue = Promise.resolve(); lastHostPayload = null; clockOffsetMs = 0;
   joinButton.hidden = true; leaveButton.hidden = true; form.hidden = false;
 }
