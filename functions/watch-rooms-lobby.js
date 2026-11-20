@@ -199,12 +199,13 @@ export const updateWatchRoomSettings = onCall({ region: "us-central1", maxInstan
   await db().runTransaction(async tx => {
     const { room, member } = await requireRoomMemberInTransaction(tx, roomId, uid);
     if (room.hostUid !== uid || member.role !== "host") throw new HttpsError("permission-denied", "Only the room host can change these settings.");
-    tx.update(roomRef, { ...update, updatedAt: Timestamp.now() });
+    const members = await tx.get(roomRef.collection("members"));
+    const updatedAt = Timestamp.now();
+    tx.update(roomRef, { ...update, updatedAt });
+    members.docs.forEach(document => {
+      tx.set(db().collection("users").doc(document.id).collection("watchRooms").doc(roomId), update, { merge: true });
+    });
   });
-  const members = await roomRef.collection("members").get();
-  await Promise.all(members.docs.map(member =>
-    db().collection("users").doc(member.id).collection("watchRooms").doc(roomId).set(update, { merge: true })
-  ));
   return { updated: true };
 });
 
@@ -258,12 +259,12 @@ export const closeWatchRoom = onCall({ region: "us-central1", maxInstances: 20 }
   await db().runTransaction(async tx => {
     const { room, member } = await requireRoomMemberInTransaction(tx, roomId, uid);
     if (room.hostUid !== uid || member.role !== "host") throw new HttpsError("permission-denied", "Only the room host can close this room.");
+    const members = await tx.get(roomRef.collection("members"));
     tx.update(roomRef, { status: "closed", closedAt, expiresAt: closedAt, updatedAt: closedAt });
+    members.docs.forEach(document => {
+      tx.set(db().collection("users").doc(document.id).collection("watchRooms").doc(roomId), { status: "closed" }, { merge: true });
+    });
   });
-  const members = await roomRef.collection("members").get();
-  await Promise.all(members.docs.map(member =>
-    db().collection("users").doc(member.id).collection("watchRooms").doc(roomId).set({ status: "closed" }, { merge: true })
-  ));
   return { closed: true };
 });
 
