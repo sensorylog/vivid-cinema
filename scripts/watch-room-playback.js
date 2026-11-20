@@ -10,6 +10,7 @@ let playbackTimer = null;
 let heartbeatTimer = null;
 let playbackRefreshInFlight = false;
 let playbackConnectionGeneration = 0;
+let playbackPollDelayMs = 2500;
 let latestRemoteState = null;
 let joinedPlayback = false;
 let localPosition = null;
@@ -47,11 +48,12 @@ function sendProviderCommand(action) {
 
 function stopConnection() {
   playbackConnectionGeneration += 1;
-  if (playbackTimer) window.clearInterval(playbackTimer);
+  if (playbackTimer) window.clearTimeout(playbackTimer);
   if (heartbeatTimer) window.clearInterval(heartbeatTimer);
   playbackTimer = null;
   heartbeatTimer = null;
   playbackRefreshInFlight = false;
+  playbackPollDelayMs = 2500;
   roomId = ""; role = ""; latestRemoteState = null; joinedPlayback = false; localPosition = null; localStatus = ""; hostStatus = "playing"; lastPublishAt = 0; lastPublishedStatus = ""; publishQueue = Promise.resolve(); lastHostPayload = null; clockOffsetMs = 0;
   joinButton.hidden = true; leaveButton.hidden = true; form.hidden = false;
 }
@@ -81,6 +83,15 @@ function applyRemoteState(force = false) {
   setNote("Connected to the host’s playback clock. Timing differences are corrected automatically.");
 }
 
+function schedulePlaybackRefresh(delay = playbackPollDelayMs) {
+  if (!roomId) return;
+  if (playbackTimer) window.clearTimeout(playbackTimer);
+  playbackTimer = window.setTimeout(() => {
+    playbackTimer = null;
+    void refreshPlayback();
+  }, delay);
+}
+
 async function refreshPlayback() {
   if (!roomId || playbackRefreshInFlight) return;
   const requestedRoomId = roomId;
@@ -90,6 +101,7 @@ async function refreshPlayback() {
   try {
     const result = await call("getWatchRoomPlaybackSnapshot")({ roomId: requestedRoomId });
     const finishedAt = Date.now();
+    playbackPollDelayMs = 2500;
     if (roomId !== requestedRoomId || requestGeneration !== playbackConnectionGeneration) return;
     const serverTime = Number(result.data?.serverTime);
     if (Number.isFinite(serverTime)) clockOffsetMs = serverTime - ((startedAt + finishedAt) / 2);
@@ -99,9 +111,15 @@ async function refreshPlayback() {
       else setNote("Room connected. Waiting for the host to start playback.");
     }
   } catch (error) {
-    if (roomId === requestedRoomId && requestGeneration === playbackConnectionGeneration) setNote(error?.message || "Playback sync connection was interrupted. Retrying automatically.");
+    if (roomId === requestedRoomId && requestGeneration === playbackConnectionGeneration) {
+      playbackPollDelayMs = Math.min(15000, Math.max(2500, playbackPollDelayMs * 2));
+      setNote(error?.message || "Playback sync connection was interrupted. Retrying automatically.");
+    }
   } finally {
-    if (requestGeneration === playbackConnectionGeneration) playbackRefreshInFlight = false;
+    if (requestGeneration === playbackConnectionGeneration) {
+      playbackRefreshInFlight = false;
+      schedulePlaybackRefresh();
+    }
   }
 }
 
@@ -133,7 +151,7 @@ async function connectToRoom(id) {
   await ping();
   await refreshPlayback();
   heartbeatTimer = window.setInterval(ping, 30000);
-  playbackTimer = window.setInterval(refreshPlayback, 2500);
+  schedulePlaybackRefresh();
 }
 
 form.addEventListener("submit", async event => {
