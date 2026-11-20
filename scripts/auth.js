@@ -1,4 +1,4 @@
-import { auth, db } from "./firebase.js?v=20261016-auth-runtime-audit2";
+import { auth, db } from "./firebase.js?v=20261120-cloudflare-app-check-1";
 import {
   createUserWithEmailAndPassword,
   browserLocalPersistence,
