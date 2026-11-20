@@ -23,4 +23,9 @@ test("watch page mounts secondary player without replacing the primary source pi
 test("Player 2 fetches real TMDB episode lists and advances within the selected series",async()=>{const {readFile}=await import("node:fs/promises");const player=await readFile(new URL("../scripts/playback/tflix-secondary-player.js",import.meta.url),"utf8");const watch=await readFile(new URL("../scripts/watch.js",import.meta.url),"utf8");assert.match(player,/import \{ tmdbApi \} from "\.\.\/tmdb\.js"/);assert.match(player,/tmdbApi\.tvSeason\(tmdbId, playbackParams\.season\)/);assert.match(player,/ep\.name/);assert.match(player,/episodeData\[currentIndex \+ 1\]\.episode_number/);assert.match(player,/seasonSelect\.addEventListener\("change"/);assert.match(player,/episodeSelect\.addEventListener\("change"/);assert.match(player,/if \(started\) \{\s*loadServer\(selectedServer\)/);assert.match(watch,/Re-mount Player 2 after TMDB metadata arrives/);});
 
 
-test("Player 2 publishes its selected provider identity without changing server URL construction", async () => { const {readFile}=await import("node:fs/promises"); const source=await readFile(new URL("../scripts/playback/tflix-secondary-player.js",import.meta.url),"utf8"); assert.match(source,/new CustomEvent\("vivid:player-adapter-selected",\s*\{ detail: \{ playerId: "player2", providerId: serverId \} \}\)/); assert.match(source,/buildTflixSecondaryServerUrl\(serverId, playbackParams\)/); });
+test("Player 2 publishes its selected provider identity without changing server URL construction", async () => {
+  const { readFile } = await import("node:fs/promises");
+  const source = await readFile(new URL("../scripts/playback/tflix-secondary-player.js", import.meta.url), "utf8");
+  assert.match(source, /new CustomEvent\("vivid:player-adapter-selected",\s*\{ detail: \{ playerId: "player2", providerId: serverId \} \}\)/);
+  assert.match(source, /buildTflixSecondaryServerUrl\(serverId, playbackParams\)/);
+});
