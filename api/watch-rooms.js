@@ -826,6 +826,7 @@ const operations = {
   createWatchInvitation,
   redeemWatchInvitation,
   revokeWatchInvitation,
+  cleanupExpiredWatchRooms,
   heartbeatWatchRoom,
   addWatchRoomQueueItem,
   removeWatchRoomQueueItem,
