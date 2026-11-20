@@ -464,7 +464,6 @@ window.addEventListener("vivid:watch-room-apply-selection", event => {
   }
   if (primaryFrame?.src && !primaryFrame.src.endsWith("about:blank")) primaryFrame.src = "about:blank";
   if (secondaryRoot) secondaryRoot.hidden = true;
-  const primaryOverlay = $("player-overlay");
   if (primaryOverlay) primaryOverlay.hidden = false;
   const position = Math.max(0, Number(selection.position) || 0);
   setPlayerSource(selection.providerId, currentParams, position);
