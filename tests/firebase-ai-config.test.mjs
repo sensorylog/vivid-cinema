@@ -95,6 +95,6 @@ test("production AI health route reports only safe binding configuration", async
   assert.equal(payload.checks.aiBinding, true);
   assert.equal(payload.checks.firebaseServiceAccount, true);
   assert.equal(payload.checks.firebaseProject, true);
-  assert.doesNotHaveProperty(payload, "privateKey");
+  assert.equal(Object.hasOwn(payload, "privateKey"), false);
 });
 
