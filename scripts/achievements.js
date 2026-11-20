@@ -93,10 +93,10 @@ function onModalKey(event){
   if(event.shiftKey&&document.activeElement===buttons[0]){event.preventDefault();buttons.at(-1).focus()}
   else if(!event.shiftKey&&document.activeElement===buttons.at(-1)){event.preventDefault();buttons[0].focus()}
 }
-async function showUnlock(a,others,library){
+function showUnlock(a,others,library){
   if(!document.body)return;
   if(modalOpen){pendingUnlocks.push({achievement:a,others,library});return}
-  modalOpen=true;lastFocus=document.activeElement;const ownerAtStart=currentUid;
+  modalOpen=true;lastFocus=document.activeElement;
   const modal=document.createElement("div");modal.id="vivid-achievement-modal";modal.className="vivid-achievement-overlay";
   modal.innerHTML='<section class="vivid-achievement-dialog" role="dialog" aria-modal="true" aria-labelledby="vivid-achievement-title" aria-describedby="vivid-achievement-description"><button class="vivid-achievement-close" type="button" aria-label="Close achievement moment">×</button><div class="vivid-achievement-mark" aria-hidden="true"></div><span class="vivid-achievement-eyebrow">VIVID MILESTONE UNLOCKED</span><h2 id="vivid-achievement-title"></h2><p id="vivid-achievement-description"></p><div class="vivid-spark-panel"><span class="vivid-spark-label"><span aria-hidden="true">✦</span> VIVID SPARK</span><p id="vivid-achievement-spark" aria-live="polite"></p></div><p class="vivid-achievement-extra" id="vivid-achievement-extra"></p><button class="vivid-achievement-continue" type="button">Keep exploring <span aria-hidden="true">↗</span></button></section>';
   modal.querySelector(".vivid-achievement-mark").textContent=a.icon;
