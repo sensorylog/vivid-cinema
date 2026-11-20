@@ -24,7 +24,7 @@ Feature branch: feature/watch-rooms
 - Firebase is initialized in scripts/firebase.js and exports the shared app, auth and db instances. Firebase Auth persistence is already configured there.
 - scripts/nav-auth.js and scripts/app-shell.js observe Firebase auth state and dispatch vivid:auth-ready. The feature must use the existing auth instance and must not introduce a competing auth listener or auth implementation unnecessarily.
 - Firestore rules are in firestore.rules and end with a deny-by-default catch-all. New room/club paths require explicit, narrow rules and emulator tests.
-- The existing Cloud Functions package is under functions/, uses Node 22 and Firebase Functions v2. functions/index.js currently contains trusted callable/scheduled functions; firebase.json configures the functions codebase as news-ingestion. Any new trusted room operations must respect this deployment layout and avoid accidental changes to existing functions.
+- Cloudflare Pages publishes the static frontend from dist/. The repository already has a Vercel serverless API at api/send-verification.js (vivid-cinema-api.vercel.app) using Firebase Admin. Watch Rooms trusted mutations use that existing Vercel API host rather than introducing Firebase Cloud Functions.
 - Movie playback is implemented in scripts/watch.js. It uses multiple third-party iframe providers and a direct player path. Provider capabilities are not uniform; some embedded providers do not report events to the parent, and custom embeds explicitly leave controls/status to the provider.
 - scripts/watch.js already validates provider postMessage origins for selected providers. Any new adapter must retain strict source-window and origin validation.
 - Unit tests use Node's test runner. Firestore rules tests use @firebase/rules-unit-testing. Browser route/navigation tests use Playwright.
@@ -177,15 +177,15 @@ Each stage is delivered as focused commits on feature/watch-rooms and reviewed b
 - Watch Room queue items can be removed by their author or the host. Removal and queueCount decrement occur in the same transaction, so a removed suggestion releases capacity without allowing concurrent overfill.
 - Room chat is capped at 500 messages per room with a transactionally maintained counter, in addition to the per-member send cooldown and message-length bound.
 - Guests can leave an open room through a trusted transaction that removes membership, presence and the private dashboard pointer. Hosts must close the room rather than orphan it.
-- A bounded hourly retention job deletes expired invitation records and expired/closed room trees, including nested subcollections and per-user dashboard pointers. Manually closed rooms are made immediately eligible for cleanup. This is necessary because Firestore TTL deletion of a parent document does not recursively delete subcollections.
+- Expiry is enforced by trusted operations, so expired rooms and invitations cannot be used. Physical recursive cleanup is not currently scheduled on the Vercel API; it must not be described as an active hourly job.
 - Anonymous Firebase identities are explicitly denied in the Watch Rooms and Cinema Club rules tests.
-- App Check is initialized in the shared web Firebase client with reCAPTCHA Enterprise, but enforcement for each Firebase product is a Firebase Console / deployment setting and must be confirmed against the actual production project before enabling callable enforcement. Do not enable server enforcement until supported app platforms (including packaged Android/Electron clients) have an App Check provider/token path.
+- The shared web Firebase client initializes reCAPTCHA Enterprise App Check. The Vercel Watch Rooms API requires Firebase ID-token verification and consumes one-time App Check tokens before performing trusted operations. This is custom API verification; it does not require enabling Firebase Cloud Functions.
 
 - Guests can leave an active Watch Room through a trusted transaction; the host must close the room. Leaving removes the member, presence lease and private dashboard pointer while preserving the host and room.
 - Cinema Club members can leave; the owner can archive the club. Both operations are transactionally authorized, update membership counts/pointers, and archived clubs become unreadable under the active-club Firestore rule.
 - Watch Room chat is capped at 500 messages per room in addition to per-member rate limiting. Queue items can be removed by their author or the host, with the transactional queue counter decremented.
 - Dashboard reads are generation-guarded so a slower response for a previous Firebase user cannot overwrite the current account's room/club list after an auth switch.
-- Closed/expired Watch Rooms and expired invitation documents are processed by a bounded hourly scheduled retention function. Room trees are recursively deleted and member dashboard pointers are removed. Firestore TTL is not relied on for subcollection cleanup.
+- Closed/expired Watch Rooms and expired invitation documents are denied by the API. Physical recursive cleanup is a separate retention task and is not claimed as deployed.
 
 - Invitation redemption, member departure and host removal update the authoritative member count and existing private dashboard summaries in the same transaction. Room and club previews therefore do not retain stale membership counts.
 - The service worker precaches the Watch Rooms dashboard, lobby, Cinema Club and playback modules. Its shell cache version is bumped so existing installations fetch the new feature assets on update.
@@ -200,6 +200,6 @@ Each stage is delivered as focused commits on feature/watch-rooms and reviewed b
 
 - Browser clients call `https://vivid-cinema-api.vercel.app/api/watch-rooms` through `scripts/watch-room-api.js`.
 - Every operation sends the current Firebase ID token in `Authorization: Bearer` and a one-time App Check token in `X-Firebase-AppCheck`. The Vercel handler verifies both before dispatch.
-- The API reuses the Firebase Admin service-account secret already used by `api/send-verification.js`; it does not create or deploy Firebase Cloud Functions.
-- Cloudflare's static build intentionally excludes `api/`; Vercel deploys that directory as serverless API routes, while Cloudflare Pages continues to publish `dist/`.
+- The API reuses the `FIREBASE_SERVICE_ACCOUNT_JSON` Vercel secret already used by `api/send-verification.js`; the service account needs Firebase Auth Admin, Datastore User, and Firebase App Check Token Verifier permissions. It does not create or deploy Firebase Cloud Functions.
+- Cloudflare's static build intentionally excludes `api/`; Vercel deploys that directory as serverless API routes, while Cloudflare Pages continues to publish `dist/`. `VIVID_ALLOWED_ORIGINS` must include the production Pages hostname and any custom domain.
 - Firestore client writes to Watch Room and Cinema Club records remain denied. Trusted API transactions remain the only mutation path.
