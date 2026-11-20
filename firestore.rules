@@ -765,7 +765,7 @@ service cloud.firestore {
     }
 
     // Cinema Club durable experience: members can read shared watchlists,
-    // screening history, member ratings and discussion; trusted callables own writes.
+    // screening history, member ratings and discussion; trusted Vercel API operations own writes.
     match /cinemaClubs/{clubId}/watchlist/{itemId} {
       allow get, list: if isClubMember(clubId);
       allow create, update, delete: if false;
