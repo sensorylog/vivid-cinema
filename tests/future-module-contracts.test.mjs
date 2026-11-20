@@ -190,7 +190,9 @@ test("Watch Rooms Stage 5 exposes trusted VidSrc and CineSRC playback bridges", 
   assert.ok(client.includes('event.source !== frame.contentWindow'));
   assert.ok(client.includes('window.addEventListener("vivid:player-adapter-selected"'));
   assert.ok(client.includes('document.getElementById(activePlayerId === "player2" ? "vivid-tflix-frame" : "vidapi-player")'));
-  assert.ok(client.includes('onSnapshot(doc(db, "rooms", roomId, "playback", "current")'));
+  assert.ok(client.includes('call("getWatchRoomPlaybackSnapshot")'));
+  assert.ok(client.includes("schedulePlaybackRefresh"));
+  assert.ok(!client.includes("onSnapshot("));
   assert.ok(client.includes("Math.abs(expected - localPosition) > 2.5"));
   assert.ok(watch.includes('event.origin === "https://vidsrc.sh"'));
   assert.ok(watch.includes('new CustomEvent("vivid:provider-playback"'));
