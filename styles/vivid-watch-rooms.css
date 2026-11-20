@@ -112,3 +112,5 @@ html[data-vivid-theme="light"] .vivid-wr-dialog{background:#fff;color:#171720}ht
 .vivid-wr-screening-item strong{font-size:.9rem}.vivid-wr-screening-item small{color:var(--vivid-text-muted,#aaa9b4)}
 .vivid-wr-screening-item button{justify-self:start}
 .vivid-wr-club-library [hidden]{display:none!important}
+
+.vivid-wr-lobby-heading-actions{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}
