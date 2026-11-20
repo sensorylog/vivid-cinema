@@ -175,14 +175,47 @@ function applyRoomPermissions() {
   if (queueForm) queueForm.querySelectorAll("input, button").forEach(control => { control.disabled = !queueAllowed; });
   if (chatForm) chatForm.querySelectorAll("input, button").forEach(control => { control.disabled = !chatAllowed; });
 }
+function buildScreeningUrl(screening) {
+  const contentId = String(screening?.contentId || "");
+  const mediaType = screening?.mediaType === "tv" ? "tv" : "movie";
+  if (!/^\d{1,12}$/.test(contentId)) return "";
+  const url = new URL("watch.html", window.location.href);
+  url.searchParams.set("id", contentId);
+  url.searchParams.set("type", mediaType);
+  url.searchParams.set("roomId", room.roomId);
+  return url.pathname + url.search;
+}
+
 function renderQueue(items) {
   const list = byId("wr-lobby-queue");
   if (!list) return;
   list.replaceChildren();
+  if (room?.activeScreening) {
+    const active = document.createElement("li");
+    active.className = "vivid-wr-queue-item vivid-wr-active-screening";
+    const copy = document.createElement("div");
+    copy.className = "vivid-wr-queue-copy";
+    const title = document.createElement("strong");
+    title.textContent = "Now screening: " + String(room.activeScreening.title || "Selected title");
+    const meta = document.createElement("small");
+    meta.textContent = "The host started this room screening.";
+    copy.append(title, meta);
+    const join = document.createElement("a");
+    join.className = "vivid-wr-button vivid-wr-button--primary";
+    join.textContent = "Join screening";
+    join.href = buildScreeningUrl(room.activeScreening);
+    active.append(copy, join);
+    list.append(active);
+  }
   items = (Array.isArray(items) ? items : []).filter(item => item.status === "queued")
     .sort((a, b) => (Number(b.voteCount) || 0) - (Number(a.voteCount) || 0));
   if (!items.length) {
-    list.textContent = "No film picks yet. Search for a title above to add the first one.";
+    if (!room?.activeScreening) list.textContent = "No film picks yet. Search for a title above to add the first one.";
+    else {
+      const empty = document.createElement("li");
+      empty.textContent = "No other picks in the queue.";
+      list.append(empty);
+    }
     return;
   }
   items.forEach(item => {
@@ -213,6 +246,25 @@ function renderQueue(items) {
     vote.disabled = room.role !== "host" && room.allowGuestVoting === false;
     vote.addEventListener("click", () => call("voteWatchRoomQueueItem")({ roomId: room.roomId, itemId: item.id }).catch(showError));
     actions.append(vote);
+    if (room.role === "host" && /^\d{1,12}$/.test(String(item.contentId || ""))) {
+      const start = document.createElement("button");
+      start.type = "button";
+      start.textContent = "Start Screening";
+      start.className = "vivid-wr-button vivid-wr-button--primary";
+      start.addEventListener("click", async () => {
+        start.disabled = true;
+        try {
+          const response = await call("startWatchRoomScreening")({ roomId: room.roomId, itemId: item.id });
+          const url = buildScreeningUrl(response.data?.screening);
+          if (!url) throw new Error("The server returned an invalid screening title.");
+          window.location.assign(url);
+        } catch (error) {
+          showError(error);
+          start.disabled = false;
+        }
+      });
+      actions.append(start);
+    }
     const openTitle = document.createElement("a");
     openTitle.className = "vivid-wr-button vivid-wr-button--quiet";
     openTitle.textContent = "View title";
