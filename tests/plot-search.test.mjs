@@ -17,6 +17,12 @@ test("extracts searchable plot phrases and distinctive clue words", () => {
   assert.ok(queries.every(query => !/^(movie|remember|where|that)$/.test(query)));
 });
 
+test("local plot matching understands additional everyday synonyms", () => {
+  const query = "A teenager escapes from a jail after a huge blast";
+  const candidate = { title: "The Prison Break", overview: "A young adolescent flees a prison after a massive explosion." };
+  assert.ok(scorePlotCandidate(query, candidate) > 0);
+});
+
 test("ranks catalogue entries by actual title and plot-summary overlap", () => {
   const query = "I watched a movie where a man relives the same day";
   const likely = scorePlotCandidate(query, { title: "Groundhog Day", overview: "A man relives the same day over and over again." });
