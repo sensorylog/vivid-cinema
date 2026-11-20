@@ -497,7 +497,7 @@ async function getWatchRoomLobbySnapshot(request) {
     return { id: document.id, ...data, createdAt: millis(data.createdAt) };
   });
   return {
-    room: { roomId, name: room.name || "Private screening", status: room.status, memberCount: members.length, selectedPlayerId: room.selectedPlayerId || "player1", selectedProviderId: room.selectedProviderId || "vidapi", selectionUpdatedAt: millis(room.selectionUpdatedAt), allowGuestQueue: room.allowGuestQueue !== false, allowGuestChat: room.allowGuestChat !== false, allowGuestVoting: room.allowGuestVoting !== false, allowGuestPlayerSelection: room.allowGuestPlayerSelection === true, allowGuestQueueManagement: room.allowGuestQueueManagement === true },
+    room: { roomId, name: room.name || "Private screening", status: room.status, memberCount: members.length, selectedPlayerId: room.selectedPlayerId || "player1", selectedProviderId: room.selectedProviderId || "vidapi", selectionUpdatedAt: millis(room.selectionUpdatedAt), allowGuestQueue: room.allowGuestQueue !== false, allowGuestChat: room.allowGuestChat !== false, allowGuestVoting: room.allowGuestVoting !== false, allowGuestPlayerSelection: room.allowGuestPlayerSelection === true, allowGuestQueueManagement: room.allowGuestQueueManagement === true, allowGuestPlaybackControl: room.allowGuestPlaybackControl === true },
     members, onlineCount: members.filter(member => member.isOnline).length, queue, chat,
     serverTime: now
   };
@@ -656,11 +656,11 @@ async function updateWatchRoomSettings(request) {
   const roomId = validId(request.data?.roomId, "room ID");
   const patch = request.data?.settings;
   if (!patch || typeof patch !== "object" || Array.isArray(patch)) throw new HttpsError("invalid-argument", "Room settings are required.");
-  const allowed = ["name", "allowGuestQueue", "allowGuestChat", "allowGuestVoting", "allowGuestPlayerSelection", "allowGuestQueueManagement"];
+  const allowed = ["name", "allowGuestQueue", "allowGuestChat", "allowGuestVoting", "allowGuestPlayerSelection", "allowGuestQueueManagement", "allowGuestPlaybackControl"];
   if (Object.keys(patch).some(key => !allowed.includes(key))) throw new HttpsError("invalid-argument", "One or more room settings are not supported.");
   const update = {};
   if (Object.hasOwn(patch, "name")) update.name = cleanText(patch.name, "Room name", 80);
-  for (const key of ["allowGuestQueue", "allowGuestChat", "allowGuestVoting", "allowGuestPlayerSelection", "allowGuestQueueManagement"]) {
+  for (const key of ["allowGuestQueue", "allowGuestChat", "allowGuestVoting", "allowGuestPlayerSelection", "allowGuestQueueManagement", "allowGuestPlaybackControl"]) {
     if (Object.hasOwn(patch, key)) {
       if (typeof patch[key] !== "boolean") throw new HttpsError("invalid-argument", key + " must be true or false.");
       update[key] = patch[key];
@@ -794,7 +794,7 @@ async function publishWatchRoomPlayback(request) {
   const season = mediaType === "tv" ? Number(request.data?.season) : null;
   const episode = mediaType === "tv" ? Number(request.data?.episode) : null;
   if (mediaType === "tv" && (!Number.isInteger(season) || season < 1 || season > 500 || !Number.isInteger(episode) || episode < 1 || episode > 5000)) throw new HttpsError("invalid-argument", "A valid season and episode are required.");
-  const { roomRef } = await requireHost(roomId, uid);
+  const roomRef = db.collection("rooms").doc(roomId);
   const stateRef = roomRef.collection("playback").doc("current");
   const now = Timestamp.now();
   return db.runTransaction(async tx => {
@@ -803,14 +803,14 @@ async function publishWatchRoomPlayback(request) {
     ]);
     const roomData = roomSnapshot.exists ? roomSnapshot.data() : null;
     const memberData = memberSnapshot.exists ? memberSnapshot.data() : null;
-    if (!roomData || roomData.status !== "open" || !Number.isFinite(roomData.expiresAt?.toMillis?.()) || roomData.expiresAt.toMillis() <= now.toMillis() || roomData.hostUid !== uid || memberData?.role !== "host") {
-      throw new HttpsError("permission-denied", "Only the active host of an open room can publish playback.");
+    if (!roomData || roomData.status !== "open" || !Number.isFinite(roomData.expiresAt?.toMillis?.()) || roomData.expiresAt.toMillis() <= now.toMillis() || !memberData || (roomData.hostUid !== uid && memberData.role !== "host" && roomData.allowGuestPlaybackControl !== true)) {
+      throw new HttpsError("permission-denied", "Only the host or a guest explicitly allowed to control playback can publish playback.");
     }
     const previous = current.exists ? current.data() : null;
     if (previous && (previous.contentId !== contentId || previous.mediaType !== mediaType || (mediaType === "tv" && (previous.season !== season || previous.episode !== episode)))) throw new HttpsError("failed-precondition", "This room is already synchronized to a different title or episode.");
     if (previous?.lastEventAt?.toMillis && now.toMillis() - previous.lastEventAt.toMillis() < 1800 && status === "playing") return { accepted: false, reason: "rate-limited" };
     const revision = Number(previous?.revision || 0) + 1;
-    tx.set(stateRef, { provider, contentId, mediaType, season, episode, status, position, duration, hostUid: uid, revision, updatedAt: now, lastEventAt: now });
+    tx.set(stateRef, { provider, contentId, mediaType, season, episode, status, position, duration, hostUid: roomData.hostUid, controllerUid: uid, revision, updatedAt: now, lastEventAt: now });
     return { accepted: true, revision };
   });
 }
