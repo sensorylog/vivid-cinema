@@ -76,7 +76,7 @@ export const heartbeatWatchRoom = onCall({ region: "us-central1", maxInstances: 
       uid, lastSeenAt: Timestamp.fromMillis(now), expiresAt: Timestamp.fromMillis(now + PRESENCE_TTL_MS)
     }, { merge: true });
   });
-  return { expiresAt: now + PRESENCE_TTL_MS };
+  return { expiresAt: now + PRESENCE_TTL_MS, serverTime: Date.now() };
 });
 
 export const addWatchRoomQueueItem = onCall({ region: "us-central1", maxInstances: 20 }, async request => {
