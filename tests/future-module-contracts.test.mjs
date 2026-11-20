@@ -275,14 +275,12 @@ test("Watch Room queue items can be removed by their author or host and release 
   assert.ok(client.includes('call("removeWatchRoomQueueItem")'), "lobby must expose the remove action");
 });
 
-test("expired Watch Rooms and invitation records receive bounded scheduled retention cleanup", () => {
-  const index = readFileSync(new URL("../api/watch-rooms.js", import.meta.url), "utf8");
-  const lobby = readFileSync(new URL("../api/watch-rooms.js", import.meta.url), "utf8");
-  assert.ok(index.includes("async function cleanupExpiredWatchRooms = onSchedule("));
-  assert.ok(index.includes('.where("expiresAt", "<=", now)'));
-  assert.ok(index.includes("db.recursiveDelete(roomRef)"), "room cleanup must remove nested subcollections");
-  assert.ok(index.includes('collection("watchRooms").doc(roomDocument.id)'), "cleanup must remove private dashboard pointers");
-  assert.ok(lobby.includes("expiresAt: closedAt"), "manually closed rooms should become immediately eligible for cleanup");
+test("Watch Room and invitation expiry are enforced by trusted API operations", () => {
+  const api = readFileSync(new URL("../api/watch-rooms.js", import.meta.url), "utf8");
+  assert.ok(api.includes("invitation.expiresAt.toMillis() <= now.toMillis()"));
+  assert.ok(api.includes("target.expiresAt.toMillis() > now.toMillis()"));
+  assert.ok(api.includes("expiresAt: closedAt"), "closed rooms should become immediately ineligible for further mutations");
+  assert.doesNotMatch(api, /firebase-functions|onSchedule\\(/);
 });
 
 
