@@ -113,8 +113,9 @@ test("Cloudflare Pages bundles the Watch Rooms API from its isolated Functions d
   assert.ok(!build.includes('"--config"'), "Wrangler Pages Functions build does not support --config");
   assert.equal(cloudflarePackage.dependencies["@ljoukov/firebase-admin-cloudflare"], "0.0.2");
   assert.equal(cloudflarePackage.devDependencies.wrangler, "3.114.17", "Match the Wrangler version used by the Cloudflare Pages deployment runtime");
-  assert.ok(route.includes("verifyIdToken(match[1], true)"));
-  assert.ok(route.includes("verifyToken(appCheckToken, { consume: true })"));
+  assert.ok(route.includes("verifyFirebaseIdToken(match[1], projectId, serviceAccount)"));
+  assert.ok(route.includes("verifyAndConsumeAppCheckToken(appCheckToken, serviceAccount)"));
+  assert.ok(!route.includes("firebase-admin/auth") && !route.includes("firebase-admin/app-check"));
   assert.ok(route.includes('export async function onRequest'));
   assert.ok(route.includes('db.runTransaction'));
   assert.ok(!route.includes("vivid-cinema-api.vercel.app"));
