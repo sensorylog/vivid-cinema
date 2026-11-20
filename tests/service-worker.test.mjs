@@ -36,7 +36,7 @@ test("every precached asset exists in the repository", async () => {
 });
 
 test("Watch Rooms security and auth modules always use network-first and cache version is bumped", () => {
-  assert.match(source, /const CACHE_NAME = "vivid-cinema-shell-v294"/);
+  assert.match(source, /const CACHE_NAME = "vivid-cinema-shell-v295"/);
   assert.ok(source.includes("const isWatchRoomRuntime=") && source.includes("watch-room-api") && source.includes("watch-room-playback"));
   assert.ok(source.includes("if(isAuthDocument||isAuthRuntime||isWatchRoomRuntime){event.respondWith(networkFirst(request));return;}"));
 });
