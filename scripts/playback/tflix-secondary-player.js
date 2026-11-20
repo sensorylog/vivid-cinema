@@ -98,6 +98,7 @@ export function mountTflixSecondaryPlayer({ root, params, media, details, title,
     const thisGeneration = generation;
     if (loadTimer) window.clearTimeout(loadTimer);
     selectedServer = serverId;
+    window.dispatchEvent(new CustomEvent("vivid:player-adapter-selected", { detail: { playerId: "player2", providerId: serverId } }));
     rememberServer(serverId);
     updateButtons();
     placeholder.hidden = true;
