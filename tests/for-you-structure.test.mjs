@@ -96,5 +96,5 @@ test("Vivid Recall chat has a Cloudflare-independent local fallback for desktop 
   assert.match(chat, /getPlotMatchRecommendations\(intent, 5, \{ localOnly: true \}\)/);
   assert.match(chat, /await fallbackToLocalSearch\(version\)/);
   assert.match(chat, /Local Recall found/);
-  assert.match(recommendations, /if \(!options\.localOnly\)/);
+  assert.match(recommendations, /shouldUseAi = !options\.localOnly && localSignalStrength < 6/);
 });
