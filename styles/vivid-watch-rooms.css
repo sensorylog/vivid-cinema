@@ -114,3 +114,16 @@ html[data-vivid-theme="light"] .vivid-wr-dialog{background:#fff;color:#171720}ht
 .vivid-wr-club-library [hidden]{display:none!important}
 
 .vivid-wr-lobby-heading-actions{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}
+
+/* Screening title picker and destructive room action */
+.vivid-wr-button--danger{border-color:rgba(248,113,113,.34);background:rgba(127,29,29,.2);color:#fecaca}
+.vivid-wr-button--danger:hover{background:rgba(127,29,29,.34);border-color:rgba(248,113,113,.6)}
+.vivid-wr-screening-search-label{display:block;color:var(--vivid-text-muted,#b7b6bc);font-size:.82rem;font-weight:750}
+.vivid-wr-title-results{display:grid;gap:7px;max-height:320px;overflow:auto;padding:6px;border:1px solid var(--vivid-border,rgba(255,255,255,.12));border-radius:14px;background:#14151d}
+.vivid-wr-title-results[hidden]{display:none}
+.vivid-wr-title-result{display:flex;align-items:center;gap:12px;width:100%;min-height:66px;padding:8px;border:1px solid transparent;border-radius:10px;background:rgba(255,255,255,.035);color:inherit;text-align:left;cursor:pointer}
+.vivid-wr-title-result:hover,.vivid-wr-title-result:focus-visible{border-color:rgba(190,164,255,.55);background:rgba(160,130,230,.12)}
+.vivid-wr-title-result img{width:42px;height:58px;object-fit:cover;border-radius:6px;background:rgba(255,255,255,.06)}
+.vivid-wr-title-result-copy{display:grid;gap:4px}
+.vivid-wr-title-result-copy strong{font-size:.9rem}
+.vivid-wr-title-result-copy small{color:var(--vivid-text-muted,#b7b6bc);font-size:.75rem}
