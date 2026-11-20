@@ -107,7 +107,7 @@ async function showUnlock(a,others,library){
   const close=()=>closeModal();modal.querySelector(".vivid-achievement-close").addEventListener("click",close);modal.querySelector(".vivid-achievement-continue").addEventListener("click",close);
   modal.addEventListener("click",event=>{if(event.target===modal)close()});document.body.append(modal);document.addEventListener("keydown",onModalKey);modal.querySelector(".vivid-achievement-continue").focus({preventScroll:true});
   try{
-    const {generateAchievementSpark}=await import("./firebase-ai.js");
+    const {generateAchievementSpark}=await import("./cloudflare-ai.js");
     const store=readStore();
     const recentSparks=(Array.isArray(store.sparkHistory)?store.sparkHistory:[]).slice(-6).map(item=>String(item?.spark||"").slice(0,240)).filter(Boolean);
     const result=await generateAchievementSpark({achievement:{title:a.title,description:a.description,category:a.category},library:contextFor(library),recentSparks});
