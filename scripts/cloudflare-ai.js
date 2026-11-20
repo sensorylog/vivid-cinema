@@ -52,14 +52,24 @@ function createRecallModel(maxOutputTokens) {
         error.code = "auth/unauthenticated";
         throw error;
       }
-      const idToken = await getIdToken(user);
-      const response = await fetch("/api/ai", {
-        method: "POST",
-        headers: { "Authorization": "Bearer " + idToken, "Content-Type": "application/json" },
-        cache: "no-store",
-        signal: options.signal,
-        body: JSON.stringify({ prompt, maxOutputTokens })
-      });
+      const requestBody = JSON.stringify({ prompt, maxOutputTokens });
+      const send = async forceRefresh => {
+        const idToken = await getIdToken(user, forceRefresh);
+        return fetch("/api/ai", {
+          method: "POST",
+          headers: { "Authorization": "Bearer " + idToken, "Content-Type": "application/json" },
+          cache: "no-store",
+          signal: options.signal,
+          body: requestBody
+        });
+      };
+      let response = await send(false);
+      // Firebase may restore a signed-in user before its cached ID token has
+      // been refreshed. If the server rejects that token, refresh it once and
+      // retry the same request without asking the user to sign in again.
+      if (response.status === 401) {
+        response = await send(true);
+      }
       const payload = await response.json().catch(() => ({}));
       if (!response.ok || !payload.ok) {
         const error = new Error(payload.message || "Vivid AI request failed (" + response.status + ").");
