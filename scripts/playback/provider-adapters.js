@@ -34,6 +34,15 @@ const VID_SRC_CAPABILITIES = Object.freeze({
   canReportEnded: true
 });
 
+const CINESRC_CAPABILITIES = Object.freeze({
+  canPlay: true,
+  canPause: true,
+  canSeek: true,
+  canReadPosition: true,
+  canReadStatus: true,
+  canReportEnded: true
+});
+
 // Player 1 provider IDs match scripts/watch.js source IDs.
 const PLAYER_1 = [
   provider("player1", "vidapi", "VidAPI", "https://vaplayer.ru"),
@@ -54,7 +63,7 @@ const PLAYER_1 = [
 const PLAYER_2 = [
   provider("player2", "moviesapi", "MoviesAPI", "https://moviesapi.to"),
   provider("player2", "vidsrc-embed", "VidSrc Embed", "https://vidsrc-embed.ru"),
-  provider("player2", "cinesrc", "CineSRC", "https://cinesrc.st"),
+  provider("player2", "cinesrc", "CineSRC", "https://cinesrc.st", CINESRC_CAPABILITIES),
   provider("player2", "vidfast", "VidFast", "https://vidfast.vc"),
   provider("player2", "vidlink", "VidLink", "https://vidlink.pro")
 ];
@@ -92,9 +101,16 @@ export function sendProviderCommand({ adapter, frame, action, position } = {}) {
   try { frameOrigin = new URL(frame.src).origin; } catch { return false; }
   if (frameOrigin !== adapter.origin) return false;
 
-  const message = action === "seek"
-    ? { player: true, action: "seek" + Math.max(0, Math.floor(Number(position) || 0)) }
-    : { player: true, action };
+  let message;
+  if (adapter.playerId === "player2" && adapter.providerId === "cinesrc") {
+    const command = action === "seek" ? "seek" : action;
+    const args = action === "seek" ? [Math.max(0, Number(position) || 0)] : [];
+    message = { type: "cinesrc:command", command, args };
+  } else {
+    message = action === "seek"
+      ? { player: true, action: "seek" + Math.max(0, Math.floor(Number(position) || 0)) }
+      : { player: true, action };
+  }
   frame.contentWindow.postMessage(message, adapter.origin);
   return true;
 }
