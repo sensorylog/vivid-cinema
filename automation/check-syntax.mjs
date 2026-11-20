@@ -33,7 +33,7 @@ const files = [
   "scripts/achievements.js",
   "scripts/achievements-page.js",
   "scripts/achievement-catalog.js",
-  "scripts/firebase-ai.js",
+  "scripts/cloudflare-ai.js",
   "scripts/recommendations.js",
   "scripts/intent-parser.js",
   "scripts/for-you.js",
