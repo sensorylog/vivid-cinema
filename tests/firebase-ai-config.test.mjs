@@ -13,6 +13,8 @@ const apiSource = await readFile(path.join(root, "cloudflare/functions/api/ai.js
 const wranglerSource = await readFile(path.join(root, "wrangler.toml"), "utf8");
 const recommendationsSource = await readFile(path.join(root, "scripts/recommendations.js"), "utf8");
 const achievementsSource = await readFile(path.join(root, "scripts/achievements.js"), "utf8");
+const recommendationsSource = await readFile(path.join(root, "scripts/recommendations.js"), "utf8");
+const achievementsSource = await readFile(path.join(root, "scripts/achievements.js"), "utf8");
 
 test("Recall and Vivid Sparks use a current Cloudflare Workers AI model", () => {
   assert.match(aiSource, /@cf\/zai-org\/glm-4\.7-flash/);
@@ -39,6 +41,7 @@ test("Cloudflare AI route verifies Firebase identity and uses the AI binding", (
   assert.match(apiSource, /MAX_OUTPUT_TOKENS = 384/);
   assert.match(apiSource, /MAX_REQUESTS_PER_WINDOW = 6/);
   assert.match(apiSource, /const MODEL = "@cf\\/ibm-granite\\/granite-4\\.0-h-micro"/);
+  assert.match(apiSource, /const MODEL = "@cf\\/ibm-granite\\/granite-4\\.0-h-micro"/);
   assert.doesNotMatch(apiSource, /GEMINI_API_KEY|generativelanguage\.googleapis\.com|X-Firebase-AppCheck/);
 });
 
@@ -57,6 +60,11 @@ test("Cloudflare AI proxy bounds requests and rate limits authenticated users", 
 test("For You invokes cloud AI only when local clue extraction is weak", () => {
   assert.match(recommendationsSource, /localSignalStrength = localClues\.length \+ recognizedConcepts\.length \* 2/);
   assert.match(recommendationsSource, /shouldUseAi = !options\.localOnly && localSignalStrength < 6/);
+});
+
+test("For You invokes cloud AI only when local clue extraction is weak", () => {
+  assert.match(recommendationsSource, /localSignalStrength = localClues\\.length \\+ recognizedConcepts\\.length \\* 2/);
+  assert.match(recommendationsSource, /shouldUseAi = !options\\.localOnly && localSignalStrength < 6/);
 });
 
 test("Recall keeps useful provider and quota diagnostics", () => {
