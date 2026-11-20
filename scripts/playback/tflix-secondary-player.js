@@ -89,6 +89,11 @@ export function mountTflixSecondaryPlayer({ root, params, media, details, title,
     const server = SERVERS.find(item => item.id === serverId);
     if (!server) { setStatus("This server is not available."); return false; }
     if (blockedServers.has(serverId)) {
+      generation++;
+      if (loadTimer) window.clearTimeout(loadTimer);
+      loadTimer = 0;
+      const currentFrame = screen.querySelector("#vivid-tflix-frame");
+      if (currentFrame) currentFrame.src = "about:blank";
       setStatus(server.name + " has been reported to play the wrong title for this movie. Please choose another server.");
       return false;
     }
