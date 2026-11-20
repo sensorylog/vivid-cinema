@@ -59,6 +59,20 @@ function getRecallModel() {
   return modelPromise;
 }
 
+function parseJsonPayload(raw) {
+  const text = String(raw || "").trim()
+    .replace(/^\x60{3}(?:json)?\s*/i, "")
+    .replace(/\s*\x60{3}$/i, "");
+  try {
+    return JSON.parse(text);
+  } catch {
+    const start = text.indexOf("{");
+    const end = text.lastIndexOf("}");
+    if (start >= 0 && end > start) return JSON.parse(text.slice(start, end + 1));
+    throw new Error("The AI response was not valid JSON.");
+  }
+}
+
 function parseClues(raw) {
   const text = String(raw || "").trim().replace(/^\x60{3}(?:json)?\s*/i, "").replace(/\s*\x60{3}$/i, "");
   let parsed;
@@ -190,7 +204,7 @@ export async function sendRecallChatMessage(messages, mediaType = "all") {
   const result = await generateWithTimeout(model, prompt, CHAT_TIMEOUT_MS, "Cloudflare Workers AI chat");
   let payload;
   try {
-    payload = JSON.parse(result?.response?.text?.() || "{}");
+    payload = parseJsonPayload(result?.response?.text?.() || "{}");
   } catch {
     throw new Error("Cloudflare Workers AI returned an unreadable chat response. Please try again.");
   }
