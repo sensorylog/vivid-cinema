@@ -75,7 +75,7 @@ test("For You records impressions only after a recommendation is actually viewab
   assert.doesNotMatch(script, /items\.slice\(0, 12\)\.forEach\(item => recordBehavior\("recommendation_impression"/);
 });
 
-test("For You preserves local matching alongside the isolated Gemini Recall chat", () => {
+test("For You preserves local matching alongside the authenticated Cloudflare AI Recall chat", () => {
   assert.match(recommendations, /localOnly:\s*!recallResult\?\.available/);
   assert.match(recommendations, /Vivid Recall is using local clue extraction and catalogue matching/);
   assert.match(recommendations, /getRecallClues/);
@@ -84,7 +84,7 @@ test("For You preserves local matching alongside the isolated Gemini Recall chat
   assert.match(html, /scripts\/vivid-recall-chat\.js/);
   assert.match(script, /getPlotMatchRecommendations/);
   assert.doesNotMatch(recommendations, /plotAiFallbackUrl|AIRFORCE|aiResult|fetch\(aiEndpoint/i);
-  assert.doesNotMatch(script, /AI clue expansion|Gemini interprets|Airforce/i);
+  assert.doesNotMatch(script, /AI clue expansion|legacy Gemini interprets|Airforce/i);
   assert.match(html, /No Cloud Functions/);
 });
 
