@@ -356,7 +356,7 @@ async function cleanupExpiredWatchRooms(request) {
 
   const expiredRooms = await db.collection("rooms")
     .where("expiresAt", "<=", now)
-    .limit(2)
+    .limit(1)
     .get();
   let deletedRooms = 0;
   for (const roomDocument of expiredRooms.docs) {
