@@ -295,3 +295,18 @@ test("Watch Room chat has a transactional per-room volume ceiling", () => {
   assert.ok(send.includes("tx.update(roomRef, { chatCount: chatCount + 1"));
   assert.ok(lifecycle.includes("chatCount: 0"));
 });
+
+
+test("Watch Room guests can leave transactionally while hosts must close the room", () => {
+  const lobby = readFileSync(new URL("../functions/watch-rooms-lobby.js", import.meta.url), "utf8");
+  const index = readFileSync(new URL("../functions/index.js", import.meta.url), "utf8");
+  const client = readFileSync(new URL("../scripts/watch-room-lobby.js", import.meta.url), "utf8");
+  const page = readFileSync(new URL("../watch-rooms.html", import.meta.url), "utf8");
+  const leave = lobby.slice(lobby.indexOf("export const leaveWatchRoom"), lobby.indexOf("export const closeWatchRoom"));
+  assert.ok(leave.includes("room.hostUid === uid || member.role === \"host\""));
+  assert.ok(leave.includes("tx.delete(memberRef)") && leave.includes("tx.delete(pointerRef)"));
+  assert.ok(leave.includes("memberCount: Math.max(1"));
+  assert.ok(index.includes("  leaveWatchRoom,"));
+  assert.ok(client.includes('call("leaveWatchRoom")'));
+  assert.ok(page.includes('id="wr-leave-room"'));
+});
