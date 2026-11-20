@@ -198,8 +198,8 @@ Each stage is delivered as focused commits on feature/watch-rooms and reviewed b
 
 ## API hosting migration
 
-- Browser clients call `https://vivid-cinema-api.vercel.app/api/watch-rooms` through `scripts/watch-room-api.js`.
-- Every operation sends the current Firebase ID token in `Authorization: Bearer` and a one-time App Check token in `X-Firebase-AppCheck`. The Vercel handler verifies both before dispatch.
+- Browser clients call the same-origin `/api/watch-rooms` route through `scripts/watch-room-api.js`.
+- Every operation sends the current Firebase ID token in `Authorization: Bearer` and a one-time App Check token in `X-Firebase-AppCheck`. The Cloudflare Pages Function verifies both before dispatch.
 - The API reuses the `FIREBASE_SERVICE_ACCOUNT_JSON` Vercel secret already used by `api/send-verification.js`; the service account needs Firebase Auth Admin, Datastore User, and Firebase App Check Token Verifier permissions. It does not create or deploy Firebase Cloud Functions.
 - Cloudflare's static build intentionally excludes `api/`; Vercel deploys that directory as serverless API routes, while Cloudflare Pages continues to publish `dist/`. `VIVID_ALLOWED_ORIGINS` must include the production Pages hostname and any custom domain.
 - Firestore client writes to Watch Room and Cinema Club records remain denied. Trusted API transactions remain the only mutation path.
