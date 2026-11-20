@@ -449,16 +449,19 @@ test("Watch Rooms API client is included in the offline application shell", () =
 });
 
 
-test("Watch Rooms classifies Firebase App Check token failures separately from sign-in failures", () => {
+test("Watch Rooms client sends Auth and App Check tokens to the trusted Cloudflare verifier", () => {
   const api = readFileSync(new URL("../scripts/watch-room-api.js", import.meta.url), "utf8");
+  const route = readFileSync(new URL("../cloudflare/functions/api/watch-rooms.js", import.meta.url), "utf8");
   const idToken = api.slice(api.indexOf("let idToken;"), api.indexOf("let response;"));
   assert.ok(idToken.includes("user.getIdToken()"));
   assert.ok(idToken.includes('startsWith("auth/")'));
   assert.ok(idToken.includes('"functions/unauthenticated"'));
   assert.ok(idToken.includes('"functions/unavailable"'));
-  assert.ok(api.includes("appCheck token acquisition failed"));
-  assert.ok(api.includes('"functions/failed-precondition"'));
-  assert.ok(!api.includes('startsWith("app-check/")'));
+  assert.ok(api.includes('getLimitedUseToken(appCheck)'));
+  assert.ok(api.includes('"X-Firebase-AppCheck": appCheckResult.token'));
+  assert.ok(route.includes("verifyIdToken(match[1], true)"));
+  assert.ok(route.includes("verifyToken(appCheckToken, { consume: true })"));
+  assert.ok(route.includes('throw new HttpsError("failed-precondition"'));
   assert.ok(!idToken.includes("Promise.all"));
 });
 
