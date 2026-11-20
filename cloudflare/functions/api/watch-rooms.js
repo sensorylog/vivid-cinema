@@ -503,6 +503,22 @@ async function getWatchRoomLobbySnapshot(request) {
   };
 }
 
+async function getWatchRoomPlaybackSnapshot(request) {
+  const uid = requireUser(request);
+  const roomId = validId(request.data?.roomId, "room ID");
+  const { roomRef, member } = await requireRoomMember(roomId, uid);
+  const playbackSnapshot = await roomRef.collection("playback").doc("current").get();
+  const playbackData = playbackSnapshot.exists ? playbackSnapshot.data() : null;
+  const updatedAt = playbackData?.updatedAt?.toMillis?.() ??
+    (typeof playbackData?.updatedAt === "number" ? playbackData.updatedAt : null);
+  return {
+    roomId,
+    role: member.role,
+    playback: playbackData ? { ...playbackData, updatedAt } : null,
+    serverTime: Date.now()
+  };
+}
+
 async function heartbeatWatchRoom(request) {
   const uid = requireUser(request);
   const roomId = validId(request.data?.roomId, "room ID");
@@ -1013,6 +1029,7 @@ const operations = {
   cleanupExpiredWatchRooms,
   heartbeatWatchRoom,
   getWatchRoomLobbySnapshot,
+  getWatchRoomPlaybackSnapshot,
   addWatchRoomQueueItem,
   removeWatchRoomQueueItem,
   voteWatchRoomQueueItem,
@@ -1036,7 +1053,7 @@ const operations = {
 
 const ROUTES = new Set([
   "createWatchRoom","getWatchRoomDashboard","createCinemaClub","createWatchInvitation","redeemWatchInvitation","revokeWatchInvitation",
-  "cleanupExpiredWatchRooms","heartbeatWatchRoom","getWatchRoomLobbySnapshot","addWatchRoomQueueItem","removeWatchRoomQueueItem","voteWatchRoomQueueItem",
+  "cleanupExpiredWatchRooms","heartbeatWatchRoom","getWatchRoomLobbySnapshot","getWatchRoomPlaybackSnapshot","addWatchRoomQueueItem","removeWatchRoomQueueItem","voteWatchRoomQueueItem",
   "sendWatchRoomMessage","reactToWatchRoomMessage","updateWatchRoomSettings","setWatchRoomPlayerSelection","removeWatchRoomMember","leaveWatchRoom",
   "closeWatchRoom","deleteWatchRoom","publishWatchRoomPlayback","addCinemaClubWatchlistItem","removeCinemaClubWatchlistItem",
   "recordCinemaClubScreening","addCinemaClubAfterCreditsReview","addCinemaClubDiscussionMessage","leaveCinemaClub","archiveCinemaClub"
