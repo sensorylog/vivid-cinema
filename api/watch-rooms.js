@@ -908,7 +908,10 @@ export default async function handler(req, res) {
     const result = await operations[action]({ auth, data: req.body.data || {} });
     return respond(res, 200, { ok: true, data: result ?? null });
   } catch (error) {
-    const code = error?.code || "internal";
+    const rawCode = error?.code || "internal";
+    const code = rawCode.startsWith("auth/") || rawCode.startsWith("app-check/")
+      ? "unauthenticated"
+      : rawCode;
     const status = ({
       unauthenticated: 401, "permission-denied": 403, "not-found": 404,
       "auth/id-token-expired": 401, "auth/id-token-revoked": 401, "auth/invalid-id-token": 401, "auth/argument-error": 401,
