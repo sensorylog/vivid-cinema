@@ -1,21 +1,22 @@
-import { app, auth, db, firebaseConfig, RECAPTCHA_ENTERPRISE_SITE_KEY } from "./firebase.js";
+import { app, auth, db, firebaseConfig } from "./firebase.js";
+import { getTurnstileAppCheckToken } from "./turnstile-app-check.js";
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
 import {
   initializeAuth, indexedDBLocalPersistence, browserLocalPersistence, inMemoryPersistence,
   onAuthStateChanged, signInAnonymously
 } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
 import { getFirestore, addDoc, collection, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
-import { initializeAppCheck, ReCaptchaEnterpriseProvider } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app-check.js";
+import { initializeAppCheck, CustomProvider } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app-check.js";
 
 // Use a separate Firebase app for anonymous analytics so analytics never changes
 // the site's real sign-in state or exposes personal account features to anonymous users.
 const anonymousApp = initializeApp(firebaseConfig, "vivid-pulse-anonymous");
 const LOCAL_HOSTS = new Set(["localhost", "127.0.0.1", "::1"]);
-if (RECAPTCHA_ENTERPRISE_SITE_KEY && !LOCAL_HOSTS.has(window.location.hostname)) {
+if (!LOCAL_HOSTS.has(window.location.hostname)) {
   try {
     initializeAppCheck(anonymousApp, {
-      provider: new ReCaptchaEnterpriseProvider(RECAPTCHA_ENTERPRISE_SITE_KEY),
-      isTokenAutoRefreshEnabled: true
+      provider: new CustomProvider({ getToken: getTurnstileAppCheckToken }),
+      isTokenAutoRefreshEnabled: false
     });
   } catch (error) {
     console.warn("[Vivid Pulse] Anonymous App Check initialization failed:", error?.message || error);
