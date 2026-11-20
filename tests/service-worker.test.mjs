@@ -13,6 +13,9 @@ test("service worker has a versioned cache and required offline shell", () => {
   assert.match(source, /const REQUIRED_APP_SHELL = \["\.\/index\.html", "\.\/home\.html", "\.\/offline\.html", "\.\/manifest\.json"\]/);
   assert.match(source, /failedRequired\.length/);
   assert.ok(source.includes("async function cacheOptionalShell()"));
+  assert.ok(source.includes('"./watch-rooms.html"'));
+  assert.ok(source.includes('"./scripts/watch-rooms.js"'));
+  assert.ok(source.includes('"./styles/vivid-watch-rooms.css"'));
   assert.match(source, /optional assets were not precached/);
   assert.ok(source.includes('type==="PRECACHE_OPTIONAL"'));
   assert.match(source, /\.\/scripts\/local-owner\.js/);
@@ -235,4 +238,16 @@ test("cached app scripts are returned immediately while a background refresh is 
   const response = await harness.worker.staleWhileRevalidate(new Request(scriptUrl), { waitUntil() {} });
   assert.equal(response, cached);
   assert.equal(networkRequested, true);
+});
+
+
+test("Watch Rooms and playback modules are included in the offline app shell", () => {
+  for (const asset of [
+    '"./watch-rooms.html"',
+    '"./scripts/watch-rooms.js"',
+    '"./scripts/watch-room-lobby.js"',
+    '"./scripts/watch-room-clubs.js"',
+    '"./scripts/watch-room-playback.js"',
+    '"./scripts/watch.js?v=watch-room-sync-1"'
+  ]) assert.ok(source.includes(asset), "missing Watch Rooms app-shell asset: " + asset);
 });

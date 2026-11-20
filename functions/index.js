@@ -1,4 +1,4 @@
-import { createHash } from "node:crypto";
+import { createHash, randomBytes } from "node:crypto";
 import { initializeApp } from "firebase-admin/app";
 import { getFirestore, Timestamp } from "firebase-admin/firestore";
 import { onSchedule } from "firebase-functions/v2/scheduler";
@@ -242,3 +242,322 @@ export const getCommunityPollResults = onCall({ region: "us-central1", maxInstan
   }
   return { counts, total: counts.reduce((sum, count) => sum + count, 0) };
 });
+
+
+// -----------------------------------------------------------------------------
+// Watch Rooms and Cinema Clubs — trusted lifecycle and invitation operations.
+// Client SDK writes to these collections are denied by firestore.rules.
+// -----------------------------------------------------------------------------
+
+const INVITE_ALPHABET = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ";
+const INVITE_TTL_MS = 48 * 60 * 60 * 1000;
+const ROOM_TTL_MS = 24 * 60 * 60 * 1000;
+const MAX_ROOM_MEMBERS = 12;
+const MAX_CLUB_MEMBERS = 100;
+
+function requireVividUser(request) {
+  if (!request.auth || request.auth.token?.firebase?.sign_in_provider === "anonymous") {
+    throw new HttpsError("unauthenticated", "Sign in with a Vivid account to use Watch Rooms.");
+  }
+  return request.auth;
+}
+
+function boundedText(value, field, max, required = false) {
+  if (value == null && !required) return "";
+  if (typeof value !== "string") {
+    throw new HttpsError("invalid-argument", field + " must be text.");
+  }
+  const normalized = value.trim();
+  if ((required && normalized.length < 1) || normalized.length > max) {
+    throw new HttpsError("invalid-argument", field + " must be " + (required ? "1–" : "0–") + max + " characters.");
+  }
+  return normalized;
+}
+
+function validDocumentId(value, field) {
+  if (typeof value !== "string" || !/^[A-Za-z0-9_-]{1,128}$/.test(value)) {
+    throw new HttpsError("invalid-argument", "A valid " + field + " is required.");
+  }
+  return value;
+}
+
+function inviteCode() {
+  const bytes = randomBytes(10);
+  let code = "";
+  for (const byte of bytes) code += INVITE_ALPHABET[byte % INVITE_ALPHABET.length];
+  return code;
+}
+
+function inviteHash(code) {
+  return createHash("sha256").update(code, "utf8").digest("hex");
+}
+
+function displayNameFor(auth) {
+  const name = typeof auth.token.name === "string" ? auth.token.name.trim().slice(0, 80) : "";
+  return name || "Vivid member";
+}
+
+export const createWatchRoom = onCall({ region: "us-central1", maxInstances: 20 }, async (request) => {
+  const auth = requireVividUser(request);
+  const name = boundedText(request.data?.name, "Room name", 48, true);
+  const filmTitle = boundedText(request.data?.filmTitle, "Film title", 100);
+  const now = Timestamp.now();
+  const expiresAt = Timestamp.fromMillis(now.toMillis() + ROOM_TTL_MS);
+  const roomRef = db.collection("rooms").doc();
+  const memberRef = roomRef.collection("members").doc(auth.uid);
+  const userRoomRef = db.collection("users").doc(auth.uid).collection("watchRooms").doc(roomRef.id);
+  const member = { userId: auth.uid, displayName: displayNameFor(auth), role: "host", joinedAt: now };
+
+  await db.runTransaction(async transaction => {
+    transaction.create(roomRef, {
+      schemaVersion: 1, name, filmTitle, hostUid: auth.uid,
+      visibility: "invite", status: "open", memberCount: 1, queueCount: 0, chatCount: 0,
+      createdAt: now, updatedAt: now, expiresAt
+    });
+    transaction.create(memberRef, member);
+    transaction.create(userRoomRef, {
+      roomId: roomRef.id, name, filmTitle, role: "host",
+      status: "open", memberCount: 1, expiresAt, joinedAt: now, createdAt: now
+    });
+  });
+  return { roomId: roomRef.id, expiresAt: expiresAt.toMillis() };
+});
+
+export const createCinemaClub = onCall({ region: "us-central1", maxInstances: 20 }, async (request) => {
+  const auth = requireVividUser(request);
+  const name = boundedText(request.data?.name, "Club name", 48, true);
+  const description = boundedText(request.data?.description, "Club description", 180);
+  const now = Timestamp.now();
+  const clubRef = db.collection("cinemaClubs").doc();
+  const memberRef = clubRef.collection("members").doc(auth.uid);
+  const userClubRef = db.collection("users").doc(auth.uid).collection("cinemaClubs").doc(clubRef.id);
+  const member = { userId: auth.uid, displayName: displayNameFor(auth), role: "owner", joinedAt: now };
+
+  await db.runTransaction(async transaction => {
+    transaction.create(clubRef, {
+      schemaVersion: 1, name, description, ownerUid: auth.uid,
+      membership: "invite", status: "active", memberCount: 1,
+      createdAt: now, updatedAt: now
+    });
+    transaction.create(memberRef, member);
+    transaction.create(userClubRef, {
+      clubId: clubRef.id, name, description, role: "owner",
+      status: "active", memberCount: 1, joinedAt: now, createdAt: now
+    });
+  });
+  return { clubId: clubRef.id };
+});
+
+export const createWatchInvitation = onCall({ region: "us-central1", maxInstances: 20 }, async (request) => {
+  const auth = requireVividUser(request);
+  const targetType = request.data?.targetType;
+  if (!["room", "club"].includes(targetType)) {
+    throw new HttpsError("invalid-argument", "Invitation target must be a room or club.");
+  }
+  const targetId = validDocumentId(request.data?.targetId, "target ID");
+  const collectionName = targetType === "room" ? "rooms" : "cinemaClubs";
+  const ownerField = targetType === "room" ? "hostUid" : "ownerUid";
+  const targetRef = db.collection(collectionName).doc(targetId);
+  const memberRef = targetRef.collection("members").doc(auth.uid);
+  const now = Timestamp.now();
+  const defaultExpiresAt = Timestamp.fromMillis(now.toMillis() + INVITE_TTL_MS);
+  let expiresAt = defaultExpiresAt;
+  const code = inviteCode();
+  const tokenHash = inviteHash(code);
+  const invitationRef = db.collection("watchInvitations").doc(tokenHash);
+
+  await db.runTransaction(async transaction => {
+    const targetSnapshot = await transaction.get(targetRef);
+    const memberSnapshot = await transaction.get(memberRef);
+    if (!targetSnapshot.exists || !memberSnapshot.exists || targetSnapshot.data()[ownerField] !== auth.uid) {
+      throw new HttpsError("permission-denied", "Only the room host or club owner can create invitations.");
+    }
+    const target = targetSnapshot.data();
+    if (targetType === "room" && target.expiresAt && target.expiresAt.toMillis() < expiresAt.toMillis()) expiresAt = target.expiresAt;
+    if ((targetType === "room" && (target.status !== "open" || !target.expiresAt || target.expiresAt.toMillis() <= now.toMillis())) || (targetType === "club" && target.status !== "active")) {
+      throw new HttpsError("failed-precondition", "This space is not accepting invitations.");
+    }
+    transaction.create(invitationRef, {
+      schemaVersion: 1, targetType, targetId, createdBy: auth.uid,
+      createdAt: now, expiresAt, maxUses: targetType === "room" ? MAX_ROOM_MEMBERS - 1 : MAX_CLUB_MEMBERS - 1,
+      useCount: 0, revokedAt: null
+    });
+  });
+  return { inviteCode: code, expiresAt: expiresAt.toMillis() };
+});
+
+export const redeemWatchInvitation = onCall({ region: "us-central1", maxInstances: 30 }, async (request) => {
+  const auth = requireVividUser(request);
+  const code = typeof request.data?.inviteCode === "string"
+    ? request.data.inviteCode.trim().toUpperCase()
+    : "";
+  if (!/^[23456789ABCDEFGHJKLMNPQRSTUVWXYZ]{10}$/.test(code)) {
+    throw new HttpsError("invalid-argument", "Enter a valid Vivid invitation code.");
+  }
+  const invitationRef = db.collection("watchInvitations").doc(inviteHash(code));
+  const now = Timestamp.now();
+
+  return db.runTransaction(async transaction => {
+    const invitationSnapshot = await transaction.get(invitationRef);
+    if (!invitationSnapshot.exists) throw new HttpsError("not-found", "This invitation is invalid or has expired.");
+    const invitation = invitationSnapshot.data();
+    const isRoom = invitation.targetType === "room";
+    if (request.data?.expectedTargetType && request.data.expectedTargetType !== invitation.targetType) throw new HttpsError("failed-precondition", "This invitation is for a different Vivid space.");
+    const targetCollection = isRoom ? "rooms" : invitation.targetType === "club" ? "cinemaClubs" : null;
+    if (!targetCollection) throw new HttpsError("failed-precondition", "This invitation has an invalid destination.");
+    const targetRef = db.collection(targetCollection).doc(invitation.targetId);
+    const memberRef = targetRef.collection("members").doc(auth.uid);
+    const pointerCollection = isRoom ? "watchRooms" : "cinemaClubs";
+    const pointerRef = db.collection("users").doc(auth.uid).collection(pointerCollection).doc(invitation.targetId);
+    const [targetSnapshot, memberSnapshot] = await Promise.all([
+      transaction.get(targetRef), transaction.get(memberRef)
+    ]);
+    if (!targetSnapshot.exists) throw new HttpsError("not-found", "This space is no longer available.");
+    const target = targetSnapshot.data();
+    const targetIsActive = (isRoom && target.status === "open" && target.expiresAt && target.expiresAt.toMillis() > now.toMillis()) || (!isRoom && target.status === "active");
+    if (memberSnapshot.exists) {
+      if (!targetIsActive) throw new HttpsError("failed-precondition", "This space is no longer active.");
+      return { targetType: invitation.targetType, targetId: invitation.targetId, alreadyMember: true };
+    }
+    if (invitation.revokedAt || invitation.expiresAt.toMillis() <= now.toMillis() || invitation.useCount >= invitation.maxUses) {
+      throw new HttpsError("failed-precondition", "This invitation is expired, revoked or full.");
+    }
+    if (!targetIsActive) {
+      throw new HttpsError("failed-precondition", "This space is no longer accepting members.");
+    }
+    const limit = isRoom ? MAX_ROOM_MEMBERS : MAX_CLUB_MEMBERS;
+    if (!Number.isInteger(target.memberCount) || target.memberCount >= limit) {
+      throw new HttpsError("resource-exhausted", "This space has reached its member limit.");
+    }
+    const existingMembers = await transaction.get(targetRef.collection("members"));
+    const role = isRoom ? "guest" : "member";
+    const displayName = displayNameFor(auth);
+    const nextMemberCount = target.memberCount + 1;
+    // Keep the private dashboard summaries in sync with the authoritative
+    // parent count. These collections are deliberately capped at 12/100.
+    existingMembers.docs.forEach(existingMember => {
+      const existingData = existingMember.data();
+      const existingPointerRef = db.collection("users").doc(existingMember.id).collection(pointerCollection).doc(invitation.targetId);
+      transaction.set(existingPointerRef, {
+        [isRoom ? "roomId" : "clubId"]: invitation.targetId,
+        name: target.name,
+        ...(isRoom ? { filmTitle: target.filmTitle || "", expiresAt: target.expiresAt } : { description: target.description || "" }),
+        role: existingData.role, status: target.status, memberCount: nextMemberCount,
+        joinedAt: existingData.joinedAt || now, createdAt: existingData.joinedAt || now
+      }, { merge: true });
+    });
+    transaction.create(memberRef, { userId: auth.uid, displayName, role, joinedAt: now });
+    transaction.create(pointerRef, {
+      [isRoom ? "roomId" : "clubId"]: invitation.targetId,
+      name: target.name, ...(isRoom ? { filmTitle: target.filmTitle || "" } : { description: target.description || "" }),
+      role, status: target.status, memberCount: nextMemberCount, ...(isRoom ? { expiresAt: target.expiresAt } : {}), joinedAt: now, createdAt: now
+    });
+    transaction.update(targetRef, { memberCount: nextMemberCount, updatedAt: now });
+    transaction.update(invitationRef, { useCount: invitation.useCount + 1, lastUsedAt: now });
+    return { targetType: invitation.targetType, targetId: invitation.targetId, alreadyMember: false };
+  });
+});
+
+export const revokeWatchInvitation = onCall({ region: "us-central1", maxInstances: 20 }, async (request) => {
+  const auth = requireVividUser(request);
+  const code = typeof request.data?.inviteCode === "string"
+    ? request.data.inviteCode.trim().toUpperCase()
+    : "";
+  if (!/^[23456789ABCDEFGHJKLMNPQRSTUVWXYZ]{10}$/.test(code)) {
+    throw new HttpsError("invalid-argument", "A valid invitation code is required.");
+  }
+  const invitationRef = db.collection("watchInvitations").doc(inviteHash(code));
+  const now = Timestamp.now();
+  await db.runTransaction(async transaction => {
+    const invitationSnapshot = await transaction.get(invitationRef);
+    if (!invitationSnapshot.exists) throw new HttpsError("not-found", "Invitation not found.");
+    const invitation = invitationSnapshot.data();
+    const collectionName = invitation.targetType === "room" ? "rooms" : "cinemaClubs";
+    const targetRef = db.collection(collectionName).doc(invitation.targetId);
+    const targetSnapshot = await transaction.get(targetRef);
+    const ownerField = invitation.targetType === "room" ? "hostUid" : "ownerUid";
+    if (!targetSnapshot.exists || targetSnapshot.data()[ownerField] !== auth.uid) {
+      throw new HttpsError("permission-denied", "Only the host or owner can revoke this invitation.");
+    }
+    if (!invitation.revokedAt) transaction.update(invitationRef, { revokedAt: now, revokedBy: auth.uid });
+  });
+  return { revoked: true };
+});
+
+
+
+/**
+ * Retention cleanup for private Watch Rooms.
+ *
+ * Firestore TTL is intentionally not used as the sole cleanup mechanism:
+ * deleting a parent document does not recursively delete its subcollections.
+ * This bounded scheduled job removes expired invitation records, dashboard
+ * pointers, and each expired room tree.
+ */
+export const cleanupExpiredWatchRooms = onSchedule({
+  schedule: "every 60 minutes",
+  timeZone: "UTC",
+  region: "us-central1",
+  timeoutSeconds: 300,
+  memory: "512MiB",
+  maxInstances: 1
+}, async () => {
+  const now = Timestamp.now();
+  const expiredInvitations = await db.collection("watchInvitations")
+    .where("expiresAt", "<=", now)
+    .limit(250)
+    .get();
+  if (!expiredInvitations.empty) {
+    const invitationBatch = db.batch();
+    expiredInvitations.docs.forEach(document => invitationBatch.delete(document.ref));
+    await invitationBatch.commit();
+  }
+
+  const expiredRooms = await db.collection("rooms")
+    .where("expiresAt", "<=", now)
+    .limit(25)
+    .get();
+  let deletedRooms = 0;
+  for (const roomDocument of expiredRooms.docs) {
+    const roomRef = roomDocument.ref;
+    const members = await roomRef.collection("members").get();
+    if (!members.empty) {
+      const pointerBatch = db.batch();
+      members.docs.forEach(member => {
+        pointerBatch.delete(db.collection("users").doc(member.id).collection("watchRooms").doc(roomDocument.id));
+      });
+      await pointerBatch.commit();
+    }
+    await db.recursiveDelete(roomRef);
+    deletedRooms += 1;
+  }
+  logger.info("Watch Rooms retention cleanup completed", {
+    deletedRooms,
+    deletedInvitations: expiredInvitations.size
+  });
+});
+
+// Watch Rooms Stage 4: trusted lobby, queue, chat and host-control operations.
+export {
+  addCinemaClubWatchlistItem,
+  removeCinemaClubWatchlistItem,
+  recordCinemaClubScreening,
+  addCinemaClubAfterCreditsReview,
+  addCinemaClubDiscussionMessage,
+  leaveCinemaClub,
+  archiveCinemaClub
+} from "./watch-rooms-clubs.js";
+
+export {
+  heartbeatWatchRoom,
+  addWatchRoomQueueItem,
+  removeWatchRoomQueueItem,
+  voteWatchRoomQueueItem,
+  sendWatchRoomMessage,
+  reactToWatchRoomMessage,
+  updateWatchRoomSettings,
+  removeWatchRoomMember,
+  leaveWatchRoom,
+  closeWatchRoom,
+  publishWatchRoomPlayback
+} from "./watch-rooms-lobby.js";
