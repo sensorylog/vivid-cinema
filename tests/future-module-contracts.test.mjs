@@ -284,3 +284,14 @@ test("expired Watch Rooms and invitation records receive bounded scheduled reten
   assert.ok(index.includes('collection("watchRooms").doc(roomDocument.id)'), "cleanup must remove private dashboard pointers");
   assert.ok(lobby.includes("expiresAt: closedAt"), "manually closed rooms should become immediately eligible for cleanup");
 });
+
+
+test("Watch Room chat has a transactional per-room volume ceiling", () => {
+  const lobby = readFileSync(new URL("../functions/watch-rooms-lobby.js", import.meta.url), "utf8");
+  const lifecycle = readFileSync(new URL("../functions/index.js", import.meta.url), "utf8");
+  const send = lobby.slice(lobby.indexOf("export const sendWatchRoomMessage"), lobby.indexOf("export const reactToWatchRoomMessage"));
+  assert.ok(lobby.includes("const ROOM_CHAT_LIMIT = 500"));
+  assert.ok(send.includes("chatCount >= ROOM_CHAT_LIMIT"));
+  assert.ok(send.includes("tx.update(roomRef, { chatCount: chatCount + 1"));
+  assert.ok(lifecycle.includes("chatCount: 0"));
+});
