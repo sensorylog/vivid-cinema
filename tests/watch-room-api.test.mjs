@@ -81,7 +81,9 @@ test("Cloudflare Watch Rooms route preserves every trusted operation and one-tim
     assert.ok(route.includes("async function " + operation + "("), "missing Cloudflare operation " + operation);
     assert.ok(route.includes('"' + operation + '"'), "Cloudflare route does not allow " + operation);
   }
-  assert.ok(route.includes("verifyIdToken(match[1], true)"));
+  assert.ok(route.includes("verifyFirebaseIdToken(match[1], projectId, serviceAccount)"));
+  assert.ok(route.includes("verifyAndConsumeAppCheckToken(appCheckToken, serviceAccount)"));
+  assert.doesNotMatch(route, /firebase-admin\\/(auth|app-check)|getAuth\\(|getAppCheck\\(/);
   assert.ok(route.includes("invalidUserTokenCodes"));
   assert.ok(!route.includes('rawCode.startsWith("auth/")'), "server-side Firebase Admin errors must not be mislabeled as user sign-in failures");
   assert.ok(route.includes('rawCode.startsWith("appCheck/")'));
@@ -91,4 +93,16 @@ test("Cloudflare Watch Rooms route preserves every trusted operation and one-tim
   assert.ok(route.includes("verifyToken(appCheckToken, { consume: true })"));
   assert.ok(route.includes("recursiveDelete(reference)"));
   assert.ok(route.includes("reference instanceof Query"));
+});
+
+
+test("Cloudflare Firebase token verification uses Web Crypto and Google REST APIs, not Node HTTPS", async () => {
+  const verifier = await readFile(new URL("../cloudflare/functions/lib/firebase-token-verification.js", import.meta.url), "utf8");
+  assert.match(verifier, /crypto\.subtle\.verify/);
+  assert.match(verifier, /securetoken@system\.gserviceaccount\.com/);
+  assert.match(verifier, /identitytoolkit\.googleapis\.com/);
+  assert.match(verifier, /firebaseappcheck\.googleapis\.com\/v1\/jwks/);
+  assert.match(verifier, /verifyAppCheckToken/);
+  assert.match(verifier, /alreadyConsumed/);
+  assert.doesNotMatch(verifier, /https\.request|firebase-admin\/auth|firebase-admin\/app-check/);
 });
