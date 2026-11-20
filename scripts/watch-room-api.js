@@ -17,22 +17,36 @@ export function callWatchRoomApi(action) {
       throw error;
     }
 
-    const [idToken, appCheckResult] = await Promise.all([
-      user.getIdToken(),
-      getLimitedUseToken(appCheck)
-    ]);
-    const response = await fetch(API_URL, {
-      method: "POST",
-      mode: "cors",
-      credentials: "omit",
-      cache: "no-store",
-      headers: {
-        "Authorization": "Bearer " + idToken,
-        "X-Firebase-AppCheck": appCheckResult.token,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ action, data })
-    });
+    let idToken, appCheckResult;
+    try {
+      [idToken, appCheckResult] = await Promise.all([
+        user.getIdToken(),
+        getLimitedUseToken(appCheck)
+      ]);
+    } catch (cause) {
+      console.warn("Vivid Watch Rooms could not obtain request credentials:", cause);
+      const error = new Error("Vivid couldn't verify your sign-in and app security. Refresh the page and try again.");
+      error.code = "functions/unauthenticated";
+      throw error;
+    }
+    let response;
+    try {
+      response = await fetch(API_URL, {
+        method: "POST",
+        mode: "cors",
+        credentials: "omit",
+        cache: "no-store",
+        headers: {
+          "Authorization": "Bearer " + idToken,
+          "X-Firebase-AppCheck": appCheckResult.token,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ action, data })
+      });
+    } catch (cause) {
+      console.warn("Vivid Watch Rooms API request failed:", cause);
+      throw new Error("Vivid couldn't reach the Watch Rooms service. Check your connection and try again.");
+    }
     let payload;
     try { payload = await response.json(); }
     catch { throw new Error("Vivid couldn't read the server response. Please try again."); }
