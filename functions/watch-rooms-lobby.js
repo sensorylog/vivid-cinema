@@ -223,10 +223,16 @@ export const removeWatchRoomMember = onCall({ region: "us-central1", maxInstance
     if (room.hostUid !== uid || member.role !== "host") throw new HttpsError("permission-denied", "Only the room host can remove members.");
     const target = await tx.get(targetRef);
     if (!target.exists) throw new HttpsError("not-found", "That member is not in this room.");
+    const members = await tx.get(roomRef.collection("members"));
+    const nextMemberCount = Math.max(1, Number(room.memberCount || 1) - 1);
     tx.delete(targetRef);
     tx.delete(roomRef.collection("presence").doc(memberUid));
     tx.delete(pointerRef);
-    tx.update(roomRef, { memberCount: Math.max(1, Number(room.memberCount || 1) - 1), updatedAt: Timestamp.now() });
+    tx.update(roomRef, { memberCount: nextMemberCount, updatedAt: Timestamp.now() });
+    members.docs.forEach(existing => {
+      if (existing.id === memberUid) return;
+      tx.set(db().collection("users").doc(existing.id).collection("watchRooms").doc(roomId), { memberCount: nextMemberCount }, { merge: true });
+    });
   });
   return { removed: true };
 });
@@ -244,10 +250,16 @@ export const leaveWatchRoom = onCall({ region: "us-central1", maxInstances: 20 }
     if (room.hostUid === uid || member.role === "host") {
       throw new HttpsError("failed-precondition", "The host must end the room instead of leaving it.");
     }
+    const members = await tx.get(roomRef.collection("members"));
+    const nextMemberCount = Math.max(1, Number(room.memberCount || 1) - 1);
     tx.delete(memberRef);
     tx.delete(roomRef.collection("presence").doc(uid));
     tx.delete(pointerRef);
-    tx.update(roomRef, { memberCount: Math.max(1, Number(room.memberCount || 1) - 1), updatedAt: Timestamp.now() });
+    tx.update(roomRef, { memberCount: nextMemberCount, updatedAt: Timestamp.now() });
+    members.docs.forEach(existing => {
+      if (existing.id === uid) return;
+      tx.set(db().collection("users").doc(existing.id).collection("watchRooms").doc(roomId), { memberCount: nextMemberCount }, { merge: true });
+    });
   });
   return { left: true };
 });
