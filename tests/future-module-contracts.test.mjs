@@ -262,3 +262,25 @@ test("Cinema Club discussion displays the latest bounded page in chronological o
   assert.ok(client.includes('orderBy("createdAt", "desc"), limit(100)'), "load the newest discussion messages rather than the oldest page");
   assert.ok(client.includes("[...snapshot.docs].reverse()"), "render the newest page in chronological order");
 });
+
+
+test("Watch Room queue items can be removed by their author or host and release queue capacity", () => {
+  const backend = readFileSync(new URL("../functions/watch-rooms-lobby.js", import.meta.url), "utf8");
+  const index = readFileSync(new URL("../functions/index.js", import.meta.url), "utf8");
+  const client = readFileSync(new URL("../scripts/watch-room-lobby.js", import.meta.url), "utf8");
+  const remove = backend.slice(backend.indexOf("export const removeWatchRoomQueueItem"), backend.indexOf("export const voteWatchRoomQueueItem"));
+  assert.ok(remove.includes("member.role !== \"host\" && item.data().addedBy !== uid"), "only host or author may remove a queue pick");
+  assert.ok(remove.includes("queueCount: Math.max(0, Number(room.queueCount || 0) - 1)"), "removal must free a queue slot transactionally");
+  assert.ok(index.includes("  removeWatchRoomQueueItem,"), "callable must be exported");
+  assert.ok(client.includes('call("removeWatchRoomQueueItem")'), "lobby must expose the remove action");
+});
+
+test("expired Watch Rooms and invitation records receive bounded scheduled retention cleanup", () => {
+  const index = readFileSync(new URL("../functions/index.js", import.meta.url), "utf8");
+  const lobby = readFileSync(new URL("../functions/watch-rooms-lobby.js", import.meta.url), "utf8");
+  assert.ok(index.includes("export const cleanupExpiredWatchRooms = onSchedule("));
+  assert.ok(index.includes('.where("expiresAt", "<=", now)'));
+  assert.ok(index.includes("db.recursiveDelete(roomRef)"), "room cleanup must remove nested subcollections");
+  assert.ok(index.includes('collection("watchRooms").doc(roomDocument.id)'), "cleanup must remove private dashboard pointers");
+  assert.ok(lobby.includes("expiresAt: closedAt"), "manually closed rooms should become immediately eligible for cleanup");
+});
