@@ -241,9 +241,11 @@ async function connectToRoom(id) {
   const user = auth.currentUser;
   if (!user || user.isAnonymous) throw new Error("Sign in to your Vivid account before joining a Watch Room.");
   stopConnection();
+  const connectionGeneration = playbackConnectionGeneration;
   const initialStartedAt = Date.now();
   const snapshot = await call("getWatchRoomPlaybackSnapshot")({ roomId: id });
   const initialFinishedAt = Date.now();
+  if (connectionGeneration !== playbackConnectionGeneration) return;
   const memberRole = snapshot.data?.role;
   if (memberRole !== "host" && memberRole !== "guest") throw new Error("Your Watch Room membership is not valid.");
   roomId = id;
@@ -266,7 +268,7 @@ async function connectToRoom(id) {
     }
   };
   await ping();
-  if (roomId !== id) return;
+  if (roomId !== id || connectionGeneration !== playbackConnectionGeneration) return;
   heartbeatTimer = window.setInterval(ping, 30000);
   try { await refreshRoomPlayerSelection(); } catch (error) { setNote(error?.message || "Could not load the room player selection."); }
   selectionTimer = window.setInterval(() => { refreshRoomPlayerSelection().catch(error => setNote(error?.message || "Room player selection could not refresh.")); }, 5000);
