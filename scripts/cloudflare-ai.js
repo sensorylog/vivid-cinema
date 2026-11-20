@@ -284,7 +284,7 @@ export async function generateAchievementSpark(input = {}) {
   const result = await generateWithTimeout(model, prompt, SPARK_TIMEOUT_MS, "Vivid Spark");
   let payload;
   try {
-    payload = JSON.parse(result?.response?.text?.() || "{}");
+    payload = parseJsonPayload(result?.response?.text?.() || "{}");
   } catch {
     throw new Error("Cloudflare Workers AI returned an unreadable Vivid Spark.");
   }
