@@ -12,7 +12,8 @@ test("Watch Rooms browser client sends Firebase Auth and standard App Check toke
   const firebase = await readFile(new URL("../scripts/firebase.js", import.meta.url), "utf8");
   assert.match(firebase, /isTokenAutoRefreshEnabled:\s*false/);
   const dashboard = await readFile(new URL("../scripts/watch-rooms.js", import.meta.url), "utf8");
-  assert.doesNotMatch(dashboard, /call\("cleanupExpiredWatchRooms"\)/, "dashboard load must not trigger maintenance/App Check assessments");
+  assert.ok(dashboard.includes('void call("cleanupExpiredWatchRooms")({})'), "retention remains scheduled as a non-blocking background task");
+  assert.ok(dashboard.indexOf('call("getWatchRoomDashboard")') < dashboard.indexOf('call("cleanupExpiredWatchRooms")'), "dashboard must load before maintenance starts");
   assert.doesNotMatch(client, /getLimitedUseToken/);
   assert.ok(client.includes('user.getIdToken()'));
   assert.ok(client.includes('"X-Firebase-AppCheck"'));
