@@ -144,8 +144,10 @@
                 <div class="vivid-wr-club-feature">
                   <div><span class="vivid-wr-section-kicker">THE FILMS YOU SHARED</span><h4>Screening history</h4><p>Keep a record of club movie nights and the conversation after.</p></div>
                   <form id="wr-club-screening-form" class="vivid-wr-inline-form">
-                    <input name="title" maxlength="180" placeholder="What did the club watch?" required>
-                    <input name="contentId" maxlength="20" placeholder="movie:123 or tv:456" pattern="(movie|tv):[0-9]{1,12}" required>
+                    <label class="vivid-wr-screening-search-label" for="wr-screening-title-search">Find the film or series</label>
+                    <input id="wr-screening-title-search" name="title" maxlength="180" placeholder="Search by title…" autocomplete="off" aria-controls="wr-screening-title-results" aria-expanded="false" required>
+                    <input id="wr-screening-content-id" name="contentId" type="hidden" required>
+                    <div id="wr-screening-title-results" class="vivid-wr-title-results" role="listbox" aria-label="Matching films and series" hidden></div>
                     <input name="notes" maxlength="1000" placeholder="Optional screening notes">
                     <button class="vivid-wr-button vivid-wr-button--quiet" type="submit">Record screening</button>
                   </form>
