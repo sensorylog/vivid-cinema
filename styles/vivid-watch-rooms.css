@@ -157,3 +157,7 @@ html[data-vivid-theme="light"] .vivid-wr-dialog{background:#fff;color:#171720}ht
 .vivid-wr-queue-actions .vivid-wr-button{font-size:.72rem;padding:.45rem .65rem;text-decoration:none}
 .vivid-wr-lobby-list:has(.vivid-wr-queue-item){padding-left:0;list-style:none}
 @media(max-width:520px){.vivid-wr-queue-form{flex-direction:column}.vivid-wr-queue-form>.vivid-wr-button{width:100%}.vivid-wr-queue-item{grid-template-columns:42px minmax(0,1fr)}.vivid-wr-queue-poster{width:42px;height:60px}.vivid-wr-queue-actions{grid-column:1/-1}}
+
+
+#wr-lobby-queue{padding-left:0;list-style:none}
+.vivid-wr-lobby-list li.vivid-wr-queue-item{display:grid!important;grid-template-columns:48px minmax(0,1fr);justify-content:initial}
