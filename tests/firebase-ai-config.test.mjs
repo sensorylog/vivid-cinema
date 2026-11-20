@@ -9,75 +9,58 @@ const aiSource = await readFile(path.join(root, "scripts/firebase-ai.js"), "utf8
 const chatSource = await readFile(path.join(root, "scripts/vivid-recall-chat.js"), "utf8");
 const workerSource = await readFile(path.join(root, "service-worker.js"), "utf8");
 const firebaseSource = await readFile(path.join(root, "scripts/firebase.js"), "utf8");
-const hostingWorkflow = await readFile(path.join(root, ".github/workflows/firebase-hosting-deploy.yml"), "utf8");
+const apiSource = await readFile(path.join(root, "cloudflare/functions/api/gemini.js"), "utf8");
 
-test("Vivid Recall uses the stable, lower-cost Gemini Flash-Lite model", () => {
+test("Vivid Recall keeps Gemini Flash-Lite as its model", () => {
   assert.match(aiSource, /const RECALL_MODEL = "gemini-3\.5-flash-lite"/);
-  assert.match(aiSource, /ThinkingLevel\.MINIMAL/);
-  assert.doesNotMatch(aiSource, /gemini-3\.8-flash/);
+  assert.match(aiSource, /Gemini runs through Vivid's authenticated Cloudflare Pages API/);
 });
 
-test("Gemini requests share one App Check client and serialize/retry only initial token throttles", () => {
-  assert.match(aiSource, /let recallAi = null/);
-  assert.match(aiSource, /useLimitedUseAppCheckTokens: false/);
-  assert.match(aiSource, /cached session tokens/);
-  assert.match(firebaseSource, /initializeAppCheck/);
-  assert.match(firebaseSource, /ReCaptchaEnterpriseProvider/);
-  assert.match(aiSource, /function serializeAiRequest\(task\)/);
-  assert.ok(aiSource.includes("appCheck\\/initial-throttle"));
-  assert.match(aiSource, /attempt < 2/);
-  assert.match(aiSource, /do not retry quota, permission, or model errors/);
+test("browser Gemini requests require a signed-in Firebase user and send an ID token", () => {
+  assert.match(aiSource, /auth\.currentUser/);
+  assert.match(aiSource, /user\.isAnonymous/);
+  assert.match(aiSource, /getIdToken\(user\)/);
+  assert.match(aiSource, /fetch\("\/api\/gemini"/);
+  assert.match(aiSource, /Authorization/);
+  assert.doesNotMatch(aiSource, /getAI\(|GoogleAIBackend|firebase-ai\.js/);
 });
 
-test("Gemini request timeouts attempt to abort the underlying browser request", () => {
-  assert.match(aiSource, /model\.generateContent\(prompt, \{ signal: controller\.signal \}\)/);
-  assert.match(aiSource, /controller\.abort\(\)/);
-  assert.match(aiSource, /CLUE_TIMEOUT_MS = 12000/);
-  assert.match(aiSource, /CHAT_TIMEOUT_MS =/);
-  assert.match(aiSource, /Electron/);
-  assert.ok(aiSource.includes("? 12000 : 30000"));
+test("Gemini credentials stay server-side and the Cloudflare route verifies Firebase identity", () => {
+  assert.match(apiSource, /env\.GEMINI_API_KEY/);
+  assert.match(apiSource, /verifyFirebaseIdToken/);
+  assert.match(apiSource, /FIREBASE_SERVICE_ACCOUNT_JSON/);
+  assert.match(apiSource, /sign_in_provider === "anonymous"/);
+  assert.match(apiSource, /MAX_PROMPT_CHARS/);
+  assert.match(apiSource, /MAX_REQUESTS_PER_WINDOW/);
+  assert.match(apiSource, /generativelanguage\.googleapis\.com/);
+  assert.doesNotMatch(apiSource, /X-Firebase-AppCheck|verifyAppCheckToken/);
 });
 
-test("Recall keeps detailed quota and provider errors visible for diagnosis", () => {
-  assert.match(chatSource, /error\?\.customData/);
+test("Gemini proxy keeps request payloads bounded and rate limits authenticated users", () => {
+  assert.match(apiSource, /MAX_BODY_BYTES/);
+  assert.match(apiSource, /takeRateLimit\(claims\.uid\)/);
+  assert.match(apiSource, /status === 429/);
+  assert.match(apiSource, /Cache-Control.*no-store/);
+});
+
+test("Recall keeps useful provider and quota diagnostics", () => {
   assert.match(chatSource, /errorDiagnostic\(error\)/);
   assert.match(chatSource, /quotaFailure/);
-  assert.match(chatSource, /full diagnostic/);
   assert.match(chatSource, /Gemini 429/);
-  assert.match(chatSource, /Try again shortly/);
-  assert.doesNotMatch(chatSource, /setStatus\(localLabel \+ .*fullDiagnostic/);
+  assert.match(chatSource, /Gemini 401/);
 });
 
-test("service worker cache version changes with the updated AI modules", () => {
-  assert.match(workerSource, /vivid-cinema-shell-v\d+/);
-});
-
-test("achievement Sparks reuse the existing Recall model and App Check protections", () => {
-  assert.match(aiSource, /export async function generateAchievementSpark/);
-  assert.match(aiSource, /const SPARK_TIMEOUT_MS = 10000/);
-  assert.match(aiSource, /const model = await getRecallModel\(\)/);
-  assert.match(aiSource, /if \(appCheckSkippedReason\)/);
-  assert.match(aiSource, /if \(appCheckError\)/);
-  assert.match(aiSource, /Never fabricate historical claims, dates, quotations, statistics/);
-  assert.match(aiSource, /35 to 65 words maximum/);
-  assert.match(aiSource, /payload\?\.confidence !== "high"/);
-  assert.match(aiSource, /recentSparks/);
-  assert.match(aiSource, /wordCount < 28 \|\| wordCount > 70/);
-  assert.match(aiSource, /export async function getRecallClues/);
-  assert.match(aiSource, /export async function sendRecallChatMessage/);
-});
-
-test("Cloudflare Pages is primary and Firebase Hosting is a manual fallback", () => {
-  assert.match(hostingWorkflow, /workflow_dispatch:/);
-  assert.doesNotMatch(hostingWorkflow, /^  push:/m);
-  assert.match(firebaseSource, /vivid-cinema\.pages\.dev/);
-  assert.match(firebaseSource, /reCAPTCHA Enterprise/);
-});
-
-test("Recall diagnostics support the deployed Cloudflare Pages origin without weakening App Check", () => {
-  assert.match(aiSource, /requires a deployed site because App Check is skipped on localhost/);
+test("App Check remains initialized for Firebase services outside the Gemini proxy", () => {
   assert.match(firebaseSource, /initializeAppCheck/);
   assert.match(firebaseSource, /ReCaptchaEnterpriseProvider/);
-  assert.match(firebaseSource, /Allow vivid-cinema\.pages\.dev and vivid-cinema\.web\.app in Firebase App Check/);
-  assert.match(workerSource, /vivid-cinema-shell-v\d+/);
+});
+
+test("service worker cache version changes with the authenticated Gemini proxy", () => {
+  assert.match(workerSource, /vivid-cinema-shell-v293/);
+});
+
+test("achievement Sparks, Recall chat and clue extraction still share the Gemini client", () => {
+  assert.match(aiSource, /export async function generateAchievementSpark/);
+  assert.match(aiSource, /export async function getRecallClues/);
+  assert.match(aiSource, /export async function sendRecallChatMessage/);
 });
