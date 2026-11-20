@@ -73,6 +73,7 @@ function applyRemoteState(force = false) {
   const state = latestRemoteState;
   if (!state || role === "host" || !joinedPlayback) return;
   if (!sameTitle(state)) { setNote("This room is synced to a different title or episode. Open that exact Vivid title to join."); return; }
+  if (state.provider !== activeProviderId) { setNote("The host is using " + String(state.provider || "another provider") + ". Select that same provider to join synchronized playback."); return; }
   const adapter = getActiveAdapter();
   if (!adapter?.capabilities.canPlay || !adapter.capabilities.canSeek) {
     setNote("Choose Player 1 · VidSrc first. This player/server does not have verified Watch Room controls.");
@@ -163,6 +164,36 @@ window.addEventListener("vivid:provider-playback", event => {
   const payload = { roomId, provider: "vidsrc", status: hostStatus, contentId: String(detail.contentId || ""), mediaType: detail.mediaType, season: detail.season, episode: detail.episode, position: localPosition, duration: Math.max(0, Number(detail.duration) || 0) };
   lastHostPayload = payload;
   publishQueue = publishQueue.then(() => roomId === payload.roomId && role === "host" ? call("publishWatchRoomPlayback")(payload) : null).catch(error => setNote(error?.message || "Could not publish the host playback state."));
+});
+
+// CineSRC's documented bridge uses a separate command/event schema from VidSrc.
+window.addEventListener("message", event => {
+  const adapter = getProviderAdapter("player2", "cinesrc");
+  const frame = document.getElementById("vivid-tflix-frame");
+  if (!adapter || !frame?.contentWindow || event.source !== frame.contentWindow || event.origin !== adapter.origin) return;
+  const data = event.data;
+  if (!data || typeof data.type !== "string" || !data.type.startsWith("cinesrc:")) return;
+  const type = data.type;
+  if (!["cinesrc:play", "cinesrc:pause", "cinesrc:timeupdate", "cinesrc:ended"].includes(type)) return;
+  let status = localStatus;
+  if (type === "cinesrc:play") status = "playing";
+  else if (type === "cinesrc:pause") status = "paused";
+  else if (type === "cinesrc:ended") status = "ended";
+  if (type === "cinesrc:timeupdate" && status !== "playing") return;
+  localPosition = Math.max(0, Number(data.currentTime) || 0);
+  localStatus = status;
+  const params = new URLSearchParams(window.location.search);
+  window.dispatchEvent(new CustomEvent("vivid:provider-playback", { detail: {
+    provider: "cinesrc",
+    origin: event.origin,
+    status,
+    position: localPosition,
+    duration: Math.max(0, Number(data.duration) || 0),
+    contentId: String(params.get("id") || ""),
+    mediaType: params.get("type") === "tv" ? "tv" : "movie",
+    season: params.get("type") === "tv" ? Number(params.get("season") || 1) : null,
+    episode: params.get("type") === "tv" ? Number(params.get("episode") || 1) : null
+  }}));
 });
 
 window.addEventListener("vivid:player-adapter-selected", event => {
