@@ -31,7 +31,10 @@ const wrangler = path.join(
 run(wrangler, [
   "pages", "functions", "build", functionsRoot,
   "--outdir", output,
-  "--project-directory", root
+  "--project-directory", root,
+  "--config", path.join(root, "wrangler.toml"),
+  "--compatibility-date", "2026-11-20",
+  "--compatibility-flags", "nodejs_compat"
 ]);
 await access(path.join(output, "_worker.js"));
 console.log("Bundled Cloudflare Pages Functions into dist/_worker.js.");
