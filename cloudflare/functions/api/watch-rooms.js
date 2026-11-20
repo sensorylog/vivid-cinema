@@ -10,6 +10,11 @@ let db;
 let allowedOrigins;
 
 function initializeServices(env) {
+  allowedOrigins = new Set([
+    "https://vivid-cinema.pages.dev", "https://vivid-cinema.web.app",
+    "https://vivid-cinema.firebaseapp.com",
+    ...(env.VIVID_ALLOWED_ORIGINS || "").split(",").map(value => value.trim()).filter(Boolean)
+  ]);
   if (db) return;
   const serviceAccountRaw = env.FIREBASE_SERVICE_ACCOUNT_JSON;
   if (!serviceAccountRaw) throw new Error("FIREBASE_SERVICE_ACCOUNT_JSON is not configured for Vivid on Cloudflare Pages.");
@@ -45,11 +50,6 @@ function initializeServices(env) {
       return typeof value === "function" ? value.bind(target) : value;
     }
   });
-  allowedOrigins = new Set([
-    "https://vivid-cinema.pages.dev", "https://vivid-cinema.web.app",
-    "https://vivid-cinema.firebaseapp.com",
-    ...(env.VIVID_ALLOWED_ORIGINS || "").split(",").map(value => value.trim()).filter(Boolean)
-  ]);
 }
 
 async function recursiveDelete(reference) {
@@ -965,7 +965,7 @@ export async function onRequest({request,env}) {
   try { initializeServices(env); }
   catch(error) {
     console.error("Vivid Watch Rooms Cloudflare configuration error:",error?.message||String(error));
-    return response(500,{ok:false,code:"internal",message:"The Watch Rooms service is not configured yet."});
+    return response(500,{ok:false,code:"internal",message:"The Watch Rooms service is not configured yet."},isAllowedOrigin(origin)?origin:"");
   }
   if(!isAllowedOrigin(origin)) return response(403,{ok:false,code:"permission-denied",message:"This origin is not allowed."},origin);
   if(request.method==="OPTIONS") return optionsResponse(origin);
