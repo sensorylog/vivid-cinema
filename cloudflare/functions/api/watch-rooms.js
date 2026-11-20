@@ -497,7 +497,7 @@ async function getWatchRoomLobbySnapshot(request) {
     return { id: document.id, ...data, createdAt: millis(data.createdAt) };
   });
   return {
-    room: { roomId, name: room.name || "Private screening", status: room.status, memberCount: members.length },
+    room: { roomId, name: room.name || "Private screening", status: room.status, memberCount: members.length, selectedPlayerId: room.selectedPlayerId || "player1", selectedProviderId: room.selectedProviderId || "vidapi", selectionUpdatedAt: millis(room.selectionUpdatedAt) },
     members, onlineCount: members.filter(member => member.isOnline).length, queue, chat,
     serverTime: now
   };
@@ -619,6 +619,35 @@ async function reactToWatchRoomMessage(request) {
     tx.update(messageRef, { ["reactions." + reaction]: nextUsers });
   });
   return { updated: true };
+}
+
+
+const ROOM_PLAYER_PROVIDERS = Object.freeze({
+  player1: new Set(["vidapi", "vidsrc", "vidlink", "vidplus", "vidking", "embedwave", "vidfast", "ezvidapi", "embedapistream", "moviesapi"]),
+  player2: new Set(["moviesapi", "vidsrc-embed", "cinesrc", "vidfast", "vidlink"])
+});
+
+async function setWatchRoomPlayerSelection(request) {
+  const uid = requireUser(request);
+  const roomId = validId(request.data?.roomId, "room ID");
+  const playerId = request.data?.playerId;
+  const providerId = request.data?.providerId;
+  if (!Object.hasOwn(ROOM_PLAYER_PROVIDERS, playerId) || typeof providerId !== "string" || !ROOM_PLAYER_PROVIDERS[playerId].has(providerId)) {
+    throw new HttpsError("invalid-argument", "Choose a valid player and server.");
+  }
+  const roomRef = db.collection("rooms").doc(roomId);
+  const selectedAt = Timestamp.now();
+  await db.runTransaction(async tx => {
+    const { room, member } = await requireRoomMemberInTransaction(tx, roomId, uid);
+    if (room.hostUid !== uid || member.role !== "host") {
+      throw new HttpsError("permission-denied", "Only the room host can change the shared player and server.");
+    }
+    if (room.status !== "open" || !room.expiresAt || room.expiresAt.toMillis() <= selectedAt.toMillis()) {
+      throw new HttpsError("failed-precondition", "This Watch Room is no longer active.");
+    }
+    tx.update(roomRef, { selectedPlayerId: playerId, selectedProviderId: providerId, selectionUpdatedAt: selectedAt, updatedAt: selectedAt });
+  });
+  return { selected: true, playerId, providerId, selectedAt: selectedAt.toMillis() };
 }
 
 async function updateWatchRoomSettings(request) {
@@ -986,6 +1015,7 @@ const operations = {
   sendWatchRoomMessage,
   reactToWatchRoomMessage,
   updateWatchRoomSettings,
+  setWatchRoomPlayerSelection,
   removeWatchRoomMember,
   leaveWatchRoom,
   closeWatchRoom,
@@ -1003,7 +1033,7 @@ const operations = {
 const ROUTES = new Set([
   "createWatchRoom","getWatchRoomDashboard","createCinemaClub","createWatchInvitation","redeemWatchInvitation","revokeWatchInvitation",
   "cleanupExpiredWatchRooms","heartbeatWatchRoom","getWatchRoomLobbySnapshot","addWatchRoomQueueItem","removeWatchRoomQueueItem","voteWatchRoomQueueItem",
-  "sendWatchRoomMessage","reactToWatchRoomMessage","updateWatchRoomSettings","removeWatchRoomMember","leaveWatchRoom",
+  "sendWatchRoomMessage","reactToWatchRoomMessage","updateWatchRoomSettings","setWatchRoomPlayerSelection","removeWatchRoomMember","leaveWatchRoom",
   "closeWatchRoom","deleteWatchRoom","publishWatchRoomPlayback","addCinemaClubWatchlistItem","removeCinemaClubWatchlistItem",
   "recordCinemaClubScreening","addCinemaClubAfterCreditsReview","addCinemaClubDiscussionMessage","leaveCinemaClub","archiveCinemaClub"
 ]);
