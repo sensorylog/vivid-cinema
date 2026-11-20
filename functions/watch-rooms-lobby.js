@@ -35,8 +35,8 @@ async function requireRoomMember(roomId, uid) {
   const roomRef = db().collection("rooms").doc(roomId);
   const memberRef = roomRef.collection("members").doc(uid);
   const [room, member] = await Promise.all([roomRef.get(), memberRef.get()]);
-  const expiresAt = room.exists ? room.data().expiresAt?.toMillis?.() : 0;
-  if (!room.exists || room.data().status !== "open" || (expiresAt && expiresAt <= Date.now()) || !member.exists) {
+  const expiresAt = room.exists ? room.data().expiresAt?.toMillis?.() : null;
+  if (!room.exists || room.data().status !== "open" || !Number.isFinite(expiresAt) || expiresAt <= Date.now() || !member.exists) {
     throw new HttpsError("permission-denied", "You are not a member of an open room.");
   }
   return { roomRef, room: room.data(), memberRef, member: member.data() };
@@ -48,8 +48,8 @@ async function requireRoomMemberInTransaction(tx, roomId, uid) {
   const memberRef = roomRef.collection("members").doc(uid);
   const [roomSnapshot, memberSnapshot] = await Promise.all([tx.get(roomRef), tx.get(memberRef)]);
   const room = roomSnapshot.exists ? roomSnapshot.data() : null;
-  const expiresAt = room?.expiresAt?.toMillis?.() || 0;
-  if (!room || room.status !== "open" || (expiresAt && expiresAt <= Date.now()) || !memberSnapshot.exists) {
+  const expiresAt = room?.expiresAt?.toMillis?.();
+  if (!room || room.status !== "open" || !Number.isFinite(expiresAt) || expiresAt <= Date.now() || !memberSnapshot.exists) {
     throw new HttpsError("permission-denied", "You are not a member of an open room.");
   }
   return { roomRef, room, memberRef, member: memberSnapshot.data() };
@@ -308,7 +308,7 @@ export const publishWatchRoomPlayback = onCall({ region: "us-central1", maxInsta
     ]);
     const roomData = roomSnapshot.exists ? roomSnapshot.data() : null;
     const memberData = memberSnapshot.exists ? memberSnapshot.data() : null;
-    if (!roomData || roomData.status !== "open" || (roomData.expiresAt?.toMillis?.() && roomData.expiresAt.toMillis() <= now.toMillis()) || roomData.hostUid !== uid || memberData?.role !== "host") {
+    if (!roomData || roomData.status !== "open" || !Number.isFinite(roomData.expiresAt?.toMillis?.()) || roomData.expiresAt.toMillis() <= now.toMillis() || roomData.hostUid !== uid || memberData?.role !== "host") {
       throw new HttpsError("permission-denied", "Only the active host of an open room can publish playback.");
     }
     const previous = current.exists ? current.data() : null;
