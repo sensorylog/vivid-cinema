@@ -141,17 +141,39 @@ export async function onRequest({ request, env }) {
   }
 
   try {
+    // Use the chat-message interface shown in Cloudflare's current model
+    // examples. It applies the model's chat template explicitly instead of
+    // relying on the plain-prompt path.
     const result = await env.AI.run(MODEL, {
-      prompt,
+      messages: [
+        { role: "system", content: "Follow the user's instructions carefully. Return the requested answer directly." },
+        { role: "user", content: prompt }
+      ],
       max_tokens: maxTokens,
       temperature: 0.2
     });
-    const text = typeof result?.response === "string"
+    const generatedText = typeof result?.response === "string"
       ? result.response
       : typeof result === "string" ? result : "";
-    if (!text.trim()) {
-      console.error("Cloudflare Workers AI returned an empty response.", { model: MODEL, uid: claims.uid });
-      return json(502, { ok: false, code: "empty-response", message: "Cloudflare Workers AI returned an empty response. Please try again." });
+    const text = generatedText.trim();
+    if (!text) {
+      const responseKeys = result && typeof result === "object" ? Object.keys(result).slice(0, 12) : [];
+      const usage = result?.usage && typeof result.usage === "object"
+        ? {
+            promptTokens: Number(result.usage.prompt_tokens || 0),
+            completionTokens: Number(result.usage.completion_tokens || 0),
+            totalTokens: Number(result.usage.total_tokens || 0)
+          }
+        : null;
+      console.error("Cloudflare Workers AI returned an empty response after chat-template inference.", {
+        model: MODEL, uid: claims.uid, responseKeys, usage
+      });
+      return json(502, {
+        ok: false,
+        code: "empty-response",
+        message: "Cloudflare Workers AI returned no generated text. Please try again.",
+        diagnostic: { model: MODEL, responseKeys, usage }
+      });
     }
     return json(200, { ok: true, text, model: MODEL });
   } catch (error) {
