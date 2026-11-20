@@ -57,7 +57,9 @@ test("Google Search Console verification token is copied into the Cloudflare Pag
 });
 
 test("shared static build publishes dist and retains Capacitor enhancements", () => {
-  assert.equal(packageJson.scripts["build:web"], "node automation/build-static-dist.mjs && node automation/build-cloudflare-functions.mjs");
+  assert.equal(packageJson.scripts["build:static"], "node automation/build-static-dist.mjs");
+  assert.equal(packageJson.scripts["build:web"], "npm run build:static && node automation/build-cloudflare-functions.mjs");
+  assert.equal(packageJson.scripts["cap:sync"], "npm run build:static && cap sync android");
   assert.ok(buildScript.includes('const output = path.join(root, "dist")'));
   assert.ok(!buildScript.includes('"_headers"'));
   assert.ok(buildScript.includes("await cp(from, to)"));
