@@ -116,7 +116,7 @@ test("Watch Rooms dashboard uses the authenticated server API rather than client
   const moduleSource = readFileSync(new URL("../scripts/watch-rooms.js", import.meta.url), "utf8");
   assert.ok(moduleSource.includes("callWatchRoomApi"));
   assert.ok(moduleSource.includes('call("getWatchRoomDashboard")'));
-  assert.ok(moduleSource.includes('call("cleanupExpiredWatchRooms")'));
+  assert.doesNotMatch(moduleSource, /call\("cleanupExpiredWatchRooms"\)/, "retention cleanup must not run on dashboard load");
   assert.ok(moduleSource.includes("dashboardState.rooms"));
   assert.ok(moduleSource.includes("dashboardState.clubs"));
   assert.ok(!moduleSource.includes('collection(db, "users"'));
