@@ -743,7 +743,7 @@ export async function getPlotMatchRecommendations(intent = {}, limit = 18, optio
   };
   if (!options.localOnly) {
     try {
-      const { getRecallClues } = await import("./firebase-ai.js");
+      const { getRecallClues } = await import("./cloudflare-ai.js");
       recallResult = await getRecallClues(query, localClues);
     } catch (error) {
       // A missing SDK, disabled AI Logic service, or App Check failure must not
