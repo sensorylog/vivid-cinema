@@ -612,7 +612,7 @@ test("Watch Room Step 6 enforces granular guest permissions in both trusted APIs
   const lobby = readFileSync(new URL("../scripts/watch-room-lobby.js", import.meta.url), "utf8");
   const html = readFileSync(new URL("../watch-rooms.html", import.meta.url), "utf8");
   for (const backend of [node, cloudflare]) {
-    assert.ok(backend.includes("allowGuestPlayerSelection !== true"));
+    assert.ok(backend.includes('member.role === "guest" && room.allowGuestPlayerSelection === true'));
     assert.ok(backend.includes("allowGuestQueueManagement !== true"));
     assert.ok(backend.includes("allowGuestVoting === false"));
     assert.ok(backend.includes("allowGuestPlayerSelection",), "snapshot/settings expose player-selection permission");
