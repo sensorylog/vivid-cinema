@@ -77,7 +77,7 @@ function selectScreening(screeningId, title) {
   byId("wr-after-credits-title").textContent = "After-Credits · " + title;
   const clubId = activeClub.clubId;
   const reviews = query(collection(db, "cinemaClubs", clubId, "screenings", screeningId, "afterCredits"), orderBy("updatedAt", "desc"), limit(60));
-  const discussion = query(collection(db, "cinemaClubs", clubId, "screenings", screeningId, "discussion"), orderBy("createdAt", "asc"), limit(100));
+  const discussion = query(collection(db, "cinemaClubs", clubId, "screenings", screeningId, "discussion"), orderBy("createdAt", "desc"), limit(100));
   const old = stops.splice(2);
   old.forEach(stop => stop());
   stops.push(onSnapshot(reviews, snapshot => {
@@ -93,7 +93,7 @@ function selectScreening(screeningId, title) {
     const list = byId("wr-club-discussion");
     list.replaceChildren();
     if (snapshot.empty) list.append(node("p", "The conversation starts here.", "vivid-wr-screening-item"));
-    snapshot.forEach(doc => {
+    [...snapshot.docs].reverse().forEach(doc => {
       const data = doc.data();
       list.append(node("article", data.message, "vivid-wr-screening-item"));
     });
