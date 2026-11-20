@@ -907,11 +907,29 @@ async function authenticate(req) {
   if (!appCheckToken) throw new HttpsError("failed-precondition", "App Check verification is required.");
   let token;
   try {
+    // Keep revocation checking enabled. It requires the service account to have
+    // Firebase Authentication user-read permissions; do not disguise IAM or
+    // credential failures as an expired end-user session.
     token = await getAuth(firebaseApp).verifyIdToken(match[1], true);
   } catch (error) {
-    if (String(error?.code || "").startsWith("auth/")) {
-      throw new HttpsError("unauthenticated", "Your Vivid sign-in token has expired. Refresh your session and try again.");
+    const code = String(error?.code || "unknown");
+    console.error("Watch Rooms Firebase ID-token verification failed:", {
+      code,
+      message: error?.message || String(error),
+      projectId: firebaseApp?.options?.projectId || null
+    });
+    const invalidUserTokenCodes = new Set([
+      "auth/id-token-expired",
+      "auth/id-token-revoked",
+      "auth/invalid-id-token",
+      "auth/argument-error",
+      "auth/user-disabled"
+    ]);
+    if (invalidUserTokenCodes.has(code)) {
+      throw new HttpsError("unauthenticated", "Your Vivid sign-in token is invalid or expired. Refresh your session and sign in again.");
     }
+    // Permission, service-account, project and upstream failures are server
+    // configuration errors (HTTP 500), not proof that the browser is signed out.
     throw error;
   }
   let appCheck;
