@@ -217,6 +217,7 @@ export const removeWatchRoomMember = onCall({ region: "us-central1", maxInstance
   if (memberUid === uid) throw new HttpsError("failed-precondition", "The host cannot remove themselves. Close the room instead.");
   const roomRef = db().collection("rooms").doc(roomId);
   const targetRef = roomRef.collection("members").doc(memberUid);
+  const pointerRef = db().collection("users").doc(memberUid).collection("watchRooms").doc(roomId);
   await db().runTransaction(async tx => {
     const { room, member } = await requireRoomMemberInTransaction(tx, roomId, uid);
     if (room.hostUid !== uid || member.role !== "host") throw new HttpsError("permission-denied", "Only the room host can remove members.");
@@ -224,9 +225,9 @@ export const removeWatchRoomMember = onCall({ region: "us-central1", maxInstance
     if (!target.exists) throw new HttpsError("not-found", "That member is not in this room.");
     tx.delete(targetRef);
     tx.delete(roomRef.collection("presence").doc(memberUid));
+    tx.delete(pointerRef);
     tx.update(roomRef, { memberCount: Math.max(1, Number(room.memberCount || 1) - 1), updatedAt: Timestamp.now() });
   });
-  await db().collection("users").doc(memberUid).collection("watchRooms").doc(roomId).delete().catch(() => {});
   return { removed: true };
 });
 
