@@ -203,6 +203,11 @@ function renderQueue(snapshot) {
 }
 function openLobby(data) {
   stop();
+  searchGeneration += 1;
+  selectedPick = null;
+  byId("wr-queue-form")?.reset();
+  byId("wr-queue-selection").hidden = true;
+  setSearchMessage("");
   room = data;
   lastRoom = data;
   memberList = [];
