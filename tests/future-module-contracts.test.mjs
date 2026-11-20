@@ -427,3 +427,14 @@ test("Watch Room playback throttles heartbeats without dropping pause/resume tra
   assert.ok(client.includes("lastPublishedStatus = hostStatus"));
   assert.ok(client.includes('lastPublishedStatus = "paused"'));
 });
+
+
+test("Watch Room creation never displays raw Firebase internal errors", () => {
+  const client = readFileSync(new URL("../scripts/watch-rooms.js", import.meta.url), "utf8");
+  const errors = client.slice(client.indexOf("function errorText"), client.indexOf("function openDialog"));
+  assert.ok(errors.includes("return fallback"));
+  assert.doesNotMatch(errors, /return error\?\.message \|\| fallback/);
+  const create = client.slice(client.indexOf('byId("wr-create-room-form")'), client.indexOf('byId("wr-join-room-form")'));
+  assert.ok(create.includes('console.error("Vivid Watch Room creation failed:", error)'));
+  assert.ok(create.includes("We couldn't create your room just now"));
+});
