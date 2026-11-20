@@ -340,7 +340,7 @@ test("Cinema Club members can leave and owners can archive with server-owned mem
   assert.ok(leave.includes("tx.delete(memberRef)") && leave.includes("tx.delete(pointerRef)"));
   assert.ok(archive.includes('club.data().ownerUid !== uid || !owner.exists || owner.data().role !== "owner"'));
   assert.ok(archive.includes('status: "archived"'));
-  assert.ok(archive.includes('tx.delete(db().collection("users")'));
+  assert.ok(archive.includes('tx.delete(db.collection("users")'));
   assert.ok(index.includes("  leaveCinemaClub,") && index.includes("  archiveCinemaClub"));
   assert.ok(client.includes('call(archive ? "archiveCinemaClub" : "leaveCinemaClub")'));
 });
