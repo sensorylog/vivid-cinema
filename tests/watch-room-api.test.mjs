@@ -15,6 +15,7 @@ test("Watch Rooms callable operations are served by the existing Vercel API, not
   assert.ok(api.includes('from "firebase-admin/firestore"'));
   assert.doesNotMatch(api, /firebase-functions|onCall\(/);
   assert.ok(api.includes('https://vivid-cinema.pages.dev'));
+  assert.ok(api.includes('parsed.hostname.endsWith(".vivid-cinema.pages.dev")'));
   assert.ok(api.includes('getAuth(firebaseApp).verifyIdToken(match[1], true)'));
   assert.ok(api.includes('verifyToken(appCheckToken, { consume: true })'));
   for (const operation of [
