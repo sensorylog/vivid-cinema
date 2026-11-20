@@ -701,7 +701,7 @@ async function publishWatchRoomPlayback(request) {
     ]);
     const roomData = roomSnapshot.exists ? roomSnapshot.data() : null;
     const memberData = memberSnapshot.exists ? memberSnapshot.data() : null;
-    if (!roomData || roomData.status !== "open" || !Number.isFinite(roomData.expiresAt?.toMillis?.()) || roomData.expiresAt.toMillis() <= now.toMillis() || !memberData || (roomData.hostUid !== uid && memberData.role !== "host" && roomData.allowGuestPlaybackControl !== true)) {
+    if (!roomData || roomData.status !== "open" || !Number.isFinite(roomData.expiresAt?.toMillis?.()) || roomData.expiresAt.toMillis() <= now.toMillis() || !memberData || !((roomData.hostUid === uid && memberData.role === "host") || (memberData.role === "guest" && roomData.allowGuestPlaybackControl === true))) {
       throw new HttpsError("permission-denied", "Only the host or a guest explicitly allowed to control playback can publish playback.");
     }
     const previous = current.exists ? current.data() : null;
