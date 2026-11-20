@@ -938,7 +938,7 @@ const ROUTES = new Set([
 ]);
 
 async function authenticateFirebaseIdentity(req) {
-  const match = String(req.headers.authorization || "").match(/^Bearer\\s+(.+)$/i);
+  const match = String(req.headers.authorization || "").match(/^Bearer\s+(.+)$/i);
   if (!match) throw new HttpsError("unauthenticated", "Sign in to your Vivid account and try again.");
   let token;
   try {
