@@ -177,7 +177,7 @@ Each stage is delivered as focused commits on feature/watch-rooms and reviewed b
 - Watch Room queue items can be removed by their author or the host. Removal and queueCount decrement occur in the same transaction, so a removed suggestion releases capacity without allowing concurrent overfill.
 - Room chat is capped at 500 messages per room with a transactionally maintained counter, in addition to the per-member send cooldown and message-length bound.
 - Guests can leave an open room through a trusted transaction that removes membership, presence and the private dashboard pointer. Hosts must close the room rather than orphan it.
-- Expiry is enforced by trusted operations, so expired rooms and invitations cannot be used. Physical recursive cleanup is not currently scheduled on the Vercel API; it must not be described as an active hourly job.
+- Expiry is enforced by trusted operations, so expired rooms and invitations cannot be used. The dashboard also triggers a best-effort, globally throttled Vercel API retention pass: up to 100 expired invitations and one expired room tree are deleted per pass, including nested subcollections and member dashboard pointers. This avoids a Firebase scheduled function; cleanup is opportunistic rather than an hourly guarantee.
 - Anonymous Firebase identities are explicitly denied in the Watch Rooms and Cinema Club rules tests.
 - The shared web Firebase client initializes reCAPTCHA Enterprise App Check. The Vercel Watch Rooms API requires Firebase ID-token verification and consumes one-time App Check tokens before performing trusted operations. This is custom API verification; it does not require enabling Firebase Cloud Functions.
 
