@@ -208,7 +208,7 @@ window.addEventListener("vivid:player-adapter-selected", event => {
   if (role === "host" && roomId && (!adapter || !adapter.capabilities.canPlay || !adapter.capabilities.canSeek)) {
     const state = lastHostPayload || latestRemoteState;
     if (state?.contentId && state?.mediaType) {
-      const payload = { roomId, provider: "vidsrc", status: "paused", contentId: state.contentId, mediaType: state.mediaType, season: state.season, episode: state.episode, position: Math.max(0, Number(localPosition ?? state.position) || 0), duration: Number(state.duration) || 0 };
+      const payload = { roomId, provider: state.provider || "vidsrc", status: "paused", contentId: state.contentId, mediaType: state.mediaType, season: state.season, episode: state.episode, position: Math.max(0, Number(localPosition ?? state.position) || 0), duration: Number(state.duration) || 0 };
       hostStatus = "paused";
       lastHostPayload = payload;
       lastPublishAt = Date.now();
@@ -231,7 +231,7 @@ window.addEventListener("vivid:player-source-changed", event => {
   if (role === "host" && roomId && (lastHostPayload || latestRemoteState?.provider === "vidsrc")) {
     hostStatus = "paused";
     const state = lastHostPayload || latestRemoteState;
-    const payload = { roomId, provider: "vidsrc", status: "paused", contentId: state.contentId, mediaType: state.mediaType, season: state.season, episode: state.episode, position: Math.max(0, Number(localPosition ?? state.position) || 0), duration: Number(state.duration) || 0 };
+    const payload = { roomId, provider: state.provider || "vidsrc", status: "paused", contentId: state.contentId, mediaType: state.mediaType, season: state.season, episode: state.episode, position: Math.max(0, Number(localPosition ?? state.position) || 0), duration: Number(state.duration) || 0 };
     lastHostPayload = payload;
     lastPublishAt = Date.now();
     lastPublishedStatus = "paused";
