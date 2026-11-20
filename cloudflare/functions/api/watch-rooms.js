@@ -1034,7 +1034,7 @@ function response(status, payload, origin) {
 function optionsResponse(origin) {
   const headers = new Headers({
     "Access-Control-Allow-Methods":"POST, OPTIONS",
-    "Access-Control-Allow-Headers":"Authorization, Content-Type, X-Firebase-AppCheck",
+    "Access-Control-Allow-Headers":"Authorization, Content-Type, X-Vivid-Room-Session",
     "Access-Control-Max-Age":"600","Cache-Control":"no-store"
   });
   if (origin) { headers.set("Access-Control-Allow-Origin",origin); headers.set("Vary","Origin"); }
