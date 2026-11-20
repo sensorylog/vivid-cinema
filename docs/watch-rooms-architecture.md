@@ -186,3 +186,6 @@ Each stage is delivered as focused commits on feature/watch-rooms and reviewed b
 - Watch Room chat is capped at 500 messages per room in addition to per-member rate limiting. Queue items can be removed by their author or the host, with the transactional queue counter decremented.
 - Dashboard reads are generation-guarded so a slower response for a previous Firebase user cannot overwrite the current account's room/club list after an auth switch.
 - Closed/expired Watch Rooms and expired invitation documents are processed by a bounded hourly scheduled retention function. Room trees are recursively deleted and member dashboard pointers are removed. Firestore TTL is not relied on for subcollection cleanup.
+
+- Invitation redemption, member departure and host removal update the authoritative member count and existing private dashboard summaries in the same transaction. Room and club previews therefore do not retain stale membership counts.
+- The service worker precaches the Watch Rooms dashboard, lobby, Cinema Club and playback modules. Its shell cache version is bumped so existing installations fetch the new feature assets on update.
