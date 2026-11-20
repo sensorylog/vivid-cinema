@@ -114,7 +114,7 @@ test("Watch Rooms dashboard exposes room creation, invitation entry and club man
 
 test("Watch Rooms dashboard uses trusted backend calls rather than local-only previews", () => {
   const moduleSource = readFileSync(new URL("../scripts/watch-rooms.js", import.meta.url), "utf8");
-  assert.ok(moduleSource.includes("httpsCallable(functions, name)"));
+  assert.ok(moduleSource.includes("callWatchRoomApi"));
   assert.ok(moduleSource.includes('collection(db, "users", user.uid, "watchRooms")'));
   assert.ok(moduleSource.includes('collection(db, "users", user.uid, "cinemaClubs")'));
   assert.ok(moduleSource.includes("createWatchInvitation"));
@@ -129,7 +129,7 @@ test("Watch Rooms backend exposes trusted lifecycle operations and hashed invita
   for (const callable of [
     "createWatchRoom", "createCinemaClub", "createWatchInvitation",
     "redeemWatchInvitation", "revokeWatchInvitation"
-  ]) assert.ok(functions.includes("async function " + callable + " = onCall"), "missing trusted callable: " + callable);
+  ]) assert.ok(functions.includes("async function " + callable + "("), "missing trusted callable: " + callable);
   for (const contract of [
     "randomBytes(10)", "createHash(\"sha256\")", "expiresAt",
     "useCount", "revokedAt", "MAX_ROOM_MEMBERS", "MAX_CLUB_MEMBERS",
@@ -151,13 +151,13 @@ test("Watch Rooms Stage 4 exposes trusted lobby, queue, chat, reactions and host
   const rules = readFileSync(new URL("../firestore.rules", import.meta.url), "utf8");
   for (const name of ["heartbeatWatchRoom","addWatchRoomQueueItem","voteWatchRoomQueueItem","sendWatchRoomMessage","reactToWatchRoomMessage","updateWatchRoomSettings","removeWatchRoomMember","closeWatchRoom"]) {
     assert.ok(index.includes(name), "missing exported callable " + name);
-    assert.ok(lobby.includes("async function " + name + " = onCall"), "missing trusted callable implementation " + name);
+    assert.ok(lobby.includes("async function " + name + "("), "missing trusted callable implementation " + name);
   }
   for (const id of ["wr-room-lobby","wr-lobby-presence","wr-lobby-queue","wr-lobby-chat","wr-host-controls","wr-close-room","wr-queue-form","wr-chat-form"]) assert.ok(page.includes('id="' + id + '"'));
   for (const callable of ["heartbeatWatchRoom","addWatchRoomQueueItem","voteWatchRoomQueueItem","sendWatchRoomMessage","reactToWatchRoomMessage","updateWatchRoomSettings","closeWatchRoom"]) assert.ok(client.includes('call("' + callable + '")'));
   for (const path of ["presence","queue","chat"]) assert.ok(rules.includes("match /" + path + "/{"), "missing member-readable " + path + " rules");
   assert.ok(lobby.includes("PRESENCE_TTL_MS"));
-  assert.ok(lobby.includes("MAX_INSTANCES") || lobby.includes("maxInstances"));
+  assert.ok(lobby.includes("MAX_INSTANCES") || lobby.includes("getAppCheck(firebaseApp).verifyToken"));
 });
 
 
@@ -169,7 +169,7 @@ test("Watch Rooms Stage 5 exposes a trusted VidSrc-only playback clock and clien
   const watch = readFileSync(new URL("../scripts/watch.js", import.meta.url), "utf8");
   const page = readFileSync(new URL("../watch.html", import.meta.url), "utf8");
   assert.ok(functions.includes("publishWatchRoomPlayback"));
-  assert.ok(backend.includes("async function publishWatchRoomPlayback = onCall"));
+  assert.ok(backend.includes("async function publishWatchRoomPlayback("));
   assert.ok(backend.includes('request.data?.provider !== "vidsrc"'));
   assert.ok(backend.includes("requireHost(roomId, uid)"));
   assert.ok(backend.includes("tx.get(roomRef.collection(\"members\").doc(uid))"));
@@ -200,7 +200,7 @@ test("Cinema Club Stage 6 provides persistent watchlists, screening history and 
   const page = readFileSync(new URL("../watch-rooms.html", import.meta.url), "utf8");
   for (const callable of ["addCinemaClubWatchlistItem","removeCinemaClubWatchlistItem","recordCinemaClubScreening","addCinemaClubAfterCreditsReview","addCinemaClubDiscussionMessage"]) {
     assert.ok(index.includes(callable), "missing Stage 6 callable export: " + callable);
-    assert.ok(backend.includes("async function " + callable + " = onCall"), "missing trusted Stage 6 operation: " + callable);
+    assert.ok(backend.includes("async function " + callable + "("), "missing trusted Stage 6 operation: " + callable);
   }
   assert.ok(backend.includes("requireClubMember(clubId, uid)"));
   assert.ok(backend.includes("tx.get(clubRef.collection(\"members\").doc(uid))"));
@@ -248,7 +248,7 @@ test("Watch Room lobby mutations revalidate membership transactionally and seria
   assert.ok(lobby.includes("async function requireRoomMemberInTransaction(tx, roomId, uid)"));
   for (const operation of ["heartbeatWatchRoom","addWatchRoomQueueItem","voteWatchRoomQueueItem","sendWatchRoomMessage","reactToWatchRoomMessage"]) {
     const start = lobby.indexOf("async function " + operation);
-    const end = lobby.indexOf("\\n});", start);
+    const end = lobby.indexOf("\\n}", start);
     assert.ok(lobby.slice(start, end).includes("requireRoomMemberInTransaction(tx, roomId, uid)"), operation + " must re-check membership and room lifecycle inside its transaction");
   }
   assert.ok(lobby.includes("queueCount >= QUEUE_LIMIT"));
@@ -326,7 +326,7 @@ test("Watch Room host administration revalidates authority and updates room poin
   assert.ok(settings.includes('tx.get(roomRef.collection("members"))'));
   assert.ok(close.includes("requireRoomMemberInTransaction(tx, roomId, uid)"));
   assert.ok(close.includes("expiresAt: closedAt"));
-  assert.ok(close.includes('tx.set(db().collection("users")'));
+  assert.ok(close.includes('tx.set(db.collection("users")'));
 });
 
 
