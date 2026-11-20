@@ -1,6 +1,5 @@
-import { auth, db } from "./firebase.js";
+import { auth } from "./firebase.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
-import { collection, getDocs, orderBy, query } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 import { callWatchRoomApi } from "./watch-room-api.js";
 
 const byId = id => document.getElementById(id);
@@ -212,15 +211,15 @@ async function loadDashboard(user) {
   // dashboard without making the page depend on cleanup availability.
   try { await call("cleanupExpiredWatchRooms")({}); }
   catch (error) { console.warn("Vivid Watch Rooms retention pass was skipped:", error); }
-  const [roomSnapshot, clubSnapshot] = await Promise.all([
-    getDocs(query(collection(db, "users", user.uid, "watchRooms"), orderBy("createdAt", "desc"))),
-    getDocs(query(collection(db, "users", user.uid, "cinemaClubs"), orderBy("createdAt", "desc")))
-  ]);
-  // Auth can change while the two dashboard queries are in flight. Never let
-  // an older account's slower response overwrite the current account's view.
+  // Read dashboard indexes through the same authenticated server API that
+  // writes them. This avoids a split client/server permission path and ensures
+  // Firestore timestamps are normalized before the browser renders the list.
+  const dashboard = await call("getWatchRoomDashboard")({});
+  // Auth can change while the dashboard request is in flight. Never let an
+  // older account's slower response overwrite the current account's view.
   if (generation !== dashboardLoadGeneration || auth.currentUser?.uid !== user.uid) return;
-  dashboardState.rooms = roomSnapshot.docs.map(document => document.data());
-  dashboardState.clubs = clubSnapshot.docs.map(document => document.data());
+  dashboardState.rooms = Array.isArray(dashboard.data?.rooms) ? dashboard.data.rooms : [];
+  dashboardState.clubs = Array.isArray(dashboard.data?.clubs) ? dashboard.data.clubs : [];
   if (!dashboardState.clubs.some(club => club.clubId === dashboardState.selectedClubId)) {
     dashboardState.selectedClubId = dashboardState.clubs[0]?.clubId || null;
   }
