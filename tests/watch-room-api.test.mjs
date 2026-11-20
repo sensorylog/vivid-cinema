@@ -46,3 +46,9 @@ test("All Watch Rooms and Cinema Club clients use the shared Vercel API adapter"
     assert.doesNotMatch(source, /firebase-functions\.js|getFunctions\(|httpsCallable\(/);
   }
 });
+
+
+test("Watch Rooms are no longer exported from the Firebase Functions codebase", async () => {
+  const functionsIndex = await readFile(new URL("../functions/index.js", import.meta.url), "utf8");
+  assert.doesNotMatch(functionsIndex, /createWatchRoom|createCinemaClub|createWatchInvitation|redeemWatchInvitation|publishWatchRoomPlayback|archiveCinemaClub|watch-rooms-lobby|watch-rooms-clubs|cleanupExpiredWatchRooms/);
+});
