@@ -150,6 +150,31 @@ async function createWatchRoom(request) {
   };
 }
 
+async function getWatchRoomDashboard(request) {
+  const auth = requireVividUser(request);
+  const userRef = db.collection("users").doc(auth.uid);
+  const [roomSnapshot, clubSnapshot] = await Promise.all([
+    userRef.collection("watchRooms").limit(100).get(),
+    userRef.collection("cinemaClubs").limit(100).get()
+  ]);
+  const timestampMillis = value => value?.toMillis?.() ?? (typeof value === "number" ? value : null);
+  const normalize = (document, idField) => {
+    const data = document.data();
+    return {
+      ...data,
+      [idField]: data[idField] || document.id,
+      joinedAt: timestampMillis(data.joinedAt),
+      createdAt: timestampMillis(data.createdAt),
+      ...(data.expiresAt != null ? { expiresAt: timestampMillis(data.expiresAt) } : {})
+    };
+  };
+  const newestFirst = (a, b) => Number(b.createdAt || b.joinedAt || 0) - Number(a.createdAt || a.joinedAt || 0);
+  return {
+    rooms: roomSnapshot.docs.map(document => normalize(document, "roomId")).sort(newestFirst),
+    clubs: clubSnapshot.docs.map(document => normalize(document, "clubId")).sort(newestFirst)
+  };
+}
+
 async function createCinemaClub(request) {
   const auth = requireVividUser(request);
   const name = boundedText(request.data?.name, "Club name", 48, true);
@@ -877,6 +902,7 @@ async function archiveCinemaClub(request) {
 
 const operations = {
   createWatchRoom,
+  getWatchRoomDashboard,
   createCinemaClub,
   createWatchInvitation,
   redeemWatchInvitation,
@@ -903,7 +929,7 @@ const operations = {
 };
 
 const ROUTES = new Set([
-  "createWatchRoom","createCinemaClub","createWatchInvitation","redeemWatchInvitation","revokeWatchInvitation",
+  "createWatchRoom","getWatchRoomDashboard","createCinemaClub","createWatchInvitation","redeemWatchInvitation","revokeWatchInvitation",
   "cleanupExpiredWatchRooms","heartbeatWatchRoom","addWatchRoomQueueItem","removeWatchRoomQueueItem","voteWatchRoomQueueItem",
   "sendWatchRoomMessage","reactToWatchRoomMessage","updateWatchRoomSettings","removeWatchRoomMember","leaveWatchRoom",
   "closeWatchRoom","publishWatchRoomPlayback","addCinemaClubWatchlistItem","removeCinemaClubWatchlistItem",
