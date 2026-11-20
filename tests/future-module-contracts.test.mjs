@@ -469,3 +469,10 @@ test("Watch Rooms surfaces the safe failed-precondition cause instead of hiding 
   assert.ok(errors.includes('if (code.includes("failed-precondition")) return error?.message'));
   assert.ok(!errors.includes("This space is no longer available for that action."));
 });
+
+
+test("Firebase App Check uses the newly supplied reCAPTCHA Enterprise site key", () => {
+  const firebase = readFileSync(new URL("../scripts/firebase.js", import.meta.url), "utf8");
+  assert.ok(firebase.includes('const RECAPTCHA_ENTERPRISE_SITE_KEY = "6LfEHikuAAAAAE3GvgM4_elW5wj035as6zBafGWu";'));
+  assert.ok(!firebase.includes("6Lfs5PMtAAAAAAH8_fR_A6g4uAftFvAv0uNsehTB"));
+});
