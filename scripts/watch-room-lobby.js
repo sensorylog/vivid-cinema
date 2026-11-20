@@ -1,4 +1,4 @@
-import { appCheck, auth, db } from "./firebase.js";
+import { auth, db } from "./firebase.js";
 import { collection, limit, onSnapshot, orderBy, query } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 import { callWatchRoomApi } from "./watch-room-api.js";
 const byId = id => document.getElementById(id);
