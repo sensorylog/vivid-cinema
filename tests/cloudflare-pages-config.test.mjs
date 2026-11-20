@@ -106,7 +106,8 @@ test("Cloudflare Pages bundles the Watch Rooms API from its isolated Functions d
   const cloudflarePackage = JSON.parse(await readFile(new URL("../cloudflare/package.json", import.meta.url), "utf8"));
   assert.ok(build.includes("pages"));
   assert.ok(build.includes("functions"));
-  assert.ok(build.includes('"--outfile", path.join(output, "_worker.js")'));
+  assert.ok(build.includes('"--outdir", path.join(output, "_worker.js")'));
+  assert.ok(!build.includes('"--outfile"'), "Do not write Wrangler multipart upload payload to Pages _worker.js");
   assert.ok(build.includes('"--build-output-directory", output'));
   assert.ok(build.includes('"--compatibility-flags", "nodejs_compat"'));
   assert.ok(!build.includes('"--config"'), "Wrangler Pages Functions build does not support --config");
