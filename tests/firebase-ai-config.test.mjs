@@ -1,4 +1,5 @@
 import test from "node:test";
+import { onRequest as vividAiRoute } from "../cloudflare/functions/api/ai.js";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
@@ -81,3 +82,19 @@ test("only explicit Recall clue expansion and chat expose AI operations", () => 
   assert.match(aiSource, /export async function getRecallClues/);
   assert.match(aiSource, /export async function sendRecallChatMessage/);
 });
+
+test("production AI health route reports only safe binding configuration", async () => {
+  const response = await vividAiRoute({
+    request: new Request("https://vivid.test/api/ai", { method: "GET" }),
+    env: { AI: { run() {} }, FIREBASE_SERVICE_ACCOUNT_JSON: "{\"project_id\":\"vivid-cinema\"}" }
+  });
+  assert.equal(response.status, 200);
+  const payload = await response.json();
+  assert.equal(payload.ok, true);
+  assert.equal(payload.provider, "cloudflare-workers-ai");
+  assert.equal(payload.checks.aiBinding, true);
+  assert.equal(payload.checks.firebaseServiceAccount, true);
+  assert.equal(payload.checks.firebaseProject, true);
+  assert.doesNotHaveProperty(payload, "privateKey");
+});
+
