@@ -2,7 +2,7 @@ import { createHash, randomBytes } from "node:crypto";
 import { cert, getApps, initializeApp } from "firebase-admin/app";
 import { getAuth } from "firebase-admin/auth";
 import { getAppCheck } from "firebase-admin/app-check";
-import { getFirestore, Timestamp, FieldValue } from "firebase-admin/firestore";
+import { getFirestore, Timestamp } from "firebase-admin/firestore";
 
 const serviceAccountRaw = process.env.FIREBASE_SERVICE_ACCOUNT_JSON;
 if (!serviceAccountRaw) throw new Error("FIREBASE_SERVICE_ACCOUNT_JSON is not configured for the Vivid API.");
@@ -268,7 +268,6 @@ async function revokeWatchInvitation(request) {
  */
 
 
-const ROOM_MEMBER_LIMIT = 12;
 const QUEUE_LIMIT = 50;
 const MESSAGE_LIMIT = 500;
 const ROOM_CHAT_LIMIT = 500;
