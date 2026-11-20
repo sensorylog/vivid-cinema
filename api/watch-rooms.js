@@ -268,6 +268,70 @@ async function revokeWatchInvitation(request) {
  */
 
 
+const ROOM_MEMBER_LIMIT = 12;
+const QUEUE_LIMIT = 50;
+const MESSAGE_LIMIT = 500;
+const ROOM_CHAT_LIMIT = 500;
+const PRESENCE_TTL_MS = 90_000;
+
+function requireUser(request) {
+  if (!request.auth || request.auth.token?.firebase?.sign_in_provider === "anonymous") {
+    throw new HttpsError("unauthenticated", "Sign in with a Vivid account to use this room.");
+  }
+  return request.auth.uid;
+}
+
+function validId(value, label) {
+  if (typeof value !== "string" || !/^[A-Za-z0-9_-]{1,150}$/.test(value)) {
+    throw new HttpsError("invalid-argument", "A valid " + label + " is required.");
+  }
+  return value;
+}
+
+function cleanText(value, label, max, required = true) {
+  if (typeof value !== "string") throw new HttpsError("invalid-argument", label + " must be text.");
+  const text = value.trim();
+  if ((required && !text) || text.length > max) {
+    throw new HttpsError("invalid-argument", label + " must be " + (required ? "1–" : "0–") + max + " characters.");
+  }
+  return text;
+}
+
+async function requireRoomMember(roomId, uid) {
+  const roomRef = db.collection("rooms").doc(roomId);
+  const memberRef = roomRef.collection("members").doc(uid);
+  const [room, member] = await Promise.all([roomRef.get(), memberRef.get()]);
+  const expiresAt = room.exists ? room.data().expiresAt?.toMillis?.() : null;
+  if (!room.exists || room.data().status !== "open" || !Number.isFinite(expiresAt) || expiresAt <= Date.now() || !member.exists) {
+    throw new HttpsError("permission-denied", "You are not a member of an open room.");
+  }
+  return { roomRef, room: room.data(), memberRef, member: member.data() };
+}
+
+
+async function requireRoomMemberInTransaction(tx, roomId, uid) {
+  const roomRef = db.collection("rooms").doc(roomId);
+  const memberRef = roomRef.collection("members").doc(uid);
+  const [roomSnapshot, memberSnapshot] = await Promise.all([tx.get(roomRef), tx.get(memberRef)]);
+  const room = roomSnapshot.exists ? roomSnapshot.data() : null;
+  const expiresAt = room?.expiresAt?.toMillis?.();
+  if (!room || room.status !== "open" || !Number.isFinite(expiresAt) || expiresAt <= Date.now() || !memberSnapshot.exists) {
+    throw new HttpsError("permission-denied", "You are not a member of an open room.");
+  }
+  return { roomRef, room, memberRef, member: memberSnapshot.data() };
+}
+
+async function requireHost(roomId, uid) {
+  const context = await requireRoomMember(roomId, uid);
+  if (context.room.hostUid !== uid || context.member.role !== "host") {
+    throw new HttpsError("permission-denied", "Only the room host can change these settings.");
+  }
+  return context;
+}
+
+// Presence is a short lease, not durable membership. Clients refresh it while
+// the lobby is open; stale leases naturally expire and are ignored by readers.
+
 async function heartbeatWatchRoom(request) {
   const uid = requireUser(request);
   const roomId = validId(request.data?.roomId, "room ID");
@@ -521,6 +585,35 @@ async function publishWatchRoomPlayback(request) {
     tx.set(stateRef, { provider: "vidsrc", contentId, mediaType, season, episode, status, position, duration, hostUid: uid, revision, updatedAt: now, lastEventAt: now });
     return { accepted: true, revision };
   });
+}
+
+const MAX_WATCHLIST_ITEMS = 100;
+const MAX_DISCUSSION_MESSAGES = 200;
+
+function clean(value, label, max, optional = false) {
+  if (typeof value !== "string") throw new HttpsError("invalid-argument", label + " must be text.");
+  const text = value.trim();
+  if ((!optional && !text) || text.length > max) throw new HttpsError("invalid-argument", label + " must be " + (optional ? "0–" : "1–") + max + " characters.");
+  return text;
+}
+
+function mediaIdentity(data) {
+  const mediaType = data?.mediaType;
+  const contentId = typeof data?.contentId === "string" ? data.contentId : "";
+  if (!["movie", "tv"].includes(mediaType) || !new RegExp("^" + mediaType + ":[0-9]{1,12}$").test(contentId)) {
+    throw new HttpsError("invalid-argument", "Choose a valid Vivid movie or TV catalogue item.");
+  }
+  return { mediaType, contentId };
+}
+
+async function requireClubMember(clubId, uid) {
+  const clubRef = db.collection("cinemaClubs").doc(clubId);
+  const memberRef = clubRef.collection("members").doc(uid);
+  const [club, member] = await Promise.all([clubRef.get(), memberRef.get()]);
+  if (!club.exists || club.data().status !== "active" || !member.exists) {
+    throw new HttpsError("permission-denied", "You must be a member of an active Cinema Club.");
+  }
+  return { clubRef, club: club.data(), member };
 }
 
 async function addCinemaClubWatchlistItem(request) {
