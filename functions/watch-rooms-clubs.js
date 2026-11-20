@@ -157,16 +157,23 @@ export const leaveCinemaClub = onCall({ region: "us-central1", maxInstances: 20 
   const memberRef = clubRef.collection("members").doc(uid);
   const pointerRef = db().collection("users").doc(uid).collection("cinemaClubs").doc(clubId);
   await db().runTransaction(async tx => {
-    const [club, member] = await Promise.all([tx.get(clubRef), tx.get(memberRef)]);
+    const [club, member, members] = await Promise.all([
+      tx.get(clubRef), tx.get(memberRef), tx.get(clubRef.collection("members"))
+    ]);
     if (!club.exists || club.data().status !== "active" || !member.exists) {
       throw new HttpsError("permission-denied", "You must be a member of an active Cinema Club.");
     }
     if (member.data().role === "owner" || club.data().ownerUid === uid) {
       throw new HttpsError("failed-precondition", "The club owner must archive the club instead of leaving it.");
     }
+    const nextMemberCount = Math.max(1, Number(club.data().memberCount || 1) - 1);
     tx.delete(memberRef);
     tx.delete(pointerRef);
-    tx.update(clubRef, { memberCount: Math.max(1, Number(club.data().memberCount || 1) - 1), updatedAt: Timestamp.now() });
+    tx.update(clubRef, { memberCount: nextMemberCount, updatedAt: Timestamp.now() });
+    members.docs.forEach(existing => {
+      if (existing.id === uid) return;
+      tx.set(db().collection("users").doc(existing.id).collection("cinemaClubs").doc(clubId), { memberCount: nextMemberCount }, { merge: true });
+    });
   });
   return { left: true };
 });
