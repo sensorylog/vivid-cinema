@@ -189,3 +189,6 @@ Each stage is delivered as focused commits on feature/watch-rooms and reviewed b
 
 - Invitation redemption, member departure and host removal update the authoritative member count and existing private dashboard summaries in the same transaction. Room and club previews therefore do not retain stale membership counts.
 - The service worker precaches the Watch Rooms dashboard, lobby, Cinema Club and playback modules. Its shell cache version is bumped so existing installations fetch the new feature assets on update.
+
+- Room access now fails closed if the parent room lacks a valid Firestore timestamp expiry. The same expiry requirement is enforced in Firestore rules, callable membership checks and playback publication.
+- Lobby listeners and presence heartbeats are torn down on pagehide and restored on back-forward cache navigation. Hosts can manage both online and offline members, not just currently active presence leases.
