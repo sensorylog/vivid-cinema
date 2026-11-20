@@ -55,9 +55,7 @@ test("anime playback excludes the unverified Aniweeb source and automatically fa
 
 test("movie and TV Player 1 exposes seven sources while anime providers remain separate", () => {
   assert.match(source, /: \["vidapi", "vidsrc", "embedwave", "vidfast", "ezvidapi", "embedapistream", "moviesapi"\];/);
-  assert.match(source, /if \(source === "vidapi" \|\| source === "vidsrc" \|\| source === "vidfast" \|\| source === "embedapistream" \|\| source === "moviesapi"\) return hasFallbackId\(\);\r?
-\s*if \(source === "embedwave" \|\| source === "ezvidapi"\) return hasTmdbId\(\);\r?
-\s*return false;/);
+  assert.match(source, /if \(source === "vidapi" \|\| source === "vidsrc" \|\| source === "vidfast" \|\| source === "embedapistream" \|\| source === "moviesapi"\) return hasFallbackId\(\);\r?\n\s*if \(source === "embedwave" \|\| source === "ezvidapi"\) return hasTmdbId\(\);\r?\n\s*return false;/);
   assert.match(source, /button\.hidden = isAnimePlayback\(\) \? !\["vidapi", "vidsrc", "vidplus", "vidlink"\]\.includes\(source\) : !\["vidapi", "vidsrc", "embedwave", "vidfast", "ezvidapi", "embedapistream", "moviesapi"\]\.includes\(source\)/);
   assert.match(source, /<span class="vivid-server-count">7 sources<\/span>/);
   assert.doesNotMatch(source, /mountPlaybackServerSettings\(serverPanel/);
@@ -144,4 +142,8 @@ test("only the verified VidSrc origin emits Watch Room playback bridge events", 
 });
 
 
-test("Player 1 publishes provider identity for the shared Watch Room adapter layer", async () => { const {readFile}=await import("node:fs/promises"); const source=await readFile(new URL("../scripts/watch.js",import.meta.url),"utf8"); assert.match(source,/new CustomEvent\("vivid:player-adapter-selected",\s*\{ detail: \{ playerId: "player1", providerId: source \} \}\)/); });
+test("Player 1 publishes provider identity for the shared Watch Room adapter layer", async () => {
+  const { readFile } = await import("node:fs/promises");
+  const source = await readFile(new URL("../scripts/watch.js", import.meta.url), "utf8");
+  assert.match(source, /new CustomEvent\("vivid:player-adapter-selected",\s*\{ detail: \{ playerId: "player1", providerId: source \} \}\)/);
+});
