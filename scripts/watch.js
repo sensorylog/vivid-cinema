@@ -256,6 +256,7 @@ function setPlayerSource(source, params, startAt = 0) {
   }
   activeSource = source;
   window.dispatchEvent(new CustomEvent("vivid:player-source-changed", { detail: { source } }));
+  window.dispatchEvent(new CustomEvent("vivid:player-adapter-selected", { detail: { playerId: "player1", providerId: source } }));
   player.closest(".vivid-player-frame")?.classList.toggle("is-embedwave", source === "embedwave");
   sourceAttempted.add(source);
   const status = $("player-status");
