@@ -552,7 +552,7 @@ window.addEventListener("message", event => {
   const data = event.data;
   if (!data || typeof data.type !== "string" || !data.type.startsWith("cinesrc:")) return;
   const type = data.type;
-  if (!["cinesrc:ready", "cinesrc:play", "cinesrc:pause", "cinesrc:timeupdate", "cinesrc:seeked", "cinesrc:ended"].includes(type)) return;
+  if (!["cinesrc:ready", "cinesrc:play", "cinesrc:pause", "cinesrc:timeupdate", "cinesrc:seeked", "cinesrc:ratechange", "cinesrc:ended"].includes(type)) return;
   let status = localStatus;
   if (type === "cinesrc:play") status = "playing";
   else if (type === "cinesrc:pause") status = "paused";
