@@ -713,16 +713,20 @@ test("Watch Room playback uses member-only realtime snapshots and trusted revisi
     const write = backend.slice(writeStart, writeEnd);
     assert.ok(write.includes("expectedRevision !== currentRevision"));
     assert.ok(write.includes('"stale-revision"'));
-    assert.ok(write.includes("tx.get(roomRef.collection(\\"members\\").doc(uid))"));
+    assert.ok(write.includes('tx.get(roomRef.collection("members").doc(uid))'));
   }
   assert.ok(client.includes('call("getWatchRoomPlaybackSnapshot")'), "trusted snapshot fetch remains available for revision conflict recovery");
   assert.ok(client.includes("playbackConnectionGeneration"));
   assert.ok(client.includes("onSnapshot("));
   assert.ok(client.includes('doc(db, "rooms", requestedRoomId, "playback", "current")'));
   assert.ok(client.includes("expectedRevision: playbackRevision"));
-  assert.ok(client.includes("data.reason !== \\"stale-revision\\""));
-  assert.doesNotMatch(client, /schedulePlaybackRefresh\\(|playbackPollDelayMs/);
-  assert.match(rules, /match \\/playback\\/\\{stateId\\}[\\s\\S]*allow get, list: if isRoomMember\\(roomId\\);[\\s\\S]*allow create, update, delete: if false;/);
+  assert.ok(client.includes('data.reason !== "stale-revision"'));
+  assert.doesNotMatch(client, /schedulePlaybackRefresh\(|playbackPollDelayMs/);
+  const playbackRulesStart = rules.indexOf("match /playback/{stateId}");
+  const playbackRulesEnd = rules.indexOf("match /cinemaClubs/{clubId}", playbackRulesStart);
+  const playbackRules = rules.slice(playbackRulesStart, playbackRulesEnd);
+  assert.ok(playbackRules.includes("allow get, list: if isRoomMember(roomId);"));
+  assert.ok(playbackRules.includes("allow create, update, delete: if false;"));
 });
 
 test("Watch Room Start Screening is host-authorized and launches the same queued title for members", () => {
