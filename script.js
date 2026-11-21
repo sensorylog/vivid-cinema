@@ -221,7 +221,8 @@ function wireRails(){
    const el=$(btn.dataset.scroll);
    if(el)el.scrollBy({left:el.clientWidth*.82*Number(btn.dataset.dir),behavior:"smooth"});
  }));
- document.querySelectorAll(".vivid-rail").forEach(rail=>rail.addEventListener("scroll",()=>updateRailControls(rail),{passive:true}));
+ // Rail overflow controls are updated after data renders and on resize.
+ // Reading scrollWidth/clientWidth on every rail scroll adds avoidable layout work.
  window.addEventListener("resize",()=>document.querySelectorAll(".vivid-rail").forEach(updateRailControls),{passive:true});
  document.addEventListener("click",e=>{
    const button=e.target.closest("[data-load-section]");
@@ -690,8 +691,23 @@ function wireReleaseAlerts(){
  document.addEventListener("click",event=>{const dismiss=event.target.closest("[data-dismiss-release]");if(dismiss){const key=dismiss.dataset.dismissRelease;const remote=serverReleaseAlerts.find(alert=>alert.key===key||alert.docId===key);if(remote){void dismissServerReleaseAlert(remote.docId);serverReleaseAlerts=serverReleaseAlerts.filter(alert=>alert.docId!==remote.docId)}dismissReleaseAlert(key);renderReleaseAlerts();return}if(popover&&!popover.hidden&&!event.target.closest("#release-alert-popover")&&!event.target.closest("#release-alert-button")){popover.hidden=true;button?.setAttribute("aria-expanded","false")}});
 }
 
-window.addEventListener("scroll",()=>{$("topbar")?.classList.toggle("is-scrolled",scrollY>18)},{passive:true});
+let homeTopbarScrollFrame = 0;
+let homeTopbarScrollState = null;
+function syncHomeTopbarScroll() {
+  homeTopbarScrollFrame = 0;
+  const topbar = $("topbar");
+  if (!topbar) return;
+  const next = window.scrollY > 18;
+  if (next === homeTopbarScrollState) return;
+  homeTopbarScrollState = next;
+  topbar.classList.toggle("is-scrolled", next);
+}
+window.addEventListener("scroll", () => {
+  if (homeTopbarScrollFrame) return;
+  homeTopbarScrollFrame = window.requestAnimationFrame(syncHomeTopbarScroll);
+}, { passive: true });
 document.addEventListener("DOMContentLoaded",()=>{
+  syncHomeTopbarScroll();
   startCinemaReminderLoop();
   // Keep a browser that already allowed notifications registered (no prompt).
   void ensureCinemaPush();
