@@ -110,6 +110,7 @@ jobs:
           "$apksigner_path" verify --verbose "release-output/$apk_name"
           aapt_path="$(find "$ANDROID_HOME/build-tools" -type f -name aapt -print -quit)"
           "$aapt_path" dump badging "release-output/$apk_name" | grep -F "package: name='com.vividcinema.app'"
+          "$aapt_path" dump permissions "release-output/$apk_name" | grep -F "android.permission.REQUEST_INSTALL_PACKAGES"
           echo "VIVID_ANDROID_APK_NAME=$apk_name" >> "$GITHUB_ENV"
 
       - name: Verify Vivid icon is embedded in the APK
