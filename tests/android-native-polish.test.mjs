@@ -134,6 +134,14 @@ test("native Android project generation registers both plugins idempotently", as
     const navigationPlugin = await readFile(path.join(javaRoot, "VividNavigationPlugin.java"), "utf8");
     const webChromeClient = await readFile(path.join(javaRoot, "VividWebChromeClient.java"), "utf8");
     const manifest = await readFile(manifestPath, "utf8");
+    const [trackedUpdater, trackedNavigation, trackedWebChrome] = await Promise.all([
+      readFile(new URL("../native/android/VividUpdaterPlugin.java", import.meta.url), "utf8"),
+      readFile(new URL("../native/android/VividNavigationPlugin.java", import.meta.url), "utf8"),
+      readFile(new URL("../native/android/VividWebChromeClient.java", import.meta.url), "utf8")
+    ]);
+    assert.equal(updaterPlugin, trackedUpdater);
+    assert.equal(navigationPlugin, trackedNavigation);
+    assert.equal(webChromeClient, trackedWebChrome);
     assert.match(gradle, /versionCode 1100001/);
     assert.match(manifest, /android\.permission\.REQUEST_INSTALL_PACKAGES/);
     assert.match(manifest, /android\.permission\.RECORD_AUDIO/);
