@@ -913,6 +913,7 @@ function renderShell(params) {
     document.querySelector(".vivid-wr-player-details")?.remove();
     const stage = $("wr-cinema-stage");
     const host = $("wr-screening-player-host");
+    const watchContentForRoom = $("watch-content");
     const overlayForRoom = $("player-overlay");
     const secondaryForRoom = $("vivid-tflix-player");
     const playerInfoForRoom = overlayForRoom?.querySelector(".vivid-player-info");
@@ -937,7 +938,8 @@ function renderShell(params) {
       const wordmark = stage.querySelector(".vivid-wr-cinema-stage__wordmark");
       stage.insertBefore(slot, wordmark);
       if (playerInfoForRoom) stage.insertBefore(detailsPanel, wordmark);
-      host.remove();
+      watchContentForRoom?.replaceChildren();
+      host.hidden = true;
       roomPlayerSlot = slot;
       roomPlayerLayout = mountWatchRoomPlayerLayout({ slot, overlay: overlayForRoom });
     }
