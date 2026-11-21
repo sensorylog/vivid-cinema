@@ -30,6 +30,16 @@ body.vivid-watch-room-mode .vivid-player-status{width:min(88%,520px)!important;m
 body.vivid-watch-room-mode #player-server-panel{position:fixed!important;z-index:100002!important;top:max(60px,calc(env(safe-area-inset-top) + 54px))!important;right:12px!important;width:min(340px,calc(100vw - 24px))!important;max-height:min(70dvh,620px)!important;overflow:auto!important;border:1px solid var(--cinema-line)!important;border-radius:16px!important;background:rgba(14,15,21,.96)!important;box-shadow:0 18px 60px rgba(0,0,0,.5)!important;backdrop-filter:blur(22px)}
 body.vivid-watch-room-mode #player-server-panel[hidden]{display:none!important}
 
+body.vivid-watch-room-mode #vivid-tflix-player{position:fixed!important;z-index:100000!important;inset:0!important;width:100vw!important;height:100dvh!important;max-width:none!important;margin:0!important;padding:0!important;overflow:hidden!important;background:#000!important}
+body.vivid-watch-room-mode #vivid-tflix-player[hidden]{display:none!important}
+body.vivid-watch-room-mode #vivid-tflix-player .vivid-tflix-card,body.vivid-watch-room-mode #vivid-tflix-player .vivid-tflix-layout,body.vivid-watch-room-mode #vivid-tflix-player .vivid-tflix-player-col,body.vivid-watch-room-mode #vivid-tflix-player .vivid-tflix-screen{display:flex!important;flex-direction:column!important;width:100%!important;height:100%!important;min-height:0!important;max-width:none!important;margin:0!important;padding:0!important;border:0!important;border-radius:0!important;background:#000!important}
+body.vivid-watch-room-mode #vivid-tflix-player .vivid-tflix-topbar,body.vivid-watch-room-mode #vivid-tflix-player .vivid-tflix-sidebar{display:none!important}
+body.vivid-watch-room-mode #vivid-tflix-player #vivid-tflix-frame{display:block!important;flex:1!important;width:100%!important;height:100%!important;min-height:0!important;border:0!important;background:#000!important}
+body.vivid-watch-room-mode #vivid-tflix-player #vivid-tflix-placeholder{position:absolute!important;inset:0!important;display:grid!important;place-content:center!important;justify-items:center!important;gap:12px!important;background:#000!important;color:#f5f4f8!important}
+body.vivid-watch-room-mode #vivid-tflix-player #vivid-tflix-placeholder[hidden],body.vivid-watch-room-mode #vivid-tflix-player #vivid-tflix-frame[hidden]{display:none!important}
+body.vivid-watch-room-mode #vivid-tflix-player #vivid-tflix-start{min-height:42px;padding:0 18px;border:1px solid var(--cinema-line);border-radius:999px;background:rgba(255,255,255,.1);color:white;font:inherit}
+
+
 .vivid-watch-room-cinema-page .vivid-watch-player,.vivid-watch-room-cinema-page .vivid-watch-player-wrap,.vivid-watch-room-cinema-page .vivid-player-shell{width:100%!important;max-width:none!important;margin:0!important;border-radius:0!important}
 .vivid-watch-room-cinema-page .vivid-watch-layout,.vivid-watch-room-cinema-page .vivid-watch-content,.vivid-watch-room-cinema-page #watch-content{max-width:none!important}
 .vivid-watch-room-cinema-page #watch-content .vivid-watch-details,.vivid-watch-room-cinema-page #watch-content .vivid-watch-recommendations,.vivid-watch-room-cinema-page #watch-content .vivid-watch-next-episode,.vivid-watch-room-cinema-page #watch-content .vivid-watch-back-link{display:none!important}
