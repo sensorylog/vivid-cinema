@@ -1475,10 +1475,10 @@ function handlePlayerEvent(event) {
   }
   if (activeSource === "vidsrc" && event.origin === "https://vidsrc.sh") {
     const providerStatus = String(data.player_status || "").toLowerCase();
-    if (["playing", "paused", "seeked", "timeupdate", "progress", "completed", "ended", "ready", "canplay", "loadedmetadata"].includes(providerStatus)) {
+    if (["play", "playing", "pause", "paused", "seeked", "timeupdate", "progress", "completed", "ended", "ready", "canplay", "loadedmetadata"].includes(providerStatus)) {
       const normalizedStatus = ["completed", "ended"].includes(providerStatus) ? "ended"
-        : providerStatus === "paused" ? "paused"
-        : providerStatus === "playing" ? "playing"
+         : ["paused", "pause"].includes(providerStatus) ? "paused"
+        : ["playing", "play"].includes(providerStatus) ? "playing"
         : providerStatus;
       window.dispatchEvent(new CustomEvent("vivid:provider-playback", { detail: {
         provider: "vidsrc", origin: event.origin, event: providerStatus, eventType: providerStatus,
