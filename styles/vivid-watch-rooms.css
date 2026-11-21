@@ -189,6 +189,7 @@ html[data-vivid-theme="light"] .vivid-wr-dialog{background:#fff;color:#171720}ht
 body.vivid-wr-screening-open{overflow:hidden!important;overscroll-behavior:none}
 body.vivid-wr-screening-open .vivid-watch-rooms-main{width:100%;max-width:none;margin:0;padding:0}
 body.vivid-wr-screening-open .vivid-wr-lobby{margin:0}
+body.vivid-wr-screening-open #watch-rooms-private>:not(#wr-room-lobby){display:none!important}
 body.vivid-wr-screening-open #wr-room-lobby>.vivid-wr-lobby-heading,
 body.vivid-wr-screening-open #wr-room-lobby>.vivid-wr-lobby-explainer,
 body.vivid-wr-screening-open #wr-room-lobby>.vivid-wr-lobby-grid,
