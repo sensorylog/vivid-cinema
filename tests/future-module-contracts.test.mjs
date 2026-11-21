@@ -450,7 +450,7 @@ test("Watch Room synchronization compensates for guest device clock skew", () =>
   assert.ok(heartbeat.includes("serverTime: Date.now()"));
   assert.ok(client.includes("clockOffsetMs = serverTime - ((startedAt + finishedAt) / 2)"));
   assert.ok(client.includes("getExpectedPlaybackPosition(state, { nowMs: now, clockOffsetMs })"));
-  assert.ok(sync.includes("Number(nowMs) + Number(clockOffsetMs || 0) - updatedAt"));
+  assert.ok(sync.includes("Number(nowMs) + Number(clockOffsetMs || 0) - positionAt"));
   assert.ok(sync.includes("PLAYBACK_DRIFT_TOLERANCE_SECONDS = 1.5"));
 });
 
@@ -469,7 +469,7 @@ test("Watch Room sync extrapolates local time and keeps command events ahead of 
   assert.ok(client.includes("capturedAtMs: payload.positionAtMs"));
   for (const backend of [node, cloudflare]) assert.ok(backend.includes("positionAtMs = Number.isFinite(capturedAtMsInput)"));
   assert.ok(client.includes("syncReconcileTimer = window.setInterval"));
-  assert.ok(client.includes("if (role !== \"guest\" || joinedPlayback)"), "guest player should preload while the room is waiting");
+  assert.ok(client.includes("if (hasActiveScreening && (role !== \"guest\" || joinedPlayback))"), "guest player should preload while the room is waiting");
   assert.ok(client.includes("Your player is ready. Tap Play once to prepare it"));
   assert.ok(client.includes("else if (detail.status === \"playing\") pauseGuestPlayer("), "guest preparation playback must be held until host playback starts");
   assert.ok(client.includes("async function refreshPlaybackSnapshot()"));
