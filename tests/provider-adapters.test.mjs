@@ -6,6 +6,7 @@ import {
   providerSupports,
   sendProviderCommand
 } from "../scripts/playback/provider-adapters.js";
+import { getGuestPlaybackAction } from "../scripts/playback/watch-room-playback-policy.js";
 
 test("provider registry keeps Player 1 and Player 2 identities distinct", () => {
   assert.equal(getProviderAdapter("player1", "vidsrc").label, "VidSrc");
@@ -59,4 +60,12 @@ test("CineSRC uses its documented command protocol and verified origin", () => {
   assert.equal(sendProviderCommand({ adapter, frame, action: "seek", position: 123.5 }), true);
   assert.deepEqual(calls[2], [{ type: "cinesrc:command", command: "seek", args: [123.5] }, "https://cinesrc.st"]);
   assert.equal(sendProviderCommand({ adapter, frame: { ...frame, src: "https://evil.example/embed" }, action: "play" }), false);
+});
+
+test("guest playback stays paused until the member explicitly joins the screening", () => {
+  assert.equal(getGuestPlaybackAction({ role: "guest", joinedPlayback: false, playbackStatus: "playing" }), "pause");
+  assert.equal(getGuestPlaybackAction({ role: "guest", joinedPlayback: false, playbackStatus: "paused" }), "pause");
+  assert.equal(getGuestPlaybackAction({ role: "guest", joinedPlayback: true, playbackStatus: "playing" }), "follow");
+  assert.equal(getGuestPlaybackAction({ role: "guest", joinedPlayback: true, playbackStatus: "paused" }), "pause");
+  assert.equal(getGuestPlaybackAction({ role: "host", joinedPlayback: false, playbackStatus: "playing" }), "ignore");
 });
