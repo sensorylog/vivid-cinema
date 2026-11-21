@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#050608">
+  <meta name="description" content="A private, synchronized Vivid Cinema screening.">
+  <title>Private Screening · Vivid Cinema</title>
+  <link rel="icon" href="icons/vivid-icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.9.1/font/bootstrap-icons.css">
+  <link rel="stylesheet" href="styles/vivid-foundation.css">
+  <link rel="stylesheet" href="styles/vivid-system.css">
+  <link rel="stylesheet" href="styles/vivid-watch.css">
+  <link rel="stylesheet" href="styles/vivid-cleanup.css">
+  <link rel="stylesheet" href="styles/vivid-watch-polish.css">
+  <link rel="stylesheet" href="styles/vivid-watch-room-cinema.css">
+</head>
+<body data-vivid-page="watch-room-cinema" class="vivid-watch-room-cinema-page">
+  <main class="vivid-cinema-shell">
+    <header class="vivid-cinema-topbar">
+      <a class="vivid-cinema-back" href="watch-rooms.html" id="wr-cinema-back"><i class="bi bi-arrow-left"></i><span>Room lobby</span></a>
+      <div class="vivid-cinema-room-mark"><span class="vivid-cinema-live-dot"></span><span id="wr-cinema-room-name">PRIVATE SCREENING</span></div>
+      <button class="vivid-cinema-icon-button" id="wr-cinema-exit" type="button" aria-label="Leave screening" title="Back to room lobby"><i class="bi bi-x-lg"></i></button>
+    </header>
+    <section class="vivid-cinema-stage" aria-label="Shared movie player">
+      <div id="watch-content" aria-live="polite">
+        <div class="vivid-cinema-loading" role="status"><span class="vivid-cinema-spinner"></span><p>Preparing your cinema…</p></div>
+      </div>
+    </section>
+    <section class="vivid-cinema-voice" id="wr-voice-call" hidden aria-label="Room voice">
+      <div class="vivid-cinema-voice-actions">
+        <span class="vivid-cinema-voice-label"><i class="bi bi-soundwave"></i> VOICE</span>
+        <button class="vivid-cinema-control" id="wr-voice-join" type="button"><i class="bi bi-mic"></i><span>Join voice</span></button>
+        <button class="vivid-cinema-control" id="wr-voice-mute" type="button" hidden><i class="bi bi-mic-mute"></i><span>Mute</span></button>
+        <button class="vivid-cinema-control" id="wr-voice-leave" type="button" hidden><i class="bi bi-telephone-x"></i><span>Leave</span></button>
+      </div>
+      <p id="wr-voice-status" role="status" aria-live="polite">Voice is optional.</p>
+      <ul id="wr-voice-participants" class="vivid-cinema-participants"></ul>
+    </section>
+    <p class="vivid-cinema-sync-status" id="vivid-cinema-sync-status" role="status" aria-live="polite">Connecting to the host’s screening…</p>
+  </main>
+  <script type="module" src="scripts/watch.js"></script>
+  <script type="module" src="scripts/watch-room-playback.js"></script>
+  <script type="module" src="scripts/watch-room-voice.js"></script>
+  <script type="module" src="scripts/watch-room-cinema.js"></script>
+</body>
+</html>
