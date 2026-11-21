@@ -163,3 +163,13 @@ test("Privacy Notice discloses the unregistered DPC status and outstanding contr
   assert.match(privacy, /service or postal address .* have not yet been supplied for publication/);
   assert.doesNotMatch(privacy, /DPC registration number:\\s*\\d+/i);
 });
+
+
+test("Home skips expensive global ambient poster blur and duplicate topbar scroll work", async () => {
+  const atmosphere = await read("scripts/atmosphere.js");
+  const css = await read("styles/vivid-home.css");
+  assert.match(atmosphere, /const homeOwnsTopbar = document\.body\?\.dataset\.vividPage === "home"/);
+  assert.match(atmosphere, /document\.body\.matches\("\.vivid-landing, \.vivid-watch-page, \.vivid-cinema-home"\)/);
+  assert.match(css, /body\[data-vivid-page="home"\]\.vivid-atmosphere \.vivid-card::after/);
+  assert.match(css, /\.vivid-card::after \{[\s\S]*?display: none !important/);
+});
