@@ -866,7 +866,7 @@ async function publishWatchRoomPlayback(request) {
     if (expectedRevision != null && expectedRevision !== currentRevision) {
       return { accepted: false, reason: "stale-revision", revision: currentRevision };
     }
-    const minimumIntervalMs = eventType === "progress" ? 1800 : eventType === "seek" ? 0 : 250;
+    const minimumIntervalMs = eventType === "progress" ? 1800 : eventType === "seek" || eventType === "rate" ? 0 : 250;
     if (shouldThrottlePlaybackWrite(previous?.status, status, previous?.lastEventAt?.toMillis?.() || 0, now.toMillis(), minimumIntervalMs)) {
       return { accepted: false, reason: "rate-limited", retryAfterMs: minimumIntervalMs, revision: currentRevision };
     }
