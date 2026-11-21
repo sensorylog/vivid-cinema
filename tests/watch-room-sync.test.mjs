@@ -88,6 +88,7 @@ test("playback event classification separates commands from progress heartbeats"
   assert.equal(classifyPlaybackEvent({ event: "play", status: "playing", previousStatus: "playing" }), "play");
   assert.equal(classifyPlaybackEvent({ event: "timeupdate", status: "playing", previousStatus: "playing" }), "progress");
   assert.equal(classifyPlaybackEvent({ event: "seeked", status: "seeked", previousStatus: "playing" }), "seek");
+  assert.equal(classifyPlaybackEvent({ event: "skipintro", status: "playing", previousStatus: "playing" }), "seek");
   assert.equal(classifyPlaybackEvent({ event: "pause", status: "paused", previousStatus: "playing" }), "pause");
   assert.equal(classifyPlaybackEvent({ event: "ended", status: "ended", previousStatus: "playing" }), "ended");
 });
