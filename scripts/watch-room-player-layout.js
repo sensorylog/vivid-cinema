@@ -73,8 +73,10 @@ export function mountWatchRoomPlayerLayout({ slot, overlay, Observer = globalThi
       destroyed = true;
       active = false;
       observer?.disconnect();
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onScroll);
+      if (typeof window !== "undefined") {
+        window.removeEventListener("scroll", onScroll);
+        window.removeEventListener("resize", onScroll);
+      }
       setFloating(false);
     }
   };
