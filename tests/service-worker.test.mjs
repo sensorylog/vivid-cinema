@@ -39,8 +39,8 @@ test("every precached asset exists in the repository", async () => {
 });
 
 test("Watch Rooms security and auth modules always use network-first and cache version is bumped", () => {
-  assert.match(source, /const CACHE_NAME = "vivid-cinema-shell-v298"/);
-  assert.ok(source.includes("const isWatchRoomRuntime=") && source.includes("watch-room-api") && source.includes("watch-room-playback"));
+  assert.match(source, /const CACHE_NAME = "vivid-cinema-shell-v299"/);
+  assert.ok(source.includes("const isWatchRoomRuntime=") && source.includes("watch-room-api") && source.includes("watch-room-playback") && source.includes("playback\\/watch-room-sync"));
   assert.ok(source.includes('"./scripts/cloudflare-api.js"'), "Cloudflare API origin helper must be precached");
   assert.ok(source.includes("if(isAuthDocument||isAuthRuntime||isWatchRoomRuntime){event.respondWith(networkFirst(request));return;}"));
 });
