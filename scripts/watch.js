@@ -989,6 +989,11 @@ function renderShell(params) {
   };
   const togglePlayerFullscreen = async () => {
     if (!playerDialog) return;
+    if (!document.fullscreenElement && overlay?.classList.contains("vivid-player-fullscreen-fallback")) {
+      overlay.classList.remove("vivid-player-fullscreen-fallback");
+      syncFullscreenButton();
+      return;
+    }
     try {
       if (document.fullscreenElement) {
         await document.exitFullscreen?.();
