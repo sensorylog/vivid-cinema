@@ -207,7 +207,7 @@ public class VividWebChromeClient extends BridgeWebChromeClient {
     public void onShowCustomView(View view, CustomViewCallback callback) {
         Activity activity = bridge.getActivity();
         if (activity == null || customView != null) {
-            callback.onCustomViewHidden();
+            if (callback != null) callback.onCustomViewHidden();
             return;
         }
 
