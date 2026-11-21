@@ -49,16 +49,8 @@ const setNote = message => { if (note) note.textContent = message; };
 
 
 const ROOM_PLAYER_OPTIONS = {
-  player1: [
-    ["vidsrc", "VidSrc · synced"], ["vidapi", "VidAPI · solo"], ["vidlink", "VidLink · solo"],
-    ["vidplus", "VidPlus · solo"], ["vidking", "VidKing · solo"], ["embedwave", "EmbedWave · solo"],
-    ["vidfast", "VidFast · solo"], ["ezvidapi", "EZVidAPI · solo"], ["embedapistream", "EmbedAPIStream · solo"],
-    ["moviesapi", "MoviesAPI · solo"]
-  ],
-  player2: [
-    ["cinesrc", "CineSRC · synced"], ["moviesapi", "MoviesAPI · solo"], ["vidsrc-embed", "VidSrc Embed · solo"],
-    ["vidfast", "VidFast · solo"], ["vidlink", "VidLink · solo"]
-  ]
+  player1: [["vidsrc", "VidSrc · synchronized"]],
+  player2: [["cinesrc", "CineSRC · synchronized"]]
 };
 
 function populateRoomProviderOptions(playerId, selectedProviderId) {
@@ -73,9 +65,14 @@ function populateRoomProviderOptions(playerId, selectedProviderId) {
 
 function applyRoomPlayerSelection(room) {
   const playerId = room.selectedPlayerId === "player2" ? "player2" : "player1";
-  const providerId = String(room.selectedProviderId || (playerId === "player1" ? "vidapi" : "moviesapi"));
+  const options = ROOM_PLAYER_OPTIONS[playerId];
+  const requestedProviderId = String(room.selectedProviderId || options[0][0]);
+  const providerId = options.some(([value]) => value === requestedProviderId) ? requestedProviderId : options[0][0];
   playerSelect.value = playerId;
   populateRoomProviderOptions(playerId, providerId);
+  if (role === "host" && providerId !== requestedProviderId) {
+    void saveRoomPlayerSelection();
+  }
   selectionPanel.hidden = false;
   allowGuestPlayerSelection = room.allowGuestPlayerSelection === true;
   allowGuestPlaybackControl = room.allowGuestPlaybackControl === true;
