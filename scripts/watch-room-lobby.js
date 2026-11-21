@@ -8,6 +8,7 @@ let room = null, lastRoom = null, stops = [], heartbeat = null, presenceRefresh 
 let memberList = [], selectedPick = null, searchTimer = null, searchGeneration = 0;
 
 function stop() {
+  if (room) document.dispatchEvent(new CustomEvent("vivid:watch-room-closing", { detail: { roomId: room.roomId } }));
   stops.forEach(fn => fn());
   stops = [];
   if (heartbeat) clearInterval(heartbeat);
@@ -190,6 +191,35 @@ function buildScreeningUrl(screening) {
   return url.pathname + url.search;
 }
 
+function openEmbeddedScreening(screening) {
+  if (!room) return;
+  const url = buildScreeningUrl(screening);
+  if (!url) { setFeedback("The room screening does not contain a valid Vivid title.", true); return; }
+  const stage = byId("wr-screening-stage");
+  const wrap = byId("wr-screening-frame-wrap");
+  if (!stage || !wrap) return;
+  let frame = byId("wr-screening-frame");
+  if (!frame || frame.dataset.src !== url) {
+    frame = document.createElement("iframe");
+    frame.id = "wr-screening-frame";
+    frame.title = "Shared Vivid Cinema screening";
+    frame.allow = "autoplay; fullscreen; picture-in-picture; encrypted-media";
+    frame.allowFullscreen = true;
+    frame.referrerPolicy = "strict-origin-when-cross-origin";
+    frame.src = url;
+    frame.dataset.src = url;
+    wrap.replaceChildren(frame);
+  }
+  stage.hidden = false;
+  stage.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+byId("wr-screening-close")?.addEventListener("click", () => {
+  const stage = byId("wr-screening-stage");
+  const wrap = byId("wr-screening-frame-wrap");
+  if (wrap) wrap.replaceChildren();
+  if (stage) stage.hidden = true;
+});
+
 function renderQueue(items) {
   const list = byId("wr-lobby-queue");
   if (!list) return;
@@ -207,7 +237,8 @@ function renderQueue(items) {
     const join = document.createElement("a");
     join.className = "vivid-wr-button vivid-wr-button--primary";
     join.textContent = "Join screening";
-    join.href = buildScreeningUrl(room.activeScreening);
+    join.href = buildScreeningUrl(room.activeScreening) || "#wr-screening-stage";
+    join.addEventListener("click", event => { event.preventDefault(); openEmbeddedScreening(room.activeScreening); });
     active.append(copy, join);
     list.append(active);
   }
@@ -261,7 +292,7 @@ function renderQueue(items) {
           const response = await call("startWatchRoomScreening")({ roomId: room.roomId, itemId: item.id });
           const url = buildScreeningUrl(response.data?.screening);
           if (!url) throw new Error("The server returned an invalid screening title.");
-          window.location.assign(url);
+          openEmbeddedScreening(response.data?.screening);
         } catch (error) {
           showError(error);
           start.disabled = false;
