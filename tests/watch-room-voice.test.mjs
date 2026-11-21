@@ -37,8 +37,8 @@ test("LiveKit access token is short-lived and scoped to one room and one member"
 test("LiveKit token signer trims copied Cloudflare key and secret whitespace", async () => {
   const now = 1_800_000_000_000;
   const result = await createLiveKitAccessToken({
-    apiKey: "  LK_TEST_KEY\\n",
-    apiSecret: "  a-test-only-livekit-secret-value\\n",
+    apiKey: "  LK_TEST_KEY\n",
+    apiSecret: "  a-test-only-livekit-secret-value\n",
     identity: "member_123",
     roomName: "vivid-" + "c".repeat(32),
     displayName: "Vivid member",
@@ -78,13 +78,15 @@ test("LiveKit token signer rejects malformed identities and unscoped room names"
 });
 
 test("Watch Room ships voice controls and keeps the shared player inside the room shell", async () => {
-  const [html, lobby, voice, api, headers, playback] = await Promise.all([
+  const [html, lobby, voice, api, headers, playback, watchPage, roomStyles] = await Promise.all([
     readFile(new URL("../watch-rooms.html", import.meta.url), "utf8"),
     readFile(new URL("../scripts/watch-room-lobby.js", import.meta.url), "utf8"),
     readFile(new URL("../scripts/watch-room-voice.js", import.meta.url), "utf8"),
     readFile(new URL("../cloudflare/functions/api/watch-rooms.js", import.meta.url), "utf8"),
     readFile(new URL("../_headers", import.meta.url), "utf8"),
-    readFile(new URL("../scripts/watch-room-playback.js", import.meta.url), "utf8")
+    readFile(new URL("../scripts/watch-room-playback.js", import.meta.url), "utf8"),
+    readFile(new URL("../scripts/watch.js", import.meta.url), "utf8"),
+    readFile(new URL("../styles/vivid-watch-rooms.css", import.meta.url), "utf8")
   ]);
   assert.match(html, /id="wr-voice-call"/);
   assert.match(html, /id="wr-screening-stage"/);
@@ -106,4 +108,15 @@ test("Watch Room ships voice controls and keeps the shared player inside the roo
   assert.ok(voice.includes("guestVoiceAllowed()"));
   assert.ok(playback.includes("This Watch Room has ended or your membership was removed"));
   assert.ok(playback.includes("pauseGuestPlayer"));
+  assert.ok(lobby.includes('url.searchParams.set("roomMode", "1")'));
+  assert.ok(lobby.includes('url.searchParams.set("sessionId", String(screening.sessionId))'));
+  assert.ok(watchPage.includes('route.params.get("roomMode") === "1"'));
+  assert.ok(roomStyles.includes("body.vivid-wr-screening-open .vivid-wr-screening-frame-wrap"));
+  assert.ok(playback.includes("joinedPlayback && latestRemoteState?.status === \"playing\""));
+  assert.ok(playback.includes("joinedPlayback = memberRole === \"guest\""));
+  assert.ok(playback.includes("joinButton.hidden = true"));
+  assert.ok(playback.includes('state.status === "playing" && !roomPlayerLoadRequested'));
+  assert.ok(api.includes('tx.delete(roomRef.collection("playback").doc("current"))'));
+  assert.ok(api.includes('roomData.activeScreening?.sessionId'));
+  assert.ok(api.includes('storedPlayback.sessionId === activeSessionId'));
 });

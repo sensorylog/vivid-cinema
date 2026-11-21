@@ -13,6 +13,8 @@ import { buildVidapiEmbedUrl, buildVidsrcEmbedUrl, buildVidlinkEmbedUrl, buildVi
 
 const $ = (id) => document.getElementById(id);
 const route = getRoute();
+const isWatchRoomCinemaMode = route.params.get("roomMode") === "1" && Boolean(route.params.get("roomId"));
+if (isWatchRoomCinemaMode) document.body.classList.add("vivid-watch-room-mode");
 const VIDAPI_ORIGINS = new Set([new URL(VIVID_CONFIG.api.vidapiEmbedBaseUrl).origin, "https://vidapi.ru", "https://vidapi.me", "https://vidapi.to", "https://vidapi.bz", "https://vidapi.tw"]);
 const VIDLINK_ORIGINS = new Set(["https://vidlink.pro", "https://www.vidlink.pro"]);
 const VIDPLUS_ORIGINS = new Set(["https://player.vidplus.to", "https://vidplus.to", "https://www.vidplus.to"]);

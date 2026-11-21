@@ -185,6 +185,8 @@ function buildScreeningUrl(screening) {
   url.searchParams.set("id", contentId);
   url.searchParams.set("type", mediaType);
   url.searchParams.set("roomId", room.roomId);
+  url.searchParams.set("roomMode", "1");
+  if (screening.sessionId) url.searchParams.set("sessionId", String(screening.sessionId));
   if (mediaType === "tv") {
     url.searchParams.set("season", String(Math.max(1, Number(screening.season) || 1)));
     url.searchParams.set("episode", String(Math.max(1, Number(screening.episode) || 1)));
@@ -214,7 +216,7 @@ function openEmbeddedScreening(screening) {
   loadedScreeningSessionId = String(screening.sessionId || "");
   dismissedScreeningSessionId = "";
   stage.hidden = false;
-  stage.scrollIntoView({ behavior: "smooth", block: "start" });
+  document.body.classList.add("vivid-wr-screening-open");
 }
 byId("wr-screening-close")?.addEventListener("click", () => {
   const stage = byId("wr-screening-stage");
@@ -223,6 +225,7 @@ byId("wr-screening-close")?.addEventListener("click", () => {
   dismissedScreeningSessionId = loadedScreeningSessionId;
   loadedScreeningSessionId = "";
   if (stage) stage.hidden = true;
+  document.body.classList.remove("vivid-wr-screening-open");
 });
 
 function renderQueue(items) {
