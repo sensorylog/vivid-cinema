@@ -191,7 +191,7 @@ test("Watch Rooms Stage 5 exposes trusted VidSrc and CineSRC playback bridges", 
   assert.ok(backend.includes("tx.get(roomRef.collection(\"members\").doc(uid))"));
   assert.ok(rules.includes("match /playback/{stateId}"));
   assert.ok(client.includes("getProviderAdapter(activePlayerId, activeProviderId)"));
-  assert.ok(client.includes("sendAdapterCommand({ adapter, frame, action, position })"));
+  assert.ok(client.includes("sendAdapterCommand({ adapter, frame, action, position, rate })"));
   assert.ok(client.includes('getProviderAdapter("player1", "vidsrc")'));
   assert.ok(client.includes('getProviderAdapter("player2", "cinesrc")'));
   assert.ok(client.includes('data.type.startsWith("cinesrc:")'));
