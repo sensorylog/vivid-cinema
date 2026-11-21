@@ -233,11 +233,12 @@ function applyRemoteState(force = false) {
   if (!sameTitle(state)) { setNote("This room is synced to a different title or episode. Open that exact Vivid title to join."); return; }
   if (state.provider !== activeProviderId) { setNote("The host is using " + String(state.provider || "another provider") + ". Select that same provider to join synchronized playback."); return; }
   const adapter = getActiveAdapter();
-  if (!adapter?.capabilities.canPlay || !adapter.capabilities.canSeek) {
+  if (!adapter?.capabilities.canPlay || !adapter.capabilities.canSeek || !adapter.capabilities.canSetRate) {
     setNote("Choose the same verified provider as the host. This player/server does not have Watch Room controls.");
     return;
   }
   const now = Date.now();
+  const desiredRate = normalizePlaybackRate(state.playbackRate);
   const expected = getExpectedPlaybackPosition(state, { nowMs: now, clockOffsetMs });
   if (!getSupportedFrame()) {
     if (role === "guest" && joinedPlayback && state.status === "playing" && !roomPlayerLoadRequested) {
@@ -254,8 +255,17 @@ function applyRemoteState(force = false) {
     position: localPosition,
     status: localStatus,
     duration: state.duration,
+    playbackRate: localPlaybackRate,
     observedAtMs: localPositionObservedAt
   }, { nowMs: now });
+  const rateMismatch = Math.abs(desiredRate - localPlaybackRate) > 0.05;
+  if (rateMismatch && now - lastRateCommandAt >= 1500) {
+    suppressPlaybackPublishUntil = Math.max(suppressPlaybackPublishUntil, now + 1800);
+    if (sendProviderCommand("rate", undefined, desiredRate)) {
+      localPlaybackRate = desiredRate;
+      lastRateCommandAt = now;
+    }
+  }
   const needsSeek = force || shouldCorrectPlayback(expected, estimatedLocalPosition);
   if (needsSeek && (force || now - lastSeekCommandAt >= 1500)) {
     if (sendProviderCommand("seek", expected)) lastSeekCommandAt = now;
