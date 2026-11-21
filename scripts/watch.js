@@ -729,7 +729,7 @@ function renderShell(params) {
   }
   const overlay = $("player-overlay");
   if (isWatchRoomCinemaMode && media?.backdrop_path) {
-    document.body.style.setProperty("--vivid-room-art", "url(\\\"" + getImageUrl(media.backdrop_path, "w1280") + "\\\")");
+    document.body.style.setProperty("--vivid-room-art", "url(\"" + getImageUrl(media.backdrop_path, "w1280") + "\")");
   }
   if (isWatchRoomCinemaMode && overlay) overlay.hidden = true;
   // Keep the page interactive until the viewer opens the cinema window.
