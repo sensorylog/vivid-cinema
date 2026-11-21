@@ -105,3 +105,97 @@ body.vivid-native-app {
   .vivid-android-update-actions { display: grid; grid-template-columns: 1fr auto; }
   .vivid-android-update-actions button { padding: 0 12px; }
 }
+
+
+/* Immersive playback on Android and other native WebViews. */
+.vivid-player-dialog:fullscreen {
+  display: flex !important;
+  flex-direction: column !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  height: 100dvh !important;
+  max-width: none !important;
+  max-height: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: #030509 !important;
+}
+.vivid-player-dialog:fullscreen .vivid-player-dialog-head {
+  position: absolute !important;
+  z-index: 20 !important;
+  inset: env(safe-area-inset-top, 0px) 0 auto !important;
+  padding: 12px max(14px, env(safe-area-inset-right, 0px)) 12px max(14px, env(safe-area-inset-left, 0px)) !important;
+  background: linear-gradient(180deg, rgba(3,5,9,.94), rgba(3,5,9,.52), transparent) !important;
+}
+.vivid-player-dialog:fullscreen .vivid-player-layout {
+  display: flex !important;
+  flex: 1 1 auto !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+.vivid-player-dialog:fullscreen .vivid-player-main {
+  display: flex !important;
+  flex: 1 1 auto !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+}
+.vivid-player-dialog:fullscreen .vivid-player-frame {
+  flex: 1 1 auto !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  aspect-ratio: auto !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+}
+.vivid-player-dialog:fullscreen iframe,
+.vivid-player-dialog:fullscreen video {
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+  max-height: none !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  object-fit: contain !important;
+}
+.vivid-player-dialog:fullscreen .vivid-player-dialog-foot {
+  display: none !important;
+}
+.vivid-player-dialog:fullscreen .vivid-server-panel {
+  z-index: 30 !important;
+  max-height: 72dvh !important;
+  overflow: auto !important;
+}
+.vivid-player-overlay.vivid-player-fullscreen-fallback {
+  position: fixed !important;
+  z-index: 2147483000 !important;
+  inset: 0 !important;
+  display: flex !important;
+  align-items: stretch !important;
+  justify-content: stretch !important;
+  padding: 0 !important;
+}
+.vivid-player-overlay.vivid-player-fullscreen-fallback .vivid-player-dialog {
+  width: 100% !important;
+  max-width: none !important;
+  height: 100dvh !important;
+  max-height: none !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+}
+.vivid-player-fullscreen {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  min-width: 42px;
+  padding: 0 !important;
+}
