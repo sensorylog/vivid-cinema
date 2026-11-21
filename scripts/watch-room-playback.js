@@ -71,8 +71,6 @@ function applyRoomPlayerSelection(room) {
   const providerId = options.some(([value]) => value === requestedProviderId) ? requestedProviderId : options[0][0];
   playerSelect.value = playerId;
   populateRoomProviderOptions(playerId, providerId);
-  activePlayerId = playerId;
-  activeProviderId = providerId;
   if (role === "host" && providerId !== requestedProviderId) {
     void saveRoomPlayerSelection();
   }
@@ -91,6 +89,8 @@ function applyRoomPlayerSelection(room) {
       localPosition = null;
       localStatus = "";
     }
+    activePlayerId = playerId;
+    activeProviderId = providerId;
     lastAppliedSelectionKey = key;
     if (playerId === "player2" && providerId === "cinesrc") pendingPlayer2Seek = position;
     if (role !== "guest" || (joinedPlayback && latestRemoteState?.status === "playing")) {
@@ -202,6 +202,9 @@ function applyRemoteState(force = false) {
     setNote("Choose the same verified provider as the host. This player/server does not have Watch Room controls.");
     return;
   }
+  const updatedAt = Number(state.updatedAt) || Date.now();
+  const elapsed = state.status === "playing" ? Math.max(0, (Date.now() + clockOffsetMs - updatedAt) / 1000) : 0;
+  const expected = Math.max(0, Math.min(Number(state.duration) || 86400, Number(state.position) + elapsed));
   if (!getSupportedFrame()) {
     if (role === "guest" && joinedPlayback && state.status === "playing" && !roomPlayerLoadRequested) {
       roomPlayerLoadRequested = true;
@@ -212,9 +215,6 @@ function applyRemoteState(force = false) {
     setNote("Loading the shared player. Playback will follow the host.");
     return;
   }
-  const updatedAt = Number(state.updatedAt) || Date.now();
-  const elapsed = state.status === "playing" ? Math.max(0, (Date.now() + clockOffsetMs - updatedAt) / 1000) : 0;
-  const expected = Math.max(0, Math.min(Number(state.duration) || 86400, Number(state.position) + elapsed));
   suppressPlaybackPublishUntil = Date.now() + 1800;
   if (force || localPosition == null || Math.abs(expected - localPosition) > 2.5) {
     sendProviderCommand("seek", expected);
