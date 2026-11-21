@@ -140,3 +140,46 @@ test("deferred Home ambient artwork can hydrate from shelves rendered before its
   assert.match(breathe, /vivid:home-trending-ready/);
   assert.match(breathe, /refreshTrending\(\);\s*$/);
 });
+
+
+test("Home skips offscreen shelf rendering and avoids layout reads on every rail scroll", async () => {
+  const css = await read("styles/vivid-home.css");
+  const source = await read("script.js");
+  const wire = source.slice(source.indexOf("function wireRails()"), source.indexOf("function updateRailControls"));
+  assert.match(css, /body\[data-vivid-page="home"\].*\.vivid-rails\s*\{[\s\S]*?content-visibility:\s*auto/);
+  assert.match(css, /contain-intrinsic-size:\s*auto\s+420px/);
+  assert.doesNotMatch(wire, /\.vivid-rail.*addEventListener\(["']scroll/);
+  assert.match(source, /requestAnimationFrame\(syncHomeTopbarScroll\)/);
+  assert.match(source, /if \(next === homeTopbarScrollState\) return/);
+});
+
+
+test("Privacy Notice discloses the unregistered DPC status and outstanding controller details", async () => {
+  const privacy = await read("privacy.html");
+  assert.match(privacy, /has not yet been registered with Ghana’s Data Protection Commission/);
+  assert.match(privacy, /Sections 27 and 53/);
+  assert.match(privacy, /must not process personal data/);
+  assert.match(privacy, /creator attribution does not, by itself, establish the legal identity of the data controller/);
+  assert.match(privacy, /service or postal address .* have not yet been supplied for publication/);
+  assert.doesNotMatch(privacy, /DPC registration number:\\s*\\d+/i);
+});
+
+
+test("Home skips expensive global ambient poster blur and duplicate topbar scroll work", async () => {
+  const atmosphere = await read("scripts/atmosphere.js");
+  const css = await read("styles/vivid-home.css");
+  assert.match(atmosphere, /const homeOwnsTopbar = document\.body\?\.dataset\.vividPage === "home"/);
+  assert.match(atmosphere, /document\.body\.matches\("\.vivid-landing, \.vivid-watch-page, \.vivid-cinema-home"\)/);
+  assert.match(css, /body\[data-vivid-page="home"\]\.vivid-atmosphere \.vivid-card::after/);
+  assert.match(css, /\.vivid-card::after \{[\s\S]*?display: none !important/);
+});
+
+
+test("Home hero stops remote trailer decoding when the billboard leaves the viewport", async () => {
+  const hero = await read("scripts/tflix-hero.js");
+  assert.match(hero, /let heroVisible = true/);
+  assert.match(hero, /if \(!item \|\| document\.hidden \|\| !heroVisible\) return/);
+  assert.match(hero, /new IntersectionObserver\(\(entries\) =>/);
+  assert.match(hero, /if \(!visible\) \{[\s\S]*?removeHeroVideos\(\)/);
+  assert.match(hero, /if \(!document\.hidden\) activateCurrentHero\(\)/);
+});

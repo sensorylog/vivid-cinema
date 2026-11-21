@@ -72,3 +72,15 @@
 /* Legal pages: editorial headline and accessible focus treatment. */
 :where(.vivid-legal-main h1,.vivid-legal-header h1,.vivid-legal-content h1){font-family:Georgia,"Times New Roman",serif;letter-spacing:-.045em}
 :where(.vivid-legal-main a:focus-visible,.vivid-legal-main button:focus-visible){outline:2px solid #c7ff55;outline-offset:3px}
+
+
+/* Premium support form details and anti-spam field. */
+.vivid-contact-honeypot{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
+.vivid-contact-grid h2 i{margin-right:7px;color:#c7ff55;font-size:.9em}
+.vivid-contact-form button{transition:transform .18s ease,background .18s ease,box-shadow .18s ease}
+.vivid-contact-form button:hover{transform:translateY(-1px);background:#e9edf2;box-shadow:0 8px 28px rgba(0,0,0,.24)}
+.vivid-contact-form button:focus-visible{outline:2px solid #c7ff55;outline-offset:4px}
+.vivid-contact-form input[type=file]{padding:10px}
+.vivid-contact-form select option{background:#101216;color:#f4f6f8}
+.vivid-contact-form .vivid-legal-note a{color:#f4f6f8}
+@media(prefers-reduced-motion:reduce){.vivid-contact-form button{transition:none}}

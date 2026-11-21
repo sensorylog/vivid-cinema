@@ -967,3 +967,37 @@ body[data-vivid-page="home"] .vivid-home-toast[hidden] { display: none; }
 .vivid-download-promo-link:hover{transform:translateY(-2px);background:#fff}
 .vivid-download-promo-link:focus-visible{outline:2px solid #aeb8ff;outline-offset:4px}
 @media(max-width:640px){.vivid-download-promo{width:calc(100% - 24px);margin:8px auto 22px;padding:19px 17px;align-items:flex-start;flex-direction:column;gap:15px;border-radius:18px}.vivid-download-promo-copy h2{font-size:23px}.vivid-download-promo-copy p{font-size:12px}.vivid-download-promo-link{width:100%;min-height:44px;box-sizing:border-box}}
+
+
+/* Long Home pages: skip layout and paint work for shelves outside the viewport.
+   The browser keeps a realistic placeholder size so scrolling stays stable. */
+body[data-vivid-page="home"] .vivid-section-wrap > .vivid-rails {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 420px;
+}
+body[data-vivid-page="home"] .vivid-section-wrap > .vivid-home-breathe,
+body[data-vivid-page="home"] .vivid-section-wrap > .vivid-support-feature,
+body[data-vivid-page="home"] .vivid-section-wrap > .vivid-news-home-card {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 380px;
+}
+@media (max-width: 640px) {
+  body[data-vivid-page="home"] .vivid-section-wrap > .vivid-rails {
+    contain-intrinsic-size: auto 330px;
+  }
+  body[data-vivid-page="home"] .vivid-section-wrap > .vivid-home-breathe,
+  body[data-vivid-page="home"] .vivid-section-wrap > .vivid-support-feature,
+  body[data-vivid-page="home"] .vivid-section-wrap > .vivid-news-home-card {
+    contain-intrinsic-size: auto 340px;
+  }
+}
+
+
+/* Home already carries rich poster artwork. Avoid one blurred pseudo-image
+   per card and the full-viewport ambient poster collage on this dense page. */
+body[data-vivid-page="home"].vivid-atmosphere .vivid-ambient-art,
+body[data-vivid-page="home"].vivid-atmosphere .vivid-card::after {
+  display: none !important;
+  content: none !important;
+  filter: none !important;
+}

@@ -4,9 +4,13 @@ document.body.classList.add("vivid-atmosphere");
 
 /* Shared scroll glass — densify sticky chrome without touching page JS */
 (function setupScrollGlass(){
-  const navs = document.querySelectorAll(
-    ".vivid-topbar, .vivid-discovery-nav, .vivid-title-nav, .vivid-library-nav, .vivid-watch-nav"
-  );
+  // Home has its own animation-frame topbar handler in script.js.
+  // Avoid two independent listeners toggling the same class at different thresholds.
+  const homeOwnsTopbar = document.body?.dataset.vividPage === "home";
+  const navSelector = homeOwnsTopbar
+    ? ".vivid-discovery-nav, .vivid-title-nav, .vivid-library-nav, .vivid-watch-nav"
+    : ".vivid-topbar, .vivid-discovery-nav, .vivid-title-nav, .vivid-library-nav, .vivid-watch-nav";
+  const navs = document.querySelectorAll(navSelector);
   let raf = 0;
   let previous = null;
   const update = () => {
@@ -74,7 +78,10 @@ function setupReveals(root=document){
 setupReveals();
 
 function setupAmbientArtwork(){
-  if(legacyPerformance || reduceMotion || document.body.matches(".vivid-landing") || document.body.matches(".vivid-watch-page")) return;
+  // Home already has a cinematic hero and dense poster catalogue. The fixed,
+  // blurred poster collage adds substantial paint/GPU work without adding useful
+  // information, so reserve this effect for lighter discovery surfaces.
+  if(legacyPerformance || reduceMotion || document.body.matches(".vivid-landing, .vivid-watch-page, .vivid-cinema-home") || document.body.dataset.vividPage === "home") return;
   const sources=()=>[...document.querySelectorAll("img[src]")].map(img=>img.currentSrc||img.src).filter(src=>/^https?:/i.test(src));
   const ensure=()=>{
     const list=[...new Set(sources())].slice(0,18);
