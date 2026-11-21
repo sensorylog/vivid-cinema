@@ -84,7 +84,7 @@ export function classifyPlaybackEvent({ event, status, previousStatus } = {}) {
   const name = String(event || "").toLowerCase();
   const nextStatus = String(status || "").toLowerCase();
   if (/(ratechange|playbackrate)/.test(name) || name === "rate") return "rate";
-  if (/(seek|scrub)/.test(name) || nextStatus === "seeked" || nextStatus === "seeking") return "seek";
+  if (/(seek|scrub|skipintro)/.test(name) || nextStatus === "seeked" || nextStatus === "seeking") return "seek";
   if (/(ended|completed)/.test(name) || nextStatus === "ended" || nextStatus === "completed") return "ended";
   if (/(pause)/.test(name) || nextStatus === "paused" || nextStatus === "pause") return "pause";
   if (name === "play" || nextStatus === "play") return "play";
