@@ -10,6 +10,7 @@ import { VIVID_CONFIG } from "./config.js";
 import { recordBehavior, startIntelligenceSync } from "./intelligence.js";
 import { playDirectStream, resolveDirectStream, stopDirectStream } from "./playback/player-engine.js";
 import { buildCustomEmbedUrl, getCustomPlaybackServer } from "./playback/playback-servers.js";
+import { mountWatchRoomPlayerLayout } from "./watch-room-player-layout.js";
 import { buildVidapiEmbedUrl, buildVidsrcEmbedUrl, buildVidlinkEmbedUrl, buildVidplusEmbedUrl, buildVidkingEmbedUrl, buildEmbedWaveUrl, buildVidFastUrl, buildEzVidApiUrl, buildEmbedApiStreamUrl, buildMoviesApiUrl } from "./playback/playback-urls.js";
 
 const $ = (id) => document.getElementById(id);
@@ -30,6 +31,8 @@ let media = null;
 let details = null;
 let watchRoomScreeningValidated = false;
 let roomOpenPlayerWindow = null;
+let roomPlayerLayout = null;
+let roomPlayerSlot = null;
 let pendingRoomPlayerSelection = null;
 let currentParams = null;
 let lastHistorySyncAt = 0;
@@ -465,9 +468,14 @@ document.addEventListener("vivid:watch-room-closing", event => {
   const params = new URLSearchParams(window.location.search);
   if (!isWatchRoomCinemaMode || !closingRoomId || closingRoomId !== params.get("roomId")) return;
   document.querySelectorAll("#player-overlay iframe, #vivid-tflix-player iframe").forEach(frame => { frame.src = "about:blank"; });
+  roomPlayerLayout?.destroy();
+  roomPlayerLayout = null;
+  roomPlayerSlot?.remove();
+  roomPlayerSlot = null;
+  document.querySelector(".vivid-wr-player-details")?.remove();
   const overlay = $("player-overlay");
   if (overlay) {
-    overlay.classList.remove("is-minimized");
+    overlay.classList.remove("is-minimized", "is-floating");
     overlay.hidden = true;
   }
   const secondary = $("vivid-tflix-player");
@@ -574,6 +582,8 @@ window.addEventListener("vivid:watch-room-apply-selection", event => {
   const primaryOverlay = $("player-overlay");
   const primaryFrame = $("vidapi-player");
   if (selection.playerId === "player2") {
+    if (roomPlayerSlot) { roomPlayerSlot.hidden = false; roomPlayerSlot.dataset.activePlayer = "secondary"; }
+    roomPlayerLayout?.setActive(true);
     if (primaryOverlay) primaryOverlay.hidden = true;
     if (primaryFrame) primaryFrame.src = "about:blank";
     if (secondaryRoot) {
@@ -600,16 +610,17 @@ window.addEventListener("vivid:watch-room-apply-selection", event => {
     }
   }
   if (primaryOverlay) {
-    primaryOverlay.classList.remove("is-minimized");
+    if (roomPlayerSlot) { roomPlayerSlot.hidden = false; roomPlayerSlot.dataset.activePlayer = "primary"; }
+    roomPlayerLayout?.setActive(true);
+    primaryOverlay.classList.remove("is-minimized", "is-floating");
     primaryOverlay.hidden = false;
     const closeButton = $("player-close");
-    const restoreButton = $("player-restore");
-    if (closeButton) closeButton.hidden = false;
-    if (restoreButton) restoreButton.hidden = true;
+    if (closeButton) closeButton.hidden = isWatchRoomCinemaMode;
   }
   const position = Math.max(0, Number(selection.position) || 0);
   setPlayerSource(selection.providerId, currentParams, position);
-  if (!isWatchRoomCinemaMode) $("player-overlay")?.scrollIntoView({ block: "center", behavior: "smooth" });
+  if (isWatchRoomCinemaMode) roomPlayerLayout?.focus();
+  else $("player-overlay")?.scrollIntoView({ block: "center", behavior: "smooth" });
 });
 
 
@@ -823,25 +834,8 @@ function mountSecondaryPlayer(params, title, detailsSnapshot = details) {
         title,
         isAnime: false
       });
-      if (isWatchRoomCinemaMode) {
-        if (root.dataset.roomActive !== "true") root.hidden = true;
-        const topbar = root.querySelector(".vivid-tflix-topbar");
-        if (topbar && !topbar.querySelector("#vivid-tflix-minimize")) {
-          const minimize = document.createElement("button");
-          minimize.type = "button";
-          minimize.id = "vivid-tflix-minimize";
-          minimize.className = "vivid-tflix-room-minimize";
-          minimize.setAttribute("aria-label", "Minimize screening player");
-          minimize.innerHTML = '<i class="bi bi-dash-lg" aria-hidden="true"></i>';
-          topbar.append(minimize);
-          minimize.addEventListener("click", () => {
-            const minimized = root.classList.toggle("is-minimized");
-            minimize.setAttribute("aria-label", minimized ? "Restore screening player" : "Minimize screening player");
-            minimize.innerHTML = minimized
-              ? '<i class="bi bi-arrows-angle-expand" aria-hidden="true"></i>'
-              : '<i class="bi bi-dash-lg" aria-hidden="true"></i>';
-          });
-        }
+      if (isWatchRoomCinemaMode && root.dataset.roomActive !== "true") {
+        root.hidden = true;
       }
     })
     .catch(error => console.warn("Vivid secondary player could not initialize:", error));
@@ -882,6 +876,16 @@ function episodeNavigationMarkup(params) {
 }
 
 function renderShell(params) {
+  if (isWatchRoomCinemaMode) {
+    roomPlayerSlot?.querySelectorAll("iframe").forEach(frame => { frame.src = "about:blank"; });
+    const previousDirectVideo = roomPlayerSlot?.querySelector("video");
+    if (previousDirectVideo) stopDirectStream(previousDirectVideo);
+    roomPlayerLayout?.destroy();
+    roomPlayerLayout = null;
+    roomPlayerSlot?.remove();
+    roomPlayerSlot = null;
+    document.querySelector(".vivid-wr-player-details")?.remove();
+  }
   const isTv = params.type === "tv";
   const title = media.title || "Vivid Cinema";
   const episodeTitle = isTv && details?.episode ? details.episode.name : "";
@@ -894,7 +898,7 @@ function renderShell(params) {
         '<h1 id="watch-title">' + escapeHtml(episodeTitle || title) + '</h1><p id="watch-overview">' + escapeHtml(isTv && details?.episode?.overview ? details.episode.overview : media.overview || "") + '</p>' +
       '</div><div class="vivid-watch-actions"><button type="button" id="watch-open-player" class="vivid-watch-play" aria-label="Play ' + escapeHtml(episodeTitle || title) + '"><i class="bi bi-play-fill" aria-hidden="true"></i><span>Play</span></button><a class="vivid-watch-details" href="' + escapeHtml(buildTitleUrl(media.id, media.media_type)) + '"><i class="bi bi-info-circle" aria-hidden="true"></i><span>Details</span></a></div></div></section>' +
     '<div id="player-overlay" class="vivid-player-overlay vivid-player-inline" role="presentation"><section class="vivid-player-dialog" role="region" aria-labelledby="player-dialog-title">' +
-      '<header class="vivid-player-dialog-head"><div class="vivid-player-dialog-heading"><span class="vivid-player-live-dot" aria-hidden="true"></span><div><span class="vivid-player-dialog-eyebrow">' + (isWatchRoomCinemaMode ? "VIVID CINEMA · PRIVATE SCREENING" : "VIVID CINEMA · PLAYER 1") + '</span><h2 id="player-dialog-title">' + escapeHtml(episodeTitle || title) + '</h2><span id="player-source-label" class="vivid-player-current-source">Choose a player to begin</span></div></div><div class="vivid-player-dialog-actions"><button type="button" id="player-server-menu" class="vivid-player-switch vivid-server-menu" aria-controls="player-server-panel" aria-expanded="false"><i class="bi bi-hdd-network" aria-hidden="true"></i> Servers <i class="bi bi-arrow-down" aria-hidden="true"></i></button><button type="button" id="player-fullscreen" class="vivid-player-switch vivid-player-fullscreen" aria-label="Enter fullscreen" title="Fullscreen" aria-pressed="false"><i class="bi bi-arrows-fullscreen" aria-hidden="true"></i></button><button type="button" id="player-close" class="vivid-player-close" aria-label="Close player"><i class="bi bi-x-lg" aria-hidden="true"></i></button></div></header>' +
+      '<header class="vivid-player-dialog-head"><div class="vivid-player-dialog-heading"><span class="vivid-player-live-dot" aria-hidden="true"></span><div><span class="vivid-player-dialog-eyebrow">' + (isWatchRoomCinemaMode ? "VIVID CINEMA · PRIVATE SCREENING" : "VIVID CINEMA · PLAYER 1") + '</span><h2 id="player-dialog-title">' + escapeHtml(episodeTitle || title) + '</h2><span id="player-source-label" class="vivid-player-current-source">Choose a player to begin</span></div></div><div class="vivid-player-dialog-actions"><button type="button" id="player-server-menu" class="vivid-player-switch vivid-server-menu" aria-controls="player-server-panel" aria-expanded="false"><i class="bi bi-hdd-network" aria-hidden="true"></i> Servers <i class="bi bi-arrow-down" aria-hidden="true"></i></button><button type="button" id="player-return-inline" class="vivid-player-switch" aria-label="Return to cinema stage" title="Return to cinema stage" hidden><i class="bi bi-arrow-up-left-square" aria-hidden="true"></i></button><button type="button" id="player-fullscreen" class="vivid-player-switch vivid-player-fullscreen" aria-label="Enter fullscreen" title="Fullscreen" aria-pressed="false"><i class="bi bi-arrows-fullscreen" aria-hidden="true"></i></button><button type="button" id="player-close" class="vivid-player-close" aria-label="Close player"><i class="bi bi-x-lg" aria-hidden="true"></i></button></div></header>' +
       '<div class="vivid-player-layout"><div class="vivid-player-main"><div class="vivid-player-frame"><div id="player-status" class="vivid-player-status" role="status" aria-live="polite">' + (resumeAt > 5 ? "Ready to resume when you choose a player." : "Choose a player to begin playback.") + '</div><button type="button" id="player-try-next" class="vivid-player-try-next" hidden>Try next server</button><iframe id="vidapi-player" title="' + escapeHtml(title) + ' player" allow="autoplay; fullscreen; picture-in-picture; encrypted-media; clipboard-write" allowfullscreen referrerpolicy="origin" loading="eager"></iframe><video id="vivid-direct-player" title="' + escapeHtml(title) + ' direct stream player" controls playsinline preload="metadata" hidden></video></div><footer class="vivid-player-dialog-foot"><span><i class="bi bi-keyboard" aria-hidden="true"></i> Press Esc to close</span><a href="' + escapeHtml(buildTitleUrl(media.id, media.media_type)) + '">Title details</a></footer></div>' +
       '<aside id="player-server-panel" class="vivid-server-panel" aria-label="Vivid Cinema playback servers" hidden><div class="vivid-server-panel-heading"><div><strong>Playback servers</strong><span>Choose a source</span></div><span class="vivid-server-count">7 sources</span></div>' +
       '<button type="button" class="vivid-player-source" data-player-source="vidapi" aria-pressed="true"><span class="vivid-server-dot"></span><span><strong>VidAPI</strong><small>Primary server · may require domain approval</small></span><span class="vivid-server-state" data-server-state="vidapi">Ready</span></button>' +
@@ -912,6 +916,42 @@ function renderShell(params) {
     '<section id="vivid-tflix-player" class="vivid-tflix-player" aria-label="Additional streaming player"></section>' +
     '<section id="watch-episode-navigation" class="vivid-episode-navigation" aria-label="TV episode navigation">' + episodeNavigationMarkup(params) + '</section>' +
     '<section class="vivid-watch-recommendations"><div class="vivid-section-heading"><div><span>MORE TO DISCOVER</span><h2>You might also like</h2></div></div><div id="watch-recommendations" class="vivid-watch-rec-rail">' + recommendationCards() + '</div></section>';
+
+  if (isWatchRoomCinemaMode) {
+    const stage = $("wr-cinema-stage");
+    const host = $("wr-screening-player-host");
+    const watchContentForRoom = $("watch-content");
+    const overlayForRoom = $("player-overlay");
+    const secondaryForRoom = $("vivid-tflix-player");
+    const playerInfoForRoom = overlayForRoom?.querySelector(".vivid-player-info");
+    if (stage && host && overlayForRoom) {
+      const slot = document.createElement("div");
+      slot.id = "wr-cinema-player-slot";
+      slot.className = "vivid-wr-player-slot";
+      slot.hidden = true;
+      slot.dataset.activePlayer = "primary";
+      slot.setAttribute("role", "region");
+      slot.setAttribute("aria-label", "Shared cinema player");
+      overlayForRoom.hidden = true;
+      overlayForRoom.classList.remove("is-minimized", "is-floating");
+      slot.append(overlayForRoom);
+      if (secondaryForRoom) {
+        secondaryForRoom.hidden = true;
+        secondaryForRoom.classList.remove("is-minimized");
+        slot.append(secondaryForRoom);
+      }
+      const detailsPanel = document.createElement("div");
+      detailsPanel.className = "vivid-wr-player-details";
+      if (playerInfoForRoom) detailsPanel.append(playerInfoForRoom);
+      const wordmark = stage.querySelector(".vivid-wr-cinema-stage__wordmark");
+      stage.insertBefore(slot, wordmark);
+      if (playerInfoForRoom) stage.insertBefore(detailsPanel, wordmark);
+      watchContentForRoom?.replaceChildren();
+      host.hidden = true;
+      roomPlayerSlot = slot;
+      roomPlayerLayout = mountWatchRoomPlayerLayout({ slot, overlay: overlayForRoom });
+    }
+  }
 
   mountSecondaryPlayer(params, episodeTitle || title);
   window.dispatchEvent(new CustomEvent("vivid:player-adapter-ready", { detail: { playerId: "player1" } }));
@@ -931,20 +971,14 @@ function renderShell(params) {
     document.body.style.setProperty("--vivid-room-art", "url(\"" + getImageUrl(media.backdrop_path, "w1280") + "\")");
   }
   if (isWatchRoomCinemaMode && overlay) overlay.hidden = true;
-  // Keep the page interactive until the viewer opens the cinema window.
+  // Keep the Watch Room player inline; the lobby remains the only room surface.
   const openPlayer = $("watch-open-player");
   const closePlayer = $("player-close");
   const fullscreenButton = $("player-fullscreen");
+  const returnInlineButton = $("player-return-inline");
+  returnInlineButton?.addEventListener("click", () => roomPlayerLayout?.focus());
   const playerDialog = overlay?.querySelector(".vivid-player-dialog");
-  const restorePlayer = document.createElement("button");
-  restorePlayer.type = "button";
-  restorePlayer.id = "player-restore";
-  restorePlayer.className = "vivid-player-restore";
-  restorePlayer.setAttribute("aria-label", "Restore screening player");
-  restorePlayer.innerHTML = '<i class="bi bi-arrows-angle-expand" aria-hidden="true"></i>';
-  closePlayer?.parentElement?.insertBefore(restorePlayer, closePlayer);
-  restorePlayer.hidden = true;
-  if (isWatchRoomCinemaMode) closePlayer?.setAttribute("aria-label", "Minimize screening player");
+  if (isWatchRoomCinemaMode && closePlayer) closePlayer.hidden = true;
   const serverMenu = $("player-server-menu");
   const serverPanel = $("player-server-panel");
   if (serverMenu && serverPanel) {
@@ -1000,14 +1034,21 @@ function renderShell(params) {
   let playerHasOpened = false;
   const openPlayerWindow = () => {
     if (!overlay) return;
-    const restoringMiniPlayer = overlay.classList.contains("is-minimized") && playerHasOpened;
+    const restoringMiniPlayer = !isWatchRoomCinemaMode && overlay.classList.contains("is-minimized") && playerHasOpened;
     overlay.classList.remove("is-minimized");
     document.body.classList.remove("vivid-watch-room-player-minimized");
-    if (restorePlayer) restorePlayer.hidden = true;
-    if (closePlayer) closePlayer.hidden = false;
-    overlay.hidden = false;
-    if (!overlay.classList.contains("vivid-player-inline")) document.body.classList.add("vivid-player-open");
+    if (closePlayer) closePlayer.hidden = isWatchRoomCinemaMode;
+    if (isWatchRoomCinemaMode && roomPlayerSlot) {
+      roomPlayerSlot.hidden = false;
+      roomPlayerLayout?.setActive(true);
+    }
+    if (!isWatchRoomCinemaMode || roomPlayerSlot?.dataset.activePlayer !== "secondary") overlay.hidden = false;
+    if (!isWatchRoomCinemaMode && !overlay.classList.contains("vivid-player-inline")) document.body.classList.add("vivid-player-open");
     if (openPlayer) openPlayer.setAttribute("aria-expanded", "true");
+    if (isWatchRoomCinemaMode && playerHasOpened) {
+      roomPlayerLayout?.focus();
+      return;
+    }
     if (restoringMiniPlayer) {
       closePlayer?.focus({ preventScroll: true });
       return;
@@ -1027,7 +1068,8 @@ function renderShell(params) {
       status.classList.add("is-warning");
       status.hidden = false;
     }
-    closePlayer?.focus({ preventScroll: true });
+    if (isWatchRoomCinemaMode) roomPlayerLayout?.focus();
+    else closePlayer?.focus({ preventScroll: true });
   };
   roomOpenPlayerWindow = openPlayerWindow;
   const closePlayerWindow = () => {
@@ -1035,13 +1077,7 @@ function renderShell(params) {
     if (document.fullscreenElement && playerDialog?.contains(document.fullscreenElement)) {
       void document.exitFullscreen?.().catch(() => {});
     }
-    if (isWatchRoomCinemaMode) {
-      overlay.classList.add("is-minimized");
-      document.body.classList.add("vivid-watch-room-player-minimized");
-      if (restorePlayer) restorePlayer.hidden = false;
-      if (closePlayer) closePlayer.hidden = true;
-      return;
-    }
+    if (isWatchRoomCinemaMode) return;
     clearFallbackTimer();
     overlay.hidden = true;
     if (!overlay.classList.contains("vivid-player-inline")) document.body.classList.remove("vivid-player-open");
@@ -1120,14 +1156,13 @@ function renderShell(params) {
   openPlayer?.addEventListener("click", openPlayerWindow);
   // Do not open or start either player until the viewer chooses one.
   closePlayer?.addEventListener("click", closePlayerWindow);
-  restorePlayer.addEventListener("click", openPlayerWindow);
   tryNextButton?.addEventListener("click", () => {
     const next = getNextSource(activeSource);
     if (!next) return showFallbackPrompt(activeSource);
     sourceAttempted.add(activeSource);
     setPlayerSource(next, currentParams, Number(getPlaybackProgress(progressKey())?.progress || route.params.get("startAt") || resumeAt || 0));
   });
-  overlay?.addEventListener("click", event => {
+  if (!isWatchRoomCinemaMode) overlay?.addEventListener("click", event => {
     if (event.target === overlay) closePlayerWindow();
   });
   serverMenu?.addEventListener("click", toggleServerMenu);
@@ -1154,7 +1189,7 @@ function renderShell(params) {
       serverMenu?.focus({ preventScroll: true });
       return;
     }
-    if (event.key === "Escape" && overlay && !overlay.hidden) {
+    if (event.key === "Escape" && !isWatchRoomCinemaMode && overlay && !overlay.hidden) {
       closePlayerWindow();
     }
   });

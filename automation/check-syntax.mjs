@@ -24,6 +24,7 @@ const files = [
   "scripts/watch-room-lobby.js",
   "scripts/watch-room-clubs.js",
   "scripts/watch-room-playback.js",
+  "scripts/watch-room-player-layout.js",
   "scripts/watch.js",
   "scripts/playback/playback-urls.js",
   "scripts/playback/tflix-secondary-player.js",

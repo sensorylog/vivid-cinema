@@ -88,8 +88,8 @@ function renderCinemaStage() {
   subtitle.textContent = screeningClubName
     ? "This screening is saved to " + screeningClubName + "'s history, with After-Credits reviews and discussion."
     : "The room is watching together. You can return to the player without leaving the conversation.";
-  open.hidden = false;
-  open.innerHTML = '<i class="bi bi-play-fill" aria-hidden="true"></i> Return to screening';
+  open.hidden = !stage.querySelector(".vivid-wr-player-slot")?.classList.contains("is-floating");
+  open.innerHTML = '<i class="bi bi-arrow-up-left-square" aria-hidden="true"></i> Return to cinema';
   const posterPath = String(screening.posterPath || "");
   if (/^\/[A-Za-z0-9/_-]+\.(?:jpg|jpeg|png|webp)$/i.test(posterPath)) {
     stage.style.setProperty("--wr-cinema-art", 'url("https://image.tmdb.org/t/p/w780' + posterPath + '")');
@@ -99,6 +99,11 @@ function renderCinemaStage() {
 }
 byId("wr-cinema-open")?.addEventListener("click", () => {
   if (room?.activeScreening) navigateToCinemaScreening(room.activeScreening);
+});
+document.addEventListener("vivid:watch-room-player-presentation", event => {
+  const button = byId("wr-cinema-open");
+  if (!button || !room?.activeScreening) return;
+  button.hidden = event.detail?.floating !== true;
 });
 byId("wr-open-linked-club")?.addEventListener("click", () => {
   const clubId = room?.activeScreening?.clubId || room?.linkedClubId;

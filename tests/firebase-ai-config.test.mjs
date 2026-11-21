@@ -82,7 +82,7 @@ test("App Check remains initialized for Firebase services outside AI", () => {
 });
 
 test("service worker cache version changes with the Cloudflare AI client", () => {
-  assert.match(workerSource, /vivid-cinema-shell-v297/);
+  assert.match(workerSource, /vivid-cinema-shell-v298/);
   assert.match(workerSource, /scripts\/cloudflare-ai\.js/);
 });
 

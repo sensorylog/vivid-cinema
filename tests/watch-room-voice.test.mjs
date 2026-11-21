@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { createHmac } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import { createLiveKitAccessToken, createLiveKitRoomAdminToken } from "../cloudflare/functions/lib/livekit-token.js";
+import { mountWatchRoomPlayerLayout } from "../scripts/watch-room-player-layout.js";
 
 function decode(part) {
   return JSON.parse(Buffer.from(part.replace(/-/g, "+").replace(/_/g, "/"), "base64").toString("utf8"));
@@ -77,25 +78,31 @@ test("LiveKit token signer rejects malformed identities and unscoped room names"
   }), /invalid/i);
 });
 
-test("Watch Room screenings stay in the lobby and minimize without stopping playback", async () => {
-  const [lobbyHtml, lobby, voice, playback, watchPage, cinemaStyles, rooms, legacyPage] = await Promise.all([
+test("Watch Room screenings stay embedded in the lobby and float without stopping playback", async () => {
+  const [lobbyHtml, lobby, voice, playback, watchPage, cinemaStyles, experienceStyles, layoutController, rooms, legacyPage] = await Promise.all([
     readFile(new URL("../watch-rooms.html", import.meta.url), "utf8"),
     readFile(new URL("../scripts/watch-room-lobby.js", import.meta.url), "utf8"),
     readFile(new URL("../scripts/watch-room-voice.js", import.meta.url), "utf8"),
     readFile(new URL("../scripts/watch-room-playback.js", import.meta.url), "utf8"),
     readFile(new URL("../scripts/watch.js", import.meta.url), "utf8"),
     readFile(new URL("../styles/vivid-watch-room-cinema.css", import.meta.url), "utf8"),
+    readFile(new URL("../styles/vivid-watch-room-experience.css", import.meta.url), "utf8"),
+    readFile(new URL("../scripts/watch-room-player-layout.js", import.meta.url), "utf8"),
     readFile(new URL("../scripts/watch-rooms.js", import.meta.url), "utf8"),
     readFile(new URL("../watch-room-cinema.html", import.meta.url), "utf8")
   ]);
   assert.ok(legacyPage.includes('new URL("watch-rooms.html", window.location.href)'));
   assert.ok(legacyPage.includes("window.location.replace(target.href)"));
   assert.ok(lobbyHtml.includes('id="wr-screening-player-host"'));
+  assert.ok(lobbyHtml.indexOf('id="wr-cinema-stage"') < lobbyHtml.indexOf('id="wr-screening-player-host"') && lobbyHtml.indexOf('id="wr-screening-player-host"') < lobbyHtml.indexOf('<aside class="vivid-wr-room-sidebar"'));
+  assert.ok(lobbyHtml.includes('id="wr-voice-count"'));
+  assert.ok(lobbyHtml.includes('styles/vivid-watch-room-experience.css'));
   assert.ok(lobbyHtml.includes('id="wr-cinema-stage"'));
   assert.ok(lobbyHtml.includes('data-room-view="queue"'));
   assert.ok(lobbyHtml.includes('data-room-view="chat"'));
   assert.ok(lobbyHtml.includes('data-room-view="members"'));
   assert.ok(lobbyHtml.includes('id="wr-voice-call"'));
+  assert.ok(lobbyHtml.indexOf('id="wr-voice-call"') < lobbyHtml.indexOf('<aside class="vivid-wr-room-sidebar"'));
   assert.ok(lobbyHtml.includes('id="wr-link-club-select"'));
   assert.ok(lobbyHtml.includes('id="wr-linked-club-watchlist"'));
   assert.ok(lobbyHtml.includes('id="wr-open-linked-club"'));
@@ -142,10 +149,22 @@ test("Watch Room screenings stay in the lobby and minimize without stopping play
   assert.ok(playback.includes('document.addEventListener("vivid:watch-room-screening-navigate"'));
   assert.ok(playback.includes("playbackSessionId = requestedSessionId"));
   assert.ok(playback.includes("playbackRevision = 0;"));
-  assert.ok(watchPage.includes('overlay.classList.add("is-minimized")'));
-  assert.ok(watchPage.includes('restorePlayer.addEventListener("click", openPlayerWindow)'));
-  assert.ok(watchPage.includes("const restoringMiniPlayer = overlay.classList.contains(\"is-minimized\") && playerHasOpened"));
+  assert.ok(watchPage.includes("mountWatchRoomPlayerLayout({ slot, overlay: overlayForRoom })"));
+  assert.ok(watchPage.includes('slot.append(overlayForRoom)'));
+  assert.ok(watchPage.includes('slot.append(secondaryForRoom)'));
+  assert.ok(watchPage.includes("watchContentForRoom?.replaceChildren()"));
+  assert.ok(watchPage.indexOf("roomPlayerSlot?.remove();") < watchPage.indexOf('$("watch-content").innerHTML ='), "old player nodes must be torn down before a new screening is rendered");
+  assert.ok(watchPage.includes("host.hidden = true"));
+  assert.ok(!watchPage.includes("host.remove()"), "the screening host must remain reusable for the next movie");
+  assert.ok(watchPage.includes('roomPlayerSlot?.querySelectorAll("iframe")'));
+  assert.ok(watchPage.includes("stopDirectStream(previousDirectVideo)"));
+  assert.ok(watchPage.includes('if (isWatchRoomCinemaMode) return;'));
+  assert.ok(watchPage.includes('roomPlayerSlot.dataset.activePlayer = "secondary"'));
+  assert.ok(watchPage.includes('roomPlayerLayout?.focus()'));
+  assert.ok(!watchPage.includes('overlay.classList.add("is-minimized")'), "Watch Room playback must not use the old close-to-minimize modal flow");
+  assert.ok(watchPage.includes('const restoringMiniPlayer = !isWatchRoomCinemaMode && overlay.classList.contains("is-minimized") && playerHasOpened'));
   assert.ok(watchPage.includes("if (restoringMiniPlayer)"));
+  assert.ok(watchPage.includes('returnInlineButton?.addEventListener("click", () => roomPlayerLayout?.focus())'));
   assert.ok(watchPage.includes('vivid:watch-room-screening-validated'));
   assert.ok(watchPage.includes("watchRoomScreeningValidated = true"));
   assert.ok(watchPage.includes("watchRoomScreeningValidated) return"));
@@ -162,9 +181,18 @@ test("Watch Room screenings stay in the lobby and minimize without stopping play
   assert.ok(voice.includes('joinVoice({ restore: true, muted: intent.muted === true })'));
   assert.ok(voice.includes("clearVoiceIntent(connectedRoomId || activeRoom?.roomId)"));
   assert.ok(cinemaStyles.includes("aspect-ratio:16/9"));
-  assert.ok(cinemaStyles.includes("#player-overlay.is-minimized"));
-  assert.ok(cinemaStyles.includes("pointer-events:none!important;background:transparent!important"), "a minimized player must not leave a full-screen click shield over the lobby");
-  assert.ok(cinemaStyles.includes("pointer-events:auto!important"), "the mini-player card itself must remain interactive");
+  assert.ok(experienceStyles.includes("overflow-y:auto!important"));
+  assert.ok(experienceStyles.includes("#player-overlay.is-floating"));
+  assert.ok(experienceStyles.includes("#vivid-tflix-player"));
+  assert.ok(experienceStyles.includes("#player-status"));
+  assert.ok(layoutController.includes('overlay.classList.toggle("is-floating", value)'));
+  assert.ok(!layoutController.includes(".src") && !layoutController.includes("innerHTML"), "scroll presentation must not reload or recreate the playing media element");
+  assert.ok(experienceStyles.includes("aspect-ratio:16/9!important"));
+  assert.ok(experienceStyles.includes("position:relative!important;top:auto!important"), "voice panel must flow with the room instead of sticking over the player");
+  assert.ok(voice.includes("participantInitials(participant)"));
+  assert.ok(voice.includes("is-speaking"));
+  assert.ok(voice.includes("RoomEvent.TrackMuted"));
+  assert.ok(voice.includes("RoomEvent.TrackUnmuted"));
 
   const roomStyles = await readFile(new URL("../styles/vivid-watch-rooms.css", import.meta.url), "utf8");
   assert.ok(roomStyles.includes(".vivid-wr-room-layout"));
@@ -172,15 +200,9 @@ test("Watch Room screenings stay in the lobby and minimize without stopping play
   assert.ok(roomStyles.includes(".vivid-wr-linked-club-shelf"));
   assert.ok(roomStyles.includes(".vivid-wr-club-link-setting"));
   assert.ok(roomStyles.includes("overflow-y:auto!important"));
-  assert.ok(roomStyles.includes("#player-overlay.is-minimized{bottom:calc(112px"));
-  assert.ok(roomStyles.includes(".vivid-wr-voice-panel{position:sticky"));
   assert.ok(!roomStyles.includes("body.vivid-wr-screening-open"), "obsolete full-screen lobby overlay styles should be removed");
   assert.ok(cinemaStyles.includes("#player-overlay[hidden]"));
-  assert.ok(cinemaStyles.includes("#vivid-tflix-player.is-minimized"));
-  assert.ok(cinemaStyles.includes(".vivid-tflix-room-minimize"));
   assert.ok(cinemaStyles.includes("body.vivid-watch-rooms-page.vivid-watch-room-mode .vivid-topbar{display:none!important}"));
-  assert.ok(cinemaStyles.includes("align-items:center!important;justify-content:center!important"));
-  assert.ok(cinemaStyles.includes("max-height:calc(100dvh - 24px)!important"));
   assert.ok(watchPage.includes("playerInfo.outerHTML = playerInfoMarkup()"));
   assert.ok(watchPage.includes('runtime + " min episode"'));
   assert.ok(watchPage.includes("TV episode scores stay episode-specific"));
@@ -196,4 +218,56 @@ test("Watch Room screenings stay in the lobby and minimize without stopping play
   assert.ok(cinemaStyles.includes('.vivid-player-fact'));
   assert.ok(rooms.includes('requestedParams.get("roomId")'));
   assert.ok(rooms.includes('document.dispatchEvent(new CustomEvent("vivid:watch-room-open"'));
+});
+
+
+test("Watch Room player uses scroll-aware floating presentation with hysteresis", () => {
+  const classes = () => {
+    const values = new Set();
+    return {
+      values,
+      toggle(name, force) {
+        if (force === undefined ? !values.has(name) : force) values.add(name);
+        else values.delete(name);
+        return values.has(name);
+      },
+      contains(name) { return values.has(name); }
+    };
+  };
+  let observerCallback;
+  let observerOptions;
+  let observedTarget;
+  class FakeIntersectionObserver {
+    constructor(callback, options) {
+      observerCallback = callback;
+      observerOptions = options;
+      this.options = options;
+    }
+    observe(target) { observedTarget = target; }
+    unobserve() { observedTarget = null; }
+    disconnect() { observedTarget = null; }
+  }
+  const slot = { classList: classes(), scrollIntoView() { this.scrolled = true; } };
+  const overlay = { classList: classes(), dataset: {}, setAttribute(name, value) { this[name] = value; }, querySelector() { return null; } };
+  const presentations = [];
+  const layout = mountWatchRoomPlayerLayout({
+    slot, overlay, Observer: FakeIntersectionObserver,
+    onPresentation: state => presentations.push(state.floating)
+  });
+  layout.setActive(true);
+  assert.equal(observedTarget, slot);
+  assert.deepEqual(observerOptions.threshold, [0, 0.12, 0.45]);
+  assert.equal(observerOptions.root, null);
+  observerCallback([{ target: slot, isIntersecting: false, intersectionRatio: 0 }]);
+  assert.equal(overlay.classList.contains("is-floating"), true);
+  observerCallback([{ target: slot, isIntersecting: true, intersectionRatio: 0.2 }]);
+  assert.equal(overlay.classList.contains("is-floating"), true, "the player should not flicker near the viewport boundary");
+  observerCallback([{ target: slot, isIntersecting: true, intersectionRatio: 0.5 }]);
+  assert.equal(overlay.classList.contains("is-floating"), false);
+  layout.focus();
+  assert.equal(slot.scrolled, true);
+  layout.setActive(false);
+  assert.equal(observedTarget, null);
+  layout.destroy();
+  assert.deepEqual(presentations, [true, false]);
 });
