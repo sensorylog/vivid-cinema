@@ -666,30 +666,81 @@ function recordWatchActivity(progress, duration) {
 }
 
 function playerInfoMarkup() {
-  const episode = currentParams?.type === "tv" ? details?.episode : null;
+  const isTv = currentParams?.type === "tv";
+  const episode = isTv ? details?.episode : null;
+  const title = episode?.name || media?.title || media?.name || "Now playing";
   const synopsis = episode?.overview || media?.overview || details?.overview || "";
+  const year = String(episode?.air_date || media?.release_date || media?.first_air_date || "").slice(0, 4);
+  const runtime = Number(episode?.runtime || details?.runtime || details?.episode_run_time?.[0] || 0);
+  const rating = Number(episode?.vote_average || media?.vote_average || details?.vote_average || 0);
+  const voteCount = Number(episode?.vote_count || media?.vote_count || details?.vote_count || 0);
+  const genres = (details?.genres || []).map(genre => genre.name).filter(Boolean).slice(0, 4);
+  const ratingLabel = rating > 0
+    ? '<span class="vivid-player-rating"><i class="bi bi-star-fill" aria-hidden="true"></i><strong>' + rating.toFixed(1) + '</strong><small>TMDB</small></span>'
+    : '<span class="vivid-player-rating vivid-player-rating--empty">Not yet rated</span>';
+  const runtimeLabel = runtime > 0
+    ? (isTv ? runtime + " min episode" : Math.floor(runtime / 60) + "h " + String(runtime % 60).padStart(2, "0") + "m")
+    : "";
+  const episodeLabel = isTv
+    ? "S" + String(currentParams?.season || 1).padStart(2, "0") + " · E" + String(currentParams?.episode || 1).padStart(2, "0")
+    : "";
+  const meta = [year, episodeLabel, runtimeLabel].filter(Boolean);
+  const metaMarkup = meta.map(value => '<span class="vivid-player-meta-item">' + escapeHtml(value) + '</span>').join("");
+  const genreMarkup = genres.map(genre => '<span class="vivid-player-genre">' + escapeHtml(genre) + '</span>').join("");
   const cast = [
     ...(Array.isArray(episode?.guest_stars) ? episode.guest_stars : []),
     ...(Array.isArray(details?.credits?.cast) ? details.credits.cast : [])
   ].filter((person, index, list) => person?.name && list.findIndex(item => String(item.id) === String(person.id)) === index).slice(0, 8);
   const castMarkup = cast.map(person =>
     '<article class="vivid-player-cast-card">' +
-      (person.profile_path ? '<img src="' + escapeHtml(getImageUrl(person.profile_path, "w185")) + '" alt="" loading="lazy" decoding="async">' : '<span class="vivid-player-cast-placeholder" aria-hidden="true"><i class="bi bi-person-fill"></i></span>') +
+      (person.profile_path
+        ? '<img src="' + escapeHtml(getImageUrl(person.profile_path, "w185")) + '" alt="" loading="lazy" decoding="async">'
+        : '<span class="vivid-player-cast-placeholder" aria-hidden="true"><i class="bi bi-person-fill"></i></span>') +
       '<span><strong>' + escapeHtml(person.name) + '</strong><small>' + escapeHtml(person.character || "") + '</small></span>' +
     '</article>'
   ).join("");
-  const year = String(media?.release_date || media?.first_air_date || "").slice(0, 4);
-  const runtime = Number(episode?.runtime || details?.runtime || details?.episode_run_time?.[0] || 0);
-  const rating = Number(episode?.vote_average || media?.vote_average || details?.vote_average || 0);
-  const genres = (details?.genres || []).slice(0, 3).map(genre => genre.name).filter(Boolean);
-  const metadata = [year, runtime > 0 ? runtime + " min" : "", rating > 0 ? "★ " + rating.toFixed(1) : "", genres.join(" · ")].filter(Boolean);
-  return '<section class="vivid-player-info" aria-label="Movie information">' +
-    '<div class="vivid-player-info-copy"><div class="vivid-player-info-meta">' +
-      metadata.map(value => '<span>' + escapeHtml(value) + '</span>').join("") +
-    '</div><h3>' + escapeHtml(episode?.name || media?.title || "Now playing") + '</h3>' +
-    (synopsis ? '<p>' + escapeHtml(synopsis) + '</p>' : '') +
+
+  // Select a data-backed detail per title. The seeded choice stays stable
+  // through metadata refreshes and never invents filming or trivia claims.
+  const facts = [];
+  const originalTitle = String(media?.original_title || media?.original_name || "");
+  const displayTitle = String(media?.title || media?.name || "");
+  if (originalTitle && displayTitle && originalTitle.toLocaleLowerCase() !== displayTitle.toLocaleLowerCase()) {
+    facts.push("Its original title is “" + originalTitle + "”.");
+  }
+  const companies = (details?.production_companies || []).map(item => item?.name).filter(Boolean);
+  if (companies.length) facts.push("Production credit: " + companies.slice(0, 2).join(" and ") + ".");
+  const countries = (details?.production_countries || []).map(item => item?.name).filter(Boolean);
+  if (countries.length > 1) facts.push("The production is credited to " + countries.slice(0, 3).join(", ") + ".");
+  const languages = (details?.spoken_languages || []).map(item => item?.english_name || item?.name).filter(Boolean);
+  if (languages.length > 1) facts.push("The title lists " + languages.length + " spoken languages: " + languages.slice(0, 3).join(", ") + ".");
+  if (isTv) {
+    const creators = (details?.created_by || []).map(item => item?.name).filter(Boolean);
+    if (creators.length) facts.push("Created by " + creators.slice(0, 2).join(" and ") + ".");
+    const seasons = Number(details?.number_of_seasons || 0);
+    const episodes = Number(details?.number_of_episodes || 0);
+    if (seasons > 0 && episodes > 0) facts.push("The series spans " + seasons + " seasons and " + episodes.toLocaleString() + " episodes.");
+    const networks = (details?.networks || []).map(item => item?.name).filter(Boolean);
+    if (networks.length) facts.push("Network credit: " + networks.slice(0, 2).join(" and ") + ".");
+  }
+  const seed = String(media?.id || displayTitle || "vivid").split("").reduce((sum, char) => (sum * 31 + char.charCodeAt(0)) >>> 0, 7);
+  const fact = facts.length ? facts[seed % facts.length] : "";
+  const factMarkup = fact
+    ? '<aside class="vivid-player-fact" aria-label="A detail about this title"><span class="vivid-player-fact-kicker"><i class="bi bi-stars" aria-hidden="true"></i> A LITTLE DETAIL</span><p>' + escapeHtml(fact) + '</p><small>From TMDB title credits and metadata</small></aside>'
+    : "";
+
+  return '<section class="vivid-player-info" aria-label="Now playing information">' +
+    '<div class="vivid-player-info-hero">' +
+      '<span class="vivid-player-info-eyebrow"><i class="bi bi-soundwave" aria-hidden="true"></i> NOW SCREENING</span>' +
+      '<h3>' + escapeHtml(title) + '</h3>' +
+      '<div class="vivid-player-info-topline">' + metaMarkup + ratingLabel +
+        (voteCount > 0 ? '<span class="vivid-player-vote-count">' + voteCount.toLocaleString() + ' ratings</span>' : '') +
+      '</div>' +
+      (genreMarkup ? '<div class="vivid-player-genre-list" aria-label="Genres">' + genreMarkup + '</div>' : '') +
+      (synopsis ? '<p class="vivid-player-synopsis">' + escapeHtml(synopsis) + '</p>' : '<p class="vivid-player-synopsis vivid-player-synopsis--empty">Movie details are not available right now.</p>') +
     '</div>' +
-    (castMarkup ? '<div class="vivid-player-cast"><h4>Cast</h4><div class="vivid-player-cast-rail">' + castMarkup + '</div></div>' : '') +
+    factMarkup +
+    (castMarkup ? '<div class="vivid-player-cast"><div class="vivid-player-section-heading"><h4>Featuring</h4><span>CAST &amp; CHARACTERS</span></div><div class="vivid-player-cast-rail">' + castMarkup + '</div></div>' : '') +
   '</section>';
 }
 
