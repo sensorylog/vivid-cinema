@@ -475,14 +475,14 @@ document.addEventListener("vivid:watch-room-screening-validated", event => {
   }
 });
 
-window.addEventListener("vivid:watch-room-screening-focus", event => {
+document.addEventListener("vivid:watch-room-screening-focus", event => {
   if (isWatchRoomCinemaMode && watchRoomScreeningValidated &&
       event.detail?.roomId === new URLSearchParams(window.location.search).get("roomId")) {
     openPlayerWindow();
   }
 });
 
-window.addEventListener("vivid:watch-room-screening-navigate", event => {
+document.addEventListener("vivid:watch-room-screening-navigate", event => {
   const detail = event.detail || {};
   const params = new URLSearchParams(window.location.search);
   if (!detail.roomId || detail.roomId !== params.get("roomId") ||
