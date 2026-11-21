@@ -5,7 +5,7 @@ import { fileURLToPath } from "node:url";
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const androidRoot = path.join(root, "android");
 const packageJson = JSON.parse(await readFile(path.join(root, "package.json"), "utf8"));
-const buildNumber = Number(process.env.GITHUB_RUN_NUMBER || process.env.VIVID_ANDROID_BUILD || 1);
+const buildNumber = Number(process.env.VIVID_ANDROID_BUILD || process.env.GITHUB_RUN_NUMBER || 1);
 if (!Number.isSafeInteger(buildNumber) || buildNumber < 1) throw new Error("Android build number must be a positive integer.");
 const versionCode = 100000 + buildNumber;
 const versionName = packageJson.version;
