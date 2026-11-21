@@ -180,6 +180,16 @@ test("Watch Room screenings stay in the lobby and minimize without stopping play
   assert.ok(cinemaStyles.includes("max-height:calc(100dvh - 24px)!important"));
   assert.ok(watchPage.includes("playerInfo.outerHTML = playerInfoMarkup()"));
   assert.ok(watchPage.includes('runtime > 0 ? runtime + " min" : ""'));
+  assert.ok(watchPage.includes('runtime > 0 ? runtime + " min episode"'));
+  assert.ok(watchPage.includes('vivid-player-rating'));
+  assert.ok(watchPage.includes('TMDB'));
+  assert.ok(watchPage.includes('vivid-player-genre-list'));
+  assert.ok(watchPage.includes('vivid-player-fact'));
+  assert.ok(watchPage.includes('production_companies'));
+  assert.ok(watchPage.includes('number_of_episodes'));
+  assert.ok(cinemaStyles.includes('.vivid-player-info::before'));
+  assert.ok(cinemaStyles.includes('.vivid-player-rating'));
+  assert.ok(cinemaStyles.includes('.vivid-player-fact'));
   assert.ok(rooms.includes('requestedParams.get("roomId")'));
   assert.ok(rooms.includes('document.dispatchEvent(new CustomEvent("vivid:watch-room-open"'));
 });
