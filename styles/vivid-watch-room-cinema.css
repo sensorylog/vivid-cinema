@@ -144,6 +144,7 @@ body.vivid-watch-rooms-page.vivid-watch-room-mode #player-overlay.is-minimized .
 body.vivid-watch-rooms-page.vivid-watch-room-mode #player-overlay.is-minimized .vivid-player-dialog-eyebrow{font-size:.5rem!important}
 body.vivid-watch-rooms-page.vivid-watch-room-mode #player-overlay.is-minimized .vivid-player-dialog-head h2{max-width:230px!important;margin:2px 0!important;font-size:.7rem!important}
 body.vivid-watch-rooms-page.vivid-watch-room-mode #player-overlay.is-minimized #player-server-menu,
+body.vivid-watch-rooms-page.vivid-watch-room-mode #player-overlay.is-minimized #player-server-panel,
 body.vivid-watch-rooms-page.vivid-watch-room-mode #player-overlay.is-minimized #player-close,
 body.vivid-watch-rooms-page.vivid-watch-room-mode #player-overlay.is-minimized .vivid-player-current-source,
 body.vivid-watch-rooms-page.vivid-watch-room-mode #player-overlay.is-minimized .vivid-player-status,
