@@ -234,3 +234,15 @@ test("shared browser performance profile leaves capable hardware on the full vis
   assert.equal(classes.has("vivid-performance-legacy"), false);
   assert.equal(links.length, 0);
 });
+
+
+test("legacy rendering profile removes expensive compositing while retaining cinematic surfaces", async () => {
+  const css = await read("styles/vivid-performance.css");
+  assert.match(css, /body\.vivid-atmosphere::before\s*\{[\s\S]*?animation:\s*none/);
+  assert.match(css, /body\.vivid-atmosphere::after\s*\{[\s\S]*?mix-blend-mode:\s*normal/);
+  assert.match(css, /body\.vivid-atmosphere \.vivid-ambient-art\s*\{[\s\S]*?display:\s*none/);
+  assert.match(css, /body\.vivid-atmosphere \.vivid-card::after,[\s\S]*?display:\s*none/);
+  assert.match(css, /backdrop-filter:\s*none/);
+  assert.match(css, /box-shadow:\s*0 8px 24px rgba\(0, 0, 0, \.18\)/);
+  assert.doesNotMatch(css, /\.vivid-card\s*\{[^}]*display:\s*none/);
+});
