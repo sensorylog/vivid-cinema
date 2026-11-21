@@ -176,6 +176,8 @@ test("Watch Room screenings stay embedded in the lobby and float without stoppin
   assert.ok(cinemaStyles.includes("aspect-ratio:16/9"));
   assert.ok(experienceStyles.includes("overflow-y:auto!important"));
   assert.ok(experienceStyles.includes("#player-overlay.is-floating"));
+  assert.ok(experienceStyles.includes("#vivid-tflix-player"));
+  assert.ok(experienceStyles.includes("#player-status"));
   assert.ok(experienceStyles.includes("aspect-ratio:16/9!important"));
   assert.ok(experienceStyles.includes("position:relative!important;top:auto!important"), "voice panel must flow with the room instead of sticking over the player");
   assert.ok(voice.includes("participantInitials(participant)"));
