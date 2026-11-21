@@ -173,3 +173,19 @@ test("Android Back exits fullscreen before closing the player", () => {
   assert.match(source, /resolveAndroidPlayerBackAction\(/);
   assert.match(source, /document\.exitFullscreen\?\.\(\)/);
 });
+
+test("player window includes compact title synopsis and cast below the video", () => {
+  assert.match(source, /function playerInfoMarkup\(\)/);
+  assert.match(source, /details\?\.credits\?\.cast/);
+  assert.match(source, /class="vivid-player-info"/);
+  assert.match(source, /class="vivid-player-cast-rail"/);
+  assert.match(source, /playerInfoMarkup\(\) \+ '<\/section><\/div>'/);
+});
+
+test("cinema room player preserves a video aspect ratio and keeps close controls visible", async () => {
+  const styles = await readFile(new URL("../styles/vivid-watch-room-cinema.css", import.meta.url), "utf8");
+  assert.match(styles, /#player-overlay \.vivid-player-frame[\s\S]*?aspect-ratio:16\/9!important/);
+  assert.match(styles, /#player-overlay #player-close\{display:inline-flex!important/);
+  assert.match(styles, /#player-overlay \.vivid-player-info/);
+  assert.match(styles, /\.vivid-topbar[\s\S]*?display:none!important/);
+});
