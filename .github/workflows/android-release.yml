@@ -127,7 +127,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: vivid-cinema-signed-android-${{ github.run_number }}
-          path: release-output/*.apk
+          path: release-output/*
           if-no-files-found: error
           retention-days: 90
 
