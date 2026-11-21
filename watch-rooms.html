@@ -114,7 +114,10 @@
                 <span class="vivid-wr-cinema-stage__eyebrow" id="wr-cinema-status">PRIVATE CINEMA · ROOM READY</span>
                 <h3 id="wr-cinema-title">Your screen is ready.</h3>
                 <p id="wr-cinema-subtitle">Choose a film together, then start the screening when everyone is ready.</p>
-                <button class="vivid-wr-button vivid-wr-button--primary" id="wr-cinema-open" type="button" hidden><i class="bi bi-play-fill" aria-hidden="true"></i> Return to screening</button>
+                <div class="vivid-wr-cinema-stage__actions">
+                  <button class="vivid-wr-button vivid-wr-button--primary" id="wr-cinema-open" type="button" hidden><i class="bi bi-play-fill" aria-hidden="true"></i> Return to screening</button>
+                  <button class="vivid-wr-button vivid-wr-button--quiet" id="wr-open-linked-club" type="button" hidden>Open linked club</button>
+                </div>
               </div>
               <span class="vivid-wr-cinema-stage__wordmark">VIVID CINEMA <span>·</span> PRIVATE SCREENING</span>
             </section>
@@ -130,6 +133,11 @@
                   <form id="wr-queue-form" class="vivid-wr-queue-form"><div class="vivid-wr-queue-search"><input name="title" maxlength="180" autocomplete="off" placeholder="Find a film or series…" aria-label="Search films or TV series" required><input type="hidden" name="contentId"><input type="hidden" name="mediaType"><input type="hidden" name="posterPath"><input type="hidden" name="releaseDate"><div id="wr-queue-search-results" class="vivid-wr-title-results" role="listbox" aria-label="Film search results" hidden></div></div><button class="vivid-wr-button vivid-wr-button--primary" type="submit">Add</button></form>
                   <p id="wr-queue-selection" class="vivid-wr-queue-selection" hidden></p>
                   <ol id="wr-lobby-queue" class="vivid-wr-lobby-list" aria-live="polite" aria-relevant="additions removals text"></ol>
+                  <section class="vivid-wr-linked-club-shelf" id="wr-linked-club-shelf" hidden>
+                    <div class="vivid-wr-room-panel-heading"><div><span class="vivid-wr-section-kicker">FROM YOUR CLUB</span><h3 id="wr-linked-club-title">Club watchlist</h3></div></div>
+                    <p id="wr-linked-club-note" class="vivid-wr-queue-hint">Shared picks from your linked Cinema Club.</p>
+                    <ul id="wr-linked-club-watchlist" class="vivid-wr-lobby-list" aria-live="polite" aria-relevant="additions removals text"></ul>
+                  </section>
                 </section>
               </section>
               <section class="vivid-wr-room-view" id="wr-room-view-chat" role="tabpanel" aria-labelledby="wr-room-tab-chat" tabindex="0" data-room-view-panel="chat" hidden>
@@ -152,6 +160,10 @@
                       <button class="vivid-wr-button vivid-wr-button--danger" id="wr-delete-room" type="button">Delete room permanently</button>
                       <form id="wr-room-settings-form" class="vivid-wr-inline-form">
                         <input name="name" maxlength="80" placeholder="Room name">
+                        <label class="vivid-wr-club-link-setting">Link a Cinema Club
+                          <select name="linkedClubId" id="wr-link-club-select"><option value="">No linked club</option></select>
+                          <small>New screenings started here will be added to the club's history and After-Credits reviews.</small>
+                        </label>
                         <label><input type="checkbox" name="allowGuestQueue" checked> Guests can suggest titles</label>
                         <label><input type="checkbox" name="allowGuestVoting" checked> Guests can vote on picks</label>
                         <label><input type="checkbox" name="allowGuestQueueManagement"> Guests can remove any queued pick</label>
