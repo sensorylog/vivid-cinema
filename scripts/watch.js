@@ -679,11 +679,13 @@ function playerInfoMarkup() {
     '</article>'
   ).join("");
   const year = String(media?.release_date || media?.first_air_date || "").slice(0, 4);
+  const runtime = Number(episode?.runtime || details?.runtime || details?.episode_run_time?.[0] || 0);
+  const rating = Number(episode?.vote_average || media?.vote_average || details?.vote_average || 0);
   const genres = (details?.genres || []).slice(0, 3).map(genre => genre.name).filter(Boolean);
+  const metadata = [year, runtime > 0 ? runtime + " min" : "", rating > 0 ? "★ " + rating.toFixed(1) : "", genres.join(" · ")].filter(Boolean);
   return '<section class="vivid-player-info" aria-label="Movie information">' +
     '<div class="vivid-player-info-copy"><div class="vivid-player-info-meta">' +
-      (year ? '<span>' + escapeHtml(year) + '</span>' : '') +
-      (genres.length ? '<span>' + escapeHtml(genres.join(" · ")) + '</span>' : '') +
+      metadata.map(value => '<span>' + escapeHtml(value) + '</span>').join("") +
     '</div><h3>' + escapeHtml(episode?.name || media?.title || "Now playing") + '</h3>' +
     (synopsis ? '<p>' + escapeHtml(synopsis) + '</p>' : '') +
     '</div>' +
@@ -1213,6 +1215,9 @@ function hydrateWatchDetails(params) {
   if (episodeNavigation) episodeNavigation.innerHTML = episodeNavigationMarkup(params);
   const recommendations = $("watch-recommendations");
   if (recommendations) recommendations.innerHTML = recommendationCards();
+  // The panel is first rendered with the loading shell; refresh it when TMDB data arrives.
+  const playerInfo = document.querySelector(".vivid-player-info");
+  if (playerInfo) playerInfo.outerHTML = playerInfoMarkup();
   document.title = (episodeTitle ? episodeTitle + " · " : "") + title + " · Vivid Cinema";
 }
 
