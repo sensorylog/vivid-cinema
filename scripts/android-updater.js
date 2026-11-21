@@ -138,3 +138,10 @@ if (document.readyState === "loading") {
 } else {
   void checkForAndroidUpdate();
 }
+
+// Re-check after returning from Android Settings or the package installer. The
+// persistent cooldown makes these lifecycle events cheap when no check is due.
+document.addEventListener("visibilitychange", () => {
+  if (!document.hidden) void checkForAndroidUpdate();
+});
+window.addEventListener("online", () => void checkForAndroidUpdate());
