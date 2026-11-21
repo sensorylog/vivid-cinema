@@ -27,13 +27,13 @@ test("production-signed Android release remains manual until signing is configur
   assert.match(workflow, /if: inputs\.publish_to_github_release/);
   assert.match(workflow, /Vivid-Cinema-Android\.apk/);
   assert.match(workflow, /Set Android app version metadata/);
-  assert.match(workflow, /VIVID_ANDROID_BUILD=\\$GITHUB_RUN_NUMBER/);
-  assert.match(workflow, /configure-android-native-project\\.mjs/);
+  assert.match(workflow, /VIVID_ANDROID_BUILD=\$GITHUB_RUN_NUMBER/);
+  assert.match(workflow, /configure-android-native-project\.mjs/);
   assert.ok(workflow.indexOf("npm run cap:sync") < workflow.indexOf("configure-android-native-project.mjs"));
   assert.ok(workflow.indexOf("configure-android-native-project.mjs") < workflow.indexOf("Configure release signing"));
-  assert.match(workflow, /Vivid-Cinema-Android-build-\\$VIVID_ANDROID_BUILD\\.json/);
-  assert.match(nativeConfigurator, /VividNavigationPlugin\\.class/);
-  assert.match(nativeConfigurator, /VividUpdaterPlugin\\.class/);
+  assert.match(workflow, /Vivid-Cinema-Android-build-\$VIVID_ANDROID_BUILD\.json/);
+  assert.match(nativeConfigurator, /VividNavigationPlugin\.class/);
+  assert.match(nativeConfigurator, /VividUpdaterPlugin\.class/);
 });
 
 test("release signer reads credentials only from environment and never writes secrets into source", () => {
@@ -50,7 +50,7 @@ test("debug APK release never republishes the Android signing keystore", async (
   assert.match(publishStep, /gh release upload/);
   assert.doesNotMatch(publishStep, /Vivid-Cinema-Debug\\.keystore/);
   assert.match(debugWorkflow, /gh release download/);
-  assert.match(debugWorkflow, /vars\\.ANDROID_PRODUCTION_SIGNING_ENABLED != 'true'/);
+  assert.match(debugWorkflow, /vars\.ANDROID_PRODUCTION_SIGNING_ENABLED != 'true'/);
 });
 
 test("Android release docs explain keystore continuity and secret setup", () => {
