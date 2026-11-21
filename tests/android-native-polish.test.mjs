@@ -6,7 +6,7 @@ import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { resolveAndroidBackAction } from "../scripts/android-navigation.js";
-import { isLegacyPerformanceDevice } from "../scripts/performance-profile.js";
+import { applyPerformanceProfile, isLegacyPerformanceDevice } from "../scripts/performance-profile.js";
 
 const [builder, nativeCss, capacitorConfig, nativeConfigurator, appShell] = await Promise.all([
   readFile(new URL("../automation/build-static-dist.mjs", import.meta.url), "utf8"),
@@ -159,5 +159,28 @@ test("native Android project generation registers both plugins idempotently", as
     assert.equal((activityAfterSecondRun.match(/setWebChromeClient\(new VividWebChromeClient/g) || []).length, 1);
   } finally {
     await rm(temp, { recursive: true, force: true });
+  }
+});
+
+test("Android native performance profile reads Navigator capability getters without spreading Navigator", () => {
+  const originalWindow = globalThis.window;
+  const added = [];
+  const documentRef = {
+    documentElement: { classList: { add: value => added.push(value) } },
+    head: { appendChild: value => added.push(value) },
+    querySelector: () => null,
+    createElement: () => ({ dataset: {}, setAttribute() {} })
+  };
+  globalThis.window = { Capacitor: { getPlatform: () => "android" } };
+  try {
+    const profile = applyPerformanceProfile({
+      documentRef,
+      navigatorRef: { hardwareConcurrency: 4, deviceMemory: undefined }
+    });
+    assert.equal(profile, "legacy");
+    assert.ok(added.includes("vivid-performance-legacy"));
+  } finally {
+    if (originalWindow === undefined) delete globalThis.window;
+    else globalThis.window = originalWindow;
   }
 });
