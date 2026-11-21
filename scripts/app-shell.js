@@ -571,6 +571,13 @@ function initNativeBackNavigation() {
       return;
     }
 
+    const moreMenu = document.querySelector(".vivid-native-more-menu:not([hidden])");
+    if (moreMenu) {
+      moreMenu.hidden = true;
+      document.querySelector("[data-vivid-more-navigation]")?.setAttribute("aria-expanded", "false");
+      return;
+    }
+
     const playerOverlay = document.querySelector("#player-overlay");
     if (playerOverlay && !playerOverlay.hidden) {
       window.dispatchEvent(new CustomEvent("vivid:android-back"));
