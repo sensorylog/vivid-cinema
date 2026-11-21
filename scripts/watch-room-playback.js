@@ -556,7 +556,7 @@ window.addEventListener("message", event => {
   const data = event.data;
   if (!data || typeof data.type !== "string" || !data.type.startsWith("cinesrc:")) return;
   const type = data.type;
-  if (!["cinesrc:ready", "cinesrc:play", "cinesrc:pause", "cinesrc:timeupdate", "cinesrc:seeked", "cinesrc:skipintro", "cinesrc:ratechange", "cinesrc:ended"].includes(type)) return;
+  if (!["cinesrc:ready", "cinesrc:play", "cinesrc:pause", "cinesrc:timeupdate", "cinesrc:seeked", "cinesrc:skipintro", "cinesrc:ratechange", "cinesrc:nextepisode", "cinesrc:ended"].includes(type)) return;
   let status = localStatus;
   if (type === "cinesrc:play") status = "playing";
   else if (type === "cinesrc:pause") status = "paused";
@@ -570,6 +570,13 @@ window.addEventListener("message", event => {
     if (role === "guest" && (!latestRemoteState || latestRemoteState.status !== "playing")) {
       pauseGuestPlayer("Your player is ready. Tap Play once to prepare it; it will pause and follow the host.");
     } else if ((role !== "host" && joinedPlayback) || (role === "host" && allowGuestPlaybackControl)) applyRemoteState(true);
+    return;
+  }
+  if (type === "cinesrc:nextepisode" && new URLSearchParams(window.location.search).get("roomMode") === "1") {
+    sendProviderCommand("pause");
+    localStatus = "paused";
+    localPlaybackRate = 1;
+    setNote("Episodes are locked to the shared screening. Use the room queue to start the next episode for everyone.");
     return;
   }
   if (type === "cinesrc:timeupdate" && status !== "playing") return;
