@@ -102,6 +102,9 @@ test("Watch Room screenings stay in the lobby and minimize without stopping play
   assert.ok(lobby.includes('onSnapshot(queueRef'));
   assert.ok(lobby.includes('onSnapshot(chatRef'));
   assert.ok(lobby.includes('onSnapshot(presenceRef'));
+  assert.ok(lobby.includes("const wasAtBottom = log.scrollHeight - log.scrollTop - log.clientHeight < 48"));
+  assert.ok(lobby.includes('button.disabled = room.role !== "host" && room.allowGuestChat === false'));
+  assert.ok(lobby.includes("result.data?.voiceEvicted === false"));
   assert.ok(lobby.includes("heartbeat = setInterval(ping, 30000)"));
   assert.ok(!lobby.includes("setInterval(refreshLobby, 5000)"), "room activity should update from realtime subscriptions, not five-second polling");
   assert.ok(lobby.includes('byId("wr-cinema-open")?.addEventListener("click"'));
