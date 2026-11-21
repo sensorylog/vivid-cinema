@@ -84,8 +84,12 @@ function latestAndroidBuild(assets) {
     : null;
 }
 
+let updateCheckInFlight = false;
+
 async function checkForAndroidUpdate() {
-  if (!nativeRuntime()) return;
+  if (!nativeRuntime() || updateCheckInFlight) return;
+  updateCheckInFlight = true;
+  try {
   const local = window.VIVID_ANDROID_BUILD_INFO || { version: "0.0.0", build: 0 };
   const storage = (() => { try { return window.localStorage; } catch { return null; } })();
   let state = readAndroidUpdateState(storage);
@@ -136,6 +140,9 @@ async function checkForAndroidUpdate() {
     // Avoid hammering the unauthenticated GitHub API on every page while offline.
     writeAndroidUpdateState(storage, { ...state, checkedAt: Date.now(), failed: true });
     console.debug("Vivid Android update check skipped:", error);
+  }
+  } finally {
+    updateCheckInFlight = false;
   }
 }
 
