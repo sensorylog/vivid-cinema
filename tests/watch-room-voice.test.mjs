@@ -98,6 +98,7 @@ test("Watch Room screenings stay in the lobby and minimize without stopping play
   assert.ok(watchPage.includes('overlay.classList.add("is-minimized")'));
   assert.ok(watchPage.includes('restorePlayer.addEventListener("click", openPlayerWindow)'));
   assert.ok(watchPage.includes('vivid:watch-room-screening-validated'));
+  assert.ok(watchPage.includes("watchRoomScreeningValidated = true"));
   assert.ok(watchPage.includes('secondaryRoot.classList.remove("is-minimized")'));
   assert.ok(playback.includes('params.get("roomMode") === "1" && params.get("id")'));
   assert.ok(playback.includes('getWatchRoomPlaybackSnapshot'));
@@ -105,6 +106,7 @@ test("Watch Room screenings stay in the lobby and minimize without stopping play
   assert.ok(voice.includes("setMicrophoneEnabled"));
   assert.ok(cinemaStyles.includes("aspect-ratio:16/9"));
   assert.ok(cinemaStyles.includes("#player-overlay.is-minimized"));
+  assert.ok(cinemaStyles.includes("#player-overlay[hidden]"));
   assert.ok(cinemaStyles.includes("#vivid-tflix-player.is-minimized"));
   assert.ok(cinemaStyles.includes(".vivid-tflix-room-minimize"));
   assert.ok(rooms.includes('requestedParams.get("roomId")'));
