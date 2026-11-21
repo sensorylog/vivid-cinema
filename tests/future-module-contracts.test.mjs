@@ -468,6 +468,7 @@ test("Watch Room sync extrapolates local time and keeps command events ahead of 
   assert.ok(client.includes("positionAtMs: now + clockOffsetMs"));
   assert.ok(client.includes("capturedAtMs: payload.positionAtMs"));
   assert.ok(client.includes("playbackRate: hostPlaybackRate"));
+  assert.ok(client.includes('sendProviderCommand("rate", undefined, desiredRate)'));
   assert.ok(client.includes('eventType === "progress" && now - lastPublishAt < 3500'));
   assert.ok(client.includes('"cinesrc:ratechange"'));
   assert.ok(sync.includes("normalizePlaybackRate"));
@@ -491,7 +492,7 @@ test("Watch Room sync extrapolates local time and keeps command events ahead of 
   assert.ok(sync.includes("export function getEstimatedLocalPlaybackPosition"));
   assert.ok(sync.includes("export function classifyPlaybackEvent"));
   for (const backend of [node, cloudflare]) {
-    assert.ok(backend.includes('["play", "pause", "seek", "ended", "progress"]'));
+    assert.ok(backend.includes('["play", "pause", "seek", "rate", "ended", "progress"]'));
     assert.ok(backend.includes('eventType === "progress" ? 1800 : eventType === "seek" ? 0 : 250'));
     assert.ok(backend.includes("schemaVersion: 1, sessionId, provider, eventType, contentId"));
   }
