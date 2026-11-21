@@ -9,8 +9,8 @@ let room = null, lastRoom = null, stops = [], heartbeat = null, presenceRefresh 
 let memberList = [], selectedPick = null, searchTimer = null, searchGeneration = 0;
 let loadedScreeningSessionId = new URLSearchParams(window.location.search).get("sessionId") || "", dismissedScreeningSessionId = "";
 
-function stop() {
-  if (room) document.dispatchEvent(new CustomEvent("vivid:watch-room-closing", { detail: { roomId: room.roomId } }));
+function stop(notifyVoice = true) {
+  if (notifyVoice && room) document.dispatchEvent(new CustomEvent("vivid:watch-room-closing", { detail: { roomId: room.roomId } }));
   stops.forEach(fn => fn());
   stops = [];
   if (heartbeat) clearInterval(heartbeat);
@@ -500,7 +500,7 @@ function subscribeRoomRealtime(roomId) {
 }
 
 function openLobby(data) {
-  stop();
+  stop(Boolean(room && room.roomId !== data.roomId));
   searchGeneration += 1;
   selectedPick = null;
   byId("wr-queue-form")?.reset();
@@ -712,7 +712,9 @@ byId("wr-room-settings-form")?.addEventListener("submit", async event => {
 });
 window.addEventListener("pagehide", () => {
   if (room) lastRoom = room;
-  stop();
+  // Leaving the document is not the same as leaving the room. Preserve the
+  // short-lived voice reconnect intent for a hard refresh or bfcache restore.
+  stop(false);
 });
 window.addEventListener("pageshow", event => {
   if (!event.persisted || !lastRoom || !auth.currentUser || auth.currentUser.isAnonymous) return;
