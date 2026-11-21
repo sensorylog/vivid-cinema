@@ -152,3 +152,14 @@ test("Home skips offscreen shelf rendering and avoids layout reads on every rail
   assert.match(source, /requestAnimationFrame\(syncHomeTopbarScroll\)/);
   assert.match(source, /if \(next === homeTopbarScrollState\) return/);
 });
+
+
+test("Privacy Notice discloses the unregistered DPC status and outstanding controller details", async () => {
+  const privacy = await read("privacy.html");
+  assert.match(privacy, /has not yet been registered with Ghana’s Data Protection Commission/);
+  assert.match(privacy, /Sections 27 and 53/);
+  assert.match(privacy, /must not process personal data/);
+  assert.match(privacy, /creator attribution does not, by itself, establish the legal identity of the data controller/);
+  assert.match(privacy, /service or postal address .* have not yet been supplied for publication/);
+  assert.doesNotMatch(privacy, /DPC registration number:\\s*\\d+/i);
+});
