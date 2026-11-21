@@ -535,6 +535,11 @@ window.addEventListener("vivid:player-source-changed", event => {
     setNote("This provider is not enabled for room sync. Switch to VidSrc to follow the host.");
   }
 });
+document.addEventListener("vivid:watch-room-closing", event => {
+  const closingRoomId = String(event.detail?.roomId || "");
+  if (closingRoomId && roomId === closingRoomId) stopConnection();
+});
+
 document.addEventListener("vivid:watch-room-screening-navigate", event => {
   const requestedRoomId = String(event.detail?.roomId || "");
   const requestedSessionId = String(event.detail?.screening?.sessionId || "");
