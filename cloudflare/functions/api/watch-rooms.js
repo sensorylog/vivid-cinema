@@ -573,7 +573,7 @@ async function getWatchRoomLobbySnapshot(request) {
     return { id: document.id, ...data, createdAt: millis(data.createdAt) };
   });
   return {
-    room: { roomId, name: room.name || "Private screening", status: room.status, memberCount: members.length, selectedPlayerId: room.selectedPlayerId || "player1", selectedProviderId: room.selectedProviderId || "vidapi", selectionUpdatedAt: millis(room.selectionUpdatedAt), activeScreening: room.activeScreening || null, allowGuestQueue: room.allowGuestQueue !== false, allowGuestChat: room.allowGuestChat !== false, allowGuestVoting: room.allowGuestVoting !== false, allowGuestPlayerSelection: room.allowGuestPlayerSelection === true, allowGuestQueueManagement: room.allowGuestQueueManagement === true, allowGuestPlaybackControl: room.allowGuestPlaybackControl === true, allowGuestVoice: room.allowGuestVoice !== false },
+    room: { roomId, name: room.name || "Private screening", status: room.status, memberCount: members.length, selectedPlayerId: room.selectedPlayerId || "player1", selectedProviderId: room.selectedProviderId || "vidapi", selectionUpdatedAt: millis(room.selectionUpdatedAt), activeScreening: room.activeScreening || null, linkedClubId: room.linkedClubId || null, linkedClubName: room.linkedClubName || null, allowGuestQueue: room.allowGuestQueue !== false, allowGuestChat: room.allowGuestChat !== false, allowGuestVoting: room.allowGuestVoting !== false, allowGuestPlayerSelection: room.allowGuestPlayerSelection === true, allowGuestQueueManagement: room.allowGuestQueueManagement === true, allowGuestPlaybackControl: room.allowGuestPlaybackControl === true, allowGuestVoice: room.allowGuestVoice !== false },
     members, onlineCount: members.filter(member => member.isOnline).length, queue, chat,
     serverTime: now
   };
@@ -663,6 +663,17 @@ async function startWatchRoomScreening(request) {
       throw new HttpsError("not-found", "That queue pick is no longer available.");
     }
     const item = itemSnapshot.data();
+    const linkedClubId = room.linkedClubId ? validId(room.linkedClubId, "linked Cinema Club ID") : "";
+    let clubScreeningRef = null;
+    if (linkedClubId) {
+      const clubRef = db.collection("cinemaClubs").doc(linkedClubId);
+      const clubMemberRef = clubRef.collection("members").doc(uid);
+      const [clubSnapshot, clubMemberSnapshot] = await Promise.all([tx.get(clubRef), tx.get(clubMemberRef)]);
+      if (!clubSnapshot.exists || clubSnapshot.data().status !== "active" || !clubMemberSnapshot.exists) {
+        throw new HttpsError("failed-precondition", "The linked Cinema Club is unavailable or your membership has changed. Unlink it in room settings to continue.");
+      }
+      clubScreeningRef = clubRef.collection("screenings").doc(sessionId);
+    }
     const contentId = String(item.contentId || "");
     if (!/^\d{1,12}$/.test(contentId) || !["movie", "tv"].includes(item.mediaType)) {
       throw new HttpsError("failed-precondition", "This pick is missing a valid catalogue title. Remove it and add it again from search.");
@@ -683,8 +694,19 @@ async function startWatchRoomScreening(request) {
       posterPath: item.posterPath || "",
       releaseDate: item.releaseDate || "",
       startedBy: uid,
-      startedAt: now
+      startedAt: now,
+      clubId: linkedClubId || null,
+      clubScreeningId: clubScreeningRef ? clubScreeningRef.id : null
     };
+    if (clubScreeningRef) {
+      tx.create(clubScreeningRef, {
+        contentId, mediaType: item.mediaType, title: screening.title, notes: "",
+        screenedAt: now, recordedBy: uid, sourceRoomId: roomId,
+        sourceRoomName: room.name || "Private screening", sourceSessionId: sessionId,
+        reviewCount: 0, ratingTotal: 0, averageRating: 0, discussionCount: 0,
+        createdAt: now
+      });
+    }
     tx.update(itemRef, { status: "screening", screeningAt: now });
     // Playback belongs to a single screening session; never carry a previous
     // title's playing state into the newly started session.
@@ -816,6 +838,9 @@ async function updateWatchRoomSettings(request) {
   if (Object.keys(patch).some(key => !allowed.includes(key))) throw new HttpsError("invalid-argument", "One or more room settings are not supported.");
   const update = {};
   if (Object.hasOwn(patch, "name")) update.name = cleanText(patch.name, "Room name", 80);
+  if (Object.hasOwn(patch, "linkedClubId")) {
+    update.linkedClubId = patch.linkedClubId === null || patch.linkedClubId === "" ? null : validId(patch.linkedClubId, "linked Cinema Club ID");
+  }
   for (const key of ["allowGuestQueue", "allowGuestChat", "allowGuestVoting", "allowGuestPlayerSelection", "allowGuestQueueManagement", "allowGuestPlaybackControl", "allowGuestVoice"]) {
     if (Object.hasOwn(patch, key)) {
       if (typeof patch[key] !== "boolean") throw new HttpsError("invalid-argument", key + " must be true or false.");
@@ -829,6 +854,21 @@ async function updateWatchRoomSettings(request) {
     guestUids.length = 0;
     const { room, member } = await requireRoomMemberInTransaction(tx, roomId, uid);
     if (room.hostUid !== uid || member.role !== "host") throw new HttpsError("permission-denied", "Only the room host can change these settings.");
+    if (Object.hasOwn(update, "linkedClubId")) {
+      if (update.linkedClubId) {
+        const clubRef = db.collection("cinemaClubs").doc(update.linkedClubId);
+        const [clubSnapshot, clubMemberSnapshot] = await Promise.all([
+          tx.get(clubRef),
+          tx.get(clubRef.collection("members").doc(uid))
+        ]);
+        if (!clubSnapshot.exists || clubSnapshot.data().status !== "active" || !clubMemberSnapshot.exists) {
+          throw new HttpsError("permission-denied", "Join an active Cinema Club before linking it to this room.");
+        }
+        update.linkedClubName = cleanText(clubSnapshot.data().name || "Cinema Club", "Cinema Club name", 48);
+      } else {
+        update.linkedClubName = null;
+      }
+    }
     const members = await tx.get(roomRef.collection("members"));
     const updatedAt = Timestamp.now();
     tx.update(roomRef, { ...update, updatedAt });
