@@ -79,7 +79,7 @@ test("LiveKit token signer rejects malformed identities and unscoped room names"
 });
 
 test("Watch Room screenings stay embedded in the lobby and float without stopping playback", async () => {
-  const [lobbyHtml, lobby, voice, playback, watchPage, cinemaStyles, experienceStyles, rooms, legacyPage] = await Promise.all([
+  const [lobbyHtml, lobby, voice, playback, watchPage, cinemaStyles, experienceStyles, layoutController, rooms, legacyPage] = await Promise.all([
     readFile(new URL("../watch-rooms.html", import.meta.url), "utf8"),
     readFile(new URL("../scripts/watch-room-lobby.js", import.meta.url), "utf8"),
     readFile(new URL("../scripts/watch-room-voice.js", import.meta.url), "utf8"),
@@ -87,6 +87,7 @@ test("Watch Room screenings stay embedded in the lobby and float without stoppin
     readFile(new URL("../scripts/watch.js", import.meta.url), "utf8"),
     readFile(new URL("../styles/vivid-watch-room-cinema.css", import.meta.url), "utf8"),
     readFile(new URL("../styles/vivid-watch-room-experience.css", import.meta.url), "utf8"),
+    readFile(new URL("../scripts/watch-room-player-layout.js", import.meta.url), "utf8"),
     readFile(new URL("../scripts/watch-rooms.js", import.meta.url), "utf8"),
     readFile(new URL("../watch-room-cinema.html", import.meta.url), "utf8")
   ]);
@@ -152,6 +153,7 @@ test("Watch Room screenings stay embedded in the lobby and float without stoppin
   assert.ok(watchPage.includes('slot.append(overlayForRoom)'));
   assert.ok(watchPage.includes('slot.append(secondaryForRoom)'));
   assert.ok(watchPage.includes("watchContentForRoom?.replaceChildren()"));
+  assert.ok(watchPage.indexOf("roomPlayerSlot?.remove();") < watchPage.indexOf('$("watch-content").innerHTML ='), "old player nodes must be torn down before a new screening is rendered");
   assert.ok(watchPage.includes("host.hidden = true"));
   assert.ok(!watchPage.includes("host.remove()"), "the screening host must remain reusable for the next movie");
   assert.ok(watchPage.includes('roomPlayerSlot?.querySelectorAll("iframe")'));
@@ -182,6 +184,8 @@ test("Watch Room screenings stay embedded in the lobby and float without stoppin
   assert.ok(experienceStyles.includes("#player-overlay.is-floating"));
   assert.ok(experienceStyles.includes("#vivid-tflix-player"));
   assert.ok(experienceStyles.includes("#player-status"));
+  assert.ok(layoutController.includes('overlay.classList.toggle("is-floating", value)'));
+  assert.ok(!layoutController.includes(".src") && !layoutController.includes("innerHTML"), "scroll presentation must not reload or recreate the playing media element");
   assert.ok(experienceStyles.includes("aspect-ratio:16/9!important"));
   assert.ok(experienceStyles.includes("position:relative!important;top:auto!important"), "voice panel must flow with the room instead of sticking over the player");
   assert.ok(voice.includes("participantInitials(participant)"));
