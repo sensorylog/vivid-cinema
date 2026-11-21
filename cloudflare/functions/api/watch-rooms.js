@@ -1,5 +1,6 @@
 import { createHash, randomBytes } from "node:crypto";
 import { verifyFirebaseIdToken, verifyAppCheckToken } from "../lib/firebase-token-verification.js";
+import { createLiveKitAccessToken } from "../lib/livekit-token.js";
 import { initializeApp as initializeRestApp } from "@ljoukov/firebase-admin-cloudflare/app";
 import { getFirestore, Query, Timestamp } from "@ljoukov/firebase-admin-cloudflare/firestore";
 
@@ -7,6 +8,9 @@ let db;
 let allowedOrigins;
 let serviceAccount;
 let projectId;
+let livekitUrl = "";
+let livekitApiKey = "";
+let livekitApiSecret = "";
 
 function initializeServices(env) {
   allowedOrigins = new Set([
@@ -14,6 +18,9 @@ function initializeServices(env) {
     "https://vivid-cinema.firebaseapp.com",
     ...(env.VIVID_ALLOWED_ORIGINS || "").split(",").map(value => value.trim()).filter(Boolean)
   ]);
+  livekitUrl = String(env.LIVEKIT_URL || "").trim();
+  livekitApiKey = String(env.LIVEKIT_API_KEY || "").trim();
+  livekitApiSecret = String(env.LIVEKIT_API_SECRET || "");
   if (db) return;
   const serviceAccountRaw = env.FIREBASE_SERVICE_ACCOUNT_JSON;
   if (!serviceAccountRaw) throw new Error("FIREBASE_SERVICE_ACCOUNT_JSON is not configured for Vivid on Cloudflare Pages.");
@@ -385,6 +392,35 @@ async function requireRoomMember(roomId, uid) {
     throw new HttpsError("permission-denied", "You are not a member of an open room.");
   }
   return { roomRef, room: room.data(), memberRef, member: member.data() };
+}
+
+async function getWatchRoomVoiceToken(request) {
+  const uid = requireUser(request);
+  const roomId = validId(request.data?.roomId, "room ID");
+  if (!livekitUrl || !livekitApiKey || !livekitApiSecret) {
+    throw new HttpsError("failed-precondition", "Voice calling is not configured yet. The room and synchronized screening are still available.");
+  }
+  let endpoint;
+  try { endpoint = new URL(livekitUrl); } catch { throw new HttpsError("failed-precondition", "The voice service URL is invalid."); }
+  if (endpoint.protocol !== "wss:" || !endpoint.hostname) {
+    throw new HttpsError("failed-precondition", "The voice service must use a secure WebSocket URL.");
+  }
+  const { room, member } = await requireRoomMember(roomId, uid);
+  if (room.status !== "open" || !["host", "guest"].includes(member.role)) {
+    throw new HttpsError("permission-denied", "You cannot join voice in this room.");
+  }
+  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(roomId));
+  const roomHash = Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, "0")).join("").slice(0, 32);
+  const roomName = "vivid-" + roomHash;
+  const result = await createLiveKitAccessToken({
+    apiKey: livekitApiKey,
+    apiSecret: livekitApiSecret,
+    identity: uid,
+    roomName,
+    displayName: member.displayName || "Vivid member",
+    role: member.role
+  });
+  return { url: endpoint.toString(), roomName, token: result.token, expiresAt: result.expiresAt };
 }
 
 
@@ -1097,6 +1133,7 @@ const operations = {
   closeWatchRoom,
   deleteWatchRoom,
   publishWatchRoomPlayback,
+  getWatchRoomVoiceToken,
   addCinemaClubWatchlistItem,
   removeCinemaClubWatchlistItem,
   recordCinemaClubScreening,
@@ -1110,7 +1147,7 @@ const ROUTES = new Set([
   "createWatchRoom","getWatchRoomDashboard","createCinemaClub","createWatchInvitation","redeemWatchInvitation","revokeWatchInvitation",
   "cleanupExpiredWatchRooms","heartbeatWatchRoom","getWatchRoomLobbySnapshot","getWatchRoomPlaybackSnapshot","addWatchRoomQueueItem","startWatchRoomScreening","removeWatchRoomQueueItem","voteWatchRoomQueueItem",
   "sendWatchRoomMessage","reactToWatchRoomMessage","updateWatchRoomSettings","setWatchRoomPlayerSelection","removeWatchRoomMember","leaveWatchRoom",
-  "closeWatchRoom","deleteWatchRoom","publishWatchRoomPlayback","addCinemaClubWatchlistItem","removeCinemaClubWatchlistItem",
+  "closeWatchRoom","deleteWatchRoom","publishWatchRoomPlayback","getWatchRoomVoiceToken","addCinemaClubWatchlistItem","removeCinemaClubWatchlistItem",
   "recordCinemaClubScreening","addCinemaClubAfterCreditsReview","addCinemaClubDiscussionMessage","leaveCinemaClub","archiveCinemaClub"
 ]);
 
