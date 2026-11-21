@@ -181,7 +181,7 @@ function buildScreeningUrl(screening) {
   const contentId = String(screening?.contentId || "");
   const mediaType = screening?.mediaType === "tv" ? "tv" : "movie";
   if (!/^\d{1,12}$/.test(contentId)) return "";
-  const url = new URL("watch.html", window.location.href);
+  const url = new URL("watch-room-cinema.html", window.location.href);
   url.searchParams.set("id", contentId);
   url.searchParams.set("type", mediaType);
   url.searchParams.set("roomId", room.roomId);
@@ -198,35 +198,11 @@ function openEmbeddedScreening(screening) {
   if (!room) return;
   const url = buildScreeningUrl(screening);
   if (!url) { setFeedback("The room screening does not contain a valid Vivid title.", true); return; }
-  const stage = byId("wr-screening-stage");
-  const wrap = byId("wr-screening-frame-wrap");
-  if (!stage || !wrap) return;
-  let frame = byId("wr-screening-frame");
-  if (!frame || frame.dataset.src !== url) {
-    frame = document.createElement("iframe");
-    frame.id = "wr-screening-frame";
-    frame.title = "Shared Vivid Cinema screening";
-    frame.allow = "autoplay; fullscreen; picture-in-picture; encrypted-media";
-    frame.allowFullscreen = true;
-    frame.referrerPolicy = "strict-origin-when-cross-origin";
-    frame.src = url;
-    frame.dataset.src = url;
-    wrap.replaceChildren(frame);
-  }
   loadedScreeningSessionId = String(screening.sessionId || "");
   dismissedScreeningSessionId = "";
-  stage.hidden = false;
-  document.body.classList.add("vivid-wr-screening-open");
+  window.location.assign(url);
 }
-byId("wr-screening-close")?.addEventListener("click", () => {
-  const stage = byId("wr-screening-stage");
-  const wrap = byId("wr-screening-frame-wrap");
-  if (wrap) wrap.replaceChildren();
-  dismissedScreeningSessionId = loadedScreeningSessionId;
-  loadedScreeningSessionId = "";
-  if (stage) stage.hidden = true;
-  document.body.classList.remove("vivid-wr-screening-open");
-});
+// The dedicated cinema route returns to this lobby when closed.
 
 function renderQueue(items) {
   const list = byId("wr-lobby-queue");
