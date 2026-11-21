@@ -263,6 +263,9 @@ body.vivid-watch-rooms-page .vivid-wr-voice-empty{padding:7px 0!important;color:
   body.vivid-watch-rooms-page.vivid-watch-room-mode .vivid-wr-player-slot #player-overlay.is-floating{
     right:10px!important;bottom:calc(92px + env(safe-area-inset-bottom))!important;width:min(252px,calc(100vw - 20px))!important
   }
+  body.vivid-watch-rooms-page.vivid-watch-room-mode .vivid-wr-player-slot.is-floating #vivid-tflix-player{
+    right:10px!important;bottom:calc(92px + env(safe-area-inset-bottom))!important;width:min(252px,calc(100vw - 20px))!important
+  }
   body.vivid-watch-rooms-page .vivid-wr-voice-panel{padding:13px!important}
   body.vivid-watch-rooms-page .vivid-wr-voice-heading{align-items:flex-start!important;flex-direction:column!important}
   body.vivid-watch-rooms-page .vivid-wr-voice-actions{width:100%!important}
