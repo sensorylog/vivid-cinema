@@ -999,7 +999,7 @@ async function publishWatchRoomPlayback(request) {
   const status = request.data?.status;
   if (!["playing", "paused", "ended"].includes(status)) throw new HttpsError("invalid-argument", "Playback status is not supported.");
   const requestedEventType = String(request.data?.eventType || "");
-  const eventType = ["play", "pause", "seek", "ended", "progress"].includes(requestedEventType)
+  const eventType = ["play", "pause", "seek", "rate", "ended", "progress"].includes(requestedEventType)
     ? requestedEventType
     : status === "paused" ? "pause" : status === "ended" ? "ended" : "progress";
   const eventStatusIsValid =
@@ -1007,7 +1007,8 @@ async function publishWatchRoomPlayback(request) {
     (eventType === "pause" && status === "paused") ||
     (eventType === "ended" && status === "ended") ||
     (eventType === "progress" && status === "playing") ||
-    eventType === "seek";
+    eventType === "seek" ||
+    eventType === "rate";
   if (!eventStatusIsValid) throw new HttpsError("invalid-argument", "Playback event type does not match its status.");
   const contentId = cleanText(String(request.data?.contentId || ""), "Catalogue ID", 80);
   if (!/^(?:\d{1,12}|tt\d{5,12})$/.test(contentId)) throw new HttpsError("invalid-argument", "A valid TMDB or IMDb title ID is required.");
@@ -1015,7 +1016,9 @@ async function publishWatchRoomPlayback(request) {
   if (!["movie", "tv"].includes(mediaType)) throw new HttpsError("invalid-argument", "Media type must be movie or tv.");
   const position = Number(request.data?.position);
   const duration = Number(request.data?.duration);
+  const playbackRate = request.data?.playbackRate == null ? 1 : Number(request.data.playbackRate);
   const capturedAtMsInput = Number(request.data?.capturedAtMs);
+  if (!Number.isFinite(playbackRate) || playbackRate < 0.25 || playbackRate > 4) throw new HttpsError("invalid-argument", "Playback speed must be between 0.25x and 4x.");
   if (!Number.isFinite(position) || position < 0 || position > 86400 || !Number.isFinite(duration) || duration < 0 || duration > 86400 || (duration > 0 && position > duration + 10)) throw new HttpsError("invalid-argument", "Playback position or duration is outside the supported range.");
   const season = mediaType === "tv" ? Number(request.data?.season) : null;
   const episode = mediaType === "tv" ? Number(request.data?.episode) : null;
@@ -1064,7 +1067,7 @@ async function publishWatchRoomPlayback(request) {
       : now.toMillis();
     tx.set(stateRef, {
       schemaVersion: 1, sessionId, provider, eventType, contentId, mediaType, season, episode,
-      status, position, positionAtMs, duration, hostUid: roomData.hostUid, controllerUid: uid,
+      status, position, positionAtMs, playbackRate, duration, hostUid: roomData.hostUid, controllerUid: uid,
       revision, updatedAt: now, lastEventAt: now
     });
     return { accepted: true, revision, serverTime: now.toMillis() };
