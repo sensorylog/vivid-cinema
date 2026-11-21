@@ -468,6 +468,10 @@ test("Watch Room sync extrapolates local time and keeps command events ahead of 
   assert.ok(client.includes("positionAtMs: now + clockOffsetMs"));
   assert.ok(client.includes("capturedAtMs: payload.positionAtMs"));
   for (const backend of [node, cloudflare]) assert.ok(backend.includes("positionAtMs = Number.isFinite(capturedAtMsInput)"));
+  for (const backend of [node, cloudflare]) {
+    assert.ok(backend.includes("Math.abs(capturedAtMsInput - now.toMillis()) <= 10_000"));
+    assert.ok(backend.includes("Playback event type does not match its status."));
+  }
   assert.ok(client.includes("syncReconcileTimer = window.setInterval"));
   assert.ok(client.includes("if (hasActiveScreening && (role !== \"guest\" || joinedPlayback))"), "guest player should preload while the room is waiting");
   assert.ok(client.includes("Your player is ready. Tap Play once to prepare it"));
