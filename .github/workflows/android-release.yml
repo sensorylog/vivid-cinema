@@ -122,6 +122,10 @@ jobs:
           aapt_path="$(find "$ANDROID_HOME/build-tools" -type f -name aapt -print -quit)"
           test -n "$aapt_path"
           "$aapt_path" dump badging "$apk" | grep -F "package: name='com.vividcinema.app'"
+          if "$aapt_path" dump permissions "$apk" | grep -Fq "android.permission.REQUEST_INSTALL_PACKAGES"; then
+            echo "Play Store APK must not request install-from-unknown-sources permission."
+            exit 1
+          fi
 
       - name: Upload signed APK artifact
         uses: actions/upload-artifact@v4
