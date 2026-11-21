@@ -813,6 +813,7 @@ function renderShell(params) {
   let playerHasOpened = false;
   const openPlayerWindow = () => {
     if (!overlay) return;
+    const restoringMiniPlayer = overlay.classList.contains("is-minimized") && playerHasOpened;
     overlay.classList.remove("is-minimized");
     document.body.classList.remove("vivid-watch-room-player-minimized");
     if (restorePlayer) restorePlayer.hidden = true;
@@ -820,6 +821,10 @@ function renderShell(params) {
     overlay.hidden = false;
     if (!overlay.classList.contains("vivid-player-inline")) document.body.classList.add("vivid-player-open");
     if (openPlayer) openPlayer.setAttribute("aria-expanded", "true");
+    if (restoringMiniPlayer) {
+      closePlayer?.focus({ preventScroll: true });
+      return;
+    }
     const saved = getPlaybackProgress(progressKey());
     const startAt = Number(saved?.progress || route.params.get("startAt") || resumeAt || 0);
     const rememberedSource = !playerHasOpened ? getRememberedSource() : null;
