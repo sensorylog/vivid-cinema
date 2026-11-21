@@ -40,3 +40,14 @@ export function isPlaybackRevisionStale(nextRevision, currentRevision) {
   const current = Number(currentRevision) || 0;
   return next < current;
 }
+
+export function shouldThrottlePlaybackWrite(previousStatus, nextStatus, previousEventAtMs, nowMs, minimumIntervalMs = 1800) {
+  if (nextStatus !== "playing" || previousStatus !== "playing") return false;
+  const previousEventAt = Number(previousEventAtMs);
+  const now = Number(nowMs);
+  const interval = Number(minimumIntervalMs);
+  if (!Number.isFinite(previousEventAt) || previousEventAt <= 0) return false;
+  if (!Number.isFinite(now) || now < previousEventAt) return false;
+  if (!Number.isFinite(interval) || interval <= 0) return false;
+  return now - previousEventAt < interval;
+}
