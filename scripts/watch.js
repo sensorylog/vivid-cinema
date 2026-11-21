@@ -1020,6 +1020,9 @@ function hydrateWatchDetails(params) {
   }
   const backdrop = $("watch-backdrop");
   if (backdrop) backdrop.style.setProperty("--watch-backdrop", "url('" + getImageUrl(media.backdrop_path || media.poster_path, media.backdrop_path ? "w1280" : "w780") + "')");
+  if (isWatchRoomCinemaMode && (media.backdrop_path || media.poster_path)) {
+    document.body.style.setProperty("--vivid-room-art", "url(\"" + getImageUrl(media.backdrop_path || media.poster_path, media.backdrop_path ? "w1280" : "w780") + "\")");
+  }
   const player = $("vidapi-player");
   if (player) player.title = title + " player";
   const episodeNavigation = $("watch-episode-navigation");
