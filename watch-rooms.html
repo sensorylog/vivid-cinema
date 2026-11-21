@@ -19,6 +19,7 @@
   <link rel="stylesheet" href="styles/vivid-watch-rooms.css">
   <link rel="stylesheet" href="styles/vivid-watch.css">
   <link rel="stylesheet" href="styles/vivid-watch-room-cinema.css">
+  <link rel="stylesheet" href="styles/vivid-watch-room-experience.css">
 </head>
 <body data-vivid-page="watch-rooms" class="vivid-watch-rooms-page vivid-atmosphere">
   <div class="vivid-watch-rooms-app">
@@ -120,7 +121,7 @@
                 </div>
               </div>
               <span class="vivid-wr-cinema-stage__wordmark">VIVID CINEMA <span>·</span> PRIVATE SCREENING</span>
-            </section>
+                      </section>
             <aside class="vivid-wr-room-sidebar" aria-label="Room activity">
               <nav class="vivid-wr-room-tabs" role="tablist" aria-label="Room panels">
                 <button class="vivid-wr-room-tab is-active" id="wr-room-tab-queue" type="button" role="tab" aria-selected="true" aria-controls="wr-room-view-queue" data-room-view="queue">Queue</button>
@@ -181,14 +182,18 @@
           </div>
           <section class="vivid-wr-voice-panel" id="wr-voice-call" hidden aria-labelledby="wr-voice-title">
             <div class="vivid-wr-voice-heading">
-              <div class="vivid-wr-voice-identity"><span class="vivid-wr-voice-live-dot" aria-hidden="true"></span><div><span class="vivid-wr-section-kicker">LIVE ROOM AUDIO</span><h3 id="wr-voice-title">Voice channel</h3><p id="wr-voice-status" role="status" aria-live="polite">Voice is separate from movie playback.</p></div></div>
+              <div class="vivid-wr-voice-identity">
+                <span class="vivid-wr-voice-live-dot" aria-hidden="true"></span>
+                <div><span class="vivid-wr-section-kicker">LIVE ROOM AUDIO</span><h3 id="wr-voice-title">Talk with your crew</h3><p id="wr-voice-status" role="status" aria-live="polite">Voice is optional and separate from movie playback.</p></div>
+                <span class="vivid-wr-voice-count" id="wr-voice-count" data-connected="false">Not connected</span>
+              </div>
               <div class="vivid-wr-voice-actions">
-                <button class="vivid-wr-button vivid-wr-button--primary" id="wr-voice-join" type="button">Join voice</button>
-                <button class="vivid-wr-button vivid-wr-button--quiet" id="wr-voice-mute" type="button" hidden>Mute</button>
-                <button class="vivid-wr-button vivid-wr-button--quiet" id="wr-voice-leave" type="button" hidden>Leave</button>
+                <button class="vivid-wr-button vivid-wr-button--primary" id="wr-voice-join" type="button"><i class="bi bi-mic-fill" aria-hidden="true"></i> Join voice</button>
+                <button class="vivid-wr-button vivid-wr-button--quiet" id="wr-voice-mute" type="button" hidden>Mute microphone</button>
+                <button class="vivid-wr-button vivid-wr-button--quiet" id="wr-voice-leave" type="button" hidden><i class="bi bi-telephone-x" aria-hidden="true"></i> Leave voice</button>
               </div>
             </div>
-            <ul id="wr-voice-participants" class="vivid-wr-voice-roster"></ul>
+            <ul id="wr-voice-participants" class="vivid-wr-voice-roster" aria-label="Voice participants"></ul>
           </section>
         </section>
 
