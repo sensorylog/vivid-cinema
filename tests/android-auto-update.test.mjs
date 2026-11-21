@@ -74,6 +74,7 @@ test("Android package keeps the simple Vivid Cinema display name and shared laun
   assert.match(configure, /versionCode/);
   assert.match(configure, /versionName/);
   assert.match(nativeUpdater, /DownloadManager/);
+  assert.match(nativeUpdater, /ContextCompat\.RECEIVER_NOT_EXPORTED/);
   assert.match(nativeUpdater, /getPackageManager\(\)\.canRequestPackageInstalls/);
   assert.match(nativeUpdater, /getSharedPreferences/);
   assert.match(iconScript, /vivid-icon-180\.png/);
