@@ -53,6 +53,18 @@ if (!mainActivity.includes("VividWebChromeClient")) {
     `$1super.onCreate(savedInstanceState);\n$1if (getBridge() != null && getBridge().getWebView() != null) {\n$1    getBridge().getWebView().setWebChromeClient(new VividWebChromeClient(getBridge()));\n$1}`
   );
 }
+
+// Cloudflare Turnstile runs inside this WebView. Capacitor already enables
+// JavaScript and DOM storage; retain cookies so its browser challenge can
+// complete consistently on Android.
+if (!mainActivity.includes("setAcceptThirdPartyCookies")) {
+  const webViewBlock = /(if \\(getBridge\\(\\) != null && getBridge\\(\\)\\.getWebView\\(\\) != null\\) \\{)/;
+  if (!webViewBlock.test(mainActivity)) throw new Error("Could not configure Android WebView cookies for Cloudflare Turnstile.");
+  mainActivity = mainActivity.replace(
+    webViewBlock,
+    `$1\\n            android.webkit.CookieManager cookieManager = android.webkit.CookieManager.getInstance();\\n            cookieManager.setAcceptCookie(true);\\n            cookieManager.setAcceptThirdPartyCookies(getBridge().getWebView(), true);`
+  );
+}
 await writeFile(mainActivityPath, mainActivity, "utf8");
 const nativeSources = [
   ...(playStoreDistribution ? [] : ["VividUpdaterPlugin.java"]),
