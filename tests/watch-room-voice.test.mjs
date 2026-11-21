@@ -182,6 +182,8 @@ test("Watch Room screenings stay embedded in the lobby and float without stoppin
   assert.ok(experienceStyles.includes("position:relative!important;top:auto!important"), "voice panel must flow with the room instead of sticking over the player");
   assert.ok(voice.includes("participantInitials(participant)"));
   assert.ok(voice.includes("is-speaking"));
+  assert.ok(voice.includes("RoomEvent.TrackMuted"));
+  assert.ok(voice.includes("RoomEvent.TrackUnmuted"));
 
   const roomStyles = await readFile(new URL("../styles/vivid-watch-rooms.css", import.meta.url), "utf8");
   assert.ok(roomStyles.includes(".vivid-wr-room-layout"));
