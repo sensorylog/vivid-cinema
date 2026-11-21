@@ -116,7 +116,7 @@ public class VividUpdaterPlugin extends Plugin {
             return;
         }
 
-        if (Build.VERSION.SDK_INT >= 26 && !Settings.canRequestPackageInstalls()) {
+        if (Build.VERSION.SDK_INT >= 26 && !getContext().getPackageManager().canRequestPackageInstalls()) {
             try {
                 Intent settings = new Intent(
                     Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES,
