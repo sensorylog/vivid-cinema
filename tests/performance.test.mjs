@@ -173,3 +173,13 @@ test("Home skips expensive global ambient poster blur and duplicate topbar scrol
   assert.match(css, /body\[data-vivid-page="home"\]\.vivid-atmosphere \.vivid-card::after/);
   assert.match(css, /\.vivid-card::after \{[\s\S]*?display: none !important/);
 });
+
+
+test("Home hero stops remote trailer decoding when the billboard leaves the viewport", async () => {
+  const hero = await read("scripts/tflix-hero.js");
+  assert.match(hero, /let heroVisible = true/);
+  assert.match(hero, /if \(!item \|\| document\.hidden \|\| !heroVisible\) return/);
+  assert.match(hero, /new IntersectionObserver\(\(entries\) =>/);
+  assert.match(hero, /if \(!visible\) \{[\s\S]*?removeHeroVideos\(\)/);
+  assert.match(hero, /if \(!document\.hidden\) activateCurrentHero\(\)/);
+});
