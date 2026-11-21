@@ -161,3 +161,22 @@ html[data-vivid-theme="light"] .vivid-wr-dialog{background:#fff;color:#171720}ht
 
 #wr-lobby-queue{padding-left:0;list-style:none}
 .vivid-wr-lobby-list li.vivid-wr-queue-item{display:grid!important;grid-template-columns:48px minmax(0,1fr);justify-content:initial}
+
+/* Watch Party Call: persistent voice rail and embedded shared screen. */
+.vivid-wr-voice-panel,.vivid-wr-screening-stage{margin:1rem 0;padding:1.15rem;border:1px solid rgba(190,164,255,.2);border-radius:18px;background:linear-gradient(145deg,rgba(130,99,190,.12),rgba(255,255,255,.025))}
+.vivid-wr-voice-panel[hidden],.vivid-wr-screening-stage[hidden]{display:none!important}
+.vivid-wr-voice-heading,.vivid-wr-screening-stage-heading{display:flex;align-items:center;justify-content:space-between;gap:1rem}
+.vivid-wr-voice-heading h3,.vivid-wr-screening-stage-heading h3{margin:.35rem 0;font-size:1.15rem}
+.vivid-wr-voice-heading p{margin:0;color:var(--vivid-text-muted,#aaa9b4);font-size:.78rem}
+.vivid-wr-voice-actions{display:flex;gap:.5rem;flex-wrap:wrap}
+#wr-voice-status{margin:.85rem 0;color:var(--vivid-text-muted,#b7b6bc);font-size:.8rem}
+#wr-voice-status[data-state="error"]{color:#ffaaa8}#wr-voice-status[data-state="warning"]{color:#e9c98c}#wr-voice-status[data-state="success"]{color:#8dd6a9}
+.vivid-wr-voice-roster{display:flex;flex-wrap:wrap;gap:.55rem;margin:0;padding:0;list-style:none}
+.vivid-wr-voice-person{display:grid;gap:4px;min-width:130px;padding:.65rem .8rem;border:1px solid rgba(255,255,255,.09);border-radius:12px;background:rgba(255,255,255,.04)}
+.vivid-wr-voice-person strong{font-size:.8rem}.vivid-wr-voice-person small{color:var(--vivid-text-muted,#aaa9b4);font-size:.7rem}
+.vivid-wr-voice-person small[data-speaking="true"]{color:#9be2b5}
+.vivid-wr-screening-stage-heading{margin-bottom:.85rem}
+.vivid-wr-screening-frame-wrap{width:100%;overflow:hidden;border-radius:14px;background:#050608;aspect-ratio:16/9;min-height:260px}
+#wr-screening-frame{display:block;width:100%;height:100%;min-height:clamp(260px,68vw,760px);border:0;background:#050608}
+.vivid-wr-voice-audio{position:fixed;width:1px;height:1px;opacity:0;pointer-events:none;left:-10px;bottom:-10px}
+@media(max-width:650px){.vivid-wr-voice-heading,.vivid-wr-screening-stage-heading{align-items:flex-start;flex-direction:column}.vivid-wr-voice-actions{width:100%}.vivid-wr-voice-actions .vivid-wr-button{flex:1 1 auto}#wr-screening-frame{min-height:68vh}}
