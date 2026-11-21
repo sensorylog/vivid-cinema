@@ -111,6 +111,6 @@ test("Watch Room uses a dedicated cinema route instead of nesting the Watch page
   assert.ok(cinemaStyles.includes(".vivid-cinema-voice"));
   assert.ok(cinemaStyles.includes(".vivid-cinema-stage"));
   assert.ok(cinemaStyles.includes("env(safe-area-inset-bottom)"));
-  assert.ok(rooms.includes('new URLSearchParams(window.location.search).get("roomId")'));
+  assert.ok(rooms.includes('requestedParams.get("roomId")'));
   assert.ok(rooms.includes('document.dispatchEvent(new CustomEvent("vivid:watch-room-open"'));
 });
