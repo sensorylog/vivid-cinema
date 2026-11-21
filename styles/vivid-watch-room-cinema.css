@@ -232,3 +232,12 @@ body.vivid-watch-rooms-page.vivid-watch-room-mode #vivid-tflix-player.is-minimiz
 /* Hidden remains authoritative despite the fullscreen room-player overrides. */
 body.vivid-watch-rooms-page.vivid-watch-room-mode #player-overlay[hidden]{display:none!important}
 body.vivid-watch-rooms-page.vivid-watch-room-mode .vivid-topbar{display:flex!important}
+
+/* The player host contributes no blank viewport after the room content. */
+body.vivid-watch-rooms-page.vivid-watch-room-mode #wr-screening-player-host{
+  height:0!important;min-height:0!important;overflow:visible!important
+}
+body.vivid-watch-rooms-page.vivid-watch-room-mode #watch-content{
+  width:0!important;height:0!important;min-height:0!important;margin:0!important;padding:0!important;
+  overflow:visible!important;background:transparent!important
+}
