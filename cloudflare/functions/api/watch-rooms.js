@@ -966,8 +966,11 @@ async function publishWatchRoomPlayback(request) {
   const episode = mediaType === "tv" ? Number(request.data?.episode) : null;
   if (mediaType === "tv" && (!Number.isInteger(season) || season < 1 || season > 500 || !Number.isInteger(episode) || episode < 1 || episode > 5000)) throw new HttpsError("invalid-argument", "A valid season and episode are required.");
   const expectedRevisionInput = request.data?.expectedRevision;
-  const expectedRevision = expectedRevisionInput == null ? null : Number(expectedRevisionInput);
-  if (expectedRevision != null && (!Number.isSafeInteger(expectedRevision) || expectedRevision < 0)) {
+  if (expectedRevisionInput == null) {
+    throw new HttpsError("invalid-argument", "A playback revision is required. Refresh the screening and try again.");
+  }
+  const expectedRevision = Number(expectedRevisionInput);
+  if (!Number.isSafeInteger(expectedRevision) || expectedRevision < 0) {
     throw new HttpsError("invalid-argument", "Playback revision is invalid. Reload the screening and try again.");
   }
   const roomRef = db.collection("rooms").doc(roomId);
@@ -996,7 +999,7 @@ async function publishWatchRoomPlayback(request) {
     if (expectedRevision != null && expectedRevision !== currentRevision) {
       return { accepted: false, reason: "stale-revision", revision: currentRevision };
     }
-    if (previous?.lastEventAt?.toMillis && now.toMillis() - previous.lastEventAt.toMillis() < 1800 && status === "playing") {
+    if (previous?.status === "playing" && previous?.lastEventAt?.toMillis && now.toMillis() - previous.lastEventAt.toMillis() < 1800 && status === "playing") {
       return { accepted: false, reason: "rate-limited", revision: currentRevision };
     }
     const revision = currentRevision + 1;
@@ -1008,6 +1011,7 @@ async function publishWatchRoomPlayback(request) {
     return { accepted: true, revision, serverTime: now.toMillis() };
   });
 }
+
 
 const MAX_WATCHLIST_ITEMS = 100;
 const MAX_DISCUSSION_MESSAGES = 200;
