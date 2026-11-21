@@ -10,6 +10,7 @@ const NO_CAPABILITIES = Object.freeze({
   canPlay: false,
   canPause: false,
   canSeek: false,
+  canSetRate: false,
   canReadPosition: false,
   canReadStatus: false,
   canReportEnded: false
@@ -29,6 +30,7 @@ const VID_SRC_CAPABILITIES = Object.freeze({
   canPlay: true,
   canPause: true,
   canSeek: true,
+  canSetRate: true,
   canReadPosition: true,
   canReadStatus: true,
   canReportEnded: true
@@ -89,11 +91,12 @@ export function providerSupports(playerId, providerId, capability) {
   return Boolean(adapter && Object.hasOwn(adapter.capabilities, capability) && adapter.capabilities[capability] === true);
 }
 
-export function sendProviderCommand({ adapter, frame, action, position } = {}) {
+export function sendProviderCommand({ adapter, frame, action, position, rate } = {}) {
   if (!adapter || !frame?.contentWindow || !frame.src) return false;
   const commandCapability = action === "play" ? "canPlay"
     : action === "pause" ? "canPause"
     : action === "seek" ? "canSeek"
+    : action === "rate" ? "canSetRate"
     : null;
   if (!commandCapability || !adapter.capabilities[commandCapability]) return false;
 
@@ -102,7 +105,13 @@ export function sendProviderCommand({ adapter, frame, action, position } = {}) {
   if (frameOrigin !== adapter.origin) return false;
 
   let message;
-  if (adapter.playerId === "player2" && adapter.providerId === "cinesrc") {
+  if (action === "rate") {
+    const playbackRate = Number(rate);
+    if (!Number.isFinite(playbackRate) || playbackRate < 0.25 || playbackRate > 4) return false;
+    message = adapter.playerId === "player2" && adapter.providerId === "cinesrc"
+      ? { type: "cinesrc:command", command: "setPlaybackRate", args: [playbackRate] }
+      : { player: true, action: "rate", value: playbackRate };
+  } else if (adapter.playerId === "player2" && adapter.providerId === "cinesrc") {
     const command = action === "seek" ? "seek" : action;
     const args = action === "seek" ? [Math.max(0, Number(position) || 0)] : [];
     message = { type: "cinesrc:command", command, args };
