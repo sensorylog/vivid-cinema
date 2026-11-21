@@ -9,7 +9,7 @@ const clients = await Promise.all([
 
 test("Watch Rooms browser client sends Firebase Auth and standard App Check tokens", async () => {
   assert.ok(client.includes('getToken(appCheck, false)'));
-  assert.match(client, /appCheck\\/native-play-integrity-not-configured/);
+  assert.ok(client.includes("appCheck/native-play-integrity-not-configured"));
   assert.match(client, /Native Firebase App Check with Play Integrity must be configured first/);
   const firebase = await readFile(new URL("../scripts/firebase.js", import.meta.url), "utf8");
   assert.match(firebase, /isTokenAutoRefreshEnabled:\s*false/);
