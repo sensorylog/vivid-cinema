@@ -330,8 +330,11 @@ function syncAndroidMoreNavigation(nav, page) {
   const more = nav.querySelector("[data-vivid-more-navigation]");
   if (!more) return;
   more.setAttribute("aria-expanded", "false");
+  more.setAttribute("aria-haspopup", "true");
   more.setAttribute("aria-controls", menu.id);
   more.classList.toggle("is-active", morePages.includes(page));
+  if (morePages.includes(page)) more.setAttribute("aria-current", "page");
+  else more.removeAttribute("aria-current");
   more.addEventListener("click", () => {
     const opening = more.getAttribute("aria-expanded") !== "true";
     more.setAttribute("aria-expanded", String(opening));
