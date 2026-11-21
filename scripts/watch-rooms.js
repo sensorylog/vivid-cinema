@@ -253,6 +253,11 @@ async function loadDashboard(user) {
   });
 }
 
+document.addEventListener("vivid:watch-room-access-revoked", () => {
+  showTab("rooms");
+  byId("wr-panel-rooms")?.scrollIntoView({ behavior: "smooth", block: "start" });
+});
+
 document.addEventListener("vivid:open-linked-club", event => {
   const club = dashboardState.clubs.find(item => item.clubId === event.detail?.clubId);
   if (!club) {
