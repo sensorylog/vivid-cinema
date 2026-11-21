@@ -108,7 +108,7 @@ export function sendProviderCommand({ adapter, frame, action, position, rate } =
   let message;
   if (action === "rate") {
     const playbackRate = Number(rate);
-    if (!Number.isFinite(playbackRate) || playbackRate < 0.25 || playbackRate > 4) return false;
+    if (!Number.isFinite(playbackRate) || playbackRate < 0.25 || playbackRate > 2) return false;
     message = adapter.playerId === "player2" && adapter.providerId === "cinesrc"
       ? { type: "cinesrc:command", command: "setPlaybackRate", args: [playbackRate] }
       : { player: true, action: "rate", value: playbackRate };
