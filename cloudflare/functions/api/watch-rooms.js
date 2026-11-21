@@ -697,6 +697,7 @@ async function startWatchRoomScreening(request) {
       startedBy: uid,
       startedAt: now,
       clubId: linkedClubId || null,
+      clubName: linkedClubId ? room.linkedClubName || null : null,
       clubScreeningId: clubScreeningRef ? clubScreeningRef.id : null
     };
     if (clubScreeningRef) {
