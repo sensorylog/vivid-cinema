@@ -8,7 +8,7 @@ html.vivid-native-app {
   overscroll-behavior-y: none;
 }
 
-body.vivid-native-app {
+html.vivid-native-app body {
   min-height: 100dvh;
   padding-bottom: env(safe-area-inset-bottom, 0px);
   -webkit-tap-highlight-color: transparent;
