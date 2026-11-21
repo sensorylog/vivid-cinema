@@ -108,12 +108,12 @@ test("native Android project generation registers both plugins idempotently", as
       '    versionName "1.0.0"',
       "  }",
       "}"
-    ].join("\\n"), "utf8");
+    ].join("\n"), "utf8");
     await writeFile(path.join(javaRoot, "MainActivity.java"), [
       "package com.vividcinema.app;",
       "import com.getcapacitor.BridgeActivity;",
       "public class MainActivity extends BridgeActivity {}"
-    ].join("\\n"), "utf8");
+    ].join("\n"), "utf8");
 
     const script = fileURLToPath(new URL("../automation/configure-android-native-project.mjs", import.meta.url));
     const env = {
