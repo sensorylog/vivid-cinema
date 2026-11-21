@@ -157,9 +157,11 @@ test("watch player exposes immersive fullscreen and landscape orientation contro
   assert.match(source, /vivid-player-fullscreen-fallback/);
 });
 
-test("Android hardware Back closes an open player before leaving the watch page", () => {
-  assert.match(source, /window\.addEventListener\("vivid:android-back", closePlayerWindow\)/);
+test("Android hardware Back routes through the player dismissal handler", () => {
+  assert.match(source, /window\.addEventListener\("vivid:android-back", \(\) =>/);
+  assert.match(source, /resolveAndroidPlayerBackAction\(/);
   assert.match(source, /document\.fullscreenElement && playerDialog\?\.contains\(document\.fullscreenElement\)/);
+  assert.match(source, /closePlayerWindow\(\)/);
 });
 
 
