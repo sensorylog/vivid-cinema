@@ -643,6 +643,7 @@ test("Watch Room linked Cinema Clubs validate membership and record screenings a
     assert.ok(screening.includes("sourceRoomId: roomId"));
     assert.ok(screening.includes("sourceSessionId: sessionId"));
     assert.ok(screening.includes("clubScreeningId: clubScreeningRef ? clubScreeningRef.id : null"));
+    assert.ok(screening.includes("clubName: linkedClubId ? room.linkedClubName || null : null"));
     assert.ok(backend.includes("linkedClubName: room.linkedClubName || null"));
   }
   const lobby = readFileSync(new URL("../scripts/watch-room-lobby.js", import.meta.url), "utf8");
