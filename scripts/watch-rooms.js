@@ -412,7 +412,8 @@ async function initializeWatchRoomsAccess() {
     document.body.dataset.vividWatchRoomsAccess = "authenticated";
     try {
       await loadDashboard(user);
-      const requestedRoomId = new URLSearchParams(window.location.search).get("roomId");
+      const requestedParams = new URLSearchParams(window.location.search);
+      const requestedRoomId = requestedParams.get("roomId");
       if (requestedRoomId) {
         const requestedRoom = dashboardState.rooms.find(item => item.roomId === requestedRoomId);
         if (requestedRoom) {
