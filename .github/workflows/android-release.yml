@@ -70,11 +70,15 @@ jobs:
         run: node --test tests/android-release-pipeline.test.mjs tests/android-native-polish.test.mjs tests/android-icon.test.mjs tests/android-auto-update.test.mjs tests/watch-player.test.mjs tests/watch-room-voice.test.mjs tests/playback-structure.test.mjs tests/service-worker.test.mjs
 
       - name: Generate Android project and bundle local website
+        env:
+          VIVID_ANDROID_DISTRIBUTION: play
         run: |
           npx cap add android
           npm run cap:sync
 
       - name: Configure shared Android native plugins and version
+        env:
+          VIVID_ANDROID_DISTRIBUTION: play
         run: node automation/configure-android-native-project.mjs
 
       - name: Configure release signing
