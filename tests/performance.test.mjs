@@ -204,7 +204,7 @@ test("shared browser performance profile applies the existing legacy stylesheet 
     querySelector: selector => selector === "[data-vivid-performance-styles]"
       ? links.find(link => link.dataset?.vividPerformanceStyles === "true") || null
       : null,
-    createElement: tag => ({ tagName: tag.toUpperCase(), dataset: {} })
+    createElement: tag => ({ tagName: tag.toUpperCase(), dataset: {}, setAttribute(name, value) { this.attributes ||= {}; this.attributes[name] = value; } })
   };
   const navigatorRef = { hardwareConcurrency: 2, deviceMemory: 4 };
 
