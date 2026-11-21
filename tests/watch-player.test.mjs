@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
+import { resolveAndroidPlayerBackAction } from "../scripts/android-navigation.js";
 
 const source = await readFile(new URL("../scripts/watch.js", import.meta.url), "utf8");
 
@@ -159,4 +160,14 @@ test("watch player exposes immersive fullscreen and landscape orientation contro
 test("Android hardware Back closes an open player before leaving the watch page", () => {
   assert.match(source, /window\.addEventListener\("vivid:android-back", closePlayerWindow\)/);
   assert.match(source, /document\.fullscreenElement && playerDialog\?\.contains\(document\.fullscreenElement\)/);
+});
+
+
+test("Android Back exits fullscreen before closing the player", () => {
+  assert.equal(resolveAndroidPlayerBackAction({ fullscreen: true, fallbackFullscreen: false }), "exit-fullscreen");
+  assert.equal(resolveAndroidPlayerBackAction({ fullscreen: false, fallbackFullscreen: true }), "exit-fullscreen");
+  assert.equal(resolveAndroidPlayerBackAction({ fullscreen: false, fallbackFullscreen: false }), "close-player");
+  assert.match(source, /window\.addEventListener\("vivid:android-back", \(\) =>/);
+  assert.match(source, /resolveAndroidPlayerBackAction\(/);
+  assert.match(source, /document\.exitFullscreen\?\.\(\)/);
 });
