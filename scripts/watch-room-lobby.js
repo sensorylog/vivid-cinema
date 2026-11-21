@@ -33,8 +33,21 @@ function setRoomView(view = "queue") {
     panel.hidden = panel.dataset.roomViewPanel !== selected;
   });
 }
-document.querySelectorAll("[data-room-view]").forEach(button => {
+const roomViewButtons = [...document.querySelectorAll("[data-room-view]")];
+roomViewButtons.forEach(button => {
   button.addEventListener("click", () => setRoomView(button.dataset.roomView));
+  button.addEventListener("keydown", event => {
+    const current = roomViewButtons.indexOf(button);
+    let next = current;
+    if (event.key === "ArrowRight") next = (current + 1) % roomViewButtons.length;
+    else if (event.key === "ArrowLeft") next = (current - 1 + roomViewButtons.length) % roomViewButtons.length;
+    else if (event.key === "Home") next = 0;
+    else if (event.key === "End") next = roomViewButtons.length - 1;
+    else return;
+    event.preventDefault();
+    roomViewButtons[next].focus();
+    setRoomView(roomViewButtons[next].dataset.roomView);
+  });
 });
 
 function renderCinemaStage() {
@@ -110,6 +123,7 @@ function renderPresence() {
       const remove = document.createElement("button");
       remove.type = "button";
       remove.textContent = "Remove";
+      remove.setAttribute("aria-label", "Remove " + (member.displayName || "member") + " from this room");
       remove.className = "vivid-wr-button vivid-wr-button--quiet";
       remove.addEventListener("click", async () => {
         remove.disabled = true;
@@ -219,7 +233,7 @@ function renderChat(messages) {
       button.textContent = reaction + " " + (message.reactions?.[reaction]?.length || 0);
       button.disabled = room.role !== "host" && room.allowGuestChat === false;
       button.setAttribute("aria-pressed", String(Boolean(reacted)));
-      button.setAttribute("aria-label", reaction + " reaction, " + (message.reactions?.[reaction]?.length || 0) + " votes");
+      button.setAttribute("aria-label", reaction + " reaction, " + (message.reactions?.[reaction]?.length || 0) + " reactions");
       button.addEventListener("click", async () => {
         button.disabled = true;
         try { await call("reactToWatchRoomMessage")({ roomId: room.roomId, messageId: message.id, reaction }); }
@@ -349,6 +363,7 @@ function renderQueue(items) {
     vote.textContent = voted ? "Voted ✓" : "Vote";
     vote.className = "vivid-wr-button vivid-wr-button--quiet";
     vote.setAttribute("aria-pressed", String(Boolean(voted)));
+    vote.setAttribute("aria-label", (voted ? "Remove your vote for " : "Vote for ") + item.title);
     vote.disabled = room.role !== "host" && room.allowGuestVoting === false;
     vote.addEventListener("click", () => call("voteWatchRoomQueueItem")({ roomId: room.roomId, itemId: item.id }).catch(showError));
     actions.append(vote);
