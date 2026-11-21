@@ -1,4 +1,4 @@
-export function mountWatchRoomPlayerLayout({ slot, overlay, Observer = globalThis.IntersectionObserver } = {}) {
+export function mountWatchRoomPlayerLayout({ slot, overlay, Observer = globalThis.IntersectionObserver, onPresentation = () => {} } = {}) {
   if (!slot || !overlay) {
     return { setActive() {}, focus() {}, destroy() {} };
   }
@@ -17,9 +17,12 @@ export function mountWatchRoomPlayerLayout({ slot, overlay, Observer = globalThi
     overlay.dataset.presentation = value ? "floating" : "inline";
     const returnButton = overlay.querySelector("#player-return-inline");
     if (returnButton) returnButton.hidden = !value;
-    document.dispatchEvent(new CustomEvent("vivid:watch-room-player-presentation", {
-      detail: { floating: value }
-    }));
+    onPresentation({ floating: value });
+    if (typeof document !== "undefined" && typeof CustomEvent === "function") {
+      document.dispatchEvent(new CustomEvent("vivid:watch-room-player-presentation", {
+        detail: { floating: value }
+      }));
+    }
   };
 
   if (typeof Observer === "function") {
