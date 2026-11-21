@@ -558,9 +558,15 @@ test("Watch Room lobby reads authoritative members, presence, queue and chat thr
   assert.ok(client.includes('call("getWatchRoomLobbySnapshot")'));
   assert.ok(client.includes("memberList = Array.isArray(snapshot.members) ? snapshot.members : []"));
   assert.ok(client.includes("memberList.filter(member => member.isOnline).length"));
-  assert.ok(client.includes("presenceRefresh = setInterval(refreshLobby, 5000)"));
+  assert.ok(client.includes("presenceRefresh = setInterval(updateMembers, 10000)"));
   assert.ok(client.includes("Couldn't load room members."));
-  assert.doesNotMatch(client, /onSnapshot|collection\(db,/);
+  assert.ok(client.includes("function subscribeRoomRealtime(roomId)"));
+  assert.match(client, /onSnapshot\(roomRef/);
+  assert.match(client, /onSnapshot\(membersRef/);
+  assert.match(client, /onSnapshot\(presenceRef/);
+  assert.match(client, /onSnapshot\(queueRef/);
+  assert.match(client, /onSnapshot\(chatRef/);
+  assert.doesNotMatch(client, /setInterval\(refreshLobby, 5000\)/);
 });
 
 
@@ -633,10 +639,10 @@ test("Watch Room Step 6 enforces granular guest permissions in both trusted APIs
     assert.ok(html.includes('name="' + name + '"'));
     assert.ok(lobby.includes("form.elements." + name));
   }
-  assert.ok(lobby.includes("currentSettings.elements.allowGuestPlayerSelection"));
-  assert.ok(lobby.includes("currentSettings.elements.allowGuestPlaybackControl"));
+  assert.ok(lobby.includes("settings.elements.allowGuestPlayerSelection"));
+  assert.ok(lobby.includes("settings.elements.allowGuestPlaybackControl"));
   assert.ok(lobby.includes("settings.dataset.dirty = \"true\""));
-  assert.ok(lobby.includes("currentSettings.dataset.dirty !== \"true\""));
+  assert.ok(lobby.includes('settings.dataset.dirty === "true"'));
   assert.ok(lobby.includes("room.allowGuestQueueManagement === true"));
   assert.ok(lobby.includes("room.allowGuestVoting === false"));
   assert.ok(lobby.includes("control.disabled = !queueAllowed"));
