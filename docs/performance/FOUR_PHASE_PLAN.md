@@ -61,3 +61,20 @@ For each representative route, use a fresh browser tab and record:
 5. Record hardware, browser version, viewport, network conditions and whether the legacy profile activated.
 
 A before/after comparison is only valid when route, viewport, browser, cache state and interaction script are held constant.
+
+
+### Phase 2 — adaptive rendering and compositing (implemented; runtime measurement pending)
+
+- Refined the shared constrained-device stylesheet rather than adding another visual mode or changing page architecture.
+- Stopped the animated, 48px-blurred fixed atmosphere layer on constrained devices while retaining a static low-cost light field.
+- Changed the full-viewport screen-blended overlay to a restrained normal-blend overlay to avoid expensive blend compositing.
+- Removed duplicated blurred card-art pseudo-elements and hover sheen on constrained devices while keeping cards, content, layout and restrained static depth shadows.
+- Disabled backdrop-filter sampling on sticky navigation and Home rail controls; retained their translucent backgrounds and controls.
+- Added source-contract tests for these adaptive rendering rules.
+- This is a targeted source-level reduction in known expensive rendering primitives, not a measured FPS/INP claim. Browser trace comparison remains required in Phase 4.
+
+#### Phase 2 findings and guardrails
+
+- Home's poster collage and repeated rail measurements were already addressed by the existing Home work; Phase 2 does not duplicate those changes.
+- The shared atmosphere pseudo-elements remained active across app routes: a fixed animated blurred layer and a screen-blended viewport overlay. These are now simplified only for constrained devices.
+- Capable devices keep the existing full cinematic effects. No content, routes, playback, navigation or feature behavior is removed.
