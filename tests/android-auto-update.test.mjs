@@ -37,6 +37,7 @@ test("Android workflow publishes a cleanly named APK and build metadata without 
   assert.match(workflow, /apk_name="Vivid-Cinema-Android\.apk"/);
   assert.match(workflow, /Vivid-Cinema-Android-build-/);
   assert.match(workflow, /gh release upload/);
+  assert.match(workflow, /tag="v\$version"/);
   assert.match(workflow, /Vivid-Cinema-Debug\.keystore/);
   assert.doesNotMatch(workflow, /ANDROID_KEYSTORE_BASE64|ANDROID_KEYSTORE_PASSWORD/);
 });
