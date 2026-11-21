@@ -177,7 +177,8 @@ test("Watch Rooms Stage 5 exposes trusted VidSrc and CineSRC playback bridges", 
   assert.ok(backend.includes("async function publishWatchRoomPlayback("));
   assert.ok(backend.includes('["vidsrc", "cinesrc"].includes(provider)'));
   assert.ok(cloudflareBackend.includes('["vidsrc", "cinesrc"].includes(provider)'));
-  assert.ok(backend.includes("tx.set(stateRef, { sessionId, provider, contentId"));
+  assert.ok(backend.includes("tx.set(stateRef, {"));
+  assert.ok(backend.includes("schemaVersion: 1, sessionId, provider, contentId,"));
   assert.ok(cloudflareBackend.includes("tx.set(stateRef, {"));
   assert.ok(cloudflareBackend.includes("schemaVersion: 1, sessionId, provider, contentId,"));
   assert.ok(cloudflareBackend.includes("expectedRevision !== currentRevision"));
@@ -711,9 +712,11 @@ test("Watch Room playback uses member-only realtime snapshots and trusted revisi
     const writeStart = backend.indexOf("async function publishWatchRoomPlayback(");
     const writeEnd = backend.indexOf("const MAX_WATCHLIST_ITEMS", writeStart);
     const write = backend.slice(writeStart, writeEnd);
+    assert.ok(write.includes("expectedRevisionInput == null"));
     assert.ok(write.includes("expectedRevision !== currentRevision"));
     assert.ok(write.includes('"stale-revision"'));
     assert.ok(write.includes('tx.get(roomRef.collection("members").doc(uid))'));
+    assert.ok(write.includes('previous?.status === "playing"'), "only repeated playing heartbeats are rate-limited");
   }
   assert.ok(client.includes('call("getWatchRoomPlaybackSnapshot")'), "trusted snapshot fetch remains available for revision conflict recovery");
   assert.ok(client.includes("playbackConnectionGeneration"));
@@ -721,6 +724,7 @@ test("Watch Room playback uses member-only realtime snapshots and trusted revisi
   assert.ok(client.includes('doc(db, "rooms", requestedRoomId, "playback", "current")'));
   assert.ok(client.includes("expectedRevision: playbackRevision"));
   assert.ok(client.includes('data.reason !== "stale-revision"'));
+  assert.equal((client.match(/call\("publishWatchRoomPlayback"\)/g) || []).length, 1, "all playback writes must pass through the revision-safe publisher");
   assert.doesNotMatch(client, /schedulePlaybackRefresh\(|playbackPollDelayMs/);
   const playbackRulesStart = rules.indexOf("match /playback/{stateId}");
   const playbackRulesEnd = rules.indexOf("match /cinemaClubs/{clubId}", playbackRulesStart);
