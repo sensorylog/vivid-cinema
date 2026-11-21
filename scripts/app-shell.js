@@ -304,6 +304,57 @@ function syncDesktopNavigation() {
   nav.classList.remove("vivid-v2-nav");
 }
 
+function isAndroidNativeRuntime() {
+  try {
+    return Boolean(window.Capacitor?.isNativePlatform?.() && window.Capacitor?.getPlatform?.() === "android");
+  } catch {
+    return false;
+  }
+}
+
+function syncAndroidMoreNavigation(nav, page) {
+  const morePages = ["live", "news", "search", "watch-rooms"];
+  const menu = document.createElement("div");
+  menu.className = "vivid-native-more-menu";
+  menu.id = "vivid-native-more-menu";
+  menu.hidden = true;
+  menu.setAttribute("aria-label", "More destinations");
+  menu.innerHTML = [
+    navLink("live.html", "bi-broadcast-pin", "Live", page === "live"),
+    navLink("news.html", "bi-newspaper", "News", page === "news"),
+    navLink("search.html", "bi-search", "Search", page === "search"),
+    navLink("watch-rooms.html", "bi-people-fill", "Watch Rooms", page === "watch-rooms")
+  ].join("");
+
+  const more = nav.querySelector("[data-vivid-more-navigation]");
+  if (!more) return;
+  more.setAttribute("aria-expanded", "false");
+  more.setAttribute("aria-controls", menu.id);
+  more.classList.toggle("is-active", morePages.includes(page));
+  more.addEventListener("click", () => {
+    const opening = more.getAttribute("aria-expanded") !== "true";
+    more.setAttribute("aria-expanded", String(opening));
+    menu.hidden = !opening;
+  });
+  menu.addEventListener("click", event => {
+    if (!event.target.closest("a")) return;
+    menu.hidden = true;
+    more.setAttribute("aria-expanded", "false");
+  });
+  document.addEventListener("click", event => {
+    if (nav.contains(event.target) || menu.contains(event.target)) return;
+    menu.hidden = true;
+    more.setAttribute("aria-expanded", "false");
+  });
+  document.addEventListener("keydown", event => {
+    if (event.key !== "Escape" || menu.hidden) return;
+    menu.hidden = true;
+    more.setAttribute("aria-expanded", "false");
+    more.focus({ preventScroll: true });
+  });
+  document.body.appendChild(menu);
+}
+
 function syncMobileNavigation() {
   const page = currentPage();
   let nav = document.querySelector(".vivid-mobile-nav");
@@ -313,15 +364,26 @@ function syncMobileNavigation() {
     nav.setAttribute("aria-label", "Mobile navigation");
     document.body.appendChild(nav);
   }
-  nav.innerHTML = [
-    navLink("home.html", "bi-house-fill", "Home", page === "home"),
-    navLink("discover.html", "bi-grid-fill", "Browse", isBrowsePage(page)),
-    navLink("for-you.html", "bi-stars", "For You", page === "for-you"),
-    navLink("live.html", "bi-broadcast-pin", "Live", page === "live"),
-    navLink("library.html", "bi-bookmark-fill", "Library", page === "library" || page === "downloads-library"),
-    navLink("news.html", "bi-newspaper", "News", page === "news"),
-    navLink("search.html", "bi-search", "Search", page === "search")
-  ].join("");
+  if (isAndroidNativeRuntime()) {
+    nav.innerHTML = [
+      navLink("home.html", "bi-house-fill", "Home", page === "home"),
+      navLink("discover.html", "bi-grid-fill", "Browse", isBrowsePage(page)),
+      navLink("for-you.html", "bi-stars", "For You", page === "for-you"),
+      navLink("library.html", "bi-bookmark-fill", "Library", page === "library" || page === "downloads-library"),
+      '<button type="button" data-vivid-more-navigation aria-expanded="false"><i class="bi bi-three-dots" aria-hidden="true"></i><span>More</span></button>'
+    ].join("");
+    syncAndroidMoreNavigation(nav, page);
+  } else {
+    nav.innerHTML = [
+      navLink("home.html", "bi-house-fill", "Home", page === "home"),
+      navLink("discover.html", "bi-grid-fill", "Browse", isBrowsePage(page)),
+      navLink("for-you.html", "bi-stars", "For You", page === "for-you"),
+      navLink("live.html", "bi-broadcast-pin", "Live", page === "live"),
+      navLink("library.html", "bi-bookmark-fill", "Library", page === "library" || page === "downloads-library"),
+      navLink("news.html", "bi-newspaper", "News", page === "news"),
+      navLink("search.html", "bi-search", "Search", page === "search")
+    ].join("");
+  }
   nav.classList.add("vivid-v2-mobile-nav");
 }
 
