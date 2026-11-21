@@ -27,6 +27,16 @@ APK output: `android/app/build/outputs/apk/debug/app-debug.apk`.
 
 Pushing to `main` triggers the **Android APK Build** workflow. A successful run produces the `vivid-cinema-android-apk` artifact and publishes the stable `Vivid-Cinema-Android.apk` asset to the latest GitHub release. You can also run the workflow manually from GitHub Actions. The current development-signed APK is for testing and early distribution, not a Play Store release.
 
+## Native Android source
+
+The Capacitor Android project is generated during CI, but Vivid's native code is maintained as normal Java source under `native/android/`:
+
+- `VividUpdaterPlugin.java` — GitHub APK download, install permission and persisted download recovery.
+- `VividNavigationPlugin.java` — Android hardware Back bridge.
+- `VividWebChromeClient.java` — fullscreen custom-view support while retaining Capacitor's permission, dialog and file-picker behavior.
+
+`automation/configure-android-native-project.mjs` copies these source files into the generated Android project and applies app version and manifest configuration.
+
 ## Current boundaries
 
 - The app UI is bundled locally; Firebase, TMDB, and third-party playback providers still need network access.
