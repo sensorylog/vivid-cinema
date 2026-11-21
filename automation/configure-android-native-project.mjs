@@ -11,6 +11,7 @@ const buildNumber = Number(process.env.VIVID_ANDROID_BUILD || process.env.GITHUB
 if (!Number.isSafeInteger(buildNumber) || buildNumber < 1) throw new Error("Android build number must be a positive integer.");
 const versionCode = 100000 + buildNumber;
 const versionName = packageJson.version;
+const playStoreDistribution = process.env.VIVID_ANDROID_DISTRIBUTION === "play";
 const gradlePath = path.join(androidRoot, "app", "build.gradle");
 let gradle = await readFile(gradlePath, "utf8");
 if (!/versionCode\s+\d+/.test(gradle) || !/versionName\s+["'][^"']+["']/.test(gradle)) {
@@ -23,7 +24,11 @@ await writeFile(gradlePath, gradle, "utf8");
 const javaRoot = path.join(androidRoot, "app", "src", "main", "java", "com", "vividcinema", "app");
 const mainActivityPath = path.join(javaRoot, "MainActivity.java");
 let mainActivity = await readFile(mainActivityPath, "utf8");
-for (const pluginClass of ["VividUpdaterPlugin.class", "VividNavigationPlugin.class"]) {
+const pluginClasses = [
+  ...(playStoreDistribution ? [] : ["VividUpdaterPlugin.class"]),
+  "VividNavigationPlugin.class"
+];
+for (const pluginClass of pluginClasses) {
   if (mainActivity.includes(pluginClass)) continue;
   const superCall = /([ \t]*)super\.onCreate\(savedInstanceState\);/;
   if (superCall.test(mainActivity)) {
@@ -35,8 +40,9 @@ for (const pluginClass of ["VividUpdaterPlugin.class", "VividNavigationPlugin.cl
     );
   }
 }
-if (!mainActivity.includes("VividUpdaterPlugin.class") || !mainActivity.includes("VividNavigationPlugin.class")) {
-  throw new Error("Could not register all Vivid native plugins in MainActivity.");
+if (!mainActivity.includes("VividNavigationPlugin.class") ||
+    (!playStoreDistribution && !mainActivity.includes("VividUpdaterPlugin.class"))) {
+  throw new Error("Could not register all Vivid native plugins required for this Android distribution.");
 }
 if (!mainActivity.includes("VividWebChromeClient")) {
   const superCall = /([ \t]*)super\.onCreate\(savedInstanceState\);/;
@@ -47,11 +53,12 @@ if (!mainActivity.includes("VividWebChromeClient")) {
   );
 }
 await writeFile(mainActivityPath, mainActivity, "utf8");
-for (const nativeSource of [
-  "VividUpdaterPlugin.java",
+const nativeSources = [
+  ...(playStoreDistribution ? [] : ["VividUpdaterPlugin.java"]),
   "VividNavigationPlugin.java",
   "VividWebChromeClient.java"
-]) {
+];
+for (const nativeSource of nativeSources) {
   await copyFile(
     path.join(root, "native", "android", nativeSource),
     path.join(javaRoot, nativeSource)
@@ -67,11 +74,12 @@ for (const nativeSource of [
 const manifestPath = path.join(androidRoot, "app", "src", "main", "AndroidManifest.xml");
 let manifest = await readFile(manifestPath, "utf8");
 let manifestChanged = false;
-for (const permission of [
-  "android.permission.REQUEST_INSTALL_PACKAGES",
+const permissions = [
+  ...(playStoreDistribution ? [] : ["android.permission.REQUEST_INSTALL_PACKAGES"]),
   "android.permission.RECORD_AUDIO",
   "android.permission.MODIFY_AUDIO_SETTINGS"
-]) {
+];
+for (const permission of permissions) {
   if (manifest.includes(permission)) continue;
   manifest = manifest.replace(
     /<application\b/,
@@ -102,4 +110,4 @@ manifest = manifest.replace(/<activity\b(?=[^>]*android:name="[^"]*MainActivity"
 );
 manifestChanged = true;
 if (manifestChanged) await writeFile(manifestPath, manifest, "utf8");
-console.log(`Configured Vivid Android updater plugin (version ${versionName}, build ${buildNumber}, versionCode ${versionCode}).`);
+console.log(`Configured Vivid Android ${playStoreDistribution ? "Play Store" : "direct APK"} distribution (version ${versionName}, build ${buildNumber}, versionCode ${versionCode}).`);
