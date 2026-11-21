@@ -384,15 +384,15 @@ for (const permission of [
 ]) {
   if (manifest.includes(permission)) continue;
   manifest = manifest.replace(
-    /<application\\b/,
-    `    <uses-permission android:name="${permission}" />\\n\\n    <application`
+    /<application\b/,
+    `    <uses-permission android:name="${permission}" />\n\n    <application`
   );
   manifestChanged = true;
 }
 if (!manifest.includes('android.hardware.microphone')) {
   manifest = manifest.replace(
-    /<application\\b/,
-    '    <uses-feature android:name="android.hardware.microphone" android:required="false" />\\n\\n    <application'
+    /<application\b/,
+    '    <uses-feature android:name="android.hardware.microphone" android:required="false" />\n\n    <application'
   );
   manifestChanged = true;
 }
