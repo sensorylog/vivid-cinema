@@ -2,6 +2,7 @@ import { auth } from "./firebase.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
 import { callWatchRoomApi } from "./watch-room-api.js";
 import { getProviderAdapter, sendProviderCommand as sendAdapterCommand } from "./playback/provider-adapters.js";
+import { getGuestPlaybackAction } from "./playback/watch-room-playback-policy.js";
 
 let activePlayerId = "player1";
 let activeProviderId = "vidapi";
@@ -173,12 +174,24 @@ function sameTitle(state) {
   return true;
 }
 
+function pauseGuestPlayer(message) {
+  if (role !== "guest") return;
+  sendProviderCommand("pause");
+  localStatus = "paused";
+  if (message) setNote(message);
+}
+
 function applyRemoteState(force = false) {
   const state = latestRemoteState;
   const controllerUid = state?.controllerUid || state?.hostUid;
   const currentUid = auth.currentUser?.uid;
   const delegatedHostFollow = role === "host" && allowGuestPlaybackControl && controllerUid && controllerUid !== currentUid;
-  if (!state || controllerUid === currentUid || (!delegatedHostFollow && (role === "host" || !joinedPlayback))) return;
+  if (!state || controllerUid === currentUid || (!delegatedHostFollow && role === "host")) return;
+  const guestAction = getGuestPlaybackAction({ role, joinedPlayback, playbackStatus: state.status });
+  if (guestAction === "pause" && state.status === "playing") {
+    pauseGuestPlayer("The host is playing. Tap Join synced playback when you’re ready to watch together.");
+    return;
+  }
   if (!sameTitle(state)) { setNote("This room is synced to a different title or episode. Open that exact Vivid title to join."); return; }
   if (state.provider !== activeProviderId) { setNote("The host is using " + String(state.provider || "another provider") + ". Select that same provider to join synchronized playback."); return; }
   const adapter = getActiveAdapter();
@@ -195,7 +208,10 @@ function applyRemoteState(force = false) {
     sendProviderCommand("seek", expected);
   }
   if (state.status === "playing" && localStatus !== "playing") sendProviderCommand("play");
-  if ((state.status === "paused" || state.status === "ended") && localStatus === "playing") sendProviderCommand("pause");
+  if (state.status === "paused" || state.status === "ended") {
+    sendProviderCommand("pause");
+    localStatus = "paused";
+  }
   setNote("Connected to the host’s playback clock. Small timing differences are corrected automatically.");
 }
 
@@ -224,7 +240,7 @@ async function refreshPlayback() {
     latestRemoteState = result.data?.playback || null;
     if (role !== "host" || allowGuestPlaybackControl) {
       if (latestRemoteState) applyRemoteState();
-      else if (role !== "host") setNote("Room connected. Waiting for the host to start playback.");
+      else if (role === "guest") pauseGuestPlayer("You’re in the room. Your player is held until the host starts the screening.");
     }
   } catch (error) {
     if (roomId === requestedRoomId && requestGeneration === playbackConnectionGeneration) {
@@ -257,7 +273,7 @@ async function connectToRoom(id) {
   if (Number.isFinite(initialServerTime)) clockOffsetMs = initialServerTime - ((initialStartedAt + initialFinishedAt) / 2);
   form.hidden = true; leaveButton.hidden = false;
   joinButton.hidden = role === "host";
-  setNote(role === "host" ? "You’re the host. Select a room-compatible player; your playback becomes the room’s reference clock." : "Room connected. Open the same title and player, then tap Join synced playback.");
+  setNote(role === "host" ? "You’re the host. Select a room-compatible player; your playback becomes the room’s reference clock." : "Room connected. Your player will stay paused until the host starts the screening.");
   const ping = async () => {
     const startedAt = Date.now();
     try {
@@ -277,7 +293,10 @@ async function connectToRoom(id) {
   heartbeatTimer = window.setInterval(ping, 30000);
   try { await refreshRoomPlayerSelection(); } catch (error) { setNote(error?.message || "Could not load the room player selection."); }
   selectionTimer = window.setInterval(() => { refreshRoomPlayerSelection().catch(error => setNote(error?.message || "Room player selection could not refresh.")); }, 5000);
-  if (latestRemoteState && (role !== "host" || allowGuestPlaybackControl)) applyRemoteState();
+  if (role === "guest") {
+    if (latestRemoteState) applyRemoteState();
+    else pauseGuestPlayer("You’re in the room. Waiting for the host to start the screening.");
+  } else if (latestRemoteState && allowGuestPlaybackControl) applyRemoteState();
   schedulePlaybackRefresh();
 }
 
@@ -297,7 +316,7 @@ form.addEventListener("submit", async event => {
 });
 
 joinButton.addEventListener("click", () => {
-  if (!getSupportedFrame() || localPosition == null) { setNote("Select a supported provider and start playback first. Once Vivid detects its playback clock, tap Join synced playback."); return; }
+  if (!getSupportedFrame()) { setNote("The shared player is still loading. Wait a moment and try again."); return; }
   joinedPlayback = true;
   if (latestRemoteState) applyRemoteState(true);
   else setNote("You’re connected. Waiting for the host’s first playback update.");
@@ -347,7 +366,8 @@ window.addEventListener("message", event => {
       pendingPlayer2Seek = 0;
       sendProviderCommand("seek", position);
     }
-    if ((role !== "host" && joinedPlayback) || (role === "host" && allowGuestPlaybackControl)) applyRemoteState(true);
+    if (role === "guest" && !joinedPlayback) pauseGuestPlayer("Your player is ready and paused. Waiting for the host to start the screening.");
+    else if ((role !== "host" && joinedPlayback) || (role === "host" && allowGuestPlaybackControl)) applyRemoteState(true);
     return;
   }
   if (type === "cinesrc:timeupdate" && status !== "playing") return;
@@ -370,8 +390,13 @@ window.addEventListener("message", event => {
 
 window.addEventListener("vivid:player-frame-loaded", event => {
   const detail = event.detail || {};
-  if (detail.playerId !== activePlayerId || detail.providerId !== activeProviderId || !latestRemoteState) return;
-  if ((role !== "host" && joinedPlayback) || (role === "host" && allowGuestPlaybackControl)) applyRemoteState(true);
+  if (detail.playerId !== activePlayerId || detail.providerId !== activeProviderId) return;
+  if (role === "guest" && !joinedPlayback && (!latestRemoteState || latestRemoteState.status !== "playing")) {
+    pauseGuestPlayer("Your player is ready and paused. Waiting for the host to start the screening.");
+    return;
+  }
+  if ((role === "guest" && joinedPlayback) || (role === "host" && allowGuestPlaybackControl)) applyRemoteState(true);
+  else if (role === "guest") pauseGuestPlayer("Your player is held until you join the shared screening.");
 });
 
 window.addEventListener("vivid:watch-room-selection-error", event => {
