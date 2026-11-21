@@ -558,7 +558,7 @@ test("Watch Room lobby reads authoritative members, presence, queue and chat thr
   assert.ok(client.includes('call("getWatchRoomLobbySnapshot")'));
   assert.ok(client.includes("memberList = Array.isArray(snapshot.members) ? snapshot.members : []"));
   assert.ok(client.includes("memberList.filter(member => member.isOnline).length"));
-  assert.ok(client.includes("presenceRefresh = setInterval(updateMembers, 10000)"));
+  assert.ok(client.includes("presenceRefresh = setInterval(() =>"));\n  assert.ok(client.includes("realtimeFallback && !accessVerification"), "server snapshot polling keeps the lobby current if realtime listeners are denied");
   assert.ok(client.includes("Couldn't load room members."));
   assert.ok(client.includes("function subscribeRoomRealtime(roomId)"));
   assert.match(client, /onSnapshot\(roomRef/);
