@@ -97,7 +97,10 @@ function applyRoomPlayerSelection(room) {
     if (activePlayerId !== playerId || activeProviderId !== providerId) {
       sendProviderCommand("pause");
       localPosition = null;
+      localPositionObservedAt = 0;
       localStatus = "";
+      lastCommandedStatus = "";
+      pendingPlaySince = 0;
     }
     activePlayerId = playerId;
     activeProviderId = providerId;
@@ -413,7 +416,7 @@ async function connectToRoom(id) {
   await ping();
   if (roomId !== id || connectionGeneration !== playbackConnectionGeneration) return;
   heartbeatTimer = window.setInterval(ping, 30000);
-  if (role === "guest" || allowGuestPlaybackControl) {
+  if (role === "guest" || role === "host") {
     syncReconcileTimer = window.setInterval(() => {
       if (document.visibilityState === "visible" && latestRemoteState) applyRemoteState();
     }, 2000);
