@@ -27,6 +27,8 @@ test("native styling covers safe areas, touch targets, and accessible focus", ()
   assert.match(nativeCss, /prefers-reduced-motion/);
   assert.match(nativeCss, /\.vivid-player-dialog:fullscreen/);
   assert.match(nativeCss, /vivid-player-fullscreen-fallback/);
+  assert.match(nativeCss, /iframe:not\(\[hidden\]\)/);
+  assert.match(nativeCss, /video:not\(\[hidden\]\)/);
 });
 
 test("Capacitor remains configured for the Vivid Cinema app", () => {
