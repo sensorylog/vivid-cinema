@@ -623,6 +623,35 @@ test("Watch Room Step 5 restores Player 2 position only after the verified CineS
   assert.ok(player2.includes('vivid:watch-room-selection-error'));
 });
 
+
+test("Watch Room linked Cinema Clubs validate membership and record screenings atomically", () => {
+  const node = readFileSync(new URL("../api/watch-rooms.js", import.meta.url), "utf8");
+  const cloudflare = readFileSync(new URL("../cloudflare/functions/api/watch-rooms.js", import.meta.url), "utf8");
+  for (const backend of [node, cloudflare]) {
+    const settingsStart = backend.indexOf("async function updateWatchRoomSettings");
+    const settingsEnd = backend.indexOf("\nasync function ", settingsStart + 10);
+    const settings = backend.slice(settingsStart, settingsEnd);
+    assert.ok(settings.includes('"linkedClubId"'));
+    assert.ok(settings.includes('clubSnapshot.data().status !== "active"'));
+    assert.ok(settings.includes('clubRef.collection("members").doc(uid)'));
+    const screeningStart = backend.indexOf("async function startWatchRoomScreening");
+    const screeningEnd = backend.indexOf("\nasync function ", screeningStart + 10);
+    const screening = backend.slice(screeningStart, screeningEnd);
+    assert.ok(screening.includes('clubRef.collection("screenings").doc(sessionId)'));
+    assert.ok(screening.includes("tx.create(clubScreeningRef"));
+    assert.ok(screening.includes("sourceRoomId: roomId"));
+    assert.ok(screening.includes("sourceSessionId: sessionId"));
+    assert.ok(screening.includes("clubScreeningId: clubScreeningRef ? clubScreeningRef.id : null"));
+    assert.ok(backend.includes("linkedClubName: room.linkedClubName || null"));
+  }
+  const lobby = readFileSync(new URL("../scripts/watch-room-lobby.js", import.meta.url), "utf8");
+  const clubs = readFileSync(new URL("../scripts/watch-room-clubs.js", import.meta.url), "utf8");
+  assert.ok(lobby.includes("function subscribeClubWatchlist(clubId)"));
+  assert.ok(lobby.includes('call("addWatchRoomQueueItem")'));
+  assert.ok(lobby.includes('vivid:open-linked-club'));
+  assert.ok(clubs.includes("data.sourceRoomName"));
+});
+
 test("Watch Room Step 6 enforces granular guest permissions in both trusted APIs and the lobby", () => {
   const node = readFileSync(new URL("../api/watch-rooms.js", import.meta.url), "utf8");
   const cloudflare = readFileSync(new URL("../cloudflare/functions/api/watch-rooms.js", import.meta.url), "utf8");
