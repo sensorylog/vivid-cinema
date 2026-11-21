@@ -27,6 +27,8 @@ const MOVIESAPI_ORIGINS = new Set(["https://moviesapi.to", "https://www.moviesap
 try { VIDSRC_ORIGINS.add(new URL(VIVID_CONFIG.api.vidsrcEmbedBaseUrl || "https://vidsrc.sh").origin); } catch { /* Keep the known HTTPS provider allowlist. */ }
 let media = null;
 let details = null;
+let watchRoomScreeningValidated = false;
+let pendingRoomPlayerSelection = null;
 let currentParams = null;
 let lastHistorySyncAt = 0;
 let persistDirectProgress = null;
@@ -459,6 +461,10 @@ function setPlayerSource(source, params, startAt = 0) {
 window.addEventListener("vivid:watch-room-apply-selection", event => {
   const selection = event.detail || {};
   if (!["player1", "player2"].includes(selection.playerId) || !currentParams) return;
+  if (isWatchRoomCinemaMode && !watchRoomScreeningValidated) {
+    pendingRoomPlayerSelection = selection;
+    return;
+  }
   const secondaryRoot = $("vivid-tflix-player");
   const primaryOverlay = $("player-overlay");
   const primaryFrame = $("vidapi-player");
@@ -721,6 +727,7 @@ function renderShell(params) {
     if (tryNextButton) status.insertAdjacentElement("afterend", tryNextButton);
   }
   const overlay = $("player-overlay");
+  if (isWatchRoomCinemaMode && overlay) overlay.hidden = true;
   // Keep the page interactive until the viewer opens the cinema window.
   const openPlayer = $("watch-open-player");
   const closePlayer = $("player-close");
@@ -965,7 +972,13 @@ function renderShell(params) {
       if (event.detail?.roomId !== params.get("roomId") ||
           String(screening?.sessionId || "") !== String(params.get("sessionId") || "") ||
           String(screening?.contentId || "") !== String(params.get("id") || "")) return;
+      watchRoomScreeningValidated = true;
       openPlayerWindow();
+      if (pendingRoomPlayerSelection) {
+        const selection = pendingRoomPlayerSelection;
+        pendingRoomPlayerSelection = null;
+        window.dispatchEvent(new CustomEvent("vivid:watch-room-apply-selection", { detail: selection }));
+      }
     });
   }
   recordHistory();
