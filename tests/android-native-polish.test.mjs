@@ -136,6 +136,9 @@ test("native Android project generation registers both plugins idempotently", as
     const manifest = await readFile(manifestPath, "utf8");
     assert.match(gradle, /versionCode 1100001/);
     assert.match(manifest, /android\.permission\.REQUEST_INSTALL_PACKAGES/);
+    assert.match(manifest, /android\.permission\.RECORD_AUDIO/);
+    assert.match(manifest, /android\.permission\.MODIFY_AUDIO_SETTINGS/);
+    assert.match(manifest, /android\.hardware\.microphone" android:required="false"/);
     assert.match(activity, /registerPlugin\(VividUpdaterPlugin\.class\)/);
     assert.match(activity, /registerPlugin\(VividNavigationPlugin\.class\)/);
     assert.match(activity, /setWebChromeClient\(new VividWebChromeClient\(getBridge\(\)\)\)/);
