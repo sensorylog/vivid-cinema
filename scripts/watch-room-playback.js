@@ -642,6 +642,7 @@ document.addEventListener("vivid:watch-room-screening-navigate", event => {
       lastPublishedStatus = "";
       lastHostPayload = null;
     }
+    void refreshRoomPlayerSelection().catch(error => setNote(error?.message || "Could not refresh the new screening's player selection."));
     return;
   }
   connectToRoom(requestedRoomId).catch(error => setNote(error?.message || "Could not connect playback to the active Watch Room."));
