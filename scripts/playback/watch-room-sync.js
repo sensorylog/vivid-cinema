@@ -20,9 +20,9 @@ export function getExpectedPlaybackPosition(state, {
   const duration = Number.isFinite(durationValue) && durationValue > 0
     ? Math.min(MAX_PLAYBACK_POSITION_SECONDS, durationValue)
     : MAX_PLAYBACK_POSITION_SECONDS;
-  const updatedAt = normalizePlaybackTimestamp(state.updatedAt);
-  const elapsed = state.status === "playing" && updatedAt > 0
-    ? Math.max(0, (Number(nowMs) + Number(clockOffsetMs || 0) - updatedAt) / 1000)
+  const positionAt = normalizePlaybackTimestamp(state.positionAtMs ?? state.updatedAt);
+  const elapsed = state.status === "playing" && positionAt > 0
+    ? Math.max(0, (Number(nowMs) + Number(clockOffsetMs || 0) - positionAt) / 1000)
     : 0;
   return Math.max(0, Math.min(duration, position + elapsed));
 }
