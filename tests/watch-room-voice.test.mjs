@@ -91,10 +91,16 @@ test("Watch Room screenings stay in the lobby and minimize without stopping play
   assert.ok(lobbyHtml.includes('src="scripts/watch.js"'));
   assert.ok(lobbyHtml.includes('src="scripts/watch-room-playback.js"'));
   assert.ok(lobby.includes('new URL("watch-rooms.html", window.location.href)'));
+  assert.ok(!lobby.includes("window.location.assign(url)"), "starting a screening must not reload the page and drop LiveKit voice");
+  assert.ok(lobby.includes("vivid:watch-room-screening-navigate"));
+  assert.ok(lobby.includes("vivid:watch-room-screening-focus"));
   assert.ok(lobby.includes('loadedScreeningSessionId = new URLSearchParams(window.location.search).get("sessionId")'));
   assert.ok(lobby.includes('vivid:watch-room-screening-validated'));
   assert.ok(lobby.includes('activeSessionId !== loadedScreeningSessionId'));
   assert.ok(watchPage.includes('route.params.get("roomMode") === "1"'));
+  assert.ok(watchPage.includes('window.addEventListener("vivid:watch-room-screening-navigate"'));
+  assert.ok(watchPage.includes("route.params = params"));
+  assert.ok(playback.includes('document.addEventListener("vivid:watch-room-screening-navigate"'));
   assert.ok(watchPage.includes('overlay.classList.add("is-minimized")'));
   assert.ok(watchPage.includes('restorePlayer.addEventListener("click", openPlayerWindow)'));
   assert.ok(watchPage.includes("const restoringMiniPlayer = overlay.classList.contains(\"is-minimized\") && playerHasOpened"));
