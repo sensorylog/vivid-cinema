@@ -23,6 +23,10 @@ test("production-signed Android release remains manual until signing is configur
   assert.match(workflow, /ANDROID_KEY_PASSWORD/);
   assert.match(workflow, /assembleRelease/);
   assert.match(workflow, /bundleRelease/);
+  assert.equal((workflow.match(/VIVID_ANDROID_DISTRIBUTION: play/g) || []).length, 2);
+  assert.match(nativeConfigurator, /playStoreDistribution/);
+  assert.match(nativeConfigurator, /playStoreDistribution \? \[\] : \["VividUpdaterPlugin\.class"\]/);
+  assert.match(nativeConfigurator, /playStoreDistribution \? \[\] : \["android\.permission\.REQUEST_INSTALL_PACKAGES"\]/);
   assert.match(workflow, /Vivid-Cinema-Android\.aab/);
   assert.match(workflow, /jarsigner -verify/);
   assert.match(workflow, /apksigner.*verify/);
