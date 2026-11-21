@@ -8,12 +8,43 @@ const leaveButton = byId("wr-voice-leave");
 const statusNode = byId("wr-voice-status");
 const participantsNode = byId("wr-voice-participants");
 const call = callWatchRoomApi;
+const VOICE_INTENT_KEY = "vivid:watch-room-voice-intent:v1";
+const VOICE_INTENT_TTL_MS = 45_000;
 let activeRoom = null;
 let livekitRoom = null;
 let sdkPromise = null;
 let connectedRoomId = "";
 let isMuted = false;
 let audioElements = [];
+
+function readVoiceIntent() {
+  try {
+    const intent = JSON.parse(sessionStorage.getItem(VOICE_INTENT_KEY) || "null");
+    if (!intent || typeof intent.roomId !== "string" || !Number.isFinite(Number(intent.expiresAt)) || Number(intent.expiresAt) <= Date.now()) {
+      sessionStorage.removeItem(VOICE_INTENT_KEY);
+      return null;
+    }
+    return intent;
+  } catch {
+    return null;
+  }
+}
+function persistVoiceIntent(roomId, muted = isMuted) {
+  if (!roomId) return;
+  try {
+    sessionStorage.setItem(VOICE_INTENT_KEY, JSON.stringify({
+      roomId,
+      muted: Boolean(muted),
+      expiresAt: Date.now() + VOICE_INTENT_TTL_MS
+    }));
+  } catch {}
+}
+function clearVoiceIntent(roomId) {
+  try {
+    const intent = readVoiceIntent();
+    if (!roomId || !intent || intent.roomId === roomId) sessionStorage.removeItem(VOICE_INTENT_KEY);
+  } catch {}
+}
 
 function guestVoiceAllowed() {
   return activeRoom?.role === "host" || activeRoom?.allowGuestVoice !== false;
@@ -81,6 +112,7 @@ async function loadSdk() {
   return sdkPromise;
 }
 async function disconnectVoice(message = "You left the voice call.") {
+  clearVoiceIntent(connectedRoomId || activeRoom?.roomId);
   const current = livekitRoom;
   livekitRoom = null;
   connectedRoomId = "";
@@ -94,12 +126,14 @@ async function disconnectVoice(message = "You left the voice call.") {
   renderParticipants();
   if (activeRoom) setStatus(message);
 }
-async function joinVoice() {
+async function joinVoice(options = {}) {
   if (!activeRoom || livekitRoom) return;
+  const targetRoomId = activeRoom.roomId;
+  const restoreMuted = options?.restore === true && options?.muted === true;
   joinButton.disabled = true;
   setStatus("Securing your room connection…");
   try {
-    const response = await call("getWatchRoomVoiceToken")({ roomId: activeRoom.roomId });
+    const response = await call("getWatchRoomVoiceToken")({ roomId: targetRoomId });
     const credentials = response.data;
     if (!credentials?.token || !credentials?.url) throw new Error("The voice service returned incomplete connection details.");
     const sdk = await loadSdk();
@@ -134,18 +168,24 @@ async function joinVoice() {
       }
     });
     await room.connect(credentials.url, credentials.token, { autoSubscribe: true });
+    if (!activeRoom || activeRoom.roomId !== targetRoomId || livekitRoom !== room) {
+      try { await room.disconnect(); } catch {}
+      return;
+    }
     joinButton.hidden = true;
     muteButton.hidden = false;
     leaveButton.hidden = false;
     try {
-      await room.localParticipant.setMicrophoneEnabled(true);
-      isMuted = false;
-      muteButton.textContent = "Mute microphone";
-      setStatus("Voice connected · Your microphone is on.", "success");
+      await room.localParticipant.setMicrophoneEnabled(!restoreMuted);
+      isMuted = restoreMuted;
+      muteButton.textContent = isMuted ? "Unmute microphone" : "Mute microphone";
+      setStatus(isMuted ? "Voice connected · Your microphone is muted." : "Voice connected · Your microphone is on.", "success");
+      persistVoiceIntent(targetRoomId, isMuted);
     } catch (error) {
       isMuted = true;
       muteButton.textContent = "Enable microphone";
       setStatus("You're connected and can hear the room, but microphone access was denied or unavailable. Check browser permissions.", "warning");
+      persistVoiceIntent(targetRoomId, true);
     }
     renderParticipants();
   } catch (error) {
@@ -176,7 +216,7 @@ async function toggleMute() {
     muteButton.disabled = false;
   }
 }
-joinButton?.addEventListener("click", joinVoice);
+joinButton?.addEventListener("click", () => { void joinVoice(); });
 muteButton?.addEventListener("click", toggleMute);
 leaveButton?.addEventListener("click", () => disconnectVoice());
 
@@ -190,6 +230,13 @@ document.addEventListener("vivid:watch-room-open", async event => {
   setStatus("Voice is separate from movie playback. Join when you're ready to talk.");
   syncVoicePermission();
   renderParticipants();
+  const intent = readVoiceIntent();
+  if (intent?.roomId === nextRoom.roomId && guestVoiceAllowed()) {
+    setStatus("Restoring your room voice connection…");
+    void joinVoice({ restore: true, muted: intent.muted === true });
+  } else if (intent?.roomId === nextRoom.roomId && !guestVoiceAllowed()) {
+    clearVoiceIntent(nextRoom.roomId);
+  }
 });
 document.addEventListener("vivid:watch-room-updated", event => {
   if (!activeRoom || event.detail?.roomId !== activeRoom.roomId) return;
@@ -202,4 +249,13 @@ document.addEventListener("vivid:watch-room-closing", () => {
   void disconnectVoice("You left the room.");
   if (panel) panel.hidden = true;
 });
-window.addEventListener("pagehide", () => { if (livekitRoom) void livekitRoom.disconnect(); });
+window.addEventListener("pagehide", () => {
+  if (!livekitRoom || !connectedRoomId) return;
+  // A screening transition reloads the lobby URL. Preserve only short-lived
+  // reconnect intent (never credentials) so voice can rejoin the same room.
+  persistVoiceIntent(connectedRoomId, isMuted);
+  const current = livekitRoom;
+  livekitRoom = null;
+  connectedRoomId = "";
+  void current.disconnect();
+});
