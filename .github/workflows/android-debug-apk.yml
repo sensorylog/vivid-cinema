@@ -65,7 +65,7 @@ jobs:
       - name: Generate Android project
         run: npx cap add android
 
-      - name: Configure stable Android signing and updater
+      - name: Prepare stable Android debug signing identity
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         shell: bash
@@ -86,10 +86,12 @@ jobs:
             keytool -genkeypair -noprompt -keystore "$RUNNER_TEMP/vivid-android-key/Vivid-Cinema-Debug.keystore" -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Vivid Cinema Development,O=Vivid Cinema,C=GH"
           fi
           cp "$RUNNER_TEMP/vivid-android-key/Vivid-Cinema-Debug.keystore" "$HOME/.android/debug.keystore"
-          node automation/configure-android-native-project.mjs
 
       - name: Bundle local website and sync Capacitor
         run: npm run cap:sync
+
+      - name: Configure shared Android native plugins and version
+        run: node automation/configure-android-native-project.mjs
 
       - name: Apply shared Vivid Cinema launcher icon
         run: node automation/apply-android-icon.mjs
