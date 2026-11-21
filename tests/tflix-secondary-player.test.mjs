@@ -8,7 +8,11 @@ test("MoviesAPI builds movie and episode routes",()=>{assert.equal(buildTflixSec
 test("CineSRC does not auto-advance episodes inside a synchronized Watch Room", () => {
   assert.equal(
     buildTflixSecondaryServerUrl("cinesrc", { ...episode, roomMode: true }),
-    "https://cinesrc.st/embed/tv/1399?s=2&e=7&autoplay=true&autonext=false&prioritize=true&lastserver=wave"
+    "https://cinesrc.st/embed/tv/1399?s=2&e=7&autoplay=false&autonext=false&prioritize=true&lastserver=wave"
+  );
+  assert.equal(
+    buildTflixSecondaryServerUrl("cinesrc", { ...movie, roomMode: true }),
+    "https://cinesrc.st/embed/movie/27205?autoplay=false&prioritize=true&lastserver=wave"
   );
 });
 test("remaining sources build movie and episode routes",()=>{assert.equal(buildTflixSecondaryServerUrl("vidsrc-embed",movie),"https://vidsrc-embed.ru/embed/movie?tmdb=27205&autoplay=1");assert.equal(buildTflixSecondaryServerUrl("vidsrc-embed",episode),"https://vidsrc-embed.ru/embed/tv?tmdb=1399&season=2&episode=7&autoplay=1");assert.equal(buildTflixSecondaryServerUrl("cinesrc",movie),"https://cinesrc.st/embed/movie/27205?autoplay=true&prioritize=true&lastserver=wave");assert.equal(buildTflixSecondaryServerUrl("cinesrc",episode),"https://cinesrc.st/embed/tv/1399?s=2&e=7&autoplay=true&autonext=true&prioritize=true&lastserver=wave");assert.equal(buildTflixSecondaryServerUrl("vidfast",movie),"https://vidfast.vc/movie/27205?autoPlay=true");assert.equal(buildTflixSecondaryServerUrl("vidfast",episode),"https://vidfast.vc/tv/1399/2/7?autoPlay=true");assert.equal(buildTflixSecondaryServerUrl("vidlink",movie),"https://vidlink.pro/movie/27205?title=true&poster=true&autoplay=true");assert.equal(buildTflixSecondaryServerUrl("vidlink",episode),"https://vidlink.pro/tv/1399/2/7?title=true&poster=true&autoplay=true&nextbutton=true");});
