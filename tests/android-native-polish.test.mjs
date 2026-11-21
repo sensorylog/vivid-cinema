@@ -115,6 +115,9 @@ test("native Android project generation registers both plugins idempotently", as
       "public class MainActivity extends BridgeActivity {}"
     ].join("\n"), "utf8");
 
+    const manifestPath = path.join(androidRoot, "app", "src", "main", "AndroidManifest.xml");
+    await writeFile(manifestPath, '<manifest xmlns:android="http://schemas.android.com/apk/res/android"><application android:label="Vivid Cinema"></application></manifest>', "utf8");
+
     const script = fileURLToPath(new URL("../automation/configure-android-native-project.mjs", import.meta.url));
     const env = {
       ...process.env,
@@ -130,7 +133,9 @@ test("native Android project generation registers both plugins idempotently", as
     const updaterPlugin = await readFile(path.join(javaRoot, "VividUpdaterPlugin.java"), "utf8");
     const navigationPlugin = await readFile(path.join(javaRoot, "VividNavigationPlugin.java"), "utf8");
     const webChromeClient = await readFile(path.join(javaRoot, "VividWebChromeClient.java"), "utf8");
+    const manifest = await readFile(manifestPath, "utf8");
     assert.match(gradle, /versionCode 1100001/);
+    assert.match(manifest, /android\.permission\.REQUEST_INSTALL_PACKAGES/);
     assert.match(activity, /registerPlugin\(VividUpdaterPlugin\.class\)/);
     assert.match(activity, /registerPlugin\(VividNavigationPlugin\.class\)/);
     assert.match(activity, /setWebChromeClient\(new VividWebChromeClient\(getBridge\(\)\)\)/);
