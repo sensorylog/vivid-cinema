@@ -293,11 +293,14 @@ async function connectToRoom(id) {
   if (memberRole !== "host" && memberRole !== "guest") throw new Error("Your Watch Room membership is not valid.");
   roomId = id;
   role = memberRole;
+  // Watch Room guests follow the host automatically; the embedded cinema
+  // route intentionally has no separate "join playback" panel or button.
+  joinedPlayback = memberRole === "guest";
   latestRemoteState = snapshot.data?.playback || null;
   const initialServerTime = Number(snapshot.data?.serverTime);
   if (Number.isFinite(initialServerTime)) clockOffsetMs = initialServerTime - ((initialStartedAt + initialFinishedAt) / 2);
   form.hidden = true; leaveButton.hidden = false;
-  joinButton.hidden = role === "host";
+  joinButton.hidden = true;
   setNote(role === "host" ? "You’re the host. Select a room-compatible player; your playback becomes the room’s reference clock." : "Room connected. Your player will stay paused until the host starts the screening.");
   const ping = async () => {
     const startedAt = Date.now();
