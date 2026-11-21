@@ -29,6 +29,7 @@ test("production-signed Android release remains manual until signing is configur
   assert.match(nativeConfigurator, /playStoreDistribution \? \[\] : \["android\.permission\.REQUEST_INSTALL_PACKAGES"\]/);
   assert.match(workflow, /Vivid-Cinema-Android\.aab/);
   assert.match(workflow, /jarsigner -verify/);
+  assert.match(workflow, /Play Store APK must not request install-from-unknown-sources permission/);
   assert.match(workflow, /apksigner.*verify/);
   assert.match(workflow, /publish_to_github_release/);
   assert.match(workflow, /if: inputs\.publish_to_github_release/);
