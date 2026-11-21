@@ -155,7 +155,7 @@ test("Watch Room screenings stay embedded in the lobby and float without stoppin
   assert.ok(watchPage.includes('roomPlayerLayout?.focus()'));
   assert.ok(!watchPage.includes('overlay.classList.add("is-minimized")'), "Watch Room playback must not use the old close-to-minimize modal flow");
   assert.ok(watchPage.includes('restorePlayer.addEventListener("click", openPlayerWindow)'));
-  assert.ok(watchPage.includes("const restoringMiniPlayer = overlay.classList.contains(\"is-minimized\") && playerHasOpened"));
+  assert.ok(watchPage.includes("const restoringMiniPlayer = !isWatchRoomCinemaMode && overlay.classList.contains(\\\"is-minimized\\\") && playerHasOpened"));
   assert.ok(watchPage.includes("if (restoringMiniPlayer)"));
   assert.ok(watchPage.includes('vivid:watch-room-screening-validated'));
   assert.ok(watchPage.includes("watchRoomScreeningValidated = true"));
