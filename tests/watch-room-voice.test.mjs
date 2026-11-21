@@ -175,6 +175,11 @@ test("Watch Room screenings stay in the lobby and minimize without stopping play
   assert.ok(cinemaStyles.includes("#player-overlay[hidden]"));
   assert.ok(cinemaStyles.includes("#vivid-tflix-player.is-minimized"));
   assert.ok(cinemaStyles.includes(".vivid-tflix-room-minimize"));
+  assert.ok(cinemaStyles.includes("body.vivid-watch-rooms-page.vivid-watch-room-mode .vivid-topbar{display:none!important}"));
+  assert.ok(cinemaStyles.includes("align-items:center!important;justify-content:center!important"));
+  assert.ok(cinemaStyles.includes("max-height:calc(100dvh - 24px)!important"));
+  assert.ok(watchPage.includes("playerInfo.outerHTML = playerInfoMarkup()"));
+  assert.ok(watchPage.includes('runtime > 0 ? runtime + " min" : ""'));
   assert.ok(rooms.includes('requestedParams.get("roomId")'));
   assert.ok(rooms.includes('document.dispatchEvent(new CustomEvent("vivid:watch-room-open"'));
 });
