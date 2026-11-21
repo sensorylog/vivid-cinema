@@ -63,8 +63,9 @@ function renderCinemaStage() {
   const open = byId("wr-cinema-open");
   const openClub = byId("wr-open-linked-club");
   if (!stage || !status || !title || !subtitle || !open) return;
-  const clubMember = (window.vividCinemaClubs || []).some(club => club.clubId === room?.linkedClubId);
-  if (openClub) openClub.hidden = !room?.linkedClubId || !clubMember;
+  const clubTargetId = room?.activeScreening?.clubId || room?.linkedClubId;
+  const clubMember = (window.vividCinemaClubs || []).some(club => club.clubId === clubTargetId);
+  if (openClub) openClub.hidden = !clubTargetId || !clubMember;
   const screening = room?.activeScreening;
   if (!screening?.sessionId || !screening?.contentId) {
     stage.classList.remove("has-screening");
@@ -83,8 +84,9 @@ function renderCinemaStage() {
     : "Feature film";
   status.textContent = "NOW SCREENING · " + mediaLabel.toUpperCase();
   title.textContent = screening.title || "Your shared screening";
-  subtitle.textContent = room?.linkedClubName
-    ? "This screening is saved to " + room.linkedClubName + "'s history, with After-Credits reviews and discussion."
+  const screeningClubName = screening.clubId ? (screening.clubName || "your linked Cinema Club") : "";
+  subtitle.textContent = screeningClubName
+    ? "This screening is saved to " + screeningClubName + "'s history, with After-Credits reviews and discussion."
     : "The room is watching together. You can return to the player without leaving the conversation.";
   open.hidden = false;
   open.innerHTML = '<i class="bi bi-play-fill" aria-hidden="true"></i> Return to screening';
@@ -99,7 +101,8 @@ byId("wr-cinema-open")?.addEventListener("click", () => {
   if (room?.activeScreening) navigateToCinemaScreening(room.activeScreening);
 });
 byId("wr-open-linked-club")?.addEventListener("click", () => {
-  if (room?.linkedClubId) document.dispatchEvent(new CustomEvent("vivid:open-linked-club", { detail: { clubId: room.linkedClubId } }));
+  const clubId = room?.activeScreening?.clubId || room?.linkedClubId;
+  if (clubId) document.dispatchEvent(new CustomEvent("vivid:open-linked-club", { detail: { clubId } }));
 });
 
 function renderLinkedClubOptions(clubs = window.vividCinemaClubs || []) {
