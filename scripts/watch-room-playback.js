@@ -1,7 +1,7 @@
 import { auth, db } from "./firebase.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
 import { doc, onSnapshot } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
-import { getExpectedPlaybackPosition, isPlaybackRevisionStale, normalizePlaybackTimestamp, shouldCorrectPlayback } from "./playback/watch-room-sync.js";
+import { classifyPlaybackEvent, getEstimatedLocalPlaybackPosition, getExpectedPlaybackPosition, isPlaybackRevisionStale, normalizePlaybackTimestamp, shouldCorrectPlayback } from "./playback/watch-room-sync.js";
 import { callWatchRoomApi } from "./watch-room-api.js";
 import { getProviderAdapter, sendProviderCommand as sendAdapterCommand } from "./playback/provider-adapters.js";
 import { getGuestPlaybackAction } from "./playback/watch-room-playback-policy.js";
@@ -23,6 +23,11 @@ let playbackSessionId = "";
 let playbackConnectionGeneration = 0;
 let heartbeatTimer = null;
 let selectionTimer = null;
+let syncReconcileTimer = null;
+let localPositionObservedAt = 0;
+let lastCommandedStatus = "";
+let lastCommandAt = 0;
+let lastSeekCommandAt = 0;
 let lastAppliedSelectionKey = "";
 let roomPlayerLoadRequested = false;
 let latestRemoteState = null;
@@ -175,9 +180,9 @@ function stopConnection() {
   playbackSessionId = "";
   if (heartbeatTimer) window.clearInterval(heartbeatTimer);
   if (selectionTimer) window.clearInterval(selectionTimer);
-  heartbeatTimer = null; selectionTimer = null; lastAppliedSelectionKey = ""; roomPlayerLoadRequested = false;
+  heartbeatTimer = null; selectionTimer = null; if (syncReconcileTimer) window.clearInterval(syncReconcileTimer); syncReconcileTimer = null; lastAppliedSelectionKey = ""; roomPlayerLoadRequested = false;
   selectionPanel.hidden = true;
-  roomId = ""; role = ""; allowGuestPlayerSelection = false; allowGuestPlaybackControl = false; suppressPlaybackPublishUntil = 0; latestRemoteState = null; joinedPlayback = false; localPosition = null; localStatus = ""; hostStatus = "playing"; lastPublishAt = 0; lastPublishedStatus = ""; publishQueue = Promise.resolve(); lastHostPayload = null; clockOffsetMs = 0;
+  roomId = ""; role = ""; allowGuestPlayerSelection = false; allowGuestPlaybackControl = false; suppressPlaybackPublishUntil = 0; latestRemoteState = null; joinedPlayback = false; localPosition = null; localPositionObservedAt = 0; localStatus = ""; hostStatus = "playing"; lastPublishAt = 0; lastPublishedStatus = ""; lastCommandedStatus = ""; lastCommandAt = 0; lastSeekCommandAt = 0; publishQueue = Promise.resolve(); lastHostPayload = null; clockOffsetMs = 0;
   joinButton.hidden = true; leaveButton.hidden = true; form.hidden = false;
 }
 
@@ -215,7 +220,8 @@ function applyRemoteState(force = false) {
     setNote("Choose the same verified provider as the host. This player/server does not have Watch Room controls.");
     return;
   }
-  const expected = getExpectedPlaybackPosition(state, { nowMs: Date.now(), clockOffsetMs });
+  const now = Date.now();
+  const expected = getExpectedPlaybackPosition(state, { nowMs: now, clockOffsetMs });
   if (!getSupportedFrame()) {
     if (role === "guest" && joinedPlayback && state.status === "playing" && !roomPlayerLoadRequested) {
       roomPlayerLoadRequested = true;
@@ -226,16 +232,33 @@ function applyRemoteState(force = false) {
     setNote("Loading the shared player. Playback will follow the host.");
     return;
   }
-  suppressPlaybackPublishUntil = Date.now() + 1800;
-  if (force || shouldCorrectPlayback(expected, localPosition)) {
-    sendProviderCommand("seek", expected);
+
+  const estimatedLocalPosition = getEstimatedLocalPlaybackPosition({
+    position: localPosition,
+    status: localStatus,
+    duration: state.duration,
+    observedAtMs: localPositionObservedAt
+  }, { nowMs: now });
+  const needsSeek = force || shouldCorrectPlayback(expected, estimatedLocalPosition);
+  if (needsSeek && (force || now - lastSeekCommandAt >= 1500)) {
+    if (sendProviderCommand("seek", expected)) lastSeekCommandAt = now;
   }
-  if (state.status === "playing" && localStatus !== "playing") sendProviderCommand("play");
-  if (state.status === "paused" || state.status === "ended") {
-    sendProviderCommand("pause");
-    localStatus = "paused";
+
+  const desiredStatus = state.status === "playing" ? "playing" : "paused";
+  const statusMatches = desiredStatus === "playing"
+    ? localStatus === "playing"
+    : localStatus === "paused" || localStatus === "ended";
+  const retryStatusCommand = lastCommandedStatus !== desiredStatus || now - lastCommandAt >= 2500;
+  if (!statusMatches && retryStatusCommand && sendProviderCommand(desiredStatus)) {
+    lastCommandedStatus = desiredStatus;
+    lastCommandAt = now;
   }
-  setNote("Connected to the host’s playback clock. Small timing differences are corrected automatically.");
+
+  if (desiredStatus === "playing" && localStatus !== "playing" && lastCommandAt > 0 && now - lastCommandAt >= 3500) {
+    setNote("Waiting for playback permission on this device. Tap Play once in the player; Vivid will then keep you synced automatically.");
+    return;
+  }
+  setNote("Connected to the host’s playback clock. Playback position and controls are being kept in sync.");
 }
 
 function applyPlaybackSnapshot(state, requestedRoomId, requestGeneration) {
