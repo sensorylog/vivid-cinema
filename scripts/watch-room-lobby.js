@@ -432,6 +432,7 @@ function subscribeRoomRealtime(roomId) {
   let membersByUid = new Map();
   let presenceByUid = new Map();
   const updateMembers = () => {
+    if (!room || room.roomId !== roomId) return;
     const now = Date.now();
     memberList = [...membersByUid.entries()].map(([uid, member]) => ({
       uid,
@@ -452,14 +453,17 @@ function subscribeRoomRealtime(roomId) {
     applyRoomDocument({ ...snapshot.data(), roomId });
   }, onError("room")));
   stops.push(onSnapshot(membersRef, snapshot => {
+    if (!room || room.roomId !== roomId) return;
     membersByUid = new Map(snapshot.docs.map(item => [item.id, item.data()]));
     updateMembers();
   }, onError("member")));
   stops.push(onSnapshot(presenceRef, snapshot => {
+    if (!room || room.roomId !== roomId) return;
     presenceByUid = new Map(snapshot.docs.map(item => [item.id, timestampMillis(item.data().expiresAt) || 0]));
     updateMembers();
   }, onError("presence")));
   stops.push(onSnapshot(queueRef, snapshot => {
+    if (!room || room.roomId !== roomId) return;
     const queue = snapshot.docs.map(item => {
       const data = item.data();
       return { id: item.id, ...data, createdAt: timestampMillis(data.createdAt), updatedAt: timestampMillis(data.updatedAt) };
@@ -468,6 +472,7 @@ function subscribeRoomRealtime(roomId) {
     renderQueue(queue);
   }, onError("queue")));
   stops.push(onSnapshot(chatRef, snapshot => {
+    if (!room || room.roomId !== roomId) return;
     const chat = [...snapshot.docs].reverse().map(item => {
       const data = item.data();
       return { id: item.id, ...data, createdAt: timestampMillis(data.createdAt) };
