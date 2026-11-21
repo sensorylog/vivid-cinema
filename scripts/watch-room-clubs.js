@@ -131,7 +131,8 @@ function renderScreenings(snapshot) {
     const row = node("article", undefined, "vivid-wr-screening-item");
     row.append(node("strong", data.title));
     const date = data.screenedAt?.toDate?.();
-    row.append(node("small", (date ? date.toLocaleDateString() : "Screening") + " · " + (data.averageRating ? data.averageRating + "/5 average" : "No ratings yet") + " · " + (data.reviewCount || 0) + " reviews"));
+    const source = data.sourceRoomName ? " · Watch Room: " + data.sourceRoomName : "";
+    row.append(node("small", (date ? date.toLocaleDateString() : "Screening") + " · " + (data.averageRating ? data.averageRating + "/5 average" : "No ratings yet") + " · " + (data.reviewCount || 0) + " reviews" + source));
     if (data.notes) row.append(node("p", data.notes));
     const select = node("button", activeScreeningId === doc.id ? "Selected" : "After-Credits", "vivid-wr-button vivid-wr-button--quiet");
     select.type = "button";
