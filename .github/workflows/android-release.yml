@@ -54,13 +54,25 @@ jobs:
           ELECTRON_SKIP_BINARY_DOWNLOAD: "1"
         run: npm ci --no-audit --no-fund
 
+      - name: Set Android app version metadata
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="$(node -p "JSON.parse(require('fs').readFileSync('package.json','utf8')).version")"
+          echo "VIVID_ANDROID_VERSION=$version" >> "$GITHUB_ENV"
+          echo "VIVID_ANDROID_BUILD=$GITHUB_RUN_NUMBER" >> "$GITHUB_ENV"
+          echo "VIVID_ANDROID_BUILT_AT=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_ENV"
+
       - name: Run Android release contract tests
-        run: node --test tests/android-release-pipeline.test.mjs tests/android-native-polish.test.mjs tests/android-icon.test.mjs tests/service-worker.test.mjs
+        run: node --test tests/android-release-pipeline.test.mjs tests/android-native-polish.test.mjs tests/android-icon.test.mjs tests/android-auto-update.test.mjs tests/watch-player.test.mjs tests/playback-structure.test.mjs tests/service-worker.test.mjs
 
       - name: Generate Android project and bundle local website
         run: |
           npx cap add android
           npm run cap:sync
+
+      - name: Configure shared Android native plugins and version
+        run: node automation/configure-android-native-project.mjs
 
       - name: Configure release signing
         env:
@@ -116,5 +128,7 @@ jobs:
           version="$(node -p "require('./package.json').version")"
           tag="v$version"
           gh release view "$tag" >/dev/null
-          gh release upload "$tag" release-output/Vivid-Cinema-Android.apk --clobber
+          node --input-type=module -e 'import {writeFileSync} from "node:fs"; writeFileSync("release-output/Vivid-Cinema-Android-build-" + process.env.VIVID_ANDROID_BUILD + ".json", JSON.stringify({version: process.env.VIVID_ANDROID_VERSION, build: Number(process.env.VIVID_ANDROID_BUILD)}, null, 2))'
+          gh release upload "$tag" release-output/Vivid-Cinema-Android.apk "release-output/Vivid-Cinema-Android-build-$VIVID_ANDROID_BUILD.json" --clobber
           gh release view "$tag" --json assets --jq '.assets[].name' | grep -Fx "Vivid-Cinema-Android.apk"
+          gh release view "$tag" --json assets --jq '.assets[].name' | grep -Fx "Vivid-Cinema-Android-build-$VIVID_ANDROID_BUILD.json"
