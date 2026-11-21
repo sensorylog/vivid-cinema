@@ -17,6 +17,8 @@
   <link rel="stylesheet" href="styles/vivid-pwa.css">
   <link rel="stylesheet" href="styles/vivid-liquid-glass.css?v=lg4">
   <link rel="stylesheet" href="styles/vivid-watch-rooms.css">
+  <link rel="stylesheet" href="styles/vivid-watch.css">
+  <link rel="stylesheet" href="styles/vivid-watch-room-cinema.css">
 </head>
 <body data-vivid-page="watch-rooms" class="vivid-watch-rooms-page vivid-atmosphere">
   <div class="vivid-watch-rooms-app">
@@ -187,6 +189,7 @@
         <p class="vivid-wr-stage-note" id="wr-stage-note" role="status">Your rooms and clubs are private to your Vivid account. Watch Rooms close after 24 hours; Cinema Clubs are persistent.</p>
       </div>
     </main>
+    <section id="wr-screening-player-host" class="wr-screening-player-host" hidden aria-label="Active shared screening"><div id="watch-content"></div></section>
   </div>
 
   <dialog class="vivid-wr-dialog" id="wr-create-room-dialog" aria-labelledby="wr-create-room-title">
@@ -231,6 +234,8 @@
   <script type="module" src="scripts/app-shell.js"></script>
   <script type="module" src="scripts/watch-rooms.js"></script>
   <script type="module" src="scripts/watch-room-lobby.js"></script>
+  <script type="module" src="scripts/watch.js"></script>
+  <script type="module" src="scripts/watch-room-playback.js"></script>
   <script type="module" src="scripts/watch-room-voice.js"></script>
   <script type="module" src="scripts/watch-room-clubs.js"></script>
   <script type="module" src="scripts/i18n.js"></script>
