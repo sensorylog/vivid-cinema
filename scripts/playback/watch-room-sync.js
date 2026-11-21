@@ -51,3 +51,37 @@ export function shouldThrottlePlaybackWrite(previousStatus, nextStatus, previous
   if (!Number.isFinite(interval) || interval <= 0) return false;
   return now - previousEventAt < interval;
 }
+
+
+export function getEstimatedLocalPlaybackPosition({
+  position,
+  status,
+  duration,
+  observedAtMs
+} = {}, { nowMs = Date.now() } = {}) {
+  const raw = Number(position);
+  if (!Number.isFinite(raw) || raw < 0) return null;
+  const maxDuration = Number(duration);
+  const ceiling = Number.isFinite(maxDuration) && maxDuration > 0
+    ? Math.min(MAX_PLAYBACK_POSITION_SECONDS, maxDuration)
+    : MAX_PLAYBACK_POSITION_SECONDS;
+  const observedAt = Number(observedAtMs);
+  const elapsed = status === "playing" && Number.isFinite(observedAt) && observedAt > 0
+    ? Math.max(0, (Number(nowMs) - observedAt) / 1000)
+    : 0;
+  return Math.max(0, Math.min(ceiling, raw + elapsed));
+}
+
+export function classifyPlaybackEvent({ event, status, previousStatus } = {}) {
+  const name = String(event || "").toLowerCase();
+  const nextStatus = String(status || "").toLowerCase();
+  if (/(seek|scrub)/.test(name) || nextStatus === "seeked" || nextStatus === "seeking") return "seek";
+  if (/(ended|completed)/.test(name) || nextStatus === "ended" || nextStatus === "completed") return "ended";
+  if (/(pause)/.test(name) || nextStatus === "paused" || nextStatus === "pause") return "pause";
+  if (/(play|playing)/.test(name) || nextStatus === "playing" || nextStatus === "play") {
+    return String(previousStatus || "").toLowerCase() === "playing" && !/(play)/.test(name)
+      ? "progress"
+      : "play";
+  }
+  return "progress";
+}
