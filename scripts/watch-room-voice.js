@@ -15,6 +15,14 @@ let connectedRoomId = "";
 let isMuted = false;
 let audioElements = [];
 
+function guestVoiceAllowed() {
+  return activeRoom?.role === "host" || activeRoom?.allowGuestVoice !== false;
+}
+function syncVoicePermission() {
+  if (!joinButton) return;
+  joinButton.disabled = !guestVoiceAllowed();
+  if (!guestVoiceAllowed()) setStatus("The host has disabled guest voice for this room.", "warning");
+}
 function setStatus(message, state = "info") {
   if (!statusNode) return;
   statusNode.textContent = message;
@@ -180,7 +188,14 @@ document.addEventListener("vivid:watch-room-open", async event => {
   panel.hidden = false;
   joinButton.hidden = Boolean(livekitRoom);
   setStatus("Voice is separate from movie playback. Join when you're ready to talk.");
+  syncVoicePermission();
   renderParticipants();
+});
+document.addEventListener("vivid:watch-room-updated", event => {
+  if (!activeRoom || event.detail?.roomId !== activeRoom.roomId) return;
+  activeRoom = { ...activeRoom, ...event.detail };
+  syncVoicePermission();
+  if (!guestVoiceAllowed() && livekitRoom) void disconnectVoice("The host disabled guest voice.");
 });
 document.addEventListener("vivid:watch-room-closing", () => {
   activeRoom = null;
