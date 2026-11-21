@@ -132,7 +132,7 @@ jobs:
           retention-days: 14
 
       - name: Publish latest Android APK for in-app updates
-        if: (github.event_name == 'release' || github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main')) && vars.ANDROID_PRODUCTION_SIGNING_ENABLED != 'true'
+        if: (github.event_name == 'release' || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main') || (github.event_name == 'push' && github.ref == 'refs/heads/main')) && vars.ANDROID_PRODUCTION_SIGNING_ENABLED != 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         shell: bash
