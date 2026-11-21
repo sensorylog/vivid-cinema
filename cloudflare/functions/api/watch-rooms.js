@@ -3,6 +3,7 @@ import { verifyFirebaseIdToken, verifyAppCheckToken } from "../lib/firebase-toke
 import { createLiveKitAccessToken, createLiveKitRoomAdminToken } from "../lib/livekit-token.js";
 import { initializeApp as initializeRestApp } from "@ljoukov/firebase-admin-cloudflare/app";
 import { getFirestore, Query, Timestamp } from "@ljoukov/firebase-admin-cloudflare/firestore";
+import { shouldThrottlePlaybackWrite } from "../../../scripts/playback/watch-room-sync.js";
 
 let db;
 let allowedOrigins;
@@ -999,7 +1000,7 @@ async function publishWatchRoomPlayback(request) {
     if (expectedRevision != null && expectedRevision !== currentRevision) {
       return { accepted: false, reason: "stale-revision", revision: currentRevision };
     }
-    if (previous?.status === "playing" && previous?.lastEventAt?.toMillis && now.toMillis() - previous.lastEventAt.toMillis() < 1800 && status === "playing") {
+    if (shouldThrottlePlaybackWrite(previous?.status, status, previous?.lastEventAt?.toMillis?.() || 0, now.toMillis())) {
       return { accepted: false, reason: "rate-limited", revision: currentRevision };
     }
     const revision = currentRevision + 1;
