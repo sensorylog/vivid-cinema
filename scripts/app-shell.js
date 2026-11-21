@@ -1,5 +1,6 @@
 import { VIVID_CONFIG } from "./config.js";
 import { applyPerformanceProfile } from "./performance-profile.js";
+import { resolveAndroidBackAction } from "./android-navigation.js";
 
 // Apply the same hardware-aware visual profile in browsers and Electron.
 // Electron preload may already have applied it; the helper is idempotent.
@@ -489,6 +490,49 @@ function ensureBackControl() {
   main.prepend(back);
 }
 
+function initNativeBackNavigation() {
+  let native = false;
+  try { native = Boolean(window.Capacitor?.isNativePlatform?.()); } catch {}
+  if (!native || window.__vividNativeBackNavigationReady) return;
+
+  const plugin = window.Capacitor?.Plugins?.VividNavigation;
+  if (!plugin?.addListener || typeof plugin.exitApp !== "function") return;
+  window.__vividNativeBackNavigationReady = true;
+
+  plugin.addListener("backButton", ({ canGoBack = false } = {}) => {
+    // Dismiss the top native HTML dialog before navigating away from its page.
+    const dialogs = [...document.querySelectorAll("dialog[open]")];
+    const activeDialog = dialogs.at(-1);
+    if (activeDialog) {
+      activeDialog.close();
+      return;
+    }
+
+    const action = resolveAndroidBackAction({
+      currentRoute: currentRoute(),
+      stack: readNavigationStack(),
+      canGoBack,
+      historyLength: history.length
+    });
+
+    if (action.type === "route") {
+      writeNavigationStack(action.stack);
+      location.assign(new URL(action.route, location.origin).href);
+      return;
+    }
+    if (action.type === "history") {
+      history.back();
+      return;
+    }
+    void plugin.exitApp().catch(error => {
+      console.warn("Vivid could not close the Android activity:", error);
+    });
+  }).catch(error => {
+    window.__vividNativeBackNavigationReady = false;
+    console.warn("Vivid Android Back navigation could not initialize:", error);
+  });
+}
+
 function initCinematicFocusNavigation() {
   const selector = [
     ".vivid-card[tabindex]",
@@ -623,6 +667,7 @@ function initAppShell() {
   initHeaderScrollBehavior();
   initThemeToggle();
   recordCurrentRoute();
+  initNativeBackNavigation();
   ensureBackControl();
   ensureSkipLink();
   initCinematicFocusNavigation();
