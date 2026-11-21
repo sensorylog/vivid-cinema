@@ -467,6 +467,15 @@ test("Watch Room sync extrapolates local time and keeps command events ahead of 
   assert.ok(client.includes("getEstimatedLocalPlaybackPosition({"));
   assert.ok(client.includes("positionAtMs: now + clockOffsetMs"));
   assert.ok(client.includes("capturedAtMs: payload.positionAtMs"));
+  assert.ok(client.includes("playbackRate: hostPlaybackRate"));
+  assert.ok(client.includes('eventType === "progress" && now - lastPublishAt < 3500'));
+  assert.ok(client.includes('"cinesrc:ratechange"'));
+  assert.ok(sync.includes("normalizePlaybackRate"));
+  for (const backend of [node, cloudflare]) {
+    assert.ok(backend.includes('"rate"'));
+    assert.ok(backend.includes("playbackRate = request.data?.playbackRate == null ? 1 : Number(request.data.playbackRate)"));
+    assert.ok(backend.includes("status, position, positionAtMs, playbackRate, duration"));
+  }
   for (const backend of [node, cloudflare]) assert.ok(backend.includes("positionAtMs = Number.isFinite(capturedAtMsInput)"));
   for (const backend of [node, cloudflare]) {
     assert.ok(backend.includes("Math.abs(capturedAtMsInput - now.toMillis()) <= 10_000"));
