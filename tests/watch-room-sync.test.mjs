@@ -51,6 +51,20 @@ test("older playback revisions are ignored but equal and newer revisions remain 
   assert.equal(isPlaybackRevisionStale(6, 5), false);
 });
 
+
+test("seek and explicit control events are never swallowed by heartbeat throttling", () => {
+  assert.equal(shouldThrottlePlaybackWrite("playing", "playing", 1_000, 1_100, undefined, "timeupdate"), true);
+  assert.equal(shouldThrottlePlaybackWrite("playing", "playing", 1_000, 1_100, undefined, "seeked"), false);
+  assert.equal(shouldThrottlePlaybackWrite("playing", "paused", 1_000, 1_100, undefined, "pause"), false);
+  assert.equal(shouldThrottlePlaybackWrite("paused", "playing", 1_000, 1_100, undefined, "play"), false);
+  assert.equal(shouldThrottlePlaybackWrite("playing", "playing", 1_000, 2_900, undefined, "progress"), false);
+});
+
+test("playback heartbeat cadence is shared between clients and the trusted writer", async () => {
+  const { PLAYBACK_HEARTBEAT_INTERVAL_MS } = await import("../scripts/playback/watch-room-sync.js");
+  assert.equal(PLAYBACK_HEARTBEAT_INTERVAL_MS, 1800);
+});
+
 test("only repeated playing heartbeats are rate-limited, never pause or resume transitions", () => {
   assert.equal(shouldThrottlePlaybackWrite("playing", "playing", 1_000, 2_000), true);
   assert.equal(shouldThrottlePlaybackWrite("paused", "playing", 1_000, 1_100), false);

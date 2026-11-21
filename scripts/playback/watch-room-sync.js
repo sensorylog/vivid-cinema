@@ -1,4 +1,5 @@
 export const PLAYBACK_DRIFT_TOLERANCE_SECONDS = 1.5;
+export const PLAYBACK_HEARTBEAT_INTERVAL_MS = 1800;
 export const MAX_PLAYBACK_POSITION_SECONDS = 86400;
 
 export function normalizePlaybackTimestamp(value) {
@@ -41,8 +42,9 @@ export function isPlaybackRevisionStale(nextRevision, currentRevision) {
   return next < current;
 }
 
-export function shouldThrottlePlaybackWrite(previousStatus, nextStatus, previousEventAtMs, nowMs, minimumIntervalMs = 1800) {
+export function shouldThrottlePlaybackWrite(previousStatus, nextStatus, previousEventAtMs, nowMs, minimumIntervalMs = PLAYBACK_HEARTBEAT_INTERVAL_MS, eventType = "playing") {
   if (nextStatus !== "playing" || previousStatus !== "playing") return false;
+  if (!["playing", "timeupdate", "progress", "heartbeat"].includes(String(eventType || "").toLowerCase())) return false;
   const previousEventAt = Number(previousEventAtMs);
   const now = Number(nowMs);
   const interval = Number(minimumIntervalMs);

@@ -189,3 +189,10 @@ test("cinema room player preserves a video aspect ratio and keeps close controls
   assert.match(styles, /#player-overlay \.vivid-player-info/);
   assert.match(styles, /\.vivid-topbar[\s\S]*?display:none!important/);
 });
+
+
+test("VidSrc forwards progress, seek, readiness and explicit play/pause transitions to room sync", () => {
+  assert.match(source, /\["play", "playing", "pause", "paused", "seeked", "timeupdate", "progress", "completed", "ended", "ready", "canplay", "loadedmetadata"\]/);
+  assert.match(source, /eventType: providerStatus/);
+  assert.match(source, /normalizedStatus/);
+});

@@ -201,6 +201,14 @@ test("Watch Rooms Stage 5 exposes trusted VidSrc and CineSRC playback bridges", 
   assert.ok(client.includes('call("getWatchRoomPlaybackSnapshot")'));
   assert.ok(client.includes("getExpectedPlaybackPosition(state, { nowMs: Date.now(), clockOffsetMs })"));
   assert.ok(client.includes("shouldCorrectPlayback(expected, localPosition)"));
+  assert.ok(client.includes("eventType, status: hostStatus"));
+  assert.ok(client.includes("now - lastPublishAt < PLAYBACK_HEARTBEAT_INTERVAL_MS"));
+  assert.ok(client.includes("PLAYBACK_HEARTBEAT_INTERVAL_MS"));
+  assert.ok(client.includes('if (eventType === "ready" || eventType === "canplay" || eventType === "loadedmetadata")'));
+
+  assert.ok(client.includes('if (state.status === "playing" && localStatus !== "playing")'));
+  assert.ok(client.includes('sendProviderCommand("play");'));
+  assert.ok(!client.includes('if (sendProviderCommand("play")) localStatus = "playing"'), "remote state must be confirmed by the provider, not optimistically assumed");
   assert.ok(client.includes("onSnapshot("));
   assert.ok(client.includes('doc(db, "rooms", requestedRoomId, "playback", "current")'));
   assert.ok(watch.includes('event.origin === "https://vidsrc.sh"'));
@@ -457,7 +465,9 @@ test("Watch Room synchronization compensates for guest device clock skew", () =>
 
 test("Watch Room playback throttles heartbeats without dropping pause/resume transitions", () => {
   const client = readFileSync(new URL("../scripts/watch-room-playback.js", import.meta.url), "utf8");
-  assert.ok(client.includes('detail.status === "playing" && lastPublishedStatus === "playing"'));
+  assert.ok(client.includes('const heartbeatEvent = ["playing", "timeupdate", "progress", "heartbeat"].includes(eventType)'));
+  assert.ok(client.includes('if (heartbeatEvent && lastPublishedStatus === "playing" && now - lastPublishAt < PLAYBACK_HEARTBEAT_INTERVAL_MS) return;'));
+  assert.ok(client.includes('if (detail.status === "paused") hostStatus = "paused"'));
   assert.ok(client.includes("lastPublishedStatus = hostStatus"));
   assert.ok(client.includes('lastPublishedStatus = "paused"'));
 });
@@ -764,10 +774,15 @@ test("Watch Room playback uses member-only realtime snapshots and trusted revisi
     assert.ok(write.includes("expectedRevision !== currentRevision"));
     assert.ok(write.includes('"stale-revision"'));
     assert.ok(write.includes('tx.get(roomRef.collection("members").doc(uid))'));
-    assert.ok(write.includes("shouldThrottlePlaybackWrite(previous?.status, status"), "only repeated playing heartbeats are rate-limited");
+    assert.ok(write.includes("shouldThrottlePlaybackWrite(previous?.status, status") && write.includes("undefined, eventType"), "only playing heartbeats are rate-limited; explicit seek and control events pass immediately");
+    assert.ok(write.includes("const eventType = String(request.data?.eventType"), "provider event type must be validated by the trusted writer");
   }
   assert.ok(client.includes('call("getWatchRoomPlaybackSnapshot")'), "trusted snapshot fetch remains available for revision conflict recovery");
   assert.ok(client.includes("playbackConnectionGeneration"));
+  const newSessionStart = client.indexOf("requestedSessionId !== playbackSessionId");
+  const newSessionEnd = client.indexOf("\n    }\n    return;", newSessionStart);
+  const newSession = client.slice(newSessionStart, newSessionEnd);
+  assert.ok(newSession.includes('hostStatus = "paused";') && newSession.includes("roomPlayerLoadRequested = false;"), "a new screening must not inherit the previous title playback state");
   assert.ok(client.includes("onSnapshot("));
   assert.ok(client.includes('doc(db, "rooms", requestedRoomId, "playback", "current")'));
   assert.ok(client.includes("expectedRevision: playbackRevision"));
