@@ -730,3 +730,34 @@ test("Watch Room Start Screening is host-authorized and launches the same queued
   assert.ok(lobby.includes('url.searchParams.set("roomId", room.roomId)'));
   assert.ok(lobby.includes('join.textContent = "Join screening"'));
 });
+
+
+test("Vivid legal and trust pages accurately describe current product practices", () => {
+  const privacy = readFileSync(new URL("../privacy.html", import.meta.url), "utf8");
+  const terms = readFileSync(new URL("../terms.html", import.meta.url), "utf8");
+  const cookies = readFileSync(new URL("../cookies.html", import.meta.url), "utf8");
+  const contact = readFileSync(new URL("../contact.html", import.meta.url), "utf8");
+  const about = readFileSync(new URL("../about.html", import.meta.url), "utf8");
+  const help = readFileSync(new URL("../help.html", import.meta.url), "utf8");
+  const accessibility = readFileSync(new URL("../accessibility.html", import.meta.url), "utf8");
+  const pulse = readFileSync(new URL("../scripts/vivid-pulse.js", import.meta.url), "utf8");
+  assert.ok(privacy.includes("does not create an anonymous Firebase account"));
+  assert.ok(privacy.includes("Watch Room and Cinema Club data"));
+  assert.ok(privacy.includes("does not automatically remove every contribution"));
+  assert.ok(privacy.includes("Formspree"));
+  assert.ok(!privacy.includes("Adcash Autotag"));
+  assert.ok(cookies.includes("does not intentionally load the previously evaluated Adcash Autotag"));
+  assert.ok(!cookies.includes("Vivid uses Adcash Autotag"));
+  assert.ok(terms.includes("Watch Rooms and Cinema Clubs"));
+  assert.ok(terms.includes("solo playback"));
+  assert.ok(terms.includes("limited, non-exclusive permission"));
+  assert.ok(contact.includes("https://formspree.io/f/mwpokaav"));
+  assert.ok(contact.includes('name="_gotcha"'));
+  assert.ok(contact.includes("Watch Rooms or Cinema Clubs"));
+  assert.ok(contact.includes('href="privacy.html"'));
+  assert.ok(about.includes("Johnson Kyei Baffour"));
+  assert.ok(help.includes("Start Screening"));
+  assert.ok(accessibility.includes("not a claim that every page or feature has been independently audited"));
+  assert.ok(pulse.includes("Public visitors do not create anonymous Firebase sessions"));
+  assert.ok(pulse.includes("search_performed"));
+});
