@@ -16,6 +16,9 @@ test("service worker has a versioned cache and required offline shell", () => {
   assert.ok(source.includes('"./watch-rooms.html"'));
   assert.ok(source.includes('"./scripts/watch-rooms.js"'));
   assert.ok(source.includes('"./styles/vivid-watch-rooms.css"'));
+  assert.ok(source.includes('"./styles/vivid-watch-room-cinema.css"'));
+  assert.ok(source.includes('"./styles/vivid-watch-room-experience.css"'));
+  assert.ok(source.includes('"./scripts/watch-room-player-layout.js"'));
   assert.match(source, /optional assets were not precached/);
   assert.ok(source.includes('type==="PRECACHE_OPTIONAL"'));
   assert.match(source, /\.\/scripts\/local-owner\.js/);
