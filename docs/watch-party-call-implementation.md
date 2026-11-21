@@ -1,6 +1,6 @@
 # Watch Party Call implementation plan
 
-Status: in progress. This document is the implementation contract for turning Watch Rooms into a shared call and screening experience.
+Status: implementation in progress on PR #501. Playback admission, the LiveKit token endpoint/client controls, and the persistent lobby screening shell are now implemented. Real LiveKit connectivity still requires project-owner Cloudflare configuration and end-to-end validation.
 
 ## Product behavior
 
@@ -40,7 +40,9 @@ Required Cloudflare Pages environment secrets/variables:
 - LIVEKIT_API_KEY (secret)
 - LIVEKIT_API_SECRET (secret)
 
-The LiveKit account/project and its credentials must be provisioned by the project owner. Never commit credentials or place the API secret in browser code. Until those server-side values exist, voice join must remain disabled with a clear configuration state.
+The LiveKit account/project and its credentials must be provisioned by the project owner. In Cloudflare Pages → Vivid Cinema → Settings → Variables and Secrets, add LIVEKIT_URL, LIVEKIT_API_KEY, and LIVEKIT_API_SECRET for the production environment and the PR preview environment used for validation. Store LIVEKIT_API_KEY and LIVEKIT_API_SECRET as encrypted secrets. Never commit credentials or place the API secret in browser code. Until those server-side values exist, voice join reports that voice is not configured; text and screening remain available.
+
+The browser currently loads the pinned livekit-client 2.15.6 ESM build from jsDelivr. If the project later adopts a local browser bundling step, move this dependency into that build rather than leaving it as a remote import.
 
 ## Delivery sequence
 
@@ -50,19 +52,18 @@ The LiveKit account/project and its credentials must be provisioned by the proje
 - Keep guests from executing host play commands before they join.
 - Add focused regression tests for the playback admission policy.
 
-### B. Voice foundation
-- Add a server-side LiveKit token operation with membership and App Check validation.
-- Add the pinned browser SDK and call controls to the room lobby.
-- Show participant roster, microphone state, speaking state, device permission errors and reconnect status.
-- Add tests for token claims, room scoping, expiry and authorization boundaries.
-- Keep the voice integration optional until the project owner configures LiveKit credentials.
+### B. Voice foundation (implemented on PR #501; awaiting credentials and live validation)
+- Server-side LiveKit token operation reuses Firebase ID-token and App Check verification, then checks active Watch Room membership before issuing a 10-minute room-scoped JWT.
+- Token permissions are restricted to microphone publishing, subscribing and data; the API secret stays server-side.
+- Pinned browser SDK and lobby controls cover join/leave, mute/unmute, participant roster, speaking state, reconnect state and permission errors.
+- Focused tests cover signature, room scoping, identity, expiry and UI/API wiring.
+- Voice remains optional until the project owner configures LiveKit credentials.
 
-### C. Unified room experience
-- Replace the separate lobby-to-watch-page mental model with a persistent room session shell: call roster/controls remain available while the shared movie player is open.
-- Host's Start Screening action loads the shared title for every connected member.
-- Guests join the active screening from within the call; no manual provider/server matching.
-- Add explicit host controls for who can play/pause/seek and who can speak.
-- Validate reconnect, late join, host pause, host seek, member removal and room close across browser, PWA, Electron and Android WebView.
+### C. Unified room experience (first implementation on PR #501; further validation remains)
+- The lobby now owns a persistent call panel and an embedded Vivid watch page. Voice remains available beside the player instead of disappearing on a lobby-to-watch navigation.
+- Host's Start Screening action loads the selected title in the embedded room player. Guests can open the active screening from the room panel and explicitly join synchronized playback.
+- The existing server-authoritative playback clock and guest admission controls remain in force.
+- Remaining validation: reconnect, late join, host pause/seek, member removal and room close across browser, PWA, Electron and Android WebView. Add explicit voice moderation controls and server-side LiveKit participant eviction before treating room moderation as complete.
 
 ## Non-goals and safeguards
 
