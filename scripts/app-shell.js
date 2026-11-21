@@ -318,6 +318,7 @@ function syncAndroidMoreNavigation(nav, page) {
   menu.className = "vivid-native-more-menu";
   menu.id = "vivid-native-more-menu";
   menu.hidden = true;
+  menu.setAttribute("role", "group");
   menu.setAttribute("aria-label", "More destinations");
   menu.innerHTML = [
     navLink("live.html", "bi-broadcast-pin", "Live", page === "live"),
