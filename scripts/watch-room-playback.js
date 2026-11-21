@@ -502,7 +502,7 @@ window.addEventListener("vivid:player-adapter-selected", event => {
       lastHostPayload = payload;
       lastPublishAt = Date.now();
       lastPublishedStatus = "paused";
-      publishQueue = publishQueue.then(() => roomId === payload.roomId && role === "host" ? call("publishWatchRoomPlayback")(payload) : null).catch(error => setNote(error?.message || "Could not pause room sync after changing players."));
+      publishQueue = publishQueue.then(() => roomId === payload.roomId && role === "host" ? publishRoomPlayback(payload) : null).catch(error => setNote(error?.message || "Could not pause room sync after changing players."));
     }
     setNote("Room playback is paused for this player/server because it has no verified remote-control bridge. Switch to Player 1 · VidSrc or Player 2 · CineSRC to resume synchronized screening.");
   } else if (role !== "host" && roomId && (!adapter || !adapter.capabilities.canPlay || !adapter.capabilities.canSeek)) {
@@ -526,7 +526,7 @@ window.addEventListener("vivid:player-source-changed", event => {
     lastHostPayload = payload;
     lastPublishAt = Date.now();
     lastPublishedStatus = "paused";
-    publishQueue = publishQueue.then(() => roomId === payload.roomId && role === "host" ? call("publishWatchRoomPlayback")(payload) : null).catch(error => setNote(error?.message || "Could not pause room sync after changing providers."));
+    publishQueue = publishQueue.then(() => roomId === payload.roomId && role === "host" ? publishRoomPlayback(payload) : null).catch(error => setNote(error?.message || "Could not pause room sync after changing providers."));
     setNote("Room playback paused because this provider does not expose verified sync controls. Switch back to VidSrc to resume synchronization.");
   } else if (role !== "host" && roomId) {
     setNote("This provider is not enabled for room sync. Switch to VidSrc to follow the host.");
