@@ -1,5 +1,7 @@
-import { auth } from "./firebase.js";
+import { auth, db } from "./firebase.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
+import { doc, onSnapshot } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+import { getExpectedPlaybackPosition, isPlaybackRevisionStale, normalizePlaybackTimestamp, shouldCorrectPlayback } from "./playback/watch-room-sync.js";
 import { callWatchRoomApi } from "./watch-room-api.js";
 import { getProviderAdapter, sendProviderCommand as sendAdapterCommand } from "./playback/provider-adapters.js";
 import { getGuestPlaybackAction } from "./playback/watch-room-playback-policy.js";
@@ -13,10 +15,11 @@ let pendingPlayer2Seek = 0;
 const call = callWatchRoomApi;
 let roomId = "";
 let role = "";
-let playbackTimer = null;
-let playbackRefreshInFlight = false;
+let playbackUnsubscribe = null;
+let playbackSubscriptionRetryTimer = null;
+let playbackSubscriptionRetryDelayMs = 1000;
+let playbackRevision = 0;
 let playbackConnectionGeneration = 0;
-let playbackPollDelayMs = 2500;
 let heartbeatTimer = null;
 let selectionTimer = null;
 let lastAppliedSelectionKey = "";
@@ -162,10 +165,12 @@ function sendProviderCommand(action, position) {
 
 function stopConnection() {
   playbackConnectionGeneration += 1;
-  if (playbackTimer) window.clearTimeout(playbackTimer);
-  playbackTimer = null;
-  playbackRefreshInFlight = false;
-  playbackPollDelayMs = 2500;
+  if (playbackUnsubscribe) playbackUnsubscribe();
+  playbackUnsubscribe = null;
+  if (playbackSubscriptionRetryTimer) window.clearTimeout(playbackSubscriptionRetryTimer);
+  playbackSubscriptionRetryTimer = null;
+  playbackSubscriptionRetryDelayMs = 1000;
+  playbackRevision = 0;
   if (heartbeatTimer) window.clearInterval(heartbeatTimer);
   if (selectionTimer) window.clearInterval(selectionTimer);
   heartbeatTimer = null; selectionTimer = null; lastAppliedSelectionKey = ""; roomPlayerLoadRequested = false;
@@ -208,9 +213,7 @@ function applyRemoteState(force = false) {
     setNote("Choose the same verified provider as the host. This player/server does not have Watch Room controls.");
     return;
   }
-  const updatedAt = Number(state.updatedAt) || Date.now();
-  const elapsed = state.status === "playing" ? Math.max(0, (Date.now() + clockOffsetMs - updatedAt) / 1000) : 0;
-  const expected = Math.max(0, Math.min(Number(state.duration) || 86400, Number(state.position) + elapsed));
+  const expected = getExpectedPlaybackPosition(state, { nowMs: Date.now(), clockOffsetMs });
   if (!getSupportedFrame()) {
     if (role === "guest" && joinedPlayback && state.status === "playing" && !roomPlayerLoadRequested) {
       roomPlayerLoadRequested = true;
@@ -222,7 +225,7 @@ function applyRemoteState(force = false) {
     return;
   }
   suppressPlaybackPublishUntil = Date.now() + 1800;
-  if (force || localPosition == null || Math.abs(expected - localPosition) > 2.5) {
+  if (force || shouldCorrectPlayback(expected, localPosition)) {
     sendProviderCommand("seek", expected);
   }
   if (state.status === "playing" && localStatus !== "playing") sendProviderCommand("play");
@@ -233,51 +236,92 @@ function applyRemoteState(force = false) {
   setNote("Connected to the host’s playback clock. Small timing differences are corrected automatically.");
 }
 
-function schedulePlaybackRefresh(delay = playbackPollDelayMs) {
-  if (!roomId) return;
-  if (playbackTimer) window.clearTimeout(playbackTimer);
-  playbackTimer = window.setTimeout(() => {
-    playbackTimer = null;
-    void refreshPlayback();
-  }, delay);
+function applyPlaybackSnapshot(state, requestedRoomId, requestGeneration) {
+  if (roomId !== requestedRoomId || requestGeneration !== playbackConnectionGeneration) return;
+  const activeSessionId = new URLSearchParams(window.location.search).get("sessionId") || "";
+  if (state && activeSessionId && state.sessionId !== activeSessionId) {
+    latestRemoteState = null;
+    if (role === "guest") pauseGuestPlayer("The room has moved to another screening. Waiting for its playback state.");
+    setNote("The room is preparing a new screening. Playback will synchronize when it starts.");
+    return;
+  }
+  const revision = Number(state?.revision) || 0;
+  if (state && isPlaybackRevisionStale(revision, playbackRevision)) return;
+  playbackRevision = Math.max(playbackRevision, revision);
+  latestRemoteState = state ? {
+    ...state,
+    updatedAt: normalizePlaybackTimestamp(state.updatedAt)
+  } : null;
+  if (role !== "host" || allowGuestPlaybackControl) {
+    if (latestRemoteState) applyRemoteState();
+    else if (role === "guest") pauseGuestPlayer("You’re in the room. Your player is held until the host starts the screening.");
+  }
 }
 
-async function refreshPlayback() {
-  if (!roomId || playbackRefreshInFlight) return;
-  const requestedRoomId = roomId;
-  const requestGeneration = playbackConnectionGeneration;
-  const startedAt = Date.now();
-  playbackRefreshInFlight = true;
+function subscribeToPlayback(requestedRoomId, requestGeneration) {
+  if (!requestedRoomId || roomId !== requestedRoomId || requestGeneration !== playbackConnectionGeneration || playbackUnsubscribe) return;
   try {
-    const result = await call("getWatchRoomPlaybackSnapshot")({ roomId: requestedRoomId });
-    const finishedAt = Date.now();
-    playbackPollDelayMs = 2500;
-    if (roomId !== requestedRoomId || requestGeneration !== playbackConnectionGeneration) return;
-    const serverTime = Number(result.data?.serverTime);
-    if (Number.isFinite(serverTime)) clockOffsetMs = serverTime - ((startedAt + finishedAt) / 2);
-    latestRemoteState = result.data?.playback || null;
-    if (role !== "host" || allowGuestPlaybackControl) {
-      if (latestRemoteState) applyRemoteState();
-      else if (role === "guest") pauseGuestPlayer("You’re in the room. Your player is held until the host starts the screening.");
-    }
-  } catch (error) {
-    if (roomId === requestedRoomId && requestGeneration === playbackConnectionGeneration) {
-      const errorCode = String(error?.code || "");
-      if (role === "guest" && (errorCode.endsWith("permission-denied") || errorCode.endsWith("not-found"))) {
-        pauseGuestPlayer("This Watch Room has ended or your membership was removed. Playback is paused.");
-        stopConnection();
-        setNote("The Watch Room is no longer active. Your player has been paused.");
-        return;
+    playbackUnsubscribe = onSnapshot(
+      doc(db, "rooms", requestedRoomId, "playback", "current"),
+      { includeMetadataChanges: true },
+      snapshot => {
+        if (roomId !== requestedRoomId || requestGeneration !== playbackConnectionGeneration) return;
+        if (snapshot.metadata?.fromCache) {
+          if (!latestRemoteState) setNote("Restoring the live playback connection…");
+          return;
+        }
+        playbackSubscriptionRetryDelayMs = 1000;
+        applyPlaybackSnapshot(snapshot.exists() ? snapshot.data() : null, requestedRoomId, requestGeneration);
+      },
+      error => {
+        if (roomId !== requestedRoomId || requestGeneration !== playbackConnectionGeneration) return;
+        playbackUnsubscribe = null;
+        const code = String(error?.code || "");
+        if (code.endsWith("permission-denied") || code.endsWith("not-found")) {
+          if (role === "guest") pauseGuestPlayer("Your Watch Room membership is no longer active. Playback has been paused.");
+          stopConnection();
+          setNote("This Watch Room is no longer available to your account.");
+          return;
+        }
+        setNote("The live playback connection was interrupted. Vivid is reconnecting automatically.");
+        const delay = playbackSubscriptionRetryDelayMs;
+        playbackSubscriptionRetryDelayMs = Math.min(30000, playbackSubscriptionRetryDelayMs * 2);
+        if (playbackSubscriptionRetryTimer) window.clearTimeout(playbackSubscriptionRetryTimer);
+        playbackSubscriptionRetryTimer = window.setTimeout(() => {
+          playbackSubscriptionRetryTimer = null;
+          subscribeToPlayback(requestedRoomId, requestGeneration);
+        }, delay);
       }
-      playbackPollDelayMs = Math.min(15000, Math.max(2500, playbackPollDelayMs * 2));
-      setNote(error?.message || "Playback sync connection was interrupted. Retrying automatically.");
-    }
-  } finally {
-    if (requestGeneration === playbackConnectionGeneration) {
-      playbackRefreshInFlight = false;
-      schedulePlaybackRefresh();
-    }
+    );
+  } catch (error) {
+    setNote(error?.message || "Could not start the live playback connection.");
   }
+}
+
+async function publishRoomPlayback(payload) {
+  const send = async () => call("publishWatchRoomPlayback")({
+    ...payload,
+    expectedRevision: playbackRevision
+  });
+  let result = await send();
+  let data = result?.data || {};
+  if (data.accepted === true || data.reason === "rate-limited") {
+    playbackRevision = Math.max(playbackRevision, Number(data.revision) || 0);
+    return result;
+  }
+  if (data.reason !== "stale-revision") return result;
+
+  // A second controller may have committed first. Rebase once on the trusted
+  // snapshot, then retry the newest queued local event against that revision.
+  const fresh = await call("getWatchRoomPlaybackSnapshot")({ roomId: payload.roomId });
+  if (roomId !== payload.roomId || fresh.data?.playback?.sessionId !== payload.sessionId) return null;
+  const latest = fresh.data.playback;
+  playbackRevision = Number(latest.revision) || 0;
+  latestRemoteState = { ...latest, updatedAt: normalizePlaybackTimestamp(latest.updatedAt) };
+  result = await send();
+  data = result?.data || {};
+  playbackRevision = Math.max(playbackRevision, Number(data.revision) || 0);
+  return result;
 }
 
 async function connectToRoom(id) {
@@ -297,8 +341,10 @@ async function connectToRoom(id) {
   // route intentionally has no separate "join playback" panel or button.
   joinedPlayback = memberRole === "guest";
   latestRemoteState = snapshot.data?.playback || null;
+  playbackRevision = Number(latestRemoteState?.revision) || 0;
   const initialServerTime = Number(snapshot.data?.serverTime);
   if (Number.isFinite(initialServerTime)) clockOffsetMs = initialServerTime - ((initialStartedAt + initialFinishedAt) / 2);
+  subscribeToPlayback(id, connectionGeneration);
   form.hidden = true; leaveButton.hidden = false;
   joinButton.hidden = true;
   setNote(role === "host" ? "You’re the host. Select a room-compatible player; your playback becomes the room’s reference clock." : "Room connected. Your player will stay paused until the host starts the screening.");
@@ -325,7 +371,6 @@ async function connectToRoom(id) {
     if (latestRemoteState) applyRemoteState();
     else pauseGuestPlayer("You’re in the room. Waiting for the host to start the screening.");
   } else if (latestRemoteState && allowGuestPlaybackControl) applyRemoteState();
-  schedulePlaybackRefresh();
 }
 
 form.addEventListener("submit", async event => {
@@ -372,7 +417,7 @@ window.addEventListener("vivid:provider-playback", event => {
   const sessionId = new URLSearchParams(window.location.search).get("sessionId") || "";
   const payload = { roomId, sessionId, provider: detail.provider, status: hostStatus, contentId: String(detail.contentId || ""), mediaType: detail.mediaType, season: detail.season, episode: detail.episode, position: localPosition, duration: Math.max(0, Number(detail.duration) || 0) };
   lastHostPayload = payload;
-  publishQueue = publishQueue.then(() => roomId === payload.roomId && (role === "host" || allowGuestPlaybackControl) ? call("publishWatchRoomPlayback")(payload) : null).catch(error => setNote(error?.message || "Could not publish the room playback state."));
+  publishQueue = publishQueue.then(() => roomId === payload.roomId && (role === "host" || allowGuestPlaybackControl) ? publishRoomPlayback(payload) : null).catch(error => setNote(error?.message || "Could not publish the room playback state."));
 });
 
 // CineSRC's documented bridge uses a separate command/event schema from VidSrc.
@@ -496,6 +541,14 @@ onAuthStateChanged(auth, user => {
   if (existingRoomId && !roomId) connectToRoom(existingRoomId).catch(error => setNote(error?.message || "Could not reconnect to this Watch Room."));
 });
 
+window.addEventListener("online", () => {
+  if (roomId && !playbackUnsubscribe) subscribeToPlayback(roomId, playbackConnectionGeneration);
+});
+window.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "visible" && roomId && !playbackUnsubscribe) {
+    subscribeToPlayback(roomId, playbackConnectionGeneration);
+  }
+});
 window.addEventListener("pagehide", stopConnection);
 window.addEventListener("pageshow", event => {
   if (!event.persisted || !auth.currentUser || auth.currentUser.isAnonymous) return;
