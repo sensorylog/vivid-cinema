@@ -487,7 +487,7 @@ document.addEventListener("vivid:watch-room-closing", event => {
   $("watch-content")?.replaceChildren();
   const host = $("wr-screening-player-host");
   if (host) host.hidden = true;
-  document.body.classList.remove("vivid-watch-room-mode", "vivid-watch-room-player-minimized", "vivid-player-open");
+  document.body.classList.remove("vivid-watch-room-mode", "vivid-watch-room-player-minimized", "vivid-room-player-fullscreen", "vivid-player-open");
   document.body.style.removeProperty("--vivid-room-art");
   const target = new URL("watch-rooms.html", window.location.href);
   window.history.replaceState({}, "", target);
