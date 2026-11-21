@@ -59,8 +59,11 @@ jobs:
         run: |
           set -euo pipefail
           version="$(node -p "JSON.parse(require('fs').readFileSync('package.json','utf8')).version")"
+          # Production builds use a higher build-number namespace than the public
+          # development APK workflow so update discovery always selects the signed track.
+          production_build=$((1000000 + GITHUB_RUN_NUMBER))
           echo "VIVID_ANDROID_VERSION=$version" >> "$GITHUB_ENV"
-          echo "VIVID_ANDROID_BUILD=$GITHUB_RUN_NUMBER" >> "$GITHUB_ENV"
+          echo "VIVID_ANDROID_BUILD=$production_build" >> "$GITHUB_ENV"
           echo "VIVID_ANDROID_BUILT_AT=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_ENV"
 
       - name: Run Android release contract tests
