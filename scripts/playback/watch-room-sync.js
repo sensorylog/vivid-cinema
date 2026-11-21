@@ -79,9 +79,7 @@ export function classifyPlaybackEvent({ event, status, previousStatus } = {}) {
   if (/(ended|completed)/.test(name) || nextStatus === "ended" || nextStatus === "completed") return "ended";
   if (/(pause)/.test(name) || nextStatus === "paused" || nextStatus === "pause") return "pause";
   if (/(play|playing)/.test(name) || nextStatus === "playing" || nextStatus === "play") {
-    return String(previousStatus || "").toLowerCase() === "playing" && !/(play)/.test(name)
-      ? "progress"
-      : "play";
+    return String(previousStatus || "").toLowerCase() === "playing" ? "progress" : "play";
   }
   return "progress";
 }
