@@ -278,6 +278,7 @@ test("Watch Rooms and playback modules are included in the offline app shell", (
     '"./scripts/watch-room-lobby.js"',
     '"./scripts/watch-room-clubs.js"',
     '"./scripts/watch-room-playback.js"',
+    '"./scripts/playback/watch-room-sync.js"',
     '"./scripts/watch.js?v=watch-room-sync-1"'
   ]) assert.ok(source.includes(asset), "missing Watch Rooms app-shell asset: " + asset);
 });
