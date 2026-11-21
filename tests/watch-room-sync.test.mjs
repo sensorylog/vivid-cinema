@@ -4,7 +4,8 @@ import {
   getExpectedPlaybackPosition,
   isPlaybackRevisionStale,
   normalizePlaybackTimestamp,
-  shouldCorrectPlayback
+  shouldCorrectPlayback,
+  shouldThrottlePlaybackWrite
 } from "../scripts/playback/watch-room-sync.js";
 
 test("playing position advances from the server timestamp and measured clock offset", () => {
@@ -48,4 +49,13 @@ test("older playback revisions are ignored but equal and newer revisions remain 
   assert.equal(isPlaybackRevisionStale(4, 5), true);
   assert.equal(isPlaybackRevisionStale(5, 5), false);
   assert.equal(isPlaybackRevisionStale(6, 5), false);
+});
+
+test("only repeated playing heartbeats are rate-limited, never pause or resume transitions", () => {
+  assert.equal(shouldThrottlePlaybackWrite("playing", "playing", 1_000, 2_000), true);
+  assert.equal(shouldThrottlePlaybackWrite("paused", "playing", 1_000, 1_100), false);
+  assert.equal(shouldThrottlePlaybackWrite("playing", "paused", 1_000, 1_100), false);
+  assert.equal(shouldThrottlePlaybackWrite("playing", "playing", 1_000, 2_800), false);
+  assert.equal(shouldThrottlePlaybackWrite("playing", "playing", 2_000, 1_900), false);
+  assert.equal(shouldThrottlePlaybackWrite("ended", "playing", 1_000, 1_100), false);
 });
