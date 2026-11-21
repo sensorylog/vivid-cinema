@@ -414,7 +414,8 @@ async function removeLiveKitParticipant(roomId, identity) {
     const response = await fetch(endpoint, {
       method: "POST",
       headers: { Authorization: "Bearer " + token, "Content-Type": "application/json" },
-      body: JSON.stringify({ room: roomName, identity })
+      body: JSON.stringify({ room: roomName, identity }),
+      signal: AbortSignal.timeout(5000)
     });
     if (!response.ok && response.status !== 404) {
       throw new Error("LiveKit participant removal failed (" + response.status + ").");
