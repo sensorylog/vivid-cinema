@@ -77,53 +77,40 @@ test("LiveKit token signer rejects malformed identities and unscoped room names"
   }), /invalid/i);
 });
 
-test("Watch Room ships voice controls and keeps the shared player inside the room shell", async () => {
-  const [html, lobby, voice, api, headers, playback, watchPage, roomStyles, appShell, cinemaStyles] = await Promise.all([
+test("Watch Room uses a dedicated cinema route instead of nesting the Watch page in an iframe", async () => {
+  const [lobbyHtml, cinemaHtml, lobby, cinema, voice, playback, watchPage, cinemaStyles, rooms] = await Promise.all([
     readFile(new URL("../watch-rooms.html", import.meta.url), "utf8"),
+    readFile(new URL("../watch-room-cinema.html", import.meta.url), "utf8"),
     readFile(new URL("../scripts/watch-room-lobby.js", import.meta.url), "utf8"),
+    readFile(new URL("../scripts/watch-room-cinema.js", import.meta.url), "utf8"),
     readFile(new URL("../scripts/watch-room-voice.js", import.meta.url), "utf8"),
-    readFile(new URL("../cloudflare/functions/api/watch-rooms.js", import.meta.url), "utf8"),
-    readFile(new URL("../_headers", import.meta.url), "utf8"),
     readFile(new URL("../scripts/watch-room-playback.js", import.meta.url), "utf8"),
     readFile(new URL("../scripts/watch.js", import.meta.url), "utf8"),
-    readFile(new URL("../styles/vivid-watch-rooms.css", import.meta.url), "utf8"),
-    readFile(new URL("../scripts/app-shell.js", import.meta.url), "utf8"),
-    readFile(new URL("../styles/vivid-watch-room-cinema.css", import.meta.url), "utf8")
+    readFile(new URL("../styles/vivid-watch-room-cinema.css", import.meta.url), "utf8"),
+    readFile(new URL("../scripts/watch-rooms.js", import.meta.url), "utf8")
   ]);
-  assert.match(html, /id="wr-voice-call"/);
-  assert.match(html, /id="wr-screening-stage"/);
-  assert.ok(html.includes('name="allowGuestVoice"'));
-  assert.match(lobby, /openEmbeddedScreening\(response\.data\?\.screening\)/);
-  assert.ok(lobby.includes("activeSessionId !== loadedScreeningSessionId"));
-  assert.ok(lobby.includes("openEmbeddedScreening(room.activeScreening)"));
-  assert.match(voice, /getWatchRoomVoiceToken/);
-  assert.match(voice, /setMicrophoneEnabled/);
-  assert.match(api, /async function getWatchRoomVoiceToken/);
-  assert.match(api, /requireRoomMember\(roomId, uid\)/);
-  assert.ok(headers.includes("microphone=(self)"));
-  assert.ok(headers.includes("wss://*.livekit.cloud"));
-  assert.ok(api.includes("removeAllLiveKitParticipants"));
-  assert.ok(api.includes("RemoveParticipant"));
-  assert.ok(api.includes("allowGuestVoice"));
-  assert.ok(api.includes('member.role === "guest" && room.allowGuestVoice === false'));
-  assert.ok(lobby.includes("vivid:watch-room-updated"));
-  assert.ok(voice.includes("guestVoiceAllowed()"));
-  assert.ok(playback.includes("This Watch Room has ended or your membership was removed"));
-  assert.ok(playback.includes("pauseGuestPlayer"));
-  assert.ok(lobby.includes('url.searchParams.set("roomMode", "1")'));
-  assert.ok(lobby.includes('url.searchParams.set("sessionId", String(screening.sessionId))'));
-  assert.ok(watchPage.includes('route.params.get("roomMode") === "1"'));
-  assert.ok(roomStyles.includes("body.vivid-wr-screening-open .vivid-wr-screening-frame-wrap"));
-  assert.ok(appShell.includes("vivid-watch-room-cinema.css"));
-  assert.ok(appShell.indexOf("vividPremiumExperience") < appShell.indexOf("vividWatchRoomCinema"));
-  assert.ok(cinemaStyles.includes("body.vivid-watch-room-mode.vivid-app-experience .vivid-mobile-nav.vivid-v2-mobile-nav"));
-  assert.ok(cinemaStyles.includes("body.vivid-wr-screening-open #wr-voice-call"));
-  assert.ok(cinemaStyles.includes("inset:auto 14px max(14px,env(safe-area-inset-bottom)) auto!important"));
-  assert.ok(playback.includes("joinedPlayback && latestRemoteState?.status === \"playing\""));
+  assert.ok(lobbyHtml.includes('name="allowGuestVoice"'));
+  assert.ok(!lobbyHtml.includes('id="wr-screening-frame-wrap"'));
+  assert.ok(!lobby.includes('document.createElement("iframe")'));
+  assert.ok(lobby.includes('new URL("watch-room-cinema.html", window.location.href)'));
+  assert.ok(lobby.includes('window.location.assign(url)'));
+  assert.ok(lobby.includes('activeSessionId !== loadedScreeningSessionId'));
+  assert.ok(cinemaHtml.includes('id="watch-content"'));
+  assert.ok(cinemaHtml.includes('id="wr-voice-call"'));
+  assert.ok(cinemaHtml.includes('src="scripts/watch-room-cinema.js"'));
+  assert.ok(cinemaHtml.includes('src="scripts/watch-room-playback.js"'));
+  assert.ok(cinema.includes('call("getWatchRoomLobbySnapshot")'));
+  assert.ok(cinema.includes('call("getWatchRoomPlaybackSnapshot")'));
+  assert.ok(cinema.includes('vivid:watch-room-open'));
+  assert.ok(voice.includes("getWatchRoomVoiceToken"));
+  assert.ok(voice.includes("setMicrophoneEnabled"));
   assert.ok(playback.includes("joinedPlayback = memberRole === \"guest\""));
   assert.ok(playback.includes("joinButton.hidden = true"));
   assert.ok(playback.includes('state.status === "playing" && !roomPlayerLoadRequested'));
-  assert.ok(api.includes('tx.delete(roomRef.collection("playback").doc("current"))'));
-  assert.ok(api.includes('roomData.activeScreening?.sessionId'));
-  assert.ok(api.includes('storedPlayback.sessionId === activeSessionId'));
+  assert.ok(watchPage.includes('route.params.get("roomMode") === "1"'));
+  assert.ok(cinemaStyles.includes(".vivid-cinema-voice"));
+  assert.ok(cinemaStyles.includes(".vivid-cinema-stage"));
+  assert.ok(cinemaStyles.includes("env(safe-area-inset-bottom)"));
+  assert.ok(rooms.includes('new URLSearchParams(window.location.search).get("roomId")'));
+  assert.ok(rooms.includes('document.dispatchEvent(new CustomEvent("vivid:watch-room-open"'));
 });
