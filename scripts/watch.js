@@ -460,11 +460,12 @@ function setPlayerSource(source, params, startAt = 0) {
 
 window.addEventListener("vivid:watch-room-apply-selection", event => {
   const selection = event.detail || {};
-  if (!["player1", "player2"].includes(selection.playerId) || !currentParams) return;
-  if (isWatchRoomCinemaMode && !watchRoomScreeningValidated) {
+  if (!["player1", "player2"].includes(selection.playerId)) return;
+  if (isWatchRoomCinemaMode && (!watchRoomScreeningValidated || !currentParams)) {
     pendingRoomPlayerSelection = selection;
     return;
   }
+  if (!currentParams) return;
   const secondaryRoot = $("vivid-tflix-player");
   const primaryOverlay = $("player-overlay");
   const primaryFrame = $("vidapi-player");
