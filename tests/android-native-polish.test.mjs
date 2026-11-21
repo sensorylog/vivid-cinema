@@ -160,7 +160,7 @@ test("native Android project generation registers both plugins idempotently", as
     assert.match(updaterPlugin, /getSharedPreferences\(PREFERENCES/);
     assert.match(updaterPlugin, /handleOnResume/);
     assert.match(updaterPlugin, /reconcileDownload/);
-    assert.match(updaterPlugin, /Settings\.canRequestPackageInstalls/);
+    assert.match(updaterPlugin, /getPackageManager\(\)\.canRequestPackageInstalls/);
     assert.match(updaterPlugin, /ACTION_MANAGE_UNKNOWN_APP_SOURCES/);
     assert.match(updaterPlugin, /STATUS_SUCCESSFUL/);
     assert.match(navigationPlugin, /@CapacitorPlugin\(name = "VividNavigation"\)/);
