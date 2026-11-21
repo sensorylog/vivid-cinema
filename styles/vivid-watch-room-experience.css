@@ -110,7 +110,7 @@ body.vivid-watch-rooms-page.vivid-watch-room-mode .vivid-wr-player-slot .vivid-p
 body.vivid-watch-rooms-page.vivid-watch-room-mode .vivid-wr-player-slot .vivid-player-main{position:relative!important}
 body.vivid-watch-rooms-page.vivid-watch-room-mode .vivid-wr-player-slot #player-status{
   position:absolute!important;z-index:7!important;top:50%!important;left:50%!important;transform:translate(-50%,-50%)!important;
-  width:min(88%,520px)!important;max-width:calc(100% - 24px)!important;margin:0!important
+  width:min(88%,520px)!important;max-width:calc(100% - 24px)!important;right:auto!important;bottom:auto!important;margin:0!important
 }
 body.vivid-watch-rooms-page.vivid-watch-room-mode .vivid-wr-player-slot #player-try-next{
   position:absolute!important;z-index:8!important;left:50%!important;bottom:12px!important;transform:translateX(-50%)!important
