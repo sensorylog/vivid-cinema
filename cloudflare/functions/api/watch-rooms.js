@@ -20,7 +20,7 @@ function initializeServices(env) {
   ]);
   livekitUrl = String(env.LIVEKIT_URL || "").trim();
   livekitApiKey = String(env.LIVEKIT_API_KEY || "").trim();
-  livekitApiSecret = String(env.LIVEKIT_API_SECRET || "");
+  livekitApiSecret = String(env.LIVEKIT_API_SECRET || "").trim();
   if (db) return;
   const serviceAccountRaw = env.FIREBASE_SERVICE_ACCOUNT_JSON;
   if (!serviceAccountRaw) throw new Error("FIREBASE_SERVICE_ACCOUNT_JSON is not configured for Vivid on Cloudflare Pages.");
