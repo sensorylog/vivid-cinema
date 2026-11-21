@@ -105,16 +105,16 @@ The following GitHub Actions results were observed for head commit `6463326a6f83
 | Quality checks (including Firestore emulator tests) | Passed |
 | Vivid Cinema CI (static validation, regression tests, syntax/import/asset checks, Cloudflare Functions bundle) | Passed |
 | Windows desktop build | Still running; installer/portable packaging step active |
-| Android APK build | Still running; APK build step active |
-| Browser navigation smoke tests | Still running; Chromium/WebKit navigation step active |
+| Android APK build | Passed |
+| Browser navigation smoke tests | Passed (Chromium and WebKit) |
 
-The combined commit-status endpoint also reported two failed Netlify deploy-preview contexts. These are deployment-preview failures, not evidence that the test suite failed; they still need investigation before treating preview deployment as healthy. Workflow states can change after this snapshot and must be refreshed before merge.
+The combined commit-status endpoint also reported two failed Netlify deploy-preview contexts. These are deployment-preview failures, not evidence that the test suite failed; they still need investigation before treating preview deployment as healthy. Workflow states can change after this snapshot and must be refreshed before merge. The Android APK and browser navigation jobs were subsequently refreshed and both completed successfully; the Windows installer/portable packaging job remained in progress.
 
 ### What these checks do and do not prove
 
 - The passing test workflows establish that the repository's automated regression, syntax and static-validation suites passed for the reviewed commit.
 - Existing performance regression tests cover conservative hardware detection, one-time stylesheet injection, preservation of the standard visual profile, constrained-profile rendering rules, and delegated Home-card event wiring.
-- Browser navigation smoke tests are still running in this snapshot; even when they pass, they are not a substitute for a performance trace.
+- Browser navigation smoke tests passed in Chromium and WebKit; they are not a substitute for a performance trace.
 - No real FPS, INP, CPU, GPU, memory, long-task, layout or paint measurements have been collected on either the target Core 2 Duo / 4 GB machine or a modern reference machine.
 - No numeric performance budget has been introduced. Without repeatable browser traces and a stable runner, a hard FPS or timing threshold would be arbitrary and could create false failures.
 
