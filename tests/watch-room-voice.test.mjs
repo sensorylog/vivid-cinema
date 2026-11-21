@@ -20,6 +20,7 @@ test("LiveKit access token is short-lived and scoped to one room and one member"
   const claims = decode(payloadPart);
   assert.equal(claims.iss, "LK_TEST_KEY");
   assert.equal(claims.sub, "member_123");
+  assert.equal(claims.nbf, claims.iat - 30);
   assert.equal(claims.video.room, "vivid-" + "a".repeat(32));
   assert.equal(claims.video.roomJoin, true);
   assert.equal(claims.video.canPublish, true);
@@ -29,6 +30,27 @@ test("LiveKit access token is short-lived and scoped to one room and one member"
   assert.equal(result.expiresAt, (claims.exp) * 1000);
   assert.equal(result.token.includes(apiSecret), false);
   const expected = createHmac("sha256", apiSecret).update(headerPart + "." + payloadPart).digest("base64url");
+  assert.equal(signaturePart, expected);
+});
+
+
+test("LiveKit token signer trims copied Cloudflare key and secret whitespace", async () => {
+  const now = 1_800_000_000_000;
+  const result = await createLiveKitAccessToken({
+    apiKey: "  LK_TEST_KEY\\n",
+    apiSecret: "  a-test-only-livekit-secret-value\\n",
+    identity: "member_123",
+    roomName: "vivid-" + "c".repeat(32),
+    displayName: "Vivid member",
+    role: "host",
+    now
+  });
+  const [headerPart, payloadPart, signaturePart] = result.token.split(".");
+  const claims = decode(payloadPart);
+  assert.equal(claims.iss, "LK_TEST_KEY");
+  assert.equal(claims.nbf, claims.iat - 30);
+  const expected = createHmac("sha256", "a-test-only-livekit-secret-value")
+    .update(headerPart + "." + payloadPart).digest("base64url");
   assert.equal(signaturePart, expected);
 });
 
