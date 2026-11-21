@@ -1,21 +1,35 @@
-/* Vivid Cinema desktop adaptive performance layer.
-   Applied only to older/low-memory Windows machines by the Electron preload.
-   Keep layout, navigation and features intact; simplify costly decoration only. */
+/* Vivid Cinema adaptive rendering profile.
+   Shared by normal browsers and Electron on constrained hardware.
+   Preserve layout and content; simplify only costly decorative compositing. */
 
 html.vivid-performance-legacy {
   scroll-behavior: auto !important;
 }
 
-html.vivid-performance-legacy body.vivid-atmosphere::before,
+/* Keep the cinematic light fields, but avoid a continuously animated,
+   large-radius filtered surface and screen-blended full-viewport overlay. */
+html.vivid-performance-legacy body.vivid-atmosphere::before {
+  animation: none !important;
+  filter: none !important;
+  opacity: .58 !important;
+  transform: none !important;
+}
+
 html.vivid-performance-legacy body.vivid-atmosphere::after {
   animation: none !important;
   filter: none !important;
+  mix-blend-mode: normal !important;
+  opacity: .24 !important;
 }
 
+/* Home already suppresses its poster collage in the normal profile.
+   Other routes keep this ambient artwork only on capable devices. */
 html.vivid-performance-legacy body.vivid-atmosphere .vivid-ambient-art {
   display: none !important;
 }
 
+/* Remove duplicated blurred poster art and hover sheen, not the actual cards.
+   Keep a restrained static card shadow so the visual hierarchy survives. */
 html.vivid-performance-legacy body.vivid-atmosphere .vivid-card,
 html.vivid-performance-legacy body.vivid-atmosphere .vivid-feature-card,
 html.vivid-performance-legacy body.vivid-atmosphere .landing-poster,
@@ -25,28 +39,37 @@ html.vivid-performance-legacy body.vivid-atmosphere .vivid-card::after {
   animation: none !important;
   transition: none !important;
   filter: none !important;
-  box-shadow: none !important;
 }
 
+html.vivid-performance-legacy body.vivid-atmosphere .vivid-card,
+html.vivid-performance-legacy body.vivid-atmosphere .vivid-feature-card,
+html.vivid-performance-legacy body.vivid-atmosphere .landing-poster {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, .18) !important;
+}
+
+html.vivid-performance-legacy body.vivid-atmosphere .vivid-card::after,
 html.vivid-performance-legacy body.vivid-atmosphere .vivid-card::before,
 html.vivid-performance-legacy body.vivid-atmosphere .vivid-feature-card::before,
 html.vivid-performance-legacy body.vivid-atmosphere .landing-poster::before {
   display: none !important;
 }
 
-html.vivid-performance-legacy body.vivid-atmosphere .vivid-reveal {
-  opacity: 1 !important;
-  transform: none !important;
-  transition: none !important;
-}
-
+/* The fixed topbar remains translucent through its existing background;
+   disabling backdrop sampling avoids repainting content behind it per frame. */
 html.vivid-performance-legacy body.vivid-atmosphere .vivid-topbar,
 html.vivid-performance-legacy body.vivid-atmosphere .vivid-discovery-nav,
 html.vivid-performance-legacy body.vivid-atmosphere .vivid-title-nav,
 html.vivid-performance-legacy body.vivid-atmosphere .vivid-library-nav,
-html.vivid-performance-legacy body.vivid-atmosphere .vivid-watch-nav {
+html.vivid-performance-legacy body.vivid-atmosphere .vivid-watch-nav,
+html.vivid-performance-legacy body.vivid-atmosphere .vivid-rail-controls button {
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
+  transition: none !important;
+}
+
+html.vivid-performance-legacy body.vivid-atmosphere .vivid-reveal {
+  opacity: 1 !important;
+  transform: none !important;
   transition: none !important;
 }
 

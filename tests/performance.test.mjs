@@ -183,3 +183,81 @@ test("Home hero stops remote trailer decoding when the billboard leaves the view
   assert.match(hero, /if \(!visible\) \{[\s\S]*?removeHeroVideos\(\)/);
   assert.match(hero, /if \(!document\.hidden\) activateCurrentHero\(\)/);
 });
+
+
+test("shared browser performance profile detects constrained hardware conservatively", async () => {
+  const { isLegacyPerformanceDevice } = await import("../scripts/performance-profile.js");
+  assert.equal(isLegacyPerformanceDevice({ hardwareConcurrency: 2, deviceMemory: 4 }), true);
+  assert.equal(isLegacyPerformanceDevice({ hardwareConcurrency: 2, deviceMemory: 8 }), true);
+  assert.equal(isLegacyPerformanceDevice({ hardwareConcurrency: 8, deviceMemory: 4 }), true);
+  assert.equal(isLegacyPerformanceDevice({ hardwareConcurrency: 4, deviceMemory: 8 }), false);
+  assert.equal(isLegacyPerformanceDevice({ hardwareConcurrency: 0, deviceMemory: 0 }), false);
+});
+
+test("shared browser performance profile applies the existing legacy stylesheet once", async () => {
+  const { applyPerformanceProfile } = await import("../scripts/performance-profile.js");
+  const classes = new Set();
+  const links = [];
+  const documentRef = {
+    documentElement: { classList: { add: value => classes.add(value) } },
+    head: { appendChild: link => links.push(link) },
+    querySelector: selector => selector === "[data-vivid-performance-styles]"
+      ? links.find(link => link.dataset?.vividPerformanceStyles === "true") || null
+      : null,
+    createElement: tag => ({ tagName: tag.toUpperCase(), dataset: {}, setAttribute(name, value) { this.attributes ||= {}; this.attributes[name] = value; } })
+  };
+  const navigatorRef = { hardwareConcurrency: 2, deviceMemory: 4 };
+
+  assert.equal(applyPerformanceProfile({ documentRef, navigatorRef }), "legacy");
+  assert.equal(applyPerformanceProfile({ documentRef, navigatorRef }), "legacy");
+  assert.ok(classes.has("vivid-performance-legacy"));
+  assert.equal(links.length, 1);
+  assert.equal(links[0].rel, "stylesheet");
+  assert.match(links[0].href, /styles\/vivid-performance\.css$/);
+});
+
+test("shared browser performance profile leaves capable hardware on the full visual profile", async () => {
+  const { applyPerformanceProfile } = await import("../scripts/performance-profile.js");
+  const classes = new Set();
+  const links = [];
+  const documentRef = {
+    documentElement: { classList: { add: value => classes.add(value) } },
+    head: { appendChild: link => links.push(link) },
+    querySelector: () => null,
+    createElement: tag => ({ tagName: tag.toUpperCase(), dataset: {} })
+  };
+
+  assert.equal(applyPerformanceProfile({
+    documentRef,
+    navigatorRef: { hardwareConcurrency: 8, deviceMemory: 16 }
+  }), "standard");
+  assert.equal(classes.has("vivid-performance-legacy"), false);
+  assert.equal(links.length, 0);
+});
+
+
+test("legacy rendering profile removes expensive compositing while retaining cinematic surfaces", async () => {
+  const css = await read("styles/vivid-performance.css");
+  assert.match(css, /body\.vivid-atmosphere::before\s*\{[\s\S]*?animation:\s*none/);
+  assert.match(css, /body\.vivid-atmosphere::after\s*\{[\s\S]*?mix-blend-mode:\s*normal/);
+  assert.match(css, /body\.vivid-atmosphere \.vivid-ambient-art\s*\{[\s\S]*?display:\s*none/);
+  assert.match(css, /body\.vivid-atmosphere \.vivid-card::after,[\s\S]*?display:\s*none/);
+  assert.match(css, /backdrop-filter:\s*none/);
+  assert.match(css, /box-shadow:\s*0 8px 24px rgba\(0, 0, 0, \.18\)/);
+  assert.doesNotMatch(css, /\.vivid-card\s*\{[^}]*display:\s*none/);
+});
+
+
+test("Home poster rails delegate card interactions once instead of binding handlers per card", async () => {
+  const source = await read("script.js");
+  assert.match(source, /const wiredCardContainers = new WeakSet\(\)/);
+  assert.match(source, /function openHomeCard\(card\)/);
+  const wire = source.slice(source.indexOf("function wireCards(container)"), source.indexOf("async function renderTonightPick"));
+  assert.match(wire, /container\.addEventListener\("click"/);
+  assert.match(wire, /container\.addEventListener\("keydown"/);
+  assert.match(wire, /wiredCardContainers\.has\(container\)/);
+  assert.doesNotMatch(wire, /querySelectorAll\("\.vivid-card"\)/);
+  assert.doesNotMatch(wire, /c\.addEventListener/);
+  assert.match(wire, /data-coming-reminder/);
+  assert.match(wire, /openHomeCard\(card\)/);
+});
