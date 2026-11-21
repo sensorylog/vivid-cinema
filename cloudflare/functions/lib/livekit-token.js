@@ -23,7 +23,7 @@ export async function createLiveKitAccessToken({
     name: typeof displayName === "string" ? displayName.slice(0, 80) : "Vivid member",
     nbf: issuedAt - 5,
     iat: issuedAt,
-    exp: issuedAt + 10 * 60,
+    exp: issuedAt + 4 * 60 * 60,
     video: {
       roomJoin: true,
       room: roomName,
@@ -40,5 +40,5 @@ export async function createLiveKitAccessToken({
     "raw", encoder.encode(apiSecret), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]
   );
   const signature = await crypto.subtle.sign("HMAC", key, encoder.encode(unsigned));
-  return { token: unsigned + "." + base64Url(new Uint8Array(signature)), expiresAt: (issuedAt + 600) * 1000 };
+  return { token: unsigned + "." + base64Url(new Uint8Array(signature)), expiresAt: (issuedAt + 4 * 60 * 60) * 1000 };
 }
