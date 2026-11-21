@@ -24,13 +24,13 @@ const pluginPath = path.join(javaRoot, "VividUpdaterPlugin.java");
 let mainActivity = await readFile(mainActivityPath, "utf8");
 for (const pluginClass of ["VividUpdaterPlugin.class", "VividNavigationPlugin.class"]) {
   if (mainActivity.includes(pluginClass)) continue;
-  const superCall = /(\\s*)super\\.onCreate\\(savedInstanceState\\);/;
+  const superCall = /(\s*)super\.onCreate\(savedInstanceState\);/;
   if (superCall.test(mainActivity)) {
-    mainActivity = mainActivity.replace(superCall, `$1registerPlugin(${pluginClass});\\n$1super.onCreate(savedInstanceState);`);
+    mainActivity = mainActivity.replace(superCall, `$1registerPlugin(${pluginClass});\n$1super.onCreate(savedInstanceState);`);
   } else {
     mainActivity = mainActivity.replace(
-      /public class MainActivity extends BridgeActivity\\s*\\{/,
-      `public class MainActivity extends BridgeActivity {\\n    @Override\\n    public void onCreate(android.os.Bundle savedInstanceState) {\\n        registerPlugin(${pluginClass});\\n        super.onCreate(savedInstanceState);\\n    }`
+      /public class MainActivity extends BridgeActivity\s*\{/,
+      `public class MainActivity extends BridgeActivity {\n    @Override\n    public void onCreate(android.os.Bundle savedInstanceState) {\n        registerPlugin(${pluginClass});\n        super.onCreate(savedInstanceState);\n    }`
     );
   }
 }
