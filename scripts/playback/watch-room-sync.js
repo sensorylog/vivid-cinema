@@ -12,7 +12,7 @@ export function normalizePlaybackTimestamp(value) {
 
 export function normalizePlaybackRate(value) {
   const rate = Number(value);
-  return Number.isFinite(rate) ? Math.max(0.25, Math.min(4, rate)) : 1;
+  return Number.isFinite(rate) ? Math.max(0.25, Math.min(2, rate)) : 1;
 }
 
 export function getExpectedPlaybackPosition(state, {
