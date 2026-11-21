@@ -827,7 +827,7 @@ async function publishWatchRoomPlayback(request) {
   const duration = Number(request.data?.duration);
   const playbackRate = request.data?.playbackRate == null ? 1 : Number(request.data.playbackRate);
   const capturedAtMsInput = Number(request.data?.capturedAtMs);
-  if (!Number.isFinite(playbackRate) || playbackRate < 0.25 || playbackRate > 4) throw new HttpsError("invalid-argument", "Playback speed must be between 0.25x and 4x.");
+  if (!Number.isFinite(playbackRate) || playbackRate < 0.25 || playbackRate > 2) throw new HttpsError("invalid-argument", "Playback speed must be between 0.25x and 2x.");
   if (!Number.isFinite(position) || position < 0 || position > 86400 || !Number.isFinite(duration) || duration < 0 || duration > 86400 || (duration > 0 && position > duration + 10)) throw new HttpsError("invalid-argument", "Playback position or duration is outside the supported range.");
   const season = mediaType === "tv" ? Number(request.data?.season) : null;
   const episode = mediaType === "tv" ? Number(request.data?.episode) : null;
