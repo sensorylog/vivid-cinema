@@ -327,3 +327,13 @@ body.vivid-watch-room-mode .vivid-player-frame iframe,
 body.vivid-watch-room-mode .vivid-player-frame video{width:100%;height:100%;min-height:0;object-fit:contain}
 body.vivid-watch-room-mode .vivid-player-status{max-height:54px;overflow:auto}
 body.vivid-watch-room-mode .vivid-server-panel{z-index:100000}
+
+
+/* A Watch Room embed is a cinema surface, not the full Vivid app shell. */
+body.vivid-watch-room-mode .vivid-mobile-nav,
+body.vivid-watch-room-mode .vivid-bottom-nav,
+body.vivid-watch-room-mode .vivid-mobile-tabbar,
+body.vivid-watch-room-mode .vivid-tab-bar,
+body.vivid-watch-room-mode .vivid-native-app .vivid-mobile-nav,
+body.vivid-watch-room-mode .vivid-native-app .vivid-bottom-nav{display:none!important}
+body.vivid-watch-room-mode{padding-bottom:0!important}
