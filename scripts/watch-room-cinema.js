@@ -30,9 +30,14 @@ async function boot() {
     setStatus("Sign in to your Vivid account to enter this private screening.", true);
     return;
   }
-  const response = await call("getWatchRoomLobbySnapshot")({ roomId });
+  const [response, playback] = await Promise.all([
+    call("getWatchRoomLobbySnapshot")({ roomId }),
+    call("getWatchRoomPlaybackSnapshot")({ roomId })
+  ]);
   const room = response.data?.room;
   if (!room?.roomId || room.roomId !== roomId) throw new Error("This Watch Room is no longer available.");
+  room.role = playback.data?.role;
+  if (!["host", "guest"].includes(room.role)) throw new Error("Your Watch Room membership is no longer active.");
   if (!room.activeScreening || String(room.activeScreening.sessionId || "") !== String(params.get("sessionId") || "")) {
     throw new Error("The host has changed or ended this screening. Return to the room lobby.");
   }
