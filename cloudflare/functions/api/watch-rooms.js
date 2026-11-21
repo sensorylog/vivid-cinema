@@ -1,6 +1,6 @@
 import { createHash, randomBytes } from "node:crypto";
 import { verifyFirebaseIdToken, verifyAppCheckToken } from "../lib/firebase-token-verification.js";
-import { createLiveKitAccessToken } from "../lib/livekit-token.js";
+import { createLiveKitAccessToken, createLiveKitRoomAdminToken } from "../lib/livekit-token.js";
 import { initializeApp as initializeRestApp } from "@ljoukov/firebase-admin-cloudflare/app";
 import { getFirestore, Query, Timestamp } from "@ljoukov/firebase-admin-cloudflare/firestore";
 
@@ -394,6 +394,45 @@ async function requireRoomMember(roomId, uid) {
   return { roomRef, room: room.data(), memberRef, member: member.data() };
 }
 
+async function liveKitRoomName(roomId) {
+  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(roomId));
+  const roomHash = Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, "0")).join("").slice(0, 32);
+  return "vivid-" + roomHash;
+}
+
+async function removeLiveKitParticipant(roomId, identity) {
+  if (!livekitUrl || !livekitApiKey || !livekitApiSecret) return false;
+  try {
+    const roomName = await liveKitRoomName(roomId);
+    const token = await createLiveKitRoomAdminToken({
+      apiKey: livekitApiKey, apiSecret: livekitApiSecret, roomName
+    });
+    const endpoint = new URL(livekitUrl);
+    endpoint.protocol = "https:";
+    endpoint.pathname = "/twirp/livekit.RoomService/RemoveParticipant";
+    endpoint.search = "";
+    const response = await fetch(endpoint, {
+      method: "POST",
+      headers: { Authorization: "Bearer " + token, "Content-Type": "application/json" },
+      body: JSON.stringify({ room: roomName, identity })
+    });
+    if (!response.ok && response.status !== 404) {
+      throw new Error("LiveKit participant removal failed (" + response.status + ").");
+    }
+    return true;
+  } catch (error) {
+    console.error("Vivid Watch Room could not evict a LiveKit participant:", {
+      roomId, identity, message: error?.message || String(error)
+    });
+    return false;
+  }
+}
+
+async function removeAllLiveKitParticipants(roomId, identities) {
+  const results = await Promise.all((identities || []).map(identity => removeLiveKitParticipant(roomId, identity)));
+  return results.every(Boolean);
+}
+
 async function getWatchRoomVoiceToken(request) {
   const uid = requireUser(request);
   const roomId = validId(request.data?.roomId, "room ID");
@@ -409,9 +448,7 @@ async function getWatchRoomVoiceToken(request) {
   if (room.status !== "open" || !["host", "guest"].includes(member.role)) {
     throw new HttpsError("permission-denied", "You cannot join voice in this room.");
   }
-  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(roomId));
-  const roomHash = Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, "0")).join("").slice(0, 32);
-  const roomName = "vivid-" + roomHash;
+  const roomName = await liveKitRoomName(roomId);
   const result = await createLiveKitAccessToken({
     apiKey: livekitApiKey,
     apiSecret: livekitApiSecret,
@@ -815,7 +852,8 @@ async function removeWatchRoomMember(request) {
       tx.set(db.collection("users").doc(existing.id).collection("watchRooms").doc(roomId), { memberCount: nextMemberCount }, { merge: true });
     });
   });
-  return { removed: true };
+  const voiceEvicted = await removeLiveKitParticipant(roomId, memberUid);
+  return { removed: true, voiceEvicted };
 }
 
 
@@ -842,7 +880,8 @@ async function leaveWatchRoom(request) {
       tx.set(db.collection("users").doc(existing.id).collection("watchRooms").doc(roomId), { memberCount: nextMemberCount }, { merge: true });
     });
   });
-  return { left: true };
+  const voiceEvicted = await removeLiveKitParticipant(roomId, uid);
+  return { left: true, voiceEvicted };
 }
 
 async function closeWatchRoom(request) {
@@ -850,23 +889,29 @@ async function closeWatchRoom(request) {
   const roomId = validId(request.data?.roomId, "room ID");
   const roomRef = db.collection("rooms").doc(roomId);
   const closedAt = Timestamp.now();
+  const memberUids = [];
   await db.runTransaction(async tx => {
+    memberUids.length = 0;
     const { room, member } = await requireRoomMemberInTransaction(tx, roomId, uid);
     if (room.hostUid !== uid || member.role !== "host") throw new HttpsError("permission-denied", "Only the room host can close this room.");
     const members = await tx.get(roomRef.collection("members"));
     tx.update(roomRef, { status: "closed", closedAt, expiresAt: closedAt, updatedAt: closedAt });
     members.docs.forEach(document => {
+      memberUids.push(document.id);
       tx.set(db.collection("users").doc(document.id).collection("watchRooms").doc(roomId), { status: "closed" }, { merge: true });
     });
   });
-  return { closed: true };
+  const voiceEvicted = await removeAllLiveKitParticipants(roomId, memberUids);
+  return { closed: true, voiceEvicted };
 }
 
 async function deleteWatchRoom(request) {
   const uid = requireUser(request);
   const roomId = validId(request.data?.roomId, "room ID");
   const roomRef = db.collection("rooms").doc(roomId);
+  const memberUids = [];
   await db.runTransaction(async tx => {
+    memberUids.length = 0;
     const { room, member } = await requireRoomMemberInTransaction(tx, roomId, uid);
     if (room.hostUid !== uid || member.role !== "host") {
       throw new HttpsError("permission-denied", "Only the room host can permanently delete this room.");
@@ -875,13 +920,15 @@ async function deleteWatchRoom(request) {
     const deletedAt = Timestamp.now();
     tx.update(roomRef, { status: "deleted", deletedAt, closedAt: deletedAt, expiresAt: deletedAt, updatedAt: deletedAt });
     members.docs.forEach(document => {
+      memberUids.push(document.id);
       tx.delete(db.collection("users").doc(document.id).collection("watchRooms").doc(roomId));
     });
   });
+  const voiceEvicted = await removeAllLiveKitParticipants(roomId, memberUids);
   // Delete the complete room tree (members, presence, chat, queue and playback)
   // only after the authoritative transaction has removed every dashboard pointer.
   await recursiveDelete(roomRef);
-  return { deleted: true };
+  return { deleted: true, voiceEvicted };
 }
 
 
