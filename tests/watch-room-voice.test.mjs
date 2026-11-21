@@ -110,6 +110,8 @@ test("Watch Room uses a dedicated cinema route instead of nesting the Watch page
   assert.ok(watchPage.includes('route.params.get("roomMode") === "1"'));
   assert.ok(cinemaStyles.includes(".vivid-cinema-voice"));
   assert.ok(cinemaStyles.includes(".vivid-cinema-stage"));
+  assert.ok(cinemaStyles.includes("body.vivid-watch-room-mode #player-overlay"));
+  assert.ok(cinemaStyles.includes("body.vivid-watch-room-mode #vivid-tflix-player"));
   assert.ok(cinemaStyles.includes("env(safe-area-inset-bottom)"));
   assert.ok(rooms.includes('requestedParams.get("roomId")'));
   assert.ok(rooms.includes('document.dispatchEvent(new CustomEvent("vivid:watch-room-open"'));
