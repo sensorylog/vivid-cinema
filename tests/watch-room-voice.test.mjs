@@ -98,7 +98,7 @@ test("Watch Room screenings stay in the lobby and minimize without stopping play
   assert.ok(lobby.includes('vivid:watch-room-screening-validated'));
   assert.ok(lobby.includes('activeSessionId !== loadedScreeningSessionId'));
   assert.ok(watchPage.includes('route.params.get("roomMode") === "1"'));
-  assert.ok(watchPage.includes('window.addEventListener("vivid:watch-room-screening-navigate"'));
+  assert.ok(watchPage.includes('document.addEventListener("vivid:watch-room-screening-navigate"'));
   assert.ok(watchPage.includes("route.params = params"));
   assert.ok(playback.includes('document.addEventListener("vivid:watch-room-screening-navigate"'));
   assert.ok(watchPage.includes('overlay.classList.add("is-minimized")'));
