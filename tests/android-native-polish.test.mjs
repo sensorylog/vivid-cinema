@@ -37,6 +37,22 @@ test("native styling covers safe areas, touch targets, and accessible focus", ()
   assert.match(nativeCss, /video:not\(\[hidden\]\)/);
 });
 
+test("Android mobile navigation uses five accessible primary tabs and a secondary More menu", () => {
+  assert.match(appShell, /function isAndroidNativeRuntime\(\)/);
+  assert.match(appShell, /data-vivid-more-navigation/);
+  assert.match(appShell, /aria-expanded/);
+  assert.match(appShell, /aria-controls/);
+  assert.match(appShell, /Escape/);
+  assert.match(appShell, /navLink\("home\.html"/);
+  assert.match(appShell, /navLink\("discover\.html"/);
+  assert.match(appShell, /navLink\("for-you\.html"/);
+  assert.match(appShell, /navLink\("library\.html"/);
+  assert.match(appShell, /navLink\("watch-rooms\.html"/);
+  assert.match(nativeCss, /grid-template-columns:\s*repeat\(5,\s*minmax\(0,\s*1fr\)\)/);
+  assert.match(nativeCss, /\.vivid-native-more-menu\[hidden\]/);
+  assert.match(nativeCss, /min-height:\s*50px/);
+});
+
 test("Capacitor remains configured for the Vivid Cinema app", () => {
   const config = JSON.parse(capacitorConfig);
   assert.equal(config.appId, "com.vividcinema.app");
