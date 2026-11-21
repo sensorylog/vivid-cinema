@@ -6,6 +6,7 @@ const byId = id => document.getElementById(id);
 const call = callWatchRoomApi;
 let room = null, lastRoom = null, stops = [], heartbeat = null, presenceRefresh = null;
 let memberList = [], selectedPick = null, searchTimer = null, searchGeneration = 0;
+let loadedScreeningSessionId = "", dismissedScreeningSessionId = "";
 
 function stop() {
   if (room) document.dispatchEvent(new CustomEvent("vivid:watch-room-closing", { detail: { roomId: room.roomId } }));
@@ -210,6 +211,8 @@ function openEmbeddedScreening(screening) {
     frame.dataset.src = url;
     wrap.replaceChildren(frame);
   }
+  loadedScreeningSessionId = String(screening.sessionId || "");
+  dismissedScreeningSessionId = "";
   stage.hidden = false;
   stage.scrollIntoView({ behavior: "smooth", block: "start" });
 }
@@ -217,6 +220,8 @@ byId("wr-screening-close")?.addEventListener("click", () => {
   const stage = byId("wr-screening-stage");
   const wrap = byId("wr-screening-frame-wrap");
   if (wrap) wrap.replaceChildren();
+  dismissedScreeningSessionId = loadedScreeningSessionId;
+  loadedScreeningSessionId = "";
   if (stage) stage.hidden = true;
 });
 
@@ -361,6 +366,10 @@ function openLobby(data) {
       const snapshot = response.data || {};
       if (snapshot.room) {
         room = { ...room, ...snapshot.room };
+        const activeSessionId = String(room.activeScreening?.sessionId || "");
+        if (activeSessionId && activeSessionId !== loadedScreeningSessionId && activeSessionId !== dismissedScreeningSessionId) {
+          openEmbeddedScreening(room.activeScreening);
+        }
         const currentSettings = byId("wr-room-settings-form");
         if (room.role === "host" && currentSettings && currentSettings.dataset.dirty !== "true") {
           currentSettings.elements.allowGuestQueue.checked = room.allowGuestQueue !== false;
