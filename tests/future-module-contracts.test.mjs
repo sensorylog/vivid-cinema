@@ -648,6 +648,12 @@ test("Watch Room linked Cinema Clubs validate membership and record screenings a
   }
   const lobby = readFileSync(new URL("../scripts/watch-room-lobby.js", import.meta.url), "utf8");
   const clubs = readFileSync(new URL("../scripts/watch-room-clubs.js", import.meta.url), "utf8");
+  assert.ok(lobby.includes("function handleRoomAccessLost("));
+  assert.ok(lobby.includes('error?.code === "permission-denied"'));
+  const watch = readFileSync(new URL("../scripts/watch.js", import.meta.url), "utf8");
+  const playback = readFileSync(new URL("../scripts/watch-room-playback.js", import.meta.url), "utf8");
+  assert.ok(watch.includes('document.addEventListener("vivid:watch-room-closing"'));
+  assert.ok(playback.includes('document.addEventListener("vivid:watch-room-closing"'));
   assert.ok(lobby.includes("function subscribeClubWatchlist(clubId)"));
   assert.ok(lobby.includes('call("addWatchRoomQueueItem")'));
   assert.ok(lobby.includes('vivid:open-linked-club'));
