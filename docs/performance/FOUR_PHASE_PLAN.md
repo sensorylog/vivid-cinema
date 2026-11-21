@@ -78,3 +78,15 @@ A before/after comparison is only valid when route, viewport, browser, cache sta
 - Home's poster collage and repeated rail measurements were already addressed by the existing Home work; Phase 2 does not duplicate those changes.
 - The shared atmosphere pseudo-elements remained active across app routes: a fixed animated blurred layer and a screen-blended viewport overlay. These are now simplified only for constrained devices.
 - Capable devices keep the existing full cinematic effects. No content, routes, playback, navigation or feature behavior is removed.
+
+
+### Phase 3 — page workload and event scheduling (implemented; runtime measurement pending)
+
+- Audited the Home, Discover and For You route scripts, shared app shell, image-loading markup and page entry points.
+- Found that Home's `wireCards()` walked every poster card after each rail render and allocated separate click and keydown closures for each card. Re-rendered rails repeated this work.
+- Replaced per-card handlers with one delegated click handler and one delegated keyboard handler per rail container. A `WeakSet` makes registration idempotent without retaining removed rail nodes.
+- Preserved card navigation, continue-watching resume URLs, recommendation-click telemetry, keyboard activation and Coming Soon reminder buttons.
+- Existing route optimisations were retained: Home already uses lazy/async poster images, visibility-triggered secondary shelves, and idle-scheduled recommendations; Discover category artwork already hydrates on intersection; For You already uses lazy/async images and visibility-based recommendation impressions.
+- Added a regression contract to prevent per-card listener allocation from returning.
+- Source inspection did not justify a broad rewrite of Discover/For You or a framework change. No blanket DOM or image-loading changes were made without a measured trace.
+- Runtime impact remains unmeasured; Phase 4 must compare event-listener count, main-thread time and interaction latency on representative routes.
