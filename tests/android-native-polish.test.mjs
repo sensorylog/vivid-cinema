@@ -67,6 +67,9 @@ test("generated Android project registers a native hardware Back bridge", () => 
   assert.match(nativeNavigation, /@CapacitorPlugin\(name = "VividNavigation"\)/);
   assert.match(nativeNavigation, /OnBackPressedCallback/);
   assert.match(nativeNavigation, /notifyListeners\("backButton"/);
+  assert.match(nativeNavigation, /VividWebChromeClient\.exitActiveCustomView\(\)/);
+  assert.match(nativeWebChrome, /static boolean exitActiveCustomView\(\)/);
+  assert.match(nativeWebChrome, /WeakReference<VividWebChromeClient>/);
   assert.match(nativeNavigation, /getActivity\(\)\.finish\(\)/);
   assert.match(nativeWebChrome, /extends BridgeWebChromeClient/);
   assert.match(nativeWebChrome, /onShowCustomView\(View view, CustomViewCallback callback\)/);
