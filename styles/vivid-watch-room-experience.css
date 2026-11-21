@@ -221,6 +221,7 @@ body.vivid-watch-rooms-page.vivid-watch-room-mode .vivid-wr-player-slot #player-
   min-height:0!important;max-width:none!important;max-height:none!important;margin:0!important;
   border:0!important;border-radius:0!important
 }
+body.vivid-watch-rooms-page.vivid-watch-room-mode .vivid-wr-player-slot #player-overlay.vivid-player-fullscreen-fallback #player-return-inline{display:none!important}
 body.vivid-watch-rooms-page.vivid-watch-room-mode .vivid-wr-player-slot #player-overlay.vivid-player-fullscreen-fallback .vivid-player-dialog-head{
   top:env(safe-area-inset-top,0px)!important;height:50px!important;min-height:50px!important
 }
