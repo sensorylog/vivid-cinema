@@ -102,8 +102,7 @@ test("Watch Room screenings stay in the lobby and minimize without stopping play
   assert.ok(lobby.includes('event.key === "Home"'));
   assert.ok(lobby.includes('event.key === "End"'));
   assert.ok(lobby.includes("setRoomView(roomViewButtons[next].dataset.roomView)"));
-  assert.ok(html.includes('role="log" aria-live="polite"'));
-  assert.ok(!roomStyles.includes("body.vivid-wr-screening-open"), "obsolete full-screen lobby overlay styles should be removed");
+  assert.ok(lobbyHtml.includes('role="log" aria-live="polite"'));
   assert.ok(lobby.includes("function renderCinemaStage()"));
   assert.ok(lobby.includes("function subscribeRoomRealtime(roomId)"));
   assert.ok(lobby.includes('onSnapshot(queueRef'));
@@ -152,6 +151,7 @@ test("Watch Room screenings stay in the lobby and minimize without stopping play
   assert.ok(roomStyles.includes(".vivid-wr-room-layout"));
   assert.ok(roomStyles.includes(".vivid-wr-room-tabs"));
   assert.ok(roomStyles.includes(".vivid-wr-voice-panel{position:sticky"));
+  assert.ok(!roomStyles.includes("body.vivid-wr-screening-open"), "obsolete full-screen lobby overlay styles should be removed");
   assert.ok(cinemaStyles.includes("#player-overlay[hidden]"));
   assert.ok(cinemaStyles.includes("#vivid-tflix-player.is-minimized"));
   assert.ok(cinemaStyles.includes(".vivid-tflix-room-minimize"));
