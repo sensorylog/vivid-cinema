@@ -59,6 +59,7 @@ export function getEstimatedLocalPlaybackPosition({
   duration,
   observedAtMs
 } = {}, { nowMs = Date.now() } = {}) {
+  if (position == null) return null;
   const raw = Number(position);
   if (!Number.isFinite(raw) || raw < 0) return null;
   const maxDuration = Number(duration);
