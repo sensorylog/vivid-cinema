@@ -70,6 +70,11 @@ test("generated Android project registers a native hardware Back bridge", () => 
   assert.match(nativeNavigation, /VividWebChromeClient\.exitActiveCustomView\(\)/);
   assert.match(nativeWebChrome, /static boolean exitActiveCustomView\(\)/);
   assert.match(nativeWebChrome, /WeakReference<VividWebChromeClient>/);
+  assert.match(nativeWebChrome, /WindowInsetsController/);
+  assert.match(nativeWebChrome, /BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE/);
+  assert.match(nativeWebChrome, /WindowInsets\.Type\.systemBars\(\)/);
+  assert.match(nativeWebChrome, /originalStatusBarVisible/);
+  assert.match(nativeWebChrome, /originalNavigationBarVisible/);
   assert.match(nativeNavigation, /getActivity\(\)\.finish\(\)/);
   assert.match(nativeWebChrome, /extends BridgeWebChromeClient/);
   assert.match(nativeWebChrome, /onShowCustomView\(View view, CustomViewCallback callback\)/);
