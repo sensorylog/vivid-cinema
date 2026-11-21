@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { resolveAndroidBackAction } from "../scripts/android-navigation.js";
+import { isLegacyPerformanceDevice } from "../scripts/performance-profile.js";
 
 const [builder, nativeCss, capacitorConfig, nativeConfigurator, appShell] = await Promise.all([
   readFile(new URL("../automation/build-static-dist.mjs", import.meta.url), "utf8"),
@@ -73,4 +74,12 @@ test("Android Back exits only when the app is already at its root", () => {
     canGoBack: false,
     historyLength: 1
   }), { type: "exit", stack: [] });
+});
+
+test("Android applies the low-compositing profile when hardware hints show a constrained device", () => {
+  assert.equal(isLegacyPerformanceDevice({ hardwareConcurrency: 4, deviceMemory: 0, platform: "android" }), true);
+  assert.equal(isLegacyPerformanceDevice({ hardwareConcurrency: 4, deviceMemory: 4, platform: "android" }), true);
+  assert.equal(isLegacyPerformanceDevice({ hardwareConcurrency: 4, deviceMemory: 8, platform: "android" }), false);
+  assert.equal(isLegacyPerformanceDevice({ hardwareConcurrency: 8, deviceMemory: 0, platform: "android" }), false);
+  assert.equal(isLegacyPerformanceDevice({ hardwareConcurrency: 4, deviceMemory: 0, platform: "web" }), false);
 });
