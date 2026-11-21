@@ -283,6 +283,25 @@ function applyPlaybackSnapshot(state, requestedRoomId, requestGeneration) {
   }
 }
 
+async function refreshPlaybackSnapshot() {
+  if (!roomId) return;
+  const requestedRoomId = roomId;
+  const requestGeneration = playbackConnectionGeneration;
+  const startedAt = Date.now();
+  try {
+    const result = await call("getWatchRoomPlaybackSnapshot")({ roomId: requestedRoomId });
+    const finishedAt = Date.now();
+    if (roomId !== requestedRoomId || requestGeneration !== playbackConnectionGeneration) return;
+    const serverTime = Number(result.data?.serverTime);
+    if (Number.isFinite(serverTime)) clockOffsetMs = serverTime - ((startedAt + finishedAt) / 2);
+    applyPlaybackSnapshot(result.data?.playback || null, requestedRoomId, requestGeneration);
+  } catch (error) {
+    if (roomId === requestedRoomId && requestGeneration === playbackConnectionGeneration) {
+      setNote(error?.message || "Could not refresh the shared playback clock.");
+    }
+  }
+}
+
 function subscribeToPlayback(requestedRoomId, requestGeneration) {
   if (!requestedRoomId || roomId !== requestedRoomId || requestGeneration !== playbackConnectionGeneration || playbackUnsubscribe) return;
   try {
@@ -589,7 +608,11 @@ document.addEventListener("vivid:watch-room-screening-navigate", event => {
       playbackRevision = 0;
       latestRemoteState = null;
       localPosition = null;
+      localPositionObservedAt = 0;
       localStatus = "";
+      lastCommandedStatus = "";
+      lastCommandAt = 0;
+      lastSeekCommandAt = 0;
       hostStatus = "playing";
       lastPublishAt = 0;
       lastPublishedStatus = "";
@@ -610,12 +633,14 @@ onAuthStateChanged(auth, user => {
 });
 
 window.addEventListener("online", () => {
-  if (roomId && !playbackUnsubscribe) subscribeToPlayback(roomId, playbackConnectionGeneration);
+  if (!roomId) return;
+  if (!playbackUnsubscribe) subscribeToPlayback(roomId, playbackConnectionGeneration);
+  void refreshPlaybackSnapshot();
 });
 window.addEventListener("visibilitychange", () => {
-  if (document.visibilityState === "visible" && roomId && !playbackUnsubscribe) {
-    subscribeToPlayback(roomId, playbackConnectionGeneration);
-  }
+  if (document.visibilityState !== "visible" || !roomId) return;
+  if (!playbackUnsubscribe) subscribeToPlayback(roomId, playbackConnectionGeneration);
+  void refreshPlaybackSnapshot();
 });
 window.addEventListener("pagehide", stopConnection);
 window.addEventListener("pageshow", event => {
