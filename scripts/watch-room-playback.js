@@ -20,6 +20,7 @@ let playbackPollDelayMs = 2500;
 let heartbeatTimer = null;
 let selectionTimer = null;
 let lastAppliedSelectionKey = "";
+let roomPlayerLoadRequested = false;
 let latestRemoteState = null;
 let joinedPlayback = false;
 let localPosition = null;
@@ -70,6 +71,8 @@ function applyRoomPlayerSelection(room) {
   const providerId = options.some(([value]) => value === requestedProviderId) ? requestedProviderId : options[0][0];
   playerSelect.value = playerId;
   populateRoomProviderOptions(playerId, providerId);
+  activePlayerId = playerId;
+  activeProviderId = providerId;
   if (role === "host" && providerId !== requestedProviderId) {
     void saveRoomPlayerSelection();
   }
@@ -90,9 +93,12 @@ function applyRoomPlayerSelection(room) {
     }
     lastAppliedSelectionKey = key;
     if (playerId === "player2" && providerId === "cinesrc") pendingPlayer2Seek = position;
-    window.dispatchEvent(new CustomEvent("vivid:watch-room-apply-selection", {
-      detail: { playerId, providerId, position }
-    }));
+    if (role !== "guest" || (joinedPlayback && latestRemoteState?.status === "playing")) {
+      roomPlayerLoadRequested = true;
+      window.dispatchEvent(new CustomEvent("vivid:watch-room-apply-selection", {
+        detail: { playerId, providerId, position }
+      }));
+    }
   }
 }
 
@@ -156,7 +162,7 @@ function stopConnection() {
   playbackPollDelayMs = 2500;
   if (heartbeatTimer) window.clearInterval(heartbeatTimer);
   if (selectionTimer) window.clearInterval(selectionTimer);
-  heartbeatTimer = null; selectionTimer = null; lastAppliedSelectionKey = "";
+  heartbeatTimer = null; selectionTimer = null; lastAppliedSelectionKey = ""; roomPlayerLoadRequested = false;
   selectionPanel.hidden = true;
   roomId = ""; role = ""; allowGuestPlayerSelection = false; allowGuestPlaybackControl = false; suppressPlaybackPublishUntil = 0; latestRemoteState = null; joinedPlayback = false; localPosition = null; localStatus = ""; hostStatus = "playing"; lastPublishAt = 0; lastPublishedStatus = ""; publishQueue = Promise.resolve(); lastHostPayload = null; clockOffsetMs = 0;
   joinButton.hidden = true; leaveButton.hidden = true; form.hidden = false;
@@ -196,7 +202,16 @@ function applyRemoteState(force = false) {
     setNote("Choose the same verified provider as the host. This player/server does not have Watch Room controls.");
     return;
   }
-  if (!getSupportedFrame()) { setNote("Select the same supported provider as the host and make sure its player has loaded."); return; }
+  if (!getSupportedFrame()) {
+    if (role === "guest" && joinedPlayback && state.status === "playing" && !roomPlayerLoadRequested) {
+      roomPlayerLoadRequested = true;
+      window.dispatchEvent(new CustomEvent("vivid:watch-room-apply-selection", {
+        detail: { playerId: activePlayerId, providerId: activeProviderId, position: expected }
+      }));
+    }
+    setNote("Loading the shared player. Playback will follow the host.");
+    return;
+  }
   const updatedAt = Number(state.updatedAt) || Date.now();
   const elapsed = state.status === "playing" ? Math.max(0, (Date.now() + clockOffsetMs - updatedAt) / 1000) : 0;
   const expected = Math.max(0, Math.min(Number(state.duration) || 86400, Number(state.position) + elapsed));
@@ -320,10 +335,9 @@ form.addEventListener("submit", async event => {
 });
 
 joinButton.addEventListener("click", () => {
-  if (!getSupportedFrame()) { setNote("The shared player is still loading. Wait a moment and try again."); return; }
   joinedPlayback = true;
-  if (latestRemoteState) applyRemoteState(true);
-  else setNote("You’re connected. Waiting for the host’s first playback update.");
+  if (latestRemoteState?.status === "playing") applyRemoteState(true);
+  else setNote("You’re ready. Your player will load when the host starts playback.");
 });
 leaveButton.addEventListener("click", () => { stopConnection(); const next = new URL(window.location.href); next.searchParams.delete("roomId"); window.history.replaceState({}, "", next); setNote("Disconnected from the Watch Room. Your Vivid player is still available."); });
 
@@ -346,7 +360,8 @@ window.addEventListener("vivid:provider-playback", event => {
   if (detail.status === "playing" && lastPublishedStatus === "playing" && now - lastPublishAt < 3500) return;
   lastPublishAt = now;
   lastPublishedStatus = hostStatus;
-  const payload = { roomId, provider: detail.provider, status: hostStatus, contentId: String(detail.contentId || ""), mediaType: detail.mediaType, season: detail.season, episode: detail.episode, position: localPosition, duration: Math.max(0, Number(detail.duration) || 0) };
+  const sessionId = new URLSearchParams(window.location.search).get("sessionId") || "";
+  const payload = { roomId, sessionId, provider: detail.provider, status: hostStatus, contentId: String(detail.contentId || ""), mediaType: detail.mediaType, season: detail.season, episode: detail.episode, position: localPosition, duration: Math.max(0, Number(detail.duration) || 0) };
   lastHostPayload = payload;
   publishQueue = publishQueue.then(() => roomId === payload.roomId && (role === "host" || allowGuestPlaybackControl) ? call("publishWatchRoomPlayback")(payload) : null).catch(error => setNote(error?.message || "Could not publish the room playback state."));
 });
@@ -395,6 +410,7 @@ window.addEventListener("message", event => {
 window.addEventListener("vivid:player-frame-loaded", event => {
   const detail = event.detail || {};
   if (detail.playerId !== activePlayerId || detail.providerId !== activeProviderId) return;
+  roomPlayerLoadRequested = false;
   if (role === "guest" && !joinedPlayback && (!latestRemoteState || latestRemoteState.status !== "playing")) {
     pauseGuestPlayer("Your player is ready and paused. Waiting for the host to start the screening.");
     return;
@@ -427,7 +443,7 @@ window.addEventListener("vivid:player-adapter-selected", event => {
   if (role === "host" && roomId && (!adapter || !adapter.capabilities.canPlay || !adapter.capabilities.canSeek)) {
     const state = lastHostPayload || latestRemoteState;
     if (state?.contentId && state?.mediaType) {
-      const payload = { roomId, provider: state.provider || "vidsrc", status: "paused", contentId: state.contentId, mediaType: state.mediaType, season: state.season, episode: state.episode, position: Math.max(0, Number(localPosition ?? state.position) || 0), duration: Number(state.duration) || 0 };
+      const payload = { roomId, sessionId: new URLSearchParams(window.location.search).get("sessionId") || "", provider: state.provider || "vidsrc", status: "paused", contentId: state.contentId, mediaType: state.mediaType, season: state.season, episode: state.episode, position: Math.max(0, Number(localPosition ?? state.position) || 0), duration: Number(state.duration) || 0 };
       hostStatus = "paused";
       lastHostPayload = payload;
       lastPublishAt = Date.now();
@@ -452,7 +468,7 @@ window.addEventListener("vivid:player-source-changed", event => {
   if (role === "host" && roomId && (lastHostPayload || latestRemoteState?.provider === "vidsrc")) {
     hostStatus = "paused";
     const state = lastHostPayload || latestRemoteState;
-    const payload = { roomId, provider: state.provider || "vidsrc", status: "paused", contentId: state.contentId, mediaType: state.mediaType, season: state.season, episode: state.episode, position: Math.max(0, Number(localPosition ?? state.position) || 0), duration: Number(state.duration) || 0 };
+    const payload = { roomId, sessionId: new URLSearchParams(window.location.search).get("sessionId") || "", provider: state.provider || "vidsrc", status: "paused", contentId: state.contentId, mediaType: state.mediaType, season: state.season, episode: state.episode, position: Math.max(0, Number(localPosition ?? state.position) || 0), duration: Number(state.duration) || 0 };
     lastHostPayload = payload;
     lastPublishAt = Date.now();
     lastPublishedStatus = "paused";
