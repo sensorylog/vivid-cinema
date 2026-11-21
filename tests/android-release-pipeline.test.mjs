@@ -27,7 +27,8 @@ test("production-signed Android release remains manual until signing is configur
   assert.match(workflow, /if: inputs\.publish_to_github_release/);
   assert.match(workflow, /Vivid-Cinema-Android\.apk/);
   assert.match(workflow, /Set Android app version metadata/);
-  assert.match(workflow, /VIVID_ANDROID_BUILD=\$GITHUB_RUN_NUMBER/);
+  assert.match(workflow, /production_build=\$\(\(1000000 \+ GITHUB_RUN_NUMBER\)\)/);
+  assert.match(workflow, /VIVID_ANDROID_BUILD=\$production_build/);
   assert.match(workflow, /configure-android-native-project\.mjs/);
   assert.ok(workflow.indexOf("npm run cap:sync") < workflow.indexOf("configure-android-native-project.mjs"));
   assert.ok(workflow.indexOf("configure-android-native-project.mjs") < workflow.indexOf("Configure release signing"));
