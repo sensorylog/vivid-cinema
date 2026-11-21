@@ -29,7 +29,7 @@ let latestRemoteState = null;
 let joinedPlayback = false;
 let localPosition = null;
 let localStatus = "";
-let hostStatus = "playing";
+let hostStatus = "paused";
 let lastPublishAt = 0;
 let lastPublishedStatus = "";
 let publishQueue = Promise.resolve();
@@ -177,7 +177,7 @@ function stopConnection() {
   if (selectionTimer) window.clearInterval(selectionTimer);
   heartbeatTimer = null; selectionTimer = null; lastAppliedSelectionKey = ""; roomPlayerLoadRequested = false;
   selectionPanel.hidden = true;
-  roomId = ""; role = ""; allowGuestPlayerSelection = false; allowGuestPlaybackControl = false; suppressPlaybackPublishUntil = 0; latestRemoteState = null; joinedPlayback = false; localPosition = null; localStatus = ""; hostStatus = "playing"; lastPublishAt = 0; lastPublishedStatus = ""; publishQueue = Promise.resolve(); lastHostPayload = null; clockOffsetMs = 0;
+  roomId = ""; role = ""; allowGuestPlayerSelection = false; allowGuestPlaybackControl = false; suppressPlaybackPublishUntil = 0; latestRemoteState = null; joinedPlayback = false; localPosition = null; localStatus = ""; hostStatus = "paused"; lastPublishAt = 0; lastPublishedStatus = ""; publishQueue = Promise.resolve(); lastHostPayload = null; clockOffsetMs = 0;
   joinButton.hidden = true; leaveButton.hidden = true; form.hidden = false;
 }
 
@@ -230,10 +230,11 @@ function applyRemoteState(force = false) {
   if (force || shouldCorrectPlayback(expected, localPosition)) {
     sendProviderCommand("seek", expected);
   }
-  if (state.status === "playing" && localStatus !== "playing") sendProviderCommand("play");
+  if (state.status === "playing" && localStatus !== "playing") {
+    if (sendProviderCommand("play")) localStatus = "playing";
+  }
   if (state.status === "paused" || state.status === "ended") {
-    sendProviderCommand("pause");
-    localStatus = "paused";
+    if (sendProviderCommand("pause")) localStatus = state.status === "ended" ? "ended" : "paused";
   }
   setNote("Connected to the host’s playback clock. Small timing differences are corrected automatically.");
 }
@@ -343,6 +344,7 @@ async function connectToRoom(id) {
   // route intentionally has no separate "join playback" panel or button.
   joinedPlayback = memberRole === "guest";
   latestRemoteState = snapshot.data?.playback || null;
+  hostStatus = latestRemoteState?.status === "playing" ? "playing" : latestRemoteState?.status === "ended" ? "ended" : "paused";
   playbackRevision = Number(latestRemoteState?.revision) || 0;
   playbackSessionId = String(latestRemoteState?.sessionId || new URLSearchParams(window.location.search).get("sessionId") || "");
   const initialServerTime = Number(snapshot.data?.serverTime);
@@ -406,19 +408,26 @@ window.addEventListener("vivid:provider-playback", event => {
   if (!eventAdapter || detail.origin !== eventAdapter.origin) return;
   localPosition = Math.max(0, Number(detail.position) || 0);
   localStatus = detail.status === "playing" ? "playing" : detail.status === "paused" || detail.status === "ended" ? detail.status : localStatus;
+  const eventType = String(detail.eventType || detail.event || detail.status || "").toLowerCase();
+  if (eventType === "ready" || eventType === "canplay" || eventType === "loadedmetadata") {
+    if ((role === "guest" && joinedPlayback) || (role === "host" && allowGuestPlaybackControl)) applyRemoteState(true);
+    return;
+  }
   if (!roomId || (role !== "host" && !allowGuestPlaybackControl)) { if (role !== "host" && joinedPlayback) applyRemoteState(); return; }
   if (Date.now() < suppressPlaybackPublishUntil) return;
   if (detail.status === "playing") hostStatus = "playing";
   if (detail.status === "paused") hostStatus = "paused";
   if (detail.status === "ended") hostStatus = "ended";
+  const heartbeatEvent = ["playing", "timeupdate", "progress", "heartbeat"].includes(eventType);
+  if (heartbeatEvent && hostStatus !== "playing") return;
   const now = Date.now();
-  // Throttle periodic playing heartbeats, but never drop a real pause/resume
-  // transition just because it follows a recent progress update.
-  if (detail.status === "playing" && lastPublishedStatus === "playing" && now - lastPublishAt < 3500) return;
+  // Frequent provider progress events keep the room clock fresh. Explicit
+  // pause/resume/seek/end events always bypass this heartbeat throttle.
+  if (heartbeatEvent && lastPublishedStatus === "playing" && now - lastPublishAt < 1800) return;
   lastPublishAt = now;
   lastPublishedStatus = hostStatus;
   const sessionId = new URLSearchParams(window.location.search).get("sessionId") || "";
-  const payload = { roomId, sessionId, provider: detail.provider, status: hostStatus, contentId: String(detail.contentId || ""), mediaType: detail.mediaType, season: detail.season, episode: detail.episode, position: localPosition, duration: Math.max(0, Number(detail.duration) || 0) };
+  const payload = { roomId, sessionId, provider: detail.provider, eventType, status: hostStatus, contentId: String(detail.contentId || ""), mediaType: detail.mediaType, season: detail.season, episode: detail.episode, position: localPosition, duration: Math.max(0, Number(detail.duration) || 0) };
   lastHostPayload = payload;
   publishQueue = publishQueue.then(() => roomId === payload.roomId && (role === "host" || allowGuestPlaybackControl) ? publishRoomPlayback(payload) : null).catch(error => setNote(error?.message || "Could not publish the room playback state."));
 });
@@ -453,6 +462,7 @@ window.addEventListener("message", event => {
   window.dispatchEvent(new CustomEvent("vivid:provider-playback", { detail: {
     provider: "cinesrc",
     origin: event.origin,
+    eventType: type.slice("cinesrc:".length),
     status,
     position: localPosition,
     duration: Math.max(0, Number(data.duration) || 0),
