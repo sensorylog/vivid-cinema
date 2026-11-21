@@ -221,7 +221,7 @@ function renderQueue(items) {
     const join = document.createElement("a");
     join.className = "vivid-wr-button vivid-wr-button--primary";
     join.textContent = "Join screening";
-    join.href = buildScreeningUrl(room.activeScreening) || "#wr-screening-stage";
+    join.href = buildScreeningUrl(room.activeScreening) || "#wr-lobby-queue";
     join.addEventListener("click", event => {
       event.preventDefault();
       const next = new URL(window.location.href);
