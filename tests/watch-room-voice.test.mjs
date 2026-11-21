@@ -72,4 +72,6 @@ test("Watch Room ships voice controls and keeps the shared player inside the roo
   assert.match(api, /requireRoomMember\(roomId, uid\)/);
   assert.ok(headers.includes("microphone=(self)"));
   assert.ok(headers.includes("wss://*.livekit.cloud"));
+  assert.ok(api.includes("removeAllLiveKitParticipants"));
+  assert.ok(api.includes("RemoveParticipant"));
 });
