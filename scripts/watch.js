@@ -1,4 +1,5 @@
 import { tmdbApi } from "./tmdb.js";
+import { resolveAndroidPlayerBackAction } from "./android-navigation.js";
 import { resolveAnimeIds } from "./playback/anime-id-resolver.js";
 import { getImageUrl, getMediaUrl, normalizeMedia, normalizeResults } from "./media.js";
 import { buildTitleUrl, buildWatchUrl, getRoute } from "./routes.js";
@@ -1017,7 +1018,24 @@ function renderShell(params) {
   };
   fullscreenButton?.addEventListener("click", () => { void togglePlayerFullscreen(); });
   document.addEventListener("fullscreenchange", syncFullscreenButton);
-  window.addEventListener("vivid:android-back", closePlayerWindow);
+  window.addEventListener("vivid:android-back", () => {
+    const action = resolveAndroidPlayerBackAction({
+      fullscreen: Boolean(document.fullscreenElement && playerDialog?.contains(document.fullscreenElement)),
+      fallbackFullscreen: Boolean(overlay?.classList.contains("vivid-player-fullscreen-fallback"))
+    });
+    if (action === "exit-fullscreen") {
+      if (document.fullscreenElement && playerDialog?.contains(document.fullscreenElement)) {
+        void document.exitFullscreen?.().catch(error => {
+          console.warn("Vivid could not exit Android player fullscreen:", error);
+        });
+      } else {
+        overlay?.classList.remove("vivid-player-fullscreen-fallback");
+        syncFullscreenButton();
+      }
+      return;
+    }
+    closePlayerWindow();
+  });
   openPlayer?.addEventListener("click", openPlayerWindow);
   // Do not open or start either player until the viewer chooses one.
   closePlayer?.addEventListener("click", closePlayerWindow);
