@@ -357,6 +357,7 @@ function openLobby(data) {
   settings.elements.allowGuestPlayerSelection.checked = data.allowGuestPlayerSelection === true;
   settings.elements.allowGuestQueueManagement.checked = data.allowGuestQueueManagement === true;
   settings.elements.allowGuestPlaybackControl.checked = data.allowGuestPlaybackControl === true;
+  settings.elements.allowGuestVoice.checked = data.allowGuestVoice !== false;
   settings.addEventListener("change", () => { settings.dataset.dirty = "true"; });
   const refreshLobby = async () => {
     if (!room || room.roomId !== data.roomId) return;
@@ -366,6 +367,7 @@ function openLobby(data) {
       const snapshot = response.data || {};
       if (snapshot.room) {
         room = { ...room, ...snapshot.room };
+        document.dispatchEvent(new CustomEvent("vivid:watch-room-updated", { detail: room }));
         const activeSessionId = String(room.activeScreening?.sessionId || "");
         if (activeSessionId && activeSessionId !== loadedScreeningSessionId && activeSessionId !== dismissedScreeningSessionId) {
           openEmbeddedScreening(room.activeScreening);
@@ -378,6 +380,7 @@ function openLobby(data) {
           currentSettings.elements.allowGuestPlayerSelection.checked = room.allowGuestPlayerSelection === true;
           currentSettings.elements.allowGuestQueueManagement.checked = room.allowGuestQueueManagement === true;
           currentSettings.elements.allowGuestPlaybackControl.checked = room.allowGuestPlaybackControl === true;
+          currentSettings.elements.allowGuestVoice.checked = room.allowGuestVoice !== false;
         }
       }
       applyRoomPermissions();
@@ -536,7 +539,8 @@ byId("wr-room-settings-form")?.addEventListener("submit", async event => {
         allowGuestVoting: form.elements.allowGuestVoting.checked,
         allowGuestPlayerSelection: form.elements.allowGuestPlayerSelection.checked,
         allowGuestQueueManagement: form.elements.allowGuestQueueManagement.checked,
-        allowGuestPlaybackControl: form.elements.allowGuestPlaybackControl.checked
+        allowGuestPlaybackControl: form.elements.allowGuestPlaybackControl.checked,
+        allowGuestVoice: form.elements.allowGuestVoice.checked
       }
     });
     form.dataset.dirty = "false";
