@@ -79,6 +79,7 @@ test("local playback clock is extrapolated from its last observed position", () 
 test("playback event classification separates commands from progress heartbeats", () => {
   assert.equal(classifyPlaybackEvent({ event: "playing", status: "playing", previousStatus: "paused" }), "play");
   assert.equal(classifyPlaybackEvent({ event: "playing", status: "playing", previousStatus: "playing" }), "progress");
+  assert.equal(classifyPlaybackEvent({ event: "play", status: "playing", previousStatus: "playing" }), "play");
   assert.equal(classifyPlaybackEvent({ event: "timeupdate", status: "playing", previousStatus: "playing" }), "progress");
   assert.equal(classifyPlaybackEvent({ event: "seeked", status: "seeked", previousStatus: "playing" }), "seek");
   assert.equal(classifyPlaybackEvent({ event: "pause", status: "paused", previousStatus: "playing" }), "pause");
