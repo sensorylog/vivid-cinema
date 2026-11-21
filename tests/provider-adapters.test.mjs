@@ -79,3 +79,10 @@ test("Watch Room client actively holds guests before and during host playback", 
   assert.match(client, /if \(state\.status === "paused" \|\| state\.status === "ended"\) \{/);
   assert.match(client, /Your player is ready and paused/);
 });
+
+test("Watch Rooms expose only providers with verified synchronized controls", async () => {
+  const client = await readFile(new URL("../scripts/watch-room-playback.js", import.meta.url), "utf8");
+  assert.match(client, /player1: \[\["vidsrc", "VidSrc · synchronized"\]\]/);
+  assert.match(client, /player2: \[\["cinesrc", "CineSRC · synchronized"\]\]/);
+  assert.doesNotMatch(client, /"VidAPI · solo"|"VidLink · solo"|"MoviesAPI · solo"/);
+});
