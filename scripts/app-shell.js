@@ -508,6 +508,12 @@ function initNativeBackNavigation() {
       return;
     }
 
+    const playerOverlay = document.querySelector("#player-overlay");
+    if (playerOverlay && !playerOverlay.hidden) {
+      window.dispatchEvent(new CustomEvent("vivid:android-back"));
+      return;
+    }
+
     const action = resolveAndroidBackAction({
       currentRoute: currentRoute(),
       stack: readNavigationStack(),
