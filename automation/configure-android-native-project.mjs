@@ -12,6 +12,7 @@ if (!Number.isSafeInteger(buildNumber) || buildNumber < 1) throw new Error("Andr
 const versionCode = 100000 + buildNumber;
 const versionName = packageJson.version;
 const playStoreDistribution = process.env.VIVID_ANDROID_DISTRIBUTION === "play";
+const voiceEnabled = process.env.VIVID_ANDROID_ENABLE_VOICE === "true";
 const gradlePath = path.join(androidRoot, "app", "build.gradle");
 let gradle = await readFile(gradlePath, "utf8");
 if (!/versionCode\s+\d+/.test(gradle) || !/versionName\s+["'][^"']+["']/.test(gradle)) {
@@ -76,8 +77,7 @@ let manifest = await readFile(manifestPath, "utf8");
 let manifestChanged = false;
 const permissions = [
   ...(playStoreDistribution ? [] : ["android.permission.REQUEST_INSTALL_PACKAGES"]),
-  "android.permission.RECORD_AUDIO",
-  "android.permission.MODIFY_AUDIO_SETTINGS"
+  ...(voiceEnabled ? ["android.permission.RECORD_AUDIO", "android.permission.MODIFY_AUDIO_SETTINGS"] : [])
 ];
 for (const permission of permissions) {
   if (manifest.includes(permission)) continue;
@@ -87,7 +87,7 @@ for (const permission of permissions) {
   );
   manifestChanged = true;
 }
-if (!manifest.includes('android.hardware.microphone')) {
+if (voiceEnabled && !manifest.includes('android.hardware.microphone')) {
   manifest = manifest.replace(
     /<application\b/,
     '    <uses-feature android:name="android.hardware.microphone" android:required="false" />\n\n    <application'
