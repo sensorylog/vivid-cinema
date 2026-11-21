@@ -146,6 +146,7 @@ test("native Android project generation registers both plugins idempotently", as
       ...process.env,
       VIVID_ANDROID_ROOT: androidRoot,
       VIVID_ANDROID_BUILD: "1000001",
+      VIVID_ANDROID_ENABLE_VOICE: "true",
       GITHUB_RUN_NUMBER: "12"
     };
     const first = spawnSync(process.execPath, [script], { encoding: "utf8", env });
@@ -242,6 +243,9 @@ test("Play Store native configuration omits the sideload updater and install-fro
     assert.match(activity, /registerPlugin\(VividNavigationPlugin\.class\)/);
     assert.doesNotMatch(activity, /VividUpdaterPlugin/);
     assert.doesNotMatch(manifest, /android\.permission\.REQUEST_INSTALL_PACKAGES/);
+    assert.doesNotMatch(manifest, /android\.permission\.RECORD_AUDIO/);
+    assert.doesNotMatch(manifest, /android\.permission\.MODIFY_AUDIO_SETTINGS/);
+    assert.doesNotMatch(manifest, /android\.hardware\.microphone/);
     assert.match(manifest, /android:usesCleartextTraffic="false"/);
     assert.match(manifest, /android:windowSoftInputMode="adjustResize"/);
     await assert.rejects(
