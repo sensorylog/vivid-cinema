@@ -16,6 +16,9 @@ public class VividNavigationPlugin extends Plugin {
         backCallback = new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
+                // WebView fullscreen custom views are native UI. Dismiss them
+                // before handing Back to the JavaScript navigation stack.
+                if (VividWebChromeClient.exitActiveCustomView()) return;
                 JSObject data = new JSObject();
                 data.put("canGoBack", getBridge().getWebView().canGoBack());
                 notifyListeners("backButton", data, true);
