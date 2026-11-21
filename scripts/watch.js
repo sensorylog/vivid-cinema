@@ -465,11 +465,23 @@ window.addEventListener("vivid:watch-room-apply-selection", event => {
   if (selection.playerId === "player2") {
     if (primaryOverlay) primaryOverlay.hidden = true;
     if (primaryFrame) primaryFrame.src = "about:blank";
+    if (secondaryRoot) {
+      secondaryRoot.dataset.roomActive = "true";
+      secondaryRoot.hidden = false;
+      secondaryRoot.classList.remove("is-minimized");
+    }
     return;
   }
   if (primaryFrame?.src && !primaryFrame.src.endsWith("about:blank")) primaryFrame.src = "about:blank";
-  if (secondaryRoot) secondaryRoot.hidden = true;
-  if (primaryOverlay) primaryOverlay.hidden = false;
+  if (secondaryRoot) {
+    secondaryRoot.dataset.roomActive = "false";
+    secondaryRoot.hidden = true;
+    secondaryRoot.classList.remove("is-minimized");
+  }
+  if (primaryOverlay) {
+    primaryOverlay.classList.remove("is-minimized");
+    primaryOverlay.hidden = false;
+  }
   const position = Math.max(0, Number(selection.position) || 0);
   setPlayerSource(selection.providerId, currentParams, position);
   $("player-overlay")?.scrollIntoView({ block: "center", behavior: "smooth" });
@@ -605,6 +617,26 @@ function mountSecondaryPlayer(params, title, detailsSnapshot = details) {
         title,
         isAnime: false
       });
+      if (isWatchRoomCinemaMode) {
+        if (root.dataset.roomActive !== "true") root.hidden = true;
+        const topbar = root.querySelector(".vivid-tflix-topbar");
+        if (topbar && !topbar.querySelector("#vivid-tflix-minimize")) {
+          const minimize = document.createElement("button");
+          minimize.type = "button";
+          minimize.id = "vivid-tflix-minimize";
+          minimize.className = "vivid-tflix-room-minimize";
+          minimize.setAttribute("aria-label", "Minimize screening player");
+          minimize.innerHTML = '<i class="bi bi-dash-lg" aria-hidden="true"></i>';
+          topbar.append(minimize);
+          minimize.addEventListener("click", () => {
+            const minimized = root.classList.toggle("is-minimized");
+            minimize.setAttribute("aria-label", minimized ? "Restore screening player" : "Minimize screening player");
+            minimize.innerHTML = minimized
+              ? '<i class="bi bi-arrows-angle-expand" aria-hidden="true"></i>'
+              : '<i class="bi bi-dash-lg" aria-hidden="true"></i>';
+          });
+        }
+      }
     })
     .catch(error => console.warn("Vivid secondary player could not initialize:", error));
 }
@@ -700,6 +732,7 @@ function renderShell(params) {
   restorePlayer.innerHTML = '<i class="bi bi-arrows-angle-expand" aria-hidden="true"></i>';
   closePlayer?.parentElement?.insertBefore(restorePlayer, closePlayer);
   restorePlayer.hidden = true;
+  if (isWatchRoomCinemaMode) closePlayer?.setAttribute("aria-label", "Minimize screening player");
   const serverMenu = $("player-server-menu");
   const serverPanel = $("player-server-panel");
   if (serverMenu && serverPanel) {
