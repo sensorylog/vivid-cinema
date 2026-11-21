@@ -459,6 +459,47 @@ function setPlayerSource(source, params, startAt = 0) {
   updateSourceLabel();
 }
 
+document.addEventListener("vivid:watch-room-closing", event => {
+  const closingRoomId = String(event.detail?.roomId || "");
+  const params = new URLSearchParams(window.location.search);
+  if (!isWatchRoomCinemaMode || !closingRoomId || closingRoomId !== params.get("roomId")) return;
+  document.querySelectorAll("#player-overlay iframe, #vivid-tflix-player iframe").forEach(frame => { frame.src = "about:blank"; });
+  const overlay = $("player-overlay");
+  if (overlay) {
+    overlay.classList.remove("is-minimized");
+    overlay.hidden = true;
+  }
+  const secondary = $("vivid-tflix-player");
+  if (secondary) {
+    secondary.classList.remove("is-minimized");
+    secondary.hidden = true;
+    secondary.dataset.roomActive = "false";
+  }
+  $("watch-content")?.replaceChildren();
+  const host = $("wr-screening-player-host");
+  if (host) host.hidden = true;
+  document.body.classList.remove("vivid-watch-room-mode", "vivid-watch-room-player-minimized", "vivid-player-open");
+  document.body.style.removeProperty("--vivid-room-art");
+  const target = new URL("watch-rooms.html", window.location.href);
+  window.history.replaceState({}, "", target);
+  route.url = target;
+  route.params = target.searchParams;
+  isWatchRoomCinemaMode = false;
+  watchRoomScreeningValidated = false;
+  roomOpenPlayerWindow = null;
+  pendingRoomPlayerSelection = null;
+  currentParams = null;
+  media = null;
+  details = null;
+  sourceAttempted.clear();
+  primaryHealthy = false;
+  if (fallbackTimer) window.clearTimeout(fallbackTimer);
+  if (fallbackPromptDismissTimer) window.clearTimeout(fallbackPromptDismissTimer);
+  fallbackTimer = null;
+  fallbackPromptDismissTimer = null;
+  document.title = "Watch Rooms · Vivid Cinema";
+});
+
 document.addEventListener("vivid:watch-room-screening-validated", event => {
   if (!isWatchRoomCinemaMode) return;
   const screening = event.detail?.activeScreening;
