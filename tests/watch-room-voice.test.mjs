@@ -113,6 +113,8 @@ test("Watch Room ships voice controls and keeps the shared player inside the roo
   assert.ok(watchPage.includes('route.params.get("roomMode") === "1"'));
   assert.ok(roomStyles.includes("body.vivid-wr-screening-open .vivid-wr-screening-frame-wrap"));
   assert.ok(playback.includes("joinedPlayback && latestRemoteState?.status === \"playing\""));
+  assert.ok(playback.includes("joinedPlayback = memberRole === \"guest\""));
+  assert.ok(playback.includes("joinButton.hidden = true"));
   assert.ok(playback.includes('state.status === "playing" && !roomPlayerLoadRequested'));
   assert.ok(api.includes('tx.delete(roomRef.collection("playback").doc("current"))'));
   assert.ok(api.includes('roomData.activeScreening?.sessionId'));
