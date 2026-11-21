@@ -876,6 +876,20 @@ function episodeNavigationMarkup(params) {
 }
 
 function renderShell(params) {
+  if (isWatchRoomCinemaMode) {
+    roomPlayerSlot?.querySelectorAll("iframe").forEach(frame => { frame.src = "about:blank"; });
+    const previousDirectVideo = roomPlayerSlot?.querySelector("video");
+    if (previousDirectVideo) {
+      previousDirectVideo.pause();
+      previousDirectVideo.removeAttribute("src");
+      previousDirectVideo.load?.();
+    }
+    roomPlayerLayout?.destroy();
+    roomPlayerLayout = null;
+    roomPlayerSlot?.remove();
+    roomPlayerSlot = null;
+    document.querySelector(".vivid-wr-player-details")?.remove();
+  }
   const isTv = params.type === "tv";
   const title = media.title || "Vivid Cinema";
   const episodeTitle = isTv && details?.episode ? details.episode.name : "";
@@ -908,9 +922,6 @@ function renderShell(params) {
     '<section class="vivid-watch-recommendations"><div class="vivid-section-heading"><div><span>MORE TO DISCOVER</span><h2>You might also like</h2></div></div><div id="watch-recommendations" class="vivid-watch-rec-rail">' + recommendationCards() + '</div></section>';
 
   if (isWatchRoomCinemaMode) {
-    roomPlayerLayout?.destroy();
-    document.getElementById("wr-cinema-player-slot")?.remove();
-    document.querySelector(".vivid-wr-player-details")?.remove();
     const stage = $("wr-cinema-stage");
     const host = $("wr-screening-player-host");
     const watchContentForRoom = $("watch-content");
