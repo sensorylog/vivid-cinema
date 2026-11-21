@@ -54,6 +54,6 @@ test("Watch Room ships voice controls and keeps the shared player inside the roo
   assert.match(voice, /setMicrophoneEnabled/);
   assert.match(api, /async function getWatchRoomVoiceToken/);
   assert.match(api, /requireRoomMember\(roomId, uid\)/);
-  assert.match(headers, /microphone=\\(self\\)/);
-  assert.match(headers, /wss:\\/\\/\\*\\.livekit\\.cloud/);
+  assert.ok(headers.includes("microphone=(self)"));
+  assert.ok(headers.includes("wss://*.livekit.cloud"));
 });
