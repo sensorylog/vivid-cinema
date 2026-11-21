@@ -573,9 +573,40 @@ window.addEventListener("message", event => {
     return;
   }
   if (type === "cinesrc:nextepisode" && new URLSearchParams(window.location.search).get("roomMode") === "1") {
+    const now = Date.now();
+    const sharedPosition = latestRemoteState
+      ? getExpectedPlaybackPosition(latestRemoteState, { nowMs: now, clockOffsetMs })
+      : Math.max(0, Number(localPosition) || 0);
+    if (role === "host" && latestRemoteState) {
+      const pausePayload = {
+        roomId,
+        sessionId: playbackSessionId,
+        provider: latestRemoteState.provider,
+        eventType: "pause",
+        status: "paused",
+        contentId: latestRemoteState.contentId,
+        mediaType: latestRemoteState.mediaType,
+        season: latestRemoteState.season,
+        episode: latestRemoteState.episode,
+        position: sharedPosition,
+        positionAtMs: now + clockOffsetMs,
+        playbackRate: hostPlaybackRate,
+        duration: latestRemoteState.duration
+      };
+      hostStatus = "paused";
+      lastHostPayload = pausePayload;
+      lastPublishedStatus = "paused";
+      lastPublishAt = now;
+      publishRoomPlayback(pausePayload);
+    }
     sendProviderCommand("pause");
     localStatus = "paused";
-    localPlaybackRate = 1;
+    lastCommandedStatus = "paused";
+    pendingPlaySince = 0;
+    roomPlayerLoadRequested = true;
+    window.setTimeout(() => window.dispatchEvent(new CustomEvent("vivid:watch-room-apply-selection", {
+      detail: { playerId: activePlayerId, providerId: activeProviderId, position: sharedPosition }
+    })), 80);
     setNote("Episodes are locked to the shared screening. Use the room queue to start the next episode for everyone.");
     return;
   }
