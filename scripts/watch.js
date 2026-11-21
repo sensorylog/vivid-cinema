@@ -13,7 +13,7 @@ import { buildVidapiEmbedUrl, buildVidsrcEmbedUrl, buildVidlinkEmbedUrl, buildVi
 
 const $ = (id) => document.getElementById(id);
 const route = getRoute();
-const isWatchRoomCinemaMode = route.params.get("roomMode") === "1" && Boolean(route.params.get("roomId"));
+let isWatchRoomCinemaMode = route.params.get("roomMode") === "1" && Boolean(route.params.get("roomId"));
 if (isWatchRoomCinemaMode) {
   document.body.classList.add("vivid-watch-room-mode");
   document.getElementById("wr-screening-player-host")?.removeAttribute("hidden");
@@ -457,6 +457,67 @@ function setPlayerSource(source, params, startAt = 0) {
   }
   updateSourceLabel();
 }
+
+document.addEventListener("vivid:watch-room-screening-validated", event => {
+  if (!isWatchRoomCinemaMode) return;
+  const screening = event.detail?.activeScreening;
+  const params = new URLSearchParams(window.location.search);
+  if (event.detail?.roomId !== params.get("roomId") ||
+      String(screening?.sessionId || "") !== String(params.get("sessionId") || "") ||
+      String(screening?.contentId || "") !== String(params.get("id") || "") ||
+      watchRoomScreeningValidated) return;
+  watchRoomScreeningValidated = true;
+  if (currentParams) openPlayerWindow();
+  if (pendingRoomPlayerSelection) {
+    const selection = pendingRoomPlayerSelection;
+    pendingRoomPlayerSelection = null;
+    window.dispatchEvent(new CustomEvent("vivid:watch-room-apply-selection", { detail: selection }));
+  }
+});
+
+window.addEventListener("vivid:watch-room-screening-focus", event => {
+  if (isWatchRoomCinemaMode && watchRoomScreeningValidated &&
+      event.detail?.roomId === new URLSearchParams(window.location.search).get("roomId")) {
+    openPlayerWindow();
+  }
+});
+
+window.addEventListener("vivid:watch-room-screening-navigate", event => {
+  const detail = event.detail || {};
+  const params = new URLSearchParams(window.location.search);
+  if (!detail.roomId || detail.roomId !== params.get("roomId") ||
+      params.get("roomMode") !== "1" || !params.get("id")) return;
+  route.params = params;
+  route.url = new URL(window.location.href);
+  isWatchRoomCinemaMode = true;
+  document.body.classList.add("vivid-watch-room-mode");
+  document.getElementById("wr-screening-player-host")?.removeAttribute("hidden");
+  watchRoomScreeningValidated = false;
+  pendingRoomPlayerSelection = null;
+  currentParams = null;
+  media = null;
+  details = null;
+  imdbId = "";
+  tmdbId = "";
+  aniListId = "";
+  malId = "";
+  activeSource = "vidapi";
+  sourceAttempted.clear();
+  primaryHealthy = false;
+  if (fallbackTimer) window.clearTimeout(fallbackTimer);
+  if (fallbackPromptDismissTimer) window.clearTimeout(fallbackPromptDismissTimer);
+  fallbackTimer = null;
+  fallbackPromptDismissTimer = null;
+  void load().catch(error => {
+    console.error("Vivid Watch Room screening could not initialize:", error);
+    const status = $("player-status");
+    if (status) {
+      status.textContent = "The screening could not initialize. Your room and voice connection are still active; try opening the screening again.";
+      status.classList.add("is-warning");
+      status.hidden = false;
+    }
+  });
+});
 
 window.addEventListener("vivid:watch-room-apply-selection", event => {
   const selection = event.detail || {};
@@ -988,23 +1049,6 @@ function renderShell(params) {
       updateSourceLabel();
     };
   }
-  if (isWatchRoomCinemaMode) {
-    document.addEventListener("vivid:watch-room-screening-validated", event => {
-      const screening = event.detail?.activeScreening;
-      const params = new URLSearchParams(window.location.search);
-      if (event.detail?.roomId !== params.get("roomId") ||
-          String(screening?.sessionId || "") !== String(params.get("sessionId") || "") ||
-          String(screening?.contentId || "") !== String(params.get("id") || "") ||
-          watchRoomScreeningValidated) return;
-      watchRoomScreeningValidated = true;
-      openPlayerWindow();
-      if (pendingRoomPlayerSelection) {
-        const selection = pendingRoomPlayerSelection;
-        pendingRoomPlayerSelection = null;
-        window.dispatchEvent(new CustomEvent("vivid:watch-room-apply-selection", { detail: selection }));
-      }
-    });
-  }
   recordHistory();
   recordBehavior("watch_started", media, { season: params.season, episode: params.episode, resumeAt });
 }
@@ -1262,6 +1306,7 @@ async function load() {
   }
   media = normalizeMedia({ id: currentParams.id, overview: "", title: currentParams.type === "tv" ? "Loading episode…" : "Loading movie…", poster_path: "", backdrop_path: "" }, currentParams.type);
   renderShell(currentParams);
+  if (isWatchRoomCinemaMode && watchRoomScreeningValidated) openPlayerWindow();
   try {
     details = currentParams.type === "tv" ? await tmdbApi.tvDetails(currentParams.id) : await tmdbApi.movieDetails(currentParams.id);
     media = normalizeMedia(details, currentParams.type);
