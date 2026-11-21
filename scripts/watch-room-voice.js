@@ -7,6 +7,7 @@ const muteButton = byId("wr-voice-mute");
 const leaveButton = byId("wr-voice-leave");
 const statusNode = byId("wr-voice-status");
 const participantsNode = byId("wr-voice-participants");
+const participantCountNode = byId("wr-voice-count");
 const call = callWatchRoomApi;
 const VOICE_INTENT_KEY = "vivid:watch-room-voice-intent:v1";
 const VOICE_INTENT_TTL_MS = 45_000;
@@ -68,28 +69,49 @@ function cleanupAudio() {
 function participantLabel(participant) {
   return participant.name || participant.identity || "Vivid member";
 }
+function participantInitials(participant) {
+  return participantLabel(participant).trim().split(/\s+/).filter(Boolean).slice(0, 2)
+    .map(part => Array.from(part)[0] || "").join("").toUpperCase() || "V";
+}
 function renderParticipants() {
   if (!participantsNode) return;
   participantsNode.replaceChildren();
+  const participants = livekitRoom
+    ? [livekitRoom.localParticipant, ...livekitRoom.remoteParticipants.values()]
+    : [];
+  if (participantCountNode) {
+    participantCountNode.textContent = livekitRoom ? participants.length + " connected" : "Not connected";
+    participantCountNode.dataset.connected = String(Boolean(livekitRoom));
+  }
+  panel?.classList.toggle("is-connected", Boolean(livekitRoom));
   if (!livekitRoom) {
-    participantsNode.textContent = "No one is connected to voice yet.";
+    const empty = document.createElement("li");
+    empty.className = "vivid-wr-voice-empty";
+    empty.textContent = "Join voice when ready. Movie playback continues independently.";
+    participantsNode.append(empty);
     return;
   }
-  const participants = [livekitRoom.localParticipant, ...livekitRoom.remoteParticipants.values()];
   participants.forEach(participant => {
     const item = document.createElement("li");
-    item.className = "vivid-wr-voice-person";
-    const name = document.createElement("strong");
-    name.textContent = participantLabel(participant) + (participant === livekitRoom.localParticipant ? " · You" : "");
-    const state = document.createElement("small");
     const speaking = participant.isSpeaking === true;
     const micOn = participant.isMicrophoneEnabled === true;
-    state.textContent = speaking ? "Speaking" : micOn ? "Microphone on" : "Muted";
+    const isLocal = participant === livekitRoom.localParticipant;
+    item.className = "vivid-wr-voice-person";
+    item.classList.toggle("is-speaking", speaking);
+    item.dataset.local = String(isLocal);
+    item.title = participantLabel(participant) + (speaking ? " is speaking" : micOn ? " microphone on" : " muted");
+    const avatar = document.createElement("span");
+    avatar.className = "vivid-wr-voice-avatar";
+    avatar.setAttribute("aria-hidden", "true");
+    avatar.textContent = participantInitials(participant);
+    const name = document.createElement("strong");
+    name.textContent = participantLabel(participant) + (isLocal ? " · You" : "");
+    const state = document.createElement("small");
+    state.textContent = speaking ? "Speaking" : micOn ? "Mic on" : "Muted";
     state.dataset.speaking = String(speaking);
-    item.append(name, state);
+    item.append(avatar, name, state);
     participantsNode.append(item);
   });
-  if (!participants.length) participantsNode.textContent = "Waiting for people to join.";
 }
 function attachAudio(track) {
   const element = track.attach();
@@ -178,12 +200,14 @@ async function joinVoice(options = {}) {
     try {
       await room.localParticipant.setMicrophoneEnabled(!restoreMuted);
       isMuted = restoreMuted;
-      muteButton.textContent = isMuted ? "Unmute microphone" : "Mute microphone";
+      muteButton.innerHTML = isMuted ? '<i class="bi bi-mic-mute-fill" aria-hidden="true"></i> Unmute microphone' : '<i class="bi bi-mic-fill" aria-hidden="true"></i> Mute microphone';
+      muteButton.setAttribute("aria-pressed", String(isMuted));
       setStatus(isMuted ? "Voice connected · Your microphone is muted." : "Voice connected · Your microphone is on.", "success");
       persistVoiceIntent(targetRoomId, isMuted);
     } catch (error) {
       isMuted = true;
-      muteButton.textContent = "Enable microphone";
+      muteButton.innerHTML = '<i class="bi bi-mic-fill" aria-hidden="true"></i> Enable microphone';
+      muteButton.setAttribute("aria-pressed", "true");
       setStatus("You're connected and can hear the room, but microphone access was denied or unavailable. Check browser permissions.", "warning");
       persistVoiceIntent(targetRoomId, true);
     }
