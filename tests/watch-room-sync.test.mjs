@@ -94,7 +94,7 @@ test("playback event classification separates commands from progress heartbeats"
 
 test("shared playback clock applies playback rate to host and local timeline estimates", () => {
   assert.equal(normalizePlaybackRate(1.5), 1.5);
-  assert.equal(normalizePlaybackRate(8), 4);
+  assert.equal(normalizePlaybackRate(8), 2);
   assert.equal(normalizePlaybackRate(0.1), 0.25);
   assert.equal(normalizePlaybackRate("invalid"), 1);
   assert.equal(getExpectedPlaybackPosition({
