@@ -93,7 +93,7 @@ test("Watch Room screenings stay embedded in the lobby and float without stoppin
   assert.ok(legacyPage.includes('new URL("watch-rooms.html", window.location.href)'));
   assert.ok(legacyPage.includes("window.location.replace(target.href)"));
   assert.ok(lobbyHtml.includes('id="wr-screening-player-host"'));
-  assert.ok(lobbyHtml.indexOf('id="wr-screening-player-host"') < lobbyHtml.indexOf('</section>\\n            <aside class="vivid-wr-room-sidebar"'));
+  assert.ok(lobbyHtml.indexOf('id="wr-screening-player-host"') < lobbyHtml.indexOf('</section>\n            <aside class="vivid-wr-room-sidebar"'));
   assert.ok(lobbyHtml.includes('id="wr-voice-count"'));
   assert.ok(lobbyHtml.includes('styles/vivid-watch-room-experience.css'));
   assert.ok(lobbyHtml.includes('id="wr-cinema-stage"'));
@@ -230,10 +230,12 @@ test("Watch Room player uses scroll-aware floating presentation with hysteresis"
     };
   };
   let observerCallback;
+  let observerOptions;
   let observedTarget;
   class FakeIntersectionObserver {
     constructor(callback, options) {
       observerCallback = callback;
+      observerOptions = options;
       this.options = options;
     }
     observe(target) { observedTarget = target; }
@@ -249,7 +251,8 @@ test("Watch Room player uses scroll-aware floating presentation with hysteresis"
   });
   layout.setActive(true);
   assert.equal(observedTarget, slot);
-  assert.deepEqual(new FakeIntersectionObserver(() => {}, {}).options, {});
+  assert.deepEqual(observerOptions.threshold, [0, 0.12, 0.45]);
+  assert.equal(observerOptions.root, null);
   observerCallback([{ target: slot, isIntersecting: false, intersectionRatio: 0 }]);
   assert.equal(overlay.classList.contains("is-floating"), true);
   observerCallback([{ target: slot, isIntersecting: true, intersectionRatio: 0.2 }]);
