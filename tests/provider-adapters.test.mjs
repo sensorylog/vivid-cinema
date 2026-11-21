@@ -81,6 +81,7 @@ test("Watch Room preloads guest players and holds preparation playback until the
   assert.match(client, /else if \(detail\.status === "playing"\) pauseGuestPlayer\(/);
   assert.match(client, /const desiredStatus = state\.status === "playing" \? "playing" : "paused"/);
   assert.match(client, /Your player is ready\. Tap Play once to prepare it/);
+  assert.ok(client.includes("refreshRoomPlayerSelection().catch(error => setNote"), "new screenings should apply the shared player selection immediately");
 });
 
 test("Watch Rooms expose only providers with verified synchronized controls and use realtime snapshots", async () => {
