@@ -391,6 +391,11 @@ async function connectToRoom(id) {
   await ping();
   if (roomId !== id || connectionGeneration !== playbackConnectionGeneration) return;
   heartbeatTimer = window.setInterval(ping, 30000);
+  if (role === "guest" || allowGuestPlaybackControl) {
+    syncReconcileTimer = window.setInterval(() => {
+      if (document.visibilityState === "visible" && latestRemoteState) applyRemoteState();
+    }, 2000);
+  }
   try { await refreshRoomPlayerSelection(); } catch (error) { setNote(error?.message || "Could not load the room player selection."); }
   selectionTimer = window.setInterval(() => { refreshRoomPlayerSelection().catch(error => setNote(error?.message || "Room player selection could not refresh.")); }, 5000);
   if (role === "guest") {
@@ -462,7 +467,7 @@ window.addEventListener("message", event => {
   const data = event.data;
   if (!data || typeof data.type !== "string" || !data.type.startsWith("cinesrc:")) return;
   const type = data.type;
-  if (!["cinesrc:ready", "cinesrc:play", "cinesrc:pause", "cinesrc:timeupdate", "cinesrc:ended"].includes(type)) return;
+  if (!["cinesrc:ready", "cinesrc:play", "cinesrc:pause", "cinesrc:timeupdate", "cinesrc:seeked", "cinesrc:ended"].includes(type)) return;
   let status = localStatus;
   if (type === "cinesrc:play") status = "playing";
   else if (type === "cinesrc:pause") status = "paused";
