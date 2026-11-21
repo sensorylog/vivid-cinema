@@ -163,6 +163,9 @@ test("Watch Room screenings stay in the lobby and minimize without stopping play
   assert.ok(voice.includes("clearVoiceIntent(connectedRoomId || activeRoom?.roomId)"));
   assert.ok(cinemaStyles.includes("aspect-ratio:16/9"));
   assert.ok(cinemaStyles.includes("#player-overlay.is-minimized"));
+  assert.ok(cinemaStyles.includes("pointer-events:none!important;background:transparent!important"), "a minimized player must not leave a full-screen click shield over the lobby");
+  assert.ok(cinemaStyles.includes("pointer-events:auto!important"), "the mini-player card itself must remain interactive");
+
   const roomStyles = await readFile(new URL("../styles/vivid-watch-rooms.css", import.meta.url), "utf8");
   assert.ok(roomStyles.includes(".vivid-wr-room-layout"));
   assert.ok(roomStyles.includes(".vivid-wr-room-tabs"));
