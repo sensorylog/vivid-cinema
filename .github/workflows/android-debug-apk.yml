@@ -24,7 +24,7 @@ permissions:
 jobs:
   build-debug-apk:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -122,6 +122,36 @@ jobs:
           test "$actual" = "$expected" || { echo "APK adaptive icon does not match icons/vivid-icon-180.png"; exit 1; }
           unzip -l "$apk" | grep -q 'res/mipmap-anydpi-v26/ic_launcher.xml'
           echo "Verified: APK adaptive launcher foreground exactly matches the Vivid Cinema icon source."
+
+      - name: Install and launch on an Android emulator
+        uses: ReactiveCircus/android-emulator-runner@v2
+        with:
+          api-level: 35
+          target: google_apis
+          arch: x86_64
+          profile: pixel_2
+          disable-animations: true
+          script: |
+            set -euo pipefail
+            apk="release-output/$VIVID_ANDROID_APK_NAME"
+            adb install -r "$apk"
+            launch="$(adb shell am start -W -n com.vividcinema.app/.MainActivity)"
+            printf '%s\\n' "$launch"
+            printf '%s' "$launch" | grep -q "Status: ok"
+            sleep 15
+            pid="$(adb shell pidof com.vividcinema.app | tr -d '\\r')"
+            test -n "$pid"
+            adb logcat -d --pid="$pid" > "$RUNNER_TEMP/vivid-android-emulator.log"
+            if grep -E "FATAL EXCEPTION|Fatal signal|Process: com\\.vividcinema\\.app" "$RUNNER_TEMP/vivid-android-emulator.log"; then
+              echo "Vivid Cinema crashed during Android emulator startup."
+              exit 1
+            fi
+            adb shell input keyevent KEYCODE_HOME
+            sleep 2
+            adb shell am start -W -n com.vividcinema.app/.MainActivity | grep -q "Status: ok"
+            sleep 3
+            test -n "$(adb shell pidof com.vividcinema.app | tr -d '\\r')"
+            echo "Android emulator smoke test passed: installed, launched, backgrounded and resumed Vivid Cinema without a fatal app crash."
 
       - name: Upload Android APK artifact
         uses: actions/upload-artifact@v4
