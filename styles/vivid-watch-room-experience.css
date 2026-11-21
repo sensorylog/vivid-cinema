@@ -129,6 +129,13 @@ body.vivid-watch-rooms-page.vivid-watch-room-mode .vivid-wr-player-slot #player-
 body.vivid-watch-rooms-page.vivid-watch-room-mode .vivid-wr-player-slot #player-overlay.is-floating .vivid-player-dialog-head{
   flex-basis:38px!important;min-height:38px!important;height:38px!important;padding:4px 7px!important
 }
+body.vivid-watch-rooms-page.vivid-watch-room-mode .vivid-wr-player-slot #player-overlay.is-floating .vivid-player-layout,
+body.vivid-watch-rooms-page.vivid-watch-room-mode .vivid-wr-player-slot #player-overlay.is-floating .vivid-player-main{
+  height:auto!important;min-height:0!important
+}
+body.vivid-watch-rooms-page.vivid-watch-room-mode .vivid-wr-player-slot #player-overlay.is-floating .vivid-player-frame{
+  height:auto!important;aspect-ratio:16/9!important
+}
 body.vivid-watch-rooms-page.vivid-watch-room-mode .vivid-wr-player-slot #player-overlay.is-floating .vivid-player-dialog-eyebrow,
 body.vivid-watch-rooms-page.vivid-watch-room-mode .vivid-wr-player-slot #player-overlay.is-floating .vivid-player-current-source,
 body.vivid-watch-rooms-page.vivid-watch-room-mode .vivid-wr-player-slot #player-overlay.is-floating #player-server-menu{
