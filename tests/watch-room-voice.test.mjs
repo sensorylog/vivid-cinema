@@ -78,15 +78,18 @@ test("LiveKit token signer rejects malformed identities and unscoped room names"
 });
 
 test("Watch Room screenings stay in the lobby and minimize without stopping playback", async () => {
-  const [lobbyHtml, lobby, voice, playback, watchPage, cinemaStyles, rooms] = await Promise.all([
+  const [lobbyHtml, lobby, voice, playback, watchPage, cinemaStyles, rooms, legacyPage] = await Promise.all([
     readFile(new URL("../watch-rooms.html", import.meta.url), "utf8"),
     readFile(new URL("../scripts/watch-room-lobby.js", import.meta.url), "utf8"),
     readFile(new URL("../scripts/watch-room-voice.js", import.meta.url), "utf8"),
     readFile(new URL("../scripts/watch-room-playback.js", import.meta.url), "utf8"),
     readFile(new URL("../scripts/watch.js", import.meta.url), "utf8"),
     readFile(new URL("../styles/vivid-watch-room-cinema.css", import.meta.url), "utf8"),
-    readFile(new URL("../scripts/watch-rooms.js", import.meta.url), "utf8")
+    readFile(new URL("../scripts/watch-rooms.js", import.meta.url), "utf8"),
+    readFile(new URL("../watch-room-cinema.html", import.meta.url), "utf8")
   ]);
+  assert.ok(legacyPage.includes('new URL("watch-rooms.html", window.location.href)'));
+  assert.ok(legacyPage.includes("window.location.replace(target.href)"));
   assert.ok(lobbyHtml.includes('id="wr-screening-player-host"'));
   assert.ok(lobbyHtml.includes('id="wr-cinema-stage"'));
   assert.ok(lobbyHtml.includes('data-room-view="queue"'));
