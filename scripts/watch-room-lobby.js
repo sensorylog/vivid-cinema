@@ -530,7 +530,7 @@ byId("wr-room-settings-form")?.addEventListener("submit", async event => {
   const button = form.querySelector('[type="submit"]');
   button.disabled = true;
   try {
-    await call("updateWatchRoomSettings")({
+    const result = await call("updateWatchRoomSettings")({
       roomId: room.roomId,
       settings: {
         name: form.elements.name.value.trim(),
@@ -545,7 +545,9 @@ byId("wr-room-settings-form")?.addEventListener("submit", async event => {
     });
     form.dataset.dirty = "false";
     byId("wr-lobby-title").textContent = form.elements.name.value.trim();
-    setFeedback("Room settings saved.");
+    if (form.elements.allowGuestVoice.checked === false && result.data?.voiceEvicted === false) {
+      setFeedback("Guest voice is blocked for new joins, but LiveKit did not confirm every active disconnection. Check the voice service.", true);
+    } else setFeedback("Room settings saved.");
   } catch (error) { showError(error); }
   finally { button.disabled = false; }
 });
