@@ -588,10 +588,55 @@ function subscribeRoomRealtime(roomId) {
     })).sort((a, b) => (a.role === "host" ? -1 : 0) - (b.role === "host" ? -1 : 0) || String(a.displayName).localeCompare(String(b.displayName)));
     renderPresence();
   };
+  // A denied realtime listener is not proof that membership was revoked.
+  // Confirm access through the trusted API before hiding the lobby; this avoids
+  // turning a transient Firestore rules/token issue into an open-close loop.
+  let accessVerification = null;
+  let fallbackRefresh = null;
+  let realtimeFallback = false;
+  const refreshTrustedSnapshot = () => {
+    if (fallbackRefresh) return fallbackRefresh;
+    fallbackRefresh = call("getWatchRoomLobbySnapshot")({ roomId })
+      .then(response => {
+        if (!room || room.roomId !== roomId) return;
+        const snapshot = response.data || {};
+        if (snapshot.room) applyRoomDocument({ ...snapshot.room, roomId });
+        if (Array.isArray(snapshot.members)) {
+          memberList = snapshot.members;
+          renderPresence();
+        }
+        if (Array.isArray(snapshot.queue)) renderQueue(snapshot.queue);
+        if (Array.isArray(snapshot.chat)) renderChat(snapshot.chat);
+      })
+      .finally(() => { fallbackRefresh = null; });
+    return fallbackRefresh;
+  };
+  const verifyRoomAccess = () => {
+    if (accessVerification) return accessVerification;
+    accessVerification = refreshTrustedSnapshot()
+      .then(() => {
+        if (room?.roomId === roomId) {
+          setFeedback("Your room access is confirmed. Live updates are temporarily unavailable; the lobby will keep refreshing.");
+        }
+      })
+      .catch(accessError => {
+        if (!room || room.roomId !== roomId) return;
+        const code = String(accessError?.code || "").toLowerCase();
+        if (code.includes("permission-denied") || code.includes("not-found")) {
+          handleRoomAccessLost(roomId, "Your access to this Watch Room was removed or has expired.");
+          return;
+        }
+        setFeedback("Your room is still open, but live updates are temporarily unavailable. Vivid will keep trying to refresh.", true);
+        console.warn("Watch Room access verification failed after a realtime permission error:", accessError);
+      })
+      .finally(() => { accessVerification = null; });
+    return accessVerification;
+  };
   const onError = label => error => {
     if (!room || room.roomId !== roomId) return;
     if (error?.code === "permission-denied") {
-      handleRoomAccessLost(roomId, "Your access to this Watch Room was removed or has expired.");
+      realtimeFallback = true;
+      void verifyRoomAccess();
       return;
     }
     setFeedback(label + " updates were interrupted. Vivid is reconnecting…", true);
@@ -631,7 +676,20 @@ function subscribeRoomRealtime(roomId) {
     });
     renderChat(chat);
   }, onError("chat")));
-  presenceRefresh = setInterval(updateMembers, 10000);
+  presenceRefresh = setInterval(() => {
+    updateMembers();
+    if (realtimeFallback && !accessVerification) {
+      void refreshTrustedSnapshot().catch(error => {
+        if (!room || room.roomId !== roomId) return;
+        const code = String(error?.code || "").toLowerCase();
+        if (code.includes("permission-denied") || code.includes("not-found")) {
+          handleRoomAccessLost(roomId, "Your access to this Watch Room was removed or has expired.");
+        } else {
+          console.warn("Watch Room fallback refresh failed:", error);
+        }
+      });
+    }
+  }, 10000);
 }
 
 function openLobby(data) {
