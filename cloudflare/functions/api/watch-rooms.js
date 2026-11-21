@@ -1002,6 +1002,13 @@ async function publishWatchRoomPlayback(request) {
   const eventType = ["play", "pause", "seek", "ended", "progress"].includes(requestedEventType)
     ? requestedEventType
     : status === "paused" ? "pause" : status === "ended" ? "ended" : "progress";
+  const eventStatusIsValid =
+    (eventType === "play" && status === "playing") ||
+    (eventType === "pause" && status === "paused") ||
+    (eventType === "ended" && status === "ended") ||
+    (eventType === "progress" && status === "playing") ||
+    eventType === "seek";
+  if (!eventStatusIsValid) throw new HttpsError("invalid-argument", "Playback event type does not match its status.");
   const contentId = cleanText(String(request.data?.contentId || ""), "Catalogue ID", 80);
   if (!/^(?:\d{1,12}|tt\d{5,12})$/.test(contentId)) throw new HttpsError("invalid-argument", "A valid TMDB or IMDb title ID is required.");
   const mediaType = request.data?.mediaType;
