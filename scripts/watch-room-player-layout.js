@@ -18,6 +18,11 @@ export function mountWatchRoomPlayerLayout({ slot, overlay, Observer = globalThi
     overlay.setAttribute("aria-label", value ? "Floating cinema player" : "Cinema player");
     const returnButton = overlay.querySelector("#player-return-inline");
     if (returnButton) returnButton.hidden = !value;
+    if (value) {
+      const serverPanel = overlay.querySelector("#player-server-panel");
+      if (serverPanel) serverPanel.hidden = true;
+      overlay.querySelector("#player-server-menu")?.setAttribute("aria-expanded", "false");
+    }
     onPresentation({ floating: value });
     if (typeof document !== "undefined" && typeof CustomEvent === "function") {
       document.dispatchEvent(new CustomEvent("vivid:watch-room-player-presentation", {
