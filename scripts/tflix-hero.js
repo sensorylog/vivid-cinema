@@ -11,6 +11,7 @@ const TRAILER_LOAD_FAILSAFE_MS = 40000;
 const HERO_BACKDROP_SIZE = () => window.matchMedia("(max-width: 767px)").matches ? "w780" : "w1280";
 const trailerCache = new Map();
 const legacyPerformance = document.documentElement.classList.contains("vivid-performance-legacy");
+let heroVisible = true;
 
 let heroSlides = [];
 let heroIndex = 0;
@@ -86,7 +87,7 @@ function activateCurrentHero() {
   removeHeroVideos();
   const token = ++heroRunToken;
   const item = heroSlides[heroIndex];
-  if (!item || document.hidden) return;
+  if (!item || document.hidden || !heroVisible) return;
 
   // Legacy PCs keep the cinematic artwork carousel but skip background
   // trailer lookups and remote iframe decoding while the user is browsing.
@@ -399,6 +400,28 @@ async function loadHero() {
     loadMovieFallback();
   }
 }
+
+// A YouTube trailer is useful while the billboard is visible, but decoding it
+// while a visitor is browsing lower Home shelves wastes CPU/GPU resources.
+function observeHeroVisibility() {
+  const hero = document.getElementById("hero");
+  if (!hero || !("IntersectionObserver" in window)) return;
+  const observer = new IntersectionObserver((entries) => {
+    const entry = entries[0];
+    const visible = Boolean(entry?.isIntersecting && entry.intersectionRatio >= 0.05);
+    if (visible === heroVisible) return;
+    heroVisible = visible;
+    if (!visible) {
+      clearPlaybackTimers();
+      heroRunToken += 1;
+      removeHeroVideos();
+      return;
+    }
+    if (!document.hidden) activateCurrentHero();
+  }, { threshold: 0.05 });
+  observer.observe(hero);
+}
+observeHeroVisibility();
 
 document.addEventListener("visibilitychange", () => {
   if (document.hidden) {
