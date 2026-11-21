@@ -133,15 +133,16 @@ test("native Android project generation registers both plugins idempotently", as
     assert.match(gradle, /versionCode 1100001/);
     assert.match(activity, /registerPlugin\(VividUpdaterPlugin\.class\)/);
     assert.match(activity, /registerPlugin\(VividNavigationPlugin\.class\)/);
+    assert.match(activity, /setWebChromeClient\(new VividWebChromeClient\(getBridge\(\)\)\)/);
     assert.equal((activity.match(/super\.onCreate\(savedInstanceState\)/g) || []).length, 1);
     assert.match(updaterPlugin, /@CapacitorPlugin\(name = "VividUpdater"\)/);
     assert.match(navigationPlugin, /@CapacitorPlugin\(name = "VividNavigation"\)/);
     assert.match(navigationPlugin, /OnBackPressedCallback/);
     assert.match(webChromeClient, /extends BridgeWebChromeClient/);
-    assert.match(webChromeClient, /onShowCustomView\\(View view, CustomViewCallback callback\\)/);
-    assert.match(webChromeClient, /onHideCustomView\\(\\)/);
-    assert.match(webChromeClient, /decorView\\)\\.addView/);
-    assert.match(webChromeClient, /removeView\\(customView\\)/);
+    assert.match(webChromeClient, /onShowCustomView\(View view, CustomViewCallback callback\)/);
+    assert.match(webChromeClient, /onHideCustomView\(\)/);
+    assert.match(webChromeClient, /decorView\)\.addView/);
+    assert.match(webChromeClient, /removeView\(customView\)/);
     assert.match(webChromeClient, /SYSTEM_UI_FLAG_IMMERSIVE_STICKY/);
 
     const second = spawnSync(process.execPath, [script], { encoding: "utf8", env });
@@ -149,6 +150,7 @@ test("native Android project generation registers both plugins idempotently", as
     const activityAfterSecondRun = await readFile(path.join(javaRoot, "MainActivity.java"), "utf8");
     assert.equal((activityAfterSecondRun.match(/registerPlugin\(VividUpdaterPlugin\.class\)/g) || []).length, 1);
     assert.equal((activityAfterSecondRun.match(/registerPlugin\(VividNavigationPlugin\.class\)/g) || []).length, 1);
+    assert.equal((activityAfterSecondRun.match(/setWebChromeClient\(new VividWebChromeClient/g) || []).length, 1);
   } finally {
     await rm(temp, { recursive: true, force: true });
   }
