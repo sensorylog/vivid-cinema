@@ -64,7 +64,7 @@ test("debug APK release never republishes the Android signing keystore", async (
   assert.match(debugWorkflow, /gh release download/);
   assert.doesNotMatch(debugWorkflow, /ANDROID_PRODUCTION_SIGNING_ENABLED/);
   assert.match(debugWorkflow, /Publish latest Android APK for in-app updates/);
-  assert.match(debugWorkflow, /Vivid-Cinema-Android\\.apk/);
+  assert.match(debugWorkflow, /Vivid-Cinema-Android\.apk/);
   assert.match(debugWorkflow, /workflow_dispatch.*github\.ref == 'refs\/heads\/main'/);
 });
 
