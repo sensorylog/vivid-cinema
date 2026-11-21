@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { createHmac } from "node:crypto";
 import { readFile } from "node:fs/promises";
-import { createLiveKitAccessToken } from "../cloudflare/functions/lib/livekit-token.js";
+import { createLiveKitAccessToken, createLiveKitRoomAdminToken } from "../cloudflare/functions/lib/livekit-token.js";
 
 function decode(part) {
   return JSON.parse(Buffer.from(part.replace(/-/g, "+").replace(/_/g, "/"), "base64").toString("utf8"));
@@ -28,6 +28,22 @@ test("LiveKit access token is short-lived and scoped to one room and one member"
   assert.equal(claims.exp - claims.iat, 4 * 60 * 60);
   assert.equal(result.expiresAt, (claims.exp) * 1000);
   assert.equal(result.token.includes(apiSecret), false);
+  const expected = createHmac("sha256", apiSecret).update(headerPart + "." + payloadPart).digest("base64url");
+  assert.equal(signaturePart, expected);
+});
+
+test("LiveKit admin token is short-lived and restricted to one room", async () => {
+  const apiSecret = "a-test-only-livekit-secret-value";
+  const now = 1_800_000_000_000;
+  const token = await createLiveKitRoomAdminToken({
+    apiKey: "LK_TEST_KEY", apiSecret, roomName: "vivid-" + "b".repeat(32), now
+  });
+  const [headerPart, payloadPart, signaturePart] = token.split(".");
+  const claims = decode(payloadPart);
+  assert.equal(decode(headerPart).alg, "HS256");
+  assert.equal(claims.video.roomAdmin, true);
+  assert.equal(claims.video.room, "vivid-" + "b".repeat(32));
+  assert.equal(claims.exp - claims.iat, 60);
   const expected = createHmac("sha256", apiSecret).update(headerPart + "." + payloadPart).digest("base64url");
   assert.equal(signaturePart, expected);
 });
