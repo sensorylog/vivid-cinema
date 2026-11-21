@@ -136,13 +136,13 @@ jobs:
             apk="release-output/$VIVID_ANDROID_APK_NAME"
             adb install -r "$apk"
             launch="$(adb shell am start -W -n com.vividcinema.app/.MainActivity)"
-            printf '%s\\n' "$launch"
+            printf '%s\n' "$launch"
             printf '%s' "$launch" | grep -q "Status: ok"
             sleep 15
-            pid="$(adb shell pidof com.vividcinema.app | tr -d '\\r')"
+            pid="$(adb shell pidof com.vividcinema.app | tr -d '\r')"
             test -n "$pid"
             adb logcat -d --pid="$pid" > "$RUNNER_TEMP/vivid-android-emulator.log"
-            if grep -E "FATAL EXCEPTION|Fatal signal|Process: com\\.vividcinema\\.app" "$RUNNER_TEMP/vivid-android-emulator.log"; then
+            if grep -E "FATAL EXCEPTION|Fatal signal|Process: com\.vividcinema\.app" "$RUNNER_TEMP/vivid-android-emulator.log"; then
               echo "Vivid Cinema crashed during Android emulator startup."
               exit 1
             fi
@@ -150,7 +150,7 @@ jobs:
             sleep 2
             adb shell am start -W -n com.vividcinema.app/.MainActivity | grep -q "Status: ok"
             sleep 3
-            test -n "$(adb shell pidof com.vividcinema.app | tr -d '\\r')"
+            test -n "$(adb shell pidof com.vividcinema.app | tr -d '\r')"
             echo "Android emulator smoke test passed: installed, launched, backgrounded and resumed Vivid Cinema without a fatal app crash."
 
       - name: Upload Android APK artifact
