@@ -198,9 +198,23 @@ function navigateToCinemaScreening(screening) {
   if (!room) return;
   const url = buildScreeningUrl(screening);
   if (!url) { setFeedback("The room screening does not contain a valid Vivid title.", true); return; }
+  const targetUrl = new URL(url, window.location.href);
+  const current = new URL(window.location.href);
+  const sameSession = current.searchParams.get("roomId") === room.roomId &&
+    current.searchParams.get("sessionId") === String(screening.sessionId || "") &&
+    current.searchParams.get("id") === String(screening.contentId || "");
   loadedScreeningSessionId = String(screening.sessionId || "");
   dismissedScreeningSessionId = "";
-  window.location.assign(url);
+  if (sameSession) {
+    document.dispatchEvent(new CustomEvent("vivid:watch-room-screening-focus", { detail: { roomId: room.roomId, screening } }));
+    return;
+  }
+  // Change the room URL in place. Reloading here would tear down LiveKit voice
+  // and the room subscriptions while everyone is moving into the cinema.
+  window.history.replaceState({}, "", targetUrl);
+  document.dispatchEvent(new CustomEvent("vivid:watch-room-screening-navigate", {
+    detail: { roomId: room.roomId, screening }
+  }));
 }
 // The dedicated cinema route returns to this lobby when closed.
 
