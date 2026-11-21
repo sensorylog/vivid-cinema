@@ -998,6 +998,10 @@ async function publishWatchRoomPlayback(request) {
   if (!/^[a-f0-9]{32}$/.test(sessionId)) throw new HttpsError("invalid-argument", "A valid screening session is required.");
   const status = request.data?.status;
   if (!["playing", "paused", "ended"].includes(status)) throw new HttpsError("invalid-argument", "Playback status is not supported.");
+  const requestedEventType = String(request.data?.eventType || "");
+  const eventType = ["play", "pause", "seek", "ended", "progress"].includes(requestedEventType)
+    ? requestedEventType
+    : status === "paused" ? "pause" : status === "ended" ? "ended" : "progress";
   const contentId = cleanText(String(request.data?.contentId || ""), "Catalogue ID", 80);
   if (!/^(?:\d{1,12}|tt\d{5,12})$/.test(contentId)) throw new HttpsError("invalid-argument", "A valid TMDB or IMDb title ID is required.");
   const mediaType = request.data?.mediaType;
@@ -1042,12 +1046,13 @@ async function publishWatchRoomPlayback(request) {
     if (expectedRevision != null && expectedRevision !== currentRevision) {
       return { accepted: false, reason: "stale-revision", revision: currentRevision };
     }
-    if (shouldThrottlePlaybackWrite(previous?.status, status, previous?.lastEventAt?.toMillis?.() || 0, now.toMillis())) {
-      return { accepted: false, reason: "rate-limited", revision: currentRevision };
+    const minimumIntervalMs = eventType === "progress" ? 1800 : eventType === "seek" ? 0 : 250;
+    if (shouldThrottlePlaybackWrite(previous?.status, status, previous?.lastEventAt?.toMillis?.() || 0, now.toMillis(), minimumIntervalMs)) {
+      return { accepted: false, reason: "rate-limited", retryAfterMs: minimumIntervalMs, revision: currentRevision };
     }
     const revision = currentRevision + 1;
     tx.set(stateRef, {
-      schemaVersion: 1, sessionId, provider, contentId, mediaType, season, episode,
+      schemaVersion: 1, sessionId, provider, eventType, contentId, mediaType, season, episode,
       status, position, duration, hostUid: roomData.hostUid, controllerUid: uid,
       revision, updatedAt: now, lastEventAt: now
     });
