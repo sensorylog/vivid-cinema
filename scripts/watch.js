@@ -1046,7 +1046,7 @@ function renderShell(params) {
       roomPlayerSlot.hidden = false;
       roomPlayerLayout?.setActive(true);
     }
-    overlay.hidden = false;
+    if (!isWatchRoomCinemaMode || roomPlayerSlot?.dataset.activePlayer !== "secondary") overlay.hidden = false;
     if (!isWatchRoomCinemaMode && !overlay.classList.contains("vivid-player-inline")) document.body.classList.add("vivid-player-open");
     if (openPlayer) openPlayer.setAttribute("aria-expanded", "true");
     if (isWatchRoomCinemaMode && playerHasOpened) {
