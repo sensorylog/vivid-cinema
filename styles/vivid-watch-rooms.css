@@ -264,3 +264,9 @@ html[data-vivid-theme="light"] .vivid-wr-dialog{background:#fff;color:#171720}ht
  .vivid-wr-voice-actions .vivid-wr-button{min-height:36px;padding:0 10px;font-size:.7rem}
 }
 @media(prefers-reduced-motion:reduce){.vivid-wr-room-tab{transition:none}}
+
+
+/* A minimized screening must never lock the room page's vertical scroll. */
+body.vivid-watch-rooms-page.vivid-watch-room-mode{overflow-x:hidden!important;overflow-y:auto!important;overscroll-behavior-y:auto!important}
+body.vivid-watch-rooms-page.vivid-watch-room-mode #player-overlay.is-minimized{bottom:calc(112px + env(safe-area-inset-bottom))!important}
+body.vivid-watch-rooms-page.vivid-watch-room-mode #vivid-tflix-player.is-minimized{bottom:calc(112px + env(safe-area-inset-bottom))!important}
