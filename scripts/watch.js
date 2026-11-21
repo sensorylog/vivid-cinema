@@ -665,6 +665,32 @@ function recordWatchActivity(progress, duration) {
   }
 }
 
+function playerInfoMarkup() {
+  const episode = currentParams?.type === "tv" ? details?.episode : null;
+  const synopsis = episode?.overview || media?.overview || details?.overview || "";
+  const cast = [
+    ...(Array.isArray(episode?.guest_stars) ? episode.guest_stars : []),
+    ...(Array.isArray(details?.credits?.cast) ? details.credits.cast : [])
+  ].filter((person, index, list) => person?.name && list.findIndex(item => String(item.id) === String(person.id)) === index).slice(0, 8);
+  const castMarkup = cast.map(person =>
+    '<article class="vivid-player-cast-card">' +
+      (person.profile_path ? '<img src="' + escapeHtml(getImageUrl(person.profile_path, "w185")) + '" alt="" loading="lazy" decoding="async">' : '<span class="vivid-player-cast-placeholder" aria-hidden="true"><i class="bi bi-person-fill"></i></span>') +
+      '<span><strong>' + escapeHtml(person.name) + '</strong><small>' + escapeHtml(person.character || "") + '</small></span>' +
+    '</article>'
+  ).join("");
+  const year = String(media?.release_date || media?.first_air_date || "").slice(0, 4);
+  const genres = (details?.genres || []).slice(0, 3).map(genre => genre.name).filter(Boolean);
+  return '<section class="vivid-player-info" aria-label="Movie information">' +
+    '<div class="vivid-player-info-copy"><div class="vivid-player-info-meta">' +
+      (year ? '<span>' + escapeHtml(year) + '</span>' : '') +
+      (genres.length ? '<span>' + escapeHtml(genres.join(" · ")) + '</span>' : '') +
+    '</div><h3>' + escapeHtml(episode?.name || media?.title || "Now playing") + '</h3>' +
+    (synopsis ? '<p>' + escapeHtml(synopsis) + '</p>' : '') +
+    '</div>' +
+    (castMarkup ? '<div class="vivid-player-cast"><h4>Cast</h4><div class="vivid-player-cast-rail">' + castMarkup + '</div></div>' : '') +
+  '</section>';
+}
+
 function recommendationCards() {
   const items = normalizeResults(details?.recommendations?.results || [], media?.media_type).slice(0, 10);
   const fallback = normalizeResults(details?.similar?.results || [], media?.media_type).slice(0, 10);
@@ -827,7 +853,7 @@ function renderShell(params) {
       '<button type="button" class="vivid-player-source" data-player-source="vidplus" hidden aria-pressed="false"><span class="vivid-server-dot"></span><span><strong>VidPlus</strong><small>Additional source · support varies</small></span><span class="vivid-server-state" data-server-state="vidplus">Available</span></button>' +
       '<button type="button" class="vivid-player-source" data-player-source="vidking" hidden aria-pressed="false"><span class="vivid-server-dot"></span><span><strong>VidKing</strong><small>Extra source · resume seeking may vary</small></span><span class="vivid-server-state" data-server-state="vidking">Available</span></button>' +
       '<button type="button" class="vivid-player-source" data-player-source="direct" hidden aria-pressed="false" hidden><span class="vivid-server-dot"></span><span><strong>Direct stream</strong><small>Authorized HLS/DASH · adaptive quality</small></span><span class="vivid-server-state" data-server-state="direct">Unavailable</span></button>' +
-      '<p>Choose another source if playback does not start. Direct streams appear only when an authorized integration is available.</p></aside></div></section></div>' +
+      '<p>Choose another source if playback does not start. Direct streams appear only when an authorized integration is available.</p></aside></div>' + playerInfoMarkup() + '</section></div>' +
     '<section id="vivid-tflix-player" class="vivid-tflix-player" aria-label="Additional streaming player"></section>' +
     '<section id="watch-episode-navigation" class="vivid-episode-navigation" aria-label="TV episode navigation">' + episodeNavigationMarkup(params) + '</section>' +
     '<section class="vivid-watch-recommendations"><div class="vivid-section-heading"><div><span>MORE TO DISCOVER</span><h2>You might also like</h2></div></div><div id="watch-recommendations" class="vivid-watch-rec-rail">' + recommendationCards() + '</div></section>';
