@@ -245,6 +245,7 @@ body.vivid-watch-rooms-page .vivid-wr-voice-person{
   border:1px solid rgba(255,255,255,.08)!important;border-radius:999px!important;background:rgba(255,255,255,.045)!important
 }
 body.vivid-watch-rooms-page .vivid-wr-voice-person.is-speaking{border-color:rgba(123,217,167,.5)!important;background:rgba(123,217,167,.09)!important}
+body.vivid-watch-rooms-page .vivid-wr-voice-person.is-speaking .vivid-wr-voice-avatar{box-shadow:0 0 0 3px rgba(123,217,167,.16),0 0 18px rgba(123,217,167,.2)!important}
 body.vivid-watch-rooms-page .vivid-wr-voice-avatar{
   display:grid!important;place-items:center!important;width:29px!important;height:29px!important;flex:0 0 29px!important;
   border:1px solid rgba(202,180,255,.3)!important;border-radius:50%!important;color:#e8dcff!important;
