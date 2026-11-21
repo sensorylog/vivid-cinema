@@ -464,6 +464,9 @@ test("Watch Room sync extrapolates local time and keeps command events ahead of 
   assert.ok(client.includes("eventType === \"progress\" && now - lastPublishAt < 3500"));
   assert.ok(client.includes("getEstimatedLocalPlaybackPosition({"));
   assert.ok(client.includes("syncReconcileTimer = window.setInterval"));
+  assert.ok(client.includes("if (role !== \"guest\" || joinedPlayback)"), "guest player should preload while the room is waiting");
+  assert.ok(client.includes("Your player is ready. Tap Play once to prepare it"));
+  assert.ok(client.includes("else if (detail.status === \"playing\") pauseGuestPlayer("), "guest preparation playback must be held until host playback starts");
   assert.ok(client.includes("async function refreshPlaybackSnapshot()"));
   assert.ok(client.includes("cinesrc:seeked"));
   assert.ok(sync.includes("export function getEstimatedLocalPlaybackPosition"));
