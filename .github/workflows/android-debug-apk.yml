@@ -86,7 +86,7 @@ jobs:
             keytool -genkeypair -noprompt -keystore "$RUNNER_TEMP/vivid-android-key/Vivid-Cinema-Debug.keystore" -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Vivid Cinema Development,O=Vivid Cinema,C=GH"
           fi
           cp "$RUNNER_TEMP/vivid-android-key/Vivid-Cinema-Debug.keystore" "$HOME/.android/debug.keystore"
-          node automation/configure-android-debug-build.mjs
+          node automation/configure-android-native-project.mjs
 
       - name: Bundle local website and sync Capacitor
         run: npm run cap:sync
