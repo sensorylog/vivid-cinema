@@ -78,13 +78,15 @@ test("LiveKit token signer rejects malformed identities and unscoped room names"
 });
 
 test("Watch Room ships voice controls and keeps the shared player inside the room shell", async () => {
-  const [html, lobby, voice, api, headers, playback] = await Promise.all([
+  const [html, lobby, voice, api, headers, playback, watchPage, roomStyles] = await Promise.all([
     readFile(new URL("../watch-rooms.html", import.meta.url), "utf8"),
     readFile(new URL("../scripts/watch-room-lobby.js", import.meta.url), "utf8"),
     readFile(new URL("../scripts/watch-room-voice.js", import.meta.url), "utf8"),
     readFile(new URL("../cloudflare/functions/api/watch-rooms.js", import.meta.url), "utf8"),
     readFile(new URL("../_headers", import.meta.url), "utf8"),
-    readFile(new URL("../scripts/watch-room-playback.js", import.meta.url), "utf8")
+    readFile(new URL("../scripts/watch-room-playback.js", import.meta.url), "utf8"),
+    readFile(new URL("../scripts/watch.js", import.meta.url), "utf8"),
+    readFile(new URL("../styles/vivid-watch-rooms.css", import.meta.url), "utf8")
   ]);
   assert.match(html, /id="wr-voice-call"/);
   assert.match(html, /id="wr-screening-stage"/);
@@ -106,4 +108,13 @@ test("Watch Room ships voice controls and keeps the shared player inside the roo
   assert.ok(voice.includes("guestVoiceAllowed()"));
   assert.ok(playback.includes("This Watch Room has ended or your membership was removed"));
   assert.ok(playback.includes("pauseGuestPlayer"));
+  assert.ok(lobby.includes('url.searchParams.set("roomMode", "1")'));
+  assert.ok(lobby.includes('url.searchParams.set("sessionId", String(screening.sessionId))'));
+  assert.ok(watchPage.includes('route.params.get("roomMode") === "1"'));
+  assert.ok(roomStyles.includes("body.vivid-wr-screening-open .vivid-wr-screening-frame-wrap"));
+  assert.ok(playback.includes("joinedPlayback && latestRemoteState?.status === \"playing\""));
+  assert.ok(playback.includes('state.status === "playing" && !roomPlayerLoadRequested'));
+  assert.ok(api.includes('tx.delete(roomRef.collection("playback").doc("current"))'));
+  assert.ok(api.includes('roomData.activeScreening?.sessionId'));
+  assert.ok(api.includes('storedPlayback.sessionId === activeSessionId'));
 });
