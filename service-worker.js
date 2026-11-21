@@ -183,7 +183,7 @@ self.addEventListener("fetch",event=>{
  const isAuthRuntime=/\/scripts\/(?:auth|firebase|nav-auth|auth-diagnostics|account|account-bootstrap|cloudflare-ai)\.js$/.test(url.pathname)||/\/init\.json$/.test(url.pathname);
  // Watch Rooms handles account credentials and trusted backend mutations. Never
  // run an old cached copy after an auth/security fix has been deployed.
- const isWatchRoomRuntime=/\/scripts\/(?:watch-rooms|watch-room-lobby|watch-room-clubs|watch-room-playback|watch-room-api)\.js$/.test(url.pathname);
+ const isWatchRoomRuntime=/\/scripts\/(?:watch-rooms|watch-room-lobby|watch-room-clubs|watch-room-playback|watch-room-api|playback\/watch-room-sync)\.js$/.test(url.pathname);
  const isFreshNewsRuntime=/\/scripts\/(?:newsroom|intelligence)\.js$/.test(url.pathname)||/\/styles\/vivid-news\.css$/.test(url.pathname)||/\/data\/(?:news-feed\.json|news-thumbnails\/)/.test(url.pathname);
  if(isAuthDocument||isAuthRuntime||isWatchRoomRuntime){event.respondWith(networkFirst(request));return;}
  if(isFreshNewsRuntime){event.respondWith(networkFirst(request));return;}
