@@ -25,7 +25,7 @@ export function buildTflixSecondaryServerUrl(serverId, params = {}) {
   switch (serverId) {
     case "moviesapi": return isTv ? "https://moviesapi.to/tv/" + id + "-" + season + "-" + episode : "https://moviesapi.to/movie/" + id;
     case "vidsrc-embed": return isTv ? "https://vidsrc-embed.ru/embed/tv?tmdb=" + id + "&season=" + season + "&episode=" + episode + "&autoplay=1" : "https://vidsrc-embed.ru/embed/movie?tmdb=" + id + "&autoplay=1";
-    case "cinesrc": return isTv ? "https://cinesrc.st/embed/tv/" + id + "?s=" + season + "&e=" + episode + "&autoplay=true&autonext=" + (params.roomMode ? "false" : "true") + "&prioritize=true&lastserver=wave" : "https://cinesrc.st/embed/movie/" + id + "?autoplay=true&prioritize=true&lastserver=wave";
+    case "cinesrc": return isTv ? "https://cinesrc.st/embed/tv/" + id + "?s=" + season + "&e=" + episode + "&autoplay=" + (params.roomMode ? "false" : "true") + "&autonext=" + (params.roomMode ? "false" : "true") + "&prioritize=true&lastserver=wave" : "https://cinesrc.st/embed/movie/" + id + "?autoplay=" + (params.roomMode ? "false" : "true") + "&prioritize=true&lastserver=wave";
     case "vidfast": return isTv ? "https://vidfast.vc/tv/" + id + "/" + season + "/" + episode + "?autoPlay=true" : "https://vidfast.vc/movie/" + id + "?autoPlay=true";
     case "vidlink": return isTv ? "https://vidlink.pro/tv/" + id + "/" + season + "/" + episode + "?title=true&poster=true&autoplay=true&nextbutton=true" : "https://vidlink.pro/movie/" + id + "?title=true&poster=true&autoplay=true";
     default: return "";
