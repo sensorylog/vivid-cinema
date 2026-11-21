@@ -17,6 +17,7 @@ function stop(notifyVoice = true) {
   if (clubWatchlistUnsubscribe) clubWatchlistUnsubscribe();
   clubWatchlistUnsubscribe = null;
   linkedClubWatchlistId = "";
+  if (byId("wr-linked-club-shelf")) byId("wr-linked-club-shelf").hidden = true;
   if (heartbeat) clearInterval(heartbeat);
   if (presenceRefresh) clearInterval(presenceRefresh);
   if (searchTimer) clearTimeout(searchTimer);
@@ -113,7 +114,10 @@ function renderLinkedClubOptions(clubs = window.vividCinemaClubs || []) {
 
 function subscribeClubWatchlist(clubId) {
   const normalizedId = String(clubId || "");
-  if (normalizedId === linkedClubWatchlistId) return;
+  if (normalizedId === linkedClubWatchlistId) {
+    if (!normalizedId && byId("wr-linked-club-shelf")) byId("wr-linked-club-shelf").hidden = true;
+    return;
+  }
   if (clubWatchlistUnsubscribe) clubWatchlistUnsubscribe();
   clubWatchlistUnsubscribe = null;
   linkedClubWatchlistId = normalizedId;
@@ -646,6 +650,7 @@ function openLobby(data) {
   settings.elements.allowGuestPlaybackControl.checked = data.allowGuestPlaybackControl === true;
   settings.elements.allowGuestVoice.checked = data.allowGuestVoice !== false;
   settings.elements.linkedClubId.value = data.linkedClubId || "";
+  settings.dataset.dirty = "false";
   if (settings.dataset.listenerBound !== "true") {
     settings.addEventListener("change", () => { settings.dataset.dirty = "true"; });
     settings.dataset.listenerBound = "true";
