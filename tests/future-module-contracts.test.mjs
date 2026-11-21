@@ -455,11 +455,24 @@ test("Watch Room synchronization compensates for guest device clock skew", () =>
 });
 
 
-test("Watch Room playback throttles heartbeats without dropping pause/resume transitions", () => {
+test("Watch Room sync extrapolates local time and keeps command events ahead of progress throttles", () => {
   const client = readFileSync(new URL("../scripts/watch-room-playback.js", import.meta.url), "utf8");
-  assert.ok(client.includes('detail.status === "playing" && lastPublishedStatus === "playing"'));
-  assert.ok(client.includes("lastPublishedStatus = hostStatus"));
-  assert.ok(client.includes('lastPublishedStatus = "paused"'));
+  const sync = readFileSync(new URL("../scripts/playback/watch-room-sync.js", import.meta.url), "utf8");
+  const node = readFileSync(new URL("../api/watch-rooms.js", import.meta.url), "utf8");
+  const cloudflare = readFileSync(new URL("../cloudflare/functions/api/watch-rooms.js", import.meta.url), "utf8");
+  assert.ok(client.includes("classifyPlaybackEvent({"));
+  assert.ok(client.includes("eventType === \"progress\" && now - lastPublishAt < 3500"));
+  assert.ok(client.includes("getEstimatedLocalPlaybackPosition({"));
+  assert.ok(client.includes("syncReconcileTimer = window.setInterval"));
+  assert.ok(client.includes("async function refreshPlaybackSnapshot()"));
+  assert.ok(client.includes("cinesrc:seeked"));
+  assert.ok(sync.includes("export function getEstimatedLocalPlaybackPosition"));
+  assert.ok(sync.includes("export function classifyPlaybackEvent"));
+  for (const backend of [node, cloudflare]) {
+    assert.ok(backend.includes('["play", "pause", "seek", "ended", "progress"]'));
+    assert.ok(backend.includes('eventType === "progress" ? 1800 : eventType === "seek" ? 0 : 250'));
+    assert.ok(backend.includes("schemaVersion: 1, sessionId, provider, eventType, contentId"));
+  }
 });
 
 
