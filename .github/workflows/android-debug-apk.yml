@@ -8,27 +8,10 @@ on:
       - android-capacitor-foundation
   release:
     types: [published]
+  # The Android app bundles almost the entire static web application. A change to
+  # any page, shared script, stylesheet, asset, or backend contract can affect the
+  # APK, so path-filtering only a handful of files gives misleading green PRs.
   pull_request:
-    paths:
-      - "capacitor.config.json"
-      - "service-worker.js"
-      - "scripts/app-shell.js"
-      - "scripts/android-updater.js"
-      - "_headers"
-      - "firebase.json"
-      - "automation/build-static-dist.mjs"
-      - "automation/build-netlify-dist.mjs"
-      - "automation/apply-android-icon.mjs"
-      - "automation/configure-android-debug-build.mjs"
-      - "styles/vivid-native-app.css"
-      - "scripts/platform-origin-redirect.js"
-      - "index.html"
-      - "home.html"
-      - "for-you.html"
-      - "package.json"
-      - "tests/android-native-polish.test.mjs"
-      - "tests/android-auto-update.test.mjs"
-      - ".github/workflows/android-debug-apk.yml"
   workflow_dispatch:
 
 concurrency:
@@ -89,9 +72,8 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p "$HOME/.android" "$RUNNER_TEMP/vivid-android-key"
-          # Reuse the debug-only key saved on an earlier release so Android accepts
-          # in-place updates. If the current release is new, locate the key on any
-          # prior release before generating a first-run development key.
+          # Reuse the development-only key retained on an earlier release so Android
+          # accepts in-place updates. This key is not a production signing identity.
           key_location="$(gh api "repos/$GITHUB_REPOSITORY/releases?per_page=100" --jq '.[] as $r | $r.assets[]? | select(.name == "Vivid-Cinema-Debug.keystore" or .name == "debug.keystore" or .label == "Vivid-Cinema-Debug.keystore") | [$r.tag_name,.name] | join("|")' | head -n 1 || true)"
           if [ -n "$key_location" ]; then
             IFS='|' read -r key_tag key_asset <<< "$key_location"
@@ -175,9 +157,9 @@ jobs:
             done
           fi
           gh release view "$tag" --repo "$GITHUB_REPOSITORY" >/dev/null
-          # Stable public APK name; metadata identifies the monotonically increasing CI build.
           node --input-type=module -e 'import {writeFileSync} from "node:fs"; writeFileSync("release-output/Vivid-Cinema-Android-build-" + process.env.VIVID_ANDROID_BUILD + ".json", JSON.stringify({version: process.env.VIVID_ANDROID_VERSION, build: Number(process.env.VIVID_ANDROID_BUILD)}, null, 2))'
-          # Keep the existing signing key for update compatibility, but never attach it to a public release.
+          # Keep the stable development signing identity available via historical
+          # release assets; do not expose the keystore as a new asset on each build.
           gh release upload "$tag" "release-output/Vivid-Cinema-Android.apk" "release-output/Vivid-Cinema-Android-build-$VIVID_ANDROID_BUILD.json" --repo "$GITHUB_REPOSITORY" --clobber
           gh release view "$tag" --repo "$GITHUB_REPOSITORY" --json assets --jq '.assets[].name' | grep -Fx "Vivid-Cinema-Android.apk"
           gh release view "$tag" --repo "$GITHUB_REPOSITORY" --json assets --jq '.assets[].name' | grep -Fx "Vivid-Cinema-Android-build-$VIVID_ANDROID_BUILD.json"
