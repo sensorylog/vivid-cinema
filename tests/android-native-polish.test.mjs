@@ -136,6 +136,12 @@ test("native Android project generation registers both plugins idempotently", as
     assert.match(activity, /setWebChromeClient\(new VividWebChromeClient\(getBridge\(\)\)\)/);
     assert.equal((activity.match(/super\.onCreate\(savedInstanceState\)/g) || []).length, 1);
     assert.match(updaterPlugin, /@CapacitorPlugin\(name = "VividUpdater"\)/);
+    assert.match(updaterPlugin, /getSharedPreferences\(PREFERENCES/);
+    assert.match(updaterPlugin, /handleOnResume/);
+    assert.match(updaterPlugin, /reconcileDownload/);
+    assert.match(updaterPlugin, /Settings\.canRequestPackageInstalls/);
+    assert.match(updaterPlugin, /ACTION_MANAGE_UNKNOWN_APP_SOURCES/);
+    assert.match(updaterPlugin, /STATUS_SUCCESSFUL/);
     assert.match(navigationPlugin, /@CapacitorPlugin\(name = "VividNavigation"\)/);
     assert.match(navigationPlugin, /OnBackPressedCallback/);
     assert.match(webChromeClient, /extends BridgeWebChromeClient/);
