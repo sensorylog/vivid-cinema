@@ -615,9 +615,7 @@ window.addEventListener("vivid:watch-room-apply-selection", event => {
     primaryOverlay.classList.remove("is-minimized", "is-floating");
     primaryOverlay.hidden = false;
     const closeButton = $("player-close");
-    const restoreButton = $("player-restore");
     if (closeButton) closeButton.hidden = isWatchRoomCinemaMode;
-    if (restoreButton) restoreButton.hidden = true;
   }
   const position = Math.max(0, Number(selection.position) || 0);
   setPlayerSource(selection.providerId, currentParams, position);
@@ -970,18 +968,7 @@ function renderShell(params) {
   const returnInlineButton = $("player-return-inline");
   returnInlineButton?.addEventListener("click", () => roomPlayerLayout?.focus());
   const playerDialog = overlay?.querySelector(".vivid-player-dialog");
-  const restorePlayer = document.createElement("button");
-  restorePlayer.type = "button";
-  restorePlayer.id = "player-restore";
-  restorePlayer.className = "vivid-player-restore";
-  restorePlayer.setAttribute("aria-label", "Restore screening player");
-  restorePlayer.innerHTML = '<i class="bi bi-arrows-angle-expand" aria-hidden="true"></i>';
-  closePlayer?.parentElement?.insertBefore(restorePlayer, closePlayer);
-  restorePlayer.hidden = true;
-  if (isWatchRoomCinemaMode) {
-    if (closePlayer) closePlayer.hidden = true;
-    restorePlayer.hidden = true;
-  }
+  if (isWatchRoomCinemaMode && closePlayer) closePlayer.hidden = true;
   const serverMenu = $("player-server-menu");
   const serverPanel = $("player-server-panel");
   if (serverMenu && serverPanel) {
@@ -1040,7 +1027,6 @@ function renderShell(params) {
     const restoringMiniPlayer = !isWatchRoomCinemaMode && overlay.classList.contains("is-minimized") && playerHasOpened;
     overlay.classList.remove("is-minimized");
     document.body.classList.remove("vivid-watch-room-player-minimized");
-    if (restorePlayer) restorePlayer.hidden = true;
     if (closePlayer) closePlayer.hidden = isWatchRoomCinemaMode;
     if (isWatchRoomCinemaMode && roomPlayerSlot) {
       roomPlayerSlot.hidden = false;
@@ -1159,7 +1145,6 @@ function renderShell(params) {
   openPlayer?.addEventListener("click", openPlayerWindow);
   // Do not open or start either player until the viewer chooses one.
   closePlayer?.addEventListener("click", closePlayerWindow);
-  restorePlayer.addEventListener("click", openPlayerWindow);
   tryNextButton?.addEventListener("click", () => {
     const next = getNextSource(activeSource);
     if (!next) return showFallbackPrompt(activeSource);
