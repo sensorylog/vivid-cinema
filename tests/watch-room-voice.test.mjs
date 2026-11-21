@@ -65,6 +65,7 @@ test("Watch Room ships voice controls and keeps the shared player inside the roo
   ]);
   assert.match(html, /id="wr-voice-call"/);
   assert.match(html, /id="wr-screening-stage"/);
+  assert.ok(html.includes('name="allowGuestVoice"'));
   assert.match(lobby, /openEmbeddedScreening\(response\.data\?\.screening\)/);
   assert.ok(lobby.includes("activeSessionId !== loadedScreeningSessionId"));
   assert.ok(lobby.includes("openEmbeddedScreening(room.activeScreening)"));
@@ -76,4 +77,8 @@ test("Watch Room ships voice controls and keeps the shared player inside the roo
   assert.ok(headers.includes("wss://*.livekit.cloud"));
   assert.ok(api.includes("removeAllLiveKitParticipants"));
   assert.ok(api.includes("RemoveParticipant"));
+  assert.ok(api.includes("allowGuestVoice"));
+  assert.ok(api.includes('member.role === "guest" && room.allowGuestVoice === false'));
+  assert.ok(lobby.includes("vivid:watch-room-updated"));
+  assert.ok(voice.includes("guestVoiceAllowed()"));
 });
