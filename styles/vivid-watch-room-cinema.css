@@ -1,173 +1,79 @@
-/* Watch Room cinematic surface. Loaded after the shared app/premium shell so
-   global mobile navigation and layout rules cannot leak into the screening. */
-body.vivid-watch-room-mode.vivid-app-experience .vivid-mobile-nav.vivid-v2-mobile-nav,
-body.vivid-watch-room-mode .vivid-mobile-nav,
-body.vivid-watch-room-mode .vivid-bottom-nav,
-body.vivid-watch-room-mode .vivid-mobile-tabbar,
-body.vivid-watch-room-mode .vivid-tab-bar,
-body.vivid-wr-screening-open.vivid-app-experience .vivid-mobile-nav.vivid-v2-mobile-nav,
-body.vivid-wr-screening-open .vivid-mobile-nav,
-body.vivid-wr-screening-open .vivid-bottom-nav,
-body.vivid-wr-screening-open .vivid-mobile-tabbar,
-body.vivid-wr-screening-open .vivid-tab-bar {
-  display:none!important;
-}
-body.vivid-watch-room-mode,
-body.vivid-wr-screening-open {
-  padding-bottom:0!important;
-  overflow:hidden!important;
-  overscroll-behavior:none;
-}
+:root{color-scheme:dark;--cinema-bg:#050608;--cinema-panel:rgba(16,17,23,.88);--cinema-line:rgba(255,255,255,.12);--cinema-text:#f5f4f8;--cinema-muted:#aaa9b4;--cinema-accent:#c3a7ff}
+html,body{width:100%;min-height:100%;margin:0;background:var(--cinema-bg);color:var(--cinema-text)}
+body.vivid-watch-room-cinema-page{overflow-x:hidden;overscroll-behavior:none;padding:0!important}
+.vivid-cinema-shell{position:relative;display:flex;flex-direction:column;width:100%;min-height:100dvh;background:#000}
+.vivid-cinema-topbar{position:fixed;z-index:100010;top:0;left:0;right:0;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:max(12px,env(safe-area-inset-top)) clamp(12px,2.5vw,28px) 12px;background:linear-gradient(180deg,rgba(0,0,0,.72),transparent);pointer-events:none}
+.vivid-cinema-topbar>*{pointer-events:auto}
+.vivid-cinema-back,.vivid-cinema-icon-button{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:40px;padding:0 13px;border:1px solid var(--cinema-line);border-radius:999px;background:rgba(15,16,22,.72);color:var(--cinema-text);font:inherit;font-size:.78rem;text-decoration:none;backdrop-filter:blur(16px)}
+.vivid-cinema-icon-button{width:40px;padding:0;cursor:pointer}
+.vivid-cinema-room-mark{display:flex;align-items:center;gap:9px;max-width:48vw;overflow:hidden;color:#e9e5f1;font-size:.65rem;font-weight:800;letter-spacing:.16em;text-overflow:ellipsis;white-space:nowrap}
+.vivid-cinema-live-dot{width:7px;height:7px;flex:0 0 7px;border-radius:50%;background:#78dca8;box-shadow:0 0 14px rgba(120,220,168,.8)}
+.vivid-cinema-stage{display:flex;flex:1;min-height:100dvh;align-items:center;justify-content:center;padding:0}
+#watch-content{width:100%;max-width:none;margin:0;padding:0}
+.vivid-cinema-loading{display:grid;min-height:100dvh;place-content:center;justify-items:center;gap:14px;color:var(--cinema-muted);font-size:.85rem}
+.vivid-cinema-spinner{width:28px;height:28px;border:2px solid rgba(255,255,255,.16);border-top-color:var(--cinema-accent);border-radius:50%;animation:cinema-spin .8s linear infinite}
+@keyframes cinema-spin{to{transform:rotate(360deg)}}
+.vivid-watch-room-cinema-page .vivid-topbar,.vivid-watch-room-cinema-page .vivid-footer,.vivid-watch-room-cinema-page .vivid-page-back{display:none!important}
 
-/* The embedded player keeps only its source control; the cinema image owns
-   the viewport, not the normal Watch page chrome. */
-body.vivid-watch-room-mode .vivid-player-dialog-head {
-  position:fixed!important;
-  z-index:100001!important;
-  inset:max(10px,env(safe-area-inset-top)) 12px auto auto!important;
-  display:flex!important;
-  justify-content:flex-end!important;
-  width:auto!important;
-  min-height:0!important;
-  padding:0!important;
-  border:0!important;
-  background:transparent!important;
-  pointer-events:none;
-}
-body.vivid-watch-room-mode .vivid-player-dialog-heading,
-body.vivid-watch-room-mode .vivid-player-dialog-head h2,
-body.vivid-watch-room-mode .vivid-player-dialog-eyebrow,
-body.vivid-watch-room-mode .vivid-player-current-source,
-body.vivid-watch-room-mode #player-close {
-  display:none!important;
-}
-body.vivid-watch-room-mode .vivid-player-dialog-actions {
-  display:flex!important;
-  align-items:center!important;
-  pointer-events:auto!important;
-}
-body.vivid-watch-room-mode #player-server-menu {
-  min-height:42px!important;
-  padding:0 15px!important;
-  border:1px solid rgba(255,255,255,.16)!important;
-  border-radius:999px!important;
-  color:#f7f7fb!important;
-  background:rgba(13,15,21,.78)!important;
-  box-shadow:0 8px 30px rgba(0,0,0,.28)!important;
-  -webkit-backdrop-filter:blur(18px) saturate(150%);
-  backdrop-filter:blur(18px) saturate(150%);
-}
-body.vivid-watch-room-mode .vivid-player-layout,
-body.vivid-watch-room-mode .vivid-player-main,
-body.vivid-watch-room-mode .vivid-player-frame {
-  min-width:0!important;
-  min-height:0!important;
-}
-body.vivid-watch-room-mode .vivid-player-status {
-  width:min(88%,520px)!important;
-  max-width:calc(100vw - 32px)!important;
-  margin:auto!important;
-  padding:15px 18px!important;
-  border:1px solid rgba(255,255,255,.08)!important;
-  border-radius:16px!important;
-  color:#f3f4f8!important;
-  background:rgba(20,24,33,.88)!important;
-  box-shadow:0 12px 36px rgba(0,0,0,.24)!important;
-  text-align:center!important;
-  line-height:1.45!important;
-  overflow-wrap:anywhere!important;
-}
+body.vivid-watch-room-mode{overflow:hidden!important;overscroll-behavior:none!important;padding:0!important}
+body.vivid-watch-room-mode #player-overlay{position:fixed!important;z-index:100000!important;inset:0!important;display:flex!important;align-items:stretch!important;justify-content:stretch!important;width:100vw!important;height:100dvh!important;max-width:none!important;max-height:none!important;margin:0!important;padding:0!important;background:#000!important}
+body.vivid-watch-room-mode #player-overlay[hidden]{display:none!important}
+body.vivid-watch-room-mode .vivid-player-dialog{position:relative!important;display:flex!important;flex-direction:column!important;width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;margin:0!important;padding:0!important;overflow:hidden!important;border:0!important;border-radius:0!important;background:#000!important;box-shadow:none!important}
+body.vivid-watch-room-mode .vivid-player-dialog-head{position:fixed!important;z-index:100001!important;inset:max(10px,env(safe-area-inset-top)) 12px auto auto!important;display:flex!important;justify-content:flex-end!important;width:auto!important;min-height:0!important;padding:0!important;border:0!important;background:transparent!important;pointer-events:none}
+body.vivid-watch-room-mode .vivid-player-dialog-heading,body.vivid-watch-room-mode .vivid-player-dialog-head h2,body.vivid-watch-room-mode .vivid-player-dialog-eyebrow,body.vivid-watch-room-mode .vivid-player-current-source,body.vivid-watch-room-mode #player-close,body.vivid-watch-room-mode .vivid-player-dialog-foot{display:none!important}
+body.vivid-watch-room-mode .vivid-player-dialog-actions{display:flex!important;align-items:center!important;pointer-events:auto!important}
+body.vivid-watch-room-mode #player-server-menu{min-height:42px!important;padding:0 15px!important;border:1px solid rgba(255,255,255,.16)!important;border-radius:999px!important;color:#f7f7fb!important;background:rgba(13,15,21,.78)!important;box-shadow:0 8px 30px rgba(0,0,0,.28)!important;backdrop-filter:blur(18px) saturate(150%)}
+body.vivid-watch-room-mode .vivid-player-layout,body.vivid-watch-room-mode .vivid-player-main,body.vivid-watch-room-mode .vivid-player-frame{display:flex!important;flex:1!important;width:100%!important;height:100%!important;min-width:0!important;min-height:0!important;margin:0!important;padding:0!important}
+body.vivid-watch-room-mode .vivid-player-frame{position:relative!important;align-items:center!important;justify-content:center!important;overflow:hidden!important;background:#000!important}
+body.vivid-watch-room-mode #vidapi-player,body.vivid-watch-room-mode #vivid-direct-player,body.vivid-watch-room-mode #vivid-tflix-frame{display:block;width:100%!important;height:100%!important;min-height:0!important;border:0!important;background:#000!important;object-fit:contain}
+body.vivid-watch-room-mode .vivid-player-status{width:min(88%,520px)!important;max-width:calc(100vw - 32px)!important;margin:auto!important;padding:15px 18px!important;border:1px solid rgba(255,255,255,.08)!important;border-radius:16px!important;color:#f3f4f8!important;background:rgba(20,24,33,.88)!important;text-align:center!important;line-height:1.45!important;overflow-wrap:anywhere!important}
+body.vivid-watch-room-mode #player-server-panel{position:fixed!important;z-index:100002!important;top:max(60px,calc(env(safe-area-inset-top) + 54px))!important;right:12px!important;width:min(340px,calc(100vw - 24px))!important;max-height:min(70dvh,620px)!important;overflow:auto!important;border:1px solid var(--cinema-line)!important;border-radius:16px!important;background:rgba(14,15,21,.96)!important;box-shadow:0 18px 60px rgba(0,0,0,.5)!important;backdrop-filter:blur(22px)}
+body.vivid-watch-room-mode #player-server-panel[hidden]{display:none!important}
 
-/* Voice becomes a discreet floating dock. No full-height sidebar, no column
-   stretching, and no room chrome over the movie. */
-body.vivid-wr-screening-open #wr-voice-call {
-  position:fixed!important;
-  z-index:100002!important;
-  inset:auto 14px max(14px,env(safe-area-inset-bottom)) auto!important;
-  display:block!important;
-  width:max-content!important;
-  max-width:calc(100vw - 28px)!important;
-  height:auto!important;
-  min-height:0!important;
-  max-height:none!important;
-  margin:0!important;
-  padding:8px!important;
-  overflow:visible!important;
-  border:1px solid rgba(190,164,255,.24)!important;
-  border-radius:16px!important;
-  background:rgba(12,14,20,.88)!important;
-  box-shadow:0 12px 38px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.07)!important;
-  -webkit-backdrop-filter:blur(22px) saturate(155%);
-  backdrop-filter:blur(22px) saturate(155%);
-}
-body.vivid-wr-screening-open #wr-voice-call .vivid-wr-voice-heading {
-  display:flex!important;
-  align-items:center!important;
-  justify-content:flex-end!important;
-  flex-direction:row!important;
-  width:auto!important;
-  min-height:0!important;
-  margin:0!important;
-  padding:0!important;
-  gap:0!important;
-}
-body.vivid-wr-screening-open #wr-voice-call .vivid-wr-voice-heading>div:first-child,
-body.vivid-wr-screening-open #wr-voice-call #wr-voice-status,
-body.vivid-wr-screening-open #wr-voice-call #wr-voice-participants {
-  display:none!important;
-}
-body.vivid-wr-screening-open #wr-voice-call .vivid-wr-voice-actions {
-  display:flex!important;
-  align-items:center!important;
-  justify-content:flex-end!important;
-  flex-direction:row!important;
-  flex-wrap:nowrap!important;
-  width:auto!important;
-  min-height:0!important;
-  margin:0!important;
-  padding:0!important;
-  gap:7px!important;
-}
-body.vivid-wr-screening-open #wr-voice-call .vivid-wr-voice-actions button {
-  display:inline-flex!important;
-  align-items:center!important;
-  justify-content:center!important;
-  flex:0 0 auto!important;
-  width:auto!important;
-  min-width:104px!important;
-  min-height:42px!important;
-  margin:0!important;
-  padding:0 15px!important;
-  border-radius:12px!important;
-  white-space:nowrap!important;
-  font-size:.82rem!important;
-}
-body.vivid-wr-screening-open #wr-voice-call .vivid-wr-voice-actions button[hidden] {
-  display:none!important;
-}
+body.vivid-watch-room-mode #vivid-tflix-player{position:fixed!important;z-index:100000!important;inset:0!important;width:100vw!important;height:100dvh!important;max-width:none!important;margin:0!important;padding:0!important;overflow:hidden!important;background:#000!important}
+body.vivid-watch-room-mode #vivid-tflix-player[hidden]{display:none!important}
+body.vivid-watch-room-mode #vivid-tflix-player .vivid-tflix-card,body.vivid-watch-room-mode #vivid-tflix-player .vivid-tflix-layout,body.vivid-watch-room-mode #vivid-tflix-player .vivid-tflix-player-col,body.vivid-watch-room-mode #vivid-tflix-player .vivid-tflix-screen{display:flex!important;flex-direction:column!important;width:100%!important;height:100%!important;min-height:0!important;max-width:none!important;margin:0!important;padding:0!important;border:0!important;border-radius:0!important;background:#000!important}
+body.vivid-watch-room-mode #vivid-tflix-player .vivid-tflix-topbar,body.vivid-watch-room-mode #vivid-tflix-player .vivid-tflix-sidebar{display:none!important}
+body.vivid-watch-room-mode #vivid-tflix-player #vivid-tflix-frame{display:block!important;flex:1!important;width:100%!important;height:100%!important;min-height:0!important;border:0!important;background:#000!important}
+body.vivid-watch-room-mode #vivid-tflix-player #vivid-tflix-placeholder{position:absolute!important;inset:0!important;display:grid!important;place-content:center!important;justify-items:center!important;gap:12px!important;background:#000!important;color:#f5f4f8!important}
+body.vivid-watch-room-mode #vivid-tflix-player #vivid-tflix-placeholder[hidden],body.vivid-watch-room-mode #vivid-tflix-player #vivid-tflix-frame[hidden]{display:none!important}
+body.vivid-watch-room-mode #vivid-tflix-player #vivid-tflix-start{min-height:42px;padding:0 18px;border:1px solid var(--cinema-line);border-radius:999px;background:rgba(255,255,255,.1);color:white;font:inherit}
 
-@media(max-width:650px) {
-  body.vivid-watch-room-mode .vivid-player-dialog-head {
-    top:max(8px,env(safe-area-inset-top))!important;
-    right:10px!important;
-  }
-  body.vivid-watch-room-mode #player-server-menu {
-    min-height:40px!important;
-    padding:0 13px!important;
-    font-size:.82rem!important;
-  }
-  body.vivid-wr-screening-open #wr-voice-call {
-    right:10px!important;
-    bottom:max(10px,env(safe-area-inset-bottom))!important;
-    left:auto!important;
-    width:max-content!important;
-    max-width:calc(100vw - 20px)!important;
-    padding:7px!important;
-  }
-  body.vivid-wr-screening-open #wr-voice-call .vivid-wr-voice-actions button {
-    min-width:100px!important;
-    min-height:40px!important;
-    padding:0 12px!important;
-    font-size:.78rem!important;
-  }
+
+.vivid-watch-room-cinema-page .vivid-watch-player,.vivid-watch-room-cinema-page .vivid-watch-player-wrap,.vivid-watch-room-cinema-page .vivid-player-shell{width:100%!important;max-width:none!important;margin:0!important;border-radius:0!important}
+.vivid-watch-room-cinema-page .vivid-watch-layout,.vivid-watch-room-cinema-page .vivid-watch-content,.vivid-watch-room-cinema-page #watch-content{max-width:none!important}
+.vivid-watch-room-cinema-page #watch-content .vivid-watch-details,.vivid-watch-room-cinema-page #watch-content .vivid-watch-recommendations,.vivid-watch-room-cinema-page #watch-content .vivid-watch-next-episode,.vivid-watch-room-cinema-page #watch-content .vivid-watch-back-link{display:none!important}
+.vivid-cinema-voice{position:fixed;z-index:100020;right:max(14px,env(safe-area-inset-right));bottom:max(14px,env(safe-area-inset-bottom));width:min(340px,calc(100vw - 28px));padding:10px 12px;border:1px solid rgba(195,167,255,.22);border-radius:16px;background:var(--cinema-panel);box-shadow:0 14px 48px rgba(0,0,0,.4);backdrop-filter:blur(22px)}
+.vivid-cinema-voice[hidden]{display:none!important}
+.vivid-cinema-voice-actions{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.vivid-cinema-voice-label{display:inline-flex;align-items:center;gap:6px;margin-right:auto;color:#c8b3ff;font-size:.62rem;font-weight:850;letter-spacing:.13em}
+.vivid-cinema-control{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:36px;padding:0 11px;border:1px solid var(--cinema-line);border-radius:999px;background:rgba(255,255,255,.07);color:#f7f4fb;font:inherit;font-size:.72rem;cursor:pointer}
+.vivid-cinema-control:disabled{opacity:.5;cursor:wait}
+.vivid-cinema-voice p{margin:8px 2px 0;color:var(--cinema-muted);font-size:.67rem;line-height:1.4}
+.vivid-cinema-participants{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0 0;padding:0;list-style:none}
+.vivid-cinema-participants:empty{display:none}
+.vivid-cinema-participants li{padding:5px 8px;border:1px solid var(--cinema-line);border-radius:99px;background:rgba(255,255,255,.05);font-size:.65rem}
+.vivid-wr-voice-audio{position:fixed!important;width:1px!important;height:1px!important;opacity:0!important;pointer-events:none!important;left:-10px!important;bottom:-10px!important}
+.vivid-cinema-sync-status{position:fixed;z-index:100015;left:max(14px,env(safe-area-inset-left));bottom:max(14px,env(safe-area-inset-bottom));max-width:min(390px,calc(100vw - 28px));margin:0;padding:9px 12px;border:1px solid var(--cinema-line);border-radius:12px;background:rgba(12,13,18,.82);color:#d5d1dd;font-size:.68rem;backdrop-filter:blur(16px)}
+.vivid-room-sync{position:fixed!important;z-index:100014!important;left:max(14px,env(safe-area-inset-left))!important;bottom:max(14px,env(safe-area-inset-bottom))!important;width:min(360px,calc(100vw - 28px))!important;max-height:min(42dvh,320px);overflow:auto;padding:12px!important;border:1px solid var(--cinema-line)!important;border-radius:16px!important;background:var(--cinema-panel)!important;color:var(--cinema-text)!important;box-shadow:0 14px 48px rgba(0,0,0,.4);backdrop-filter:blur(22px)}
+.vivid-room-sync__head{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.vivid-room-sync__head h2{margin:3px 0;font-size:.86rem}
+.vivid-room-sync__head p{margin:0;color:var(--cinema-muted);font-size:.66rem;line-height:1.4}
+.vivid-room-sync__eyebrow,.vivid-room-sync__provider{font-size:.56rem;letter-spacing:.1em;color:#c8b3ff}
+.vivid-room-sync__form,.vivid-room-sync__actions{display:none!important}
+.vivid-room-sync__selection{display:grid!important;gap:6px;margin-top:8px}
+.vivid-room-sync__selection>p{margin:0;color:var(--cinema-muted);font-size:.65rem}
+.vivid-room-sync__selection-controls{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.vivid-room-sync__selection-controls label{font-size:.64rem;color:var(--cinema-muted)}
+.vivid-room-sync__selection-controls select{max-width:140px;min-height:32px;padding:4px 7px;border:1px solid var(--cinema-line);border-radius:8px;background:#20212a;color:white;font:inherit;font-size:.68rem}
+@media(max-width:680px){
+ .vivid-cinema-topbar{padding-top:max(8px,env(safe-area-inset-top))}
+ .vivid-cinema-back{min-height:36px;font-size:.7rem}
+ .vivid-cinema-room-mark{font-size:.55rem}
+ .vivid-cinema-voice{right:10px;bottom:max(10px,env(safe-area-inset-bottom));width:auto;max-width:calc(100vw - 20px);padding:8px 9px}
+ .vivid-cinema-voice-actions{gap:5px}
+ .vivid-cinema-control{min-height:34px;padding:0 9px;font-size:.68rem}
+ .vivid-cinema-sync-status{left:10px;right:10px;bottom:calc(66px + env(safe-area-inset-bottom));max-width:none}
+ .vivid-room-sync{left:10px!important;right:10px!important;bottom:calc(62px + env(safe-area-inset-bottom))!important;width:auto!important;max-height:30dvh}
 }
+@media(prefers-reduced-motion:reduce){.vivid-cinema-spinner{animation:none}}

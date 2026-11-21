@@ -181,7 +181,7 @@ function buildScreeningUrl(screening) {
   const contentId = String(screening?.contentId || "");
   const mediaType = screening?.mediaType === "tv" ? "tv" : "movie";
   if (!/^\d{1,12}$/.test(contentId)) return "";
-  const url = new URL("watch.html", window.location.href);
+  const url = new URL("watch-room-cinema.html", window.location.href);
   url.searchParams.set("id", contentId);
   url.searchParams.set("type", mediaType);
   url.searchParams.set("roomId", room.roomId);
@@ -194,39 +194,15 @@ function buildScreeningUrl(screening) {
   return url.pathname + url.search;
 }
 
-function openEmbeddedScreening(screening) {
+function navigateToCinemaScreening(screening) {
   if (!room) return;
   const url = buildScreeningUrl(screening);
   if (!url) { setFeedback("The room screening does not contain a valid Vivid title.", true); return; }
-  const stage = byId("wr-screening-stage");
-  const wrap = byId("wr-screening-frame-wrap");
-  if (!stage || !wrap) return;
-  let frame = byId("wr-screening-frame");
-  if (!frame || frame.dataset.src !== url) {
-    frame = document.createElement("iframe");
-    frame.id = "wr-screening-frame";
-    frame.title = "Shared Vivid Cinema screening";
-    frame.allow = "autoplay; fullscreen; picture-in-picture; encrypted-media";
-    frame.allowFullscreen = true;
-    frame.referrerPolicy = "strict-origin-when-cross-origin";
-    frame.src = url;
-    frame.dataset.src = url;
-    wrap.replaceChildren(frame);
-  }
   loadedScreeningSessionId = String(screening.sessionId || "");
   dismissedScreeningSessionId = "";
-  stage.hidden = false;
-  document.body.classList.add("vivid-wr-screening-open");
+  window.location.assign(url);
 }
-byId("wr-screening-close")?.addEventListener("click", () => {
-  const stage = byId("wr-screening-stage");
-  const wrap = byId("wr-screening-frame-wrap");
-  if (wrap) wrap.replaceChildren();
-  dismissedScreeningSessionId = loadedScreeningSessionId;
-  loadedScreeningSessionId = "";
-  if (stage) stage.hidden = true;
-  document.body.classList.remove("vivid-wr-screening-open");
-});
+// The dedicated cinema route returns to this lobby when closed.
 
 function renderQueue(items) {
   const list = byId("wr-lobby-queue");
@@ -245,8 +221,14 @@ function renderQueue(items) {
     const join = document.createElement("a");
     join.className = "vivid-wr-button vivid-wr-button--primary";
     join.textContent = "Join screening";
-    join.href = buildScreeningUrl(room.activeScreening) || "#wr-screening-stage";
-    join.addEventListener("click", event => { event.preventDefault(); openEmbeddedScreening(room.activeScreening); });
+    join.href = buildScreeningUrl(room.activeScreening) || "#wr-lobby-queue";
+    join.addEventListener("click", event => {
+      event.preventDefault();
+      const next = new URL(window.location.href);
+      next.searchParams.delete("suppressScreening");
+      window.history.replaceState({}, "", next);
+      navigateToCinemaScreening(room.activeScreening);
+    });
     active.append(copy, join);
     list.append(active);
   }
@@ -300,7 +282,7 @@ function renderQueue(items) {
           const response = await call("startWatchRoomScreening")({ roomId: room.roomId, itemId: item.id });
           const url = buildScreeningUrl(response.data?.screening);
           if (!url) throw new Error("The server returned an invalid screening title.");
-          openEmbeddedScreening(response.data?.screening);
+          navigateToCinemaScreening(response.data?.screening);
         } catch (error) {
           showError(error);
           start.disabled = false;
@@ -372,8 +354,9 @@ function openLobby(data) {
         room = { ...room, ...snapshot.room };
         document.dispatchEvent(new CustomEvent("vivid:watch-room-updated", { detail: room }));
         const activeSessionId = String(room.activeScreening?.sessionId || "");
-        if (activeSessionId && activeSessionId !== loadedScreeningSessionId && activeSessionId !== dismissedScreeningSessionId) {
-          openEmbeddedScreening(room.activeScreening);
+        const screeningSuppressed = new URLSearchParams(window.location.search).get("suppressScreening") === "1";
+        if (!screeningSuppressed && activeSessionId && activeSessionId !== loadedScreeningSessionId && activeSessionId !== dismissedScreeningSessionId) {
+          navigateToCinemaScreening(room.activeScreening);
         }
         const currentSettings = byId("wr-room-settings-form");
         if (room.role === "host" && currentSettings && currentSettings.dataset.dirty !== "true") {
