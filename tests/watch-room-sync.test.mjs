@@ -5,7 +5,9 @@ import {
   isPlaybackRevisionStale,
   normalizePlaybackTimestamp,
   shouldCorrectPlayback,
-  shouldThrottlePlaybackWrite
+  shouldThrottlePlaybackWrite,
+  getEstimatedLocalPlaybackPosition,
+  classifyPlaybackEvent
 } from "../scripts/playback/watch-room-sync.js";
 
 test("playing position advances from the server timestamp and measured clock offset", () => {
@@ -58,4 +60,27 @@ test("only repeated playing heartbeats are rate-limited, never pause or resume t
   assert.equal(shouldThrottlePlaybackWrite("playing", "playing", 1_000, 2_800), false);
   assert.equal(shouldThrottlePlaybackWrite("playing", "playing", 2_000, 1_900), false);
   assert.equal(shouldThrottlePlaybackWrite("ended", "playing", 1_000, 1_100), false);
+});
+
+
+test("local playback clock is extrapolated from its last observed position", () => {
+  assert.equal(getEstimatedLocalPlaybackPosition({
+    position: 100, status: "playing", duration: 500, observedAtMs: 10_000
+  }, { nowMs: 12_500 }), 102.5);
+  assert.equal(getEstimatedLocalPlaybackPosition({
+    position: 100, status: "paused", duration: 500, observedAtMs: 10_000
+  }, { nowMs: 12_500 }), 100);
+  assert.equal(getEstimatedLocalPlaybackPosition({
+    position: 499, status: "playing", duration: 500, observedAtMs: 10_000
+  }, { nowMs: 12_500 }), 500);
+  assert.equal(getEstimatedLocalPlaybackPosition({ position: null }), null);
+});
+
+test("playback event classification separates commands from progress heartbeats", () => {
+  assert.equal(classifyPlaybackEvent({ event: "playing", status: "playing", previousStatus: "paused" }), "play");
+  assert.equal(classifyPlaybackEvent({ event: "playing", status: "playing", previousStatus: "playing" }), "progress");
+  assert.equal(classifyPlaybackEvent({ event: "timeupdate", status: "playing", previousStatus: "playing" }), "progress");
+  assert.equal(classifyPlaybackEvent({ event: "seeked", status: "seeked", previousStatus: "playing" }), "seek");
+  assert.equal(classifyPlaybackEvent({ event: "pause", status: "paused", previousStatus: "playing" }), "pause");
+  assert.equal(classifyPlaybackEvent({ event: "ended", status: "ended", previousStatus: "playing" }), "ended");
 });
