@@ -108,7 +108,13 @@ async function refreshRoomPlayerSelection() {
   const requestGeneration = playbackConnectionGeneration;
   const response = await call("getWatchRoomLobbySnapshot")({ roomId: requestedRoomId });
   if (roomId !== requestedRoomId || requestGeneration !== playbackConnectionGeneration) return;
-  applyRoomPlayerSelection(response.data?.room || {});
+  const room = response.data?.room || {};
+  const sessionId = String(room.activeScreening?.sessionId || "");
+  const nextUrl = new URL(window.location.href);
+  if (sessionId) nextUrl.searchParams.set("sessionId", sessionId);
+  else nextUrl.searchParams.delete("sessionId");
+  if (nextUrl.search !== window.location.search) window.history.replaceState({}, "", nextUrl);
+  applyRoomPlayerSelection(room);
 }
 
 async function saveRoomPlayerSelection() {
