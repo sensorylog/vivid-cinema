@@ -490,13 +490,15 @@ window.addEventListener("vivid:player-source-changed", event => {
 onAuthStateChanged(auth, user => {
   if (!user || user.isAnonymous) { stopConnection(); setNote("Sign in to connect a private Watch Room."); form.querySelector("button").disabled = true; return; }
   form.querySelector("button").disabled = false;
-  const existingRoomId = new URLSearchParams(window.location.search).get("roomId");
+  const params = new URLSearchParams(window.location.search);
+  const existingRoomId = params.get("roomMode") === "1" && params.get("id") ? params.get("roomId") : "";
   if (existingRoomId && !roomId) connectToRoom(existingRoomId).catch(error => setNote(error?.message || "Could not reconnect to this Watch Room."));
 });
 
 window.addEventListener("pagehide", stopConnection);
 window.addEventListener("pageshow", event => {
   if (!event.persisted || !auth.currentUser || auth.currentUser.isAnonymous) return;
-  const restoredRoomId = new URLSearchParams(window.location.search).get("roomId");
+  const params = new URLSearchParams(window.location.search);
+  const restoredRoomId = params.get("roomMode") === "1" && params.get("id") ? params.get("roomId") : "";
   if (restoredRoomId && !roomId) connectToRoom(restoredRoomId).catch(error => setNote(error?.message || "Could not reconnect to this Watch Room."));
 });
