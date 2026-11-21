@@ -7,7 +7,7 @@ const clients = await Promise.all([
   "watch-rooms.js", "watch-room-lobby.js", "watch-room-clubs.js", "watch-room-playback.js"
 ].map(name => readFile(new URL("../scripts/" + name, import.meta.url), "utf8")));
 
-test("Watch Rooms browser client sends Firebase Auth and standard App Check tokens", async () => {
+test("Watch Rooms browser client sends Firebase Auth and Cloudflare-backed verification tokens", async () => {
   assert.ok(client.includes('getToken(appCheck, false)'));
   assert.doesNotMatch(client, /Play Integrity/);
   assert.match(client, /Cloudflare browser verification is unavailable/);
