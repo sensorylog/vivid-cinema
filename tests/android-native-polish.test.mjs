@@ -270,6 +270,21 @@ test("Play Store native configuration omits the sideload updater and install-fro
   }
 });
 
+test("Android uses a Pages subdomain for Turnstile and routes protected APIs to Cloudflare", async () => {
+  const config = JSON.parse(await readFile(new URL("../capacitor.config.json", import.meta.url), "utf8"));
+  assert.equal(config.server.hostname, "android.vivid-cinema.pages.dev");
+  assert.equal(config.server.androidScheme, "https");
+  const api = await readFile(new URL("../scripts/cloudflare-api.js", import.meta.url), "utf8");
+  assert.ok(api.includes("https://vivid-cinema.pages.dev"));
+  const appCheck = await readFile(new URL("../scripts/turnstile-app-check.js", import.meta.url), "utf8");
+  assert.ok(appCheck.includes('getCloudflareApiUrl("/api/app-check")'));
+  assert.ok(appCheck.includes("challenges.cloudflare.com/turnstile/v0/api.js"));
+  const roomApi = await readFile(new URL("../scripts/watch-room-api.js", import.meta.url), "utf8");
+  assert.ok(roomApi.includes('getCloudflareApiUrl("/api/watch-rooms")'));
+  const exchange = await readFile(new URL("../cloudflare/functions/api/app-check.js", import.meta.url), "utf8");
+  assert.ok(exchange.includes('hostname.endsWith(".vivid-cinema.pages.dev")'));
+});
+
 test("Android native performance profile reads Navigator capability getters without spreading Navigator", () => {
   const originalWindow = globalThis.window;
   const added = [];
