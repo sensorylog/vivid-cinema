@@ -8,7 +8,7 @@ const [builder, nativeCss, capacitorConfig, nativeConfigurator, appShell] = awai
   readFile(new URL("../automation/build-static-dist.mjs", import.meta.url), "utf8"),
   readFile(new URL("../styles/vivid-native-app.css", import.meta.url), "utf8"),
   readFile(new URL("../capacitor.config.json", import.meta.url), "utf8"),
-  readFile(new URL("../automation/configure-android-debug-build.mjs", import.meta.url), "utf8"),
+  readFile(new URL("../automation/configure-android-native-project.mjs", import.meta.url), "utf8"),
   readFile(new URL("../scripts/app-shell.js", import.meta.url), "utf8")
 ]);
 
