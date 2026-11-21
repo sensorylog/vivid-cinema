@@ -25,7 +25,16 @@ APK output: `android/app/build/outputs/apk/debug/app-debug.apk`.
 
 ## GitHub Actions
 
-Pushing to `main` triggers the **Android APK Build** workflow. A successful run produces the `vivid-cinema-android-apk` artifact and publishes the stable `Vivid-Cinema-Android.apk` asset to the latest GitHub release. You can also run the workflow manually from GitHub Actions. The current development-signed APK is for testing and early distribution, not a Play Store release.
+Every pull request runs the **Android APK Build** workflow because the APK bundles the shared application, not just a small Android-only folder. The workflow runs Android-specific regression tests, generates and signs the Capacitor project, verifies the package and launcher icon, then installs and launches the APK in an Android 15 emulator. The emulator smoke test backgrounds and resumes the app and checks for a fatal process crash. A successful PR run uploads the `vivid-cinema-android-apk` artifact; it does not publish a preview APK. A push to `main` builds and publishes the stable `Vivid-Cinema-Android.apk` asset to the matching GitHub release. You can also run the workflow manually from GitHub Actions. The current development-signed APK is for testing and early distribution, not a Play Store release.
+
+## Android experience and compatibility
+
+- Android uses five primary bottom-navigation destinations (Home, Browse, For You, Library, More). Live, News, Search and Watch Rooms are in the accessible More menu, avoiding seven compressed navigation targets on small screens.
+- The app bundles its shell locally. Catalogue, account, recommendations, Watch Rooms and third-party playback still depend on their respective network services.
+- Playback progress is saved when the document is hidden or page-hidden. Watch Room realtime subscriptions reconnect when the app returns to the foreground. The updater rechecks when Android returns the app to the foreground, subject to its cache cooldown.
+- Background push is currently implemented through the browser Web Push API. A native Firebase Cloud Messaging integration is not included; the feature is available only when the runtime exposes the required service-worker, PushManager and Notification APIs.
+- Google sign-in and third-party streaming-provider behavior must be verified on physical Android devices. Provider iframe fullscreen behavior varies by provider and Android WebView version.
+- The CI emulator test is a launch/lifecycle smoke test, not a substitute for testing account sign-in, microphone permission prompts, fullscreen playback, external providers, low-memory pressure, rotation, or interrupted downloads on real devices.
 
 ## Native Android source
 
