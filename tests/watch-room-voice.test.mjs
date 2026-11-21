@@ -77,42 +77,36 @@ test("LiveKit token signer rejects malformed identities and unscoped room names"
   }), /invalid/i);
 });
 
-test("Watch Room uses a dedicated cinema route instead of nesting the Watch page in an iframe", async () => {
-  const [lobbyHtml, cinemaHtml, lobby, cinema, voice, playback, watchPage, cinemaStyles, rooms] = await Promise.all([
+test("Watch Room screenings stay in the lobby and minimize without stopping playback", async () => {
+  const [lobbyHtml, lobby, voice, playback, watchPage, cinemaStyles, rooms] = await Promise.all([
     readFile(new URL("../watch-rooms.html", import.meta.url), "utf8"),
-    readFile(new URL("../watch-room-cinema.html", import.meta.url), "utf8"),
     readFile(new URL("../scripts/watch-room-lobby.js", import.meta.url), "utf8"),
-    readFile(new URL("../scripts/watch-room-cinema.js", import.meta.url), "utf8"),
     readFile(new URL("../scripts/watch-room-voice.js", import.meta.url), "utf8"),
     readFile(new URL("../scripts/watch-room-playback.js", import.meta.url), "utf8"),
     readFile(new URL("../scripts/watch.js", import.meta.url), "utf8"),
     readFile(new URL("../styles/vivid-watch-room-cinema.css", import.meta.url), "utf8"),
     readFile(new URL("../scripts/watch-rooms.js", import.meta.url), "utf8")
   ]);
-  assert.ok(lobbyHtml.includes('name="allowGuestVoice"'));
-  assert.ok(!lobbyHtml.includes('id="wr-screening-frame-wrap"'));
-  assert.ok(!lobby.includes('document.createElement("iframe")'));
-  assert.ok(lobby.includes('new URL("watch-room-cinema.html", window.location.href)'));
-  assert.ok(lobby.includes('window.location.assign(url)'));
+  assert.ok(lobbyHtml.includes('id="wr-screening-player-host"'));
+  assert.ok(lobbyHtml.includes('src="scripts/watch.js"'));
+  assert.ok(lobbyHtml.includes('src="scripts/watch-room-playback.js"'));
+  assert.ok(lobby.includes('new URL("watch-rooms.html", window.location.href)'));
+  assert.ok(lobby.includes('loadedScreeningSessionId = new URLSearchParams(window.location.search).get("sessionId")'));
+  assert.ok(lobby.includes('vivid:watch-room-screening-validated'));
   assert.ok(lobby.includes('activeSessionId !== loadedScreeningSessionId'));
-  assert.ok(cinemaHtml.includes('id="watch-content"'));
-  assert.ok(cinemaHtml.includes('id="wr-voice-call"'));
-  assert.ok(cinemaHtml.includes('src="scripts/watch-room-cinema.js"'));
-  assert.ok(cinemaHtml.includes('src="scripts/watch-room-playback.js"'));
-  assert.ok(cinema.includes('call("getWatchRoomLobbySnapshot")'));
-  assert.ok(cinema.includes('call("getWatchRoomPlaybackSnapshot")'));
-  assert.ok(cinema.includes('vivid:watch-room-open'));
+  assert.ok(watchPage.includes('route.params.get("roomMode") === "1"'));
+  assert.ok(watchPage.includes('overlay.classList.add("is-minimized")'));
+  assert.ok(watchPage.includes('restorePlayer.addEventListener("click", openPlayerWindow)'));
+  assert.ok(watchPage.includes('vivid:watch-room-screening-validated'));
+  assert.ok(watchPage.includes('secondaryRoot.classList.remove("is-minimized")'));
+  assert.ok(playback.includes('params.get("roomMode") === "1" && params.get("id")'));
+  assert.ok(playback.includes('getWatchRoomPlaybackSnapshot'));
   assert.ok(voice.includes("getWatchRoomVoiceToken"));
   assert.ok(voice.includes("setMicrophoneEnabled"));
-  assert.ok(playback.includes("joinedPlayback = memberRole === \"guest\""));
-  assert.ok(playback.includes("joinButton.hidden = true"));
-  assert.ok(playback.includes('state.status === "playing" && !roomPlayerLoadRequested'));
-  assert.ok(watchPage.includes('route.params.get("roomMode") === "1"'));
-  assert.ok(cinemaStyles.includes(".vivid-cinema-voice"));
-  assert.ok(cinemaStyles.includes(".vivid-cinema-stage"));
-  assert.ok(cinemaStyles.includes("body.vivid-watch-room-mode #player-overlay"));
-  assert.ok(cinemaStyles.includes("body.vivid-watch-room-mode #vivid-tflix-player"));
-  assert.ok(cinemaStyles.includes("env(safe-area-inset-bottom)"));
+  assert.ok(cinemaStyles.includes("aspect-ratio:16/9"));
+  assert.ok(cinemaStyles.includes("#player-overlay.is-minimized"));
+  assert.ok(cinemaStyles.includes("#vivid-tflix-player.is-minimized"));
+  assert.ok(cinemaStyles.includes(".vivid-tflix-room-minimize"));
   assert.ok(rooms.includes('requestedParams.get("roomId")'));
   assert.ok(rooms.includes('document.dispatchEvent(new CustomEvent("vivid:watch-room-open"'));
 });
