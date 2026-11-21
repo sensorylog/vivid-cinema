@@ -445,8 +445,9 @@ async function getWatchRoomVoiceToken(request) {
     throw new HttpsError("failed-precondition", "The voice service must use a secure WebSocket URL.");
   }
   const { room, member } = await requireRoomMember(roomId, uid);
-  if (room.status !== "open" || !["host", "guest"].includes(member.role)) {
-    throw new HttpsError("permission-denied", "You cannot join voice in this room.");
+  if (room.status !== "open" || !["host", "guest"].includes(member.role) ||
+      (member.role === "guest" && room.allowGuestVoice === false)) {
+    throw new HttpsError("permission-denied", "The host has disabled guest voice for this room.");
   }
   const roomName = await liveKitRoomName(roomId);
   const result = await createLiveKitAccessToken({
@@ -570,7 +571,7 @@ async function getWatchRoomLobbySnapshot(request) {
     return { id: document.id, ...data, createdAt: millis(data.createdAt) };
   });
   return {
-    room: { roomId, name: room.name || "Private screening", status: room.status, memberCount: members.length, selectedPlayerId: room.selectedPlayerId || "player1", selectedProviderId: room.selectedProviderId || "vidapi", selectionUpdatedAt: millis(room.selectionUpdatedAt), activeScreening: room.activeScreening || null, allowGuestQueue: room.allowGuestQueue !== false, allowGuestChat: room.allowGuestChat !== false, allowGuestVoting: room.allowGuestVoting !== false, allowGuestPlayerSelection: room.allowGuestPlayerSelection === true, allowGuestQueueManagement: room.allowGuestQueueManagement === true, allowGuestPlaybackControl: room.allowGuestPlaybackControl === true },
+    room: { roomId, name: room.name || "Private screening", status: room.status, memberCount: members.length, selectedPlayerId: room.selectedPlayerId || "player1", selectedProviderId: room.selectedProviderId || "vidapi", selectionUpdatedAt: millis(room.selectionUpdatedAt), activeScreening: room.activeScreening || null, allowGuestQueue: room.allowGuestQueue !== false, allowGuestChat: room.allowGuestChat !== false, allowGuestVoting: room.allowGuestVoting !== false, allowGuestPlayerSelection: room.allowGuestPlayerSelection === true, allowGuestQueueManagement: room.allowGuestQueueManagement === true, allowGuestPlaybackControl: room.allowGuestPlaybackControl === true, allowGuestVoice: room.allowGuestVoice !== false },
     members, onlineCount: members.filter(member => member.isOnline).length, queue, chat,
     serverTime: now
   };
@@ -802,11 +803,11 @@ async function updateWatchRoomSettings(request) {
   const roomId = validId(request.data?.roomId, "room ID");
   const patch = request.data?.settings;
   if (!patch || typeof patch !== "object" || Array.isArray(patch)) throw new HttpsError("invalid-argument", "Room settings are required.");
-  const allowed = ["name", "allowGuestQueue", "allowGuestChat", "allowGuestVoting", "allowGuestPlayerSelection", "allowGuestQueueManagement", "allowGuestPlaybackControl"];
+  const allowed = ["name", "allowGuestQueue", "allowGuestChat", "allowGuestVoting", "allowGuestPlayerSelection", "allowGuestQueueManagement", "allowGuestPlaybackControl", "allowGuestVoice"];
   if (Object.keys(patch).some(key => !allowed.includes(key))) throw new HttpsError("invalid-argument", "One or more room settings are not supported.");
   const update = {};
   if (Object.hasOwn(patch, "name")) update.name = cleanText(patch.name, "Room name", 80);
-  for (const key of ["allowGuestQueue", "allowGuestChat", "allowGuestVoting", "allowGuestPlayerSelection", "allowGuestQueueManagement", "allowGuestPlaybackControl"]) {
+  for (const key of ["allowGuestQueue", "allowGuestChat", "allowGuestVoting", "allowGuestPlayerSelection", "allowGuestQueueManagement", "allowGuestPlaybackControl", "allowGuestVoice"]) {
     if (Object.hasOwn(patch, key)) {
       if (typeof patch[key] !== "boolean") throw new HttpsError("invalid-argument", key + " must be true or false.");
       update[key] = patch[key];
@@ -814,17 +815,21 @@ async function updateWatchRoomSettings(request) {
   }
   if (!Object.keys(update).length) throw new HttpsError("invalid-argument", "No room settings were supplied.");
   const roomRef = db.collection("rooms").doc(roomId);
+  const guestUids = [];
   await db.runTransaction(async tx => {
+    guestUids.length = 0;
     const { room, member } = await requireRoomMemberInTransaction(tx, roomId, uid);
     if (room.hostUid !== uid || member.role !== "host") throw new HttpsError("permission-denied", "Only the room host can change these settings.");
     const members = await tx.get(roomRef.collection("members"));
     const updatedAt = Timestamp.now();
     tx.update(roomRef, { ...update, updatedAt });
     members.docs.forEach(document => {
+      if (update.allowGuestVoice === false && document.data().role === "guest") guestUids.push(document.id);
       tx.set(db.collection("users").doc(document.id).collection("watchRooms").doc(roomId), update, { merge: true });
     });
   });
-  return { updated: true };
+  const voiceEvicted = update.allowGuestVoice === false ? await removeAllLiveKitParticipants(roomId, guestUids) : true;
+  return { updated: true, voiceEvicted };
 }
 
 async function removeWatchRoomMember(request) {
