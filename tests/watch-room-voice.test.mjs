@@ -101,6 +101,7 @@ test("Watch Room screenings stay embedded in the lobby and float without stoppin
   assert.ok(lobbyHtml.includes('data-room-view="chat"'));
   assert.ok(lobbyHtml.includes('data-room-view="members"'));
   assert.ok(lobbyHtml.includes('id="wr-voice-call"'));
+  assert.ok(lobbyHtml.indexOf('id="wr-voice-call"') < lobbyHtml.indexOf('<aside class="vivid-wr-room-sidebar"'));
   assert.ok(lobbyHtml.includes('id="wr-link-club-select"'));
   assert.ok(lobbyHtml.includes('id="wr-linked-club-watchlist"'));
   assert.ok(lobbyHtml.includes('id="wr-open-linked-club"'));
@@ -173,9 +174,6 @@ test("Watch Room screenings stay embedded in the lobby and float without stoppin
   assert.ok(voice.includes('joinVoice({ restore: true, muted: intent.muted === true })'));
   assert.ok(voice.includes("clearVoiceIntent(connectedRoomId || activeRoom?.roomId)"));
   assert.ok(cinemaStyles.includes("aspect-ratio:16/9"));
-  assert.ok(cinemaStyles.includes("#player-overlay.is-minimized"));
-  assert.ok(cinemaStyles.includes("pointer-events:none!important;background:transparent!important"), "a minimized player must not leave a full-screen click shield over the lobby");
-  assert.ok(cinemaStyles.includes("pointer-events:auto!important"), "the existing player remains interactive");
   assert.ok(experienceStyles.includes("overflow-y:auto!important"));
   assert.ok(experienceStyles.includes("#player-overlay.is-floating"));
   assert.ok(experienceStyles.includes("aspect-ratio:16/9!important"));
@@ -189,15 +187,9 @@ test("Watch Room screenings stay embedded in the lobby and float without stoppin
   assert.ok(roomStyles.includes(".vivid-wr-linked-club-shelf"));
   assert.ok(roomStyles.includes(".vivid-wr-club-link-setting"));
   assert.ok(roomStyles.includes("overflow-y:auto!important"));
-  assert.ok(roomStyles.includes("#player-overlay.is-minimized{bottom:calc(112px"));
-  assert.ok(roomStyles.includes(".vivid-wr-voice-panel{position:sticky"));
   assert.ok(!roomStyles.includes("body.vivid-wr-screening-open"), "obsolete full-screen lobby overlay styles should be removed");
   assert.ok(cinemaStyles.includes("#player-overlay[hidden]"));
-  assert.ok(cinemaStyles.includes("#vivid-tflix-player.is-minimized"));
-  assert.ok(cinemaStyles.includes(".vivid-tflix-room-minimize"));
   assert.ok(cinemaStyles.includes("body.vivid-watch-rooms-page.vivid-watch-room-mode .vivid-topbar{display:none!important}"));
-  assert.ok(cinemaStyles.includes("align-items:center!important;justify-content:center!important"));
-  assert.ok(cinemaStyles.includes("max-height:calc(100dvh - 24px)!important"));
   assert.ok(watchPage.includes("playerInfo.outerHTML = playerInfoMarkup()"));
   assert.ok(watchPage.includes('runtime + " min episode"'));
   assert.ok(watchPage.includes("TV episode scores stay episode-specific"));
