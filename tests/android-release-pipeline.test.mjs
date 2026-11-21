@@ -6,10 +6,12 @@ import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
-const [workflow, signer, docs] = await Promise.all([
+const [workflow, signer, nativeConfigurator, docs, debugWorkflow] = await Promise.all([
   readFile(new URL("../.github/workflows/android-release.yml", import.meta.url), "utf8"),
   readFile(new URL("../automation/configure-android-release-signing.mjs", import.meta.url), "utf8"),
-  readFile(new URL("../ANDROID_BUILD.md", import.meta.url), "utf8")
+  readFile(new URL("../automation/configure-android-native-project.mjs", import.meta.url), "utf8"),
+  readFile(new URL("../ANDROID_BUILD.md", import.meta.url), "utf8"),
+  readFile(new URL("../.github/workflows/android-debug-apk.yml", import.meta.url), "utf8")
 ]);
 
 test("production-signed Android release remains manual until signing is configured", () => {
@@ -40,6 +42,7 @@ test("debug APK release never republishes the Android signing keystore", async (
   assert.match(publishStep, /gh release upload/);
   assert.doesNotMatch(publishStep, /Vivid-Cinema-Debug\\.keystore/);
   assert.match(debugWorkflow, /gh release download/);
+  assert.match(debugWorkflow, /vars\\.ANDROID_PRODUCTION_SIGNING_ENABLED != 'true'/);
 });
 
 test("Android release docs explain keystore continuity and secret setup", () => {
@@ -47,6 +50,7 @@ test("Android release docs explain keystore continuity and secret setup", () => 
   assert.match(docs, /never commit/i);
   assert.match(docs, /same signing key/i);
   assert.match(docs, /signed release APK/i);
+  assert.match(docs, /ANDROID_PRODUCTION_SIGNING_ENABLED/);
 });
 
 
