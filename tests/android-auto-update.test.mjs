@@ -79,7 +79,7 @@ test("Android package keeps the simple Vivid Cinema display name and shared laun
   assert.match(nativeUpdater, /getSharedPreferences/);
   assert.match(nativeUpdater, /handleOnResume/);
   assert.match(nativeUpdater, /handleOnDestroy/);
-  assert.match(nativeUpdater, /unregisterReceiver\\(receiver\\)/);
+  assert.match(nativeUpdater, /unregisterReceiver\(receiver\)/);
   assert.match(iconScript, /vivid-icon-180\.png/);
   assert.match(iconScript, /ic_launcher_round\.png/);
 });
