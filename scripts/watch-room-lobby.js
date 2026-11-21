@@ -20,6 +20,59 @@ function stop() {
   searchTimer = null;
   room = null;
 }
+function setRoomView(view = "queue") {
+  const selected = ["queue", "chat", "members"].includes(view) ? view : "queue";
+  document.querySelectorAll("[data-room-view]").forEach(button => {
+    const active = button.dataset.roomView === selected;
+    button.classList.toggle("is-active", active);
+    button.setAttribute("aria-selected", String(active));
+    button.tabIndex = active ? 0 : -1;
+  });
+  document.querySelectorAll("[data-room-view-panel]").forEach(panel => {
+    panel.hidden = panel.dataset.roomViewPanel !== selected;
+  });
+}
+document.querySelectorAll("[data-room-view]").forEach(button => {
+  button.addEventListener("click", () => setRoomView(button.dataset.roomView));
+});
+
+function renderCinemaStage() {
+  const stage = byId("wr-cinema-stage");
+  const status = byId("wr-cinema-status");
+  const title = byId("wr-cinema-title");
+  const subtitle = byId("wr-cinema-subtitle");
+  const open = byId("wr-cinema-open");
+  if (!stage || !status || !title || !subtitle || !open) return;
+  const screening = room?.activeScreening;
+  if (!screening?.sessionId || !screening?.contentId) {
+    stage.classList.remove("has-screening");
+    stage.style.removeProperty("--wr-cinema-art");
+    status.textContent = "PRIVATE CINEMA · ROOM READY";
+    title.textContent = "Your screen is ready.";
+    subtitle.textContent = "Choose a film together, then start the screening when everyone is ready.";
+    open.hidden = true;
+    return;
+  }
+  stage.classList.add("has-screening");
+  const mediaLabel = screening.mediaType === "tv"
+    ? "TV series · S" + String(screening.season || 1) + " E" + String(screening.episode || 1)
+    : "Feature film";
+  status.textContent = "NOW SCREENING · " + mediaLabel.toUpperCase();
+  title.textContent = screening.title || "Your shared screening";
+  subtitle.textContent = "The room is watching together. You can return to the player without leaving the conversation.";
+  open.hidden = false;
+  open.innerHTML = '<i class="bi bi-play-fill" aria-hidden="true"></i> Return to screening';
+  const posterPath = String(screening.posterPath || "");
+  if (/^\/[A-Za-z0-9/_-]+\.(?:jpg|jpeg|png|webp)$/i.test(posterPath)) {
+    stage.style.setProperty("--wr-cinema-art", 'url("https://image.tmdb.org/t/p/w780' + posterPath + '")');
+  } else {
+    stage.style.removeProperty("--wr-cinema-art");
+  }
+}
+byId("wr-cinema-open")?.addEventListener("click", () => {
+  if (room?.activeScreening) navigateToCinemaScreening(room.activeScreening);
+});
+
 function setFeedback(message, isError = false) {
   const note = byId("wr-stage-note");
   if (!note) return;
@@ -294,6 +347,8 @@ function renderQueue(items) {
         start.disabled = true;
         try {
           const response = await call("startWatchRoomScreening")({ roomId: room.roomId, itemId: item.id });
+          room.activeScreening = response.data?.screening || room.activeScreening;
+          renderCinemaStage();
           const url = buildScreeningUrl(response.data?.screening);
           if (!url) throw new Error("The server returned an invalid screening title.");
           navigateToCinemaScreening(response.data?.screening);
@@ -334,6 +389,8 @@ function openLobby(data) {
   setSearchMessage("");
   room = data;
   lastRoom = data;
+  setRoomView("queue");
+  renderCinemaStage();
   applyRoomPermissions();
   memberList = [];
   byId("wr-panel-rooms").hidden = true;
@@ -366,6 +423,7 @@ function openLobby(data) {
       const snapshot = response.data || {};
       if (snapshot.room) {
         room = { ...room, ...snapshot.room };
+        renderCinemaStage();
         document.dispatchEvent(new CustomEvent("vivid:watch-room-updated", { detail: room }));
         const requestedParams = new URLSearchParams(window.location.search);
         if (requestedParams.get("roomMode") === "1" && requestedParams.get("id") &&
