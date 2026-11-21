@@ -30,6 +30,7 @@ let lastCommandAt = 0;
 let lastSeekCommandAt = 0;
 let pendingPlaySince = 0;
 let lastAppliedSelectionKey = "";
+let loadedScreeningSessionId = "";
 let roomPlayerLoadRequested = false;
 let latestRemoteState = null;
 let joinedPlayback = false;
@@ -92,8 +93,9 @@ function applyRoomPlayerSelection(room) {
     ? "Choose the player and server for everyone in this room."
     : "Shared room selection: " + (playerId === "player1" ? "Player 1" : "Player 2") + " · " + providerId + ".";
   const key = playerId + ":" + providerId;
-  const hasActiveScreening = Boolean(room.activeScreening?.sessionId);
-  if (key !== lastAppliedSelectionKey) {
+  const screeningSessionId = String(room.activeScreening?.sessionId || "");
+  const hasActiveScreening = Boolean(screeningSessionId);
+  if (key !== lastAppliedSelectionKey || (hasActiveScreening && loadedScreeningSessionId !== screeningSessionId)) {
     const position = Math.max(0, Number(localPosition ?? latestRemoteState?.position ?? lastHostPayload?.position) || 0);
     if (activePlayerId !== playerId || activeProviderId !== providerId) {
       sendProviderCommand("pause");
@@ -105,9 +107,10 @@ function applyRoomPlayerSelection(room) {
     }
     activePlayerId = playerId;
     activeProviderId = providerId;
-    lastAppliedSelectionKey = hasActiveScreening ? key : "";
+    lastAppliedSelectionKey = key;
     if (playerId === "player2" && providerId === "cinesrc") pendingPlayer2Seek = position;
     if (hasActiveScreening && (role !== "guest" || joinedPlayback)) {
+      loadedScreeningSessionId = screeningSessionId;
       roomPlayerLoadRequested = true;
       window.dispatchEvent(new CustomEvent("vivid:watch-room-apply-selection", {
         detail: { playerId, providerId, position }
@@ -185,7 +188,7 @@ function stopConnection() {
   playbackSessionId = "";
   if (heartbeatTimer) window.clearInterval(heartbeatTimer);
   if (selectionTimer) window.clearInterval(selectionTimer);
-  heartbeatTimer = null; selectionTimer = null; if (syncReconcileTimer) window.clearInterval(syncReconcileTimer); syncReconcileTimer = null; lastAppliedSelectionKey = ""; roomPlayerLoadRequested = false;
+  heartbeatTimer = null; selectionTimer = null; if (syncReconcileTimer) window.clearInterval(syncReconcileTimer); syncReconcileTimer = null; lastAppliedSelectionKey = ""; loadedScreeningSessionId = ""; roomPlayerLoadRequested = false;
   selectionPanel.hidden = true;
   roomId = ""; role = ""; allowGuestPlayerSelection = false; allowGuestPlaybackControl = false; suppressPlaybackPublishUntil = 0; latestRemoteState = null; joinedPlayback = false; localPosition = null; localPositionObservedAt = 0; localStatus = ""; hostStatus = "paused"; lastPublishAt = 0; lastPublishedStatus = ""; lastCommandedStatus = ""; lastCommandAt = 0; lastSeekCommandAt = 0; pendingPlaySince = 0; publishQueue = Promise.resolve(); lastHostPayload = null; clockOffsetMs = 0;
   joinButton.hidden = true; leaveButton.hidden = true; form.hidden = false;
