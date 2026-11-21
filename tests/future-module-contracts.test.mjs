@@ -481,6 +481,7 @@ test("Watch Room sync extrapolates local time and keeps command events ahead of 
   for (const backend of [node, cloudflare]) {
     assert.ok(backend.includes("Math.abs(capturedAtMsInput - now.toMillis()) <= 10_000"));
     assert.ok(backend.includes("Playback event type does not match its status."));
+    assert.ok(backend.includes("Playback speed must be between 0.25x and 2x."));
   }
   assert.ok(client.includes("syncReconcileTimer = window.setInterval"));
   assert.ok(client.includes("const screeningSessionId = String(room.activeScreening?.sessionId || \"\")"));
