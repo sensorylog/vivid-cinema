@@ -29,7 +29,7 @@ test("Android workflow publishes a cleanly named APK and build metadata without 
   assert.doesNotMatch(workflow, /pull_request:\s*\n\s*paths:/, "all application changes must exercise the Android bundle");
   assert.match(workflow, /release:\s*\n\s*types: \[published\]/);
   assert.match(workflow, /assembleDebug/);
-  assert.match(workflow, /configure-android-native-project\\.mjs/);
+  assert.match(workflow, /configure-android-native-project\.mjs/);
   assert.ok(workflow.indexOf("npm run cap:sync") < workflow.indexOf("configure-android-native-project.mjs"));
   assert.match(workflow, /apk_name="Vivid-Cinema-Android\.apk"/);
   assert.match(workflow, /Vivid-Cinema-Android-build-/);
@@ -69,7 +69,7 @@ test("Android update checks are cached across page navigation", () => {
 test("Android package keeps the simple Vivid Cinema display name and shared launcher icon", () => {
   assert.equal(JSON.parse(capacitorConfig).appName, "Vivid Cinema");
   assert.match(configure, /VividUpdaterPlugin/);
-  assert.match(legacyConfigure, /configure-android-native-project\\.mjs/);
+  assert.match(legacyConfigure, /configure-android-native-project\.mjs/);
   assert.match(configure, /REQUEST_INSTALL_PACKAGES/);
   assert.match(configure, /versionCode/);
   assert.match(configure, /versionName/);
