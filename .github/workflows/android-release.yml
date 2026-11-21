@@ -67,7 +67,7 @@ jobs:
           echo "VIVID_ANDROID_BUILT_AT=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_ENV"
 
       - name: Run Android release contract tests
-        run: node --test tests/android-release-pipeline.test.mjs tests/android-native-polish.test.mjs tests/android-icon.test.mjs tests/android-auto-update.test.mjs tests/watch-player.test.mjs tests/playback-structure.test.mjs tests/service-worker.test.mjs
+        run: node --test tests/android-release-pipeline.test.mjs tests/android-native-polish.test.mjs tests/android-icon.test.mjs tests/android-auto-update.test.mjs tests/watch-player.test.mjs tests/watch-room-voice.test.mjs tests/playback-structure.test.mjs tests/service-worker.test.mjs
 
       - name: Generate Android project and bundle local website
         run: |
