@@ -26,8 +26,8 @@ export function inferPlaybackRate(previousPosition, currentPosition, elapsedSeco
   const commonRates = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2];
   const nearestRate = commonRates.reduce((best, rate) =>
     Math.abs(rate - measuredRate) < Math.abs(best - measuredRate) ? rate : best, commonRates[0]);
-  const tolerance = nearestRate === 1 ? 0.08 : 0.16;
-  return Math.abs(nearestRate - measuredRate) <= tolerance ? nearestRate : null;
+  const tolerance = nearestRate === 1 ? 0.08 : 0.1;
+  return Math.abs(nearestRate - measuredRate) < tolerance ? nearestRate : null;
 }
 
 export function getExpectedPlaybackPosition(state, {
