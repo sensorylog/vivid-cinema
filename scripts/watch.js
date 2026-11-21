@@ -14,7 +14,10 @@ import { buildVidapiEmbedUrl, buildVidsrcEmbedUrl, buildVidlinkEmbedUrl, buildVi
 const $ = (id) => document.getElementById(id);
 const route = getRoute();
 const isWatchRoomCinemaMode = route.params.get("roomMode") === "1" && Boolean(route.params.get("roomId"));
-if (isWatchRoomCinemaMode) document.body.classList.add("vivid-watch-room-mode");
+if (isWatchRoomCinemaMode) {
+  document.body.classList.add("vivid-watch-room-mode");
+  document.getElementById("wr-screening-player-host")?.removeAttribute("hidden");
+}
 const VIDAPI_ORIGINS = new Set([new URL(VIVID_CONFIG.api.vidapiEmbedBaseUrl).origin, "https://vidapi.ru", "https://vidapi.me", "https://vidapi.to", "https://vidapi.bz", "https://vidapi.tw"]);
 const VIDLINK_ORIGINS = new Set(["https://vidlink.pro", "https://www.vidlink.pro"]);
 const VIDPLUS_ORIGINS = new Set(["https://player.vidplus.to", "https://vidplus.to", "https://www.vidplus.to"]);
@@ -689,6 +692,14 @@ function renderShell(params) {
   // Keep the page interactive until the viewer opens the cinema window.
   const openPlayer = $("watch-open-player");
   const closePlayer = $("player-close");
+  const restorePlayer = document.createElement("button");
+  restorePlayer.type = "button";
+  restorePlayer.id = "player-restore";
+  restorePlayer.className = "vivid-player-restore";
+  restorePlayer.setAttribute("aria-label", "Restore screening player");
+  restorePlayer.innerHTML = '<i class="bi bi-arrows-angle-expand" aria-hidden="true"></i>';
+  closePlayer?.parentElement?.insertBefore(restorePlayer, closePlayer);
+  restorePlayer.hidden = true;
   const serverMenu = $("player-server-menu");
   const serverPanel = $("player-server-panel");
   if (serverMenu && serverPanel) {
@@ -744,6 +755,10 @@ function renderShell(params) {
   let playerHasOpened = false;
   const openPlayerWindow = () => {
     if (!overlay) return;
+    overlay.classList.remove("is-minimized");
+    document.body.classList.remove("vivid-watch-room-player-minimized");
+    if (restorePlayer) restorePlayer.hidden = true;
+    if (closePlayer) closePlayer.hidden = false;
     overlay.hidden = false;
     if (!overlay.classList.contains("vivid-player-inline")) document.body.classList.add("vivid-player-open");
     if (openPlayer) openPlayer.setAttribute("aria-expanded", "true");
@@ -766,6 +781,13 @@ function renderShell(params) {
   };
   const closePlayerWindow = () => {
     if (!overlay) return;
+    if (isWatchRoomCinemaMode) {
+      overlay.classList.add("is-minimized");
+      document.body.classList.add("vivid-watch-room-player-minimized");
+      if (restorePlayer) restorePlayer.hidden = false;
+      if (closePlayer) closePlayer.hidden = true;
+      return;
+    }
     clearFallbackTimer();
     overlay.hidden = true;
     if (!overlay.classList.contains("vivid-player-inline")) document.body.classList.remove("vivid-player-open");
@@ -784,6 +806,7 @@ function renderShell(params) {
   openPlayer?.addEventListener("click", openPlayerWindow);
   // Do not open or start either player until the viewer chooses one.
   closePlayer?.addEventListener("click", closePlayerWindow);
+  restorePlayer.addEventListener("click", openPlayerWindow);
   tryNextButton?.addEventListener("click", () => {
     const next = getNextSource(activeSource);
     if (!next) return showFallbackPrompt(activeSource);
@@ -902,6 +925,7 @@ function renderShell(params) {
       updateSourceLabel();
     };
   }
+  if (isWatchRoomCinemaMode) openPlayerWindow();
   recordHistory();
   recordBehavior("watch_started", media, { season: params.season, episode: params.episode, resumeAt });
 }
