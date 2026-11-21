@@ -527,8 +527,21 @@ function syncRoomSettings() {
   settings.elements.linkedClubId.value = room.linkedClubId || "";
 }
 
+function handleRoomAccessLost(roomId, message = "Your access to this Watch Room has ended.") {
+  if (!room || room.roomId !== roomId) return;
+  setFeedback(message, true);
+  byId("wr-room-lobby") && (byId("wr-room-lobby").hidden = true);
+  byId("wr-panel-rooms") && (byId("wr-panel-rooms").hidden = false);
+  document.dispatchEvent(new CustomEvent("vivid:watch-room-access-revoked", { detail: { roomId } }));
+  stop(true);
+}
+
 function applyRoomDocument(data) {
   if (!room || !data || room.roomId !== data.roomId) return;
+  if (data.status && data.status !== "open") {
+    handleRoomAccessLost(room.roomId, "The host has ended this Watch Room.");
+    return;
+  }
   const role = room.role;
   const previousClubId = room.linkedClubId || "";
   room = { ...room, ...data, role, roomId: data.roomId };
@@ -577,11 +590,18 @@ function subscribeRoomRealtime(roomId) {
   };
   const onError = label => error => {
     if (!room || room.roomId !== roomId) return;
+    if (error?.code === "permission-denied") {
+      handleRoomAccessLost(roomId, "Your access to this Watch Room was removed or has expired.");
+      return;
+    }
     setFeedback(label + " updates were interrupted. Vivid is reconnecting…", true);
     console.warn("Watch Room realtime " + label + " subscription failed:", error);
   };
   stops.push(onSnapshot(roomRef, snapshot => {
-    if (!snapshot.exists()) return;
+    if (!snapshot.exists()) {
+      handleRoomAccessLost(roomId, "This Watch Room is no longer available.");
+      return;
+    }
     applyRoomDocument({ ...snapshot.data(), roomId });
   }, onError("room")));
   stops.push(onSnapshot(membersRef, snapshot => {
