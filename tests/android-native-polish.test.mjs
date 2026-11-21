@@ -1,6 +1,10 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
+import { readFile, writeFile, mkdir, mkdtemp, rm } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import path from "node:path";
+import { spawnSync } from "node:child_process";
+import { fileURLToPath } from "node:url";
 import { resolveAndroidBackAction } from "../scripts/android-navigation.js";
 import { isLegacyPerformanceDevice } from "../scripts/performance-profile.js";
 
@@ -88,4 +92,57 @@ test("Android applies the low-compositing profile when hardware hints show a con
   assert.equal(isLegacyPerformanceDevice({ hardwareConcurrency: 4, deviceMemory: 8, platform: "android" }), false);
   assert.equal(isLegacyPerformanceDevice({ hardwareConcurrency: 8, deviceMemory: 0, platform: "android" }), false);
   assert.equal(isLegacyPerformanceDevice({ hardwareConcurrency: 4, deviceMemory: 0, platform: "web" }), false);
+});
+
+test("native Android project generation registers both plugins idempotently", async () => {
+  const temp = await mkdtemp(path.join(tmpdir(), "vivid-android-native-"));
+  try {
+    const androidRoot = path.join(temp, "android");
+    const gradlePath = path.join(androidRoot, "app", "build.gradle");
+    const javaRoot = path.join(androidRoot, "app", "src", "main", "java", "com", "vividcinema", "app");
+    await mkdir(javaRoot, { recursive: true });
+    await writeFile(gradlePath, [
+      "android {",
+      "  defaultConfig {",
+      "    versionCode 1",
+      '    versionName "1.0.0"',
+      "  }",
+      "}"
+    ].join("\\n"), "utf8");
+    await writeFile(path.join(javaRoot, "MainActivity.java"), [
+      "package com.vividcinema.app;",
+      "import com.getcapacitor.BridgeActivity;",
+      "public class MainActivity extends BridgeActivity {}"
+    ].join("\\n"), "utf8");
+
+    const script = fileURLToPath(new URL("../automation/configure-android-native-project.mjs", import.meta.url));
+    const env = {
+      ...process.env,
+      VIVID_ANDROID_ROOT: androidRoot,
+      VIVID_ANDROID_BUILD: "1000001",
+      GITHUB_RUN_NUMBER: "12"
+    };
+    const first = spawnSync(process.execPath, [script], { encoding: "utf8", env });
+    assert.equal(first.status, 0, first.stderr || first.stdout);
+
+    const gradle = await readFile(gradlePath, "utf8");
+    const activity = await readFile(path.join(javaRoot, "MainActivity.java"), "utf8");
+    const updaterPlugin = await readFile(path.join(javaRoot, "VividUpdaterPlugin.java"), "utf8");
+    const navigationPlugin = await readFile(path.join(javaRoot, "VividNavigationPlugin.java"), "utf8");
+    assert.match(gradle, /versionCode 1100001/);
+    assert.match(activity, /registerPlugin\(VividUpdaterPlugin\.class\)/);
+    assert.match(activity, /registerPlugin\(VividNavigationPlugin\.class\)/);
+    assert.equal((activity.match(/super\.onCreate\(savedInstanceState\)/g) || []).length, 1);
+    assert.match(updaterPlugin, /@CapacitorPlugin\(name = "VividUpdater"\)/);
+    assert.match(navigationPlugin, /@CapacitorPlugin\(name = "VividNavigation"\)/);
+    assert.match(navigationPlugin, /OnBackPressedCallback/);
+
+    const second = spawnSync(process.execPath, [script], { encoding: "utf8", env });
+    assert.equal(second.status, 0, second.stderr || second.stdout);
+    const activityAfterSecondRun = await readFile(path.join(javaRoot, "MainActivity.java"), "utf8");
+    assert.equal((activityAfterSecondRun.match(/registerPlugin\(VividUpdaterPlugin\.class\)/g) || []).length, 1);
+    assert.equal((activityAfterSecondRun.match(/registerPlugin\(VividNavigationPlugin\.class\)/g) || []).length, 1);
+  } finally {
+    await rm(temp, { recursive: true, force: true });
+  }
 });
