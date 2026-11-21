@@ -129,6 +129,7 @@ test("native Android project generation registers both plugins idempotently", as
     const activity = await readFile(path.join(javaRoot, "MainActivity.java"), "utf8");
     const updaterPlugin = await readFile(path.join(javaRoot, "VividUpdaterPlugin.java"), "utf8");
     const navigationPlugin = await readFile(path.join(javaRoot, "VividNavigationPlugin.java"), "utf8");
+    const webChromeClient = await readFile(path.join(javaRoot, "VividWebChromeClient.java"), "utf8");
     assert.match(gradle, /versionCode 1100001/);
     assert.match(activity, /registerPlugin\(VividUpdaterPlugin\.class\)/);
     assert.match(activity, /registerPlugin\(VividNavigationPlugin\.class\)/);
@@ -136,6 +137,12 @@ test("native Android project generation registers both plugins idempotently", as
     assert.match(updaterPlugin, /@CapacitorPlugin\(name = "VividUpdater"\)/);
     assert.match(navigationPlugin, /@CapacitorPlugin\(name = "VividNavigation"\)/);
     assert.match(navigationPlugin, /OnBackPressedCallback/);
+    assert.match(webChromeClient, /extends BridgeWebChromeClient/);
+    assert.match(webChromeClient, /onShowCustomView\\(View view, CustomViewCallback callback\\)/);
+    assert.match(webChromeClient, /onHideCustomView\\(\\)/);
+    assert.match(webChromeClient, /decorView\\)\\.addView/);
+    assert.match(webChromeClient, /removeView\\(customView\\)/);
+    assert.match(webChromeClient, /SYSTEM_UI_FLAG_IMMERSIVE_STICKY/);
 
     const second = spawnSync(process.execPath, [script], { encoding: "utf8", env });
     assert.equal(second.status, 0, second.stderr || second.stdout);
