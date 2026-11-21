@@ -879,11 +879,7 @@ function renderShell(params) {
   if (isWatchRoomCinemaMode) {
     roomPlayerSlot?.querySelectorAll("iframe").forEach(frame => { frame.src = "about:blank"; });
     const previousDirectVideo = roomPlayerSlot?.querySelector("video");
-    if (previousDirectVideo) {
-      previousDirectVideo.pause();
-      previousDirectVideo.removeAttribute("src");
-      previousDirectVideo.load?.();
-    }
+    if (previousDirectVideo) stopDirectStream(previousDirectVideo);
     roomPlayerLayout?.destroy();
     roomPlayerLayout = null;
     roomPlayerSlot?.remove();
