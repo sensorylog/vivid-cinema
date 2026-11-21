@@ -8,6 +8,7 @@ import {
   shouldThrottlePlaybackWrite,
   getEstimatedLocalPlaybackPosition,
   normalizePlaybackRate,
+  inferPlaybackRate,
   classifyPlaybackEvent
 } from "../scripts/playback/watch-room-sync.js";
 
@@ -108,4 +109,14 @@ test("shared playback clock applies playback rate to host and local timeline est
 
 test("playback rate changes are treated as immediate control events", () => {
   assert.equal(classifyPlaybackEvent({ event: "ratechange", status: "playing", previousStatus: "playing" }), "rate");
+});
+
+
+test("VidSrc progress intervals infer only stable supported playback rates", () => {
+  assert.equal(inferPlaybackRate(100, 107.5, 5), 1.5);
+  assert.equal(inferPlaybackRate(100, 105, 5), 1);
+  assert.equal(inferPlaybackRate(100, 103.75, 5), 0.75);
+  assert.equal(inferPlaybackRate(100, 105.5, 5), null, "small timing jitter must not become a false speed change");
+  assert.equal(inferPlaybackRate(100, 120, 5), null, "rates above the common provider limit are ignored");
+  assert.equal(inferPlaybackRate(100, 107, 0), null);
 });
