@@ -18,24 +18,16 @@ export function callWatchRoomApi(action) {
     }
     if (!appCheck) {
       const cause = appCheckError;
-      let nativeAndroid = false;
-      try {
-        nativeAndroid = Boolean(window.Capacitor?.isNativePlatform?.() && window.Capacitor?.getPlatform?.() === "android");
-      } catch {}
-      const diagnosticCode = nativeAndroid
-        ? "appCheck/native-play-integrity-not-configured"
-        : String(cause?.code || "appCheck/not-initialized");
-      console.error("Vivid Watch Rooms App Check initialization failed:", {
+      const diagnosticCode = String(cause?.code || "appCheck/not-initialized");
+      console.error("Vivid Watch Rooms Cloudflare Turnstile verification initialization failed:", {
         hostname: window.location.hostname,
         origin: window.location.origin,
-        nativeAndroid,
         code: diagnosticCode,
-        message: cause?.message || "Firebase App Check did not initialize."
+        message: cause?.message || "Cloudflare Turnstile-backed verification did not initialize."
       });
-      const message = nativeAndroid
-        ? "Watch Rooms are not enabled in this Android build yet. Native Firebase App Check with Play Integrity must be configured first. Your account and Watch Rooms security are not being bypassed."
-        : "Browser verification is unavailable (" + diagnosticCode + "). Reload Vivid and try again. If it continues, the site's App Check provider or allowed-domain configuration needs attention.";
-      const error = new Error(message);
+      const error = new Error(
+        "Cloudflare browser verification is unavailable (" + diagnosticCode + "). Reload Vivid and try again. If it continues, check the Turnstile widget hostname and Cloudflare Pages configuration."
+      );
       error.code = diagnosticCode;
       error.cause = cause || undefined;
       throw error;
