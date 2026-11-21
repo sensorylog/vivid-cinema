@@ -121,7 +121,7 @@ jobs:
               throw "Release $tag is already public. Refusing to overwrite a published release."
             }
           } else {
-            gh release create $tag --verify-tag --draft --title "Vivid Cinema $version" --notes "Vivid Cinema Windows release $version. Draft remains private until installer, portable executable, and updater metadata are verified."
+            gh release create $tag --verify-tag --draft --title "Vivid Cinema $version" --notes "Vivid Cinema Windows release $version. Installer, portable executable, and updater metadata are verified before publication. Android is released separately."
             if ($LASTEXITCODE -ne 0) {
               throw "Could not create draft release $tag for electron-builder."
             }
@@ -163,30 +163,6 @@ jobs:
           if (!$blockMap) {
             throw "Installer blockmap was not generated; refusing to publish an incomplete update."
           }
-      - name: Wait for Android APK in draft release
-        if: steps.release-decision.outputs.publish == 'true'
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        shell: pwsh
-        run: |
-          $version = node -p "require('./package.json').version"
-          $tag = "v$version"
-          $apkReady = $false
-          for ($attempt = 1; $attempt -le 30; $attempt++) {
-            $releaseJson = gh release view $tag --json assets 2>$null
-            if ($LASTEXITCODE -eq 0) {
-              $release = $releaseJson | ConvertFrom-Json
-              $assetNames = @($release.assets | ForEach-Object { $_.name })
-              if ($assetNames -contains "Vivid-Cinema-Android.apk") {
-                $apkReady = $true
-                break
-              }
-            }
-            Start-Sleep -Seconds 20
-          }
-          if (!$apkReady) {
-            throw "The Android APK did not arrive in draft release $tag; leaving the release unpublished."
-          }
       - name: Verify draft release contains all required assets
         if: steps.release-decision.outputs.publish == 'true'
         env:
@@ -202,7 +178,7 @@ jobs:
             throw "Release $tag must remain a draft until every asset has been verified."
           }
           $assetNames = @($release.assets | ForEach-Object { $_.name })
-          $requiredAssets = @("Vivid-Cinema-Setup-$version.exe", "Vivid-Cinema-Portable-$version.exe", "Vivid-Cinema-Setup-$version.exe.blockmap", "latest.yml", "Vivid-Cinema-Android.apk")
+          $requiredAssets = @("Vivid-Cinema-Setup-$version.exe", "Vivid-Cinema-Portable-$version.exe", "Vivid-Cinema-Setup-$version.exe.blockmap", "latest.yml")
           foreach ($assetName in $requiredAssets) {
             if ($assetNames -notcontains $assetName) {
               throw "Published release $tag is missing required updater asset: $assetName"
