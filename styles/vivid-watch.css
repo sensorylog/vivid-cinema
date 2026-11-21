@@ -301,3 +301,29 @@ body.vivid-watch-page :where(.vivid-watch-kicker,.vivid-watch-section-head span)
 .vivid-room-sync button:disabled{opacity:.5;cursor:wait}
 .vivid-room-sync__actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
 @media(max-width:560px){.vivid-room-sync{width:calc(100% - 24px);padding:15px}.vivid-room-sync__head{flex-direction:column}.vivid-room-sync__form>div{flex-direction:column}.vivid-room-sync__form button{width:100%}}
+
+
+/* The embedded Watch Room route renders only the shared cinema player. */
+body.vivid-watch-room-mode{height:100dvh;min-height:100dvh;overflow:hidden!important;background:#000!important;overscroll-behavior:none}
+body.vivid-watch-room-mode .vivid-topbar,
+body.vivid-watch-room-mode .vivid-footer,
+body.vivid-watch-room-mode .vivid-page-back,
+body.vivid-watch-room-mode .vivid-watch-hero,
+body.vivid-watch-room-mode .vivid-watch-recommendations,
+body.vivid-watch-room-mode .vivid-episode-navigation,
+body.vivid-watch-room-mode #vivid-tflix-player,
+body.vivid-watch-room-mode #vivid-room-sync{display:none!important}
+body.vivid-watch-room-mode .vivid-watch-app,
+body.vivid-watch-room-mode #watch-content{width:100%;height:100dvh;min-height:0;margin:0;padding:0;overflow:hidden;background:#000}
+body.vivid-watch-room-mode .vivid-player-overlay.vivid-player-inline{position:fixed;z-index:99999;inset:0;width:100vw;height:100dvh;max-width:none;padding:0;overflow:hidden;background:#000}
+body.vivid-watch-room-mode .vivid-player-overlay.vivid-player-inline .vivid-player-dialog{display:flex;width:100vw;height:100dvh;max-height:none;margin:0;border:0;border-radius:0;overflow:hidden;background:#000}
+body.vivid-watch-room-mode .vivid-player-dialog-head{flex:0 0 auto;min-height:48px;padding:6px 12px;background:#08090c}
+body.vivid-watch-room-mode .vivid-player-dialog-foot,
+body.vivid-watch-room-mode #player-close{display:none!important}
+body.vivid-watch-room-mode .vivid-player-layout,
+body.vivid-watch-room-mode .vivid-player-main{display:flex;flex:1 1 auto;min-height:0;flex-direction:column}
+body.vivid-watch-room-mode .vivid-player-overlay.vivid-player-inline .vivid-player-frame{flex:1 1 auto;width:100%;height:auto;min-height:0;aspect-ratio:auto;margin:0;border:0;border-radius:0}
+body.vivid-watch-room-mode .vivid-player-frame iframe,
+body.vivid-watch-room-mode .vivid-player-frame video{width:100%;height:100%;min-height:0;object-fit:contain}
+body.vivid-watch-room-mode .vivid-player-status{max-height:54px;overflow:auto}
+body.vivid-watch-room-mode .vivid-server-panel{z-index:100000}
