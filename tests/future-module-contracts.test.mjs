@@ -494,7 +494,7 @@ test("Watch Room sync extrapolates local time and keeps command events ahead of 
   assert.ok(sync.includes("export function classifyPlaybackEvent"));
   for (const backend of [node, cloudflare]) {
     assert.ok(backend.includes('["play", "pause", "seek", "rate", "ended", "progress"]'));
-    assert.ok(backend.includes('eventType === "progress" ? 1800 : eventType === "seek" ? 0 : 250'));
+    assert.ok(backend.includes('eventType === "progress" ? 1800 : eventType === "seek" || eventType === "rate" ? 0 : 250'));
     assert.ok(backend.includes("schemaVersion: 1, sessionId, provider, eventType, contentId"));
   }
 });
