@@ -1,4 +1,11 @@
 /* Integrated Watch Room cinema stage and scroll-aware floating player. */
+/* The cinema stage is a real lobby section, not a fixed-ratio poster tile. */
+body.vivid-watch-rooms-page #wr-cinema-stage{
+  display:flex!important;flex-direction:column!important;align-items:stretch!important;justify-content:flex-start!important;
+  min-height:0!important;height:auto!important;aspect-ratio:auto!important;overflow:visible!important
+}
+body.vivid-watch-rooms-page #wr-cinema-stage .vivid-wr-cinema-stage__content{max-width:none!important}
+
 body.vivid-watch-room-mode{
   height:auto!important;min-height:100%!important;overflow-x:hidden!important;overflow-y:auto!important;
   overscroll-behavior-y:contain!important;position:relative!important
