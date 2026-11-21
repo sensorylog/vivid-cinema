@@ -53,6 +53,7 @@ test("debug APK release never republishes the Android signing keystore", async (
   assert.doesNotMatch(publishStep, /Vivid-Cinema-Debug\\.keystore/);
   assert.match(debugWorkflow, /gh release download/);
   assert.match(debugWorkflow, /vars\.ANDROID_PRODUCTION_SIGNING_ENABLED != 'true'/);
+  assert.match(debugWorkflow, /workflow_dispatch.*github\.ref == 'refs\/heads\/main'/);
 });
 
 test("Android release docs explain keystore continuity and secret setup", () => {
