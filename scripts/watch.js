@@ -715,6 +715,7 @@ function playerInfoMarkup() {
   if (countries.length > 1) facts.push("The production is credited to " + countries.slice(0, 3).join(", ") + ".");
   const languages = (details?.spoken_languages || []).map(item => item?.english_name || item?.name).filter(Boolean);
   if (languages.length > 1) facts.push("The title lists " + languages.length + " spoken languages: " + languages.slice(0, 3).join(", ") + ".");
+  else if (languages.length === 1) facts.push("The title lists " + languages[0] + " as its spoken language.");
   if (isTv) {
     const creators = (details?.created_by || []).map(item => item?.name).filter(Boolean);
     if (creators.length) facts.push("Created by " + creators.slice(0, 2).join(" and ") + ".");
@@ -731,10 +732,10 @@ function playerInfoMarkup() {
     : "";
 
   return '<section class="vivid-player-info" aria-label="Now playing information">' +
-    '<div class="vivid-player-info-hero">' +
+    '<div class="vivid-player-info-copy vivid-player-info-hero">' +
       '<span class="vivid-player-info-eyebrow"><i class="bi bi-soundwave" aria-hidden="true"></i> NOW SCREENING</span>' +
       '<h3>' + escapeHtml(title) + '</h3>' +
-      '<div class="vivid-player-info-topline">' + metaMarkup + ratingLabel +
+      '<div class="vivid-player-info-meta vivid-player-info-topline">' + metaMarkup + ratingLabel +
         (voteCount > 0 ? '<span class="vivid-player-vote-count">' + voteCount.toLocaleString() + ' ratings</span>' : '') +
       '</div>' +
       (genreMarkup ? '<div class="vivid-player-genre-list" aria-label="Genres">' + genreMarkup + '</div>' : '') +
