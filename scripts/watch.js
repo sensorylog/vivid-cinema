@@ -971,7 +971,8 @@ function renderShell(params) {
       const params = new URLSearchParams(window.location.search);
       if (event.detail?.roomId !== params.get("roomId") ||
           String(screening?.sessionId || "") !== String(params.get("sessionId") || "") ||
-          String(screening?.contentId || "") !== String(params.get("id") || "")) return;
+          String(screening?.contentId || "") !== String(params.get("id") || "") ||
+          watchRoomScreeningValidated) return;
       watchRoomScreeningValidated = true;
       openPlayerWindow();
       if (pendingRoomPlayerSelection) {
