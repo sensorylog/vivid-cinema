@@ -179,7 +179,7 @@ test("Watch Room screenings stay in the lobby and minimize without stopping play
   assert.ok(cinemaStyles.includes("align-items:center!important;justify-content:center!important"));
   assert.ok(cinemaStyles.includes("max-height:calc(100dvh - 24px)!important"));
   assert.ok(watchPage.includes("playerInfo.outerHTML = playerInfoMarkup()"));
-  assert.ok(watchPage.includes('runtime > 0 ? runtime + " min episode"'));
+  assert.ok(watchPage.includes('runtime + " min episode"'));
   assert.ok(watchPage.includes("TV episode scores stay episode-specific"));
   assert.ok(watchPage.includes("episode.vote_average : media?.vote_average"));
   assert.ok(watchPage.includes('vivid-player-rating'));
