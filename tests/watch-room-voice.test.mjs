@@ -88,9 +88,17 @@ test("Watch Room screenings stay in the lobby and minimize without stopping play
     readFile(new URL("../scripts/watch-rooms.js", import.meta.url), "utf8")
   ]);
   assert.ok(lobbyHtml.includes('id="wr-screening-player-host"'));
+  assert.ok(lobbyHtml.includes('id="wr-cinema-stage"'));
+  assert.ok(lobbyHtml.includes('data-room-view="queue"'));
+  assert.ok(lobbyHtml.includes('data-room-view="chat"'));
+  assert.ok(lobbyHtml.includes('data-room-view="members"'));
+  assert.ok(lobbyHtml.includes('id="wr-voice-call"'));
   assert.ok(lobbyHtml.includes('src="scripts/watch.js"'));
   assert.ok(lobbyHtml.includes('src="scripts/watch-room-playback.js"'));
   assert.ok(lobby.includes('new URL("watch-rooms.html", window.location.href)'));
+  assert.ok(lobby.includes("function setRoomView("));
+  assert.ok(lobby.includes("function renderCinemaStage()"));
+  assert.ok(lobby.includes('byId("wr-cinema-open")?.addEventListener("click"'));
   assert.ok(!lobby.includes("window.location.assign(url)"), "starting a screening must not reload the page and drop LiveKit voice");
   assert.ok(lobby.includes("vivid:watch-room-screening-navigate"));
   assert.ok(lobby.includes("vivid:watch-room-screening-focus"));
@@ -123,6 +131,10 @@ test("Watch Room screenings stay in the lobby and minimize without stopping play
   assert.ok(voice.includes("clearVoiceIntent(connectedRoomId || activeRoom?.roomId)"));
   assert.ok(cinemaStyles.includes("aspect-ratio:16/9"));
   assert.ok(cinemaStyles.includes("#player-overlay.is-minimized"));
+  const roomStyles = await readFile(new URL("../styles/vivid-watch-rooms.css", import.meta.url), "utf8");
+  assert.ok(roomStyles.includes(".vivid-wr-room-layout"));
+  assert.ok(roomStyles.includes(".vivid-wr-room-tabs"));
+  assert.ok(roomStyles.includes(".vivid-wr-voice-panel{position:sticky"));
   assert.ok(cinemaStyles.includes("#player-overlay[hidden]"));
   assert.ok(cinemaStyles.includes("#vivid-tflix-player.is-minimized"));
   assert.ok(cinemaStyles.includes(".vivid-tflix-room-minimize"));
