@@ -1,4 +1,5 @@
-import { auth } from "./firebase.js";
+import { auth, db } from "./firebase.js";
+import { collection, doc, limit, onSnapshot, orderBy, query } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 import { callWatchRoomApi } from "./watch-room-api.js";
 import { tmdbApi } from "./tmdb.js";
 
@@ -380,6 +381,102 @@ function renderQueue(items) {
     list.append(li);
   });
 }
+function timestampMillis(value) {
+  if (value && typeof value.toMillis === "function") return value.toMillis();
+  const number = Number(value);
+  return Number.isFinite(number) && number > 0 ? number : null;
+}
+
+function syncRoomSettings() {
+  if (!room || room.role !== "host") return;
+  const settings = byId("wr-room-settings-form");
+  if (!settings || settings.dataset.dirty === "true") return;
+  settings.elements.name.value = room.name || "";
+  settings.elements.allowGuestQueue.checked = room.allowGuestQueue !== false;
+  settings.elements.allowGuestChat.checked = room.allowGuestChat !== false;
+  settings.elements.allowGuestVoting.checked = room.allowGuestVoting !== false;
+  settings.elements.allowGuestPlayerSelection.checked = room.allowGuestPlayerSelection === true;
+  settings.elements.allowGuestQueueManagement.checked = room.allowGuestQueueManagement === true;
+  settings.elements.allowGuestPlaybackControl.checked = room.allowGuestPlaybackControl === true;
+  settings.elements.allowGuestVoice.checked = room.allowGuestVoice !== false;
+}
+
+function applyRoomDocument(data) {
+  if (!room || !data || room.roomId !== data.roomId) return;
+  const role = room.role;
+  room = { ...room, ...data, role, roomId: data.roomId };
+  renderCinemaStage();
+  applyRoomPermissions();
+  syncRoomSettings();
+  document.dispatchEvent(new CustomEvent("vivid:watch-room-updated", { detail: room }));
+  const requestedParams = new URLSearchParams(window.location.search);
+  if (requestedParams.get("roomMode") === "1" && requestedParams.get("id") &&
+      requestedParams.get("roomId") === room.roomId &&
+      String(room.activeScreening?.sessionId || "") === String(requestedParams.get("sessionId") || "") &&
+      String(room.activeScreening?.contentId || "") === String(requestedParams.get("id") || "")) {
+    document.dispatchEvent(new CustomEvent("vivid:watch-room-screening-validated", { detail: room }));
+  }
+  const activeSessionId = String(room.activeScreening?.sessionId || "");
+  const screeningSuppressed = new URLSearchParams(window.location.search).get("suppressScreening") === "1";
+  if (!screeningSuppressed && activeSessionId && activeSessionId !== loadedScreeningSessionId && activeSessionId !== dismissedScreeningSessionId) {
+    navigateToCinemaScreening(room.activeScreening);
+  }
+}
+
+function subscribeRoomRealtime(roomId) {
+  const roomRef = doc(db, "rooms", roomId);
+  const membersRef = collection(db, "rooms", roomId, "members");
+  const presenceRef = collection(db, "rooms", roomId, "presence");
+  const queueRef = collection(db, "rooms", roomId, "queue");
+  const chatRef = query(collection(db, "rooms", roomId, "chat"), orderBy("createdAt", "desc"), limit(80));
+  let membersByUid = new Map();
+  let presenceByUid = new Map();
+  const updateMembers = () => {
+    const now = Date.now();
+    memberList = [...membersByUid.entries()].map(([uid, member]) => ({
+      uid,
+      displayName: member.displayName || "Vivid member",
+      role: member.role || "guest",
+      joinedAt: timestampMillis(member.joinedAt),
+      isOnline: Number(presenceByUid.get(uid) || 0) > now
+    })).sort((a, b) => (a.role === "host" ? -1 : 0) - (b.role === "host" ? -1 : 0) || String(a.displayName).localeCompare(String(b.displayName)));
+    renderPresence();
+  };
+  const onError = label => error => {
+    if (!room || room.roomId !== roomId) return;
+    setFeedback(label + " updates were interrupted. Vivid is reconnecting…", true);
+    console.warn("Watch Room realtime " + label + " subscription failed:", error);
+  };
+  stops.push(onSnapshot(roomRef, snapshot => {
+    if (!snapshot.exists()) return;
+    applyRoomDocument({ ...snapshot.data(), roomId });
+  }, onError("room")));
+  stops.push(onSnapshot(membersRef, snapshot => {
+    membersByUid = new Map(snapshot.docs.map(item => [item.id, item.data()]));
+    updateMembers();
+  }, onError("member")));
+  stops.push(onSnapshot(presenceRef, snapshot => {
+    presenceByUid = new Map(snapshot.docs.map(item => [item.id, timestampMillis(item.data().expiresAt) || 0]));
+    updateMembers();
+  }, onError("presence")));
+  stops.push(onSnapshot(queueRef, snapshot => {
+    const queue = snapshot.docs.map(item => {
+      const data = item.data();
+      return { id: item.id, ...data, createdAt: timestampMillis(data.createdAt), updatedAt: timestampMillis(data.updatedAt) };
+    }).filter(item => item.status === "queued")
+      .sort((a, b) => (Number(b.voteCount) || 0) - (Number(a.voteCount) || 0) || (a.createdAt || 0) - (b.createdAt || 0));
+    renderQueue(queue);
+  }, onError("queue")));
+  stops.push(onSnapshot(chatRef, snapshot => {
+    const chat = [...snapshot.docs].reverse().map(item => {
+      const data = item.data();
+      return { id: item.id, ...data, createdAt: timestampMillis(data.createdAt) };
+    });
+    renderChat(chat);
+  }, onError("chat")));
+  presenceRefresh = setInterval(updateMembers, 10000);
+}
+
 function openLobby(data) {
   stop();
   searchGeneration += 1;
@@ -421,33 +518,7 @@ function openLobby(data) {
       const response = await call("getWatchRoomLobbySnapshot")({ roomId: data.roomId });
       if (!room || room.roomId !== data.roomId) return;
       const snapshot = response.data || {};
-      if (snapshot.room) {
-        room = { ...room, ...snapshot.room };
-        renderCinemaStage();
-        document.dispatchEvent(new CustomEvent("vivid:watch-room-updated", { detail: room }));
-        const requestedParams = new URLSearchParams(window.location.search);
-        if (requestedParams.get("roomMode") === "1" && requestedParams.get("id") &&
-            requestedParams.get("roomId") === room.roomId &&
-            String(room.activeScreening?.sessionId || "") === String(requestedParams.get("sessionId") || "") &&
-            String(room.activeScreening?.contentId || "") === String(requestedParams.get("id") || "")) {
-          document.dispatchEvent(new CustomEvent("vivid:watch-room-screening-validated", { detail: room }));
-        }
-        const activeSessionId = String(room.activeScreening?.sessionId || "");
-        const screeningSuppressed = new URLSearchParams(window.location.search).get("suppressScreening") === "1";
-        if (!screeningSuppressed && activeSessionId && activeSessionId !== loadedScreeningSessionId && activeSessionId !== dismissedScreeningSessionId) {
-          navigateToCinemaScreening(room.activeScreening);
-        }
-        const currentSettings = byId("wr-room-settings-form");
-        if (room.role === "host" && currentSettings && currentSettings.dataset.dirty !== "true") {
-          currentSettings.elements.allowGuestQueue.checked = room.allowGuestQueue !== false;
-          currentSettings.elements.allowGuestChat.checked = room.allowGuestChat !== false;
-          currentSettings.elements.allowGuestVoting.checked = room.allowGuestVoting !== false;
-          currentSettings.elements.allowGuestPlayerSelection.checked = room.allowGuestPlayerSelection === true;
-          currentSettings.elements.allowGuestQueueManagement.checked = room.allowGuestQueueManagement === true;
-          currentSettings.elements.allowGuestPlaybackControl.checked = room.allowGuestPlaybackControl === true;
-          currentSettings.elements.allowGuestVoice.checked = room.allowGuestVoice !== false;
-        }
-      }
+      if (snapshot.room) applyRoomDocument({ ...snapshot.room, roomId: data.roomId });
       applyRoomPermissions();
       memberList = Array.isArray(snapshot.members) ? snapshot.members : [];
       renderPresence();
@@ -471,15 +542,16 @@ function openLobby(data) {
       if (note) note.dataset.state = "lobby-load-error";
     }
   };
+  subscribeRoomRealtime(data.roomId);
+  void refreshLobby();
   const ping = () => call("heartbeatWatchRoom")({ roomId: data.roomId })
-    .then(() => refreshLobby())
+    .then(() => {})
     .catch(error => {
       showError(error);
       byId("wr-lobby-presence").textContent = "Couldn't confirm your room connection. " + (error?.message || "Try reopening the room.");
     });
   ping();
   heartbeat = setInterval(ping, 30000);
-  presenceRefresh = setInterval(refreshLobby, 5000);
 }
 document.addEventListener("vivid:watch-room-open", event => openLobby(event.detail));
 const queueTitleInput = byId("wr-queue-form")?.elements.title;
