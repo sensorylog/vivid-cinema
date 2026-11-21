@@ -44,6 +44,7 @@ test("Android mobile navigation uses five accessible primary tabs and a secondar
   assert.match(appShell, /aria-expanded/);
   assert.match(appShell, /aria-controls/);
   assert.match(appShell, /Escape/);
+  assert.match(appShell, /vivid-native-more-menu:\\(\[hidden\]\\)/);
   assert.match(appShell, /navLink\("home\.html"/);
   assert.match(appShell, /navLink\("discover\.html"/);
   assert.match(appShell, /navLink\("for-you\.html"/);
