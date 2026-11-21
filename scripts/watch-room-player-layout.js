@@ -15,6 +15,8 @@ export function mountWatchRoomPlayerLayout({ slot, overlay, Observer = globalThi
     overlay.classList.toggle("is-floating", value);
     slot.classList.toggle("is-floating", value);
     overlay.dataset.presentation = value ? "floating" : "inline";
+    const returnButton = overlay.querySelector("#player-return-inline");
+    if (returnButton) returnButton.hidden = !value;
     document.dispatchEvent(new CustomEvent("vivid:watch-room-player-presentation", {
       detail: { floating: value }
     }));
