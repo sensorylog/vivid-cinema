@@ -42,6 +42,7 @@ test("Android bundle embeds build metadata and loads the updater", () => {
   assert.match(builder, /VIVID_ANDROID_VERSION/);
   assert.match(builder, /VIVID_ANDROID_BUILD/);
   assert.match(builder, /VIVID_ANDROID_BUILD_INFO/);
+  assert.match(builder, /VIVID_ANDROID_DISTRIBUTION/);
   assert.match(builder, /scripts\/android-updater\.js/);
 });
 
@@ -50,7 +51,8 @@ test("updater compares remote metadata and installs the cleanly named APK", () =
   assert.match(updater, /Vivid-Cinema-Android\.apk/);
   assert.match(updater, /shouldShowAndroidUpdate/);
   assert.match(updater, /isAndroidUpdateCheckFresh/);
-  assert.match(updater, /if \(!nativeRuntime\(\) \|\| updateCheckInFlight\) return/);
+  assert.match(updater, /window\.VIVID_ANDROID_DISTRIBUTION === "play"/);
+  assert.match(updater, /if \(!nativeRuntime\(\) \|\| window\.VIVID_ANDROID_DISTRIBUTION === "play" \|\| updateCheckInFlight\) return/);
   assert.match(updater, /finally \{[\s\S]*?updateCheckInFlight = false/);
   assert.match(updater, /if \(!remote\)[\s\S]*?failed: true/);
   assert.match(updater, /retain any cached APK/);
