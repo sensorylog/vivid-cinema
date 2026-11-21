@@ -191,7 +191,8 @@ jobs:
           if [ "$GITHUB_EVENT_NAME" = "release" ]; then
             tag="$(node -e 'const fs=require("fs");const e=JSON.parse(fs.readFileSync(process.env.GITHUB_EVENT_PATH,"utf8"));process.stdout.write(e.release.tag_name)')"
           elif [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ]; then
-            tag="$(gh release view --repo "$GITHUB_REPOSITORY" --json tagName --jq .tagName)"
+            tag="v$version"
+            gh release view "$tag" --repo "$GITHUB_REPOSITORY" >/dev/null
           else
             # Windows release creation and this APK publish run in parallel.
             tag="v$version"
