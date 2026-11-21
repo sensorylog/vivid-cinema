@@ -23,6 +23,8 @@ const [workflow, updater, builder, configure, downloads, capacitorConfig, iconSc
 
 test("Android workflow publishes a cleanly named APK and build metadata without production secrets", () => {
   assert.match(workflow, /name: Android APK Build/);
+  assert.match(workflow, /pull_request:/);
+  assert.doesNotMatch(workflow, /pull_request:\s*\n\s*paths:/, "all application changes must exercise the Android bundle");
   assert.match(workflow, /release:\s*\n\s*types: \[published\]/);
   assert.match(workflow, /assembleDebug/);
   assert.match(workflow, /apk_name="Vivid-Cinema-Android\.apk"/);
