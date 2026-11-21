@@ -207,7 +207,7 @@ jobs:
             done
           fi
           gh release view "$tag" --repo "$GITHUB_REPOSITORY" >/dev/null
-          node --input-type=module -e 'import {writeFileSync} from "node:fs"; writeFileSync("release-output/Vivid-Cinema-Android-build-" + process.env.VIVID_ANDROID_BUILD + ".json", JSON.stringify({version: process.env.VIVID_ANDROID_VERSION || process.argv[1], build: Number(process.env.VIVID_ANDROID_BUILD)}, null, 2))' "$version"
+          VIVID_ANDROID_VERSION="$version" node --input-type=module -e 'import {writeFileSync} from "node:fs"; writeFileSync("release-output/Vivid-Cinema-Android-build-" + process.env.VIVID_ANDROID_BUILD + ".json", JSON.stringify({version: process.env.VIVID_ANDROID_VERSION, build: Number(process.env.VIVID_ANDROID_BUILD)}, null, 2))'
           test -s release-output/Vivid-Cinema-Android.apk
           gh release upload "$tag" release-output/Vivid-Cinema-Android.apk "release-output/Vivid-Cinema-Android-build-$VIVID_ANDROID_BUILD.json" --repo "$GITHUB_REPOSITORY" --clobber
           gh release view "$tag" --repo "$GITHUB_REPOSITORY" --json assets --jq '.assets[].name' | grep -Fx "Vivid-Cinema-Android.apk"
