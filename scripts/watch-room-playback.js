@@ -532,6 +532,12 @@ window.addEventListener("vivid:player-source-changed", event => {
     setNote("This provider is not enabled for room sync. Switch to VidSrc to follow the host.");
   }
 });
+document.addEventListener("vivid:watch-room-screening-navigate", event => {
+  const requestedRoomId = String(event.detail?.roomId || "");
+  if (!requestedRoomId || (roomId === requestedRoomId && playbackUnsubscribe)) return;
+  connectToRoom(requestedRoomId).catch(error => setNote(error?.message || "Could not connect playback to the active Watch Room."));
+});
+
 onAuthStateChanged(auth, user => {
   if (!user || user.isAnonymous) { stopConnection(); setNote("Sign in to connect a private Watch Room."); form.querySelector("button").disabled = true; return; }
   form.querySelector("button").disabled = false;
