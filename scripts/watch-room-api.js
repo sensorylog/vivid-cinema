@@ -1,7 +1,8 @@
+import { getCloudflareApiUrl } from "./cloudflare-api.js";
 import { auth, appCheck, appCheckError } from "./firebase.js";
 import { getToken } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app-check.js";
 
-const API_URL = "/api/watch-rooms";
+const API_URL = getCloudflareApiUrl("/api/watch-rooms");
 
 export function callWatchRoomApi(action) {
   return async (data = {}) => {
