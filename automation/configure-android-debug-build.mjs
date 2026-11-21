@@ -22,13 +22,21 @@ const javaRoot = path.join(androidRoot, "app", "src", "main", "java", "com", "vi
 const mainActivityPath = path.join(javaRoot, "MainActivity.java");
 const pluginPath = path.join(javaRoot, "VividUpdaterPlugin.java");
 let mainActivity = await readFile(mainActivityPath, "utf8");
-if (!mainActivity.includes("VividUpdaterPlugin.class")) {
-  mainActivity = mainActivity.replace(
-    /public class MainActivity extends BridgeActivity\s*\{/,
-    "public class MainActivity extends BridgeActivity {\n    @Override\n    public void onCreate(android.os.Bundle savedInstanceState) {\n        registerPlugin(VividUpdaterPlugin.class);\n        super.onCreate(savedInstanceState);\n    }"
-  );
+for (const pluginClass of ["VividUpdaterPlugin.class", "VividNavigationPlugin.class"]) {
+  if (mainActivity.includes(pluginClass)) continue;
+  const superCall = /(\\s*)super\\.onCreate\\(savedInstanceState\\);/;
+  if (superCall.test(mainActivity)) {
+    mainActivity = mainActivity.replace(superCall, `$1registerPlugin(${pluginClass});\\n$1super.onCreate(savedInstanceState);`);
+  } else {
+    mainActivity = mainActivity.replace(
+      /public class MainActivity extends BridgeActivity\\s*\\{/,
+      `public class MainActivity extends BridgeActivity {\\n    @Override\\n    public void onCreate(android.os.Bundle savedInstanceState) {\\n        registerPlugin(${pluginClass});\\n        super.onCreate(savedInstanceState);\\n    }`
+    );
+  }
 }
-if (!mainActivity.includes("VividUpdaterPlugin.class")) throw new Error("Could not register VividUpdaterPlugin in MainActivity.");
+if (!mainActivity.includes("VividUpdaterPlugin.class") || !mainActivity.includes("VividNavigationPlugin.class")) {
+  throw new Error("Could not register all Vivid native plugins in MainActivity.");
+}
 await writeFile(mainActivityPath, mainActivity, "utf8");
 
 const plugin = `package com.vividcinema.app;
@@ -120,6 +128,41 @@ public class VividUpdaterPlugin extends Plugin {
 }
 `;
 await writeFile(pluginPath, plugin, "utf8");
+
+const navigationPlugin = `package com.vividcinema.app;
+
+import androidx.activity.OnBackPressedCallback;
+import com.getcapacitor.JSObject;
+import com.getcapacitor.Plugin;
+import com.getcapacitor.PluginCall;
+import com.getcapacitor.PluginMethod;
+import com.getcapacitor.annotation.CapacitorPlugin;
+
+@CapacitorPlugin(name = "VividNavigation")
+public class VividNavigationPlugin extends Plugin {
+    private OnBackPressedCallback backCallback;
+
+    @Override
+    public void load() {
+        backCallback = new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                JSObject data = new JSObject();
+                data.put("canGoBack", getBridge().getWebView().canGoBack());
+                notifyListeners("backButton", data, true);
+            }
+        };
+        getActivity().getOnBackPressedDispatcher().addCallback(getActivity(), backCallback);
+    }
+
+    @PluginMethod
+    public void exitApp(PluginCall call) {
+        call.resolve();
+        getActivity().finish();
+    }
+}
+`;
+await writeFile(path.join(javaRoot, "VividNavigationPlugin.java"), navigationPlugin, "utf8");
 
 const manifestPath = path.join(androidRoot, "app", "src", "main", "AndroidManifest.xml");
 let manifest = await readFile(manifestPath, "utf8");
