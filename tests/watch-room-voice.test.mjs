@@ -99,6 +99,7 @@ test("Watch Room screenings stay in the lobby and minimize without stopping play
   assert.ok(watchPage.includes('restorePlayer.addEventListener("click", openPlayerWindow)'));
   assert.ok(watchPage.includes('vivid:watch-room-screening-validated'));
   assert.ok(watchPage.includes("watchRoomScreeningValidated = true"));
+  assert.ok(watchPage.includes("watchRoomScreeningValidated) return"));
   assert.ok(watchPage.includes('secondaryRoot.classList.remove("is-minimized")'));
   assert.ok(playback.includes('params.get("roomMode") === "1" && params.get("id")'));
   assert.ok(playback.includes('getWatchRoomPlaybackSnapshot'));
