@@ -359,6 +359,7 @@ function subscribeToPlayback(requestedRoomId, requestGeneration) {
 async function publishRoomPlayback(payload) {
   const send = async () => call("publishWatchRoomPlayback")({
     ...payload,
+    capturedAtMs: payload.positionAtMs,
     expectedRevision: playbackRevision
   });
   let result = await send();
@@ -495,7 +496,7 @@ window.addEventListener("vivid:provider-playback", event => {
   lastPublishAt = now;
   lastPublishedStatus = hostStatus;
   const sessionId = new URLSearchParams(window.location.search).get("sessionId") || "";
-  const payload = { roomId, sessionId, provider: detail.provider, eventType, status: hostStatus, contentId: String(detail.contentId || ""), mediaType: detail.mediaType, season: detail.season, episode: detail.episode, position: localPosition, duration: Math.max(0, Number(detail.duration) || 0) };
+  const payload = { roomId, sessionId, provider: detail.provider, eventType, status: hostStatus, contentId: String(detail.contentId || ""), mediaType: detail.mediaType, season: detail.season, episode: detail.episode, position: localPosition, positionAtMs: now + clockOffsetMs, duration: Math.max(0, Number(detail.duration) || 0) };
   lastHostPayload = payload;
   publishQueue = publishQueue.then(() => roomId === payload.roomId && (role === "host" || allowGuestPlaybackControl) ? publishRoomPlayback(payload) : null).catch(error => setNote(error?.message || "Could not publish the room playback state."));
 });
