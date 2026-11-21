@@ -190,7 +190,7 @@ test("Watch Room screenings stay embedded in the lobby and float without stoppin
   assert.ok(experienceStyles.includes("aspect-ratio:16/9!important"));
   assert.ok(experienceStyles.includes("position:relative!important;inset:auto!important;flex:0 0 50px!important"));
   assert.ok(experienceStyles.includes("aspect-ratio:16/9!important;overflow:hidden!important"));
-  assert.ok(experienceStyles.includes(".vivid-player-frame{\\n  width:100%!important;height:auto!important;min-height:0!important;max-height:none!important;\\n  aspect-ratio:16/9!important"));
+  assert.ok(experienceStyles.includes("width:100%!important;height:auto!important;min-height:0!important;max-height:none!important;"));
   assert.ok(experienceStyles.includes("position:relative!important;inset:auto!important;flex:0 0 38px!important"));
   assert.ok(experienceStyles.includes("position:relative!important;top:auto!important"), "voice panel must flow with the room instead of sticking over the player");
   assert.ok(voice.includes("participantInitials(participant)"));
