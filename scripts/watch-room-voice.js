@@ -64,7 +64,7 @@ function attachAudio(track) {
 }
 async function loadSdk() {
   if (!sdkPromise) {
-    sdkPromise = import("https://cdn.jsdelivr.net/npm/livekit-client@2.15.6/dist/livekit-client.esm.mjs")
+    sdkPromise = import("https://cdn.jsdelivr.net/npm/livekit-client@2.24.1/dist/livekit-client.esm.mjs")
       .catch(error => {
         sdkPromise = null;
         throw new Error("The voice calling library could not load. Check your connection and retry.");
