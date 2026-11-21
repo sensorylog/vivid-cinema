@@ -483,15 +483,18 @@ window.addEventListener("vivid:provider-playback", event => {
     : detail.provider === "vidsrc" ? getProviderAdapter("player1", "vidsrc") : null;
   if (!eventAdapter || detail.origin !== eventAdapter.origin) return;
   const previousLocalStatus = localStatus;
+  const previousLocalPosition = localPosition;
+  const previousLocalPositionObservedAt = localPositionObservedAt;
+  const now = Date.now();
   localPosition = Math.max(0, Number(detail.position) || 0);
-  localPositionObservedAt = Date.now();
+  localPositionObservedAt = now;
   localStatus = detail.status === "playing" ? "playing" : detail.status === "paused" || detail.status === "ended" ? detail.status : localStatus;
   if (localStatus === "playing" || localStatus === "paused" || localStatus === "ended") {
     lastCommandedStatus = localStatus === "playing" ? "playing" : "paused";
     pendingPlaySince = 0;
   }
   if (role === "guest" && !allowGuestPlaybackControl) {
-    if (latestRemoteState?.status === "playing") applyRemoteState();
+    if (latestRemoteState) applyRemoteState();
     else if (detail.status === "playing") pauseGuestPlayer("Your player is prepared. It will start automatically with the host’s screening.");
     return;
   }
@@ -500,19 +503,43 @@ window.addEventListener("vivid:provider-playback", event => {
   if (detail.status === "playing") hostStatus = "playing";
   if (detail.status === "paused") hostStatus = "paused";
   if (detail.status === "ended") hostStatus = "ended";
-  const now = Date.now();
-  const eventType = classifyPlaybackEvent({
+  let eventType = classifyPlaybackEvent({
     event: detail.event || detail.status,
     status: detail.status,
     previousStatus: previousLocalStatus
   });
-  // Only progress heartbeats are coalesced. Play, pause, seek and ended
+  const reportedRate = Number(detail.playbackRate);
+  if (Number.isFinite(reportedRate) && reportedRate >= 0.25 && reportedRate <= 4) {
+    localPlaybackRate = normalizePlaybackRate(reportedRate);
+    if (role === "host" || allowGuestPlaybackControl) hostPlaybackRate = localPlaybackRate;
+    eventType = "rate";
+  } else if (eventType === "progress" && previousLocalStatus === "playing" &&
+      previousLocalPosition != null && previousLocalPositionObservedAt > 0) {
+    const elapsedSeconds = (now - previousLocalPositionObservedAt) / 1000;
+    const measuredRate = elapsedSeconds > 0
+      ? (localPosition - previousLocalPosition) / elapsedSeconds
+      : 0;
+    if (measuredRate >= 0.25 && measuredRate <= 4) {
+      const commonRates = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.5, 3, 4];
+      const nearestRate = commonRates.reduce((best, rate) =>
+        Math.abs(rate - measuredRate) < Math.abs(best - measuredRate) ? rate : best, commonRates[0]);
+      const tolerance = nearestRate === 1 ? 0.08 : 0.16;
+      if (Math.abs(nearestRate - measuredRate) <= tolerance) {
+        localPlaybackRate = nearestRate;
+        if ((role === "host" || allowGuestPlaybackControl) && nearestRate !== hostPlaybackRate) {
+          hostPlaybackRate = nearestRate;
+          eventType = "rate";
+        }
+      }
+    }
+  }
+  // Only progress heartbeats are coalesced. Play, pause, seek, rate and ended
   // transitions must reach the room immediately, even after a recent tick.
   if (eventType === "progress" && now - lastPublishAt < 3500) return;
   lastPublishAt = now;
   lastPublishedStatus = hostStatus;
   const sessionId = new URLSearchParams(window.location.search).get("sessionId") || "";
-  const payload = { roomId, sessionId, provider: detail.provider, eventType, status: hostStatus, contentId: String(detail.contentId || ""), mediaType: detail.mediaType, season: detail.season, episode: detail.episode, position: localPosition, positionAtMs: now + clockOffsetMs, duration: Math.max(0, Number(detail.duration) || 0) };
+  const payload = { roomId, sessionId, provider: detail.provider, eventType, status: hostStatus, contentId: String(detail.contentId || ""), mediaType: detail.mediaType, season: detail.season, episode: detail.episode, position: localPosition, positionAtMs: now + clockOffsetMs, playbackRate: hostPlaybackRate, duration: Math.max(0, Number(detail.duration) || 0) };
   lastHostPayload = payload;
   publishQueue = publishQueue.then(() => roomId === payload.roomId && (role === "host" || allowGuestPlaybackControl) ? publishRoomPlayback(payload) : null).catch(error => setNote(error?.message || "Could not publish the room playback state."));
 });
