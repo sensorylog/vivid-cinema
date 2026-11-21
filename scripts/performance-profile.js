@@ -23,7 +23,11 @@ export function applyPerformanceProfile({
 } = {}) {
   let platform = "";
   try { platform = window.Capacitor?.getPlatform?.() || ""; } catch {}
-  if (!isLegacyPerformanceDevice({ ...navigatorRef, platform })) return "standard";
+  if (!isLegacyPerformanceDevice({
+    hardwareConcurrency: navigatorRef.hardwareConcurrency,
+    deviceMemory: navigatorRef.deviceMemory,
+    platform
+  })) return "standard";
 
   const root = documentRef.documentElement;
   if (!root) return "legacy";
