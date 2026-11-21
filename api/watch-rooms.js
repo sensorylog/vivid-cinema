@@ -3,6 +3,7 @@ import { cert, getApp, getApps, initializeApp } from "firebase-admin/app";
 import { getAuth } from "firebase-admin/auth";
 import { getAppCheck } from "firebase-admin/app-check";
 import { getFirestore, Timestamp } from "firebase-admin/firestore";
+import { shouldThrottlePlaybackWrite } from "../scripts/playback/watch-room-sync.js";
 
 const serviceAccountRaw = process.env.FIREBASE_SERVICE_ACCOUNT_JSON;
 if (!serviceAccountRaw) throw new Error("FIREBASE_SERVICE_ACCOUNT_JSON is not configured for the Vivid API.");
@@ -808,7 +809,7 @@ async function publishWatchRoomPlayback(request) {
     if (expectedRevision != null && expectedRevision !== currentRevision) {
       return { accepted: false, reason: "stale-revision", revision: currentRevision };
     }
-    if (previous?.status === "playing" && previous?.lastEventAt?.toMillis && now.toMillis() - previous.lastEventAt.toMillis() < 1800 && status === "playing") {
+    if (shouldThrottlePlaybackWrite(previous?.status, status, previous?.lastEventAt?.toMillis?.() || 0, now.toMillis())) {
       return { accepted: false, reason: "rate-limited", revision: currentRevision };
     }
     const revision = currentRevision + 1;
