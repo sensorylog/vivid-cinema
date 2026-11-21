@@ -11,7 +11,7 @@ export async function createLiveKitAccessToken({
 }) {
   if (typeof apiKey !== "string" || !apiKey.trim() ||
       typeof apiSecret !== "string" || apiSecret.length < 16 ||
-      typeof identity !== "string" || !/^[A-Za-z0-9_-]{1,128}$/.test(identity) ||
+      typeof identity !== "string" || !identity.trim() || identity.length > 128 || /[\u0000-\u001f]/.test(identity) ||
       typeof roomName !== "string" || !/^vivid-[a-f0-9]{32}$/.test(roomName)) {
     throw new TypeError("LiveKit token configuration or identity is invalid.");
   }
@@ -28,6 +28,7 @@ export async function createLiveKitAccessToken({
       roomJoin: true,
       room: roomName,
       canPublish: true,
+      canPublishSources: ["microphone"],
       canSubscribe: true,
       canPublishData: true
     },
