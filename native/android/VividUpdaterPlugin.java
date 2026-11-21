@@ -50,6 +50,19 @@ public class VividUpdaterPlugin extends Plugin {
     }
 
     @Override
+    protected void handleOnDestroy() {
+        if (receiver != null) {
+            try {
+                getContext().unregisterReceiver(receiver);
+            } catch (IllegalArgumentException error) {
+                android.util.Log.w("VividUpdater", "Update receiver was already unregistered", error);
+            }
+            receiver = null;
+        }
+        super.handleOnDestroy();
+    }
+
+    @Override
     protected void handleOnResume() {
         super.handleOnResume();
         long id = activeDownload.get();
