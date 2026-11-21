@@ -161,3 +161,15 @@ test("authoritative playback writes are screening-scoped, revision-safe and real
   assert.match(rules, /allow get, list: if isRoomMember\(roomId\)/);
   assert.match(rules, /allow create, update, delete: if false/);
 });
+
+test("Realtime permission errors are verified by the trusted API before the lobby closes", async () => {
+  const lobby = await readFile(new URL("../scripts/watch-room-lobby.js", import.meta.url), "utf8");
+  const start = lobby.indexOf("function subscribeRoomRealtime(");
+  const end = lobby.indexOf("\nfunction openLobby(", start);
+  const realtime = lobby.slice(start, end);
+  assert.ok(start >= 0 && end > start);
+  assert.match(realtime, /call\("getWatchRoomLobbySnapshot"\)/);
+  assert.match(realtime, /if \(error\?\.code === "permission-denied"\) \{\s*void verifyRoomAccess\(\);/);
+  assert.match(realtime, /code\.includes\("permission-denied"\).*handleRoomAccessLost/s);
+  assert.doesNotMatch(realtime, /if \(error\?\.code === "permission-denied"\) \{\s*handleRoomAccessLost/);
+});
