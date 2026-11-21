@@ -15,7 +15,7 @@ const [workflow, updater, builder, configure, downloads, capacitorConfig, iconSc
   readFile(new URL("../.github/workflows/android-debug-apk.yml", import.meta.url), "utf8"),
   readFile(new URL("../scripts/android-updater.js", import.meta.url), "utf8"),
   readFile(new URL("../automation/build-static-dist.mjs", import.meta.url), "utf8"),
-  readFile(new URL("../automation/configure-android-debug-build.mjs", import.meta.url), "utf8"),
+  readFile(new URL("../automation/configure-android-native-project.mjs", import.meta.url), "utf8"),
   readFile(new URL("../scripts/downloads.js", import.meta.url), "utf8"),
   readFile(new URL("../capacitor.config.json", import.meta.url), "utf8"),
   readFile(new URL("../automation/apply-android-icon.mjs", import.meta.url), "utf8")
