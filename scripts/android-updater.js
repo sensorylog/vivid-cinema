@@ -87,7 +87,9 @@ function latestAndroidBuild(assets) {
 let updateCheckInFlight = false;
 
 async function checkForAndroidUpdate() {
-  if (!nativeRuntime() || updateCheckInFlight) return;
+  // Google Play must update Play-distributed installs through Play itself.
+  // The GitHub APK installer is reserved for direct/sideloaded builds.
+  if (!nativeRuntime() || window.VIVID_ANDROID_DISTRIBUTION === "play" || updateCheckInFlight) return;
   updateCheckInFlight = true;
   try {
   const local = window.VIVID_ANDROID_BUILD_INFO || { version: "0.0.0", build: 0 };
