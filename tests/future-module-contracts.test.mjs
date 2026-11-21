@@ -199,7 +199,7 @@ test("Watch Rooms Stage 5 exposes trusted VidSrc and CineSRC playback bridges", 
   assert.ok(client.includes('window.addEventListener("vivid:player-adapter-selected"'));
   assert.ok(client.includes('document.getElementById(activePlayerId === "player2" ? "vivid-tflix-frame" : "vidapi-player")'));
   assert.ok(client.includes('call("getWatchRoomPlaybackSnapshot")'));
-  assert.ok(client.includes("getExpectedPlaybackPosition(state, { nowMs: Date.now(), clockOffsetMs })"));
+  assert.ok(client.includes("getExpectedPlaybackPosition(state, { nowMs: now, clockOffsetMs })"));
   assert.ok(client.includes("shouldCorrectPlayback(expected, estimatedLocalPosition)"));
   assert.ok(client.includes("onSnapshot("));
   assert.ok(client.includes('doc(db, "rooms", requestedRoomId, "playback", "current")'));
@@ -449,7 +449,7 @@ test("Watch Room synchronization compensates for guest device clock skew", () =>
   const heartbeat = backend.slice(backend.indexOf("async function heartbeatWatchRoom"), backend.indexOf("async function addWatchRoomQueueItem"));
   assert.ok(heartbeat.includes("serverTime: Date.now()"));
   assert.ok(client.includes("clockOffsetMs = serverTime - ((startedAt + finishedAt) / 2)"));
-  assert.ok(client.includes("getExpectedPlaybackPosition(state, { nowMs: Date.now(), clockOffsetMs })"));
+  assert.ok(client.includes("getExpectedPlaybackPosition(state, { nowMs: now, clockOffsetMs })"));
   assert.ok(sync.includes("Number(nowMs) + Number(clockOffsetMs || 0) - updatedAt"));
   assert.ok(sync.includes("PLAYBACK_DRIFT_TOLERANCE_SECONDS = 1.5"));
 });
