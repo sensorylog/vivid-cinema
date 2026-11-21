@@ -426,9 +426,13 @@ async function getWatchRoomLobbySnapshot(request) {
 async function getWatchRoomPlaybackSnapshot(request) {
   const uid = requireUser(request);
   const roomId = validId(request.data?.roomId, "room ID");
-  const { roomRef, member } = await requireRoomMember(roomId, uid);
+  const { roomRef, room, member } = await requireRoomMember(roomId, uid);
   const playbackSnapshot = await roomRef.collection("playback").doc("current").get();
-  const playbackData = playbackSnapshot.exists ? playbackSnapshot.data() : null;
+  const storedPlayback = playbackSnapshot.exists ? playbackSnapshot.data() : null;
+  const activeSessionId = String(room.activeScreening?.sessionId || "");
+  const playbackData = storedPlayback && activeSessionId && storedPlayback.sessionId === activeSessionId
+    ? storedPlayback
+    : null;
   const updatedAt = playbackData?.updatedAt?.toMillis?.() ??
     (typeof playbackData?.updatedAt === "number" ? playbackData.updatedAt : null);
   return {
@@ -526,6 +530,9 @@ async function startWatchRoomScreening(request) {
       startedAt: now
     };
     tx.update(itemRef, { status: "screening", screeningAt: now });
+    // Playback belongs to a single screening session; never carry a previous
+    // title's playing state into the newly started session.
+    tx.delete(roomRef.collection("playback").doc("current"));
     tx.update(roomRef, {
       activeScreening: screening,
       queueCount: Math.max(0, Number(room.queueCount || 0) - 1),
@@ -753,6 +760,8 @@ async function publishWatchRoomPlayback(request) {
   const roomId = validId(request.data?.roomId, "room ID");
   const provider = request.data?.provider;
   if (!["vidsrc", "cinesrc"].includes(provider)) throw new HttpsError("failed-precondition", "This provider is not enabled for synchronized playback.");
+  const sessionId = String(request.data?.sessionId || "");
+  if (!/^[a-f0-9]{32}$/.test(sessionId)) throw new HttpsError("invalid-argument", "A valid screening session is required.");
   const status = request.data?.status;
   if (!["playing", "paused", "ended"].includes(status)) throw new HttpsError("invalid-argument", "Playback status is not supported.");
   const contentId = cleanText(String(request.data?.contentId || ""), "Catalogue ID", 80);
@@ -777,11 +786,14 @@ async function publishWatchRoomPlayback(request) {
     if (!roomData || roomData.status !== "open" || !Number.isFinite(roomData.expiresAt?.toMillis?.()) || roomData.expiresAt.toMillis() <= now.toMillis() || !memberData || !((roomData.hostUid === uid && memberData.role === "host") || (memberData.role === "guest" && roomData.allowGuestPlaybackControl === true))) {
       throw new HttpsError("permission-denied", "Only the host or a guest explicitly allowed to control playback can publish playback.");
     }
+    if (String(roomData.activeScreening?.sessionId || "") !== sessionId) {
+      throw new HttpsError("failed-precondition", "This playback update belongs to an old or inactive screening.");
+    }
     const previous = current.exists ? current.data() : null;
     if (previous && (previous.contentId !== contentId || previous.mediaType !== mediaType || (mediaType === "tv" && (previous.season !== season || previous.episode !== episode)))) throw new HttpsError("failed-precondition", "This room is already synchronized to a different title or episode.");
     if (previous?.lastEventAt?.toMillis && now.toMillis() - previous.lastEventAt.toMillis() < 1800 && status === "playing") return { accepted: false, reason: "rate-limited" };
     const revision = Number(previous?.revision || 0) + 1;
-    tx.set(stateRef, { provider, contentId, mediaType, season, episode, status, position, duration, hostUid: roomData.hostUid, controllerUid: uid, revision, updatedAt: now, lastEventAt: now });
+    tx.set(stateRef, { sessionId, provider, contentId, mediaType, season, episode, status, position, duration, hostUid: roomData.hostUid, controllerUid: uid, revision, updatedAt: now, lastEventAt: now });
     return { accepted: true, revision };
   });
 }
