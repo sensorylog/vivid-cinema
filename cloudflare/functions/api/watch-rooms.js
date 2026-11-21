@@ -1008,6 +1008,7 @@ async function publishWatchRoomPlayback(request) {
   if (!["movie", "tv"].includes(mediaType)) throw new HttpsError("invalid-argument", "Media type must be movie or tv.");
   const position = Number(request.data?.position);
   const duration = Number(request.data?.duration);
+  const capturedAtMsInput = Number(request.data?.capturedAtMs);
   if (!Number.isFinite(position) || position < 0 || position > 86400 || !Number.isFinite(duration) || duration < 0 || duration > 86400 || (duration > 0 && position > duration + 10)) throw new HttpsError("invalid-argument", "Playback position or duration is outside the supported range.");
   const season = mediaType === "tv" ? Number(request.data?.season) : null;
   const episode = mediaType === "tv" ? Number(request.data?.episode) : null;
@@ -1051,9 +1052,12 @@ async function publishWatchRoomPlayback(request) {
       return { accepted: false, reason: "rate-limited", retryAfterMs: minimumIntervalMs, revision: currentRevision };
     }
     const revision = currentRevision + 1;
+    const positionAtMs = Number.isFinite(capturedAtMsInput) && Math.abs(capturedAtMsInput - now.toMillis()) <= 10_000
+      ? capturedAtMsInput
+      : now.toMillis();
     tx.set(stateRef, {
       schemaVersion: 1, sessionId, provider, eventType, contentId, mediaType, season, episode,
-      status, position, duration, hostUid: roomData.hostUid, controllerUid: uid,
+      status, position, positionAtMs, duration, hostUid: roomData.hostUid, controllerUid: uid,
       revision, updatedAt: now, lastEventAt: now
     });
     return { accepted: true, revision, serverTime: now.toMillis() };
