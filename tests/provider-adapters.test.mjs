@@ -69,3 +69,12 @@ test("guest playback stays paused until the member explicitly joins the screenin
   assert.equal(getGuestPlaybackAction({ role: "guest", joinedPlayback: true, playbackStatus: "paused" }), "pause");
   assert.equal(getGuestPlaybackAction({ role: "host", joinedPlayback: false, playbackStatus: "playing" }), "ignore");
 });
+
+test("Watch Room client actively holds guests before and during host playback", async () => {
+  const client = await readFile(new URL("../scripts/watch-room-playback.js", import.meta.url), "utf8");
+  assert.match(client, /function pauseGuestPlayer\(/);
+  assert.match(client, /getGuestPlaybackAction\(\{ role, joinedPlayback, playbackStatus: state\.status \}\)/);
+  assert.match(client, /else if \(role === "guest"\) pauseGuestPlayer\(/);
+  assert.match(client, /if \(state\.status === "paused" \|\| state\.status === "ended"\) \{/);
+  assert.match(client, /Your player is ready and paused/);
+});
