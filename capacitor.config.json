@@ -4,5 +4,9 @@
   "webDir": "dist",
   "android": {
     "allowMixedContent": false
+  },
+  "server": {
+    "hostname": "android.vivid-cinema.pages.dev",
+    "androidScheme": "https"
   }
 }
