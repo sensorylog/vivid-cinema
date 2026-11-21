@@ -131,7 +131,7 @@ jobs:
           if-no-files-found: error
           retention-days: 90
 
-      - name: Publish APK to matching GitHub release
+      - name: Publish Play App Bundle to matching GitHub release
         if: inputs.publish_to_github_release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -140,7 +140,7 @@ jobs:
           version="$(node -p "require('./package.json').version")"
           tag="v$version"
           gh release view "$tag" >/dev/null
-          node --input-type=module -e 'import {writeFileSync} from "node:fs"; writeFileSync("release-output/Vivid-Cinema-Android-build-" + process.env.VIVID_ANDROID_BUILD + ".json", JSON.stringify({version: process.env.VIVID_ANDROID_VERSION, build: Number(process.env.VIVID_ANDROID_BUILD)}, null, 2))'
-          gh release upload "$tag" release-output/Vivid-Cinema-Android.apk "release-output/Vivid-Cinema-Android-build-$VIVID_ANDROID_BUILD.json" --clobber
-          gh release view "$tag" --json assets --jq '.assets[].name' | grep -Fx "Vivid-Cinema-Android.apk"
-          gh release view "$tag" --json assets --jq '.assets[].name' | grep -Fx "Vivid-Cinema-Android-build-$VIVID_ANDROID_BUILD.json"
+          node --input-type=module -e 'import {writeFileSync} from "node:fs"; writeFileSync("release-output/Vivid-Cinema-Android-Play-build-" + process.env.VIVID_ANDROID_BUILD + ".json", JSON.stringify({version: process.env.VIVID_ANDROID_VERSION, build: Number(process.env.VIVID_ANDROID_BUILD)}, null, 2))'
+          gh release upload "$tag" release-output/Vivid-Cinema-Android.aab "release-output/Vivid-Cinema-Android-Play-build-$VIVID_ANDROID_BUILD.json" --clobber
+          gh release view "$tag" --json assets --jq '.assets[].name' | grep -Fx "Vivid-Cinema-Android.aab"
+          gh release view "$tag" --json assets --jq '.assets[].name' | grep -Fx "Vivid-Cinema-Android-Play-build-$VIVID_ANDROID_BUILD.json"
