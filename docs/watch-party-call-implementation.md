@@ -42,7 +42,7 @@ Required Cloudflare Pages environment secrets/variables:
 
 The LiveKit account/project and its credentials must be provisioned by the project owner. In Cloudflare Pages → Vivid Cinema → Settings → Variables and Secrets, add LIVEKIT_URL, LIVEKIT_API_KEY, and LIVEKIT_API_SECRET for the production environment and the PR preview environment used for validation. Store LIVEKIT_API_KEY and LIVEKIT_API_SECRET as encrypted secrets. Never commit credentials or place the API secret in browser code. Until those server-side values exist, voice join reports that voice is not configured; text and screening remain available.
 
-The browser currently loads the pinned livekit-client 2.15.6 ESM build from jsDelivr. If the project later adopts a local browser bundling step, move this dependency into that build rather than leaving it as a remote import.
+The browser currently loads the pinned livekit-client 2.15.6 ESM build from jsDelivr. The site CSP allows LiveKit Cloud WebSocket/API hosts and microphone access for the same-origin room page; custom LiveKit domains must be added to the connect-src policy. If the project later adopts a local browser bundling step, move this dependency into that build rather than leaving it as a remote import.
 
 ## Delivery sequence
 
