@@ -934,6 +934,7 @@ function renderShell(params) {
       slot.className = "vivid-wr-player-slot";
       slot.hidden = true;
       slot.dataset.activePlayer = "primary";
+      slot.setAttribute("role", "region");
       slot.setAttribute("aria-label", "Shared cinema player");
       overlayForRoom.hidden = true;
       overlayForRoom.classList.remove("is-minimized", "is-floating");
