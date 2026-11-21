@@ -164,9 +164,6 @@ body.vivid-watch-rooms-page.vivid-watch-room-mode .vivid-wr-player-slot #player-
   display:inline-flex!important;width:30px!important;min-width:30px!important;min-height:29px!important;height:29px!important;
   padding:0!important;border-radius:8px!important;font-size:.72rem!important
 }
-body.vivid-watch-rooms-page.vivid-watch-room-mode .vivid-wr-player-slot #player-overlay.is-floating .vivid-player-frame{
-  aspect-ratio:16/9!important;border-radius:0 0 12px 12px!important
-}
 body.vivid-watch-rooms-page.vivid-watch-room-mode .vivid-wr-player-slot #player-overlay.is-floating .vivid-player-dialog-foot,
 body.vivid-watch-rooms-page.vivid-watch-room-mode .vivid-wr-player-slot #player-overlay.is-floating .vivid-player-info,
 body.vivid-watch-rooms-page.vivid-watch-room-mode .vivid-wr-player-slot #player-overlay.is-floating #player-server-panel{display:none!important}
@@ -207,10 +204,6 @@ body.vivid-watch-rooms-page.vivid-watch-room-mode .vivid-wr-player-slot.is-float
 }
 body.vivid-watch-rooms-page.vivid-watch-room-mode .vivid-wr-player-slot.is-floating #vivid-tflix-player #vivid-tflix-frame{
   position:absolute!important;inset:0!important;width:100%!important;height:100%!important
-}
-body.vivid-watch-rooms-page.vivid-watch-room-mode .vivid-wr-player-slot.is-floating #vivid-tflix-player{
-  position:fixed!important;inset:auto 12px calc(92px + env(safe-area-inset-bottom)) auto!important;
-  z-index:100600!important;width:min(340px,calc(100vw - 24px))!important;max-width:calc(100vw - 24px)!important
 }
 
 /* Premium room voice: calm status, clear controls, and speaking-aware member chips. */
