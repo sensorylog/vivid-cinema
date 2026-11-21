@@ -92,6 +92,7 @@ function applyRoomPlayerSelection(room) {
     ? "Choose the player and server for everyone in this room."
     : "Shared room selection: " + (playerId === "player1" ? "Player 1" : "Player 2") + " · " + providerId + ".";
   const key = playerId + ":" + providerId;
+  const hasActiveScreening = Boolean(room.activeScreening?.sessionId);
   if (key !== lastAppliedSelectionKey) {
     const position = Math.max(0, Number(localPosition ?? latestRemoteState?.position ?? lastHostPayload?.position) || 0);
     if (activePlayerId !== playerId || activeProviderId !== providerId) {
@@ -106,7 +107,7 @@ function applyRoomPlayerSelection(room) {
     activeProviderId = providerId;
     lastAppliedSelectionKey = key;
     if (playerId === "player2" && providerId === "cinesrc") pendingPlayer2Seek = position;
-    if (role !== "guest" || joinedPlayback) {
+    if (hasActiveScreening && (role !== "guest" || joinedPlayback)) {
       roomPlayerLoadRequested = true;
       window.dispatchEvent(new CustomEvent("vivid:watch-room-apply-selection", {
         detail: { playerId, providerId, position }
