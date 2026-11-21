@@ -89,5 +89,5 @@ test("Watch Rooms expose only providers with verified synchronized controls and 
   assert.match(client, /doc\(db, "rooms", requestedRoomId, "playback", "current"\)/);
   assert.doesNotMatch(client, /playbackPollDelayMs|schedulePlaybackRefresh\(|refreshPlayback\(/);
   assert.match(client, /expectedRevision: playbackRevision/);
-  assert.match(client, /reason === "stale-revision"/);
+  assert.match(client, /reason !== "stale-revision"/);
 });
