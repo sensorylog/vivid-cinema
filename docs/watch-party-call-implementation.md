@@ -32,7 +32,7 @@ Preferred implementation: LiveKit Cloud / LiveKit SFU with the livekit-client br
 - A trusted API endpoint verifies the Firebase identity, App Check, active room membership and room status before issuing a short-lived LiveKit access token.
 - Token grants are scoped to the one room and the member's own identity. No client receives the LiveKit API secret. Host room closure, member removal and member leave use a one-minute room-admin token on the server to evict active LiveKit participants.
 - Microphone publish and room subscribe are granted to active members. Room closure or membership removal prevents future token issuance; short token lifetime bounds stale access.
-- The client provides join/leave, mute/unmute, participant presence and speaking indicators. Microphone permission denial and device errors must be visible and recoverable.
+- The client provides join/leave, mute/unmute, participant presence and speaking indicators. Microphone permission denial and device errors must be visible and recoverable. Hosts can disable guest voice from room settings; the server blocks new guest tokens and evicts existing guest participants when the setting is switched off.
 - Voice must fail independently: if LiveKit is not configured or unavailable, the room's text and movie experience remains usable and the UI reports voice unavailable.
 
 Required Cloudflare Pages environment secrets/variables:
