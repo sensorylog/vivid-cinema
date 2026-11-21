@@ -513,6 +513,10 @@ window.addEventListener("vivid:provider-playback", event => {
     localPlaybackRate = normalizePlaybackRate(reportedRate);
     if (role === "host" || allowGuestPlaybackControl) hostPlaybackRate = localPlaybackRate;
     eventType = "rate";
+  } else if (role === "guest" && eventType === "play") {
+    // The first local play gesture may be required to unlock provider commands.
+    // Re-apply the room's speed immediately after that gesture.
+    localPlaybackRate = 1;
   } else if (eventType === "progress" && previousLocalStatus === "playing" &&
       previousLocalPosition != null && previousLocalPositionObservedAt > 0) {
     const elapsedSeconds = (now - previousLocalPositionObservedAt) / 1000;
