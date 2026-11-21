@@ -779,7 +779,10 @@ test("Watch Room playback uses member-only realtime snapshots and trusted revisi
   }
   assert.ok(client.includes('call("getWatchRoomPlaybackSnapshot")'), "trusted snapshot fetch remains available for revision conflict recovery");
   assert.ok(client.includes("playbackConnectionGeneration"));
-  assert.ok(client.includes('hostStatus = "paused";\n      roomPlayerLoadRequested = false;'), "a new screening must not inherit the previous title playback state");
+  const newSessionStart = client.indexOf("requestedSessionId !== playbackSessionId");
+  const newSessionEnd = client.indexOf("\n    }\n    return;", newSessionStart);
+  const newSession = client.slice(newSessionStart, newSessionEnd);
+  assert.ok(newSession.includes('hostStatus = "paused";') && newSession.includes("roomPlayerLoadRequested = false;"), "a new screening must not inherit the previous title playback state");
   assert.ok(client.includes("onSnapshot("));
   assert.ok(client.includes('doc(db, "rooms", requestedRoomId, "playback", "current")'));
   assert.ok(client.includes("expectedRevision: playbackRevision"));
