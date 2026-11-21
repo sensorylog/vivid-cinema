@@ -991,3 +991,13 @@ body[data-vivid-page="home"] .vivid-section-wrap > .vivid-news-home-card {
     contain-intrinsic-size: auto 340px;
   }
 }
+
+
+/* Home already carries rich poster artwork. Avoid one blurred pseudo-image
+   per card and the full-viewport ambient poster collage on this dense page. */
+body[data-vivid-page="home"].vivid-atmosphere .vivid-ambient-art,
+body[data-vivid-page="home"].vivid-atmosphere .vivid-card::after {
+  display: none !important;
+  content: none !important;
+  filter: none !important;
+}
