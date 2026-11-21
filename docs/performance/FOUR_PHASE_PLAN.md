@@ -131,3 +131,11 @@ Run the same build and repeatable interaction script on (A) the target low-end P
 Compare like-for-like traces. Record actual values and attach the trace files; do not infer improvement from the device profile activating or from a source diff alone.
 
 **Phase 4 status: not complete yet.** Automated regression checks have passed where reported above, but final browser smoke/build jobs were still in progress at the snapshot, deploy previews reported failures, and the required real-hardware performance comparison has not been run. Keep PR #508 open and in draft until these gaps are closed.
+
+
+### Release packaging follow-up
+
+- Prepared package version `1.0.46` consistently in the root package manifest/lockfile and the isolated desktop runtime manifest/lockfile.
+- Removed the Windows release workflow's wait for `Vivid-Cinema-Android.apk`; Windows publication now verifies only its own installer, portable executable, blockmap and updater metadata. The signed Android release workflow remains independently responsible for uploading the APK to a matching release when Android is ready.
+- Added a desktop packaging contract assertion to prevent the Windows release from becoming coupled to the Android APK again.
+- These release-path changes are on the same PR and must pass a fresh CI run before merge. Version `1.0.46` is prepared but is not published yet.
