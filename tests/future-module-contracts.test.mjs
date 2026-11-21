@@ -64,8 +64,8 @@ test("Watch Rooms is added to the shared top tools without changing the seven mo
   assert.ok(mobileBuilder, "shared mobile navigation builder should exist");
   const androidMobileBuilder = mobileBuilder.slice(mobileBuilder.indexOf("if (isAndroidNativeRuntime())"), mobileBuilder.indexOf("} else {"));
   const browserMobileBuilder = mobileBuilder.slice(mobileBuilder.indexOf("} else {"));
-  assert.equal((androidMobileBuilder.match(/navLink\\(/g) || []).length, 4);
-  assert.equal((browserMobileBuilder.match(/navLink\\(/g) || []).length, 7);
+  assert.equal((androidMobileBuilder.match(/navLink\(/g) || []).length, 4);
+  assert.equal((browserMobileBuilder.match(/navLink\(/g) || []).length, 7);
   assert.match(androidMobileBuilder, /data-vivid-more-navigation/);
   assert.doesNotMatch(mobileBuilder, /watch-rooms/);
 });
