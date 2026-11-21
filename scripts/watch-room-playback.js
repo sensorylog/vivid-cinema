@@ -231,10 +231,10 @@ function applyRemoteState(force = false) {
     sendProviderCommand("seek", expected);
   }
   if (state.status === "playing" && localStatus !== "playing") {
-    if (sendProviderCommand("play")) localStatus = "playing";
+    sendProviderCommand("play");
   }
   if (state.status === "paused" || state.status === "ended") {
-    if (sendProviderCommand("pause")) localStatus = state.status === "ended" ? "ended" : "paused";
+    sendProviderCommand("pause");
   }
   setNote("Connected to the host’s playback clock. Small timing differences are corrected automatically.");
 }
