@@ -108,6 +108,11 @@ test("Watch Room screenings stay in the lobby and minimize without stopping play
   assert.ok(playback.includes('getWatchRoomPlaybackSnapshot'));
   assert.ok(voice.includes("getWatchRoomVoiceToken"));
   assert.ok(voice.includes("setMicrophoneEnabled"));
+  assert.ok(voice.includes("VOICE_INTENT_KEY"));
+  assert.ok(voice.includes("sessionStorage.setItem(VOICE_INTENT_KEY"));
+  assert.ok(voice.includes("persistVoiceIntent(connectedRoomId, isMuted)"));
+  assert.ok(voice.includes('joinVoice({ restore: true, muted: intent.muted === true })'));
+  assert.ok(voice.includes("clearVoiceIntent(connectedRoomId || activeRoom?.roomId)"));
   assert.ok(cinemaStyles.includes("aspect-ratio:16/9"));
   assert.ok(cinemaStyles.includes("#player-overlay.is-minimized"));
   assert.ok(cinemaStyles.includes("#player-overlay[hidden]"));
