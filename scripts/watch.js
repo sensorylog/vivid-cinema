@@ -476,6 +476,11 @@ window.addEventListener("vivid:watch-room-apply-selection", event => {
       secondaryRoot.dataset.roomActive = "true";
       secondaryRoot.hidden = false;
       secondaryRoot.classList.remove("is-minimized");
+      const secondaryMinimize = secondaryRoot.querySelector("#vivid-tflix-minimize");
+      if (secondaryMinimize) {
+        secondaryMinimize.setAttribute("aria-label", "Minimize screening player");
+        secondaryMinimize.innerHTML = '<i class="bi bi-dash-lg" aria-hidden="true"></i>';
+      }
     }
     return;
   }
@@ -484,10 +489,19 @@ window.addEventListener("vivid:watch-room-apply-selection", event => {
     secondaryRoot.dataset.roomActive = "false";
     secondaryRoot.hidden = true;
     secondaryRoot.classList.remove("is-minimized");
+    const secondaryMinimize = secondaryRoot.querySelector("#vivid-tflix-minimize");
+    if (secondaryMinimize) {
+      secondaryMinimize.setAttribute("aria-label", "Minimize screening player");
+      secondaryMinimize.innerHTML = '<i class="bi bi-dash-lg" aria-hidden="true"></i>';
+    }
   }
   if (primaryOverlay) {
     primaryOverlay.classList.remove("is-minimized");
     primaryOverlay.hidden = false;
+    const closeButton = $("player-close");
+    const restoreButton = $("player-restore");
+    if (closeButton) closeButton.hidden = false;
+    if (restoreButton) restoreButton.hidden = true;
   }
   const position = Math.max(0, Number(selection.position) || 0);
   setPlayerSource(selection.providerId, currentParams, position);
