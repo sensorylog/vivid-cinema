@@ -97,7 +97,7 @@ function getParams() {
   const type = route.params.get("type") === "tv" ? "tv" : "movie";
   const season = Math.max(0, Number.parseInt(route.params.get("season") || "1", 10) || 1);
   const episode = Math.max(1, Number.parseInt(route.params.get("episode") || "1", 10) || 1);
-  return { id, type, season, episode };
+  return { id, type, season, episode, roomMode: route.params.get("roomMode") === "1" };
 }
 
 function progressKey() {
