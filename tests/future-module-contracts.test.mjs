@@ -205,9 +205,9 @@ test("Watch Rooms Stage 5 exposes trusted VidSrc and CineSRC playback bridges", 
   assert.ok(client.includes("now - lastPublishAt < 1800"));
   assert.ok(client.includes('if (eventType === "ready" || eventType === "canplay" || eventType === "loadedmetadata")'));
 
-  assert.ok(client.includes("eventType, status: hostStatus"));
-  assert.ok(client.includes("now - lastPublishAt < 1800"));
-  assert.ok(client.includes("if (sendProviderCommand(\"play\")) localStatus = \"playing\""));
+  assert.ok(client.includes('if (state.status === "playing" && localStatus !== "playing")'));
+  assert.ok(client.includes('sendProviderCommand("play");'));
+  assert.ok(!client.includes('if (sendProviderCommand("play")) localStatus = "playing"'), "remote state must be confirmed by the provider, not optimistically assumed");
   assert.ok(client.includes("onSnapshot("));
   assert.ok(client.includes('doc(db, "rooms", requestedRoomId, "playback", "current")'));
   assert.ok(watch.includes('event.origin === "https://vidsrc.sh"'));
