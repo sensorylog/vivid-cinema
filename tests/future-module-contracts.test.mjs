@@ -471,6 +471,8 @@ test("Watch Room sync extrapolates local time and keeps command events ahead of 
   assert.ok(client.includes('sendProviderCommand("rate", undefined, desiredRate)'));
   assert.ok(client.includes('eventType === "progress" && now - lastPublishAt < 3500'));
   assert.ok(client.includes('"cinesrc:ratechange"'));
+  assert.ok(client.includes('"cinesrc:nextepisode"'));
+  assert.ok(client.includes("Episodes are locked to the shared screening"));
   assert.ok(sync.includes("normalizePlaybackRate"));
   for (const backend of [node, cloudflare]) {
     assert.ok(backend.includes('"rate"'));
