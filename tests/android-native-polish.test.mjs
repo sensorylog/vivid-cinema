@@ -121,7 +121,7 @@ test("native Android project generation registers both plugins idempotently", as
     ].join("\n"), "utf8");
 
     const manifestPath = path.join(androidRoot, "app", "src", "main", "AndroidManifest.xml");
-    await writeFile(manifestPath, '<manifest xmlns:android="http://schemas.android.com/apk/res/android"><application android:label="Vivid Cinema"></application></manifest>', "utf8");
+    await writeFile(manifestPath, '<manifest xmlns:android="http://schemas.android.com/apk/res/android"><application android:label="Vivid Cinema"><activity android:name=".MainActivity" android:exported="true"></activity></application></manifest>', "utf8");
 
     const script = fileURLToPath(new URL("../automation/configure-android-native-project.mjs", import.meta.url));
     const env = {
@@ -152,6 +152,8 @@ test("native Android project generation registers both plugins idempotently", as
     assert.match(manifest, /android\.permission\.RECORD_AUDIO/);
     assert.match(manifest, /android\.permission\.MODIFY_AUDIO_SETTINGS/);
     assert.match(manifest, /android\.hardware\.microphone" android:required="false"/);
+    assert.match(manifest, /android:usesCleartextTraffic="false"/);
+    assert.match(manifest, /android:windowSoftInputMode="adjustResize"/);
     assert.match(activity, /registerPlugin\(VividUpdaterPlugin\.class\)/);
     assert.match(activity, /registerPlugin\(VividNavigationPlugin\.class\)/);
     assert.match(activity, /setWebChromeClient\(new VividWebChromeClient\(getBridge\(\)\)\)/);
