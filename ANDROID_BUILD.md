@@ -71,7 +71,7 @@ The 90-day workflow artifact contains a signed APK for controlled QA and a signe
 
 The direct/sideload channel remains separate: the **Android APK Build** workflow publishes its development-signed APK and uses the GitHub updater. That channel is for testing and early distribution, not a production Play Store release. Do not mix the direct development signing key with the private Play upload key.
 
-The workflow intentionally fails early when signing secrets are missing. It uses the shared navigation and fullscreen plugins and icon resources, omits the direct-distribution updater, then applies the private production signing configuration. Production builds use a separate higher build-number range. A Play Store listing, Firebase Android app registration, Play Integrity/App Check configuration, policy review, and physical-device acceptance testing are still required before a public Play rollout. No Firebase Cloud Functions, Blaze plan, or cloud backend is required for APK signing.
+The workflow intentionally fails early when signing secrets are missing. It uses the shared navigation and fullscreen plugins and icon resources, omits the direct-distribution updater, then applies the private production signing configuration. Production builds use a separate higher build-number range. A Play Store listing, production upload-key secrets, policy review, and physical-device acceptance testing are still required before a public Play rollout. Native Firebase Android registration and Play Integrity are not prerequisites for the current Cloudflare Turnstile-backed Watch Rooms flow. No Firebase Cloud Functions, Blaze plan, or cloud backend is required for APK signing.
 
 
 ### Moving from the current debug APK to the first signed release
