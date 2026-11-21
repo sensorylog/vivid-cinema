@@ -12,10 +12,12 @@ function setStatus(message, isError = false) {
   if (!statusNode) return;
   statusNode.textContent = message;
   statusNode.dataset.state = isError ? "error" : "info";
+  statusNode.hidden = !isError;
 }
 function returnToLobby() {
   const target = new URL("watch-rooms.html", window.location.href);
   target.searchParams.set("roomId", roomId);
+  target.searchParams.set("suppressScreening", "1");
   window.location.assign(target.pathname + target.search);
 }
 exitButton?.addEventListener("click", returnToLobby);
