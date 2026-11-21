@@ -6,7 +6,7 @@ const byId = id => document.getElementById(id);
 const call = callWatchRoomApi;
 let room = null, lastRoom = null, stops = [], heartbeat = null, presenceRefresh = null;
 let memberList = [], selectedPick = null, searchTimer = null, searchGeneration = 0;
-let loadedScreeningSessionId = "", dismissedScreeningSessionId = "";
+let loadedScreeningSessionId = new URLSearchParams(window.location.search).get("sessionId") || "", dismissedScreeningSessionId = "";
 
 function stop() {
   if (room) document.dispatchEvent(new CustomEvent("vivid:watch-room-closing", { detail: { roomId: room.roomId } }));
@@ -181,7 +181,7 @@ function buildScreeningUrl(screening) {
   const contentId = String(screening?.contentId || "");
   const mediaType = screening?.mediaType === "tv" ? "tv" : "movie";
   if (!/^\d{1,12}$/.test(contentId)) return "";
-  const url = new URL("watch-room-cinema.html", window.location.href);
+  const url = new URL("watch-rooms.html", window.location.href);
   url.searchParams.set("id", contentId);
   url.searchParams.set("type", mediaType);
   url.searchParams.set("roomId", room.roomId);
