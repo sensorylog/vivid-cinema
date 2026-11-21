@@ -255,6 +255,7 @@ function applyRemoteState(force = false) {
   const statusMatches = desiredStatus === "playing"
     ? localStatus === "playing"
     : localStatus === "paused" || localStatus === "ended";
+  if (needsSeek || !statusMatches) suppressPlaybackPublishUntil = Math.max(suppressPlaybackPublishUntil, now + 1800);
   if (desiredStatus !== "playing") pendingPlaySince = 0;
   const retryStatusCommand = lastCommandedStatus !== desiredStatus || now - lastCommandAt >= 2500;
   if (!statusMatches && retryStatusCommand && sendProviderCommand(desiredStatus === "playing" ? "play" : "pause")) {
