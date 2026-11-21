@@ -94,7 +94,7 @@ test("Watch Room screenings stay embedded in the lobby and float without stoppin
   assert.ok(legacyPage.includes('new URL("watch-rooms.html", window.location.href)'));
   assert.ok(legacyPage.includes("window.location.replace(target.href)"));
   assert.ok(lobbyHtml.includes('id="wr-screening-player-host"'));
-  assert.ok(lobbyHtml.indexOf('id="wr-screening-player-host"') < lobbyHtml.indexOf('</section>\n            <aside class="vivid-wr-room-sidebar"'));
+  assert.ok(lobbyHtml.indexOf('id="wr-cinema-stage"') < lobbyHtml.indexOf('id="wr-screening-player-host"') && lobbyHtml.indexOf('id="wr-screening-player-host"') < lobbyHtml.indexOf('<aside class="vivid-wr-room-sidebar"'));
   assert.ok(lobbyHtml.includes('id="wr-voice-count"'));
   assert.ok(lobbyHtml.includes('styles/vivid-watch-room-experience.css'));
   assert.ok(lobbyHtml.includes('id="wr-cinema-stage"'));
