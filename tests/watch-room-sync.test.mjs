@@ -15,6 +15,9 @@ test("playing position advances from the server timestamp and measured clock off
     status: "playing", position: 120, duration: 3600, updatedAt: 10_000
   }, { nowMs: 12_000, clockOffsetMs: 500 });
   assert.equal(position, 122.5);
+  assert.equal(getExpectedPlaybackPosition({
+    status: "playing", position: 120, duration: 3600, updatedAt: 10_000, positionAtMs: 9_000
+  }, { nowMs: 12_000, clockOffsetMs: 500 }), 123.5);
 });
 
 test("paused and ended positions do not advance", () => {
