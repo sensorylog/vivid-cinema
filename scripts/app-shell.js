@@ -1,4 +1,9 @@
 import { VIVID_CONFIG } from "./config.js";
+import { applyPerformanceProfile } from "./performance-profile.js";
+
+// Apply the same hardware-aware visual profile in browsers and Electron.
+// Electron preload may already have applied it; the helper is idempotent.
+applyPerformanceProfile();
 
 const MOBILE_BREAKPOINT = 768;
 let initialized = false;
