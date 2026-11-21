@@ -188,6 +188,8 @@ test("native Android project generation registers both plugins idempotently", as
     assert.match(activity, /registerPlugin\(VividUpdaterPlugin\.class\)/);
     assert.match(activity, /registerPlugin\(VividNavigationPlugin\.class\)/);
     assert.match(activity, /setWebChromeClient\(new VividWebChromeClient\(getBridge\(\)\)\)/);
+    assert.match(activity, /CookieManager\.getInstance\(\)/);
+    assert.match(activity, /setAcceptThirdPartyCookies\(getBridge\(\)\.getWebView\(\), true\)/);
     assert.equal((activity.match(/super\.onCreate\(savedInstanceState\)/g) || []).length, 1);
     assert.match(updaterPlugin, /@CapacitorPlugin\(name = "VividUpdater"\)/);
     assert.match(updaterPlugin, /getSharedPreferences\(PREFERENCES/);
