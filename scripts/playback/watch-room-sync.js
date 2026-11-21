@@ -10,6 +10,11 @@ export function normalizePlaybackTimestamp(value) {
   return Number.isFinite(timestamp) && timestamp > 0 ? timestamp : 0;
 }
 
+export function normalizePlaybackRate(value) {
+  const rate = Number(value);
+  return Number.isFinite(rate) ? Math.max(0.25, Math.min(4, rate)) : 1;
+}
+
 export function getExpectedPlaybackPosition(state, {
   nowMs = Date.now(),
   clockOffsetMs = 0
@@ -21,8 +26,9 @@ export function getExpectedPlaybackPosition(state, {
     ? Math.min(MAX_PLAYBACK_POSITION_SECONDS, durationValue)
     : MAX_PLAYBACK_POSITION_SECONDS;
   const positionAt = normalizePlaybackTimestamp(state.positionAtMs ?? state.updatedAt);
+  const playbackRate = normalizePlaybackRate(state.playbackRate);
   const elapsed = state.status === "playing" && positionAt > 0
-    ? Math.max(0, (Number(nowMs) + Number(clockOffsetMs || 0) - positionAt) / 1000)
+    ? Math.max(0, (Number(nowMs) + Number(clockOffsetMs || 0) - positionAt) / 1000) * playbackRate
     : 0;
   return Math.max(0, Math.min(duration, position + elapsed));
 }
@@ -57,6 +63,7 @@ export function getEstimatedLocalPlaybackPosition({
   position,
   status,
   duration,
+  playbackRate = 1,
   observedAtMs
 } = {}, { nowMs = Date.now() } = {}) {
   if (position == null) return null;
@@ -68,7 +75,7 @@ export function getEstimatedLocalPlaybackPosition({
     : MAX_PLAYBACK_POSITION_SECONDS;
   const observedAt = Number(observedAtMs);
   const elapsed = status === "playing" && Number.isFinite(observedAt) && observedAt > 0
-    ? Math.max(0, (Number(nowMs) - observedAt) / 1000)
+    ? Math.max(0, (Number(nowMs) - observedAt) / 1000) * normalizePlaybackRate(playbackRate)
     : 0;
   return Math.max(0, Math.min(ceiling, raw + elapsed));
 }
@@ -76,6 +83,7 @@ export function getEstimatedLocalPlaybackPosition({
 export function classifyPlaybackEvent({ event, status, previousStatus } = {}) {
   const name = String(event || "").toLowerCase();
   const nextStatus = String(status || "").toLowerCase();
+  if (/(ratechange|playbackrate)/.test(name) || name === "rate") return "rate";
   if (/(seek|scrub)/.test(name) || nextStatus === "seeked" || nextStatus === "seeking") return "seek";
   if (/(ended|completed)/.test(name) || nextStatus === "ended" || nextStatus === "completed") return "ended";
   if (/(pause)/.test(name) || nextStatus === "paused" || nextStatus === "pause") return "pause";
