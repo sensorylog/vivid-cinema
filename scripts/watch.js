@@ -491,7 +491,7 @@ window.addEventListener("vivid:watch-room-apply-selection", event => {
   }
   const position = Math.max(0, Number(selection.position) || 0);
   setPlayerSource(selection.providerId, currentParams, position);
-  $("player-overlay")?.scrollIntoView({ block: "center", behavior: "smooth" });
+  if (!isWatchRoomCinemaMode) $("player-overlay")?.scrollIntoView({ block: "center", behavior: "smooth" });
 });
 
 
