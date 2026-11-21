@@ -961,7 +961,7 @@ function renderShell(params) {
     document.body.style.setProperty("--vivid-room-art", "url(\"" + getImageUrl(media.backdrop_path, "w1280") + "\")");
   }
   if (isWatchRoomCinemaMode && overlay) overlay.hidden = true;
-  // Keep the page interactive until the viewer opens the cinema window.
+  // Keep the Watch Room player inline; the lobby remains the only room surface.
   const openPlayer = $("watch-open-player");
   const closePlayer = $("player-close");
   const fullscreenButton = $("player-fullscreen");
@@ -1058,7 +1058,8 @@ function renderShell(params) {
       status.classList.add("is-warning");
       status.hidden = false;
     }
-    closePlayer?.focus({ preventScroll: true });
+    if (isWatchRoomCinemaMode) roomPlayerLayout?.focus();
+    else closePlayer?.focus({ preventScroll: true });
   };
   roomOpenPlayerWindow = openPlayerWindow;
   const closePlayerWindow = () => {
