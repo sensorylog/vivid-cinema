@@ -177,8 +177,12 @@ test("Watch Rooms Stage 5 exposes trusted VidSrc and CineSRC playback bridges", 
   assert.ok(backend.includes("async function publishWatchRoomPlayback("));
   assert.ok(backend.includes('["vidsrc", "cinesrc"].includes(provider)'));
   assert.ok(cloudflareBackend.includes('["vidsrc", "cinesrc"].includes(provider)'));
-  assert.ok(backend.includes("tx.set(stateRef, { sessionId, provider, contentId"));
-  assert.ok(cloudflareBackend.includes("tx.set(stateRef, { sessionId, provider, contentId"));
+  assert.ok(backend.includes("tx.set(stateRef, {"));
+  assert.ok(backend.includes("schemaVersion: 1, sessionId, provider, contentId,"));
+  assert.ok(cloudflareBackend.includes("tx.set(stateRef, {"));
+  assert.ok(cloudflareBackend.includes("schemaVersion: 1, sessionId, provider, contentId,"));
+  assert.ok(cloudflareBackend.includes("expectedRevision !== currentRevision"));
+  assert.ok(cloudflareBackend.includes('reason: "stale-revision"'));
   assert.ok(backend.includes('memberData.role === "guest" && roomData.allowGuestPlaybackControl === true'));
   assert.ok(backend.includes("tx.get(roomRef.collection(\"members\").doc(uid))"));
   assert.ok(rules.includes("match /playback/{stateId}"));
@@ -191,9 +195,10 @@ test("Watch Rooms Stage 5 exposes trusted VidSrc and CineSRC playback bridges", 
   assert.ok(client.includes('window.addEventListener("vivid:player-adapter-selected"'));
   assert.ok(client.includes('document.getElementById(activePlayerId === "player2" ? "vivid-tflix-frame" : "vidapi-player")'));
   assert.ok(client.includes('call("getWatchRoomPlaybackSnapshot")'));
-  assert.ok(client.includes("schedulePlaybackRefresh"));
-  assert.ok(!client.includes("onSnapshot("));
-  assert.ok(client.includes("Math.abs(expected - localPosition) > 2.5"));
+  assert.ok(client.includes("getExpectedPlaybackPosition(state, { nowMs: Date.now(), clockOffsetMs })"));
+  assert.ok(client.includes("shouldCorrectPlayback(expected, localPosition)"));
+  assert.ok(client.includes("onSnapshot("));
+  assert.ok(client.includes('doc(db, "rooms", requestedRoomId, "playback", "current")'));
   assert.ok(watch.includes('event.origin === "https://vidsrc.sh"'));
   assert.ok(watch.includes('new CustomEvent("vivid:provider-playback"'));
   assert.ok(page.includes('src="scripts/watch-room-playback.js"'));
@@ -436,10 +441,13 @@ test("Watch Room backend and Firestore rules fail closed for missing expiry time
 test("Watch Room synchronization compensates for guest device clock skew", () => {
   const backend = readFileSync(new URL("../api/watch-rooms.js", import.meta.url), "utf8");
   const client = readFileSync(new URL("../scripts/watch-room-playback.js", import.meta.url), "utf8");
+  const sync = readFileSync(new URL("../scripts/playback/watch-room-sync.js", import.meta.url), "utf8");
   const heartbeat = backend.slice(backend.indexOf("async function heartbeatWatchRoom"), backend.indexOf("async function addWatchRoomQueueItem"));
   assert.ok(heartbeat.includes("serverTime: Date.now()"));
   assert.ok(client.includes("clockOffsetMs = serverTime - ((startedAt + finishedAt) / 2)"));
-  assert.ok(client.includes("Date.now() + clockOffsetMs - updatedAt"));
+  assert.ok(client.includes("getExpectedPlaybackPosition(state, { nowMs: Date.now(), clockOffsetMs })"));
+  assert.ok(sync.includes("Number(nowMs) + Number(clockOffsetMs || 0) - updatedAt"));
+  assert.ok(sync.includes("PLAYBACK_DRIFT_TOLERANCE_SECONDS = 1.5"));
 });
 
 
@@ -550,9 +558,15 @@ test("Watch Room lobby reads authoritative members, presence, queue and chat thr
   assert.ok(client.includes('call("getWatchRoomLobbySnapshot")'));
   assert.ok(client.includes("memberList = Array.isArray(snapshot.members) ? snapshot.members : []"));
   assert.ok(client.includes("memberList.filter(member => member.isOnline).length"));
-  assert.ok(client.includes("presenceRefresh = setInterval(refreshLobby, 5000)"));
+  assert.ok(client.includes("presenceRefresh = setInterval(updateMembers, 10000)"));
   assert.ok(client.includes("Couldn't load room members."));
-  assert.doesNotMatch(client, /onSnapshot|collection\(db,/);
+  assert.ok(client.includes("function subscribeRoomRealtime(roomId)"));
+  assert.match(client, /onSnapshot\(roomRef/);
+  assert.match(client, /onSnapshot\(membersRef/);
+  assert.match(client, /onSnapshot\(presenceRef/);
+  assert.match(client, /onSnapshot\(queueRef/);
+  assert.match(client, /onSnapshot\(chatRef/);
+  assert.doesNotMatch(client, /setInterval\(refreshLobby, 5000\)/);
 });
 
 
@@ -609,6 +623,43 @@ test("Watch Room Step 5 restores Player 2 position only after the verified CineS
   assert.ok(player2.includes('vivid:watch-room-selection-error'));
 });
 
+
+test("Watch Room linked Cinema Clubs validate membership and record screenings atomically", () => {
+  const node = readFileSync(new URL("../api/watch-rooms.js", import.meta.url), "utf8");
+  const cloudflare = readFileSync(new URL("../cloudflare/functions/api/watch-rooms.js", import.meta.url), "utf8");
+  for (const backend of [node, cloudflare]) {
+    assert.ok(backend.includes("linkedClubId: null, linkedClubName: null"));
+    const settingsStart = backend.indexOf("async function updateWatchRoomSettings");
+    const settingsEnd = backend.indexOf("\nasync function ", settingsStart + 10);
+    const settings = backend.slice(settingsStart, settingsEnd);
+    assert.ok(settings.includes('"linkedClubId"'));
+    assert.ok(settings.includes('clubSnapshot.data().status !== "active"'));
+    assert.ok(settings.includes('clubRef.collection("members").doc(uid)'));
+    const screeningStart = backend.indexOf("async function startWatchRoomScreening");
+    const screeningEnd = backend.indexOf("\nasync function ", screeningStart + 10);
+    const screening = backend.slice(screeningStart, screeningEnd);
+    assert.ok(screening.includes('clubRef.collection("screenings").doc(sessionId)'));
+    assert.ok(screening.includes("tx.create(clubScreeningRef"));
+    assert.ok(screening.includes("sourceRoomId: roomId"));
+    assert.ok(screening.includes("sourceSessionId: sessionId"));
+    assert.ok(screening.includes("clubScreeningId: clubScreeningRef ? clubScreeningRef.id : null"));
+    assert.ok(screening.includes("clubName: linkedClubId ? room.linkedClubName || null : null"));
+    assert.ok(backend.includes("linkedClubName: room.linkedClubName || null"));
+  }
+  const lobby = readFileSync(new URL("../scripts/watch-room-lobby.js", import.meta.url), "utf8");
+  const clubs = readFileSync(new URL("../scripts/watch-room-clubs.js", import.meta.url), "utf8");
+  assert.ok(lobby.includes("function handleRoomAccessLost("));
+  assert.ok(lobby.includes('error?.code === "permission-denied"'));
+  const watch = readFileSync(new URL("../scripts/watch.js", import.meta.url), "utf8");
+  const playback = readFileSync(new URL("../scripts/watch-room-playback.js", import.meta.url), "utf8");
+  assert.ok(watch.includes('document.addEventListener("vivid:watch-room-closing"'));
+  assert.ok(playback.includes('document.addEventListener("vivid:watch-room-closing"'));
+  assert.ok(lobby.includes("function subscribeClubWatchlist(clubId)"));
+  assert.ok(lobby.includes('call("addWatchRoomQueueItem")'));
+  assert.ok(lobby.includes('vivid:open-linked-club'));
+  assert.ok(clubs.includes("data.sourceRoomName"));
+});
+
 test("Watch Room Step 6 enforces granular guest permissions in both trusted APIs and the lobby", () => {
   const node = readFileSync(new URL("../api/watch-rooms.js", import.meta.url), "utf8");
   const cloudflare = readFileSync(new URL("../cloudflare/functions/api/watch-rooms.js", import.meta.url), "utf8");
@@ -625,10 +676,10 @@ test("Watch Room Step 6 enforces granular guest permissions in both trusted APIs
     assert.ok(html.includes('name="' + name + '"'));
     assert.ok(lobby.includes("form.elements." + name));
   }
-  assert.ok(lobby.includes("currentSettings.elements.allowGuestPlayerSelection"));
-  assert.ok(lobby.includes("currentSettings.elements.allowGuestPlaybackControl"));
+  assert.ok(lobby.includes("settings.elements.allowGuestPlayerSelection"));
+  assert.ok(lobby.includes("settings.elements.allowGuestPlaybackControl"));
   assert.ok(lobby.includes("settings.dataset.dirty = \"true\""));
-  assert.ok(lobby.includes("currentSettings.dataset.dirty !== \"true\""));
+  assert.ok(lobby.includes('settings.dataset.dirty === "true"'));
   assert.ok(lobby.includes("room.allowGuestQueueManagement === true"));
   assert.ok(lobby.includes("room.allowGuestVoting === false"));
   assert.ok(lobby.includes("control.disabled = !queueAllowed"));
@@ -686,10 +737,11 @@ test("Watch Room followers resync when the selected provider iframe finishes loa
 });
 
 
-test("Watch Room playback snapshots use authenticated API polling instead of browser Firestore listeners", () => {
+test("Watch Room playback uses member-only realtime snapshots and trusted revision-safe writes", () => {
   const node = readFileSync(new URL("../api/watch-rooms.js", import.meta.url), "utf8");
   const cloudflare = readFileSync(new URL("../cloudflare/functions/api/watch-rooms.js", import.meta.url), "utf8");
   const client = readFileSync(new URL("../scripts/watch-room-playback.js", import.meta.url), "utf8");
+  const rules = readFileSync(new URL("../firestore.rules", import.meta.url), "utf8");
   for (const backend of [node, cloudflare]) {
     const start = backend.indexOf("async function getWatchRoomPlaybackSnapshot(");
     const end = backend.indexOf("async function heartbeatWatchRoom(", start);
@@ -700,12 +752,28 @@ test("Watch Room playback snapshots use authenticated API polling instead of bro
     assert.ok(operation.includes('collection("playback").doc("current")'));
     assert.ok(backend.includes("  getWatchRoomPlaybackSnapshot,"));
     assert.ok(backend.includes('"getWatchRoomPlaybackSnapshot"'));
+    const writeStart = backend.indexOf("async function publishWatchRoomPlayback(");
+    const writeEnd = backend.indexOf("const MAX_WATCHLIST_ITEMS", writeStart);
+    const write = backend.slice(writeStart, writeEnd);
+    assert.ok(write.includes("expectedRevisionInput == null"));
+    assert.ok(write.includes("expectedRevision !== currentRevision"));
+    assert.ok(write.includes('"stale-revision"'));
+    assert.ok(write.includes('tx.get(roomRef.collection("members").doc(uid))'));
+    assert.ok(write.includes("shouldThrottlePlaybackWrite(previous?.status, status"), "only repeated playing heartbeats are rate-limited");
   }
-  assert.ok(client.includes('call("getWatchRoomPlaybackSnapshot")'));
-  assert.ok(client.includes("schedulePlaybackRefresh"));
+  assert.ok(client.includes('call("getWatchRoomPlaybackSnapshot")'), "trusted snapshot fetch remains available for revision conflict recovery");
   assert.ok(client.includes("playbackConnectionGeneration"));
-  assert.ok(!client.includes("onSnapshot("));
-  assert.ok(!client.includes('from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js"'));
+  assert.ok(client.includes("onSnapshot("));
+  assert.ok(client.includes('doc(db, "rooms", requestedRoomId, "playback", "current")'));
+  assert.ok(client.includes("expectedRevision: playbackRevision"));
+  assert.ok(client.includes('data.reason !== "stale-revision"'));
+  assert.equal((client.match(/call\("publishWatchRoomPlayback"\)/g) || []).length, 1, "all playback writes must pass through the revision-safe publisher");
+  assert.doesNotMatch(client, /schedulePlaybackRefresh\(|playbackPollDelayMs/);
+  const playbackRulesStart = rules.indexOf("match /playback/{stateId}");
+  const playbackRulesEnd = rules.indexOf("match /cinemaClubs/{clubId}", playbackRulesStart);
+  const playbackRules = rules.slice(playbackRulesStart, playbackRulesEnd);
+  assert.ok(playbackRules.includes("allow get, list: if isRoomMember(roomId);"));
+  assert.ok(playbackRules.includes("allow create, update, delete: if false;"));
 });
 
 test("Watch Room Start Screening is host-authorized and launches the same queued title for members", () => {

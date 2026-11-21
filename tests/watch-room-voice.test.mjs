@@ -77,42 +77,104 @@ test("LiveKit token signer rejects malformed identities and unscoped room names"
   }), /invalid/i);
 });
 
-test("Watch Room uses a dedicated cinema route instead of nesting the Watch page in an iframe", async () => {
-  const [lobbyHtml, cinemaHtml, lobby, cinema, voice, playback, watchPage, cinemaStyles, rooms] = await Promise.all([
+test("Watch Room screenings stay in the lobby and minimize without stopping playback", async () => {
+  const [lobbyHtml, lobby, voice, playback, watchPage, cinemaStyles, rooms, legacyPage] = await Promise.all([
     readFile(new URL("../watch-rooms.html", import.meta.url), "utf8"),
-    readFile(new URL("../watch-room-cinema.html", import.meta.url), "utf8"),
     readFile(new URL("../scripts/watch-room-lobby.js", import.meta.url), "utf8"),
-    readFile(new URL("../scripts/watch-room-cinema.js", import.meta.url), "utf8"),
     readFile(new URL("../scripts/watch-room-voice.js", import.meta.url), "utf8"),
     readFile(new URL("../scripts/watch-room-playback.js", import.meta.url), "utf8"),
     readFile(new URL("../scripts/watch.js", import.meta.url), "utf8"),
     readFile(new URL("../styles/vivid-watch-room-cinema.css", import.meta.url), "utf8"),
-    readFile(new URL("../scripts/watch-rooms.js", import.meta.url), "utf8")
+    readFile(new URL("../scripts/watch-rooms.js", import.meta.url), "utf8"),
+    readFile(new URL("../watch-room-cinema.html", import.meta.url), "utf8")
   ]);
-  assert.ok(lobbyHtml.includes('name="allowGuestVoice"'));
-  assert.ok(!lobbyHtml.includes('id="wr-screening-frame-wrap"'));
-  assert.ok(!lobby.includes('document.createElement("iframe")'));
-  assert.ok(lobby.includes('new URL("watch-room-cinema.html", window.location.href)'));
-  assert.ok(lobby.includes('window.location.assign(url)'));
+  assert.ok(legacyPage.includes('new URL("watch-rooms.html", window.location.href)'));
+  assert.ok(legacyPage.includes("window.location.replace(target.href)"));
+  assert.ok(lobbyHtml.includes('id="wr-screening-player-host"'));
+  assert.ok(lobbyHtml.includes('id="wr-cinema-stage"'));
+  assert.ok(lobbyHtml.includes('data-room-view="queue"'));
+  assert.ok(lobbyHtml.includes('data-room-view="chat"'));
+  assert.ok(lobbyHtml.includes('data-room-view="members"'));
+  assert.ok(lobbyHtml.includes('id="wr-voice-call"'));
+  assert.ok(lobbyHtml.includes('id="wr-link-club-select"'));
+  assert.ok(lobbyHtml.includes('id="wr-linked-club-watchlist"'));
+  assert.ok(lobbyHtml.includes('id="wr-open-linked-club"'));
+  assert.ok(lobbyHtml.includes('src="scripts/watch.js"'));
+  assert.ok(lobbyHtml.includes('src="scripts/watch-room-playback.js"'));
+  assert.ok(lobby.includes('new URL("watch-rooms.html", window.location.href)'));
+  assert.ok(lobby.includes("function setRoomView("));
+  assert.ok(lobby.includes('event.key === "ArrowRight"'));
+  assert.ok(lobby.includes('event.key === "ArrowLeft"'));
+  assert.ok(lobby.includes('event.key === "Home"'));
+  assert.ok(lobby.includes('event.key === "End"'));
+  assert.ok(lobby.includes("setRoomView(roomViewButtons[next].dataset.roomView)"));
+  assert.ok(lobbyHtml.includes('role="log" aria-live="polite"'));
+  assert.ok(lobby.includes("function renderCinemaStage()"));
+  assert.ok(lobby.includes("function subscribeClubWatchlist(clubId)"));
+  assert.ok(lobby.includes("linkedClubId: form.elements.linkedClubId.value || null"));
+  assert.ok(lobby.includes('vivid:cinema-clubs-updated'));
+  assert.ok(lobby.includes('vivid:open-linked-club'));
+  assert.ok(rooms.includes('vivid:open-linked-club'));
+  assert.ok(lobby.includes("function subscribeRoomRealtime(roomId)"));
+  assert.ok(lobby.includes('onSnapshot(queueRef'));
+  assert.ok(lobby.includes('onSnapshot(chatRef'));
+  assert.ok(lobby.includes('onSnapshot(presenceRef'));
+  assert.ok(lobby.includes("const wasAtBottom = log.scrollHeight - log.scrollTop - log.clientHeight < 48"));
+  assert.ok(lobby.includes('button.disabled = room.role !== "host" && room.allowGuestChat === false'));
+  assert.ok(lobby.includes("result.data?.voiceEvicted === false"));
+  assert.ok(lobby.includes("heartbeat = setInterval(ping, 30000)"));
+  assert.ok(!lobby.includes("setInterval(refreshLobby, 5000)"), "room activity should update from realtime subscriptions, not five-second polling");
+  assert.ok(lobby.includes('byId("wr-cinema-open")?.addEventListener("click"'));
+  assert.ok(!lobby.includes("window.location.assign(url)"), "starting a screening must not reload the page and drop LiveKit voice");
+  assert.ok(lobby.includes("vivid:watch-room-screening-navigate"));
+  assert.ok(lobby.includes("vivid:watch-room-screening-focus"));
+  assert.ok(lobby.includes('loadedScreeningSessionId = new URLSearchParams(window.location.search).get("sessionId")'));
+  assert.ok(lobby.includes('vivid:watch-room-screening-validated'));
   assert.ok(lobby.includes('activeSessionId !== loadedScreeningSessionId'));
-  assert.ok(cinemaHtml.includes('id="watch-content"'));
-  assert.ok(cinemaHtml.includes('id="wr-voice-call"'));
-  assert.ok(cinemaHtml.includes('src="scripts/watch-room-cinema.js"'));
-  assert.ok(cinemaHtml.includes('src="scripts/watch-room-playback.js"'));
-  assert.ok(cinema.includes('call("getWatchRoomLobbySnapshot")'));
-  assert.ok(cinema.includes('call("getWatchRoomPlaybackSnapshot")'));
-  assert.ok(cinema.includes('vivid:watch-room-open'));
+  assert.ok(watchPage.includes('route.params.get("roomMode") === "1"'));
+  assert.ok(watchPage.includes('document.addEventListener("vivid:watch-room-screening-navigate"'));
+  assert.ok(watchPage.includes("let roomOpenPlayerWindow = null"));
+  assert.ok(watchPage.includes("roomOpenPlayerWindow = openPlayerWindow"));
+  assert.ok(watchPage.includes('document.addEventListener("vivid:watch-room-closing"'));
+  assert.ok(playback.includes('document.addEventListener("vivid:watch-room-closing"'));
+  assert.ok(lobby.includes("function handleRoomAccessLost("));
+  assert.ok(watchPage.includes("route.params = params"));
+  assert.ok(playback.includes('document.addEventListener("vivid:watch-room-screening-navigate"'));
+  assert.ok(playback.includes("playbackSessionId = requestedSessionId"));
+  assert.ok(playback.includes("playbackRevision = 0;"));
+  assert.ok(watchPage.includes('overlay.classList.add("is-minimized")'));
+  assert.ok(watchPage.includes('restorePlayer.addEventListener("click", openPlayerWindow)'));
+  assert.ok(watchPage.includes("const restoringMiniPlayer = overlay.classList.contains(\"is-minimized\") && playerHasOpened"));
+  assert.ok(watchPage.includes("if (restoringMiniPlayer)"));
+  assert.ok(watchPage.includes('vivid:watch-room-screening-validated'));
+  assert.ok(watchPage.includes("watchRoomScreeningValidated = true"));
+  assert.ok(watchPage.includes("watchRoomScreeningValidated) return"));
+  assert.ok(watchPage.includes('secondaryRoot.classList.remove("is-minimized")'));
+  assert.ok(playback.includes('document.body.dataset.vividPage === "watch-rooms" && !params.get("id")'));
+  assert.ok(playback.includes('existingRoomId = isLobbyOnlyRoute ? "" : params.get("roomId")'));
+  assert.ok(playback.includes('getWatchRoomPlaybackSnapshot'));
   assert.ok(voice.includes("getWatchRoomVoiceToken"));
   assert.ok(voice.includes("setMicrophoneEnabled"));
-  assert.ok(playback.includes("joinedPlayback = memberRole === \"guest\""));
-  assert.ok(playback.includes("joinButton.hidden = true"));
-  assert.ok(playback.includes('state.status === "playing" && !roomPlayerLoadRequested'));
-  assert.ok(watchPage.includes('route.params.get("roomMode") === "1"'));
-  assert.ok(cinemaStyles.includes(".vivid-cinema-voice"));
-  assert.ok(cinemaStyles.includes(".vivid-cinema-stage"));
-  assert.ok(cinemaStyles.includes("body.vivid-watch-room-mode #player-overlay"));
-  assert.ok(cinemaStyles.includes("body.vivid-watch-room-mode #vivid-tflix-player"));
-  assert.ok(cinemaStyles.includes("env(safe-area-inset-bottom)"));
+  assert.ok(voice.includes("VOICE_INTENT_KEY"));
+  assert.ok(voice.includes("sessionStorage.setItem(VOICE_INTENT_KEY"));
+  assert.ok(voice.includes("persistVoiceIntent(connectedRoomId, isMuted)"));
+  assert.ok(lobby.includes("stop(false)"), "page lifecycle cleanup must not be treated as an intentional room leave");
+  assert.ok(voice.includes('joinVoice({ restore: true, muted: intent.muted === true })'));
+  assert.ok(voice.includes("clearVoiceIntent(connectedRoomId || activeRoom?.roomId)"));
+  assert.ok(cinemaStyles.includes("aspect-ratio:16/9"));
+  assert.ok(cinemaStyles.includes("#player-overlay.is-minimized"));
+  const roomStyles = await readFile(new URL("../styles/vivid-watch-rooms.css", import.meta.url), "utf8");
+  assert.ok(roomStyles.includes(".vivid-wr-room-layout"));
+  assert.ok(roomStyles.includes(".vivid-wr-room-tabs"));
+  assert.ok(roomStyles.includes(".vivid-wr-linked-club-shelf"));
+  assert.ok(roomStyles.includes(".vivid-wr-club-link-setting"));
+  assert.ok(roomStyles.includes("overflow-y:auto!important"));
+  assert.ok(roomStyles.includes("#player-overlay.is-minimized{bottom:calc(112px"));
+  assert.ok(roomStyles.includes(".vivid-wr-voice-panel{position:sticky"));
+  assert.ok(!roomStyles.includes("body.vivid-wr-screening-open"), "obsolete full-screen lobby overlay styles should be removed");
+  assert.ok(cinemaStyles.includes("#player-overlay[hidden]"));
+  assert.ok(cinemaStyles.includes("#vivid-tflix-player.is-minimized"));
+  assert.ok(cinemaStyles.includes(".vivid-tflix-room-minimize"));
   assert.ok(rooms.includes('requestedParams.get("roomId")'));
   assert.ok(rooms.includes('document.dispatchEvent(new CustomEvent("vivid:watch-room-open"'));
 });

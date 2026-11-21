@@ -143,3 +143,21 @@ test("Cloudflare Watch Rooms logs safe operation-level rejection details and pre
   assert.ok(route.includes('console.warn("Vivid Watch Rooms rejected request origin:"'));
   assert.ok(rooms.includes('if (code.includes("permission-denied")) return error?.message ||'));
 });
+
+
+test("authoritative playback writes are screening-scoped, revision-safe and realtime-readable", async () => {
+  const route = await readFile(new URL("../cloudflare/functions/api/watch-rooms.js", import.meta.url), "utf8");
+  const rules = await readFile(new URL("../firestore.rules", import.meta.url), "utf8");
+  const start = route.indexOf("async function publishWatchRoomPlayback(");
+  const end = route.indexOf("\nasync function ", start + 10);
+  const publish = route.slice(start, end);
+  assert.ok(start >= 0 && end > start);
+  assert.match(publish, /expectedRevision/);
+  assert.match(publish, /stale-revision/);
+  assert.match(publish, /activeScreening\.contentId/);
+  assert.match(publish, /activeScreening\.mediaType/);
+  assert.match(publish, /schemaVersion: 1/);
+  assert.match(rules, /match \/playback\/{stateId}/);
+  assert.match(rules, /allow get, list: if isRoomMember\(roomId\)/);
+  assert.match(rules, /allow create, update, delete: if false/);
+});

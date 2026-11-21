@@ -3,6 +3,7 @@ import { cert, getApp, getApps, initializeApp } from "firebase-admin/app";
 import { getAuth } from "firebase-admin/auth";
 import { getAppCheck } from "firebase-admin/app-check";
 import { getFirestore, Timestamp } from "firebase-admin/firestore";
+import { shouldThrottlePlaybackWrite } from "../scripts/playback/watch-room-sync.js";
 
 const serviceAccountRaw = process.env.FIREBASE_SERVICE_ACCOUNT_JSON;
 if (!serviceAccountRaw) throw new Error("FIREBASE_SERVICE_ACCOUNT_JSON is not configured for the Vivid API.");
@@ -84,6 +85,7 @@ async function createWatchRoom(request) {
     transaction.create(roomRef, {
       schemaVersion: 1, name, filmTitle, hostUid: auth.uid,
       visibility: "invite", status: "open", memberCount: 1, queueCount: 0, chatCount: 0,
+      linkedClubId: null, linkedClubName: null,
       createdAt: now, updatedAt: now, expiresAt
     });
     transaction.create(memberRef, member);
@@ -417,7 +419,7 @@ async function getWatchRoomLobbySnapshot(request) {
     return { id: document.id, ...data, createdAt: millis(data.createdAt) };
   });
   return {
-    room: { roomId, name: room.name || "Private screening", status: room.status, memberCount: members.length, selectedPlayerId: room.selectedPlayerId || "player1", selectedProviderId: room.selectedProviderId || "vidapi", selectionUpdatedAt: millis(room.selectionUpdatedAt), activeScreening: room.activeScreening || null, allowGuestQueue: room.allowGuestQueue !== false, allowGuestChat: room.allowGuestChat !== false, allowGuestVoting: room.allowGuestVoting !== false, allowGuestPlayerSelection: room.allowGuestPlayerSelection === true, allowGuestQueueManagement: room.allowGuestQueueManagement === true, allowGuestPlaybackControl: room.allowGuestPlaybackControl === true },
+    room: { roomId, name: room.name || "Private screening", status: room.status, memberCount: members.length, selectedPlayerId: room.selectedPlayerId || "player1", selectedProviderId: room.selectedProviderId || "vidapi", selectionUpdatedAt: millis(room.selectionUpdatedAt), activeScreening: room.activeScreening || null, linkedClubId: room.linkedClubId || null, linkedClubName: room.linkedClubName || null, allowGuestQueue: room.allowGuestQueue !== false, allowGuestChat: room.allowGuestChat !== false, allowGuestVoting: room.allowGuestVoting !== false, allowGuestPlayerSelection: room.allowGuestPlayerSelection === true, allowGuestQueueManagement: room.allowGuestQueueManagement === true, allowGuestPlaybackControl: room.allowGuestPlaybackControl === true },
     members, onlineCount: members.filter(member => member.isOnline).length, queue, chat,
     serverTime: now
   };
@@ -507,6 +509,17 @@ async function startWatchRoomScreening(request) {
       throw new HttpsError("not-found", "That queue pick is no longer available.");
     }
     const item = itemSnapshot.data();
+    const linkedClubId = room.linkedClubId ? validId(room.linkedClubId, "linked Cinema Club ID") : "";
+    let clubScreeningRef = null;
+    if (linkedClubId) {
+      const clubRef = db.collection("cinemaClubs").doc(linkedClubId);
+      const clubMemberRef = clubRef.collection("members").doc(uid);
+      const [clubSnapshot, clubMemberSnapshot] = await Promise.all([tx.get(clubRef), tx.get(clubMemberRef)]);
+      if (!clubSnapshot.exists || clubSnapshot.data().status !== "active" || !clubMemberSnapshot.exists) {
+        throw new HttpsError("failed-precondition", "The linked Cinema Club is unavailable or your membership has changed. Unlink it in room settings to continue.");
+      }
+      clubScreeningRef = clubRef.collection("screenings").doc(sessionId);
+    }
     const contentId = String(item.contentId || "");
     if (!/^\d{1,12}$/.test(contentId) || !["movie", "tv"].includes(item.mediaType)) {
       throw new HttpsError("failed-precondition", "This pick is missing a valid catalogue title. Remove it and add it again from search.");
@@ -527,8 +540,20 @@ async function startWatchRoomScreening(request) {
       posterPath: item.posterPath || "",
       releaseDate: item.releaseDate || "",
       startedBy: uid,
-      startedAt: now
+      startedAt: now,
+      clubId: linkedClubId || null,
+      clubName: linkedClubId ? room.linkedClubName || null : null,
+      clubScreeningId: clubScreeningRef ? clubScreeningRef.id : null
     };
+    if (clubScreeningRef) {
+      tx.create(clubScreeningRef, {
+        contentId, mediaType: item.mediaType, title: screening.title, notes: "",
+        screenedAt: now, recordedBy: uid, sourceRoomId: roomId,
+        sourceRoomName: room.name || "Private screening", sourceSessionId: sessionId,
+        reviewCount: 0, ratingTotal: 0, averageRating: 0, discussionCount: 0,
+        createdAt: now
+      });
+    }
     tx.update(itemRef, { status: "screening", screeningAt: now });
     // Playback belongs to a single screening session; never carry a previous
     // title's playing state into the newly started session.
@@ -656,10 +681,13 @@ async function updateWatchRoomSettings(request) {
   const roomId = validId(request.data?.roomId, "room ID");
   const patch = request.data?.settings;
   if (!patch || typeof patch !== "object" || Array.isArray(patch)) throw new HttpsError("invalid-argument", "Room settings are required.");
-  const allowed = ["name", "allowGuestQueue", "allowGuestChat", "allowGuestVoting", "allowGuestPlayerSelection", "allowGuestQueueManagement", "allowGuestPlaybackControl"];
+  const allowed = ["name", "allowGuestQueue", "allowGuestChat", "allowGuestVoting", "allowGuestPlayerSelection", "allowGuestQueueManagement", "allowGuestPlaybackControl", "linkedClubId"];
   if (Object.keys(patch).some(key => !allowed.includes(key))) throw new HttpsError("invalid-argument", "One or more room settings are not supported.");
   const update = {};
   if (Object.hasOwn(patch, "name")) update.name = cleanText(patch.name, "Room name", 80);
+  if (Object.hasOwn(patch, "linkedClubId")) {
+    update.linkedClubId = patch.linkedClubId === null || patch.linkedClubId === "" ? null : validId(patch.linkedClubId, "linked Cinema Club ID");
+  }
   for (const key of ["allowGuestQueue", "allowGuestChat", "allowGuestVoting", "allowGuestPlayerSelection", "allowGuestQueueManagement", "allowGuestPlaybackControl"]) {
     if (Object.hasOwn(patch, key)) {
       if (typeof patch[key] !== "boolean") throw new HttpsError("invalid-argument", key + " must be true or false.");
@@ -671,6 +699,21 @@ async function updateWatchRoomSettings(request) {
   await db.runTransaction(async tx => {
     const { room, member } = await requireRoomMemberInTransaction(tx, roomId, uid);
     if (room.hostUid !== uid || member.role !== "host") throw new HttpsError("permission-denied", "Only the room host can change these settings.");
+    if (Object.hasOwn(update, "linkedClubId")) {
+      if (update.linkedClubId) {
+        const clubRef = db.collection("cinemaClubs").doc(update.linkedClubId);
+        const [clubSnapshot, clubMemberSnapshot] = await Promise.all([
+          tx.get(clubRef),
+          tx.get(clubRef.collection("members").doc(uid))
+        ]);
+        if (!clubSnapshot.exists || clubSnapshot.data().status !== "active" || !clubMemberSnapshot.exists) {
+          throw new HttpsError("permission-denied", "Join an active Cinema Club before linking it to this room.");
+        }
+        update.linkedClubName = cleanText(clubSnapshot.data().name || "Cinema Club", "Cinema Club name", 48);
+      } else {
+        update.linkedClubName = null;
+      }
+    }
     const members = await tx.get(roomRef.collection("members"));
     const updatedAt = Timestamp.now();
     tx.update(roomRef, { ...update, updatedAt });
@@ -774,6 +817,14 @@ async function publishWatchRoomPlayback(request) {
   const season = mediaType === "tv" ? Number(request.data?.season) : null;
   const episode = mediaType === "tv" ? Number(request.data?.episode) : null;
   if (mediaType === "tv" && (!Number.isInteger(season) || season < 1 || season > 500 || !Number.isInteger(episode) || episode < 1 || episode > 5000)) throw new HttpsError("invalid-argument", "A valid season and episode are required.");
+  const expectedRevisionInput = request.data?.expectedRevision;
+  if (expectedRevisionInput == null) {
+    throw new HttpsError("invalid-argument", "A playback revision is required. Refresh the screening and try again.");
+  }
+  const expectedRevision = Number(expectedRevisionInput);
+  if (!Number.isSafeInteger(expectedRevision) || expectedRevision < 0) {
+    throw new HttpsError("invalid-argument", "Playback revision is invalid. Reload the screening and try again.");
+  }
   const roomRef = db.collection("rooms").doc(roomId);
   const stateRef = roomRef.collection("playback").doc("current");
   const now = Timestamp.now();
@@ -786,17 +837,33 @@ async function publishWatchRoomPlayback(request) {
     if (!roomData || roomData.status !== "open" || !Number.isFinite(roomData.expiresAt?.toMillis?.()) || roomData.expiresAt.toMillis() <= now.toMillis() || !memberData || !((roomData.hostUid === uid && memberData.role === "host") || (memberData.role === "guest" && roomData.allowGuestPlaybackControl === true))) {
       throw new HttpsError("permission-denied", "Only the host or a guest explicitly allowed to control playback can publish playback.");
     }
-    if (String(roomData.activeScreening?.sessionId || "") !== sessionId) {
+    const activeScreening = roomData.activeScreening || {};
+    if (String(activeScreening.sessionId || "") !== sessionId) {
       throw new HttpsError("failed-precondition", "This playback update belongs to an old or inactive screening.");
+    }
+    if (String(activeScreening.contentId || "") !== contentId || activeScreening.mediaType !== mediaType ||
+      (mediaType === "tv" && (Number(activeScreening.season) !== season || Number(activeScreening.episode) !== episode))) {
+      throw new HttpsError("failed-precondition", "Playback must match the exact title and episode selected for this screening.");
     }
     const previous = current.exists ? current.data() : null;
     if (previous && (previous.contentId !== contentId || previous.mediaType !== mediaType || (mediaType === "tv" && (previous.season !== season || previous.episode !== episode)))) throw new HttpsError("failed-precondition", "This room is already synchronized to a different title or episode.");
-    if (previous?.lastEventAt?.toMillis && now.toMillis() - previous.lastEventAt.toMillis() < 1800 && status === "playing") return { accepted: false, reason: "rate-limited" };
-    const revision = Number(previous?.revision || 0) + 1;
-    tx.set(stateRef, { sessionId, provider, contentId, mediaType, season, episode, status, position, duration, hostUid: roomData.hostUid, controllerUid: uid, revision, updatedAt: now, lastEventAt: now });
-    return { accepted: true, revision };
+    const currentRevision = Number(previous?.revision || 0);
+    if (expectedRevision != null && expectedRevision !== currentRevision) {
+      return { accepted: false, reason: "stale-revision", revision: currentRevision };
+    }
+    if (shouldThrottlePlaybackWrite(previous?.status, status, previous?.lastEventAt?.toMillis?.() || 0, now.toMillis())) {
+      return { accepted: false, reason: "rate-limited", revision: currentRevision };
+    }
+    const revision = currentRevision + 1;
+    tx.set(stateRef, {
+      schemaVersion: 1, sessionId, provider, contentId, mediaType, season, episode,
+      status, position, duration, hostUid: roomData.hostUid, controllerUid: uid,
+      revision, updatedAt: now, lastEventAt: now
+    });
+    return { accepted: true, revision, serverTime: now.toMillis() };
   });
 }
+
 
 const MAX_WATCHLIST_ITEMS = 100;
 const MAX_DISCUSSION_MESSAGES = 200;

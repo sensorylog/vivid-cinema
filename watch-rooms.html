@@ -17,6 +17,8 @@
   <link rel="stylesheet" href="styles/vivid-pwa.css">
   <link rel="stylesheet" href="styles/vivid-liquid-glass.css?v=lg4">
   <link rel="stylesheet" href="styles/vivid-watch-rooms.css">
+  <link rel="stylesheet" href="styles/vivid-watch.css">
+  <link rel="stylesheet" href="styles/vivid-watch-room-cinema.css">
 </head>
 <body data-vivid-page="watch-rooms" class="vivid-watch-rooms-page vivid-atmosphere">
   <div class="vivid-watch-rooms-app">
@@ -105,25 +107,89 @@
             <div><span class="vivid-wr-section-kicker">THE SCREENING ROOM</span><h2 id="wr-lobby-title">Room lobby</h2><p id="wr-lobby-subtitle">Your crew is getting together.</p></div>
             <div class="vivid-wr-lobby-heading-actions"><button class="vivid-wr-button vivid-wr-button--quiet" id="wr-leave-room" type="button" hidden>Leave room</button><button class="vivid-wr-button vivid-wr-button--quiet" id="wr-lobby-close" type="button">Back to rooms</button></div>
           </div>
-          <p class="vivid-wr-lobby-explainer">Plan the film together here. The queue helps everyone choose; it does not stream the movie. Open a title to check its available viewing options.</p>
-          <div class="vivid-wr-lobby-grid">
-            <section class="vivid-wr-lobby-panel"><h3><i class="bi bi-people" aria-hidden="true"></i> In the room <span class="vivid-wr-member-count"><strong id="wr-lobby-presence-count">0</strong><small id="wr-lobby-online-count">0 online</small></span></h3><ul id="wr-lobby-presence" class="vivid-wr-lobby-list"></ul></section>
-            <section class="vivid-wr-lobby-panel"><h3><i class="bi bi-list-ol" aria-hidden="true"></i> Up next <span class="vivid-wr-queue-hint">Search and vote</span></h3><form id="wr-queue-form" class="vivid-wr-queue-form"><div class="vivid-wr-queue-search"><input name="title" maxlength="180" autocomplete="off" placeholder="Search films or TV series…" aria-label="Search films or TV series" required><input type="hidden" name="contentId"><input type="hidden" name="mediaType"><input type="hidden" name="posterPath"><input type="hidden" name="releaseDate"><div id="wr-queue-search-results" class="vivid-wr-title-results" role="listbox" aria-label="Film search results" hidden></div></div><button class="vivid-wr-button vivid-wr-button--primary" type="submit">Add pick</button></form><p id="wr-queue-selection" class="vivid-wr-queue-selection" hidden></p><ol id="wr-lobby-queue" class="vivid-wr-lobby-list"></ol></section>
-            <section class="vivid-wr-lobby-panel vivid-wr-lobby-chat"><h3><i class="bi bi-chat-dots" aria-hidden="true"></i> Room chat</h3><div id="wr-lobby-chat" class="vivid-wr-chat-log" aria-live="polite"></div><form id="wr-chat-form" class="vivid-wr-inline-form"><input name="text" maxlength="500" placeholder="Say something to the room…" required><button class="vivid-wr-button vivid-wr-button--primary" type="submit">Send</button></form></section>
+          <div class="vivid-wr-room-layout">
+            <section class="vivid-wr-cinema-stage" id="wr-cinema-stage" aria-label="Shared cinema">
+              <div class="vivid-wr-cinema-stage__glow" aria-hidden="true"></div>
+              <div class="vivid-wr-cinema-stage__content">
+                <span class="vivid-wr-cinema-stage__eyebrow" id="wr-cinema-status">PRIVATE CINEMA · ROOM READY</span>
+                <h3 id="wr-cinema-title">Your screen is ready.</h3>
+                <p id="wr-cinema-subtitle">Choose a film together, then start the screening when everyone is ready.</p>
+                <div class="vivid-wr-cinema-stage__actions">
+                  <button class="vivid-wr-button vivid-wr-button--primary" id="wr-cinema-open" type="button" hidden><i class="bi bi-play-fill" aria-hidden="true"></i> Return to screening</button>
+                  <button class="vivid-wr-button vivid-wr-button--quiet" id="wr-open-linked-club" type="button" hidden>Open linked club</button>
+                </div>
+              </div>
+              <span class="vivid-wr-cinema-stage__wordmark">VIVID CINEMA <span>·</span> PRIVATE SCREENING</span>
+            </section>
+            <aside class="vivid-wr-room-sidebar" aria-label="Room activity">
+              <nav class="vivid-wr-room-tabs" role="tablist" aria-label="Room panels">
+                <button class="vivid-wr-room-tab is-active" id="wr-room-tab-queue" type="button" role="tab" aria-selected="true" aria-controls="wr-room-view-queue" data-room-view="queue">Queue</button>
+                <button class="vivid-wr-room-tab" id="wr-room-tab-chat" type="button" role="tab" aria-selected="false" aria-controls="wr-room-view-chat" data-room-view="chat">Chat</button>
+                <button class="vivid-wr-room-tab" id="wr-room-tab-members" type="button" role="tab" aria-selected="false" aria-controls="wr-room-view-members" data-room-view="members">Members <span id="wr-lobby-presence-count">0</span></button>
+              </nav>
+              <section class="vivid-wr-room-view" id="wr-room-view-queue" role="tabpanel" aria-labelledby="wr-room-tab-queue" tabindex="0" data-room-view-panel="queue">
+                <section class="vivid-wr-lobby-panel">
+                  <div class="vivid-wr-room-panel-heading"><div><span class="vivid-wr-section-kicker">THE SHARED LIST</span><h3>Up next</h3></div><span class="vivid-wr-queue-hint">Search · suggest · vote</span></div>
+                  <form id="wr-queue-form" class="vivid-wr-queue-form"><div class="vivid-wr-queue-search"><input name="title" maxlength="180" autocomplete="off" placeholder="Find a film or series…" aria-label="Search films or TV series" required><input type="hidden" name="contentId"><input type="hidden" name="mediaType"><input type="hidden" name="posterPath"><input type="hidden" name="releaseDate"><div id="wr-queue-search-results" class="vivid-wr-title-results" role="listbox" aria-label="Film search results" hidden></div></div><button class="vivid-wr-button vivid-wr-button--primary" type="submit">Add</button></form>
+                  <p id="wr-queue-selection" class="vivid-wr-queue-selection" hidden></p>
+                  <ol id="wr-lobby-queue" class="vivid-wr-lobby-list" aria-live="polite" aria-relevant="additions removals text"></ol>
+                  <section class="vivid-wr-linked-club-shelf" id="wr-linked-club-shelf" hidden>
+                    <div class="vivid-wr-room-panel-heading"><div><span class="vivid-wr-section-kicker">FROM YOUR CLUB</span><h3 id="wr-linked-club-title">Club watchlist</h3></div></div>
+                    <p id="wr-linked-club-note" class="vivid-wr-queue-hint">Shared picks from your linked Cinema Club.</p>
+                    <ul id="wr-linked-club-watchlist" class="vivid-wr-lobby-list" aria-live="polite" aria-relevant="additions removals text"></ul>
+                  </section>
+                </section>
+              </section>
+              <section class="vivid-wr-room-view" id="wr-room-view-chat" role="tabpanel" aria-labelledby="wr-room-tab-chat" tabindex="0" data-room-view-panel="chat" hidden>
+                <section class="vivid-wr-lobby-panel vivid-wr-lobby-chat">
+                  <div class="vivid-wr-room-panel-heading"><div><span class="vivid-wr-section-kicker">THE CONVERSATION</span><h3>Room chat</h3></div></div>
+                  <div id="wr-lobby-chat" class="vivid-wr-chat-log" role="log" aria-live="polite" aria-relevant="additions text" aria-atomic="false"></div>
+                  <form id="wr-chat-form" class="vivid-wr-inline-form"><input name="text" maxlength="500" placeholder="Message your crew…" required><button class="vivid-wr-button vivid-wr-button--primary" type="submit">Send</button></form>
+                </section>
+              </section>
+              <section class="vivid-wr-room-view" id="wr-room-view-members" role="tabpanel" aria-labelledby="wr-room-tab-members" tabindex="0" data-room-view-panel="members" hidden>
+                <section class="vivid-wr-lobby-panel">
+                  <div class="vivid-wr-room-panel-heading"><div><span class="vivid-wr-section-kicker">YOUR CREW</span><h3>In this room</h3></div><span id="wr-lobby-online-count">0 online</span></div>
+                  <ul id="wr-lobby-presence" class="vivid-wr-lobby-list" aria-live="polite" aria-relevant="additions removals text"></ul>
+                </section>
+                <section class="vivid-wr-lobby-panel vivid-wr-host-controls" id="wr-host-controls" hidden>
+                  <details class="vivid-wr-host-details">
+                    <summary><i class="bi bi-shield-check" aria-hidden="true"></i> Host controls & permissions</summary>
+                    <div class="vivid-wr-host-details__body">
+                      <button class="vivid-wr-button vivid-wr-button--quiet" id="wr-close-room" type="button">End this room</button>
+                      <button class="vivid-wr-button vivid-wr-button--danger" id="wr-delete-room" type="button">Delete room permanently</button>
+                      <form id="wr-room-settings-form" class="vivid-wr-inline-form">
+                        <input name="name" maxlength="80" placeholder="Room name">
+                        <label class="vivid-wr-club-link-setting">Link a Cinema Club
+                          <select name="linkedClubId" id="wr-link-club-select"><option value="">No linked club</option></select>
+                          <small>New screenings started here will be added to the club's history and After-Credits reviews.</small>
+                        </label>
+                        <label><input type="checkbox" name="allowGuestQueue" checked> Guests can suggest titles</label>
+                        <label><input type="checkbox" name="allowGuestVoting" checked> Guests can vote on picks</label>
+                        <label><input type="checkbox" name="allowGuestQueueManagement"> Guests can remove any queued pick</label>
+                        <label><input type="checkbox" name="allowGuestChat" checked> Guests can chat</label>
+                        <label><input type="checkbox" name="allowGuestPlayerSelection"> Guests can change the shared player/server</label>
+                        <label><input type="checkbox" name="allowGuestPlaybackControl"> Guests can control playback (play, pause and seek)</label>
+                        <label><input type="checkbox" name="allowGuestVoice" checked> Guests can join the voice call</label>
+                        <button class="vivid-wr-button vivid-wr-button--quiet" type="submit">Save settings</button>
+                      </form>
+                    </div>
+                  </details>
+                </section>
+              </section>
+            </aside>
           </div>
           <section class="vivid-wr-voice-panel" id="wr-voice-call" hidden aria-labelledby="wr-voice-title">
             <div class="vivid-wr-voice-heading">
-              <div><span class="vivid-wr-section-kicker">LIVE ROOM AUDIO</span><h3 id="wr-voice-title">Voice call</h3><p>Talk with your crew while the screening stays open below.</p></div>
+              <div class="vivid-wr-voice-identity"><span class="vivid-wr-voice-live-dot" aria-hidden="true"></span><div><span class="vivid-wr-section-kicker">LIVE ROOM AUDIO</span><h3 id="wr-voice-title">Voice channel</h3><p id="wr-voice-status" role="status" aria-live="polite">Voice is separate from movie playback.</p></div></div>
               <div class="vivid-wr-voice-actions">
                 <button class="vivid-wr-button vivid-wr-button--primary" id="wr-voice-join" type="button">Join voice</button>
-                <button class="vivid-wr-button vivid-wr-button--quiet" id="wr-voice-mute" type="button" hidden>Mute microphone</button>
-                <button class="vivid-wr-button vivid-wr-button--quiet" id="wr-voice-leave" type="button" hidden>Leave call</button>
+                <button class="vivid-wr-button vivid-wr-button--quiet" id="wr-voice-mute" type="button" hidden>Mute</button>
+                <button class="vivid-wr-button vivid-wr-button--quiet" id="wr-voice-leave" type="button" hidden>Leave</button>
               </div>
             </div>
-            <p id="wr-voice-status" role="status" aria-live="polite">Voice is separate from movie playback.</p>
             <ul id="wr-voice-participants" class="vivid-wr-voice-roster"></ul>
           </section>
-          <section class="vivid-wr-lobby-panel vivid-wr-host-controls" id="wr-host-controls" hidden><h3><i class="bi bi-shield-check" aria-hidden="true"></i> Host controls</h3><button class="vivid-wr-button vivid-wr-button--quiet" id="wr-close-room" type="button">End this room</button><button class="vivid-wr-button vivid-wr-button--danger" id="wr-delete-room" type="button">Delete room permanently</button><form id="wr-room-settings-form" class="vivid-wr-inline-form"><input name="name" maxlength="80" placeholder="Room name"><label><input type="checkbox" name="allowGuestQueue" checked> Guests can suggest titles</label><label><input type="checkbox" name="allowGuestVoting" checked> Guests can vote on picks</label><label><input type="checkbox" name="allowGuestQueueManagement"> Guests can remove any queued pick</label><label><input type="checkbox" name="allowGuestChat" checked> Guests can chat</label><label><input type="checkbox" name="allowGuestPlayerSelection"> Guests can change the shared player/server</label><label><input type="checkbox" name="allowGuestPlaybackControl"> Guests can control playback (play, pause and seek)</label><label><input type="checkbox" name="allowGuestVoice" checked> Guests can join the voice call</label><button class="vivid-wr-button vivid-wr-button--quiet" type="submit">Save settings</button></form></section>
         </section>
 
         <section class="vivid-wr-tab-panel" id="wr-panel-clubs" role="tabpanel" aria-labelledby="wr-tab-clubs" data-wr-panel="clubs" hidden>
@@ -156,7 +222,8 @@
                 </div>
                 <div class="vivid-wr-club-feature">
                   <div><span class="vivid-wr-section-kicker">THE FILMS YOU SHARED</span><h4>Screening history</h4><p>Keep a record of club movie nights and the conversation after.</p></div>
-                  <form id="wr-club-screening-form" class="vivid-wr-inline-form">
+                  <p class="vivid-wr-lobby-explainer">Screenings started in a room linked to this club are added automatically. Use this form for movie nights held outside a Watch Room.</p>
+            <form id="wr-club-screening-form" class="vivid-wr-inline-form">
                     <label class="vivid-wr-screening-search-label" for="wr-screening-title-search">Find the film or series</label>
                     <input id="wr-screening-title-search" name="title" maxlength="180" placeholder="Search by title…" autocomplete="off" aria-controls="wr-screening-title-results" aria-expanded="false" required>
                     <input id="wr-screening-content-id" name="contentId" type="hidden" required>
@@ -187,6 +254,7 @@
         <p class="vivid-wr-stage-note" id="wr-stage-note" role="status">Your rooms and clubs are private to your Vivid account. Watch Rooms close after 24 hours; Cinema Clubs are persistent.</p>
       </div>
     </main>
+    <section id="wr-screening-player-host" class="wr-screening-player-host" hidden aria-label="Active shared screening"><div id="watch-content"></div></section>
   </div>
 
   <dialog class="vivid-wr-dialog" id="wr-create-room-dialog" aria-labelledby="wr-create-room-title">
@@ -231,6 +299,8 @@
   <script type="module" src="scripts/app-shell.js"></script>
   <script type="module" src="scripts/watch-rooms.js"></script>
   <script type="module" src="scripts/watch-room-lobby.js"></script>
+  <script type="module" src="scripts/watch.js"></script>
+  <script type="module" src="scripts/watch-room-playback.js"></script>
   <script type="module" src="scripts/watch-room-voice.js"></script>
   <script type="module" src="scripts/watch-room-clubs.js"></script>
   <script type="module" src="scripts/i18n.js"></script>

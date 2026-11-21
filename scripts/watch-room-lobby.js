@@ -1,17 +1,23 @@
-import { auth } from "./firebase.js";
+import { auth, db } from "./firebase.js";
+import { collection, doc, limit, onSnapshot, orderBy, query } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 import { callWatchRoomApi } from "./watch-room-api.js";
 import { tmdbApi } from "./tmdb.js";
 
 const byId = id => document.getElementById(id);
 const call = callWatchRoomApi;
 let room = null, lastRoom = null, stops = [], heartbeat = null, presenceRefresh = null;
+let clubWatchlistUnsubscribe = null, linkedClubWatchlistId = "";
 let memberList = [], selectedPick = null, searchTimer = null, searchGeneration = 0;
-let loadedScreeningSessionId = "", dismissedScreeningSessionId = "";
+let loadedScreeningSessionId = new URLSearchParams(window.location.search).get("sessionId") || "", dismissedScreeningSessionId = "";
 
-function stop() {
-  if (room) document.dispatchEvent(new CustomEvent("vivid:watch-room-closing", { detail: { roomId: room.roomId } }));
+function stop(notifyVoice = true) {
+  if (notifyVoice && room) document.dispatchEvent(new CustomEvent("vivid:watch-room-closing", { detail: { roomId: room.roomId } }));
   stops.forEach(fn => fn());
   stops = [];
+  if (clubWatchlistUnsubscribe) clubWatchlistUnsubscribe();
+  clubWatchlistUnsubscribe = null;
+  linkedClubWatchlistId = "";
+  if (byId("wr-linked-club-shelf")) byId("wr-linked-club-shelf").hidden = true;
   if (heartbeat) clearInterval(heartbeat);
   if (presenceRefresh) clearInterval(presenceRefresh);
   if (searchTimer) clearTimeout(searchTimer);
@@ -20,6 +26,160 @@ function stop() {
   searchTimer = null;
   room = null;
 }
+function setRoomView(view = "queue") {
+  const selected = ["queue", "chat", "members"].includes(view) ? view : "queue";
+  document.querySelectorAll("[data-room-view]").forEach(button => {
+    const active = button.dataset.roomView === selected;
+    button.classList.toggle("is-active", active);
+    button.setAttribute("aria-selected", String(active));
+    button.tabIndex = active ? 0 : -1;
+  });
+  document.querySelectorAll("[data-room-view-panel]").forEach(panel => {
+    panel.hidden = panel.dataset.roomViewPanel !== selected;
+  });
+}
+const roomViewButtons = [...document.querySelectorAll("[data-room-view]")];
+roomViewButtons.forEach(button => {
+  button.addEventListener("click", () => setRoomView(button.dataset.roomView));
+  button.addEventListener("keydown", event => {
+    const current = roomViewButtons.indexOf(button);
+    let next = current;
+    if (event.key === "ArrowRight") next = (current + 1) % roomViewButtons.length;
+    else if (event.key === "ArrowLeft") next = (current - 1 + roomViewButtons.length) % roomViewButtons.length;
+    else if (event.key === "Home") next = 0;
+    else if (event.key === "End") next = roomViewButtons.length - 1;
+    else return;
+    event.preventDefault();
+    roomViewButtons[next].focus();
+    setRoomView(roomViewButtons[next].dataset.roomView);
+  });
+});
+
+function renderCinemaStage() {
+  const stage = byId("wr-cinema-stage");
+  const status = byId("wr-cinema-status");
+  const title = byId("wr-cinema-title");
+  const subtitle = byId("wr-cinema-subtitle");
+  const open = byId("wr-cinema-open");
+  const openClub = byId("wr-open-linked-club");
+  if (!stage || !status || !title || !subtitle || !open) return;
+  const clubTargetId = room?.activeScreening?.clubId || room?.linkedClubId;
+  const clubMember = (window.vividCinemaClubs || []).some(club => club.clubId === clubTargetId);
+  if (openClub) openClub.hidden = !clubTargetId || !clubMember;
+  const screening = room?.activeScreening;
+  if (!screening?.sessionId || !screening?.contentId) {
+    stage.classList.remove("has-screening");
+    stage.style.removeProperty("--wr-cinema-art");
+    status.textContent = "PRIVATE CINEMA · ROOM READY";
+    title.textContent = "Your screen is ready.";
+    subtitle.textContent = room?.linkedClubName
+      ? "Linked to " + room.linkedClubName + ". Its shared watchlist is available below."
+      : "Choose a film together, then start the screening when everyone is ready.";
+    open.hidden = true;
+    return;
+  }
+  stage.classList.add("has-screening");
+  const mediaLabel = screening.mediaType === "tv"
+    ? "TV series · S" + String(screening.season || 1) + " E" + String(screening.episode || 1)
+    : "Feature film";
+  status.textContent = "NOW SCREENING · " + mediaLabel.toUpperCase();
+  title.textContent = screening.title || "Your shared screening";
+  const screeningClubName = screening.clubId ? (screening.clubName || "your linked Cinema Club") : "";
+  subtitle.textContent = screeningClubName
+    ? "This screening is saved to " + screeningClubName + "'s history, with After-Credits reviews and discussion."
+    : "The room is watching together. You can return to the player without leaving the conversation.";
+  open.hidden = false;
+  open.innerHTML = '<i class="bi bi-play-fill" aria-hidden="true"></i> Return to screening';
+  const posterPath = String(screening.posterPath || "");
+  if (/^\/[A-Za-z0-9/_-]+\.(?:jpg|jpeg|png|webp)$/i.test(posterPath)) {
+    stage.style.setProperty("--wr-cinema-art", 'url("https://image.tmdb.org/t/p/w780' + posterPath + '")');
+  } else {
+    stage.style.removeProperty("--wr-cinema-art");
+  }
+}
+byId("wr-cinema-open")?.addEventListener("click", () => {
+  if (room?.activeScreening) navigateToCinemaScreening(room.activeScreening);
+});
+byId("wr-open-linked-club")?.addEventListener("click", () => {
+  const clubId = room?.activeScreening?.clubId || room?.linkedClubId;
+  if (clubId) document.dispatchEvent(new CustomEvent("vivid:open-linked-club", { detail: { clubId } }));
+});
+
+function renderLinkedClubOptions(clubs = window.vividCinemaClubs || []) {
+  const select = byId("wr-link-club-select");
+  if (!select) return;
+  const selected = room?.linkedClubId || select.value || "";
+  const options = [new Option("No linked club", "")];
+  for (const club of clubs) options.push(new Option(club.name || "Cinema Club", club.clubId));
+  select.replaceChildren(...options);
+  select.value = selected;
+}
+
+function subscribeClubWatchlist(clubId) {
+  const normalizedId = String(clubId || "");
+  if (normalizedId === linkedClubWatchlistId) {
+    if (!normalizedId && byId("wr-linked-club-shelf")) byId("wr-linked-club-shelf").hidden = true;
+    return;
+  }
+  if (clubWatchlistUnsubscribe) clubWatchlistUnsubscribe();
+  clubWatchlistUnsubscribe = null;
+  linkedClubWatchlistId = normalizedId;
+  const shelf = byId("wr-linked-club-shelf");
+  const list = byId("wr-linked-club-watchlist");
+  const title = byId("wr-linked-club-title");
+  const note = byId("wr-linked-club-note");
+  if (!shelf || !list || !title || !note) return;
+  list.replaceChildren();
+  if (!normalizedId) { shelf.hidden = true; return; }
+  shelf.hidden = false;
+  title.textContent = room?.linkedClubName || "Club watchlist";
+  note.textContent = "Loading shared club picks…";
+  const watchlist = query(collection(db, "cinemaClubs", normalizedId, "watchlist"), orderBy("createdAt", "desc"), limit(40));
+  clubWatchlistUnsubscribe = onSnapshot(watchlist, snapshot => {
+    if (!room || room.linkedClubId !== normalizedId) return;
+    list.replaceChildren();
+    title.textContent = room.linkedClubName || "Club watchlist";
+    note.textContent = snapshot.empty ? "Your club watchlist is empty. Add a pick from the Clubs tab." : "Add a club pick straight to this room's queue.";
+    snapshot.forEach(documentSnapshot => {
+      const item = { id: documentSnapshot.id, ...documentSnapshot.data() };
+      const row = document.createElement("li");
+      const copy = document.createElement("div");
+      const name = document.createElement("strong");
+      const meta = document.createElement("small");
+      name.textContent = item.title || "Untitled pick";
+      meta.textContent = (item.mediaType === "tv" ? "TV series" : "Film") + (item.year ? " · " + item.year : "");
+      copy.append(name, meta);
+      const add = document.createElement("button");
+      add.type = "button";
+      add.className = "vivid-wr-button vivid-wr-button--quiet";
+      add.textContent = "Add to queue";
+      add.disabled = room.role !== "host" && room.allowGuestQueue === false;
+      add.addEventListener("click", async () => {
+        add.disabled = true;
+        try {
+          await call("addWatchRoomQueueItem")({ roomId: room.roomId, title: item.title, contentId: item.contentId, mediaType: item.mediaType, posterPath: item.posterPath || "", releaseDate: item.year || "" });
+          add.textContent = "Added";
+        } catch (error) { showError(error); add.disabled = false; }
+      });
+      row.append(copy, add);
+      list.append(row);
+    });
+  }, error => {
+    if (!room || room.linkedClubId !== normalizedId) return;
+    list.replaceChildren();
+    note.textContent = error?.code === "permission-denied"
+      ? "This shelf is private to club members. Join the linked club to add its picks here."
+      : "The club watchlist couldn't load. Try again in a moment.";
+    console.warn("Linked Cinema Club watchlist could not load:", error);
+  });
+}
+
+document.addEventListener("vivid:cinema-clubs-updated", event => {
+  window.vividCinemaClubs = Array.isArray(event.detail?.clubs) ? event.detail.clubs : [];
+  renderLinkedClubOptions(window.vividCinemaClubs);
+  renderCinemaStage();
+});
+
 function setFeedback(message, isError = false) {
   const note = byId("wr-stage-note");
   if (!note) return;
@@ -56,11 +216,15 @@ function renderPresence() {
       const remove = document.createElement("button");
       remove.type = "button";
       remove.textContent = "Remove";
+      remove.setAttribute("aria-label", "Remove " + (member.displayName || "member") + " from this room");
       remove.className = "vivid-wr-button vivid-wr-button--quiet";
       remove.addEventListener("click", async () => {
         remove.disabled = true;
-        try { await call("removeWatchRoomMember")({ roomId: room.roomId, memberUid: member.uid }); }
-        catch (error) { showError(error); remove.disabled = false; }
+        try {
+          const result = await call("removeWatchRoomMember")({ roomId: room.roomId, memberUid: member.uid });
+          if (result.data?.voiceEvicted === false) setFeedback("Member removed, but LiveKit could not confirm the voice disconnection. Check the voice service.", true);
+          else setFeedback("Member removed from the room.");
+        } catch (error) { showError(error); remove.disabled = false; }
       });
       li.append(remove);
     }
@@ -144,6 +308,8 @@ async function searchQueueTitles(value, generation) {
 function renderChat(messages) {
   const log = byId("wr-lobby-chat");
   if (!log) return;
+  const wasAtBottom = log.scrollHeight - log.scrollTop - log.clientHeight < 48;
+  const previousScrollTop = log.scrollTop;
   log.replaceChildren();
   messages.forEach(message => {
     const member = memberList.find(item => item.uid === message.uid);
@@ -156,15 +322,23 @@ function renderChat(messages) {
     ["❤️", "😂", "👏", "😮", "🔥"].forEach(reaction => {
       const button = document.createElement("button");
       button.type = "button";
+      const reacted = Array.isArray(message.reactions?.[reaction]) && message.reactions[reaction].includes(auth.currentUser?.uid);
       button.textContent = reaction + " " + (message.reactions?.[reaction]?.length || 0);
-      button.addEventListener("click", () => call("reactToWatchRoomMessage")({ roomId: room.roomId, messageId: message.id, reaction }).catch(showError));
+      button.disabled = room.role !== "host" && room.allowGuestChat === false;
+      button.setAttribute("aria-pressed", String(Boolean(reacted)));
+      button.setAttribute("aria-label", reaction + " reaction, " + (message.reactions?.[reaction]?.length || 0) + " reactions");
+      button.addEventListener("click", async () => {
+        button.disabled = true;
+        try { await call("reactToWatchRoomMessage")({ roomId: room.roomId, messageId: message.id, reaction }); }
+        catch (error) { showError(error); button.disabled = false; }
+      });
       actions.append(button);
     });
     row.append(text, actions);
     log.append(row);
   });
   if (!messages.length) log.textContent = "No messages yet. Say hello to your crew.";
-  log.scrollTop = log.scrollHeight;
+  log.scrollTop = wasAtBottom ? log.scrollHeight : previousScrollTop;
 }
 
 function applyRoomPermissions() {
@@ -181,7 +355,7 @@ function buildScreeningUrl(screening) {
   const contentId = String(screening?.contentId || "");
   const mediaType = screening?.mediaType === "tv" ? "tv" : "movie";
   if (!/^\d{1,12}$/.test(contentId)) return "";
-  const url = new URL("watch-room-cinema.html", window.location.href);
+  const url = new URL("watch-rooms.html", window.location.href);
   url.searchParams.set("id", contentId);
   url.searchParams.set("type", mediaType);
   url.searchParams.set("roomId", room.roomId);
@@ -198,9 +372,23 @@ function navigateToCinemaScreening(screening) {
   if (!room) return;
   const url = buildScreeningUrl(screening);
   if (!url) { setFeedback("The room screening does not contain a valid Vivid title.", true); return; }
+  const targetUrl = new URL(url, window.location.href);
+  const current = new URL(window.location.href);
+  const sameSession = current.searchParams.get("roomId") === room.roomId &&
+    current.searchParams.get("sessionId") === String(screening.sessionId || "") &&
+    current.searchParams.get("id") === String(screening.contentId || "");
   loadedScreeningSessionId = String(screening.sessionId || "");
   dismissedScreeningSessionId = "";
-  window.location.assign(url);
+  if (sameSession) {
+    document.dispatchEvent(new CustomEvent("vivid:watch-room-screening-focus", { detail: { roomId: room.roomId, screening } }));
+    return;
+  }
+  // Change the room URL in place. Reloading here would tear down LiveKit voice
+  // and the room subscriptions while everyone is moving into the cinema.
+  window.history.replaceState({}, "", targetUrl);
+  document.dispatchEvent(new CustomEvent("vivid:watch-room-screening-navigate", {
+    detail: { roomId: room.roomId, screening }
+  }));
 }
 // The dedicated cinema route returns to this lobby when closed.
 
@@ -268,6 +456,7 @@ function renderQueue(items) {
     vote.textContent = voted ? "Voted ✓" : "Vote";
     vote.className = "vivid-wr-button vivid-wr-button--quiet";
     vote.setAttribute("aria-pressed", String(Boolean(voted)));
+    vote.setAttribute("aria-label", (voted ? "Remove your vote for " : "Vote for ") + item.title);
     vote.disabled = room.role !== "host" && room.allowGuestVoting === false;
     vote.addEventListener("click", () => call("voteWatchRoomQueueItem")({ roomId: room.roomId, itemId: item.id }).catch(showError));
     actions.append(vote);
@@ -280,6 +469,8 @@ function renderQueue(items) {
         start.disabled = true;
         try {
           const response = await call("startWatchRoomScreening")({ roomId: room.roomId, itemId: item.id });
+          room.activeScreening = response.data?.screening || room.activeScreening;
+          renderCinemaStage();
           const url = buildScreeningUrl(response.data?.screening);
           if (!url) throw new Error("The server returned an invalid screening title.");
           navigateToCinemaScreening(response.data?.screening);
@@ -304,15 +495,147 @@ function renderQueue(items) {
       remove.type = "button";
       remove.textContent = "Remove";
       remove.className = "vivid-wr-button vivid-wr-button--quiet";
-      remove.addEventListener("click", () => call("removeWatchRoomQueueItem")({ roomId: room.roomId, itemId: item.id }).catch(showError));
+      remove.addEventListener("click", async () => {
+       remove.disabled = true;
+       try { await call("removeWatchRoomQueueItem")({ roomId: room.roomId, itemId: item.id }); }
+       catch (error) { showError(error); remove.disabled = false; }
+     });
       actions.append(remove);
     }
     li.append(poster, details, actions);
     list.append(li);
   });
 }
+function timestampMillis(value) {
+  if (value && typeof value.toMillis === "function") return value.toMillis();
+  const number = Number(value);
+  return Number.isFinite(number) && number > 0 ? number : null;
+}
+
+function syncRoomSettings() {
+  if (!room || room.role !== "host") return;
+  const settings = byId("wr-room-settings-form");
+  if (!settings || settings.dataset.dirty === "true") return;
+  settings.elements.name.value = room.name || "";
+  settings.elements.allowGuestQueue.checked = room.allowGuestQueue !== false;
+  settings.elements.allowGuestChat.checked = room.allowGuestChat !== false;
+  settings.elements.allowGuestVoting.checked = room.allowGuestVoting !== false;
+  settings.elements.allowGuestPlayerSelection.checked = room.allowGuestPlayerSelection === true;
+  settings.elements.allowGuestQueueManagement.checked = room.allowGuestQueueManagement === true;
+  settings.elements.allowGuestPlaybackControl.checked = room.allowGuestPlaybackControl === true;
+  settings.elements.allowGuestVoice.checked = room.allowGuestVoice !== false;
+  settings.elements.linkedClubId.value = room.linkedClubId || "";
+}
+
+function handleRoomAccessLost(roomId, message = "Your access to this Watch Room has ended.") {
+  if (!room || room.roomId !== roomId) return;
+  setFeedback(message, true);
+  byId("wr-room-lobby") && (byId("wr-room-lobby").hidden = true);
+  byId("wr-panel-rooms") && (byId("wr-panel-rooms").hidden = false);
+  document.dispatchEvent(new CustomEvent("vivid:watch-room-access-revoked", { detail: { roomId } }));
+  stop(true);
+}
+
+function applyRoomDocument(data) {
+  if (!room || !data || room.roomId !== data.roomId) return;
+  if (data.status && data.status !== "open") {
+    handleRoomAccessLost(room.roomId, "The host has ended this Watch Room.");
+    return;
+  }
+  const role = room.role;
+  const previousClubId = room.linkedClubId || "";
+  room = { ...room, ...data, role, roomId: data.roomId };
+  renderCinemaStage();
+  if (previousClubId !== (room.linkedClubId || "")) {
+    subscribeClubWatchlist(room.linkedClubId);
+    const linkedClub = (window.vividCinemaClubs || []).find(club => club.clubId === room.linkedClubId);
+    if (linkedClub) document.dispatchEvent(new CustomEvent("vivid:cinema-club-selected", { detail: linkedClub }));
+  }
+  applyRoomPermissions();
+  syncRoomSettings();
+  document.dispatchEvent(new CustomEvent("vivid:watch-room-updated", { detail: room }));
+  const requestedParams = new URLSearchParams(window.location.search);
+  if (requestedParams.get("roomMode") === "1" && requestedParams.get("id") &&
+      requestedParams.get("roomId") === room.roomId &&
+      String(room.activeScreening?.sessionId || "") === String(requestedParams.get("sessionId") || "") &&
+      String(room.activeScreening?.contentId || "") === String(requestedParams.get("id") || "")) {
+    document.dispatchEvent(new CustomEvent("vivid:watch-room-screening-validated", { detail: room }));
+  }
+  const activeSessionId = String(room.activeScreening?.sessionId || "");
+  const screeningSuppressed = new URLSearchParams(window.location.search).get("suppressScreening") === "1";
+  if (!screeningSuppressed && activeSessionId && activeSessionId !== loadedScreeningSessionId && activeSessionId !== dismissedScreeningSessionId) {
+    navigateToCinemaScreening(room.activeScreening);
+  }
+}
+
+function subscribeRoomRealtime(roomId) {
+  const roomRef = doc(db, "rooms", roomId);
+  const membersRef = collection(db, "rooms", roomId, "members");
+  const presenceRef = collection(db, "rooms", roomId, "presence");
+  const queueRef = collection(db, "rooms", roomId, "queue");
+  const chatRef = query(collection(db, "rooms", roomId, "chat"), orderBy("createdAt", "desc"), limit(80));
+  let membersByUid = new Map();
+  let presenceByUid = new Map();
+  const updateMembers = () => {
+    if (!room || room.roomId !== roomId) return;
+    const now = Date.now();
+    memberList = [...membersByUid.entries()].map(([uid, member]) => ({
+      uid,
+      displayName: member.displayName || "Vivid member",
+      role: member.role || "guest",
+      joinedAt: timestampMillis(member.joinedAt),
+      isOnline: Number(presenceByUid.get(uid) || 0) > now
+    })).sort((a, b) => (a.role === "host" ? -1 : 0) - (b.role === "host" ? -1 : 0) || String(a.displayName).localeCompare(String(b.displayName)));
+    renderPresence();
+  };
+  const onError = label => error => {
+    if (!room || room.roomId !== roomId) return;
+    if (error?.code === "permission-denied") {
+      handleRoomAccessLost(roomId, "Your access to this Watch Room was removed or has expired.");
+      return;
+    }
+    setFeedback(label + " updates were interrupted. Vivid is reconnecting…", true);
+    console.warn("Watch Room realtime " + label + " subscription failed:", error);
+  };
+  stops.push(onSnapshot(roomRef, snapshot => {
+    if (!snapshot.exists()) {
+      handleRoomAccessLost(roomId, "This Watch Room is no longer available.");
+      return;
+    }
+    applyRoomDocument({ ...snapshot.data(), roomId });
+  }, onError("room")));
+  stops.push(onSnapshot(membersRef, snapshot => {
+    if (!room || room.roomId !== roomId) return;
+    membersByUid = new Map(snapshot.docs.map(item => [item.id, item.data()]));
+    updateMembers();
+  }, onError("member")));
+  stops.push(onSnapshot(presenceRef, snapshot => {
+    if (!room || room.roomId !== roomId) return;
+    presenceByUid = new Map(snapshot.docs.map(item => [item.id, timestampMillis(item.data().expiresAt) || 0]));
+    updateMembers();
+  }, onError("presence")));
+  stops.push(onSnapshot(queueRef, snapshot => {
+    if (!room || room.roomId !== roomId) return;
+    const queue = snapshot.docs.map(item => {
+      const data = item.data();
+      return { id: item.id, ...data, createdAt: timestampMillis(data.createdAt), updatedAt: timestampMillis(data.updatedAt) };
+    }).filter(item => item.status === "queued")
+      .sort((a, b) => (Number(b.voteCount) || 0) - (Number(a.voteCount) || 0) || (a.createdAt || 0) - (b.createdAt || 0));
+    renderQueue(queue);
+  }, onError("queue")));
+  stops.push(onSnapshot(chatRef, snapshot => {
+    if (!room || room.roomId !== roomId) return;
+    const chat = [...snapshot.docs].reverse().map(item => {
+      const data = item.data();
+      return { id: item.id, ...data, createdAt: timestampMillis(data.createdAt) };
+    });
+    renderChat(chat);
+  }, onError("chat")));
+  presenceRefresh = setInterval(updateMembers, 10000);
+}
+
 function openLobby(data) {
-  stop();
+  stop(Boolean(room && room.roomId !== data.roomId));
   searchGeneration += 1;
   selectedPick = null;
   byId("wr-queue-form")?.reset();
@@ -320,6 +643,12 @@ function openLobby(data) {
   setSearchMessage("");
   room = data;
   lastRoom = data;
+  setRoomView("queue");
+  renderCinemaStage();
+  renderLinkedClubOptions(window.vividCinemaClubs || []);
+  subscribeClubWatchlist(data.linkedClubId);
+  const linkedClub = (window.vividCinemaClubs || []).find(club => club.clubId === data.linkedClubId);
+  if (linkedClub) document.dispatchEvent(new CustomEvent("vivid:cinema-club-selected", { detail: linkedClub }));
   applyRoomPermissions();
   memberList = [];
   byId("wr-panel-rooms").hidden = true;
@@ -343,32 +672,19 @@ function openLobby(data) {
   settings.elements.allowGuestQueueManagement.checked = data.allowGuestQueueManagement === true;
   settings.elements.allowGuestPlaybackControl.checked = data.allowGuestPlaybackControl === true;
   settings.elements.allowGuestVoice.checked = data.allowGuestVoice !== false;
-  settings.addEventListener("change", () => { settings.dataset.dirty = "true"; });
+  settings.elements.linkedClubId.value = data.linkedClubId || "";
+  settings.dataset.dirty = "false";
+  if (settings.dataset.listenerBound !== "true") {
+    settings.addEventListener("change", () => { settings.dataset.dirty = "true"; });
+    settings.dataset.listenerBound = "true";
+  }
   const refreshLobby = async () => {
     if (!room || room.roomId !== data.roomId) return;
     try {
       const response = await call("getWatchRoomLobbySnapshot")({ roomId: data.roomId });
       if (!room || room.roomId !== data.roomId) return;
       const snapshot = response.data || {};
-      if (snapshot.room) {
-        room = { ...room, ...snapshot.room };
-        document.dispatchEvent(new CustomEvent("vivid:watch-room-updated", { detail: room }));
-        const activeSessionId = String(room.activeScreening?.sessionId || "");
-        const screeningSuppressed = new URLSearchParams(window.location.search).get("suppressScreening") === "1";
-        if (!screeningSuppressed && activeSessionId && activeSessionId !== loadedScreeningSessionId && activeSessionId !== dismissedScreeningSessionId) {
-          navigateToCinemaScreening(room.activeScreening);
-        }
-        const currentSettings = byId("wr-room-settings-form");
-        if (room.role === "host" && currentSettings && currentSettings.dataset.dirty !== "true") {
-          currentSettings.elements.allowGuestQueue.checked = room.allowGuestQueue !== false;
-          currentSettings.elements.allowGuestChat.checked = room.allowGuestChat !== false;
-          currentSettings.elements.allowGuestVoting.checked = room.allowGuestVoting !== false;
-          currentSettings.elements.allowGuestPlayerSelection.checked = room.allowGuestPlayerSelection === true;
-          currentSettings.elements.allowGuestQueueManagement.checked = room.allowGuestQueueManagement === true;
-          currentSettings.elements.allowGuestPlaybackControl.checked = room.allowGuestPlaybackControl === true;
-          currentSettings.elements.allowGuestVoice.checked = room.allowGuestVoice !== false;
-        }
-      }
+      if (snapshot.room) applyRoomDocument({ ...snapshot.room, roomId: data.roomId });
       applyRoomPermissions();
       memberList = Array.isArray(snapshot.members) ? snapshot.members : [];
       renderPresence();
@@ -392,15 +708,16 @@ function openLobby(data) {
       if (note) note.dataset.state = "lobby-load-error";
     }
   };
+  subscribeRoomRealtime(data.roomId);
+  void refreshLobby();
   const ping = () => call("heartbeatWatchRoom")({ roomId: data.roomId })
-    .then(() => refreshLobby())
+    .then(() => {})
     .catch(error => {
       showError(error);
       byId("wr-lobby-presence").textContent = "Couldn't confirm your room connection. " + (error?.message || "Try reopening the room.");
     });
   ping();
   heartbeat = setInterval(ping, 30000);
-  presenceRefresh = setInterval(refreshLobby, 5000);
 }
 document.addEventListener("vivid:watch-room-open", event => openLobby(event.detail));
 const queueTitleInput = byId("wr-queue-form")?.elements.title;
@@ -526,7 +843,8 @@ byId("wr-room-settings-form")?.addEventListener("submit", async event => {
         allowGuestPlayerSelection: form.elements.allowGuestPlayerSelection.checked,
         allowGuestQueueManagement: form.elements.allowGuestQueueManagement.checked,
         allowGuestPlaybackControl: form.elements.allowGuestPlaybackControl.checked,
-        allowGuestVoice: form.elements.allowGuestVoice.checked
+        allowGuestVoice: form.elements.allowGuestVoice.checked,
+        linkedClubId: form.elements.linkedClubId.value || null
       }
     });
     form.dataset.dirty = "false";
@@ -539,7 +857,9 @@ byId("wr-room-settings-form")?.addEventListener("submit", async event => {
 });
 window.addEventListener("pagehide", () => {
   if (room) lastRoom = room;
-  stop();
+  // Leaving the document is not the same as leaving the room. Preserve the
+  // short-lived voice reconnect intent for a hard refresh or bfcache restore.
+  stop(false);
 });
 window.addEventListener("pageshow", event => {
   if (!event.persisted || !lastRoom || !auth.currentUser || auth.currentUser.isAnonymous) return;

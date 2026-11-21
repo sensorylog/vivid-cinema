@@ -237,6 +237,8 @@ async function loadDashboard(user) {
   if (generation !== dashboardLoadGeneration || auth.currentUser?.uid !== user.uid) return;
   dashboardState.rooms = Array.isArray(dashboard.data?.rooms) ? dashboard.data.rooms : [];
   dashboardState.clubs = Array.isArray(dashboard.data?.clubs) ? dashboard.data.clubs : [];
+  window.vividCinemaClubs = dashboardState.clubs;
+  document.dispatchEvent(new CustomEvent("vivid:cinema-clubs-updated", { detail: { clubs: dashboardState.clubs } }));
   if (!dashboardState.clubs.some(club => club.clubId === dashboardState.selectedClubId)) {
     dashboardState.selectedClubId = dashboardState.clubs[0]?.clubId || null;
   }
@@ -250,6 +252,23 @@ async function loadDashboard(user) {
     console.warn("Vivid Watch Rooms background retention pass was skipped:", error);
   });
 }
+
+document.addEventListener("vivid:watch-room-access-revoked", () => {
+  showTab("rooms");
+  byId("wr-panel-rooms")?.scrollIntoView({ behavior: "smooth", block: "start" });
+});
+
+document.addEventListener("vivid:open-linked-club", event => {
+  const club = dashboardState.clubs.find(item => item.clubId === event.detail?.clubId);
+  if (!club) {
+    setFeedback("wr-room-feedback", "You need to be a member of this Cinema Club to open its private space.", true);
+    return;
+  }
+  dashboardState.selectedClubId = club.clubId;
+  renderClubPreviews();
+  showTab("clubs");
+  byId("wr-panel-clubs")?.scrollIntoView({ behavior: "smooth", block: "start" });
+});
 
 function showTab(name) {
   document.querySelectorAll("[data-wr-tab]").forEach(tab => {
