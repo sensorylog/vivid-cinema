@@ -7,6 +7,7 @@ import {
   shouldCorrectPlayback,
   shouldThrottlePlaybackWrite,
   getEstimatedLocalPlaybackPosition,
+  normalizePlaybackRate,
   classifyPlaybackEvent
 } from "../scripts/playback/watch-room-sync.js";
 
@@ -88,4 +89,22 @@ test("playback event classification separates commands from progress heartbeats"
   assert.equal(classifyPlaybackEvent({ event: "seeked", status: "seeked", previousStatus: "playing" }), "seek");
   assert.equal(classifyPlaybackEvent({ event: "pause", status: "paused", previousStatus: "playing" }), "pause");
   assert.equal(classifyPlaybackEvent({ event: "ended", status: "ended", previousStatus: "playing" }), "ended");
+});
+
+
+test("shared playback clock applies playback rate to host and local timeline estimates", () => {
+  assert.equal(normalizePlaybackRate(1.5), 1.5);
+  assert.equal(normalizePlaybackRate(8), 4);
+  assert.equal(normalizePlaybackRate(0.1), 0.25);
+  assert.equal(normalizePlaybackRate("invalid"), 1);
+  assert.equal(getExpectedPlaybackPosition({
+    status: "playing", position: 100, duration: 1000, updatedAt: 10_000, playbackRate: 1.5
+  }, { nowMs: 12_000 }), 103);
+  assert.equal(getEstimatedLocalPlaybackPosition({
+    position: 100, status: "playing", duration: 1000, playbackRate: 2, observedAtMs: 10_000
+  }, { nowMs: 12_000 }), 104);
+});
+
+test("playback rate changes are treated as immediate control events", () => {
+  assert.equal(classifyPlaybackEvent({ event: "ratechange", status: "playing", previousStatus: "playing" }), "rate");
 });
