@@ -376,9 +376,25 @@ await writeFile(path.join(javaRoot, "VividWebChromeClient.java"), webChromeClien
 
 const manifestPath = path.join(androidRoot, "app", "src", "main", "AndroidManifest.xml");
 let manifest = await readFile(manifestPath, "utf8");
-if (!manifest.includes('android.permission.REQUEST_INSTALL_PACKAGES')) {
-  manifest = manifest.replace("<manifest ", '<manifest ');
-  manifest = manifest.replace(/<application\b/, '    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />\n\n    <application');
-  await writeFile(manifestPath, manifest, "utf8");
+let manifestChanged = false;
+for (const permission of [
+  "android.permission.REQUEST_INSTALL_PACKAGES",
+  "android.permission.RECORD_AUDIO",
+  "android.permission.MODIFY_AUDIO_SETTINGS"
+]) {
+  if (manifest.includes(permission)) continue;
+  manifest = manifest.replace(
+    /<application\\b/,
+    `    <uses-permission android:name="${permission}" />\\n\\n    <application`
+  );
+  manifestChanged = true;
 }
+if (!manifest.includes('android.hardware.microphone')) {
+  manifest = manifest.replace(
+    /<application\\b/,
+    '    <uses-feature android:name="android.hardware.microphone" android:required="false" />\\n\\n    <application'
+  );
+  manifestChanged = true;
+}
+if (manifestChanged) await writeFile(manifestPath, manifest, "utf8");
 console.log(`Configured Vivid Android updater plugin (version ${versionName}, build ${buildNumber}, versionCode ${versionCode}).`);
