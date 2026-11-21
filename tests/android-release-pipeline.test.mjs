@@ -59,12 +59,12 @@ test("release signer reads credentials only from environment and never writes se
 
 test("debug APK release never republishes the Android signing keystore", async () => {
   const debugWorkflow = await readFile(new URL("../.github/workflows/android-debug-apk.yml", import.meta.url), "utf8");
-  const publishStep = debugWorkflow.split("Publish latest Android APK for in-app updates")[1] || "";
+  const publishStep = debugWorkflow.split("publish-direct-apk:")[1] || "";
   assert.match(publishStep, /gh release upload/);
   assert.doesNotMatch(publishStep, /Vivid-Cinema-Debug\\.keystore/);
   assert.match(debugWorkflow, /gh release download/);
   assert.doesNotMatch(debugWorkflow, /ANDROID_PRODUCTION_SIGNING_ENABLED/);
-  assert.match(debugWorkflow, /Publish latest Android APK for in-app updates/);
+  assert.match(debugWorkflow, /Publish direct APK and build metadata/);
   assert.match(debugWorkflow, /Vivid-Cinema-Android\.apk/);
   assert.match(debugWorkflow, /workflow_dispatch.*github\.ref == 'refs\/heads\/main'/);
 });
