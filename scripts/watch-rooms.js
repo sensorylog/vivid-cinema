@@ -412,6 +412,16 @@ async function initializeWatchRoomsAccess() {
     document.body.dataset.vividWatchRoomsAccess = "authenticated";
     try {
       await loadDashboard(user);
+      const requestedRoomId = new URLSearchParams(window.location.search).get("roomId");
+      if (requestedRoomId) {
+        const requestedRoom = dashboardState.rooms.find(item => item.roomId === requestedRoomId);
+        if (requestedRoom) {
+          showTab("rooms");
+          document.dispatchEvent(new CustomEvent("vivid:watch-room-open", { detail: requestedRoom }));
+        } else {
+          byId("wr-stage-note").textContent = "That room is not available in your account. Reopen it with a valid invitation.";
+        }
+      }
     } catch (error) {
       console.error("Vivid Watch Rooms dashboard could not load:", error);
       byId("wr-stage-note").textContent = "We couldn't load your rooms and clubs. Check your connection and use Try again.";
