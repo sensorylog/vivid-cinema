@@ -68,6 +68,7 @@ test("generated Android project registers a native hardware Back bridge", () => 
   assert.match(nativeNavigation, /OnBackPressedCallback/);
   assert.match(nativeNavigation, /notifyListeners\("backButton"/);
   assert.match(nativeNavigation, /VividWebChromeClient\.exitActiveCustomView\(\)/);
+  assert.ok(nativeNavigation.indexOf("VividWebChromeClient.exitActiveCustomView()") < nativeNavigation.indexOf('notifyListeners("backButton"'), "native fullscreen must close before JavaScript handles Back");
   assert.match(nativeWebChrome, /static boolean exitActiveCustomView\(\)/);
   assert.match(nativeWebChrome, /WeakReference<VividWebChromeClient>/);
   assert.match(nativeWebChrome, /WindowInsetsController/);
