@@ -19,7 +19,7 @@ concurrency:
   cancel-in-progress: true
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   build-debug-apk:
@@ -162,22 +162,39 @@ jobs:
           if-no-files-found: error
           retention-days: 14
 
-      - name: Publish latest Android APK for in-app updates
-        if: github.event_name == 'release' || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main') || (github.event_name == 'push' && github.ref == 'refs/heads/main')
+
+  publish-direct-apk:
+    needs: build-debug-apk
+    if: github.event_name == 'release' || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main') || (github.event_name == 'push' && github.ref == 'refs/heads/main')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download verified Android APK artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: vivid-cinema-android-apk
+          path: release-output
+
+      - name: Publish direct APK and build metadata
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: \${{ secrets.GITHUB_TOKEN }}
+          VIVID_ANDROID_BUILD: \${{ github.run_number }}
         shell: bash
         run: |
           set -euo pipefail
+          version="$(node -p "JSON.parse(require('fs').readFileSync('package.json','utf8')).version")"
           if [ "$GITHUB_EVENT_NAME" = "release" ]; then
             tag="$(node -e 'const fs=require("fs");const e=JSON.parse(fs.readFileSync(process.env.GITHUB_EVENT_PATH,"utf8"));process.stdout.write(e.release.tag_name)')"
           elif [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ]; then
             tag="$(gh release view --repo "$GITHUB_REPOSITORY" --json tagName --jq .tagName)"
           else
-            # A version bump starts Windows release creation and this APK build in
-            # parallel. Wait for the matching versioned release instead of racing
-            # and uploading the new APK to the previous release.
-            tag="v$VIVID_ANDROID_VERSION"
+            # Windows release creation and this APK publish run in parallel.
+            tag="v$version"
             for attempt in $(seq 1 30); do
               if gh release view "$tag" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
                 break
@@ -190,10 +207,9 @@ jobs:
             done
           fi
           gh release view "$tag" --repo "$GITHUB_REPOSITORY" >/dev/null
-          node --input-type=module -e 'import {writeFileSync} from "node:fs"; writeFileSync("release-output/Vivid-Cinema-Android-build-" + process.env.VIVID_ANDROID_BUILD + ".json", JSON.stringify({version: process.env.VIVID_ANDROID_VERSION, build: Number(process.env.VIVID_ANDROID_BUILD)}, null, 2))'
-          # Keep the stable development signing identity available via historical
-          # release assets; do not expose the keystore as a new asset on each build.
-          gh release upload "$tag" "release-output/Vivid-Cinema-Android.apk" "release-output/Vivid-Cinema-Android-build-$VIVID_ANDROID_BUILD.json" --repo "$GITHUB_REPOSITORY" --clobber
+          node --input-type=module -e 'import {writeFileSync} from "node:fs"; writeFileSync("release-output/Vivid-Cinema-Android-build-" + process.env.VIVID_ANDROID_BUILD + ".json", JSON.stringify({version: process.env.VIVID_ANDROID_VERSION || process.argv[1], build: Number(process.env.VIVID_ANDROID_BUILD)}, null, 2))' "$version"
+          test -s release-output/Vivid-Cinema-Android.apk
+          gh release upload "$tag" release-output/Vivid-Cinema-Android.apk "release-output/Vivid-Cinema-Android-build-$VIVID_ANDROID_BUILD.json" --repo "$GITHUB_REPOSITORY" --clobber
           gh release view "$tag" --repo "$GITHUB_REPOSITORY" --json assets --jq '.assets[].name' | grep -Fx "Vivid-Cinema-Android.apk"
           gh release view "$tag" --repo "$GITHUB_REPOSITORY" --json assets --jq '.assets[].name' | grep -Fx "Vivid-Cinema-Android-build-$VIVID_ANDROID_BUILD.json"
-          echo "Published Vivid-Cinema-Android.apk to $tag."
+          echo "Published direct-distribution Vivid-Cinema-Android.apk to $tag."
