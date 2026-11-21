@@ -185,42 +185,6 @@ html[data-vivid-theme="light"] .vivid-wr-dialog{background:#fff;color:#171720}ht
 .vivid-wr-voice-panel{position:sticky;top:10px;z-index:30;backdrop-filter:blur(18px)}
 
 
-/* Immersive Watch Room cinema stage: one screen, no nested page scrolling. */
-body.vivid-wr-screening-open{overflow:hidden!important;overscroll-behavior:none}
-body.vivid-wr-screening-open .vivid-watch-rooms-main{width:100%;max-width:none;margin:0;padding:0}
-body.vivid-wr-screening-open .vivid-wr-lobby{margin:0}
-body.vivid-wr-screening-open #watch-rooms-private>:not(#wr-room-lobby){display:none!important}
-body.vivid-wr-screening-open #wr-room-lobby>.vivid-wr-lobby-heading,
-body.vivid-wr-screening-open #wr-room-lobby>.vivid-wr-lobby-explainer,
-body.vivid-wr-screening-open #wr-room-lobby>.vivid-wr-lobby-grid,
-body.vivid-wr-screening-open #wr-room-lobby>.vivid-wr-host-controls{display:none!important}
-body.vivid-wr-screening-open .vivid-wr-screening-stage{position:fixed;z-index:1000;inset:0;display:flex;flex-direction:column;gap:0;margin:0;padding:0;border:0;border-radius:0;background:#000}
-body.vivid-wr-screening-open .vivid-wr-screening-stage-heading{position:absolute;z-index:2;top:max(8px,env(safe-area-inset-top));right:12px;left:12px;justify-content:flex-end;pointer-events:none}
-body.vivid-wr-screening-open .vivid-wr-screening-stage-heading>div{display:none}
-body.vivid-wr-screening-open #wr-screening-close{min-height:38px;padding:0 13px;border-color:rgba(255,255,255,.24);background:rgba(8,9,12,.72);backdrop-filter:blur(12px);pointer-events:auto}
-body.vivid-wr-screening-open .vivid-wr-screening-frame-wrap{flex:1;width:100%;height:100dvh;min-height:0;aspect-ratio:auto;overflow:hidden;border-radius:0}
-body.vivid-wr-screening-open #wr-screening-frame{width:100%;height:100%;min-height:0}
-body.vivid-wr-screening-open .vivid-wr-voice-panel{position:fixed;z-index:1002;right:12px;bottom:max(12px,env(safe-area-inset-bottom));left:12px;width:max-content;max-width:calc(100vw - 24px);margin:0;padding:8px 10px;border-radius:12px;background:rgba(10,11,16,.78);backdrop-filter:blur(16px)}
-body.vivid-wr-screening-open .vivid-wr-voice-heading p,
-body.vivid-wr-screening-open #wr-voice-status,
-body.vivid-wr-screening-open .vivid-wr-voice-roster{display:none}
-body.vivid-wr-screening-open .vivid-wr-voice-heading{gap:8px}
-body.vivid-wr-screening-open .vivid-wr-voice-heading h3{display:none}
-body.vivid-wr-screening-open .vivid-wr-voice-heading .vivid-wr-section-kicker{display:none}
-@media(max-width:650px){
-  body.vivid-wr-screening-open .vivid-wr-voice-panel{
-    position:fixed!important;z-index:1002;top:auto!important;right:10px!important;bottom:max(10px,env(safe-area-inset-bottom))!important;left:auto!important;
-    display:block!important;width:auto!important;height:auto!important;max-width:calc(100vw - 20px);margin:0;padding:7px 9px;
-    border:1px solid rgba(190,164,255,.28);border-radius:14px;background:rgba(10,11,16,.88);box-shadow:0 8px 28px rgba(0,0,0,.38);
-  }
-  body.vivid-wr-screening-open .vivid-wr-voice-heading{
-    display:flex!important;align-items:center!important;justify-content:flex-end!important;flex-direction:row!important;gap:8px!important;width:auto!important;
-  }
-  body.vivid-wr-screening-open .vivid-wr-voice-actions{display:flex!important;align-items:center;width:auto!important;gap:6px}
-  body.vivid-wr-screening-open .vivid-wr-voice-actions .vivid-wr-button{flex:0 0 auto!important;width:auto!important;min-height:40px;padding:0 13px;font-size:.8rem}
-}
-
-
 /* Stage 3 — one focused room workspace, with Discord-inspired activity tabs. */
 .vivid-wr-room-layout{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(310px,.9fr);gap:18px;align-items:stretch;margin-top:18px}
 .vivid-wr-cinema-stage{--wr-cinema-art:none;position:relative;isolation:isolate;display:flex;align-items:flex-end;min-width:0;min-height:420px;aspect-ratio:16/10;padding:clamp(22px,3.2vw,38px);overflow:hidden;border:1px solid rgba(193,166,255,.2);border-radius:24px;background:radial-gradient(ellipse at 75% 25%,rgba(123,87,190,.34),transparent 48%),linear-gradient(145deg,#171720 0%,#0b0d14 72%);box-shadow:0 24px 70px rgba(0,0,0,.22)}
@@ -242,7 +206,7 @@ body.vivid-wr-screening-open .vivid-wr-voice-heading .vivid-wr-section-kicker{di
 .vivid-wr-room-view{padding-top:12px}
 .vivid-wr-room-view[hidden]{display:none!important}
 .vivid-wr-room-view .vivid-wr-lobby-panel{min-height:250px;padding:16px;border:0;border-radius:14px;background:rgba(255,255,255,.025)}
-.vivid-wr-room-panel-heading{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:16px}
+.vivid-wr-room-panel-heading{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:16px}
 .vivid-wr-room-panel-heading h3{margin:4px 0 0;font-size:1.05rem;letter-spacing:-.02em}
 .vivid-wr-room-panel-heading>span{color:#a9a6b4;font-size:.68rem}
 .vivid-wr-room-panel-heading .vivid-wr-section-kicker{font-size:.57rem}
@@ -269,7 +233,7 @@ body.vivid-wr-screening-open .vivid-wr-voice-heading .vivid-wr-section-kicker{di
 .vivid-wr-voice-identity>div{min-width:0}
 .vivid-wr-voice-identity h3{margin:2px 0;color:#f2edf9;font-size:.86rem}
 .vivid-wr-voice-identity p{margin:0;color:#aaa7b5;font-size:.68rem}
-.vivid-wr-voice-actions{display:flex;align-items:center;gap:7px;flex:0 0 auto}
+.vivid-wr-voice-actions{display:flex;align-items:center;gap:7px;flex:0 0 auto;flex-wrap:wrap}
 .vivid-wr-voice-actions .vivid-wr-button{min-height:38px;padding:0 13px;font-size:.75rem}
 .vivid-wr-voice-roster{display:flex;align-items:center;gap:7px;max-width:48%;margin:0;padding:0;list-style:none}
 .vivid-wr-voice-person{display:flex;align-items:center;gap:7px;min-width:0;padding:6px 9px;border:1px solid rgba(255,255,255,.08);border-radius:999px;background:rgba(255,255,255,.045)}
