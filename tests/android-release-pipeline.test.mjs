@@ -23,7 +23,7 @@ test("production-signed Android release remains manual until signing is configur
   assert.match(workflow, /ANDROID_KEY_PASSWORD/);
   assert.match(workflow, /assembleRelease/);
   assert.match(workflow, /bundleRelease/);
-  assert.match(workflow, /Vivid-Cinema-Android\\.aab/);
+  assert.match(workflow, /Vivid-Cinema-Android\.aab/);
   assert.match(workflow, /jarsigner -verify/);
   assert.match(workflow, /apksigner.*verify/);
   assert.match(workflow, /publish_to_github_release/);
