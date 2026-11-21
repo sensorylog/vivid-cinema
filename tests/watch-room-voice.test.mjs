@@ -98,6 +98,12 @@ test("Watch Room screenings stay in the lobby and minimize without stopping play
   assert.ok(lobby.includes('new URL("watch-rooms.html", window.location.href)'));
   assert.ok(lobby.includes("function setRoomView("));
   assert.ok(lobby.includes("function renderCinemaStage()"));
+  assert.ok(lobby.includes("function subscribeRoomRealtime(roomId)"));
+  assert.ok(lobby.includes('onSnapshot(queueRef'));
+  assert.ok(lobby.includes('onSnapshot(chatRef'));
+  assert.ok(lobby.includes('onSnapshot(presenceRef'));
+  assert.ok(lobby.includes("heartbeat = setInterval(ping, 30000)"));
+  assert.ok(!lobby.includes("setInterval(refreshLobby, 5000)"), "room activity should update from realtime subscriptions, not five-second polling");
   assert.ok(lobby.includes('byId("wr-cinema-open")?.addEventListener("click"'));
   assert.ok(!lobby.includes("window.location.assign(url)"), "starting a screening must not reload the page and drop LiveKit voice");
   assert.ok(lobby.includes("vivid:watch-room-screening-navigate"));
