@@ -35,7 +35,7 @@ let latestRemoteState = null;
 let joinedPlayback = false;
 let localPosition = null;
 let localStatus = "";
-let hostStatus = "playing";
+let hostStatus = "paused";
 let lastPublishAt = 0;
 let lastPublishedStatus = "";
 let publishQueue = Promise.resolve();
@@ -186,7 +186,7 @@ function stopConnection() {
   if (selectionTimer) window.clearInterval(selectionTimer);
   heartbeatTimer = null; selectionTimer = null; if (syncReconcileTimer) window.clearInterval(syncReconcileTimer); syncReconcileTimer = null; lastAppliedSelectionKey = ""; roomPlayerLoadRequested = false;
   selectionPanel.hidden = true;
-  roomId = ""; role = ""; allowGuestPlayerSelection = false; allowGuestPlaybackControl = false; suppressPlaybackPublishUntil = 0; latestRemoteState = null; joinedPlayback = false; localPosition = null; localPositionObservedAt = 0; localStatus = ""; hostStatus = "playing"; lastPublishAt = 0; lastPublishedStatus = ""; lastCommandedStatus = ""; lastCommandAt = 0; lastSeekCommandAt = 0; pendingPlaySince = 0; publishQueue = Promise.resolve(); lastHostPayload = null; clockOffsetMs = 0;
+  roomId = ""; role = ""; allowGuestPlayerSelection = false; allowGuestPlaybackControl = false; suppressPlaybackPublishUntil = 0; latestRemoteState = null; joinedPlayback = false; localPosition = null; localPositionObservedAt = 0; localStatus = ""; hostStatus = "paused"; lastPublishAt = 0; lastPublishedStatus = ""; lastCommandedStatus = ""; lastCommandAt = 0; lastSeekCommandAt = 0; pendingPlaySince = 0; publishQueue = Promise.resolve(); lastHostPayload = null; clockOffsetMs = 0;
   joinButton.hidden = true; leaveButton.hidden = true; form.hidden = false;
 }
 
@@ -632,7 +632,7 @@ document.addEventListener("vivid:watch-room-screening-navigate", event => {
       lastCommandAt = 0;
       lastSeekCommandAt = 0;
       pendingPlaySince = 0;
-      hostStatus = "playing";
+      hostStatus = "paused";
       lastPublishAt = 0;
       lastPublishedStatus = "";
       lastHostPayload = null;
