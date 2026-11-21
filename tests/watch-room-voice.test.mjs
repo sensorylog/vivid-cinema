@@ -93,6 +93,9 @@ test("Watch Room screenings stay in the lobby and minimize without stopping play
   assert.ok(lobbyHtml.includes('data-room-view="chat"'));
   assert.ok(lobbyHtml.includes('data-room-view="members"'));
   assert.ok(lobbyHtml.includes('id="wr-voice-call"'));
+  assert.ok(lobbyHtml.includes('id="wr-link-club-select"'));
+  assert.ok(lobbyHtml.includes('id="wr-linked-club-watchlist"'));
+  assert.ok(lobbyHtml.includes('id="wr-open-linked-club"'));
   assert.ok(lobbyHtml.includes('src="scripts/watch.js"'));
   assert.ok(lobbyHtml.includes('src="scripts/watch-room-playback.js"'));
   assert.ok(lobby.includes('new URL("watch-rooms.html", window.location.href)'));
@@ -104,6 +107,11 @@ test("Watch Room screenings stay in the lobby and minimize without stopping play
   assert.ok(lobby.includes("setRoomView(roomViewButtons[next].dataset.roomView)"));
   assert.ok(lobbyHtml.includes('role="log" aria-live="polite"'));
   assert.ok(lobby.includes("function renderCinemaStage()"));
+  assert.ok(lobby.includes("function subscribeClubWatchlist(clubId)"));
+  assert.ok(lobby.includes("linkedClubId: form.elements.linkedClubId.value || null"));
+  assert.ok(lobby.includes('vivid:cinema-clubs-updated'));
+  assert.ok(lobby.includes('vivid:open-linked-club'));
+  assert.ok(watchRooms.includes('vivid:open-linked-club'));
   assert.ok(lobby.includes("function subscribeRoomRealtime(roomId)"));
   assert.ok(lobby.includes('onSnapshot(queueRef'));
   assert.ok(lobby.includes('onSnapshot(chatRef'));
@@ -150,6 +158,8 @@ test("Watch Room screenings stay in the lobby and minimize without stopping play
   const roomStyles = await readFile(new URL("../styles/vivid-watch-rooms.css", import.meta.url), "utf8");
   assert.ok(roomStyles.includes(".vivid-wr-room-layout"));
   assert.ok(roomStyles.includes(".vivid-wr-room-tabs"));
+  assert.ok(roomStyles.includes(".vivid-wr-linked-club-shelf"));
+  assert.ok(roomStyles.includes(".vivid-wr-club-link-setting"));
   assert.ok(roomStyles.includes("overflow-y:auto!important"));
   assert.ok(roomStyles.includes("#player-overlay.is-minimized{bottom:calc(112px"));
   assert.ok(roomStyles.includes(".vivid-wr-voice-panel{position:sticky"));
