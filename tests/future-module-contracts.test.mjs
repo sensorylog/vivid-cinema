@@ -473,6 +473,7 @@ test("Watch Room sync extrapolates local time and keeps command events ahead of 
     assert.ok(backend.includes("Playback event type does not match its status."));
   }
   assert.ok(client.includes("syncReconcileTimer = window.setInterval"));
+  assert.ok(client.includes("const screeningSessionId = String(room.activeScreening?.sessionId || \"\")"));
   assert.ok(client.includes("if (hasActiveScreening && (role !== \"guest\" || joinedPlayback))"), "guest player should preload while the room is waiting");
   assert.ok(client.includes("Your player is ready. Tap Play once to prepare it"));
   assert.ok(client.includes("else if (detail.status === \"playing\") pauseGuestPlayer("), "guest preparation playback must be held until host playback starts");
