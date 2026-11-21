@@ -1036,7 +1036,7 @@ function renderShell(params) {
     if (!overlay) return;
     const restoringMiniPlayer = !isWatchRoomCinemaMode && overlay.classList.contains("is-minimized") && playerHasOpened;
     overlay.classList.remove("is-minimized");
-    document.body.classList.remove("vivid-watch-room-player-minimized");
+    document.body.classList.remove("vivid-watch-room-player-minimized", "vivid-room-player-fullscreen");
     if (closePlayer) closePlayer.hidden = isWatchRoomCinemaMode;
     if (isWatchRoomCinemaMode && roomPlayerSlot) {
       roomPlayerSlot.hidden = false;
@@ -1105,6 +1105,10 @@ function renderShell(params) {
       try { screen.orientation?.unlock?.(); } catch {}
     }
   };
+  const setFallbackFullscreen = active => {
+    overlay?.classList.toggle("vivid-player-fullscreen-fallback", Boolean(active));
+    document.body.classList.toggle("vivid-room-player-fullscreen", isWatchRoomCinemaMode && Boolean(active));
+  };
   const togglePlayerFullscreen = async () => {
     if (!playerDialog) return;
     if (!document.fullscreenElement && overlay?.classList.contains("vivid-player-fullscreen-fallback")) {
@@ -1118,14 +1122,14 @@ function renderShell(params) {
         return;
       }
       if (typeof playerDialog.requestFullscreen === "function") {
-        overlay?.classList.remove("vivid-player-fullscreen-fallback");
+        setFallbackFullscreen(false);
         await playerDialog.requestFullscreen();
         const androidNative = window.Capacitor?.isNativePlatform?.() && window.Capacitor?.getPlatform?.() === "android";
         if (androidNative) {
           try { await screen.orientation?.lock?.("landscape"); } catch {}
         }
       } else {
-        overlay?.classList.add("vivid-player-fullscreen-fallback");
+        setFallbackFullscreen(true);
       }
     } catch (error) {
       console.warn("Vivid player fullscreen is unavailable:", error);
