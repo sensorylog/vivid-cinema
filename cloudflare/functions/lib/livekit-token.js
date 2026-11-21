@@ -9,7 +9,9 @@ function base64Url(bytes) {
 export async function createLiveKitAccessToken({
   apiKey, apiSecret, identity, roomName, displayName, role, now = Date.now()
 }) {
-  if (typeof apiKey !== "string" || !apiKey.trim() ||
+  apiKey = typeof apiKey === "string" ? apiKey.trim() : apiKey;
+  apiSecret = typeof apiSecret === "string" ? apiSecret.trim() : apiSecret;
+  if (typeof apiKey !== "string" || !apiKey ||
       typeof apiSecret !== "string" || apiSecret.length < 16 ||
       typeof identity !== "string" || !identity.trim() || identity.length > 128 || /[\u0000-\u001f]/.test(identity) ||
       typeof roomName !== "string" || !/^vivid-[a-f0-9]{32}$/.test(roomName)) {
@@ -21,7 +23,7 @@ export async function createLiveKitAccessToken({
     iss: apiKey,
     sub: identity,
     name: typeof displayName === "string" ? displayName.slice(0, 80) : "Vivid member",
-    nbf: issuedAt - 5,
+    nbf: issuedAt - 30,
     iat: issuedAt,
     exp: issuedAt + 4 * 60 * 60,
     video: {
@@ -44,7 +46,9 @@ export async function createLiveKitAccessToken({
 }
 
 export async function createLiveKitRoomAdminToken({ apiKey, apiSecret, roomName, now = Date.now() }) {
-  if (typeof apiKey !== "string" || !apiKey.trim() ||
+  apiKey = typeof apiKey === "string" ? apiKey.trim() : apiKey;
+  apiSecret = typeof apiSecret === "string" ? apiSecret.trim() : apiSecret;
+  if (typeof apiKey !== "string" || !apiKey ||
       typeof apiSecret !== "string" || apiSecret.length < 16 ||
       typeof roomName !== "string" || !/^vivid-[a-f0-9]{32}$/.test(roomName)) {
     throw new TypeError("LiveKit admin token configuration is invalid.");
