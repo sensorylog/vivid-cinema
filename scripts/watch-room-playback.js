@@ -569,8 +569,11 @@ window.addEventListener("message", event => {
     return;
   }
   if (type === "cinesrc:timeupdate" && status !== "playing") return;
-  localPosition = Math.max(0, Number(data.currentTime) || 0);
-  localPositionObservedAt = Date.now();
+  const reportedPosition = Number(data.currentTime);
+  if (Number.isFinite(reportedPosition) && reportedPosition >= 0) {
+    localPosition = reportedPosition;
+    localPositionObservedAt = Date.now();
+  }
   localStatus = status;
   const params = new URLSearchParams(window.location.search);
   window.dispatchEvent(new CustomEvent("vivid:provider-playback", { detail: {
