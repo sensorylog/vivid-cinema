@@ -1195,16 +1195,20 @@ export async function onRequest({request,env}) {
     console.error("Vivid Watch Rooms Cloudflare configuration error:",error?.message||String(error));
     return response(500,{ok:false,code:"internal",message:"The Watch Rooms service is not configured yet."},isAllowedOrigin(origin)?origin:"");
   }
-  if(!isAllowedOrigin(origin)) return response(403,{ok:false,code:"permission-denied",message:"This origin is not allowed."},origin);
+  if(!isAllowedOrigin(origin)) {
+    console.warn("Vivid Watch Rooms rejected request origin:", { origin, host: request.headers.get("Host") || "", action: "not-yet-parsed" });
+    return response(403,{ok:false,code:"permission-denied",message:"This origin is not allowed."},origin);
+  }
   if(request.method==="OPTIONS") return optionsResponse(origin);
   if(request.method!=="POST") return response(405,{ok:false,code:"method-not-allowed",message:"Use POST for this endpoint."},origin);
+  let action = "unknown";
   try {
     const raw=await request.text();
     if(raw.length>24000) throw new HttpsError("invalid-argument","This request is too large.");
     let body;
     try { body=JSON.parse(raw); } catch { throw new HttpsError("invalid-argument","A valid Watch Rooms request is required."); }
     if(!body||typeof body!=="object"||Array.isArray(body)) throw new HttpsError("invalid-argument","A valid Watch Rooms request is required.");
-    const action=body.action;
+    action=body.action;
     if(typeof action!=="string"||!ROUTES.has(action)) throw new HttpsError("invalid-argument","Unknown Watch Rooms operation.");
     const auth=await authenticate({headers:{
       authorization:request.headers.get("Authorization")||"",
@@ -1234,7 +1238,11 @@ export async function onRequest({request,env}) {
       "app-check/invalid-argument":401,"app-check/invalid-credential":401,"app-check/app-check-token-expired":401,
       "invalid-argument":400,"failed-precondition":409,"resource-exhausted":429,"already-exists":409
     })[code]||500;
-    if(!(error instanceof HttpsError)||status>=500) console.error("Vivid Watch Rooms Cloudflare API failed:",error);
+    if(error instanceof HttpsError) {
+      console.warn("Vivid Watch Rooms request rejected:", { action, code, message: error.message });
+    } else {
+      console.error("Vivid Watch Rooms Cloudflare API failed:", { action, code, message: error?.message || String(error), stack: error?.stack || null });
+    }
     const safeMessage=error instanceof HttpsError&&status<500?error.message:
       status===401?"Your sign-in or app verification needs refreshing. Please refresh and try again.":"We couldn't complete that action right now. Please try again.";
     return response(status,{ok:false,code,message:safeMessage},origin);

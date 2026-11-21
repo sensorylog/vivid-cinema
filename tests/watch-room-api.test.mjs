@@ -133,3 +133,13 @@ test("Only the host can permanently delete a room and all room data", async () =
   assert.match(implementation, /collection\("watchRooms"\)/);
   assert.match(implementation, /recursiveDelete\(roomRef\)/);
 });
+
+
+test("Cloudflare Watch Rooms logs safe operation-level rejection details and preserves permission messages", async () => {
+  const route = await readFile(new URL("../cloudflare/functions/api/watch-rooms.js", import.meta.url), "utf8");
+  const rooms = await readFile(new URL("../scripts/watch-rooms.js", import.meta.url), "utf8");
+  assert.ok(route.includes('console.warn("Vivid Watch Rooms request rejected:"'));
+  assert.ok(route.includes('{ action, code, message: error.message }'));
+  assert.ok(route.includes('console.warn("Vivid Watch Rooms rejected request origin:"'));
+  assert.ok(rooms.includes('if (code.includes("permission-denied")) return error?.message ||'));
+});
