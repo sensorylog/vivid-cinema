@@ -150,6 +150,8 @@ test("Watch Room screenings stay in the lobby and minimize without stopping play
   const roomStyles = await readFile(new URL("../styles/vivid-watch-rooms.css", import.meta.url), "utf8");
   assert.ok(roomStyles.includes(".vivid-wr-room-layout"));
   assert.ok(roomStyles.includes(".vivid-wr-room-tabs"));
+  assert.ok(roomStyles.includes("overflow-y:auto!important"));
+  assert.ok(roomStyles.includes("#player-overlay.is-minimized{bottom:calc(112px"));
   assert.ok(roomStyles.includes(".vivid-wr-voice-panel{position:sticky"));
   assert.ok(!roomStyles.includes("body.vivid-wr-screening-open"), "obsolete full-screen lobby overlay styles should be removed");
   assert.ok(cinemaStyles.includes("#player-overlay[hidden]"));
