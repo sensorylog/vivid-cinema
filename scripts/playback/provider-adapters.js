@@ -40,6 +40,7 @@ const CINESRC_CAPABILITIES = Object.freeze({
   canPlay: true,
   canPause: true,
   canSeek: true,
+  canSetRate: true,
   canReadPosition: true,
   canReadStatus: true,
   canReportEnded: true
