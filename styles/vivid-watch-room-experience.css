@@ -1,0 +1,213 @@
+/* Integrated Watch Room cinema stage and scroll-aware floating player. */
+body.vivid-watch-room-mode{
+  height:auto!important;min-height:100%!important;overflow-x:hidden!important;overflow-y:auto!important;
+  overscroll-behavior-y:contain!important;position:relative!important
+}
+body.vivid-watch-rooms-page.vivid-watch-room-mode .vivid-watch-rooms-app,
+body.vivid-watch-rooms-page.vivid-watch-room-mode .vivid-watch-rooms-main,
+body.vivid-watch-rooms-page.vivid-watch-room-mode #wr-panel-rooms,
+body.vivid-watch-rooms-page.vivid-watch-room-mode #wr-room-lobby{
+  height:auto!important;min-height:0!important;overflow:visible!important
+}
+body.vivid-watch-rooms-page.vivid-watch-room-mode #wr-cinema-stage.has-screening{
+  display:flex!important;flex-direction:column!important;align-items:stretch!important;justify-content:flex-start!important;
+  gap:16px!important;min-height:0!important;height:auto!important;aspect-ratio:auto!important;
+  padding:clamp(16px,2.4vw,28px)!important;overflow:visible!important
+}
+body.vivid-watch-rooms-page.vivid-watch-room-mode #wr-cinema-stage.has-screening .vivid-wr-cinema-stage__content{
+  position:relative!important;z-index:2!important;max-width:none!important
+}
+body.vivid-watch-rooms-page.vivid-watch-room-mode #wr-cinema-stage.has-screening .vivid-wr-cinema-stage__content h3{
+  margin:7px 0!important;font-size:clamp(1.15rem,2vw,1.65rem)!important
+}
+body.vivid-watch-rooms-page.vivid-watch-room-mode #wr-cinema-stage.has-screening .vivid-wr-cinema-stage__content p{
+  max-width:760px!important;margin:0!important;font-size:.82rem!important
+}
+body.vivid-watch-rooms-page.vivid-watch-room-mode #wr-cinema-stage.has-screening .vivid-wr-cinema-stage__wordmark,
+body.vivid-watch-rooms-page.vivid-watch-room-mode #wr-screening-player-host{
+  display:none!important
+}
+body.vivid-watch-rooms-page.vivid-watch-room-mode .vivid-wr-player-slot{
+  position:relative!important;display:block!important;z-index:4!important;width:100%!important;min-width:0!important;
+  min-height:clamp(235px,calc(56.25vw + 50px),760px)!important;overflow:visible!important;
+  border-radius:16px!important
+}
+body.vivid-watch-rooms-page.vivid-watch-room-mode .vivid-wr-player-slot[hidden]{display:none!important}
+body.vivid-watch-rooms-page.vivid-watch-room-mode .vivid-wr-player-slot #player-overlay{
+  position:absolute!important;inset:0!important;display:block!important;box-sizing:border-box!important;
+  width:100%!important;height:100%!important;min-height:0!important;max-width:none!important;max-height:none!important;
+  margin:0!important;padding:0!important;overflow:visible!important;z-index:1!important;
+  background:transparent!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important
+}
+body.vivid-watch-rooms-page.vivid-watch-room-mode .vivid-wr-player-slot #player-overlay[hidden]{display:none!important}
+body.vivid-watch-rooms-page.vivid-watch-room-mode .vivid-wr-player-slot #player-overlay .vivid-player-dialog{
+  position:relative!important;display:flex!important;flex-direction:column!important;box-sizing:border-box!important;
+  width:100%!important;height:100%!important;min-height:0!important;max-height:none!important;
+  margin:0!important;padding:0!important;overflow:hidden!important;border:1px solid rgba(210,190,255,.24)!important;
+  border-radius:16px!important;background:linear-gradient(145deg,#17151f,#090a0e 58%)!important;
+  box-shadow:0 20px 60px rgba(0,0,0,.38)!important
+}
+body.vivid-watch-rooms-page.vivid-watch-room-mode .vivid-wr-player-slot .vivid-player-dialog-head{
+  position:relative!important;inset:auto!important;display:flex!important;align-items:center!important;
+  justify-content:space-between!important;gap:12px!important;flex:0 0 50px!important;min-height:50px!important;
+  width:100%!important;padding:7px 12px!important;border:0!important;border-bottom:1px solid rgba(255,255,255,.07)!important;
+  background:rgba(14,13,20,.94)!important;pointer-events:auto!important
+}
+body.vivid-watch-rooms-page.vivid-watch-room-mode .vivid-wr-player-slot .vivid-player-dialog-heading{
+  display:flex!important;align-items:center!important;gap:9px!important;min-width:0!important
+}
+body.vivid-watch-rooms-page.vivid-watch-room-mode .vivid-wr-player-slot .vivid-player-dialog-heading>div{min-width:0!important}
+body.vivid-watch-rooms-page.vivid-watch-room-mode .vivid-wr-player-slot .vivid-player-dialog-heading h2{
+  margin:0!important;overflow:hidden!important;color:#f8f6fc!important;font-size:.9rem!important;
+  font-weight:850!important;text-overflow:ellipsis!important;white-space:nowrap!important
+}
+body.vivid-watch-rooms-page.vivid-watch-room-mode .vivid-wr-player-slot .vivid-player-dialog-eyebrow{
+  display:block!important;color:#bfa2ff!important;font-size:.52rem!important;letter-spacing:.16em!important
+}
+body.vivid-watch-rooms-page.vivid-watch-room-mode .vivid-wr-player-slot .vivid-player-current-source{
+  display:block!important;margin-top:1px!important;color:#9c98a8!important;font-size:.62rem!important
+}
+body.vivid-watch-rooms-page.vivid-watch-room-mode .vivid-wr-player-slot .vivid-player-dialog-actions{
+  display:flex!important;align-items:center!important;gap:7px!important;flex:0 0 auto!important
+}
+body.vivid-watch-rooms-page.vivid-watch-room-mode .vivid-wr-player-slot #player-close,
+body.vivid-watch-rooms-page.vivid-watch-room-mode .vivid-wr-player-slot #player-restore,
+body.vivid-watch-rooms-page.vivid-watch-room-mode .vivid-wr-player-slot #player-return-inline[hidden]{
+  display:none!important
+}
+body.vivid-watch-rooms-page.vivid-watch-room-mode .vivid-wr-player-slot #player-fullscreen,
+body.vivid-watch-rooms-page.vivid-watch-room-mode .vivid-wr-player-slot #player-server-menu,
+body.vivid-watch-rooms-page.vivid-watch-room-mode .vivid-wr-player-slot #player-return-inline{
+  display:inline-flex!important;align-items:center!important;justify-content:center!important;min-height:36px!important;
+  padding:0 11px!important;border:1px solid rgba(255,255,255,.13)!important;border-radius:10px!important;
+  background:rgba(255,255,255,.06)!important;color:#f7f4fc!important;pointer-events:auto!important
+}
+body.vivid-watch-rooms-page.vivid-watch-room-mode .vivid-wr-player-slot #player-fullscreen{width:38px!important;min-width:38px!important;padding:0!important}
+body.vivid-watch-rooms-page.vivid-watch-room-mode .vivid-wr-player-slot .vivid-player-layout,
+body.vivid-watch-rooms-page.vivid-watch-room-mode .vivid-wr-player-slot .vivid-player-main{
+  display:block!important;flex:1 1 auto!important;width:100%!important;height:auto!important;min-height:0!important;
+  margin:0!important;padding:0!important
+}
+body.vivid-watch-rooms-page.vivid-watch-room-mode .vivid-wr-player-slot .vivid-player-frame{
+  position:relative!important;display:block!important;width:100%!important;height:auto!important;min-height:0!important;
+  max-height:none!important;aspect-ratio:16/9!important;margin:0!important;overflow:hidden!important;
+  border:0!important;border-radius:0 0 15px 15px!important;background:#000!important
+}
+body.vivid-watch-rooms-page.vivid-watch-room-mode .vivid-wr-player-slot .vivid-player-frame iframe,
+body.vivid-watch-rooms-page.vivid-watch-room-mode .vivid-wr-player-slot .vivid-player-frame video{
+  position:absolute!important;inset:0!important;display:block!important;width:100%!important;height:100%!important;
+  min-height:0!important;border:0!important;object-fit:contain!important
+}
+body.vivid-watch-rooms-page.vivid-watch-room-mode .vivid-wr-player-slot .vivid-player-dialog-foot,
+body.vivid-watch-rooms-page.vivid-watch-room-mode .vivid-wr-player-slot .vivid-player-info{display:none!important}
+body.vivid-watch-rooms-page.vivid-watch-room-mode .vivid-wr-player-details{
+  position:relative!important;z-index:2!important;margin:0!important;padding:14px 16px!important;
+  border:1px solid rgba(255,255,255,.09)!important;border-radius:14px!important;background:rgba(8,9,14,.72)!important
+}
+body.vivid-watch-rooms-page.vivid-watch-room-mode .vivid-wr-player-details .vivid-player-info{
+  display:grid!important;gap:12px!important;padding:0!important
+}
+body.vivid-watch-rooms-page.vivid-watch-room-mode .vivid-wr-player-details .vivid-player-info::before{display:none!important}
+body.vivid-watch-rooms-page.vivid-watch-room-mode .vivid-wr-player-slot #player-server-panel{
+  position:fixed!important;z-index:100700!important;top:70px!important;right:12px!important;left:auto!important;
+  max-width:calc(100vw - 24px)!important
+}
+
+/* Floating mode only changes presentation; the same iframe/video node stays mounted. */
+body.vivid-watch-rooms-page.vivid-watch-room-mode .vivid-wr-player-slot #player-overlay.is-floating{
+  position:fixed!important;inset:auto 12px calc(92px + env(safe-area-inset-bottom)) auto!important;
+  display:block!important;width:min(340px,calc(100vw - 24px))!important;height:auto!important;
+  min-height:0!important;max-width:calc(100vw - 24px)!important;max-height:none!important;
+  margin:0!important;padding:0!important;overflow:visible!important;z-index:100600!important;
+  pointer-events:auto!important;background:transparent!important;box-shadow:none!important
+}
+body.vivid-watch-rooms-page.vivid-watch-room-mode .vivid-wr-player-slot #player-overlay.is-floating .vivid-player-dialog{
+  width:100%!important;height:auto!important;min-height:0!important;max-height:none!important;
+  overflow:hidden!important;border:1px solid rgba(205,181,255,.42)!important;border-radius:14px!important;
+  background:#090a0f!important;box-shadow:0 14px 42px rgba(0,0,0,.62)!important
+}
+body.vivid-watch-rooms-page.vivid-watch-room-mode .vivid-wr-player-slot #player-overlay.is-floating .vivid-player-dialog-head{
+  flex-basis:38px!important;min-height:38px!important;height:38px!important;padding:4px 7px!important
+}
+body.vivid-watch-rooms-page.vivid-watch-room-mode .vivid-wr-player-slot #player-overlay.is-floating .vivid-player-dialog-eyebrow,
+body.vivid-watch-rooms-page.vivid-watch-room-mode .vivid-wr-player-slot #player-overlay.is-floating .vivid-player-current-source,
+body.vivid-watch-rooms-page.vivid-watch-room-mode .vivid-wr-player-slot #player-overlay.is-floating #player-server-menu{
+  display:none!important
+}
+body.vivid-watch-rooms-page.vivid-watch-room-mode .vivid-wr-player-slot #player-overlay.is-floating .vivid-player-dialog-heading h2{
+  max-width:150px!important;font-size:.72rem!important
+}
+body.vivid-watch-rooms-page.vivid-watch-room-mode .vivid-wr-player-slot #player-overlay.is-floating #player-fullscreen,
+body.vivid-watch-rooms-page.vivid-watch-room-mode .vivid-wr-player-slot #player-overlay.is-floating #player-return-inline{
+  display:inline-flex!important;width:30px!important;min-width:30px!important;min-height:29px!important;height:29px!important;
+  padding:0!important;border-radius:8px!important;font-size:.72rem!important
+}
+body.vivid-watch-rooms-page.vivid-watch-room-mode .vivid-wr-player-slot #player-overlay.is-floating .vivid-player-frame{
+  aspect-ratio:16/9!important;border-radius:0 0 12px 12px!important
+}
+body.vivid-watch-rooms-page.vivid-watch-room-mode .vivid-wr-player-slot #player-overlay.is-floating .vivid-player-dialog-foot,
+body.vivid-watch-rooms-page.vivid-watch-room-mode .vivid-wr-player-slot #player-overlay.is-floating .vivid-player-info,
+body.vivid-watch-rooms-page.vivid-watch-room-mode .vivid-wr-player-slot #player-overlay.is-floating #player-server-panel{display:none!important}
+body.vivid-watch-rooms-page.vivid-watch-room-mode .vivid-wr-player-slot.is-floating{z-index:100600!important}
+body.vivid-watch-rooms-page.vivid-watch-room-mode .vivid-wr-player-slot.is-floating #vivid-tflix-player{
+  position:fixed!important;inset:auto 12px calc(92px + env(safe-area-inset-bottom)) auto!important;
+  z-index:100600!important;width:min(340px,calc(100vw - 24px))!important;max-width:calc(100vw - 24px)!important
+}
+
+/* Premium room voice: calm status, clear controls, and speaking-aware member chips. */
+body.vivid-watch-rooms-page .vivid-wr-voice-panel{
+  position:relative!important;top:auto!important;z-index:5!important;display:block!important;
+  margin:16px 0 0!important;padding:16px 18px!important;border:1px solid rgba(192,164,255,.18)!important;
+  border-radius:18px!important;background:linear-gradient(135deg,rgba(24,22,34,.96),rgba(10,12,18,.96))!important;
+  box-shadow:0 14px 42px rgba(0,0,0,.22)!important;backdrop-filter:blur(18px)!important
+}
+body.vivid-watch-rooms-page .vivid-wr-voice-panel[hidden]{display:none!important}
+body.vivid-watch-rooms-page .vivid-wr-voice-heading{
+  display:flex!important;align-items:center!important;justify-content:space-between!important;gap:14px!important
+}
+body.vivid-watch-rooms-page .vivid-wr-voice-identity{display:flex!important;align-items:center!important;gap:12px!important;min-width:0!important}
+body.vivid-watch-rooms-page .vivid-wr-voice-live-dot{flex:0 0 9px!important}
+body.vivid-watch-rooms-page .vivid-wr-voice-identity h3{margin:2px 0!important;font-size:1rem!important}
+body.vivid-watch-rooms-page .vivid-wr-voice-identity p{margin:0!important;max-width:540px!important;font-size:.72rem!important;line-height:1.4!important}
+body.vivid-watch-rooms-page .vivid-wr-voice-count{
+  display:inline-flex!important;align-items:center!important;gap:6px!important;flex:0 0 auto!important;
+  padding:6px 10px!important;border:1px solid rgba(255,255,255,.1)!important;border-radius:999px!important;
+  color:#d9d3e5!important;background:rgba(255,255,255,.045)!important;font-size:.65rem!important;font-weight:800!important
+}
+body.vivid-watch-rooms-page .vivid-wr-voice-count[data-connected="true"]{color:#9de5b8!important;border-color:rgba(123,217,167,.25)!important}
+body.vivid-watch-rooms-page .vivid-wr-voice-actions{display:flex!important;align-items:center!important;gap:8px!important;flex:0 0 auto!important}
+body.vivid-watch-rooms-page .vivid-wr-voice-actions .vivid-wr-button{min-height:38px!important;padding:0 14px!important;font-size:.72rem!important}
+body.vivid-watch-rooms-page .vivid-wr-voice-roster{
+  display:flex!important;align-items:center!important;flex-wrap:wrap!important;gap:7px!important;
+  max-width:none!important;margin:12px 0 0!important;padding:0!important;list-style:none!important
+}
+body.vivid-watch-rooms-page .vivid-wr-voice-person{
+  display:flex!important;align-items:center!important;gap:8px!important;min-width:0!important;padding:6px 10px 6px 6px!important;
+  border:1px solid rgba(255,255,255,.08)!important;border-radius:999px!important;background:rgba(255,255,255,.045)!important
+}
+body.vivid-watch-rooms-page .vivid-wr-voice-person.is-speaking{border-color:rgba(123,217,167,.5)!important;background:rgba(123,217,167,.09)!important}
+body.vivid-watch-rooms-page .vivid-wr-voice-avatar{
+  display:grid!important;place-items:center!important;width:29px!important;height:29px!important;flex:0 0 29px!important;
+  border:1px solid rgba(202,180,255,.3)!important;border-radius:50%!important;color:#e8dcff!important;
+  background:linear-gradient(145deg,#604c86,#282237)!important;font-size:.64rem!important;font-weight:900!important
+}
+body.vivid-watch-rooms-page .vivid-wr-voice-person strong{
+  max-width:130px!important;overflow:hidden!important;color:#f0ebf8!important;font-size:.68rem!important;
+  text-overflow:ellipsis!important;white-space:nowrap!important
+}
+body.vivid-watch-rooms-page .vivid-wr-voice-person small{color:#a9a4b4!important;font-size:.61rem!important;white-space:nowrap!important}
+body.vivid-watch-rooms-page .vivid-wr-voice-person.is-speaking small{color:#9be3b6!important}
+@media(max-width:680px){
+  body.vivid-watch-rooms-page.vivid-watch-room-mode #wr-cinema-stage.has-screening{gap:12px!important;padding:14px!important}
+  body.vivid-watch-rooms-page.vivid-watch-room-mode .vivid-wr-player-slot{min-height:calc((100vw - 60px)*.5625 + 46px)!important}
+  body.vivid-watch-rooms-page.vivid-watch-room-mode .vivid-wr-player-slot #player-overlay.is-floating{
+    right:10px!important;bottom:calc(92px + env(safe-area-inset-bottom))!important;width:min(252px,calc(100vw - 20px))!important
+  }
+  body.vivid-watch-rooms-page .vivid-wr-voice-panel{padding:13px!important}
+  body.vivid-watch-rooms-page .vivid-wr-voice-heading{align-items:flex-start!important;flex-direction:column!important}
+  body.vivid-watch-rooms-page .vivid-wr-voice-actions{width:100%!important}
+  body.vivid-watch-rooms-page .vivid-wr-voice-actions .vivid-wr-button{flex:1 1 auto!important}
+}
+@media(prefers-reduced-motion:reduce){
+  body.vivid-watch-rooms-page.vivid-watch-room-mode .vivid-wr-player-slot #player-overlay{transition:none!important}
+}
