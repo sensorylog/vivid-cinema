@@ -169,7 +169,8 @@ test("Realtime permission errors are verified by the trusted API before the lobb
   const realtime = lobby.slice(start, end);
   assert.ok(start >= 0 && end > start);
   assert.match(realtime, /call\("getWatchRoomLobbySnapshot"\)/);
-  assert.match(realtime, /if \(error\?\.code === "permission-denied"\) \{\s*void verifyRoomAccess\(\);/);
+  assert.match(realtime, /if \(error\?\.code === "permission-denied"\) \{\s*realtimeFallback = true;\s*void verifyRoomAccess\(\);/);
   assert.match(realtime, /code\.includes\("permission-denied"\).*handleRoomAccessLost/s);
+  assert.match(realtime, /if \(realtimeFallback && !accessVerification\) \{\s*void refreshTrustedSnapshot\(\)/);
   assert.doesNotMatch(realtime, /if \(error\?\.code === "permission-denied"\) \{\s*handleRoomAccessLost/);
 });
