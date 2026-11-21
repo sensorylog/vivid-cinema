@@ -11,12 +11,13 @@ import {
   writeAndroidUpdateState
 } from "../scripts/android-update-state.js";
 
-const [workflow, updater, builder, configure, legacyConfigure, downloads, capacitorConfig, iconScript] = await Promise.all([
+const [workflow, updater, builder, configure, legacyConfigure, nativeUpdater, downloads, capacitorConfig, iconScript] = await Promise.all([
   readFile(new URL("../.github/workflows/android-debug-apk.yml", import.meta.url), "utf8"),
   readFile(new URL("../scripts/android-updater.js", import.meta.url), "utf8"),
   readFile(new URL("../automation/build-static-dist.mjs", import.meta.url), "utf8"),
   readFile(new URL("../automation/configure-android-native-project.mjs", import.meta.url), "utf8"),
   readFile(new URL("../automation/configure-android-debug-build.mjs", import.meta.url), "utf8"),
+  readFile(new URL("../native/android/VividUpdaterPlugin.java", import.meta.url), "utf8"),
   readFile(new URL("../scripts/downloads.js", import.meta.url), "utf8"),
   readFile(new URL("../capacitor.config.json", import.meta.url), "utf8"),
   readFile(new URL("../automation/apply-android-icon.mjs", import.meta.url), "utf8")
@@ -72,7 +73,9 @@ test("Android package keeps the simple Vivid Cinema display name and shared laun
   assert.match(configure, /REQUEST_INSTALL_PACKAGES/);
   assert.match(configure, /versionCode/);
   assert.match(configure, /versionName/);
-  assert.match(configure, /DownloadManager/);
+  assert.match(nativeUpdater, /DownloadManager/);
+  assert.match(nativeUpdater, /Settings\.canRequestPackageInstalls/);
+  assert.match(nativeUpdater, /getSharedPreferences/);
   assert.match(iconScript, /vivid-icon-180\.png/);
   assert.match(iconScript, /ic_launcher_round\.png/);
 });
