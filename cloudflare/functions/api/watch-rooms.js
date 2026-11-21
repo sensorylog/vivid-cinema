@@ -965,6 +965,11 @@ async function publishWatchRoomPlayback(request) {
   const season = mediaType === "tv" ? Number(request.data?.season) : null;
   const episode = mediaType === "tv" ? Number(request.data?.episode) : null;
   if (mediaType === "tv" && (!Number.isInteger(season) || season < 1 || season > 500 || !Number.isInteger(episode) || episode < 1 || episode > 5000)) throw new HttpsError("invalid-argument", "A valid season and episode are required.");
+  const expectedRevisionInput = request.data?.expectedRevision;
+  const expectedRevision = expectedRevisionInput == null ? null : Number(expectedRevisionInput);
+  if (expectedRevision != null && (!Number.isSafeInteger(expectedRevision) || expectedRevision < 0)) {
+    throw new HttpsError("invalid-argument", "Playback revision is invalid. Reload the screening and try again.");
+  }
   const roomRef = db.collection("rooms").doc(roomId);
   const stateRef = roomRef.collection("playback").doc("current");
   const now = Timestamp.now();
@@ -977,15 +982,30 @@ async function publishWatchRoomPlayback(request) {
     if (!roomData || roomData.status !== "open" || !Number.isFinite(roomData.expiresAt?.toMillis?.()) || roomData.expiresAt.toMillis() <= now.toMillis() || !memberData || !((roomData.hostUid === uid && memberData.role === "host") || (memberData.role === "guest" && roomData.allowGuestPlaybackControl === true))) {
       throw new HttpsError("permission-denied", "Only the host or a guest explicitly allowed to control playback can publish playback.");
     }
-    if (String(roomData.activeScreening?.sessionId || "") !== sessionId) {
+    const activeScreening = roomData.activeScreening || {};
+    if (String(activeScreening.sessionId || "") !== sessionId) {
       throw new HttpsError("failed-precondition", "This playback update belongs to an old or inactive screening.");
+    }
+    if (String(activeScreening.contentId || "") !== contentId || activeScreening.mediaType !== mediaType ||
+      (mediaType === "tv" && (Number(activeScreening.season) !== season || Number(activeScreening.episode) !== episode))) {
+      throw new HttpsError("failed-precondition", "Playback must match the exact title and episode selected for this screening.");
     }
     const previous = current.exists ? current.data() : null;
     if (previous && (previous.contentId !== contentId || previous.mediaType !== mediaType || (mediaType === "tv" && (previous.season !== season || previous.episode !== episode)))) throw new HttpsError("failed-precondition", "This room is already synchronized to a different title or episode.");
-    if (previous?.lastEventAt?.toMillis && now.toMillis() - previous.lastEventAt.toMillis() < 1800 && status === "playing") return { accepted: false, reason: "rate-limited" };
-    const revision = Number(previous?.revision || 0) + 1;
-    tx.set(stateRef, { sessionId, provider, contentId, mediaType, season, episode, status, position, duration, hostUid: roomData.hostUid, controllerUid: uid, revision, updatedAt: now, lastEventAt: now });
-    return { accepted: true, revision };
+    const currentRevision = Number(previous?.revision || 0);
+    if (expectedRevision != null && expectedRevision !== currentRevision) {
+      return { accepted: false, reason: "stale-revision", revision: currentRevision };
+    }
+    if (previous?.lastEventAt?.toMillis && now.toMillis() - previous.lastEventAt.toMillis() < 1800 && status === "playing") {
+      return { accepted: false, reason: "rate-limited", revision: currentRevision };
+    }
+    const revision = currentRevision + 1;
+    tx.set(stateRef, {
+      schemaVersion: 1, sessionId, provider, contentId, mediaType, season, episode,
+      status, position, duration, hostUid: roomData.hostUid, controllerUid: uid,
+      revision, updatedAt: now, lastEventAt: now
+    });
+    return { accepted: true, revision, serverTime: now.toMillis() };
   });
 }
 
