@@ -56,7 +56,7 @@ const selectionLabel = document.getElementById("vivid-room-sync-selection-label"
 const selectionControls = document.getElementById("vivid-room-sync-selection-controls");
 const playerSelect = document.getElementById("vivid-room-sync-player");
 const providerSelect = document.getElementById("vivid-room-sync-provider");
-const setNote = message => { if (note) note.textContent = message; };
+const setNote = message => { if (note && note.textContent !== message) note.textContent = message; };
 
 
 const ROOM_PLAYER_OPTIONS = {
