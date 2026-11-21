@@ -243,7 +243,7 @@ test("Watch Room player uses scroll-aware floating presentation with hysteresis"
     disconnect() { observedTarget = null; }
   }
   const slot = { classList: classes(), scrollIntoView() { this.scrolled = true; } };
-  const overlay = { classList: classes(), dataset: {}, querySelector() { return null; } };
+  const overlay = { classList: classes(), dataset: {}, setAttribute(name, value) { this[name] = value; }, querySelector() { return null; } };
   const presentations = [];
   const layout = mountWatchRoomPlayerLayout({
     slot, overlay, Observer: FakeIntersectionObserver,
