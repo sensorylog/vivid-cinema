@@ -254,7 +254,7 @@ document.addEventListener("vivid:watch-room-open", async event => {
   activeRoom = nextRoom;
   panel.hidden = false;
   joinButton.hidden = Boolean(livekitRoom);
-  setStatus("Voice is separate from movie playback. Join when you're ready to talk.");
+  setStatus("Voice is optional and separate from movie playback. Join when ready to talk.");
   syncVoicePermission();
   renderParticipants();
   const intent = readVoiceIntent();
