@@ -282,7 +282,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
-import android.webkit.WebChromeClient;
+import android.webkit.WebChromeClient.CustomViewCallback;
 import com.getcapacitor.Bridge;
 import com.getcapacitor.BridgeWebChromeClient;
 
