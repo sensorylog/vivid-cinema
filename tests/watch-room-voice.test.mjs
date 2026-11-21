@@ -164,6 +164,8 @@ test("Watch Room screenings stay embedded in the lobby and float without stoppin
   assert.ok(!watchPage.includes('overlay.classList.add("is-minimized")'), "Watch Room playback must not use the old close-to-minimize modal flow");
   assert.ok(watchPage.includes('const restoringMiniPlayer = !isWatchRoomCinemaMode && overlay.classList.contains("is-minimized") && playerHasOpened'));
   assert.ok(watchPage.includes("if (restoringMiniPlayer)"));
+  assert.ok(watchPage.includes("setFallbackFullscreen(true)"));
+  assert.ok(watchPage.includes('document.body.classList.toggle("vivid-room-player-fullscreen"'));
   assert.ok(watchPage.includes('returnInlineButton?.addEventListener("click", () => roomPlayerLayout?.focus())'));
   assert.ok(watchPage.includes('vivid:watch-room-screening-validated'));
   assert.ok(watchPage.includes("watchRoomScreeningValidated = true"));
@@ -185,6 +187,7 @@ test("Watch Room screenings stay embedded in the lobby and float without stoppin
   assert.ok(experienceStyles.includes("#player-overlay.is-floating"));
   assert.ok(experienceStyles.includes("#vivid-tflix-player"));
   assert.ok(experienceStyles.includes("#player-status"));
+  assert.ok(experienceStyles.includes("vivid-player-fullscreen-fallback"));
   assert.ok(layoutController.includes('overlay.classList.toggle("is-floating", value)'));
   assert.ok(!layoutController.includes(".src") && !layoutController.includes("innerHTML"), "scroll presentation must not reload or recreate the playing media element");
   assert.ok(experienceStyles.includes("aspect-ratio:16/9!important"));
