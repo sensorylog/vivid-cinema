@@ -9,8 +9,9 @@ const clients = await Promise.all([
 
 test("Watch Rooms browser client sends Firebase Auth and standard App Check tokens", async () => {
   assert.ok(client.includes('getToken(appCheck, false)'));
-  assert.ok(client.includes("appCheck/native-play-integrity-not-configured"));
-  assert.match(client, /Native Firebase App Check with Play Integrity must be configured first/);
+  assert.doesNotMatch(client, /Play Integrity/);
+  assert.match(client, /Cloudflare browser verification is unavailable/);
+  assert.match(client, /Turnstile widget hostname/);
   const firebase = await readFile(new URL("../scripts/firebase.js", import.meta.url), "utf8");
   assert.match(firebase, /isTokenAutoRefreshEnabled:\s*false/);
   const dashboard = await readFile(new URL("../scripts/watch-rooms.js", import.meta.url), "utf8");
@@ -19,7 +20,7 @@ test("Watch Rooms browser client sends Firebase Auth and standard App Check toke
   assert.doesNotMatch(client, /getLimitedUseToken/);
   assert.ok(client.includes('user.getIdToken()'));
   assert.ok(client.includes('"X-Firebase-AppCheck"'));
-  assert.ok(client.includes('const API_URL = "/api/watch-rooms"'));
+  assert.ok(client.includes('getCloudflareApiUrl("/api/watch-rooms")'));
   assert.ok(client.includes('credentials: "omit"'));
   assert.ok(client.includes('return { data: payload.data }'));
 });
