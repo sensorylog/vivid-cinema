@@ -1,8 +1,8 @@
 /**
  * Decide whether a guest may follow the room clock.
- * Guests are held locally until they explicitly join the screening. This also
- * prevents an embed's own autoplay behaviour from becoming an independent
- * playback session while the host is still waiting.
+ * A guest follows the room clock as soon as their active screening is open.
+ * The provider/browser may still require one user gesture before audible
+ * playback can begin; after that, remote commands keep the player aligned.
  */
 export function getGuestPlaybackAction({ role, joinedPlayback, playbackStatus } = {}) {
   if (role !== "guest") return "ignore";
