@@ -91,6 +91,8 @@ test("Watch Room preloads guest players and holds preparation playback until the
   assert.ok(client.includes("refreshRoomPlayerSelection().catch(error => setNote"), "new screenings should apply the shared player selection immediately");
   assert.match(client, /"cinesrc:skipintro"/);
   assert.match(client, /"cinesrc:ratechange"/);
+  assert.match(client, /"cinesrc:nextepisode"/);
+  assert.match(client, /Episodes are locked to the shared screening/);
 });
 
 test("Watch Rooms expose only providers with verified synchronized controls and use realtime snapshots", async () => {
