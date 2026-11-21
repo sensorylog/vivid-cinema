@@ -46,6 +46,8 @@ test("updater compares remote metadata and installs the cleanly named APK", () =
   assert.match(updater, /Vivid-Cinema-Android\.apk/);
   assert.match(updater, /shouldShowAndroidUpdate/);
   assert.match(updater, /isAndroidUpdateCheckFresh/);
+  assert.match(updater, /if \(!nativeRuntime\(\) \|\| updateCheckInFlight\) return/);
+  assert.match(updater, /finally \{[\s\S]*?updateCheckInFlight = false/);
   assert.match(updater, /if \(!remote\)[\s\S]*?failed: true/);
   assert.match(updater, /retain any cached APK/);
   assert.match(updater, /downloadAndInstall\(\{ url: update\.url, version: update\.version \}\)/);
