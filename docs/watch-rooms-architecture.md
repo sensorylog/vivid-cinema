@@ -138,18 +138,20 @@ Each stage is delivered as focused commits on feature/watch-rooms and reviewed b
 - Lobby collections are readable only by current room members. All client writes to presence, queue and chat are denied by Firestore rules; mutations use trusted API operations.
 - Client lobby listeners are torn down when the user leaves the lobby. Playback synchronization remains Stage 5 and is not implied by the lobby.
 
-## Stage 5 synchronized playback — initial adapter
+## Stage 5 synchronized playback — verified provider adapters and room clock
 
-- The first verified synchronization adapter is VidSrc at the configured exact origin `https://vidsrc.sh`.
-- VidSrc documents both `PLAYER_EVENT` playback updates and parent-frame play, pause and absolute/relative seek commands. Vivid accepts events only from the active iframe window and exact VidSrc origin, and sends commands back with that exact target origin.
-- VidAPI currently documents playback events but not a parent command API; VidLink documents events but not playback control commands. Those providers remain normal playback sources and are not advertised as synchronized.
-- The host is authoritative. A trusted API operation rechecks open-room membership and host role in the same transaction that updates `rooms/{roomId}/playback/current`.
+- VidSrc at the exact origin `https://vidsrc.sh` and CineSRC at `https://cinesrc.st` are the currently enabled synchronization adapters. Both expose parent-frame playback commands and playback events. Vivid validates both the active iframe window and exact provider origin before accepting events or sending commands.
+- VidAPI, VidLink and other providers remain available for individual playback, but are not advertised as synchronized until their command and event contracts are independently verified.
+- The host is authoritative by default. A trusted API operation rechecks open-room membership, host role, active screening identity and expected playback revision inside the same transaction that updates `rooms/{roomId}/playback/current`. Delegated guest control remains an explicit room setting.
 - Members receive realtime read-only playback snapshots. Clients cannot write playback state directly.
-- Guests join through a room invitation code on the watch page. The expected invitation target is validated before redemption so a Cinema Club code cannot be consumed accidentally.
-- The guest estimates the host position using the server timestamp, applies play/pause commands, and seeks when drift exceeds 2.5 seconds. A guest must start the VidSrc player through a user gesture before browser playback policy permits remote play commands.
-- Room state is locked to one title and (for TV) one episode. Changing to a different title requires a new screening room.
-- Host authority does not transfer automatically. Only the current host may publish playback; guests cannot claim control. If the host disconnects, the last snapshot remains available but no new authoritative commands are issued. The host can close the room; a new screening should be created if a different host is needed.
-- This is provider-assisted synchronization, not a promise of frame-perfect playback. Third-party network latency, buffering and browser autoplay restrictions remain outside Vivid's control.
+- The lobby automatically moves active members into the room's current screening. Once connected, guests follow the room clock automatically; there is no second manual join action.
+- Play, pause, seek and ended events are classified separately from periodic progress heartbeats. Control transitions are committed immediately; only repeated progress heartbeats are rate-limited. A seek must never be discarded as an ordinary playing heartbeat.
+- Playback position is estimated from the trusted server timestamp and a measured client/server clock offset. The client also extrapolates its own last observed playback position before comparing drift, avoiding repeated seeks caused by stale event timestamps.
+- Guests periodically reconcile against the latest room clock, retry unconfirmed play/pause/seek commands, and fetch a fresh authoritative snapshot after reconnect or returning to a visible tab. Older playback revisions and stale screening sessions are ignored.
+- Some browsers and embedded providers block audible autoplay until the viewer interacts with the player. When that happens, Vivid explains that the viewer must tap Play once; subsequent host commands and timeline corrections are automatic. This is a browser/provider restriction, not something a web app can safely bypass.
+- Room state is locked to one title and (for TV) one episode. Changing to a different title starts a new screening session.
+- Host authority does not transfer automatically. The last trusted snapshot remains available if the host disconnects, but no new host commands are issued until the host reconnects or the room is closed.
+- This is provider-assisted synchronization, not a promise of frame-perfect playback. Third-party buffering, network latency, and provider behavior remain outside Vivid's control.
 
 
 ## Stage 6 persistent Cinema Club experience
@@ -172,7 +174,7 @@ Each stage is delivered as focused commits on feature/watch-rooms and reviewed b
 - The club UI disables write forms until a club is selected, restores listeners after back-forward cache navigation, shows live watchlist/screening counts, and links the screening action to the actual club screening form.
 - Stage 7 test coverage includes Stage 6 API route contracts, active-club transaction rechecks, member-only archive access, archived-club read denial, and client-write denial.
 - Release gate: the latest commit must pass the repository's Tests, Firestore Rules, static validation, browser navigation, Windows and Android workflows. Cloudflare Pages is tracked separately as a deployment check. A queued or in-progress workflow is not considered a pass.
-- Known product boundary: synchronized playback is currently supported only through the verified VidSrc parent-frame control contract; it is not frame-perfect and browser autoplay/network buffering remain external constraints.
+- Known product boundary: synchronized playback is enabled only for the verified VidSrc and CineSRC parent-frame control contracts; it is not frame-perfect and browser autoplay/network buffering remain external constraints.
 
 - Watch Room queue items can be removed by their author or the host. Removal and queueCount decrement occur in the same transaction, so a removed suggestion releases capacity without allowing concurrent overfill.
 - Room chat is capped at 500 messages per room with a transactionally maintained counter, in addition to the per-member send cooldown and message-length bound.
