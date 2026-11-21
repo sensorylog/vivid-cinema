@@ -12,3 +12,7 @@ export function resolveAndroidBackAction({ currentRoute, stack, canGoBack, histo
   }
   return { type: "exit", stack: nextStack };
 }
+
+export function resolveAndroidPlayerBackAction({ fullscreen, fallbackFullscreen }) {
+  return fullscreen || fallbackFullscreen ? "exit-fullscreen" : "close-player";
+}
