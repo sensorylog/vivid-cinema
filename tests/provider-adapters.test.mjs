@@ -26,6 +26,8 @@ test("only documented VidSrc and CineSRC bridges advertise room-control capabili
     }
   }
   assert.equal(providerSupports("player1", "vidsrc", "canSeek"), true);
+  assert.equal(providerSupports("player1", "vidsrc", "canSetRate"), true);
+  assert.equal(providerSupports("player2", "cinesrc", "canSetRate"), true);
   assert.equal(providerSupports("player2", "vidsrc-embed", "canSeek"), false);
   assert.equal(providerSupports("player2", "cinesrc", "canSeek"), true);
   assert.equal(providerSupports("player2", "vidlink", "canReadPosition"), false);
@@ -43,6 +45,7 @@ test("commands require a supported action and matching iframe origin", () => {
   assert.deepEqual(calls[2], [{ player: true, action: "rate", value: 1.5 }, "https://vidsrc.sh"]);
   assert.equal(sendProviderCommand({ adapter, frame, action: "pause" }), true);
   assert.equal(sendProviderCommand({ adapter, frame, action: "volume" }), false);
+  assert.equal(sendProviderCommand({ adapter, frame, action: "rate", rate: 5 }), false);
   assert.equal(sendProviderCommand({ adapter: getProviderAdapter("player2", "vidsrc-embed"), frame, action: "play" }), false);
   assert.equal(sendProviderCommand({ adapter, frame: { ...frame, src: "https://evil.example/embed" }, action: "play" }), false);
 });
