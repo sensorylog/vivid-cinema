@@ -672,8 +672,9 @@ function playerInfoMarkup() {
   const synopsis = episode?.overview || media?.overview || details?.overview || "";
   const year = String(episode?.air_date || media?.release_date || media?.first_air_date || "").slice(0, 4);
   const runtime = Number(episode?.runtime || details?.runtime || details?.episode_run_time?.[0] || 0);
-  const rating = Number(episode?.vote_average || media?.vote_average || details?.vote_average || 0);
-  const voteCount = Number(episode?.vote_count || media?.vote_count || details?.vote_count || 0);
+  // TV episode scores stay episode-specific; never silently substitute the series score.
+  const rating = Number(isTv && episode ? episode.vote_average : media?.vote_average || details?.vote_average || 0);
+  const voteCount = Number(isTv && episode ? episode.vote_count : media?.vote_count || details?.vote_count || 0);
   const genres = (details?.genres || []).map(genre => genre.name).filter(Boolean).slice(0, 4);
   const ratingLabel = rating > 0
     ? '<span class="vivid-player-rating"><i class="bi bi-star-fill" aria-hidden="true"></i><strong>' + rating.toFixed(1) + '</strong><small>TMDB</small></span>'
