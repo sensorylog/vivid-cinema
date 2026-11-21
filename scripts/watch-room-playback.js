@@ -241,6 +241,13 @@ async function refreshPlayback() {
     }
   } catch (error) {
     if (roomId === requestedRoomId && requestGeneration === playbackConnectionGeneration) {
+      const errorCode = String(error?.code || "");
+      if (role === "guest" && (errorCode.endsWith("permission-denied") || errorCode.endsWith("not-found"))) {
+        pauseGuestPlayer("This Watch Room has ended or your membership was removed. Playback is paused.");
+        stopConnection();
+        setNote("The Watch Room is no longer active. Your player has been paused.");
+        return;
+      }
       playbackPollDelayMs = Math.min(15000, Math.max(2500, playbackPollDelayMs * 2));
       setNote(error?.message || "Playback sync connection was interrupted. Retrying automatically.");
     }
