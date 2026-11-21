@@ -64,7 +64,6 @@ public class VividWebChromeClient extends BridgeWebChromeClient {
         if (view.getParent() instanceof ViewGroup) {
             ((ViewGroup) view.getParent()).removeView(view);
         }
-        window.addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             WindowInsets rootInsets = decorView.getRootWindowInsets();
             if (rootInsets != null) {
@@ -75,6 +74,13 @@ public class VividWebChromeClient extends BridgeWebChromeClient {
             if (controller != null) {
                 originalSystemBarsBehavior = controller.getSystemBarsBehavior();
                 originalSystemBarsAppearance = controller.getSystemBarsAppearance();
+            }
+        }
+
+        window.addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            WindowInsetsController controller = window.getInsetsController();
+            if (controller != null) {
                 controller.setSystemBarsBehavior(WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
                 controller.hide(WindowInsets.Type.systemBars());
             }
@@ -119,7 +125,6 @@ public class VividWebChromeClient extends BridgeWebChromeClient {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                 WindowInsetsController controller = window.getInsetsController();
                 if (controller != null) {
-                    int systemBars = WindowInsets.Type.systemBars();
                     controller.setSystemBarsBehavior(originalSystemBarsBehavior);
                     controller.setSystemBarsAppearance(
                         originalSystemBarsAppearance,
