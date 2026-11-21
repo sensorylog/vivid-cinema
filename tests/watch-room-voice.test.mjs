@@ -66,6 +66,8 @@ test("Watch Room ships voice controls and keeps the shared player inside the roo
   assert.match(html, /id="wr-voice-call"/);
   assert.match(html, /id="wr-screening-stage"/);
   assert.match(lobby, /openEmbeddedScreening\(response\.data\?\.screening\)/);
+  assert.ok(lobby.includes("activeSessionId !== loadedScreeningSessionId"));
+  assert.ok(lobby.includes("openEmbeddedScreening(room.activeScreening)"));
   assert.match(voice, /getWatchRoomVoiceToken/);
   assert.match(voice, /setMicrophoneEnabled/);
   assert.match(api, /async function getWatchRoomVoiceToken/);
