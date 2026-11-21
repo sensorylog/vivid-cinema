@@ -112,12 +112,18 @@ async function checkForAndroidUpdate() {
     }
     const release = await response.json();
     const remote = latestAndroidBuild(Array.isArray(release.assets) ? release.assets : []);
+    if (!remote) {
+      // A newly published desktop release may appear before its Android APK
+      // workflow finishes uploading assets. Retry soon and retain any cached APK.
+      writeAndroidUpdateState(storage, { ...state, checkedAt: Date.now(), failed: true });
+      return;
+    }
     const version = String(release.tag_name || local.version || "latest").replace(/^v/i, "");
     state = {
       ...state,
       checkedAt: Date.now(),
       failed: false,
-      update: remote ? { ...remote, version: remote.version || version } : null
+      update: { ...remote, version: remote.version || version }
     };
     writeAndroidUpdateState(storage, state);
     if (shouldShowAndroidUpdate(state, Number(local.build || 0))) {
