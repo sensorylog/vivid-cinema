@@ -25,6 +25,8 @@ test("native styling covers safe areas, touch targets, and accessible focus", ()
   assert.match(nativeCss, /font-size:\s*16px/);
   assert.match(nativeCss, /:focus-visible/);
   assert.match(nativeCss, /prefers-reduced-motion/);
+  assert.match(nativeCss, /\.vivid-player-dialog:fullscreen/);
+  assert.match(nativeCss, /vivid-player-fullscreen-fallback/);
 });
 
 test("Capacitor remains configured for the Vivid Cinema app", () => {
@@ -42,6 +44,8 @@ test("generated Android project registers a native hardware Back bridge", () => 
   assert.match(nativeConfigurator, /getActivity\(\)\.finish\(\)/);
   assert.match(appShell, /window\.Capacitor\?\.Plugins\?\.VividNavigation/);
   assert.match(appShell, /plugin\.addListener\("backButton"/);
+  assert.match(appShell, /playerOverlay && !playerOverlay\.hidden/);
+  assert.match(appShell, /vivid:android-back/);
 });
 
 test("Android Back follows the in-app route stack before using WebView history", () => {
