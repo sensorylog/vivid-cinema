@@ -628,6 +628,7 @@ test("Watch Room linked Cinema Clubs validate membership and record screenings a
   const node = readFileSync(new URL("../api/watch-rooms.js", import.meta.url), "utf8");
   const cloudflare = readFileSync(new URL("../cloudflare/functions/api/watch-rooms.js", import.meta.url), "utf8");
   for (const backend of [node, cloudflare]) {
+    assert.ok(backend.includes("linkedClubId: null, linkedClubName: null"));
     const settingsStart = backend.indexOf("async function updateWatchRoomSettings");
     const settingsEnd = backend.indexOf("\nasync function ", settingsStart + 10);
     const settings = backend.slice(settingsStart, settingsEnd);
