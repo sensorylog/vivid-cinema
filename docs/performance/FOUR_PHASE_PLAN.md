@@ -34,11 +34,12 @@ This document tracks the four phases of the shared web + desktop performance ove
 - Avoid large DOM rebuilds and unnecessary event handlers.
 - Add targeted regression tests around the measured causes.
 
-### Phase 4 — verification and regression protection
+### Phase 4 — verification and regression protection (CI verification complete; hardware profiling outstanding)
 
+- Run the full repository regression suite, syntax checks, static validation and cross-browser navigation smoke tests.
 - Compare representative pages on constrained and modern hardware.
 - Capture cold/warm navigation, scroll, input responsiveness, CPU, memory, DOM nodes, style/layout recalculations and long tasks.
-- Add sustainable performance budgets or automated checks where the environment can measure them reliably.
+- Add sustainable performance budgets or automated checks only where the environment can measure them reliably; do not invent thresholds without a baseline.
 - Document remaining trade-offs and confirm that visual/functional behaviour remains intact.
 
 ## Phase 1 audit findings (source inspection)
@@ -90,3 +91,43 @@ A before/after comparison is only valid when route, viewport, browser, cache sta
 - Added a regression contract to prevent per-card listener allocation from returning.
 - Source inspection did not justify a broad rewrite of Discover/For You or a framework change. No blanket DOM or image-loading changes were made without a measured trace.
 - Runtime impact remains unmeasured; Phase 4 must compare event-listener count, main-thread time and interaction latency on representative routes.
+
+
+## Phase 4 verification record
+
+### Automated verification observed on the Phase 4 review pass
+
+The following GitHub Actions results were observed for head commit `6463326a6f83f24503d60db11cdf093a25784f08`:
+
+| Workflow | Observed result |
+| --- | --- |
+| Tests (full Node test suite + syntax check) | Passed |
+| Quality checks (including Firestore emulator tests) | Passed |
+| Vivid Cinema CI (static validation, regression tests, syntax/import/asset checks, Cloudflare Functions bundle) | Passed |
+| Windows desktop build | Still running; installer/portable packaging step active |
+| Android APK build | Still running; APK build step active |
+| Browser navigation smoke tests | Still running; Chromium/WebKit navigation step active |
+
+The combined commit-status endpoint also reported two failed Netlify deploy-preview contexts. These are deployment-preview failures, not evidence that the test suite failed; they still need investigation before treating preview deployment as healthy. Workflow states can change after this snapshot and must be refreshed before merge.
+
+### What these checks do and do not prove
+
+- The passing test workflows establish that the repository's automated regression, syntax and static-validation suites passed for the reviewed commit.
+- Existing performance regression tests cover conservative hardware detection, one-time stylesheet injection, preservation of the standard visual profile, constrained-profile rendering rules, and delegated Home-card event wiring.
+- Browser navigation smoke tests are still running in this snapshot; even when they pass, they are not a substitute for a performance trace.
+- No real FPS, INP, CPU, GPU, memory, long-task, layout or paint measurements have been collected on either the target Core 2 Duo / 4 GB machine or a modern reference machine.
+- No numeric performance budget has been introduced. Without repeatable browser traces and a stable runner, a hard FPS or timing threshold would be arbitrary and could create false failures.
+
+### Required hardware comparison before Phase 4 can be called complete
+
+Run the same build and repeatable interaction script on (A) the target low-end PC and (B) a modern reference machine. Record browser/Electron version, OS, viewport, display scale, power mode, network, cache state and whether `vivid-performance-legacy` is present. For Home, Discover, Library and For You, capture:
+
+1. Cold navigation and a second warm navigation.
+2. Ten seconds idle, 30 seconds vertical scrolling, ten horizontal-rail swipes, and repeated primary actions.
+3. Chrome/Chromium Performance traces and Performance Monitor samples: CPU, JS heap, DOM nodes, event listeners, layouts/sec and style recalculations/sec.
+4. FPS meter / paint flashing during scrolling, plus long tasks and interaction latency.
+5. Functional/visual checks: card navigation, keyboard activation, resume playback, Coming Soon reminders, rail controls, sticky navigation, poster visibility and route transitions.
+
+Compare like-for-like traces. Record actual values and attach the trace files; do not infer improvement from the device profile activating or from a source diff alone.
+
+**Phase 4 status: not complete yet.** Automated regression checks have passed where reported above, but final browser smoke/build jobs were still in progress at the snapshot, deploy previews reported failures, and the required real-hardware performance comparison has not been run. Keep PR #508 open and in draft until these gaps are closed.
