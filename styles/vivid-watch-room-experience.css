@@ -206,6 +206,37 @@ body.vivid-watch-rooms-page.vivid-watch-room-mode .vivid-wr-player-slot.is-float
   position:absolute!important;inset:0!important;width:100%!important;height:100%!important
 }
 
+/* Fullscreen fallback for Safari/WebViews that cannot fullscreen the dialog element. */
+body.vivid-watch-rooms-page.vivid-watch-room-mode.vivid-room-player-fullscreen #wr-cinema-stage{
+  position:relative!important;z-index:2147483000!important
+}
+body.vivid-watch-rooms-page.vivid-watch-room-mode .vivid-wr-player-slot #player-overlay.vivid-player-fullscreen-fallback{
+  position:fixed!important;inset:0!important;display:flex!important;align-items:stretch!important;justify-content:stretch!important;
+  box-sizing:border-box!important;width:100vw!important;height:100dvh!important;min-height:0!important;
+  max-width:none!important;max-height:none!important;margin:0!important;padding:0!important;overflow:hidden!important;
+  z-index:2147483000!important;background:#000!important;pointer-events:auto!important
+}
+body.vivid-watch-rooms-page.vivid-watch-room-mode .vivid-wr-player-slot #player-overlay.vivid-player-fullscreen-fallback .vivid-player-dialog{
+  display:flex!important;flex-direction:column!important;width:100%!important;height:100dvh!important;
+  min-height:0!important;max-width:none!important;max-height:none!important;margin:0!important;
+  border:0!important;border-radius:0!important
+}
+body.vivid-watch-rooms-page.vivid-watch-room-mode .vivid-wr-player-slot #player-overlay.vivid-player-fullscreen-fallback .vivid-player-dialog-head{
+  top:env(safe-area-inset-top,0px)!important;height:50px!important;min-height:50px!important
+}
+body.vivid-watch-rooms-page.vivid-watch-room-mode .vivid-wr-player-slot #player-overlay.vivid-player-fullscreen-fallback .vivid-player-layout{
+  display:flex!important;flex:1 1 auto!important;width:100%!important;height:100%!important;min-height:0!important
+}
+body.vivid-watch-rooms-page.vivid-watch-room-mode .vivid-wr-player-slot #player-overlay.vivid-player-fullscreen-fallback .vivid-player-main,
+body.vivid-watch-rooms-page.vivid-watch-room-mode .vivid-wr-player-slot #player-overlay.vivid-player-fullscreen-fallback .vivid-player-frame{
+  width:100%!important;height:100%!important;min-height:0!important;aspect-ratio:auto!important
+}
+body.vivid-watch-rooms-page.vivid-watch-room-mode .vivid-wr-player-slot #player-overlay.vivid-player-fullscreen-fallback .vivid-player-frame{
+  border-radius:0!important
+}
+body.vivid-watch-rooms-page.vivid-watch-room-mode .vivid-wr-player-slot .vivid-player-dialog:fullscreen{
+  width:100vw!important;height:100dvh!important;max-height:none!important;border:0!important;border-radius:0!important
+}
 /* Premium room voice: calm status, clear controls, and speaking-aware member chips. */
 body.vivid-watch-rooms-page .vivid-wr-voice-panel{
   position:relative!important;top:auto!important;z-index:5!important;display:block!important;
