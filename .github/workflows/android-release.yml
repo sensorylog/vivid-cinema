@@ -93,13 +93,17 @@ jobs:
       - name: Apply shared Vivid Cinema launcher icon
         run: node automation/apply-android-icon.mjs
 
-      - name: Build signed release APK
+      - name: Build signed release APK and Google Play App Bundle
         run: |
+          set -euo pipefail
           chmod +x android/gradlew
           cd android
-          ./gradlew assembleRelease
+          ./gradlew assembleRelease bundleRelease
           mkdir -p ../release-output
           cp app/build/outputs/apk/release/app-release.apk ../release-output/Vivid-Cinema-Android.apk
+          cp app/build/outputs/bundle/release/app-release.aab ../release-output/Vivid-Cinema-Android.aab
+          test -s ../release-output/Vivid-Cinema-Android.apk
+          test -s ../release-output/Vivid-Cinema-Android.aab
 
       - name: Verify APK signature and package
         shell: bash
@@ -110,6 +114,7 @@ jobs:
           apksigner_path="$(find "$ANDROID_HOME/build-tools" -type f -name apksigner -print -quit)"
           test -n "$apksigner_path"
           "$apksigner_path" verify --verbose "$apk"
+          jarsigner -verify -verbose release-output/Vivid-Cinema-Android.aab >/dev/null
           aapt_path="$(find "$ANDROID_HOME/build-tools" -type f -name aapt -print -quit)"
           test -n "$aapt_path"
           "$aapt_path" dump badging "$apk" | grep -F "package: name='com.vividcinema.app'"
