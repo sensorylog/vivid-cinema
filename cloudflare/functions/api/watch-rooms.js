@@ -401,7 +401,7 @@ async function liveKitRoomName(roomId) {
 }
 
 async function removeLiveKitParticipant(roomId, identity) {
-  if (!livekitUrl || !livekitApiKey || !livekitApiSecret) return false;
+  if (!livekitUrl || !livekitApiKey || !livekitApiSecret) return true;
   try {
     const roomName = await liveKitRoomName(roomId);
     const token = await createLiveKitRoomAdminToken({
