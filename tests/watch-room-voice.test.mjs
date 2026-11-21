@@ -37,8 +37,8 @@ test("LiveKit access token is short-lived and scoped to one room and one member"
 test("LiveKit token signer trims copied Cloudflare key and secret whitespace", async () => {
   const now = 1_800_000_000_000;
   const result = await createLiveKitAccessToken({
-    apiKey: "  LK_TEST_KEY\\n",
-    apiSecret: "  a-test-only-livekit-secret-value\\n",
+    apiKey: "  LK_TEST_KEY\n",
+    apiSecret: "  a-test-only-livekit-secret-value\n",
     identity: "member_123",
     roomName: "vivid-" + "c".repeat(32),
     displayName: "Vivid member",
