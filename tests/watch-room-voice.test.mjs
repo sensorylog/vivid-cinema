@@ -97,6 +97,13 @@ test("Watch Room screenings stay in the lobby and minimize without stopping play
   assert.ok(lobbyHtml.includes('src="scripts/watch-room-playback.js"'));
   assert.ok(lobby.includes('new URL("watch-rooms.html", window.location.href)'));
   assert.ok(lobby.includes("function setRoomView("));
+  assert.ok(lobby.includes('event.key === "ArrowRight"'));
+  assert.ok(lobby.includes('event.key === "ArrowLeft"'));
+  assert.ok(lobby.includes('event.key === "Home"'));
+  assert.ok(lobby.includes('event.key === "End"'));
+  assert.ok(lobby.includes("setRoomView(roomViewButtons[next].dataset.roomView)"));
+  assert.ok(html.includes('role="log" aria-live="polite"'));
+  assert.ok(!roomStyles.includes("body.vivid-wr-screening-open"), "obsolete full-screen lobby overlay styles should be removed");
   assert.ok(lobby.includes("function renderCinemaStage()"));
   assert.ok(lobby.includes("function subscribeRoomRealtime(roomId)"));
   assert.ok(lobby.includes('onSnapshot(queueRef'));
