@@ -28,6 +28,7 @@ try { VIDSRC_ORIGINS.add(new URL(VIVID_CONFIG.api.vidsrcEmbedBaseUrl || "https:/
 let media = null;
 let details = null;
 let watchRoomScreeningValidated = false;
+let roomOpenPlayerWindow = null;
 let pendingRoomPlayerSelection = null;
 let currentParams = null;
 let lastHistorySyncAt = 0;
@@ -467,7 +468,7 @@ document.addEventListener("vivid:watch-room-screening-validated", event => {
       String(screening?.contentId || "") !== String(params.get("id") || "") ||
       watchRoomScreeningValidated) return;
   watchRoomScreeningValidated = true;
-  if (currentParams) openPlayerWindow();
+  if (currentParams) roomOpenPlayerWindow?.();
   if (pendingRoomPlayerSelection) {
     const selection = pendingRoomPlayerSelection;
     pendingRoomPlayerSelection = null;
@@ -478,7 +479,7 @@ document.addEventListener("vivid:watch-room-screening-validated", event => {
 document.addEventListener("vivid:watch-room-screening-focus", event => {
   if (isWatchRoomCinemaMode && watchRoomScreeningValidated &&
       event.detail?.roomId === new URLSearchParams(window.location.search).get("roomId")) {
-    openPlayerWindow();
+    roomOpenPlayerWindow?.();
   }
 });
 
@@ -903,6 +904,7 @@ function renderShell(params) {
     }
     closePlayer?.focus({ preventScroll: true });
   };
+  roomOpenPlayerWindow = openPlayerWindow;
   const closePlayerWindow = () => {
     if (!overlay) return;
     if (isWatchRoomCinemaMode) {
@@ -1306,7 +1308,7 @@ async function load() {
   }
   media = normalizeMedia({ id: currentParams.id, overview: "", title: currentParams.type === "tv" ? "Loading episode…" : "Loading movie…", poster_path: "", backdrop_path: "" }, currentParams.type);
   renderShell(currentParams);
-  if (isWatchRoomCinemaMode && watchRoomScreeningValidated) openPlayerWindow();
+  if (isWatchRoomCinemaMode && watchRoomScreeningValidated) roomOpenPlayerWindow?.();
   try {
     details = currentParams.type === "tv" ? await tmdbApi.tvDetails(currentParams.id) : await tmdbApi.movieDetails(currentParams.id);
     media = normalizeMedia(details, currentParams.type);
