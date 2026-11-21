@@ -6,6 +6,7 @@ import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { resolveAndroidBackAction } from "../scripts/android-navigation.js";
+import { getCloudflareApiUrl } from "../scripts/cloudflare-api.js";
 import { applyPerformanceProfile, isLegacyPerformanceDevice } from "../scripts/performance-profile.js";
 
 const [builder, nativeCss, capacitorConfig, nativeConfigurator, appShell, nativeNavigation, nativeWebChrome] = await Promise.all([
@@ -269,6 +270,27 @@ test("Play Store native configuration omits the sideload updater and install-fro
     await readFile(path.join(javaRoot, "VividWebChromeClient.java"), "utf8");
   } finally {
     await rm(temp, { recursive: true, force: true });
+  }
+});
+
+test("Cloudflare API URL selection is native-aware and rejects unsafe paths", () => {
+  const originalWindow = globalThis.window;
+  try {
+    globalThis.window = {
+      location: { origin: "https://android.vivid-cinema.pages.dev" },
+      Capacitor: { isNativePlatform: () => true, getPlatform: () => "android" }
+    };
+    assert.equal(
+      getCloudflareApiUrl("/api/watch-rooms"),
+      "https://vivid-cinema.pages.dev/api/watch-rooms"
+    );
+    globalThis.window = { location: { origin: "https://vivid-cinema.pages.dev" } };
+    assert.equal(getCloudflareApiUrl("/api/app-check"), "https://vivid-cinema.pages.dev/api/app-check");
+    assert.throws(() => getCloudflareApiUrl("//evil.example/path"), TypeError);
+    assert.throws(() => getCloudflareApiUrl("https://evil.example/path"), TypeError);
+  } finally {
+    if (originalWindow === undefined) delete globalThis.window;
+    else globalThis.window = originalWindow;
   }
 });
 
