@@ -75,7 +75,8 @@ test("Watch Room preloads guest players and holds preparation playback until the
   const client = await readFile(new URL("../scripts/watch-room-playback.js", import.meta.url), "utf8");
   assert.match(client, /function pauseGuestPlayer\(/);
   assert.match(client, /getGuestPlaybackAction\(\{ role, joinedPlayback, playbackStatus: state\.status \}\)/);
-  assert.match(client, /if \(role !== "guest" \|\| joinedPlayback\)/);
+  assert.match(client, /const hasActiveScreening = Boolean\(room\.activeScreening\?\.sessionId\)/);
+  assert.match(client, /if \(hasActiveScreening && \(role !== "guest" \|\| joinedPlayback\)\)/);
   assert.match(client, /role === "guest" && \(!latestRemoteState \|\| latestRemoteState\.status !== "playing"\)/);
   assert.match(client, /else if \(detail\.status === "playing"\) pauseGuestPlayer\(/);
   assert.match(client, /const desiredStatus = state\.status === "playing" \? "playing" : "paused"/);
