@@ -228,3 +228,7 @@ body.vivid-watch-rooms-page.vivid-watch-room-mode #vivid-tflix-player.is-minimiz
  body.vivid-watch-rooms-page.vivid-watch-room-mode #vivid-tflix-player .vivid-tflix-sidebar{max-height:24dvh!important;border-top:1px solid rgba(255,255,255,.08)!important;border-left:0!important}
  body.vivid-watch-rooms-page.vivid-watch-room-mode #vivid-tflix-player.is-minimized{right:10px!important;bottom:max(10px,env(safe-area-inset-bottom))!important;width:min(300px,calc(100vw - 20px))!important}
 }
+
+/* Hidden remains authoritative despite the fullscreen room-player overrides. */
+body.vivid-watch-rooms-page.vivid-watch-room-mode #player-overlay[hidden]{display:none!important}
+body.vivid-watch-rooms-page.vivid-watch-room-mode .vivid-topbar{display:flex!important}
