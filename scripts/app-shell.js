@@ -562,6 +562,13 @@ function ensureMediaLayoutStyles() {
     link.dataset.vividPremiumExperience = "true";
     document.head.appendChild(link);
   }
+  if ((new URLSearchParams(window.location.search).get("roomMode") === "1" || /(?:^|\/)watch-rooms\.html$/.test(window.location.pathname)) && !document.querySelector("link[data-vivid-watch-room-cinema]")) {
+    const link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href = "./styles/vivid-watch-room-cinema.css?v=1";
+    link.dataset.vividWatchRoomCinema = "true";
+    document.head.appendChild(link);
+  }
 }
 
 function initHeaderScrollBehavior() {

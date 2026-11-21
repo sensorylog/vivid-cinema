@@ -1,0 +1,173 @@
+/* Watch Room cinematic surface. Loaded after the shared app/premium shell so
+   global mobile navigation and layout rules cannot leak into the screening. */
+body.vivid-watch-room-mode.vivid-app-experience .vivid-mobile-nav.vivid-v2-mobile-nav,
+body.vivid-watch-room-mode .vivid-mobile-nav,
+body.vivid-watch-room-mode .vivid-bottom-nav,
+body.vivid-watch-room-mode .vivid-mobile-tabbar,
+body.vivid-watch-room-mode .vivid-tab-bar,
+body.vivid-wr-screening-open.vivid-app-experience .vivid-mobile-nav.vivid-v2-mobile-nav,
+body.vivid-wr-screening-open .vivid-mobile-nav,
+body.vivid-wr-screening-open .vivid-bottom-nav,
+body.vivid-wr-screening-open .vivid-mobile-tabbar,
+body.vivid-wr-screening-open .vivid-tab-bar {
+  display:none!important;
+}
+body.vivid-watch-room-mode,
+body.vivid-wr-screening-open {
+  padding-bottom:0!important;
+  overflow:hidden!important;
+  overscroll-behavior:none;
+}
+
+/* The embedded player keeps only its source control; the cinema image owns
+   the viewport, not the normal Watch page chrome. */
+body.vivid-watch-room-mode .vivid-player-dialog-head {
+  position:fixed!important;
+  z-index:100001!important;
+  inset:max(10px,env(safe-area-inset-top)) 12px auto auto!important;
+  display:flex!important;
+  justify-content:flex-end!important;
+  width:auto!important;
+  min-height:0!important;
+  padding:0!important;
+  border:0!important;
+  background:transparent!important;
+  pointer-events:none;
+}
+body.vivid-watch-room-mode .vivid-player-dialog-heading,
+body.vivid-watch-room-mode .vivid-player-dialog-head h2,
+body.vivid-watch-room-mode .vivid-player-dialog-eyebrow,
+body.vivid-watch-room-mode .vivid-player-current-source,
+body.vivid-watch-room-mode #player-close {
+  display:none!important;
+}
+body.vivid-watch-room-mode .vivid-player-dialog-actions {
+  display:flex!important;
+  align-items:center!important;
+  pointer-events:auto!important;
+}
+body.vivid-watch-room-mode #player-server-menu {
+  min-height:42px!important;
+  padding:0 15px!important;
+  border:1px solid rgba(255,255,255,.16)!important;
+  border-radius:999px!important;
+  color:#f7f7fb!important;
+  background:rgba(13,15,21,.78)!important;
+  box-shadow:0 8px 30px rgba(0,0,0,.28)!important;
+  -webkit-backdrop-filter:blur(18px) saturate(150%);
+  backdrop-filter:blur(18px) saturate(150%);
+}
+body.vivid-watch-room-mode .vivid-player-layout,
+body.vivid-watch-room-mode .vivid-player-main,
+body.vivid-watch-room-mode .vivid-player-frame {
+  min-width:0!important;
+  min-height:0!important;
+}
+body.vivid-watch-room-mode .vivid-player-status {
+  width:min(88%,520px)!important;
+  max-width:calc(100vw - 32px)!important;
+  margin:auto!important;
+  padding:15px 18px!important;
+  border:1px solid rgba(255,255,255,.08)!important;
+  border-radius:16px!important;
+  color:#f3f4f8!important;
+  background:rgba(20,24,33,.88)!important;
+  box-shadow:0 12px 36px rgba(0,0,0,.24)!important;
+  text-align:center!important;
+  line-height:1.45!important;
+  overflow-wrap:anywhere!important;
+}
+
+/* Voice becomes a discreet floating dock. No full-height sidebar, no column
+   stretching, and no room chrome over the movie. */
+body.vivid-wr-screening-open #wr-voice-call {
+  position:fixed!important;
+  z-index:100002!important;
+  inset:auto 14px max(14px,env(safe-area-inset-bottom)) auto!important;
+  display:block!important;
+  width:max-content!important;
+  max-width:calc(100vw - 28px)!important;
+  height:auto!important;
+  min-height:0!important;
+  max-height:none!important;
+  margin:0!important;
+  padding:8px!important;
+  overflow:visible!important;
+  border:1px solid rgba(190,164,255,.24)!important;
+  border-radius:16px!important;
+  background:rgba(12,14,20,.88)!important;
+  box-shadow:0 12px 38px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.07)!important;
+  -webkit-backdrop-filter:blur(22px) saturate(155%);
+  backdrop-filter:blur(22px) saturate(155%);
+}
+body.vivid-wr-screening-open #wr-voice-call .vivid-wr-voice-heading {
+  display:flex!important;
+  align-items:center!important;
+  justify-content:flex-end!important;
+  flex-direction:row!important;
+  width:auto!important;
+  min-height:0!important;
+  margin:0!important;
+  padding:0!important;
+  gap:0!important;
+}
+body.vivid-wr-screening-open #wr-voice-call .vivid-wr-voice-heading>div:first-child,
+body.vivid-wr-screening-open #wr-voice-call #wr-voice-status,
+body.vivid-wr-screening-open #wr-voice-call #wr-voice-participants {
+  display:none!important;
+}
+body.vivid-wr-screening-open #wr-voice-call .vivid-wr-voice-actions {
+  display:flex!important;
+  align-items:center!important;
+  justify-content:flex-end!important;
+  flex-direction:row!important;
+  flex-wrap:nowrap!important;
+  width:auto!important;
+  min-height:0!important;
+  margin:0!important;
+  padding:0!important;
+  gap:7px!important;
+}
+body.vivid-wr-screening-open #wr-voice-call .vivid-wr-voice-actions button {
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  flex:0 0 auto!important;
+  width:auto!important;
+  min-width:104px!important;
+  min-height:42px!important;
+  margin:0!important;
+  padding:0 15px!important;
+  border-radius:12px!important;
+  white-space:nowrap!important;
+  font-size:.82rem!important;
+}
+body.vivid-wr-screening-open #wr-voice-call .vivid-wr-voice-actions button[hidden] {
+  display:none!important;
+}
+
+@media(max-width:650px) {
+  body.vivid-watch-room-mode .vivid-player-dialog-head {
+    top:max(8px,env(safe-area-inset-top))!important;
+    right:10px!important;
+  }
+  body.vivid-watch-room-mode #player-server-menu {
+    min-height:40px!important;
+    padding:0 13px!important;
+    font-size:.82rem!important;
+  }
+  body.vivid-wr-screening-open #wr-voice-call {
+    right:10px!important;
+    bottom:max(10px,env(safe-area-inset-bottom))!important;
+    left:auto!important;
+    width:max-content!important;
+    max-width:calc(100vw - 20px)!important;
+    padding:7px!important;
+  }
+  body.vivid-wr-screening-open #wr-voice-call .vivid-wr-voice-actions button {
+    min-width:100px!important;
+    min-height:40px!important;
+    padding:0 12px!important;
+    font-size:.78rem!important;
+  }
+}

@@ -78,7 +78,7 @@ test("LiveKit token signer rejects malformed identities and unscoped room names"
 });
 
 test("Watch Room ships voice controls and keeps the shared player inside the room shell", async () => {
-  const [html, lobby, voice, api, headers, playback, watchPage, roomStyles] = await Promise.all([
+  const [html, lobby, voice, api, headers, playback, watchPage, roomStyles, appShell, cinemaStyles] = await Promise.all([
     readFile(new URL("../watch-rooms.html", import.meta.url), "utf8"),
     readFile(new URL("../scripts/watch-room-lobby.js", import.meta.url), "utf8"),
     readFile(new URL("../scripts/watch-room-voice.js", import.meta.url), "utf8"),
@@ -86,7 +86,9 @@ test("Watch Room ships voice controls and keeps the shared player inside the roo
     readFile(new URL("../_headers", import.meta.url), "utf8"),
     readFile(new URL("../scripts/watch-room-playback.js", import.meta.url), "utf8"),
     readFile(new URL("../scripts/watch.js", import.meta.url), "utf8"),
-    readFile(new URL("../styles/vivid-watch-rooms.css", import.meta.url), "utf8")
+    readFile(new URL("../styles/vivid-watch-rooms.css", import.meta.url), "utf8"),
+    readFile(new URL("../scripts/app-shell.js", import.meta.url), "utf8"),
+    readFile(new URL("../styles/vivid-watch-room-cinema.css", import.meta.url), "utf8")
   ]);
   assert.match(html, /id="wr-voice-call"/);
   assert.match(html, /id="wr-screening-stage"/);
@@ -112,6 +114,11 @@ test("Watch Room ships voice controls and keeps the shared player inside the roo
   assert.ok(lobby.includes('url.searchParams.set("sessionId", String(screening.sessionId))'));
   assert.ok(watchPage.includes('route.params.get("roomMode") === "1"'));
   assert.ok(roomStyles.includes("body.vivid-wr-screening-open .vivid-wr-screening-frame-wrap"));
+  assert.ok(appShell.includes("vivid-watch-room-cinema.css"));
+  assert.ok(appShell.indexOf("vividPremiumExperience") < appShell.indexOf("vividWatchRoomCinema"));
+  assert.ok(cinemaStyles.includes("body.vivid-watch-room-mode.vivid-app-experience .vivid-mobile-nav.vivid-v2-mobile-nav"));
+  assert.ok(cinemaStyles.includes("body.vivid-wr-screening-open #wr-voice-call"));
+  assert.ok(cinemaStyles.includes("inset:auto 14px max(14px,env(safe-area-inset-bottom)) auto!important"));
   assert.ok(playback.includes("joinedPlayback && latestRemoteState?.status === \"playing\""));
   assert.ok(playback.includes("joinedPlayback = memberRole === \"guest\""));
   assert.ok(playback.includes("joinButton.hidden = true"));
