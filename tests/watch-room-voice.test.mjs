@@ -111,7 +111,7 @@ test("Watch Room screenings stay in the lobby and minimize without stopping play
   assert.ok(lobby.includes("linkedClubId: form.elements.linkedClubId.value || null"));
   assert.ok(lobby.includes('vivid:cinema-clubs-updated'));
   assert.ok(lobby.includes('vivid:open-linked-club'));
-  assert.ok(watchRooms.includes('vivid:open-linked-club'));
+  assert.ok(rooms.includes('vivid:open-linked-club'));
   assert.ok(lobby.includes("function subscribeRoomRealtime(roomId)"));
   assert.ok(lobby.includes('onSnapshot(queueRef'));
   assert.ok(lobby.includes('onSnapshot(chatRef'));
