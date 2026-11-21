@@ -105,7 +105,7 @@ function applyRoomPlayerSelection(room) {
     }
     activePlayerId = playerId;
     activeProviderId = providerId;
-    lastAppliedSelectionKey = key;
+    lastAppliedSelectionKey = hasActiveScreening ? key : "";
     if (playerId === "player2" && providerId === "cinesrc") pendingPlayer2Seek = position;
     if (hasActiveScreening && (role !== "guest" || joinedPlayback)) {
       roomPlayerLoadRequested = true;
