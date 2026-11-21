@@ -1,7 +1,7 @@
 import { auth, db } from "./firebase.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
 import { doc, onSnapshot } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
-import { classifyPlaybackEvent, getEstimatedLocalPlaybackPosition, getExpectedPlaybackPosition, isPlaybackRevisionStale, normalizePlaybackTimestamp, shouldCorrectPlayback } from "./playback/watch-room-sync.js";
+import { classifyPlaybackEvent, getEstimatedLocalPlaybackPosition, getExpectedPlaybackPosition, isPlaybackRevisionStale, normalizePlaybackRate, normalizePlaybackTimestamp, shouldCorrectPlayback } from "./playback/watch-room-sync.js";
 import { callWatchRoomApi } from "./watch-room-api.js";
 import { getProviderAdapter, sendProviderCommand as sendAdapterCommand } from "./playback/provider-adapters.js";
 import { getGuestPlaybackAction } from "./playback/watch-room-playback-policy.js";
@@ -29,6 +29,9 @@ let lastCommandedStatus = "";
 let lastCommandAt = 0;
 let lastSeekCommandAt = 0;
 let pendingPlaySince = 0;
+let localPlaybackRate = 1;
+let hostPlaybackRate = 1;
+let lastRateCommandAt = 0;
 let lastAppliedSelectionKey = "";
 let loadedScreeningSessionId = "";
 let roomPlayerLoadRequested = false;
@@ -104,6 +107,9 @@ function applyRoomPlayerSelection(room) {
       localStatus = "";
       lastCommandedStatus = "";
       pendingPlaySince = 0;
+      localPlaybackRate = 1;
+      hostPlaybackRate = 1;
+      lastRateCommandAt = 0;
     }
     activePlayerId = playerId;
     activeProviderId = providerId;
@@ -170,11 +176,11 @@ function getSupportedFrame() {
   try { return new URL(frame.src).origin === adapter.origin ? frame : null; } catch { return null; }
 }
 
-function sendProviderCommand(action, position) {
+function sendProviderCommand(action, position, rate) {
   const adapter = getActiveAdapter();
   const frame = getSupportedFrame();
   if (!adapter || !frame) return false;
-  return sendAdapterCommand({ adapter, frame, action, position });
+  return sendAdapterCommand({ adapter, frame, action, position, rate });
 }
 
 function stopConnection() {
@@ -190,7 +196,7 @@ function stopConnection() {
   if (selectionTimer) window.clearInterval(selectionTimer);
   heartbeatTimer = null; selectionTimer = null; if (syncReconcileTimer) window.clearInterval(syncReconcileTimer); syncReconcileTimer = null; lastAppliedSelectionKey = ""; loadedScreeningSessionId = ""; roomPlayerLoadRequested = false;
   selectionPanel.hidden = true;
-  roomId = ""; role = ""; allowGuestPlayerSelection = false; allowGuestPlaybackControl = false; suppressPlaybackPublishUntil = 0; latestRemoteState = null; joinedPlayback = false; localPosition = null; localPositionObservedAt = 0; localStatus = ""; hostStatus = "paused"; lastPublishAt = 0; lastPublishedStatus = ""; lastCommandedStatus = ""; lastCommandAt = 0; lastSeekCommandAt = 0; pendingPlaySince = 0; publishQueue = Promise.resolve(); lastHostPayload = null; clockOffsetMs = 0;
+  roomId = ""; role = ""; allowGuestPlayerSelection = false; allowGuestPlaybackControl = false; suppressPlaybackPublishUntil = 0; latestRemoteState = null; joinedPlayback = false; localPosition = null; localPositionObservedAt = 0; localStatus = ""; hostStatus = "paused"; lastPublishAt = 0; lastPublishedStatus = ""; lastCommandedStatus = ""; lastCommandAt = 0; lastSeekCommandAt = 0; pendingPlaySince = 0; localPlaybackRate = 1; hostPlaybackRate = 1; lastRateCommandAt = 0; publishQueue = Promise.resolve(); lastHostPayload = null; clockOffsetMs = 0;
   joinButton.hidden = true; leaveButton.hidden = true; form.hidden = false;
 }
 
@@ -637,6 +643,9 @@ document.addEventListener("vivid:watch-room-screening-navigate", event => {
       lastCommandAt = 0;
       lastSeekCommandAt = 0;
       pendingPlaySince = 0;
+      localPlaybackRate = 1;
+      hostPlaybackRate = 1;
+      lastRateCommandAt = 0;
       hostStatus = "paused";
       lastPublishAt = 0;
       lastPublishedStatus = "";
