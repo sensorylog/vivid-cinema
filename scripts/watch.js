@@ -925,7 +925,16 @@ function renderShell(params) {
       updateSourceLabel();
     };
   }
-  if (isWatchRoomCinemaMode) openPlayerWindow();
+  if (isWatchRoomCinemaMode) {
+    document.addEventListener("vivid:watch-room-screening-validated", event => {
+      const screening = event.detail?.activeScreening;
+      const params = new URLSearchParams(window.location.search);
+      if (event.detail?.roomId !== params.get("roomId") ||
+          String(screening?.sessionId || "") !== String(params.get("sessionId") || "") ||
+          String(screening?.contentId || "") !== String(params.get("id") || "")) return;
+      openPlayerWindow();
+    });
+  }
   recordHistory();
   recordBehavior("watch_started", media, { season: params.season, episode: params.episode, resumeAt });
 }
