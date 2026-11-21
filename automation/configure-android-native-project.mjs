@@ -86,5 +86,20 @@ if (!manifest.includes('android.hardware.microphone')) {
   );
   manifestChanged = true;
 }
+// Keep the embedded app on HTTPS-only transport and make Android resize the
+// WebView viewport when the software keyboard opens. Explicitly set values even
+// if a generated Capacitor template changes its defaults in a future release.
+const ensureManifestAttribute = (tag, name, value) => {
+  const pattern = new RegExp(`\\\\s${name.replace(/[.*+?^${}()|[\\]\\\\]/g, "\\\\if (manifestChanged) await writeFile(manifestPath, manifest, "utf8");")}="[^"]*"`);
+  if (pattern.test(tag)) return tag.replace(pattern, ` ${name}="${value}"`);
+  return tag.replace(/>$/, ` ${name}="${value}">`);
+};
+manifest = manifest.replace(/<application\\b[^>]*>/, tag =>
+  ensureManifestAttribute(tag, "android:usesCleartextTraffic", "false")
+);
+manifest = manifest.replace(/<activity\\b(?=[^>]*android:name="[^"]*MainActivity")[^>]*>/, tag =>
+  ensureManifestAttribute(tag, "android:windowSoftInputMode", "adjustResize")
+);
+manifestChanged = true;
 if (manifestChanged) await writeFile(manifestPath, manifest, "utf8");
 console.log(`Configured Vivid Android updater plugin (version ${versionName}, build ${buildNumber}, versionCode ${versionCode}).`);
