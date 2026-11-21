@@ -11,6 +11,7 @@ export function normalizePlaybackTimestamp(value) {
 }
 
 export function normalizePlaybackRate(value) {
+  if (value == null || value === "") return 1;
   const rate = Number(value);
   return Number.isFinite(rate) ? Math.max(0.25, Math.min(2, rate)) : 1;
 }
