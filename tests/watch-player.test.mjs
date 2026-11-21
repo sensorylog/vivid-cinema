@@ -147,3 +147,16 @@ test("Player 1 publishes provider identity for the shared Watch Room adapter lay
   const source = await readFile(new URL("../scripts/watch.js", import.meta.url), "utf8");
   assert.match(source, /new CustomEvent\("vivid:player-adapter-selected",\s*\{ detail: \{ playerId: "player1", providerId: source \} \}\)/);
 });
+
+test("watch player exposes immersive fullscreen and landscape orientation controls", () => {
+  assert.match(source, /id="player-fullscreen"/);
+  assert.match(source, /playerDialog\.requestFullscreen\(\)/);
+  assert.match(source, /screen\.orientation\?\.lock\?\.\("landscape"\)/);
+  assert.match(source, /document\.addEventListener\("fullscreenchange"/);
+  assert.match(source, /vivid-player-fullscreen-fallback/);
+});
+
+test("Android hardware Back closes an open player before leaving the watch page", () => {
+  assert.match(source, /window\.addEventListener\("vivid:android-back", closePlayerWindow\)/);
+  assert.match(source, /document\.fullscreenElement && playerDialog\?\.contains\(document\.fullscreenElement\)/);
+});
