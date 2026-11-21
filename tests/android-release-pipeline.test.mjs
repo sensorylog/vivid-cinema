@@ -35,6 +35,7 @@ test("production-signed Android release remains manual until signing is configur
   assert.match(workflow, /Vivid-Cinema-Android-build-\$VIVID_ANDROID_BUILD\.json/);
   assert.match(nativeConfigurator, /VividNavigationPlugin\.class/);
   assert.match(nativeConfigurator, /VividUpdaterPlugin\.class/);
+  assert.match(nativeConfigurator, /process\.env\.VIVID_ANDROID_BUILD \|\| process\.env\.GITHUB_RUN_NUMBER/);
 });
 
 test("release signer reads credentials only from environment and never writes secrets into source", () => {
