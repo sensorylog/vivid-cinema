@@ -1,11 +1,13 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 import {
   getProviderAdapter,
   listProviderAdapters,
   providerSupports,
   sendProviderCommand
 } from "../scripts/playback/provider-adapters.js";
+import { getGuestPlaybackAction } from "../scripts/playback/watch-room-playback-policy.js";
 
 test("provider registry keeps Player 1 and Player 2 identities distinct", () => {
   assert.equal(getProviderAdapter("player1", "vidsrc").label, "VidSrc");
@@ -59,4 +61,28 @@ test("CineSRC uses its documented command protocol and verified origin", () => {
   assert.equal(sendProviderCommand({ adapter, frame, action: "seek", position: 123.5 }), true);
   assert.deepEqual(calls[2], [{ type: "cinesrc:command", command: "seek", args: [123.5] }, "https://cinesrc.st"]);
   assert.equal(sendProviderCommand({ adapter, frame: { ...frame, src: "https://evil.example/embed" }, action: "play" }), false);
+});
+
+test("guest playback stays paused until the member explicitly joins the screening", () => {
+  assert.equal(getGuestPlaybackAction({ role: "guest", joinedPlayback: false, playbackStatus: "playing" }), "pause");
+  assert.equal(getGuestPlaybackAction({ role: "guest", joinedPlayback: false, playbackStatus: "paused" }), "pause");
+  assert.equal(getGuestPlaybackAction({ role: "guest", joinedPlayback: true, playbackStatus: "playing" }), "follow");
+  assert.equal(getGuestPlaybackAction({ role: "guest", joinedPlayback: true, playbackStatus: "paused" }), "pause");
+  assert.equal(getGuestPlaybackAction({ role: "host", joinedPlayback: false, playbackStatus: "playing" }), "ignore");
+});
+
+test("Watch Room client actively holds guests before and during host playback", async () => {
+  const client = await readFile(new URL("../scripts/watch-room-playback.js", import.meta.url), "utf8");
+  assert.match(client, /function pauseGuestPlayer\(/);
+  assert.match(client, /getGuestPlaybackAction\(\{ role, joinedPlayback, playbackStatus: state\.status \}\)/);
+  assert.match(client, /else if \(role === "guest"\) pauseGuestPlayer\(/);
+  assert.match(client, /if \(state\.status === "paused" \|\| state\.status === "ended"\) \{/);
+  assert.match(client, /Your player is ready and paused/);
+});
+
+test("Watch Rooms expose only providers with verified synchronized controls", async () => {
+  const client = await readFile(new URL("../scripts/watch-room-playback.js", import.meta.url), "utf8");
+  assert.match(client, /player1: \[\["vidsrc", "VidSrc · synchronized"\]\]/);
+  assert.match(client, /player2: \[\["cinesrc", "CineSRC · synchronized"\]\]/);
+  assert.doesNotMatch(client, /"VidAPI · solo"|"VidLink · solo"|"MoviesAPI · solo"/);
 });

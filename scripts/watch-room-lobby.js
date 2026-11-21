@@ -6,8 +6,10 @@ const byId = id => document.getElementById(id);
 const call = callWatchRoomApi;
 let room = null, lastRoom = null, stops = [], heartbeat = null, presenceRefresh = null;
 let memberList = [], selectedPick = null, searchTimer = null, searchGeneration = 0;
+let loadedScreeningSessionId = "", dismissedScreeningSessionId = "";
 
 function stop() {
+  if (room) document.dispatchEvent(new CustomEvent("vivid:watch-room-closing", { detail: { roomId: room.roomId } }));
   stops.forEach(fn => fn());
   stops = [];
   if (heartbeat) clearInterval(heartbeat);
@@ -190,6 +192,39 @@ function buildScreeningUrl(screening) {
   return url.pathname + url.search;
 }
 
+function openEmbeddedScreening(screening) {
+  if (!room) return;
+  const url = buildScreeningUrl(screening);
+  if (!url) { setFeedback("The room screening does not contain a valid Vivid title.", true); return; }
+  const stage = byId("wr-screening-stage");
+  const wrap = byId("wr-screening-frame-wrap");
+  if (!stage || !wrap) return;
+  let frame = byId("wr-screening-frame");
+  if (!frame || frame.dataset.src !== url) {
+    frame = document.createElement("iframe");
+    frame.id = "wr-screening-frame";
+    frame.title = "Shared Vivid Cinema screening";
+    frame.allow = "autoplay; fullscreen; picture-in-picture; encrypted-media";
+    frame.allowFullscreen = true;
+    frame.referrerPolicy = "strict-origin-when-cross-origin";
+    frame.src = url;
+    frame.dataset.src = url;
+    wrap.replaceChildren(frame);
+  }
+  loadedScreeningSessionId = String(screening.sessionId || "");
+  dismissedScreeningSessionId = "";
+  stage.hidden = false;
+  stage.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+byId("wr-screening-close")?.addEventListener("click", () => {
+  const stage = byId("wr-screening-stage");
+  const wrap = byId("wr-screening-frame-wrap");
+  if (wrap) wrap.replaceChildren();
+  dismissedScreeningSessionId = loadedScreeningSessionId;
+  loadedScreeningSessionId = "";
+  if (stage) stage.hidden = true;
+});
+
 function renderQueue(items) {
   const list = byId("wr-lobby-queue");
   if (!list) return;
@@ -207,7 +242,8 @@ function renderQueue(items) {
     const join = document.createElement("a");
     join.className = "vivid-wr-button vivid-wr-button--primary";
     join.textContent = "Join screening";
-    join.href = buildScreeningUrl(room.activeScreening);
+    join.href = buildScreeningUrl(room.activeScreening) || "#wr-screening-stage";
+    join.addEventListener("click", event => { event.preventDefault(); openEmbeddedScreening(room.activeScreening); });
     active.append(copy, join);
     list.append(active);
   }
@@ -261,7 +297,7 @@ function renderQueue(items) {
           const response = await call("startWatchRoomScreening")({ roomId: room.roomId, itemId: item.id });
           const url = buildScreeningUrl(response.data?.screening);
           if (!url) throw new Error("The server returned an invalid screening title.");
-          window.location.assign(url);
+          openEmbeddedScreening(response.data?.screening);
         } catch (error) {
           showError(error);
           start.disabled = false;
@@ -321,6 +357,7 @@ function openLobby(data) {
   settings.elements.allowGuestPlayerSelection.checked = data.allowGuestPlayerSelection === true;
   settings.elements.allowGuestQueueManagement.checked = data.allowGuestQueueManagement === true;
   settings.elements.allowGuestPlaybackControl.checked = data.allowGuestPlaybackControl === true;
+  settings.elements.allowGuestVoice.checked = data.allowGuestVoice !== false;
   settings.addEventListener("change", () => { settings.dataset.dirty = "true"; });
   const refreshLobby = async () => {
     if (!room || room.roomId !== data.roomId) return;
@@ -330,6 +367,11 @@ function openLobby(data) {
       const snapshot = response.data || {};
       if (snapshot.room) {
         room = { ...room, ...snapshot.room };
+        document.dispatchEvent(new CustomEvent("vivid:watch-room-updated", { detail: room }));
+        const activeSessionId = String(room.activeScreening?.sessionId || "");
+        if (activeSessionId && activeSessionId !== loadedScreeningSessionId && activeSessionId !== dismissedScreeningSessionId) {
+          openEmbeddedScreening(room.activeScreening);
+        }
         const currentSettings = byId("wr-room-settings-form");
         if (room.role === "host" && currentSettings && currentSettings.dataset.dirty !== "true") {
           currentSettings.elements.allowGuestQueue.checked = room.allowGuestQueue !== false;
@@ -338,6 +380,7 @@ function openLobby(data) {
           currentSettings.elements.allowGuestPlayerSelection.checked = room.allowGuestPlayerSelection === true;
           currentSettings.elements.allowGuestQueueManagement.checked = room.allowGuestQueueManagement === true;
           currentSettings.elements.allowGuestPlaybackControl.checked = room.allowGuestPlaybackControl === true;
+          currentSettings.elements.allowGuestVoice.checked = room.allowGuestVoice !== false;
         }
       }
       applyRoomPermissions();
@@ -487,7 +530,7 @@ byId("wr-room-settings-form")?.addEventListener("submit", async event => {
   const button = form.querySelector('[type="submit"]');
   button.disabled = true;
   try {
-    await call("updateWatchRoomSettings")({
+    const result = await call("updateWatchRoomSettings")({
       roomId: room.roomId,
       settings: {
         name: form.elements.name.value.trim(),
@@ -496,12 +539,15 @@ byId("wr-room-settings-form")?.addEventListener("submit", async event => {
         allowGuestVoting: form.elements.allowGuestVoting.checked,
         allowGuestPlayerSelection: form.elements.allowGuestPlayerSelection.checked,
         allowGuestQueueManagement: form.elements.allowGuestQueueManagement.checked,
-        allowGuestPlaybackControl: form.elements.allowGuestPlaybackControl.checked
+        allowGuestPlaybackControl: form.elements.allowGuestPlaybackControl.checked,
+        allowGuestVoice: form.elements.allowGuestVoice.checked
       }
     });
     form.dataset.dirty = "false";
     byId("wr-lobby-title").textContent = form.elements.name.value.trim();
-    setFeedback("Room settings saved.");
+    if (form.elements.allowGuestVoice.checked === false && result.data?.voiceEvicted === false) {
+      setFeedback("Guest voice is blocked for new joins, but LiveKit did not confirm every active disconnection. Check the voice service.", true);
+    } else setFeedback("Room settings saved.");
   } catch (error) { showError(error); }
   finally { button.disabled = false; }
 });

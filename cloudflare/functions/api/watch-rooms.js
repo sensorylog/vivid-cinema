@@ -1,5 +1,6 @@
 import { createHash, randomBytes } from "node:crypto";
 import { verifyFirebaseIdToken, verifyAppCheckToken } from "../lib/firebase-token-verification.js";
+import { createLiveKitAccessToken, createLiveKitRoomAdminToken } from "../lib/livekit-token.js";
 import { initializeApp as initializeRestApp } from "@ljoukov/firebase-admin-cloudflare/app";
 import { getFirestore, Query, Timestamp } from "@ljoukov/firebase-admin-cloudflare/firestore";
 
@@ -7,6 +8,9 @@ let db;
 let allowedOrigins;
 let serviceAccount;
 let projectId;
+let livekitUrl = "";
+let livekitApiKey = "";
+let livekitApiSecret = "";
 
 function initializeServices(env) {
   allowedOrigins = new Set([
@@ -14,6 +18,9 @@ function initializeServices(env) {
     "https://vivid-cinema.firebaseapp.com",
     ...(env.VIVID_ALLOWED_ORIGINS || "").split(",").map(value => value.trim()).filter(Boolean)
   ]);
+  livekitUrl = String(env.LIVEKIT_URL || "").trim();
+  livekitApiKey = String(env.LIVEKIT_API_KEY || "").trim();
+  livekitApiSecret = String(env.LIVEKIT_API_SECRET || "");
   if (db) return;
   const serviceAccountRaw = env.FIREBASE_SERVICE_ACCOUNT_JSON;
   if (!serviceAccountRaw) throw new Error("FIREBASE_SERVICE_ACCOUNT_JSON is not configured for Vivid on Cloudflare Pages.");
@@ -387,6 +394,74 @@ async function requireRoomMember(roomId, uid) {
   return { roomRef, room: room.data(), memberRef, member: member.data() };
 }
 
+async function liveKitRoomName(roomId) {
+  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(roomId));
+  const roomHash = Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, "0")).join("").slice(0, 32);
+  return "vivid-" + roomHash;
+}
+
+async function removeLiveKitParticipant(roomId, identity) {
+  if (!livekitUrl || !livekitApiKey || !livekitApiSecret) return true;
+  try {
+    const roomName = await liveKitRoomName(roomId);
+    const token = await createLiveKitRoomAdminToken({
+      apiKey: livekitApiKey, apiSecret: livekitApiSecret, roomName
+    });
+    const endpoint = new URL(livekitUrl);
+    endpoint.protocol = "https:";
+    endpoint.pathname = "/twirp/livekit.RoomService/RemoveParticipant";
+    endpoint.search = "";
+    const response = await fetch(endpoint, {
+      method: "POST",
+      headers: { Authorization: "Bearer " + token, "Content-Type": "application/json" },
+      body: JSON.stringify({ room: roomName, identity }),
+      signal: AbortSignal.timeout(5000)
+    });
+    if (!response.ok && response.status !== 404) {
+      throw new Error("LiveKit participant removal failed (" + response.status + ").");
+    }
+    return true;
+  } catch (error) {
+    console.error("Vivid Watch Room could not evict a LiveKit participant:", {
+      roomId, identity, message: error?.message || String(error)
+    });
+    return false;
+  }
+}
+
+async function removeAllLiveKitParticipants(roomId, identities) {
+  const results = await Promise.all((identities || []).map(identity => removeLiveKitParticipant(roomId, identity)));
+  return results.every(Boolean);
+}
+
+async function getWatchRoomVoiceToken(request) {
+  const uid = requireUser(request);
+  const roomId = validId(request.data?.roomId, "room ID");
+  if (!livekitUrl || !livekitApiKey || !livekitApiSecret) {
+    throw new HttpsError("failed-precondition", "Voice calling is not configured yet. The room and synchronized screening are still available.");
+  }
+  let endpoint;
+  try { endpoint = new URL(livekitUrl); } catch { throw new HttpsError("failed-precondition", "The voice service URL is invalid."); }
+  if (endpoint.protocol !== "wss:" || !endpoint.hostname) {
+    throw new HttpsError("failed-precondition", "The voice service must use a secure WebSocket URL.");
+  }
+  const { room, member } = await requireRoomMember(roomId, uid);
+  if (room.status !== "open" || !["host", "guest"].includes(member.role) ||
+      (member.role === "guest" && room.allowGuestVoice === false)) {
+    throw new HttpsError("permission-denied", "The host has disabled guest voice for this room.");
+  }
+  const roomName = await liveKitRoomName(roomId);
+  const result = await createLiveKitAccessToken({
+    apiKey: livekitApiKey,
+    apiSecret: livekitApiSecret,
+    identity: uid,
+    roomName,
+    displayName: member.displayName || "Vivid member",
+    role: member.role
+  });
+  return { url: endpoint.toString(), roomName, token: result.token, expiresAt: result.expiresAt };
+}
+
 
 async function requireRoomMemberInTransaction(tx, roomId, uid) {
   const roomRef = db.collection("rooms").doc(roomId);
@@ -497,7 +572,7 @@ async function getWatchRoomLobbySnapshot(request) {
     return { id: document.id, ...data, createdAt: millis(data.createdAt) };
   });
   return {
-    room: { roomId, name: room.name || "Private screening", status: room.status, memberCount: members.length, selectedPlayerId: room.selectedPlayerId || "player1", selectedProviderId: room.selectedProviderId || "vidapi", selectionUpdatedAt: millis(room.selectionUpdatedAt), activeScreening: room.activeScreening || null, allowGuestQueue: room.allowGuestQueue !== false, allowGuestChat: room.allowGuestChat !== false, allowGuestVoting: room.allowGuestVoting !== false, allowGuestPlayerSelection: room.allowGuestPlayerSelection === true, allowGuestQueueManagement: room.allowGuestQueueManagement === true, allowGuestPlaybackControl: room.allowGuestPlaybackControl === true },
+    room: { roomId, name: room.name || "Private screening", status: room.status, memberCount: members.length, selectedPlayerId: room.selectedPlayerId || "player1", selectedProviderId: room.selectedProviderId || "vidapi", selectionUpdatedAt: millis(room.selectionUpdatedAt), activeScreening: room.activeScreening || null, allowGuestQueue: room.allowGuestQueue !== false, allowGuestChat: room.allowGuestChat !== false, allowGuestVoting: room.allowGuestVoting !== false, allowGuestPlayerSelection: room.allowGuestPlayerSelection === true, allowGuestQueueManagement: room.allowGuestQueueManagement === true, allowGuestPlaybackControl: room.allowGuestPlaybackControl === true, allowGuestVoice: room.allowGuestVoice !== false },
     members, onlineCount: members.filter(member => member.isOnline).length, queue, chat,
     serverTime: now
   };
@@ -729,11 +804,11 @@ async function updateWatchRoomSettings(request) {
   const roomId = validId(request.data?.roomId, "room ID");
   const patch = request.data?.settings;
   if (!patch || typeof patch !== "object" || Array.isArray(patch)) throw new HttpsError("invalid-argument", "Room settings are required.");
-  const allowed = ["name", "allowGuestQueue", "allowGuestChat", "allowGuestVoting", "allowGuestPlayerSelection", "allowGuestQueueManagement", "allowGuestPlaybackControl"];
+  const allowed = ["name", "allowGuestQueue", "allowGuestChat", "allowGuestVoting", "allowGuestPlayerSelection", "allowGuestQueueManagement", "allowGuestPlaybackControl", "allowGuestVoice"];
   if (Object.keys(patch).some(key => !allowed.includes(key))) throw new HttpsError("invalid-argument", "One or more room settings are not supported.");
   const update = {};
   if (Object.hasOwn(patch, "name")) update.name = cleanText(patch.name, "Room name", 80);
-  for (const key of ["allowGuestQueue", "allowGuestChat", "allowGuestVoting", "allowGuestPlayerSelection", "allowGuestQueueManagement", "allowGuestPlaybackControl"]) {
+  for (const key of ["allowGuestQueue", "allowGuestChat", "allowGuestVoting", "allowGuestPlayerSelection", "allowGuestQueueManagement", "allowGuestPlaybackControl", "allowGuestVoice"]) {
     if (Object.hasOwn(patch, key)) {
       if (typeof patch[key] !== "boolean") throw new HttpsError("invalid-argument", key + " must be true or false.");
       update[key] = patch[key];
@@ -741,17 +816,21 @@ async function updateWatchRoomSettings(request) {
   }
   if (!Object.keys(update).length) throw new HttpsError("invalid-argument", "No room settings were supplied.");
   const roomRef = db.collection("rooms").doc(roomId);
+  const guestUids = [];
   await db.runTransaction(async tx => {
+    guestUids.length = 0;
     const { room, member } = await requireRoomMemberInTransaction(tx, roomId, uid);
     if (room.hostUid !== uid || member.role !== "host") throw new HttpsError("permission-denied", "Only the room host can change these settings.");
     const members = await tx.get(roomRef.collection("members"));
     const updatedAt = Timestamp.now();
     tx.update(roomRef, { ...update, updatedAt });
     members.docs.forEach(document => {
+      if (update.allowGuestVoice === false && document.data().role === "guest") guestUids.push(document.id);
       tx.set(db.collection("users").doc(document.id).collection("watchRooms").doc(roomId), update, { merge: true });
     });
   });
-  return { updated: true };
+  const voiceEvicted = update.allowGuestVoice === false ? await removeAllLiveKitParticipants(roomId, guestUids) : true;
+  return { updated: true, voiceEvicted };
 }
 
 async function removeWatchRoomMember(request) {
@@ -779,7 +858,8 @@ async function removeWatchRoomMember(request) {
       tx.set(db.collection("users").doc(existing.id).collection("watchRooms").doc(roomId), { memberCount: nextMemberCount }, { merge: true });
     });
   });
-  return { removed: true };
+  const voiceEvicted = await removeLiveKitParticipant(roomId, memberUid);
+  return { removed: true, voiceEvicted };
 }
 
 
@@ -806,7 +886,8 @@ async function leaveWatchRoom(request) {
       tx.set(db.collection("users").doc(existing.id).collection("watchRooms").doc(roomId), { memberCount: nextMemberCount }, { merge: true });
     });
   });
-  return { left: true };
+  const voiceEvicted = await removeLiveKitParticipant(roomId, uid);
+  return { left: true, voiceEvicted };
 }
 
 async function closeWatchRoom(request) {
@@ -814,23 +895,29 @@ async function closeWatchRoom(request) {
   const roomId = validId(request.data?.roomId, "room ID");
   const roomRef = db.collection("rooms").doc(roomId);
   const closedAt = Timestamp.now();
+  const memberUids = [];
   await db.runTransaction(async tx => {
+    memberUids.length = 0;
     const { room, member } = await requireRoomMemberInTransaction(tx, roomId, uid);
     if (room.hostUid !== uid || member.role !== "host") throw new HttpsError("permission-denied", "Only the room host can close this room.");
     const members = await tx.get(roomRef.collection("members"));
     tx.update(roomRef, { status: "closed", closedAt, expiresAt: closedAt, updatedAt: closedAt });
     members.docs.forEach(document => {
+      memberUids.push(document.id);
       tx.set(db.collection("users").doc(document.id).collection("watchRooms").doc(roomId), { status: "closed" }, { merge: true });
     });
   });
-  return { closed: true };
+  const voiceEvicted = await removeAllLiveKitParticipants(roomId, memberUids);
+  return { closed: true, voiceEvicted };
 }
 
 async function deleteWatchRoom(request) {
   const uid = requireUser(request);
   const roomId = validId(request.data?.roomId, "room ID");
   const roomRef = db.collection("rooms").doc(roomId);
+  const memberUids = [];
   await db.runTransaction(async tx => {
+    memberUids.length = 0;
     const { room, member } = await requireRoomMemberInTransaction(tx, roomId, uid);
     if (room.hostUid !== uid || member.role !== "host") {
       throw new HttpsError("permission-denied", "Only the room host can permanently delete this room.");
@@ -839,13 +926,15 @@ async function deleteWatchRoom(request) {
     const deletedAt = Timestamp.now();
     tx.update(roomRef, { status: "deleted", deletedAt, closedAt: deletedAt, expiresAt: deletedAt, updatedAt: deletedAt });
     members.docs.forEach(document => {
+      memberUids.push(document.id);
       tx.delete(db.collection("users").doc(document.id).collection("watchRooms").doc(roomId));
     });
   });
+  const voiceEvicted = await removeAllLiveKitParticipants(roomId, memberUids);
   // Delete the complete room tree (members, presence, chat, queue and playback)
   // only after the authoritative transaction has removed every dashboard pointer.
   await recursiveDelete(roomRef);
-  return { deleted: true };
+  return { deleted: true, voiceEvicted };
 }
 
 
@@ -1097,6 +1186,7 @@ const operations = {
   closeWatchRoom,
   deleteWatchRoom,
   publishWatchRoomPlayback,
+  getWatchRoomVoiceToken,
   addCinemaClubWatchlistItem,
   removeCinemaClubWatchlistItem,
   recordCinemaClubScreening,
@@ -1110,7 +1200,7 @@ const ROUTES = new Set([
   "createWatchRoom","getWatchRoomDashboard","createCinemaClub","createWatchInvitation","redeemWatchInvitation","revokeWatchInvitation",
   "cleanupExpiredWatchRooms","heartbeatWatchRoom","getWatchRoomLobbySnapshot","getWatchRoomPlaybackSnapshot","addWatchRoomQueueItem","startWatchRoomScreening","removeWatchRoomQueueItem","voteWatchRoomQueueItem",
   "sendWatchRoomMessage","reactToWatchRoomMessage","updateWatchRoomSettings","setWatchRoomPlayerSelection","removeWatchRoomMember","leaveWatchRoom",
-  "closeWatchRoom","deleteWatchRoom","publishWatchRoomPlayback","addCinemaClubWatchlistItem","removeCinemaClubWatchlistItem",
+  "closeWatchRoom","deleteWatchRoom","publishWatchRoomPlayback","getWatchRoomVoiceToken","addCinemaClubWatchlistItem","removeCinemaClubWatchlistItem",
   "recordCinemaClubScreening","addCinemaClubAfterCreditsReview","addCinemaClubDiscussionMessage","leaveCinemaClub","archiveCinemaClub"
 ]);
 
