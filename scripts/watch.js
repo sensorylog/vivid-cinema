@@ -976,7 +976,7 @@ function renderShell(params) {
     openPlayer?.focus({ preventScroll: true });
   };
   const syncFullscreenButton = () => {
-    const active = Boolean(document.fullscreenElement && playerDialog?.contains(document.fullscreenElement));
+    const active = Boolean((document.fullscreenElement && playerDialog?.contains(document.fullscreenElement)) || overlay?.classList.contains("vivid-player-fullscreen-fallback"));
     fullscreenButton?.setAttribute("aria-pressed", String(active));
     fullscreenButton?.setAttribute("aria-label", active ? "Exit fullscreen" : "Enter fullscreen");
     fullscreenButton?.setAttribute("title", active ? "Exit fullscreen" : "Fullscreen");
@@ -995,17 +995,18 @@ function renderShell(params) {
         return;
       }
       if (typeof playerDialog.requestFullscreen === "function") {
+        overlay?.classList.remove("vivid-player-fullscreen-fallback");
         await playerDialog.requestFullscreen();
         const androidNative = window.Capacitor?.isNativePlatform?.() && window.Capacitor?.getPlatform?.() === "android";
         if (androidNative) {
           try { await screen.orientation?.lock?.("landscape"); } catch {}
         }
       } else {
-        overlay?.classList.toggle("vivid-player-fullscreen-fallback");
+        overlay?.classList.add("vivid-player-fullscreen-fallback");
       }
     } catch (error) {
       console.warn("Vivid player fullscreen is unavailable:", error);
-      overlay?.classList.toggle("vivid-player-fullscreen-fallback");
+      overlay?.classList.add("vivid-player-fullscreen-fallback");
     }
     syncFullscreenButton();
   };
