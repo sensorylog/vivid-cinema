@@ -25,7 +25,7 @@ const mainActivityPath = path.join(javaRoot, "MainActivity.java");
 let mainActivity = await readFile(mainActivityPath, "utf8");
 for (const pluginClass of ["VividUpdaterPlugin.class", "VividNavigationPlugin.class"]) {
   if (mainActivity.includes(pluginClass)) continue;
-  const superCall = /([ \\t]*)super\\.onCreate\\(savedInstanceState\\);/;
+  const superCall = /([ \t]*)super\.onCreate\(savedInstanceState\);/;
   if (superCall.test(mainActivity)) {
     mainActivity = mainActivity.replace(superCall, `$1registerPlugin(${pluginClass});\n$1super.onCreate(savedInstanceState);`);
   } else {
@@ -39,11 +39,11 @@ if (!mainActivity.includes("VividUpdaterPlugin.class") || !mainActivity.includes
   throw new Error("Could not register all Vivid native plugins in MainActivity.");
 }
 if (!mainActivity.includes("VividWebChromeClient")) {
-  const superCall = /([ \\t]*)super\\.onCreate\\(savedInstanceState\\);/;
+  const superCall = /([ \t]*)super\.onCreate\(savedInstanceState\);/;
   if (!superCall.test(mainActivity)) throw new Error("Could not install the Vivid fullscreen WebChromeClient.");
   mainActivity = mainActivity.replace(
     superCall,
-    `$1super.onCreate(savedInstanceState);\\n$1if (getBridge() != null && getBridge().getWebView() != null) {\\n$1    getBridge().getWebView().setWebChromeClient(new VividWebChromeClient(getBridge()));\\n$1}`
+    `$1super.onCreate(savedInstanceState);\n$1if (getBridge() != null && getBridge().getWebView() != null) {\n$1    getBridge().getWebView().setWebChromeClient(new VividWebChromeClient(getBridge()));\n$1}`
   );
 }
 await writeFile(mainActivityPath, mainActivity, "utf8");
