@@ -353,6 +353,13 @@ function openLobby(data) {
       if (snapshot.room) {
         room = { ...room, ...snapshot.room };
         document.dispatchEvent(new CustomEvent("vivid:watch-room-updated", { detail: room }));
+        const requestedParams = new URLSearchParams(window.location.search);
+        if (requestedParams.get("roomMode") === "1" && requestedParams.get("id") &&
+            requestedParams.get("roomId") === room.roomId &&
+            String(room.activeScreening?.sessionId || "") === String(requestedParams.get("sessionId") || "") &&
+            String(room.activeScreening?.contentId || "") === String(requestedParams.get("id") || "")) {
+          document.dispatchEvent(new CustomEvent("vivid:watch-room-screening-validated", { detail: room }));
+        }
         const activeSessionId = String(room.activeScreening?.sessionId || "");
         const screeningSuppressed = new URLSearchParams(window.location.search).get("suppressScreening") === "1";
         if (!screeningSuppressed && activeSessionId && activeSessionId !== loadedScreeningSessionId && activeSessionId !== dismissedScreeningSessionId) {
