@@ -80,7 +80,7 @@ function renderParticipants() {
     ? [livekitRoom.localParticipant, ...livekitRoom.remoteParticipants.values()]
     : [];
   if (participantCountNode) {
-    participantCountNode.textContent = livekitRoom ? participants.length + " connected" : "Not connected";
+    participantCountNode.textContent = livekitRoom ? participants.length + (participants.length === 1 ? " person connected" : " people connected") : "Not connected";
     participantCountNode.dataset.connected = String(Boolean(livekitRoom));
   }
   panel?.classList.toggle("is-connected", Boolean(livekitRoom));
