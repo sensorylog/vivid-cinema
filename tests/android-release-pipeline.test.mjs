@@ -71,8 +71,8 @@ test("debug APK release never republishes the Android signing keystore", async (
 test("Android release docs explain keystore continuity and secret setup", () => {
   assert.match(docs, /ANDROID_KEYSTORE_BASE64/);
   assert.match(docs, /never commit/i);
-  assert.match(docs, /same signing key/i);
-  assert.match(docs, /signed release APK/i);
+  assert.match(docs, /upload key/i);
+  assert.match(docs, /production-signed APK/i);
   assert.match(docs, /Play Store distribution/);
   assert.match(docs, /does not publish to Google Play automatically/i);
 });
