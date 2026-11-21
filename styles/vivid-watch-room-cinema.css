@@ -434,3 +434,34 @@ body.vivid-watch-rooms-page.vivid-watch-room-mode #player-overlay .vivid-player-
   body.vivid-watch-rooms-page.vivid-watch-room-mode #player-overlay .vivid-player-synopsis{font-size:.74rem;line-height:1.58}
   body.vivid-watch-rooms-page.vivid-watch-room-mode #player-overlay .vivid-player-cast-card{flex-basis:158px}
 }
+
+
+/* Persistent Watch Room mini-player: keep the floating card interactive without
+   allowing its former full-screen overlay box to intercept lobby navigation. */
+body.vivid-watch-rooms-page.vivid-watch-room-mode #player-overlay.is-minimized{
+  position:fixed!important;inset:auto 12px calc(112px + env(safe-area-inset-bottom)) auto!important;
+  display:block!important;width:min(320px,calc(100vw - 24px))!important;height:auto!important;
+  max-width:calc(100vw - 24px)!important;max-height:none!important;padding:0!important;
+  overflow:visible!important;pointer-events:none!important;background:transparent!important;
+  z-index:100600!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important
+}
+body.vivid-watch-rooms-page.vivid-watch-room-mode #player-overlay.is-minimized .vivid-player-dialog{
+  width:100%!important;height:auto!important;max-height:none!important;min-height:0!important;
+  margin:0!important;overflow:hidden!important;pointer-events:auto!important
+}
+body.vivid-watch-rooms-page.vivid-watch-room-mode #player-overlay.is-minimized .vivid-player-frame{
+  width:100%!important;height:auto!important;min-height:0!important;aspect-ratio:16/9!important
+}
+body.vivid-watch-rooms-page.vivid-watch-room-mode #player-overlay.is-minimized .vivid-player-frame iframe,
+body.vivid-watch-rooms-page.vivid-watch-room-mode #player-overlay.is-minimized .vivid-player-frame video{
+  display:block!important;width:100%!important;height:100%!important
+}
+body.vivid-watch-rooms-page.vivid-watch-room-mode #player-overlay.is-minimized[hidden]{
+  display:none!important
+}
+@media(max-width:680px){
+  body.vivid-watch-rooms-page.vivid-watch-room-mode #player-overlay.is-minimized{
+    right:10px!important;bottom:calc(112px + env(safe-area-inset-bottom))!important;
+    width:min(280px,calc(100vw - 20px))!important
+  }
+}
