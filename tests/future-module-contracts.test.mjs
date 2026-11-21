@@ -202,7 +202,8 @@ test("Watch Rooms Stage 5 exposes trusted VidSrc and CineSRC playback bridges", 
   assert.ok(client.includes("getExpectedPlaybackPosition(state, { nowMs: Date.now(), clockOffsetMs })"));
   assert.ok(client.includes("shouldCorrectPlayback(expected, localPosition)"));
   assert.ok(client.includes("eventType, status: hostStatus"));
-  assert.ok(client.includes("now - lastPublishAt < 1800"));
+  assert.ok(client.includes("now - lastPublishAt < PLAYBACK_HEARTBEAT_INTERVAL_MS"));
+  assert.ok(client.includes("PLAYBACK_HEARTBEAT_INTERVAL_MS"));
   assert.ok(client.includes('if (eventType === "ready" || eventType === "canplay" || eventType === "loadedmetadata")'));
 
   assert.ok(client.includes('if (state.status === "playing" && localStatus !== "playing")'));
@@ -465,7 +466,7 @@ test("Watch Room synchronization compensates for guest device clock skew", () =>
 test("Watch Room playback throttles heartbeats without dropping pause/resume transitions", () => {
   const client = readFileSync(new URL("../scripts/watch-room-playback.js", import.meta.url), "utf8");
   assert.ok(client.includes('const heartbeatEvent = ["playing", "timeupdate", "progress", "heartbeat"].includes(eventType)'));
-  assert.ok(client.includes('if (heartbeatEvent && lastPublishedStatus === "playing" && now - lastPublishAt < 1800) return;'));
+  assert.ok(client.includes('if (heartbeatEvent && lastPublishedStatus === "playing" && now - lastPublishAt < PLAYBACK_HEARTBEAT_INTERVAL_MS) return;'));
   assert.ok(client.includes('if (detail.status === "paused") hostStatus = "paused"'));
   assert.ok(client.includes("lastPublishedStatus = hostStatus"));
   assert.ok(client.includes('lastPublishedStatus = "paused"'));
