@@ -151,6 +151,10 @@ test("Watch Room screenings stay embedded in the lobby and float without stoppin
   assert.ok(watchPage.includes("mountWatchRoomPlayerLayout({ slot, overlay: overlayForRoom })"));
   assert.ok(watchPage.includes('slot.append(overlayForRoom)'));
   assert.ok(watchPage.includes('slot.append(secondaryForRoom)'));
+  assert.ok(watchPage.includes("watchContentForRoom?.replaceChildren()"));
+  assert.ok(watchPage.includes("host.hidden = true"));
+  assert.ok(!watchPage.includes("host.remove()"), "the screening host must remain reusable for the next movie");
+  assert.ok(watchPage.includes('roomPlayerSlot?.querySelectorAll("iframe")'));
   assert.ok(watchPage.includes('if (isWatchRoomCinemaMode) return;'));
   assert.ok(watchPage.includes('roomPlayerSlot.dataset.activePlayer = "secondary"'));
   assert.ok(watchPage.includes('roomPlayerLayout?.focus()'));
