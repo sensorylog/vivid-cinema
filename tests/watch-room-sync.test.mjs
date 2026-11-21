@@ -60,6 +60,7 @@ test("only repeated playing heartbeats are rate-limited, never pause or resume t
   assert.equal(shouldThrottlePlaybackWrite("playing", "playing", 1_000, 2_800), false);
   assert.equal(shouldThrottlePlaybackWrite("playing", "playing", 2_000, 1_900), false);
   assert.equal(shouldThrottlePlaybackWrite("ended", "playing", 1_000, 1_100), false);
+  assert.equal(shouldThrottlePlaybackWrite("playing", "playing", 1_000, 1_100, 0), false, "a seek control event must bypass the progress heartbeat throttle");
 });
 
 
