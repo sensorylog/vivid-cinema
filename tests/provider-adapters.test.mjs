@@ -71,13 +71,15 @@ test("guest playback stays paused until the member explicitly joins the screenin
   assert.equal(getGuestPlaybackAction({ role: "host", joinedPlayback: false, playbackStatus: "playing" }), "ignore");
 });
 
-test("Watch Room client actively holds guests before and during host playback", async () => {
+test("Watch Room preloads guest players and holds preparation playback until the host starts", async () => {
   const client = await readFile(new URL("../scripts/watch-room-playback.js", import.meta.url), "utf8");
   assert.match(client, /function pauseGuestPlayer\(/);
   assert.match(client, /getGuestPlaybackAction\(\{ role, joinedPlayback, playbackStatus: state\.status \}\)/);
-  assert.match(client, /else if \(role === "guest"\) pauseGuestPlayer\(/);
-  assert.match(client, /if \(state\.status === "paused" \|\| state\.status === "ended"\) \{/);
-  assert.match(client, /Your player is ready and paused/);
+  assert.match(client, /if \(role !== "guest" \|\| joinedPlayback\)/);
+  assert.match(client, /role === "guest" && \(!latestRemoteState \|\| latestRemoteState\.status !== "playing"\)/);
+  assert.match(client, /else if \(detail\.status === "playing"\) pauseGuestPlayer\(/);
+  assert.match(client, /const desiredStatus = state\.status === "playing" \? "playing" : "paused"/);
+  assert.match(client, /Your player is ready\. Tap Play once to prepare it/);
 });
 
 test("Watch Rooms expose only providers with verified synchronized controls and use realtime snapshots", async () => {
