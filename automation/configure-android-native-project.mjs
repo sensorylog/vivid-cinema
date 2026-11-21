@@ -26,7 +26,7 @@ const pluginPath = path.join(javaRoot, "VividUpdaterPlugin.java");
 let mainActivity = await readFile(mainActivityPath, "utf8");
 for (const pluginClass of ["VividUpdaterPlugin.class", "VividNavigationPlugin.class"]) {
   if (mainActivity.includes(pluginClass)) continue;
-  const superCall = /(\s*)super\.onCreate\(savedInstanceState\);/;
+  const superCall = /([ \\t]*)super\\.onCreate\\(savedInstanceState\\);/;
   if (superCall.test(mainActivity)) {
     mainActivity = mainActivity.replace(superCall, `$1registerPlugin(${pluginClass});\n$1super.onCreate(savedInstanceState);`);
   } else {
