@@ -1,4 +1,5 @@
 import { tmdbApi } from "./tmdb.js";
+import { resolveAndroidPlayerBackAction } from "./android-navigation.js";
 import { resolveAnimeIds } from "./playback/anime-id-resolver.js";
 import { getImageUrl, getMediaUrl, normalizeMedia, normalizeResults } from "./media.js";
 import { buildTitleUrl, buildWatchUrl, getRoute } from "./routes.js";
@@ -664,6 +665,32 @@ function recordWatchActivity(progress, duration) {
   }
 }
 
+function playerInfoMarkup() {
+  const episode = currentParams?.type === "tv" ? details?.episode : null;
+  const synopsis = episode?.overview || media?.overview || details?.overview || "";
+  const cast = [
+    ...(Array.isArray(episode?.guest_stars) ? episode.guest_stars : []),
+    ...(Array.isArray(details?.credits?.cast) ? details.credits.cast : [])
+  ].filter((person, index, list) => person?.name && list.findIndex(item => String(item.id) === String(person.id)) === index).slice(0, 8);
+  const castMarkup = cast.map(person =>
+    '<article class="vivid-player-cast-card">' +
+      (person.profile_path ? '<img src="' + escapeHtml(getImageUrl(person.profile_path, "w185")) + '" alt="" loading="lazy" decoding="async">' : '<span class="vivid-player-cast-placeholder" aria-hidden="true"><i class="bi bi-person-fill"></i></span>') +
+      '<span><strong>' + escapeHtml(person.name) + '</strong><small>' + escapeHtml(person.character || "") + '</small></span>' +
+    '</article>'
+  ).join("");
+  const year = String(media?.release_date || media?.first_air_date || "").slice(0, 4);
+  const genres = (details?.genres || []).slice(0, 3).map(genre => genre.name).filter(Boolean);
+  return '<section class="vivid-player-info" aria-label="Movie information">' +
+    '<div class="vivid-player-info-copy"><div class="vivid-player-info-meta">' +
+      (year ? '<span>' + escapeHtml(year) + '</span>' : '') +
+      (genres.length ? '<span>' + escapeHtml(genres.join(" · ")) + '</span>' : '') +
+    '</div><h3>' + escapeHtml(episode?.name || media?.title || "Now playing") + '</h3>' +
+    (synopsis ? '<p>' + escapeHtml(synopsis) + '</p>' : '') +
+    '</div>' +
+    (castMarkup ? '<div class="vivid-player-cast"><h4>Cast</h4><div class="vivid-player-cast-rail">' + castMarkup + '</div></div>' : '') +
+  '</section>';
+}
+
 function recommendationCards() {
   const items = normalizeResults(details?.recommendations?.results || [], media?.media_type).slice(0, 10);
   const fallback = normalizeResults(details?.similar?.results || [], media?.media_type).slice(0, 10);
@@ -812,7 +839,7 @@ function renderShell(params) {
         '<h1 id="watch-title">' + escapeHtml(episodeTitle || title) + '</h1><p id="watch-overview">' + escapeHtml(isTv && details?.episode?.overview ? details.episode.overview : media.overview || "") + '</p>' +
       '</div><div class="vivid-watch-actions"><button type="button" id="watch-open-player" class="vivid-watch-play" aria-label="Play ' + escapeHtml(episodeTitle || title) + '"><i class="bi bi-play-fill" aria-hidden="true"></i><span>Play</span></button><a class="vivid-watch-details" href="' + escapeHtml(buildTitleUrl(media.id, media.media_type)) + '"><i class="bi bi-info-circle" aria-hidden="true"></i><span>Details</span></a></div></div></section>' +
     '<div id="player-overlay" class="vivid-player-overlay vivid-player-inline" role="presentation"><section class="vivid-player-dialog" role="region" aria-labelledby="player-dialog-title">' +
-      '<header class="vivid-player-dialog-head"><div class="vivid-player-dialog-heading"><span class="vivid-player-live-dot" aria-hidden="true"></span><div><span class="vivid-player-dialog-eyebrow">' + (isWatchRoomCinemaMode ? "VIVID CINEMA · PRIVATE SCREENING" : "VIVID CINEMA · PLAYER 1") + '</span><h2 id="player-dialog-title">' + escapeHtml(episodeTitle || title) + '</h2><span id="player-source-label" class="vivid-player-current-source">Choose a player to begin</span></div></div><div class="vivid-player-dialog-actions"><button type="button" id="player-server-menu" class="vivid-player-switch vivid-server-menu" aria-controls="player-server-panel" aria-expanded="false"><i class="bi bi-hdd-network" aria-hidden="true"></i> Servers <i class="bi bi-arrow-down" aria-hidden="true"></i></button><button type="button" id="player-close" class="vivid-player-close" aria-label="Close player"><i class="bi bi-x-lg" aria-hidden="true"></i></button></div></header>' +
+      '<header class="vivid-player-dialog-head"><div class="vivid-player-dialog-heading"><span class="vivid-player-live-dot" aria-hidden="true"></span><div><span class="vivid-player-dialog-eyebrow">' + (isWatchRoomCinemaMode ? "VIVID CINEMA · PRIVATE SCREENING" : "VIVID CINEMA · PLAYER 1") + '</span><h2 id="player-dialog-title">' + escapeHtml(episodeTitle || title) + '</h2><span id="player-source-label" class="vivid-player-current-source">Choose a player to begin</span></div></div><div class="vivid-player-dialog-actions"><button type="button" id="player-server-menu" class="vivid-player-switch vivid-server-menu" aria-controls="player-server-panel" aria-expanded="false"><i class="bi bi-hdd-network" aria-hidden="true"></i> Servers <i class="bi bi-arrow-down" aria-hidden="true"></i></button><button type="button" id="player-fullscreen" class="vivid-player-switch vivid-player-fullscreen" aria-label="Enter fullscreen" title="Fullscreen" aria-pressed="false"><i class="bi bi-arrows-fullscreen" aria-hidden="true"></i></button><button type="button" id="player-close" class="vivid-player-close" aria-label="Close player"><i class="bi bi-x-lg" aria-hidden="true"></i></button></div></header>' +
       '<div class="vivid-player-layout"><div class="vivid-player-main"><div class="vivid-player-frame"><div id="player-status" class="vivid-player-status" role="status" aria-live="polite">' + (resumeAt > 5 ? "Ready to resume when you choose a player." : "Choose a player to begin playback.") + '</div><button type="button" id="player-try-next" class="vivid-player-try-next" hidden>Try next server</button><iframe id="vidapi-player" title="' + escapeHtml(title) + ' player" allow="autoplay; fullscreen; picture-in-picture; encrypted-media; clipboard-write" allowfullscreen referrerpolicy="origin" loading="eager"></iframe><video id="vivid-direct-player" title="' + escapeHtml(title) + ' direct stream player" controls playsinline preload="metadata" hidden></video></div><footer class="vivid-player-dialog-foot"><span><i class="bi bi-keyboard" aria-hidden="true"></i> Press Esc to close</span><a href="' + escapeHtml(buildTitleUrl(media.id, media.media_type)) + '">Title details</a></footer></div>' +
       '<aside id="player-server-panel" class="vivid-server-panel" aria-label="Vivid Cinema playback servers" hidden><div class="vivid-server-panel-heading"><div><strong>Playback servers</strong><span>Choose a source</span></div><span class="vivid-server-count">7 sources</span></div>' +
       '<button type="button" class="vivid-player-source" data-player-source="vidapi" aria-pressed="true"><span class="vivid-server-dot"></span><span><strong>VidAPI</strong><small>Primary server · may require domain approval</small></span><span class="vivid-server-state" data-server-state="vidapi">Ready</span></button>' +
@@ -826,7 +853,7 @@ function renderShell(params) {
       '<button type="button" class="vivid-player-source" data-player-source="vidplus" hidden aria-pressed="false"><span class="vivid-server-dot"></span><span><strong>VidPlus</strong><small>Additional source · support varies</small></span><span class="vivid-server-state" data-server-state="vidplus">Available</span></button>' +
       '<button type="button" class="vivid-player-source" data-player-source="vidking" hidden aria-pressed="false"><span class="vivid-server-dot"></span><span><strong>VidKing</strong><small>Extra source · resume seeking may vary</small></span><span class="vivid-server-state" data-server-state="vidking">Available</span></button>' +
       '<button type="button" class="vivid-player-source" data-player-source="direct" hidden aria-pressed="false" hidden><span class="vivid-server-dot"></span><span><strong>Direct stream</strong><small>Authorized HLS/DASH · adaptive quality</small></span><span class="vivid-server-state" data-server-state="direct">Unavailable</span></button>' +
-      '<p>Choose another source if playback does not start. Direct streams appear only when an authorized integration is available.</p></aside></div></section></div>' +
+      '<p>Choose another source if playback does not start. Direct streams appear only when an authorized integration is available.</p></aside></div>' + playerInfoMarkup() + '</section></div>' +
     '<section id="vivid-tflix-player" class="vivid-tflix-player" aria-label="Additional streaming player"></section>' +
     '<section id="watch-episode-navigation" class="vivid-episode-navigation" aria-label="TV episode navigation">' + episodeNavigationMarkup(params) + '</section>' +
     '<section class="vivid-watch-recommendations"><div class="vivid-section-heading"><div><span>MORE TO DISCOVER</span><h2>You might also like</h2></div></div><div id="watch-recommendations" class="vivid-watch-rec-rail">' + recommendationCards() + '</div></section>';
@@ -852,6 +879,8 @@ function renderShell(params) {
   // Keep the page interactive until the viewer opens the cinema window.
   const openPlayer = $("watch-open-player");
   const closePlayer = $("player-close");
+  const fullscreenButton = $("player-fullscreen");
+  const playerDialog = overlay?.querySelector(".vivid-player-dialog");
   const restorePlayer = document.createElement("button");
   restorePlayer.type = "button";
   restorePlayer.id = "player-restore";
@@ -948,6 +977,9 @@ function renderShell(params) {
   roomOpenPlayerWindow = openPlayerWindow;
   const closePlayerWindow = () => {
     if (!overlay) return;
+    if (document.fullscreenElement && playerDialog?.contains(document.fullscreenElement)) {
+      void document.exitFullscreen?.().catch(() => {});
+    }
     if (isWatchRoomCinemaMode) {
       overlay.classList.add("is-minimized");
       document.body.classList.add("vivid-watch-room-player-minimized");
@@ -970,6 +1002,66 @@ function renderShell(params) {
     primaryHealthy = false;
     openPlayer?.focus({ preventScroll: true });
   };
+  const syncFullscreenButton = () => {
+    const active = Boolean((document.fullscreenElement && playerDialog?.contains(document.fullscreenElement)) || overlay?.classList.contains("vivid-player-fullscreen-fallback"));
+    fullscreenButton?.setAttribute("aria-pressed", String(active));
+    fullscreenButton?.setAttribute("aria-label", active ? "Exit fullscreen" : "Enter fullscreen");
+    fullscreenButton?.setAttribute("title", active ? "Exit fullscreen" : "Fullscreen");
+    if (fullscreenButton) fullscreenButton.innerHTML = active
+      ? '<i class="bi bi-fullscreen-exit" aria-hidden="true"></i>'
+      : '<i class="bi bi-arrows-fullscreen" aria-hidden="true"></i>';
+    if (!active) {
+      try { screen.orientation?.unlock?.(); } catch {}
+    }
+  };
+  const togglePlayerFullscreen = async () => {
+    if (!playerDialog) return;
+    if (!document.fullscreenElement && overlay?.classList.contains("vivid-player-fullscreen-fallback")) {
+      overlay.classList.remove("vivid-player-fullscreen-fallback");
+      syncFullscreenButton();
+      return;
+    }
+    try {
+      if (document.fullscreenElement) {
+        await document.exitFullscreen?.();
+        return;
+      }
+      if (typeof playerDialog.requestFullscreen === "function") {
+        overlay?.classList.remove("vivid-player-fullscreen-fallback");
+        await playerDialog.requestFullscreen();
+        const androidNative = window.Capacitor?.isNativePlatform?.() && window.Capacitor?.getPlatform?.() === "android";
+        if (androidNative) {
+          try { await screen.orientation?.lock?.("landscape"); } catch {}
+        }
+      } else {
+        overlay?.classList.add("vivid-player-fullscreen-fallback");
+      }
+    } catch (error) {
+      console.warn("Vivid player fullscreen is unavailable:", error);
+      overlay?.classList.add("vivid-player-fullscreen-fallback");
+    }
+    syncFullscreenButton();
+  };
+  fullscreenButton?.addEventListener("click", () => { void togglePlayerFullscreen(); });
+  document.addEventListener("fullscreenchange", syncFullscreenButton);
+  window.addEventListener("vivid:android-back", () => {
+    const action = resolveAndroidPlayerBackAction({
+      fullscreen: Boolean(document.fullscreenElement && playerDialog?.contains(document.fullscreenElement)),
+      fallbackFullscreen: Boolean(overlay?.classList.contains("vivid-player-fullscreen-fallback"))
+    });
+    if (action === "exit-fullscreen") {
+      if (document.fullscreenElement && playerDialog?.contains(document.fullscreenElement)) {
+        void document.exitFullscreen?.().catch(error => {
+          console.warn("Vivid could not exit Android player fullscreen:", error);
+        });
+      } else {
+        overlay?.classList.remove("vivid-player-fullscreen-fallback");
+        syncFullscreenButton();
+      }
+      return;
+    }
+    closePlayerWindow();
+  });
   openPlayer?.addEventListener("click", openPlayerWindow);
   // Do not open or start either player until the viewer chooses one.
   closePlayer?.addEventListener("click", closePlayerWindow);

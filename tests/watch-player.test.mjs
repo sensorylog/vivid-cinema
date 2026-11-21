@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
+import { resolveAndroidPlayerBackAction } from "../scripts/android-navigation.js";
 
 const source = await readFile(new URL("../scripts/watch.js", import.meta.url), "utf8");
 
@@ -146,4 +147,45 @@ test("Player 1 publishes provider identity for the shared Watch Room adapter lay
   const { readFile } = await import("node:fs/promises");
   const source = await readFile(new URL("../scripts/watch.js", import.meta.url), "utf8");
   assert.match(source, /new CustomEvent\("vivid:player-adapter-selected",\s*\{ detail: \{ playerId: "player1", providerId: source \} \}\)/);
+});
+
+test("watch player exposes immersive fullscreen and landscape orientation controls", () => {
+  assert.match(source, /id="player-fullscreen"/);
+  assert.match(source, /playerDialog\.requestFullscreen\(\)/);
+  assert.match(source, /screen\.orientation\?\.lock\?\.\("landscape"\)/);
+  assert.match(source, /document\.addEventListener\("fullscreenchange"/);
+  assert.match(source, /vivid-player-fullscreen-fallback/);
+});
+
+test("Android hardware Back routes through the player dismissal handler", () => {
+  assert.match(source, /window\.addEventListener\("vivid:android-back", \(\) =>/);
+  assert.match(source, /resolveAndroidPlayerBackAction\(/);
+  assert.match(source, /document\.fullscreenElement && playerDialog\?\.contains\(document\.fullscreenElement\)/);
+  assert.match(source, /closePlayerWindow\(\)/);
+});
+
+
+test("Android Back exits fullscreen before closing the player", () => {
+  assert.equal(resolveAndroidPlayerBackAction({ fullscreen: true, fallbackFullscreen: false }), "exit-fullscreen");
+  assert.equal(resolveAndroidPlayerBackAction({ fullscreen: false, fallbackFullscreen: true }), "exit-fullscreen");
+  assert.equal(resolveAndroidPlayerBackAction({ fullscreen: false, fallbackFullscreen: false }), "close-player");
+  assert.match(source, /window\.addEventListener\("vivid:android-back", \(\) =>/);
+  assert.match(source, /resolveAndroidPlayerBackAction\(/);
+  assert.match(source, /document\.exitFullscreen\?\.\(\)/);
+});
+
+test("player window includes compact title synopsis and cast below the video", () => {
+  assert.match(source, /function playerInfoMarkup\(\)/);
+  assert.match(source, /details\?\.credits\?\.cast/);
+  assert.match(source, /class="vivid-player-info"/);
+  assert.match(source, /class="vivid-player-cast-rail"/);
+  assert.match(source, /playerInfoMarkup\(\) \+ '<\/section><\/div>'/);
+});
+
+test("cinema room player preserves a video aspect ratio and keeps close controls visible", async () => {
+  const styles = await readFile(new URL("../styles/vivid-watch-room-cinema.css", import.meta.url), "utf8");
+  assert.match(styles, /#player-overlay \.vivid-player-frame[\s\S]*?aspect-ratio:16\/9!important/);
+  assert.match(styles, /#player-overlay #player-close\{display:inline-flex!important/);
+  assert.match(styles, /#player-overlay \.vivid-player-info/);
+  assert.match(styles, /\.vivid-topbar[\s\S]*?display:none!important/);
 });

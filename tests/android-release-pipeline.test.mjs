@@ -6,10 +6,12 @@ import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
-const [workflow, signer, docs] = await Promise.all([
+const [workflow, signer, nativeConfigurator, docs, debugWorkflow] = await Promise.all([
   readFile(new URL("../.github/workflows/android-release.yml", import.meta.url), "utf8"),
   readFile(new URL("../automation/configure-android-release-signing.mjs", import.meta.url), "utf8"),
-  readFile(new URL("../ANDROID_BUILD.md", import.meta.url), "utf8")
+  readFile(new URL("../automation/configure-android-native-project.mjs", import.meta.url), "utf8"),
+  readFile(new URL("../ANDROID_BUILD.md", import.meta.url), "utf8"),
+  readFile(new URL("../.github/workflows/android-debug-apk.yml", import.meta.url), "utf8")
 ]);
 
 test("production-signed Android release remains manual until signing is configured", () => {
@@ -20,10 +22,31 @@ test("production-signed Android release remains manual until signing is configur
   assert.match(workflow, /ANDROID_KEY_ALIAS/);
   assert.match(workflow, /ANDROID_KEY_PASSWORD/);
   assert.match(workflow, /assembleRelease/);
+  assert.match(workflow, /bundleRelease/);
+  assert.equal((workflow.match(/VIVID_ANDROID_DISTRIBUTION: play/g) || []).length, 2);
+  assert.match(nativeConfigurator, /playStoreDistribution/);
+  assert.match(nativeConfigurator, /playStoreDistribution \? \[\] : \["VividUpdaterPlugin\.class"\]/);
+  assert.match(nativeConfigurator, /playStoreDistribution \? \[\] : \["android\.permission\.REQUEST_INSTALL_PACKAGES"\]/);
+  assert.match(workflow, /Vivid-Cinema-Android\.aab/);
+  assert.match(workflow, /jarsigner -verify/);
+  assert.match(workflow, /Play Store APK must not request install-from-unknown-sources permission/);
   assert.match(workflow, /apksigner.*verify/);
   assert.match(workflow, /publish_to_github_release/);
   assert.match(workflow, /if: inputs\.publish_to_github_release/);
   assert.match(workflow, /Vivid-Cinema-Android\.apk/);
+  assert.match(workflow, /Set Android app version metadata/);
+  assert.match(workflow, /production_build=\$\(\(1000000 \+ GITHUB_RUN_NUMBER\)\)/);
+  assert.match(workflow, /VIVID_ANDROID_BUILD=\$production_build/);
+  assert.match(workflow, /configure-android-native-project\.mjs/);
+  assert.ok(workflow.indexOf("npm run cap:sync") < workflow.indexOf("configure-android-native-project.mjs"));
+  assert.ok(workflow.indexOf("configure-android-native-project.mjs") < workflow.indexOf("Configure release signing"));
+  assert.match(workflow, /Vivid-Cinema-Android-Play-build-\$VIVID_ANDROID_BUILD\.json/);
+  const publish = workflow.split("Publish Play App Bundle to matching GitHub release")[1] || "";
+  assert.match(publish, /Vivid-Cinema-Android\.aab/);
+  assert.doesNotMatch(publish, /gh release upload[^\n]*Vivid-Cinema-Android\.apk/);
+  assert.match(nativeConfigurator, /VividNavigationPlugin\.class/);
+  assert.match(nativeConfigurator, /VividUpdaterPlugin\.class/);
+  assert.match(nativeConfigurator, /process\.env\.VIVID_ANDROID_BUILD \|\| process\.env\.GITHUB_RUN_NUMBER/);
 });
 
 test("release signer reads credentials only from environment and never writes secrets into source", () => {
@@ -36,17 +59,23 @@ test("release signer reads credentials only from environment and never writes se
 
 test("debug APK release never republishes the Android signing keystore", async () => {
   const debugWorkflow = await readFile(new URL("../.github/workflows/android-debug-apk.yml", import.meta.url), "utf8");
-  const publishStep = debugWorkflow.split("Publish latest Android APK for in-app updates")[1] || "";
+  const publishStep = debugWorkflow.split("publish-direct-apk:")[1] || "";
   assert.match(publishStep, /gh release upload/);
   assert.doesNotMatch(publishStep, /Vivid-Cinema-Debug\\.keystore/);
   assert.match(debugWorkflow, /gh release download/);
+  assert.doesNotMatch(debugWorkflow, /ANDROID_PRODUCTION_SIGNING_ENABLED/);
+  assert.match(debugWorkflow, /Publish direct APK and build metadata/);
+  assert.match(debugWorkflow, /Vivid-Cinema-Android\.apk/);
+  assert.match(debugWorkflow, /workflow_dispatch.*github\.ref == 'refs\/heads\/main'/);
 });
 
 test("Android release docs explain keystore continuity and secret setup", () => {
   assert.match(docs, /ANDROID_KEYSTORE_BASE64/);
   assert.match(docs, /never commit/i);
-  assert.match(docs, /same signing key/i);
-  assert.match(docs, /signed release APK/i);
+  assert.match(docs, /upload key/i);
+  assert.match(docs, /production-signed APK/i);
+  assert.match(docs, /Play Store distribution/);
+  assert.match(docs, /does not publish to Google Play automatically/i);
 });
 
 

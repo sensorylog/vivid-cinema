@@ -1,5 +1,6 @@
 import { VIVID_CONFIG } from "./config.js";
 import { applyPerformanceProfile } from "./performance-profile.js";
+import { resolveAndroidBackAction } from "./android-navigation.js";
 
 // Apply the same hardware-aware visual profile in browsers and Electron.
 // Electron preload may already have applied it; the helper is idempotent.
@@ -303,6 +304,61 @@ function syncDesktopNavigation() {
   nav.classList.remove("vivid-v2-nav");
 }
 
+function isAndroidNativeRuntime() {
+  try {
+    return Boolean(window.Capacitor?.isNativePlatform?.() && window.Capacitor?.getPlatform?.() === "android");
+  } catch {
+    return false;
+  }
+}
+
+function syncAndroidMoreNavigation(nav, page) {
+  const morePages = ["live", "news", "search", "watch-rooms"];
+  const menu = document.createElement("div");
+  menu.className = "vivid-native-more-menu";
+  menu.id = "vivid-native-more-menu";
+  menu.hidden = true;
+  menu.setAttribute("role", "group");
+  menu.setAttribute("aria-label", "More destinations");
+  menu.innerHTML = [
+    navLink("live.html", "bi-broadcast-pin", "Live", page === "live"),
+    navLink("news.html", "bi-newspaper", "News", page === "news"),
+    navLink("search.html", "bi-search", "Search", page === "search"),
+    navLink("watch-rooms.html", "bi-people-fill", "Watch Rooms", page === "watch-rooms")
+  ].join("");
+
+  const more = nav.querySelector("[data-vivid-more-navigation]");
+  if (!more) return;
+  more.setAttribute("aria-expanded", "false");
+  more.setAttribute("aria-haspopup", "true");
+  more.setAttribute("aria-controls", menu.id);
+  more.classList.toggle("is-active", morePages.includes(page));
+  if (morePages.includes(page)) more.setAttribute("aria-current", "page");
+  else more.removeAttribute("aria-current");
+  more.addEventListener("click", () => {
+    const opening = more.getAttribute("aria-expanded") !== "true";
+    more.setAttribute("aria-expanded", String(opening));
+    menu.hidden = !opening;
+  });
+  menu.addEventListener("click", event => {
+    if (!event.target.closest("a")) return;
+    menu.hidden = true;
+    more.setAttribute("aria-expanded", "false");
+  });
+  document.addEventListener("click", event => {
+    if (nav.contains(event.target) || menu.contains(event.target)) return;
+    menu.hidden = true;
+    more.setAttribute("aria-expanded", "false");
+  });
+  document.addEventListener("keydown", event => {
+    if (event.key !== "Escape" || menu.hidden) return;
+    menu.hidden = true;
+    more.setAttribute("aria-expanded", "false");
+    more.focus({ preventScroll: true });
+  });
+  document.body.appendChild(menu);
+}
+
 function syncMobileNavigation() {
   const page = currentPage();
   let nav = document.querySelector(".vivid-mobile-nav");
@@ -312,15 +368,26 @@ function syncMobileNavigation() {
     nav.setAttribute("aria-label", "Mobile navigation");
     document.body.appendChild(nav);
   }
-  nav.innerHTML = [
-    navLink("home.html", "bi-house-fill", "Home", page === "home"),
-    navLink("discover.html", "bi-grid-fill", "Browse", isBrowsePage(page)),
-    navLink("for-you.html", "bi-stars", "For You", page === "for-you"),
-    navLink("live.html", "bi-broadcast-pin", "Live", page === "live"),
-    navLink("library.html", "bi-bookmark-fill", "Library", page === "library" || page === "downloads-library"),
-    navLink("news.html", "bi-newspaper", "News", page === "news"),
-    navLink("search.html", "bi-search", "Search", page === "search")
-  ].join("");
+  if (isAndroidNativeRuntime()) {
+    nav.innerHTML = [
+      navLink("home.html", "bi-house-fill", "Home", page === "home"),
+      navLink("discover.html", "bi-grid-fill", "Browse", isBrowsePage(page)),
+      navLink("for-you.html", "bi-stars", "For You", page === "for-you"),
+      navLink("library.html", "bi-bookmark-fill", "Library", page === "library" || page === "downloads-library"),
+      '<button type="button" data-vivid-more-navigation aria-expanded="false"><i class="bi bi-three-dots" aria-hidden="true"></i><span>More</span></button>'
+    ].join("");
+    syncAndroidMoreNavigation(nav, page);
+  } else {
+    nav.innerHTML = [
+      navLink("home.html", "bi-house-fill", "Home", page === "home"),
+      navLink("discover.html", "bi-grid-fill", "Browse", isBrowsePage(page)),
+      navLink("for-you.html", "bi-stars", "For You", page === "for-you"),
+      navLink("live.html", "bi-broadcast-pin", "Live", page === "live"),
+      navLink("library.html", "bi-bookmark-fill", "Library", page === "library" || page === "downloads-library"),
+      navLink("news.html", "bi-newspaper", "News", page === "news"),
+      navLink("search.html", "bi-search", "Search", page === "search")
+    ].join("");
+  }
   nav.classList.add("vivid-v2-mobile-nav");
 }
 
@@ -489,6 +556,62 @@ function ensureBackControl() {
   main.prepend(back);
 }
 
+function initNativeBackNavigation() {
+  let native = false;
+  try { native = Boolean(window.Capacitor?.isNativePlatform?.()); } catch {}
+  if (!native || window.__vividNativeBackNavigationReady) return;
+
+  const plugin = window.Capacitor?.Plugins?.VividNavigation;
+  if (!plugin?.addListener || typeof plugin.exitApp !== "function") return;
+  window.__vividNativeBackNavigationReady = true;
+
+  plugin.addListener("backButton", ({ canGoBack = false } = {}) => {
+    // Dismiss the top native HTML dialog before navigating away from its page.
+    const dialogs = [...document.querySelectorAll("dialog[open]")];
+    const activeDialog = dialogs.at(-1);
+    if (activeDialog) {
+      activeDialog.close();
+      return;
+    }
+
+    const moreMenu = document.querySelector(".vivid-native-more-menu:not([hidden])");
+    if (moreMenu) {
+      moreMenu.hidden = true;
+      document.querySelector("[data-vivid-more-navigation]")?.setAttribute("aria-expanded", "false");
+      return;
+    }
+
+    const playerOverlay = document.querySelector("#player-overlay");
+    if (playerOverlay && !playerOverlay.hidden) {
+      window.dispatchEvent(new CustomEvent("vivid:android-back"));
+      return;
+    }
+
+    const action = resolveAndroidBackAction({
+      currentRoute: currentRoute(),
+      stack: readNavigationStack(),
+      canGoBack,
+      historyLength: history.length
+    });
+
+    if (action.type === "route") {
+      writeNavigationStack(action.stack);
+      location.assign(new URL(action.route, location.origin).href);
+      return;
+    }
+    if (action.type === "history") {
+      history.back();
+      return;
+    }
+    void plugin.exitApp().catch(error => {
+      console.warn("Vivid could not close the Android activity:", error);
+    });
+  }).catch(error => {
+    window.__vividNativeBackNavigationReady = false;
+    console.warn("Vivid Android Back navigation could not initialize:", error);
+  });
+}
+
 function initCinematicFocusNavigation() {
   const selector = [
     ".vivid-card[tabindex]",
@@ -623,6 +746,7 @@ function initAppShell() {
   initHeaderScrollBehavior();
   initThemeToggle();
   recordCurrentRoute();
+  initNativeBackNavigation();
   ensureBackControl();
   ensureSkipLink();
   initCinematicFocusNavigation();

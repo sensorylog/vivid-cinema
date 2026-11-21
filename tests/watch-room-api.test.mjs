@@ -7,8 +7,11 @@ const clients = await Promise.all([
   "watch-rooms.js", "watch-room-lobby.js", "watch-room-clubs.js", "watch-room-playback.js"
 ].map(name => readFile(new URL("../scripts/" + name, import.meta.url), "utf8")));
 
-test("Watch Rooms browser client sends Firebase Auth and standard App Check tokens", async () => {
+test("Watch Rooms browser client sends Firebase Auth and Cloudflare-backed verification tokens", async () => {
   assert.ok(client.includes('getToken(appCheck, false)'));
+  assert.doesNotMatch(client, /Play Integrity/);
+  assert.match(client, /Cloudflare browser verification is unavailable/);
+  assert.match(client, /Turnstile widget hostname/);
   const firebase = await readFile(new URL("../scripts/firebase.js", import.meta.url), "utf8");
   assert.match(firebase, /isTokenAutoRefreshEnabled:\s*false/);
   const dashboard = await readFile(new URL("../scripts/watch-rooms.js", import.meta.url), "utf8");
@@ -17,7 +20,7 @@ test("Watch Rooms browser client sends Firebase Auth and standard App Check toke
   assert.doesNotMatch(client, /getLimitedUseToken/);
   assert.ok(client.includes('user.getIdToken()'));
   assert.ok(client.includes('"X-Firebase-AppCheck"'));
-  assert.ok(client.includes('const API_URL = "/api/watch-rooms"'));
+  assert.ok(client.includes('getCloudflareApiUrl("/api/watch-rooms")'));
   assert.ok(client.includes('credentials: "omit"'));
   assert.ok(client.includes('return { data: payload.data }'));
 });

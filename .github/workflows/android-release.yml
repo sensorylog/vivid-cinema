@@ -1,4 +1,4 @@
-name: Android signed release APK
+name: Android Play Store signed release
 
 on:
   workflow_dispatch:
@@ -54,13 +54,32 @@ jobs:
           ELECTRON_SKIP_BINARY_DOWNLOAD: "1"
         run: npm ci --no-audit --no-fund
 
+      - name: Set Android app version metadata
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="$(node -p "JSON.parse(require('fs').readFileSync('package.json','utf8')).version")"
+          # Production builds use a higher build-number namespace than the public
+          # development APK workflow so update discovery always selects the signed track.
+          production_build=$((1000000 + GITHUB_RUN_NUMBER))
+          echo "VIVID_ANDROID_VERSION=$version" >> "$GITHUB_ENV"
+          echo "VIVID_ANDROID_BUILD=$production_build" >> "$GITHUB_ENV"
+          echo "VIVID_ANDROID_BUILT_AT=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_ENV"
+
       - name: Run Android release contract tests
-        run: node --test tests/android-release-pipeline.test.mjs tests/android-native-polish.test.mjs tests/android-icon.test.mjs tests/service-worker.test.mjs
+        run: node --test tests/android-release-pipeline.test.mjs tests/android-native-polish.test.mjs tests/android-icon.test.mjs tests/android-auto-update.test.mjs tests/watch-player.test.mjs tests/watch-room-voice.test.mjs tests/playback-structure.test.mjs tests/service-worker.test.mjs
 
       - name: Generate Android project and bundle local website
+        env:
+          VIVID_ANDROID_DISTRIBUTION: play
         run: |
           npx cap add android
           npm run cap:sync
+
+      - name: Configure shared Android native plugins and version
+        env:
+          VIVID_ANDROID_DISTRIBUTION: play
+        run: node automation/configure-android-native-project.mjs
 
       - name: Configure release signing
         env:
@@ -78,13 +97,17 @@ jobs:
       - name: Apply shared Vivid Cinema launcher icon
         run: node automation/apply-android-icon.mjs
 
-      - name: Build signed release APK
+      - name: Build signed release APK and Google Play App Bundle
         run: |
+          set -euo pipefail
           chmod +x android/gradlew
           cd android
-          ./gradlew assembleRelease
+          ./gradlew assembleRelease bundleRelease
           mkdir -p ../release-output
           cp app/build/outputs/apk/release/app-release.apk ../release-output/Vivid-Cinema-Android.apk
+          cp app/build/outputs/bundle/release/app-release.aab ../release-output/Vivid-Cinema-Android.aab
+          test -s ../release-output/Vivid-Cinema-Android.apk
+          test -s ../release-output/Vivid-Cinema-Android.aab
 
       - name: Verify APK signature and package
         shell: bash
@@ -95,19 +118,24 @@ jobs:
           apksigner_path="$(find "$ANDROID_HOME/build-tools" -type f -name apksigner -print -quit)"
           test -n "$apksigner_path"
           "$apksigner_path" verify --verbose "$apk"
+          jarsigner -verify -verbose release-output/Vivid-Cinema-Android.aab >/dev/null
           aapt_path="$(find "$ANDROID_HOME/build-tools" -type f -name aapt -print -quit)"
           test -n "$aapt_path"
           "$aapt_path" dump badging "$apk" | grep -F "package: name='com.vividcinema.app'"
+          if "$aapt_path" dump permissions "$apk" | grep -Fq "android.permission.REQUEST_INSTALL_PACKAGES"; then
+            echo "Play Store APK must not request install-from-unknown-sources permission."
+            exit 1
+          fi
 
       - name: Upload signed APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: vivid-cinema-signed-android-${{ github.run_number }}
-          path: release-output/*.apk
+          path: release-output/*
           if-no-files-found: error
           retention-days: 90
 
-      - name: Publish APK to matching GitHub release
+      - name: Publish Play App Bundle to matching GitHub release
         if: inputs.publish_to_github_release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -116,5 +144,7 @@ jobs:
           version="$(node -p "require('./package.json').version")"
           tag="v$version"
           gh release view "$tag" >/dev/null
-          gh release upload "$tag" release-output/Vivid-Cinema-Android.apk --clobber
-          gh release view "$tag" --json assets --jq '.assets[].name' | grep -Fx "Vivid-Cinema-Android.apk"
+          node --input-type=module -e 'import {writeFileSync} from "node:fs"; writeFileSync("release-output/Vivid-Cinema-Android-Play-build-" + process.env.VIVID_ANDROID_BUILD + ".json", JSON.stringify({version: process.env.VIVID_ANDROID_VERSION, build: Number(process.env.VIVID_ANDROID_BUILD)}, null, 2))'
+          gh release upload "$tag" release-output/Vivid-Cinema-Android.aab "release-output/Vivid-Cinema-Android-Play-build-$VIVID_ANDROID_BUILD.json" --clobber
+          gh release view "$tag" --json assets --jq '.assets[].name' | grep -Fx "Vivid-Cinema-Android.aab"
+          gh release view "$tag" --json assets --jq '.assets[].name' | grep -Fx "Vivid-Cinema-Android-Play-build-$VIVID_ANDROID_BUILD.json"

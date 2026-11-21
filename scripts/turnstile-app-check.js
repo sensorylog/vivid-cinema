@@ -1,4 +1,6 @@
-const ENDPOINT = "/api/app-check";
+import { getCloudflareApiUrl } from "./cloudflare-api.js";
+
+const ENDPOINT = getCloudflareApiUrl("/api/app-check");
 let scriptPromise = null;
 let configPromise = null;
 let tokenExchangePromise = null;

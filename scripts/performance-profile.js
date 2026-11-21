@@ -8,7 +8,9 @@ const PERFORMANCE_STYLES_ATTRIBUTE = "data-vivid-performance-styles";
 export function isLegacyPerformanceDevice(capabilities = {}) {
   const cores = Number(capabilities.hardwareConcurrency || 0);
   const memory = Number(capabilities.deviceMemory || 0);
-  return (cores > 0 && cores <= 2) || (memory > 0 && memory <= 4);
+  const androidNative = capabilities.platform === "android";
+  const constrainedAndroid = androidNative && cores > 0 && cores <= 4 && (!memory || memory <= 4);
+  return (cores > 0 && cores <= 2) || (memory > 0 && memory <= 4) || constrainedAndroid;
 }
 
 /**
@@ -19,7 +21,13 @@ export function applyPerformanceProfile({
   documentRef = document,
   navigatorRef = navigator
 } = {}) {
-  if (!isLegacyPerformanceDevice(navigatorRef)) return "standard";
+  let platform = "";
+  try { platform = window.Capacitor?.getPlatform?.() || ""; } catch {}
+  if (!isLegacyPerformanceDevice({
+    hardwareConcurrency: navigatorRef.hardwareConcurrency,
+    deviceMemory: navigatorRef.deviceMemory,
+    platform
+  })) return "standard";
 
   const root = documentRef.documentElement;
   if (!root) return "legacy";

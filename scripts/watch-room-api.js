@@ -1,7 +1,8 @@
+import { getCloudflareApiUrl } from "./cloudflare-api.js";
 import { auth, appCheck, appCheckError } from "./firebase.js";
 import { getToken } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app-check.js";
 
-const API_URL = "/api/watch-rooms";
+const API_URL = getCloudflareApiUrl("/api/watch-rooms");
 
 export function callWatchRoomApi(action) {
   return async (data = {}) => {
@@ -18,13 +19,15 @@ export function callWatchRoomApi(action) {
     if (!appCheck) {
       const cause = appCheckError;
       const diagnosticCode = String(cause?.code || "appCheck/not-initialized");
-      console.error("Vivid Watch Rooms App Check initialization failed:", {
+      console.error("Vivid Watch Rooms Cloudflare Turnstile verification initialization failed:", {
         hostname: window.location.hostname,
         origin: window.location.origin,
         code: diagnosticCode,
-        message: cause?.message || "Firebase App Check did not initialize."
+        message: cause?.message || "Cloudflare Turnstile-backed verification did not initialize."
       });
-      const error = new Error("Browser verification is unavailable (" + diagnosticCode + "). Reload Vivid and try again. If it continues, the site's App Check provider or allowed-domain configuration needs attention.");
+      const error = new Error(
+        "Cloudflare browser verification is unavailable (" + diagnosticCode + "). Reload Vivid and try again. If it continues, check the Turnstile widget hostname and Cloudflare Pages configuration."
+      );
       error.code = diagnosticCode;
       error.cause = cause || undefined;
       throw error;
