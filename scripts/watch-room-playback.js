@@ -1,7 +1,7 @@
 import { auth, db } from "./firebase.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
 import { doc, onSnapshot } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
-import { getExpectedPlaybackPosition, isPlaybackRevisionStale, normalizePlaybackTimestamp, shouldCorrectPlayback } from "./playback/watch-room-sync.js";
+import { getExpectedPlaybackPosition, isPlaybackRevisionStale, normalizePlaybackTimestamp, PLAYBACK_HEARTBEAT_INTERVAL_MS, shouldCorrectPlayback } from "./playback/watch-room-sync.js";
 import { callWatchRoomApi } from "./watch-room-api.js";
 import { getProviderAdapter, sendProviderCommand as sendAdapterCommand } from "./playback/provider-adapters.js";
 import { getGuestPlaybackAction } from "./playback/watch-room-playback-policy.js";
@@ -423,7 +423,7 @@ window.addEventListener("vivid:provider-playback", event => {
   const now = Date.now();
   // Frequent provider progress events keep the room clock fresh. Explicit
   // pause/resume/seek/end events always bypass this heartbeat throttle.
-  if (heartbeatEvent && lastPublishedStatus === "playing" && now - lastPublishAt < 1800) return;
+  if (heartbeatEvent && lastPublishedStatus === "playing" && now - lastPublishAt < PLAYBACK_HEARTBEAT_INTERVAL_MS) return;
   lastPublishAt = now;
   lastPublishedStatus = hostStatus;
   const sessionId = new URLSearchParams(window.location.search).get("sessionId") || "";
