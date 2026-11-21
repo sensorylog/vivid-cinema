@@ -140,3 +140,15 @@ test("deferred Home ambient artwork can hydrate from shelves rendered before its
   assert.match(breathe, /vivid:home-trending-ready/);
   assert.match(breathe, /refreshTrending\(\);\s*$/);
 });
+
+
+test("Home skips offscreen shelf rendering and avoids layout reads on every rail scroll", async () => {
+  const css = await read("styles/vivid-home.css");
+  const source = await read("script.js");
+  const wire = source.slice(source.indexOf("function wireRails()"), source.indexOf("function updateRailControls"));
+  assert.match(css, /body\[data-vivid-page="home"\].*\.vivid-rails\s*\{[\s\S]*?content-visibility:\s*auto/);
+  assert.match(css, /contain-intrinsic-size:\s*auto\s+420px/);
+  assert.doesNotMatch(wire, /\.vivid-rail.*addEventListener\(["']scroll/);
+  assert.match(source, /requestAnimationFrame\(syncHomeTopbarScroll\)/);
+  assert.match(source, /if \(next === homeTopbarScrollState\) return/);
+});
