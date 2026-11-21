@@ -716,7 +716,7 @@ test("Watch Room playback uses member-only realtime snapshots and trusted revisi
     assert.ok(write.includes("expectedRevision !== currentRevision"));
     assert.ok(write.includes('"stale-revision"'));
     assert.ok(write.includes('tx.get(roomRef.collection("members").doc(uid))'));
-    assert.ok(write.includes('previous?.status === "playing"'), "only repeated playing heartbeats are rate-limited");
+    assert.ok(write.includes("shouldThrottlePlaybackWrite(previous?.status, status"), "only repeated playing heartbeats are rate-limited");
   }
   assert.ok(client.includes('call("getWatchRoomPlaybackSnapshot")'), "trusted snapshot fetch remains available for revision conflict recovery");
   assert.ok(client.includes("playbackConnectionGeneration"));
