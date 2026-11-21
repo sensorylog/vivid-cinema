@@ -465,6 +465,9 @@ test("Watch Room sync extrapolates local time and keeps command events ahead of 
   assert.ok(client.includes("suppressPlaybackPublishUntil = Math.max(suppressPlaybackPublishUntil, now + 1800)"), "remote-follow commands must not echo back as controller actions");
   assert.ok(client.includes("eventType === \"progress\" && now - lastPublishAt < 3500"));
   assert.ok(client.includes("getEstimatedLocalPlaybackPosition({"));
+  assert.ok(client.includes("positionAtMs: now + clockOffsetMs"));
+  assert.ok(client.includes("capturedAtMs: payload.positionAtMs"));
+  for (const backend of [node, cloudflare]) assert.ok(backend.includes("positionAtMs = Number.isFinite(capturedAtMsInput)"));
   assert.ok(client.includes("syncReconcileTimer = window.setInterval"));
   assert.ok(client.includes("if (role !== \"guest\" || joinedPlayback)"), "guest player should preload while the room is waiting");
   assert.ok(client.includes("Your player is ready. Tap Play once to prepare it"));
