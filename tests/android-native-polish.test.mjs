@@ -30,6 +30,7 @@ test("native styling covers safe areas, touch targets, and accessible focus", ()
   assert.match(nativeCss, /html\.vivid-native-app body/);
   assert.match(nativeCss, /min-height:\s*44px/);
   assert.match(nativeCss, /font-size:\s*16px/);
+  assert.doesNotMatch(nativeCss, /touch-action:\s*pan-x\s+pan-y\s*;/, "native shell must not disable pinch-to-zoom");
   assert.match(nativeCss, /:focus-visible/);
   assert.match(nativeCss, /prefers-reduced-motion/);
   assert.match(nativeCss, /\.vivid-player-dialog:fullscreen/);
