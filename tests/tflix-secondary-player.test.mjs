@@ -28,6 +28,9 @@ test("watch page mounts secondary player without replacing the primary source pi
   for (const source of ["vidapi", "vidsrc", "vidlink", "vidplus", "vidking"]) assert.match(watch, new RegExp('data-player-source="' + source + '"'));
   assert.match(watch, /class="vivid-player-layout"/);
   assert.match(watch, /aria-label="Vivid Cinema playback servers"/);
+  assert.match(watch, /roomMode: route\.params\.get\("roomMode"\) === "1"/);
+  const secondary = await readFile(new URL("../scripts/playback/tflix-secondary-player.js", import.meta.url), "utf8");
+  assert.match(secondary, /if \(params\.roomMode\) root\.querySelector\("#vivid-tflix-tv-panel"\)\?\.remove\(\)/);
 });
 
 test("Player 2 fetches real TMDB episode lists and advances within the selected series",async()=>{const {readFile}=await import("node:fs/promises");const player=await readFile(new URL("../scripts/playback/tflix-secondary-player.js",import.meta.url),"utf8");const watch=await readFile(new URL("../scripts/watch.js",import.meta.url),"utf8");assert.match(player,/import \{ tmdbApi \} from "\.\.\/tmdb\.js"/);assert.match(player,/tmdbApi\.tvSeason\(tmdbId, playbackParams\.season\)/);assert.match(player,/ep\.name/);assert.match(player,/episodeData\[currentIndex \+ 1\]\.episode_number/);assert.match(player,/seasonSelect\.addEventListener\("change"/);assert.match(player,/episodeSelect\.addEventListener\("change"/);assert.match(player,/if \(started\) \{\s*loadServer\(selectedServer\)/);assert.match(watch,/Re-mount Player 2 after TMDB metadata arrives/);});
