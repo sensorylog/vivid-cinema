@@ -39,6 +39,8 @@ test("commands require a supported action and matching iframe origin", () => {
   assert.deepEqual(calls[0], [{ player: true, action: "play" }, "https://vidsrc.sh"]);
   assert.equal(sendProviderCommand({ adapter, frame, action: "seek", position: 91.8 }), true);
   assert.deepEqual(calls[1], [{ player: true, action: "seek91" }, "https://vidsrc.sh"]);
+  assert.equal(sendProviderCommand({ adapter, frame, action: "rate", rate: 1.5 }), true);
+  assert.deepEqual(calls[2], [{ player: true, action: "rate", value: 1.5 }, "https://vidsrc.sh"]);
   assert.equal(sendProviderCommand({ adapter, frame, action: "pause" }), true);
   assert.equal(sendProviderCommand({ adapter, frame, action: "volume" }), false);
   assert.equal(sendProviderCommand({ adapter: getProviderAdapter("player2", "vidsrc-embed"), frame, action: "play" }), false);
@@ -60,6 +62,8 @@ test("CineSRC uses its documented command protocol and verified origin", () => {
   assert.deepEqual(calls[1], [{ type: "cinesrc:command", command: "pause", args: [] }, "https://cinesrc.st"]);
   assert.equal(sendProviderCommand({ adapter, frame, action: "seek", position: 123.5 }), true);
   assert.deepEqual(calls[2], [{ type: "cinesrc:command", command: "seek", args: [123.5] }, "https://cinesrc.st"]);
+  assert.equal(sendProviderCommand({ adapter, frame, action: "rate", rate: 1.75 }), true);
+  assert.deepEqual(calls[3], [{ type: "cinesrc:command", command: "setPlaybackRate", args: [1.75] }, "https://cinesrc.st"]);
   assert.equal(sendProviderCommand({ adapter, frame: { ...frame, src: "https://evil.example/embed" }, action: "play" }), false);
 });
 
