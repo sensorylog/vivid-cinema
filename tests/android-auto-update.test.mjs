@@ -29,6 +29,7 @@ test("Android workflow publishes a cleanly named APK and build metadata without 
   assert.doesNotMatch(workflow, /pull_request:\s*\n\s*paths:/, "all application changes must exercise the Android bundle");
   assert.match(workflow, /release:\s*\n\s*types: \[published\]/);
   assert.match(workflow, /assembleDebug/);
+  assert.match(workflow, /REQUEST_INSTALL_PACKAGES/);
   assert.match(workflow, /configure-android-native-project\.mjs/);
   assert.ok(workflow.indexOf("npm run cap:sync") < workflow.indexOf("configure-android-native-project.mjs"));
   assert.match(workflow, /apk_name="Vivid-Cinema-Android\.apk"/);
