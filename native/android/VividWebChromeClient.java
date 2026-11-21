@@ -6,6 +6,7 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.webkit.WebChromeClient.CustomViewCallback;
+import java.lang.ref.WeakReference;
 import com.getcapacitor.Bridge;
 import com.getcapacitor.BridgeWebChromeClient;
 
@@ -15,6 +16,7 @@ import com.getcapacitor.BridgeWebChromeClient;
  * the native view attachment required by HTML fullscreen and provider video.
  */
 public class VividWebChromeClient extends BridgeWebChromeClient {
+    private static WeakReference<VividWebChromeClient> activeClient = new WeakReference<>(null);
     private final Bridge bridge;
     private View customView;
     private CustomViewCallback customViewCallback;
@@ -25,6 +27,15 @@ public class VividWebChromeClient extends BridgeWebChromeClient {
     public VividWebChromeClient(Bridge bridge) {
         super(bridge);
         this.bridge = bridge;
+        activeClient = new WeakReference<>(this);
+    }
+
+    /** Exits the currently displayed WebView fullscreen custom view on Android Back. */
+    public static boolean exitActiveCustomView() {
+        VividWebChromeClient client = activeClient.get();
+        if (client == null || client.customView == null) return false;
+        client.onHideCustomView();
+        return true;
     }
 
     @Override
