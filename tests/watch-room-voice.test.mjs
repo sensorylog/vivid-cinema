@@ -23,8 +23,9 @@ test("LiveKit access token is short-lived and scoped to one room and one member"
   assert.equal(claims.video.room, "vivid-" + "a".repeat(32));
   assert.equal(claims.video.roomJoin, true);
   assert.equal(claims.video.canPublish, true);
+  assert.deepEqual(claims.video.canPublishSources, ["microphone"]);
   assert.equal(claims.video.canSubscribe, true);
-  assert.equal(claims.exp - claims.iat, 600);
+  assert.equal(claims.exp - claims.iat, 4 * 60 * 60);
   assert.equal(result.expiresAt, (claims.exp) * 1000);
   assert.equal(result.token.includes(apiSecret), false);
   const expected = createHmac("sha256", apiSecret).update(headerPart + "." + payloadPart).digest("base64url");
@@ -39,11 +40,12 @@ test("LiveKit token signer rejects malformed identities and unscoped room names"
 });
 
 test("Watch Room ships voice controls and keeps the shared player inside the room shell", async () => {
-  const [html, lobby, voice, api] = await Promise.all([
+  const [html, lobby, voice, api, headers] = await Promise.all([
     readFile(new URL("../watch-rooms.html", import.meta.url), "utf8"),
     readFile(new URL("../scripts/watch-room-lobby.js", import.meta.url), "utf8"),
     readFile(new URL("../scripts/watch-room-voice.js", import.meta.url), "utf8"),
-    readFile(new URL("../cloudflare/functions/api/watch-rooms.js", import.meta.url), "utf8")
+    readFile(new URL("../cloudflare/functions/api/watch-rooms.js", import.meta.url), "utf8"),
+    readFile(new URL("../_headers", import.meta.url), "utf8")
   ]);
   assert.match(html, /id="wr-voice-call"/);
   assert.match(html, /id="wr-screening-stage"/);
