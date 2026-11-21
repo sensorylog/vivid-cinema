@@ -97,6 +97,7 @@ test("shared playback clock applies playback rate to host and local timeline est
   assert.equal(normalizePlaybackRate(8), 2);
   assert.equal(normalizePlaybackRate(0.1), 0.25);
   assert.equal(normalizePlaybackRate("invalid"), 1);
+  assert.equal(normalizePlaybackRate(null), 1);
   assert.equal(getExpectedPlaybackPosition({
     status: "playing", position: 100, duration: 1000, updatedAt: 10_000, playbackRate: 1.5
   }, { nowMs: 12_000 }), 103);
