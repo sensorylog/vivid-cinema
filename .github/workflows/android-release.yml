@@ -1,4 +1,4 @@
-name: Android signed release APK
+name: Android Play Store signed release
 
 on:
   workflow_dispatch:
