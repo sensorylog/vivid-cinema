@@ -19,6 +19,7 @@ let playbackUnsubscribe = null;
 let playbackSubscriptionRetryTimer = null;
 let playbackSubscriptionRetryDelayMs = 1000;
 let playbackRevision = 0;
+let playbackSessionId = "";
 let playbackConnectionGeneration = 0;
 let heartbeatTimer = null;
 let selectionTimer = null;
@@ -171,6 +172,7 @@ function stopConnection() {
   playbackSubscriptionRetryTimer = null;
   playbackSubscriptionRetryDelayMs = 1000;
   playbackRevision = 0;
+  playbackSessionId = "";
   if (heartbeatTimer) window.clearInterval(heartbeatTimer);
   if (selectionTimer) window.clearInterval(selectionTimer);
   heartbeatTimer = null; selectionTimer = null; lastAppliedSelectionKey = ""; roomPlayerLoadRequested = false;
@@ -342,6 +344,7 @@ async function connectToRoom(id) {
   joinedPlayback = memberRole === "guest";
   latestRemoteState = snapshot.data?.playback || null;
   playbackRevision = Number(latestRemoteState?.revision) || 0;
+  playbackSessionId = String(latestRemoteState?.sessionId || new URLSearchParams(window.location.search).get("sessionId") || "");
   const initialServerTime = Number(snapshot.data?.serverTime);
   if (Number.isFinite(initialServerTime)) clockOffsetMs = initialServerTime - ((initialStartedAt + initialFinishedAt) / 2);
   subscribeToPlayback(id, connectionGeneration);
@@ -534,7 +537,23 @@ window.addEventListener("vivid:player-source-changed", event => {
 });
 document.addEventListener("vivid:watch-room-screening-navigate", event => {
   const requestedRoomId = String(event.detail?.roomId || "");
-  if (!requestedRoomId || (roomId === requestedRoomId && playbackUnsubscribe)) return;
+  const requestedSessionId = String(event.detail?.screening?.sessionId || "");
+  if (!requestedRoomId) return;
+  if (roomId === requestedRoomId && playbackUnsubscribe) {
+    if (requestedSessionId && requestedSessionId !== playbackSessionId) {
+      // A new film in the same room starts a fresh playback revision sequence.
+      playbackSessionId = requestedSessionId;
+      playbackRevision = 0;
+      latestRemoteState = null;
+      localPosition = null;
+      localStatus = "";
+      hostStatus = "playing";
+      lastPublishAt = 0;
+      lastPublishedStatus = "";
+      lastHostPayload = null;
+    }
+    return;
+  }
   connectToRoom(requestedRoomId).catch(error => setNote(error?.message || "Could not connect playback to the active Watch Room."));
 });
 
