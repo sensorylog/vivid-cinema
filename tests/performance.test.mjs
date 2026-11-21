@@ -246,3 +246,18 @@ test("legacy rendering profile removes expensive compositing while retaining cin
   assert.match(css, /box-shadow:\s*0 8px 24px rgba\(0, 0, 0, \.18\)/);
   assert.doesNotMatch(css, /\.vivid-card\s*\{[^}]*display:\s*none/);
 });
+
+
+test("Home poster rails delegate card interactions once instead of binding handlers per card", async () => {
+  const source = await read("script.js");
+  assert.match(source, /const wiredCardContainers = new WeakSet\(\)/);
+  assert.match(source, /function openHomeCard\(card\)/);
+  const wire = source.slice(source.indexOf("function wireCards(container)"), source.indexOf("async function renderTonightPick"));
+  assert.match(wire, /container\.addEventListener\("click"/);
+  assert.match(wire, /container\.addEventListener\("keydown"/);
+  assert.match(wire, /wiredCardContainers\.has\(container\)/);
+  assert.doesNotMatch(wire, /querySelectorAll\("\.vivid-card"\)/);
+  assert.doesNotMatch(wire, /c\.addEventListener/);
+  assert.match(wire, /data-coming-reminder/);
+  assert.match(wire, /openHomeCard\(card\)/);
+});
