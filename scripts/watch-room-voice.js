@@ -165,6 +165,8 @@ async function joinVoice(options = {}) {
     room.on(sdk.RoomEvent.ParticipantConnected, renderParticipants);
     room.on(sdk.RoomEvent.ParticipantDisconnected, renderParticipants);
     room.on(sdk.RoomEvent.ActiveSpeakersChanged, renderParticipants);
+    room.on(sdk.RoomEvent.TrackMuted, renderParticipants);
+    room.on(sdk.RoomEvent.TrackUnmuted, renderParticipants);
     room.on(sdk.RoomEvent.TrackSubscribed, (track, publication, participant) => {
       if (track.kind === sdk.Track.Kind.Audio) attachAudio(track);
       renderParticipants();
