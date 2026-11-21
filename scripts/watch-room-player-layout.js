@@ -15,6 +15,7 @@ export function mountWatchRoomPlayerLayout({ slot, overlay, Observer = globalThi
     overlay.classList.toggle("is-floating", value);
     slot.classList.toggle("is-floating", value);
     overlay.dataset.presentation = value ? "floating" : "inline";
+    overlay.setAttribute("aria-label", value ? "Floating cinema player" : "Cinema player");
     const returnButton = overlay.querySelector("#player-return-inline");
     if (returnButton) returnButton.hidden = !value;
     onPresentation({ floating: value });
