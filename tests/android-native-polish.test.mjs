@@ -8,12 +8,14 @@ import { fileURLToPath } from "node:url";
 import { resolveAndroidBackAction } from "../scripts/android-navigation.js";
 import { applyPerformanceProfile, isLegacyPerformanceDevice } from "../scripts/performance-profile.js";
 
-const [builder, nativeCss, capacitorConfig, nativeConfigurator, appShell] = await Promise.all([
+const [builder, nativeCss, capacitorConfig, nativeConfigurator, appShell, nativeNavigation, nativeWebChrome] = await Promise.all([
   readFile(new URL("../automation/build-static-dist.mjs", import.meta.url), "utf8"),
   readFile(new URL("../styles/vivid-native-app.css", import.meta.url), "utf8"),
   readFile(new URL("../capacitor.config.json", import.meta.url), "utf8"),
   readFile(new URL("../automation/configure-android-native-project.mjs", import.meta.url), "utf8"),
-  readFile(new URL("../scripts/app-shell.js", import.meta.url), "utf8")
+  readFile(new URL("../scripts/app-shell.js", import.meta.url), "utf8"),
+  readFile(new URL("../native/android/VividNavigationPlugin.java", import.meta.url), "utf8"),
+  readFile(new URL("../native/android/VividWebChromeClient.java", import.meta.url), "utf8")
 ]);
 
 test("native-only styling is injected into the generated bundle, not source HTML", () => {
@@ -44,10 +46,13 @@ test("Capacitor remains configured for the Vivid Cinema app", () => {
 
 test("generated Android project registers a native hardware Back bridge", () => {
   assert.match(nativeConfigurator, /VividNavigationPlugin\.class/);
-  assert.match(nativeConfigurator, /@CapacitorPlugin\(name = "VividNavigation"\)/);
-  assert.match(nativeConfigurator, /OnBackPressedCallback/);
-  assert.match(nativeConfigurator, /notifyListeners\("backButton"/);
-  assert.match(nativeConfigurator, /getActivity\(\)\.finish\(\)/);
+  assert.match(nativeNavigation, /@CapacitorPlugin\(name = "VividNavigation"\)/);
+  assert.match(nativeNavigation, /OnBackPressedCallback/);
+  assert.match(nativeNavigation, /notifyListeners\("backButton"/);
+  assert.match(nativeNavigation, /getActivity\(\)\.finish\(\)/);
+  assert.match(nativeWebChrome, /extends BridgeWebChromeClient/);
+  assert.match(nativeWebChrome, /onShowCustomView\(View view, CustomViewCallback callback\)/);
+  assert.match(nativeWebChrome, /onHideCustomView\(\)/);
   assert.match(appShell, /window\.Capacitor\?\.Plugins\?\.VividNavigation/);
   assert.match(appShell, /plugin\.addListener\("backButton"/);
   assert.match(appShell, /playerOverlay && !playerOverlay\.hidden/);
