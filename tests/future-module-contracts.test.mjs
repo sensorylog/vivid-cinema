@@ -461,6 +461,8 @@ test("Watch Room sync extrapolates local time and keeps command events ahead of 
   const node = readFileSync(new URL("../api/watch-rooms.js", import.meta.url), "utf8");
   const cloudflare = readFileSync(new URL("../cloudflare/functions/api/watch-rooms.js", import.meta.url), "utf8");
   assert.ok(client.includes("classifyPlaybackEvent({"));
+  assert.ok(client.includes('let hostStatus = "paused"'), "a new screening must wait for a real host play event");
+  assert.ok(client.includes("suppressPlaybackPublishUntil = Math.max(suppressPlaybackPublishUntil, now + 1800)"), "remote-follow commands must not echo back as controller actions");
   assert.ok(client.includes("eventType === \"progress\" && now - lastPublishAt < 3500"));
   assert.ok(client.includes("getEstimatedLocalPlaybackPosition({"));
   assert.ok(client.includes("syncReconcileTimer = window.setInterval"));
