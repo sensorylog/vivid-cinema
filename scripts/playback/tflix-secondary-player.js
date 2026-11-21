@@ -25,7 +25,7 @@ export function buildTflixSecondaryServerUrl(serverId, params = {}) {
   switch (serverId) {
     case "moviesapi": return isTv ? "https://moviesapi.to/tv/" + id + "-" + season + "-" + episode : "https://moviesapi.to/movie/" + id;
     case "vidsrc-embed": return isTv ? "https://vidsrc-embed.ru/embed/tv?tmdb=" + id + "&season=" + season + "&episode=" + episode + "&autoplay=1" : "https://vidsrc-embed.ru/embed/movie?tmdb=" + id + "&autoplay=1";
-    case "cinesrc": return isTv ? "https://cinesrc.st/embed/tv/" + id + "?s=" + season + "&e=" + episode + "&autoplay=true&autonext=true&prioritize=true&lastserver=wave" : "https://cinesrc.st/embed/movie/" + id + "?autoplay=true&prioritize=true&lastserver=wave";
+    case "cinesrc": return isTv ? "https://cinesrc.st/embed/tv/" + id + "?s=" + season + "&e=" + episode + "&autoplay=true&autonext=" + (params.roomMode ? "false" : "true") + "&prioritize=true&lastserver=wave" : "https://cinesrc.st/embed/movie/" + id + "?autoplay=true&prioritize=true&lastserver=wave";
     case "vidfast": return isTv ? "https://vidfast.vc/tv/" + id + "/" + season + "/" + episode + "?autoPlay=true" : "https://vidfast.vc/movie/" + id + "?autoPlay=true";
     case "vidlink": return isTv ? "https://vidlink.pro/tv/" + id + "/" + season + "/" + episode + "?title=true&poster=true&autoplay=true&nextbutton=true" : "https://vidlink.pro/movie/" + id + "?title=true&poster=true&autoplay=true";
     default: return "";
@@ -59,6 +59,7 @@ export function mountTflixSecondaryPlayer({ root, params, media, details, title,
         (isTv ? '<section class="vivid-tflix-panel" id="vivid-tflix-tv-panel"><div class="vivid-tflix-panel-title">Episode</div><div class="vivid-tflix-selectors"><label><span>Season</span><select id="vivid-tflix-season" class="vivid-tflix-select"></select></label><label><span>Episode</span><select id="vivid-tflix-episode" class="vivid-tflix-select"></select></label></div><button type="button" id="vivid-tflix-next" class="vivid-tflix-next">Next Episode <span aria-hidden="true">▶</span></button></section>' : '') +
         '<section class="vivid-tflix-panel"><div class="vivid-tflix-panel-title">Streaming Servers</div><div class="vivid-tflix-server-grid" id="vivid-tflix-server-grid"></div></section>' +
       '</aside></div><p class="vivid-tflix-footnote">Playback is provided by third-party embeds. If a server is unavailable or stays blank, select another server.</p></div>';
+  if (params.roomMode) root.querySelector("#vivid-tflix-tv-panel")?.remove();
   const screen = root.querySelector("#vivid-tflix-screen");
   const placeholder = root.querySelector("#vivid-tflix-placeholder");
   const loading = root.querySelector("#vivid-tflix-loading");
@@ -66,7 +67,7 @@ export function mountTflixSecondaryPlayer({ root, params, media, details, title,
   const grid = root.querySelector("#vivid-tflix-server-grid");
   const nowTitle = root.querySelector("#vivid-tflix-now-title");
   let selectedServer = readRememberedServer(), generation = 0, loadTimer = 0, started = false;
-  const playbackParams = { id: tmdbId, tmdbId, type: params.type, season: positiveInteger(params.season), episode: positiveInteger(params.episode) };
+  const playbackParams = { id: tmdbId, tmdbId, type: params.type, season: positiveInteger(params.season), episode: positiveInteger(params.episode), roomMode: Boolean(params.roomMode) };
   const buttons = new Map();
   function updateTitle() {
     nowTitle.textContent = isTv ? titleText + " · S" + playbackParams.season + " E" + playbackParams.episode : titleText;
