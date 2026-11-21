@@ -156,8 +156,8 @@ body.vivid-native-app {
   border: 0 !important;
   border-radius: 0 !important;
 }
-.vivid-player-dialog:fullscreen iframe,
-.vivid-player-dialog:fullscreen video {
+.vivid-player-dialog:fullscreen iframe:not([hidden]),
+.vivid-player-dialog:fullscreen video:not([hidden]) {
   display: block !important;
   width: 100% !important;
   height: 100% !important;
@@ -198,4 +198,49 @@ body.vivid-native-app {
   width: 42px;
   min-width: 42px;
   padding: 0 !important;
+}
+
+
+.vivid-player-overlay.vivid-player-fullscreen-fallback .vivid-player-dialog {
+  display: flex !important;
+  flex-direction: column !important;
+}
+.vivid-player-overlay.vivid-player-fullscreen-fallback .vivid-player-dialog-head {
+  position: absolute !important;
+  z-index: 20 !important;
+  inset: env(safe-area-inset-top, 0px) 0 auto !important;
+  background: linear-gradient(180deg, rgba(3,5,9,.94), rgba(3,5,9,.52), transparent) !important;
+}
+.vivid-player-overlay.vivid-player-fullscreen-fallback .vivid-player-layout {
+  display: flex !important;
+  flex: 1 1 auto !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 0 !important;
+}
+.vivid-player-overlay.vivid-player-fullscreen-fallback .vivid-player-main {
+  display: flex !important;
+  flex: 1 1 auto !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 0 !important;
+}
+.vivid-player-overlay.vivid-player-fullscreen-fallback .vivid-player-frame {
+  flex: 1 1 auto !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  aspect-ratio: auto !important;
+}
+.vivid-player-overlay.vivid-player-fullscreen-fallback iframe:not([hidden]),
+.vivid-player-overlay.vivid-player-fullscreen-fallback video:not([hidden]) {
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+  max-height: none !important;
+  border: 0 !important;
+  object-fit: contain !important;
+}
+.vivid-player-overlay.vivid-player-fullscreen-fallback .vivid-player-dialog-foot {
+  display: none !important;
 }
