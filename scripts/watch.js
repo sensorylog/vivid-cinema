@@ -683,7 +683,7 @@ function playerInfoMarkup() {
     ? (isTv ? runtime + " min episode" : Math.floor(runtime / 60) + "h " + String(runtime % 60).padStart(2, "0") + "m")
     : "";
   const episodeLabel = isTv
-    ? "S" + String(currentParams?.season || 1).padStart(2, "0") + " · E" + String(currentParams?.episode || 1).padStart(2, "0")
+    ? "S" + String(currentParams?.season ?? 1).padStart(2, "0") + " · E" + String(currentParams?.episode ?? 1).padStart(2, "0")
     : "";
   const meta = [year, episodeLabel, runtimeLabel].filter(Boolean);
   const metaMarkup = meta.map(value => '<span class="vivid-player-meta-item">' + escapeHtml(value) + '</span>').join("");
@@ -739,7 +739,7 @@ function playerInfoMarkup() {
         (voteCount > 0 ? '<span class="vivid-player-vote-count">' + voteCount.toLocaleString() + ' ratings</span>' : '') +
       '</div>' +
       (genreMarkup ? '<div class="vivid-player-genre-list" aria-label="Genres">' + genreMarkup + '</div>' : '') +
-      (synopsis ? '<p class="vivid-player-synopsis">' + escapeHtml(synopsis) + '</p>' : '<p class="vivid-player-synopsis vivid-player-synopsis--empty">Movie details are not available right now.</p>') +
+      (synopsis ? '<p class="vivid-player-synopsis">' + escapeHtml(synopsis) + '</p>' : '<p class="vivid-player-synopsis vivid-player-synopsis--empty">Title details are not available right now.</p>') +
     '</div>' +
     factMarkup +
     (castMarkup ? '<div class="vivid-player-cast"><div class="vivid-player-section-heading"><h4>Featuring</h4><span>CAST &amp; CHARACTERS</span></div><div class="vivid-player-cast-rail">' + castMarkup + '</div></div>' : '') +
