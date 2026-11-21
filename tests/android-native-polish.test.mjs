@@ -203,6 +203,57 @@ test("native Android project generation registers both plugins idempotently", as
   }
 });
 
+test("Play Store native configuration omits the sideload updater and install-from-source permission", async () => {
+  const temp = await mkdtemp(path.join(tmpdir(), "vivid-android-play-"));
+  try {
+    const androidRoot = path.join(temp, "android");
+    const gradlePath = path.join(androidRoot, "app", "build.gradle");
+    const javaRoot = path.join(androidRoot, "app", "src", "main", "java", "com", "vividcinema", "app");
+    await mkdir(javaRoot, { recursive: true });
+    await writeFile(gradlePath, [
+      "android {",
+      "  defaultConfig {",
+      "    versionCode 1",
+      '    versionName "1.0.0"',
+      "  }",
+      "}"
+    ].join("\n"), "utf8");
+    await writeFile(path.join(javaRoot, "MainActivity.java"), [
+      "package com.vividcinema.app;",
+      "import com.getcapacitor.BridgeActivity;",
+      "public class MainActivity extends BridgeActivity {}"
+    ].join("\n"), "utf8");
+    const manifestPath = path.join(androidRoot, "app", "src", "main", "AndroidManifest.xml");
+    await writeFile(manifestPath, '<manifest xmlns:android="http://schemas.android.com/apk/res/android"><application android:label="Vivid Cinema"><activity android:name=".MainActivity" android:exported="true"></activity></application></manifest>', "utf8");
+
+    const script = fileURLToPath(new URL("../automation/configure-android-native-project.mjs", import.meta.url));
+    const result = spawnSync(process.execPath, [script], {
+      encoding: "utf8",
+      env: {
+        ...process.env,
+        VIVID_ANDROID_ROOT: androidRoot,
+        VIVID_ANDROID_BUILD: "2000001",
+        VIVID_ANDROID_DISTRIBUTION: "play"
+      }
+    });
+    assert.equal(result.status, 0, result.stderr || result.stdout);
+    const activity = await readFile(path.join(javaRoot, "MainActivity.java"), "utf8");
+    const manifest = await readFile(manifestPath, "utf8");
+    assert.match(activity, /registerPlugin\(VividNavigationPlugin\.class\)/);
+    assert.doesNotMatch(activity, /VividUpdaterPlugin/);
+    assert.doesNotMatch(manifest, /android\.permission\.REQUEST_INSTALL_PACKAGES/);
+    assert.match(manifest, /android:usesCleartextTraffic="false"/);
+    assert.match(manifest, /android:windowSoftInputMode="adjustResize"/);
+    await assert.rejects(
+      readFile(path.join(javaRoot, "VividUpdaterPlugin.java"), "utf8"),
+      error => error.code === "ENOENT"
+    );
+    await readFile(path.join(javaRoot, "VividWebChromeClient.java"), "utf8");
+  } finally {
+    await rm(temp, { recursive: true, force: true });
+  }
+});
+
 test("Android native performance profile reads Navigator capability getters without spreading Navigator", () => {
   const originalWindow = globalThis.window;
   const added = [];
