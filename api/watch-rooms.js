@@ -85,6 +85,7 @@ async function createWatchRoom(request) {
     transaction.create(roomRef, {
       schemaVersion: 1, name, filmTitle, hostUid: auth.uid,
       visibility: "invite", status: "open", memberCount: 1, queueCount: 0, chatCount: 0,
+      linkedClubId: null, linkedClubName: null,
       createdAt: now, updatedAt: now, expiresAt
     });
     transaction.create(memberRef, member);
