@@ -106,7 +106,7 @@ function applyRoomPlayerSelection(room) {
     activeProviderId = providerId;
     lastAppliedSelectionKey = key;
     if (playerId === "player2" && providerId === "cinesrc") pendingPlayer2Seek = position;
-    if (role !== "guest" || (joinedPlayback && latestRemoteState?.status === "playing")) {
+    if (role !== "guest" || joinedPlayback) {
       roomPlayerLoadRequested = true;
       window.dispatchEvent(new CustomEvent("vivid:watch-room-apply-selection", {
         detail: { playerId, providerId, position }
@@ -203,6 +203,9 @@ function pauseGuestPlayer(message) {
   if (role !== "guest") return;
   sendProviderCommand("pause");
   localStatus = "paused";
+  lastCommandedStatus = "paused";
+  lastCommandAt = Date.now();
+  pendingPlaySince = 0;
   if (message) setNote(message);
 }
 
@@ -465,7 +468,12 @@ window.addEventListener("vivid:provider-playback", event => {
     lastCommandedStatus = localStatus === "playing" ? "playing" : "paused";
     pendingPlaySince = 0;
   }
-  if (!roomId || (role !== "host" && !allowGuestPlaybackControl)) { if (role !== "host" && joinedPlayback) applyRemoteState(); return; }
+  if (role === "guest" && !allowGuestPlaybackControl) {
+    if (latestRemoteState?.status === "playing") applyRemoteState();
+    else if (detail.status === "playing") pauseGuestPlayer("Your player is prepared. It will start automatically with the host’s screening.");
+    return;
+  }
+  if (!roomId) return;
   if (Date.now() < suppressPlaybackPublishUntil) return;
   if (detail.status === "playing") hostStatus = "playing";
   if (detail.status === "paused") hostStatus = "paused";
@@ -506,8 +514,9 @@ window.addEventListener("message", event => {
       pendingPlayer2Seek = 0;
       sendProviderCommand("seek", position);
     }
-    if (role === "guest" && !joinedPlayback) pauseGuestPlayer("Your player is ready and paused. Waiting for the host to start the screening.");
-    else if ((role !== "host" && joinedPlayback) || (role === "host" && allowGuestPlaybackControl)) applyRemoteState(true);
+    if (role === "guest" && (!latestRemoteState || latestRemoteState.status !== "playing")) {
+      pauseGuestPlayer("Your player is ready. Tap Play once to prepare it; it will pause and follow the host.");
+    } else if ((role !== "host" && joinedPlayback) || (role === "host" && allowGuestPlaybackControl)) applyRemoteState(true);
     return;
   }
   if (type === "cinesrc:timeupdate" && status !== "playing") return;
@@ -534,12 +543,11 @@ window.addEventListener("vivid:player-frame-loaded", event => {
   const detail = event.detail || {};
   if (detail.playerId !== activePlayerId || detail.providerId !== activeProviderId) return;
   roomPlayerLoadRequested = false;
-  if (role === "guest" && !joinedPlayback && (!latestRemoteState || latestRemoteState.status !== "playing")) {
-    pauseGuestPlayer("Your player is ready and paused. Waiting for the host to start the screening.");
+  if (role === "guest" && (!latestRemoteState || latestRemoteState.status !== "playing")) {
+    pauseGuestPlayer("Your player is ready. Tap Play once to prepare it; it will pause and follow the host.");
     return;
   }
   if ((role === "guest" && joinedPlayback) || (role === "host" && allowGuestPlaybackControl)) applyRemoteState(true);
-  else if (role === "guest") pauseGuestPlayer("Your player is held until you join the shared screening.");
 });
 
 window.addEventListener("vivid:watch-room-selection-error", event => {
