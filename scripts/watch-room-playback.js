@@ -217,7 +217,7 @@ function applyRemoteState(force = false) {
   if (!state || controllerUid === currentUid || (!delegatedHostFollow && role === "host")) return;
   const guestAction = getGuestPlaybackAction({ role, joinedPlayback, playbackStatus: state.status });
   if (guestAction === "pause" && state.status === "playing") {
-    pauseGuestPlayer("The host is playing. Tap Join synced playback when you’re ready to watch together.");
+    pauseGuestPlayer("Your player is held until you open the active room screening.");
     return;
   }
   if (!sameTitle(state)) { setNote("This room is synced to a different title or episode. Open that exact Vivid title to join."); return; }
@@ -593,7 +593,7 @@ window.addEventListener("vivid:player-source-changed", event => {
   const source = event.detail?.source;
   if (source === "vidsrc") {
     if (role === "host") setNote("VidSrc is active. Your playback controls the room clock.");
-    else if (roomId) setNote("VidSrc is active. Join synced playback when the player clock appears.");
+    else if (roomId) setNote("VidSrc is active. Your player will follow the host automatically; tap Play once if your browser blocks playback.");
     return;
   }
   if (role === "host" && roomId && (lastHostPayload || latestRemoteState?.provider === "vidsrc")) {
