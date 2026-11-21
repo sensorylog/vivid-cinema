@@ -166,6 +166,7 @@ test("Watch Room screenings stay embedded in the lobby and float without stoppin
   assert.ok(watchPage.includes("if (restoringMiniPlayer)"));
   assert.ok(watchPage.includes("setFallbackFullscreen(true)"));
   assert.ok(watchPage.includes('document.body.classList.toggle("vivid-room-player-fullscreen"'));
+  assert.ok(watchPage.includes('"vivid-room-player-fullscreen", "vivid-player-open"'));
   assert.ok(watchPage.includes('returnInlineButton?.addEventListener("click", () => roomPlayerLayout?.focus())'));
   assert.ok(watchPage.includes('vivid:watch-room-screening-validated'));
   assert.ok(watchPage.includes("watchRoomScreeningValidated = true"));
