@@ -231,7 +231,8 @@ async function toggleMute() {
     const nextMuted = !isMuted;
     await livekitRoom.localParticipant.setMicrophoneEnabled(!nextMuted);
     isMuted = nextMuted;
-    muteButton.textContent = isMuted ? "Unmute microphone" : "Mute microphone";
+    muteButton.innerHTML = isMuted ? '<i class="bi bi-mic-mute-fill" aria-hidden="true"></i> Unmute microphone' : '<i class="bi bi-mic-fill" aria-hidden="true"></i> Mute microphone';
+    muteButton.setAttribute("aria-pressed", String(isMuted));
     setStatus(isMuted ? "Your microphone is muted." : "Your microphone is on.", "success");
     renderParticipants();
   } catch (error) {
