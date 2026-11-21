@@ -127,18 +127,39 @@ async function saveComingSoonReminder(button){
    showHomeToast(error?.message||"Could not save this reminder.");
  }
 }
+const wiredCardContainers = new WeakSet();
+
+function openHomeCard(card){
+ if(card.dataset.recommendation==="true"){
+   recordBehavior("recommendation_clicked",{id:card.dataset.id,media_type:card.dataset.type,title:card.dataset.title||""},{surface:card.dataset.surface||"recommendation",position:Number(card.dataset.position||0)});
+ }
+ const progress=getPlaybackProgress(card.dataset.type+":"+card.dataset.id);
+ location.href=progress ? buildWatchUrl(card.dataset.id,card.dataset.type,progress.season,progress.episode,progress.progress) : getMediaUrl({id:card.dataset.id,media_type:card.dataset.type});
+}
+
 function wireCards(container){
- container?.querySelectorAll(".vivid-card").forEach(c=>{
-   const open=()=>{
-     if(c.dataset.recommendation==="true"){
-       recordBehavior("recommendation_clicked",{id:c.dataset.id,media_type:c.dataset.type,title:c.dataset.title||""},{surface:c.dataset.surface||"recommendation",position:Number(c.dataset.position||0)});
-     }
-     const progress=getPlaybackProgress(c.dataset.type+":"+c.dataset.id);
-     location.href=progress ? buildWatchUrl(c.dataset.id,c.dataset.type,progress.season,progress.episode,progress.progress) : getMediaUrl({id:c.dataset.id,media_type:c.dataset.type});
-   };
-   c.querySelector("[data-coming-reminder]")?.addEventListener("click",event=>{event.preventDefault();event.stopPropagation();void saveComingSoonReminder(event.currentTarget)});
-   c.addEventListener("click",open);
-   c.addEventListener("keydown",e=>{if(e.target.closest?.("[data-coming-reminder]"))return;if(e.key==="Enter"||e.key===" "){e.preventDefault();open()}});
+ if(!container||wiredCardContainers.has(container))return;
+ wiredCardContainers.add(container);
+ // Rails are replaced as pages load. Delegate once per rail instead of
+ // allocating click and keydown closures for every poster card on every render.
+ container.addEventListener("click",event=>{
+   const reminder=event.target.closest?.("[data-coming-reminder]");
+   if(reminder&&container.contains(reminder)){
+     event.preventDefault();
+     event.stopPropagation();
+     void saveComingSoonReminder(reminder);
+     return;
+   }
+   const card=event.target.closest?.(".vivid-card");
+   if(card&&container.contains(card))openHomeCard(card);
+ });
+ container.addEventListener("keydown",event=>{
+   if(event.target.closest?.("[data-coming-reminder]"))return;
+   if(event.key!=="Enter"&&event.key!==" ")return;
+   const card=event.target.closest?.(".vivid-card");
+   if(!card||!container.contains(card))return;
+   event.preventDefault();
+   openHomeCard(card);
  });
 }
 
