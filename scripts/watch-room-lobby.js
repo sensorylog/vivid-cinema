@@ -113,8 +113,11 @@ function renderPresence() {
       remove.className = "vivid-wr-button vivid-wr-button--quiet";
       remove.addEventListener("click", async () => {
         remove.disabled = true;
-        try { await call("removeWatchRoomMember")({ roomId: room.roomId, memberUid: member.uid }); }
-        catch (error) { showError(error); remove.disabled = false; }
+        try {
+          const result = await call("removeWatchRoomMember")({ roomId: room.roomId, memberUid: member.uid });
+          if (result.data?.voiceEvicted === false) setFeedback("Member removed, but LiveKit could not confirm the voice disconnection. Check the voice service.", true);
+          else setFeedback("Member removed from the room.");
+        } catch (error) { showError(error); remove.disabled = false; }
       });
       li.append(remove);
     }
@@ -198,6 +201,8 @@ async function searchQueueTitles(value, generation) {
 function renderChat(messages) {
   const log = byId("wr-lobby-chat");
   if (!log) return;
+  const wasAtBottom = log.scrollHeight - log.scrollTop - log.clientHeight < 48;
+  const previousScrollTop = log.scrollTop;
   log.replaceChildren();
   messages.forEach(message => {
     const member = memberList.find(item => item.uid === message.uid);
@@ -210,15 +215,23 @@ function renderChat(messages) {
     ["❤️", "😂", "👏", "😮", "🔥"].forEach(reaction => {
       const button = document.createElement("button");
       button.type = "button";
+      const reacted = Array.isArray(message.reactions?.[reaction]) && message.reactions[reaction].includes(auth.currentUser?.uid);
       button.textContent = reaction + " " + (message.reactions?.[reaction]?.length || 0);
-      button.addEventListener("click", () => call("reactToWatchRoomMessage")({ roomId: room.roomId, messageId: message.id, reaction }).catch(showError));
+      button.disabled = room.role !== "host" && room.allowGuestChat === false;
+      button.setAttribute("aria-pressed", String(Boolean(reacted)));
+      button.setAttribute("aria-label", reaction + " reaction, " + (message.reactions?.[reaction]?.length || 0) + " votes");
+      button.addEventListener("click", async () => {
+        button.disabled = true;
+        try { await call("reactToWatchRoomMessage")({ roomId: room.roomId, messageId: message.id, reaction }); }
+        catch (error) { showError(error); button.disabled = false; }
+      });
       actions.append(button);
     });
     row.append(text, actions);
     log.append(row);
   });
   if (!messages.length) log.textContent = "No messages yet. Say hello to your crew.";
-  log.scrollTop = log.scrollHeight;
+  log.scrollTop = wasAtBottom ? log.scrollHeight : previousScrollTop;
 }
 
 function applyRoomPermissions() {
@@ -374,7 +387,11 @@ function renderQueue(items) {
       remove.type = "button";
       remove.textContent = "Remove";
       remove.className = "vivid-wr-button vivid-wr-button--quiet";
-      remove.addEventListener("click", () => call("removeWatchRoomQueueItem")({ roomId: room.roomId, itemId: item.id }).catch(showError));
+      remove.addEventListener("click", async () => {
+       remove.disabled = true;
+       try { await call("removeWatchRoomQueueItem")({ roomId: room.roomId, itemId: item.id }); }
+       catch (error) { showError(error); remove.disabled = false; }
+     });
       actions.append(remove);
     }
     li.append(poster, details, actions);
