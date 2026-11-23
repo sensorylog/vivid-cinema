@@ -1,5 +1,5 @@
 import { getCloudflareApiUrl } from "./cloudflare-api.js";
-import { auth, appCheck, appCheckError } from "./firebase.js";
+import { auth, ensureAppCheck } from "./firebase.js";
 import { getToken } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app-check.js";
 
 const API_URL = getCloudflareApiUrl("/api/watch-rooms");
@@ -16,8 +16,9 @@ export function callWatchRoomApi(action) {
       error.code = "functions/unauthenticated";
       throw error;
     }
-    if (!appCheck) {
-      const cause = appCheckError;
+    let appCheck;
+    try { appCheck = await ensureAppCheck(); }
+    catch (cause) {
       const diagnosticCode = String(cause?.code || "appCheck/not-initialized");
       console.error("Vivid Watch Rooms Cloudflare Turnstile verification initialization failed:", {
         hostname: window.location.hostname,
@@ -30,6 +31,11 @@ export function callWatchRoomApi(action) {
       );
       error.code = diagnosticCode;
       error.cause = cause || undefined;
+      throw error;
+    }
+    if (!appCheck) {
+      const error = new Error("Browser verification is unavailable on this local development host.");
+      error.code = "appCheck/not-initialized";
       throw error;
     }
 
