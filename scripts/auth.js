@@ -46,6 +46,9 @@ const resetLink=document.getElementById("reset-password");
 const forgotForm=document.getElementById("forgot-form");
 const forgotMessage=document.getElementById("forgot-message");
 const googleButtons=document.querySelectorAll("[data-google-auth]");
+const SIGNUP_CHALLENGE_KEY="vivid:signup-verification";
+function markSignupVerification(){try{sessionStorage.setItem(SIGNUP_CHALLENGE_KEY,"1");}catch{}}
+function clearSignupVerification(){try{sessionStorage.removeItem(SIGNUP_CHALLENGE_KEY);}catch{}}
 
 try {
   const rememberedEmail=sessionStorage.getItem("vivid:signup-email");
@@ -222,24 +225,28 @@ async function finishPendingGoogleRedirect(){
   }
 }
 googleButtons.forEach(button=>button.addEventListener("click",async()=>{
+  const isCreateAccountPage=document.body?.dataset?.vividPage==="auth";
+  if(isCreateAccountPage)markSignupVerification();
   button.disabled=true;showMessage("Connecting to Google…",true);
-  try{await googleSignIn();}catch(error){console.error(error);showMessage(friendlyError(error));button.disabled=false;}
+  try{await googleSignIn();}catch(error){clearSignupVerification();console.error(error);showMessage(friendlyError(error));button.disabled=false;}
 }));
 signupForm?.addEventListener("submit",async(event)=>{
   event.preventDefault();
   const name=document.getElementById("username")?.value.trim()||"",email=document.getElementById("email")?.value.trim()||"",password=document.getElementById("password")?.value||"",button=signupForm.querySelector("button[type=submit]");
   if(password.length<6){showMessage("Password must be at least 6 characters.");return;}
   button.disabled=true;showMessage("Creating your account…",true);
+  markSignupVerification();
   try{
     const credential=await withTimeout(createUserWithEmailAndPassword(auth,email,password),15000,"Account creation timed out.");
     if(name)await withTimeout(updateProfile(credential.user,{displayName:name}),10000,"Profile update timed out.");
     try{await withTimeout(createUserRecord(credential.user,name),10000,"Profile sync timed out.");}
     catch(profileError){console.warn("Profile sync skipped after account creation:",profileError);}
     await withTimeout(sendVividVerificationEmail(),20000,"Verification email request timed out.");
+    clearSignupVerification();
     showMessage("Account created! Check your inbox for a Vivid Cinema email and tap Verify My Email.",true);
     await signOut(auth);
     button.disabled=false;
-  }catch(error){console.error(error);showMessage(friendlyError(error));button.disabled=false;}
+  }catch(error){clearSignupVerification();console.error(error);showMessage(friendlyError(error));button.disabled=false;}
 });
 loginForm?.addEventListener("submit",async(event)=>{
   event.preventDefault();
