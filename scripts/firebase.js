@@ -66,28 +66,40 @@ const app = initializeApp(firebaseConfig);
 let appCheck = null;
 let appCheckError = null;
 let appCheckSkippedReason = null;
-if (LOCAL_HOSTS.has(window.location.hostname)) {
-  // Localhost and loopback are intentionally excluded from production attestation.
-  appCheckSkippedReason =
-    "App Check is intentionally skipped on local development hosts; test protected Firebase services on the deployed Vivid site.";
-} else {
-  try {
-    appCheck = initializeAppCheck(app, {
-      provider: new CustomProvider({ getToken: getTurnstileAppCheckToken }),
-      // Firebase caches the returned one-hour token and requests a fresh one
-      // when a Firebase service needs it after expiry.
-      isTokenAutoRefreshEnabled: false
-    });
-  } catch (error) {
-    appCheckError = error instanceof Error ? error : new Error(String(error));
-    console.warn("Vivid custom App Check could not initialize:", {
-      hostname: window.location.hostname,
-      origin: window.location.origin,
-      code: appCheckError.code || null,
-      message: appCheckError.message,
-      hint: "Check the Cloudflare Turnstile widget hostnames and Pages environment variables."
+let appCheckPromise = null;
+
+// Do not initialize App Check during ordinary page startup. Its custom
+// provider performs a Turnstile exchange, so eager initialization can block
+// public visitors before they choose a protected action.
+export async function ensureAppCheck() {
+  if (appCheck) return appCheck;
+  if (LOCAL_HOSTS.has(window.location.hostname)) {
+    appCheckSkippedReason =
+      "App Check is intentionally skipped on local development hosts; test protected Firebase services on the deployed Vivid site.";
+    return null;
+  }
+  if (appCheckError) throw appCheckError;
+  if (!appCheckPromise) {
+    appCheckPromise = Promise.resolve().then(() => {
+      appCheck = initializeAppCheck(app, {
+        provider: new CustomProvider({ getToken: getTurnstileAppCheckToken }),
+        isTokenAutoRefreshEnabled: false
+      });
+      return appCheck;
+    }).catch(error => {
+      appCheckError = error instanceof Error ? error : new Error(String(error));
+      appCheckPromise = null;
+      console.warn("Vivid custom App Check could not initialize:", {
+        hostname: window.location.hostname,
+        origin: window.location.origin,
+        code: appCheckError.code || null,
+        message: appCheckError.message,
+        hint: "Check the Cloudflare Turnstile widget hostnames and Pages environment variables."
+      });
+      throw appCheckError;
     });
   }
+  return appCheckPromise;
 }
 
 // Prefer IndexedDB persistence on desktop WebViews, then localStorage, with memory only as a last resort.
