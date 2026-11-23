@@ -522,6 +522,7 @@ test("Firebase App Check uses Cloudflare Turnstile through the supported custom-
   const firebase = readFileSync(new URL("../scripts/firebase.js", import.meta.url), "utf8");
   const provider = readFileSync(new URL("../scripts/turnstile-app-check.js", import.meta.url), "utf8");
   const endpoint = readFileSync(new URL("../cloudflare/functions/api/app-check.js", import.meta.url), "utf8");
+  assert.ok(firebase.includes("ensureAppCheck"));
   assert.ok(firebase.includes("initializeAppCheck"));
   assert.ok(firebase.includes("new CustomProvider({ getToken: getTurnstileAppCheckToken })"));
   assert.ok(firebase.includes("./turnstile-app-check.js"));
