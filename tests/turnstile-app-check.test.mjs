@@ -170,6 +170,12 @@ test("Vivid App Check no longer initializes the reCAPTCHA Enterprise provider", 
   const pulse = await readFile(new URL("../scripts/vivid-pulse.js", import.meta.url), "utf8");
   const headers = await readFile(new URL("../_headers", import.meta.url), "utf8");
   assert.match(firebase, /new CustomProvider\(\{ getToken: getTurnstileAppCheckToken \}\)/);
+  const provider = await readFile(new URL("../scripts/turnstile-app-check.js", import.meta.url), "utf8");
+  const auth = await readFile(new URL("../scripts/auth.js", import.meta.url), "utf8");
+  assert.match(provider, /const showSignupOverlay = isSignupChallenge\(\)/);
+  assert.match(provider, /if \(showSignupOverlay\)/);
+  assert.match(auth, /vivid:signup-verification/);
+  assert.match(auth, /markSignupVerification\(\)/);
   assert.doesNotMatch(pulse, /signInAnonymously|getAnonymousUser|anonymousApp|initializeAppCheck/);
   assert.match(pulse, /if \(user && !user\.isAnonymous\)/);
   assert.doesNotMatch(firebase + pulse, /ReCaptchaEnterpriseProvider|RECAPTCHA_ENTERPRISE_SITE_KEY/);
