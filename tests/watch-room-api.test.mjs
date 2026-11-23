@@ -9,6 +9,7 @@ const clients = await Promise.all([
 
 test("Watch Rooms browser client sends Firebase Auth and Cloudflare-backed verification tokens", async () => {
   assert.ok(client.includes('getToken(appCheck, false)'));
+  assert.ok(client.includes("ensureAppCheck()"));
   assert.doesNotMatch(client, /Play Integrity/);
   assert.match(client, /Cloudflare browser verification is unavailable/);
   assert.match(client, /Turnstile widget hostname/);
