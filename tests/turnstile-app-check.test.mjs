@@ -169,6 +169,7 @@ test("Vivid App Check no longer initializes the reCAPTCHA Enterprise provider", 
   const firebase = await readFile(new URL("../scripts/firebase.js", import.meta.url), "utf8");
   const pulse = await readFile(new URL("../scripts/vivid-pulse.js", import.meta.url), "utf8");
   const headers = await readFile(new URL("../_headers", import.meta.url), "utf8");
+  assert.match(firebase, /export async function ensureAppCheck\(\)/);
   assert.match(firebase, /new CustomProvider\(\{ getToken: getTurnstileAppCheckToken \}\)/);
   const provider = await readFile(new URL("../scripts/turnstile-app-check.js", import.meta.url), "utf8");
   const auth = await readFile(new URL("../scripts/auth.js", import.meta.url), "utf8");
@@ -192,6 +193,7 @@ test("Account creation, sign-in and the synced library keep their Firebase SDK p
   assert.match(firebase, /initializeAuth\(app/);
   assert.match(firebase, /getFirestore\(app\)/);
   assert.match(firebase, /initializeAppCheck\(app/);
+  assert.match(auth, /verifyNewAccountBrowser\(\)/);
   assert.match(auth, /createUserWithEmailAndPassword\(auth/);
   assert.match(auth, /signInWithEmailAndPassword\(auth/);
   assert.match(auth, /signInWithPopup\(auth/);

@@ -74,15 +74,16 @@ test("Recall keeps useful provider and quota diagnostics", () => {
   assert.match(chatSource, /Vivid AI 401/);
 });
 
-test("App Check remains initialized for Firebase services outside AI", () => {
-  assert.match(firebaseSource, /initializeAppCheck/);
+test("App Check initializes lazily instead of triggering verification on every public page", () => {
+  assert.match(firebaseSource, /export async function ensureAppCheck\(\)/);
+  assert.match(firebaseSource, /initializeAppCheck\(app/);
   assert.match(firebaseSource, /CustomProvider/);
   assert.match(firebaseSource, /getTurnstileAppCheckToken/);
-  assert.match(firebaseSource, /isTokenAutoRefreshEnabled:\s*false/);
+  assert.match(firebaseSource, /Do not initialize App Check during ordinary page startup/);
 });
 
 test("service worker cache version changes with the Cloudflare AI client", () => {
-  assert.match(workerSource, /vivid-cinema-shell-v299/);
+  assert.match(workerSource, /vivid-cinema-shell-v300/);
   assert.match(workerSource, /scripts\/cloudflare-ai\.js/);
 });
 

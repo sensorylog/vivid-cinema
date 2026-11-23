@@ -1,4 +1,5 @@
-import { auth, db } from "./firebase.js?v=20261120-cloudflare-app-check-1";
+import { auth, db, ensureAppCheck } from "./firebase.js";
+import { getToken } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app-check.js";
 import {
   createUserWithEmailAndPassword,
   browserLocalPersistence,
@@ -49,6 +50,11 @@ const googleButtons=document.querySelectorAll("[data-google-auth]");
 const SIGNUP_CHALLENGE_KEY="vivid:signup-verification";
 function markSignupVerification(){try{sessionStorage.setItem(SIGNUP_CHALLENGE_KEY,"1");}catch{}}
 function clearSignupVerification(){try{sessionStorage.removeItem(SIGNUP_CHALLENGE_KEY);}catch{}}
+async function verifyNewAccountBrowser(){
+  const instance=await ensureAppCheck();
+  if(instance)await withTimeout(getToken(instance,false),90000,"Browser verification timed out. Please retry.");
+  clearSignupVerification();
+}
 
 try {
   const rememberedEmail=sessionStorage.getItem("vivid:signup-email");
@@ -227,8 +233,8 @@ async function finishPendingGoogleRedirect(){
 googleButtons.forEach(button=>button.addEventListener("click",async()=>{
   const isCreateAccountPage=document.body?.dataset?.vividPage==="auth";
   if(isCreateAccountPage)markSignupVerification();
-  button.disabled=true;showMessage("Connecting to Google…",true);
-  try{await googleSignIn();}catch(error){clearSignupVerification();console.error(error);showMessage(friendlyError(error));button.disabled=false;}
+  button.disabled=true;showMessage(isCreateAccountPage?"Securing your new account…":"Connecting to Google…",true);
+  try{if(isCreateAccountPage)await verifyNewAccountBrowser();await googleSignIn();}catch(error){clearSignupVerification();console.error(error);showMessage(friendlyError(error));button.disabled=false;}
 }));
 signupForm?.addEventListener("submit",async(event)=>{
   event.preventDefault();
@@ -237,6 +243,7 @@ signupForm?.addEventListener("submit",async(event)=>{
   button.disabled=true;showMessage("Creating your account…",true);
   markSignupVerification();
   try{
+    await verifyNewAccountBrowser();
     const credential=await withTimeout(createUserWithEmailAndPassword(auth,email,password),15000,"Account creation timed out.");
     if(name)await withTimeout(updateProfile(credential.user,{displayName:name}),10000,"Profile update timed out.");
     try{await withTimeout(createUserRecord(credential.user,name),10000,"Profile sync timed out.");}
