@@ -1,10 +1,23 @@
 {
-  "generatedAt": "2026-11-23T03:29:46.821Z",
+  "generatedAt": "2026-11-23T03:33:46.386Z",
   "source": "Google News RSS search feeds",
   "count": 120,
   "failedQueries": 0,
   "feedCount": 21,
   "articles": [
+    {
+      "id": "zxrysj",
+      "headline": "‘You Can See Everything’ Crosses $100M Globally, Becomes First Doc to Hit 1M Letterboxd Watches",
+      "publisher": "The Hollywood Reporter",
+      "publisherUrl": "https://www.hollywoodreporter.com",
+      "sourceUrl": "https://www.hollywoodreporter.com/movies/movie-news/you-can-see-everything-box-office-100-million-letterboxd-1236746421/",
+      "publishedAt": "2026-11-23T03:30:03.000Z",
+      "region": "global",
+      "category": "box-office",
+      "summary": "You Can See Everything hit $100 million at the global box office. A24's Elizabeth Holmes documentary from Nathan Fielder also set Letterboxd records.",
+      "imageUrl": "./data/news-thumbnails/zxrysj.webp",
+      "imageFallbackUrl": "https://www.hollywoodreporter.com/wp-content/uploads/2026/11/MCDYOCA_EC124.jpg?w=1296&h=730&crop=1"
+    },
     {
       "id": "1g8z4iv",
       "headline": "Macaulay Culkin Reportedly Returning as Kevin McCallister in a Disney New 'Home Alone' Sequel",
@@ -123,6 +136,19 @@
       "imageFallbackUrl": "https://images.jkn.co.kr/data/images/full/112/57/1125783.jpg?width=1200&height=630"
     },
     {
+      "id": "1lvjieg",
+      "headline": "'Ramayana: Rise of a Legend' box office collection day 18: Ranbir Kapoor's film earns Rs 35.60 cr on Sund",
+      "publisher": "The Times of India",
+      "publisherUrl": "https://timesofindia.indiatimes.com",
+      "sourceUrl": "https://timesofindia.indiatimes.com/entertainment/hindi/bollywood/box-office/ramayana-rise-of-a-legend-box-office-collection-day-18-ranbir-kapoors-film-earns-rs-35-60-cr-on-sunday-india-net-nears-rs-1000-cr/articleshow/136085986.cms",
+      "publishedAt": "2026-11-23T01:52:00.000Z",
+      "region": "india",
+      "category": "film",
+      "summary": "Ranbir Kapoor, Yash and Sai Pallavi's 'Ramayana: Rise of a Legend' continued its impressive box-office run on Sunday, November 22.",
+      "imageUrl": "./data/news-thumbnails/1lvjieg.avif",
+      "imageFallbackUrl": "https://static.toiimg.com/thumb/msid-136085990,width-1280,height-720,resizemode-6,overlay-toi_sw,pt-32,y_pad-600/photo.jpg"
+    },
+    {
       "id": "e36s1f",
       "headline": "Hunger Games Prequel Opens to $225 Million Globally",
       "publisher": "Wisevoter",
@@ -140,26 +166,26 @@
       "headline": "The Japanese Film Festival returns to Adelaide with acclaimed Cannes and Venice selections",
       "publisher": "The AU Review",
       "publisherUrl": "https://www.theaureview.com",
-      "sourceUrl": "https://www.theaureview.com/watch/the-japanese-film-festival-adelaide/",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMiekFVX3lxTFB0TTNkSHRoNnU0WGFtY2pWRE40TllMRXF0bUxCOUZCcnBMSFktRDg3aXozcTlmcVc0M2hMblFadTg4LVBEcV9OQkJtNUdVcU9zWHh3WDdBbmNvNXV1X0IzOFNUMnNQQXhvdDRVX0Q2dVRVVktIbjFCRjVn?oc=5",
       "publishedAt": "2026-11-23T01:24:15.000Z",
       "region": "global",
       "category": "festivals",
-      "summary": "After an eight-year absence, the Japanese Film Festival is returning to Adelaide this November, bringing three celebrated films to Palace Nova Eastend Cinemas as part of its 30th anniversary celebrations. Running from November 23rd to 28th, the festival marks its first Adelaide presentation since 2018, offering local audiences an opportunity to experience a selection of...",
-      "imageUrl": "./data/news-thumbnails/3jwmo4.jpg",
-      "imageFallbackUrl": "https://www.theaureview.com/wp-content/uploads/2026/11/481016611_1205228274306162_8007283110808319915_n.jpg"
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
     },
     {
       "id": "iv2csr",
       "headline": "Ramayana Box Office Surge: Ranbir Kapoor Film Crosses Records on Day 18",
       "publisher": "Zoom News",
       "publisherUrl": "https://www.zoomnews.in",
-      "sourceUrl": "https://www.zoomnews.in/en/news-detail/ramayana-box-office-surge-ranbir-kapoor-film-crosses-records-on-day-18.html",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMitAFBVV95cUxPX2RpNGRXWk1FaVpBZ0hrSnZ6cDJwV05Gd0dvekVkb2hjOFZMZm40QkI2MXI1TWxqM1ZNSEFSR2d5NDRNUVVqb21oVjRBcDFnUTctSGI2enhHdktxR2JuLXRnRUpBUlAzd2FERlR6SGFlMXZISGYwNjhKUnA1TE9qUzVKNTdxM05LMjcyU0RxS2JYTElOM1NFQlVjRDhibUh1bVdpc2gzVlN3TjNxUVp6YjBONm3SAboBQVVfeXFMT0UtY0ppN3NKM1dDOW1FandjLUo5TE1EaWFJSzVqbmQ3bE9BVVZLdjRiYTZsRlNDNHhyS0FncVhWUWZSS2tIZDNZZGlFSXRQX2xZbFZBOVV6d3o2YUI0OFFVX3BmaUlEVmp0TnoyUGE2cFVEcGY4Q0t1SDNRcnVlU28yRFF6R1BUeWQwUjZZa0FXd2plWEpfWmV2MWxSaXVlM1RDZUhpbnlabnNhYXpMMExUNFZIYWVaTnp3?oc=5",
       "publishedAt": "2026-11-23T01:19:27.000Z",
       "region": "global",
       "category": "box-office",
-      "summary": "Ranbir Kapoor starrer Ramayana crosses 35.60 crore on day 18, surpassing Dhurandhar 2 and Pushpa 2. Check total worldwide collection details.",
-      "imageUrl": "./data/news-thumbnails/iv2csr.webp",
-      "imageFallbackUrl": "https://www.zoomnews.in/uploads_2019/newses/new_2071880126_sm.webp"
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
     },
     {
       "id": "1rfut31",
@@ -495,6 +521,19 @@
       "publishedAt": "2026-11-22T19:31:00.000Z",
       "region": "africa",
       "category": "celebrity",
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
+    },
+    {
+      "id": "o0txpj",
+      "headline": "ART2FRIENDS chooses auteur cinema and stop motion for KVIFF.TV",
+      "publisher": "Foro3D",
+      "publisherUrl": "https://foro3d.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMiogFBVV95cUxPVVBaRUJ5MWR3VnBLak1vaHdzT0lod0hsMHZJSHdsTnVxV2dtTWhJcUJnODhpaWVpa21ObDc0ZG9VanVibTZHZEJGQ09mNkVpVzZtZ1hYYmY2TGhROTBZU2dlcXBTWTJRekZXZlloTS1iTTBWalNMYTRYQVJtbVBKMFpCM3J2QnBucTJFbExCamo3R1NFd1ZEZklienVWcFFOZEE?oc=5",
+      "publishedAt": "2026-11-22T19:27:10.000Z",
+      "region": "global",
+      "category": "festivals",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
       "imageUrl": "",
       "imageFallbackUrl": ""
@@ -877,6 +916,19 @@
       "imageFallbackUrl": ""
     },
     {
+      "id": "q38o13",
+      "headline": "Bishkek's Weekly Agenda: Musical Classics, Exhibitions, and Performances",
+      "publisher": "open.kg",
+      "publisherUrl": "https://open.kg",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMitgFBVV95cUxNSVhWS1ZyTEVyWC1zLUtXYjNJVnk3VVFxR2pYR200TXVSSFJZdE1RLWFqbnVEcmp5ZTN6WFdUcGNMbDNVRDFNakxPbFh6WWl0TWtWQkJISWNqSU9ycmdnbElYV3ZuaDhFOElwYzc5MFgtRDA1YzZubzZsalpGUzF2VnR0d1QtcEdYcVZwMkVoeEh3X0dSODFnQkpubjRkTlFjblhHNXFudTFudjg0NlJEQ0JXWTJqQQ?oc=5",
+      "publishedAt": "2026-11-22T14:12:17.000Z",
+      "region": "global",
+      "category": "festivals",
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
+    },
+    {
       "id": "1wtkmju",
       "headline": "Elle Fanning Wears Custom Givenchy for 'Hunger Games' Premiere",
       "publisher": "Yahoo",
@@ -1150,11 +1202,11 @@
       "imageFallbackUrl": ""
     },
     {
-      "id": "1havbn9",
+      "id": "5dx01c",
       "headline": "Beloved Hollywood actress, 93, wants to grow into a tree after her death",
       "publisher": "Yahoo",
       "publisherUrl": "https://www.yahoo.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMivwFBVV95cUxOR3B6RUlXZ1NhVUFWTUVncFBlcEU2QUFkWW5ydldwV2FMb0c1RmdxOEw0YzVtR2c5andxSVJaVHQ2M2N3RTg2dU5MSTE4OXhNNHVaWWlQcTVlR0xMaDAwaWdhd0lzOVJyRVllbVROTzhBTEozNHBJbWhPcXd2SFVNRG5fRjRjbTh6Nnlpd3RmQ2ZEd2pJelIwX2VhZWg0UnI3S045Z1pTR3FvTHNMT3o3MnpodGNQQ0pjbjVKZ2xGZw?oc=5",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMivwFBVV95cUxPS0JPRUczVFd3b2dpUDBqNm8ya0IteExXcXNPQ3ZuVzlfZ3g4bjNSUDFqNmxpODczSVhEYUdDc0hhZGhCMkpwRWhRWFhUTmI4OUlZY2VMXzQ2SHUwQ3diQ2Qzd3BseW5iUkRvOFhtZzNxWUlVSjdGbVZxLTZaWGg5Y0FxcWc3MFptMnhpLUtQUEVfWDJHTDRMZWh1Z2VQTGJDamN0NjIzWWUwX1VDTTZnanBrVDhHYlJlaFM1dlpkbw?oc=5",
       "publishedAt": "2026-11-22T11:01:56.000Z",
       "region": "hollywood",
       "category": "celebrity",
@@ -1267,40 +1319,14 @@
       "imageFallbackUrl": ""
     },
     {
-      "id": "1b83w0n",
-      "headline": "K-Pop, Hanbok And Korean Beauty: How K-Food Universe Brought Korean Culture Closer To Indian Fans",
-      "publisher": "The Daily Jagran",
-      "publisherUrl": "https://www.thedailyjagran.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMi4gFBVV95cUxNVV84VjVBaXg2SG1iNzZiazVSbTlpSlJPOUdQWHVWejVNeWNsb2hfZDVqd3ZFa3YzOTZGQU1RNzk4ZkdTTzZMNEdZbXNnSHp4ZnpOTGtlaG1rOEZ6NHRjVWN2U2FXM2hXTTJlNURVOXVyWThiRUZpU0djQXlqZG9lMXBwLVExY0E3R1k3UktkN19PRWtPVEdXVkEyT1NoTi1lRW5pd0VvdEVDSFhaaGJTMlFCRHFfWnVLTEhMbTAzY3VWNnY4NkVjM2NnUlJHWTczSXdZeUVoZnc2S01IOFJYMzFn?oc=5",
-      "publishedAt": "2026-11-22T10:17:00.000Z",
-      "region": "asia",
-      "category": "television",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
-      "id": "1d9lpfl",
-      "headline": "First clip released from David Turpin’s ‘Ancestors’ following TIFF World Premiere",
-      "publisher": "IFTN",
-      "publisherUrl": "https://iftn.ie",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMimAFBVV95cUxPaWZTZG8yeDJfdlAwQkRvUzh6bWczNV96VkJBRjNwZl82dWF5SFlRZE42a1ZLbGR0UDY3VlNKRWNHRHJkeEg0S0FfRWJBdHZWdEJ1ejJGbnRDQjFyVmhXOXlwZno4N2dNZndPMFlOZDZYTDdGMjFUNld3MTZtSEljV2NvcDVUcVYzMGRUT0NjOEVWUHZlbElOdA?oc=5",
-      "publishedAt": "2026-11-22T10:05:45.000Z",
-      "region": "global",
-      "category": "festivals",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
-      "id": "uh130y",
-      "headline": "Diljit Dosanjh Questions Ban On His Songs, Calls Decision Double Standards: When Coldplay Sings I'm Drunk...",
-      "publisher": "Filmibeat",
-      "publisherUrl": "https://www.filmibeat.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMi6gFBVV95cUxPS19abmRCX1lYckwwTWhGS0tXdkRuOFJBVEtGUEtmdzBnV3NyaHY2dmREczBKUV90NGJmSkc0UGx0ZmdBMk9QYkR4OFRjSXZ3SUpKZVc2Wkp1dVMxUFc5VGxMOExxdXhoSW1FQzN2OGs2REY0akVDaFhmeGc4XzkwNkFESE9IZWtvTlo3eURfX3kzRzQ5VU9fNHZTOEhlbEdSSnZtbG1iUmUxOERQQ2E1NHVsOTIwd0s2cjRRU0xFaDRRazVBemRyWG9fX1VOWVZPWi1SY0h3M180X1BoeE1pWjVxNWhzOWhJSkE?oc=5",
-      "publishedAt": "2026-11-22T10:01:36.000Z",
-      "region": "global",
-      "category": "music",
+      "id": "1dj3md9",
+      "headline": "\"My spec\": Benjamin Asare wins best-dressed male celebrity at the EMY Awards",
+      "publisher": "Yen News",
+      "publisherUrl": "https://yen.com.gh",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMiqAFBVV95cUxPS0lpQU1WMU9DNjdkQlJEUkhDX2FfZjhpeWtudG83T3ltdmdCeHpxR3pNbkxlVzRYTUlmWlFBZ2hLb3RvSzFLTm5FdzB0al9MYlFDRzdzMFpqeFZXODBaY19wbHZtRFM0TTRQLU4wa3ZoTGs0NVpKWkhpdTg1aV9MVmtwYkw4T0VCWWRSY2hiSm1ieUtmQkNaLUxyay1EVGxqSDRKcXM5WTY?oc=5",
+      "publishedAt": "2026-11-22T10:27:08.000Z",
+      "region": "africa",
+      "category": "celebrity",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
       "imageUrl": "",
       "imageFallbackUrl": ""
@@ -1319,19 +1345,6 @@
       "imageFallbackUrl": ""
     },
     {
-      "id": "1vgh0ws",
-      "headline": "‘Hirayasumi’ Anime Series Coming to Netflix Globally in January 2027",
-      "publisher": "IMDb",
-      "publisherUrl": "https://www.imdb.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMiTkFVX3lxTFByMlRYamIzaGhBUTRUeU53WWFhWDN3NngtNDc2ZmdycUZlMXNfaHVCbk5ZUG53UlpoSm1zT21UWDNJTWw0NnBLTVMzb2hVZw?oc=5",
-      "publishedAt": "2026-11-22T09:59:04.000Z",
-      "region": "asia",
-      "category": "anime",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
       "id": "1ji3im7",
       "headline": "10 Things To Know About Actor Diewait Ikpechukwu As He Dies At 71",
       "publisher": "LEADERSHIP Newspapers",
@@ -1339,19 +1352,6 @@
       "sourceUrl": "https://news.google.com/rss/articles/CBMikgFBVV95cUxOajFCM3c1cWozRUdGYmxFelRUc0JxY0JfeGxUbkhrckh2NnFqOFVfb0J5NEQyeGY2aHJ1QVZzQ3lCRUpWS1pxTndxbVdsek1WeW9kNnFCZVdiQjlLZVlfYTNuVE4yV2d6QUlQNzFmRThDb1NIUnpad19Ka3F2cVRKdnEwbFFST1pCQzFEVmU1SzEydw?oc=5",
       "publishedAt": "2026-11-22T09:28:52.000Z",
       "region": "africa",
-      "category": "film",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
-      "id": "z4ydr8",
-      "headline": "'Ramayana: Part 1' box office collection day 17 (LIVE): The Ranbir Kapoor, Yash, Sai Pallavi starrer cros",
-      "publisher": "The Times of India",
-      "publisherUrl": "https://timesofindia.indiatimes.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMizgNBVV95cUxPQUtzYnhlR19leXFfWS02MFdzRi1kZ1JqdHpWWjR5Q3N3SnJIRjMxVnQyQ2xkS3dtUGtiemI5U1JoTHpKVzB4MXN2UV9INmZfYjdhLW9uSUhnaTV1RzUtc2haYXFjZ2JZdC1YTjd3UWx3azVTcFpBaFpxVEFFLTlRcDJ4SGU3TkhSc3lfY3V1WGE3MDg5TlFHbTJtbDBKMUNTbDN0aUEyaUVnOVpNWjdfNldhWEZpZ2ZXcm9HLTBjSXlaVGU5dzhkVE5GQ0xZaDJPMW5iaXY3N2hINHZoZlZqR0VEcGIzbzBZb3lBWGZrbkVYZ2p0VkVyNEZIMmp1Z1JNR1hpc0hMQ0pQQmxNNWV6azBrbUFXNUw5d2s4aDVuNHhPNkFKUnlfQ2EtUW9ycF9qdm9rb19xU0hiSUtBVVN3VF9YSU5OQXRfNTFzVXBUVnR1cmtaWVNLNG5ycmlUYVNVYmRDWTFab2dERm9hSmJCVHdMYWdqTjRKYVoxVnNMekNGUWh2RzcydUxEVnhGUERlb0E3U3FERWFpMU51LTlRUmp3MXE3Z2RkQnNlalJDMWUtOEd3VWRMNTFhSmpSeUFJOFhZVkVneGRKLVp6eXfSAdMDQVVfeXFMTllLd3A4ODR5bFpYOG56RW93blZTV19GUWNrbUFnbVoweGhUelpBWmppQTRGVGctYk1RTWNGT0JEelM4eVlaWWtlcDBXQlliX3NOVHhKV01NN1dsRFZUVzRDWUpQb3M0amVRZVhFVWo3MUR3WjFTaHplbEQwMjQ2MGJOWXZQRUpXbGIyOUwyX0dtZHpJT21sSFlIN0ltcWRydVVUaUc2aENlQ3ZydTJrNDI4SmVZTTNHTm94aE1rTV9LaHMwZGtEVDNYWmdYTjduZTBzRTZCaVdyd1RTcUF5ajZtMy1RRHlEekRZTjZtaWR4ZkRKMGRITDNXSzQ3bEYtLXliTXFScGs0dFFHeUlzQjJFNXdBRmoyUENLc1o1Q2IyeENMbHREd3I2bU5naFdwYm1FSHgwa3E0MThwazBoazdqMnRMZDhiN2JZcHdCSFM1QUV2dGY1dmVlb1FHSWlPeTdOUFRoY01MenJkRmxHRVdYUHFlSjFUQnZBclRUc3VQR0dJMDJsOEJPeW5VNVpMVG42dVY3ek5wYmsyTG1VOTZsYlNkRno2Q0hfUjlaX1hqUlJnckRoLUxaNHM1bWFRLTZWdXRHWWlIN3hvS1pSLXlPVFk?oc=5",
-      "publishedAt": "2026-11-22T09:10:00.000Z",
-      "region": "india",
       "category": "film",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
       "imageUrl": "",
