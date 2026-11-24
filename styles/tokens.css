@@ -1,0 +1,27 @@
+/* Vivid Cinema — canonical semantic design tokens.
+   Additive foundation: legacy variables remain intact while surfaces migrate safely. */
+:root {
+  color-scheme: dark;
+  --vivid-color-background: #080a0e;
+  --vivid-color-surface-1: #0d1015;
+  --vivid-color-surface-2: #111318;
+  --vivid-color-surface-3: #191b21;
+  --vivid-color-text-primary: #f4f2ed;
+  --vivid-color-text-secondary: #c1c0c4;
+  --vivid-color-text-muted: #92939a;
+  --vivid-color-accent: #c7ff55;
+  --vivid-color-border: rgba(255, 255, 255, .09);
+  --vivid-color-border-strong: rgba(255, 255, 255, .16);
+  --vivid-color-focus: rgba(200, 215, 255, .72);
+  --vivid-color-success: #32d583;
+  --vivid-color-danger: #ff5f56;
+
+  --vivid-elevation-1: 0 8px 24px rgba(0, 0, 0, .18);
+  --vivid-elevation-2: 0 18px 50px rgba(0, 0, 0, .28);
+  --vivid-elevation-3: 0 28px 90px rgba(0, 0, 0, .42);
+  --vivid-opacity-muted: .64;
+  --vivid-opacity-subtle: .42;
+  --vivid-opacity-disabled: .48;
+  --vivid-blur-standard: 18px;
+  --vivid-blur-strong: 28px;
+}
