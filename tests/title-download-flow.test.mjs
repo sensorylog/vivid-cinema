@@ -60,8 +60,8 @@ test("title download action opens the native Vivid Offline library", async () =>
   assert.match(page, /desktop-series-picker/);
   assert.match(page, /desktop-season-select/);
   assert.match(page, /desktop-episodes/);
-  assert.match(shell, /search\\.href = "search\\.html"/);
-  assert.match(shell, /function syncMoreNavigation\\(nav, page\\)/);
+  assert.ok(shell.includes('search.href = "search.html"'));
+  assert.ok(shell.includes("function syncMoreNavigation(nav, page)"));
   assert.match(offline, /engine\.openDownloadTranscode\(job\.id,fileIndex\)/);
   assert.match(offline, /engine\.openLocalTranscode\(\)/);
   assert.match(preload, /openDownloadTranscode/);
