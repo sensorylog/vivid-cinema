@@ -16,6 +16,13 @@ test("premium PWA shell keeps four direct mobile destinations and a More menu", 
   assert.ok(mobileNav.includes(`.join("")`));
 });
 
+test("mobile navigation distributes all five destinations across the full bar", () => {
+  const css = read("../styles/vivid-shell.css");
+  assert.match(css, /\.vivid-mobile-nav\.vivid-v2-mobile-nav\s*\{[^}]*display:\s*grid/s);
+  assert.match(css, /grid-template-columns:\s*repeat\(5,\s*minmax\(0,\s*1fr\)\)/);
+  assert.match(css, /justify-content:\s*stretch/);
+});
+
 test("premium PWA experience styles are loaded globally and respect reduced motion", () => {
   const shell = read("../scripts/app-shell.js");
   const worker = read("../service-worker.js");
@@ -75,7 +82,7 @@ test("canonical design tokens are available to the app shell and public landing 
     assert.ok(landing.includes(`data-vivid-design-system="${name}"`));
     assert.ok(read(`../styles/${name}.css`).length > 100);
   }
-  assert.match(worker, /vivid-cinema-shell-v303/);
+  assert.match(worker, /vivid-cinema-shell-v304/);
   assert.ok(worker.includes("vivid-rounded-cards.css?v=round-1"));
 });
 
