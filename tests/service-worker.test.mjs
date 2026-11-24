@@ -18,6 +18,7 @@ test("service worker has a versioned cache and required offline shell", () => {
   assert.ok(source.includes('"./styles/vivid-watch-rooms.css"'));
   assert.ok(source.includes('"./styles/vivid-watch-room-cinema.css"'));
   assert.ok(source.includes('"./styles/vivid-watch-room-experience.css"'));
+  assert.ok(source.includes('"./styles/vivid-rounded-cards.css?v=round-1"'));
   assert.ok(source.includes('"./scripts/watch-room-player-layout.js"'));
   assert.match(source, /optional assets were not precached/);
   assert.ok(source.includes('type==="PRECACHE_OPTIONAL"'));
@@ -39,7 +40,7 @@ test("every precached asset exists in the repository", async () => {
 });
 
 test("Watch Rooms security and auth modules always use network-first and cache version is bumped", () => {
-  assert.match(source, /const CACHE_NAME = "vivid-cinema-shell-v302"/);
+  assert.match(source, /const CACHE_NAME = "vivid-cinema-shell-v303"/);
   assert.ok(source.includes("const isWatchRoomRuntime=") && source.includes("watch-room-api") && source.includes("watch-room-playback"));
   assert.ok(source.includes('"./scripts/cloudflare-api.js"'), "Cloudflare API origin helper must be precached");
   assert.ok(source.includes("if(isAuthDocument||isAuthRuntime||isWatchRoomRuntime){event.respondWith(networkFirst(request));return;}"));
