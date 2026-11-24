@@ -68,10 +68,10 @@ test("canonical design tokens are available to the app shell and public landing 
   const landing = read("../index.html");
   const tokenFiles = ["tokens", "typography", "spacing", "motion", "theme"];
   for (const name of tokenFiles) {
-    assert.match(shell, new RegExp(`data-vivid-design-system="\\${name}"`));
-    assert.match(worker, new RegExp(`styles/\\${name}\\.css\\?v=1`));
-    assert.match(landing, new RegExp(`styles/\\${name}\\.css\\?v=1`));
-    assert.ok(read(`../styles/\\${name}.css`).length > 100);
+    assert.ok(shell.includes(`data-vivid-design-system="${name}"`));
+    assert.ok(worker.includes(`styles/${name}.css?v=1`));
+    assert.ok(landing.includes(`styles/${name}.css?v=1`));
+    assert.ok(read(`../styles/${name}.css`).length > 100);
   }
   assert.match(worker, /vivid-cinema-shell-v301/);
 });
@@ -90,6 +90,6 @@ test("design tokens define restrained cinematic surfaces, type, spacing and redu
   for (const value of ["4px", "8px", "12px", "16px", "24px", "32px", "48px", "64px", "96px"]) {
     assert.ok(spacing.includes(value), `spacing scale is missing ${value}`);
   }
-  assert.match(motion, /prefers-reduced-motion:\\s*reduce/);
+  assert.match(motion, /prefers-reduced-motion:\s*reduce/);
   assert.match(theme, /data-vivid-theme="light"/);
 });
