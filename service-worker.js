@@ -1,5 +1,5 @@
 // Bump this version whenever the precached app shell changes.
-const CACHE_NAME = "vivid-cinema-shell-v302";
+const CACHE_NAME = "vivid-cinema-shell-v303";
 const HLS_LIBRARY_URL = "https://cdn.jsdelivr.net/npm/hls.js@1.7.3/dist/hls.min.js";
 const APP_SHELL = [
   HLS_LIBRARY_URL,
@@ -14,7 +14,7 @@ const APP_SHELL = [
   "./scripts/mascot-autoplay.js?v=1","./styles/vivid-foundation.css","./styles/vivid-system.css","./styles/tokens.css?v=1","./styles/typography.css?v=1","./styles/spacing.css?v=1","./styles/motion.css?v=1","./styles/theme.css?v=1","./styles/downloads.css","./styles/vivid-liquid-glass.css",
   "./styles/vivid-liquid-glass.css?v=lg4","./styles/my-downloads.css?v=offline-cinema-redesign-2","./styles/vivid-media-layout.css?v=1","./styles/vivid-premium-experience.css?v=2","./styles/vivid-home.css","./styles/vivid-donate.css","./styles/vivid-support-v2.css?v=1","./styles/vivid-shell.css","./styles/vivid-watch-rooms.css","./styles/vivid-watch-room-cinema.css","./styles/vivid-watch-room-experience.css",
   "./styles/vivid-cinematic.css","./styles/vivid-title.css","./styles/vivid-person.css","./styles/vivid-watch.css","./styles/vivid-watch.css?v=watch-player-layout-3",
-  "./styles/vivid-library.css","./styles/vivid-library.css?v=library-mobile-fix1","./styles/vivid-discovery.css","./styles/vivid-for-you.css","./styles/vivid-collection.css",
+  "./styles/vivid-library.css","./styles/vivid-library.css?v=library-mobile-fix1","./styles/vivid-rounded-cards.css?v=round-1","./styles/vivid-discovery.css","./styles/vivid-for-you.css","./styles/vivid-collection.css",
   "./styles/vivid-auth.css","./styles/vivid-account.css","./styles/vivid-account-cinematic.css?v=20261018-cinematic-1","./styles/vivid-achievements-page.css?v=20261018-cinematic-1","./styles/vivid-pwa.css",
   "./styles/vivid-tflix-hero.css","./styles/vivid-tflix-hero.css?v=hero-trailer-full-bleed-1","./styles/vivid-viewport.css?v=page-gutters-1","./styles/vivid-apple-tv-mobile.css?v=apple-tv-mobile-2","./scripts/tflix-hero.js",
   "./scripts/tflix-hero.js?v=hero-responsive-artwork-1","./styles/vivid-atmosphere.css","./styles/vivid-search-standalone.css","./styles/vivid-desktop.css","./styles/vivid-landing.css",
