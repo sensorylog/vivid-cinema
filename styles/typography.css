@@ -1,0 +1,16 @@
+/* Vivid Cinema — editorial type scale. */
+:root {
+  --vivid-type-font-display: "SF Pro Display", Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --vivid-type-font-body: "Hanken Grotesk", Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --vivid-type-display: clamp(2.75rem, 6vw, 5.5rem);
+  --vivid-type-hero: clamp(2.25rem, 5vw, 4.5rem);
+  --vivid-type-page-title: clamp(1.875rem, 3.6vw, 3rem);
+  --vivid-type-section-title: clamp(1.25rem, 2vw, 1.75rem);
+  --vivid-type-body: 1rem;
+  --vivid-type-caption: .75rem;
+  --vivid-type-leading-display: 1;
+  --vivid-type-leading-heading: 1.12;
+  --vivid-type-leading-body: 1.55;
+  --vivid-type-tracking-display: -.045em;
+  --vivid-type-tracking-heading: -.03em;
+}
