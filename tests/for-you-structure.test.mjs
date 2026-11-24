@@ -24,7 +24,7 @@ test("For You page is registered as a real, accessible destination", () => {
   assert.doesNotMatch(serviceWorker, /gemini-plot-search/);
   assert.match(serviceWorker, /"\.\/styles\/vivid-for-you\.css"/);
   assert.match(appShell, /navLink\("for-you\.html", "bi-stars", "For You", page === "for-you"\)/);
-  assert.equal((appShell.match(/navLink\("for-you\\.html"/g) || []).length, 1, "For You is available through the shared More menu");
+  assert.equal(appShell.split('navLink("for-you.html"').length - 1, 1, "For You is available through the shared More menu");
   assert.match(serviceWorker, /vivid-cinema-shell-v\d+/);
   assert.match(html, /id="recommendation-status"[^>]*role="status"/);
 });
