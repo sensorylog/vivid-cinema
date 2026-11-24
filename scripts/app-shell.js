@@ -703,7 +703,7 @@ function ensureMediaLayoutStyles() {
   if (!document.querySelector('link[data-vivid-premium-experience]')) {
     const link = document.createElement("link");
     link.rel = "stylesheet";
-    link.href = "./styles/vivid-premium-experience.css?v=2";
+    link.href = "./styles/vivid-premium-experience.css?v=3";
     link.dataset.vividPremiumExperience = "true";
     document.head.appendChild(link);
   }
