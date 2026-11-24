@@ -60,3 +60,36 @@ test("installed iOS PWA supports an edge-swipe back gesture without hijacking pl
   assert.match(shell, /history.back\(\)/);
   assert.match(css, /touch-action:\s*manipulation/);
 });
+
+
+test("canonical design tokens are available to the app shell and public landing page", () => {
+  const shell = read("../scripts/app-shell.js");
+  const worker = read("../service-worker.js");
+  const landing = read("../index.html");
+  const tokenFiles = ["tokens", "typography", "spacing", "motion", "theme"];
+  for (const name of tokenFiles) {
+    assert.match(shell, new RegExp(`data-vivid-design-system="\\${name}"`));
+    assert.match(worker, new RegExp(`styles/\\${name}\\.css\\?v=1`));
+    assert.match(landing, new RegExp(`styles/\\${name}\\.css\\?v=1`));
+    assert.ok(read(`../styles/\\${name}.css`).length > 100);
+  }
+  assert.match(worker, /vivid-cinema-shell-v301/);
+});
+
+test("design tokens define restrained cinematic surfaces, type, spacing and reduced motion", () => {
+  const tokens = read("../styles/tokens.css");
+  const typography = read("../styles/typography.css");
+  const spacing = read("../styles/spacing.css");
+  const motion = read("../styles/motion.css");
+  const theme = read("../styles/theme.css");
+  assert.match(tokens, /--vivid-color-background/);
+  assert.match(tokens, /--vivid-color-surface-3/);
+  assert.match(tokens, /--vivid-color-accent/);
+  assert.match(typography, /--vivid-type-display/);
+  assert.match(typography, /--vivid-type-page-title/);
+  for (const value of ["4px", "8px", "12px", "16px", "24px", "32px", "48px", "64px", "96px"]) {
+    assert.ok(spacing.includes(value), `spacing scale is missing ${value}`);
+  }
+  assert.match(motion, /prefers-reduced-motion:\\s*reduce/);
+  assert.match(theme, /data-vivid-theme="light"/);
+});
