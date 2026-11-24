@@ -235,7 +235,7 @@ html[data-vivid-theme="light"] .vivid-topbar .vivid-nav-account:hover{color:#101
 .vivid-mobile-nav a[aria-current="page"]{color:#f4f2ed}
 .vivid-native-more-menu{
   position:fixed;z-index:1201;right:max(12px,env(safe-area-inset-right,0px));
-  bottom:calc(76px + env(safe-area-inset-bottom,0px));width:min(260px,calc(100vw - 24px));
+  bottom:calc(90px + env(safe-area-inset-bottom,0px));width:min(260px,calc(100vw - 24px));
   max-height:min(68vh,520px);overflow:auto;padding:8px;
   border:1px solid rgba(255,255,255,.12);border-radius:16px;
   background:rgba(15,17,22,.97);box-shadow:0 18px 55px rgba(0,0,0,.48);
@@ -254,7 +254,8 @@ html[data-vivid-theme="light"] .vivid-topbar .vivid-nav-account:hover{color:#101
   body{padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
   .vivid-mobile-nav.vivid-v2-mobile-nav{
     position:fixed;left:0;right:0;bottom:0;z-index:1200;
-    display:flex;align-items:stretch;justify-content:space-around;gap:3px;
+    display:grid;grid-template-columns:repeat(5,minmax(0,1fr));
+    align-items:stretch;justify-content:stretch;gap:3px;width:100%;
     min-height:62px;padding:6px 8px calc(6px + env(safe-area-inset-bottom,0px));
     border-top:1px solid rgba(255,255,255,.09);
     background:rgba(9,11,15,.94);color:#9299a4;

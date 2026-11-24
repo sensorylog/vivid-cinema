@@ -698,9 +698,10 @@ html[data-vivid-theme="light"] body.vivid-atmosphere :is(
     bottom: calc(14px + env(safe-area-inset-bottom, 0px)) !important;
     height: 62px !important;
     z-index: 1100 !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: space-around !important;
+    display: grid !important;
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+    align-items: stretch !important;
+    justify-content: stretch !important;
     gap: 2px !important;
     padding: 4px 6px !important;
     margin: 0 !important;
@@ -756,11 +757,13 @@ html[data-vivid-theme="light"] body.vivid-atmosphere :is(
   }
 
   /* Tabs */
-  body.vivid-atmosphere .vivid-mobile-nav a,
-  .vivid-mobile-nav a {
+  body.vivid-atmosphere .vivid-mobile-nav :is(a, button),
+  .vivid-mobile-nav :is(a, button) {
     position: relative !important;
     z-index: 1 !important;
-    flex: 1 1 0 !important;
+    flex: none !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
     min-width: 0 !important;
     min-height: 48px !important;
     display: flex !important;
@@ -780,17 +783,15 @@ html[data-vivid-theme="light"] body.vivid-atmosphere :is(
     transition: color 0.18s ease, background 0.18s ease, transform 0.18s ease !important;
   }
 
-  body.vivid-atmosphere .vivid-mobile-nav a i,
-  .vivid-mobile-nav a i {
+  body.vivid-atmosphere .vivid-mobile-nav :is(a, button) i,
+  .vivid-mobile-nav :is(a, button) i {
     font-size: 1.22rem !important;
     line-height: 1 !important;
   }
 
   /* Active tab — liquid highlight */
-  body.vivid-atmosphere .vivid-mobile-nav a[aria-current="page"],
-  body.vivid-atmosphere .vivid-mobile-nav a.is-active,
-  .vivid-mobile-nav a[aria-current="page"],
-  .vivid-mobile-nav a.is-active {
+  body.vivid-atmosphere .vivid-mobile-nav :is(a[aria-current="page"], a.is-active, button[aria-current="page"], button[aria-expanded="true"]),
+  .vivid-mobile-nav :is(a[aria-current="page"], a.is-active, button[aria-current="page"], button[aria-expanded="true"]) {
     color: #fff !important;
     background: rgba(255, 255, 255, 0.22) !important;
     box-shadow:
@@ -798,11 +799,28 @@ html[data-vivid-theme="light"] body.vivid-atmosphere :is(
       0 2px 8px rgba(0, 0, 0, 0.12) !important;
   }
 
-  body.vivid-atmosphere .vivid-mobile-nav a[aria-current="page"] i,
-  body.vivid-atmosphere .vivid-mobile-nav a.is-active i,
-  .vivid-mobile-nav a[aria-current="page"] i,
-  .vivid-mobile-nav a.is-active i {
+  body.vivid-atmosphere .vivid-mobile-nav :is(a[aria-current="page"], a.is-active, button[aria-current="page"], button[aria-expanded="true"]) i,
+  .vivid-mobile-nav :is(a[aria-current="page"], a.is-active, button[aria-current="page"], button[aria-expanded="true"]) i {
     transform: scale(1.08);
+  }
+
+  body.vivid-atmosphere .vivid-mobile-nav button,
+  .vivid-mobile-nav button {
+    appearance: none !important;
+    border: 0 !important;
+    margin: 0 !important;
+    cursor: pointer !important;
+    font-family: inherit !important;
+    font-size: .58rem !important;
+    font-weight: 600 !important;
+    line-height: 1.1 !important;
+    text-align: center !important;
+    -webkit-tap-highlight-color: transparent !important;
+  }
+  body.vivid-atmosphere .vivid-mobile-nav :is(a, button):focus-visible,
+  .vivid-mobile-nav :is(a, button):focus-visible {
+    outline: 2px solid rgba(255,255,255,.88) !important;
+    outline-offset: -3px !important;
   }
 
   /* Safe bottom padding so content never hides under the floating nav */

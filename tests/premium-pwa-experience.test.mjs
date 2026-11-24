@@ -16,16 +16,38 @@ test("premium PWA shell keeps four direct mobile destinations and a More menu", 
   assert.ok(mobileNav.includes(`.join("")`));
 });
 
+test("mobile navigation distributes all five destinations across the full bar", () => {
+  const css = read("../styles/vivid-shell.css");
+  assert.match(css, /\.vivid-mobile-nav\.vivid-v2-mobile-nav\s*\{[^}]*display:\s*grid/s);
+  assert.match(css, /grid-template-columns:\s*repeat\(5,\s*minmax\(0,\s*1fr\)\)/);
+  assert.match(css, /justify-content:\s*stretch/);
+  const glass = read("../styles/vivid-liquid-glass.css");
+  assert.match(glass, /grid-template-columns:\s*repeat\(5,\s*minmax\(0,\s*1fr\)\)/);
+  assert.match(glass, /\.vivid-mobile-nav :is\(a, button\)/);
+  const premium = read("../styles/vivid-premium-experience.css");
+  assert.match(premium, /grid-template-columns:\s*repeat\(5,minmax\(0,1fr\)\)/);
+  assert.doesNotMatch(premium, /grid-template-columns:\s*repeat\(7/);
+  assert.match(premium, /:is\(a, button\)/);
+  const appShell = read("../scripts/app-shell.js");
+  const moreStart = appShell.indexOf("function syncMoreNavigation(");
+  const moreEnd = appShell.indexOf("function syncMobileNavigation()", moreStart);
+  const moreMenu = appShell.slice(moreStart, moreEnd);
+  assert.match(moreMenu, /role", "menu"/);
+  assert.match(moreMenu, /role", "menuitem"/);
+  assert.match(moreMenu, /event.key === "ArrowDown"/);
+  assert.match(moreMenu, /event.key === "Escape"/);
+});
+
 test("premium PWA experience styles are loaded globally and respect reduced motion", () => {
   const shell = read("../scripts/app-shell.js");
   const worker = read("../service-worker.js");
   const css = read("../styles/vivid-premium-experience.css");
-  assert.match(shell, /vivid-premium-experience\.css\?v=2/);
+  assert.match(shell, /vivid-premium-experience\.css\?v=3/);
   assert.match(shell, /vivid-app-experience/);
   assert.match(worker, /vivid-cinema-shell-v\d+/);
-  assert.match(worker, /vivid-premium-experience\.css\?v=2/);
+  assert.match(worker, /vivid-premium-experience\.css\?v=3/);
   assert.match(css, /@view-transition\s*\{\s*navigation:\s*auto;/);
-  assert.match(css, /grid-template-columns:\s*repeat\(7/);
+  assert.match(css, /grid-template-columns:\s*repeat\(5/);
   assert.match(css, /aria-current="page"/);
   assert.match(css, /prefers-reduced-motion:\s*reduce/);
 });
@@ -39,9 +61,9 @@ test("installed iOS PWA gets a standalone app shell and safe-area-aware content"
   assert.match(shell, /display-mode:\s*standalone/);
   assert.match(shell, /vivid-ios-standalone/);
   assert.match(shell, /apple-mobile-web-app-status-bar-style/);
-  assert.match(shell, /vivid-premium-experience\.css\?v=2/);
+  assert.match(shell, /vivid-premium-experience\.css\?v=3/);
   assert.match(worker, /vivid-cinema-shell-v\d+/);
-  assert.match(worker, /vivid-premium-experience\.css\?v=2/);
+  assert.match(worker, /vivid-premium-experience\.css\?v=3/);
   assert.match(css, /env\(safe-area-inset-bottom/);
   assert.match(css, /overscroll-behavior-y:\s*contain/);
 });
@@ -75,7 +97,7 @@ test("canonical design tokens are available to the app shell and public landing 
     assert.ok(landing.includes(`data-vivid-design-system="${name}"`));
     assert.ok(read(`../styles/${name}.css`).length > 100);
   }
-  assert.match(worker, /vivid-cinema-shell-v303/);
+  assert.match(worker, /vivid-cinema-shell-v308/);
   assert.ok(worker.includes("vivid-rounded-cards.css?v=round-1"));
 });
 
@@ -98,4 +120,17 @@ test("design tokens define restrained cinematic surfaces, type, spacing and redu
   }
   assert.match(motion, /prefers-reduced-motion:\s*reduce/);
   assert.match(theme, /data-vivid-theme="light"/);
+});
+
+test("all Vivid top navigation uses one safe-area inset without external top margins", () => {
+  const css = read("../styles/vivid-audit-fixes.css");
+  assert.match(css, /--vivid-top-safe-inset:\s*env\(safe-area-inset-top,\s*0px\)/);
+  assert.match(css, /padding-block-start:\s*calc\(var\(--vivid-top-chrome-gap\) \+ var\(--vivid-top-safe-inset\)\)/);
+  assert.match(css, /margin-block-start:\s*0\s*!important/);
+  assert.match(css, /\.vivid-topbar\s*\{\s*top:\s*0\s*!important/);
+  assert.doesNotMatch(css, /margin-top:\s*max\(10px,\s*env\(safe-area-inset-top/);
+  for (const path of ["../home.html", "../index.html", "../discover.html", "../collection.html"]) {
+    const html = read(path);
+    assert.match(html, /viewport-fit=cover/, path + " must opt into safe-area layout");
+  }
 });

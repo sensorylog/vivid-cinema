@@ -1026,29 +1026,6 @@ html[data-vivid-theme="light"] body.vivid-atmosphere .vivid-navlinks a{
 }
 
 
-/* SAFE AREA — keep the Vivid navigation below iPhone/iPad sensor housing. */
-body.vivid-atmosphere :is(
-  .vivid-topbar,
-  .vivid-discovery-nav,
-  .vivid-title-nav,
-  .vivid-library-nav,
-  .vivid-watch-nav,
-  .vivid-unified-header
-){
-  margin-top:max(8px, env(safe-area-inset-top));
-}
-@media(max-width:700px){
-  body.vivid-atmosphere :is(
-    .vivid-topbar,
-    .vivid-discovery-nav,
-    .vivid-title-nav,
-    .vivid-library-nav,
-    .vivid-watch-nav,
-    .vivid-unified-header
-  ){
-    margin-top:max(10px, env(safe-area-inset-top));
-  }
-}
 /* ========================================================================== */
 /* Header spacing — give navigation tabs room to breathe without drifting.    */
 /* ========================================================================== */
@@ -1117,7 +1094,7 @@ html:not([data-vivid-theme="light"]) body.vivid-search-page .vivid-search-main{
 .vivid-library-shelf{touch-action:pan-x;}
 @media(max-width:640px){
   .vivid-v2-mobile-nav{background:rgba(20,20,23,.94)!important;border-top-color:#2c2c2e!important;backdrop-filter:blur(24px) saturate(125%);-webkit-backdrop-filter:blur(24px) saturate(125%);}
-  .vivid-v2-mobile-nav a[aria-current="page"],.vivid-v2-mobile-nav a.is-active{color:#0a84ff!important;}
+  .vivid-v2-mobile-nav :is(a[aria-current="page"],a.is-active,button[aria-current="page"],button[aria-expanded="true"]){color:#0a84ff!important;}
 }
 @media(prefers-reduced-motion:reduce){
   .vivid-library-continue-rail,
@@ -1868,3 +1845,61 @@ html[data-vivid-theme="light"] select option:checked{background-color:#111216;co
 .landing-form{min-width:0;max-width:100%;box-sizing:border-box}
 .landing-email{min-width:0;max-width:100%;box-sizing:border-box}
 .landing-submit{flex-shrink:0}
+
+
+/* ==========================================================================
+   UNIVERSAL TOP SAFE-AREA STANDARD
+   One predictable header inset for iOS, Android, installed PWAs and browsers.
+   Devices without a sensor cutout resolve the env() inset to zero and retain
+   only the small optical spacing. Never add the safe inset as an outer margin.
+   ========================================================================== */
+:root {
+  --vivid-top-safe-inset: env(safe-area-inset-top, 0px);
+  --vivid-top-chrome-gap: 8px;
+}
+body.vivid-atmosphere :is(
+  .vivid-topbar,
+  .vivid-unified-header,
+  .vivid-discovery-nav,
+  .vivid-library-nav,
+  .vivid-title-nav,
+  .vivid-watch-nav,
+  .vivid-legal-nav
+),
+.vivid-topbar,
+.vivid-unified-header,
+.vivid-discovery-nav,
+.vivid-library-nav,
+.vivid-title-nav,
+ .vivid-watch-nav,
+.vivid-legal-nav {
+  box-sizing: border-box !important;
+  margin-block-start: 0 !important;
+  padding-block-start: calc(var(--vivid-top-chrome-gap) + var(--vivid-top-safe-inset)) !important;
+  scroll-margin-top: calc(72px + var(--vivid-top-safe-inset));
+}
+.vivid-topbar {
+  top: 0 !important;
+}
+/* Unified headers are in normal document flow; their content must start
+   immediately after the header, not after a second legacy spacer. */
+.vivid-unified-header + main,
+.vivid-unified-header ~ main {
+  padding-block-start: 0 !important;
+}
+@media (max-width: 700px) {
+  :root { --vivid-top-chrome-gap: 8px; }
+  .vivid-topbar,
+  .vivid-unified-header,
+  .vivid-discovery-nav,
+  .vivid-library-nav,
+  .vivid-title-nav,
+  .vivid-watch-nav,
+  .vivid-legal-nav {
+    padding-inline-start: max(14px, env(safe-area-inset-left, 0px)) !important;
+    padding-inline-end: max(14px, env(safe-area-inset-right, 0px)) !important;
+  }
+}
+@supports (padding-top: env(safe-area-inset-top)) {
+  html { scroll-padding-top: calc(72px + env(safe-area-inset-top, 0px)); }
+}
