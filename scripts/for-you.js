@@ -132,7 +132,7 @@ function cardMarkup(item, index, compact = false) {
   const feedback = getFeedback(item);
   const href = getMediaUrl(item);
   const reason = item.recommendationReason || (item.sourceLabel === "trending" ? "Popular now" : "Picked for you");
-  return `<article class="vivid-for-you-card${compact ? " vivid-for-you-card-compact" : ""}" data-impression-index="${index}">
+  return `<article class="vivid-for-you-card vivid-card--poster${compact ? " vivid-for-you-card-compact" : ""}" data-impression-index="${index}">
     <a class="vivid-for-you-poster" href="${escapeHtml(href)}" data-open-index="${index}" aria-label="Explore ${escapeHtml(title)}">
       <img src="${escapeHtml(poster)}" alt="Poster for ${escapeHtml(title)}" loading="lazy" decoding="async">
       ${rating > 0 ? '<span class="vivid-for-you-rating"><i class="bi bi-star-fill" aria-hidden="true"></i> ' + rating.toFixed(1) + "</span>" : ""}
@@ -205,7 +205,7 @@ async function loadSecondarySections(expectedRequestId = requestId) {
     const poster = getImageUrl(item.poster_path || item.raw?.poster_path, "w185");
     const percentage = Math.max(0, Math.min(100, Number(item.percentage) || 0));
     const href = getMediaUrl({ id: item.id, media_type: item.media_type || "movie" });
-    return `<a class="vivid-for-you-continue-card" href="${escapeHtml(href)}">
+    return `<a class="vivid-for-you-continue-card vivid-card--poster" href="${escapeHtml(href)}">
       <img src="${escapeHtml(poster)}" alt="" loading="lazy" decoding="async">
       <span class="vivid-for-you-continue-copy"><strong>${escapeHtml(title)}</strong><span>${escapeHtml(item.media_type === "tv" ? "Series" : "Movie")} · ${escapeHtml(formatProgress(item))} complete</span><span class="vivid-for-you-progress"><span style="width:${percentage}%"></span></span></span>
     </a>`;

@@ -1,0 +1,15 @@
+/* Vivid Cinema — restrained, accessible motion tokens. */
+:root {
+  --vivid-motion-ease-standard: cubic-bezier(.2, .7, .2, 1);
+  --vivid-motion-ease-emphasis: cubic-bezier(.22, .8, .22, 1);
+  --vivid-motion-duration-fast: 160ms;
+  --vivid-motion-duration-standard: 280ms;
+  --vivid-motion-duration-slow: 500ms;
+}
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --vivid-motion-duration-fast: 0ms;
+    --vivid-motion-duration-standard: 0ms;
+    --vivid-motion-duration-slow: 0ms;
+  }
+}

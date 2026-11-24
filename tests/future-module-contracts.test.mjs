@@ -53,7 +53,7 @@ test("future-module contracts explicitly reuse existing Memory and Intelligence 
   }
 });
 
-test("Watch Rooms is added to the shared top tools without changing the seven mobile destinations", () => {
+test("Watch Rooms stays in the desktop tools while mobile navigation is capped at five controls", () => {
   const appShell = readFileSync(new URL("../scripts/app-shell.js", import.meta.url), "utf8");
   assert.ok(appShell.includes('watchRooms.className = "vivid-watch-rooms-nav"'));
   assert.ok(appShell.includes('watchRooms.href = "watch-rooms.html"'));
@@ -61,13 +61,13 @@ test("Watch Rooms is added to the shared top tools without changing the seven mo
   const mobileEnd = appShell.indexOf("function syncNavigation()", mobileStart);
   const mobileBuilder = appShell.slice(mobileStart, mobileEnd);
   assert.ok(mobileStart >= 0 && mobileEnd > mobileStart, "shared mobile navigation builder should exist");
-  assert.ok(mobileBuilder, "shared mobile navigation builder should exist");
-  const androidMobileBuilder = mobileBuilder.slice(mobileBuilder.indexOf("if (isAndroidNativeRuntime())"), mobileBuilder.indexOf("} else {"));
-  const browserMobileBuilder = mobileBuilder.slice(mobileBuilder.indexOf("} else {"));
-  assert.equal((androidMobileBuilder.match(/navLink\(/g) || []).length, 4);
-  assert.equal((browserMobileBuilder.match(/navLink\(/g) || []).length, 7);
-  assert.match(androidMobileBuilder, /data-vivid-more-navigation/);
+  assert.equal((mobileBuilder.match(/navLink\(/g) || []).length, 4, "four direct mobile links leave the fifth slot for More");
+  assert.match(mobileBuilder, /data-vivid-more-navigation/);
   assert.doesNotMatch(mobileBuilder, /watch-rooms/);
+  const moreStart = appShell.indexOf("function syncMoreNavigation(");
+  const moreEnd = appShell.indexOf("function syncMobileNavigation()", moreStart);
+  const moreBuilder = appShell.slice(moreStart, moreEnd);
+  assert.match(moreBuilder, /navLink\("watch-rooms\.html"/);
 });
 
 test("Watch Rooms private content waits for a non-anonymous Firebase user", () => {

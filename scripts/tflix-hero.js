@@ -184,7 +184,7 @@ function createSlide(item, index) {
   const match = matchPct(item.vote_average);
   const isMovie = type === "movie";
   const slide = document.createElement("article");
-  slide.className = "hero-slide" + (index === 0 ? " active" : "");
+  slide.className = "hero-slide vivid-card--hero" + (index === 0 ? " active" : "");
   slide.setAttribute("aria-label", title);
   slide.setAttribute("aria-hidden", String(index !== 0));
   slide.inert = index !== 0;

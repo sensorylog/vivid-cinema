@@ -62,7 +62,7 @@ function renderResults(items, query, canLoadMore = false, notes = currentSearchN
         const image = item.poster_path
           ? "https://image.tmdb.org/t/p/w185" + item.poster_path
           : "icons/vivid-icon.svg";
-        return '<a class="vivid-search-page-result" href="' + escapeHtml(resultHref(item)) + '">' +
+        return '<a class="vivid-search-page-result' + (item.media_type === "person" ? "" : " vivid-card--poster") + '" href="' + escapeHtml(resultHref(item)) + '">' +
           '<img src="' + escapeHtml(image) + '" alt="" loading="lazy">' +
           '<span><strong>' + escapeHtml(title) + '</strong><small>' + escapeHtml(meta) + '</small></span>' +
           '<i class="bi bi-chevron-right"></i></a>';

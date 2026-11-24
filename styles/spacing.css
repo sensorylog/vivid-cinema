@@ -1,0 +1,16 @@
+/* Vivid Cinema — 4pt-based spacing scale (8pt rhythm with 4pt half-steps). */
+:root {
+  --vivid-spacing-1: 4px;
+  --vivid-spacing-2: 8px;
+  --vivid-spacing-3: 12px;
+  --vivid-spacing-4: 16px;
+  --vivid-spacing-6: 24px;
+  --vivid-spacing-8: 32px;
+  --vivid-spacing-12: 48px;
+  --vivid-spacing-16: 64px;
+  --vivid-spacing-24: 96px;
+  --vivid-layout-page-gutter: clamp(16px, 3vw, 48px);
+  --vivid-layout-content-width: 1500px;
+  --vivid-layout-reading-width: 720px;
+  --vivid-layout-section-gap: clamp(32px, 6vw, 64px);
+}

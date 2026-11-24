@@ -91,7 +91,7 @@ function reminderMarkup(s) {
 }
 function card(s, compact = false) {
   const meta = s.when ? releaseLanguage(s.when) : (s.media_type === "tv" ? "TV series" : "Movie");
-  return '<article class="vivid-news-card ' + (compact ? "is-compact" : "") + '">' +
+  return '<article class="vivid-news-card vivid-card--news ' + (compact ? "is-compact" : "") + '">' +
     '<a class="vivid-news-image" href="' + escapeHtml(hrefFor(s)) + '">' +
       '<img src="' + getImageUrl(s.backdrop_path || s.poster_path, compact ? "w500" : "w780") + '" alt="' + escapeHtml(s.title) + '" loading="lazy" decoding="async">' +
       '<span>' + escapeHtml(s.label) + '</span>' +
@@ -146,7 +146,7 @@ function renderFinderResults(results, query) {
     return;
   }
   el.innerHTML = '<div class="vivid-news-search-head"><div><span>VIVID SEARCH</span><h2>Here’s what I found</h2></div><button type="button" id="news-search-close" aria-label="Close search results"><i class="bi bi-x-lg"></i></button></div><div class="vivid-news-search-grid">' +
-    results.slice(0,8).map(item => '<a class="vivid-news-search-card" href="' + escapeHtml(getMediaUrl(item)) + '"><img src="' + getImageUrl(item.poster_path || item.backdrop_path, "w342") + '" alt="' + escapeHtml(titleOf(item)) + '" loading="lazy"><div><strong>' + escapeHtml(titleOf(item)) + '</strong><small>' + escapeHtml(mediaType(item) === "tv" ? "TV series" : "Movie") + (item.release_date || item.first_air_date ? " · " + escapeHtml((item.release_date || item.first_air_date).slice(0,4)) : "") + (item.vote_average ? " · ★ " + Number(item.vote_average).toFixed(1) : "") + '</small><p>' + escapeHtml(safeOverview(item.overview, "Open the title for the full cinema brief.")) + '</p><span>Open cinema brief <i class="bi bi-arrow-right"></i></span></div></a>').join("") +
+    results.slice(0,8).map(item => '<a class="vivid-news-search-card vivid-card--poster" href="' + escapeHtml(getMediaUrl(item)) + '"><img src="' + getImageUrl(item.poster_path || item.backdrop_path, "w342") + '" alt="' + escapeHtml(titleOf(item)) + '" loading="lazy"><div><strong>' + escapeHtml(titleOf(item)) + '</strong><small>' + escapeHtml(mediaType(item) === "tv" ? "TV series" : "Movie") + (item.release_date || item.first_air_date ? " · " + escapeHtml((item.release_date || item.first_air_date).slice(0,4)) : "") + (item.vote_average ? " · ★ " + Number(item.vote_average).toFixed(1) : "") + '</small><p>' + escapeHtml(safeOverview(item.overview, "Open the title for the full cinema brief.")) + '</p><span>Open cinema brief <i class="bi bi-arrow-right"></i></span></div></a>').join("") +
     '</div>';
   $("news-search-close")?.addEventListener("click", () => { el.hidden = true; });
 }

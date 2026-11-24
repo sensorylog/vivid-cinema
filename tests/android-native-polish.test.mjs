@@ -9,9 +9,10 @@ import { resolveAndroidBackAction } from "../scripts/android-navigation.js";
 import { getCloudflareApiUrl } from "../scripts/cloudflare-api.js";
 import { applyPerformanceProfile, isLegacyPerformanceDevice } from "../scripts/performance-profile.js";
 
-const [builder, nativeCss, capacitorConfig, nativeConfigurator, appShell, nativeNavigation, nativeWebChrome] = await Promise.all([
+const [builder, nativeCss, shellCss, capacitorConfig, nativeConfigurator, appShell, nativeNavigation, nativeWebChrome] = await Promise.all([
   readFile(new URL("../automation/build-static-dist.mjs", import.meta.url), "utf8"),
   readFile(new URL("../styles/vivid-native-app.css", import.meta.url), "utf8"),
+  readFile(new URL("../styles/vivid-shell.css", import.meta.url), "utf8"),
   readFile(new URL("../capacitor.config.json", import.meta.url), "utf8"),
   readFile(new URL("../automation/configure-android-native-project.mjs", import.meta.url), "utf8"),
   readFile(new URL("../scripts/app-shell.js", import.meta.url), "utf8"),
@@ -41,7 +42,7 @@ test("native styling covers safe areas, touch targets, and accessible focus", ()
 });
 
 test("Android mobile navigation uses five accessible primary tabs and a secondary More menu", () => {
-  assert.match(appShell, /function isAndroidNativeRuntime\(\)/);
+  assert.match(appShell, /function syncMobileNavigation\(\)/);
   assert.match(appShell, /data-vivid-more-navigation/);
   assert.match(appShell, /aria-expanded/);
   assert.match(appShell, /aria-controls/);
@@ -54,9 +55,9 @@ test("Android mobile navigation uses five accessible primary tabs and a secondar
   assert.match(appShell, /navLink\("for-you\.html"/);
   assert.match(appShell, /navLink\("library\.html"/);
   assert.match(appShell, /navLink\("watch-rooms\.html"/);
-  assert.match(nativeCss, /grid-template-columns:\s*repeat\(5,\s*minmax\(0,\s*1fr\)\)/);
-  assert.match(nativeCss, /\.vivid-native-more-menu\[hidden\]/);
-  assert.match(nativeCss, /min-height:\s*50px/);
+  assert.match(shellCss, /justify-content:\s*space-around/);
+  assert.match(shellCss, /\.vivid-native-more-menu\[hidden\]/);
+  assert.match(shellCss, /min-height:\s*62px/);
 });
 
 test("Capacitor remains configured for the Vivid Cinema app", () => {

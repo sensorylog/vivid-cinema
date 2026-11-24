@@ -463,8 +463,8 @@ test("Windows desktop navigation keeps Home Search visible and restores previous
 
   // Home's shared header is rebuilt at startup. The Windows branch must use
   // the dedicated Search page route, not the website-only in-page dialog.
-  assert.match(shell, /navLink\("search\.html", "bi-search", "Search", page === "search"\)/);
-  assert.match(shell, /window\.vividDownloads\?\.available === true/);
+  assert.ok(shell.includes('search.href = "search.html"'));
+  assert.match(shell, /function buildPrimaryLinks\(page\)/);
   assert.match(shell, /vivid-windows-desktop/);
   assert.match(home, /data-search-trigger/);
   assert.match(searchPage, /id="search-page-input"/);

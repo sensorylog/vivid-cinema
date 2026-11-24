@@ -441,7 +441,7 @@ function renderPersonPage(person) {
     const type = item.media_type === "tv" ? "tv" : "movie";
     const name = item.title || item.name || "Untitled";
     const year = String(item.release_date || item.first_air_date || "").slice(0,4);
-    return '<a class="vivid-card" href="title.html?id='+encodeURIComponent(item.id)+'&type='+type+'"><div class="vivid-card-media"><img loading="lazy" src="'+getImageUrl(item.poster_path,"w342")+'" alt="'+escapeHtml(name)+'"></div><div class="vivid-card-info"><strong class="vivid-card-title">'+escapeHtml(name)+'</strong><small class="vivid-card-sub">'+escapeHtml(year)+'</small></div></a>';
+    return '<a class="vivid-card vivid-card--poster" href="title.html?id='+encodeURIComponent(item.id)+'&type='+type+'"><div class="vivid-card-media"><img loading="lazy" src="'+getImageUrl(item.poster_path,"w342")+'" alt="'+escapeHtml(name)+'"></div><div class="vivid-card-info"><strong class="vivid-card-title">'+escapeHtml(name)+'</strong><small class="vivid-card-sub">'+escapeHtml(year)+'</small></div></a>';
   }).join("");
   const bio = String(person?.biography || "").trim();
   const jobs = known.map((item) => escapeHtml(item.job || item.department || "Crew")).filter(Boolean).slice(0,4).join(" · ");

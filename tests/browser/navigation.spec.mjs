@@ -7,7 +7,9 @@ const routes = [
   "/for-you.html",
   "/search.html",
   "/account.html",
-  "/watch.html"
+  "/watch.html",
+  "/anime.html",
+  "/community.html"
 ];
 
 test("core app routes remain navigable with the service worker active", async ({ page }) => {
@@ -52,12 +54,13 @@ test("core app routes remain navigable with the service worker active", async ({
 });
 
 
-test("website navigation does not advertise the unsupported Offline downloads tab", async ({ page }) => {
+test("mobile navigation stays within five destinations and exposes secondary routes through More", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/home.html", { waitUntil: "domcontentloaded" });
   await expect(page.locator(".vivid-navlinks a[href='my-downloads.html']")).toHaveCount(0);
   await expect(page.locator(".vivid-mobile-nav a[href='my-downloads.html']")).toHaveCount(0);
-  await expect(page.locator(".vivid-navlinks a[href='library.html']")).toHaveCount(1);
+  await expect(page.locator(".vivid-mobile-nav a")).toHaveCount(4);
+  await expect(page.locator(".vivid-mobile-nav button[data-vivid-more-navigation]")).toHaveCount(1);
   const watchRoomsIcon = page.locator(".vivid-watch-rooms-nav");
   await expect(watchRoomsIcon).toHaveAttribute("href", "watch-rooms.html");
   await expect(watchRoomsIcon).toBeVisible();
@@ -65,5 +68,19 @@ test("website navigation does not advertise the unsupported Offline downloads ta
   expect(iconBounds).not.toBeNull();
   expect(iconBounds.x).toBeGreaterThanOrEqual(0);
   expect(iconBounds.x + iconBounds.width).toBeLessThanOrEqual(390);
-  await expect(page.locator(".vivid-mobile-nav a")).toHaveCount(7);
+  await expect(page.locator(".vivid-mobile-nav a")).toHaveCount(4);
+  await page.locator("[data-vivid-more-navigation]").click();
+  const moreMenu = page.locator("#vivid-more-menu");
+  await expect(moreMenu).toBeVisible();
+  for (const href of ["discover.html", "anime.html", "community.html", "library.html", "account.html", "search.html", "watch-rooms.html"]) {
+    await expect(moreMenu.locator("a[href='" + href + "']")).toHaveCount(1);
+  }
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await expect(page.locator(".vivid-navlinks a")).toHaveCount(8);
+  for (const href of ["collection.html?collection=movies", "collection.html?collection=tv", "anime.html", "live.html", "community.html", "library.html"]) {
+    await expect(page.locator(".vivid-navlinks a[href='" + href + "']")).toHaveCount(1);
+  }
+  const profileLink = page.locator(".vivid-navlinks #auth-link");
+  await expect(profileLink).toHaveCount(1);
+  await expect(profileLink).toHaveAttribute("href", /(?:auth|account)\\.html$/);
 });

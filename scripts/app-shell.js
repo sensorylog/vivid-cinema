@@ -203,32 +203,25 @@ function isBrowsePage(page = currentPage()) {
   return ["discover", "collection", "anime"].includes(page);
 }
 
+function isCollectionType(type) {
+  return currentPage() === "collection" && new URLSearchParams(location.search).get("collection") === type;
+}
+
 function navLink(href, icon, label, active = false) {
   return '<a href="' + href + '"' + (active ? ' aria-current="page"' : '') + '><i class="bi ' + icon + '" aria-hidden="true"></i><span>' + label + '</span></a>';
 }
 
 function buildPrimaryLinks(page) {
-  const links = [
+  return [
     navLink("home.html", "bi-house-fill", "Home", page === "home"),
-    navLink("discover.html", "bi-grid-fill", "Browse", isBrowsePage(page)),
-    navLink("for-you.html", "bi-stars", "For You", page === "for-you"),
+    navLink("collection.html?collection=movies", "bi-film", "Movies", isCollectionType("movies")),
+    navLink("collection.html?collection=tv", "bi-tv", "Series", isCollectionType("tv")),
+    navLink("anime.html", "bi-stars", "Anime", page === "anime"),
     navLink("live.html", "bi-broadcast-pin", "Live", page === "live"),
+    navLink("community.html", "bi-chat-square-heart", "Community", page === "community"),
     navLink("library.html", "bi-bookmark-fill", "Library", page === "library"),
-    ...(window.vividDownloads?.available === true
-      ? [navLink("my-downloads.html", "bi-download", "Offline", page === "downloads-library")]
-      : []),
-    navLink("news.html", "bi-newspaper", "News", page === "news")
-  ];
-  // Home has a working in-page search dialog; keep its trigger instead of
-  // replacing it with a plain route link when the shell is rebuilt.
-  // The Windows app uses a real Search page route. The website keeps its
-  // in-page dialog on Home, while mobile navigation always links to search.html.
-  if (page === "home" && !window.vividDownloads?.available) {
-    links.push('<button class="vivid-nav-search-modal" type="button" data-search-trigger aria-label="Open search"><i class="bi bi-search" aria-hidden="true"></i><span>Search</span></button>');
-  } else {
-    links.push(navLink("search.html", "bi-search", "Search", page === "search"));
-  }
-  return links.join("");
+    '<a id="auth-link" class="vivid-nav-profile" href="account.html" aria-label="Open profile"' + (page === "account" ? ' aria-current="page"' : '') + '><i class="bi bi-person-circle" aria-hidden="true"></i><span>Profile</span></a>'
+  ].join("");
 }
 
 function buildSearchControl() {
@@ -240,7 +233,6 @@ function syncDesktopNavigation() {
   const nav = document.querySelector(".vivid-nav, .vivid-unified-nav");
   if (!nav) return;
 
-  // Preserve existing Home controls that have behavior wired by script.js.
   const notification = nav.querySelector("#release-alert-button");
   const searchControl = nav.querySelector(".vivid-search-trigger, .vivid-nav-search");
   const languageControl = nav.querySelector(".vivid-language, [data-vivid-language], .vivid-language-selector");
@@ -268,6 +260,7 @@ function syncDesktopNavigation() {
     search.innerHTML = '<i class="bi bi-search" aria-hidden="true"></i><span>Search</span>';
     tools.appendChild(search);
   }
+
   const watchRooms = document.createElement("a");
   watchRooms.className = "vivid-watch-rooms-nav";
   watchRooms.href = "watch-rooms.html";
@@ -288,14 +281,6 @@ function syncDesktopNavigation() {
   }
   nav.appendChild(tools);
 
-  const account = document.createElement("a");
-  account.className = "vivid-nav-account";
-  account.id = "auth-link";
-  account.href = "account.html";
-  account.setAttribute("aria-label", "Sign in");
-  account.innerHTML = '<i class="bi bi-person-fill" aria-hidden="true"></i><span>Account</span>';
-  nav.appendChild(account);
-
   const language = document.createElement("div");
   language.className = "vivid-nav-language-slot";
   if (languageControl) language.appendChild(languageControl);
@@ -304,24 +289,20 @@ function syncDesktopNavigation() {
   nav.classList.remove("vivid-v2-nav");
 }
 
-function isAndroidNativeRuntime() {
-  try {
-    return Boolean(window.Capacitor?.isNativePlatform?.() && window.Capacitor?.getPlatform?.() === "android");
-  } catch {
-    return false;
-  }
-}
-
-function syncAndroidMoreNavigation(nav, page) {
-  const morePages = ["live", "news", "search", "watch-rooms"];
+function syncMoreNavigation(nav, page) {
   const menu = document.createElement("div");
   menu.className = "vivid-native-more-menu";
-  menu.id = "vivid-native-more-menu";
+  menu.id = "vivid-more-menu";
   menu.hidden = true;
   menu.setAttribute("role", "group");
   menu.setAttribute("aria-label", "More destinations");
   menu.innerHTML = [
-    navLink("live.html", "bi-broadcast-pin", "Live", page === "live"),
+    navLink("discover.html", "bi-compass", "Discover", page === "discover"),
+    navLink("for-you.html", "bi-stars", "For You", page === "for-you"),
+    navLink("anime.html", "bi-stars", "Anime", page === "anime"),
+    navLink("community.html", "bi-chat-square-heart", "Community", page === "community"),
+    navLink("library.html", "bi-bookmark-fill", "Library", page === "library" || page === "downloads-library"),
+    navLink("account.html", "bi-person-circle", "Profile", page === "account"),
     navLink("news.html", "bi-newspaper", "News", page === "news"),
     navLink("search.html", "bi-search", "Search", page === "search"),
     navLink("watch-rooms.html", "bi-people-fill", "Watch Rooms", page === "watch-rooms")
@@ -329,6 +310,7 @@ function syncAndroidMoreNavigation(nav, page) {
 
   const more = nav.querySelector("[data-vivid-more-navigation]");
   if (!more) return;
+  const morePages = ["discover", "for-you", "anime", "community", "library", "downloads-library", "account", "news", "search", "watch-rooms"];
   more.setAttribute("aria-expanded", "false");
   more.setAttribute("aria-haspopup", "true");
   more.setAttribute("aria-controls", menu.id);
@@ -351,8 +333,9 @@ function syncAndroidMoreNavigation(nav, page) {
     more.setAttribute("aria-expanded", "false");
   });
   document.addEventListener("keydown", event => {
-    if (event.key !== "Escape" || menu.hidden) return;
-    menu.hidden = true;
+    const openMenu = document.querySelector(".vivid-native-more-menu:not([hidden])");
+    if (event.key !== "Escape" || !openMenu) return;
+    openMenu.hidden = true;
     more.setAttribute("aria-expanded", "false");
     more.focus({ preventScroll: true });
   });
@@ -368,26 +351,15 @@ function syncMobileNavigation() {
     nav.setAttribute("aria-label", "Mobile navigation");
     document.body.appendChild(nav);
   }
-  if (isAndroidNativeRuntime()) {
-    nav.innerHTML = [
-      navLink("home.html", "bi-house-fill", "Home", page === "home"),
-      navLink("discover.html", "bi-grid-fill", "Browse", isBrowsePage(page)),
-      navLink("for-you.html", "bi-stars", "For You", page === "for-you"),
-      navLink("library.html", "bi-bookmark-fill", "Library", page === "library" || page === "downloads-library"),
-      '<button type="button" data-vivid-more-navigation aria-expanded="false"><i class="bi bi-three-dots" aria-hidden="true"></i><span>More</span></button>'
-    ].join("");
-    syncAndroidMoreNavigation(nav, page);
-  } else {
-    nav.innerHTML = [
-      navLink("home.html", "bi-house-fill", "Home", page === "home"),
-      navLink("discover.html", "bi-grid-fill", "Browse", isBrowsePage(page)),
-      navLink("for-you.html", "bi-stars", "For You", page === "for-you"),
-      navLink("live.html", "bi-broadcast-pin", "Live", page === "live"),
-      navLink("library.html", "bi-bookmark-fill", "Library", page === "library" || page === "downloads-library"),
-      navLink("news.html", "bi-newspaper", "News", page === "news"),
-      navLink("search.html", "bi-search", "Search", page === "search")
-    ].join("");
-  }
+
+  nav.innerHTML = [
+    navLink("home.html", "bi-house-fill", "Home", page === "home"),
+    navLink("collection.html?collection=movies", "bi-film", "Movies", isCollectionType("movies")),
+    navLink("collection.html?collection=tv", "bi-tv", "Series", isCollectionType("tv")),
+    navLink("live.html", "bi-broadcast-pin", "Live", page === "live"),
+    '<button type="button" data-vivid-more-navigation><i class="bi bi-three-dots" aria-hidden="true"></i><span>More</span></button>'
+  ].join("");
+  syncMoreNavigation(nav, page);
   nav.classList.add("vivid-v2-mobile-nav");
 }
 
@@ -413,9 +385,9 @@ function syncAccountNavigation() {
         const destination = user ? "account.html" : "auth.html";
         document.querySelectorAll("#auth-link, [data-vivid-nav-auth], .vivid-nav-account, .vivid-nav-action").forEach((link) => {
           link.href = destination;
-          link.setAttribute("aria-label", user ? "Open account" : "Sign in");
+          link.setAttribute("aria-label", user ? "Open profile" : "Sign in");
           const label = link.querySelector("span");
-          if (label) label.textContent = "Account";
+          if (label) label.textContent = user ? "Profile" : "Sign in";
         });
         window.dispatchEvent(new CustomEvent("vivid:auth-ready", { detail: user }));
       });
@@ -675,6 +647,18 @@ function initCinematicFocusNavigation() {
   }, true);
 }
 
+function ensureDesignSystemStyles() {
+  const styles = ["tokens", "typography", "spacing", "motion", "theme"];
+  styles.forEach(name => {
+    if (document.querySelector(`link[data-vivid-design-system="${name}"]`)) return;
+    const link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href = `./styles/${name}.css?v=1`;
+    link.dataset.vividDesignSystem = name;
+    document.head.appendChild(link);
+  });
+}
+
 function ensureMediaLayoutStyles() {
   if (!document.querySelector('link[data-vivid-media-layout]')) {
     const link = document.createElement("link");
@@ -728,6 +712,7 @@ function initAppShell() {
   if (initialized) return;
   initialized = true;
 
+  ensureDesignSystemStyles();
   ensureMediaLayoutStyles();
   setStandaloneExperience();
   document.body.classList.add("vivid-app-experience");

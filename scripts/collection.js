@@ -40,7 +40,7 @@ function populateGenres(){
   $("collection-genre").value=state.genre;
 }
 function card(item){
-  return '<a class="vivid-discovery-card" href="'+escapeHtml(getMediaUrl(item))+'"><div class="vivid-discovery-poster"><img loading="lazy" src="'+getImageUrl(item.poster_path,"w500")+'" alt="'+escapeHtml(item.title)+' poster" onerror="this.style.visibility=\'hidden\'"><span class="vivid-discovery-rating">★ '+(item.vote_average?item.vote_average.toFixed(1):"—")+'</span></div><div class="vivid-discovery-copy"><strong>'+escapeHtml(item.title)+'</strong><small>'+escapeHtml(item.year||"—")+' · '+(item.media_type==="tv"?"TV":"Movie")+'</small></div></a>';
+  return '<a class="vivid-discovery-card vivid-card--poster" href="'+escapeHtml(getMediaUrl(item))+'"><div class="vivid-discovery-poster"><img loading="lazy" src="'+getImageUrl(item.poster_path,"w500")+'" alt="'+escapeHtml(item.title)+' poster" onerror="this.style.visibility=\'hidden\'"><span class="vivid-discovery-rating">★ '+(item.vote_average?item.vote_average.toFixed(1):"—")+'</span></div><div class="vivid-discovery-copy"><strong>'+escapeHtml(item.title)+'</strong><small>'+escapeHtml(item.year||"—")+' · '+(item.media_type==="tv"?"TV":"Movie")+'</small></div></a>';
 }
 function sort(items){
   const date=x=>Date.parse(x.date||"")||0;
