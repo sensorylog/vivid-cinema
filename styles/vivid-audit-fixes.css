@@ -1026,29 +1026,6 @@ html[data-vivid-theme="light"] body.vivid-atmosphere .vivid-navlinks a{
 }
 
 
-/* SAFE AREA — keep the Vivid navigation below iPhone/iPad sensor housing. */
-body.vivid-atmosphere :is(
-  .vivid-topbar,
-  .vivid-discovery-nav,
-  .vivid-title-nav,
-  .vivid-library-nav,
-  .vivid-watch-nav,
-  .vivid-unified-header
-){
-  margin-top:max(8px, env(safe-area-inset-top));
-}
-@media(max-width:700px){
-  body.vivid-atmosphere :is(
-    .vivid-topbar,
-    .vivid-discovery-nav,
-    .vivid-title-nav,
-    .vivid-library-nav,
-    .vivid-watch-nav,
-    .vivid-unified-header
-  ){
-    margin-top:max(10px, env(safe-area-inset-top));
-  }
-}
 /* ========================================================================== */
 /* Header spacing — give navigation tabs room to breathe without drifting.    */
 /* ========================================================================== */
