@@ -8,6 +8,7 @@
   --vivid-theme-text-secondary: var(--vivid-color-text-secondary);
   --vivid-theme-text-muted: var(--vivid-color-text-muted);
   --vivid-theme-accent: var(--vivid-color-accent);
+  --vivid-theme-focus: var(--vivid-color-focus);
   --vivid-theme-border: var(--vivid-color-border);
 }
 html[data-vivid-theme="light"] {
@@ -20,5 +21,6 @@ html[data-vivid-theme="light"] {
   --vivid-theme-text-secondary: #59616d;
   --vivid-theme-text-muted: #7a828e;
   --vivid-theme-accent: #10131a;
+  --vivid-theme-focus: rgba(20, 28, 40, .68);
   --vivid-theme-border: rgba(20, 28, 40, .12);
 }
