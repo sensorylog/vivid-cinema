@@ -30,7 +30,7 @@ body.vivid-app-experience :where(a,button,[role="button"]):focus-visible {
   body.vivid-app-experience .vivid-mobile-nav.vivid-v2-mobile-nav {
     position: fixed !important;
     display: grid !important;
-    grid-template-columns: repeat(7,minmax(0,1fr)) !important;
+    grid-template-columns: repeat(5,minmax(0,1fr)) !important;
     align-items: stretch !important;
     gap: 2px !important;
     left: 12px !important;
@@ -55,11 +55,12 @@ body.vivid-app-experience :where(a,button,[role="button"]):focus-visible {
     content: none !important;
     animation: none !important;
   }
-  body.vivid-app-experience .vivid-mobile-nav.vivid-v2-mobile-nav a {
+  body.vivid-app-experience .vivid-mobile-nav.vivid-v2-mobile-nav :is(a, button) {
     position: relative !important;
     z-index: 1;
     display: flex !important;
-    flex: 1 1 0 !important;
+    flex: none !important;
+    width: 100% !important;
     flex-direction: column !important;
     align-items: center !important;
     justify-content: center !important;
@@ -79,27 +80,27 @@ body.vivid-app-experience :where(a,button,[role="button"]):focus-visible {
     transform: none !important;
     transition: color 160ms ease, background 160ms ease, border-color 160ms ease !important;
   }
-  body.vivid-app-experience .vivid-mobile-nav.vivid-v2-mobile-nav a i {
+  body.vivid-app-experience .vivid-mobile-nav.vivid-v2-mobile-nav :is(a, button) i {
     font-size: 1.13rem !important;
     line-height: 1 !important;
   }
-  body.vivid-app-experience .vivid-mobile-nav.vivid-v2-mobile-nav a span {
+  body.vivid-app-experience .vivid-mobile-nav.vivid-v2-mobile-nav :is(a, button) span {
     max-width: 100%;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
-  body.vivid-app-experience .vivid-mobile-nav.vivid-v2-mobile-nav a[aria-current="page"] {
+  body.vivid-app-experience .vivid-mobile-nav.vivid-v2-mobile-nav :is(a[aria-current="page"], button[aria-current="page"], button[aria-expanded="true"]) {
     border-color: rgba(199,255,85,.2) !important;
     background: rgba(199,255,85,.105) !important;
     color: #d5ff83 !important;
     box-shadow: inset 0 1px 0 rgba(255,255,255,.06) !important;
   }
-  body.vivid-app-experience .vivid-mobile-nav.vivid-v2-mobile-nav a:active {
+  body.vivid-app-experience .vivid-mobile-nav.vivid-v2-mobile-nav :is(a, button):active {
     background: rgba(255,255,255,.1) !important;
     transform: scale(.96) !important;
   }
-  body.vivid-app-experience .vivid-mobile-nav.vivid-v2-mobile-nav a:focus-visible {
+  body.vivid-app-experience .vivid-mobile-nav.vivid-v2-mobile-nav :is(a, button):focus-visible {
     outline: 2px solid #c7ff55 !important;
     outline-offset: -2px !important;
   }
