@@ -26,8 +26,16 @@ test("mobile navigation distributes all five destinations across the full bar", 
   assert.match(glass, /\.vivid-mobile-nav :is\(a, button\)/);
   const premium = read("../styles/vivid-premium-experience.css");
   assert.match(premium, /grid-template-columns:\s*repeat\(5,minmax\(0,1fr\)\)/);
-  assert.doesNotMatch(premium, /grid-template-columns:\s*repeat\(5/);
+  assert.doesNotMatch(premium, /grid-template-columns:\s*repeat\(7/);
   assert.match(premium, /:is\(a, button\)/);
+  const appShell = read("../scripts/app-shell.js");
+  const moreStart = appShell.indexOf("function syncMoreNavigation(");
+  const moreEnd = appShell.indexOf("function syncMobileNavigation()", moreStart);
+  const moreMenu = appShell.slice(moreStart, moreEnd);
+  assert.match(moreMenu, /role", "menu"/);
+  assert.match(moreMenu, /role", "menuitem"/);
+  assert.match(moreMenu, /event.key === "ArrowDown"/);
+  assert.match(moreMenu, /event.key === "Escape"/);
 });
 
 test("premium PWA experience styles are loaded globally and respect reduced motion", () => {
