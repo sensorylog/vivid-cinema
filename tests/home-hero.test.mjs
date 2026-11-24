@@ -163,7 +163,7 @@ test("Home loads the current audit stylesheet once, without a duplicate cache-bu
   const home = read("../home.html");
   const references = [...home.matchAll(/<link\b[^>]*href=["']([^"']*vivid-audit-fixes\.css(?:\?[^"']*)?)["'][^>]*>/g)]
     .map((match) => match[1]);
-  assert.deepEqual(references, ["styles/vivid-audit-fixes.css?v=editorial-v4"]);
+  assert.deepEqual(references, ["styles/vivid-audit-fixes.css?v=editorial-v5"]);
 });
 
 test("app Home exposes the official download page on desktop, mobile, and footer navigation", () => {
