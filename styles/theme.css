@@ -1,0 +1,24 @@
+/* Vivid Cinema — semantic theme mapping. Existing theme toggle remains authoritative. */
+:root {
+  --vivid-theme-background: var(--vivid-color-background);
+  --vivid-theme-surface-1: var(--vivid-color-surface-1);
+  --vivid-theme-surface-2: var(--vivid-color-surface-2);
+  --vivid-theme-surface-3: var(--vivid-color-surface-3);
+  --vivid-theme-text-primary: var(--vivid-color-text-primary);
+  --vivid-theme-text-secondary: var(--vivid-color-text-secondary);
+  --vivid-theme-text-muted: var(--vivid-color-text-muted);
+  --vivid-theme-accent: var(--vivid-color-accent);
+  --vivid-theme-border: var(--vivid-color-border);
+}
+html[data-vivid-theme="light"] {
+  color-scheme: light;
+  --vivid-theme-background: #f2f4f7;
+  --vivid-theme-surface-1: #e9ecf1;
+  --vivid-theme-surface-2: #ffffff;
+  --vivid-theme-surface-3: #f7f8fa;
+  --vivid-theme-text-primary: #10131a;
+  --vivid-theme-text-secondary: #59616d;
+  --vivid-theme-text-muted: #7a828e;
+  --vivid-theme-accent: #10131a;
+  --vivid-theme-border: rgba(20, 28, 40, .12);
+}
