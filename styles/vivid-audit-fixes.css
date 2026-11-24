@@ -1117,7 +1117,7 @@ html:not([data-vivid-theme="light"]) body.vivid-search-page .vivid-search-main{
 .vivid-library-shelf{touch-action:pan-x;}
 @media(max-width:640px){
   .vivid-v2-mobile-nav{background:rgba(20,20,23,.94)!important;border-top-color:#2c2c2e!important;backdrop-filter:blur(24px) saturate(125%);-webkit-backdrop-filter:blur(24px) saturate(125%);}
-  .vivid-v2-mobile-nav a[aria-current="page"],.vivid-v2-mobile-nav a.is-active{color:#0a84ff!important;}
+  .vivid-v2-mobile-nav :is(a[aria-current="page"],a.is-active,button[aria-current="page"],button[aria-expanded="true"]){color:#0a84ff!important;}
 }
 @media(prefers-reduced-motion:reduce){
   .vivid-library-continue-rail,
