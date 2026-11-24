@@ -88,6 +88,9 @@ test("design tokens define restrained cinematic surfaces, type, spacing and redu
   assert.match(tokens, /--vivid-color-background/);
   assert.match(tokens, /--vivid-color-surface-3/);
   assert.match(tokens, /--vivid-color-accent/);
+  assert.match(tokens, /--vivid-radius-lg/);
+  assert.match(tokens, /--vivid-focus-ring/);
+  assert.match(theme, /--vivid-theme-focus/);
   assert.match(typography, /--vivid-type-display/);
   assert.match(typography, /--vivid-type-page-title/);
   for (const value of ["4px", "8px", "12px", "16px", "24px", "32px", "48px", "64px", "96px"]) {
