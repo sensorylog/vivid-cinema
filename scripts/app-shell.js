@@ -289,14 +289,6 @@ function syncDesktopNavigation() {
   nav.classList.remove("vivid-v2-nav");
 }
 
-function isAndroidNativeRuntime() {
-  try {
-    return Boolean(window.Capacitor?.isNativePlatform?.() && window.Capacitor?.getPlatform?.() === "android");
-  } catch {
-    return false;
-  }
-}
-
 function syncMoreNavigation(nav, page) {
   const menu = document.createElement("div");
   menu.className = "vivid-native-more-menu";
