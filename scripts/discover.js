@@ -279,7 +279,7 @@ function renderResults(items, totalPages) {
     const meta = isPerson ? "Person" : [item.year, item.media_type === "tv" ? "TV" : "Movie"].filter(Boolean).join(" · ");
     const href = isPerson ? "person.html?id=" + encodeURIComponent(item.id) : getMediaUrl(item);
     const image = item.poster_path || item.profile_path;
-    return '<a class="vivid-discovery-card' + (isPerson ? ' vivid-discovery-card--person' : '') + '" href="' + escapeHtml(href) + '">' +
+    return '<a class="vivid-discovery-card' + (isPerson ? ' vivid-discovery-card--person' : ' vivid-card--poster') + '" href="' + escapeHtml(href) + '">' +
       '<div class="vivid-discovery-poster"><img loading="lazy" decoding="async" src="' + getImageUrl(image, "w500") +
       '" alt="' + escapeHtml(item.title) + ' poster" onerror="this.style.visibility=\'hidden\'">' +
       (!isPerson ? '<span class="vivid-discovery-rating">★ ' + (item.vote_average ? item.vote_average.toFixed(1) : "—") + '</span>' : '') +
