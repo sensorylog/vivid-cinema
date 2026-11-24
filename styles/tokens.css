@@ -16,6 +16,17 @@
   --vivid-color-success: #32d583;
   --vivid-color-danger: #ff5f56;
 
+  --vivid-radius-xs: 6px;
+  --vivid-radius-sm: 10px;
+  --vivid-radius-md: 14px;
+  --vivid-radius-lg: 20px;
+  --vivid-radius-xl: 28px;
+  --vivid-radius-pill: 999px;
+
+  --vivid-focus-outline-width: 2px;
+  --vivid-focus-outline-offset: 3px;
+  --vivid-focus-ring: 0 0 0 3px var(--vivid-color-focus);
+
   --vivid-elevation-1: 0 8px 24px rgba(0, 0, 0, .18);
   --vivid-elevation-2: 0 18px 50px rgba(0, 0, 0, .28);
   --vivid-elevation-3: 0 28px 90px rgba(0, 0, 0, .42);
