@@ -67,9 +67,10 @@ test("canonical design tokens are available to the app shell and public landing 
   const worker = read("../service-worker.js");
   const landing = read("../index.html");
   const tokenFiles = ["tokens", "typography", "spacing", "motion", "theme"];
+  assert.ok(shell.includes('const styles = ["tokens", "typography", "spacing", "motion", "theme"]'));
+  assert.ok(shell.includes("link.dataset.vividDesignSystem = name"));
+  assert.ok(shell.includes("link.href = `./styles/${name}.css?v=1`"));
   for (const name of tokenFiles) {
-    assert.ok(shell.includes(`"./styles/${name}.css?v=1"`));
-    assert.ok(shell.includes("link.dataset.vividDesignSystem = name"));
     assert.ok(worker.includes(`styles/${name}.css?v=1`));
     assert.ok(landing.includes(`styles/${name}.css?v=1`));
     assert.ok(landing.includes(`data-vivid-design-system="${name}"`));
