@@ -83,7 +83,7 @@ test("App Check initializes lazily instead of triggering verification on every p
 });
 
 test("service worker cache version changes with the Cloudflare AI client", () => {
-  assert.match(workerSource, /vivid-cinema-shell-v301/);
+  assert.match(workerSource, /vivid-cinema-shell-v302/);
   assert.match(workerSource, /scripts\/cloudflare-ai\.js/);
 });
 
