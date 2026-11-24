@@ -675,6 +675,18 @@ function initCinematicFocusNavigation() {
   }, true);
 }
 
+function ensureDesignSystemStyles() {
+  const styles = ["tokens", "typography", "spacing", "motion", "theme"];
+  styles.forEach(name => {
+    if (document.querySelector(`link[data-vivid-design-system="${name}"]`)) return;
+    const link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href = `./styles/${name}.css?v=1`;
+    link.dataset.vividDesignSystem = name;
+    document.head.appendChild(link);
+  });
+}
+
 function ensureMediaLayoutStyles() {
   if (!document.querySelector('link[data-vivid-media-layout]')) {
     const link = document.createElement("link");
@@ -728,6 +740,7 @@ function initAppShell() {
   if (initialized) return;
   initialized = true;
 
+  ensureDesignSystemStyles();
   ensureMediaLayoutStyles();
   setStandaloneExperience();
   document.body.classList.add("vivid-app-experience");
