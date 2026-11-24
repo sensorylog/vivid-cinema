@@ -220,7 +220,7 @@ function buildPrimaryLinks(page) {
     navLink("live.html", "bi-broadcast-pin", "Live", page === "live"),
     navLink("community.html", "bi-chat-square-heart", "Community", page === "community"),
     navLink("library.html", "bi-bookmark-fill", "Library", page === "library"),
-    navLink("account.html", "bi-person-circle", "Profile", page === "account")
+    '<a id="auth-link" class="vivid-nav-profile" href="account.html" aria-label="Open profile"><i class="bi bi-person-circle" aria-hidden="true"></i><span>Profile</span></a>'
   ].join("");
 }
 
@@ -280,14 +280,6 @@ function syncDesktopNavigation() {
     tools.appendChild(alerts);
   }
   nav.appendChild(tools);
-
-  const account = document.createElement("a");
-  account.className = "vivid-nav-account";
-  account.id = "auth-link";
-  account.href = "account.html";
-  account.setAttribute("aria-label", "Open profile");
-  account.innerHTML = '<i class="bi bi-person-fill" aria-hidden="true"></i><span>Profile</span>';
-  nav.appendChild(account);
 
   const language = document.createElement("div");
   language.className = "vivid-nav-language-slot";
