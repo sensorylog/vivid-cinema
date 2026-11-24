@@ -1,6 +1,7 @@
 const AD_CONFIG = Object.freeze({
   enabled: true,
   nativeBanner: true,
+  maxNativeRequestsPerSession: 2,
   // Social Bar can deliver overlays/interstitials controlled by the ad network.
   // Keep it off until the publisher account is confirmed to use non-blocking formats.
   socialBar: false,
@@ -26,10 +27,10 @@ function currentPage() {
     location.pathname.split("/").pop()?.replace(/\.html$/i, "") || "home";
 }
 
-function createNativePlacement() {
+function nativeRequestCount() {\n  try { return Number(sessionStorage.getItem("vivid:native-ad-requests") || 0) || 0; }\n  catch { return 0; }\n}\n\nfunction createNativePlacement() {
   const page = currentPage();
   const placement = PAGE_PLACEMENTS[page];
-  if (!AD_CONFIG.enabled || !AD_CONFIG.nativeBanner || !placement || EXCLUDED_PAGES.has(page)) return;
+  if (!AD_CONFIG.enabled || !AD_CONFIG.nativeBanner || !placement || EXCLUDED_PAGES.has(page)) return;\n  if (nativeRequestCount() >= AD_CONFIG.maxNativeRequestsPerSession) return;
   if (document.getElementById("vivid-native-ad-slot")) return;
 
   const anchor = document.querySelector(placement.selector);
@@ -48,7 +49,7 @@ function createNativePlacement() {
 
   const load = () => {
     if (!slot.isConnected || slot.dataset.adRequested === "true") return;
-    slot.dataset.adRequested = "true";
+    slot.dataset.adRequested = "true";\n    try { sessionStorage.setItem("vivid:native-ad-requests", String(nativeRequestCount() + 1)); } catch {}
     const surface = slot.querySelector(".vivid-ad-slot__surface");
     if (!surface) return;
     const container = document.createElement("div");
