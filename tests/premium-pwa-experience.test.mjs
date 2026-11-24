@@ -72,6 +72,7 @@ test("canonical design tokens are available to the app shell and public landing 
     assert.ok(shell.includes("link.dataset.vividDesignSystem = name"));
     assert.ok(worker.includes(`styles/${name}.css?v=1`));
     assert.ok(landing.includes(`styles/${name}.css?v=1`));
+    assert.ok(landing.includes(`data-vivid-design-system="${name}"`));
     assert.ok(read(`../styles/${name}.css`).length > 100);
   }
   assert.match(worker, /vivid-cinema-shell-v301/);
