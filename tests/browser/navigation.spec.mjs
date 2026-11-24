@@ -73,7 +73,7 @@ test("mobile navigation stays within five destinations and exposes secondary rou
   const moreMenu = page.locator("#vivid-more-menu");
   await expect(moreMenu).toBeVisible();
   for (const href of ["discover.html", "anime.html", "community.html", "library.html", "account.html", "search.html", "watch-rooms.html"]) {
-    await expect(moreMenu.locator("a").filter({ has: page.locator("a[href='" + href + "']") })).toHaveCount(1);
+    await expect(moreMenu.locator("a[href='" + href + "']")).toHaveCount(1);
   }
   await page.setViewportSize({ width: 1440, height: 900 });
   await expect(page.locator(".vivid-navlinks a")).toHaveCount(8);
