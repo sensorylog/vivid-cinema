@@ -1886,14 +1886,16 @@ body.vivid-atmosphere :is(
   .vivid-discovery-nav,
   .vivid-library-nav,
   .vivid-title-nav,
-  .vivid-watch-nav
+  .vivid-watch-nav,
+  .vivid-legal-nav
 ),
 .vivid-topbar,
 .vivid-unified-header,
 .vivid-discovery-nav,
 .vivid-library-nav,
 .vivid-title-nav,
-.vivid-watch-nav {
+ .vivid-watch-nav,
+.vivid-legal-nav {
   box-sizing: border-box !important;
   margin-block-start: 0 !important;
   padding-block-start: calc(var(--vivid-top-chrome-gap) + var(--vivid-top-safe-inset)) !important;
@@ -1903,13 +1905,14 @@ body.vivid-atmosphere :is(
   top: 0 !important;
 }
 @media (max-width: 700px) {
-  :root { --vivid-top-chrome-gap: 6px; }
+  :root { --vivid-top-chrome-gap: 8px; }
   .vivid-topbar,
   .vivid-unified-header,
   .vivid-discovery-nav,
   .vivid-library-nav,
   .vivid-title-nav,
-  .vivid-watch-nav {
+  .vivid-watch-nav,
+  .vivid-legal-nav {
     padding-inline-start: max(14px, env(safe-area-inset-left, 0px)) !important;
     padding-inline-end: max(14px, env(safe-area-inset-right, 0px)) !important;
   }
