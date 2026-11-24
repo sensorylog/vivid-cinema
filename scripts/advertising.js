@@ -1,10 +1,8 @@
 const AD_CONFIG = Object.freeze({
   enabled: true,
   nativeBanner: true,
+  socialBar: true,
   maxNativeRequestsPerSession: 2,
-  // Social Bar can deliver overlays/interstitials controlled by the ad network.
-  // Keep it off until the publisher account is confirmed to use non-blocking formats.
-  socialBar: false,
   socialBarSrc: "https://bancadeltempoidea.org/14/51cedddacdb3782114144ec932519319",
   nativeBannerSrc: "https://bancadeltempoidea.org/21/ccca2189b46a42d139aaf46fcf6e4ca9",
   nativeContainerId: "container-ccca2189b46a42d139aaf46fcf6e4ca9"
@@ -27,10 +25,19 @@ function currentPage() {
     location.pathname.split("/").pop()?.replace(/\.html$/i, "") || "home";
 }
 
-function nativeRequestCount() {\n  try { return Number(sessionStorage.getItem("vivid:native-ad-requests") || 0) || 0; }\n  catch { return 0; }\n}\n\nfunction createNativePlacement() {
+function nativeRequestCount() {
+  try {
+    return Number(sessionStorage.getItem("vivid:native-ad-requests") || 0) || 0;
+  } catch {
+    return 0;
+  }
+}
+
+function createNativePlacement() {
   const page = currentPage();
   const placement = PAGE_PLACEMENTS[page];
-  if (!AD_CONFIG.enabled || !AD_CONFIG.nativeBanner || !placement || EXCLUDED_PAGES.has(page)) return;\n  if (nativeRequestCount() >= AD_CONFIG.maxNativeRequestsPerSession) return;
+  if (!AD_CONFIG.enabled || !AD_CONFIG.nativeBanner || !placement || EXCLUDED_PAGES.has(page)) return;
+  if (nativeRequestCount() >= AD_CONFIG.maxNativeRequestsPerSession) return;
   if (document.getElementById("vivid-native-ad-slot")) return;
 
   const anchor = document.querySelector(placement.selector);
@@ -49,7 +56,10 @@ function nativeRequestCount() {\n  try { return Number(sessionStorage.getItem("v
 
   const load = () => {
     if (!slot.isConnected || slot.dataset.adRequested === "true") return;
-    slot.dataset.adRequested = "true";\n    try { sessionStorage.setItem("vivid:native-ad-requests", String(nativeRequestCount() + 1)); } catch {}
+    slot.dataset.adRequested = "true";
+    try {
+      sessionStorage.setItem("vivid:native-ad-requests", String(nativeRequestCount() + 1));
+    } catch {}
     const surface = slot.querySelector(".vivid-ad-slot__surface");
     if (!surface) return;
     const container = document.createElement("div");
