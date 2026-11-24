@@ -1881,6 +1881,12 @@ body.vivid-atmosphere :is(
 .vivid-topbar {
   top: 0 !important;
 }
+/* Unified headers are in normal document flow; their content must start
+   immediately after the header, not after a second legacy spacer. */
+.vivid-unified-header + main,
+.vivid-unified-header ~ main {
+  padding-block-start: 0 !important;
+}
 @media (max-width: 700px) {
   :root { --vivid-top-chrome-gap: 8px; }
   .vivid-topbar,
