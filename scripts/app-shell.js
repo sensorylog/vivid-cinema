@@ -393,9 +393,9 @@ function syncAccountNavigation() {
         const destination = user ? "account.html" : "auth.html";
         document.querySelectorAll("#auth-link, [data-vivid-nav-auth], .vivid-nav-account, .vivid-nav-action").forEach((link) => {
           link.href = destination;
-          link.setAttribute("aria-label", user ? "Open account" : "Sign in");
+          link.setAttribute("aria-label", user ? "Open profile" : "Sign in");
           const label = link.querySelector("span");
-          if (label) label.textContent = "Account";
+          if (label) label.textContent = user ? "Profile" : "Sign in";
         });
         window.dispatchEvent(new CustomEvent("vivid:auth-ready", { detail: user }));
       });
