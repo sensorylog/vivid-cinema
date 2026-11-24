@@ -317,7 +317,7 @@ function syncMoreNavigation(nav, page) {
   if (!more) return;
   const morePages = ["discover", "for-you", "anime", "community", "library", "downloads-library", "account", "news", "search", "watch-rooms"];
   more.setAttribute("aria-expanded", "false");
-  more.setAttribute("aria-haspopup", "true");
+  more.setAttribute("aria-haspopup", "menu");
   more.setAttribute("aria-label", "More destinations");
   more.setAttribute("aria-controls", menu.id);
   more.classList.toggle("is-active", morePages.includes(page));
