@@ -310,7 +310,7 @@ function syncMoreNavigation(nav, page) {
   ].join("");
   menu.querySelectorAll("a").forEach(link => {
     link.setAttribute("role", "menuitem");
-    link.tabIndex = -1;
+    link.tabIndex = 0;
   });
 
   const more = nav.querySelector("[data-vivid-more-navigation]");
@@ -335,9 +335,14 @@ function syncMoreNavigation(nav, page) {
     menu.hidden = !opening;
   });
   more.addEventListener("keydown", event => {
-    if (event.key !== "ArrowDown" || menu.hidden) return;
+    if (event.key !== "ArrowDown") return;
     event.preventDefault();
+    menu.hidden = false;
+    more.setAttribute("aria-expanded", "true");
     menu.querySelector("a")?.focus({ preventScroll: true });
+  });
+  nav.addEventListener("click", event => {
+    if (!event.target.closest("[data-vivid-more-navigation]")) closeMenu();
   });
   menu.addEventListener("click", event => {
     if (event.target.closest("a")) closeMenu();
