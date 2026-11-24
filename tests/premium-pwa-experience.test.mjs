@@ -4,16 +4,15 @@ import { readFileSync } from "node:fs";
 
 const read = path => readFileSync(new URL(path, import.meta.url), "utf8");
 
-test("premium PWA shell keeps all seven mobile destinations", () => {
+test("premium PWA shell keeps four direct mobile destinations and a More menu", () => {
   const shell = read("../scripts/app-shell.js");
   const mobileNav = shell.slice(shell.indexOf("function syncMobileNavigation()"), shell.indexOf("function syncNavigation()"));
-  assert.match(mobileNav, /navLink\("home\.html".*?"Home"/s);
-  assert.match(mobileNav, /navLink\("discover\.html".*?"Browse"/s);
-  assert.match(mobileNav, /navLink\("for-you\.html".*?"For You"/s);
-  assert.match(mobileNav, /navLink\("live\.html".*?"Live"/s);
-  assert.match(mobileNav, /navLink\("library\.html".*?"Library"/s);
-  assert.match(mobileNav, /navLink\("news\.html".*?"News"/s);
-  assert.match(mobileNav, /navLink\("search\.html".*?"Search"/s);
+  assert.match(mobileNav, /navLink\("home\\.html".*?"Home"/s);
+  assert.match(mobileNav, /navLink\("collection\\.html\\?collection=movies".*?"Movies"/s);
+  assert.match(mobileNav, /navLink\("collection\\.html\\?collection=tv".*?"Series"/s);
+  assert.match(mobileNav, /navLink\("live\\.html".*?"Live"/s);
+  assert.match(mobileNav, /data-vivid-more-navigation/);
+  assert.equal((mobileNav.match(/navLink\(/g) || []).length, 4);
   assert.ok(mobileNav.includes(`.join("")`));
 });
 
