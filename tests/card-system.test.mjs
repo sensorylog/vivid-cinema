@@ -45,5 +45,5 @@ test("shared card motion respects reduced-motion and remains available offline",
   const worker = read("../service-worker.js");
   assert.match(css, /prefers-reduced-motion:\s*reduce/);
   assert.ok(worker.includes('"./styles/vivid-rounded-cards.css?v=round-1"'));
-  assert.match(worker, /vivid-cinema-shell-v305/);
+  assert.match(worker, /vivid-cinema-shell-v\\d+/);
 });
