@@ -91,7 +91,7 @@ function reminderMarkup(s) {
 }
 function card(s, compact = false) {
   const meta = s.when ? releaseLanguage(s.when) : (s.media_type === "tv" ? "TV series" : "Movie");
-  return '<article class="vivid-news-card ' + (compact ? "is-compact" : "") + '">' +
+  return '<article class="vivid-news-card vivid-card--news ' + (compact ? "is-compact" : "") + '">' +
     '<a class="vivid-news-image" href="' + escapeHtml(hrefFor(s)) + '">' +
       '<img src="' + getImageUrl(s.backdrop_path || s.poster_path, compact ? "w500" : "w780") + '" alt="' + escapeHtml(s.title) + '" loading="lazy" decoding="async">' +
       '<span>' + escapeHtml(s.label) + '</span>' +
