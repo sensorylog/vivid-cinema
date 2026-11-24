@@ -1,0 +1,50 @@
+.vivid-ad-slot {
+  position: relative;
+  width: min(100% - 32px, 1440px);
+  min-height: 0;
+  margin: clamp(28px, 4vw, 52px) auto;
+  color: #f2f2f2;
+  contain: layout style;
+}
+.vivid-ad-slot__label {
+  margin: 0 0 10px 2px;
+  color: rgba(226, 232, 242, .58);
+  font: 700 10px/1.2 system-ui, sans-serif;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+}
+.vivid-ad-slot__surface {
+  position: relative;
+  display: grid;
+  width: 100%;
+  min-height: clamp(74px, 18vw, 180px);
+  max-height: 220px;
+  overflow: hidden;
+  place-items: center;
+  border: 1px solid rgba(255,255,255,.075);
+  border-radius: 18px;
+  background: linear-gradient(115deg, rgba(255,255,255,.045), rgba(255,255,255,.018));
+}
+.vivid-native-ad-container {
+  width: 100%;
+  min-height: inherit;
+  max-height: inherit;
+  overflow: hidden;
+  color: #f2f2f2;
+}
+.vivid-native-ad-container > script { display: none !important; }
+.vivid-ad-slot__loading {
+  width: 34px;
+  height: 3px;
+  border-radius: 4px;
+  background: linear-gradient(90deg, rgba(255,255,255,.12), rgba(255,255,255,.48), rgba(255,255,255,.12));
+  opacity: .6;
+}
+.vivid-ad-slot.is-unavailable { display: none; }
+@media (max-width: 640px) {
+  .vivid-ad-slot { width: calc(100% - 28px); margin: 24px auto 30px; }
+  .vivid-ad-slot__surface { min-height: 76px; max-height: 156px; border-radius: 14px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .vivid-ad-slot__loading { background: rgba(255,255,255,.2); }
+}

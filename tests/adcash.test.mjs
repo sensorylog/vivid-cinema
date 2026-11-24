@@ -20,3 +20,20 @@ test("Adcash ads are disabled from the shared app shell and service worker", asy
   assert.doesNotMatch(headers, /acscdn\.com/i);
   assert.doesNotMatch(firebase, /acscdn\.com/i);
 });
+
+
+test("Adsterra placements stay isolated to browsing surfaces and defer native loading", async () => {
+  const advertising = await readFile(path.join(root, "scripts", "advertising.js"), "utf8");
+  const style = await readFile(path.join(root, "styles", "vivid-advertising.css"), "utf8");
+  const protectedPages = ["watch.html", "live.html", "watch-rooms.html", "login.html", "auth.html"];
+  for (const page of protectedPages) {
+    const html = await readFile(path.join(root, page), "utf8");
+    assert.doesNotMatch(html, /scripts\/advertising\.js|vivid-advertising\.css/);
+  }
+  assert.match(advertising, /socialBar: false/);
+  assert.match(advertising, /IntersectionObserver/);
+  assert.match(advertising, /fetchpriority", "low"/);
+  assert.match(advertising, /EXCLUDED_PAGES/);
+  assert.match(advertising, /Sponsored/);
+  assert.match(style, /max-height/);
+});
