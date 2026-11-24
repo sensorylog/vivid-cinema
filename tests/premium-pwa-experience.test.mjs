@@ -21,6 +21,13 @@ test("mobile navigation distributes all five destinations across the full bar", 
   assert.match(css, /\.vivid-mobile-nav\.vivid-v2-mobile-nav\s*\{[^}]*display:\s*grid/s);
   assert.match(css, /grid-template-columns:\s*repeat\(5,\s*minmax\(0,\s*1fr\)\)/);
   assert.match(css, /justify-content:\s*stretch/);
+  const glass = read("../styles/vivid-liquid-glass.css");
+  assert.match(glass, /grid-template-columns:\s*repeat\(5,\s*minmax\(0,\s*1fr\)\)/);
+  assert.match(glass, /\.vivid-mobile-nav :is\(a, button\)/);
+  const premium = read("../styles/vivid-premium-experience.css");
+  assert.match(premium, /grid-template-columns:\s*repeat\(5,minmax\(0,1fr\)\)/);
+  assert.doesNotMatch(premium, /grid-template-columns:\s*repeat\(5/);
+  assert.match(premium, /:is\(a, button\)/);
 });
 
 test("premium PWA experience styles are loaded globally and respect reduced motion", () => {
@@ -32,7 +39,7 @@ test("premium PWA experience styles are loaded globally and respect reduced moti
   assert.match(worker, /vivid-cinema-shell-v\d+/);
   assert.match(worker, /vivid-premium-experience\.css\?v=2/);
   assert.match(css, /@view-transition\s*\{\s*navigation:\s*auto;/);
-  assert.match(css, /grid-template-columns:\s*repeat\(7/);
+  assert.match(css, /grid-template-columns:\s*repeat\(5/);
   assert.match(css, /aria-current="page"/);
   assert.match(css, /prefers-reduced-motion:\s*reduce/);
 });
