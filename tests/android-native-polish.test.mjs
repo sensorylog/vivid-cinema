@@ -30,7 +30,7 @@ test("native-only styling is injected into the generated bundle, not source HTML
 test("native styling covers safe areas, touch targets, and accessible focus", () => {
   assert.match(nativeCss, /env\(safe-area-inset-bottom/);
   assert.match(nativeCss, /html\.vivid-native-app body/);
-  assert.match(nativeCss, /min-height:\s*44px/);
+  assert.match(shellCss, /min-height:\s*62px/);
   assert.match(nativeCss, /font-size:\s*16px/);
   assert.doesNotMatch(nativeCss, /touch-action:\s*pan-x\s+pan-y\s*;/, "native shell must not disable pinch-to-zoom");
   assert.match(nativeCss, /:focus-visible/);
@@ -55,9 +55,9 @@ test("Android mobile navigation uses five accessible primary tabs and a secondar
   assert.match(appShell, /navLink\("for-you\.html"/);
   assert.match(appShell, /navLink\("library\.html"/);
   assert.match(appShell, /navLink\("watch-rooms\.html"/);
-  assert.match(nativeCss, /grid-template-columns:\s*repeat\(5,\s*minmax\(0,\s*1fr\)\)/);
-  assert.match(nativeCss, /\.vivid-native-more-menu\[hidden\]/);
-  assert.match(nativeCss, /min-height:\s*50px/);
+  assert.match(shellCss, /justify-content:\s*space-around/);
+  assert.match(shellCss, /\.vivid-native-more-menu\[hidden\]/);
+  assert.match(shellCss, /min-height:\s*62px/);
 });
 
 test("Capacitor remains configured for the Vivid Cinema app", () => {
