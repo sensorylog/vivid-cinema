@@ -80,4 +80,7 @@ test("mobile navigation stays within five destinations and exposes secondary rou
   for (const href of ["collection.html?collection=movies", "collection.html?collection=tv", "anime.html", "live.html", "community.html", "library.html"]) {
     await expect(page.locator(".vivid-navlinks a[href='" + href + "']")).toHaveCount(1);
   }
+  const profileLink = page.locator(".vivid-navlinks #auth-link");
+  await expect(profileLink).toHaveCount(1);
+  await expect(profileLink).toHaveAttribute("href", /(?:auth|account)\\.html$/);
 });
