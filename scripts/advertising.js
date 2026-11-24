@@ -66,7 +66,7 @@ function createNativePlacement() {
       slot.classList.add("is-unavailable");
       slot.setAttribute("aria-hidden", "true");
     };
-    container.append(script);
+    surface.append(script);
     slot.dataset.adState = "requested";
   };
 
