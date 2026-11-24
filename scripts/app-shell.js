@@ -220,7 +220,7 @@ function buildPrimaryLinks(page) {
     navLink("live.html", "bi-broadcast-pin", "Live", page === "live"),
     navLink("community.html", "bi-chat-square-heart", "Community", page === "community"),
     navLink("library.html", "bi-bookmark-fill", "Library", page === "library"),
-    '<a id="auth-link" class="vivid-nav-profile" href="account.html" aria-label="Open profile"><i class="bi bi-person-circle" aria-hidden="true"></i><span>Profile</span></a>'
+    '<a id="auth-link" class="vivid-nav-profile" href="account.html" aria-label="Open profile"' + (page === "account" ? ' aria-current="page"' : '') + '><i class="bi bi-person-circle" aria-hidden="true"></i><span>Profile</span></a>'
   ].join("");
 }
 
