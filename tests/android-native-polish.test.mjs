@@ -9,9 +9,10 @@ import { resolveAndroidBackAction } from "../scripts/android-navigation.js";
 import { getCloudflareApiUrl } from "../scripts/cloudflare-api.js";
 import { applyPerformanceProfile, isLegacyPerformanceDevice } from "../scripts/performance-profile.js";
 
-const [builder, nativeCss, capacitorConfig, nativeConfigurator, appShell, nativeNavigation, nativeWebChrome] = await Promise.all([
+const [builder, nativeCss, shellCss, capacitorConfig, nativeConfigurator, appShell, nativeNavigation, nativeWebChrome] = await Promise.all([
   readFile(new URL("../automation/build-static-dist.mjs", import.meta.url), "utf8"),
   readFile(new URL("../styles/vivid-native-app.css", import.meta.url), "utf8"),
+  readFile(new URL("../styles/vivid-shell.css", import.meta.url), "utf8"),
   readFile(new URL("../capacitor.config.json", import.meta.url), "utf8"),
   readFile(new URL("../automation/configure-android-native-project.mjs", import.meta.url), "utf8"),
   readFile(new URL("../scripts/app-shell.js", import.meta.url), "utf8"),
