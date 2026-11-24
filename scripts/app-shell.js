@@ -294,8 +294,9 @@ function syncMoreNavigation(nav, page) {
   menu.className = "vivid-native-more-menu";
   menu.id = "vivid-more-menu";
   menu.hidden = true;
-  menu.setAttribute("role", "group");
+  menu.setAttribute("role", "menu");
   menu.setAttribute("aria-label", "More destinations");
+  menu.tabIndex = -1;
   menu.innerHTML = [
     navLink("discover.html", "bi-compass", "Discover", page === "discover"),
     navLink("for-you.html", "bi-stars", "For You", page === "for-you"),
@@ -307,37 +308,64 @@ function syncMoreNavigation(nav, page) {
     navLink("search.html", "bi-search", "Search", page === "search"),
     navLink("watch-rooms.html", "bi-people-fill", "Watch Rooms", page === "watch-rooms")
   ].join("");
+  menu.querySelectorAll("a").forEach(link => {
+    link.setAttribute("role", "menuitem");
+    link.tabIndex = -1;
+  });
 
   const more = nav.querySelector("[data-vivid-more-navigation]");
   if (!more) return;
   const morePages = ["discover", "for-you", "anime", "community", "library", "downloads-library", "account", "news", "search", "watch-rooms"];
   more.setAttribute("aria-expanded", "false");
   more.setAttribute("aria-haspopup", "true");
+  more.setAttribute("aria-label", "More destinations");
   more.setAttribute("aria-controls", menu.id);
   more.classList.toggle("is-active", morePages.includes(page));
   if (morePages.includes(page)) more.setAttribute("aria-current", "page");
   else more.removeAttribute("aria-current");
+
+  const closeMenu = (restoreFocus = false) => {
+    menu.hidden = true;
+    more.setAttribute("aria-expanded", "false");
+    if (restoreFocus) more.focus({ preventScroll: true });
+  };
   more.addEventListener("click", () => {
     const opening = more.getAttribute("aria-expanded") !== "true";
     more.setAttribute("aria-expanded", String(opening));
     menu.hidden = !opening;
   });
+  more.addEventListener("keydown", event => {
+    if (event.key !== "ArrowDown" || menu.hidden) return;
+    event.preventDefault();
+    menu.querySelector("a")?.focus({ preventScroll: true });
+  });
   menu.addEventListener("click", event => {
-    if (!event.target.closest("a")) return;
-    menu.hidden = true;
-    more.setAttribute("aria-expanded", "false");
+    if (event.target.closest("a")) closeMenu();
+  });
+  menu.addEventListener("keydown", event => {
+    const items = [...menu.querySelectorAll('a[role="menuitem"]')];
+    const current = items.indexOf(document.activeElement);
+    if (event.key === "Escape") {
+      event.preventDefault();
+      closeMenu(true);
+      return;
+    }
+    let next = -1;
+    if (event.key === "ArrowDown") next = (current + 1) % items.length;
+    else if (event.key === "ArrowUp") next = (current - 1 + items.length) % items.length;
+    else if (event.key === "Home") next = 0;
+    else if (event.key === "End") next = items.length - 1;
+    if (next < 0 || !items.length) return;
+    event.preventDefault();
+    items[next].focus({ preventScroll: true });
   });
   document.addEventListener("click", event => {
     if (nav.contains(event.target) || menu.contains(event.target)) return;
-    menu.hidden = true;
-    more.setAttribute("aria-expanded", "false");
+    closeMenu();
   });
   document.addEventListener("keydown", event => {
-    const openMenu = document.querySelector(".vivid-native-more-menu:not([hidden])");
-    if (event.key !== "Escape" || !openMenu) return;
-    openMenu.hidden = true;
-    more.setAttribute("aria-expanded", "false");
-    more.focus({ preventScroll: true });
+    if (event.key !== "Escape" || menu.hidden) return;
+    closeMenu(true);
   });
   document.body.appendChild(menu);
 }
@@ -357,7 +385,7 @@ function syncMobileNavigation() {
     navLink("collection.html?collection=movies", "bi-film", "Movies", isCollectionType("movies")),
     navLink("collection.html?collection=tv", "bi-tv", "Series", isCollectionType("tv")),
     navLink("live.html", "bi-broadcast-pin", "Live", page === "live"),
-    '<button type="button" data-vivid-more-navigation><i class="bi bi-three-dots" aria-hidden="true"></i><span>More</span></button>'
+    '<button type="button" data-vivid-more-navigation aria-label="More destinations"><i class="bi bi-three-dots" aria-hidden="true"></i><span>More</span></button>'
   ].join("");
   syncMoreNavigation(nav, page);
   nav.classList.add("vivid-v2-mobile-nav");
