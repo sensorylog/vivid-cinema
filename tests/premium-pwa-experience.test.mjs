@@ -97,7 +97,7 @@ test("canonical design tokens are available to the app shell and public landing 
     assert.ok(landing.includes(`data-vivid-design-system="${name}"`));
     assert.ok(read(`../styles/${name}.css`).length > 100);
   }
-  assert.match(worker, /vivid-cinema-shell-v305/);
+  assert.match(worker, /vivid-cinema-shell-v306/);
   assert.ok(worker.includes("vivid-rounded-cards.css?v=round-1"));
 });
 
@@ -120,4 +120,17 @@ test("design tokens define restrained cinematic surfaces, type, spacing and redu
   }
   assert.match(motion, /prefers-reduced-motion:\s*reduce/);
   assert.match(theme, /data-vivid-theme="light"/);
+});
+
+test("all Vivid top navigation uses one safe-area inset without external top margins", () => {
+  const css = read("../styles/vivid-audit-fixes.css");
+  assert.match(css, /--vivid-top-safe-inset:\s*env\(safe-area-inset-top,\s*0px\)/);
+  assert.match(css, /padding-block-start:\s*calc\(var\(--vivid-top-chrome-gap\) \+ var\(--vivid-top-safe-inset\)\)/);
+  assert.match(css, /margin-block-start:\s*0\s*!important/);
+  assert.match(css, /\.vivid-topbar\s*\{\s*top:\s*0\s*!important/);
+  assert.doesNotMatch(css, /margin-top:\s*max\(10px,\s*env\(safe-area-inset-top/);
+  for (const path of ["../home.html", "../index.html", "../discover.html", "../collection.html"]) {
+    const html = read(path);
+    assert.match(html, /viewport-fit=cover/, path + " must opt into safe-area layout");
+  }
 });
