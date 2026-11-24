@@ -7,10 +7,10 @@ const read = path => readFileSync(new URL(path, import.meta.url), "utf8");
 test("premium PWA shell keeps four direct mobile destinations and a More menu", () => {
   const shell = read("../scripts/app-shell.js");
   const mobileNav = shell.slice(shell.indexOf("function syncMobileNavigation()"), shell.indexOf("function syncNavigation()"));
-  assert.match(mobileNav, /navLink\("home\\.html".*?"Home"/s);
-  assert.match(mobileNav, /navLink\("collection\\.html\\?collection=movies".*?"Movies"/s);
-  assert.match(mobileNav, /navLink\("collection\\.html\\?collection=tv".*?"Series"/s);
-  assert.match(mobileNav, /navLink\("live\\.html".*?"Live"/s);
+  assert.ok(mobileNav.includes('navLink("home.html", "bi-house-fill", "Home"'));
+  assert.ok(mobileNav.includes('navLink("collection.html?collection=movies", "bi-film", "Movies"'));
+  assert.ok(mobileNav.includes('navLink("collection.html?collection=tv", "bi-tv", "Series"'));
+  assert.ok(mobileNav.includes('navLink("live.html", "bi-broadcast-pin", "Live"'));
   assert.match(mobileNav, /data-vivid-more-navigation/);
   assert.equal((mobileNav.match(/navLink\(/g) || []).length, 4);
   assert.ok(mobileNav.includes(`.join("")`));
