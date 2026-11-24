@@ -763,7 +763,7 @@ function recommendationCards() {
   const list = items.length ? items : fallback;
   return list.length
     ? list.map(item =>
-        '<a class="vivid-watch-rec-card" href="' + escapeHtml(getMediaUrl(item)) + '">' +
+        '<a class="vivid-watch-rec-card vivid-card--poster" href="' + escapeHtml(getMediaUrl(item)) + '">' +
           '<img loading="lazy" src="' + getImageUrl(item.poster_path, "w342") + '" alt="' + escapeHtml(item.title) + '">' +
           '<strong>' + escapeHtml(item.title) + '</strong>' +
           '<small>★ ' + (item.vote_average ? item.vote_average.toFixed(1) : "—") + '</small>' +
