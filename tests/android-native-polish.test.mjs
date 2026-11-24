@@ -42,7 +42,7 @@ test("native styling covers safe areas, touch targets, and accessible focus", ()
 });
 
 test("Android mobile navigation uses five accessible primary tabs and a secondary More menu", () => {
-  assert.match(appShell, /function isAndroidNativeRuntime\(\)/);
+  assert.match(appShell, /function syncMobileNavigation\(\)/);
   assert.match(appShell, /data-vivid-more-navigation/);
   assert.match(appShell, /aria-expanded/);
   assert.match(appShell, /aria-controls/);
