@@ -35,6 +35,7 @@ test("community posts and news articles use their dedicated shared card contract
   assert.match(css, /\.vivid-card--news/);
   assert.match(read("../scripts/news-community.js"), /vivid-card--community/);
   assert.match(read("../scripts/news.js"), /vivid-card--news/);
+  assert.match(read("../scripts/news.js"), /vivid-news-search-card vivid-card--poster/);
   assert.match(read("../community.html"), /vivid-rounded-cards\.css/);
   assert.match(read("../news.html"), /vivid-rounded-cards\.css/);
 });
