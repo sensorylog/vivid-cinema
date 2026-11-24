@@ -30,7 +30,7 @@ test("native-only styling is injected into the generated bundle, not source HTML
 test("native styling covers safe areas, touch targets, and accessible focus", () => {
   assert.match(nativeCss, /env\(safe-area-inset-bottom/);
   assert.match(nativeCss, /html\.vivid-native-app body/);
-  assert.match(shellCss, /min-height:\s*62px/);
+  assert.match(nativeCss, /min-height:\s*44px/);
   assert.match(nativeCss, /font-size:\s*16px/);
   assert.doesNotMatch(nativeCss, /touch-action:\s*pan-x\s+pan-y\s*;/, "native shell must not disable pinch-to-zoom");
   assert.match(nativeCss, /:focus-visible/);
