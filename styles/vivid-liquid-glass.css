@@ -763,6 +763,7 @@ html[data-vivid-theme="light"] body.vivid-atmosphere :is(
     z-index: 1 !important;
     flex: none !important;
     width: 100% !important;
+    box-sizing: border-box !important;
     min-width: 0 !important;
     min-height: 48px !important;
     display: flex !important;
@@ -809,7 +810,10 @@ html[data-vivid-theme="light"] body.vivid-atmosphere :is(
     border: 0 !important;
     margin: 0 !important;
     cursor: pointer !important;
-    font: inherit !important;
+    font-family: inherit !important;
+    font-size: .58rem !important;
+    font-weight: 600 !important;
+    line-height: 1.1 !important;
     text-align: center !important;
     -webkit-tap-highlight-color: transparent !important;
   }
