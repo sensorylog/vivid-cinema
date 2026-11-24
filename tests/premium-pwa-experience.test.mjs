@@ -76,7 +76,7 @@ test("canonical design tokens are available to the app shell and public landing 
     assert.ok(landing.includes(`data-vivid-design-system="${name}"`));
     assert.ok(read(`../styles/${name}.css`).length > 100);
   }
-  assert.match(worker, /vivid-cinema-shell-v301/);
+  assert.match(worker, /vivid-cinema-shell-v302/);
 });
 
 test("design tokens define restrained cinematic surfaces, type, spacing and reduced motion", () => {
