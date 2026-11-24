@@ -1868,3 +1868,52 @@ html[data-vivid-theme="light"] select option:checked{background-color:#111216;co
 .landing-form{min-width:0;max-width:100%;box-sizing:border-box}
 .landing-email{min-width:0;max-width:100%;box-sizing:border-box}
 .landing-submit{flex-shrink:0}
+
+
+/* ==========================================================================
+   UNIVERSAL TOP SAFE-AREA STANDARD
+   One predictable header inset for iOS, Android, installed PWAs and browsers.
+   Devices without a sensor cutout resolve the env() inset to zero and retain
+   only the small optical spacing. Never add the safe inset as an outer margin.
+   ========================================================================== */
+:root {
+  --vivid-top-safe-inset: env(safe-area-inset-top, 0px);
+  --vivid-top-chrome-gap: 8px;
+}
+body.vivid-atmosphere :is(
+  .vivid-topbar,
+  .vivid-unified-header,
+  .vivid-discovery-nav,
+  .vivid-library-nav,
+  .vivid-title-nav,
+  .vivid-watch-nav
+),
+.vivid-topbar,
+.vivid-unified-header,
+.vivid-discovery-nav,
+.vivid-library-nav,
+.vivid-title-nav,
+.vivid-watch-nav {
+  box-sizing: border-box !important;
+  margin-block-start: 0 !important;
+  padding-block-start: calc(var(--vivid-top-chrome-gap) + var(--vivid-top-safe-inset)) !important;
+  scroll-margin-top: calc(72px + var(--vivid-top-safe-inset));
+}
+.vivid-topbar {
+  top: 0 !important;
+}
+@media (max-width: 700px) {
+  :root { --vivid-top-chrome-gap: 6px; }
+  .vivid-topbar,
+  .vivid-unified-header,
+  .vivid-discovery-nav,
+  .vivid-library-nav,
+  .vivid-title-nav,
+  .vivid-watch-nav {
+    padding-inline-start: max(14px, env(safe-area-inset-left, 0px)) !important;
+    padding-inline-end: max(14px, env(safe-area-inset-right, 0px)) !important;
+  }
+}
+@supports (padding-top: env(safe-area-inset-top)) {
+  html { scroll-padding-top: calc(72px + env(safe-area-inset-top, 0px)); }
+}
