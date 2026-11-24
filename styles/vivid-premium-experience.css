@@ -61,6 +61,7 @@ body.vivid-app-experience :where(a,button,[role="button"]):focus-visible {
     display: flex !important;
     flex: none !important;
     width: 100% !important;
+    box-sizing: border-box !important;
     flex-direction: column !important;
     align-items: center !important;
     justify-content: center !important;
