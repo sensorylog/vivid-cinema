@@ -304,18 +304,17 @@ function syncMoreNavigation(nav, page) {
   menu.hidden = true;
   menu.setAttribute("role", "group");
   menu.setAttribute("aria-label", "More destinations");
-  const destinations = [
-    ["discover.html", "bi-compass", "Discover", page === "discover"],
-    ["for-you.html", "bi-stars", "For You", page === "for-you"],
-    ["anime.html", "bi-stars", "Anime", page === "anime"],
-    ["community.html", "bi-chat-square-heart", "Community", page === "community"],
-    ["library.html", "bi-bookmark-fill", "Library", page === "library" || page === "downloads-library"],
-    ["account.html", "bi-person-circle", "Profile", page === "account"],
-    ["news.html", "bi-newspaper", "News", page === "news"],
-    ["search.html", "bi-search", "Search", page === "search"],
-    ["watch-rooms.html", "bi-people-fill", "Watch Rooms", page === "watch-rooms"]
-  ];
-  menu.innerHTML = destinations.map(([href, icon, label, active]) => navLink(href, icon, label, active)).join("");
+  menu.innerHTML = [
+    navLink("discover.html", "bi-compass", "Discover", page === "discover"),
+    navLink("for-you.html", "bi-stars", "For You", page === "for-you"),
+    navLink("anime.html", "bi-stars", "Anime", page === "anime"),
+    navLink("community.html", "bi-chat-square-heart", "Community", page === "community"),
+    navLink("library.html", "bi-bookmark-fill", "Library", page === "library" || page === "downloads-library"),
+    navLink("account.html", "bi-person-circle", "Profile", page === "account"),
+    navLink("news.html", "bi-newspaper", "News", page === "news"),
+    navLink("search.html", "bi-search", "Search", page === "search"),
+    navLink("watch-rooms.html", "bi-people-fill", "Watch Rooms", page === "watch-rooms")
+  ].join("");
 
   const more = nav.querySelector("[data-vivid-more-navigation]");
   if (!more) return;
@@ -342,8 +341,9 @@ function syncMoreNavigation(nav, page) {
     more.setAttribute("aria-expanded", "false");
   });
   document.addEventListener("keydown", event => {
-    if (event.key !== "Escape" || menu.hidden) return;
-    menu.hidden = true;
+    const openMenu = document.querySelector(".vivid-native-more-menu:not([hidden])");
+    if (event.key !== "Escape" || !openMenu) return;
+    openMenu.hidden = true;
     more.setAttribute("aria-expanded", "false");
     more.focus({ preventScroll: true });
   });
