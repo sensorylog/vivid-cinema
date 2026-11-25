@@ -46,6 +46,7 @@ test("only published titles with explicit authorized source records can play", (
   assert.equal(isAfricanSourcePlayable(title, source, { territory: "GH", now }), true);
   assert.equal(isAfricanSourcePlayable({ ...title, published: false }, source, { territory: "GH", now }), false);
   assert.equal(isAfricanSourcePlayable(title, { ...source, authorized: false }, { territory: "GH", now }), false);
+  assert.equal(isAfricanSourcePlayable(title, { ...source, provider: "unregistered" }, { territory: "GH", now }), false);
   assert.equal(isAfricanSourcePlayable(title, { ...source, authorization: { status: "pending" } }, { territory: "GH", now }), false);
   assert.equal(isAfricanSourcePlayable({ ...title, accessState: "discover_archive_record" }, source, { territory: "GH", now }), false);
 });
