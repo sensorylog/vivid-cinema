@@ -380,7 +380,7 @@ test("archive source records require explicit rights basis and evidence", async 
       playbackSources: [{
         sourceId: "archive-public-file", provider: "archive",
         archiveIdentifier: "ghana-archive-item-001", archiveFile: "film.mp4",
-        rightsBasis: "written_permission", enabled: true, evidenceRef: "permission-001"
+        rightsBasis: "public_domain", enabled: true, evidenceRef: "permission-001"
       }]
     }]
   };
