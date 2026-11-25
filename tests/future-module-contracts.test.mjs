@@ -69,52 +69,20 @@ test("retired community destinations are absent from shared navigation", () => {
   assert.doesNotMatch(moreBuilder, /watch-rooms|community/);
 });
 
-test("Watch Rooms private content waits for a non-anonymous Firebase user", () => {
+test("Retired Watch Rooms route is a noindex notice, not a private dashboard", () => {
   const page = readFileSync(new URL("../watch-rooms.html", import.meta.url), "utf8");
-  const moduleSource = readFileSync(new URL("../scripts/watch-rooms.js", import.meta.url), "utf8");
-  assert.ok(page.includes('id="watch-rooms-private"'));
-  assert.ok(page.includes('id="watch-rooms-loading"'));
-  assert.ok(moduleSource.includes("auth.authStateReady()"));
-  assert.ok(moduleSource.includes("user.isAnonymous"));
-  assert.ok(moduleSource.includes("auth.html?returnTo="));
-  assert.ok(moduleSource.includes("onAuthStateChanged(auth"));
-  const authSource = readFileSync(new URL("../scripts/auth.js", import.meta.url), "utf8");
-  assert.ok(authSource.includes("preservePostAuthDestination"));
+  assert.ok(page.includes('name="robots" content="noindex,follow"'));
+  assert.match(page, /Watch Rooms have ended/);
+  assert.doesNotMatch(page, /watch-rooms-private|watch-rooms-loading|scripts\/watch-rooms\.js/);
 });
-
-
-test("Watch Rooms dashboard exposes room creation, invitation entry and club management UI", () => {
+test("Retired Watch Rooms dashboard no longer exposes room or club creation UI", () => {
   const page = readFileSync(new URL("../watch-rooms.html", import.meta.url), "utf8");
-  const moduleSource = readFileSync(new URL("../scripts/watch-rooms.js", import.meta.url), "utf8");
-  const styles = readFileSync(new URL("../styles/vivid-watch-rooms.css", import.meta.url), "utf8");
-  for (const required of [
-    'data-open-dialog="create-room"',
-    'data-open-dialog="join-room"',
-    'data-open-dialog="create-club"',
-    'id="wr-create-room-dialog"',
-    'id="wr-join-room-dialog"',
-    'id="wr-create-club-dialog"',
-    'id="wr-panel-rooms"',
-    'id="wr-panel-clubs"',
-    'id="wr-room-count"',
-    'id="wr-club-detail"'
-  ]) assert.ok(page.includes(required), "missing Watch Rooms UI contract: " + required);
-  for (const required of [
-    'addEventListener("submit"',
-    "renderRoomPreviews()",
-    "renderClubPreviews()",
-    "renderClubDetail(selected)",
-    "user.isAnonymous",
-    "auth.authStateReady()",
-    "createWatchRoom",
-    "createCinemaClub",
-    "redeemWatchInvitation",
-    "loadDashboard(user)"
-  ]) assert.ok(moduleSource.includes(required), "missing Watch Rooms interaction contract: " + required);
-  assert.ok(styles.includes(".vivid-wr-dialog::backdrop"));
-  assert.ok(styles.includes("@media(max-width:760px)"));
+  assert.match(page, /Watch Rooms have ended/);
+  for (const retiredControl of ["data-open-dialog=\"create-room\"","data-open-dialog=\"join-room\"","data-open-dialog=\"create-club\"","wr-create-room-dialog","wr-join-room-dialog","wr-create-club-dialog"]) {
+    assert.ok(!page.includes(retiredControl), "retired control must not be active: " + retiredControl);
+  }
+  assert.doesNotMatch(page, /scripts\/watch-rooms\.js|watch-room-lobby\.js|watch-room-clubs\.js/);
 });
-
 test("Watch Rooms dashboard uses the authenticated server API rather than client Firestore reads", () => {
   const moduleSource = readFileSync(new URL("../scripts/watch-rooms.js", import.meta.url), "utf8");
   assert.ok(moduleSource.includes("callWatchRoomApi"));
@@ -150,24 +118,16 @@ test("Watch Rooms backend exposes trusted lifecycle operations and hashed invita
 });
 
 
-test("Watch Rooms Stage 4 exposes trusted lobby, queue, chat, reactions and host controls", () => {
+test("Retired Watch Rooms UI stays offline while legacy server contracts remain dormant", () => {
   const index = readFileSync(new URL("../api/watch-rooms.js", import.meta.url), "utf8");
-  const lobby = readFileSync(new URL("../api/watch-rooms.js", import.meta.url), "utf8");
   const page = readFileSync(new URL("../watch-rooms.html", import.meta.url), "utf8");
-  const client = readFileSync(new URL("../scripts/watch-room-lobby.js", import.meta.url), "utf8");
-  const rules = readFileSync(new URL("../firestore.rules", import.meta.url), "utf8");
-  for (const name of ["heartbeatWatchRoom","addWatchRoomQueueItem","voteWatchRoomQueueItem","sendWatchRoomMessage","reactToWatchRoomMessage","updateWatchRoomSettings","removeWatchRoomMember","closeWatchRoom"]) {
-    assert.ok(index.includes(name), "missing exported callable " + name);
-    assert.ok(lobby.includes("async function " + name + "("), "missing trusted callable implementation " + name);
+  for (const operation of ["heartbeatWatchRoom","addWatchRoomQueueItem","voteWatchRoomQueueItem","sendWatchRoomMessage","reactToWatchRoomMessage","updateWatchRoomSettings","removeWatchRoomMember","closeWatchRoom"]) {
+    assert.ok(index.includes(operation), "legacy server operation retained for dormant data handling: " + operation);
   }
-  for (const id of ["wr-room-lobby","wr-lobby-presence","wr-lobby-queue","wr-lobby-chat","wr-host-controls","wr-close-room","wr-queue-form","wr-chat-form"]) assert.ok(page.includes('id="' + id + '"'));
-  for (const callable of ["heartbeatWatchRoom","addWatchRoomQueueItem","voteWatchRoomQueueItem","sendWatchRoomMessage","reactToWatchRoomMessage","updateWatchRoomSettings","closeWatchRoom"]) assert.ok(client.includes('call("' + callable + '")'));
-  for (const path of ["presence","queue","chat"]) assert.ok(rules.includes("match /" + path + "/{"), "missing member-readable " + path + " rules");
-  assert.ok(lobby.includes("PRESENCE_TTL_MS"));
-  assert.ok(lobby.includes("MAX_INSTANCES") || lobby.includes("getAppCheck(firebaseApp).verifyToken"));
+  assert.ok(page.includes('name="robots" content="noindex,follow"'));
+  assert.match(page, /Watch Rooms have ended/);
+  assert.doesNotMatch(page, /watch-room-lobby\.js|watch-room-playback\.js/);
 });
-
-
 test("Watch Rooms Stage 5 exposes trusted VidSrc and CineSRC playback bridges", () => {
   const functions = readFileSync(new URL("../api/watch-rooms.js", import.meta.url), "utf8");
   const backend = readFileSync(new URL("../api/watch-rooms.js", import.meta.url), "utf8");
@@ -224,29 +184,19 @@ test("Watch Room playback invitation form only redeems room invitations", () => 
 });
 
 
-test("Cinema Club Stage 6 provides persistent watchlists, screening history and After-Credits", () => {
-  const index = readFileSync(new URL("../api/watch-rooms.js", import.meta.url), "utf8");
+test("Retired Cinema Clubs UI is not served while legacy records and rules remain", () => {
   const backend = readFileSync(new URL("../api/watch-rooms.js", import.meta.url), "utf8");
   const rules = readFileSync(new URL("../firestore.rules", import.meta.url), "utf8");
-  const client = readFileSync(new URL("../scripts/watch-room-clubs.js", import.meta.url), "utf8");
   const page = readFileSync(new URL("../watch-rooms.html", import.meta.url), "utf8");
-  for (const callable of ["addCinemaClubWatchlistItem","removeCinemaClubWatchlistItem","recordCinemaClubScreening","addCinemaClubAfterCreditsReview","addCinemaClubDiscussionMessage"]) {
-    assert.ok(index.includes(callable), "missing Stage 6 callable export: " + callable);
-    assert.ok(backend.includes("async function " + callable + "("), "missing trusted Stage 6 operation: " + callable);
+  for (const operation of ["addCinemaClubWatchlistItem","removeCinemaClubWatchlistItem","recordCinemaClubScreening","addCinemaClubAfterCreditsReview","addCinemaClubDiscussionMessage"]) {
+    assert.ok(backend.includes(operation), "dormant legacy operation retained: " + operation);
   }
-  assert.ok(backend.includes("requireClubMember(clubId, uid)"));
-  assert.ok(backend.includes("tx.get(clubRef.collection(\"members\").doc(uid))"));
   assert.ok(rules.includes("match /cinemaClubs/{clubId}/watchlist/{itemId}"));
   assert.ok(rules.includes("match /cinemaClubs/{clubId}/screenings/{screeningId}"));
-  assert.ok(rules.includes("match /afterCredits/{userId}"));
-  assert.ok(rules.includes("match /discussion/{messageId}"));
-  assert.ok(client.includes("vivid:cinema-club-selected"));
-  assert.ok(client.includes("addCinemaClubAfterCreditsReview"));
-  assert.ok(client.includes("addCinemaClubDiscussionMessage"));
-  assert.ok(page.includes('src="scripts/watch-room-clubs.js"'));
+  assert.ok(page.includes('name="robots" content="noindex,follow"'));
+  assert.match(page, /Watch Rooms have ended/);
+  assert.doesNotMatch(page, /watch-room-clubs\.js/);
 });
-
-
 test("Cinema Club writes re-check active club status inside their transactions", () => {
   const backend = readFileSync(new URL("../api/watch-rooms.js", import.meta.url), "utf8");
   for (const operation of ["removeCinemaClubWatchlistItem","addCinemaClubAfterCreditsReview","addCinemaClubDiscussionMessage"]) {
@@ -332,21 +282,18 @@ test("Watch Room chat has a transactional per-room volume ceiling", () => {
 });
 
 
-test("Watch Room guests can leave transactionally while hosts must close the room", () => {
+test("Dormant Watch Room guest-leave backend remains transactional after UI retirement", () => {
   const lobby = readFileSync(new URL("../api/watch-rooms.js", import.meta.url), "utf8");
   const index = readFileSync(new URL("../api/watch-rooms.js", import.meta.url), "utf8");
-  const client = readFileSync(new URL("../scripts/watch-room-lobby.js", import.meta.url), "utf8");
   const page = readFileSync(new URL("../watch-rooms.html", import.meta.url), "utf8");
   const leave = lobby.slice(lobby.indexOf("async function leaveWatchRoom"), lobby.indexOf("async function closeWatchRoom"));
   assert.ok(leave.includes("room.hostUid === uid || member.role === \"host\""));
   assert.ok(leave.includes("tx.delete(memberRef)") && leave.includes("tx.delete(pointerRef)"));
   assert.ok(leave.includes("memberCount: nextMemberCount"));
   assert.ok(index.includes("  leaveWatchRoom,"));
-  assert.ok(client.includes('call("leaveWatchRoom")'));
-  assert.ok(page.includes('id="wr-leave-room"'));
+  assert.ok(page.includes('name="robots" content="noindex,follow"'));
+  assert.match(page, /Watch Rooms have ended/);
 });
-
-
 test("Watch Rooms dashboard ignores stale account responses after authentication changes", () => {
   const client = readFileSync(new URL("../scripts/watch-rooms.js", import.meta.url), "utf8");
   assert.ok(client.includes("let dashboardLoadGeneration = 0"));
@@ -483,12 +430,12 @@ test("Watch Room creation never displays raw Firebase internal errors", () => {
 });
 
 
-test("Watch Rooms API client is included in the offline application shell", () => {
+test("Retired Watch Rooms API client is excluded from the offline application shell", () => {
   const worker = readFileSync(new URL("../service-worker.js", import.meta.url), "utf8");
-  assert.ok(worker.includes('"./scripts/watch-room-api.js"'));
+  assert.ok(!worker.includes('"./scripts/watch-room-api.js"'));
+  assert.ok(!worker.includes('"./scripts/watch-room-playback.js"'));
+  assert.ok(!worker.includes('"./watch-rooms.html"'));
 });
-
-
 test("Watch Rooms client sends Auth and standard App Check tokens to the trusted Cloudflare verifier", () => {
   const api = readFileSync(new URL("../scripts/watch-room-api.js", import.meta.url), "utf8");
   const route = readFileSync(new URL("../cloudflare/functions/api/watch-rooms.js", import.meta.url), "utf8");
@@ -533,30 +480,23 @@ test("Firebase App Check uses Cloudflare Turnstile through the supported custom-
 });
 
 
-test("Watch Room lobby shows real membership and requires a searchable catalogue pick", () => {
+test("Dormant Watch Room queue backend retains catalogue selection validation after UI retirement", () => {
   const lobby = readFileSync(new URL("../scripts/watch-room-lobby.js", import.meta.url), "utf8");
   const page = readFileSync(new URL("../watch-rooms.html", import.meta.url), "utf8");
-  const styles = readFileSync(new URL("../styles/vivid-watch-rooms.css", import.meta.url), "utf8");
   const api = readFileSync(new URL("../api/watch-rooms.js", import.meta.url), "utf8");
   const cloudflare = readFileSync(new URL("../cloudflare/functions/api/watch-rooms.js", import.meta.url), "utf8");
   assert.ok(lobby.includes('import { tmdbApi } from "./tmdb.js"'));
-  assert.ok(lobby.includes("tmdbApi.searchMulti(value, 1)"), "queue suggestions must search TMDB movies and TV");
-  assert.ok(lobby.includes("selectedPick"), "users must select a catalogue result before submitting");
-  assert.ok(lobby.includes("contentId: String(selectedPick.id)"), "queue writes must include the selected TMDB ID");
-  assert.ok(lobby.includes("memberList.length"), "the room count must represent members, not online heartbeats");
-  assert.ok(lobby.includes("member.displayName"), "the roster must show real member display names");
-  assert.ok(lobby.includes('call("heartbeatWatchRoom")'), "room presence heartbeat must remain active");
-  for (const id of ["wr-lobby-online-count", "wr-queue-search-results", "wr-queue-selection"]) {
-    assert.ok(page.includes('id="' + id + '"'), "missing lobby experience element " + id);
-  }
-  assert.ok(styles.includes(".vivid-wr-queue-item"));
+  assert.ok(lobby.includes("tmdbApi.searchMulti(value, 1)"));
+  assert.ok(lobby.includes("selectedPick"));
+  assert.ok(lobby.includes("contentId: String(selectedPick.id)"));
   for (const source of [api, cloudflare]) {
     const queue = source.slice(source.indexOf("async function addWatchRoomQueueItem"), source.indexOf("async function removeWatchRoomQueueItem"));
-    assert.ok(queue.includes("posterPath") && queue.includes("releaseDate"), "queue must retain selected title artwork and release year");
-    assert.ok(queue.includes("!/^\\d{1,12}$/.test(contentId)"), "queue must validate catalogue IDs");
+    assert.ok(queue.includes("posterPath") && queue.includes("releaseDate"));
+    assert.ok(queue.includes("!/^\\d{1,12}$/.test(contentId)"));
   }
+  assert.ok(page.includes('name="robots" content="noindex,follow"'));
+  assert.doesNotMatch(page, /watch-room-lobby\.js|wr-lobby-online-count|wr-queue-search-results/);
 });
-
 test("Watch Room lobby reads authoritative members, presence, queue and chat through the authenticated API", () => {
   const cloudflare = readFileSync(new URL("../cloudflare/functions/api/watch-rooms.js", import.meta.url), "utf8");
   const nodeApi = readFileSync(new URL("../api/watch-rooms.js", import.meta.url), "utf8");
@@ -675,7 +615,7 @@ test("Watch Room linked Cinema Clubs validate membership and record screenings a
   assert.ok(clubs.includes("data.sourceRoomName"));
 });
 
-test("Watch Room Step 6 enforces granular guest permissions in both trusted APIs and the lobby", () => {
+test("Dormant Watch Room APIs retain granular guest permission checks after UI retirement", () => {
   const node = readFileSync(new URL("../api/watch-rooms.js", import.meta.url), "utf8");
   const cloudflare = readFileSync(new URL("../cloudflare/functions/api/watch-rooms.js", import.meta.url), "utf8");
   const lobby = readFileSync(new URL("../scripts/watch-room-lobby.js", import.meta.url), "utf8");
@@ -684,24 +624,17 @@ test("Watch Room Step 6 enforces granular guest permissions in both trusted APIs
     assert.ok(backend.includes('member.role === "guest" && room.allowGuestPlayerSelection === true'));
     assert.ok(backend.includes("allowGuestQueueManagement !== true"));
     assert.ok(backend.includes("allowGuestVoting === false"));
-    assert.ok(backend.includes("allowGuestPlayerSelection",), "snapshot/settings expose player-selection permission");
+    assert.ok(backend.includes("allowGuestPlayerSelection"));
     assert.ok(backend.includes("allowGuestQueueManagement"));
   }
   for (const name of ["allowGuestQueue", "allowGuestChat", "allowGuestVoting", "allowGuestPlayerSelection", "allowGuestQueueManagement", "allowGuestPlaybackControl"]) {
-    assert.ok(html.includes('name="' + name + '"'));
     assert.ok(lobby.includes("form.elements." + name));
   }
   assert.ok(lobby.includes("settings.elements.allowGuestPlayerSelection"));
   assert.ok(lobby.includes("settings.elements.allowGuestPlaybackControl"));
-  assert.ok(lobby.includes("settings.dataset.dirty = \"true\""));
-  assert.ok(lobby.includes('settings.dataset.dirty === "true"'));
-  assert.ok(lobby.includes("room.allowGuestQueueManagement === true"));
-  assert.ok(lobby.includes("room.allowGuestVoting === false"));
-  assert.ok(lobby.includes("control.disabled = !queueAllowed"));
-  assert.ok(lobby.includes("control.disabled = !chatAllowed"));
+  assert.ok(html.includes('name="robots" content="noindex,follow"'));
+  assert.doesNotMatch(html, /name="allowGuestQueue"|watch-room-lobby\.js/);
 });
-
-
 test("Delegated playback control is opt-in and preserves the host as room owner", () => {
   const node = readFileSync(new URL("../api/watch-rooms.js", import.meta.url), "utf8");
   const cloudflare = readFileSync(new URL("../cloudflare/functions/api/watch-rooms.js", import.meta.url), "utf8");
@@ -830,14 +763,14 @@ test("Vivid legal and trust pages accurately describe current product practices"
   const accessibility = readFileSync(new URL("../accessibility.html", import.meta.url), "utf8");
   const pulse = readFileSync(new URL("../scripts/vivid-pulse.js", import.meta.url), "utf8");
   assert.ok(privacy.includes("does not create an anonymous Firebase account"));
-  assert.ok(privacy.includes("historical community, room and club records"));
+  assert.ok(privacy.includes("historical posts, messages, membership records, reports, room/club records"));
   assert.ok(privacy.includes("does not automatically remove every historical contribution"));
   assert.ok(privacy.includes("Formspree"));
   assert.ok(!privacy.includes("Adcash Autotag"));
   assert.ok(cookies.includes("does not intentionally load the previously evaluated Adcash Autotag"));
   assert.ok(!cookies.includes("Vivid uses Adcash Autotag"));
   assert.ok(terms.includes("Retired community features"));
-  assert.ok(terms.includes("solo playback"));
+  assert.ok(terms.includes("former community, Watch Rooms and Cinema Clubs experiences have been retired"));
   assert.ok(terms.includes("limited, non-exclusive permission"));
   assert.ok(contact.includes("https://formspree.io/f/mwpokaav"));
   assert.ok(contact.includes('name="_gotcha"'));

@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="theme-color" content="#08090c">
+  <title>African Stories Operations — Vivid Cinema</title>
+  <link rel="stylesheet" href="/styles/vivid-foundation.css">
+  <link rel="stylesheet" href="/styles/african-stories.css">
+</head>
+<body class="african-stories-page">
+  <main class="african-shell african-admin-shell">
+    <a class="african-back-link" href="/home.html">← Back to Vivid Cinema</a>
+    <header class="african-page-heading">
+      <span class="african-eyebrow">RESTRICTED OPERATIONS</span>
+      <h1>African Stories Console</h1>
+      <p>Draft catalogue records, publish reviewed metadata, maintain provider configuration and record title/version rights decisions. Every privileged action is re-authorized by the server.</p>
+    </header>
+    <section class="african-admin-panel">
+      <p id="african-admin-state" class="african-admin-state" role="status" aria-live="polite">Checking your Vivid account permissions…</p>
+      <div id="african-admin-controls" hidden>
+        <label for="african-admin-action">Operation</label>
+        <select id="african-admin-action">
+          <option value="saveAfricanWorkDraft">Save work draft — Editor</option>
+          <option value="publishAfricanWork">Publish public record — Publisher</option>
+          <option value="registerAfricanProvider">Register provider — Provider admin</option>
+          <option value="setAfricanRightsDecision">Set title/version rights decision — Rights admin</option>
+        </select>
+        <label for="african-admin-source-template">Playback source template</label>
+        <div class="african-admin-actions">
+          <select id="african-admin-source-template" aria-label="Playback source template">
+            <option value="">Choose a source template…</option>
+            <option value="youtube">Official YouTube embed</option>
+            <option value="vimeo">Official Vimeo embed</option>
+            <option value="dailymotion">Dailymotion embed (creator Player ID required)</option>
+            <option value="rumble">Rumble official embed</option>
+            <option value="peertube">PeerTube embed (reviewed instances only)</option>
+            <option value="archive">Internet Archive public file</option>
+          </select>
+          <button id="african-admin-insert-source" type="button" class="african-admin-secondary">Insert into first edition</button>
+        </div>
+        <p class="african-admin-state">Templates are examples, not playable titles. Replace every placeholder and attach a verifiable evidence reference before saving. Official platform sources require <code>watch_officially</code>; archive files require a documented rights basis.</p>
+        <label for="african-admin-payload">Request payload (JSON)</label>
+        <textarea id="african-admin-payload" rows="18" spellcheck="false" autocomplete="off">{
+  "workId": "example-work",
+  "work": {
+    "title": "Example title",
+    "workType": "documentary",
+    "productionCountries": ["Ghana"],
+    "originalLanguages": ["English"],
+    "versions": [{"versionId": "original-cut", "originalAudioLanguages": ["English"]}],
+    "sourceCitations": [{"label": "Primary catalogue record", "url": "https://example.org/catalogue"}],
+    "accessState": "archive_record"
+  }
+}</textarea>
+        <div class="african-admin-actions">
+          <button id="african-admin-submit" type="button">Run operation</button>
+          <button id="african-admin-format" type="button" class="african-admin-secondary">Format JSON</button>
+        </div>
+      </div>
+      <pre id="african-admin-result" class="african-admin-result" hidden></pre>
+    </section>
+    <p class="african-player-footnote">This console never grants itself permissions. Claims are assigned out-of-band by a trusted Firebase administrator. Private rights and provider records are never read directly by the browser.</p>
+  </main>
+  <script type="module" src="/scripts/app-shell.js"></script>
+  <script type="module" src="/scripts/african-stories/admin.js"></script>
+</body>
+</html>

@@ -239,3 +239,56 @@ test("discovery queue is private and publication is coupled to an article write"
   await assertSucceeds(getDoc(doc(env.unauthenticatedContext().firestore(), "articles", "queue-article-1")));
   await assertFails(updateDoc(queueRef, { status: "dismissed", reviewedAt: serverTimestamp(), reviewedBy: "mod-1", reviewNotes: "Trying to change published decision." }));
 });
+
+
+test("African Stories public catalogue projections are publicly readable and client read-only", async () => {
+  await env.withSecurityRulesDisabled(async context => {
+    await setDoc(doc(context.firestore(), "africanWorksPublic", "example-film"), {
+      workId: "example-film", title: "Example Film", accessState: "archive_record",
+      versions: [{ versionId: "original-cut" }]
+    });
+  });
+  const publicDb = env.unauthenticatedContext().firestore();
+  const memberDb = member("african-member");
+  await assertSucceeds(getDoc(doc(publicDb, "africanWorksPublic", "example-film")));
+  await assertFails(setDoc(doc(memberDb, "africanWorksPublic", "forged-film"), {
+    workId: "forged-film", title: "Forged Film", accessState: "stream_on_vivid"
+  }));
+  await assertFails(setDoc(doc(memberDb, "africanWorksPublic", "example-film"), {
+    workId: "example-film", title: "Overwritten", accessState: "archive_record"
+  }));
+});
+
+test("African Stories private rights, provider and session records are inaccessible even to custom-claim clients", async () => {
+  await env.withSecurityRulesDisabled(async context => {
+    const db = context.firestore();
+    await setDoc(doc(db, "africanWorkDrafts", "private-film"), { title: "Unpublished title" });
+    await setDoc(doc(db, "africanRightsGrants", "private-film__original-cut"), {
+      status: "approved", rightsApproved: true
+    });
+    await setDoc(doc(db, "africanProviderRegistryPrivate", "provider-one"), {
+      status: "active", agreementRef: "contract-private"
+    });
+    await setDoc(doc(db, "africanPlaybackSessions", "session-one"), {
+      userId: "rights-admin", status: "active"
+    });
+    await setDoc(doc(db, "africanAuditEvents", "event-one"), {
+      action: "rights_decision_approved"
+    });
+  });
+  const privileged = env.authenticatedContext("rights-admin", {
+    email_verified: true,
+    africanStoriesEditor: true,
+    africanStoriesPublisher: true,
+    africanStoriesRightsAdmin: true,
+    africanStoriesProviderAdmin: true
+  }).firestore();
+  await assertFails(getDoc(doc(privileged, "africanWorkDrafts", "private-film")));
+  await assertFails(getDoc(doc(privileged, "africanRightsGrants", "private-film__original-cut")));
+  await assertFails(getDoc(doc(privileged, "africanProviderRegistryPrivate", "provider-one")));
+  await assertFails(getDoc(doc(privileged, "africanPlaybackSessions", "session-one")));
+  await assertFails(getDoc(doc(privileged, "africanAuditEvents", "event-one")));
+  await assertFails(setDoc(doc(privileged, "africanRightsGrants", "forged-grant"), {
+    status: "approved", rightsApproved: true
+  }));
+});

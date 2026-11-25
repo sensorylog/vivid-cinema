@@ -27,6 +27,8 @@ export const VIVID_CONFIG = Object.freeze({
     library: "library.html",
     login: "login.html",
     signup: "auth.html",
-    account: "account.html"
+    account: "account.html",
+    africanStoriesWatch: "african-stories-watch.html",
+    africanStoriesAdmin: "african-stories-admin.html"
   })
 });

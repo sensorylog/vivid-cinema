@@ -3,8 +3,19 @@ const VIMEO_ID = /^[0-9]{6,15}$/;
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const ARCHIVE_ID = /^[A-Za-z0-9][A-Za-z0-9._-]{1,119}$/;
 const ARCHIVE_FILE = /^[A-Za-z0-9][A-Za-z0-9._ -]{0,239}$/;
-const PUBLIC_ARCHIVE_FORMATS = new Set(["MPEG4","h.264","H.264","WebM","Ogg Video","Ogg Video File"]);
-const FILMFLUX_ENDPOINT = "https://filmflux.app/api/public/trending?limit=20";
+const PUBLIC_ARCHIVE_FORMATS = new Set(["MPEG4","h.264","H.264","WebM","Ogg Video","Ogg Video File","M3U8","M3U8 Playlist"]);
+const ARCHIVE_RIGHTS_BASES = new Set(["public_domain","cc0","cc_by","cc_by_sa"]);
+const FILMFLUX_ENDPOINT = "https://filmflux.app/api/public/trending?limit=10";
+const PEERTUBE_ALLOWED_HOSTS = new Set(["framatube.org", "peer.tube"]);
+
+export const AFRICAN_PROVIDER_CAPABILITIES = Object.freeze({
+  youtube: Object.freeze({ type: "official_embed", controls: "provider_api", fallback: true }),
+  vimeo: Object.freeze({ type: "official_embed", controls: "provider_api", fallback: true }),
+  peertube: Object.freeze({ type: "official_embed", controls: "provider_api", fallback: true }),
+  dailymotion: Object.freeze({ type: "official_embed", controls: "provider_native", fallback: true }),
+  rumble: Object.freeze({ type: "official_embed", controls: "provider_native", fallback: true }),
+  archive: Object.freeze({ type: "public_file", controls: "html5", fallback: true })
+});
 
 function cleanText(value, max = 240) {
   return typeof value === "string" ? value.trim().slice(0, max) : "";
@@ -24,7 +35,7 @@ export function validateAfricanPlaybackSource(source) {
     throw new TypeError("This playback source is not enabled by the published catalogue.");
   }
   const provider = source.provider;
-  if (!["youtube","vimeo","peertube","archive","partner"].includes(provider)) {
+  if (!Object.hasOwn(AFRICAN_PROVIDER_CAPABILITIES, provider)) {
     throw new TypeError("Unsupported African Stories playback provider.");
   }
   const sourceId = cleanText(source.sourceId, 80);
@@ -32,7 +43,7 @@ export function validateAfricanPlaybackSource(source) {
   return { ...source, sourceId, provider };
 }
 
-export function buildOfficialEmbed(source, { origin = window.location.origin } = {}) {
+export function buildOfficialEmbed(source, { origin = globalThis.location?.origin || "https://vivid-cinema.example" } = {}) {
   const item = validateAfricanPlaybackSource(source);
   const referrerOrigin = new URL(origin).origin;
   if (item.provider === "youtube") {
@@ -54,21 +65,38 @@ export function buildOfficialEmbed(source, { origin = window.location.origin } =
     url.searchParams.set("dnt", "1");
     return { provider: item.provider, url: url.toString(), origin: url.origin, title: cleanText(item.label) || "Official Vimeo player" };
   }
+  if (item.provider === "dailymotion") {
+    if (!/^[A-Za-z0-9]{6,16}$/.test(item.videoId || "") || !/^[A-Za-z0-9]{4,32}$/.test(item.playerId || "")) {
+      throw new TypeError("Dailymotion requires a valid video ID and creator-provided Player ID.");
+    }
+    const url = new URL("/player/" + item.playerId + ".html", "https://geo.dailymotion.com");
+    url.searchParams.set("video", item.videoId);
+    return { provider: item.provider, url: url.toString(), origin: url.origin, title: cleanText(item.label) || "Official Dailymotion player" };
+  }
+  if (item.provider === "rumble") {
+    if (!/^[A-Za-z0-9]+(?:\.[A-Za-z0-9]+)?$/.test(item.embedId || "")) {
+      throw new TypeError("Rumble requires the exact embed ID copied from its official embed code.");
+    }
+    const url = new URL("/embed/" + item.embedId + "/", "https://rumble.com");
+    return { provider: item.provider, url: url.toString(), origin: url.origin, title: cleanText(item.label) || "Official Rumble player" };
+  }
   if (item.provider === "peertube") {
     let instance;
     try { instance = new URL(item.instanceOrigin); } catch { instance = null; }
     if (!instance || instance.protocol !== "https:" || instance.username || instance.password ||
         instance.pathname !== "/" || instance.search || instance.hash ||
         !/^[a-z0-9.-]+$/i.test(instance.hostname) || instance.hostname.includes("..") ||
-        instance.hostname === "localhost" || instance.hostname.endsWith(".local") || instance.hostname.endsWith(".internal")) {
-      throw new TypeError("Invalid PeerTube instance origin.");
+        instance.hostname === "localhost" || instance.hostname.endsWith(".local") ||
+        instance.hostname.endsWith(".internal") || !PEERTUBE_ALLOWED_HOSTS.has(instance.hostname.toLowerCase())) {
+      throw new TypeError("Invalid PeerTube instance origin: use a reviewed instance (peer.tube or framatube.org).");
     }
     if (!UUID.test(item.videoUuid || "")) throw new TypeError("Invalid PeerTube video UUID.");
     const url = new URL("/videos/embed/" + item.videoUuid, instance.origin);
     url.searchParams.set("api", "1");
+    url.searchParams.set("controlBar", "1");
     return { provider: item.provider, url: url.toString(), origin: url.origin, title: cleanText(item.label) || "PeerTube player" };
   }
-  throw new TypeError("This source is not an official platform embed.");
+  throw new TypeError("This source uses a public media file, not an official iframe embed.");
 }
 
 export async function resolveInternetArchiveFile(source, fetchImpl = fetch) {
@@ -80,13 +108,46 @@ export async function resolveInternetArchiveFile(source, fetchImpl = fetch) {
   if (!ARCHIVE_FILE.test(item.archiveFile || "") || item.archiveFile.includes("..")) {
     throw new TypeError("Invalid Internet Archive filename.");
   }
+  if (!ARCHIVE_RIGHTS_BASES.has(item.rightsBasis)) {
+    throw new Error("Archive playback has no recognized public-domain or supported Creative Commons rights basis. Written-permission streams need the separate territory/window entitlement workflow.");
+  }
+  const attributionText = cleanText(item.attributionText, 500);
+  if (["cc_by","cc_by_sa"].includes(item.rightsBasis) && attributionText.length < 10) {
+    throw new Error("Creative Commons BY/BY-SA playback requires an attribution credit.");
+  }
   const metadataUrl = "https://archive.org/metadata/" + encodeURIComponent(item.archiveIdentifier);
-  const response = await fetchImpl(metadataUrl, { headers: { Accept: "application/json" }, credentials: "omit" });
-  if (!response.ok) throw new Error("Internet Archive item metadata is unavailable.");
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 12000);
+  let response;
+  try {
+    response = await fetchImpl(metadataUrl, {
+      headers: { Accept: "application/json" }, credentials: "omit", signal: controller.signal
+    });
+  } finally {
+    clearTimeout(timeout);
+  }
+  if (!response?.ok) throw new Error("Internet Archive item metadata is unavailable.");
   const metadata = await response.json();
+  const declaredLicense = cleanText(metadata.metadata?.licenseurl, 500);
+  const licensePatterns = {
+    public_domain: /^https?:\/\/creativecommons\.org\/publicdomain\/mark\/1\.0\/?$/i,
+    cc0: /^https?:\/\/creativecommons\.org\/publicdomain\/zero\/1\.0\/?$/i,
+    cc_by: /^https?:\/\/creativecommons\.org\/licenses\/by\/(?:1\.0|2\.0|2\.5|3\.0|4\.0)\/?$/i,
+    cc_by_sa: /^https?:\/\/creativecommons\.org\/licenses\/by-sa\/(?:1\.0|2\.0|2\.5|3\.0|4\.0)\/?$/i
+  };
+  if (declaredLicense && !licensePatterns[item.rightsBasis]?.test(declaredLicense)) {
+    throw new Error("The Internet Archive item's declared license does not match the editorial rights basis.");
+  }
+  const licenseUrl = (declaredLicense ? declaredLicense.replace(/^http:/i, "https:") : null) || (item.rightsBasis === "cc_by" ? "https://creativecommons.org/licenses/by/4.0/" :
+    item.rightsBasis === "cc_by_sa" ? "https://creativecommons.org/licenses/by-sa/4.0/" :
+    item.rightsBasis === "cc0" ? "https://creativecommons.org/publicdomain/zero/1.0/" :
+    "https://creativecommons.org/publicdomain/mark/1.0/");
   const file = Array.isArray(metadata.files) ? metadata.files.find(entry => entry.name === item.archiveFile) : null;
-  if (!file || file.private === "true" || !PUBLIC_ARCHIVE_FORMATS.has(file.format)) {
+  if (!file || file.private === "true" || file.private === true || !PUBLIC_ARCHIVE_FORMATS.has(file.format)) {
     throw new Error("The selected file is not a supported public video file in this archive item.");
+  }
+  if (file.size != null && (!Number.isFinite(Number(file.size)) || Number(file.size) <= 0)) {
+    throw new Error("The selected archive file has no valid media size.");
   }
   const extension = item.archiveFile.toLowerCase().split(".").pop();
   if (!["mp4","webm","ogv","ogg","m3u8"].includes(extension)) {
@@ -101,18 +162,26 @@ export async function resolveInternetArchiveFile(source, fetchImpl = fetch) {
     mimeType: extension === "m3u8" ? "application/vnd.apple.mpegurl" :
       extension === "webm" ? "video/webm" : extension === "ogv" || extension === "ogg" ? "video/ogg" : "video/mp4",
     itemUrl: "https://archive.org/details/" + encodeURIComponent(item.archiveIdentifier),
-    rightsBasis: cleanText(item.rightsBasis, 80),
+    rightsBasis: item.rightsBasis,
+    attributionText,
+    licenseUrl,
     evidenceRef: cleanText(item.evidenceRef, 240)
   };
 }
 
 export async function fetchFilmFluxTrending(fetchImpl = fetch) {
-  const response = await fetchImpl(FILMFLUX_ENDPOINT, {
-    headers: { Accept: "application/json" },
-    credentials: "omit",
-    cache: "no-store"
-  });
-  if (!response.ok) throw new Error("FilmFlux discovery is temporarily unavailable.");
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 10000);
+  let response;
+  try {
+    response = await fetchImpl(FILMFLUX_ENDPOINT, {
+      headers: { Accept: "application/json" }, credentials: "omit",
+      cache: "no-store", signal: controller.signal
+    });
+  } finally {
+    clearTimeout(timeout);
+  }
+  if (!response?.ok) throw new Error("FilmFlux discovery is temporarily unavailable.");
   const payload = await response.json();
   if (!Array.isArray(payload.movies)) throw new Error("FilmFlux returned an unexpected catalogue response.");
   return payload.movies.slice(0, 20).map((movie, index) => {
@@ -136,7 +205,13 @@ export function getOfficialSourceFallback(source) {
   try {
     const item = validateAfricanPlaybackSource(source);
     if (item.provider === "youtube" && YOUTUBE_ID.test(item.videoId || "")) return "https://www.youtube.com/watch?v=" + item.videoId;
-    if (item.provider === "vimeo" && VIMEO_ID.test(item.videoId || "")) return "https://vimeo.com/" + item.videoId;
+    if (item.provider === "vimeo" && VIMEO_ID.test(item.videoId || "")) {
+      const url = new URL("https://vimeo.com/" + item.videoId);
+      if (item.vimeoHash && /^[A-Za-z0-9]{6,80}$/.test(item.vimeoHash)) url.searchParams.set("h", item.vimeoHash);
+      return url.toString();
+    }
+    if (item.provider === "dailymotion" && /^[A-Za-z0-9]{6,16}$/.test(item.videoId || "")) return "https://www.dailymotion.com/video/" + item.videoId;
+    if (item.provider === "rumble" && /^[A-Za-z0-9]+(?:\.[A-Za-z0-9]+)?$/.test(item.embedId || "")) return "https://rumble.com/embed/" + item.embedId + "/";
     if (item.provider === "peertube") return buildOfficialEmbed(item).url.replace("/videos/embed/", "/videos/watch/");
     if (item.provider === "archive" && ARCHIVE_ID.test(item.archiveIdentifier || "")) return "https://archive.org/details/" + encodeURIComponent(item.archiveIdentifier);
   } catch {}
