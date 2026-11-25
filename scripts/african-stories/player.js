@@ -160,15 +160,16 @@ function loadScript(src, id) {
 
 async function loadYouTubeApi() {
   if (window.YT?.Player) return;
-  const ready = new Promise((resolve, reject) => {
+  await loadScript("https://www.youtube.com/iframe_api", "african-youtube-iframe-api");
+  if (window.YT?.Player) return;
+  await new Promise((resolve, reject) => {
     const previous = window.onYouTubeIframeAPIReady;
+    const timeout = window.setTimeout(() => reject(new Error("YouTube player controls did not initialize.")), 12000);
     window.onYouTubeIframeAPIReady = () => {
+      window.clearTimeout(timeout);
       try { previous?.(); } finally { resolve(); }
     };
-    window.setTimeout(() => reject(new Error("YouTube player controls did not initialize.")), 12000);
   });
-  await loadScript("https://www.youtube.com/iframe_api", "african-youtube-iframe-api");
-  if (!window.YT?.Player) await ready;
 }
 
 function attachYouTubeController(generation) {
