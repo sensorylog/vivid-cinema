@@ -9,7 +9,7 @@ import {
 
 const byId = id => document.getElementById(id);
 const state = byId("african-player-state");
-const frame = byId("african-player-frame");
+let frame = byId("african-player-frame");
 const video = byId("african-player-video");
 const title = byId("african-player-title");
 const description = byId("african-player-description");
@@ -113,7 +113,21 @@ function clearPlayback() {
     activeHls = null;
   }
   if (activeController?.destroy) {
-    try { activeController.destroy(); } catch {}
+    const oldFrame = frame;
+    const freshFrame = document.createElement("iframe");
+    freshFrame.id = "african-player-frame";
+    freshFrame.title = "African Stories platform player";
+    freshFrame.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen";
+    freshFrame.allowFullscreen = true;
+    freshFrame.referrerPolicy = "strict-origin-when-cross-origin";
+    freshFrame.hidden = true;
+    oldFrame.replaceWith(freshFrame);
+    oldFrame.removeAttribute("src");
+    try {
+      const destroyed = activeController.destroy();
+      destroyed?.catch?.(() => {});
+    } catch {}
+    frame = freshFrame;
   }
   activeController = null;
   setControlsVisible(false);
