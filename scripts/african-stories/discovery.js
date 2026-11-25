@@ -1,3 +1,4 @@
+import { trackAfricanStories } from "./metrics.js";
 import {
   accessLabel,
   filterAfricanCountries,
@@ -284,6 +285,7 @@ function render() {
 
 async function load() {
   try {
+    trackAfricanStories("atlas_view");
     const [experienceResponse, catalogueResponse] = await Promise.all([
       fetch(EXPERIENCE_URL, { headers: { Accept: "application/json" }, credentials: "same-origin", cache: "no-store" }),
       fetch(CATALOGUE_URL, { headers: { Accept: "application/json" }, credentials: "same-origin", cache: "no-store" })
@@ -304,7 +306,16 @@ async function load() {
   }
 }
 
-ui.query?.addEventListener("input", render);\nui.query?.addEventListener("change", () => trackAfricanStories("search_used"));\nui.region?.addEventListener("change", () => trackAfricanStories("region_filter", { region: ui.region.value }));\nui.countries?.addEventListener("click", event => {\n  const link = event.target.closest?.("a[href*=country]");\n  if (link) { const code = new URL(link.href).searchParams.get("country"); if (code) trackAfricanStories("country_open", { countryCode: code }); }\n});\nui.titles?.addEventListener("click", event => {\n  if (event.target.closest?.("a[href*=african-stories-watch]")) trackAfricanStories("title_open");\n});
+ui.query?.addEventListener("input", render);
+ui.query?.addEventListener("change", () => trackAfricanStories("search_used"));
+ui.region?.addEventListener("change", () => trackAfricanStories("region_filter", { region: ui.region.value }));
+ui.countries?.addEventListener("click", event => {
+  const link = event.target.closest?.("a[href*=country]");
+  if (link) { const code = new URL(link.href).searchParams.get("country"); if (code) trackAfricanStories("country_open", { countryCode: code }); }
+});
+ui.titles?.addEventListener("click", event => {
+  if (event.target.closest?.("a[href*=african-stories-watch]")) trackAfricanStories("title_open");
+});
 ui.region?.addEventListener("change", render);
 ui.format?.addEventListener("change", renderTitles);
 ui.language?.addEventListener("change", renderTitles);
