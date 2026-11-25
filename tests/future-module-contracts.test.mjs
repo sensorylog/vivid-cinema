@@ -836,7 +836,7 @@ test("Vivid legal and trust pages accurately describe current product practices"
   assert.ok(!privacy.includes("Adcash Autotag"));
   assert.ok(cookies.includes("does not intentionally load the previously evaluated Adcash Autotag"));
   assert.ok(!cookies.includes("Vivid uses Adcash Autotag"));
-  assert.ok(terms.includes("retired community features"));
+  assert.ok(terms.includes("Retired community features"));
   assert.ok(terms.includes("solo playback"));
   assert.ok(terms.includes("limited, non-exclusive permission"));
   assert.ok(contact.includes("https://formspree.io/f/mwpokaav"));
