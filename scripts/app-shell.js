@@ -220,7 +220,7 @@ function buildPrimaryLinks(page) {
     navLink("live.html", "bi-broadcast-pin", "Live", page === "live"),
     navLink("african-stories.html", "bi-globe2", "African Stories", page === "african-stories"),
     navLink("library.html", "bi-bookmark-fill", "Library", page === "library"),
-    '<a id="auth-link" class="vivid-nav-profile" href="account.html" aria-label="Open account"' + (page === "account" ? ' aria-current="page"' : '') + '><i class="bi bi-person-circle" aria-hidden="true"></i><span>Profile</span></a>'
+    '<a id="auth-link" class="vivid-nav-profile" href="account.html" aria-label="Open account"' + (page === "account" ? ' aria-current="page"' : '') + '><i class="bi bi-person-circle" aria-hidden="true"></i><span>Account</span></a>'
   ].join("");
 }
 
