@@ -27,6 +27,18 @@
           <option value="registerAfricanProvider">Register provider — Provider admin</option>
           <option value="setAfricanRightsDecision">Set title/version rights decision — Rights admin</option>
         </select>
+        <label for="african-admin-source-template">Playback source template</label>
+        <div class="african-admin-actions">
+          <select id="african-admin-source-template" aria-label="Playback source template">
+            <option value="">Choose a source template…</option>
+            <option value="youtube">Official YouTube embed</option>
+            <option value="vimeo">Official Vimeo embed</option>
+            <option value="peertube">PeerTube embed (reviewed instances only)</option>
+            <option value="archive">Internet Archive public file</option>
+          </select>
+          <button id="african-admin-insert-source" type="button" class="african-admin-secondary">Insert into first edition</button>
+        </div>
+        <p class="african-admin-state">Templates are examples, not playable titles. Replace every placeholder and attach a verifiable evidence reference before saving. Official platform sources require <code>watch_officially</code>; archive files require a documented rights basis.</p>
         <label for="african-admin-payload">Request payload (JSON)</label>
         <textarea id="african-admin-payload" rows="18" spellcheck="false" autocomplete="off">{
   "workId": "example-work",
