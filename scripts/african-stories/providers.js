@@ -56,10 +56,13 @@ export function buildOfficialEmbed(source, { origin = globalThis.location?.origi
     return { provider: item.provider, url: url.toString(), origin: url.origin, title: cleanText(item.label) || "Official Vimeo player" };
   }
   if (item.provider === "peertube") {
-    const instance = safeHttpsUrl(item.instanceOrigin, []);
-    if (!instance || instance.pathname !== "/" || instance.search || instance.hash ||
+    let instance;
+    try { instance = new URL(item.instanceOrigin); } catch { instance = null; }
+    if (!instance || instance.protocol !== "https:" || instance.username || instance.password ||
+        instance.pathname !== "/" || instance.search || instance.hash ||
         !/^[a-z0-9.-]+$/i.test(instance.hostname) || instance.hostname.includes("..") ||
-        instance.hostname === "localhost" || instance.hostname.endsWith(".local")) {
+        instance.hostname === "localhost" || instance.hostname.endsWith(".local") ||
+        instance.hostname.endsWith(".internal") || !PEERTUBE_ALLOWED_HOSTS.has(instance.hostname.toLowerCase())) {
       throw new TypeError("Invalid PeerTube instance origin.");
     }
     if (!UUID.test(item.videoUuid || "")) throw new TypeError("Invalid PeerTube video UUID.");
