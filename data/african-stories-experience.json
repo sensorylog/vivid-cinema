@@ -550,6 +550,28 @@
       ]
     },
     {
+      "id": "ghana-independence-1957",
+      "title": "1957: independence changes the political horizon",
+      "dateLabel": "6 March 1957",
+      "kicker": "GHANA · INDEPENDENCE",
+      "summary": "Ghana’s independence created a new political context for film institutions inherited from colonial administration. The camera could now be mobilised for national development and Pan-African imagination, but the question of who controls production and public memory did not disappear.",
+      "reframe": "Political independence is not the same thing as instant institutional decolonisation. Equipment, bureaucracies, training systems and habits of representation can outlive the flag under which they were built.",
+      "whyItMatters": "The transition from colonial film unit to national film policy deserves to be read as both rupture and continuity.",
+      "confidence": "Date is established historical fact; film-institution interpretation is supported by scholarship.",
+      "evidenceRef": "ghana-independence-film-institutions",
+      "published": true,
+      "references": [
+        {
+          "label": "Rebecca Ohene-Asah — Nkrumah’s Pan-African film legacy",
+          "url": "https://www.tandfonline.com/doi/full/10.1080/01439685.2021.1907679"
+        },
+        {
+          "label": "Ghana National Commission on Culture — Ghanaian film history",
+          "url": "https://ghanaculture.gov.gh/the-development-of-ghanaian-film-and-its-cultural-identity/"
+        }
+      ]
+    },
+    {
       "id": "ghana-gfic-1964",
       "title": "1964: Ghana Film Industry Corporation",
       "dateLabel": "1964",
@@ -732,28 +754,6 @@
         {
           "label": "Oxford — UNREST and African film heritage restitution",
           "url": "https://www.qeh.ox.ac.uk/news/unrest-new-agenda-african-film-heritage-restitution"
-        }
-      ]
-    },
-    {
-      "id": "ghana-independence-1957",
-      "title": "1957: independence changes the political horizon",
-      "dateLabel": "6 March 1957",
-      "kicker": "GHANA · INDEPENDENCE",
-      "summary": "Ghana’s independence created a new political context for film institutions inherited from colonial administration. The camera could now be mobilised for national development and Pan-African imagination, but the question of who controls production and public memory did not disappear.",
-      "reframe": "Political independence is not the same thing as instant institutional decolonisation. Equipment, bureaucracies, training systems and habits of representation can outlive the flag under which they were built.",
-      "whyItMatters": "The transition from colonial film unit to national film policy deserves to be read as both rupture and continuity.",
-      "confidence": "Date is established historical fact; film-institution interpretation is supported by scholarship.",
-      "evidenceRef": "ghana-independence-film-institutions",
-      "published": true,
-      "references": [
-        {
-          "label": "Rebecca Ohene-Asah — Nkrumah’s Pan-African film legacy",
-          "url": "https://www.tandfonline.com/doi/full/10.1080/01439685.2021.1907679"
-        },
-        {
-          "label": "Ghana National Commission on Culture — Ghanaian film history",
-          "url": "https://ghanaculture.gov.gh/the-development-of-ghanaian-film-and-its-cultural-identity/"
         }
       ]
     }
