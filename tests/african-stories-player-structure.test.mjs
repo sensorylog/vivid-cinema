@@ -17,6 +17,7 @@ test("African Stories player loads only exact published work and edition records
 test("African Stories player supports official embeds, archive media and protected partner sessions", () => {
   assert.match(providers, /provider === "youtube"/);
   assert.match(providers, /provider === "vimeo"/);
+  assert.match(providers, /provider === "dailymotion"/);
   assert.match(providers, /provider === "peertube"/);
   assert.match(providers, /provider === "archive"/);
   assert.match(player, /resolveInternetArchiveFile/);
@@ -35,6 +36,7 @@ test("FilmFlux is a separate credited discovery route and not an arbitrary URL p
 
 test("operations console provides source templates and requires editorial evidence", () => {
   assert.match(admin, /REPLACE_WITH_CREATOR_VERIFICATION_RECORD/);
+  assert.match(admin, /REPLACE_CREATOR_PLAYER_ID/);
   assert.match(admin, /REPLACE_WITH_RIGHTS_EVIDENCE_RECORD/);
   assert.match(admin, /watch_officially/);
   assert.match(page, /Official platform embeds retain the platform's player/);
