@@ -7,11 +7,11 @@ const AD_CONFIG = Object.freeze({
   maxNativeRequestsPerSession: 8,
   maxNativePlacementsPerPage: 2,
   socialBarSrc: "https://bancadeltempoidea.org/14/51cedddacdb3782114144ec932519319",
-  // Popunder remains deliberately disabled until Adsterra confirms a
-  // network-side limit of one impression per visitor per 24 hours.
+  // Best-effort browser-side cap: load the provider tag at most once per
+  // browser profile every 24 hours. This limits tag loads, not impressions
+  // generated internally by the provider after the tag has loaded.
   popunder: Object.freeze({
-    enabled: false,
-    frequencyCapConfirmed: false,
+    enabled: true,
     src: "https://aarems.org/1/afc16a6f6fd987b460882c312398d244",
     maxScriptLoadsPerVisitorMs: 24 * 60 * 60 * 1000,
     eligiblePages: Object.freeze(["home", "discover", "collection", "for-you", "anime"])
@@ -181,9 +181,10 @@ function loadSocialBar() {
 
 function loadPopunder(page) {
   const config = AD_CONFIG.popunder;
-  // Never execute this third-party script until both the feature switch and
-  // Adsterra's requested network-side frequency cap have been confirmed.
-  if (!config?.enabled || !config.frequencyCapConfirmed || !config.src) return;
+  // The provider tag is loaded at most once per browser profile per 24h.
+  // This is a best-effort tag-load cap; only the provider can cap its
+  // internally generated impressions after a tag has loaded.
+  if (!config?.enabled || !config.src) return;
   if (!config.eligiblePages.includes(page) || EXCLUDED_PAGES.has(page)) return;
 
   const storageKey = "vivid:popunder:last-script-load";
