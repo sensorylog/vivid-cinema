@@ -8,6 +8,7 @@ const COUNTRY = /^[A-Z]{2}$/;
 const PROVIDER_SESSION_ADAPTERS = Object.freeze({});
 const WORK_TYPES = new Set(["feature_film","short_film","series","documentary","short_documentary","newsreel","oral_history","educational_film","animation","experimental","archive_footage","other"]);
 const PUBLIC_ACCESS_STATES = new Set(["archive_record","access_pending","watch_officially"]);
+const PEERTUBE_ALLOWED_HOSTS = new Set(["framatube.org", "peer.tube"]);
 
 function fail(HttpsError, code, message) {
   throw new HttpsError(code, message);
@@ -81,7 +82,8 @@ function playbackSourceRecords(value, accessState, HttpsError) {
       const videoUuid = boundedText(item.videoUuid, 36, "PeerTube videoUuid", HttpsError, enabled);
       if (enabled) {
         const origin = parseProviderUrl(instanceOrigin, "PeerTube instanceOrigin", HttpsError);
-        if (origin.origin !== origin.href.replace(/\/$/, "") || !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(videoUuid)) {
+        if (origin.origin !== origin.href.replace(/\/$/, "") || !PEERTUBE_ALLOWED_HOSTS.has(origin.hostname.toLowerCase()) ||
+            !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(videoUuid)) {
           fail(HttpsError, "invalid-argument", "PeerTube requires an origin-only HTTPS instance URL and a valid video UUID.");
         }
         if (accessState !== "watch_officially") fail(HttpsError, "failed-precondition", "PeerTube embeds require the watch_officially editorial state.");
