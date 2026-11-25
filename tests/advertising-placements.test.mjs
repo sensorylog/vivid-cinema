@@ -67,7 +67,7 @@ test("browsing pages use the refreshed advertising assets", async () => {
   for (const page of ["home.html", "discover.html", "collection.html", "anime.html", "for-you.html"]) {
     const html = await readFile(path.join(root, page), "utf8");
     assert.match(html, /styles\/vivid-advertising\.css\?v=2/);
-    assert.match(html, /scripts\/advertising\.js\?v=3/);
+    assert.match(html, /scripts\\/advertising\\.js\\?v=4/);
   }
 });
 
@@ -80,5 +80,6 @@ test("Popunder uses a best-effort 24-hour browser tag-load cap and stays off exc
   assert.ok(advertising.includes("maxScriptLoadsPerVisitorMs: 24 * 60 * 60 * 1000"));
   assert.ok(advertising.includes('eligiblePages: Object.freeze(["home", "discover", "collection", "for-you", "anime"])'));
   assert.ok(advertising.includes("vivid:popunder:last-script-load"));
-  assert.ok(advertising.includes("Fail closed when storage is unavailable"));\n  assert.ok(advertising.includes("if (!config.eligiblePages.includes(page) || EXCLUDED_PAGES.has(page)) return;"));
+  assert.ok(advertising.includes("Fail closed when storage is unavailable"));
+  assert.ok(advertising.includes("if (!config.eligiblePages.includes(page) || EXCLUDED_PAGES.has(page)) return;"));
 });
