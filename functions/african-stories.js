@@ -53,7 +53,7 @@ function playbackSourceRecords(value, accessState, HttpsError) {
   if (value == null) return [];
   if (!Array.isArray(value) || value.length > 12) fail(HttpsError, "invalid-argument", "playbackSources must be a list of no more than 12 sources.");
   const ids = new Set();
-  const rightsBases = new Set(["public_domain","cc0","cc_by","cc_by_sa","written_permission"]);
+  const rightsBases = new Set(["public_domain","cc0","cc_by","cc_by_sa"]);
   return value.map(item => {
     if (!item || typeof item !== "object" || Array.isArray(item)) fail(HttpsError, "invalid-argument", "Each playback source must be an object.");
     const sourceId = boundedText(item.sourceId, 80, "playback sourceId", HttpsError, true);
@@ -108,14 +108,19 @@ function playbackSourceRecords(value, accessState, HttpsError) {
       const archiveIdentifier = boundedText(item.archiveIdentifier, 120, "archiveIdentifier", HttpsError, enabled);
       const archiveFile = boundedText(item.archiveFile, 240, "archiveFile", HttpsError, enabled);
       const rightsBasis = boundedText(item.rightsBasis, 40, "archive rightsBasis", HttpsError, enabled);
+      const attributionText = boundedText(item.attributionText, 500, "archive attributionText", HttpsError);
       if (enabled && (!/^[A-Za-z0-9][A-Za-z0-9._-]{1,119}$/.test(archiveIdentifier) || archiveIdentifier.includes("..") ||
           !/^[A-Za-z0-9][A-Za-z0-9._ -]{0,239}$/.test(archiveFile) || archiveFile.includes("..") ||
           !rightsBases.has(rightsBasis))) {
-        fail(HttpsError, "invalid-argument", "Internet Archive playback requires a valid item/file and an explicit public-domain, Creative Commons or written-permission basis.");
+        fail(HttpsError, "invalid-argument", "Internet Archive playback requires a valid item/file and a public-domain or supported Creative Commons basis.");
+      }
+      if (enabled && ["cc_by","cc_by_sa"].includes(rightsBasis) && attributionText.length < 10) {
+        fail(HttpsError, "invalid-argument", "Creative Commons BY/BY-SA archive playback requires an attribution credit.");
       }
       source.archiveIdentifier = archiveIdentifier;
       source.archiveFile = archiveFile;
       source.rightsBasis = rightsBasis;
+      source.attributionText = attributionText;
     }
     return source;
   });
