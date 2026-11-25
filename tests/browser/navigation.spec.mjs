@@ -7,6 +7,7 @@ const routes = [
   "/for-you.html",
   "/search.html",
   "/account.html",
+  "/african-stories.html",
   "/watch.html",
   "/anime.html",
   "/community.html"
@@ -65,7 +66,7 @@ test("mobile navigation stays within five destinations and exposes secondary rou
   await page.locator("[data-vivid-more-navigation]").click();
   const moreMenu = page.locator("#vivid-more-menu");
   await expect(moreMenu).toBeVisible();
-  for (const href of ["discover.html", "anime.html", "library.html", "account.html", "search.html"]) {
+  for (const href of ["discover.html", "anime.html", "library.html", "african-stories.html", "account.html", "search.html"]) {
     await expect(moreMenu.locator("a[href='" + href + "']")).toHaveCount(1);
   }
   await page.setViewportSize({ width: 1440, height: 900 });
@@ -76,6 +77,7 @@ test("mobile navigation stays within five destinations and exposes secondary rou
   const profileLink = page.locator(".vivid-navlinks #auth-link");
   await expect(profileLink).toHaveCount(1);
   await expect(profileLink).toHaveAttribute("href", /(?:auth|account)\\.html$/);
+  await expect(profileLink).toContainText(/account/i);
 });
 
 test("retired community routes show a transition notice without social controls", async ({page}) => {
