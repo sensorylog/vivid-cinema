@@ -89,7 +89,7 @@ function safePublicProjection(draft, now) {
 export function createAfricanStoriesFunctions({ db, onCall, HttpsError, Timestamp, FieldValue }) {
   const region = "us-central1";
 
-  const saveAfricanWorkDraft = onCall({ region, maxInstances: 10 }, async request => {
+  const saveAfricanWorkDraft = onCall({ region, maxInstances: 10, enforceAppCheck: true }, async request => {
     requireClaim(request, "africanStoriesEditor", HttpsError);
     const workId = boundedText(request.data?.workId, 100, "workId", HttpsError, true);
     if (!WORK_ID.test(workId)) fail(HttpsError, "invalid-argument", "workId must be a URL-safe canonical identifier.");
@@ -171,7 +171,7 @@ export function createAfricanStoriesFunctions({ db, onCall, HttpsError, Timestam
     return { workId, editorialStatus: "published", publishedAt: now.toMillis() };
   });
 
-  const registerAfricanProvider = onCall({ region, maxInstances: 5 }, async request => {
+  const registerAfricanProvider = onCall({ region, maxInstances: 5, enforceAppCheck: true }, async request => {
     requireClaim(request, "africanStoriesProviderAdmin", HttpsError);
     const providerId = boundedText(request.data?.providerId, 80, "providerId", HttpsError, true);
     if (!PROVIDER_ID.test(providerId)) fail(HttpsError, "invalid-argument", "Invalid providerId.");
@@ -239,7 +239,7 @@ export function createAfricanStoriesFunctions({ db, onCall, HttpsError, Timestam
     return { workId, versionId, status, streamOnVivid: payload.streamOnVivid };
   });
 
-  const createAfricanPlaybackSession = onCall({ region, maxInstances: 20 }, async request => {
+  const createAfricanPlaybackSession = onCall({ region, maxInstances: 20, enforceAppCheck: true }, async request => {
     if (!request.auth) fail(HttpsError, "unauthenticated", "Sign in is required to request playback.");
     const trustedHeader = process.env.AFRICAN_STORIES_TRUSTED_COUNTRY_HEADER;
     if (!trustedHeader) fail(HttpsError, "failed-precondition", "Territory verification is not configured. African Stories playback is not enabled.");
