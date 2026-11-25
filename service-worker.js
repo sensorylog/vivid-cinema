@@ -5,7 +5,7 @@ const APP_SHELL = [
   HLS_LIBRARY_URL,
   "./","./index.html","./home.html","./downloads.html","./my-downloads.html","./for-you.html",
   "./person.html","./discover.html","./collection.html","./title.html","./watch.html",
-  "./scripts/downloads/desktop-offline.js?windows-offline-hls-v3","./styles/my-downloads.css?v=offline-cinema-redesign-2",
+  "./scripts/downloads/desktop-offline.js?windows-offline-hls-v3","./scripts/downloads/transcode-player.js?windows-offline-hls-v4","./scripts/downloads/browser-hls-adapter.js","./scripts/downloads.js?v=direct-download-v4","./styles/my-downloads.css?v=offline-cinema-redesign-2","./styles/vivid-premium-experience.css?v=3",
   "./library.html","./auth.html","./login.html","./verify-email.html","./forgot-password.html",
   "./donate.html","./donation-success.html","./offline.html","./live.html","./news.html",
   "./anime.html","./african-stories-watch.html","./african-stories-admin.html","./help.html","./about.html","./accessibility.html","./cookies.html",
@@ -175,10 +175,9 @@ self.addEventListener("fetch",event=>{
  // Authentication must not depend on stale cached documents or SDK bundles.
  // Always try the network first for auth pages, auth modules and Firebase config.
  const isAuthDocument=/\/(?:login|auth|forgot-password|verify-email|auth-diagnostics|account)\.html$/.test(url.pathname);
- const isWatchRoomRuntime=/watch-room-api|watch-room-playback/.test(new URL(request.url).pathname);
 const isAuthRuntime=/\/scripts\/(?:auth|firebase|nav-auth|auth-diagnostics|account|account-bootstrap|cloudflare-ai)\.js$/.test(url.pathname)||/\/init\.json$/.test(url.pathname);
  const isFreshNewsRuntime=/\/scripts\/(?:newsroom|intelligence)\.js$/.test(url.pathname)||/\/styles\/vivid-news\.css$/.test(url.pathname)||/\/data\/(?:news-feed\.json|news-thumbnails\/)/.test(url.pathname);
- if(isAuthDocument||isAuthRuntime||isWatchRoomRuntime){event.respondWith(networkFirst(request));return;}
+ if(isAuthDocument||isAuthRuntime){event.respondWith(networkFirst(request));return;}
  if(isFreshNewsRuntime){event.respondWith(networkFirst(request));return;}
  if(request.mode==="navigate"){event.respondWith(staleWhileRevalidate(request,event,true));return;}
  const isCodeOrStyle=/\.(?:js|css)$/.test(url.pathname);
