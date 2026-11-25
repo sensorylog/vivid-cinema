@@ -23,6 +23,8 @@ test("Vimeo official embed preserves an unlisted privacy hash", () => {
   assert.equal(url.origin, "https://player.vimeo.com");
   assert.equal(url.searchParams.get("h"), "abc123hash");
   assert.equal(url.searchParams.get("dnt"), "1");
+  assert.equal(getOfficialSourceFallback({ ...base, provider: "vimeo", videoId: "12345678", vimeoHash: "abc123hash" }),
+    "https://vimeo.com/12345678?h=abc123hash");
 });
 
 test("PeerTube embed is restricted to reviewed instance origins", () => {
