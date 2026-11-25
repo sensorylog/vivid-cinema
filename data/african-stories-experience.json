@@ -153,10 +153,17 @@
         {
           "label": "UNESCO — African Film Heritage Project",
           "url": "https://www.unesco.org/en/articles/african-film-heritage-project-cannes-2019"
+        },
+        {
+          "label": "Lindiwe Dovey — New Looks: The Rise of African Women Filmmakers",
+          "url": "https://africanfilmny.org/articles/new-looks-the-rise-of-african-women-filmmakers/"
         }
       ],
       "personIds": [
-        "sarah-maldoror"
+        "sarah-maldoror",
+        "annette-mbaye-derneville",
+        "safi-faye",
+        "therese-sita-bella"
       ],
       "timelineIds": [
         "sambizanga-1972",
@@ -221,7 +228,9 @@
           "url": "https://archivism.meson.press/chapters/trajectories-of-restitution/remnants-of-the-central-film-library-and-the-rethinking-of-ghanas-audio-visual-heritage/"
         }
       ],
-      "personIds": [],
+      "personIds": [
+        "rebecca-ohene-asah"
+      ],
       "timelineIds": [
         "african-film-heritage-project-2019"
       ]
@@ -706,6 +715,108 @@
       "selectedWorks": [
         "Rencontres Cinématographiques de Dakar (RECIDAK) — cultural organising",
         "Association Sénégalaise de la Critique Cinématographique — film criticism"
+      ]
+    },
+    {
+      "id": "safi-faye",
+      "title": "Safi Faye",
+      "kicker": "SENEGAL · FILMMAKER / ETHNOGRAPHIC CINEMA",
+      "summary": "Safi Faye is a major Senegalese woman filmmaker named in scholarship on African women’s cinema. Lindiwe Dovey notes that many women directors who emerged in the 1970s–1990s made relatively few films and that their work was not widely screened; she also points to the difficulty of finding copies of Faye’s films.",
+      "reframe": "A filmography can exist in scholarship while the films themselves remain difficult for audiences and researchers to access.",
+      "whyItMatters": "Visibility in a canon and practical access to a filmmaker’s work are different things. This profile makes that gap part of the story.",
+      "confidence": "Based on Lindiwe Dovey’s essay and related archival scholarship; individual film availability and rights require title-by-title verification.",
+      "evidenceRef": "safi-faye-access-gap",
+      "published": true,
+      "countryCodes": [
+        "SN"
+      ],
+      "references": [
+        {
+          "label": "Lindiwe Dovey — New Looks: The Rise of African Women Filmmakers",
+          "url": "https://africanfilmny.org/articles/new-looks-the-rise-of-african-women-filmmakers/"
+        },
+        {
+          "label": "Bisschoff & Murphy — Revising the Classics",
+          "url": "https://storre.stir.ac.uk/bitstream/1893/23398/1/DM_LostClassicsIntro.pdf"
+        }
+      ],
+      "selectedWorks": [
+        "Kaddu Beykat / Letter from My Village (1975) — title-specific edition and rights verification required"
+      ]
+    },
+    {
+      "id": "therese-sita-bella",
+      "title": "Thérèse Sita-Bella",
+      "kicker": "CAMEROON · FILMMAKER / JOURNALIST",
+      "summary": "Thérèse Sita-Bella is identified in scholarship on African women’s screen histories as an early woman filmmaker whose short film Tam-Tam à Paris was screened at the first FESPACO in 1969. A later scholarly account notes that a copy is now extremely difficult to find.",
+      "reframe": "An early festival screening does not guarantee that a film survives in accessible form. The historical record can preserve a title’s existence while the actual moving image remains hard to locate.",
+      "whyItMatters": "This is a concrete example of how archival disappearance shapes whose work can be studied, screened and included in histories of African cinema.",
+      "confidence": "Based on a scholarly account citing the film’s 1969 screening and later difficulty locating a copy; present custody is not established here.",
+      "evidenceRef": "therese-sita-bella-tamtam-archive",
+      "published": true,
+      "countryCodes": [
+        "CM"
+      ],
+      "references": [
+        {
+          "label": "University of Edinburgh — archival silences in African women’s cinema",
+          "url": "https://journals.ed.ac.uk/forum/article/download/6458/8762/"
+        },
+        {
+          "label": "Beti Ellerson — African Women in Cinema",
+          "url": "https://www.cambridge.org/core/books/gaze-regimes/african-women-in-cinema-an-overview/056AD61E7BF872888BB58A7BD9957261"
+        }
+      ],
+      "selectedWorks": [
+        "Tam-Tam à Paris (short film; surviving copy not verified)"
+      ]
+    },
+    {
+      "id": "nana-mahomo",
+      "title": "Nana Mahomo",
+      "kicker": "SOUTH AFRICA · EXILE / DOCUMENTARY",
+      "summary": "Nana Mahomo was a South African exile and co-founder of Morena Films, identified in Nicholas Cull’s 2025 research on clandestine anti-apartheid documentaries. The research examines Phela-Ndaba / End of the Dialogue (1970) and Last Grave at Dimbaza (1974), made through clandestine filming techniques and shown internationally on television.",
+      "reframe": "These documentaries were not simply films about apartheid. Their production methods and international circulation were part of a struggle over who could document the regime and whose images could reach the world.",
+      "whyItMatters": "Documentary history here is inseparable from risk, exile, covert production and international television.",
+      "confidence": "Based on the abstract of Cull’s 2025 peer-reviewed article; detailed production credits and the collective’s full membership should be verified against the article and archival records.",
+      "evidenceRef": "nana-mahomo-morena-films",
+      "published": true,
+      "countryCodes": [
+        "ZA"
+      ],
+      "references": [
+        {
+          "label": "Nicholas J. Cull — Clandestine Documentary Film v. Apartheid (2025)",
+          "url": "https://www.tandfonline.com/doi/abs/10.1080/01439685.2025.2474285"
+        },
+        {
+          "label": "UCT Libraries — Unbanned",
+          "url": "https://lib.uct.ac.za/articles/2025-10-08-unbanned-films-south-africans-were-not-allowed-see"
+        }
+      ],
+      "selectedWorks": [
+        "Phela-Ndaba / End of the Dialogue (1970)",
+        "Last Grave at Dimbaza (1974)"
+      ]
+    },
+    {
+      "id": "rebecca-ohene-asah",
+      "title": "Rebecca Ohene-Asah",
+      "kicker": "GHANA · AUDIOVISUAL ARCHIVES / PRESERVATION",
+      "summary": "Rebecca Ohene-Asah’s research examines the preservation and public accessibility of Ghana’s historical audiovisual archives. Her 2022 article argues that storage and preservation practices can impede public access to film materials, connecting restitution debates to custody, conservation and use.",
+      "reframe": "The archive question is not simply where materials are held. It is also how they are stored, who can consult them and what makes access possible.",
+      "whyItMatters": "Preservation and access are not synonyms. A collection may survive physically while remaining difficult for students, filmmakers and the public to use.",
+      "confidence": "Based on the article abstract and author affiliation with NAFTI; current institutional role and archive conditions should be checked against current records.",
+      "evidenceRef": "rebecca-ohene-asah-ghana-archives",
+      "published": true,
+      "countryCodes": [
+        "GH"
+      ],
+      "references": [
+        {
+          "label": "Ohene-Asah — Audio-visual heritage preservation and Ghana’s historical film archives (2022)",
+          "url": "https://www.tandfonline.com/doi/full/10.1080/23257962.2021.2012441"
+        }
       ]
     }
   ],
