@@ -39,6 +39,7 @@ function setState(heading, message, label = "SOURCE CHECK") {
     if (p) p.textContent = message;
   }
   if (ui.sourceLabel) ui.sourceLabel.textContent = label;
+  if (ui.fallback) ui.fallback.hidden = true;
   if (ui.frame) { ui.frame.hidden = true; ui.frame.removeAttribute("src"); }
   if (ui.video) {
     stopAuthorizedMedia(ui.video);
