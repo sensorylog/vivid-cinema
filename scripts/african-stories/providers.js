@@ -128,6 +128,20 @@ export async function resolveInternetArchiveFile(source, fetchImpl = fetch) {
   }
   if (!response?.ok) throw new Error("Internet Archive item metadata is unavailable.");
   const metadata = await response.json();
+  const declaredLicense = cleanText(metadata.metadata?.licenseurl, 500);
+  const licensePatterns = {
+    public_domain: /^https?:\\/\\/creativecommons\\.org\\/publicdomain\\/mark\\/1\\.0\\/?$/i,
+    cc0: /^https?:\\/\\/creativecommons\\.org\\/publicdomain\\/zero\\/1\\.0\\/?$/i,
+    cc_by: /^https?:\\/\\/creativecommons\\.org\\/licenses\\/by\\/(?:1\\.0|2\\.0|2\\.5|3\\.0|4\\.0)\\/?$/i,
+    cc_by_sa: /^https?:\\/\\/creativecommons\\.org\\/licenses\\/by-sa\\/(?:1\\.0|2\\.0|2\\.5|3\\.0|4\\.0)\\/?$/i
+  };
+  if (declaredLicense && !licensePatterns[item.rightsBasis]?.test(declaredLicense)) {
+    throw new Error("The Internet Archive item's declared license does not match the editorial rights basis.");
+  }
+  const licenseUrl = declaredLicense || (item.rightsBasis === "cc_by" ? "https://creativecommons.org/licenses/by/4.0/" :
+    item.rightsBasis === "cc_by_sa" ? "https://creativecommons.org/licenses/by-sa/4.0/" :
+    item.rightsBasis === "cc0" ? "https://creativecommons.org/publicdomain/zero/1.0/" :
+    "https://creativecommons.org/publicdomain/mark/1.0/");
   const file = Array.isArray(metadata.files) ? metadata.files.find(entry => entry.name === item.archiveFile) : null;
   if (!file || file.private === "true" || file.private === true || !PUBLIC_ARCHIVE_FORMATS.has(file.format)) {
     throw new Error("The selected file is not a supported public video file in this archive item.");
@@ -150,10 +164,7 @@ export async function resolveInternetArchiveFile(source, fetchImpl = fetch) {
     itemUrl: "https://archive.org/details/" + encodeURIComponent(item.archiveIdentifier),
     rightsBasis: item.rightsBasis,
     attributionText,
-    licenseUrl: item.rightsBasis === "cc_by" ? "https://creativecommons.org/licenses/by/4.0/" :
-      item.rightsBasis === "cc_by_sa" ? "https://creativecommons.org/licenses/by-sa/4.0/" :
-      item.rightsBasis === "cc0" ? "https://creativecommons.org/publicdomain/zero/1.0/" :
-      "https://creativecommons.org/publicdomain/mark/1.0/",
+    licenseUrl,
     evidenceRef: cleanText(item.evidenceRef, 240)
   };
 }
