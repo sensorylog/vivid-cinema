@@ -21,7 +21,7 @@ Configure a Cloudflare Pages service binding named `AFRICAN_STORIES_PROVIDER` on
 - `mimeType`: one of HLS, DASH, MP4 or WebM MIME types accepted by the browser adapter
 - `sessionId`: opaque session identifier
 
-The provider service must independently validate the published title/edition, signed or otherwise auditable rights evidence, allowed territory, validity window, provider registration, source status and any user entitlement. It must not trust browser-supplied URLs or claims. Keep provider credentials in the service binding's secret store, never in static JavaScript or the catalogue.
+The provider service must independently validate the published title/edition, signed or otherwise auditable rights evidence, allowed territory, validity window, provider registration, source status and public-access policy. The current browser contract does not forward Firebase identity tokens, so do not use this endpoint for user-specific entitlements; add an authenticated identity contract before private subscription-gated playback. It must not trust browser-supplied URLs or claims. Keep provider credentials in the service binding's secret store, never in static JavaScript or the catalogue.
 
 ## Current operational status
 
