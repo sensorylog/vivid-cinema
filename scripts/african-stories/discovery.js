@@ -178,12 +178,12 @@ function renderEditorialDetail() {
 
   const works = document.getElementById("african-editorial-works");
   if (works) works.remove();
-  if (Array.isArray(record?.filmography) && record.filmography.length) {
+  const selectedWorks = Array.isArray(record?.selectedWorks) ? record.selectedWorks : record?.filmography;\n  if (Array.isArray(selectedWorks) && selectedWorks.length) {
     const workSection = element("section", "african-editorial-works");
     workSection.id = "african-editorial-works";
     workSection.append(element("h3", "", "Selected works"));
     const list = element("ul", "african-editorial-work-list");
-    for (const work of record.filmography) list.append(element("li", "", work));
+    for (const work of selectedWorks) list.append(element("li", "", work));
     workSection.append(list);
     insights.after(workSection);
   }
