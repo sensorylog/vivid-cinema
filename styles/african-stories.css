@@ -113,3 +113,17 @@
 .african-player-references{display:flex;flex-wrap:wrap;gap:10px 18px;margin-top:12px}
 .african-player-references a{color:#d3e1f2;font-size:.78rem;font-weight:700;text-decoration:none}
 .african-player-references a:hover{text-decoration:underline}
+
+
+/* Rights-holder intake */
+.african-submission-form{display:grid;grid-template-columns:1fr;gap:10px;max-width:760px;margin:22px 0}
+.african-submission-form>label{margin-top:9px;color:#dce5ef;font-size:.88rem;font-weight:650}
+.african-submission-form input:not([type=checkbox]),.african-submission-form select,.african-submission-form textarea{width:100%;min-height:46px;padding:12px 14px;border:1px solid rgba(255,255,255,.17);border-radius:10px;background:#0b1018;color:#f5f7fa;font:inherit}
+.african-submission-form textarea{min-height:112px;resize:vertical}
+.african-submission-form input:focus,.african-submission-form select:focus,.african-submission-form textarea:focus{outline:2px solid #8caed2;outline-offset:2px}
+.african-submission-form .african-consent-row{display:flex;align-items:flex-start;gap:10px;color:#b8c4d2;font-size:.82rem;font-weight:450;line-height:1.6}
+.african-consent-row input{margin-top:4px;flex:0 0 auto}
+.african-submit-button{justify-self:start;min-height:46px;padding:12px 20px;border:0;border-radius:10px;background:#e5c98e;color:#17130c;font-weight:800;cursor:pointer}
+.african-submit-button:disabled{opacity:.55;cursor:wait}
+#african-submission-status{color:#c3cfdd;font-size:.84rem;line-height:1.6}
+@media(max-width:560px){.african-submission-form{gap:8px}.african-submit-button{width:100%}}
