@@ -191,3 +191,18 @@ test("approved rights alone cannot launch playback without a provider-specific s
     else process.env.AFRICAN_STORIES_TRUSTED_COUNTRY_HEADER = previous;
   }
 });
+
+
+test("official external viewing links require the explicit watch_officially access state", async () => {
+  const api = makeFunctions();
+  await assert.rejects(
+    api.saveAfricanWorkDraft({
+      auth: { uid: "editor-1", token: { africanStoriesEditor: true } },
+      data: {
+        workId: "river-film",
+        work: { ...validDraft, officialExternalUrl: "https://video.example.org/watch/1" }
+      }
+    }),
+    error => error.code === "invalid-argument"
+  );
+});
