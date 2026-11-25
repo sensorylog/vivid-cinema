@@ -77,3 +77,10 @@
 .african-editorial-detail>p{max-width:780px;color:#b3bfce;line-height:1.75}
 .african-editorial-references{display:flex;gap:12px;flex-wrap:wrap;margin:16px 0}
 .african-editorial-references:empty{display:none}
+
+.african-editorial-meta{display:flex;gap:9px;flex-wrap:wrap;margin:16px 0}
+.african-editorial-meta-item{padding:7px 11px;border:1px solid rgba(255,255,255,.14);border-radius:999px;color:#c5d0dd;font-size:.82rem}
+.african-editorial-works{margin:20px 0}
+.african-editorial-works h3{font-size:1rem}
+.african-editorial-work-list{display:flex;gap:10px 24px;flex-wrap:wrap;padding-left:20px;color:#c5d0dd}
+.african-editorial-references{gap:10px 18px}
