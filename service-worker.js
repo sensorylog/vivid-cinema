@@ -5,7 +5,7 @@ const APP_SHELL = [
   HLS_LIBRARY_URL,
   "./","./index.html","./home.html","./african-stories.html","./downloads.html","./my-downloads.html","./for-you.html",
   "./person.html","./discover.html","./collection.html","./title.html","./watch.html",
-  "./scripts/downloads/desktop-offline.js?windows-offline-hls-v3","./styles/my-downloads.css?v=offline-cinema-redesign-2",
+  "./scripts/downloads/desktop-offline.js?windows-offline-hls-v3","./scripts/downloads/transcode-player.js?windows-offline-hls-v4","./scripts/downloads/browser-hls-adapter.js","./scripts/downloads.js?v=direct-download-v4","./styles/vivid-premium-experience.css?v=3","./styles/my-downloads.css?v=offline-cinema-redesign-2",
   "./library.html","./auth.html","./login.html","./verify-email.html","./forgot-password.html",
   "./donate.html","./donation-success.html","./offline.html","./live.html","./news.html",
   "./anime.html","./help.html","./about.html","./accessibility.html","./cookies.html",
