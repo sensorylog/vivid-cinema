@@ -207,7 +207,7 @@ Internet Archive example:
 }
 ```
 
-Archive source records require `public_domain`, `cc0`, `cc_by` or `cc_by_sa`, plus a non-empty editorial evidence reference. CC BY/BY-SA sources must also publish an attribution credit and a visible canonical license link. `written_permission` is not enabled through the public-file path because the current archive adapter cannot enforce territory and term windows; those titles must wait for the protected rights-entitlement workflow. The player verifies the exact public item/file metadata at playback time. The evidence reference is an editorial record pointer, not an automated legal opinion.
+Archive source records require `public_domain`, `cc0`, `cc_by` or `cc_by_sa`, plus a non-empty editorial evidence reference. CC BY/BY-SA sources must also publish an attribution credit and a visible canonical license link. `written_permission` is not enabled through the public-file path because the current archive adapter cannot enforce territory and term windows; those titles must wait for the protected rights-entitlement workflow. The player verifies the exact public item/file metadata at playback time and rejects an Internet Archive-declared license that conflicts with the editorial rights basis. CC BY/BY-SA credits and canonical license links are displayed in the player. Written-permission files remain disabled until the territory/window entitlement path can enforce those terms. The evidence reference is an editorial record pointer, not an automated legal opinion.
 
 ### Player route
 
