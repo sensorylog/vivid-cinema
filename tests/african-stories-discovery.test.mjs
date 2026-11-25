@@ -19,11 +19,12 @@ test("country discovery filters by region and search term", () => {
 
 test("title discovery filters by country, format and query", () => {
   const titles = [
-    { id: "a", countryCode: "GH", format: "documentary", title: "Coastal Memory", synopsis: "Fishing communities" },
-    { id: "b", countryCode: "NG", format: "feature", title: "City Lights", synopsis: "A family story" }
+    { id: "a", countryCode: "GH", format: "documentary", languages: ["Twi", "English"], title: "Coastal Memory", synopsis: "Fishing communities" },
+    { id: "b", countryCode: "NG", format: "feature", languages: ["Yoruba"], title: "City Lights", synopsis: "A family story" }
   ];
   assert.deepEqual(filterAfricanTitles(titles, { country: "GH" }).map(item => item.id), ["a"]);
   assert.deepEqual(filterAfricanTitles(titles, { format: "documentary", query: "fishing" }).map(item => item.id), ["a"]);
+  assert.deepEqual(filterAfricanTitles(titles, { language: "Yoruba" }).map(item => item.id), ["b"]);
 });
 
 test("editorial records require publication and an evidence reference", () => {
