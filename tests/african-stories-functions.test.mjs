@@ -288,3 +288,29 @@ test("Internet Archive playback requires an explicit rights basis and evidence r
     } }
   }), error => error.code === "invalid-argument");
 });
+
+
+test("Dailymotion source requires a creator-provided Player ID and official viewing state", async () => {
+  const api = makeFunctions();
+  const source = {
+    sourceId: "official-dailymotion", provider: "dailymotion", videoId: "x84sh87",
+    playerId: "x8lr5", label: "Creator's Dailymotion player", enabled: true,
+    evidenceRef: "creator-channel-verification-002"
+  };
+  await api.saveAfricanWorkDraft({
+    auth: { uid: "editor-1", token: { africanStoriesEditor: true } },
+    data: { workId: "river-film", work: {
+      ...validDraft, accessState: "watch_officially",
+      versions: [{ ...validDraft.versions[0], playbackSources: [source] }]
+    } }
+  });
+  const saved = api.db.records.get("africanWorkDrafts/river-film");
+  assert.equal(saved.versions[0].playbackSources[0].playerId, "x8lr5");
+  await assert.rejects(api.saveAfricanWorkDraft({
+    auth: { uid: "editor-1", token: { africanStoriesEditor: true } },
+    data: { workId: "other-film", work: {
+      ...validDraft, accessState: "watch_officially",
+      versions: [{ ...validDraft.versions[0], playbackSources: [{ ...source, playerId: "" }] }]
+    } }
+  }), error => error.code === "invalid-argument");
+});
