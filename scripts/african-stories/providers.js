@@ -4,7 +4,7 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-
 const ARCHIVE_ID = /^[A-Za-z0-9][A-Za-z0-9._-]{1,119}$/;
 const ARCHIVE_FILE = /^[A-Za-z0-9][A-Za-z0-9._ -]{0,239}$/;
 const PUBLIC_ARCHIVE_FORMATS = new Set(["MPEG4","h.264","H.264","WebM","Ogg Video","Ogg Video File","M3U8","M3U8 Playlist"]);
-const FILMFLUX_ENDPOINT = "https://filmflux.app/api/public/trending?limit=20";
+const FILMFLUX_ENDPOINT = "https://filmflux.app/api/public/trending?limit=10";
 const PEERTUBE_ALLOWED_HOSTS = new Set(["framatube.org", "peer.tube"]);
 
 function cleanText(value, max = 240) {
