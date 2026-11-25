@@ -137,3 +137,21 @@ test("Internet Archive rejects unrecognized rights basis before requesting metad
     archiveFile: "film.mp4", rightsBasis: "unknown"
   }, async () => { throw new Error("metadata must not be requested"); }), /no recognized/);
 });
+
+
+test("Creative Commons BY archive playback requires attribution and exposes its license", async () => {
+  const source = {
+    ...base, provider: "archive", archiveIdentifier: "ghana-film-archive-001",
+    archiveFile: "film.mp4", rightsBasis: "cc_by"
+  };
+  await assert.rejects(resolveInternetArchiveFile(source, async () => ({
+    ok: true, json: async () => ({ files: [{ name: "film.mp4", format: "MPEG4", size: "1024" }] })
+  })), /requires an attribution credit/);
+  const resolved = await resolveInternetArchiveFile({
+    ...source, attributionText: "Directed by Ama Example, Ghana Film Archive"
+  }, async () => ({
+    ok: true, json: async () => ({ files: [{ name: "film.mp4", format: "MPEG4", size: "1024" }] })
+  }));
+  assert.equal(resolved.attributionText, "Directed by Ama Example, Ghana Film Archive");
+  assert.equal(resolved.licenseUrl, "https://creativecommons.org/licenses/by/4.0/");
+});
