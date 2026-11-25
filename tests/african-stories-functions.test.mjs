@@ -338,3 +338,90 @@ test("Rumble source accepts only an official embed ID and watch_officially state
     } }
   }), error => error.code === "invalid-argument");
 });
+
+
+test("official provider source records are validated and retained on the exact edition", async () => {
+  const api = makeFunctions();
+  const work = {
+    ...validDraft,
+    accessState: "watch_officially",
+    versions: [{
+      ...validDraft.versions[0],
+      playbackSources: [
+        { sourceId: "official-youtube", provider: "youtube", videoId: "M7lc1UVf-VE", enabled: true, evidenceRef: "creator-check-001" },
+        { sourceId: "official-vimeo", provider: "vimeo", videoId: "12345678", vimeoHash: "abc123hash", enabled: true, evidenceRef: "creator-check-002" },
+        { sourceId: "official-dailymotion", provider: "dailymotion", videoId: "x84sh87", playerId: "x8lr5", enabled: true, evidenceRef: "creator-check-003" },
+        { sourceId: "official-rumble", provider: "rumble", embedId: "v5pv5f", enabled: true, evidenceRef: "creator-check-004" },
+        { sourceId: "official-peertube", provider: "peertube", instanceOrigin: "https://peer.tube", videoUuid: "52a10666-3a18-4e73-93da-e8d3c12c305a", enabled: true, evidenceRef: "creator-check-005" }
+      ]
+    }]
+  };
+  await api.saveAfricanWorkDraft({
+    auth: { uid: "editor-1", token: { africanStoriesEditor: true } },
+    data: { workId: "multi-provider-work", work }
+  });
+  await api.publishAfricanWork({
+    auth: { uid: "publisher-1", token: { africanStoriesPublisher: true } },
+    data: { workId: "multi-provider-work" }
+  });
+  const published = api.db.records.get("africanWorksPublic/multi-provider-work");
+  assert.deepEqual(published.versions[0].playbackSources.map(source => source.provider),
+    ["youtube", "vimeo", "dailymotion", "rumble", "peertube"]);
+  assert.equal("evidenceRef" in published.versions[0].playbackSources[0], false);
+  assert.equal(published.versions[0].playbackSources[2].playerId, "x8lr5");
+});
+
+test("archive source records require explicit rights basis and evidence", async () => {
+  const api = makeFunctions();
+  const work = {
+    ...validDraft,
+    versions: [{
+      ...validDraft.versions[0],
+      playbackSources: [{
+        sourceId: "archive-public-file", provider: "archive",
+        archiveIdentifier: "ghana-archive-item-001", archiveFile: "film.mp4",
+        rightsBasis: "written_permission", enabled: true, evidenceRef: "permission-001"
+      }]
+    }]
+  };
+  await api.saveAfricanWorkDraft({
+    auth: { uid: "editor-1", token: { africanStoriesEditor: true } },
+    data: { workId: "archive-work", work }
+  });
+  const saved = api.db.records.get("africanWorkDrafts/archive-work");
+  assert.equal(saved.versions[0].playbackSources[0].rightsBasis, "written_permission");
+  await assert.rejects(api.saveAfricanWorkDraft({
+    auth: { uid: "editor-1", token: { africanStoriesEditor: true } },
+    data: { workId: "archive-work-bad", work: {
+      ...work,
+      versions: [{
+        ...work.versions[0],
+        playbackSources: [{
+          ...work.versions[0].playbackSources[0], rightsBasis: "unknown"
+        }]
+      }]
+    } }
+  }), error => error.code === "invalid-argument");
+});
+
+test("PeerTube rejects unreviewed instance origins and Dailymotion requires its creator player ID", async () => {
+  const api = makeFunctions();
+  const baseSource = { sourceId: "peertube-source", provider: "peertube", instanceOrigin: "https://unreviewed.example", videoUuid: "52a10666-3a18-4e73-93da-e8d3c12c305a", enabled: true, evidenceRef: "creator-check" };
+  await assert.rejects(api.saveAfricanWorkDraft({
+    auth: { uid: "editor-1", token: { africanStoriesEditor: true } },
+    data: { workId: "bad-peertube", work: {
+      ...validDraft, accessState: "watch_officially",
+      versions: [{ ...validDraft.versions[0], playbackSources: [baseSource] }]
+    } }
+  }), error => error.code === "invalid-argument");
+  await assert.rejects(api.saveAfricanWorkDraft({
+    auth: { uid: "editor-1", token: { africanStoriesEditor: true } },
+    data: { workId: "bad-dailymotion", work: {
+      ...validDraft, accessState: "watch_officially",
+      versions: [{ ...validDraft.versions[0], playbackSources: [{
+        sourceId: "dailymotion-source", provider: "dailymotion", videoId: "x84sh87",
+        enabled: true, evidenceRef: "creator-check"
+      }] }]
+    } }
+  }), error => error.code === "invalid-argument");
+});
