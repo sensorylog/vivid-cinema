@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "catalogueVersion": "2026-11-25.5",
+  "catalogueVersion": "2026-11-25.6",
   "regions": [
     {
       "id": "north",
@@ -333,6 +333,81 @@
       ],
       "timelineIds": [
         "ghana-video-film-breakthrough-1987-89"
+      ]
+    },
+    {
+      "id": "who-was-allowed-to-film",
+      "title": "Who was allowed to hold the camera?",
+      "kicker": "FRENCH COLONIAL RULE · PRODUCTION RIGHTS",
+      "summary": "The history of colonial cinema includes restrictions on image-making itself. The 1934 Laval Decree prevented colonised people from filming in the colonies until it was overturned in 1960. This collection follows the difference between permission to make images and the actual resources required to build a filmmaking practice.",
+      "reframe": "Colonial control was not limited to screening permits and censorship boards. In parts of the French empire, it also restricted who could become a filmmaker. The legal opening in 1960 did not erase the economic and institutional barriers that followed.",
+      "whyItMatters": "The question 'who gets to tell the story?' begins before a film reaches an audience. It begins with who can access the camera, training, finance and distribution.",
+      "confidence": "The decree and its overturning are documented by BFI; the collection’s wider structural interpretation is editorial.",
+      "evidenceRef": "laval-decree-camera-access",
+      "published": true,
+      "references": [
+        {
+          "label": "BFI — Where to begin with Ousmane Sembène",
+          "url": "https://www.bfi.org.uk/features/where-begin-with-ousmane-sembene"
+        }
+      ],
+      "personIds": [
+        "ousmane-sembene",
+        "sarah-maldoror"
+      ],
+      "timelineIds": [
+        "laval-decree-1934",
+        "laval-decree-overturned-1960"
+      ]
+    },
+    {
+      "id": "festival-canon-video-film",
+      "title": "Who gets to decide what counts as African cinema?",
+      "kicker": "FESPACO · NOLLYWOOD · VIDEO",
+      "summary": "FESPACO helped define African cinema for more than half a century, but its relationship with video-film cultures was contested. Oxford scholarship notes that Nollywood was effectively excluded until 2015 because of format incompatibility and debates over aesthetics and ideology. The disagreement exposes a hierarchy between festival prestige and popular screen economies.",
+      "reframe": "The argument was not simply celluloid versus video. It was about cultural legitimacy: which audiences, production systems and storytelling forms were allowed to represent African cinema on its most visible stages.",
+      "whyItMatters": "Vivid should document popular cinema and festival cinema as interacting histories, not treat one as the authentic version and the other as a footnote.",
+      "confidence": "Oxford Bibliographies and the Oxford Research Encyclopedia describe the debate; precise programme-by-programme history needs festival catalogue research.",
+      "evidenceRef": "fespaco-format-debate",
+      "published": true,
+      "references": [
+        {
+          "label": "Oxford Bibliographies — Nollywood",
+          "url": "https://academic.oup.com/reference/62328/reference-article-abstract/553809173"
+        },
+        {
+          "label": "Kate Cowcher — African Films and FESPACO",
+          "url": "https://academic.oup.com/edited-volume/61663/chapter-abstract/553408769"
+        }
+      ],
+      "personIds": [],
+      "timelineIds": [
+        "fespaco-founded-1969",
+        "living-in-bondage-1992",
+        "fespaco-nollywood-2015"
+      ]
+    },
+    {
+      "id": "egyptian-cinema-and-censorship",
+      "title": "Egyptian cinema: industrial power, artistic risk",
+      "kicker": "EGYPT · YOUSSEF CHAHINE",
+      "summary": "Egypt had one of the Arab world’s largest film industries by the 1950s, but scale did not guarantee artistic freedom. Youssef Chahine’s Cairo Station became a celebrated work while also facing a long domestic ban. This collection puts industrial history, censorship and the filmmaker’s formal ambition in the same frame.",
+      "reframe": "A strong national film industry is not the same as an uncensored one. The history of Egyptian cinema includes both industrial reach and intense local disputes over what could be shown.",
+      "whyItMatters": "It resists flattening North African cinema into a footnote and shows how a major industry can still contain contested films and fragile freedoms.",
+      "confidence": "BFI’s Chahine profile supports the industry context and Cairo Station ban; broader censorship history needs further Egyptian archival research.",
+      "evidenceRef": "egyptian-cinema-chahine-censorship",
+      "published": true,
+      "references": [
+        {
+          "label": "BFI — Where to begin with Youssef Chahine",
+          "url": "https://www.bfi.org.uk/features/where-begin-with-youssef-chahine"
+        }
+      ],
+      "personIds": [
+        "youssef-chahine"
+      ],
+      "timelineIds": [
+        "cairo-station-1958-censorship"
       ]
     }
   ],
@@ -692,6 +767,24 @@
       ]
     },
     {
+      "id": "laval-decree-1934",
+      "title": "1934: the Laval Decree restricts who can film",
+      "dateLabel": "1934",
+      "kicker": "FRENCH COLONIAL EMPIRE · CAMERA ACCESS",
+      "summary": "The Laval Decree of 1934 restricted colonised people from filming in the colonies. BFI’s account of Ousmane Sembène’s generation identifies the decree as a barrier that shaped who could operate a camera and make images under French colonial rule.",
+      "reframe": "Colonial power did not only decide which films audiences could see. It could also restrict who was allowed to make films in the first place. The camera itself was part of the struggle over authority and representation.",
+      "whyItMatters": "This adds a production-rights dimension to colonial film history: the issue was not only censorship after a film existed, but barriers to making images at all.",
+      "confidence": "The decree and its broad effect are described by BFI; country-specific implementation and enforcement should be researched separately.",
+      "evidenceRef": "laval-decree-bfi-history",
+      "published": true,
+      "references": [
+        {
+          "label": "BFI — Where to begin with Ousmane Sembène",
+          "url": "https://www.bfi.org.uk/features/where-begin-with-ousmane-sembene"
+        }
+      ]
+    },
+    {
       "id": "gold-coast-film-unit-1947-48",
       "title": "1947–1949: the Gold Coast Film Unit takes shape",
       "dateLabel": "1947–1949 (sources differ)",
@@ -766,6 +859,24 @@
       ]
     },
     {
+      "id": "cairo-station-1958-censorship",
+      "title": "1958: Cairo Station is banned at home",
+      "dateLabel": "1958",
+      "kicker": "EGYPT · YOUSSEF CHAHINE",
+      "summary": "Youssef Chahine’s Cairo Station was banned in Egypt for more than a decade, according to BFI. The film’s frank treatment of sexuality and its street-level view of class and labour challenged local moral and political expectations—even though the sexual act that provoked controversy takes place off screen.",
+      "reframe": "International recognition and domestic acceptance are not the same thing. A film can be celebrated as a landmark while being denied access to audiences in its own country.",
+      "whyItMatters": "It makes censorship part of the film’s reception history and complicates the idea that Egypt’s large film industry was free from internal contestation.",
+      "confidence": "BFI’s film essay records the ban and its context; further legal and contemporary press records would deepen the chronology.",
+      "evidenceRef": "cairo-station-bfi-censorship",
+      "published": true,
+      "references": [
+        {
+          "label": "BFI — Where to begin with Youssef Chahine",
+          "url": "https://www.bfi.org.uk/features/where-begin-with-youssef-chahine"
+        }
+      ]
+    },
+    {
       "id": "ghana-audiences-market-power-1960s",
       "title": "Early 1960s: Ghanaian audiences shape the cinema market",
       "dateLabel": "Early 1960s",
@@ -780,6 +891,24 @@
         {
           "label": "Gareth McFeely — Gone Are the Days (Boston University dissertation)",
           "url": "https://hdl.handle.net/2144/15684"
+        }
+      ]
+    },
+    {
+      "id": "laval-decree-overturned-1960",
+      "title": "1960: the Laval Decree is overturned",
+      "dateLabel": "1960",
+      "kicker": "FRANCOPHONE AFRICA · FILMMAKING ACCESS",
+      "summary": "BFI notes that the Laval Decree was overturned in 1960, during the wave of African independence. This legal change matters, but it should not be confused with instant equality in funding, equipment, distribution or international visibility for African filmmakers.",
+      "reframe": "The end of a colonial restriction is a threshold, not the end of the structural barriers it helped create. Legal permission to film does not automatically create a film industry.",
+      "whyItMatters": "It helps distinguish political independence, legal access to cameras and the material ability to produce and distribute films.",
+      "confidence": "The 1960 repeal is stated in BFI’s filmmaker history; the wider interpretation is editorial.",
+      "evidenceRef": "laval-decree-repeal-bfi",
+      "published": true,
+      "references": [
+        {
+          "label": "BFI — Where to begin with Ousmane Sembène",
+          "url": "https://www.bfi.org.uk/features/where-begin-with-ousmane-sembene"
         }
       ]
     },
@@ -1014,6 +1143,28 @@
         {
           "label": "Oxford Bibliographies — Nollywood",
           "url": "https://academic.oup.com/reference/62328/reference-article-abstract/553809173"
+        }
+      ]
+    },
+    {
+      "id": "fespaco-nollywood-2015",
+      "title": "2015: Nollywood enters FESPACO’s main conversation",
+      "dateLabel": "2015",
+      "kicker": "BURKINA FASO · FORMAT / CANON",
+      "summary": "Oxford Bibliographies notes that FESPACO effectively excluded Nollywood until 2015, citing format incompatibility and persistent aesthetic and ideological boundaries. This was more than a technical disagreement: it reflected a debate about what counted as cinema and which African production cultures belonged in the continent’s most prestigious festival space.",
+      "reframe": "A major African film festival did not automatically represent every African film culture. The video-film industry’s scale and popularity did not guarantee recognition by the festival canon.",
+      "whyItMatters": "It shows that African cinema has never had one uncontested definition; institutions have shaped the boundary between festival cinema, popular video and commercial screen culture.",
+      "confidence": "Oxford Bibliographies explicitly describes the effective exclusion until 2015; the exact programming history should be checked against annual festival catalogues.",
+      "evidenceRef": "nollywood-fespaco-exclusion-oxford",
+      "published": true,
+      "references": [
+        {
+          "label": "Oxford Bibliographies — Nollywood",
+          "url": "https://academic.oup.com/reference/62328/reference-article-abstract/553809173"
+        },
+        {
+          "label": "Kate Cowcher — African Films and FESPACO",
+          "url": "https://academic.oup.com/edited-volume/61663/chapter-abstract/553408769"
         }
       ]
     },
