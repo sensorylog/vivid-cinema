@@ -314,3 +314,27 @@ test("Dailymotion source requires a creator-provided Player ID and official view
     } }
   }), error => error.code === "invalid-argument");
 });
+
+
+test("Rumble source accepts only an official embed ID and watch_officially state", async () => {
+  const api = makeFunctions();
+  const source = {
+    sourceId: "official-rumble", provider: "rumble", embedId: "v5pv5f",
+    label: "Creator-provided Rumble embed", enabled: true, evidenceRef: "creator-channel-verification-003"
+  };
+  await api.saveAfricanWorkDraft({
+    auth: { uid: "editor-1", token: { africanStoriesEditor: true } },
+    data: { workId: "river-film", work: {
+      ...validDraft, accessState: "watch_officially",
+      versions: [{ ...validDraft.versions[0], playbackSources: [source] }]
+    } }
+  });
+  assert.equal(api.db.records.get("africanWorkDrafts/river-film").versions[0].playbackSources[0].embedId, "v5pv5f");
+  await assert.rejects(api.saveAfricanWorkDraft({
+    auth: { uid: "editor-1", token: { africanStoriesEditor: true } },
+    data: { workId: "other-film", work: {
+      ...validDraft, accessState: "watch_officially",
+      versions: [{ ...validDraft.versions[0], playbackSources: [{ ...source, embedId: "bad id" }] }]
+    } }
+  }), error => error.code === "invalid-argument");
+});
