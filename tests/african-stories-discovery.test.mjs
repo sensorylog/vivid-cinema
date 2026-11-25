@@ -26,6 +26,9 @@ test("title discovery filters by country, format and query", () => {
   assert.deepEqual(filterAfricanTitles(titles, { country: "GH" }).map(item => item.id), ["a"]);
   assert.deepEqual(filterAfricanTitles(titles, { format: "documentary", query: "fishing" }).map(item => item.id), ["a"]);
   assert.deepEqual(filterAfricanTitles(titles, { language: "Yoruba" }).map(item => item.id), ["b"]);
+  const countries = [{ code: "GH", regionId: "west" }, { code: "NG", regionId: "west" }];
+  assert.deepEqual(filterAfricanTitles(titles, { region: "west", countries }).map(item => item.id), ["a", "b"]);
+  assert.deepEqual(filterAfricanTitles(titles, { region: "north", countries }).map(item => item.id), []);
 });
 
 test("editorial records require publication and an evidence reference", () => {
