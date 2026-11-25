@@ -74,11 +74,11 @@ test("browsing pages use the refreshed advertising assets", async () => {
 
 test("Popunder is isolated and cannot execute before a confirmed network frequency cap", async () => {
   const advertising = await readFile(path.join(root, "scripts", "advertising.js"), "utf8");
-  assert.match(advertising, /popunder: Object\\.freeze\\(\\{/);
-  assert.match(advertising, /enabled: false,\\s*frequencyCapConfirmed: false/);
-  assert.match(advertising, /if \\(!config\\?\\.enabled \\|\\| !config\\.frequencyCapConfirmed \\|\\| !config\\.src\\) return/);
-  assert.match(advertising, /maxScriptLoadsPerVisitorMs: 24 \\* 60 \\* 60 \\* 1000/);
-  assert.match(advertising, /eligiblePages: Object\\.freeze\\(\\["home", "discover", "collection", "for-you", "anime"\\]\\)/);
-  assert.match(advertising, /vivid:popunder:last-script-load/);
-  assert.match(advertising, /Fail closed when storage is unavailable/);
+  assert.ok(advertising.includes("popunder: Object.freeze({"));
+  assert.ok(advertising.includes("enabled: false,\n    frequencyCapConfirmed: false"));
+  assert.ok(advertising.includes("if (!config?.enabled || !config.frequencyCapConfirmed || !config.src) return;"));
+  assert.ok(advertising.includes("maxScriptLoadsPerVisitorMs: 24 * 60 * 60 * 1000"));
+  assert.ok(advertising.includes('eligiblePages: Object.freeze(["home", "discover", "collection", "for-you", "anime"])'));
+  assert.ok(advertising.includes("vivid:popunder:last-script-load"));
+  assert.ok(advertising.includes("Fail closed when storage is unavailable"));
 });
