@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
-  buildOfficialEmbed, fetchFilmFluxTrending, getOfficialSourceFallback,
+  AFRICAN_PROVIDER_CAPABILITIES, buildOfficialEmbed, fetchFilmFluxTrending, getOfficialSourceFallback,
   resolveInternetArchiveFile, validateAfricanPlaybackSource
 } from "../scripts/african-stories/providers.js";
 
@@ -117,4 +117,23 @@ test("Rumble uses the official embed route and accepts only copied embed IDs", (
   assert.equal(result.url, "https://rumble.com/embed/v5pv5f/");
   assert.equal(getOfficialSourceFallback({ ...base, provider: "rumble", embedId: "v5pv5f" }), result.url);
   assert.throws(() => buildOfficialEmbed({ ...base, provider: "rumble", embedId: "bad id" }), /exact embed ID/);
+});
+
+
+test("provider capabilities distinguish official embeds from public files", () => {
+  const { youtube, vimeo, peertube, dailymotion, rumble, archive } = AFRICAN_PROVIDER_CAPABILITIES;
+  assert.equal(youtube.type, "official_embed");
+  assert.equal(youtube.controls, "provider_api");
+  assert.equal(vimeo.controls, "provider_api");
+  assert.equal(peertube.controls, "provider_api");
+  assert.equal(dailymotion.controls, "provider_native");
+  assert.equal(rumble.controls, "provider_native");
+  assert.equal(archive.type, "public_file");
+});
+
+test("Internet Archive rejects unrecognized rights basis before requesting metadata", async () => {
+  await assert.rejects(resolveInternetArchiveFile({
+    ...base, provider: "archive", archiveIdentifier: "ghana-film-archive-001",
+    archiveFile: "film.mp4", rightsBasis: "unknown"
+  }, async () => { throw new Error("metadata must not be requested"); }), /no recognized/);
 });
