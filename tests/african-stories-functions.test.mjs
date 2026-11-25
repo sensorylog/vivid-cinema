@@ -425,3 +425,30 @@ test("PeerTube rejects unreviewed instance origins and Dailymotion requires its 
     } }
   }), error => error.code === "invalid-argument");
 });
+
+
+test("Creative Commons BY archive records require attribution before publication", async () => {
+  const api = makeFunctions();
+  const work = {
+    ...validDraft,
+    versions: [{
+      ...validDraft.versions[0],
+      playbackSources: [{
+        sourceId: "archive-cc-by", provider: "archive",
+        archiveIdentifier: "ghana-archive-item-002", archiveFile: "film.mp4",
+        rightsBasis: "cc_by", enabled: true, evidenceRef: "archive-rights-002"
+      }]
+    }]
+  };
+  await assert.rejects(api.saveAfricanWorkDraft({
+    auth: { uid: "editor-1", token: { africanStoriesEditor: true } },
+    data: { workId: "archive-cc-by-no-credit", work }
+  }), error => error.code === "invalid-argument");
+  work.versions[0].playbackSources[0].attributionText = "Directed by Ama Example, Ghana Film Archive";
+  await api.saveAfricanWorkDraft({
+    auth: { uid: "editor-1", token: { africanStoriesEditor: true } },
+    data: { workId: "archive-cc-by-with-credit", work }
+  });
+  const saved = api.db.records.get("africanWorkDrafts/archive-cc-by-with-credit");
+  assert.equal(saved.versions[0].playbackSources[0].attributionText, "Directed by Ama Example, Ghana Film Archive");
+});
