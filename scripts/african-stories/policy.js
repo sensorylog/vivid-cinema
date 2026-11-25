@@ -26,7 +26,7 @@ export function isAfricanSourcePlayable(title, source, options = {}) {
   if (title.published !== true || !nonEmpty(title.id) || !nonEmpty(title.editionId)) return false;
   if (!source || typeof source !== "object" || Array.isArray(source)) return false;
   if (source.enabled !== true || source.authorized !== true || source.status !== "active") return false;
-  if (!nonEmpty(source.sourceId) || !nonEmpty(source.provider)) return false;
+  if (!nonEmpty(source.sourceId) || !["youtube", "vimeo", "peertube", "archive", "partner"].includes(source.provider)) return false;
   if (source.authorization?.status !== "verified" ||
       !nonEmpty(source.authorization.evidenceRef) ||
       !nonEmpty(source.authorization.authorizedBy)) return false;
