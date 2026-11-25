@@ -181,11 +181,11 @@ export function createAfricanStoriesFunctions({ db, onCall, HttpsError, Timestam
     const originUrl = parseHttpsUrl(boundedText(request.data?.embedOrigin, 500, "embedOrigin", HttpsError, true), "embedOrigin", HttpsError);
     if (originUrl.origin !== originUrl.href.replace(/\/$/, "")) fail(HttpsError, "invalid-argument", "embedOrigin must be an origin only, without a path or query.");
     const agreementRef = boundedText(request.data?.agreementRef, 160, "agreementRef", HttpsError, true);
-    if (!request.data?.securityReviewed) fail(HttpsError, "failed-precondition", "Provider security review must be explicitly confirmed.");
+    if (request.data?.securityReviewed !== true) fail(HttpsError, "failed-precondition", "Provider security review must be explicitly confirmed.");
     const now = Timestamp.now();
     await db.collection("africanProviderRegistryPrivate").doc(providerId).set({
       providerId, adapterType, embedOrigin: originUrl.origin,
-      status: request.data.status === "active" ? "active" : "inactive",
+      status: request.data?.status === "active" ? "active" : "inactive",
       adapterReady: typeof PROVIDER_SESSION_ADAPTERS[providerId]?.createSession === "function",
       agreementRef, securityReviewed: true,
       updatedAt: now, updatedBy: request.auth.uid
@@ -193,7 +193,7 @@ export function createAfricanStoriesFunctions({ db, onCall, HttpsError, Timestam
     await db.collection("africanAuditEvents").doc(randomUUID()).set({
       action: "provider_registry_updated", providerId, actorUid: request.auth.uid, occurredAt: now
     });
-    return { providerId, status: request.data.status === "active" ? "active" : "inactive" };
+    return { providerId, status: request.data?.status === "active" ? "active" : "inactive", adapterReady: typeof PROVIDER_SESSION_ADAPTERS[providerId]?.createSession === "function" };
   });
 
   const setAfricanRightsDecision = onCall({ region, maxInstances: 5, enforceAppCheck: true }, async request => {
@@ -236,7 +236,7 @@ export function createAfricanStoriesFunctions({ db, onCall, HttpsError, Timestam
     await db.collection("africanAuditEvents").doc(randomUUID()).set({
       action: "rights_decision_" + status, workId, versionId, actorUid: request.auth.uid, occurredAt: now
     });
-    return { workId, versionId, status, streamOnVivid: payload.streamOnVivid };
+    return { workId, versionId, status, rightsApproved: payload.rightsApproved === true, playbackAdapterReady: Boolean(payload.providerId && typeof PROVIDER_SESSION_ADAPTERS[payload.providerId]?.createSession === "function") };
   });
 
   const createAfricanPlaybackSession = onCall({ region, maxInstances: 20, enforceAppCheck: true }, async request => {
