@@ -4,7 +4,7 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-
 const ARCHIVE_ID = /^[A-Za-z0-9][A-Za-z0-9._-]{1,119}$/;
 const ARCHIVE_FILE = /^[A-Za-z0-9][A-Za-z0-9._ -]{0,239}$/;
 const PUBLIC_ARCHIVE_FORMATS = new Set(["MPEG4","h.264","H.264","WebM","Ogg Video","Ogg Video File","M3U8","M3U8 Playlist"]);
-const ARCHIVE_RIGHTS_BASES = new Set(["public_domain","cc0","cc_by","cc_by_sa","written_permission"]);
+const ARCHIVE_RIGHTS_BASES = new Set(["public_domain","cc0","cc_by","cc_by_sa"]);
 const FILMFLUX_ENDPOINT = "https://filmflux.app/api/public/trending?limit=10";
 const PEERTUBE_ALLOWED_HOSTS = new Set(["framatube.org", "peer.tube"]);
 
@@ -109,7 +109,11 @@ export async function resolveInternetArchiveFile(source, fetchImpl = fetch) {
     throw new TypeError("Invalid Internet Archive filename.");
   }
   if (!ARCHIVE_RIGHTS_BASES.has(item.rightsBasis)) {
-    throw new Error("The archive file has no recognized public-domain, Creative Commons or written-permission basis.");
+    throw new Error("Public archive playback requires a public-domain or supported Creative Commons basis. Written-permission streams need the separate territory/window entitlement workflow.");
+  }
+  const attributionText = cleanText(item.attributionText, 500);
+  if (["cc_by","cc_by_sa"].includes(item.rightsBasis) && attributionText.length < 10) {
+    throw new Error("Creative Commons BY/BY-SA playback requires an attribution credit.");
   }
   const metadataUrl = "https://archive.org/metadata/" + encodeURIComponent(item.archiveIdentifier);
   const controller = new AbortController();
@@ -145,6 +149,11 @@ export async function resolveInternetArchiveFile(source, fetchImpl = fetch) {
       extension === "webm" ? "video/webm" : extension === "ogv" || extension === "ogg" ? "video/ogg" : "video/mp4",
     itemUrl: "https://archive.org/details/" + encodeURIComponent(item.archiveIdentifier),
     rightsBasis: item.rightsBasis,
+    attributionText,
+    licenseUrl: item.rightsBasis === "cc_by" ? "https://creativecommons.org/licenses/by/4.0/" :
+      item.rightsBasis === "cc_by_sa" ? "https://creativecommons.org/licenses/by-sa/4.0/" :
+      item.rightsBasis === "cc0" ? "https://creativecommons.org/publicdomain/zero/1.0/" :
+      "https://creativecommons.org/publicdomain/mark/1.0/",
     evidenceRef: cleanText(item.evidenceRef, 240)
   };
 }
