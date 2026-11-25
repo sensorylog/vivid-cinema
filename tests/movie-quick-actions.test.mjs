@@ -7,8 +7,9 @@ const read = path => readFile(new URL(path, import.meta.url), "utf8");
 
 test("quick actions reuse the canonical library collections and never create a second store", async () => {
   const source = await read("../scripts/movie-quick-actions.js");
-  assert.match(source, /toggleLibraryItem\("favorites"/);
-  assert.match(source, /toggleLibraryItem\("watchLater"/);
+  assert.match(source, /data-collection="favorites"/);
+  assert.match(source, /data-collection="watchLater"/);
+  assert.match(source, /toggleLibraryItem\(collection, activeItem\)/);
   assert.match(source, /from "\.\/library\.js"/);
   assert.doesNotMatch(source, /localStorage\.(?:getItem|setItem)\(/);
 });
@@ -18,6 +19,7 @@ test("quick actions are available from a long press and suppress the card's norm
   assert.match(source, /pointerdown/);
   assert.match(source, /HOLD_DELAY\s*=\s*520/);
   assert.match(source, /pointermove/);
+  assert.match(source, /swipe|touchend|sheetStartY/i);
   assert.match(source, /stopImmediatePropagation/);
   assert.match(source, /role="dialog"/);
   assert.match(source, /aria-modal="true"/);
