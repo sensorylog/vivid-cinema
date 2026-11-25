@@ -69,6 +69,19 @@ test("published Phase 5 editorial records are sourced and internally connected",
   assert.ok(experience.timelines.some(item => item.id === "love-brewed-1980" && item.dateLabel.includes("1981")));
 });
 
+test("Ghana timeline separates exhibition, safety regulation and formal censorship", () => {
+  const byId = id => experience.timelines.find(item => item.id === id);
+  assert.ok(byId("gold-coast-1912-safety-ordinance").summary.includes("flammable film"));
+  assert.ok(byId("gold-coast-1925-censorship-board").summary.includes("formal film censorship"));
+  assert.ok(byId("gold-coast-1914-first-purpose-built-theatre").summary.includes("travelling showmen"));
+  assert.ok(byId("gold-coast-1923-cinema-exhibition").summary.includes("not be treated as the first time"));
+  assert.ok(byId("gold-coast-film-unit-1947-48").dateLabel.includes("1949"));
+  assert.ok(byId("love-brewed-1980").dateLabel.includes("1981"));
+  assert.ok(experience.collections.some(item => item.id === "audiences-not-passive"));
+  const years = experience.timelines.map(item => Number((String(item.dateLabel).match(/(?:18|19|20)\\d{2}/) || ["0"])[0]));
+  assert.ok(years.every((year, index) => index === 0 || year >= years[index - 1]));
+});
+
 test("access labels keep discovery separate from viewing rights", () => {
   assert.equal(accessLabel("discover_archive_record"), "Discover / archive record");
   assert.equal(accessLabel("access_pending"), "Access pending");
