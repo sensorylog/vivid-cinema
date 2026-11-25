@@ -1,6 +1,6 @@
 # African Stories — Phase 4 provider discovery
 
-**Status:** research register; candidates are not production-enabled.
+**Status:** provider discovery and public-source runtime implementation recorded on PR #524. Individual title availability, creator authority, rights, live endpoint health and production deployment remain unverified.
 **Branch:** `feat/african-stories-phases-2-7`
 **PR:** #524 — all Phase 2–7 work remains in this single PR.
 
@@ -245,3 +245,23 @@ The restricted operations console now includes source templates for YouTube, Vim
 - Rumble's own help centre describes the creator-facing video embed workflow: https://rumble.support/en/help/rumble-basics-how-to-embed-your-video
 - Example official Rumble embed route: https://rumble.com/embed/v17j3tt/
 - The adapter accepts only an embed ID and constructs the official `https://rumble.com/embed/{embedId}/` route. It does not call undocumented media endpoints or extract stream URLs.
+
+
+## Implementation status on PR #524
+
+The public-source runtime now implements:
+- **YouTube:** official embed URL, strict video ID validation, IFrame Player API integration, playback state, seeking, mute, duration and original-watch fallback
+- **Vimeo:** official player embed, optional unlisted privacy hash, Player SDK controls and creator-page fallback
+- **PeerTube:** official embed and Embed API controls, restricted to the reviewed `peer.tube` and `framatube.org` origins
+- **Dailymotion:** creator-provided Player ID plus official Geo Player iframe route; native controls retained
+- **Rumble:** exact creator-provided embed ID plus official Rumble iframe route; native controls retained
+- **Internet Archive:** exact item/file metadata lookup, public-file/format checks, explicit rights-basis requirement and HTML5/HLS playback
+- **FilmFlux:** documented trending endpoint connector, response normalization, safe URL/YouTube ID validation and attribution in the discovery UI
+
+The player now provides a unified Vivid control strip for providers with documented control APIs (YouTube, Vimeo and PeerTube). It does not cover or replace those providers' official player controls. Dailymotion and Rumble retain their own controls. Archive files use browser-native video controls. Provider APIs and source-specific player SDKs are loaded only on the relevant provider route.
+
+The site CSP was updated for the implemented official player/API origins and FilmFlux's discovery endpoint. The service-worker shell version was bumped so clients refresh the updated player assets. Provider unit tests, callable source-validation tests and player structure tests were expanded.
+
+**Not implemented as public playback APIs:** Wazi Movies and NG-Movies remain discovery leads without verified public catalogue APIs or data-reuse permissions. AfriDocs and CINAF remain external/partner destinations until their operators confirm an integration route. No scraping of their private endpoints or rehosting of their video is performed.
+
+**Not yet production-complete:** CI has not yet been confirmed green for the final PR head; live FilmFlux CORS/schema/terms checks, browser/device playback QA, archive item-by-item rights review, partner session adapters, trusted territory ingress, kill switches, monitoring and deployment remain outstanding.
