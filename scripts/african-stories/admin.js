@@ -89,8 +89,9 @@ const sourceTemplates = {
   },
   archive: {
     sourceId: "archive-public-file", provider: "archive", archiveIdentifier: "REPLACE_ARCHIVE_ITEM",
-    archiveFile: "REPLACE_FILE.mp4", rightsBasis: "written_permission",
-    label: "Authorized archive access copy", enabled: true, evidenceRef: "REPLACE_WITH_RIGHTS_EVIDENCE_RECORD"
+    archiveFile: "REPLACE_FILE.mp4", rightsBasis: "REPLACE_WITH_PUBLIC_DOMAIN_OR_CC_LICENSE",
+    attributionText: "REPLACE_WITH_CREATOR_AND_TITLE_CREDIT",
+    label: "Public-domain or Creative Commons archive copy", enabled: false, evidenceRef: "REPLACE_WITH_RIGHTS_EVIDENCE_RECORD"
   }
 };
 
@@ -114,7 +115,7 @@ insertSource.addEventListener("click", () => {
   firstVersion.playbackSources.push({ ...template });
   if (template.provider !== "archive") data.work.accessState = "watch_officially";
   payload.value = JSON.stringify(data, null, 2);
-  showResult("Template inserted into the first edition. Replace the provider ID, UUID or archive item/file and the evidence reference before saving.", false);
+  showResult("Template inserted into the first edition. Replace the provider ID, UUID or archive item/file and the evidence reference before saving. Archive templates start disabled; enable them only after confirming public-domain/CC status and required attribution.", false);
 });
 
 action.addEventListener("change", updateActions);
