@@ -152,3 +152,74 @@ Research sources:
 - CINAF Studio: https://studio.cinaf.tv/en
 
 This document records public technical documentation and discovery leads, not a legal opinion, partner confirmation, rights clearance, or a claim that any specific film is currently playable in Vivid. All production sources must be verified against the exact title/edition, territory, creator/uploader authority, embedding settings and provider terms.
+
+
+## Implementation update — provider runtime committed
+
+The following public-source integrations are now implemented on PR #524:
+
+| Provider | Runtime status | Implemented behavior |
+|---|---|---|
+| YouTube | Implemented | Validated 11-character video IDs; official YouTube embed URL; creator evidence reference; original-platform fallback |
+| Vimeo | Implemented | Official player iframe; numeric video ID; optional unlisted privacy hash; DNT parameter; original-platform fallback |
+| PeerTube | Implemented with reviewed instance allowlist | Official embed route with API enabled for `framatube.org` and `peer.tube`; arbitrary instances are rejected until their exact origins are reviewed and added to both CSP and the runtime allowlist |
+| Internet Archive | Implemented | Fetches item metadata, requires the exact selected public file, rejects private/unsupported files, and plays compatible MP4/WebM/Ogg/HLS media in the dedicated HTML5 player; links back to the archive item |
+| FilmFlux | Implemented as discovery connector | Fetches its documented public trending endpoint, validates returned IDs/URLs, credits FilmFlux and launches original YouTube uploads in the official YouTube player |
+| Vimeo | Implemented | Source records can include the privacy hash required for unlisted embeds |
+| Wazi Movies | External discovery destination | Link to its own catalogue; no public API/data licence verified |
+| NG-Movies | External discovery destination | Link to its own catalogue; no public API/data licence verified |
+| AfriDocs | External destination | Link to its own documentary platform; no embed/syndication API assumed |
+| CINAF | External/partner destination | Link to its own platform; technical API and partner permissions still require direct confirmation |
+
+### Editorial source record contract
+
+Playback sources are stored inside the exact published edition/version. The operations console's draft JSON accepts a `playbackSources` array per version.
+
+Official platform example:
+
+```json
+{
+  "sourceId": "official-youtube",
+  "provider": "youtube",
+  "videoId": "M7lc1UVf-VE",
+  "label": "Official creator upload",
+  "enabled": true,
+  "evidenceRef": "editorial-verification-record-001"
+}
+```
+
+Vimeo uses `videoId` and optional `vimeoHash`. PeerTube uses `instanceOrigin` and `videoUuid`, with the instance restricted to the reviewed allowlist. YouTube, Vimeo and PeerTube sources can only be enabled when the work's editorial state is `watch_officially`.
+
+Internet Archive example:
+
+```json
+{
+  "sourceId": "archive-public-copy",
+  "provider": "archive",
+  "archiveIdentifier": "example-moving-image-item",
+  "archiveFile": "feature.mp4",
+  "rightsBasis": "written_permission",
+  "label": "Authorized archive access copy",
+  "enabled": true,
+  "evidenceRef": "archive-permission-record-001"
+}
+```
+
+Archive source records require one of `public_domain`, `cc0`, `cc_by`, `cc_by_sa` or `written_permission`, plus a non-empty editorial evidence reference. The player still verifies the exact public item/file metadata at playback time. The evidence reference is an editorial record pointer, not an automated legal opinion.
+
+### Player route
+
+- Catalogue edition: `african-stories-watch.html?work={workId}&version={versionId}`
+- FilmFlux discovery: `african-stories-watch.html?provider=filmflux`
+- Protected partner session: `african-stories-watch.html?provider=partner&work={workId}&version={versionId}`
+
+The player reads published public catalogue records only. It does not accept arbitrary external URLs from query parameters. FilmFlux is explicitly a third-party discovery feed; its returned YouTube ID is played by YouTube, not rehosted by Vivid.
+
+### Remaining provider and launch gates
+
+- FilmFlux endpoint behavior, CORS, live schema, attribution and usage terms must be monitored in deployment; the UI fails gracefully if the endpoint changes or is unavailable.
+- PeerTube instances outside the reviewed `framatube.org` and `peer.tube` origins require individual review, a code allowlist update and CSP update.
+- Wazi Movies and NG-Movies do not have verified public APIs in this implementation; no scraping or bulk catalogue reuse is performed.
+- AfriDocs and CINAF remain official external destinations until the operators confirm embeddable playback, APIs or syndication.
+- No title has been seeded or marked playable merely because a provider adapter exists. Each exact title/version still needs editorial source evidence and, for archive files, an explicit rights basis.
+- Partner CDN adapters, trusted territory ingress, revocation/kill switches, provider health monitoring, full CMS workflows and end-to-end deployment tests remain separate Phase 4 work.
