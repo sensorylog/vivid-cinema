@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import { accessLabel, filterAfricanCountries, filterAfricanTitles, validEditorialRecord, validAfricanTitleRecord } from "../scripts/african-stories/discovery-data.js";
+import { accessLabel, filterAfricanCountries, filterAfricanTitles, filterEditorialRecords, validEditorialRecord, validAfricanTitleRecord } from "../scripts/african-stories/discovery-data.js";
 
 const experience = JSON.parse(await readFile(new URL("../data/african-stories-experience.json", import.meta.url), "utf8"));
 
@@ -154,6 +154,18 @@ test("new archive and film-history records preserve explicit access uncertainty"
   assert.ok(women.confidence.includes("title-specific"));
   assert.ok(nigeria.confidence.includes("remains disputed"));
   assert.ok(experience.people.find(item => item.id === "therese-sita-bella").selectedWorks[0].includes("not verified"));
+});
+
+test("editorial search covers themes, evidence framing, country and region", () => {
+  const records = [
+    { id: "ghana", title: "Archive memory", summary: "Film reels and preservation", kicker: "GHANA", reframe: "Cocoa farm financing", whyItMatters: "Access", evidenceRef: "a", published: true, countryCodes: ["GH"], references: [{ label: "Source", url: "https://example.org/a" }] },
+    { id: "nigeria", title: "Video origins", summary: "Cassette distribution", kicker: "NIGERIA", reframe: "Travelling theatre", whyItMatters: "Audiences", evidenceRef: "b", published: true, countryCodes: ["NG"], references: [{ label: "Source", url: "https://example.org/b" }] }
+  ];
+  const countries = [{ code: "GH", regionId: "west" }, { code: "NG", regionId: "west" }];
+  assert.deepEqual(filterEditorialRecords(records, { query: "cocoa" }).map(item => item.id), ["ghana"]);
+  assert.deepEqual(filterEditorialRecords(records, { country: "NG" }).map(item => item.id), ["nigeria"]);
+  assert.deepEqual(filterEditorialRecords(records, { region: "west", countries }).map(item => item.id), ["ghana", "nigeria"]);
+  assert.deepEqual(filterEditorialRecords(records, { region: "north", countries }), []);
 });
 
 test("access labels keep discovery separate from viewing rights", () => {
