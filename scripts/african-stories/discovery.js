@@ -178,7 +178,8 @@ function renderEditorialDetail() {
 
   const works = document.getElementById("african-editorial-works");
   if (works) works.remove();
-  const selectedWorks = Array.isArray(record?.selectedWorks) ? record.selectedWorks : record?.filmography;\n  if (Array.isArray(selectedWorks) && selectedWorks.length) {
+  const selectedWorks = Array.isArray(record?.selectedWorks) ? record.selectedWorks : record?.filmography;
+  if (Array.isArray(selectedWorks) && selectedWorks.length) {
     const workSection = element("section", "african-editorial-works");
     workSection.id = "african-editorial-works";
     workSection.append(element("h3", "", "Selected works"));
