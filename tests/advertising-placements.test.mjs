@@ -32,6 +32,23 @@ test("all approved browsing pages define a primary and optional secondary positi
   assert.match(advertising, /"watch", "watch-room", "watch-rooms", "live"/);
 });
 
+test("configured native ad anchors exist in their target pages", async () => {
+  const placements = [
+    ["home.html", ".vivid-catalogue-explore", "#top-10"],
+    ["discover.html", ".vivid-discovery-results", ".vivid-discovery-filters"],
+    ["collection.html", "#collection-grid", ".vivid-collection-toolbar"],
+    ["for-you.html", "#recommendation-grid", ".vivid-for-you-controls"],
+    ["anime.html", "#anime-grid", ".vivid-anime-controls"]
+  ];
+  for (const [page, ...selectors] of placements) {
+    const html = await readFile(path.join(root, page), "utf8");
+    for (const selector of selectors) {
+      const token = selector.startsWith("#") ? `id="${selector.slice(1)}"` : `class="${selector.slice(1)}"`;
+      assert.ok(html.includes(token) || (selector.startsWith(".") && new RegExp(`class="[^"]*\\\\b${selector.slice(1)}\\\\b[^"]*"`).test(html)), page + " is missing " + selector);
+    }
+  }
+});
+
 test("native ad presentation does not crop provider creatives", async () => {
   const style = await readFile(path.join(root, "styles", "vivid-advertising.css"), "utf8");
   const advertising = await readFile(path.join(root, "scripts", "advertising.js"), "utf8");
