@@ -255,6 +255,7 @@ async function attachVimeoController(generation) {
   if (generation !== sourceGeneration) { player.destroy(); return; }
   const activeFrame = document.querySelector(".african-player-frame iframe");
   if (activeFrame) frame = activeFrame;
+  let previousVolume = 1;
   attachController({
     play: () => player.play(),
     pause: () => player.pause(),
@@ -262,8 +263,16 @@ async function attachVimeoController(generation) {
     getCurrentTime: () => player.getCurrentTime(),
     getDuration: () => player.getDuration(),
     isPlaying: async () => (await player.getPaused()) === false,
-    isMuted: async () => (await player.getVolume()) === 0,
-    setMuted: async muted => player.setVolume(muted ? 0 : 1),
+    isMuted: async () => (await player.getVolume()) <= 0.001,
+    setMuted: async muted => {
+      if (muted) {
+        const volume = await player.getVolume();
+        if (volume > 0) previousVolume = volume;
+        await player.setVolume(0);
+      } else {
+        await player.setVolume(previousVolume || 1);
+      }
+    },
     destroy: () => player.destroy()
   });
   player.on("timeupdate", event => updateProgress(event.seconds, event.duration, true));
@@ -281,6 +290,7 @@ async function attachPeerTubeController(generation) {
   if (generation !== sourceGeneration) return;
   const activeFrame = document.querySelector(".african-player-frame iframe");
   if (activeFrame) frame = activeFrame;
+  let previousVolume = 1;
   attachController({
     play: () => player.play(),
     pause: () => player.pause(),
@@ -288,8 +298,16 @@ async function attachPeerTubeController(generation) {
     getCurrentTime: () => player.getCurrentTime(),
     getDuration: async () => lastDuration,
     isPlaying: async () => await player.isPlaying?.() ?? false,
-    isMuted: async () => (await player.getVolume()) === 0,
-    setMuted: muted => player.setVolume(muted ? 0 : 1)
+    isMuted: async () => (await player.getVolume()) <= 0.001,
+    setMuted: async muted => {
+      if (muted) {
+        const volume = await player.getVolume();
+        if (volume > 0) previousVolume = volume;
+        await player.setVolume(0);
+      } else {
+        await player.setVolume(previousVolume || 1);
+      }
+    }
   });
   player.addEventListener("playbackStatusUpdate", status => {
     const duration = Number(status?.duration) || lastDuration;

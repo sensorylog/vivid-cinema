@@ -52,6 +52,8 @@ test("premium playback controls use provider APIs without replacing native playe
   assert.match(player, /setMuted: muted => muted \? event\.target\.mute\(\) : event\.target\.unMute\(\)/);
   assert.match(player, /player\.setMuted\(muted\)/);
   assert.match(player, /player\.setVolume\(0\)/);
+  assert.match(player, /previousVolume = volume/);
+  assert.match(player, /player\.setVolume\(previousVolume \|\| 1\)/);
   assert.match(player, /african-control-progress/);
   assert.match(player, /playbackStatusUpdate/);
   assert.match(page, /african-control-fullscreen/);
