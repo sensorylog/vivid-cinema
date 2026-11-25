@@ -29,14 +29,11 @@ test("hero cards keep a separate full-bleed presentation contract", () => {
   assert.match(read("../scripts/tflix-hero.js"), /hero-slide vivid-card--hero/);
 });
 
-test("community posts and news articles use their dedicated shared card contracts", () => {
+test("news articles use the dedicated shared card contract after community retirement", () => {
   const css = read("../styles/vivid-rounded-cards.css");
-  assert.match(css, /\.vivid-card--community/);
   assert.match(css, /\.vivid-card--news/);
-  assert.match(read("../scripts/news-community.js"), /vivid-card--community/);
   assert.match(read("../scripts/news.js"), /vivid-card--news/);
   assert.match(read("../scripts/news.js"), /vivid-news-search-card vivid-card--poster/);
-  assert.match(read("../community.html"), /vivid-rounded-cards\.css/);
   assert.match(read("../news.html"), /vivid-rounded-cards\.css/);
 });
 

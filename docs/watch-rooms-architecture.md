@@ -1,3 +1,5 @@
+> **ARCHIVED — 25 November 2026:** Watch Rooms and Cinema Clubs have been retired from the active Vivid Cinema product. This document is retained as historical engineering reference only. Its implementation steps, navigation guidance, and release status are no longer current. Existing backend records and services are dormant pending a separate retention and decommissioning decision.
+
 # Vivid Watch Rooms — Engineering Architecture
 
 Status: Stages 1–6 implemented; Stage 7 hardening and release validation in progress. GitHub Actions validation remains pending.
