@@ -60,7 +60,7 @@ function playbackSourceRecords(value, accessState, HttpsError) {
     if (!/^[a-z0-9][a-z0-9-]{1,79}$/.test(sourceId) || ids.has(sourceId)) fail(HttpsError, "invalid-argument", "Playback source IDs must be unique URL-safe identifiers.");
     ids.add(sourceId);
     const provider = boundedText(item.provider, 20, "playback provider", HttpsError, true);
-    if (!["youtube","vimeo","peertube","archive"].includes(provider)) fail(HttpsError, "invalid-argument", "Unsupported public playback provider.");
+    if (!["youtube","vimeo","dailymotion","peertube","archive"].includes(provider)) fail(HttpsError, "invalid-argument", "Unsupported public playback provider.");
     const enabled = item.enabled === true;
     const label = boundedText(item.label, 160, "playback source label", HttpsError);
     const evidenceRef = boundedText(item.evidenceRef, 240, "playback source evidenceRef", HttpsError, enabled);
@@ -77,6 +77,15 @@ function playbackSourceRecords(value, accessState, HttpsError) {
       if (enabled && accessState !== "watch_officially") fail(HttpsError, "failed-precondition", "Vimeo embeds require the watch_officially editorial state.");
       source.videoId = videoId;
       source.vimeoHash = vimeoHash;
+    } else if (provider === "dailymotion") {
+      const videoId = boundedText(item.videoId, 16, "Dailymotion videoId", HttpsError, enabled);
+      const playerId = boundedText(item.playerId, 32, "Dailymotion playerId", HttpsError, enabled);
+      if (enabled && (!/^[A-Za-z0-9]{6,16}$/.test(videoId) || !/^[A-Za-z0-9]{4,32}$/.test(playerId))) {
+        fail(HttpsError, "invalid-argument", "Dailymotion requires the exact video ID and a creator-provided Player ID.");
+      }
+      if (enabled && accessState !== "watch_officially") fail(HttpsError, "failed-precondition", "Dailymotion embeds require the watch_officially editorial state.");
+      source.videoId = videoId;
+      source.playerId = playerId;
     } else if (provider === "peertube") {
       const instanceOrigin = boundedText(item.instanceOrigin, 500, "PeerTube instanceOrigin", HttpsError, enabled);
       const videoUuid = boundedText(item.videoUuid, 36, "PeerTube videoUuid", HttpsError, enabled);
