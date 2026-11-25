@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "catalogueVersion": "2026-11-25.12",
+  "catalogueVersion": "2026-11-25.13",
   "regions": [
     {
       "id": "north",
@@ -1884,13 +1884,18 @@
         {
           "label": "Abiodun Olayiwola — Yoruba Travelling Theatre",
           "url": "https://www.jpanafrican.org/docs/vol4no5/4.5Nollywood.pdf"
+        },
+        {
+          "label": "R. Emelonye — Nollywood Cinema: A Disputed Taxonomy (2024)",
+          "url": "https://research.gold.ac.uk/38040/1/TAP_thesis_EmelonyeR_2024.pdf"
         }
       ],
       "personIds": [],
       "timelineIds": [
         "yoruba-travelling-theatre-1950s",
         "living-in-bondage-1992",
-        "nollywood-name-2002"
+        "nollywood-name-2002",
+        "nigeria-video-origins-1984-1986"
       ],
       "countryCodes": [
         "NG",
@@ -1914,7 +1919,10 @@
         }
       ],
       "personIds": [
-        "sarah-maldoror"
+        "sarah-maldoror",
+        "annette-mbaye-derneville",
+        "safi-faye",
+        "therese-sita-bella"
       ],
       "timelineIds": [
         "sambizanga-1972"
@@ -1994,16 +2002,86 @@
         }
       ],
       "personIds": [
-        "vitus-nanbigne"
+        "vitus-nanbigne",
+        "rebecca-ohene-asah"
       ],
       "timelineIds": [
         "african-film-heritage-project-2019",
-        "ghana-film-archive-crisis-1986-2000"
+        "ghana-film-archive-crisis-1986-2000",
+        "mayibuye-afravision-archive-2000",
+        "ghana-archive-access-research-2022"
       ],
       "countryCodes": [
         "GH",
         "ZA",
         "AO"
+      ]
+    },
+    {
+      "published": true,
+      "id": "women-screen-culture-journey",
+      "title": "Women who built the screen culture—and the archive gaps around them",
+      "kicker": "SENEGAL · CAMEROON · ANGOLA",
+      "summary": "Follow women’s work across filmmaking, criticism, festival culture and archival survival: from Annette Mbaye d’Erneville’s cultural organising to the films and difficult-to-locate works of Safi Faye, Thérèse Sita-Bella and Sarah Maldoror.",
+      "reframe": "This journey refuses the narrow idea that film history is only a sequence of directors and titles. It follows the people who created the institutions, critical language and films—and asks what remains accessible.",
+      "whyItMatters": "It connects creative authorship to cultural infrastructure and the politics of preservation.",
+      "confidence": "Built from scholarly research on African women’s cinema; individual film access is not implied.",
+      "evidenceRef": "women-screen-culture-journey",
+      "countryCodes": [
+        "SN",
+        "CM",
+        "AO"
+      ],
+      "references": [
+        {
+          "label": "Beti Ellerson — African Women in Cinema",
+          "url": "https://www.cambridge.org/core/books/gaze-regimes/african-women-in-cinema-an-overview/056AD61E7BF872888BB58A7BD9957261"
+        },
+        {
+          "label": "Lindiwe Dovey — New Looks",
+          "url": "https://africanfilmny.org/articles/new-looks-the-rise-of-african-women-filmmakers/"
+        }
+      ],
+      "personIds": [
+        "annette-mbaye-derneville",
+        "safi-faye",
+        "therese-sita-bella",
+        "sarah-maldoror"
+      ],
+      "timelineIds": [
+        "sambizanga-1972"
+      ]
+    },
+    {
+      "published": true,
+      "id": "apartheid-documentary-counter-image",
+      "title": "Apartheid on film: the clandestine image and the official reply",
+      "kicker": "SOUTH AFRICA · DOCUMENTARY / COUNTER-PROPAGANDA",
+      "summary": "Trace clandestine anti-apartheid documentaries, international television circulation, the state’s response films and the archives that preserve footage of the struggle. Connect Morena Films’ work to the wider collection of banned films documented by UCT Libraries and the Mayibuye Archive.",
+      "reframe": "The struggle over apartheid was also a struggle over images: who could film, which images could circulate and whether the state could demand an equal platform for propaganda.",
+      "whyItMatters": "It reveals documentary as political action and the archive as part of the conflict’s afterlife.",
+      "confidence": "Based on UCT Libraries, Mayibuye Archive and Cull’s 2025 study; individual film rights and current viewing access are not asserted.",
+      "evidenceRef": "apartheid-documentary-counter-image",
+      "countryCodes": [
+        "ZA"
+      ],
+      "references": [
+        {
+          "label": "UCT Libraries — Unbanned",
+          "url": "https://lib.uct.ac.za/articles/2025-10-08-unbanned-films-south-africans-were-not-allowed-see"
+        },
+        {
+          "label": "Mayibuye Archive — Film and Video Archive",
+          "url": "https://mayibuyearchives.robben-island.org.za/film-and-video-archive"
+        }
+      ],
+      "personIds": [
+        "nana-mahomo"
+      ],
+      "timelineIds": [
+        "morena-clandestine-film-1970",
+        "last-grave-dimbaza-1974",
+        "mayibuye-afravision-archive-2000"
       ]
     }
   ],
