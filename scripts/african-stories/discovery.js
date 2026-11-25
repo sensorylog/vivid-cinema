@@ -43,7 +43,7 @@ function emptyState(container, message) {
 }
 
 function editorialCards(container, records, kind, emptyMessage) {
-  const published = (Array.isArray(records) ? records : []).filter(validEditorialRecord);
+  const published = (Array.isArray(records) ? records : []).filter(validEditorialRecord).slice().sort((a, b) => kind === "Timeline" ? String(a.date || "").localeCompare(String(b.date || "")) : 0);
   if (!published.length) { emptyState(container, emptyMessage); return; }
   container.replaceChildren();
   for (const record of published) {
@@ -123,6 +123,19 @@ function renderEditorialDetail() {
   document.getElementById("african-editorial-kind").textContent = label.toUpperCase();
   document.getElementById("african-editorial-title").textContent = record?.title || label + " not published";
   document.getElementById("african-editorial-summary").textContent = record?.summary || "This editorial record is not published yet. Profiles, historical entries and curated journeys appear only after source review.";
+  const meta = document.getElementById("african-editorial-meta");
+  meta.replaceChildren();
+  const metadata = record ? [record.role, record.country, record.born, record.died ? "Died " + record.died : "", record.dateLabel ? "Date: " + record.dateLabel : ""].filter(Boolean) : [];
+  for (const item of metadata) meta.append(element("span", "african-editorial-meta-item", item));
+  const works = document.getElementById("african-editorial-works");
+  works.replaceChildren();
+  if (Array.isArray(record?.selectedWorks) && record.selectedWorks.length) {
+    works.append(element("h3", "", "Selected works"));
+    const list = element("ul", "african-editorial-work-list");
+    for (const work of record.selectedWorks) list.append(element("li", "", work));
+    works.append(list);
+  }
+
   const references = document.getElementById("african-editorial-references");
   references.replaceChildren();
   for (const reference of (Array.isArray(record?.references) ? record.references : [])) {
@@ -138,6 +151,23 @@ function renderEditorialDetail() {
   }
   const related = document.getElementById("african-editorial-related");
   related.replaceChildren();
+
+  const linkedRecords = [
+    ...(record?.personIds || []).map(id => ({ key: "people", type: "person", id })),
+    ...(record?.timelineIds || []).map(id => ({ key: "timelines", type: "timeline", id }))
+  ];
+  for (const linked of linkedRecords) {
+    const target = (experience[linked.key] || []).find(item => item.id === linked.id && validEditorialRecord(item));
+    if (!target) continue;
+    const card = element("article", "african-content-card");
+    card.append(element("span", "african-card-eyebrow", linked.type === "person" ? "FILMMAKER / PERSON" : "HISTORICAL MILESTONE"));
+    card.append(element("h3", "", target.title));
+    card.append(element("p", "", target.summary));
+    const link = element("a", "african-card-link", "Explore " + linked.type);
+    link.href = "african-stories.html?" + linked.type + "=" + encodeURIComponent(target.id);
+    card.append(link);
+    related.append(card);
+  }
   const titleIds = new Set(Array.isArray(record?.titleIds) ? record.titleIds : []);
   const relatedTitles = (catalogue.titles || []).filter(title => titleIds.has(title.id) && validAfricanTitleRecord(title));
   for (const title of relatedTitles) {
