@@ -60,7 +60,7 @@ function playbackSourceRecords(value, accessState, HttpsError) {
     if (!/^[a-z0-9][a-z0-9-]{1,79}$/.test(sourceId) || ids.has(sourceId)) fail(HttpsError, "invalid-argument", "Playback source IDs must be unique URL-safe identifiers.");
     ids.add(sourceId);
     const provider = boundedText(item.provider, 20, "playback provider", HttpsError, true);
-    if (!["youtube","vimeo","dailymotion","peertube","archive"].includes(provider)) fail(HttpsError, "invalid-argument", "Unsupported public playback provider.");
+    if (!["youtube","vimeo","dailymotion","rumble","peertube","archive"].includes(provider)) fail(HttpsError, "invalid-argument", "Unsupported public playback provider.");
     const enabled = item.enabled === true;
     const label = boundedText(item.label, 160, "playback source label", HttpsError);
     const evidenceRef = boundedText(item.evidenceRef, 240, "playback source evidenceRef", HttpsError, enabled);
@@ -86,6 +86,11 @@ function playbackSourceRecords(value, accessState, HttpsError) {
       if (enabled && accessState !== "watch_officially") fail(HttpsError, "failed-precondition", "Dailymotion embeds require the watch_officially editorial state.");
       source.videoId = videoId;
       source.playerId = playerId;
+    } else if (provider === "rumble") {
+      const embedId = boundedText(item.embedId, 40, "Rumble embedId", HttpsError, enabled);
+      if (enabled && !/^[A-Za-z0-9]+(?:\\.[A-Za-z0-9]+)?$/.test(embedId)) fail(HttpsError, "invalid-argument", "Rumble requires the exact embed ID copied from its official embed code.");
+      if (enabled && accessState !== "watch_officially") fail(HttpsError, "failed-precondition", "Rumble embeds require the watch_officially editorial state.");
+      source.embedId = embedId;
     } else if (provider === "peertube") {
       const instanceOrigin = boundedText(item.instanceOrigin, 500, "PeerTube instanceOrigin", HttpsError, enabled);
       const videoUuid = boundedText(item.videoUuid, 36, "PeerTube videoUuid", HttpsError, enabled);
