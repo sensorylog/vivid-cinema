@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import { isIP } from "node:net";
 
 const WORK_ID = /^[a-z0-9][a-z0-9-]{1,99}$/;
 const VERSION_ID = /^[a-z0-9][a-z0-9-]{0,79}$/;
@@ -35,6 +36,15 @@ function parseHttpsUrl(value, field, HttpsError) {
   let url;
   try { url = new URL(value); } catch { fail(HttpsError, "invalid-argument", field + " must be a valid HTTPS URL."); }
   if (url.protocol !== "https:" || url.username || url.password) fail(HttpsError, "invalid-argument", field + " must be an HTTPS URL without embedded credentials.");
+  return url;
+}
+
+function parseProviderUrl(value, field, HttpsError) {
+  const url = parseHttpsUrl(value, field, HttpsError);
+  const host = url.hostname.toLowerCase();
+  if (isIP(host) || host === "localhost" || host.endsWith(".localhost") || host.endsWith(".local") || host.endsWith(".internal")) {
+    fail(HttpsError, "invalid-argument", field + " must use a public DNS hostname.");
+  }
   return url;
 }
 
@@ -179,7 +189,7 @@ export function createAfricanStoriesFunctions({ db, onCall, HttpsError, Timestam
     if (!PROVIDER_ID.test(providerId)) fail(HttpsError, "invalid-argument", "Invalid providerId.");
     const adapterType = request.data?.adapterType;
     if (adapterType !== "provider_session") fail(HttpsError, "invalid-argument", "Providers must use a provider-specific server-issued session adapter.");
-    const originUrl = parseHttpsUrl(boundedText(request.data?.embedOrigin, 500, "embedOrigin", HttpsError, true), "embedOrigin", HttpsError);
+    const originUrl = parseProviderUrl(boundedText(request.data?.embedOrigin, 500, "embedOrigin", HttpsError, true), "embedOrigin", HttpsError);
     if (originUrl.origin !== originUrl.href.replace(/\/$/, "")) fail(HttpsError, "invalid-argument", "embedOrigin must be an origin only, without a path or query.");
     const agreementRef = boundedText(request.data?.agreementRef, 160, "agreementRef", HttpsError, true);
     if (request.data?.securityReviewed !== true) fail(HttpsError, "failed-precondition", "Provider security review must be explicitly confirmed.");
@@ -268,11 +278,17 @@ export function createAfricanStoriesFunctions({ db, onCall, HttpsError, Timestam
     if (!providerSnapshot.exists || providerSnapshot.data().status !== "active" || providerSnapshot.data().adapterType !== "provider_session") fail(HttpsError, "failed-precondition", "The approved playback provider is unavailable.");
     const adapter = PROVIDER_SESSION_ADAPTERS[grant.providerId];
     if (typeof adapter?.createSession !== "function") fail(HttpsError, "failed-precondition", "This provider has no implemented server-issued session adapter. Playback remains disabled.");
+    const recentSessions = await db.collection("africanPlaybackSessions")
+      .where("userId", "==", request.auth.uid)
+      .where("createdAt", ">", Timestamp.fromMillis(now.toMillis() - 60 * 1000))
+      .limit(5)
+      .get();
+    if (recentSessions.size >= 5) fail(HttpsError, "resource-exhausted", "Playback session request limit reached. Try again shortly.");
     const issued = await adapter.createSession({
       work: workSnapshot.data(), grant, provider: providerSnapshot.data(),
       userId: request.auth.uid, territory, now
     });
-    const playback = parseHttpsUrl(issued?.url, "provider session URL", HttpsError);
+    const playback = parseProviderUrl(issued?.url, "provider session URL", HttpsError);
     if (playback.origin !== providerSnapshot.data().embedOrigin) fail(HttpsError, "failed-precondition", "The provider session URL failed exact-origin verification.");
     const expiresAtMs = Number(issued?.expiresAtMs);
     if (!Number.isFinite(expiresAtMs) || expiresAtMs <= now.toMillis() || expiresAtMs > now.toMillis() + 5 * 60 * 1000) {
