@@ -10,7 +10,7 @@ const base = { sourceId: "source-one", enabled: true, label: "Test source", evid
 test("YouTube uses the official embedded player and validates the video ID", () => {
   const result = buildOfficialEmbed({ ...base, provider: "youtube", videoId: "M7lc1UVf-VE" }, { origin: "https://vivid.example" });
   const url = new URL(result.url);
-  assert.equal(url.origin, "https://www.youtube.com");
+  assert.equal(url.origin, "https://www.youtube-nocookie.com");
   assert.equal(url.pathname, "/embed/M7lc1UVf-VE");
   assert.equal(url.searchParams.get("enablejsapi"), "1");
   assert.equal(url.searchParams.get("origin"), "https://vivid.example");
