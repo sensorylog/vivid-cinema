@@ -481,33 +481,38 @@ Implementation must use additive, namespaced African Stories modules and routes.
 - accessibility, security, performance and mobile/device tests pass;
 - support and takedown processes are staffed.
 
-## 16. Phase 3 decisions requiring explicit review
+## 16. Phase 3 architecture decisions
 
-These are architecture decisions, not assumptions to silently implement:
-1. Where African Stories appears in global Vivid navigation and whether it receives a dedicated top-level destination.
-2. Whether first release is discovery-only plus a small licensed playback cohort, or discovery-only until Phase 6 contracts are ready. Recommendation: discovery catalogue and official external routes can launch before in-Vivid playback; licensed playback is enabled only for individually cleared titles.
-3. Which backend environment and data store own the canonical catalogue and rights records, taking account of current Firebase/Firestore architecture and security rules.
-4. Whether editorial publishing is integrated with an existing admin/CMS workflow or a new scoped admin surface.
-5. The initial country/region launch cohort and minimum language coverage.
-6. Which metadata sources permit commercial reuse and which are link-only discovery sources.
-7. Which provider integration types are acceptable for the first authorized African player release.
-8. What content-rating, age-gating and sensitive-history review policy is required in each launch market.
-9. Which user library features (save, watchlist, progress) should support African Stories in the first release without changing existing user data semantics.
-10. What operational owner reviews licence expiry, source health, corrections and takedowns.
+The initial architecture decisions have been resolved against the actual VividCinema codebase. The decision record is authoritative for the implementation baseline:
 
-## 17. Phase 3 acceptance criteria
+- [Phase 3 codebase architecture audit](african-stories-phase-3-codebase-architecture-audit.md)
+- [Phase 3 architecture decisions](african-stories-phase-3-architecture-decisions.md)
 
-Phase 3 is complete only when:
-- product scope, audiences and non-goals are approved;
-- IA, page types and navigation are documented;
-- canonical data model and taxonomy are documented;
-- provenance and editorial standards are documented;
-- rights/access state machine is approved;
-- third-player architecture and adapter contract are documented;
-- security, privacy, observability and failure behavior are specified;
-- metadata ingestion and review workflow is documented;
-- compatibility/regression boundaries are explicit;
-- launch gates, operational ownership and deferred partner/legal tasks are assigned;
-- unresolved decisions are recorded with an owner and a decision date.
+The decisions establish:
+1. African Stories is a dedicated top-level destination with its own route family.
+2. Discovery and verified official external routes can precede Vivid playback; playback is title/version/territory-specific and rights-gated.
+3. Firebase/Firestore remains the initial canonical catalogue platform, with Cloud Functions and Admin SDK for privileged workflows.
+4. Public catalogue projections are physically separate from private drafts, rights grants, provider configuration and audit records.
+5. A dedicated African Stories admin surface is used; the newsroom moderator desk is not repurposed as a film-rights CMS.
+6. Dedicated least-privilege African Stories custom claims are required; the generic moderator claim does not confer rights or provider authority.
+7. The third player is isolated from movie/TV, TFLIX and anime player systems.
+8. Provider access is server-authorized and fail-closed; no scraping, guessed URLs or unauthorized fallbacks.
+9. Initial discovery uses curated Firestore-backed search and filters; no new search vendor is introduced without measured need.
+10. Existing movie/TV library schemas remain unchanged; African work saves, if included, use a separate namespaced user subcollection.
+11. Country coverage is continental in information architecture and progressive in actual content rollout.
+12. Multilingual metadata is modelled from the start; English UI is only an initial interface baseline.
+13. Sensitive-history labels require human editorial review; legal classification remains market-specific.
+14. Metadata and every image/video asset have independent reuse/permission checks.
+15. Licensed playback requires named operational owners, expiry controls and a takedown process.
 
-**No production code should be treated as Phase 4 implementation until this blueprint has passed review.**
+The following remain launch gates rather than architecture blockers: local legal advice, exact first-wave countries, title/version chain-of-title, metadata and asset reuse permission, provider contracts, operational owners and monetization terms.
+
+## 17. Phase 3 exit criteria and status
+
+<badge>Architecture baseline completed</badge>
+
+Phase 3 architecture planning is complete when read together with the codebase audit and decision record. The repository inspection confirms that the architecture can be implemented additively on the existing static HTML/ES-module and Firebase stack without a framework migration.
+
+Phase 4 may now begin engineering the namespaced data model, public/private Firestore boundaries, privileged Functions and dedicated admin/player modules. It must not enable public Vivid playback until the title-level rights, provider, territory, term and technical QA gates pass.
+
+Phase 3 completion does **not** mean the Phase 4 systems already exist, the product/legal launch gates are approved, any partner has signed, or any title is cleared for Vivid playback.
