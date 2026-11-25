@@ -4,6 +4,7 @@ import { readFile } from "node:fs/promises";
 import { accessLabel, filterAfricanCountries, filterAfricanTitles, filterEditorialRecords, validEditorialRecord, validAfricanTitleRecord } from "../scripts/african-stories/discovery-data.js";
 
 const experience = JSON.parse(await readFile(new URL("../data/african-stories-experience.json", import.meta.url), "utf8"));
+const catalogue = JSON.parse(await readFile(new URL("../data/african-stories-catalog.json", import.meta.url), "utf8"));
 
 test("atlas defines five regions and a unique country hub index", () => {
   assert.equal(experience.regions.length, 5);
@@ -166,6 +167,20 @@ test("editorial search covers themes, evidence framing, country and region", () 
   assert.deepEqual(filterEditorialRecords(records, { country: "NG" }).map(item => item.id), ["nigeria"]);
   assert.deepEqual(filterEditorialRecords(records, { region: "west", countries }).map(item => item.id), ["ghana", "nigeria"]);
   assert.deepEqual(filterEditorialRecords(records, { region: "north", countries }), []);
+});
+
+test("published title catalogue contains researched records without inventing streaming rights", () => {
+  assert.equal(catalogue.titles.length, 5);
+  for (const title of catalogue.titles) {
+    assert.equal(validAfricanTitleRecord(title), true, title.id);
+    assert.equal(title.accessState, "discover_archive_record", title.id + " must remain discovery-only until viewing rights are verified");
+    assert.equal(Array.isArray(title.sources) ? title.sources.length : 0, 0, title.id + " must not carry invented playback sources");
+  }
+  assert.ok(catalogue.titles.some(title => title.id === "sambizanga-1972"));
+  assert.ok(catalogue.titles.some(title => title.id === "yeelen-1987"));
+  assert.ok(catalogue.titles.some(title => title.id === "cairo-station-1958"));
+  assert.ok(catalogue.titles.some(title => title.id === "last-grave-at-dimbaza-1974"));
+  assert.ok(catalogue.titles.some(title => title.id === "living-in-bondage-1992"));
 });
 
 test("access labels keep discovery separate from viewing rights", () => {
