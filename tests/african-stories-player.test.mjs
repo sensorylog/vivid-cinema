@@ -45,7 +45,7 @@ test("African Stories public player stays gated while its underlying rights poli
   assert.match(player, /does not grant streaming or reproduction rights/);
   assert.match(page, /african-development-gate/);
   assert.match(page, /In Development/);
-  assert.doesNotMatch(page, /african-title-evidence|african-player-references|scripts\\/african-stories\\/player\\.js/);
+  assert.doesNotMatch(page, /african-title-evidence|african-player-references|scripts\/african-stories\/player\.js/);
 });
 
 test("requires a verified, evidenced, in-date rights grant", () => {
