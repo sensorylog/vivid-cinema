@@ -48,7 +48,64 @@ function parseProviderUrl(value, field, HttpsError) {
   return url;
 }
 
-function versionRecords(value, HttpsError) {
+function playbackSourceRecords(value, accessState, HttpsError) {
+  if (value == null) return [];
+  if (!Array.isArray(value) || value.length > 12) fail(HttpsError, "invalid-argument", "playbackSources must be a list of no more than 12 sources.");
+  const ids = new Set();
+  const rightsBases = new Set(["public_domain","cc0","cc_by","cc_by_sa","written_permission"]);
+  return value.map(item => {
+    if (!item || typeof item !== "object" || Array.isArray(item)) fail(HttpsError, "invalid-argument", "Each playback source must be an object.");
+    const sourceId = boundedText(item.sourceId, 80, "playback sourceId", HttpsError, true);
+    if (!/^[a-z0-9][a-z0-9-]{1,79}$/.test(sourceId) || ids.has(sourceId)) fail(HttpsError, "invalid-argument", "Playback source IDs must be unique URL-safe identifiers.");
+    ids.add(sourceId);
+    const provider = boundedText(item.provider, 20, "playback provider", HttpsError, true);
+    if (!["youtube","vimeo","peertube","archive"].includes(provider)) fail(HttpsError, "invalid-argument", "Unsupported public playback provider.");
+    const enabled = item.enabled === true;
+    const label = boundedText(item.label, 160, "playback source label", HttpsError);
+    const evidenceRef = boundedText(item.evidenceRef, 240, "playback source evidenceRef", HttpsError, enabled);
+    const source = { sourceId, provider, label, enabled, evidenceRef };
+    if (provider === "youtube") {
+      const videoId = boundedText(item.videoId, 11, "YouTube videoId", HttpsError, enabled);
+      if (enabled && !/^[A-Za-z0-9_-]{11}$/.test(videoId)) fail(HttpsError, "invalid-argument", "YouTube videoId must be an 11-character video ID.");
+      if (enabled && accessState !== "watch_officially") fail(HttpsError, "failed-precondition", "YouTube embeds require the watch_officially editorial state.");
+      source.videoId = videoId;
+    } else if (provider === "vimeo") {
+      const videoId = boundedText(item.videoId, 15, "Vimeo videoId", HttpsError, enabled);
+      const vimeoHash = boundedText(item.vimeoHash, 80, "Vimeo privacy hash", HttpsError);
+      if (enabled && (!/^[0-9]{6,15}$/.test(videoId) || (vimeoHash && !/^[A-Za-z0-9]{6,80}$/.test(vimeoHash)))) fail(HttpsError, "invalid-argument", "Vimeo video ID or privacy hash is invalid.");
+      if (enabled && accessState !== "watch_officially") fail(HttpsError, "failed-precondition", "Vimeo embeds require the watch_officially editorial state.");
+      source.videoId = videoId;
+      source.vimeoHash = vimeoHash;
+    } else if (provider === "peertube") {
+      const instanceOrigin = boundedText(item.instanceOrigin, 500, "PeerTube instanceOrigin", HttpsError, enabled);
+      const videoUuid = boundedText(item.videoUuid, 36, "PeerTube videoUuid", HttpsError, enabled);
+      if (enabled) {
+        const origin = parseProviderUrl(instanceOrigin, "PeerTube instanceOrigin", HttpsError);
+        if (origin.origin !== origin.href.replace(/\/$/, "") || !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(videoUuid)) {
+          fail(HttpsError, "invalid-argument", "PeerTube requires an origin-only HTTPS instance URL and a valid video UUID.");
+        }
+        if (accessState !== "watch_officially") fail(HttpsError, "failed-precondition", "PeerTube embeds require the watch_officially editorial state.");
+      }
+      source.instanceOrigin = instanceOrigin;
+      source.videoUuid = videoUuid;
+    } else {
+      const archiveIdentifier = boundedText(item.archiveIdentifier, 120, "archiveIdentifier", HttpsError, enabled);
+      const archiveFile = boundedText(item.archiveFile, 240, "archiveFile", HttpsError, enabled);
+      const rightsBasis = boundedText(item.rightsBasis, 40, "archive rightsBasis", HttpsError, enabled);
+      if (enabled && (!/^[A-Za-z0-9][A-Za-z0-9._-]{1,119}$/.test(archiveIdentifier) || archiveIdentifier.includes("..") ||
+          !/^[A-Za-z0-9][A-Za-z0-9._ -]{0,239}$/.test(archiveFile) || archiveFile.includes("..") ||
+          !rightsBases.has(rightsBasis))) {
+        fail(HttpsError, "invalid-argument", "Internet Archive playback requires a valid item/file and an explicit public-domain, Creative Commons or written-permission basis.");
+      }
+      source.archiveIdentifier = archiveIdentifier;
+      source.archiveFile = archiveFile;
+      source.rightsBasis = rightsBasis;
+    }
+    return source;
+  });
+}
+
+function versionRecords(value, accessState, HttpsError) {
   if (!Array.isArray(value) || value.length < 1 || value.length > 30) fail(HttpsError, "invalid-argument", "At least one and no more than 30 edition/version records are required.");
   const ids = new Set();
   return value.map((item, index) => {
@@ -68,7 +125,8 @@ function versionRecords(value, HttpsError) {
       dubbedLanguages: boundedStringList(item.dubbedLanguages, 20, 80, "dubbedLanguages", HttpsError),
       runtimeMinutes,
       releaseYear,
-      versionNotes: boundedText(item.versionNotes, 1000, "versionNotes", HttpsError)
+      versionNotes: boundedText(item.versionNotes, 1000, "versionNotes", HttpsError),
+      playbackSources: playbackSourceRecords(item.playbackSources, accessState, HttpsError)
     };
   });
 }
@@ -115,10 +173,7 @@ export function createAfricanStoriesFunctions({ db, onCall, HttpsError, Timestam
     if (!PUBLIC_ACCESS_STATES.has(accessState)) fail(HttpsError, "invalid-argument", "Draft accessState must be archive_record, access_pending or watch_officially. Vivid playback states are assigned only by the rights workflow.");
     const officialExternalUrl = boundedText(input.officialExternalUrl, 2000, "officialExternalUrl", HttpsError);
     if (accessState !== "watch_officially" && officialExternalUrl) fail(HttpsError, "invalid-argument", "An official external URL may only be published with the watch_officially access state.");
-    if (accessState === "watch_officially") {
-      if (!officialExternalUrl) fail(HttpsError, "failed-precondition", "An official external route is required for watch_officially.");
-      parseHttpsUrl(officialExternalUrl, "officialExternalUrl", HttpsError);
-    }
+    if (officialExternalUrl) parseHttpsUrl(officialExternalUrl, "officialExternalUrl", HttpsError);
     const credits = Array.isArray(input.credits) ? input.credits.slice(0, 100).map(item => ({
       personName: boundedText(item?.personName, 160, "credit personName", HttpsError, true),
       role: boundedText(item?.role, 100, "credit role", HttpsError, true),
@@ -131,6 +186,10 @@ export function createAfricanStoriesFunctions({ db, onCall, HttpsError, Timestam
       return { label: boundedText(item?.label, 180, "source citation label", HttpsError, true), url };
     }) : [];
     if (!Array.isArray(input.sourceCitations || [])) fail(HttpsError, "invalid-argument", "sourceCitations must be a list.");
+    const versions = versionRecords(input.versions, accessState, HttpsError);
+    if (accessState === "watch_officially" && !officialExternalUrl && !versions.some(version => version.playbackSources.some(source => source.enabled))) {
+      fail(HttpsError, "failed-precondition", "watch_officially requires an official external URL or at least one enabled official playback source.");
+    }
     const now = Timestamp.now();
     const ref = db.collection("africanWorkDrafts").doc(workId);
     const existing = await ref.get();
@@ -148,7 +207,7 @@ export function createAfricanStoriesFunctions({ db, onCall, HttpsError, Timestam
       synopsis: boundedText(input.synopsis, 3000, "synopsis", HttpsError),
       subjects: boundedStringList(input.subjects, 50, 100, "subjects", HttpsError),
       credits,
-      versions: versionRecords(input.versions, HttpsError),
+      versions,
       sourceCitations,
       accessState,
       officialExternalUrl,
@@ -173,7 +232,7 @@ export function createAfricanStoriesFunctions({ db, onCall, HttpsError, Timestam
     if (!draft.title || !draft.workType || !Array.isArray(draft.versions) || !draft.versions.length || !Array.isArray(draft.sourceCitations) || !draft.sourceCitations.length) {
       fail(HttpsError, "failed-precondition", "A title, work type, at least one version and source citations are required before publication.");
     }
-    if (draft.accessState === "watch_officially") parseHttpsUrl(draft.officialExternalUrl, "officialExternalUrl", HttpsError);
+    if (draft.officialExternalUrl) parseHttpsUrl(draft.officialExternalUrl, "officialExternalUrl", HttpsError);
     const now = Timestamp.now();
     await db.collection("africanWorksPublic").doc(workId).set(safePublicProjection(draft, now));
     await ref.update({ editorialStatus: "published", publishedAt: now, publishedBy: request.auth.uid, updatedAt: now });
