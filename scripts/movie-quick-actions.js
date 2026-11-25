@@ -120,15 +120,25 @@ function ensureOverlay() {
     sheetStartY = null;
   }, { passive: true });
   overlay.querySelectorAll("[data-collection]").forEach(button => {
-    button.addEventListener("click", () => {
+    button.addEventListener("click", async () => {
       if (!activeItem) return;
       const collection = button.dataset.collection;
-      const wasSaved = hasLibraryItem(collection, activeItem);
-      toggleLibraryItem(collection, activeItem);
-      updateActionStates();
-      const label = collection === "favorites" ? "Favourites" : "Watch Later";
-      overlay.querySelector(".vivid-quick-actions-feedback").textContent =
-        wasSaved ? "Removed from " + label + "." : "Added to " + label + ".";
+      button.disabled = true;
+      try {
+        const library = await getLibraryModule();
+        if (!activeItem) return;
+        const wasSaved = library.hasLibraryItem(collection, activeItem);
+        library.toggleLibraryItem(collection, activeItem);
+        updateActionStates(library);
+        const label = collection === "favorites" ? "Favourites" : "Watch Later";
+        overlay.querySelector(".vivid-quick-actions-feedback").textContent =
+          wasSaved ? "Removed from " + label + "." : "Added to " + label + ".";
+      } catch {
+        overlay.querySelector(".vivid-quick-actions-feedback").textContent =
+          "Your library is unavailable right now. Please try again.";
+      } finally {
+        if (button.isConnected) button.disabled = false;
+      }
     });
   });
   document.addEventListener("keydown", event => {
