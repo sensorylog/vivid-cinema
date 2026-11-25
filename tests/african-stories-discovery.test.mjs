@@ -78,7 +78,7 @@ test("Ghana timeline separates exhibition, safety regulation and formal censorsh
   assert.ok(byId("gold-coast-film-unit-1947-48").dateLabel.includes("1949"));
   assert.ok(byId("love-brewed-1980").dateLabel.includes("1981"));
   assert.ok(experience.collections.some(item => item.id === "audiences-not-passive"));
-  const years = experience.timelines.map(item => Number((String(item.dateLabel).match(/(?:18|19|20)\\d{2}/) || ["0"])[0]));
+  const years = experience.timelines.map(item => Number((String(item.dateLabel).match(/(?:18|19|20)[0-9]{2}/) || ["0"])[0]));
   assert.ok(years.every((year, index) => index === 0 || year >= years[index - 1]));
 });
 
