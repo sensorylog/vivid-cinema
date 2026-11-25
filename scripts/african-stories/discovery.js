@@ -129,7 +129,9 @@ function renderEditorialDetail() {
 
   const references = document.getElementById("african-editorial-references");
   references.replaceChildren();
-  for (const reference of (Array.isArray(record?.references) ? record.references : [])) {
+  const sourceRecords = Array.isArray(record?.references) ? record.references : [];
+  if (sourceRecords.length) references.append(element("h3", "african-sources-heading", "Sources & further reading"));
+  for (const reference of sourceRecords) {
     try {
       const url = new URL(reference.url);
       if (url.protocol !== "https:") continue;
@@ -148,7 +150,7 @@ function renderEditorialDetail() {
   }
   insights.replaceChildren();
   const insightCards = [
-    ["The familiar version", record?.reframe],
+    ["What the evidence complicates", record?.reframe],
     ["Why this matters", record?.whyItMatters],
     ["Evidence note", record?.confidence]
   ];
