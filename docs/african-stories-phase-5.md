@@ -13,19 +13,19 @@ The destination is a screen library and story atlas, not a social feed or a gene
 
 ## Researched editorial starter set
 
-The current starter set contains six collections, nine people/profiles, fourteen timeline milestones and six documentary journeys. It deliberately begins with deeper coverage of Ghana, Nigeria, Senegal, Mali, Mauritania, Egypt, Kenya, Angola, Eswatini and South Africa rather than pretending every country has equally researched coverage.
+The current starter set contains seven collections, nine people/profiles, seventeen timeline milestones and six documentary journeys. It deliberately begins with deeper coverage of Ghana, Nigeria, Senegal, Mali, Mauritania, Egypt, Kenya, Angola, Eswatini and South Africa rather than pretending every country has equally researched coverage.
 
 The editorial layer prioritises questions that are often flattened in popular summaries:
 
 - Colonial cinema in the Gold Coast as both exhibition culture and an instrument of administration, censorship and imperial messaging.
-- The Gold Coast Film Unit's 1947/1948 dating discrepancy, preserved as an unresolved source difference.
-- The 1918 licensing reference in archival scholarship alongside the Ghana ministry's 1923 public-history milestone.
+- The Gold Coast Film Unit's 1947/1948/1949 dating discrepancy, preserved as an unresolved source difference.
+- The distinction between 1912 fire-safety regulation and formal 1925 censorship; early travelling screenings and a 1914 Accra theatre; and the Ghana ministry's 1923 public-history marker.
 - The transition from colonial film infrastructure to Nkrumah-era GFIC, including both Pan-African ambition and the power of state-authored memory.
-- The 1980/1981 date discrepancy for Love Brewed in the African Pot.
+- The 1980/1981 dating variation for Love Brewed in the African Pot, with 1980 treated as the better-supported film date and 1981 explicitly qualified.
 - Nollywood as a multi-lineage movement shaped by Yoruba travelling theatre, television, video technology, marketers and informal distribution—not a one-film invention.
 - FESPACO as a major Pan-African institution that has also faced debates about format, taste, inclusion and its role in defining African cinema.
 - Restoration versus restitution: preservation, custody, access, rights and interpretive authority are treated as separate questions.
-- Women filmmakers, regional differences and transnational careers are treated as central histories rather than sidebars.
+- Ghanaian moviegoers are treated as active participants in exhibition culture and distribution economics, not passive colonial audiences.\n- Women filmmakers, regional differences and transnational careers are treated as central histories rather than sidebars.
 
 ## Editorial integrity rules
 
