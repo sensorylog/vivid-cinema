@@ -9,6 +9,7 @@ let activeCard = null;
 let activeItem = null;
 let overlay = null;
 let restoreFocus = null;
+let sheetStartY = null;
 
 function ensureStyles() {
   if (document.querySelector('link[data-vivid-quick-actions-style]')) return;
@@ -99,6 +100,16 @@ function ensureOverlay() {
     if (event.target === overlay) closeOverlay();
   });
   overlay.querySelector(".vivid-quick-actions-close").addEventListener("click", closeOverlay);
+  const panel = overlay.querySelector(".vivid-quick-actions-panel");
+  panel.addEventListener("touchstart", event => {
+    sheetStartY = event.target.closest(".vivid-quick-actions-grabber, .vivid-quick-actions-header")
+      ? event.touches[0]?.clientY ?? null : null;
+  }, { passive: true });
+  panel.addEventListener("touchend", event => {
+    const endY = event.changedTouches[0]?.clientY;
+    if (sheetStartY !== null && Number.isFinite(endY) && endY - sheetStartY > 90) closeOverlay();
+    sheetStartY = null;
+  }, { passive: true });
   overlay.querySelectorAll("[data-collection]").forEach(button => {
     button.addEventListener("click", () => {
       if (!activeItem) return;
