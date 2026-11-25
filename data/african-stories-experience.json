@@ -683,6 +683,30 @@
       "countryCodes": [
         "GH"
       ]
+    },
+    {
+      "id": "annette-mbaye-derneville",
+      "title": "Annette Mbaye d’Erneville",
+      "kicker": "SENEGAL · JOURNALISM / FILM CULTURE",
+      "summary": "Journalist, writer, critic and cultural organiser, Annette Mbaye d’Erneville helped build Senegalese film culture beyond directing and production. Beti Ellerson credits her with helping forge the Association Sénégalaise de la Critique Cinématographique, RECIDAK and the Henriette Bathily Women’s House.",
+      "reframe": "Film history is often told through directors and films. This profile foregrounds the critic, organiser and institution-builder whose work helped create spaces for cinema to be discussed, programmed and remembered.",
+      "whyItMatters": "Film culture is not only what appears on screen. Criticism, festivals, education and women-led cultural institutions shape which films are seen and how they are understood.",
+      "confidence": "Based on Beti Ellerson’s scholarly chapter; institutional histories and oral testimony would deepen each organisation’s chronology.",
+      "evidenceRef": "annette-mbaye-derneville-cultural-infrastructure",
+      "published": true,
+      "countryCodes": [
+        "SN"
+      ],
+      "references": [
+        {
+          "label": "Beti Ellerson — African Women in Cinema: An Overview",
+          "url": "https://www.cambridge.org/core/books/gaze-regimes/african-women-in-cinema-an-overview/056AD61E7BF872888BB58A7BD9957261"
+        }
+      ],
+      "selectedWorks": [
+        "Rencontres Cinématographiques de Dakar (RECIDAK) — cultural organising",
+        "Association Sénégalaise de la Critique Cinématographique — film criticism"
+      ]
     }
   ],
   "timelines": [
