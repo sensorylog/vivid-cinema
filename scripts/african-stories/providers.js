@@ -3,7 +3,7 @@ const VIMEO_ID = /^[0-9]{6,15}$/;
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const ARCHIVE_ID = /^[A-Za-z0-9][A-Za-z0-9._-]{1,119}$/;
 const ARCHIVE_FILE = /^[A-Za-z0-9][A-Za-z0-9._ -]{0,239}$/;
-const PUBLIC_ARCHIVE_FORMATS = new Set(["MPEG4","h.264","H.264","WebM","Ogg Video","Ogg Video File"]);
+const PUBLIC_ARCHIVE_FORMATS = new Set(["MPEG4","h.264","H.264","WebM","Ogg Video","Ogg Video File","M3U8","M3U8 Playlist"]);
 const FILMFLUX_ENDPOINT = "https://filmflux.app/api/public/trending?limit=20";
 const PEERTUBE_ALLOWED_HOSTS = new Set(["framatube.org", "peer.tube"]);
 
@@ -84,7 +84,7 @@ export async function resolveInternetArchiveFile(source, fetchImpl = fetch) {
   if (!response.ok) throw new Error("Internet Archive item metadata is unavailable.");
   const metadata = await response.json();
   const file = Array.isArray(metadata.files) ? metadata.files.find(entry => entry.name === item.archiveFile) : null;
-  if (!file || file.private === "true" || !PUBLIC_ARCHIVE_FORMATS.has(file.format)) {
+  if (!file || file.private === "true" || file.private === true || !PUBLIC_ARCHIVE_FORMATS.has(file.format)) {
     throw new Error("The selected file is not a supported public video file in this archive item.");
   }
   const extension = item.archiveFile.toLowerCase().split(".").pop();
