@@ -82,6 +82,17 @@ test("Ghana timeline separates exhibition, safety regulation and formal censorsh
   assert.ok(years.every((year, index) => index === 0 || year >= years[index - 1]));
 });
 
+test("Ghana archive, financing and video histories preserve attributed archival detail", () => {
+  const byId = id => experience.timelines.find(item => item.id === id);
+  assert.ok(byId("gfic-financing-crisis-1970s").summary.includes("cocoa farm"));
+  assert.ok(byId("ghana-film-archive-crisis-1986-2000").summary.includes("1986"));
+  assert.ok(byId("ghana-video-film-breakthrough-1987-89").summary.includes("GFIC"));
+  assert.ok(byId("love-brewed-1980").summary.includes("father-in-law"));
+  assert.ok(experience.collections.some(item => item.id === "ghana-lost-reels"));
+  assert.ok(experience.collections.some(item => item.id === "cocoa-farm-cinema-finance"));
+  assert.ok(experience.collections.some(item => item.id === "ghana-video-revolution"));
+});
+
 test("access labels keep discovery separate from viewing rights", () => {
   assert.equal(accessLabel("discover_archive_record"), "Discover / archive record");
   assert.equal(accessLabel("access_pending"), "Access pending");
