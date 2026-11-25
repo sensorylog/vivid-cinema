@@ -1,4 +1,4 @@
-const form = document.getElementById("african-submission-form");
+import { trackAfricanStories } from "./metrics.js";\nconst form = document.getElementById("african-submission-form");
 const status = document.getElementById("african-submission-status");
 const country = document.getElementById("submission-country");
 const FORMATS = new Set(["feature", "documentary", "short", "series", "animation", "archive", "other"]);
