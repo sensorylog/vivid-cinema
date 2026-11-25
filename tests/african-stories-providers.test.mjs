@@ -111,3 +111,10 @@ test("Dailymotion requires a creator Player ID and uses the current official emb
     ...base, provider: "dailymotion", videoId: "x84sh87", playerId: ""
   }), /creator-provided Player ID/);
 });
+
+test("Rumble uses the official embed route and accepts only copied embed IDs", () => {
+  const result = buildOfficialEmbed({ ...base, provider: "rumble", embedId: "v5pv5f" });
+  assert.equal(result.url, "https://rumble.com/embed/v5pv5f/");
+  assert.equal(getOfficialSourceFallback({ ...base, provider: "rumble", embedId: "v5pv5f" }), result.url);
+  assert.throws(() => buildOfficialEmbed({ ...base, provider: "rumble", embedId: "bad id" }), /exact embed ID/);
+});
