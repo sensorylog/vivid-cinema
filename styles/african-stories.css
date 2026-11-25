@@ -11,3 +11,5 @@
 
 .african-discovery-launch{display:inline-flex;align-items:center;gap:10px;margin:-10px 0 24px;padding:10px 15px;border:1px solid rgba(255,255,255,.17);border-radius:999px;color:#dce7f5;text-decoration:none;font-size:.8rem;font-weight:750;background:rgba(255,255,255,.045)}
 .african-discovery-launch:hover,.african-discovery-launch:focus-visible{border-color:rgba(210,226,246,.55);background:rgba(255,255,255,.09);outline:none}
+
+.african-admin-actions select{flex:1;min-width:220px;width:auto}
