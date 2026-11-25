@@ -17,7 +17,9 @@ test("service worker has a versioned cache and required offline shell", () => {
   assert.ok(!source.includes('"./community.html"'));
   assert.ok(!source.includes('"./scripts/watch-rooms.js"'));
   assert.ok(source.includes('"./styles/vivid-rounded-cards.css?v=round-1"'));
-  assert.ok(source.includes('"./scripts/watch-room-player-layout.js"'));
+  assert.ok(!source.includes('"./scripts/watch-room-player-layout.js"'));
+  assert.ok(!source.includes('"./scripts/watch-room-api.js"'));
+  assert.ok(!source.includes('"./scripts/watch-room-playback.js"'));
   assert.match(source, /optional assets were not precached/);
   assert.ok(source.includes('type==="PRECACHE_OPTIONAL"'));
   assert.match(source, /\.\/scripts\/local-owner\.js/);
@@ -37,33 +39,18 @@ test("every precached asset exists in the repository", async () => {
   assert.deepEqual(missing, [], "Missing precache assets: " + missing.join(", "));
 });
 
-test("Watch Rooms security and auth modules always use network-first and cache version is bumped", () => {
-  assert.match(source, /const CACHE_NAME = "vivid-cinema-shell-v\d+"/);
-  assert.ok(source.includes("const isWatchRoomRuntime=") && source.includes("watch-room-api") && source.includes("watch-room-playback"));
-  assert.ok(source.includes('"./scripts/cloudflare-api.js"'), "Cloudflare API origin helper must be precached");
-  assert.ok(source.includes("if(isAuthDocument||isAuthRuntime||isWatchRoomRuntime){event.respondWith(networkFirst(request));return;}"));
+test("Retired Watch Rooms modules are excluded from special service-worker routing", () => {
+  assert.match(source, /const CACHE_NAME = "vivid-cinema-shell-v\\d+"/);
+  assert.ok(!source.includes("isWatchRoomRuntime"));
+  assert.ok(!source.includes("watch-room-api"));
+  assert.ok(!source.includes("watch-room-playback"));
+  assert.ok(source.includes('"./scripts/cloudflare-api.js"'), "Cloudflare API origin helper remains precached");
 });
-test("Watch Rooms API adapter bypasses an installed stale service-worker cache", async () => {
-  const url = "https://vivid.test/scripts/watch-room-api.js";
-  const stale = mockResponse({ url, status: 200 });
-  const fresh = mockResponse({ url, status: 200 });
-  let requested = false;
-  const harness = createWorkerHarness(async request => {
-    requested = true;
-    assert.equal(typeof request === "string" ? request : request.url, url);
-    return fresh;
-  }, new Map([[url, stale]]));
-  const event = {
-    request: new Request(url),
-    respondWith(promise) { this.response = promise; }
-  };
-  harness.handlers.fetch(event);
-  const response = await event.response;
-  assert.equal(requested, true);
-  assert.equal(response.url, fresh.url);
-  assert.equal(harness.cacheEntries.get(url)?.url, fresh.url);
+test("Retired Watch Rooms API adapter is not cached or routed as an active feature", () => {
+  assert.ok(!source.includes('"./scripts/watch-room-api.js"'));
+  assert.ok(!source.includes('"./scripts/watch-room-playback.js"'));
+  assert.ok(!source.includes("isWatchRoomRuntime"));
 });
-
 test("ordinary JavaScript and CSS serve cache immediately and refresh in the background", () => {
   assert.match(source, /const CACHE_NAME = "vivid-cinema-shell-v\d+"/);
   assert.ok(source.includes("event.respondWith(isCodeOrStyle?staleWhileRevalidate(request,event):isHtml?networkFirst(request):staleWhileRevalidate(request,event));"));
