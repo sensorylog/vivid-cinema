@@ -4,8 +4,18 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-
 const ARCHIVE_ID = /^[A-Za-z0-9][A-Za-z0-9._-]{1,119}$/;
 const ARCHIVE_FILE = /^[A-Za-z0-9][A-Za-z0-9._ -]{0,239}$/;
 const PUBLIC_ARCHIVE_FORMATS = new Set(["MPEG4","h.264","H.264","WebM","Ogg Video","Ogg Video File","M3U8","M3U8 Playlist"]);
+const ARCHIVE_RIGHTS_BASES = new Set(["public_domain","cc0","cc_by","cc_by_sa","written_permission"]);
 const FILMFLUX_ENDPOINT = "https://filmflux.app/api/public/trending?limit=10";
 const PEERTUBE_ALLOWED_HOSTS = new Set(["framatube.org", "peer.tube"]);
+
+export const AFRICAN_PROVIDER_CAPABILITIES = Object.freeze({
+  youtube: Object.freeze({ type: "official_embed", controls: "provider_api", fallback: true }),
+  vimeo: Object.freeze({ type: "official_embed", controls: "provider_api", fallback: true }),
+  peertube: Object.freeze({ type: "official_embed", controls: "provider_api", fallback: true }),
+  dailymotion: Object.freeze({ type: "official_embed", controls: "provider_native", fallback: true }),
+  rumble: Object.freeze({ type: "official_embed", controls: "provider_native", fallback: true }),
+  archive: Object.freeze({ type: "public_file", controls: "html5", fallback: true })
+});
 
 function cleanText(value, max = 240) {
   return typeof value === "string" ? value.trim().slice(0, max) : "";
@@ -25,7 +35,7 @@ export function validateAfricanPlaybackSource(source) {
     throw new TypeError("This playback source is not enabled by the published catalogue.");
   }
   const provider = source.provider;
-  if (!["youtube","vimeo","dailymotion","rumble","peertube","archive"].includes(provider)) {
+  if (!Object.hasOwn(AFRICAN_PROVIDER_CAPABILITIES, provider)) {
     throw new TypeError("Unsupported African Stories playback provider.");
   }
   const sourceId = cleanText(source.sourceId, 80);
@@ -78,14 +88,15 @@ export function buildOfficialEmbed(source, { origin = globalThis.location?.origi
         !/^[a-z0-9.-]+$/i.test(instance.hostname) || instance.hostname.includes("..") ||
         instance.hostname === "localhost" || instance.hostname.endsWith(".local") ||
         instance.hostname.endsWith(".internal") || !PEERTUBE_ALLOWED_HOSTS.has(instance.hostname.toLowerCase())) {
-      throw new TypeError("Invalid PeerTube instance origin.");
+      throw new TypeError("PeerTube source must use a reviewed instance origin (peer.tube or framatube.org).");
     }
     if (!UUID.test(item.videoUuid || "")) throw new TypeError("Invalid PeerTube video UUID.");
     const url = new URL("/videos/embed/" + item.videoUuid, instance.origin);
     url.searchParams.set("api", "1");
+    url.searchParams.set("controlBar", "1");
     return { provider: item.provider, url: url.toString(), origin: url.origin, title: cleanText(item.label) || "PeerTube player" };
   }
-  throw new TypeError("This source is not an official platform embed.");
+  throw new TypeError("This source uses a public media file, not an official iframe embed.");
 }
 
 export async function resolveInternetArchiveFile(source, fetchImpl = fetch) {
@@ -97,13 +108,28 @@ export async function resolveInternetArchiveFile(source, fetchImpl = fetch) {
   if (!ARCHIVE_FILE.test(item.archiveFile || "") || item.archiveFile.includes("..")) {
     throw new TypeError("Invalid Internet Archive filename.");
   }
+  if (!ARCHIVE_RIGHTS_BASES.has(item.rightsBasis)) {
+    throw new Error("The archive file has no recognized public-domain, Creative Commons or written-permission basis.");
+  }
   const metadataUrl = "https://archive.org/metadata/" + encodeURIComponent(item.archiveIdentifier);
-  const response = await fetchImpl(metadataUrl, { headers: { Accept: "application/json" }, credentials: "omit" });
-  if (!response.ok) throw new Error("Internet Archive item metadata is unavailable.");
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 12000);
+  let response;
+  try {
+    response = await fetchImpl(metadataUrl, {
+      headers: { Accept: "application/json" }, credentials: "omit", signal: controller.signal
+    });
+  } finally {
+    clearTimeout(timeout);
+  }
+  if (!response?.ok) throw new Error("Internet Archive item metadata is unavailable.");
   const metadata = await response.json();
   const file = Array.isArray(metadata.files) ? metadata.files.find(entry => entry.name === item.archiveFile) : null;
   if (!file || file.private === "true" || file.private === true || !PUBLIC_ARCHIVE_FORMATS.has(file.format)) {
     throw new Error("The selected file is not a supported public video file in this archive item.");
+  }
+  if (file.size != null && (!Number.isFinite(Number(file.size)) || Number(file.size) <= 0)) {
+    throw new Error("The selected archive file has no valid media size.");
   }
   const extension = item.archiveFile.toLowerCase().split(".").pop();
   if (!["mp4","webm","ogv","ogg","m3u8"].includes(extension)) {
@@ -118,18 +144,24 @@ export async function resolveInternetArchiveFile(source, fetchImpl = fetch) {
     mimeType: extension === "m3u8" ? "application/vnd.apple.mpegurl" :
       extension === "webm" ? "video/webm" : extension === "ogv" || extension === "ogg" ? "video/ogg" : "video/mp4",
     itemUrl: "https://archive.org/details/" + encodeURIComponent(item.archiveIdentifier),
-    rightsBasis: cleanText(item.rightsBasis, 80),
+    rightsBasis: item.rightsBasis,
     evidenceRef: cleanText(item.evidenceRef, 240)
   };
 }
 
 export async function fetchFilmFluxTrending(fetchImpl = fetch) {
-  const response = await fetchImpl(FILMFLUX_ENDPOINT, {
-    headers: { Accept: "application/json" },
-    credentials: "omit",
-    cache: "no-store"
-  });
-  if (!response.ok) throw new Error("FilmFlux discovery is temporarily unavailable.");
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 10000);
+  let response;
+  try {
+    response = await fetchImpl(FILMFLUX_ENDPOINT, {
+      headers: { Accept: "application/json" }, credentials: "omit",
+      cache: "no-store", signal: controller.signal
+    });
+  } finally {
+    clearTimeout(timeout);
+  }
+  if (!response?.ok) throw new Error("FilmFlux discovery is temporarily unavailable.");
   const payload = await response.json();
   if (!Array.isArray(payload.movies)) throw new Error("FilmFlux returned an unexpected catalogue response.");
   return payload.movies.slice(0, 20).map((movie, index) => {
