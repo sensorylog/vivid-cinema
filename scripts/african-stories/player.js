@@ -10,6 +10,7 @@ import {
   getAfricanAccessMessage,
   getPlayableAfricanSources
 } from "./policy.js";
+import { accessLabel } from "./discovery-data.js";
 
 const CATALOGUE_URL = "/data/african-stories-catalog.json";
 const SOURCE_TIMEOUT_MS = 12000;
@@ -185,6 +186,34 @@ async function loadTitle() {
     }
     if (ui.title) ui.title.textContent = title.title || "African Stories";
     if (ui.description) ui.description.textContent = title.synopsis || "African cinema, documentary and moving-image heritage.";
+    const evidencePanel = document.getElementById("african-title-evidence");
+    const metadata = document.getElementById("african-player-metadata");
+    const access = document.getElementById("african-player-access");
+    const references = document.getElementById("african-player-references");
+    if (evidencePanel && metadata && access && references) {
+      evidencePanel.hidden = false;
+      metadata.textContent = [title.year, title.director, title.countryName, title.format,
+        ...(Array.isArray(title.languages) ? title.languages : [])].filter(Boolean).join(" · ");
+      access.textContent = "Access status: " + accessLabel(title.accessState) +
+        ". This record is for discovery and research; it does not grant streaming or reproduction rights.";
+      references.replaceChildren();
+      const sourceRecords = [
+        ...(title.provenance?.sourceUrl ? [{ label: "Primary catalogue / provenance record", url: title.provenance.sourceUrl }] : []),
+        ...(Array.isArray(title.references) ? title.references : [])
+      ];
+      for (const source of sourceRecords) {
+        try {
+          const url = new URL(source.url);
+          if (url.protocol !== "https:") continue;
+          const link = document.createElement("a");
+          link.href = url.toString();
+          link.target = "_blank";
+          link.rel = "noopener noreferrer";
+          link.textContent = source.label || "Open research source";
+          references.append(link);
+        } catch {}
+      }
+    }
     const sources = getPlayableAfricanSources(title);
     if (!sources.length) {
       setState("Viewing access not confirmed", getAfricanAccessMessage(title) + " No source has passed the rights, territory and authorization checks.", "ACCESS NOT CLEARED");
