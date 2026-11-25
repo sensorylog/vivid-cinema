@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "catalogueVersion": "2026-11-25.14",
+  "catalogueVersion": "2026-11-25.15",
   "regions": [
     {
       "id": "north",
@@ -189,7 +189,8 @@
         "NG"
       ],
       "titleIds": [
-        "sambizanga-1972"
+        "sambizanga-1972",
+        "kaddu-beykat-1975"
       ]
     },
     {
@@ -567,7 +568,8 @@
         "sambizanga-1972"
       ],
       "titleIds": [
-        "sambizanga-1972"
+        "sambizanga-1972",
+        "kaddu-beykat-1975"
       ]
     },
     {
@@ -1003,10 +1005,18 @@
         {
           "label": "Bisschoff & Murphy — Revising the Classics",
           "url": "https://storre.stir.ac.uk/bitstream/1893/23398/1/DM_LostClassicsIntro.pdf"
+        },
+        {
+          "label": "African Film Festival — Safi Faye",
+          "url": "https://africanfilmny.org/directors/safi-faye/"
+        },
+        {
+          "label": "MoMA — Safi Faye",
+          "url": "https://www.moma.org/artists/74056-safi-faye"
         }
       ],
       "selectedWorks": [
-        "Kaddu Beykat / Letter from My Village (1975) — title-specific edition and rights verification required"
+        "Letter from My Village / Kaddu Beykat (1975)"
       ]
     },
     {
@@ -2079,7 +2089,8 @@
         "sambizanga-1972"
       ],
       "titleIds": [
-        "sambizanga-1972"
+        "sambizanga-1972",
+        "kaddu-beykat-1975"
       ]
     },
     {
