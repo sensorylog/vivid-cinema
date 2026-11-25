@@ -201,6 +201,8 @@ function attachYouTubeController(generation) {
       events: {
         onReady: event => {
           if (generation !== sourceGeneration) { event.target.destroy(); return; }
+          const activeFrame = document.querySelector(".african-player-frame iframe");
+          if (activeFrame) frame = activeFrame;
           settled = true;
           attachController({
             play: () => event.target.playVideo(),
@@ -251,6 +253,8 @@ async function attachVimeoController(generation) {
   const player = new window.Vimeo.Player(frame);
   await player.ready();
   if (generation !== sourceGeneration) { player.destroy(); return; }
+  const activeFrame = document.querySelector(".african-player-frame iframe");
+  if (activeFrame) frame = activeFrame;
   attachController({
     play: () => player.play(),
     pause: () => player.pause(),
@@ -275,6 +279,8 @@ async function attachPeerTubeController(generation) {
   const player = new window.PeerTubePlayer(frame);
   await player.ready;
   if (generation !== sourceGeneration) return;
+  const activeFrame = document.querySelector(".african-player-frame iframe");
+  if (activeFrame) frame = activeFrame;
   attachController({
     play: () => player.play(),
     pause: () => player.pause(),
