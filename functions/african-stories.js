@@ -4,7 +4,8 @@ const WORK_ID = /^[a-z0-9][a-z0-9-]{1,99}$/;
 const VERSION_ID = /^[a-z0-9][a-z0-9-]{0,79}$/;
 const PROVIDER_ID = /^[a-z0-9][a-z0-9-]{1,79}$/;
 const COUNTRY = /^[A-Z]{2}$/;
-const PROVIDER_SESSION_ADAPTERS = Object.freeze({});\nconst WORK_TYPES = new Set(["feature_film","short_film","series","documentary","short_documentary","newsreel","oral_history","educational_film","animation","experimental","archive_footage","other"]);
+const PROVIDER_SESSION_ADAPTERS = Object.freeze({});
+const WORK_TYPES = new Set(["feature_film","short_film","series","documentary","short_documentary","newsreel","oral_history","educational_film","animation","experimental","archive_footage","other"]);
 const PUBLIC_ACCESS_STATES = new Set(["archive_record","access_pending","watch_officially"]);
 
 function fail(HttpsError, code, message) {
@@ -185,6 +186,7 @@ export function createAfricanStoriesFunctions({ db, onCall, HttpsError, Timestam
     await db.collection("africanProviderRegistryPrivate").doc(providerId).set({
       providerId, adapterType, embedOrigin: originUrl.origin,
       status: request.data.status === "active" ? "active" : "inactive",
+      adapterReady: typeof PROVIDER_SESSION_ADAPTERS[providerId]?.createSession === "function",
       agreementRef, securityReviewed: true,
       updatedAt: now, updatedBy: request.auth.uid
     });
@@ -222,12 +224,12 @@ export function createAfricanStoriesFunctions({ db, onCall, HttpsError, Timestam
       const validUntilMs = Number(request.data?.validUntilMs);
       if (!Number.isFinite(validFromMs) || !Number.isFinite(validUntilMs) || validUntilMs <= validFromMs || validUntilMs <= Date.now()) fail(HttpsError, "invalid-argument", "A valid future rights window is required.");
       payload.providerId = providerId;
-      payload.playbackUrl = playbackUrl;
       payload.allowedTerritories = territories;
       payload.validFrom = Timestamp.fromMillis(validFromMs);
       payload.validUntil = Timestamp.fromMillis(validUntilMs);
-      payload.deliveryType = "authorized_embed";
-      payload.streamOnVivid = true;
+      payload.deliveryType = "provider_session";
+      payload.rightsApproved = true;
+      payload.streamOnVivid = false;
     }
     const grantId = workId + "__" + versionId;
     await db.collection("africanRightsGrants").doc(grantId).set(payload);
