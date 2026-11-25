@@ -29,7 +29,7 @@ export async function onRequest({ request, env }) {
   const allowed = new Set(["event", ...Object.keys(CODES)]);
   if (Object.keys(body).some(key => !allowed.has(key))) return json(400, { ok: false, code: "unknown-field" });
   try {
-    env.AFRICAN_STORIES_ANALYTICS.writeDataPoint({
+    await env.AFRICAN_STORIES_ANALYTICS.writeDataPoint({
       blobs: [body.event, dimensions.countryCode || "", dimensions.region || "", dimensions.format || "", dimensions.accessState || ""],
       doubles: [1], indexes: ["african-stories"]
     });
