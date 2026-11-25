@@ -35,5 +35,5 @@ test("Adsterra units load only on approved browsing surfaces", async () => {
   assert.match(advertising, /fetchpriority", "low"/);
   assert.match(advertising, /EXCLUDED_PAGES/);
   assert.match(advertising, /Sponsored/);
-  assert.match(style, /max-height/);
+  assert.doesNotMatch(style, /max-height\\s*:/);\n  assert.doesNotMatch(style, /overflow\\s*:\\s*hidden/);
 });
