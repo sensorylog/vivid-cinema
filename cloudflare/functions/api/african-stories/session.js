@@ -43,8 +43,8 @@ export async function onRequest({ request, env }) {
   }
   try {
     // The provider service is the trust boundary: it must re-check title-level
-    // rights, territory, time window, provider registration and user/session
-    // policy before minting a short-lived URL. The browser never supplies URLs.
+    // rights, territory, time window and provider registration before minting
+    // a short-lived public-access URL. The browser never supplies URLs.
     const upstream = await env.AFRICAN_STORIES_PROVIDER.fetch("https://african-stories-provider.internal/session", {
       method: "POST",
       headers: { "Content-Type": "application/json", Accept: "application/json" },
@@ -63,10 +63,22 @@ export async function onRequest({ request, env }) {
         message: "The authorized provider could not issue a playback session."
       });
     }
+    let playbackUrl;
+    try { playbackUrl = new URL(payload.playbackUrl); } catch { playbackUrl = null; }
+    const now = Date.now();
+    const expiresAt = Date.parse(payload.expiresAt);
+    const supportedMimeTypes = ["application/vnd.apple.mpegurl", "application/dash+xml", "video/mp4", "video/webm"];
+    if (!playbackUrl || playbackUrl.protocol !== "https:" || playbackUrl.username || playbackUrl.password ||
+        !Number.isFinite(expiresAt) || expiresAt <= now || expiresAt > now + 15 * 60 * 1000 ||
+        !supportedMimeTypes.includes(payload.mimeType) ||
+        typeof payload.sessionId !== "string" || !/^[A-Za-z0-9_-]{8,128}$/.test(payload.sessionId)) {
+      console.error("African Stories provider returned an invalid playback session envelope.");
+      return json(502, { ok: false, code: "invalid-provider-session", message: "The authorized provider returned an invalid playback session." });
+    }
     return json(200, {
       ok: true,
-      playbackUrl: payload.playbackUrl,
-      expiresAt: payload.expiresAt,
+      playbackUrl: playbackUrl.toString(),
+      expiresAt: new Date(expiresAt).toISOString(),
       mimeType: payload.mimeType,
       sessionId: payload.sessionId
     });
