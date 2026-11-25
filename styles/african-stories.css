@@ -39,33 +39,91 @@
 .african-filmflux-actions a:hover{text-decoration:underline}
 @media(max-width:640px){.african-player-workspace{border-radius:14px}.african-player-toolbar{min-height:46px;padding:0 13px}.african-player-frame{min-height:250px}.african-player-underbar{align-items:flex-start;padding:13px}.african-player-sources{width:100%}.african-source-button{min-height:42px}.african-filmflux-panel{margin-top:40px}}
 
-.african-platform-directory{margin-top:54px}
-.african-platform-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr));gap:12px}
-.african-platform-grid a{display:flex;min-height:142px;flex-direction:column;gap:9px;padding:18px;border:1px solid rgba(255,255,255,.12);border-radius:14px;background:linear-gradient(145deg,#151b25,#0d1016);color:#f5f6f8;text-decoration:none;transition:border-color .18s ease,transform .18s ease}
-.african-platform-grid a:hover,.african-platform-grid a:focus-visible{transform:translateY(-2px);border-color:rgba(210,226,246,.5);outline:none}
-.african-platform-grid strong{font-size:1rem}
-.african-platform-grid span{color:#aeb8c7;font-size:.8rem;line-height:1.5}
-.african-platform-grid small{margin-top:auto;color:#c8d6e8;font-size:.7rem;font-weight:750;letter-spacing:.04em}
+/* Phase 5 — African Stories discovery atlas */
+.african-discovery-page{background:radial-gradient(ellipse at 50% -12%,rgba(76,96,128,.24),transparent 48%),#08090c}
+.african-discovery-shell{width:min(1280px,100%);margin:auto;padding:clamp(26px,5vw,64px) clamp(18px,4vw,48px) 90px}
+.african-discovery-hero{padding:clamp(34px,7vw,88px) 0 48px;border-bottom:1px solid rgba(255,255,255,.1)}
+.african-hero-kicker{margin:24px 0 12px;color:#aeb8c7;font-size:.7rem;font-weight:800;letter-spacing:.19em}
+.african-discovery-hero h1{margin:0;font-size:clamp(3.2rem,10vw,7.8rem);line-height:.92;letter-spacing:-.075em}
+.african-discovery-hero h1 em{color:#c8d8e8;font-style:normal}
+.african-hero-copy{max-width:640px;margin:22px 0;color:#b6bfcd;font-size:clamp(1rem,2vw,1.2rem);line-height:1.7}
+.african-discovery-search{display:grid;grid-template-columns:minmax(220px,1fr) repeat(3,minmax(130px,180px));gap:10px;max-width:920px;margin-top:28px}
+.african-discovery-search input,.african-discovery-search select{min-height:50px;width:100%;padding:0 15px;border:1px solid rgba(255,255,255,.17);border-radius:10px;background:#111720;color:#f5f6f8;font:inherit}
+.african-discovery-status{margin:14px 0 0;color:#9eacbd;font-size:.82rem}
+.african-atlas-section{padding:52px 0;border-bottom:1px solid rgba(255,255,255,.09)}
+.african-region-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}
+.african-region-card,.african-content-card{display:flex;flex-direction:column;min-height:190px;padding:20px;border:1px solid rgba(255,255,255,.12);border-radius:15px;background:linear-gradient(145deg,#141a24,#0c1016);color:#f5f6f8;text-decoration:none}
+.african-region-card h3,.african-content-card h3{margin:14px 0 8px;font-size:1.15rem;letter-spacing:-.025em}
+.african-region-card p,.african-content-card p{margin:0;color:#aeb8c7;font-size:.83rem;line-height:1.6}
+.african-region-card small{margin-top:auto;padding-top:16px;color:#c7d5e6;font-size:.72rem}
+.african-card-eyebrow{color:#9db0c8;font-size:.62rem;font-weight:800;letter-spacing:.15em;text-transform:uppercase}
+.african-country-toolbar{display:flex;align-items:center;justify-content:space-between;gap:14px;margin:30px 0 14px}
+.african-country-toolbar h3{margin:0;font-size:1.05rem}.african-country-toolbar span{color:#9eacbd;font-size:.75rem}
+.african-country-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:9px}
+.african-country-card{display:grid;grid-template-columns:38px 1fr;align-items:center;gap:2px 10px;min-height:68px;padding:12px;border:1px solid rgba(255,255,255,.1);border-radius:11px;background:#10151d;color:#f5f6f8;text-decoration:none}
+.african-country-code{grid-row:span 2;display:grid;place-items:center;width:36px;height:36px;border-radius:9px;background:#202a38;color:#d9e5f4;font-size:.68rem;font-weight:800}
+.african-country-card strong{font-size:.82rem}.african-country-card small{color:#96a4b5;font-size:.68rem}
+.african-content-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,260px),1fr));gap:13px}
+.african-content-card{min-height:200px}.african-card-link{display:inline-flex;align-items:center;margin-top:auto;padding-top:18px;color:#d3e1f2;font-size:.77rem;font-weight:750;text-decoration:none}
+.african-card-link:hover{text-decoration:underline}.african-title-meta{margin-top:12px;color:#9eacbd;font-size:.7rem}
+.african-empty-state{grid-column:1/-1;margin:0;padding:22px;border:1px dashed rgba(255,255,255,.18);border-radius:12px;color:#aeb8c7;font-size:.85rem;line-height:1.65}
+.african-country-hub{padding:32px 0;border-bottom:1px solid rgba(255,255,255,.1)}
+.african-sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+@media(max-width:900px){.african-region-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.african-discovery-search{grid-template-columns:1fr 1fr}.african-discovery-search input{grid-column:1/-1}}
+@media(max-width:560px){.african-discovery-shell{padding-top:20px}.african-discovery-hero{padding-top:34px}.african-region-grid{grid-template-columns:1fr 1fr}.african-region-card{min-height:170px;padding:15px}.african-discovery-search{grid-template-columns:1fr}.african-discovery-search input{grid-column:auto}.african-country-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.african-country-card{grid-template-columns:32px 1fr;padding:9px}.african-country-code{width:30px;height:30px}}
 
-.african-discovery-launch{display:inline-flex;align-items:center;gap:10px;margin:-10px 0 24px;padding:10px 15px;border:1px solid rgba(255,255,255,.17);border-radius:999px;color:#dce7f5;text-decoration:none;font-size:.8rem;font-weight:750;background:rgba(255,255,255,.045)}
-.african-discovery-launch:hover,.african-discovery-launch:focus-visible{border-color:rgba(210,226,246,.55);background:rgba(255,255,255,.09);outline:none}
+.african-editorial-detail{margin:28px 0;padding:clamp(22px,4vw,38px);border:1px solid rgba(255,255,255,.14);border-radius:18px;background:linear-gradient(145deg,#151d29,#0d1118)}
+.african-editorial-detail h2{margin:12px 0;font-size:clamp(1.6rem,4vw,2.5rem);letter-spacing:-.045em}
+.african-editorial-detail>p{max-width:780px;color:#b3bfce;line-height:1.75}
+.african-editorial-references{display:flex;gap:12px;flex-wrap:wrap;margin:16px 0}
+.african-editorial-references:empty{display:none}
 
-.african-admin-actions select{flex:1;min-width:220px;width:auto}
+.african-editorial-meta{display:flex;gap:9px;flex-wrap:wrap;margin:16px 0}
+.african-editorial-meta-item{padding:7px 11px;border:1px solid rgba(255,255,255,.14);border-radius:999px;color:#c5d0dd;font-size:.82rem}
+.african-editorial-works{margin:20px 0}
+.african-editorial-works h3{font-size:1rem}
+.african-editorial-work-list{display:flex;gap:10px 24px;flex-wrap:wrap;padding-left:20px;color:#c5d0dd}
+.african-editorial-references{gap:10px 18px}
 
-/* African Stories premium player controls */
-.african-player-controls{display:flex;align-items:center;gap:12px;padding:13px 18px;background:linear-gradient(180deg,#101722,#0b0e14);border-top:1px solid rgba(255,255,255,.08)}
-.african-player-controls[hidden]{display:none}
-.african-control-button{min-height:38px;padding:0 13px;border:1px solid rgba(255,255,255,.17);border-radius:999px;background:#1b2532;color:#f4f7fb;font:inherit;font-size:.75rem;font-weight:750;white-space:nowrap;cursor:pointer}
-.african-control-button:hover,.african-control-button:focus-visible{border-color:#d7e3f3;background:#29384b;outline:none}
-.african-control-time{min-width:42px;color:#c1cad6;font:600 .72rem/1 ui-monospace,SFMono-Regular,Consolas,monospace;text-align:center;font-variant-numeric:tabular-nums}
-.african-control-progress{width:100%;min-width:70px;accent-color:#dce7f5;cursor:pointer}
-.african-player-sources button[aria-pressed=true]{border-color:#dce7f5;background:#34465b;box-shadow:inset 0 0 0 1px rgba(220,231,245,.18)}
-.african-player-frame iframe{min-height:100%;}
-.african-player-fallback{display:inline-flex;align-items:center;min-height:38px;padding:0 12px;border:1px solid rgba(255,255,255,.12);border-radius:999px;background:rgba(255,255,255,.035)}
-.african-filmflux-status{min-height:24px}
-@media(max-width:680px){.african-player-controls{gap:7px;padding:11px 10px;flex-wrap:wrap}.african-control-progress{order:2;flex-basis:100%;width:100%}.african-control-time{font-size:.68rem}.african-control-button{min-height:40px;padding:0 10px;font-size:.7rem}.african-player-controls #african-control-play{margin-right:auto}}
-@media(prefers-reduced-motion:reduce){.african-platform-grid a{transition:none}}
 
-.african-player-attribution{display:flex;align-items:center;gap:12px;flex-wrap:wrap;width:100%;margin:0;color:#9eacbd;font-size:.72rem;line-height:1.5}
-.african-player-attribution[hidden]{display:none}
-.african-player-attribution a{color:#d4e1f1;font-weight:750;text-decoration:underline;text-underline-offset:3px}
+/* Evidence-led editorial detail cards */
+.african-editorial-insights{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:12px;margin:22px 0}
+.african-insight-card{padding:18px;border:1px solid rgba(255,255,255,.13);border-radius:13px;background:linear-gradient(145deg,#151c27,#0c1118)}
+.african-insight-card h3{margin:0 0 9px;color:#d9e5f3;font-size:.82rem;letter-spacing:.015em}
+.african-insight-card p{margin:0;color:#b6c1d0;font-size:.84rem;line-height:1.72}
+.african-related-editorial{margin:24px 0}
+.african-related-editorial>h3{margin:0 0 12px;font-size:1rem}
+.african-related-editorial .african-content-card{min-height:150px}
+.african-editorial-meta{margin:16px 0}
+.african-editorial-works{padding:18px 0;border-top:1px solid rgba(255,255,255,.1)}
+.african-editorial-works h3{margin:0 0 12px;color:#d9e5f3}
+.african-editorial-work-list{display:flex;gap:9px 25px;flex-wrap:wrap;margin:0;padding-left:20px;color:#b6c1d0;font-size:.83rem;line-height:1.7}
+.african-editorial-detail[hidden]{display:none}
+@media(max-width:560px){.african-insight-card{padding:15px}.african-editorial-insights{grid-template-columns:1fr}}
+
+
+.african-sources-heading{flex:0 0 100%;margin:8px 0 0;color:#d9e5f3;font-size:.9rem}
+.african-editorial-references .african-card-link{margin:0;padding:8px 0}
+
+
+.african-title-evidence{margin:22px 0;padding:18px 20px;border:1px solid rgba(255,255,255,.13);border-radius:14px;background:#10151d}
+.african-title-evidence[hidden]{display:none}
+.african-player-metadata,.african-player-access{margin:9px 0;color:#aeb8c7;font-size:.82rem;line-height:1.65}
+.african-player-access{color:#d6c7a4}
+.african-player-references{display:flex;flex-wrap:wrap;gap:10px 18px;margin-top:12px}
+.african-player-references a{color:#d3e1f2;font-size:.78rem;font-weight:700;text-decoration:none}
+.african-player-references a:hover{text-decoration:underline}
+
+
+/* Rights-holder intake */
+.african-submission-form{display:grid;grid-template-columns:1fr;gap:10px;max-width:760px;margin:22px 0}
+.african-submission-form>label{margin-top:9px;color:#dce5ef;font-size:.88rem;font-weight:650}
+.african-submission-form input:not([type=checkbox]),.african-submission-form select,.african-submission-form textarea{width:100%;min-height:46px;padding:12px 14px;border:1px solid rgba(255,255,255,.17);border-radius:10px;background:#0b1018;color:#f5f7fa;font:inherit}
+.african-submission-form textarea{min-height:112px;resize:vertical}
+.african-submission-form input:focus,.african-submission-form select:focus,.african-submission-form textarea:focus{outline:2px solid #8caed2;outline-offset:2px}
+.african-submission-form .african-consent-row{display:flex;align-items:flex-start;gap:10px;color:#b8c4d2;font-size:.82rem;font-weight:450;line-height:1.6}
+.african-consent-row input{margin-top:4px;flex:0 0 auto}
+.african-submit-button{justify-self:start;min-height:46px;padding:12px 20px;border:0;border-radius:10px;background:#e5c98e;color:#17130c;font-weight:800;cursor:pointer}
+.african-submit-button:disabled{opacity:.55;cursor:wait}
+#african-submission-status{color:#c3cfdd;font-size:.84rem;line-height:1.6}
+@media(max-width:560px){.african-submission-form{gap:8px}.african-submit-button{width:100%}}

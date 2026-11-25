@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#08090c">
+<meta name="description" content="African Stories — explore African cinema, documentaries, filmmakers, historical timelines and audiovisual heritage.">
+<title>African Stories — Vivid Cinema</title>
+<link rel="stylesheet" href="/styles/vivid-foundation.css">
+<link rel="stylesheet" href="/styles/vivid-system.css">
+<link rel="stylesheet" href="/styles/vivid-shell.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.9.1/font/bootstrap-icons.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.9.1/font/bootstrap-icons.css">
+<link rel="stylesheet" href="/styles/african-stories.css">
+</head>
+<body data-vivid-page="african-stories" class="african-stories-page african-discovery-page">
+<header class="vivid-topbar"><nav class="vivid-nav" aria-label="Primary"></nav></header>
+<main class="african-discovery-shell">
+<section class="african-discovery-hero">
+ <span class="african-eyebrow">VIVID CINEMA PRESENTS</span>
+ <p class="african-hero-kicker">THE AFRICAN SCREEN LIBRARY & STORY ATLAS</p>
+ <h1>Africa, <em>on screen.</em></h1>
+ <p class="african-hero-copy">Go beyond the familiar canon. Explore who controlled the camera, who financed the films, how audiences shaped the industry, and what happened to the archives.</p>
+ <div class="african-discovery-search">
+  <label class="african-sr-only" for="african-discovery-query">Search African Stories</label>
+  <input id="african-discovery-query" type="search" placeholder="Search films, people, history, archives, countries, themes…" autocomplete="off">
+  <label class="african-sr-only" for="african-region-filter">Filter by region</label>
+  <select id="african-region-filter"><option value="">All regions</option></select>
+  <label class="african-sr-only" for="african-format-filter">Filter by format</label>
+  <select id="african-format-filter"><option value="">All formats</option><option value="feature">Feature films</option><option value="documentary">Documentaries</option><option value="oral_history">Oral histories</option><option value="newsreel">Newsreels</option><option value="archive_footage">Archive footage</option><option value="historical_drama">Historical drama</option></select>
+  <label class="african-sr-only" for="african-language-filter">Filter by language</label>
+  <select id="african-language-filter"><option value="">All languages</option></select>
+ </div>
+ <p id="african-discovery-status" class="african-discovery-status" role="status" aria-live="polite">Preparing the African Stories atlas…</p>
+ <p class="african-discovery-status"><a class="african-card-link" href="/african-stories-submit.html">Are you a filmmaker or rights holder? Submit a film for review →</a></p>
+</section>
+<section id="african-country-hub" class="african-country-hub" hidden>
+ <div class="african-section-heading"><span class="african-eyebrow">COUNTRY HUB</span><h2 id="african-country-title"></h2><p id="african-country-description"></p></div>
+ <a class="african-back-link" href="african-stories.html">← Explore all African Stories</a>
+</section>
+<section id="african-editorial-detail" class="african-editorial-detail" hidden aria-live="polite"><span id="african-editorial-kind" class="african-eyebrow"></span><h2 id="african-editorial-title"></h2><p id="african-editorial-summary"></p><div id="african-editorial-meta" class="african-editorial-meta"></div><div id="african-editorial-works" class="african-editorial-works"></div><div id="african-editorial-references" class="african-editorial-references"></div><div id="african-editorial-related" class="african-content-grid"></div></section>
+<section class="african-atlas-section">
+ <div class="african-section-heading"><span class="african-eyebrow">EXPLORE THE CONTINENT</span><h2>Stories by region</h2><p>Start with a region, then explore its country hubs.</p></div>
+ <div id="african-region-grid" class="african-region-grid"></div>
+ <div class="african-country-toolbar"><h3>Country hubs</h3><span id="african-country-count">54 countries</span></div>
+ <div id="african-country-grid" class="african-country-grid"></div>
+</section>
+<section class="african-atlas-section">
+ <div class="african-section-heading"><span class="african-eyebrow">EDITORIAL COLLECTIONS</span><h2>The stories behind the stories</h2><p>Contested timelines, forgotten audiences, lost reels and the economics behind the films—not just a list of famous titles.</p></div>
+ <div id="african-collection-grid" class="african-content-grid"></div>
+</section>
+<section class="african-atlas-section">
+ <div class="african-section-heading"><span class="african-eyebrow">PEOPLE & FILMMAKERS</span><h2>The people behind the stories</h2><p>Filmmakers, historians, archivists and cultural figures, with sourced profiles, selected works and research references.</p></div>
+ <div id="african-people-grid" class="african-content-grid"></div>
+</section>
+<section class="african-atlas-section">
+ <div class="african-section-heading"><span class="african-eyebrow">HISTORY IN CONTEXT</span><h2>The official date is not always the whole story</h2><p>Explore documented milestones, source disagreements and the historical context behind familiar dates.</p></div>
+ <div id="african-timeline-grid" class="african-content-grid"></div>
+</section>
+<section class="african-atlas-section">
+ <div class="african-section-heading"><span class="african-eyebrow">DOCUMENTARY JOURNEYS</span><h2>Follow a subject across borders</h2><p>Connected documentary pathways bring together related places, people and events.</p></div>
+ <div id="african-journey-grid" class="african-content-grid"></div>
+</section>
+<section class="african-atlas-section">
+ <div class="african-section-heading"><span class="african-eyebrow">PUBLISHED TITLES</span><h2>Films and moving-image records</h2><p>Every title displays its actual access status. A catalogue record is not a streaming licence.</p></div>
+ <div id="african-title-grid" class="african-content-grid"></div>
+</section>
+</main>
+<script type="module" src="/scripts/app-shell.js"></script>
+<script type="module" src="/scripts/african-stories/discovery.js"></script>
+</body>
+</html>

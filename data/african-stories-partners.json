@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "purpose": "Research-backed acquisition and distribution outreach pipeline. Prospects only; none is a confirmed Vivid partner.",
+  "lastReviewed": "2026-11-25",
+  "partners": [
+    {"id":"miff-mpplus","name":"MIFF / MPPLUS","type":"festival-to-digital-pathway","regions":["southern-africa","international"],"status":"research_target","rightsApproach":"Published information says filmmakers retain copyright and any streaming requires a separate agreement.","opportunity":"Explore post-festival digital audience pathways and title-by-title licensing.","source":"https://www.miff.co.za/mpplus/"},
+    {"id":"paffnow","name":"PAFFnow","type":"festival-streaming-platform","regions":["pan-african","diaspora"],"status":"research_target","rightsApproach":"Describes itself as the official Pan African Film & Arts Festival streaming platform; title-level terms require direct verification.","opportunity":"Explore festival catalogue discovery and properly licensed co-curation.","source":"https://www.paffnow.com/home"},
+    {"id":"laba-cinema","name":"Laba Cinema","type":"hybrid-distribution-exhibition","regions":["pan-african","diaspora"],"status":"research_target","rightsApproach":"Published pack describes non-exclusive arrangements by default, with rights limited by channel, territory and term; verify directly.","opportunity":"Explore streaming, community exhibition, education and offline-first distribution windows.","source":"https://www.labacinema.com/filmdistribution/pack"},
+    {"id":"filmmerge-afrispotlight","name":"FilmMerge / AfriSpotlight","type":"aggregator-buyer-pipeline","regions":["pan-african","international"],"status":"research_target","rightsApproach":"Public site describes distribution placement pathways; verify catalogue authority, buyers and contract terms.","opportunity":"Assess aggregation and buyer-introduction capability for independently controlled titles.","source":"https://www.filmmerge.com/"},
+    {"id":"afropix","name":"AfroPix","type":"african-caribbean-streaming","regions":["pan-african","caribbean","diaspora"],"status":"research_target","rightsApproach":"Public mission describes filmmaker, festival and film-board collaboration; verify current scope and operations.","opportunity":"Explore reciprocal discovery, co-curation or rights-holder referrals.","source":"https://afropix.com/pages/our-mission"}
+  ]
+}
