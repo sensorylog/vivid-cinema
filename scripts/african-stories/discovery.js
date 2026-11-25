@@ -58,6 +58,7 @@ function editorialCards(container, records, kind, emptyMessage) {
 
 function renderRegions() {
   ui.region.replaceChildren(new Option("All regions", ""));
+  ui.region.value = params.get("region") || "";
   for (const region of experience.regions) {
     ui.region.add(new Option(region.name, region.id));
   }
@@ -75,7 +76,7 @@ function renderRegions() {
 }
 
 function renderCountries() {
-  const region = params.get("region") || ui.region.value;
+  const region = ui.region.value;
   const query = ui.query.value;
   const countries = filterAfricanCountries(experience.countries, { region, query });
   ui.countryCount.textContent = countries.length + " of " + experience.countries.length + " country hubs";
