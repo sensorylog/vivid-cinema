@@ -210,3 +210,12 @@ Phase F upgrades Vivid's core Discover → Title → Watch flow without adding p
 ### Phase F verification
 
 No browser/device runtime QA was performed in this environment. The branch was inspected for integration consistency; production verification still needs to cover mobile/desktop rendering, TMDB failures, collection pagination, title routing, VidAPI progress events, TV next-episode behavior, Firebase rules deployment, and PWA cache activation.
+
+
+## African Stories — seven-phase transformation
+
+Vivid Cinema is transitioning incrementally toward **African Stories**, a major African cinema, documentary, history and audiovisual-heritage destination. Preserve existing movie/TV/anime/live playback, Firebase auth and data, personal library, downloads, SEO, PWA and Android/Desktop/Web compatibility.
+
+All seven phases remain in one feature branch and one pull request: (1) retire the community product; (2) deep research into African films, documentaries, archives, metadata, authorized playback, distributors, institutions, rights holders and competitors across the continent; (3) define the product, taxonomy, provenance, editorial and rights-aware data blueprint; (4) build a dedicated third African player/provider ecosystem; (5) build premium country, collection, people, timeline and historical discovery; (6) establish acquisition and rights-holder partnerships; (7) verify, launch in stages and expand. Phase 2 begins only after Phase 1 exit checks. Community backend records and services remain dormant pending a deliberate retention decision; no destructive data deletion in Phase 1.
+
+Phase 1 retirement implementation and its regression coverage are tracked in [the African Stories transformation pull request](https://github.com/sensorylog/vivid-cinema/pull/523). The PR remains open so Phases 2–7 can be delivered and reviewed in the same change set before the final merge.

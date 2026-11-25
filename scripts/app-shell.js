@@ -218,7 +218,6 @@ function buildPrimaryLinks(page) {
     navLink("collection.html?collection=tv", "bi-tv", "Series", isCollectionType("tv")),
     navLink("anime.html", "bi-stars", "Anime", page === "anime"),
     navLink("live.html", "bi-broadcast-pin", "Live", page === "live"),
-    navLink("community.html", "bi-chat-square-heart", "Community", page === "community"),
     navLink("library.html", "bi-bookmark-fill", "Library", page === "library"),
     '<a id="auth-link" class="vivid-nav-profile" href="account.html" aria-label="Open profile"' + (page === "account" ? ' aria-current="page"' : '') + '><i class="bi bi-person-circle" aria-hidden="true"></i><span>Profile</span></a>'
   ].join("");
@@ -261,15 +260,6 @@ function syncDesktopNavigation() {
     tools.appendChild(search);
   }
 
-  const watchRooms = document.createElement("a");
-  watchRooms.className = "vivid-watch-rooms-nav";
-  watchRooms.href = "watch-rooms.html";
-  watchRooms.setAttribute("aria-label", "Watch Rooms");
-  watchRooms.title = "Watch Rooms";
-  watchRooms.innerHTML = '<i class="bi bi-people-fill" aria-hidden="true"></i>';
-  if (page === "watch-rooms") watchRooms.setAttribute("aria-current", "page");
-  tools.appendChild(watchRooms);
-
   if (notification) tools.appendChild(notification);
   else {
     const alerts = document.createElement("a");
@@ -301,12 +291,10 @@ function syncMoreNavigation(nav, page) {
     navLink("discover.html", "bi-compass", "Discover", page === "discover"),
     navLink("for-you.html", "bi-stars", "For You", page === "for-you"),
     navLink("anime.html", "bi-stars", "Anime", page === "anime"),
-    navLink("community.html", "bi-chat-square-heart", "Community", page === "community"),
     navLink("library.html", "bi-bookmark-fill", "Library", page === "library" || page === "downloads-library"),
     navLink("account.html", "bi-person-circle", "Profile", page === "account"),
     navLink("news.html", "bi-newspaper", "News", page === "news"),
     navLink("search.html", "bi-search", "Search", page === "search"),
-    navLink("watch-rooms.html", "bi-people-fill", "Watch Rooms", page === "watch-rooms")
   ].join("");
   menu.querySelectorAll("a").forEach(link => {
     link.setAttribute("role", "menuitem");
@@ -315,7 +303,7 @@ function syncMoreNavigation(nav, page) {
 
   const more = nav.querySelector("[data-vivid-more-navigation]");
   if (!more) return;
-  const morePages = ["discover", "for-you", "anime", "community", "library", "downloads-library", "account", "news", "search", "watch-rooms"];
+  const morePages = ["discover", "for-you", "anime", "library", "downloads-library", "account", "news", "search"];
   more.setAttribute("aria-expanded", "false");
   more.setAttribute("aria-haspopup", "menu");
   more.setAttribute("aria-label", "More destinations");
@@ -705,13 +693,6 @@ function ensureMediaLayoutStyles() {
     link.rel = "stylesheet";
     link.href = "./styles/vivid-premium-experience.css?v=3";
     link.dataset.vividPremiumExperience = "true";
-    document.head.appendChild(link);
-  }
-  if ((new URLSearchParams(window.location.search).get("roomMode") === "1" || /(?:^|\/)watch-rooms\.html$/.test(window.location.pathname)) && !document.querySelector("link[data-vivid-watch-room-cinema]")) {
-    const link = document.createElement("link");
-    link.rel = "stylesheet";
-    link.href = "./styles/vivid-watch-room-cinema.css?v=1";
-    link.dataset.vividWatchRoomCinema = "true";
     document.head.appendChild(link);
   }
 }

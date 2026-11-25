@@ -13,11 +13,9 @@ test("service worker has a versioned cache and required offline shell", () => {
   assert.match(source, /const REQUIRED_APP_SHELL = \["\.\/index\.html", "\.\/home\.html", "\.\/offline\.html", "\.\/manifest\.json"\]/);
   assert.match(source, /failedRequired\.length/);
   assert.ok(source.includes("async function cacheOptionalShell()"));
-  assert.ok(source.includes('"./watch-rooms.html"'));
-  assert.ok(source.includes('"./scripts/watch-rooms.js"'));
-  assert.ok(source.includes('"./styles/vivid-watch-rooms.css"'));
-  assert.ok(source.includes('"./styles/vivid-watch-room-cinema.css"'));
-  assert.ok(source.includes('"./styles/vivid-watch-room-experience.css"'));
+  assert.ok(!source.includes('"./watch-rooms.html"'));
+  assert.ok(!source.includes('"./community.html"'));
+  assert.ok(!source.includes('"./scripts/watch-rooms.js"'));
   assert.ok(source.includes('"./styles/vivid-rounded-cards.css?v=round-1"'));
   assert.ok(source.includes('"./scripts/watch-room-player-layout.js"'));
   assert.match(source, /optional assets were not precached/);
@@ -278,7 +276,7 @@ test("Watch Rooms and playback modules are included in the offline app shell", (
     '"./scripts/watch-rooms.js"',
     '"./scripts/watch-room-lobby.js"',
     '"./scripts/watch-room-clubs.js"',
-    '"./scripts/watch-room-playback.js"',
-    '"./scripts/watch.js?v=watch-room-sync-1"'
-  ]) assert.ok(source.includes(asset), "missing Watch Rooms app-shell asset: " + asset);
+    '"./scripts/watch-room-playback.js"'
+  ]) assert.ok(!source.includes(asset), "retired Watch Rooms asset remains in the offline app shell: " + asset);
+  assert.ok(source.includes('"./scripts/watch.js?v=watch-room-sync-1"'), "the primary watch experience remains available");
 });

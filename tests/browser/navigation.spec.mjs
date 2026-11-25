@@ -61,26 +61,28 @@ test("mobile navigation stays within five destinations and exposes secondary rou
   await expect(page.locator(".vivid-mobile-nav a[href='my-downloads.html']")).toHaveCount(0);
   await expect(page.locator(".vivid-mobile-nav a")).toHaveCount(4);
   await expect(page.locator(".vivid-mobile-nav button[data-vivid-more-navigation]")).toHaveCount(1);
-  const watchRoomsIcon = page.locator(".vivid-watch-rooms-nav");
-  await expect(watchRoomsIcon).toHaveAttribute("href", "watch-rooms.html");
-  await expect(watchRoomsIcon).toBeVisible();
-  const iconBounds = await watchRoomsIcon.boundingBox();
-  expect(iconBounds).not.toBeNull();
-  expect(iconBounds.x).toBeGreaterThanOrEqual(0);
-  expect(iconBounds.x + iconBounds.width).toBeLessThanOrEqual(390);
   await expect(page.locator(".vivid-mobile-nav a")).toHaveCount(4);
   await page.locator("[data-vivid-more-navigation]").click();
   const moreMenu = page.locator("#vivid-more-menu");
   await expect(moreMenu).toBeVisible();
-  for (const href of ["discover.html", "anime.html", "community.html", "library.html", "account.html", "search.html", "watch-rooms.html"]) {
+  for (const href of ["discover.html", "anime.html", "library.html", "account.html", "search.html"]) {
     await expect(moreMenu.locator("a[href='" + href + "']")).toHaveCount(1);
   }
   await page.setViewportSize({ width: 1440, height: 900 });
-  await expect(page.locator(".vivid-navlinks a")).toHaveCount(8);
-  for (const href of ["collection.html?collection=movies", "collection.html?collection=tv", "anime.html", "live.html", "community.html", "library.html"]) {
+  await expect(page.locator(".vivid-navlinks a")).toHaveCount(7);
+  for (const href of ["collection.html?collection=movies", "collection.html?collection=tv", "anime.html", "live.html", "library.html"]) {
     await expect(page.locator(".vivid-navlinks a[href='" + href + "']")).toHaveCount(1);
   }
   const profileLink = page.locator(".vivid-navlinks #auth-link");
   await expect(profileLink).toHaveCount(1);
   await expect(profileLink).toHaveAttribute("href", /(?:auth|account)\\.html$/);
+});
+
+test("retired community routes show a transition notice without social controls", async ({page}) => {
+  for (const route of ["/community.html","/watch-rooms.html","/watch-room-cinema.html"]) {
+    await page.goto(route,{waitUntil:"domcontentloaded"});
+    await expect(page.getByRole("heading",{name:/community experience has ended|watch rooms have ended/i})).toBeVisible();
+    await expect(page.locator("form,textarea,[data-open-dialog]")).toHaveCount(0);
+    await expect(page.getByRole("link",{name:/return to vivid/i})).toHaveAttribute("href","home.html");
+  }
 });

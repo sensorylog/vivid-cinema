@@ -54,7 +54,8 @@ test("Android mobile navigation uses five accessible primary tabs and a secondar
   assert.match(appShell, /navLink\("discover\.html"/);
   assert.match(appShell, /navLink\("for-you\.html"/);
   assert.match(appShell, /navLink\("library\.html"/);
-  assert.match(appShell, /navLink\("watch-rooms\.html"/);
+  assert.doesNotMatch(appShell, /navLink\("watch-rooms\.html"/);
+  assert.doesNotMatch(appShell, /navLink\("community\.html"/);
   assert.match(shellCss, /justify-content:\s*space-around/);
   assert.match(shellCss, /\.vivid-native-more-menu\[hidden\]/);
   assert.match(shellCss, /min-height:\s*62px/);

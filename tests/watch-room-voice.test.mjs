@@ -91,8 +91,8 @@ test("Watch Room screenings stay embedded in the lobby and float without stoppin
     readFile(new URL("../scripts/watch-rooms.js", import.meta.url), "utf8"),
     readFile(new URL("../watch-room-cinema.html", import.meta.url), "utf8")
   ]);
-  assert.ok(legacyPage.includes('new URL("watch-rooms.html", window.location.href)'));
-  assert.ok(legacyPage.includes("window.location.replace(target.href)"));
+  assert.match(legacyPage, /Watch Rooms have ended/);
+  assert.ok(!legacyPage.includes("window.location.replace(target.href)"), "retired legacy links must not reopen the social experience");
   assert.ok(lobbyHtml.includes('id="wr-screening-player-host"'));
   assert.ok(lobbyHtml.indexOf('id="wr-cinema-stage"') < lobbyHtml.indexOf('id="wr-screening-player-host"') && lobbyHtml.indexOf('id="wr-screening-player-host"') < lobbyHtml.indexOf('<aside class="vivid-wr-room-sidebar"'));
   assert.ok(lobbyHtml.includes('id="wr-voice-count"'));

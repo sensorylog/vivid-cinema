@@ -53,10 +53,9 @@ test("future-module contracts explicitly reuse existing Memory and Intelligence 
   }
 });
 
-test("Watch Rooms stays in the desktop tools while mobile navigation is capped at five controls", () => {
+test("retired community destinations are absent from shared navigation", () => {
   const appShell = readFileSync(new URL("../scripts/app-shell.js", import.meta.url), "utf8");
-  assert.ok(appShell.includes('watchRooms.className = "vivid-watch-rooms-nav"'));
-  assert.ok(appShell.includes('watchRooms.href = "watch-rooms.html"'));
+  assert.doesNotMatch(appShell, /vivid-watch-rooms-nav|watch-rooms\.html|community\.html/);
   const mobileStart = appShell.indexOf("function syncMobileNavigation()");
   const mobileEnd = appShell.indexOf("function syncNavigation()", mobileStart);
   const mobileBuilder = appShell.slice(mobileStart, mobileEnd);
@@ -67,7 +66,7 @@ test("Watch Rooms stays in the desktop tools while mobile navigation is capped a
   const moreStart = appShell.indexOf("function syncMoreNavigation(");
   const moreEnd = appShell.indexOf("function syncMobileNavigation()", moreStart);
   const moreBuilder = appShell.slice(moreStart, moreEnd);
-  assert.match(moreBuilder, /navLink\("watch-rooms\.html"/);
+  assert.doesNotMatch(moreBuilder, /watch-rooms|community/);
 });
 
 test("Watch Rooms private content waits for a non-anonymous Firebase user", () => {
@@ -831,21 +830,21 @@ test("Vivid legal and trust pages accurately describe current product practices"
   const accessibility = readFileSync(new URL("../accessibility.html", import.meta.url), "utf8");
   const pulse = readFileSync(new URL("../scripts/vivid-pulse.js", import.meta.url), "utf8");
   assert.ok(privacy.includes("does not create an anonymous Firebase account"));
-  assert.ok(privacy.includes("Watch Room and Cinema Club data"));
-  assert.ok(privacy.includes("does not automatically remove every contribution"));
+  assert.ok(privacy.includes("historical community, room and club records"));
+  assert.ok(privacy.includes("does not automatically remove every historical contribution"));
   assert.ok(privacy.includes("Formspree"));
   assert.ok(!privacy.includes("Adcash Autotag"));
   assert.ok(cookies.includes("does not intentionally load the previously evaluated Adcash Autotag"));
   assert.ok(!cookies.includes("Vivid uses Adcash Autotag"));
-  assert.ok(terms.includes("Watch Rooms and Cinema Clubs"));
+  assert.ok(terms.includes("Retired community features"));
   assert.ok(terms.includes("solo playback"));
   assert.ok(terms.includes("limited, non-exclusive permission"));
   assert.ok(contact.includes("https://formspree.io/f/mwpokaav"));
   assert.ok(contact.includes('name="_gotcha"'));
-  assert.ok(contact.includes("Watch Rooms or Cinema Clubs"));
+  assert.ok(contact.includes("Legacy community data request"));
   assert.ok(contact.includes('href="privacy.html"'));
   assert.ok(about.includes("Johnson Kyei Baffour"));
-  assert.ok(help.includes("Start Screening"));
+  assert.ok(help.includes("Community features have been retired"));
   assert.ok(accessibility.includes("not a claim that every page or feature has been independently audited"));
   assert.ok(pulse.includes("Public visitors do not create anonymous Firebase sessions"));
   assert.ok(pulse.includes("search_performed"));
