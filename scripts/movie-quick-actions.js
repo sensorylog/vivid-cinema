@@ -195,6 +195,7 @@ async function openOverlay(card, item) {
     view.querySelectorAll("[data-collection]").forEach(button => { button.disabled = false; });
     view.querySelector(".vivid-quick-actions-feedback").textContent = "Your saved titles stay in My Library.";
   } catch {
+    view.querySelectorAll("[data-collection]").forEach(button => { button.disabled = false; });
     view.querySelector(".vivid-quick-actions-feedback").textContent = "Your library is unavailable right now. Please try again.";
   }
 }
