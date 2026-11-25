@@ -303,7 +303,7 @@ async function load() {
 }
 
 ui.query?.addEventListener("input", render);
-ui.region?.addEventListener("change", renderCountries);
+ui.region?.addEventListener("change", render);
 ui.format?.addEventListener("change", renderTitles);
 ui.language?.addEventListener("change", renderTitles);
 load();
