@@ -26,10 +26,10 @@ The secondary positions are inert until a separate zone is configured. Do not co
 Every native placement retains the visible "Sponsored" label. Ad creatives are never styled to impersonate Vivid movie cards or controls, and placements are kept outside playback surfaces. Native creative containers do not impose a maximum height or hide overflow, so provider creatives are not cropped.
 
 
-## Popunder (received; deliberately not activated)
+## Popunder (limited browser-side test)
 
-The Adsterra Popunder tag supplied for Vivid is configured in `scripts/advertising.js` but remains **disabled by default**. Its source is `https://aarems.org/1/afc16a6f6fd987b460882c312398d244`.
+The supplied Adsterra Popunder tag is enabled for a cautious test on Home, Discover, Collections, For You, and Anime only. It is not loaded on the player, Watch Rooms, Live TV, authentication, account, or offline pages.
 
-Do not enable it until Adsterra Support confirms a network-side frequency cap of **one popunder per unique visitor per 24 hours**. A browser-side script-load guard is not a substitute for the ad network's own cap: one loaded script may otherwise trigger more than one popunder. Once Adsterra confirms the cap, review its trigger behavior and creative categories, then deliberately enable both `popunder.enabled` and `popunder.frequencyCapConfirmed`. The loader is restricted to Home, Discover, Collections, For You, and Anime; it is not loaded on player, Watch Room, Live TV, authentication, account, or offline pages. It fails closed if local storage is unavailable.
+Vivid records the last tag-load time in local storage and will not load the tag again in that browser profile for 24 hours. If local storage is unavailable, it fails closed and does not load the tag. This is a **best-effort client-side tag-load limit, not a guaranteed impression cap**: after the script has loaded, Adsterra's own code may trigger more than one popunder. Browser storage can also be cleared or differ between browsers/devices. If the test produces more than one popunder in 24 hours, disable the feature immediately and ask Adsterra Support for a server-side frequency cap.
 
-Before activation, add the exact provider origin(s) required by Adsterra to the CSP in `_headers`, verify in real browsers, and keep a rapid kill switch by setting `popunder.enabled` to `false`. Never attach the tag to play, download, login, or other interface controls.
+The feature can be stopped immediately by setting `popunder.enabled` to `false`. The provider script origin `https://aarems.org` is allowed in the site's script and connection CSP directives. Verify browser console/network behavior and test on desktop and mobile before keeping the experiment live. Never attach the tag to play, download, login, or other interface controls.
