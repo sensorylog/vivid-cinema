@@ -7,7 +7,7 @@ The destination is a screen library and story atlas, not a social feed or a gene
 - Five regional entry points: North, West, Central, East and Southern Africa.
 - A country index for 54 African countries with region membership.
 - Search and region filtering for country hubs.
-- Format and text filtering for published title records.
+- Format, language and text filtering for published title records.
 - Dedicated editorial sections for collections, filmmakers and cultural people, historical timelines and documentary journeys.
 - A country-hub route state using `?country=ISO-3166-1-alpha-2`.
 - Explicit access labels: Stream on Vivid, Watch officially, Discover / archive record and Access pending.
@@ -15,7 +15,7 @@ The destination is a screen library and story atlas, not a social feed or a gene
 
 ## Editorial content contract
 
-The experience data file contains regional and country navigation only. Its collections, people, timelines and journeys arrays start empty. Do not fill these sections with invented biographies, historical dates, archive holdings, title availability or rights claims. Every editorial record must have a stable ID, title, summary, `published: true` and `evidenceRef`. Every film/title record belongs in the versioned catalogue and must carry provenance, edition identity and an explicit access state.
+The experience data file contains regional and country navigation only. Its collections, people, timelines and journeys arrays start empty. Do not fill these sections with invented biographies, historical dates, archive holdings, title availability or rights claims. Every editorial record must have a stable ID, title, summary, `published: true` and `evidenceRef`. Every film/title record belongs in the versioned catalogue and must carry a stable title and edition ID, country code, supported format, language list, synopsis, provenance evidence reference and HTTPS source URL, an approved editorial review timestamp, and an explicit access state. Only those reviewed records appear in discovery.
 
 ## Next implementation steps
 
