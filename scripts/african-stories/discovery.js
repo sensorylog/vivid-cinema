@@ -304,7 +304,7 @@ async function load() {
   }
 }
 
-ui.query?.addEventListener("input", render);
+ui.query?.addEventListener("input", render);\nui.query?.addEventListener("change", () => trackAfricanStories("search_used"));\nui.region?.addEventListener("change", () => trackAfricanStories("region_filter", { region: ui.region.value }));\nui.countries?.addEventListener("click", event => {\n  const link = event.target.closest?.("a[href*=country]");\n  if (link) { const code = new URL(link.href).searchParams.get("country"); if (code) trackAfricanStories("country_open", { countryCode: code }); }\n});\nui.titles?.addEventListener("click", event => {\n  if (event.target.closest?.("a[href*=african-stories-watch]")) trackAfricanStories("title_open");\n});
 ui.region?.addEventListener("change", render);
 ui.format?.addEventListener("change", renderTitles);
 ui.language?.addEventListener("change", renderTitles);
