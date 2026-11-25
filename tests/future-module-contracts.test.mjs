@@ -770,7 +770,7 @@ test("Vivid legal and trust pages accurately describe current product practices"
   assert.ok(cookies.includes("does not intentionally load the previously evaluated Adcash Autotag"));
   assert.ok(!cookies.includes("Vivid uses Adcash Autotag"));
   assert.ok(terms.includes("Retired community features"));
-  assert.ok(terms.includes("solo playback"));
+  assert.ok(terms.includes("former community, Watch Rooms and Cinema Clubs experiences have been retired"));
   assert.ok(terms.includes("limited, non-exclusive permission"));
   assert.ok(contact.includes("https://formspree.io/f/mwpokaav"));
   assert.ok(contact.includes('name="_gotcha"'));
