@@ -50,3 +50,20 @@ test("provider-session API forwards identities only to the trusted service bindi
   assert.equal(Object.hasOwn(forwarded.body, "playbackUrl"), false);
   assert.equal((await response.json()).ok, true);
 });
+
+test("provider-session API rejects invalid upstream session envelopes", async () => {
+  const binding = {
+    async fetch() {
+      return new Response(JSON.stringify({
+        ok: true,
+        playbackUrl: "http://insecure.example/stream.m3u8",
+        expiresAt: new Date(Date.now() + 5 * 60 * 1000).toISOString(),
+        mimeType: "application/vnd.apple.mpegurl",
+        sessionId: "session_opaque_001"
+      }), { status: 200 });
+    }
+  };
+  const response = await onRequest({ request: request(valid), env: { AFRICAN_STORIES_PROVIDER: binding } });
+  assert.equal(response.status, 502);
+  assert.equal((await response.json()).code, "invalid-provider-session");
+});
