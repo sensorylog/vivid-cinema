@@ -5,6 +5,7 @@ const APP_SHELL = [
   HLS_LIBRARY_URL,
   "./","./index.html","./home.html","./downloads.html","./my-downloads.html","./for-you.html",
   "./person.html","./discover.html","./collection.html","./title.html","./watch.html",
+  "./scripts/desktop-offline.js?windows-offline-hls-v3","./styles/my-downloads.css?v=offline-cinema-redesign-2",
   "./library.html","./auth.html","./login.html","./verify-email.html","./forgot-password.html",
   "./donate.html","./donation-success.html","./offline.html","./live.html","./news.html",
   "./anime.html","./help.html","./about.html","./accessibility.html","./cookies.html",
