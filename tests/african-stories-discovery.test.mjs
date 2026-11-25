@@ -187,6 +187,16 @@ test("published title catalogue contains researched records without inventing st
   assert.ok(catalogue.titles.some(title => title.id === "kaddu-beykat-1975"));
 });
 
+test("Nigerian audience history connects VHS sharing to smartphone streaming", () => {
+  const shared = experience.timelines.find(item => item.id === "nollywood-household-vhs-1990s");
+  const streaming = experience.timelines.find(item => item.id === "nigeria-streaming-pocket-video-2010s");
+  assert.ok(shared.summary.includes("passed newly released copies"));
+  assert.ok(shared.summary.includes("watched films together"));
+  assert.ok(streaming.summary.includes("iROKOtv"));
+  assert.ok(streaming.summary.includes("individualised smartphone viewing"));
+  assert.ok(experience.collections.find(item => item.id === "nollywood-many-beginnings").timelineIds.includes(shared.id));
+});
+
 test("access labels keep discovery separate from viewing rights", () => {
   assert.equal(accessLabel("discover_archive_record"), "Discover / archive record");
   assert.equal(accessLabel("access_pending"), "Access pending");
