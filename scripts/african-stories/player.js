@@ -4,6 +4,8 @@ import {
   getOfficialSourceFallback,
   resolveInternetArchiveFile
 } from "./providers.js";
+import { requestAfricanProviderSession } from "./provider-session.js";
+import { playAuthorizedMedia, stopAuthorizedMedia } from "./media-player.js";
 import {
   getAfricanAccessMessage,
   getPlayableAfricanSources
@@ -13,7 +15,6 @@ const CATALOGUE_URL = "/data/african-stories-catalog.json";
 const SOURCE_TIMEOUT_MS = 12000;
 const params = new URLSearchParams(window.location.search);
 const titleId = params.get("id") || "";
-const requestedTerritory = (params.get("territory") || "").toUpperCase();
 
 const ui = {
   title: document.getElementById("african-player-title"),
@@ -40,6 +41,7 @@ function setState(heading, message, label = "SOURCE CHECK") {
   if (ui.sourceLabel) ui.sourceLabel.textContent = label;
   if (ui.frame) { ui.frame.hidden = true; ui.frame.removeAttribute("src"); }
   if (ui.video) {
+    stopAuthorizedMedia(ui.video);
     ui.video.pause();
     ui.video.hidden = true;
     ui.video.removeAttribute("src");
@@ -96,7 +98,6 @@ function showArchiveVideo(resolved) {
     ui.video.addEventListener("loadedmetadata", onReady, { once: true });
     ui.video.addEventListener("error", onError, { once: true });
     ui.video.src = resolved.url;
-    ui.video.type = resolved.mimeType;
     ui.video.load();
   });
 }
@@ -119,6 +120,16 @@ function renderSourceButtons(sources, activeSourceId, onSelect) {
 async function activateSource(title, source, sources) {
   setState("Checking source", "Verifying the authorized source record and preparing its official player.");
   try {
+    if (source.provider === "partner") {
+      const session = await requestAfricanProviderSession(title, source);
+      await playAuthorizedMedia(ui.video, session);
+      ui.frame.hidden = true;
+      ui.state.hidden = true;
+      ui.video.hidden = false;
+      if (ui.sourceLabel) ui.sourceLabel.textContent = "AUTHORIZED PARTNER STREAM";
+      if (ui.fallback) ui.fallback.hidden = true;
+      return;
+    }
     if (source.provider === "archive") {
       const resolved = await resolveInternetArchiveFile(source);
       const ok = await showArchiveVideo(resolved);
@@ -168,7 +179,7 @@ async function loadTitle() {
     }
     if (ui.title) ui.title.textContent = title.title || "African Stories";
     if (ui.description) ui.description.textContent = title.synopsis || "African cinema, documentary and moving-image heritage.";
-    const sources = getPlayableAfricanSources(title, { territory: requestedTerritory });
+    const sources = getPlayableAfricanSources(title);
     if (!sources.length) {
       setState("Viewing access not confirmed", getAfricanAccessMessage(title) + " No source has passed the rights, territory and authorization checks.", "ACCESS NOT CLEARED");
       return;
