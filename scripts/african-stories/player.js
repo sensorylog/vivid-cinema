@@ -112,7 +112,7 @@ function clearPlayback() {
     activeHls.destroy();
     activeHls = null;
   }
-  if (activeController?.destroy) {
+  if (activeController) {
     const oldFrame = frame;
     const freshFrame = document.createElement("iframe");
     freshFrame.id = "african-player-frame";
@@ -124,7 +124,7 @@ function clearPlayback() {
     oldFrame.replaceWith(freshFrame);
     oldFrame.removeAttribute("src");
     try {
-      const destroyed = activeController.destroy();
+      const destroyed = activeController.destroy?.();
       destroyed?.catch?.(() => {});
     } catch {}
     frame = freshFrame;
