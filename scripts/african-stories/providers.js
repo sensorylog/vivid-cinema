@@ -138,7 +138,7 @@ export async function resolveInternetArchiveFile(source, fetchImpl = fetch) {
   if (declaredLicense && !licensePatterns[item.rightsBasis]?.test(declaredLicense)) {
     throw new Error("The Internet Archive item's declared license does not match the editorial rights basis.");
   }
-  const licenseUrl = declaredLicense || (item.rightsBasis === "cc_by" ? "https://creativecommons.org/licenses/by/4.0/" :
+  const licenseUrl = (declaredLicense ? declaredLicense.replace(/^http:/i, "https:") : null) || (item.rightsBasis === "cc_by" ? "https://creativecommons.org/licenses/by/4.0/" :
     item.rightsBasis === "cc_by_sa" ? "https://creativecommons.org/licenses/by-sa/4.0/" :
     item.rightsBasis === "cc0" ? "https://creativecommons.org/publicdomain/zero/1.0/" :
     "https://creativecommons.org/publicdomain/mark/1.0/");
