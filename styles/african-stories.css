@@ -84,3 +84,19 @@
 .african-editorial-works h3{font-size:1rem}
 .african-editorial-work-list{display:flex;gap:10px 24px;flex-wrap:wrap;padding-left:20px;color:#c5d0dd}
 .african-editorial-references{gap:10px 18px}
+
+
+/* Evidence-led editorial detail cards */
+.african-editorial-insights{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:12px;margin:22px 0}
+.african-insight-card{padding:18px;border:1px solid rgba(255,255,255,.13);border-radius:13px;background:linear-gradient(145deg,#151c27,#0c1118)}
+.african-insight-card h3{margin:0 0 9px;color:#d9e5f3;font-size:.82rem;letter-spacing:.015em}
+.african-insight-card p{margin:0;color:#b6c1d0;font-size:.84rem;line-height:1.72}
+.african-related-editorial{margin:24px 0}
+.african-related-editorial>h3{margin:0 0 12px;font-size:1rem}
+.african-related-editorial .african-content-card{min-height:150px}
+.african-editorial-meta{margin:16px 0}
+.african-editorial-works{padding:18px 0;border-top:1px solid rgba(255,255,255,.1)}
+.african-editorial-works h3{margin:0 0 12px;color:#d9e5f3}
+.african-editorial-work-list{display:flex;gap:9px 25px;flex-wrap:wrap;margin:0;padding-left:20px;color:#b6c1d0;font-size:.83rem;line-height:1.7}
+.african-editorial-detail[hidden]{display:none}
+@media(max-width:560px){.african-insight-card{padding:15px}.african-editorial-insights{grid-template-columns:1fr}}
