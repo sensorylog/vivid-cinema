@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "catalogueVersion": "2026-11-25.8",
+  "catalogueVersion": "2026-11-25.10",
   "regions": [
     {
       "id": "north",
@@ -66,6 +66,12 @@
         "gold-coast-1923-cinema-exhibition",
         "gold-coast-1925-censorship-board",
         "gold-coast-film-unit-1947-48"
+      ],
+      "countryCodes": [
+        "GH",
+        "SN",
+        "AO",
+        "CM"
       ]
     },
     {
@@ -98,6 +104,9 @@
       "timelineIds": [
         "ghana-independence-1957",
         "ghana-gfic-1964"
+      ],
+      "countryCodes": [
+        "GH"
       ]
     },
     {
@@ -133,6 +142,10 @@
         "yoruba-travelling-theatre-1950s",
         "living-in-bondage-1992",
         "nollywood-name-2002"
+      ],
+      "countryCodes": [
+        "NG",
+        "GH"
       ]
     },
     {
@@ -168,6 +181,12 @@
       "timelineIds": [
         "sambizanga-1972",
         "african-film-heritage-project-2019"
+      ],
+      "countryCodes": [
+        "SN",
+        "AO",
+        "CM",
+        "NG"
       ]
     },
     {
@@ -202,6 +221,12 @@
       "timelineIds": [
         "yeelen-cannes-1987",
         "fespaco-founded-1969"
+      ],
+      "countryCodes": [
+        "ML",
+        "MR",
+        "SN",
+        "BF"
       ]
     },
     {
@@ -233,6 +258,11 @@
       ],
       "timelineIds": [
         "african-film-heritage-project-2019"
+      ],
+      "countryCodes": [
+        "GH",
+        "ZA",
+        "AO"
       ]
     },
     {
@@ -258,6 +288,10 @@
         "gold-coast-1914-first-purpose-built-theatre",
         "gold-coast-1925-censorship-board",
         "ghana-audiences-market-power-1960s"
+      ],
+      "countryCodes": [
+        "GH",
+        "NG"
       ]
     },
     {
@@ -287,6 +321,9 @@
       "timelineIds": [
         "gfic-financing-crisis-1970s",
         "love-brewed-1980"
+      ],
+      "countryCodes": [
+        "GH"
       ]
     },
     {
@@ -319,6 +356,9 @@
       "timelineIds": [
         "ghana-film-archive-crisis-1986-2000",
         "african-film-heritage-project-2019"
+      ],
+      "countryCodes": [
+        "GH"
       ]
     },
     {
@@ -342,6 +382,9 @@
       ],
       "timelineIds": [
         "ghana-video-film-breakthrough-1987-89"
+      ],
+      "countryCodes": [
+        "GH"
       ]
     },
     {
@@ -367,6 +410,13 @@
       "timelineIds": [
         "laval-decree-1934",
         "laval-decree-overturned-1960"
+      ],
+      "countryCodes": [
+        "SN",
+        "AO",
+        "ML",
+        "BF",
+        "CM"
       ]
     },
     {
@@ -394,6 +444,11 @@
         "fespaco-founded-1969",
         "living-in-bondage-1992",
         "fespaco-nollywood-2015"
+      ],
+      "countryCodes": [
+        "BF",
+        "NG",
+        "GH"
       ]
     },
     {
@@ -417,6 +472,9 @@
       ],
       "timelineIds": [
         "cairo-station-1958-censorship"
+      ],
+      "countryCodes": [
+        "EG"
       ]
     }
   ],
@@ -837,6 +895,9 @@
           "label": "Gareth McFeely — Gone Are the Days (Boston University dissertation)",
           "url": "https://hdl.handle.net/2144/15684"
         }
+      ],
+      "countryCodes": [
+        "GH"
       ]
     },
     {
@@ -855,6 +916,9 @@
           "label": "Gareth McFeely — Gone Are the Days (Boston University dissertation)",
           "url": "https://hdl.handle.net/2144/15684"
         }
+      ],
+      "countryCodes": [
+        "GH"
       ]
     },
     {
@@ -877,6 +941,9 @@
           "label": "Gareth McFeely — Gone Are the Days (Boston University dissertation)",
           "url": "https://hdl.handle.net/2144/15684"
         }
+      ],
+      "countryCodes": [
+        "GH"
       ]
     },
     {
@@ -899,6 +966,9 @@
           "label": "Odile Goerg — Tropical Dream Palaces, censorship chapter",
           "url": "https://academic.oup.com/book/61453/chapter-abstract/534807150"
         }
+      ],
+      "countryCodes": [
+        "GH"
       ]
     },
     {
@@ -917,6 +987,13 @@
           "label": "BFI — Where to begin with Ousmane Sembène",
           "url": "https://www.bfi.org.uk/features/where-begin-with-ousmane-sembene"
         }
+      ],
+      "countryCodes": [
+        "SN",
+        "AO",
+        "ML",
+        "BF",
+        "CM"
       ]
     },
     {
@@ -943,6 +1020,9 @@
           "label": "Accidental Archivism — Ghana’s Central Film Library (1947)",
           "url": "https://archivism.meson.press/chapters/trajectories-of-restitution/remnants-of-the-central-film-library-and-the-rethinking-of-ghanas-audio-visual-heritage/"
         }
+      ],
+      "countryCodes": [
+        "GH"
       ]
     },
     {
@@ -969,6 +1049,9 @@
           "label": "Abiodun Olayiwola — Yoruba Travelling Theatre and Video Film Development",
           "url": "https://www.jpanafrican.org/docs/vol4no5/4.5Nollywood.pdf"
         }
+      ],
+      "countryCodes": [
+        "NG"
       ]
     },
     {
@@ -991,6 +1074,9 @@
           "label": "Ghana National Commission on Culture — Ghanaian film history",
           "url": "https://ghanaculture.gov.gh/the-development-of-ghanaian-film-and-its-cultural-identity/"
         }
+      ],
+      "countryCodes": [
+        "GH"
       ]
     },
     {
@@ -1009,6 +1095,9 @@
           "label": "BFI — Where to begin with Youssef Chahine",
           "url": "https://www.bfi.org.uk/features/where-begin-with-youssef-chahine"
         }
+      ],
+      "countryCodes": [
+        "EG"
       ]
     },
     {
@@ -1027,6 +1116,9 @@
           "label": "Gareth McFeely — Gone Are the Days (Boston University dissertation)",
           "url": "https://hdl.handle.net/2144/15684"
         }
+      ],
+      "countryCodes": [
+        "GH"
       ]
     },
     {
@@ -1045,6 +1137,13 @@
           "label": "BFI — Where to begin with Ousmane Sembène",
           "url": "https://www.bfi.org.uk/features/where-begin-with-ousmane-sembene"
         }
+      ],
+      "countryCodes": [
+        "SN",
+        "AO",
+        "ML",
+        "BF",
+        "CM"
       ]
     },
     {
@@ -1067,6 +1166,9 @@
           "label": "Rebecca Ohene-Asah — Documenting Africa on Film",
           "url": "https://www.tandfonline.com/doi/full/10.1080/01439685.2021.1907679"
         }
+      ],
+      "countryCodes": [
+        "GH"
       ]
     },
     {
@@ -1089,6 +1191,9 @@
           "label": "Aboubakar Sanogo — Cine-Agora Africana",
           "url": "https://online.ucpress.edu/fq/article-abstract/73/2/31/109600/Cine-Agora-Africana-Meditating-on-the-Fiftieth"
         }
+      ],
+      "countryCodes": [
+        "BF"
       ]
     },
     {
@@ -1132,6 +1237,9 @@
           "label": "Vitus Nanbigne — Cinema in Ghana: History, Ideology and Popular Culture",
           "url": "https://citeseerx.ist.psu.edu/document?doi=f3307aae92aa82daa6402edcf5e6bfc5ba3b4cd6&repid=rep1&type=pdf"
         }
+      ],
+      "countryCodes": [
+        "GH"
       ]
     },
     {
@@ -1150,6 +1258,9 @@
           "label": "BFI — Where to begin with Sarah Maldoror",
           "url": "https://www.bfi.org.uk/features/where-begin-with-sarah-maldoror"
         }
+      ],
+      "countryCodes": [
+        "AO"
       ]
     },
     {
@@ -1205,6 +1316,9 @@
           "label": "Vitus Nanbigne — Cinema in Ghana: History, Ideology and Popular Culture",
           "url": "https://citeseerx.ist.psu.edu/document?doi=f3307aae92aa82daa6402edcf5e6bfc5ba3b4cd6&repid=rep1&type=pdf"
         }
+      ],
+      "countryCodes": [
+        "GH"
       ]
     },
     {
@@ -1256,6 +1370,9 @@
           "label": "UNESCO — African Film Heritage Project",
           "url": "https://www.unesco.org/en/articles/african-film-heritage-project-cannes-2019"
         }
+      ],
+      "countryCodes": [
+        "GH"
       ]
     },
     {
@@ -1274,6 +1391,9 @@
           "label": "African Studies Centre Leiden — Souleymane Cissé",
           "url": "https://www.ascleiden.nl/content/library-weekly/souleymane-cisse"
         }
+      ],
+      "countryCodes": [
+        "ML"
       ]
     },
     {
@@ -1292,6 +1412,9 @@
           "label": "Vitus Nanbigne — Cinema in Ghana: History, Ideology and Popular Culture",
           "url": "https://citeseerx.ist.psu.edu/document?doi=f3307aae92aa82daa6402edcf5e6bfc5ba3b4cd6&repid=rep1&type=pdf"
         }
+      ],
+      "countryCodes": [
+        "GH"
       ]
     },
     {
@@ -1310,6 +1433,9 @@
           "label": "African Film Festival — Kwaw Ansah filmography",
           "url": "https://africanfilmny.org/directors/kwaw-ansah/"
         }
+      ],
+      "countryCodes": [
+        "GH"
       ]
     },
     {
@@ -1336,6 +1462,9 @@
           "label": "Lani Akande — Nollywood and Yoruba travelling theatre",
           "url": "https://scholars.uncw.edu/display/d240218925056"
         }
+      ],
+      "countryCodes": [
+        "NG"
       ]
     },
     {
@@ -1375,6 +1504,9 @@
           "label": "Oxford Bibliographies — Nollywood",
           "url": "https://academic.oup.com/reference/62328/reference-article-abstract/553809173"
         }
+      ],
+      "countryCodes": [
+        "NG"
       ]
     },
     {
@@ -1397,6 +1529,10 @@
           "label": "Kate Cowcher — African Films and FESPACO",
           "url": "https://academic.oup.com/edited-volume/61663/chapter-abstract/553408769"
         }
+      ],
+      "countryCodes": [
+        "BF",
+        "NG"
       ]
     },
     {
@@ -1419,6 +1555,13 @@
           "label": "Oxford — UNREST and African film heritage restitution",
           "url": "https://www.qeh.ox.ac.uk/news/unrest-new-agenda-african-film-heritage-restitution"
         }
+      ],
+      "countryCodes": [
+        "GH",
+        "SN",
+        "ML",
+        "AO",
+        "BF"
       ]
     },
     {
@@ -1482,6 +1625,9 @@
         "gold-coast-1925-censorship-board",
         "gold-coast-film-unit-1947-48",
         "ghana-audiences-market-power-1960s"
+      ],
+      "countryCodes": [
+        "GH"
       ]
     },
     {
@@ -1522,6 +1668,9 @@
         "gfic-financing-crisis-1970s",
         "ghana-video-film-breakthrough-1987-89",
         "ghana-film-archive-crisis-1986-2000"
+      ],
+      "countryCodes": [
+        "GH"
       ]
     },
     {
@@ -1553,6 +1702,10 @@
         "yoruba-travelling-theatre-1950s",
         "living-in-bondage-1992",
         "nollywood-name-2002"
+      ],
+      "countryCodes": [
+        "NG",
+        "GH"
       ]
     },
     {
@@ -1576,6 +1729,11 @@
       ],
       "timelineIds": [
         "sambizanga-1972"
+      ],
+      "countryCodes": [
+        "AO",
+        "SN",
+        "CM"
       ]
     },
     {
@@ -1610,6 +1768,12 @@
       "timelineIds": [
         "fespaco-founded-1969",
         "yeelen-cannes-1987"
+      ],
+      "countryCodes": [
+        "ML",
+        "MR",
+        "SN",
+        "BF"
       ]
     },
     {
@@ -1646,6 +1810,11 @@
       "timelineIds": [
         "african-film-heritage-project-2019",
         "ghana-film-archive-crisis-1986-2000"
+      ],
+      "countryCodes": [
+        "GH",
+        "ZA",
+        "AO"
       ]
     }
   ],
