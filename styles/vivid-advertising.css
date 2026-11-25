@@ -1,14 +1,14 @@
 .vivid-ad-slot {
   position: relative;
   width: min(calc(100% - 32px), 880px);
-  min-height: 0;
+  min-width: 0;
   margin: clamp(28px, 4vw, 52px) auto;
   color: #f2f2f2;
   contain: layout style;
 }
 .vivid-ad-slot__label {
   margin: 0 0 10px 2px;
-  color: rgba(226, 232, 242, .58);
+  color: rgba(226, 232, 242, .62);
   font: 700 10px/1.2 system-ui, sans-serif;
   letter-spacing: .16em;
   text-transform: uppercase;
@@ -17,9 +17,8 @@
   position: relative;
   display: grid;
   width: 100%;
-  min-height: clamp(74px, 18vw, 180px);
-  max-height: 220px;
-  overflow: hidden;
+  min-width: 0;
+  min-height: 90px;
   place-items: center;
   border: 1px solid rgba(255,255,255,.075);
   border-radius: 18px;
@@ -27,10 +26,12 @@
 }
 .vivid-native-ad-container {
   width: 100%;
-  min-height: inherit;
-  max-height: inherit;
-  overflow: hidden;
+  min-width: 0;
   color: #f2f2f2;
+}
+.vivid-native-ad-container iframe,
+.vivid-native-ad-container img {
+  max-width: 100%;
 }
 .vivid-native-ad-container > script { display: none !important; }
 .vivid-ad-slot__loading {
@@ -43,7 +44,7 @@
 .vivid-ad-slot.is-unavailable { display: none; }
 @media (max-width: 640px) {
   .vivid-ad-slot { width: calc(100% - 28px); margin: 24px auto 30px; }
-  .vivid-ad-slot__surface { min-height: 76px; max-height: 120px; border-radius: 14px; }
+  .vivid-ad-slot__surface { min-height: 90px; border-radius: 14px; }
 }
 @media (prefers-reduced-motion: reduce) {
   .vivid-ad-slot__loading { background: rgba(255,255,255,.2); }
