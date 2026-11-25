@@ -19,11 +19,11 @@
 
 ### 3. Playback session broker and isolated player
 - Added `createAfricanPlaybackSession`. The initial broker requires a signed-in account, exact public work/version match, approved private grant, active provider, exact URL origin, rights term and territory match.
-- Provider discovery has now identified multiple adapter classes that the initial foundation did not model: official platform embeds (YouTube, Vimeo, PeerTube), explicitly public archive files (eligible Internet Archive files), and contracted partner sessions (signed HLS/DASH or provider-issued embeds).
-- The current broker only supports the third class and has no session adapter configured. The next implementation increment must add provider-specific handling for official embeds and public files rather than requiring every provider to mint a Vivid-specific short-lived token.
+- The protected partner-session broker remains separate from public-source playback. It handles contracted signed HLS/DASH or provider-issued embeds and still has no configured provider session issuer.
+- Public-source playback is implemented separately through exact, editorially enabled source records attached to the published edition. It does not require a Vivid-specific token from public platforms that do not issue one.
 - Territory verification is deliberately fail-closed. No trusted geo header is configured by this code. Playback stays disabled until infrastructure supplies a trusted header through a proxy that strips/overwrites any client-supplied value. Do not set `AFRICAN_STORIES_TRUSTED_COUNTRY_HEADER` until that ingress behavior has been verified.
-- Added a separate `african-stories-watch.html` player route. It never searches alternate providers or guesses URLs. It creates an iframe only after a provider-specific server adapter returns an authorized session and the browser confirms HTTPS and exact origin equality; the browser closes the frame when the returned expiry is reached.
-- Existing CSP `frame-src` must be updated with an exact provider origin only after the provider and embedding behavior have passed legal and security review. No broad wildcard has been added.
+- Added a separate `african-stories-watch.html` player route. It never searches arbitrary alternate providers or accepts an arbitrary URL parameter. It builds official embed URLs from validated provider-specific IDs, and resolves archive files only from exact public item/file metadata.
+- Provider origins are constrained by the site's CSP. Current approved embed origins cover YouTube, Vimeo, Dailymotion, Rumble, PeerTube's reviewed `framatube.org` and `peer.tube` instances, and Internet Archive file delivery. No wildcard provider origin is added.
 
 ### 4. Restricted operations console and roles
 - Added `african-stories-admin.html` and a callable-only operations console.
@@ -53,18 +53,18 @@ Vivid playback entitlement is computed from the private title/version rights gra
 2. Static title URLs are not stored in rights grants. Provider session URLs are returned only after entitlement checks, must be HTTPS and must match the exact registered provider origin.
 3. The browser never reads private grants, contracts, provider registry or sessions.
 4. The public projection contains no provider URL, contract, fee, rights note or secret.
-5. No provider is preconfigured, no title has a seeded grant, no rights are claimed secured and no Vivid playback is enabled by default.
-6. The partner-session adapter registry is intentionally empty. No generic static-iframe adapter exists. Official public embeds and public archive files require their own source-specific validation and player adapters; contracted protected streams require a provider-specific server-side session issuer. An approved rights grant alone does not enable licensed Vivid playback. CSP and provider security review remain explicit gates.
+5. No protected partner-session provider is preconfigured, no title has a seeded Vivid rights grant, no rights are claimed secured and no licensed Vivid-hosted playback is enabled by default. Public-source adapters are code paths, not proof that any particular title is available or authorized.
+6. The partner-session adapter registry is intentionally empty. No generic static-iframe adapter exists. Public official embeds and archive files use their own source-specific validation and playback adapters; contracted protected streams require a provider-specific server-side session issuer. An approved rights grant alone does not enable licensed Vivid playback. CSP and provider security review remain explicit gates.
 7. Admin claims are out-of-band privileged operations. The role assignment utility must be run only by an authorized Firebase administrator.
 
 
-### 4. Public provider runtime (implemented on this PR)
-- `scripts/african-stories/providers.js` contains strict source validation and provider-specific URL/file resolution for YouTube, Vimeo, the reviewed PeerTube origins and Internet Archive.
-- `scripts/african-stories/player.js` loads an exact published work/version from the public catalogue, renders only editorially enabled sources, switches between official platform embeds and the HTML5 archive player, and preserves original-platform/archive fallbacks.
+### 6. Public provider runtime (implemented on this PR)
+- `scripts/african-stories/providers.js` contains strict source validation and provider-specific URL/file resolution for YouTube, Vimeo, Dailymotion, Rumble, the reviewed PeerTube origins and Internet Archive.
+- `scripts/african-stories/player.js` loads an exact published work/version from the public catalogue, renders only editorially enabled sources, switches between official platform embeds and the HTML5 archive player, and preserves original-platform/archive fallbacks. YouTube, Vimeo and PeerTube SDKs power a unified play/pause, seek, mute and fullscreen control layer; Dailymotion and Rumble retain their native player controls.
 - FilmFlux trending discovery is available at `african-stories-watch.html?provider=filmflux`. The feed is credited and its YouTube IDs are played through YouTube's own player.
 - The player includes a curated external directory for Wazi Movies, NG-Movies, AfriDocs and CINAF. These are official outbound destinations, not falsely represented as integrated APIs or Vivid-hosted streams.
 - Version source records are validated by `saveAfricanWorkDraft` and published only with the exact edition. Official embeds require `watch_officially` plus an evidence reference. Archive playback requires an explicit rights basis and evidence reference; the player verifies the exact public file at runtime. The restricted operations console now provides provider source templates. Evidence references stay private in drafts and are removed from the public projection.
-- Provider adapter unit tests are included in `tests/african-stories-providers.test.mjs`; callable validation tests cover published official and archive source records. Test results are pending until CI runs for the final head.
+- Provider adapter unit tests are included in `tests/african-stories-providers.test.mjs`; callable validation tests cover YouTube, Vimeo, Dailymotion, Rumble, PeerTube and archive source records, including rejected origins and missing creator Player IDs. Test results are pending until CI runs for the final head.
 
 ## Not yet complete
 
