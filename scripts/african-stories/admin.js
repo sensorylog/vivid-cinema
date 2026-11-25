@@ -102,7 +102,7 @@ insertSource.addEventListener("click", () => {
   const firstVersion = data.work.versions[0];
   if (!Array.isArray(firstVersion.playbackSources)) firstVersion.playbackSources = [];
   firstVersion.playbackSources = firstVersion.playbackSources.filter(item => item.sourceId !== template.sourceId);
-  firstVersion.playbackSources.push(structuredClone(template));
+  firstVersion.playbackSources.push({ ...template });
   if (template.provider !== "archive") data.work.accessState = "watch_officially";
   payload.value = JSON.stringify(data, null, 2);
   showResult("Template inserted into the first edition. Replace the provider ID, UUID or archive item/file and the evidence reference before saving.", false);
