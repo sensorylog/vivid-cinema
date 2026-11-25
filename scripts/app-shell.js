@@ -218,6 +218,7 @@ function buildPrimaryLinks(page) {
     navLink("collection.html?collection=tv", "bi-tv", "Series", isCollectionType("tv")),
     navLink("anime.html", "bi-stars", "Anime", page === "anime"),
     navLink("live.html", "bi-broadcast-pin", "Live", page === "live"),
+    navLink("african-stories.html", "bi-globe2", "African Stories", page === "african-stories"),
     navLink("library.html", "bi-bookmark-fill", "Library", page === "library"),
     '<a id="auth-link" class="vivid-nav-profile" href="account.html" aria-label="Open profile"' + (page === "account" ? ' aria-current="page"' : '') + '><i class="bi bi-person-circle" aria-hidden="true"></i><span>Profile</span></a>'
   ].join("");

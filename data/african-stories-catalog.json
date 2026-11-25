@@ -1,0 +1,253 @@
+{
+  "schemaVersion": 1,
+  "catalogueVersion": "2026-11-25.3",
+  "publishedAt": "2026-11-25T00:00:00.000Z",
+  "titles": [
+    {
+      "id": "sambizanga-1972",
+      "editionId": "sambizanga-1972-reference-record",
+      "title": "Sambizanga",
+      "countryCode": "AO",
+      "countryName": "Angola",
+      "format": "feature",
+      "languages": [
+        "Portuguese",
+        "Lingala",
+        "Kimbundu"
+      ],
+      "year": 1972,
+      "runtimeMinutes": 97,
+      "director": "Sarah Maldoror",
+      "productionCountries": [
+        "Angola",
+        "France"
+      ],
+      "synopsis": "Sarah Maldoror’s anti-colonial feature follows Maria as she searches for her arrested husband, Domingos Xavier, moving through villages and the colonial bureaucracy toward Luanda. The film was restored in 4K in 2021 by The Film Foundation’s World Cinema Project and Cineteca di Bologna.",
+      "themes": [
+        "Angolan independence",
+        "anti-colonial struggle",
+        "women and liberation",
+        "political imprisonment"
+      ],
+      "historicalPeriod": "Angolan War of Independence",
+      "published": true,
+      "accessState": "discover_archive_record",
+      "provenance": {
+        "evidenceRef": "bfi-sambizanga-1972",
+        "sourceUrl": "https://www.bfi.org.uk/film/0542d05a-7eba-5f82-b444-52b21c2d3db0/sambizanga"
+      },
+      "editorialReview": {
+        "status": "approved",
+        "reviewedAt": "2026-11-25T00:00:00.000Z"
+      },
+      "references": [
+        {
+          "label": "BFI — Sambizanga (1972)",
+          "url": "https://www.bfi.org.uk/film/0542d05a-7eba-5f82-b444-52b21c2d3db0/sambizanga"
+        },
+        {
+          "label": "The Film Foundation — 2021 restoration report",
+          "url": "https://www.film-foundation.org/contents/reports/2021/2021.pdf"
+        }
+      ]
+    },
+    {
+      "id": "yeelen-1987",
+      "editionId": "yeelen-1987-reference-record",
+      "title": "Yeelen",
+      "countryCode": "ML",
+      "countryName": "Mali",
+      "format": "feature",
+      "languages": [
+        "Bambara"
+      ],
+      "year": 1987,
+      "runtimeMinutes": 105,
+      "director": "Souleymane Cissé",
+      "synopsis": "Souleymane Cissé’s feature draws on Bambara traditions in a mythic story of a young man’s journey toward knowledge and a conflict between generations. The film competed at Cannes in 1987 and received the Jury Prize.",
+      "themes": [
+        "Bambara culture",
+        "oral tradition",
+        "knowledge and power",
+        "generational conflict"
+      ],
+      "historicalPeriod": "1980s African cinema",
+      "published": true,
+      "accessState": "discover_archive_record",
+      "provenance": {
+        "evidenceRef": "festival-cannes-yeelen-1987",
+        "sourceUrl": "https://www.festival-cannes.com/en/f/yeelen/"
+      },
+      "editorialReview": {
+        "status": "approved",
+        "reviewedAt": "2026-11-25T00:00:00.000Z"
+      },
+      "references": [
+        {
+          "label": "Festival de Cannes — Yeelen",
+          "url": "https://www.festival-cannes.com/en/f/yeelen/"
+        },
+        {
+          "label": "African Film Festival — Yeelen / Brightness",
+          "url": "https://africanfilmny.org/films/yeelen-brightness/"
+        }
+      ]
+    },
+    {
+      "id": "cairo-station-1958",
+      "editionId": "cairo-station-1958-reference-record",
+      "title": "Cairo Station (Bab el-Hadid)",
+      "countryCode": "EG",
+      "countryName": "Egypt",
+      "format": "feature",
+      "languages": [
+        "Arabic"
+      ],
+      "year": 1958,
+      "runtimeMinutes": 76,
+      "director": "Youssef Chahine",
+      "synopsis": "Set in Cairo’s central railway station, Youssef Chahine’s film follows Kenawi, a newspaper seller whose obsession with Hanouma leads to violence. The film explores class, labour, desire and the changing social order of post-revolutionary Egypt.",
+      "themes": [
+        "urban life",
+        "class and labour",
+        "desire",
+        "post-revolutionary Egypt"
+      ],
+      "historicalPeriod": "1950s Egyptian cinema",
+      "published": true,
+      "accessState": "discover_archive_record",
+      "provenance": {
+        "evidenceRef": "criterion-cairo-station-1958",
+        "sourceUrl": "https://www.criterion.com/films/32722-cairo-station"
+      },
+      "editorialReview": {
+        "status": "approved",
+        "reviewedAt": "2026-11-25T00:00:00.000Z"
+      },
+      "references": [
+        {
+          "label": "SPLA — Cairo Station",
+          "url": "https://www.spla.pro/en/file.film.cairo-station.1255.html"
+        },
+        {
+          "label": "BFI — Cairo Station programme notes",
+          "url": "https://bfidatadigipres.github.io/drama%20and%20desire%3Cbr%3E%20the%20films%20of%20youssef%20chahine/2023/07/07/cairo-station/"
+        }
+      ]
+    },
+    {
+      "id": "last-grave-at-dimbaza-1974",
+      "editionId": "last-grave-at-dimbaza-1974-reference-record",
+      "title": "Last Grave at Dimbaza",
+      "countryCode": "ZA",
+      "countryName": "South Africa",
+      "format": "documentary",
+      "year": 1974,
+      "director": "Nana Mahomo / Morena Films",
+      "synopsis": "An anti-apartheid documentary exposing the human costs of apartheid. UCT Libraries includes it among films that brought the injustices of the regime to local and international audiences; recent scholarship examines its clandestine production and international circulation.",
+      "themes": [
+        "apartheid",
+        "anti-apartheid resistance",
+        "documentary",
+        "international solidarity"
+      ],
+      "historicalPeriod": "Apartheid South Africa",
+      "published": true,
+      "accessState": "discover_archive_record",
+      "provenance": {
+        "evidenceRef": "uct-unbanned-last-grave",
+        "sourceUrl": "https://lib.uct.ac.za/articles/2025-10-08-unbanned-films-south-africans-were-not-allowed-see"
+      },
+      "editorialReview": {
+        "status": "approved",
+        "reviewedAt": "2026-11-25T00:00:00.000Z"
+      },
+      "references": [
+        {
+          "label": "Mayibuye Archive — Film and Video Archive",
+          "url": "https://mayibuyearchives.robben-island.org.za/film-and-video-archive"
+        },
+        {
+          "label": "Nicholas J. Cull — Clandestine Documentary Film v. Apartheid (2025)",
+          "url": "https://www.tandfonline.com/doi/abs/10.1080/01439685.2025.2474285"
+        }
+      ]
+    },
+    {
+      "id": "living-in-bondage-1992",
+      "editionId": "living-in-bondage-1992-reference-record",
+      "title": "Living in Bondage",
+      "countryCode": "NG",
+      "countryName": "Nigeria",
+      "format": "feature",
+      "year": 1992,
+      "synopsis": "A landmark in the commercial emergence of Nigeria’s straight-to-video film industry. Research on Nigerian video culture describes how the film’s circulation through informal vendors helped demonstrate the commercial potential of locally produced VHS stories.",
+      "themes": [
+        "Nollywood",
+        "VHS",
+        "informal distribution",
+        "popular cinema"
+      ],
+      "historicalPeriod": "Early Nigerian video film",
+      "published": true,
+      "accessState": "discover_archive_record",
+      "provenance": {
+        "evidenceRef": "simon-nigerian-video-culture",
+        "sourceUrl": "https://journals.sagepub.com/doi/full/10.1177/13678779231197697"
+      },
+      "editorialReview": {
+        "status": "approved",
+        "reviewedAt": "2026-11-25T00:00:00.000Z"
+      },
+      "references": [
+        {
+          "label": "Oxford Research Encyclopedia — West African Cinema",
+          "url": "https://academic.oup.com/edited-volume/61663/chapter-abstract/553444673"
+        }
+      ]
+    },
+    {
+      "id": "kaddu-beykat-1975",
+      "editionId": "kaddu-beykat-1975-reference-record",
+      "title": "Kaddu Beykat (Letter from My Village)",
+      "countryCode": "SN",
+      "countryName": "Senegal",
+      "format": "feature",
+      "year": 1975,
+      "director": "Safi Faye",
+      "synopsis": "Safi Faye’s first feature-length docudrama returns to her rural Senegalese hometown. Through an audiovisual letter and scenes shaped with villagers, it examines agricultural hardship, colonial-era cash-crop monoculture and the pressures connecting village life to the city.",
+      "themes": [
+        "Serer rural life",
+        "agriculture",
+        "colonial economic legacies",
+        "ethnographic cinema",
+        "women filmmakers"
+      ],
+      "historicalPeriod": "Post-independence Senegal",
+      "published": true,
+      "accessState": "discover_archive_record",
+      "provenance": {
+        "evidenceRef": "kaddu-beykat-1975-african-film-festival",
+        "sourceUrl": "https://africanfilmny.org/films/letter-from-my-village-kaddu-beykat/"
+      },
+      "references": [
+        {
+          "label": "African Film Festival — Letter from My Village / Kaddu Beykat",
+          "url": "https://africanfilmny.org/films/letter-from-my-village-kaddu-beykat/"
+        },
+        {
+          "label": "MoMA — Safi Faye",
+          "url": "https://www.moma.org/artists/74056-safi-faye"
+        },
+        {
+          "label": "Arsenal — Kaddu Beykat",
+          "url": "https://www.arsenal-berlin.de/en/forum-forum-expanded/archive/program-archive/2024/program-forum/forum-special/kaddu-beykat/"
+        }
+      ],
+      "editorialReview": {
+        "status": "approved",
+        "reviewedAt": "2026-11-25T00:00:00.000Z"
+      }
+    }
+  ]
+}

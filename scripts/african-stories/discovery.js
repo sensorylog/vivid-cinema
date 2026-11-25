@@ -1,0 +1,322 @@
+import { trackAfricanStories } from "./metrics.js";
+import {
+  accessLabel,
+  filterAfricanCountries,
+  filterAfricanTitles,
+  filterEditorialRecords,
+  validEditorialRecord,
+  validAfricanTitleRecord
+} from "./discovery-data.js";
+
+const EXPERIENCE_URL = "/data/african-stories-experience.json";
+const CATALOGUE_URL = "/data/african-stories-catalog.json";
+const params = new URLSearchParams(location.search);
+const selectedCountry = (params.get("country") || "").toUpperCase();
+const ui = {
+  query: document.getElementById("african-discovery-query"),
+  region: document.getElementById("african-region-filter"),
+  format: document.getElementById("african-format-filter"),
+  language: document.getElementById("african-language-filter"),
+  status: document.getElementById("african-discovery-status"),
+  countryHub: document.getElementById("african-country-hub"),
+  countryTitle: document.getElementById("african-country-title"),
+  countryDescription: document.getElementById("african-country-description"),
+  regions: document.getElementById("african-region-grid"),
+  countries: document.getElementById("african-country-grid"),
+  countryCount: document.getElementById("african-country-count"),
+  collections: document.getElementById("african-collection-grid"),
+  people: document.getElementById("african-people-grid"),
+  timelines: document.getElementById("african-timeline-grid"),
+  journeys: document.getElementById("african-journey-grid"),
+  titles: document.getElementById("african-title-grid")
+};
+let experience = null;
+let catalogue = null;
+
+function element(tag, className, text) {
+  const node = document.createElement(tag);
+  if (className) node.className = className;
+  if (text !== undefined) node.textContent = text;
+  return node;
+}
+
+function emptyState(container, message) {
+  container.replaceChildren(element("p", "african-empty-state", message));
+}
+
+function editorialCards(container, records, kind, emptyMessage, filters = {}) {
+  const published = filterEditorialRecords(records, { ...filters, countries: experience.countries });
+  if (!published.length) { emptyState(container, emptyMessage); return; }
+  container.replaceChildren();
+  for (const record of published) {
+    const card = element("article", "african-content-card");
+    const eyebrow = element("span", "african-card-eyebrow", record.kicker || kind);
+    const heading = element("h3", "", record.title);
+    const summary = element("p", "", record.summary);
+    if (record.dateLabel) card.append(element("small", "african-title-meta", record.dateLabel));
+    const routeKey = ({ Collection: "collection", People: "person", Timeline: "timeline", Journey: "journey" })[kind] || "collection";
+    const link = element("a", "african-card-link", "Explore " + kind.toLowerCase());
+    link.href = "african-stories.html?" + routeKey + "=" + encodeURIComponent(record.id);
+    card.append(eyebrow, heading, summary, link);
+    container.append(card);
+  }
+}
+
+function renderRegions() {
+  ui.region.replaceChildren(new Option("All regions", ""));
+  for (const region of experience.regions) {
+    ui.region.add(new Option(region.name, region.id));
+  }
+  ui.region.value = params.get("region") || "";
+  ui.regions.replaceChildren();
+  for (const region of experience.regions) {
+    const card = element("a", "african-region-card");
+    card.href = "african-stories.html?region=" + encodeURIComponent(region.id);
+    card.append(element("span", "african-card-eyebrow", "AFRICAN REGION"));
+    card.append(element("h3", "", region.name));
+    card.append(element("p", "", region.description));
+    const count = experience.countries.filter(country => country.regionId === region.id).length;
+    card.append(element("small", "", count + " country hubs"));
+    ui.regions.append(card);
+  }
+}
+
+function renderCountries() {
+  const region = ui.region.value;
+  const query = ui.query.value;
+  const countries = filterAfricanCountries(experience.countries, { region, query });
+  ui.countryCount.textContent = countries.length + " of " + experience.countries.length + " country hubs";
+  ui.countries.replaceChildren();
+  for (const country of countries) {
+    const card = element("a", "african-country-card");
+    card.href = "african-stories.html?country=" + encodeURIComponent(country.code);
+    card.append(element("span", "african-country-code", country.code));
+    card.append(element("strong", "", country.name));
+    const regionName = experience.regions.find(item => item.id === country.regionId)?.name || "";
+    card.append(element("small", "", regionName));
+    ui.countries.append(card);
+  }
+  if (!countries.length) emptyState(ui.countries, "No country hubs match this search.");
+}
+
+function renderCountryHub() {
+  const country = experience.countries.find(item => item.code === selectedCountry);
+  if (!country) return;
+  const region = experience.regions.find(item => item.id === country.regionId);
+  ui.countryHub.hidden = false;
+  ui.countryTitle.textContent = country.name;
+  const countFor = key => (experience[key] || []).filter(record => Array.isArray(record.countryCodes) && record.countryCodes.includes(country.code)).length;
+  ui.countryDescription.textContent = "Explore " + countFor("collections") + " collections, " + countFor("people") + " people and " + countFor("timelines") + " historical milestones connected to " + country.name + ". " + (region?.name || "") + " Published title access is shown separately from archive discovery.";
+}
+
+
+function renderEditorialDetail() {
+  const detailTypes = [
+    ["collection", "collections", "Collection"],
+    ["person", "people", "Person"],
+    ["timeline", "timelines", "Timeline"],
+    ["journey", "journeys", "Documentary journey"]
+  ];
+  const selected = detailTypes.find(([param]) => params.has(param));
+  if (!selected) return;
+  const [param, key, label] = selected;
+  const id = params.get(param);
+  const record = (experience[key] || []).find(item => item.id === id && validEditorialRecord(item));
+  const panel = document.getElementById("african-editorial-detail");
+  panel.hidden = false;
+  document.getElementById("african-editorial-kind").textContent =
+    [label.toUpperCase(), record?.kicker].filter(Boolean).join(" · ");
+  document.getElementById("african-editorial-title").textContent = record?.title || label + " not published";
+  document.getElementById("african-editorial-summary").textContent = record?.summary ||
+    "This editorial record is not published yet. Profiles, historical entries and curated journeys appear only after source review.";
+
+  const references = document.getElementById("african-editorial-references");
+  references.replaceChildren();
+  const sourceRecords = Array.isArray(record?.references) ? record.references : [];
+  if (sourceRecords.length) references.append(element("h3", "african-sources-heading", "Sources & further reading"));
+  for (const reference of sourceRecords) {
+    try {
+      const url = new URL(reference.url);
+      if (url.protocol !== "https:") continue;
+      const link = element("a", "african-card-link", reference.label || "Open source reference");
+      link.href = url.toString();
+      link.target = "_blank";
+      link.rel = "noopener noreferrer";
+      references.append(link);
+    } catch {}
+  }
+
+  let insights = document.getElementById("african-editorial-insights");
+  if (!insights) {
+    insights = element("div", "african-editorial-insights");
+    document.getElementById("african-editorial-summary").after(insights);
+  }
+  insights.replaceChildren();
+  const insightCards = [
+    ["What the evidence complicates", record?.reframe],
+    ["Why this matters", record?.whyItMatters],
+    ["Evidence note", record?.confidence]
+  ];
+  for (const [heading, copy] of insightCards) {
+    if (!copy) continue;
+    const card = element("section", "african-insight-card");
+    card.append(element("h3", "", heading));
+    card.append(element("p", "", copy));
+    insights.append(card);
+  }
+
+  const metadata = [];
+  if (record?.dateLabel) metadata.push(record.dateLabel);
+  if (Array.isArray(record?.countryCodes)) {
+    const names = record.countryCodes.map(code =>
+      experience.countries.find(country => country.code === code)?.name || code
+    );
+    metadata.push(...names);
+  }
+  if (metadata.length) {
+    const chips = element("div", "african-editorial-meta");
+    for (const value of metadata) chips.append(element("span", "african-editorial-meta-item", value));
+    insights.before(chips);
+  }
+
+  const works = document.getElementById("african-editorial-works");
+  if (works) works.remove();
+  const selectedWorks = Array.isArray(record?.selectedWorks) ? record.selectedWorks : record?.filmography;
+  if (Array.isArray(selectedWorks) && selectedWorks.length) {
+    const workSection = element("section", "african-editorial-works");
+    workSection.id = "african-editorial-works";
+    workSection.append(element("h3", "", "Selected works"));
+    const list = element("ul", "african-editorial-work-list");
+    for (const work of selectedWorks) list.append(element("li", "", work));
+    workSection.append(list);
+    insights.after(workSection);
+  }
+
+  const related = document.getElementById("african-editorial-related");
+  related.replaceChildren();
+  const titleIds = new Set(Array.isArray(record?.titleIds) ? record.titleIds : []);
+  const relatedTitles = (catalogue.titles || []).filter(title => titleIds.has(title.id) && validAfricanTitleRecord(title));
+  for (const title of relatedTitles) {
+    const card = element("article", "african-content-card");
+    card.append(element("span", "african-card-eyebrow", accessLabel(title.accessState)));
+    card.append(element("h3", "", title.title));
+    const link = element("a", "african-card-link", "View title");
+    link.href = "african-stories-watch.html?id=" + encodeURIComponent(title.id);
+    card.append(link);
+    related.append(card);
+  }
+
+  const relatedEditorial = [
+    ["timelineIds", "timelines", "timeline", "Related milestones"],
+    ["personIds", "people", "person", "Related people"]
+  ];
+  for (const [field, collection, route, heading] of relatedEditorial) {
+    const ids = new Set(Array.isArray(record?.[field]) ? record[field] : []);
+    const matches = (experience[collection] || []).filter(item => ids.has(item.id) && validEditorialRecord(item));
+    if (!matches.length) continue;
+    const group = element("section", "african-related-editorial");
+    group.append(element("h3", "", heading));
+    const grid = element("div", "african-content-grid");
+    for (const item of matches) {
+      const card = element("article", "african-content-card");
+      card.append(element("span", "african-card-eyebrow", item.kicker || heading));
+      card.append(element("h4", "", item.title));
+      const link = element("a", "african-card-link", "Explore record");
+      link.href = "african-stories.html?" + route + "=" + encodeURIComponent(item.id);
+      card.append(link);
+      grid.append(card);
+    }
+    group.append(grid);
+    related.append(group);
+  }
+}
+
+function renderLanguageOptions() {
+  const languages = [...new Set((catalogue.titles || [])
+    .filter(validAfricanTitleRecord)
+    .flatMap(title => Array.isArray(title.languages) ? title.languages : [])
+    .filter(language => typeof language === "string" && language.trim()))]
+    .sort((a, b) => a.localeCompare(b));
+  ui.language.replaceChildren(new Option("All languages", ""));
+  for (const language of languages) ui.language.add(new Option(language, language));
+}
+
+function renderTitles() {
+  const titles = filterAfricanTitles(catalogue.titles || [], {
+    country: selectedCountry,
+    query: ui.query.value,
+    format: ui.format.value,
+    language: ui.language.value,
+    region: ui.region.value,
+    countries: experience.countries
+  }).filter(validAfricanTitleRecord);
+  ui.titles.replaceChildren();
+  if (!titles.length) {
+    emptyState(ui.titles, "No verified title records are published here yet. The atlas will only display records with editorial evidence and an explicit access status.");
+    return;
+  }
+  for (const title of titles) {
+    const card = element("article", "african-content-card african-title-card");
+    card.append(element("span", "african-card-eyebrow", accessLabel(title.accessState)));
+    card.append(element("h3", "", title.title));
+    card.append(element("p", "", title.synopsis || "No synopsis has been published."));
+    const meta = [title.year, title.director, title.countryName, title.format, ...(title.languages || [])].filter(Boolean).join(" · ");
+    card.append(element("small", "african-title-meta", meta));
+    const link = element("a", "african-card-link", "View title & access details");
+    link.href = "african-stories-watch.html?id=" + encodeURIComponent(title.id);
+    card.append(link);
+    ui.titles.append(card);
+  }
+}
+
+function renderEditorialSections() {
+  const filters = { query: ui.query.value, country: selectedCountry, region: ui.region.value };
+  editorialCards(ui.collections, experience.collections, "Collection", "No sourced collections match this search or country yet.", filters);
+  editorialCards(ui.people, experience.people, "People", "No sourced people or cultural contributors match this search or country yet.", filters);
+  editorialCards(ui.timelines, experience.timelines, "Timeline", "No historical milestones match this search or country yet.", filters);
+  editorialCards(ui.journeys, experience.journeys, "Journey", "No documentary journeys match this search or country yet.", filters);
+}
+
+function render() {
+  renderCountries();
+  renderTitles();
+  renderEditorialSections();
+}
+
+async function load() {
+  try {
+    trackAfricanStories("atlas_view");
+    const [experienceResponse, catalogueResponse] = await Promise.all([
+      fetch(EXPERIENCE_URL, { headers: { Accept: "application/json" }, credentials: "same-origin", cache: "no-store" }),
+      fetch(CATALOGUE_URL, { headers: { Accept: "application/json" }, credentials: "same-origin", cache: "no-store" })
+    ]);
+    if (!experienceResponse.ok || !catalogueResponse.ok) throw new Error("The African Stories atlas is temporarily unavailable.");
+    experience = await experienceResponse.json();
+    catalogue = await catalogueResponse.json();
+    if (experience.schemaVersion !== 1 || !Array.isArray(experience.regions) || !Array.isArray(experience.countries) ||
+        catalogue.schemaVersion !== 1 || !Array.isArray(catalogue.titles)) throw new Error("The African Stories data format is not supported.");
+    renderRegions();
+    renderLanguageOptions();
+    renderCountryHub();
+    renderEditorialDetail();
+    render();
+    ui.status.textContent = "Explore " + experience.countries.length + " country hubs across " + experience.regions.length + " African regions. Published title and editorial records are added only after review.";
+  } catch (error) {
+    ui.status.textContent = error instanceof Error ? error.message : "The African Stories atlas could not be loaded.";
+  }
+}
+
+ui.query?.addEventListener("input", render);
+ui.query?.addEventListener("change", () => trackAfricanStories("search_used"));
+ui.region?.addEventListener("change", () => trackAfricanStories("region_filter", { region: ui.region.value }));
+ui.countries?.addEventListener("click", event => {
+  const link = event.target.closest?.("a[href*=country]");
+  if (link) { const code = new URL(link.href).searchParams.get("country"); if (code) trackAfricanStories("country_open", { countryCode: code }); }
+});
+ui.titles?.addEventListener("click", event => {
+  if (event.target.closest?.("a[href*=african-stories-watch]")) trackAfricanStories("title_open");
+});
+ui.region?.addEventListener("change", render);
+ui.format?.addEventListener("change", renderTitles);
+ui.language?.addEventListener("change", renderTitles);
+load();
