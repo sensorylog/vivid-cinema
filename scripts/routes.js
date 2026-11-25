@@ -11,7 +11,9 @@ export const VIVID_ROUTES = Object.freeze({
   library: { path: VIVID_CONFIG.routes.library, page: "library" },
   login: { path: VIVID_CONFIG.routes.login, page: "login" },
   signup: { path: VIVID_CONFIG.routes.signup, page: "signup" },
-  account: { path: VIVID_CONFIG.routes.account, page: "account" }
+  account: { path: VIVID_CONFIG.routes.account, page: "account" },
+  africanStoriesWatch: { path: VIVID_CONFIG.routes.africanStoriesWatch, page: "african-stories-watch" },
+  africanStoriesAdmin: { path: VIVID_CONFIG.routes.africanStoriesAdmin, page: "african-stories-admin" }
 });
 
 export function getRoute(url = window.location.href) {
