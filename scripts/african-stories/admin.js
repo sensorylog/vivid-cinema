@@ -9,6 +9,8 @@ const payload = document.getElementById("african-admin-payload");
 const result = document.getElementById("african-admin-result");
 const submit = document.getElementById("african-admin-submit");
 const format = document.getElementById("african-admin-format");
+const sourceTemplate = document.getElementById("african-admin-source-template");
+const insertSource = document.getElementById("african-admin-insert-source");
 const functions = getFunctions(app, "us-central1");
 const roles = {
   saveAfricanWorkDraft: "africanStoriesEditor",
@@ -59,6 +61,51 @@ onAuthStateChanged(auth, async user => {
     state.textContent = "Could not verify operational permissions. No actions are available.";
     console.warn("African Stories admin claim check failed:", error?.code || error?.message);
   }
+});
+
+
+const sourceTemplates = {
+  youtube: {
+    sourceId: "official-youtube", provider: "youtube", videoId: "REPLACE_VIDEO_ID",
+    label: "Official creator upload", enabled: true, evidenceRef: "REPLACE_WITH_CREATOR_VERIFICATION_RECORD"
+  },
+  vimeo: {
+    sourceId: "official-vimeo", provider: "vimeo", videoId: "REPLACE_VIMEO_ID", vimeoHash: "",
+    label: "Official Vimeo upload", enabled: true, evidenceRef: "REPLACE_WITH_CREATOR_VERIFICATION_RECORD"
+  },
+  peertube: {
+    sourceId: "official-peertube", provider: "peertube", instanceOrigin: "https://peer.tube",
+    videoUuid: "00000000-0000-4000-8000-000000000000", label: "Official PeerTube upload",
+    enabled: true, evidenceRef: "REPLACE_WITH_CREATOR_VERIFICATION_RECORD"
+  },
+  archive: {
+    sourceId: "archive-public-file", provider: "archive", archiveIdentifier: "REPLACE_ARCHIVE_ITEM",
+    archiveFile: "REPLACE_FILE.mp4", rightsBasis: "written_permission",
+    label: "Authorized archive access copy", enabled: true, evidenceRef: "REPLACE_WITH_RIGHTS_EVIDENCE_RECORD"
+  }
+};
+
+insertSource.addEventListener("click", () => {
+  const template = sourceTemplates[sourceTemplate.value];
+  if (!template) {
+    showResult("Choose a provider template first.", true);
+    return;
+  }
+  let data;
+  try { data = JSON.parse(payload.value); }
+  catch { showResult("Format the request as valid JSON before inserting a source.", true); return; }
+  if (!data.work || typeof data.work !== "object") data.work = {};
+  if (!Array.isArray(data.work.versions) || !data.work.versions.length) {
+    showResult("Add at least one edition/version before inserting a playback source.", true);
+    return;
+  }
+  const firstVersion = data.work.versions[0];
+  if (!Array.isArray(firstVersion.playbackSources)) firstVersion.playbackSources = [];
+  firstVersion.playbackSources = firstVersion.playbackSources.filter(item => item.sourceId !== template.sourceId);
+  firstVersion.playbackSources.push(structuredClone(template));
+  if (template.provider !== "archive") data.work.accessState = "watch_officially";
+  payload.value = JSON.stringify(data, null, 2);
+  showResult("Template inserted into the first edition. Replace the provider ID, UUID or archive item/file and the evidence reference before saving.", false);
 });
 
 action.addEventListener("change", updateActions);
