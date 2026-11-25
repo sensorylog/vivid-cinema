@@ -4,7 +4,7 @@ const WORK_ID = /^[a-z0-9][a-z0-9-]{1,99}$/;
 const VERSION_ID = /^[a-z0-9][a-z0-9-]{0,79}$/;
 const PROVIDER_ID = /^[a-z0-9][a-z0-9-]{1,79}$/;
 const COUNTRY = /^[A-Z]{2}$/;
-const WORK_TYPES = new Set(["feature_film","short_film","series","documentary","short_documentary","newsreel","oral_history","educational_film","animation","experimental","archive_footage","other"]);
+const PROVIDER_SESSION_ADAPTERS = Object.freeze({});\nconst WORK_TYPES = new Set(["feature_film","short_film","series","documentary","short_documentary","newsreel","oral_history","educational_film","animation","experimental","archive_footage","other"]);
 const PUBLIC_ACCESS_STATES = new Set(["archive_record","access_pending","watch_officially"]);
 
 function fail(HttpsError, code, message) {
@@ -176,7 +176,7 @@ export function createAfricanStoriesFunctions({ db, onCall, HttpsError, Timestam
     const providerId = boundedText(request.data?.providerId, 80, "providerId", HttpsError, true);
     if (!PROVIDER_ID.test(providerId)) fail(HttpsError, "invalid-argument", "Invalid providerId.");
     const adapterType = request.data?.adapterType;
-    if (adapterType !== "iframe") fail(HttpsError, "invalid-argument", "Only the reviewed iframe adapter contract is supported in this foundation.");
+    if (adapterType !== "provider_session") fail(HttpsError, "invalid-argument", "Providers must use a provider-specific server-issued session adapter.");
     const originUrl = parseHttpsUrl(boundedText(request.data?.embedOrigin, 500, "embedOrigin", HttpsError, true), "embedOrigin", HttpsError);
     if (originUrl.origin !== originUrl.href.replace(/\/$/, "")) fail(HttpsError, "invalid-argument", "embedOrigin must be an origin only, without a path or query.");
     const agreementRef = boundedText(request.data?.agreementRef, 160, "agreementRef", HttpsError, true);
@@ -215,9 +215,7 @@ export function createAfricanStoriesFunctions({ db, onCall, HttpsError, Timestam
       if (!PROVIDER_ID.test(providerId)) fail(HttpsError, "invalid-argument", "Invalid providerId.");
       const providerSnapshot = await db.collection("africanProviderRegistryPrivate").doc(providerId).get();
       if (!providerSnapshot.exists || providerSnapshot.data().status !== "active" || providerSnapshot.data().securityReviewed !== true) fail(HttpsError, "failed-precondition", "An active, reviewed provider is required.");
-      const playbackUrl = boundedText(request.data?.playbackUrl, 2000, "playbackUrl", HttpsError, true);
-      const playback = parseHttpsUrl(playbackUrl, "playbackUrl", HttpsError);
-      if (playback.origin !== providerSnapshot.data().embedOrigin) fail(HttpsError, "failed-precondition", "The title playback URL does not match the provider's approved embed origin.");
+      if (providerSnapshot.data().adapterType !== "provider_session") fail(HttpsError, "failed-precondition", "The provider has no approved server-issued session contract.");
       const territories = boundedStringList(request.data?.territories, 100, 2, "territories", HttpsError);
       if (!territories.length || territories.some(code => !COUNTRY.test(code))) fail(HttpsError, "invalid-argument", "At least one ISO alpha-2 territory is required.");
       const validFromMs = Number(request.data?.validFromMs);
@@ -256,7 +254,7 @@ export function createAfricanStoriesFunctions({ db, onCall, HttpsError, Timestam
     if (!workSnapshot.exists || !grantSnapshot.exists) fail(HttpsError, "not-found", "No licensed Vivid playback route is available for this work version.");
     const grant = grantSnapshot.data();
     const now = Timestamp.now();
-    if (grant.status !== "approved" || grant.streamOnVivid !== true || grant.deliveryType !== "authorized_embed" ||
+    if (grant.status !== "approved" || grant.rightsApproved !== true || grant.deliveryType !== "provider_session" ||
         !grant.validFrom || !grant.validUntil || grant.validFrom.toMillis() > now.toMillis() || grant.validUntil.toMillis() <= now.toMillis() ||
         !Array.isArray(grant.allowedTerritories) || !grant.allowedTerritories.includes(territory)) {
       fail(HttpsError, "permission-denied", "This exact edition is not cleared for playback in your territory at this time.");
@@ -264,11 +262,21 @@ export function createAfricanStoriesFunctions({ db, onCall, HttpsError, Timestam
     const versionExists = Array.isArray(workSnapshot.data().versions) && workSnapshot.data().versions.some(version => version.versionId === versionId);
     if (!versionExists) fail(HttpsError, "failed-precondition", "The published catalogue version does not match the rights record.");
     const providerSnapshot = await db.collection("africanProviderRegistryPrivate").doc(grant.providerId).get();
-    if (!providerSnapshot.exists || providerSnapshot.data().status !== "active" || providerSnapshot.data().adapterType !== "iframe") fail(HttpsError, "failed-precondition", "The approved playback provider is unavailable.");
-    const playback = parseHttpsUrl(grant.playbackUrl, "playbackUrl", HttpsError);
-    if (playback.origin !== providerSnapshot.data().embedOrigin) fail(HttpsError, "failed-precondition", "The playback route failed provider-origin verification.");
+    if (!providerSnapshot.exists || providerSnapshot.data().status !== "active" || providerSnapshot.data().adapterType !== "provider_session") fail(HttpsError, "failed-precondition", "The approved playback provider is unavailable.");
+    const adapter = PROVIDER_SESSION_ADAPTERS[grant.providerId];
+    if (typeof adapter?.createSession !== "function") fail(HttpsError, "failed-precondition", "This provider has no implemented server-issued session adapter. Playback remains disabled.");
+    const issued = await adapter.createSession({
+      work: workSnapshot.data(), grant, provider: providerSnapshot.data(),
+      userId: request.auth.uid, territory, now
+    });
+    const playback = parseHttpsUrl(issued?.url, "provider session URL", HttpsError);
+    if (playback.origin !== providerSnapshot.data().embedOrigin) fail(HttpsError, "failed-precondition", "The provider session URL failed exact-origin verification.");
+    const expiresAtMs = Number(issued?.expiresAtMs);
+    if (!Number.isFinite(expiresAtMs) || expiresAtMs <= now.toMillis() || expiresAtMs > now.toMillis() + 5 * 60 * 1000) {
+      fail(HttpsError, "failed-precondition", "The provider did not issue a valid short-lived playback session.");
+    }
     const sessionId = randomUUID();
-    const expiresAt = Timestamp.fromMillis(now.toMillis() + 5 * 60 * 1000);
+    const expiresAt = Timestamp.fromMillis(expiresAtMs);
     await db.collection("africanPlaybackSessions").doc(sessionId).set({
       sessionId, workId, versionId, userId: request.auth.uid, providerId: grant.providerId,
       territory, status: "active", createdAt: now, expiresAt
