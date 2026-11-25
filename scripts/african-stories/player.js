@@ -110,6 +110,7 @@ function renderSourceButtons(sources, activeSourceId, onSelect) {
     const button = document.createElement("button");
     button.type = "button";
     button.className = "african-source-button";
+    button.dataset.sourceId = source.sourceId;
     button.textContent = source.label || source.provider;
     button.setAttribute("aria-pressed", String(source.sourceId === activeSourceId));
     button.addEventListener("click", () => {
@@ -122,7 +123,7 @@ function renderSourceButtons(sources, activeSourceId, onSelect) {
 }
 
 async function activateSource(title, source, sources) {
-  for (const button of ui.sources?.querySelectorAll("button") || []) button.setAttribute("aria-pressed", String(button.textContent === (source.label || source.provider)));
+  for (const button of ui.sources?.querySelectorAll("button") || []) button.setAttribute("aria-pressed", String(button.dataset.sourceId === source.sourceId));
   setState("Checking source", "Verifying the authorized source record and preparing its official player.");
   try {
     if (source.provider === "partner") {
