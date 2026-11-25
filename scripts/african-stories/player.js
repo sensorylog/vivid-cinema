@@ -112,13 +112,17 @@ function renderSourceButtons(sources, activeSourceId, onSelect) {
     button.className = "african-source-button";
     button.textContent = source.label || source.provider;
     button.setAttribute("aria-pressed", String(source.sourceId === activeSourceId));
-    button.addEventListener("click", () => onSelect(source));
+    button.addEventListener("click", () => {
+      for (const candidate of ui.sources.querySelectorAll("button")) candidate.setAttribute("aria-pressed", String(candidate === button));
+      onSelect(source);
+    });
     ui.sources.append(button);
   }
   ui.sources.hidden = sources.length < 2;
 }
 
 async function activateSource(title, source, sources) {
+  for (const button of ui.sources?.querySelectorAll("button") || []) button.setAttribute("aria-pressed", String(button.textContent === (source.label || source.provider)));
   setState("Checking source", "Verifying the authorized source record and preparing its official player.");
   try {
     if (source.provider === "partner") {
@@ -185,7 +189,7 @@ async function loadTitle() {
       setState("Viewing access not confirmed", getAfricanAccessMessage(title) + " No source has passed the rights, territory and authorization checks.", "ACCESS NOT CLEARED");
       return;
     }
-    renderSourceButtons(sources, "", source => activateSource(title, source, sources));
+    renderSourceButtons(sources, sources[0].sourceId, source => activateSource(title, source, sources));
     await activateSource(title, sources[0], sources);
   } catch (error) {
     setState("African Stories is temporarily unavailable", error instanceof Error ? error.message : "The catalogue could not be checked.", "CATALOGUE ERROR");
