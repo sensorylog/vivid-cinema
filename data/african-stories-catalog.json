@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "catalogueVersion": "2026-11-25.2",
+  "catalogueVersion": "2026-11-25.3",
   "publishedAt": "2026-11-25T00:00:00.000Z",
   "titles": [
     {
@@ -205,6 +205,49 @@
           "url": "https://academic.oup.com/edited-volume/61663/chapter-abstract/553444673"
         }
       ]
+    },
+    {
+      "id": "kaddu-beykat-1975",
+      "editionId": "kaddu-beykat-1975-reference-record",
+      "title": "Kaddu Beykat (Letter from My Village)",
+      "countryCode": "SN",
+      "countryName": "Senegal",
+      "format": "feature",
+      "year": 1975,
+      "director": "Safi Faye",
+      "synopsis": "Safi Faye’s first feature-length docudrama returns to her rural Senegalese hometown. Through an audiovisual letter and scenes shaped with villagers, it examines agricultural hardship, colonial-era cash-crop monoculture and the pressures connecting village life to the city.",
+      "themes": [
+        "Serer rural life",
+        "agriculture",
+        "colonial economic legacies",
+        "ethnographic cinema",
+        "women filmmakers"
+      ],
+      "historicalPeriod": "Post-independence Senegal",
+      "published": true,
+      "accessState": "discover_archive_record",
+      "provenance": {
+        "evidenceRef": "kaddu-beykat-1975-african-film-festival",
+        "sourceUrl": "https://africanfilmny.org/films/letter-from-my-village-kaddu-beykat/"
+      },
+      "references": [
+        {
+          "label": "African Film Festival — Letter from My Village / Kaddu Beykat",
+          "url": "https://africanfilmny.org/films/letter-from-my-village-kaddu-beykat/"
+        },
+        {
+          "label": "MoMA — Safi Faye",
+          "url": "https://www.moma.org/artists/74056-safi-faye"
+        },
+        {
+          "label": "Arsenal — Kaddu Beykat",
+          "url": "https://www.arsenal-berlin.de/en/forum-forum-expanded/archive/program-archive/2024/program-forum/forum-special/kaddu-beykat/"
+        }
+      ],
+      "editorialReview": {
+        "status": "approved",
+        "reviewedAt": "2026-11-25T00:00:00.000Z"
+      }
     }
   ]
 }
