@@ -53,4 +53,6 @@ test("premium playback controls use provider APIs without replacing native playe
   assert.match(player, /playbackStatusUpdate/);
   assert.match(page, /african-control-fullscreen/);
   assert.match(page, /african-control-mute/);
+  assert.match(page, /african-player-attribution/);
+  assert.match(player, /resolved\.licenseUrl/);
 });
