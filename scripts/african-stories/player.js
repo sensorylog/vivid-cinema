@@ -55,9 +55,9 @@ function clearPlayback() {
   frame.hidden = true;
   frame.removeAttribute("src");
   video.pause();
+  video.hidden = true;
   video.removeAttribute("src");
   video.load();
-  video.hidden = true;
   fallback.hidden = true;
   fallback.removeAttribute("href");
   sourceLabel.textContent = "";
