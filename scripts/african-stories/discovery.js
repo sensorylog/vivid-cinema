@@ -120,21 +120,11 @@ function renderEditorialDetail() {
   const record = (experience[key] || []).find(item => item.id === id && validEditorialRecord(item));
   const panel = document.getElementById("african-editorial-detail");
   panel.hidden = false;
-  document.getElementById("african-editorial-kind").textContent = label.toUpperCase();
+  document.getElementById("african-editorial-kind").textContent =
+    [label.toUpperCase(), record?.kicker].filter(Boolean).join(" · ");
   document.getElementById("african-editorial-title").textContent = record?.title || label + " not published";
-  document.getElementById("african-editorial-summary").textContent = record?.summary || "This editorial record is not published yet. Profiles, historical entries and curated journeys appear only after source review.";
-  const meta = document.getElementById("african-editorial-meta");
-  meta.replaceChildren();
-  const metadata = record ? [record.role, record.country, record.born, record.died ? "Died " + record.died : "", record.dateLabel ? "Date: " + record.dateLabel : ""].filter(Boolean) : [];
-  for (const item of metadata) meta.append(element("span", "african-editorial-meta-item", item));
-  const works = document.getElementById("african-editorial-works");
-  works.replaceChildren();
-  if (Array.isArray(record?.selectedWorks) && record.selectedWorks.length) {
-    works.append(element("h3", "", "Selected works"));
-    const list = element("ul", "african-editorial-work-list");
-    for (const work of record.selectedWorks) list.append(element("li", "", work));
-    works.append(list);
-  }
+  document.getElementById("african-editorial-summary").textContent = record?.summary ||
+    "This editorial record is not published yet. Profiles, historical entries and curated journeys appear only after source review.";
 
   const references = document.getElementById("african-editorial-references");
   references.replaceChildren();
@@ -149,25 +139,54 @@ function renderEditorialDetail() {
       references.append(link);
     } catch {}
   }
+
+  let insights = document.getElementById("african-editorial-insights");
+  if (!insights) {
+    insights = element("div", "african-editorial-insights");
+    document.getElementById("african-editorial-summary").after(insights);
+  }
+  insights.replaceChildren();
+  const insightCards = [
+    ["The familiar version", record?.reframe],
+    ["Why this matters", record?.whyItMatters],
+    ["Evidence note", record?.confidence]
+  ];
+  for (const [heading, copy] of insightCards) {
+    if (!copy) continue;
+    const card = element("section", "african-insight-card");
+    card.append(element("h3", "", heading));
+    card.append(element("p", "", copy));
+    insights.append(card);
+  }
+
+  const metadata = [];
+  if (record?.dateLabel) metadata.push(record.dateLabel);
+  if (Array.isArray(record?.countryCodes)) {
+    const names = record.countryCodes.map(code =>
+      experience.countries.find(country => country.code === code)?.name || code
+    );
+    metadata.push(...names);
+  }
+  if (metadata.length) {
+    const chips = element("div", "african-editorial-meta");
+    for (const value of metadata) chips.append(element("span", "african-editorial-meta-item", value));
+    insights.before(chips);
+  }
+
+  const works = document.getElementById("african-editorial-works");
+  if (works) works.remove();
+  if (Array.isArray(record?.filmography) && record.filmography.length) {
+    const workSection = element("section", "african-editorial-works");
+    workSection.id = "african-editorial-works";
+    workSection.append(element("h3", "", "Selected works"));
+    const list = element("ul", "african-editorial-work-list");
+    for (const work of record.filmography) list.append(element("li", "", work));
+    workSection.append(list);
+    insights.after(workSection);
+  }
+
   const related = document.getElementById("african-editorial-related");
   related.replaceChildren();
-
-  const linkedRecords = [
-    ...(record?.personIds || []).map(id => ({ key: "people", type: "person", id })),
-    ...(record?.timelineIds || []).map(id => ({ key: "timelines", type: "timeline", id }))
-  ];
-  for (const linked of linkedRecords) {
-    const target = (experience[linked.key] || []).find(item => item.id === linked.id && validEditorialRecord(item));
-    if (!target) continue;
-    const card = element("article", "african-content-card");
-    card.append(element("span", "african-card-eyebrow", linked.type === "person" ? "FILMMAKER / PERSON" : "HISTORICAL MILESTONE"));
-    card.append(element("h3", "", target.title));
-    card.append(element("p", "", target.summary));
-    const link = element("a", "african-card-link", "Explore " + linked.type);
-    link.href = "african-stories.html?" + linked.type + "=" + encodeURIComponent(target.id);
-    card.append(link);
-    related.append(card);
-  }
   const titleIds = new Set(Array.isArray(record?.titleIds) ? record.titleIds : []);
   const relatedTitles = (catalogue.titles || []).filter(title => titleIds.has(title.id) && validAfricanTitleRecord(title));
   for (const title of relatedTitles) {
@@ -179,8 +198,31 @@ function renderEditorialDetail() {
     card.append(link);
     related.append(card);
   }
-}
 
+  const relatedEditorial = [
+    ["timelineIds", "timelines", "timeline", "Related milestones"],
+    ["personIds", "people", "person", "Related people"]
+  ];
+  for (const [field, collection, route, heading] of relatedEditorial) {
+    const ids = new Set(Array.isArray(record?.[field]) ? record[field] : []);
+    const matches = (experience[collection] || []).filter(item => ids.has(item.id) && validEditorialRecord(item));
+    if (!matches.length) continue;
+    const group = element("section", "african-related-editorial");
+    group.append(element("h3", "", heading));
+    const grid = element("div", "african-content-grid");
+    for (const item of matches) {
+      const card = element("article", "african-content-card");
+      card.append(element("span", "african-card-eyebrow", item.kicker || heading));
+      card.append(element("h4", "", item.title));
+      const link = element("a", "african-card-link", "Explore record");
+      link.href = "african-stories.html?" + route + "=" + encodeURIComponent(item.id);
+      card.append(link);
+      grid.append(card);
+    }
+    group.append(grid);
+    related.append(group);
+  }
+}
 
 function renderLanguageOptions() {
   const languages = [...new Set((catalogue.titles || [])
