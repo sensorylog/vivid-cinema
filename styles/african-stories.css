@@ -104,3 +104,12 @@
 
 .african-sources-heading{flex:0 0 100%;margin:8px 0 0;color:#d9e5f3;font-size:.9rem}
 .african-editorial-references .african-card-link{margin:0;padding:8px 0}
+
+
+.african-title-evidence{margin:22px 0;padding:18px 20px;border:1px solid rgba(255,255,255,.13);border-radius:14px;background:#10151d}
+.african-title-evidence[hidden]{display:none}
+.african-player-metadata,.african-player-access{margin:9px 0;color:#aeb8c7;font-size:.82rem;line-height:1.65}
+.african-player-access{color:#d6c7a4}
+.african-player-references{display:flex;flex-wrap:wrap;gap:10px 18px;margin-top:12px}
+.african-player-references a{color:#d3e1f2;font-size:.78rem;font-weight:700;text-decoration:none}
+.african-player-references a:hover{text-decoration:underline}
