@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "catalogueVersion": "2026-11-25.11",
+  "catalogueVersion": "2026-11-25.12",
   "regions": [
     {
       "id": "north",
@@ -475,6 +475,195 @@
       ],
       "countryCodes": [
         "EG"
+      ]
+    },
+    {
+      "published": true,
+      "id": "films-that-never-travelled",
+      "title": "The films that never travelled",
+      "kicker": "PAN-AFRICAN · LOST / UNSEEN CINEMA",
+      "summary": "Scholarship on African cinema warns that the internationally visible canon is a narrow window. Some films circulated only locally, received one or two screenings, or were never screened at all. Women filmmakers’ work is particularly vulnerable to this gap: titles may be discussed in scholarship while surviving copies remain difficult to locate.",
+      "reframe": "The absence of a film from international catalogues is not proof that it was unimportant, and a film’s presence in a scholarly bibliography does not mean audiences can actually watch it.",
+      "whyItMatters": "Vivid should make archival uncertainty visible rather than silently equating discoverability with survival or access.",
+      "confidence": "Grounded in Aboubakar Sanogo’s research discussion, the Africa’s Lost Classics project and scholarship on women filmmakers; individual title status must be checked separately.",
+      "evidenceRef": "films-never-travelled",
+      "countryCodes": [
+        "GH",
+        "NG",
+        "SN",
+        "AO",
+        "CM",
+        "ZA"
+      ],
+      "references": [
+        {
+          "label": "Carleton — African Cinema, Memory, and the Work of Preservation",
+          "url": "https://carleton.ca/fass/story/aboubakar-sanogo-on-african-cinema-memory-and-the-work-of-preservation/"
+        },
+        {
+          "label": "Bisschoff & Murphy — Revising the Classics",
+          "url": "https://storre.stir.ac.uk/bitstream/1893/23398/1/DM_LostClassicsIntro.pdf"
+        },
+        {
+          "label": "Dovey — New Looks: The Rise of African Women Filmmakers",
+          "url": "https://africanfilmny.org/articles/new-looks-the-rise-of-african-women-filmmakers/"
+        }
+      ],
+      "personIds": [
+        "safi-faye",
+        "therese-sita-bella",
+        "sarah-maldoror"
+      ],
+      "timelineIds": [
+        "sambizanga-1972",
+        "mayibuye-afravision-archive-2000"
+      ]
+    },
+    {
+      "published": true,
+      "id": "women-archive-silences",
+      "title": "The women whose films are hard to find",
+      "kicker": "PAN-AFRICAN · WOMEN / ARCHIVAL SILENCES",
+      "summary": "Sarah Maldoror, Safi Faye and Thérèse Sita-Bella appear in scholarship on African women’s filmmaking, but the archival record is uneven. Research documents difficulty locating copies of some films and notes that works by women directors were often not widely screened or preserved in modern formats. Annette Mbaye d’Erneville’s cultural organising shows that women shaped film culture beyond directing.",
+      "reframe": "The gap is not just between men and women in film credits. It is also between who gets programmed, whose work is preserved, who writes criticism and who builds cultural institutions.",
+      "whyItMatters": "Recovering women’s screen histories requires attention to filmmakers, critics, organisers, archivists and the material survival of their work.",
+      "confidence": "Based on Ellerson and Dovey’s scholarship and the Edinburgh archival study; surviving-copy claims are title-specific and should not be generalised to every film.",
+      "evidenceRef": "women-archive-silences",
+      "countryCodes": [
+        "SN",
+        "AO",
+        "CM"
+      ],
+      "references": [
+        {
+          "label": "Beti Ellerson — African Women in Cinema: An Overview",
+          "url": "https://www.cambridge.org/core/books/gaze-regimes/african-women-in-cinema-an-overview/056AD61E7BF872888BB58A7BD9957261"
+        },
+        {
+          "label": "Lindiwe Dovey — New Looks: The Rise of African Women Filmmakers",
+          "url": "https://africanfilmny.org/articles/new-looks-the-rise-of-african-women-filmmakers/"
+        },
+        {
+          "label": "University of Edinburgh — archival silences in African women’s cinema",
+          "url": "https://journals.ed.ac.uk/forum/article/download/6458/8762/"
+        }
+      ],
+      "personIds": [
+        "annette-mbaye-derneville",
+        "safi-faye",
+        "therese-sita-bella",
+        "sarah-maldoror"
+      ],
+      "timelineIds": [
+        "sambizanga-1972"
+      ]
+    },
+    {
+      "published": true,
+      "id": "apartheid-camera-underground",
+      "title": "The camera underground: clandestine anti-apartheid cinema",
+      "kicker": "SOUTH AFRICA · BANNED FILMS / EXILE",
+      "summary": "Anti-apartheid documentaries were made clandestinely, circulated internationally and sometimes answered by official counter-films. Research on Morena Films traces Phela-Ndaba / End of the Dialogue (1970), Last Grave at Dimbaza (1974) and the South African government's documentary response. UCT Libraries’ Unbanned exhibit documents a wider group of films made illegally or abroad because of apartheid censorship.",
+      "reframe": "The archive of resistance includes both the films that escaped censorship and the state's attempts to control the visual argument. This is a history of competing image-making, not simply a list of banned titles.",
+      "whyItMatters": "Understanding apartheid cinema means studying production conditions, distribution routes, censorship and counter-propaganda together.",
+      "confidence": "Based on UCT Libraries’ exhibit, the Mayibuye Archive catalogue and Cull’s 2025 scholarly article; item-level access and rights must be checked separately.",
+      "evidenceRef": "apartheid-camera-underground",
+      "countryCodes": [
+        "ZA"
+      ],
+      "references": [
+        {
+          "label": "UCT Libraries — Unbanned",
+          "url": "https://lib.uct.ac.za/articles/2025-10-08-unbanned-films-south-africans-were-not-allowed-see"
+        },
+        {
+          "label": "Mayibuye Archive — Film and Video Archive",
+          "url": "https://mayibuyearchives.robben-island.org.za/film-and-video-archive"
+        },
+        {
+          "label": "Nicholas J. Cull — Clandestine Documentary Film v. Apartheid (2025)",
+          "url": "https://www.tandfonline.com/doi/abs/10.1080/01439685.2025.2474285"
+        }
+      ],
+      "personIds": [
+        "nana-mahomo",
+        "zola-maseko"
+      ],
+      "timelineIds": [
+        "morena-clandestine-film-1970",
+        "last-grave-dimbaza-1974",
+        "mayibuye-afravision-archive-2000"
+      ]
+    },
+    {
+      "published": true,
+      "id": "nollywood-many-beginnings",
+      "title": "Nollywood had many beginnings",
+      "kicker": "NIGERIA · VIDEO / ORAL HISTORY",
+      "summary": "The 1992 success of Living in Bondage is an important commercial landmark, but it does not settle the question of the first Nigerian video film. Recent scholarship traces Yoruba travelling-theatre practitioners, early video experiments in Onitsha, Enugu and Port Harcourt, cassette importers, informal vendors and household circulation.",
+      "reframe": "The first commercially influential title, the earliest surviving video experiment and the first production lineage are different historical questions. Treating them as one origin story erases regional experiments and the people who built distribution before formal industry recognition.",
+      "whyItMatters": "An honest Nollywood history should preserve disagreement over origins while explaining the social and economic conditions that made video cinema viable.",
+      "confidence": "Based on a 2024 thesis mapping competing origin claims and a 2023 peer-reviewed study of Nigerian video consumption; the exact first film remains disputed.",
+      "evidenceRef": "nollywood-many-beginnings",
+      "countryCodes": [
+        "NG"
+      ],
+      "references": [
+        {
+          "label": "R. Emelonye — Nollywood Cinema: A Disputed Taxonomy (2024)",
+          "url": "https://research.gold.ac.uk/38040/1/TAP_thesis_EmelonyeR_2024.pdf"
+        },
+        {
+          "label": "Godwin Iretomiwa Simon — video consumption in Nigeria (2023)",
+          "url": "https://journals.sagepub.com/doi/full/10.1177/13678779231197697"
+        },
+        {
+          "label": "Oxford Research Encyclopedia — West African Cinema",
+          "url": "https://academic.oup.com/edited-volume/61663/chapter-abstract/553444673"
+        }
+      ],
+      "personIds": [],
+      "timelineIds": [
+        "nigeria-video-origins-1984-1986",
+        "living-in-bondage-1992",
+        "nollywood-name-2002"
+      ]
+    },
+    {
+      "published": true,
+      "id": "archive-catalogue-is-not-access",
+      "title": "An archive catalogue is not the same as access",
+      "kicker": "PAN-AFRICAN · PRESERVATION / RIGHTS",
+      "summary": "South Africa’s Mayibuye Archive describes extensive film and video holdings, including approximately 5,000 Beta recordings acquired in 2000, while noting that inventories and descriptions remain a work in progress. Ghanaian archival research similarly distinguishes preservation practices from public access. An archive listing should never be treated as proof that a film can be streamed.",
+      "reframe": "A record can exist without a digitised copy; a digitised copy can exist without public access; public access can exist without streaming rights. Each step requires evidence.",
+      "whyItMatters": "This principle protects audiences and rights holders while making Vivid a more trustworthy guide to African screen heritage.",
+      "confidence": "Based on archive descriptions and peer-reviewed research; current access and rights must be checked with each holding institution.",
+      "evidenceRef": "archive-catalogue-not-access",
+      "countryCodes": [
+        "GH",
+        "ZA",
+        "AO"
+      ],
+      "references": [
+        {
+          "label": "Mayibuye Archive — Film and Video Archive",
+          "url": "https://mayibuyearchives.robben-island.org.za/film-and-video-archive"
+        },
+        {
+          "label": "Ohene-Asah — Ghana audiovisual heritage preservation",
+          "url": "https://www.tandfonline.com/doi/full/10.1080/23257962.2021.2012441"
+        },
+        {
+          "label": "South African National Archives — Film and Video collections",
+          "url": "https://www.nationalarchives.gov.za/film"
+        }
+      ],
+      "personIds": [
+        "rebecca-ohene-asah"
+      ],
+      "timelineIds": [
+        "mayibuye-afravision-archive-2000",
+        "ghana-archive-access-research-2022"
       ]
     }
   ],
