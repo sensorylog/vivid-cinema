@@ -112,6 +112,50 @@ test("African film histories include camera restrictions, domestic censorship an
   assert.ok(experience.collections.some(item => item.id === "egyptian-cinema-and-censorship"));
 });
 
+test("Phase 5 expands women filmmakers, disputed Nollywood origins and archive histories", () => {
+  const personIds = new Set(experience.people.map(item => item.id));
+  const timelineIds = new Set(experience.timelines.map(item => item.id));
+  const collectionIds = new Set(experience.collections.map(item => item.id));
+  const journeyIds = new Set(experience.journeys.map(item => item.id));
+  assert.ok(personIds.has("annette-mbaye-derneville"));
+  assert.ok(personIds.has("safi-faye"));
+  assert.ok(personIds.has("therese-sita-bella"));
+  assert.ok(personIds.has("nana-mahomo"));
+  assert.ok(personIds.has("rebecca-ohene-asah"));
+  assert.ok(timelineIds.has("nigeria-video-origins-1984-1986"));
+  assert.ok(timelineIds.has("morena-clandestine-film-1970"));
+  assert.ok(timelineIds.has("last-grave-dimbaza-1974"));
+  assert.ok(timelineIds.has("mayibuye-afravision-archive-2000"));
+  assert.ok(timelineIds.has("ghana-archive-access-research-2022"));
+  assert.ok(collectionIds.has("films-that-never-travelled"));
+  assert.ok(collectionIds.has("women-archive-silences"));
+  assert.ok(collectionIds.has("apartheid-camera-underground"));
+  assert.ok(collectionIds.has("nollywood-many-beginnings"));
+  assert.ok(collectionIds.has("archive-catalogue-is-not-access"));
+  assert.ok(journeyIds.has("women-screen-culture-journey"));
+  assert.ok(journeyIds.has("apartheid-documentary-counter-image"));
+});
+
+test("every editorial country code maps to a published country hub", () => {
+  const codes = new Set(experience.countries.map(item => item.code));
+  for (const key of ["collections", "people", "timelines", "journeys"]) {
+    for (const record of experience[key]) {
+      assert.ok(Array.isArray(record.countryCodes) && record.countryCodes.length, key + ": " + record.id + " needs country metadata");
+      assert.ok(record.countryCodes.every(code => codes.has(code)), key + ": " + record.id + " has unknown country code");
+    }
+  }
+});
+
+test("new archive and film-history records preserve explicit access uncertainty", () => {
+  const archive = experience.collections.find(item => item.id === "archive-catalogue-is-not-access");
+  const women = experience.collections.find(item => item.id === "women-archive-silences");
+  const nigeria = experience.collections.find(item => item.id === "nollywood-many-beginnings");
+  assert.ok(archive.confidence.includes("current access"));
+  assert.ok(women.confidence.includes("title-specific"));
+  assert.ok(nigeria.confidence.includes("remains disputed"));
+  assert.ok(experience.people.find(item => item.id === "therese-sita-bella").selectedWorks[0].includes("not verified"));
+});
+
 test("access labels keep discovery separate from viewing rights", () => {
   assert.equal(accessLabel("discover_archive_record"), "Discover / archive record");
   assert.equal(accessLabel("access_pending"), "Access pending");
