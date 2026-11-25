@@ -187,6 +187,8 @@ function attachYouTubeController(generation) {
             getCurrentTime: () => event.target.getCurrentTime(),
             getDuration: () => event.target.getDuration(),
             isPlaying: () => event.target.getPlayerState() === window.YT.PlayerState.PLAYING,
+            isMuted: () => event.target.isMuted(),
+            setMuted: muted => muted ? event.target.mute() : event.target.unMute(),
             destroy: () => event.target.destroy()
           });
           resolve();
@@ -234,6 +236,8 @@ async function attachVimeoController(generation) {
     getCurrentTime: () => player.getCurrentTime(),
     getDuration: () => player.getDuration(),
     isPlaying: async () => (await player.getPaused()) === false,
+    isMuted: async () => (await player.getVolume()) === 0,
+    setMuted: async muted => player.setVolume(muted ? 0 : 1),
     destroy: () => player.destroy()
   });
   player.on("timeupdate", event => updateProgress(event.seconds, event.duration, true));
@@ -254,11 +258,10 @@ async function attachPeerTubeController(generation) {
     pause: () => player.pause(),
     seek: seconds => player.seek(seconds),
     getCurrentTime: () => player.getCurrentTime(),
-    getDuration: async () => {
-      const status = await player.getCurrentTime();
-      return lastDuration || Number(status?.duration) || 0;
-    },
-    isPlaying: async () => await player.isPlaying?.() ?? false
+    getDuration: async () => lastDuration,
+    isPlaying: async () => await player.isPlaying?.() ?? false,
+    isMuted: async () => (await player.getVolume()) === 0,
+    setMuted: muted => player.setVolume(muted ? 0 : 1)
   });
   player.addEventListener("playbackStatusUpdate", status => {
     const duration = Number(status?.duration) || lastDuration;
