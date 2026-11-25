@@ -78,6 +78,10 @@ const sourceTemplates = {
     playerId: "REPLACE_CREATOR_PLAYER_ID", label: "Official Dailymotion upload",
     enabled: true, evidenceRef: "REPLACE_WITH_CREATOR_VERIFICATION_RECORD"
   },
+  rumble: {
+    sourceId: "official-rumble", provider: "rumble", embedId: "REPLACE_RUMBLE_EMBED_ID",
+    label: "Official Rumble upload", enabled: true, evidenceRef: "REPLACE_WITH_CREATOR_VERIFICATION_RECORD"
+  },
   peertube: {
     sourceId: "official-peertube", provider: "peertube", instanceOrigin: "https://peer.tube",
     videoUuid: "00000000-0000-4000-8000-000000000000", label: "Official PeerTube upload",
