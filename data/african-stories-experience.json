@@ -1,0 +1,307 @@
+{
+  "schemaVersion": 1,
+  "catalogueVersion": "2026-11-25.1",
+  "regions": [
+    {
+      "id": "north",
+      "name": "North Africa",
+      "description": "Stories, cinema and moving-image heritage from North Africa."
+    },
+    {
+      "id": "west",
+      "name": "West Africa",
+      "description": "Cinema, documentary and cultural memory across West Africa."
+    },
+    {
+      "id": "central",
+      "name": "Central Africa",
+      "description": "Screen histories and documentary voices from Central Africa."
+    },
+    {
+      "id": "east",
+      "name": "East Africa",
+      "description": "Films, filmmakers and archives from East Africa and the Indian Ocean."
+    },
+    {
+      "id": "south",
+      "name": "Southern Africa",
+      "description": "Cinema and audiovisual heritage from Southern Africa."
+    }
+  ],
+  "countries": [
+    {
+      "code": "DZ",
+      "name": "Algeria",
+      "regionId": "north"
+    },
+    {
+      "code": "EG",
+      "name": "Egypt",
+      "regionId": "north"
+    },
+    {
+      "code": "LY",
+      "name": "Libya",
+      "regionId": "north"
+    },
+    {
+      "code": "MA",
+      "name": "Morocco",
+      "regionId": "north"
+    },
+    {
+      "code": "SD",
+      "name": "Sudan",
+      "regionId": "north"
+    },
+    {
+      "code": "TN",
+      "name": "Tunisia",
+      "regionId": "north"
+    },
+    {
+      "code": "BJ",
+      "name": "Benin",
+      "regionId": "west"
+    },
+    {
+      "code": "BF",
+      "name": "Burkina Faso",
+      "regionId": "west"
+    },
+    {
+      "code": "CV",
+      "name": "Cabo Verde",
+      "regionId": "west"
+    },
+    {
+      "code": "CI",
+      "name": "Côte d’Ivoire",
+      "regionId": "west"
+    },
+    {
+      "code": "GM",
+      "name": "Gambia",
+      "regionId": "west"
+    },
+    {
+      "code": "GH",
+      "name": "Ghana",
+      "regionId": "west"
+    },
+    {
+      "code": "GN",
+      "name": "Guinea",
+      "regionId": "west"
+    },
+    {
+      "code": "GW",
+      "name": "Guinea-Bissau",
+      "regionId": "west"
+    },
+    {
+      "code": "LR",
+      "name": "Liberia",
+      "regionId": "west"
+    },
+    {
+      "code": "ML",
+      "name": "Mali",
+      "regionId": "west"
+    },
+    {
+      "code": "MR",
+      "name": "Mauritania",
+      "regionId": "west"
+    },
+    {
+      "code": "NE",
+      "name": "Niger",
+      "regionId": "west"
+    },
+    {
+      "code": "NG",
+      "name": "Nigeria",
+      "regionId": "west"
+    },
+    {
+      "code": "SN",
+      "name": "Senegal",
+      "regionId": "west"
+    },
+    {
+      "code": "SL",
+      "name": "Sierra Leone",
+      "regionId": "west"
+    },
+    {
+      "code": "TG",
+      "name": "Togo",
+      "regionId": "west"
+    },
+    {
+      "code": "AO",
+      "name": "Angola",
+      "regionId": "central"
+    },
+    {
+      "code": "CM",
+      "name": "Cameroon",
+      "regionId": "central"
+    },
+    {
+      "code": "CF",
+      "name": "Central African Republic",
+      "regionId": "central"
+    },
+    {
+      "code": "TD",
+      "name": "Chad",
+      "regionId": "central"
+    },
+    {
+      "code": "CG",
+      "name": "Republic of the Congo",
+      "regionId": "central"
+    },
+    {
+      "code": "CD",
+      "name": "Democratic Republic of the Congo",
+      "regionId": "central"
+    },
+    {
+      "code": "GQ",
+      "name": "Equatorial Guinea",
+      "regionId": "central"
+    },
+    {
+      "code": "GA",
+      "name": "Gabon",
+      "regionId": "central"
+    },
+    {
+      "code": "ST",
+      "name": "São Tomé and Príncipe",
+      "regionId": "central"
+    },
+    {
+      "code": "BI",
+      "name": "Burundi",
+      "regionId": "east"
+    },
+    {
+      "code": "KM",
+      "name": "Comoros",
+      "regionId": "east"
+    },
+    {
+      "code": "DJ",
+      "name": "Djibouti",
+      "regionId": "east"
+    },
+    {
+      "code": "ER",
+      "name": "Eritrea",
+      "regionId": "east"
+    },
+    {
+      "code": "ET",
+      "name": "Ethiopia",
+      "regionId": "east"
+    },
+    {
+      "code": "KE",
+      "name": "Kenya",
+      "regionId": "east"
+    },
+    {
+      "code": "MG",
+      "name": "Madagascar",
+      "regionId": "east"
+    },
+    {
+      "code": "MW",
+      "name": "Malawi",
+      "regionId": "east"
+    },
+    {
+      "code": "MU",
+      "name": "Mauritius",
+      "regionId": "east"
+    },
+    {
+      "code": "MZ",
+      "name": "Mozambique",
+      "regionId": "east"
+    },
+    {
+      "code": "RW",
+      "name": "Rwanda",
+      "regionId": "east"
+    },
+    {
+      "code": "SC",
+      "name": "Seychelles",
+      "regionId": "east"
+    },
+    {
+      "code": "SO",
+      "name": "Somalia",
+      "regionId": "east"
+    },
+    {
+      "code": "SS",
+      "name": "South Sudan",
+      "regionId": "east"
+    },
+    {
+      "code": "TZ",
+      "name": "Tanzania",
+      "regionId": "east"
+    },
+    {
+      "code": "UG",
+      "name": "Uganda",
+      "regionId": "east"
+    },
+    {
+      "code": "BW",
+      "name": "Botswana",
+      "regionId": "south"
+    },
+    {
+      "code": "LS",
+      "name": "Lesotho",
+      "regionId": "south"
+    },
+    {
+      "code": "NA",
+      "name": "Namibia",
+      "regionId": "south"
+    },
+    {
+      "code": "ZA",
+      "name": "South Africa",
+      "regionId": "south"
+    },
+    {
+      "code": "SZ",
+      "name": "Eswatini",
+      "regionId": "south"
+    },
+    {
+      "code": "ZM",
+      "name": "Zambia",
+      "regionId": "south"
+    },
+    {
+      "code": "ZW",
+      "name": "Zimbabwe",
+      "regionId": "south"
+    }
+  ],
+  "collections": [],
+  "people": [],
+  "timelines": [],
+  "journeys": []
+}
