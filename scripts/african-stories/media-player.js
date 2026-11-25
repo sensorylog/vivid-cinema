@@ -54,14 +54,24 @@ export async function playAuthorizedMedia(video, session) {
   video.pause();
   video.removeAttribute("src");
   video.load();
+
+  let Hls = null;
+  let dashjs = null;
+  if (session.mimeType === "application/vnd.apple.mpegurl" &&
+      !video.canPlayType("application/vnd.apple.mpegurl")) {
+    Hls = await loadLibrary(HLS_LIBRARY, "Hls");
+    if (!Hls.isSupported()) throw new Error("This device cannot play the authorized HLS stream.");
+  }
+  if (session.mimeType === "application/dash+xml") {
+    dashjs = await loadLibrary(DASH_LIBRARY, "dashjs");
+  }
+
   const ready = waitForVideo(video);
   if (session.mimeType === "application/vnd.apple.mpegurl") {
     if (video.canPlayType("application/vnd.apple.mpegurl")) {
       video.src = url.toString();
       video.load();
     } else {
-      const Hls = await loadLibrary(HLS_LIBRARY, "Hls");
-      if (!Hls.isSupported()) throw new Error("This device cannot play the authorized HLS stream.");
       activeHls = new Hls({ enableWorker: true, lowLatencyMode: false });
       activeHls.attachMedia(video);
       activeHls.on(Hls.Events.MEDIA_ATTACHED, () => activeHls?.loadSource(url.toString()));
@@ -73,7 +83,6 @@ export async function playAuthorizedMedia(video, session) {
       });
     }
   } else if (session.mimeType === "application/dash+xml") {
-    const dashjs = await loadLibrary(DASH_LIBRARY, "dashjs");
     activeDash = dashjs.MediaPlayer().create();
     activeDash.initialize(video, url.toString(), false);
     activeDash.on(dashjs.MediaPlayer.events.ERROR, () => video.dispatchEvent(new Event("error")));
@@ -86,7 +95,6 @@ export async function playAuthorizedMedia(video, session) {
   await ready;
   return true;
 }
-
 export function stopAuthorizedMedia(video) {
   clearAdapters();
   if (!video) return;
