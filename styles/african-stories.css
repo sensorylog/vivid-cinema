@@ -100,3 +100,7 @@
 .african-editorial-work-list{display:flex;gap:9px 25px;flex-wrap:wrap;margin:0;padding-left:20px;color:#b6c1d0;font-size:.83rem;line-height:1.7}
 .african-editorial-detail[hidden]{display:none}
 @media(max-width:560px){.african-insight-card{padding:15px}.african-editorial-insights{grid-template-columns:1fr}}
+
+
+.african-sources-heading{flex:0 0 100%;margin:8px 0 0;color:#d9e5f3;font-size:.9rem}
+.african-editorial-references .african-card-link{margin:0;padding:8px 0}
