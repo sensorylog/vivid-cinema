@@ -104,6 +104,7 @@ export function createAfricanStoriesFunctions({ db, onCall, HttpsError, Timestam
     const accessState = input.accessState || "archive_record";
     if (!PUBLIC_ACCESS_STATES.has(accessState)) fail(HttpsError, "invalid-argument", "Draft accessState must be archive_record, access_pending or watch_officially. Vivid playback states are assigned only by the rights workflow.");
     const officialExternalUrl = boundedText(input.officialExternalUrl, 2000, "officialExternalUrl", HttpsError);
+    if (accessState !== "watch_officially" && officialExternalUrl) fail(HttpsError, "invalid-argument", "An official external URL may only be published with the watch_officially access state.");
     if (accessState === "watch_officially") {
       if (!officialExternalUrl) fail(HttpsError, "failed-precondition", "An official external route is required for watch_officially.");
       parseHttpsUrl(officialExternalUrl, "officialExternalUrl", HttpsError);
