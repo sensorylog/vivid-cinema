@@ -245,7 +245,9 @@ function renderTitles() {
     country: selectedCountry,
     query: ui.query.value,
     format: ui.format.value,
-    language: ui.language.value
+    language: ui.language.value,
+    region: ui.region.value,
+    countries: experience.countries
   }).filter(validAfricanTitleRecord);
   ui.titles.replaceChildren();
   if (!titles.length) {
