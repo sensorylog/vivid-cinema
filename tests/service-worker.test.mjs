@@ -39,17 +39,19 @@ test("every precached asset exists in the repository", async () => {
   assert.deepEqual(missing, [], "Missing precache assets: " + missing.join(", "));
 });
 
-test("Retired Watch Rooms modules are excluded from special service-worker routing", () => {
+test("Retired Watch Rooms clients stay out of the shell while legacy API routes remain network-first", () => {
   assert.match(source, /const CACHE_NAME = "vivid-cinema-shell-v\\d+"/);
-  assert.ok(!source.includes("isWatchRoomRuntime"));
-  assert.ok(!source.includes("watch-room-api"));
-  assert.ok(!source.includes("watch-room-playback"));
-  assert.ok(source.includes('"./scripts/cloudflare-api.js"'), "Cloudflare API origin helper remains precached");
-});
-test("Retired Watch Rooms API adapter is not cached or routed as an active feature", () => {
+  assert.ok(source.includes("const isWatchRoomRuntime=/watch-room-api|watch-room-playback/"));
+  assert.match(source, /isAuthDocument\\|\\|isAuthRuntime\\|\\|isWatchRoomRuntime\\)\\{event\\.respondWith\\(networkFirst\\(request\\)\\);return;/);
   assert.ok(!source.includes('"./scripts/watch-room-api.js"'));
   assert.ok(!source.includes('"./scripts/watch-room-playback.js"'));
-  assert.ok(!source.includes("isWatchRoomRuntime"));
+  assert.ok(source.includes('"./scripts/cloudflare-api.js"'), "Cloudflare API origin helper remains precached");
+});
+test("Retired Watch Rooms API adapter is not cached but cannot be served from a stale cache", () => {
+  assert.ok(!source.includes('"./scripts/watch-room-api.js"'));
+  assert.ok(!source.includes('"./scripts/watch-room-playback.js"'));
+  assert.ok(source.includes("isWatchRoomRuntime"));
+  assert.match(source, /isAuthDocument\\|\\|isAuthRuntime\\|\\|isWatchRoomRuntime\\)\\{event\\.respondWith\\(networkFirst\\(request\\)\\);return;/);
 });
 test("ordinary JavaScript and CSS serve cache immediately and refresh in the background", () => {
   assert.match(source, /const CACHE_NAME = "vivid-cinema-shell-v\d+"/);
