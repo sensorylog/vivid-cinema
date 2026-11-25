@@ -70,8 +70,8 @@ test("mobile navigation stays within five destinations and exposes secondary rou
     await expect(moreMenu.locator("a[href='" + href + "']")).toHaveCount(1);
   }
   await page.setViewportSize({ width: 1440, height: 900 });
-  await expect(page.locator(".vivid-navlinks a")).toHaveCount(7);
-  for (const href of ["collection.html?collection=movies", "collection.html?collection=tv", "anime.html", "live.html", "library.html"]) {
+  await expect(page.locator(".vivid-navlinks a")).toHaveCount(8);
+  for (const href of ["collection.html?collection=movies", "collection.html?collection=tv", "anime.html", "live.html", "african-stories.html", "library.html"]) {
     await expect(page.locator(".vivid-navlinks a[href='" + href + "']")).toHaveCount(1);
   }
   const profileLink = page.locator(".vivid-navlinks #auth-link");
