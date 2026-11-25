@@ -1,5 +1,3 @@
-import { hasLibraryItem, toggleLibraryItem } from "./library.js";
-
 const HOLD_DELAY = 520;
 const MOVE_TOLERANCE = 12;
 const CARD_SELECTOR = ".vivid-card--poster";
@@ -10,6 +8,17 @@ let activeItem = null;
 let overlay = null;
 let restoreFocus = null;
 let sheetStartY = null;
+let libraryModulePromise = null;
+
+function getLibraryModule() {
+  if (!libraryModulePromise) {
+    libraryModulePromise = import("./library.js").catch(error => {
+      libraryModulePromise = null;
+      throw error;
+    });
+  }
+  return libraryModulePromise;
+}
 
 function ensureStyles() {
   if (document.querySelector('link[data-vivid-quick-actions-style]')) return;
@@ -128,11 +137,11 @@ function ensureOverlay() {
   return overlay;
 }
 
-function updateActionStates() {
-  if (!overlay || !activeItem) return;
+function updateActionStates(library) {
+  if (!overlay || !activeItem || !library) return;
   overlay.querySelectorAll("[data-collection]").forEach(button => {
     const collection = button.dataset.collection;
-    const saved = hasLibraryItem(collection, activeItem);
+    const saved = library.hasLibraryItem(collection, activeItem);
     button.setAttribute("aria-pressed", String(saved));
     button.classList.toggle("is-saved", saved);
     const icon = button.querySelector(".vivid-quick-action-icon i");
@@ -150,7 +159,7 @@ function updateActionStates() {
   });
 }
 
-function openOverlay(card, item) {
+async function openOverlay(card, item) {
   activeCard = card;
   activeItem = item;
   restoreFocus = document.activeElement;
@@ -164,11 +173,20 @@ function openOverlay(card, item) {
   view.querySelector(".vivid-quick-actions-meta").textContent =
     [item.year, item.media_type === "tv" ? "TV series" : "Movie"].filter(Boolean).join(" · ") +
     "  ·  Save without opening details";
-  view.querySelector(".vivid-quick-actions-feedback").textContent = "Your saved titles stay in My Library.";
-  updateActionStates();
+  view.querySelector(".vivid-quick-actions-feedback").textContent = "Loading your saved titles…";
+  view.querySelectorAll("[data-collection]").forEach(button => { button.disabled = true; });
   view.hidden = false;
   document.body.classList.add("vivid-quick-actions-open");
   view.querySelector("[data-collection='favorites']").focus({ preventScroll: true });
+  try {
+    const library = await getLibraryModule();
+    if (activeItem !== item || view.hidden) return;
+    updateActionStates(library);
+    view.querySelectorAll("[data-collection]").forEach(button => { button.disabled = false; });
+    view.querySelector(".vivid-quick-actions-feedback").textContent = "Your saved titles stay in My Library.";
+  } catch {
+    view.querySelector(".vivid-quick-actions-feedback").textContent = "Your library is unavailable right now. Please try again.";
+  }
 }
 
 function closeOverlay() {
@@ -204,7 +222,7 @@ function onPointerDown(event) {
     timer: setTimeout(() => {
       if (!pending) return;
       suppressClickUntil = Date.now() + 900;
-      openOverlay(card, item);
+      void openOverlay(card, item);
       pending = null;
     }, HOLD_DELAY)
   };
