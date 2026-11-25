@@ -45,9 +45,12 @@ function emptyState(container, message) {
 function editorialCards(container, records, kind, emptyMessage, filters = {}) {
   const query = String(filters.query || "").trim().toLocaleLowerCase();
   const country = String(filters.country || "").toUpperCase();
+  const region = String(filters.region || "");
+  const regionCodes = new Set(experience.countries.filter(item => item.regionId === region).map(item => item.code));
   const published = (Array.isArray(records) ? records : []).filter(validEditorialRecord).filter(record => {
     const countries = Array.isArray(record.countryCodes) ? record.countryCodes : [];
     if (country && !countries.includes(country)) return false;
+    if (region && !countries.some(code => regionCodes.has(code))) return false;
     if (!query) return true;
     const haystack = [record.title, record.summary, record.kicker, record.reframe, record.whyItMatters]
       .filter(Boolean).join(" ").toLocaleLowerCase();
@@ -112,7 +115,8 @@ function renderCountryHub() {
   const region = experience.regions.find(item => item.id === country.regionId);
   ui.countryHub.hidden = false;
   ui.countryTitle.textContent = country.name;
-  ui.countryDescription.textContent = "Explore published cinema, documentary, filmmakers and historical records connected to " + country.name + ". " + (region?.name || "");
+  const countFor = key => (experience[key] || []).filter(record => Array.isArray(record.countryCodes) && record.countryCodes.includes(country.code)).length;
+  ui.countryDescription.textContent = "Explore " + countFor("collections") + " collections, " + countFor("people") + " people and " + countFor("timelines") + " historical milestones connected to " + country.name + ". " + (region?.name || "") + " Published title access is shown separately from archive discovery.";
 }
 
 
@@ -274,7 +278,7 @@ function renderTitles() {
 }
 
 function renderEditorialSections() {
-  const filters = { query: ui.query.value, country: selectedCountry };
+  const filters = { query: ui.query.value, country: selectedCountry, region: ui.region.value };
   editorialCards(ui.collections, experience.collections, "Collection", "No sourced collections match this search or country yet.", filters);
   editorialCards(ui.people, experience.people, "People", "No sourced people or cultural contributors match this search or country yet.", filters);
   editorialCards(ui.timelines, experience.timelines, "Timeline", "No historical milestones match this search or country yet.", filters);
