@@ -107,6 +107,9 @@ function attachController(controller) {
 
 function clearPlayback() {
   sourceGeneration += 1;
+  const playerFrameHost = document.querySelector(".african-player-frame");
+  const currentFrame = playerFrameHost?.querySelector("iframe#african-player-frame");
+  if (currentFrame) frame = currentFrame;
   if (progressTimer) window.clearInterval(progressTimer);
   progressTimer = null;
   if (activeHls) {
@@ -122,7 +125,8 @@ function clearPlayback() {
     freshFrame.allowFullscreen = true;
     freshFrame.referrerPolicy = "strict-origin-when-cross-origin";
     freshFrame.hidden = true;
-    oldFrame.replaceWith(freshFrame);
+    if (oldFrame.parentElement) oldFrame.replaceWith(freshFrame);
+    else playerFrameHost?.append(freshFrame);
     oldFrame.removeAttribute("src");
     try {
       const destroyed = activeController.destroy?.();
