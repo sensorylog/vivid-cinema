@@ -40,9 +40,9 @@ test("every precached asset exists in the repository", async () => {
 });
 
 test("Retired Watch Rooms clients stay out of the shell while legacy API routes remain network-first", () => {
-  assert.match(source, /const CACHE_NAME = "vivid-cinema-shell-v\\d+"/);
+  assert.match(source, /const CACHE_NAME = "vivid-cinema-shell-v\d+"/);
   assert.ok(source.includes("const isWatchRoomRuntime=/watch-room-api|watch-room-playback/"));
-  assert.match(source, /isAuthDocument\\|\\|isAuthRuntime\\|\\|isWatchRoomRuntime\\)\\{event\\.respondWith\\(networkFirst\\(request\\)\\);return;/);
+  assert.match(source, /isAuthDocument\|\|isAuthRuntime\|\|isWatchRoomRuntime\)\{event\.respondWith\(networkFirst\(request\)\);return;/);
   assert.ok(!source.includes('"./scripts/watch-room-api.js"'));
   assert.ok(!source.includes('"./scripts/watch-room-playback.js"'));
   assert.ok(source.includes('"./scripts/cloudflare-api.js"'), "Cloudflare API origin helper remains precached");
@@ -51,7 +51,7 @@ test("Retired Watch Rooms API adapter is not cached but cannot be served from a 
   assert.ok(!source.includes('"./scripts/watch-room-api.js"'));
   assert.ok(!source.includes('"./scripts/watch-room-playback.js"'));
   assert.ok(source.includes("isWatchRoomRuntime"));
-  assert.match(source, /isAuthDocument\\|\\|isAuthRuntime\\|\\|isWatchRoomRuntime\\)\\{event\\.respondWith\\(networkFirst\\(request\\)\\);return;/);
+  assert.match(source, /isAuthDocument\|\|isAuthRuntime\|\|isWatchRoomRuntime\)\{event\.respondWith\(networkFirst\(request\)\);return;/);
 });
 test("ordinary JavaScript and CSS serve cache immediately and refresh in the background", () => {
   assert.match(source, /const CACHE_NAME = "vivid-cinema-shell-v\d+"/);
