@@ -10,7 +10,7 @@ test("quick actions reuse the canonical library collections and never create a s
   assert.match(source, /data-collection="favorites"/);
   assert.match(source, /data-collection="watchLater"/);
   assert.match(source, /toggleLibraryItem\(collection, activeItem\)/);
-  assert.match(source, /from "\.\/library\.js"/);
+  assert.match(source, /import\("\.\/library\.js"\)/);
   assert.doesNotMatch(source, /localStorage\.(?:getItem|setItem)\(/);
 });
 
