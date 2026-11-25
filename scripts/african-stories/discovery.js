@@ -257,7 +257,7 @@ function renderTitles() {
     card.append(element("span", "african-card-eyebrow", accessLabel(title.accessState)));
     card.append(element("h3", "", title.title));
     card.append(element("p", "", title.synopsis || "No synopsis has been published."));
-    const meta = [title.countryName, title.format, ...(title.languages || [])].filter(Boolean).join(" · ");
+    const meta = [title.year, title.director, title.countryName, title.format, ...(title.languages || [])].filter(Boolean).join(" · ");
     card.append(element("small", "african-title-meta", meta));
     const link = element("a", "african-card-link", "View title & access details");
     link.href = "african-stories-watch.html?id=" + encodeURIComponent(title.id);
