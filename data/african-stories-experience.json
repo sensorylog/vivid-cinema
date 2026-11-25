@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "catalogueVersion": "2026-11-25.13",
+  "catalogueVersion": "2026-11-25.14",
   "regions": [
     {
       "id": "north",
@@ -187,6 +187,9 @@
         "AO",
         "CM",
         "NG"
+      ],
+      "titleIds": [
+        "sambizanga-1972"
       ]
     },
     {
@@ -227,6 +230,9 @@
         "MR",
         "SN",
         "BF"
+      ],
+      "titleIds": [
+        "yeelen-1987"
       ]
     },
     {
@@ -475,6 +481,9 @@
       ],
       "countryCodes": [
         "EG"
+      ],
+      "titleIds": [
+        "cairo-station-1958"
       ]
     },
     {
@@ -556,6 +565,9 @@
       ],
       "timelineIds": [
         "sambizanga-1972"
+      ],
+      "titleIds": [
+        "sambizanga-1972"
       ]
     },
     {
@@ -593,6 +605,9 @@
         "morena-clandestine-film-1970",
         "last-grave-dimbaza-1974",
         "mayibuye-afravision-archive-2000"
+      ],
+      "titleIds": [
+        "last-grave-at-dimbaza-1974"
       ]
     },
     {
@@ -627,6 +642,9 @@
         "nigeria-video-origins-1984-1986",
         "living-in-bondage-1992",
         "nollywood-name-2002"
+      ],
+      "titleIds": [
+        "living-in-bondage-1992"
       ]
     },
     {
@@ -1900,6 +1918,9 @@
       "countryCodes": [
         "NG",
         "GH"
+      ],
+      "titleIds": [
+        "living-in-bondage-1992"
       ]
     },
     {
@@ -1971,6 +1992,9 @@
         "MR",
         "SN",
         "BF"
+      ],
+      "titleIds": [
+        "yeelen-1987"
       ]
     },
     {
@@ -2015,6 +2039,9 @@
         "GH",
         "ZA",
         "AO"
+      ],
+      "titleIds": [
+        "last-grave-at-dimbaza-1974"
       ]
     },
     {
@@ -2050,6 +2077,9 @@
       ],
       "timelineIds": [
         "sambizanga-1972"
+      ],
+      "titleIds": [
+        "sambizanga-1972"
       ]
     },
     {
@@ -2082,6 +2112,9 @@
         "morena-clandestine-film-1970",
         "last-grave-dimbaza-1974",
         "mayibuye-afravision-archive-2000"
+      ],
+      "titleIds": [
+        "last-grave-at-dimbaza-1974"
       ]
     }
   ],
