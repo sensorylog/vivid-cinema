@@ -27,7 +27,7 @@
 ### 4. Restricted operations console and roles
 - Added `african-stories-admin.html` and a callable-only operations console.
 - Browser controls are hidden unless the refreshed Firebase ID token has a matching dedicated role; every operation is independently checked server-side.
-- Added `scripts/admin/set-african-stories-claims.mjs` for trusted operators using Firebase Admin Application Default Credentials. It preserves unrelated custom claims and can remove the African Stories roles with the `none` argument.
+- Added `automation/set-african-stories-claims.mjs` for trusted operators using Firebase Admin Application Default Credentials. It preserves unrelated custom claims and can remove the African Stories roles with the `none` argument.
 - No role can be assigned from the browser. Do not grant roles to unreviewed accounts.
 
 ### 5. Firestore and PWA
