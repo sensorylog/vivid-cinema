@@ -136,3 +136,57 @@ test("African Stories playback fails closed until trusted territory infrastructu
     else process.env.AFRICAN_STORIES_TRUSTED_COUNTRY_HEADER = previous;
   }
 });
+
+
+test("approved rights alone cannot launch playback without a provider-specific session adapter", async () => {
+  const api = makeFunctions();
+  await api.saveAfricanWorkDraft({
+    auth: { uid: "editor-1", token: { africanStoriesEditor: true } },
+    data: { workId: "river-film", work: validDraft }
+  });
+  await api.publishAfricanWork({
+    auth: { uid: "publisher-1", token: { africanStoriesPublisher: true } },
+    data: { workId: "river-film" }
+  });
+  api.db.records.set("africanProviderRegistryPrivate/provider-one", {
+    providerId: "provider-one",
+    status: "active",
+    securityReviewed: true,
+    adapterType: "provider_session",
+    embedOrigin: "https://player.provider.example"
+  });
+  const now = Date.now();
+  const decision = await api.setAfricanRightsDecision({
+    auth: { uid: "rights-admin", token: { africanStoriesRightsAdmin: true } },
+    data: {
+      workId: "river-film",
+      versionId: "original-cut",
+      status: "approved",
+      evidenceRef: "contract-record-2026-001",
+      providerId: "provider-one",
+      territories: ["GH"],
+      validFromMs: now - 60_000,
+      validUntilMs: now + 60 * 60 * 1000
+    }
+  });
+  assert.equal(decision.streamOnVivid, false);
+  const grant = api.db.records.get("africanRightsGrants/river-film__original-cut");
+  assert.equal(grant.rightsApproved, true);
+  assert.equal("playbackUrl" in grant, false);
+
+  const previous = process.env.AFRICAN_STORIES_TRUSTED_COUNTRY_HEADER;
+  process.env.AFRICAN_STORIES_TRUSTED_COUNTRY_HEADER = "x-appengine-country";
+  try {
+    await assert.rejects(
+      api.createAfricanPlaybackSession({
+        auth: { uid: "viewer", token: {} },
+        data: { workId: "river-film", versionId: "original-cut" },
+        rawRequest: { headers: { "x-appengine-country": "GH" } }
+      }),
+      error => error.code === "failed-precondition" && error.message.includes("session adapter")
+    );
+  } finally {
+    if (previous === undefined) delete process.env.AFRICAN_STORIES_TRUSTED_COUNTRY_HEADER;
+    else process.env.AFRICAN_STORIES_TRUSTED_COUNTRY_HEADER = previous;
+  }
+});
