@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "catalogueVersion": "2026-11-25.6",
+  "catalogueVersion": "2026-11-25.8",
   "regions": [
     {
       "id": "north",
@@ -1092,6 +1092,31 @@
       ]
     },
     {
+      "id": "morena-clandestine-film-1970",
+      "title": "1970: clandestine cameras document apartheid",
+      "dateLabel": "1970",
+      "kicker": "SOUTH AFRICA · DOCUMENTARY / EXILE",
+      "summary": "Nicholas Cull’s 2025 study identifies Phela-Ndaba / End of the Dialogue (1970) as a clandestinely produced anti-apartheid documentary by Morena Films, a collective co-founded by South African exile Nana Mahomo. The film circulated internationally as part of the visual struggle over apartheid.",
+      "reframe": "The camera was not a neutral observer. Filming under a repressive regime required covert methods, while distribution abroad turned documentary images into political evidence and counter-propaganda.",
+      "whyItMatters": "Clandestine production, exile networks and international television formed part of the infrastructure of anti-apartheid cinema.",
+      "confidence": "Based on the abstract of Cull’s peer-reviewed 2025 article; production locations and individual crew roles need full-text and archival confirmation.",
+      "evidenceRef": "morena-clandestine-1970",
+      "published": true,
+      "countryCodes": [
+        "ZA"
+      ],
+      "references": [
+        {
+          "label": "Nicholas J. Cull — Clandestine Documentary Film v. Apartheid (2025)",
+          "url": "https://www.tandfonline.com/doi/abs/10.1080/01439685.2025.2474285"
+        },
+        {
+          "label": "Mayibuye Archive — Film and Video Archive",
+          "url": "https://mayibuyearchives.robben-island.org.za/film-and-video-archive"
+        }
+      ]
+    },
+    {
       "id": "gfic-financing-crisis-1970s",
       "title": "1971–1980: the state studio struggles to finance films",
       "dateLabel": "1971–1980",
@@ -1128,6 +1153,31 @@
       ]
     },
     {
+      "id": "last-grave-dimbaza-1974",
+      "title": "1974: Last Grave at Dimbaza carries apartheid beyond the border",
+      "dateLabel": "1974",
+      "kicker": "SOUTH AFRICA · DOCUMENTARY / INTERNATIONAL BROADCAST",
+      "summary": "Last Grave at Dimbaza (1974), associated with Nana Mahomo and Morena Films, documented the human costs of apartheid. UCT Libraries records the film among works that exposed the regime’s injustices; Cull’s 2025 research places it within clandestine documentary production and an international television struggle.",
+      "reframe": "The film’s history is not only about what it showed. It is also about how a documentary made under repression could reach audiences outside the country and provoke an official response.",
+      "whyItMatters": "International circulation could create a counter-public record when domestic censorship and restrictions prevented open documentation.",
+      "confidence": "UCT Libraries and Cull’s 2025 article support the film’s anti-apartheid role; exact production and broadcast chronology should be checked against original records.",
+      "evidenceRef": "last-grave-dimbaza-1974",
+      "published": true,
+      "countryCodes": [
+        "ZA"
+      ],
+      "references": [
+        {
+          "label": "UCT Libraries — Unbanned: the Films South Africans Were Not Allowed to See",
+          "url": "https://lib.uct.ac.za/articles/2025-10-08-unbanned-films-south-africans-were-not-allowed-see"
+        },
+        {
+          "label": "Nicholas J. Cull — Clandestine Documentary Film v. Apartheid (2025)",
+          "url": "https://www.tandfonline.com/doi/abs/10.1080/01439685.2025.2474285"
+        }
+      ]
+    },
+    {
       "id": "love-brewed-1980",
       "title": "1980 / 1981: Love Brewed in the African Pot",
       "dateLabel": "1980 / 1981 — sources differ",
@@ -1154,6 +1204,31 @@
         {
           "label": "Vitus Nanbigne — Cinema in Ghana: History, Ideology and Popular Culture",
           "url": "https://citeseerx.ist.psu.edu/document?doi=f3307aae92aa82daa6402edcf5e6bfc5ba3b4cd6&repid=rep1&type=pdf"
+        }
+      ]
+    },
+    {
+      "id": "nigeria-video-origins-1984-1986",
+      "title": "1984–1986: Nigerian video cinema has more than one origin story",
+      "dateLabel": "1984–1986",
+      "kicker": "NIGERIA · VHS / POPULAR CINEMA",
+      "summary": "A 2024 thesis surveys earlier experiments before Living in Bondage: Yoruba travelling-theatre practitioners moving toward video as celluloid became expensive, Ekun (1986) as one candidate for an early documented video film, and separate mid-1980s experiments in Onitsha, Enugu and Port Harcourt. The thesis explicitly notes that the claim to primacy is disputed.",
+      "reframe": "The first documented video film, the first commercially consequential hit and the first production lineage that later fed the industry are not the same question.",
+      "whyItMatters": "Replacing a single-founder myth with a map of parallel experiments gives regional practitioners and informal production networks their place in the history.",
+      "confidence": "The 2024 thesis presents competing claims and is used as a guide to the debate, not as a final adjudication of the first Nigerian video film.",
+      "evidenceRef": "nigeria-video-origin-debate",
+      "published": true,
+      "countryCodes": [
+        "NG"
+      ],
+      "references": [
+        {
+          "label": "R. Emelonye — Nollywood Cinema: A Disputed Taxonomy (2024 thesis)",
+          "url": "https://research.gold.ac.uk/38040/1/TAP_thesis_EmelonyeR_2024.pdf"
+        },
+        {
+          "label": "Godwin Iretomiwa Simon — video consumption in Nigeria (2023)",
+          "url": "https://journals.sagepub.com/doi/full/10.1177/13678779231197697"
         }
       ]
     },
@@ -1264,6 +1339,27 @@
       ]
     },
     {
+      "id": "mayibuye-afravision-archive-2000",
+      "title": "2000: an archive acquires roughly 5,000 Beta recordings of the struggle",
+      "dateLabel": "2000",
+      "kicker": "SOUTH AFRICA · ARCHIVE / MEMORY",
+      "summary": "The UWC-Robben Island Mayibuye Archive records that it acquired the Afravision Video Archive in 2000: approximately 5,000 Beta recordings documenting mass struggles in the 1980s and the tense prelude to democracy in the early 1990s. Its catalogue notes that inventories and descriptions remain a work in progress.",
+      "reframe": "The scale of an archive does not automatically make it discoverable. Thousands of recordings can survive while descriptions, inventories and access pathways remain unfinished.",
+      "whyItMatters": "A collection’s existence, a catalogue record, a digitised copy, a viewable file and a streaming licence are five different states.",
+      "confidence": "Holdings and approximate quantity are stated by the archive itself; public access to each item must be confirmed individually.",
+      "evidenceRef": "mayibuye-afravision-2000",
+      "published": true,
+      "countryCodes": [
+        "ZA"
+      ],
+      "references": [
+        {
+          "label": "UWC-Robben Island Mayibuye Archive — Film and Video Archive",
+          "url": "https://mayibuyearchives.robben-island.org.za/film-and-video-archive"
+        }
+      ]
+    },
+    {
       "id": "nollywood-name-2002",
       "title": "2002: the name Nollywood enters circulation",
       "dateLabel": "2002",
@@ -1322,6 +1418,27 @@
         {
           "label": "Oxford — UNREST and African film heritage restitution",
           "url": "https://www.qeh.ox.ac.uk/news/unrest-new-agenda-african-film-heritage-restitution"
+        }
+      ]
+    },
+    {
+      "id": "ghana-archive-access-research-2022",
+      "title": "2022: Ghana’s archive debate turns on preservation and public access",
+      "dateLabel": "2022",
+      "kicker": "GHANA · ARCHIVE / RESTITUTION",
+      "summary": "Rebecca Ohene-Asah’s 2022 article in Archives and Records examines Ghana’s historical audiovisual archives and argues that storage and preservation practices can significantly impede public access. The research highlights that debates about restitution and ownership cannot be separated from the conditions under which film materials are stored and made available.",
+      "reframe": "The question is not only whether film heritage is physically in Ghana or abroad. Custody, preservation standards, catalogue descriptions and practical access all shape who can use it.",
+      "whyItMatters": "An archive that cannot be consulted is not fully serving filmmakers, researchers, students or the public.",
+      "confidence": "Based on the peer-reviewed article abstract; specific institutional holdings and current access arrangements require direct confirmation.",
+      "evidenceRef": "ghana-archive-access-ohene-asah",
+      "published": true,
+      "countryCodes": [
+        "GH"
+      ],
+      "references": [
+        {
+          "label": "Ohene-Asah — Audio-visual heritage preservation and Ghana’s historical film archives (2022)",
+          "url": "https://www.tandfonline.com/doi/full/10.1080/23257962.2021.2012441"
         }
       ]
     }
