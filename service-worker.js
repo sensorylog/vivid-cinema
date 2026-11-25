@@ -1,24 +1,20 @@
 // Bump this version whenever the precached app shell changes.
-const CACHE_NAME = "vivid-cinema-shell-v309";
+const CACHE_NAME = "vivid-cinema-shell-v310";
 const HLS_LIBRARY_URL = "https://cdn.jsdelivr.net/npm/hls.js@1.7.3/dist/hls.min.js";
 const APP_SHELL = [
   HLS_LIBRARY_URL,
   "./","./index.html","./home.html","./downloads.html","./my-downloads.html","./for-you.html",
   "./person.html","./discover.html","./collection.html","./title.html","./watch.html",
   "./library.html","./auth.html","./login.html","./verify-email.html","./forgot-password.html",
-  "./account.html","./achievements.html","./watch-rooms.html","./terms.html","./privacy.html","./contact.html",
   "./donate.html","./donation-success.html","./offline.html","./live.html","./news.html",
-  "./community.html","./news-story.html","./moderator.html","./scripts/news-source-registry.js","./search.html",
   "./anime.html","./help.html","./about.html","./accessibility.html","./cookies.html",
   "./404.html","./manifest.json","./robots.txt","./icons/vivid-icon.svg","./assets/images/IMG_6099.jpeg",
   "./scripts/mascot-autoplay.js?v=1","./styles/vivid-foundation.css","./styles/vivid-system.css","./styles/tokens.css?v=1","./styles/typography.css?v=1","./styles/spacing.css?v=1","./styles/motion.css?v=1","./styles/theme.css?v=1","./styles/downloads.css","./styles/vivid-liquid-glass.css",
-  "./styles/vivid-liquid-glass.css?v=lg5","./styles/my-downloads.css?v=offline-cinema-redesign-2","./styles/vivid-media-layout.css?v=1","./styles/vivid-premium-experience.css?v=3","./styles/vivid-home.css","./styles/vivid-donate.css","./styles/vivid-support-v2.css?v=1","./styles/vivid-shell.css","./styles/vivid-watch-rooms.css","./styles/vivid-watch-room-cinema.css","./styles/vivid-watch-room-experience.css",
   "./styles/vivid-cinematic.css","./styles/vivid-title.css","./styles/vivid-person.css","./styles/vivid-watch.css","./styles/vivid-watch.css?v=watch-player-layout-3",
   "./styles/vivid-library.css","./styles/vivid-library.css?v=library-mobile-fix1","./styles/vivid-rounded-cards.css?v=round-1","./styles/vivid-discovery.css","./styles/vivid-for-you.css","./styles/vivid-collection.css",
   "./styles/vivid-auth.css","./styles/vivid-account.css","./styles/vivid-account-cinematic.css?v=20261018-cinematic-1","./styles/vivid-achievements-page.css?v=20261018-cinematic-1","./styles/vivid-pwa.css",
   "./styles/vivid-tflix-hero.css","./styles/vivid-tflix-hero.css?v=hero-trailer-full-bleed-1","./styles/vivid-viewport.css?v=page-gutters-1","./styles/vivid-apple-tv-mobile.css?v=apple-tv-mobile-2","./scripts/tflix-hero.js",
   "./scripts/tflix-hero.js?v=hero-responsive-artwork-1","./styles/vivid-atmosphere.css","./styles/vivid-search-standalone.css","./styles/vivid-desktop.css","./styles/vivid-landing.css",
-  "./styles/vivid-landing-final.css","./styles/vivid-home-breathe.css","./styles/vivid-news.css","./styles/vivid-community.css","./styles/vivid-moderation.css",
   "./styles/vivid-anime.css","./styles/vivid-viewport.css","./styles/vivid-legal.css","./styles/vivid-live.css","./styles/vivid-audit-fixes.css",
   "./styles/vivid-achievements.css?v=20261018-achievements-1","./scripts/achievements.js","./scripts/achievements-page.js?v=20261018-cinematic-1","./scripts/achievement-catalog.js","./scripts/app-shell.js","./scripts/home-optional-resources.js",
   "./scripts/donate.js","./scripts/google-tag.js","./scripts/analytics.js","./scripts/vivid-pulse.js","./scripts/provider-region.js",
@@ -26,10 +22,8 @@ const APP_SHELL = [
   "./scripts/for-you.js","./scripts/vivid-recall-chat.js","./scripts/cloudflare-ai.js","./scripts/local-owner.js","./scripts/firebase.js","./scripts/turnstile-app-check.js?v=20261123-signup-only-1","./scripts/cloudflare-api.js",
   "./scripts/firebase.js?v=20261123-signup-only-1","./scripts/pwa.js","./scripts/atmosphere.js","./scripts/i18n.js","./scripts/routes.js",
   "./scripts/config.js","./scripts/utils.js","./scripts/content.js","./scripts/media.js","./scripts/tmdb.js",
-  "./scripts/watch-rooms.js","./scripts/watch-room-lobby.js","./scripts/watch-room-clubs.js","./scripts/watch-room-playback.js","./scripts/watch-room-player-layout.js","./scripts/watch-room-api.js","./scripts/nav-auth.js","./scripts/downloads.js?v=direct-download-v4","./scripts/my-downloads.js","./scripts/downloads/desktop-offline.js?windows-offline-hls-v3","./scripts/downloads/transcode-player.js?windows-offline-hls-v4","./scripts/downloads/release-matcher.js","./scripts/downloads/download-manager.js","./scripts/downloads/indexeddb-persistence.js","./scripts/downloads/browser-direct-adapter.js","./scripts/downloads/browser-hls-adapter.js","./scripts/downloads/offline-playback.js","./scripts/library.js","./scripts/library-page.js","./scripts/discover.js",
   "./scripts/collection.js","./scripts/person.js","./scripts/recommendations.js","./scripts/release-alerts.js","./scripts/cinema-reminders.js",
   "./scripts/push-notifications.js","./scripts/news.js","./scripts/news.js?v=20261018-feedback-sync-4",
-  "./scripts/newsroom.js","./scripts/news-community-highlights.js","./scripts/news-community.js","./scripts/news-story.js","./scripts/moderation.js",
   "./scripts/editorial-desk.js","./scripts/title.js","./scripts/playback/player-engine.js","./scripts/playback/playback-servers.js","./scripts/playback/server-settings.js",
   "./scripts/watch.js","./scripts/watch.js?v=watch-room-sync-1","./scripts/playback/tflix-secondary-player.js","./scripts/playback/playback-urls.js","./scripts/landing.js","./scripts/account.js",
   "./scripts/account-bootstrap.js","./scripts/account-bootstrap.js?v=20261016-account-bootstrap-1","./scripts/auth.js","./scripts/auth.js?v=20261123-signup-only-1","./scripts/verify-email.js",
@@ -181,11 +175,8 @@ self.addEventListener("fetch",event=>{
  // Always try the network first for auth pages, auth modules and Firebase config.
  const isAuthDocument=/\/(?:login|auth|forgot-password|verify-email|auth-diagnostics|account)\.html$/.test(url.pathname);
  const isAuthRuntime=/\/scripts\/(?:auth|firebase|nav-auth|auth-diagnostics|account|account-bootstrap|cloudflare-ai)\.js$/.test(url.pathname)||/\/init\.json$/.test(url.pathname);
- // Watch Rooms handles account credentials and trusted backend mutations. Never
- // run an old cached copy after an auth/security fix has been deployed.
- const isWatchRoomRuntime=/\/scripts\/(?:watch-rooms|watch-room-lobby|watch-room-clubs|watch-room-playback|watch-room-api)\.js$/.test(url.pathname);
  const isFreshNewsRuntime=/\/scripts\/(?:newsroom|intelligence)\.js$/.test(url.pathname)||/\/styles\/vivid-news\.css$/.test(url.pathname)||/\/data\/(?:news-feed\.json|news-thumbnails\/)/.test(url.pathname);
- if(isAuthDocument||isAuthRuntime||isWatchRoomRuntime){event.respondWith(networkFirst(request));return;}
+ if(isAuthDocument||isAuthRuntime){event.respondWith(networkFirst(request));return;}
  if(isFreshNewsRuntime){event.respondWith(networkFirst(request));return;}
  if(request.mode==="navigate"){event.respondWith(staleWhileRevalidate(request,event,true));return;}
  const isCodeOrStyle=/\.(?:js|css)$/.test(url.pathname);
