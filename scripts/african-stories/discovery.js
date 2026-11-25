@@ -51,6 +51,7 @@ function editorialCards(container, records, kind, emptyMessage) {
     const eyebrow = element("span", "african-card-eyebrow", record.kicker || kind);
     const heading = element("h3", "", record.title);
     const summary = element("p", "", record.summary);
+    if (record.dateLabel) card.append(element("small", "african-title-meta", record.dateLabel));
     const routeKey = ({ Collection: "collection", People: "person", Timeline: "timeline", Journey: "journey" })[kind] || "collection";
     const link = element("a", "african-card-link", "Explore " + kind.toLowerCase());
     link.href = "african-stories.html?" + routeKey + "=" + encodeURIComponent(record.id);
