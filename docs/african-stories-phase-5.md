@@ -13,7 +13,7 @@ The destination is a screen library and story atlas, not a social feed or a gene
 
 ## Researched editorial starter set
 
-The current starter set contains eighteen collections, fifteen people/profiles, twenty-nine timeline milestones and eight documentary journeys. It deliberately begins with deeper coverage of Ghana, Nigeria, Senegal, Mali, Mauritania, Egypt, Kenya, Angola, Eswatini and South Africa rather than pretending every country has equally researched coverage.
+The current starter set contains eighteen collections, fifteen people/profiles, twenty-nine timeline milestones, eight documentary journeys and five reviewed discovery-only title records. It deliberately begins with deeper coverage of Ghana, Nigeria, Senegal, Mali, Mauritania, Egypt, Kenya, Angola, Eswatini and South Africa rather than pretending every country has equally researched coverage.
 
 The editorial layer prioritises questions that are often flattened in popular summaries:
 
@@ -44,6 +44,8 @@ The current editorial set adds five connected research strands:
 - **Ghanaian audiovisual preservation:** Rebecca Ohene-Asah’s peer-reviewed research connects storage and preservation practices to the public’s ability to access historical film materials.
 
 Country metadata now connects collections, people, milestones and journeys to country hubs. Search covers editorial titles, summaries, themes and evidence framing; country selection filters the editorial sections as well as the title catalogue.
+
+The five title records are **Sambizanga**, **Yeelen**, **Cairo Station**, **Last Grave at Dimbaza** and **Living in Bondage**. Each is published as `discover_archive_record` with provenance and an editorial review timestamp. None is presented as a Vivid stream or as an authorized playback source. Title pages explain the access limitation rather than pretending that a catalogue entry grants viewing rights.
 
 ## Phase 5 completion boundary
 
