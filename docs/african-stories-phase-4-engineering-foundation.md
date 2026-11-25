@@ -18,8 +18,9 @@
 - Provider registration does not prove an agreement exists. The agreement reference and security-review flag are operational attestations that must be backed by actual signed evidence and review before use.
 
 ### 3. Playback session broker and isolated player
-- Added `createAfricanPlaybackSession`. It requires a signed-in account, exact public work/version match, approved private grant, active provider, exact URL origin, rights term and territory match.
-- The broker accepts only provider-issued sessions with a verified expiry of no more than five minutes and records the session privately. No provider adapter is currently implemented, so no session can be issued.
+- Added `createAfricanPlaybackSession`. The initial broker requires a signed-in account, exact public work/version match, approved private grant, active provider, exact URL origin, rights term and territory match.
+- Provider discovery has now identified multiple adapter classes that the initial foundation did not model: official platform embeds (YouTube, Vimeo, PeerTube), explicitly public archive files (eligible Internet Archive files), and contracted partner sessions (signed HLS/DASH or provider-issued embeds).
+- The current broker only supports the third class and has no session adapter configured. The next implementation increment must add provider-specific handling for official embeds and public files rather than requiring every provider to mint a Vivid-specific short-lived token.
 - Territory verification is deliberately fail-closed. No trusted geo header is configured by this code. Playback stays disabled until infrastructure supplies a trusted header through a proxy that strips/overwrites any client-supplied value. Do not set `AFRICAN_STORIES_TRUSTED_COUNTRY_HEADER` until that ingress behavior has been verified.
 - Added a separate `african-stories-watch.html` player route. It never searches alternate providers or guesses URLs. It creates an iframe only after a provider-specific server adapter returns an authorized session and the browser confirms HTTPS and exact origin equality; the browser closes the frame when the returned expiry is reached.
 - Existing CSP `frame-src` must be updated with an exact provider origin only after the provider and embedding behavior have passed legal and security review. No broad wildcard has been added.
@@ -53,14 +54,16 @@ Vivid playback entitlement is computed from the private title/version rights gra
 3. The browser never reads private grants, contracts, provider registry or sessions.
 4. The public projection contains no provider URL, contract, fee, rights note or secret.
 5. No provider is preconfigured, no title has a seeded grant, no rights are claimed secured and no Vivid playback is enabled by default.
-6. The provider-session adapter registry is intentionally empty. No generic static-iframe adapter exists; each provider must implement a server-side session issuer before playback can open. An approved rights grant alone does not enable playback. CSP and provider security review remain explicit gates.
+6. The partner-session adapter registry is intentionally empty. No generic static-iframe adapter exists. Official public embeds and public archive files require their own source-specific validation and player adapters; contracted protected streams require a provider-specific server-side session issuer. An approved rights grant alone does not enable licensed Vivid playback. CSP and provider security review remain explicit gates.
 7. Admin claims are out-of-band privileged operations. The role assignment utility must be run only by an authorized Firebase administrator.
 
 ## Not yet complete
 
 - Production trusted geolocation/territory integration and spoof-resistant ingress configuration.
 - Actual provider contracts, title/version chain-of-title and written playback permissions.
-- Exact provider adapter-specific URL construction, authentication, token refresh and provider QA where required.
+- Provider-specific adapter implementations for official embeds (YouTube/Vimeo/PeerTube), public archive files (Internet Archive), and contracted partner sessions; URL construction, authentication, token refresh and QA where required.
+- Live validation of the FilmFlux public discovery endpoint and any usage/attribution terms before enabling it as a catalogue connector.
+- Technical/partner diligence for Wazi Movies, NG-Movies, AfriDocs and CINAF; no API or syndication rights are assumed.
 - CSP updates for each individually approved provider origin.
 - Full editorial CMS UX, record search/review queue, person/institution/collection/timeline workflows and asset permissions.
 - Playback revocation/kill-switch UI, licence-expiry alerting, provider health monitoring and takedown operations.
@@ -76,7 +79,7 @@ The repository test suite and GitHub Actions are the verification source of trut
 1. Run and fix the Functions syntax and unit tests.
 2. Run Firestore emulator rules tests and verify every new private namespace is inaccessible to browser clients.
 3. Complete the catalogue/admin editorial experience and source/asset provenance handling.
-4. Add provider-specific adapter support only after a provider contract and technical specification are available.
+4. Implement official YouTube embeds first, then FilmFlux discovery validation, PeerTube and Internet Archive source adapters; add Vimeo for creator-authorized material. Keep protected partner CDN integrations behind provider-specific contracts and session adapters.
 5. Integrate a trusted territory resolver and exact CSP origin only after ingress spoofing tests.
 6. Add session revocation, expiry jobs, audit review, kill switches and monitoring.
 7. Run all existing playback, downloads, account, PWA, Android and desktop regression suites.
