@@ -200,14 +200,14 @@ Internet Archive example:
   "provider": "archive",
   "archiveIdentifier": "example-moving-image-item",
   "archiveFile": "feature.mp4",
-  "rightsBasis": "written_permission",
+  "rightsBasis": "public_domain",
   "label": "Authorized archive access copy",
   "enabled": true,
   "evidenceRef": "archive-permission-record-001"
 }
 ```
 
-Archive source records require one of `public_domain`, `cc0`, `cc_by`, `cc_by_sa` or `written_permission`, plus a non-empty editorial evidence reference. The player still verifies the exact public item/file metadata at playback time. The evidence reference is an editorial record pointer, not an automated legal opinion.
+Archive source records require `public_domain`, `cc0`, `cc_by` or `cc_by_sa`, plus a non-empty editorial evidence reference. CC BY/BY-SA sources must also publish an attribution credit and a visible canonical license link. `written_permission` is not enabled through the public-file path because the current archive adapter cannot enforce territory and term windows; those titles must wait for the protected rights-entitlement workflow. The player verifies the exact public item/file metadata at playback time. The evidence reference is an editorial record pointer, not an automated legal opinion.
 
 ### Player route
 
