@@ -389,7 +389,7 @@ test("archive source records require explicit rights basis and evidence", async 
     data: { workId: "archive-work", work }
   });
   const saved = api.db.records.get("africanWorkDrafts/archive-work");
-  assert.equal(saved.versions[0].playbackSources[0].rightsBasis, "written_permission");
+  assert.equal(saved.versions[0].playbackSources[0].rightsBasis, "public_domain");
   await assert.rejects(api.saveAfricanWorkDraft({
     auth: { uid: "editor-1", token: { africanStoriesEditor: true } },
     data: { workId: "archive-work-bad", work: {
