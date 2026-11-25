@@ -95,3 +95,19 @@ test("disabled and malformed catalogue sources cannot be played", () => {
   assert.throws(() => validateAfricanPlaybackSource({ ...base, provider: "unknown" }), /Unsupported/);
   assert.equal(getOfficialSourceFallback({ ...base, provider: "youtube", videoId: "M7lc1UVf-VE" }), "https://www.youtube.com/watch?v=M7lc1UVf-VE");
 });
+
+test("Dailymotion requires a creator Player ID and uses the current official embed endpoint", () => {
+  const result = buildOfficialEmbed({
+    ...base, provider: "dailymotion", videoId: "x84sh87", playerId: "x8lr5"
+  });
+  const url = new URL(result.url);
+  assert.equal(url.origin, "https://geo.dailymotion.com");
+  assert.equal(url.pathname, "/player/x8lr5.html");
+  assert.equal(url.searchParams.get("video"), "x84sh87");
+  assert.equal(getOfficialSourceFallback({
+    ...base, provider: "dailymotion", videoId: "x84sh87", playerId: "x8lr5"
+  }), "https://www.dailymotion.com/video/x84sh87");
+  assert.throws(() => buildOfficialEmbed({
+    ...base, provider: "dailymotion", videoId: "x84sh87", playerId: ""
+  }), /creator-provided Player ID/);
+});
