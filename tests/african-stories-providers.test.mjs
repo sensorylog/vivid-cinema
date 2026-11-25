@@ -55,7 +55,7 @@ test("Internet Archive resolves only the exact public supported file", async () 
   assert.match(requested, /archive\.org\/metadata/);
   assert.equal(resolved.url, "https://archive.org/download/ghana-film-archive-001/film.mp4");
   assert.equal(resolved.mimeType, "video/mp4");
-  assert.equal(resolved.rightsBasis, "written_permission");
+  assert.equal(resolved.rightsBasis, "public_domain");
 });
 
 test("Internet Archive rejects private files and path traversal", async () => {
