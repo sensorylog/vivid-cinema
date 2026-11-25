@@ -281,6 +281,7 @@ async function playArchiveSource(source, generation) {
   video.controls = true;
   video.playsInline = true;
   video.preload = "metadata";
+  let hlsManaged = false;
   if (resolved.mimeType === "application/vnd.apple.mpegurl") {
     if (video.canPlayType(resolved.mimeType)) {
       video.src = resolved.url;
@@ -289,16 +290,17 @@ async function playArchiveSource(source, generation) {
       if (generation !== sourceGeneration) return;
       if (!window.Hls?.isSupported()) throw new Error("This browser cannot play the archive HLS stream.");
       activeHls = new window.Hls({ enableWorker: true, lowLatencyMode: false });
-      activeHls.loadSource(resolved.url);
       activeHls.attachMedia(video);
+      activeHls.loadSource(resolved.url);
       activeHls.on(window.Hls.Events.ERROR, (_event, data) => {
         if (data?.fatal) setState("Archive stream interrupted", "The archive stream could not continue. Open the original item to check availability.");
       });
+      hlsManaged = true;
     }
   } else {
     video.src = resolved.url;
   }
-  video.load();
+  if (!hlsManaged) video.load();
   sourceLabel.textContent = "INTERNET ARCHIVE · PUBLIC FILE";
   setState("", "", false);
   setFallback(resolved.itemUrl, "View archive item and rights information");
