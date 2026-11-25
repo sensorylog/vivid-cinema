@@ -58,8 +58,8 @@ test("partner pipeline and launch gates never imply deals or launch readiness", 
 test("public intake and operational plan include rights and staged launch boundaries", async () => {
   const html = await read("../african-stories-submit.html");
   const docs = await read("../docs/african-stories-phase-6-7.md");
-  assert.match(html, /rightsDeclaration/);
-  assert.match(html, /privacyConsent/);
+  assert.match(html, /african-development-gate/);
+  assert.doesNotMatch(html, /african-submission-form|rightsDeclaration|privacyConsent/);
   assert.match(docs, /no ingest or playback before signed authority/);
   assert.match(docs, /Stage 3 — measured expansion/);
 });
