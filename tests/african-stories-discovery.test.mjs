@@ -46,6 +46,25 @@ test("title records require provenance, edition identity and editorial approval"
   assert.equal(validAfricanTitleRecord({ ...record, editorialReview: { status: "pending" } }), false);
 });
 
+test("published Phase 5 editorial records are sourced and internally connected", () => {
+  for (const key of ["collections", "people", "timelines", "journeys"]) {
+    assert.ok(experience[key].length > 0, key + " should contain researched records");
+    for (const record of experience[key]) {
+      assert.equal(validEditorialRecord(record), true, key + ": " + record.id);
+      assert.ok(record.references.every(reference => reference.url.startsWith("https://")));
+    }
+  }
+  const ids = new Set(experience.timelines.map(record => record.id));
+  for (const journey of experience.journeys) {
+    assert.ok((journey.timelineIds || []).every(id => ids.has(id)), journey.id + " timeline links");
+  }
+  const people = new Set(experience.people.map(record => record.id));
+  for (const collection of experience.collections) {
+    assert.ok((collection.personIds || []).every(id => people.has(id)), collection.id + " person links");
+  }
+  assert.ok(experience.timelines.some(item => item.id === "love-brewed-1980" && item.dateLabel.includes("1981")));
+});
+
 test("access labels keep discovery separate from viewing rights", () => {
   assert.equal(accessLabel("discover_archive_record"), "Discover / archive record");
   assert.equal(accessLabel("access_pending"), "Access pending");
