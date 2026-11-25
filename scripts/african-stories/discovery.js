@@ -49,8 +49,9 @@ function editorialCards(container, records, kind, emptyMessage) {
     const eyebrow = element("span", "african-card-eyebrow", record.kicker || kind);
     const heading = element("h3", "", record.title);
     const summary = element("p", "", record.summary);
+    const routeKey = ({ Collection: "collection", People: "person", Timeline: "timeline", Journey: "journey" })[kind] || "collection";
     const link = element("a", "african-card-link", "Explore " + kind.toLowerCase());
-    link.href = "african-stories.html?" + kind.toLowerCase() + "=" + encodeURIComponent(record.id);
+    link.href = "african-stories.html?" + routeKey + "=" + encodeURIComponent(record.id);
     card.append(eyebrow, heading, summary, link);
     container.append(card);
   }
@@ -102,6 +103,52 @@ function renderCountryHub() {
   ui.countryDescription.textContent = "Explore published cinema, documentary, filmmakers and historical records connected to " + country.name + ". " + (region?.name || "");
 }
 
+
+function renderEditorialDetail() {
+  const detailTypes = [
+    ["collection", "collections", "Collection"],
+    ["person", "people", "Person"],
+    ["timeline", "timelines", "Timeline"],
+    ["journey", "journeys", "Documentary journey"]
+  ];
+  const selected = detailTypes.find(([param]) => params.has(param));
+  if (!selected) return;
+  const [param, key, label] = selected;
+  const id = params.get(param);
+  const record = (experience[key] || []).find(item => item.id === id && validEditorialRecord(item));
+  const panel = document.getElementById("african-editorial-detail");
+  panel.hidden = false;
+  document.getElementById("african-editorial-kind").textContent = label.toUpperCase();
+  document.getElementById("african-editorial-title").textContent = record?.title || label + " not published";
+  document.getElementById("african-editorial-summary").textContent = record?.summary || "This editorial record is not published yet. Profiles, historical entries and curated journeys appear only after source review.";
+  const references = document.getElementById("african-editorial-references");
+  references.replaceChildren();
+  for (const reference of (Array.isArray(record?.references) ? record.references : [])) {
+    try {
+      const url = new URL(reference.url);
+      if (url.protocol !== "https:") continue;
+      const link = element("a", "african-card-link", reference.label || "Open source reference");
+      link.href = url.toString();
+      link.target = "_blank";
+      link.rel = "noopener noreferrer";
+      references.append(link);
+    } catch {}
+  }
+  const related = document.getElementById("african-editorial-related");
+  related.replaceChildren();
+  const titleIds = new Set(Array.isArray(record?.titleIds) ? record.titleIds : []);
+  const relatedTitles = (catalogue.titles || []).filter(title => titleIds.has(title.id) && title.published === true);
+  for (const title of relatedTitles) {
+    const card = element("article", "african-content-card");
+    card.append(element("span", "african-card-eyebrow", accessLabel(title.accessState)));
+    card.append(element("h3", "", title.title));
+    const link = element("a", "african-card-link", "View title");
+    link.href = "african-stories-watch.html?id=" + encodeURIComponent(title.id);
+    card.append(link);
+    related.append(card);
+  }
+}
+
 function renderTitles() {
   const titles = filterAfricanTitles(catalogue.titles || [], {
     country: selectedCountry,
@@ -145,6 +192,7 @@ async function load() {
         catalogue.schemaVersion !== 1 || !Array.isArray(catalogue.titles)) throw new Error("The African Stories data format is not supported.");
     renderRegions();
     renderCountryHub();
+    renderEditorialDetail();
     editorialCards(ui.collections, experience.collections, "Collection", "Curated collections are being prepared with sourced title records.");
     editorialCards(ui.people, experience.people, "People", "Filmmaker and cultural-person profiles will appear when biographies and filmographies are sourced.");
     editorialCards(ui.timelines, experience.timelines, "Timeline", "Historical timelines are being researched. Dates and events will be published with references.");
