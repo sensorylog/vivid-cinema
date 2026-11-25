@@ -57,14 +57,23 @@ Vivid playback entitlement is computed from the private title/version rights gra
 6. The partner-session adapter registry is intentionally empty. No generic static-iframe adapter exists. Official public embeds and public archive files require their own source-specific validation and player adapters; contracted protected streams require a provider-specific server-side session issuer. An approved rights grant alone does not enable licensed Vivid playback. CSP and provider security review remain explicit gates.
 7. Admin claims are out-of-band privileged operations. The role assignment utility must be run only by an authorized Firebase administrator.
 
+
+### 4. Public provider runtime (implemented on this PR)
+- `scripts/african-stories/providers.js` contains strict source validation and provider-specific URL/file resolution for YouTube, Vimeo, the reviewed PeerTube origins and Internet Archive.
+- `scripts/african-stories/player.js` loads an exact published work/version from the public catalogue, renders only editorially enabled sources, switches between official platform embeds and the HTML5 archive player, and preserves original-platform/archive fallbacks.
+- FilmFlux trending discovery is available at `african-stories-watch.html?provider=filmflux`. The feed is credited and its YouTube IDs are played through YouTube's own player.
+- The player includes a curated external directory for Wazi Movies, NG-Movies, AfriDocs and CINAF. These are official outbound destinations, not falsely represented as integrated APIs or Vivid-hosted streams.
+- Version source records are validated by `saveAfricanWorkDraft` and published only with the exact edition. Official embeds require `watch_officially` plus an evidence reference. Archive playback requires an explicit rights basis and evidence reference; the player verifies the exact public file at runtime.
+- Provider adapter unit tests are included in `tests/african-stories-providers.test.mjs`; callable validation tests cover published official and archive source records. Test results are pending until CI runs for the final head.
+
 ## Not yet complete
 
 - Production trusted geolocation/territory integration and spoof-resistant ingress configuration.
 - Actual provider contracts, title/version chain-of-title and written playback permissions.
-- Provider-specific adapter implementations for official embeds (YouTube/Vimeo/PeerTube), public archive files (Internet Archive), and contracted partner sessions; URL construction, authentication, token refresh and QA where required.
-- Live validation of the FilmFlux public discovery endpoint and any usage/attribution terms before enabling it as a catalogue connector.
+- Protected partner-session adapter implementations and provider-specific authentication/token refresh for contracted CDNs. Public-source adapters for YouTube, Vimeo, reviewed PeerTube instances and eligible Internet Archive files are implemented in `scripts/african-stories/providers.js` and the dedicated player. FilmFlux's documented public trending feed is implemented as a discovery connector.
+- Production monitoring and terms/attribution review for the FilmFlux public discovery endpoint. The client connector fails gracefully; no full catalogue bulk feed is assumed.
 - Technical/partner diligence for Wazi Movies, NG-Movies, AfriDocs and CINAF; no API or syndication rights are assumed.
-- CSP updates for each individually approved provider origin.
+- CSP and code allowlist updates for each additional PeerTube instance or partner embed origin. Current PeerTube allowlist is limited to `framatube.org` and `peer.tube`; Vimeo and FilmFlux/Internet Archive origins are added.
 - Full editorial CMS UX, record search/review queue, person/institution/collection/timeline workflows and asset permissions.
 - Playback revocation/kill-switch UI, licence-expiry alerting, provider health monitoring and takedown operations.
 - Firestore emulator, unit, syntax, static build, Android and desktop test results for this commit.
@@ -79,7 +88,7 @@ The repository test suite and GitHub Actions are the verification source of trut
 1. Run and fix the Functions syntax and unit tests.
 2. Run Firestore emulator rules tests and verify every new private namespace is inaccessible to browser clients.
 3. Complete the catalogue/admin editorial experience and source/asset provenance handling.
-4. Implement official YouTube embeds first, then FilmFlux discovery validation, PeerTube and Internet Archive source adapters; add Vimeo for creator-authorized material. Keep protected partner CDN integrations behind provider-specific contracts and session adapters.
+4. Continue production QA for the implemented YouTube/Vimeo/PeerTube/Internet Archive adapters and FilmFlux connector; add new PeerTube origins only after review. Keep protected partner CDN integrations behind provider-specific contracts and session adapters.
 5. Integrate a trusted territory resolver and exact CSP origin only after ingress spoofing tests.
 6. Add session revocation, expiry jobs, audit review, kill switches and monitoring.
 7. Run all existing playback, downloads, account, PWA, Android and desktop regression suites.
