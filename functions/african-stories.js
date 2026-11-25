@@ -148,7 +148,10 @@ function safePublicProjection(draft, now) {
     synopsis: draft.synopsis,
     subjects: draft.subjects,
     credits: draft.credits,
-    versions: draft.versions,
+    versions: draft.versions.map(version => ({
+      ...version,
+      playbackSources: (version.playbackSources || []).map(({ evidenceRef, ...source }) => source)
+    })),
     sourceCitations: draft.sourceCitations,
     accessState: draft.accessState,
     officialExternalUrl: draft.officialExternalUrl,
