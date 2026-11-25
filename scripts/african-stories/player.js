@@ -10,8 +10,11 @@ const params = new URLSearchParams(window.location.search);
 const workId = params.get("work");
 const versionId = params.get("version");
 const functions = getFunctions(app, "us-central1");
+let expiryTimer = null;
 
 function showState(heading, message) {
+  if (expiryTimer) window.clearTimeout(expiryTimer);
+  expiryTimer = null;
   frame.hidden = true;
   frame.removeAttribute("src");
   state.hidden = false;
@@ -49,6 +52,10 @@ async function requestPlayback(user) {
     await ensureAppCheck();
     const createSession = httpsCallable(functions, "createAfricanPlaybackSession");
     const result = await createSession({ workId, versionId });
+    const expiresAt = Number(result.data?.expiresAt);
+    if (!Number.isFinite(expiresAt) || expiresAt <= Date.now() || expiresAt > Date.now() + 5 * 60 * 1000) {
+      throw new Error("The server did not issue a valid short-lived playback session.");
+    }
     const playback = result.data?.playback;
     if (playback?.type !== "iframe" || typeof playback.url !== "string" || typeof playback.origin !== "string") {
       throw new Error("The playback service returned an invalid adapter response.");
@@ -63,6 +70,9 @@ async function requestPlayback(user) {
     frame.src = url.toString();
     frame.title = "Authorized African Stories edition";
     frame.hidden = false;
+    expiryTimer = window.setTimeout(() => {
+      showState("Playback session expired", "This provider-issued session has expired. Request a fresh authorization before playback can continue.");
+    }, Math.max(0, expiresAt - Date.now()));
   } catch (error) {
     console.warn("African Stories playback request was denied:", error?.code || error?.message);
     showState("Playback unavailable", friendlyError(error));
@@ -70,3 +80,8 @@ async function requestPlayback(user) {
 }
 
 onAuthStateChanged(auth, user => { requestPlayback(user); });
+
+window.addEventListener("pagehide", () => {
+  if (expiryTimer) window.clearTimeout(expiryTimer);
+  frame.removeAttribute("src");
+}, { once: true });
