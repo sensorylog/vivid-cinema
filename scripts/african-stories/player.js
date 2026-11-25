@@ -329,7 +329,7 @@ async function playSource(source) {
     if (generation !== sourceGeneration) return;
     console.warn("African Stories provider initialization failed:", itemProvider(source), error?.message);
     if (!frame.hidden) {
-      setState("Provider controls unavailable", "The official platform player may still work using its built-in controls. Use the original-source link if it does not load.");
+      sourceLabel.textContent = (sourceLabel.textContent || "OFFICIAL PLAYER") + " · NATIVE CONTROLS";
     } else {
       clearPlayback();
       setState("Source unavailable", error?.message || "This source could not be opened.");
