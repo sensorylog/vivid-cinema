@@ -4,6 +4,7 @@ import { getFirestore, Timestamp } from "firebase-admin/firestore";
 import { onSchedule } from "firebase-functions/v2/scheduler";
 import { onCall, HttpsError } from "firebase-functions/v2/https";
 import { logger } from "firebase-functions";
+import { createAfricanStoriesFunctions } from "./african-stories.js";
 import Parser from "rss-parser";
 
 initializeApp();
@@ -248,3 +249,12 @@ export const getCommunityPollResults = onCall({ region: "us-central1", maxInstan
 // Watch Rooms and Cinema Clubs — trusted lifecycle and invitation operations.
 // Client SDK writes to these collections are denied by firestore.rules.
 // -----------------------------------------------------------------------------
+
+
+// African Stories: separate catalogue, rights and playback authority boundary.
+const africanStoriesFunctions = createAfricanStoriesFunctions({ db, onCall, HttpsError, Timestamp });
+export const saveAfricanWorkDraft = africanStoriesFunctions.saveAfricanWorkDraft;
+export const publishAfricanWork = africanStoriesFunctions.publishAfricanWork;
+export const registerAfricanProvider = africanStoriesFunctions.registerAfricanProvider;
+export const setAfricanRightsDecision = africanStoriesFunctions.setAfricanRightsDecision;
+export const createAfricanPlaybackSession = africanStoriesFunctions.createAfricanPlaybackSession;
