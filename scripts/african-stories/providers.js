@@ -64,7 +64,7 @@ export function buildOfficialEmbed(source, { origin = globalThis.location?.origi
     return { provider: item.provider, url: url.toString(), origin: url.origin, title: cleanText(item.label) || "Official Dailymotion player" };
   }
   if (item.provider === "rumble") {
-    if (!/^[A-Za-z0-9]+(?:\\.[A-Za-z0-9]+)?$/.test(item.embedId || "")) {
+    if (!/^[A-Za-z0-9]+(?:\.[A-Za-z0-9]+)?$/.test(item.embedId || "")) {
       throw new TypeError("Rumble requires the exact embed ID copied from its official embed code.");
     }
     const url = new URL("/embed/" + item.embedId + "/", "https://rumble.com");
@@ -159,7 +159,7 @@ export function getOfficialSourceFallback(source) {
       return url.toString();
     }
     if (item.provider === "dailymotion" && /^[A-Za-z0-9]{6,16}$/.test(item.videoId || "")) return "https://www.dailymotion.com/video/" + item.videoId;
-    if (item.provider === "rumble" && /^[A-Za-z0-9]+(?:\\.[A-Za-z0-9]+)?$/.test(item.embedId || "")) return "https://rumble.com/embed/" + item.embedId + "/";
+    if (item.provider === "rumble" && /^[A-Za-z0-9]+(?:\.[A-Za-z0-9]+)?$/.test(item.embedId || "")) return "https://rumble.com/embed/" + item.embedId + "/";
     if (item.provider === "peertube") return buildOfficialEmbed(item).url.replace("/videos/embed/", "/videos/watch/");
     if (item.provider === "archive" && ARCHIVE_ID.test(item.archiveIdentifier || "")) return "https://archive.org/details/" + encodeURIComponent(item.archiveIdentifier);
   } catch {}
