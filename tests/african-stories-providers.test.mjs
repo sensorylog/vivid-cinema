@@ -44,7 +44,7 @@ test("Internet Archive resolves only the exact public supported file", async () 
   let requested = "";
   const resolved = await resolveInternetArchiveFile({
     ...base, provider: "archive", archiveIdentifier: "ghana-film-archive-001",
-    archiveFile: "film.mp4", rightsBasis: "written_permission"
+    archiveFile: "film.mp4", rightsBasis: "public_domain"
   }, async url => {
     requested = url;
     return { ok: true, json: async () => ({ files: [
