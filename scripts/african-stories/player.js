@@ -27,6 +27,12 @@ const functions = getFunctions(app, "us-central1");
 let activeHls = null;
 let activeSource = null;
 
+video.addEventListener("error", () => {
+  if (!video.hidden) {
+    setState("Media playback failed", "This file could not be decoded or delivered by the browser. Use the archive item link to inspect other available formats.");
+  }
+});
+
 function setState(heading, message, visible = true) {
   state.hidden = !visible;
   state.replaceChildren();
