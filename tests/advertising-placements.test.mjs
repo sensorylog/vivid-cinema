@@ -67,7 +67,7 @@ test("browsing pages use the refreshed advertising assets", async () => {
   for (const page of ["home.html", "discover.html", "collection.html", "anime.html", "for-you.html"]) {
     const html = await readFile(path.join(root, page), "utf8");
     assert.match(html, /styles\/vivid-advertising\.css\?v=2/);
-    assert.match(html, /scripts\/advertising\.js\?v=2/);
+    assert.match(html, /scripts\/advertising\.js\?v=3/);
   }
 });
 
