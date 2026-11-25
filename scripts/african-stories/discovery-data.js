@@ -9,10 +9,11 @@ export function filterAfricanCountries(countries, { region = "", query = "" } = 
   });
 }
 
-export function filterAfricanTitles(titles, { country = "", query = "", format = "", language = "" } = {}) {
+export function filterAfricanTitles(titles, { country = "", query = "", format = "", language = "", region = "", countries = [] } = {}) {
   const normalized = String(query).trim().toLocaleLowerCase();
   return (Array.isArray(titles) ? titles : []).filter(title => {
     if (country && title.countryCode !== country) return false;
+    if (region && !(Array.isArray(countries) && countries.some(item => item.code === title.countryCode && item.regionId === region))) return false;
     if (format && title.format !== format) return false;
     if (language && !(Array.isArray(title.languages) && title.languages.includes(language))) return false;
     if (!normalized) return true;
