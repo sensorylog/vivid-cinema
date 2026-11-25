@@ -207,6 +207,10 @@ function isCollectionType(type) {
   return currentPage() === "collection" && new URLSearchParams(location.search).get("collection") === type;
 }
 
+function africanStoriesNavLink(active = false) {
+  return '<a class="vivid-african-stories-link" href="african-stories.html"' + (active ? ' aria-current="page"' : '') + '><i class="bi bi-globe2" aria-hidden="true"></i><span>African Stories</span><small class="vivid-nav-development">In Development</small></a>';
+}
+
 function navLink(href, icon, label, active = false) {
   return '<a href="' + href + '"' + (active ? ' aria-current="page"' : '') + '><i class="bi ' + icon + '" aria-hidden="true"></i><span>' + label + '</span></a>';
 }
@@ -218,7 +222,7 @@ function buildPrimaryLinks(page) {
     navLink("collection.html?collection=tv", "bi-tv", "Series", isCollectionType("tv")),
     navLink("anime.html", "bi-stars", "Anime", page === "anime"),
     navLink("live.html", "bi-broadcast-pin", "Live", page === "live"),
-    navLink("african-stories.html", "bi-globe2", "African Stories", page === "african-stories"),
+    africanStoriesNavLink(page === "african-stories"),
     navLink("library.html", "bi-bookmark-fill", "Library", page === "library"),
     '<a id="auth-link" class="vivid-nav-profile" href="account.html" aria-label="Open account"' + (page === "account" ? ' aria-current="page"' : '') + '><i class="bi bi-person-circle" aria-hidden="true"></i><span>Account</span></a>'
   ].join("");
@@ -293,7 +297,7 @@ function syncMoreNavigation(nav, page) {
     navLink("for-you.html", "bi-stars", "For You", page === "for-you"),
     navLink("anime.html", "bi-stars", "Anime", page === "anime"),
     navLink("library.html", "bi-bookmark-fill", "Library", page === "library" || page === "downloads-library"),
-    navLink("african-stories.html", "bi-globe2", "African Stories", page === "african-stories"),
+    africanStoriesNavLink(page === "african-stories"),
     navLink("account.html", "bi-person-circle", "Account", page === "account"),
     navLink("news.html", "bi-newspaper", "News", page === "news"),
     navLink("search.html", "bi-search", "Search", page === "search"),
