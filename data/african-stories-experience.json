@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "catalogueVersion": "2026-11-25.1",
+  "catalogueVersion": "2026-11-25.2",
   "regions": [
     {
       "id": "north",
@@ -300,8 +300,468 @@
       "regionId": "south"
     }
   ],
-  "collections": [],
-  "people": [],
-  "timelines": [],
-  "journeys": []
+  "collections": [
+    {
+      "id": "ghana-cinema-through-the-decades",
+      "title": "Ghana: cameras, independence and reinvention",
+      "kicker": "GHANA · CINEMA HISTORY",
+      "summary": "Trace Ghanaian screen culture from colonial-era information films and the Gold Coast Film Unit through the post-independence Ghana Film Industry Corporation, independent features and the rise of video filmmaking. This collection foregrounds who controlled the camera, what stories were told and how audiences encountered them.",
+      "published": true,
+      "evidenceRef": "ghana-cinema-history-motcca-ncc",
+      "references": [
+        {
+          "label": "Ghana Ministry of Tourism, Culture & Creative Arts — Film history",
+          "url": "https://www.motcca.gov.gh/film/"
+        },
+        {
+          "label": "National Commission on Culture — The Development of Ghanaian Film and Its Cultural Identity",
+          "url": "https://ghanaculture.gov.gh/the-development-of-ghanaian-film-and-its-cultural-identity/"
+        },
+        {
+          "label": "African Film Festival — Ghanaian Film Industry: Past and Present",
+          "url": "https://africanfilmny.org/articles/ghanaian-film-industry-past-and-present/"
+        }
+      ],
+      "timelineIds": [
+        "ghana-film-unit-1948",
+        "ghana-gfic-1964",
+        "love-brewed-1980",
+        "ghana-film-act-2016"
+      ],
+      "personIds": [
+        "kwaw-ansah"
+      ]
+    },
+    {
+      "id": "pan-african-cinema-and-solidarity",
+      "title": "Pan-African cinema: images, memory and self-determination",
+      "kicker": "PAN-AFRICAN · FILM MOVEMENTS",
+      "summary": "Explore filmmakers and institutions that used cinema to question colonial power, represent African social realities and build networks across borders. The route connects Ousmane Sembène, Sarah Maldoror, FESPACO and the wider project of African film cooperation.",
+      "published": true,
+      "evidenceRef": "unesco-african-cinema-timeline-african-film-festival",
+      "references": [
+        {
+          "label": "UNESCO — Key dates in African cinema",
+          "url": "https://www.unesco.org/creativity/sites/default/files/medias/fichiers/2023/01/379165eng.pdf"
+        },
+        {
+          "label": "Oxford Research Encyclopedia — African Films and FESPACO",
+          "url": "https://academic.oup.com/edited-volume/61663/chapter-abstract/553408769"
+        },
+        {
+          "label": "African Film Festival — Ousmane Sembène",
+          "url": "https://africanfilmny.org/directors/ousmane-sembene/"
+        },
+        {
+          "label": "African Film Festival — Sarah Maldoror",
+          "url": "https://africanfilmny.org/directors/sarah-maldoror/"
+        }
+      ],
+      "personIds": [
+        "ousmane-sembene",
+        "sarah-maldoror"
+      ],
+      "timelineIds": [
+        "fespaco-founded-1969",
+        "borom-sarret-1963",
+        "ceddo-1976"
+      ]
+    },
+    {
+      "id": "west-african-cinema-language-and-memory",
+      "title": "West African cinema: language, memory and change",
+      "kicker": "WEST AFRICA · FILMMAKERS",
+      "summary": "A filmmaker-led introduction to Senegalese and Malian cinema, including stories shaped by local languages, social change, work, tradition and political power. Follow the distinct creative paths of Ousmane Sembène and Souleymane Cissé without treating the region as a single cinematic voice.",
+      "published": true,
+      "evidenceRef": "festival-cannes-souleymane-cisse-african-film-festival-sembene",
+      "references": [
+        {
+          "label": "Festival de Cannes — Souleymane Cissé",
+          "url": "https://www.festival-cannes.com/en/p/souleymane-cisse-3/"
+        },
+        {
+          "label": "African Film Festival — Souleymane Cissé",
+          "url": "https://africanfilmny.org/directors/souleymane-cisse/"
+        },
+        {
+          "label": "African Film Festival — Ousmane Sembène",
+          "url": "https://africanfilmny.org/directors/ousmane-sembene/"
+        }
+      ],
+      "personIds": [
+        "ousmane-sembene",
+        "souleymane-cisse"
+      ],
+      "timelineIds": [
+        "borom-sarret-1963",
+        "den-muso-1975",
+        "yeelen-cannes-1987"
+      ]
+    }
+  ],
+  "people": [
+    {
+      "id": "kwaw-ansah",
+      "title": "Kwaw Ansah",
+      "kicker": "FILMMAKER · GHANA",
+      "summary": "Ghanaian filmmaker, writer and producer whose work includes Love Brewed in the African Pot and Heritage Africa. Ansah founded Film Africa Limited in 1977 and has been an advocate for African filmmaking and stronger distribution for African films.",
+      "published": true,
+      "evidenceRef": "african-film-festival-kwaw-ansah-profile",
+      "role": "Director · Writer · Producer",
+      "country": "Ghana",
+      "born": "1941 · Agona Swedru, Ghana",
+      "selectedWorks": [
+        "Love Brewed in the African Pot (1980)",
+        "Heritage Africa (1989)",
+        "Crossroads of People, Crossroads of Trade (1994)"
+      ],
+      "references": [
+        {
+          "label": "African Film Festival — Kwaw Ansah biography and filmography",
+          "url": "https://africanfilmny.org/directors/kwaw-ansah/"
+        },
+        {
+          "label": "African Film Festival — Love Brewed in the African Pot",
+          "url": "https://africanfilmny.org/films/love-brewed-in-an-african-pot/"
+        }
+      ]
+    },
+    {
+      "id": "ousmane-sembene",
+      "title": "Ousmane Sembène",
+      "kicker": "FILMMAKER · SENEGAL",
+      "summary": "Senegalese novelist and filmmaker whose writing and films examined colonial legacies, class, independence and modernity. Often described as the father of African cinema, he turned to filmmaking in part to reach audiences beyond the written word.",
+      "published": true,
+      "evidenceRef": "african-film-festival-ousmane-sembene-profile",
+      "role": "Director · Screenwriter · Novelist",
+      "country": "Senegal",
+      "born": "1923 · southern Senegal",
+      "died": "2007",
+      "selectedWorks": [
+        "Borom Sarret (1963)",
+        "La Noire de… (Black Girl) (1966)",
+        "Ceddo (1976)",
+        "Moolaadé (2004)"
+      ],
+      "references": [
+        {
+          "label": "African Film Festival — Ousmane Sembène biography",
+          "url": "https://africanfilmny.org/directors/ousmane-sembene/"
+        },
+        {
+          "label": "UNESCO — Key dates in African cinema",
+          "url": "https://www.unesco.org/creativity/sites/default/files/medias/fichiers/2023/01/379165eng.pdf"
+        }
+      ]
+    },
+    {
+      "id": "souleymane-cisse",
+      "title": "Souleymane Cissé",
+      "kicker": "FILMMAKER · MALI",
+      "summary": "Malian filmmaker whose work brought Malian stories and Bambara-language cinema to international audiences. His films include Den Muso, Baara, Finyè and Yeelen; Yeelen received the Jury Prize at the 1987 Cannes Film Festival.",
+      "published": true,
+      "evidenceRef": "festival-cannes-souleymane-cisse-profile",
+      "role": "Director · Screenwriter",
+      "country": "Mali",
+      "born": "1940 · Bamako, Mali",
+      "died": "2025",
+      "selectedWorks": [
+        "Den Muso (The Young Girl) (1975)",
+        "Baara (The Porter) (1977)",
+        "Finyè (The Wind) (1981/1982)",
+        "Yeelen (Brightness) (1987)"
+      ],
+      "references": [
+        {
+          "label": "Festival de Cannes — Souleymane Cissé biography and awards",
+          "url": "https://www.festival-cannes.com/en/p/souleymane-cisse-3/"
+        },
+        {
+          "label": "African Film Festival — Souleymane Cissé biography",
+          "url": "https://africanfilmny.org/directors/souleymane-cisse/"
+        }
+      ]
+    },
+    {
+      "id": "sarah-maldoror",
+      "title": "Sarah Maldoror",
+      "kicker": "FILMMAKER · GUADELOUPE / FRANCE",
+      "summary": "Guadeloupean filmmaker of African descent whose politically engaged work connected cinema, theatre and liberation struggles. She co-founded the Compagnie d’Art Dramatique des Griots in Paris, studied cinema in Moscow and worked across Paris, Martinique and Portuguese-speaking African countries.",
+      "published": true,
+      "evidenceRef": "african-film-festival-sarah-maldoror-profile",
+      "role": "Director · Assistant Director",
+      "country": "Guadeloupe / France",
+      "born": "1939 · France",
+      "died": "2020",
+      "selectedWorks": [
+        "Monangambé (1969)",
+        "Sambizanga (1972)"
+      ],
+      "references": [
+        {
+          "label": "African Film Festival — Sarah Maldoror biography",
+          "url": "https://africanfilmny.org/directors/sarah-maldoror/"
+        }
+      ]
+    }
+  ],
+  "timelines": [
+    {
+      "id": "borom-sarret-1963",
+      "title": "Borom Sarret: an early landmark in African fiction cinema",
+      "kicker": "1963 · SENEGAL",
+      "summary": "Ousmane Sembène’s Borom Sarret is identified by the African Film Festival as the first fiction film by an African filmmaker to be distributed outside Africa. Its focus on a Dakar cart driver helped establish Sembène’s socially engaged cinematic voice.",
+      "published": true,
+      "evidenceRef": "african-film-festival-sembene-profile",
+      "date": "1963-01-01",
+      "dateLabel": "1963",
+      "references": [
+        {
+          "label": "African Film Festival — Ousmane Sembène",
+          "url": "https://africanfilmny.org/directors/ousmane-sembene/"
+        }
+      ]
+    },
+    {
+      "id": "ghana-film-unit-1948",
+      "title": "The Gold Coast Film Unit is established",
+      "kicker": "1948 · GHANA",
+      "summary": "The colonial administration established the Gold Coast Film Unit. It produced newsreels, documentaries and public-information films, including screenings delivered through travelling cinema vans. The institution’s history also raises questions about colonial control of images and public narratives.",
+      "published": true,
+      "evidenceRef": "ghana-motcca-film-history",
+      "date": "1948-01-01",
+      "dateLabel": "1948",
+      "references": [
+        {
+          "label": "Ghana Ministry of Tourism, Culture & Creative Arts — Film history",
+          "url": "https://www.motcca.gov.gh/film/"
+        },
+        {
+          "label": "National Commission on Culture — Ghanaian film and cultural identity",
+          "url": "https://ghanaculture.gov.gh/the-development-of-ghanaian-film-and-its-cultural-identity/"
+        }
+      ]
+    },
+    {
+      "id": "ghana-gfic-1964",
+      "title": "Ghana Film Industry Corporation established",
+      "kicker": "1964 · GHANA",
+      "summary": "Ghana established the Ghana Film Industry Corporation as a state film institution after independence. Its remit included film production and the development of locally made films as part of a wider national cultural project.",
+      "published": true,
+      "evidenceRef": "ghana-motcca-film-history-ncc",
+      "date": "1964-01-01",
+      "dateLabel": "1964",
+      "references": [
+        {
+          "label": "Ghana Ministry of Tourism, Culture & Creative Arts — Film history",
+          "url": "https://www.motcca.gov.gh/film/"
+        },
+        {
+          "label": "National Commission on Culture — Ghanaian film and cultural identity",
+          "url": "https://ghanaculture.gov.gh/the-development-of-ghanaian-film-and-its-cultural-identity/"
+        }
+      ]
+    },
+    {
+      "id": "fespaco-founded-1969",
+      "title": "The first African Film Festival in Ouagadougou",
+      "kicker": "1969 · BURKINA FASO",
+      "summary": "The first African Film Festival took place in Ouagadougou in 1969. It later became FESPACO, a major meeting point for African filmmakers, audiences and the wider film industry.",
+      "published": true,
+      "evidenceRef": "unesco-key-dates-african-cinema-1969",
+      "date": "1969-02-01",
+      "dateLabel": "1–15 February 1969",
+      "references": [
+        {
+          "label": "FESPACO — About the festival",
+          "url": "https://fespaco.bf/en/fespaco/about-the-festival/"
+        },
+        {
+          "label": "UNESCO — Key dates in African cinema",
+          "url": "https://www.unesco.org/creativity/sites/default/files/medias/fichiers/2023/01/379165eng.pdf"
+        },
+        {
+          "label": "Oxford Research Encyclopedia — African Films and FESPACO",
+          "url": "https://academic.oup.com/edited-volume/61663/chapter-abstract/553408769"
+        }
+      ]
+    },
+    {
+      "id": "den-muso-1975",
+      "title": "Den Muso: a Bambara-language feature film",
+      "kicker": "1975 · MALI",
+      "summary": "Souleymane Cissé made Den Muso (The Young Girl), described by the Festival de Cannes as Mali’s first feature-length fiction film in Bambara. The film was banned by the authorities after its production.",
+      "published": true,
+      "evidenceRef": "festival-cannes-souleymane-cisse",
+      "date": "1975-01-01",
+      "dateLabel": "1975",
+      "references": [
+        {
+          "label": "Festival de Cannes — Souleymane Cissé",
+          "url": "https://www.festival-cannes.com/en/p/souleymane-cisse-3/"
+        }
+      ]
+    },
+    {
+      "id": "ceddo-1976",
+      "title": "Sembène’s Ceddo confronts religious and political power",
+      "kicker": "1976 · SENEGAL",
+      "summary": "Ousmane Sembène’s Ceddo examines popular resistance to religious oppression. UNESCO’s African cinema chronology records the film and notes that it was banned until 1984.",
+      "published": true,
+      "evidenceRef": "unesco-key-dates-african-cinema-1976",
+      "date": "1976-01-01",
+      "dateLabel": "1976",
+      "references": [
+        {
+          "label": "UNESCO — Key dates in African cinema",
+          "url": "https://www.unesco.org/creativity/sites/default/files/medias/fichiers/2023/01/379165eng.pdf"
+        }
+      ]
+    },
+    {
+      "id": "love-brewed-1980",
+      "title": "Love Brewed in the African Pot reaches audiences",
+      "kicker": "1980 · GHANA",
+      "summary": "Kwaw Ansah’s Love Brewed in the African Pot is catalogued by the African Film Festival as a 1980 Ghanaian feature. Set in colonial Ghana, it explores tensions between tradition and modernity through a family and romantic conflict. Some Ghanaian institutional accounts give 1981 as the release year; the catalogue date is retained here with that discrepancy noted.",
+      "published": true,
+      "evidenceRef": "african-film-festival-love-brewed-film-entry",
+      "date": "1980-01-01",
+      "dateLabel": "1980 · some sources list 1981",
+      "references": [
+        {
+          "label": "African Film Festival — Love Brewed in the African Pot (1980)",
+          "url": "https://africanfilmny.org/films/love-brewed-in-an-african-pot/"
+        },
+        {
+          "label": "Ghana Ministry of Tourism, Culture & Creative Arts — Film history (1981)",
+          "url": "https://www.motcca.gov.gh/film/"
+        }
+      ]
+    },
+    {
+      "id": "yeelen-cannes-1987",
+      "title": "Yeelen wins the Cannes Jury Prize",
+      "kicker": "1987 · MALI / FRANCE",
+      "summary": "Souleymane Cissé’s Yeelen (Brightness) received the Jury Prize at the 1987 Cannes Film Festival, bringing major international recognition to a film rooted in Malian stories and cultural traditions.",
+      "published": true,
+      "evidenceRef": "festival-cannes-souleymane-cisse-award",
+      "date": "1987-05-01",
+      "dateLabel": "1987",
+      "references": [
+        {
+          "label": "Festival de Cannes — Souleymane Cissé and Yeelen",
+          "url": "https://www.festival-cannes.com/en/p/souleymane-cisse-3/"
+        }
+      ]
+    },
+    {
+      "id": "ghana-film-act-2016",
+      "title": "Ghana establishes a statutory National Film Authority",
+      "kicker": "2016 · GHANA",
+      "summary": "The Development and Classification of Film Act, 2016 (Act 935) provides the legal framework for regulation and development of Ghana’s film industry and establishes the National Film Authority.",
+      "published": true,
+      "evidenceRef": "ghana-act-935-national-film-authority",
+      "date": "2016-12-16",
+      "dateLabel": "16 December 2016 · assent",
+      "references": [
+        {
+          "label": "Ghana — Development and Classification of Film Act, 2016 (Act 935)",
+          "url": "https://www.brr.gov.gh/acc/registry/docs/Development%20and%20Classification%20of%20Film%20Act%2C%202016%20%28Act%20935%29.pdf"
+        },
+        {
+          "label": "Ghana Ministry — National Film Authority",
+          "url": "https://www.motcca.gov.gh/national-film-authority-nfa/"
+        }
+      ]
+    }
+  ],
+  "journeys": [
+    {
+      "id": "ghana-from-film-unit-to-video-era",
+      "title": "Ghana: from the Film Unit to the video era",
+      "kicker": "DOCUMENTARY JOURNEY · GHANA",
+      "summary": "Follow the changing institutions and technologies of Ghanaian cinema: colonial information films and travelling screenings, the post-independence GFIC, independent features such as Love Brewed in the African Pot, and the emergence of video filmmaking. The route keeps the political context of each period visible.",
+      "published": true,
+      "evidenceRef": "ghana-cinema-history-journey",
+      "references": [
+        {
+          "label": "Ghana Ministry — Film history",
+          "url": "https://www.motcca.gov.gh/film/"
+        },
+        {
+          "label": "National Commission on Culture — Ghanaian film and cultural identity",
+          "url": "https://ghanaculture.gov.gh/the-development-of-ghanaian-film-and-its-cultural-identity/"
+        },
+        {
+          "label": "African Film Festival — Ghanaian Film Industry: Past and Present",
+          "url": "https://africanfilmny.org/articles/ghanaian-film-industry-past-and-present/"
+        }
+      ],
+      "timelineIds": [
+        "ghana-film-unit-1948",
+        "ghana-gfic-1964",
+        "love-brewed-1980",
+        "ghana-film-act-2016"
+      ],
+      "personIds": [
+        "kwaw-ansah"
+      ]
+    },
+    {
+      "id": "cinema-as-a-language-of-resistance",
+      "title": "Cinema as a language of resistance",
+      "kicker": "DOCUMENTARY JOURNEY · PAN-AFRICAN",
+      "summary": "Connect filmmakers whose work challenged colonial narratives, social hierarchies and political power. From Sembène’s socially grounded fiction to Maldoror’s liberation-era filmmaking, this journey explores cinema as cultural expression and political argument.",
+      "published": true,
+      "evidenceRef": "unesco-african-cinema-and-african-film-festival-profiles",
+      "references": [
+        {
+          "label": "UNESCO — Key dates in African cinema",
+          "url": "https://www.unesco.org/creativity/sites/default/files/medias/fichiers/2023/01/379165eng.pdf"
+        },
+        {
+          "label": "African Film Festival — Ousmane Sembène",
+          "url": "https://africanfilmny.org/directors/ousmane-sembene/"
+        },
+        {
+          "label": "African Film Festival — Sarah Maldoror",
+          "url": "https://africanfilmny.org/directors/sarah-maldoror/"
+        }
+      ],
+      "timelineIds": [
+        "borom-sarret-1963",
+        "ceddo-1976",
+        "fespaco-founded-1969"
+      ],
+      "personIds": [
+        "ousmane-sembene",
+        "sarah-maldoror"
+      ]
+    },
+    {
+      "id": "malian-stories-on-the-world-stage",
+      "title": "Malian stories on the world stage",
+      "kicker": "DOCUMENTARY JOURNEY · MALI",
+      "summary": "Explore Souleymane Cissé’s path from early Bambara-language filmmaking to international recognition for Yeelen. The journey places film milestones alongside the institutions and audiences that helped African cinema travel across borders.",
+      "published": true,
+      "evidenceRef": "festival-cannes-and-african-film-festival-cisse",
+      "references": [
+        {
+          "label": "Festival de Cannes — Souleymane Cissé",
+          "url": "https://www.festival-cannes.com/en/p/souleymane-cisse-3/"
+        },
+        {
+          "label": "African Film Festival — Souleymane Cissé",
+          "url": "https://africanfilmny.org/directors/souleymane-cisse/"
+        }
+      ],
+      "timelineIds": [
+        "den-muso-1975",
+        "yeelen-cannes-1987"
+      ],
+      "personIds": [
+        "souleymane-cisse"
+      ]
+    }
+  ]
 }
