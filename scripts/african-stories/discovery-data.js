@@ -23,6 +23,21 @@ export function filterAfricanTitles(titles, { country = "", query = "", format =
   });
 }
 
+export function filterEditorialRecords(records, { query = "", country = "", region = "", countries = [] } = {}) {
+  const normalized = String(query).trim().toLocaleLowerCase();
+  const countryCode = String(country).toUpperCase();
+  const regionCodes = new Set((Array.isArray(countries) ? countries : [])
+    .filter(item => item.regionId === region).map(item => item.code));
+  return (Array.isArray(records) ? records : []).filter(validEditorialRecord).filter(record => {
+    const codes = Array.isArray(record.countryCodes) ? record.countryCodes : [];
+    if (countryCode && !codes.includes(countryCode)) return false;
+    if (region && !codes.some(code => regionCodes.has(code))) return false;
+    if (!normalized) return true;
+    return [record.title, record.summary, record.kicker, record.reframe, record.whyItMatters]
+      .filter(Boolean).some(value => String(value).toLocaleLowerCase().includes(normalized));
+  });
+}
+
 export function accessLabel(state) {
   return ({
     stream_on_vivid: "Stream on Vivid",
