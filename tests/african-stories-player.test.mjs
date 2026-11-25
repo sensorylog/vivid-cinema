@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 import { requestAfricanProviderSession } from "../scripts/african-stories/provider-session.js";
 import {
   getAfricanAccessMessage,
@@ -35,6 +36,16 @@ const source = {
   authorization: { status: "verified", evidenceRef: "contract-001", authorizedBy: "rights-team" },
   priority: 1
 };
+
+test("title pages show provenance and clearly label discovery-only records", async () => {
+  const player = await readFile(new URL("../scripts/african-stories/player.js", import.meta.url), "utf8");
+  const page = await readFile(new URL("../african-stories-watch.html", import.meta.url), "utf8");
+  assert.match(player, /accessLabel\(title\.accessState\)/);
+  assert.match(player, /title\.provenance\?\.sourceUrl/);
+  assert.match(player, /does not grant streaming or reproduction rights/);
+  assert.match(page, /african-title-evidence/);
+  assert.match(page, /african-player-references/);
+});
 
 test("requires a verified, evidenced, in-date rights grant", () => {
   assert.equal(isGrantCurrent(grant, { territory: "GH", now }), true);
