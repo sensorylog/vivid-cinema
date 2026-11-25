@@ -150,7 +150,7 @@ export function createAfricanStoriesFunctions({ db, onCall, HttpsError, Timestam
     return { workId, editorialStatus: "draft", updatedAt: now.toMillis() };
   });
 
-  const publishAfricanWork = onCall({ region, maxInstances: 10 }, async request => {
+  const publishAfricanWork = onCall({ region, maxInstances: 10, enforceAppCheck: true }, async request => {
     requireClaim(request, "africanStoriesPublisher", HttpsError);
     const workId = boundedText(request.data?.workId, 100, "workId", HttpsError, true);
     if (!WORK_ID.test(workId)) fail(HttpsError, "invalid-argument", "Invalid workId.");
@@ -194,7 +194,7 @@ export function createAfricanStoriesFunctions({ db, onCall, HttpsError, Timestam
     return { providerId, status: request.data.status === "active" ? "active" : "inactive" };
   });
 
-  const setAfricanRightsDecision = onCall({ region, maxInstances: 5 }, async request => {
+  const setAfricanRightsDecision = onCall({ region, maxInstances: 5, enforceAppCheck: true }, async request => {
     requireClaim(request, "africanStoriesRightsAdmin", HttpsError);
     const workId = boundedText(request.data?.workId, 100, "workId", HttpsError, true);
     const versionId = boundedText(request.data?.versionId, 80, "versionId", HttpsError, true);
