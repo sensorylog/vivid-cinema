@@ -163,6 +163,7 @@ The following public-source integrations are now implemented on PR #524:
 | YouTube | Implemented | Validated 11-character video IDs; official YouTube embed URL; creator evidence reference; original-platform fallback |
 | Vimeo | Implemented | Official player iframe; numeric video ID; optional unlisted privacy hash; DNT parameter; original-platform fallback |
 | Dailymotion | Implemented for creator-configured players | Current `geo.dailymotion.com/player/{playerId}.html?video={videoId}` endpoint; requires the creator's Player ID; original-platform fallback |
+| Rumble | Implemented | Official `rumble.com/embed/{embedId}/` player route; requires the exact embed ID from the creator's embed code; original-platform fallback |
 | PeerTube | Implemented with reviewed instance allowlist | Official embed route with API enabled for `framatube.org` and `peer.tube`; arbitrary instances are rejected until their exact origins are reviewed and added to both CSP and the runtime allowlist |
 | Internet Archive | Implemented | Fetches item metadata, requires the exact selected public file, rejects private/unsupported files, and plays compatible MP4/WebM/Ogg/HLS media in the dedicated HTML5 player; links back to the archive item |
 | FilmFlux | Implemented as discovery connector | Fetches its documented public trending endpoint, validates returned IDs/URLs, credits FilmFlux and launches original YouTube uploads in the official YouTube player |
@@ -189,7 +190,7 @@ Official platform example:
 }
 ```
 
-Vimeo uses `videoId` and optional `vimeoHash`. Dailymotion uses `videoId` and the creator-provided `playerId` from their Dailymotion Studio embed code; the player ID is required by Dailymotion's current embed endpoint. PeerTube uses `instanceOrigin` and `videoUuid`, with the instance restricted to the reviewed allowlist. YouTube, Vimeo and PeerTube sources can only be enabled when the work's editorial state is `watch_officially`.
+Vimeo uses `videoId` and optional `vimeoHash`. Dailymotion uses `videoId` and the creator-provided `playerId` from their Dailymotion Studio embed code; the player ID is required by Dailymotion's current embed endpoint. Rumble uses the exact `embedId` copied from the creator's official Rumble embed snippet; the adapter does not extract direct media URLs. PeerTube uses `instanceOrigin` and `videoUuid`, with the instance restricted to the reviewed allowlist. YouTube, Vimeo and PeerTube sources can only be enabled when the work's editorial state is `watch_officially`.
 
 Internet Archive example:
 
@@ -237,3 +238,10 @@ The restricted operations console now includes source templates for YouTube, Vim
 - Current iframe endpoint format and required Player ID: https://developers.dailymotion.com/docs/iframe-web
 - Dailymotion documents the current endpoint as `https://geo.dailymotion.com/player/{Player ID}.html?video={Video ID}`. The adapter deliberately requires the creator-provided Player ID; it does not guess a generic player ID or scrape video URLs.
 - The creator must supply an official embed configuration and evidence reference. Some Dailymotion embedding/player customization features require the creator's account plan, and domain/privacy restrictions still apply.
+
+
+### Rumble integration evidence
+
+- Rumble's own help centre describes the creator-facing video embed workflow: https://rumble.support/en/help/rumble-basics-how-to-embed-your-video
+- Example official Rumble embed route: https://rumble.com/embed/v17j3tt/
+- The adapter accepts only an embed ID and constructs the official `https://rumble.com/embed/{embedId}/` route. It does not call undocumented media endpoints or extract stream URLs.
