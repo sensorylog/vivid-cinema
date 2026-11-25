@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "catalogueVersion": "2026-11-25.2",
+  "catalogueVersion": "2026-11-25.3",
   "regions": [
     {
       "id": "north",
@@ -33,10 +33,10 @@
       "id": "colonial-screen-censorship",
       "title": "The empire behind the projector",
       "kicker": "POWER · GOLD COAST",
-      "summary": "Colonial film in the Gold Coast was not a neutral window onto modern life. Exhibition, licensing, censorship and mobile projection formed part of a system that promoted imperial priorities while deciding which images and arguments were acceptable. The uncomfortable question is not simply what films were shown, but who had the authority to select, regulate and explain them.",
-      "reframe": "The popular shorthand says colonial authorities brought cinema to African audiences as education and entertainment. Archival scholarship shows a more complicated arrangement: cinema also helped manage colonial subjects, and censorship targeted challenges to authority.",
-      "whyItMatters": "It changes the starting point of Ghanaian film history: before asking when Ghanaians began making films, ask who controlled the screens and the rules around them.",
-      "confidence": "Strongly documented; local audience reception remains an area for further archival work.",
+      "summary": "Colonial film in the Gold Coast was not a neutral window onto modern life. But the history is more intricate than a simple story of officials introducing cinema and controlling every image: private exhibitors and travelling showmen built a local audience, safety laws preceded formal censorship, and selected African elites later sat on censorship boards. The real question is how access, commercial life and state power interacted.",
+      "reframe": "The received shorthand says cinema arrived in 1923 and colonial authorities immediately used it to control audiences. Archival research traces screenings much earlier, distinguishes 1912 fire-safety rules from 1925 content censorship, and shows that local entrepreneurs and viewers shaped cinema culture too.",
+      "whyItMatters": "It replaces a passive-audience story with a social history of exhibitors, moviegoers, regulators and the political economy of the screen.",
+      "confidence": "Based primarily on Gareth McFeely’s archival dissertation, alongside published Gold Coast censorship research and official Ghana chronology.",
       "evidenceRef": "gold-coast-cinema-scholarship",
       "published": true,
       "references": [
@@ -51,12 +51,18 @@
         {
           "label": "Films for the Colonies — Colonial Film Unit rules",
           "url": "https://films-for-the-colonies.wp.st-andrews.ac.uk/chapter-two/"
+        },
+        {
+          "label": "Gareth McFeely — Gone Are the Days (Boston University dissertation)",
+          "url": "https://hdl.handle.net/2144/15684"
         }
       ],
       "personIds": [],
       "timelineIds": [
-        "gold-coast-1918-cinema-regulation",
+        "gold-coast-1912-safety-ordinance",
+        "gold-coast-1914-first-purpose-built-theatre",
         "gold-coast-1923-cinema-exhibition",
+        "gold-coast-1925-censorship-board",
         "gold-coast-film-unit-1947-48"
       ]
     },
@@ -216,6 +222,29 @@
       "personIds": [],
       "timelineIds": [
         "african-film-heritage-project-2019"
+      ]
+    },
+    {
+      "id": "audiences-not-passive",
+      "title": "The audience was never passive",
+      "kicker": "GHANA · MOVIEGOERS / MARKET POWER",
+      "summary": "A history of cinema is incomplete if it only follows directors, governments and distributors. Ghanaian moviegoers built routines around cheap urban leisure, new releases and old favourites; their preferences helped shape the exhibition market and forced compromises on foreign distributors. The people in the seats were participants in the industry’s history.",
+      "reframe": "The colonial gaze often treated African audiences as a problem to be managed or educated. McFeely’s research recovers viewers as active interpreters and consumers who could influence what exhibitors and distributors did.",
+      "whyItMatters": "It puts ordinary moviegoers back into the story as people with taste, agency and economic influence—not merely as passive targets of film policy.",
+      "confidence": "Based on Gareth McFeely’s archival social and business history of cinema-going in Gold Coast/Ghana, 1910–1982.",
+      "evidenceRef": "ghana-audience-agency",
+      "published": true,
+      "references": [
+        {
+          "label": "Gareth McFeely — Gone Are the Days (Boston University dissertation)",
+          "url": "https://hdl.handle.net/2144/15684"
+        }
+      ],
+      "personIds": [],
+      "timelineIds": [
+        "gold-coast-1914-first-purpose-built-theatre",
+        "gold-coast-1925-censorship-board",
+        "ghana-audiences-market-power-1960s"
       ]
     }
   ],
@@ -458,20 +487,38 @@
   ],
   "timelines": [
     {
-      "id": "gold-coast-1918-cinema-regulation",
-      "title": "1918: cinema regulation enters the record",
-      "dateLabel": "1918",
-      "kicker": "GOLD COAST · REGULATION",
-      "summary": "Archival references cited in scholarship include a 1918 licence for cinema exhibition premises in the Gold Coast. This is an important clue that formal cinema regulation predates the often-repeated 1923 starting point. It does not, by itself, establish the first screening or first film shown.",
-      "reframe": "A government timeline that starts in 1923 can be useful as a broad marker, but it should not be mistaken for proof that cinema began in that year. Licensing records and actual exhibition history answer different questions.",
-      "whyItMatters": "The archive may preserve administrative traces earlier than the dates repeated in popular summaries.",
-      "confidence": "Primary archival reference identified in Augustine Danso’s published scholarship; original file should be consulted for a definitive transcription.",
-      "evidenceRef": "danso-1918-licensing-reference",
+      "id": "gold-coast-1912-safety-ordinance",
+      "title": "1912: cinema rules were not yet content censorship",
+      "dateLabel": "1912",
+      "kicker": "GOLD COAST · LAW / EXHIBITION",
+      "summary": "The first Cinematograph Ordinance in the Gold Coast dealt with permission to use flammable film. A written description of a film had to be supplied, but the archival research finds no evidence that officials were required to view films or apply content standards before 1925. Safety regulation and censorship were not the same thing.",
+      "reframe": "It is tempting to read every early cinema regulation as censorship. The archival distinction matters: the 1912 rules addressed fire risk and licensing; formal pre-screening censorship arrived later.",
+      "whyItMatters": "This changes how we date the machinery of colonial control—and stops us from making the law say more than the archive supports.",
+      "confidence": "Based on Gareth McFeely’s 2015 Boston University dissertation and the archival legislation it cites.",
+      "evidenceRef": "mcfeely-ordinance-versus-censorship",
       "published": true,
       "references": [
         {
-          "label": "Augustine Danso — Reconstructing cinematic activities in early twentieth-century Gold Coast",
-          "url": "https://intellectdiscover.com/content/journals/10.1386/jac_00051_1"
+          "label": "Gareth McFeely — Gone Are the Days (Boston University dissertation)",
+          "url": "https://hdl.handle.net/2144/15684"
+        }
+      ]
+    },
+    {
+      "id": "gold-coast-1914-first-purpose-built-theatre",
+      "title": "1913/1914: Accra builds a permanent cinema",
+      "dateLabel": "1913/1914",
+      "kicker": "ACCRA · CINEMA-GOING",
+      "summary": "Gareth McFeely traces early screenings to travelling showmen and dates the Gold Coast’s first purpose-built cinema to 1914, on Station Road in Accra, built by businessman John Bartholomew. He notes that some sources suggest 1913, while contemporary press evidence points to the theatre opening in 1914. This is a history of local entrepreneurs and audiences—not only colonial officials.",
+      "reframe": "The common 1923 starting date hides a much earlier exhibition culture. Travelling screenings, a permanent theatre and state film production are separate milestones and should not be collapsed into one 'birth of cinema' date.",
+      "whyItMatters": "The cinema business in Ghana began as a commercial and social practice before the later government film units.",
+      "confidence": "Based on a doctoral social and business history using contemporary newspaper records; 1913/1914 opening date is explicitly qualified.",
+      "evidenceRef": "mcfeely-early-accra-cinema",
+      "published": true,
+      "references": [
+        {
+          "label": "Gareth McFeely — Gone Are the Days (Boston University dissertation)",
+          "url": "https://hdl.handle.net/2144/15684"
         }
       ]
     },
@@ -480,10 +527,10 @@
       "title": "1923: a commonly cited early exhibition milestone",
       "dateLabel": "1923",
       "kicker": "GOLD COAST · EXHIBITION",
-      "summary": "Ghana’s Ministry of Tourism, Culture and Creative Arts identifies 1923 as an early milestone in the introduction of cinema in the Gold Coast. That official summary describes early urban exhibition and its class exclusivity. It should be read alongside archival research pointing to earlier regulation and a longer, less tidy history.",
-      "reframe": "1923 is a useful public-history marker, not a complete origin story. Exhibition, regulation, travelling projection and local film production did not necessarily begin at the same moment.",
-      "whyItMatters": "Good history keeps the convenient date while explaining what it does—and does not—prove.",
-      "confidence": "Official Ghana ministry account; interpretation reconciled with academic archival research.",
+      "summary": "Ghana’s Ministry of Tourism, Culture and Creative Arts uses 1923 as a public-history milestone for the introduction of cinema. But McFeely’s archival social history traces travelling screenings to shortly after 1900 and a purpose-built Accra theatre to 1914. The dates describe different stages of exhibition history; 1923 should not be treated as the first time people in the Gold Coast saw a film.",
+      "reframe": "The widely repeated 1923 date is not the whole origin story. Earlier travelling screenings and the 1914 Station Road theatre are documented in academic research. Official summaries can be useful entry points without being the final word.",
+      "whyItMatters": "It shifts the focus from a single official milestone to a longer history of private exhibitors, travelling showmen and local audiences.",
+      "confidence": "1923 is the Ghana ministry’s stated milestone; earlier screenings and a 1914 theatre are documented in McFeely’s dissertation.",
       "evidenceRef": "ghana-ministry-film-history",
       "published": true,
       "references": [
@@ -492,23 +539,49 @@
           "url": "https://www.motcca.gov.gh/film/"
         },
         {
-          "label": "Augustine Danso — Gold Coast cinema research",
-          "url": "https://intellectdiscover.com/content/journals/10.1386/jac_00051_1"
+          "label": "Gareth McFeely — Gone Are the Days (Boston University dissertation)",
+          "url": "https://hdl.handle.net/2144/15684"
+        }
+      ]
+    },
+    {
+      "id": "gold-coast-1925-censorship-board",
+      "title": "1925: formal film censorship begins",
+      "dateLabel": "1925",
+      "kicker": "GOLD COAST · CENSORSHIP",
+      "summary": "The Gold Coast’s formal film censorship process dates from 1925. The censorship board included colonial administrators and other influential figures, with African members drawn from professions such as law and education. That limited participation did not make the system representative: broader political power remained tightly constrained, and the new rules expanded official scrutiny of what could appear on commercial screens.",
+      "reframe": "The story is more complex than 'British officials alone banned films'. Local elite Africans also served on censorship panels, but their presence was not equivalent to broad popular control over the screen.",
+      "whyItMatters": "It exposes how colonial governance could incorporate selected local elites while keeping the larger structure of authority intact.",
+      "confidence": "Detailed archival reconstruction in McFeely’s Boston University dissertation; compare with Odile Goerg’s wider account of colonial West African censorship.",
+      "evidenceRef": "mcfeely-1925-censorship-board",
+      "published": true,
+      "references": [
+        {
+          "label": "Gareth McFeely — Gone Are the Days (Boston University dissertation)",
+          "url": "https://hdl.handle.net/2144/15684"
+        },
+        {
+          "label": "Odile Goerg — Tropical Dream Palaces, censorship chapter",
+          "url": "https://academic.oup.com/book/61453/chapter-abstract/534807150"
         }
       ]
     },
     {
       "id": "gold-coast-film-unit-1947-48",
-      "title": "1947–1948: the Gold Coast Film Unit",
-      "dateLabel": "1947–1948 (sources differ)",
+      "title": "1947–1949: the Gold Coast Film Unit takes shape",
+      "dateLabel": "1947–1949 (sources differ)",
       "kicker": "COLONIAL FILM UNIT",
-      "summary": "The Gold Coast Film Unit emerged within the colonial Information Services Department. Sources differ on whether to date its establishment to 1947 or 1948; the Ghana ministry account uses 1948, while archival scholarship and heritage research discuss a 1947 foundation. Its work included mobile cinema and public-information films.",
-      "reframe": "The date discrepancy is not a reason to pick whichever year looks neat. It is a reminder that institutions can emerge through a sequence—administrative decision, staffing, production and public operation—rather than one clean birthday.",
-      "whyItMatters": "The unit expanded access to moving images while also carrying colonial educational and ideological priorities.",
-      "confidence": "Institutional existence and function documented; founding year varies by source and is explicitly left unresolved.",
+      "summary": "Sources date the Gold Coast Film Unit’s formation differently: archival heritage research refers to 1947, Ghana’s Ministry account uses 1948, and Rebecca Ohene-Asah’s chapter dates the unit’s creation in Accra to 1949. The postwar decentralisation of colonial film production was a process, so these dates may refer to different institutional steps. The unit made documentaries, newsreels and dramatic work, while gradually involving local personnel.",
+      "reframe": "Do not force 1947, 1948 or 1949 into a single unquestioned founding date. Distinguish the policy decision, training activity, administrative establishment and actual production.",
+      "whyItMatters": "A precise chronology requires identifying which institutional milestone each source is dating.",
+      "confidence": "The existence and role of the unit are well documented; the exact founding date varies across sources.",
       "evidenceRef": "gold-coast-film-unit-date-variation",
       "published": true,
       "references": [
+        {
+          "label": "Rebecca Ohene-Asah — Decolonizing the Colonial Film Archive",
+          "url": "https://doi.org/10.4324/9781003701620-5"
+        },
         {
           "label": "Ghana Ministry — Film historical overview (1948)",
           "url": "https://www.motcca.gov.gh/film/"
@@ -516,10 +589,6 @@
         {
           "label": "Accidental Archivism — Ghana’s Central Film Library (1947)",
           "url": "https://archivism.meson.press/chapters/trajectories-of-restitution/remnants-of-the-central-film-library-and-the-rethinking-of-ghanas-audio-visual-heritage/"
-        },
-        {
-          "label": "Films for the Colonies — Colonial Film Unit",
-          "url": "https://films-for-the-colonies.wp.st-andrews.ac.uk/chapter-two/"
         }
       ]
     },
@@ -568,6 +637,24 @@
         {
           "label": "Ghana National Commission on Culture — Ghanaian film history",
           "url": "https://ghanaculture.gov.gh/the-development-of-ghanaian-film-and-its-cultural-identity/"
+        }
+      ]
+    },
+    {
+      "id": "ghana-audiences-market-power-1960s",
+      "title": "Early 1960s: Ghanaian audiences shape the cinema market",
+      "dateLabel": "Early 1960s",
+      "kicker": "GHANA · AUDIENCE AGENCY",
+      "summary": "McFeely’s research describes a cinema culture built by Ghanaian audiences, who embraced screenings as cheap leisure and as a space for comparison and reflection. By the early 1960s, more than seventy cinemas operated, and audiences’ appetite for rotating new releases and old favourites helped force compromises on an American film industry seeking to impose its own business model.",
+      "reframe": "Colonial and postcolonial officials often imagined cinema audiences as people to be managed. The audience history shows something else: viewers made choices, developed habits and exerted commercial power.",
+      "whyItMatters": "This restores ordinary moviegoers to film history as active participants who shaped exhibition and distribution—not just the people sitting in the dark.",
+      "confidence": "Based on a doctoral social and business history drawing on newspaper records, business records and archival research.",
+      "evidenceRef": "mcfeely-ghana-audience-agency",
+      "published": true,
+      "references": [
+        {
+          "label": "Gareth McFeely — Gone Are the Days (Boston University dissertation)",
+          "url": "https://hdl.handle.net/2144/15684"
         }
       ]
     },
@@ -638,20 +725,24 @@
       "title": "1980 / 1981: Love Brewed in the African Pot",
       "dateLabel": "1980 / 1981 — sources differ",
       "kicker": "GHANA · KWAW ANSAH",
-      "summary": "Kwaw Ansah’s Love Brewed in the African Pot is often dated 1980 in film festival and industry records, while some Ghanaian accounts cite 1981. Rather than silently choosing one, Vivid preserves the discrepancy until a primary production or release record settles which date refers to production, premiere or general release.",
-      "reframe": "A one-year disagreement may look trivial, but it is a good example of how national film histories are assembled from festival catalogues, oral memory, press records and later summaries that may refer to different events.",
-      "whyItMatters": "The platform should show its working when the evidence does not support a single tidy date.",
-      "confidence": "Date discrepancy explicitly recorded; African Film Festival lists 1980. Further primary-source verification needed.",
+      "summary": "Love Brewed in the African Pot is widely catalogued as a 1980 film, including in African Film Festival and Filmfest DC records. Some secondary scholarship also gives 1981, which may reflect later circulation, festival recognition or a different dating convention. Until a primary production and premiere record is checked, Vivid preserves the variation rather than pretending every catalogue uses the same date.",
+      "reframe": "The most defensible public-facing date is 1980, supported by film-festival catalogues. The 1981 variant appears in some secondary writing; it should be explained, not presented as an equally established release date.",
+      "whyItMatters": "Filmographies often compress production, premiere, release and award dates into one year. Those events are not interchangeable.",
+      "confidence": "1980 is strongly supported by African Film Festival and Filmfest DC catalogues; 1981 appears in secondary scholarship and needs primary-source clarification.",
       "evidenceRef": "love-brewed-date-variation",
       "published": true,
       "references": [
         {
-          "label": "African Film Festival — Kwaw Ansah filmography (1980)",
-          "url": "https://africanfilmny.org/directors/kwaw-ansah/"
+          "label": "African Film Festival — Love Brewed in the African Pot (1980)",
+          "url": "https://africanfilmny.org/films/love-brewed-in-an-african-pot/"
         },
         {
-          "label": "Ghana Ministry — Film historical overview",
-          "url": "https://www.motcca.gov.gh/film/"
+          "label": "Filmfest DC 1988 catalogue — Love Brewed in the African Pot (1980)",
+          "url": "https://www.filmfestdc.org/PDFs/catalog1988.pdf"
+        },
+        {
+          "label": "Vitus Nanbigne — Cinema in Ghana (mentions 1980 / sometimes 1981)",
+          "url": "https://citeseerx.ist.psu.edu/document?doi=f3307aae92aa82daa6402edcf5e6bfc5ba3b4cd6&repid=rep1&type=pdf"
         }
       ]
     },
@@ -763,10 +854,10 @@
       "id": "gold-coast-camera-journey",
       "title": "Who controlled the screen in colonial Ghana?",
       "kicker": "GHANA · ARCHIVE INVESTIGATION",
-      "summary": "Follow the paper trail from early exhibition licences to colonial censorship and the Gold Coast Film Unit. This journey separates the history of watching films from the history of making them, and asks how mobile projection expanded access while also carrying an imperial message.",
-      "reframe": "The central question is not whether colonial cinema was purely propaganda or purely education. It is how entertainment, instruction, regulation and audience agency coexisted.",
-      "whyItMatters": "A grounded entry point into Ghana’s cinema history that starts before the post-independence industry.",
-      "confidence": "Based on published archival scholarship and official institutional histories.",
+      "summary": "Follow the paper trail from early travelling screenings and Accra’s first purpose-built theatre to safety rules, formal censorship, mobile cinema and audience agency. This journey separates the history of watching films from the history of making them, and asks how commercial culture, colonial regulation and local moviegoers shaped one another.",
+      "reframe": "The central question is not whether colonial cinema was purely propaganda or purely education. It is how private enterprise, entertainment, instruction, regulation and audience choice coexisted—and sometimes collided.",
+      "whyItMatters": "A grounded entry point into Ghana’s cinema history that starts with local exhibitors and viewers, not just official film units.",
+      "confidence": "Based on published archival scholarship and official institutional histories; founding dates for the Film Unit remain contested.",
       "evidenceRef": "gold-coast-camera-journey",
       "published": true,
       "references": [
@@ -781,13 +872,20 @@
         {
           "label": "Ghana Ministry — Film history",
           "url": "https://www.motcca.gov.gh/film/"
+        },
+        {
+          "label": "Gareth McFeely — Gone Are the Days (Boston University dissertation)",
+          "url": "https://hdl.handle.net/2144/15684"
         }
       ],
       "personIds": [],
       "timelineIds": [
-        "gold-coast-1918-cinema-regulation",
+        "gold-coast-1912-safety-ordinance",
+        "gold-coast-1914-first-purpose-built-theatre",
         "gold-coast-1923-cinema-exhibition",
-        "gold-coast-film-unit-1947-48"
+        "gold-coast-1925-censorship-board",
+        "gold-coast-film-unit-1947-48",
+        "ghana-audiences-market-power-1960s"
       ]
     },
     {
@@ -818,7 +916,8 @@
         "ghana-independence-1957",
         "ghana-gfic-1964",
         "love-brewed-1980",
-        "heritage-africa-1989"
+        "heritage-africa-1989",
+        "ghana-audiences-market-power-1960s"
       ]
     },
     {
