@@ -12,16 +12,25 @@ test("African Stories is visibly marked as in development in navigation and dest
   const styles = await readFile(path.join(root, "styles", "african-stories.css"), "utf8");
   assert.match(shell, /vivid-african-stories-link/);
   assert.match(shell, /vivid-nav-development">In Development/);
-  assert.match(page, /african-development-notice/);
-  assert.match(page, /African films, documentaries, filmmakers, cultural history and audiovisual archives/);
-  assert.match(page, /rights-cleared viewing pathways/);
-  assert.match(styles, /\.african-development-notice/);
+  assert.match(page, /african-development-gate/);
+  assert.match(page, /In Development/);
+  assert.match(page, /full destination isn't open yet/);
+  assert.match(styles, /\.african-development-gate/);
 });
 
-test("African Stories remains a destination but is not presented as a launched streaming catalogue", async () => {
-  const page = await readFile(path.join(root, "african-stories.html"), "utf8");
-  const discovery = await readFile(path.join(root, "scripts", "african-stories", "discovery.js"), "utf8");
-  assert.match(page, /id="african-discovery-status"/);
-  assert.match(page, /Preparing the African Stories atlas/);
-  assert.match(page, /In Development/);
+test("African Stories public landing, player and submission routes are gated, not merely badged", async () => {
+  for (const file of ["african-stories.html", "african-stories-watch.html", "african-stories-submit.html"]) {
+    const page = await readFile(path.join(root, file), "utf8");
+    assert.match(page, /african-development-gate/);
+    assert.match(page, /In Development/);
+    assert.doesNotMatch(page, /scripts\/african-stories\/(?:discovery|player|acquisition)\.js/);
+    assert.doesNotMatch(page, /african-discovery-query|african-player-frame|african-submission-form/);
+  }
+});
+
+test("service worker no longer precaches gated African Stories feature runtimes", async () => {
+  const worker = await readFile(path.join(root, "service-worker.js"), "utf8");
+  assert.match(worker, /vivid-cinema-shell-v327/);
+  assert.doesNotMatch(worker, /\.\/scripts\/african-stories\/(?:discovery|player|acquisition)\.js/);
+  assert.doesNotMatch(worker, /\.\/african-stories-watch\.html|\.\/african-stories-submit\.html/);
 });
