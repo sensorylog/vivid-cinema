@@ -37,14 +37,15 @@ const source = {
   priority: 1
 };
 
-test("title pages show provenance and clearly label discovery-only records", async () => {
+test("African Stories public player stays gated while its underlying rights policy remains strict", async () => {
   const player = await readFile(new URL("../scripts/african-stories/player.js", import.meta.url), "utf8");
   const page = await readFile(new URL("../african-stories-watch.html", import.meta.url), "utf8");
   assert.match(player, /accessLabel\(title\.accessState\)/);
   assert.match(player, /title\.provenance\?\.sourceUrl/);
   assert.match(player, /does not grant streaming or reproduction rights/);
-  assert.match(page, /african-title-evidence/);
-  assert.match(page, /african-player-references/);
+  assert.match(page, /african-development-gate/);
+  assert.match(page, /In Development/);
+  assert.doesNotMatch(page, /african-title-evidence|african-player-references|scripts\/african-stories\/player\.js/);
 });
 
 test("requires a verified, evidenced, in-date rights grant", () => {

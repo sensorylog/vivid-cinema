@@ -128,3 +128,17 @@
 .african-submit-button:disabled{opacity:.55;cursor:wait}
 #african-submission-status{color:#c3cfdd;font-size:.84rem;line-height:1.6}
 @media(max-width:560px){.african-submission-form{gap:8px}.african-submit-button{width:100%}}
+
+/* Public African Stories routes remain closed until the product is ready. */
+.african-development-gate{display:grid;place-items:center;min-height:calc(100svh - 82px);padding:clamp(28px,7vw,80px) 20px 36px}
+.african-development-gate-card{width:min(100%,760px);padding:clamp(28px,6vw,64px);border:1px solid rgba(255,255,255,.13);border-radius:28px;background:radial-gradient(ellipse at 12% 0,rgba(193,157,92,.14),transparent 52%),linear-gradient(145deg,#171e29,#0b1018 68%);box-shadow:0 28px 90px rgba(0,0,0,.35)}
+.african-development-gate-card>.african-development-pill{display:inline-flex;margin:0 0 30px;padding:8px 13px;border:1px solid rgba(226,199,146,.35);border-radius:999px;background:rgba(226,199,146,.1);color:#e5cb97;font-size:.7rem;font-weight:850;letter-spacing:.09em;text-transform:uppercase}
+.african-development-gate-card>.african-eyebrow{display:block;color:#c9b17d;font-size:.68rem;font-weight:850;letter-spacing:.19em}
+.african-development-gate-card h1{margin:14px 0 12px;color:#fff;font-size:clamp(2.8rem,8vw,5.8rem);line-height:.98;letter-spacing:-.065em}
+.african-development-gate-card h1 span{color:#d6bd8b}
+.african-development-gate-lead{max-width:600px;margin:0;color:#dce3ec;font-size:clamp(1.08rem,2.5vw,1.45rem);line-height:1.5}
+.african-development-gate-rule{width:74px;height:2px;margin:28px 0;background:linear-gradient(90deg,#e0c48e,transparent)}
+.african-development-gate-copy{max-width:590px;margin:0;color:#aebaca;font-size:.92rem;line-height:1.8}
+.african-development-gate-back{display:inline-flex;align-items:center;gap:9px;margin-top:32px;padding:12px 17px;border:1px solid rgba(255,255,255,.16);border-radius:12px;background:rgba(255,255,255,.055);color:#f4f6f9;font-size:.82rem;font-weight:750;text-decoration:none}
+.african-development-gate-back:hover{border-color:rgba(226,199,146,.5);background:rgba(226,199,146,.1)}
+.african-development-gate-foot{margin:22px 0 0;color:#77879a;font-size:.72rem;letter-spacing:.04em;text-align:center}
