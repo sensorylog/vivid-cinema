@@ -223,3 +223,8 @@ The player reads published public catalogue records only. It does not accept arb
 - AfriDocs and CINAF remain official external destinations until the operators confirm embeddable playback, APIs or syndication.
 - No title has been seeded or marked playable merely because a provider adapter exists. Each exact title/version still needs editorial source evidence and, for archive files, an explicit rights basis.
 - Partner CDN adapters, trusted territory ingress, revocation/kill switches, provider health monitoring, full CMS workflows and end-to-end deployment tests remain separate Phase 4 work.
+
+
+### Operations console support
+
+The restricted operations console now includes source templates for YouTube, Vimeo, the reviewed PeerTube instances and Internet Archive. Templates insert a source into the first edition of the JSON draft and visibly retain placeholder IDs/evidence references that editors must replace. They do not create catalogue entries or claim that a sample ID is playable. Private evidence references are retained in the draft record and stripped from the public catalogue projection.
