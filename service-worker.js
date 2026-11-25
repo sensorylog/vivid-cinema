@@ -1,5 +1,5 @@
 // Bump this version whenever the precached app shell changes.
-const CACHE_NAME = "vivid-cinema-shell-v310";
+const CACHE_NAME = "vivid-cinema-shell-v311";
 const HLS_LIBRARY_URL = "https://cdn.jsdelivr.net/npm/hls.js@1.7.3/dist/hls.min.js";
 const APP_SHELL = [
   HLS_LIBRARY_URL,
@@ -8,9 +8,9 @@ const APP_SHELL = [
   "./scripts/downloads/desktop-offline.js?windows-offline-hls-v3","./styles/my-downloads.css?v=offline-cinema-redesign-2",
   "./library.html","./auth.html","./login.html","./verify-email.html","./forgot-password.html",
   "./donate.html","./donation-success.html","./offline.html","./live.html","./news.html",
-  "./anime.html","./help.html","./about.html","./accessibility.html","./cookies.html",
+  "./anime.html","./african-stories-watch.html","./african-stories-admin.html","./help.html","./about.html","./accessibility.html","./cookies.html",
   "./404.html","./manifest.json","./robots.txt","./icons/vivid-icon.svg","./assets/images/IMG_6099.jpeg",
-  "./scripts/mascot-autoplay.js?v=1","./styles/vivid-foundation.css","./styles/vivid-system.css","./styles/tokens.css?v=1","./styles/typography.css?v=1","./styles/spacing.css?v=1","./styles/motion.css?v=1","./styles/theme.css?v=1","./styles/downloads.css","./styles/vivid-liquid-glass.css",
+  "./scripts/mascot-autoplay.js?v=1","./styles/vivid-foundation.css","./styles/african-stories.css","./styles/vivid-system.css","./styles/tokens.css?v=1","./styles/typography.css?v=1","./styles/spacing.css?v=1","./styles/motion.css?v=1","./styles/theme.css?v=1","./styles/downloads.css","./styles/vivid-liquid-glass.css",
   "./styles/vivid-cinematic.css","./styles/vivid-title.css","./styles/vivid-person.css","./styles/vivid-watch.css","./styles/vivid-watch.css?v=watch-player-layout-3",
   "./styles/vivid-library.css","./styles/vivid-library.css?v=library-mobile-fix1","./styles/vivid-rounded-cards.css?v=round-1","./styles/vivid-discovery.css","./styles/vivid-for-you.css","./styles/vivid-collection.css",
   "./styles/vivid-auth.css","./styles/vivid-account.css","./styles/vivid-account-cinematic.css?v=20261018-cinematic-1","./styles/vivid-achievements-page.css?v=20261018-cinematic-1","./styles/vivid-pwa.css",
@@ -21,7 +21,7 @@ const APP_SHELL = [
   "./scripts/donate.js","./scripts/google-tag.js","./scripts/analytics.js","./scripts/vivid-pulse.js","./scripts/provider-region.js",
   "./scripts/search.js","./scripts/search-page.js","./scripts/intelligence.js","./scripts/intent-parser.js","./scripts/plot-search.js",
   "./scripts/for-you.js","./scripts/vivid-recall-chat.js","./scripts/cloudflare-ai.js","./scripts/local-owner.js","./scripts/firebase.js","./scripts/turnstile-app-check.js?v=20261123-signup-only-1","./scripts/cloudflare-api.js",
-  "./scripts/firebase.js?v=20261123-signup-only-1","./scripts/pwa.js","./scripts/atmosphere.js","./scripts/i18n.js","./scripts/routes.js",
+  "./scripts/firebase.js?v=20261123-signup-only-1","./scripts/pwa.js","./scripts/atmosphere.js","./scripts/i18n.js","./scripts/routes.js","./scripts/african-stories/player.js","./scripts/african-stories/admin.js",
   "./scripts/config.js","./scripts/utils.js","./scripts/content.js","./scripts/media.js","./scripts/tmdb.js",
   "./scripts/collection.js","./scripts/person.js","./scripts/recommendations.js","./scripts/release-alerts.js","./scripts/cinema-reminders.js",
   "./scripts/push-notifications.js","./scripts/news.js","./scripts/news.js?v=20261018-feedback-sync-4",
