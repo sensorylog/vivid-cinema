@@ -1,6 +1,6 @@
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
 import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-functions.js";
-import { auth, app, ensureAppCheck } from "./firebase.js";
+import { auth, app, ensureAppCheck } from "../firebase.js";
 
 const state = document.getElementById("african-player-state");
 const frame = document.getElementById("african-authorized-frame");
