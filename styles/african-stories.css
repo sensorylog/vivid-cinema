@@ -51,3 +51,17 @@
 .african-discovery-launch:hover,.african-discovery-launch:focus-visible{border-color:rgba(210,226,246,.55);background:rgba(255,255,255,.09);outline:none}
 
 .african-admin-actions select{flex:1;min-width:220px;width:auto}
+
+/* African Stories premium player controls */
+.african-player-controls{display:flex;align-items:center;gap:12px;padding:13px 18px;background:linear-gradient(180deg,#101722,#0b0e14);border-top:1px solid rgba(255,255,255,.08)}
+.african-player-controls[hidden]{display:none}
+.african-control-button{min-height:38px;padding:0 13px;border:1px solid rgba(255,255,255,.17);border-radius:999px;background:#1b2532;color:#f4f7fb;font:inherit;font-size:.75rem;font-weight:750;white-space:nowrap;cursor:pointer}
+.african-control-button:hover,.african-control-button:focus-visible{border-color:#d7e3f3;background:#29384b;outline:none}
+.african-control-time{min-width:42px;color:#c1cad6;font:600 .72rem/1 ui-monospace,SFMono-Regular,Consolas,monospace;text-align:center;font-variant-numeric:tabular-nums}
+.african-control-progress{width:100%;min-width:70px;accent-color:#dce7f5;cursor:pointer}
+.african-player-sources button[aria-pressed=true]{border-color:#dce7f5;background:#34465b;box-shadow:inset 0 0 0 1px rgba(220,231,245,.18)}
+.african-player-frame iframe{min-height:100%;}
+.african-player-fallback{display:inline-flex;align-items:center;min-height:38px;padding:0 12px;border:1px solid rgba(255,255,255,.12);border-radius:999px;background:rgba(255,255,255,.035)}
+.african-filmflux-status{min-height:24px}
+@media(max-width:680px){.african-player-controls{gap:7px;padding:11px 10px;flex-wrap:wrap}.african-control-progress{order:2;flex-basis:100%;width:100%}.african-control-time{font-size:.68rem}.african-control-button{min-height:40px;padding:0 10px;font-size:.7rem}.african-player-controls #african-control-play{margin-right:auto}}
+@media(prefers-reduced-motion:reduce){.african-platform-grid a{transition:none}}
