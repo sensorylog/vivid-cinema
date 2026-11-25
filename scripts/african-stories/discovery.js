@@ -42,8 +42,17 @@ function emptyState(container, message) {
   container.replaceChildren(element("p", "african-empty-state", message));
 }
 
-function editorialCards(container, records, kind, emptyMessage) {
-  const published = (Array.isArray(records) ? records : []).filter(validEditorialRecord).slice().sort((a, b) => kind === "Timeline" ? String(a.date || "").localeCompare(String(b.date || "")) : 0);
+function editorialCards(container, records, kind, emptyMessage, filters = {}) {
+  const query = String(filters.query || "").trim().toLocaleLowerCase();
+  const country = String(filters.country || "").toUpperCase();
+  const published = (Array.isArray(records) ? records : []).filter(validEditorialRecord).filter(record => {
+    const countries = Array.isArray(record.countryCodes) ? record.countryCodes : [];
+    if (country && !countries.includes(country)) return false;
+    if (!query) return true;
+    const haystack = [record.title, record.summary, record.kicker, record.reframe, record.whyItMatters]
+      .filter(Boolean).join(" ").toLocaleLowerCase();
+    return haystack.includes(query);
+  });
   if (!published.length) { emptyState(container, emptyMessage); return; }
   container.replaceChildren();
   for (const record of published) {
@@ -264,9 +273,18 @@ function renderTitles() {
   }
 }
 
+function renderEditorialSections() {
+  const filters = { query: ui.query.value, country: selectedCountry };
+  editorialCards(ui.collections, experience.collections, "Collection", "No sourced collections match this search or country yet.", filters);
+  editorialCards(ui.people, experience.people, "People", "No sourced people or cultural contributors match this search or country yet.", filters);
+  editorialCards(ui.timelines, experience.timelines, "Timeline", "No historical milestones match this search or country yet.", filters);
+  editorialCards(ui.journeys, experience.journeys, "Journey", "No documentary journeys match this search or country yet.", filters);
+}
+
 function render() {
   renderCountries();
   renderTitles();
+  renderEditorialSections();
 }
 
 async function load() {
@@ -284,10 +302,6 @@ async function load() {
     renderLanguageOptions();
     renderCountryHub();
     renderEditorialDetail();
-    editorialCards(ui.collections, experience.collections, "Collection", "Curated collections are being prepared with sourced title records.");
-    editorialCards(ui.people, experience.people, "People", "Filmmaker and cultural-person profiles will appear when biographies and filmographies are sourced.");
-    editorialCards(ui.timelines, experience.timelines, "Timeline", "Historical timelines are being researched. Dates and events will be published with references.");
-    editorialCards(ui.journeys, experience.journeys, "Journey", "Documentary journeys will connect published titles, people and places.");
     render();
     ui.status.textContent = "Explore " + experience.countries.length + " country hubs across " + experience.regions.length + " African regions. Published title and editorial records are added only after review.";
   } catch (error) {
