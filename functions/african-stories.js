@@ -88,7 +88,7 @@ function playbackSourceRecords(value, accessState, HttpsError) {
       source.playerId = playerId;
     } else if (provider === "rumble") {
       const embedId = boundedText(item.embedId, 40, "Rumble embedId", HttpsError, enabled);
-      if (enabled && !/^[A-Za-z0-9]+(?:\\.[A-Za-z0-9]+)?$/.test(embedId)) fail(HttpsError, "invalid-argument", "Rumble requires the exact embed ID copied from its official embed code.");
+      if (enabled && !/^[A-Za-z0-9]+(?:\.[A-Za-z0-9]+)?$/.test(embedId)) fail(HttpsError, "invalid-argument", "Rumble requires the exact embed ID copied from its official embed code.");
       if (enabled && accessState !== "watch_officially") fail(HttpsError, "failed-precondition", "Rumble embeds require the watch_officially editorial state.");
       source.embedId = embedId;
     } else if (provider === "peertube") {
