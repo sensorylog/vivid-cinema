@@ -245,7 +245,7 @@ function onPointerMove(event) {
 }
 
 function onClickCapture(event) {
-  if (Date.now() >= suppressClickUntil) return;
+  if (Date.now() >= suppressClickUntil || !event.target.closest(CARD_SELECTOR)) return;
   suppressClickUntil = 0;
   event.preventDefault();
   event.stopPropagation();
