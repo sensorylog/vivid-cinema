@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { requestAfricanProviderSession } from "../scripts/african-stories/provider-session.js";
 import {
   getAfricanAccessMessage,
   getPlayableAfricanSources,
@@ -65,4 +66,41 @@ test("access messaging never implies that catalogue discovery grants playback", 
 
 test("an empty catalogue remains safe and does not invent playable titles", () => {
   assert.deepEqual(getPlayableAfricanSources({ id: "empty", sources: [] }), []);
+});
+
+test("partner playback requests send title identities, never a browser-supplied stream URL", async () => {
+  let requestBody;
+  const title = { id: "film-001", editionId: "film-001-restored" };
+  const source = { sourceId: "partner-001", provider: "partner" };
+  const session = await requestAfricanProviderSession(title, source, async (_url, init) => {
+    requestBody = JSON.parse(init.body);
+    return new Response(JSON.stringify({
+      ok: true,
+      playbackUrl: "https://media.partner.example/session/master.m3u8",
+      expiresAt: new Date(Date.now() + 5 * 60 * 1000).toISOString(),
+      mimeType: "application/vnd.apple.mpegurl",
+      sessionId: "session_opaque_001"
+    }), { status: 200, headers: { "Content-Type": "application/json" } });
+  });
+  assert.deepEqual(requestBody, { titleId: "film-001", editionId: "film-001-restored", sourceId: "partner-001" });
+  assert.equal(session.mimeType, "application/vnd.apple.mpegurl");
+  assert.equal(new URL(session.url).protocol, "https:");
+});
+
+test("partner playback rejects expired and insecure session envelopes", async () => {
+  const title = { id: "film-001", editionId: "film-001-restored" };
+  const source = { sourceId: "partner-001", provider: "partner" };
+  const responseFor = payload => async () => new Response(JSON.stringify({ ok: true, ...payload }), { status: 200 });
+  await assert.rejects(requestAfricanProviderSession(title, source, responseFor({
+    playbackUrl: "https://media.partner.example/master.m3u8",
+    expiresAt: new Date(Date.now() - 1000).toISOString(),
+    mimeType: "application/vnd.apple.mpegurl",
+    sessionId: "session_opaque_001"
+  })), /invalid or expired/i);
+  await assert.rejects(requestAfricanProviderSession(title, source, responseFor({
+    playbackUrl: "http://media.partner.example/master.m3u8",
+    expiresAt: new Date(Date.now() + 5 * 60 * 1000).toISOString(),
+    mimeType: "application/vnd.apple.mpegurl",
+    sessionId: "session_opaque_001"
+  })), /invalid or expired/i);
 });
