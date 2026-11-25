@@ -13,7 +13,7 @@ The destination is a screen library and story atlas, not a social feed or a gene
 
 ## Researched editorial starter set
 
-The current starter set contains seven collections, nine people/profiles, seventeen timeline milestones and six documentary journeys. It deliberately begins with deeper coverage of Ghana, Nigeria, Senegal, Mali, Mauritania, Egypt, Kenya, Angola, Eswatini and South Africa rather than pretending every country has equally researched coverage.
+The current starter set contains ten collections, nine people/profiles, twenty timeline milestones and six documentary journeys. It deliberately begins with deeper coverage of Ghana, Nigeria, Senegal, Mali, Mauritania, Egypt, Kenya, Angola, Eswatini and South Africa rather than pretending every country has equally researched coverage.
 
 The editorial layer prioritises questions that are often flattened in popular summaries:
 
@@ -25,7 +25,7 @@ The editorial layer prioritises questions that are often flattened in popular su
 - Nollywood as a multi-lineage movement shaped by Yoruba travelling theatre, television, video technology, marketers and informal distribution—not a one-film invention.
 - FESPACO as a major Pan-African institution that has also faced debates about format, taste, inclusion and its role in defining African cinema.
 - Restoration versus restitution: preservation, custody, access, rights and interpretive authority are treated as separate questions.
-- Ghanaian moviegoers are treated as active participants in exhibition culture and distribution economics, not passive colonial audiences.\n- Women filmmakers, regional differences and transnational careers are treated as central histories rather than sidebars.
+- Ghanaian moviegoers are treated as active participants in exhibition culture and distribution economics, not passive colonial audiences.\n- A 2011 Ghana cinema dissertation documents the reported loss and displacement of film-library materials, the collapse of practical projection access, and the need to distinguish surviving reels from usable public heritage.\n- The same research records GFIC’s commercial-financing problems, the reported use of a house and cocoa farm as collateral for Love Brewed in the African Pot, and the studio’s rejection of an early video-film screening.\n- Women filmmakers, regional differences and transnational careers are treated as central histories rather than sidebars.
 
 ## Editorial integrity rules
 
