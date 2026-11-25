@@ -173,7 +173,7 @@ test("editorial search covers themes, evidence framing, country and region", () 
 });
 
 test("published title catalogue contains researched records without inventing streaming rights", () => {
-  assert.equal(catalogue.titles.length, 5);
+  assert.equal(catalogue.titles.length, 6);
   for (const title of catalogue.titles) {
     assert.equal(validAfricanTitleRecord(title), true, title.id);
     assert.equal(title.accessState, "discover_archive_record", title.id + " must remain discovery-only until viewing rights are verified");
@@ -184,6 +184,7 @@ test("published title catalogue contains researched records without inventing st
   assert.ok(catalogue.titles.some(title => title.id === "cairo-station-1958"));
   assert.ok(catalogue.titles.some(title => title.id === "last-grave-at-dimbaza-1974"));
   assert.ok(catalogue.titles.some(title => title.id === "living-in-bondage-1992"));
+  assert.ok(catalogue.titles.some(title => title.id === "kaddu-beykat-1975"));
 });
 
 test("access labels keep discovery separate from viewing rights", () => {
