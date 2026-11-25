@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "catalogueVersion": "2026-11-25.3",
+  "catalogueVersion": "2026-11-25.4",
   "regions": [
     {
       "id": "north",
@@ -246,6 +246,85 @@
         "gold-coast-1925-censorship-board",
         "ghana-audiences-market-power-1960s"
       ]
+    },
+    {
+      "id": "cocoa-farm-cinema-finance",
+      "title": "A cocoa farm helped finance a Ghanaian film",
+      "kicker": "GHANA · INDEPENDENT PRODUCTION",
+      "summary": "The making of Love Brewed in the African Pot reveals the private risks behind a landmark film. Vitus Nanbigne’s dissertation reports that Kwaw Ansah struggled to secure a bank loan and that his father-in-law eventually put up a house and cocoa farm as collateral. The detail connects film history to property, rural wealth, banking and the fragile economics of independent production.",
+      "reframe": "Celebrated films are often remembered as acts of creative vision. This story asks what had to be pledged, borrowed or risked before the camera could roll.",
+      "whyItMatters": "It makes film financing visible as part of cultural history—and shows how an individual family’s assets could carry a national film’s production risk.",
+      "confidence": "The financing account is reported in Nanbigne’s 2011 University of Bergen dissertation; it should be attributed to that research and cross-checked with further interviews or production records.",
+      "evidenceRef": "nanbigne-ansah-cocoa-farm-collateral",
+      "published": true,
+      "references": [
+        {
+          "label": "Vitus Nanbigne — Cinema in Ghana: History, Ideology and Popular Culture",
+          "url": "https://citeseerx.ist.psu.edu/document?doi=f3307aae92aa82daa6402edcf5e6bfc5ba3b4cd6&repid=rep1&type=pdf"
+        },
+        {
+          "label": "African Film Festival — Kwaw Ansah",
+          "url": "https://africanfilmny.org/directors/kwaw-ansah/"
+        }
+      ],
+      "personIds": [
+        "kwaw-ansah"
+      ],
+      "timelineIds": [
+        "gfic-financing-crisis-1970s",
+        "love-brewed-1980"
+      ]
+    },
+    {
+      "id": "ghana-lost-reels",
+      "title": "The lost reels: when Ghana could no longer easily see its own cinema",
+      "kicker": "GHANA · ARCHIVE / RESTITUTION",
+      "summary": "A 2011 dissertation records a painful account of film-library destruction, exposed negatives, rescued prints, storage failures abroad and the disappearance of working projection equipment. The result was not simply a damaged archive; it was a barrier to teaching, research, restoration and public memory. The account also connects to current African-led restitution work.",
+      "reframe": "A film archive can disappear in stages: a fire, a divestiture, a storage failure, an export, a lack of equipment and finally a lack of access. No single dramatic event explains the whole loss.",
+      "whyItMatters": "The question is not only 'where are the films?' but 'who can inspect them, project them, catalogue them and interpret them now?'",
+      "confidence": "Nanbigne’s dissertation records the historical account and participant testimony; current custody must be verified film by film.",
+      "evidenceRef": "ghana-lost-reels-dissertation",
+      "published": true,
+      "references": [
+        {
+          "label": "Vitus Nanbigne — Cinema in Ghana: History, Ideology and Popular Culture",
+          "url": "https://citeseerx.ist.psu.edu/document?doi=f3307aae92aa82daa6402edcf5e6bfc5ba3b4cd6&repid=rep1&type=pdf"
+        },
+        {
+          "label": "Oxford — UNREST: African film heritage restitution",
+          "url": "https://www.qeh.ox.ac.uk/news/unrest-new-agenda-african-film-heritage-restitution"
+        },
+        {
+          "label": "Rebecca Ohene-Asah — Decolonizing the Colonial Film Archive",
+          "url": "https://doi.org/10.4324/9781003701620-5"
+        }
+      ],
+      "personIds": [],
+      "timelineIds": [
+        "ghana-film-archive-crisis-1986-2000",
+        "african-film-heritage-project-2019"
+      ]
+    },
+    {
+      "id": "ghana-video-revolution",
+      "title": "The video revolution the state studio did not understand",
+      "kicker": "GHANA · VIDEO / EXHIBITION",
+      "summary": "The late-1980s Ghanaian video-film movement challenged the assumptions of the celluloid-era institutions. Nanbigne’s account describes GFIC rejecting a video-film screening as inferior, while private cinemas and video parlours built alternative exhibition routes. The shift was not only technological; it was a struggle over who could define cinema and where audiences would watch it.",
+      "reframe": "The institution that once represented national cinema could become an obstacle to a new popular form. The future arrived through the doors the old studio refused to open.",
+      "whyItMatters": "It connects the later Ghanaian video industry to an earlier conflict over format, legitimacy, distribution and the economics of exhibition.",
+      "confidence": "Historical account from Nanbigne’s dissertation; additional oral histories would strengthen the detail.",
+      "evidenceRef": "ghana-video-revolution-dissertation",
+      "published": true,
+      "references": [
+        {
+          "label": "Vitus Nanbigne — Cinema in Ghana: History, Ideology and Popular Culture",
+          "url": "https://citeseerx.ist.psu.edu/document?doi=f3307aae92aa82daa6402edcf5e6bfc5ba3b4cd6&repid=rep1&type=pdf"
+        }
+      ],
+      "personIds": [],
+      "timelineIds": [
+        "ghana-video-film-breakthrough-1987-89"
+      ]
     }
   ],
   "people": [
@@ -253,10 +332,10 @@
       "id": "kwaw-ansah",
       "title": "Kwaw Ansah",
       "kicker": "GHANA · DIRECTOR / PRODUCER",
-      "summary": "Kwaw Ansah’s Love Brewed in the African Pot and Heritage Africa are central to modern Ghanaian screen history. His career also reaches beyond directing into institution-building and advocacy for African production, funding and distribution. His work is a useful entry point into the question of what national independence should look and sound like on screen.",
-      "reframe": "Do not reduce Ansah to one 'classic' title. His filmography and industry advocacy connect narrative cinema to the harder political economy of who gets to produce and circulate African films.",
-      "whyItMatters": "Ghanaian cinema history is not only a sequence of films; it is also a struggle over the infrastructure that makes films possible.",
-      "confidence": "Biography and filmography sourced from African Film Festival, Inc.; interpretation is editorial.",
+      "summary": "Kwaw Ansah’s Love Brewed in the African Pot and Heritage Africa are central to modern Ghanaian screen history. But the production story is just as important: a 2011 University of Bergen dissertation reports that Ansah struggled to obtain bank finance for Love Brewed and that his father-in-law used a house and cocoa farm as collateral. Ansah’s wider career also reaches into advocacy for African production, funding and distribution.",
+      "reframe": "Ansah is not only a director of celebrated national classics. His career exposes the private financial risk that independent Ghanaian filmmakers sometimes had to assume when the state studio could not fund production.",
+      "whyItMatters": "It turns an abstract discussion of film-industry weakness into a concrete story about the assets, relationships and risks required to get a film made.",
+      "confidence": "Filmography and career from African Film Festival; the financing detail is attributed to Vitus Nanbigne’s 2011 dissertation.",
       "evidenceRef": "kwaw-ansah-aff-biography",
       "published": true,
       "references": [
@@ -267,6 +346,10 @@
         {
           "label": "Ghana National Commission on Culture — Ghanaian film history",
           "url": "https://ghanaculture.gov.gh/the-development-of-ghanaian-film-and-its-cultural-identity/"
+        },
+        {
+          "label": "Vitus Nanbigne — Cinema in Ghana: History, Ideology and Popular Culture",
+          "url": "https://citeseerx.ist.psu.edu/document?doi=f3307aae92aa82daa6402edcf5e6bfc5ba3b4cd6&repid=rep1&type=pdf"
         }
       ],
       "filmography": [
@@ -703,6 +786,24 @@
       ]
     },
     {
+      "id": "gfic-financing-crisis-1970s",
+      "title": "1971–1980: the state studio struggles to finance films",
+      "dateLabel": "1971–1980",
+      "kicker": "GHANA · FILM ECONOMICS",
+      "summary": "Vitus Nanbigne’s 2011 dissertation describes a GFIC that struggled to become commercially self-sustaining, relied on facility rentals and co-productions, and was unable to provide ordinary production finance to independent filmmakers. After a costly co-production debt, Kwaw Ansah struggled for years to finance Love Brewed in the African Pot; Nanbigne reports that his father-in-law eventually put up a house and cocoa farm as collateral for the bank loan.",
+      "reframe": "The familiar nostalgia for a state-backed golden age misses the economic bottleneck. A national studio could possess equipment and infrastructure yet fail to finance the independent films that would define the era.",
+      "whyItMatters": "The cocoa-farm collateral story makes film financing tangible: the survival of a landmark Ghanaian film depended on private family assets when institutional finance failed.",
+      "confidence": "Detailed account in Vitus Nanbigne’s 2011 University of Bergen dissertation, which also draws on interviews; the collateral detail should be attributed to that source, not presented as a government record.",
+      "evidenceRef": "nanbigne-gfic-film-financing",
+      "published": true,
+      "references": [
+        {
+          "label": "Vitus Nanbigne — Cinema in Ghana: History, Ideology and Popular Culture",
+          "url": "https://citeseerx.ist.psu.edu/document?doi=f3307aae92aa82daa6402edcf5e6bfc5ba3b4cd6&repid=rep1&type=pdf"
+        }
+      ]
+    },
+    {
       "id": "sambizanga-1972",
       "title": "1972: Sambizanga puts liberation in lived experience",
       "dateLabel": "1972",
@@ -725,10 +826,10 @@
       "title": "1980 / 1981: Love Brewed in the African Pot",
       "dateLabel": "1980 / 1981 — sources differ",
       "kicker": "GHANA · KWAW ANSAH",
-      "summary": "Love Brewed in the African Pot is widely catalogued as a 1980 film, including in African Film Festival and Filmfest DC records. Some secondary scholarship also gives 1981, which may reflect later circulation, festival recognition or a different dating convention. Until a primary production and premiere record is checked, Vivid preserves the variation rather than pretending every catalogue uses the same date.",
-      "reframe": "The most defensible public-facing date is 1980, supported by film-festival catalogues. The 1981 variant appears in some secondary writing; it should be explained, not presented as an equally established release date.",
-      "whyItMatters": "Filmographies often compress production, premiere, release and award dates into one year. Those events are not interchangeable.",
-      "confidence": "1980 is strongly supported by African Film Festival and Filmfest DC catalogues; 1981 appears in secondary scholarship and needs primary-source clarification.",
+      "summary": "Love Brewed in the African Pot is widely catalogued as a 1980 film. But its financing story is as revealing as its release date: Vitus Nanbigne’s dissertation reports that Ansah completed the script in 1974, struggled for years to secure a bank loan, and eventually received help from his father-in-law, who put a house and cocoa farm up as collateral. The thesis also records why 1981 appears in some secondary dating.",
+      "reframe": "The landmark independent feature did not emerge from a healthy financing system. It was made possible by a family taking a serious financial risk after the state studio could not provide commercial production finance.",
+      "whyItMatters": "The story connects the film’s independence to the material conditions of making it: access to credit, collateral, private risk and the weakness of the studio economy.",
+      "confidence": "Nanbigne’s dissertation provides the financing account and notes the 1980/1981 date variation; African Film Festival and Filmfest DC catalogue the film as 1980.",
       "evidenceRef": "love-brewed-date-variation",
       "published": true,
       "references": [
@@ -743,6 +844,36 @@
         {
           "label": "Vitus Nanbigne — Cinema in Ghana (mentions 1980 / sometimes 1981)",
           "url": "https://citeseerx.ist.psu.edu/document?doi=f3307aae92aa82daa6402edcf5e6bfc5ba3b4cd6&repid=rep1&type=pdf"
+        },
+        {
+          "label": "Vitus Nanbigne — Cinema in Ghana: History, Ideology and Popular Culture",
+          "url": "https://citeseerx.ist.psu.edu/document?doi=f3307aae92aa82daa6402edcf5e6bfc5ba3b4cd6&repid=rep1&type=pdf"
+        }
+      ]
+    },
+    {
+      "id": "ghana-film-archive-crisis-1986-2000",
+      "title": "1986–2000: Ghana’s film memory is damaged, displaced and hard to access",
+      "dateLabel": "1986–2000",
+      "kicker": "GHANA · ARCHIVE CRISIS",
+      "summary": "Nanbigne’s dissertation records a devastating chain of losses: a 1986 fire at GBC-TV destroyed a large film library; after GFIC’s 1996 divestiture, reels including negatives were reportedly left exposed; some prints were rescued by veteran filmmakers and sent to Rank Laboratories in London; later, after a storage-payment dispute, the thesis reports Ghanaian films were left outside the Ghana embassy. By 2000, material held by the Information Services Department was also deteriorating, while working 16mm and 35mm projectors were difficult to find.",
+      "reframe": "The archive problem is not just that old films were forgotten. The dissertation describes physical loss, unstable custody, poor storage, equipment collapse and the practical impossibility of viewing surviving material inside Ghana.",
+      "whyItMatters": "A country can have a rich film history but lose the physical means to see, study and pass that history on. Preservation without access is only partial preservation.",
+      "confidence": "A 2011 scholarly dissertation documents the sequence and cites filmmaker testimony; individual reel histories and present-day custody should be verified against archive inventories before making title-specific claims.",
+      "evidenceRef": "nanbigne-ghana-film-archive-crisis",
+      "published": true,
+      "references": [
+        {
+          "label": "Vitus Nanbigne — Cinema in Ghana: History, Ideology and Popular Culture",
+          "url": "https://citeseerx.ist.psu.edu/document?doi=f3307aae92aa82daa6402edcf5e6bfc5ba3b4cd6&repid=rep1&type=pdf"
+        },
+        {
+          "label": "Oxford — UNREST: African film heritage restitution",
+          "url": "https://www.qeh.ox.ac.uk/news/unrest-new-agenda-african-film-heritage-restitution"
+        },
+        {
+          "label": "UNESCO — African Film Heritage Project",
+          "url": "https://www.unesco.org/en/articles/african-film-heritage-project-cannes-2019"
         }
       ]
     },
@@ -761,6 +892,24 @@
         {
           "label": "African Studies Centre Leiden — Souleymane Cissé",
           "url": "https://www.ascleiden.nl/content/library-weekly/souleymane-cisse"
+        }
+      ]
+    },
+    {
+      "id": "ghana-video-film-breakthrough-1987-89",
+      "title": "1987–1989: video cinema is rejected by the old studio system",
+      "dateLabel": "1987–1989",
+      "kicker": "GHANA · VIDEO-FILM REVOLUTION",
+      "summary": "Nanbigne traces the success of William Akuffo’s Zinabu and the rise of video-film production in the late 1980s. His account says GFIC turned Akuffo away when he tried to screen the video at its Kanda theatre because the corporation regarded video as inferior to cinematic artistry. Private cinemas offered a 'four-wall' arrangement, shifting exhibition risk onto producers; video parlours and home-video systems then became part of the new distribution ecology.",
+      "reframe": "The video-film revolution was not simply a cheaper technical substitute. It exposed an institutional blind spot: a state cinema corporation could defend celluloid standards while a new audience and distribution economy formed outside its doors.",
+      "whyItMatters": "The old industry's rejection of video helps explain why Ghana’s popular film culture moved through private exhibitors, video parlours and informal distribution rather than through the inherited studio network.",
+      "confidence": "Based on Nanbigne’s historical account and interviews; the exact screening negotiations should be checked against additional participant testimony.",
+      "evidenceRef": "nanbigne-ghana-video-revolution",
+      "published": true,
+      "references": [
+        {
+          "label": "Vitus Nanbigne — Cinema in Ghana: History, Ideology and Popular Culture",
+          "url": "https://citeseerx.ist.psu.edu/document?doi=f3307aae92aa82daa6402edcf5e6bfc5ba3b4cd6&repid=rep1&type=pdf"
         }
       ]
     },
@@ -892,10 +1041,10 @@
       "id": "ghana-state-to-independent-cinema",
       "title": "From colonial film unit to Ghanaian screen identity",
       "kicker": "GHANA · INSTITUTIONS",
-      "summary": "Trace the transition from the Gold Coast Film Unit to the Ghana Film Industry Corporation, then connect that institutional story to Kwaw Ansah’s independent filmmaking and advocacy. The journey explores what was inherited, what was transformed and what remained difficult: funding, distribution and control of the national image.",
-      "reframe": "Neither a simple colonial continuity story nor a clean postcolonial rebirth. The evidence points to institutional inheritance being redirected toward new national and Pan-African ambitions.",
-      "whyItMatters": "It connects the history of film organisations to the films audiences remember.",
-      "confidence": "Institutional sources and filmmaker biography; interpretation identified as editorial.",
+      "summary": "Trace the transition from the colonial Film Unit to GFIC, the state's struggle to finance commercial production, Kwaw Ansah’s private financing gamble, the rise of video cinema and the later crisis of the film archive. This is not a simple golden-age-to-decline story: it is a history of institutions, independent risk, format battles and cultural memory.",
+      "reframe": "The state's film institutions could carry national ambition while failing to finance independent production; later, the same system could reject video as inferior while a new popular cinema formed outside it.",
+      "whyItMatters": "It connects the film on screen to the economic and archival systems that determine whether a national cinema can survive.",
+      "confidence": "Based on Ghanaian institutional sources and Nanbigne’s 2011 dissertation; some archive events rely on testimony and need film-by-film verification.",
       "evidenceRef": "ghana-institutional-journey",
       "published": true,
       "references": [
@@ -906,6 +1055,10 @@
         {
           "label": "African Film Festival — Kwaw Ansah",
           "url": "https://africanfilmny.org/directors/kwaw-ansah/"
+        },
+        {
+          "label": "Vitus Nanbigne — Cinema in Ghana: History, Ideology and Popular Culture",
+          "url": "https://citeseerx.ist.psu.edu/document?doi=f3307aae92aa82daa6402edcf5e6bfc5ba3b4cd6&repid=rep1&type=pdf"
         }
       ],
       "personIds": [
@@ -917,7 +1070,10 @@
         "ghana-gfic-1964",
         "love-brewed-1980",
         "heritage-africa-1989",
-        "ghana-audiences-market-power-1960s"
+        "ghana-audiences-market-power-1960s",
+        "gfic-financing-crisis-1970s",
+        "ghana-video-film-breakthrough-1987-89",
+        "ghana-film-archive-crisis-1986-2000"
       ]
     },
     {
@@ -1030,11 +1186,16 @@
         {
           "label": "Accidental Archivism — Ghana audiovisual heritage",
           "url": "https://archivism.meson.press/chapters/trajectories-of-restitution/remnants-of-the-central-film-library-and-the-rethinking-of-ghanas-audio-visual-heritage/"
+        },
+        {
+          "label": "Vitus Nanbigne — Cinema in Ghana: History, Ideology and Popular Culture",
+          "url": "https://citeseerx.ist.psu.edu/document?doi=f3307aae92aa82daa6402edcf5e6bfc5ba3b4cd6&repid=rep1&type=pdf"
         }
       ],
       "personIds": [],
       "timelineIds": [
-        "african-film-heritage-project-2019"
+        "african-film-heritage-project-2019",
+        "ghana-film-archive-crisis-1986-2000"
       ]
     }
   ],
