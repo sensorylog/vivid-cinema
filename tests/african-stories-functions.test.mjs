@@ -237,6 +237,9 @@ test("official YouTube source is validated and published with the exact edition"
   assert.equal(published.versions[0].playbackSources[0].provider, "youtube");
   assert.equal(published.versions[0].playbackSources[0].videoId, "M7lc1UVf-VE");
   assert.equal(published.versions[0].playbackSources[0].enabled, true);
+  assert.equal("evidenceRef" in published.versions[0].playbackSources[0], false);
+  const draft = api.db.records.get("africanWorkDrafts/river-film");
+  assert.equal(draft.versions[0].playbackSources[0].evidenceRef, "creator-channel-verification-001");
 });
 
 test("official platform embeds cannot be published without watch_officially and evidence", async () => {
