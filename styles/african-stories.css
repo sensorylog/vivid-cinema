@@ -65,3 +65,7 @@
 .african-filmflux-status{min-height:24px}
 @media(max-width:680px){.african-player-controls{gap:7px;padding:11px 10px;flex-wrap:wrap}.african-control-progress{order:2;flex-basis:100%;width:100%}.african-control-time{font-size:.68rem}.african-control-button{min-height:40px;padding:0 10px;font-size:.7rem}.african-player-controls #african-control-play{margin-right:auto}}
 @media(prefers-reduced-motion:reduce){.african-platform-grid a{transition:none}}
+
+.african-player-attribution{display:flex;align-items:center;gap:12px;flex-wrap:wrap;width:100%;margin:0;color:#9eacbd;font-size:.72rem;line-height:1.5}
+.african-player-attribution[hidden]{display:none}
+.african-player-attribution a{color:#d4e1f1;font-weight:750;text-decoration:underline;text-underline-offset:3px}
