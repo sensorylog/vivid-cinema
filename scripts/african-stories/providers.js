@@ -88,7 +88,7 @@ export function buildOfficialEmbed(source, { origin = globalThis.location?.origi
         !/^[a-z0-9.-]+$/i.test(instance.hostname) || instance.hostname.includes("..") ||
         instance.hostname === "localhost" || instance.hostname.endsWith(".local") ||
         instance.hostname.endsWith(".internal") || !PEERTUBE_ALLOWED_HOSTS.has(instance.hostname.toLowerCase())) {
-      throw new TypeError("PeerTube source must use a reviewed instance origin (peer.tube or framatube.org).");
+      throw new TypeError("Invalid PeerTube instance origin: use a reviewed instance (peer.tube or framatube.org).");
     }
     if (!UUID.test(item.videoUuid || "")) throw new TypeError("Invalid PeerTube video UUID.");
     const url = new URL("/videos/embed/" + item.videoUuid, instance.origin);
@@ -109,7 +109,7 @@ export async function resolveInternetArchiveFile(source, fetchImpl = fetch) {
     throw new TypeError("Invalid Internet Archive filename.");
   }
   if (!ARCHIVE_RIGHTS_BASES.has(item.rightsBasis)) {
-    throw new Error("Public archive playback requires a public-domain or supported Creative Commons basis. Written-permission streams need the separate territory/window entitlement workflow.");
+    throw new Error("Archive playback has no recognized public-domain or supported Creative Commons rights basis. Written-permission streams need the separate territory/window entitlement workflow.");
   }
   const attributionText = cleanText(item.attributionText, 500);
   if (["cc_by","cc_by_sa"].includes(item.rightsBasis) && attributionText.length < 10) {

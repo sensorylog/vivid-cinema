@@ -294,6 +294,9 @@ async function attachPeerTubeController(generation) {
   player.addEventListener("playbackStatusUpdate", status => {
     const duration = Number(status?.duration) || lastDuration;
     updateProgress(status?.position, duration, status?.playbackState === "playing");
+    if (Number.isFinite(Number(status?.volume))) {
+      muteButton.textContent = Number(status.volume) <= 0.001 ? "Unmute" : "Mute";
+    }
   });
   player.addEventListener("playbackStatusChange", status => {
     if (status?.playbackState) playButton.textContent = status.playbackState === "playing" ? "Pause" : "Play";
