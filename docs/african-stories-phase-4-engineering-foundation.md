@@ -70,7 +70,7 @@ Vivid playback entitlement is computed from the private title/version rights gra
 
 - Production trusted geolocation/territory integration and spoof-resistant ingress configuration.
 - Actual provider contracts, title/version chain-of-title and written playback permissions.
-- Protected partner-session adapter implementations and provider-specific authentication/token refresh for contracted CDNs. Public-source adapters for YouTube, Vimeo, Dailymotion, reviewed PeerTube instances and eligible Internet Archive files are implemented in `scripts/african-stories/providers.js` and the dedicated player. FilmFlux's documented public trending feed is implemented as a discovery connector.
+- Protected partner-session adapter implementations and provider-specific authentication/token refresh for contracted CDNs. Public-source adapters for YouTube, Vimeo, Dailymotion, Rumble, reviewed PeerTube instances and eligible Internet Archive files are implemented in `scripts/african-stories/providers.js` and the dedicated player. FilmFlux's documented public trending feed is implemented as a discovery connector.
 - Production monitoring and terms/attribution review for the FilmFlux public discovery endpoint. The client connector fails gracefully; no full catalogue bulk feed is assumed.
 - Technical/partner diligence for Wazi Movies, NG-Movies, AfriDocs and CINAF; no API or syndication rights are assumed.
 - CSP and code allowlist updates for each additional PeerTube instance or partner embed origin. Current PeerTube allowlist is limited to `framatube.org` and `peer.tube`; Vimeo and FilmFlux/Internet Archive origins are added.
@@ -88,7 +88,7 @@ The repository test suite and GitHub Actions are the verification source of trut
 1. Run and fix the Functions syntax and unit tests.
 2. Run Firestore emulator rules tests and verify every new private namespace is inaccessible to browser clients.
 3. Complete the catalogue/admin editorial experience and source/asset provenance handling.
-4. Continue production QA for the implemented YouTube/Vimeo/Dailymotion/PeerTube/Internet Archive adapters and FilmFlux connector; add new PeerTube origins only after review. Keep protected partner CDN integrations behind provider-specific contracts and session adapters.
+4. Continue production QA for the implemented YouTube/Vimeo/Dailymotion/Rumble/PeerTube/Internet Archive adapters and FilmFlux connector; add new PeerTube origins only after review. Keep protected partner CDN integrations behind provider-specific contracts and session adapters.
 5. Integrate a trusted territory resolver and exact CSP origin only after ingress spoofing tests.
 6. Add session revocation, expiry jobs, audit review, kill switches and monitoring.
 7. Run all existing playback, downloads, account, PWA, Android and desktop regression suites.
