@@ -812,6 +812,51 @@ service cloud.firestore {
       allow update, delete: if false;
     }
 
+    // African Stories public catalogue projections are read-only to clients.
+    // Privileged publication and every private workflow use Cloud Functions/Admin SDK.
+    match /africanWorksPublic/{workId} {
+      allow get, list: if true;
+      allow create, update, delete: if false;
+    }
+    match /africanPeoplePublic/{personId} {
+      allow get, list: if true;
+      allow create, update, delete: if false;
+    }
+    match /africanInstitutionsPublic/{institutionId} {
+      allow get, list: if true;
+      allow create, update, delete: if false;
+    }
+    match /africanCollectionsPublic/{collectionId} {
+      allow get, list: if true;
+      allow create, update, delete: if false;
+    }
+    match /africanTimelinesPublic/{entryId} {
+      allow get, list: if true;
+      allow create, update, delete: if false;
+    }
+
+    // Drafts, rights grants, provider configuration, review queues, sessions
+    // and audit events contain private or security-sensitive data. No browser
+    // client, including a custom-claim holder, may access these documents.
+    match /africanWorkDrafts/{document=**} {
+      allow read, write: if false;
+    }
+    match /africanRightsGrants/{document=**} {
+      allow read, write: if false;
+    }
+    match /africanProviderRegistryPrivate/{document=**} {
+      allow read, write: if false;
+    }
+    match /africanEditorialQueue/{document=**} {
+      allow read, write: if false;
+    }
+    match /africanPlaybackSessions/{document=**} {
+      allow read, write: if false;
+    }
+    match /africanAuditEvents/{document=**} {
+      allow read, write: if false;
+    }
+
     match /{document=**} {
       allow read, write: if false;
     }
