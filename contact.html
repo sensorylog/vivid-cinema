@@ -10,7 +10,7 @@
 <div class="vivid-contact-lead"><span class="vivid-contact-icon"><i class="bi bi-shield-check" aria-hidden="true"></i></span><div><strong>Your information deserves care.</strong><p>Share only what is needed to investigate. Never send a password, one-time verification code, private key, full payment-card number or government identity document through this form.</p></div></div>
 <div class="vivid-contact-grid">
 <div><h2><i class="bi bi-headset" aria-hidden="true"></i> Product support</h2><p>Sign-in, account settings, search, library, downloads, playback and general product issues.</p></div>
-<div><h2><i class="bi bi-people" aria-hidden="true"></i> Watch Rooms</h2><p>Invitations, room membership, shared queues, chat, host permissions and playback synchronisation.</p></div>
+
 <div><h2><i class="bi bi-shield-lock" aria-hidden="true"></i> Privacy & trust</h2><p>Access, correction, deletion, objections, accessibility feedback, copyright notices and responsible security reports.</p></div>
 </div>
 <form id="contactForm" class="vivid-contact-form" method="POST" enctype="multipart/form-data" action="https://formspree.io/f/mwpokaav">
@@ -19,8 +19,8 @@
 <label>Your name<input name="name" autocomplete="name" maxlength="100" required></label>
 <label>Reply email<input type="email" name="email" autocomplete="email" maxlength="254" required></label>
 <label>How can we help?
-<select name="reason" required><option value="">Choose a request type</option><option>Account and sign-in support</option><option>Playback or streaming provider</option><option>Watch Rooms or Cinema Clubs</option><option>Library, downloads or app issue</option><option>Privacy request</option><option>Copyright or rights complaint</option><option>Accessibility feedback</option><option>Security vulnerability report</option><option>Legal question</option><option>General feedback</option><option>Other</option></select></label>
-<label>Room or reference ID <span class="vivid-field-optional">Optional. Include this only if it helps us locate the issue. Never include an invitation secret or password.</span><input name="reference_id" maxlength="128" autocomplete="off"></label>
+<select name="reason" required><option value="">Choose a request type</option><option>Account and sign-in support</option><option>Playback or streaming provider</option><option>Legacy community data request</option><option>Library, downloads or app issue</option><option>Privacy request</option><option>Copyright or rights complaint</option><option>Accessibility feedback</option><option>Security vulnerability report</option><option>Legal question</option><option>General feedback</option><option>Other</option></select></label>
+<label>Reference ID <span class="vivid-field-optional">Optional. Include this only if it helps us locate the issue. Never include passwords or authentication codes.</span><input name="reference_id" maxlength="128" autocomplete="off"></label>
 <label>Message<textarea name="message" rows="8" maxlength="5000" required placeholder="Describe what happened, what you expected, and the steps we can use to understand the issue…"></textarea></label>
 <label>Screenshot <span class="vivid-field-optional">Optional. Attach a relevant image only after checking that it contains no private messages, credentials or financial information.</span><input type="file" name="screenshot" accept="image/png,image/jpeg,image/webp"></label>
 <label class="vivid-contact-check"><input type="checkbox" name="safe_submission" value="confirmed" required><span>I confirm that I have not included passwords, one-time codes, private keys, payment-card details or unnecessary sensitive information.</span></label>
