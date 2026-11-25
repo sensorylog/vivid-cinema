@@ -21,17 +21,20 @@ test("native advertising supports independent, optional placement units", async 
 test("all approved browsing pages define a primary and optional secondary position", async () => {
   const advertising = await readFile(path.join(root, "scripts", "advertising.js"), "utf8");
   for (const page of ["home", "discover", "collection", '"for-you"', "anime"]) {
-    const escaped = page.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-    const pageBlock = advertising.match(new RegExp(`(?:^|\\n)\\s*${escaped}: \\\[([\\s\\S]*?)\\n  \\]`, "m"));
-    assert.ok(pageBlock, `missing placement configuration for ${page}`);
-    assert.match(pageBlock[1], /key: "primary"/);
-    assert.match(pageBlock[1], /key: "secondary"/);
+    const pageStart = advertising.indexOf(`${page}: [`);
+    assert.notEqual(pageStart, -1, `missing placement configuration for ${page}`);
+    const pageEnd = advertising.indexOf("\n  ]", pageStart);
+    assert.notEqual(pageEnd, -1, `unterminated placement configuration for ${page}`);
+    const pageConfig = advertising.slice(pageStart, pageEnd);
+    assert.match(pageConfig, /key: "primary"/);
+    assert.match(pageConfig, /key: "secondary"/);
   }
   assert.match(advertising, /"watch", "watch-room", "watch-rooms", "live"/);
 });
 
 test("native ad presentation does not crop provider creatives", async () => {
   const style = await readFile(path.join(root, "styles", "vivid-advertising.css"), "utf8");
+  const advertising = await readFile(path.join(root, "scripts", "advertising.js"), "utf8");
   assert.doesNotMatch(style, /max-height\s*:/);
   assert.doesNotMatch(style, /overflow\s*:\s*hidden/);
   assert.match(advertising, /Sponsored/);
