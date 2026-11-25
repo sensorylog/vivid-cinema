@@ -7,6 +7,15 @@ const AD_CONFIG = Object.freeze({
   maxNativeRequestsPerSession: 8,
   maxNativePlacementsPerPage: 2,
   socialBarSrc: "https://bancadeltempoidea.org/14/51cedddacdb3782114144ec932519319",
+  // Popunder remains deliberately disabled until Adsterra confirms a
+  // network-side limit of one impression per visitor per 24 hours.
+  popunder: Object.freeze({
+    enabled: false,
+    frequencyCapConfirmed: false,
+    src: "https://aarems.org/1/afc16a6f6fd987b460882c312398d244",
+    maxScriptLoadsPerVisitorMs: 24 * 60 * 60 * 1000,
+    eligiblePages: Object.freeze(["home", "discover", "collection", "for-you", "anime"])
+  }),
   nativeBannerUnits: Object.freeze({
     primary: Object.freeze({
       enabled: true,
@@ -170,10 +179,38 @@ function loadSocialBar() {
   document.body.append(script);
 }
 
+function loadPopunder(page) {
+  const config = AD_CONFIG.popunder;
+  // Never execute this third-party script until both the feature switch and
+  // Adsterra's requested network-side frequency cap have been confirmed.
+  if (!config?.enabled || !config.frequencyCapConfirmed || !config.src) return;
+  if (!config.eligiblePages.includes(page) || EXCLUDED_PAGES.has(page)) return;
+
+  const storageKey = "vivid:popunder:last-script-load";
+  try {
+    const lastLoaded = Number(localStorage.getItem(storageKey) || 0);
+    if (Number.isFinite(lastLoaded) && lastLoaded > 0 &&
+        Date.now() - lastLoaded < config.maxScriptLoadsPerVisitorMs) return;
+    // Record before insertion so reloads cannot repeatedly request the tag.
+    localStorage.setItem(storageKey, String(Date.now()));
+  } catch {
+    // Fail closed when storage is unavailable; do not load an uncapped popunder.
+    return;
+  }
+
+  const script = document.createElement("script");
+  script.async = true;
+  script.dataset.cfasync = "false";
+  script.dataset.vividPopunder = "true";
+  script.src = config.src;
+  document.head.append(script);
+}
+
 function initVividAdvertising() {
   const page = currentPage();
   if (EXCLUDED_PAGES.has(page)) return;
   createNativePlacements();
+  loadPopunder(page);
   loadSocialBar();
 }
 
