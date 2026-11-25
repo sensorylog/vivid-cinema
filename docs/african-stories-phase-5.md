@@ -13,7 +13,7 @@ The destination is a screen library and story atlas, not a social feed or a gene
 
 ## Researched editorial starter set
 
-The current starter set contains eighteen collections, fifteen people/profiles, twenty-nine timeline milestones, eight documentary journeys and six reviewed discovery-only title records. It deliberately begins with deeper coverage of Ghana, Nigeria, Senegal, Mali, Mauritania, Egypt, Kenya, Angola, Eswatini and South Africa rather than pretending every country has equally researched coverage.
+The current starter set contains eighteen collections, fifteen people/profiles, thirty-one timeline milestones, eight documentary journeys and six reviewed discovery-only title records. It deliberately begins with deeper coverage of Ghana, Nigeria, Senegal, Mali, Mauritania, Egypt, Kenya, Angola, Eswatini and South Africa rather than pretending every country has equally researched coverage.
 
 The editorial layer prioritises questions that are often flattened in popular summaries:
 
@@ -39,6 +39,7 @@ The current editorial set adds five connected research strands:
 
 - **Women and archival silences:** Annette Mbaye d’Erneville as a critic and institution-builder; Safi Faye and Thérèse Sita-Bella as filmmakers whose works are difficult to locate; and Sarah Maldoror’s work within the anti-colonial screen history. The interface does not imply that a film is currently available just because scholarship names it.
 - **Nollywood’s multiple beginnings:** a 2024 thesis maps disputed early-video claims, including Yoruba travelling-theatre lineages and experiments in Onitsha, Enugu and Port Harcourt. Living in Bondage remains an important commercial landmark, not a definitive answer to every "first" question.
+- **Nollywood’s audience economy:** household-to-household VHS sharing and communal viewing are connected to the later shift toward smartphone streaming and more individualised viewing.
 - **Clandestine anti-apartheid documentary:** Morena Films, Nana Mahomo, Phela-Ndaba / End of the Dialogue (1970), Last Grave at Dimbaza (1974), international circulation and the official counter-film response.
 - **Archive scale versus practical access:** the Mayibuye Archive reports acquiring approximately 5,000 Beta recordings in 2000 and explicitly says its online inventories remain a work in progress.
 - **Ghanaian audiovisual preservation:** Rebecca Ohene-Asah’s peer-reviewed research connects storage and preservation practices to the public’s ability to access historical film materials.
