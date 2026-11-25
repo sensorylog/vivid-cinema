@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import { accessLabel, filterAfricanCountries, filterAfricanTitles, validEditorialRecord } from "../scripts/african-stories/discovery-data.js";
+import { accessLabel, filterAfricanCountries, filterAfricanTitles, validEditorialRecord, validAfricanTitleRecord } from "../scripts/african-stories/discovery-data.js";
 
 const experience = JSON.parse(await readFile(new URL("../data/african-stories-experience.json", import.meta.url), "utf8"));
 
@@ -27,8 +27,22 @@ test("title discovery filters by country, format and query", () => {
 });
 
 test("editorial records require publication and an evidence reference", () => {
-  assert.equal(validEditorialRecord({ id: "profile-1", title: "Filmmaker", summary: "A sourced profile", evidenceRef: "archive-record-1", published: true }), true);
+  assert.equal(validEditorialRecord({ id: "profile-1", title: "Filmmaker", summary: "A sourced profile", evidenceRef: "archive-record-1", references: [{ label: "Archive record", url: "https://archive.example/record/1" }], published: true }), true);
   assert.equal(validEditorialRecord({ id: "profile-2", title: "Unverified profile", summary: "No source", published: true }), false);
+});
+
+
+test("title records require provenance, edition identity and editorial approval", () => {
+  const record = {
+    id: "film-001", editionId: "film-001-restored", published: true,
+    title: "A sourced film", synopsis: "A verified synopsis.", countryCode: "GH",
+    format: "documentary", accessState: "discover_archive_record",
+    provenance: { evidenceRef: "archive-item-1", sourceUrl: "https://archive.example/item/1" },
+    editorialReview: { status: "approved", reviewedAt: "2026-11-25T00:00:00.000Z" }
+  };
+  assert.equal(validAfricanTitleRecord(record), true);
+  assert.equal(validAfricanTitleRecord({ ...record, provenance: {} }), false);
+  assert.equal(validAfricanTitleRecord({ ...record, editorialReview: { status: "pending" } }), false);
 });
 
 test("access labels keep discovery separate from viewing rights", () => {
