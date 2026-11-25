@@ -25,7 +25,7 @@ export function validateAfricanPlaybackSource(source) {
     throw new TypeError("This playback source is not enabled by the published catalogue.");
   }
   const provider = source.provider;
-  if (!["youtube","vimeo","peertube","archive"].includes(provider)) {
+  if (!["youtube","vimeo","dailymotion","peertube","archive"].includes(provider)) {
     throw new TypeError("Unsupported African Stories playback provider.");
   }
   const sourceId = cleanText(source.sourceId, 80);
@@ -54,6 +54,14 @@ export function buildOfficialEmbed(source, { origin = globalThis.location?.origi
     }
     url.searchParams.set("dnt", "1");
     return { provider: item.provider, url: url.toString(), origin: url.origin, title: cleanText(item.label) || "Official Vimeo player" };
+  }
+  if (item.provider === "dailymotion") {
+    if (!/^[A-Za-z0-9]{6,16}$/.test(item.videoId || "") || !/^[A-Za-z0-9]{4,32}$/.test(item.playerId || "")) {
+      throw new TypeError("Dailymotion requires a valid video ID and creator-provided Player ID.");
+    }
+    const url = new URL("/player/" + item.playerId + ".html", "https://geo.dailymotion.com");
+    url.searchParams.set("video", item.videoId);
+    return { provider: item.provider, url: url.toString(), origin: url.origin, title: cleanText(item.label) || "Official Dailymotion player" };
   }
   if (item.provider === "peertube") {
     let instance;
@@ -143,6 +151,7 @@ export function getOfficialSourceFallback(source) {
       if (item.vimeoHash && /^[A-Za-z0-9]{6,80}$/.test(item.vimeoHash)) url.searchParams.set("h", item.vimeoHash);
       return url.toString();
     }
+    if (item.provider === "dailymotion" && /^[A-Za-z0-9]{6,16}$/.test(item.videoId || "")) return "https://www.dailymotion.com/video/" + item.videoId;
     if (item.provider === "peertube") return buildOfficialEmbed(item).url.replace("/videos/embed/", "/videos/watch/");
     if (item.provider === "archive" && ARCHIVE_ID.test(item.archiveIdentifier || "")) return "https://archive.org/details/" + encodeURIComponent(item.archiveIdentifier);
   } catch {}
