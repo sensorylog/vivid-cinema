@@ -34,7 +34,7 @@ test("native ad presentation does not crop provider creatives", async () => {
   const style = await readFile(path.join(root, "styles", "vivid-advertising.css"), "utf8");
   assert.doesNotMatch(style, /max-height\s*:/);
   assert.doesNotMatch(style, /overflow\s*:\s*hidden/);
-  assert.match(style, /Sponsored/);
+  assert.match(advertising, /Sponsored/);
 });
 
 test("Adsterra script origin is explicitly allowed by the site CSP", async () => {
