@@ -24,11 +24,11 @@ class FakeDb {
             const value = this.records.get(key);
             return { exists: value !== undefined, data: () => value };
           },
-          set: async value => { this.records.set(key, structuredClone(value)); },
+          set: async value => { this.records.set(key, value); },
           update: async value => {
             const current = this.records.get(key);
             if (!current) throw new Error("missing record");
-            this.records.set(key, { ...current, ...structuredClone(value) });
+            this.records.set(key, { ...current, ...value });
           }
         };
       }
