@@ -63,7 +63,7 @@ Vivid playback entitlement is computed from the private title/version rights gra
 - `scripts/african-stories/player.js` loads an exact published work/version from the public catalogue, renders only editorially enabled sources, switches between official platform embeds and the HTML5 archive player, and preserves original-platform/archive fallbacks.
 - FilmFlux trending discovery is available at `african-stories-watch.html?provider=filmflux`. The feed is credited and its YouTube IDs are played through YouTube's own player.
 - The player includes a curated external directory for Wazi Movies, NG-Movies, AfriDocs and CINAF. These are official outbound destinations, not falsely represented as integrated APIs or Vivid-hosted streams.
-- Version source records are validated by `saveAfricanWorkDraft` and published only with the exact edition. Official embeds require `watch_officially` plus an evidence reference. Archive playback requires an explicit rights basis and evidence reference; the player verifies the exact public file at runtime.
+- Version source records are validated by `saveAfricanWorkDraft` and published only with the exact edition. Official embeds require `watch_officially` plus an evidence reference. Archive playback requires an explicit rights basis and evidence reference; the player verifies the exact public file at runtime. The restricted operations console now provides provider source templates. Evidence references stay private in drafts and are removed from the public projection.
 - Provider adapter unit tests are included in `tests/african-stories-providers.test.mjs`; callable validation tests cover published official and archive source records. Test results are pending until CI runs for the final head.
 
 ## Not yet complete
