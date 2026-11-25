@@ -107,7 +107,7 @@ test("Ghanaian research contributors are credited and connected to their source 
 
 test("African film histories include camera restrictions, domestic censorship and festival gatekeeping", () => {
   const byId = id => experience.timelines.find(item => item.id === id);
-  assert.ok(byId("laval-decree-1934").summary.includes("prevented colonised people from filming"));
+  assert.ok(byId("laval-decree-1934").summary.includes("restricted colonised people from filming"));
   assert.ok(byId("laval-decree-overturned-1960").summary.includes("overturned in 1960"));
   assert.ok(byId("cairo-station-1958-censorship").summary.includes("more than a decade"));
   assert.ok(byId("fespaco-nollywood-2015").summary.includes("effectively excluded"));

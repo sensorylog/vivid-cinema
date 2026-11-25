@@ -47,6 +47,7 @@
 .african-discovery-hero h1{margin:0;font-size:clamp(3.2rem,10vw,7.8rem);line-height:.92;letter-spacing:-.075em}
 .african-discovery-hero h1 em{color:#c8d8e8;font-style:normal}
 .african-hero-copy{max-width:640px;margin:22px 0;color:#b6bfcd;font-size:clamp(1rem,2vw,1.2rem);line-height:1.7}
+.african-development-notice{display:flex;align-items:flex-start;gap:14px;max-width:860px;margin:24px 0 8px;padding:16px 18px;border:1px solid rgba(190,202,220,.16);border-radius:14px;background:rgba(255,255,255,.035)}.african-development-notice p{margin:0;color:#b8c2d0;font-size:.88rem;line-height:1.65}.african-development-pill{flex:0 0 auto;padding:6px 9px;border:1px solid rgba(190,202,220,.22);border-radius:999px;color:#d0d9e5;font-size:.62rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase}@media(max-width:640px){.african-development-notice{display:block}.african-development-pill{display:inline-flex;margin-bottom:10px}}
 .african-discovery-search{display:grid;grid-template-columns:minmax(220px,1fr) repeat(3,minmax(130px,180px));gap:10px;max-width:920px;margin-top:28px}
 .african-discovery-search input,.african-discovery-search select{min-height:50px;width:100%;padding:0 15px;border:1px solid rgba(255,255,255,.17);border-radius:10px;background:#111720;color:#f5f6f8;font:inherit}
 .african-discovery-status{margin:14px 0 0;color:#9eacbd;font-size:.82rem}
