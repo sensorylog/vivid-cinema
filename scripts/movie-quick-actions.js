@@ -262,7 +262,9 @@ function init() {
   document.addEventListener("pointercancel", clearPending, true);
   document.addEventListener("click", onClickCapture, true);
   document.addEventListener("contextmenu", event => {
-    if (event.target.closest(CARD_SELECTOR) && Date.now() < suppressClickUntil) event.preventDefault();
+    if (event.target.closest(CARD_SELECTOR) && window.matchMedia?.("(pointer: coarse)")?.matches) {
+      event.preventDefault();
+    }
   }, true);
 }
 
