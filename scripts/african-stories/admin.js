@@ -73,6 +73,11 @@ const sourceTemplates = {
     sourceId: "official-vimeo", provider: "vimeo", videoId: "REPLACE_VIMEO_ID", vimeoHash: "",
     label: "Official Vimeo upload", enabled: true, evidenceRef: "REPLACE_WITH_CREATOR_VERIFICATION_RECORD"
   },
+  dailymotion: {
+    sourceId: "official-dailymotion", provider: "dailymotion", videoId: "REPLACE_DAILYMOTION_ID",
+    playerId: "REPLACE_CREATOR_PLAYER_ID", label: "Official Dailymotion upload",
+    enabled: true, evidenceRef: "REPLACE_WITH_CREATOR_VERIFICATION_RECORD"
+  },
   peertube: {
     sourceId: "official-peertube", provider: "peertube", instanceOrigin: "https://peer.tube",
     videoUuid: "00000000-0000-4000-8000-000000000000", label: "Official PeerTube upload",
