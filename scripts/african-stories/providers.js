@@ -33,7 +33,7 @@ export function validateAfricanPlaybackSource(source) {
   return { ...source, sourceId, provider };
 }
 
-export function buildOfficialEmbed(source, { origin = window.location.origin } = {}) {
+export function buildOfficialEmbed(source, { origin = globalThis.location?.origin || "https://vivid-cinema.example" } = {}) {
   const item = validateAfricanPlaybackSource(source);
   const referrerOrigin = new URL(origin).origin;
   if (item.provider === "youtube") {
