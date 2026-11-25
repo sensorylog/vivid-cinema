@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "catalogueVersion": "2026-11-25.3",
+  "catalogueVersion": "2026-11-25.2",
   "regions": [
     {
       "id": "north",
@@ -26,6 +26,866 @@
       "id": "south",
       "name": "Southern Africa",
       "description": "Cinema and audiovisual heritage from Southern Africa."
+    }
+  ],
+  "collections": [
+    {
+      "id": "colonial-screen-censorship",
+      "title": "The empire behind the projector",
+      "kicker": "POWER · GOLD COAST",
+      "summary": "Colonial film in the Gold Coast was not a neutral window onto modern life. Exhibition, licensing, censorship and mobile projection formed part of a system that promoted imperial priorities while deciding which images and arguments were acceptable. The uncomfortable question is not simply what films were shown, but who had the authority to select, regulate and explain them.",
+      "reframe": "The popular shorthand says colonial authorities brought cinema to African audiences as education and entertainment. Archival scholarship shows a more complicated arrangement: cinema also helped manage colonial subjects, and censorship targeted challenges to authority.",
+      "whyItMatters": "It changes the starting point of Ghanaian film history: before asking when Ghanaians began making films, ask who controlled the screens and the rules around them.",
+      "confidence": "Strongly documented; local audience reception remains an area for further archival work.",
+      "evidenceRef": "gold-coast-cinema-scholarship",
+      "published": true,
+      "references": [
+        {
+          "label": "Augustine Danso — Gold Coast cinema and regulation",
+          "url": "https://intellectdiscover.com/content/journals/10.1386/jac_00051_1"
+        },
+        {
+          "label": "Odile Goerg — Tropical Dream Palaces",
+          "url": "https://academic.oup.com/book/61453/chapter-abstract/534807150"
+        },
+        {
+          "label": "Films for the Colonies — Colonial Film Unit rules",
+          "url": "https://films-for-the-colonies.wp.st-andrews.ac.uk/chapter-two/"
+        }
+      ],
+      "personIds": [],
+      "timelineIds": [
+        "gold-coast-1918-cinema-regulation",
+        "gold-coast-1923-cinema-exhibition",
+        "gold-coast-film-unit-1947-48"
+      ]
+    },
+    {
+      "id": "nkrumah-state-camera",
+      "title": "The state camera: cinema after independence",
+      "kicker": "GHANA · PAN-AFRICANISM",
+      "summary": "Independence did not mean the camera suddenly became politically neutral. Ghana inherited colonial film infrastructure, then Kwame Nkrumah reorganised it into a national institution and used film to project a Pan-African vision. That vision mattered enormously—but it was also a state-authored narrative, and the distinction deserves scrutiny.",
+      "reframe": "The easy story is colonial film unit bad, national film corporation good. The deeper story is institutional continuity plus a change in political purpose: equipment, personnel and distribution systems could be repurposed, while state power still shaped what was documented.",
+      "whyItMatters": "A national cinema can challenge empire and still produce official memory. Both truths belong in the same history.",
+      "confidence": "Documented institutional history; individual film readings should be assessed title by title.",
+      "evidenceRef": "ghana-film-unit-gfic-pan-africanism",
+      "published": true,
+      "references": [
+        {
+          "label": "Rebecca Ohene-Asah — Documenting Africa on Film and Nkrumah’s Legacy",
+          "url": "https://www.tandfonline.com/doi/full/10.1080/01439685.2021.1907679"
+        },
+        {
+          "label": "Ghana National Commission on Culture — Development of Ghanaian Film",
+          "url": "https://ghanaculture.gov.gh/the-development-of-ghanaian-film-and-its-cultural-identity/"
+        },
+        {
+          "label": "Ghana Ministry — Film historical overview",
+          "url": "https://www.motcca.gov.gh/film/"
+        }
+      ],
+      "personIds": [
+        "kwame-nkrumah"
+      ],
+      "timelineIds": [
+        "ghana-independence-1957",
+        "ghana-gfic-1964"
+      ]
+    },
+    {
+      "id": "nollywood-before-nollywood",
+      "title": "Nollywood did not appear from nowhere",
+      "kicker": "NIGERIA · THE VIDEO REVOLUTION",
+      "summary": "Living in Bondage (1992) is a landmark, but treating it as the birth of Nigerian screen culture erases the Yoruba travelling-theatre tradition, earlier video production, television serials, marketers and the informal cassette economy. The more accurate story is a convergence—not a single inventor or a single film.",
+      "reframe": "The 1992 origin story describes a commercial breakthrough and a powerful branding moment, not the beginning of Nigerian popular screen performance. Scholars trace multiple lineages, and even the label Nollywood arrived later.",
+      "whyItMatters": "The origin debate is also a debate about whose labour gets remembered: theatre practitioners, regional-language performers, traders and distributors often disappear from the headline version.",
+      "confidence": "Strong scholarly debate; avoid assigning a single uncontested birth date.",
+      "evidenceRef": "nollywood-multiple-origins",
+      "published": true,
+      "references": [
+        {
+          "label": "Jonathan Haynes — Creating Nollywood",
+          "url": "https://doi.org/10.7208/chicago/9780226388007.003.0001"
+        },
+        {
+          "label": "Lani Akande — Nollywood Cinema’s Character of Recurrence",
+          "url": "https://scholars.uncw.edu/display/d240218925056"
+        },
+        {
+          "label": "Noah Tsika — Nollywood, Oxford Bibliographies",
+          "url": "https://academic.oup.com/reference/62328/reference-article-abstract/553809173"
+        },
+        {
+          "label": "Abiodun Olayiwola — Yoruba Travelling Theatre and Video Film Development",
+          "url": "https://www.jpanafrican.org/docs/vol4no5/4.5Nollywood.pdf"
+        }
+      ],
+      "personIds": [],
+      "timelineIds": [
+        "yoruba-travelling-theatre-1950s",
+        "living-in-bondage-1992",
+        "nollywood-name-2002"
+      ]
+    },
+    {
+      "id": "women-anti-colonial-camera",
+      "title": "The women the canon keeps at the margins",
+      "kicker": "WOMEN · LIBERATION · FORM",
+      "summary": "Sarah Maldoror’s Sambizanga is not a footnote to a male-centred history of liberation cinema. Her work joins anti-colonial politics to a distinct visual and feminist practice. The wider question is why histories of African cinema so often celebrate women as symbols on screen while giving less space to women directing, organising and shaping the camera.",
+      "reframe": "Calling Maldoror simply the 'mother of African cinema' can honour her while also reducing a complex body of work to a ceremonial label. Her films deserve close formal analysis, not only symbolic recognition.",
+      "whyItMatters": "This collection treats women filmmakers as makers of cinematic language and political thought, not as an inclusion checkbox.",
+      "confidence": "Maldoror’s career and work are documented; broader claims about canon formation are interpretive and open to debate.",
+      "evidenceRef": "sarah-maldoror-bfi-profile",
+      "published": true,
+      "references": [
+        {
+          "label": "BFI — Where to begin with Sarah Maldoror",
+          "url": "https://www.bfi.org.uk/features/where-begin-with-sarah-maldoror"
+        },
+        {
+          "label": "UNESCO — African Film Heritage Project",
+          "url": "https://www.unesco.org/en/articles/african-film-heritage-project-cannes-2019"
+        }
+      ],
+      "personIds": [
+        "sarah-maldoror"
+      ],
+      "timelineIds": [
+        "sambizanga-1972",
+        "african-film-heritage-project-2019"
+      ]
+    },
+    {
+      "id": "sahel-not-a-single-story",
+      "title": "The Sahel is not one cinematic story",
+      "kicker": "MALI · MAURITANIA · SENEGAL",
+      "summary": "From Souleymane Cissé’s social realism and mythic registers to Abderrahmane Sissako’s transnational, border-crossing cinema, filmmakers from the Sahel have never spoken with one voice. Their films move between local languages, state power, migration, memory, religion, gender and the politics of looking.",
+      "reframe": "The export label 'African art cinema' can flatten radically different national histories and artistic strategies into one marketable category. Compare the films and their production contexts rather than treating the region as a single aesthetic.",
+      "whyItMatters": "Regional cinema becomes more legible when we follow differences—language, funding, political history and form—instead of searching for one authentic African style.",
+      "confidence": "Interpretive collection grounded in documented filmmaker careers and film histories.",
+      "evidenceRef": "sahel-filmmakers-research",
+      "published": true,
+      "references": [
+        {
+          "label": "African Studies Centre Leiden — Souleymane Cissé",
+          "url": "https://www.ascleiden.nl/content/library-weekly/souleymane-cisse"
+        },
+        {
+          "label": "Cannes — Abderrahmane Sissako",
+          "url": "https://www.festival-cannes.com/en/p/abderrahmane-sissako/"
+        },
+        {
+          "label": "BFI — Ousmane Sembène",
+          "url": "https://www.bfi.org.uk/features/where-begin-with-ousmane-sembene"
+        }
+      ],
+      "personIds": [
+        "soulemane-cisse",
+        "abderrahmane-sissako",
+        "ousmane-sembene"
+      ],
+      "timelineIds": [
+        "yeelen-cannes-1987",
+        "fespaco-founded-1969"
+      ]
+    },
+    {
+      "id": "archives-who-owns-memory",
+      "title": "The archive is part of the story",
+      "kicker": "RESTORATION · REPATRIATION",
+      "summary": "African moving-image heritage is vulnerable not only because films deteriorate, but because surviving materials are dispersed, inaccessible or held far from the communities whose histories they record. Restoration raises hard questions: who chooses what is saved, who can see it, who controls the master, and who gets to add context?",
+      "reframe": "A restored film is not automatically a returned film. Preservation, access, custody, ownership and interpretive authority are different questions—and a project can make progress on one while leaving the others unresolved.",
+      "whyItMatters": "Vivid should not present an overseas archive link as proof that a community has regained control of its heritage.",
+      "confidence": "The archival dispersal problem is documented; each film’s custody and rights require separate verification.",
+      "evidenceRef": "african-film-heritage-restitution",
+      "published": true,
+      "references": [
+        {
+          "label": "Oxford — UNREST: African film heritage restitution",
+          "url": "https://www.qeh.ox.ac.uk/news/unrest-new-agenda-african-film-heritage-restitution"
+        },
+        {
+          "label": "UNESCO — African Film Heritage Project",
+          "url": "https://www.unesco.org/en/articles/african-film-heritage-project-cannes-2019"
+        },
+        {
+          "label": "Accidental Archivism — Ghana’s audiovisual heritage",
+          "url": "https://archivism.meson.press/chapters/trajectories-of-restitution/remnants-of-the-central-film-library-and-the-rethinking-of-ghanas-audio-visual-heritage/"
+        }
+      ],
+      "personIds": [],
+      "timelineIds": [
+        "african-film-heritage-project-2019"
+      ]
+    }
+  ],
+  "people": [
+    {
+      "id": "kwaw-ansah",
+      "title": "Kwaw Ansah",
+      "kicker": "GHANA · DIRECTOR / PRODUCER",
+      "summary": "Kwaw Ansah’s Love Brewed in the African Pot and Heritage Africa are central to modern Ghanaian screen history. His career also reaches beyond directing into institution-building and advocacy for African production, funding and distribution. His work is a useful entry point into the question of what national independence should look and sound like on screen.",
+      "reframe": "Do not reduce Ansah to one 'classic' title. His filmography and industry advocacy connect narrative cinema to the harder political economy of who gets to produce and circulate African films.",
+      "whyItMatters": "Ghanaian cinema history is not only a sequence of films; it is also a struggle over the infrastructure that makes films possible.",
+      "confidence": "Biography and filmography sourced from African Film Festival, Inc.; interpretation is editorial.",
+      "evidenceRef": "kwaw-ansah-aff-biography",
+      "published": true,
+      "references": [
+        {
+          "label": "African Film Festival — Kwaw Ansah biography and filmography",
+          "url": "https://africanfilmny.org/directors/kwaw-ansah/"
+        },
+        {
+          "label": "Ghana National Commission on Culture — Ghanaian film history",
+          "url": "https://ghanaculture.gov.gh/the-development-of-ghanaian-film-and-its-cultural-identity/"
+        }
+      ],
+      "filmography": [
+        "Love Brewed in the African Pot (1980)",
+        "Heritage Africa (1989)",
+        "Crossroads of People, Crossroads of Trade (1994)"
+      ],
+      "countryCodes": [
+        "GH"
+      ]
+    },
+    {
+      "id": "ousmane-sembene",
+      "title": "Ousmane Sembène",
+      "kicker": "SENEGAL · WRITER / DIRECTOR",
+      "summary": "Sembène moved from writing to filmmaking partly because French-language literature could not reach many of the people he wanted to address. His films used Wolof and other African languages, village screenings and social satire to treat cinema as a public conversation—not merely a route to international recognition.",
+      "reframe": "The 'father of African cinema' label is convenient, but it can make a collective generation look like one man's invention. Sembène himself worked alongside and within a wider ecosystem of filmmakers, organisers and audiences.",
+      "whyItMatters": "The language, distribution and intended audience of a film are not side details; they are part of its politics.",
+      "confidence": "Career and film details documented by BFI and Oxford Bibliographies.",
+      "evidenceRef": "sembene-bfi-oxford",
+      "published": true,
+      "references": [
+        {
+          "label": "BFI — Where to begin with Ousmane Sembène",
+          "url": "https://www.bfi.org.uk/features/where-begin-with-ousmane-sembene"
+        },
+        {
+          "label": "Oxford Bibliographies — Ousmane Sembène",
+          "url": "https://academic.oup.com/reference/62328/reference-article-abstract/553809319"
+        }
+      ],
+      "filmography": [
+        "Borom Sarret (1963)",
+        "Black Girl / La Noire de… (1966)",
+        "Mandabi (1968)",
+        "Xala (1975)",
+        "Camp de Thiaroye (1988)"
+      ],
+      "countryCodes": [
+        "SN"
+      ]
+    },
+    {
+      "id": "soulemane-cisse",
+      "title": "Souleymane Cissé",
+      "kicker": "MALI · DIRECTOR",
+      "summary": "Cissé’s cinema moves between social realism, political critique and the recovery of cultural traditions. Yeelen brought international attention, but his work also examined money, power, patriarchy and everyday life in Mali. He began his film career after encountering cinema through projection work.",
+      "reframe": "Do not let the Cannes prize become the whole story. Yeelen is a landmark, but Cissé’s earlier social and political films show a much broader artistic trajectory.",
+      "whyItMatters": "African filmmakers are often introduced through the festival prize that made them visible abroad. The work before and beyond that moment deserves equal attention.",
+      "confidence": "Career details cross-checked with African Studies Centre Leiden; film interpretation is editorial.",
+      "evidenceRef": "cisse-african-studies-leiden",
+      "published": true,
+      "references": [
+        {
+          "label": "African Studies Centre Leiden — Souleymane Cissé",
+          "url": "https://www.ascleiden.nl/content/library-weekly/souleymane-cisse"
+        }
+      ],
+      "filmography": [
+        "Baara (1978)",
+        "Yeelen (1987)"
+      ],
+      "countryCodes": [
+        "ML"
+      ]
+    },
+    {
+      "id": "sarah-maldoror",
+      "title": "Sarah Maldoror",
+      "kicker": "GUADELOUPE / ANGOLA · DIRECTOR",
+      "summary": "Maldoror brought theatre, anti-colonial organising and a radical visual imagination into filmmaking. Sambizanga (1972), set amid Angola’s liberation struggle, is central to her legacy, but her body of work extends across documentary and fiction and resists being reduced to a single emblematic film.",
+      "reframe": "Her frequent description as the 'mother of African cinema' can obscure the specificity of her practice and the breadth of her two-dozen-film body of work.",
+      "whyItMatters": "A history of liberation cinema that sidelines women directors is not just incomplete; it misunderstands who shaped its forms and political imagination.",
+      "confidence": "Career and film count described by BFI; interpretive framing identified as editorial.",
+      "evidenceRef": "maldoror-bfi-profile",
+      "published": true,
+      "references": [
+        {
+          "label": "BFI — Where to begin with Sarah Maldoror",
+          "url": "https://www.bfi.org.uk/features/where-begin-with-sarah-maldoror"
+        }
+      ],
+      "filmography": [
+        "Sambizanga (1972)"
+      ],
+      "countryCodes": [
+        "AO"
+      ]
+    },
+    {
+      "id": "youssef-chahine",
+      "title": "Youssef Chahine",
+      "kicker": "EGYPT · DIRECTOR / ACTOR",
+      "summary": "Chahine worked within a major Egyptian film industry that was already producing at scale in the 1950s. His films crossed melodrama, social realism, musical form and autobiography, while confronting class, sexuality, corruption and political pressure.",
+      "reframe": "Egyptian cinema should not be treated as a footnote to sub-Saharan African cinema—or collapsed into a generic 'Arab cinema' label. Chahine’s work reveals a distinct industrial history and a complicated relationship with both local audiences and international festivals.",
+      "whyItMatters": "The continental map must hold multiple film histories without pretending they are interchangeable.",
+      "confidence": "Career and selected film analysis sourced from BFI.",
+      "evidenceRef": "chahine-bfi-profile",
+      "published": true,
+      "references": [
+        {
+          "label": "BFI — Where to begin with Youssef Chahine",
+          "url": "https://www.bfi.org.uk/features/where-begin-with-youssef-chahine"
+        }
+      ],
+      "filmography": [
+        "Cairo Station (1958)",
+        "The Land (1969)",
+        "Alexandria… Why? (1979)"
+      ],
+      "countryCodes": [
+        "EG"
+      ]
+    },
+    {
+      "id": "abderrahmane-sissako",
+      "title": "Abderrahmane Sissako",
+      "kicker": "MAURITANIA / MALI · DIRECTOR",
+      "summary": "Born in Mauritania, raised in Mali and trained in Moscow, Sissako’s biography crosses borders in ways that resist tidy national labels. His films examine the relations between North and South, migration, memory and political violence, with Timbuktu bringing global attention to his work.",
+      "reframe": "A director’s nationality is not always a sufficient description of their cinema. Sissako’s formation across Mauritania, Mali, the Soviet Union and France is part of the story—not a footnote.",
+      "whyItMatters": "African cinema is shaped by movement, study, exile and collaboration as much as by national production systems.",
+      "confidence": "Biography and Cannes record sourced from Festival de Cannes.",
+      "evidenceRef": "sissako-cannes-profile",
+      "published": true,
+      "references": [
+        {
+          "label": "Festival de Cannes — Abderrahmane Sissako",
+          "url": "https://www.festival-cannes.com/en/p/abderrahmane-sissako/"
+        }
+      ],
+      "filmography": [
+        "Life on Earth (1998)",
+        "Waiting for Happiness (2002)",
+        "Bamako (2006)",
+        "Timbuktu (2014)"
+      ],
+      "countryCodes": [
+        "MR",
+        "ML"
+      ]
+    },
+    {
+      "id": "zola-maseko",
+      "title": "Zola Maseko",
+      "kicker": "ESWATINI / SOUTH AFRICA · DIRECTOR",
+      "summary": "Born in exile in 1967, Maseko trained at the UK’s National Film and Television School after involvement in the anti-apartheid struggle. His films include The Life and Times of Sara Baartman and Drum, which revisits 1950s Johannesburg through journalist Henry Nxumalo and the magazine culture around Drum.",
+      "reframe": "Maseko’s work links apartheid-era South African memory to older colonial histories of display, racial science and the politics of representation. Sara Baartman’s story is not simply a period subject; it is a continuing argument about who gets to narrate a life.",
+      "whyItMatters": "Historical drama can expose how the past is still organised in the present—but it must be read alongside the historical record.",
+      "confidence": "Biography and filmography sourced from African Film Festival, Inc.",
+      "evidenceRef": "zola-maseko-aff-profile",
+      "published": true,
+      "references": [
+        {
+          "label": "African Film Festival — Zola Maseko biography and filmography",
+          "url": "https://africanfilmny.org/directors/zola-maseko/"
+        }
+      ],
+      "filmography": [
+        "The Life and Times of Sara Baartman (1998)",
+        "Drum (2004)",
+        "The Manuscripts of Timbuktu (2009)"
+      ],
+      "countryCodes": [
+        "SZ",
+        "ZA"
+      ]
+    },
+    {
+      "id": "wanuri-kahiu",
+      "title": "Wanuri Kahiu",
+      "kicker": "KENYA · DIRECTOR / WRITER",
+      "summary": "Kahiu’s work spans Afrofuturist science fiction, intimate drama and stories of queer love. Rafiki became the first Kenyan feature to screen at Cannes and was banned in Kenya, making its reception part of the film’s history rather than a separate controversy.",
+      "reframe": "The global conversation often frames African cinema through trauma, poverty or political crisis. Kahiu’s AfroBubbleGum philosophy explicitly argues for joyful, bold and imaginative African art as an essential part of the picture.",
+      "whyItMatters": "The future, pleasure and speculative imagination are not departures from African reality; they are part of it.",
+      "confidence": "Career and film details drawn from Kahiu’s official biography; reception claims should be checked against local legal records before deeper expansion.",
+      "evidenceRef": "wanuri-kahiu-official-bio",
+      "published": true,
+      "references": [
+        {
+          "label": "Wanuri Kahiu — official biography",
+          "url": "https://www.wanurikahiu.com/bio/"
+        }
+      ],
+      "filmography": [
+        "From a Whisper (2008)",
+        "Pumzi (2009)",
+        "Rafiki (2018)"
+      ],
+      "countryCodes": [
+        "KE"
+      ]
+    }
+  ],
+  "timelines": [
+    {
+      "id": "gold-coast-1918-cinema-regulation",
+      "title": "1918: cinema regulation enters the record",
+      "dateLabel": "1918",
+      "kicker": "GOLD COAST · REGULATION",
+      "summary": "Archival references cited in scholarship include a 1918 licence for cinema exhibition premises in the Gold Coast. This is an important clue that formal cinema regulation predates the often-repeated 1923 starting point. It does not, by itself, establish the first screening or first film shown.",
+      "reframe": "A government timeline that starts in 1923 can be useful as a broad marker, but it should not be mistaken for proof that cinema began in that year. Licensing records and actual exhibition history answer different questions.",
+      "whyItMatters": "The archive may preserve administrative traces earlier than the dates repeated in popular summaries.",
+      "confidence": "Primary archival reference identified in Augustine Danso’s published scholarship; original file should be consulted for a definitive transcription.",
+      "evidenceRef": "danso-1918-licensing-reference",
+      "published": true,
+      "references": [
+        {
+          "label": "Augustine Danso — Reconstructing cinematic activities in early twentieth-century Gold Coast",
+          "url": "https://intellectdiscover.com/content/journals/10.1386/jac_00051_1"
+        }
+      ]
+    },
+    {
+      "id": "gold-coast-1923-cinema-exhibition",
+      "title": "1923: a commonly cited early exhibition milestone",
+      "dateLabel": "1923",
+      "kicker": "GOLD COAST · EXHIBITION",
+      "summary": "Ghana’s Ministry of Tourism, Culture and Creative Arts identifies 1923 as an early milestone in the introduction of cinema in the Gold Coast. That official summary describes early urban exhibition and its class exclusivity. It should be read alongside archival research pointing to earlier regulation and a longer, less tidy history.",
+      "reframe": "1923 is a useful public-history marker, not a complete origin story. Exhibition, regulation, travelling projection and local film production did not necessarily begin at the same moment.",
+      "whyItMatters": "Good history keeps the convenient date while explaining what it does—and does not—prove.",
+      "confidence": "Official Ghana ministry account; interpretation reconciled with academic archival research.",
+      "evidenceRef": "ghana-ministry-film-history",
+      "published": true,
+      "references": [
+        {
+          "label": "Ghana Ministry — Film historical overview",
+          "url": "https://www.motcca.gov.gh/film/"
+        },
+        {
+          "label": "Augustine Danso — Gold Coast cinema research",
+          "url": "https://intellectdiscover.com/content/journals/10.1386/jac_00051_1"
+        }
+      ]
+    },
+    {
+      "id": "gold-coast-film-unit-1947-48",
+      "title": "1947–1948: the Gold Coast Film Unit",
+      "dateLabel": "1947–1948 (sources differ)",
+      "kicker": "COLONIAL FILM UNIT",
+      "summary": "The Gold Coast Film Unit emerged within the colonial Information Services Department. Sources differ on whether to date its establishment to 1947 or 1948; the Ghana ministry account uses 1948, while archival scholarship and heritage research discuss a 1947 foundation. Its work included mobile cinema and public-information films.",
+      "reframe": "The date discrepancy is not a reason to pick whichever year looks neat. It is a reminder that institutions can emerge through a sequence—administrative decision, staffing, production and public operation—rather than one clean birthday.",
+      "whyItMatters": "The unit expanded access to moving images while also carrying colonial educational and ideological priorities.",
+      "confidence": "Institutional existence and function documented; founding year varies by source and is explicitly left unresolved.",
+      "evidenceRef": "gold-coast-film-unit-date-variation",
+      "published": true,
+      "references": [
+        {
+          "label": "Ghana Ministry — Film historical overview (1948)",
+          "url": "https://www.motcca.gov.gh/film/"
+        },
+        {
+          "label": "Accidental Archivism — Ghana’s Central Film Library (1947)",
+          "url": "https://archivism.meson.press/chapters/trajectories-of-restitution/remnants-of-the-central-film-library-and-the-rethinking-of-ghanas-audio-visual-heritage/"
+        },
+        {
+          "label": "Films for the Colonies — Colonial Film Unit",
+          "url": "https://films-for-the-colonies.wp.st-andrews.ac.uk/chapter-two/"
+        }
+      ]
+    },
+    {
+      "id": "ghana-independence-1957",
+      "title": "1957: independence changes the political horizon",
+      "dateLabel": "6 March 1957",
+      "kicker": "GHANA · INDEPENDENCE",
+      "summary": "Ghana’s independence created a new political context for film institutions inherited from colonial administration. The camera could now be mobilised for national development and Pan-African imagination, but the question of who controls production and public memory did not disappear.",
+      "reframe": "Political independence is not the same thing as instant institutional decolonisation. Equipment, bureaucracies, training systems and habits of representation can outlive the flag under which they were built.",
+      "whyItMatters": "The transition from colonial film unit to national film policy deserves to be read as both rupture and continuity.",
+      "confidence": "Date is established historical fact; film-institution interpretation is supported by scholarship.",
+      "evidenceRef": "ghana-independence-film-institutions",
+      "published": true,
+      "references": [
+        {
+          "label": "Rebecca Ohene-Asah — Nkrumah’s Pan-African film legacy",
+          "url": "https://www.tandfonline.com/doi/full/10.1080/01439685.2021.1907679"
+        },
+        {
+          "label": "Ghana National Commission on Culture — Ghanaian film history",
+          "url": "https://ghanaculture.gov.gh/the-development-of-ghanaian-film-and-its-cultural-identity/"
+        }
+      ]
+    },
+    {
+      "id": "ghana-gfic-1964",
+      "title": "1964: Ghana Film Industry Corporation",
+      "dateLabel": "1964",
+      "kicker": "GHANA · STATE CINEMA",
+      "summary": "Nkrumah established the Ghana Film Industry Corporation at Kanda, Accra, reorganising inherited film capacity as part of a national and Pan-African project. Film became a tool for documenting Africa and projecting a political vision beyond Ghana’s borders.",
+      "reframe": "GFIC should not be described only as a golden age lost or as simple state propaganda. Its institutional ambition, production work and political constraints need to be examined together.",
+      "whyItMatters": "This is a major chapter in the history of African state-backed film infrastructure.",
+      "confidence": "Institutional date and broad role documented by Ghana’s cultural institutions and academic research.",
+      "evidenceRef": "gfic-1964",
+      "published": true,
+      "references": [
+        {
+          "label": "Ghana Ministry — Film historical overview",
+          "url": "https://www.motcca.gov.gh/film/"
+        },
+        {
+          "label": "Rebecca Ohene-Asah — Documenting Africa on Film",
+          "url": "https://www.tandfonline.com/doi/full/10.1080/01439685.2021.1907679"
+        }
+      ]
+    },
+    {
+      "id": "fespaco-founded-1969",
+      "title": "1969: FESPACO is founded in Ouagadougou",
+      "dateLabel": "1969",
+      "kicker": "BURKINA FASO · PAN-AFRICAN CINEMA",
+      "summary": "FESPACO began as a small gathering for African filmmakers and audiences and grew into a major continental institution. It offered a recurring space to see films made by Africans and debate what African cinema could be after colonial rule.",
+      "reframe": "FESPACO is not simply a trophy ceremony. It is an institution that has helped define the category 'African cinema'—and has therefore also been a site of arguments over format, aesthetics, access and who gets included.",
+      "whyItMatters": "The festival’s history is also the history of a debate about the meaning and audience of African cinema.",
+      "confidence": "Historical overview and debates documented by Oxford Research Encyclopedia.",
+      "evidenceRef": "fespaco-oxford-history",
+      "published": true,
+      "references": [
+        {
+          "label": "Kate Cowcher — African Films and FESPACO",
+          "url": "https://academic.oup.com/edited-volume/61663/chapter-abstract/553408769"
+        },
+        {
+          "label": "Aboubakar Sanogo — Cine-Agora Africana",
+          "url": "https://online.ucpress.edu/fq/article-abstract/73/2/31/109600/Cine-Agora-Africana-Meditating-on-the-Fiftieth"
+        }
+      ]
+    },
+    {
+      "id": "sambizanga-1972",
+      "title": "1972: Sambizanga puts liberation in lived experience",
+      "dateLabel": "1972",
+      "kicker": "ANGOLA · SARAH MALDOROR",
+      "summary": "Sarah Maldoror’s Sambizanga follows the human cost of anti-colonial struggle through a woman’s search for her imprisoned husband. Its focus on domestic life, waiting, care and political awakening complicates the idea that liberation cinema must be told only through armed heroes and battlefield spectacle.",
+      "reframe": "The film’s political force is not only what it says about the liberation struggle; it is also whose labour, fear and knowledge it places at the centre of that struggle.",
+      "whyItMatters": "It gives a woman filmmaker and a woman’s perspective a central place in the visual memory of Angola’s liberation movement.",
+      "confidence": "Film and filmmaker details documented by BFI.",
+      "evidenceRef": "sambizanga-bfi",
+      "published": true,
+      "references": [
+        {
+          "label": "BFI — Where to begin with Sarah Maldoror",
+          "url": "https://www.bfi.org.uk/features/where-begin-with-sarah-maldoror"
+        }
+      ]
+    },
+    {
+      "id": "love-brewed-1980",
+      "title": "1980 / 1981: Love Brewed in the African Pot",
+      "dateLabel": "1980 / 1981 — sources differ",
+      "kicker": "GHANA · KWAW ANSAH",
+      "summary": "Kwaw Ansah’s Love Brewed in the African Pot is often dated 1980 in film festival and industry records, while some Ghanaian accounts cite 1981. Rather than silently choosing one, Vivid preserves the discrepancy until a primary production or release record settles which date refers to production, premiere or general release.",
+      "reframe": "A one-year disagreement may look trivial, but it is a good example of how national film histories are assembled from festival catalogues, oral memory, press records and later summaries that may refer to different events.",
+      "whyItMatters": "The platform should show its working when the evidence does not support a single tidy date.",
+      "confidence": "Date discrepancy explicitly recorded; African Film Festival lists 1980. Further primary-source verification needed.",
+      "evidenceRef": "love-brewed-date-variation",
+      "published": true,
+      "references": [
+        {
+          "label": "African Film Festival — Kwaw Ansah filmography (1980)",
+          "url": "https://africanfilmny.org/directors/kwaw-ansah/"
+        },
+        {
+          "label": "Ghana Ministry — Film historical overview",
+          "url": "https://www.motcca.gov.gh/film/"
+        }
+      ]
+    },
+    {
+      "id": "yeelen-cannes-1987",
+      "title": "1987: Yeelen wins a Cannes Jury Prize",
+      "dateLabel": "1987",
+      "kicker": "MALI · SOULEYMANE CISSÉ",
+      "summary": "Souleymane Cissé’s Yeelen received the Jury Prize at Cannes, a landmark moment for African cinema at the festival. The achievement is significant, but Cissé’s career had already developed through documentary work, state employment and earlier feature films.",
+      "reframe": "The festival milestone is not the beginning of the filmmaker’s importance. It is the moment a particular international institution recognised work that had a longer local and regional history.",
+      "whyItMatters": "Vivid should tell the story before and after the international breakthrough.",
+      "confidence": "Award and career summary reported by African Studies Centre Leiden.",
+      "evidenceRef": "yeelen-cannes-cisse",
+      "published": true,
+      "references": [
+        {
+          "label": "African Studies Centre Leiden — Souleymane Cissé",
+          "url": "https://www.ascleiden.nl/content/library-weekly/souleymane-cisse"
+        }
+      ]
+    },
+    {
+      "id": "heritage-africa-1989",
+      "title": "1989: Heritage Africa interrogates colonial inheritance",
+      "dateLabel": "1989",
+      "kicker": "GHANA · KWAW ANSAH",
+      "summary": "Kwaw Ansah’s Heritage Africa turns the colonial legacy into a personal and political crisis. Its subject is not simply the past; it is the afterlife of colonial values in the minds, institutions and ambitions of people living after independence.",
+      "reframe": "The film asks whether a change of flag is enough if colonial hierarchies and ideas remain embedded in social life.",
+      "whyItMatters": "It belongs in a timeline of cinema as historical argument, not merely as a national classic.",
+      "confidence": "Film title and date listed by African Film Festival; interpretation is editorial.",
+      "evidenceRef": "heritage-africa-aff-filmography",
+      "published": true,
+      "references": [
+        {
+          "label": "African Film Festival — Kwaw Ansah filmography",
+          "url": "https://africanfilmny.org/directors/kwaw-ansah/"
+        }
+      ]
+    },
+    {
+      "id": "living-in-bondage-1992",
+      "title": "1992: Living in Bondage becomes a commercial landmark",
+      "dateLabel": "1992",
+      "kicker": "NIGERIA · VIDEO FILM",
+      "summary": "Kenneth Nnebue’s Living in Bondage, directed by Chris Obi Rapu, became a major turning point in the professional marketing of Nigerian video films. Its success helped crystallise a rapidly developing commercial form built on video technology, informal distribution and existing popular performance networks.",
+      "reframe": "It is more precise to call it a landmark in commercialisation and visibility than the uncontested beginning of Nigerian filmmaking or popular screen culture.",
+      "whyItMatters": "The distinction restores the longer histories of Yoruba travelling theatre, television and regional video production.",
+      "confidence": "Oxford scholarship supports this framing; the industry's origins remain debated.",
+      "evidenceRef": "living-in-bondage-nollywood-scholarship",
+      "published": true,
+      "references": [
+        {
+          "label": "Jonathan Haynes — Creating Nollywood",
+          "url": "https://doi.org/10.7208/chicago/9780226388007.003.0001"
+        },
+        {
+          "label": "Oxford Bibliographies — Nollywood",
+          "url": "https://academic.oup.com/reference/62328/reference-article-abstract/553809173"
+        },
+        {
+          "label": "Lani Akande — Nollywood and Yoruba travelling theatre",
+          "url": "https://scholars.uncw.edu/display/d240218925056"
+        }
+      ]
+    },
+    {
+      "id": "nollywood-name-2002",
+      "title": "2002: the name Nollywood enters circulation",
+      "dateLabel": "2002",
+      "kicker": "NIGERIA · NAMING THE INDUSTRY",
+      "summary": "The term Nollywood was not the name under which the early video-film movement began. Oxford Bibliographies notes that the label was coined in 2002 and later applied retrospectively to films produced from the late 1980s onward.",
+      "reframe": "A name can make an industry visible internationally while also narrowing how its earlier, diverse practices are remembered.",
+      "whyItMatters": "The label is useful, but it should not overwrite the histories of the communities, languages and distribution networks that came before it.",
+      "confidence": "Date and retrospective use described in Oxford Bibliographies.",
+      "evidenceRef": "nollywood-name-oxford",
+      "published": true,
+      "references": [
+        {
+          "label": "Oxford Bibliographies — Nollywood",
+          "url": "https://academic.oup.com/reference/62328/reference-article-abstract/553809173"
+        }
+      ]
+    },
+    {
+      "id": "african-film-heritage-project-2019",
+      "title": "2019: African Film Heritage Project targets restoration",
+      "dateLabel": "2019",
+      "kicker": "UNESCO · RESTORATION",
+      "summary": "FEPACI, The Film Foundation, Cineteca di Bologna and UNESCO presented the African Film Heritage Project, with a stated aim to restore and preserve 50 films of historical, cultural and artistic significance. Restoration is essential work—but it does not, by itself, settle questions of custody, access, ownership or local control.",
+      "reframe": "A film can be physically restored while the larger politics of where it lives and who can access it remain unresolved.",
+      "whyItMatters": "Preservation metrics should be accompanied by transparent information about access, rights and community participation.",
+      "confidence": "Project partners and stated target documented by UNESCO.",
+      "evidenceRef": "unesco-african-film-heritage-project",
+      "published": true,
+      "references": [
+        {
+          "label": "UNESCO — African Film Heritage Project at Cannes 2019",
+          "url": "https://www.unesco.org/en/articles/african-film-heritage-project-cannes-2019"
+        },
+        {
+          "label": "Oxford — UNREST and African film heritage restitution",
+          "url": "https://www.qeh.ox.ac.uk/news/unrest-new-agenda-african-film-heritage-restitution"
+        }
+      ]
+    }
+  ],
+  "journeys": [
+    {
+      "id": "gold-coast-camera-journey",
+      "title": "Who controlled the screen in colonial Ghana?",
+      "kicker": "GHANA · ARCHIVE INVESTIGATION",
+      "summary": "Follow the paper trail from early exhibition licences to colonial censorship and the Gold Coast Film Unit. This journey separates the history of watching films from the history of making them, and asks how mobile projection expanded access while also carrying an imperial message.",
+      "reframe": "The central question is not whether colonial cinema was purely propaganda or purely education. It is how entertainment, instruction, regulation and audience agency coexisted.",
+      "whyItMatters": "A grounded entry point into Ghana’s cinema history that starts before the post-independence industry.",
+      "confidence": "Based on published archival scholarship and official institutional histories.",
+      "evidenceRef": "gold-coast-camera-journey",
+      "published": true,
+      "references": [
+        {
+          "label": "Augustine Danso — Gold Coast cinema",
+          "url": "https://intellectdiscover.com/content/journals/10.1386/jac_00051_1"
+        },
+        {
+          "label": "Odile Goerg — Tropical Dream Palaces",
+          "url": "https://academic.oup.com/book/61453/chapter-abstract/534807150"
+        },
+        {
+          "label": "Ghana Ministry — Film history",
+          "url": "https://www.motcca.gov.gh/film/"
+        }
+      ],
+      "personIds": [],
+      "timelineIds": [
+        "gold-coast-1918-cinema-regulation",
+        "gold-coast-1923-cinema-exhibition",
+        "gold-coast-film-unit-1947-48"
+      ]
+    },
+    {
+      "id": "ghana-state-to-independent-cinema",
+      "title": "From colonial film unit to Ghanaian screen identity",
+      "kicker": "GHANA · INSTITUTIONS",
+      "summary": "Trace the transition from the Gold Coast Film Unit to the Ghana Film Industry Corporation, then connect that institutional story to Kwaw Ansah’s independent filmmaking and advocacy. The journey explores what was inherited, what was transformed and what remained difficult: funding, distribution and control of the national image.",
+      "reframe": "Neither a simple colonial continuity story nor a clean postcolonial rebirth. The evidence points to institutional inheritance being redirected toward new national and Pan-African ambitions.",
+      "whyItMatters": "It connects the history of film organisations to the films audiences remember.",
+      "confidence": "Institutional sources and filmmaker biography; interpretation identified as editorial.",
+      "evidenceRef": "ghana-institutional-journey",
+      "published": true,
+      "references": [
+        {
+          "label": "Rebecca Ohene-Asah — Nkrumah’s film legacy",
+          "url": "https://www.tandfonline.com/doi/full/10.1080/01439685.2021.1907679"
+        },
+        {
+          "label": "African Film Festival — Kwaw Ansah",
+          "url": "https://africanfilmny.org/directors/kwaw-ansah/"
+        }
+      ],
+      "personIds": [
+        "kwaw-ansah"
+      ],
+      "timelineIds": [
+        "gold-coast-film-unit-1947-48",
+        "ghana-independence-1957",
+        "ghana-gfic-1964",
+        "love-brewed-1980",
+        "heritage-africa-1989"
+      ]
+    },
+    {
+      "id": "nigeria-stage-to-vhs",
+      "title": "From travelling theatre to VHS: the longer road to Nollywood",
+      "kicker": "NIGERIA · POPULAR CULTURE",
+      "summary": "Follow the connections between Yoruba travelling theatre, television serials, regional-language video and the cassette economy. Living in Bondage is a crucial landmark, but it sits inside a much longer story of performance, entrepreneurship and distribution.",
+      "reframe": "The breakthrough-film narrative is not false; it is incomplete. The journey treats Nollywood as an ecosystem built by many kinds of cultural labour.",
+      "whyItMatters": "It brings theatre artists, marketers and audiences into a history often told only through producers and one famous title.",
+      "confidence": "Grounded in peer-reviewed and scholarly work; origin narratives remain contested.",
+      "evidenceRef": "nigeria-vhs-journey",
+      "published": true,
+      "references": [
+        {
+          "label": "Jonathan Haynes — Creating Nollywood",
+          "url": "https://doi.org/10.7208/chicago/9780226388007.003.0001"
+        },
+        {
+          "label": "Lani Akande — Nollywood’s character of recurrence",
+          "url": "https://scholars.uncw.edu/display/d240218925056"
+        },
+        {
+          "label": "Abiodun Olayiwola — Yoruba Travelling Theatre",
+          "url": "https://www.jpanafrican.org/docs/vol4no5/4.5Nollywood.pdf"
+        }
+      ],
+      "personIds": [],
+      "timelineIds": [
+        "yoruba-travelling-theatre-1950s",
+        "living-in-bondage-1992",
+        "nollywood-name-2002"
+      ]
+    },
+    {
+      "id": "women-camera-liberation",
+      "title": "Women behind the anti-colonial camera",
+      "kicker": "ANGOLA · PAN-AFRICAN FILM",
+      "summary": "Begin with Sarah Maldoror’s theatre work and move into Sambizanga and her wider film practice. The journey asks how women filmmakers represented liberation, how their work circulated and why their place in film history has so often been framed through labels rather than close engagement with the films themselves.",
+      "reframe": "A woman-centred film history is not a side chapter to the 'main' political story. It changes what counts as political action, cinematic form and historical evidence.",
+      "whyItMatters": "It restores creative agency to women filmmakers and the people whose lives their films placed at the centre.",
+      "confidence": "Filmmaker profile sourced from BFI; interpretive questions are editorial.",
+      "evidenceRef": "women-liberation-journey",
+      "published": true,
+      "references": [
+        {
+          "label": "BFI — Sarah Maldoror",
+          "url": "https://www.bfi.org.uk/features/where-begin-with-sarah-maldoror"
+        }
+      ],
+      "personIds": [
+        "sarah-maldoror"
+      ],
+      "timelineIds": [
+        "sambizanga-1972"
+      ]
+    },
+    {
+      "id": "sahel-cross-border-cinema",
+      "title": "Cinema across Sahelian borders",
+      "kicker": "MALI · MAURITANIA · SENEGAL",
+      "summary": "Connect Sembène, Cissé and Sissako through language, politics, migration, production histories and international circulation. Their work shares concerns without collapsing into a single regional style or a single definition of African cinema.",
+      "reframe": "The national label on a filmmaker’s biography may not capture the routes through which their cinema was formed, funded, studied or watched.",
+      "whyItMatters": "This is a map of exchange and difference, not a claim that the Sahel has one cinematic identity.",
+      "confidence": "Biographical and film-history sources cited; comparative interpretation is editorial.",
+      "evidenceRef": "sahel-cross-border-journey",
+      "published": true,
+      "references": [
+        {
+          "label": "BFI — Ousmane Sembène",
+          "url": "https://www.bfi.org.uk/features/where-begin-with-ousmane-sembene"
+        },
+        {
+          "label": "African Studies Centre Leiden — Souleymane Cissé",
+          "url": "https://www.ascleiden.nl/content/library-weekly/souleymane-cisse"
+        },
+        {
+          "label": "Cannes — Abderrahmane Sissako",
+          "url": "https://www.festival-cannes.com/en/p/abderrahmane-sissako/"
+        }
+      ],
+      "personIds": [
+        "ousmane-sembene",
+        "soulemane-cisse",
+        "abderrahmane-sissako"
+      ],
+      "timelineIds": [
+        "fespaco-founded-1969",
+        "yeelen-cannes-1987"
+      ]
+    },
+    {
+      "id": "archive-return-journey",
+      "title": "Where did the films go—and who gets them back?",
+      "kicker": "ARCHIVES · HERITAGE RESTITUTION",
+      "summary": "Explore the dispersal of African newsreels, documentaries and feature films, the international restoration partnerships attempting to preserve them, and emerging research on restitution and digital repatriation. The journey distinguishes a surviving copy from meaningful access and shared authority.",
+      "reframe": "Restoration is not the end of the story. A film can be saved but remain hard to find, difficult to screen, or disconnected from the communities it depicts.",
+      "whyItMatters": "It makes archival provenance and access part of the viewing experience rather than invisible back-office details.",
+      "confidence": "The preservation and restitution challenge is documented by UNESCO and Oxford research; individual film rights remain case-specific.",
+      "evidenceRef": "archive-return-journey",
+      "published": true,
+      "references": [
+        {
+          "label": "Oxford — UNREST project",
+          "url": "https://www.qeh.ox.ac.uk/news/unrest-new-agenda-african-film-heritage-restitution"
+        },
+        {
+          "label": "UNESCO — African Film Heritage Project",
+          "url": "https://www.unesco.org/en/articles/african-film-heritage-project-cannes-2019"
+        },
+        {
+          "label": "Accidental Archivism — Ghana audiovisual heritage",
+          "url": "https://archivism.meson.press/chapters/trajectories-of-restitution/remnants-of-the-central-film-library-and-the-rethinking-of-ghanas-audio-visual-heritage/"
+        }
+      ],
+      "personIds": [],
+      "timelineIds": [
+        "african-film-heritage-project-2019"
+      ]
     }
   ],
   "countries": [
@@ -298,779 +1158,6 @@
       "code": "ZW",
       "name": "Zimbabwe",
       "regionId": "south"
-    }
-  ],
-  "collections": [
-    {
-      "id": "ghana-cinema-through-the-decades",
-      "title": "Ghana: cameras, independence and reinvention",
-      "kicker": "GHANA · CINEMA HISTORY",
-      "summary": "Trace Ghanaian screen culture from colonial-era information films and the Gold Coast Film Unit through the post-independence Ghana Film Industry Corporation, independent features and the rise of video filmmaking. This collection foregrounds who controlled the camera, what stories were told and how audiences encountered them.",
-      "published": true,
-      "evidenceRef": "ghana-cinema-history-motcca-ncc",
-      "references": [
-        {
-          "label": "Ghana Ministry of Tourism, Culture & Creative Arts — Film history",
-          "url": "https://www.motcca.gov.gh/film/"
-        },
-        {
-          "label": "National Commission on Culture — The Development of Ghanaian Film and Its Cultural Identity",
-          "url": "https://ghanaculture.gov.gh/the-development-of-ghanaian-film-and-its-cultural-identity/"
-        },
-        {
-          "label": "African Film Festival — Ghanaian Film Industry: Past and Present",
-          "url": "https://africanfilmny.org/articles/ghanaian-film-industry-past-and-present/"
-        }
-      ],
-      "timelineIds": [
-        "ghana-film-unit-1948",
-        "ghana-gfic-1964",
-        "love-brewed-1980",
-        "ghana-film-act-2016"
-      ],
-      "personIds": [
-        "kwaw-ansah"
-      ]
-    },
-    {
-      "id": "pan-african-cinema-and-solidarity",
-      "title": "Pan-African cinema: images, memory and self-determination",
-      "kicker": "PAN-AFRICAN · FILM MOVEMENTS",
-      "summary": "Explore filmmakers and institutions that used cinema to question colonial power, represent African social realities and build networks across borders. The route connects Ousmane Sembène, Sarah Maldoror, FESPACO and the wider project of African film cooperation.",
-      "published": true,
-      "evidenceRef": "unesco-african-cinema-timeline-african-film-festival",
-      "references": [
-        {
-          "label": "UNESCO — Key dates in African cinema",
-          "url": "https://www.unesco.org/creativity/sites/default/files/medias/fichiers/2023/01/379165eng.pdf"
-        },
-        {
-          "label": "Oxford Research Encyclopedia — African Films and FESPACO",
-          "url": "https://academic.oup.com/edited-volume/61663/chapter-abstract/553408769"
-        },
-        {
-          "label": "African Film Festival — Ousmane Sembène",
-          "url": "https://africanfilmny.org/directors/ousmane-sembene/"
-        },
-        {
-          "label": "African Film Festival — Sarah Maldoror",
-          "url": "https://africanfilmny.org/directors/sarah-maldoror/"
-        }
-      ],
-      "personIds": [
-        "ousmane-sembene",
-        "sarah-maldoror"
-      ],
-      "timelineIds": [
-        "fespaco-founded-1969",
-        "borom-sarret-1963",
-        "ceddo-1976"
-      ]
-    },
-    {
-      "id": "west-african-cinema-language-and-memory",
-      "title": "West African cinema: language, memory and change",
-      "kicker": "WEST AFRICA · FILMMAKERS",
-      "summary": "A filmmaker-led introduction to Senegalese and Malian cinema, including stories shaped by local languages, social change, work, tradition and political power. Follow the distinct creative paths of Ousmane Sembène and Souleymane Cissé without treating the region as a single cinematic voice.",
-      "published": true,
-      "evidenceRef": "festival-cannes-souleymane-cisse-african-film-festival-sembene",
-      "references": [
-        {
-          "label": "Festival de Cannes — Souleymane Cissé",
-          "url": "https://www.festival-cannes.com/en/p/souleymane-cisse-3/"
-        },
-        {
-          "label": "African Film Festival — Souleymane Cissé",
-          "url": "https://africanfilmny.org/directors/souleymane-cisse/"
-        },
-        {
-          "label": "African Film Festival — Ousmane Sembène",
-          "url": "https://africanfilmny.org/directors/ousmane-sembene/"
-        }
-      ],
-      "personIds": [
-        "ousmane-sembene",
-        "souleymane-cisse"
-      ],
-      "timelineIds": [
-        "borom-sarret-1963",
-        "den-muso-1975",
-        "yeelen-cannes-1987"
-      ]
-    },
-    {
-      "id": "egyptian-cinema-and-the-city",
-      "title": "Egyptian cinema: history, city and change",
-      "kicker": "NORTH AFRICA · EGYPT",
-      "summary": "An introduction to Youssef Chahine’s long career and the way Egyptian cinema has used popular storytelling, historical drama and personal filmmaking to engage with social change.",
-      "published": true,
-      "evidenceRef": "bfi-and-egypt-sis-youssef-chahine",
-      "references": [
-        {
-          "label": "British Film Institute — Youssef Chahine",
-          "url": "https://www.bfi.org.uk/features/where-begin-with-youssef-chahine"
-        },
-        {
-          "label": "Egypt State Information Service — Youssef Chahine",
-          "url": "https://sis.gov.eg/en/egypt/egyptian-figures/youssef-chahine/"
-        }
-      ],
-      "personIds": [
-        "youssef-chahine"
-      ]
-    },
-    {
-      "id": "east-african-futures-and-imagination",
-      "title": "East African futures: Afrofuturism and new voices",
-      "kicker": "EAST AFRICA · KENYA",
-      "summary": "Follow Kenyan filmmaker Wanuri Kahiu’s movement between intimate drama and speculative cinema, from From a Whisper to the science-fiction short Pumzi and the Cannes-selected Rafiki.",
-      "published": true,
-      "evidenceRef": "african-film-festival-wanuri-kahiu",
-      "references": [
-        {
-          "label": "African Film Festival — Wanuri Kahiu",
-          "url": "https://africanfilmny.org/directors/wanuri-kahiu/"
-        },
-        {
-          "label": "Wanuri Kahiu — official biography",
-          "url": "https://www.wanurikahiu.com/bio/"
-        }
-      ],
-      "personIds": [
-        "wanuri-kahiu"
-      ],
-      "timelineIds": [
-        "rafiki-cannes-2018"
-      ]
-    },
-    {
-      "id": "southern-african-memory-and-resistance",
-      "title": "Southern African memory: exile, identity and resistance",
-      "kicker": "SOUTHERN AFRICA · ESWATINI / SOUTH AFRICA",
-      "summary": "Explore Zola Maseko’s work on exile, apartheid, historical memory and the representation of Sara Baartman, alongside the story of Drum and its portrait of 1950s Johannesburg.",
-      "published": true,
-      "evidenceRef": "african-film-festival-zola-maseko",
-      "references": [
-        {
-          "label": "African Film Festival — Zola Maseko",
-          "url": "https://africanfilmny.org/directors/zola-maseko/"
-        },
-        {
-          "label": "African Film Festival — The Foreigner and Zola Maseko",
-          "url": "https://africanfilmny.org/films/the-foreigner/"
-        }
-      ],
-      "personIds": [
-        "zola-maseko"
-      ]
-    }
-  ],
-  "people": [
-    {
-      "id": "kwaw-ansah",
-      "title": "Kwaw Ansah",
-      "kicker": "FILMMAKER · GHANA",
-      "summary": "Ghanaian filmmaker, writer and producer whose work includes Love Brewed in the African Pot and Heritage Africa. Ansah founded Film Africa Limited in 1977 and has been an advocate for African filmmaking and stronger distribution for African films.",
-      "published": true,
-      "evidenceRef": "african-film-festival-kwaw-ansah-profile",
-      "role": "Director · Writer · Producer",
-      "country": "Ghana",
-      "born": "1941 · Agona Swedru, Ghana",
-      "selectedWorks": [
-        "Love Brewed in the African Pot (1980)",
-        "Heritage Africa (1989)",
-        "Crossroads of People, Crossroads of Trade (1994)"
-      ],
-      "references": [
-        {
-          "label": "African Film Festival — Kwaw Ansah biography and filmography",
-          "url": "https://africanfilmny.org/directors/kwaw-ansah/"
-        },
-        {
-          "label": "African Film Festival — Love Brewed in the African Pot",
-          "url": "https://africanfilmny.org/films/love-brewed-in-an-african-pot/"
-        }
-      ]
-    },
-    {
-      "id": "ousmane-sembene",
-      "title": "Ousmane Sembène",
-      "kicker": "FILMMAKER · SENEGAL",
-      "summary": "Senegalese novelist and filmmaker whose writing and films examined colonial legacies, class, independence and modernity. Often described as the father of African cinema, he turned to filmmaking in part to reach audiences beyond the written word.",
-      "published": true,
-      "evidenceRef": "african-film-festival-ousmane-sembene-profile",
-      "role": "Director · Screenwriter · Novelist",
-      "country": "Senegal",
-      "born": "1923 · southern Senegal",
-      "died": "2007",
-      "selectedWorks": [
-        "Borom Sarret (1963)",
-        "La Noire de… (Black Girl) (1966)",
-        "Ceddo (1976)",
-        "Moolaadé (2004)"
-      ],
-      "references": [
-        {
-          "label": "African Film Festival — Ousmane Sembène biography",
-          "url": "https://africanfilmny.org/directors/ousmane-sembene/"
-        },
-        {
-          "label": "UNESCO — Key dates in African cinema",
-          "url": "https://www.unesco.org/creativity/sites/default/files/medias/fichiers/2023/01/379165eng.pdf"
-        }
-      ]
-    },
-    {
-      "id": "souleymane-cisse",
-      "title": "Souleymane Cissé",
-      "kicker": "FILMMAKER · MALI",
-      "summary": "Malian filmmaker whose work brought Malian stories and Bambara-language cinema to international audiences. His films include Den Muso, Baara, Finyè and Yeelen; Yeelen received the Jury Prize at the 1987 Cannes Film Festival.",
-      "published": true,
-      "evidenceRef": "festival-cannes-souleymane-cisse-profile",
-      "role": "Director · Screenwriter",
-      "country": "Mali",
-      "born": "1940 · Bamako, Mali",
-      "died": "2025",
-      "selectedWorks": [
-        "Den Muso (The Young Girl) (1975)",
-        "Baara (The Porter) (1977)",
-        "Finyè (The Wind) (1981/1982)",
-        "Yeelen (Brightness) (1987)"
-      ],
-      "references": [
-        {
-          "label": "Festival de Cannes — Souleymane Cissé biography and awards",
-          "url": "https://www.festival-cannes.com/en/p/souleymane-cisse-3/"
-        },
-        {
-          "label": "African Film Festival — Souleymane Cissé biography",
-          "url": "https://africanfilmny.org/directors/souleymane-cisse/"
-        }
-      ]
-    },
-    {
-      "id": "sarah-maldoror",
-      "title": "Sarah Maldoror",
-      "kicker": "FILMMAKER · GUADELOUPE / FRANCE",
-      "summary": "Guadeloupean filmmaker of African descent whose politically engaged work connected cinema, theatre and liberation struggles. She co-founded the Compagnie d’Art Dramatique des Griots in Paris, studied cinema in Moscow and worked across Paris, Martinique and Portuguese-speaking African countries.",
-      "published": true,
-      "evidenceRef": "african-film-festival-sarah-maldoror-profile",
-      "role": "Director · Assistant Director",
-      "country": "Guadeloupe / France",
-      "born": "1939 · France",
-      "died": "2020",
-      "selectedWorks": [
-        "Monangambé (1969)",
-        "Sambizanga (1972)"
-      ],
-      "references": [
-        {
-          "label": "African Film Festival — Sarah Maldoror biography",
-          "url": "https://africanfilmny.org/directors/sarah-maldoror/"
-        }
-      ]
-    },
-    {
-      "id": "youssef-chahine",
-      "title": "Youssef Chahine",
-      "kicker": "FILMMAKER · EGYPT",
-      "summary": "Egyptian director whose career stretched from the 1950s into the 2000s. His films combined a distinctive personal style with bold explorations of Egyptian society, history, politics and taboo subjects.",
-      "published": true,
-      "evidenceRef": "bfi-youssef-chahine-profile",
-      "role": "Director · Actor · Screenwriter",
-      "country": "Egypt",
-      "born": "1926 · Alexandria, Egypt",
-      "died": "2008",
-      "selectedWorks": [
-        "Baba Amin (1950)",
-        "The Land (1969)",
-        "The Emigrant (1994)",
-        "The Other (1999)"
-      ],
-      "references": [
-        {
-          "label": "British Film Institute — Where to begin with Youssef Chahine",
-          "url": "https://www.bfi.org.uk/features/where-begin-with-youssef-chahine"
-        },
-        {
-          "label": "Egypt State Information Service — Youssef Chahine",
-          "url": "https://sis.gov.eg/en/egypt/egyptian-figures/youssef-chahine/"
-        }
-      ]
-    },
-    {
-      "id": "wanuri-kahiu",
-      "title": "Wanuri Kahiu",
-      "kicker": "FILMMAKER · KENYA",
-      "summary": "Kenyan filmmaker and co-founder of AFROBUBBLEGUM, known for work that spans drama and Afrofuturist science fiction. Her films include From a Whisper, Pumzi and Rafiki; Rafiki became the first Kenyan feature selected for Cannes’ Un Certain Regard.",
-      "published": true,
-      "evidenceRef": "african-film-festival-wanuri-kahiu-profile",
-      "role": "Director · Writer · Producer",
-      "country": "Kenya",
-      "born": "Nairobi, Kenya",
-      "selectedWorks": [
-        "From a Whisper (2008)",
-        "Pumzi (2009)",
-        "Rafiki (2018)"
-      ],
-      "references": [
-        {
-          "label": "African Film Festival — Wanuri Kahiu biography and filmography",
-          "url": "https://africanfilmny.org/directors/wanuri-kahiu/"
-        },
-        {
-          "label": "Wanuri Kahiu — official biography",
-          "url": "https://www.wanurikahiu.com/bio/"
-        }
-      ]
-    },
-    {
-      "id": "zola-maseko",
-      "title": "Zola Maseko",
-      "kicker": "FILMMAKER · ESWATINI / SOUTH AFRICA",
-      "summary": "Swazi-born filmmaker and screenwriter whose work has examined exile, xenophobia, memory and apartheid-era South Africa. His films include The Life and Times of Sara Baartman and Drum, which won FESPACO’s top prize.",
-      "published": true,
-      "evidenceRef": "african-film-festival-zola-maseko-profile",
-      "role": "Director · Screenwriter",
-      "country": "Eswatini / South Africa",
-      "born": "1967 · born in exile",
-      "selectedWorks": [
-        "The Life and Times of Sara Baartman (1998)",
-        "The Return of Sara Baartman (2003)",
-        "Drum (2004)"
-      ],
-      "references": [
-        {
-          "label": "African Film Festival — Zola Maseko biography and filmography",
-          "url": "https://africanfilmny.org/directors/zola-maseko/"
-        }
-      ]
-    },
-    {
-      "id": "abderrahmane-sissako",
-      "title": "Abderrahmane Sissako",
-      "kicker": "FILMMAKER · MAURITANIA / MALI",
-      "summary": "Mauritanian-born filmmaker raised in Mali whose humanist work explores migration, cultural crossings and the relationship between North and South. His films include Waiting for Happiness, Bamako and Timbuktu.",
-      "published": true,
-      "evidenceRef": "festival-cannes-abderrahmane-sissako-profile",
-      "role": "Director · Writer · Producer",
-      "country": "Mauritania / Mali",
-      "born": "1961 · Kiffa, Mauritania",
-      "selectedWorks": [
-        "Life on Earth (1998)",
-        "Waiting for Happiness (2002)",
-        "Bamako (2006)",
-        "Timbuktu (2014)"
-      ],
-      "references": [
-        {
-          "label": "Festival de Cannes — Abderrahmane Sissako",
-          "url": "https://www.festival-cannes.com/en/p/abderrahmane-sissako/"
-        },
-        {
-          "label": "African Film Festival — Abderrahmane Sissako",
-          "url": "https://africanfilmny.org/directors/abderrahmane-sissako/"
-        }
-      ]
-    }
-  ],
-  "timelines": [
-    {
-      "id": "borom-sarret-1963",
-      "title": "Borom Sarret: an early landmark in African fiction cinema",
-      "kicker": "1963 · SENEGAL",
-      "summary": "Ousmane Sembène’s Borom Sarret is identified by the African Film Festival as the first fiction film by an African filmmaker to be distributed outside Africa. Its focus on a Dakar cart driver helped establish Sembène’s socially engaged cinematic voice.",
-      "published": true,
-      "evidenceRef": "african-film-festival-sembene-profile",
-      "date": "1963-01-01",
-      "dateLabel": "1963",
-      "references": [
-        {
-          "label": "African Film Festival — Ousmane Sembène",
-          "url": "https://africanfilmny.org/directors/ousmane-sembene/"
-        }
-      ]
-    },
-    {
-      "id": "ghana-film-unit-1948",
-      "title": "The Gold Coast Film Unit is established",
-      "kicker": "1948 · GHANA",
-      "summary": "The colonial administration established the Gold Coast Film Unit. It produced newsreels, documentaries and public-information films, including screenings delivered through travelling cinema vans. The institution’s history also raises questions about colonial control of images and public narratives.",
-      "published": true,
-      "evidenceRef": "ghana-motcca-film-history",
-      "date": "1948-01-01",
-      "dateLabel": "1948",
-      "references": [
-        {
-          "label": "Ghana Ministry of Tourism, Culture & Creative Arts — Film history",
-          "url": "https://www.motcca.gov.gh/film/"
-        },
-        {
-          "label": "National Commission on Culture — Ghanaian film and cultural identity",
-          "url": "https://ghanaculture.gov.gh/the-development-of-ghanaian-film-and-its-cultural-identity/"
-        }
-      ]
-    },
-    {
-      "id": "ghana-gfic-1964",
-      "title": "Ghana Film Industry Corporation established",
-      "kicker": "1964 · GHANA",
-      "summary": "Ghana established the Ghana Film Industry Corporation as a state film institution after independence. Its remit included film production and the development of locally made films as part of a wider national cultural project.",
-      "published": true,
-      "evidenceRef": "ghana-motcca-film-history-ncc",
-      "date": "1964-01-01",
-      "dateLabel": "1964",
-      "references": [
-        {
-          "label": "Ghana Ministry of Tourism, Culture & Creative Arts — Film history",
-          "url": "https://www.motcca.gov.gh/film/"
-        },
-        {
-          "label": "National Commission on Culture — Ghanaian film and cultural identity",
-          "url": "https://ghanaculture.gov.gh/the-development-of-ghanaian-film-and-its-cultural-identity/"
-        }
-      ]
-    },
-    {
-      "id": "fespaco-founded-1969",
-      "title": "The first African Film Festival in Ouagadougou",
-      "kicker": "1969 · BURKINA FASO",
-      "summary": "The first African Film Festival took place in Ouagadougou in 1969. It later became FESPACO, a major meeting point for African filmmakers, audiences and the wider film industry.",
-      "published": true,
-      "evidenceRef": "unesco-key-dates-african-cinema-1969",
-      "date": "1969-02-01",
-      "dateLabel": "1–15 February 1969",
-      "references": [
-        {
-          "label": "FESPACO — About the festival",
-          "url": "https://fespaco.bf/en/fespaco/about-the-festival/"
-        },
-        {
-          "label": "UNESCO — Key dates in African cinema",
-          "url": "https://www.unesco.org/creativity/sites/default/files/medias/fichiers/2023/01/379165eng.pdf"
-        },
-        {
-          "label": "Oxford Research Encyclopedia — African Films and FESPACO",
-          "url": "https://academic.oup.com/edited-volume/61663/chapter-abstract/553408769"
-        }
-      ]
-    },
-    {
-      "id": "den-muso-1975",
-      "title": "Den Muso: a Bambara-language feature film",
-      "kicker": "1975 · MALI",
-      "summary": "Souleymane Cissé made Den Muso (The Young Girl), described by the Festival de Cannes as Mali’s first feature-length fiction film in Bambara. The film was banned by the authorities after its production.",
-      "published": true,
-      "evidenceRef": "festival-cannes-souleymane-cisse",
-      "date": "1975-01-01",
-      "dateLabel": "1975",
-      "references": [
-        {
-          "label": "Festival de Cannes — Souleymane Cissé",
-          "url": "https://www.festival-cannes.com/en/p/souleymane-cisse-3/"
-        }
-      ]
-    },
-    {
-      "id": "ceddo-1976",
-      "title": "Sembène’s Ceddo confronts religious and political power",
-      "kicker": "1976 · SENEGAL",
-      "summary": "Ousmane Sembène’s Ceddo examines popular resistance to religious oppression. UNESCO’s African cinema chronology records the film and notes that it was banned until 1984.",
-      "published": true,
-      "evidenceRef": "unesco-key-dates-african-cinema-1976",
-      "date": "1976-01-01",
-      "dateLabel": "1976",
-      "references": [
-        {
-          "label": "UNESCO — Key dates in African cinema",
-          "url": "https://www.unesco.org/creativity/sites/default/files/medias/fichiers/2023/01/379165eng.pdf"
-        }
-      ]
-    },
-    {
-      "id": "love-brewed-1980",
-      "title": "Love Brewed in the African Pot reaches audiences",
-      "kicker": "1980 · GHANA",
-      "summary": "Kwaw Ansah’s Love Brewed in the African Pot is catalogued by the African Film Festival as a 1980 Ghanaian feature. Set in colonial Ghana, it explores tensions between tradition and modernity through a family and romantic conflict. Some Ghanaian institutional accounts give 1981 as the release year; the catalogue date is retained here with that discrepancy noted.",
-      "published": true,
-      "evidenceRef": "african-film-festival-love-brewed-film-entry",
-      "date": "1980-01-01",
-      "dateLabel": "1980 · some sources list 1981",
-      "references": [
-        {
-          "label": "African Film Festival — Love Brewed in the African Pot (1980)",
-          "url": "https://africanfilmny.org/films/love-brewed-in-an-african-pot/"
-        },
-        {
-          "label": "Ghana Ministry of Tourism, Culture & Creative Arts — Film history (1981)",
-          "url": "https://www.motcca.gov.gh/film/"
-        }
-      ]
-    },
-    {
-      "id": "yeelen-cannes-1987",
-      "title": "Yeelen wins the Cannes Jury Prize",
-      "kicker": "1987 · MALI / FRANCE",
-      "summary": "Souleymane Cissé’s Yeelen (Brightness) received the Jury Prize at the 1987 Cannes Film Festival, bringing major international recognition to a film rooted in Malian stories and cultural traditions.",
-      "published": true,
-      "evidenceRef": "festival-cannes-souleymane-cisse-award",
-      "date": "1987-05-01",
-      "dateLabel": "1987",
-      "references": [
-        {
-          "label": "Festival de Cannes — Souleymane Cissé and Yeelen",
-          "url": "https://www.festival-cannes.com/en/p/souleymane-cisse-3/"
-        }
-      ]
-    },
-    {
-      "id": "ghana-film-act-2016",
-      "title": "Ghana establishes a statutory National Film Authority",
-      "kicker": "2016 · GHANA",
-      "summary": "The Development and Classification of Film Act, 2016 (Act 935) provides the legal framework for regulation and development of Ghana’s film industry and establishes the National Film Authority.",
-      "published": true,
-      "evidenceRef": "ghana-act-935-national-film-authority",
-      "date": "2016-12-16",
-      "dateLabel": "16 December 2016 · assent",
-      "references": [
-        {
-          "label": "Ghana — Development and Classification of Film Act, 2016 (Act 935)",
-          "url": "https://www.brr.gov.gh/acc/registry/docs/Development%20and%20Classification%20of%20Film%20Act%2C%202016%20%28Act%20935%29.pdf"
-        },
-        {
-          "label": "Ghana Ministry — National Film Authority",
-          "url": "https://www.motcca.gov.gh/national-film-authority-nfa/"
-        }
-      ]
-    },
-    {
-      "id": "baba-amin-1950",
-      "title": "Youssef Chahine makes his first film",
-      "kicker": "1950 · EGYPT",
-      "summary": "Youssef Chahine directed his first film, Baba Amin, beginning a career that would span more than five decades and become one of the most internationally visible bodies of Egyptian cinema.",
-      "published": true,
-      "evidenceRef": "egypt-state-information-service-youssef-chahine",
-      "date": "1950-01-01",
-      "dateLabel": "1950",
-      "references": [
-        {
-          "label": "Egypt State Information Service — Youssef Chahine",
-          "url": "https://sis.gov.eg/en/egypt/egyptian-figures/youssef-chahine/"
-        },
-        {
-          "label": "British Film Institute — Where to begin with Youssef Chahine",
-          "url": "https://www.bfi.org.uk/features/where-begin-with-youssef-chahine"
-        }
-      ]
-    },
-    {
-      "id": "drum-fespaco-2004",
-      "title": "Drum wins FESPACO’s top prize",
-      "kicker": "2004 · SOUTH AFRICA",
-      "summary": "Zola Maseko’s feature Drum, set in 1950s Johannesburg and focused on journalist Henry Nxumalo, received the Golden Stallion of Yennenga at FESPACO, according to the African Film Festival profile.",
-      "published": true,
-      "evidenceRef": "african-film-festival-zola-maseko-profile",
-      "date": "2004-01-01",
-      "dateLabel": "2004",
-      "references": [
-        {
-          "label": "African Film Festival — Zola Maseko biography and filmography",
-          "url": "https://africanfilmny.org/directors/zola-maseko/"
-        }
-      ]
-    },
-    {
-      "id": "timbuktu-2014",
-      "title": "Timbuktu reaches the Cannes competition",
-      "kicker": "2014 · MAURITANIA / MALI",
-      "summary": "Abderrahmane Sissako’s Timbuktu was selected for the Cannes Competition in 2014. The film later became Mauritania’s first Academy Award nomination in the foreign-language film category.",
-      "published": true,
-      "evidenceRef": "festival-cannes-abderrahmane-sissako",
-      "date": "2014-05-01",
-      "dateLabel": "2014",
-      "references": [
-        {
-          "label": "Festival de Cannes — Abderrahmane Sissako",
-          "url": "https://www.festival-cannes.com/en/p/abderrahmane-sissako/"
-        }
-      ]
-    },
-    {
-      "id": "rafiki-cannes-2018",
-      "title": "Rafiki becomes the first Kenyan feature selected for Cannes Un Certain Regard",
-      "kicker": "2018 · KENYA",
-      "summary": "Wanuri Kahiu’s Rafiki was the first Kenyan feature invited to Cannes’ Official Un Certain Regard selection. The film’s Kenyan release was also shaped by a high-profile censorship dispute.",
-      "published": true,
-      "evidenceRef": "african-film-festival-wanuri-kahiu",
-      "date": "2018-05-01",
-      "dateLabel": "2018",
-      "references": [
-        {
-          "label": "African Film Festival — Wanuri Kahiu",
-          "url": "https://africanfilmny.org/directors/wanuri-kahiu/"
-        },
-        {
-          "label": "Wanuri Kahiu — official biography",
-          "url": "https://www.wanurikahiu.com/bio/"
-        }
-      ]
-    }
-  ],
-  "journeys": [
-    {
-      "id": "ghana-from-film-unit-to-video-era",
-      "title": "Ghana: from the Film Unit to the video era",
-      "kicker": "DOCUMENTARY JOURNEY · GHANA",
-      "summary": "Follow the changing institutions and technologies of Ghanaian cinema: colonial information films and travelling screenings, the post-independence GFIC, independent features such as Love Brewed in the African Pot, and the emergence of video filmmaking. The route keeps the political context of each period visible.",
-      "published": true,
-      "evidenceRef": "ghana-cinema-history-journey",
-      "references": [
-        {
-          "label": "Ghana Ministry — Film history",
-          "url": "https://www.motcca.gov.gh/film/"
-        },
-        {
-          "label": "National Commission on Culture — Ghanaian film and cultural identity",
-          "url": "https://ghanaculture.gov.gh/the-development-of-ghanaian-film-and-its-cultural-identity/"
-        },
-        {
-          "label": "African Film Festival — Ghanaian Film Industry: Past and Present",
-          "url": "https://africanfilmny.org/articles/ghanaian-film-industry-past-and-present/"
-        }
-      ],
-      "timelineIds": [
-        "ghana-film-unit-1948",
-        "ghana-gfic-1964",
-        "love-brewed-1980",
-        "ghana-film-act-2016"
-      ],
-      "personIds": [
-        "kwaw-ansah"
-      ]
-    },
-    {
-      "id": "cinema-as-a-language-of-resistance",
-      "title": "Cinema as a language of resistance",
-      "kicker": "DOCUMENTARY JOURNEY · PAN-AFRICAN",
-      "summary": "Connect filmmakers whose work challenged colonial narratives, social hierarchies and political power. From Sembène’s socially grounded fiction to Maldoror’s liberation-era filmmaking, this journey explores cinema as cultural expression and political argument.",
-      "published": true,
-      "evidenceRef": "unesco-african-cinema-and-african-film-festival-profiles",
-      "references": [
-        {
-          "label": "UNESCO — Key dates in African cinema",
-          "url": "https://www.unesco.org/creativity/sites/default/files/medias/fichiers/2023/01/379165eng.pdf"
-        },
-        {
-          "label": "African Film Festival — Ousmane Sembène",
-          "url": "https://africanfilmny.org/directors/ousmane-sembene/"
-        },
-        {
-          "label": "African Film Festival — Sarah Maldoror",
-          "url": "https://africanfilmny.org/directors/sarah-maldoror/"
-        }
-      ],
-      "timelineIds": [
-        "borom-sarret-1963",
-        "ceddo-1976",
-        "fespaco-founded-1969"
-      ],
-      "personIds": [
-        "ousmane-sembene",
-        "sarah-maldoror"
-      ]
-    },
-    {
-      "id": "malian-stories-on-the-world-stage",
-      "title": "Malian stories on the world stage",
-      "kicker": "DOCUMENTARY JOURNEY · MALI",
-      "summary": "Explore Souleymane Cissé’s path from early Bambara-language filmmaking to international recognition for Yeelen. The journey places film milestones alongside the institutions and audiences that helped African cinema travel across borders.",
-      "published": true,
-      "evidenceRef": "festival-cannes-and-african-film-festival-cisse",
-      "references": [
-        {
-          "label": "Festival de Cannes — Souleymane Cissé",
-          "url": "https://www.festival-cannes.com/en/p/souleymane-cisse-3/"
-        },
-        {
-          "label": "African Film Festival — Souleymane Cissé",
-          "url": "https://africanfilmny.org/directors/souleymane-cisse/"
-        }
-      ],
-      "timelineIds": [
-        "den-muso-1975",
-        "yeelen-cannes-1987"
-      ],
-      "personIds": [
-        "souleymane-cisse"
-      ]
-    },
-    {
-      "id": "egyptian-cinema-through-chahine",
-      "title": "Egyptian cinema through Youssef Chahine",
-      "kicker": "DOCUMENTARY JOURNEY · EGYPT",
-      "summary": "Trace Chahine’s career from his 1950 debut through films that confronted social change, politics and the shifting identity of modern Egypt. Use the linked profile and references as a starting point for a deeper filmography.",
-      "published": true,
-      "evidenceRef": "bfi-egypt-sis-chahine-journey",
-      "references": [
-        {
-          "label": "British Film Institute — Youssef Chahine",
-          "url": "https://www.bfi.org.uk/features/where-begin-with-youssef-chahine"
-        },
-        {
-          "label": "Egypt State Information Service — Youssef Chahine",
-          "url": "https://sis.gov.eg/en/egypt/egyptian-figures/youssef-chahine/"
-        }
-      ],
-      "personIds": [
-        "youssef-chahine"
-      ],
-      "timelineIds": [
-        "baba-amin-1950"
-      ]
-    },
-    {
-      "id": "east-african-futures-wanuri-kahiu",
-      "title": "East African futures with Wanuri Kahiu",
-      "kicker": "DOCUMENTARY JOURNEY · KENYA",
-      "summary": "Connect Kahiu’s work in contemporary drama and science fiction, and explore how Pumzi imagines a future shaped by environmental scarcity while Rafiki tells an intimate story grounded in present-day Kenya.",
-      "published": true,
-      "evidenceRef": "african-film-festival-wanuri-kahiu-journey",
-      "references": [
-        {
-          "label": "African Film Festival — Wanuri Kahiu",
-          "url": "https://africanfilmny.org/directors/wanuri-kahiu/"
-        },
-        {
-          "label": "Wanuri Kahiu — official biography",
-          "url": "https://www.wanurikahiu.com/bio/"
-        }
-      ],
-      "personIds": [
-        "wanuri-kahiu"
-      ],
-      "timelineIds": [
-        "rafiki-cannes-2018"
-      ]
-    },
-    {
-      "id": "southern-african-memory-zola-maseko",
-      "title": "Southern African memory with Zola Maseko",
-      "kicker": "DOCUMENTARY JOURNEY · SOUTHERN AFRICA",
-      "summary": "Follow a filmmaker whose work returns to exile, apartheid, historical memory and the afterlives of colonial history through documentary and fiction.",
-      "published": true,
-      "evidenceRef": "african-film-festival-zola-maseko-journey",
-      "references": [
-        {
-          "label": "African Film Festival — Zola Maseko",
-          "url": "https://africanfilmny.org/directors/zola-maseko/"
-        }
-      ],
-      "personIds": [
-        "zola-maseko"
-      ],
-      "timelineIds": [
-        "drum-fespaco-2004"
-      ]
     }
   ]
 }
