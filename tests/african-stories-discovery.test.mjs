@@ -55,11 +55,11 @@ test("published Phase 5 editorial records are sourced and internally connected",
     }
   }
   const ids = new Set(experience.timelines.map(record => record.id));
+  const people = new Set(experience.people.map(record => record.id));
   for (const journey of experience.journeys) {
     assert.ok((journey.timelineIds || []).every(id => ids.has(id)), journey.id + " timeline links");
     assert.ok((journey.personIds || []).every(id => people.has(id)), journey.id + " person links");
   }
-  const people = new Set(experience.people.map(record => record.id));
   const timelineIds = new Set(experience.timelines.map(record => record.id));
   for (const collection of experience.collections) {
     assert.ok((collection.personIds || []).every(id => people.has(id)), collection.id + " person links");
