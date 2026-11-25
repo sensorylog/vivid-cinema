@@ -60,7 +60,7 @@ test("native ad presentation does not crop provider creatives", async () => {
 test("Adsterra script origin is explicitly allowed by the site CSP", async () => {
   const headers = await readFile(path.join(root, "_headers"), "utf8");
   assert.match(headers, /script-src[^\n]*https:\/\/bancadeltempoidea\.org/);
-  assert.match(headers, /connect-src[^\n]*https:\/\/bancadeltempoidea\.org/);
+  assert.match(headers, /connect-src[^\n]*https:\/\/bancadeltempoidea\.org/);\n  assert.match(headers, /script-src[^\n]*https:\/\/aarems\.org/);\n  assert.match(headers, /connect-src[^\n]*https:\/\/aarems\.org/);
 });
 
 test("browsing pages use the refreshed advertising assets", async () => {
@@ -72,13 +72,13 @@ test("browsing pages use the refreshed advertising assets", async () => {
 });
 
 
-test("Popunder is isolated and cannot execute before a confirmed network frequency cap", async () => {
+test("Popunder uses a best-effort 24-hour browser tag-load cap and stays off excluded pages", async () => {
   const advertising = await readFile(path.join(root, "scripts", "advertising.js"), "utf8");
   assert.ok(advertising.includes("popunder: Object.freeze({"));
-  assert.ok(advertising.includes("enabled: false,\n    frequencyCapConfirmed: false"));
-  assert.ok(advertising.includes("if (!config?.enabled || !config.frequencyCapConfirmed || !config.src) return;"));
+  assert.ok(advertising.includes("enabled: true,"));
+  assert.ok(advertising.includes("if (!config?.enabled || !config.src) return;"));
   assert.ok(advertising.includes("maxScriptLoadsPerVisitorMs: 24 * 60 * 60 * 1000"));
   assert.ok(advertising.includes('eligiblePages: Object.freeze(["home", "discover", "collection", "for-you", "anime"])'));
   assert.ok(advertising.includes("vivid:popunder:last-script-load"));
-  assert.ok(advertising.includes("Fail closed when storage is unavailable"));
+  assert.ok(advertising.includes("Fail closed when storage is unavailable"));\n  assert.ok(advertising.includes("if (!config.eligiblePages.includes(page) || EXCLUDED_PAGES.has(page)) return;"));
 });
