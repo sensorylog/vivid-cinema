@@ -24,7 +24,7 @@ export function validateAfricanPlaybackSource(source) {
     throw new TypeError("This playback source is not enabled by the published catalogue.");
   }
   const provider = source.provider;
-  if (!["youtube","vimeo","peertube","archive"].includes(provider)) {
+  if (!["youtube","vimeo","peertube","archive","partner"].includes(provider)) {
     throw new TypeError("Unsupported African Stories playback provider.");
   }
   const sourceId = cleanText(source.sourceId, 80);
