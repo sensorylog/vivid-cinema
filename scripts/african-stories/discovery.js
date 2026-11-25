@@ -2,6 +2,7 @@ import {
   accessLabel,
   filterAfricanCountries,
   filterAfricanTitles,
+  filterEditorialRecords,
   validEditorialRecord,
   validAfricanTitleRecord
 } from "./discovery-data.js";
@@ -43,19 +44,7 @@ function emptyState(container, message) {
 }
 
 function editorialCards(container, records, kind, emptyMessage, filters = {}) {
-  const query = String(filters.query || "").trim().toLocaleLowerCase();
-  const country = String(filters.country || "").toUpperCase();
-  const region = String(filters.region || "");
-  const regionCodes = new Set(experience.countries.filter(item => item.regionId === region).map(item => item.code));
-  const published = (Array.isArray(records) ? records : []).filter(validEditorialRecord).filter(record => {
-    const countries = Array.isArray(record.countryCodes) ? record.countryCodes : [];
-    if (country && !countries.includes(country)) return false;
-    if (region && !countries.some(code => regionCodes.has(code))) return false;
-    if (!query) return true;
-    const haystack = [record.title, record.summary, record.kicker, record.reframe, record.whyItMatters]
-      .filter(Boolean).join(" ").toLocaleLowerCase();
-    return haystack.includes(query);
-  });
+  const published = filterEditorialRecords(records, { ...filters, countries: experience.countries });
   if (!published.length) { emptyState(container, emptyMessage); return; }
   container.replaceChildren();
   for (const record of published) {
