@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "catalogueVersion": "2026-11-25.4",
+  "catalogueVersion": "2026-11-25.5",
   "regions": [
     {
       "id": "north",
@@ -57,7 +57,9 @@
           "url": "https://hdl.handle.net/2144/15684"
         }
       ],
-      "personIds": [],
+      "personIds": [
+        "vitus-nanbigne"
+      ],
       "timelineIds": [
         "gold-coast-1912-safety-ordinance",
         "gold-coast-1914-first-purpose-built-theatre",
@@ -240,7 +242,9 @@
           "url": "https://hdl.handle.net/2144/15684"
         }
       ],
-      "personIds": [],
+      "personIds": [
+        "vitus-nanbigne"
+      ],
       "timelineIds": [
         "gold-coast-1914-first-purpose-built-theatre",
         "gold-coast-1925-censorship-board",
@@ -268,7 +272,8 @@
         }
       ],
       "personIds": [
-        "kwaw-ansah"
+        "kwaw-ansah",
+        "vitus-nanbigne"
       ],
       "timelineIds": [
         "gfic-financing-crisis-1970s",
@@ -299,7 +304,9 @@
           "url": "https://doi.org/10.4324/9781003701620-5"
         }
       ],
-      "personIds": [],
+      "personIds": [
+        "vitus-nanbigne"
+      ],
       "timelineIds": [
         "ghana-film-archive-crisis-1986-2000",
         "african-film-heritage-project-2019"
@@ -321,7 +328,9 @@
           "url": "https://citeseerx.ist.psu.edu/document?doi=f3307aae92aa82daa6402edcf5e6bfc5ba3b4cd6&repid=rep1&type=pdf"
         }
       ],
-      "personIds": [],
+      "personIds": [
+        "vitus-nanbigne"
+      ],
       "timelineIds": [
         "ghana-video-film-breakthrough-1987-89"
       ]
@@ -563,6 +572,39 @@
         }
       ],
       "filmography": [],
+      "countryCodes": [
+        "GH"
+      ]
+    },
+    {
+      "id": "vitus-nanbigne",
+      "title": "Dr. Vitus Nanbigne",
+      "kicker": "GHANA · FILM HISTORIAN / EDUCATOR",
+      "summary": "A Senior Lecturer in the University of Cape Coast’s Department of Theatre and Film Studies, Nanbigne researches film, media and culture and has also worked as a documentary producer and director. His 2011 University of Bergen dissertation, Cinema in Ghana: History, Ideology and Popular Culture, is one of the most detailed studies of Ghanaian cinema-going, film institutions, video-film practice and the politics of national cinema.",
+      "reframe": "A major part of Ghana’s screen history is not preserved in one neat public archive. Nanbigne’s dissertation is valuable partly because it documents the gaps: inaccessible films, damaged collections, missing institutional records and the difficulty of reconstructing a national cinema from scattered evidence.",
+      "whyItMatters": "This profile credits the Ghanaian scholar whose research makes several of these less-visible histories discussable—and reminds readers that a thesis is a research source, not a substitute for checking original reels, files and oral testimony.",
+      "confidence": "Current role confirmed by the University of Cape Coast directory; research details and historical claims attributed to the dissertation and related scholarly work.",
+      "evidenceRef": "ucc-vitus-nanbigne-profile",
+      "published": true,
+      "references": [
+        {
+          "label": "University of Cape Coast — Dr. Vitus Nanbigne",
+          "url": "https://directory.ucc.edu.gh/p/vitus-nanbigne"
+        },
+        {
+          "label": "Vitus Nanbigne — Cinema in Ghana (2011 dissertation)",
+          "url": "https://citeseerx.ist.psu.edu/document?doi=f3307aae92aa82daa6402edcf5e6bfc5ba3b4cd6&repid=rep1&type=pdf"
+        },
+        {
+          "label": "University of Cape Coast repository — The mediation of cultural identities in Ghanaian video-films",
+          "url": "https://ir.ucc.edu.gh/xmlui/bitstream/handle/123456789/7092/The%20mediation%20of%20cultural%20identities%20%20texts%20and%20contexts%20in%20Ghanaian%20video-films.pdf?isAllowed=y&sequence=1"
+        }
+      ],
+      "selectedWorks": [
+        "Cinema in Ghana: History, Ideology and Popular Culture (2011)",
+        "The mediation of cultural identities: texts and contexts in Ghanaian video-films (2015)",
+        "Counter-hegemony in Ghanaian video-film practice (2015)"
+      ],
       "countryCodes": [
         "GH"
       ]
@@ -1027,7 +1069,9 @@
           "url": "https://hdl.handle.net/2144/15684"
         }
       ],
-      "personIds": [],
+      "personIds": [
+        "vitus-nanbigne"
+      ],
       "timelineIds": [
         "gold-coast-1912-safety-ordinance",
         "gold-coast-1914-first-purpose-built-theatre",
@@ -1062,7 +1106,8 @@
         }
       ],
       "personIds": [
-        "kwaw-ansah"
+        "kwaw-ansah",
+        "vitus-nanbigne"
       ],
       "timelineIds": [
         "gold-coast-film-unit-1947-48",
@@ -1192,7 +1237,9 @@
           "url": "https://citeseerx.ist.psu.edu/document?doi=f3307aae92aa82daa6402edcf5e6bfc5ba3b4cd6&repid=rep1&type=pdf"
         }
       ],
-      "personIds": [],
+      "personIds": [
+        "vitus-nanbigne"
+      ],
       "timelineIds": [
         "african-film-heritage-project-2019",
         "ghana-film-archive-crisis-1986-2000"
