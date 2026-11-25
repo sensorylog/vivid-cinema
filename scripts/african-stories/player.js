@@ -16,6 +16,7 @@ const description = byId("african-player-description");
 const sourceList = byId("african-player-sources");
 const sourceLabel = byId("african-player-source-label");
 const fallback = byId("african-player-fallback");
+const attribution = byId("african-player-attribution");
 const filmFluxPanel = byId("african-filmflux-panel");
 const filmFluxList = byId("african-filmflux-list");
 const filmFluxStatus = byId("african-filmflux-status");
@@ -140,6 +141,8 @@ function clearPlayback() {
   video.load();
   fallback.hidden = true;
   fallback.removeAttribute("href");
+  attribution.hidden = true;
+  attribution.replaceChildren();
   sourceLabel.textContent = "";
 }
 
@@ -315,7 +318,20 @@ async function playArchiveSource(source, generation) {
     video.src = resolved.url;
   }
   if (!hlsManaged) video.load();
-  sourceLabel.textContent = "INTERNET ARCHIVE · PUBLIC FILE";
+  sourceLabel.textContent = "INTERNET ARCHIVE · PUBLIC FILE · " + resolved.rightsBasis.toUpperCase();
+  attribution.replaceChildren();
+  const credit = document.createElement("span");
+  credit.textContent = resolved.attributionText || "Archive item: " + source.archiveIdentifier;
+  attribution.append(credit);
+  if (resolved.licenseUrl) {
+    const license = document.createElement("a");
+    license.href = resolved.licenseUrl;
+    license.target = "_blank";
+    license.rel = "noopener noreferrer";
+    license.textContent = "View license";
+    attribution.append(license);
+  }
+  attribution.hidden = false;
   setState("", "", false);
   setFallback(resolved.itemUrl, "View archive item and rights information");
 }
