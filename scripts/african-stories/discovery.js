@@ -2,7 +2,8 @@ import {
   accessLabel,
   filterAfricanCountries,
   filterAfricanTitles,
-  validEditorialRecord
+  validEditorialRecord,
+  validAfricanTitleRecord
 } from "./discovery-data.js";
 
 const EXPERIENCE_URL = "/data/african-stories-experience.json";
@@ -137,7 +138,7 @@ function renderEditorialDetail() {
   const related = document.getElementById("african-editorial-related");
   related.replaceChildren();
   const titleIds = new Set(Array.isArray(record?.titleIds) ? record.titleIds : []);
-  const relatedTitles = (catalogue.titles || []).filter(title => titleIds.has(title.id) && title.published === true);
+  const relatedTitles = (catalogue.titles || []).filter(title => titleIds.has(title.id) && validAfricanTitleRecord(title));
   for (const title of relatedTitles) {
     const card = element("article", "african-content-card");
     card.append(element("span", "african-card-eyebrow", accessLabel(title.accessState)));
@@ -154,7 +155,7 @@ function renderTitles() {
     country: selectedCountry,
     query: ui.query.value,
     format: ui.format.value
-  }).filter(title => title.published === true);
+  }).filter(validAfricanTitleRecord);
   ui.titles.replaceChildren();
   if (!titles.length) {
     emptyState(ui.titles, "No verified title records are published here yet. The atlas will only display records with editorial evidence and an explicit access status.");
