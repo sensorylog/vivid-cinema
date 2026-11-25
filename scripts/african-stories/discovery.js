@@ -59,10 +59,10 @@ function editorialCards(container, records, kind, emptyMessage) {
 
 function renderRegions() {
   ui.region.replaceChildren(new Option("All regions", ""));
-  ui.region.value = params.get("region") || "";
   for (const region of experience.regions) {
     ui.region.add(new Option(region.name, region.id));
   }
+  ui.region.value = params.get("region") || "";
   ui.regions.replaceChildren();
   for (const region of experience.regions) {
     const card = element("a", "african-region-card");
