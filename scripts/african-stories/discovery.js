@@ -14,6 +14,7 @@ const ui = {
   query: document.getElementById("african-discovery-query"),
   region: document.getElementById("african-region-filter"),
   format: document.getElementById("african-format-filter"),
+  language: document.getElementById("african-language-filter"),
   status: document.getElementById("african-discovery-status"),
   countryHub: document.getElementById("african-country-hub"),
   countryTitle: document.getElementById("african-country-title"),
@@ -150,11 +151,23 @@ function renderEditorialDetail() {
   }
 }
 
+
+function renderLanguageOptions() {
+  const languages = [...new Set((catalogue.titles || [])
+    .filter(validAfricanTitleRecord)
+    .flatMap(title => Array.isArray(title.languages) ? title.languages : [])
+    .filter(language => typeof language === "string" && language.trim()))]
+    .sort((a, b) => a.localeCompare(b));
+  ui.language.replaceChildren(new Option("All languages", ""));
+  for (const language of languages) ui.language.add(new Option(language, language));
+}
+
 function renderTitles() {
   const titles = filterAfricanTitles(catalogue.titles || [], {
     country: selectedCountry,
     query: ui.query.value,
-    format: ui.format.value
+    format: ui.format.value,
+    language: ui.language.value
   }).filter(validAfricanTitleRecord);
   ui.titles.replaceChildren();
   if (!titles.length) {
@@ -192,6 +205,7 @@ async function load() {
     if (experience.schemaVersion !== 1 || !Array.isArray(experience.regions) || !Array.isArray(experience.countries) ||
         catalogue.schemaVersion !== 1 || !Array.isArray(catalogue.titles)) throw new Error("The African Stories data format is not supported.");
     renderRegions();
+    renderLanguageOptions();
     renderCountryHub();
     renderEditorialDetail();
     editorialCards(ui.collections, experience.collections, "Collection", "Curated collections are being prepared with sourced title records.");
@@ -208,4 +222,5 @@ async function load() {
 ui.query?.addEventListener("input", render);
 ui.region?.addEventListener("change", renderCountries);
 ui.format?.addEventListener("change", renderTitles);
+ui.language?.addEventListener("change", renderTitles);
 load();
