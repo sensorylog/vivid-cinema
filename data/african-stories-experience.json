@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "catalogueVersion": "2026-11-25.2",
+  "catalogueVersion": "2026-11-25.3",
   "regions": [
     {
       "id": "north",
@@ -397,6 +397,72 @@
         "den-muso-1975",
         "yeelen-cannes-1987"
       ]
+    },
+    {
+      "id": "egyptian-cinema-and-the-city",
+      "title": "Egyptian cinema: history, city and change",
+      "kicker": "NORTH AFRICA · EGYPT",
+      "summary": "An introduction to Youssef Chahine’s long career and the way Egyptian cinema has used popular storytelling, historical drama and personal filmmaking to engage with social change.",
+      "published": true,
+      "evidenceRef": "bfi-and-egypt-sis-youssef-chahine",
+      "references": [
+        {
+          "label": "British Film Institute — Youssef Chahine",
+          "url": "https://www.bfi.org.uk/features/where-begin-with-youssef-chahine"
+        },
+        {
+          "label": "Egypt State Information Service — Youssef Chahine",
+          "url": "https://sis.gov.eg/en/egypt/egyptian-figures/youssef-chahine/"
+        }
+      ],
+      "personIds": [
+        "youssef-chahine"
+      ]
+    },
+    {
+      "id": "east-african-futures-and-imagination",
+      "title": "East African futures: Afrofuturism and new voices",
+      "kicker": "EAST AFRICA · KENYA",
+      "summary": "Follow Kenyan filmmaker Wanuri Kahiu’s movement between intimate drama and speculative cinema, from From a Whisper to the science-fiction short Pumzi and the Cannes-selected Rafiki.",
+      "published": true,
+      "evidenceRef": "african-film-festival-wanuri-kahiu",
+      "references": [
+        {
+          "label": "African Film Festival — Wanuri Kahiu",
+          "url": "https://africanfilmny.org/directors/wanuri-kahiu/"
+        },
+        {
+          "label": "Wanuri Kahiu — official biography",
+          "url": "https://www.wanurikahiu.com/bio/"
+        }
+      ],
+      "personIds": [
+        "wanuri-kahiu"
+      ],
+      "timelineIds": [
+        "rafiki-cannes-2018"
+      ]
+    },
+    {
+      "id": "southern-african-memory-and-resistance",
+      "title": "Southern African memory: exile, identity and resistance",
+      "kicker": "SOUTHERN AFRICA · ESWATINI / SOUTH AFRICA",
+      "summary": "Explore Zola Maseko’s work on exile, apartheid, historical memory and the representation of Sara Baartman, alongside the story of Drum and its portrait of 1950s Johannesburg.",
+      "published": true,
+      "evidenceRef": "african-film-festival-zola-maseko",
+      "references": [
+        {
+          "label": "African Film Festival — Zola Maseko",
+          "url": "https://africanfilmny.org/directors/zola-maseko/"
+        },
+        {
+          "label": "African Film Festival — The Foreigner and Zola Maseko",
+          "url": "https://africanfilmny.org/films/the-foreigner/"
+        }
+      ],
+      "personIds": [
+        "zola-maseko"
+      ]
     }
   ],
   "people": [
@@ -501,6 +567,109 @@
         {
           "label": "African Film Festival — Sarah Maldoror biography",
           "url": "https://africanfilmny.org/directors/sarah-maldoror/"
+        }
+      ]
+    },
+    {
+      "id": "youssef-chahine",
+      "title": "Youssef Chahine",
+      "kicker": "FILMMAKER · EGYPT",
+      "summary": "Egyptian director whose career stretched from the 1950s into the 2000s. His films combined a distinctive personal style with bold explorations of Egyptian society, history, politics and taboo subjects.",
+      "published": true,
+      "evidenceRef": "bfi-youssef-chahine-profile",
+      "role": "Director · Actor · Screenwriter",
+      "country": "Egypt",
+      "born": "1926 · Alexandria, Egypt",
+      "died": "2008",
+      "selectedWorks": [
+        "Baba Amin (1950)",
+        "The Land (1969)",
+        "The Emigrant (1994)",
+        "The Other (1999)"
+      ],
+      "references": [
+        {
+          "label": "British Film Institute — Where to begin with Youssef Chahine",
+          "url": "https://www.bfi.org.uk/features/where-begin-with-youssef-chahine"
+        },
+        {
+          "label": "Egypt State Information Service — Youssef Chahine",
+          "url": "https://sis.gov.eg/en/egypt/egyptian-figures/youssef-chahine/"
+        }
+      ]
+    },
+    {
+      "id": "wanuri-kahiu",
+      "title": "Wanuri Kahiu",
+      "kicker": "FILMMAKER · KENYA",
+      "summary": "Kenyan filmmaker and co-founder of AFROBUBBLEGUM, known for work that spans drama and Afrofuturist science fiction. Her films include From a Whisper, Pumzi and Rafiki; Rafiki became the first Kenyan feature selected for Cannes’ Un Certain Regard.",
+      "published": true,
+      "evidenceRef": "african-film-festival-wanuri-kahiu-profile",
+      "role": "Director · Writer · Producer",
+      "country": "Kenya",
+      "born": "Nairobi, Kenya",
+      "selectedWorks": [
+        "From a Whisper (2008)",
+        "Pumzi (2009)",
+        "Rafiki (2018)"
+      ],
+      "references": [
+        {
+          "label": "African Film Festival — Wanuri Kahiu biography and filmography",
+          "url": "https://africanfilmny.org/directors/wanuri-kahiu/"
+        },
+        {
+          "label": "Wanuri Kahiu — official biography",
+          "url": "https://www.wanurikahiu.com/bio/"
+        }
+      ]
+    },
+    {
+      "id": "zola-maseko",
+      "title": "Zola Maseko",
+      "kicker": "FILMMAKER · ESWATINI / SOUTH AFRICA",
+      "summary": "Swazi-born filmmaker and screenwriter whose work has examined exile, xenophobia, memory and apartheid-era South Africa. His films include The Life and Times of Sara Baartman and Drum, which won FESPACO’s top prize.",
+      "published": true,
+      "evidenceRef": "african-film-festival-zola-maseko-profile",
+      "role": "Director · Screenwriter",
+      "country": "Eswatini / South Africa",
+      "born": "1967 · born in exile",
+      "selectedWorks": [
+        "The Life and Times of Sara Baartman (1998)",
+        "The Return of Sara Baartman (2003)",
+        "Drum (2004)"
+      ],
+      "references": [
+        {
+          "label": "African Film Festival — Zola Maseko biography and filmography",
+          "url": "https://africanfilmny.org/directors/zola-maseko/"
+        }
+      ]
+    },
+    {
+      "id": "abderrahmane-sissako",
+      "title": "Abderrahmane Sissako",
+      "kicker": "FILMMAKER · MAURITANIA / MALI",
+      "summary": "Mauritanian-born filmmaker raised in Mali whose humanist work explores migration, cultural crossings and the relationship between North and South. His films include Waiting for Happiness, Bamako and Timbuktu.",
+      "published": true,
+      "evidenceRef": "festival-cannes-abderrahmane-sissako-profile",
+      "role": "Director · Writer · Producer",
+      "country": "Mauritania / Mali",
+      "born": "1961 · Kiffa, Mauritania",
+      "selectedWorks": [
+        "Life on Earth (1998)",
+        "Waiting for Happiness (2002)",
+        "Bamako (2006)",
+        "Timbuktu (2014)"
+      ],
+      "references": [
+        {
+          "label": "Festival de Cannes — Abderrahmane Sissako",
+          "url": "https://www.festival-cannes.com/en/p/abderrahmane-sissako/"
+        },
+        {
+          "label": "African Film Festival — Abderrahmane Sissako",
+          "url": "https://africanfilmny.org/directors/abderrahmane-sissako/"
         }
       ]
     }
@@ -673,6 +842,78 @@
           "url": "https://www.motcca.gov.gh/national-film-authority-nfa/"
         }
       ]
+    },
+    {
+      "id": "baba-amin-1950",
+      "title": "Youssef Chahine makes his first film",
+      "kicker": "1950 · EGYPT",
+      "summary": "Youssef Chahine directed his first film, Baba Amin, beginning a career that would span more than five decades and become one of the most internationally visible bodies of Egyptian cinema.",
+      "published": true,
+      "evidenceRef": "egypt-state-information-service-youssef-chahine",
+      "date": "1950-01-01",
+      "dateLabel": "1950",
+      "references": [
+        {
+          "label": "Egypt State Information Service — Youssef Chahine",
+          "url": "https://sis.gov.eg/en/egypt/egyptian-figures/youssef-chahine/"
+        },
+        {
+          "label": "British Film Institute — Where to begin with Youssef Chahine",
+          "url": "https://www.bfi.org.uk/features/where-begin-with-youssef-chahine"
+        }
+      ]
+    },
+    {
+      "id": "drum-fespaco-2004",
+      "title": "Drum wins FESPACO’s top prize",
+      "kicker": "2004 · SOUTH AFRICA",
+      "summary": "Zola Maseko’s feature Drum, set in 1950s Johannesburg and focused on journalist Henry Nxumalo, received the Golden Stallion of Yennenga at FESPACO, according to the African Film Festival profile.",
+      "published": true,
+      "evidenceRef": "african-film-festival-zola-maseko-profile",
+      "date": "2004-01-01",
+      "dateLabel": "2004",
+      "references": [
+        {
+          "label": "African Film Festival — Zola Maseko biography and filmography",
+          "url": "https://africanfilmny.org/directors/zola-maseko/"
+        }
+      ]
+    },
+    {
+      "id": "timbuktu-2014",
+      "title": "Timbuktu reaches the Cannes competition",
+      "kicker": "2014 · MAURITANIA / MALI",
+      "summary": "Abderrahmane Sissako’s Timbuktu was selected for the Cannes Competition in 2014. The film later became Mauritania’s first Academy Award nomination in the foreign-language film category.",
+      "published": true,
+      "evidenceRef": "festival-cannes-abderrahmane-sissako",
+      "date": "2014-05-01",
+      "dateLabel": "2014",
+      "references": [
+        {
+          "label": "Festival de Cannes — Abderrahmane Sissako",
+          "url": "https://www.festival-cannes.com/en/p/abderrahmane-sissako/"
+        }
+      ]
+    },
+    {
+      "id": "rafiki-cannes-2018",
+      "title": "Rafiki becomes the first Kenyan feature selected for Cannes Un Certain Regard",
+      "kicker": "2018 · KENYA",
+      "summary": "Wanuri Kahiu’s Rafiki was the first Kenyan feature invited to Cannes’ Official Un Certain Regard selection. The film’s Kenyan release was also shaped by a high-profile censorship dispute.",
+      "published": true,
+      "evidenceRef": "african-film-festival-wanuri-kahiu",
+      "date": "2018-05-01",
+      "dateLabel": "2018",
+      "references": [
+        {
+          "label": "African Film Festival — Wanuri Kahiu",
+          "url": "https://africanfilmny.org/directors/wanuri-kahiu/"
+        },
+        {
+          "label": "Wanuri Kahiu — official biography",
+          "url": "https://www.wanurikahiu.com/bio/"
+        }
+      ]
     }
   ],
   "journeys": [
@@ -761,6 +1002,74 @@
       ],
       "personIds": [
         "souleymane-cisse"
+      ]
+    },
+    {
+      "id": "egyptian-cinema-through-chahine",
+      "title": "Egyptian cinema through Youssef Chahine",
+      "kicker": "DOCUMENTARY JOURNEY · EGYPT",
+      "summary": "Trace Chahine’s career from his 1950 debut through films that confronted social change, politics and the shifting identity of modern Egypt. Use the linked profile and references as a starting point for a deeper filmography.",
+      "published": true,
+      "evidenceRef": "bfi-egypt-sis-chahine-journey",
+      "references": [
+        {
+          "label": "British Film Institute — Youssef Chahine",
+          "url": "https://www.bfi.org.uk/features/where-begin-with-youssef-chahine"
+        },
+        {
+          "label": "Egypt State Information Service — Youssef Chahine",
+          "url": "https://sis.gov.eg/en/egypt/egyptian-figures/youssef-chahine/"
+        }
+      ],
+      "personIds": [
+        "youssef-chahine"
+      ],
+      "timelineIds": [
+        "baba-amin-1950"
+      ]
+    },
+    {
+      "id": "east-african-futures-wanuri-kahiu",
+      "title": "East African futures with Wanuri Kahiu",
+      "kicker": "DOCUMENTARY JOURNEY · KENYA",
+      "summary": "Connect Kahiu’s work in contemporary drama and science fiction, and explore how Pumzi imagines a future shaped by environmental scarcity while Rafiki tells an intimate story grounded in present-day Kenya.",
+      "published": true,
+      "evidenceRef": "african-film-festival-wanuri-kahiu-journey",
+      "references": [
+        {
+          "label": "African Film Festival — Wanuri Kahiu",
+          "url": "https://africanfilmny.org/directors/wanuri-kahiu/"
+        },
+        {
+          "label": "Wanuri Kahiu — official biography",
+          "url": "https://www.wanurikahiu.com/bio/"
+        }
+      ],
+      "personIds": [
+        "wanuri-kahiu"
+      ],
+      "timelineIds": [
+        "rafiki-cannes-2018"
+      ]
+    },
+    {
+      "id": "southern-african-memory-zola-maseko",
+      "title": "Southern African memory with Zola Maseko",
+      "kicker": "DOCUMENTARY JOURNEY · SOUTHERN AFRICA",
+      "summary": "Follow a filmmaker whose work returns to exile, apartheid, historical memory and the afterlives of colonial history through documentary and fiction.",
+      "published": true,
+      "evidenceRef": "african-film-festival-zola-maseko-journey",
+      "references": [
+        {
+          "label": "African Film Festival — Zola Maseko",
+          "url": "https://africanfilmny.org/directors/zola-maseko/"
+        }
+      ],
+      "personIds": [
+        "zola-maseko"
+      ],
+      "timelineIds": [
+        "drum-fespaco-2004"
       ]
     }
   ]
