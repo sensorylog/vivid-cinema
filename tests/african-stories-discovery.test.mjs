@@ -93,6 +93,14 @@ test("Ghana archive, financing and video histories preserve attributed archival 
   assert.ok(experience.collections.some(item => item.id === "ghana-video-revolution"));
 });
 
+test("Ghanaian research contributors are credited and connected to their source records", () => {
+  const scholar = experience.people.find(person => person.id === "vitus-nanbigne");
+  assert.ok(scholar);
+  assert.ok(scholar.selectedWorks.some(work => work.includes("Cinema in Ghana")));
+  assert.ok(scholar.references.some(reference => reference.url.includes("directory.ucc.edu.gh")));
+  assert.ok(experience.collections.filter(item => item.personIds?.includes("vitus-nanbigne")).length >= 3);
+});
+
 test("access labels keep discovery separate from viewing rights", () => {
   assert.equal(accessLabel("discover_archive_record"), "Discover / archive record");
   assert.equal(accessLabel("access_pending"), "Access pending");
