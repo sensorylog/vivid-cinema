@@ -22,6 +22,6 @@ test("African Stories remains a destination but is not presented as a launched s
   const page = await readFile(path.join(root, "african-stories.html"), "utf8");
   const discovery = await readFile(path.join(root, "scripts", "african-stories", "discovery.js"), "utf8");
   assert.match(page, /id="african-discovery-status"/);
-  assert.match(discovery, /Preparing the African Stories atlas/);
+  assert.match(page, /Preparing the African Stories atlas/);
   assert.match(page, /In Development/);
 });
