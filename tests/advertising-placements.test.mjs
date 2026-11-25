@@ -57,10 +57,12 @@ test("native ad presentation does not crop provider creatives", async () => {
   assert.match(advertising, /Sponsored/);
 });
 
-test("Adsterra script origin is explicitly allowed by the site CSP", async () => {
+test("Adsterra script origins are explicitly allowed by the site CSP", async () => {
   const headers = await readFile(path.join(root, "_headers"), "utf8");
   assert.match(headers, /script-src[^\n]*https:\/\/bancadeltempoidea\.org/);
-  assert.match(headers, /connect-src[^\n]*https:\/\/bancadeltempoidea\.org/);\n  assert.match(headers, /script-src[^\n]*https:\/\/aarems\.org/);\n  assert.match(headers, /connect-src[^\n]*https:\/\/aarems\.org/);
+  assert.match(headers, /connect-src[^\n]*https:\/\/bancadeltempoidea\.org/);
+  assert.match(headers, /script-src[^\n]*https:\/\/aarems\.org/);
+  assert.match(headers, /connect-src[^\n]*https:\/\/aarems\.org/);
 });
 
 test("browsing pages use the refreshed advertising assets", async () => {
