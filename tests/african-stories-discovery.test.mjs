@@ -51,6 +51,7 @@ test("published Phase 5 editorial records are sourced and internally connected",
     assert.ok(experience[key].length > 0, key + " should contain researched records");
     for (const record of experience[key]) {
       assert.equal(validEditorialRecord(record), true, key + ": " + record.id);
+      assert.ok(record.reframe && record.whyItMatters && record.confidence, key + ": " + record.id + " needs a sourced reframe, significance and confidence note");
       assert.ok(record.references.every(reference => reference.url.startsWith("https://")));
     }
   }
