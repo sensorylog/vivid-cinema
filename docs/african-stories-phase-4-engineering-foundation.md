@@ -6,7 +6,7 @@
 ## Delivered in this increment
 
 ### 1. Server-authoritative catalogue workflow
-- Added a Cloud Functions module for African Stories.
+- Added a Cloud Functions module for African Stories. All five callable operations require Firebase App Check and apply dedicated custom-claim authorization where appropriate.
 - `saveAfricanWorkDraft` requires the `africanStoriesEditor` claim and validates canonical work IDs, work types, editions/versions, language tracks, credits and HTTPS source citations.
 - `publishAfricanWork` requires `africanStoriesPublisher`, checks minimum editorial fields and publishes a deliberately limited public projection.
 - Editorial input cannot assign `licensed_embed` or `stream_on_vivid` public access states.
@@ -19,9 +19,9 @@
 
 ### 3. Playback session broker and isolated player
 - Added `createAfricanPlaybackSession`. It requires a signed-in account, exact public work/version match, approved private grant, active provider, exact URL origin, rights term and territory match.
-- Sessions are short-lived (five minutes) and recorded privately.
+- The broker accepts only provider-issued sessions with a verified expiry of no more than five minutes and records the session privately. No provider adapter is currently implemented, so no session can be issued.
 - Territory verification is deliberately fail-closed. No trusted geo header is configured by this code. Playback stays disabled until infrastructure supplies a trusted header through a proxy that strips/overwrites any client-supplied value. Do not set `AFRICAN_STORIES_TRUSTED_COUNTRY_HEADER` until that ingress behavior has been verified.
-- Added a separate `african-stories-watch.html` player route. It never searches alternate providers or guesses URLs. It creates an iframe only after the server returns an authorized session and the browser confirms HTTPS and exact origin equality.
+- Added a separate `african-stories-watch.html` player route. It never searches alternate providers or guesses URLs. It creates an iframe only after a provider-specific server adapter returns an authorized session and the browser confirms HTTPS and exact origin equality; the browser closes the frame when the returned expiry is reached.
 - Existing CSP `frame-src` must be updated with an exact provider origin only after the provider and embedding behavior have passed legal and security review. No broad wildcard has been added.
 
 ### 4. Restricted operations console and roles
@@ -49,7 +49,7 @@ Vivid playback entitlement is computed from the private title/version rights gra
 ## Important security boundaries
 
 1. A client-supplied territory is never accepted. The trusted country header must be supplied by a verified ingress layer that overwrites inbound values. Until then the broker returns `failed-precondition`.
-2. Provider URLs are stored privately and returned only after entitlement checks. Provider session URLs must be HTTPS and match the exact registered provider origin. Static title URLs are not stored in rights grants.
+2. Static title URLs are not stored in rights grants. Provider session URLs are returned only after entitlement checks, must be HTTPS and must match the exact registered provider origin.
 3. The browser never reads private grants, contracts, provider registry or sessions.
 4. The public projection contains no provider URL, contract, fee, rights note or secret.
 5. No provider is preconfigured, no title has a seeded grant, no rights are claimed secured and no Vivid playback is enabled by default.
