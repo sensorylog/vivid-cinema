@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "releaseState": "not_ready",
+  "updatedAt": "2026-11-25",
+  "gates": [
+    {"id":"provider_contract","label":"Provider agreement and security review","required":true,"status":"blocked","evidence":null},
+    {"id":"title_rights","label":"Signed title-by-title rights, territory and term grants","required":true,"status":"blocked","evidence":null},
+    {"id":"intake_storage","label":"Secure submission processor, retention policy and access controls","required":true,"status":"blocked","evidence":null},
+    {"id":"privacy_review","label":"Privacy notice, consent, retention and data-subject workflow approved","required":true,"status":"pending","evidence":null},
+    {"id":"accessibility","label":"Keyboard, screen-reader, captions and subtitle QA","required":true,"status":"pending","evidence":null},
+    {"id":"low_bandwidth","label":"Low-bandwidth playback, offline discovery and mobile QA","required":true,"status":"pending","evidence":null},
+    {"id":"editorial_review","label":"Local editorial review and source verification for launch slate","required":true,"status":"pending","evidence":null},
+    {"id":"analytics","label":"Consent-aware aggregate analytics binding and retention configured","required":true,"status":"pending","evidence":null},
+    {"id":"support","label":"Support escalation, takedown and rights-complaint process tested","required":true,"status":"pending","evidence":null},
+    {"id":"rollback","label":"Staged rollout, monitoring and rollback procedure tested","required":true,"status":"pending","evidence":null}
+  ],
+  "launchPolicy":{"allowDiscovery":true,"allowExternalOfficialLinks":true,"allowVividPlayback":false,"allowPartnerClaims":false,"allowPaidPromotion":false,"minimumVerifiedPlayableTitles":1,"note":"Discovery can ship independently. Playback and partner claims remain disabled until evidence-backed gates are approved."},
+  "measurement":{"events":["atlas_view","search_used","region_filter","country_open","editorial_open","title_open","source_open","player_unavailable","submission_started","submission_received"],"dimensions":["countryCode","region","format","accessState"],"excluded":["names","email","free-text searches","account IDs","IP addresses","precise location","playback URLs"],"metrics":["discovery-to-title-open rate","source-link engagement","search-to-result rate","country and regional coverage","rights-holder intake completion","player error rate","caption and subtitle coverage","low-bandwidth playback success"]}
+}
