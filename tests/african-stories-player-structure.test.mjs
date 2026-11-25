@@ -43,3 +43,14 @@ test("operations console provides source templates and requires editorial eviden
   assert.match(admin, /watch_officially/);
   assert.match(page, /Official platform embeds retain the platform's player/);
 });
+
+
+test("premium playback controls use provider APIs without replacing native player controls", () => {
+  assert.match(player, /attachYouTubeController/);
+  assert.match(player, /attachVimeoController/);
+  assert.match(player, /attachPeerTubeController/);
+  assert.match(player, /african-control-progress/);
+  assert.match(player, /playbackStatusUpdate/);
+  assert.match(page, /african-control-fullscreen/);
+  assert.match(page, /african-control-mute/);
+});
