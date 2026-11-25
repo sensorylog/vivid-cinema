@@ -13,7 +13,7 @@ The destination is a screen library and story atlas, not a social feed or a gene
 
 ## Researched editorial starter set
 
-The current starter set contains ten collections, ten people/profiles, twenty timeline milestones and six documentary journeys. It deliberately begins with deeper coverage of Ghana, Nigeria, Senegal, Mali, Mauritania, Egypt, Kenya, Angola, Eswatini and South Africa rather than pretending every country has equally researched coverage.
+The current starter set contains thirteen collections, ten people/profiles, twenty-four timeline milestones and six documentary journeys. It deliberately begins with deeper coverage of Ghana, Nigeria, Senegal, Mali, Mauritania, Egypt, Kenya, Angola, Eswatini and South Africa rather than pretending every country has equally researched coverage.
 
 The editorial layer prioritises questions that are often flattened in popular summaries:
 
@@ -25,7 +25,7 @@ The editorial layer prioritises questions that are often flattened in popular su
 - Nollywood as a multi-lineage movement shaped by Yoruba travelling theatre, television, video technology, marketers and informal distribution—not a one-film invention.
 - FESPACO as a major Pan-African institution that has also faced debates about format, taste, inclusion and its role in defining African cinema.
 - Restoration versus restitution: preservation, custody, access, rights and interpretive authority are treated as separate questions.
-- Ghanaian moviegoers are treated as active participants in exhibition culture and distribution economics, not passive colonial audiences.\n- A 2011 Ghana cinema dissertation documents the reported loss and displacement of film-library materials, the collapse of practical projection access, and the need to distinguish surviving reels from usable public heritage.\n- The same research records GFIC’s commercial-financing problems, the reported use of a house and cocoa farm as collateral for Love Brewed in the African Pot, and the studio’s rejection of an early video-film screening.\n- Women filmmakers, regional differences and transnational careers are treated as central histories rather than sidebars.
+- Ghanaian moviegoers are treated as active participants in exhibition culture and distribution economics, not passive colonial audiences.\n- A 2011 Ghana cinema dissertation documents the reported loss and displacement of film-library materials, the collapse of practical projection access, and the need to distinguish surviving reels from usable public heritage.\n- The same research records GFIC’s commercial-financing problems, the reported use of a house and cocoa farm as collateral for Love Brewed in the African Pot, and the studio’s rejection of an early video-film screening.\n- French colonial restrictions on who could film, and the 1960 repeal of the Laval Decree, are connected to filmmaker histories.\n- Egypt’s industrial cinema history is paired with the domestic ban on Chahine’s Cairo Station.\n- FESPACO’s contested relationship with Nollywood and video formats is treated as a debate over the canon, not just a technical footnote.\n- Women filmmakers, regional differences and transnational careers are treated as central histories rather than sidebars.
 
 ## Editorial integrity rules
 
