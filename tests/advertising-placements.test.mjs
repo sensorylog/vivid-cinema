@@ -1,0 +1,52 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+
+test("native advertising supports independent, optional placement units", async () => {
+  const advertising = await readFile(path.join(root, "scripts", "advertising.js"), "utf8");
+  assert.match(advertising, /nativeBannerUnits: Object\.freeze/);
+  assert.match(advertising, /primary: Object\.freeze/);
+  assert.match(advertising, /secondary: Object\.freeze\(\{\s*enabled: false/);
+  assert.match(advertising, /maxNativeRequestsPerSession: 8/);
+  assert.match(advertising, /maxNativePlacementsPerPage: 2/);
+  assert.match(advertising, /wasPlacementRequested/);
+  assert.match(advertising, /vivid-native-ad-slot-\$\{page\}-\$\{placement\.key\}/);
+  assert.match(advertising, /if \(!unit\?\.enabled \|\| !unit\.src \|\| !unit\.containerId\) return/);
+});
+
+test("all approved browsing pages define a primary and optional secondary position", async () => {
+  const advertising = await readFile(path.join(root, "scripts", "advertising.js"), "utf8");
+  for (const page of ["home", "discover", "collection", '"for-you"', "anime"]) {
+    const escaped = page.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const pageBlock = advertising.match(new RegExp(`(?:^|\\n)\\s*${escaped}: \\\[([\\s\\S]*?)\\n  \\]`, "m"));
+    assert.ok(pageBlock, `missing placement configuration for ${page}`);
+    assert.match(pageBlock[1], /key: "primary"/);
+    assert.match(pageBlock[1], /key: "secondary"/);
+  }
+  assert.match(advertising, /"watch", "watch-room", "watch-rooms", "live"/);
+});
+
+test("native ad presentation does not crop provider creatives", async () => {
+  const style = await readFile(path.join(root, "styles", "vivid-advertising.css"), "utf8");
+  assert.doesNotMatch(style, /max-height\s*:/);
+  assert.doesNotMatch(style, /overflow\s*:\s*hidden/);
+  assert.match(style, /Sponsored/);
+});
+
+test("Adsterra script origin is explicitly allowed by the site CSP", async () => {
+  const headers = await readFile(path.join(root, "_headers"), "utf8");
+  assert.match(headers, /script-src[^\n]*https:\/\/bancadeltempoidea\.org/);
+  assert.match(headers, /connect-src[^\n]*https:\/\/bancadeltempoidea\.org/);
+});
+
+test("browsing pages use the refreshed advertising assets", async () => {
+  for (const page of ["home.html", "discover.html", "collection.html", "anime.html", "for-you.html"]) {
+    const html = await readFile(path.join(root, page), "utf8");
+    assert.match(html, /styles\/vivid-advertising\.css\?v=2/);
+    assert.match(html, /scripts\/advertising\.js\?v=2/);
+  }
+});
