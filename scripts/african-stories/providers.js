@@ -5,6 +5,7 @@ const ARCHIVE_ID = /^[A-Za-z0-9][A-Za-z0-9._-]{1,119}$/;
 const ARCHIVE_FILE = /^[A-Za-z0-9][A-Za-z0-9._ -]{0,239}$/;
 const PUBLIC_ARCHIVE_FORMATS = new Set(["MPEG4","h.264","H.264","WebM","Ogg Video","Ogg Video File"]);
 const FILMFLUX_ENDPOINT = "https://filmflux.app/api/public/trending?limit=20";
+const PEERTUBE_ALLOWED_HOSTS = new Set(["framatube.org", "peer.tube"]);
 
 function cleanText(value, max = 240) {
   return typeof value === "string" ? value.trim().slice(0, max) : "";
