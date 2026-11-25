@@ -13,7 +13,7 @@
 
 ### 2. Rights and provider controls
 - `registerAfricanProvider` requires `africanStoriesProviderAdmin`, an HTTPS origin-only embed origin, an agreement reference and an explicit security-review confirmation.
-- `setAfricanRightsDecision` requires `africanStoriesRightsAdmin`, exact work/version identity, an active reviewed provider, an exact matching HTTPS provider origin, explicit territory codes and a bounded valid-from/valid-until window.
+- `setAfricanRightsDecision` requires `africanStoriesRightsAdmin`, exact work/version identity, an active reviewed provider, an HTTPS provider origin, explicit territory codes and a bounded valid-from/valid-until window.
 - Rights decisions are private server-side records; client writes and reads are denied by Firestore rules.
 - Provider registration does not prove an agreement exists. The agreement reference and security-review flag are operational attestations that must be backed by actual signed evidence and review before use.
 
@@ -49,11 +49,11 @@ Vivid playback entitlement is computed from the private title/version rights gra
 ## Important security boundaries
 
 1. A client-supplied territory is never accepted. The trusted country header must be supplied by a verified ingress layer that overwrites inbound values. Until then the broker returns `failed-precondition`.
-2. Provider URLs are stored privately and returned only after entitlement checks. The URL must be HTTPS and match the exact registered provider origin.
+2. Provider URLs are stored privately and returned only after entitlement checks. Provider session URLs must be HTTPS and match the exact registered provider origin. Static title URLs are not stored in rights grants.
 3. The browser never reads private grants, contracts, provider registry or sessions.
 4. The public projection contains no provider URL, contract, fee, rights note or secret.
 5. No provider is preconfigured, no title has a seeded grant, no rights are claimed secured and no Vivid playback is enabled by default.
-6. The iframe adapter is a narrow technical contract, not blanket approval to embed any provider. CSP and provider security review remain explicit gates.
+6. The provider-session adapter registry is intentionally empty. No generic static-iframe adapter exists; each provider must implement a server-side session issuer before playback can open. An approved rights grant alone does not enable playback. CSP and provider security review remain explicit gates.
 7. Admin claims are out-of-band privileged operations. The role assignment utility must be run only by an authorized Firebase administrator.
 
 ## Not yet complete
