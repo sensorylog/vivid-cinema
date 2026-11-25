@@ -1,16 +1,16 @@
 // Bump this version whenever the precached app shell changes.
-const CACHE_NAME = "vivid-cinema-shell-v325";
+const CACHE_NAME = "vivid-cinema-shell-v326";
 const HLS_LIBRARY_URL = "https://cdn.jsdelivr.net/npm/hls.js@1.7.3/dist/hls.min.js";
 const APP_SHELL = [
   HLS_LIBRARY_URL,
-  "./","./index.html","./home.html","./african-stories-watch.html","./african-stories.html","./data/african-stories-catalog.json","./data/african-stories-experience.json","./downloads.html","./my-downloads.html","./for-you.html",
+  "./","./index.html","./home.html","./african-stories-watch.html","./african-stories.html","./african-stories-submit.html","./data/african-stories-partners.json","./data/african-stories-launch-gates.json","./data/african-stories-catalog.json","./data/african-stories-experience.json","./downloads.html","./my-downloads.html","./for-you.html",
   "./person.html","./discover.html","./collection.html","./title.html","./watch.html",
   "./scripts/downloads/desktop-offline.js?windows-offline-hls-v3","./styles/my-downloads.css?v=offline-cinema-redesign-2",
   "./library.html","./auth.html","./login.html","./verify-email.html","./forgot-password.html",
   "./donate.html","./donation-success.html","./offline.html","./live.html","./news.html",
   "./anime.html","./help.html","./about.html","./accessibility.html","./cookies.html",
   "./404.html","./manifest.json","./robots.txt","./icons/vivid-icon.svg","./assets/images/IMG_6099.jpeg",
-  "./scripts/african-stories/player.js","./scripts/african-stories/providers.js","./scripts/african-stories/policy.js","./scripts/african-stories/provider-session.js","./scripts/african-stories/media-player.js","./scripts/african-stories/discovery.js","./scripts/african-stories/discovery-data.js","./styles/african-stories.css",
+  "./scripts/african-stories/player.js","./scripts/african-stories/providers.js","./scripts/african-stories/policy.js","./scripts/african-stories/provider-session.js","./scripts/african-stories/media-player.js","./scripts/african-stories/discovery.js","./scripts/african-stories/discovery-data.js","./scripts/african-stories/acquisition.js","./scripts/african-stories/metrics.js","./styles/african-stories.css",
   "./scripts/mascot-autoplay.js?v=1","./styles/vivid-foundation.css","./styles/vivid-system.css","./styles/tokens.css?v=1","./styles/typography.css?v=1","./styles/spacing.css?v=1","./styles/motion.css?v=1","./styles/theme.css?v=1","./styles/downloads.css","./styles/vivid-liquid-glass.css",
   "./styles/vivid-cinematic.css","./styles/vivid-title.css","./styles/vivid-person.css","./styles/vivid-watch.css","./styles/vivid-watch.css?v=watch-player-layout-3",
   "./styles/vivid-library.css","./styles/vivid-library.css?v=library-mobile-fix1","./styles/vivid-rounded-cards.css?v=round-1","./styles/vivid-discovery.css","./styles/vivid-for-you.css","./styles/vivid-collection.css",
