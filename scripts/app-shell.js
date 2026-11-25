@@ -220,7 +220,7 @@ function buildPrimaryLinks(page) {
     navLink("live.html", "bi-broadcast-pin", "Live", page === "live"),
     navLink("african-stories.html", "bi-globe2", "African Stories", page === "african-stories"),
     navLink("library.html", "bi-bookmark-fill", "Library", page === "library"),
-    '<a id="auth-link" class="vivid-nav-profile" href="account.html" aria-label="Open profile"' + (page === "account" ? ' aria-current="page"' : '') + '><i class="bi bi-person-circle" aria-hidden="true"></i><span>Profile</span></a>'
+    '<a id="auth-link" class="vivid-nav-profile" href="account.html" aria-label="Open account"' + (page === "account" ? ' aria-current="page"' : '') + '><i class="bi bi-person-circle" aria-hidden="true"></i><span>Profile</span></a>'
   ].join("");
 }
 
@@ -293,7 +293,8 @@ function syncMoreNavigation(nav, page) {
     navLink("for-you.html", "bi-stars", "For You", page === "for-you"),
     navLink("anime.html", "bi-stars", "Anime", page === "anime"),
     navLink("library.html", "bi-bookmark-fill", "Library", page === "library" || page === "downloads-library"),
-    navLink("account.html", "bi-person-circle", "Profile", page === "account"),
+    navLink("african-stories.html", "bi-globe2", "African Stories", page === "african-stories"),
+    navLink("account.html", "bi-person-circle", "Account", page === "account"),
     navLink("news.html", "bi-newspaper", "News", page === "news"),
     navLink("search.html", "bi-search", "Search", page === "search"),
   ].join("");
@@ -304,7 +305,7 @@ function syncMoreNavigation(nav, page) {
 
   const more = nav.querySelector("[data-vivid-more-navigation]");
   if (!more) return;
-  const morePages = ["discover", "for-you", "anime", "library", "downloads-library", "account", "news", "search"];
+  const morePages = ["discover", "for-you", "anime", "library", "downloads-library", "african-stories", "account", "news", "search"];
   more.setAttribute("aria-expanded", "false");
   more.setAttribute("aria-haspopup", "menu");
   more.setAttribute("aria-label", "More destinations");
@@ -407,9 +408,9 @@ function syncAccountNavigation() {
         const destination = user ? "account.html" : "auth.html";
         document.querySelectorAll("#auth-link, [data-vivid-nav-auth], .vivid-nav-account, .vivid-nav-action").forEach((link) => {
           link.href = destination;
-          link.setAttribute("aria-label", user ? "Open profile" : "Sign in");
+          link.setAttribute("aria-label", user ? "Open account" : "Sign in");
           const label = link.querySelector("span");
-          if (label) label.textContent = user ? "Profile" : "Sign in";
+          if (label) label.textContent = user ? "Account" : "Sign in";
         });
         window.dispatchEvent(new CustomEvent("vivid:auth-ready", { detail: user }));
       });
