@@ -1,4 +1,5 @@
-import { trackAfricanStories } from "./metrics.js";\nconst form = document.getElementById("african-submission-form");
+import { trackAfricanStories } from "./metrics.js";
+const form = document.getElementById("african-submission-form");
 const status = document.getElementById("african-submission-status");
 const country = document.getElementById("submission-country");
 const FORMATS = new Set(["feature", "documentary", "short", "series", "animation", "archive", "other"]);
@@ -33,6 +34,7 @@ form?.addEventListener("submit", async event => {
   if (!form.reportValidity()) return;
   const button = form.querySelector('button[type="submit"]');
   button.disabled = true;
+  trackAfricanStories("submission_started");
   status.textContent = "Sending your submission securely…";
   const payload = payloadFrom(new FormData(form));
   if (!FORMATS.has(payload.format) || !ROLES.has(payload.role)) {
@@ -49,6 +51,7 @@ form?.addEventListener("submit", async event => {
     const result = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(result.message || "The secure intake service is not available yet.");
     form.reset();
+    trackAfricanStories("submission_received");
     status.textContent = "Submission received. Reference: " + String(result.reference || "pending") + ". This is an acknowledgement, not acceptance or a rights agreement.";
   } catch (error) {
     status.textContent = error instanceof Error ? error.message : "Submission could not be sent. Please try again later.";
