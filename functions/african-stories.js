@@ -257,7 +257,7 @@ export function createAfricanStoriesFunctions({ db, onCall, HttpsError, Timestam
     const grant = grantSnapshot.data();
     const now = Timestamp.now();
     if (grant.status !== "approved" || grant.streamOnVivid !== true || grant.deliveryType !== "authorized_embed" ||
-        grant.validFrom?.toMillis?.() > now.toMillis() || grant.validUntil?.toMillis?.() <= now.toMillis() ||
+        !grant.validFrom || !grant.validUntil || grant.validFrom.toMillis() > now.toMillis() || grant.validUntil.toMillis() <= now.toMillis() ||
         !Array.isArray(grant.allowedTerritories) || !grant.allowedTerritories.includes(territory)) {
       fail(HttpsError, "permission-denied", "This exact edition is not cleared for playback in your territory at this time.");
     }
