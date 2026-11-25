@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "catalogueVersion": "2026-11-25.15",
+  "catalogueVersion": "2026-11-25.16",
   "regions": [
     {
       "id": "north",
@@ -643,7 +643,9 @@
       "timelineIds": [
         "nigeria-video-origins-1984-1986",
         "living-in-bondage-1992",
-        "nollywood-name-2002"
+        "nollywood-name-2002",
+        "nollywood-household-vhs-1990s",
+        "nigeria-streaming-pocket-video-2010s"
       ],
       "titleIds": [
         "living-in-bondage-1992"
@@ -1656,6 +1658,27 @@
       ]
     },
     {
+      "published": true,
+      "countryCodes": [
+        "NG"
+      ],
+      "references": [
+        {
+          "label": "Godwin Iretomiwa Simon — ‘They are now pocket videos, not home videos’ (2023)",
+          "url": "https://journals.sagepub.com/doi/full/10.1177/13678779231197697"
+        }
+      ],
+      "id": "nollywood-household-vhs-1990s",
+      "title": "1990s: Nollywood travelled through family rooms and informal networks",
+      "dateLabel": "1990s",
+      "kicker": "NIGERIA · VHS / AUDIENCE CULTURE",
+      "summary": "Research on Nigerian video consumption describes how households watched films together, families passed newly released copies to other families for free, and informal circulation helped local films reach domestic audiences. The home-video label described not only the format but a social practice: people watched, argued and commented together.",
+      "reframe": "Nollywood’s early distribution story cannot be reduced to piracy or retail sales. Household sharing and communal viewing were part of how the industry found and built its audience.",
+      "whyItMatters": "The audience was not just the end of the supply chain. Its social networks helped circulate the films and sustain a domestic viewing culture.",
+      "confidence": "Based on Godwin Iretomiwa Simon’s peer-reviewed study of Nigerian video consumption, which synthesises earlier research and describes household-to-household sharing.",
+      "evidenceRef": "nigeria-household-vhs-sharing-1990s"
+    },
+    {
       "id": "living-in-bondage-1992",
       "title": "1992: Living in Bondage becomes a commercial landmark",
       "dateLabel": "1992",
@@ -1725,6 +1748,27 @@
       "countryCodes": [
         "NG"
       ]
+    },
+    {
+      "published": true,
+      "countryCodes": [
+        "NG"
+      ],
+      "references": [
+        {
+          "label": "Godwin Iretomiwa Simon — ‘They are now pocket videos, not home videos’ (2023)",
+          "url": "https://journals.sagepub.com/doi/full/10.1177/13678779231197697"
+        }
+      ],
+      "id": "nigeria-streaming-pocket-video-2010s",
+      "title": "2010s: the communal home video becomes the individual pocket video",
+      "dateLabel": "2010s",
+      "kicker": "NIGERIA · STREAMING / VIEWING CULTURE",
+      "summary": "Simon’s 2023 study argues that streaming formalised access to Nollywood films and shifted parts of Nigerian viewing culture away from shared television-and-VHS practices toward more individualised smartphone viewing. It traces iROKOtv’s emergence in 2010, its transition from a YouTube channel to a freemium service in 2011 and a subscription service in 2014.",
+      "reframe": "The change was not simply that films moved online. The social arrangement of watching changed too: the family room and shared cassette gave way, in part, to the personal screen and app.",
+      "whyItMatters": "A history of African cinema should include how technology changes audience relationships, not just how production tools change.",
+      "confidence": "Based on a 2023 peer-reviewed article; the author also notes that informal communal viewing persists alongside streaming.",
+      "evidenceRef": "nigeria-pocket-video-streaming-2010s"
     },
     {
       "id": "fespaco-nollywood-2015",
@@ -1923,7 +1967,9 @@
         "yoruba-travelling-theatre-1950s",
         "living-in-bondage-1992",
         "nollywood-name-2002",
-        "nigeria-video-origins-1984-1986"
+        "nigeria-video-origins-1984-1986",
+        "nollywood-household-vhs-1990s",
+        "nigeria-streaming-pocket-video-2010s"
       ],
       "countryCodes": [
         "NG",
