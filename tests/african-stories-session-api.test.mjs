@@ -37,9 +37,9 @@ test("provider-session API forwards identities only to the trusted service bindi
       return new Response(JSON.stringify({
         ok: true,
         playbackUrl: "https://media.partner.example/session/master.m3u8",
-        expiresAt: "2026-11-25T00:10:00.000Z",
+        expiresAt: new Date(Date.now() + 5 * 60 * 1000).toISOString(),
         mimeType: "application/vnd.apple.mpegurl",
-        sessionId: "session-opaque-001"
+        sessionId: "session_opaque_001"
       }), { status: 200, headers: { "Content-Type": "application/json" } });
     }
   };
