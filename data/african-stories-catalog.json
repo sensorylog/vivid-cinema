@@ -39,7 +39,17 @@
       "editorialReview": {
         "status": "approved",
         "reviewedAt": "2026-11-25T00:00:00.000Z"
-      }
+      },
+      "references": [
+        {
+          "label": "BFI — Sambizanga (1972)",
+          "url": "https://www.bfi.org.uk/film/0542d05a-7eba-5f82-b444-52b21c2d3db0/sambizanga"
+        },
+        {
+          "label": "The Film Foundation — 2021 restoration report",
+          "url": "https://www.film-foundation.org/contents/reports/2021/2021.pdf"
+        }
+      ]
     },
     {
       "id": "yeelen-1987",
@@ -71,7 +81,17 @@
       "editorialReview": {
         "status": "approved",
         "reviewedAt": "2026-11-25T00:00:00.000Z"
-      }
+      },
+      "references": [
+        {
+          "label": "Festival de Cannes — Yeelen",
+          "url": "https://www.festival-cannes.com/en/f/yeelen/"
+        },
+        {
+          "label": "African Film Festival — Yeelen / Brightness",
+          "url": "https://africanfilmny.org/films/yeelen-brightness/"
+        }
+      ]
     },
     {
       "id": "cairo-station-1958",
@@ -103,7 +123,17 @@
       "editorialReview": {
         "status": "approved",
         "reviewedAt": "2026-11-25T00:00:00.000Z"
-      }
+      },
+      "references": [
+        {
+          "label": "SPLA — Cairo Station",
+          "url": "https://www.spla.pro/en/file.film.cairo-station.1255.html"
+        },
+        {
+          "label": "BFI — Cairo Station programme notes",
+          "url": "https://bfidatadigipres.github.io/drama%20and%20desire%3Cbr%3E%20the%20films%20of%20youssef%20chahine/2023/07/07/cairo-station/"
+        }
+      ]
     },
     {
       "id": "last-grave-at-dimbaza-1974",
@@ -131,7 +161,17 @@
       "editorialReview": {
         "status": "approved",
         "reviewedAt": "2026-11-25T00:00:00.000Z"
-      }
+      },
+      "references": [
+        {
+          "label": "Mayibuye Archive — Film and Video Archive",
+          "url": "https://mayibuyearchives.robben-island.org.za/film-and-video-archive"
+        },
+        {
+          "label": "Nicholas J. Cull — Clandestine Documentary Film v. Apartheid (2025)",
+          "url": "https://www.tandfonline.com/doi/abs/10.1080/01439685.2025.2474285"
+        }
+      ]
     },
     {
       "id": "living-in-bondage-1992",
@@ -158,7 +198,13 @@
       "editorialReview": {
         "status": "approved",
         "reviewedAt": "2026-11-25T00:00:00.000Z"
-      }
+      },
+      "references": [
+        {
+          "label": "Oxford Research Encyclopedia — West African Cinema",
+          "url": "https://academic.oup.com/edited-volume/61663/chapter-abstract/553444673"
+        }
+      ]
     }
   ]
 }
