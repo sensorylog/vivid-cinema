@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#08090c">
+  <meta name="description" content="Authorized African cinema playback on Vivid Cinema.">
+  <title>African Stories Player — Vivid Cinema</title>
+  <link rel="stylesheet" href="/styles/vivid-foundation.css">
+  <link rel="stylesheet" href="/styles/vivid-system.css">
+  <link rel="stylesheet" href="/styles/african-stories.css">
+</head>
+<body class="african-stories-page african-player-page">
+  <main class="african-shell">
+    <a class="african-back-link" href="/home.html">← Back to Vivid Cinema</a>
+    <header class="african-page-heading">
+      <span class="african-eyebrow">VIVID CINEMA · AFRICAN STORIES</span>
+      <h1 id="african-player-title">African Stories Player</h1>
+      <p id="african-player-description">Playback is checked against the exact edition, rights window, provider and territory before a player is opened.</p>
+    </header>
+    <section class="african-player-frame" aria-label="African Stories playback">
+      <div id="african-player-state" class="african-player-state" role="status" aria-live="polite">
+        <span class="african-state-mark" aria-hidden="true">◇</span>
+        <h2>Checking playback eligibility</h2>
+        <p>Vivid will only open a route that has been explicitly cleared for this edition.</p>
+      </div>
+      <iframe id="african-authorized-frame" title="African Stories authorized player" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen referrerpolicy="no-referrer" sandbox="allow-scripts allow-same-origin allow-presentation" hidden></iframe>
+    </section>
+    <p class="african-player-footnote">An archive record or an official external viewing link does not automatically grant playback on Vivid Cinema. If no authorized route is available, this player will remain closed.</p>
+  </main>
+  <script type="module" src="/scripts/african-stories/player.js"></script>
+</body>
+</html>
