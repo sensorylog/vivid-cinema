@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#08090c">
-  <meta name="description" content="Authorized African cinema playback on Vivid Cinema.">
+  <meta name="description" content="African Stories — a dedicated African cinema and moving-image heritage player on Vivid Cinema.">
   <title>African Stories Player — Vivid Cinema</title>
   <link rel="stylesheet" href="/styles/vivid-foundation.css">
   <link rel="stylesheet" href="/styles/vivid-system.css">
@@ -16,17 +16,41 @@
     <header class="african-page-heading">
       <span class="african-eyebrow">VIVID CINEMA · AFRICAN STORIES</span>
       <h1 id="african-player-title">African Stories Player</h1>
-      <p id="african-player-description">Playback is checked against the exact edition, rights window, provider and territory before a player is opened.</p>
+      <p id="african-player-description">A dedicated playback experience for African cinema, documentary and moving-image heritage.</p>
     </header>
-    <section class="african-player-frame" aria-label="African Stories playback">
-      <div id="african-player-state" class="african-player-state" role="status" aria-live="polite">
-        <span class="african-state-mark" aria-hidden="true">◇</span>
-        <h2>Checking playback eligibility</h2>
-        <p>Vivid will only open a route that has been explicitly cleared for this edition.</p>
+
+    <section class="african-player-workspace" aria-label="African Stories playback">
+      <div class="african-player-toolbar">
+        <span class="african-player-live-mark"><i></i> AFRICAN STORIES PLAYER</span>
+        <span id="african-player-source-label" class="african-player-source-label">SOURCE CHECK</span>
       </div>
-      <iframe id="african-authorized-frame" title="African Stories authorized player" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen referrerpolicy="no-referrer" sandbox="allow-scripts allow-same-origin allow-presentation" hidden></iframe>
+      <div class="african-player-frame">
+        <div id="african-player-state" class="african-player-state" role="status" aria-live="polite">
+          <span class="african-state-mark" aria-hidden="true">◇</span>
+          <h2>Loading African Stories</h2>
+          <p>Verifying the published edition and its available sources.</p>
+        </div>
+        <iframe id="african-player-frame" title="African Stories platform player" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen" allowfullscreen referrerpolicy="strict-origin-when-cross-origin" sandbox="allow-scripts allow-same-origin allow-presentation allow-popups" hidden></iframe>
+        <video id="african-player-video" playsinline controls preload="metadata" hidden></video>
+      </div>
+      <div class="african-player-underbar">
+        <div id="african-player-sources" class="african-player-sources" aria-label="Available playback sources" hidden></div>
+        <a id="african-player-fallback" class="african-player-fallback" target="_blank" rel="noopener noreferrer" hidden>Open original source</a>
+      </div>
     </section>
-    <p class="african-player-footnote">An archive record or an official external viewing link does not automatically grant playback on Vivid Cinema. If no authorized route is available, this player will remain closed.</p>
+
+    <section id="african-filmflux-panel" class="african-filmflux-panel" hidden aria-labelledby="african-filmflux-heading">
+      <div class="african-section-heading">
+        <span class="african-eyebrow">AFRICAN FILM DISCOVERY</span>
+        <h2 id="african-filmflux-heading">Discover more cinema</h2>
+        <p>Public trending leads from FilmFlux. Videos play through their original YouTube player; FilmFlux is credited as the discovery source.</p>
+      </div>
+      <p id="african-filmflux-status" class="african-filmflux-status" role="status" aria-live="polite">Loading discovery feed…</p>
+      <div id="african-filmflux-list" class="african-filmflux-grid"></div>
+      <p class="african-player-footnote">Discovery listings are not Vivid-licensed titles. Check the uploader and the original platform listing for creator identity, availability and usage terms.</p>
+    </section>
+
+    <p class="african-player-footnote">Official platform embeds retain the platform's player, controls and policies. Archive files are checked against the exact public item and file record. Protected partner streams require a separate title/version entitlement.</p>
   </main>
   <script type="module" src="/scripts/app-shell.js"></script>
   <script type="module" src="/scripts/african-stories/player.js"></script>
