@@ -101,6 +101,17 @@ test("Ghanaian research contributors are credited and connected to their source 
   assert.ok(experience.collections.filter(item => item.personIds?.includes("vitus-nanbigne")).length >= 3);
 });
 
+test("African film histories include camera restrictions, domestic censorship and festival gatekeeping", () => {
+  const byId = id => experience.timelines.find(item => item.id === id);
+  assert.ok(byId("laval-decree-1934").summary.includes("prevented colonised people from filming"));
+  assert.ok(byId("laval-decree-overturned-1960").summary.includes("overturned in 1960"));
+  assert.ok(byId("cairo-station-1958-censorship").summary.includes("more than a decade"));
+  assert.ok(byId("fespaco-nollywood-2015").summary.includes("effectively excluded"));
+  assert.ok(experience.collections.some(item => item.id === "who-was-allowed-to-film"));
+  assert.ok(experience.collections.some(item => item.id === "festival-canon-video-film"));
+  assert.ok(experience.collections.some(item => item.id === "egyptian-cinema-and-censorship"));
+});
+
 test("access labels keep discovery separate from viewing rights", () => {
   assert.equal(accessLabel("discover_archive_record"), "Discover / archive record");
   assert.equal(accessLabel("access_pending"), "Access pending");
