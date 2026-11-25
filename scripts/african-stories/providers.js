@@ -138,7 +138,11 @@ export function getOfficialSourceFallback(source) {
   try {
     const item = validateAfricanPlaybackSource(source);
     if (item.provider === "youtube" && YOUTUBE_ID.test(item.videoId || "")) return "https://www.youtube.com/watch?v=" + item.videoId;
-    if (item.provider === "vimeo" && VIMEO_ID.test(item.videoId || "")) return "https://vimeo.com/" + item.videoId;
+    if (item.provider === "vimeo" && VIMEO_ID.test(item.videoId || "")) {
+      const url = new URL("https://vimeo.com/" + item.videoId);
+      if (item.vimeoHash && /^[A-Za-z0-9]{6,80}$/.test(item.vimeoHash)) url.searchParams.set("h", item.vimeoHash);
+      return url.toString();
+    }
     if (item.provider === "peertube") return buildOfficialEmbed(item).url.replace("/videos/embed/", "/videos/watch/");
     if (item.provider === "archive" && ARCHIVE_ID.test(item.archiveIdentifier || "")) return "https://archive.org/details/" + encodeURIComponent(item.archiveIdentifier);
   } catch {}
