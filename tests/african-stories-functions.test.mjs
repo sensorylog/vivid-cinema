@@ -169,7 +169,8 @@ test("approved rights alone cannot launch playback without a provider-specific s
       validUntilMs: now + 60 * 60 * 1000
     }
   });
-  assert.equal(decision.streamOnVivid, false);
+  assert.equal(decision.rightsApproved, true);
+  assert.equal(decision.playbackAdapterReady, false);
   const grant = api.db.records.get("africanRightsGrants/river-film__original-cut");
   assert.equal(grant.rightsApproved, true);
   assert.equal("playbackUrl" in grant, false);
