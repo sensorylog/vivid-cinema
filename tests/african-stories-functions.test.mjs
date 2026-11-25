@@ -206,3 +206,82 @@ test("official external viewing links require the explicit watch_officially acce
     error => error.code === "invalid-argument"
   );
 });
+
+
+test("official YouTube source is validated and published with the exact edition", async () => {
+  const api = makeFunctions();
+  const work = {
+    ...validDraft,
+    accessState: "watch_officially",
+    versions: [{
+      ...validDraft.versions[0],
+      playbackSources: [{
+        sourceId: "official-youtube",
+        provider: "youtube",
+        videoId: "M7lc1UVf-VE",
+        label: "Official creator upload",
+        enabled: true,
+        evidenceRef: "creator-channel-verification-001"
+      }]
+    }]
+  };
+  await api.saveAfricanWorkDraft({
+    auth: { uid: "editor-1", token: { africanStoriesEditor: true } },
+    data: { workId: "river-film", work }
+  });
+  await api.publishAfricanWork({
+    auth: { uid: "publisher-1", token: { africanStoriesPublisher: true } },
+    data: { workId: "river-film" }
+  });
+  const published = api.db.records.get("africanWorksPublic/river-film");
+  assert.equal(published.versions[0].playbackSources[0].provider, "youtube");
+  assert.equal(published.versions[0].playbackSources[0].videoId, "M7lc1UVf-VE");
+  assert.equal(published.versions[0].playbackSources[0].enabled, true);
+});
+
+test("official platform embeds cannot be published without watch_officially and evidence", async () => {
+  const api = makeFunctions();
+  const youtube = {
+    sourceId: "official-youtube", provider: "youtube", videoId: "M7lc1UVf-VE",
+    label: "Official upload", enabled: true, evidenceRef: "creator-verification"
+  };
+  await assert.rejects(api.saveAfricanWorkDraft({
+    auth: { uid: "editor-1", token: { africanStoriesEditor: true } },
+    data: { workId: "river-film", work: {
+      ...validDraft,
+      versions: [{ ...validDraft.versions[0], playbackSources: [youtube] }]
+    } }
+  }), error => error.code === "failed-precondition");
+  await assert.rejects(api.saveAfricanWorkDraft({
+    auth: { uid: "editor-1", token: { africanStoriesEditor: true } },
+    data: { workId: "river-film", work: {
+      ...validDraft, accessState: "watch_officially",
+      versions: [{ ...validDraft.versions[0], playbackSources: [{ ...youtube, evidenceRef: "" }] }]
+    } }
+  }), error => error.code === "invalid-argument");
+});
+
+test("Internet Archive playback requires an explicit rights basis and evidence reference", async () => {
+  const api = makeFunctions();
+  const archiveSource = {
+    sourceId: "archive-file", provider: "archive", archiveIdentifier: "ghana-archive-001",
+    archiveFile: "feature.mp4", rightsBasis: "public_domain", enabled: true,
+    evidenceRef: "rights-review-001", label: "Public archive copy"
+  };
+  await api.saveAfricanWorkDraft({
+    auth: { uid: "editor-1", token: { africanStoriesEditor: true } },
+    data: { workId: "river-film", work: {
+      ...validDraft,
+      versions: [{ ...validDraft.versions[0], playbackSources: [archiveSource] }]
+    } }
+  });
+  const saved = api.db.records.get("africanWorkDrafts/river-film");
+  assert.equal(saved.versions[0].playbackSources[0].provider, "archive");
+  await assert.rejects(api.saveAfricanWorkDraft({
+    auth: { uid: "editor-1", token: { africanStoriesEditor: true } },
+    data: { workId: "other-film", work: {
+      ...validDraft,
+      versions: [{ ...validDraft.versions[0], playbackSources: [{ ...archiveSource, rightsBasis: "unknown", evidenceRef: "" }] }]
+    } }
+  }), error => error.code === "invalid-argument");
+});
