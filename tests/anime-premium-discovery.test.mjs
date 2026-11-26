@@ -38,7 +38,8 @@ test("Premium discovery assets are cached and syntax-checked", () => {
   assert.match(sw, /scripts\/anime-premium-discovery\.js/);
   assert.match(sw, /vivid-cinema-shell-v330/);
   assert.match(sw, /anime-premium-title\.html/);
-  assert.match(sw, /anime-premium-title\.html/);
+  assert.match(sw, /anime-premium-title\.js/);
   assert.match(sw, /vivid-anime-premium-title\.css/);
   assert.match(syntax, /scripts\/anime-premium-discovery\.js/);
+  assert.match(syntax, /scripts\/anime-premium-title\.js/);
 });
