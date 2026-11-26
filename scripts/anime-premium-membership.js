@@ -138,7 +138,7 @@ async function loadMembership() {
   }
   const accountLabel = currentUser.displayName || currentUser.email || "your Vivid account";
   $("vap-account-status").textContent = "Signed in as " + accountLabel + ". Your existing Vivid account will own your Anime Premium membership.";
-  const token = await currentUser.getIdToken();
+  const token = await currentUser.getIdToken(true);
   const response = await withTimeout(fetch("/api/anime-premium/membership", {
     headers: { Authorization: "Bearer " + token }, cache: "no-store"
   }), 6500, "Membership status request timed out.");
