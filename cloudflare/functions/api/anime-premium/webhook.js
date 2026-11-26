@@ -87,7 +87,7 @@ async function handleChargeSuccess(db, env, data, eventRef) {
   const paystackSubscriptionCode = String(verified.subscription?.subscription_code || data.subscription?.subscription_code || data.subscription_code || pendingSubscription.subscriptionCode || "");
   const subscriptionEmailToken = String(verified.subscription?.email_token || data.subscription?.email_token || pendingSubscription.emailToken || "");
   const requestedNextPayment = millis(verified.subscription?.next_payment_date || data.subscription?.next_payment_date);
-  const hasRecurringPlan = Boolean(paystackSubscriptionCode || verified.plan || data.plan);
+  const hasRecurringPlan = Boolean(paystackSubscriptionCode);
 
   await db.runTransaction(async transaction => {
     const [eventSnapshot, liveCheckout, existingMembership] = await Promise.all([
@@ -183,7 +183,7 @@ async function handleRecurringEvent(db, eventName, data, eventRef) {
         renewalMode: "automatic",
         cancelAtPeriodEnd: false,
         currentPeriodStart: timestampFromMillis(start),
-        currentPeriodEnd: timestampFromMillis(Math.max(next > now ? next : 0, addDaysMillis(30, start))),
+        currentPeriodEnd: timestampFromMillis(Math.max(next > now ? next : 0, addMonthsMillis(value.planId || "monthly", start))),
         updatedAt: timestampFromMillis(now)
       }, { merge: true });
     } else if (eventName === "invoice.payment_failed") {
