@@ -1,5 +1,12 @@
 
 const $ = id => document.getElementById(id);
+function withTimeout(promise, milliseconds, message) {
+  let timer;
+  return Promise.race([
+    promise,
+    new Promise((_, reject) => { timer = window.setTimeout(() => reject(new Error(message)), milliseconds); })
+  ]).finally(() => window.clearTimeout(timer));
+}
 const reference = new URLSearchParams(window.location.search).get("reference") || "";
 let currentUser = null;
 let checks = 0;
@@ -56,10 +63,10 @@ $("vap-return-reference").textContent = reference ? "Payment reference · …" +
 $("vap-return-refresh").addEventListener("click", () => { void checkMembership(); });
 async function initAuth() {
   try {
-    const [{ auth }, { onAuthStateChanged }] = await Promise.all([
+    const [{ auth }, { onAuthStateChanged }] = await withTimeout(Promise.all([
       import("./firebase.js"),
       import("https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js")
-    ]);
+    ]), 10000, "Vivid account services timed out.");
     if (typeof auth.authStateReady === "function") await auth.authStateReady();
     currentUser = auth.currentUser && !auth.currentUser.isAnonymous ? auth.currentUser : null;
     onAuthStateChanged(auth, user => {
