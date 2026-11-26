@@ -36,7 +36,7 @@ test("catalogue cards open dedicated title routes and signature cards use per-ti
 
 test("Premium discovery assets are cached and syntax-checked", () => {
   assert.match(sw, /scripts\/anime-premium-discovery\.js/);
-  assert.match(sw, /vivid-cinema-shell-v336/);
+  assert.match(sw, /vivid-cinema-shell-v337/);
   assert.match(sw, /anime-premium-title\.html/);
   assert.match(sw, /anime-premium-title\.js/);
   assert.match(sw, /vivid-anime-premium-title\.css/);
