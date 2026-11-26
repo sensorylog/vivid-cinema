@@ -74,10 +74,16 @@ test("payment return checks server membership and never grants access from the c
   assert.match(returnHtml, /Membership activation is confirmed only by Vivid’s server/);
 });
 
+test("payment return can render its status even if Firebase auth is temporarily unavailable", () => {
+  assert.match(returnScript, /import\("\.\/firebase\.js"\)/);
+  assert.doesNotMatch(returnScript, /^import \{ auth \}/m);
+  assert.match(returnScript, /async function initAuth\(\)/);
+});
+
 test("membership return survives Vivid email verification and is cached offline", () => {
   assert.match(sendVerification, /anime-premium-membership\.html/);
   assert.match(verifyEmail, /anime-premium-membership\.html/);
-  assert.match(sw, /vivid-cinema-shell-v352/);
+  assert.match(sw, /vivid-cinema-shell-v353/);
   assert.match(sw, /anime-premium-membership\.html/);
   assert.match(sw, /anime-premium-return\.html/);
   assert.match(sw, /anime-premium-membership\.js/);
