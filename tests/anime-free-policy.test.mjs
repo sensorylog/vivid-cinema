@@ -16,6 +16,7 @@ test("free Anime is a fixed six-series sampler, not a paginated full catalogue",
   assert.match(page, /anime-premium\.html/);
   assert.doesNotMatch(page, /anime-load-more/);
   assert.match(client, /FREE_ANIME_SAMPLE_IDS\.map/);
+  assert.match(client, /buildWatchUrl\(item\.id, "tv", 1, 1\)/);
   assert.doesNotMatch(client, /getAnimePage|load\(false\)/);
 });
 
@@ -29,6 +30,7 @@ test("free Anime only grants the first episode of the curated sample series", ()
   assert.equal(isFreeAnimePreview({ id: "999999", type: "tv", season: "1", episode: "1" }), false);
   assert.match(watch, /isFreeAnimePreview\(currentParams\)/);
   assert.match(watch, /renderAnimePremiumGate/);
+  assert.match(watch, /isAnimePlayback\(\) && !isFreeAnimePreview\(currentParams\)/);
   assert.match(watch, /continues on Premium/);
 });
 
