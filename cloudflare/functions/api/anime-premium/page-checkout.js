@@ -1,6 +1,6 @@
 import {
   allowedOrigin, AnimePremiumError, enforceRateLimit, getPremiumServices, jsonResponse, optionsResponse,
-  requirePremiumUser, timestampFromMillis
+  requirePremiumUser, timestampFromMillis, isValidEmailAddress
 } from "../../lib/anime-premium-service.js";
 
 const PAGE_PLANS = Object.freeze({
@@ -32,7 +32,7 @@ export async function onRequestPost({ request, env }) {
     const reference = "VAPP" + crypto.randomUUID().replace(/-/g, "").slice(0, 28).toUpperCase();
     const now = Date.now();
     const email = String(user.email || "").trim().toLowerCase();
-    if (!email || !/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email)) {
+    if (!isValidEmailAddress(email)) {
       throw new AnimePremiumError(403, "verified-email-required", "A verified Vivid account email is required for Premium checkout.");
     }
     const pendingRef = db.collection("animePremiumPageCheckouts");

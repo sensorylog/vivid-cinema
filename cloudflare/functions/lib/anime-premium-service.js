@@ -26,6 +26,12 @@ let cachedDb = null;
 let cachedServiceAccount = null;
 let cachedServiceAccountRaw = "";
 
+export function isValidEmailAddress(value) {
+  const email = String(value || "").trim();
+  if (!email || email.length > 254) return false;
+  return /^[A-Z0-9.!#$%&'*+/=?^_\x60{|}~-]+@[A-Z0-9](?:[A-Z0-9-]*[A-Z0-9])?(?:\.[A-Z0-9](?:[A-Z0-9-]*[A-Z0-9])?)+$/i.test(email);
+}
+
 export class AnimePremiumError extends Error {
   constructor(status, code, message) {
     super(message);
