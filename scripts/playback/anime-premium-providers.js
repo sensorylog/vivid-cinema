@@ -1,3 +1,8 @@
+import {
+  buildVidapiEmbedUrl, buildVidsrcEmbedUrl, buildVidlinkEmbedUrl,
+  buildVidplusEmbedUrl, buildEmbedWaveUrl, buildVidFastUrl
+} from "./playback-urls.js";
+
 const PROVIDERS = Object.freeze([
   { id: "vidplus", label: "VidPlus", origin: "https://player.vidplus.to", kind: "anilist", events: false, note: "AniList anime player · sub/dub" },
   { id: "vidlink", label: "VidLink", origin: "https://vidlink.pro", kind: "mal", events: false, note: "MAL anime player · automatic audio fallback" },
@@ -40,28 +45,18 @@ export function buildAnimePremiumProviderUrl(providerId, {
   const audio = track === "dub" ? "dub" : "sub";
   const isMovie = mediaType === "movie";
 
+  const params = { id: tmdb, type: mediaType, season: s, episode: ep };
   if (provider.kind === "tmdb" || provider.kind === "either-tmdb") {
     if (!tmdb) return "";
+    if (providerId === "vidapi") return buildVidapiEmbedUrl(params);
+    if (providerId === "vidsrc") return buildVidsrcEmbedUrl(params, { tmdbId: tmdb });
+    if (providerId === "embedwave") return buildEmbedWaveUrl(params, { tmdbId: tmdb });
+    if (providerId === "vidfast") return buildVidFastUrl(params, { tmdbId: tmdb });
     if (providerId === "vidrift") {
       if (isMovie) return provider.origin + "/embed/movie/" + tmdb;
       if (ani) return provider.origin + "/embed/anilist/" + ani + "/" + ep + (audio === "dub" ? "?dub=1" : "");
       return provider.origin + "/embed/tv/" + tmdb + "/" + s + "/" + ep;
     }
-    if (providerId === "vidsrc") {
-      const path = isMovie ? "/embed/movie/" + tmdb : "/embed/tv/" + tmdb + "/" + s + "/" + ep;
-      return provider.origin + path + "?ds_lang=en";
-    }
-    if (providerId === "vidfast") {
-      const path = isMovie ? "/embed/movie/" + tmdb : "/embed/tv/" + tmdb + "/" + s + "/" + ep;
-      return provider.origin + path;
-    }
-    if (providerId === "vidapi") {
-      const path = isMovie ? "/embed/movie/" + tmdb : "/embed/tv/" + tmdb + "/" + s + "/" + ep;
-      const query = new URLSearchParams({ autoplay: "1", controls: "1", overlay: "1", ds_lang: "en" });
-      return provider.origin + path + "?" + query;
-    }
-    const path = isMovie ? "/embed/movie/" + tmdb : "/embed/tv/" + tmdb + "/" + s + "/" + ep;
-    return provider.origin + path + "?autoplay=true";
   }
   if (isMovie) return "";
   if (provider.kind === "anilist" && !ani) return "";
@@ -69,14 +64,10 @@ export function buildAnimePremiumProviderUrl(providerId, {
   if (provider.kind === "either" && !ani && !mal) return "";
 
   switch (providerId) {
-    case "vidplus": {
-      const query = new URLSearchParams({ dub: String(audio === "dub"), autoplay: "true", primarycolor: "e50914", secondarycolor: "171717", iconcolor: "ffffff" });
-      return provider.origin + "/embed/anime/" + ani + "/" + ep + "?" + query;
-    }
-    case "vidlink": {
-      const query = new URLSearchParams({ fallback: "true", autoplay: "true", primaryColor: "e50914", secondaryColor: "1b1b1b", iconColor: "ffffff" });
-      return provider.origin + "/anime/" + mal + "/" + ep + "/" + audio + "?" + query;
-    }
+    case "vidplus":
+      return buildVidplusEmbedUrl(params, { aniListId: ani, anime: true, track: audio });
+    case "vidlink":
+      return buildVidlinkEmbedUrl(params, { tmdbId: tmdb, malId: mal, anime: true, track: audio });
     case "anixo": {
       const path = ani ? "/embed/ani/" + ani : "/embed/mal/" + mal;
       return provider.origin + path + "/" + ep + "?track=" + audio + "&autoSkipIntro=1&autoSkipOutro=1";
