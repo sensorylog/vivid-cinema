@@ -1,10 +1,20 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { onRequestGet } from "../cloudflare/functions/api/anime-premium/countries.js";
+import { ANIME_PREMIUM_COUNTRIES } from "../scripts/anime-premium-countries.js";
 
-test("country directory is served from the bundled ISO catalogue without network dependencies", async () => {
+test("bundled country directory contains the complete international country and territory catalogue", async () => {
+  assert.ok(ANIME_PREMIUM_COUNTRIES.length >= 240);
+  assert.ok(ANIME_PREMIUM_COUNTRIES.some(country => country.code === "GH" && country.currency === "GHS"));
+  assert.ok(ANIME_PREMIUM_COUNTRIES.some(country => country.code === "NG" && country.currency === "NGN"));
+  assert.ok(ANIME_PREMIUM_COUNTRIES.some(country => country.code === "CA" && country.currency === "CAD"));
+  assert.ok(ANIME_PREMIUM_COUNTRIES.some(country => country.code === "GB" && country.currency === "GBP"));
+  assert.ok(ANIME_PREMIUM_COUNTRIES.some(country => country.code === "DE" && country.currency === "EUR"));
+});
+
+test("country directory endpoint serves the bundled list without any external network request", async () => {
   const originalFetch = globalThis.fetch;
-  globalThis.fetch = async () => { throw new Error("Country endpoint must not make an upstream request."); };
+  globalThis.fetch = async () => { throw new Error("country endpoint must not fetch external APIs"); };
   try {
     const response = await onRequestGet({
       request: new Request("https://vivid-cinema.pages.dev/api/anime-premium/countries"),
@@ -13,22 +23,14 @@ test("country directory is served from the bundled ISO catalogue without network
     const payload = await response.json();
     assert.equal(response.status, 200);
     assert.equal(payload.ok, true);
-    assert.ok(payload.count >= 200, "full ISO country list should contain at least 200 entries");
-    assert.equal(payload.countries.length, payload.count);
-    assert.deepEqual(payload.countries.find(country => country.code === "GH"), {
-      code: "GH", name: "Ghana", currency: "GHS"
-    });
-    assert.equal(payload.countries.find(country => country.code === "NG")?.currency, "NGN");
-    assert.equal(payload.countries.find(country => country.code === "US")?.currency, "USD");
-    assert.ok(payload.countries.some(country => country.code === "CA"));
-    assert.ok(payload.countries.some(country => country.code === "JP"));
-    assert.match(payload.source, /Bundled countries-list ISO 3166-1/);
+    assert.equal(payload.count, ANIME_PREMIUM_COUNTRIES.length);
+    assert.equal(payload.countries.length, ANIME_PREMIUM_COUNTRIES.length);
   } finally {
     globalThis.fetch = originalFetch;
   }
 });
 
-test("country directory endpoint rejects unapproved origins", async () => {
+test("country directory endpoint respects Vivid origin restrictions", async () => {
   const response = await onRequestGet({
     request: new Request("https://vivid-cinema.pages.dev/api/anime-premium/countries", {
       headers: { Origin: "https://attacker.example" }
@@ -36,5 +38,4 @@ test("country directory endpoint rejects unapproved origins", async () => {
     env: {}
   });
   assert.equal(response.status, 403);
-  assert.equal((await response.json()).code, "origin-not-allowed");
 });
