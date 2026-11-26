@@ -118,16 +118,14 @@ function renderServerOptions() {
   const list = $("vap-server-list");
   list.innerHTML = providerOptions.map(provider =>
     '<button class="vap-server-option" type="button" data-vap-server="' + provider.id + '"' +
-    (provider.available ? "" : " disabled") +
     ' aria-pressed="' + String(provider.id === activeProviderId) + '">' +
-    '<span class="vap-server-option-copy"><strong>' + escapeHtml(provider.label) + '</strong><small>' +
-    escapeHtml(provider.available ? provider.note : (mediaType === "movie" ? "Episode-only provider" : "No matching catalogue ID")) +
-    '</small></span><span class="vap-server-option-state">' +
-    (provider.available ? (provider.id === activeProviderId ? "Selected" : failedProviderIds.has(provider.id) ? "Failed · retry" : "ID matched") : "Unavailable") +
+    '<span class="vap-server-option-copy"><strong>' + escapeHtml(provider.label) + '</strong><small>Anime stream · ' + escapeHtml(animeTrack.toUpperCase()) + '</small></span>' +
+    '<span class="vap-server-option-state">' +
+    (provider.id === activeProviderId ? "Selected" : failedProviderIds.has(provider.id) ? "Failed · retry" : "Ready to try") +
     '</span></button>'
   ).join("");
   list.querySelectorAll("[data-vap-server]").forEach(button => button.addEventListener("click", () => activateProvider(button.dataset.vapServer)));
-  $("vap-server-count").textContent = providerOptions.filter(item => item.available).length + " ID matched";
+  $("vap-server-count").textContent = providerOptions.length + (providerOptions.length === 1 ? " server option" : " server options");
 }
 function activateProvider(providerId) {
   const provider = providerOptions.find(item => item.id === providerId && item.available);
@@ -365,7 +363,7 @@ async function requestPlayback(episode) {
     providerOptions = resolveAnimePremiumProviderOptions({
       mediaType, tmdbId: titleId, aniListId: seasonAnimeIds.aniListId, malId: seasonAnimeIds.malId,
       season: seasonNumber, episode: activeProviderEpisodeNumber, track: animeTrack
-    });
+    }).filter(item => item.available).map((item, index) => ({ ...item, label: "Server " + (index + 1) }));
     renderServerOptions();
     const preferredPlayer = getAnimeLibraryPreferences().preferredPlayer;
     const first = providerOptions.find(item => item.available && preferredPlayer !== "auto" && item.id === preferredPlayer)
