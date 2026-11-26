@@ -73,6 +73,8 @@ test("Premium supports monthly, biannual and annual Paystack plans with server-o
   const now = Date.UTC(2026, 0, 31);
   assert.equal(new Date(addPlanIntervalMillis("biannually", now)).toISOString(), "2026-07-31T00:00:00.000Z");
   assert.equal(new Date(addPlanIntervalMillis("annually", now)).toISOString(), "2027-01-31T00:00:00.000Z");
+  const augustEnd = Date.UTC(2026, 7, 31);
+  assert.equal(new Date(addPlanIntervalMillis("biannually", augustEnd)).toISOString(), "2027-02-28T00:00:00.000Z");
 });
 
 test("unconfigured country currencies fall back to the configured default checkout currency", () => {
