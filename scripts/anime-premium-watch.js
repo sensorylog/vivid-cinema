@@ -209,6 +209,7 @@ async function requestPlayback(episode) {
 }
 async function selectEpisode(index, request = false) {
   if (!activeEpisodes[index]) return;
+  if (currentPlaybackSessionId) void syncPlaybackProgress(true);
   activeEpisodeIndex = index;
   const episode = activeEpisodes[index];
   const season = Number(params.get("season") || 1);
@@ -220,8 +221,8 @@ async function selectEpisode(index, request = false) {
 }
 async function loadSeason(seasonNumber) {
   const request = ++seasonRequest;
+  if (currentPlaybackSessionId) void syncPlaybackProgress(true);
   playbackRequestId += 1;
-  pendingProgressSnapshot = null;
   showGate("Loading season", "Choose an episode after the season list has loaded.");
   const season = Number(seasonNumber || 1);
   params.set("season", String(season));
