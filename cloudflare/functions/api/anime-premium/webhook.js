@@ -28,6 +28,8 @@ async function handleChargeSuccess(db, env, data, eventRef) {
   let checkoutSnapshot;
   let checkout = {};
   let hostedPageCheckout = false;
+  let pendingSubscriptionDoc = null;
+  let pendingSubscription = {};
   if (reference.startsWith("VAP") && safeReference(reference)) {
     checkoutRef = db.collection("animePremiumCheckouts").doc(reference);
     checkoutSnapshot = await checkoutRef.get();
@@ -43,6 +45,16 @@ async function handleChargeSuccess(db, env, data, eventRef) {
       return;
     }
     const email = String(data.customer?.email || "").trim().toLowerCase();
+    const customerCode = String(data.customer?.customer_code || "");
+    if (customerCode) {
+      const pendingSubscriptionSnapshot = await db.collection("animePremiumPendingSubscriptions").where("customerCode", "==", customerCode).limit(1).get();
+      pendingSubscriptionDoc = pendingSubscriptionSnapshot.empty ? null : pendingSubscriptionSnapshot.docs[0];
+      pendingSubscription = pendingSubscriptionDoc ? pendingSubscriptionDoc.data() || {} : {};
+    }
+    if (!data.plan && !data.subscription && !data.subscription_code && !pendingSubscriptionDoc) {
+      console.warn("Ignoring a successful Paystack charge without subscription-page evidence.", { reference });
+      return;
+    }
     const amount = Number(data.amount || 0);
     const currency = String(data.currency || "").toUpperCase();
     if (!email || !amount || !currency) return;
@@ -82,11 +94,11 @@ async function handleChargeSuccess(db, env, data, eventRef) {
   const membershipRef = db.collection("animePremiumMemberships").doc(uid);
   const now = Date.now();
   const customerCode = String(verified.customer?.customer_code || data.customer?.customer_code || "");
-  const pendingSubscriptionSnapshot = customerCode
-    ? await db.collection("animePremiumPendingSubscriptions").where("customerCode", "==", customerCode).limit(1).get()
-    : null;
-  const pendingSubscriptionDoc = pendingSubscriptionSnapshot && !pendingSubscriptionSnapshot.empty ? pendingSubscriptionSnapshot.docs[0] : null;
-  const pendingSubscription = pendingSubscriptionDoc ? pendingSubscriptionDoc.data() || {} : {};
+  if (!pendingSubscriptionDoc && customerCode) {
+    const pendingSubscriptionSnapshot = await db.collection("animePremiumPendingSubscriptions").where("customerCode", "==", customerCode).limit(1).get();
+    pendingSubscriptionDoc = pendingSubscriptionSnapshot.empty ? null : pendingSubscriptionSnapshot.docs[0];
+    pendingSubscription = pendingSubscriptionDoc ? pendingSubscriptionDoc.data() || {} : {};
+  }
   const paystackSubscriptionCode = String(verified.subscription?.subscription_code || data.subscription?.subscription_code || data.subscription_code || pendingSubscription.subscriptionCode || "");
   const subscriptionEmailToken = String(verified.subscription?.email_token || data.subscription?.email_token || pendingSubscription.emailToken || "");
   const requestedNextPayment = millis(verified.subscription?.next_payment_date || data.subscription?.next_payment_date);
