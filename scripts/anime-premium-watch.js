@@ -117,7 +117,7 @@ function renderServerOptions() {
     '<span class="vap-server-option-copy"><strong>' + escapeHtml(provider.label) + '</strong><small>' +
     escapeHtml(provider.available ? provider.note : (mediaType === "movie" ? "Episode-only provider" : "No matching catalogue ID")) +
     '</small></span><span class="vap-server-option-state">' +
-    (provider.available ? (provider.id === activeProviderId ? "Selected" : "Ready") : "Unavailable") +
+    (provider.available ? (provider.id === activeProviderId ? "Selected" : failedProviderIds.has(provider.id) ? "Failed · retry" : "Ready") : "Unavailable") +
     '</span></button>'
   ).join("");
   list.querySelectorAll("[data-vap-server]").forEach(button => button.addEventListener("click", () => activateProvider(button.dataset.vapServer)));
@@ -128,6 +128,7 @@ function activateProvider(providerId) {
   if (!provider || !currentPlaybackSessionId) return false;
   const frame = $("vap-player-frame");
   if (activeProviderId && activeProviderId !== provider.id) void syncPlaybackProgress(true);
+  failedProviderIds.delete(provider.id);
   const generation = ++providerRequestId;
   if (providerLoadTimer) window.clearTimeout(providerLoadTimer);
   providerLoadTimer = null;
@@ -165,7 +166,8 @@ function fallbackToNextPlaybackServer(message) {
   if (activeProviderId) failedProviderIds.add(activeProviderId);
   const next = providerOptions.find(item => item.available && !failedProviderIds.has(item.id));
   if (!next) {
-    setStatus(message + " No other available server remains. Choose a server above to retry.");
+    activeProviderId = "";
+    setStatus(message + " No other available server remains. Choose a failed server above to retry.");
     $("vap-server-next").hidden = true;
     renderServerOptions();
     return;
