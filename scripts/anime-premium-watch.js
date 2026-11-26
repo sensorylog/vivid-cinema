@@ -160,7 +160,10 @@ async function requestPlayback(episode, excludedCandidates = failedPlaybackCandi
       setStatus("The protected playback service has not issued a stream for this episode.");
       return;
     }
-    if (!response.ok) throw new Error("The protected playback request could not be completed.");
+    if (!response.ok) {
+      const failure = await response.json().catch(() => ({}));
+      throw new Error(failure.message || "The protected playback request could not be completed.");
+    }
     const payload = await response.json();
     if (requestId !== playbackRequestId) return;
     const playback = payload?.playback;
