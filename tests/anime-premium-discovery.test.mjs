@@ -51,6 +51,15 @@ test("search, type, year and sort controls share one catalogue state", () => {
   assert.match(script, /function yearOf\(item\).*item\.year/);
 });
 
+test("catalogue loading is independent from shelves and all discovery requests are bounded", () => {
+  assert.match(script, /withTimeout\(/);
+  assert.match(script, /12000/);
+  assert.match(script, /15000/);
+  assert.match(script, /void loadShelves\(\)\.catch/);
+  assert.match(script, /void loadCatalogue\(true\)/);
+  assert.doesNotMatch(script, /loadShelves\(\)\.then\(\(\) => loadCatalogue/);
+});
+
 test("featured action safely falls back to catalogue before a title is available", () => {
   assert.match(script, /const target = \$\("vap-hero-open"\)\.dataset\.vapTitle \|\| ""/);
   assert.match(script, /else \$\("vap-catalogue"\)\.scrollIntoView/);
