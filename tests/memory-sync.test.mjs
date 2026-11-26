@@ -85,7 +85,7 @@ test("manual cloud library sync initializes App Check before Firestore access", 
   assert.match(syncBody, /await firebase\.ensureAppCheck\(\);/);
   assert.ok(
     syncBody.indexOf("await firebase.ensureAppCheck()") <
-    syncBody.indexOf("getDocsFromServer"),
+    syncBody.indexOf("fetchRemote("),
     "App Check must initialize before the first Firestore server read"
   );
 });
