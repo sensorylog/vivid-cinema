@@ -11,6 +11,7 @@ let backdropSlides = [];
 let activeBackdropLayer = 0;
 let backdropIndex = 0;
 let backdropTimer = null;
+let backdropAdvancing = false;
 
 function titleName(details) { return details.title || details.name || "Anime title"; }
 function releaseYear(details) {
@@ -105,7 +106,9 @@ function applyInitialBackdrop(src) {
   backdropIndex = 0;
 }
 async function advanceBackdrop() {
-  if (backdropSlides.length < 2) return;
+  if (backdropAdvancing || backdropSlides.length < 2) return;
+  backdropAdvancing = true;
+  try {
   for (let attempt = 0; attempt < backdropSlides.length; attempt++) {
     const nextIndex = (backdropIndex + 1 + attempt) % backdropSlides.length;
     const nextSrc = backdropSlides[nextIndex];
@@ -122,6 +125,9 @@ async function advanceBackdrop() {
     backdropIndex = nextIndex;
     void preloadImage(backdropSlides[(backdropIndex + 1) % backdropSlides.length]);
     return;
+  }
+  } finally {
+    backdropAdvancing = false;
   }
 }
 function startBackdrop(slides) {
