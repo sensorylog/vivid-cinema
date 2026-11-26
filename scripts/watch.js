@@ -1,6 +1,7 @@
 import { tmdbApi } from "./tmdb.js";
 import { resolveAndroidPlayerBackAction } from "./android-navigation.js";
 import { resolveAnimeIds } from "./playback/anime-id-resolver.js";
+import { isFreeAnimePreview } from "./anime-free-policy.js";
 import { getImageUrl, getMediaUrl, normalizeMedia, normalizeResults } from "./media.js";
 import { buildTitleUrl, buildWatchUrl, getRoute } from "./routes.js";
 import { escapeHtml } from "./utils.js";
@@ -132,6 +133,16 @@ function hasTmdbId() {
 
 function isAnimePlayback() {
   return route.params.get("anime") === "1";
+}
+function renderAnimePremiumGate() {
+  const title = media?.title || "This anime";
+  const content = $("watch-content");
+  if (!content) return;
+  content.innerHTML = '<section class="vivid-anime-premium-gate" role="status">' +
+    '<span>VIVID ANIME · PREMIUM</span><h1>' + escapeHtml(title) + ' continues on Premium.</h1>' +
+    '<p>The free Anime area includes six selected series and one first-episode preview per series. Unlock the full catalogue, every episode, anime films and your personal anime library with Vivid Anime Premium.</p>' +
+    '<div><a class="vivid-button vivid-button--primary" href="anime-premium.html">Explore Anime Premium <i class="bi bi-arrow-up-right"></i></a>' +
+    '<a class="vivid-button vivid-button--secondary" href="anime.html">Back to free previews</a></div></section>';
 }
 
 function sourceAvailable(source) {
@@ -1542,6 +1553,7 @@ async function load() {
   try {
     details = currentParams.type === "tv" ? await tmdbApi.tvDetails(currentParams.id) : await tmdbApi.movieDetails(currentParams.id);
     media = normalizeMedia(details, currentParams.type);
+    if (isLikelyAnime() && !(isAnimePlayback() && isFreeAnimePreview(currentParams))) { renderAnimePremiumGate(); return; }
     imdbId = resolveImdbId(details) || (/^tt\d+$/i.test(String(currentParams.id || "")) ? String(currentParams.id) : "");
     tmdbId = /^\d+$/.test(String(currentParams.id || "")) ? String(currentParams.id) : String(details?.id || "");
     // Render the TMDB title artwork and metadata immediately. Episode-specific
@@ -1590,7 +1602,7 @@ async function load() {
     }
     // Re-mount Player 2 after TMDB metadata arrives so its season and episode
     // selectors use the actual series seasons, not the early loading shell.
-    mountSecondaryPlayer(currentParams, details.episode?.name || media.title || media.name, details);
+    if (!isFreeAnimePreview(currentParams)) mountSecondaryPlayer(currentParams, details.episode?.name || media.title || media.name, details);
     void loadWatchRecommendations(currentParams);
     // Metadata arrived after shell — re-arm
     // the primary timer if the player is still waiting.
