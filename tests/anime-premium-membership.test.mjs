@@ -19,11 +19,11 @@ const [html, client, returnHtml, returnScript, pricing, checkout, webhook, membe
 ]);
 
 test("membership page offers global country selection and separate renewal methods", () => {
-  assert.match(html, /id="vap-country"/);
+  assert.match(html, /id="vap-country"/);\n  assert.match(html, /data-vap-plan="monthly"/);\n  assert.match(html, /data-vap-plan="biannually"/);\n  assert.match(html, /data-vap-plan="annually"/);
   assert.match(html, /value="card"/);
   assert.match(html, /value="mobile_money"/);
-  assert.match(html, /Automatic monthly renewal/);
-  assert.match(html, /Manual renewal each month/);
+  assert.match(html, /Automatic renewal for this billing period/);
+  assert.match(html, /Pay once; renew manually after this period/);
   assert.match(html, /anime-premium-membership\.js/);
   assert.doesNotMatch(html, /pk_live_|PaystackPop|PAYSTACK_SECRET_KEY/);
 });
@@ -54,12 +54,12 @@ test("membership pricing is not blocked by optional country or Firebase auth req
 
 test("client sends only country and payment method; server owns the amount and Paystack secret", () => {
   assert.match(client, /fetch\("\/api\/anime-premium\/checkout"/);
-  assert.match(client, /JSON\.stringify\(\{ country: selectedCountry, paymentMethod: selectedPaymentMethod \}\)/);
+  assert.match(client, /JSON\.stringify\(\{ country: selectedCountry, paymentMethod: selectedPaymentMethod, planId: selectedPlanId \}\)/);
   assert.doesNotMatch(client, /PAYSTACK_SECRET_KEY|pk_live_|PaystackPop/);
   assert.match(checkout, /transaction/);
   assert.match(service, /PAYSTACK_SECRET_KEY/);
   assert.match(checkout, /PAYSTACK_LIVE_ENABLED !== "true"/);
-  assert.match(client, /pricing\.checkoutEnabled/);
+  assert.match(client, /pricing\.checkoutEnabled/);\n  assert.match(client, /PLAN_LABELS/);\n  assert.match(client, /pricing\.plans\[selectedPlanId\]/);
   assert.match(checkout, /paystackBody\.plan = plan\.planCode/);
   assert.match(checkout, /channels: paymentMethod === "card" \? \["card"\] : \["mobile_money"\]/);
   assert.match(checkout, /renewalMode = paymentMethod === "card" \? "automatic" : "manual"/);
@@ -92,7 +92,7 @@ test("payment return can render its status even if Firebase auth is temporarily 
 test("membership return survives Vivid email verification and is cached offline", () => {
   assert.match(sendVerification, /anime-premium-membership\.html/);
   assert.match(verifyEmail, /anime-premium-membership\.html/);
-  assert.match(sw, /vivid-cinema-shell-v366/);
+  assert.match(sw, /vivid-cinema-shell-v367/);
   assert.match(sw, /anime-premium-membership\.html/);
   assert.match(sw, /anime-premium-return\.html/);
   assert.match(sw, /anime-premium-membership\.js/);
