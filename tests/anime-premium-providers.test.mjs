@@ -6,7 +6,7 @@ const episode = { mediaType: "tv", tmdbId: "12345", aniListId: "21", malId: "21"
 
 test("Premium provider registry includes existing Vivid sources and anime-specific alternatives", () => {
   assert.deepEqual(listAnimePremiumProviders().map(item => item.id), [
-    "vidplus", "vidlink", "vidsrc", "anixo", "anilink", "megaplay", "megaplay-legacy", "megavid", "megaflix", "vidapi", "embedwave", "vidfast", "vidrift"
+    "vidplus", "vidlink", "vidsrc", "anixo", "anilink", "megaplay", "megaplay-legacy", "megavid", "megaflix", "vidapi", "embedwave", "vidfast", "embedapistream", "vidrift"
   ]);
 });
 
@@ -33,6 +33,7 @@ test("AniXo, AniLink, MegaPlay, Megavid and MegaFlix use anime-specific embed pa
   assert.equal(buildAnimePremiumProviderUrl("megaflix", episode), "https://megaflix.buzz/stream/ani/21/3/sub");
   assert.equal(buildAnimePremiumProviderUrl("vidrift", episode), "https://embed.vidrift.net/embed/anilist/21/3");
   assert.equal(buildAnimePremiumProviderUrl("vidfast", episode), "https://vidfast.to/embed/tv/12345/2/3");
+  assert.equal(buildAnimePremiumProviderUrl("embedapistream", episode), "https://watch.embed-api.stream/embed/tv/12345/2/3");
 });
 
 test("MAL fallback is used when an anime provider accepts MAL but AniList is unavailable", () => {
@@ -44,11 +45,12 @@ test("MAL fallback is used when an anime provider accepts MAL but AniList is una
 
 test("episode-only anime providers stay unavailable for films while TMDB providers remain available", () => {
   const options = resolveAnimePremiumProviderOptions({ ...episode, mediaType: "movie" });
-  assert.equal(options.filter(item => item.available).map(item => item.id).sort().join(","), "embedwave,vidapi,vidfast,vidrift,vidsrc");
+  assert.equal(options.filter(item => item.available).map(item => item.id).sort().join(","), "embedapistream,embedwave,vidapi,vidfast,vidrift,vidsrc");
   assert.equal(buildAnimePremiumProviderUrl("vidapi", { mediaType: "movie", tmdbId: "550" }), "https://vaplayer.ru/embed/movie/550?autoplay=1&controls=1&overlay=1");
   assert.equal(buildAnimePremiumProviderUrl("embedwave", { mediaType: "movie", tmdbId: "550" }), "https://embedwave.cc/embed/movie/550?autoplay=true");
   assert.equal(buildAnimePremiumProviderUrl("vidrift", { mediaType: "movie", tmdbId: "550" }), "https://embed.vidrift.net/embed/movie/550");
   assert.equal(buildAnimePremiumProviderUrl("vidfast", { mediaType: "movie", tmdbId: "550" }), "https://vidfast.to/embed/movie/550");
+  assert.equal(buildAnimePremiumProviderUrl("embedapistream", { mediaType: "movie", tmdbId: "550" }), "https://watch.embed-api.stream/embed/movie/550");
   assert.equal(buildAnimePremiumProviderUrl("vidsrc", { mediaType: "movie", tmdbId: "550" }), "https://vidsrc.sh/embed/movie/550?ds_lang=en");
 });
 
@@ -64,7 +66,7 @@ test("provider event capability is explicit so only event-capable sources use au
   for (const id of ["vidplus", "vidlink", "vidsrc", "anixo", "anilink", "megaplay", "megavid", "megaflix", "vidapi", "vidrift"]) {
     assert.equal(providers[id].events, true, id + " should expose playback events");
   }
-  for (const id of ["megaplay-legacy", "embedwave", "vidfast"]) {
+  for (const id of ["megaplay-legacy", "embedwave", "vidfast", "embedapistream"]) {
     assert.equal(providers[id].events, false, id + " should use manual fallback");
   }
 });
