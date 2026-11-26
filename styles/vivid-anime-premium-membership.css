@@ -77,3 +77,5 @@
 .vap-billing-option:focus-visible{outline:2px solid #c4a7ff;outline-offset:2px}
 .vap-region-heading{margin-top:24px}
 @media(max-width:420px){.vap-billing-periods{grid-template-columns:1fr}.vap-billing-option{min-height:60px}}
+
+.vap-country-status{margin:.55rem 0 0;color:var(--vap-muted,#a49baa);font-size:.82rem;line-height:1.45}
