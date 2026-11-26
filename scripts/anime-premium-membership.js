@@ -211,6 +211,15 @@ async function cancelAutomaticRenewal() {
 }
 
 function bind() {
+  document.querySelectorAll("[data-vap-plan]").forEach(button => button.addEventListener("click", async () => {
+    selectedPlanId = button.dataset.vapPlan;
+    document.querySelectorAll("[data-vap-plan]").forEach(option => {
+      const active = option === button;
+      option.classList.toggle("is-active", active);
+      option.setAttribute("aria-pressed", String(active));
+    });
+    await updatePrice();
+  }));
   $("vap-country").addEventListener("change", async event => {
     selectedCountry = event.target.value;
     localStorage.setItem("vivid:anime-premium-country", selectedCountry);
