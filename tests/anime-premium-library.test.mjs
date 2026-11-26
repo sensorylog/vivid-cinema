@@ -43,7 +43,8 @@ test("Anime library reuses Vivid's canonical shared library and playback progres
 test("Premium watch saves episode progress and playback history without inventing progress", () => {
   assert.match(watch, /savePlaybackProgress\(contentId, progressData\)/);
   assert.match(watch, /completePlaybackProgress\(contentId, progressData\)/);
-  assert.match(watch, /flushPlaybackProgress\(\)/);
+  assert.match(watch, /flushAllPlaybackProgress\(\)/);
+  assert.match(recommendations, /export async function flushAllPlaybackProgress\(\)/);
   assert.match(watch, /recordAnimeHistory\(currentTime, total\)/);
   assert.match(watch, /isAnime: true/);
   assert.match(watch, /getAnimeLibraryPreferences\(\)\.autoplayNextEpisode/);
