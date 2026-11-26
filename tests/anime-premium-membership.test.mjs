@@ -30,6 +30,7 @@ test("membership page offers country selection and only supported Paystack card 
 test("membership UI initialises pricing before Firebase auth and always exits loading states", () => {
   assert.doesNotMatch(client, /^import\s+\{\s*auth\s*\}\s+from\s+["']\.\/firebase\.js["']/m);
   assert.match(client, /import\("\.\/firebase\.js"\)/);
+  assert.match(client, /9000, "Vivid sign-in initialisation timed out\."/);
   assert.match(client, /Promise\.allSettled\(\[countriesTask, pricingTask\]\)/);
   assert.match(client, /withTimeout\(fetch\("\/api\/anime-premium\/pricing"/);
   assert.match(client, /Checking checkout availability/);
