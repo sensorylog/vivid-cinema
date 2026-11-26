@@ -79,7 +79,7 @@ test("failed Premium shelves leave loading state and expose a retry action", () 
 
 test("Premium discovery assets are cached and syntax-checked", () => {
   assert.match(sw, /scripts\/anime-premium-discovery\.js/);
-  assert.match(sw, /vivid-cinema-shell-v363/);
+  assert.match(sw, /vivid-cinema-shell-v364/);
   assert.match(sw, /anime-premium-title\.html/);
   assert.match(sw, /anime-premium-title\.js/);
   assert.match(sw, /vivid-anime-premium-title\.css/);
