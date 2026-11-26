@@ -1,7 +1,7 @@
 import { tmdbApi } from "./tmdb.js";
 import { resolveAndroidPlayerBackAction } from "./android-navigation.js";
 import { resolveAnimeIds } from "./playback/anime-id-resolver.js";
-import { getAnimeGlobalEpisode, readAnimeTrackPreference, writeAnimeTrackPreference, normalizeAnimeTrack, normalizeAnimeProviderMessage } from "./playback/anime-playback.js";
+import { getAnimeGlobalEpisode, getAnimeEpisodeOffset, readAnimeTrackPreference, writeAnimeTrackPreference, normalizeAnimeTrack, normalizeAnimeProviderMessage } from "./playback/anime-playback.js";
 import { getImageUrl, getMediaUrl, normalizeMedia, normalizeResults } from "./media.js";
 import { buildTitleUrl, buildWatchUrl, getRoute } from "./routes.js";
 import { escapeHtml } from "./utils.js";
@@ -51,6 +51,7 @@ let tmdbId = "";
 let aniListId = "";
 let malId = "";
 let animeTrack = readAnimeTrackPreference();
+let animeEpisodeOffset = 0;
 const PRIMARY_FALLBACK_MS = 11000;
 const ANIME_FALLBACK_MS = 11000;
 const SOURCE_PREFERENCES_KEY = "vivid:playback-source-preferences:v3";
@@ -139,7 +140,7 @@ function isAnimePlayback() {
 }
 
 function getAnimeProviderParams(params = currentParams) {
-  return { ...params, episode: getAnimeGlobalEpisode(params, details?.seasons) };
+  return { ...params, episode: Math.max(1, Number(params?.episode) || 1) + Math.max(0, Number(animeEpisodeOffset) || 0) };
 }
 
 function sourceAvailable(source) {
@@ -612,6 +613,7 @@ document.addEventListener("vivid:watch-room-screening-navigate", event => {
   tmdbId = "";
   aniListId = "";
   malId = "";
+  animeEpisodeOffset = 0;
   activeSource = "vidapi";
   sourceAttempted.clear();
   primaryHealthy = false;
@@ -866,7 +868,7 @@ function mountSecondaryPlayer(params, title, detailsSnapshot = details) {
   if (!root) return;
 
   if (isAnimePlayback()) {
-    const animeParams = { ...params, episode: getAnimeGlobalEpisode(params, detailsSnapshot?.seasons), anime: true };
+    const animeParams = { ...params, episode: getAnimeProviderParams(params).episode, anime: true };
     void import("./playback/anime-secondary-player.js")
       .then(({ mountAnimeSecondaryPlayer }) => {
         if (!root.isConnected) return;
@@ -1666,15 +1668,6 @@ async function load() {
     // details can refine it after the season request completes.
     hydrateWatchDetails(currentParams);
 
-    // Anime catalog lookups are optional: skip them for ordinary movies/TV and
-    // never let a provider timeout prevent the watch page from rendering.
-    const animeIdsPromise = (isAnimePlayback() || isLikelyAnime())
-      ? resolveAnimeIds(media?.title || details?.name || details?.title || "").catch(error => {
-          console.warn("Vivid anime ID lookup unavailable:", error);
-          return { aniListId: "", malId: "" };
-        })
-      : Promise.resolve({ aniListId: "", malId: "" });
-
     if (isAnimePlayback()) {
       const status = $("player-status");
       if (status) {
@@ -1683,17 +1676,36 @@ async function load() {
       }
     }
 
+    let currentSeasonDetails = null;
     if (currentParams.type === "tv") {
-      details.episode = await tmdbApi.tvSeason(currentParams.id, currentParams.season)
-        .then(season => (season.episodes || []).find(ep => Number(ep.episode_number) === Number(currentParams.episode)) || null)
-        .catch(() => null);
+      currentSeasonDetails = await tmdbApi.tvSeason(currentParams.id, currentParams.season).catch(() => null);
+      if (currentSeasonDetails) details.currentSeason = currentSeasonDetails;
+      details.episode = (currentSeasonDetails?.episodes || [])
+        .find(ep => Number(ep.episode_number) === Number(currentParams.episode)) || null;
     }
     // Re-render episode-specific text/artwork if the season request supplied it.
     hydrateWatchDetails(currentParams);
 
+    const animeLookupOptions = {
+      seasonTitle: details.currentSeason?.name || "",
+      seasonYear: String(details.currentSeason?.air_date || details.currentSeason?.episodes?.[0]?.air_date || "").slice(0, 4),
+      globalEpisode: getAnimeGlobalEpisode(currentParams, details?.seasons),
+      localEpisode: currentParams.episode,
+      episodeOffset: getAnimeEpisodeOffset(currentParams, details?.seasons)
+    };
+    // Resolve the actual season entry where TMDB provides a distinct title/year;
+    // this prevents a sequel season from being forced onto season one's anime ID.
+    const animeIdsPromise = (isAnimePlayback() || isLikelyAnime())
+      ? resolveAnimeIds(media?.title || details?.name || details?.title || "", animeLookupOptions).catch(error => {
+          console.warn("Vivid anime ID lookup unavailable:", error);
+          return { aniListId: "", malId: "", episodeOffset: animeLookupOptions.episodeOffset };
+        })
+      : Promise.resolve({ aniListId: "", malId: "", episodeOffset: animeLookupOptions.episodeOffset });
+
     const animeIds = await animeIdsPromise;
     aniListId = animeIds.aniListId;
     malId = animeIds.malId;
+    animeEpisodeOffset = Math.max(0, Number(animeIds.episodeOffset ?? animeLookupOptions.episodeOffset) || 0);
     updateSourceLabel();
     if (isAnimePlayback()) {
       // Do not load a third-party iframe until the viewer explicitly opens the player.
