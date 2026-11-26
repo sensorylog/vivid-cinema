@@ -170,7 +170,7 @@ export function resolveCheckoutPlan(country, env = {}, planId = "monthly") {
   if (!PLAN_INTERVALS[periodId]) throw new AnimePremiumError(400, "invalid-plan", "Choose a valid Premium billing period.");
   const periodPlans = plans[periodId];
   const preferred = COUNTRY_PAYSTACK_CURRENCY[code] || defaultCurrency;
-  const currency = periodPlans[preferred] ? preferred : defaultCurrency;
+  const currency = periodPlans[preferred] ? preferred : periodPlans[defaultCurrency] ? defaultCurrency : Object.keys(periodPlans)[0];
   const selected = periodPlans[currency];
   if (!selected) throw new AnimePremiumError(503, "plan-not-configured", "This Premium billing period is not configured for the selected checkout currency yet.");
   return {
