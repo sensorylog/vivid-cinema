@@ -53,7 +53,7 @@ test("membership UI initialises pricing before Firebase auth and always exits lo
   assert.match(html, /vap-country-status/);
   assert.match(shell, /window\.vividAuthUser = user \|\| null/);
   assert.match(shell, /window\.vividAuthResolved = true/);
-  assert.doesNotMatch(headers, /api\.frankfurter\.dev|open-rates\.currencyfreaks\.com/);
+  assert.doesNotMatch(client, /api\.frankfurter\.dev|open-rates\.currencyfreaks\.com/);
   assert.doesNotMatch(client, /restcountries\.com|annexare\/Countries/);
   assert.match(countriesApi, /restcountries\.com/);
   assert.match(countriesApi, /annexare\/Countries/);
