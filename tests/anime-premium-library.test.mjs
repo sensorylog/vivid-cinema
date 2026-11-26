@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
 const read = path => readFile(new URL(path, import.meta.url), "utf8");
-const [html, titleHtml, script, module, watch, title, library, recommendations, rules, shell, syntax] = await Promise.all([
+const [html, titleHtml, script, module, watch, title, library, recommendations, rules, shell, syntax, profileApi] = await Promise.all([
   read("../anime-premium-library.html"),
   read("../anime-premium-title.html"),
   read("../scripts/anime-premium-library.js"),
@@ -14,7 +14,8 @@ const [html, titleHtml, script, module, watch, title, library, recommendations, 
   read("../scripts/recommendations.js"),
   read("../firestore.rules"),
   read("../service-worker.js"),
-  read("../automation/check-syntax.mjs")
+  read("../automation/check-syntax.mjs"),
+  read("../cloudflare/functions/api/anime-premium/profile.js")
 ]);
 
 test("private Premium Anime Library is no-index and has membership-gated sections", () => {
@@ -25,6 +26,9 @@ test("private Premium Anime Library is no-index and has membership-gated section
   }
   assert.match(script, /fetch\("\/api\/anime-premium\/membership"/);
   assert.match(script, /payload\?\.membership\?\.active === true/);
+  assert.match(profileApi, /animePremiumMemberships/);
+  assert.match(profileApi, /premium-membership-required/);
+  assert.match(profileApi, /periodEnd <= Date\.now\(\)/);
   assert.match(script, /reason === "verify"/);
   for (const provider of ["vidplus", "vidlink", "vidsrc", "anixo", "anilink", "megaplay", "megaplay-legacy", "megavid", "megaflix", "vidapi", "embedwave", "vidfast", "embedapistream", "vidrift"]) assert.ok(html.includes('value="' + provider + '"'));
   assert.match(script, /auth\.html\?returnTo=anime-premium-library\.html/);
