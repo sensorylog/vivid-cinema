@@ -313,7 +313,8 @@ async function syncPlaybackProgress(force = false) {
     sessionId: currentPlaybackSessionId,
     user: currentUser,
     currentTime: video.currentTime,
-    duration: video.duration
+    duration: video.duration,
+    keepalive: force
   };
   if (progressSyncInFlight) return;
   progressSyncInFlight = true;
@@ -328,7 +329,7 @@ async function syncPlaybackProgress(force = false) {
           method: "POST",
           headers: { "Content-Type": "application/json", Authorization: "Bearer " + token },
           cache: "no-store",
-          keepalive: force,
+          keepalive: snapshot.keepalive,
           body: JSON.stringify({
             sessionId: snapshot.sessionId,
             currentTime: snapshot.currentTime,
