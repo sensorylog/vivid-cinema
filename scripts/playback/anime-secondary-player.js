@@ -1,3 +1,5 @@
+import { readAnimeTrackPreference, writeAnimeTrackPreference } from "./anime-playback.js";
+
 const STORAGE_KEY = "vivid:anime-player-2:v1";
 const SERVERS = Object.freeze([
   { id: "anixo", name: "AniXo", note: "AniList and MAL · automatic upstream failover" },
@@ -50,7 +52,7 @@ function readPreferences() {
     const value = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
     return {
       server: SERVERS.some(item => item.id === value.server) ? value.server : "anixo",
-      track: value.track === "dub" ? "dub" : "sub"
+      track: readAnimeTrackPreference()
     };
   } catch {
     return { server: "anixo", track: "sub" };
@@ -58,11 +60,13 @@ function readPreferences() {
 }
 
 function savePreferences(server, track) {
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ server, track })); } catch { /* Optional preference only. */ }
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ server })); } catch { /* Optional preference only. */ }
+  writeAnimeTrackPreference(track);
 }
 
 export function mountAnimeSecondaryPlayer({ root, params, media, title, aniListId, malId } = {}) {
   if (!root) return null;
+  root.__vividAnimePlayer2Cleanup?.();
   const isAnime = params?.anime === true || params?.anime === "1" || params?.isAnime === true;
   const ani = numericId(aniListId);
   const mal = numericId(malId);
@@ -129,6 +133,17 @@ export function mountAnimeSecondaryPlayer({ root, params, media, title, aniListI
   }
 
   function setStatus(message) { status.textContent = message; }
+
+  const trackChangeListener = event => {
+    const nextTrack = event.detail?.track === "dub" ? "dub" : "sub";
+    if (nextTrack === track) return;
+    track = writeAnimeTrackPreference(nextTrack);
+    savePreferences(selectedServer, track);
+    updateButtons();
+    if (screen.querySelector("iframe")) loadServer(selectedServer);
+    else setStatus("Audio changed to " + track.toUpperCase() + ". Start playback when ready.");
+  };
+  window.addEventListener("vivid:anime-track-changed", trackChangeListener);
 
   function tryNextServer(reason) {
     const nextServer = getNextAnimeSecondaryServer(selectedServer, [...attemptedServers]);
@@ -210,20 +225,33 @@ export function mountAnimeSecondaryPlayer({ root, params, media, title, aniListI
     button.addEventListener("click", () => {
       const nextTrack = button.dataset.animeP2Track === "dub" ? "dub" : "sub";
       if (nextTrack === track) return;
-      track = nextTrack;
+      track = writeAnimeTrackPreference(nextTrack);
       savePreferences(selectedServer, track);
       updateButtons();
+      window.dispatchEvent(new CustomEvent("vivid:anime-track-changed", { detail: { track, source: "player2" } }));
       if (screen.querySelector("iframe")) loadServer(selectedServer);
       else setStatus("Audio changed to " + track.toUpperCase() + ". Start playback when ready.");
     });
   });
   root.querySelector("[data-anime-p2-start]")?.addEventListener("click", () => loadServer(selectedServer));
   updateButtons();
+  const cleanup = () => {
+    generation += 1;
+    window.removeEventListener("vivid:anime-track-changed", trackChangeListener);
+    if (timer) window.clearTimeout(timer);
+    const frame = screen.querySelector("iframe");
+    if (frame) frame.src = "about:blank";
+    root.innerHTML = "";
+    root.hidden = true;
+  };
+  root.__vividAnimePlayer2Cleanup = cleanup;
   return {
     loadServer,
     getSelectedServer: () => selectedServer,
-    destroy: () => {
+    destroy: cleanup
       generation += 1;
+      window.removeEventListener("vivid:anime-track-changed", trackChangeListener);
+      if (root.__vividAnimePlayer2Cleanup === cleanup) delete root.__vividAnimePlayer2Cleanup;
       if (timer) window.clearTimeout(timer);
       const frame = screen.querySelector("iframe");
       if (frame) frame.src = "about:blank";
