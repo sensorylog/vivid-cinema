@@ -114,7 +114,7 @@ async function updatePrice() {
     } catch (error) {
       console.warn("Vivid FX reference-rate lookup failed:", error);
       if (requestId !== priceRequestId) return;
-      $("vap-local-price").textContent = "Rate unavailable";
+      $("vap-local-price").textContent = formatMoney(plan.amountMajor, "GHS");
       $("vap-price-note").textContent = "Local estimate temporarily unavailable. Paystack charges " + formatMoney(plan.amountMajor, "GHS") + " in Ghanaian Cedis (GHS); your bank/card provider determines any conversion and fees.";
     }
   }
