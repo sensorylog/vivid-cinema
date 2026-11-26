@@ -34,6 +34,23 @@ test("catalogue cards open dedicated title routes and signature cards use per-ti
   assert.doesNotMatch(script, /\.m3u8|\.mp4|playbackUrl|streamUrl/i);
 });
 
+test("search respects the selected media type and release year and supports result pagination", () => {
+  assert.match(script, /tmdbApi\.searchMulti\(query, page\)/);
+  assert.match(script, /state\.type === "all" \|\| item\.media_type === state\.type/);
+  assert.match(script, /!state\.year \|\| yearOf\(item\) === state\.year/);
+  assert.match(script, /totalPages: Math\.min\(500, Number\(response\.total_pages \|\| 1\)\)/);
+  assert.match(script, /state\.page \+= 1; loadCatalogue\(false\)/);
+  assert.match(script, /\$\("vap-load-more"\)\.hidden = state\.page >= state\.totalPages/);
+});
+
+test("search, type, year and sort controls share one catalogue state", () => {
+  assert.match(script, /state\.type = button\.dataset\.vapType/);
+  assert.match(script, /state\.year = event\.target\.value/);
+  assert.match(script, /state\.sort = event\.target\.value/);
+  assert.match(script, /state\.query = \$\("vap-search"\)\.value\.trim\(\)/);
+  assert.match(script, /function yearOf\(item\).*item\.year/);
+});
+
 test("Premium discovery assets are cached and syntax-checked", () => {
   assert.match(sw, /scripts\/anime-premium-discovery\.js/);
   assert.match(sw, /vivid-cinema-shell-v337/);
