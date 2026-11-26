@@ -80,7 +80,7 @@ async function loadCountries() {
   countries = FALLBACK_COUNTRIES;
   const countryStatus = $("vap-country-status");
   if (countryStatus) countryStatus.textContent = "Loading the full international country list…";
-  selectedCountry = countries.some(country => country.code === saved) ? saved : "GH";
+  selectedCountry = saved;
   render();
 
   // Use Vivid's same-origin Pages Function instead of depending on browser
@@ -106,23 +106,19 @@ async function loadCountries() {
   if (countryStatus) countryStatus.textContent = "International country list loaded · " + countries.length + " countries available.";
   select.value = selectedCountry;
 }
-async function getExchangeRates(baseCurrency) {
-  // Frankfurter v2 blended middle/reference rates; not a card issuer settlement quote.
+async function getExchangeRate(currency) {
   const now = Date.now();
-  if (rateCache && now - rateCacheAt < 15 * 60 * 1000) return rateCache;
-  const response = await withTimeout(fetch("https://api.frankfurter.dev/v2/rates?base=" + encodeURIComponent(baseCurrency), { cache: "no-store" }), 7000, "Reference-rate request timed out.");
-  if (!response.ok) throw new Error("Reference exchange rates are unavailable (" + response.status + ").");
-  const rows = await response.json();
-  if (!Array.isArray(rows) || !rows.length) throw new Error("The exchange-rate provider returned no rates.");
-  const rates = {};
-  let date = "";
-  for (const row of rows) {
-    const rate = Number(row.rate);
-    if (row.base === baseCurrency && row.quote && Number.isFinite(rate) && rate > 0) rates[row.quote] = rate;
-    if (row.date && (!date || row.date > date)) date = row.date;
+  if (rateCache && rateCache.currency === currency && now - rateCacheAt < 6 * 60 * 60 * 1000) return rateCache;
+  const response = await withTimeout(
+    fetch("/api/anime-premium/exchange-rate?currency=" + encodeURIComponent(currency), { cache: "no-store" }),
+    9000,
+    "Daily exchange-rate request timed out."
+  );
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok || payload.ok !== true || !Number.isFinite(Number(payload.rate)) || Number(payload.rate) <= 0) {
+    throw new Error(payload.message || "A published GHS/" + currency + " reference rate is unavailable.");
   }
-  if (!Object.keys(rates).length) throw new Error("No supported reference rates were returned.");
-  rateCache = { rates, date };
+  rateCache = { currency, rate: Number(payload.rate), date: String(payload.date || "") };
   rateCacheAt = now;
   return rateCache;
 }
@@ -142,10 +138,10 @@ async function updatePrice() {
     try {
       const quote = await getExchangeRates("GHS");
       if (requestId !== priceRequestId) return;
-      const rate = quote.rates?.[localCurrency];
+      const rate = quote.rate;
       if (Number.isFinite(rate) && rate > 0) {
         $("vap-local-price").textContent = "≈ " + formatMoney(plan.amountMajor * rate, localCurrency);
-        $("vap-price-note").textContent = "Reference rate: 1 GHS = " + rate.toFixed(6) + " " + localCurrency + (quote.date ? " · Rate date: " + quote.date : "") + ". Source: Frankfurter blended central-bank reference rates. Paystack charges " + formatMoney(plan.amountMajor, "GHS") + "; your bank/card provider sets the final converted charge and may add fees.";
+        $("vap-price-note").textContent = "Reference rate: 1 GHS = " + rate.toFixed(6) + " " + localCurrency + (quote.date ? " · Rate date: " + quote.date : "") + ". Source: CurrencyFreaks Open Rates, blended daily reference rates from central banks and official sources. Paystack charges " + formatMoney(plan.amountMajor, "GHS") + "; your bank/card provider sets the final converted charge and may add fees.";
       } else {
         $("vap-local-price").textContent = "Rate unavailable";
         $("vap-price-note").textContent = "No published GHS/" + localCurrency + " reference rate is currently available. We will not display an invented conversion. Paystack charges " + formatMoney(plan.amountMajor, "GHS") + "; your bank/card provider determines the converted amount.";
