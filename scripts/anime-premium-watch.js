@@ -503,7 +503,7 @@ async function loadWatchPage() {
   const getDetails = mediaType === "movie" ? tmdbApi.movieDetails : tmdbApi.tvDetails;
   titleDetails = await withTimeout(getDetails(titleId), 15000, "Anime details timed out. Please try again.");
   if (!titleDetails?.id) throw new Error("This anime title could not be found.");
-  animeIdPromise = resolveAnimeIds(titleName(titleDetails)).then(ids => {
+  animeIdPromise = withTimeout(resolveAnimeIds(titleName(titleDetails)), 10000, "Anime ID lookup timed out.").then(ids => {
     baseAnimeIds = ids || { aniListId: "", malId: "" };
     if (mediaType === "tv" && Number(params.get("season") || 1) === 1) seasonAnimeIds = { ...baseAnimeIds };
     return baseAnimeIds;
