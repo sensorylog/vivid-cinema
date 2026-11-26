@@ -43,9 +43,9 @@ async function checkMembership() {
     checks++;
     setState("bi-hourglass-split", "Payment confirmation is pending", reference
       ? "Paystack returned your payment reference, but Vivid has not yet received a verified membership event. Wait a moment and check again. Do not submit another payment."
-      : "No payment reference was returned. Check your membership status again or contact Vivid support if you completed a payment.");
+      : "No payment reference was returned. Vivid is still checking for a verified payment against your signed-in account. Check again shortly or contact support if you completed payment.");
     $("vap-return-refresh").textContent = "Check membership status";
-    if (checks < 5 && reference) window.setTimeout(() => { void checkMembership(); }, 6000);
+    if (checks < 5) window.setTimeout(() => { void checkMembership(); }, 6000);
   } catch (error) {
     setState("bi-exclamation-circle", "We couldn’t confirm your membership yet", error.message || "Please try again.");
     $("vap-return-refresh").textContent = "Try again";
