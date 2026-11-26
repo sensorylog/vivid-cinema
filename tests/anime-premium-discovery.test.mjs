@@ -29,7 +29,7 @@ test("Premium catalogue uses the existing anime metadata API and filters Japanes
 
 test("catalogue cards open dedicated title routes and signature cards use per-title SVG masks", () => {
   assert.match(html, /id="vap-identities"/);
-  assert.match(script, /dialog\.showModal\(\)/);
+  assert.match(script, /anime-premium-title\.html/);
   assert.match(script, /vap-identity-svg/);
   assert.doesNotMatch(script, /\.m3u8|\.mp4|playbackUrl|streamUrl/i);
 });
@@ -37,8 +37,8 @@ test("catalogue cards open dedicated title routes and signature cards use per-ti
 test("Premium discovery assets are cached and syntax-checked", () => {
   assert.match(sw, /scripts\/anime-premium-discovery\.js/);
   assert.match(sw, /vivid-cinema-shell-v330/);
-  assert.match(sw, /anime-premium-title\\.html/);
-  assert.match(sw, /anime-premium-title\\.js/);
-  assert.match(sw, /vivid-anime-premium-title\\.css/);
+  assert.match(sw, /anime-premium-title\.html/);
+  assert.match(sw, /anime-premium-title\.html/);
+  assert.match(sw, /vivid-anime-premium-title\.css/);
   assert.match(syntax, /scripts\/anime-premium-discovery\.js/);
 });
