@@ -181,7 +181,9 @@ function updateProviderProgress(position, duration, force = false) {
 function handleProviderMessage(event) {
   const provider = providerOptions.find(item => item.id === activeProviderId);
   const frame = $("vap-player-frame");
-  if (!provider || !frame?.contentWindow || event.source !== frame.contentWindow || event.origin !== provider.origin) return;
+  let expectedOrigin = "";
+  try { expectedOrigin = new URL(provider?.url || "").origin; } catch { return; }
+  if (!provider || !frame?.contentWindow || event.source !== frame.contentWindow || event.origin !== expectedOrigin) return;
   let data = event.data;
   if (typeof data === "string") {
     try { data = JSON.parse(data); } catch { return; }
@@ -251,6 +253,41 @@ function handleProviderMessage(event) {
       fallbackToNextPlaybackServer(provider.label + " reported a playback error.");
     }
     return;
+  }
+  if (["vidapi", "vidsrc", "vidlink", "vidplus"].includes(provider.id)) {
+    const payload = data;
+    const eventData = payload.data && typeof payload.data === "object" ? payload.data : payload;
+    const status = String(eventData.player_status || eventData.status || eventData.event || "").toLowerCase();
+    const error = String(eventData.error || eventData.error_code || eventData.code || eventData.message || "").toLowerCase();
+    const numericCode = Number(eventData.status_code ?? eventData.http_status ?? eventData.httpStatus ?? eventData.statusCode);
+    const failed = (Number.isFinite(numericCode) && numericCode >= 400) ||
+      /(^|\\D)(404|403|500|502|503)(\\D|$)/.test(error) ||
+      /(error|failed|failure|not.?found|unavailable|offline|load.?failed|source.?failed)/.test(status + " " + error);
+    if (failed) {
+      fallbackToNextPlaybackServer(provider.label + " reported a playback error.");
+      return;
+    }
+    const eventName = String(eventData.event || eventData.player_status || "").toLowerCase();
+    const info = eventData.player_info && typeof eventData.player_info === "object" ? eventData.player_info : {};
+    const eventMediaType = String(eventData.mediaType || info.mediaType || "").toLowerCase();
+    if (eventMediaType && ![mediaType, "anime"].includes(eventMediaType)) return;
+    const eventTmdbId = String(eventData.tmdbId || eventData.tmdb || info.tmdb || "").trim();
+    if (eventTmdbId && eventTmdbId !== titleId) return;
+    if (mediaType === "tv") {
+      if (eventData.season != null && Number(eventData.season) !== Number(params.get("season") || 1)) return;
+      if (eventData.episode != null && Number(eventData.episode) !== Number(activeEpisodes[activeEpisodeIndex]?.episode_number || 1)) return;
+    }
+    const progress = Number(eventData.currentTime ?? eventData.player_progress ?? eventData.time) || 0;
+    const duration = Number(eventData.duration ?? eventData.player_duration ?? eventData.total) || 0;
+    const healthy = payload.type === "PLAYER_EVENT" ||
+      /^(play|playing|pause|paused|timeupdate|progress|seeked|ended|completed|loadedmetadata|canplay|ready|started)$/.test(status) ||
+      progress > 0;
+    if (!healthy) return;
+    if (providerLoadTimer) window.clearTimeout(providerLoadTimer);
+    providerLoadTimer = null;
+    setStatus("Playing with " + provider.label + " · " + animeTrack.toUpperCase());
+    if (progress > 0 && duration > 0) updateProviderProgress(progress, duration);
+    if (/^(ended|completed)$/.test(eventName) && duration > 0) updateProviderProgress(duration, duration, true);
   }
 }
 async function requestPlayback(episode) {
