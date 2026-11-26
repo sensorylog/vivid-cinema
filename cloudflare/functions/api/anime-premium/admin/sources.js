@@ -22,8 +22,9 @@ export async function onRequest({ request, env }) {
     const body = await request.json();
     const mediaType = body.mediaType === "movie" ? "movie" : body.mediaType === "tv" ? "tv" : "";
     const titleId = String(body.titleId || "");
-    const season = mediaType === "tv" ? Number(body.season) : null;
-    const episode = mediaType === "tv" ? Number(body.episode) : null;
+    const scope = mediaType === "tv" && body.scope === "title" ? "title" : "episode";
+    const season = mediaType === "tv" && scope === "episode" ? Number(body.season) : null;
+    const episode = mediaType === "tv" && scope === "episode" ? Number(body.episode) : null;
     const sourceId = String(body.sourceId || "").trim();
     const provider = String(body.provider || "").trim().slice(0, 80);
     const allowedTerritories = Array.isArray(body.allowedTerritories)
@@ -41,12 +42,12 @@ export async function onRequest({ request, env }) {
         body.rightsVerified !== true) {
       throw new AnimePremiumError(400, "invalid-source-rights", "Enter the provider, verified rights reference, licensed territories and a valid licence window before saving a source.");
     }
-    if (mediaType === "tv" && (!Number.isInteger(season) || season < 1 || season > 100 || !Number.isInteger(episode) || episode < 1 || episode > 10000)) {
+    if (mediaType === "tv" && scope === "episode" && (!Number.isInteger(season) || season < 1 || season > 100 || !Number.isInteger(episode) || episode < 1 || episode > 10000)) {
       throw new AnimePremiumError(400, "invalid-episode", "Enter a valid season and episode.");
     }
     const { db } = getPremiumServices(env);
     await enforceRateLimit(db, user.uid, "admin-sources", 20, 60 * 1000);
-    const key = mediaType + "_" + titleId + (mediaType === "tv" ? "_s" + season + "_e" + episode : "");
+    const key = mediaType + "_" + titleId + (mediaType === "tv" && scope === "episode" ? "_s" + season + "_e" + episode : "");
     const now = Date.now();
     const sourceRef = db.collection("animePremiumSources").doc(key);
     const existingSnapshot = await sourceRef.get();
@@ -55,7 +56,7 @@ export async function onRequest({ request, env }) {
       (existing.sourceId && existing.provider ? [{ ...existing, candidateId: String(existing.provider) }] : []);
     const candidateId = String(body.candidateId || provider).trim().slice(0, 80);
     const nextCandidate = {
-      candidateId, mediaType, titleId, season, episode, sourceId, provider,
+      candidateId, mediaType, titleId, season, episode, scope, sourceId, provider,
       rightsVerified: true, rightsReference, allowedTerritories,
       licenseStartsAt: timestampFromMillis(licenseStartsAt),
       licenseEndsAt: timestampFromMillis(licenseEndsAt),
