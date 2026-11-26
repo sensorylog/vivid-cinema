@@ -81,7 +81,7 @@ async function submitSource(event) {
   };
   try {
     const result = await api("/api/anime-premium/admin/sources", "POST", payload);
-    status("Authorised source mapping saved: " + result.sourceKey);
+    status("Authorised server candidate saved: " + (payload.candidateId || payload.provider) + " · " + result.sourceKey);
     $("vap-admin-source-id").value = "";
   } catch (error) { status(error.message, true); }
 }
