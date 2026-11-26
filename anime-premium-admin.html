@@ -37,6 +37,8 @@
       <label>Season<input id="vap-admin-season" type="number" min="1" max="100" value="1"></label>
       <label>Episode<input id="vap-admin-episode" type="number" min="1" max="10000" value="1"></label>
       <label>Approved provider ID<input id="vap-admin-provider" required maxlength="64" pattern="[A-Za-z0-9][A-Za-z0-9._-]{1,63}"></label>
+      <label>Server candidate ID<input id="vap-admin-candidate-id" maxlength="80" placeholder="e.g. licensed-primary"></label>
+      <label>Fallback priority (1 = first)<input id="vap-admin-priority" type="number" min="1" max="100" value="50"></label>
       <label>Resolver source ID<input id="vap-admin-source-id" required maxlength="160"></label>
       <label>Licensed territories (ISO codes)<input id="vap-admin-territories" required placeholder="GH, NG, KE" maxlength="400"></label>
       <label>Rights / contract reference<input id="vap-admin-rights-reference" required maxlength="120"></label>
