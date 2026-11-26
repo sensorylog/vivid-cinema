@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 import { webcrypto } from "node:crypto";
 import {
   allowedOrigin, jsonResponse, parsePlanConfig, publicPricing,
@@ -7,6 +8,7 @@ import {
 } from "../cloudflare/functions/lib/anime-premium-service.js";
 
 globalThis.crypto ||= webcrypto;
+const playback = await readFile(new URL("../cloudflare/functions/api/anime-premium/playback.js", import.meta.url), "utf8");
 
 async function sign(secret, value) {
   const key = await crypto.subtle.importKey("raw", new TextEncoder().encode(secret), { name: "HMAC", hash: "SHA-512" }, false, ["sign"]);
