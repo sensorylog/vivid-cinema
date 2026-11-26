@@ -85,6 +85,8 @@ test("client selects one of the three server-owned hosted Paystack plan pages", 
 
 test("hosted page checkout requires verified identity and maps the three plans server-side", () => {
   assert.match(pageCheckout, /requirePremiumUser/);
+  assert.match(pageCheckout, /isValidEmailAddress\(email\)/);
+  assert.doesNotMatch(pageCheckout, /\\\\\\\\s@/);
   assert.match(pageCheckout, /PAYSTACK_SECRET_KEY/);
   assert.doesNotMatch(pageCheckout, /paystackRequest/);
   assert.match(pageCheckout, /PAYSTACK_WEBHOOK_SECRET \|\| env\.PAYSTACK_SECRET_KEY/);
@@ -127,6 +129,9 @@ test("membership return survives Vivid email verification and is cached offline"
   assert.match(sw, /anime-premium-return\.js/);
   assert.match(pricing, /publicPricing/);
   assert.match(service, /PAYSTACK_WEBHOOK_SECRET/);
+  assert.match(service, /claims\.email_verified !== true/);
+  assert.doesNotMatch(service, /sign_in_provider/);
+  assert.match(service, /export function isValidEmailAddress/);
   assert.match(service, /checkoutEnabled: Boolean\(env\.FIREBASE_SERVICE_ACCOUNT_JSON && \(env\.PAYSTACK_WEBHOOK_SECRET \|\| env\.PAYSTACK_SECRET_KEY\)\)/);
   assert.match(service, /const webhookSecret = String\(env\.PAYSTACK_WEBHOOK_SECRET \|\| ""\)/);
   assert.match(service, /const secret = String\(env\.PAYSTACK_SECRET_KEY \|\| ""\)/);
