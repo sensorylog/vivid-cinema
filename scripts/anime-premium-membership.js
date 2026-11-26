@@ -1,9 +1,4 @@
-import { auth } from "./firebase.js";
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
-
 const $ = id => document.getElementById(id);
-const COUNTRY_TO_PAYSTACK = { GH: "GHS", NG: "NGN", KE: "KES", ZA: "ZAR", US: "USD", GB: "USD", CA: "USD", AU: "USD", IN: "USD", DE: "USD", FR: "USD", ES: "USD", IT: "USD", NL: "USD", BE: "USD", IE: "USD", PT: "USD", SE: "USD", NO: "USD", DK: "USD", FI: "USD", CH: "USD", AE: "USD", SA: "USD", EG: "USD", MA: "USD", BR: "USD", MX: "USD", JP: "USD", KR: "USD", SG: "USD", MY: "USD", ID: "USD", PH: "USD", TH: "USD", NZ: "USD", UG: "USD", TZ: "USD", RW: "USD", CI: "USD", SN: "USD", CM: "USD", ET: "USD" };
-const MOBILE_MONEY_COUNTRIES = new Set(["GH", "KE"]);
 const FALLBACK_COUNTRIES = [
   { code: "GH", name: "Ghana", currency: "GHS" }, { code: "NG", name: "Nigeria", currency: "NGN" },
   { code: "KE", name: "Kenya", currency: "KES" }, { code: "ZA", name: "South Africa", currency: "ZAR" },
@@ -16,112 +11,137 @@ const FALLBACK_COUNTRIES = [
   { code: "RW", name: "Rwanda", currency: "RWF" }, { code: "CI", name: "Côte d’Ivoire", currency: "XOF" },
   { code: "SN", name: "Senegal", currency: "XOF" }, { code: "BR", name: "Brazil", currency: "BRL" }
 ];
-let pricing = null;
+const PAGE_CHECKOUT_PLANS = {
+  monthly: { amountMajor: 53.30, label: "1 month", period: "month" },
+  biannually: { amountMajor: 287.82, label: "6 months", period: "6 months" },
+  annually: { amountMajor: 511.68, label: "1 year", period: "year" }
+};
+let pricing = { checkoutEnabled: false, defaultCurrency: "GHS" };
 let countries = FALLBACK_COUNTRIES;
 let currentUser = null;
+let authReady = false;
 let membershipActive = false;
 let membershipAutoRenew = false;
 let selectedCountry = "GH";
-let selectedPaymentMethod = "card";
 let selectedPlanId = "monthly";
-const PAGE_CHECKOUT_PLANS = { monthly: { amountMajor: 53.30 }, biannually: { amountMajor: 287.82 }, annually: { amountMajor: 511.68 } };
+let priceRequestId = 0;
 const rateCache = new Map();
-
+const withTimeout = async (promise, ms, message) => {
+  let timer;
+  try {
+    return await Promise.race([
+      promise,
+      new Promise((_, reject) => { timer = window.setTimeout(() => reject(new Error(message)), ms); })
+    ]);
+  } finally { window.clearTimeout(timer); }
+};
 function getCountry(code) { return countries.find(country => country.code === code) || FALLBACK_COUNTRIES[0]; }
-function getCheckoutCurrency(countryCode) { return "GHS"; }
 function formatMoney(amount, currency) {
   try { return new Intl.NumberFormat(undefined, { style: "currency", currency, maximumFractionDigits: 2 }).format(amount); }
-  catch { return amount.toFixed(2) + " " + currency; }
+  catch { return Number(amount).toFixed(2) + " " + currency; }
+}
+function setCheckoutState() {
+  const button = $("vap-checkout-button");
+  if (!button) return;
+  button.disabled = !pricing.checkoutEnabled || (membershipActive && membershipAutoRenew) || !authReady;
+  button.textContent = !pricing.checkoutEnabled ? "Checkout temporarily unavailable"
+    : membershipActive && membershipAutoRenew ? "Membership active — auto-renew on"
+    : !authReady ? "Checking your Vivid account…"
+    : currentUser ? "Continue to secure checkout →" : "Sign in to subscribe →";
+}
+function renderPlan() {
+  const plan = PAGE_CHECKOUT_PLANS[selectedPlanId];
+  if ($("vap-price-period")) $("vap-price-period").textContent = "/ " + plan.period;
+  const pill = document.querySelector(".vap-plan-pill");
+  if (pill) pill.textContent = plan.label.toUpperCase() + " MEMBERSHIP";
+  document.querySelectorAll("[data-vap-plan]").forEach(button => {
+    const active = button.dataset.vapPlan === selectedPlanId;
+    button.classList.toggle("is-active", active);
+    button.setAttribute("aria-pressed", String(active));
+  });
 }
 async function loadCountries() {
+  const select = $("vap-country");
+  if (!select) throw new Error("Country selector is missing from the membership page.");
+  const saved = (() => { try { return localStorage.getItem("vivid:anime-premium-country") || "GH"; } catch { return "GH"; } })();
+  // Render a usable selector immediately; remote country metadata can improve it afterwards.
+  countries = FALLBACK_COUNTRIES;
+  const render = () => {
+    select.innerHTML = countries.map(country => {
+      const option = document.createElement("option");
+      option.value = country.code;
+      option.textContent = country.name;
+      return option;
+    }).map(option => option.outerHTML).join("");
+    select.value = countries.some(country => country.code === selectedCountry) ? selectedCountry : "GH";
+  };
+  selectedCountry = countries.some(country => country.code === saved) ? saved : "GH";
+  render();
   try {
-    const controller = new AbortController();
-    const timeout = window.setTimeout(() => controller.abort(), 4500);
-    let response;
-    try { response = await fetch("https://restcountries.com/v3.1/all?fields=cca2,name,currencies", { cache: "force-cache", signal: controller.signal }); }
-    finally { window.clearTimeout(timeout); }
+    const response = await withTimeout(fetch("https://restcountries.com/v3.1/all?fields=cca2,name,currencies", { cache: "force-cache" }), 4000, "Country list request timed out.");
     if (!response.ok) throw new Error("Country list unavailable");
     const data = await response.json();
-    const parsed = data.map(country => {
-      const currency = Object.keys(country.currencies || {})[0] || "";
-      return {
-        code: String(country.cca2 || "").toUpperCase(),
-        name: country.name?.common || country.cca2,
-        currency
-      };
-    }).filter(country => /^[A-Z]{2}$/.test(country.code) && country.name);
-    if (parsed.length > 100) countries = parsed.sort((a,b) => a.name.localeCompare(b.name));
-  } catch {
-    countries = FALLBACK_COUNTRIES;
+    const parsed = data.map(country => ({
+      code: String(country.cca2 || "").toUpperCase(),
+      name: country.name?.common || country.cca2,
+      currency: Object.keys(country.currencies || {})[0] || ""
+    })).filter(country => /^[A-Z]{2}$/.test(country.code) && country.name && country.currency);
+    if (parsed.length > 180) {
+      countries = parsed.sort((a, b) => a.name.localeCompare(b.name));
+      if (!countries.some(country => country.code === selectedCountry)) selectedCountry = "GH";
+      render();
+    }
+  } catch (error) {
+    console.warn("Using the built-in country list:", error);
   }
-  const select = $("vap-country");
-  const saved = localStorage.getItem("vivid:anime-premium-country") || "GH";
-  const current = countries.some(country => country.code === saved) ? saved : "GH";
-  select.innerHTML = countries.map(country =>
-    '<option value="' + country.code + '">' + country.name.replace(/[&<>"]/g, "") + '</option>'
-  ).join("");
-  select.value = current;
-  selectedCountry = current;
+  select.value = selectedCountry;
 }
 async function getExchangeRates(baseCurrency) {
   if (rateCache.has(baseCurrency)) return rateCache.get(baseCurrency);
-  const promise = fetch("https://open.er-api.com/v6/latest/" + encodeURIComponent(baseCurrency), { cache: "no-store" })
-    .then(response => response.ok ? response.json() : Promise.reject(new Error("Exchange rates unavailable")))
+  const request = withTimeout(
+    fetch("https://open.er-api.com/v6/latest/" + encodeURIComponent(baseCurrency), { cache: "no-store" }),
+    4500,
+    "Exchange-rate request timed out."
+  ).then(response => response.ok ? response.json() : Promise.reject(new Error("Exchange rates unavailable")))
     .then(data => data.result === "success" && data.rates ? data.rates : null)
-    .catch(() => null);
-  rateCache.set(baseCurrency, promise);
-  return promise;
+    .catch(error => { console.warn("Vivid local-currency estimate unavailable:", error); return null; });
+  rateCache.set(baseCurrency, request);
+  return request;
 }
 async function updatePrice() {
-  if (!pricing) return;
-  const country = getCountry(selectedCountry);
-  const localCurrency = country.currency || pricing.defaultCurrency;
-  const checkoutCurrency = getCheckoutCurrency(selectedCountry);
+  const requestId = ++priceRequestId;
   const plan = PAGE_CHECKOUT_PLANS[selectedPlanId];
+  const country = getCountry(selectedCountry);
+  const localCurrency = country.currency || "GHS";
   $("vap-local-currency").textContent = localCurrency;
-  $("vap-checkout-currency").textContent = checkoutCurrency === "GHS" ? "GHS · Ghanaian Cedi" : checkoutCurrency;
-  if (!plan) {
-    $("vap-local-price").textContent = "Price unavailable";
-    $("vap-price-note").textContent = "Vivid has not configured a checkout price for this region yet.";
-    $("vap-checkout-button").disabled = true;
-    return;
-  }
-  const baseAmount = Number(plan.amountMajor);
-  if (localCurrency === checkoutCurrency) {
-    $("vap-local-price").textContent = formatMoney(baseAmount, checkoutCurrency);
-    $("vap-price-note").textContent = "Your selected country uses Ghanaian Cedis. Paystack will charge " + formatMoney(baseAmount, checkoutCurrency) + ".";
+  $("vap-checkout-currency").textContent = "GHS · Ghanaian Cedi";
+  $("vap-local-price").textContent = localCurrency === "GHS" ? formatMoney(plan.amountMajor, "GHS") : "Calculating…";
+  $("vap-price-note").textContent = "Paystack always charges the fixed Ghana Cedi plan price. Local currency is an estimate.";
+  renderPlan();
+  if (localCurrency === "GHS") {
+    $("vap-price-note").textContent = "Your selected country uses Ghanaian Cedis. Paystack will charge " + formatMoney(plan.amountMajor, "GHS") + ".";
   } else {
-    const rates = await getExchangeRates(checkoutCurrency);
+    const rates = await getExchangeRates("GHS");
+    if (requestId !== priceRequestId) return;
     const rate = rates?.[localCurrency];
     if (Number.isFinite(rate) && rate > 0) {
-      $("vap-local-price").textContent = "≈ " + formatMoney(baseAmount * rate, localCurrency);
-      $("vap-price-note").textContent = "Estimated price in " + localCurrency + ". At Paystack checkout, the plan remains " + formatMoney(baseAmount, checkoutCurrency) + " in Ghanaian Cedis (GHS). Your bank or card provider converts it using its rate; the final card charge may vary and foreign transaction fees may apply.";
+      $("vap-local-price").textContent = "≈ " + formatMoney(plan.amountMajor * rate, localCurrency);
+      $("vap-price-note").textContent = "Estimated in " + localCurrency + ". Paystack checkout remains " + formatMoney(plan.amountMajor, "GHS") + ". Your bank/card provider converts the GHS charge at its exchange rate; the final amount and any foreign transaction fee may vary.";
     } else {
-      $("vap-local-price").textContent = formatMoney(baseAmount, checkoutCurrency);
-      $("vap-price-note").textContent = "We could not retrieve the local exchange rate right now. Paystack will charge the fixed " + formatMoney(baseAmount, checkoutCurrency) + " in Ghanaian Cedis (GHS), and your bank or card provider will convert it.";
+      $("vap-local-price").textContent = formatMoney(plan.amountMajor, "GHS");
+      $("vap-price-note").textContent = "We could not retrieve a reliable " + localCurrency + " estimate right now. The fixed Paystack charge is " + formatMoney(plan.amountMajor, "GHS") + "; your bank/card provider will convert it.";
     }
   }
-  selectedPaymentMethod = "card";
-  const cardRadio = document.querySelector('input[name="vap-payment-method"][value="card"]');
-  const mobileRadio = document.querySelector('input[name="vap-payment-method"][value="mobile_money"]');
-  if (cardRadio) { cardRadio.checked = true; cardRadio.disabled = false; }
-  if (mobileRadio) mobileRadio.disabled = true;
-  $("vap-card-method")?.setAttribute("aria-disabled", "false");
-  $("vap-mobile-method")?.setAttribute("aria-disabled", "true");
-  $("vap-method-note").textContent = "Use the same verified email address as your Vivid account on the Paystack page so your payment can be matched to your membership.";
-  $("vap-checkout-button").disabled = !pricing.checkoutEnabled || (membershipActive && membershipAutoRenew) || !selectedPaymentMethod;
-  $("vap-checkout-button").textContent = !pricing.checkoutEnabled ? "Checkout temporarily unavailable" : membershipActive ? (membershipAutoRenew ? "Membership active — auto-renew on" : "Renew manually →") : currentUser ? "Continue to secure checkout →" : "Sign in to subscribe →";
+  if (requestId !== priceRequestId) return;
+  $("vap-method-note").textContent = "Checkout is completed securely on Paystack. Use the same verified email address as your Vivid account so your payment can be matched to your membership.";
+  setCheckoutState();
 }
 async function loadPricing() {
-  const controller = new AbortController();
-  const timeout = window.setTimeout(() => controller.abort(), 8000);
-  let response;
-  try { response = await fetch("/api/anime-premium/pricing", { cache: "no-store", signal: controller.signal }); }
-  finally { window.clearTimeout(timeout); }
-  if (!response.ok) throw new Error("Premium pricing is temporarily unavailable.");
-  pricing = await response.json();
-  if (!pricing.ok || !pricing.plans || !Object.keys(pricing.plans).length) throw new Error("No Premium checkout currency is configured yet.");
-  await updatePrice();
+  const response = await withTimeout(fetch("/api/anime-premium/pricing", { cache: "no-store" }), 6500, "Pricing service timed out.");
+  if (!response.ok) throw new Error("Premium pricing is temporarily unavailable (" + response.status + ").");
+  const payload = await response.json();
+  if (!payload.ok || !payload.plans || !Object.keys(payload.plans).length) throw new Error(payload.message || "Premium pricing is not configured.");
+  pricing = payload;
 }
 async function loadMembership() {
   if (!currentUser) {
@@ -130,68 +150,52 @@ async function loadMembership() {
     $("vap-account-status").innerHTML = 'Already subscribed? <a href="auth.html?returnTo=anime-premium-membership.html">Sign in with your Vivid account</a>.';
     return;
   }
-  try {
-    const token = await currentUser.getIdToken();
-    const response = await fetch("/api/anime-premium/membership", {
-      headers: { Authorization: "Bearer " + token },
-      cache: "no-store"
-    });
-    if (response.status === 403) {
-      $("vap-checkout-status").textContent = "Verify your Vivid email address before subscribing.";
-      return;
-    }
-    if (!response.ok) return;
-    const payload = await response.json();
-    const membership = payload.membership || {};
-    membershipActive = membership.active === true;
-    membershipAutoRenew = membership.autoRenew === true;
-    $("vap-cancel-renewal").hidden = !membershipActive || !membership.canCancelAutoRenew;
-    if (membershipActive) {
-      $("vap-current-membership").hidden = false;
-      $("vap-membership-state").textContent = membership.autoRenew ? "Your Premium membership is active and set to renew automatically." : "Your Premium membership is active.";
-      $("vap-membership-period").textContent = "Access through " + (membership.currentPeriodEnd ? new Date(membership.currentPeriodEnd).toLocaleDateString() : "the current billing period") + " · " + (membership.autoRenew ? (membership.canCancelAutoRenew ? "Card auto-renewal is on" : "Card auto-renewal is on · contact support to cancel") : "Manual renewal");
-      $("vap-account-status").textContent = "You are signed in with your Vivid account.";
-    }
-  } catch (error) {
-    console.warn("Vivid Anime Premium membership status could not be loaded:", error);
+  const token = await currentUser.getIdToken();
+  const response = await withTimeout(fetch("/api/anime-premium/membership", {
+    headers: { Authorization: "Bearer " + token }, cache: "no-store"
+  }), 6500, "Membership status request timed out.");
+  if (response.status === 403) {
+    $("vap-checkout-status").textContent = "Verify your Vivid email address before subscribing.";
+    return;
+  }
+  if (!response.ok) throw new Error("Membership status could not be checked.");
+  const payload = await response.json();
+  const membership = payload.membership || {};
+  membershipActive = membership.active === true;
+  membershipAutoRenew = membership.autoRenew === true;
+  $("vap-cancel-renewal").hidden = !membershipActive || !membership.canCancelAutoRenew;
+  if (membershipActive) {
+    $("vap-current-membership").hidden = false;
+    $("vap-membership-state").textContent = membership.autoRenew ? "Your Premium membership is active and set to renew automatically." : "Your Premium membership is active.";
+    $("vap-membership-period").textContent = "Access through " + (membership.currentPeriodEnd ? new Date(membership.currentPeriodEnd).toLocaleDateString() : "the current billing period") + " · " + (membership.autoRenew ? (membership.canCancelAutoRenew ? "Card auto-renewal is on" : "Card auto-renewal is on · contact support to cancel") : "Manual renewal");
+    $("vap-account-status").textContent = "You are signed in with your Vivid account.";
   }
 }
 async function startCheckout() {
-  if (!pricing?.checkoutEnabled) { $("vap-checkout-status").textContent = "Secure checkout is not enabled in this environment yet."; return; }
+  if (!pricing.checkoutEnabled) { $("vap-checkout-status").textContent = "Secure checkout is temporarily unavailable. Please try again shortly."; return; }
+  if (!authReady) { $("vap-checkout-status").textContent = "Vivid account status is still loading. Please try again."; return; }
   if (membershipActive && membershipAutoRenew) return;
-  if (!currentUser) {
-    window.location.href = "auth.html?returnTo=anime-premium-membership.html";
-    return;
-  }
-  if (!selectedPaymentMethod) {
-    $("vap-checkout-status").textContent = "Choose a supported payment method.";
-    return;
-  }
+  if (!currentUser) { window.location.href = "auth.html?returnTo=anime-premium-membership.html"; return; }
   const button = $("vap-checkout-button");
   button.disabled = true;
-  button.textContent = "Preparing secure Paystack checkout…";
+  button.textContent = "Preparing Paystack checkout…";
   $("vap-checkout-status").textContent = "";
   try {
     const token = await currentUser.getIdToken();
-    const response = await fetch("/api/anime-premium/page-checkout", {
+    const response = await withTimeout(fetch("/api/anime-premium/page-checkout", {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: "Bearer " + token },
       cache: "no-store",
       body: JSON.stringify({ planId: selectedPlanId })
-    });
+    }), 9000, "Checkout request timed out. Please try again.");
     const payload = await response.json().catch(() => ({}));
     if (!response.ok || !payload.paymentPageUrl) throw new Error(payload.message || "Paystack payment page could not be opened.");
-    $("vap-checkout-status").textContent = "Opening your selected Paystack page. Use the same verified email as your Vivid account.";
     window.location.assign(payload.paymentPageUrl);
+    return;
   } catch (error) {
     $("vap-checkout-status").textContent = error.message || "Checkout could not be started.";
-    await updatePrice();
-  } finally {
-    button.disabled = !pricing.checkoutEnabled || (membershipActive && membershipAutoRenew) || !selectedPaymentMethod;
-    button.textContent = !pricing.checkoutEnabled ? "Checkout temporarily unavailable" : membershipActive ? (membershipAutoRenew ? "Membership active — auto-renew on" : "Renew manually →") : currentUser ? "Continue to secure checkout →" : "Sign in to subscribe →";
-  }
+  } finally { setCheckoutState(); }
 }
-
 async function cancelAutomaticRenewal() {
   if (!currentUser || !membershipAutoRenew) return;
   const button = $("vap-cancel-renewal");
@@ -199,71 +203,82 @@ async function cancelAutomaticRenewal() {
   button.textContent = "Cancelling…";
   try {
     const token = await currentUser.getIdToken();
-    const response = await fetch("/api/anime-premium/cancel", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: "Bearer " + token },
-      cache: "no-store",
-      body: JSON.stringify({})
-    });
+    const response = await withTimeout(fetch("/api/anime-premium/cancel", {
+      method: "POST", headers: { "Content-Type": "application/json", Authorization: "Bearer " + token },
+      cache: "no-store", body: JSON.stringify({})
+    }), 9000, "Cancellation request timed out.");
     const payload = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(payload.message || "Automatic renewal could not be cancelled.");
     membershipAutoRenew = false;
     button.hidden = true;
     $("vap-membership-state").textContent = "Automatic renewal is cancelled. Your Premium access remains active until the current period ends.";
     $("vap-checkout-status").textContent = "Automatic renewal cancelled. You can renew manually before your access expires.";
-    await updatePrice();
   } catch (error) {
     $("vap-checkout-status").textContent = error.message || "Could not cancel automatic renewal.";
     button.disabled = false;
     button.textContent = "Cancel automatic renewal";
   }
+  setCheckoutState();
 }
-
 function bind() {
-  document.querySelectorAll("[data-vap-plan]").forEach(button => button.addEventListener("click", async () => {
-    selectedPlanId = button.dataset.vapPlan;
-    document.querySelectorAll("[data-vap-plan]").forEach(option => {
-      const active = option === button;
-      option.classList.toggle("is-active", active);
-      option.setAttribute("aria-pressed", String(active));
-    });
-    await updatePrice();
+  document.querySelectorAll("[data-vap-plan]").forEach(button => button.addEventListener("click", () => {
+    selectedPlanId = PAGE_CHECKOUT_PLANS[button.dataset.vapPlan] ? button.dataset.vapPlan : "monthly";
+    void updatePrice();
   }));
-  $("vap-country").addEventListener("change", async event => {
+  $("vap-country").addEventListener("change", event => {
     selectedCountry = event.target.value;
-    localStorage.setItem("vivid:anime-premium-country", selectedCountry);
-    selectedPaymentMethod = "";
-    await updatePrice();
+    try { localStorage.setItem("vivid:anime-premium-country", selectedCountry); } catch {}
+    void updatePrice();
   });
-  document.querySelectorAll('input[name="vap-payment-method"]').forEach(input => input.addEventListener("change", () => {
-    if (!input.disabled) {
-      selectedPaymentMethod = input.value;
-      void updatePrice();
-    }
-  }));
   $("vap-checkout-button").addEventListener("click", startCheckout);
   $("vap-cancel-renewal").addEventListener("click", cancelAutomaticRenewal);
 }
-onAuthStateChanged(auth, async user => {
-  currentUser = user && !user.isAnonymous ? user : null;
-  if (currentUser) await loadMembership();
-  else {
-    membershipActive = false;
-    membershipAutoRenew = false;
-    $("vap-account-status").innerHTML = 'Already subscribed? <a href="auth.html?returnTo=anime-premium-membership.html">Sign in with your Vivid account</a>.';
+async function initialiseAuth() {
+  try {
+    const [{ auth }, { onAuthStateChanged }] = await Promise.all([
+      import("./firebase.js"),
+      import("https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js")
+    ]);
+    onAuthStateChanged(auth, async user => {
+      currentUser = user && !user.isAnonymous ? user : null;
+      authReady = true;
+      try { await loadMembership(); }
+      catch (error) { console.warn("Premium membership lookup failed:", error); }
+      setCheckoutState();
+      if (!currentUser) $("vap-account-status").innerHTML = 'Already subscribed? <a href="auth.html?returnTo=anime-premium-membership.html">Sign in with your Vivid account</a>.';
+    }, error => {
+      console.warn("Vivid authentication state unavailable:", error);
+      authReady = true;
+      setCheckoutState();
+      $("vap-checkout-status").textContent = "We could not verify your Vivid sign-in. Refresh the page or sign in again.";
+    });
+  } catch (error) {
+    console.error("Vivid authentication module could not initialise:", error);
+    authReady = true;
+    setCheckoutState();
+    $("vap-checkout-status").textContent = "Vivid sign-in could not be loaded. Refresh the page and try again.";
   }
-  if (pricing) await updatePrice();
-});
+}
 async function init() {
   bind();
-  await loadCountries();
-  try { await loadPricing(); }
-  catch (error) {
-    $("vap-local-price").textContent = "Price unavailable";
-    $("vap-price-note").textContent = error.message;
-    $("vap-checkout-button").disabled = true;
+  renderPlan();
+  $("vap-local-price").textContent = formatMoney(PAGE_CHECKOUT_PLANS.monthly.amountMajor, "GHS");
+  $("vap-price-note").textContent = "Loading the selected country's currency estimate…";
+  $("vap-checkout-button").textContent = "Checking checkout availability…";
+  const countriesTask = loadCountries().then(() => updatePrice()).catch(error => {
+    console.error("Country selector initialisation failed:", error);
+    $("vap-price-note").textContent = "Country information could not be loaded. The Paystack charge remains in Ghanaian Cedis (GHS).";
+  });
+  const pricingTask = loadPricing().then(() => updatePrice()).catch(error => {
+    console.error("Premium pricing initialisation failed:", error);
+    pricing = { checkoutEnabled: false, defaultCurrency: "GHS" };
+    $("vap-price-note").textContent = error.message + " The displayed GHS amount is the configured plan reference price.";
     $("vap-checkout-status").textContent = error.message;
-  }
+    setCheckoutState();
+  });
+  void initialiseAuth();
+  await Promise.allSettled([countriesTask, pricingTask]);
+  if ($("vap-local-price").textContent === "Calculating…") $("vap-local-price").textContent = formatMoney(PAGE_CHECKOUT_PLANS[selectedPlanId].amountMajor, "GHS");
 }
 if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init, { once: true });
 else init();
