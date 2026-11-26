@@ -221,3 +221,8 @@ test("anime movie routes do not select episode-only AniList or MAL players", () 
   assert.match(source, /return animeSeries && Boolean\(aniListId\)/);
   assert.match(source, /return animeSeries && Boolean\(malId\)/);
 });
+
+test("anime audio preference changes synchronize between Player 1 and Player 2", () => {
+  assert.match(source, /window\.dispatchEvent\(new CustomEvent\("vivid:anime-track-changed"/);
+  assert.match(source, /window\.addEventListener\("vivid:anime-track-changed"/);
+});
