@@ -92,10 +92,12 @@ Never expose partner secrets to the browser. Never store a permanent stream URL 
 ## Current codebase fit
 
 The current Phase 4 API already has:
-- `animePremiumSources/{mediaType_titleId_sN_eN}` as a server-managed episode source registry;
+- `animePremiumSources/{mediaType_titleId_sN_eN}` as a server-managed episode source registry; each episode record now supports up to eight independently rights-cleared `candidates`, each with a unique candidate ID, provider, source ID, priority, territory list, licence window and active flag;
 - `ANIME_PREMIUM_PROVIDER_RESOLVERS_JSON` as the preferred server-only map of provider ID to resolver URL, resolver token and provider-specific allowed hostnames;
 - legacy `ANIME_PREMIUM_STREAM_RESOLVER_URL`, `ANIME_PREMIUM_STREAM_RESOLVER_TOKEN` and `ANIME_PREMIUM_STREAM_HOSTS` as a backwards-compatible single-resolver fallback;
 - provider-specific final host allowlists, so one partner's resolver cannot return another provider's domain;
+- priority-ordered server fallback: the resolver tries each eligible candidate in order, rejects redirects, applies a 12-second timeout and continues to the next licensed candidate when a resolver is unavailable or returns an invalid session;
+- playback-session responses include the selected candidate ID; if the browser reports a fatal native/HLS playback failure or cannot load Hls.js, the client requests another candidate while asking the server to exclude already-failed candidate IDs (maximum eight);
 - membership and playback-session checks before progress writes.
 
 The playback endpoint now supports isolated provider resolver configurations. Configure a secret environment variable using this shape (example values are deliberately non-functional placeholders):
@@ -115,7 +117,7 @@ The playback endpoint now supports isolated provider resolver configurations. Co
 }
 ```
 
-The source registry's server-managed `provider` value selects the matching configuration. Each provider has a separate token, resolver URL and final hostname allowlist. The existing single-resolver environment variables remain as a backwards-compatible fallback while the multi-provider configuration is introduced. It must not accept arbitrary URLs, arbitrary resolver destinations, browser-supplied provider names, or user-supplied stream hosts.
+The source registry's server-managed candidate `provider` value selects the matching configuration. Each provider has a separate token, resolver URL and final hostname allowlist. The existing single-resolver environment variables remain as a backwards-compatible fallback while the multi-provider configuration is introduced. It must not accept arbitrary URLs, arbitrary resolver destinations, browser-supplied provider names, or user-supplied stream hosts. The browser may only submit candidate IDs to skip after a playback failure; it cannot select a provider, set a stream URL, or bypass territory and licence checks.
 
 ## Phase 4 implementation gates
 
@@ -136,9 +138,10 @@ Until those gates are met, keep the provider visible only as a researched candid
 ## Immediate Phase 4 priorities
 
 1. Finish player lifecycle, session expiry, episode navigation and reliable final progress persistence.
-2. Formalise the provider adapter/resolver contract and rights metadata.
-3. Build a provider due-diligence shortlist and outreach package for Crunchyroll, Sentai/HIDIVE and direct rights holders via AniBiz.
-4. Integrate the first partner only after VIVID has written permission, credentials and a test asset.
-5. Add real-device playback QA for HLS/DRM, subtitles, audio tracks, network changes and low-bandwidth conditions.
+2. Complete the eight-candidate registry and automatic failover QA, including actual media errors after a resolver successfully returns a URL.
+3. Formalise the provider adapter/resolver contract and rights metadata.
+4. Build a provider due-diligence shortlist and outreach package for Crunchyroll, Sentai/HIDIVE and direct rights holders via AniBiz.
+5. Integrate the first partner only after VIVID has written permission, credentials and a test asset.
+6. Add real-device playback QA for HLS/DRM, subtitles, audio tracks, network changes and low-bandwidth conditions.
 
 **No third-party provider is represented as partnered with VIVID by this document.**
