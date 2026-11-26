@@ -30,7 +30,9 @@ function getCountry(code) { return countries.find(country => country.code === co
 function getCheckoutCurrency(countryCode) {
   const periodPlans = pricing.plans[selectedPlanId] || {};
   const preferred = COUNTRY_TO_PAYSTACK[countryCode] || pricing.defaultCurrency;
-  return periodPlans[preferred] ? preferred : pricing.defaultCurrency;
+  if (periodPlans[preferred]) return preferred;
+  if (periodPlans[pricing.defaultCurrency]) return pricing.defaultCurrency;
+  return Object.keys(periodPlans)[0] || pricing.defaultCurrency;
 }
 function formatMoney(amount, currency) {
   try { return new Intl.NumberFormat(undefined, { style: "currency", currency, maximumFractionDigits: 2 }).format(amount); }
