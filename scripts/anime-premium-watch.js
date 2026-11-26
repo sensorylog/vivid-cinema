@@ -1,5 +1,3 @@
-import { auth } from "./firebase.js";
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
 import { tmdbApi } from "./tmdb.js";
 import { getImageUrl } from "./media.js";
 import { escapeHtml } from "./utils.js";
@@ -15,6 +13,7 @@ const mediaType = params.get("type") === "movie" ? "movie" : "tv";
 const rawId = params.get("id") || "";
 const titleId = /^\d{1,12}$/.test(rawId) ? rawId : "";
 let currentUser = null;
+let authReady = Promise.resolve();
 let titleDetails = null;
 let seasonDetails = null;
 let activeEpisodes = [];
@@ -317,6 +316,7 @@ function handleProviderMessage(event) {
   }
 }
 async function requestPlayback(episode) {
+  await authReady;
   const requestId = ++playbackRequestId;
   if (!currentUser) {
     showGate("Sign in to continue", "A Vivid account is required before Premium playback can be checked. Sign in with the same account you use across Vivid Cinema.");
@@ -546,30 +546,45 @@ function bindControls() {
   });
   window.addEventListener("message", handleProviderMessage);
 }
-function bindAuth() {
-  onAuthStateChanged(auth, user => {
-    const nextUser = user && !user.isAnonymous ? user : null;
-    if (currentUser?.uid && currentUser.uid !== nextUser?.uid) {
-      void syncPlaybackProgress(true);
-      playbackRequestId += 1;
-      latestProviderProgress = null;
-      showGate("Vivid account changed", "Playback has stopped because the signed-in Vivid account changed. Sign in with the account that holds your Premium membership.");
-      setStatus("Playback stopped after the Vivid account changed.");
-    }
-    currentUser = nextUser;
-    if (currentUser) {
-      void syncAnimePreferencesForUser(currentUser).then(preferences => {
-        if (currentUser?.uid !== user?.uid) return;
-        animeTrack = preferences.track;
-        $("vap-audio-track")?.querySelectorAll("[data-vap-track]").forEach(button => button.setAttribute("aria-pressed", String(button.dataset.vapTrack === animeTrack)));
-      }).catch(error => console.warn("Vivid Anime Premium preferences could not sync:", error));
-    }
-    $("vap-player-signin").href = currentUser ? "account.html" : "auth.html?returnTo=anime-premium.html";
-    $("vap-player-signin").textContent = currentUser ? "Open Vivid account →" : "Sign in to Vivid →";
-  }, error => {
+async function bindAuth() {
+  try {
+    const [{ auth }, { onAuthStateChanged }] = await Promise.all([
+      import("./firebase.js"),
+      import("https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js")
+    ]);
+    if (typeof auth.authStateReady === "function") await auth.authStateReady();
+    currentUser = auth.currentUser && !auth.currentUser.isAnonymous ? auth.currentUser : null;
+    onAuthStateChanged(auth, user => {
+      const nextUser = user && !user.isAnonymous ? user : null;
+      if (currentUser?.uid && currentUser.uid !== nextUser?.uid) {
+        void syncPlaybackProgress(true);
+        playbackRequestId += 1;
+        latestProviderProgress = null;
+        showGate("Vivid account changed", "Playback has stopped because the signed-in Vivid account changed. Sign in with the account that holds your Premium membership.");
+        setStatus("Playback stopped after the Vivid account changed.");
+      }
+      currentUser = nextUser;
+      if (currentUser) {
+        void syncAnimePreferencesForUser(currentUser).then(preferences => {
+          if (currentUser?.uid !== user?.uid) return;
+          animeTrack = preferences.track;
+          $("vap-audio-track")?.querySelectorAll("[data-vap-track]").forEach(button => button.setAttribute("aria-pressed", String(button.dataset.vapTrack === animeTrack)));
+        }).catch(error => console.warn("Vivid Anime Premium preferences could not sync:", error));
+      }
+      $("vap-player-signin").href = currentUser ? "account.html" : "auth.html?returnTo=anime-premium-watch.html" + window.location.search;
+      $("vap-player-signin").textContent = currentUser ? "Open Vivid account →" : "Sign in to Vivid →";
+    }, error => {
+      currentUser = null;
+      console.warn("Vivid Anime Premium auth state unavailable:", error);
+      showGate("Vivid account unavailable", "Your episode details are available, but Vivid could not restore your account session. Please sign in again.", "Sign in to Vivid", "auth.html?returnTo=anime-premium-watch.html" + window.location.search);
+      setStatus("Vivid account verification is unavailable.");
+    });
+  } catch (error) {
     currentUser = null;
-    console.warn("Vivid Anime Premium auth state unavailable:", error);
-  });
+    console.warn("Vivid Anime Premium auth initialization failed:", error);
+    showGate("Vivid account unavailable", "Your episode details are available, but Vivid could not connect to your Vivid account. Check your connection and try again.", "Sign in to Vivid", "auth.html?returnTo=anime-premium-watch.html" + window.location.search);
+    setStatus("Vivid account verification is unavailable.");
+  }
 }
 function renderError(error) {
   $("vap-watch-content").innerHTML = '<section class="vap-title-error"><span class="vap-eyebrow">VIVID ANIME PREMIUM</span><h1>We couldn’t open this episode.</h1><p>' + escapeHtml(error?.message || "Please return to the Premium catalogue and choose a title.") + '</p><a class="vap-primary" href="anime-premium.html">Back to discovery <span aria-hidden="true">→</span></a></section>';
@@ -587,5 +602,5 @@ document.addEventListener("visibilitychange", () => {
   }
 });
 bindControls();
-bindAuth();
+authReady = bindAuth();
 loadWatchPage().catch(renderError);
