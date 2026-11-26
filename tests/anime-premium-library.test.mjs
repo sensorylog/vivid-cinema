@@ -55,7 +55,7 @@ test("Premium title page supports Watch Later and explicit completed-title state
   assert.match(title, /unmarkAnimeCompleted/);
   assert.match(title, /addAnimeFavorite/);
   assert.match(title, /removeAnimeFavorite/);
-  assert.match(html, /vap-title-star/);
+  assert.match(titleHtml, /vap-title-star/);
   assert.match(titleHtml, /vap-title-completed/);
 });
 
