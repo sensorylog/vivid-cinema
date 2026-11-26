@@ -293,6 +293,13 @@ async function performLibrarySyncForUser(user=null){
   const auth=await getFirebaseAuth();
   if(!auth?.currentUser)throw new Error("Authentication is unavailable during library sync.");
   if(String(auth.currentUser.uid)!==String(user.uid))throw new Error("The signed-in account changed during library sync. Please retry.");
+
+  // Firestore App Check is initialized lazily to avoid blocking public browsing.
+  // A signed-in cloud sync is a protected action, so initialize the configured
+  // Turnstile-backed provider before the first server read or write.
+  const firebase = await getFirebase();
+  await firebase.ensureAppCheck();
+
   ensureLocalOwner(user.uid);
   const local=readLocal();
 
