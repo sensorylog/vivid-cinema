@@ -19,18 +19,20 @@ export function writeAnimeTrackPreference(value, storage = getStorage()) {
   return track;
 }
 
-export function getAnimeGlobalEpisode(params, seasons = []) {
-  const episode = Math.max(1, Number(params?.episode) || 1);
-  if (params?.type !== "tv") return episode;
+export function getAnimeEpisodeOffset(params, seasons = []) {
+  if (params?.type !== "tv") return 0;
   const seasonNumber = Math.max(1, Number(params?.season) || 1);
   const ordered = (Array.isArray(seasons) ? seasons : [])
     .filter(season => Number(season?.season_number) > 0 && Number(season?.episode_count) > 0)
     .sort((a, b) => Number(a.season_number) - Number(b.season_number));
-  if (!ordered.some(season => Number(season.season_number) === seasonNumber)) return episode;
-  const previousEpisodes = ordered
+  if (!ordered.some(season => Number(season.season_number) === seasonNumber)) return 0;
+  return ordered
     .filter(season => Number(season.season_number) < seasonNumber)
     .reduce((total, season) => total + Math.max(0, Number(season.episode_count) || 0), 0);
-  return previousEpisodes + episode;
+}
+
+export function getAnimeGlobalEpisode(params, seasons = []) {
+  return Math.max(1, Number(params?.episode) || 1) + getAnimeEpisodeOffset(params, seasons);
 }
 
 const ANIME_PROVIDER_EVENTS = new Set(["ready", "play", "playing", "pause", "paused", "buffering", "progress", "timeupdate", "seeked", "ended", "error"]);
