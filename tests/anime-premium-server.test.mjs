@@ -132,3 +132,25 @@ test("playback enforces verified territory and licence-window rights before reso
   assert.match(playback, /licenseEndsAt <= Date\.now\(\)/);
   assert.match(playback, /territory-or-rights-unavailable/);
 });
+
+
+test("playback walks multiple licensed source candidates in priority order and fails closed", () => {
+  assert.match(playback, /Array\.isArray\(source\.candidates\)/);
+  assert.match(playback, /candidates\.slice\(0, 8\)/);
+  assert.match(playback, /for \(const candidate of candidates\)/);
+  assert.match(playback, /candidate\.rightsVerified !== true/);
+  assert.match(playback, /candidate\.allowedTerritories\.includes\(territory\)/);
+  assert.match(playback, /redirect: "error"/);
+  assert.match(playback, /AbortSignal\.timeout\(12000\)/);
+  assert.match(playback, /No authorised streaming server could open this episode/);
+  assert.match(playback, /selected\.candidate\.provider/);
+});
+
+test("admin source registry stores and sorts up to eight independent authorised server candidates", async () => {
+  const adminSources = await readFile(new URL("../cloudflare/functions/api/anime-premium/admin/sources.js", import.meta.url), "utf8");
+  assert.match(adminSources, /existing\.candidates/);
+  assert.match(adminSources, /candidateId/);
+  assert.match(adminSources, /candidates\.sort/);
+  assert.match(adminSources, /candidates\.length > 8/);
+  assert.match(adminSources, /rightsVerified: true/);
+});
