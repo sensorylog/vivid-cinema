@@ -24,3 +24,16 @@ html[data-vivid-theme="light"] body.vivid-anime-page{background:#f5f5f7}.vivid-a
 .vivid-anime-card-copy small{display:block;min-height:1.3em}
 .vivid-anime-controls button:focus-visible,.vivid-anime-load-wrap button:focus-visible,.vivid-anime-card:focus-visible{outline:2px solid #c6b8ff;outline-offset:3px}
 @media(max-width:520px){.vivid-anime-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}}
+
+.vivid-anime-free-notice{display:flex;align-items:center;justify-content:space-between;gap:18px;margin:24px 0 32px;padding:20px 22px;border:1px solid rgba(177,148,255,.25);border-radius:16px;background:linear-gradient(115deg,rgba(142,111,219,.14),rgba(255,255,255,.025))}
+.vivid-anime-free-notice>div{display:grid;gap:5px}
+.vivid-anime-free-notice>div>span{color:#c4a7ff;font-size:.58rem;font-weight:950;letter-spacing:.16em}
+.vivid-anime-free-notice strong{font-size:.95rem}
+.vivid-anime-free-notice p{margin:0;color:#9992a4;font-size:.7rem}
+.vivid-anime-free-notice>a{flex:0 0 auto;color:#e4d9ff;font-size:.7rem;font-weight:850;text-decoration:none}
+.vivid-anime-free-notice>a:hover{text-decoration:underline}
+.vivid-free-anime-card .vivid-anime-poster span{background:#211632;color:#d8c4ff}
+.vivid-free-anime-card .vivid-anime-poster b{background:rgba(7,8,12,.82);color:#fff}
+.vivid-free-anime-card .vivid-anime-card-copy small{color:#bda4f3}
+.vivid-anime-page .vivid-anime-hero-actions .vivid-button--secondary{display:inline-flex;align-items:center;gap:9px;padding:13px 17px;border:1px solid rgba(208,185,255,.38);border-radius:999px;color:#e5d9ff;text-decoration:none;font-size:.72rem;font-weight:850;background:rgba(157,125,220,.1)}
+@media(max-width:640px){.vivid-anime-free-notice{align-items:flex-start;flex-direction:column;padding:17px}.vivid-anime-free-notice>a{width:100%}}
