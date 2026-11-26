@@ -27,6 +27,9 @@ test("anime library separates watchlist, favourites, history, completed and cont
 
 test("anime watch history and episode progress retain the anime identity across devices", () => {
   assert.match(watch, /isAnime: isAnimePlayback\(\)/);
+  const writes = [...watch.matchAll(/savePlaybackProgress\(progressKey\(\),\s*\{([\s\S]*?)\}\);/g)];
+  assert.ok(writes.length >= 5, "all player adapters should persist episode progress");
+  for (const write of writes) assert.match(write[1], /isAnime: isAnimePlayback\(\)/);
   assert.match(library, /item\.isAnime===true/);
   assert.match(recommendations, /item\.isAnime === true/);
   assert.match(rules, /'isAnime'/);
