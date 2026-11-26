@@ -10,6 +10,7 @@ const routes = [
   "/african-stories.html",
   "/watch.html",
   "/anime.html",
+  "/anime-premium.html",
   "/community.html"
 ];
 
@@ -55,9 +56,17 @@ test("core app routes remain navigable with the service worker active", async ({
 });
 
 
+async function dismissTransientHomeOverlays(page) {
+  const onboardingSkip = page.locator("#vivid-onboarding-skip");
+  if (await onboardingSkip.count() && await onboardingSkip.isVisible()) await onboardingSkip.click();
+  const inviteClose = page.locator("#vivid-social-invite .vivid-social-invite-close");
+  if (await inviteClose.count() && await inviteClose.isVisible()) await inviteClose.click();
+}
+
 test("mobile navigation stays within five destinations and exposes secondary routes through More", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/home.html", { waitUntil: "domcontentloaded" });
+  await dismissTransientHomeOverlays(page);
   await expect(page.locator(".vivid-navlinks a[href='my-downloads.html']")).toHaveCount(0);
   await expect(page.locator(".vivid-mobile-nav a[href='my-downloads.html']")).toHaveCount(0);
   await expect(page.locator(".vivid-mobile-nav a")).toHaveCount(4);
