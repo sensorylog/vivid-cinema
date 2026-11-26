@@ -21,7 +21,7 @@
 
 ## Verification still required
 
-Automated regression and syntax checks are now passing in GitHub Actions. Live real-episode playback still needs desktop and mobile verification. Confirm title-to-ID mapping, season/episode correctness, Sub/Dub availability, provider playback, fallback behavior, and upstream errors. Aniweeb remains excluded. Vivid cannot inspect media events inside arbitrary cross-origin iframes unless the provider exposes a supported messaging API.
+TMDB Specials (season 0) are kept as season 0 in generic TMDB fallback routes and are not sent to episode-only AniList/MAL providers unless a dedicated mapping exists. Automated regression and syntax checks are now passing in GitHub Actions. Live real-episode playback still needs desktop and mobile verification. Confirm title-to-ID mapping, season/episode correctness, Sub/Dub availability, provider playback, fallback behavior, and upstream errors. Aniweeb remains excluded. Vivid cannot inspect media events inside arbitrary cross-origin iframes unless the provider exposes a supported messaging API.
 
 ## Discovery catalogue scope
 
