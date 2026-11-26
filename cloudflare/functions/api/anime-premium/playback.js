@@ -96,7 +96,9 @@ export async function onRequestPost({ request, env }) {
     }
     let rightsEligible = false;
     let selected = null;
+    const resolverDeadline = Date.now() + 25000;
     for (const candidate of candidates) {
+      if (Date.now() >= resolverDeadline) break;
       if (!candidate || excludedCandidates.has(String(candidate.candidateId || candidate.provider || "legacy")) ||
           candidate.active !== true || !candidate.sourceId || typeof candidate.provider !== "string") continue;
       const licenseStartsAt = timestampMillis(candidate.licenseStartsAt);
@@ -110,7 +112,7 @@ export async function onRequestPost({ request, env }) {
         const resolverResponse = await fetch(provider.url.toString(), {
           method: "POST",
           redirect: "error",
-          signal: AbortSignal.timeout(12000),
+          signal: AbortSignal.timeout(Math.min(12000, Math.max(1, resolverDeadline - Date.now()))),
           headers: { Authorization: "Bearer " + provider.token, "Content-Type": "application/json" },
           body: JSON.stringify({
             sourceId: candidate.sourceId,
