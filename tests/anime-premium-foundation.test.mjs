@@ -23,11 +23,13 @@ test("Premium has its own route, namespaced assets and discoverable metadata", (
   assert.match(html, /VIVID ANIME PREMIUM/);
   assert.match(html, /rel="canonical" href="https:\/\/vivid-cinema\.pages\.dev\/anime-premium\.html"/);
   assert.match(styles, /\.vap-hero/);
+  assert.match(styles, /padding-bottom:calc\(160px \+ env\(safe-area-inset-bottom/);
+  assert.match(shell, /navLink\("anime-premium\.html", "bi-stars", "Premium"/);
   assert.match(sitemap, /https:\/\/vivid-cinema\.pages\.dev\/anime-premium\.html/);
 });
 
 test("Premium is explicitly labelled in navigation and Free Anime remains distinct", () => {
-  assert.match(shell, /navLink\("anime-premium\.html", "bi-stars", "Premium Anime"/);
+  assert.match(shell, /navLink\("anime-premium\.html", "bi-stars", "Premium"/);
   assert.match(shell, /navLink\("anime\.html", "bi-stars", "Free Anime"/);
   assert.match(shell, /page\.startsWith\("anime-premium"\)/);
 });
