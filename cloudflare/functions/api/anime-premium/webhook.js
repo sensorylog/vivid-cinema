@@ -130,6 +130,7 @@ async function handleChargeSuccess(db, env, data, eventRef) {
       autoRenew: renewalMode === "automatic",
       cancelAtPeriodEnd: false,
       paymentMethod: checkout.paymentMethod,
+      amount: Number(checkout.amount),
       paystackCustomerCode: customerCode || old.paystackCustomerCode || null,
       subscriptionCode: paystackSubscriptionCode || old.subscriptionCode || null,
       subscriptionEmailToken: subscriptionEmailToken || old.subscriptionEmailToken || null,
@@ -188,10 +189,14 @@ async function handleRecurringEvent(db, eventName, data, eventRef) {
         renewalMode: "automatic",
         updatedAt: timestampFromMillis(now)
       }, { merge: true });
-    } else if (eventName === "invoice.payment_success") {
+    } else if (eventName === "invoice.payment_success" || (eventName === "invoice.update" && (String(data.status || "").toLowerCase() === "success" || data.paid === true || data.paid === 1))) {
+      const paidAmount = Number(data.amount || data.transaction?.amount || 0);
+      if (paidAmount && Number(value.amount || 0) && paidAmount !== Number(value.amount)) return;
+      const paidCurrency = String(data.currency || data.transaction?.currency || "").toUpperCase();
+      if (paidCurrency && value.currency && paidCurrency !== String(value.currency).toUpperCase()) return;
       const oldEnd = typeof value.currentPeriodEnd?.toMillis === "function" ? value.currentPeriodEnd.toMillis() : Number(value.currentPeriodEnd || 0);
       const start = oldEnd > now ? oldEnd : now;
-      const next = millis(data.next_payment_date || data.subscription?.next_payment_date);
+      const next = millis(data.next_payment_date || data.subscription?.next_payment_date || data.period_end);
       transaction.set(membershipRef, {
         status: "active",
         billingStatus: "paid",
@@ -236,7 +241,7 @@ export async function onRequestPost({ request, env }) {
     const id = await eventDocumentId(eventName, data);
     const eventRef = db.collection("animePremiumWebhookEvents").doc(id);
     if (eventName === "charge.success") await handleChargeSuccess(db, env, data, eventRef);
-    else if (["subscription.create", "invoice.payment_success", "invoice.payment_failed", "subscription.disable", "subscription.not_renew"].includes(eventName)) {
+    else if (["subscription.create", "invoice.payment_success", "invoice.payment_failed", "invoice.update", "subscription.disable", "subscription.not_renew"].includes(eventName)) {
       await handleRecurringEvent(db, eventName, data, eventRef);
     } else {
       await eventRef.set({ processedAt: timestampFromMillis(Date.now()), event: eventName, ignored: true }, { merge: true });
