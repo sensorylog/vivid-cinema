@@ -170,3 +170,23 @@ test("multi-server resolver fallback has a bounded total deadline", () => {
   assert.match(playback, /if \(Date\.now\(\) >= resolverDeadline\) break/);
   assert.match(playback, /AbortSignal\.timeout\(Math\.min\(12000, Math\.max\(1, resolverDeadline - Date\.now\(\)\)\)\)/);
 });
+
+
+test("title-level source mappings are considered after episode-specific licensed candidates", () => {
+  assert.match(playback, /lookupKeys = mediaType === "tv" \? \[sourceKey, "tv_" \+ titleId\]/);
+  assert.match(playback, /sourceRecords\.flatMap/);
+  assert.match(playback, /registryRank/);
+  assert.match(playback, /left\.registryRank - right\.registryRank/);
+  assert.match(playback, /sourceKey: selected\.candidate\.registryKey/);
+});
+
+test("admin source registry supports episode-level and whole-title mappings", async () => {
+  const adminSources = await readFile(new URL("../cloudflare/functions/api/anime-premium/admin/sources.js", import.meta.url), "utf8");
+  const adminPage = await readFile(new URL("../anime-premium-admin.html", import.meta.url), "utf8");
+  const adminScript = await readFile(new URL("../scripts/anime-premium-admin.js", import.meta.url), "utf8");
+  assert.match(adminSources, /body\.scope === "title"/);
+  assert.match(adminSources, /mediaType \+ "_" \+ titleId/);
+  assert.match(adminPage, /vap-admin-source-scope/);
+  assert.match(adminScript, /scope: mediaType === "tv" \?/);
+  assert.match(adminScript, /vap-admin-source-scope.*change/);
+});
