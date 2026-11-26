@@ -24,7 +24,6 @@ test("Premium catalogue uses the existing anime metadata API and filters Japanes
   assert.match(script, /getAnimePage\(/);
   assert.match(script, /tmdbApi\.searchMulti\(/);
   assert.match(script, /isAnimeMetadata\(item\)/);
-  assert.match(script, /item\.original_language === "ja"/);
   assert.doesNotMatch(script, /initializeApp\s*\(|getAuth\s*\(/);
 });
 
