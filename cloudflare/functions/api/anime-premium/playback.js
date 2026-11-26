@@ -79,17 +79,26 @@ export async function onRequestPost({ request, env }) {
       throw new AnimePremiumError(403, "premium-membership-required", "An active Vivid Anime Premium membership is required.");
     }
     const sourceKey = mediaType + "_" + titleId + (mediaType === "tv" ? "_s" + season + "_e" + episode : "");
-    const sourceSnapshot = await db.collection("animePremiumSources").doc(sourceKey).get();
-    if (!sourceSnapshot.exists || sourceSnapshot.data()?.active !== true) {
+    const sourceCollection = db.collection("animePremiumSources");
+    const lookupKeys = mediaType === "tv" ? [sourceKey, "tv_" + titleId] : [sourceKey];
+    const sourceSnapshots = await Promise.all(lookupKeys.map(async key => ({
+      key, snapshot: await sourceCollection.doc(key).get()
+    })));
+    const sourceRecords = sourceSnapshots
+      .filter(item => item.snapshot.exists && item.snapshot.data()?.active === true)
+      .map((item, registryRank) => ({ key: item.key, rank: registryRank, data: item.snapshot.data() || {} }));
+    if (!sourceRecords.length) {
       throw new AnimePremiumError(404, "authorised-source-not-found", "No authorised playback source is available for this episode.");
     }
-    const source = sourceSnapshot.data() || {};
-    // One episode can have several independently rights-cleared server candidates.
-    // Legacy single-source documents remain readable during migration.
-    const candidates = (Array.isArray(source.candidates) ? source.candidates.slice(0, 8) :
-      [{ ...source, candidateId: String(source.provider || "legacy") }])
-      .filter(candidate => candidate && typeof candidate === "object")
-      .sort((left, right) => Number(left.priority || 50) - Number(right.priority || 50));
+    // Episode-specific candidates take precedence; title-level candidates cover every episode
+    // through the same provider adapter, which receives the requested season and episode.
+    const candidates = sourceRecords.flatMap(record => {
+      const entries = Array.isArray(record.data.candidates) ? record.data.candidates.slice(0, 8) :
+        [{ ...record.data, candidateId: String(record.data.provider || "legacy") }];
+      return entries.filter(candidate => candidate && typeof candidate === "object")
+        .map(candidate => ({ ...candidate, registryKey: record.key, registryRank: record.rank }));
+    }).sort((left, right) => left.registryRank - right.registryRank ||
+      Number(left.priority || 50) - Number(right.priority || 50));
     const territory = String(request.cf?.country || "").toUpperCase();
     if (!/^[A-Z]{2}$/.test(territory)) {
       throw new AnimePremiumError(451, "territory-or-rights-unavailable", "Vivid could not verify the playback territory for this request.");
@@ -149,7 +158,7 @@ export async function onRequestPost({ request, env }) {
     }
     const sessionId = crypto.randomUUID();
     await db.collection("animePremiumPlaybackSessions").doc(sessionId).set({
-      uid: user.uid, mediaType, titleId, season, episode, sourceKey,
+      uid: user.uid, mediaType, titleId, season, episode, sourceKey: selected.candidate.registryKey,
       provider: selected.candidate.provider,
       candidateId: selected.candidate.candidateId || selected.candidate.provider,
       expiresAt: timestampFromMillis(selected.expiresAt), createdAt: timestampFromMillis(Date.now())
