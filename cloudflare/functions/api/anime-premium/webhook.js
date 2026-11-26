@@ -121,7 +121,8 @@ async function handleRecurringEvent(db, eventName, data, eventRef) {
         updatedAt: timestampFromMillis(now)
       }, { merge: true });
     } else if (eventName === "invoice.payment_success") {
-      const start = now;
+      const oldEnd = typeof value.currentPeriodEnd?.toMillis === "function" ? value.currentPeriodEnd.toMillis() : Number(value.currentPeriodEnd || 0);
+      const start = oldEnd > now ? oldEnd : now;
       const next = millis(data.next_payment_date || data.subscription?.next_payment_date);
       transaction.set(membershipRef, {
         status: "active",
