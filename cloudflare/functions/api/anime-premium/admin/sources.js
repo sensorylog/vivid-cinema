@@ -26,8 +26,19 @@ export async function onRequest({ request, env }) {
     const episode = mediaType === "tv" ? Number(body.episode) : null;
     const sourceId = String(body.sourceId || "").trim();
     const provider = String(body.provider || "").trim().slice(0, 80);
-    if (!mediaType || !/^\d{1,12}$/.test(titleId) || !/^[A-Za-z0-9:_-]{3,160}$/.test(sourceId) || !provider) {
-      throw new AnimePremiumError(400, "invalid-source", "Enter a valid anime title, approved provider and resolver source ID.");
+    const allowedTerritories = Array.isArray(body.allowedTerritories)
+      ? [...new Set(body.allowedTerritories.map(value => String(value).trim().toUpperCase()))]
+      : [];
+    const rightsReference = String(body.rightsReference || "").trim();
+    const licenseStartsAt = Date.parse(body.licenseStartsAt);
+    const licenseEndsAt = Date.parse(body.licenseEndsAt);
+    if (!mediaType || !/^\d{1,12}$/.test(titleId) || !/^[A-Za-z0-9:_-]{3,160}$/.test(sourceId) ||
+        !/^[a-z0-9][a-z0-9._-]{1,63}$/i.test(provider) ||
+        !allowedTerritories.length || allowedTerritories.length > 100 || allowedTerritories.some(code => !/^[A-Z]{2}$/.test(code)) ||
+        !/^[A-Za-z0-9._:-]{3,120}$/.test(rightsReference) ||
+        !Number.isFinite(licenseStartsAt) || !Number.isFinite(licenseEndsAt) || licenseEndsAt <= licenseStartsAt ||
+        body.rightsVerified !== true) {
+      throw new AnimePremiumError(400, "invalid-source-rights", "Enter the provider, verified rights reference, licensed territories and a valid licence window before saving a source.");
     }
     if (mediaType === "tv" && (!Number.isInteger(season) || season < 1 || season > 100 || !Number.isInteger(episode) || episode < 1 || episode > 10000)) {
       throw new AnimePremiumError(400, "invalid-episode", "Enter a valid season and episode.");
@@ -38,12 +49,18 @@ export async function onRequest({ request, env }) {
     const now = Date.now();
     await db.collection("animePremiumSources").doc(key).set({
       mediaType, titleId, season, episode, sourceId, provider,
+      rightsVerified: true, rightsReference, allowedTerritories,
+      licenseStartsAt: timestampFromMillis(licenseStartsAt),
+      licenseEndsAt: timestampFromMillis(licenseEndsAt),
       active: body.active !== false,
       updatedBy: user.uid, updatedAt: timestampFromMillis(now)
     }, { merge: true });
     await db.collection("animePremiumAdminAudit").add({
       actorUid: user.uid, action: "source_registry_update", sourceKey: key,
-      provider, active: body.active !== false, createdAt: timestampFromMillis(now)
+      provider, rightsReference, allowedTerritories,
+      licenseStartsAt: timestampFromMillis(licenseStartsAt),
+      licenseEndsAt: timestampFromMillis(licenseEndsAt),
+      active: body.active !== false, createdAt: timestampFromMillis(now)
     });
     return jsonResponse({ ok: true, sourceKey: key }, 200, origin, env);
   } catch (error) {
