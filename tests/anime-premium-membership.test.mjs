@@ -58,7 +58,7 @@ test("membership UI initialises pricing before Firebase auth and always exits lo
   assert.doesNotMatch(client, /restcountries\.com|annexare\/Countries/);
   assert.match(countriesApi, /from "countries-list"/);
   assert.doesNotMatch(countriesApi, /restcountries\.com|annexare\/Countries|fetch\(/);
-  assert.match(countriesApi, /countries\.length < 180/);
+  assert.match(countriesApi, /countries\.length < 200/);
   assert.match(client, /unique\.length < 180/);
   assert.match(client, /countries = unique\.sort/);
   assert.match(client, /option\.textContent = .*country\.name.*country\.currency/);
