@@ -381,3 +381,10 @@ body.vivid-watch-room-mode{padding-bottom:0!important}
 .vivid-player-section-heading h4{margin:0;color:#f4f1fa;font-size:.82rem;font-weight:750}
 .vivid-player-section-heading span{color:#9692a2;font-size:.55rem;font-weight:750;letter-spacing:.14em}
 @media(max-width:680px){.vivid-player-info-hero h3{font-size:1.2rem}.vivid-player-synopsis{font-size:.74rem;line-height:1.58}}
+
+.vivid-anime-premium-gate{width:min(760px,calc(100% - 32px));margin:70px auto;padding:clamp(28px,5vw,54px);border:1px solid rgba(181,151,255,.25);border-radius:22px;background:radial-gradient(circle at 85% 15%,rgba(143,109,220,.16),transparent 38%),linear-gradient(145deg,#171321,#0b0b10);color:#f6f0ff;text-align:left}
+.vivid-anime-premium-gate>span{color:#c6aaff;font-size:.62rem;font-weight:950;letter-spacing:.16em}
+.vivid-anime-premium-gate h1{margin:15px 0;font-size:clamp(2rem,5vw,3.5rem);line-height:1.02;letter-spacing:-.06em}
+.vivid-anime-premium-gate p{max-width:590px;color:#b5acbf;font-size:.86rem;line-height:1.75}
+.vivid-anime-premium-gate>div{display:flex;flex-wrap:wrap;gap:11px;margin-top:24px}
+.vivid-anime-premium-gate>div a{display:inline-flex;align-items:center;gap:8px}
