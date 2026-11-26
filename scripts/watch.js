@@ -850,7 +850,7 @@ function mountSecondaryPlayer(params, title, detailsSnapshot = details) {
   if (!root) return;
 
   if (isAnimePlayback()) {
-    const animeParams = { ...params, anime: true };
+    const animeParams = { ...params, episode: getAnimeGlobalEpisode(params, detailsSnapshot?.seasons), anime: true };
     void import("./playback/anime-secondary-player.js")
       .then(({ mountAnimeSecondaryPlayer }) => {
         if (!root.isConnected) return;
