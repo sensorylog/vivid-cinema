@@ -417,7 +417,9 @@ function syncAccountNavigation() {
           const label = link.querySelector("span");
           if (label) label.textContent = user ? "Account" : "Sign in";
         });
-        window.dispatchEvent(new CustomEvent("vivid:auth-ready", { detail: user }));
+        window.vividAuthUser = user || null;
+        window.vividAuthResolved = true;
+        window.dispatchEvent(new CustomEvent("vivid:auth-ready", { detail: user || null }));
       });
     } catch (error) {
       console.warn("Vivid account navigation could not resolve the auth session:", error);
