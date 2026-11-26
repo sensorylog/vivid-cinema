@@ -59,7 +59,7 @@ The client must not trust query parameters, local storage, Firestore client writ
 5. Membership, backend and administration — Paystack flows, entitlement service, webhook handling, catalogue/admin tools and authorised provider integration.
 6. Personalisation, optimisation and QA — My Anime, watchlists, continue watching, recommendations, accessibility, performance, security and regression testing.
 
-All six phases are delivered in one pull request. The PR remains unmerged while the existing Anime page is subsequently limited as the final task. The final integration audit must cover Premium, the limited free Anime experience, Movies & TV and the shared Vivid account system together.
+The six-phase foundation was merged through PR #529. The follow-up branch continues the final integration work: limiting the Free Anime route, separating its navigation and access boundary from Premium, and completing the multi-period Paystack subscription flow. The final integration audit must cover Premium, the limited free Anime experience, Movies & TV and the shared Vivid account system together.
 
 ## Phase 1 implementation notes
 
