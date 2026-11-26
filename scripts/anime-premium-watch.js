@@ -328,6 +328,7 @@ async function syncPlaybackProgress(force = false) {
           method: "POST",
           headers: { "Content-Type": "application/json", Authorization: "Bearer " + token },
           cache: "no-store",
+          keepalive: force,
           body: JSON.stringify({
             sessionId: snapshot.sessionId,
             currentTime: snapshot.currentTime,
