@@ -3,8 +3,9 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
 const read = path => readFile(new URL(path, import.meta.url), "utf8");
-const [html, script, module, watch, title, library, recommendations, rules, shell, syntax] = await Promise.all([
+const [html, titleHtml, script, module, watch, title, library, recommendations, rules, shell, syntax] = await Promise.all([
   read("../anime-premium-library.html"),
+  read("../anime-premium-title.html"),
   read("../scripts/anime-premium-library.js"),
   read("../scripts/anime-library.js"),
   read("../scripts/anime-premium-watch.js"),
@@ -18,6 +19,7 @@ const [html, script, module, watch, title, library, recommendations, rules, shel
 
 test("private Premium Anime Library is no-index and has membership-gated sections", () => {
   assert.match(html, /name="robots" content="noindex,nofollow"/);
+  assert.match(html, /scripts\/google-tag\.js/);
   for (const id of ["vap-library-gate", "vap-library-content", "vap-library-continue", "vap-library-watchlist", "vap-library-completed", "vap-library-history", "vap-library-episodes", "vap-pref-track", "vap-pref-autoplay"]) {
     assert.match(html, new RegExp('id="' + id + '"'));
   }
@@ -52,7 +54,7 @@ test("Premium title page supports Watch Later and explicit completed-title state
   assert.match(title, /addAnimeFavorite/);
   assert.match(title, /removeAnimeFavorite/);
   assert.match(html, /vap-title-star/);
-  assert.match(html, /vap-title-completed/);
+  assert.match(titleHtml, /vap-title-completed/);
 });
 
 test("Anime preferences sync to the authenticated Vivid account and are owner-protected", () => {
