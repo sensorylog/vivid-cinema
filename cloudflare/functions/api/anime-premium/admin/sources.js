@@ -34,6 +34,7 @@ export async function onRequest({ request, env }) {
     const licenseEndsAt = Date.parse(body.licenseEndsAt);
     if (!mediaType || !/^\d{1,12}$/.test(titleId) || !/^[A-Za-z0-9:_-]{3,160}$/.test(sourceId) ||
         !/^[a-z0-9][a-z0-9._-]{1,63}$/i.test(provider) ||
+        (body.candidateId != null && !/^[A-Za-z0-9][A-Za-z0-9._-]{1,79}$/.test(String(body.candidateId))) ||
         !allowedTerritories.length || allowedTerritories.length > 100 || allowedTerritories.some(code => !/^[A-Z]{2}$/.test(code)) ||
         !/^[A-Za-z0-9._:-]{3,120}$/.test(rightsReference) ||
         !Number.isFinite(licenseStartsAt) || !Number.isFinite(licenseEndsAt) || licenseEndsAt <= licenseStartsAt ||
