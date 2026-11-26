@@ -26,6 +26,7 @@ test("verified account email validation accepts Google and email/password addres
   assert.equal(isValidEmailAddress("@example.com"), false);
   assert.equal(isValidEmailAddress("dave@example"), false);
   assert.equal(isValidEmailAddress("dave@example.com\\n.attacker"), false);
+  assert.equal(isValidEmailAddress("dave@example.com" + String.fromCharCode(10) + ".attacker"), false);
   assert.equal(isValidEmailAddress("x".repeat(245) + "@example.com"), false);
 });
 
