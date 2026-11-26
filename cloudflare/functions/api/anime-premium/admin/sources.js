@@ -51,7 +51,7 @@ export async function onRequest({ request, env }) {
     const sourceRef = db.collection("animePremiumSources").doc(key);
     const existingSnapshot = await sourceRef.get();
     const existing = existingSnapshot.exists ? existingSnapshot.data() || {} : {};
-    const candidates = Array.isArray(existing.candidates) ? [...existing.candidates] :
+    const candidates = Array.isArray(existing.candidates) ? existing.candidates.filter(item => item && typeof item === "object") :
       (existing.sourceId && existing.provider ? [{ ...existing, candidateId: String(existing.provider) }] : []);
     const candidateId = String(body.candidateId || provider).trim().slice(0, 80);
     const nextCandidate = {
