@@ -42,6 +42,7 @@ test("private library route includes the shared app shell and recovers from auth
   assert.match(html, /scripts\/app-shell\.js/);
   assert.match(html, /scripts\/anime-premium\.js/);
   assert.match(script, /async function initAuth\(\)/);
+  assert.match(script, /Vivid account services timed out/);
   assert.match(script, /import\("\.\/firebase\.js"\)/);
   assert.match(script, /AbortSignal\.timeout\(10000\)/);
 });
