@@ -34,6 +34,7 @@
     <form id="vap-admin-source-form">
       <label>Media type<select id="vap-admin-media-type"><option value="tv">Anime series</option><option value="movie">Anime film</option></select></label>
       <label>TMDB title ID<input id="vap-admin-title-id" inputmode="numeric" required pattern="[0-9]{1,12}"></label>
+      <label>Apply source to<select id="vap-admin-source-scope"><option value="episode">This episode only</option><option value="title">Entire anime title</option></select></label>
       <label>Season<input id="vap-admin-season" type="number" min="1" max="100" value="1"></label>
       <label>Episode<input id="vap-admin-episode" type="number" min="1" max="10000" value="1"></label>
       <label>Approved provider ID<input id="vap-admin-provider" required maxlength="64" pattern="[A-Za-z0-9][A-Za-z0-9._-]{1,63}"></label>
