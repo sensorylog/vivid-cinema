@@ -697,6 +697,7 @@ function historyItem(extra = {}) {
     year: media.year,
     poster_path: media.poster_path,
     backdrop_path: media.backdrop_path,
+    isAnime: isAnimePlayback(),
     ...extra
   };
 }
@@ -1302,7 +1303,7 @@ function renderShell(params) {
       const episode = currentParams.type === "tv" ? currentParams.episode : undefined;
       savePlaybackProgress(progressKey(), {
         progress, duration, season, episode,
-        title: media.title, media_type: media.media_type, id: media.id
+        title: media.title, media_type: media.media_type, id: media.id, isAnime: isAnimePlayback()
       });
       recordWatchActivity(progress, duration);
       recordBehavior("playback_progress", media, {
