@@ -24,6 +24,11 @@ test("Premium title route has its own cinematic title shell and content sections
   }
 });
 
+test("title details and artwork requests have bounded loading times", () => {
+  assert.match(titleScript, /withTimeout\(getDetails\(titleId\), 15000/);
+  assert.match(titleScript, /withTimeout\(getImages\(titleId\), 12000/);
+});
+
 test("Living Cinematic Backdrop preloads same-title images and crossfades every 8.5 seconds", () => {
   assert.match(titleScript, /movieImages/);
   assert.match(titleScript, /tvImages/);
