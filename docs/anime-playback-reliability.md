@@ -15,7 +15,7 @@
 - Compatibility fallbacks: EmbedWave (TMDB movie/TV route), VidSrc (TMDB/IMDb movie/TV route), and VidAPI (TMDB/IMDb movie/TV route). The latter three are not claimed to have dedicated anime endpoints.
 - Aniweeb was removed from the active player because its availability and real episode playback could not be verified. Do not treat a documented URL as a confirmed working source.
 - Player 1 uses a shared Sub/Dub preference across both anime players. VidPlus, VidLink, and AnimeEmbed receive the selected track; Vidy and generic TMDB fallbacks are not offered for Dub because their documented anime routes do not expose a dependable track selector.
-- Player 1 validates AnimeEmbed channel/version and Vidy JSON-string progress messages, persists their progress events, and automatically advances to another eligible provider when a source times out without a healthy playback event.
+- Player 1 validates AnimeEmbed channel/version and Vidy JSON-string progress messages, persists their progress events, forwards them to Watch Room playback synchronization, and automatically advances to another eligible provider when a source times out without a healthy playback event.
 - Player 2 automatically advances only when an iframe errors or never emits a load event. A cross-origin iframe load is not proof that a video started; if the provider page loads but the stream remains blank, the user still has manual server switching.
 - AniList/Jikan are metadata resolvers, not playback sources. Other aggregators still need live episode, provider-terms, and security checks before production integration. AnimeEmbed and Vidy now have documented iframe adapters, but real episode playback still requires device verification.
 
