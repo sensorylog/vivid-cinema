@@ -10,7 +10,7 @@ const $ = id => document.getElementById(id);
 const params = new URLSearchParams(window.location.search);
 const mediaType = params.get("type") === "movie" ? "movie" : "tv";
 const rawId = params.get("id") || "";
-const titleId = /^\\d{1,12}$/.test(rawId) ? rawId : "";
+const titleId = /^\d{1,12}$/.test(rawId) ? rawId : "";
 let currentUser = null;
 let titleDetails = null;
 let seasonDetails = null;
@@ -334,7 +334,7 @@ async function loadSeason(seasonNumber) {
     if (request !== seasonRequest) return;
     seasonDetails = result;
     if (season > 1) {
-      const seasonLabel = result.name && !/^season\\s+\\d+$/i.test(result.name) ? result.name : "season " + season;
+      const seasonLabel = result.name && !/^season\s+\d+$/i.test(result.name) ? result.name : "season " + season;
       const resolvedSeasonIds = await resolveAnimeIds(titleName(titleDetails) + " " + seasonLabel).catch(() => ({ aniListId: "", malId: "" }));
       if (request !== seasonRequest) return;
       seasonAnimeIds = { aniListId: resolvedSeasonIds.aniListId || baseAnimeIds.aniListId, malId: resolvedSeasonIds.malId || baseAnimeIds.malId };
