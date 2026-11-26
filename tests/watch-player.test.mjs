@@ -48,7 +48,7 @@ test("anime playback exposes documented anime iframe sources and keeps origin ch
   for (const provider of ["vidplus", "vidlink", "animeembed", "vidy"]) {
     assert.ok(source.includes('data-player-source="' + provider + '"'), provider + " should have an anime server button");
   }
-  assert.match(source, /\? \["vidplus", "vidlink", "animeembed", "vidy", "aniweeb", "embedwave", "vidsrc", "vidapi"\]/);
+  assert.match(source, /\? \["vidplus", "vidlink", "animeembed", "vidy", "embedwave", "vidsrc", "vidapi"\]/);
   assert.match(source, /ANIMEEMBED_ORIGINS\.has\(event\.origin\)/);
   assert.match(source, /VIDY_ORIGINS\.has\(event\.origin\)/);
   assert.match(source, /if \(isAnimeEmbed && payload\.channel !== "animeembed"\) return/);
@@ -59,13 +59,13 @@ test("anime playback exposes documented anime iframe sources and keeps origin ch
 test("movie/TV Player 1 retains its seven sources and anime Player 1 exposes additional adapters", () => {
   assert.match(source, /: \["vidapi", "vidsrc", "embedwave", "vidfast", "ezvidapi", "embedapistream", "moviesapi"\];/);
   assert.match(source, /if \(source === "vidapi" \|\| source === "vidsrc" \|\| source === "vidfast" \|\| source === "embedapistream" \|\| source === "moviesapi"\) return hasFallbackId\(\);\r?\n\s*if \(source === "embedwave" \|\| source === "ezvidapi"\) return hasTmdbId\(\);\r?\n\s*return false;/);
-  assert.match(source, /button\.hidden = isAnimePlayback\(\) \? !\["vidapi", "vidsrc", "vidplus", "vidlink", "animeembed", "vidy", "aniweeb", "embedwave"\]\.includes\(source\) : !\["vidapi", "vidsrc", "embedwave", "vidfast", "ezvidapi", "embedapistream", "moviesapi"\]\.includes\(source\)/);
+  assert.match(source, /button\.hidden = isAnimePlayback\(\) \? !\["vidapi", "vidsrc", "vidplus", "vidlink", "animeembed", "vidy", "embedwave"\]\.includes\(source\) : !\["vidapi", "vidsrc", "embedwave", "vidfast", "ezvidapi", "embedapistream", "moviesapi"\]\.includes\(source\)/);
   assert.match(source, /<span class="vivid-server-count">7 sources<\/span>/);
   assert.doesNotMatch(source, /mountPlaybackServerSettings\(serverPanel/);
   for (const provider of ["embedwave", "vidfast", "ezvidapi", "embedapistream", "moviesapi"]) {
     assert.ok(source.includes(`data-player-source="${provider}"`), `${provider} should have a Player 1 button`);
   }
-  assert.match(source, /\? \["vidplus", "vidlink", "animeembed", "vidy", "aniweeb", "embedwave", "vidsrc", "vidapi"\]/);
+  assert.match(source, /\? \["vidplus", "vidlink", "animeembed", "vidy", "embedwave", "vidsrc", "vidapi"\]/);
 });
 
 test("movie/TV server picker keeps all providers in a simple scrollable dropdown", async () => {
