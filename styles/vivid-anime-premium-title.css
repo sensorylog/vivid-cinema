@@ -49,3 +49,7 @@ body.vap-title-page{overflow-x:hidden}
 .vap-title-related-card strong{font-size:.72rem;line-height:1.35}
 .vap-title-related-card small{font-size:.6rem;color:#9f97aa}
 .vap-title-person-placeholder{display:grid;place-items:center;aspect-ratio:3/4;background:linear-gradient(145deg,#302449,#14111c);color:#bca8f5;font-size:2rem;font-weight:900}
+
+.vap-title-actions .vap-favorite-button{display:inline-flex;align-items:center;gap:9px;border:1px solid var(--vap-line);background:rgba(255,255,255,.045);color:#e7def1;font:inherit;cursor:pointer}
+.vap-title-actions .vap-favorite-button.is-saved{border-color:rgba(191,160,255,.65);background:rgba(166,128,225,.16);color:#e2d2ff}
+.vap-title-actions .vap-favorite-button:disabled{opacity:.5;cursor:wait}
