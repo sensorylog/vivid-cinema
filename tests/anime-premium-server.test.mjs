@@ -188,5 +188,5 @@ test("admin source registry supports episode-level and whole-title mappings", as
   assert.match(adminSources, /mediaType \+ "_" \+ titleId/);
   assert.match(adminPage, /vap-admin-source-scope/);
   assert.match(adminScript, /scope: mediaType === "tv" \?/);
-  assert.match(adminScript, /vap-admin-source-scope.*change/);
+  assert.match(adminScript, /addEventListener\("change", updateSourceScope\)/);
 });
