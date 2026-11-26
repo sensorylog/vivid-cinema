@@ -186,9 +186,18 @@ async function requestPlayback(episode, excludedCandidates = failedPlaybackCandi
       video.src = streamUrl.href;
       video.load();
     } else {
-      const Hls = await loadHlsLibrary();
+      let Hls;
+      try { Hls = await loadHlsLibrary(); }
+      catch {
+        if (requestId !== playbackRequestId) return;
+        fallbackToNextPlaybackServer("The HLS playback engine could not load. Trying another authorised server.");
+        return;
+      }
       if (requestId !== playbackRequestId) return;
-      if (!Hls.isSupported()) throw new Error("This browser cannot play the authorised HLS stream.");
+      if (!Hls.isSupported()) {
+        fallbackToNextPlaybackServer("This browser cannot use the HLS engine. Trying another authorised server.");
+        return;
+      }
       const hls = new Hls({ enableWorker: true, lowLatencyMode: false, backBufferLength: 90, maxBufferLength: 30 });
       activeHls = hls;
       deferredHlsPlayback = true;
