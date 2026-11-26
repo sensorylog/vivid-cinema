@@ -15,6 +15,9 @@ let seasonDetails = null;
 let activeEpisodes = [];
 let activeEpisodeIndex = 0;
 let seasonRequest = 0;
+let currentPlaybackSessionId = "";
+let lastProgressSync = 0;
+let progressSyncInFlight = false;
 
 function titleName(details) { return details.title || details.name || "Anime title"; }
 function titleRoute() {
@@ -29,6 +32,7 @@ function watchRoute(season, episode) {
   return "anime-premium-watch.html?" + query.toString();
 }
 function showGate(title, message, actionLabel = "Sign in to Vivid", actionHref = "auth.html?returnTo=anime-premium.html", retry = false) {
+  currentPlaybackSessionId = "";
   $("vap-player").pause();
   $("vap-player").removeAttribute("src");
   $("vap-player").load();
@@ -120,7 +124,7 @@ async function requestPlayback(episode) {
     if (!response.ok) throw new Error("The protected playback request could not be completed.");
     const payload = await response.json();
     const playback = payload?.playback;
-    if (!playback?.url || !playback?.expiresAt) throw new Error("The playback service returned an incomplete session.");
+    if (!playback?.url || !playback?.expiresAt || !playback?.sessionId) throw new Error("The playback service returned an incomplete session.");
     const streamUrl = new URL(playback.url, window.location.origin);
     if (streamUrl.protocol !== "https:" || streamUrl.username || streamUrl.password) throw new Error("The playback service returned an unsafe stream URL.");
     if (Date.parse(playback.expiresAt) <= Date.now()) throw new Error("The playback session has expired. Please try again.");
@@ -128,6 +132,8 @@ async function requestPlayback(episode) {
     if (!["video/mp4", "application/vnd.apple.mpegurl", "application/x-mpegURL"].includes(mimeType)) throw new Error("The playback service returned an unsupported media format.");
     const video = $("vap-player");
     if (mimeType !== "video/mp4" && !video.canPlayType(mimeType)) throw new Error("This browser does not support the authorised stream format.");
+    currentPlaybackSessionId = String(playback.sessionId);
+    lastProgressSync = 0;
     video.src = streamUrl.href;
     video.hidden = false;
     $("vap-player-gate").hidden = true;
@@ -220,9 +226,39 @@ async function loadWatchPage() {
   if (season) await loadSeason(season);
   else $("vap-episode-grid").innerHTML = '<p class="vap-watch-empty">No seasons are listed for this anime.</p>';
 }
+
+async function syncPlaybackProgress(force = false) {
+  const video = $("vap-player");
+  if (!currentPlaybackSessionId || !currentUser || !Number.isFinite(video.duration) || video.duration <= 0 || video.currentTime <= 0) return;
+  if (!force && Date.now() - lastProgressSync < 15000) return;
+  if (progressSyncInFlight) return;
+  lastProgressSync = Date.now();
+  progressSyncInFlight = true;
+  try {
+    const token = await currentUser.getIdToken();
+    await fetch("/api/anime-premium/progress", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: "Bearer " + token },
+      cache: "no-store",
+      body: JSON.stringify({
+        sessionId: currentPlaybackSessionId,
+        currentTime: video.currentTime,
+        duration: video.duration
+      })
+    });
+  } catch (error) {
+    console.warn("Vivid Anime Premium playback progress could not be saved:", error);
+  } finally {
+    progressSyncInFlight = false;
+  }
+}
+
 function bindControls() {
   $("vap-previous-episode").addEventListener("click", () => { if (activeEpisodeIndex > 0) void selectEpisode(activeEpisodeIndex - 1, true); });
   $("vap-next-episode").addEventListener("click", () => { if (activeEpisodeIndex < activeEpisodes.length - 1) void selectEpisode(activeEpisodeIndex + 1, true); });
+  $("vap-player").addEventListener("timeupdate", () => { void syncPlaybackProgress(false); });
+  $("vap-player").addEventListener("pause", () => { void syncPlaybackProgress(true); });
+  $("vap-player").addEventListener("ended", () => { void syncPlaybackProgress(true); });
   $("vap-player-retry").addEventListener("click", () => {
     const episode = activeEpisodes[activeEpisodeIndex];
     if (episode) void requestPlayback(episode);
