@@ -27,6 +27,13 @@ These are kept because Vivid already uses them, but they are not represented as 
 
 The separate anime Player 2 remains independent and retains AniXo, AniLink, MegaPlay, Megavid and MegaFlix. Its existing tests cover route construction and invalid-ID rejection. Provider availability can change independently of Vivid releases.
 
+## Phase 5 player engineering
+
+- Anime series use a persisted Sub / Dub preference. VidPlus, VidLink and AnimeEmbed receive the selected track; Vidy and generic TMDB fallbacks are restricted to Sub because their documented routes do not expose a reliable track selector.
+- Split TMDB seasons are converted to a continuous episode number for AniList / MAL anime-native endpoints. TMDB season and episode values remain unchanged for generic TV fallback embeds and Vivid progress records.
+- AnimeEmbed messages are accepted only from its documented `animeembed` channel and from the active iframe origin. Vidy and AnimeEmbed playback progress is normalized into Vivid progress events instead of being incorrectly treated as a TMDB `player_info` message.
+- Anime-native and compatibility providers automatically fail over after a timeout when no valid playback event arrives. Iframe `load` alone is never considered proof of playback.
+
 ## Runtime and reliability rules
 
 - Prefer native AniList/MAL providers when the matching ID is available.
