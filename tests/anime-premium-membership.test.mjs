@@ -46,6 +46,7 @@ test("membership pricing is not blocked by optional country or Firebase auth req
   assert.match(client, /has not been enabled in this environment/);
   assert.match(client, /membershipStatusUnavailable/);
   assert.match(client, /membershipVerificationRequired/);
+  assert.match(client, /payload\.code === "email-not-verified"/);
   assert.match(client, /AbortSignal\.timeout\(10000\)/);
   assert.match(client, /AbortSignal\.timeout\(15000\)/);
   assert.match(client, /if \(membershipStatusUnavailable \|\| membershipVerificationRequired\)/);
