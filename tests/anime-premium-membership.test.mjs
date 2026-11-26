@@ -32,8 +32,8 @@ test("membership page offers global country selection and separate renewal metho
 test("local currency display is an estimate while Paystack checkout currency is explicit", () => {
   assert.match(client, /restcountries\.com/);
   assert.match(client, /open\.er-api\.com/);
-  assert.match(client, /Estimated local equivalent/);
-  assert.match(client, /Paystack checkout will charge/);
+  assert.match(client, /Estimated price in/);
+  assert.match(client, /Ghanaian Cedis/);
   assert.match(client, /localStorage\.setItem\("vivid:anime-premium-country"/);
 });
 
