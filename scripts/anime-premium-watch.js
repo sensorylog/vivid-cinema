@@ -108,7 +108,7 @@ async function requestPlayback(episode) {
       return;
     }
     if (response.status === 403) {
-      showGate("Premium membership required", "This title is protected. An active Vivid Anime Premium membership is required to request playback.", "Explore Premium", "anime-premium.html");
+      showGate("Premium membership required", "This title is protected. An active Vivid Anime Premium membership is required to request playback.", "Get Premium membership", "anime-premium-membership.html");
       setStatus("Your account does not currently have Premium playback access.");
       return;
     }
