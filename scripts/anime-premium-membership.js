@@ -1,6 +1,3 @@
-import { auth } from "./firebase.js";
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
-
 const $ = id => document.getElementById(id);
 const COUNTRY_TO_PAYSTACK = { GH: "GHS", NG: "NGN", KE: "KES", ZA: "ZAR", US: "USD", GB: "USD", CA: "USD", AU: "USD", IN: "USD", DE: "USD", FR: "USD", ES: "USD", IT: "USD", NL: "USD", BE: "USD", IE: "USD", PT: "USD", SE: "USD", NO: "USD", DK: "USD", FI: "USD", CH: "USD", AE: "USD", SA: "USD", EG: "USD", MA: "USD", BR: "USD", MX: "USD", JP: "USD", KR: "USD", SG: "USD", MY: "USD", ID: "USD", PH: "USD", TH: "USD", NZ: "USD", UG: "USD", TZ: "USD", RW: "USD", CI: "USD", SN: "USD", CM: "USD", ET: "USD" };
 const MOBILE_MONEY_COUNTRIES = new Set(["GH", "KE"]);
@@ -36,7 +33,7 @@ function formatMoney(amount, currency) {
 }
 async function loadCountries() {
   try {
-    const response = await fetch("https://restcountries.com/v3.1/all?fields=cca2,name,currencies", { cache: "force-cache" });
+    const response = await fetch("https://restcountries.com/v3.1/all?fields=cca2,name,currencies", { cache: "force-cache", signal: AbortSignal.timeout(5000) });
     if (!response.ok) throw new Error("Country list unavailable");
     const data = await response.json();
     const parsed = data.map(country => {
@@ -62,7 +59,7 @@ async function loadCountries() {
 }
 async function getExchangeRates(baseCurrency) {
   if (rateCache.has(baseCurrency)) return rateCache.get(baseCurrency);
-  const promise = fetch("https://open.er-api.com/v6/latest/" + encodeURIComponent(baseCurrency), { cache: "no-store" })
+  const promise = fetch("https://open.er-api.com/v6/latest/" + encodeURIComponent(baseCurrency), { cache: "no-store", signal: AbortSignal.timeout(5000) })
     .then(response => response.ok ? response.json() : Promise.reject(new Error("Exchange rates unavailable")))
     .then(data => data.result === "success" && data.rates ? data.rates : null)
     .catch(() => null);
@@ -122,9 +119,14 @@ async function updatePrice() {
 }
 async function loadPricing() {
   const response = await fetch("/api/anime-premium/pricing", { cache: "no-store" });
-  if (!response.ok) throw new Error("Premium pricing is temporarily unavailable.");
-  pricing = await response.json();
-  if (!pricing.ok || !pricing.plans || !Object.keys(pricing.plans).length) throw new Error("No Premium checkout currency is configured yet.");
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok || !payload.ok) {
+    throw new Error(payload.message || (response.status === 404
+      ? "Premium pricing service is not deployed on this Vivid environment yet."
+      : "Premium pricing is temporarily unavailable. Please try again shortly."));
+  }
+  if (!payload.plans || !Object.keys(payload.plans).length) throw new Error("No Premium checkout currency is configured yet.");
+  pricing = payload;
   await updatePrice();
 }
 async function loadMembership() {
@@ -239,19 +241,41 @@ function bind() {
   $("vap-checkout-button").addEventListener("click", startCheckout);
   $("vap-cancel-renewal").addEventListener("click", cancelAutomaticRenewal);
 }
-onAuthStateChanged(auth, async user => {
-  currentUser = user && !user.isAnonymous ? user : null;
-  if (currentUser) await loadMembership();
-  else {
-    membershipActive = false;
-    membershipAutoRenew = false;
-    $("vap-account-status").innerHTML = 'Already subscribed? <a href="auth.html?returnTo=anime-premium-membership.html">Sign in with your Vivid account</a>.';
+async function initAuth() {
+  try {
+    const [{ auth }, { onAuthStateChanged }] = await Promise.all([
+      import("./firebase.js"),
+      import("https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js")
+    ]);
+    if (typeof auth.authStateReady === "function") await auth.authStateReady();
+    onAuthStateChanged(auth, async user => {
+      currentUser = user && !user.isAnonymous ? user : null;
+      if (currentUser) await loadMembership();
+      else {
+        membershipActive = false;
+        membershipAutoRenew = false;
+        $("vap-account-status").innerHTML = 'Already subscribed? <a href="auth.html?returnTo=anime-premium-membership.html">Sign in with your Vivid account</a>.';
+      }
+      if (pricing) await updatePrice();
+    }, error => {
+      console.warn("Vivid Anime Premium could not restore the account session:", error);
+      currentUser = null;
+      if (pricing) void updatePrice();
+    });
+  } catch (error) {
+    console.warn("Vivid account services are unavailable on the membership page:", error);
+    currentUser = null;
+    $("vap-checkout-status").textContent = "Pricing is available, but Vivid sign-in could not be verified. Reload or sign in again before checkout.";
+    if (pricing) await updatePrice();
   }
-  if (pricing) await updatePrice();
-});
+}
 async function init() {
   bind();
-  await loadCountries();
+  // Country and FX services are optional presentation enhancements. They must
+  // never hold the server-owned price or checkout controls behind a slow request.
+  void loadCountries().then(() => {
+    if (pricing) return updatePrice();
+  }).catch(error => console.warn("Premium country list unavailable; using the fallback list:", error));
   try { await loadPricing(); }
   catch (error) {
     $("vap-local-price").textContent = "Price unavailable";
@@ -259,6 +283,7 @@ async function init() {
     $("vap-checkout-button").disabled = true;
     $("vap-checkout-status").textContent = error.message;
   }
+  void initAuth();
 }
 if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init, { once: true });
 else init();
