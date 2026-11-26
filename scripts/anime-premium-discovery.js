@@ -242,7 +242,8 @@ function init() {
   bindFilters();
   populateYears();
   $("vap-hero-open").addEventListener("click", () => {
-    const [type, id] = $("vap-hero-open").dataset.vapTitle.split(":");
+    const target = $("vap-hero-open").dataset.vapTitle || "";
+    const [type, id] = target.split(":");
     if (id) window.location.href = "anime-premium-title.html?id=" + encodeURIComponent(id) + "&type=" + encodeURIComponent(type);
     else $("vap-catalogue").scrollIntoView({ behavior: "smooth", block: "start" });
   });
