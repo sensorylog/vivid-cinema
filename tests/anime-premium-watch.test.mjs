@@ -44,6 +44,7 @@ test("watch page waits for optional auth restoration without blocking episode me
   assert.match(script, /async function bindAuth\(\)/);
   assert.match(script, /authReady = bindAuth\(\)/);
   assert.match(script, /await authReady/);
+  assert.match(script, /Vivid account services timed out/);
   assert.match(script, /returnTo=anime-premium-watch\.html/);
 });
 
