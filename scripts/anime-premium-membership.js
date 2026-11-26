@@ -126,20 +126,27 @@ async function updatePrice() {
   $("vap-local-currency").textContent = localCurrency;
   $("vap-checkout-currency").textContent = "GHS · Ghanaian Cedi";
   $("vap-local-price").textContent = localCurrency === "GHS" ? formatMoney(plan.amountMajor, "GHS") : "Calculating…";
-  $("vap-price-note").textContent = "Paystack always charges the fixed Ghana Cedi plan price. Local currency is an estimate.";
+  $("vap-price-note").textContent = "Retrieving the latest published reference rate…";
   renderPlan();
   if (localCurrency === "GHS") {
-    $("vap-price-note").textContent = "Your selected country uses Ghanaian Cedis. Paystack will charge " + formatMoney(plan.amountMajor, "GHS") + ".";
+    $("vap-price-note").textContent = "Paystack checkout charge: " + formatMoney(plan.amountMajor, "GHS") + ".";
   } else {
-    const quote = await getExchangeRates("GHS");
-    if (requestId !== priceRequestId) return;
-    const rate = quote.rates?.[localCurrency];
-    if (Number.isFinite(rate) && rate > 0) {
-      $("vap-local-price").textContent = "≈ " + formatMoney(plan.amountMajor * rate, localCurrency);
-      $("vap-price-note").textContent = "Reference rate: 1 GHS = " + rate.toFixed(6) + " " + localCurrency + (quote.date ? " · Rate date: " + quote.date : "") + ". Source: Frankfurter blended central-bank reference rates. Paystack charges " + formatMoney(plan.amountMajor, "GHS") + "; your bank/card provider sets the final converted charge and may add fees.";
-    } else {
+    try {
+      const quote = await getExchangeRates("GHS");
+      if (requestId !== priceRequestId) return;
+      const rate = quote.rates?.[localCurrency];
+      if (Number.isFinite(rate) && rate > 0) {
+        $("vap-local-price").textContent = "≈ " + formatMoney(plan.amountMajor * rate, localCurrency);
+        $("vap-price-note").textContent = "Reference rate: 1 GHS = " + rate.toFixed(6) + " " + localCurrency + (quote.date ? " · Rate date: " + quote.date : "") + ". Source: Frankfurter blended central-bank reference rates. Paystack charges " + formatMoney(plan.amountMajor, "GHS") + "; your bank/card provider sets the final converted charge and may add fees.";
+      } else {
+        $("vap-local-price").textContent = "Rate unavailable";
+        $("vap-price-note").textContent = "No published GHS/" + localCurrency + " reference rate is currently available. We will not display an invented conversion. Paystack charges " + formatMoney(plan.amountMajor, "GHS") + "; your bank/card provider determines the converted amount.";
+      }
+    } catch (error) {
+      console.warn("Vivid FX reference-rate lookup failed:", error);
+      if (requestId !== priceRequestId) return;
       $("vap-local-price").textContent = "Rate unavailable";
-      $("vap-price-note").textContent = "We could not retrieve a current published GHS/" + localCurrency + " reference rate. We will not display an invented conversion. Paystack checkout charges " + formatMoney(plan.amountMajor, "GHS") + "; your bank/card provider determines the converted amount.";
+      $("vap-price-note").textContent = "We could not retrieve a current published GHS/" + localCurrency + " reference rate. Paystack charges " + formatMoney(plan.amountMajor, "GHS") + "; your bank/card provider determines the converted amount.";
     }
   }
   if (requestId !== priceRequestId) return;
