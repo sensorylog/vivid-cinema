@@ -10,7 +10,7 @@ const PROVIDERS = Object.freeze([
   { id: "embedwave", label: "EmbedWave", origin: "https://embedwave.cc", kind: "tmdb", events: false, note: "Existing VIVID player · TMDB movie/TV route" }
 ]);
 
-const cleanId = value => /^\\d+$/.test(String(value || "").trim()) ? String(value).trim() : "";
+const cleanId = value => /^\d+$/.test(String(value || "").trim()) ? String(value).trim() : "";
 const positive = value => Math.max(1, Math.trunc(Number(value) || 1));
 
 export function listAnimePremiumProviders() {
