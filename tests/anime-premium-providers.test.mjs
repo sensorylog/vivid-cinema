@@ -12,7 +12,7 @@ test("Premium provider registry includes the two existing Vivid servers and anim
 
 test("VidAPI and EmbedWave use the documented TMDB episode routes", () => {
   assert.equal(buildAnimePremiumProviderUrl("vidsrc", episode), "https://vidsrc.sh/embed/tv/12345/2/3?ds_lang=en");
-  assert.equal(buildAnimePremiumProviderUrl("vidapi", episode), "https://vaplayer.ru/embed/tv/12345/2/3?autoplay=1&controls=1&overlay=1&ds_lang=en");
+  assert.equal(buildAnimePremiumProviderUrl("vidapi", episode), "https://vaplayer.ru/embed/tv/12345/2/3?autoplay=1&controls=1&overlay=1");
   assert.equal(buildAnimePremiumProviderUrl("embedwave", episode), "https://embedwave.cc/embed/tv/12345/2/3?autoplay=true");
 });
 
@@ -44,7 +44,7 @@ test("MAL fallback is used when an anime provider accepts MAL but AniList is una
 test("episode-only anime providers stay unavailable for films while TMDB providers remain available", () => {
   const options = resolveAnimePremiumProviderOptions({ ...episode, mediaType: "movie" });
   assert.equal(options.filter(item => item.available).map(item => item.id).sort().join(","), "embedwave,vidapi,vidfast,vidrift,vidsrc");
-  assert.equal(buildAnimePremiumProviderUrl("vidapi", { mediaType: "movie", tmdbId: "550" }), "https://vaplayer.ru/embed/movie/550?autoplay=1&controls=1&overlay=1&ds_lang=en");
+  assert.equal(buildAnimePremiumProviderUrl("vidapi", { mediaType: "movie", tmdbId: "550" }), "https://vaplayer.ru/embed/movie/550?autoplay=1&controls=1&overlay=1");
   assert.equal(buildAnimePremiumProviderUrl("embedwave", { mediaType: "movie", tmdbId: "550" }), "https://embedwave.cc/embed/movie/550?autoplay=true");
   assert.equal(buildAnimePremiumProviderUrl("vidrift", { mediaType: "movie", tmdbId: "550" }), "https://embed.vidrift.net/embed/movie/550");
   assert.equal(buildAnimePremiumProviderUrl("vidfast", { mediaType: "movie", tmdbId: "550" }), "https://vidfast.to/embed/movie/550");
