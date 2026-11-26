@@ -10,7 +10,8 @@ This document records the provider contracts used by Vivid's anime Player 1 and 
 | VidLink | MAL ID | `/anime/{malId}/{episode}/sub?fallback=true` | Native anime route. Provider documents sub/dub and fallback to the alternate track. |
 | AnimeEmbed | AniList ID | `/embed/ani/{anilistId}/{episode}?track=sub` | Documents sub/dub, resume start, server selection, next episode and an `animeembed` postMessage channel. |
 | Vidy | AniList ID | `/anime/{anilistId}/{episode}` | Documents progress, autoplay, next episode and episode selector options. |
-| Aniweeb | AniList ID | `/embed/ani/{anilistId}/{episode}?track=sub` | Provides a self-contained iframe player and an in-player server selector. Its broader JSON API docs recommend backend caching; Vivid uses the documented iframe endpoint only. |
+
+Aniweeb is intentionally not enabled: its docs expose an iframe route and a test player page, but the actual episode stream has not been independently verified. This preserves the earlier reliability decision not to treat a documented URL as a confirmed working source.
 
 ## TMDB compatibility fallbacks
 
