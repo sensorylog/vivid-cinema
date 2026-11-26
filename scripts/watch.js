@@ -1,6 +1,7 @@
 import { tmdbApi } from "./tmdb.js";
 import { resolveAndroidPlayerBackAction } from "./android-navigation.js";
 import { resolveAnimeIds } from "./playback/anime-id-resolver.js";
+import { isFreeAnimePreviewRoute } from "./anime-free-policy.js";
 import { getImageUrl, getMediaUrl, normalizeMedia, normalizeResults } from "./media.js";
 import { buildTitleUrl, buildWatchUrl, getRoute } from "./routes.js";
 import { escapeHtml } from "./utils.js";
@@ -115,7 +116,7 @@ function resolveImdbId(source) {
 function isLikelyAnime() {
   const genres = Array.isArray(details?.genres) ? details.genres : [];
   const isAnimation = genres.some(g => Number(g?.id) === 16 || String(g?.name || "").toLowerCase() === "animation");
-  return currentParams?.type === "tv" && (isAnimation && String(details?.original_language || "").toLowerCase() === "ja");
+  return isAnimation && String(details?.original_language || "").toLowerCase() === "ja";
 }
 
 function fallbackDelayMs() {
@@ -137,29 +138,17 @@ function isAnimePlayback() {
 function sourceAvailable(source) {
   if (typeof source === "string" && source.startsWith("custom:")) return false;
   if (source === "direct") return false;
-  if (isAnimePlayback()) {
-    if (source === "vidplus") return Boolean(aniListId);
-    if (source === "vidlink") return Boolean(malId);
-    if (source === "vidapi" || source === "vidsrc") return hasFallbackId();
-    return false;
-  }
+  if (isAnimePlayback()) return source === "vidapi" && hasFallbackId();
   if (source === "vidapi" || source === "vidsrc" || source === "vidfast" || source === "embedapistream" || source === "moviesapi") return hasFallbackId();
   if (source === "embedwave" || source === "ezvidapi") return hasTmdbId();
   return false;
 }
 
 function getNextSource(source) {
-  // Anime providers use different catalog IDs; try only providers with a resolved ID.
-  // Standard movie/TV providers use the documented TMDB-based URL builders.
-  const order = isAnimePlayback()
-    ? ["vidplus", "vidlink", "vidsrc", "vidapi"]
-    : ["vidapi", "vidsrc", "embedwave", "vidfast", "ezvidapi", "embedapistream", "moviesapi"];
+  if (isAnimePlayback()) return null;
+  const order = ["vidapi", "vidsrc", "embedwave", "vidfast", "ezvidapi", "embedapistream", "moviesapi"];
   const index = order.indexOf(source);
-  // Cycle through alternatives so a remembered last-position provider can still recover
-  // to the primary source instead of getting stuck with no next server.
-  const candidates = isAnimePlayback()
-    ? order.filter(candidate => candidate !== source)
-    : [...order.slice(index + 1), ...order.slice(0, Math.max(0, index))];
+  const candidates = [...order.slice(index + 1), ...order.slice(0, Math.max(0, index))];
   return candidates.find(candidate => !sourceAttempted.has(candidate) && sourceAvailable(candidate)) || null;
 }
 
@@ -237,7 +226,7 @@ function showFallbackPrompt(source) {
 
 function updateSourceLabel() {
   const count = document.querySelector(".vivid-server-count");
-  if (count) count.textContent = isAnimePlayback() ? "4 sources" : "7 sources";
+  if (count) count.textContent = isAnimePlayback() ? "1 preview source" : "7 sources";
   const label = document.getElementById("player-source-label");
   if (label) label.textContent = getSourceLabel(activeSource);
   document.querySelectorAll("[data-server-state]").forEach(node => {
@@ -247,7 +236,7 @@ function updateSourceLabel() {
   document.querySelectorAll("[data-player-source]").forEach(button => {
     const source = button.getAttribute("data-player-source");
     button.classList.toggle("is-active", source === activeSource);
-    button.hidden = isAnimePlayback() ? !["vidapi", "vidsrc", "vidplus", "vidlink"].includes(source) : !["vidapi", "vidsrc", "embedwave", "vidfast", "ezvidapi", "embedapistream", "moviesapi"].includes(source);
+    button.hidden = isAnimePlayback() ? source !== "vidapi" : !["vidapi", "vidsrc", "embedwave", "vidfast", "ezvidapi", "embedapistream", "moviesapi"].includes(source);
     button.disabled = !sourceAvailable(source);
     button.setAttribute("aria-pressed", source === activeSource ? "true" : "false");
   });
@@ -953,7 +942,8 @@ function renderShell(params) {
     }
   }
 
-  mountSecondaryPlayer(params, episodeTitle || title);
+  if (isAnimePlayback()) $("vivid-tflix-player")?.remove();
+  else mountSecondaryPlayer(params, episodeTitle || title);
   window.dispatchEvent(new CustomEvent("vivid:player-adapter-ready", { detail: { playerId: "player1" } }));
 
   const player = $("vidapi-player");
@@ -1532,6 +1522,11 @@ window.addEventListener("message", handlePlayerEvent);
 async function load() {
   currentParams = getParams();
   tmdbId = /^\d+$/.test(String(currentParams.id || "")) ? String(currentParams.id) : "";
+  if (isAnimePlayback() && !isFreeAnimePreviewRoute({ id: currentParams.id, type: currentParams.type, season: currentParams.season, episode: currentParams.episode })) {
+    const query = new URLSearchParams({ id: String(currentParams.id || ""), type: currentParams.type });
+    window.location.replace("anime-premium-title.html?" + query.toString());
+    return;
+  }
   if (!currentParams.id) {
     $("watch-content").innerHTML = '<section class="vivid-watch-error"><i class="bi bi-exclamation-circle"></i><h1>Playback link is incomplete.</h1><p>Choose a title from Vivid Cinema and start playback again.</p><a class="vivid-button vivid-button--secondary" href="home.html">Browse titles</a></section>';
     return;
@@ -1542,6 +1537,11 @@ async function load() {
   try {
     details = currentParams.type === "tv" ? await tmdbApi.tvDetails(currentParams.id) : await tmdbApi.movieDetails(currentParams.id);
     media = normalizeMedia(details, currentParams.type);
+    if (isLikelyAnime() && !isAnimePlayback()) {
+      const query = new URLSearchParams({ id: String(currentParams.id), type: currentParams.type });
+      window.location.replace("anime-premium-title.html?" + query.toString());
+      return;
+    }
     imdbId = resolveImdbId(details) || (/^tt\d+$/i.test(String(currentParams.id || "")) ? String(currentParams.id) : "");
     tmdbId = /^\d+$/.test(String(currentParams.id || "")) ? String(currentParams.id) : String(details?.id || "");
     // Render the TMDB title artwork and metadata immediately. Episode-specific
@@ -1590,7 +1590,7 @@ async function load() {
     }
     // Re-mount Player 2 after TMDB metadata arrives so its season and episode
     // selectors use the actual series seasons, not the early loading shell.
-    mountSecondaryPlayer(currentParams, details.episode?.name || media.title || media.name, details);
+    if (!isAnimePlayback()) mountSecondaryPlayer(currentParams, details.episode?.name || media.title || media.name, details);
     void loadWatchRecommendations(currentParams);
     // Metadata arrived after shell — re-arm
     // the primary timer if the player is still waiting.

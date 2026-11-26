@@ -1,4 +1,6 @@
 import { tmdbApi } from "./tmdb.js";
+import { auth } from "./firebase.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
 import { getImageUrl, normalizeResults } from "./media.js";
 import { escapeHtml } from "./utils.js";
 import { hasLibraryItem, toggleLibraryItem } from "./library.js";
@@ -15,6 +17,52 @@ let backdropIndex = 0;
 let backdropTimer = null;
 let backdropAdvancing = false;
 let activeTitleDetails = null;
+let activeVividUser = null;
+let premiumMembershipActive = false;
+
+
+async function syncTitleAccess(user) {
+  activeVividUser = user && !user.isAnonymous ? user : null;
+  premiumMembershipActive = false;
+  if (activeVividUser) {
+    try {
+      const token = await activeVividUser.getIdToken();
+      const response = await fetch("/api/anime-premium/membership", { headers: { Authorization: "Bearer " + token }, cache: "no-store" });
+      if (response.ok) {
+        const payload = await response.json();
+        premiumMembershipActive = payload?.membership?.active === true;
+      }
+    } catch (error) {
+      console.warn("Vivid Anime Premium membership status could not be checked:", error);
+    }
+  }
+  const primary = $("vap-title-account");
+  const watch = $("vap-title-watch");
+  const membership = $("vap-title-membership");
+  if (!primary) return;
+  if (!activeVividUser) {
+    primary.textContent = "Sign in & subscribe →";
+    primary.href = "auth.html?returnTo=" + encodeURIComponent("anime-premium-title.html" + window.location.search);
+    if (watch) watch.hidden = true;
+    if (membership) membership.hidden = true;
+    return;
+  }
+  if (premiumMembershipActive) {
+    primary.textContent = "Watch with Premium →";
+    primary.href = watch?.href || "anime-premium.html";
+    if (watch) watch.hidden = true;
+    if (membership) membership.hidden = true;
+  } else {
+    primary.textContent = "Subscribe to Vivid Anime Premium →";
+    primary.href = "anime-premium-membership.html";
+    if (watch) watch.hidden = true;
+    if (membership) membership.hidden = true;
+  }
+}
+onAuthStateChanged(auth, user => { void syncTitleAccess(user); }, error => {
+  console.warn("Vivid Anime Premium account status could not be resolved:", error);
+  void syncTitleAccess(null);
+});
 
 function titleName(details) { return details.title || details.name || "Anime title"; }
 function releaseYear(details) {
@@ -238,7 +286,8 @@ function renderTitle(details) {
   const watchParams = new URLSearchParams({ id: String(details.id), type: mediaType });
   if (mediaType === "tv") { watchParams.set("season", "1"); watchParams.set("episode", "1"); }
   $("vap-title-watch").href = "anime-premium-watch.html?" + watchParams.toString();
-  $("vap-title-watch").hidden = false;
+  $("vap-title-watch").hidden = true;
+  void syncTitleAccess(activeVividUser);
   $("vap-title-meta").textContent = (mediaType === "movie" ? "ANIME FILM" : "ANIME SERIES") + " · " + releaseYear(details) + " · VIVID ANIME PREMIUM";
   $("vap-title-tagline").textContent = details.tagline || "";
   $("vap-title-overview").textContent = details.overview || "Explore the characters, setting and story behind this anime.";

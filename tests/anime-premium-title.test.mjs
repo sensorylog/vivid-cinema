@@ -54,7 +54,7 @@ test("anime identity cards use per-title SVG silhouette masks and mobile poster 
 });
 
 test("title route and runtime are available offline and included in syntax checks", () => {
-  assert.match(sw, /vivid-cinema-shell-v349/);
+  assert.match(sw, /vivid-cinema-shell-v350/);
   assert.match(sw, /anime-premium-title\.html/);
   assert.match(sw, /vivid-anime-premium-title\.css/);
   assert.match(sw, /anime-premium-title\.js/);
@@ -71,6 +71,9 @@ test("Anime Premium My List uses the shared Vivid Library Watch Later collection
   assert.match(titleScript, /aria-pressed/);
   assert.match(titleScript, /Added to My List/);
   assert.match(titleScript, /vap:my-list-changed/);
+  assert.match(titleScript, /Subscribe to Vivid Anime Premium/);
+  assert.match(titleScript, /Sign in & subscribe/);
+  assert.match(titleScript, /api\/anime-premium\/membership/);
   assert.doesNotMatch(titleScript, /vivid:anime-premium:my-list/);
   assert.match(library, /export function toggleLibraryItem\(collection,item\)/);
   assert.match(library, /export function syncLibraryForUser\(user=null\)/);
