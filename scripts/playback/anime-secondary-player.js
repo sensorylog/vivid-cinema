@@ -194,8 +194,8 @@ export function mountAnimeSecondaryPlayer({ root, params, media, title, aniListI
       timer = 0;
       tryNextServer(server.name + " failed to load");
     });
-    screen.appendChild(frame);
     frame.src = url;
+    screen.appendChild(frame);
     setStatus("Loading " + server.name + " · " + track.toUpperCase() + "…");
     timer = window.setTimeout(() => {
       if (thisGeneration !== generation) return;
