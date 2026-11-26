@@ -8,6 +8,13 @@ import { savePlaybackProgress, completePlaybackProgress, flushAllPlaybackProgres
 import { getAnimeLibraryPreferences, saveAnimeLibraryPreferences, syncAnimePreferencesForUser, markAnimeCompleted } from "./anime-library.js";
 
 const $ = id => document.getElementById(id);
+function withTimeout(promise, milliseconds, message) {
+  let timer;
+  return Promise.race([
+    promise,
+    new Promise((_, reject) => { timer = window.setTimeout(() => reject(new Error(message)), milliseconds); })
+  ]).finally(() => window.clearTimeout(timer));
+}
 const params = new URLSearchParams(window.location.search);
 const mediaType = params.get("type") === "movie" ? "movie" : "tv";
 const rawId = params.get("id") || "";
@@ -332,6 +339,7 @@ async function requestPlayback(episode) {
     const response = await fetch("/api/anime-premium/playback", {
       method: "POST", headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
       cache: "no-store",
+      signal: AbortSignal.timeout(15000),
       body: JSON.stringify({ mediaType, titleId, season: mediaType === "tv" ? Number(params.get("season") || 1) : null, episode: mediaType === "tv" ? Number(episode.episode_number || 1) : null })
     });
     if (requestId !== playbackRequestId) return;
@@ -456,14 +464,14 @@ async function loadSeason(seasonNumber) {
   history.replaceState({}, "", watchRoute(season, episodeParam));
   $("vap-episode-grid").innerHTML = '<p class="vap-watch-loading">Loading episodes…</p>';
   try {
-    const result = await tmdbApi.tvSeason(titleId, season);
+    const result = await withTimeout(tmdbApi.tvSeason(titleId, season), 15000, "This season took too long to load. Please try again.");
     if (request !== seasonRequest) return;
     seasonDetails = result;
     if (season > 1) {
       const seasonLabel = result.name && !/^season\s+\d+$/i.test(result.name) ? result.name : "season " + season;
       const [baseIds, resolvedSeasonIds] = await Promise.all([
         animeIdPromise,
-        resolveAnimeIds(titleName(titleDetails) + " " + seasonLabel).catch(() => ({ aniListId: "", malId: "" }))
+        withTimeout(resolveAnimeIds(titleName(titleDetails) + " " + seasonLabel), 10000, "Anime ID lookup timed out.").catch(() => ({ aniListId: "", malId: "" }))
       ]);
       baseAnimeIds = baseIds || baseAnimeIds;
       if (request !== seasonRequest) return;
@@ -493,7 +501,7 @@ function bindSeasonPicker(details) {
 async function loadWatchPage() {
   if (!titleId) throw new Error("This watch link is invalid. Return to the Premium catalogue and choose a title.");
   const getDetails = mediaType === "movie" ? tmdbApi.movieDetails : tmdbApi.tvDetails;
-  titleDetails = await getDetails(titleId);
+  titleDetails = await withTimeout(getDetails(titleId), 15000, "Anime details timed out. Please try again.");
   if (!titleDetails?.id) throw new Error("This anime title could not be found.");
   animeIdPromise = resolveAnimeIds(titleName(titleDetails)).then(ids => {
     baseAnimeIds = ids || { aniListId: "", malId: "" };
