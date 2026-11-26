@@ -179,16 +179,17 @@ async function requestPlayback(episode) {
       const Hls = await loadHlsLibrary();
       if (requestId !== playbackRequestId) return;
       if (!Hls.isSupported()) throw new Error("This browser cannot play the authorised HLS stream.");
-      activeHls = new Hls({ enableWorker: true, lowLatencyMode: false, backBufferLength: 90, maxBufferLength: 30 });
-      activeHls.on(Hls.Events.ERROR, (_event, data) => {
-        if (!data?.fatal || !activeHls) return;
+      const hls = new Hls({ enableWorker: true, lowLatencyMode: false, backBufferLength: 90, maxBufferLength: 30 });
+      activeHls = hls;
+      hls.on(Hls.Events.ERROR, (_event, data) => {
+        if (!data?.fatal || activeHls !== hls) return;
         setStatus("The authorised stream encountered a playback error. Try again or choose another episode.");
-        if (data.type === Hls.ErrorTypes.NETWORK_ERROR) activeHls.startLoad();
-        else if (data.type === Hls.ErrorTypes.MEDIA_ERROR) activeHls.recoverMediaError();
+        if (data.type === Hls.ErrorTypes.NETWORK_ERROR) hls.startLoad();
+        else if (data.type === Hls.ErrorTypes.MEDIA_ERROR) hls.recoverMediaError();
         else showGate("Playback interrupted", "The authorised stream could not continue. Request a fresh playback session.", "Back to title", titleRoute(), true);
       });
-      activeHls.loadSource(streamUrl.href);
-      activeHls.attachMedia(video);
+      hls.loadSource(streamUrl.href);
+      hls.attachMedia(video);
     }
     const expiresIn = Date.parse(playback.expiresAt) - Date.now();
     playbackExpiryTimer = window.setTimeout(() => {
