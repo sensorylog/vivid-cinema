@@ -9,7 +9,7 @@ function cleanText(value, max = 240) {
   return String(value ?? "").replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim().slice(0, max);
 }
 
-function licenseFor(metadata) {
+export function licenseFor(metadata) {
   const url = cleanText(metadata?.licenseurl, 500);
   const rights = cleanText(metadata?.rights, 500);
   const normalized = url.toLowerCase();
@@ -23,7 +23,7 @@ function licenseFor(metadata) {
   return null;
 }
 
-function hasPlayableVideo(files) {
+export function hasPlayableVideo(files) {
   return (Array.isArray(files) ? files : []).some(file => {
     const name = String(file?.name || "").toLowerCase();
     const format = String(file?.format || "").toLowerCase();
