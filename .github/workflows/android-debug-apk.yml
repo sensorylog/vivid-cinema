@@ -22,7 +22,10 @@ permissions:
   contents: read
 
 jobs:
+  # Release packaging stays paused while VIVID ANIME PREMIUM is being built.
+  # Enable the repository variable only after all six phases and final QA are complete.
   build-debug-apk:
+    if: vars.VIVID_RELEASE_BUILDS == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
