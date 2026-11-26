@@ -44,7 +44,7 @@ test("membership UI initialises pricing before Firebase auth and always exits lo
   assert.match(client, /Reference rate: 1 GHS =/);
   assert.match(client, /Rate unavailable/);
   assert.match(client, /bank\/card provider sets the final converted charge/);
-  assert.match(client, /restcountries\.com/);
+  assert.match(client, /fetch\("\/api\/anime-premium\/countries"/);
   assert.match(client, /window\.vividAuthResolved/);
   assert.match(client, /window\.vividAuthUser/);
   assert.match(client, /International country list loaded/);
@@ -77,6 +77,8 @@ test("client selects one of the three server-owned hosted Paystack plan pages", 
 
 test("hosted page checkout requires verified identity and maps the three plans server-side", () => {
   assert.match(pageCheckout, /requirePremiumUser/);\n  assert.match(pageCheckout, /PAYSTACK_SECRET_KEY/);\n  assert.doesNotMatch(pageCheckout, /PAYSTACK_LIVE_ENABLED/);
+  assert.match(pageCheckout, /PAYSTACK_SECRET_KEY/);
+  assert.doesNotMatch(pageCheckout, /PAYSTACK_LIVE_ENABLED/);
   assert.match(pageCheckout, /monthly: \{ amount: 5330, currency: "GHS", url:/);
   assert.match(pageCheckout, /biannually: \{ amount: 28782, currency: "GHS", url:/);
   assert.match(pageCheckout, /annually: \{ amount: 51168, currency: "GHS", url:/);
@@ -107,5 +109,6 @@ test("membership return survives Vivid email verification and is cached offline"
   assert.match(sw, /anime-premium-return\.html/);
   assert.match(sw, /anime-premium-membership\.js/);
   assert.match(sw, /anime-premium-return\.js/);
-  assert.match(pricing, /publicPricing/);\n  assert.match(service, /checkoutEnabled: Boolean\\(env\\.PAYSTACK_SECRET_KEY && env\\.FIREBASE_SERVICE_ACCOUNT_JSON\\)/);
+  assert.match(pricing, /publicPricing/);\n  assert.match(service, /checkoutEnabled: Boolean\(env\.PAYSTACK_SECRET_KEY && env\.FIREBASE_SERVICE_ACCOUNT_JSON\)/);
+  assert.match(service, /checkoutEnabled: Boolean\\(env\\.PAYSTACK_SECRET_KEY && env\\.FIREBASE_SERVICE_ACCOUNT_JSON\\)/);
 });
