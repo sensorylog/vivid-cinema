@@ -16,7 +16,7 @@ test("Premium discovery exposes search, collections, type, year and sort control
     assert.match(html, new RegExp('id="' + id + '"'));
   }
   for (const type of ["all", "tv", "movie"]) assert.match(html, new RegExp('data-vap-type="' + type + '"'));
-  for (const id of ["vap-popular", "vap-series", "vap-films", "vap-top-rated"]) assert.match(html, new RegExp('id="' + id + '"'));
+  for (const id of ["vap-popular", "vap-series", "vap-films", "vap-top-rated", "vap-identities"]) assert.match(html, new RegExp('id="' + id + '"'));
 });
 
 test("Premium catalogue uses the existing anime metadata API and filters Japanese animation", () => {
@@ -28,9 +28,9 @@ test("Premium catalogue uses the existing anime metadata API and filters Japanes
 });
 
 test("catalogue cards open accessible title previews without exposing playback sources", () => {
-  assert.match(html, /<dialog[^>]*id="vap-title-dialog"/);
+  assert.match(html, /id="vap-identities"/);
   assert.match(script, /dialog\.showModal\(\)/);
-  assert.match(script, /Premium catalogue preview/);
+  assert.match(script, /vap-identity-svg/);
   assert.doesNotMatch(script, /\.m3u8|\.mp4|playbackUrl|streamUrl/i);
 });
 
