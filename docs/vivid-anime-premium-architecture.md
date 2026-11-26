@@ -151,7 +151,7 @@ A provider's iframe route and published features do not guarantee that every tit
 
 ## Multi-period Paystack configuration
 
-`ANIME_PREMIUM_PLANS_JSON` uses period-first configuration. Example values below are placeholders and must be replaced with the approved Vivid prices and actual Paystack plan codes:
+`ANIME_PREMIUM_PLANS_JSON` uses period-first configuration. Example values below are placeholders and must be replaced with the approved Vivid prices and actual Paystack plan codes. The `0` amounts deliberately fail validation and keep those intervals unavailable until real amounts are configured:
 
 ```json
 {
