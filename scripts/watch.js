@@ -434,13 +434,11 @@ function setPlayerSource(source, params, startAt = 0) {
       status.classList.remove("is-warning");
       status.hidden = false;
     }
-    {
-      fallbackTimer = window.setTimeout(() => {
+    fallbackTimer = window.setTimeout(() => {
         fallbackTimer = null;
         if (primaryHealthy || activeSource !== source) return;
         showFallbackPrompt(source);
-      }, 25000);
-    }
+    }, 25000);
   } else if (["embedwave", "vidfast", "ezvidapi", "embedapistream", "moviesapi"].includes(source)) {
     if (isAnimePlayback() && source !== "embedwave") return;
     primaryHealthy = false;
