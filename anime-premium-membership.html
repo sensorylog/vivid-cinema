@@ -26,7 +26,7 @@
   <section class="vap-membership-intro"><span class="vap-eyebrow">THE FULL ANIME EXPERIENCE</span><h1>Unlock <span>VIVID ANIME PREMIUM.</span></h1><p>One Vivid account. A dedicated anime world. Secure checkout powered by Paystack.</p></section>
   <div class="vap-membership-layout">
     <section class="vap-membership-plan">
-      <div class="vap-membership-plan-top"><span class="vap-plan-pill">MONTHLY MEMBERSHIP</span><span class="vap-plan-check"><i class="bi bi-shield-check" aria-hidden="true"></i> Secure billing</span></div>
+      <div class="vap-membership-plan-top"><span class="vap-plan-pill" id="vap-plan-pill">MONTHLY MEMBERSHIP</span><span class="vap-plan-check"><i class="bi bi-shield-check" aria-hidden="true"></i> Secure billing</span></div>
       <h2>Anime Premium</h2>
       <p class="vap-plan-description">Premium discovery, title experiences and protected playback access when authorised content is available.</p>
       <div class="vap-price-line"><strong id="vap-local-price">Loading price…</strong><span id="vap-price-period">/ month</span></div>
@@ -35,15 +35,22 @@
       <div class="vap-membership-trust"><i class="bi bi-lock-fill" aria-hidden="true"></i><span>Your payment is handled by Paystack. Vivid never stores your card details.</span></div>
     </section>
     <section class="vap-checkout-panel">
-      <div class="vap-checkout-heading"><span class="vap-eyebrow">YOUR CHECKOUT</span><h2>Choose your region</h2><p>Set your country to view the closest local currency estimate.</p></div>
+      <div class="vap-checkout-heading"><span class="vap-eyebrow">YOUR CHECKOUT</span><h2>Choose your plan</h2><p>Select how long you want Vivid Anime Premium. Your total price and renewal terms update before checkout.</p></div>
+      <span class="vap-field-label" id="vap-billing-label">Billing period</span>
+      <div class="vap-billing-periods" role="group" aria-labelledby="vap-billing-label">
+        <button type="button" class="vap-billing-option is-active" data-vap-plan="monthly" aria-pressed="true"><strong>1 month</strong><small>Monthly</small></button>
+        <button type="button" class="vap-billing-option" data-vap-plan="biannually" aria-pressed="false" disabled><strong>6 months</strong><small>Save with a longer plan</small></button>
+        <button type="button" class="vap-billing-option" data-vap-plan="annually" aria-pressed="false" disabled><strong>1 year</strong><small>Best long-term value</small></button>
+      </div>
+      <div class="vap-checkout-heading vap-region-heading"><h2>Choose your region</h2><p>Set your country to view the closest local currency estimate.</p></div>
       <label class="vap-field-label" for="vap-country">Country</label>
       <select id="vap-country" class="vap-country-select"><option value="GH">Ghana</option></select>
       <div class="vap-currency-summary"><span>Local currency</span><strong id="vap-local-currency">GHS</strong></div>
       <div class="vap-currency-summary"><span>Paystack checkout currency</span><strong id="vap-checkout-currency">GHS</strong></div>
       <div class="vap-method-heading"><span class="vap-field-label">Payment method</span><small>Choose how you want to renew</small></div>
       <div class="vap-payment-methods">
-        <label class="vap-payment-method" id="vap-card-method"><input type="radio" name="vap-payment-method" value="card"><span class="vap-method-icon"><i class="bi bi-credit-card" aria-hidden="true"></i></span><span><strong>Card</strong><small>Automatic monthly renewal</small></span><span class="vap-method-check"><i class="bi bi-check-circle-fill"></i></span></label>
-        <label class="vap-payment-method" id="vap-mobile-method"><input type="radio" name="vap-payment-method" value="mobile_money"><span class="vap-method-icon"><i class="bi bi-phone" aria-hidden="true"></i></span><span><strong>Mobile money</strong><small>Manual renewal each month</small></span><span class="vap-method-check"><i class="bi bi-check-circle-fill"></i></span></label>
+        <label class="vap-payment-method" id="vap-card-method"><input type="radio" name="vap-payment-method" value="card"><span class="vap-method-icon"><i class="bi bi-credit-card" aria-hidden="true"></i></span><span><strong>Card</strong><small>Automatic renewal for this billing period</small></span><span class="vap-method-check"><i class="bi bi-check-circle-fill"></i></span></label>
+        <label class="vap-payment-method" id="vap-mobile-method"><input type="radio" name="vap-payment-method" value="mobile_money"><span class="vap-method-icon"><i class="bi bi-phone" aria-hidden="true"></i></span><span><strong>Mobile money</strong><small>Pay once; renew manually after this period</small></span><span class="vap-method-check"><i class="bi bi-check-circle-fill"></i></span></label>
       </div>
       <p class="vap-method-note" id="vap-method-note">Card payments renew automatically where supported. Mobile money is always a manual renewal.</p>
       <button class="vap-primary vap-checkout-button" id="vap-checkout-button" type="button" disabled>Loading secure checkout… <span aria-hidden="true">→</span></button>
