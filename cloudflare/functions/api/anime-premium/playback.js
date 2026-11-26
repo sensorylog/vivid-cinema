@@ -6,6 +6,11 @@ import {
 function allowedStreamHosts(env) {
   return new Set(String(env.ANIME_PREMIUM_STREAM_HOSTS || "").split(",").map(value => value.trim().toLowerCase()).filter(Boolean));
 }
+function timestampMillis(value) {
+  if (typeof value?.toMillis === "function") return value.toMillis();
+  if (typeof value === "string") return Date.parse(value);
+  return Number(value || 0);
+}
 function providerResolver(env, providerId) {
   if (!/^[a-z0-9][a-z0-9._-]{1,63}$/i.test(providerId)) {
     throw new AnimePremiumError(404, "authorised-source-not-found", "No authorised playback source is available for this episode.");
@@ -74,6 +79,15 @@ export async function onRequestPost({ request, env }) {
     }
     const source = sourceSnapshot.data();
     if (!source.sourceId || typeof source.provider !== "string") throw new AnimePremiumError(404, "authorised-source-not-found", "No authorised playback source is available for this episode.");
+    const territory = String(request.cf?.country || "").toUpperCase();
+    const licenseStartsAt = timestampMillis(source.licenseStartsAt);
+    const licenseEndsAt = timestampMillis(source.licenseEndsAt);
+    if (source.rightsVerified !== true || !/^[A-Z]{2}$/.test(territory) ||
+        !Array.isArray(source.allowedTerritories) || !source.allowedTerritories.includes(territory) ||
+        !Number.isFinite(licenseStartsAt) || !Number.isFinite(licenseEndsAt) ||
+        licenseStartsAt > Date.now() || licenseEndsAt <= Date.now()) {
+      throw new AnimePremiumError(451, "territory-or-rights-unavailable", "This episode is not licensed for playback in your region or outside its authorised release window.");
+    }
     const provider = providerResolver(env, source.provider);
     const resolverResponse = await fetch(provider.url.toString(), {
       method: "POST",
