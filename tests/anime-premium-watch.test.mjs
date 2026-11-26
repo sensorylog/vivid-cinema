@@ -35,7 +35,7 @@ test("player accepts only unexpired HTTPS playback sessions returned by the serv
   assert.match(script, /streamUrl\.protocol !== "https:"/);
   assert.match(script, /Date\.parse\(playback\.expiresAt\) <= Date\.now\(\)/);
   assert.match(script, /application\/vnd\.apple\.mpegurl/);
-  assert.match(script, /video\.mp4/);
+  assert.match(script, /video\/mp4/);
   assert.doesNotMatch(script, /vidsrc|vidlink|vidplus|vidking|embedapi|moviesapi/i);
 });
 
