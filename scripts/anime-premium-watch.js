@@ -147,7 +147,7 @@ function activateProvider(providerId) {
   frame.title = titleName(titleDetails) + " · " + provider.label;
   frame.onload = () => {
     if (generation === providerRequestId && activeProviderId === provider.id) {
-      setStatus(provider.label + " player loaded. If the episode does not start, switch to another server.");
+      setStatus(provider.label + " page opened. Playback is not confirmed yet; switch servers if the episode does not start.");
     }
   };
   frame.onerror = () => {
