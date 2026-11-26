@@ -189,11 +189,14 @@ async function handleRecurringEvent(db, eventName, data, eventRef) {
         renewalMode: "automatic",
         updatedAt: timestampFromMillis(now)
       }, { merge: true });
-    } else if (eventName === "invoice.payment_success" || (eventName === "invoice.update" && (String(data.status || "").toLowerCase() === "success" || data.paid === true || data.paid === 1))) {
+    } else if (eventName === "invoice.payment_success" || (eventName === "invoice.update" && String(data.status || "").toLowerCase() === "success")) {
       const paidAmount = Number(data.amount || data.transaction?.amount || 0);
-      if (paidAmount && Number(value.amount || 0) && paidAmount !== Number(value.amount)) return;
       const paidCurrency = String(data.currency || data.transaction?.currency || "").toUpperCase();
-      if (paidCurrency && value.currency && paidCurrency !== String(value.currency).toUpperCase()) return;
+      if ((paidAmount && Number(value.amount || 0) && paidAmount !== Number(value.amount)) ||
+          (paidCurrency && value.currency && paidCurrency !== String(value.currency).toUpperCase())) {
+        transaction.set(eventRef, { processedAt: timestampFromMillis(now), event: eventName, ignored: true, reason: "invoice-payment-mismatch" });
+        return;
+      }
       const oldEnd = typeof value.currentPeriodEnd?.toMillis === "function" ? value.currentPeriodEnd.toMillis() : Number(value.currentPeriodEnd || 0);
       const start = oldEnd > now ? oldEnd : now;
       const next = millis(data.next_payment_date || data.subscription?.next_payment_date || data.period_end);
