@@ -56,7 +56,10 @@ test("Progress messages are origin-checked and saved through the Premium progres
   assert.match(script, /provider\\.id === "vidrift"/);
   assert.match(script, /message\\.type === "watching-log"/);
   assert.match(script, /if \(provider\.events\)/);
-  assert.match(script, /provider\.id === "megavid"/);
+  assert.match(script, /provider\.id === "vidrift"/);
+  assert.match(script, /\["megaplay", "megaplay-legacy", "megavid", "megaflix"\]/);
+  assert.match(script, /message\.type === "watching-log"/);
+  assert.match(script, /if \(provider\.events\)/);
   assert.match(script, /fetch\("\/api\/anime-premium\/progress"/);
   assert.match(script, /keepalive: snapshot\.keepalive/);
   assert.match(script, /Progress endpoint returned HTTP/);
