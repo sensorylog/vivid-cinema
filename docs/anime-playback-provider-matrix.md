@@ -6,7 +6,7 @@ This document records the provider contracts used by Vivid's anime Player 1 and 
 
 | Provider | Identity | Route used by Vivid | Notes |
 |---|---|---|---|
-| VidPlus | AniList ID | `/embed/anime/{anilistId}/{episode}?dub={true|false}` | Native anime route. Vivid currently starts sub by default. |
+| VidPlus | AniList ID | `/embed/anime/{anilistId}/{episode}?dub={true|false}` | Native anime route. Vivid now exposes a persisted Sub / Dub preference and maps split TMDB seasons to continuous episode numbering. |
 | VidLink | MAL ID | `/anime/{malId}/{episode}/sub?fallback=true` | Native anime route. Provider documents sub/dub and fallback to the alternate track. |
 | AnimeEmbed | AniList ID | `/embed/ani/{anilistId}/{episode}?track=sub` | Documents sub/dub, resume start, server selection, next episode and an `animeembed` postMessage channel. |
 | Vidy | AniList ID | `/anime/{anilistId}/{episode}` | Documents progress, autoplay, next episode and episode selector options. |
