@@ -1,12 +1,26 @@
 import { getLocalLibrary, upsertLibraryItem, removeLibraryItem } from "./library.js";
 import { getAllPlaybackProgress } from "./recommendations.js";
-import { auth } from "./firebase.js";
+let auth = null;
 
 const PREFERENCES_KEY = "vivid:anime-premium-preferences:v1";
 const PREFERENCES_OWNER_KEY = "vivid:anime-premium-preferences-owner:v1";
 const PREFERENCES_SNAPSHOT_PREFIX = "vivid:anime-premium-preferences-snapshot:";
 const MEDIA_TYPES = new Set(["movie", "tv"]);
 const TRACKS = new Set(["sub", "dub"]);
+
+// Keep local anime preferences available even if Firebase's remote SDK is slow
+// or temporarily unavailable. Account sync attaches when the shared auth module
+// finishes restoring the Vivid session.
+void import("./firebase.js").then(({ auth: instance }) => {
+  auth = instance;
+  ensurePreferencesOwner(auth?.currentUser?.uid || "guest");
+  if (auth?.currentUser) {
+    void syncAnimePreferencesForUser(auth.currentUser)
+      .catch(error => console.warn("Anime preferences cloud sync unavailable:", error));
+  }
+}).catch(error => {
+  console.warn("Anime preferences are running locally until Vivid account services reconnect:", error);
+});
 
 function normalizeItem(item = {}) {
   const id = String(item.id ?? "").trim();
