@@ -237,3 +237,8 @@ test("anime specials preserve TMDB season zero and avoid episode-only anime-nati
   assert.match(source, /const nativeAnimeEpisode = animeSeries && Number\(currentParams\?\.season\) > 0/);
   assert.match(source, /Number\(params\?\.season\) === 0/);
 });
+
+test("anime provider progress is forwarded to shared watch-room playback synchronization", () => {
+  assert.match(source, /provider: isAnimeEmbed \? "animeembed" : "vidy"/);
+  assert.match(source, /new CustomEvent\("vivid:provider-playback"/);
+});
