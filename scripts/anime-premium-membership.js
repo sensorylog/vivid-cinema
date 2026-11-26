@@ -2,7 +2,7 @@ import { auth } from "./firebase.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
 
 const $ = id => document.getElementById(id);
-const COUNTRY_TO_PAYSTACK = { GH: "GHS", NG: "NGN", KE: "KES", ZA: "ZAR", US: "USD" };
+const COUNTRY_TO_PAYSTACK = { GH: "GHS", NG: "NGN", KE: "KES", ZA: "ZAR", US: "USD", GB: "USD", CA: "USD", AU: "USD", IN: "USD", DE: "USD", FR: "USD", ES: "USD", IT: "USD", NL: "USD", BE: "USD", IE: "USD", PT: "USD", SE: "USD", NO: "USD", DK: "USD", FI: "USD", CH: "USD", AE: "USD", SA: "USD", EG: "USD", MA: "USD", BR: "USD", MX: "USD", JP: "USD", KR: "USD", SG: "USD", MY: "USD", ID: "USD", PH: "USD", TH: "USD", NZ: "USD", UG: "USD", TZ: "USD", RW: "USD", CI: "USD", SN: "USD", CM: "USD", ET: "USD" };
 const MOBILE_MONEY_COUNTRIES = new Set(["GH", "KE"]);
 const FALLBACK_COUNTRIES = [
   { code: "GH", name: "Ghana", currency: "GHS" }, { code: "NG", name: "Nigeria", currency: "NGN" },
