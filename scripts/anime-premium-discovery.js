@@ -66,7 +66,7 @@ function identityCard(item) {
   const type = item.media_type === "movie" ? "ANIME FILM" : "ANIME SERIES";
   return '<a class="vap-identity-card" href="' + escapeHtml(titleUrl(item)) + '" aria-label="Explore ' + escapeHtml(title) + '">' +
     '<span class="vap-identity-art">' +
-      (poster ? '<svg class="vap-identity-svg" viewBox="0 0 240 320" aria-hidden="true"><defs><clipPath id="' + maskId + '"><path d="' + path + '"/></clipPath></defs><image href="' + escapeHtml(poster) + '" width="240" height="320" preserveAspectRatio="xMidYMid slice" clip-path="url(#' + maskId + ')"/></svg><img class="vap-identity-mobile-poster" loading="lazy" decoding="async" src="' + escapeHtml(poster) + '" alt="' + escapeHtml(title) + ' poster">' : '<span class="vap-identity-fallback">VIVID</span>') +
+      (poster ? '<svg class="vap-identity-svg" viewBox="0 0 240 320" aria-hidden="true"><defs><clipPath id="' + maskId + '"><path d="' + path + '"/></clipPath></defs><path d="' + path + '" fill="#2a203a"/><image href="' + escapeHtml(poster) + '" width="240" height="320" preserveAspectRatio="xMidYMid slice" clip-path="url(#' + maskId + ')"/></svg><img class="vap-identity-mobile-poster" loading="lazy" decoding="async" src="' + escapeHtml(poster) + '" alt="' + escapeHtml(title) + ' poster">' : '<span class="vap-identity-fallback">VIVID</span>') +
       '<span class="vap-identity-shade"></span><span class="vap-identity-stamp">VAP / ' + String((seed % 90) + 10) + '</span>' +
     '</span><span class="vap-identity-copy"><small>' + type + '</small><strong>' + escapeHtml(title) + '</strong><span>' + escapeHtml(yearOf(item) || "Premium collection") + '</span></span></a>';
 }
