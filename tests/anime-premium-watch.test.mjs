@@ -132,3 +132,12 @@ test("watcher can fail over when HLS.js is unavailable or unsupported", () => {
   assert.match(script, /fallbackToNextPlaybackServer\("The HLS playback engine could not load/);
   assert.match(script, /fallbackToNextPlaybackServer\("This browser cannot use the HLS engine/);
 });
+
+
+test("playback progress checks HTTP responses and retries a failed snapshot at most once", () => {
+  assert.match(script, /Progress endpoint returned HTTP/);
+  assert.match(script, /retries: 0/);
+  assert.match(script, /Number\(snapshot\.retries \|\| 0\) < 1/);
+  assert.match(script, /retries: Number\(snapshot\.retries \|\| 0\) \+ 1/);
+  assert.match(script, /!pendingProgressSnapshot/);
+});
