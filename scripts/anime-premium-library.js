@@ -81,7 +81,7 @@ async function verifyMembership(user) {
     cache: "no-store"
   });
   if (response.status === 401) return { active: false, reason: "signin" };
-  if (response.status === 403) return { active: false, reason: "membership" };
+  if (response.status === 403) return { active: false, reason: "verify" };
   if (!response.ok) throw new Error("Membership check returned HTTP " + response.status);
   const payload = await response.json();
   return { active: payload?.membership?.active === true, reason: "membership" };
@@ -91,7 +91,9 @@ async function openLibrary(user) {
   try {
     const membership = await verifyMembership(user);
     if (!membership.active) {
-      showGate("Premium membership required", "Your private anime library is available to active VIVID ANIME PREMIUM members.", "anime-premium-membership.html", "Explore membership");
+      if (membership.reason === "verify") showGate("Verify your Vivid email", "Email verification is required before Premium account features can be opened.", "verify-email.html", "Verify email");
+      else if (membership.reason === "signin") showGate("Sign in again", "Your Vivid session needs to be refreshed before we can check your membership.", "auth.html?returnTo=anime-premium-library.html", "Sign in to Vivid");
+      else showGate("Premium membership required", "Your private anime library is available to active VIVID ANIME PREMIUM members.", "anime-premium-membership.html", "Explore membership");
       return;
     }
     $("vap-library-gate").hidden = true;
