@@ -396,6 +396,7 @@ test("Anime Premium billing, memberships, playback sources and audit records are
       uid: "premium-user", amount: 5330, currency: "GHS", status: "pending"
     });
     await setDoc(doc(db, "animePremiumWebhookEvents", "event-one"), { event: "charge.success" });
+    await setDoc(doc(db, "animePremiumPendingSubscriptions", "sub-one"), { subscriptionCode: "sub-one", customerCode: "CUS_ONE" });
     await setDoc(doc(db, "animePremiumSources", "tv_123_s1_e1"), {
       provider: "approved-provider", sourceId: "rights-cleared-source", active: true
     });
@@ -410,6 +411,7 @@ test("Anime Premium billing, memberships, playback sources and audit records are
     "animePremiumMemberships/premium-user",
     "animePremiumCheckouts/VAPTEST123",
     "animePremiumWebhookEvents/event-one",
+    "animePremiumPendingSubscriptions/sub-one",
     "animePremiumSources/tv_123_s1_e1",
     "animePremiumAdminAudit/audit-one"
   ];
