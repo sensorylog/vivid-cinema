@@ -117,11 +117,11 @@ async function updatePrice() {
       : "No payment method is configured for this region yet.";
   $("vap-checkout-button").disabled = !pricing.checkoutEnabled || (membershipActive && membershipAutoRenew) || !selectedPaymentMethod;
   $("vap-checkout-button").textContent = !pricing.checkoutEnabled ? "Checkout temporarily unavailable" : membershipActive ? (membershipAutoRenew ? "Membership active — auto-renew on" : "Renew manually →") : currentUser ? "Continue to secure checkout →" : "Sign in to subscribe →";
-  $("vap-checkout-status").textContent = !pricing.checkoutEnabled
-    ? "Your membership price is available, but secure Paystack checkout has not been enabled in this environment."
-    : !selectedPaymentMethod
-      ? "No supported payment method is configured for this country yet."
-      : "";
+  if (!pricing.checkoutEnabled) {
+    $("vap-checkout-status").textContent = "Your membership price is available, but secure Paystack checkout has not been enabled in this environment.";
+  } else if (!selectedPaymentMethod) {
+    $("vap-checkout-status").textContent = "No supported payment method is configured for this country yet.";
+  }
 }
 async function loadPricing() {
   const response = await fetch("/api/anime-premium/pricing", { cache: "no-store", signal: AbortSignal.timeout(8000) });
@@ -196,8 +196,8 @@ async function startCheckout() {
     $("vap-checkout-status").textContent = "Opening Paystack securely…";
     window.location.assign(payload.authorizationUrl);
   } catch (error) {
-    $("vap-checkout-status").textContent = error.message || "Checkout could not be started.";
     await updatePrice();
+    $("vap-checkout-status").textContent = error.message || "Checkout could not be started.";
   } finally {
     button.disabled = !pricing.checkoutEnabled || (membershipActive && membershipAutoRenew) || !selectedPaymentMethod;
     button.textContent = !pricing.checkoutEnabled ? "Checkout temporarily unavailable" : membershipActive ? (membershipAutoRenew ? "Membership active — auto-renew on" : "Renew manually →") : currentUser ? "Continue to secure checkout →" : "Sign in to subscribe →";
@@ -236,11 +236,13 @@ function bind() {
     selectedCountry = event.target.value;
     localStorage.setItem("vivid:anime-premium-country", selectedCountry);
     selectedPaymentMethod = "";
+    $("vap-checkout-status").textContent = "";
     await updatePrice();
   });
   document.querySelectorAll('input[name="vap-payment-method"]').forEach(input => input.addEventListener("change", () => {
     if (!input.disabled) {
       selectedPaymentMethod = input.value;
+      $("vap-checkout-status").textContent = "";
       void updatePrice();
     }
   }));
