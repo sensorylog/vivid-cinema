@@ -43,6 +43,8 @@ test("Premium watch resolves AniList and MAL identifiers independently and suppo
 test("Provider fallback switches embeds without requesting arbitrary stream URLs", () => {
   assert.match(script, /function fallbackToNextPlaybackServer/);
   assert.match(script, /failedProviderIds\.add\(activeProviderId\)/);
+  assert.match(script, /failedProviderIds\.has\(provider\.id\) \? "Failed · retry"/);
+  assert.match(script, /failedProviderIds\.delete\(provider\.id\)/);
   assert.match(script, /providerOptions\.find\(item => item\.available && !failedProviderIds\.has\(item\.id\)\)/);
   assert.match(script, /frame\.src = provider\.url/);
   assert.match(script, /event\.origin !== expectedOrigin/);
