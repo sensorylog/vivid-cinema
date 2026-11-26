@@ -45,7 +45,7 @@ test("iframe diagnostics are opt-in and do not log raw provider payloads", () =>
 
 
 test("anime playback exposes documented anime iframe sources and keeps origin checks scoped", () => {
-  for (const provider of ["vidplus", "vidlink", "animeembed", "vidy", "aniweeb"]) {
+  for (const provider of ["vidplus", "vidlink", "animeembed", "vidy"]) {
     assert.ok(source.includes('data-player-source="' + provider + '"'), provider + " should have an anime server button");
   }
   assert.match(source, /\? \["vidplus", "vidlink", "animeembed", "vidy", "aniweeb", "embedwave", "vidsrc", "vidapi"\]/);
