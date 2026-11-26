@@ -77,56 +77,81 @@ export async function onRequestPost({ request, env }) {
     if (!sourceSnapshot.exists || sourceSnapshot.data()?.active !== true) {
       throw new AnimePremiumError(404, "authorised-source-not-found", "No authorised playback source is available for this episode.");
     }
-    const source = sourceSnapshot.data();
-    if (!source.sourceId || typeof source.provider !== "string") throw new AnimePremiumError(404, "authorised-source-not-found", "No authorised playback source is available for this episode.");
+    const source = sourceSnapshot.data() || {};
+    // One episode can have several independently rights-cleared server candidates.
+    // Legacy single-source documents remain readable during migration.
+    const candidates = Array.isArray(source.candidates) ? source.candidates.slice(0, 8) :
+      [{ ...source, candidateId: String(source.provider || "legacy") }];
     const territory = String(request.cf?.country || "").toUpperCase();
-    const licenseStartsAt = timestampMillis(source.licenseStartsAt);
-    const licenseEndsAt = timestampMillis(source.licenseEndsAt);
-    if (source.rightsVerified !== true || !/^[A-Z]{2}$/.test(territory) ||
-        !Array.isArray(source.allowedTerritories) || !source.allowedTerritories.includes(territory) ||
-        !Number.isFinite(licenseStartsAt) || !Number.isFinite(licenseEndsAt) ||
-        licenseStartsAt > Date.now() || licenseEndsAt <= Date.now()) {
-      throw new AnimePremiumError(451, "territory-or-rights-unavailable", "This episode is not licensed for playback in your region or outside its authorised release window.");
+    if (!/^[A-Z]{2}$/.test(territory)) {
+      throw new AnimePremiumError(451, "territory-or-rights-unavailable", "Vivid could not verify the playback territory for this request.");
     }
-    const provider = providerResolver(env, source.provider);
-    const resolverResponse = await fetch(provider.url.toString(), {
-      method: "POST",
-      headers: { Authorization: "Bearer " + provider.token, "Content-Type": "application/json" },
-      body: JSON.stringify({
-        sourceId: source.sourceId,
-        provider: source.provider,
-        mediaType,
-        titleId,
-        season,
-        episode,
-        userId: user.uid
-      })
-    });
-    const resolved = await resolverResponse.json().catch(() => ({}));
-    if (!resolverResponse.ok || !resolved.url || !resolved.expiresAt) {
-      throw new AnimePremiumError(502, "playback-source-unavailable", "The authorised playback provider could not open this episode.");
+    let rightsEligible = false;
+    let lastProviderError = null;
+    let selected = null;
+    for (const candidate of candidates) {
+      if (!candidate || candidate.active !== true || !candidate.sourceId || typeof candidate.provider !== "string") continue;
+      const licenseStartsAt = timestampMillis(candidate.licenseStartsAt);
+      const licenseEndsAt = timestampMillis(candidate.licenseEndsAt);
+      if (candidate.rightsVerified !== true || !Array.isArray(candidate.allowedTerritories) ||
+          !candidate.allowedTerritories.includes(territory) || !Number.isFinite(licenseStartsAt) ||
+          !Number.isFinite(licenseEndsAt) || licenseStartsAt > Date.now() || licenseEndsAt <= Date.now()) continue;
+      rightsEligible = true;
+      try {
+        const provider = providerResolver(env, candidate.provider);
+        const resolverResponse = await fetch(provider.url.toString(), {
+          method: "POST",
+          redirect: "error",
+          signal: AbortSignal.timeout(12000),
+          headers: { Authorization: "Bearer " + provider.token, "Content-Type": "application/json" },
+          body: JSON.stringify({
+            sourceId: candidate.sourceId,
+            provider: candidate.provider,
+            mediaType,
+            titleId,
+            season,
+            episode,
+            userId: user.uid
+          })
+        });
+        const resolved = await resolverResponse.json().catch(() => ({}));
+        if (!resolverResponse.ok || typeof resolved.url !== "string" || !resolved.url || !resolved.expiresAt) {
+          throw new Error("Provider did not return a playable session.");
+        }
+        let url;
+        try { url = new URL(resolved.url); } catch { throw new Error("Provider returned an invalid stream URL."); }
+        const expiresAt = Date.parse(resolved.expiresAt);
+        const mimeType = String(resolved.mimeType || "");
+        if (url.protocol !== "https:" || !provider.hosts.has(url.hostname.toLowerCase()) || url.username || url.password ||
+            !Number.isFinite(expiresAt) || expiresAt <= Date.now() || expiresAt > Date.now() + 60 * 60 * 1000 ||
+            !["video/mp4", "application/vnd.apple.mpegurl", "application/x-mpegURL"].includes(mimeType)) {
+          throw new Error("Provider returned a stream outside its approved playback policy.");
+        }
+        selected = { candidate, url, expiresAt, mimeType };
+        break;
+      } catch (error) {
+        lastProviderError = error;
+      }
     }
-    const url = new URL(resolved.url);
-    const expiresAt = Date.parse(resolved.expiresAt);
-    const mimeType = String(resolved.mimeType || "");
-    if (url.protocol !== "https:" || !provider.hosts.has(url.hostname.toLowerCase()) || url.username || url.password ||
-        !Number.isFinite(expiresAt) || expiresAt <= Date.now() || expiresAt > Date.now() + 60 * 60 * 1000 ||
-        !["video/mp4", "application/vnd.apple.mpegurl", "application/x-mpegURL"].includes(mimeType)) {
-      throw new AnimePremiumError(502, "invalid-playback-session", "The authorised provider returned an invalid playback session.");
+    if (!selected) {
+      if (!rightsEligible) throw new AnimePremiumError(451, "territory-or-rights-unavailable", "This episode is not licensed for playback in your region or outside its authorised release window.");
+      throw new AnimePremiumError(502, "playback-source-unavailable", "No authorised streaming server could open this episode. Vivid checked the enabled licensed sources and none was ready.");
     }
     const sessionId = crypto.randomUUID();
     await db.collection("animePremiumPlaybackSessions").doc(sessionId).set({
       uid: user.uid, mediaType, titleId, season, episode, sourceKey,
-      expiresAt: timestampFromMillis(expiresAt), createdAt: timestampFromMillis(Date.now())
+      provider: selected.candidate.provider,
+      candidateId: selected.candidate.candidateId || selected.candidate.provider,
+      expiresAt: timestampFromMillis(selected.expiresAt), createdAt: timestampFromMillis(Date.now())
     });
     return jsonResponse({
       ok: true,
       playback: {
         sessionId,
-        url: url.toString(),
-        expiresAt: new Date(expiresAt).toISOString(),
-        mimeType,
-        provider: String(source.provider || "Vivid authorised source")
+        url: selected.url.toString(),
+        expiresAt: new Date(selected.expiresAt).toISOString(),
+        mimeType: selected.mimeType,
+        provider: String(selected.candidate.label || selected.candidate.provider || "Vivid authorised source")
       }
     }, 200, origin, env);
   } catch (error) {
