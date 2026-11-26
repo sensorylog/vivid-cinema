@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#08070d">
+<title>Anime Premium Administration · Vivid Cinema</title>
+<link rel="icon" href="icons/vivid-icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="styles/vivid-foundation.css">
+<link rel="stylesheet" href="styles/vivid-system.css">
+<link rel="stylesheet" href="styles/vivid-shell.css">
+<link rel="stylesheet" href="styles/vivid-anime-premium.css">
+<link rel="stylesheet" href="styles/vivid-anime-premium-admin.css">
+</head>
+<body class="vivid-anime-premium-page vap-admin-page" data-vivid-page="anime-premium-admin">
+<div class="vap-shell">
+<header class="vap-header"><a class="vap-brand" href="anime-premium.html"><span>VIVID</span><b>ANIME</b><small>ADMIN</small></a><nav aria-label="Admin navigation"><a href="anime-premium.html">Premium home</a><a href="account.html" data-vap-account>Account</a></nav></header>
+<main class="vap-admin-main">
+  <div class="vap-admin-heading"><span class="vap-eyebrow">SERVER-VERIFIED OPERATIONS</span><h1>Anime Premium Admin</h1><p>Membership overrides and authorised source mappings are audited on the server. Admin access is verified from Firebase claims or the server allowlist.</p></div>
+  <p class="vap-admin-status" id="vap-admin-status" role="status" aria-live="polite">Verifying administrator access…</p>
+  <section class="vap-admin-panel">
+    <div class="vap-admin-panel-heading"><div><span class="vap-eyebrow">MEMBERSHIP CONTROL</span><h2>Grant or revoke access</h2></div><button type="button" id="vap-admin-refresh">Refresh list</button></div>
+    <form id="vap-admin-membership-form">
+      <label>User UID<input id="vap-admin-uid" required maxlength="128" autocomplete="off"></label>
+      <label>Action<select id="vap-admin-action"><option value="grant">Grant membership</option><option value="revoke">Revoke membership</option></select></label>
+      <label>Duration (days)<input id="vap-admin-days" type="number" min="1" max="3650" value="30"></label>
+      <label>Audit reason<textarea id="vap-admin-reason" minlength="8" maxlength="300" required></textarea></label>
+      <button type="submit">Apply audited membership action</button>
+    </form>
+    <div class="vap-admin-table-wrap"><table><thead><tr><th>User</th><th>Status</th><th>Renewal</th><th>Access until</th></tr></thead><tbody id="vap-admin-memberships"><tr><td colspan="4">Loading memberships…</td></tr></tbody></table></div>
+  </section>
+  <section class="vap-admin-panel">
+    <div class="vap-admin-panel-heading"><div><span class="vap-eyebrow">RIGHTS-CLEARED SOURCE REGISTRY</span><h2>Map an authorised source</h2></div></div>
+    <form id="vap-admin-source-form">
+      <label>Media type<select id="vap-admin-media-type"><option value="tv">Anime series</option><option value="movie">Anime film</option></select></label>
+      <label>TMDB title ID<input id="vap-admin-title-id" inputmode="numeric" required pattern="[0-9]{1,12}"></label>
+      <label>Season<input id="vap-admin-season" type="number" min="1" max="100" value="1"></label>
+      <label>Episode<input id="vap-admin-episode" type="number" min="1" max="10000" value="1"></label>
+      <label>Approved provider<input id="vap-admin-provider" required maxlength="80"></label>
+      <label>Resolver source ID<input id="vap-admin-source-id" required maxlength="160"></label>
+      <label class="vap-admin-toggle"><input id="vap-admin-source-active" type="checkbox" checked> Source is active</label>
+      <button type="submit">Save authorised source mapping</button>
+    </form>
+  </section>
+</main>
+<footer class="vap-footer"><span>© 2026 Vivid Cinema</span><span><a href="privacy.html">Privacy</a><a href="help.html">Help</a></span></footer>
+</div>
+<script type="module" src="scripts/app-shell.js"></script>
+<script type="module" src="scripts/anime-premium.js"></script>
+<script type="module" src="scripts/anime-premium-admin.js"></script>
+</body>
+</html>
