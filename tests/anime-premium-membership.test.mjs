@@ -46,7 +46,7 @@ test("membership UI initialises pricing before Firebase auth and always exits lo
   assert.match(client, /parsed\.length < 180/);
   assert.match(client, /new Map\(parsed\.map\(country => \[country\.code, country\]\)\)/);
   assert.match(client, /countries = unique\.sort/);
-  assert.match(client, /country\.name \+ " \(" \+ country\.currency \+ "\)"/);
+  assert.match(client, /option\.textContent = .*country\.name.*country\.currency/);
   assert.match(client, /Frankfurter blended central-bank reference rates/);
   assert.match(client, /Ghanaian Cedis/);
   assert.match(client, /localStorage\.setItem\("vivid:anime-premium-country"/);
