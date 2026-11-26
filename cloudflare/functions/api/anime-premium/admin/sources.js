@@ -74,7 +74,7 @@ export async function onRequest({ request, env }) {
     }, { merge: true });
     await db.collection("animePremiumAdminAudit").add({
       actorUid: user.uid, action: "source_registry_update", sourceKey: key,
-      provider, rightsReference, allowedTerritories,
+      provider, candidateId, priority: nextCandidate.priority, rightsReference, allowedTerritories,
       licenseStartsAt: timestampFromMillis(licenseStartsAt),
       licenseEndsAt: timestampFromMillis(licenseEndsAt),
       active: body.active !== false, createdAt: timestampFromMillis(now)
