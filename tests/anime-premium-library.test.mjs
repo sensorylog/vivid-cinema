@@ -31,6 +31,14 @@ test("private Premium Anime Library is no-index and has membership-gated section
   assert.match(script, /anime-premium-membership\.html/);
 });
 
+test("private library route includes the shared app shell and recovers from auth loading failures", () => {
+  assert.match(html, /scripts\/app-shell\.js/);
+  assert.match(html, /scripts\/anime-premium\.js/);
+  assert.match(script, /async function initAuth\(\)/);
+  assert.match(script, /import\("\.\/firebase\.js"\)/);
+  assert.match(script, /AbortSignal\.timeout\(10000\)/);
+});
+
 test("Anime library reuses Vivid's canonical shared library and playback progress stores", () => {
   assert.match(module, /getLocalLibrary/);
   assert.match(module, /getAllPlaybackProgress/);
@@ -63,6 +71,8 @@ test("Premium title page supports Watch Later and explicit completed-title state
 
 test("Anime preferences sync to the authenticated Vivid account and are owner-protected", () => {
   assert.match(module, /syncAnimePreferencesForUser/);
+  assert.match(module, /import\("\.\/firebase\.js"\)/);
+  assert.doesNotMatch(module, /^import \{ auth \}/m);
   assert.match(module, /getDocFromServer/);
   assert.match(module, /setDoc\(reference, local/);
   assert.match(rules, /match \/animePreferences\/\{preferenceId\}/);
