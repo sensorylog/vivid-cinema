@@ -19,20 +19,24 @@ const [html, client, returnHtml, returnScript, pricing, checkout, pageCheckout, 
   read("../cloudflare/functions/lib/anime-premium-service.js")
 ]);
 
-test("membership page offers global country selection and separate renewal methods", () => {
+test("membership page offers country selection and only supported Paystack card checkout", () => {
   assert.match(html, /id="vap-country"/);
-  assert.match(html, /value="card"/);
-  assert.match(html, /value="mobile_money"/);
-  assert.match(html, /Automatic monthly renewal/);
-  assert.match(html, /Manual renewal each month/);
+  assert.match(html, /id="vap-card-method"/);
+  assert.doesNotMatch(html, /value="mobile_money"|Automatic monthly renewal|Manual renewal each month/);
   assert.match(html, /anime-premium-membership\.js/);
   assert.doesNotMatch(html, /pk_live_|PaystackPop|PAYSTACK_SECRET_KEY/);
 });
 
-test("local currency display is an estimate while Paystack checkout currency is explicit", () => {
-  assert.match(client, /restcountries\.com/);
+test("membership UI initialises pricing before Firebase auth and always exits loading states", () => {
+  assert.doesNotMatch(client, /^import\s+\{\s*auth\s*\}\s+from\s+["']\.\/firebase\.js["']/m);
+  assert.match(client, /import\("\.\/firebase\.js"\)/);
+  assert.match(client, /Promise\.allSettled\(\[countriesTask, pricingTask\]\)/);
+  assert.match(client, /withTimeout\(fetch\("\/api\/anime-premium\/pricing"/);
+  assert.match(client, /Checking checkout availability/);
+  assert.match(client, /Checkout temporarily unavailable/);
   assert.match(client, /open\.er-api\.com/);
-  assert.match(client, /Estimated price in/);
+  assert.match(client, /restcountries\.com/);
+  assert.match(client, /Estimated in/);
   assert.match(client, /Ghanaian Cedis/);
   assert.match(client, /localStorage\.setItem\("vivid:anime-premium-country"/);
 });
@@ -41,10 +45,17 @@ test("client selects one of the three server-owned hosted Paystack plan pages", 
   assert.match(client, /fetch\("\/api\/anime-premium\/page-checkout"/);
   assert.match(client, /JSON\.stringify\(\{ planId: selectedPlanId \}\)/);
   assert.match(client, /data-vap-plan/);
-  assert.match(client, /monthly: \{ amountMajor: 53\.30 \}/);
-  assert.match(client, /biannually: \{ amountMajor: 287\.82 \}/);
-  assert.match(client, /annually: \{ amountMajor: 511\.68 \}/);
+  assert.match(client, /monthly: \{ amountMajor: 53\.30/);
+  assert.match(client, /biannually: \{ amountMajor: 287\.82/);
+  assert.match(client, /annually: \{ amountMajor: 511\.68/);
   assert.doesNotMatch(client, /PAYSTACK_SECRET_KEY|pk_live_|PaystackPop/);
+});
+
+test("hosted page checkout requires verified identity and maps the three plans server-side", () => {
+  assert.match(pageCheckout, /requirePremiumUser/);
+  assert.match(pageCheckout, /monthly: \{ amount: 5330, currency: "GHS", url:/);
+  assert.match(pageCheckout, /biannually: \{ amount: 28782, currency: "GHS", url:/);
+  assert.match(pageCheckout, /annually: \{ amount: 51168, currency: "GHS", url:/);
 });
 
 test("webhook verification is the source of truth for membership activation and renewals", () => {
@@ -67,7 +78,7 @@ test("payment return checks server membership and never grants access from the c
 test("membership return survives Vivid email verification and is cached offline", () => {
   assert.match(sendVerification, /anime-premium-membership\.html/);
   assert.match(verifyEmail, /anime-premium-membership\.html/);
-  assert.match(sw, /vivid-cinema-shell-v350/);
+  assert.match(sw, /vivid-cinema-shell-v351/);
   assert.match(sw, /anime-premium-membership\.html/);
   assert.match(sw, /anime-premium-return\.html/);
   assert.match(sw, /anime-premium-membership\.js/);
