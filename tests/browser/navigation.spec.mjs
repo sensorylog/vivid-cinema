@@ -11,6 +11,7 @@ const routes = [
   "/watch.html",
   "/anime.html",
   "/anime-premium.html",
+  "/anime-premium-title.html?id=1&type=tv",
   "/community.html"
 ];
 
