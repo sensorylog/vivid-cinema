@@ -67,7 +67,8 @@ test("membership UI initialises pricing before Firebase auth and always exits lo
   assert.match(client, /CurrencyFreaks Open Rates, blended daily reference rates/);
   assert.match(exchangeRateApi, /open-rates\.currencyfreaks\.com/);
   assert.match(exchangeRateApi, /rates\.GHS/);
-  assert.match(exchangeRateApi, /targetPerUsd \/ quote\.ghsPerUsd/);
+  assert.match(exchangeRateApi, /payload\.base !== "GHS"/);
+  assert.match(exchangeRateApi, /const rate = Number\(quote\.rates\[currency\]\)/);
   assert.match(client, /Ghanaian Cedis/);
   assert.match(client, /localStorage\.setItem\("vivid:anime-premium-country"/);
 });
