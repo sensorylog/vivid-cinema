@@ -871,7 +871,7 @@ function mountSecondaryPlayer(params, title, detailsSnapshot = details) {
   if (!root) return;
 
   if (isAnimePlayback()) {
-    if (Number(params?.season) === 0) {
+    if (params?.type !== "tv" || Number(params?.season) === 0) {
       root.hidden = true;
       root.innerHTML = "";
       return;
