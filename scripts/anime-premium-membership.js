@@ -149,11 +149,11 @@ async function loadMembership() {
     const membership = payload.membership || {};
     membershipActive = membership.active === true;
     membershipAutoRenew = membership.autoRenew === true;
-    $("vap-cancel-renewal").hidden = !membershipActive || !membershipAutoRenew;
+    $("vap-cancel-renewal").hidden = !membershipActive || !membership.canCancelAutoRenew;
     if (membershipActive) {
       $("vap-current-membership").hidden = false;
       $("vap-membership-state").textContent = membership.autoRenew ? "Your Premium membership is active and set to renew automatically." : "Your Premium membership is active.";
-      $("vap-membership-period").textContent = "Access through " + (membership.currentPeriodEnd ? new Date(membership.currentPeriodEnd).toLocaleDateString() : "the current billing period") + " · " + (membership.autoRenew ? "Card auto-renewal is on" : "Manual renewal");
+      $("vap-membership-period").textContent = "Access through " + (membership.currentPeriodEnd ? new Date(membership.currentPeriodEnd).toLocaleDateString() : "the current billing period") + " · " + (membership.autoRenew ? (membership.canCancelAutoRenew ? "Card auto-renewal is on" : "Card auto-renewal is on · contact support to cancel") : "Manual renewal");
       $("vap-account-status").textContent = "You are signed in with your Vivid account.";
     }
   } catch (error) {
