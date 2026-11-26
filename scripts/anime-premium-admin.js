@@ -61,6 +61,11 @@ async function submitSource(event) {
     episode: Number($("vap-admin-episode").value || 1),
     provider: $("vap-admin-provider").value.trim(),
     sourceId: $("vap-admin-source-id").value.trim(),
+    allowedTerritories: $("vap-admin-territories").value.split(",").map(value => value.trim().toUpperCase()).filter(Boolean),
+    rightsReference: $("vap-admin-rights-reference").value.trim(),
+    licenseStartsAt: new Date($("vap-admin-license-start").value).toISOString(),
+    licenseEndsAt: new Date($("vap-admin-license-end").value).toISOString(),
+    rightsVerified: $("vap-admin-rights-verified").checked,
     active: $("vap-admin-source-active").checked
   };
   try {
