@@ -20,6 +20,7 @@ const IDENTITY_MASKS = [
   "M120 4 C173 36 229 67 230 140 C230 220 175 291 120 316 C65 291 10 220 10 140 C11 67 67 36 120 4 Z"
 ];
 let activeItems = [];
+let shelfRequest = 0;
 
 function titleOf(item) { return item.title || item.name || "Untitled anime"; }
 function dateOf(item) { return item.release_date || item.first_air_date || item.date || ""; }
@@ -72,6 +73,10 @@ function renderShelf(container, items) {
   if (!container) return;
   container.innerHTML = items.length ? items.map(card).join("") : '<p class="vap-inline-empty">No titles are available in this collection right now.</p>';
 }
+function renderShelfError(container, shelf) {
+  if (!container) return;
+  container.innerHTML = '<div class="vap-shelf-error"><span>' + escapeHtml(shelf.title) + ' could not load.</span><button type="button" data-vap-retry-shelves>Retry</button></div>';
+}
 function setItems(items) {
   const clean = unique(items);
   const registry = new Map(Object.entries(window.__vividAnimePremiumById || {}));
@@ -81,21 +86,34 @@ function setItems(items) {
   return clean;
 }
 async function loadShelves() {
+  const request = ++shelfRequest;
   const jobs = shelves.map(async shelf => {
     const result = await getAnimePage(1, { type: shelf.type, sort_by: shelf.sort });
     return { shelf, items: sorted(result.items || [], shelf.sort).slice(0, 12) };
   });
   const results = await Promise.allSettled(jobs);
+  if (request !== shelfRequest) return;
   const all = [];
-  for (const result of results) {
-    if (result.status !== "fulfilled") continue;
-    renderShelf($(result.value.shelf.id), result.value.items);
+  results.forEach((result, index) => {
+    const shelf = shelves[index];
+    if (result.status === "rejected") {
+      renderShelfError($(shelf.id), shelf);
+      console.warn("Vivid Anime Premium shelf failed:", shelf.id, result.reason);
+      return;
+    }
+    renderShelf($(shelf.id), result.value.items);
     all.push(...result.value.items);
-  }
+  });
   const registered = setItems(all);
   const identityItems = unique(registered).slice(0, 9);
   const identityRail = $("vap-identities");
-  if (identityRail) identityRail.innerHTML = identityItems.length ? identityItems.map(identityCard).join("") : '<p class="vap-inline-empty">Signature anime identities will appear here.</p>';
+  if (identityRail) {
+    identityRail.innerHTML = identityItems.length
+      ? identityItems.map(identityCard).join("")
+      : all.length
+        ? '<p class="vap-inline-empty">Signature anime identities will appear here.</p>'
+        : '<div class="vap-shelf-error"><span>Anime collections are temporarily unavailable.</span><button type="button" data-vap-retry-shelves>Retry collections</button></div>';
+  }
   const featured = sorted(all, "popularity.desc").find(item => item.backdrop_path) || all[0];
   if (featured) setHero(featured);
 }
@@ -170,6 +188,9 @@ async function loadCatalogue(reset = true) {
   }
 }
 function bindFilters() {
+  document.addEventListener("click", event => {
+    if (event.target.closest("[data-vap-retry-shelves]")) void loadShelves();
+  });
   document.querySelectorAll("[data-vap-type]").forEach(button => button.addEventListener("click", () => {
     state.type = button.dataset.vapType;
     document.querySelectorAll("[data-vap-type]").forEach(item => {
