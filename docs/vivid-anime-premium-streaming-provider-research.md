@@ -118,7 +118,7 @@ The source registry's server-managed `provider` value selects the matching confi
 A provider is **not integrated** until all of the following are true:
 
 - [ ] Written licence / integration authorisation is on file and covers VIVID's intended Premium distribution model.
-- [ ] Territory and title/episode rights are recorded and machine-enforced.
+- [x] Territory and title/episode rights are recorded in the admin source registry and machine-enforced at playback.
 - [ ] Provider has supplied an approved API, SDK, feed or delivery mechanism and credentials.
 - [ ] Provider adapter resolves a short-lived stream or DRM session without exposing secrets.
 - [ ] Host, expiry, MIME type, redirects and manifest/segment delivery are validated.
