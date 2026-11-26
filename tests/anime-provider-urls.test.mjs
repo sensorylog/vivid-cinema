@@ -14,3 +14,11 @@ test("anime provider builders reject invalid IDs and clamp zero episodes",()=>{
  assert.equal(buildAnimeEmbedUrl({aniListId:"not-a-number",episode:1}),"");
  assert.equal(buildVidyAnimeUrl({aniListId:"21",episode:0}),"https://vidy.st/anime/21/1?color=E50914&episodeSelector=true&nextEpisode=true");
 });
+
+test("anime track selection maps to provider-specific sub and dub routes",()=>{
+ const params={type:"tv",id:"123",season:1,episode:7};
+ assert.match(buildVidlinkEmbedUrl(params,{malId:"456",anime:true,track:"dub"}),/\/anime\/456\/7\/dub\?/);
+ assert.match(buildVidlinkEmbedUrl(params,{malId:"456",anime:true,track:"sub"}),/\/anime\/456\/7\/sub\?/);
+ assert.match(buildVidplusEmbedUrl(params,{aniListId:"789",anime:true,track:"dub"}),/dub=true/);
+ assert.match(buildVidplusEmbedUrl(params,{aniListId:"789",anime:true,track:"sub"}),/dub=false/);
+});
