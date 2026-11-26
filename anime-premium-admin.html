@@ -36,9 +36,15 @@
       <label>TMDB title ID<input id="vap-admin-title-id" inputmode="numeric" required pattern="[0-9]{1,12}"></label>
       <label>Season<input id="vap-admin-season" type="number" min="1" max="100" value="1"></label>
       <label>Episode<input id="vap-admin-episode" type="number" min="1" max="10000" value="1"></label>
-      <label>Approved provider<input id="vap-admin-provider" required maxlength="80"></label>
+      <label>Approved provider ID<input id="vap-admin-provider" required maxlength="64" pattern="[A-Za-z0-9][A-Za-z0-9._-]{1,63}"></label>
       <label>Resolver source ID<input id="vap-admin-source-id" required maxlength="160"></label>
+      <label>Licensed territories (ISO codes)<input id="vap-admin-territories" required placeholder="GH, NG, KE" maxlength="400"></label>
+      <label>Rights / contract reference<input id="vap-admin-rights-reference" required maxlength="120"></label>
+      <label>Licence starts at<input id="vap-admin-license-start" type="datetime-local" required></label>
+      <label>Licence ends at<input id="vap-admin-license-end" type="datetime-local" required></label>
+      <label class="vap-admin-toggle"><input id="vap-admin-rights-verified" type="checkbox" required> I confirm VIVID holds distribution rights for these territories and dates</label>
       <label class="vap-admin-toggle"><input id="vap-admin-source-active" type="checkbox" checked> Source is active</label>
+      <p class="vap-admin-help">Only enter a source after the written licence or integration permission is approved. The server blocks playback outside the recorded territories and licence window.</p>
       <button type="submit">Save authorised source mapping</button>
     </form>
   </section>
