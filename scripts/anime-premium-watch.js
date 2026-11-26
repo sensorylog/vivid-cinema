@@ -3,6 +3,7 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.19.0/f
 import { tmdbApi } from "./tmdb.js";
 import { getImageUrl } from "./media.js";
 import { escapeHtml } from "./utils.js";
+import { isAnimeMetadata } from "./anime-eligibility.js";
 import { resolveAnimeIds } from "./playback/anime-id-resolver.js";
 import { resolveAnimePremiumProviderOptions } from "./playback/anime-premium-providers.js";
 import { getLocalLibrary, upsertLibraryItem } from "./library.js";
@@ -126,7 +127,7 @@ function renderServerOptions() {
     '</span></button>'
   ).join("");
   list.querySelectorAll("[data-vap-server]").forEach(button => button.addEventListener("click", () => activateProvider(button.dataset.vapServer)));
-  $("vap-server-count").textContent = providerOptions.filter(item => item.available).length + " compatible";
+  $("vap-server-count").textContent = providerOptions.filter(item => item.available).length + " ID matched";
 }
 function activateProvider(providerId) {
   const provider = providerOptions.find(item => item.id === providerId && item.available);
@@ -495,6 +496,7 @@ async function loadWatchPage() {
   const getDetails = mediaType === "movie" ? tmdbApi.movieDetails : tmdbApi.tvDetails;
   titleDetails = await getDetails(titleId);
   if (!titleDetails?.id) throw new Error("This anime title could not be found.");
+  if (!isAnimeMetadata(titleDetails)) throw new Error("This title is not listed as Japanese animation in the Vivid Anime Premium catalogue.");
   animeIdPromise = resolveAnimeIds(titleName(titleDetails)).then(ids => {
     baseAnimeIds = ids || { aniListId: "", malId: "" };
     if (mediaType === "tv" && Number(params.get("season") || 1) === 1) seasonAnimeIds = { ...baseAnimeIds };
