@@ -27,12 +27,12 @@ async function handleChargeSuccess(db, env, data, eventRef) {
     const amount = Number(data.amount || 0);
     const currency = String(data.currency || "").toUpperCase();
     if (!email || !amount || !currency) return;
-    const pending = await db.collection("animePremiumPageCheckouts").where("email", "==", email).where("status", "==", "pending").limit(10).get();
+    const pending = await db.collection("animePremiumPageCheckouts").where("email", "==", email).limit(10).get();
     const now = Date.now();
     const match = pending.docs.find(doc => {
       const value = doc.data() || {};
       const created = typeof value.createdAt?.toMillis === "function" ? value.createdAt.toMillis() : Number(value.createdAt || 0);
-      return Number(value.amount) === amount && String(value.currency || "").toUpperCase() === currency && created > now - 24 * 60 * 60 * 1000;
+      return value.status === "pending" && Number(value.amount) === amount && String(value.currency || "").toUpperCase() === currency && created > now - 24 * 60 * 60 * 1000;
     });
     if (!match) return;
     checkoutRef = match.ref;
