@@ -1011,6 +1011,8 @@ function renderShell(params) {
           }
         });
       }).catch(error => console.warn("Vivid Archive Cinema could not initialize:", error));
+    } else if (archiveRoot) {
+      archiveRoot.hidden = true;
     }
     serverMenu.setAttribute("aria-expanded", "false");
   }
