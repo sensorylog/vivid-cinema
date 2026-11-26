@@ -6,6 +6,7 @@ const read = (path) => readFileSync(new URL(path, import.meta.url), "utf8");
 const library = read("../scripts/library.js");
 const progress = read("../scripts/recommendations.js");
 const intelligence = read("../scripts/intelligence.js");
+import { cleanItem } from "../scripts/library.js";
 
 test("library, progress, and intelligence use the shared owner snapshot policy", () => {
   for (const source of [library, progress, intelligence]) {
@@ -63,4 +64,14 @@ test("progress and library retain local-first semantics when cloud sync fails", 
   assert.match(progress, /writeProgress\(current\)/);
   assert.match(library, /Do not replace local data until all required cloud operations have been/);
   assert.match(library, /The signed-in account changed during library sync/);
+});
+
+
+test("library sync normalizes numeric and missing years to Firestore-safe strings", () => {
+  const numericYear = cleanItem({ id: 550, media_type: "movie", title: "The Matrix", year: 1999 });
+  assert.equal(numericYear.year, "1999");
+  assert.equal(typeof numericYear.year, "string");
+  const missingYear = cleanItem({ id: 551, media_type: "movie", title: "Untitled" });
+  assert.equal(missingYear.year, "");
+  assert.equal(typeof missingYear.year, "string");
 });

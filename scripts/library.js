@@ -124,12 +124,12 @@ export function clearLibraryCollection(collection){
   return library;
 }
 
-function cleanItem(item){
+export function cleanItem(item){
   return {
     id:String(item.id),
     media_type:item.media_type||item.mediaType||"movie",
     title:item.title||item.name||"Untitled",
-    year:item.year||"",
+    year:String(item.year??""),
     poster_path:item.poster_path||"",
     backdrop_path:item.backdrop_path||"",
     updatedAt:Number(item.updatedAt)||Date.now(),
