@@ -11,139 +11,66 @@ const [html, script, sw, syntax, css] = await Promise.all([
   read("../styles/vivid-anime-premium-watch.css")
 ]);
 
-test("Premium watch route provides a native protected player and episode browser", () => {
-  assert.match(html, /data-vivid-page="anime-premium-watch"/);
-  assert.match(html, /<video id="vap-player" controls playsinline/);
-  assert.match(html, /id="vap-player-gate"/);
-  assert.match(html, /id="vap-season-picker"/);
-  assert.match(html, /id="vap-episode-grid"/);
-  assert.match(html, /id="vap-next-episode"/);
-  assert.match(html, /scripts\/anime-premium-watch\.js/);
+test("Premium watch page has a responsive embedded player and multi-server selector", () => {
+  assert.match(html, /id="vap-player-frame"/);
+  assert.match(html, /id="vap-server-list"/);
+  assert.match(html, /id="vap-server-count"/);
+  assert.match(html, /id="vap-server-next"/);
+  assert.match(html, /data-vap-track="sub"/);
+  assert.match(html, /data-vap-track="dub"/);
+  assert.doesNotMatch(html, /<video[^>]+src=/i);
+  assert.match(css, /\.vap-server-list/);
+  assert.match(css, /\.vap-player-stage iframe/);
 });
 
-test("playback requests use the existing Vivid Firebase user token and server endpoint", () => {
+test("Premium access is verified through the existing Firebase account before a provider iframe opens", () => {
   assert.match(script, /import \{ auth \} from "\.\/firebase\.js"/);
   assert.match(script, /onAuthStateChanged\(auth/);
   assert.match(script, /currentUser\.getIdToken\(\)/);
   assert.match(script, /fetch\("\/api\/anime-premium\/playback"/);
-  assert.match(script, /Authorization": "Bearer " \+ token/);
+  assert.match(script, /response\.status === 403/);
+  assert.match(script, /activateProvider\(first\.id\)/);
   assert.doesNotMatch(script, /initializeApp\s*\(|getAuth\s*\(/);
 });
 
-test("player accepts only unexpired HTTPS playback sessions returned by the server", () => {
-  assert.match(script, /new URL\(playback\.url/);
-  assert.match(script, /streamUrl\.protocol !== "https:"/);
-  assert.match(script, /const expiresAt = Date\.parse\(playback\.expiresAt\)/);
-  assert.match(script, /!Number\.isFinite\(expiresAt\) \|\| expiresAt <= Date\.now\(\)/);
-  assert.match(script, /application\/vnd\.apple\.mpegurl/);
-  assert.match(script, /video\/mp4/);
-  assert.doesNotMatch(script, /vidsrc|vidlink|vidplus|vidking|embedapi|moviesapi/i);
+test("Premium watch resolves AniList and MAL identifiers independently and supports season-specific lookups", () => {
+  assert.match(script, /resolveAnimeIds\(titleName\(titleDetails\)\)/);
+  assert.match(script, /resolveAnimeIds\(titleName\(titleDetails\) \+ " " \+ seasonLabel\)/);
+  assert.match(script, /seasonAnimeIds/);
+  assert.match(script, /episodeNumber \+ offset/);
 });
 
-test("watch page fails closed for missing sessions, missing membership and unavailable playback", () => {
-  assert.match(script, /response\.status === 401/);
-  assert.match(script, /response\.status === 403/);
-  assert.match(script, /response\.status === 404 \|\| response\.status === 503/);
-  assert.match(script, /No unverified third-party source will be substituted/);
-  assert.doesNotMatch(html, /<video[^>]+src=/i);
+test("Provider fallback switches embeds without requesting arbitrary stream URLs", () => {
+  assert.match(script, /function fallbackToNextPlaybackServer/);
+  assert.match(script, /failedProviderIds\.add\(activeProviderId\)/);
+  assert.match(script, /providerOptions\.find\(item => item\.available && !failedProviderIds\.has\(item\.id\)\)/);
+  assert.match(script, /frame\.src = provider\.url/);
+  assert.match(script, /event\.origin !== provider\.origin/);
+  assert.match(script, /event\.source !== frame\.contentWindow/);
+  assert.doesNotMatch(script, /ANIME_PREMIUM_STREAM_RESOLVER|excludeCandidateIds|HLS_LIBRARY_URL/);
 });
 
-test("watch route assets are cached offline and included in syntax checks", () => {
-  assert.match(sw, /vivid-cinema-shell-v337/);
-  assert.match(sw, /anime-premium-watch\.html/);
-  assert.match(sw, /vivid-anime-premium-watch\.css/);
-  assert.match(sw, /anime-premium-watch\.js/);
-  assert.match(syntax, /scripts\/anime-premium-watch\.js/);
-  assert.match(css, /vap-player-stage/);
-});
-
-
-test("HLS streams use the shared cached Hls.js runtime when native playback is unavailable", () => {
-  assert.match(script, /HLS_LIBRARY_URL = "https:\/\/cdn\.jsdelivr\.net\/npm\/hls\.js@1\.7\.3\/dist\/hls\.min\.js"/);
-  assert.match(script, /Hls\.isSupported\(\)/);
-  assert.match(script, /const hls = new Hls\(/);
-  assert.match(script, /hls\.loadSource\(streamUrl\.href\)/);
-  assert.match(script, /hls\.attachMedia\(video\)/);
-  assert.match(script, /activeHls !== hls/);
-  assert.match(script, /video\.canPlayType\(mimeType\)/);
-});
-
-test("playback sessions expire safely and stale episode requests cannot replace newer selections", () => {
-  assert.match(script, /playbackRequestId/);
-  assert.match(script, /requestId !== playbackRequestId/);
-  assert.match(script, /Playback session expired/);
-  assert.match(script, /disposeHls\(\)/);
-  assert.match(script, /window\.clearTimeout\(playbackExpiryTimer\)/);
-});
-
-test("invalid playback expiry timestamps fail closed instead of creating an immediate or endless session", () => {
-  assert.match(script, /const expiresAt = Date\.parse\(playback\.expiresAt\)/);
-  assert.match(script, /!Number\.isFinite\(expiresAt\) \|\| expiresAt <= Date\.now\(\)/);
-  assert.match(script, /const expiresIn = expiresAt - Date\.now\(\)/);
-});
-
-test("episode navigation preserves the final progress snapshot and invalidates stale playback requests", () => {
-  assert.match(script, /if \(currentPlaybackSessionId\) void syncPlaybackProgress\(true\)/);
-  assert.match(script, /playbackRequestId \+= 1;[\s\S]*showGate\("Loading season"/);
-  assert.match(script, /pendingProgressSnapshot = \{/);
-  assert.match(script, /while \(pendingProgressSnapshot\)/);
-  assert.match(script, /sessionId: snapshot\.sessionId/);
-});
-
-test("account changes invalidate pending playback and discard queued progress from the prior account", () => {
-  assert.match(script, /currentUser\?\.uid && currentUser\.uid !== nextUser\?\.uid/);
-  assert.match(script, /pendingProgressSnapshot = null/);
-  assert.match(script, /Playback stopped after the Vivid account changed/);
-});
-
-test("HLS playback waits for manifest readiness and bounds fatal recovery attempts", () => {
-  assert.match(script, /Hls\.Events\.MANIFEST_PARSED/);
-  assert.match(script, /deferredHlsPlayback = true/);
-  assert.match(script, /hlsRecoveryAttempts \+= 1/);
-  assert.match(script, /hlsRecoveryAttempts > 2/);
-  assert.match(script, /requestId !== playbackRequestId/);
-});
-
-test("watch page flushes the latest progress with keepalive before HLS teardown", () => {
-  assert.match(script, /keepalive: force/);
-  assert.match(script, /window\.addEventListener\("pagehide"/);
-  assert.match(script, /if \(currentPlaybackSessionId\) void syncPlaybackProgress\(true\)/);
-  assert.match(script, /playbackRequestId \+= 1;[\s\S]*disposeHls\(\)/);
-});
-
-
-test("queued final progress snapshots retain keepalive when a periodic save is already running", () => {
-  assert.match(script, /duration: video\.duration,\s*keepalive: force/);
+test("Progress messages are origin-checked and saved through the Premium progress endpoint", () => {
+  assert.match(script, /anilink-player:progress/);
+  assert.match(script, /aniembed:play/);
+  assert.match(script, /provider\.id === "megavid"/);
+  assert.match(script, /fetch\("\/api\/anime-premium\/progress"/);
   assert.match(script, /keepalive: snapshot\.keepalive/);
-});
-
-
-test("watcher requests ordered server candidates and automatically fails over after a source error", () => {
-  assert.match(script, /excludeCandidateIds: excludedCandidates\.slice\(0, 8\)/);
-  assert.match(script, /activePlaybackCandidateId = String\(playback\.candidateId \|\| playback\.provider \|\| ""\)/);
-  assert.match(script, /fallbackToNextPlaybackServer\("This authorised server failed during playback\."/);
-  assert.match(script, /fallbackToNextPlaybackServer\("The current authorised server could not recover\."/);
-  assert.match(script, /failedPlaybackCandidates = \[\.\.\.new Set/);
-  assert.match(script, /Trying the next authorised server/);
-});
-
-
-test("watcher can fail over when HLS.js is unavailable or unsupported", () => {
-  assert.match(script, /fallbackToNextPlaybackServer\("The HLS playback engine could not load/);
-  assert.match(script, /fallbackToNextPlaybackServer\("This browser cannot use the HLS engine/);
-});
-
-
-test("playback progress checks HTTP responses and retries a failed snapshot at most once", () => {
   assert.match(script, /Progress endpoint returned HTTP/);
-  assert.match(script, /retries: 0/);
-  assert.match(script, /Number\(snapshot\.retries \|\| 0\) < 1/);
-  assert.match(script, /retries: Number\(snapshot\.retries \|\| 0\) \+ 1/);
-  assert.match(script, /!pendingProgressSnapshot/);
 });
 
+test("Playback sessions expire and account changes stop embedded playback", () => {
+  assert.match(script, /const expiresAt = Date\.parse\(playback\.expiresAt\)/);
+  assert.match(script, /Playback session expired/);
+  assert.match(script, /currentUser\?\.uid && currentUser\.uid !== nextUser\?\.uid/);
+  assert.match(script, /frame\.src = "about:blank"/);
+  assert.match(script, /window\.addEventListener\("pagehide"/);
+});
 
-test("watcher surfaces server-provided territory and provider fallback explanations", () => {
-  assert.match(script, /const failure = await response\.json\(\)\.catch\(\(\) => \(\{\}\)\)/);
-  assert.match(script, /failure\.message \|\| "The protected playback request could not be completed\."/);
+test("Watch page assets are cached and syntax-checked", () => {
+  assert.match(sw, /vivid-cinema-shell-v338/);
+  assert.match(sw, /anime-premium-watch\.html/);
+  assert.match(sw, /anime-premium-providers\.js/);
+  assert.match(syntax, /scripts\/anime-premium-watch\.js/);
+  assert.match(syntax, /scripts\/playback\/anime-premium-providers\.js/);
 });
