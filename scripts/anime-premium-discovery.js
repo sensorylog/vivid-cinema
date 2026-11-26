@@ -21,6 +21,7 @@ const IDENTITY_MASKS = [
   "M120 4 C173 36 229 67 230 140 C230 220 175 291 120 316 C65 291 10 220 10 140 C11 67 67 36 120 4 Z"
 ];
 let activeItems = [];
+let identityCardInstance = 0;
 
 function titleOf(item) { return item.title || item.name || "Untitled anime"; }
 function dateOf(item) { return item.release_date || item.first_air_date || item.date || ""; }
@@ -60,7 +61,7 @@ function identityCard(item) {
   const key = String(item.media_type || "tv") + ":" + String(item.id);
   let seed = 0;
   for (const char of key) seed = (seed * 31 + char.charCodeAt(0)) >>> 0;
-  const maskId = "vap-identity-" + (item.media_type || "tv") + "-" + String(item.id).replace(/[^0-9]/g, "");
+  const maskId = "vap-identity-" + (++identityCardInstance);
   const path = IDENTITY_MASKS[seed % IDENTITY_MASKS.length];
   const type = item.media_type === "movie" ? "ANIME FILM" : "ANIME SERIES";
   return '<a class="vap-identity-card" href="' + escapeHtml(titleUrl(item)) + '" aria-label="Explore ' + escapeHtml(title) + '">' +
@@ -71,7 +72,7 @@ function identityCard(item) {
 }
 function renderShelf(container, items) {
   if (!container) return;
-  container.innerHTML = items.length ? items.map(card).join("") : '<p class="vap-inline-empty">No titles are available in this collection right now.</p>';
+  container.innerHTML = items.length ? items.map(identityCard).join("") : '<p class="vap-inline-empty">No titles are available in this collection right now.</p>';
 }
 function setItems(items) {
   const clean = unique(items);
@@ -149,7 +150,7 @@ async function loadCatalogue(reset = true) {
     const items = sorted(result.items || [], state.sort);
     const combined = reset ? items : [...activeItems, ...items];
     activeItems = setItems(combined);
-    const markup = items.length ? items.map(card).join("") : '<div class="vap-empty-state"><strong>No anime found</strong><span>Try a different title, year or filter.</span></div>';
+    const markup = items.length ? items.map(identityCard).join("") : '<div class="vap-empty-state"><strong>No anime found</strong><span>Try a different title, year or filter.</span></div>';
     if (reset) $("vap-catalogue-grid").innerHTML = markup;
     else $("vap-catalogue-grid").insertAdjacentHTML("beforeend", markup);
     state.totalPages = Number(result.totalPages || 1);
