@@ -54,7 +54,7 @@ test("anime identity cards use per-title SVG silhouette masks and mobile poster 
 });
 
 test("title route and runtime are available offline and included in syntax checks", () => {
-  assert.match(sw, /vivid-cinema-shell-v357/);
+  assert.match(sw, /vivid-cinema-shell-v358/);
   assert.match(sw, /scripts\/anime-eligibility\.js/);
   assert.match(sw, /anime-premium-title\.html/);
   assert.match(sw, /vivid-anime-premium-title\.css/);
