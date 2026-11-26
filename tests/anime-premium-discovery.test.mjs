@@ -27,7 +27,7 @@ test("Premium catalogue uses the existing anime metadata API and filters Japanes
   assert.doesNotMatch(script, /initializeApp\s*\(|getAuth\s*\(/);
 });
 
-test("catalogue cards open accessible title previews without exposing playback sources", () => {
+test("catalogue cards open dedicated title routes and signature cards use per-title SVG masks", () => {
   assert.match(html, /id="vap-identities"/);
   assert.match(script, /dialog\.showModal\(\)/);
   assert.match(script, /vap-identity-svg/);
@@ -36,6 +36,9 @@ test("catalogue cards open accessible title previews without exposing playback s
 
 test("Premium discovery assets are cached and syntax-checked", () => {
   assert.match(sw, /scripts\/anime-premium-discovery\.js/);
-  assert.match(sw, /vivid-cinema-shell-v329/);
+  assert.match(sw, /vivid-cinema-shell-v330/);
+  assert.match(sw, /anime-premium-title\\.html/);
+  assert.match(sw, /anime-premium-title\\.js/);
+  assert.match(sw, /vivid-anime-premium-title\\.css/);
   assert.match(syntax, /scripts\/anime-premium-discovery\.js/);
 });
