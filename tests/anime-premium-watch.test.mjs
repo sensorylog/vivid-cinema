@@ -55,3 +55,19 @@ test("watch route assets are cached offline and included in syntax checks", () =
   assert.match(syntax, /scripts\/anime-premium-watch\.js/);
   assert.match(css, /vap-player-stage/);
 });
+
+\ntest("HLS streams use the shared cached Hls.js runtime when native playback is unavailable", () => {
+  assert.match(script, /HLS_LIBRARY_URL = "https:\\/\\/cdn\\.jsdelivr\\.net\\/npm\\/hls\\.js@1\\.7\\.3\\/dist\\/hls\\.min\\.js"/);
+  assert.match(script, /Hls\\.isSupported\\(\\)/);
+  assert.match(script, /activeHls\\.loadSource\\(streamUrl\\.href\\)/);
+  assert.match(script, /activeHls\\.attachMedia\\(video\\)/);
+  assert.match(script, /video\\.canPlayType\\(mimeType\\)/);
+});
+
+test("playback sessions expire safely and stale episode requests cannot replace newer selections", () => {
+  assert.match(script, /playbackRequestId/);
+  assert.match(script, /requestId !== playbackRequestId/);
+  assert.match(script, /Playback session expired/);
+  assert.match(script, /disposeHls\\(\\)/);
+  assert.match(script, /window\\.clearTimeout\\(playbackExpiryTimer\\)/);
+});
