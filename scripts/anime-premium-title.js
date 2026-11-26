@@ -1,6 +1,7 @@
 import { tmdbApi } from "./tmdb.js";
 import { getImageUrl, normalizeResults } from "./media.js";
 import { escapeHtml } from "./utils.js";
+import { hasLibraryItem, toggleLibraryItem } from "./library.js";
 
 const $ = id => document.getElementById(id);
 const params = new URLSearchParams(window.location.search);
@@ -146,44 +147,52 @@ function observeHeroScroll() {
   }, { threshold: [0, 0.25, 0.5, 1] });
   observer.observe(hero);
 }
-const FAVORITES_KEY = "vivid:anime-premium:my-list";
-
-function readFavorites() {
-  try {
-    const value = JSON.parse(localStorage.getItem(FAVORITES_KEY) || "[]");
-    return Array.isArray(value) ? value.filter(item => item && /^\d{1,12}$/.test(String(item.id)) && ["tv", "movie"].includes(item.type)) : [];
-  } catch {
-    return [];
-  }
+function libraryTitleItem(details) {
+  return {
+    id: String(details.id),
+    media_type: mediaType,
+    title: titleName(details),
+    year: releaseYear(details) === "Year unavailable" ? "" : releaseYear(details),
+    poster_path: details.poster_path || "",
+    backdrop_path: details.backdrop_path || ""
+  };
 }
+
 function updateFavoriteButton(details) {
   const button = $("vap-title-favorite");
   if (!button) return;
-  const key = mediaType + ":" + details.id;
-  const saved = readFavorites().some(item => item.type + ":" + item.id === key);
+  const item = libraryTitleItem(details);
+  const saved = hasLibraryItem("favorites", item);
   button.setAttribute("aria-pressed", String(saved));
   button.classList.toggle("is-saved", saved);
   button.innerHTML = saved
     ? '<i class="bi bi-bookmark-check" aria-hidden="true"></i> Added to My List'
     : '<i class="bi bi-bookmark-plus" aria-hidden="true"></i> Add to My List';
   button.onclick = () => {
-    const favorites = readFavorites();
-    const exists = favorites.some(item => item.type + ":" + item.id === key);
-    const next = exists
-      ? favorites.filter(item => item.type + ":" + item.id !== key)
-      : [...favorites, { id: String(details.id), type: mediaType, title: titleName(details), savedAt: new Date().toISOString() }];
-    try {
-      localStorage.setItem(FAVORITES_KEY, JSON.stringify(next));
-      updateFavoriteButton(details);
-      button.dispatchEvent(new CustomEvent("vap:favorites-changed", { bubbles: true, detail: { id: String(details.id), type: mediaType, saved: !exists } }));
-    } catch {
-      button.setAttribute("aria-pressed", String(exists));
-      button.textContent = exists ? "Added to My List" : "Could not save — try again";
-    }
+    const next = toggleLibraryItem("favorites", item);
+    const isSaved = (next.favorites || []).some(entry =>
+      String(entry.id) === item.id && (entry.media_type || entry.mediaType || "movie") === mediaType
+    );
+    button.setAttribute("aria-pressed", String(isSaved));
+    button.classList.toggle("is-saved", isSaved);
+    button.innerHTML = isSaved
+      ? '<i class="bi bi-bookmark-check" aria-hidden="true"></i> Added to My List'
+      : '<i class="bi bi-bookmark-plus" aria-hidden="true"></i> Add to My List';
+    button.dispatchEvent(new CustomEvent("vap:favorites-changed", {
+      bubbles: true,
+      detail: { id: item.id, type: mediaType, saved: isSaved }
+    }));
   };
 }
 
+window.addEventListener("vivid:library-changed", () => {
+  const name = $("vap-title-name")?.textContent;
+  if (!name || !window.currentAnimePremiumDetails) return;
+  updateFavoriteButton(window.currentAnimePremiumDetails);
+});
+
 function renderTitle(details) {
+  window.currentAnimePremiumDetails = details;
   const name = titleName(details);
   document.title = name + " · VIVID ANIME PREMIUM";
   $("vap-title-name").textContent = name;
