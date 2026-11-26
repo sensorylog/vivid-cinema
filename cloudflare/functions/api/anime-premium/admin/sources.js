@@ -14,7 +14,7 @@ export function onRequestOptions({ request, env }) {
 }
 export async function onRequest({ request, env }) {
   const origin = request.headers.get("Origin") || "";
-  if (!allowedOrigin(origin, env)) return jsonResponse({ ok: false, code: "origin-not-allowed" }, 403, "", env);
+  if (origin && !allowedOrigin(origin, env)) return jsonResponse({ ok: false, code: "origin-not-allowed" }, 403, "", env);
   try {
     const user = await requirePremiumUser(request, env);
     requireAdmin(user, env);
