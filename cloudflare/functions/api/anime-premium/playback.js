@@ -76,9 +76,15 @@ export async function onRequestPost({ request, env }) {
         !["video/mp4", "application/vnd.apple.mpegurl", "application/x-mpegURL"].includes(mimeType)) {
       throw new AnimePremiumError(502, "invalid-playback-session", "The authorised provider returned an invalid playback session.");
     }
+    const sessionId = crypto.randomUUID();
+    await db.collection("animePremiumPlaybackSessions").doc(sessionId).set({
+      uid: user.uid, mediaType, titleId, season, episode, sourceKey,
+      expiresAt: timestampFromMillis(expiresAt), createdAt: timestampFromMillis(Date.now())
+    });
     return jsonResponse({
       ok: true,
       playback: {
+        sessionId,
         url: url.toString(),
         expiresAt: new Date(expiresAt).toISOString(),
         mimeType,
