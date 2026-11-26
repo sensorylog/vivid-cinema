@@ -114,10 +114,10 @@ The Premium entry route now acts as a dedicated discovery homepage rather than a
 - The browser never supplies the account UID, payment amount, page URL or entitlement duration. The server owns all of those values.
 - The Paystack hosted page performs the payment. A signed `charge.success` webhook is the authoritative payment confirmation. For hosted-page transactions, the webhook's Paystack-generated reference is matched to exactly one recent pending checkout using verified account email, fixed plan amount and GHS currency. Ambiguous matches are not granted automatically.
 - Hosted-page fulfilment uses the authenticated Paystack webhook signature and validates success status, exact amount and currency. It does not call transaction initialization or transaction verification APIs for the hosted-page redirect flow. The older API-initialized checkout path retains its server-side transaction verification.
-- `PAYSTACK_WEBHOOK_SECRET` is the preferred server-only webhook signing secret. `PAYSTACK_SECRET_KEY` is not required to open or pay through the three hosted pages; it remains an optional fallback for legacy webhook signatures and the older API-initialized checkout route. Never expose either secret to browser code.
+- `PAYSTACK_WEBHOOK_SECRET` (`whsec_...`) is the preferred server-only secret for Paystack's modern timestamped webhook signature. If the integration has not enabled that header yet, `PAYSTACK_SECRET_KEY` (`sk_...`) can validate the legacy `X-Paystack-Signature` header. The hosted payment pages themselves do not require a secret key to collect payment; Vivid needs one of these server-only verification secrets to safely activate membership. Never expose either secret to browser code.
 - Paystack subscription pages should be configured as recurring subscription pages with the correct plan interval. When Paystack supplies a subscription code, Vivid records automatic renewal; otherwise the entitlement is treated as manual renewal rather than claiming an unverified recurring arrangement.
 - Configure each of the three Paystack pages to redirect after payment to `https://vivid-cinema.pages.dev/anime-premium-return.html`. The return page only polls Vivid's server-owned membership status; it never grants access from a browser redirect.
-- Configure the Paystack webhook URL as `https://vivid-cinema.pages.dev/api/anime-premium/webhook`. The webhook signing secret must be stored in Cloudflare Pages production secrets as `PAYSTACK_WEBHOOK_SECRET`.
+- Configure the Paystack webhook URL as `https://vivid-cinema.pages.dev/api/anime-premium/webhook`. Prefer generating the webhook signing secret in Paystack Dashboard → Developers → API configuration and storing it in Cloudflare Pages Production as `PAYSTACK_WEBHOOK_SECRET`. Until Paystack sends the modern `Paystack-Signature` header, the existing server-side `PAYSTACK_SECRET_KEY` can validate the legacy `X-Paystack-Signature` header.
 - Country selection is populated from the complete country/currency dataset; local-currency conversion is labelled as an indicative reference estimate. Paystack still charges the fixed GHS amount shown on the selected hosted page, and the card issuer/payment provider determines any final conversion and fees.
 - Voluntary Support Vivid donations remain separate and continue to use their existing Paystack Inline public-key flow.
 ### Entitlement and playback security
@@ -132,11 +132,11 @@ The Premium entry route now acts as a dedicated discovery homepage rather than a
 
 ### Required Cloudflare environment configuration before live payments
 - FIREBASE_SERVICE_ACCOUNT_JSON and FIREBASE_PROJECT_ID (existing Vivid server-side Firebase credentials).
-- PAYSTACK_WEBHOOK_SECRET (required server-only signing secret for the three hosted Premium Payment Pages; never expose it to the browser).
-- PAYSTACK_SECRET_KEY is not required for the hosted-page redirect or signed-webhook fulfilment. It is retained only for the older API-initialized checkout route and legacy webhook signature compatibility.
+- PAYSTACK_WEBHOOK_SECRET (preferred server-only `whsec_...` signing secret; never expose it to the browser).
+- PAYSTACK_SECRET_KEY (`sk_...`) is not required to open the hosted payment pages. It remains a server-only fallback for legacy `X-Paystack-Signature` verification and the older API-initialized checkout route.
 - Do not require PAYSTACK_LIVE_ENABLED or Paystack plan-code environment variables for the three fixed hosted Payment Pages. Those settings belong to the older API-initialized checkout path.
 - ANIME_PREMIUM_ADMIN_UIDS for server-side admin allowlisting when custom admin claims are not used.
-- Configure the Paystack webhook URL as https://vivid-cinema.pages.dev/api/anime-premium/webhook on the Vivid production origin and save the matching signing secret in Cloudflare Pages Production as PAYSTACK_WEBHOOK_SECRET.
+- Configure the Paystack webhook URL as https://vivid-cinema.pages.dev/api/anime-premium/webhook on the Vivid production origin. Prefer saving the matching `whsec_...` signing secret in Cloudflare Pages Production as PAYSTACK_WEBHOOK_SECRET; an existing `PAYSTACK_SECRET_KEY` supports legacy webhook signatures until modern signing is enabled.
 - Set the Redirect after payment URL on all three hosted Payment Pages to https://vivid-cinema.pages.dev/anime-premium-return.html. The return page only checks membership; the signed webhook activates it.
 - Support Vivid donations remain on their existing, separate Paystack Inline public-key flow.
 
