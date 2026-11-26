@@ -27,3 +27,8 @@ test("anime Player 2 only auto-advances when an iframe fails to load", async () 
   assert.match(player, /if \(!frameLoaded\) \{\s*tryNextServer/);
   assert.match(player, /Actual video playback is not yet confirmed/);
 });
+
+test("anime Player 2 sets the provider URL before inserting the iframe", async () => {
+  const player = await readFile(new URL("../scripts/playback/anime-secondary-player.js", import.meta.url), "utf8");
+  assert.match(player, /frame\.src = url;\s*screen\.appendChild\(frame\)/);
+});
