@@ -103,3 +103,10 @@ test("HLS playback waits for manifest readiness and bounds fatal recovery attemp
   assert.match(script, /hlsRecoveryAttempts > 2/);
   assert.match(script, /requestId !== playbackRequestId/);
 });
+
+test("watch page flushes the latest progress with keepalive before HLS teardown", () => {
+  assert.match(script, /keepalive: force/);
+  assert.match(script, /window\.addEventListener\("pagehide"/);
+  assert.match(script, /if \(currentPlaybackSessionId\) void syncPlaybackProgress\(true\)/);
+  assert.match(script, /playbackRequestId \+= 1;[\s\S]*disposeHls\(\)/);
+});
