@@ -1,6 +1,6 @@
 import {
   AnimePremiumError, getPremiumServices, paystackRequest, timestampFromMillis,
-  verifyPaystackSignature, jsonResponse, safeReference, addDaysMillis
+  verifyPaystackSignature, jsonResponse, safeReference
 } from "../../lib/anime-premium-service.js";
 
 async function eventDocumentId(event, data) {
