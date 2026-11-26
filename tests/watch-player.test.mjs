@@ -205,7 +205,8 @@ test("Archive Cinema is integrated as a rights-filtered movie fallback in Player
   assert.match(source, /id="vivid-archive-search"/);
   assert.match(source, /mountArchiveFilmSearch/);
   assert.match(source, /function showArchiveFallback\(\)/);
-  assert.match(source, /if \(!nextSource\)/);\n  assert.ok(source.includes("showArchiveFallback();"));
+  assert.match(source, /if \(!nextSource\)/);
+  assert.ok(source.includes("showArchiveFallback();"));
   assert.match(source, /if \(archiveRoot\) archiveRoot\.hidden = true/);
   assert.match(source, /currentParams\?\.type !== "movie"/);
   assert.match(source, /providerId: "archive"/);
