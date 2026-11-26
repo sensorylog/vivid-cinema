@@ -141,10 +141,3 @@ export function buildVidyAnimeUrl({ aniListId = "", episode = 1, startAt = 0 } =
   if (Number(startAt) > 0) query.set("progress", String(Math.floor(Number(startAt))));
   return "https://vidy.st/anime/" + id + "/" + Math.max(1, Number(episode) || 1) + "?" + query;
 }
-
-export function buildAniweebAnimeUrl({ aniListId = "", episode = 1, track = "sub" } = {}) {
-  const id = /^\d+$/.test(String(aniListId || "")) ? String(aniListId) : "";
-  if (!id) return "";
-  const query = new URLSearchParams({ track: track === "dub" ? "dub" : "sub" });
-  return "https://api.aniweeb.net/embed/ani/" + id + "/" + Math.max(1, Number(episode) || 1) + "?" + query;
-}
