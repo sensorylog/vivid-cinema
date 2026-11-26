@@ -92,7 +92,7 @@ Never expose partner secrets to the browser. Never store a permanent stream URL 
 ## Current codebase fit
 
 The current Phase 4 API already has:
-- `animePremiumSources/{mediaType_titleId_sN_eN}` as a server-managed episode source registry; each episode record now supports up to eight independently rights-cleared `candidates`, each with a unique candidate ID, provider, source ID, priority, territory list, licence window and active flag;
+- `animePremiumSources/{mediaType_titleId_sN_eN}` as a server-managed episode source registry, plus `animePremiumSources/tv_titleId` title-wide mappings; title-wide mappings let an approved provider adapter resolve any season/episode for a series without manually entering every episode. Each mapping supports up to eight independently rights-cleared `candidates`, each with a unique candidate ID, provider, source ID, priority, territory list, licence window and active flag;
 - `ANIME_PREMIUM_PROVIDER_RESOLVERS_JSON` as the preferred server-only map of provider ID to resolver URL, resolver token and provider-specific allowed hostnames;
 - legacy `ANIME_PREMIUM_STREAM_RESOLVER_URL`, `ANIME_PREMIUM_STREAM_RESOLVER_TOKEN` and `ANIME_PREMIUM_STREAM_HOSTS` as a backwards-compatible single-resolver fallback;
 - provider-specific final host allowlists, so one partner's resolver cannot return another provider's domain;
@@ -117,7 +117,7 @@ The playback endpoint now supports isolated provider resolver configurations. Co
 }
 ```
 
-The source registry's server-managed candidate `provider` value selects the matching configuration. Each provider has a separate token, resolver URL and final hostname allowlist. The existing single-resolver environment variables remain as a backwards-compatible fallback while the multi-provider configuration is introduced. It must not accept arbitrary URLs, arbitrary resolver destinations, browser-supplied provider names, or user-supplied stream hosts. The browser may only submit candidate IDs to skip after a playback failure; it cannot select a provider, set a stream URL, or bypass territory and licence checks.
+The source registry's server-managed candidate `provider` value selects the matching configuration. Each provider has a separate token, resolver URL and final hostname allowlist. The existing single-resolver environment variables remain as a backwards-compatible fallback while the multi-provider configuration is introduced. It must not accept arbitrary URLs, arbitrary resolver destinations, browser-supplied provider names, or user-supplied stream hosts. The browser may only submit candidate IDs to skip after a playback failure; it cannot select a provider, set a stream URL, or bypass territory and licence checks. Episode-specific mappings are tried before title-wide mappings, so a title can use a default provider while exceptional episodes can be mapped to a different approved source.
 
 ## Phase 4 implementation gates
 
