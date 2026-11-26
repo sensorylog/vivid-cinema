@@ -876,6 +876,15 @@ service cloud.firestore {
     match /animePremiumSources/{sourceId} {
       allow read, write: if false;
     }
+    match /animePremiumProfiles/{uid} {
+      allow read, write: if false;
+    }
+    match /animePremiumPlaybackSessions/{sessionId} {
+      allow read, write: if false;
+    }
+    match /animePremiumRateLimits/{rateLimitId} {
+      allow read, write: if false;
+    }
     match /animePremiumAdminAudit/{auditId} {
       allow read, write: if false;
     }
