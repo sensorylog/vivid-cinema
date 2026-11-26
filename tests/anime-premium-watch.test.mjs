@@ -30,9 +30,10 @@ test("Premium access is verified through the existing Firebase account before a 
   assert.match(script, /import \{ auth \} from "\.\/firebase\.js"/);
   assert.match(script, /onAuthStateChanged\(auth/);
   assert.match(script, /isAnimeMetadata\(titleDetails\)/);
+  assert.match(script, /Verify your Vivid email/);
   assert.match(playbackApi, /isAnimeMetadata\(metadata\)/);
   assert.match(playbackApi, /anime-title-not-eligible/);
-  assert.match(script, /currentUser\.getIdToken\(\)/);
+  assert.match(script, /currentUser\.getIdToken\(true\)/);
   assert.match(script, /fetch\("\/api\/anime-premium\/playback"/);
   assert.match(script, /response\.status === 403/);
   assert.match(script, /activateProvider\(first\.id\)/);
