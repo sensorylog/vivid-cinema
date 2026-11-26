@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { buildAnimeEmbedUrl, buildVidyAnimeUrl, buildVidlinkEmbedUrl, buildVidplusEmbedUrl } from "../scripts/playback/playback-urls.js";
+import { buildAnimeEmbedUrl, buildVidyAnimeUrl, buildVidlinkEmbedUrl, buildVidplusEmbedUrl, buildVidapiEmbedUrl, buildVidsrcEmbedUrl, buildEmbedWaveUrl } from "../scripts/playback/playback-urls.js";
 const ids={aniListId:"21",episode:4,track:"sub"};
 test("AnimeEmbed uses its documented AniList iframe route and track parameter",()=>{
  assert.equal(buildAnimeEmbedUrl(ids),"https://animeembed.com/embed/ani/21/4?track=sub&autoPlay=1");
@@ -25,4 +25,11 @@ test("anime track selection maps to provider-specific sub and dub routes",()=>{
 
 test("VidPlus anime route receives saved playback progress", () => {
  assert.match(buildVidplusEmbedUrl({type:"tv",episode:8},{aniListId:"21",anime:true,startAt:245}),/progress=245/);
+});
+
+test("TMDB special season zero is preserved by compatibility fallback URLs", () => {
+ const params={id:"12345",type:"tv",season:0,episode:2};
+ assert.match(buildVidapiEmbedUrl(params),/\/tv\/12345\/0\/2/);
+ assert.match(buildVidsrcEmbedUrl(params),/\/tv\/12345\/0\/2/);
+ assert.match(buildEmbedWaveUrl(params),/\/tv\/12345\/0\/2/);
 });
