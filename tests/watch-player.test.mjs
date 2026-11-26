@@ -235,7 +235,7 @@ test("watch route changes clear previous anime IDs and episode offsets", () => {
 test("anime specials preserve TMDB season zero and avoid episode-only anime-native providers", () => {
   assert.match(source, /const rawSeason = route\.params\.get\("season"\);[\s\S]*?Math\.max\(0, parsedSeason\)/);
   assert.match(source, /const nativeAnimeEpisode = animeSeries && Number\(currentParams\?\.season\) > 0/);
-  assert.match(source, /Number\(params\?\.season\) === 0/);
+  assert.match(source, /params\?\.type !== "tv" \|\| Number\(params\?\.season\) === 0/);
 });
 
 test("anime provider progress is forwarded to shared watch-room playback synchronization", () => {
