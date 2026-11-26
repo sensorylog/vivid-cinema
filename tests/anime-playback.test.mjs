@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { getAnimeGlobalEpisode, normalizeAnimeTrack, readAnimeTrackPreference, writeAnimeTrackPreference } from "../scripts/playback/anime-playback.js";
+import { getAnimeGlobalEpisode, normalizeAnimeTrack, readAnimeTrackPreference, writeAnimeTrackPreference, normalizeAnimeProviderMessage } from "../scripts/playback/anime-playback.js";
 
 test("anime episode mapping converts split TMDB seasons to continuous anime episode numbers", () => {
   const seasons = [
@@ -29,4 +29,20 @@ test("anime track preference safely normalizes and persists sub or dub", () => {
   assert.equal(writeAnimeTrackPreference("dub", storage), "dub");
   assert.equal(readAnimeTrackPreference(storage), "dub");
   assert.equal(writeAnimeTrackPreference("invalid", storage), "sub");
+});
+
+test("AnimeEmbed messages require their documented channel and normalize progress", () => {
+  assert.equal(normalizeAnimeProviderMessage("animeembed", { channel: "other", event: "play" }), null);
+  const message = normalizeAnimeProviderMessage("animeembed", { channel: "animeembed", event: "progress", currentTime: 42, duration: 120 });
+  assert.equal(message.type, "PLAYER_EVENT");
+  assert.equal(message.data.player_status, "timeupdate");
+  assert.equal(message.data.player_progress, 42);
+  assert.equal(message.data.player_duration, 120);
+});
+
+test("Vidy JSON-string events normalize while malformed or unknown events are rejected", () => {
+  const message = normalizeAnimeProviderMessage("vidy", JSON.stringify({ event: "playing", position: 9, duration: 80 }));
+  assert.equal(message.data.player_progress, 9);
+  assert.equal(normalizeAnimeProviderMessage("vidy", "{bad json"), null);
+  assert.equal(normalizeAnimeProviderMessage("vidy", { event: "arbitrary" }), null);
 });
