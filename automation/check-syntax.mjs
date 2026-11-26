@@ -30,6 +30,7 @@ const files = [
   "scripts/anime-premium-watch.js",
   "scripts/anime-premium-title.js",
   "scripts/anime-premium-membership.js",
+  "scripts/anime-premium-countries.js",
   "scripts/playback/playback-urls.js",
   "scripts/playback/tflix-secondary-player.js",
   "scripts/african-stories/providers.js",
