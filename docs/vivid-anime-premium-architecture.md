@@ -92,15 +92,18 @@ The Premium entry route now acts as a dedicated discovery homepage rather than a
 - The title route, stylesheet and runtime are added to the offline app shell and scoped syntax checks, with dedicated structural tests for the identity masks and backdrop lifecycle.
 
 
-## Phase 4 implementation — protected watch experience
+## Phase 4 implementation — multi-server anime watch experience
 
-- Adds a dedicated anime-premium-watch.html route with a native video player shell, season selector, episode browser, previous/next navigation and responsive cinema layout.
-- Episode and season metadata comes from TMDB; it is not treated as a playback source or entitlement.
-- Playback requests are sent only to the Vivid-owned /api/anime-premium/playback endpoint with the existing Firebase user's ID token. The browser never constructs or falls back to third-party streaming embeds.
-- A playback response is accepted only when it includes an HTTPS URL, a future expiry time and a supported media MIME type. Missing, unauthenticated, unentitled or unavailable responses fail closed with an explicit gate state.
-- The protected playback endpoint and server-side membership/source resolution are intentionally reserved for Phase 5. Until then the player shell remains safely locked rather than inventing a stream.
-- The watch route, stylesheet and runtime are included in the offline app shell, syntax checks and dedicated tests.
-
+- Adds a dedicated anime-premium-watch.html route with a responsive iframe player shell, season selector, episode browser, previous/next navigation and sub/dub controls.
+- Uses VIVID's existing third-party embed model rather than a custom raw-stream resolver.
+- Registers 13 provider endpoints: VidPlus, VidLink, VidSrc, AniXo, AniLink, MegaPlay, MegaPlay Legacy, Megavid, MegaFlix, VidAPI, EmbedWave, VidFast and VidRift.
+- Reuses the existing AniList/MAL ID resolver and TMDB season/episode metadata to build provider-specific URLs. Each provider is enabled only when its required catalogue ID is available.
+- VidAPI and EmbedWave are retained as requested; VidSrc and VidFast are also drawn from VIVID's existing provider set. VidRift is an additional researched provider with its own multi-source player.
+- Providers with validated readiness/error events can trigger automatic failover. Other providers offer a manual next-server action rather than treating iframe load as proof of playback.
+- Progress is saved only when a provider reports a valid time/duration pair. Incoming messages must match the active iframe's exact origin and source window.
+- The playback endpoint verifies the existing Firebase user and active Premium membership, then issues a short-lived, user-owned playback session. It never returns a raw HLS/MP4 stream URL.
+- Provider routes, ID matching limitations and title-by-title QA requirements are documented in `docs/vivid-anime-premium-streaming-provider-research.md`.
+- The watch route, stylesheet, provider registry and anime ID resolver are included in the offline app shell, syntax checks and dedicated tests.
 
 ## Phase 5 implementation — Paystack, memberships and administration
 
@@ -116,13 +119,12 @@ The Premium entry route now acts as a dedicated discovery homepage rather than a
 ### Entitlement and playback security
 - Firebase ID tokens are verified server-side; unverified email accounts cannot start checkout or use membership/playback APIs.
 - Membership, checkout, webhook-event, source-registry and audit collections are explicitly denied to browser clients in Firestore rules.
-- Playback checks the server-owned membership period before resolving an episode. The resolver is configured only through server secrets and the returned signed URL must be HTTPS, unexpired, use an allowed host and match an approved MIME type.
-- No playback URL is accepted from client state or an arbitrary third-party embed. If no authorised resolver/source is configured, playback returns a closed 404/503 state.
+- Playback checks the server-owned membership period before creating an expiring session for the fixed third-party embed registry.
+- Provider URLs are generated from validated catalogue identifiers in the browser; no raw stream URL is returned by the membership endpoint or accepted from user-controlled state.
 
 ### Administration
-- Adds a restricted admin workspace and server endpoints for membership grant/revoke and authorised source mappings.
-- Admin access is checked from Firebase admin claims or the server-side ANIME_PREMIUM_ADMIN_UIDS allowlist. Each manual membership/source change creates an audit record.
-- Source records contain provider/source IDs only; direct stream URLs are not entered in the browser admin form.
+- Adds a restricted admin workspace and server endpoints for audited membership grant/revoke.
+- Admin access is checked from Firebase admin claims or the server-side ANIME_PREMIUM_ADMIN_UIDS allowlist. Each manual membership change creates an audit record.
 
 ### Required Cloudflare environment configuration before live payments
 - FIREBASE_SERVICE_ACCOUNT_JSON and FIREBASE_PROJECT_ID (existing Vivid server-side Firebase credentials).
@@ -131,8 +133,7 @@ The Premium entry route now acts as a dedicated discovery homepage rather than a
 - PAYSTACK_PLAN_GHS_MONTHLY or ANIME_PREMIUM_PLANS_JSON for each enabled checkout currency. Card auto-renew is unavailable for currencies without a configured Paystack plan code.
 - ANIME_PREMIUM_DEFAULT_CURRENCY (defaults to GHS) and optional ANIME_PREMIUM_GHS_MONTHLY_AMOUNT (defaults to 5330 minor units).
 - ANIME_PREMIUM_ADMIN_UIDS for server-side admin allowlisting when custom admin claims are not used.
-- ANIME_PREMIUM_STREAM_RESOLVER_URL, ANIME_PREMIUM_STREAM_RESOLVER_TOKEN and ANIME_PREMIUM_STREAM_HOSTS for an authorised playback resolver. Without these, the player remains safely unavailable.
-- Configure the Paystack webhook URL as /api/anime-premium/webhook on the Vivid production origin. Support Vivid donations remain on their existing, separate payment flow.
+ - Configure the Paystack webhook URL as /api/anime-premium/webhook on the Vivid production origin. Support Vivid donations remain on their existing, separate payment flow.
 
 
 ## Third-party anime embed playback
