@@ -70,7 +70,7 @@ async function handleChargeSuccess(db, env, data, eventRef) {
     // charges can share those values. Only a real Paystack subscription charge
     // may activate a hosted-page Premium checkout.
     const subscriptionCode = String(data.subscription?.subscription_code || data.subscription_code || "");
-    if (!safeReference(subscriptionCode)) {
+    if (!/^SUB_[A-Za-z0-9]{6,80}$/i.test(subscriptionCode)) {
       console.warn("Hosted Paystack charge has no subscription evidence; Premium was not activated.", {
         reference, email: data.customer?.email || "", amount: data.amount, currency: data.currency
       });
