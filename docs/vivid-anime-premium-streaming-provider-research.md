@@ -55,6 +55,8 @@ The registry contains **13 selectable provider endpoints**. Some are separate en
 - VidAPI embed API: https://vidapi.ru/api
 - EmbedWave player and route reference: https://embedwave.cc/
 - VidLink player documentation: https://vidlink.pro/
+- VidPlus anime player: https://player.vidplus.to/
+- VidSrc embed player: https://vidsrc.sh/
 - AniLink introduction: https://anilink.cc/docs
 - AniLink embed parameters: https://anilink.cc/docs/embed-parameters
 - AniLink player events: https://anilink.cc/docs/player-events
