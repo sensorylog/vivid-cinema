@@ -275,3 +275,8 @@ test("Watch Rooms and playback modules are included in the offline app shell", (
   ]) assert.ok(!source.includes(asset), "retired Watch Rooms asset remains in the offline app shell: " + asset);
   assert.ok(source.includes('"./scripts/watch.js?v=anime-enrichment-servers-2"'), "the primary watch experience remains available");
 });
+
+test("service worker precaches the Phase 5 anime playback helpers and watch entry", () => {
+  assert.match(source, /\.\/scripts\/playback\/anime-playback\.js/);
+  assert.match(source, /watch\.js\?v=anime-phase5-player-1/);
+});
