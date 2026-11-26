@@ -6,7 +6,7 @@ import { escapeHtml } from "./utils.js";
 import { resolveAnimeIds } from "./playback/anime-id-resolver.js";
 import { resolveAnimePremiumProviderOptions } from "./playback/anime-premium-providers.js";
 import { getLocalLibrary, upsertLibraryItem } from "./library.js";
-import { savePlaybackProgress, completePlaybackProgress, flushPlaybackProgress } from "./recommendations.js";
+import { savePlaybackProgress, completePlaybackProgress, flushAllPlaybackProgress } from "./recommendations.js";
 import { getAnimeLibraryPreferences, saveAnimeLibraryPreferences, syncAnimePreferencesForUser, markAnimeCompleted } from "./anime-library.js";
 
 const $ = id => document.getElementById(id);
@@ -576,14 +576,14 @@ function renderError(error) {
 }
 window.addEventListener("pagehide", () => {
   if (currentPlaybackSessionId) void syncPlaybackProgress(true);
-  void flushPlaybackProgress();
+  void flushAllPlaybackProgress();
   playbackRequestId += 1;
   disposePlayer();
 });
 document.addEventListener("visibilitychange", () => {
   if (document.visibilityState === "hidden") {
     if (currentPlaybackSessionId) void syncPlaybackProgress(true);
-    void flushPlaybackProgress();
+    void flushAllPlaybackProgress();
   }
 });
 bindControls();
