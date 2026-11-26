@@ -22,7 +22,7 @@ export async function onRequest({ request, env }) {
     const body = await request.json();
     const mediaType = body.mediaType === "movie" ? "movie" : body.mediaType === "tv" ? "tv" : "";
     const titleId = String(body.titleId || "");
-    const scope = mediaType === "tv" && body.scope === "title" ? "title" : "episode";
+    const scope = mediaType === "movie" || body.scope === "title" ? "title" : "episode";
     const season = mediaType === "tv" && scope === "episode" ? Number(body.season) : null;
     const episode = mediaType === "tv" && scope === "episode" ? Number(body.episode) : null;
     const sourceId = String(body.sourceId || "").trim();
