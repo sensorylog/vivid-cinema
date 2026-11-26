@@ -64,3 +64,17 @@ All six phases are delivered in one pull request. The PR remains unmerged while 
 ## Phase 1 implementation notes
 
 The initial Premium route is a public introduction and account-aware shell only. It does not expose the Premium catalogue, playback URLs, checkout or any client-controlled membership state. Those capabilities are added in their respective later phases and must remain server-authorized.
+
+
+## Phase 2 implementation — Premium discovery
+
+The Premium entry route now acts as a dedicated discovery homepage rather than a static teaser.
+
+- Curated shelves surface popular anime, series, films and highest-rated titles.
+- Search uses the existing TMDB metadata integration and keeps results within Japanese-language anime or animation-tagged titles.
+- Catalogue filters cover all anime, series, films, release year and sort order; pagination loads additional catalogue pages.
+- Selecting a card opens an accessible title-preview dialog with artwork, synopsis, release year and rating.
+- Discovery uses TMDB metadata and artwork only. It does not expose stream URLs, playback files, third-party embeds, checkout or client-side membership state.
+- TMDB attribution is shown in the Premium footer. Image usage remains subject to the applicable TMDB terms.
+- The discovery module is namespaced, included in the offline app shell and included in scoped syntax checks.
+- The existing anime.html experience remains untouched. Premium playback and entitlement checks remain reserved for the later watch and membership phases.
