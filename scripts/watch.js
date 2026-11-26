@@ -116,7 +116,7 @@ function resolveImdbId(source) {
 function isLikelyAnime() {
   const genres = Array.isArray(details?.genres) ? details.genres : [];
   const isAnimation = genres.some(g => Number(g?.id) === 16 || String(g?.name || "").toLowerCase() === "animation");
-  return currentParams?.type === "tv" && (isAnimation && String(details?.original_language || "").toLowerCase() === "ja");
+  return isAnimation && String(details?.original_language || "").toLowerCase() === "ja";
 }
 
 function fallbackDelayMs() {
