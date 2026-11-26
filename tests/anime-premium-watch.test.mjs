@@ -116,3 +116,13 @@ test("queued final progress snapshots retain keepalive when a periodic save is a
   assert.match(script, /duration: video\.duration,\s*keepalive: force/);
   assert.match(script, /keepalive: snapshot\.keepalive/);
 });
+
+
+test("watcher requests ordered server candidates and automatically fails over after a source error", () => {
+  assert.match(script, /excludeCandidateIds: excludedCandidates\.slice\(0, 8\)/);
+  assert.match(script, /activePlaybackCandidateId = String\(playback\.candidateId \|\| playback\.provider \|\| ""\)/);
+  assert.match(script, /fallbackToNextPlaybackServer\("This authorised server failed during playback\."/);
+  assert.match(script, /fallbackToNextPlaybackServer\("The current authorised server could not recover\."/);
+  assert.match(script, /failedPlaybackCandidates = \[\.\.\.new Set/);
+  assert.match(script, /Trying the next authorised server/);
+});
