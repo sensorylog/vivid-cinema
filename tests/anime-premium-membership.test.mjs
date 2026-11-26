@@ -47,6 +47,7 @@ test("membership pricing is not blocked by optional country or Firebase auth req
   assert.match(client, /membershipStatusUnavailable/);
   assert.match(client, /membershipVerificationRequired/);
   assert.match(client, /AbortSignal\.timeout\(10000\)/);
+  assert.match(client, /AbortSignal\.timeout\(15000\)/);
   assert.match(client, /if \(membershipStatusUnavailable \|\| membershipVerificationRequired\)/);
 });
 
