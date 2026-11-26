@@ -40,6 +40,14 @@ export async function onRequest({ request, env }) {
     const user = await requirePremiumUser(request, env);
     const { db } = getPremiumServices(env);
     await enforceRateLimit(db, user.uid, "profile", 60, 60000);
+    const membershipSnapshot = await db.collection("animePremiumMemberships").doc(user.uid).get();
+    const membership = membershipSnapshot.exists ? membershipSnapshot.data() || {} : {};
+    const periodEnd = typeof membership.currentPeriodEnd?.toMillis === "function"
+      ? membership.currentPeriodEnd.toMillis()
+      : Number(membership.currentPeriodEnd || 0);
+    if (!["active", "past_due"].includes(membership.status) || periodEnd <= Date.now()) {
+      throw new AnimePremiumError(403, "premium-membership-required", "An active Vivid Anime Premium membership is required to access your anime library.");
+    }
     const ref = db.collection("animePremiumProfiles").doc(user.uid);
     if (request.method === "GET") {
       const snapshot = await ref.get();
