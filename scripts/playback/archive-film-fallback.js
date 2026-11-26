@@ -108,11 +108,18 @@ export function mountArchiveFilmSearch({ root, title = "", year = "", onPlay }) 
         name.textContent = item.title + (item.year ? " (" + item.year + ")" : "");
         const meta = document.createElement("small");
         meta.textContent = [item.creator, item.license].filter(Boolean).join(" · ");
+        const sourceLink = document.createElement("a");
+        sourceLink.href = "https://archive.org/details/" + encodeURIComponent(item.identifier);
+        sourceLink.target = "_blank";
+        sourceLink.rel = "noopener noreferrer";
+        sourceLink.textContent = "Source & rights";
+        sourceLink.className = "vivid-archive-source-link";
         const action = document.createElement("button");
         action.type = "button";
         action.textContent = "Play in Vivid";
         action.addEventListener("click", () => onPlay?.(item));
         details.append(name, meta);
+        details.append(sourceLink);
         card.append(details, action);
         results.append(card);
       }
