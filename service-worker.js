@@ -1,6 +1,6 @@
 // Bump this version whenever the precached app shell changes.
-const CACHE_NAME = "vivid-cinema-shell-v327";
 const HLS_LIBRARY_URL = "https://cdn.jsdelivr.net/npm/hls.js@1.7.3/dist/hls.min.js";
+const CACHE_NAME = "vivid-cinema-shell-v349";
 const APP_SHELL = [
   HLS_LIBRARY_URL,
   "./","./index.html","./home.html","./african-stories.html","./downloads.html","./my-downloads.html","./for-you.html",
@@ -8,7 +8,7 @@ const APP_SHELL = [
   "./scripts/downloads/desktop-offline.js?windows-offline-hls-v3","./scripts/downloads/transcode-player.js?windows-offline-hls-v4","./scripts/downloads/browser-hls-adapter.js","./scripts/downloads.js?v=direct-download-v4","./styles/vivid-premium-experience.css?v=3","./styles/vivid-media-layout.css?v=1","./styles/my-downloads.css?v=offline-cinema-redesign-2",
   "./library.html","./auth.html","./login.html","./verify-email.html","./forgot-password.html",
   "./donate.html","./donation-success.html","./offline.html","./live.html","./news.html",
-  "./anime.html","./help.html","./about.html","./accessibility.html","./cookies.html",
+  "./anime.html","./anime-premium.html","./anime-premium-title.html","./anime-premium-watch.html","./anime-premium-library.html","./anime-premium-membership.html","./anime-premium-return.html","./anime-premium-admin.html","./help.html","./about.html","./accessibility.html","./cookies.html",
   "./404.html","./manifest.json","./robots.txt","./icons/vivid-icon.svg","./assets/images/IMG_6099.jpeg",
   "./styles/african-stories.css",
   "./scripts/mascot-autoplay.js?v=1","./styles/vivid-foundation.css","./styles/vivid-system.css","./styles/tokens.css?v=1","./styles/typography.css?v=1","./styles/spacing.css?v=1","./styles/motion.css?v=1","./styles/theme.css?v=1","./styles/downloads.css","./styles/vivid-liquid-glass.css",
@@ -17,7 +17,7 @@ const APP_SHELL = [
   "./styles/vivid-auth.css","./styles/vivid-account.css","./styles/vivid-account-cinematic.css?v=20261018-cinematic-1","./styles/vivid-achievements-page.css?v=20261018-cinematic-1","./styles/vivid-pwa.css",
   "./styles/vivid-tflix-hero.css","./styles/vivid-tflix-hero.css?v=hero-trailer-full-bleed-1","./styles/vivid-viewport.css?v=page-gutters-1","./styles/vivid-apple-tv-mobile.css?v=apple-tv-mobile-2","./scripts/tflix-hero.js",
   "./scripts/tflix-hero.js?v=hero-responsive-artwork-1","./styles/vivid-atmosphere.css","./styles/vivid-search-standalone.css","./styles/vivid-desktop.css","./styles/vivid-landing.css",
-  "./styles/vivid-anime.css","./styles/vivid-viewport.css","./styles/vivid-legal.css","./styles/vivid-live.css","./styles/vivid-audit-fixes.css",
+  "./styles/vivid-anime.css","./styles/vivid-anime-premium.css","./styles/vivid-anime-premium-library.css","./styles/vivid-anime-premium-title.css","./styles/vivid-anime-premium-watch.css","./styles/vivid-anime-premium-membership.css","./styles/vivid-anime-premium-admin.css","./styles/vivid-viewport.css","./styles/vivid-legal.css","./styles/vivid-live.css","./styles/vivid-audit-fixes.css",
   "./styles/vivid-achievements.css?v=20261018-achievements-1","./scripts/achievements.js","./scripts/achievements-page.js?v=20261018-cinematic-1","./scripts/achievement-catalog.js","./scripts/app-shell.js","./scripts/movie-quick-actions.js","./styles/vivid-movie-quick-actions.css","./scripts/home-optional-resources.js",
   "./scripts/donate.js","./scripts/google-tag.js","./scripts/analytics.js","./scripts/vivid-pulse.js","./scripts/provider-region.js",
   "./scripts/search.js","./scripts/search-page.js","./scripts/intelligence.js","./scripts/intent-parser.js","./scripts/plot-search.js",
@@ -27,9 +27,9 @@ const APP_SHELL = [
   "./scripts/collection.js","./scripts/person.js","./scripts/recommendations.js","./scripts/release-alerts.js","./scripts/cinema-reminders.js",
   "./scripts/push-notifications.js","./scripts/news.js","./scripts/news.js?v=20261018-feedback-sync-4",
   "./scripts/editorial-desk.js","./scripts/title.js","./scripts/playback/player-engine.js","./scripts/playback/playback-servers.js","./scripts/playback/server-settings.js",
-  "./scripts/watch.js","./scripts/watch.js?v=watch-room-sync-1","./scripts/playback/tflix-secondary-player.js","./scripts/playback/playback-urls.js","./scripts/landing.js","./scripts/account.js",
+  "./scripts/watch.js","./scripts/watch.js?v=watch-room-sync-1","./scripts/playback/tflix-secondary-player.js","./scripts/playback/playback-urls.js","./scripts/playback/anime-id-resolver.js","./scripts/playback/anime-premium-providers.js","./scripts/landing.js","./scripts/account.js",
   "./scripts/account-bootstrap.js","./scripts/account-bootstrap.js?v=20261016-account-bootstrap-1","./scripts/auth.js","./scripts/auth.js?v=20261123-signup-only-1","./scripts/verify-email.js",
-  "./scripts/anime.js","./scripts/live.js","./scripts/home-breathe.js","./data/live-channels.json","./script.js",
+  "./scripts/anime.js","./scripts/anime-premium.js","./scripts/anime-premium-discovery.js","./scripts/anime-premium-title.js","./scripts/anime-premium-watch.js","./scripts/anime-premium-library.js","./scripts/anime-library.js","./scripts/anime-premium-membership.js","./scripts/anime-premium-return.js","./scripts/anime-premium-admin.js","./scripts/live.js","./scripts/home-breathe.js","./data/live-channels.json","./script.js",
   "./script.js?v=20261006-2","./scripts/watch.js?v=watch-player-server-scroll-1","./scripts/account.js?v=20261016-account-runtime-2","./styles/vivid-news.css?v=20261021-this-week-1","./scripts/newsroom.js?v=20261020-newsroom-images-3",
   "./scripts/live.js?v=live8","./styles/vivid-cleanup.css?v=1","./styles/vivid-title-refresh.css?v=beast-1","./scripts/title.js?v=download-year-identity-1","./styles/vivid-donate.css?v=support3", "./scripts/tflix-hero.js?v=hero-fast-fallback-1", "./scripts/mascot-autoplay.js?v=2","./scripts/advertising.js?v=1","./styles/vivid-advertising.css?v=1",
   "./styles/vivid-watch.css?v=player-flow-3-servers","./styles/vivid-watch.css?v=watch-player-layout-1","./styles/vivid-watch.css?v=watch-player-layout-2","./styles/vivid-cleanup.css?v=4","./styles/vivid-watch-polish.css?v=2",
@@ -159,16 +159,14 @@ self.addEventListener("fetch",event=>{
  const url=new URL(request.url);
  if(url.href===HLS_LIBRARY_URL){
   event.respondWith((async()=>{
-   const cached=await safeCachedResponse(HLS_LIBRARY_URL);
+   const cache=await caches.open(CACHE_NAME);
+   const cached=await cache.match(HLS_LIBRARY_URL);
    if(cached)return cached;
-   try{
-    const response=await fetch(request,{cache:"no-store",redirect:"error"});
-    if(response.ok&&response.type==="cors"&&isSafeResponse(response)){
-     const cache=await caches.open(CACHE_NAME);
-     await cache.put(HLS_LIBRARY_URL,response.clone());
-    }
-    return response;
-   }catch{return new Response("",{status:504,statusText:"Offline"});}
+   const response=await fetch(request);
+   if(response.ok&&response.type==="cors"&&!response.redirected&&response.url===HLS_LIBRARY_URL){
+    await cache.put(HLS_LIBRARY_URL,response.clone());
+   }
+   return response;
   })());
   return;
  }

@@ -10,6 +10,27 @@ const env = await initializeTestEnvironment({
   firestore: { rules }
 });
 
+test("anime library owner can save completed titles, season-scoped progress and preferences", async () => {
+  const db = env.authenticatedContext("anime-owner").firestore();
+  await assertSucceeds(setDoc(doc(db, "users/anime-owner/completed/tv:123"), {
+    id: "123", media_type: "tv", title: "Anime series", year: "2025",
+    poster_path: "/anime.jpg", backdrop_path: "/anime-bg.jpg",
+    updatedAt: Date.now(), completion: 100, completedAt: Date.now(), isAnime: true
+  }));
+  await assertSucceeds(setDoc(doc(db, "users/anime-owner/progress/tv:123:0:3"), {
+    id: "123", media_type: "tv", progress: 450, duration: 1200, percentage: 37.5,
+    completed: false, season: 0, episode: 3, title: "Anime special", updatedAt: Date.now(), isAnime: true
+  }));
+  await assertSucceeds(setDoc(doc(db, "users/anime-owner/animePreferences/default"), {
+    track: "dub", autoplayNextEpisode: true, subtitleLanguage: "en",
+    preferredPlayer: "auto", updatedAt: Date.now()
+  }));
+  await assertFails(setDoc(doc(db, "users/other/animePreferences/default"), {
+    track: "dub", autoplayNextEpisode: true, subtitleLanguage: "en",
+    preferredPlayer: "auto", updatedAt: Date.now()
+  }));
+});
+
 test("owner can write a valid library item", async () => {
   const db = env.authenticatedContext("alice").firestore();
   await assertSucceeds(setDoc(doc(db, "users/alice/favorites/movie:550"), {
@@ -383,4 +404,46 @@ test("African Stories private rights, provider and session records are inaccessi
   await assertFails(setDoc(doc(privilegedClient, "africanRightsGrants/forged-grant"), {
     status: "approved", streamOnVivid: true
   }));
+});
+
+
+test("Anime Premium billing, memberships, playback sources and audit records are server-only", async () => {
+  await env.withSecurityRulesDisabled(async context => {
+    const db = context.firestore();
+    await setDoc(doc(db, "animePremiumMemberships", "premium-user"), {
+      uid: "premium-user", status: "active", currentPeriodEnd: new Date(Date.now() + 86400000)
+    });
+    await setDoc(doc(db, "animePremiumCheckouts", "VAPTEST123"), {
+      uid: "premium-user", amount: 5330, currency: "GHS", status: "pending"
+    });
+    await setDoc(doc(db, "animePremiumWebhookEvents", "event-one"), { event: "charge.success" });
+    await setDoc(doc(db, "animePremiumPendingSubscriptions", "sub-one"), { subscriptionCode: "sub-one", customerCode: "CUS_ONE" });
+    await setDoc(doc(db, "animePremiumSources", "tv_123_s1_e1"), {
+      provider: "approved-provider", sourceId: "rights-cleared-source", active: true
+    });
+    await setDoc(doc(db, "animePremiumProfiles", "premium-user"), { favorites: [] });
+    await setDoc(doc(db, "animePremiumPlaybackSessions", "session-one"), { uid: "premium-user" });
+    await setDoc(doc(db, "animePremiumRateLimits", "premium-user_profile_1"), { uid: "premium-user", count: 1 });
+    await setDoc(doc(db, "animePremiumAdminAudit", "audit-one"), {
+      action: "membership_override", uid: "premium-user"
+    });
+  });
+  const privilegedClient = env.authenticatedContext("premium-admin", {
+    admin: true, animePremiumAdmin: true, email_verified: true
+  }).firestore();
+  const privatePaths = [
+    "animePremiumMemberships/premium-user",
+    "animePremiumCheckouts/VAPTEST123",
+    "animePremiumWebhookEvents/event-one",
+    "animePremiumPendingSubscriptions/sub-one",
+    "animePremiumSources/tv_123_s1_e1",
+    "animePremiumProfiles/premium-user",
+    "animePremiumPlaybackSessions/session-one",
+    "animePremiumRateLimits/premium-user_profile_1",
+    "animePremiumAdminAudit/audit-one"
+  ];
+  for (const path of privatePaths) {
+    await assertFails(getDoc(doc(privilegedClient, path)));
+    await assertFails(setDoc(doc(privilegedClient, path), { forged: true }));
+  }
 });

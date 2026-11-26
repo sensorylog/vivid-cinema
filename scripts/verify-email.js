@@ -8,6 +8,19 @@ const action = document.getElementById("verification-action");
 const help = document.getElementById("verification-help");
 const mark = document.getElementById("verification-mark");
 
+const params = new URLSearchParams(window.location.search);
+function loginDestination() {
+  let requested = params.get("returnTo");
+  if (!requested && params.has("continueUrl")) {
+    try { requested = new URL(params.get("continueUrl"), window.location.origin).searchParams.get("returnTo"); }
+    catch { requested = null; }
+  }
+  const allowed = new Set(["anime-premium.html", "anime-premium-membership.html"]);
+  return allowed.has(requested)
+    ? "login.html?returnTo=" + encodeURIComponent(requested)
+    : "login.html";
+}
+
 function showSuccess() {
   title.textContent = "Email verified successfully!";
   message.textContent = "You’re all set. Your Vivid Cinema account is ready.";
@@ -15,7 +28,7 @@ function showSuccess() {
   mark.style.color = "#7ee787";
   action.style.display = "block";
   action.textContent = "Continue to Log In";
-  action.href = "login.html";
+  action.href = loginDestination();
   help.textContent = "For your security, sign in with your email and password to start your session.";
 }
 function showFailure(text) {
@@ -25,11 +38,10 @@ function showFailure(text) {
   mark.style.color = "#ff6b6b";
   action.style.display = "block";
   action.textContent = "Go to Log In";
-  action.href = "login.html";
+  action.href = loginDestination();
   help.textContent = "If the link has expired or was already used, sign in and request a new verification email.";
 }
 
-const params = new URLSearchParams(window.location.search);
 const mode = params.get("mode");
 const code = params.get("oobCode");
 

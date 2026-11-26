@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#08070d">
+<meta name="description" content="VIVID ANIME PREMIUM — discover anime series, films and curated collections on Vivid Cinema.">
+<link rel="canonical" href="https://vivid-cinema.pages.dev/anime-premium.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="VIVID ANIME PREMIUM · Vivid Cinema">
+<meta property="og:description" content="A dedicated premium anime destination with cinematic discovery and a purpose-built watch experience.">
+<title>VIVID ANIME PREMIUM · Vivid Cinema</title>
+<link rel="icon" href="icons/vivid-icon.svg" type="image/svg+xml">
+<link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="styles/vivid-foundation.css">
+<link rel="stylesheet" href="styles/vivid-system.css">
+<link rel="stylesheet" href="styles/vivid-shell.css">
+<link rel="stylesheet" href="styles/vivid-anime-premium.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.9.1/font/bootstrap-icons.css">
+</head>
+<body class="vivid-anime-premium-page" data-vivid-page="anime-premium">
+<div class="vap-shell">
+<header class="vap-header">
+  <a class="vap-brand" href="home.html" aria-label="Vivid Cinema home"><span>VIVID</span><b>ANIME</b><small>PREMIUM</small></a>
+  <nav aria-label="Premium navigation"><a href="anime.html">Free anime</a><a href="home.html">Vivid Cinema</a><a href="anime-premium-library.html">My Anime</a><a href="anime-premium-membership.html">Membership</a><a class="vap-account-link" href="auth.html?returnTo=anime-premium.html" data-vap-account>Sign in</a></nav>
+</header>
+<main class="vap-main">
+<section class="vap-hero" id="vap-hero" aria-labelledby="vap-hero-title">
+  <div class="vap-hero-backdrop" aria-hidden="true"></div><div class="vap-hero-shade" aria-hidden="true"></div>
+  <div class="vap-hero-content">
+    <span class="vap-kicker"><i class="bi bi-stars" aria-hidden="true"></i> VIVID ANIME PREMIUM</span>
+    <p class="vap-hero-meta" id="vap-hero-meta">YOUR NEXT ANIME OBSESSION</p>
+    <h1 id="vap-hero-title">A universe of anime.</h1>
+    <p class="vap-hero-description" id="vap-hero-copy">Discover series and films from across the world of anime.</p>
+    <div class="vap-actions"><button class="vap-primary" type="button" id="vap-hero-open">Explore title <span aria-hidden="true">↗</span></button><a class="vap-secondary" href="#vap-catalogue">Explore catalogue</a></div>
+    <p class="vap-account-note" id="vap-account-status" role="status" aria-live="polite">Connect with your existing Vivid account. No second account is needed.</p>
+  </div>
+  <div class="vap-hero-index" aria-hidden="true"><span>THE ANIME COLLECTION</span><b>VIVID / 01</b></div>
+</section>
+
+<section class="vap-collection-strip" aria-label="Quick anime collections">
+  <button type="button" data-vap-collection="all">All anime</button>
+  <button type="button" data-vap-collection="tv">Series</button>
+  <button type="button" data-vap-collection="movie">Anime films</button>
+</section>
+
+<section class="vap-identity-section" aria-labelledby="vap-identities-title">
+  <div class="vap-section-heading"><div><span class="vap-eyebrow">ANIME, WITH AN IDENTITY</span><h2 id="vap-identities-title">Signature worlds</h2></div><a href="#vap-catalogue">Explore all <span aria-hidden="true">→</span></a></div>
+  <div class="vap-identity-row" id="vap-identities"><div class="vap-shelf-loading">Preparing signature anime identities…</div></div>
+</section>
+
+<section class="vap-shelves" aria-label="Featured anime collections">
+  <div class="vap-section-heading"><div><span class="vap-eyebrow">CURATED FOR YOU</span><h2>Popular right now</h2></div><a href="#vap-catalogue">View catalogue <span aria-hidden="true">→</span></a></div>
+  <div class="vap-card-row" id="vap-popular" aria-live="polite"><div class="vap-shelf-loading">Loading the collection…</div></div>
+  <div class="vap-section-heading"><div><span class="vap-eyebrow">LONG-FORM STORIES</span><h2>Anime series</h2></div><a href="#vap-catalogue" data-vap-collection="tv">Explore series <span aria-hidden="true">→</span></a></div>
+  <div class="vap-card-row" id="vap-series"><div class="vap-shelf-loading">Loading series…</div></div>
+  <div class="vap-section-heading"><div><span class="vap-eyebrow">FEATURE-LENGTH WORLDS</span><h2>Anime films</h2></div><a href="#vap-catalogue" data-vap-collection="movie">Explore films <span aria-hidden="true">→</span></a></div>
+  <div class="vap-card-row" id="vap-films"><div class="vap-shelf-loading">Loading films…</div></div>
+  <div class="vap-section-heading"><div><span class="vap-eyebrow">LOVED BY FANS</span><h2>Highest rated</h2></div><a href="#vap-catalogue">Find your favourite <span aria-hidden="true">→</span></a></div>
+  <div class="vap-card-row" id="vap-top-rated"><div class="vap-shelf-loading">Loading top-rated anime…</div></div>
+</section>
+
+<section class="vap-catalogue" id="vap-catalogue" aria-labelledby="vap-catalogue-title">
+  <div class="vap-catalogue-heading"><div><span class="vap-eyebrow">THE FULL COLLECTION</span><h2 id="vap-catalogue-title">Find your next world</h2><p>Search, filter and discover anime titles in one dedicated destination.</p></div></div>
+  <form class="vap-search-form" id="vap-search-form" role="search">
+    <label class="vap-search-box"><i class="bi bi-search" aria-hidden="true"></i><input id="vap-search" type="search" maxlength="80" placeholder="Search anime titles…" autocomplete="off" aria-label="Search anime titles"></label>
+    <button type="submit" class="vap-search-submit">Search</button><button type="button" class="vap-search-clear" id="vap-search-clear">Clear</button>
+  </form>
+  <div class="vap-filter-bar">
+    <div class="vap-type-filters" role="group" aria-label="Filter by anime type">
+      <button type="button" class="is-active" data-vap-type="all" aria-pressed="true">All</button>
+      <button type="button" data-vap-type="tv" aria-pressed="false">Series</button>
+      <button type="button" data-vap-type="movie" aria-pressed="false">Films</button>
+    </div>
+    <label><span>Release year</span><select id="vap-year"><option value="">Any year</option></select></label>
+    <label><span>Sort by</span><select id="vap-sort"><option value="popularity.desc">Most popular</option><option value="vote_average.desc">Highest rated</option><option value="first_air_date.desc">Newest first</option></select></label>
+  </div>
+  <p class="vap-catalogue-status" id="vap-catalogue-status" role="status" aria-live="polite">Preparing the anime catalogue…</p>
+  <div class="vap-catalogue-grid" id="vap-catalogue-grid" aria-live="polite" aria-busy="true"></div>
+  <button class="vap-load-more" type="button" id="vap-load-more" hidden>Load more anime</button>
+</section>
+
+<section class="vap-account-promo"><div><span class="vap-eyebrow">ONE ACCOUNT. ONE VIVID.</span><h2>Your anime journey belongs here.</h2><p>Use your existing Vivid Cinema account to keep your profile and future Premium membership together.</p></div><a href="auth.html?returnTo=anime-premium.html" data-vap-primary>Connect Vivid account <span aria-hidden="true">→</span></a></section>
+</main>
+<footer class="vap-footer"><span>© 2026 Vivid Cinema</span><span><a href="terms.html">Terms</a><a href="privacy.html">Privacy</a><a href="help.html">Help</a></span><small>Anime metadata and artwork supplied by TMDB. This product uses the TMDB API but is not endorsed or certified by TMDB.</small></footer>
+</div>
+
+<script type="module" src="scripts/app-shell.js"></script>
+<script type="module" src="scripts/anime-premium.js"></script>
+<script type="module" src="scripts/anime-premium-discovery.js"></script>
+</body>
+</html>

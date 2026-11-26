@@ -1,0 +1,22 @@
+.vap-admin-main{padding:38px 0 70px}
+.vap-admin-heading{max-width:800px;margin-bottom:26px}
+.vap-admin-heading h1{margin:8px 0;font-size:clamp(2.2rem,5vw,4rem);letter-spacing:-.065em}
+.vap-admin-heading p{color:#a9a0b4;font-size:.78rem;line-height:1.7}
+.vap-admin-status{min-height:22px;color:#c6b2f5;font-size:.68rem}
+.vap-admin-panel{margin:18px 0;padding:clamp(18px,3vw,28px);border:1px solid var(--vap-line);border-radius:16px;background:rgba(255,255,255,.025)}
+.vap-admin-panel-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:20px}
+.vap-admin-panel-heading h2{margin:5px 0 0;font-size:1.45rem;letter-spacing:-.04em}
+.vap-admin-panel-heading button,.vap-admin-panel form button{border:0;border-radius:999px;padding:11px 17px;background:#c5a6ff;color:#140e20;font:inherit;font-size:.66rem;font-weight:950;cursor:pointer}
+.vap-admin-panel form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}
+.vap-admin-panel form label{display:flex;flex-direction:column;gap:7px;color:#c9c1d2;font-size:.63rem;font-weight:800}
+.vap-admin-panel input,.vap-admin-panel select,.vap-admin-panel textarea{width:100%;min-height:42px;border:1px solid var(--vap-line);border-radius:9px;padding:10px 12px;background:#17131f;color:#fff;font:inherit;font-size:.72rem}
+.vap-admin-panel textarea{min-height:78px;resize:vertical}
+.vap-admin-panel form button{grid-column:1/-1;justify-self:start}
+.vap-admin-panel .vap-admin-toggle{flex-direction:row;align-items:center;gap:9px}
+.vap-admin-panel .vap-admin-toggle input{width:18px;min-height:18px}
+.vap-admin-table-wrap{overflow-x:auto;margin-top:22px}
+.vap-admin-table-wrap table{width:100%;border-collapse:collapse;min-width:560px}
+.vap-admin-table-wrap th,.vap-admin-table-wrap td{padding:12px 10px;border-bottom:1px solid var(--vap-line);text-align:left;font-size:.63rem}
+.vap-admin-table-wrap th{color:#9e95aa;font-size:.56rem;letter-spacing:.12em;text-transform:uppercase}
+.vap-admin-table-wrap td{color:#e4ddec}
+@media(max-width:650px){.vap-admin-panel form{grid-template-columns:1fr}.vap-admin-panel form button{justify-self:stretch}.vap-admin-panel-heading{align-items:flex-start;flex-direction:column}}

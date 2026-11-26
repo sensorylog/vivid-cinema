@@ -1,0 +1,70 @@
+.vap-membership-main{padding:38px 0 70px}
+.vap-membership-back{display:inline-flex;align-items:center;gap:8px;color:#d0c7de;text-decoration:none;font-size:.7rem;font-weight:850}
+.vap-membership-intro{max-width:800px;padding:34px 0 35px}
+.vap-membership-intro h1{margin:10px 0 12px;font-size:clamp(2.6rem,7vw,5.5rem);line-height:.92;letter-spacing:-.075em}
+.vap-membership-intro h1 span{color:#c4a6ff}
+.vap-membership-intro p{max-width:580px;color:#b6adbf;font-size:.9rem;line-height:1.7}
+.vap-membership-layout{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(360px,.95fr);gap:18px;align-items:stretch}
+.vap-membership-plan,.vap-checkout-panel{border:1px solid var(--vap-line);border-radius:18px;background:linear-gradient(145deg,rgba(255,255,255,.045),rgba(255,255,255,.012));padding:clamp(22px,3.2vw,38px)}
+.vap-membership-plan{display:flex;flex-direction:column}
+.vap-membership-plan-top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.vap-plan-pill{padding:7px 11px;border-radius:999px;background:rgba(183,145,255,.13);color:#d3c0ff;font-size:.55rem;font-weight:950;letter-spacing:.13em}
+.vap-plan-check{display:flex;align-items:center;gap:6px;color:#a9a0b4;font-size:.57rem}
+.vap-plan-check i{color:#c9b4ff}
+.vap-membership-plan h2{margin:34px 0 8px;font-size:2rem;letter-spacing:-.055em}
+.vap-plan-description{max-width:500px;color:#b7afc1;font-size:.78rem;line-height:1.7}
+.vap-price-line{display:flex;align-items:baseline;gap:9px;margin:22px 0 3px}
+.vap-price-line strong{font-size:clamp(2.4rem,5vw,4rem);letter-spacing:-.07em}
+.vap-price-line span{color:#a49bad;font-size:.75rem}
+.vap-price-note{max-width:460px;color:#91889c;font-size:.62rem;line-height:1.6}
+.vap-plan-benefits{display:grid;gap:13px;margin:28px 0;padding:0;list-style:none}
+.vap-plan-benefits li{display:flex;align-items:center;gap:11px;color:#d5cedf;font-size:.74rem}
+.vap-plan-benefits i{color:#c4a7ff;font-size:.9rem}
+.vap-membership-trust{display:flex;align-items:center;gap:10px;margin-top:auto;padding:14px;border:1px solid rgba(185,157,235,.17);border-radius:10px;background:rgba(173,145,224,.055);color:#a9a0b4;font-size:.62rem;line-height:1.5}
+.vap-membership-trust i{color:#cbb6ff}
+.vap-checkout-heading h2{margin:7px 0;font-size:1.7rem;letter-spacing:-.05em}
+.vap-checkout-heading p{margin:0 0 22px;color:#a9a0b4;font-size:.7rem;line-height:1.6}
+.vap-field-label{display:block;margin:0 0 8px;color:#d5cde1;font-size:.65rem;font-weight:850}
+.vap-country-select{width:100%;height:48px;border:1px solid var(--vap-line);border-radius:10px;padding:0 13px;background:#17131f;color:#fff;font:inherit;font-size:.75rem}
+.vap-currency-summary{display:flex;justify-content:space-between;gap:15px;padding:12px 0;border-bottom:1px solid var(--vap-line);color:#a69daf;font-size:.65rem}
+.vap-currency-summary strong{color:#f4efff;font-size:.7rem}
+.vap-method-heading{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:23px 0 10px}
+.vap-method-heading small{color:#8f8799;font-size:.56rem}
+.vap-payment-methods{display:grid;gap:9px}
+.vap-payment-method{position:relative;display:flex;align-items:center;gap:11px;padding:13px;border:1px solid var(--vap-line);border-radius:11px;background:rgba(255,255,255,.025);cursor:pointer;transition:border-color .2s,background .2s}
+.vap-payment-method:has(input:checked){border-color:rgba(190,159,255,.7);background:rgba(160,126,219,.12)}
+.vap-payment-method:has(input:disabled){opacity:.4;cursor:not-allowed}
+.vap-payment-method input{position:absolute;opacity:0;pointer-events:none}
+.vap-method-icon{width:37px;height:37px;display:grid;place-items:center;border-radius:9px;background:rgba(255,255,255,.06);color:#d0bcff;font-size:1rem}
+.vap-payment-method>span:nth-of-type(2){display:flex;flex-direction:column;gap:4px}
+.vap-payment-method strong{font-size:.7rem}
+.vap-payment-method small{color:#9b92a6;font-size:.58rem}
+.vap-method-check{margin-left:auto;color:#cbb3ff;opacity:0}
+.vap-payment-method:has(input:checked) .vap-method-check{opacity:1}
+.vap-method-note{min-height:30px;margin:11px 0;color:#948b9e;font-size:.59rem;line-height:1.5}
+.vap-checkout-button{width:100%;display:flex;align-items:center;justify-content:center;gap:12px;border:0;cursor:pointer}
+.vap-checkout-button:disabled{opacity:.45;cursor:not-allowed}
+.vap-checkout-status{min-height:20px;margin:10px 0 0;color:#c5b1f3;font-size:.65rem;line-height:1.5}
+.vap-existing-account{margin:12px 0 0;color:#8f8799;font-size:.6rem}
+.vap-existing-account a{color:#d1bdff}
+.vap-current-membership{display:flex;align-items:center;gap:14px;margin-top:18px;padding:17px;border:1px solid rgba(167,218,181,.25);border-radius:12px;background:rgba(89,167,107,.07)}
+.vap-current-membership>i{color:#9ee1ad;font-size:1.3rem}
+.vap-current-membership>div{display:flex;flex-direction:column;gap:4px;flex:1}
+.vap-current-membership strong{font-size:.75rem}
+.vap-current-membership span{color:#a9a0b4;font-size:.6rem}
+.vap-current-membership>a{color:#d7c5ff;text-decoration:none;font-size:.65rem;font-weight:850}
+.vap-membership-legal{max-width:950px;margin:22px 0 0;color:#777080;font-size:.58rem;line-height:1.65}
+@media(max-width:900px){.vap-membership-layout{grid-template-columns:1fr}.vap-membership-plan{min-height:0}}
+@media(max-width:520px){.vap-membership-main{padding-top:24px}.vap-membership-intro{padding:25px 0}.vap-membership-plan,.vap-checkout-panel{padding:20px}.vap-membership-plan-top{align-items:flex-start;flex-direction:column}.vap-method-heading{align-items:flex-start;flex-direction:column}.vap-current-membership{align-items:flex-start;flex-wrap:wrap}.vap-current-membership>a{margin-left:34px}}
+
+.vap-return-main{min-height:62vh;display:grid;place-items:center;padding:45px 0}
+.vap-return-card{width:min(620px,100%);display:flex;flex-direction:column;align-items:center;gap:14px;padding:clamp(26px,5vw,48px);border:1px solid var(--vap-line);border-radius:18px;background:linear-gradient(145deg,rgba(255,255,255,.05),rgba(255,255,255,.012));text-align:center}
+.vap-return-icon{width:64px;height:64px;display:grid;place-items:center;border:1px solid rgba(194,166,255,.32);border-radius:50%;background:rgba(173,140,230,.1);color:#d5c0ff;font-size:1.55rem}
+.vap-return-card h1{margin:4px 0;font-size:clamp(1.8rem,4vw,2.8rem);line-height:1.05;letter-spacing:-.06em}
+.vap-return-card p{max-width:470px;margin:0;color:#aaa1b5;font-size:.75rem;line-height:1.7}
+.vap-return-card .vap-return-reference{color:#837a8d;font-size:.6rem;letter-spacing:.08em}
+.vap-return-card .vap-primary,.vap-return-card .vap-secondary{display:inline-flex;justify-content:center;align-items:center;gap:10px;text-decoration:none}
+
+.vap-current-membership button{border:1px solid rgba(255,255,255,.16);border-radius:999px;padding:9px 13px;background:transparent;color:#d7cde2;font:inherit;font-size:.58rem;font-weight:850;cursor:pointer}
+.vap-current-membership button[hidden]{display:none}
+.vap-current-membership button:hover{border-color:rgba(215,197,255,.55);color:#fff}

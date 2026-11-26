@@ -13,7 +13,9 @@ permissions:
   contents: write
 
 jobs:
+  # Signed APK publishing stays paused until all six Premium phases and final QA pass.
   signed-release-apk:
+    if: false # re-enable only after the complete Premium build is approved
     runs-on: ubuntu-latest
     timeout-minutes: 35
     steps:

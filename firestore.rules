@@ -35,10 +35,16 @@ service cloud.firestore {
       return contentId.matches('^(movie|tv):[0-9]+$');
     }
 
+    function validProgressId(contentId) {
+      return contentId.matches('^movie:[0-9]+$')
+        || contentId.matches('^tv:[0-9]+$')
+        || contentId.matches('^tv:[0-9]+:[0-9]+:[0-9]+$');
+    }
+
     function validLibraryData() {
       return request.resource.data.keys().hasOnly([
         'id','media_type','title','year','poster_path','backdrop_path','updatedAt',
-        'startedAt','lastWatchedAt','watchedSeconds','completion','completedAt'
+        'startedAt','lastWatchedAt','watchedSeconds','completion','completedAt','isAnime'
       ])
       && request.resource.data.id is string
       && request.resource.data.id.matches('^[0-9]+$')
@@ -60,13 +66,14 @@ service cloud.firestore {
         request.resource.data.completion >= 0 &&
         request.resource.data.completion <= 100
       ))
-      && (!request.resource.data.keys().hasAny(['completedAt']) || request.resource.data.completedAt is number);
+      && (!request.resource.data.keys().hasAny(['completedAt']) || request.resource.data.completedAt is number)
+      && (!request.resource.data.keys().hasAny(['isAnime']) || request.resource.data.isAnime is bool);
     }
 
     function validProgressData() {
       return request.resource.data.keys().hasOnly([
         'id','media_type','progress','duration','percentage','completed','completedAt',
-        'season','episode','title','updatedAt'
+        'season','episode','title','updatedAt','isAnime'
       ])
       && request.resource.data.id is string
       && request.resource.data.id.matches('^[0-9]+$')
@@ -86,12 +93,25 @@ service cloud.firestore {
       && (!request.resource.data.keys().hasAny(['episode']) || request.resource.data.episode == null || request.resource.data.episode is number)
       && request.resource.data.title is string
       && request.resource.data.title.size() <= 300
+      && (!request.resource.data.keys().hasAny(['isAnime']) || request.resource.data.isAnime is bool)
       && request.resource.data.updatedAt is number;
+    }
+
+    function validAnimePreferences() {
+      return request.resource.data.keys().hasOnly(['track','autoplayNextEpisode','subtitleLanguage','preferredPlayer','updatedAt'])
+        && request.resource.data.track in ['sub','dub']
+        && request.resource.data.autoplayNextEpisode is bool
+        && request.resource.data.subtitleLanguage is string
+        && request.resource.data.subtitleLanguage.size() <= 12
+        && request.resource.data.preferredPlayer is string
+        && request.resource.data.preferredPlayer.size() <= 32
+        && request.resource.data.updatedAt is number
+        && request.resource.data.updatedAt >= 0;
     }
 
     function validTombstoneData() {
       return request.resource.data.keys().hasOnly(['collection','contentId','deletedAt'])
-      && request.resource.data.collection in ['favorites','watchLater','history']
+      && request.resource.data.collection in ['favorites','watchLater','history','completed']
       && request.resource.data.contentId is string
       && request.resource.data.contentId.matches('^(movie|tv):[0-9]+$')
       && request.resource.data.deletedAt is number;
@@ -306,9 +326,21 @@ service cloud.firestore {
         allow delete: if isOwner(userId);
       }
 
+      match /completed/{contentId} {
+        allow read: if isOwner(userId);
+        allow create, update: if isOwner(userId) && validContentId(contentId) && validLibraryData();
+        allow delete: if isOwner(userId);
+      }
+
       match /progress/{contentId} {
         allow read: if isOwner(userId);
-        allow create, update: if isOwner(userId) && validContentId(contentId) && validProgressData();
+        allow create, update: if isOwner(userId) && validProgressId(contentId) && validProgressData();
+        allow delete: if isOwner(userId);
+      }
+
+      match /animePreferences/{preferenceId} {
+        allow read: if isOwner(userId);
+        allow create, update: if isOwner(userId) && preferenceId == "default" && validAnimePreferences();
         allow delete: if isOwner(userId);
       }
 
@@ -854,6 +886,38 @@ service cloud.firestore {
       allow read, write: if false;
     }
     match /africanAuditEvents/{document=**} {
+      allow read, write: if false;
+    }
+
+
+    // Anime Premium billing, entitlements, authorised sources and audit trails
+    // are server-owned. Even signed-in users and custom-claim admins must use
+    // the authenticated Cloudflare API; browser clients cannot read or mutate them.
+    match /animePremiumMemberships/{uid} {
+      allow read, write: if false;
+    }
+    match /animePremiumCheckouts/{reference} {
+      allow read, write: if false;
+    }
+    match /animePremiumPendingSubscriptions/{subscriptionCode} {
+      allow read, write: if false;
+    }
+    match /animePremiumWebhookEvents/{eventId} {
+      allow read, write: if false;
+    }
+    match /animePremiumSources/{sourceId} {
+      allow read, write: if false;
+    }
+    match /animePremiumProfiles/{uid} {
+      allow read, write: if false;
+    }
+    match /animePremiumPlaybackSessions/{sessionId} {
+      allow read, write: if false;
+    }
+    match /animePremiumRateLimits/{rateLimitId} {
+      allow read, write: if false;
+    }
+    match /animePremiumAdminAudit/{auditId} {
       allow read, write: if false;
     }
 

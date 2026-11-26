@@ -1,8 +1,8 @@
 import { switchLocalOwner } from "./local-owner.js";
 
 const STORAGE_KEY="vivid:library:v2";
-const COLLECTIONS=["favorites","watchLater","history"];
-const emptyLibrary=()=>({favorites:[],watchLater:[],history:[]});
+const COLLECTIONS=["favorites","watchLater","history","completed"];
+const emptyLibrary=()=>({favorites:[],watchLater:[],history:[],completed:[]});
 const TOMBSTONE_STORAGE_KEY="vivid:library-tombstones:v1";
 const LOCAL_OWNER_KEY="vivid:library-owner:v1";
 let localMutationRevision=0;
@@ -137,7 +137,8 @@ function cleanItem(item){
     ...(item.lastWatchedAt?{lastWatchedAt:Number(item.lastWatchedAt)}:{}),
     ...(item.watchedSeconds!=null?{watchedSeconds:Math.max(0,Number(item.watchedSeconds)||0)}:{}),
     ...(item.completion!=null?{completion:Math.max(0,Math.min(100,Number(item.completion)||0))}:{}),
-    ...(item.completedAt?{completedAt:Number(item.completedAt)}:{})
+    ...(item.completedAt?{completedAt:Number(item.completedAt)}:{}),
+    ...(item.isAnime===true?{isAnime:true}:{})
   };
 }
 

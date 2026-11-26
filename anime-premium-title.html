@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#08070d">
+<meta name="description" content="Discover the story, characters and world behind this Vivid Anime Premium title.">
+<link rel="canonical" href="https://vivid-cinema.pages.dev/anime-premium.html">
+<title>Anime title · VIVID ANIME PREMIUM</title>
+<link rel="icon" href="icons/vivid-icon.svg" type="image/svg+xml">
+<link rel="manifest" href="manifest.json">
+<link rel="preconnect" href="https://api.themoviedb.org">
+<link rel="preconnect" href="https://image.tmdb.org">
+<link rel="stylesheet" href="styles/vivid-foundation.css">
+<link rel="stylesheet" href="styles/vivid-system.css">
+<link rel="stylesheet" href="styles/vivid-shell.css">
+<link rel="stylesheet" href="styles/vivid-anime-premium.css">
+<link rel="stylesheet" href="styles/vivid-anime-premium-title.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.9.1/font/bootstrap-icons.css">
+</head>
+<body class="vivid-anime-premium-page vap-title-page" data-vivid-page="anime-premium-title">
+<div class="vap-shell">
+<header class="vap-header">
+  <a class="vap-brand" href="anime-premium.html" aria-label="Vivid Anime Premium home"><span>VIVID</span><b>ANIME</b><small>PREMIUM</small></a>
+  <nav aria-label="Premium navigation"><a href="anime-premium.html">Discover</a><a href="anime-premium-library.html">My Anime</a><a href="anime.html">Free anime</a><a class="vap-account-link" href="auth.html?returnTo=anime-premium.html" data-vap-account>Sign in</a></nav>
+</header>
+<main id="vap-title-content" aria-live="polite">
+  <section class="vap-title-hero" id="vap-title-hero">
+    <div class="vap-title-backdrop is-active" id="vap-title-backdrop-a" aria-hidden="true"></div>
+    <div class="vap-title-backdrop" id="vap-title-backdrop-b" aria-hidden="true"></div>
+    <div class="vap-title-hero-shade" aria-hidden="true"></div>
+    <div class="vap-title-hero-content">
+      <a class="vap-title-back" href="anime-premium.html"><i class="bi bi-arrow-left" aria-hidden="true"></i> Back to Premium</a>
+      <span class="vap-kicker"><i class="bi bi-stars" aria-hidden="true"></i> VIVID ANIME PREMIUM</span>
+      <p class="vap-title-meta" id="vap-title-meta">LOADING TITLE</p>
+      <h1 id="vap-title-name">Discover the story.</h1>
+      <p class="vap-title-tagline" id="vap-title-tagline"></p>
+      <p class="vap-title-overview" id="vap-title-overview">Loading title details…</p>
+      <div class="vap-title-actions">
+        <a class="vap-primary" id="vap-title-account" data-vap-primary href="auth.html?returnTo=anime-premium.html">Continue with Vivid <span aria-hidden="true">→</span></a>
+        <button class="vap-secondary vap-favorite-button" id="vap-title-favorite" type="button" aria-pressed="false"><i class="bi bi-bookmark-plus" aria-hidden="true"></i> Add to My List</button>
+        <button class="vap-secondary vap-favorite-button" id="vap-title-star" type="button" aria-pressed="false"><i class="bi bi-star" aria-hidden="true"></i> Add to favourites</button>
+        <button class="vap-secondary vap-favorite-button" id="vap-title-completed" type="button" aria-pressed="false"><i class="bi bi-check-circle" aria-hidden="true"></i> Mark as completed</button>
+        <a class="vap-secondary" href="anime-premium-membership.html"><i class="bi bi-crown" aria-hidden="true"></i> Get Premium</a>
+        <a class="vap-secondary" id="vap-title-watch" href="anime-premium-watch.html" hidden><i class="bi bi-play-circle" aria-hidden="true"></i> Watch with Premium</a>
+        <a class="vap-secondary" id="vap-title-trailer" href="anime-premium.html" hidden target="_blank" rel="noopener noreferrer"><i class="bi bi-play-circle" aria-hidden="true"></i> Official trailer</a>
+      </div>
+    </div>
+    <div class="vap-title-hero-index" aria-hidden="true"><span>THE STORY CONTINUES</span><b>VIVID / ANIME</b></div>
+  </section>
+  <section class="vap-title-facts" id="vap-title-facts" aria-label="Anime details"></section>
+  <section class="vap-title-section vap-title-story"><div class="vap-title-section-head"><span class="vap-eyebrow">THE WORLD</span><h2>About this anime</h2></div><p id="vap-title-description">Loading the story…</p><div class="vap-title-genres" id="vap-title-genres"></div></section>
+  <section class="vap-title-section" id="vap-title-cast-section" hidden><div class="vap-title-section-head"><span class="vap-eyebrow">THE PEOPLE BEHIND IT</span><h2>Cast & characters</h2></div><div class="vap-title-cast" id="vap-title-cast"></div></section>
+  <section class="vap-title-section" id="vap-title-related-section" hidden><div class="vap-title-section-head"><span class="vap-eyebrow">KEEP EXPLORING</span><h2>More anime worlds</h2></div><div class="vap-card-row" id="vap-title-related"></div></section>
+  <p class="vap-title-credit">Anime metadata and artwork supplied by TMDB. This product uses the TMDB API but is not endorsed or certified by TMDB.</p>
+</main>
+<footer class="vap-footer"><span>© 2026 Vivid Cinema</span><span><a href="terms.html">Terms</a><a href="privacy.html">Privacy</a><a href="help.html">Help</a></span></footer>
+</div>
+<script type="module" src="scripts/app-shell.js"></script>
+<script type="module" src="scripts/anime-premium.js"></script>
+<script type="module" src="scripts/anime-premium-title.js"></script>
+</body>
+</html>

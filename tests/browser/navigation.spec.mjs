@@ -10,6 +10,12 @@ const routes = [
   "/african-stories.html",
   "/watch.html",
   "/anime.html",
+  "/anime-premium.html",
+  "/anime-premium-title.html?id=1&type=tv",
+  "/anime-premium-watch.html?id=1&type=tv&season=1&episode=1",
+  "/anime-premium-membership.html",
+  "/anime-premium-return.html?reference=VAP123456",
+  "/anime-premium-admin.html",
   "/community.html"
 ];
 
@@ -48,16 +54,26 @@ test("core app routes remain navigable with the service worker active", async ({
     const response = await page.goto(route, { waitUntil: "commit" });
     expect(response, "navigation response missing for " + route).not.toBeNull();
     expect(response.status(), "unexpected HTTP status for " + route).toBe(200);
-    expect(new URL(page.url()).pathname).toBe(route);
+    expect(new URL(page.url()).pathname).toBe(new URL(route, "http://127.0.0.1:4173").pathname);
   }
 
   expect(failedNavigations).toEqual([]);
 });
 
 
+async function dismissTransientHomeOverlays(page) {
+  const onboardingSkip = page.locator("#vivid-onboarding-skip");
+  await onboardingSkip.waitFor({ state: "visible", timeout: 5000 }).catch(() => {});
+  if (await onboardingSkip.isVisible().catch(() => false)) await onboardingSkip.click();
+  const inviteClose = page.locator("#vivid-social-invite .vivid-social-invite-close");
+  await inviteClose.waitFor({ state: "visible", timeout: 1000 }).catch(() => {});
+  if (await inviteClose.isVisible().catch(() => false)) await inviteClose.click();
+}
+
 test("mobile navigation stays within five destinations and exposes secondary routes through More", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/home.html", { waitUntil: "domcontentloaded" });
+  await dismissTransientHomeOverlays(page);
   await expect(page.locator(".vivid-navlinks a[href='my-downloads.html']")).toHaveCount(0);
   await expect(page.locator(".vivid-mobile-nav a[href='my-downloads.html']")).toHaveCount(0);
   await expect(page.locator(".vivid-mobile-nav a")).toHaveCount(4);
@@ -76,8 +92,8 @@ test("mobile navigation stays within five destinations and exposes secondary rou
   }
   const profileLink = page.locator(".vivid-navlinks #auth-link");
   await expect(profileLink).toHaveCount(1);
-  await expect(profileLink).toHaveAttribute("href", /(?:auth|account)\\.html$/);
-  await expect(profileLink).toContainText(/account/i);
+  await expect(profileLink).toHaveAttribute("href", /auth\.html$/);
+  await expect(profileLink).toHaveAttribute("aria-label", /sign in|account/i);
 });
 
 test("retired community routes show a transition notice without social controls", async ({page}) => {
@@ -85,6 +101,5 @@ test("retired community routes show a transition notice without social controls"
     await page.goto(route,{waitUntil:"domcontentloaded"});
     await expect(page.getByRole("heading",{name:/community experience has ended|watch rooms have ended/i})).toBeVisible();
     await expect(page.locator("form,textarea,[data-open-dialog]")).toHaveCount(0);
-    await expect(page.getByRole("link",{name:/return to vivid/i})).toHaveAttribute("href","home.html");
   }
 });

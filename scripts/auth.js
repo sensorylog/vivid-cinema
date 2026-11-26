@@ -27,7 +27,7 @@ async function sendVividVerificationEmail() {
       Authorization: "Bearer " + token,
       "Content-Type": "application/json"
     },
-    body: JSON.stringify({}),
+    body: JSON.stringify(["anime-premium.html", "anime-premium-membership.html"].includes(postAuthDestination()) ? { returnTo: postAuthDestination() } : {}),
     credentials: "omit",
     cache: "no-store"
   });
