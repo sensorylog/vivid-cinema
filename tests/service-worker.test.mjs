@@ -25,6 +25,13 @@ test("service worker has a versioned cache and required offline shell", () => {
   assert.match(source, /\.\/scripts\/local-owner\.js/);
 });
 
+test("Premium Anime Library routes and assets are included in the offline shell", () => {
+  assert.ok(source.includes('"./anime-premium-library.html"'));
+  assert.ok(source.includes('"./scripts/anime-premium-library.js"'));
+  assert.ok(source.includes('"./scripts/anime-library.js"'));
+  assert.ok(source.includes('"./styles/vivid-anime-premium-library.css"'));
+});
+
 test("every precached asset exists in the repository", async () => {
   const match = source.match(/const APP_SHELL = \[([\s\S]*?)\n\];/);
   assert.ok(match, "APP_SHELL array must be discoverable");
