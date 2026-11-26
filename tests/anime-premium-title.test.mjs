@@ -45,10 +45,12 @@ test("title experience stays metadata-only and uses official trailer links only"
   assert.doesNotMatch(titleScript, /<video|playbackUrl|streamUrl|\.m3u8|\.mp4/i);
 });
 
-test("anime identity cards use per-title SVG silhouette masks and mobile poster fallback", () => {
+test("anime identity cards keep per-title SVG silhouette masks across desktop and mobile", () => {
   assert.match(discovery, /IDENTITY_MASKS/);
   assert.match(discovery, /clipPath/);
+  assert.match(discovery, /items\.map\(identityCard\)/);
   assert.match(discovery, /vap-identity-mobile-poster/);
+  assert.match(css, /\.vap-identity-svg\{display:block;width:100%;height:100%\}/);
   assert.match(discovery, /anime-premium-title\.html/);
   assert.match(css, /vap-title-hero\.is-scrolled/);
 });
@@ -74,6 +76,11 @@ test("Anime Premium My List uses the shared Vivid Library Watch Later collection
   assert.match(titleScript, /vap:my-list-changed/);
   assert.match(titleScript, /Subscribe to Vivid Anime Premium/);
   assert.match(titleScript, /isAnimeMetadata\(details\)/);
+  assert.match(titleScript, /movieDetailsBasic : tmdbApi\.tvDetailsBasic/);
+  assert.match(titleScript, /Promise\.allSettled\(\[\s*getImages\(titleId\), getCredits\(titleId\), getVideos\(titleId\), getRecommendations\(titleId\)/);
+  assert.match(titleScript, /renderTitle\(details\);[\s\S]*?Optional metadata enriches the already-visible page/);
+  assert.match(tmdb, /movieCredits: \(id\)/);
+  assert.match(tmdb, /tvCredits: \(id\)/);
   assert.match(titleScript, /related\.filter\(item => item\.poster_path && isAnimeMetadata\(item\)\)/);
   assert.match(titleScript, /canonicalUrl\.searchParams\.set\("id"/);
   assert.match(titleScript, /meta\[property="og:title"\]/);
