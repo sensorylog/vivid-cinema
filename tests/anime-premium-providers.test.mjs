@@ -42,10 +42,11 @@ test("MAL fallback is used when an anime provider accepts MAL but AniList is una
 
 test("episode-only anime providers stay unavailable for films while TMDB providers remain available", () => {
   const options = resolveAnimePremiumProviderOptions({ ...episode, mediaType: "movie" });
-  assert.equal(options.filter(item => item.available).map(item => item.id).sort().join(","), "embedwave,vidapi");
+  assert.equal(options.filter(item => item.available).map(item => item.id).sort().join(","), "embedwave,vidapi,vidfast,vidrift");
   assert.equal(buildAnimePremiumProviderUrl("vidapi", { mediaType: "movie", tmdbId: "550" }), "https://vaplayer.ru/embed/movie/550?autoplay=1&controls=1&overlay=1&ds_lang=en");
   assert.equal(buildAnimePremiumProviderUrl("embedwave", { mediaType: "movie", tmdbId: "550" }), "https://embedwave.cc/embed/movie/550?autoplay=true");
   assert.equal(buildAnimePremiumProviderUrl("vidrift", { mediaType: "movie", tmdbId: "550" }), "https://embed.vidrift.net/embed/movie/550");
+  assert.equal(buildAnimePremiumProviderUrl("vidfast", { mediaType: "movie", tmdbId: "550" }), "https://vidfast.to/embed/movie/550");
 });
 
 test("provider builders reject invalid catalogue IDs and unknown provider names", () => {
