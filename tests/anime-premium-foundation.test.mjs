@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
 const read = path => readFile(new URL(path, import.meta.url), "utf8");
-const [html, client, styles, legacyAnime, authRuntime, serviceWorker, sitemap, freePolicy, watchRuntime] = await Promise.all([
+const [html, client, styles, legacyAnime, authRuntime, serviceWorker, sitemap, freePolicy, watchRuntime, shell] = await Promise.all([
   read("../anime-premium.html"),
   read("../scripts/anime-premium.js"),
   read("../styles/vivid-anime-premium.css"),
@@ -12,7 +12,8 @@ const [html, client, styles, legacyAnime, authRuntime, serviceWorker, sitemap, f
   read("../service-worker.js"),
   read("../sitemap.xml"),
   read("../scripts/anime-free-policy.js"),
-  read("../scripts/watch.js")
+  read("../scripts/watch.js"),
+  read("../scripts/app-shell.js")
 ]);
 
 test("Premium has its own route, namespaced assets and discoverable metadata", () => {
@@ -23,6 +24,12 @@ test("Premium has its own route, namespaced assets and discoverable metadata", (
   assert.match(html, /rel="canonical" href="https:\/\/vivid-cinema\.pages\.dev\/anime-premium\.html"/);
   assert.match(styles, /\.vap-hero/);
   assert.match(sitemap, /https:\/\/vivid-cinema\.pages\.dev\/anime-premium\.html/);
+});
+
+test("Premium is explicitly labelled in navigation and Free Anime remains distinct", () => {
+  assert.match(shell, /navLink\("anime-premium\.html", "bi-stars", "Premium Anime"/);
+  assert.match(shell, /navLink\("anime\.html", "bi-stars", "Free Anime"/);
+  assert.match(shell, /page\.startsWith\("anime-premium"\)/);
 });
 
 test("Premium reuses the existing Vivid Firebase authentication instance", () => {
