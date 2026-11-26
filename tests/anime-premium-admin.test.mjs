@@ -42,7 +42,7 @@ test("card auto-renew cancellation uses stored Paystack subscription credentials
 });
 
 test("server-only Firestore collections remain private to all browser clients", () => {
-  for (const collection of ["animePremiumMemberships", "animePremiumCheckouts", "animePremiumWebhookEvents", "animePremiumPendingSubscriptions", "animePremiumSources", "animePremiumAdminAudit"]) {
+  for (const collection of ["animePremiumMemberships", "animePremiumCheckouts", "animePremiumWebhookEvents", "animePremiumPendingSubscriptions", "animePremiumSources", "animePremiumProfiles", "animePremiumPlaybackSessions", "animePremiumRateLimits", "animePremiumAdminAudit"]) {
     assert.match(rules, new RegExp("match \\/" + collection + "\\/"));
   }
   assert.match(rules, /allow read, write: if false/);
