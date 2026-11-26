@@ -146,7 +146,7 @@ export function resolveCheckoutPlan(country, env = {}) {
     localCheckoutCurrency: preferred,
     ...plans[currency],
     fallback: currency !== preferred,
-    mobileMoneyAvailable: MOBILE_MONEY_COUNTRIES.has(code)
+    mobileMoneyAvailable: (code === "GH" && currency === "GHS") || (code === "KE" && currency === "KES")
   };
 }
 export function publicPricing(env = {}) {
