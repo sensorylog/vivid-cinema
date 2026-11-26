@@ -42,18 +42,19 @@ export function normalizeAnimeProviderMessage(provider, rawPayload) {
   }
   if (!payload || typeof payload !== "object" || Array.isArray(payload)) return null;
   const message = payload.data && typeof payload.data === "object" ? payload.data : payload;
-  if (provider === "animeembed" && payload.channel !== "animeembed") return null;
+  if (provider === "animeembed" && (payload.channel !== "animeembed" || payload.version !== 1)) return null;
   if (!["animeembed", "vidy"].includes(provider)) return null;
-  const event = String(message.event || "").toLowerCase();
+  const event = String(payload.event || message.event || "").toLowerCase();
   if (!ANIME_PROVIDER_EVENTS.has(event)) return null;
+  const details = message.data && typeof message.data === "object" ? message.data : message;
   return {
     type: "PLAYER_EVENT",
     data: {
-      ...message,
+      ...details,
       event,
       player_status: event === "progress" ? "timeupdate" : event,
-      player_progress: message.currentTime ?? message.progress ?? message.position ?? 0,
-      player_duration: message.duration ?? 0
+      player_progress: details.currentTime ?? details.progress ?? details.position ?? message.currentTime ?? message.progress ?? 0,
+      player_duration: details.duration ?? message.duration ?? 0
     }
   };
 }
