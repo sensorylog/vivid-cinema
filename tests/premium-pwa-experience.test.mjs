@@ -10,7 +10,7 @@ test("premium PWA shell keeps four direct mobile destinations and a More menu", 
   assert.ok(mobileNav.includes('navLink("home.html", "bi-house-fill", "Home"'));
   assert.ok(mobileNav.includes('navLink("collection.html?collection=movies", "bi-film", "Movies"'));
   assert.ok(mobileNav.includes('navLink("collection.html?collection=tv", "bi-tv", "Series"'));
-  assert.ok(mobileNav.includes('navLink("live.html", "bi-broadcast-pin", "Live"'));
+  assert.ok(mobileNav.includes('navLink("anime-premium.html", "bi-stars", "Anime"'));
   assert.match(mobileNav, /data-vivid-more-navigation/);
   assert.equal((mobileNav.match(/navLink\(/g) || []).length, 4);
   assert.ok(mobileNav.includes(`.join("")`));
