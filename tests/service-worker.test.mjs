@@ -278,5 +278,5 @@ test("Watch Rooms and playback modules are included in the offline app shell", (
 
 test("service worker precaches the Phase 5 anime playback helpers and watch entry", () => {
   assert.match(source, /\.\/scripts\/playback\/anime-playback\.js/);
-  assert.match(source, /watch\.js\?v=anime-phase5-player-1/);
+  assert.match(source, /watch\.js\?v=anime-phase5-player-2/);
 });
