@@ -42,6 +42,8 @@ test("membership pricing is not blocked by optional country or Firebase auth req
   assert.match(client, /import\("\.\/firebase\.js"\)/);
   assert.doesNotMatch(client, /^import \{ auth \}/m);
   assert.match(client, /AbortSignal\.timeout\(5000\)/);
+  assert.match(client, /AbortSignal\.timeout\(8000\)/);
+  assert.match(client, /has not been enabled in this environment/);
 });
 
 test("client sends only country and payment method; server owns the amount and Paystack secret", () => {
@@ -83,7 +85,7 @@ test("payment return can render its status even if Firebase auth is temporarily 
 test("membership return survives Vivid email verification and is cached offline", () => {
   assert.match(sendVerification, /anime-premium-membership\.html/);
   assert.match(verifyEmail, /anime-premium-membership\.html/);
-  assert.match(sw, /vivid-cinema-shell-v353/);
+  assert.match(sw, /vivid-cinema-shell-v354/);
   assert.match(sw, /anime-premium-membership\.html/);
   assert.match(sw, /anime-premium-return\.html/);
   assert.match(sw, /anime-premium-membership\.js/);
