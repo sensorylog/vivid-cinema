@@ -2,14 +2,14 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { onRequestGet } from "../cloudflare/functions/api/anime-premium/exchange-rate.js";
 
-test("exchange-rate endpoint converts GHS to the selected currency from daily USD-base rates", async () => {
+test("exchange-rate endpoint requests a direct GHS-base table and returns the selected currency rate", async () => {
   const originalFetch = globalThis.fetch;
   globalThis.fetch = async url => {
-    assert.equal(String(url), "https://open-rates.currencyfreaks.com/rates?base=USD");
+    assert.equal(String(url), "https://open-rates.currencyfreaks.com/rates?base=GHS");
     return new Response(JSON.stringify({
       date: "2026-11-26",
-      base: "USD",
-      rates: { GHS: 10, NGN: 1000, EUR: 0.9 }
+      base: "GHS",
+      rates: { GHS: 1, NGN: 100, EUR: 0.09, USD: 0.1 }
     }), { status: 200, headers: { "Content-Type": "application/json" } });
   };
   try {
@@ -29,12 +29,27 @@ test("exchange-rate endpoint converts GHS to the selected currency from daily US
   }
 });
 
+test("GHS is exactly one-to-one and does not require an external FX request", async () => {
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = async () => { throw new Error("GHS should not need an FX provider call."); };
+  try {
+    const response = await onRequestGet({
+      request: new Request("https://vivid-cinema.pages.dev/api/anime-premium/exchange-rate?currency=GHS"),
+      env: {}
+    });
+    assert.equal(response.status, 200);
+    assert.equal((await response.json()).rate, 1);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
 test("exchange-rate endpoint rejects invalid or unpublished currencies without inventing a rate", async () => {
   const originalFetch = globalThis.fetch;
   let calls = 0;
   globalThis.fetch = async () => {
     calls += 1;
-    return new Response(JSON.stringify({ date: "2026-11-26", base: "USD", rates: { GHS: 10, EUR: 0.9 } }), {
+    return new Response(JSON.stringify({ date: "2026-11-26", base: "GHS", rates: { GHS: 1, EUR: 0.09 } }), {
       status: 200, headers: { "Content-Type": "application/json" }
     });
   };
