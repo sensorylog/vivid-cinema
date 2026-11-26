@@ -1,5 +1,5 @@
 /**
- * Shared TMDB anime eligibility rules for discovery and protected playback.
+ * Shared TMDB anime eligibility rules for discovery and playback authorization.
  * Require animation metadata plus a Japanese-language or Japan-origin signal.
  */
 export function isAnimeMetadata(item = {}) {
