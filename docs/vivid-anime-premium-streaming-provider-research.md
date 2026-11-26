@@ -46,7 +46,7 @@ The registry contains **13 selectable provider endpoints**. Some are separate en
 - **VidSrc** is retained because the existing VIVID Anime watch flow already uses its TMDB movie/TV embed route for anime titles represented in TMDB. It is not treated as a dedicated MAL/AniList anime endpoint.
 - **AniLink** documents an AniList episode route, requires an explicit audio variant and publishes a validated `postMessage` event contract.
 - **AniXo** documents both AniList and MAL embed routes, as well as its claimed multi-engine failover.
-- **MegaPlay, Megavid and MegaFlix** document MAL/AniList anime routes and iframe player events. MegaPlay's current public API documentation uses `megaplay.buzz/stream/...`; VIVID also retains its older `ani.megaplay.su` endpoint as a compatibility fallback.
+- **MegaPlay, Megavid and MegaFlix** document MAL/AniList anime routes and iframe player events. MegaPlay's current public API documentation uses `megaplay.buzz/stream/...`; VIVID also retains its older `ani.megaplay.su` endpoint as a compatibility fallback. MegaPlay's docs warn that not every title is mapped to MAL/AniList. They document a separate Anikoto catalogue API (`recent-anime` then `series/{id}`) that returns episode embed IDs, but explicitly recommend server-side use and document rate limits. Premium currently uses the documented MAL/AniList iframe routes; a future Anikoto catalog adapter should be added only after its response schema and title-matching behavior are validated server-side.
 - **VidRift** documents TMDB and AniList routes, a multi-source player with automatic failover, and progress/error messages.
 - **VidFast** documents TMDB/IMDb movie and TV routes. It is a generic catalogue fallback, not an anime-specific ID provider.
 
@@ -62,6 +62,7 @@ The registry contains **13 selectable provider endpoints**. Some are separate en
 - AniLink player events: https://anilink.cc/docs/player-events
 - AniXo embed/API reference: https://anixo.buzz/
 - MegaPlay embed API: https://megaplay.buzz/api
+- Anikoto catalogue API used by MegaPlay: https://anikotoapi.site/
 - MegaPlay legacy player: https://ani.megaplay.su/
 - Megavid embed API: https://megavid.buzz/
 - MegaFlix embed API: https://megaflix.buzz/
@@ -100,6 +101,7 @@ Only use these embeds for content VIVID has the right to make available in its t
 ## Phase 4 QA checklist
 
 - [ ] Test a representative current-season anime episode on every enabled provider.
+- [ ] Validate whether a server-side Anikoto catalogue lookup improves MegaPlay coverage for titles not mapped to MAL/AniList; do not call the API directly from the browser.
 - [ ] Test a long-running series, a sequel/cour split and a special episode to validate ID and episode-number mapping.
 - [ ] Test sub and dub separately; do not infer dub availability from a successful sub stream.
 - [ ] Test at least one anime film through each TMDB movie provider.
