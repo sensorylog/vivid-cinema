@@ -30,9 +30,14 @@ async function handleChargeSuccess(db, env, data, eventRef) {
   if (!uid) throw new AnimePremiumError(409, "checkout-owner-missing", "The checkout has no verified Vivid account.");
   const membershipRef = db.collection("animePremiumMemberships").doc(uid);
   const now = Date.now();
-  const paystackSubscriptionCode = String(verified.subscription?.subscription_code || data.subscription?.subscription_code || "");
   const customerCode = String(verified.customer?.customer_code || data.customer?.customer_code || "");
-  const subscriptionEmailToken = String(verified.subscription?.email_token || data.subscription?.email_token || "");
+  const pendingSubscriptionSnapshot = customerCode
+    ? await db.collection("animePremiumPendingSubscriptions").where("customerCode", "==", customerCode).limit(1).get()
+    : null;
+  const pendingSubscriptionDoc = pendingSubscriptionSnapshot && !pendingSubscriptionSnapshot.empty ? pendingSubscriptionSnapshot.docs[0] : null;
+  const pendingSubscription = pendingSubscriptionDoc ? pendingSubscriptionDoc.data() || {} : {};
+  const paystackSubscriptionCode = String(verified.subscription?.subscription_code || data.subscription?.subscription_code || pendingSubscription.subscriptionCode || "");
+  const subscriptionEmailToken = String(verified.subscription?.email_token || data.subscription?.email_token || pendingSubscription.emailToken || "");
   const requestedNextPayment = millis(verified.subscription?.next_payment_date || data.subscription?.next_payment_date);
   await db.runTransaction(async transaction => {
     const [eventSnapshot, liveCheckout, existingMembership] = await Promise.all([
@@ -71,6 +76,7 @@ async function handleChargeSuccess(db, env, data, eventRef) {
       paidAt: timestampFromMillis(now),
       updatedAt: timestampFromMillis(now)
     }, { merge: true });
+    if (pendingSubscriptionDoc) transaction.delete(pendingSubscriptionDoc.ref);
     transaction.set(eventRef, { processedAt: timestampFromMillis(now), event: "charge.success", reference });
   });
 }
@@ -88,7 +94,17 @@ async function handleRecurringEvent(db, eventName, data, eventRef) {
   const subscriptionCode = String(data.subscription?.subscription_code || data.subscription_code || data.subscription?.code || "");
   const customerCode = String(data.customer?.customer_code || data.customer_code || "");
   const membershipDoc = await membershipBySubscription(db, subscriptionCode) || (eventName === "subscription.create" ? await membershipByCustomer(db, customerCode) : null);
-  if (!membershipDoc) return;
+  if (!membershipDoc) {
+    if (eventName === "subscription.create" && subscriptionCode) {
+      await db.collection("animePremiumPendingSubscriptions").doc(subscriptionCode).set({
+        subscriptionCode, customerCode,
+        emailToken: String(data.email_token || data.subscription?.email_token || ""),
+        createdAt: timestampFromMillis(Date.now())
+      }, { merge: true });
+      await eventRef.set({ processedAt: timestampFromMillis(Date.now()), event: eventName, subscriptionCode, pending: true }, { merge: true });
+    }
+    return;
+  }
   const membershipRef = membershipDoc.ref;
   const now = Date.now();
   await db.runTransaction(async transaction => {
