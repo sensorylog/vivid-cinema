@@ -1,5 +1,5 @@
 // Bump this version whenever the precached app shell changes.
-const CACHE_NAME = "vivid-cinema-shell-v348";
+const CACHE_NAME = "vivid-cinema-shell-v349";
 const HLS_LIBRARY_URL = "https://cdn.jsdelivr.net/npm/hls.js@1.7.3/dist/hls.min.js";
 const APP_SHELL = [
   HLS_LIBRARY_URL,
@@ -24,7 +24,7 @@ const APP_SHELL = [
   "./scripts/for-you.js","./scripts/vivid-recall-chat.js","./scripts/cloudflare-ai.js","./scripts/local-owner.js","./scripts/firebase.js","./scripts/turnstile-app-check.js?v=20261123-signup-only-1","./scripts/cloudflare-api.js",
   "./scripts/firebase.js?v=20261123-signup-only-1","./scripts/pwa.js","./scripts/atmosphere.js","./scripts/i18n.js","./scripts/routes.js",
   "./scripts/config.js","./scripts/utils.js","./scripts/content.js","./scripts/media.js","./scripts/tmdb.js",
-  "./scripts/collection.js","./scripts/person.js","./scripts/recommendations.js","./scripts/release-alerts.js","./scripts/cinema-reminders.js",
+  "./scripts/collection.js","./scripts/person.js","./scripts/library.js","./scripts/recommendations.js","./scripts/anime-library.js","./scripts/release-alerts.js","./scripts/cinema-reminders.js",
   "./scripts/push-notifications.js","./scripts/news.js","./scripts/news.js?v=20261018-feedback-sync-4",
   "./scripts/editorial-desk.js","./scripts/title.js","./scripts/playback/player-engine.js","./scripts/playback/playback-servers.js","./scripts/playback/server-settings.js",
   "./scripts/watch.js","./scripts/watch.js?v=anime-phase5-player-10","./scripts/anime-enrichment.js","./styles/vivid-watch-polish.css?v=anime-phase5-player-1","./scripts/playback/tflix-secondary-player.js","./scripts/playback/playback-urls.js","./scripts/playback/anime-playback.js","./scripts/playback/anime-id-resolver.js","./scripts/playback/anime-secondary-player.js","./scripts/landing.js","./scripts/account.js",
