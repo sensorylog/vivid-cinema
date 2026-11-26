@@ -31,7 +31,10 @@ test("Premium pricing has a configurable GHS default and does not expose Paystac
   assert.equal(hostedReady.checkoutEnabled, true);
   const missingWebhookSecret = publicPricing({ FIREBASE_SERVICE_ACCOUNT_JSON: "{}" });
   assert.equal(missingWebhookSecret.checkoutEnabled, false);
-  assert.match(missingWebhookSecret.checkoutMessage, /Paystack payment verification is not configured/);
+  assert.match(missingWebhookSecret.checkoutMessage, /Paystack webhook verification is not configured/);
+  const webhookReady = publicPricing({ PAYSTACK_WEBHOOK_SECRET: "whsec_example", FIREBASE_SERVICE_ACCOUNT_JSON: "{}" });
+  assert.equal(webhookReady.checkoutEnabled, true);
+  assert.equal(webhookReady.checkoutMessage, "");
   assert.doesNotMatch(JSON.stringify(publicData), /PLN_PRIVATE_CODE/);
 });
 
