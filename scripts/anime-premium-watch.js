@@ -198,6 +198,7 @@ async function requestPlayback(episode) {
     try { await video.play(); } catch { setStatus("Your episode is ready. Press play to begin."); }
     if (requestId === playbackRequestId) setStatus("Authorised playback session opened.");
   } catch (error) {
+    if (requestId !== playbackRequestId) return;
     showGate("Playback could not start", error?.message || "Try again in a moment.", "Back to title", titleRoute(), true);
     setStatus(error?.message || "Playback could not start.");
     console.warn("Vivid Anime Premium playback request failed:", error);
@@ -323,7 +324,12 @@ function bindControls() {
 }
 function bindAuth() {
   onAuthStateChanged(auth, user => {
-    currentUser = user && !user.isAnonymous ? user : null;
+    const nextUser = user && !user.isAnonymous ? user : null;
+    if (currentUser?.uid && currentUser.uid !== nextUser?.uid && currentPlaybackSessionId) {
+      playbackRequestId += 1;
+      showGate("Vivid account changed", "Playback has stopped because the signed-in Vivid account changed. Sign in with the account that holds your Premium membership.");
+    }
+    currentUser = nextUser;
     if (!currentUser) {
       $("vap-player-signin").href = "auth.html?returnTo=anime-premium.html";
       $("vap-player-signin").textContent = "Sign in to Vivid →";
