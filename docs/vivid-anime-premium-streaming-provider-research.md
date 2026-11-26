@@ -28,8 +28,10 @@ The next provider integrations should plug into this resolver contract. Do not p
 | **Netflix** | Significant anime commissioner and distributor in many markets. | Treat as a licensing/distribution relationship, not a consumer playback endpoint. Require written rights and an approved technical delivery method. |
 | **Prime Video Channels / Amazon** | Distribution channel for third-party services, including anime services in selected markets. | Potential commercial distribution route only where Amazon and the underlying rights holder approve VIVID's role. A Prime Video subscription or channel listing does not authorise re-streaming. |
 | **Official rights-holder / distributor delivery** | Studios, production committees and regional distributors may license individual titles or packages directly. | Strongest route for a VIVID-owned catalogue. Negotiate title, territory, language, window, monetisation and technical-delivery rights per contract. |
+| **Bilibili** | Regional anime streaming and distribution business, with selected licensed catalogues in parts of Asia. | Investigate only for territories and content packages that explicitly include VIVID's launch markets; do not assume a Southeast Asia licence covers Ghana or global distribution. |
+| **Disney+ / Hulu / Tubi** | General streaming services that carry selected anime titles in certain markets. | Secondary title-by-title licensing/distribution candidates; regional availability and app integrations are separate questions. |
 | **Official YouTube channels** | Some rights holders publish selected episodes, trailers or promotional content. | Use official embed/API mechanisms only where the channel owner permits embedding and the content is available in the user's territory. Do not treat this as a substitute for a licensed Premium catalogue. |
-| **AniBiz** | B2B anime IP marketplace connecting rights holders with potential licensees. | Useful discovery and introduction channel for rights-holder conversations. It is a licensing marketplace, not a video-streaming API or a source of playable manifests. |
+| **AniBiz** | B2B anime IP marketplace connecting rights holders with potential licensees. In October 2026 it announced 30+ licensors and investment from TBS Group, Toei Animation and TV TOKYO Holdings. | Useful discovery and introduction channel for rights-holder conversations. It is a licensing marketplace, not a video-streaming API or a source of playable manifests. |
 
 ### Primary research references
 
@@ -41,13 +43,15 @@ The next provider integrations should plug into this resolver contract. Do not p
 - Netflix Help Center, content licensing: https://help.netflix.com/en/node/4976 — Netflix describes licensing rights by title, country and time window.
 - AniBiz official marketplace: https://anibiz.com/about
 - AniBiz licensee information: https://anibiz.com/lp/licensee
+- AniBiz October 2026 licensor expansion announcement: https://www.prnewswire.com/news-releases/tbs-group-toei-animation-and-tv-tokyo-holdings-make-strategic-investment-in-anibizcom-the-official-anime-licensing-platform-302921185.html
+- Netflix Ghana official anime category: https://www3.stage.netflix.com/gh/browse/genre/6721 — useful to confirm consumer-facing regional availability only, not redistribution rights.
 - Sony's overview of Crunchyroll's distribution and localisation business: https://www.sony.com/en/SonyInfo/blog/2026/10/06/
 
 These references establish that providers and licensing pathways exist; they do **not** establish that any provider has granted VIVID rights, supplied credentials, or approved a technical integration.
 
 ## Ghana and global availability
 
-Provider availability is territory-specific and may vary by title, season, language, subscription tier and release window. Do not infer Ghana availability from a provider's global marketing page or from a title appearing in a catalogue search.
+Provider availability is territory-specific and may vary by title, season, language, subscription tier and release window. Do not infer Ghana availability from a provider's global marketing page or from a title appearing in a catalogue search. Current third-party availability trackers returned conflicting Crunchyroll availability signals for Ghana during research, so those aggregators are not authoritative enough to unlock a VIVID title. Netflix does expose a Ghana-specific official anime category page, which is useful evidence of a local consumer catalogue, but it does not grant VIVID retransmission rights or an API integration.
 
 For every licensed title, the rights record must explicitly capture:
 - permitted territories (ISO 3166-1 alpha-2 codes);
