@@ -2,7 +2,7 @@ import { tmdbApi } from "./tmdb.js";
 import { getImageUrl, normalizeResults } from "./media.js";
 import { escapeHtml } from "./utils.js";
 import { hasLibraryItem, toggleLibraryItem } from "./library.js";
-import { markAnimeCompleted, unmarkAnimeCompleted } from "./anime-library.js";
+import { markAnimeCompleted, unmarkAnimeCompleted, addAnimeFavorite, removeAnimeFavorite } from "./anime-library.js";
 
 const $ = id => document.getElementById(id);
 const params = new URLSearchParams(window.location.search);
@@ -161,6 +161,23 @@ function libraryTitleItem(details) {
   };
 }
 
+function updateStarButton(details) {
+  const button = $("vap-title-star");
+  if (!button) return;
+  const item = libraryTitleItem(details);
+  const saved = hasLibraryItem("favorites", item);
+  button.setAttribute("aria-pressed", String(saved));
+  button.classList.toggle("is-saved", saved);
+  button.innerHTML = saved
+    ? '<i class="bi bi-star-fill" aria-hidden="true"></i> Favourite'
+    : '<i class="bi bi-star" aria-hidden="true"></i> Add to favourites';
+  button.onclick = () => {
+    if (hasLibraryItem("favorites", item)) removeAnimeFavorite(item.id, mediaType);
+    else addAnimeFavorite(item);
+    updateStarButton(details);
+  };
+}
+
 function updateCompletedButton(details) {
   const button = $("vap-title-completed");
   if (!button) return;
@@ -210,6 +227,7 @@ window.addEventListener("vivid:library-changed", () => {
   if (!name || !activeTitleDetails) return;
   updateFavoriteButton(activeTitleDetails);
   updateCompletedButton(activeTitleDetails);
+  updateStarButton(activeTitleDetails);
 });
 
 function renderTitle(details) {
@@ -227,6 +245,7 @@ function renderTitle(details) {
   $("vap-title-description").textContent = details.overview || "A story from the Vivid Anime Premium collection.";
   updateFavoriteButton(details);
   updateCompletedButton(details);
+  updateStarButton(details);
   renderFacts(details);
   renderGenres(details);
   renderCast(details);
