@@ -1,5 +1,3 @@
-import { auth } from "./firebase.js";
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
 import { getImageUrl } from "./media.js";
 import { escapeHtml } from "./utils.js";
 import { getAnimeLibrarySnapshot, removeAnimeFromWatchlist, unmarkAnimeCompleted, removeAnimeFavorite, saveAnimeLibraryPreferences, syncAnimePreferencesForUser } from "./anime-library.js";
@@ -78,7 +76,8 @@ function render() {
 async function verifyMembership(user) {
   const response = await fetch("/api/anime-premium/membership", {
     headers: { Authorization: "Bearer " + await user.getIdToken() },
-    cache: "no-store"
+    cache: "no-store",
+    signal: AbortSignal.timeout(10000)
   });
   if (response.status === 401) return { active: false, reason: "signin" };
   if (response.status === 403) return { active: false, reason: "verify" };
@@ -134,14 +133,29 @@ window.addEventListener("vivid:library-changed", render);
 window.addEventListener("vivid:progress-changed", render);
 window.addEventListener("vivid:anime-preferences-changed", render);
 
-onAuthStateChanged(auth, user => {
-  currentUser = user && !user.isAnonymous ? user : null;
-  if (!currentUser) {
-    showGate("Sign in to see your anime", "Use your existing Vivid account to open your private Premium library.", "auth.html?returnTo=anime-premium-library.html", "Sign in to Vivid");
-    return;
+async function initAuth() {
+  try {
+    const [{ auth }, { onAuthStateChanged }] = await Promise.all([
+      import("./firebase.js"),
+      import("https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js")
+    ]);
+    if (typeof auth.authStateReady === "function") await auth.authStateReady();
+    onAuthStateChanged(auth, user => {
+      currentUser = user && !user.isAnonymous ? user : null;
+      if (!currentUser) {
+        showGate("Sign in to see your anime", "Use your existing Vivid account to open your private Premium library.", "auth.html?returnTo=anime-premium-library.html", "Sign in to Vivid");
+        return;
+      }
+      void openLibrary(currentUser);
+    }, error => {
+      currentUser = null;
+      console.warn("Vivid Anime Premium library authentication failed:", error);
+      showGate("Vivid account unavailable", "Vivid could not restore your account session. Check your connection and sign in again.", "auth.html?returnTo=anime-premium-library.html", "Sign in to Vivid");
+    });
+  } catch (error) {
+    currentUser = null;
+    console.warn("Vivid Anime Premium library auth initialization failed:", error);
+    showGate("Vivid account unavailable", "Your private library needs a Vivid account session. Account services could not be reached; please retry.", "auth.html?returnTo=anime-premium-library.html", "Sign in to Vivid");
   }
-  void openLibrary(currentUser);
-}, error => {
-  console.warn("Vivid Anime Premium library authentication failed:", error);
-  showGate("Sign in to continue", "Vivid could not verify your account. Please sign in again.", "auth.html?returnTo=anime-premium-library.html", "Sign in to Vivid");
-});
+}
+void initAuth();
