@@ -101,4 +101,4 @@ test("Anime Premium My List uses the shared Vivid Library Watch Later collection
   assert.match(library, /onAuthStateChanged\(auth,user=>/);
 });
 
-test("title metadata loading is independent of Firebase and library startup", () => { assert.doesNotMatch(titleScript, /^import .*firebase|^import .*library\\.js|^import .*anime-library\\.js/m); assert.match(titleScript, /initializeOptionalAccountFeatures/); assert.match(titleScript, /import\\("\\.\\/firebase\\.js"\\)/); assert.match(html, /auth-independent-loader-1/); assert.match(sw, /vivid-cinema-shell-v360/); });
+test("title metadata loading is independent of Firebase and library startup", () => { assert.doesNotMatch(titleScript, /^import .*firebase|^import .*library\\.js|^import .*anime-library\\.js/m); assert.match(titleScript, /initializeOptionalAccountFeatures/); assert.match(titleScript, /import\("\.\/firebase\.js"\)/); assert.match(html, /auth-independent-loader-1/); assert.match(sw, /vivid-cinema-shell-v360/); });
