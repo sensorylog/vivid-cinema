@@ -15,6 +15,7 @@ const routes = [
   "/anime-premium-watch.html?id=1&type=tv&season=1&episode=1",
   "/anime-premium-membership.html",
   "/anime-premium-return.html?reference=VAP123456",
+  "/anime-premium-admin.html",
   "/community.html"
 ];
 
