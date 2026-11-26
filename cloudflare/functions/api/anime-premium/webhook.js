@@ -8,7 +8,17 @@ async function eventDocumentId(event, data) {
   const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(value));
   return [...new Uint8Array(digest)].map(byte => byte.toString(16).padStart(2, "0")).join("");
 }
-function addMonthsMillis(planId, from = Date.now()) {\n  const months = planId === "annually" ? 12 : planId === "biannually" ? 6 : 1;\n  const date = new Date(from);\n  const day = date.getUTCDate();\n  date.setUTCDate(1);\n  date.setUTCMonth(date.getUTCMonth() + months);\n  const last = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + 1, 0)).getUTCDate();\n  date.setUTCDate(Math.min(day, last));\n  return date.getTime();\n}\nfunction millis(value) {
+function addMonthsMillis(planId, from = Date.now()) {
+  const months = planId === "annually" ? 12 : planId === "biannually" ? 6 : 1;
+  const date = new Date(from);
+  const day = date.getUTCDate();
+  date.setUTCDate(1);
+  date.setUTCMonth(date.getUTCMonth() + months);
+  const last = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + 1, 0)).getUTCDate();
+  date.setUTCDate(Math.min(day, last));
+  return date.getTime();
+}
+function millis(value) {
   const result = Date.parse(value || "");
   return Number.isFinite(result) ? result : 0;
 }
