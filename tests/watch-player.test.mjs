@@ -44,27 +44,30 @@ test("iframe diagnostics are opt-in and do not log raw provider payloads", () =>
 
 
 
-test("anime playback excludes the unverified Aniweeb source and automatically falls back after timeout", () => {
+test("free anime previews are allowlisted and expose only one in-app player", () => {
+  assert.match(source, /isFreeAnimePreviewRoute/);
+  assert.match(source, /return source === "vidapi" && hasFallbackId\(\)/);
+  assert.match(source, /if \(isAnimePlayback\(\)\) return null/);
+  assert.match(source, /button\.hidden = isAnimePlayback\(\) \? source !== "vidapi"/);
+  assert.match(source, /if \(isAnimePlayback\(\)\) \$\("vivid-tflix-player"\)\?\.remove\(\)/);
+  assert.match(source, /if \(!isAnimePlayback\(\)\) mountSecondaryPlayer/);
   assert.doesNotMatch(source, /data-player-source="aniweeb"/);
-  assert.doesNotMatch(source, /\["aniweeb", "vidplus"/);
-  assert.match(source, /\? \["vidplus", "vidlink", "vidsrc", "vidapi"\]/);
-  assert.equal((source.match(/if \(isAnimePlayback\(\)\) triggerFallback\("anime_source_timeout"\)/g) || []).length, 4);
-  assert.match(source, /if \(isAnimePlayback\(\)\) triggerFallback\("anime_source_timeout"\)/);
-  assert.match(source, /isAnimePlayback\(\) \? 12000 : 25000/);
 });
 
 
-test("movie and TV Player 1 exposes seven sources while anime providers remain separate", () => {
-  assert.match(source, /: \["vidapi", "vidsrc", "embedwave", "vidfast", "ezvidapi", "embedapistream", "moviesapi"\];/);
-  assert.match(source, /if \(source === "vidapi" \|\| source === "vidsrc" \|\| source === "vidfast" \|\| source === "embedapistream" \|\| source === "moviesapi"\) return hasFallbackId\(\);\r?\n\s*if \(source === "embedwave" \|\| source === "ezvidapi"\) return hasTmdbId\(\);\r?\n\s*return false;/);
-  assert.match(source, /button\.hidden = isAnimePlayback\(\) \? !\["vidapi", "vidsrc", "vidplus", "vidlink"\]\.includes\(source\) : !\["vidapi", "vidsrc", "embedwave", "vidfast", "ezvidapi", "embedapistream", "moviesapi"\]\.includes\(source\)/);
+
+test("movie and TV playback retains seven sources while Free Anime is restricted", () => {
+  assert.match(source, /const order = \["vidapi", "vidsrc", "embedwave", "vidfast", "ezvidapi", "embedapistream", "moviesapi"\]/);
+  assert.match(source, /if \(source === "vidapi" \|\| source === "vidsrc" \|\| source === "vidfast" \|\| source === "embedapistream" \|\| source === "moviesapi"\) return hasFallbackId\(\)/);
+  assert.match(source, /button\.hidden = isAnimePlayback\(\) \? source !== "vidapi"/);
   assert.match(source, /<span class="vivid-server-count">7 sources<\/span>/);
   assert.doesNotMatch(source, /mountPlaybackServerSettings\(serverPanel/);
   for (const provider of ["embedwave", "vidfast", "ezvidapi", "embedapistream", "moviesapi"]) {
     assert.ok(source.includes(`data-player-source="${provider}"`), `${provider} should have a Player 1 button`);
   }
-  assert.match(source, /\? \["vidplus", "vidlink", "vidsrc", "vidapi"\]/);
 });
+
+
 
 test("movie/TV server picker keeps all providers in a simple scrollable dropdown", async () => {
   assert.match(source, /"embedwave", "vidfast", "ezvidapi", "embedapistream", "moviesapi"\]\.includes\(source\)/);
