@@ -132,12 +132,13 @@ The Premium entry route now acts as a dedicated discovery homepage rather than a
 
 ### Required Cloudflare environment configuration before live payments
 - FIREBASE_SERVICE_ACCOUNT_JSON and FIREBASE_PROJECT_ID (existing Vivid server-side Firebase credentials).
-- PAYSTACK_SECRET_KEY and PAYSTACK_WEBHOOK_SECRET (server secrets; never expose them to the browser).
-- PAYSTACK_LIVE_ENABLED=true only in the production environment after the Paystack merchant, plan codes and webhook are configured. Checkout stays disabled in previews by default.
-- PAYSTACK_PLAN_GHS_MONTHLY or ANIME_PREMIUM_PLANS_JSON for each enabled checkout currency. Card auto-renew is unavailable for currencies without a configured Paystack plan code.
-- ANIME_PREMIUM_DEFAULT_CURRENCY (defaults to GHS) and optional ANIME_PREMIUM_GHS_MONTHLY_AMOUNT (defaults to 5330 minor units).
+- PAYSTACK_WEBHOOK_SECRET (required server-only signing secret for the three hosted Premium Payment Pages; never expose it to the browser).
+- PAYSTACK_SECRET_KEY is not required for the hosted-page redirect or signed-webhook fulfilment. It is retained only for the older API-initialized checkout route and legacy webhook signature compatibility.
+- Do not require PAYSTACK_LIVE_ENABLED or Paystack plan-code environment variables for the three fixed hosted Payment Pages. Those settings belong to the older API-initialized checkout path.
 - ANIME_PREMIUM_ADMIN_UIDS for server-side admin allowlisting when custom admin claims are not used.
- - Configure the Paystack webhook URL as /api/anime-premium/webhook on the Vivid production origin. Support Vivid donations remain on their existing, separate payment flow.
+- Configure the Paystack webhook URL as https://vivid-cinema.pages.dev/api/anime-premium/webhook on the Vivid production origin and save the matching signing secret in Cloudflare Pages Production as PAYSTACK_WEBHOOK_SECRET.
+- Set the Redirect after payment URL on all three hosted Payment Pages to https://vivid-cinema.pages.dev/anime-premium-return.html. The return page only checks membership; the signed webhook activates it.
+- Support Vivid donations remain on their existing, separate Paystack Inline public-key flow.
 
 
 ## Third-party anime embed playback
