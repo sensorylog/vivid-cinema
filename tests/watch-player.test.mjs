@@ -209,7 +209,7 @@ test("Archive Cinema is integrated as a rights-filtered movie fallback in Player
   assert.ok(source.includes("showArchiveFallback();"));
   assert.match(source, /if \(archiveRoot\) archiveRoot\.hidden = true/);
   assert.match(source, /currentParams\?\.type !== "movie"/);
-  assert.match(source, /providerId: "archive"/);
+  assert.match(source, /activeSource = "archive"/);
   assert.match(source, /https:\/\/archive\.org\/embed\//);
   const archive = await readFile(new URL("../scripts/playback/archive-film-fallback.js", import.meta.url), "utf8");
   assert.ok(archive.includes('creativecommons\\.org'));
