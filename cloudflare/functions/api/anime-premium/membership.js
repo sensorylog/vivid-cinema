@@ -29,7 +29,7 @@ export async function onRequestGet({ request, env }) {
         currency: data.currency || null,
         renewalMode: data.renewalMode || "manual",
         autoRenew: Boolean(data.autoRenew && data.renewalMode === "automatic"),
-        canCancelAutoRenew: Boolean(data.autoRenew && data.subscriptionCode && data.subscriptionEmailToken),
+        canCancelAutoRenew: Boolean(env.PAYSTACK_SECRET_KEY && data.autoRenew && data.subscriptionCode && data.subscriptionEmailToken),
         currentPeriodEnd: periodEndMillis ? new Date(periodEndMillis).toISOString() : null,
         cancelAtPeriodEnd: Boolean(data.cancelAtPeriodEnd)
       }
