@@ -48,7 +48,7 @@ test("watch page fails closed for missing sessions, missing membership and unava
 });
 
 test("watch route assets are cached offline and included in syntax checks", () => {
-  assert.match(sw, /vivid-cinema-shell-v331/);
+  assert.match(sw, /vivid-cinema-shell-v332/);
   assert.match(sw, /anime-premium-watch\.html/);
   assert.match(sw, /vivid-anime-premium-watch\.css/);
   assert.match(sw, /anime-premium-watch\.js/);
