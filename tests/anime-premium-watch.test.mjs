@@ -110,3 +110,9 @@ test("watch page flushes the latest progress with keepalive before HLS teardown"
   assert.match(script, /if \(currentPlaybackSessionId\) void syncPlaybackProgress\(true\)/);
   assert.match(script, /playbackRequestId \+= 1;[\s\S]*disposeHls\(\)/);
 });
+
+
+test("queued final progress snapshots retain keepalive when a periodic save is already running", () => {
+  assert.match(script, /duration: video\.duration,\s*keepalive: force/);
+  assert.match(script, /keepalive: snapshot\.keepalive/);
+});
