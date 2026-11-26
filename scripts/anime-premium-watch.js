@@ -56,7 +56,7 @@ function disposePlayer() {
   const frame = $("vap-player-frame");
   if (frame) { frame.onload = null; frame.onerror = null; frame.src = "about:blank"; frame.hidden = true; }
 }
-function showGate(title, message, actionLabel = "Sign in to Vivid", actionHref = "auth.html?returnTo=anime-premium.html", retry = false) {
+function showGate(title, message, actionLabel = "Sign in to Vivid", actionHref = "auth.html?returnTo=anime-premium-watch.html" + window.location.search, retry = false) {
   disposePlayer();
   currentPlaybackSessionId = "";
   activeProviderId = "";
