@@ -32,6 +32,7 @@ async function handleChargeSuccess(db, env, data, eventRef) {
   const now = Date.now();
   const paystackSubscriptionCode = String(verified.subscription?.subscription_code || data.subscription?.subscription_code || "");
   const customerCode = String(verified.customer?.customer_code || data.customer?.customer_code || "");
+  const subscriptionEmailToken = String(verified.subscription?.email_token || data.subscription?.email_token || "");
   const requestedNextPayment = millis(verified.subscription?.next_payment_date || data.subscription?.next_payment_date);
   await db.runTransaction(async transaction => {
     const [eventSnapshot, liveCheckout, existingMembership] = await Promise.all([
@@ -58,6 +59,7 @@ async function handleChargeSuccess(db, env, data, eventRef) {
       paymentMethod: checkout.paymentMethod,
       paystackCustomerCode: customerCode || old.paystackCustomerCode || null,
       subscriptionCode: paystackSubscriptionCode || old.subscriptionCode || null,
+      subscriptionEmailToken: subscriptionEmailToken || old.subscriptionEmailToken || null,
       lastPaymentReference: reference,
       currentPeriodStart: timestampFromMillis(periodStart),
       currentPeriodEnd: timestampFromMillis(periodEnd),
@@ -77,9 +79,15 @@ async function membershipBySubscription(db, subscriptionCode) {
   const snapshot = await db.collection("animePremiumMemberships").where("subscriptionCode", "==", subscriptionCode).limit(1).get();
   return snapshot.empty ? null : snapshot.docs[0];
 }
+async function membershipByCustomer(db, customerCode) {
+  if (!customerCode) return null;
+  const snapshot = await db.collection("animePremiumMemberships").where("paystackCustomerCode", "==", customerCode).limit(1).get();
+  return snapshot.empty ? null : snapshot.docs[0];
+}
 async function handleRecurringEvent(db, eventName, data, eventRef) {
   const subscriptionCode = String(data.subscription?.subscription_code || data.subscription_code || data.subscription?.code || "");
-  const membershipDoc = await membershipBySubscription(db, subscriptionCode);
+  const customerCode = String(data.customer?.customer_code || data.customer_code || "");
+  const membershipDoc = await membershipBySubscription(db, subscriptionCode) || (eventName === "subscription.create" ? await membershipByCustomer(db, customerCode) : null);
   if (!membershipDoc) return;
   const membershipRef = membershipDoc.ref;
   const now = Date.now();
@@ -87,7 +95,16 @@ async function handleRecurringEvent(db, eventName, data, eventRef) {
     const [eventSnapshot, current] = await Promise.all([transaction.get(eventRef), transaction.get(membershipRef)]);
     if (eventSnapshot.exists || !current.exists) return;
     const value = current.data() || {};
-    if (eventName === "invoice.payment_success") {
+    if (eventName === "subscription.create") {
+      transaction.set(membershipRef, {
+        subscriptionCode: subscriptionCode || value.subscriptionCode || null,
+        subscriptionEmailToken: String(data.email_token || data.subscription?.email_token || value.subscriptionEmailToken || ""),
+        paystackCustomerCode: customerCode || value.paystackCustomerCode || null,
+        autoRenew: true,
+        renewalMode: "automatic",
+        updatedAt: timestampFromMillis(now)
+      }, { merge: true });
+    } else if (eventName === "invoice.payment_success") {
       const start = now;
       const next = millis(data.next_payment_date || data.subscription?.next_payment_date);
       transaction.set(membershipRef, {
@@ -134,7 +151,7 @@ export async function onRequestPost({ request, env }) {
     const id = await eventDocumentId(eventName, data);
     const eventRef = db.collection("animePremiumWebhookEvents").doc(id);
     if (eventName === "charge.success") await handleChargeSuccess(db, env, data, eventRef);
-    else if (["invoice.payment_success", "invoice.payment_failed", "subscription.disable", "subscription.not_renew"].includes(eventName)) {
+    else if (["subscription.create", "invoice.payment_success", "invoice.payment_failed", "subscription.disable", "subscription.not_renew"].includes(eventName)) {
       await handleRecurringEvent(db, eventName, data, eventRef);
     } else {
       await eventRef.set({ processedAt: timestampFromMillis(Date.now()), event: eventName, ignored: true }, { merge: true });
