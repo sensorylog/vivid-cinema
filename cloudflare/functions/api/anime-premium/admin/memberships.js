@@ -1,6 +1,6 @@
 import {
   allowedOrigin, AnimePremiumError, getPremiumServices, jsonResponse, optionsResponse,
-  requirePremiumUser, timestampFromMillis, addDaysMillis
+  requirePremiumUser, timestampFromMillis, addDaysMillis, paystackRequest
 } from "../../../lib/anime-premium-service.js";
 
 function requireAdmin(user, env) {
@@ -48,6 +48,8 @@ export async function onRequest({ request, env }) {
       throw new AnimePremiumError(400, "invalid-admin-request", "Enter a valid user ID and an audit reason of at least 8 characters.");
     }
     const ref = db.collection("animePremiumMemberships").doc(uid);
+    const existingSnapshot = await ref.get();
+    const existingMembership = existingSnapshot.exists ? existingSnapshot.data() || {} : {};
     const now = Date.now();
     if (action === "grant") {
       const days = Number(body.days || 30);
@@ -59,6 +61,11 @@ export async function onRequest({ request, env }) {
         adminGrantReason: reason, adminGrantBy: user.uid, updatedAt: timestampFromMillis(now)
       }, { merge: true });
     } else if (action === "revoke") {
+      if (existingMembership.autoRenew && existingMembership.subscriptionCode && existingMembership.subscriptionEmailToken) {
+        await paystackRequest(env, "/subscription/disable", { body: { code: existingMembership.subscriptionCode, token: existingMembership.subscriptionEmailToken } });
+      } else if (existingMembership.autoRenew) {
+        throw new AnimePremiumError(409, "renewal-cancellation-unavailable", "Automatic renewal credentials are unavailable. Disable the Paystack subscription before revoking this membership.");
+      }
       await ref.set({
         status: "suspended", billingStatus: "admin_revoked", autoRenew: false,
         cancelAtPeriodEnd: false, adminRevokeReason: reason, adminRevokeBy: user.uid,
