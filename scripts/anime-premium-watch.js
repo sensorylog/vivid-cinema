@@ -20,6 +20,8 @@ let lastProgressSync = 0;
 let progressSyncInFlight = false;
 let pendingProgressSnapshot = null;
 let activeHls = null;
+let activePlaybackCandidateId = "";
+let failedPlaybackCandidates = [];
 let playbackRequestId = 0;
 let playbackExpiryTimer = null;
 let hlsLibraryPromise = null;
@@ -117,7 +119,7 @@ function updateEpisodeControls() {
     button.setAttribute("aria-pressed", String(active));
   });
 }
-async function requestPlayback(episode) {
+async function requestPlayback(episode, excludedCandidates = failedPlaybackCandidates) {
   const requestId = ++playbackRequestId;
   if (!currentUser) {
     showGate("Sign in to continue", "A Vivid account is required before Premium playback can be checked. Sign in with the same account you use across Vivid Cinema.");
@@ -137,7 +139,8 @@ async function requestPlayback(episode) {
         mediaType,
         titleId,
         season: mediaType === "tv" ? Number(params.get("season") || 1) : null,
-        episode: mediaType === "tv" ? Number(episode.episode_number || 1) : null
+        episode: mediaType === "tv" ? Number(episode.episode_number || 1) : null,
+        excludeCandidateIds: excludedCandidates.slice(0, 8)
       })
     });
     if (requestId !== playbackRequestId) return;
@@ -171,6 +174,7 @@ async function requestPlayback(episode) {
     let deferredHlsPlayback = false;
     hlsRecoveryAttempts = 0;
     currentPlaybackSessionId = String(playback.sessionId);
+    activePlaybackCandidateId = String(playback.candidateId || playback.provider || "");
     lastProgressSync = 0;
     video.hidden = false;
     $("vap-player-gate").hidden = true;
@@ -196,7 +200,7 @@ async function requestPlayback(episode) {
         hlsRecoveryAttempts += 1;
         setStatus("The authorised stream encountered a playback error. Recovering…");
         if (hlsRecoveryAttempts > 2) {
-          showGate("Playback interrupted", "The authorised stream could not recover. Request a fresh playback session.", "Back to title", titleRoute(), true);
+          fallbackToNextPlaybackServer("The current authorised server could not recover.");
         } else if (data.type === Hls.ErrorTypes.NETWORK_ERROR) hls.startLoad();
         else if (data.type === Hls.ErrorTypes.MEDIA_ERROR) hls.recoverMediaError();
         else showGate("Playback interrupted", "The authorised stream could not continue. Request a fresh playback session.", "Back to title", titleRoute(), true);
@@ -212,7 +216,7 @@ async function requestPlayback(episode) {
     if (!deferredHlsPlayback) {
       try { await video.play(); } catch { setStatus("Your episode is ready. Press play to begin."); }
     }
-    if (requestId === playbackRequestId) setStatus("Authorised playback session opened.");
+    if (requestId === playbackRequestId) setStatus("Authorised playback session opened" + (playback.provider ? " · " + playback.provider : "") + ".");
   } catch (error) {
     if (requestId !== playbackRequestId) return;
     showGate("Playback could not start", error?.message || "Try again in a moment.", "Back to title", titleRoute(), true);
@@ -224,6 +228,8 @@ async function selectEpisode(index, request = false) {
   if (!activeEpisodes[index]) return;
   if (currentPlaybackSessionId) void syncPlaybackProgress(true);
   activeEpisodeIndex = index;
+  failedPlaybackCandidates = [];
+  activePlaybackCandidateId = "";
   const episode = activeEpisodes[index];
   const season = Number(params.get("season") || 1);
   history.replaceState({}, "", watchRoute(season, episode.episode_number || index + 1));
@@ -345,15 +351,30 @@ async function syncPlaybackProgress(force = false) {
   }
 }
 
+function fallbackToNextPlaybackServer(message) {
+  if (!currentPlaybackSessionId || !activePlaybackCandidateId || failedPlaybackCandidates.length >= 8) return;
+  failedPlaybackCandidates = [...new Set([...failedPlaybackCandidates, activePlaybackCandidateId])].slice(0, 8);
+  const episode = activeEpisodes[activeEpisodeIndex];
+  if (!episode) return;
+  currentPlaybackSessionId = "";
+  activePlaybackCandidateId = "";
+  setStatus(message + " Trying the next authorised server…");
+  void requestPlayback(episode, failedPlaybackCandidates);
+}
 function bindControls() {
   $("vap-previous-episode").addEventListener("click", () => { if (activeEpisodeIndex > 0) void selectEpisode(activeEpisodeIndex - 1, true); });
   $("vap-next-episode").addEventListener("click", () => { if (activeEpisodeIndex < activeEpisodes.length - 1) void selectEpisode(activeEpisodeIndex + 1, true); });
   $("vap-player").addEventListener("timeupdate", () => { void syncPlaybackProgress(false); });
   $("vap-player").addEventListener("pause", () => { void syncPlaybackProgress(true); });
   $("vap-player").addEventListener("ended", () => { void syncPlaybackProgress(true); });
+  $("vap-player").addEventListener("error", () => {
+    if (currentPlaybackSessionId && activePlaybackCandidateId) fallbackToNextPlaybackServer("This authorised server failed during playback.");
+  });
   $("vap-player-retry").addEventListener("click", () => {
     const episode = activeEpisodes[activeEpisodeIndex];
-    if (episode) void requestPlayback(episode);
+    failedPlaybackCandidates = [];
+    activePlaybackCandidateId = "";
+    if (episode) void requestPlayback(episode, []);
   });
 }
 function bindAuth() {
