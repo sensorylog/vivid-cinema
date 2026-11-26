@@ -15,6 +15,7 @@ export async function onRequestPost({ request, env }) {
     let body;
     try { body = JSON.parse(raw); } catch { throw new AnimePremiumError(400, "invalid-request", "A valid checkout request is required."); }
     const user = await requirePremiumUser(request, env);
+    if (env.PAYSTACK_LIVE_ENABLED !== "true") throw new AnimePremiumError(503, "checkout-disabled", "Paystack checkout is not enabled in this environment.");
     const country = String(body.country || "").toUpperCase();
     const paymentMethod = String(body.paymentMethod || "");
     if (!["card", "mobile_money"].includes(paymentMethod)) throw new AnimePremiumError(400, "invalid-payment-method", "Choose card or mobile money.");
