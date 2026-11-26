@@ -114,6 +114,9 @@ test("webhook verification is the source of truth for membership activation and 
   assert.match(webhook, /checkoutSource === "hosted_payment_page"/);
   assert.match(webhook, /eventName === "charge\.success"/);
   assert.match(webhook, /invoice\.payment_success/);
+  assert.match(webhook, /eventName === "invoice\.update"/);
+  assert.match(webhook, /invoice-payment-mismatch/);
+  assert.match(webhook, /Number\(value\.amount\)/);
   assert.match(webhook, /invoice\.payment_failed/);
   assert.match(webhook, /animePremiumMemberships/);
   assert.match(membership, /animePremiumMemberships/);
