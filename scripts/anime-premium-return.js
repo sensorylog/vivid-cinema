@@ -21,7 +21,7 @@ async function checkMembership() {
   $("vap-return-refresh").disabled = true;
   $("vap-return-refresh").textContent = "Checking…";
   try {
-    const token = await currentUser.getIdToken();
+    const token = await currentUser.getIdToken(true);
     const response = await fetch("/api/anime-premium/membership", {
       headers: { Authorization: "Bearer " + token },
       cache: "no-store"
