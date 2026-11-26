@@ -8,17 +8,37 @@ async function eventDocumentId(event, data) {
   const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(value));
   return [...new Uint8Array(digest)].map(byte => byte.toString(16).padStart(2, "0")).join("");
 }
-function millis(value) {
+function addMonthsMillis(planId, from = Date.now()) {\n  const months = planId === "annually" ? 12 : planId === "biannually" ? 6 : 1;\n  const date = new Date(from);\n  const day = date.getUTCDate();\n  date.setUTCDate(1);\n  date.setUTCMonth(date.getUTCMonth() + months);\n  const last = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + 1, 0)).getUTCDate();\n  date.setUTCDate(Math.min(day, last));\n  return date.getTime();\n}\nfunction millis(value) {
   const result = Date.parse(value || "");
   return Number.isFinite(result) ? result : 0;
 }
 async function handleChargeSuccess(db, env, data, eventRef) {
   const reference = String(data.reference || "");
-  if (!reference.startsWith("VAP") || !safeReference(reference)) return;
-  const checkoutRef = db.collection("animePremiumCheckouts").doc(reference);
-  const checkoutSnapshot = await checkoutRef.get();
-  if (!checkoutSnapshot.exists) return;
-  const checkout = checkoutSnapshot.data() || {};
+  let checkoutRef;
+  let checkoutSnapshot;
+  let checkout = {};
+  if (reference.startsWith("VAP") && safeReference(reference)) {
+    checkoutRef = db.collection("animePremiumCheckouts").doc(reference);
+    checkoutSnapshot = await checkoutRef.get();
+    if (!checkoutSnapshot.exists) return;
+    checkout = checkoutSnapshot.data() || {};
+  } else {
+    const email = String(data.customer?.email || "").trim().toLowerCase();
+    const amount = Number(data.amount || 0);
+    const currency = String(data.currency || "").toUpperCase();
+    if (!email || !amount || !currency) return;
+    const pending = await db.collection("animePremiumPageCheckouts").where("email", "==", email).where("status", "==", "pending").limit(10).get();
+    const now = Date.now();
+    const match = pending.docs.find(doc => {
+      const value = doc.data() || {};
+      const created = typeof value.createdAt?.toMillis === "function" ? value.createdAt.toMillis() : Number(value.createdAt || 0);
+      return Number(value.amount) === amount && String(value.currency || "").toUpperCase() === currency && created > now - 24 * 60 * 60 * 1000;
+    });
+    if (!match) return;
+    checkoutRef = match.ref;
+    checkoutSnapshot = match;
+    checkout = checkoutSnapshot.data() || {};
+  }
   if (checkout.status === "paid") return;
   const verified = await paystackRequest(env, "/transaction/verify/" + encodeURIComponent(reference), { method: "GET" });
   if (verified.status !== "success" || String(verified.reference) !== reference ||
@@ -49,7 +69,7 @@ async function handleChargeSuccess(db, env, data, eventRef) {
     const old = existingMembership.exists ? existingMembership.data() || {} : {};
     const oldEnd = typeof old.currentPeriodEnd?.toMillis === "function" ? old.currentPeriodEnd.toMillis() : Number(old.currentPeriodEnd || 0);
     const periodStart = oldEnd > now ? oldEnd : now;
-    const periodEnd = Math.max(requestedNextPayment > now ? requestedNextPayment : 0, addDaysMillis(30, periodStart));
+    const periodEnd = Math.max(requestedNextPayment > now ? requestedNextPayment : 0, addMonthsMillis(checkout.planId || "monthly", periodStart));
     const renewalMode = checkout.renewalMode === "automatic" && checkout.paymentMethod === "card" ? "automatic" : "manual";
     transaction.set(membershipRef, {
       uid,
