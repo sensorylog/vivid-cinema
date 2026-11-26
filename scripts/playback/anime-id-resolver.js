@@ -5,12 +5,12 @@ const REQUEST_TIMEOUT_MS = 6500;
 export function normalizeAnimeTitle(value) {
   return String(value || "")
     .normalize("NFKD")
-    .replace(/[\\u0300-\\u036f]/g, "")
+    .replace(/[\u0300-\u036f]/g, "")
     .toLowerCase()
     .replace(/&/g, " and ")
     .replace(/[^a-z0-9]+/g, " ")
-    .replace(/\\b(season|part|cour|tv)\\s+[0-9ivx]+\\b/g, " ")
-    .replace(/\\s+/g, " ")
+    .replace(/\b(season|part|cour|tv)\s+[0-9ivx]+\b/g, " ")
+    .replace(/\s+/g, " ")
     .trim();
 }
 
@@ -62,7 +62,7 @@ function buildSearchTerms(title, options = {}) {
   const terms = [];
   const seasonTitle = String(options.seasonTitle || "").trim();
   const normalizedSeason = normalizeAnimeTitle(seasonTitle);
-  const genericSeason = /^season \\d+$/.test(normalizedSeason);
+  const genericSeason = /^season \d+$/.test(normalizedSeason);
   if (seasonTitle && !genericSeason && normalizedSeason && normalizedSeason !== normalizeAnimeTitle(title)) {
     terms.push(String(title).trim() + " " + seasonTitle);
   }
