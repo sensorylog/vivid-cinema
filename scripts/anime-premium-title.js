@@ -31,11 +31,13 @@ async function syncTitleAccess(user) {
   const requestId = ++titleAccessRequest;
   activeVividUser = user && !user.isAnonymous ? user : null;
   premiumMembershipActive = false;
+  let emailVerificationRequired = false;
   if (activeVividUser) {
     try {
-      const token = await activeVividUser.getIdToken();
+      const token = await activeVividUser.getIdToken(true);
       const response = await fetch("/api/anime-premium/membership", { headers: { Authorization: "Bearer " + token }, cache: "no-store" });
       if (requestId !== titleAccessRequest || activeVividUser?.uid !== user.uid) return;
+      if (response.status === 403 && activeVividUser.emailVerified !== true) emailVerificationRequired = true;
       if (response.ok) {
         const payload = await response.json();
         premiumMembershipActive = payload?.membership?.active === true;
@@ -51,6 +53,13 @@ async function syncTitleAccess(user) {
   const watch = $("vap-title-watch");
   const membership = $("vap-title-membership");
   if (!primary) return;
+  if (activeVividUser && emailVerificationRequired) {
+    primary.textContent = "Verify your email →";
+    primary.href = "verify-email.html?returnTo=" + encodeURIComponent("anime-premium-title.html" + window.location.search);
+    if (watch) watch.hidden = true;
+    if (membership) membership.hidden = true;
+    return;
+  }
   if (!activeVividUser) {
     primary.textContent = "Sign in & subscribe →";
     primary.href = "auth.html?returnTo=" + encodeURIComponent("anime-premium-title.html" + window.location.search);
