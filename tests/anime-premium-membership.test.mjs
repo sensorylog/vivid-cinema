@@ -52,12 +52,12 @@ test("membership UI initialises pricing before Firebase auth and always exits lo
   assert.match(html, /vap-country-status/);
   assert.match(shell, /window\.vividAuthUser = user \|\| null/);
   assert.match(shell, /window\.vividAuthResolved = true/);
-  assert.match(headers, /https:\/\/restcountries\.com/);
-  assert.match(headers, /https:\/\/cdn\.jsdelivr\.net/);
   assert.match(headers, /https:\/\/api\.frankfurter\.dev/);
-  assert.match(client, /annexare\/Countries/);
-  assert.match(client, /parsed\.length < 180/);
-  assert.match(client, /new Map\(parsed\.map\(country => \[country\.code, country\]\)\)/);
+  assert.doesNotMatch(client, /restcountries\.com|annexare\/Countries/);
+  assert.match(countriesApi, /restcountries\.com/);
+  assert.match(countriesApi, /annexare\/Countries/);
+  assert.match(countriesApi, /countries\.length < 180/);
+  assert.match(client, /unique\.length < 180/);
   assert.match(client, /countries = unique\.sort/);
   assert.match(client, /option\.textContent = .*country\.name.*country\.currency/);
   assert.match(client, /Frankfurter blended central-bank reference rates/);
@@ -76,7 +76,7 @@ test("client selects one of the three server-owned hosted Paystack plan pages", 
 });
 
 test("hosted page checkout requires verified identity and maps the three plans server-side", () => {
-  assert.match(pageCheckout, /requirePremiumUser/);\n  assert.match(pageCheckout, /PAYSTACK_SECRET_KEY/);\n  assert.doesNotMatch(pageCheckout, /PAYSTACK_LIVE_ENABLED/);
+  assert.match(pageCheckout, /requirePremiumUser/);
   assert.match(pageCheckout, /PAYSTACK_SECRET_KEY/);
   assert.doesNotMatch(pageCheckout, /PAYSTACK_LIVE_ENABLED/);
   assert.match(pageCheckout, /monthly: \{ amount: 5330, currency: "GHS", url:/);
@@ -109,6 +109,6 @@ test("membership return survives Vivid email verification and is cached offline"
   assert.match(sw, /anime-premium-return\.html/);
   assert.match(sw, /anime-premium-membership\.js/);
   assert.match(sw, /anime-premium-return\.js/);
-  assert.match(pricing, /publicPricing/);\n  assert.match(service, /checkoutEnabled: Boolean\(env\.PAYSTACK_SECRET_KEY && env\.FIREBASE_SERVICE_ACCOUNT_JSON\)/);
-  assert.match(service, /checkoutEnabled: Boolean\\(env\\.PAYSTACK_SECRET_KEY && env\\.FIREBASE_SERVICE_ACCOUNT_JSON\\)/);
+  assert.match(pricing, /publicPricing/);
+  assert.match(service, /checkoutEnabled: Boolean\(env\.PAYSTACK_SECRET_KEY && env\.FIREBASE_SERVICE_ACCOUNT_JSON\)/);
 });
