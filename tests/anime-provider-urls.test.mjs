@@ -22,3 +22,7 @@ test("anime track selection maps to provider-specific sub and dub routes",()=>{
  assert.match(buildVidplusEmbedUrl(params,{aniListId:"789",anime:true,track:"dub"}),/dub=true/);
  assert.match(buildVidplusEmbedUrl(params,{aniListId:"789",anime:true,track:"sub"}),/dub=false/);
 });
+
+test("VidPlus anime route receives saved playback progress", () => {
+ assert.match(buildVidplusEmbedUrl({type:"tv",episode:8},{aniListId:"21",anime:true,startAt:245}),/progress=245/);
+});
