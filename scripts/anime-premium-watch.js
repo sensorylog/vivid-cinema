@@ -3,6 +3,8 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.19.0/f
 import { tmdbApi } from "./tmdb.js";
 import { getImageUrl } from "./media.js";
 import { escapeHtml } from "./utils.js";
+import { resolveAnimeIds } from "./playback/anime-id-resolver.js";
+import { resolveAnimePremiumProviderOptions } from "./playback/anime-premium-providers.js";
 
 const $ = id => document.getElementById(id);
 const params = new URLSearchParams(window.location.search);
@@ -19,39 +21,24 @@ let currentPlaybackSessionId = "";
 let lastProgressSync = 0;
 let progressSyncInFlight = false;
 let pendingProgressSnapshot = null;
-let activeHls = null;
-let activePlaybackCandidateId = "";
-let failedPlaybackCandidates = [];
+let activeProviderId = "";
+let providerOptions = [];
+let failedProviderIds = new Set();
+let providerRequestId = 0;
+let providerLoadTimer = null;
 let playbackRequestId = 0;
 let playbackExpiryTimer = null;
-let hlsLibraryPromise = null;
-let hlsRecoveryAttempts = 0;
-const HLS_LIBRARY_URL = "https://cdn.jsdelivr.net/npm/hls.js@1.7.3/dist/hls.min.js";
+let baseAnimeIds = { aniListId: "", malId: "" };
+let seasonAnimeIds = { aniListId: "", malId: "" };
+let animeTrack = "sub";
+let latestProviderProgress = null;
 
-function loadHlsLibrary() {
-  if (window.Hls) return Promise.resolve(window.Hls);
-  if (hlsLibraryPromise) return hlsLibraryPromise;
-  hlsLibraryPromise = new Promise((resolve, reject) => {
-    const script = document.createElement("script");
-    script.src = HLS_LIBRARY_URL;
-    script.async = true;
-    script.crossOrigin = "anonymous";
-    script.onload = () => window.Hls ? resolve(window.Hls) : reject(new Error("The HLS playback engine did not initialise."));
-    script.onerror = () => reject(new Error("The HLS playback engine could not be loaded. Check your connection and try again."));
-    document.head.appendChild(script);
-  }).catch(error => { hlsLibraryPromise = null; throw error; });
-  return hlsLibraryPromise;
-}
-
-function disposeHls() {
-  if (activeHls) {
-    try { activeHls.destroy(); } catch {}
-    activeHls = null;
-  }
+function disposePlayerTimers() {
+  if (providerLoadTimer) window.clearTimeout(providerLoadTimer);
+  providerLoadTimer = null;
   if (playbackExpiryTimer) window.clearTimeout(playbackExpiryTimer);
   playbackExpiryTimer = null;
 }
-
 function titleName(details) { return details.title || details.name || "Anime title"; }
 function titleRoute() {
   return "anime-premium-title.html?id=" + encodeURIComponent(titleId) + "&type=" + encodeURIComponent(mediaType);
@@ -65,19 +52,21 @@ function watchRoute(season, episode) {
   return "anime-premium-watch.html?" + query.toString();
 }
 function showGate(title, message, actionLabel = "Sign in to Vivid", actionHref = "auth.html?returnTo=anime-premium.html", retry = false) {
-  disposeHls();
+  disposePlayerTimers();
   currentPlaybackSessionId = "";
-  activePlaybackCandidateId = "";
-  $("vap-player").pause();
-  $("vap-player").removeAttribute("src");
-  $("vap-player").load();
-  $("vap-player").hidden = true;
+  activeProviderId = "";
+  const frame = $("vap-player-frame");
+  if (frame) {
+    frame.src = "about:blank";
+    frame.hidden = true;
+  }
   $("vap-player-gate").hidden = false;
   $("vap-player-gate-title").textContent = title;
   $("vap-player-gate-copy").textContent = message;
   $("vap-player-signin").textContent = actionLabel + " →";
   $("vap-player-signin").href = actionHref;
   $("vap-player-retry").hidden = !retry;
+  $("vap-server-next").hidden = true;
 }
 function setStatus(message) { $("vap-player-status").textContent = message; }
 function renderEpisodes(episodes) {
