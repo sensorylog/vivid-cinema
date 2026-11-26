@@ -117,8 +117,8 @@ async function updatePrice() {
     : selectedPaymentMethod === "mobile_money"
       ? "Mobile money is a one-time payment. Renew manually each month; no automatic debit is created."
       : "No payment method is configured for this region yet.";
-  $("vap-checkout-button").disabled = (membershipActive && membershipAutoRenew) || !selectedPaymentMethod;
-  $("vap-checkout-button").textContent = membershipActive ? (membershipAutoRenew ? "Membership active — auto-renew on" : "Renew manually →") : currentUser ? "Continue to secure checkout →" : "Sign in to subscribe →";
+  $("vap-checkout-button").disabled = !pricing.checkoutEnabled || (membershipActive && membershipAutoRenew) || !selectedPaymentMethod;
+  $("vap-checkout-button").textContent = !pricing.checkoutEnabled ? "Checkout temporarily unavailable" : membershipActive ? (membershipAutoRenew ? "Membership active — auto-renew on" : "Renew manually →") : currentUser ? "Continue to secure checkout →" : "Sign in to subscribe →";
 }
 async function loadPricing() {
   const response = await fetch("/api/anime-premium/pricing", { cache: "no-store" });
@@ -161,6 +161,7 @@ async function loadMembership() {
   }
 }
 async function startCheckout() {
+  if (!pricing?.checkoutEnabled) { $("vap-checkout-status").textContent = "Secure checkout is not enabled in this environment yet."; return; }
   if (membershipActive && membershipAutoRenew) return;
   if (!currentUser) {
     window.location.href = "auth.html?returnTo=anime-premium-membership.html";
@@ -190,8 +191,8 @@ async function startCheckout() {
     $("vap-checkout-status").textContent = error.message || "Checkout could not be started.";
     await updatePrice();
   } finally {
-    button.disabled = (membershipActive && membershipAutoRenew) || !selectedPaymentMethod;
-    button.textContent = membershipActive ? (membershipAutoRenew ? "Membership active — auto-renew on" : "Renew manually →") : currentUser ? "Continue to secure checkout →" : "Sign in to subscribe →";
+    button.disabled = !pricing.checkoutEnabled || (membershipActive && membershipAutoRenew) || !selectedPaymentMethod;
+    button.textContent = !pricing.checkoutEnabled ? "Checkout temporarily unavailable" : membershipActive ? (membershipAutoRenew ? "Membership active — auto-renew on" : "Renew manually →") : currentUser ? "Continue to secure checkout →" : "Sign in to subscribe →";
   }
 }
 
