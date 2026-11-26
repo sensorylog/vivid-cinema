@@ -1,6 +1,6 @@
 import {
   buildVidapiEmbedUrl, buildVidsrcEmbedUrl, buildVidlinkEmbedUrl,
-  buildVidplusEmbedUrl, buildEmbedWaveUrl, buildVidFastUrl
+  buildVidplusEmbedUrl, buildEmbedWaveUrl, buildVidFastUrl, buildEmbedApiStreamUrl
 } from "./playback-urls.js";
 
 const PROVIDERS = Object.freeze([
@@ -16,6 +16,7 @@ const PROVIDERS = Object.freeze([
   { id: "vidapi", label: "VidAPI", origin: "https://vaplayer.ru", kind: "tmdb", events: true, note: "Existing VIVID player · TMDB movie/TV route" },
   { id: "embedwave", label: "EmbedWave", origin: "https://embedwave.cc", kind: "tmdb", events: false, note: "Existing VIVID player · TMDB movie/TV route" },
   { id: "vidfast", label: "VidFast", origin: "https://vidfast.to", kind: "tmdb", events: false, note: "Existing VIVID player · TMDB movie/TV route" },
+  { id: "embedapistream", label: "Embed API Stream", origin: "https://watch.embed-api.stream", kind: "tmdb", events: false, note: "Existing VIVID provider · multi-provider TMDB player" },
   { id: "vidrift", label: "VidRift", origin: "https://embed.vidrift.net", kind: "either-tmdb", events: true, note: "TMDB/AniList · multi-server automatic failover" }
 ]);
 
@@ -52,6 +53,7 @@ export function buildAnimePremiumProviderUrl(providerId, {
     if (providerId === "vidsrc") return buildVidsrcEmbedUrl(params, { tmdbId: tmdb });
     if (providerId === "embedwave") return buildEmbedWaveUrl(params, { tmdbId: tmdb });
     if (providerId === "vidfast") return buildVidFastUrl(params, { tmdbId: tmdb });
+    if (providerId === "embedapistream") return buildEmbedApiStreamUrl(params, { tmdbId: tmdb });
     if (providerId === "vidrift") {
       if (isMovie) return provider.origin + "/embed/movie/" + tmdb;
       if (ani) return provider.origin + "/embed/anilist/" + ani + "/" + ep + (audio === "dub" ? "?dub=1" : "");
