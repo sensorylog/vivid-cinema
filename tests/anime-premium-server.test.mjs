@@ -4,7 +4,7 @@ import { readFile } from "node:fs/promises";
 import { webcrypto } from "node:crypto";
 import {
   allowedOrigin, jsonResponse, parsePlanConfig, publicPricing,
-  resolveCheckoutPlan, safeReference, verifyPaystackSignature
+  resolveCheckoutPlan, safeReference, verifyPaystackSignature, isValidEmailAddress
 } from "../cloudflare/functions/lib/anime-premium-service.js";
 
 globalThis.crypto ||= webcrypto;
@@ -15,6 +15,19 @@ async function sign(secret, value) {
   const result = await crypto.subtle.sign("HMAC", key, value instanceof Uint8Array ? value : new TextEncoder().encode(value));
   return [...new Uint8Array(result)].map(byte => byte.toString(16).padStart(2, "0")).join("");
 }
+
+test("verified account email validation accepts Google and email/password addresses", () => {
+  assert.equal(isValidEmailAddress("dave@gmail.com"), true);
+  assert.equal(isValidEmailAddress("dave.kyei+premium@gmail.com"), true);
+  assert.equal(isValidEmailAddress("  dave@example.co.uk  "), true);
+  assert.equal(isValidEmailAddress(""), false);
+  assert.equal(isValidEmailAddress("not-an-email"), false);
+  assert.equal(isValidEmailAddress("dave@"), false);
+  assert.equal(isValidEmailAddress("@example.com"), false);
+  assert.equal(isValidEmailAddress("dave@example"), false);
+  assert.equal(isValidEmailAddress("dave@example.com\\n.attacker"), false);
+  assert.equal(isValidEmailAddress("x".repeat(245) + "@example.com"), false);
+});
 
 test("Premium pricing has a configurable GHS default and does not expose Paystack plan codes", () => {
   const config = parsePlanConfig({ PAYSTACK_PLAN_GHS_MONTHLY: "PLN_PRIVATE_CODE" });
