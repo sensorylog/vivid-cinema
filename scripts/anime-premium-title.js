@@ -150,6 +150,10 @@ function renderTitle(details) {
   const name = titleName(details);
   document.title = name + " · VIVID ANIME PREMIUM";
   $("vap-title-name").textContent = name;
+  const watchParams = new URLSearchParams({ id: String(details.id), type: mediaType });
+  if (mediaType === "tv") { watchParams.set("season", "1"); watchParams.set("episode", "1"); }
+  $("vap-title-watch").href = "anime-premium-watch.html?" + watchParams.toString();
+  $("vap-title-watch").hidden = false;
   $("vap-title-meta").textContent = (mediaType === "movie" ? "ANIME FILM" : "ANIME SERIES") + " · " + releaseYear(details) + " · VIVID ANIME PREMIUM";
   $("vap-title-tagline").textContent = details.tagline || "";
   $("vap-title-overview").textContent = details.overview || "Explore the characters, setting and story behind this anime.";
