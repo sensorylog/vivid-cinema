@@ -236,10 +236,10 @@ function bind() {
 }
 async function initialiseAuth() {
   try {
-    const [{ auth }, { onAuthStateChanged }] = await Promise.all([
+    const [{ auth }, { onAuthStateChanged }] = await withTimeout(Promise.all([
       import("./firebase.js"),
       import("https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js")
-    ]);
+    ]), 9000, "Vivid sign-in initialisation timed out.");
     onAuthStateChanged(auth, async user => {
       currentUser = user && !user.isAnonymous ? user : null;
       authReady = true;
