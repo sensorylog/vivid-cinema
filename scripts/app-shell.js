@@ -298,6 +298,7 @@ function syncMoreNavigation(nav, page) {
     navLink("discover.html", "bi-compass", "Discover", page === "discover"),
     navLink("for-you.html", "bi-stars", "For You", page === "for-you"),
     navLink("anime.html", "bi-stars", "Free Anime", page === "anime"),
+    navLink("live.html", "bi-broadcast-pin", "Live", page === "live"),
     navLink("library.html", "bi-bookmark-fill", "Library", page === "library" || page === "downloads-library"),
     africanStoriesNavLink(page === "african-stories"),
     navLink("account.html", "bi-person-circle", "Account", page === "account"),
@@ -311,7 +312,7 @@ function syncMoreNavigation(nav, page) {
 
   const more = nav.querySelector("[data-vivid-more-navigation]");
   if (!more) return;
-  const morePages = ["discover", "for-you", "anime", "anime-premium", "library", "downloads-library", "african-stories", "account", "news", "search"];
+  const morePages = ["discover", "for-you", "anime", "live", "anime-premium", "library", "downloads-library", "african-stories", "account", "news", "search"];
   more.setAttribute("aria-expanded", "false");
   more.setAttribute("aria-haspopup", "menu");
   more.setAttribute("aria-label", "More destinations");

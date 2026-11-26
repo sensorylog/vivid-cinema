@@ -58,7 +58,7 @@ test("anime identity cards keep per-title SVG silhouette masks across desktop an
 });
 
 test("title route and runtime are available offline and included in syntax checks", () => {
-  assert.match(sw, /vivid-cinema-shell-v359/);
+  assert.match(sw, /vivid-cinema-shell-v361/);
   assert.match(sw, /scripts\/anime-eligibility\.js/);
   assert.match(sw, /anime-premium-title\.html/);
   assert.match(sw, /vivid-anime-premium-title\.css/);
@@ -67,9 +67,9 @@ test("title route and runtime are available offline and included in syntax check
 });
 
 test("Anime Premium My List uses the shared Vivid Library Watch Later collection", () => {
-  assert.match(titleScript, /from "\.\/library\.js"/);
-  assert.match(titleScript, /hasLibraryItem\("watchLater", item\)/);
-  assert.match(titleScript, /toggleLibraryItem\("watchLater", item\)/);
+  assert.match(titleScript, /import\("\.\/library\.js"\)/);
+  assert.match(titleScript, /libraryApi\.hasLibraryItem\("watchLater", item\)/);
+  assert.match(titleScript, /libraryApi\.toggleLibraryItem\("watchLater", item\)/);
   assert.match(titleScript, /media_type: mediaType/);
   assert.match(titleScript, /poster_path: details\.poster_path/);
   assert.match(titleScript, /vivid:library-changed/);
@@ -100,3 +100,5 @@ test("Anime Premium My List uses the shared Vivid Library Watch Later collection
   assert.match(library, /export async function startLibrarySync\(\)/);
   assert.match(library, /onAuthStateChanged\(auth,user=>/);
 });
+
+test("title metadata loading is independent of Firebase and library startup", () => { assert.doesNotMatch(titleScript, /^import .*firebase|^import .*library\\.js|^import .*anime-library\\.js/m); assert.match(titleScript, /initializeOptionalAccountFeatures/); assert.match(titleScript, /import\("\.\/firebase\.js"\)/); assert.match(html, /auth-independent-loader-1/); assert.match(sw, /vivid-cinema-shell-v361/); });
