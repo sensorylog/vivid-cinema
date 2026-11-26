@@ -190,6 +190,19 @@ function handleProviderMessage(event) {
     if (type === "error") fallbackToNextPlaybackServer("AniLink reported a playback error.");
     return;
   }
+  if (provider.id === "vidrift" && typeof data.type === "string" && data.type.startsWith("vidrift:")) {
+    if (data.type === "vidrift:progress") {
+      if (providerLoadTimer) window.clearTimeout(providerLoadTimer);
+      providerLoadTimer = null;
+      updateProviderProgress(data.currentTime, data.duration);
+      setStatus("Playing with VidRift · " + animeTrack.toUpperCase());
+    } else if (data.type === "vidrift:ended") {
+      if (Number.isFinite(Number(data.duration))) updateProviderProgress(data.duration, data.duration, true);
+    } else if (data.type === "vidrift:wont-play") {
+      fallbackToNextPlaybackServer("VidRift could not find a playable source.");
+    }
+    return;
+  }
   if (provider.id === "anixo") {
     if (data.type === "aniembed:play") {
       if (providerLoadTimer) window.clearTimeout(providerLoadTimer);
@@ -201,17 +214,32 @@ function handleProviderMessage(event) {
     } else if (data.type === "aniembed:error") fallbackToNextPlaybackServer("AniXo reported a playback error.");
     return;
   }
-  if (provider.id === "megavid") {
-    const type = String(data.type || data.event || "").toLowerCase();
-    if (["time", "timeupdate", "progress", "playing"].includes(type)) {
+  if (["megaplay", "megaplay-legacy", "megavid", "megaflix"].includes(provider.id)) {
+    let message = data;
+    if (typeof message === "string") {
+      try { message = JSON.parse(message); } catch { return; }
+    }
+    if (message.type === "watching-log") {
+      updateProviderProgress(message.currentTime, message.duration);
       if (providerLoadTimer) window.clearTimeout(providerLoadTimer);
       providerLoadTimer = null;
-      updateProviderProgress(data.currentTime ?? data.time ?? data.position, data.duration ?? data.total);
-      setStatus("Playing with Megavid · " + animeTrack.toUpperCase());
-    } else if (["error", "failed"].includes(type)) fallbackToNextPlaybackServer("Megavid reported a playback error.");
-    else if (["complete", "ended"].includes(type) && Number.isFinite(Number(data.duration ?? data.total))) {
-      updateProviderProgress(data.duration ?? data.total, data.duration ?? data.total, true);
+      setStatus("Playing with " + provider.label + " · " + animeTrack.toUpperCase());
+      return;
     }
+    const eventName = String(message.event || message.type || "").toLowerCase();
+    const channel = String(message.channel || "").toLowerCase();
+    if (["time", "timeupdate", "progress"].includes(eventName) && (!channel || ["megacloud", "megaplay"].includes(channel))) {
+      if (providerLoadTimer) window.clearTimeout(providerLoadTimer);
+      providerLoadTimer = null;
+      updateProviderProgress(message.currentTime ?? message.time ?? message.position, message.duration ?? message.total);
+      setStatus("Playing with " + provider.label + " · " + animeTrack.toUpperCase());
+    } else if (["complete", "ended"].includes(eventName)) {
+      const total = Number(message.duration ?? message.total);
+      if (Number.isFinite(total) && total > 0) updateProviderProgress(total, total, true);
+    } else if (["error", "failed"].includes(eventName)) {
+      fallbackToNextPlaybackServer(provider.label + " reported a playback error.");
+    }
+    return;
   }
 }
 async function requestPlayback(episode) {
