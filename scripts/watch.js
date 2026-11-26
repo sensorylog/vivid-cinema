@@ -1510,14 +1510,14 @@ function handlePlayerEvent(event) {
       episode
     } }));
     if (progress > 0) {
-      savePlaybackProgress(progressKey(), { progress, duration, season, episode, title: media.title, media_type: media.media_type, id: media.id });
+      savePlaybackProgress(progressKey(), { progress, duration, season, episode, title: media.title, media_type: media.media_type, id: media.id, isAnime: isAnimePlayback() });
       recordWatchActivity(progress, duration);
       recordBehavior("playback_progress", media, { progress, duration, percentage: duration ? Math.round(progress / duration * 100) : 0, season, episode });
     }
     if (/^(ended|completed)$/i.test(eventName)) {
       recordBehavior("watch_completed", media, { duration, season, episode });
       upsertLibraryItem("history", { ...historyItem(), completion: 100, completedAt: Date.now(), updatedAt: Date.now() });
-      completePlaybackProgress(progressKey(), { duration, season, episode, title: media.title, media_type: media.media_type, id: media.id });
+      completePlaybackProgress(progressKey(), { duration, season, episode, title: media.title, media_type: media.media_type, id: media.id, isAnime: isAnimePlayback() });
     }
     return;
   }
@@ -1546,7 +1546,7 @@ function handlePlayerEvent(event) {
     if (progress > 0) {
       savePlaybackProgress(progressKey(), {
         progress, duration, season, episode,
-        title: media.title, media_type: media.media_type, id: media.id
+        title: media.title, media_type: media.media_type, id: media.id, isAnime: isAnimePlayback()
       });
       recordWatchActivity(progress, duration);
       recordBehavior("playback_progress", media, {
@@ -1560,7 +1560,7 @@ function handlePlayerEvent(event) {
       upsertLibraryItem("history", { ...historyItem(), completion: 100, completedAt: Date.now(), updatedAt: Date.now() });
       completePlaybackProgress(progressKey(), {
         duration, season, episode,
-        title: media.title, media_type: media.media_type, id: media.id
+        title: media.title, media_type: media.media_type, id: media.id, isAnime: isAnimePlayback()
       });
     }
     return;
@@ -1589,7 +1589,7 @@ function handlePlayerEvent(event) {
     if (progress > 0) {
       savePlaybackProgress(progressKey(), {
         progress, duration, season, episode,
-        title: media.title, media_type: media.media_type, id: media.id
+        title: media.title, media_type: media.media_type, id: media.id, isAnime: isAnimePlayback()
       });
       recordWatchActivity(progress, duration);
       recordBehavior("playback_progress", media, {
@@ -1603,7 +1603,7 @@ function handlePlayerEvent(event) {
       upsertLibraryItem("history", { ...historyItem(), completion: 100, completedAt: Date.now(), updatedAt: Date.now() });
       completePlaybackProgress(progressKey(), {
         duration, season, episode,
-        title: media.title, media_type: media.media_type, id: media.id
+        title: media.title, media_type: media.media_type, id: media.id, isAnime: isAnimePlayback()
       });
     }
     return;
@@ -1652,7 +1652,7 @@ function handlePlayerEvent(event) {
       progress, duration,
       season: info.season ?? currentParams?.season,
       episode: info.episode ?? currentParams?.episode,
-      title: media.title, media_type: media.media_type, id: media.id
+      title: media.title, media_type: media.media_type, id: media.id, isAnime: isAnimePlayback()
     });
     recordWatchActivity(progress, duration);
     recordBehavior("playback_progress", media, {
@@ -1667,7 +1667,7 @@ function handlePlayerEvent(event) {
     upsertLibraryItem("history", { ...historyItem(), completion: 100, completedAt: Date.now(), updatedAt: Date.now() });
     completePlaybackProgress(progressKey(), {
       duration, season: info.season ?? currentParams?.season, episode: info.episode ?? currentParams?.episode,
-      title: media.title, media_type: media.media_type, id: media.id
+      title: media.title, media_type: media.media_type, id: media.id, isAnime: isAnimePlayback()
     });
     // Stay on the current player after completion. Next-episode navigation is explicit only.
   }
