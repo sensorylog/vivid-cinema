@@ -125,6 +125,7 @@ function activateProvider(providerId) {
   const provider = providerOptions.find(item => item.id === providerId && item.available);
   if (!provider || !currentPlaybackSessionId) return false;
   const frame = $("vap-player-frame");
+  if (activeProviderId && activeProviderId !== provider.id) void syncPlaybackProgress(true);
   const generation = ++providerRequestId;
   if (providerLoadTimer) window.clearTimeout(providerLoadTimer);
   providerLoadTimer = null;
@@ -211,6 +212,12 @@ function handleProviderMessage(event) {
     return;
   }
   if (provider.id === "anixo") {
+    if (["aniembed:ready", "aniembed:play", "aniembed:progress", "aniembed:timeupdate"].includes(data.type)) {
+      if (providerLoadTimer) window.clearTimeout(providerLoadTimer);
+      providerLoadTimer = null;
+      setStatus("Playing with AniXo · " + animeTrack.toUpperCase());
+      if (Number.isFinite(Number(data.duration))) updateProviderProgress(data.currentTime ?? data.time, data.duration);
+    }
     if (data.type === "aniembed:play") {
       if (providerLoadTimer) window.clearTimeout(providerLoadTimer);
       providerLoadTimer = null;
@@ -303,6 +310,7 @@ async function requestPlayback(episode) {
       return;
     }
     playbackExpiryTimer = window.setTimeout(() => {
+      void syncPlaybackProgress(true);
       showGate("Playback session expired", "Your Premium playback session has expired. Request a fresh session to continue.", "Back to title", titleRoute(), true);
       setStatus("Playback session expired.");
     }, Math.max(0, expiresAt - Date.now()));
@@ -451,8 +459,8 @@ function bindAuth() {
   onAuthStateChanged(auth, user => {
     const nextUser = user && !user.isAnonymous ? user : null;
     if (currentUser?.uid && currentUser.uid !== nextUser?.uid) {
+      void syncPlaybackProgress(true);
       playbackRequestId += 1;
-      pendingProgressSnapshot = null;
       latestProviderProgress = null;
       showGate("Vivid account changed", "Playback has stopped because the signed-in Vivid account changed. Sign in with the account that holds your Premium membership.");
       setStatus("Playback stopped after the Vivid account changed.");
