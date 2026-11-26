@@ -168,16 +168,55 @@ function getSourceLabel(source) {
   return "VidAPI primary source";
 }
 
+function showArchiveFallback() {
+  if (isAnimePlayback() || currentParams?.type !== "movie") return false;
+  const root = $("vivid-archive-search");
+  if (!root) return false;
+  root.hidden = false;
+  if (root.dataset.archiveMounted === "true") return true;
+  void import("./playback/archive-film-fallback.js").then(({ mountArchiveFilmSearch }) => {
+    if (!root.isConnected || isAnimePlayback() || currentParams?.type !== "movie") return;
+    mountArchiveFilmSearch({
+      root,
+      title: media?.title || "",
+      year: String(media?.release_date || "").slice(0, 4),
+      onPlay: item => {
+        if (!/^[a-z0-9._-]{1,180}$/i.test(String(item?.identifier || ""))) return;
+        const player = $("vidapi-player");
+        if (!player) return;
+        activeSource = "archive";
+        sourceAttempted.add("archive");
+        primaryHealthy = false;
+        clearFallbackTimer();
+        player.src = "https://archive.org/embed/" + encodeURIComponent(item.identifier) + "?autoplay=1";
+        player.hidden = false;
+        $("vivid-direct-player")?.setAttribute("hidden", "");
+        const status = $("player-status");
+        if (status) {
+          status.textContent = "Opening " + String(item.title || "archive film") + " · " + String(item.license || "declared rights") + ". Source rights declarations are supplied by the archive uploader.";
+          status.classList.remove("is-warning");
+          status.hidden = false;
+        }
+        const sourceLabel = $("player-source-label");
+        if (sourceLabel) sourceLabel.textContent = getSourceLabel("archive");
+        updateSourceLabel();
+      }
+    });
+  }).catch(error => console.warn("Vivid Archive Cinema could not initialize:", error));
+  return true;
+}
+
 function triggerFallback(reason = "source_error") {
   if (!currentParams || (isAnimePlayback() ? !(aniListId || malId || hasFallbackId()) : !hasFallbackId() && !sourceAvailable("direct"))) return false;
   const nextSource = getNextSource(activeSource);
   if (!nextSource) {
     const status = $("player-status");
     if (status) {
-      status.textContent = "This title could not start on the available players. Choose another source or try again later.";
+      status.textContent = "Vivid's available streaming servers could not play this movie. Checking the classic-film archive as a last resort…";
       status.classList.add("is-warning");
       status.hidden = false;
     }
+    showArchiveFallback();
     return false;
   }
 
@@ -979,41 +1018,7 @@ function renderShell(params) {
     picker.append(serverMenu, serverPanel);
     serverPanel.hidden = true;
     const archiveRoot = $("vivid-archive-search");
-    if (archiveRoot && params?.type === "movie" && !isAnimePlayback()) {
-      void import("./playback/archive-film-fallback.js").then(({ mountArchiveFilmSearch }) => {
-        if (!archiveRoot.isConnected) return;
-        mountArchiveFilmSearch({
-          root: archiveRoot,
-          title: media?.title || "",
-          year: String(media?.release_date || media?.first_air_date || "").slice(0, 4),
-          onPlay: item => {
-            if (!/^[a-z0-9._-]{1,180}$/i.test(String(item?.identifier || ""))) return;
-            const currentPlayer = $("vidapi-player");
-            if (!currentPlayer) return;
-            activeSource = "archive";
-            sourceAttempted.add("archive");
-            primaryHealthy = false;
-            clearFallbackTimer();
-            currentPlayer.src = "https://archive.org/embed/" + encodeURIComponent(item.identifier) + "?autoplay=1";
-            currentPlayer.hidden = false;
-            $("vivid-direct-player")?.setAttribute("hidden", "");
-            const currentStatus = $("player-status");
-            if (currentStatus) {
-              currentStatus.textContent = "Opening " + String(item.title || "archive film") + " · " + String(item.license || "declared rights") + ". Source rights declarations are supplied by the archive uploader.";
-              currentStatus.classList.remove("is-warning");
-              currentStatus.hidden = false;
-            }
-            const sourceLabel = $("player-source-label");
-            if (sourceLabel) sourceLabel.textContent = getSourceLabel("archive");
-            window.dispatchEvent(new CustomEvent("vivid:player-source-changed", { detail: { source: "archive", identifier: item.identifier } }));
-            window.dispatchEvent(new CustomEvent("vivid:player-adapter-selected", { detail: { playerId: "player1", providerId: "archive" } }));
-            closeServerMenu();
-          }
-        });
-      }).catch(error => console.warn("Vivid Archive Cinema could not initialize:", error));
-    } else if (archiveRoot) {
-      archiveRoot.hidden = true;
-    }
+    if (archiveRoot) archiveRoot.hidden = true;
     serverMenu.setAttribute("aria-expanded", "false");
   }
   const positionServerPanel = () => {
