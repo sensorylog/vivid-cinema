@@ -49,7 +49,7 @@ async function handleChargeSuccess(db, env, data, eventRef) {
     const old = existingMembership.exists ? existingMembership.data() || {} : {};
     const oldEnd = typeof old.currentPeriodEnd?.toMillis === "function" ? old.currentPeriodEnd.toMillis() : Number(old.currentPeriodEnd || 0);
     const periodStart = oldEnd > now ? oldEnd : now;
-    const periodEnd = requestedNextPayment > now ? requestedNextPayment : addDaysMillis(30, periodStart);
+    const periodEnd = Math.max(requestedNextPayment > now ? requestedNextPayment : 0, addDaysMillis(30, periodStart));
     const renewalMode = checkout.renewalMode === "automatic" && checkout.paymentMethod === "card" ? "automatic" : "manual";
     transaction.set(membershipRef, {
       uid,
@@ -131,7 +131,7 @@ async function handleRecurringEvent(db, eventName, data, eventRef) {
         renewalMode: "automatic",
         cancelAtPeriodEnd: false,
         currentPeriodStart: timestampFromMillis(start),
-        currentPeriodEnd: timestampFromMillis(next > start ? next : addDaysMillis(30, start)),
+        currentPeriodEnd: timestampFromMillis(Math.max(next > now ? next : 0, addDaysMillis(30, start))),
         updatedAt: timestampFromMillis(now)
       }, { merge: true });
     } else if (eventName === "invoice.payment_failed") {
