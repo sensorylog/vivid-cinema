@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#08070d">
+<meta name="robots" content="noindex,nofollow">
+<meta name="description" content="Your private VIVID ANIME PREMIUM library, watch history and playback preferences.">
+<title>My Anime · VIVID ANIME PREMIUM</title>
+<link rel="icon" href="icons/vivid-icon.svg" type="image/svg+xml">
+<link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="styles/vivid-foundation.css">
+<link rel="stylesheet" href="styles/vivid-system.css">
+<link rel="stylesheet" href="styles/vivid-anime-premium.css">
+<link rel="stylesheet" href="styles/vivid-anime-premium-library.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.9.1/font/bootstrap-icons.css">
+</head>
+<body class="vivid-anime-premium-page vap-library-page" data-vivid-page="anime-premium-library">
+<div class="vap-shell">
+<header class="vap-header">
+  <a class="vap-brand" href="anime-premium.html" aria-label="Vivid Anime Premium home"><span>VIVID</span><b>ANIME</b><small>PREMIUM</small></a>
+  <nav aria-label="Premium navigation"><a href="anime-premium.html">Discover</a><a href="anime-premium-library.html" aria-current="page">My Anime</a><a href="anime.html">Free anime</a><a href="anime-premium-membership.html">Membership</a><a class="vap-account-link" href="auth.html?returnTo=anime-premium-library.html">Vivid account</a></nav>
+</header>
+<main class="vap-library-main">
+  <section class="vap-library-hero">
+    <span class="vap-eyebrow">YOUR PERSONAL ANIME SPACE</span>
+    <h1>My <span>Anime.</span></h1>
+    <p>Your watchlist, viewing progress and completed titles — kept with your Vivid account.</p>
+    <div class="vap-library-stats" id="vap-library-stats" aria-live="polite"></div>
+  </section>
+
+  <section class="vap-library-gate" id="vap-library-gate" role="status" aria-live="polite">
+    <span class="vap-eyebrow">VIVID ANIME PREMIUM</span>
+    <h2 id="vap-library-gate-title">Checking your membership…</h2>
+    <p id="vap-library-gate-copy">Your private anime library is available to active Premium members.</p>
+    <a class="vap-primary" id="vap-library-gate-link" href="auth.html?returnTo=anime-premium-library.html">Continue with Vivid <span aria-hidden="true">→</span></a>
+  </section>
+
+  <div id="vap-library-content" hidden>
+    <section class="vap-library-section" aria-labelledby="vap-continue-title">
+      <div class="vap-library-heading"><div><span class="vap-eyebrow">PICK UP WHERE YOU LEFT OFF</span><h2 id="vap-continue-title">Continue watching</h2></div></div>
+      <div class="vap-library-grid" id="vap-library-continue"></div>
+    </section>
+    <section class="vap-library-section" aria-labelledby="vap-watchlist-title">
+      <div class="vap-library-heading"><div><span class="vap-eyebrow">SAVED FOR LATER</span><h2 id="vap-watchlist-title">My watchlist</h2></div></div>
+      <div class="vap-library-grid" id="vap-library-watchlist"></div>
+    </section>
+    <section class="vap-library-section" aria-labelledby="vap-completed-title">
+      <div class="vap-library-heading"><div><span class="vap-eyebrow">YOUR FINISHED STORIES</span><h2 id="vap-completed-title">Completed anime</h2></div></div>
+      <div class="vap-library-grid" id="vap-library-completed"></div>
+    </section>
+    <section class="vap-library-section" aria-labelledby="vap-favorites-title">
+      <div class="vap-library-heading"><div><span class="vap-eyebrow">YOUR COLLECTION</span><h2 id="vap-favorites-title">Favourites</h2></div></div>
+      <div class="vap-library-grid" id="vap-library-favorites"></div>
+    </section>
+    <section class="vap-library-section" aria-labelledby="vap-history-title">
+      <div class="vap-library-heading"><div><span class="vap-eyebrow">RECENT ACTIVITY</span><h2 id="vap-history-title">Watch history</h2></div></div>
+      <div class="vap-library-grid" id="vap-library-history"></div>
+    </section>
+    <section class="vap-library-section" aria-labelledby="vap-episodes-title">
+      <div class="vap-library-heading"><div><span class="vap-eyebrow">EPISODE MILESTONES</span><h2 id="vap-episodes-title">Completed episodes</h2></div></div>
+      <div class="vap-library-grid" id="vap-library-episodes"></div>
+    </section>
+    <section class="vap-library-preferences" aria-labelledby="vap-preferences-title">
+      <div><span class="vap-eyebrow">MAKE IT YOURS</span><h2 id="vap-preferences-title">Playback preferences</h2><p>Provider support varies by title. Your choices are remembered on this device and synced to your Vivid account.</p></div>
+      <div class="vap-preference-grid">
+        <label>Default audio track<select id="vap-pref-track"><option value="sub">Subtitled</option><option value="dub">Dubbed</option></select></label>
+        <label>Preferred server<select id="vap-pref-player"><option value="auto">Automatic (recommended)</option><option value="vidplus">VidPlus</option><option value="vidlink">VidLink</option><option value="vidapi">VidAPI</option><option value="embedwave">EmbedWave</option><option value="vidrift">VidRift</option><option value="anixo">AniXo</option><option value="anilink">AniLink</option><option value="megaplay">MegaPlay</option><option value="megaplay-legacy">MegaPlay Legacy</option><option value="megavid">Megavid</option><option value="megaflix">MegaFlix</option></select></label>
+        <label>Preferred subtitles<select id="vap-pref-language"><option value="en">English</option><option value="ja">Japanese</option><option value="es">Spanish</option><option value="fr">French</option><option value="pt">Portuguese</option></select></label>
+        <label class="vap-preference-toggle"><input id="vap-pref-autoplay" type="checkbox"> Automatically play the next episode</label>
+      </div>
+      <p class="vap-preference-status" id="vap-pref-status" role="status" aria-live="polite">Preferences are ready.</p>
+    </section>
+  </div>
+</main>
+</div>
+<script type="module" src="scripts/anime-premium-library.js"></script>
+</body>
+</html>
