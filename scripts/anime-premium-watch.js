@@ -547,7 +547,7 @@ function bindControls() {
   window.addEventListener("message", handleProviderMessage);
 }
 function bindAuth() {
-  onAuthStateChanged(auth, user => {
+  onAuthStateChanged(auth, async user => {
     const nextUser = user && !user.isAnonymous ? user : null;
     if (currentUser?.uid && currentUser.uid !== nextUser?.uid) {
       void syncPlaybackProgress(true);
@@ -563,14 +563,35 @@ function bindAuth() {
         animeTrack = preferences.track;
         $("vap-audio-track")?.querySelectorAll("[data-vap-track]").forEach(button => button.setAttribute("aria-pressed", String(button.dataset.vapTrack === animeTrack)));
       }).catch(error => console.warn("Vivid Anime Premium preferences could not sync:", error));
+      try {
+        const token = await currentUser.getIdToken();
+        const response = await fetch("/api/anime-premium/membership", { headers: { Authorization: "Bearer " + token }, cache: "no-store" });
+        const payload = response.ok ? await response.json() : null;
+        if (currentUser !== nextUser) return;
+        if (payload?.membership?.active === true) {
+          showGate("Premium access confirmed", "Your Vivid Anime Premium membership is active. Select an episode to start watching.", "Open Vivid account", "account.html");
+        } else {
+          showGate("Premium membership required", "You are signed in to Vivid. Subscribe to Anime Premium to unlock this title and its episodes.", "Subscribe to Vivid Anime Premium", "anime-premium-membership.html");
+        }
+      } catch (error) {
+        console.warn("Premium membership status could not be checked:", error);
+        showGate("Checking your Premium access", "We could not confirm your membership just now. Try again in a moment.", "Retry membership check", "anime-premium-membership.html", true);
+      }
+      $("vap-player-signin").href = "account.html";
+      $("vap-player-signin").textContent = "Open Vivid account →";
+    } else {
+      const returnTo = "anime-premium-watch.html" + window.location.search;
+      showGate("Sign in to continue", "Sign in with your existing Vivid account. If you do not have Premium yet, you can subscribe after signing in.", "Sign in & subscribe", "auth.html?returnTo=" + encodeURIComponent(returnTo));
+      $("vap-player-signin").href = "auth.html?returnTo=" + encodeURIComponent(returnTo);
+      $("vap-player-signin").textContent = "Sign in & subscribe →";
     }
-    $("vap-player-signin").href = currentUser ? "account.html" : "auth.html?returnTo=anime-premium.html";
-    $("vap-player-signin").textContent = currentUser ? "Open Vivid account →" : "Sign in to Vivid →";
   }, error => {
     currentUser = null;
     console.warn("Vivid Anime Premium auth state unavailable:", error);
+    showGate("Sign in to continue", "We could not confirm your Vivid account session. Please sign in again.", "Sign in & subscribe", "auth.html?returnTo=" + encodeURIComponent("anime-premium-watch.html" + window.location.search));
   });
 }
+
 function renderError(error) {
   $("vap-watch-content").innerHTML = '<section class="vap-title-error"><span class="vap-eyebrow">VIVID ANIME PREMIUM</span><h1>We couldn’t open this episode.</h1><p>' + escapeHtml(error?.message || "Please return to the Premium catalogue and choose a title.") + '</p><a class="vap-primary" href="anime-premium.html">Back to discovery <span aria-hidden="true">→</span></a></section>';
 }
