@@ -7,7 +7,7 @@
 - **Firebase Hosting** is retained as a manual backup. Its GitHub Actions deployment remains manual-only; run it only when intentionally switching or validating the backup and after checking Firebase Hosting quota.
 - Firebase Authentication, Firestore, Firebase AI Logic, and App Check remain on the existing Firebase project. Moving static hosting does not migrate or disable these services.
 - Netlify is retired from the intended hosting setup. This repository change does not delete the Netlify project or disable its deployment; those are separate dashboard actions.
-- Cloudflare Pages Functions are used only for the Watch Rooms API; movie media is not stored in Pages, and the app continues to use its configured external services.
+- Cloudflare Pages Functions host both Watch Rooms (`/api/watch-rooms`) and the VIVID Anime Premium API family (`/api/anime-premium/*`). Movie media is not stored in Pages; the app continues to use its configured external services.
 
 ## Cloudflare Pages build settings
 
@@ -18,13 +18,26 @@
 - Build output directory: `dist`
 - Root directory: `/`
 - Build-time dependencies: the build installs the isolated Cloudflare function dependencies under `cloudflare/` before bundling the Pages Function.
-- Runtime secret: `FIREBASE_SERVICE_ACCOUNT_JSON` must be configured in Pages Settings → Variables and Secrets (Production and Preview).
+- Runtime secrets: `FIREBASE_SERVICE_ACCOUNT_JSON`, `PAYSTACK_SECRET_KEY`, and `PAYSTACK_WEBHOOK_SECRET` must be configured in Pages Settings → Variables and Secrets (Production and Preview). Set `FIREBASE_PROJECT_ID` when it cannot be derived from the service account.
 
 The shared script `automation/build-static-dist.mjs` creates the static `dist/` assets and excludes repository/backend source. The `build:web` command then bundles `cloudflare/functions/` into the `dist/_worker.js/` directory (`index.js` entrypoint); the root Firebase Functions directory is not used as the Pages Functions source. Do not publish the repository root.
 
 ## Pages Functions runtime
 
-The root `wrangler.toml` enables `nodejs_compat` for the Pages Functions bundle and sets the Pages output directory to `dist`. Keep the Cloudflare Pages Production and Preview compatibility settings aligned with this config. The Watch Rooms Function requires Node.js compatibility for its Firebase Auth and App Check dependencies. Keep `FIREBASE_SERVICE_ACCOUNT_JSON` as a secret, not a plain-text public variable.
+The root `wrangler.toml` enables `nodejs_compat` for the Pages Functions bundle and sets the Pages output directory to `dist`. Keep the Cloudflare Pages Production and Preview compatibility settings aligned with this config. Watch Rooms and Anime Premium use the isolated Firebase Admin-compatible runtime; keep `FIREBASE_SERVICE_ACCOUNT_JSON` as a secret, not a plain-text public variable.
+
+### VIVID Anime Premium runtime configuration
+
+The build bundles every route under `cloudflare/functions/`, including the Anime Premium endpoints. The following settings are required for the full subscription and membership journey:
+
+- `FIREBASE_SERVICE_ACCOUNT_JSON` and `FIREBASE_PROJECT_ID` for authenticated membership, checkout, playback, progress, cancellation and admin operations.
+- `PAYSTACK_SECRET_KEY` and `PAYSTACK_WEBHOOK_SECRET` as Cloudflare secrets.
+- `PAYSTACK_LIVE_ENABLED=true` only after the Paystack merchant, live plan codes and webhook are ready. Preview deployments should remain disabled.
+- `PAYSTACK_PLAN_GHS_MONTHLY` or `ANIME_PREMIUM_PLANS_JSON` with a valid Paystack plan code for each currency offering automatic card renewal.
+- Optional `ANIME_PREMIUM_DEFAULT_CURRENCY` (defaults to `GHS`), `ANIME_PREMIUM_GHS_MONTHLY_AMOUNT` (defaults to 5330 minor units), and `ANIME_PREMIUM_ADMIN_UIDS` for server-side administrator allowlisting.
+- Configure the Paystack webhook URL as `/api/anime-premium/webhook` on the production Vivid origin.
+
+The public pricing endpoint can display the configured price while checkout is disabled. Authenticated membership and payment operations must not be considered ready until the Firebase and Paystack settings above are present and the webhook has been verified.
 
 ## Headers and caching
 
@@ -38,7 +51,7 @@ Before making Cloudflare the only public host, verify the deployed Pages site:
 2. Firebase initialization, email/password sign-in, Google sign-in if enabled, password reset, and email verification.
 3. Firestore-backed profile and library behavior.
 4. Firebase AI Logic / Vivid Recall and App Check.
-5. TMDB requests, images, external playback embeds, Paystack checkout if used, service worker/PWA behavior, and mobile Safari/Chrome.
+5. TMDB requests, images, external playback embeds, VIVID Anime Premium pricing and membership APIs, Paystack checkout/webhook activation, service worker/PWA behavior, and mobile Safari/Chrome.
 6. In Firebase Authentication, ensure the Pages hostname (and any custom hostname) is listed in Authorized domains where required.
 7. In the Google Cloud reCAPTCHA Enterprise configuration used by Firebase App Check, allow the Pages hostname for the existing site key. Do not disable App Check as a workaround.
 
