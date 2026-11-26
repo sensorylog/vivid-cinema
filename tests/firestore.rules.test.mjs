@@ -384,3 +384,37 @@ test("African Stories private rights, provider and session records are inaccessi
     status: "approved", streamOnVivid: true
   }));
 });
+
+
+test("Anime Premium billing, memberships, playback sources and audit records are server-only", async () => {
+  await env.withSecurityRulesDisabled(async context => {
+    const db = context.firestore();
+    await setDoc(doc(db, "animePremiumMemberships", "premium-user"), {
+      uid: "premium-user", status: "active", currentPeriodEnd: new Date(Date.now() + 86400000)
+    });
+    await setDoc(doc(db, "animePremiumCheckouts", "VAPTEST123"), {
+      uid: "premium-user", amount: 5330, currency: "GHS", status: "pending"
+    });
+    await setDoc(doc(db, "animePremiumWebhookEvents", "event-one"), { event: "charge.success" });
+    await setDoc(doc(db, "animePremiumSources", "tv_123_s1_e1"), {
+      provider: "approved-provider", sourceId: "rights-cleared-source", active: true
+    });
+    await setDoc(doc(db, "animePremiumAdminAudit", "audit-one"), {
+      action: "membership_override", uid: "premium-user"
+    });
+  });
+  const privilegedClient = env.authenticatedContext("premium-admin", {
+    admin: true, animePremiumAdmin: true, email_verified: true
+  }).firestore();
+  const privatePaths = [
+    "animePremiumMemberships/premium-user",
+    "animePremiumCheckouts/VAPTEST123",
+    "animePremiumWebhookEvents/event-one",
+    "animePremiumSources/tv_123_s1_e1",
+    "animePremiumAdminAudit/audit-one"
+  ];
+  for (const path of privatePaths) {
+    await assertFails(getDoc(doc(privilegedClient, path)));
+    await assertFails(setDoc(doc(privilegedClient, path), { forged: true }));
+  }
+});
