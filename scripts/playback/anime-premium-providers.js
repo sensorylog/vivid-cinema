@@ -3,11 +3,14 @@ const PROVIDERS = Object.freeze([
   { id: "vidlink", label: "VidLink", origin: "https://vidlink.pro", kind: "mal", events: false, note: "MAL anime player · automatic audio fallback" },
   { id: "anixo", label: "AniXo", origin: "https://anixo.buzz", kind: "either", events: true, note: "AniList/MAL · multi-engine failover" },
   { id: "anilink", label: "AniLink", origin: "https://anilink.cc", kind: "anilist", events: true, note: "AniList anime player · progress events" },
-  { id: "megaplay", label: "MegaPlay", origin: "https://ani.megaplay.su", kind: "either", events: false, note: "AniList/MAL episode player" },
+  { id: "megaplay", label: "MegaPlay", origin: "https://megaplay.buzz", kind: "either", events: true, note: "AniList/MAL · progress and error events" },
+  { id: "megaplay-legacy", label: "MegaPlay Legacy", origin: "https://ani.megaplay.su", kind: "either", events: false, note: "Existing VIVID anime embed fallback" },
   { id: "megavid", label: "Megavid", origin: "https://megavid.buzz", kind: "either", events: true, note: "AniList/MAL · progress and error events" },
-  { id: "megaflix", label: "MegaFlix", origin: "https://megaflix.buzz", kind: "either", events: false, note: "AniList/MAL episode player" },
+  { id: "megaflix", label: "MegaFlix", origin: "https://megaflix.buzz", kind: "either", events: true, note: "AniList/MAL · progress and error events" },
   { id: "vidapi", label: "VidAPI", origin: "https://vaplayer.ru", kind: "tmdb", events: false, note: "Existing VIVID player · TMDB movie/TV route" },
-  { id: "embedwave", label: "EmbedWave", origin: "https://embedwave.cc", kind: "tmdb", events: false, note: "Existing VIVID player · TMDB movie/TV route" }
+  { id: "embedwave", label: "EmbedWave", origin: "https://embedwave.cc", kind: "tmdb", events: false, note: "Existing VIVID player · TMDB movie/TV route" },
+  { id: "vidfast", label: "VidFast", origin: "https://vidfast.to", kind: "tmdb", events: false, note: "Existing VIVID player · TMDB movie/TV route" },
+  { id: "vidrift", label: "VidRift", origin: "https://embed.vidrift.net", kind: "either-tmdb", events: true, note: "TMDB/AniList · multi-server automatic failover" }
 ]);
 
 const cleanId = value => /^\d+$/.test(String(value || "").trim()) ? String(value).trim() : "";
@@ -36,8 +39,17 @@ export function buildAnimePremiumProviderUrl(providerId, {
   const audio = track === "dub" ? "dub" : "sub";
   const isMovie = mediaType === "movie";
 
-  if (provider.kind === "tmdb") {
+  if (provider.kind === "tmdb" || provider.kind === "either-tmdb") {
     if (!tmdb) return "";
+    if (providerId === "vidrift") {
+      if (isMovie) return provider.origin + "/embed/movie/" + tmdb;
+      if (ani) return provider.origin + "/embed/anilist/" + ani + "/" + ep + (audio === "dub" ? "?dub=1" : "");
+      return provider.origin + "/embed/tv/" + tmdb + "/" + s + "/" + ep;
+    }
+    if (providerId === "vidfast") {
+      const path = isMovie ? "/embed/movie/" + tmdb : "/embed/tv/" + tmdb + "/" + s + "/" + ep;
+      return provider.origin + path;
+    }
     if (providerId === "vidapi") {
       const path = isMovie ? "/embed/movie/" + tmdb : "/embed/tv/" + tmdb + "/" + s + "/" + ep;
       const query = new URLSearchParams({ autoplay: "1", controls: "1", overlay: "1", ds_lang: "en" });
@@ -69,6 +81,8 @@ export function buildAnimePremiumProviderUrl(providerId, {
       return provider.origin + "/watch/" + ani + "/" + ep + "?" + query;
     }
     case "megaplay":
+      return provider.origin + "/stream" + (ani ? "/ani/" + ani : "/mal/" + mal) + "/" + ep + "/" + audio;
+    case "megaplay-legacy":
       return provider.origin + (ani ? "/ani/" + ani : "/mal/" + mal) + "/" + ep + "/" + audio;
     case "megavid":
       return provider.origin + (ani ? "/ani/" + ani : "/mal/" + mal) + "/" + ep + "/" + audio + "?autoplay=true";
