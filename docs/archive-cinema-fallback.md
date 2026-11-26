@@ -27,3 +27,7 @@ Internet Archive's own guidance:
 - Archive playback is user-selected and is not part of automatic server failover.
 - The archive player controls playback, subtitles, quality and progress. Vivid cannot inspect its cross-origin iframe internals.
 - Search is limited to 12 catalogue hits and checks metadata for up to 10 candidates per search. Searches time out after 15 seconds.
+
+## Next catalogue expansion
+
+After this last-resort fallback is stable, evaluate the Library of Congress National Screening Room as a separate, rights-aware historical-film catalogue. Integrate only titles whose item-level access and reuse terms permit the intended playback experience; keep it behind the same exhausted-Vivid-servers gate. Do not make it a default source for current releases or ordinary catalogue titles.
