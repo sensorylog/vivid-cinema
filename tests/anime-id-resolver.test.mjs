@@ -43,3 +43,38 @@ test("rejects unrelated catalogue results instead of assigning the wrong anime I
     globalThis.fetch = originalFetch;
   }
 });
+
+test("prefers a season-specific AniList entry and keeps its local episode numbering", async () => {
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = async (input, init = {}) => {
+    const body = JSON.parse(init.body || "{}");
+    const search = body.variables?.search || "";
+    const media = search.includes("Final Season")
+      ? [{ id: 2, idMal: 2, episodes: 16, seasonYear: 2020, title: { english: "Attack on Titan: The Final Season", romaji: "Shingeki no Kyojin: The Final Season", native: "" }, synonyms: [] }]
+      : [{ id: 1, idMal: 1, episodes: 25, seasonYear: 2013, title: { english: "Attack on Titan", romaji: "Shingeki no Kyojin", native: "" }, synonyms: [] }];
+    return { ok: true, json: async () => input.toString().includes("graphql.anilist.co") ? { data: { Page: { media } } } : { data: [] } };
+  };
+  try {
+    const result = await resolveAnimeIds("Attack on Titan", { seasonTitle: "The Final Season", seasonYear: "2020", globalEpisode: 60, localEpisode: 1, episodeOffset: 59 });
+    assert.deepEqual(result, { aniListId: "2", malId: "2", episodeOffset: 0 });
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test("rejects an old season ID when its episode count cannot cover the requested season", async () => {
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = async (input, init = {}) => {
+    const payload = input.toString().includes("graphql.anilist.co")
+      ? { data: { Page: { media: [{ id: 1, idMal: 1, episodes: 12, seasonYear: 2014, title: { english: "Example Anime", romaji: "Example Anime", native: "" }, synonyms: [] }] } } }
+      : { data: [] };
+    return { ok: true, json: async () => payload };
+  };
+  try {
+    const result = await resolveAnimeIds("Example Anime", { seasonTitle: "Season 2", seasonYear: "2017", globalEpisode: 13, localEpisode: 1, episodeOffset: 12 });
+    assert.equal(result.aniListId, "");
+    assert.equal(result.malId, "");
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
