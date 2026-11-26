@@ -332,7 +332,8 @@ async function syncPlaybackProgress(force = false) {
     user: currentUser,
     currentTime: video.currentTime,
     duration: video.duration,
-    keepalive: force
+    keepalive: force,
+    retries: 0
   };
   if (progressSyncInFlight) return;
   progressSyncInFlight = true;
@@ -343,7 +344,7 @@ async function syncPlaybackProgress(force = false) {
       lastProgressSync = Date.now();
       try {
         const token = await snapshot.user.getIdToken();
-        await fetch("/api/anime-premium/progress", {
+        const response = await fetch("/api/anime-premium/progress", {
           method: "POST",
           headers: { "Content-Type": "application/json", Authorization: "Bearer " + token },
           cache: "no-store",
@@ -354,7 +355,11 @@ async function syncPlaybackProgress(force = false) {
             duration: snapshot.duration
           })
         });
+        if (!response.ok) throw new Error("Progress endpoint returned HTTP " + response.status);
       } catch (error) {
+        if (!pendingProgressSnapshot && Number(snapshot.retries || 0) < 1) {
+          pendingProgressSnapshot = { ...snapshot, retries: Number(snapshot.retries || 0) + 1 };
+        }
         console.warn("Vivid Anime Premium playback progress could not be saved:", error);
       }
     }
