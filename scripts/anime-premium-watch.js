@@ -556,10 +556,10 @@ function bindControls() {
 }
 async function bindAuth() {
   try {
-    const [{ auth }, { onAuthStateChanged }] = await Promise.all([
+    const [{ auth }, { onAuthStateChanged }] = await withTimeout(Promise.all([
       import("./firebase.js"),
       import("https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js")
-    ]);
+    ]), 10000, "Vivid account services timed out.");
     if (typeof auth.authStateReady === "function") await auth.authStateReady();
     currentUser = auth.currentUser && !auth.currentUser.isAnonymous ? auth.currentUser : null;
     onAuthStateChanged(auth, user => {
