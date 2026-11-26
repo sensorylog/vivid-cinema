@@ -51,8 +51,8 @@ test("anime playback exposes documented anime iframe sources and keeps origin ch
   assert.match(source, /\? \["vidplus", "vidlink", "animeembed", "vidy", "embedwave", "vidsrc", "vidapi"\]/);
   assert.match(source, /ANIMEEMBED_ORIGINS\.has\(event\.origin\)/);
   assert.match(source, /VIDY_ORIGINS\.has\(event\.origin\)/);
-  assert.match(source, /if \(isAnimeEmbed && payload\.channel !== "animeembed"\) return/);
-  assert.equal((source.match(/if \(isAnimePlayback\(\)\) triggerFallback\("anime_source_timeout"\)/g) || []).length, 4);
+  assert.match(source, /normalizeAnimeProviderMessage\(isAnimeEmbed \? "animeembed" : "vidy", payload\)/);
+  assert.equal((source.match(/if \(isAnimePlayback\(\)\) triggerFallback\("anime_source_timeout"\)/g) || []).length, 6);
 });
 
 
