@@ -21,7 +21,7 @@ test("service worker has a versioned cache and required offline shell", () => {
   assert.ok(source.includes('"./scripts/anime-enrichment.js"'));
   assert.ok(source.includes('"./scripts/anime.js?v=discovery-3"'));
   assert.ok(source.includes('"./styles/vivid-anime.css?v=discovery-3"'));
-  assert.ok(source.includes('"./scripts/watch.js?v=anime-phase5-player-6"'));
+  assert.ok(source.includes('"./scripts/watch.js?v=anime-phase5-player-7"'));
   assert.ok(source.includes('"./styles/vivid-watch-polish.css?v=anime-phase5-player-1"'));
   assert.ok(!source.includes('"./scripts/watch-room-player-layout.js"'));
   assert.ok(!source.includes('"./scripts/watch-room-api.js"'));
@@ -273,12 +273,12 @@ test("Watch Rooms and playback modules are included in the offline app shell", (
     '"./scripts/watch-room-clubs.js"',
     '"./scripts/watch-room-playback.js"'
   ]) assert.ok(!source.includes(asset), "retired Watch Rooms asset remains in the offline app shell: " + asset);
-  assert.ok(source.includes('"./scripts/watch.js?v=anime-phase5-player-6"'), "the primary watch experience remains available");
+  assert.ok(source.includes('"./scripts/watch.js?v=anime-phase5-player-7"'), "the primary watch experience remains available");
 });
 
 test("service worker precaches the Phase 5 anime playback helpers and watch entry", () => {
   assert.match(source, /\.\/scripts\/playback\/anime-playback\.js/);
   assert.match(source, /\.\/scripts\/playback\/anime-id-resolver\.js/);
   assert.match(source, /\.\/scripts\/playback\/anime-secondary-player\.js/);
-  assert.match(source, /watch\.js\?v=anime-phase5-player-6/);
+  assert.match(source, /watch\.js\?v=anime-phase5-player-7/);
 });
