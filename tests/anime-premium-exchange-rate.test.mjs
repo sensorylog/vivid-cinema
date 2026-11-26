@@ -79,10 +79,16 @@ test("GHS is exactly one-to-one and does not require an external FX request", as
 test("exchange-rate endpoint rejects invalid or unpublished currencies without inventing a rate", async () => {
   const originalFetch = globalThis.fetch;
   let calls = 0;
-  globalThis.fetch = async () => {
+  globalThis.fetch = async url => {
     calls += 1;
+    if (String(url) === "https://open.er-api.com/v6/latest/USD") {
+      return new Response(JSON.stringify({
+        result: "success", base_code: "USD",
+        rates: { USD: 1, GHS: 10, EUR: 0.9 }
+      }), { status: 200, headers: { "Content-Type": "application/json" } });
+    }
     return new Response(JSON.stringify({
-      result: "success", base_code: "USD",
+      base: "USD", date: "2026-11-26",
       rates: { USD: 1, GHS: 10, EUR: 0.9 }
     }), { status: 200, headers: { "Content-Type": "application/json" } });
   };
