@@ -31,8 +31,8 @@ Premium membership is backend-owned. The browser may display membership state, b
 1. Require a Firebase ID token on protected Premium API requests.
 2. Verify the token and resolve its UID on the server.
 3. Read membership state from a server-controlled entitlement record.
-4. Initialize and verify Paystack transactions on the server.
-5. Verify webhook signatures against the unmodified request body.
+4. Verify signed Paystack webhook events against the unmodified request body and validate the exact pending order.
+5. Process webhook events idempotently before activating the UID-owned entitlement.
 6. Process webhook events idempotently.
 7. Keep Paystack secret credentials out of client code.
 8. Deny protected catalogue/playback access when entitlement is absent, expired, cancelled or unverified.
@@ -108,14 +108,18 @@ The Premium entry route now acts as a dedicated discovery homepage rather than a
 ## Phase 5 implementation — Paystack, memberships and administration
 
 ### Server-owned payment flow
-- Adds separate Cloudflare Pages API routes for public pricing, authenticated checkout, membership status, automatic renewal cancellation, Paystack webhook processing, protected playback and administrator operations.
-- Checkout requires a verified Firebase ID token and verified email. The browser sends only country and payment method; amount, currency, plan code, reference, renewal mode and user identity are derived or verified server-side.
-- Card checkout uses a configured Paystack monthly plan code and automatic renewal. Mobile money uses a one-time Paystack transaction and manual renewal. Mobile money is only offered for the currently supported GH/KE routes; the server validates this again.
-- The existing displayed Ghana price is represented as a configurable default of 5330 minor units (GH₵53.30) via ANIME_PREMIUM_GHS_MONTHLY_AMOUNT. Additional supported checkout currencies and their Paystack plan codes are configured in ANIME_PREMIUM_PLANS_JSON. This is configuration, not a final locked global price.
-- Country selection is populated from country/currency data; local-currency conversion is labelled as an estimate. Paystack's own checkout page displays the final billing currency and amount.
-- Payment return never grants access. The signed Paystack webhook verifies its signature, verifies the transaction with Paystack, checks the stored checkout amount/currency/reference, and idempotently updates the membership document.
-- Manual mobile-money renewals extend the existing entitlement period. Card subscription events maintain automatic-renewal state. Users can cancel card auto-renewal while retaining access through the paid period.
-
+- The live Anime Premium page uses the three owner-created Paystack hosted Payment Pages; it does not create a second checkout product or initialize a separate transaction for these plans.
+- The server maps the selected billing period to a fixed, server-owned page URL and fixed GHS amount: monthly GH₵53.30, six months GH₵287.82, annual GH₵511.68.
+- Before redirecting, the authenticated Pages Function verifies the Firebase ID token and verified account email, creates a pending checkout record tied to the Firebase UID, and supersedes older pending attempts for that same account. It pre-fills the hosted Paystack page email and marks the email field read-only using Paystack's supported URL parameters.
+- The browser never supplies the account UID, payment amount, page URL or entitlement duration. The server owns all of those values.
+- The Paystack hosted page performs the payment. A signed `charge.success` webhook is the authoritative payment confirmation. For hosted-page transactions, the webhook's Paystack-generated reference is matched to exactly one recent pending checkout using verified account email, fixed plan amount and GHS currency. Ambiguous matches are not granted automatically.
+- Hosted-page fulfilment uses the authenticated Paystack webhook signature and validates success status, exact amount and currency. It does not call transaction initialization or transaction verification APIs for the hosted-page redirect flow. The older API-initialized checkout path retains its server-side transaction verification.
+- `PAYSTACK_WEBHOOK_SECRET` (`whsec_...`) is the preferred server-only secret for Paystack's modern timestamped webhook signature. If the integration has not enabled that header yet, `PAYSTACK_SECRET_KEY` (`sk_...`) can validate the legacy `X-Paystack-Signature` header. The hosted payment pages themselves do not require a secret key to collect payment; Vivid needs one of these server-only verification secrets to safely activate membership. Never expose either secret to browser code.
+- Paystack subscription pages should be configured as recurring subscription pages with the correct plan interval. When Paystack supplies a subscription code, Vivid records automatic renewal; otherwise the entitlement is treated as manual renewal rather than claiming an unverified recurring arrangement.
+- Configure each of the three Paystack pages to redirect after payment to `https://vivid-cinema.pages.dev/anime-premium-return.html`. The return page only polls Vivid's server-owned membership status; it never grants access from a browser redirect.
+- Configure the Paystack webhook URL as `https://vivid-cinema.pages.dev/api/anime-premium/webhook`. Prefer generating the webhook signing secret in Paystack Dashboard → Developers → API configuration and storing it in Cloudflare Pages Production as `PAYSTACK_WEBHOOK_SECRET`. Until Paystack sends the modern `Paystack-Signature` header, the existing server-side `PAYSTACK_SECRET_KEY` can validate the legacy `X-Paystack-Signature` header.
+- Country selection uses a bundled 252-entry country/territory and currency catalogue (`scripts/anime-premium-countries.js`) shared by the browser and Pages Function. It loads offline and has no runtime dependency on REST Countries or a CDN. Dataset source and MIT licence are recorded in `licenses/annexare-countries-MIT.txt`. Local-currency conversion is labelled as an indicative published reference estimate. Paystack still charges the fixed GHS amount shown on the selected hosted page, and the card issuer/payment provider determines any final conversion and fees.
+- Voluntary Support Vivid donations remain separate and continue to use their existing Paystack Inline public-key flow.
 ### Entitlement and playback security
 - Firebase ID tokens are verified server-side; unverified email accounts cannot start checkout or use membership/playback APIs.
 - Membership, checkout, webhook-event, source-registry and audit collections are explicitly denied to browser clients in Firestore rules.
@@ -128,12 +132,13 @@ The Premium entry route now acts as a dedicated discovery homepage rather than a
 
 ### Required Cloudflare environment configuration before live payments
 - FIREBASE_SERVICE_ACCOUNT_JSON and FIREBASE_PROJECT_ID (existing Vivid server-side Firebase credentials).
-- PAYSTACK_SECRET_KEY and PAYSTACK_WEBHOOK_SECRET (server secrets; never expose them to the browser).
-- PAYSTACK_LIVE_ENABLED=true only in the production environment after the Paystack merchant, plan codes and webhook are configured. Checkout stays disabled in previews by default.
-- PAYSTACK_PLAN_GHS_MONTHLY or ANIME_PREMIUM_PLANS_JSON for each enabled checkout currency. Card auto-renew is unavailable for currencies without a configured Paystack plan code.
-- ANIME_PREMIUM_DEFAULT_CURRENCY (defaults to GHS) and optional ANIME_PREMIUM_GHS_MONTHLY_AMOUNT (defaults to 5330 minor units).
+- PAYSTACK_WEBHOOK_SECRET (preferred server-only `whsec_...` signing secret; never expose it to the browser).
+- PAYSTACK_SECRET_KEY (`sk_...`) is not required to open the hosted payment pages. It remains a server-only fallback for legacy `X-Paystack-Signature` verification and the older API-initialized checkout route.
+- Do not require PAYSTACK_LIVE_ENABLED or Paystack plan-code environment variables for the three fixed hosted Payment Pages. Those settings belong to the older API-initialized checkout path.
 - ANIME_PREMIUM_ADMIN_UIDS for server-side admin allowlisting when custom admin claims are not used.
- - Configure the Paystack webhook URL as /api/anime-premium/webhook on the Vivid production origin. Support Vivid donations remain on their existing, separate payment flow.
+- Configure the Paystack webhook URL as https://vivid-cinema.pages.dev/api/anime-premium/webhook on the Vivid production origin. Prefer saving the matching `whsec_...` signing secret in Cloudflare Pages Production as PAYSTACK_WEBHOOK_SECRET; an existing `PAYSTACK_SECRET_KEY` supports legacy webhook signatures until modern signing is enabled.
+- Set the Redirect after payment URL on all three hosted Payment Pages to https://vivid-cinema.pages.dev/anime-premium-return.html. The return page only checks membership; the signed webhook activates it.
+- Support Vivid donations remain on their existing, separate Paystack Inline public-key flow.
 
 
 ## Third-party anime embed playback

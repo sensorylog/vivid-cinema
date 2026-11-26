@@ -160,11 +160,11 @@ export function publicPricing(env = {}) {
   const { defaultCurrency, plans } = parsePlanConfig(env);
   return {
     defaultCurrency,
-    checkoutEnabled: Boolean(env.PAYSTACK_SECRET_KEY && env.FIREBASE_SERVICE_ACCOUNT_JSON),
+    checkoutEnabled: Boolean(env.FIREBASE_SERVICE_ACCOUNT_JSON && (env.PAYSTACK_WEBHOOK_SECRET || env.PAYSTACK_SECRET_KEY)),
     checkoutMessage: !env.FIREBASE_SERVICE_ACCOUNT_JSON
       ? "Vivid membership authentication is not configured on this deployment."
-      : !env.PAYSTACK_SECRET_KEY
-        ? "Paystack payment verification is not configured on this deployment."
+      : !(env.PAYSTACK_WEBHOOK_SECRET || env.PAYSTACK_SECRET_KEY)
+        ? "Paystack webhook verification is not configured. Add a Paystack webhook signing secret or server-only legacy secret key in Cloudflare."
         : "",
     supportedCurrencies: SUPPORTED_PAYSTACK_CURRENCIES.filter(currency => Boolean(plans[currency])),
     mobileMoneyCountries: [...MOBILE_MONEY_COUNTRIES],
@@ -211,7 +211,9 @@ function constantTimeEqual(left, right) {
 }
 export async function verifyPaystackSignature(request, rawBody, env = {}) {
   const modern = request.headers.get("Paystack-Signature") || "";
-  const webhookSecret = String(env.PAYSTACK_WEBHOOK_SECRET || env.PAYSTACK_SECRET_KEY || "").trim();
+  // The modern timestamped header is signed only with the dedicated whsec_ secret.
+  // The legacy X-Paystack-Signature remains signed with the server-side sk_ key.
+  const webhookSecret = String(env.PAYSTACK_WEBHOOK_SECRET || "").trim();
   if (modern && webhookSecret) {
     const values = modern.split(",").map(value => value.trim());
     const timestamp = values.find(value => value.startsWith("t="))?.slice(2) || "";

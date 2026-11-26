@@ -18,13 +18,13 @@
 - Build output directory: `dist`
 - Root directory: `/`
 - Build-time dependencies: the build installs the isolated Cloudflare function dependencies under `cloudflare/` before bundling the Pages Function.
-- Runtime secret: `FIREBASE_SERVICE_ACCOUNT_JSON` must be configured in Pages Settings → Variables and Secrets (Production and Preview).
+- Runtime secrets for the three hosted Anime Premium pages: `FIREBASE_SERVICE_ACCOUNT_JSON` and `PAYSTACK_WEBHOOK_SECRET` must be configured as encrypted secrets in Pages Settings → Variables and Secrets for **Production**. A Paystack API secret key is not needed for the hosted-page redirect or signed-webhook flow. Keep both secrets out of `wrangler.toml`, source code and frontend variables.
 
 The shared script `automation/build-static-dist.mjs` creates the static `dist/` assets and excludes repository/backend source. The `build:web` command then bundles `cloudflare/functions/` into the `dist/_worker.js/` directory (`index.js` entrypoint); the root Firebase Functions directory is not used as the Pages Functions source. Do not publish the repository root.
 
 ## Pages Functions runtime
 
-The root `wrangler.toml` enables `nodejs_compat` for the Pages Functions bundle and sets the Pages output directory to `dist`. Keep the Cloudflare Pages Production and Preview compatibility settings aligned with this config. The Watch Rooms Function requires Node.js compatibility for its Firebase Auth and App Check dependencies. Keep `FIREBASE_SERVICE_ACCOUNT_JSON` as a secret, not a plain-text public variable.
+The root `wrangler.toml` enables `nodejs_compat` for the Pages Functions bundle and sets the Pages output directory to `dist`. Keep the Cloudflare Pages Production and Preview compatibility settings aligned with this config. The Watch Rooms and Anime Premium Functions require Node.js compatibility for their Firebase dependencies. Keep `FIREBASE_SERVICE_ACCOUNT_JSON` and `PAYSTACK_WEBHOOK_SECRET` encrypted as secrets, not plain-text public variables.
 
 ## Headers and caching
 
@@ -38,7 +38,8 @@ Before making Cloudflare the only public host, verify the deployed Pages site:
 2. Firebase initialization, email/password sign-in, Google sign-in if enabled, password reset, and email verification.
 3. Firestore-backed profile and library behavior.
 4. Firebase AI Logic / Vivid Recall and App Check.
-5. TMDB requests, images, external playback embeds, Paystack checkout if used, service worker/PWA behavior, and mobile Safari/Chrome.
+5. TMDB requests, images, external playback embeds, Anime Premium country directory (`/api/anime-premium/countries` returns the bundled full ISO list), local-currency quote (`/api/anime-premium/exchange-rate?currency=NGN`), hosted Paystack checkout, webhook verification, service worker/PWA behavior, and mobile Safari/Chrome.
+8. Confirm the Pages Production secrets `FIREBASE_SERVICE_ACCOUNT_JSON` and `PAYSTACK_WEBHOOK_SECRET` exist. The webhook signing secret authenticates Paystack payment notifications before membership activation. Do not bypass this guard.
 6. In Firebase Authentication, ensure the Pages hostname (and any custom hostname) is listed in Authorized domains where required.
 7. In the Google Cloud reCAPTCHA Enterprise configuration used by Firebase App Check, allow the Pages hostname for the existing site key. Do not disable App Check as a workaround.
 
