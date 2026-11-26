@@ -59,7 +59,7 @@ test("title route and runtime are available offline and included in syntax check
   assert.match(syntax, /scripts\/anime-premium-title\.js/);
 });
 
-test("Anime Premium My List uses the shared Vivid Library favorites collection", () => {
+test("Anime Premium My List uses the shared Vivid Library Watch Later collection", () => {
   assert.match(titleScript, /from "\.\/library\.js"/);
   assert.match(titleScript, /hasLibraryItem\("favorites", item\)/);
   assert.match(titleScript, /toggleLibraryItem\("favorites", item\)/);
