@@ -86,11 +86,29 @@ Never expose partner secrets to the browser. Never store a permanent stream URL 
 
 The current Phase 4 API already has:
 - `animePremiumSources/{mediaType_titleId_sN_eN}` as a server-managed episode source registry;
-- `ANIME_PREMIUM_STREAM_RESOLVER_URL` and `ANIME_PREMIUM_STREAM_RESOLVER_TOKEN` as server-only resolver configuration;
-- `ANIME_PREMIUM_STREAM_HOSTS` as a final host allowlist;
+- `ANIME_PREMIUM_PROVIDER_RESOLVERS_JSON` as the preferred server-only map of provider ID to resolver URL, resolver token and provider-specific allowed hostnames;
+- legacy `ANIME_PREMIUM_STREAM_RESOLVER_URL`, `ANIME_PREMIUM_STREAM_RESOLVER_TOKEN` and `ANIME_PREMIUM_STREAM_HOSTS` as a backwards-compatible single-resolver fallback;
+- provider-specific final host allowlists, so one partner's resolver cannot return another provider's domain;
 - membership and playback-session checks before progress writes.
 
-The generic resolver is the provider-adapter boundary. It should route by a server-validated provider identifier to a partner-specific adapter. It must not accept arbitrary URLs, arbitrary resolver destinations, browser-supplied provider names, or user-supplied stream hosts.
+The playback endpoint now supports isolated provider resolver configurations. Configure a secret environment variable using this shape (example values are deliberately non-functional placeholders):
+
+```json
+{
+  "licensed-provider-one": {
+    "resolverUrl": "https://resolver.partner-one.example/v1/playback",
+    "resolverToken": "STORE_THIS_AS_A_SECRET",
+    "allowedHosts": ["video.partner-one.example", "cdn.partner-one.example"]
+  },
+  "licensed-provider-two": {
+    "resolverUrl": "https://resolver.partner-two.example/v1/playback",
+    "resolverToken": "STORE_THIS_AS_A_SECRET",
+    "allowedHosts": ["stream.partner-two.example"]
+  }
+}
+```
+
+The source registry's server-managed `provider` value selects the matching configuration. Each provider has a separate token, resolver URL and final hostname allowlist. The existing single-resolver environment variables remain as a backwards-compatible fallback while the multi-provider configuration is introduced. It must not accept arbitrary URLs, arbitrary resolver destinations, browser-supplied provider names, or user-supplied stream hosts.
 
 ## Phase 4 implementation gates
 
