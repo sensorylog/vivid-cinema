@@ -32,3 +32,28 @@ export function getAnimeGlobalEpisode(params, seasons = []) {
     .reduce((total, season) => total + Math.max(0, Number(season.episode_count) || 0), 0);
   return previousEpisodes + episode;
 }
+
+const ANIME_PROVIDER_EVENTS = new Set(["ready", "play", "playing", "pause", "paused", "buffering", "progress", "timeupdate", "seeked", "ended", "error"]);
+
+export function normalizeAnimeProviderMessage(provider, rawPayload) {
+  let payload = rawPayload;
+  if (typeof payload === "string") {
+    try { payload = JSON.parse(payload); } catch { return null; }
+  }
+  if (!payload || typeof payload !== "object" || Array.isArray(payload)) return null;
+  const message = payload.data && typeof payload.data === "object" ? payload.data : payload;
+  if (provider === "animeembed" && payload.channel !== "animeembed") return null;
+  if (!["animeembed", "vidy"].includes(provider)) return null;
+  const event = String(message.event || "").toLowerCase();
+  if (!ANIME_PROVIDER_EVENTS.has(event)) return null;
+  return {
+    type: "PLAYER_EVENT",
+    data: {
+      ...message,
+      event,
+      player_status: event === "progress" ? "timeupdate" : event,
+      player_progress: message.currentTime ?? message.progress ?? message.position ?? 0,
+      player_duration: message.duration ?? 0
+    }
+  };
+}
