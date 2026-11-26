@@ -258,6 +258,11 @@ export async function flushPlaybackProgress(contentId) {
   }
 }
 
+export async function flushAllPlaybackProgress() {
+  const contentIds = Array.from(pendingProgress.keys());
+  await Promise.all(contentIds.map(contentId => flushPlaybackProgress(contentId)));
+}
+
 export function removePlaybackProgress(contentId) {
   if (!contentId) return;
   const current = readProgress();
