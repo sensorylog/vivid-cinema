@@ -19,7 +19,8 @@ export async function onRequestPost({ request, env }) {
     const country = String(body.country || "").toUpperCase();
     const paymentMethod = String(body.paymentMethod || "");
     if (!["card", "mobile_money"].includes(paymentMethod)) throw new AnimePremiumError(400, "invalid-payment-method", "Choose card or mobile money.");
-    const plan = resolveCheckoutPlan(country, env);
+    const planId = String(body.planId || "monthly").toLowerCase();
+    const plan = resolveCheckoutPlan(country, env, planId);
     if (paymentMethod === "card" && !plan.planCode) {
       throw new AnimePremiumError(503, "card-renewal-not-configured", "Automatic card renewal is not configured for this checkout currency yet.");
     }
@@ -37,7 +38,7 @@ export async function onRequestPost({ request, env }) {
       reference,
       uid: user.uid,
       email: user.email,
-      planId: "monthly",
+      planId: plan.planId,
       country,
       currency: plan.currency,
       amount: plan.amount,
@@ -59,7 +60,7 @@ export async function onRequestPost({ request, env }) {
       channels: paymentMethod === "card" ? ["card"] : ["mobile_money"],
       metadata: {
         uid: user.uid,
-        planId: "monthly",
+        planId: plan.planId,
         country,
         paymentMethod,
         renewalMode,
