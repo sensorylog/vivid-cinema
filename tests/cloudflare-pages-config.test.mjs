@@ -119,3 +119,22 @@ test("Cloudflare Pages bundles the Watch Rooms API from its isolated Functions d
   assert.ok(route.includes('db.runTransaction'));
   assert.ok(!route.includes("vivid-cinema-api.vercel.app"));
 });
+
+
+test("Cloudflare Pages bundles the Anime Premium API and documents its live payment requirements", async () => {
+  const build = await readFile(new URL("../automation/build-cloudflare-functions.mjs", import.meta.url), "utf8");
+  const pricing = await readFile(new URL("../cloudflare/functions/api/anime-premium/pricing.js", import.meta.url), "utf8");
+  const checkout = await readFile(new URL("../cloudflare/functions/api/anime-premium/checkout.js", import.meta.url), "utf8");
+  const webhook = await readFile(new URL("../cloudflare/functions/api/anime-premium/webhook.js", import.meta.url), "utf8");
+  const service = await readFile(new URL("../cloudflare/functions/lib/anime-premium-service.js", import.meta.url), "utf8");
+  const hosting = await readFile(new URL("../docs/cloudflare-pages-hosting.md", import.meta.url), "utf8");
+  assert.ok(build.includes('const functionsRoot = path.join(cloudflareRoot, "functions")'));
+  assert.ok(pricing.includes("publicPricing"));
+  assert.ok(checkout.includes('PAYSTACK_LIVE_ENABLED !== "true"'));
+  assert.ok(webhook.includes("verifyPaystackSignature"));
+  assert.ok(service.includes("PAYSTACK_SECRET_KEY"));
+  assert.ok(service.includes("PAYSTACK_WEBHOOK_SECRET"));
+  assert.ok(hosting.includes("/api/anime-premium/*"));
+  assert.ok(hosting.includes("PAYSTACK_LIVE_ENABLED=true"));
+  assert.ok(hosting.includes("/api/anime-premium/webhook"));
+});
