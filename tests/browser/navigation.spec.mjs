@@ -54,7 +54,7 @@ test("core app routes remain navigable with the service worker active", async ({
     const response = await page.goto(route, { waitUntil: "commit" });
     expect(response, "navigation response missing for " + route).not.toBeNull();
     expect(response.status(), "unexpected HTTP status for " + route).toBe(200);
-    expect(new URL(page.url()).pathname).toBe(route);
+    expect(new URL(page.url()).pathname).toBe(new URL(route, "http://127.0.0.1:4173").pathname);
   }
 
   expect(failedNavigations).toEqual([]);
@@ -93,7 +93,7 @@ test("mobile navigation stays within five destinations and exposes secondary rou
   const profileLink = page.locator(".vivid-navlinks #auth-link");
   await expect(profileLink).toHaveCount(1);
   await expect(profileLink).toHaveAttribute("href", /auth\.html$/);
-  await expect(profileLink).toContainText(/sign in|account/i);
+  await expect(profileLink).toHaveAttribute("aria-label", /sign in|account/i);
 });
 
 test("retired community routes show a transition notice without social controls", async ({page}) => {
