@@ -26,6 +26,8 @@ test("admin page provides audited membership and authorised source operations", 
   assert.match(client, /licenseStartsAt:/);
   assert.match(client, /licenseEndsAt:/);
   assert.match(client, /rightsVerified:/);
+  assert.match(client, /licenseEnd <= licenseStart/);
+  assert.match(client, /territories\.some\(code => !\/\^\[A-Z\]\{2\}\$\/.test\(code\)\)/);
   assert.match(sources, /rightsVerified !== true/);
   assert.match(sources, /allowedTerritories/);
   assert.match(sources, /licenseEndsAt/);
