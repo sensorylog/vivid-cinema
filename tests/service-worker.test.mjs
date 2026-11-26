@@ -273,5 +273,5 @@ test("Watch Rooms and playback modules are included in the offline app shell", (
     '"./scripts/watch-room-clubs.js"',
     '"./scripts/watch-room-playback.js"'
   ]) assert.ok(!source.includes(asset), "retired Watch Rooms asset remains in the offline app shell: " + asset);
-  assert.ok(source.includes('"./scripts/watch.js?v=watch-room-sync-1"'), "the primary watch experience remains available");
+  assert.ok(source.includes('"./scripts/watch.js?v=anime-enrichment-servers-2"'), "the primary watch experience remains available");
 });
