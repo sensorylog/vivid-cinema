@@ -23,6 +23,11 @@ let membershipVerificationRequired = false;
 let selectedCountry = "GH";
 let selectedPlanId = "monthly";
 const PLAN_LABELS = { monthly: { title: "MONTHLY MEMBERSHIP", price: "/ month", renewal: "each month" }, biannually: { title: "6-MONTH MEMBERSHIP", price: "/ 6 months", renewal: "every 6 months" }, annually: { title: "ANNUAL MEMBERSHIP", price: "/ year", renewal: "each year" } };
+const PAGE_CHECKOUT_PLANS = {
+  monthly: { amountMajor: 53.30, amountMinor: 5330, currency: "GHS" },
+  biannually: { amountMajor: 287.82, amountMinor: 28782, currency: "GHS" },
+  annually: { amountMajor: 511.68, amountMinor: 51168, currency: "GHS" }
+};
 let selectedPaymentMethod = "card";
 const rateCache = new Map();
 
@@ -78,7 +83,7 @@ async function updatePrice() {
   const country = getCountry(selectedCountry);
   const localCurrency = country.currency || pricing.defaultCurrency;
   const checkoutCurrency = getCheckoutCurrency(selectedCountry);
-  const plan = pricing.plans[selectedPlanId]?.[checkoutCurrency];
+  const plan = PAGE_CHECKOUT_PLANS[selectedPlanId];
   $("vap-local-currency").textContent = localCurrency;
   $("vap-checkout-currency").textContent = checkoutCurrency;
   if (!plan) {
