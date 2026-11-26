@@ -5,6 +5,13 @@ import { syncLibraryForUser } from "./library.js";
 import { syncPlaybackProgressForUser } from "./recommendations.js";
 
 const $ = id => document.getElementById(id);
+function withTimeout(promise, milliseconds, message) {
+  let timer;
+  return Promise.race([
+    promise,
+    new Promise((_, reject) => { timer = window.setTimeout(() => reject(new Error(message)), milliseconds); })
+  ]).finally(() => window.clearTimeout(timer));
+}
 let currentUser = null;
 let membershipChecked = false;
 
@@ -97,9 +104,17 @@ async function openLibrary(user) {
     }
     $("vap-library-gate").hidden = true;
     $("vap-library-content").hidden = false;
-    await Promise.allSettled([syncLibraryForUser(user), syncPlaybackProgressForUser(user), syncAnimePreferencesForUser(user)]);
+    $("vap-library-stats").innerHTML = '<p class="vap-library-loading">Syncing your private anime library…</p>';
+    const syncResults = await Promise.allSettled([
+      withTimeout(syncLibraryForUser(user), 10000, "Library sync timed out."),
+      withTimeout(syncPlaybackProgressForUser(user), 10000, "Playback progress sync timed out."),
+      withTimeout(syncAnimePreferencesForUser(user), 10000, "Anime preferences sync timed out.")
+    ]);
     if (currentUser?.uid !== user.uid) return;
     render();
+    $("vap-pref-status").textContent = syncResults.some(result => result.status === "rejected")
+      ? "Some cloud data could not sync. Showing locally saved items; reconnect and refresh to try again."
+      : "Your Premium library is up to date.";
   } catch (error) {
     console.warn("Vivid Anime Premium library could not load:", error);
     showGate("Your library could not be loaded", "Vivid could not verify your membership or sync your private library. Check your connection and try again.", "anime-premium.html", "Back to Premium");
