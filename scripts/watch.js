@@ -979,7 +979,7 @@ function renderShell(params) {
     picker.append(serverMenu, serverPanel);
     serverPanel.hidden = true;
     const archiveRoot = $("vivid-archive-search");
-    if (archiveRoot && !isAnimePlayback()) {
+    if (archiveRoot && params?.type === "movie" && !isAnimePlayback()) {
       void import("./playback/archive-film-fallback.js").then(({ mountArchiveFilmSearch }) => {
         if (!archiveRoot.isConnected) return;
         mountArchiveFilmSearch({
