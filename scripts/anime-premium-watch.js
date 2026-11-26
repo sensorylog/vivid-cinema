@@ -29,6 +29,7 @@ let baseAnimeIds = { aniListId: "", malId: "" };
 let seasonAnimeIds = { aniListId: "", malId: "" };
 let animeIdPromise = Promise.resolve(baseAnimeIds);
 let animeTrack = "sub";
+let activeProviderEpisodeNumber = 1;
 let latestProviderProgress = null;
 let lastProgressSync = 0;
 let progressSyncInFlight = false;
@@ -274,8 +275,11 @@ function handleProviderMessage(event) {
     const eventTmdbId = String(eventData.tmdbId || eventData.tmdb || info.tmdb || "").trim();
     if (eventTmdbId && eventTmdbId !== titleId) return;
     if (mediaType === "tv") {
-      if (eventData.season != null && Number(eventData.season) !== Number(params.get("season") || 1)) return;
-      if (eventData.episode != null && Number(eventData.episode) !== Number(activeEpisodes[activeEpisodeIndex]?.episode_number || 1)) return;
+      if (provider.kind === "tmdb") {
+        if (eventData.season != null && Number(eventData.season) !== Number(params.get("season") || 1)) return;
+        if (eventData.episode != null && Number(eventData.episode) !== Number(activeEpisodes[activeEpisodeIndex]?.episode_number || 1)) return;
+      } else if (eventData.episode != null &&
+        ![Number(activeEpisodes[activeEpisodeIndex]?.episode_number || 1), activeProviderEpisodeNumber].includes(Number(eventData.episode))) return;
     }
     const progress = Number(eventData.currentTime ?? eventData.player_progress ?? eventData.time) || 0;
     const duration = Number(eventData.duration ?? eventData.player_duration ?? eventData.total) || 0;
@@ -334,9 +338,10 @@ async function requestPlayback(episode) {
     const offset = seasonNumber > 1 && seasonAnimeIds.aniListId === baseAnimeIds.aniListId && seasonAnimeIds.malId === baseAnimeIds.malId
       ? (titleDetails.seasons || []).filter(item => Number(item.season_number) > 0 && Number(item.season_number) < seasonNumber).reduce((sum, item) => sum + Number(item.episode_count || 0), 0)
       : 0;
+    activeProviderEpisodeNumber = episodeNumber + offset;
     providerOptions = resolveAnimePremiumProviderOptions({
       mediaType, tmdbId: titleId, aniListId: seasonAnimeIds.aniListId, malId: seasonAnimeIds.malId,
-      season: seasonNumber, episode: episodeNumber + offset, track: animeTrack
+      season: seasonNumber, episode: activeProviderEpisodeNumber, track: animeTrack
     });
     renderServerOptions();
     const first = providerOptions.find(item => item.available);
