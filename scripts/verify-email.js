@@ -37,11 +37,10 @@ function showFailure(text) {
   mark.style.color = "#ff6b6b";
   action.style.display = "block";
   action.textContent = "Go to Log In";
-  action.href = "login.html";
+  action.href = loginDestination();
   help.textContent = "If the link has expired or was already used, sign in and request a new verification email.";
 }
 
-const params = new URLSearchParams(window.location.search);
 const mode = params.get("mode");
 const code = params.get("oobCode");
 
