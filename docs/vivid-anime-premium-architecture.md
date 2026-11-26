@@ -13,6 +13,7 @@ The existing Movies & TV product remains unchanged. The current `anime.html` pag
 - A user must have a non-anonymous Vivid account before starting subscription checkout.
 - Subscription ownership is keyed to the authenticated Firebase UID, never an email address supplied by the browser.
 - Preserve the existing Vivid auth flow, email verification rules, Google sign-in, persistence and return-to routing.
+- For email/password sign-up, retain the Premium return destination through Vivid's existing verification email and the subsequent login. The verification endpoint accepts only the explicit `anime-premium.html` return destination; all other values fall back to the existing default verification route.
 - A successful browser redirect or Paystack checkout callback must never itself grant Premium access.
 
 ## Route and module boundary
@@ -44,7 +45,7 @@ The client must not trust query parameters, local storage, Firestore client writ
 
 1. Visitor can view the public Premium introduction.
 2. Selecting a subscription action requires a Vivid account.
-3. Signed-out visitors use the existing Vivid sign-in/sign-up flow and return to the Premium journey.
+3. Signed-out visitors use the existing Vivid sign-in/sign-up flow and return to the Premium journey. Email/password sign-up retains this destination across email verification and the subsequent login; Google sign-in returns directly.
 4. Signed-in visitors continue with the same Firebase UID.
 5. Backend-verified payment activates the entitlement for that UID.
 6. Every protected API and playback-session request re-checks the server-owned entitlement.
