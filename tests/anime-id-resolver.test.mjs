@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { normalizeAnimeTitle, resolveAnimeIds } from "../scripts/playback/anime-id-resolver.js";
+import { normalizeAnimeTitle, resolveAnimeIds, clearAnimeIdResolverCache } from "../scripts/playback/anime-id-resolver.js";
 
 test("normalizes punctuation, accents, and title separators", () => {
   assert.equal(normalizeAnimeTitle("Spy × Family"), "spy family");
@@ -75,6 +75,30 @@ test("rejects an old season ID when its episode count cannot cover the requested
     assert.equal(result.aniListId, "");
     assert.equal(result.malId, "");
   } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test("anime ID results are cached per title and TMDB season identity", async () => {
+  const originalFetch = globalThis.fetch;
+  let calls = 0;
+  clearAnimeIdResolverCache();
+  globalThis.fetch = async input => {
+    calls += 1;
+    const payload = input.toString().includes("graphql.anilist.co")
+      ? { data: { Media: { id: 101, idMal: 202, episodes: 24, seasonYear: 2024, title: { english: "Cache Sample", romaji: "Cache Sample", native: "" }, synonyms: [] } } }
+      : { data: [] };
+    return { ok: true, json: async () => payload };
+  };
+  try {
+    const options = { seasonTitle: "Season 1", seasonYear: "2024", globalEpisode: 1, localEpisode: 1, episodeOffset: 0 };
+    const first = await resolveAnimeIds("Cache Sample", options);
+    const callsAfterFirst = calls;
+    const second = await resolveAnimeIds("Cache Sample", options);
+    assert.deepEqual(second, first);
+    assert.equal(calls, callsAfterFirst);
+  } finally {
+    clearAnimeIdResolverCache();
     globalThis.fetch = originalFetch;
   }
 });
