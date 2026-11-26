@@ -123,6 +123,7 @@ test("webhook verification is the source of truth for membership activation and 
   assert.match(webhook, /Number\(value\.amount\)/);
   assert.match(webhook, /invoice\.payment_failed/);
   assert.match(webhook, /animePremiumMemberships/);
+  assert.match(membership, /canCancelAutoRenew: Boolean\(env\.PAYSTACK_SECRET_KEY && data\.autoRenew/);
   assert.match(membership, /animePremiumMemberships/);
   assert.match(membership, /currentPeriodEnd/);
   assert.match(membership, /env\.PAYSTACK_SECRET_KEY && data\.autoRenew/);
