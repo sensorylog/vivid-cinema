@@ -1491,6 +1491,23 @@ function handlePlayerEvent(event) {
     const duration = Math.max(0, Number(data.player_duration ?? data.duration) || 0);
     const season = currentParams?.season;
     const episode = currentParams?.episode;
+    const normalizedStatus = /^(ended|completed)$/i.test(eventName) ? "ended"
+      : /^(pause|paused)$/i.test(eventName) ? "paused"
+      : /^(play|playing)$/i.test(eventName) ? "playing"
+      : eventName;
+    window.dispatchEvent(new CustomEvent("vivid:provider-playback", { detail: {
+      provider: isAnimeEmbed ? "animeembed" : "vidy",
+      origin: event.origin,
+      event: eventName,
+      eventType: eventName,
+      status: normalizedStatus,
+      position: progress,
+      duration,
+      contentId: String(currentParams?.id || ""),
+      mediaType: String(currentParams?.type || "tv"),
+      season,
+      episode
+    } }));
     if (progress > 0) {
       savePlaybackProgress(progressKey(), { progress, duration, season, episode, title: media.title, media_type: media.media_type, id: media.id });
       recordWatchActivity(progress, duration);
