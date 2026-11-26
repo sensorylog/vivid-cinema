@@ -77,7 +77,7 @@ function renderTrailer(details) {
   const videos = (details.videos?.results || []).filter(video =>
     video.site === "YouTube" && video.key && ["Trailer", "Teaser"].includes(video.type)
   );
-  const official = videos.find(video => video.official === true) || videos[0];
+  const official = videos.find(video => video.official === true);
   if (!official) return;
   const link = $("vap-title-trailer");
   link.href = "https://www.youtube.com/watch?v=" + encodeURIComponent(official.key);
