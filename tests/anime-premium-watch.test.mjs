@@ -33,8 +33,8 @@ test("playback requests use the existing Vivid Firebase user token and server en
 test("player accepts only unexpired HTTPS playback sessions returned by the server", () => {
   assert.match(script, /new URL\(playback\.url/);
   assert.match(script, /streamUrl\.protocol !== "https:"/);
-  assert.match(script, /const expiresAt = Date\\.parse\\(playback\\.expiresAt\\)/);
-  assert.match(script, /!Number\\.isFinite\\(expiresAt\\) \\|\\| expiresAt <= Date\\.now\\(\\)/);
+  assert.match(script, /const expiresAt = Date\.parse\(playback\.expiresAt\)/);
+  assert.match(script, /!Number\.isFinite\(expiresAt\) \|\| expiresAt <= Date\.now\(\)/);
   assert.match(script, /application\/vnd\.apple\.mpegurl/);
   assert.match(script, /video\/mp4/);
   assert.doesNotMatch(script, /vidsrc|vidlink|vidplus|vidking|embedapi|moviesapi/i);
