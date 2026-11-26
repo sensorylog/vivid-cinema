@@ -1,6 +1,6 @@
 import {
   AnimePremiumError, getPremiumServices, paystackRequest, timestampFromMillis,
-  verifyPaystackSignature, jsonResponse, safeReference, addDaysMillis
+  verifyPaystackSignature, jsonResponse, safeReference
 } from "../../lib/anime-premium-service.js";
 
 async function eventDocumentId(event, data) {
@@ -27,31 +27,47 @@ async function handleChargeSuccess(db, env, data, eventRef) {
   let checkoutRef;
   let checkoutSnapshot;
   let checkout = {};
+  let hostedPageCheckout = false;
   if (reference.startsWith("VAP") && safeReference(reference)) {
     checkoutRef = db.collection("animePremiumCheckouts").doc(reference);
     checkoutSnapshot = await checkoutRef.get();
     if (!checkoutSnapshot.exists) return;
     checkout = checkoutSnapshot.data() || {};
   } else {
+    // Hosted Payment Pages use Paystack-generated references. Their signed
+    // charge.success payload is the authoritative receipt for this flow.
+    if (String(data.status || "").toLowerCase() !== "success") return;
     const email = String(data.customer?.email || "").trim().toLowerCase();
     const amount = Number(data.amount || 0);
     const currency = String(data.currency || "").toUpperCase();
     if (!email || !amount || !currency) return;
-    const pending = await db.collection("animePremiumPageCheckouts").where("email", "==", email).limit(10).get();
+    const pending = await db.collection("animePremiumPageCheckouts").where("email", "==", email).limit(20).get();
     const now = Date.now();
-    const match = pending.docs.find(doc => {
+    const matches = pending.docs.filter(doc => {
       const value = doc.data() || {};
       const created = typeof value.createdAt?.toMillis === "function" ? value.createdAt.toMillis() : Number(value.createdAt || 0);
-      return value.status === "pending" && Number(value.amount) === amount && String(value.currency || "").toUpperCase() === currency && created > now - 24 * 60 * 60 * 1000;
+      return value.status === "pending" &&
+        Number(value.amount) === amount &&
+        String(value.currency || "").toUpperCase() === currency &&
+        created > now - 24 * 60 * 60 * 1000;
     });
-    if (!match) return;
-    checkoutRef = match.ref;
-    checkoutSnapshot = match;
+    // Do not guess if more than one pending checkout could own this payment.
+    if (matches.length !== 1) {
+      console.warn("Hosted Paystack payment did not map to exactly one pending Vivid checkout.", {
+        reference, email, amount, currency, matches: matches.length
+      });
+      return;
+    }
+    checkoutRef = matches[0].ref;
+    checkoutSnapshot = matches[0];
     checkout = checkoutSnapshot.data() || {};
+    hostedPageCheckout = true;
   }
   if (checkout.status === "paid") return;
-  const verified = await paystackRequest(env, "/transaction/verify/" + encodeURIComponent(reference), { method: "GET" });
-  if (verified.status !== "success" || String(verified.reference) !== reference ||
+  const verified = hostedPageCheckout
+    ? data
+    : await paystackRequest(env, "/transaction/verify/" + encodeURIComponent(reference), { method: "GET" });
+  if (String(verified.status || "").toLowerCase() !== "success" || String(verified.reference) !== reference ||
       Number(verified.amount) !== Number(checkout.amount) ||
       String(verified.currency).toUpperCase() !== String(checkout.currency).toUpperCase()) {
     throw new AnimePremiumError(409, "payment-verification-failed", "The Paystack transaction did not match the pending checkout.");
@@ -66,9 +82,10 @@ async function handleChargeSuccess(db, env, data, eventRef) {
     : null;
   const pendingSubscriptionDoc = pendingSubscriptionSnapshot && !pendingSubscriptionSnapshot.empty ? pendingSubscriptionSnapshot.docs[0] : null;
   const pendingSubscription = pendingSubscriptionDoc ? pendingSubscriptionDoc.data() || {} : {};
-  const paystackSubscriptionCode = String(verified.subscription?.subscription_code || data.subscription?.subscription_code || pendingSubscription.subscriptionCode || "");
+  const paystackSubscriptionCode = String(verified.subscription?.subscription_code || data.subscription?.subscription_code || data.subscription_code || pendingSubscription.subscriptionCode || "");
   const subscriptionEmailToken = String(verified.subscription?.email_token || data.subscription?.email_token || pendingSubscription.emailToken || "");
   const requestedNextPayment = millis(verified.subscription?.next_payment_date || data.subscription?.next_payment_date);
+  const hasRecurringPlan = Boolean(paystackSubscriptionCode);
   await db.runTransaction(async transaction => {
     const [eventSnapshot, liveCheckout, existingMembership] = await Promise.all([
       transaction.get(eventRef),
@@ -80,7 +97,9 @@ async function handleChargeSuccess(db, env, data, eventRef) {
     const oldEnd = typeof old.currentPeriodEnd?.toMillis === "function" ? old.currentPeriodEnd.toMillis() : Number(old.currentPeriodEnd || 0);
     const periodStart = oldEnd > now ? oldEnd : now;
     const periodEnd = Math.max(requestedNextPayment > now ? requestedNextPayment : 0, addMonthsMillis(checkout.planId || "monthly", periodStart));
-    const renewalMode = checkout.renewalMode === "automatic" && checkout.paymentMethod === "card" ? "automatic" : "manual";
+    const renewalMode = checkout.checkoutSource === "hosted_payment_page"
+      ? (hasRecurringPlan ? "automatic" : "manual")
+      : checkout.renewalMode === "automatic" && checkout.paymentMethod === "card" ? "automatic" : "manual";
     transaction.set(membershipRef, {
       uid,
       status: "active",
@@ -161,7 +180,7 @@ async function handleRecurringEvent(db, eventName, data, eventRef) {
         renewalMode: "automatic",
         cancelAtPeriodEnd: false,
         currentPeriodStart: timestampFromMillis(start),
-        currentPeriodEnd: timestampFromMillis(Math.max(next > now ? next : 0, addDaysMillis(30, start))),
+        currentPeriodEnd: timestampFromMillis(Math.max(next > now ? next : 0, addMonthsMillis(value.planId || "monthly", start))),
         updatedAt: timestampFromMillis(now)
       }, { merge: true });
     } else if (eventName === "invoice.payment_failed") {
