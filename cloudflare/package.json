@@ -3,7 +3,8 @@
   "private": true,
   "type": "module",
   "dependencies": {
-    "@ljoukov/firebase-admin-cloudflare": "0.0.2"
+    "@ljoukov/firebase-admin-cloudflare": "0.0.2",
+    "countries-list": "3.4.1"
   },
   "devDependencies": {
     "wrangler": "3.114.17"
