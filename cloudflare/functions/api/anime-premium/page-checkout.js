@@ -44,7 +44,7 @@ export async function onRequestPost({ request, env }) {
     batch.set(checkoutRef, {
       reference, uid: user.uid, email,
       planId, country: "GH", currency: plan.currency, amount: plan.amount,
-      paymentMethod: "hosted_payment_page", renewalMode: "pending", status: "pending",
+      paymentMethod: "card", checkoutSource: "hosted_payment_page", renewalMode: "pending", status: "pending",
       createdAt: timestampFromMillis(now), updatedAt: timestampFromMillis(now)
     });
     await batch.commit();
