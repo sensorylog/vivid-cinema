@@ -61,6 +61,38 @@ test("CurrencyFreaks USD-base table is used as a fallback when the primary provi
   }
 });
 
+
+test("fallback provider is checked when the primary provider omits a currency", async () => {
+  const originalFetch = globalThis.fetch;
+  const calls = [];
+  globalThis.fetch = async url => {
+    calls.push(String(url));
+    if (calls.length === 1) {
+      return new Response(JSON.stringify({
+        result: "success", base_code: "USD",
+        rates: { USD: 1, GHS: 10, EUR: 0.9 }
+      }), { status: 200, headers: { "Content-Type": "application/json" } });
+    }
+    return new Response(JSON.stringify({
+      base: "USD", date: "2026-11-26",
+      rates: { USD: 1, GHS: 10, XCG: 5 }
+    }), { status: 200, headers: { "Content-Type": "application/json" } });
+  };
+  try {
+    const response = await onRequestGet({
+      request: new Request("https://vivid-cinema.pages.dev/api/anime-premium/exchange-rate?currency=XCG"),
+      env: {}
+    });
+    const payload = await response.json();
+    assert.equal(response.status, 200);
+    assert.equal(payload.rate, 0.5);
+    assert.equal(payload.source, "CurrencyFreaks Open Rates");
+    assert.equal(calls.length, 2);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
 test("GHS is exactly one-to-one and does not require an external FX request", async () => {
   const originalFetch = globalThis.fetch;
   globalThis.fetch = async () => { throw new Error("GHS should not need an FX provider call."); };
